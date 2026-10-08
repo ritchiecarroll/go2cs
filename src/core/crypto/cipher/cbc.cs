@@ -18,7 +18,7 @@ using go.crypto.@internal.fips140;
 
 partial class cipher_package {
 
-[GoType] partial struct cbc {
+partial struct cbc {
     internal Block b;
     internal nint blockSize;
     internal slice<byte> iv;
@@ -34,12 +34,12 @@ internal static ж<cbc> newCBC(Block b, slice<byte> iv) {
     ));
 }
 
-[GoType("cbc")] partial struct cbcEncrypter;
+partial struct cbcEncrypter /*cbc*/;
 
 // cbcEncAble is an interface implemented by ciphers that have a specific
 // optimized implementation of CBC encryption. crypto/aes doesn't use this
 // anymore, and we'd like to eventually remove it.
-[GoType] partial interface cbcEncAble {
+partial interface cbcEncAble {
     BlockMode NewCBCEncrypter(slice<byte> iv);
 }
 
@@ -77,11 +77,11 @@ internal static BlockMode newCBCGenericEncrypter(Block b, slice<byte> iv) {
     return new cbcEncrypterжBlockMode(newCBC(b, iv).Reinterpret<cbc, cbcEncrypter>());
 }
 
-[GoRecv] internal static nint BlockSize(this ref cbcEncrypter x) {
+internal static nint BlockSize(this ref cbcEncrypter x) {
     return x.blockSize;
 }
 
-[GoRecv] internal static void CryptBlocks(this ref cbcEncrypter x, slice<byte> dst, slice<byte> src) {
+internal static void CryptBlocks(this ref cbcEncrypter x, slice<byte> dst, slice<byte> src) {
     if (len(src) % x.blockSize != 0) {
         throw panic("crypto/cipher: input not full blocks");
     }
@@ -110,19 +110,19 @@ internal static BlockMode newCBCGenericEncrypter(Block b, slice<byte> iv) {
     copy(x.iv, iv);
 }
 
-[GoRecv] internal static void SetIV(this ref cbcEncrypter x, slice<byte> iv) {
+internal static void SetIV(this ref cbcEncrypter x, slice<byte> iv) {
     if (len(iv) != len(x.iv)) {
         throw panic("cipher: incorrect length IV");
     }
     copy(x.iv, iv);
 }
 
-[GoType("cbc")] partial struct cbcDecrypter;
+partial struct cbcDecrypter /*cbc*/;
 
 // cbcDecAble is an interface implemented by ciphers that have a specific
 // optimized implementation of CBC decryption. crypto/aes doesn't use this
 // anymore, and we'd like to eventually remove it.
-[GoType] partial interface cbcDecAble {
+partial interface cbcDecAble {
     BlockMode NewCBCDecrypter(slice<byte> iv);
 }
 
@@ -160,11 +160,11 @@ internal static BlockMode newCBCGenericDecrypter(Block b, slice<byte> iv) {
     return new cbcDecrypterжBlockMode(newCBC(b, iv).Reinterpret<cbc, cbcDecrypter>());
 }
 
-[GoRecv] internal static nint BlockSize(this ref cbcDecrypter x) {
+internal static nint BlockSize(this ref cbcDecrypter x) {
     return x.blockSize;
 }
 
-[GoRecv] internal static void CryptBlocks(this ref cbcDecrypter x, slice<byte> dst, slice<byte> src) {
+internal static void CryptBlocks(this ref cbcDecrypter x, slice<byte> dst, slice<byte> src) {
     if (len(src) % x.blockSize != 0) {
         throw panic("crypto/cipher: input not full blocks");
     }
@@ -204,7 +204,7 @@ internal static BlockMode newCBCGenericDecrypter(Block b, slice<byte> iv) {
     (x.iv, x.tmp) = (x.tmp, x.iv);
 }
 
-[GoRecv] internal static void SetIV(this ref cbcDecrypter x, slice<byte> iv) {
+internal static void SetIV(this ref cbcDecrypter x, slice<byte> iv) {
     if (len(iv) != len(x.iv)) {
         throw panic("cipher: incorrect length IV");
     }

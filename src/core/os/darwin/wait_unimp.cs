@@ -15,7 +15,7 @@ partial class os_package {
 // or where we have not implemented it yet. Note that this is racy:
 // a call to Process.Signal can in an extremely unlikely case send a
 // signal to the wrong process, see issue #13987.
-[GoRecv] internal static (bool, error) blockUntilWaitable(this ref Process p) {
+internal static (bool, error) blockUntilWaitable(this ref Process p) {
     return (false, default!);
 }
 

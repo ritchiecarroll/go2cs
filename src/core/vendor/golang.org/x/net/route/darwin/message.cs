@@ -7,19 +7,19 @@ namespace go.vendor.golang.org.x.net;
 partial class route_package {
 
 // A Message represents a routing message.
-[GoType] partial interface Message {
+partial interface Message {
     // Sys returns operating system-specific information.
     slice<ΔSys> Sys();
 }
 
 // A Sys reprensents operating system-specific information.
-[GoType] partial interface ΔSys {
+partial interface ΔSys {
     // SysType returns a type of operating system-specific
     // information.
     ΔSysType SysType();
 }
 
-[GoType("num:nint")] partial struct ΔSysType;
+partial struct ΔSysType /*num:nint*/;
 
 public static ΔSysType SysMetrics => /* iota */ 0;
 public static ΔSysType SysStats => 1;

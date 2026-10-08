@@ -37,7 +37,7 @@ partial class fuzz_package {
 
 // CoordinateFuzzingOpts is a set of arguments for CoordinateFuzzing.
 // The zero value is valid for each field unless specified otherwise.
-[GoType] partial struct CoordinateFuzzingOpts {
+partial struct CoordinateFuzzingOpts {
     // Log is a writer for logging progress messages and warnings.
     // If nil, io.Discard will be used instead.
     public io.Writer Log;
@@ -425,34 +425,33 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
 // crashError wraps a crasher written to the seed corpus. It saves the name
 // of the file where the input causing the crasher was saved. The testing
 // framework uses this to report a command to re-run that specific input.
-[GoType] partial struct crashError {
+partial struct crashError {
     internal @string path;
     internal error err;
 }
 
-[GoRecv] internal static @string Error(this ref crashError e) {
+internal static @string Error(this ref crashError e) {
     return e.err.Error();
 }
 
-[GoRecv] internal static error Unwrap(this ref crashError e) {
+internal static error Unwrap(this ref crashError e) {
     return e.err;
 }
 
-[GoRecv] internal static @string CrashPath(this ref crashError e) {
+internal static @string CrashPath(this ref crashError e) {
     return e.path;
 }
 
-[GoType] partial struct corpus {
+partial struct corpus {
     internal slice<CorpusEntry> entries;
-    [GoMapKeyDims(32)]
-    internal map<array<byte>, bool> hashes;
+    internal map</*[32]*/ array<byte>, bool> hashes;
 }
 
 // addCorpusEntries adds entries to the corpus, and optionally writes the entries
 // to the cache directory. If an entry is already in the corpus it is skipped. If
 // all of the entries are unique, addCorpusEntries returns true and a nil error,
 // if at least one of the entries was a duplicate, it returns false and a nil error.
-[GoRecv] internal static (bool, error) addCorpusEntries(this ref coordinator c, bool addToCache, params ꓸꓸꓸCorpusEntry entriesʗp) {
+internal static (bool, error) addCorpusEntries(this ref coordinator c, bool addToCache, params ꓸꓸꓸCorpusEntry entriesʗp) {
     var entries = entriesʗp.sslice();
 
     var noDupes = true;
@@ -492,7 +491,7 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
 // packages, but testing can't import this package directly, and we don't want
 // to export this type from testing. Instead, we use the same struct type and
 // use a type alias (not a defined type) for convenience.
-[GoType("dyn")] public partial struct CorpusEntryᴛ1 {
+public partial struct CorpusEntryᴛ1 /*dyn*/ {
     public @string Parent;
     // Path is the path of the corpus file, if the entry was loaded from disk.
     // For other entries, including seed values provided by f.Add, Path is the
@@ -518,7 +517,7 @@ internal static (slice<byte>, error) corpusEntryData(CorpusEntry ce) {
     return os.ReadFile(ce.Path);
 }
 
-[GoType] partial struct fuzzInput {
+partial struct fuzzInput {
     // entry is the value to test initially. The worker will randomly mutate
     // values from this starting point.
     internal CorpusEntry entry;
@@ -537,7 +536,7 @@ internal static (slice<byte>, error) corpusEntryData(CorpusEntry ce) {
     internal slice<byte> coverageData;
 }
 
-[GoType] partial struct fuzzResult {
+partial struct fuzzResult {
     // entry is an interesting value or a crasher.
     internal CorpusEntry entry;
     // crasherMsg is an error message from a crash. It's "" if no crash was found.
@@ -558,7 +557,7 @@ internal static (slice<byte>, error) corpusEntryData(CorpusEntry ce) {
     internal time.Duration entryDuration;
 }
 
-[GoType] partial struct fuzzMinimizeInput {
+partial struct fuzzMinimizeInput {
     // entry is an interesting value or crasher to minimize.
     internal CorpusEntry entry;
     // crasherMsg is an error message from a crash. It's "" if no crash was found.
@@ -581,7 +580,7 @@ internal static (slice<byte>, error) corpusEntryData(CorpusEntry ce) {
 
 // coordinator holds channels that workers can use to communicate with
 // the coordinator.
-[GoType] partial struct coordinator {
+partial struct coordinator {
     internal CoordinateFuzzingOpts opts;
     // startTime is the time we started the workers after loading the corpus.
     // Used for logging.
@@ -707,13 +706,13 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
     return (c, default!);
 }
 
-[GoRecv] internal static void updateStats(this ref coordinator c, fuzzResult result) {
+internal static void updateStats(this ref coordinator c, fuzzResult result) {
     c.count += result.count;
     c.countWaiting -= result.limit;
     c.duration += result.totalDuration;
 }
 
-[GoRecv] internal static void logStats(this ref coordinator c) {
+internal static void logStats(this ref coordinator c) {
     var now = time.Now();
     if (c.warmupRun()){
         nint runSoFar = c.warmupInputCount - c.warmupInputLeft;
@@ -748,7 +747,7 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
 //
 // If the input queue is empty and the coverage/testing-only run has completed,
 // queue refills it from the corpus.
-[GoRecv] internal static (fuzzInput, bool) peekInput(this ref coordinator c) {
+internal static (fuzzInput, bool) peekInput(this ref coordinator c) {
     if (c.opts.Limit > 0 && c.count + c.countWaiting >= c.opts.Limit) {
         // Already making the maximum number of calls to the fuzz function.
         // Don't send more inputs right now.
@@ -794,14 +793,14 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
 }
 
 // sentInput updates internal counters after an input is sent to c.inputC.
-[GoRecv] internal static void sentInput(this ref coordinator c, fuzzInput input) {
+internal static void sentInput(this ref coordinator c, fuzzInput input) {
     c.inputQueue.dequeue();
     c.countWaiting += input.limit;
 }
 
 // refillInputQueue refills the input queue from the corpus after it becomes
 // empty.
-[GoRecv] internal static void refillInputQueue(this ref coordinator c) {
+internal static void refillInputQueue(this ref coordinator c) {
     foreach (var (_, e) in c.corpus.entries) {
         c.inputQueue.enqueue(e);
     }
@@ -809,7 +808,7 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
 
 // queueForMinimization creates a fuzzMinimizeInput from result and adds it
 // to the minimization queue to be sent to workers.
-[GoRecv] internal static void queueForMinimization(this ref coordinator c, fuzzResult result, slice<byte> keepCoverage) {
+internal static void queueForMinimization(this ref coordinator c, fuzzResult result, slice<byte> keepCoverage) {
     if (shouldPrintDebugInfo()) {
         c.debugLogf(
             "queueing input for minimization, id: %s, parent: %s, keepCoverage: %t, crasher: %t"u8,
@@ -831,7 +830,7 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
 
 // peekMinimizeInput returns the next input that should be sent to workers for
 // minimization.
-[GoRecv] internal static (fuzzMinimizeInput, bool) peekMinimizeInput(this ref coordinator c) {
+internal static (fuzzMinimizeInput, bool) peekMinimizeInput(this ref coordinator c) {
     if (!c.canMinimize()) {
         // Already making the maximum number of calls to the fuzz function.
         // Don't send more inputs right now.
@@ -869,7 +868,7 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
 
 // sentMinimizeInput removes an input from the minimization queue after it's
 // sent to minimizeC.
-[GoRecv] internal static void sentMinimizeInput(this ref coordinator c, fuzzMinimizeInput input) {
+internal static void sentMinimizeInput(this ref coordinator c, fuzzMinimizeInput input) {
     c.minimizeQueue.dequeue();
     c.countWaiting += input.limit;
 }
@@ -887,14 +886,14 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
 // gather coverage for that entry only, without fuzzing or minimizing. This
 // phase ends when all workers have finished, and the coordinator has a combined
 // coverage map.
-[GoRecv] internal static bool warmupRun(this ref coordinator c) {
+internal static bool warmupRun(this ref coordinator c) {
     return c.warmupInputLeft > 0;
 }
 
 // updateCoverage sets bits in c.coverageMask that are set in newCoverage.
 // updateCoverage returns the number of newly set bits. See the comment on
 // coverageMask for the format.
-[GoRecv] internal static nint updateCoverage(this ref coordinator c, slice<byte> newCoverage) {
+internal static nint updateCoverage(this ref coordinator c, slice<byte> newCoverage) {
     if (len(newCoverage) != len(c.coverageMask)) {
         throw panic(fmt.Sprintf("number of coverage counters changed at runtime: %d, expected %d"u8, len(newCoverage), len(c.coverageMask)));
     }
@@ -909,11 +908,11 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
 
 // canMinimize returns whether the coordinator should attempt to find smaller
 // inputs that reproduce a crash or new coverage.
-[GoRecv] internal static bool canMinimize(this ref coordinator c) {
+internal static bool canMinimize(this ref coordinator c) {
     return c.minimizationAllowed && (c.opts.Limit == 0 || c.count + c.countWaiting < c.opts.Limit);
 }
 
-[GoRecv] internal static time.Duration elapsed(this ref coordinator c) {
+internal static time.Duration elapsed(this ref coordinator c) {
     return time.Since(c.startTime).Round(1 * time.ΔSecond);
 }
 
@@ -922,7 +921,7 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
 //
 // TODO(fuzzing): need a mechanism that can remove values that
 // aren't useful anymore, for example, because they have the wrong type.
-[GoRecv] internal static error readCache(this ref coordinator c) {
+internal static error readCache(this ref coordinator c) {
     {
         var (_, errΔ1) = c.addCorpusEntries(false, c.opts.Seed.ꓸꓸꓸ); if (errΔ1 != default!) {
             return errΔ1;
@@ -952,11 +951,11 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
 // MalformedCorpusError is an error found while reading the corpus from the
 // filesystem. All of the errors are stored in the errs list. The testing
 // framework uses this to report malformed files in testdata.
-[GoType] partial struct MalformedCorpusError {
+partial struct MalformedCorpusError {
     internal slice<error> errs;
 }
 
-[GoRecv] public static @string Error(this ref MalformedCorpusError e) {
+public static @string Error(this ref MalformedCorpusError e) {
     slice<@string> msgs = default!;
     foreach (var (_, s) in e.errs) {
         msgs = append(msgs, s.Error());
@@ -1099,7 +1098,7 @@ internal static bool shouldPrintDebugInfo() {
     return debugInfo;
 }
 
-[GoRecv] internal static void debugLogf(this ref coordinator c, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void debugLogf(this ref coordinator c, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     @string t = time.Now().Format("2006-01-02 15:04:05.999999999"u8);

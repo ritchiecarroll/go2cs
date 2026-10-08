@@ -52,7 +52,7 @@ using static go.debug.gosym_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("debug/gosym/pclntab.go", "pclntab.cs", "AEmiAQAMEoKCgoKUgoKUgoK0tLSCtJSmgpKs0oKUgq7igpSCgqYAAhYACAIAAh4ADgKCAAcYooKUqNKCgoIABhCEgpS6ppaCgoKUtLS0tLS0tLSkloKEhpiUgoKCgoKCgoKCgqSCgoKCgoKCgoKkgoKCgoKCgoKCgqTEpuSCgqiCgoKCgoKCgoKCAAcQlNiykoKUloKospKCgoKCgoKmgqiSgIKkgoKCqJKAgqSCgoKokqiSgpSosgAJFpKokoKClKiSqJKClAAIFLKCqJKotqaUpoCigKKAooCigKqygriCgpSCgqjCgoKUgpSUgoKCgqyylJKSgoKmAAIS4oKWkpKSkpKSgoKCgpTKgpSCgpSCpqaUqOKCgqiCgpSCgujigoKogoKUgoKCgoKUppKUgoCCpOjigoKogoKCnLKCgoKCgoKUlJSCgqbo4oKEgpSEgoKCpoKCgoKmoqrygoKogoK0", "209-212:1;251-253:2;254-256:3;303-305:1;337-339:1;570-574:1;587-591:1;619-623:1;686-688:1")]
+[assembly: go.GoPositionMap("debug/gosym/pclntab.go", "pclntab.cs", "AEmiAQAMEoKCgoKUgoKUgoK0tLSCtJSmgpKs0oKUgq7igpSCgqYAAhYACAIAAh4ADgKCAAcYooKUqNKCgoIABhCEgpS6ppaCgoKUtLS0tLS0tLSkloKEhpiUgoKCgoKCgoKCgqSCgoKCgoKCgoKkgoKCgoKCgoKCgqTEpuSCgqiCgoKCgoKCgoKCAAcQlNiykoKUloKospKCgoKCgoKmgqiSgIKkgoKCqJKAgqSCgoKokqiSgpSosgAJFpKokoKClKiSqJKClAAIFLKCqJKotqaUpoCigKKAooCigKqygriCgpSCgqjCgoKUgpSUgoKCgqyylJKSgoKmAAIS4oKWkpKSkpKSgoKCgpTKgpSCgpSCpqaUqOKCgqiCgpSCgujigoKogoKUgoKCgoKUppKUgoCCpOjigoKogoKCnLKCgoKCgoKUlJSCgqbo4oKEgpSEgoKCpoKCgoKmoqrygoKogoK0", "209-212:1;251-253:2;254-256:3;303-305:1;337-339:1;570-574:1;587-591:1;619-623:1;686-688:1", "", "349=nameOff/1/1/3,funcName/1/1/3")]
 [assembly: go.GoPositionMap("debug/gosym/symtab.go", "symtab.cs", "ACFGkK7SgoKUgpSU6qLMgqiCloKCloCCpKyypoKCuJSClMqCqJKCgIKCgsqmpAA5eoKCloKSlIKCmoLktIK0goKClIKClJSCgoKClIKCgoKUlIKCgoKmgoKUgriCgoKCgpSClIKUgoKmgoKUgsqCgpSCgpSCgpiSgoKCgqaUgoKCgtiClIKChIKCpoKUlKzSgoKClIKWgoKUgoKCgoKSgoKCgoKCgpaCgpKCgpSClLSClIKSgoKUgIKkxpS0tIKUgpaChIKUgoKUuoKCgpSklpKUhoKChrKCgIK2goaCkoKClIKU2oCSpIKYooKCgpS0tOqCgoKCgoKCgoK4koKClIKClLSCgrSCgsbIgpSClKqigoKCgpS0pMaq4oCCpIKClJSs8oKCloKCgpSWgoKUgoKCgqaqtIKClILYqqKCgoKmqJKCgpSC2AAMHAAJAgAAEISCgpKUuMiSlIK4+IKUpoKClpSCqIKCgoKCgpSmgoKSgsiClOaUAAQWsAAKFIIAChaCgoKUgg==", "338-341:1;355-401:2")]
 // </GoSourcePositionMaps>
 
@@ -62,7 +62,7 @@ namespace go.debug;
 public static partial class gosym_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

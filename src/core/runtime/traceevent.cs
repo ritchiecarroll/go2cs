@@ -12,7 +12,7 @@ using ꓸꓸꓸtraceArg = Span<runtime_package.traceArg>;
 
 partial class runtime_package {
 
-[GoType("num:uint8")] partial struct traceEv;
+partial struct traceEv /*num:uint8*/;
 
 internal static traceEv traceEvNone => /* iota */ 0; // unused
 internal static traceEv traceEvEventBatch => 1; // start of per-M batch of events [generation, M ID, timestamp, batch length]
@@ -65,13 +65,13 @@ internal static traceEv traceEvGoCreateBlocked => 47; // goroutine creation (sta
 internal static traceEv traceEvGoStatusStack => 48; // goroutine status at the start of a generation, with a stack [timestamp, goroutine ID, M ID, status, stack ID]
 internal static traceEv traceEvExperimentalBatch => 49; // start of extra data [experiment ID, generation, M ID, timestamp, batch length, batch data...]
 
-[GoType("num:uint64")] partial struct traceArg;
+partial struct traceArg /*num:uint64*/;
 
 // traceEventWriter is the high-level API for writing trace events.
 //
 // See the comment on traceWriter about style for more details as to why
 // this type and its methods are structured the way they are.
-[GoType] partial struct traceEventWriter {
+partial struct traceEventWriter {
     internal traceLocker tl;
 }
 

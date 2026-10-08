@@ -25,14 +25,14 @@ using path;
 partial class gccgoimporter_package {
 
 // A PackageInit describes an imported package that needs initialization.
-[GoType] partial struct PackageInit {
+partial struct PackageInit {
     public @string Name; // short package name
     public @string InitFunc; // name of init function
     public nint Priority;   // priority of init function, see InitData.Priority
 }
 
 // The gccgo-specific init data for a package.
-[GoType] partial struct InitData {
+partial struct InitData {
     // Initialization priority of this package relative to other packages.
     // This is based on the maximum depth of the package's dependency graph;
     // it is guaranteed to be greater than that of its dependencies.
@@ -144,7 +144,7 @@ internal static (io.ReadSeeker reader, io.Closer closer, error err) openExportFi
 
 // type Importer is a methodless func type — rendered inline as its base delegate
 
-[GoType("dyn")] internal partial interface GetImporter_type {
+internal partial interface GetImporter_type /*dyn*/ {
     @string Name();
 }
 

@@ -12,7 +12,7 @@ internal const bool staticLockRanking = false;
 
 // // lockRankStruct is embedded in mutex, but is empty when staticklockranking is
 // disabled (the default)
-[GoType] partial struct lockRankStruct {
+partial struct lockRankStruct {
 }
 
 internal static void lockInit(ж<mutex> Ꮡl, lockRank rank) {

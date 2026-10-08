@@ -150,7 +150,7 @@ public static readonly @string DefaultDebugPath = "/debug/rpc"u8;
 // Precompute the reflect type for error.
 internal static reflectꓸType typeOfError = reflect.TypeFor<error>();
 
-[GoType] public partial struct methodType {
+public partial struct methodType {
     public partial ref sync_package.Mutex Mutex { get; } // protects counters
     internal reflectꓸMethod method;
     public reflectꓸType ArgType;
@@ -158,7 +158,7 @@ internal static reflectꓸType typeOfError = reflect.TypeFor<error>();
     internal nuint numCalls;
 }
 
-[GoType] public partial struct service {
+public partial struct service {
     internal @string name;                // name of service
     internal reflectꓸValue rcvr;          // receiver of methods for the service
     internal reflectꓸType typ;           // type of the receiver
@@ -168,7 +168,7 @@ internal static reflectꓸType typeOfError = reflect.TypeFor<error>();
 // Request is a header written before every RPC call. It is used internally
 // but documented here as an aid to debugging, such as when analyzing
 // network traffic.
-[GoType] partial struct Request {
+partial struct Request {
     public @string ServiceMethod;  // format: "Service.Method"
     public uint64 Seq;   // sequence number chosen by client
     internal ж<Request> next; // for free list in Server
@@ -177,7 +177,7 @@ internal static reflectꓸType typeOfError = reflect.TypeFor<error>();
 // Response is a header written before every RPC return. It is used internally
 // but documented here as an aid to debugging, such as when analyzing
 // network traffic.
-[GoType] partial struct Response {
+partial struct Response {
     public @string ServiceMethod;   // echoes that of the Request
     public uint64 Seq;    // echoes that of the request
     public @string Error;   // error, if any.
@@ -185,7 +185,7 @@ internal static reflectꓸType typeOfError = reflect.TypeFor<error>();
 }
 
 // Server represents an RPC Server.
-[GoType] partial struct Server {
+partial struct Server {
     internal sync.Map serviceMap;   // map[string]*service
     internal sync.Mutex reqLock; // protects freeReq
     internal ж<Request> freeReq;
@@ -407,7 +407,7 @@ internal static void call(this ж<service> Ꮡs, ж<Server> Ꮡserver, ж<sync.M
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct gobServerCodec {
+partial struct gobServerCodec {
     internal io.ReadWriteCloser rwc;
     internal ж<gob.Decoder> dec;
     internal ж<gob.Encoder> enc;
@@ -415,11 +415,11 @@ internal static void call(this ж<service> Ꮡs, ж<Server> Ꮡserver, ж<sync.M
     internal bool closed;
 }
 
-[GoRecv] internal static error ReadRequestHeader(this ref gobServerCodec c, ж<Request> Ꮡr) {
+internal static error ReadRequestHeader(this ref gobServerCodec c, ж<Request> Ꮡr) {
     return c.dec.Decode(Ꮡr.OrTypedNil());
 }
 
-[GoRecv] internal static error ReadRequestBody(this ref gobServerCodec c, any body) {
+internal static error ReadRequestBody(this ref gobServerCodec c, any body) {
     return c.dec.Decode(body);
 }
 
@@ -427,7 +427,7 @@ internal static void call(this ж<service> Ꮡs, ж<Server> Ꮡserver, ж<sync.M
 internal static readonly object rpcGobErrorEncodingˢ = (@string)"rpc: gob error encoding response:"u8;
 internal static readonly object rpcGobErrorEncodingBodyˢ = (@string)"rpc: gob error encoding body:"u8;
 
-[GoRecv] internal static error /*err*/ WriteResponse(this ref gobServerCodec c, ж<Response> Ꮡr, any body) {
+internal static error /*err*/ WriteResponse(this ref gobServerCodec c, ж<Response> Ꮡr, any body) {
     error err = default!;
 
     {
@@ -455,7 +455,7 @@ internal static readonly object rpcGobErrorEncodingBodyˢ = (@string)"rpc: gob e
     return c.encBuf.Flush();
 }
 
-[GoRecv] internal static error Close(this ref gobServerCodec c) {
+internal static error Close(this ref gobServerCodec c) {
     if (c.closed) {
         // Only call c.rwc.Close once; otherwise the semantics are undefined.
         return default!;
@@ -714,7 +714,7 @@ public static error RegisterName(@string name, any rcvr) {
 // connection. ReadRequestBody may be called with a nil
 // argument to force the body of the request to be read and discarded.
 // See [NewClient]'s comment for information about concurrent access.
-[GoType] partial interface ServerCodec :
+partial interface ServerCodec :
     io.Closer
 {
     error ReadRequestHeader(ж<Request> _);

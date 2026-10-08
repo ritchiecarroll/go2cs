@@ -33,7 +33,7 @@ using go.debug;
 partial class macho_package {
 
 // A File represents an open Mach-O file.
-[GoType] partial struct File {
+partial struct File {
     public partial ref FileHeader FileHeader { get; }
     public binary.ByteOrder ByteOrder;
     public slice<Load> Loads;
@@ -44,18 +44,18 @@ partial class macho_package {
 }
 
 // A Load represents any Mach-O load command.
-[GoType] partial interface Load {
+partial interface Load {
     slice<byte> Raw();
 }
 
-[GoType("[]byte")] partial struct LoadBytes;
+partial struct LoadBytes /*[]byte*/;
 
 public static slice<byte> Raw(this LoadBytes b) {
     return b;
 }
 
 // A SegmentHeader is the header for a Mach-O 32-bit or 64-bit load segment command.
-[GoType] partial struct SegmentHeader {
+partial struct SegmentHeader {
     public LoadCmd Cmd;
     public uint32 Len;
     public @string Name;
@@ -70,7 +70,7 @@ public static slice<byte> Raw(this LoadBytes b) {
 }
 
 // A Segment represents a Mach-O 32-bit or 64-bit load segment command.
-[GoType] partial struct ΔSegment {
+partial struct ΔSegment {
     public partial ref LoadBytes LoadBytes { get; }
     public partial ref SegmentHeader SegmentHeader { get; }
     // Embed ReaderAt for ReadAt method.
@@ -79,21 +79,21 @@ public static slice<byte> Raw(this LoadBytes b) {
     // If a client wants Read and Seek it must use
     // Open() to avoid fighting over the seek offset
     // with other clients.
-    [GoEmbedded] public io_package.ReaderAt ReaderAt;
+    /*embed*/ public io_package.ReaderAt ReaderAt;
     internal ж<io.SectionReader> sr;
 }
 
 // Data reads and returns the contents of the segment.
-[GoRecv] public static (slice<byte>, error) Data(this ref ΔSegment s) {
+public static (slice<byte>, error) Data(this ref ΔSegment s) {
     return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), s.Filesz, 0);
 }
 
 // Open returns a new ReadSeeker reading the segment.
-[GoRecv] public static io.ReadSeeker Open(this ref ΔSegment s) {
+public static io.ReadSeeker Open(this ref ΔSegment s) {
     return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
 }
 
-[GoType] partial struct SectionHeader {
+partial struct SectionHeader {
     public @string Name;
     public @string Seg;
     public uint64 Addr;
@@ -106,7 +106,7 @@ public static slice<byte> Raw(this LoadBytes b) {
 }
 
 // A Reloc represents a Mach-O relocation.
-[GoType] partial struct Reloc {
+partial struct Reloc {
     public uint32 Addr;
     public uint32 Value;
     // when Scattered == false && Extern == true, Value is the symbol number.
@@ -119,7 +119,7 @@ public static slice<byte> Raw(this LoadBytes b) {
     public bool Scattered;
 }
 
-[GoType] partial struct ΔSection {
+partial struct ΔSection {
     public partial ref SectionHeader SectionHeader { get; }
     public slice<Reloc> Relocs;
     // Embed ReaderAt for ReadAt method.
@@ -128,22 +128,22 @@ public static slice<byte> Raw(this LoadBytes b) {
     // If a client wants Read and Seek it must use
     // Open() to avoid fighting over the seek offset
     // with other clients.
-    [GoEmbedded] public io_package.ReaderAt ReaderAt;
+    /*embed*/ public io_package.ReaderAt ReaderAt;
     internal ж<io.SectionReader> sr;
 }
 
 // Data reads and returns the contents of the Mach-O section.
-[GoRecv] public static (slice<byte>, error) Data(this ref ΔSection s) {
+public static (slice<byte>, error) Data(this ref ΔSection s) {
     return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), s.Size, 0);
 }
 
 // Open returns a new ReadSeeker reading the Mach-O section.
-[GoRecv] public static io.ReadSeeker Open(this ref ΔSection s) {
+public static io.ReadSeeker Open(this ref ΔSection s) {
     return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
 }
 
 // A Dylib represents a Mach-O load dynamic library command.
-[GoType] partial struct Dylib {
+partial struct Dylib {
     public partial ref LoadBytes LoadBytes { get; }
     public @string Name;
     public uint32 Time;
@@ -152,27 +152,27 @@ public static slice<byte> Raw(this LoadBytes b) {
 }
 
 // A Symtab represents a Mach-O symbol table command.
-[GoType] partial struct Symtab {
+partial struct Symtab {
     public partial ref LoadBytes LoadBytes { get; }
     public partial ref SymtabCmd SymtabCmd { get; }
     public slice<Symbol> Syms;
 }
 
 // A Dysymtab represents a Mach-O dynamic symbol table command.
-[GoType] partial struct Dysymtab {
+partial struct Dysymtab {
     public partial ref LoadBytes LoadBytes { get; }
     public partial ref DysymtabCmd DysymtabCmd { get; }
     public slice<uint32> IndirectSyms; // indices into Symtab.Syms
 }
 
 // A Rpath represents a Mach-O rpath command.
-[GoType] partial struct Rpath {
+partial struct Rpath {
     public partial ref LoadBytes LoadBytes { get; }
     public @string Path;
 }
 
 // A Symbol is a Mach-O 32-bit or 64-bit symbol table entry.
-[GoType] partial struct Symbol {
+partial struct Symbol {
     public @string Name;
     public uint8 Type;
     public uint8 Sect;
@@ -186,13 +186,13 @@ public static slice<byte> Raw(this LoadBytes b) {
 
 // FormatError is returned by some operations if the data does
 // not have the correct format for an object file.
-[GoType] partial struct FormatError {
+partial struct FormatError {
     internal int64 off;
     internal @string msg;
     internal any val;
 }
 
-[GoRecv] public static @string Error(this ref FormatError e) {
+public static @string Error(this ref FormatError e) {
     @string msg = e.msg;
     if (e.val != default!) {
         msg += fmt.Sprintf(" '%v'"u8, e.val);
@@ -219,7 +219,7 @@ public static (ж<File>, error) Open(@string name) {
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
-[GoRecv] public static error Close(this ref File f) {
+public static error Close(this ref File f) {
     error err = default!;
     if (f.closer != default!) {
         err = f.closer.Close();
@@ -504,7 +504,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     return (f, default!);
 }
 
-[GoRecv] internal static (ж<Symtab>, error) parseSymtab(this ref File f, slice<byte> symdat, slice<byte> strtab, slice<byte> cmddat, ж<SymtabCmd> Ꮡhdr, int64 offset) {
+internal static (ж<Symtab>, error) parseSymtab(this ref File f, slice<byte> symdat, slice<byte> strtab, slice<byte> cmddat, ж<SymtabCmd> Ꮡhdr, int64 offset) {
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
     var bo = f.ByteOrder;
@@ -557,12 +557,12 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     return (st, default!);
 }
 
-[GoType] partial struct relocInfo {
+partial struct relocInfo {
     public uint32 Addr;
     public uint32 Symnum;
 }
 
-[GoRecv] internal static error pushSection(this ref File f, ж<ΔSection> Ꮡsh, io.ReaderAt r) {
+internal static error pushSection(this ref File f, ж<ΔSection> Ꮡsh, io.ReaderAt r) {
     ref var sh = ref Ꮡsh.DerefOrNull();
 
     f.Sections = append(f.Sections, Ꮡsh);
@@ -629,7 +629,7 @@ internal static @string cstring(slice<byte> b) {
 }
 
 // Segment returns the first Segment with the given name, or nil if no such segment exists.
-[GoRecv] public static ж<ΔSegment> Segment(this ref File f, @string name) {
+public static ж<ΔSegment> Segment(this ref File f, @string name) {
     foreach (var (_, l) in f.Loads) {
         {
             var (s, ok) = l._<ж<ΔSegment>>(ᐧ); if (ok && (~s).Name == name) {
@@ -642,7 +642,7 @@ internal static @string cstring(slice<byte> b) {
 
 // Section returns the first section with the given name, or nil if no such
 // section exists.
-[GoRecv] public static ж<ΔSection> Section(this ref File f, @string name) {
+public static ж<ΔSection> Section(this ref File f, @string name) {
     foreach (var (_, s) in f.Sections) {
         if ((~s).Name == name) {
             return s;
@@ -661,7 +661,7 @@ internal static readonly @string rangesˢ = "ranges"u8;
 internal static readonly @string strˢ = "str"u8;
 
 // DWARF returns the DWARF debug information for the Mach-O file.
-[GoRecv] public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
+public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
     @string dwarfSuffix(ж<ΔSection> s) {
         @string sectname = s.Value.Name;
         nint pfx = default!;
@@ -777,7 +777,7 @@ internal static readonly @string strˢ = "str"u8;
 // ImportedSymbols returns the names of all symbols
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
-[GoRecv] public static (slice<@string>, error) ImportedSymbols(this ref File f) {
+public static (slice<@string>, error) ImportedSymbols(this ref File f) {
     if (f.Dysymtab == nil || f.Symtab == nil) {
         return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "missing symbol table"u8, default!))));
     }
@@ -793,7 +793,7 @@ internal static readonly @string strˢ = "str"u8;
 // ImportedLibraries returns the paths of all libraries
 // referred to by the binary f that are expected to be
 // linked with the binary at dynamic link time.
-[GoRecv] public static (slice<@string>, error) ImportedLibraries(this ref File f) {
+public static (slice<@string>, error) ImportedLibraries(this ref File f) {
     slice<@string> all = default!;
     foreach (var (_, l) in f.Loads) {
         {

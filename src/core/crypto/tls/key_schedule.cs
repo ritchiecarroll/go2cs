@@ -66,7 +66,7 @@ internal static slice<byte> finishedHash(this ж<cipherSuiteTLS13> Ꮡc, slice<b
 
 // exportKeyingMaterial implements RFC5705 exporters for TLS 1.3 according to
 // RFC 8446, Section 7.5.
-[GoRecv] internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> exportKeyingMaterial(this ref cipherSuiteTLS13 c, ж<tls13ꓸMasterSecret> Ꮡs, hash.Hash transcript) {
+internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> exportKeyingMaterial(this ref cipherSuiteTLS13 c, ж<tls13ꓸMasterSecret> Ꮡs, hash.Hash transcript) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var expMasterSecret = s.ExporterMasterSecret(new hash_HashᴠHash(transcript));
@@ -74,7 +74,7 @@ internal static slice<byte> finishedHash(this ж<cipherSuiteTLS13> Ꮡc, slice<b
     return (@string label, slice<byte> context, nint length) => (expMasterSecretʗ1.Exporter(label, context, length), default!);
 }
 
-[GoType] partial struct keySharePrivateKeys {
+partial struct keySharePrivateKeys {
     internal CurveID curveID;
     internal ж<ecdh.PrivateKey> ecdhe;
     internal ж<mlkem.DecapsulationKey768> mlkem;

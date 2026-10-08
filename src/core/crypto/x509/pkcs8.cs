@@ -21,7 +21,7 @@ partial class x509_package {
 // pkcs8 reflects an ASN.1, PKCS #8 PrivateKey. See
 // ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-8/pkcs-8v1_2.asn
 // and RFC 5208.
-[GoType] partial struct pkcs8 {
+partial struct pkcs8 {
     public nint Version;
     public pkix.AlgorithmIdentifier Algo;
     public slice<byte> PrivateKey;

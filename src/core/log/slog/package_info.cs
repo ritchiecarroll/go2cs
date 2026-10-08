@@ -75,11 +75,11 @@ using static go.log.slog_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("log/slog/attr.go", "attr.cs", "ABAkkqiSqqKokqiSqJKqoqiSAAIUAAkCpoKYgoKUqqKokqaCqqI=")]
-[assembly: go.GoPositionMap("log/slog/handler.go", "handler.cs", "AFu+AYLcgqwACAKCgoKCkoKC1oKmggBCmAGUAAscwoKClKbmgpSUkoKCgIKCgsiCgoKmppTWgoKCqvKSgoKmgoKUgoKCgoKUuIKCgoKUpoKUgoKCgpSUgoKEgoKC1sSAgoKCgoLsgoLKgoKCgoKClJSCgqaUgqa6koKUAA4egoLGou6CgpSmgoKUgIKCpKaCggAGEqKCgoKUgqaCupKClKSCgryigoKCpqzSgoCCgoKmlLaCpoCCgIKClNiClMqUgpSCgpSCuIKUpoKmgoKUlJSClJSmgoKCgqaClPrCkoDcgJKCuLiCgpSUgrSkooKUuIrCgoKCgsrIgKKAooCigA==", "341-346:1;557-572:1")]
+[assembly: go.GoPositionMap("log/slog/handler.go", "handler.cs", "AFu+AYLcgqwACAKCgoKCkoKC1oKmggBCmAGUAAscwoKClKbmgpSUkoKCgIKCgsiCgoKmppTWgoKCqvKSgoKmgoKUgoKCgoKUuIKCgoKUpoKUgoKCgpSUgoKEgoKC1sSAgoKCgoLsgoLKgoKCgoKClJSCgqaUgqa6koKUAA4egoLGou6CgpSmgoKUgIKCpKaCggAGEqKCgoKUgqaCupKClKSCgryigoKCpqzSgoCCgoKmlLaCpoCCgIKClNiClMqUgpSCgpSCuIKUpoKmgoKUlJSClJSmgoKCgqaClPrCkoDcgJKCuLiCgpSUgrSkooKUuIrCgoKCgsrIgKKAooCigA==", "341-346:1;557-572:1", "", "200=Clip/1/2/3,Clip/2/2/5;414=New/1/1/5")]
 [assembly: go.GoPositionMap("log/slog/json_handler.go", "json_handler.cs", "ABw80oKUAAkYoqqipoIAAkIAIALYsoCmpIKCpqKUpKSqgLLGprSkgoKAgpTGpKakkoKCgIKkgoIABxDSgJKAlIKCgIKCgpSClIKUtLS0toKCxIKCpIKCgpSCgoIACBKCgpSCgoKClJSClAAMGg==", "161-161:1;162-162:2")]
 [assembly: go.GoPositionMap("log/slog/level.go", "level.cs", "ADZ2AAkCgoKUlpSkpKTM2AACENKCgpSqoqqiAAIQ0tbSgoKogoKAgoKCgraUpKSkpKSC6qAACxiSqJKmgqqiqqKqooKAgqSC", "60-65:1;123-127:1")]
 [assembly: go.GoPositionMap("log/slog/logger.go", "logger.cs", "ABxYABgCgoKmgqiQrvLugIKSggAMGIKCgpSChJKCqIKCggAMGoKSqJCq4oKUgoIAAhIACAKClIKCqJKClKiyqJKClKyyAAIaAAwCqLKosqiyqLKosqiyqLKosqiyrNKClIKClIKUgoKClKiygpSCgpSClIKCgpSosqiyqLKosqiyqLKosqiyqLKosg==")]
-[assembly: go.GoPositionMap("log/slog/record.go", "record.cs", "AC900gAHFtKCqLKqwoKCpoKCAAgOwoKCgoKUgriCgpSCpoKCgoIABBDSgoKCgpSCgpSClMySgoKCgIK2AAQW4pSClKa2ABcowoKClIKUgpSu4oKC")]
+[assembly: go.GoPositionMap("log/slog/record.go", "record.cs", "AC900gAHFtKCqLKqwoKCpoKCAAgOwoKCgoKUgriCgpSCpoKCgoIABBDSgoKCgpSCgpSClMySgoKCgIK2AAQW4pSClKa2ABQowoKClIKUgpSu4oKC")]
 [assembly: go.GoPositionMap("log/slog/text_handler.go", "text_handler.cs", "ABs40oKUAAkYoqqipoIAAk4AJgKmopSkpICCgoKmgqSAlIKkpKSssoCCtoKClKaCgpSCgqaClIKUgoKUlA==")]
 [assembly: go.GoPositionMap("log/slog/value.go", "value.cs", "ADp8AA8agoKUAAQQkpSkxKSkpLS+wqiSqJKokqiSqJKCgpQABhyiypSCgpS4qJKq+ICCgoKCpqSokoKCgqYAAiQADwKUpKSkpKSkpKSkpKSkpKSkpKSkpLS+spSAgqSkpKSkpKSkpKSkzrKAgqSCpoKqooCSpKqigJKkqqKAkqSmgqqigJKmpoKqooCSpqaCqqKAkqSokpSClKS0zKKqooCCpKaCrLKCgoKUlKSkpKSkpMqSgsqqopSkpKSkpKSkpKQADioACgKCgoCCuIKClJSCAAkGgoKCgpSCgoKCgoKClIKCgqY=", "502-506:1")]
 // </GoSourcePositionMaps>
@@ -90,7 +90,7 @@ namespace go.log;
 public static partial class slog_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

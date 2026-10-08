@@ -106,7 +106,7 @@ partial class types_package {
 // Use [Named.Obj] to obtain the object S.
 //
 // Before type aliases (Go 1.9), the spec called defined types "named types".
-[GoType] partial struct Named {
+partial struct Named {
     internal ж<Checker> check; // non-nil during type-checking; nil otherwise
     internal ж<TypeName> obj; // corresponding declared object for declared types; see above for instantiated types
     // fromRHS holds the type (on RHS of declaration) this *Named type is derived
@@ -131,14 +131,14 @@ partial class types_package {
 
 // instance holds information that is only necessary for instantiated named
 // types.
-[GoType] partial struct Δinstance {
+partial struct Δinstance {
     internal ж<Named> orig; // original, uninstantiated type
     internal ж<TypeList> targs; // type arguments
     internal nint expandedMethods;      // number of expanded methods; expandedMethods <= len(orig.methods)
     internal ж<Context> ctxt; // local Context; set to nil after full expansion
 }
 
-[GoType("num:uint32")] partial struct namedState;
+partial struct namedState /*num:uint32*/;
 
 internal static namedState unresolved => /* iota */ 0; // tparams, underlying type and methods might be unavailable
 internal static namedState resolved => 1;  // resolve has run; methods might be incomplete (for instances)
@@ -307,7 +307,7 @@ internal static void cleanup(this ж<Named> Ꮡt) {
 
 // Obj returns the type name for the declaration defining the named type t. For
 // instantiated types, this is same as the type name of the origin type.
-[GoRecv] public static ж<TypeName> Obj(this ref Named t) {
+public static ж<TypeName> Obj(this ref Named t) {
     if (t.inst == nil) {
         return t.obj;
     }
@@ -341,7 +341,7 @@ public static void SetTypeParams(this ж<Named> Ꮡt, slice<ж<TypeParam>> tpara
 }
 
 // TypeArgs returns the type arguments used to instantiate the named type t.
-[GoRecv] public static ж<TypeList> TypeArgs(this ref Named t) {
+public static ж<TypeList> TypeArgs(this ref Named t) {
     if (t.inst == nil) {
         return default!;
     }
@@ -490,7 +490,7 @@ public static void AddMethod(this ж<Named> Ꮡt, ж<Func> Ꮡm) {
 // methodIndex returns the index of the method with the given name.
 // If foldCase is set, capitalization in the name is ignored.
 // The result is negative if no such method exists.
-[GoRecv] internal static nint methodIndex(this ref Named t, @string name, bool foldCase) {
+internal static nint methodIndex(this ref Named t, @string name, bool foldCase) {
     if (name == "_"u8) {
         return -1;
     }
@@ -648,7 +648,7 @@ internal static (nint, ж<Func>) lookupMethod(this ж<Named> Ꮡn, ж<Package> �
 }
 
 // context returns the type-checker context.
-[GoRecv] internal static ж<Context> context(this ref Checker check) {
+internal static ж<Context> context(this ref Checker check) {
     if (check.ctxt == nil) {
         check.ctxt = NewContext();
     }

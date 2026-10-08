@@ -26,7 +26,7 @@ partial class encodecounter_package {
 // is enabled.  Counter data files may contain multiple segments; the file
 // header and first segment are written via the "Write" method below, and
 // additional segments can then be added using "AddSegment".
-[GoType] partial struct CoverageDataWriter {
+partial struct CoverageDataWriter {
     internal ж<stringtab.Writer> stab;
     internal ж<bufio.Writer> w;
     internal coverage.CounterSegmentHeader csh;
@@ -53,7 +53,7 @@ public static ж<CoverageDataWriter> NewCoverageDataWriter(io.Writer w, coverage
 // CounterVisitor to the write/emit routines, then the expectation is
 // that the VisitFuncs method will then invoke the callback "f" with
 // data for each function to emit to the file.
-[GoType] partial interface CounterVisitor {
+partial interface CounterVisitor {
     error VisitFuncs(Func<uint32, uint32, slice<uint32>, error> f);
 }
 
@@ -62,7 +62,7 @@ public static ж<CoverageDataWriter> NewCoverageDataWriter(io.Writer w, coverage
 // Write writes the contents of the count-data file to the writer
 // previously supplied to NewCoverageDataWriter. Returns an error
 // if something went wrong somewhere with the write.
-public static error Write(this ж<CoverageDataWriter> Ꮡcfw, [GoArrayDims(16)] array<byte> metaFileHash, map<@string, @string> args, CounterVisitor visitor) {
+public static error Write(this ж<CoverageDataWriter> Ꮡcfw, /*[16]*/ array<byte> metaFileHash, map<@string, @string> args, CounterVisitor visitor) {
     metaFileHash = metaFileHash.Clone();
 
     ref var cfw = ref Ꮡcfw.DerefOrNull();
@@ -94,7 +94,7 @@ internal static error padToFourByteBoundary(ж<slicewriter.WriteSeeker> Ꮡws) {
     return default!;
 }
 
-[GoRecv] internal static error patchSegmentHeader(this ref CoverageDataWriter cfw, ж<slicewriter.WriteSeeker> Ꮡws) {
+internal static error patchSegmentHeader(this ref CoverageDataWriter cfw, ж<slicewriter.WriteSeeker> Ꮡws) {
     ref var ws = ref Ꮡws.DerefOrNull();
 
     // record position
@@ -235,7 +235,7 @@ public static error AppendSegment(this ж<CoverageDataWriter> Ꮡcfw, map<@strin
     return default!;
 }
 
-[GoRecv] internal static error writeHeader(this ref CoverageDataWriter cfw, [GoArrayDims(16)] array<byte> metaFileHash) {
+internal static error writeHeader(this ref CoverageDataWriter cfw, /*[16]*/ array<byte> metaFileHash) {
     metaFileHash = metaFileHash.Clone();
 
     // Emit file header.
@@ -254,7 +254,7 @@ public static error AppendSegment(this ж<CoverageDataWriter> Ꮡcfw, map<@strin
     return default!;
 }
 
-[GoRecv] internal static error writeBytes(this ref CoverageDataWriter cfw, slice<byte> b) {
+internal static error writeBytes(this ref CoverageDataWriter cfw, slice<byte> b) {
     if (len(b) == 0) {
         return default!;
     }
@@ -339,7 +339,7 @@ internal static error writeCounters(this ж<CoverageDataWriter> Ꮡcfw, CounterV
     return default!;
 }
 
-[GoRecv] internal static error writeFooter(this ref CoverageDataWriter cfw) {
+internal static error writeFooter(this ref CoverageDataWriter cfw) {
     cfw.segs++;
     var cf = new coverage.CounterFileFooter(
         Magic: coverage.CovCounterMagic.Clone(),

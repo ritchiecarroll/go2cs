@@ -11,7 +11,7 @@ partial class poll_package {
 
 // eofError returns io.EOF when fd is available for reading end of
 // file.
-[GoRecv] internal static error eofError(this ref FD fd, nint n, error err) {
+internal static error eofError(this ref FD fd, nint n, error err) {
     if (n == 0 && err == default! && fd.ZeroReadIsEOF) {
         return io.EOF;
     }

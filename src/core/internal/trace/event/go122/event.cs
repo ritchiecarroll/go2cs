@@ -432,7 +432,7 @@ internal static array<@event.Spec> specs = new golib.SparseArray<@event.Spec>{
     )
 }.array(137);
 
-[GoType("num:uint8")] partial struct GoStatus;
+partial struct GoStatus /*num:uint8*/;
 
 public static GoStatus GoBad => /* iota */ 0;
 public static GoStatus GoRunnable => 1;
@@ -465,7 +465,7 @@ public static @string String(this GoStatus s) {
     return badˢ;
 }
 
-[GoType("num:uint8")] partial struct ProcStatus;
+partial struct ProcStatus /*num:uint8*/;
 
 public static ProcStatus ProcBad => /* iota */ 0;
 public static ProcStatus ProcRunning => 1;

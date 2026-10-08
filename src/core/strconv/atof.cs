@@ -79,7 +79,7 @@ internal static (float64 f, nint n, bool ok) special(@string s) {
     return (0D, 0, false);
 }
 
-[GoRecv] internal static bool /*ok*/ set(this ref @decimal b, @string s) {
+internal static bool /*ok*/ set(this ref @decimal b, @string s) {
     bool ok = default!;
 
     nint i = 0;

@@ -18,7 +18,7 @@ partial class runtime_package {
 // binaries.
 internal static UntypedInt sigPerThreadSyscall => /* _SIGRTMIN + 1 */ 33;
 
-[GoType] partial struct mOS {
+partial struct mOS {
     // profileTimer holds the ID of the POSIX interval timer for profiling CPU
     // usage on this thread.
     //
@@ -555,7 +555,7 @@ internal static void setSignalstackSP(ж<stackt> Ꮡs, uintptr sp) {
 }
 
 //go:nosplit
-[GoRecv] internal static void fixsigcode(this ref sigctxt c, uint32 sig) {
+internal static void fixsigcode(this ref sigctxt c, uint32 sig) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -654,7 +654,7 @@ internal static bool validSIGPROF(ж<m> Ꮡmp, ж<sigctxt> Ꮡc) {
 
 // perThreadSyscallArgs contains the system call number, arguments, and
 // expected return values for a system call to be executed on all threads.
-[GoType] partial struct perThreadSyscallArgs {
+partial struct perThreadSyscallArgs {
     internal uintptr trap;
     internal uintptr a1;
     internal uintptr a2;
@@ -711,7 +711,7 @@ internal static UntypedInt _SYS_SECCOMP => 1;
 // to kill or tgkill.
 //
 //go:nosplit
-[GoRecv] internal static bool sigFromUser(this ref sigctxt c) {
+internal static bool sigFromUser(this ref sigctxt c) {
     var code = (int32)c.sigcode();
     return code == _SI_USER || code == _SI_TKILL;
 }
@@ -719,7 +719,7 @@ internal static UntypedInt _SYS_SECCOMP => 1;
 // sigFromSeccomp reports whether the signal was sent from seccomp.
 //
 //go:nosplit
-[GoRecv] internal static bool sigFromSeccomp(this ref sigctxt c) {
+internal static bool sigFromSeccomp(this ref sigctxt c) {
     var code = (int32)c.sigcode();
     return code == _SYS_SECCOMP;
 }

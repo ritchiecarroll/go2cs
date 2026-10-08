@@ -12,7 +12,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class types_package {
 
-[GoType("@string")] partial struct goVersion;
+partial struct goVersion /*@string*/;
 
 // asGoVersion returns v as a goVersion (e.g., "go1.20.1" becomes "go1.20").
 // If v is not a valid Go version, the result is the empty string.
@@ -45,7 +45,7 @@ internal static goVersion go_current = asGoVersion(fmt.Sprintf("go1.%d"u8, (nint
 // allowVersion reports whether the current effective Go version
 // (which may vary from one file to another) is allowed to use the
 // feature version (want).
-[GoRecv] internal static bool allowVersion(this ref Checker check, goVersion want) {
+internal static bool allowVersion(this ref Checker check, goVersion want) {
     return !check.version.isValid() || check.version.cmp(want) >= 0;
 }
 

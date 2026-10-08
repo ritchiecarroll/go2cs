@@ -7,7 +7,7 @@ using os = os_package;
 
 partial class net_package {
 
-[GoType("@string")] partial struct fileAddr;
+partial struct fileAddr /*@string*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fileNetˢ = "file+net"u8;

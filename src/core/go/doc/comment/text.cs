@@ -14,7 +14,7 @@ using io = io_package;
 partial class comment_package {
 
 // A textPrinter holds the state needed for printing a Doc as plain text.
-[GoType] partial struct textPrinter {
+partial struct textPrinter {
     public partial ref ж<Printer> Printer { get; }
     internal strings.Builder @long;
     internal @string prefix;
@@ -182,7 +182,7 @@ internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @s
 // oneLongLine prints the text sequence x to out as one long line,
 // without worrying about line wrapping.
 // Explicit links have the [ ] dropped to improve readability.
-[GoRecv] internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> Ꮡout, slice<ΔText> x) {
+internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> Ꮡout, slice<ΔText> x) {
     foreach (var (_, t) in x) {
         switch (t.type()) {
         case Plain tΔ1: {
@@ -206,7 +206,7 @@ internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @s
 
 // A score is the score (also called weight) for a given line.
 // add and cmp add and compare scores.
-[GoType("dyn")] internal partial struct wrap_score {
+internal partial struct wrap_score /*dyn*/ {
     internal int64 hi;
     internal int64 lo;
 }

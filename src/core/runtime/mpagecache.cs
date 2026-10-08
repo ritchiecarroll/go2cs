@@ -15,14 +15,14 @@ internal static uintptr pageCachePages => /* 8 * unsafe.Sizeof(pageCache{}.cache
 // allocate from without a lock. More specifically, it represents
 // a pageCachePages*pageSize chunk of memory with 0 or more free
 // pages in it.
-[GoType] partial struct pageCache {
+partial struct pageCache {
     internal uintptr @base; // base address of the chunk
     internal uint64 cache;  // 64-bit bitmap representing free pages (1 means free)
     internal uint64 scav;  // 64-bit bitmap representing scavenged pages (1 means scavenged)
 }
 
 // empty reports whether the page cache has no free pages.
-[GoRecv] internal static bool empty(this ref pageCache c) {
+internal static bool empty(this ref pageCache c) {
     return c.cache == 0;
 }
 
@@ -34,7 +34,7 @@ internal static uintptr pageCachePages => /* 8 * unsafe.Sizeof(pageCache{}.cache
 //
 // Returns a base address of zero on failure, in which case the
 // amount of scavenged memory should be ignored.
-[GoRecv] internal static (uintptr, uintptr) alloc(this ref pageCache c, uintptr npages) {
+internal static (uintptr, uintptr) alloc(this ref pageCache c, uintptr npages) {
     if (c.cache == 0) {
         return (0, 0);
     }
@@ -54,7 +54,7 @@ internal static uintptr pageCachePages => /* 8 * unsafe.Sizeof(pageCache{}.cache
 //
 // Returns a base address and the amount of scavenged memory in the
 // allocated region in bytes.
-[GoRecv] internal static (uintptr, uintptr) allocN(this ref pageCache c, uintptr npages) {
+internal static (uintptr, uintptr) allocN(this ref pageCache c, uintptr npages) {
     nuint i = findBitRange64(c.cache, (nuint)npages);
     if (i >= 64) {
         return (0, 0);
@@ -75,7 +75,7 @@ internal static uintptr pageCachePages => /* 8 * unsafe.Sizeof(pageCache{}.cache
 // Must run on the system stack because p.mheapLock must be held.
 //
 //go:systemstack
-[GoRecv] internal static void flush(this ref pageCache c, ж<pageAlloc> Ꮡp) {
+internal static void flush(this ref pageCache c, ж<pageAlloc> Ꮡp) {
     ref var Δp = ref Ꮡp.DerefOrNull();
 
     assertLockHeld(Δp.mheapLock);
@@ -116,7 +116,7 @@ internal static uintptr pageCachePages => /* 8 * unsafe.Sizeof(pageCache{}.cache
 // Must run on the system stack because p.mheapLock must be held.
 //
 //go:systemstack
-[GoRecv] internal static pageCache allocToCache(this ref pageAlloc Δp) {
+internal static pageCache allocToCache(this ref pageAlloc Δp) {
     assertLockHeld(Δp.mheapLock);
     // If the searchAddr refers to a region which has a higher address than
     // any known chunk, then we know we're out of memory.

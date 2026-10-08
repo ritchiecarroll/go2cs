@@ -15,7 +15,7 @@ using fmt = fmt_package;
 partial class hpack_package {
 
 // A DecodingError is something the spec defines as a decoding error.
-[GoType] partial struct DecodingError {
+partial struct DecodingError {
     public error Err;
 }
 
@@ -23,7 +23,7 @@ public static @string Error(this DecodingError de) {
     return fmt.Sprintf("decoding error: %v"u8, de.Err);
 }
 
-[GoType("num:nint")] partial struct InvalidIndexError;
+partial struct InvalidIndexError /*num:nint*/;
 
 public static @string Error(this InvalidIndexError e) {
     return fmt.Sprintf("invalid indexed representation index %d"u8, (nint)e);
@@ -31,7 +31,7 @@ public static @string Error(this InvalidIndexError e) {
 
 // A HeaderField is a name-value pair. Both the name and value are
 // treated as opaque sequences of octets.
-[GoType] partial struct HeaderField {
+partial struct HeaderField {
     public @string Name, Value;
     // Sensitive means that this header field should never be
     // indexed.
@@ -75,7 +75,7 @@ public static uint32 Size(this HeaderField hf) {
 
 // A Decoder is the decoding context for incremental processing of
 // header blocks.
-[GoType] partial struct Decoder {
+partial struct Decoder {
     internal dynamicTable dynTab;
     internal Action<HeaderField> emit;
     internal bool emitEnabled; // whether calls to emit are enabled
@@ -114,14 +114,14 @@ public static error ErrStringLength = errors.New("hpack: string too long"u8);
 // value string. If a string exceeds this length (even after any
 // decompression), Write will return ErrStringLength.
 // A value of 0 means unlimited and is the default from NewDecoder.
-[GoRecv] public static void SetMaxStringLength(this ref Decoder d, nint n) {
+public static void SetMaxStringLength(this ref Decoder d, nint n) {
     d.maxStrLen = n;
 }
 
 // SetEmitFunc changes the callback used when new header fields
 // are decoded.
 // It must be non-nil. It does not affect EmitEnabled.
-[GoRecv] public static void SetEmitFunc(this ref Decoder d, Action<HeaderField> emitFunc) {
+public static void SetEmitFunc(this ref Decoder d, Action<HeaderField> emitFunc) {
     d.emit = emitFunc;
 }
 
@@ -132,30 +132,30 @@ public static error ErrStringLength = errors.New("hpack: string too long"u8);
 // while still decoding and keeping in-sync with decoder state, but
 // without doing unnecessary decompression or generating unnecessary
 // garbage for header fields past the limit.
-[GoRecv] public static void SetEmitEnabled(this ref Decoder d, bool v) {
+public static void SetEmitEnabled(this ref Decoder d, bool v) {
     d.emitEnabled = v;
 }
 
 // EmitEnabled reports whether calls to the emitFunc provided to NewDecoder
 // are currently enabled. The default is true.
-[GoRecv] public static bool EmitEnabled(this ref Decoder d) {
+public static bool EmitEnabled(this ref Decoder d) {
     return d.emitEnabled;
 }
 
 // TODO: add method *Decoder.Reset(maxSize, emitFunc) to let callers re-use Decoders and their
 // underlying buffers for garbage reasons.
-[GoRecv] public static void SetMaxDynamicTableSize(this ref Decoder d, uint32 v) {
+public static void SetMaxDynamicTableSize(this ref Decoder d, uint32 v) {
     d.dynTab.setMaxSize(v);
 }
 
 // SetAllowedMaxDynamicTableSize sets the upper bound that the encoded
 // stream (via dynamic table size updates) may set the maximum size
 // to.
-[GoRecv] public static void SetAllowedMaxDynamicTableSize(this ref Decoder d, uint32 v) {
+public static void SetAllowedMaxDynamicTableSize(this ref Decoder d, uint32 v) {
     d.dynTab.allowedMaxSize = v;
 }
 
-[GoType] partial struct dynamicTable {
+partial struct dynamicTable {
     // https://httpwg.org/specs/rfc7541.html#rfc.section.2.3.2
     internal headerFieldTable table;
     internal uint32 size; // in bytes
@@ -163,19 +163,19 @@ public static error ErrStringLength = errors.New("hpack: string too long"u8);
     internal uint32 allowedMaxSize; // maxSize may go up to this, inclusive
 }
 
-[GoRecv] internal static void setMaxSize(this ref dynamicTable dt, uint32 v) {
+internal static void setMaxSize(this ref dynamicTable dt, uint32 v) {
     dt.maxSize = v;
     dt.evict();
 }
 
-[GoRecv] internal static void add(this ref dynamicTable dt, HeaderField f) {
+internal static void add(this ref dynamicTable dt, HeaderField f) {
     dt.table.addEntry(f);
     dt.size += f.Size();
     dt.evict();
 }
 
 // If we're too big, evict old stuff.
-[GoRecv] internal static void evict(this ref dynamicTable dt) {
+internal static void evict(this ref dynamicTable dt) {
     nint n = default!;
     while (dt.size > dt.maxSize && n < dt.table.len()) {
         dt.size -= dt.table.ents[n].Size();
@@ -184,14 +184,14 @@ public static error ErrStringLength = errors.New("hpack: string too long"u8);
     dt.table.evictOldest(n);
 }
 
-[GoRecv] internal static nint maxTableIndex(this ref Decoder d) {
+internal static nint maxTableIndex(this ref Decoder d) {
     // This should never overflow. RFC 7540 Section 6.5.2 limits the size of
     // the dynamic table to 2^32 bytes, where each entry will occupy more than
     // one byte. Further, the staticTable has a fixed, small length.
     return d.dynTab.table.len() + staticTable.len();
 }
 
-[GoRecv] internal static (HeaderField hf, bool ok) at(this ref Decoder d, uint64 i) {
+internal static (HeaderField hf, bool ok) at(this ref Decoder d, uint64 i) {
     HeaderField hf = default!;
     bool ok = default!;
 
@@ -252,7 +252,7 @@ private static readonly @string truncatedHeadersˢ = "truncated headers"u8;
 // Close declares that the decoding is complete and resets the Decoder
 // to be reused again for a new header block. If there is any remaining
 // data in the decoder's buffer, Close returns an error.
-[GoRecv] public static error Close(this ref Decoder d) {
+public static error Close(this ref Decoder d) {
     if (d.saveBuf.Len() > 0) {
         d.saveBuf.Reset();
         return new DecodingError(errors.New(truncatedHeadersˢ));
@@ -261,7 +261,7 @@ private static readonly @string truncatedHeadersˢ = "truncated headers"u8;
     return default!;
 }
 
-[GoRecv] public static (nint n, error err) Write(this ref Decoder d, slice<byte> p) {
+public static (nint n, error err) Write(this ref Decoder d, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -308,7 +308,7 @@ private static readonly @string truncatedHeadersˢ = "truncated headers"u8;
 // continue parsing.
 internal static error errNeedMore = errors.New("need more data"u8);
 
-[GoType("num:nint")] partial struct indexType;
+partial struct indexType /*num:nint*/;
 
 internal static indexType indexedTrue => /* iota */ 0;
 internal static indexType indexedFalse => 1;
@@ -329,7 +329,7 @@ private static readonly @string invalidEncodingˢ = "invalid encoding"u8;
 // any other error is fatal.
 // consumes d.buf iff it returns nil.
 // precondition: must be called with len(d.buf) > 0
-[GoRecv] internal static error parseHeaderFieldRepr(this ref Decoder d) {
+internal static error parseHeaderFieldRepr(this ref Decoder d) {
     var b = d.buf[0];
     switch (ᐧ) {
     case {} when (byte)(b & 128) != 0: {
@@ -367,7 +367,7 @@ private static readonly @string invalidEncodingˢ = "invalid encoding"u8;
 }
 
 // (same invariants and behavior as parseHeaderFieldRepr)
-[GoRecv] internal static error parseFieldIndexed(this ref Decoder d) {
+internal static error parseFieldIndexed(this ref Decoder d) {
     var buf = d.buf;
     (var idx, buf, var err) = readVarInt(7, buf);
     if (err != default!) {
@@ -382,7 +382,7 @@ private static readonly @string invalidEncodingˢ = "invalid encoding"u8;
 }
 
 // (same invariants and behavior as parseHeaderFieldRepr)
-[GoRecv] internal static error parseFieldLiteral(this ref Decoder d, uint8 n, indexType it) {
+internal static error parseFieldLiteral(this ref Decoder d, uint8 n, indexType it) {
     var buf = d.buf;
     (var nameIdx, buf, var err) = readVarInt(n, buf);
     if (err != default!) {
@@ -427,7 +427,7 @@ private static readonly @string invalidEncodingˢ = "invalid encoding"u8;
     return d.callEmit(hf);
 }
 
-[GoRecv] internal static error callEmit(this ref Decoder d, HeaderField hf) {
+internal static error callEmit(this ref Decoder d, HeaderField hf) {
     if (d.maxStrLen != 0) {
         if (builtin.len(hf.Name) > d.maxStrLen || builtin.len(hf.Value) > d.maxStrLen) {
             return ErrStringLength;
@@ -444,7 +444,7 @@ private static readonly @string dynamicTableSizeUpdateˢ = "dynamic table size u
 private static readonly @string dynamicTableSizeUpdateˢ2 = "dynamic table size update too large"u8;
 
 // (same invariants and behavior as parseHeaderFieldRepr)
-[GoRecv] internal static error parseDynamicTableSizeUpdate(this ref Decoder d) {
+internal static error parseDynamicTableSizeUpdate(this ref Decoder d) {
     // RFC 7541, sec 4.2: This dynamic table size update MUST occur at the
     // beginning of the first header block following the change to the dynamic table size.
     if (!d.firstField && d.dynTab.size > 0) {
@@ -512,7 +512,7 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
 //
 // It returns a reference to the encoded string data to permit deferring decode costs
 // until after the caller verifies all data is present.
-[GoRecv] internal static (undecodedString u, slice<byte> remain, error err) readString(this ref Decoder d, slice<byte> p) {
+internal static (undecodedString u, slice<byte> remain, error err) readString(this ref Decoder d, slice<byte> p) {
     undecodedString u = default!;
     error err = default!;
 
@@ -540,12 +540,12 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
     return (u, p.slice((nint)(strLen)), default!);
 }
 
-[GoType] partial struct undecodedString {
+partial struct undecodedString {
     internal bool isHuff;
     internal slice<byte> b;
 }
 
-[GoRecv] internal static (@string, error) decodeString(this ref Decoder d, undecodedString u) {
+internal static (@string, error) decodeString(this ref Decoder d, undecodedString u) {
     if (!u.isHuff) {
         return (((@string)u.b), default!);
     }

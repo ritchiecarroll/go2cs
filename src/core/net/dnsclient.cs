@@ -170,14 +170,14 @@ internal static @string absDomainName(@string s) {
 }
 
 // An SRV represents a single DNS SRV record.
-[GoType] partial struct SRV {
+partial struct SRV {
     public @string Target;
     public uint16 Port;
     public uint16 Priority;
     public uint16 Weight;
 }
 
-[GoType("[]ж<SRV>")] partial struct byPriorityWeight;
+partial struct byPriorityWeight /*[]ж<SRV>*/;
 
 // shuffleByWeight shuffles SRV records by weight using the algorithm
 // described in RFC 2782.
@@ -224,12 +224,12 @@ internal static void sort(this byPriorityWeight addrs) {
 }
 
 // An MX represents a single DNS MX record.
-[GoType] partial struct MX {
+partial struct MX {
     public @string Host;
     public uint16 Pref;
 }
 
-[GoType("[]ж<MX>")] partial struct byPref;
+partial struct byPref /*[]ж<MX>*/;
 
 // sort reorders MX records as specified in RFC 5321.
 internal static void sort(this byPref s) {
@@ -241,7 +241,7 @@ internal static void sort(this byPref s) {
 }
 
 // An NS represents a single DNS NS record.
-[GoType] partial struct NS {
+partial struct NS {
     public @string Host;
 }
 

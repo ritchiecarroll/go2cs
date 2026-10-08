@@ -25,7 +25,7 @@ public static int32 RODATA; // set to 2 in asm.s
 // initialized at link time, so it is treated as DATA and not BSS.
 // The pointer is deferred to init time.
 
-[GoType("dyn")] partial struct DATAᴛ1 {
+partial struct DATAᴛ1 /*dyn*/ {
     public ж<nint> P;
     public nint X;
 }

@@ -27,34 +27,34 @@ using ꓸꓸꓸstring = Span<@string>;
 partial class url_package {
 
 // Error reports an error and the operation and URL that caused it.
-[GoType] partial struct ΔError {
+partial struct ΔError {
     public @string Op;
     public @string URL;
     public error Err;
 }
 
-[GoRecv] public static error Unwrap(this ref ΔError e) {
+public static error Unwrap(this ref ΔError e) {
     return e.Err;
 }
 
-[GoRecv] public static @string Error(this ref ΔError e) {
+public static @string Error(this ref ΔError e) {
     return fmt.Sprintf("%s %q: %s"u8, e.Op, e.URL, e.Err);
 }
 
-[GoType("dyn")] internal partial interface Timeout_type {
+internal partial interface Timeout_type /*dyn*/ {
     bool Timeout();
 }
 
-[GoRecv] public static bool Timeout(this ref ΔError e) {
+public static bool Timeout(this ref ΔError e) {
     var (t, ok) = e.Err._<Timeout_type>(ᐧ);
     return ok && t.Timeout();
 }
 
-[GoType("dyn")] internal partial interface Temporary_type {
+internal partial interface Temporary_type /*dyn*/ {
     bool Temporary();
 }
 
-[GoRecv] public static bool Temporary(this ref ΔError e) {
+public static bool Temporary(this ref ΔError e) {
     var (t, ok) = e.Err._<Temporary_type>(ᐧ);
     return ok && t.Temporary();
 }
@@ -91,7 +91,7 @@ internal static byte unhex(byte c) {
     return 0;
 }
 
-[GoType("num:nint")] partial struct encoding;
+partial struct encoding /*num:nint*/;
 
 internal static encoding encodePath => /* 1 + iota */ 1;
 internal static encoding encodePathSegment => 2;
@@ -101,13 +101,13 @@ internal static encoding encodeUserPassword => 5;
 internal static encoding encodeQueryComponent => 6;
 internal static encoding encodeFragment => 7;
 
-[GoType("@string")] partial struct EscapeError;
+partial struct EscapeError /*@string*/;
 
 public static @string Error(this EscapeError e) {
     return "invalid URL escape "u8 + strconv.Quote(((@string)e));
 }
 
-[GoType("@string")] partial struct InvalidHostError;
+partial struct InvalidHostError /*@string*/;
 
 public static @string Error(this InvalidHostError e) {
     return "invalid character "u8 + strconv.Quote(((@string)e)) + " in host name"u8;
@@ -409,7 +409,7 @@ internal static @string escape(@string s, encoding mode) {
 // for more details.
 //
 // URL's String method uses the EscapedPath method to obtain the path.
-[GoType] partial struct URL {
+partial struct URL {
     public @string Scheme;
     public @string Opaque;   // encoded opaque data
     public ж<Userinfo> User; // username and password information
@@ -445,7 +445,7 @@ public static ж<Userinfo> UserPassword(@string username, @string password) {
 // password details for a [URL]. An existing Userinfo value is guaranteed
 // to have a username set (potentially empty, as allowed by RFC 2396),
 // and optionally a password.
-[GoType] partial struct Userinfo {
+partial struct Userinfo {
     internal @string username;
     internal @string password;
     internal bool passwordSet;
@@ -795,7 +795,7 @@ internal static (@string, error) parseHost(@string host) {
 // See go.dev/issue/67401.
 //
 //go:linkname badSetPath net/url.(*URL).setPath
-[GoRecv] internal static error setPath(this ref URL u, @string p) {
+internal static error setPath(this ref URL u, @string p) {
     var (path, err) = unescape(p, encodePath);
     if (err != default!) {
         return err;
@@ -824,7 +824,7 @@ internal static partial error badSetPath(ж<URL> _Δp0, @string _Δp1);
 // their results.
 // In general, code should call EscapedPath instead of
 // reading u.RawPath directly.
-[GoRecv] public static @string EscapedPath(this ref URL u) {
+public static @string EscapedPath(this ref URL u) {
     if (u.RawPath != ""u8 && validEncoded(u.RawPath, encodePath)) {
         var (p, err) = unescape(u.RawPath, encodePath);
         if (err == default! && p == u.Path) {
@@ -872,7 +872,7 @@ internal static bool validEncoded(@string s, encoding mode) {
 }
 
 // setFragment is like setPath but for Fragment/RawFragment.
-[GoRecv] internal static error setFragment(this ref URL u, @string f) {
+internal static error setFragment(this ref URL u, @string f) {
     var (frag, err) = unescape(f, encodeFragment);
     if (err != default!) {
         return err;
@@ -897,7 +897,7 @@ internal static bool validEncoded(@string s, encoding mode) {
 // The [URL.String] method uses EscapedFragment to construct its result.
 // In general, code should call EscapedFragment instead of
 // reading u.RawFragment directly.
-[GoRecv] public static @string EscapedFragment(this ref URL u) {
+public static @string EscapedFragment(this ref URL u) {
     if (u.RawFragment != ""u8 && validEncoded(u.RawFragment, encodeFragment)) {
         var (f, err) = unescape(u.RawFragment, encodeFragment);
         if (err == default! && f == u.Fragment) {
@@ -945,7 +945,7 @@ internal static bool validOptionalPort(@string port) {
 //     the form host/path does not add its own /.
 //   - if u.RawQuery is empty, ?query is omitted.
 //   - if u.Fragment is empty, #fragment is omitted.
-[GoRecv] public static @string String(this ref URL u) {
+public static @string String(this ref URL u) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     nint n = len(u.Scheme);
     if (u.Opaque != ""u8){
@@ -1038,7 +1038,7 @@ public static @string Redacted(this ж<URL> Ꮡu) {
     return ru.String();
 }
 
-[GoType("map[@string, slice<@string>]")] partial struct Values;
+partial struct Values /*map[@string, slice<@string>]*/;
 
 // Get gets the first value associated with the given key.
 // If there are no values associated with the key, Get returns
@@ -1234,14 +1234,14 @@ internal static @string resolvePath(@string @base, @string @ref) {
 
 // IsAbs reports whether the [URL] is absolute.
 // Absolute means that it has a non-empty scheme.
-[GoRecv] public static bool IsAbs(this ref URL u) {
+public static bool IsAbs(this ref URL u) {
     return u.Scheme != ""u8;
 }
 
 // Parse parses a [URL] in the context of the receiver. The provided URL
 // may be relative or absolute. Parse returns nil, err on parse
 // failure, otherwise its return value is the same as [URL.ResolveReference].
-[GoRecv] public static (ж<URL>, error) Parse(this ref URL u, @string @ref) {
+public static (ж<URL>, error) Parse(this ref URL u, @string @ref) {
     var (refURL, err) = Parse(@ref);
     if (err != default!) {
         return (default!, err);
@@ -1255,7 +1255,7 @@ internal static @string resolvePath(@string @base, @string @ref) {
 // [URL] instance, even if the returned URL is identical to either the
 // base or reference. If ref is an absolute URL, then ResolveReference
 // ignores base and returns a copy of ref.
-[GoRecv] public static ж<URL> ResolveReference(this ref URL u, ж<URL> Ꮡref) {
+public static ж<URL> ResolveReference(this ref URL u, ж<URL> Ꮡref) {
     ref var @ref = ref Ꮡref.DerefOrNull();
 
     ref var url = ref heap<URL>(out var Ꮡurl);
@@ -1300,14 +1300,14 @@ internal static @string resolvePath(@string @base, @string @ref) {
 // Query parses RawQuery and returns the corresponding values.
 // It silently discards malformed value pairs.
 // To check errors use [ParseQuery].
-[GoRecv] public static Values Query(this ref URL u) {
+public static Values Query(this ref URL u) {
     var (v, _) = ParseQuery(u.RawQuery);
     return v;
 }
 
 // RequestURI returns the encoded path?query or opaque?query
 // string that would be used in an HTTP request for u.
-[GoRecv] public static @string RequestURI(this ref URL u) {
+public static @string RequestURI(this ref URL u) {
     @string result = u.Opaque;
     if (result == ""u8){
         result = u.EscapedPath();
@@ -1329,7 +1329,7 @@ internal static @string resolvePath(@string @base, @string @ref) {
 //
 // If the result is enclosed in square brackets, as literal IPv6 addresses are,
 // the square brackets are removed from the result.
-[GoRecv] public static @string Hostname(this ref URL u) {
+public static @string Hostname(this ref URL u) {
     var (host, _) = splitHostPort(u.Host);
     return host;
 }
@@ -1337,7 +1337,7 @@ internal static @string resolvePath(@string @base, @string @ref) {
 // Port returns the port part of u.Host, without the leading colon.
 //
 // If u.Host doesn't contain a valid numeric port, Port returns an empty string.
-[GoRecv] public static @string Port(this ref URL u) {
+public static @string Port(this ref URL u) {
     var (_, port) = splitHostPort(u.Host);
     return port;
 }
@@ -1362,15 +1362,15 @@ internal static (@string host, @string port) splitHostPort(@string hostPort) {
 
 // Marshaling interface implementations.
 // Would like to implement MarshalText/UnmarshalText but that will change the JSON representation of URLs.
-[GoRecv] public static (slice<byte> text, error err) MarshalBinary(this ref URL u) {
+public static (slice<byte> text, error err) MarshalBinary(this ref URL u) {
     return u.AppendBinary(default!);
 }
 
-[GoRecv] public static (slice<byte>, error) AppendBinary(this ref URL u, slice<byte> b) {
+public static (slice<byte>, error) AppendBinary(this ref URL u, slice<byte> b) {
     return (append(b, u.String().ꓸꓸꓸ), default!);
 }
 
-[GoRecv] public static error UnmarshalBinary(this ref URL u, slice<byte> text) {
+public static error UnmarshalBinary(this ref URL u, slice<byte> text) {
     var (u1, err) = Parse(((@string)text));
     if (err != default!) {
         return err;
@@ -1382,7 +1382,7 @@ internal static (@string host, @string port) splitHostPort(@string hostPort) {
 // JoinPath returns a new [URL] with the provided path elements joined to
 // any existing path and the resulting path cleaned of any ./ or ../ elements.
 // Any sequences of multiple / characters will be reduced to a single /.
-[GoRecv] public static ж<URL> JoinPath(this ref URL u, params ꓸꓸꓸstring elemʗp) {
+public static ж<URL> JoinPath(this ref URL u, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.slice();
 
     elem = appendꓸꓸꓸ(new @string[]{u.EscapedPath()}.slice(), elem);

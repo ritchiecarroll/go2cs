@@ -77,7 +77,7 @@ internal static ж<uint8> key8(ж<uintptr> Ꮡp) {
 // of Ms waiting for the lock. It does that via this struct's next field,
 // forming a singly-linked list with the mutex's key field pointing to the head
 // of the list.
-[GoType] partial struct mWaitList {
+partial struct mWaitList {
     internal muintptr next; // next m waiting for lock
 }
 

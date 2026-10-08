@@ -15,7 +15,7 @@ partial class runtime_package {
 // A spanSet is a set of *mspans.
 //
 // spanSet is safe for concurrent push and pop operations.
-[GoType] partial struct spanSet {
+partial struct spanSet {
 // A spanSet is a two-level data structure consisting of a
 // growable spine that points to fixed-sized blocks. The spine
 // can be accessed without locks, but adding a block or
@@ -53,7 +53,7 @@ partial class runtime_package {
 internal static UntypedInt spanSetBlockEntries => 512; // 4KB on 64-bit
 internal static UntypedInt spanSetInitSpineCap => 256; // Enough for 1GB heap on 64-bit
 
-[GoType] partial struct spanSetBlock {
+partial struct spanSetBlock {
     // Free spanSetBlocks are managed via a lock-free stack.
     internal partial ref lfnode lfnode { get; }
     // popped is the number of pop operations that have occurred on
@@ -264,7 +264,7 @@ internal static void reset(this ж<spanSet> Ꮡb) {
 // atomicSpanSetSpinePointer is an atomically-accessed spanSetSpinePointer.
 //
 // It has the same semantics as atomic.UnsafePointer.
-[GoType] partial struct atomicSpanSetSpinePointer {
+partial struct atomicSpanSetSpinePointer {
     internal atomic.UnsafePointer a;
 }
 
@@ -283,7 +283,7 @@ internal static void StoreNoWB(this ж<atomicSpanSetSpinePointer> Ꮡs, spanSetS
 }
 
 // spanSetSpinePointer represents a pointer to a contiguous block of atomic.Pointer[spanSetBlock].
-[GoType] partial struct spanSetSpinePointer {
+partial struct spanSetSpinePointer {
     internal @unsafe.Pointer p;
 }
 
@@ -297,7 +297,7 @@ internal static ж<spanSetBlockAlloc> ᏑspanSetBlockPool = new StandardBox<span
 internal static ref spanSetBlockAlloc spanSetBlockPool => ref ᏑspanSetBlockPool.Value;
 
 // spanSetBlockAlloc represents a concurrent pool of spanSetBlocks.
-[GoType] partial struct spanSetBlockAlloc {
+partial struct spanSetBlockAlloc {
     internal lfstack stack;
 }
 
@@ -318,7 +318,7 @@ internal static void free(this ж<spanSetBlockAlloc> Ꮡp, ж<spanSetBlock> Ꮡb
     Ꮡp.of(spanSetBlockAlloc.Ꮡstack).push(Ꮡblock.of(spanSetBlock.Ꮡlfnode));
 }
 
-[GoType("num:uint64")] partial struct headTailIndex;
+partial struct headTailIndex /*num:uint64*/;
 
 // makeHeadTailIndex creates a headTailIndex value from a separate
 // head and tail.
@@ -342,7 +342,7 @@ internal static (uint32 head, uint32 tail) split(this headTailIndex h) {
 }
 
 // atomicHeadTailIndex is an atomically-accessed headTailIndex.
-[GoType] partial struct atomicHeadTailIndex {
+partial struct atomicHeadTailIndex {
     internal atomic.Uint64 u;
 }
 
@@ -386,7 +386,7 @@ internal static void reset(this ж<atomicHeadTailIndex> Ꮡh) {
 }
 
 // atomicMSpanPointer is an atomic.Pointer[mspan]. Can't use generics because it's NotInHeap.
-[GoType] partial struct atomicMSpanPointer {
+partial struct atomicMSpanPointer {
     internal atomic.UnsafePointer p;
 }
 

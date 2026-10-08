@@ -14,7 +14,7 @@ using io = io_package;
 partial class quotedprintable_package {
 
 // Reader is a quoted-printable decoder.
-[GoType] partial struct Reader {
+partial struct Reader {
     internal ж<bufio.Reader> br;
     internal error rerr;  // last read error
     internal slice<byte> line; // to be consumed before more of br
@@ -78,7 +78,7 @@ internal static slice<byte> lf = slice<byte>("\n"u8);
 internal static slice<byte> softSuffix = slice<byte>("="u8);
 
 // Read reads and decodes quoted-printable data from the underlying reader.
-[GoRecv] public static (nint n, error err) Read(this ref Reader r, slice<byte> p) {
+public static (nint n, error err) Read(this ref Reader r, slice<byte> p) {
     nint n = default!;
     error err = default!;
 

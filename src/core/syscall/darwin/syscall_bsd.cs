@@ -81,7 +81,7 @@ public static (nint n, error err) ReadDirent(nint fd, slice<byte> buf) {
     return Getdirentries(fd, buf, @base);
 }
 
-[GoType("num:uint32")] partial struct WaitStatus;
+partial struct WaitStatus /*num:uint32*/;
 
 // Wait status is 7 bits at bottom, either 0 (exited),
 // 0x7F (stopped), or a signal number that caused an exit.

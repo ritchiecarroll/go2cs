@@ -45,7 +45,7 @@ internal static UntypedInt workbufAlloc => /* 32 << 10 */ 32768;
 // the garbage collector from transitioning to mark termination since
 // gcWork may locally hold GC work buffers. This can be done by
 // disabling preemption (systemstack or acquirem).
-[GoType] partial struct gcWork {
+partial struct gcWork {
     // wbuf1 and wbuf2 are the primary and secondary work buffers.
     //
     // This can be thought of as a stack of both work buffers'
@@ -85,7 +85,7 @@ internal static UntypedInt workbufAlloc => /* 32 << 10 */ 32768;
 // write barrier while the gcWork was in an inconsistent state, and
 // the write barrier in turn invoked a gcWork method, it could
 // permanently corrupt the gcWork.
-[GoRecv] internal static void init(this ref gcWork w) {
+internal static void init(this ref gcWork w) {
     w.wbuf1 = getempty();
     var wbuf2 = trygetfull();
     if (wbuf2 == nil) {
@@ -98,7 +98,7 @@ internal static UntypedInt workbufAlloc => /* 32 << 10 */ 32768;
 // obj must point to the beginning of a heap object or an oblet.
 //
 //go:nowritebarrierrec
-[GoRecv] internal static void put(this ref gcWork w, uintptr obj) {
+internal static void put(this ref gcWork w, uintptr obj) {
     var flushed = false;
     var wbuf = w.wbuf1;
     // Record that this may acquire the wbufSpans or heap lock to
@@ -136,7 +136,7 @@ internal static UntypedInt workbufAlloc => /* 32 << 10 */ 32768;
 // otherwise it returns false and the caller needs to call put.
 //
 //go:nowritebarrierrec
-[GoRecv] internal static bool putFast(this ref gcWork w, uintptr obj) {
+internal static bool putFast(this ref gcWork w, uintptr obj) {
     var wbuf = w.wbuf1;
     if (wbuf == nil || (~wbuf).nobj == len((~wbuf).obj)) {
         return false;
@@ -150,7 +150,7 @@ internal static UntypedInt workbufAlloc => /* 32 << 10 */ 32768;
 // constraints on these pointers.
 //
 //go:nowritebarrierrec
-[GoRecv] internal static void putBatch(this ref gcWork w, slice<uintptr> obj) {
+internal static void putBatch(this ref gcWork w, slice<uintptr> obj) {
     if (len(obj) == 0) {
         return;
     }
@@ -184,7 +184,7 @@ internal static UntypedInt workbufAlloc => /* 32 << 10 */ 32768;
 // other gcWork instances or other caches.
 //
 //go:nowritebarrierrec
-[GoRecv] internal static uintptr tryGet(this ref gcWork w) {
+internal static uintptr tryGet(this ref gcWork w) {
     var wbuf = w.wbuf1;
     if (wbuf == nil) {
         w.init();
@@ -213,7 +213,7 @@ internal static UntypedInt workbufAlloc => /* 32 << 10 */ 32768;
 // the caller is expected to call tryGet().
 //
 //go:nowritebarrierrec
-[GoRecv] internal static uintptr tryGetFast(this ref gcWork w) {
+internal static uintptr tryGetFast(this ref gcWork w) {
     var wbuf = w.wbuf1;
     if (wbuf == nil || (~wbuf).nobj == 0) {
         return 0;
@@ -229,7 +229,7 @@ internal static UntypedInt workbufAlloc => /* 32 << 10 */ 32768;
 // ability to hide pointers during the concurrent mark phase.
 //
 //go:nowritebarrierrec
-[GoRecv] internal static void dispose(this ref gcWork w) {
+internal static void dispose(this ref gcWork w) {
     {
         var wbuf = w.wbuf1; if (wbuf != nil) {
             if ((~wbuf).nobj == 0){
@@ -267,7 +267,7 @@ internal static UntypedInt workbufAlloc => /* 32 << 10 */ 32768;
 // global queue.
 //
 //go:nowritebarrierrec
-[GoRecv] internal static void balance(this ref gcWork w) {
+internal static void balance(this ref gcWork w) {
     if (w.wbuf1 == nil) {
         return;
     }
@@ -295,19 +295,19 @@ internal static UntypedInt workbufAlloc => /* 32 << 10 */ 32768;
 // empty reports whether w has no mark work available.
 //
 //go:nowritebarrierrec
-[GoRecv] internal static bool empty(this ref gcWork w) {
+internal static bool empty(this ref gcWork w) {
     return w.wbuf1 == nil || ((~w.wbuf1).nobj == 0 && (~w.wbuf2).nobj == 0);
 }
 
 // Internally, the GC work pool is kept in arrays in work buffers.
 // The gcWork interface caches a work buffer until full (or empty) to
 // avoid contending on the global work buffer lists.
-[GoType] partial struct workbufhdr {
+partial struct workbufhdr {
     internal lfnode node; // must be first
     internal nint nobj;
 }
 
-[GoType] partial struct workbuf {
+partial struct workbuf {
     internal sys.NotInHeap _;
     internal partial ref workbufhdr workbufhdr { get; }
     // account for the above fields
@@ -321,7 +321,7 @@ internal static readonly @string workbufIsEmptyˢ = "workbuf is empty"u8;
 // workbufs.
 // If the GC asks for some work these are the only routines that
 // make wbufs available to the GC.
-[GoRecv] internal static void checknonempty(this ref workbuf b) {
+internal static void checknonempty(this ref workbuf b) {
     if (b.nobj == 0) {
         @throw(workbufIsEmptyˢ);
     }
@@ -330,7 +330,7 @@ internal static readonly @string workbufIsEmptyˢ = "workbuf is empty"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string workbufIsNotEmptyˢ = "workbuf is not empty"u8;
 
-[GoRecv] internal static void checkempty(this ref workbuf b) {
+internal static void checkempty(this ref workbuf b) {
     if (b.nobj != 0) {
         @throw(workbufIsNotEmptyˢ);
     }

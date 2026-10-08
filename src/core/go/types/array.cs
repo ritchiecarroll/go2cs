@@ -8,7 +8,7 @@ namespace go.go;
 partial class types_package {
 
 // An Array represents an array type.
-[GoType] partial struct Array {
+partial struct Array {
     internal int64 len;
     internal ΔType elem;
 }
@@ -21,12 +21,12 @@ public static ж<Array> NewArray(ΔType elem, int64 len) {
 
 // Len returns the length of array a.
 // A negative result indicates an unknown length.
-[GoRecv] public static int64 Len(this ref Array a) {
+public static int64 Len(this ref Array a) {
     return a.len;
 }
 
 // Elem returns element type of array a.
-[GoRecv] public static ΔType Elem(this ref Array a) {
+public static ΔType Elem(this ref Array a) {
     return a.elem;
 }
 

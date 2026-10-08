@@ -50,7 +50,7 @@ using static go.@internal.chacha8rand_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/chacha8rand/chacha8.go", "chacha8.cs", "ABMoAA8wAAkCgoKUgqiyAAcSwoKCgoKs0oIABxCCgoKClIKCgoIAAxDigoKCgoKClKYAAhDygoKCgoKUAAgKgqiygpSCgpSClIKCgoKClA==")]
+[assembly: go.GoPositionMap("internal/chacha8rand/chacha8.go", "chacha8.cs", "ABMoAA8wAAkCgoKUgqiyAAcSwoKCgoKs0oIABxCCgoKClIKCgoIAAxDigoKCgoKClKYAAhDygoKCgoKUAAgKgqiygpSCgpSClIKCgoKClA==", "", "", "58=LEUint64/1/4/1,LEUint64/2/4/2,LEUint64/3/4/3,LEUint64/4/4/4")]
 [assembly: go.GoPositionMap("internal/chacha8rand/chacha8_generic.go", "chacha8_generic.cs", "ADqWApSCggAEnAGSgoKCgoKCgoKCgoKC")]
 // </GoSourcePositionMaps>
 
@@ -60,7 +60,7 @@ namespace go.@internal;
 public static partial class chacha8rand_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

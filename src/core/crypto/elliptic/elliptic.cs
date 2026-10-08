@@ -29,7 +29,7 @@ partial class elliptic_package {
 //
 // Using Curve implementations besides those returned by [P224], [P256], [P384],
 // and [P521] is deprecated.
-[GoType] partial interface Curve {
+partial interface Curve {
     // Params returns the parameters for the curve.
     ж<CurveParams> Params();
     // IsOnCurve reports whether the given (x,y) lies on the curve.
@@ -136,7 +136,7 @@ public static slice<byte> MarshalCompressed(Curve curve, ж<bigꓸInt> Ꮡx, ж<
 //
 // There isn't an equivalent interface for Marshal/MarshalCompressed because
 // that doesn't involve any mathematical operations, only FillBytes and Bit.
-[GoType] partial interface unmarshaler {
+partial interface unmarshaler {
     (ж<bigꓸInt> x, ж<bigꓸInt> y) Unmarshal(slice<byte> _);
     (ж<bigꓸInt> x, ж<bigꓸInt> y) UnmarshalCompressed(slice<byte> _);
 }

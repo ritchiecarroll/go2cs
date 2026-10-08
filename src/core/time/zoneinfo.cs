@@ -19,7 +19,7 @@ partial class time_package {
 // Location is used to provide a time zone in a printed Time value and for
 // calculations involving intervals that may cross daylight savings time
 // boundaries.
-[GoType] partial struct ΔLocation {
+partial struct ΔLocation {
     internal @string name;
     internal slice<zone> zone;
     internal slice<zoneTrans> tx;
@@ -44,14 +44,14 @@ partial class time_package {
 }
 
 // A zone represents a single time zone such as CET.
-[GoType] partial struct zone {
+partial struct zone {
     internal @string name; // abbreviated name, "CET"
     internal nint offset;   // seconds east of UTC
     internal bool isDST;   // is this zone Daylight Savings Time?
 }
 
 // A zoneTrans represents a single time zone transition.
-[GoType] partial struct zoneTrans {
+partial struct zoneTrans {
     internal int64 when; // transition time, in seconds since 1970 GMT
     internal uint8 index; // the index of the zone that goes into effect at that time
     internal bool isstd, isutc;  // ignored - no idea what these mean
@@ -239,7 +239,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
 //  3. Otherwise, use the first zone that is not daylight time, if
 //     there is one.
 //  4. Otherwise, use the first zone.
-[GoRecv] internal static nint lookupFirstZone(this ref ΔLocation l) {
+internal static nint lookupFirstZone(this ref ΔLocation l) {
     // Case 1.
     if (!l.firstZoneUsed()) {
         return 0;
@@ -264,7 +264,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
 
 // firstZoneUsed reports whether the first zone is used by some
 // transition.
-[GoRecv] internal static bool firstZoneUsed(this ref ΔLocation l) {
+internal static bool firstZoneUsed(this ref ΔLocation l) {
     foreach (var (_, tx) in l.tx) {
         if (tx.index == 0) {
             return true;
@@ -453,14 +453,14 @@ internal static (nint offset, @string rest, bool ok) tzsetOffset(@string s) {
     return (off, s, true);
 }
 
-[GoType("num:nint")] partial struct ruleKind;
+partial struct ruleKind /*num:nint*/;
 
 internal static ruleKind ruleJulian => /* iota */ 0;
 internal static ruleKind ruleDOY => 1;
 internal static ruleKind ruleMonthWeekDay => 2;
 
 // rule is a rule read from a tzset string.
-[GoType] partial struct rule {
+partial struct rule {
     internal ruleKind kind;
     internal nint day;
     internal nint week;

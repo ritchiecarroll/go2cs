@@ -11,7 +11,7 @@ using @unsafe = unsafe_package;
 partial class runtime_package {
 
 // inlinedCall is the encoding of entries in the FUNCDATA_InlTree table.
-[GoType] partial struct inlinedCall {
+partial struct inlinedCall {
     internal abi.FuncID funcID; // type of the called function
     internal array<byte> _ = new(3);
     internal int32 nameOff; // offset into pclntab for name of called function
@@ -32,14 +32,13 @@ partial class runtime_package {
 // must not mutate pointer fields. Also, we keep the mutable state in a separate
 // struct mostly to keep both structs SSA-able, which generates much better
 // code.
-[GoType] partial struct inlineUnwinder {
+partial struct inlineUnwinder {
     internal ΔfuncInfo f;
-    [GoArrayDims(1048576)]
-    internal ж<array<inlinedCall>> inlTree;
+    internal /*[1048576]*/ ж<array<inlinedCall>> inlTree;
 }
 
 // An inlineFrame is a position in an inlineUnwinder.
-[GoType] partial struct inlineFrame {
+partial struct inlineFrame {
     // pc is the PC giving the file/line metadata of the current frame. This is
     // always a "call PC" (not a "return PC"). This is 0 when the iterator is
     // exhausted.
@@ -76,7 +75,7 @@ internal static (inlineUnwinder, inlineFrame) newInlineUnwinder(ΔfuncInfo f, ui
     return (u, ᴛ1);
 }
 
-[GoRecv] internal static inlineFrame resolveInternal(this ref inlineUnwinder u, uintptr pc) {
+internal static inlineFrame resolveInternal(this ref inlineUnwinder u, uintptr pc) {
     return new inlineFrame(
         pc: pc, // Conveniently, this returns -1 if there's an error, which is the same
  // value we use for the outermost frame.
@@ -90,7 +89,7 @@ internal static bool valid(this inlineFrame uf) {
 }
 
 // next returns the frame representing uf's logical caller.
-[GoRecv] internal static inlineFrame next(this ref inlineUnwinder u, inlineFrame uf) {
+internal static inlineFrame next(this ref inlineUnwinder u, inlineFrame uf) {
     if (uf.index < 0) {
         uf.pc = 0;
         return uf;
@@ -100,7 +99,7 @@ internal static bool valid(this inlineFrame uf) {
 }
 
 // isInlined returns whether uf is an inlined frame.
-[GoRecv] internal static bool isInlined(this ref inlineUnwinder u, inlineFrame uf) {
+internal static bool isInlined(this ref inlineUnwinder u, inlineFrame uf) {
     return uf.index >= 0;
 }
 
@@ -115,7 +114,7 @@ internal static bool valid(this inlineFrame uf) {
 // See go.dev/issue/67401.
 //
 // The go:linkname is below.
-[GoRecv] internal static ΔsrcFunc srcFunc(this ref inlineUnwinder u, inlineFrame uf) {
+internal static ΔsrcFunc srcFunc(this ref inlineUnwinder u, inlineFrame uf) {
     if (uf.index < 0) {
         return u.f.srcFunc();
     }
@@ -137,7 +136,7 @@ internal static partial ΔsrcFunc badSrcFunc(ж<inlineUnwinder> _Δp0, inlineFra
 // physical function).
 //
 // It returns "?", 0 if something goes wrong.
-[GoRecv] internal static (@string @file, nint line) fileLine(this ref inlineUnwinder u, inlineFrame uf) {
+internal static (@string @file, nint line) fileLine(this ref inlineUnwinder u, inlineFrame uf) {
     @string @file = default!;
 
     (@file, var line32) = funcline1(u.f, uf.pc, false);

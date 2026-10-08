@@ -12,7 +12,7 @@ using go.text.template;
 partial class template_package {
 
 // common holds the information shared by related templates.
-[GoType] partial struct common {
+partial struct common {
     internal map<@string, ж<Template>> tmpl; // Map from name to defined templates.
     internal sync.RWMutex muTmpl;         // protects tmpl
     internal option option;
@@ -27,7 +27,7 @@ partial class template_package {
 // Template is the representation of a parsed template. The *parse.Tree
 // field is exported only for use by [html/template] and should be treated
 // as unexported by all other clients.
-[GoType] partial struct Template {
+partial struct Template {
     internal @string name;
     public partial ref ж<text.template.parse_package.Tree> Tree { get; }
     internal partial ref ж<common> common { get; }
@@ -45,7 +45,7 @@ public static ж<Template> New(@string name) {
 }
 
 // Name returns the name of the template.
-[GoRecv] public static @string Name(this ref Template t) {
+public static @string Name(this ref Template t) {
     return t.name;
 }
 
@@ -56,7 +56,7 @@ public static ж<Template> New(@string name) {
 // Because associated templates share underlying data, template construction
 // cannot be done safely in parallel. Once the templates are constructed, they
 // can be executed in parallel.
-[GoRecv] public static ж<Template> New(this ref Template t, @string name) {
+public static ж<Template> New(this ref Template t, @string name) {
     t.init();
     var nt = Ꮡ(new Template(
         name: name,
@@ -68,7 +68,7 @@ public static ж<Template> New(@string name) {
 }
 
 // init guarantees that t has a valid common structure.
-[GoRecv] internal static void init(this ref Template t) {
+internal static void init(this ref Template t) {
     if (t.common == nil) {
         var c = @new<common>();
         c.Value.tmpl = new map<@string, ж<Template>>();
@@ -118,7 +118,7 @@ public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) {
 }
 
 // copy returns a shallow copy of t, with common set to the argument.
-[GoRecv] internal static ж<Template> copy(this ref Template t, ж<common> Ꮡc) {
+internal static ж<Template> copy(this ref Template t, ж<common> Ꮡc) {
     return Ꮡ(new Template(
         name: t.name,
         Tree: t.Tree,
@@ -268,7 +268,7 @@ public static (ж<Template>, error) Parse(this ж<Template> Ꮡt, @string text) 
 // associate installs the new template into the group of templates associated
 // with t. The two are already known to share the common structure.
 // The boolean return value reports whether to store this tree as t.Tree.
-[GoRecv] internal static bool associate(this ref Template t, ж<Template> Ꮡnew, ж<parse.Tree> Ꮡtree) {
+internal static bool associate(this ref Template t, ж<Template> Ꮡnew, ж<parse.Tree> Ꮡtree) {
     ref var @new = ref Ꮡnew.DerefOrNull();
     ref var tree = ref Ꮡtree.DerefOrNull();
 

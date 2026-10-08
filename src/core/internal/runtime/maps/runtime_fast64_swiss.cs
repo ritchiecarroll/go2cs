@@ -141,7 +141,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast64(ж<abi.SwissMa
     }
 }
 
-[GoRecv] internal static @unsafe.Pointer putSlotSmallFast64(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, uint64 key) {
+internal static @unsafe.Pointer putSlotSmallFast64(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, uint64 key) {
     var g = new groupReference(
         data: m.dirPtr
     );
@@ -286,7 +286,7 @@ break_outer:;
     return slotElem;
 }
 
-[GoRecv] internal static @unsafe.Pointer putSlotSmallFastPtr(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+internal static @unsafe.Pointer putSlotSmallFastPtr(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     var g = new groupReference(
         data: m.dirPtr
     );

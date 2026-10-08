@@ -34,7 +34,7 @@ partial class http_package {
 // with malformed chunked encoding.
 public static error ErrLineTooLong = @internal.ErrLineTooLong;
 
-[GoType] partial struct errorReader {
+partial struct errorReader {
     internal error err;
 }
 
@@ -42,12 +42,12 @@ internal static (nint n, error err) Read(this errorReader r, slice<byte> p) {
     return (0, r.err);
 }
 
-[GoType] partial struct byteReader {
+partial struct byteReader {
     internal byte b;
     internal bool done;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref byteReader br, slice<byte> p) {
+internal static (nint n, error err) Read(this ref byteReader br, slice<byte> p) {
     if (br.done) {
         return (0, io.EOF);
     }
@@ -62,7 +62,7 @@ internal static (nint n, error err) Read(this errorReader r, slice<byte> p) {
 // transferWriter inspects the fields of a user-supplied Request or Response,
 // sanitizes them without changing the user object and provides methods for
 // writing the respective header, body and trailer in wire format.
-[GoType] partial struct transferWriter {
+partial struct transferWriter {
     public @string Method;
     public io.Reader Body;
     public io.Closer BodyCloser;
@@ -268,7 +268,7 @@ internal static bool noResponseBodyExpected(@string requestMethod) {
     return requestMethod == "HEAD"u8;
 }
 
-[GoRecv] internal static bool shouldSendContentLength(this ref transferWriter t) {
+internal static bool shouldSendContentLength(this ref transferWriter t) {
     if (chunked(t.TransferEncoding)) {
         return false;
     }
@@ -297,7 +297,7 @@ internal static readonly @string contentLengthˢ3 = "Content-Length: "u8;
 internal static readonly @string transferEncodingChunkedˢ = "Transfer-Encoding: chunked\r\n"u8;
 internal static readonly @string invalidTrailerKeyˢ = "invalid Trailer key"u8;
 
-[GoRecv] internal static error writeHeader(this ref transferWriter t, io.Writer w, ж<httptrace.ClientTrace> Ꮡtrace) {
+internal static error writeHeader(this ref transferWriter t, io.Writer w, ж<httptrace.ClientTrace> Ꮡtrace) {
     ref var trace = ref Ꮡtrace.DerefOrNull();
 
     if (t.Close && !hasToken(t.Header.get(connectionˢ), closeˢ)) {
@@ -483,7 +483,7 @@ internal static (int64 n, error err) doBodyCopy(this ж<transferWriter> Ꮡt, io
 // files (*os.File types) are properly optimized.
 //
 // This function is only intended for use in writeBody.
-[GoRecv] internal static io.Reader unwrapBody(this ref transferWriter t) {
+internal static io.Reader unwrapBody(this ref transferWriter t) {
     {
         var (r, ok) = unwrapNopCloser(t.Body); if (ok) {
             return r;
@@ -498,7 +498,7 @@ internal static (int64 n, error err) doBodyCopy(this ж<transferWriter> Ꮡt, io
     return t.Body;
 }
 
-[GoType] partial struct transferReader {
+partial struct transferReader {
     // Input
     public ΔHeader Header;
     public nint StatusCode;
@@ -513,7 +513,7 @@ internal static (int64 n, error err) doBodyCopy(this ж<transferWriter> Ꮡt, io
     public ΔHeader Trailer;
 }
 
-[GoRecv] internal static bool protoAtLeast(this ref transferReader t, nint m, nint n) {
+internal static bool protoAtLeast(this ref transferReader t, nint m, nint n) {
     return t.ProtoMajor > m || (t.ProtoMajor == m && t.ProtoMinor >= n);
 }
 
@@ -696,11 +696,11 @@ internal static bool isIdentity(slice<@string> te) {
 }
 
 // unsupportedTEError reports unsupported transfer-encodings.
-[GoType] partial struct unsupportedTEError {
+partial struct unsupportedTEError {
     internal @string err;
 }
 
-[GoRecv] internal static @string Error(this ref unsupportedTEError uste) {
+internal static @string Error(this ref unsupportedTEError uste) {
     return uste.err;
 }
 
@@ -712,7 +712,7 @@ internal static bool isUnsupportedTEError(error err) {
 }
 
 // parseTransferEncoding sets t.Chunked based on the Transfer-Encoding header.
-[GoRecv] internal static error parseTransferEncoding(this ref transferReader t) {
+internal static error parseTransferEncoding(this ref transferReader t) {
     var (raw, present) = t.Header[transferEncodingˢ, ꟷ];
     if (!present) {
         return default!;
@@ -884,7 +884,7 @@ internal static (ΔHeader, error) fixTrailer(ΔHeader header, bool chunked) {
 // body turns a Reader into a ReadCloser.
 // Close ensures that the body has been fully read
 // and then reads the trailer if necessary.
-[GoType] partial struct body {
+partial struct body {
     internal io.Reader src;
     internal any hdr;           // non-nil (Response or Request) value means read trailer
     internal ж<bufio.Reader> r; // underlying wire-format reader for the trailer
@@ -923,7 +923,7 @@ internal static (nint n, error err) Read(this ж<body> Ꮡb, slice<byte> p) {
 }
 
 // Must hold b.mu.
-[GoRecv] internal static (nint n, error err) readLocked(this ref body b, slice<byte> p) {
+internal static (nint n, error err) readLocked(this ref body b, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -1001,7 +1001,7 @@ internal static error errTrailerEOF = errors.New("http: unexpected EOF reading t
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string httpSuspiciouslyLongˢ = "http: suspiciously long trailer after chunked body"u8;
 
-[GoRecv] internal static error readTrailer(this ref body b) {
+internal static error readTrailer(this ref body b) {
     // The common case, since nobody uses trailers.
     var (buf, err) = b.r.Peek(2);
     if (bytes.Equal(buf, singleCRLF)) {
@@ -1055,7 +1055,7 @@ internal static void mergeSetHeader(ref ΔHeader dst, ΔHeader src) {
 // unreadDataSizeLocked returns the number of bytes of unread input.
 // It returns -1 if unknown.
 // b.mu must be held.
-[GoRecv] internal static int64 unreadDataSizeLocked(this ref body b) {
+internal static int64 unreadDataSizeLocked(this ref body b) {
     {
         var (lr, ok) = b.src._<ж<io.LimitedReader>>(ᐧ); if (ok) {
             return (~lr).N;
@@ -1169,7 +1169,7 @@ internal static void registerOnHitEOF(this ж<body> Ꮡb, Action fn) {
 
 // bodyLocked is an io.Reader reading from a *body when its mutex is
 // already held.
-[GoType] partial struct bodyLocked {
+partial struct bodyLocked {
     internal ж<body> b;
 }
 
@@ -1212,7 +1212,7 @@ internal static (int64, error) parseContentLength(slice<@string> clHeaders) {
 
 // finishAsyncByteRead finishes reading the 1-byte sniff
 // from the ContentLength==0, Body!=nil case.
-[GoType] partial struct finishAsyncByteRead {
+partial struct finishAsyncByteRead {
     internal ж<transferWriter> tw;
 }
 
@@ -1237,9 +1237,9 @@ internal static (nint n, error err) Read(this finishAsyncByteRead fr, slice<byte
 internal static reflectꓸType nopCloserType = reflect.TypeOf(io.NopCloser(default!));
 
 
-    [GoType("dyn")] partial struct rᴛ1 {
-        [GoEmbedded] public io_package.Reader Reader;
-        [GoEmbedded] public io_package.WriterTo WriterTo;
+    partial struct rᴛ1 /*dyn*/ {
+        /*embed*/ public io_package.Reader Reader;
+        /*embed*/ public io_package.WriterTo WriterTo;
     }
 internal static reflectꓸType nopCloserWriterToType = reflect.TypeOf(io.NopCloser(new rᴛ1()));
 
@@ -1282,7 +1282,7 @@ internal static bool isKnownInMemoryReader(io.Reader r) {
 
 // bufioFlushWriter is an io.Writer wrapper that flushes all writes
 // on its wrapped writer if it's a *bufio.Writer.
-[GoType] partial struct bufioFlushWriter {
+partial struct bufioFlushWriter {
     internal io.Writer w;
 }
 

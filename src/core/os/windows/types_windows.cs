@@ -18,7 +18,7 @@ using go.io;
 partial class os_package {
 
 // A fileStat is the implementation of FileInfo returned by Stat and Lstat.
-[GoType] partial struct fileStat {
+partial struct fileStat {
     internal @string name;
     // from ByHandleFileInformation, Win32FileAttributeData, Win32finddata, and GetFileInformationByHandleEx
     public uint32 FileAttributes;
@@ -155,18 +155,18 @@ internal static ж<fileStat> newFileStatFromWin32finddata(ref syscall.Win32findd
 //
 // See https://learn.microsoft.com/en-us/windows/win32/api/winnt/nf-winnt-isreparsetagnamesurrogate
 // and https://learn.microsoft.com/en-us/windows/win32/fileio/reparse-point-tags.
-[GoRecv] internal static bool isReparseTagNameSurrogate(this ref fileStat fs) {
+internal static bool isReparseTagNameSurrogate(this ref fileStat fs) {
     // True for IO_REPARSE_TAG_SYMLINK and IO_REPARSE_TAG_MOUNT_POINT.
     return (uint32)(fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0 && (uint32)(fs.ReparseTag & 0x20000000) != 0;
 }
 
-[GoRecv] internal static int64 Size(this ref fileStat fs) {
+internal static int64 Size(this ref fileStat fs) {
     return ((int64)fs.FileSizeHigh << (int)(32)) + (int64)fs.FileSizeLow;
 }
 
 internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink"u8);
 
-[GoRecv] internal static FileMode Mode(this ref fileStat fs) {
+internal static FileMode Mode(this ref fileStat fs) {
     var m = fs.mode();
     if (winsymlink.Value() == "0"u8) {
         var old = fs.modePreGo1_23();
@@ -178,7 +178,7 @@ internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink"u8);
     return m;
 }
 
-[GoRecv] internal static FileMode /*m*/ mode(this ref fileStat fs) {
+internal static FileMode /*m*/ mode(this ref fileStat fs) {
     FileMode m = default!;
 
     if ((uint32)(fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0){
@@ -243,7 +243,7 @@ internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink"u8);
 // logic for determining the file mode.
 // The logic is subtle and not well-documented, so it is better to keep it
 // separate from the new logic.
-[GoRecv] internal static FileMode /*m*/ modePreGo1_23(this ref fileStat fs) {
+internal static FileMode /*m*/ modePreGo1_23(this ref fileStat fs) {
     FileMode m = default!;
 
     if ((uint32)(fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0){
@@ -280,12 +280,12 @@ internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink"u8);
     return m;
 }
 
-[GoRecv] internal static time.Time ModTime(this ref fileStat fs) {
+internal static time.Time ModTime(this ref fileStat fs) {
     return time.Unix(0, fs.LastWriteTime.Nanoseconds());
 }
 
 // Sys returns syscall.Win32FileAttributeData for file fs.
-[GoRecv] internal static any Sys(this ref fileStat fs) {
+internal static any Sys(this ref fileStat fs) {
     return Ꮡ(new syscall.Win32FileAttributeData(
         FileAttributes: fs.FileAttributes,
         CreationTime: fs.CreationTime,
@@ -354,7 +354,7 @@ internal static error loadFileId(this ж<fileStat> Ꮡfs) {
 
 // saveInfoFromPath saves full path of the file to be used by os.SameFile later,
 // and set name from path.
-[GoRecv] internal static error saveInfoFromPath(this ref fileStat fs, @string path) {
+internal static error saveInfoFromPath(this ref fileStat fs, @string path) {
     fs.path = path;
     if (!filepathlite.IsAbs(fs.path)) {
         error err = default!;

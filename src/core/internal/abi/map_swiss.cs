@@ -23,7 +23,7 @@ internal static UntypedInt bitsetLSB => 0x0101010101010101;
 
 public const uint64 SwissMapCtrlEmpty = /* bitsetLSB * uint64(ctrlEmpty) */ 9259542123273814144;
 
-[GoType] partial struct SwissMapType {
+partial struct SwissMapType {
     public partial ref Type Type { get; }
     public ж<Type> Key;
     public ж<Type> Elem;
@@ -45,22 +45,22 @@ public static UntypedInt SwissMapIndirectKey => 4;
 
 public static UntypedInt SwissMapIndirectElem => 8;
 
-[GoRecv] public static bool NeedKeyUpdate(this ref SwissMapType mt) {
+public static bool NeedKeyUpdate(this ref SwissMapType mt) {
     // true if we need to update key on an overwrite
     return (uint32)(mt.Flags & (uint32)SwissMapNeedKeyUpdate) != 0;
 }
 
-[GoRecv] public static bool HashMightPanic(this ref SwissMapType mt) {
+public static bool HashMightPanic(this ref SwissMapType mt) {
     // true if hash function might panic
     return (uint32)(mt.Flags & (uint32)SwissMapHashMightPanic) != 0;
 }
 
-[GoRecv] public static bool IndirectKey(this ref SwissMapType mt) {
+public static bool IndirectKey(this ref SwissMapType mt) {
     // store ptr to key instead of key itself
     return (uint32)(mt.Flags & (uint32)SwissMapIndirectKey) != 0;
 }
 
-[GoRecv] public static bool IndirectElem(this ref SwissMapType mt) {
+public static bool IndirectElem(this ref SwissMapType mt) {
     // store ptr to elem instead of elem itself
     return (uint32)(mt.Flags & (uint32)SwissMapIndirectElem) != 0;
 }

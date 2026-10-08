@@ -6,7 +6,7 @@ namespace go.@internal;
 partial class xcoff_package {
 
 // File Header.
-[GoType] partial struct FileHeader32 {
+partial struct FileHeader32 {
     public uint16 Fmagic; // Target machine
     public uint16 Fnscns; // Number of sections
     public uint32 Ftimedat; // Time and date of file creation
@@ -16,7 +16,7 @@ partial class xcoff_package {
     public uint16 Fflags; // Flags
 }
 
-[GoType] partial struct FileHeader64 {
+partial struct FileHeader64 {
     public uint16 Fmagic; // Target machine
     public uint16 Fnscns; // Number of sections
     public uint32 Ftimedat; // Time and date of file creation
@@ -54,7 +54,7 @@ public static UntypedInt F_SHROBJ => 0x2000;
 public static UntypedInt F_LOADONLY => 0x4000;
 
 // Section Header.
-[GoType] partial struct SectionHeader32 {
+partial struct SectionHeader32 {
     public array<byte> Sname = new(8); // Section name
     public uint32 Spaddr;  // Physical address
     public uint32 Svaddr;  // Virtual address
@@ -67,7 +67,7 @@ public static UntypedInt F_LOADONLY => 0x4000;
     public uint32 Sflags;  // Flags to define the section type
 }
 
-[GoType] partial struct SectionHeader64 {
+partial struct SectionHeader64 {
     public array<byte> Sname = new(8); // Section name
     public uint64 Spaddr;  // Physical address
     public uint64 Svaddr;  // Virtual address
@@ -119,7 +119,7 @@ public static UntypedInt SSUBTYP_DWFRAME => 0xA0000; // DWARF frames section
 public static UntypedInt SSUBTYP_DWMAC => 0xB0000; // DWARF macros section
 
 // Symbol Table Entry.
-[GoType] partial struct SymEnt32 {
+partial struct SymEnt32 {
     public array<byte> Nname = new(8); // Symbol name
     public uint32 Nvalue;  // Symbol value
     public uint16 Nscnum;  // Section number of symbol
@@ -128,7 +128,7 @@ public static UntypedInt SSUBTYP_DWMAC => 0xB0000; // DWARF macros section
     public uint8 Nnumaux;   // Number of auxiliary entries
 }
 
-[GoType] partial struct SymEnt64 {
+partial struct SymEnt64 {
     public uint64 Nvalue; // Symbol value
     public uint32 Noffset; // Offset of the name in string table or .debug section
     public uint16 Nscnum; // Section number of symbol
@@ -204,14 +204,14 @@ public static UntypedInt C_GTLS => 145; // Global thread-local variable
 public static UntypedInt C_STTLS => 146; // Static thread-local variable
 
 // File Auxiliary Entry
-[GoType] partial struct AuxFile64 {
+partial struct AuxFile64 {
     public array<byte> Xfname = new(8); // Name or offset inside string table
     public uint8 Xftype;   // Source file string type
     public uint8 Xauxtype;   // Type of auxiliary entry
 }
 
 // Function Auxiliary Entry
-[GoType] partial struct AuxFcn32 {
+partial struct AuxFcn32 {
     public uint32 Xexptr; // File offset to exception table entry
     public uint32 Xfsize; // Size of function in bytes
     public uint32 Xlnnoptr; // File pointer to line number
@@ -219,7 +219,7 @@ public static UntypedInt C_STTLS => 146; // Static thread-local variable
     public uint16 Xpad; // Unused
 }
 
-[GoType] partial struct AuxFcn64 {
+partial struct AuxFcn64 {
     public uint64 Xlnnoptr; // File pointer to line number
     public uint32 Xfsize; // Size of function in bytes
     public uint32 Xendndx; // Symbol table index of next entry
@@ -227,7 +227,7 @@ public static UntypedInt C_STTLS => 146; // Static thread-local variable
     public uint8 Xauxtype;  // Type of auxiliary entry
 }
 
-[GoType] partial struct AuxSect64 {
+partial struct AuxSect64 {
     public uint64 Xscnlen; // section length
     public uint64 Xnreloc; // Num RLDs
     internal uint8 pad;
@@ -235,7 +235,7 @@ public static UntypedInt C_STTLS => 146; // Static thread-local variable
 }
 
 // csect Auxiliary Entry.
-[GoType] partial struct AuxCSect32 {
+partial struct AuxCSect32 {
     public uint32 Xscnlen; // Length or symbol table index
     public uint32 Xparmhash; // Offset of parameter type-check string
     public uint16 Xsnhash; // .typchk section number
@@ -245,7 +245,7 @@ public static UntypedInt C_STTLS => 146; // Static thread-local variable
     public uint16 Xsnstab; // Reserved
 }
 
-[GoType] partial struct AuxCSect64 {
+partial struct AuxCSect64 {
     public uint32 Xscnlenlo; // Lower 4 bytes of length or symbol table index
     public uint32 Xparmhash; // Offset of parameter type-check string
     public uint16 Xsnhash; // .typchk section number
@@ -327,7 +327,7 @@ public static UntypedInt XMC_UL => 21; // Read/Write thread-local data (.tbss)
 public static UntypedInt XMC_TE => 22; // TOC entry
 
 // Loader Header.
-[GoType] partial struct LoaderHeader32 {
+partial struct LoaderHeader32 {
     public uint32 Lversion; // Loader section version number
     public uint32 Lnsyms; // Number of symbol table entries
     public uint32 Lnreloc; // Number of relocation table entries
@@ -338,7 +338,7 @@ public static UntypedInt XMC_TE => 22; // TOC entry
     public uint32 Lstoff; // Offset to start of string table
 }
 
-[GoType] partial struct LoaderHeader64 {
+partial struct LoaderHeader64 {
     public uint32 Lversion; // Loader section version number
     public uint32 Lnsyms; // Number of symbol table entries
     public uint32 Lnreloc; // Number of relocation table entries
@@ -355,7 +355,7 @@ public static UntypedInt LDHDRSZ_32 => 32;
 public static UntypedInt LDHDRSZ_64 => 56;
 
 // Loader Symbol.
-[GoType] partial struct LoaderSymbol32 {
+partial struct LoaderSymbol32 {
     public array<byte> Lname = new(8); // Symbol name or byte offset into string table
     public uint32 Lvalue;  // Address field
     public uint16 Lscnum;  // Section number containing symbol
@@ -365,7 +365,7 @@ public static UntypedInt LDHDRSZ_64 => 56;
     public uint32 Lparm;  // Parameter type-check field
 }
 
-[GoType] partial struct LoaderSymbol64 {
+partial struct LoaderSymbol64 {
     public uint64 Lvalue; // Address field
     public uint32 Loffset; // Byte offset into string table of symbol name
     public uint16 Lscnum; // Section number containing symbol
@@ -375,14 +375,14 @@ public static UntypedInt LDHDRSZ_64 => 56;
     public uint32 Lparm; // Parameter type-check field
 }
 
-[GoType] partial struct Reloc32 {
+partial struct Reloc32 {
     public uint32 Rvaddr; // (virtual) address of reference
     public uint32 Rsymndx; // Index into symbol table
     public uint8 Rsize;  // Sign and reloc bit len
     public uint8 Rtype;  // Toc relocation type
 }
 
-[GoType] partial struct Reloc64 {
+partial struct Reloc64 {
     public uint64 Rvaddr; // (virtual) address of reference
     public uint32 Rsymndx; // Index into symbol table
     public uint8 Rsize;  // Sign and reloc bit len

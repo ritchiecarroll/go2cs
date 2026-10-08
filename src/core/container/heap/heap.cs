@@ -30,7 +30,7 @@ partial class heap_package {
 // Note that [Push] and [Pop] in this interface are for package heap's
 // implementation to call. To add and remove things from the heap,
 // use [heap.Push] and [heap.Pop].
-[GoType] partial interface Interface :
+partial interface Interface :
     sort.Interface
 {
     void Push(any x); // add x as element Len()

@@ -15,7 +15,7 @@ partial class runtime_package {
 
 // Frames may be used to get function/file/line information for a
 // slice of PC values returned by [Callers].
-[GoType] partial struct Frames {
+partial struct Frames {
     // callers is a slice of PCs that have not yet been expanded to frames.
     internal slice<uintptr> callers;
     // nextPC is a next PC to expand ahead of processing callers.
@@ -26,7 +26,7 @@ partial class runtime_package {
 }
 
 // Frame is the information returned by [Frames] for each call frame.
-[GoType] partial struct Frame {
+partial struct Frame {
     // PC is the program counter for the location in this frame.
     // For a frame that calls another frame, this will be the
     // program counter of a call instruction. Because of inlining,
@@ -208,7 +208,7 @@ internal static slice<Frame> expandCgoFrames(uintptr pc) {
 // or funcInfo() to get the funcInfo instead.
 
 // A Func represents a Go function in the running binary.
-[GoType] partial struct Func {
+partial struct Func {
     internal EmptyStruct opaque; // unexported field to disallow conversions
 }
 
@@ -242,7 +242,7 @@ internal static ΔfuncInfo funcInfo(this ж<_func> Ꮡf) {
 }
 
 // pcHeader holds data used by the pclntab lookups.
-[GoType] partial struct pcHeader {
+partial struct pcHeader {
     internal uint32 magic;  // 0xFFFFFFF1
     internal uint8 pad1, pad2;   // 0,0
     internal uint8 minLC;   // min instruction size
@@ -262,7 +262,7 @@ internal static ΔfuncInfo funcInfo(this ж<_func> Ꮡf) {
 // matched changes to the code in cmd/link/internal/ld/symtab.go:symtab.
 // moduledata is stored in statically allocated non-pointer memory;
 // none of the pointers here are visible to the garbage collector.
-[GoType] partial struct moduledata {
+partial struct moduledata {
     public partial ref @internal.runtime.sys_package.NotInHeap NotInHeap { get; } // Only in static data
     internal ж<pcHeader> pcHeader;
     internal slice<byte> funcnametab;
@@ -313,7 +313,7 @@ internal static ΔfuncInfo funcInfo(this ж<_func> Ꮡf) {
 // newly loaded package that can be used to check the plugin's version of
 // a package against any previously loaded version of the package.
 // This is done in plugin.lastmoduleinit.
-[GoType] partial struct modulehash {
+partial struct modulehash {
     internal @string modulename;
     internal @string linktimehash;
     internal ж<@string> runtimehash;
@@ -428,13 +428,13 @@ internal static void modulesinit() {
     atomicstorep(@unsafe.Pointer.FromBox(ᏑmodulesSlice), @unsafe.Pointer.FromPinnedBox(modules));
 }
 
-[GoType] partial struct functab {
+partial struct functab {
     internal uint32 entryoff; // relative to runtime.text
     internal uint32 funcoff;
 }
 
 // Mapping information for secondary text sections
-[GoType] partial struct textsect {
+partial struct textsect {
     internal uintptr vaddr; // prelinked section vaddr
     internal uintptr end; // vaddr + section length
     internal uintptr baseaddr; // relocated section address
@@ -448,7 +448,7 @@ internal static void modulesinit() {
 // function index. Then scan the functab array starting at that
 // index to find the target function.
 // This table uses 20 bytes for every 4096 bytes of code, or ~0.5% overhead.
-[GoType] partial struct findfuncbucket {
+partial struct findfuncbucket {
     internal uint32 idx;
     internal array<byte> subbuckets = new(16);
 }
@@ -545,7 +545,7 @@ internal static readonly @string runtimeTextOffsetOutOfˢ = "runtime: text offse
 // It is nosplit because it is part of the findfunc implementation.
 //
 //go:nosplit
-[GoRecv] internal static uintptr textAddr(this ref moduledata md, uint32 off32) {
+internal static uintptr textAddr(this ref moduledata md, uint32 off32) {
     var off = (uintptr)off32;
     var res = md.text + off;
     if (len(md.textsectmap) > 1) {
@@ -571,7 +571,7 @@ internal static readonly @string runtimeTextOffsetOutOfˢ = "runtime: text offse
 // It is nosplit because it is part of the findfunc implementation.
 //
 //go:nosplit
-[GoRecv] internal static (uint32, bool) textOff(this ref moduledata md, uintptr pc) {
+internal static (uint32, bool) textOff(this ref moduledata md, uintptr pc) {
     var res = (uint32)(pc - md.text);
     if (len(md.textsectmap) > 1) {
         foreach (var (i, sect) in md.textsectmap) {
@@ -594,7 +594,7 @@ internal static readonly @string runtimeTextOffsetOutOfˢ = "runtime: text offse
 }
 
 // funcName returns the string at nameOff in the function name table.
-[GoRecv] internal static @string funcName(this ref moduledata md, int32 nameOff) {
+internal static @string funcName(this ref moduledata md, int32 nameOff) {
     if (nameOff == 0) {
         return ""u8;
     }
@@ -647,7 +647,7 @@ internal static ж<moduledata> findmoduledatap(uintptr pc) {
     return default!;
 }
 
-[GoType] partial struct ΔfuncInfo {
+partial struct ΔfuncInfo {
     internal partial ref ж<_func> _func { get; }
     internal ж<moduledata> datap;
 }
@@ -661,7 +661,7 @@ internal static ж<Func> _Func(this ΔfuncInfo f) {
 }
 
 // isInlined reports whether f should be re-interpreted as a *funcinl.
-[GoRecv] internal static bool isInlined(this ref _func f) {
+internal static bool isInlined(this ref _func f) {
     return f.entryOff == ~(uint32)0; // see comment for funcinl.ones
 }
 
@@ -722,7 +722,7 @@ internal static ΔfuncInfo findfunc(uintptr pc) {
 // A srcFunc represents a logical function in the source code. This may
 // correspond to an actual symbol in the binary text, or it may correspond to a
 // source function that has been inlined.
-[GoType] partial struct ΔsrcFunc {
+partial struct ΔsrcFunc {
     internal ж<moduledata> datap;
     internal int32 nameOff;
     internal int32 startLine;
@@ -753,12 +753,12 @@ internal static @string name(this ΔsrcFunc s) {
 //go:linkname badSrcFuncName runtime.srcFunc.name
 internal static partial @string badSrcFuncName(ΔsrcFunc _);
 
-[GoType] partial struct pcvalueCache {
+partial struct pcvalueCache {
     internal array<array<pcvalueCacheEnt>> entries = new(2, () => new(8));
     internal nint inUse;
 }
 
-[GoType] partial struct pcvalueCacheEnt {
+partial struct pcvalueCacheEnt {
     // targetpc and off together are the key of this cache entry.
     internal uintptr targetpc;
     internal uint32 off;
@@ -1090,7 +1090,7 @@ internal static (uint32 read, uint32 val) readvarint(slice<byte> Δp) {
     return (n, v);
 }
 
-[GoType] partial struct stackmap {
+partial struct stackmap {
     internal int32 n;   // number of bitmaps
     internal int32 nbit;   // number of bits in each bitmap
     internal array<byte> bytedata = new(1); // bitmaps, each starting on a byte boundary

@@ -17,7 +17,7 @@ using ꓸꓸꓸany = Span<any>;
 partial class doc_package {
 
 // Package is the documentation for an entire package.
-[GoType] partial struct Package {
+partial struct Package {
     public @string Doc;
     public @string Name;
     public @string ImportPath;
@@ -41,7 +41,7 @@ partial class doc_package {
 }
 
 // Value is the documentation for a (possibly grouped) var or const declaration.
-[GoType] partial struct Value {
+partial struct Value {
     public @string Doc;
     public slice<@string> Names; // var or const names in declaration order
     public ж<ast.GenDecl> Decl;
@@ -49,7 +49,7 @@ partial class doc_package {
 }
 
 // Type is the documentation for a type declaration.
-[GoType] partial struct Type {
+partial struct Type {
     public @string Doc;
     public @string Name;
     public ж<ast.GenDecl> Decl;
@@ -65,7 +65,7 @@ partial class doc_package {
 }
 
 // Func is the documentation for a func declaration.
-[GoType] partial struct Func {
+partial struct Func {
     public @string Doc;
     public @string Name;
     public ж<ast.FuncDecl> Decl;
@@ -84,13 +84,13 @@ partial class doc_package {
 // Any note with a marker of 2 or more upper case [A-Z] letters and a uid of
 // at least one character is recognized. The ":" following the uid is optional.
 // Notes are collected in the Package.Notes map indexed by the notes marker.
-[GoType] partial struct Note {
+partial struct Note {
     public tokenꓸPos Pos, End; // position range of the comment containing the marker
     public @string UID;   // uid found with the marker
     public @string Body;   // note body text
 }
 
-[GoType("num:nint")] partial struct Mode;
+partial struct Mode /*num:nint*/;
 
 public static Mode AllDecls => /* 1 << iota */ 1;
 public static Mode AllMethods => 2;
@@ -132,7 +132,7 @@ public static ж<Package> New(ж<ast.Package> Ꮡpkg, @string importPath, Mode m
     return p;
 }
 
-[GoRecv] internal static void collectValues(this ref Package p, slice<ж<Value>> values) {
+internal static void collectValues(this ref Package p, slice<ж<Value>> values) {
     foreach (var (_, v) in values) {
         foreach (var (_, name) in (~v).Names) {
             p.syms[name] = true;
@@ -140,7 +140,7 @@ public static ж<Package> New(ж<ast.Package> Ꮡpkg, @string importPath, Mode m
     }
 }
 
-[GoRecv] internal static void collectTypes(this ref Package p, slice<ж<Type>> types) {
+internal static void collectTypes(this ref Package p, slice<ж<Type>> types) {
     foreach (var (_, t) in types) {
         if (p.syms[(~t).Name]) {
             // Shouldn't be any cycles but stop just in case.
@@ -154,7 +154,7 @@ public static ж<Package> New(ж<ast.Package> Ꮡpkg, @string importPath, Mode m
     }
 }
 
-[GoRecv] internal static void collectFuncs(this ref Package p, slice<ж<Func>> funcs) {
+internal static void collectFuncs(this ref Package p, slice<ж<Func>> funcs) {
     foreach (var (_, f) in funcs) {
         if ((~f).Recv != ""u8){
             @string r = strings.TrimPrefix((~f).Recv, "*"u8);
@@ -279,7 +279,7 @@ internal static (ж<ast.Object>, error) simpleImporter(map<@string, ж<ast.Objec
 //
 // If recv != "", HasSym reports whether the package has a type
 // named recv with a method named name.
-[GoRecv] internal static bool lookupSym(this ref Package p, @string recv, @string name) {
+internal static bool lookupSym(this ref Package p, @string recv, @string name) {
     if (recv != ""u8) {
         return p.syms[recv + "."u8 + name];
     }
@@ -293,7 +293,7 @@ internal static (ж<ast.Object>, error) simpleImporter(map<@string, ж<ast.Objec
 // Otherwise, if name is the name of p itself, importPath returns "", true,
 // to signal a reference to p.
 // Otherwise, importPath returns "", false.
-[GoRecv] internal static (@string importPath, bool ok) lookupPackage(this ref Package p, @string name) {
+internal static (@string importPath, bool ok) lookupPackage(this ref Package p, @string name) {
     {
         var (path, okΔ1) = p.importByName[name, ꟷ]; if (okΔ1) {
             if (path == ""u8) {
@@ -323,7 +323,7 @@ public static ж<comment.Parser> Parser(this ж<Package> Ꮡp) {
 // for printing doc comments from package p.
 // Each call returns a new printer, so that the caller may
 // customize it before use.
-[GoRecv] public static ж<comment.Printer> Printer(this ref Package p) {
+public static ж<comment.Printer> Printer(this ref Package p) {
     // No customization today, but having p.Printer()
     // gives us flexibility in the future, and it is convenient for callers.
     return Ꮡ(new comment.Printer(nil));

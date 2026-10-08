@@ -27,7 +27,7 @@ partial class net_package {
 // is available on this system.
 internal const bool cgoAvailable = true;
 
-[GoType("num:nint")] partial struct addrinfoErrno;
+partial struct addrinfoErrno /*num:nint*/;
 
 internal static @string Error(this addrinfoErrno eai) {
     return _C_gai_strerror(((_C_int)eai));
@@ -45,7 +45,7 @@ internal static bool Timeout(this addrinfoErrno eai) {
 internal static void isAddrinfoErrno(this addrinfoErrno eai) {
 }
 
-[GoType("dyn")] internal partial struct doBlockingWithCtx_result<T> {
+internal partial struct doBlockingWithCtx_result<T> /*dyn*/ {
     internal T res;
     internal error err;
 }

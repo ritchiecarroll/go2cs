@@ -17,7 +17,7 @@ using io = io_package;
 
 partial class trace_package {
 
-[GoType("num:uint16")] partial struct EventKind;
+partial struct EventKind /*num:uint16*/;
 
 public static EventKind EventBad => /* iota */ 0;
 public static EventKind EventSync => 1;
@@ -63,7 +63,7 @@ internal static array<@string> eventKindStrings = new golib.SparseArray<@string>
 
 internal static ΔTime maxTime => /* Time(math.MaxInt64) */ 9223372036854775807;
 
-[GoType("num:int64")] partial struct ΔTime;
+partial struct ΔTime /*num:int64*/;
 
 // Sub subtracts t0 from t, returning the duration in nanoseconds.
 public static time.Duration Sub(this ΔTime t, ΔTime t0) {
@@ -71,7 +71,7 @@ public static time.Duration Sub(this ΔTime t, ΔTime t0) {
 }
 
 // Metric provides details about a Metric event.
-[GoType] partial struct ΔMetric {
+partial struct ΔMetric {
     // Name is the name of the sampled metric.
     //
     // Names follow the same convention as metric names in the
@@ -89,7 +89,7 @@ public static time.Duration Sub(this ΔTime t, ΔTime t0) {
 }
 
 // Label provides details about a Label event.
-[GoType] partial struct ΔLabel {
+partial struct ΔLabel {
     // Label is the label applied to some resource.
     public @string ΔΔLabel;
     // Resource is the resource to which this label should be applied.
@@ -97,7 +97,7 @@ public static time.Duration Sub(this ΔTime t, ΔTime t0) {
 }
 
 // Range provides details about a Range event.
-[GoType] partial struct ΔRange {
+partial struct ΔRange {
     // Name is a human-readable name for the range.
     //
     // This name can be used to identify the end of the range for the resource
@@ -125,20 +125,20 @@ public static time.Duration Sub(this ΔTime t, ΔTime t0) {
 }
 
 // RangeAttributes provides attributes about a completed Range.
-[GoType] partial struct RangeAttribute {
+partial struct RangeAttribute {
     // Name is the human-readable name for the range.
     public @string Name;
     // Value is the value of the attribute.
     public Value Value;
 }
 
-[GoType("num:uint64")] partial struct TaskID;
+partial struct TaskID /*num:uint64*/;
 
 public static TaskID NoTask => /* TaskID(^uint64(0)) */ unchecked((TaskID)18446744073709551615);
 public static TaskID BackgroundTask => /* TaskID(0) */ 0;
 
 // Task provides details about a Task event.
-[GoType] partial struct ΔTask {
+partial struct ΔTask {
     // ID is a unique identifier for the task.
     //
     // This can be used to associate the beginning of a task with its end.
@@ -152,7 +152,7 @@ public static TaskID BackgroundTask => /* TaskID(0) */ 0;
 }
 
 // Region provides details about a Region event.
-[GoType] partial struct ΔRegion {
+partial struct ΔRegion {
     // Task is the ID of the task this region is associated with.
     public TaskID Task;
     // Type is the regionType that was passed to runtime/trace.StartRegion or runtime/trace.WithRegion.
@@ -160,7 +160,7 @@ public static TaskID BackgroundTask => /* TaskID(0) */ 0;
 }
 
 // Log provides details about a Log event.
-[GoType] partial struct ΔLog {
+partial struct ΔLog {
     // Task is the ID of the task this region is associated with.
     public TaskID Task;
     // Category is the category that was passed to runtime/trace.Log or runtime/trace.Logf.
@@ -173,7 +173,7 @@ public static TaskID BackgroundTask => /* TaskID(0) */ 0;
 //
 // If two Stacks are equal then their Frames are guaranteed to be identical. If they are not
 // equal, however, their Frames may still be equal.
-[GoType] partial struct ΔStack {
+partial struct ΔStack {
     internal ж<evTable> table;
     internal stackID id;
 }
@@ -206,7 +206,7 @@ public static iter.Seq<StackFrame> Frames(this ΔStack s) {
 public static ΔStack NoStack = new ΔStack(nil);
 
 // StackFrame represents a single frame of a stack.
-[GoType] partial struct StackFrame {
+partial struct StackFrame {
     // PC is the program counter of the function call if this
     // is not a leaf frame. If it's a leaf frame, it's the point
     // at which the stack trace was taken.
@@ -220,7 +220,7 @@ public static ΔStack NoStack = new ΔStack(nil);
 }
 
 // ExperimentalEvent presents a raw view of an experimental event's arguments and their names.
-[GoType] partial struct ExperimentalEvent {
+partial struct ExperimentalEvent {
     // Name is the name of the event.
     public @string Name;
     // ArgNames is the names of the event's arguments in order.
@@ -238,13 +238,13 @@ public static ΔStack NoStack = new ΔStack(nil);
 // associated with certain kinds of experimental events. For example, this data may contain
 // tables needed to interpret ExperimentalEvent arguments, or the ExperimentEvent could just be
 // a placeholder for a differently encoded event that's actually present in the experimental data.
-[GoType] partial struct ExperimentalData {
+partial struct ExperimentalData {
     // Batches contain the actual experimental data, along with metadata about each batch.
     public slice<ExperimentalBatch> Batches;
 }
 
 // ExperimentalBatch represents a packet of unparsed data along with metadata about that packet.
-[GoType] partial struct ExperimentalBatch {
+partial struct ExperimentalBatch {
     // Thread is the ID of the thread that produced a packet of data.
     public ThreadID Thread;
     // Data is a packet of unparsed data all produced by one thread.
@@ -252,7 +252,7 @@ public static ΔStack NoStack = new ΔStack(nil);
 }
 
 // Event represents a single event in the trace.
-[GoType] partial struct ΔEvent {
+partial struct ΔEvent {
     internal ж<evTable> table;
     internal schedCtx ctx;
     internal baseEvent @base;

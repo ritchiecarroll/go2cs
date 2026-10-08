@@ -22,7 +22,7 @@ using encoding;
 
 partial class fcgi_package {
 
-[GoType("num:uint8")] public partial struct recType;
+public partial struct recType /*num:uint8*/;
 
 internal static recType typeBeginRequest => 1;
 internal static recType typeAbortRequest => 2;
@@ -51,7 +51,7 @@ internal static UntypedInt statusCantMultiplex => 1;
 internal static UntypedInt statusOverloaded => 2;
 internal static UntypedInt statusUnknownRole => 3;
 
-[GoType] partial struct header {
+partial struct header {
     public uint8 Version;
     public recType Type;
     public uint16 Id;
@@ -60,7 +60,7 @@ internal static UntypedInt statusUnknownRole => 3;
     public uint8 Reserved;
 }
 
-[GoType] partial struct beginRequest {
+partial struct beginRequest {
     internal uint16 role;
     internal uint8 flags;
     internal array<uint8> reserved = new(5);
@@ -69,7 +69,7 @@ internal static UntypedInt statusUnknownRole => 3;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fcgiInvalidBeginRequestˢ = "fcgi: invalid begin request record"u8;
 
-[GoRecv] internal static error read(this ref beginRequest br, slice<byte> content) {
+internal static error read(this ref beginRequest br, slice<byte> content) {
     if (len(content) != 8) {
         return errors.New(fcgiInvalidBeginRequestˢ);
     }
@@ -82,7 +82,7 @@ internal static readonly @string fcgiInvalidBeginRequestˢ = "fcgi: invalid begi
 // not synchronized because we don't care what the contents are
 internal static array<byte> pad = new(255);
 
-[GoRecv] internal static void init(this ref header h, recType recType, uint16 reqId, nint contentLength) {
+internal static void init(this ref header h, recType recType, uint16 reqId, nint contentLength) {
     h.Version = 1;
     h.Type = recType;
     h.Id = reqId;
@@ -91,7 +91,7 @@ internal static array<byte> pad = new(255);
 }
 
 // conn sends records over rwc
-[GoType] partial struct conn {
+partial struct conn {
     internal sync.Mutex mutex;
     internal io.ReadWriteCloser rwc;
     internal error closeErr;
@@ -124,7 +124,7 @@ internal static error Close(this ж<conn> Ꮡc) {
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }
 }
 
-[GoType] partial struct record {
+partial struct record {
     internal header h;
     internal array<byte> buf = new(maxWrite + maxPad);
 }
@@ -153,7 +153,7 @@ internal static error /*err*/ read(this ж<record> Ꮡrec, io.Reader r) {
     return default!;
 }
 
-[GoRecv] internal static slice<byte> content(this ref record r) {
+internal static slice<byte> content(this ref record r) {
     return r.buf.slice(0, r.h.ContentLength);
 }
 
@@ -259,12 +259,12 @@ internal static nint encodeSize(slice<byte> b, uint32 size) {
 
 // bufWriter encapsulates bufio.Writer but also closes the underlying stream when
 // Closed.
-[GoType] partial struct bufWriter {
+partial struct bufWriter {
     internal io.Closer closer;
     public partial ref ж<bufio_package.Writer> Writer { get; }
 }
 
-[GoRecv] internal static error Close(this ref bufWriter w) {
+internal static error Close(this ref bufWriter w) {
     {
         var err = w.Writer.Flush(); if (err != default!) {
             w.closer.Close();
@@ -282,13 +282,13 @@ internal static ж<bufWriter> newWriter(ж<conn> Ꮡc, recType recType, uint16 r
 
 // streamWriter abstracts out the separation of a stream into discrete records.
 // It only writes maxWrite bytes at a time.
-[GoType] partial struct streamWriter {
+partial struct streamWriter {
     internal ж<conn> c;
     internal recType recType;
     internal uint16 reqId;
 }
 
-[GoRecv] internal static (nint, error) Write(this ref streamWriter w, slice<byte> p) {
+internal static (nint, error) Write(this ref streamWriter w, slice<byte> p) {
     nint nn = 0;
     while (len(p) > 0) {
         nint n = len(p);
@@ -306,7 +306,7 @@ internal static ж<bufWriter> newWriter(ж<conn> Ꮡc, recType recType, uint16 r
     return (nn, default!);
 }
 
-[GoRecv] internal static error Close(this ref streamWriter w) {
+internal static error Close(this ref streamWriter w) {
     // send empty record to close the stream
     return w.c.writeRecord(w.recType, w.reqId, default!);
 }

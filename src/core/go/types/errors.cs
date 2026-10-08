@@ -37,7 +37,7 @@ internal static partial void assert(bool p) {
 }
 
 // An errorDesc describes part of a type-checking error.
-[GoType] partial struct errorDesc {
+partial struct errorDesc {
     internal positioner posn;
     internal @string msg;
 }
@@ -45,7 +45,7 @@ internal static partial void assert(bool p) {
 // An error_ represents a type-checking error.
 // A new error_ is created with Checker.newError.
 // To report an error_, call error_.report.
-[GoType] partial struct error_ {
+partial struct error_ {
     internal ж<Checker> check;
     internal slice<errorDesc> desc;
     internal errors.Code code;
@@ -66,14 +66,14 @@ internal static ж<error_> newError(this ж<Checker> Ꮡcheck, errors.Code code)
 // Subsequent calls to addf provide additional information in the form of additional lines
 // in the error message (types2) or continuation errors identified by a tab-indented error
 // message (go/types).
-[GoRecv] internal static void addf(this ref error_ err, positioner at, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void addf(this ref error_ err, positioner at, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     err.desc = append(err.desc, new errorDesc(at, err.check.sprintf(format, args.ꓸꓸꓸ)));
 }
 
 // addAltDecl is a specialized form of addf reporting another declaration of obj.
-[GoRecv] internal static void addAltDecl(this ref error_ err, Object obj) {
+internal static void addAltDecl(this ref error_ err, Object obj) {
     {
         tokenꓸPos pos = obj.Pos(); if (pos.IsValid()) {
             // We use "other" rather than "previous" here because
@@ -84,11 +84,11 @@ internal static ж<error_> newError(this ж<Checker> Ꮡcheck, errors.Code code)
     }
 }
 
-[GoRecv] internal static bool empty(this ref error_ err) {
+internal static bool empty(this ref error_ err) {
     return err.desc == default!;
 }
 
-[GoRecv] internal static positioner posn(this ref error_ err) {
+internal static positioner posn(this ref error_ err) {
     if (err.empty()) {
         return noposn;
     }
@@ -99,7 +99,7 @@ internal static ж<error_> newError(this ж<Checker> Ꮡcheck, errors.Code code)
 internal static readonly @string noErrorˢ = "no error"u8;
 
 // msg returns the formatted error message without the primary error position pos().
-[GoRecv] internal static @string msg(this ref error_ err) {
+internal static @string msg(this ref error_ err) {
     if (err.empty()) {
         return noErrorˢ;
     }
@@ -123,7 +123,7 @@ internal static readonly @string invalidTypeˢ = "invalid type"u8;
 internal static readonly @string errorSCodeDˢ = "ERROR: %s (code = %d)"u8;
 
 // report reports the error err, setting check.firstError if necessary.
-[GoRecv] internal static void report(this ref error_ err) {
+internal static void report(this ref error_ err) {
     if (err.empty()) {
         throw panic("no error");
     }
@@ -168,7 +168,7 @@ internal static readonly @string errorSCodeDˢ = "ERROR: %s (code = %d)"u8;
 }
 
 // handleError should only be called by error_.report.
-[GoRecv] internal static void handleError(this ref Checker check, nint index, positioner posn, errors.Code code, @string msg, bool soft) {
+internal static void handleError(this ref Checker check, nint index, positioner posn, errors.Code code, @string msg, bool soft) {
     assert(code != 0);
     if (index == 0){
         // If we are encountering an error while evaluating an inherited
@@ -235,7 +235,7 @@ internal static readonly @string invalidArg = "invalid argument: "u8;
 internal static readonly @string invalidOp = "invalid operation: "u8;
 
 // The positioner interface is used to extract the position of type-checker errors.
-[GoType] partial interface positioner {
+partial interface positioner {
     tokenꓸPos Pos();
 }
 
@@ -271,7 +271,7 @@ internal static void versionErrorf(this ж<Checker> Ꮡcheck, positioner at, goV
     err.report();
 }
 
-[GoType("global::go.go.token_package.ΔPos")] partial struct atPos;
+partial struct atPos /*global::go.go.token_package.ΔPos*/;
 
 internal static tokenꓸPos Pos(this atPos s) {
     return ((tokenꓸPos)s);
@@ -282,7 +282,7 @@ internal static tokenꓸPos Pos(this atPos s) {
 // first position in the source where the error is known to exist, and start
 // and end defining the full span of syntax being considered when the error was
 // detected. Invariant: start <= pos < end || start == pos == end.
-[GoType] partial struct posSpan {
+partial struct posSpan {
     internal tokenꓸPos start, pos, end;
 }
 

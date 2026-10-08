@@ -10,7 +10,7 @@ using @internal.runtime;
 
 partial class runtime_package {
 
-[GoType] partial struct mstats {
+partial struct mstats {
     // Statistics about malloc heap.
     internal consistentHeapStats heapStats;
     // Statistics about stacks.
@@ -41,7 +41,7 @@ partial class runtime_package {
 internal static ж<mstats> Ꮡmemstats = new StandardBox<mstats>(new mstats());
 internal static ref mstats memstats => ref Ꮡmemstats.Value;
 
-[GoType("dyn")] partial struct MemStats_BySize {
+partial struct MemStats_BySize /*dyn*/ {
     // Size is the maximum byte size of an object in this
     // size class.
     public uint32 Size;
@@ -56,7 +56,7 @@ internal static ref mstats memstats => ref Ꮡmemstats.Value;
 }
 
 // A MemStats records statistics about the memory allocator.
-[GoType] partial struct MemStats {
+partial struct MemStats {
 // General statistics.
 
     // Alloc is bytes of allocated heap objects.
@@ -559,7 +559,7 @@ internal static void flushmcache(nint i) {
 
 // go2cs generated this placeholder — func flushallmcaches is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoType("num:uint64")] partial struct sysMemStat;
+partial struct sysMemStat /*num:uint64*/;
 
 // load atomically reads the value of the stat.
 //
@@ -589,7 +589,7 @@ internal static void add(this ж<sysMemStat> Ꮡs, int64 n) {
 // heapStatsDelta contains deltas of various runtime memory statistics
 // that need to be updated together in order for them to be kept
 // consistent with one another.
-[GoType] partial struct heapStatsDelta {
+partial struct heapStatsDelta {
     // Memory stats.
     internal int64 committed; // byte delta of memory committed
     internal int64 released; // byte delta of released memory generated
@@ -615,7 +615,7 @@ internal static void add(this ж<sysMemStat> Ꮡs, int64 n) {
 // fields may be unaligned and fail on 32-bit platforms.
 
 // merge adds in the deltas from b into a.
-[GoRecv] internal static void merge(this ref heapStatsDelta a, ж<heapStatsDelta> Ꮡb) {
+internal static void merge(this ref heapStatsDelta a, ж<heapStatsDelta> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     a.committed += b.committed;
@@ -644,7 +644,7 @@ internal static void add(this ж<sysMemStat> Ꮡs, int64 n) {
 // To write updates to memory stats use the acquire and release
 // methods. To obtain a consistent global snapshot of these statistics,
 // use read.
-[GoType] partial struct consistentHeapStats {
+partial struct consistentHeapStats {
     // stats is a ring buffer of heapStatsDelta values.
     // Writers always atomically update the delta at index gen.
     //
@@ -752,7 +752,7 @@ internal static void release(this ж<consistentHeapStats> Ꮡm) {
 //
 // Unsafe because it does so without any synchronization. The
 // world must be stopped.
-[GoRecv] internal static void unsafeRead(this ref consistentHeapStats m, ж<heapStatsDelta> Ꮡout) {
+internal static void unsafeRead(this ref consistentHeapStats m, ж<heapStatsDelta> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     assertWorldStopped();
@@ -765,7 +765,7 @@ internal static void release(this ж<consistentHeapStats> Ꮡm) {
 //
 // Unsafe because the world must be stopped and values should
 // be donated elsewhere before clearing.
-[GoRecv] internal static void unsafeClear(this ref consistentHeapStats m) {
+internal static void unsafeClear(this ref consistentHeapStats m) {
     assertWorldStopped();
     foreach (var (i, _) in m.stats) {
         m.stats[i] = new heapStatsDelta(nil);
@@ -774,7 +774,7 @@ internal static void release(this ж<consistentHeapStats> Ꮡm) {
 
 // go2cs generated this placeholder — func read is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoType] partial struct cpuStats {
+partial struct cpuStats {
 // All fields are CPU time in nanoseconds computed by comparing
 // calls of nanotime. This means they're all overestimates, because
 // they don't accurately compute on-CPU time (so some of the time
@@ -796,7 +796,7 @@ internal static void release(this ж<consistentHeapStats> Ꮡm) {
 // the actual time spent paused, for orthogonality. maxProcs should be GOMAXPROCS,
 // not work.stwprocs, since this number must be comparable to a total time computed
 // from GOMAXPROCS.
-[GoRecv] internal static void accumulateGCPauseTime(this ref cpuStats s, int64 dt, int32 maxProcs) {
+internal static void accumulateGCPauseTime(this ref cpuStats s, int64 dt, int32 maxProcs) {
     var cpu = dt * (int64)maxProcs;
     s.GCPauseTime += cpu;
     s.GCTotalTime += cpu;
@@ -807,7 +807,7 @@ internal static void release(this ж<consistentHeapStats> Ꮡm) {
 //
 // gcMarkPhase indicates that we're in the mark phase and that certain counter
 // values should be used.
-[GoRecv] internal static void accumulate(this ref cpuStats s, int64 now, bool gcMarkPhase) {
+internal static void accumulate(this ref cpuStats s, int64 now, bool gcMarkPhase) {
     // N.B. Mark termination and sweep termination pauses are
     // accumulated in work.cpuStats at the end of their respective pauses.
     int64 markAssistCpu = default!;

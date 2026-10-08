@@ -28,13 +28,13 @@ internal static ref sync.Once fixedOnce => ref ᏑfixedOnce.Value;
 internal static ж<huffmanDecoder> ᏑfixedHuffmanDecoder = new StandardBox<huffmanDecoder>(new huffmanDecoder());
 internal static ref huffmanDecoder fixedHuffmanDecoder => ref ᏑfixedHuffmanDecoder.Value;
 
-[GoType("num:int64")] partial struct CorruptInputError;
+partial struct CorruptInputError /*num:int64*/;
 
 public static @string Error(this CorruptInputError e) {
     return "flate: corrupt input before offset "u8 + strconv.FormatInt((int64)e, 10);
 }
 
-[GoType("@string")] partial struct InternalError;
+partial struct InternalError /*@string*/;
 
 public static @string Error(this InternalError e) {
     return "flate: internal error: "u8 + ((@string)e);
@@ -43,31 +43,31 @@ public static @string Error(this InternalError e) {
 // A ReadError reports an error encountered while reading input.
 //
 // Deprecated: No longer returned.
-[GoType] partial struct ReadError {
+partial struct ReadError {
     public int64 Offset; // byte offset where error occurred
     public error Err; // error returned by underlying Read
 }
 
-[GoRecv] public static @string Error(this ref ReadError e) {
+public static @string Error(this ref ReadError e) {
     return "flate: read error at offset "u8 + strconv.FormatInt(e.Offset, 10) + ": "u8 + e.Err.Error();
 }
 
 // A WriteError reports an error encountered while writing output.
 //
 // Deprecated: No longer returned.
-[GoType] partial struct WriteError {
+partial struct WriteError {
     public int64 Offset; // byte offset where error occurred
     public error Err; // error returned by underlying Write
 }
 
-[GoRecv] public static @string Error(this ref WriteError e) {
+public static @string Error(this ref WriteError e) {
     return "flate: write error at offset "u8 + strconv.FormatInt(e.Offset, 10) + ": "u8 + e.Err.Error();
 }
 
 // Resetter resets a ReadCloser returned by [NewReader] or [NewReaderDict]
 // to switch to a new underlying [Reader]. This permits reusing a ReadCloser
 // instead of allocating a new one.
-[GoType] partial interface Resetter {
+partial interface Resetter {
     // Reset discards any buffered data and resets the Resetter as if it was
     // newly initialized with the given reader.
     error Reset(io.Reader r, slice<byte> dict);
@@ -96,7 +96,7 @@ internal static UntypedInt huffmanNumChunks => /* 1 << huffmanChunkBits */ 512;
 internal static UntypedInt huffmanCountMask => 15;
 internal static UntypedInt huffmanValueShift => 4;
 
-[GoType] partial struct huffmanDecoder {
+partial struct huffmanDecoder {
     internal nint min;                     // the minimum code length
     internal array<uint32> chunks = new(huffmanNumChunks); // chunks as described above
     internal slice<slice<uint32>> links;     // overflow links
@@ -108,7 +108,7 @@ internal static UntypedInt huffmanValueShift => 4;
 // tree (i.e., neither over-subscribed nor under-subscribed). The exception is a
 // degenerate case where the tree has only a single symbol with length 1. Empty
 // trees are permitted.
-[GoRecv] internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
+internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
     // Sanity enables additional runtime tests during Huffman
     // table construction. It's intended to be used during
     // development to supplement the currently ad-hoc unit tests.
@@ -244,14 +244,14 @@ internal static UntypedInt huffmanValueShift => 4;
 // The actual read interface needed by [NewReader].
 // If the passed in io.Reader does not also have ReadByte,
 // the [NewReader] will introduce its own buffering.
-[GoType] partial interface Reader :
+partial interface Reader :
     io.Reader,
     io.ByteReader
 {
 }
 
 // Decompress state.
-[GoType] partial struct decompressor {
+partial struct decompressor {
     // Input source.
     internal Reader r;
     internal ж<bufio.Reader> rBuf; // created if provided io.Reader does not implement io.ByteReader
@@ -262,10 +262,8 @@ internal static UntypedInt huffmanValueShift => 4;
     // Huffman decoders for literal/length, distance.
     internal huffmanDecoder h1, h2;
     // Length arrays used to define Huffman codes.
-    [GoArrayDims(316)]
-    internal ж<array<nint>> bits;
-    [GoArrayDims(19)]
-    internal ж<array<nint>> codebits;
+    internal /*[316]*/ ж<array<nint>> bits;
+    internal /*[19]*/ ж<array<nint>> codebits;
     // Output history, buffer.
     internal dictDecoder dict;
     // Temporary buffer (avoids repeated allocation).
@@ -351,7 +349,7 @@ internal static (nint, error) Read(this ж<decompressor> Ꮡf, slice<byte> b) {
     }
 }
 
-[GoRecv] internal static error Close(this ref decompressor f) {
+internal static error Close(this ref decompressor f) {
     if (AreEqual(f.err, io.EOF)) {
         return default!;
     }
@@ -487,7 +485,7 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
 // hl and hd are the Huffman states for the lit/length values
 // and the distance values, respectively. If hd == nil, using the
 // fixed distance encoding associated with fixed Huffman blocks.
-[GoRecv] internal static void huffmanBlock(this ref decompressor f) {
+internal static void huffmanBlock(this ref decompressor f) {
     const nint stateInit = iota; // Zero value must be stateInit
     const nint stateDict = 1;
     var exprᴛ1 = f.stepState;
@@ -654,7 +652,7 @@ copyHistory:
 }
 
 // Copy a single uncompressed data block from input to output.
-[GoRecv] internal static void dataBlock(this ref decompressor f) {
+internal static void dataBlock(this ref decompressor f) {
     // Uncompressed.
     // Discard current half-byte.
     f.nb = 0;
@@ -683,7 +681,7 @@ copyHistory:
 
 // copyData copies f.copyLen bytes from the underlying reader into f.hist.
 // It pauses for reads when f.hist is full.
-[GoRecv] internal static void copyData(this ref decompressor f) {
+internal static void copyData(this ref decompressor f) {
     var buf = f.dict.writeSlice();
     if (len(buf) > f.copyLen) {
         buf = buf.slice(0, f.copyLen);
@@ -704,7 +702,7 @@ copyHistory:
     f.finishBlock();
 }
 
-[GoRecv] internal static void finishBlock(this ref decompressor f) {
+internal static void finishBlock(this ref decompressor f) {
     if (f.final) {
         if (f.dict.availRead() > 0) {
             f.toRead = f.dict.readFlush();
@@ -722,7 +720,7 @@ internal static error noEOF(error e) {
     return e;
 }
 
-[GoRecv] internal static error moreBits(this ref decompressor f) {
+internal static error moreBits(this ref decompressor f) {
     var (c, err) = f.r.ReadByte();
     if (err != default!) {
         return noEOF(err);
@@ -734,7 +732,7 @@ internal static error noEOF(error e) {
 }
 
 // Read the next Huffman-encoded symbol from f according to h.
-[GoRecv] internal static (nint, error) huffSym(this ref decompressor f, ж<huffmanDecoder> Ꮡh) {
+internal static (nint, error) huffSym(this ref decompressor f, ж<huffmanDecoder> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     // Since a huffmanDecoder can be empty or be composed of a degenerate tree
@@ -779,7 +777,7 @@ internal static error noEOF(error e) {
     }
 }
 
-[GoRecv] internal static void makeReader(this ref decompressor f, io.Reader r) {
+internal static void makeReader(this ref decompressor f, io.Reader r) {
     {
         var (rr, ok) = r._<Reader>(ᐧ); if (ok) {
             f.rBuf = default!;
@@ -817,7 +815,7 @@ internal static void fixedHuffmanDecoderInit() {
     });
 }
 
-[GoRecv] internal static error Reset(this ref decompressor f, io.Reader r, slice<byte> dict) {
+internal static error Reset(this ref decompressor f, io.Reader r, slice<byte> dict) {
     f = new decompressor(
         rBuf: f.rBuf,
         bits: f.bits,

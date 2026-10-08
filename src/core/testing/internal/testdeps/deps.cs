@@ -34,7 +34,7 @@ public static bool Cover;
 
 // TestDeps is an implementation of the testing.testDeps interface,
 // suitable for passing to [testing.MainStart].
-[GoType] partial struct TestDeps {
+partial struct TestDeps {
 }
 
 internal static @string matchPat;
@@ -75,7 +75,7 @@ public static @string ImportPath(this TestDeps _) {
 }
 
 // testLog implements testlog.Interface, logging actions by package os.
-[GoType] partial struct testLog {
+partial struct testLog {
     internal sync.Mutex mu;
     internal ж<bufio.Writer> w;
     internal bool set;

@@ -72,7 +72,7 @@ internal static readonly @string earlyExporterLabel = "e exp master"u8;
 internal static readonly @string exporterLabel = "exp master"u8;
 internal static readonly @string resumptionLabel = "res master"u8;
 
-[GoType] partial struct EarlySecret {
+partial struct EarlySecret {
     internal slice<byte> secret;
     internal Func<fips140.Hash> hash;
 }
@@ -86,17 +86,17 @@ public static ж<EarlySecret> NewEarlySecret<H>(Func<H> hash, slice<byte> psk)
     ));
 }
 
-[GoRecv] public static slice<byte> ResumptionBinderKey(this ref EarlySecret s) {
+public static slice<byte> ResumptionBinderKey(this ref EarlySecret s) {
     return deriveSecret(s.hash, s.secret, resumptionBinderLabel, default!);
 }
 
 // ClientEarlyTrafficSecret derives the client_early_traffic_secret from the
 // early secret and the transcript up to the ClientHello.
-[GoRecv] public static slice<byte> ClientEarlyTrafficSecret(this ref EarlySecret s, fips140.Hash transcript) {
+public static slice<byte> ClientEarlyTrafficSecret(this ref EarlySecret s, fips140.Hash transcript) {
     return deriveSecret(s.hash, s.secret, clientEarlyTrafficLabel, transcript);
 }
 
-[GoType] partial struct ΔHandshakeSecret {
+partial struct ΔHandshakeSecret {
     internal slice<byte> secret;
     internal Func<fips140.Hash> hash;
 }
@@ -104,7 +104,7 @@ public static ж<EarlySecret> NewEarlySecret<H>(Func<H> hash, slice<byte> psk)
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string derivedˢ = "derived"u8;
 
-[GoRecv] public static ж<ΔHandshakeSecret> HandshakeSecret(this ref EarlySecret s, slice<byte> sharedSecret) {
+public static ж<ΔHandshakeSecret> HandshakeSecret(this ref EarlySecret s, slice<byte> sharedSecret) {
     var derived = deriveSecret(s.hash, s.secret, derivedˢ, default!);
     return Ꮡ(new ΔHandshakeSecret(
         secret: extract(s.hash, sharedSecret, derived),
@@ -114,22 +114,22 @@ private static readonly @string derivedˢ = "derived"u8;
 
 // ClientHandshakeTrafficSecret derives the client_handshake_traffic_secret from
 // the handshake secret and the transcript up to the ServerHello.
-[GoRecv] public static slice<byte> ClientHandshakeTrafficSecret(this ref ΔHandshakeSecret s, fips140.Hash transcript) {
+public static slice<byte> ClientHandshakeTrafficSecret(this ref ΔHandshakeSecret s, fips140.Hash transcript) {
     return deriveSecret(s.hash, s.secret, clientHandshakeTrafficLabel, transcript);
 }
 
 // ServerHandshakeTrafficSecret derives the server_handshake_traffic_secret from
 // the handshake secret and the transcript up to the ServerHello.
-[GoRecv] public static slice<byte> ServerHandshakeTrafficSecret(this ref ΔHandshakeSecret s, fips140.Hash transcript) {
+public static slice<byte> ServerHandshakeTrafficSecret(this ref ΔHandshakeSecret s, fips140.Hash transcript) {
     return deriveSecret(s.hash, s.secret, serverHandshakeTrafficLabel, transcript);
 }
 
-[GoType] partial struct ΔMasterSecret {
+partial struct ΔMasterSecret {
     internal slice<byte> secret;
     internal Func<fips140.Hash> hash;
 }
 
-[GoRecv] public static ж<ΔMasterSecret> MasterSecret(this ref ΔHandshakeSecret s) {
+public static ж<ΔMasterSecret> MasterSecret(this ref ΔHandshakeSecret s) {
     var derived = deriveSecret(s.hash, s.secret, derivedˢ, default!);
     return Ꮡ(new ΔMasterSecret(
         secret: extract(s.hash, default!, derived),
@@ -139,30 +139,30 @@ private static readonly @string derivedˢ = "derived"u8;
 
 // ClientApplicationTrafficSecret derives the client_application_traffic_secret_0
 // from the master secret and the transcript up to the server Finished.
-[GoRecv] public static slice<byte> ClientApplicationTrafficSecret(this ref ΔMasterSecret s, fips140.Hash transcript) {
+public static slice<byte> ClientApplicationTrafficSecret(this ref ΔMasterSecret s, fips140.Hash transcript) {
     return deriveSecret(s.hash, s.secret, clientApplicationTrafficLabel, transcript);
 }
 
 // ServerApplicationTrafficSecret derives the server_application_traffic_secret_0
 // from the master secret and the transcript up to the server Finished.
-[GoRecv] public static slice<byte> ServerApplicationTrafficSecret(this ref ΔMasterSecret s, fips140.Hash transcript) {
+public static slice<byte> ServerApplicationTrafficSecret(this ref ΔMasterSecret s, fips140.Hash transcript) {
     return deriveSecret(s.hash, s.secret, serverApplicationTrafficLabel, transcript);
 }
 
 // ResumptionMasterSecret derives the resumption_master_secret from the master secret
 // and the transcript up to the client Finished.
-[GoRecv] public static slice<byte> ResumptionMasterSecret(this ref ΔMasterSecret s, fips140.Hash transcript) {
+public static slice<byte> ResumptionMasterSecret(this ref ΔMasterSecret s, fips140.Hash transcript) {
     return deriveSecret(s.hash, s.secret, resumptionLabel, transcript);
 }
 
-[GoType] partial struct ΔExporterMasterSecret {
+partial struct ΔExporterMasterSecret {
     internal slice<byte> secret;
     internal Func<fips140.Hash> hash;
 }
 
 // ExporterMasterSecret derives the exporter_master_secret from the master secret
 // and the transcript up to the server Finished.
-[GoRecv] public static ж<ΔExporterMasterSecret> ExporterMasterSecret(this ref ΔMasterSecret s, fips140.Hash transcript) {
+public static ж<ΔExporterMasterSecret> ExporterMasterSecret(this ref ΔMasterSecret s, fips140.Hash transcript) {
     return Ꮡ(new ΔExporterMasterSecret(
         secret: deriveSecret(s.hash, s.secret, exporterLabel, transcript),
         hash: s.hash
@@ -171,7 +171,7 @@ private static readonly @string derivedˢ = "derived"u8;
 
 // EarlyExporterMasterSecret derives the exporter_master_secret from the early secret
 // and the transcript up to the ClientHello.
-[GoRecv] public static ж<ΔExporterMasterSecret> EarlyExporterMasterSecret(this ref EarlySecret s, fips140.Hash transcript) {
+public static ж<ΔExporterMasterSecret> EarlyExporterMasterSecret(this ref EarlySecret s, fips140.Hash transcript) {
     return Ꮡ(new ΔExporterMasterSecret(
         secret: deriveSecret(s.hash, s.secret, earlyExporterLabel, transcript),
         hash: s.hash
@@ -181,7 +181,7 @@ private static readonly @string derivedˢ = "derived"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string exporterˢ = "exporter"u8;
 
-[GoRecv] public static slice<byte> Exporter(this ref ΔExporterMasterSecret s, @string label, slice<byte> context, nint length) {
+public static slice<byte> Exporter(this ref ΔExporterMasterSecret s, @string label, slice<byte> context, nint length) {
     var secret = deriveSecret(s.hash, s.secret, label, default!);
     var h = s.hash();
     h.Write(context);

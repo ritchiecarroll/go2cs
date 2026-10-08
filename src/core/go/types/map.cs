@@ -8,7 +8,7 @@ namespace go.go;
 partial class types_package {
 
 // A Map represents a map type.
-[GoType] partial struct Map {
+partial struct Map {
     internal ΔType key, elem;
 }
 
@@ -18,12 +18,12 @@ public static ж<Map> NewMap(ΔType key, ΔType elem) {
 }
 
 // Key returns the key type of map m.
-[GoRecv] public static ΔType Key(this ref Map m) {
+public static ΔType Key(this ref Map m) {
     return m.key;
 }
 
 // Elem returns the element type of map m.
-[GoRecv] public static ΔType Elem(this ref Map m) {
+public static ΔType Elem(this ref Map m) {
     return m.elem;
 }
 

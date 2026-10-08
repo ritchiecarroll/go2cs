@@ -33,7 +33,7 @@ internal static UntypedInt workerSharedMemSize => /* 100 << 20 */ 104857600; // 
 // exists only in the coordinator (the process started by 'go test -fuzz').
 // workerClient is used by the coordinator to send RPCs to the worker process,
 // which handles them with workerServer.
-[GoType] partial struct worker {
+partial struct worker {
     internal @string dir;  // working directory, same as package directory
     internal @string binPath;  // path to test executable
     internal slice<@string> args; // arguments for test executable
@@ -66,7 +66,7 @@ internal static (ж<worker>, error) newWorker(ж<coordinator> Ꮡc, @string dir,
 }
 
 // cleanup releases persistent resources associated with the worker.
-[GoRecv] internal static error cleanup(this ref worker w) {
+internal static error cleanup(this ref worker w) {
     var mem = ᐸꟷ(w.memMu);
     if (mem == nil) {
         return default!;
@@ -298,7 +298,7 @@ internal static (fuzzResult min, error err) minimize(this ж<worker> Ꮡw, conte
     ᒐdone: return (min, err);
 }
 
-[GoRecv] internal static bool isRunning(this ref worker w) {
+internal static bool isRunning(this ref worker w) {
     return w.cmd != nil;
 }
 
@@ -540,7 +540,7 @@ public static error RunFuzzWorker(context.Context ctx, Func<CorpusEntry, error> 
 // call is serialized and sent from the coordinator on fuzz_in. It acts as
 // a minimalist RPC mechanism. Exactly one of its fields must be set to indicate
 // which method to call.
-[GoType] partial struct call {
+partial struct call {
     public ж<pingArgs> Ping;
     public ж<fuzzArgs> Fuzz;
     public ж<minimizeArgs> Minimize;
@@ -548,7 +548,7 @@ public static error RunFuzzWorker(context.Context ctx, Func<CorpusEntry, error> 
 
 // minimizeArgs contains arguments to workerServer.minimize. The value to
 // minimize is already in shared memory.
-[GoType] public partial struct minimizeArgs {
+public partial struct minimizeArgs {
     // Timeout is the time to spend minimizing. This may include time to start up,
     // especially if the input causes the worker process to terminated, requiring
     // repeated restarts.
@@ -565,7 +565,7 @@ public static error RunFuzzWorker(context.Context ctx, Func<CorpusEntry, error> 
 }
 
 // minimizeResponse contains results from workerServer.minimize.
-[GoType] partial struct minimizeResponse {
+partial struct minimizeResponse {
     // WroteToMem is true if the worker found a smaller input and wrote it to
     // shared memory. If minimizeArgs.KeepCoverage was set, the minimized input
     // preserved at least one coverage bit and did not cause an error.
@@ -585,7 +585,7 @@ public static error RunFuzzWorker(context.Context ctx, Func<CorpusEntry, error> 
 
 // fuzzArgs contains arguments to workerServer.fuzz. The value to fuzz is
 // passed in shared memory.
-[GoType] public partial struct fuzzArgs {
+public partial struct fuzzArgs {
     // Timeout is the time to spend fuzzing, not including starting or
     // cleaning up.
     public time.Duration Timeout;
@@ -602,7 +602,7 @@ public static error RunFuzzWorker(context.Context ctx, Func<CorpusEntry, error> 
 }
 
 // fuzzResponse contains results from workerServer.fuzz.
-[GoType] partial struct fuzzResponse {
+partial struct fuzzResponse {
     // Duration is the time spent fuzzing, not including starting or cleaning up.
     public time.Duration TotalDuration;
     public time.Duration InterestingDuration;
@@ -620,11 +620,11 @@ public static error RunFuzzWorker(context.Context ctx, Func<CorpusEntry, error> 
 }
 
 // pingArgs contains arguments to workerServer.ping.
-[GoType] public partial struct pingArgs {
+public partial struct pingArgs {
 }
 
 // pingResponse contains results from workerServer.ping.
-[GoType] partial struct pingResponse {
+partial struct pingResponse {
 }
 
 // workerComm holds pipes and shared memory used for communication
@@ -636,7 +636,7 @@ public static error RunFuzzWorker(context.Context ctx, Func<CorpusEntry, error> 
 // implemented in workerServer and workerClient. During a call, the client
 // (worker) has exclusive access to shared memory; at other times, the server
 // (coordinator) has exclusive access.
-[GoType] partial struct workerComm {
+partial struct workerComm {
     internal ж<os.File> fuzzIn, fuzzOut;
     internal channel<ж<sharedMem>> memMu; // mutex guarding shared memory
 }
@@ -646,7 +646,7 @@ public static error RunFuzzWorker(context.Context ctx, Func<CorpusEntry, error> 
 // worker process. This system allows the coordinator to run multiple worker
 // processes in parallel and to collect inputs that caused crashes from shared
 // memory after a worker process terminates unexpectedly.
-[GoType] partial struct workerServer {
+partial struct workerServer {
     internal partial ref workerComm workerComm { get; }
     internal ж<mutator> m;
     // coverageMask is the local coverage data for the worker. It is
@@ -1018,14 +1018,14 @@ internal static void writeToMem(slice<any> vals, ж<sharedMem> Ꮡmem) {
 
 // ping does nothing. The coordinator calls this method to ensure the worker
 // has called F.Fuzz and can communicate.
-[GoRecv] internal static pingResponse ping(this ref workerServer ws, context.Context ctx, pingArgs args) {
+internal static pingResponse ping(this ref workerServer ws, context.Context ctx, pingArgs args) {
     return new pingResponse(nil);
 }
 
 // workerClient is a minimalist RPC client. The coordinator process uses a
 // workerClient to call methods in each worker process (handled by
 // workerServer).
-[GoType] partial struct workerClient {
+partial struct workerClient {
     internal partial ref workerComm workerComm { get; }
     internal ж<mutator> m;
     // mu is the mutex protecting the workerComm.fuzzIn pipe. This must be
@@ -1286,7 +1286,7 @@ internal static error ping(this ж<workerClient> Ꮡwc, context.Context ctx) {
 
 // callLocked sends an RPC from the coordinator to the worker process and waits
 // for the response. The callLocked may be canceled with ctx.
-[GoRecv] internal static error /*err*/ callLocked(this ref workerClient wc, context.Context ctx, call c, any resp) {
+internal static error /*err*/ callLocked(this ref workerClient wc, context.Context ctx, call c, any resp) {
     var enc = json.NewEncoder(new os.FileжWriter(wc.fuzzIn));
     var dec = json.NewDecoder(new contextReaderжReader(Ꮡ(new contextReader(ctx: ctx, r: new os_FileжReader(wc.fuzzOut)))));
     {
@@ -1305,7 +1305,7 @@ internal static error ping(this ж<workerClient> Ꮡwc, context.Context ctx) {
 // other file descriptor (the write end) must be closed in all processes that
 // inherit it. This is difficult to do correctly in the situation we care about
 // (process group termination).
-[GoType] partial struct contextReader {
+partial struct contextReader {
     internal context.Context ctx;
     internal io.Reader r;
 }

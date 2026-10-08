@@ -12,7 +12,7 @@ partial class types_package {
 // A Tuple represents an ordered list of variables; a nil *Tuple is a valid (empty) tuple.
 // Tuples are used as components of signatures and to represent the type of multiple
 // assignments; they are not first class types of Go.
-[GoType] partial struct Tuple {
+partial struct Tuple {
     internal slice<ж<Var>> vars;
 }
 
@@ -37,7 +37,7 @@ public static nint Len(this ж<Tuple> Ꮡt) {
 }
 
 // At returns the i'th variable of tuple t.
-[GoRecv] public static ж<Var> At(this ref Tuple t, nint i) {
+public static ж<Var> At(this ref Tuple t, nint i) {
     return t.vars[i];
 }
 

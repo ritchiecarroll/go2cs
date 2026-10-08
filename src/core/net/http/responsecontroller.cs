@@ -13,7 +13,7 @@ partial class http_package {
 // A ResponseController is used by an HTTP handler to control the response.
 //
 // A ResponseController may not be used after the [Handler.ServeHTTP] method has returned.
-[GoType] partial struct ResponseController {
+partial struct ResponseController {
     internal ResponseWriter rw;
 }
 
@@ -38,16 +38,16 @@ public static ж<ResponseController> NewResponseController(ResponseWriter rw) {
     return Ꮡ(new ResponseController(rw));
 }
 
-[GoType] partial interface rwUnwrapper {
+partial interface rwUnwrapper {
     ResponseWriter Unwrap();
 }
 
-[GoType("dyn")] internal partial interface Flush_type {
+internal partial interface Flush_type /*dyn*/ {
     error FlushError();
 }
 
 // Flush flushes buffered data to the client.
-[GoRecv] public static error Flush(this ref ResponseController c) {
+public static error Flush(this ref ResponseController c) {
     var rw = c.rw;
     while (ᐧ) {
         switch (rw.type()) {
@@ -71,7 +71,7 @@ public static ж<ResponseController> NewResponseController(ResponseWriter rw) {
 
 // Hijack lets the caller take over the connection.
 // See the Hijacker interface for details.
-[GoRecv] public static (net.Conn, ж<bufio.ReadWriter>, error) Hijack(this ref ResponseController c) {
+public static (net.Conn, ж<bufio.ReadWriter>, error) Hijack(this ref ResponseController c) {
     var rw = c.rw;
     while (ᐧ) {
         switch (rw.type()) {
@@ -89,7 +89,7 @@ public static ж<ResponseController> NewResponseController(ResponseWriter rw) {
     }
 }
 
-[GoType("dyn")] internal partial interface SetReadDeadline_type {
+internal partial interface SetReadDeadline_type /*dyn*/ {
     error SetReadDeadline(time.Time _);
 }
 
@@ -98,7 +98,7 @@ public static ж<ResponseController> NewResponseController(ResponseWriter rw) {
 // A zero value means no deadline.
 //
 // Setting the read deadline after it has been exceeded will not extend it.
-[GoRecv] public static error SetReadDeadline(this ref ResponseController c, time.Time deadline) {
+public static error SetReadDeadline(this ref ResponseController c, time.Time deadline) {
     var rw = c.rw;
     while (ᐧ) {
         switch (rw.type()) {
@@ -116,7 +116,7 @@ public static ж<ResponseController> NewResponseController(ResponseWriter rw) {
     }
 }
 
-[GoType("dyn")] internal partial interface SetWriteDeadline_type {
+internal partial interface SetWriteDeadline_type /*dyn*/ {
     error SetWriteDeadline(time.Time _);
 }
 
@@ -126,7 +126,7 @@ public static ж<ResponseController> NewResponseController(ResponseWriter rw) {
 // A zero value means no deadline.
 //
 // Setting the write deadline after it has been exceeded will not extend it.
-[GoRecv] public static error SetWriteDeadline(this ref ResponseController c, time.Time deadline) {
+public static error SetWriteDeadline(this ref ResponseController c, time.Time deadline) {
     var rw = c.rw;
     while (ᐧ) {
         switch (rw.type()) {
@@ -144,7 +144,7 @@ public static ж<ResponseController> NewResponseController(ResponseWriter rw) {
     }
 }
 
-[GoType("dyn")] internal partial interface EnableFullDuplex_type {
+internal partial interface EnableFullDuplex_type /*dyn*/ {
     error EnableFullDuplex();
 }
 
@@ -158,7 +158,7 @@ public static ж<ResponseController> NewResponseController(ResponseWriter rw) {
 // from the request while concurrently writing the response.
 //
 // For HTTP/2 requests, the Go HTTP server always permits concurrent reads and responses.
-[GoRecv] public static error EnableFullDuplex(this ref ResponseController c) {
+public static error EnableFullDuplex(this ref ResponseController c) {
     var rw = c.rw;
     while (ᐧ) {
         switch (rw.type()) {

@@ -93,10 +93,10 @@ using ꓸꓸꓸuintptr = Span<uintptr>;
 
 partial class runtime_package {
 
-[GoType("[32]uintptr")] partial struct ΔcgoCallers;
+partial struct ΔcgoCallers /*[32]uintptr*/;
 
 // argset matches runtime/cgo/linux_syscall.c:argset_t
-[GoType] partial struct argset {
+partial struct argset {
     internal @unsafe.Pointer args;
     internal uintptr retval;
 }

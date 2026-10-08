@@ -33,15 +33,15 @@ public static void SetKevent(ж<Kevent_t> Ꮡk, nint fd, nint mode, nint flags) 
     k.Flags = (uint16)flags;
 }
 
-[GoRecv] public static void SetLen(this ref Iovec iov, nint length) {
+public static void SetLen(this ref Iovec iov, nint length) {
     iov.Len = (uint64)length;
 }
 
-[GoRecv] public static void SetControllen(this ref Msghdr msghdr, nint length) {
+public static void SetControllen(this ref Msghdr msghdr, nint length) {
     msghdr.Controllen = (uint32)length;
 }
 
-[GoRecv] public static void SetLen(this ref Cmsghdr cmsg, nint length) {
+public static void SetLen(this ref Cmsghdr cmsg, nint length) {
     cmsg.Len = (uint32)length;
 }
 

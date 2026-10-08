@@ -36,7 +36,7 @@ internal static error errBufferTooSmall = errors.New("buffer too small"u8);
 // 16-, 32-, or 64-bit unsigned integers.
 //
 // It is implemented by [LittleEndian], [BigEndian], and [NativeEndian].
-[GoType] partial interface ByteOrder {
+partial interface ByteOrder {
     uint16 Uint16(slice<byte> _);
     uint32 Uint32(slice<byte> _);
     uint64 Uint64(slice<byte> _);
@@ -50,7 +50,7 @@ internal static error errBufferTooSmall = errors.New("buffer too small"u8);
 // into a byte slice.
 //
 // It is implemented by [LittleEndian], [BigEndian], and [NativeEndian].
-[GoType] partial interface AppendByteOrder {
+partial interface AppendByteOrder {
     slice<byte> AppendUint16(slice<byte> _Δp0, uint16 _Δp1);
     slice<byte> AppendUint32(slice<byte> _Δp0, uint32 _Δp1);
     slice<byte> AppendUint64(slice<byte> _Δp0, uint64 _Δp1);
@@ -63,7 +63,7 @@ public static littleEndian LittleEndian;
 // BigEndian is the big-endian implementation of [ByteOrder] and [AppendByteOrder].
 public static bigEndian BigEndian;
 
-[GoType] public partial struct littleEndian {
+public partial struct littleEndian {
 }
 
 // Uint16 returns the uint16 representation of b[0:2].
@@ -156,7 +156,7 @@ public static @string GoString(this littleEndian _) {
     return binaryLittleEndianˢ;
 }
 
-[GoType] public partial struct bigEndian {
+public partial struct bigEndian {
 }
 
 // Uint16 returns the uint16 representation of b[0:2].
@@ -936,23 +936,23 @@ internal static nint @sizeof(reflectꓸType t) {
     return -1;
 }
 
-[GoType] partial struct coder {
+partial struct coder {
     internal ByteOrder order;
     internal slice<byte> buf;
     internal nint offset;
 }
 
-[GoType("coder")] partial struct decoder;
+partial struct decoder /*coder*/;
 
-[GoType("coder")] partial struct encoder;
+partial struct encoder /*coder*/;
 
-[GoRecv] internal static bool @bool(this ref decoder d) {
+internal static bool @bool(this ref decoder d) {
     var x = d.buf[d.offset];
     d.offset++;
     return x != 0;
 }
 
-[GoRecv] internal static void @bool(this ref encoder e, bool x) {
+internal static void @bool(this ref encoder e, bool x) {
     if (x){
         e.buf[e.offset] = 1;
     } else {
@@ -961,83 +961,83 @@ internal static nint @sizeof(reflectꓸType t) {
     e.offset++;
 }
 
-[GoRecv] internal static uint8 uint8(this ref decoder d) {
+internal static uint8 uint8(this ref decoder d) {
     var x = d.buf[d.offset];
     d.offset++;
     return x;
 }
 
-[GoRecv] internal static void uint8(this ref encoder e, uint8 x) {
+internal static void uint8(this ref encoder e, uint8 x) {
     e.buf[e.offset] = x;
     e.offset++;
 }
 
-[GoRecv] internal static uint16 uint16(this ref decoder d) {
+internal static uint16 uint16(this ref decoder d) {
     var x = d.order.Uint16(d.buf.slice(d.offset, d.offset + 2));
     d.offset += 2;
     return x;
 }
 
-[GoRecv] internal static void uint16(this ref encoder e, uint16 x) {
+internal static void uint16(this ref encoder e, uint16 x) {
     e.order.PutUint16(e.buf.slice(e.offset, e.offset + 2), x);
     e.offset += 2;
 }
 
-[GoRecv] internal static uint32 uint32(this ref decoder d) {
+internal static uint32 uint32(this ref decoder d) {
     var x = d.order.Uint32(d.buf.slice(d.offset, d.offset + 4));
     d.offset += 4;
     return x;
 }
 
-[GoRecv] internal static void uint32(this ref encoder e, uint32 x) {
+internal static void uint32(this ref encoder e, uint32 x) {
     e.order.PutUint32(e.buf.slice(e.offset, e.offset + 4), x);
     e.offset += 4;
 }
 
-[GoRecv] internal static uint64 uint64(this ref decoder d) {
+internal static uint64 uint64(this ref decoder d) {
     var x = d.order.Uint64(d.buf.slice(d.offset, d.offset + 8));
     d.offset += 8;
     return x;
 }
 
-[GoRecv] internal static void uint64(this ref encoder e, uint64 x) {
+internal static void uint64(this ref encoder e, uint64 x) {
     e.order.PutUint64(e.buf.slice(e.offset, e.offset + 8), x);
     e.offset += 8;
 }
 
-[GoRecv] internal static int8 int8(this ref decoder d) {
+internal static int8 int8(this ref decoder d) {
     return (int8)d.uint8();
 }
 
-[GoRecv] internal static void int8(this ref encoder e, int8 x) {
+internal static void int8(this ref encoder e, int8 x) {
     e.uint8((uint8)x);
 }
 
-[GoRecv] internal static int16 int16(this ref decoder d) {
+internal static int16 int16(this ref decoder d) {
     return (int16)d.uint16();
 }
 
-[GoRecv] internal static void int16(this ref encoder e, int16 x) {
+internal static void int16(this ref encoder e, int16 x) {
     e.uint16((uint16)x);
 }
 
-[GoRecv] internal static int32 int32(this ref decoder d) {
+internal static int32 int32(this ref decoder d) {
     return (int32)d.uint32();
 }
 
-[GoRecv] internal static void int32(this ref encoder e, int32 x) {
+internal static void int32(this ref encoder e, int32 x) {
     e.uint32((uint32)x);
 }
 
-[GoRecv] internal static int64 int64(this ref decoder d) {
+internal static int64 int64(this ref decoder d) {
     return (int64)d.uint64();
 }
 
-[GoRecv] internal static void int64(this ref encoder e, int64 x) {
+internal static void int64(this ref encoder e, int64 x) {
     e.uint64((uint64)x);
 }
 
-[GoRecv] internal static void value(this ref decoder d, reflectꓸValue v) {
+internal static void value(this ref decoder d, reflectꓸValue v) {
     var exprᴛ1 = v.Kind();
     if (exprᴛ1 == reflect.Array) {
         nint l = v.Len();
@@ -1115,7 +1115,7 @@ internal static nint @sizeof(reflectꓸType t) {
 
 }
 
-[GoRecv] internal static void value(this ref encoder e, reflectꓸValue v) {
+internal static void value(this ref encoder e, reflectꓸValue v) {
     var exprᴛ1 = v.Kind();
     if (exprᴛ1 == reflect.Array) {
         nint l = v.Len();
@@ -1189,11 +1189,11 @@ internal static nint @sizeof(reflectꓸType t) {
 
 }
 
-[GoRecv] internal static void skip(this ref decoder d, reflectꓸValue v) {
+internal static void skip(this ref decoder d, reflectꓸValue v) {
     d.offset += dataSize(v);
 }
 
-[GoRecv] internal static void skip(this ref encoder e, reflectꓸValue v) {
+internal static void skip(this ref encoder e, reflectꓸValue v) {
     nint n = dataSize(v);
     clear(e.buf.slice(e.offset, e.offset + n));
     e.offset += n;

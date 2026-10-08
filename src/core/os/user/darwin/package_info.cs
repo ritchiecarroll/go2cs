@@ -58,7 +58,7 @@ using static go.os.user_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("os/user/cgo_listgroups_unix.go", "cgo_listgroups_unix.cs", "AA4igoKClIKChJKSgqaAgraCgoKUquSClIKCgpQ=")]
 [assembly: go.GoPositionMap("os/user/cgo_lookup_syscall.go", "cgo_lookup_syscall.cs", "ABUugKKAooCigKKAooCigKSAooCkgKSygoKmsoKCprKCgqaygoIABRCA")]
-[assembly: go.GoPositionMap("os/user/cgo_lookup_unix.go", "cgo_lookup_unix.cs", "AA8kgqaCgoKChJKClJSClIKUpoKCgpSmgoKEgoKUlIKUgpSmggAKFoKmgoKEgoSSgpSUgpSClKaCgoKUpoKChIKClJSClIKUpoK4AAcUgoK4lJSUrLKCgoKCkpailIKClNyCqJKSgoI=", "28-33:1;55-60:1;93-98:1;120-125:1")]
+[assembly: go.GoPositionMap("os/user/cgo_lookup_unix.go", "cgo_lookup_unix.cs", "AA8kgqaCgoKChJKClJSClIKUpoKCgpSmgoKEgoKUlIKUgpSmggAKFoKmgoKEgoSSgpSUgpSClKaCgoKUpoKChIKClJSClIKUpoK4AAcUgoK4lJSUrLKCgoKCkpailIKClNyCqJKSgoI=", "28-33:1;55-60:1;93-98:1;120-125:1", "", "68=_C_pw_uid/1/1/1,FormatUint/1/2/1,_C_pw_gid/1/1/2,FormatUint/2/2/2,_C_pw_name/1/1/3,_C_GoString/1/3/3,_C_pw_gecos/1/1/4,_C_GoString/2/3/4,_C_pw_dir/1/1/5,_C_GoString/3/3/5;131=_C_gr_gid/1/1/1,Itoa/1/1/1,_C_gr_name/1/1/2,_C_GoString/1/1/2")]
 [assembly: go.GoPositionMap("os/user/getgrouplist_syscall.go", "getgrouplist_syscall.cs", "AAsagoKClA==")]
 [assembly: go.GoPositionMap("os/user/lookup.go", "lookup.cs", "AAwcntKAkoKUkgAMGKKAgqSqooCCpKqiqqKokg==", "22-22:1")]
 [assembly: go.GoPositionMap("os/user/user.go", "user.cs", "AEOKAYLOgs6CzoI=")]
@@ -70,7 +70,7 @@ namespace go.os;
 public static partial class user_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

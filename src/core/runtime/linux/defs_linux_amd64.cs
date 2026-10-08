@@ -79,34 +79,34 @@ internal static UntypedInt _SIGEV_THREAD_ID => 0x4;
 internal static UntypedInt _AF_UNIX => 0x1;
 internal static UntypedInt _SOCK_DGRAM => 0x2;
 
-[GoType] partial struct timespec {
+partial struct timespec {
     internal int64 tv_sec;
     internal int64 tv_nsec;
 }
 
 //go:nosplit
-[GoRecv] internal static void setNsec(this ref timespec ts, int64 ns) {
+internal static void setNsec(this ref timespec ts, int64 ns) {
     ts.tv_sec = ns / 1000000000;
     ts.tv_nsec = ns % 1000000000;
 }
 
-[GoType] partial struct timeval {
+partial struct timeval {
     internal int64 tv_sec;
     internal int64 tv_usec;
 }
 
-[GoRecv] internal static void set_usec(this ref timeval tv, int32 x) {
+internal static void set_usec(this ref timeval tv, int32 x) {
     tv.tv_usec = (int64)x;
 }
 
-[GoType] partial struct sigactiont {
+partial struct sigactiont {
     internal uintptr sa_handler;
     internal uint64 sa_flags;
     internal uintptr sa_restorer;
     internal uint64 sa_mask;
 }
 
-[GoType] partial struct siginfoFields {
+partial struct siginfoFields {
     internal int32 si_signo;
     internal int32 si_errno;
     internal int32 si_code;
@@ -114,23 +114,23 @@ internal static UntypedInt _SOCK_DGRAM => 0x2;
     internal uint64 si_addr;
 }
 
-[GoType] partial struct siginfo {
+partial struct siginfo {
     internal partial ref siginfoFields siginfoFields { get; }
     // Pad struct to the max size in the kernel.
     internal array<byte> _ = new((uintptr)_si_max_size - /* unsafe.Sizeof(siginfoFields{}) */ (uintptr)24);
 }
 
-[GoType] partial struct itimerspec {
+partial struct itimerspec {
     internal timespec it_interval;
     internal timespec it_value;
 }
 
-[GoType] partial struct itimerval {
+partial struct itimerval {
     internal timeval it_interval;
     internal timeval it_value;
 }
 
-[GoType] partial struct sigeventFields {
+partial struct sigeventFields {
     internal uintptr value;
     internal int32 signo;
     internal int32 notify;
@@ -138,7 +138,7 @@ internal static UntypedInt _SOCK_DGRAM => 0x2;
     internal int32 sigev_notify_thread_id;
 }
 
-[GoType] partial struct sigevent {
+partial struct sigevent {
     internal partial ref sigeventFields sigeventFields { get; }
     // Pad struct to the max size in the kernel.
     internal array<byte> _ = new((uintptr)_sigev_max_size - /* unsafe.Sizeof(sigeventFields{}) */ (uintptr)24);
@@ -153,21 +153,21 @@ internal static UntypedInt _O_TRUNC => 0x200;
 internal static UntypedInt _O_NONBLOCK => 0x800;
 internal static UntypedInt _O_CLOEXEC => 0x80000;
 
-[GoType] partial struct usigset {
+partial struct usigset {
     internal array<uint64> __val = new(16);
 }
 
-[GoType] partial struct fpxreg {
+partial struct fpxreg {
     internal array<uint16> significand = new(4);
     internal uint16 exponent;
     internal array<uint16> padding = new(3);
 }
 
-[GoType] partial struct xmmreg {
+partial struct xmmreg {
     internal array<uint32> element = new(4);
 }
 
-[GoType] partial struct fpstate {
+partial struct fpstate {
     internal uint16 cwd;
     internal uint16 swd;
     internal uint16 ftw;
@@ -181,17 +181,17 @@ internal static UntypedInt _O_CLOEXEC => 0x80000;
     internal array<uint32> padding = new(24);
 }
 
-[GoType] partial struct fpxreg1 {
+partial struct fpxreg1 {
     internal array<uint16> significand = new(4);
     internal uint16 exponent;
     internal array<uint16> padding = new(3);
 }
 
-[GoType] partial struct xmmreg1 {
+partial struct xmmreg1 {
     internal array<uint32> element = new(4);
 }
 
-[GoType] partial struct fpstate1 {
+partial struct fpstate1 {
     internal uint16 cwd;
     internal uint16 swd;
     internal uint16 ftw;
@@ -205,25 +205,25 @@ internal static UntypedInt _O_CLOEXEC => 0x80000;
     internal array<uint32> padding = new(24);
 }
 
-[GoType] partial struct fpreg1 {
+partial struct fpreg1 {
     internal array<uint16> significand = new(4);
     internal uint16 exponent;
 }
 
-[GoType] partial struct stackt {
+partial struct stackt {
     internal ж<byte> ss_sp;
     internal int32 ss_flags;
     internal array<byte> pad_cgo_0 = new(4);
     internal uintptr ss_size;
 }
 
-[GoType] partial struct mcontext {
+partial struct mcontext {
     internal array<uint64> gregs = new(23);
     internal ж<fpstate> fpregs;
     internal array<uint64> __reserved1 = new(8);
 }
 
-[GoType] partial struct ucontext {
+partial struct ucontext {
     internal uint64 uc_flags;
     internal ж<ucontext> uc_link;
     internal stackt uc_stack;
@@ -232,7 +232,7 @@ internal static UntypedInt _O_CLOEXEC => 0x80000;
     internal fpstate __fpregs_mem;
 }
 
-[GoType] partial struct sigcontext {
+partial struct sigcontext {
     internal uint64 r8;
     internal uint64 r9;
     internal uint64 r10;
@@ -263,7 +263,7 @@ internal static UntypedInt _O_CLOEXEC => 0x80000;
     internal array<uint64> __reserved1 = new(8);
 }
 
-[GoType] partial struct sockaddr_un {
+partial struct sockaddr_un {
     internal uint16 family;
     internal array<byte> path = new(108);
 }

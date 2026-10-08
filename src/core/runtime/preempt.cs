@@ -59,7 +59,7 @@ using @unsafe = unsafe_package;
 
 partial class runtime_package {
 
-[GoType] partial struct suspendGState {
+partial struct suspendGState {
     internal ж<g> g;
     // dead indicates the goroutine was not suspended because it
     // is dead. This goroutine could be reused after the dead

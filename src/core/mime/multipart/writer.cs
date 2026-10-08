@@ -19,7 +19,7 @@ using net;
 partial class multipart_package {
 
 // A Writer generates multipart messages.
-[GoType] partial struct Writer {
+partial struct Writer {
     internal io.Writer w;
     internal @string boundary;
     internal ж<part> lastpart;
@@ -35,7 +35,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
 }
 
 // Boundary returns the [Writer]'s boundary.
-[GoRecv] public static @string Boundary(this ref Writer w) {
+public static @string Boundary(this ref Writer w) {
     return w.boundary;
 }
 
@@ -50,7 +50,7 @@ internal static readonly @string mimeInvalidBoundaryˢ2 = "mime: invalid boundar
 // SetBoundary must be called before any parts are created, may only
 // contain certain ASCII characters, and must be non-empty and
 // at most 70 bytes long.
-[GoRecv] public static error SetBoundary(this ref Writer w, @string boundary) {
+public static error SetBoundary(this ref Writer w, @string boundary) {
     if (w.lastpart != nil) {
         return errors.New(mimeSetBoundaryCalledˢ);
     }
@@ -83,7 +83,7 @@ internal static readonly @string mimeInvalidBoundaryˢ2 = "mime: invalid boundar
 
 // FormDataContentType returns the Content-Type for an HTTP
 // multipart/form-data with this [Writer]'s Boundary.
-[GoRecv] public static @string FormDataContentType(this ref Writer w) {
+public static @string FormDataContentType(this ref Writer w) {
     @string b = w.boundary;
     // We must quote the boundary if it contains any of the
     // tspecials characters defined by RFC 2045, or space.
@@ -181,7 +181,7 @@ public static error WriteField(this ж<Writer> Ꮡw, @string fieldname, @string 
 
 // Close finishes the multipart message and writes the trailing
 // boundary end line to the output.
-[GoRecv] public static error Close(this ref Writer w) {
+public static error Close(this ref Writer w) {
     if (w.lastpart != nil) {
         {
             var errΔ1 = w.lastpart.close(); if (errΔ1 != default!) {
@@ -194,13 +194,13 @@ public static error WriteField(this ж<Writer> Ꮡw, @string fieldname, @string 
     return err;
 }
 
-[GoType] partial struct part {
+partial struct part {
     internal ж<Writer> mw;
     internal bool closed;
     internal error we; // last error that occurred writing
 }
 
-[GoRecv] internal static error close(this ref part p) {
+internal static error close(this ref part p) {
     p.closed = true;
     return p.we;
 }
@@ -208,7 +208,7 @@ public static error WriteField(this ж<Writer> Ꮡw, @string fieldname, @string 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string multipartCanTWriteToˢ = "multipart: can't write to finished part"u8;
 
-[GoRecv] internal static (nint n, error err) Write(this ref part p, slice<byte> d) {
+internal static (nint n, error err) Write(this ref part p, slice<byte> d) {
     nint n = default!;
     error err = default!;
 

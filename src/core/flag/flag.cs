@@ -124,7 +124,7 @@ internal static error numError(error err) {
     return err;
 }
 
-[GoType("bool")] partial struct boolValue;
+partial struct boolValue /*bool*/;
 
 internal static ж<boolValue> newBoolValue(bool val, ж<bool> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -133,7 +133,7 @@ internal static ж<boolValue> newBoolValue(bool val, ж<bool> Ꮡp) {
     return Ꮡp.Reinterpret<bool, boolValue>();
 }
 
-[GoRecv] internal static error Set(this ref boolValue b, @string s) {
+internal static error Set(this ref boolValue b, @string s) {
     var (v, err) = strconv.ParseBool(s);
     if (err != default!) {
         err = errParse;
@@ -142,27 +142,27 @@ internal static ж<boolValue> newBoolValue(bool val, ж<bool> Ꮡp) {
     return err;
 }
 
-[GoRecv] internal static any Get(this ref boolValue b) {
+internal static any Get(this ref boolValue b) {
     return (bool)(b);
 }
 
-[GoRecv] internal static @string String(this ref boolValue b) {
+internal static @string String(this ref boolValue b) {
     return strconv.FormatBool((bool)(b));
 }
 
-[GoRecv] internal static bool IsBoolFlag(this ref boolValue b) {
+internal static bool IsBoolFlag(this ref boolValue b) {
     return true;
 }
 
 // optional interface to indicate boolean flags that can be
 // supplied without "=value" text
-[GoType] partial interface boolFlag :
+partial interface boolFlag :
     Value
 {
     bool IsBoolFlag();
 }
 
-[GoType("num:nint")] partial struct intValue;
+partial struct intValue /*num:nint*/;
 
 internal static ж<intValue> newIntValue(nint val, ж<nint> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -171,7 +171,7 @@ internal static ж<intValue> newIntValue(nint val, ж<nint> Ꮡp) {
     return Ꮡp.Reinterpret<nint, intValue>();
 }
 
-[GoRecv] internal static error Set(this ref intValue i, @string s) {
+internal static error Set(this ref intValue i, @string s) {
     var (v, err) = strconv.ParseInt(s, 0, strconv.IntSize);
     if (err != default!) {
         err = numError(err);
@@ -180,15 +180,15 @@ internal static ж<intValue> newIntValue(nint val, ж<nint> Ꮡp) {
     return err;
 }
 
-[GoRecv] internal static any Get(this ref intValue i) {
+internal static any Get(this ref intValue i) {
     return (nint)(i);
 }
 
-[GoRecv] internal static @string String(this ref intValue i) {
+internal static @string String(this ref intValue i) {
     return strconv.Itoa((nint)(i));
 }
 
-[GoType("num:int64")] partial struct int64Value;
+partial struct int64Value /*num:int64*/;
 
 internal static ж<int64Value> newInt64Value(int64 val, ж<int64> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -197,7 +197,7 @@ internal static ж<int64Value> newInt64Value(int64 val, ж<int64> Ꮡp) {
     return Ꮡp.Reinterpret<int64, int64Value>();
 }
 
-[GoRecv] internal static error Set(this ref int64Value i, @string s) {
+internal static error Set(this ref int64Value i, @string s) {
     var (v, err) = strconv.ParseInt(s, 0, 64);
     if (err != default!) {
         err = numError(err);
@@ -206,15 +206,15 @@ internal static ж<int64Value> newInt64Value(int64 val, ж<int64> Ꮡp) {
     return err;
 }
 
-[GoRecv] internal static any Get(this ref int64Value i) {
+internal static any Get(this ref int64Value i) {
     return (int64)(i);
 }
 
-[GoRecv] internal static @string String(this ref int64Value i) {
+internal static @string String(this ref int64Value i) {
     return strconv.FormatInt((int64)(i), 10);
 }
 
-[GoType("num:nuint")] partial struct uintValue;
+partial struct uintValue /*num:nuint*/;
 
 internal static ж<uintValue> newUintValue(nuint val, ж<nuint> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -223,7 +223,7 @@ internal static ж<uintValue> newUintValue(nuint val, ж<nuint> Ꮡp) {
     return Ꮡp.Reinterpret<nuint, uintValue>();
 }
 
-[GoRecv] internal static error Set(this ref uintValue i, @string s) {
+internal static error Set(this ref uintValue i, @string s) {
     var (v, err) = strconv.ParseUint(s, 0, strconv.IntSize);
     if (err != default!) {
         err = numError(err);
@@ -232,15 +232,15 @@ internal static ж<uintValue> newUintValue(nuint val, ж<nuint> Ꮡp) {
     return err;
 }
 
-[GoRecv] internal static any Get(this ref uintValue i) {
+internal static any Get(this ref uintValue i) {
     return (nuint)(i);
 }
 
-[GoRecv] internal static @string String(this ref uintValue i) {
+internal static @string String(this ref uintValue i) {
     return strconv.FormatUint((uint64)(nuint)(i), 10);
 }
 
-[GoType("num:uint64")] partial struct uint64Value;
+partial struct uint64Value /*num:uint64*/;
 
 internal static ж<uint64Value> newUint64Value(uint64 val, ж<uint64> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -249,7 +249,7 @@ internal static ж<uint64Value> newUint64Value(uint64 val, ж<uint64> Ꮡp) {
     return Ꮡp.Reinterpret<uint64, uint64Value>();
 }
 
-[GoRecv] internal static error Set(this ref uint64Value i, @string s) {
+internal static error Set(this ref uint64Value i, @string s) {
     var (v, err) = strconv.ParseUint(s, 0, 64);
     if (err != default!) {
         err = numError(err);
@@ -258,15 +258,15 @@ internal static ж<uint64Value> newUint64Value(uint64 val, ж<uint64> Ꮡp) {
     return err;
 }
 
-[GoRecv] internal static any Get(this ref uint64Value i) {
+internal static any Get(this ref uint64Value i) {
     return (uint64)(i);
 }
 
-[GoRecv] internal static @string String(this ref uint64Value i) {
+internal static @string String(this ref uint64Value i) {
     return strconv.FormatUint((uint64)(i), 10);
 }
 
-[GoType("@string")] partial struct stringValue;
+partial struct stringValue /*@string*/;
 
 internal static ж<stringValue> newStringValue(@string val, ж<@string> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -275,20 +275,20 @@ internal static ж<stringValue> newStringValue(@string val, ж<@string> Ꮡp) {
     return Ꮡp.Reinterpret<@string, stringValue>();
 }
 
-[GoRecv] internal static error Set(this ref stringValue s, @string val) {
+internal static error Set(this ref stringValue s, @string val) {
     s = ((stringValue)val);
     return default!;
 }
 
-[GoRecv] internal static any Get(this ref stringValue s) {
+internal static any Get(this ref stringValue s) {
     return ((@string)(s));
 }
 
-[GoRecv] internal static @string String(this ref stringValue s) {
+internal static @string String(this ref stringValue s) {
     return ((@string)(s));
 }
 
-[GoType("num:float64")] partial struct float64Value;
+partial struct float64Value /*num:float64*/;
 
 internal static ж<float64Value> newFloat64Value(float64 val, ж<float64> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -297,7 +297,7 @@ internal static ж<float64Value> newFloat64Value(float64 val, ж<float64> Ꮡp) 
     return Ꮡp.Reinterpret<float64, float64Value>();
 }
 
-[GoRecv] internal static error Set(this ref float64Value f, @string s) {
+internal static error Set(this ref float64Value f, @string s) {
     var (v, err) = strconv.ParseFloat(s, 64);
     if (err != default!) {
         err = numError(err);
@@ -306,15 +306,15 @@ internal static ж<float64Value> newFloat64Value(float64 val, ж<float64> Ꮡp) 
     return err;
 }
 
-[GoRecv] internal static any Get(this ref float64Value f) {
+internal static any Get(this ref float64Value f) {
     return (float64)(f);
 }
 
-[GoRecv] internal static @string String(this ref float64Value f) {
+internal static @string String(this ref float64Value f) {
     return strconv.FormatFloat((float64)(f), (rune)'g', -1, 64);
 }
 
-[GoType("global::go.time_package.Duration")] partial struct durationValue;
+partial struct durationValue /*global::go.time_package.Duration*/;
 
 internal static ж<durationValue> newDurationValue(time.Duration val, ж<time.Duration> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -323,7 +323,7 @@ internal static ж<durationValue> newDurationValue(time.Duration val, ж<time.Du
     return Ꮡp.Reinterpret<time.Duration, durationValue>();
 }
 
-[GoRecv] internal static error Set(this ref durationValue d, @string s) {
+internal static error Set(this ref durationValue d, @string s) {
     var (v, err) = time.ParseDuration(s);
     if (err != default!) {
         err = errParse;
@@ -332,7 +332,7 @@ internal static ж<durationValue> newDurationValue(time.Duration val, ж<time.Du
     return err;
 }
 
-[GoRecv] internal static any Get(this ref durationValue d) {
+internal static any Get(this ref durationValue d) {
     return ((time.Duration)d);
 }
 
@@ -341,7 +341,7 @@ internal static @string String(this ж<durationValue> Ꮡd) {
 }
 
 // -- encoding.TextUnmarshaler Value
-[GoType] partial struct textValue {
+partial struct textValue {
     internal encoding.TextUnmarshaler p;
 }
 
@@ -416,7 +416,7 @@ internal static bool IsBoolFlag(this boolFuncValue f) {
 // Set is called once, in command line order, for each flag present.
 // The flag package may call the [String] method with a zero-valued receiver,
 // such as a nil pointer.
-[GoType] partial interface Value :
+partial interface Value :
     fmt.Stringer
 {
     error Set(@string _);
@@ -426,13 +426,13 @@ internal static bool IsBoolFlag(this boolFuncValue f) {
 // It wraps the [Value] interface, rather than being part of it, because it
 // appeared after Go 1 and its compatibility rules. All [Value] types provided
 // by this package satisfy the [Getter] interface, except the type used by [Func].
-[GoType] partial interface Getter :
+partial interface Getter :
     Value
 {
     any Get();
 }
 
-[GoType("num:nint")] partial struct ΔErrorHandling;
+partial struct ΔErrorHandling /*num:nint*/;
 
 // These constants cause [FlagSet.Parse] to behave as described if the parse fails.
 public static ΔErrorHandling ContinueOnError => /* iota */ 0; // Return a descriptive error.
@@ -446,7 +446,7 @@ public static ΔErrorHandling PanicOnError => 2;   // Call panic with a descript
 //
 // [Flag] names must be unique within a FlagSet. An attempt to define a flag whose
 // name is already in use will cause a panic.
-[GoType] partial struct FlagSet {
+partial struct FlagSet {
     // Usage is the function called when an error occurs while parsing flags.
     // The field is a function (not a method) that may be changed to point to
     // a custom error handler. What happens after Usage is called depends
@@ -464,7 +464,7 @@ public static ΔErrorHandling PanicOnError => 2;   // Call panic with a descript
 }
 
 // A Flag represents the state of a flag.
-[GoType] partial struct Flag {
+partial struct Flag {
     public @string Name; // name as it appears on command line
     public @string Usage; // help message
     public Value Value;  // value as set
@@ -485,7 +485,7 @@ internal static slice<ж<Flag>> sortFlags(map<@string, ж<Flag>> flags) {
 
 // Output returns the destination for usage and error messages. [os.Stderr] is returned if
 // output was not set or was set to nil.
-[GoRecv] public static Δio.Writer Output(this ref FlagSet f) {
+public static Δio.Writer Output(this ref FlagSet f) {
     if (f.output == default!) {
         return new os.FileжWriter(os.Stderr);
     }
@@ -493,24 +493,24 @@ internal static slice<ж<Flag>> sortFlags(map<@string, ж<Flag>> flags) {
 }
 
 // Name returns the name of the flag set.
-[GoRecv] public static @string Name(this ref FlagSet f) {
+public static @string Name(this ref FlagSet f) {
     return f.name;
 }
 
 // ErrorHandling returns the error handling behavior of the flag set.
-[GoRecv] public static ΔErrorHandling ErrorHandling(this ref FlagSet f) {
+public static ΔErrorHandling ErrorHandling(this ref FlagSet f) {
     return f.errorHandling;
 }
 
 // SetOutput sets the destination for usage and error messages.
 // If output is nil, [os.Stderr] is used.
-[GoRecv] public static void SetOutput(this ref FlagSet f, Δio.Writer output) {
+public static void SetOutput(this ref FlagSet f, Δio.Writer output) {
     f.output = output;
 }
 
 // VisitAll visits the flags in lexicographical order, calling fn for each.
 // It visits all flags, even those not set.
-[GoRecv] public static void VisitAll(this ref FlagSet f, Action<ж<Flag>> fn) {
+public static void VisitAll(this ref FlagSet f, Action<ж<Flag>> fn) {
     foreach (var (_, flag) in sortFlags(f.formal)) {
         fn(flag);
     }
@@ -524,7 +524,7 @@ public static void VisitAll(Action<ж<Flag>> fn) {
 
 // Visit visits the flags in lexicographical order, calling fn for each.
 // It visits only those flags that have been set.
-[GoRecv] public static void Visit(this ref FlagSet f, Action<ж<Flag>> fn) {
+public static void Visit(this ref FlagSet f, Action<ж<Flag>> fn) {
     foreach (var (_, flag) in sortFlags(f.actual)) {
         fn(flag);
     }
@@ -537,7 +537,7 @@ public static void Visit(Action<ж<Flag>> fn) {
 }
 
 // Lookup returns the [Flag] structure of the named flag, returning nil if none exists.
-[GoRecv] public static ж<Flag> Lookup(this ref FlagSet f, @string name) {
+public static ж<Flag> Lookup(this ref FlagSet f, @string name) {
     return f.formal[name];
 }
 
@@ -548,11 +548,11 @@ public static ж<Flag> Lookup(@string name) {
 }
 
 // Set sets the value of the named flag.
-[GoRecv] public static partial error Set(this ref FlagSet f, @string name, @string value) {
+public static partial error Set(this ref FlagSet f, @string name, @string value) {
     return f.set(name, value);
 }
 
-[GoRecv] internal static partial error set(this ref FlagSet f, @string name, @string value) {
+internal static partial error set(this ref FlagSet f, @string name, @string value) {
     var (flag, ok) = f.formal[name, ꟷ];
     if (!ok) {
         // Remember that a flag that isn't defined is being set.
@@ -818,7 +818,7 @@ internal static void initᴛUsage() { Usage = () => {
 }; }
 
 // NFlag returns the number of flags that have been set.
-[GoRecv] public static nint NFlag(this ref FlagSet f) {
+public static nint NFlag(this ref FlagSet f) {
     return len(f.actual);
 }
 
@@ -830,7 +830,7 @@ public static nint NFlag() {
 // Arg returns the i'th argument. Arg(0) is the first remaining argument
 // after flags have been processed. Arg returns an empty string if the
 // requested element does not exist.
-[GoRecv] public static @string Arg(this ref FlagSet f, nint i) {
+public static @string Arg(this ref FlagSet f, nint i) {
     if (i < 0 || i >= len(f.args)) {
         return ""u8;
     }
@@ -845,7 +845,7 @@ public static @string Arg(nint i) {
 }
 
 // NArg is the number of arguments remaining after flags have been processed.
-[GoRecv] public static nint NArg(this ref FlagSet f) {
+public static nint NArg(this ref FlagSet f) {
     return len(f.args);
 }
 
@@ -855,7 +855,7 @@ public static nint NArg() {
 }
 
 // Args returns the non-flag arguments.
-[GoRecv] public static slice<@string> Args(this ref FlagSet f) {
+public static slice<@string> Args(this ref FlagSet f) {
     return f.args;
 }
 
@@ -866,7 +866,7 @@ public static slice<@string> Args() {
 
 // BoolVar defines a bool flag with specified name, default value, and usage string.
 // The argument p points to a bool variable in which to store the value of the flag.
-[GoRecv] public static void BoolVar(this ref FlagSet f, ж<bool> Ꮡp, @string name, bool value, @string usage) {
+public static void BoolVar(this ref FlagSet f, ж<bool> Ꮡp, @string name, bool value, @string usage) {
     f.Var(new boolValueжValue(newBoolValue(value, Ꮡp)), name, usage);
 }
 
@@ -878,7 +878,7 @@ public static void BoolVar(ж<bool> Ꮡp, @string name, bool value, @string usag
 
 // Bool defines a bool flag with specified name, default value, and usage string.
 // The return value is the address of a bool variable that stores the value of the flag.
-[GoRecv] public static ж<bool> Bool(this ref FlagSet f, @string name, bool value, @string usage) {
+public static ж<bool> Bool(this ref FlagSet f, @string name, bool value, @string usage) {
     var p = @new<bool>();
     f.BoolVar(p, name, value, usage);
     return p;
@@ -892,7 +892,7 @@ public static ж<bool> Bool(@string name, bool value, @string usage) {
 
 // IntVar defines an int flag with specified name, default value, and usage string.
 // The argument p points to an int variable in which to store the value of the flag.
-[GoRecv] public static void IntVar(this ref FlagSet f, ж<nint> Ꮡp, @string name, nint value, @string usage) {
+public static void IntVar(this ref FlagSet f, ж<nint> Ꮡp, @string name, nint value, @string usage) {
     f.Var(new intValueжValue(newIntValue(value, Ꮡp)), name, usage);
 }
 
@@ -904,7 +904,7 @@ public static void IntVar(ж<nint> Ꮡp, @string name, nint value, @string usage
 
 // Int defines an int flag with specified name, default value, and usage string.
 // The return value is the address of an int variable that stores the value of the flag.
-[GoRecv] public static ж<nint> Int(this ref FlagSet f, @string name, nint value, @string usage) {
+public static ж<nint> Int(this ref FlagSet f, @string name, nint value, @string usage) {
     var p = @new<nint>();
     f.IntVar(p, name, value, usage);
     return p;
@@ -918,7 +918,7 @@ public static ж<nint> Int(@string name, nint value, @string usage) {
 
 // Int64Var defines an int64 flag with specified name, default value, and usage string.
 // The argument p points to an int64 variable in which to store the value of the flag.
-[GoRecv] public static void Int64Var(this ref FlagSet f, ж<int64> Ꮡp, @string name, int64 value, @string usage) {
+public static void Int64Var(this ref FlagSet f, ж<int64> Ꮡp, @string name, int64 value, @string usage) {
     f.Var(new int64ValueжValue(newInt64Value(value, Ꮡp)), name, usage);
 }
 
@@ -930,7 +930,7 @@ public static void Int64Var(ж<int64> Ꮡp, @string name, int64 value, @string u
 
 // Int64 defines an int64 flag with specified name, default value, and usage string.
 // The return value is the address of an int64 variable that stores the value of the flag.
-[GoRecv] public static ж<int64> Int64(this ref FlagSet f, @string name, int64 value, @string usage) {
+public static ж<int64> Int64(this ref FlagSet f, @string name, int64 value, @string usage) {
     var p = @new<int64>();
     f.Int64Var(p, name, value, usage);
     return p;
@@ -944,7 +944,7 @@ public static ж<int64> Int64(@string name, int64 value, @string usage) {
 
 // UintVar defines a uint flag with specified name, default value, and usage string.
 // The argument p points to a uint variable in which to store the value of the flag.
-[GoRecv] public static void UintVar(this ref FlagSet f, ж<nuint> Ꮡp, @string name, nuint value, @string usage) {
+public static void UintVar(this ref FlagSet f, ж<nuint> Ꮡp, @string name, nuint value, @string usage) {
     f.Var(new uintValueжValue(newUintValue(value, Ꮡp)), name, usage);
 }
 
@@ -956,7 +956,7 @@ public static void UintVar(ж<nuint> Ꮡp, @string name, nuint value, @string us
 
 // Uint defines a uint flag with specified name, default value, and usage string.
 // The return value is the address of a uint variable that stores the value of the flag.
-[GoRecv] public static ж<nuint> Uint(this ref FlagSet f, @string name, nuint value, @string usage) {
+public static ж<nuint> Uint(this ref FlagSet f, @string name, nuint value, @string usage) {
     var p = @new<nuint>();
     f.UintVar(p, name, value, usage);
     return p;
@@ -970,7 +970,7 @@ public static ж<nuint> Uint(@string name, nuint value, @string usage) {
 
 // Uint64Var defines a uint64 flag with specified name, default value, and usage string.
 // The argument p points to a uint64 variable in which to store the value of the flag.
-[GoRecv] public static void Uint64Var(this ref FlagSet f, ж<uint64> Ꮡp, @string name, uint64 value, @string usage) {
+public static void Uint64Var(this ref FlagSet f, ж<uint64> Ꮡp, @string name, uint64 value, @string usage) {
     f.Var(new uint64ValueжValue(newUint64Value(value, Ꮡp)), name, usage);
 }
 
@@ -982,7 +982,7 @@ public static void Uint64Var(ж<uint64> Ꮡp, @string name, uint64 value, @strin
 
 // Uint64 defines a uint64 flag with specified name, default value, and usage string.
 // The return value is the address of a uint64 variable that stores the value of the flag.
-[GoRecv] public static ж<uint64> Uint64(this ref FlagSet f, @string name, uint64 value, @string usage) {
+public static ж<uint64> Uint64(this ref FlagSet f, @string name, uint64 value, @string usage) {
     var p = @new<uint64>();
     f.Uint64Var(p, name, value, usage);
     return p;
@@ -996,7 +996,7 @@ public static ж<uint64> Uint64(@string name, uint64 value, @string usage) {
 
 // StringVar defines a string flag with specified name, default value, and usage string.
 // The argument p points to a string variable in which to store the value of the flag.
-[GoRecv] public static void StringVar(this ref FlagSet f, ж<@string> Ꮡp, @string name, @string value, @string usage) {
+public static void StringVar(this ref FlagSet f, ж<@string> Ꮡp, @string name, @string value, @string usage) {
     f.Var(new stringValueжValue(newStringValue(value, Ꮡp)), name, usage);
 }
 
@@ -1008,7 +1008,7 @@ public static void StringVar(ж<@string> Ꮡp, @string name, @string value, @str
 
 // String defines a string flag with specified name, default value, and usage string.
 // The return value is the address of a string variable that stores the value of the flag.
-[GoRecv] public static ж<@string> String(this ref FlagSet f, @string name, @string value, @string usage) {
+public static ж<@string> String(this ref FlagSet f, @string name, @string value, @string usage) {
     var p = @new<@string>();
     f.StringVar(p, name, value, usage);
     return p;
@@ -1022,7 +1022,7 @@ public static ж<@string> String(@string name, @string value, @string usage) {
 
 // Float64Var defines a float64 flag with specified name, default value, and usage string.
 // The argument p points to a float64 variable in which to store the value of the flag.
-[GoRecv] public static void Float64Var(this ref FlagSet f, ж<float64> Ꮡp, @string name, float64 value, @string usage) {
+public static void Float64Var(this ref FlagSet f, ж<float64> Ꮡp, @string name, float64 value, @string usage) {
     f.Var(new float64ValueжValue(newFloat64Value(value, Ꮡp)), name, usage);
 }
 
@@ -1034,7 +1034,7 @@ public static void Float64Var(ж<float64> Ꮡp, @string name, float64 value, @st
 
 // Float64 defines a float64 flag with specified name, default value, and usage string.
 // The return value is the address of a float64 variable that stores the value of the flag.
-[GoRecv] public static ж<float64> Float64(this ref FlagSet f, @string name, float64 value, @string usage) {
+public static ж<float64> Float64(this ref FlagSet f, @string name, float64 value, @string usage) {
     var p = @new<float64>();
     f.Float64Var(p, name, value, usage);
     return p;
@@ -1049,7 +1049,7 @@ public static ж<float64> Float64(@string name, float64 value, @string usage) {
 // DurationVar defines a time.Duration flag with specified name, default value, and usage string.
 // The argument p points to a time.Duration variable in which to store the value of the flag.
 // The flag accepts a value acceptable to time.ParseDuration.
-[GoRecv] public static void DurationVar(this ref FlagSet f, ж<time.Duration> Ꮡp, @string name, time.Duration value, @string usage) {
+public static void DurationVar(this ref FlagSet f, ж<time.Duration> Ꮡp, @string name, time.Duration value, @string usage) {
     f.Var(new durationValueжValue(newDurationValue(value, Ꮡp)), name, usage);
 }
 
@@ -1063,7 +1063,7 @@ public static void DurationVar(ж<time.Duration> Ꮡp, @string name, time.Durati
 // Duration defines a time.Duration flag with specified name, default value, and usage string.
 // The return value is the address of a time.Duration variable that stores the value of the flag.
 // The flag accepts a value acceptable to time.ParseDuration.
-[GoRecv] public static ж<time.Duration> Duration(this ref FlagSet f, @string name, time.Duration value, @string usage) {
+public static ж<time.Duration> Duration(this ref FlagSet f, @string name, time.Duration value, @string usage) {
     var p = @new<time.Duration>();
     f.DurationVar(p, name, value, usage);
     return p;
@@ -1081,7 +1081,7 @@ public static ж<time.Duration> Duration(@string name, time.Duration value, @str
 // of the flag, and p must implement encoding.TextUnmarshaler.
 // If the flag is used, the flag value will be passed to p's UnmarshalText method.
 // The type of the default value must be the same as the type of p.
-[GoRecv] public static void TextVar(this ref FlagSet f, encoding.TextUnmarshaler p, @string name, encoding.TextMarshaler value, @string usage) {
+public static void TextVar(this ref FlagSet f, encoding.TextUnmarshaler p, @string name, encoding.TextMarshaler value, @string usage) {
     f.Var(newTextValue(value, p), name, usage);
 }
 
@@ -1097,7 +1097,7 @@ public static void TextVar(encoding.TextUnmarshaler p, @string name, encoding.Te
 // Func defines a flag with the specified name and usage string.
 // Each time the flag is seen, fn is called with the value of the flag.
 // If fn returns a non-nil error, it will be treated as a flag value parsing error.
-[GoRecv] public static void Func(this ref FlagSet f, @string name, @string usage, Func<@string, error> fn) {
+public static void Func(this ref FlagSet f, @string name, @string usage, Func<@string, error> fn) {
     f.Var(new funcValueᴠValue(NilSafeDelegateConversion<funcValue, Func<@string, error>>(fn)), name, usage);
 }
 
@@ -1111,7 +1111,7 @@ public static void Func(@string name, @string usage, Func<@string, error> fn) {
 // BoolFunc defines a flag with the specified name and usage string without requiring values.
 // Each time the flag is seen, fn is called with the value of the flag.
 // If fn returns a non-nil error, it will be treated as a flag value parsing error.
-[GoRecv] public static void BoolFunc(this ref FlagSet f, @string name, @string usage, Func<@string, error> fn) {
+public static void BoolFunc(this ref FlagSet f, @string name, @string usage, Func<@string, error> fn) {
     f.Var(new boolFuncValueᴠValue(NilSafeDelegateConversion<boolFuncValue, Func<@string, error>>(fn)), name, usage);
 }
 
@@ -1128,7 +1128,7 @@ public static void BoolFunc(@string name, @string usage, Func<@string, error> fn
 // caller could create a flag that turns a comma-separated string into a slice
 // of strings by giving the slice the methods of [Value]; in particular, [Set] would
 // decompose the comma-separated string into the slice.
-[GoRecv] public static void Var(this ref FlagSet f, Value value, @string name, @string usage) {
+public static void Var(this ref FlagSet f, Value value, @string name, @string usage) {
     // Flag must not begin "-" or contain "=".
     if (strings.HasPrefix(name, "-"u8)){
         throw panic(f.sprintf("flag %q begins with -"u8, name));
@@ -1170,7 +1170,7 @@ public static void Var(Value value, @string name, @string usage) {
 }
 
 // sprintf formats the message, prints it to output, and returns it.
-[GoRecv] internal static @string sprintf(this ref FlagSet f, @string format, params ꓸꓸꓸany aʗp) {
+internal static @string sprintf(this ref FlagSet f, @string format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.sslice();
 
     @string msg = fmt.Sprintf(format, a.ꓸꓸꓸ);
@@ -1326,7 +1326,7 @@ public static error Parse(this ж<FlagSet> Ꮡf, slice<@string> arguments) {
 }
 
 // Parsed reports whether f.Parse has been called.
-[GoRecv] public static bool Parsed(this ref FlagSet f) {
+public static bool Parsed(this ref FlagSet f) {
     return f.parsed;
 }
 
@@ -1381,7 +1381,7 @@ public static ж<FlagSet> NewFlagSet(@string name, ΔErrorHandling errorHandling
 // Init sets the name and error handling property for a flag set.
 // By default, the zero [FlagSet] uses an empty name and the
 // [ContinueOnError] error handling policy.
-[GoRecv] public static void Init(this ref FlagSet f, @string name, ΔErrorHandling errorHandling) {
+public static void Init(this ref FlagSet f, @string name, ΔErrorHandling errorHandling) {
     f.name = name;
     f.errorHandling = errorHandling;
 }

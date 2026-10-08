@@ -19,12 +19,12 @@ using go.crypto.@internal.fips140;
 partial class rc4_package {
 
 // A Cipher is an instance of RC4 using a particular key.
-[GoType] partial struct Cipher {
+partial struct Cipher {
     internal array<uint32> s = new(256);
     internal uint8 i, j;
 }
 
-[GoType("num:nint")] partial struct KeySizeError;
+partial struct KeySizeError /*num:nint*/;
 
 public static @string Error(this KeySizeError k) {
     return "crypto/rc4: invalid key size "u8 + strconv.Itoa((nint)k);
@@ -59,7 +59,7 @@ public static (ж<Cipher>, error) NewCipher(slice<byte> key) {
 //
 // Deprecated: Reset can't guarantee that the key will be entirely removed from
 // the process's memory.
-[GoRecv] public static void Reset(this ref Cipher c) {
+public static void Reset(this ref Cipher c) {
     foreach (var (i, _) in c.s) {
         c.s[i] = 0;
     }
@@ -68,7 +68,7 @@ public static (ж<Cipher>, error) NewCipher(slice<byte> key) {
 
 // XORKeyStream sets dst to the result of XORing src with the key stream.
 // Dst and src must overlap entirely or not at all.
-[GoRecv] public static void XORKeyStream(this ref Cipher c, slice<byte> dst, slice<byte> src) {
+public static void XORKeyStream(this ref Cipher c, slice<byte> dst, slice<byte> src) {
     if (len(src) == 0) {
         return;
     }

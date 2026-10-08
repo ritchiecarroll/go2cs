@@ -249,7 +249,7 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
 }
 
 // embeddedType represents an embedded type
-[GoType] partial struct embeddedType {
+partial struct embeddedType {
     internal ΔType typ;
     internal slice<nint> index; // embedded field indices, starting with index at depth 0
     internal bool indirect;  // if set, there was a pointer indirection on the path to this field
@@ -295,14 +295,14 @@ internal static (nint, bool) lookupType(map<ΔType, nint> m, ΔType typ) {
     return (0, false);
 }
 
-[GoType] partial struct instanceLookup {
+partial struct instanceLookup {
     // buf is used to avoid allocating the map m in the common case of a small
     // number of instances.
     internal array<ж<Named>> buf = new(3);
     internal map<ж<Named>, slice<ж<Named>>> m;
 }
 
-[GoRecv] internal static ж<Named> lookup(this ref instanceLookup l, ж<Named> Ꮡinst) {
+internal static ж<Named> lookup(this ref instanceLookup l, ж<Named> Ꮡinst) {
     foreach (var (_, t) in l.buf.ΔRangeSnapshot()) {
         if (t != nil && Identical(new NamedжΔType(Ꮡinst), new NamedжΔType(t))) {
             return t;
@@ -316,7 +316,7 @@ internal static (nint, bool) lookupType(map<ΔType, nint> m, ΔType typ) {
     return default!;
 }
 
-[GoRecv] internal static void add(this ref instanceLookup l, ж<Named> Ꮡinst) {
+internal static void add(this ref instanceLookup l, ж<Named> Ꮡinst) {
     foreach (var (i, t) in l.buf.ΔRangeSnapshot()) {
         if (t == nil) {
             l.buf[i] = Ꮡinst;

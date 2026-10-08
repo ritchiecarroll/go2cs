@@ -8,11 +8,11 @@ using Δio = io_package;
 
 partial class os_package {
 
-[GoRecv] internal static (int64 written, bool handled, error err) writeTo(this ref File f, Δio.Writer w) {
+internal static (int64 written, bool handled, error err) writeTo(this ref File f, Δio.Writer w) {
     return (0, false, default!);
 }
 
-[GoRecv] internal static (int64 n, bool handled, error err) readFrom(this ref File f, Δio.Reader r) {
+internal static (int64 n, bool handled, error err) readFrom(this ref File f, Δio.Reader r) {
     return (0, false, default!);
 }
 

@@ -15,7 +15,7 @@ partial class poll_package {
 
 // errNetClosing is the type of the variable ErrNetClosing.
 // This is used to implement the net.Error interface.
-[GoType] public partial struct errNetClosing {
+public partial struct errNetClosing {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -62,7 +62,7 @@ internal static error errClosing(bool isFile) {
 public static error ErrDeadlineExceeded = new DeadlineExceededErrorжerror(Ꮡ(new DeadlineExceededError(nil)));
 
 // DeadlineExceededError is returned for an expired deadline.
-[GoType] partial struct DeadlineExceededError {
+partial struct DeadlineExceededError {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -72,15 +72,15 @@ internal static readonly @string iOTimeoutˢ = "i/o timeout"u8;
 // The string is "i/o timeout" because that is what was returned
 // by earlier Go versions. Changing it may break programs that
 // match on error strings.
-[GoRecv] public static @string Error(this ref DeadlineExceededError e) {
+public static @string Error(this ref DeadlineExceededError e) {
     return iOTimeoutˢ;
 }
 
-[GoRecv] public static bool Timeout(this ref DeadlineExceededError e) {
+public static bool Timeout(this ref DeadlineExceededError e) {
     return true;
 }
 
-[GoRecv] public static bool Temporary(this ref DeadlineExceededError e) {
+public static bool Temporary(this ref DeadlineExceededError e) {
     return true;
 }
 
@@ -106,6 +106,6 @@ internal static void consume(ref slice<slice<byte>> v, int64 n) {
 public static Action<nint> TestHookDidWritev = (nint wrote) => {
 };
 
-[GoType("@string")] partial struct String;
+partial struct String /*@string*/;
 
 } // end poll_package

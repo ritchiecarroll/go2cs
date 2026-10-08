@@ -44,7 +44,7 @@ internal static (syscallꓸSockaddr, error) sockaddr(this ж<TCPAddr> Ꮡa, nint
     return ipToSockaddr(family, a.IP, a.Port, a.Zone);
 }
 
-[GoRecv] internal static Δsockaddr toLocal(this ref TCPAddr a, @string net) {
+internal static Δsockaddr toLocal(this ref TCPAddr a, @string net) {
     return new TCPAddrжΔsockaddr(Ꮡ(new TCPAddr(loopbackIP(net), a.Port, a.Zone)));
 }
 
@@ -181,7 +181,7 @@ internal static bool ok(this ж<TCPListener> Ꮡln) {
     return Ꮡln != nil && ln.fd != nil;
 }
 
-[GoRecv] internal static (ж<TCPConn>, error) accept(this ref TCPListener ln) {
+internal static (ж<TCPConn>, error) accept(this ref TCPListener ln) {
     var (fd, err) = ln.fd.accept();
     if (err != default!) {
         return (default!, err);
@@ -189,11 +189,11 @@ internal static bool ok(this ж<TCPListener> Ꮡln) {
     return (newTCPConn(fd, ln.lc.KeepAlive, ln.lc.KeepAliveConfig, testPreHookSetKeepAlive, testHookSetKeepAlive), default!);
 }
 
-[GoRecv] internal static error close(this ref TCPListener ln) {
+internal static error close(this ref TCPListener ln) {
     return ln.fd.Close();
 }
 
-[GoRecv] internal static (ж<os.File>, error) @file(this ref TCPListener ln) {
+internal static (ж<os.File>, error) @file(this ref TCPListener ln) {
     var (f, err) = ln.fd.dup();
     if (err != default!) {
         return (default!, err);

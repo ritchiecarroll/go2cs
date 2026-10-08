@@ -10,7 +10,7 @@ using time = time_package;
 partial class debug_package {
 
 // GCStats collect information about recent garbage collections.
-[GoType] partial struct GCStats {
+partial struct GCStats {
     public time.Time LastGC;       // time of last collection
     public int64 NumGC;           // number of garbage collections
     public time.Duration PauseTotal;   // total pause for all collections

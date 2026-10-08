@@ -37,7 +37,7 @@ internal static UntypedInt init3 => 0x10325476;
 internal static UntypedInt init4 => 0xC3D2E1F0;
 
 // digest represents the partial evaluation of a checksum.
-[GoType] partial struct digest {
+partial struct digest {
     internal array<uint32> h = new(5);
     internal array<byte> x = new(chunk);
     internal nint nx;
@@ -47,11 +47,11 @@ internal static UntypedInt init4 => 0xC3D2E1F0;
 internal static readonly @string magic = "sha\x01"u8;
 internal const nint marshaledSize = /* len(magic) + 5*4 + chunk + 8 */ 96;
 
-[GoRecv] internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
+internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
-[GoRecv] internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) {
     b = append(b, magic.ꓸꓸꓸ);
     b = byteorder.BEAppendUint32(b, d.h[0]);
     b = byteorder.BEAppendUint32(b, d.h[1]);
@@ -68,7 +68,7 @@ internal const nint marshaledSize = /* len(magic) + 5*4 + chunk + 8 */ 96;
 internal static readonly @string cryptoSha1InvalidHashˢ = "crypto/sha1: invalid hash state identifier"u8;
 internal static readonly @string cryptoSha1InvalidHashˢ2 = "crypto/sha1: invalid hash state size"u8;
 
-[GoRecv] internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
+internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
         return errors.New(cryptoSha1InvalidHashˢ);
     }
@@ -95,7 +95,7 @@ internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
     return (b[4..], byteorder.BEUint32(b));
 }
 
-[GoRecv] internal static void Reset(this ref digest d) {
+internal static void Reset(this ref digest d) {
     d.h[0] = init0;
     d.h[1] = init1;
     d.h[2] = init2;
@@ -118,11 +118,11 @@ public static hash.Hash New() {
     return new digestжHash(d);
 }
 
-[GoRecv] internal static nint Size(this ref digest d) {
+internal static nint Size(this ref digest d) {
     return ΔSize;
 }
 
-[GoRecv] internal static nint BlockSize(this ref digest d) {
+internal static nint BlockSize(this ref digest d) {
     return ΔBlockSize;
 }
 
@@ -160,7 +160,7 @@ internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) 
     return (nn, err);
 }
 
-[GoRecv] internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
+internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     boring.Unreachable();
     // Make a copy of d so that caller can keep writing and summing.
     ref var d0 = ref heap<digest>(out var Ꮡd0);
@@ -203,7 +203,7 @@ internal static array<byte> checkSum(this ж<digest> Ꮡd) {
 }
 
 // ConstantTimeSum computes the same result of [Sum] but in constant time
-[GoRecv] internal static slice<byte> ConstantTimeSum(this ref digest d, slice<byte> @in) {
+internal static slice<byte> ConstantTimeSum(this ref digest d, slice<byte> @in) {
     ref var d0 = ref heap<digest>(out var Ꮡd0);
     d0 = d.ΔClone();
     var hash = Ꮡd0.constSum();

@@ -11,7 +11,7 @@ partial class atomic_package {
 // Int32 is an atomically accessed int32 value.
 //
 // An Int32 must not be copied.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Int32 {
+[StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Int32 {
     [FieldOffset(0)] internal readonly noCopy noCopy;
     [FieldOffset(0)] internal int32 value;
 }
@@ -63,7 +63,7 @@ public static int32 Add(this ж<Int32> Ꮡi, int32 delta) {
 // 8-byte aligned on all platforms, unlike a regular int64.
 //
 // An Int64 must not be copied.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Int64 {
+[StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Int64 {
     [FieldOffset(0)] internal readonly noCopy noCopy;
     [FieldOffset(0)] internal readonly align64 _;
     [FieldOffset(0)] internal int64 value;
@@ -114,7 +114,7 @@ public static int64 Add(this ж<Int64> Ꮡi, int64 delta) {
 // Uint8 is an atomically accessed uint8 value.
 //
 // A Uint8 must not be copied.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 1)] partial struct Uint8 {
+[StructLayout(LayoutKind.Explicit, Size = 1)] partial struct Uint8 {
     [FieldOffset(0)] internal readonly noCopy noCopy;
     [FieldOffset(0)] internal uint8 value;
 }
@@ -158,7 +158,7 @@ public static void Or(this ж<Uint8> Ꮡu, uint8 value) {
 // Bool is an atomically accessed bool value.
 //
 // A Bool must not be copied.
-[GoType] partial struct Bool {
+partial struct Bool {
     // Inherits noCopy from Uint8.
     internal Uint8 u;
 }
@@ -184,7 +184,7 @@ public static void Store(this ж<Bool> Ꮡb, bool value) {
 // Uint32 is an atomically accessed uint32 value.
 //
 // A Uint32 must not be copied.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Uint32 {
+[StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Uint32 {
     [FieldOffset(0)] internal readonly noCopy noCopy;
     [FieldOffset(0)] internal uint32 value;
 }
@@ -298,7 +298,7 @@ public static uint32 Add(this ж<Uint32> Ꮡu, int32 delta) {
 // 8-byte aligned on all platforms, unlike a regular uint64.
 //
 // A Uint64 must not be copied.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Uint64 {
+[StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Uint64 {
     [FieldOffset(0)] internal readonly noCopy noCopy;
     [FieldOffset(0)] internal readonly align64 _;
     [FieldOffset(0)] internal uint64 value;
@@ -349,7 +349,7 @@ public static uint64 Add(this ж<Uint64> Ꮡu, int64 delta) {
 // Uintptr is an atomically accessed uintptr value.
 //
 // A Uintptr must not be copied.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Uintptr {
+[StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Uintptr {
     [FieldOffset(0)] internal readonly noCopy noCopy;
     [FieldOffset(0)] internal uintptr value;
 }
@@ -427,7 +427,7 @@ public static uintptr Add(this ж<Uintptr> Ꮡu, uintptr delta) {
 // 8-byte aligned on all platforms, unlike a regular float64.
 //
 // A Float64 must not be copied.
-[GoType] partial struct Float64 {
+partial struct Float64 {
     // Inherits noCopy and align64 from Uint64.
     internal Uint64 u;
 }
@@ -456,7 +456,7 @@ public static void Store(this ж<Float64> Ꮡf, float64 value) {
 // mostly with values that do not live in the Go heap anyway.
 //
 // An UnsafePointer must not be copied.
-[GoType] partial struct UnsafePointer {
+partial struct UnsafePointer {
     internal noCopy noCopy;
     internal @unsafe.Pointer value;
 }
@@ -517,7 +517,7 @@ public static bool CompareAndSwap(this ж<UnsafePointer> Ꮡu, @unsafe.Pointer o
 internal static partial bool casPointer(ж<@unsafe.Pointer> ptr, @unsafe.Pointer old, @unsafe.Pointer @new);
 
 // Pointer is an atomic pointer of type *T.
-[GoType] partial struct Pointer<T> {
+partial struct Pointer<T> {
     internal UnsafePointer u;
 }
 
@@ -577,20 +577,20 @@ public static bool CompareAndSwap<T>(this ж<Pointer<T>> Ꮡp, ж<T> Ꮡold, ж<
 //
 // See https://golang.org/issues/8005#issuecomment-190753527
 // for details.
-[GoType] partial struct noCopy {
+partial struct noCopy {
 }
 
 // Lock is a no-op used by -copylocks checker from `go vet`.
-[GoRecv] internal static void Lock(this ref noCopy _) {
+internal static void Lock(this ref noCopy _) {
 }
 
-[GoRecv] internal static void Unlock(this ref noCopy _) {
+internal static void Unlock(this ref noCopy _) {
 }
 
 // align64 may be added to structs that must be 64-bit aligned.
 // This struct is recognized by a special case in the compiler
 // and will not work if copied to any other package.
-[GoType] partial struct align64 {
+partial struct align64 {
 }
 
 } // end atomic_package

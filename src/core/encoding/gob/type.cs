@@ -22,7 +22,7 @@ partial class gob_package {
 // userTypeInfo stores the information associated with a type the user has handed
 // to the package. It's computed once and stored in a map keyed by reflection
 // type.
-[GoType] partial struct userTypeInfo {
+partial struct userTypeInfo {
     internal reflectꓸType user; // the type the user handed us
     internal reflectꓸType @base; // the base type after all indirections
     internal nint indir;         // number of indirections to reach the base type
@@ -171,14 +171,14 @@ internal static ж<userTypeInfo> userType(reflectꓸType rt) {
     return ut;
 }
 
-[GoType("num:int32")] public partial struct typeId;
+public partial struct typeId /*num:int32*/;
 
 internal static ж<sync.Mutex> ᏑtypeLock = new StandardBox<sync.Mutex>(default(sync.Mutex));
 internal static ref sync.Mutex typeLock => ref ᏑtypeLock.Value; // set while building a type
 
 internal static UntypedInt firstUserId => 64; // lowest id number granted to user
 
-[GoType] partial interface ΔgobType {
+partial interface ΔgobType {
     typeId id();
     void setId(typeId id);
     @string name();
@@ -244,28 +244,28 @@ internal static @string name(this typeId t) {
 // It is a historical artifact, kept for binary compatibility and exported
 // only for the benefit of the package's encoding of type descriptors. It is
 // not intended for direct use by clients.
-[GoType] partial struct CommonType {
+partial struct CommonType {
     public @string Name;
     public typeId Id;
 }
 
-[GoRecv] internal static typeId id(this ref CommonType t) {
+internal static typeId id(this ref CommonType t) {
     return t.Id;
 }
 
-[GoRecv] internal static void setId(this ref CommonType t, typeId id) {
+internal static void setId(this ref CommonType t, typeId id) {
     t.Id = id;
 }
 
-[GoRecv] internal static @string @string(this ref CommonType t) {
+internal static @string @string(this ref CommonType t) {
     return t.Name;
 }
 
-[GoRecv] internal static @string safeString(this ref CommonType t, map<typeId, bool> seen) {
+internal static @string safeString(this ref CommonType t, map<typeId, bool> seen) {
     return t.Name;
 }
 
-[GoRecv] internal static @string name(this ref CommonType t) {
+internal static @string name(this ref CommonType t) {
     return t.Name;
 }
 
@@ -280,37 +280,37 @@ internal static typeId tString = bootstrapType("string"u8, ((ж<@string>)nil));
 internal static typeId tComplex = bootstrapType("complex"u8, ((ж<complex128>)nil));
 internal static typeId tInterface = bootstrapType("interface"u8, ((ж<any>)nil));
 
-    [GoType("dyn")] partial struct eᴛ1 {
+    partial struct eᴛ1 /*dyn*/ {
         internal nint r7;
     }
 internal static typeId tReserved7 = bootstrapType("_reserved1"u8, ((ж<eᴛ1>)nil));
 
-    [GoType("dyn")] partial struct eᴛ2 {
+    partial struct eᴛ2 /*dyn*/ {
         internal nint r6;
     }
 internal static typeId tReserved6 = bootstrapType("_reserved1"u8, ((ж<eᴛ2>)nil));
 
-    [GoType("dyn")] partial struct eᴛ3 {
+    partial struct eᴛ3 /*dyn*/ {
         internal nint r5;
     }
 internal static typeId tReserved5 = bootstrapType("_reserved1"u8, ((ж<eᴛ3>)nil));
 
-    [GoType("dyn")] partial struct eᴛ4 {
+    partial struct eᴛ4 /*dyn*/ {
         internal nint r4;
     }
 internal static typeId tReserved4 = bootstrapType("_reserved1"u8, ((ж<eᴛ4>)nil));
 
-    [GoType("dyn")] partial struct eᴛ5 {
+    partial struct eᴛ5 /*dyn*/ {
         internal nint r3;
     }
 internal static typeId tReserved3 = bootstrapType("_reserved1"u8, ((ж<eᴛ5>)nil));
 
-    [GoType("dyn")] partial struct eᴛ6 {
+    partial struct eᴛ6 /*dyn*/ {
         internal nint r2;
     }
 internal static typeId tReserved2 = bootstrapType("_reserved1"u8, ((ж<eᴛ6>)nil));
 
-    [GoType("dyn")] partial struct eᴛ7 {
+    partial struct eᴛ7 /*dyn*/ {
         internal nint r1;
     }
 internal static typeId tReserved1 = bootstrapType("_reserved1"u8, ((ж<eᴛ7>)nil));
@@ -344,7 +344,7 @@ internal static ж<userTypeInfo> wireTypeUserInfo; // userTypeInfo of wireType
 }
 
 // Array type
-[GoType] public partial struct arrayType {
+public partial struct arrayType {
     public partial ref CommonType CommonType { get; }
     public typeId Elem;
     public nint Len;
@@ -364,7 +364,7 @@ internal static void init(this ж<arrayType> Ꮡa, ΔgobType elem, nint len) {
     a.Len = len;
 }
 
-[GoRecv] internal static @string safeString(this ref arrayType a, map<typeId, bool> seen) {
+internal static @string safeString(this ref arrayType a, map<typeId, bool> seen) {
     if (seen[a.Id]) {
         return a.Name;
     }
@@ -372,12 +372,12 @@ internal static void init(this ж<arrayType> Ꮡa, ΔgobType elem, nint len) {
     return fmt.Sprintf("[%d]%s"u8, a.Len, a.Elem.gobType().safeString(seen));
 }
 
-[GoRecv] internal static @string @string(this ref arrayType a) {
+internal static @string @string(this ref arrayType a) {
     return a.safeString(new map<typeId, bool>());
 }
 
 // GobEncoder type (something that implements the GobEncoder interface)
-[GoType] public partial struct gobEncoderType {
+public partial struct gobEncoderType {
     public partial ref CommonType CommonType { get; }
 }
 
@@ -387,16 +387,16 @@ internal static ж<gobEncoderType> newGobEncoderType(@string name) {
     return g;
 }
 
-[GoRecv] internal static @string safeString(this ref gobEncoderType g, map<typeId, bool> seen) {
+internal static @string safeString(this ref gobEncoderType g, map<typeId, bool> seen) {
     return g.Name;
 }
 
-[GoRecv] internal static @string @string(this ref gobEncoderType g) {
+internal static @string @string(this ref gobEncoderType g) {
     return g.Name;
 }
 
 // Map type
-[GoType] public partial struct mapType {
+public partial struct mapType {
     public partial ref CommonType CommonType { get; }
     public typeId Key;
     public typeId Elem;
@@ -416,7 +416,7 @@ internal static void init(this ж<mapType> Ꮡm, ΔgobType key, ΔgobType elem) 
     m.Elem = elem.id();
 }
 
-[GoRecv] internal static @string safeString(this ref mapType m, map<typeId, bool> seen) {
+internal static @string safeString(this ref mapType m, map<typeId, bool> seen) {
     if (seen[m.Id]) {
         return m.Name;
     }
@@ -426,12 +426,12 @@ internal static void init(this ж<mapType> Ꮡm, ΔgobType key, ΔgobType elem) 
     return fmt.Sprintf("map[%s]%s"u8, key, elem);
 }
 
-[GoRecv] internal static @string @string(this ref mapType m) {
+internal static @string @string(this ref mapType m) {
     return m.safeString(new map<typeId, bool>());
 }
 
 // Slice type
-[GoType] public partial struct sliceType {
+public partial struct sliceType {
     public partial ref CommonType CommonType { get; }
     public typeId Elem;
 }
@@ -454,7 +454,7 @@ internal static void init(this ж<sliceType> Ꮡs, ΔgobType elem) {
     s.Elem = elem.id();
 }
 
-[GoRecv] internal static @string safeString(this ref sliceType s, map<typeId, bool> seen) {
+internal static @string safeString(this ref sliceType s, map<typeId, bool> seen) {
     if (seen[s.Id]) {
         return s.Name;
     }
@@ -462,17 +462,17 @@ internal static void init(this ж<sliceType> Ꮡs, ΔgobType elem) {
     return fmt.Sprintf("[]%s"u8, s.Elem.gobType().safeString(seen));
 }
 
-[GoRecv] internal static @string @string(this ref sliceType s) {
+internal static @string @string(this ref sliceType s) {
     return s.safeString(new map<typeId, bool>());
 }
 
 // Struct type
-[GoType] public partial struct fieldType {
+public partial struct fieldType {
     public @string Name;
     public typeId Id;
 }
 
-[GoType] public partial struct structType {
+public partial struct structType {
     public partial ref CommonType CommonType { get; }
     public slice<fieldType> Field;
 }
@@ -723,7 +723,7 @@ internal static typeId bootstrapType(@string name, any e) {
 // are built in encode.go's init() function.
 // To maintain binary compatibility, if you extend this type, always put
 // the new fields last.
-[GoType] partial struct wireType {
+partial struct wireType {
     public ж<arrayType> ArrayT;
     public ж<sliceType> SliceT;
     public ж<structType> StructT;
@@ -769,7 +769,7 @@ internal static @string @string(this ж<wireType> Ꮡw) {
     return unknown;
 }
 
-[GoType] partial struct typeInfo {
+partial struct typeInfo {
     internal typeId id;
     internal sync.Mutex encInit; // protects creation of encoder
     internal atomic.Pointer<encEngine> encoder;
@@ -910,7 +910,7 @@ internal static ж<typeInfo> mustGetTypeInfo(reflectꓸType rt) {
 // to guarantee the encoding used by a GobEncoder is stable as the
 // software evolves. For instance, it might make sense for GobEncode
 // to include a version number in the encoding.
-[GoType] partial interface GobEncoder {
+partial interface GobEncoder {
     // GobEncode returns a byte slice representing the encoding of the
     // receiver for transmission to a GobDecoder, usually of the same
     // concrete type.
@@ -919,7 +919,7 @@ internal static ж<typeInfo> mustGetTypeInfo(reflectꓸType rt) {
 
 // GobDecoder is the interface describing data that provides its own
 // routine for decoding transmitted values sent by a GobEncoder.
-[GoType] partial interface GobDecoder {
+partial interface GobDecoder {
     // GobDecode overwrites the receiver, which must be a pointer,
     // with the value represented by the byte slice, which was written
     // by GobEncode, usually for the same concrete type.

@@ -63,8 +63,8 @@ public static ж<Conn> Client(net.Conn conn, ж<Config> Ꮡconfig) {
 }
 
 // A listener implements a network listener (net.Listener) for TLS connections.
-[GoType] partial struct listener {
-    [GoEmbedded] public net_package.Listener Listener;
+partial struct listener {
+    /*embed*/ public net_package.Listener Listener;
     internal ж<Config> config;
 }
 
@@ -78,7 +78,7 @@ internal static error Close(this listener recvᴛ) => recvᴛ.Listener.Close();
 
 // Accept waits for and returns the next incoming TLS connection.
 // The returned connection is of type *Conn.
-[GoRecv] internal static (net.Conn, error) Accept(this ref listener l) {
+internal static (net.Conn, error) Accept(this ref listener l) {
     var (c, err) = l.Listener.Accept();
     if (err != default!) {
         return (default!, err);
@@ -120,7 +120,7 @@ public static (net.Listener, error) Listen(@string network, @string laddr, ж<Co
     return (NewListener(l, Ꮡconfig), default!);
 }
 
-[GoType] partial struct timeoutError {
+partial struct timeoutError {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -215,7 +215,7 @@ public static (ж<Conn>, error) Dial(@string network, @string addr, ж<Config> �
 
 // Dialer dials TLS connections given a configuration and a Dialer for the
 // underlying connection.
-[GoType] partial struct Dialer {
+partial struct Dialer {
     // NetDialer is the optional dialer to use for the TLS connections'
     // underlying TCP connections.
     // A nil NetDialer is equivalent to the net.Dialer zero value.
@@ -234,11 +234,11 @@ public static (ж<Conn>, error) Dial(@string network, @string addr, ж<Config> �
 //
 // Dial uses context.Background internally; to specify the context,
 // use [Dialer.DialContext].
-[GoRecv] public static (net.Conn, error) Dial(this ref Dialer d, @string network, @string addr) {
+public static (net.Conn, error) Dial(this ref Dialer d, @string network, @string addr) {
     return d.DialContext(context.Background(), network, addr);
 }
 
-[GoRecv] internal static ж<net.Dialer> netDialer(this ref Dialer d) {
+internal static ж<net.Dialer> netDialer(this ref Dialer d) {
     if (d.NetDialer != nil) {
         return d.NetDialer;
     }
@@ -254,7 +254,7 @@ public static (ж<Conn>, error) Dial(@string network, @string addr, ж<Config> �
 // connection.
 //
 // The returned [Conn], if any, will always be of type *[Conn].
-[GoRecv] public static (net.Conn, error) DialContext(this ref Dialer d, context.Context ctx, @string network, @string addr) {
+public static (net.Conn, error) DialContext(this ref Dialer d, context.Context ctx, @string network, @string addr) {
     var (c, err) = dial(ctx, d.netDialer(), network, addr, d.Config);
     if (err != default!) {
         // Don't return c (a typed nil) in an interface.

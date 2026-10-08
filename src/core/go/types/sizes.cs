@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 partial class types_package {
 
 // Sizes defines the sizing functions for package unsafe.
-[GoType] partial interface Sizes {
+partial interface Sizes {
     // Alignof returns the alignment of a variable of type T.
     // Alignof must implement the alignment guarantees required by the spec.
     // The result must be >= 1.
@@ -44,7 +44,7 @@ partial class types_package {
 //     types are naturally aligned with a maximum alignment MaxAlign.
 //
 // *StdSizes implements Sizes.
-[GoType] partial struct StdSizes {
+partial struct StdSizes {
     public int64 WordSize; // word size in bytes - must be >= 4 (32bits)
     public int64 MaxAlign; // maximum alignment in bytes - must be >= 1
 }
@@ -314,7 +314,7 @@ public static Sizes SizesFor(@string compiler, @string arch) {
 internal static Sizes stdSizes;
 internal static void initᴛstdSizes() { stdSizes = SizesFor("gc"u8, "amd64"u8); }
 
-[GoRecv] internal static int64 alignof(this ref Config conf, ΔType T) {
+internal static int64 alignof(this ref Config conf, ΔType T) {
     var f = stdSizes.Alignof;
     if (conf.Sizes != default!) {
         f = conf.Sizes.Alignof;
@@ -327,7 +327,7 @@ internal static void initᴛstdSizes() { stdSizes = SizesFor("gc"u8, "amd64"u8);
     throw panic("implementation of alignof returned an alignment < 1");
 }
 
-[GoRecv] internal static slice<int64> offsetsof(this ref Config conf, ж<Struct> ᏑT) {
+internal static slice<int64> offsetsof(this ref Config conf, ж<Struct> ᏑT) {
     ref var T = ref ᏑT.DerefOrNull();
 
     slice<int64> offsets = default!;
@@ -351,7 +351,7 @@ internal static void initᴛstdSizes() { stdSizes = SizesFor("gc"u8, "amd64"u8);
 // must be structs (rather than pointers to structs).
 // If the offset is too large (because T is too large),
 // the result is negative.
-[GoRecv] internal static int64 offsetof(this ref Config conf, ΔType T, slice<nint> index) {
+internal static int64 offsetof(this ref Config conf, ΔType T, slice<nint> index) {
     int64 offs = default!;
     foreach (var (_, i) in index) {
         var s = under(T)._<ж<Struct>>();
@@ -370,7 +370,7 @@ internal static void initᴛstdSizes() { stdSizes = SizesFor("gc"u8, "amd64"u8);
 
 // sizeof returns the size of T.
 // If T is too large, the result is negative.
-[GoRecv] internal static int64 @sizeof(this ref Config conf, ΔType T) {
+internal static int64 @sizeof(this ref Config conf, ΔType T) {
     var f = stdSizes.Sizeof;
     if (conf.Sizes != default!) {
         f = conf.Sizes.Sizeof;

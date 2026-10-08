@@ -23,7 +23,7 @@ public static UntypedInt SYMLINK_FLAG_RELATIVE => 1;
 // These structures are described
 // in https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fscc/ca069dad-ed16-42aa-b057-b6b207f447cc
 // and https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fscc/b41f1cbf-10df-4a47-98d4-1c52a833d913.
-[GoType] partial struct REPARSE_DATA_BUFFER {
+partial struct REPARSE_DATA_BUFFER {
     public uint32 ReparseTag;
     public uint16 ReparseDataLength;
     public uint16 Reserved;
@@ -31,7 +31,7 @@ public static UntypedInt SYMLINK_FLAG_RELATIVE => 1;
 }
 
 // REPARSE_DATA_BUFFER_HEADER is a common part of REPARSE_DATA_BUFFER structure.
-[GoType] partial struct REPARSE_DATA_BUFFER_HEADER {
+partial struct REPARSE_DATA_BUFFER_HEADER {
     public uint32 ReparseTag;
     // The size, in bytes, of the reparse data that follows
     // the common portion of the REPARSE_DATA_BUFFER element.
@@ -41,7 +41,7 @@ public static UntypedInt SYMLINK_FLAG_RELATIVE => 1;
     public uint16 Reserved;
 }
 
-[GoType] partial struct SymbolicLinkReparseBuffer {
+partial struct SymbolicLinkReparseBuffer {
     // The integer that contains the offset, in bytes,
     // of the substitute name string in the PathBuffer array,
     // computed as an offset from byte 0 of PathBuffer. Note that
@@ -62,13 +62,13 @@ public static UntypedInt SYMLINK_FLAG_RELATIVE => 1;
 }
 
 // Path returns path stored in rb.
-[GoRecv] public static @string Path(this ref SymbolicLinkReparseBuffer rb) {
+public static @string Path(this ref SymbolicLinkReparseBuffer rb) {
     var n1 = (uint16)(rb.SubstituteNameOffset / 2);
     var n2 = (uint16)((uint16)(rb.SubstituteNameOffset + rb.SubstituteNameLength) / 2);
     return syscall.UTF16ToString((~array<uint16>.AliasPointer(Ꮡ(rb.PathBuffer, 0), 65535)).slice(n1, n2, n2));
 }
 
-[GoType] partial struct MountPointReparseBuffer {
+partial struct MountPointReparseBuffer {
     // The integer that contains the offset, in bytes,
     // of the substitute name string in the PathBuffer array,
     // computed as an offset from byte 0 of PathBuffer. Note that
@@ -86,7 +86,7 @@ public static UntypedInt SYMLINK_FLAG_RELATIVE => 1;
 }
 
 // Path returns path stored in rb.
-[GoRecv] public static @string Path(this ref MountPointReparseBuffer rb) {
+public static @string Path(this ref MountPointReparseBuffer rb) {
     var n1 = (uint16)(rb.SubstituteNameOffset / 2);
     var n2 = (uint16)((uint16)(rb.SubstituteNameOffset + rb.SubstituteNameLength) / 2);
     return syscall.UTF16ToString((~array<uint16>.AliasPointer(Ꮡ(rb.PathBuffer, 0), 65535)).slice(n1, n2, n2));

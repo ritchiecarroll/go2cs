@@ -18,7 +18,7 @@ partial class raw_package {
 // Note that this typically includes much more than just
 // timestamped events, and it also represents parts of the
 // trace format's framing. (But not interpreted.)
-[GoType] partial struct Event {
+partial struct Event {
     public version.Version Version;
     public Δevent.Type Ev;
     public slice<uint64> Args;
@@ -32,7 +32,7 @@ private static readonly @string dataˢ = "\n\tdata="u8;
 //
 // This format is the same format that is parsed by the TextReader
 // and emitted by the TextWriter.
-[GoRecv] public static @string String(this ref Event e) {
+public static @string String(this ref Event e) {
     var spec = e.Version.Specs()[e.Ev];
     ref var s = ref heap(new strings.Builder(), out var Ꮡs);
     Ꮡs.WriteString(spec.Name);
@@ -63,7 +63,7 @@ private static readonly @string dataˢ = "\n\tdata="u8;
 }
 
 // EncodedSize returns the canonical encoded size of an event.
-[GoRecv] public static nint EncodedSize(this ref Event e) {
+public static nint EncodedSize(this ref Event e) {
     nint size = 1;
     array<byte> buf = new(10); /* binary.MaxVarintLen64 */
     foreach (var (_, arg) in e.Args) {

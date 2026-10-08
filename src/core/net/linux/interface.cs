@@ -34,7 +34,7 @@ internal static error errNoSuchMulticastInterface = errors.New("no such multicas
 // Interface represents a mapping between network interface name
 // and index. It also represents network interface facility
 // information.
-[GoType] partial struct Interface {
+partial struct Interface {
     public nint Index;         // positive integer that starts at one, zero is never used
     public nint MTU;         // maximum transmission unit
     public @string Name;      // e.g., "en0", "lo0", "eth0.100"
@@ -42,7 +42,7 @@ internal static error errNoSuchMulticastInterface = errors.New("no such multicas
     public Flags Flags;        // e.g., FlagUp, FlagLoopback, FlagMulticast
 }
 
-[GoType("num:nuint")] partial struct Flags;
+partial struct Flags /*num:nuint*/;
 
 public static Flags FlagUp => /* 1 << iota */ 1;                 // interface is administratively up
 public static Flags FlagBroadcast => 2;          // interface supports broadcast access capability
@@ -188,7 +188,7 @@ public static (ж<Interface>, error) InterfaceByName(@string name) {
 //
 // Multiple names sharing the index are managed by first-come
 // first-served basis for consistency.
-[GoType] partial struct ipv6ZoneCache {
+partial struct ipv6ZoneCache {
     public partial ref sync_package.RWMutex RWMutex { get; }                // guard the following
     internal time.Time lastFetched;      // last time routing information was fetched
     internal map<@string, nint> toIndex; // interface name to its index
@@ -242,7 +242,7 @@ internal static bool /*updated*/ update(this ж<ipv6ZoneCache> Ꮡzc, slice<Inte
     ᒐdone: return updated;
 }
 
-[GoRecv] internal static @string name(this ref ipv6ZoneCache zc, nint index) {
+internal static @string name(this ref ipv6ZoneCache zc, nint index) {
     if (index == 0) {
         return ""u8;
     }
@@ -263,7 +263,7 @@ internal static bool /*updated*/ update(this ж<ipv6ZoneCache> Ꮡzc, slice<Inte
     return name;
 }
 
-[GoRecv] internal static nint index(this ref ipv6ZoneCache zc, @string name) {
+internal static nint index(this ref ipv6ZoneCache zc, @string name) {
     if (name == ""u8) {
         return 0;
     }

@@ -9,7 +9,7 @@ using path = path_package;
 partial class fs_package {
 
 // A SubFS is a file system with a Sub method.
-[GoType] partial interface SubFS :
+partial interface SubFS :
     FS
 {
     // Sub returns an FS corresponding to the subtree rooted at dir.
@@ -45,13 +45,13 @@ public static (FS, error) Sub(FS fsys, @string dir) {
     return (new subFSжFS(Ꮡ(new subFS(fsys, dir))), default!);
 }
 
-[GoType] partial struct subFS {
+partial struct subFS {
     internal FS fsys;
     internal @string dir;
 }
 
 // fullName maps name to the fully-qualified name dir/name.
-[GoRecv] internal static (@string, error) fullName(this ref subFS f, @string op, @string name) {
+internal static (@string, error) fullName(this ref subFS f, @string op, @string name) {
     if (!ValidPath(name)) {
         return ("", new PathErrorжerror(Ꮡ(new PathError(Op: op, Path: name, Err: ErrInvalid))));
     }
@@ -59,7 +59,7 @@ public static (FS, error) Sub(FS fsys, @string dir) {
 }
 
 // shorten maps name, which should start with f.dir, back to the suffix after f.dir.
-[GoRecv] internal static (@string rel, bool ok) shorten(this ref subFS f, @string name) {
+internal static (@string rel, bool ok) shorten(this ref subFS f, @string name) {
     if (name == f.dir) {
         return (".", true);
     }
@@ -70,7 +70,7 @@ public static (FS, error) Sub(FS fsys, @string dir) {
 }
 
 // fixErr shortens any reported names in PathErrors by stripping f.dir.
-[GoRecv] internal static error fixErr(this ref subFS f, error err) {
+internal static error fixErr(this ref subFS f, error err) {
     {
         var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
             {
@@ -86,7 +86,7 @@ public static (FS, error) Sub(FS fsys, @string dir) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string openˢ = "open"u8;
 
-[GoRecv] internal static (File, error) Open(this ref subFS f, @string name) {
+internal static (File, error) Open(this ref subFS f, @string name) {
     var (full, err) = f.fullName(openˢ, name);
     if (err != default!) {
         return (default!, err);
@@ -98,7 +98,7 @@ private static readonly @string openˢ = "open"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string readˢ = "read"u8;
 
-[GoRecv] internal static (slice<DirEntry>, error) ReadDir(this ref subFS f, @string name) {
+internal static (slice<DirEntry>, error) ReadDir(this ref subFS f, @string name) {
     var (full, err) = f.fullName(readˢ, name);
     if (err != default!) {
         return (default!, err);
@@ -107,7 +107,7 @@ private static readonly @string readˢ = "read"u8;
     return (dir, f.fixErr(err));
 }
 
-[GoRecv] internal static (slice<byte>, error) ReadFile(this ref subFS f, @string name) {
+internal static (slice<byte>, error) ReadFile(this ref subFS f, @string name) {
     var (full, err) = f.fullName(readˢ, name);
     if (err != default!) {
         return (default!, err);
@@ -116,7 +116,7 @@ private static readonly @string readˢ = "read"u8;
     return (data, f.fixErr(err));
 }
 
-[GoRecv] internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) {
+internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) {
     // Check pattern is well-formed.
     {
         var (_, errΔ1) = path.Match(pattern, ""u8); if (errΔ1 != default!) {

@@ -13,7 +13,7 @@ using go.math;
 
 partial class big_package {
 
-[GoType("num:nuint")] partial struct Word;
+partial struct Word /*num:nuint*/;
 
 internal static UntypedInt _S => /* _W / 8 */ 8; // word size in bytes
 internal static UntypedInt _W => /* bits.UintSize */ 64; // word size in bits

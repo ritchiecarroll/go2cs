@@ -60,7 +60,7 @@ partial class runtime_package {
 //   - github.com/segmentio/encoding and github.com/RomiChan/protobuf check if h
 //     is non-nil, but the code has no effect. Thus the value of h does not
 //     matter. See internal/runtime_reflect/map.go.
-[GoType] partial struct linknameIter {
+partial struct linknameIter {
     // Fields from hiter.
     internal @unsafe.Pointer key;
     internal @unsafe.Pointer elem;

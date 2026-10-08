@@ -41,7 +41,7 @@ internal static error errUnrefData = errors.New("archive/tar: sparse file contai
 internal static error errWriteHole = errors.New("archive/tar: write non-NUL byte in sparse hole"u8);
 internal static error errSparseTooLong = errors.New("archive/tar: sparse map too long"u8);
 
-[GoType("[]@string")] partial struct headerError;
+partial struct headerError /*[]@string*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string andˢ = "; and "u8;
@@ -157,7 +157,7 @@ internal static map<@string, bool> basicKeys = new map<@string, bool>{
 // mutate it in some ways, and then pass it back to Writer.WriteHeader
 // should do so by creating a new Header and copying the fields
 // that they are interested in preserving.
-[GoType] partial struct Header {
+partial struct Header {
     // Typeflag is the type of header entry.
     // The zero value is automatically promoted to either TypeReg or TypeDir
     // depending on the presence of a trailing slash in Name.
@@ -216,7 +216,7 @@ internal static map<@string, bool> basicKeys = new map<@string, bool>{
 }
 
 // sparseEntry represents a Length-sized fragment at Offset in the file.
-[GoType] partial struct sparseEntry {
+partial struct sparseEntry {
     public int64 Offset, Length;
 }
 
@@ -224,9 +224,9 @@ internal static int64 endOffset(this sparseEntry s) {
     return s.Offset + s.Length;
 }
 
-[GoType("[]sparseEntry")] partial struct sparseDatas;
+partial struct sparseDatas /*[]sparseEntry*/;
 
-[GoType("[]sparseEntry")] partial struct sparseHoles;
+partial struct sparseHoles /*[]sparseEntry*/;
 
 // validateSparseEntries reports whether sp is a valid sparse map.
 // It does not matter whether sp represents data fragments or hole fragments.
@@ -308,7 +308,7 @@ internal static slice<sparseEntry> invertSparseEntries(slice<sparseEntry> src, i
 // (actual in tar archive) bytes remaining for the current file.
 //
 // Invariant: logicalRemaining >= physicalRemaining
-[GoType] partial interface fileState {
+partial interface fileState {
     int64 logicalRemaining();
     int64 physicalRemaining();
 }
@@ -573,7 +573,7 @@ public static fs.FileInfo FileInfo(this ж<Header> Ꮡh) {
 }
 
 // headerFileInfo implements fs.FileInfo.
-[GoType] partial struct headerFileInfo {
+partial struct headerFileInfo {
     internal ж<Header> h;
 }
 
@@ -796,7 +796,7 @@ public static (ж<Header>, error) FileInfoHeader(fs.FileInfo fi, @string link) {
 // FileInfoNames extends [fs.FileInfo].
 // Passing an instance of this to [FileInfoHeader] permits the caller
 // to avoid a system-dependent name lookup by specifying the Uname and Gname directly.
-[GoType] partial interface FileInfoNames :
+partial interface FileInfoNames :
     fs.FileInfo
 {
     // Uname should give a user name.

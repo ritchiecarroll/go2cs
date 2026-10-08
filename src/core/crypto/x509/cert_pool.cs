@@ -12,11 +12,11 @@ using go.crypto;
 
 partial class x509_package {
 
-[GoType("[28]byte")] /* [sha256.Size224]byte */
-partial struct sum224;
+/* [sha256.Size224]byte */
+partial struct sum224 /*[28]byte*/;
 
 // CertPool is a set of certificates.
-[GoType] partial struct CertPool {
+partial struct CertPool {
     internal map<@string, slice<nint>> byName; // cert.RawSubject => index into lazyCerts
     // lazyCerts contains funcs that return a certificate,
     // lazily parsing/decompressing it as needed.
@@ -36,7 +36,7 @@ partial struct sum224;
 
 // lazyCert is minimal metadata about a Cert and a func to retrieve it
 // in its normal expanded *Certificate form.
-[GoType] partial struct lazyCert {
+partial struct lazyCert {
     // rawSubject is the Certificate.RawSubject value.
     // It's the same as the CertPool.byName key, but in []byte
     // form to make CertPool.Subjects (as used by crypto/tls) do
@@ -77,13 +77,13 @@ internal static nint len(this ж<CertPool> Ꮡs) {
 }
 
 // cert returns cert index n in s.
-[GoRecv] internal static (ж<Certificate>, Func<slice<ж<Certificate>>, error>, error) cert(this ref CertPool s, nint n) {
+internal static (ж<Certificate>, Func<slice<ж<Certificate>>, error>, error) cert(this ref CertPool s, nint n) {
     var (cert, err) = s.lazyCerts[n].getCert();
     return (cert, s.lazyCerts[n].constraint, err);
 }
 
 // Clone returns a copy of s.
-[GoRecv] public static ж<CertPool> Clone(this ref CertPool s) {
+public static ж<CertPool> Clone(this ref CertPool s) {
     var p = Ꮡ(new CertPool(
         byName: new map<@string, slice<nint>>(builtin.len(s.byName)),
         lazyCerts: new slice<lazyCert>(builtin.len(s.lazyCerts)),
@@ -124,7 +124,7 @@ public static (ж<CertPool>, error) SystemCertPool() {
     return loadSystemRoots();
 }
 
-[GoType] partial struct potentialParent {
+partial struct potentialParent {
     internal ж<Certificate> cert;
     internal Func<slice<ж<Certificate>>, error> constraint;
 }
@@ -190,7 +190,7 @@ internal static bool contains(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
 }
 
 // AddCert adds a certificate to a pool.
-[GoRecv] public static void AddCert(this ref CertPool s, ж<Certificate> Ꮡcert) {
+public static void AddCert(this ref CertPool s, ж<Certificate> Ꮡcert) {
     ref var cert = ref Ꮡcert.DerefOrNull();
 
     if (Ꮡcert == nil) {
@@ -204,7 +204,7 @@ internal static bool contains(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
 //
 // The rawSubject is Certificate.RawSubject and must be non-empty.
 // The getCert func may be called 0 or more times.
-[GoRecv] internal static void addCertFunc(this ref CertPool s, sum224 rawSum224, @string rawSubject, Func<(ж<Certificate>, error)> getCert, Func<slice<ж<Certificate>>, error> constraint) {
+internal static void addCertFunc(this ref CertPool s, sum224 rawSum224, @string rawSubject, Func<(ж<Certificate>, error)> getCert, Func<slice<ж<Certificate>>, error> constraint) {
     rawSum224 = rawSum224.Clone();
 
     if (getCert == default!) {
@@ -223,7 +223,7 @@ internal static bool contains(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
     s.byName[rawSubject] = append(s.byName[rawSubject], builtin.len(s.lazyCerts) - 1);
 }
 
-[GoType("dyn")] internal partial struct AppendCertsFromPEM_lazyCert {
+internal partial struct AppendCertsFromPEM_lazyCert /*dyn*/ {
     public partial ref sync_package.Once Once { get; }
     internal ж<Certificate> v;
 }
@@ -234,7 +234,7 @@ internal static bool contains(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
 //
 // On many Linux systems, /etc/ssl/cert.pem will contain the system wide set
 // of root CAs in a format suitable for this function.
-[GoRecv] public static bool /*ok*/ AppendCertsFromPEM(this ref CertPool s, slice<byte> pemCerts) {
+public static bool /*ok*/ AppendCertsFromPEM(this ref CertPool s, slice<byte> pemCerts) {
     bool ok = default!;
 
     while (builtin.len(pemCerts) > 0) {
@@ -307,7 +307,7 @@ public static bool Equal(this ж<CertPool> Ꮡs, ж<CertPool> Ꮡother) {
 // it will additionally pass the whole chain to constraint to determine its
 // validity. If constraint returns a non-nil error, the chain will be discarded.
 // constraint may be called concurrently from multiple goroutines.
-[GoRecv] public static void AddCertWithConstraint(this ref CertPool s, ж<Certificate> Ꮡcert, Func<slice<ж<Certificate>>, error> constraint) {
+public static void AddCertWithConstraint(this ref CertPool s, ж<Certificate> Ꮡcert, Func<slice<ж<Certificate>>, error> constraint) {
     ref var cert = ref Ꮡcert.DerefOrNull();
 
     if (Ꮡcert == nil) {

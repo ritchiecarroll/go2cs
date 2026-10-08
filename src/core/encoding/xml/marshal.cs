@@ -105,7 +105,7 @@ public static (slice<byte>, error) Marshal(any v) {
 // to generate the XML output one token at a time.
 // The sequence of encoded tokens must make up zero or more valid
 // XML elements.
-[GoType] partial interface Marshaler {
+partial interface Marshaler {
     error MarshalXML(ж<Encoder> e, StartElement start);
 }
 
@@ -120,7 +120,7 @@ public static (slice<byte>, error) Marshal(any v) {
 // will be generated in the output.
 // MarshalXMLAttr is used only for struct fields with the
 // "attr" option in the field tag.
-[GoType] partial interface MarshalerAttr {
+partial interface MarshalerAttr {
     (Attr, error) MarshalXMLAttr(Name name);
 }
 
@@ -145,7 +145,7 @@ public static (slice<byte>, error) MarshalIndent(any v, @string prefix, @string 
 }
 
 // An Encoder writes XML data to an output stream.
-[GoType] partial struct Encoder {
+partial struct Encoder {
     internal printer p;
 }
 
@@ -159,7 +159,7 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
 // Indent sets the encoder to generate XML in which each element
 // begins on a new indented line that starts with prefix and is followed by
 // one or more copies of indent according to the nesting depth.
-[GoRecv] public static void Indent(this ref Encoder enc, @string prefix, @string indent) {
+public static void Indent(this ref Encoder enc, @string prefix, @string indent) {
     enc.p.prefix = prefix;
     enc.p.indent = indent;
 }
@@ -336,18 +336,18 @@ internal static bool isValidDirective(Directive dir) {
 
 // Flush flushes any buffered XML to the underlying writer.
 // See the [Encoder.EncodeToken] documentation for details about when it is necessary.
-[GoRecv] public static error Flush(this ref Encoder enc) {
+public static error Flush(this ref Encoder enc) {
     return enc.p.w.Flush();
 }
 
 // Close the Encoder, indicating that no more data will be written. It flushes
 // any buffered XML to the underlying writer and returns an error if the
 // written XML is invalid (e.g. by containing unclosed elements).
-[GoRecv] public static error Close(this ref Encoder enc) {
+public static error Close(this ref Encoder enc) {
     return enc.p.Close();
 }
 
-[GoType] partial struct printer {
+partial struct printer {
     internal ж<bufio.Writer> w;
     internal ж<Encoder> encoder;
     internal nint seq;
@@ -431,16 +431,16 @@ internal static @string createAttrPrefix(this ж<printer> Ꮡp, @string url) {
 }
 
 // deleteAttrPrefix removes an attribute name space prefix.
-[GoRecv] internal static void deleteAttrPrefix(this ref printer p, @string prefix) {
+internal static void deleteAttrPrefix(this ref printer p, @string prefix) {
     delete(p.attrPrefix, p.attrNS[prefix]);
     delete(p.attrNS, prefix);
 }
 
-[GoRecv] internal static void markPrefix(this ref printer p) {
+internal static void markPrefix(this ref printer p) {
     p.prefixes = append(p.prefixes, ""u8);
 }
 
-[GoRecv] internal static void popPrefix(this ref printer p) {
+internal static void popPrefix(this ref printer p) {
     while (len(p.prefixes) > 0) {
         @string prefix = p.prefixes[len(p.prefixes) - 1];
         p.prefixes = p.prefixes.slice(0, len(p.prefixes) - 1);
@@ -611,7 +611,7 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
 }
 
 // marshalAttr marshals an attribute with the given name and value, adding to start.Attr.
-[GoRecv] internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart, Name name, reflectꓸValue val) {
+internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart, Name name, reflectꓸValue val) {
     ref var start = ref Ꮡstart.DerefOrNull();
 
     if (val.CanInterface() && val.Type().Implements(marshalerAttrType)) {
@@ -720,7 +720,7 @@ internal static StartElement defaultStart(reflectꓸType typ, ж<fieldInfo> Ꮡf
 }
 
 // marshalInterface marshals a Marshaler interface value.
-[GoRecv] internal static error marshalInterface(this ref printer p, Marshaler val, StartElement start) {
+internal static error marshalInterface(this ref printer p, Marshaler val, StartElement start) {
     // Push a marker onto the tag stack so that MarshalXML
     // cannot close the XML tags that it did not open.
     p.tags = append(p.tags, new Name(nil));
@@ -796,7 +796,7 @@ internal static error writeStart(this ж<printer> Ꮡp, ж<StartElement> Ꮡstar
     return default!;
 }
 
-[GoRecv] internal static error writeEnd(this ref printer p, Name name) {
+internal static error writeEnd(this ref printer p, Name name) {
     if (name.Local == ""u8) {
         return fmt.Errorf("xml: end tag with no name"u8);
     }
@@ -821,7 +821,7 @@ internal static error writeStart(this ж<printer> Ꮡp, ж<StartElement> Ꮡstar
     return default!;
 }
 
-[GoRecv] internal static (@string, slice<byte>, error) marshalSimple(this ref printer p, reflectꓸType typ, reflectꓸValue val) {
+internal static (@string, slice<byte>, error) marshalSimple(this ref printer p, reflectꓸType typ, reflectꓸValue val) {
     var exprᴛ1 = val.Kind();
     if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {
         return (strconv.FormatInt(val.Int(), 10), default!, default!);
@@ -1084,7 +1084,7 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
 internal static readonly @string useOfClosedEncoderˢ = "use of closed Encoder"u8;
 
 // Write implements io.Writer
-[GoRecv] internal static (nint n, error err) Write(this ref printer p, slice<byte> b) {
+internal static (nint n, error err) Write(this ref printer p, slice<byte> b) {
     nint n = default!;
 
     if (p.closed && p.err == default!) {
@@ -1097,7 +1097,7 @@ internal static readonly @string useOfClosedEncoderˢ = "use of closed Encoder"u
 }
 
 // WriteString implements io.StringWriter
-[GoRecv] internal static (nint n, error err) WriteString(this ref printer p, @string s) {
+internal static (nint n, error err) WriteString(this ref printer p, @string s) {
     nint n = default!;
 
     if (p.closed && p.err == default!) {
@@ -1110,7 +1110,7 @@ internal static readonly @string useOfClosedEncoderˢ = "use of closed Encoder"u
 }
 
 // WriteByte implements io.ByteWriter
-[GoRecv] internal static error WriteByte(this ref printer p, byte c) {
+internal static error WriteByte(this ref printer p, byte c) {
     if (p.closed && p.err == default!) {
         p.err = errors.New(useOfClosedEncoderˢ);
     }
@@ -1123,7 +1123,7 @@ internal static readonly @string useOfClosedEncoderˢ = "use of closed Encoder"u
 // Close the Encoder, indicating that no more data will be written. It flushes
 // any buffered XML to the underlying writer and returns an error if the
 // written XML is invalid (e.g. by containing unclosed elements).
-[GoRecv] internal static error Close(this ref printer p) {
+internal static error Close(this ref printer p) {
     if (p.closed) {
         return default!;
     }
@@ -1140,12 +1140,12 @@ internal static readonly @string useOfClosedEncoderˢ = "use of closed Encoder"u
 }
 
 // return the bufio Writer's cached write error
-[GoRecv] internal static error cachedWriteError(this ref printer p) {
+internal static error cachedWriteError(this ref printer p) {
     var (_, err) = p.Write(default!);
     return err;
 }
 
-[GoRecv] internal static void writeIndent(this ref printer p, nint depthDelta) {
+internal static void writeIndent(this ref printer p, nint depthDelta) {
     if (len(p.prefix) == 0 && len(p.indent) == 0) {
         return;
     }
@@ -1176,7 +1176,7 @@ internal static readonly @string useOfClosedEncoderˢ = "use of closed Encoder"u
     }
 }
 
-[GoType] partial struct parentStack {
+partial struct parentStack {
     internal ж<printer> p;
     internal slice<@string> stack;
 }
@@ -1184,7 +1184,7 @@ internal static readonly @string useOfClosedEncoderˢ = "use of closed Encoder"u
 // trim updates the XML context to match the longest common prefix of the stack
 // and the given parents. A closing tag will be written for every parent
 // popped. Passing a zero slice or nil will close all the elements.
-[GoRecv] internal static error trim(this ref parentStack s, slice<@string> parents) {
+internal static error trim(this ref parentStack s, slice<@string> parents) {
     nint split = 0;
     for (; split < len(parents) && split < len(s.stack); split++) {
         if (parents[split] != s.stack[split]) {
@@ -1203,7 +1203,7 @@ internal static readonly @string useOfClosedEncoderˢ = "use of closed Encoder"u
 }
 
 // push adds parent elements to the stack and writes open tags.
-[GoRecv] internal static error push(this ref parentStack s, slice<@string> parents) {
+internal static error push(this ref parentStack s, slice<@string> parents) {
     for (nint i = 0; i < len(parents); i++) {
         {
             var err = s.p.writeStart(Ꮡ(new StartElement(Name: new Name(Local: parents[i])))); if (err != default!) {
@@ -1217,11 +1217,11 @@ internal static readonly @string useOfClosedEncoderˢ = "use of closed Encoder"u
 
 // UnsupportedTypeError is returned when [Marshal] encounters a type
 // that cannot be converted into XML.
-[GoType] partial struct UnsupportedTypeError {
+partial struct UnsupportedTypeError {
     public reflectꓸType Type;
 }
 
-[GoRecv] public static @string Error(this ref UnsupportedTypeError e) {
+public static @string Error(this ref UnsupportedTypeError e) {
     return "xml: unsupported type: "u8 + e.Type.String();
 }
 

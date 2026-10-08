@@ -20,7 +20,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class gccgoimporter_package {
 
-[GoType] partial struct parser {
+partial struct parser {
     internal ж<scanner.Scanner> scanner;
     internal @string version;                   // format version
     internal rune tok;                      // current token
@@ -50,7 +50,7 @@ partial class gccgoimporter_package {
 // To handle such cases, the parser generates a fixup record (below) and
 // delays setting of N1's underlying type until parsing is complete, at
 // which point fixups are applied.
-[GoType] partial struct fixupRecord {
+partial struct fixupRecord {
     internal ж<types.Named> toUpdate; // type to modify when fixup is processed
     internal typesꓸType target;   // type that was incomplete when fixup was created
 }
@@ -78,7 +78,7 @@ internal static void initScanner(this ж<parser> Ꮡp, @string filename, io.Read
     p.next();
 }
 
-[GoType] partial struct importError {
+partial struct importError {
     internal scanner.Position pos;
     internal error err;
 }
@@ -87,7 +87,7 @@ internal static @string Error(this importError e) {
     return fmt.Sprintf("import error %s (byte offset = %d): %s"u8, e.pos, e.pos.Offset, e.err);
 }
 
-[GoRecv] internal static void error(this ref parser p, any err) {
+internal static void error(this ref parser p, any err) {
     {
         var (s, ok) = err._<@string>(ᐧ); if (ok) {
             err = errors.New(s);
@@ -97,13 +97,13 @@ internal static @string Error(this importError e) {
     throw panic(new importError(p.scanner.Pos(), err._<error>()));
 }
 
-[GoRecv] internal static void errorf(this ref parser p, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf(this ref parser p, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     p.error(fmt.Errorf(format, args.ꓸꓸꓸ));
 }
 
-[GoRecv] internal static @string expect(this ref parser p, rune tok) {
+internal static @string expect(this ref parser p, rune tok) {
     @string lit = p.lit;
     if (p.tok != tok) {
         p.errorf("expected %s, got %s (%s)"u8, scanner.TokenString(tok), scanner.TokenString(p.tok), lit);
@@ -112,21 +112,21 @@ internal static @string Error(this importError e) {
     return lit;
 }
 
-[GoRecv] internal static void expectEOL(this ref parser p) {
+internal static void expectEOL(this ref parser p) {
     if (p.version == "v1"u8 || p.version == "v2"u8) {
         p.expect((rune)';');
     }
     p.expect((rune)'\n');
 }
 
-[GoRecv] internal static void expectKeyword(this ref parser p, @string keyword) {
+internal static void expectKeyword(this ref parser p, @string keyword) {
     @string lit = p.expect(scanner.Ident);
     if (lit != keyword) {
         p.errorf("expected keyword %s, got %q"u8, keyword, lit);
     }
 }
 
-[GoRecv] internal static @string parseString(this ref parser p) {
+internal static @string parseString(this ref parser p) {
     var (str, err) = strconv.Unquote(p.expect(scanner.ΔString));
     if (err != default!) {
         p.error(err);
@@ -139,7 +139,7 @@ internal static readonly object unexpectedEofˢ = (@string)"unexpected EOF"u8;
 
 // unquotedString     = { unquotedStringChar } .
 // unquotedStringChar = <neither a whitespace nor a ';' char> .
-[GoRecv] internal static @string parseUnquotedString(this ref parser p) {
+internal static @string parseUnquotedString(this ref parser p) {
     if (p.tok == scanner.EOF) {
         p.error(unexpectedEofˢ);
     }
@@ -155,7 +155,7 @@ internal static readonly object unexpectedEofˢ = (@string)"unexpected EOF"u8;
     return b.String();
 }
 
-[GoRecv] internal static void next(this ref parser p) {
+internal static void next(this ref parser p) {
     p.tok = p.scanner.Scan();
     var exprᴛ1 = p.tok;
     if (exprᴛ1 == scanner.Ident || exprᴛ1 == scanner.Int || exprᴛ1 == scanner.Float || exprᴛ1 == scanner.ΔString || exprᴛ1 == (rune)'·') {
@@ -167,18 +167,18 @@ internal static readonly object unexpectedEofˢ = (@string)"unexpected EOF"u8;
 
 }
 
-[GoRecv] internal static (@string path, @string name) parseQualifiedName(this ref parser p) {
+internal static (@string path, @string name) parseQualifiedName(this ref parser p) {
     return p.parseQualifiedNameStr(p.parseString());
 }
 
-[GoRecv] internal static (@string path, @string name) parseUnquotedQualifiedName(this ref parser p) {
+internal static (@string path, @string name) parseUnquotedQualifiedName(this ref parser p) {
     return p.parseQualifiedNameStr(p.parseUnquotedString());
 }
 
 // qualifiedName = [ ["."] unquotedString "." ] unquotedString .
 //
 // The above production uses greedy matching.
-[GoRecv] internal static (@string pkgpath, @string name) parseQualifiedNameStr(this ref parser p, @string unquotedName) {
+internal static (@string pkgpath, @string name) parseQualifiedNameStr(this ref parser p, @string unquotedName) {
     @string pkgpath = default!;
     @string name = default!;
 
@@ -210,7 +210,7 @@ internal static readonly object unexpectedEofˢ = (@string)"unexpected EOF"u8;
 // getPkg returns the package for a given path. If the package is
 // not found but we have a package name, create the package and
 // add it to the p.imports map.
-[GoRecv] internal static ж<types.Package> getPkg(this ref parser p, @string pkgpath, @string name) {
+internal static ж<types.Package> getPkg(this ref parser p, @string pkgpath, @string name) {
     // package unsafe is not in the imports map - handle explicitly
     if (pkgpath == "unsafe"u8) {
         return types.Unsafe;
@@ -227,7 +227,7 @@ internal static readonly object unexpectedEofˢ = (@string)"unexpected EOF"u8;
 // the package path is resolved to an imported *types.Package.
 //
 // ExportedName = string [string] .
-[GoRecv] internal static (ж<types.Package> pkg, @string name) parseExportedName(this ref parser p) {
+internal static (ж<types.Package> pkg, @string name) parseExportedName(this ref parser p) {
     ж<types.Package> pkg = default!;
     @string name = default!;
 
@@ -244,7 +244,7 @@ internal static readonly object unexpectedEofˢ = (@string)"unexpected EOF"u8;
 }
 
 // Name = QualifiedName | "?" .
-[GoRecv] internal static @string parseName(this ref parser p) {
+internal static @string parseName(this ref parser p) {
     if (p.tok == (rune)'?') {
         // Anonymous.
         p.next();
@@ -515,13 +515,13 @@ internal static ж<types.Const> parseConst(this ж<parser> Ꮡp, ж<types.Packag
 // the actual type must replace a reserved entry (or we have an internal
 // error). Used for self-verification only - not required for correctness.
 
-[GoType("dyn")] partial struct reservedᴛ1 {
-    [GoEmbedded] public global::go.go.types_package.ΔType Type;
+partial struct reservedᴛ1 /*dyn*/ {
+    /*embed*/ public global::go.go.types_package.ΔType Type;
 }
 internal static ж<reservedᴛ1> reserved = @new<reservedᴛ1>();
 
 // reserve reserves the type map entry n for future use.
-[GoRecv] internal static void reserve(this ref parser p, nint n) {
+internal static void reserve(this ref parser p, nint n) {
     // Notes:
     // - for pre-V3 export data, the type numbers we see are
     //   guaranteed to be in increasing order, so we append a
@@ -547,7 +547,7 @@ internal static ж<reservedᴛ1> reserved = @new<reservedᴛ1>();
 // used to resolve named types, or it can be a *types.Pointer,
 // used to resolve pointers to named types in case they are referenced
 // by embedded fields.
-[GoRecv] internal static void update(this ref parser p, typesꓸType t, slice<any> nlist) {
+internal static void update(this ref parser p, typesꓸType t, slice<any> nlist) {
     if (AreEqual(t, reserved)) {
         p.errorf("internal error: update(%v) invoked on reserved"u8, (any)(nlist));
     }
@@ -693,7 +693,7 @@ internal static typesꓸType parseNamedType(this ж<parser> Ꮡp, slice<any> nli
     return new types.NamedжΔType(nt);
 }
 
-[GoRecv] internal static int64 parseInt64(this ref parser p) {
+internal static int64 parseInt64(this ref parser p) {
     @string lit = p.expect(scanner.Int);
     var (n, err) = strconv.ParseInt(lit, 10, 64);
     if (err != default!) {
@@ -702,7 +702,7 @@ internal static typesꓸType parseNamedType(this ж<parser> Ꮡp, slice<any> nli
     return n;
 }
 
-[GoRecv] internal static nint parseInt(this ref parser p) {
+internal static nint parseInt(this ref parser p) {
     @string lit = p.expect(scanner.Int);
     var (n, err) = strconv.ParseInt(lit, 10, 0);
     /* int */
@@ -1129,7 +1129,7 @@ internal static void skipInlineBody(this ж<parser> Ꮡp) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct parseTypes_typeOffset {
+internal partial struct parseTypes_typeOffset /*dyn*/ {
     internal nint offset;
     internal nint length;
 }
@@ -1211,7 +1211,7 @@ internal static void parseSavedType(this ж<parser> Ꮡp, ж<types.Package> Ꮡp
 }
 
 // PackageInit = unquotedString unquotedString int .
-[GoRecv] internal static PackageInit parsePackageInit(this ref parser p) {
+internal static PackageInit parsePackageInit(this ref parser p) {
     @string name = p.parseUnquotedString();
     @string initfunc = p.parseUnquotedString();
     nint priority = -1;
@@ -1222,7 +1222,7 @@ internal static void parseSavedType(this ж<parser> Ꮡp, ж<types.Package> Ꮡp
 }
 
 // Create the package if we have parsed both the package path and package name.
-[GoRecv] internal static void maybeCreatePackage(this ref parser p) {
+internal static void maybeCreatePackage(this ref parser p) {
     if (p.pkgname != ""u8 && p.pkgpath != ""u8) {
         p.pkg = p.getPkg(p.pkgpath, p.pkgname);
     }

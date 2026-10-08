@@ -12,7 +12,7 @@ using math = math_package;
 partial class rand_package {
 
 // A Zipf generates Zipf distributed variates.
-[GoType] partial struct Zipf {
+partial struct Zipf {
     internal ж<Rand> r;
     internal float64 imax;
     internal float64 v;
@@ -24,11 +24,11 @@ partial class rand_package {
     internal float64 hx0minusHxm;
 }
 
-[GoRecv] internal static float64 h(this ref Zipf z, float64 x) {
+internal static float64 h(this ref Zipf z, float64 x) {
     return math.Exp(z.oneminusQ * math.Log(z.v + x)) * z.oneminusQinv;
 }
 
-[GoRecv] internal static float64 hinv(this ref Zipf z, float64 x) {
+internal static float64 hinv(this ref Zipf z, float64 x) {
     return math.Exp(z.oneminusQinv * math.Log(z.oneminusQ * x)) - z.v;
 }
 

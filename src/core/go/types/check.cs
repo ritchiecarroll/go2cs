@@ -65,7 +65,7 @@ internal static bool aliasAny() {
 }
 
 // exprInfo stores information about an untyped expression.
-[GoType] partial struct exprInfo {
+partial struct exprInfo {
     internal bool isLhs; // expression is lhs operand of a shift with delayed type-check
     internal operandMode mode;
     internal ж<Basic> typ;
@@ -74,7 +74,7 @@ internal static bool aliasAny() {
 
 // An environment represents the environment within which an object is
 // type-checked.
-[GoType] partial struct environment {
+partial struct environment {
     internal ж<declInfo> decl;           // package-level declaration whose init expression/function body is checked
     internal ж<ΔScope> scope;              // top-most scope for lookups
     internal goVersion version;              // current accepted language version; changes across files
@@ -97,7 +97,7 @@ internal static bool aliasAny() {
 // object was inserted into the scope and already had a parent at that
 // time (see Scope.Insert). This can only happen for dot-imported objects
 // whose parent is the scope of the package that exported them.
-[GoRecv] internal static (ж<ΔScope>, Object) lookupScope(this ref environment env, @string name) {
+internal static (ж<ΔScope>, Object) lookupScope(this ref environment env, @string name) {
     for (var s = env.scope; s != nil; s = s.Value.parent) {
         {
             var obj = s.Lookup(name); if (obj != default! && (!env.exprPos.IsValid() || cmpPos(obj.scopePos(), env.exprPos) <= 0)) {
@@ -109,7 +109,7 @@ internal static bool aliasAny() {
 }
 
 // lookup is like lookupScope but it only returns the object (or nil).
-[GoRecv] internal static Object lookup(this ref environment env, @string name) {
+internal static Object lookup(this ref environment env, @string name) {
     var (_, obj) = env.lookupScope(name);
     return obj;
 }
@@ -120,18 +120,18 @@ internal static bool aliasAny() {
 // importer must always return the same package (but given two different import paths,
 // an importer may still return the same package by mapping them to the same package
 // paths).
-[GoType] partial struct importKey {
+partial struct importKey {
     internal @string path, dir;
 }
 
 // A dotImportKey describes a dot-imported object in the given scope.
-[GoType] partial struct dotImportKey {
+partial struct dotImportKey {
     internal ж<ΔScope> scope;
     internal @string name;
 }
 
 // An action describes a (delayed) action.
-[GoType] partial struct action {
+partial struct action {
     internal goVersion version;   // applicable language version
     internal Action f;      // action to be executed
     internal ж<actionDesc> desc; // action description; may be nil, requires debug to be set
@@ -139,7 +139,7 @@ internal static bool aliasAny() {
 
 // If debug is set, describef sets a printf-formatted description for action a.
 // Otherwise, it is a no-op.
-[GoRecv] internal static void describef(this ref action a, positioner pos, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void describef(this ref action a, positioner pos, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
     if (debug) {
@@ -149,7 +149,7 @@ internal static bool aliasAny() {
 
 // An actionDesc provides information on an action.
 // For debugging only.
-[GoType] partial struct actionDesc {
+partial struct actionDesc {
     internal positioner pos;
     internal @string format;
     internal slice<any> args;
@@ -157,7 +157,7 @@ internal static bool aliasAny() {
 
 // A Checker maintains the state of the type checker.
 // It must be created with [NewChecker].
-[GoType] partial struct Checker {
+partial struct Checker {
     // package information
     // (initialized by NewChecker, valid for the life-time of checker)
     internal ж<Config> conf;
@@ -206,7 +206,7 @@ internal static bool aliasAny() {
 }
 
 // addDeclDep adds the dependency edge (check.decl -> to) if check.decl exists
-[GoRecv] internal static void addDeclDep(this ref Checker check, Object to) {
+internal static void addDeclDep(this ref Checker check, Object to) {
     var from = check.decl;
     if (from == nil) {
         return; // not in a package-level init expression
@@ -225,7 +225,7 @@ internal static bool aliasAny() {
 // brokenAlias records that alias doesn't have a determined type yet.
 // It also sets alias.typ to Typ[Invalid].
 // Not used if check.conf._EnableAlias is set.
-[GoRecv] internal static void brokenAlias(this ref Checker check, ж<TypeName> Ꮡalias) {
+internal static void brokenAlias(this ref Checker check, ж<TypeName> Ꮡalias) {
     ref var alias = ref Ꮡalias.DerefOrNull();
 
     assert(!(~check.conf)._EnableAlias);
@@ -237,7 +237,7 @@ internal static bool aliasAny() {
 }
 
 // validAlias records that alias has the valid type typ (possibly Typ[Invalid]).
-[GoRecv] internal static void validAlias(this ref Checker check, ж<TypeName> Ꮡalias, ΔType typ) {
+internal static void validAlias(this ref Checker check, ж<TypeName> Ꮡalias, ΔType typ) {
     ref var alias = ref Ꮡalias.DerefOrNull();
 
     assert(!(~check.conf)._EnableAlias);
@@ -246,12 +246,12 @@ internal static bool aliasAny() {
 }
 
 // isBrokenAlias reports whether alias doesn't have a determined type yet.
-[GoRecv] internal static bool isBrokenAlias(this ref Checker check, ж<TypeName> Ꮡalias) {
+internal static bool isBrokenAlias(this ref Checker check, ж<TypeName> Ꮡalias) {
     assert(!(~check.conf)._EnableAlias);
     return check.brokenAliases[Ꮡalias];
 }
 
-[GoRecv] internal static void rememberUntyped(this ref Checker check, ast.Expr e, bool lhs, operandMode mode, ж<Basic> Ꮡtyp, constant.Value val) {
+internal static void rememberUntyped(this ref Checker check, ast.Expr e, bool lhs, operandMode mode, ж<Basic> Ꮡtyp, constant.Value val) {
     var m = check.untyped;
     if (m == default!) {
         m = new map<ast.Expr, exprInfo>();
@@ -266,20 +266,20 @@ internal static bool aliasAny() {
 // (so that f still sees the scope before any new declarations).
 // later returns the pushed action so one can provide a description
 // via action.describef for debugging, if desired.
-[GoRecv] internal static ж<action> later(this ref Checker check, Action f) {
+internal static ж<action> later(this ref Checker check, Action f) {
     nint i = len(check.delayed);
     check.delayed = append(check.delayed, new action(version: check.version, f: f));
     return Ꮡ(check.delayed, i);
 }
 
 // push pushes obj onto the object path and returns its index in the path.
-[GoRecv] internal static nint push(this ref Checker check, Object obj) {
+internal static nint push(this ref Checker check, Object obj) {
     check.objPath = append(check.objPath, obj);
     return len(check.objPath) - 1;
 }
 
 // pop pops and returns the topmost object from the object path.
-[GoRecv] internal static Object pop(this ref Checker check) {
+internal static Object pop(this ref Checker check) {
     nint i = len(check.objPath) - 1;
     var obj = check.objPath[i];
     check.objPath[i] = default!;
@@ -287,13 +287,13 @@ internal static bool aliasAny() {
     return obj;
 }
 
-[GoType] partial interface cleaner {
+partial interface cleaner {
     void cleanup();
 }
 
 // needsCleanup records objects/types that implement the cleanup method
 // which will be called at the end of type-checking.
-[GoRecv] internal static void needsCleanup(this ref Checker check, cleaner c) {
+internal static void needsCleanup(this ref Checker check, cleaner c) {
     check.cleaners = append(check.cleaners, c);
 }
 
@@ -436,7 +436,7 @@ internal static goVersion versionMax(goVersion a, goVersion b) {
 }
 
 // A bailout panic is used for early termination.
-[GoType] partial struct bailout {
+partial struct bailout {
 }
 
 internal static void handleBailout(this ж<Checker> Ꮡcheck, ж<error> Ꮡerr) {
@@ -606,7 +606,7 @@ internal static void processDelayed(this ж<Checker> Ꮡcheck, nint top) {
 }
 
 // cleanup runs cleanup for all collected cleaners.
-[GoRecv] internal static void cleanup(this ref Checker check) {
+internal static void cleanup(this ref Checker check) {
     // Don't use a range clause since Named.cleanup may add more cleaners.
     for (nint i = 0; i < len(check.cleaners); i++) {
         check.cleaners[i].cleanup();
@@ -616,14 +616,14 @@ internal static void processDelayed(this ж<Checker> Ꮡcheck, nint top) {
 
 // go/types doesn't support recording of types directly in the AST.
 // dummy function to match types2 code.
-[GoRecv] internal static void recordTypeAndValueInSyntax(this ref Checker check, ast.Expr x, operandMode mode, ΔType typ, constant.Value val) {
+internal static void recordTypeAndValueInSyntax(this ref Checker check, ast.Expr x, operandMode mode, ΔType typ, constant.Value val) {
 }
 
 // nothing to do
 
 // go/types doesn't support recording of types directly in the AST.
 // dummy function to match types2 code.
-[GoRecv] internal static void recordCommaOkTypesInSyntax(this ref Checker check, ast.Expr x, ΔType t0, ΔType t1) {
+internal static void recordCommaOkTypesInSyntax(this ref Checker check, ast.Expr x, ΔType t0, ΔType t1) {
 }
 
 // nothing to do

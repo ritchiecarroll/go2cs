@@ -37,7 +37,7 @@ partial class runtime_package {
 // See golang.org/issue/17953 for a program that worked badly
 // before we introduced the second level of list, and
 // BenchmarkSemTable/OneAddrCollision/* for a benchmark that exercises this.
-[GoType] partial struct semaRoot {
+partial struct semaRoot {
     internal mutex @lock;
     internal ж<sudog> treap;     // root of balanced tree of unique waiters.
     internal atomic.Uint32 nwait; // Number of waiters. Read w/o the lock.
@@ -49,15 +49,15 @@ internal static ref semTable semtable => ref Ꮡsemtable.Value;
 // Prime to not correlate with any user patterns.
 internal static UntypedInt semTabSize => 251;
 
-[GoType("dyn")] partial struct semTableᴛ1 {
+partial struct semTableᴛ1 /*dyn*/ {
     internal semaRoot root;
     internal array<byte> pad = new(40);
 }
 
-[GoType("[251]semTableᴛ1")] /* [semTabSize]semTableᴛ1 */
-partial struct semTable;
+/* [semTabSize]semTableᴛ1 */
+partial struct semTable /*[251]semTableᴛ1*/;
 
-[GoRecv] internal static ж<semaRoot> rootFor(this ref semTable t, ж<uint32> Ꮡaddr) {
+internal static ж<semaRoot> rootFor(this ref semTable t, ж<uint32> Ꮡaddr) {
     return Ꮡ(t.Value, (((uintptr)Ꮡaddr >> (int)(3))) % (uintptr)semTabSize).of(semTableᴛ1.Ꮡroot);
 }
 
@@ -131,7 +131,7 @@ internal static void readyWithTime(ref sudog s, nint traceskip) {
     goready(s.g, traceskip);
 }
 
-[GoType("num:nint")] partial struct semaProfileFlags;
+partial struct semaProfileFlags /*num:nint*/;
 
 internal static semaProfileFlags semaBlockProfile => /* 1 << iota */ 1;
 internal static semaProfileFlags semaMutexProfile => 2;
@@ -351,7 +351,7 @@ internal static readonly @string semaRootRotateLeftˢ = "semaRoot rotateLeft"u8;
 
 // rotateLeft rotates the tree rooted at node x.
 // turning (x a (y b c)) into (y (x a b) c).
-[GoRecv] internal static void rotateLeft(this ref semaRoot root, ж<sudog> Ꮡx) {
+internal static void rotateLeft(this ref semaRoot root, ж<sudog> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // p -> (x a (y b c))
@@ -383,7 +383,7 @@ internal static readonly @string semaRootRotateRightˢ = "semaRoot rotateRight"u
 
 // rotateRight rotates the tree rooted at node y.
 // turning (y (x a b) c) into (x a (y b c)).
-[GoRecv] internal static void rotateRight(this ref semaRoot root, ж<sudog> Ꮡy) {
+internal static void rotateRight(this ref semaRoot root, ж<sudog> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     // p -> (y (x a b) c)
@@ -413,7 +413,7 @@ internal static readonly @string semaRootRotateRightˢ = "semaRoot rotateRight"u
 // notifyList is a ticket-based notification list used to implement sync.Cond.
 //
 // It must be kept in sync with the sync package.
-[GoType] partial struct notifyList {
+partial struct notifyList {
     // wait is the ticket number of the next waiter. It is atomically
     // incremented outside the lock.
     internal atomic.Uint32 wait;

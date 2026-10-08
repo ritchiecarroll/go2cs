@@ -16,7 +16,7 @@ partial class x509_package {
 internal static readonly @string certFileEnv = "SSL_CERT_FILE"u8;
 internal static readonly @string certDirEnv = "SSL_CERT_DIR"u8;
 
-[GoRecv] internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(this ref Certificate c, ж<VerifyOptions> Ꮡopts) {
+internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(this ref Certificate c, ж<VerifyOptions> Ꮡopts) {
     return (default!, default!);
 }
 

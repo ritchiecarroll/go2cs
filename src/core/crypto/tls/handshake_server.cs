@@ -27,7 +27,7 @@ partial class tls_package {
 
 // serverHandshakeState contains details of a server handshake in progress.
 // It's discarded once the handshake has completed.
-[GoType] partial struct serverHandshakeState {
+partial struct serverHandshakeState {
     internal ж<Conn> c;
     internal context.Context ctx;
     internal ж<clientHelloMsg> clientHello;
@@ -240,7 +240,7 @@ internal static (ж<clientHelloMsg>, ж<echServerContext>, error) readClientHell
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tlsClientDoesNotSupportˢ = "tls: client does not support uncompressed connections"u8;
 
-[GoRecv] internal static error processClientHello(this ref serverHandshakeState hs) {
+internal static error processClientHello(this ref serverHandshakeState hs) {
     var c = hs.c;
     hs.hello = @new<serverHelloMsg>();
     hs.hello.Value.vers = c.Value.vers;
@@ -458,7 +458,7 @@ internal static error pickCipherSuite(this ж<serverHandshakeState> Ꮡhs) {
     return default!;
 }
 
-[GoRecv] internal static bool cipherSuiteOk(this ref serverHandshakeState hs, ж<cipherSuite> Ꮡc) {
+internal static bool cipherSuiteOk(this ref serverHandshakeState hs, ж<cipherSuite> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if ((nint)(c.flags & (nint)suiteECDHE) != 0){
@@ -832,7 +832,7 @@ internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) {
     return default!;
 }
 
-[GoRecv] internal static error establishKeys(this ref serverHandshakeState hs) {
+internal static error establishKeys(this ref serverHandshakeState hs) {
     var c = hs.c;
     var (clientMAC, serverMAC, clientKey, serverKey, clientIV, serverIV) = keysFromMasterSecret((~c).vers, ref (hs.suite).DerefOrNull(), hs.masterSecret, (~hs.clientHello).random, (~hs.hello).random, (~hs.suite).macLen, (~hs.suite).keyLen, (~hs.suite).ivLen);
     any clientCipher = default!;

@@ -26,7 +26,7 @@ internal static UntypedInt maxNewlines => 2; // max. number of newlines between 
 internal const bool debug = false; // enable for debugging
 internal static UntypedInt infinity => /* 1 << 30 */ 1073741824;
 
-[GoType("num:byte")] partial struct whiteSpace;
+partial struct whiteSpace /*num:byte*/;
 
 internal static whiteSpace ignore => /* whiteSpace(0) */ 0;
 internal static whiteSpace blank => /* whiteSpace(' ') */ 32;
@@ -36,19 +36,19 @@ internal static whiteSpace formfeed => /* whiteSpace('\f') */ 12;
 internal static whiteSpace indent => /* whiteSpace('>') */ 62;
 internal static whiteSpace unindent => /* whiteSpace('<') */ 60;
 
-[GoType("num:nint")] partial struct pmode;
+partial struct pmode /*num:nint*/;
 
 internal static pmode noExtraBlank => /* 1 << iota */ 1;         // disables extra blank after /*-style comment
 internal static pmode noExtraLinebreak => 2;     // disables extra line break after /*-style comment
 
-[GoType] partial struct commentInfo {
+partial struct commentInfo {
     internal nint cindex;              // index of the next comment
     internal ж<ast.CommentGroup> comment; // = printer.comments[cindex-1]; or nil
     internal nint commentOffset;              // = printer.posFor(printer.comments[cindex-1].List[0].Pos()).Offset; or infinity
     internal bool commentNewline;              // true if the comment group contains newlines
 }
 
-[GoType] partial struct printer {
+partial struct printer {
     // Configuration (does not change after initialization)
     public partial ref Config Config { get; }
     internal ж<token.FileSet> fset;
@@ -87,7 +87,7 @@ internal static pmode noExtraLinebreak => 2;     // disables extra line break af
     internal nint cachedLine; // line corresponding to cachedPos
 }
 
-[GoRecv] internal static void internalError(this ref printer p, params ꓸꓸꓸany msgʗp) {
+internal static void internalError(this ref printer p, params ꓸꓸꓸany msgʗp) {
     var msg = msgʗp.sslice();
 
     if (debug) {
@@ -100,7 +100,7 @@ internal static pmode noExtraLinebreak => 2;     // disables extra line break af
 // commentsHaveNewline reports whether a list of comments belonging to
 // an *ast.CommentGroup contains newlines. Because the position information
 // may only be partially correct, we also have to read the comment text.
-[GoRecv] internal static bool commentsHaveNewline(this ref printer p, slice<ж<ast.Comment>> list) {
+internal static bool commentsHaveNewline(this ref printer p, slice<ж<ast.Comment>> list) {
     // len(list) > 0
     nint line = p.lineFor(list[0].Pos());
     foreach (var (i, c) in list) {
@@ -118,7 +118,7 @@ internal static pmode noExtraLinebreak => 2;     // disables extra line break af
     return false;
 }
 
-[GoRecv] internal static void nextComment(this ref printer p) {
+internal static void nextComment(this ref printer p) {
     while (p.cindex < len(p.comments)) {
         var c = p.comments[p.cindex];
         p.cindex++;
@@ -140,7 +140,7 @@ internal static pmode noExtraLinebreak => 2;     // disables extra line break af
 // commentBefore reports whether the current comment group occurs
 // before the next position in the source code and printing it does
 // not introduce implicit semicolons.
-[GoRecv] internal static bool commentBefore(this ref printer p, tokenꓸPosition next) {
+internal static bool commentBefore(this ref printer p, tokenꓸPosition next) {
     return p.commentOffset < next.Offset && (!p.impliedSemi || !p.commentNewline);
 }
 
@@ -172,7 +172,7 @@ internal static nint commentSizeBefore(this ж<printer> Ꮡp, tokenꓸPosition n
 // token in *linePtr. It is used to compute an accurate line number for a
 // formatted construct, independent of pending (not yet emitted) whitespace
 // or comments.
-[GoRecv] internal static void recordLine(this ref printer p, ж<nint> ᏑlinePtr) {
+internal static void recordLine(this ref printer p, ж<nint> ᏑlinePtr) {
     ref var linePtr = ref ᏑlinePtr.DerefOrNull();
 
     p.linePtr = ᏑlinePtr;
@@ -182,17 +182,17 @@ internal static nint commentSizeBefore(this ж<printer> Ꮡp, tokenꓸPosition n
 // output line and the line argument, ignoring any pending (not yet
 // emitted) whitespace or comments. It is used to compute an accurate
 // size (in number of lines) for a formatted construct.
-[GoRecv] internal static nint linesFrom(this ref printer p, nint line) {
+internal static nint linesFrom(this ref printer p, nint line) {
     return p.@out.Line - line;
 }
 
-[GoRecv] internal static tokenꓸPosition posFor(this ref printer p, tokenꓸPos pos) {
+internal static tokenꓸPosition posFor(this ref printer p, tokenꓸPos pos) {
     // not used frequently enough to cache entire token.Position
     return p.fset.PositionFor(pos, false);
 }
 
 /* absolute position */
-[GoRecv] internal static nint lineFor(this ref printer p, tokenꓸPos pos) {
+internal static nint lineFor(this ref printer p, tokenꓸPos pos) {
     if (pos != p.cachedPos) {
         p.cachedPos = pos;
         p.cachedLine = p.fset.PositionFor(pos, false).Line;
@@ -202,7 +202,7 @@ internal static nint commentSizeBefore(this ж<printer> Ꮡp, tokenꓸPosition n
 }
 
 // writeLineDirective writes a //line directive if necessary.
-[GoRecv] internal static void writeLineDirective(this ref printer p, tokenꓸPosition pos) {
+internal static void writeLineDirective(this ref printer p, tokenꓸPosition pos) {
     if (pos.IsValid() && (p.@out.Line != pos.Line || p.@out.Filename != pos.Filename)) {
         if (strings.ContainsAny(pos.Filename, "\r\n"u8)) {
             if (p.sourcePosErr == default!) {
@@ -220,7 +220,7 @@ internal static nint commentSizeBefore(this ж<printer> Ꮡp, tokenꓸPosition n
 }
 
 // writeIndent writes indentation.
-[GoRecv] internal static void writeIndent(this ref printer p) {
+internal static void writeIndent(this ref printer p) {
     // use "hard" htabs - indentation columns
     // must not be discarded by the tabwriter
     nint n = p.Config.Indent + p.indent; // include base indentation
@@ -235,7 +235,7 @@ internal static nint commentSizeBefore(this ж<printer> Ꮡp, tokenꓸPosition n
 
 // writeByte writes ch n times to p.output and updates p.pos.
 // Only used to write formatting (white space) characters.
-[GoRecv] internal static void writeByte(this ref printer p, byte ch, nint n) {
+internal static void writeByte(this ref printer p, byte ch, nint n) {
     if (p.endAlignment) {
         // Ignore any alignment control character;
         // and at the end of the line, break with
@@ -283,7 +283,7 @@ internal static nint commentSizeBefore(this ж<printer> Ꮡp, tokenꓸPosition n
 // needed (i.e., when we don't know that s contains no tabs or line breaks)
 // avoids processing extra escape characters and reduces run time of the
 // printer benchmark by up to 10%.
-[GoRecv] internal static void writeString(this ref printer p, tokenꓸPosition pos, @string s, bool isLit) {
+internal static void writeString(this ref printer p, tokenꓸPosition pos, @string s, bool isLit) {
     if (p.@out.Column == 1) {
         if ((Mode)(p.Config.Mode & SourcePos) != 0) {
             p.writeLineDirective(pos);
@@ -348,7 +348,7 @@ internal static nint commentSizeBefore(this ж<printer> Ꮡp, tokenꓸPosition n
 // pos is the comment position, next the position of the item
 // after all pending comments, prev is the previous comment in
 // a group of comments (or nil), and tok is the next token.
-[GoRecv] internal static void writeCommentPrefix(this ref printer p, tokenꓸPosition pos, tokenꓸPosition next, ж<ast.Comment> Ꮡprev, token.Token tok) {
+internal static void writeCommentPrefix(this ref printer p, tokenꓸPosition pos, tokenꓸPosition next, ж<ast.Comment> Ꮡprev, token.Token tok) {
     ref var prev = ref Ꮡprev.DerefOrNull();
 
     if (len(p.output) == 0) {
@@ -695,7 +695,7 @@ internal static void writeComment(this ж<printer> Ꮡp, ж<ast.Comment> Ꮡcomm
 // pending whitespace. The writeCommentSuffix result indicates if a
 // newline was written or if a formfeed was dropped from the whitespace
 // buffer.
-[GoRecv] internal static (bool wroteNewline, bool droppedFF) writeCommentSuffix(this ref printer p, bool needsLinebreak) {
+internal static (bool wroteNewline, bool droppedFF) writeCommentSuffix(this ref printer p, bool needsLinebreak) {
     bool wroteNewline = default!;
     bool droppedFF = default!;
 
@@ -733,7 +733,7 @@ internal static void writeComment(this ж<printer> Ꮡp, ж<ast.Comment> Ꮡcomm
 }
 
 // containsLinebreak reports whether the whitespace buffer contains any line breaks.
-[GoRecv] internal static bool containsLinebreak(this ref printer p) {
+internal static bool containsLinebreak(this ref printer p) {
     foreach (var (_, ch) in p.wsbuf) {
         if (ch == newline || ch == formfeed) {
             return true;
@@ -827,7 +827,7 @@ internal static (bool wroteNewline, bool droppedFF) intersperseComments(this ж<
 internal static readonly object negativeIndentationˢ = (@string)"negative indentation:"u8;
 
 // writeWhitespace writes the first n whitespace entries.
-[GoRecv] internal static void writeWhitespace(this ref printer p, nint n) {
+internal static void writeWhitespace(this ref printer p, nint n) {
     // write entries
     for (nint i = 0; i < n; i++) {
         {
@@ -911,7 +911,7 @@ internal static bool /*b*/ mayCombine(token.Token prev, byte next) {
     return b;
 }
 
-[GoRecv] internal static void setPos(this ref printer p, tokenꓸPos pos) {
+internal static void setPos(this ref printer p, tokenꓸPos pos) {
     if (pos.IsValid()) {
         p.pos = p.posFor(pos); // accurate position of next item
     }
@@ -1271,7 +1271,7 @@ unsupported:
 // and vtab characters into newlines and htabs (in case no tabwriter
 // is used). Text bracketed by tabwriter.Escape characters is passed
 // through unchanged.
-[GoType] partial struct trimmer {
+partial struct trimmer {
     internal io.Writer output;
     internal nint state;
     internal slice<byte> space;
@@ -1285,7 +1285,7 @@ internal static UntypedInt inEscape => 1; // inside text bracketed by tabwriter.
 
 internal static UntypedInt inText => 2; // inside text
 
-[GoRecv] internal static void resetSpace(this ref trimmer p) {
+internal static void resetSpace(this ref trimmer p) {
     p.state = inSpace;
     p.space = p.space[0..0];
 }
@@ -1297,7 +1297,7 @@ internal static UntypedInt inText => 2; // inside text
 //              the tabwriter.
 internal static slice<byte> aNewline = slice<byte>("\n"u8);
 
-[GoRecv] internal static (nint n, error err) Write(this ref trimmer p, slice<byte> data) {
+internal static (nint n, error err) Write(this ref trimmer p, slice<byte> data) {
     nint nΔ1 = default!;
     error err = default!;
 
@@ -1382,7 +1382,7 @@ internal static slice<byte> aNewline = slice<byte>("\n"u8);
     return (nΔ1, err);
 }
 
-[GoType("num:nuint")] partial struct Mode;
+partial struct Mode /*num:nuint*/;
 
 // ----------------------------------------------------------------------------
 // Public interface
@@ -1399,7 +1399,7 @@ public static Mode SourcePos => 8;       // emit //line directives to preserve o
 internal static Mode normalizeNumbers => /* 1 << 30 */ 1073741824;
 
 // A Config node controls the output of Fprint.
-[GoType] partial struct Config {
+partial struct Config {
     public Mode Mode; // default: 0
     public nint Tabwidth; // default: 8
     public nint Indent; // default: 0 (all code is indented at least by this much)
@@ -1502,7 +1502,7 @@ internal static error /*err*/ fprint(this ж<Config> Ꮡcfg, io.Writer output, �
 
 // A CommentedNode bundles an AST node and corresponding comments.
 // It may be provided as argument to any of the [Fprint] functions.
-[GoType] partial struct CommentedNode {
+partial struct CommentedNode {
     public any Node; // *ast.File, or ast.Expr, ast.Decl, ast.Spec, or ast.Stmt
     public slice<ж<ast.CommentGroup>> Comments;
 }

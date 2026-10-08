@@ -29,7 +29,7 @@ using @internal.runtime;
 partial class runtime_package {
 
 // rtype is a wrapper that allows us to define additional methods.
-[GoType] partial struct Δrtype {
+partial struct Δrtype {
     public partial ref ж<@internal.abi_package.Type> Type { get; } // embedding is okay here (unlike reflect) because none of this is public
 }
 
@@ -165,7 +165,7 @@ internal static ж<byte> getGCMaskOnDemand(ж<_type> Ꮡt) {
 
 // A bitCursor is a simple cursor to memory to which we
 // can write a set of bits.
-[GoType] partial struct bitCursor {
+partial struct bitCursor {
     internal ж<byte> ptr; // base of region
     internal uintptr n; // cursor points to bit n of region
 }
@@ -299,7 +299,7 @@ top:
 //
 // Entries are created by reflect.addReflectOff.
 
-[GoType("dyn")] partial struct reflectOffsᴛ1 {
+partial struct reflectOffsᴛ1 /*dyn*/ {
     internal mutex @lock;
     internal int32 next;
     internal map<int32, @unsafe.Pointer> m;
@@ -510,7 +510,7 @@ break_collect:;
     }
 }
 
-[GoType] partial struct _typePair {
+partial struct _typePair {
     internal ж<_type> t1;
     internal ж<_type> t2;
 }

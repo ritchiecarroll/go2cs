@@ -25,12 +25,12 @@ using go.unicode;
 partial class xml_package {
 
 // A SyntaxError represents a syntax error in the XML input stream.
-[GoType] partial struct SyntaxError {
+partial struct SyntaxError {
     public @string Msg;
     public nint Line;
 }
 
-[GoRecv] public static @string Error(this ref SyntaxError e) {
+public static @string Error(this ref SyntaxError e) {
     return "XML syntax error on line "u8 + strconv.Itoa(e.Line) + ": "u8 + e.Msg;
 }
 
@@ -39,21 +39,18 @@ partial class xml_package {
 // In tokens returned by [Decoder.Token], the Space identifier
 // is given as a canonical URL, not the short prefix used
 // in the document being parsed.
-[GoType] partial struct Name {
+partial struct Name {
     public @string Space, Local;
 }
 
 // An Attr represents an attribute in an XML element (Name=Value).
-[GoType] partial struct Attr {
+partial struct Attr {
     public Name Name;
     public @string Value;
 }
-// Descriptor carrier for `Token` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("Token")] public interface ΔTokenᴅ { }
-
 
 // A StartElement represents an XML start element.
-[GoType] partial struct StartElement {
+partial struct StartElement {
     public Name Name;
     public slice<Attr> Attr;
 }
@@ -72,18 +69,18 @@ public static EndElement End(this StartElement e) {
 }
 
 // An EndElement represents an XML end element.
-[GoType] partial struct EndElement {
+partial struct EndElement {
     public Name Name;
 }
 
-[GoType("[]byte")] partial struct CharData;
+partial struct CharData /*[]byte*/;
 
 // Copy creates a new copy of CharData.
 public static CharData Copy(this CharData c) {
     return ((CharData)bytes.Clone(c));
 }
 
-[GoType("[]byte")] partial struct Comment;
+partial struct Comment /*[]byte*/;
 
 // Copy creates a new copy of Comment.
 public static Comment Copy(this Comment c) {
@@ -91,7 +88,7 @@ public static Comment Copy(this Comment c) {
 }
 
 // A ProcInst represents an XML processing instruction of the form <?target inst?>
-[GoType] partial struct ProcInst {
+partial struct ProcInst {
     public @string Target;
     public slice<byte> Inst;
 }
@@ -102,7 +99,7 @@ public static ProcInst Copy(this ProcInst p) {
     return p;
 }
 
-[GoType("[]byte")] partial struct Directive;
+partial struct Directive /*[]byte*/;
 
 // Copy creates a new copy of Directive.
 public static Directive Copy(this Directive d) {
@@ -143,13 +140,13 @@ public static ΔToken CopyToken(ΔToken t) {
 // Implementations of Token are discouraged from returning a nil token with a
 // nil error. Callers should treat a return of nil, nil as indicating that
 // nothing happened; in particular it does not indicate EOF.
-[GoType] partial interface TokenReader {
+partial interface TokenReader {
     (ΔToken, error) Token();
 }
 
 // A Decoder represents an XML parser reading a particular input stream.
 // The parser assumes that its input is encoded in UTF-8.
-[GoType] partial struct Decoder {
+partial struct Decoder {
     // Strict defaults to true, enforcing the requirements
     // of the XML specification.
     // If set to false, the parser allows input containing common
@@ -204,7 +201,6 @@ public static ΔToken CopyToken(ΔToken t) {
     internal ж<stack> free;
     internal bool needClose;
     internal Name toClose;
-    [GoDescriptorType(Self = typeof(ΔTokenᴅ))]
     internal ΔToken nextToken;
     internal nint nextByte;
     internal map<@string, @string> ns;
@@ -276,7 +272,7 @@ internal static readonly @string unexpectedEofˢ = "unexpected EOF"u8;
 // set to the URL identifying its name space when known.
 // If Token encounters an unrecognized name space prefix,
 // it uses the prefix as the Space rather than report an error.
-[GoRecv] public static (ΔToken, error) Token(this ref Decoder d) {
+public static (ΔToken, error) Token(this ref Decoder d) {
     ΔToken t = default!;
     error err = default!;
     if (d.stk != nil && (~d.stk).kind == stkEOF) {
@@ -352,7 +348,7 @@ internal static readonly @string xmlPrefix = "xml"u8;
 // Apply name space translation to name n.
 // The default name space (for Space=="")
 // applies only to element names, not to attribute names.
-[GoRecv] internal static void translate(this ref Decoder d, ж<Name> Ꮡn, bool isElementName) {
+internal static void translate(this ref Decoder d, ж<Name> Ꮡn, bool isElementName) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     switch (ᐧ) {
@@ -380,7 +376,7 @@ internal static readonly @string xmlPrefix = "xml"u8;
     }
 }
 
-[GoRecv] internal static void switchToReader(this ref Decoder d, io.Reader r) {
+internal static void switchToReader(this ref Decoder d, io.Reader r) {
     // Get efficient byte at a time reader.
     // Assume that if reader has its own
     // ReadByte, it's efficient enough.
@@ -398,7 +394,7 @@ internal static readonly @string xmlPrefix = "xml"u8;
 // and the current set of open elements. The translations to pop when
 // ending a given tag are *below* it on the stack, which is
 // more work but forced on us by XML.
-[GoType] partial struct stack {
+partial struct stack {
     internal ж<stack> next;
     internal nint kind;
     internal Name name;
@@ -409,7 +405,7 @@ internal static UntypedInt stkStart => iota;
 internal static UntypedInt stkNs => 1;
 internal static UntypedInt stkEOF => 2;
 
-[GoRecv] internal static ж<stack> push(this ref Decoder d, nint kind) {
+internal static ж<stack> push(this ref Decoder d, nint kind) {
     var s = d.free;
     if (s != nil){
         d.free = s.Value.next;
@@ -422,7 +418,7 @@ internal static UntypedInt stkEOF => 2;
     return s;
 }
 
-[GoRecv] internal static ж<stack> pop(this ref Decoder d) {
+internal static ж<stack> pop(this ref Decoder d) {
     var s = d.stk;
     if (s != nil) {
         d.stk = s.Value.next;
@@ -435,7 +431,7 @@ internal static UntypedInt stkEOF => 2;
 // Record that after the current element is finished
 // (that element is already pushed on the stack)
 // Token should return EOF until popEOF is called.
-[GoRecv] internal static void pushEOF(this ref Decoder d) {
+internal static void pushEOF(this ref Decoder d) {
     // Walk down stack to find Start.
     // It might not be the top, because there might be stkNs
     // entries above it.
@@ -461,7 +457,7 @@ internal static UntypedInt stkEOF => 2;
 
 // Undo a pushEOF.
 // The element must have been finished, so the EOF should be at the top of the stack.
-[GoRecv] internal static bool popEOF(this ref Decoder d) {
+internal static bool popEOF(this ref Decoder d) {
     if (d.stk == nil || (~d.stk).kind != stkEOF) {
         return false;
     }
@@ -470,14 +466,14 @@ internal static UntypedInt stkEOF => 2;
 }
 
 // Record that we are starting an element with the given name.
-[GoRecv] internal static void pushElement(this ref Decoder d, Name name) {
+internal static void pushElement(this ref Decoder d, Name name) {
     var s = d.push(stkStart);
     s.Value.name = name;
 }
 
 // Record that we are changing the value of ns[local].
 // The old value is url, ok.
-[GoRecv] internal static void pushNs(this ref Decoder d, @string local, @string url, bool ok) {
+internal static void pushNs(this ref Decoder d, @string local, @string url, bool ok) {
     var s = d.push(stkNs);
     s.Value.name.Local = local;
     s.Value.name.Space = url;
@@ -485,7 +481,7 @@ internal static UntypedInt stkEOF => 2;
 }
 
 // Creates a SyntaxError with the current line number.
-[GoRecv] internal static error syntaxError(this ref Decoder d, @string msg) {
+internal static error syntaxError(this ref Decoder d, @string msg) {
     return new SyntaxErrorжerror(Ꮡ(new SyntaxError(Msg: msg, Line: d.line)));
 }
 
@@ -495,7 +491,7 @@ internal static UntypedInt stkEOF => 2;
 // After popping the element, apply any undo records from
 // the stack to restore the name translations that existed
 // before we saw this element.
-[GoRecv] internal static bool popElement(this ref Decoder d, ж<EndElement> Ꮡt) {
+internal static bool popElement(this ref Decoder d, ж<EndElement> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var s = d.pop();
@@ -540,7 +536,7 @@ internal static UntypedInt stkEOF => 2;
 
 // If the top element on the stack is autoclosing and
 // t is not the end tag, invent the end tag.
-[GoRecv] internal static (ΔToken, bool) autoClose(this ref Decoder d, ΔToken t) {
+internal static (ΔToken, bool) autoClose(this ref Decoder d, ΔToken t) {
     if (d.stk == nil || (~d.stk).kind != stkStart) {
         return (default!, false);
     }
@@ -562,7 +558,7 @@ internal static error errRawToken = errors.New("xml: cannot use RawToken from Un
 // RawToken is like [Decoder.Token] but does not verify that
 // start and end elements match and does not translate
 // name space prefixes to their corresponding URLs.
-[GoRecv] public static (ΔToken, error) RawToken(this ref Decoder d) {
+public static (ΔToken, error) RawToken(this ref Decoder d) {
     if (d.unmarshalDepth > 0) {
         return (default!, errRawToken);
     }
@@ -583,7 +579,7 @@ internal static readonly @string expectedInElementˢ = "expected /> in element"u
 internal static readonly @string expectedAttributeNameInˢ = "expected attribute name in element"u8;
 internal static readonly @string attributeNameWithoutInˢ = "attribute name without = in element"u8;
 
-[GoRecv] internal static (ΔToken, error) rawToken(this ref Decoder d) {
+internal static (ΔToken, error) rawToken(this ref Decoder d) {
     if (d.t != default!) {
         return d.t.Token();
     }
@@ -921,7 +917,7 @@ HandleB:
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unquotedOrMissingˢ = "unquoted or missing attribute value in element"u8;
 
-[GoRecv] internal static slice<byte> attrval(this ref Decoder d) {
+internal static slice<byte> attrval(this ref Decoder d) {
     var (b, ok) = d.mustgetc();
     if (!ok) {
         return default!;
@@ -955,7 +951,7 @@ internal static readonly @string unquotedOrMissingˢ = "unquoted or missing attr
 }
 
 // Skip spaces if any
-[GoRecv] internal static void space(this ref Decoder d) {
+internal static void space(this ref Decoder d) {
     while (ᐧ) {
         var (b, ok) = d.getc();
         if (!ok) {
@@ -977,7 +973,7 @@ internal static readonly @string unquotedOrMissingˢ = "unquoted or missing attr
 // If there is no byte to read, return ok==false
 // and leave the error in d.err.
 // Maintain line number.
-[GoRecv] internal static (byte b, bool ok) getc(this ref Decoder d) {
+internal static (byte b, bool ok) getc(this ref Decoder d) {
     byte b = default!;
 
     if (d.err != default!) {
@@ -1006,20 +1002,20 @@ internal static readonly @string unquotedOrMissingˢ = "unquoted or missing attr
 // InputOffset returns the input stream byte offset of the current decoder position.
 // The offset gives the location of the end of the most recently returned token
 // and the beginning of the next token.
-[GoRecv] public static int64 InputOffset(this ref Decoder d) {
+public static int64 InputOffset(this ref Decoder d) {
     return d.offset;
 }
 
 // InputPos returns the line of the current decoder position and the 1 based
 // input position of the line. The position gives the location of the end of the
 // most recently returned token.
-[GoRecv] public static (nint line, nint column) InputPos(this ref Decoder d) {
+public static (nint line, nint column) InputPos(this ref Decoder d) {
     return (d.line, (nint)(d.offset - d.linestart) + 1);
 }
 
 // Return saved offset.
 // If we did ungetc (nextByte >= 0), have to back up one.
-[GoRecv] internal static nint savedOffset(this ref Decoder d) {
+internal static nint savedOffset(this ref Decoder d) {
     nint n = d.saved.Len();
     if (d.nextByte >= 0) {
         n--;
@@ -1031,7 +1027,7 @@ internal static readonly @string unquotedOrMissingˢ = "unquoted or missing attr
 // If there is no byte to read,
 // set d.err to SyntaxError("unexpected EOF")
 // and return ok==false
-[GoRecv] internal static (byte b, bool ok) mustgetc(this ref Decoder d) {
+internal static (byte b, bool ok) mustgetc(this ref Decoder d) {
     byte b = default!;
     bool ok = default!;
 
@@ -1046,7 +1042,7 @@ internal static readonly @string unquotedOrMissingˢ = "unquoted or missing attr
 }
 
 // Unread a single byte.
-[GoRecv] internal static void ungetc(this ref Decoder d, byte b) {
+internal static void ungetc(this ref Decoder d, byte b) {
     if (b == (rune)'\n') {
         d.line--;
     }
@@ -1072,7 +1068,7 @@ internal static readonly @string invalidUtf8ˢ = "invalid UTF-8"u8;
 // If quote >= 0, we are in a quoted string and need to find the matching quote.
 // If cdata == true, we are in a <![CDATA[ section and need to find ]]>.
 // On failure return nil and leave the error in d.err.
-[GoRecv] internal static slice<byte> text(this ref Decoder d, nint quote, bool cdata) {
+internal static slice<byte> text(this ref Decoder d, nint quote, bool cdata) {
     byte b0 = default!;
     byte b1 = default!;
     nint trunc = default!;
@@ -1254,7 +1250,7 @@ internal static bool /*inrange*/ isInCharacterRange(rune r) {
 
 // Get name space name: name with a : stuck in the middle.
 // The part before the : is the name space identifier.
-[GoRecv] internal static (Name name, bool ok) nsname(this ref Decoder d) {
+internal static (Name name, bool ok) nsname(this ref Decoder d) {
     Name name = default!;
     bool ok = default!;
 
@@ -1279,7 +1275,7 @@ internal static bool /*inrange*/ isInCharacterRange(rune r) {
 // Get name: /first(first|second)*/
 // Do not set d.err if the name is missing (unless unexpected EOF is received):
 // let the caller provide better context.
-[GoRecv] internal static (@string s, bool ok) name(this ref Decoder d) {
+internal static (@string s, bool ok) name(this ref Decoder d) {
     d.buf.Reset();
     if (!d.readName()) {
         return ("", false);
@@ -1296,7 +1292,7 @@ internal static bool /*inrange*/ isInCharacterRange(rune r) {
 // Read a name and append its bytes to d.buf.
 // The name is delimited by any single-byte character not valid in names.
 // All multi-byte characters are accepted; the caller must check their validity.
-[GoRecv] internal static bool /*ok*/ readName(this ref Decoder d) {
+internal static bool /*ok*/ readName(this ref Decoder d) {
     bool ok = default!;
 
     byte b = default!;
@@ -2078,7 +2074,7 @@ internal static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline)
 
 // EscapeString writes to p the properly escaped XML equivalent
 // of the plain text data s.
-[GoRecv] internal static void EscapeString(this ref printer p, @string s) {
+internal static void EscapeString(this ref printer p, @string s) {
     slice<byte> esc = default!;
     nint last = 0;
     for (nint i = 0; i < len(s); ) {

@@ -20,7 +20,7 @@ using hash = hash_package;
 partial class png_package {
 
 // Encoder configures encoding PNG images.
-[GoType] partial struct Encoder {
+partial struct Encoder {
     public CompressionLevel CompressionLevel;
     // BufferPool optionally specifies a buffer pool to get temporary
     // EncoderBuffers when encoding an image.
@@ -30,14 +30,14 @@ partial class png_package {
 // EncoderBufferPool is an interface for getting and returning temporary
 // instances of the [EncoderBuffer] struct. This can be used to reuse buffers
 // when encoding multiple images.
-[GoType] partial interface EncoderBufferPool {
+partial interface EncoderBufferPool {
     ж<EncoderBuffer> Get();
     void Put(ж<EncoderBuffer> _);
 }
 
-[GoType("encoder")] partial struct EncoderBuffer;
+partial struct EncoderBuffer /*encoder*/;
 
-[GoType] public partial struct encoder {
+public partial struct encoder {
     internal ж<Encoder> enc;
     internal io.Writer w;
     internal image.Image m;
@@ -53,7 +53,7 @@ partial class png_package {
     internal ж<bufio.Writer> bw;
 }
 
-[GoType("num:nint")] partial struct CompressionLevel;
+partial struct CompressionLevel /*num:nint*/;
 
 public static CompressionLevel DefaultCompression => 0;
 public static CompressionLevel NoCompression => -1;
@@ -62,7 +62,7 @@ public static CompressionLevel BestCompression => -3;
 
 // Positive CompressionLevel values are reserved to mean a numeric zlib
 // compression level, although that is not implemented yet.
-[GoType] partial interface opaquer {
+partial interface opaquer {
     bool Opaque();
 }
 
@@ -93,7 +93,7 @@ internal static nint abs8(uint8 d) {
     return 256 - (nint)d;
 }
 
-[GoRecv] internal static void writeChunk(this ref encoder e, slice<byte> b, @string name) {
+internal static void writeChunk(this ref encoder e, slice<byte> b, @string name) {
     if (e.err != default!) {
         return;
     }
@@ -125,7 +125,7 @@ internal static nint abs8(uint8 d) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string ihdrˢ = "IHDR"u8;
 
-[GoRecv] internal static void writeIHDR(this ref encoder e) {
+internal static void writeIHDR(this ref encoder e) {
     var b = e.m.Bounds();
     binary.BigEndian.PutUint32(e.tmp[0..4], (uint32)b.Dx());
     binary.BigEndian.PutUint32(e.tmp[4..8], (uint32)b.Dy());
@@ -182,7 +182,7 @@ internal static readonly @string ihdrˢ = "IHDR"u8;
 internal static readonly @string plteˢ = "PLTE"u8;
 internal static readonly @string tRNSˢ = "tRNS"u8;
 
-[GoRecv] internal static void writePLTEAndTRNS(this ref encoder e, color.Palette p) {
+internal static void writePLTEAndTRNS(this ref encoder e, color.Palette p) {
     if (len(p) < 1 || len(p) > 256) {
         e.err = ((FormatError)("bad palette length: "u8 + strconv.Itoa(len(p))));
         return;
@@ -213,7 +213,7 @@ internal static readonly @string idatˢ = "IDAT"u8;
 //
 // This method should only be called from writeIDATs (via writeImage).
 // No other code should treat an encoder as an io.Writer.
-[GoRecv] public static (nint, error) Write(this ref encoder e, slice<byte> b) {
+public static (nint, error) Write(this ref encoder e, slice<byte> b) {
     e.writeChunk(b, idatˢ);
     if (e.err != default!) {
         return (0, e.err);
@@ -621,7 +621,7 @@ internal static nint levelToZlib(CompressionLevel l) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string iendˢ = "IEND"u8;
 
-[GoRecv] internal static void writeIEND(this ref encoder e) {
+internal static void writeIEND(this ref encoder e) {
     e.writeChunk(default!, iendˢ);
 }
 

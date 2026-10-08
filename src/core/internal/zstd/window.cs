@@ -12,14 +12,14 @@ partial class zstd_package {
 // save calls overwrite previously saved data at off
 // and update off such that it always points at
 // the byte stored before others.
-[GoType] partial struct window {
+partial struct window {
     internal nint size;
     internal slice<byte> data;
     internal nint off;
 }
 
 // reset clears stored data and configures window size.
-[GoRecv] internal static void reset(this ref window w, nint size) {
+internal static void reset(this ref window w, nint size) {
     var b = w.data[..0];
     if (cap(b) < size) {
         b = new slice<byte>(0, size);
@@ -30,12 +30,12 @@ partial class zstd_package {
 }
 
 // len returns the number of stored bytes.
-[GoRecv] internal static uint32 len(this ref window w) {
+internal static uint32 len(this ref window w) {
     return (uint32)builtin.len(w.data);
 }
 
 // save stores up to size last bytes from the buf.
-[GoRecv] internal static void save(this ref window w, slice<byte> buf) {
+internal static void save(this ref window w, slice<byte> buf) {
     if (w.size == 0) {
         return;
     }
@@ -69,7 +69,7 @@ partial class zstd_package {
 
 // appendTo appends stored bytes between from and to indices to the buf.
 // Index from must be less or equal to index to and to must be less or equal to w.len().
-[GoRecv] internal static slice<byte> appendTo(this ref window w, slice<byte> buf, uint32 from, uint32 to) {
+internal static slice<byte> appendTo(this ref window w, slice<byte> buf, uint32 from, uint32 to) {
     var dataLen = (uint32)builtin.len(w.data);
     from += (uint32)w.off;
     to += (uint32)w.off;

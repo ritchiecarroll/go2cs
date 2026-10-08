@@ -31,7 +31,7 @@ internal static ж<sweepdata> ᏑΔsweep = new StandardBox<sweepdata>(new sweepd
 internal static ref sweepdata Δsweep => ref ᏑΔsweep.Value;
 
 // State of background sweep.
-[GoType] partial struct sweepdata {
+partial struct sweepdata {
     internal mutex @lock;
     internal ж<g> g;
     internal bool parked;
@@ -48,7 +48,7 @@ internal static ref sweepdata Δsweep => ref ᏑΔsweep.Value;
     internal sweepClass centralIndex;
 }
 
-[GoType("num:uint32")] partial struct sweepClass;
+partial struct sweepClass /*num:uint32*/;
 
 internal static UntypedInt numSweepClasses => /* numSpanClasses * 2 */ 272;
 internal static sweepClass sweepClassDone => /* sweepClass(^uint32(0)) */ 4294967295;
@@ -88,7 +88,7 @@ internal static (spanClass spc, bool full) split(this sweepClass s) {
 // nextSpanForSweep finds and pops the next span for sweeping from the
 // central sweep buffers. It returns ownership of the span to the caller.
 // Returns nil if no such span exists.
-[GoRecv] internal static ж<mspan> nextSpanForSweep(this ref mheap h) {
+internal static ж<mspan> nextSpanForSweep(this ref mheap h) {
     var sg = h.sweepgen;
     for (var sc = ᏑΔsweep.of(sweepdata.ᏑcentralIndex).load(); sc < numSweepClasses; sc++) {
         var (spc, full) = sc.split();
@@ -118,7 +118,7 @@ internal static UntypedInt sweepDrainedMask => /* 1 << 31 */ 2147483648;
 //
 // Every potential sweeper must call begin() before they look
 // for work, and end() after they've finished sweeping.
-[GoType] partial struct activeSweep {
+partial struct activeSweep {
     // state is divided into two parts.
     //
     // The top bit (masked by sweepDrainedMask) is a boolean
@@ -313,14 +313,14 @@ internal static void bgsweep(channel<nint> c) {
 }
 
 // sweepLocker acquires sweep ownership of spans.
-[GoType] partial struct sweepLocker {
+partial struct sweepLocker {
     // sweepGen is the sweep generation of the heap.
     internal uint32 sweepGen;
     internal bool valid;
 }
 
 // sweepLocked represents sweep ownership of a span.
-[GoType] partial struct sweepLocked {
+partial struct sweepLocked {
     internal partial ref ж<mspan> mspan { get; }
 }
 
@@ -329,7 +329,7 @@ internal static readonly @string useOfInvalidSweepLockerˢ = "use of invalid swe
 
 // tryAcquire attempts to acquire sweep ownership of span s. If it
 // successfully acquires ownership, it blocks sweep completion.
-[GoRecv] internal static (sweepLocked, bool) tryAcquire(this ref sweepLocker l, ж<mspan> Ꮡs) {
+internal static (sweepLocked, bool) tryAcquire(this ref sweepLocker l, ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (!l.valid) {
@@ -506,7 +506,7 @@ internal static readonly @string userArenaSpanIsOnTheˢ = "user arena span is on
 // Returns true if the span was returned to heap.
 // If preserve=true, don't return it to heap nor relink in mcentral lists;
 // caller takes care of it.
-[GoRecv] internal static bool sweep(this ref sweepLocked sl, bool preserve) {
+internal static bool sweep(this ref sweepLocked sl, bool preserve) {
     // It's critical that we enter this function with preemption disabled,
     // GC must not start while we are in the middle of this function.
     var gp = getg();

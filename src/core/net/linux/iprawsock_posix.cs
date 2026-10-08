@@ -41,11 +41,11 @@ internal static (syscall.Sockaddr, error) sockaddr(this ж<IPAddr> Ꮡa, nint fa
     return ipToSockaddr(family, a.IP, 0, a.Zone);
 }
 
-[GoRecv] internal static Δsockaddr toLocal(this ref IPAddr a, @string net) {
+internal static Δsockaddr toLocal(this ref IPAddr a, @string net) {
     return new IPAddrжΔsockaddr(Ꮡ(new IPAddr(loopbackIP(net), a.Zone)));
 }
 
-[GoRecv] internal static (nint, ж<IPAddr>, error) readFrom(this ref IPConn c, slice<byte> b) {
+internal static (nint, ж<IPAddr>, error) readFrom(this ref IPConn c, slice<byte> b) {
     // TODO(cw,rsc): consider using readv if we know the family
     // type to avoid the header trim/copy
     ж<IPAddr> addr = default!;
@@ -78,7 +78,7 @@ internal static nint stripIPv4Header(nint n, slice<byte> b) {
     return n - l;
 }
 
-[GoRecv] internal static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) readMsg(this ref IPConn c, slice<byte> b, slice<byte> oob) {
+internal static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) readMsg(this ref IPConn c, slice<byte> b, slice<byte> oob) {
     nint n = default!;
     nint oobn = default!;
     nint flags = default!;
@@ -99,7 +99,7 @@ internal static nint stripIPv4Header(nint n, slice<byte> b) {
     return (n, oobn, flags, addr, err);
 }
 
-[GoRecv] internal static (nint, error) writeTo(this ref IPConn c, slice<byte> b, ж<IPAddr> Ꮡaddr) {
+internal static (nint, error) writeTo(this ref IPConn c, slice<byte> b, ж<IPAddr> Ꮡaddr) {
     if ((~c.fd).isConnected) {
         return (0, ErrWriteToConnected);
     }
@@ -113,7 +113,7 @@ internal static nint stripIPv4Header(nint n, slice<byte> b) {
     return c.fd.writeTo(b, sa);
 }
 
-[GoRecv] internal static (nint n, nint oobn, error err) writeMsg(this ref IPConn c, slice<byte> b, slice<byte> oob, ж<IPAddr> Ꮡaddr) {
+internal static (nint n, nint oobn, error err) writeMsg(this ref IPConn c, slice<byte> b, slice<byte> oob, ж<IPAddr> Ꮡaddr) {
     error err = default!;
 
     if ((~c.fd).isConnected) {

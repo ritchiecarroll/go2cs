@@ -12,7 +12,7 @@ partial class netip_package {
 //
 // When the methods below mention a bit number, bit 0 is the most
 // significant bit (in hi) and bit 127 is the lowest (lo&1).
-[GoType] partial struct uint128 {
+partial struct uint128 {
     internal uint64 hi;
     internal uint64 lo;
 }

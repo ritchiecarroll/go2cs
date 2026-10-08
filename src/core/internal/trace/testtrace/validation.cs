@@ -15,7 +15,7 @@ using ꓸꓸꓸany = Span<any>;
 partial class testtrace_package {
 
 // Validator is a type used for validating a stream of trace.Events.
-[GoType] partial struct Validator {
+partial struct Validator {
     internal traceꓸTime lastTs;
     internal map<trace.GoID, ж<goState>> gs;
     internal map<trace.ProcID, ж<procState>> ps;
@@ -26,18 +26,18 @@ partial class testtrace_package {
     public bool Go121;
 }
 
-[GoType] partial struct schedContext {
+partial struct schedContext {
     public trace.ThreadID M;
     public trace.ProcID P;
     public trace.GoID G;
 }
 
-[GoType] partial struct goState {
+partial struct goState {
     internal trace.GoState state;
     internal ж<schedContext> binding;
 }
 
-[GoType] partial struct procState {
+partial struct procState {
     internal trace.ProcState state;
     internal ж<schedContext> binding;
 }
@@ -319,23 +319,23 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
     return e.Errors();
 }
 
-[GoRecv] internal static bool hasRange(this ref Validator v, trace.ResourceID r, @string name) {
+internal static bool hasRange(this ref Validator v, trace.ResourceID r, @string name) {
     var (ranges, ok) = v.ranges[r, ꟷ];
     return ok && slices.Contains(ranges, name);
 }
 
-[GoRecv] internal static void addRange(this ref Validator v, trace.ResourceID r, @string name) {
+internal static void addRange(this ref Validator v, trace.ResourceID r, @string name) {
     var (ranges, _) = v.ranges[r, ꟷ];
     ranges = append(ranges, name);
     v.ranges[r] = ranges;
 }
 
-[GoRecv] internal static bool hasAnyRange(this ref Validator v, trace.ResourceID r) {
+internal static bool hasAnyRange(this ref Validator v, trace.ResourceID r) {
     var (ranges, ok) = v.ranges[r, ꟷ];
     return ok && len(ranges) != 0;
 }
 
-[GoRecv] internal static void deleteRange(this ref Validator v, trace.ResourceID r, @string name) {
+internal static void deleteRange(this ref Validator v, trace.ResourceID r, @string name) {
     var (ranges, ok) = v.ranges[r, ꟷ];
     if (!ok) {
         return;
@@ -400,17 +400,17 @@ internal static void checkStack(ж<errAccumulator> Ꮡe, traceꓸStack stk) {
     }
 }
 
-[GoType] partial struct errAccumulator {
+partial struct errAccumulator {
     internal slice<error> errs;
 }
 
-[GoRecv] internal static void Errorf(this ref errAccumulator e, @string f, params ꓸꓸꓸany argsʗp) {
+internal static void Errorf(this ref errAccumulator e, @string f, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     e.errs = append(e.errs, fmt.Errorf(f, args.ꓸꓸꓸ));
 }
 
-[GoRecv] internal static error Errors(this ref errAccumulator e) {
+internal static error Errors(this ref errAccumulator e) {
     return errors.Join(e.errs.ꓸꓸꓸ);
 }
 

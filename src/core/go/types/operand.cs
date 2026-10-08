@@ -18,7 +18,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class types_package {
 
-[GoType("num:byte")] partial struct operandMode;
+partial struct operandMode /*num:byte*/;
 
 internal static operandMode invalid => /* iota */ 0;  // operand is invalid
 internal static operandMode novalue => 1;  // operand represents no value (result of a function call w/o result)
@@ -54,7 +54,7 @@ internal static array<@string> operandModeString = new golib.SparseArray<@string
 // the operand, the operand's type, a value for constants, and an id
 // for built-in functions.
 // The zero value of operand is a ready to use invalid operand.
-[GoType] partial struct operand {
+partial struct operand {
     internal operandMode mode;
     internal ast.Expr expr;
     internal ΔType typ;
@@ -64,7 +64,7 @@ internal static array<@string> operandModeString = new golib.SparseArray<@string
 
 // Pos returns the position of the expression corresponding to x.
 // If x is invalid the position is nopos.
-[GoRecv] internal static tokenꓸPos Pos(this ref operand x) {
+internal static tokenꓸPos Pos(this ref operand x) {
     // x.expr may not be set if x is invalid
     if (x.expr == default!) {
         return nopos;
@@ -298,7 +298,7 @@ internal static @string String(this ж<operand> Ꮡx) {
 }
 
 // setConst sets x to the untyped constant for literal lit.
-[GoRecv] internal static void setConst(this ref operand x, token.Token k, @string lit) {
+internal static void setConst(this ref operand x, token.Token k, @string lit) {
     BasicKind kind = default!;
     var exprᴛ1 = k;
     if (exprᴛ1 == token.INT) {
@@ -332,7 +332,7 @@ internal static @string String(this ж<operand> Ꮡx) {
 }
 
 // isNil reports whether x is the (untyped) nil value.
-[GoRecv] internal static bool isNil(this ref operand x) {
+internal static bool isNil(this ref operand x) {
     if (isTypes2){
         return x.mode == nilvalue;
     } else {

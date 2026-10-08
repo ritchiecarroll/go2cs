@@ -17,7 +17,7 @@ public static UntypedInt OldMapMaxKeyBytes => 128;
 
 public static UntypedInt OldMapMaxElemBytes => 128; // Must fit in a uint8.
 
-[GoType] partial struct OldMapType {
+partial struct OldMapType {
     public partial ref Type Type { get; }
     public ж<Type> Key;
     public ж<Type> Elem;
@@ -32,27 +32,27 @@ public static UntypedInt OldMapMaxElemBytes => 128; // Must fit in a uint8.
 
 // Note: flag values must match those used in the TMAP case
 // in ../cmd/compile/internal/reflectdata/reflect.go:writeType.
-[GoRecv] public static bool IndirectKey(this ref OldMapType mt) {
+public static bool IndirectKey(this ref OldMapType mt) {
     // store ptr to key instead of key itself
     return (uint32)(mt.Flags & 1) != 0;
 }
 
-[GoRecv] public static bool IndirectElem(this ref OldMapType mt) {
+public static bool IndirectElem(this ref OldMapType mt) {
     // store ptr to elem instead of elem itself
     return (uint32)(mt.Flags & 2) != 0;
 }
 
-[GoRecv] public static bool ReflexiveKey(this ref OldMapType mt) {
+public static bool ReflexiveKey(this ref OldMapType mt) {
     // true if k==k for all keys
     return (uint32)(mt.Flags & 4) != 0;
 }
 
-[GoRecv] public static bool NeedKeyUpdate(this ref OldMapType mt) {
+public static bool NeedKeyUpdate(this ref OldMapType mt) {
     // true if we need to update key on an overwrite
     return (uint32)(mt.Flags & 8) != 0;
 }
 
-[GoRecv] public static bool HashMightPanic(this ref OldMapType mt) {
+public static bool HashMightPanic(this ref OldMapType mt) {
     // true if hash function might panic
     return (uint32)(mt.Flags & 16) != 0;
 }

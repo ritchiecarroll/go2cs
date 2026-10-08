@@ -14,7 +14,7 @@ partial class comment_package {
 // The fields in the struct can be filled in before calling
 // any of the printing methods
 // in order to customize the details of the printing process.
-[GoType] partial struct Printer {
+partial struct Printer {
     // HeadingLevel is the nesting level used for
     // HTML and Markdown headings.
     // If HeadingLevel is zero, it defaults to level 3,
@@ -49,14 +49,14 @@ partial class comment_package {
     public nint TextWidth;
 }
 
-[GoRecv] internal static nint headingLevel(this ref Printer p) {
+internal static nint headingLevel(this ref Printer p) {
     if (p.HeadingLevel <= 0) {
         return 3;
     }
     return p.HeadingLevel;
 }
 
-[GoRecv] internal static @string headingID(this ref Printer p, ж<Heading> Ꮡh) {
+internal static @string headingID(this ref Printer p, ж<Heading> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (p.HeadingID == default!) {
@@ -65,7 +65,7 @@ partial class comment_package {
     return p.HeadingID(Ꮡh);
 }
 
-[GoRecv] internal static @string docLinkURL(this ref Printer p, ж<DocLink> Ꮡlink) {
+internal static @string docLinkURL(this ref Printer p, ж<DocLink> Ꮡlink) {
     ref var link = ref Ꮡlink.DerefOrNull();
 
     if (p.DocLinkURL != default!) {
@@ -92,7 +92,7 @@ partial class comment_package {
 //	"/pkg"  → "/pkg/math#Sqrt"
 //	"/"     → "/math/#Sqrt"
 //	""      → "/math#Sqrt"
-[GoRecv] public static @string DefaultURL(this ref DocLink l, @string baseURL) {
+public static @string DefaultURL(this ref DocLink l, @string baseURL) {
     if (l.ImportPath != ""u8) {
         @string slash = ""u8;
         if (strings.HasSuffix(baseURL, "/"u8)){
@@ -128,7 +128,7 @@ internal static readonly @string hdrˢ = "hdr-"u8;
 // and then adding the prefix “hdr-”.
 // For example, if the heading text is “Go Doc Comments”,
 // the default ID is “hdr-Go_Doc_Comments”.
-[GoRecv] public static @string DefaultID(this ref Heading h) {
+public static @string DefaultID(this ref Heading h) {
     // Note: The “hdr-” prefix is important to avoid DOM clobbering attacks.
     // See https://pkg.go.dev/github.com/google/safehtml#Identifier.
     ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
@@ -150,7 +150,7 @@ internal static readonly @string hdrˢ = "hdr-"u8;
     return @out.String();
 }
 
-[GoType] partial struct commentPrinter {
+partial struct commentPrinter {
     public partial ref ж<Printer> Printer { get; }
 }
 
@@ -207,7 +207,7 @@ internal static bool blankBefore(Block x) {
 internal static readonly @string fourSpaceᶜ1 = "    "u8;
 
 // block prints the block x to out.
-[GoRecv] internal static void block(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
+internal static void block(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     switch (x.type()) {
@@ -267,7 +267,7 @@ internal static readonly @string fourSpaceᶜ1 = "    "u8;
 }
 
 // text prints the text sequence x to out.
-[GoRecv] internal static void text(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, slice<ΔText> x) {
+internal static void text(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, slice<ΔText> x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     foreach (var (_, t) in x) {
@@ -301,7 +301,7 @@ internal static readonly @string fourSpaceᶜ1 = "    "u8;
 
 // indent prints s to out, indenting with the indent string
 // after each newline in s.
-[GoRecv] internal static void indent(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, @string s) {
+internal static void indent(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, @string s) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     while (s != ""u8) {

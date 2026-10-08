@@ -12,7 +12,7 @@ partial class fuzz_package {
 //
 // TODO(golang.org/issue/46224): use a prioritization algorithm based on input
 // size, previous duration, coverage, and any other metrics that seem useful.
-[GoType] partial struct queue {
+partial struct queue {
     // elems holds a ring buffer.
     // The queue is empty when begin = end.
     // The queue is full (until grow is called) when end = begin + N - 1 (mod N)
@@ -21,11 +21,11 @@ partial class fuzz_package {
     internal nint head, len;
 }
 
-[GoRecv] internal static nint cap(this ref queue q) {
+internal static nint cap(this ref queue q) {
     return len(q.elems);
 }
 
-[GoRecv] internal static void grow(this ref queue q) {
+internal static void grow(this ref queue q) {
     nint oldCap = q.cap();
     nint newCap = oldCap * 2;
     if (newCap == 0) {
@@ -40,7 +40,7 @@ partial class fuzz_package {
     q.head = 0;
 }
 
-[GoRecv] internal static void enqueue(this ref queue q, any e) {
+internal static void enqueue(this ref queue q, any e) {
     if (q.len + 1 > q.cap()) {
         q.grow();
     }
@@ -49,7 +49,7 @@ partial class fuzz_package {
     q.len++;
 }
 
-[GoRecv] internal static (any, bool) dequeue(this ref queue q) {
+internal static (any, bool) dequeue(this ref queue q) {
     if (q.len == 0) {
         return (default!, false);
     }
@@ -60,14 +60,14 @@ partial class fuzz_package {
     return (e, true);
 }
 
-[GoRecv] internal static (any, bool) peek(this ref queue q) {
+internal static (any, bool) peek(this ref queue q) {
     if (q.len == 0) {
         return (default!, false);
     }
     return (q.elems[q.head], true);
 }
 
-[GoRecv] internal static void clear(this ref queue q) {
+internal static void clear(this ref queue q) {
     q = new queue(nil);
 }
 

@@ -72,10 +72,10 @@ using static go.@internal.profile_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/profile/encode.go", "encode.cs", "AAsagqyygoSCgpaCgoKClIKCgoIABhCCgpSCgoKCAAYQgoKogoKWgoKClKaClKaCgoKWgoSAgoKmgoK4goKUgpSClIKUgpSCgoKCgoCCpAASBqiCgoKogoKCqIKCgqiCgoKogoKCqIKClIKUAAYYgoKCAAYa0oSCgoKCloKCgoKCloKCgoKCgIKCgpS2loKCloKCgqKSgoKClKaClIKUgoKUloKEgIKmgIKCpKKCgpaCgoKmgqaCguYABRCCpoKCgpSCAAgIAAQQgoKCuIKmgoKC9gAGFIKmgoKCgoKCgoKCggAOBgANHIKmgoKCgoIACQjcgoKCuIKmgoLmAAUQgqaCgoKCggAJBgAIHIKCgoKUpoKClIKClII=")]
+[assembly: go.GoPositionMap("internal/profile/encode.go", "encode.cs", "AAsagqyygoSCgpaCgoKClIKCgoIABhCCgpSCgoKCAAYQgoKogoKWgoKClKaClKaCgoKWgoSAgoKmgoK4goKUgpSClIKUgpSCgoKCgoCCpAASBqiCgoKogoKCqIKCgqiCgoKogoKCqIKClIKUAAYYgoKCAAYa0oSCgoKCloKCgoKCloKCgoKCgIKCgpS2loKCloKCgqKSgoKClKaClIKUgoKUloKEgIKmgIKCpKKCgpaCgoKmgqaCguYABRCCpoKCgpSCAAgIAAQQgoKCuIKmgoKC9gAGFIKmgoKCgoKCgoKCggAOBgANHIKmgoKCgoIACQjcgoKCuIKmgoLmAAUQgqaCgoKCggAJBgAIHIKCgoKUpoKClIKClII=", "", "", "36=addString/1/2/2,addString/2/2/3;51=addString/1/1/2")]
 [assembly: go.GoPositionMap("internal/profile/filter.go", "filter.cs", "AAoe4oKCgoKCgqaCqtKCgoKClIK4goKClIK4")]
 [assembly: go.GoPositionMap("internal/profile/graph.go", "graph.cs", "ADyKAaKClKqigpSqoqrSgIKCgoKUgpSmgoIACRaSqJKCgpSAgqaW+tQACC6ygoCCuICCpqaCpoKmgoKCzIKCgqamgqaCgoKCggAQKKKClKjCgoKCgpKCgpSClIKUgpSUAAcSgoCCpIKCgoKCgoKmgoKCpoKCloKmlKimlIKCgpSClIKUlAAGEqKUpKQACRKCgpS4goKUvtKCgoKCgpSCgpSUpoKCgpSmsoKAgqaAgqSmgoKUyoKowoKClKaUgoKUgrqShISCloKClIKUgpSUrLKCgpaCqJKCgpTKgqaCgpaCgoKWgoSmgqaCgpQ=")]
-[assembly: go.GoPositionMap("internal/profile/merge.go", "merge.cs", "AAwq8oKUgoKWAAYQlIKChMqWgoK6gqaorNSAgqaCgoKogoKCqIKCgpSmgqaCgoKmABQuou6ClIKCgpSCgoKCgoKCyoKAgoKUpIKCgqiSgoKWgoKUhIKClIQADBqigpaAgoKmgu6CuIKAgoKkgoKCqJK4lIKUgoKClJSCAAgSooKWgIK4goCCgoKkAAsYloKCgqqmpIKCgrqUtAAJDAAHEIK4pqKClICCpIKAgoKk7oKCgqiSAAweooKAgriigoKCgoKUgoKUgoCCgraCqAAKHIKs0oKWgpaCgqaqog==")]
+[assembly: go.GoPositionMap("internal/profile/merge.go", "merge.cs", "AAwq8oKUgoKWAAYQlIKChMqWgoK6gqaorNSAgqaCgoKogoKCqIKCgpSmgqaCgoKmABQuou6ClIKCgpSCgoKCgoKCyoKAgoKUpIKCgqiSgoKWgoKUhIKClIQADBqigpaAgoKmgu6CuIKAgoKkgoKCqJK4lIKUgoKClJSCAAgSooKWgIK4goCCgoKkAAsYloKCgqqmpIKCgrqUtAAJDAAHEIK4pqKClICCpIKAgoKk7oKCgqiSAAweooKAgriigoKCgoKUgoKUgoCCgraCqAAKHIKs0oKWgpaCgqaqog==", "", "", "186=Join/1/3/1,Join/2/3/2,Join/3/3/3;343=mapFunction/1/1/1")]
 [assembly: go.GoPositionMap("internal/profile/profile.go", "profile.cs", "AHH4AaKCgpaCgoKUgoKUloKCloCCpKaSlIKCloKAgqaAgqao0oKCgpKC3tSCgpSCgsyCgoKUgpSUgoKClIKUlIKCgpSClIKAgoK2goCCgtqssoKCgoKogoKCgpSCzIKCgpSCgqaCutqkgoCCpIKClIKWgoKClIKCgoKUgoKUgoKCgoKUlIKCgpSogoKCgIKkgpSCgoCCyoK2lKiCgoKClIKUgpSClAAGEK7igIKmloKWhIKClIKClIKCloKCgriCrNKCloKWgoKoqqKCgqaqooKCpqaygpSosoKEgoCCpICCpgAEFrSSgqiCgpSCgIK2qJKokoKUgoKUqJKClIKCgoKmgpSCgoK4")]
 [assembly: go.GoPositionMap("internal/profile/proto.go", "proto.cs", "AClYgoKCpoKCgpSmgoKmlIKmgpSCgpSCgoKCgoKUgriCgpSmgoKmgoKUpoKUgoKUgoKCgoKClIK4goKmgoK4goKUuIKClKaigoKCgoKCgqaCkqaCpoLWgoKCgoKUgoIACAqCgoKUgoKCgpSCgsaClIK0goKClIKUgrSClIK0ptaCgpSmooCCpIKChJKCgpSClICCtqaigIKkgqailIKCgoSAgqSUlIKAgqSCpqKAgqSCpqKClIKChICCpJSUgoCCpIKmgoCCpIKmooKAgqSCpqKAgqSClJQ=")]
 [assembly: go.GoPositionMap("internal/profile/prune.go", "prune.cs", "AAsisoKEgoKCgIKUgpSCgtyUlpSUzLiCgoKCgpSClIKClIKCAAUQopKEgoCCpIKAgraU")]
@@ -87,7 +87,7 @@ namespace go.@internal;
 public static partial class profile_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

@@ -83,7 +83,7 @@ public static error ErrNoProgress = errors.New("multiple Read calls return no da
 // nothing happened; in particular it does not indicate EOF.
 //
 // Implementations must not retain p.
-[GoType] partial interface Reader {
+partial interface Reader {
     (nint n, error err) Read(slice<byte> p);
 }
 
@@ -96,7 +96,7 @@ public static error ErrNoProgress = errors.New("multiple Read calls return no da
 // Write must not modify the slice data, even temporarily.
 //
 // Implementations must not retain p.
-[GoType] partial interface Writer {
+partial interface Writer {
     (nint n, error err) Write(slice<byte> p);
 }
 
@@ -104,7 +104,7 @@ public static error ErrNoProgress = errors.New("multiple Read calls return no da
 //
 // The behavior of Close after the first call is undefined.
 // Specific implementations may document their own behavior.
-[GoType] partial interface Closer {
+partial interface Closer {
     error Close();
 }
 
@@ -123,33 +123,33 @@ public static error ErrNoProgress = errors.New("multiple Read calls return no da
 // Seeking to any positive offset may be allowed, but if the new offset exceeds
 // the size of the underlying object the behavior of subsequent I/O operations
 // is implementation-dependent.
-[GoType] partial interface Seeker {
+partial interface Seeker {
     (int64, error) Seek(int64 offset, nint whence);
 }
 
 // ReadWriter is the interface that groups the basic Read and Write methods.
-[GoType] partial interface ReadWriter :
+partial interface ReadWriter :
     Reader,
     Writer
 {
 }
 
 // ReadCloser is the interface that groups the basic Read and Close methods.
-[GoType] partial interface ReadCloser :
+partial interface ReadCloser :
     Reader,
     Closer
 {
 }
 
 // WriteCloser is the interface that groups the basic Write and Close methods.
-[GoType] partial interface WriteCloser :
+partial interface WriteCloser :
     Writer,
     Closer
 {
 }
 
 // ReadWriteCloser is the interface that groups the basic Read, Write and Close methods.
-[GoType] partial interface ReadWriteCloser :
+partial interface ReadWriteCloser :
     Reader,
     Writer,
     Closer
@@ -157,7 +157,7 @@ public static error ErrNoProgress = errors.New("multiple Read calls return no da
 }
 
 // ReadSeeker is the interface that groups the basic Read and Seek methods.
-[GoType] partial interface ReadSeeker :
+partial interface ReadSeeker :
     Reader,
     Seeker
 {
@@ -165,7 +165,7 @@ public static error ErrNoProgress = errors.New("multiple Read calls return no da
 
 // ReadSeekCloser is the interface that groups the basic Read, Seek and Close
 // methods.
-[GoType] partial interface ReadSeekCloser :
+partial interface ReadSeekCloser :
     Reader,
     Seeker,
     Closer
@@ -173,14 +173,14 @@ public static error ErrNoProgress = errors.New("multiple Read calls return no da
 }
 
 // WriteSeeker is the interface that groups the basic Write and Seek methods.
-[GoType] partial interface WriteSeeker :
+partial interface WriteSeeker :
     Writer,
     Seeker
 {
 }
 
 // ReadWriteSeeker is the interface that groups the basic Read, Write and Seek methods.
-[GoType] partial interface ReadWriteSeeker :
+partial interface ReadWriteSeeker :
     Reader,
     Writer,
     Seeker
@@ -194,7 +194,7 @@ public static error ErrNoProgress = errors.New("multiple Read calls return no da
 // Any error except EOF encountered during the read is also returned.
 //
 // The [Copy] function uses [ReaderFrom] if available.
-[GoType] partial interface ReaderFrom {
+partial interface ReaderFrom {
     (int64 n, error err) ReadFrom(Reader r);
 }
 
@@ -205,7 +205,7 @@ public static error ErrNoProgress = errors.New("multiple Read calls return no da
 // written. Any error encountered during the write is also returned.
 //
 // The Copy function uses WriterTo if available.
-[GoType] partial interface WriterTo {
+partial interface WriterTo {
     (int64 n, error err) WriteTo(Writer w);
 }
 
@@ -235,7 +235,7 @@ public static error ErrNoProgress = errors.New("multiple Read calls return no da
 // same input source.
 //
 // Implementations must not retain p.
-[GoType] partial interface ReaderAt {
+partial interface ReaderAt {
     (nint n, error err) ReadAt(slice<byte> p, int64 off);
 }
 
@@ -254,7 +254,7 @@ public static error ErrNoProgress = errors.New("multiple Read calls return no da
 // destination if the ranges do not overlap.
 //
 // Implementations must not retain p.
-[GoType] partial interface WriterAt {
+partial interface WriterAt {
     (nint n, error err) WriteAt(slice<byte> p, int64 off);
 }
 
@@ -267,7 +267,7 @@ public static error ErrNoProgress = errors.New("multiple Read calls return no da
 // ReadByte provides an efficient interface for byte-at-time
 // processing. A [Reader] that does not implement  ByteReader
 // can be wrapped using bufio.NewReader to add this method.
-[GoType] partial interface ByteReader {
+partial interface ByteReader {
     (byte, error) ReadByte();
 }
 
@@ -279,14 +279,14 @@ public static error ErrNoProgress = errors.New("multiple Read calls return no da
 // return an error, unread the last byte read (or the byte prior to the
 // last-unread byte), or (in implementations that support the [Seeker] interface)
 // seek to one byte before the current offset.
-[GoType] partial interface ByteScanner :
+partial interface ByteScanner :
     ByteReader
 {
     error UnreadByte();
 }
 
 // ByteWriter is the interface that wraps the WriteByte method.
-[GoType] partial interface ByteWriter {
+partial interface ByteWriter {
     error WriteByte(byte c);
 }
 
@@ -295,7 +295,7 @@ public static error ErrNoProgress = errors.New("multiple Read calls return no da
 // ReadRune reads a single encoded Unicode character
 // and returns the rune and its size in bytes. If no character is
 // available, err will be set.
-[GoType] partial interface RuneReader {
+partial interface RuneReader {
     (rune r, nint size, error err) ReadRune();
 }
 
@@ -307,14 +307,14 @@ public static error ErrNoProgress = errors.New("multiple Read calls return no da
 // return an error, unread the last rune read (or the rune prior to the
 // last-unread rune), or (in implementations that support the [Seeker] interface)
 // seek to the start of the rune before the current offset.
-[GoType] partial interface RuneScanner :
+partial interface RuneScanner :
     RuneReader
 {
     error UnreadRune();
 }
 
 // StringWriter is the interface that wraps the WriteString method.
-[GoType] partial interface StringWriter {
+partial interface StringWriter {
     (nint n, error err) WriteString(@string s);
 }
 
@@ -494,12 +494,12 @@ public static Reader LimitReader(Reader r, int64 n) {
 // data returned to just N bytes. Each call to Read
 // updates N to reflect the new amount remaining.
 // Read returns EOF when N <= 0 or when the underlying R returns EOF.
-[GoType] partial struct LimitedReader {
+partial struct LimitedReader {
     public Reader R; // underlying reader
     public int64 N;  // max bytes remaining
 }
 
-[GoRecv] public static (nint n, error err) Read(this ref LimitedReader l, slice<byte> p) {
+public static (nint n, error err) Read(this ref LimitedReader l, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -531,7 +531,7 @@ public static ж<SectionReader> NewSectionReader(ReaderAt r, int64 off, int64 n)
 
 // SectionReader implements Read, Seek, and ReadAt on a section
 // of an underlying [ReaderAt].
-[GoType] partial struct SectionReader {
+partial struct SectionReader {
     internal ReaderAt r; // constant after creation
     internal int64 @base;    // constant after creation
     internal int64 off;
@@ -539,7 +539,7 @@ public static ж<SectionReader> NewSectionReader(ReaderAt r, int64 off, int64 n)
     internal int64 n; // constant after creation
 }
 
-[GoRecv] public static (nint n, error err) Read(this ref SectionReader s, slice<byte> p) {
+public static (nint n, error err) Read(this ref SectionReader s, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -560,7 +560,7 @@ internal static error errWhence = errors.New("Seek: invalid whence"u8);
 
 internal static error errOffset = errors.New("Seek: invalid offset"u8);
 
-[GoRecv] public static (int64, error) Seek(this ref SectionReader s, int64 offset, nint whence) {
+public static (int64, error) Seek(this ref SectionReader s, int64 offset, nint whence) {
     var exprᴛ1 = whence;
     if (exprᴛ1 == SeekStart) {
         offset += s.@base;
@@ -582,7 +582,7 @@ internal static error errOffset = errors.New("Seek: invalid offset"u8);
     return (offset - s.@base, default!);
 }
 
-[GoRecv] public static (nint n, error err) ReadAt(this ref SectionReader s, slice<byte> p, int64 off) {
+public static (nint n, error err) ReadAt(this ref SectionReader s, slice<byte> p, int64 off) {
     nint n = default!;
     error err = default!;
 
@@ -604,7 +604,7 @@ internal static error errOffset = errors.New("Seek: invalid offset"u8);
 }
 
 // Size returns the size of the section in bytes.
-[GoRecv] public static int64 Size(this ref SectionReader s) {
+public static int64 Size(this ref SectionReader s) {
     return s.limit - s.@base;
 }
 
@@ -612,12 +612,12 @@ internal static error errOffset = errors.New("Seek: invalid offset"u8);
 //
 // The returned values are the same that were passed to [NewSectionReader]
 // when the [SectionReader] was created.
-[GoRecv] public static (ReaderAt r, int64 off, int64 n) Outer(this ref SectionReader s) {
+public static (ReaderAt r, int64 off, int64 n) Outer(this ref SectionReader s) {
     return (s.r, s.@base, s.n);
 }
 
 // An OffsetWriter maps writes at offset base to offset base+off in the underlying writer.
-[GoType] partial struct OffsetWriter {
+partial struct OffsetWriter {
     internal WriterAt w;
     internal int64 @base; // the original offset
     internal int64 off; // the current offset
@@ -629,7 +629,7 @@ public static ж<OffsetWriter> NewOffsetWriter(WriterAt w, int64 off) {
     return Ꮡ(new OffsetWriter(w, off, off));
 }
 
-[GoRecv] public static (nint n, error err) Write(this ref OffsetWriter o, slice<byte> p) {
+public static (nint n, error err) Write(this ref OffsetWriter o, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -638,7 +638,7 @@ public static ж<OffsetWriter> NewOffsetWriter(WriterAt w, int64 off) {
     return (n, err);
 }
 
-[GoRecv] public static (nint n, error err) WriteAt(this ref OffsetWriter o, slice<byte> p, int64 off) {
+public static (nint n, error err) WriteAt(this ref OffsetWriter o, slice<byte> p, int64 off) {
     if (off < 0) {
         return (0, errOffset);
     }
@@ -646,7 +646,7 @@ public static ж<OffsetWriter> NewOffsetWriter(WriterAt w, int64 off) {
     return o.w.WriteAt(p, off);
 }
 
-[GoRecv] public static (int64, error) Seek(this ref OffsetWriter o, int64 offset, nint whence) {
+public static (int64, error) Seek(this ref OffsetWriter o, int64 offset, nint whence) {
     var exprᴛ1 = whence;
     if (exprᴛ1 == SeekStart) {
         offset += o.@base;
@@ -674,12 +674,12 @@ public static Reader TeeReader(Reader r, Writer w) {
     return new teeReaderжReader(Ꮡ(new teeReader(r, w)));
 }
 
-[GoType] partial struct teeReader {
+partial struct teeReader {
     internal Reader r;
     internal Writer w;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref teeReader t, slice<byte> p) {
+internal static (nint n, error err) Read(this ref teeReader t, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -698,7 +698,7 @@ public static Reader TeeReader(Reader r, Writer w) {
 // without doing anything.
 public static Writer Discard = new discard(nil);
 
-[GoType] partial struct discard {
+partial struct discard {
 }
 
 // discard implements ReaderFrom as an optimization so Copy to
@@ -753,16 +753,16 @@ public static ReadCloser NopCloser(Reader r) {
     return new nopCloser(r);
 }
 
-[GoType] partial struct nopCloser {
-    [GoEmbedded] public Reader Reader;
+partial struct nopCloser {
+    /*embed*/ public Reader Reader;
 }
 
 internal static error Close(this nopCloser _) {
     return default!;
 }
 
-[GoType] partial struct nopCloserWriterTo {
-    [GoEmbedded] public Reader Reader;
+partial struct nopCloserWriterTo {
+    /*embed*/ public Reader Reader;
 }
 
 internal static error Close(this nopCloserWriterTo _) {

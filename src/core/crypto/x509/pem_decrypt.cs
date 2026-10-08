@@ -21,7 +21,7 @@ using hash = hash_package;
 
 partial class x509_package {
 
-[GoType("num:nint")] partial struct PEMCipher;
+partial struct PEMCipher /*num:nint*/;
 
 // Possible values for the EncryptPEMBlock encryption algorithm.
 internal static PEMCipher _ᴛ1ʗ => /* iota */ 0;
@@ -37,7 +37,7 @@ public static PEMCipher PEMCipherAES192 => 4;
 public static PEMCipher PEMCipherAES256 => 5;
 
 // rfc1423Algo holds a method for enciphering a PEM block.
-[GoType] partial struct rfc1423Algo {
+partial struct rfc1423Algo {
     internal PEMCipher cipher;
     internal @string name;
     internal Func<slice<byte>, (cipher.Block, error)> cipherFunc;

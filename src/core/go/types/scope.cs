@@ -20,7 +20,7 @@ partial class types_package {
 // (parent) and contained (children) scopes. Objects may be inserted
 // and looked up by name. The zero value for Scope is a ready-to-use
 // empty scope.
-[GoType] partial struct ΔScope {
+partial struct ΔScope {
     internal ж<ΔScope> parent;
     internal slice<ж<ΔScope>> children;
     internal nint number;              // parent.children[number-1] is this scope; 0 if there is no parent
@@ -45,17 +45,17 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
 }
 
 // Parent returns the scope's containing (parent) scope.
-[GoRecv] public static ж<ΔScope> Parent(this ref ΔScope s) {
+public static ж<ΔScope> Parent(this ref ΔScope s) {
     return s.parent;
 }
 
 // Len returns the number of scope elements.
-[GoRecv] public static nint Len(this ref ΔScope s) {
+public static nint Len(this ref ΔScope s) {
     return len(s.elems);
 }
 
 // Names returns the scope's element names in sorted order.
-[GoRecv] public static slice<@string> Names(this ref ΔScope s) {
+public static slice<@string> Names(this ref ΔScope s) {
     var names = new slice<@string>(len(s.elems));
     nint i = 0;
     foreach (var (name, _) in s.elems) {
@@ -67,18 +67,18 @@ public static ж<ΔScope> NewScope(ж<ΔScope> Ꮡparent, tokenꓸPos pos, token
 }
 
 // NumChildren returns the number of scopes nested in s.
-[GoRecv] public static nint NumChildren(this ref ΔScope s) {
+public static nint NumChildren(this ref ΔScope s) {
     return len(s.children);
 }
 
 // Child returns the i'th child scope for 0 <= i < NumChildren().
-[GoRecv] public static ж<ΔScope> Child(this ref ΔScope s, nint i) {
+public static ж<ΔScope> Child(this ref ΔScope s, nint i) {
     return s.children[i];
 }
 
 // Lookup returns the object in scope s with the given name if such an
 // object exists; otherwise the result is nil.
-[GoRecv] public static Object Lookup(this ref ΔScope s, @string name) {
+public static Object Lookup(this ref ΔScope s, @string name) {
     var obj = resolve(name, s.elems[name]);
     // Hijack Lookup for "any": with gotypesalias=1, we want the Universe to
     // return an Alias for "any", and with gotypesalias=0 we want to return
@@ -137,7 +137,7 @@ internal static bool _InsertLazy(this ж<ΔScope> Ꮡs, @string name, Func<Objec
     return true;
 }
 
-[GoRecv] internal static void insert(this ref ΔScope s, @string name, Object obj) {
+internal static void insert(this ref ΔScope s, @string name, Object obj) {
     if (s.elems == default!) {
         s.elems = new map<@string, Object>();
     }
@@ -179,7 +179,7 @@ public static @string String(this ж<ΔScope> Ꮡs) {
 
 // A lazyObject represents an imported Object that has not been fully
 // resolved yet by its importer.
-[GoType] partial struct lazyObject {
+partial struct lazyObject {
     internal ж<ΔScope> parent;
     internal Func<Object> resolve;
     internal Object obj;
@@ -215,71 +215,71 @@ internal static Object resolve(@string name, Object obj) {
 
 // stub implementations so *lazyObject implements Object and we can
 // store them directly into Scope.elems.
-[GoRecv] internal static ж<ΔScope> Parent(this ref lazyObject _) {
+internal static ж<ΔScope> Parent(this ref lazyObject _) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static tokenꓸPos Pos(this ref lazyObject _) {
+internal static tokenꓸPos Pos(this ref lazyObject _) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static ж<Package> Pkg(this ref lazyObject _) {
+internal static ж<Package> Pkg(this ref lazyObject _) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static @string Name(this ref lazyObject _) {
+internal static @string Name(this ref lazyObject _) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static ΔType Type(this ref lazyObject _) {
+internal static ΔType Type(this ref lazyObject _) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static bool Exported(this ref lazyObject _) {
+internal static bool Exported(this ref lazyObject _) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static @string Id(this ref lazyObject _) {
+internal static @string Id(this ref lazyObject _) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static @string String(this ref lazyObject _) {
+internal static @string String(this ref lazyObject _) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static uint32 order(this ref lazyObject _) {
+internal static uint32 order(this ref lazyObject _) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static Δcolor color(this ref lazyObject _) {
+internal static Δcolor color(this ref lazyObject _) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static void setType(this ref lazyObject _Δp0, ΔType _Δp1) {
+internal static void setType(this ref lazyObject _Δp0, ΔType _Δp1) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static void setOrder(this ref lazyObject _Δp0, uint32 _Δp1) {
+internal static void setOrder(this ref lazyObject _Δp0, uint32 _Δp1) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static void setColor(this ref lazyObject _, Δcolor Δcolor) {
+internal static void setColor(this ref lazyObject _, Δcolor Δcolor) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static void setParent(this ref lazyObject _Δp0, ж<ΔScope> _Δp1) {
+internal static void setParent(this ref lazyObject _Δp0, ж<ΔScope> _Δp1) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static bool sameId(this ref lazyObject _Δp0, ж<Package> _Δp1, @string _Δp2, bool _Δp3) {
+internal static bool sameId(this ref lazyObject _Δp0, ж<Package> _Δp1, @string _Δp2, bool _Δp3) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static tokenꓸPos scopePos(this ref lazyObject _) {
+internal static tokenꓸPos scopePos(this ref lazyObject _) {
     throw panic("unreachable");
 }
 
-[GoRecv] internal static void setScopePos(this ref lazyObject _Δp0, tokenꓸPos _Δp1) {
+internal static void setScopePos(this ref lazyObject _Δp0, tokenꓸPos _Δp1) {
     throw panic("unreachable");
 }
 

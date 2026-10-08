@@ -29,7 +29,7 @@ public static error ErrNegativeCount = errors.New("bufio: negative count"u8);
 // A new Reader is created by calling [NewReader] or [NewReaderSize];
 // alternatively the zero value of a Reader may be used after calling [Reset]
 // on it.
-[GoType] partial struct Reader {
+partial struct Reader {
     internal slice<byte> buf;
     internal io.Reader rd; // reader provided by the client
     internal nint r, w;      // buf read and write positions
@@ -62,7 +62,7 @@ public static ж<Reader> NewReader(io.Reader rd) {
 }
 
 // Size returns the size of the underlying buffer in bytes.
-[GoRecv] public static nint Size(this ref Reader b) {
+public static nint Size(this ref Reader b) {
     return len(b.buf);
 }
 
@@ -86,7 +86,7 @@ public static void Reset(this ж<Reader> Ꮡb, io.Reader r) {
     b.reset(b.buf, r);
 }
 
-[GoRecv] internal static void reset(this ref Reader b, slice<byte> buf, io.Reader r) {
+internal static void reset(this ref Reader b, slice<byte> buf, io.Reader r) {
     b = new Reader(
         buf: buf,
         rd: r,
@@ -98,7 +98,7 @@ public static void Reset(this ж<Reader> Ꮡb, io.Reader r) {
 internal static error errNegativeRead = errors.New("bufio: reader returned negative count from Read"u8);
 
 // fill reads a new chunk into the buffer.
-[GoRecv] internal static void fill(this ref Reader b) {
+internal static void fill(this ref Reader b) {
     // Slide existing data to beginning.
     if (b.r > 0) {
         copy(b.buf, b.buf.slice(b.r, b.w));
@@ -126,7 +126,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
     b.err = io.ErrNoProgress;
 }
 
-[GoRecv] internal static error readErr(this ref Reader b) {
+internal static error readErr(this ref Reader b) {
     var err = b.err;
     b.err = default!;
     return err;
@@ -140,7 +140,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
 //
 // Calling Peek prevents a [Reader.UnreadByte] or [Reader.UnreadRune] call from succeeding
 // until the next read operation.
-[GoRecv] public static (slice<byte>, error) Peek(this ref Reader b, nint n) {
+public static (slice<byte>, error) Peek(this ref Reader b, nint n) {
     if (n < 0) {
         return (default!, ErrNegativeCount);
     }
@@ -172,7 +172,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
 // If Discard skips fewer than n bytes, it also returns an error.
 // If 0 <= n <= b.Buffered(), Discard is guaranteed to succeed without
 // reading from the underlying io.Reader.
-[GoRecv] public static (nint discarded, error err) Discard(this ref Reader b, nint n) {
+public static (nint discarded, error err) Discard(this ref Reader b, nint n) {
     nint discarded = default!;
     error err = default!;
 
@@ -212,7 +212,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
 // To read exactly len(p) bytes, use io.ReadFull(b, p).
 // If the underlying [Reader] can return a non-zero count with io.EOF,
 // then this Read method can do so as well; see the [io.Reader] docs.
-[GoRecv] public static (nint n, error err) Read(this ref Reader b, slice<byte> p) {
+public static (nint n, error err) Read(this ref Reader b, slice<byte> p) {
     nint n = default!;
 
     n = len(p);
@@ -264,7 +264,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
 
 // ReadByte reads and returns a single byte.
 // If no byte is available, returns an error.
-[GoRecv] public static (byte, error) ReadByte(this ref Reader b) {
+public static (byte, error) ReadByte(this ref Reader b) {
     b.lastRuneSize = -1;
     while (b.r == b.w) {
         if (b.err != default!) {
@@ -283,7 +283,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
 // UnreadByte returns an error if the most recent method called on the
 // [Reader] was not a read operation. Notably, [Reader.Peek], [Reader.Discard], and [Reader.WriteTo] are not
 // considered read operations.
-[GoRecv] public static error UnreadByte(this ref Reader b) {
+public static error UnreadByte(this ref Reader b) {
     if (b.lastByte < 0 || b.r == 0 && b.w > 0) {
         return ErrInvalidUnreadByte;
     }
@@ -303,7 +303,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
 // ReadRune reads a single UTF-8 encoded Unicode character and returns the
 // rune and its size in bytes. If the encoded rune is invalid, it consumes one byte
 // and returns unicode.ReplacementChar (U+FFFD) with a size of 1.
-[GoRecv] public static (rune r, nint size, error err) ReadRune(this ref Reader b) {
+public static (rune r, nint size, error err) ReadRune(this ref Reader b) {
     rune r = default!;
     nint size = default!;
 
@@ -328,7 +328,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
 // the [Reader] was not a [Reader.ReadRune], [Reader.UnreadRune] returns an error. (In this
 // regard it is stricter than [Reader.UnreadByte], which will unread the last byte
 // from any read operation.)
-[GoRecv] public static error UnreadRune(this ref Reader b) {
+public static error UnreadRune(this ref Reader b) {
     if (b.lastRuneSize < 0 || b.r < b.lastRuneSize) {
         return ErrInvalidUnreadRune;
     }
@@ -339,7 +339,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
 }
 
 // Buffered returns the number of bytes that can be read from the current buffer.
-[GoRecv] public static nint Buffered(this ref Reader b) {
+public static nint Buffered(this ref Reader b) {
     return b.w - b.r;
 }
 
@@ -353,7 +353,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
 // by the next I/O operation, most clients should use
 // [Reader.ReadBytes] or ReadString instead.
 // ReadSlice returns err != nil if and only if line does not end in delim.
-[GoRecv] public static (slice<byte> line, error err) ReadSlice(this ref Reader b, byte delim) {
+public static (slice<byte> line, error err) ReadSlice(this ref Reader b, byte delim) {
     slice<byte> line = default!;
     error err = default!;
 
@@ -411,7 +411,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
 // Calling [Reader.UnreadByte] after ReadLine will always unread the last byte read
 // (possibly a character belonging to the line end) even if that byte is not
 // part of the line returned by ReadLine.
-[GoRecv] public static (slice<byte> line, bool isPrefix, error err) ReadLine(this ref Reader b) {
+public static (slice<byte> line, bool isPrefix, error err) ReadLine(this ref Reader b) {
     slice<byte> line = default!;
     bool isPrefix = default!;
     error err = default!;
@@ -455,7 +455,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
 // `bytes.Join(append(fullBuffers, finalFragment), nil)`, which has a
 // length of `totalLen`. The result is structured in this way to allow callers
 // to minimize allocations and copies.
-[GoRecv] internal static (slice<slice<byte>> fullBuffers, slice<byte> finalFragment, nint totalLen, error err) collectFragments(this ref Reader b, byte delim) {
+internal static (slice<slice<byte>> fullBuffers, slice<byte> finalFragment, nint totalLen, error err) collectFragments(this ref Reader b, byte delim) {
     slice<slice<byte>> fullBuffers = default!;
     nint totalLen = default!;
     error err = default!;
@@ -490,7 +490,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
 // ReadBytes returns err != nil if and only if the returned data does not end in
 // delim.
 // For simple uses, a Scanner may be more convenient.
-[GoRecv] public static (slice<byte>, error) ReadBytes(this ref Reader b, byte delim) {
+public static (slice<byte>, error) ReadBytes(this ref Reader b, byte delim) {
     var (full, frag, n, err) = b.collectFragments(delim);
     // Allocate new buffer to hold the full pieces and the fragment.
     var buf = new slice<byte>(n);
@@ -510,7 +510,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
 // ReadString returns err != nil if and only if the returned data does not end in
 // delim.
 // For simple uses, a Scanner may be more convenient.
-[GoRecv] public static (@string, error) ReadString(this ref Reader b, byte delim) {
+public static (@string, error) ReadString(this ref Reader b, byte delim) {
     var (full, frag, n, err) = b.collectFragments(delim);
     // Allocate new buffer to hold the full pieces and the fragment.
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
@@ -527,7 +527,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
 // This may make multiple calls to the [Reader.Read] method of the underlying [Reader].
 // If the underlying reader supports the [Reader.WriteTo] method,
 // this calls the underlying [Reader.WriteTo] without buffering.
-[GoRecv] public static (int64 n, error err) WriteTo(this ref Reader b, io.Writer w) {
+public static (int64 n, error err) WriteTo(this ref Reader b, io.Writer w) {
     int64 n = default!;
     error err = default!;
 
@@ -572,7 +572,7 @@ internal static error errNegativeRead = errors.New("bufio: reader returned negat
 internal static error errNegativeWrite = errors.New("bufio: writer returned negative count from Write"u8);
 
 // writeBuf writes the [Reader]'s buffer to the writer.
-[GoRecv] internal static (int64, error) writeBuf(this ref Reader b, io.Writer w) {
+internal static (int64, error) writeBuf(this ref Reader b, io.Writer w) {
     var (n, err) = w.Write(b.buf.slice(b.r, b.w));
     if (n < 0) {
         throw panic(errNegativeWrite);
@@ -589,7 +589,7 @@ internal static error errNegativeWrite = errors.New("bufio: writer returned nega
 // After all data has been written, the client should call the
 // [Writer.Flush] method to guarantee all data has been forwarded to
 // the underlying [io.Writer].
-[GoType] partial struct Writer {
+partial struct Writer {
     internal error err;
     internal slice<byte> buf;
     internal nint n;
@@ -622,7 +622,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
 }
 
 // Size returns the size of the underlying buffer in bytes.
-[GoRecv] public static nint Size(this ref Writer b) {
+public static nint Size(this ref Writer b) {
     return len(b.buf);
 }
 
@@ -649,7 +649,7 @@ public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
 }
 
 // Flush writes any buffered data to the underlying [io.Writer].
-[GoRecv] public static error Flush(this ref Writer b) {
+public static error Flush(this ref Writer b) {
     if (b.err != default!) {
         return b.err;
     }
@@ -673,7 +673,7 @@ public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
 }
 
 // Available returns how many bytes are unused in the buffer.
-[GoRecv] public static nint Available(this ref Writer b) {
+public static nint Available(this ref Writer b) {
     return len(b.buf) - b.n;
 }
 
@@ -681,12 +681,12 @@ public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
 // This buffer is intended to be appended to and
 // passed to an immediately succeeding [Writer.Write] call.
 // The buffer is only valid until the next write operation on b.
-[GoRecv] public static slice<byte> AvailableBuffer(this ref Writer b) {
+public static slice<byte> AvailableBuffer(this ref Writer b) {
     return b.buf.slice(b.n)[..0];
 }
 
 // Buffered returns the number of bytes that have been written into the current buffer.
-[GoRecv] public static nint Buffered(this ref Writer b) {
+public static nint Buffered(this ref Writer b) {
     return b.n;
 }
 
@@ -694,7 +694,7 @@ public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
 // It returns the number of bytes written.
 // If nn < len(p), it also returns an error explaining
 // why the write is short.
-[GoRecv] public static (nint nn, error err) Write(this ref Writer b, slice<byte> p) {
+public static (nint nn, error err) Write(this ref Writer b, slice<byte> p) {
     nint nn = default!;
 
     while (len(p) > b.Available() && b.err == default!) {
@@ -721,7 +721,7 @@ public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
 }
 
 // WriteByte writes a single byte.
-[GoRecv] public static error WriteByte(this ref Writer b, byte c) {
+public static error WriteByte(this ref Writer b, byte c) {
     if (b.err != default!) {
         return b.err;
     }
@@ -735,7 +735,7 @@ public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
 
 // WriteRune writes a single Unicode code point, returning
 // the number of bytes written and any error.
-[GoRecv] public static (nint size, error err) WriteRune(this ref Writer b, rune r) {
+public static (nint size, error err) WriteRune(this ref Writer b, rune r) {
     nint size = default!;
     error err = default!;
 
@@ -772,7 +772,7 @@ public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
 // It returns the number of bytes written.
 // If the count is less than len(s), it also returns an error explaining
 // why the write is short.
-[GoRecv] public static (nint, error) WriteString(this ref Writer b, @string s) {
+public static (nint, error) WriteString(this ref Writer b, @string s) {
     io.StringWriter sw = default!;
     var tryStringWriter = true;
     nint nn = 0;
@@ -808,7 +808,7 @@ public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
 // supports the ReadFrom method, this calls the underlying ReadFrom.
 // If there is buffered data and an underlying ReadFrom, this fills
 // the buffer and writes it before calling ReadFrom.
-[GoRecv] public static (int64 n, error err) ReadFrom(this ref Writer b, io.Reader r) {
+public static (int64 n, error err) ReadFrom(this ref Writer b, io.Reader r) {
     int64 n = default!;
     error err = default!;
 
@@ -863,7 +863,7 @@ public static void Reset(this ж<Writer> Ꮡb, io.Writer w) {
 
 // ReadWriter stores pointers to a [Reader] and a [Writer].
 // It implements [io.ReadWriter].
-[GoType] partial struct ReadWriter {
+partial struct ReadWriter {
     public partial ref ж<Reader> Reader { get; }
     public partial ref ж<Writer> Writer { get; }
 }

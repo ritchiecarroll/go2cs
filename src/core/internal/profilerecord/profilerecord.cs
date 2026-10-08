@@ -10,25 +10,25 @@ namespace go.@internal;
 
 partial class profilerecord_package {
 
-[GoType] partial struct StackRecord {
+partial struct StackRecord {
     public slice<uintptr> Stack;
 }
 
-[GoType] partial struct MemProfileRecord {
+partial struct MemProfileRecord {
     public int64 AllocBytes, FreeBytes;
     public int64 AllocObjects, FreeObjects;
     public slice<uintptr> Stack;
 }
 
-[GoRecv] public static int64 InUseBytes(this ref MemProfileRecord r) {
+public static int64 InUseBytes(this ref MemProfileRecord r) {
     return r.AllocBytes - r.FreeBytes;
 }
 
-[GoRecv] public static int64 InUseObjects(this ref MemProfileRecord r) {
+public static int64 InUseObjects(this ref MemProfileRecord r) {
     return r.AllocObjects - r.FreeObjects;
 }
 
-[GoType] partial struct BlockProfileRecord {
+partial struct BlockProfileRecord {
     public int64 Count;
     public int64 Cycles;
     public slice<uintptr> Stack;

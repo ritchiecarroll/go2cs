@@ -8,12 +8,12 @@ using fmt = fmt_package;
 partial class trace_package {
 
 // Value is a dynamically-typed value obtained from a trace.
-[GoType] partial struct Value {
+partial struct Value {
     internal ValueKind kind;
     internal uint64 scalar;
 }
 
-[GoType("num:uint8")] partial struct ValueKind;
+partial struct ValueKind /*num:uint8*/;
 
 public static ValueKind ValueBad => /* iota */ 0;
 public static ValueKind ValueUint64 => 1;

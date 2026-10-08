@@ -105,7 +105,7 @@ using static go.os_package;
 [assembly: go.GoPositionMap("os/sys_windows.go", "sys_windows.cs", "AA4YhJSSgoKCgpSCuoI=")]
 [assembly: go.GoPositionMap("os/tempfile.go", "tempfile.cs", "AA4o9IIAAhgACQKCloKClISCgoKCgoCCpJS4mNKCgqaAgpSkAAIWAAgCgpaCgpSEgoKCgoKUgoCCpJSCgIK2uIKClA==")]
 [assembly: go.GoPositionMap("os/types.go", "types.cs", "AA4akAAsXoCigAACEOKCgoKU")]
-[assembly: go.GoPositionMap("os/types_windows.go", "types_windows.cs", "ACpcwoKCgpaCgoKCgpSWAA4o4gAJGAAICgAMHsIAChqiAAcQypQAAhDkpoKmlIKCgoKCgqamooKUAAoYgoKWlKS4gpSkAAQgABAGruKClJSElIKUlKSkgoKUgqa4poKokgAJFMKCgpSUgoKUlIKCAA8ihIKClIKCgoKUgoKCgtqigoKCgoKmgqaygoKUgoKUqJI=")]
+[assembly: go.GoPositionMap("os/types_windows.go", "types_windows.cs", "ACpcwoKCgpaCgoKCgpSWAA4o4gAJGAAICgAMHsIAChqiAAcQypQAAhDkpoKmlIKCgoKCgqamooKUAAoYgoKWlKS4gpSkAAQgABAGruKClJSElIKUlKSkgoKUgqa4poKokgAJFMKCgpSUgoKUlIKCAA8ihIKClIKCgoKUgoKCgtqigoKCgoKmgqaygoKUgoKUqJI=", "", "", "62=Base/1/1/1")]
 [assembly: go.GoPositionMap("os/zero_copy_posix.go", "zero_copy_posix.cs", "AAsgooCCpKyyhIKCloI=")]
 [assembly: go.GoPositionMap("os/zero_copy_stub.go", "zero_copy_stub.cs", "AAoWgqaC")]
 // </GoSourcePositionMaps>
@@ -116,7 +116,7 @@ namespace go;
 public static partial class os_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

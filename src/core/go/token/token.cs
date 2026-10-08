@@ -13,7 +13,7 @@ using global::go.unicode;
 
 partial class token_package {
 
-[GoType("num:nint")] partial struct Token;
+partial struct Token /*num:nint*/;
 
 // The list of tokens.
 public static Token ILLEGAL => /* iota */ 0;

@@ -10,7 +10,7 @@ using @internal.runtime;
 
 partial class runtime_package {
 
-[GoType("num:uint64")] partial struct Δhex;
+partial struct Δhex /*num:uint64*/;
 
 // go2cs generated this placeholder — func bytes is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 

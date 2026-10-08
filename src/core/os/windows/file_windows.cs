@@ -28,7 +28,7 @@ internal static UntypedInt _UTIME_OMIT => -1;
 // The extra level of indirection ensures that no clients of os
 // can overwrite this data, which could cause the finalizer
 // to close the wrong file descriptor.
-[GoType] partial struct @file {
+partial struct @file {
     internal poll.FD pfd;
     internal @string name;
     internal atomic.Pointer<dirInfo> dirinfo; // nil unless directory being read

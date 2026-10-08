@@ -51,7 +51,7 @@ partial class types_package {
 //
 // Finally, we look for any positive-weight cycles. Zero-weight cycles
 // are allowed because static instantiation will reach a fixed point.
-[GoType] partial struct monoGraph {
+partial struct monoGraph {
     internal slice<monoVertex> vertices;
     internal slice<monoEdge> edges;
     // canon maps method receiver type parameters to their respective
@@ -62,7 +62,7 @@ partial class types_package {
     internal map<ж<TypeName>, nint> nameIdx;
 }
 
-[GoType] partial struct monoVertex {
+partial struct monoVertex {
     internal nint weight; // weight of heaviest known path to this vertex
     internal nint pre; // previous edge (if any) in the above path
     internal nint len; // length of the above path
@@ -71,7 +71,7 @@ partial class types_package {
     internal ж<TypeName> obj;
 }
 
-[GoType] partial struct monoEdge {
+partial struct monoEdge {
     internal nint dst, src;
     internal nint weight;
     internal tokenꓸPos pos;
@@ -158,7 +158,7 @@ internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
 
 // recordCanon records that tpar is the canonical type parameter
 // corresponding to method type parameter mpar.
-[GoRecv] internal static void recordCanon(this ref monoGraph w, ж<TypeParam> Ꮡmpar, ж<TypeParam> Ꮡtpar) {
+internal static void recordCanon(this ref monoGraph w, ж<TypeParam> Ꮡmpar, ж<TypeParam> Ꮡtpar) {
     if (w.canon == default!) {
         w.canon = new map<ж<TypeParam>, ж<TypeParam>>();
     }
@@ -282,7 +282,7 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, token�
 
 // localNamedVertex returns the index of the vertex representing
 // named, or -1 if named doesn't need representation.
-[GoRecv] internal static nint localNamedVertex(this ref monoGraph w, ж<Package> Ꮡpkg, ж<Named> Ꮡnamed) {
+internal static nint localNamedVertex(this ref monoGraph w, ж<Package> Ꮡpkg, ж<Named> Ꮡnamed) {
     ref var named = ref Ꮡnamed.DerefOrNull();
 
     var obj = named.Obj();
@@ -326,7 +326,7 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, token�
 }
 
 // typeParamVertex returns the index of the vertex representing tpar.
-[GoRecv] internal static nint typeParamVertex(this ref monoGraph w, ж<TypeParam> Ꮡtpar) {
+internal static nint typeParamVertex(this ref monoGraph w, ж<TypeParam> Ꮡtpar) {
     ref var tpar = ref Ꮡtpar.DerefOrNull();
 
     {
@@ -349,7 +349,7 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, token�
     return idx;
 }
 
-[GoRecv] internal static void addEdge(this ref monoGraph w, nint dst, nint src, nint weight, tokenꓸPos pos, ΔType typ) {
+internal static void addEdge(this ref monoGraph w, nint dst, nint src, nint weight, tokenꓸPos pos, ΔType typ) {
     // TODO(mdempsky): Deduplicate redundant edges?
     w.edges = append(w.edges, new monoEdge(
         dst: dst,

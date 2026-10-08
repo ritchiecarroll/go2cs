@@ -47,7 +47,7 @@ public static slice<StructField> VisibleFields(ΔType t) {
     return (~w).fields.slice(0, j);
 }
 
-[GoType] partial struct visibleFieldsWalker {
+partial struct visibleFieldsWalker {
     internal map<@string, nint> byName;
     internal map<ΔType, bool> visiting;
     internal slice<StructField> fields;
@@ -59,7 +59,7 @@ public static slice<StructField> VisibleFields(ΔType t) {
 // (this maintains the required ordering).
 // Fields that have been overridden have their
 // Name field cleared.
-[GoRecv] internal static void walk(this ref visibleFieldsWalker w, ΔType t) {
+internal static void walk(this ref visibleFieldsWalker w, ΔType t) {
     if (w.visiting[t]) {
         return;
     }

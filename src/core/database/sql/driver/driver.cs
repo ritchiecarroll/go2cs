@@ -45,12 +45,9 @@ using errors = errors_package;
 using reflect = reflect_package;
 
 partial class driver_package {
-// Descriptor carrier for `Value` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("Value")] public interface Valueᴅ { }
-
 
 // NamedValue holds both the value name and value.
-[GoType] partial struct NamedValue {
+partial struct NamedValue {
     // If the Name is not empty it should be used for the parameter identifier and
     // not the ordinal position.
     //
@@ -59,7 +56,6 @@ partial class driver_package {
     // Ordinal position of the parameter starting from one and is always set.
     public nint Ordinal;
     // Value is the parameter value.
-    [GoDescriptorType(Self = typeof(Valueᴅ))]
     public Value Value;
 }
 
@@ -69,7 +65,7 @@ partial class driver_package {
 // Database drivers may implement [DriverContext] for access
 // to contexts and to parse the name only once for a pool of connections,
 // instead of once per connection.
-[GoType] partial interface Driver {
+partial interface Driver {
     // Open returns a new connection to the database.
     // The name is a string in a driver-specific format.
     //
@@ -88,7 +84,7 @@ partial class driver_package {
 // instead of invoking the [Driver]'s Open method for each connection.
 // The two-step sequence allows drivers to parse the name just once
 // and also provides access to per-[Conn] contexts.
-[GoType] partial interface DriverContext {
+partial interface DriverContext {
     // OpenConnector must parse the name in the same format that Driver.Open
     // parses the name parameter.
     (Connector, error) OpenConnector(@string name);
@@ -106,7 +102,7 @@ partial class driver_package {
 //
 // If a Connector implements [io.Closer], the [database/sql.DB.Close]
 // method will call the Close method and return error (if any).
-[GoType] partial interface Connector {
+partial interface Connector {
     // Connect returns a connection to the database.
     // Connect may return a cached connection (one previously
     // closed), but doing so is unnecessary; the sql package
@@ -155,7 +151,7 @@ public static error ErrBadConn = errors.New("driver: bad connection"u8);
 //
 // If Conn.Ping returns [ErrBadConn], [database/sql.DB.Ping] and [database/sql.DB.PingContext] will remove
 // the [Conn] from pool.
-[GoType] partial interface Pinger {
+partial interface Pinger {
     error Ping(context.Context ctx);
 }
 
@@ -168,7 +164,7 @@ public static error ErrBadConn = errors.New("driver: bad connection"u8);
 // Exec may return [ErrSkip].
 //
 // Deprecated: Drivers should implement [ExecerContext] instead.
-[GoType] partial interface Execer {
+partial interface Execer {
     (Result, error) Exec(@string query, slice<Value> args);
 }
 
@@ -182,7 +178,7 @@ public static error ErrBadConn = errors.New("driver: bad connection"u8);
 // ExecContext may return [ErrSkip].
 //
 // ExecContext must honor the context timeout and return when the context is canceled.
-[GoType] partial interface ExecerContext {
+partial interface ExecerContext {
     (Result, error) ExecContext(context.Context ctx, @string query, slice<NamedValue> args);
 }
 
@@ -195,7 +191,7 @@ public static error ErrBadConn = errors.New("driver: bad connection"u8);
 // Query may return [ErrSkip].
 //
 // Deprecated: Drivers should implement [QueryerContext] instead.
-[GoType] partial interface Queryer {
+partial interface Queryer {
     (Rows, error) Query(@string query, slice<Value> args);
 }
 
@@ -209,7 +205,7 @@ public static error ErrBadConn = errors.New("driver: bad connection"u8);
 // QueryContext may return [ErrSkip].
 //
 // QueryContext must honor the context timeout and return when the context is canceled.
-[GoType] partial interface QueryerContext {
+partial interface QueryerContext {
     (Rows, error) QueryContext(context.Context ctx, @string query, slice<NamedValue> args);
 }
 
@@ -217,7 +213,7 @@ public static error ErrBadConn = errors.New("driver: bad connection"u8);
 // by multiple goroutines.
 //
 // Conn is assumed to be stateful.
-[GoType] partial interface Conn {
+partial interface Conn {
     // Prepare returns a prepared statement, bound to this connection.
     (Stmt, error) Prepare(@string query);
     // Close invalidates and potentially stops any current
@@ -239,25 +235,25 @@ public static error ErrBadConn = errors.New("driver: bad connection"u8);
 }
 
 // ConnPrepareContext enhances the [Conn] interface with context.
-[GoType] partial interface ConnPrepareContext {
+partial interface ConnPrepareContext {
     // PrepareContext returns a prepared statement, bound to this connection.
     // context is for the preparation of the statement,
     // it must not store the context within the statement itself.
     (Stmt, error) PrepareContext(context.Context ctx, @string query);
 }
 
-[GoType("num:nint")] partial struct IsolationLevel;
+partial struct IsolationLevel /*num:nint*/;
 
 // TxOptions holds the transaction options.
 //
 // This type should be considered identical to [database/sql.TxOptions].
-[GoType] partial struct TxOptions {
+partial struct TxOptions {
     public IsolationLevel Isolation;
     public bool ReadOnly;
 }
 
 // ConnBeginTx enhances the [Conn] interface with context and [TxOptions].
-[GoType] partial interface ConnBeginTx {
+partial interface ConnBeginTx {
     // BeginTx starts and returns a new transaction.
     // If the context is canceled by the user the sql package will
     // call Tx.Rollback before discarding and closing the connection.
@@ -275,7 +271,7 @@ public static error ErrBadConn = errors.New("driver: bad connection"u8);
 
 // SessionResetter may be implemented by [Conn] to allow drivers to reset the
 // session state associated with the connection and to signal a bad connection.
-[GoType] partial interface SessionResetter {
+partial interface SessionResetter {
     // ResetSession is called prior to executing a query on the connection
     // if the connection has been used before. If the driver returns ErrBadConn
     // the connection is discarded.
@@ -287,14 +283,14 @@ public static error ErrBadConn = errors.New("driver: bad connection"u8);
 //
 // If implemented, drivers may return the underlying error from queries,
 // even if the connection should be discarded by the connection pool.
-[GoType] partial interface Validator {
+partial interface Validator {
     // IsValid is called prior to placing the connection into the
     // connection pool. The connection will be discarded if false is returned.
     bool IsValid();
 }
 
 // Result is the result of a query execution.
-[GoType] partial interface Result {
+partial interface Result {
     // LastInsertId returns the database's auto-generated ID
     // after, for example, an INSERT into a table with primary
     // key.
@@ -306,7 +302,7 @@ public static error ErrBadConn = errors.New("driver: bad connection"u8);
 
 // Stmt is a prepared statement. It is bound to a [Conn] and not
 // used by multiple goroutines concurrently.
-[GoType] partial interface Stmt {
+partial interface Stmt {
     // Close closes the statement.
     //
     // As of Go 1.1, a Stmt will not be closed if it's in use
@@ -338,7 +334,7 @@ public static error ErrBadConn = errors.New("driver: bad connection"u8);
 }
 
 // StmtExecContext enhances the [Stmt] interface by providing Exec with context.
-[GoType] partial interface StmtExecContext {
+partial interface StmtExecContext {
     // ExecContext executes a query that doesn't return rows, such
     // as an INSERT or UPDATE.
     //
@@ -347,7 +343,7 @@ public static error ErrBadConn = errors.New("driver: bad connection"u8);
 }
 
 // StmtQueryContext enhances the [Stmt] interface by providing Query with context.
-[GoType] partial interface StmtQueryContext {
+partial interface StmtQueryContext {
     // QueryContext executes a query that may return rows, such as a
     // SELECT.
     //
@@ -376,7 +372,7 @@ public static error ErrRemoveArgument = errors.New("driver: remove argument from
 // If [ErrSkip] is returned the column converter error checking
 // path is used for the argument. Drivers may wish to return [ErrSkip] after
 // they have exhausted their own special cases.
-[GoType] partial interface NamedValueChecker {
+partial interface NamedValueChecker {
     // CheckNamedValue is called before passing arguments to the driver
     // and is called in place of any ColumnConverter. CheckNamedValue must do type
     // validation and conversion as appropriate for the driver.
@@ -388,7 +384,7 @@ public static error ErrRemoveArgument = errors.New("driver: remove argument from
 // any type to a driver [Value].
 //
 // Deprecated: Drivers should implement [NamedValueChecker].
-[GoType] partial interface ColumnConverter {
+partial interface ColumnConverter {
     // ColumnConverter returns a ValueConverter for the provided
     // column index. If the type of a specific column isn't known
     // or shouldn't be handled specially, [DefaultParameterConverter]
@@ -397,7 +393,7 @@ public static error ErrRemoveArgument = errors.New("driver: remove argument from
 }
 
 // Rows is an iterator over an executed query's results.
-[GoType] partial interface Rows {
+partial interface Rows {
     // Columns returns the names of the columns. The number of
     // columns of the result is inferred from the length of the
     // slice. If a particular column name isn't known, an empty
@@ -419,7 +415,7 @@ public static error ErrRemoveArgument = errors.New("driver: remove argument from
 
 // RowsNextResultSet extends the [Rows] interface by providing a way to signal
 // the driver to advance to the next result set.
-[GoType] partial interface RowsNextResultSet :
+partial interface RowsNextResultSet :
     Rows
 {
     // HasNextResultSet is called at the end of the current result set and
@@ -435,7 +431,7 @@ public static error ErrRemoveArgument = errors.New("driver: remove argument from
 // RowsColumnTypeScanType may be implemented by [Rows]. It should return
 // the value type that can be used to scan types into. For example, the database
 // column type "bigint" this should return "[reflect.TypeOf](int64(0))".
-[GoType] partial interface RowsColumnTypeScanType :
+partial interface RowsColumnTypeScanType :
     Rows
 {
     reflectꓸType ColumnTypeScanType(nint index);
@@ -446,7 +442,7 @@ public static error ErrRemoveArgument = errors.New("driver: remove argument from
 // Examples of returned types: "VARCHAR", "NVARCHAR", "VARCHAR2", "CHAR", "TEXT",
 // "DECIMAL", "SMALLINT", "INT", "BIGINT", "BOOL", "[]BIGINT", "JSONB", "XML",
 // "TIMESTAMP".
-[GoType] partial interface RowsColumnTypeDatabaseTypeName :
+partial interface RowsColumnTypeDatabaseTypeName :
     Rows
 {
     @string ColumnTypeDatabaseTypeName(nint index);
@@ -464,7 +460,7 @@ public static error ErrRemoveArgument = errors.New("driver: remove argument from
 //	decimal       (0, false)
 //	int           (0, false)
 //	bytea(30)     (30, true)
-[GoType] partial interface RowsColumnTypeLength :
+partial interface RowsColumnTypeLength :
     Rows
 {
     (int64 length, bool ok) ColumnTypeLength(nint index);
@@ -474,7 +470,7 @@ public static error ErrRemoveArgument = errors.New("driver: remove argument from
 // be true if it is known the column may be null, or false if the column is known
 // to be not nullable.
 // If the column nullability is unknown, ok should be false.
-[GoType] partial interface RowsColumnTypeNullable :
+partial interface RowsColumnTypeNullable :
     Rows
 {
     (bool nullable, bool ok) ColumnTypeNullable(nint index);
@@ -487,19 +483,19 @@ public static error ErrRemoveArgument = errors.New("driver: remove argument from
 //	decimal(38, 4)    (38, 4, true)
 //	int               (0, 0, false)
 //	decimal           (math.MaxInt64, math.MaxInt64, true)
-[GoType] partial interface RowsColumnTypePrecisionScale :
+partial interface RowsColumnTypePrecisionScale :
     Rows
 {
     (int64 precision, int64 scale, bool ok) ColumnTypePrecisionScale(nint index);
 }
 
 // Tx is a transaction.
-[GoType] partial interface Tx {
+partial interface Tx {
     error Commit();
     error Rollback();
 }
 
-[GoType("num:int64")] partial struct ΔRowsAffected;
+partial struct ΔRowsAffected /*num:int64*/;
 
 internal static Result _ᴛ1ʗ = ((ΔRowsAffected)0);
 
@@ -519,7 +515,7 @@ public static (int64, error) RowsAffected(this ΔRowsAffected v) {
 // LastInsertId and [RowsAffected].
 public static noRows ResultNoRows;
 
-[GoType] public partial struct noRows {
+public partial struct noRows {
 }
 
 internal static Result _ᴛ2ʗ = new noRows(nil);

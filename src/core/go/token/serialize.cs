@@ -7,7 +7,7 @@ using global::go.sync;
 
 partial class token_package {
 
-[GoType] public partial struct serializedFile {
+public partial struct serializedFile {
     // fields correspond 1:1 to fields with same (lower-case) name in File
     public @string Name;
     public nint Base;
@@ -16,7 +16,7 @@ partial class token_package {
     public slice<lineInfo> Infos;
 }
 
-[GoType] partial struct serializedFileSet {
+partial struct serializedFileSet {
     public nint Base;
     public slice<serializedFile> Files;
 }

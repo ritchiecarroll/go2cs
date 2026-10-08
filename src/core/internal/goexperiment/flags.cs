@@ -56,7 +56,7 @@ partial class goexperiment_package {
 // [internal/buildcfg.ParseGOEXPERIMENT].
 //
 // If you change this struct definition, run "go generate".
-[GoType] partial struct Flags {
+partial struct Flags {
     public bool FieldTrack;
     public bool PreemptibleLoops;
     public bool StaticLockRanking;

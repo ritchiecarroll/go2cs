@@ -61,7 +61,7 @@ partial class x509_package {
 
 // pkixPublicKey reflects a PKIX public key structure. See SubjectPublicKeyInfo
 // in RFC 3280.
-[GoType] partial struct pkixPublicKey {
+partial struct pkixPublicKey {
     public pkix.AlgorithmIdentifier Algo;
     public asn1.BitString BitString;
 }
@@ -198,51 +198,46 @@ public static (slice<byte>, error) MarshalPKIXPublicKey(any pub) {
 }
 
 // These structures reflect the ASN.1 structure of X.509 certificates.:
-[GoType] partial struct certificate {
+partial struct certificate {
     public tbsCertificate TBSCertificate;
     public pkix.AlgorithmIdentifier SignatureAlgorithm;
     public asn1.BitString SignatureValue;
 }
 
-[GoType] public partial struct tbsCertificate {
+public partial struct tbsCertificate {
     public asn1.RawContent Raw;
-    [GoTag(@"asn1:""optional,explicit,default:0,tag:0""")]
-    public nint Version;
+    public nint Version; /*`asn1:"optional,explicit,default:0,tag:0"`*/
     public ж<bigꓸInt> SerialNumber;
     public pkix.AlgorithmIdentifier SignatureAlgorithm;
     public asn1.RawValue Issuer;
     public validity Validity;
     public asn1.RawValue Subject;
     public publicKeyInfo PublicKey;
-    [GoTag(@"asn1:""optional,tag:1""")]
-    public asn1.BitString UniqueId;
-    [GoTag(@"asn1:""optional,tag:2""")]
-    public asn1.BitString SubjectUniqueId;
-    [GoTag(@"asn1:""omitempty,optional,explicit,tag:3""")]
-    public slice<pkix.Extension> Extensions;
+    public asn1.BitString UniqueId; /*`asn1:"optional,tag:1"`*/
+    public asn1.BitString SubjectUniqueId; /*`asn1:"optional,tag:2"`*/
+    public slice<pkix.Extension> Extensions; /*`asn1:"omitempty,optional,explicit,tag:3"`*/
 }
 
-[GoType] partial struct dsaAlgorithmParameters {
+partial struct dsaAlgorithmParameters {
     public ж<bigꓸInt> P, Q, G;
 }
 
-[GoType] public partial struct validity {
+public partial struct validity {
     public time.Time NotBefore, NotAfter;
 }
 
-[GoType] public partial struct publicKeyInfo {
+public partial struct publicKeyInfo {
     public asn1.RawContent Raw;
     public pkix.AlgorithmIdentifier Algorithm;
     public asn1.BitString PublicKey;
 }
 
 // RFC 5280,  4.2.1.1
-[GoType] partial struct authKeyId {
-    [GoTag(@"asn1:""optional,tag:0""")]
-    public slice<byte> Id;
+partial struct authKeyId {
+    public slice<byte> Id; /*`asn1:"optional,tag:0"`*/
 }
 
-[GoType("num:nint")] partial struct SignatureAlgorithm;
+partial struct SignatureAlgorithm /*num:nint*/;
 
 public static SignatureAlgorithm UnknownSignatureAlgorithm => /* iota */ 0;
 public static SignatureAlgorithm MD2WithRSA => 1; // Unsupported.
@@ -289,7 +284,7 @@ public static @string String(this SignatureAlgorithm algo) {
     return strconv.Itoa((nint)algo);
 }
 
-[GoType("num:nint")] partial struct PublicKeyAlgorithm;
+partial struct PublicKeyAlgorithm /*num:nint*/;
 
 public static PublicKeyAlgorithm UnknownPublicKeyAlgorithm => /* iota */ 0;
 public static PublicKeyAlgorithm RSA => 1;
@@ -397,7 +392,7 @@ internal static asn1.ObjectIdentifier oidISOSignatureSHA1WithRSA = new asn1.Obje
 
 /* no pre-hashing */
 
-[GoType("dyn")] partial struct signatureAlgorithmDetailsᴛ1 {
+partial struct signatureAlgorithmDetailsᴛ1 /*dyn*/ {
     internal SignatureAlgorithm algo;
     internal @string name;
     internal asn1.ObjectIdentifier oid;
@@ -443,18 +438,14 @@ internal static asn1.RawValue pssParametersSHA512 = new asn1.RawValue(FullBytes:
 
 // pssParameters reflects the parameters in an AlgorithmIdentifier that
 // specifies RSA PSS. See RFC 3447, Appendix A.2.3.
-[GoType] partial struct pssParameters {
+partial struct pssParameters {
     // The following three fields are not marked as
     // optional because the default values specify SHA-1,
     // which is no longer suitable for use in signatures.
-    [GoTag(@"asn1:""explicit,tag:0""")]
-    public pkix.AlgorithmIdentifier Hash;
-    [GoTag(@"asn1:""explicit,tag:1""")]
-    public pkix.AlgorithmIdentifier MGF;
-    [GoTag(@"asn1:""explicit,tag:2""")]
-    public nint SaltLength;
-    [GoTag(@"asn1:""optional,explicit,tag:3,default:1""")]
-    public nint TrailerField;
+    public pkix.AlgorithmIdentifier Hash; /*`asn1:"explicit,tag:0"`*/
+    public pkix.AlgorithmIdentifier MGF; /*`asn1:"explicit,tag:1"`*/
+    public nint SaltLength; /*`asn1:"explicit,tag:2"`*/
+    public nint TrailerField; /*`asn1:"optional,explicit,tag:3,default:1"`*/
 }
 
 internal static SignatureAlgorithm getSignatureAlgorithmFromAI(pkix.AlgorithmIdentifier ai) {
@@ -614,7 +605,7 @@ internal static (asn1.ObjectIdentifier, bool) oidFromECDHCurve(ecdhꓸCurve curv
     return (default!, false);
 }
 
-[GoType("num:nint")] partial struct KeyUsage;
+partial struct KeyUsage /*num:nint*/;
 
 public static KeyUsage KeyUsageDigitalSignature => /* 1 << iota */ 1;
 public static KeyUsage KeyUsageContentCommitment => 2;
@@ -666,7 +657,7 @@ internal static asn1.ObjectIdentifier oidExtKeyUsageMicrosoftCommercialCodeSigni
 
 internal static asn1.ObjectIdentifier oidExtKeyUsageMicrosoftKernelCodeSigning = new asn1.ObjectIdentifier(new nint[]{1, 3, 6, 1, 4, 1, 311, 61, 1, 1}.slice());
 
-[GoType("num:nint")] partial struct ExtKeyUsage;
+partial struct ExtKeyUsage /*num:nint*/;
 
 public static ExtKeyUsage ExtKeyUsageAny => /* iota */ 0;
 public static ExtKeyUsage ExtKeyUsageServerAuth => 1;
@@ -685,7 +676,7 @@ public static ExtKeyUsage ExtKeyUsageMicrosoftKernelCodeSigning => 13;
 
 // extKeyUsageOIDs contains the mapping between an ExtKeyUsage and its OID.
 
-[GoType("dyn")] partial struct extKeyUsageOIDsᴛ1 {
+partial struct extKeyUsageOIDsᴛ1 /*dyn*/ {
     internal ExtKeyUsage extKeyUsage;
     internal asn1.ObjectIdentifier oid;
 }
@@ -731,7 +722,7 @@ internal static (asn1.ObjectIdentifier oid, bool ok) oidFromExtKeyUsage(ExtKeyUs
 }
 
 // A Certificate represents an X.509 certificate.
-[GoType] partial struct Certificate {
+partial struct Certificate {
     public slice<byte> Raw; // Complete ASN.1 DER content (certificate, signature algorithm and signature).
     public slice<byte> RawTBSCertificate; // Certificate part of raw ASN.1 DER content.
     public slice<byte> RawSubjectPublicKeyInfo; // DER encoded SubjectPublicKeyInfo.
@@ -890,7 +881,7 @@ internal static (asn1.ObjectIdentifier oid, bool ok) oidFromExtKeyUsage(ExtKeyUs
 }
 
 // PolicyMapping represents a policy mapping entry in the policyMappings extension.
-[GoType] partial struct PolicyMapping {
+partial struct PolicyMapping {
     // IssuerDomainPolicy contains a policy OID the issuing certificate considers
     // equivalent to SubjectDomainPolicy in the subject certificate.
     public OID IssuerDomainPolicy;
@@ -903,7 +894,7 @@ internal static (asn1.ObjectIdentifier oid, bool ok) oidFromExtKeyUsage(ExtKeyUs
 // involves algorithms that are not currently implemented.
 public static error ErrUnsupportedAlgorithm = errors.New("x509: cannot verify signature: algorithm unimplemented"u8);
 
-[GoType("num:nint")] partial struct InsecureAlgorithmError;
+partial struct InsecureAlgorithmError /*num:nint*/;
 
 public static @string Error(this InsecureAlgorithmError e) {
     return fmt.Sprintf("x509: cannot verify signature: insecure algorithm %v"u8, ((SignatureAlgorithm)(nint)e));
@@ -912,7 +903,7 @@ public static @string Error(this InsecureAlgorithmError e) {
 // ConstraintViolationError results when a requested usage is not permitted by
 // a certificate. For example: checking a signature when the public key isn't a
 // certificate signing key.
-[GoType] partial struct ConstraintViolationError {
+partial struct ConstraintViolationError {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -932,7 +923,7 @@ public static bool Equal(this ж<Certificate> Ꮡc, ж<Certificate> Ꮡother) {
     return bytes.Equal(c.Raw, other.Raw);
 }
 
-[GoRecv] internal static bool hasSANExtension(this ref Certificate c) {
+internal static bool hasSANExtension(this ref Certificate c) {
     return oidInExtensions(oidExtensionSubjectAltName, c.Extensions);
 }
 
@@ -940,7 +931,7 @@ public static bool Equal(this ж<Certificate> Ꮡc, ж<Certificate> Ꮡother) {
 //
 // This is a low-level API that performs very limited checks, and not a full
 // path verifier. Most users should use [Certificate.Verify] instead.
-[GoRecv] public static error CheckSignatureFrom(this ref Certificate c, ж<Certificate> Ꮡparent) {
+public static error CheckSignatureFrom(this ref Certificate c, ж<Certificate> Ꮡparent) {
     ref var parent = ref Ꮡparent.DerefOrNull();
 
     // RFC 5280, 4.2.1.9:
@@ -967,15 +958,15 @@ public static bool Equal(this ж<Certificate> Ꮡc, ж<Certificate> Ꮡother) {
 //
 // [MD5WithRSA] signatures are rejected, while [SHA1WithRSA] and [ECDSAWithSHA1]
 // signatures are currently accepted.
-[GoRecv] public static error CheckSignature(this ref Certificate c, SignatureAlgorithm algo, slice<byte> signed, slice<byte> signature) {
+public static error CheckSignature(this ref Certificate c, SignatureAlgorithm algo, slice<byte> signed, slice<byte> signature) {
     return checkSignature(algo, signed, signature, c.PublicKey, true);
 }
 
-[GoRecv] internal static bool hasNameConstraints(this ref Certificate c) {
+internal static bool hasNameConstraints(this ref Certificate c) {
     return oidInExtensions(oidExtensionNameConstraints, c.Extensions);
 }
 
-[GoRecv] internal static slice<byte> getSANExtension(this ref Certificate c) {
+internal static slice<byte> getSANExtension(this ref Certificate c) {
     foreach (var (_, e) in c.Extensions) {
         if (e.Id.Equal(oidExtensionSubjectAltName)) {
             return e.Value;
@@ -1068,14 +1059,14 @@ internal static error /*err*/ checkSignature(SignatureAlgorithm algo, slice<byte
 // CheckCRLSignature checks that the signature in crl is from c.
 //
 // Deprecated: Use [RevocationList.CheckSignatureFrom] instead.
-[GoRecv] public static error CheckCRLSignature(this ref Certificate c, ж<pkix.CertificateList> Ꮡcrl) {
+public static error CheckCRLSignature(this ref Certificate c, ж<pkix.CertificateList> Ꮡcrl) {
     ref var crl = ref Ꮡcrl.DerefOrNull();
 
     SignatureAlgorithm algo = getSignatureAlgorithmFromAI(crl.SignatureAlgorithm);
     return c.CheckSignature(algo, crl.TBSCertList.Raw, crl.SignatureValue.RightAlign());
 }
 
-[GoType] partial struct UnhandledCriticalExtension {
+partial struct UnhandledCriticalExtension {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1085,15 +1076,13 @@ public static @string Error(this UnhandledCriticalExtension h) {
     return x509UnhandledCriticalˢ;
 }
 
-[GoType] partial struct basicConstraints {
-    [GoTag(@"asn1:""optional""")]
-    public bool IsCA;
-    [GoTag(@"asn1:""optional,default:-1""")]
-    public nint MaxPathLen;
+partial struct basicConstraints {
+    public bool IsCA; /*`asn1:"optional"`*/
+    public nint MaxPathLen; /*`asn1:"optional,default:-1"`*/
 }
 
 // RFC 5280 4.2.1.4
-[GoType] partial struct policyInformation {
+partial struct policyInformation {
     public asn1.ObjectIdentifier Policy;
 }
 
@@ -1104,26 +1093,21 @@ internal static UntypedInt nameTypeURI => 6;
 internal static UntypedInt nameTypeIP => 7;
 
 // RFC 5280, 4.2.2.1
-[GoType] partial struct authorityInfoAccess {
+partial struct authorityInfoAccess {
     public asn1.ObjectIdentifier Method;
     public asn1.RawValue Location;
 }
 
 // RFC 5280, 4.2.1.14
-[GoType] partial struct distributionPoint {
-    [GoTag(@"asn1:""optional,tag:0""")]
-    public distributionPointName DistributionPoint;
-    [GoTag(@"asn1:""optional,tag:1""")]
-    public asn1.BitString Reason;
-    [GoTag(@"asn1:""optional,tag:2""")]
-    public asn1.RawValue CRLIssuer;
+partial struct distributionPoint {
+    public distributionPointName DistributionPoint; /*`asn1:"optional,tag:0"`*/
+    public asn1.BitString Reason; /*`asn1:"optional,tag:1"`*/
+    public asn1.RawValue CRLIssuer; /*`asn1:"optional,tag:2"`*/
 }
 
-[GoType] public partial struct distributionPointName {
-    [GoTag(@"asn1:""optional,tag:0""")]
-    public slice<asn1.RawValue> FullName;
-    [GoTag(@"asn1:""optional,tag:1""")]
-    public pkix.RDNSequence RelativeName;
+public partial struct distributionPointName {
+    public slice<asn1.RawValue> FullName; /*`asn1:"optional,tag:0"`*/
+    public pkix.RDNSequence RelativeName; /*`asn1:"optional,tag:1"`*/
 }
 
 internal static byte reverseBitsInAByte(byte @in) {
@@ -1876,7 +1860,7 @@ public static (ж<pkix.CertificateList>, error) ParseDERCRL(slice<byte> derBytes
 //
 // Deprecated: this method does not generate an RFC 5280 conformant X.509 v2 CRL.
 // To generate a standards compliant CRL, use [CreateRevocationList] instead.
-[GoRecv] public static (slice<byte> crlBytes, error err) CreateCRL(this ref Certificate c, io.Reader rand, any priv, slice<pkix.RevokedCertificate> revokedCerts, time.Time now, time.Time expiry) {
+public static (slice<byte> crlBytes, error err) CreateCRL(this ref Certificate c, io.Reader rand, any priv, slice<pkix.RevokedCertificate> revokedCerts, time.Time now, time.Time expiry) {
     error err = default!;
 
     var (key, ok) = priv._<crypto.Signer>(ᐧ);
@@ -1930,7 +1914,7 @@ public static (ж<pkix.CertificateList>, error) ParseDERCRL(slice<byte> derBytes
 }
 
 // CertificateRequest represents a PKCS #10, certificate signature request.
-[GoType] partial struct CertificateRequest {
+partial struct CertificateRequest {
     public slice<byte> Raw; // Complete ASN.1 DER content (CSR, signature algorithm and signature).
     public slice<byte> RawTBSCertificateRequest; // Certificate request info part of raw ASN.1 DER content.
     public slice<byte> RawSubjectPublicKeyInfo; // DER encoded SubjectPublicKeyInfo.
@@ -1968,16 +1952,15 @@ public static (ж<pkix.CertificateList>, error) ParseDERCRL(slice<byte> derBytes
 
 // These structures reflect the ASN.1 structure of X.509 certificate
 // signature requests (see RFC 2986):
-[GoType] public partial struct tbsCertificateRequest {
+public partial struct tbsCertificateRequest {
     public asn1.RawContent Raw;
     public nint Version;
     public asn1.RawValue Subject;
     public publicKeyInfo PublicKey;
-    [GoTag(@"asn1:""tag:0""")]
-    public slice<asn1.RawValue> RawAttributes;
+    public slice<asn1.RawValue> RawAttributes; /*`asn1:"tag:0"`*/
 }
 
-[GoType] partial struct certificateRequest {
+partial struct certificateRequest {
     public asn1.RawContent Raw;
     public tbsCertificateRequest TBSCSR;
     public pkix.AlgorithmIdentifier SignatureAlgorithm;
@@ -2028,10 +2011,9 @@ internal static slice<pkix.AttributeTypeAndValueSET> parseRawAttributes(slice<as
 internal static readonly @string x509CertificateRequestˢ = "x509: certificate request contains duplicate requested extensions"u8;
 
 // pkcs10Attribute reflects the Attribute structure from RFC 2986, Section 4.1.
-[GoType("dyn")] internal partial struct parseCSRExtensions_pkcs10Attribute {
+internal partial struct parseCSRExtensions_pkcs10Attribute /*dyn*/ {
     public asn1.ObjectIdentifier Id;
-    [GoTag(@"asn1:""set""")]
-    public slice<asn1.RawValue> Values;
+    public slice<asn1.RawValue> Values; /*`asn1:"set"`*/
 }
 
 // parseCSRExtensions parses the attributes from a CSR and extracts any
@@ -2068,10 +2050,9 @@ internal static (slice<pkix.Extension>, error) parseCSRExtensions(slice<asn1.Raw
     return (ret, default!);
 }
 
-[GoType("dyn")] internal partial struct CreateCertificateRequest_attr {
+internal partial struct CreateCertificateRequest_attr /*dyn*/ {
     public asn1.ObjectIdentifier Type;
-    [GoTag(@"asn1:""set""")]
-    public slice<slice<pkix.Extension>> Value;
+    public slice<slice<pkix.Extension>> Value; /*`asn1:"set"`*/
 }
 
 // CreateCertificateRequest creates a new certificate request based on a
@@ -2285,13 +2266,13 @@ internal static (ж<CertificateRequest>, error) parseCertificateRequest(ref cert
 }
 
 // CheckSignature reports whether the signature on c is valid.
-[GoRecv] public static error CheckSignature(this ref CertificateRequest c) {
+public static error CheckSignature(this ref CertificateRequest c) {
     return checkSignature(c.SignatureAlgorithm, c.RawTBSCertificateRequest, c.Signature, c.PublicKey, true);
 }
 
 // RevocationListEntry represents an entry in the revokedCertificates
 // sequence of a CRL.
-[GoType] partial struct RevocationListEntry {
+partial struct RevocationListEntry {
     // Raw contains the raw bytes of the revokedCertificates entry. It is set when
     // parsing a CRL; it is ignored when generating a CRL.
     public slice<byte> Raw;
@@ -2326,7 +2307,7 @@ internal static (ж<CertificateRequest>, error) parseCertificateRequest(ref cert
 
 // RevocationList represents a [Certificate] Revocation List (CRL) as specified
 // by RFC 5280.
-[GoType] partial struct RevocationList {
+partial struct RevocationList {
     // Raw contains the complete ASN.1 DER content of the CRL (tbsCertList,
     // signatureAlgorithm, and signatureValue.)
     public slice<byte> Raw;
@@ -2384,25 +2365,21 @@ internal static (ж<CertificateRequest>, error) parseCertificateRequest(ref cert
 //
 // Notably, we include issuer as an asn1.RawValue, mirroring the behavior of
 // tbsCertificate and allowing raw (unparsed) subjects to be passed cleanly.
-[GoType] partial struct certificateList {
+partial struct certificateList {
     public tbsCertificateList TBSCertList;
     public pkix.AlgorithmIdentifier SignatureAlgorithm;
     public asn1.BitString SignatureValue;
 }
 
-[GoType] public partial struct tbsCertificateList {
+public partial struct tbsCertificateList {
     public asn1.RawContent Raw;
-    [GoTag(@"asn1:""optional,default:0""")]
-    public nint Version;
+    public nint Version; /*`asn1:"optional,default:0"`*/
     public pkix.AlgorithmIdentifier Signature;
     public asn1.RawValue Issuer;
     public time.Time ThisUpdate;
-    [GoTag(@"asn1:""optional""")]
-    public time.Time NextUpdate;
-    [GoTag(@"asn1:""optional""")]
-    public slice<pkix.RevokedCertificate> RevokedCertificates;
-    [GoTag(@"asn1:""tag:0,optional,explicit""")]
-    public slice<pkix.Extension> Extensions;
+    public time.Time NextUpdate; /*`asn1:"optional"`*/
+    public slice<pkix.RevokedCertificate> RevokedCertificates; /*`asn1:"optional"`*/
+    public slice<pkix.Extension> Extensions; /*`asn1:"tag:0,optional,explicit"`*/
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -2571,7 +2548,7 @@ public static (slice<byte>, error) CreateRevocationList(io.Reader rand, ж<Revoc
 
 // CheckSignatureFrom verifies that the signature on rl is a valid signature
 // from issuer.
-[GoRecv] public static error CheckSignatureFrom(this ref RevocationList rl, ж<Certificate> Ꮡparent) {
+public static error CheckSignatureFrom(this ref RevocationList rl, ж<Certificate> Ꮡparent) {
     ref var parent = ref Ꮡparent.DerefOrNull();
 
     if (parent.Version == 3 && !parent.BasicConstraintsValid || parent.BasicConstraintsValid && !parent.IsCA) {

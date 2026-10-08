@@ -19,7 +19,7 @@ using go.crypto.@internal.fips140;
 
 partial class cipher_package {
 
-[GoType] partial struct ctr {
+partial struct ctr {
     internal Block b;
     internal slice<byte> Δctr;
     internal slice<byte> @out;
@@ -31,7 +31,7 @@ internal static UntypedInt streamBufferSize => 512;
 // ctrAble is an interface implemented by ciphers that have a specific optimized
 // implementation of CTR. crypto/aes doesn't use this anymore, and we'd like to
 // eventually remove it.
-[GoType] partial interface ctrAble {
+partial interface ctrAble {
     Stream NewCTR(slice<byte> iv);
 }
 
@@ -67,7 +67,7 @@ public static Stream NewCTR(Block block, slice<byte> iv) {
 }
 
 // aesCtrWrapper hides extra methods from aes.CTR.
-[GoType] partial struct aesCtrWrapper {
+partial struct aesCtrWrapper {
     internal ж<aes.CTR> c;
 }
 
@@ -75,7 +75,7 @@ internal static void XORKeyStream(this aesCtrWrapper x, slice<byte> dst, slice<b
     x.c.XORKeyStream(dst, src);
 }
 
-[GoRecv] internal static void refill(this ref ctr x) {
+internal static void refill(this ref ctr x) {
     nint remain = len(x.@out) - x.outUsed;
     copy(x.@out, x.@out.slice(x.outUsed));
     x.@out = x.@out.slice(0, cap(x.@out));
@@ -95,7 +95,7 @@ internal static void XORKeyStream(this aesCtrWrapper x, slice<byte> dst, slice<b
     x.outUsed = 0;
 }
 
-[GoRecv] internal static void XORKeyStream(this ref ctr x, slice<byte> dst, slice<byte> src) {
+internal static void XORKeyStream(this ref ctr x, slice<byte> dst, slice<byte> src) {
     if (len(dst) < len(src)) {
         throw panic("crypto/cipher: output smaller than input");
     }

@@ -27,19 +27,19 @@ internal static void errorf(@string format, params ꓸꓸꓸany argsʗp) {
 }
 
 // Synthesize a token.Pos
-[GoType] partial struct fakeFileSet {
+partial struct fakeFileSet {
     internal ж<token.FileSet> fset;
     internal map<@string, ж<fileInfo>> files;
 }
 
-[GoType] partial struct fileInfo {
+partial struct fileInfo {
     internal ж<tokenꓸFile> @file;
     internal nint lastline;
 }
 
 internal static UntypedInt maxlines => /* 64 * 1024 */ 65536;
 
-[GoRecv] internal static tokenꓸPos pos(this ref fakeFileSet s, @string @file, nint line, nint column) {
+internal static tokenꓸPos pos(this ref fakeFileSet s, @string @file, nint line, nint column) {
     // TODO(mdempsky): Make use of column.
     // Since we don't know the set of needed file positions, we reserve
     // maxlines positions per file. We delay calling token.File.SetLines until
@@ -60,7 +60,7 @@ internal static UntypedInt maxlines => /* 64 * 1024 */ 65536;
     return ((tokenꓸPos)((~f).@file.Base() + line - 1));
 }
 
-[GoRecv] internal static void setLines(this ref fakeFileSet s) {
+internal static void setLines(this ref fakeFileSet s) {
     ᏑfakeLinesOnce.Do(() => {
         fakeLines = new slice<nint>(maxlines);
         foreach (var (i, _) in fakeLines) {
@@ -77,13 +77,13 @@ internal static ж<sync.Once> ᏑfakeLinesOnce = new StandardBox<sync.Once>(defa
 internal static ref sync.Once fakeLinesOnce => ref ᏑfakeLinesOnce.Value;
 
 // See cmd/compile/internal/noder.derivedInfo.
-[GoType] partial struct derivedInfo {
+partial struct derivedInfo {
     internal pkgbits.Index idx;
     internal bool needed;
 }
 
 // See cmd/compile/internal/noder.typeInfo.
-[GoType] partial struct typeInfo {
+partial struct typeInfo {
     internal pkgbits.Index idx;
     internal bool derived;
 }

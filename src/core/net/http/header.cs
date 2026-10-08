@@ -19,7 +19,7 @@ using vendor.golang.org.x.net.http;
 
 partial class http_package {
 
-[GoType("map[@string, slice<@string>]")] partial struct ΔHeader;
+partial struct ΔHeader /*map[@string, slice<@string>]*/;
 
 // Add adds the key, value pair to the header.
 // It appends to any existing values associated with key.
@@ -142,7 +142,7 @@ public static (time.Time t, error err) ParseTime(@string text) {
 internal static ж<strings.Replacer> headerNewlineToSpace = strings.NewReplacer("\n"u8, " ", "\r", " ");
 
 // stringWriter implements WriteString on a Writer.
-[GoType] partial struct stringWriter {
+partial struct stringWriter {
     internal io.Writer w;
 }
 
@@ -150,13 +150,13 @@ internal static (nint n, error err) WriteString(this stringWriter w, @string s) 
     return w.w.Write(slice<byte>(s));
 }
 
-[GoType] partial struct keyValues {
+partial struct keyValues {
     internal @string key;
     internal slice<@string> values;
 }
 
 // headerSorter contains a slice of keyValues sorted by keyValues.key.
-[GoType] partial struct headerSorter {
+partial struct headerSorter {
     internal slice<keyValues> kvs;
 }
 

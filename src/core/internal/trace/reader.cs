@@ -19,7 +19,7 @@ using go.@internal.trace.@internal;
 partial class trace_package {
 
 // Reader reads a byte stream, validates it, and produces trace events.
-[GoType] partial struct Reader {
+partial struct Reader {
     internal ж<bufio.Reader> r;
     internal ΔTime lastTs;
     internal ж<generation> gen;

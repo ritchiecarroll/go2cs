@@ -62,7 +62,7 @@ partial class os_package {
 // Name returns the name of the file as presented to Open.
 //
 // It is safe to call Name after [Close].
-[GoRecv] public static @string Name(this ref File f) {
+public static @string Name(this ref File f) {
     return f.name;
 }
 
@@ -110,18 +110,18 @@ public const nint SEEK_END = 2; // seek relative to the end
 
 // LinkError records an error during a link or symlink or rename
 // system call and the paths that caused it.
-[GoType] partial struct LinkError {
+partial struct LinkError {
     public @string Op;
     public @string Old;
     public @string New;
     public error Err;
 }
 
-[GoRecv] public static @string Error(this ref LinkError e) {
+public static @string Error(this ref LinkError e) {
     return e.Op + " "u8 + e.Old + " "u8 + e.New + ": "u8 + e.Err.Error();
 }
 
-[GoRecv] public static error Unwrap(this ref LinkError e) {
+public static error Unwrap(this ref LinkError e) {
     return e.Err;
 }
 
@@ -199,7 +199,7 @@ public static (int64 n, error err) ReadFrom(this ж<File> Ꮡf, Δio.Reader r) {
 
 // noReadFrom can be embedded alongside another type to
 // hide the ReadFrom method of that other type.
-[GoType] partial struct noReadFrom {
+partial struct noReadFrom {
 }
 
 // ReadFrom hides another ReadFrom method.
@@ -211,7 +211,7 @@ internal static (int64, error) ReadFrom(this noReadFrom _Δp0, Δio.Reader _Δp1
 // fileWithoutReadFrom implements all the methods of *File other
 // than ReadFrom. This is used to permit ReadFrom to call io.Copy
 // without leading to a recursive call to ReadFrom.
-[GoType] partial struct fileWithoutReadFrom {
+partial struct fileWithoutReadFrom {
     internal partial ref noReadFrom noReadFrom { get; }
     public partial ref ж<File> File { get; }
 }
@@ -302,7 +302,7 @@ public static (int64 n, error err) WriteTo(this ж<File> Ꮡf, Δio.Writer w) {
 
 // noWriteTo can be embedded alongside another type to
 // hide the WriteTo method of that other type.
-[GoType] partial struct noWriteTo {
+partial struct noWriteTo {
 }
 
 // WriteTo hides another WriteTo method.
@@ -314,7 +314,7 @@ internal static (int64, error) WriteTo(this noWriteTo _Δp0, Δio.Writer _Δp1) 
 // fileWithoutWriteTo implements all the methods of *File other
 // than WriteTo. This is used to permit WriteTo to call io.Copy
 // without leading to a recursive call to WriteTo.
-[GoType] partial struct fileWithoutWriteTo {
+partial struct fileWithoutWriteTo {
     internal partial ref noWriteTo noWriteTo { get; }
     public partial ref ж<File> File { get; }
 }
@@ -499,7 +499,7 @@ internal static bool checkWrapErr = false;
 // wrapErr wraps an error that occurred during an operation on an open file.
 // It passes io.EOF through unchanged, otherwise converts
 // poll.ErrFileClosing to ErrClosed and wraps the error in a PathError.
-[GoRecv] internal static error wrapErr(this ref File f, @string op, error err) {
+internal static error wrapErr(this ref File f, @string op, error err) {
     if (err == default! || AreEqual(err, Δio.EOF)) {
         return err;
     }
@@ -804,7 +804,7 @@ public static fs.FS DirFS(@string dir) {
     return ((dirFS)dir);
 }
 
-[GoType("@string")] partial struct dirFS;
+partial struct dirFS /*@string*/;
 
 internal static (fs.File, error) Open(this dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);

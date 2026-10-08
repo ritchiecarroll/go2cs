@@ -26,7 +26,7 @@ internal static traceWriter unsafeTraceExpWriter(uintptr gen, ж<traceBuf> Ꮡbu
     return new traceWriter(traceLocker: new traceLocker(gen: gen), traceBuf: Ꮡbuf, exp: exp);
 }
 
-[GoType("num:uint8")] partial struct traceExperiment;
+partial struct traceExperiment /*num:uint8*/;
 
 internal static traceExperiment traceNoExperiment => /* iota */ 0;
 internal static traceExperiment traceExperimentAllocFree => 1;

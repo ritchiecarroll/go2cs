@@ -12,13 +12,13 @@ namespace go.go;
 
 partial class types_package {
 
-[GoType("map[@string, Object]")] partial struct objset;
+partial struct objset /*map[@string, Object]*/;
 
 // insert attempts to insert an object obj into objset s.
 // If s already contains an alternative object alt with
 // the same name, insert leaves s unchanged and returns alt.
 // Otherwise it inserts obj and returns nil.
-[GoRecv] internal static Object insert(this ref objset s, Object obj) {
+internal static Object insert(this ref objset s, Object obj) {
     @string id = obj.Id();
     {
         var alt = (s)[id]; if (alt != default!) {

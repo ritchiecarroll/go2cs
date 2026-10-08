@@ -19,7 +19,7 @@ internal static map<@string, metricData> metrics;
 internal static slice<float64> sizeClassBuckets;
 internal static slice<float64> timeHistBuckets;
 
-[GoType] partial struct metricData {
+partial struct metricData {
     // deps is the set of runtime statistics that this metric
     // depends on. Before compute is called, the statAggregate
     // which will be passed must ensure() these dependencies.
@@ -484,7 +484,7 @@ internal static void godebug_registerMetric(@string name, Func<uint64> read) {
     metricsUnlock();
 }
 
-[GoType("num:nuint")] partial struct statDep;
+partial struct statDep /*num:nuint*/;
 
 internal static statDep heapStatsDep => /* iota */ 0; // corresponds to heapStatsAggregate
 internal static statDep sysStatsDep => 1; // corresponds to sysStatsAggregate
@@ -492,7 +492,7 @@ internal static statDep cpuStatsDep => 2; // corresponds to cpuStatsAggregate
 internal static statDep gcStatsDep => 3;  // corresponds to gcStatsAggregate
 internal static statDep numStatsDeps => 4;
 
-[GoType("[1]uint64")] partial struct statDepSet;
+partial struct statDepSet /*[1]uint64*/;
 
 // makeStatDepSet creates a new statDepSet from a list of statDeps.
 internal static statDepSet makeStatDepSet(params ꓸꓸꓸstatDep depsʗp) {
@@ -530,7 +530,7 @@ internal static statDepSet union(this statDepSet s, statDepSet b) {
 }
 
 // empty returns true if there are no dependencies in the set.
-[GoRecv] internal static bool empty(this ref statDepSet s) {
+internal static bool empty(this ref statDepSet s) {
     foreach (var (_, c) in s.Value) {
         if (c != 0) {
             return false;
@@ -540,7 +540,7 @@ internal static statDepSet union(this statDepSet s, statDepSet b) {
 }
 
 // has returns true if the set contains a given statDep.
-[GoRecv] internal static bool has(this ref statDepSet s, statDep d) {
+internal static bool has(this ref statDepSet s, statDep d) {
     return (uint64)(s.Value[d / 64] & (((uint64)1 << (int)(nuint)((d % 64))))) != 0;
 }
 
@@ -549,7 +549,7 @@ internal static statDepSet union(this statDepSet s, statDepSet b) {
 // depend on each other in some way to make sense of the runtime's
 // current heap memory use. They're also sharded across Ps, so it
 // makes sense to grab them all at once.
-[GoType] partial struct heapStatsAggregate {
+partial struct heapStatsAggregate {
     internal partial ref heapStatsDelta heapStatsDelta { get; }
 // Derived from values in heapStatsDelta.
 
@@ -600,7 +600,7 @@ internal static void compute(this ж<heapStatsAggregate> Ꮡa) {
 // may be acquired at different times, especially with respect to
 // heapStatsAggregate, means there could be some skew, but because of
 // these stats are independent, there's no real consistency issue here.
-[GoType] partial struct sysStatsAggregate {
+partial struct sysStatsAggregate {
     internal uint64 stacksSys;
     internal uint64 mSpanSys;
     internal uint64 mSpanInUse;
@@ -637,12 +637,12 @@ internal static void compute(this ж<sysStatsAggregate> Ꮡa) {
 
 // cpuStatsAggregate represents CPU stats obtained from the runtime
 // acquired together to avoid skew and inconsistencies.
-[GoType] partial struct cpuStatsAggregate {
+partial struct cpuStatsAggregate {
     internal partial ref cpuStats cpuStats { get; }
 }
 
 // compute populates the cpuStatsAggregate with values from the runtime.
-[GoRecv] internal static void compute(this ref cpuStatsAggregate a) {
+internal static void compute(this ref cpuStatsAggregate a) {
     a.cpuStats = work.cpuStats;
 }
 
@@ -654,7 +654,7 @@ internal static void compute(this ж<sysStatsAggregate> Ꮡa) {
 
 // gcStatsAggregate represents various GC stats obtained from the runtime
 // acquired together to avoid skew and inconsistencies.
-[GoType] partial struct gcStatsAggregate {
+partial struct gcStatsAggregate {
     internal uint64 heapScan;
     internal uint64 stackScan;
     internal uint64 globalsScan;
@@ -662,7 +662,7 @@ internal static void compute(this ж<sysStatsAggregate> Ꮡa) {
 }
 
 // compute populates the gcStatsAggregate with values from the runtime.
-[GoRecv] internal static void compute(this ref gcStatsAggregate a) {
+internal static void compute(this ref gcStatsAggregate a) {
     a.heapScan = ᏑgcController.of(gcControllerState.ᏑheapScan).Load();
     a.stackScan = ᏑgcController.of(gcControllerState.ᏑlastStackScan).Load();
     a.globalsScan = ᏑgcController.of(gcControllerState.ᏑglobalsScan).Load();
@@ -680,7 +680,7 @@ internal static float64 nsToSec(int64 ns) {
 // It contains multiple aggregates of runtime statistics, as well
 // as a set of these aggregates that it has populated. The aggregates
 // are populated lazily by its ensure method.
-[GoType] partial struct statAggregate {
+partial struct statAggregate {
     internal statDepSet ensured;
     internal heapStatsAggregate heapStats;
     internal sysStatsAggregate sysStats;
@@ -720,7 +720,7 @@ internal static void ensure(this ж<statAggregate> Ꮡa, ж<statDepSet> Ꮡdeps)
     a.ensured = a.ensured.union(missing);
 }
 
-[GoType("num:nint")] partial struct metricKind;
+partial struct metricKind /*num:nint*/;
 
 internal static metricKind metricKindBad => /* iota */ 0;
 internal static metricKind metricKindUint64 => 1;
@@ -729,14 +729,14 @@ internal static metricKind metricKindFloat64Histogram => 3;
 
 // metricSample is a runtime copy of runtime/metrics.Sample and
 // must be kept structurally identical to that type.
-[GoType] partial struct metricSample {
+partial struct metricSample {
     internal @string name;
     internal metricValue value;
 }
 
 // metricValue is a runtime copy of runtime/metrics.Sample and
 // must be kept structurally identical to that type.
-[GoType] partial struct metricValue {
+partial struct metricValue {
     internal metricKind kind;
     internal uint64 scalar;         // contains scalar values for scalar Kinds.
     internal @unsafe.Pointer pointer; // contains non-scalar values.
@@ -745,7 +745,7 @@ internal static metricKind metricKindFloat64Histogram => 3;
 // float64HistOrInit tries to pull out an existing float64Histogram
 // from the value, but if none exists, then it allocates one with
 // the given buckets.
-[GoRecv] internal static ж<metricFloat64Histogram> float64HistOrInit(this ref metricValue v, slice<float64> buckets) {
+internal static ж<metricFloat64Histogram> float64HistOrInit(this ref metricValue v, slice<float64> buckets) {
     ж<metricFloat64Histogram> hist = default!;
     if (v.kind == metricKindFloat64Histogram && v.pointer != nil){
         hist = (ж<metricFloat64Histogram>)(uintptr)(v.pointer);
@@ -763,7 +763,7 @@ internal static metricKind metricKindFloat64Histogram => 3;
 
 // metricFloat64Histogram is a runtime copy of runtime/metrics.Float64Histogram
 // and must be kept structurally identical to that type.
-[GoType] partial struct metricFloat64Histogram {
+partial struct metricFloat64Histogram {
     internal slice<uint64> counts;
     internal slice<float64> buckets;
 }
@@ -776,7 +776,7 @@ internal static metricKind metricKindFloat64Histogram => 3;
 internal static ж<statAggregate> Ꮡagg = new StandardBox<statAggregate>(new statAggregate());
 internal static ref statAggregate agg => ref Ꮡagg.Value;
 
-[GoType] partial struct metricName {
+partial struct metricName {
     internal @string name;
     internal metricKind kind;
 }

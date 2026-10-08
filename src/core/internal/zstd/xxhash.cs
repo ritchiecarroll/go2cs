@@ -17,7 +17,7 @@ internal static UntypedInt xxhPrime64c4 => 0x85ebca77c2b2ae63;
 internal static UntypedInt xxhPrime64c5 => 0x27d4eb2f165667c5;
 
 // xxhash64 is the state of a xxHash-64 checksum.
-[GoType] partial struct xxhash64 {
+partial struct xxhash64 {
     internal uint64 len;    // total length hashed
     internal array<uint64> v = new(4); // accumulators
     internal array<byte> buf = new(32); // buffer
@@ -26,7 +26,7 @@ internal static UntypedInt xxhPrime64c5 => 0x27d4eb2f165667c5;
 
 // reset discards the current state and prepares to compute a new hash.
 // We assume a seed of 0 since that is what zstd uses.
-[GoRecv] internal static void reset(this ref xxhash64 xh) {
+internal static void reset(this ref xxhash64 xh) {
     xh.len = 0;
     // Separate addition for awkward constant overflow.
     xh.v[0] = xxhPrime64c1;
@@ -43,7 +43,7 @@ internal static UntypedInt xxhPrime64c5 => 0x27d4eb2f165667c5;
 }
 
 // update adds a buffer to the has.
-[GoRecv] internal static void update(this ref xxhash64 xh, slice<byte> b) {
+internal static void update(this ref xxhash64 xh, slice<byte> b) {
     xh.len += (uint64)builtin.len(b);
     if (xh.cnt + builtin.len(b) < builtin.len(xh.buf)) {
         copy(xh.buf.slice(xh.cnt), b);
@@ -73,7 +73,7 @@ internal static UntypedInt xxhPrime64c5 => 0x27d4eb2f165667c5;
 }
 
 // digest returns the final hash value.
-[GoRecv] internal static uint64 digest(this ref xxhash64 xh) {
+internal static uint64 digest(this ref xxhash64 xh) {
     uint64 h64 = default!;
     if (xh.len < 32){
         h64 = xh.v[2] + (uint64)xxhPrime64c5;
@@ -116,7 +116,7 @@ internal static UntypedInt xxhPrime64c5 => 0x27d4eb2f165667c5;
 }
 
 // round updates a value.
-[GoRecv] internal static uint64 round(this ref xxhash64 xh, uint64 v, uint64 n) {
+internal static uint64 round(this ref xxhash64 xh, uint64 v, uint64 n) {
     v += n * (uint64)xxhPrime64c2;
     v = bits.RotateLeft64(v, 31);
     v *= xxhPrime64c1;
@@ -124,7 +124,7 @@ internal static UntypedInt xxhPrime64c5 => 0x27d4eb2f165667c5;
 }
 
 // mergeRound updates a value in the final round.
-[GoRecv] internal static uint64 mergeRound(this ref xxhash64 xh, uint64 v, uint64 n) {
+internal static uint64 mergeRound(this ref xxhash64 xh, uint64 v, uint64 n) {
     n = xh.round(0, n);
     v ^= (uint64)(n);
     v = v * (uint64)xxhPrime64c1 + (uint64)xxhPrime64c4;

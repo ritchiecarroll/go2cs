@@ -12,7 +12,7 @@ using go;
 partial class windows_package {
 
 // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/ns-wdm-_osversioninfow
-[GoType] partial struct _OSVERSIONINFOW {
+partial struct _OSVERSIONINFOW {
     internal uint32 osVersionInfoSize;
     internal uint32 majorVersion;
     internal uint32 minorVersion;

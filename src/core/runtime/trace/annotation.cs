@@ -12,7 +12,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class trace_package {
 
-[GoType] partial struct traceContextKey {
+partial struct traceContextKey {
 }
 
 // NewTask creates a task instance with the type taskType and returns
@@ -74,14 +74,14 @@ internal static ж<Task> fromContext(context.Context ctx) {
 }
 
 // Task is a data type for tracing a user-defined, logical operation.
-[GoType] partial struct Task {
+partial struct Task {
     internal uint64 id;
 }
 
 // TODO(hyangah): record parent id?
 
 // End marks the end of the operation represented by the [Task].
-[GoRecv] public static void End(this ref Task t) {
+public static void End(this ref Task t) {
     userTaskEnd(t.id);
 }
 
@@ -171,7 +171,7 @@ public static ж<Region> StartRegion(context.Context ctx, @string regionType) {
 }
 
 // Region is a region of code whose execution time interval is traced.
-[GoType] partial struct Region {
+partial struct Region {
     internal uint64 id;
     internal @string regionType;
 }

@@ -25,7 +25,7 @@ internal static error errInconsistentByteCount = errors.New("transform: inconsis
 internal static error errShortInternal = errors.New("transform: short internal buffer"u8);
 
 // Transformer transforms bytes.
-[GoType] partial interface Transformer {
+partial interface Transformer {
     // Transform writes to dst the transformed bytes read from src, and
     // returns the number of dst bytes written and src bytes read. The
     // atEOF argument tells whether src represents the last bytes of the
@@ -52,7 +52,7 @@ internal static error errShortInternal = errors.New("transform: short internal b
 
 // SpanningTransformer extends the Transformer interface with a Span method
 // that determines how much of the input already conforms to the Transformer.
-[GoType] partial interface SpanningTransformer :
+partial interface SpanningTransformer :
     Transformer
 {
     // Span returns a position in src such that transforming src[:n] results in
@@ -87,7 +87,7 @@ internal static error errShortInternal = errors.New("transform: short internal b
 
 // NopResetter can be embedded by implementations of Transformer to add a nop
 // Reset method.
-[GoType] partial struct NopResetter {
+partial struct NopResetter {
 }
 
 // Reset implements the Reset method of the Transformer interface.
@@ -95,7 +95,7 @@ public static void Reset(this NopResetter _) {
 }
 
 // Reader wraps another io.Reader by transforming the bytes read.
-[GoType] partial struct Reader {
+partial struct Reader {
     internal io.Reader r;
     internal Transformer t;
     internal error err;
@@ -127,7 +127,7 @@ public static ж<Reader> NewReader(io.Reader r, Transformer t) {
 }
 
 // Read implements the io.Reader interface.
-[GoRecv] public static (nint, error) Read(this ref Reader r, slice<byte> p) {
+public static (nint, error) Read(this ref Reader r, slice<byte> p) {
     nint n = 0;
     var err = ((error)default!);
     while (ᐧ) {
@@ -198,7 +198,7 @@ public static ж<Reader> NewReader(io.Reader r, Transformer t) {
 // Writer wraps another io.Writer by transforming the bytes read.
 // The user needs to call Close to flush unwritten bytes that may
 // be buffered.
-[GoType] partial struct Writer {
+partial struct Writer {
     internal io.Writer w;
     internal Transformer t;
     internal slice<byte> dst;
@@ -222,7 +222,7 @@ public static ж<Writer> NewWriter(io.Writer w, Transformer t) {
 // Write implements the io.Writer interface. If there are not enough
 // bytes available to complete a Transform, the bytes will be buffered
 // for the next write. Call Close to convert the remaining bytes.
-[GoRecv] public static (nint n, error err) Write(this ref Writer w, slice<byte> data) {
+public static (nint n, error err) Write(this ref Writer w, slice<byte> data) {
     nint n = default!;
 
     var src = data;
@@ -293,7 +293,7 @@ public static ж<Writer> NewWriter(io.Writer w, Transformer t) {
 }
 
 // Close implements the io.Closer interface.
-[GoRecv] public static error Close(this ref Writer w) {
+public static error Close(this ref Writer w) {
     var src = w.src.slice(0, w.n);
     while (ᐧ) {
         var (nDst, nSrc, err) = w.t.Transform(w.dst, src, true);
@@ -309,7 +309,7 @@ public static ж<Writer> NewWriter(io.Writer w, Transformer t) {
     }
 }
 
-[GoType] partial struct nop {
+partial struct nop {
     public partial ref NopResetter NopResetter { get; }
 }
 
@@ -327,7 +327,7 @@ internal static (nint n, error err) Span(this nop _, slice<byte> src, bool atEOF
     return (len(src), default!);
 }
 
-[GoType] partial struct discard {
+partial struct discard {
     public partial ref NopResetter NopResetter { get; }
 }
 
@@ -344,7 +344,7 @@ public static SpanningTransformer Nop = new nop(nil);
 // buffers owned by the chain. The i'th link transforms bytes from the i'th
 // buffer chain.link[i].b at read offset chain.link[i].p to the i+1'th buffer
 // chain.link[i+1].b at write offset chain.link[i+1].n, for i in [0, N).
-[GoType] partial struct chain {
+partial struct chain {
     internal slice<link> link;
     internal error err;
     // errStart is the index at which the error occurred plus 1. Processing
@@ -353,7 +353,7 @@ public static SpanningTransformer Nop = new nop(nil);
     internal nint errStart;
 }
 
-[GoRecv] internal static void fatalError(this ref chain c, nint errIndex, error err) {
+internal static void fatalError(this ref chain c, nint errIndex, error err) {
     {
         nint i = errIndex + 1; if (i > c.errStart) {
             c.errStart = i;
@@ -362,7 +362,7 @@ public static SpanningTransformer Nop = new nop(nil);
     }
 }
 
-[GoType] partial struct link {
+partial struct link {
     internal Transformer t;
     // b[p:n] holds the bytes to be transformed by t.
     internal slice<byte> b;
@@ -370,11 +370,11 @@ public static SpanningTransformer Nop = new nop(nil);
     internal nint n;
 }
 
-[GoRecv] internal static slice<byte> src(this ref link l) {
+internal static slice<byte> src(this ref link l) {
     return l.b.slice(l.p, l.n);
 }
 
-[GoRecv] internal static slice<byte> dst(this ref link l) {
+internal static slice<byte> dst(this ref link l) {
     return l.b.slice(l.n);
 }
 
@@ -398,7 +398,7 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
 }
 
 // Reset resets the state of Chain. It calls Reset on all the Transformers.
-[GoRecv] internal static void Reset(this ref chain c) {
+internal static void Reset(this ref chain c) {
     foreach (var (i, l) in c.link) {
         if (l.t != default!) {
             l.t.Reset();
@@ -410,7 +410,7 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
 // TODO: make chain use Span (is going to be fun to implement!)
 
 // Transform applies the transformers of c in sequence.
-[GoRecv] internal static (nint nDst, nint nSrc, error err) Transform(this ref chain c, slice<byte> dst, slice<byte> src, bool atEOF) {
+internal static (nint nDst, nint nSrc, error err) Transform(this ref chain c, slice<byte> dst, slice<byte> src, bool atEOF) {
     error err = default!;
 
     // Set up src and dst in the chain.

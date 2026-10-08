@@ -71,7 +71,7 @@ partial class context_package {
 // API boundaries.
 //
 // Context's methods may be called by multiple goroutines simultaneously.
-[GoType] partial interface Context {
+partial interface Context {
     // Deadline returns the time when work done on behalf of this context
     // should be canceled. Deadline returns ok==false when no deadline is
     // set. Successive calls to Deadline return the same results.
@@ -170,7 +170,7 @@ public static error Canceled = errors.New("context canceled"u8);
 // due to its deadline passing.
 public static error DeadlineExceeded = new deadlineExceededError(nil);
 
-[GoType] partial struct deadlineExceededError {
+partial struct deadlineExceededError {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -190,7 +190,7 @@ internal static bool Temporary(this deadlineExceededError _) {
 
 // An emptyCtx is never canceled, has no values, and has no deadline.
 // It is the common base of backgroundCtx and todoCtx.
-[GoType] partial struct emptyCtx {
+partial struct emptyCtx {
 }
 
 internal static (time.Time deadline, bool ok) Deadline(this emptyCtx _) {
@@ -212,7 +212,7 @@ internal static any Value(this emptyCtx _, any key) {
     return default!;
 }
 
-[GoType] partial struct backgroundCtx {
+partial struct backgroundCtx {
     internal partial ref emptyCtx emptyCtx { get; }
 }
 
@@ -223,7 +223,7 @@ internal static @string String(this backgroundCtx _) {
     return contextBackgroundˢ;
 }
 
-[GoType] partial struct todoCtx {
+partial struct todoCtx {
     internal partial ref emptyCtx emptyCtx { get; }
 }
 
@@ -360,11 +360,11 @@ public static Func<bool> /*stop*/ AfterFunc(Context ctx, Action f) {
     };
 }
 
-[GoType] partial interface afterFuncer {
+partial interface afterFuncer {
     Func<bool> AfterFunc(Action _);
 }
 
-[GoType] partial struct afterFuncCtx {
+partial struct afterFuncCtx {
     internal partial ref cancelCtx cancelCtx { get; }
     internal Δsync.Once once; // either starts running f or stops f from running
     internal Action f;
@@ -385,8 +385,8 @@ internal static void cancel(this ж<afterFuncCtx> Ꮡa, bool removeFromParent, e
 // A stopCtx is used as the parent context of a cancelCtx when
 // an AfterFunc has been registered with the parent.
 // It holds the stop function used to unregister the AfterFunc.
-[GoType] partial struct stopCtx {
-    [GoEmbedded] public Context Context;
+partial struct stopCtx {
+    /*embed*/ public Context Context;
     internal Func<bool> stop;
 }
 
@@ -441,7 +441,7 @@ internal static void removeChild(Context parent, canceler child) {
 
 // A canceler is a context type that can be canceled directly. The
 // implementations are *cancelCtx and *timerCtx.
-[GoType] partial interface canceler {
+partial interface canceler {
     void cancel(bool removeFromParent, error err, error cause);
     /*<-*/channel<EmptyStruct> Done();
 }
@@ -455,8 +455,8 @@ internal static channel<EmptyStruct> closedchan = new channel<EmptyStruct>(0);
 
 // A cancelCtx can be canceled. When canceled, it also cancels any children
 // that implement canceler.
-[GoType] partial struct cancelCtx {
-    [GoEmbedded] public Context Context;
+partial struct cancelCtx {
+    /*embed*/ public Context Context;
     internal Δsync.Mutex mu;            // protects following fields
     internal atomic.Value done;          // of chan struct{}, created lazily, closed by first cancel call
     internal map<canceler, EmptyStruct> children; // set to nil by the first cancel call
@@ -576,7 +576,7 @@ internal static partial void propagateCancel(this ж<cancelCtx> Ꮡc, Context pa
     });
 }
 
-[GoType] partial interface stringer {
+partial interface stringer {
     @string String();
 }
 
@@ -589,7 +589,7 @@ internal static @string contextName(Context c) {
     return reflectlite.TypeOf(c).String();
 }
 
-[GoRecv] internal static @string String(this ref cancelCtx c) {
+internal static @string String(this ref cancelCtx c) {
     return contextName(c.Context) + ".WithCancel"u8;
 }
 
@@ -640,7 +640,7 @@ public static Context WithoutCancel(Context parent) {
     return new withoutCancelCtx(parent);
 }
 
-[GoType] partial struct withoutCancelCtx {
+partial struct withoutCancelCtx {
     internal Context c;
 }
 
@@ -728,17 +728,17 @@ public static (Context, Action) WithDeadlineCause(Context parent, time.Time d, e
 // A timerCtx carries a timer and a deadline. It embeds a cancelCtx to
 // implement Done and Err. It implements cancel by stopping its timer then
 // delegating to cancelCtx.cancel.
-[GoType] partial struct timerCtx {
+partial struct timerCtx {
     internal partial ref cancelCtx cancelCtx { get; }
     internal ж<time.Timer> timer; // Under cancelCtx.mu.
     internal time.Time deadline;
 }
 
-[GoRecv] internal static (time.Time deadline, bool ok) Deadline(this ref timerCtx c) {
+internal static (time.Time deadline, bool ok) Deadline(this ref timerCtx c) {
     return (c.deadline, true);
 }
 
-[GoRecv] internal static @string String(this ref timerCtx c) {
+internal static @string String(this ref timerCtx c) {
     return contextName(c.cancelCtx.Context) + ".WithDeadline("u8 + c.deadline.String() + " ["u8 + time.Until(c.deadline).String() + "])"u8;
 }
 
@@ -807,8 +807,8 @@ public static Context WithValue(Context parent, any key, any val) {
 
 // A valueCtx carries a key-value pair. It implements Value for that key and
 // delegates all other calls to the embedded Context.
-[GoType] partial struct valueCtx {
-    [GoEmbedded] public Context Context;
+partial struct valueCtx {
+    /*embed*/ public Context Context;
     internal any key, val;
 }
 
@@ -844,11 +844,11 @@ internal static @string stringify(any v) {
     return reflectlite.TypeOf(v).String();
 }
 
-[GoRecv] internal static @string String(this ref valueCtx c) {
+internal static @string String(this ref valueCtx c) {
     return contextName(c.Context) + ".WithValue("u8 + stringify(c.key) + ", "u8 + stringify(c.val) + ")"u8;
 }
 
-[GoRecv] internal static any Value(this ref valueCtx c, any key) {
+internal static any Value(this ref valueCtx c, any key) {
     if (AreEqual(c.key, key)) {
         return c.val;
     }

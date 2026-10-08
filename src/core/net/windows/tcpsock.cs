@@ -19,7 +19,7 @@ partial class net_package {
 // TCPListener is not implemented.
 
 // TCPAddr represents the address of a TCP end point.
-[GoType] partial struct TCPAddr {
+partial struct TCPAddr {
     public IP IP;
     public nint Port;
     public @string Zone; // IPv6 scoped addressing zone
@@ -42,7 +42,7 @@ public static netip.AddrPort AddrPort(this ж<TCPAddr> Ꮡa) {
 }
 
 // Network returns the address's network name, "tcp".
-[GoRecv] public static @string Network(this ref TCPAddr a) {
+public static @string Network(this ref TCPAddr a) {
     return tcpˢ;
 }
 
@@ -122,7 +122,7 @@ public static ж<TCPAddr> TCPAddrFromAddrPort(netip.AddrPort addr) {
 
 // TCPConn is an implementation of the [Conn] interface for TCP network
 // connections.
-[GoType] partial struct TCPConn {
+partial struct TCPConn {
     internal partial ref conn conn { get; }
 }
 
@@ -142,7 +142,7 @@ public static ж<TCPAddr> TCPAddrFromAddrPort(netip.AddrPort addr) {
 //
 // Note that Solaris and its derivatives do not support setting Interval to a non-negative value
 // and Count to a negative value, or vice-versa.
-[GoType] partial struct KeepAliveConfig {
+partial struct KeepAliveConfig {
     // If Enable is true, keep-alive probes are enabled.
     public bool Enable;
     // Idle is the time that the connection must be idle before
@@ -383,7 +383,7 @@ public static (ж<TCPConn>, error) DialTCP(@string network, ж<TCPAddr> Ꮡladdr
 
 // TCPListener is a TCP network listener. Clients should typically
 // use variables of type [Listener] instead of assuming TCP.
-[GoType] partial struct TCPListener {
+partial struct TCPListener {
     internal ж<netFD> fd;
     internal ListenConfig lc;
 }
@@ -451,7 +451,7 @@ public static error Close(this ж<TCPListener> Ꮡl) {
 // Addr returns the listener's network address, a [*TCPAddr].
 // The Addr returned is shared by all invocations of Addr, so
 // do not modify it.
-[GoRecv] public static ΔAddr Addr(this ref TCPListener l) {
+public static ΔAddr Addr(this ref TCPListener l) {
     return (~l.fd).laddr;
 }
 

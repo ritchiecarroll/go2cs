@@ -19,7 +19,7 @@ partial class x509_package {
 internal static error errInvalidOID = errors.New("invalid oid"u8);
 
 // An OID represents an ASN.1 OBJECT IDENTIFIER.
-[GoType] partial struct OID {
+partial struct OID {
     internal slice<byte> der;
 }
 
@@ -120,11 +120,11 @@ public static (slice<byte>, error) MarshalText(this OID o) {
 }
 
 // UnmarshalText implements [encoding.TextUnmarshaler]
-[GoRecv] public static error UnmarshalText(this ref OID o, slice<byte> text) {
+public static error UnmarshalText(this ref OID o, slice<byte> text) {
     return o.unmarshalOIDText(((@string)text));
 }
 
-[GoRecv] internal static error unmarshalOIDText(this ref OID o, @string oid) {
+internal static error unmarshalOIDText(this ref OID o, @string oid) {
     // (*big.Int).SetString allows +/- signs, but we don't want
     // to allow them in the string representation of Object Identifier, so
     // reject such encodings.
@@ -184,7 +184,7 @@ public static (slice<byte>, error) MarshalBinary(this OID o) {
 }
 
 // UnmarshalBinary implements [encoding.BinaryUnmarshaler]
-[GoRecv] public static error UnmarshalBinary(this ref OID o, slice<byte> b) {
+public static error UnmarshalBinary(this ref OID o, slice<byte> b) {
     var (oid, ok) = newOIDFromDER(bytes.Clone(b));
     if (!ok) {
         return errInvalidOID;

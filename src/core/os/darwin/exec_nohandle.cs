@@ -6,7 +6,7 @@ namespace go;
 
 partial class os_package {
 
-[GoRecv] internal static void closeHandle(this ref Process p) {
+internal static void closeHandle(this ref Process p) {
 }
 
 } // end os_package

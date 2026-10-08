@@ -79,7 +79,7 @@ partial class regexp_package {
 // Regexp is the representation of a compiled regular expression.
 // A Regexp is safe for concurrent use by multiple goroutines,
 // except for configuration methods, such as [Regexp.Longest].
-[GoType] partial struct Regexp {
+partial struct Regexp {
     internal @string expr;      // as passed to Compile
     internal ж<syntax.Prog> prog; // compiled program
     internal ж<onePassProg> onepass; // onepass program or nil
@@ -101,7 +101,7 @@ partial class regexp_package {
 }
 
 // String returns the source text used to compile the regular expression.
-[GoRecv] public static @string String(this ref Regexp re) {
+public static @string String(this ref Regexp re) {
     return re.expr;
 }
 
@@ -113,7 +113,7 @@ partial class regexp_package {
 // As of Go 1.12, using Copy is no longer necessary to avoid lock contention.
 // Copy may still be appropriate if the reason for its use is to make
 // two copies with different [Regexp.Longest] settings.
-[GoRecv] public static ж<Regexp> Copy(this ref Regexp re) {
+public static ж<Regexp> Copy(this ref Regexp re) {
     ref var re2 = ref heap<Regexp>(out var Ꮡre2);
     re2 = re;
     return Ꮡre2;
@@ -162,7 +162,7 @@ public static (ж<Regexp>, error) CompilePOSIX(@string expr) {
 // it chooses a match that is as long as possible.
 // This method modifies the [Regexp] and may not be called concurrently
 // with any other methods.
-[GoRecv] public static void Longest(this ref Regexp re) {
+public static void Longest(this ref Regexp re) {
     re.longest = true;
 }
 
@@ -260,7 +260,7 @@ internal static ж<machine> get(this ж<Regexp> Ꮡre) {
 }
 
 // put returns a machine to the correct machine pool.
-[GoRecv] internal static void put(this ref Regexp re, ж<machine> Ꮡm) {
+internal static void put(this ref Regexp re, ж<machine> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     m.re = default!;
@@ -346,7 +346,7 @@ internal static @string quote(@string s) {
 }
 
 // NumSubexp returns the number of parenthesized subexpressions in this [Regexp].
-[GoRecv] public static nint NumSubexp(this ref Regexp re) {
+public static nint NumSubexp(this ref Regexp re) {
     return re.numSubexp;
 }
 
@@ -355,7 +355,7 @@ internal static @string quote(@string s) {
 // so that if m is a match slice, the name for m[i] is SubexpNames()[i].
 // Since the Regexp as a whole cannot be named, names[0] is always
 // the empty string. The slice should not be modified.
-[GoRecv] public static slice<@string> SubexpNames(this ref Regexp re) {
+public static slice<@string> SubexpNames(this ref Regexp re) {
     return re.subexpNames;
 }
 
@@ -366,7 +366,7 @@ internal static @string quote(@string s) {
 // (?P<bob>a+)(?P<bob>b+), which declares two subexpressions named "bob".
 // In this case, SubexpIndex returns the index of the leftmost such subexpression
 // in the regular expression.
-[GoRecv] public static nint SubexpIndex(this ref Regexp re, @string name) {
+public static nint SubexpIndex(this ref Regexp re, @string name) {
     if (name != ""u8) {
         foreach (var (i, s) in re.subexpNames) {
             if (name == s) {
@@ -381,7 +381,7 @@ internal const rune endOfText = -1;
 
 // input abstracts different representations of the input text. It provides
 // one-character lookahead.
-[GoType] partial interface input {
+partial interface input {
     (rune r, nint width) step(nint pos); // advance one rune
     bool canCheckPrefix();             // can we look ahead without losing info?
     bool hasPrefix(ж<Regexp> re);
@@ -390,11 +390,11 @@ internal const rune endOfText = -1;
 }
 
 // inputString scans a string.
-[GoType] partial struct inputString {
+partial struct inputString {
     internal @string str;
 }
 
-[GoRecv] internal static (rune, nint) step(this ref inputString i, nint pos) {
+internal static (rune, nint) step(this ref inputString i, nint pos) {
     if (pos < len(i.str)) {
         var c = i.str[pos];
         if (c < utf8.RuneSelf) {
@@ -405,23 +405,23 @@ internal const rune endOfText = -1;
     return (endOfText, 0);
 }
 
-[GoRecv] internal static bool canCheckPrefix(this ref inputString i) {
+internal static bool canCheckPrefix(this ref inputString i) {
     return true;
 }
 
-[GoRecv] internal static bool hasPrefix(this ref inputString i, ж<Regexp> Ꮡre) {
+internal static bool hasPrefix(this ref inputString i, ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     return strings.HasPrefix(i.str, re.prefix);
 }
 
-[GoRecv] internal static nint index(this ref inputString i, ж<Regexp> Ꮡre, nint pos) {
+internal static nint index(this ref inputString i, ж<Regexp> Ꮡre, nint pos) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     return strings.Index(i.str.slice(pos), re.prefix);
 }
 
-[GoRecv] internal static lazyFlag context(this ref inputString i, nint pos) {
+internal static lazyFlag context(this ref inputString i, nint pos) {
     var (r1, r2) = (endOfText, endOfText);
     // 0 < pos && pos <= len(i.str)
     if ((nuint)(pos - 1) < (nuint)len(i.str)) {
@@ -441,11 +441,11 @@ internal const rune endOfText = -1;
 }
 
 // inputBytes scans a byte slice.
-[GoType] partial struct inputBytes {
+partial struct inputBytes {
     internal slice<byte> str;
 }
 
-[GoRecv] internal static (rune, nint) step(this ref inputBytes i, nint pos) {
+internal static (rune, nint) step(this ref inputBytes i, nint pos) {
     if (pos < len(i.str)) {
         var c = i.str[pos];
         if (c < utf8.RuneSelf) {
@@ -456,23 +456,23 @@ internal const rune endOfText = -1;
     return (endOfText, 0);
 }
 
-[GoRecv] internal static bool canCheckPrefix(this ref inputBytes i) {
+internal static bool canCheckPrefix(this ref inputBytes i) {
     return true;
 }
 
-[GoRecv] internal static bool hasPrefix(this ref inputBytes i, ж<Regexp> Ꮡre) {
+internal static bool hasPrefix(this ref inputBytes i, ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     return bytes.HasPrefix(i.str, re.prefixBytes);
 }
 
-[GoRecv] internal static nint index(this ref inputBytes i, ж<Regexp> Ꮡre, nint pos) {
+internal static nint index(this ref inputBytes i, ж<Regexp> Ꮡre, nint pos) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     return bytes.Index(i.str.slice(pos), re.prefixBytes);
 }
 
-[GoRecv] internal static lazyFlag context(this ref inputBytes i, nint pos) {
+internal static lazyFlag context(this ref inputBytes i, nint pos) {
     var (r1, r2) = (endOfText, endOfText);
     // 0 < pos && pos <= len(i.str)
     if ((nuint)(pos - 1) < (nuint)len(i.str)) {
@@ -492,13 +492,13 @@ internal const rune endOfText = -1;
 }
 
 // inputReader scans a RuneReader.
-[GoType] partial struct inputReader {
+partial struct inputReader {
     internal io.RuneReader r;
     internal bool atEOT;
     internal nint pos;
 }
 
-[GoRecv] internal static (rune, nint) step(this ref inputReader i, nint pos) {
+internal static (rune, nint) step(this ref inputReader i, nint pos) {
     if (!i.atEOT && pos != i.pos) {
         return (endOfText, 0);
     }
@@ -511,26 +511,26 @@ internal const rune endOfText = -1;
     return (r, w);
 }
 
-[GoRecv] internal static bool canCheckPrefix(this ref inputReader i) {
+internal static bool canCheckPrefix(this ref inputReader i) {
     return false;
 }
 
-[GoRecv] internal static bool hasPrefix(this ref inputReader i, ж<Regexp> Ꮡre) {
+internal static bool hasPrefix(this ref inputReader i, ж<Regexp> Ꮡre) {
     return false;
 }
 
-[GoRecv] internal static nint index(this ref inputReader i, ж<Regexp> Ꮡre, nint pos) {
+internal static nint index(this ref inputReader i, ж<Regexp> Ꮡre, nint pos) {
     return -1;
 }
 
-[GoRecv] internal static lazyFlag context(this ref inputReader i, nint pos) {
+internal static lazyFlag context(this ref inputReader i, nint pos) {
     return 0; // not used
 }
 
 // LiteralPrefix returns a literal string that must begin any match
 // of the regular expression re. It returns the boolean true if the
 // literal string comprises the entire regular expression.
-[GoRecv] public static (@string prefix, bool complete) LiteralPrefix(this ref Regexp re) {
+public static (@string prefix, bool complete) LiteralPrefix(this ref Regexp re) {
     return (re.prefix, re.prefixComplete);
 }
 
@@ -770,7 +770,7 @@ public static @string QuoteMeta(@string s) {
 // For example, "(a){0}" turns into an empty program, so the
 // maximum capture in the program is 0 but we need to return
 // an expression for \1.  Pad appends -1s to the slice a as needed.
-[GoRecv] internal static slice<nint> pad(this ref Regexp re, slice<nint> a) {
+internal static slice<nint> pad(this ref Regexp re, slice<nint> a) {
     if (a == default!) {
         // No match.
         return default!;
@@ -932,18 +932,18 @@ public static slice<slice<byte>> FindSubmatch(this ж<Regexp> Ꮡre, slice<byte>
 // equivalent to ${1x}, not ${1}x, and, $10 is equivalent to ${10}, not ${1}0.
 //
 // To insert a literal $ in the output, use $$ in the template.
-[GoRecv] public static slice<byte> Expand(this ref Regexp re, slice<byte> dst, slice<byte> template, slice<byte> src, slice<nint> match) {
+public static slice<byte> Expand(this ref Regexp re, slice<byte> dst, slice<byte> template, slice<byte> src, slice<nint> match) {
     return re.expand(dst, ((@string)template), src, ""u8, match);
 }
 
 // ExpandString is like [Regexp.Expand] but the template and source are strings.
 // It appends to and returns a byte slice in order to give the calling
 // code control over allocation.
-[GoRecv] public static slice<byte> ExpandString(this ref Regexp re, slice<byte> dst, @string template, @string src, slice<nint> match) {
+public static slice<byte> ExpandString(this ref Regexp re, slice<byte> dst, @string template, @string src, slice<nint> match) {
     return re.expand(dst, template, default!, src, match);
 }
 
-[GoRecv] internal static slice<byte> expand(this ref Regexp re, slice<byte> dst, @string template, slice<byte> bsrc, @string src, slice<nint> match) {
+internal static slice<byte> expand(this ref Regexp re, slice<byte> dst, @string template, slice<byte> bsrc, @string src, slice<nint> match) {
     while (len(template) > 0) {
         var (before, after, ok) = strings.Cut(template, "$"u8);
         if (!ok) {
@@ -1311,7 +1311,7 @@ public static slice<@string> Split(this ж<Regexp> Ꮡre, @string s, nint n) {
 // Note that the output is lossy in some cases: This method does not indicate
 // POSIX regular expressions (i.e. those compiled by calling [CompilePOSIX]), or
 // those for which the [Regexp.Longest] method has been called.
-[GoRecv] public static (slice<byte>, error) AppendText(this ref Regexp re, slice<byte> b) {
+public static (slice<byte>, error) AppendText(this ref Regexp re, slice<byte> b) {
     return (append(b, re.String().ꓸꓸꓸ), default!);
 }
 
@@ -1319,13 +1319,13 @@ public static slice<@string> Split(this ж<Regexp> Ꮡre, @string s, nint n) {
 // matches that of calling the [Regexp.AppendText] method.
 //
 // See [Regexp.AppendText] for more information.
-[GoRecv] public static (slice<byte>, error) MarshalText(this ref Regexp re) {
+public static (slice<byte>, error) MarshalText(this ref Regexp re) {
     return re.AppendText(default!);
 }
 
 // UnmarshalText implements [encoding.TextUnmarshaler] by calling
 // [Compile] on the encoded value.
-[GoRecv] public static error UnmarshalText(this ref Regexp re, slice<byte> text) {
+public static error UnmarshalText(this ref Regexp re, slice<byte> text) {
     var (newRE, err) = Compile(((@string)text));
     if (err != default!) {
         return err;

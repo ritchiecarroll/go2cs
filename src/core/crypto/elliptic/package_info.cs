@@ -65,9 +65,9 @@ using static go.crypto.elliptic_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/elliptic/elliptic.go", "elliptic.cs", "AD+IAZ4ACgKCgoKEgoKCuKaWgpaUAAISAAkChISChIKErOKCgoKCggAMGgABEAAJAoCCpoKClJKUgoKCgpSClKzigIKmgoKUkpSCgoKmgoKClIKUgpSm1oKWguyCgoKCAAIU8oIAAhYACAKCAAIU8oIAAhTygg==")]
-[assembly: go.GoPositionMap("crypto/elliptic/nistec.go", "nistec.cs", "AA0auIIADyDIggALGLiCAAsiuIIAJl6ipvaClILmAAgGgqaClIKmgoKCgoKm0oKmlIKCgqaigoKUgoKUpqKCgpSqwoKClIKClIKmooKClIKCgpSmooKCgpSqwoKCgpSCgpSCgoKUptKCpoKCyoKCgqaigpSCgpSmgoKClKaCgoKU")]
+[assembly: go.GoPositionMap("crypto/elliptic/nistec.go", "nistec.cs", "AA0auIIADyDIggALGLiCAAsiuIIAJl6ipvaClILmAAgGgqaClIKmgoKCgoKm0oKmlIKCgqaigoKUgoKUpqKCgpSqwoKClIKClIKmooKClIKCgpSmooKCgpSqwoKCgpSCgpSCgoKUptKCpoKCyoKCgqaigpSCgpSmgoKClKaCgoKU", "", "", "19=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;41=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;58=bigFromDecimal/1/2/4,bigFromDecimal/2/2/6,bigFromHex/1/3/8,bigFromHex/2/3/10,bigFromHex/3/3/12;75=bigFromDecimal/1/2/4,bigFromDecimal/2/2/7,bigFromHex/1/3/10,bigFromHex/2/3/13,bigFromHex/3/3/16")]
 [assembly: go.GoPositionMap("crypto/elliptic/nistec_p256.go", "nistec_p256.cs", "AA0copSUlJSCgoKU")]
-[assembly: go.GoPositionMap("crypto/elliptic/params.go", "params.cs", "ABkwggACFgAIAoKEgoSCgoQAAhIADAaAgqaEqIKErOKCgpSq4oKWgoSCgoKCggACEgAKBoCCpIKEgoK65IKCgoKClIKCgoKWgoKChIKCgoKCgoKUgoKEgoKCgoKCgoKUgoKUgoSCgoKCgoSCgoKCgoKEgoKCgoKEAAISAAoGgIKkhIK6tIKCgoKCgpSCgoKChISCgoKCgpSEgoKCgpSCgpSEgoKClISCgoSCgpSEAAISAAoGgIKkhIKEooKCgpSoAAISAAoGgIKmpoKCgqY=")]
+[assembly: go.GoPositionMap("crypto/elliptic/params.go", "params.cs", "ABkwggACFgAIAoKEgoSCgoQAAhIADAaAgqaEqIKErOKCgpSq4oKWgoSCgoKCggACEgAKBoCCpIKEgoK65IKCgoKClIKCgoKWgoKChIKCgoKCgoKUgoKEgoKCgoKCgoKUgoKUgoSCgoKCgoSCgoKCgoKEgoKCgoKEAAISAAoGgIKkhIK6tIKCgoKCgpSCgoKChISCgoKCgpSEgoKCgpSCgpSEgoKClISCgoSCgpSEAAISAAoGgIKkhIKEooKCgpSoAAISAAoGgIKmpoKCgqY=", "", "", "67=Sign/2/2/1,Cmp/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -76,7 +76,7 @@ namespace go.crypto;
 public static partial class elliptic_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

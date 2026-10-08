@@ -25,7 +25,7 @@ partial class tabwriter_package {
 // The text itself is stored in a separate buffer; cell only describes the
 // segment's size in bytes, its width in runes, and whether it's an htab
 // ('\t') terminated cell.
-[GoType] partial struct cell {
+partial struct cell {
     internal nint size; // cell size in bytes
     internal nint width; // cell width in runes
     internal bool htab; // true if the cell is terminated by an htab ('\t')
@@ -88,7 +88,7 @@ partial class tabwriter_package {
 // The Writer must buffer input internally, because proper spacing
 // of one line may depend on the cells in future lines. Clients must
 // call Flush when done calling [Writer.Write].
-[GoType] partial struct Writer {
+partial struct Writer {
     // configuration
     internal io.Writer output;
     internal nint minwidth;
@@ -108,7 +108,7 @@ partial class tabwriter_package {
 // addLine adds a new line.
 // flushed is a hint indicating whether the underlying writer was just flushed.
 // If so, the previous line is not likely to be a good indicator of the new line's cells.
-[GoRecv] internal static void addLine(this ref Writer b, bool flushed) {
+internal static void addLine(this ref Writer b, bool flushed) {
     // Grow slice instead of appending,
     // as that gives us an opportunity
     // to re-use an existing []cell.
@@ -138,7 +138,7 @@ partial class tabwriter_package {
 }
 
 // Reset the current state.
-[GoRecv] internal static void reset(this ref Writer b) {
+internal static void reset(this ref Writer b) {
     b.buf = b.buf[..0];
     b.pos = 0;
     b.cell = new cell(nil);
@@ -220,7 +220,7 @@ public static ж<Writer> Init(this ж<Writer> Ꮡb, io.Writer output, nint minwi
 }
 
 // debugging support (keep code around)
-[GoRecv] internal static void dump(this ref Writer b) {
+internal static void dump(this ref Writer b) {
     nint pos = 0;
     foreach (var (i, line) in b.lines) {
         print((@string)"("u8, i, (@string)") "u8);
@@ -235,11 +235,11 @@ public static ж<Writer> Init(this ж<Writer> Ꮡb, io.Writer output, nint minwi
 
 // local error wrapper so we can distinguish errors we want to return
 // as errors from genuine panics (which we don't want to return as errors)
-[GoType] partial struct osError {
+partial struct osError {
     internal error err;
 }
 
-[GoRecv] internal static void write0(this ref Writer b, slice<byte> buf) {
+internal static void write0(this ref Writer b, slice<byte> buf) {
     var (n, err) = b.output.Write(buf);
     if (n != len(buf) && err == default!) {
         err = io.ErrShortWrite;
@@ -249,7 +249,7 @@ public static ж<Writer> Init(this ж<Writer> Ꮡb, io.Writer output, nint minwi
     }
 }
 
-[GoRecv] internal static void writeN(this ref Writer b, slice<byte> src, nint n) {
+internal static void writeN(this ref Writer b, slice<byte> src, nint n) {
     while (n > len(src)) {
         b.write0(src);
         n -= len(src);
@@ -260,7 +260,7 @@ public static ж<Writer> Init(this ж<Writer> Ꮡb, io.Writer output, nint minwi
 internal static slice<byte> newline = new byte[]{(rune)'\n'}.slice();
 internal static slice<byte> tabs = slice<byte>("\t\t\t\t\t\t\t\t"u8);
 
-[GoRecv] internal static void writePadding(this ref Writer b, nint textw, nint cellw, bool useTabs) {
+internal static void writePadding(this ref Writer b, nint textw, nint cellw, bool useTabs) {
     if (b.padbytes[0] == (rune)'\t' || useTabs) {
         // padding is done with tabs
         if (b.tabwidth == 0) {
@@ -281,7 +281,7 @@ internal static slice<byte> tabs = slice<byte>("\t\t\t\t\t\t\t\t"u8);
 
 internal static slice<byte> vbar = new byte[]{(rune)'|'}.slice();
 
-[GoRecv] internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0, nint line1) {
+internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0, nint line1) {
     nint pos = default!;
 
     pos = pos0;
@@ -336,7 +336,7 @@ internal static slice<byte> vbar = new byte[]{(rune)'|'}.slice();
 // is the buffer position corresponding to the beginning of line0.
 // Returns the buffer position corresponding to the beginning of
 // line1 and an error, if any.
-[GoRecv] internal static nint /*pos*/ format(this ref Writer b, nint pos0, nint line0, nint line1) {
+internal static nint /*pos*/ format(this ref Writer b, nint pos0, nint line0, nint line1) {
     nint pos = default!;
 
     pos = pos0;
@@ -393,13 +393,13 @@ internal static slice<byte> vbar = new byte[]{(rune)'|'}.slice();
 }
 
 // Append text to current cell.
-[GoRecv] internal static void append(this ref Writer b, slice<byte> text) {
+internal static void append(this ref Writer b, slice<byte> text) {
     b.buf = builtin.appendꓸꓸꓸ(b.buf, text);
     b.cell.size += len(text);
 }
 
 // Update the cell width.
-[GoRecv] internal static void updateWidth(this ref Writer b) {
+internal static void updateWidth(this ref Writer b) {
     b.cell.width += utf8.RuneCount(b.buf.slice(b.pos));
     b.pos = len(b.buf);
 }
@@ -413,7 +413,7 @@ internal static slice<byte> vbar = new byte[]{(rune)'|'}.slice();
 public static UntypedInt Escape => /* '\xff' */ 255;
 
 // Start escaped mode.
-[GoRecv] internal static void startEscape(this ref Writer b, byte ch) {
+internal static void startEscape(this ref Writer b, byte ch) {
     var exprᴛ1 = ch;
     if (exprᴛ1 == Escape) {
         b.endChar = Escape;
@@ -431,7 +431,7 @@ public static UntypedInt Escape => /* '\xff' */ 255;
 // is assumed to be zero for formatting purposes; if it was an HTML entity,
 // its width is assumed to be one. In all other cases, the width is the
 // unicode width of the text.
-[GoRecv] internal static void endEscape(this ref Writer b) {
+internal static void endEscape(this ref Writer b) {
     var exprᴛ1 = b.endChar;
     if (exprᴛ1 == Escape) {
         b.updateWidth();
@@ -452,7 +452,7 @@ public static UntypedInt Escape => /* '\xff' */ 255;
 
 // Terminate the current cell by adding it to the list of cells of the
 // current line. Returns the number of cells in that line.
-[GoRecv] internal static nint terminateCell(this ref Writer b, bool htab) {
+internal static nint terminateCell(this ref Writer b, bool htab) {
     b.cell.htab = htab;
     var line = Ꮡ(b.lines, len(b.lines) - 1);
     line.ValueSlot = builtin.append(line.ValueSlot, b.cell);
@@ -518,7 +518,7 @@ internal static error /*err*/ flush(this ж<Writer> Ꮡb) {
 // flushNoDefers is like flush, but without a deferred handlePanic call. This
 // can be called from other methods which already have their own deferred
 // handlePanic calls, such as Write, and avoid the extra defer work.
-[GoRecv] internal static void flushNoDefers(this ref Writer b) {
+internal static void flushNoDefers(this ref Writer b) {
     // add current cell if not empty
     if (b.cell.size > 0) {
         if (b.endChar != 0) {

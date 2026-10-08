@@ -205,28 +205,28 @@ public static (slice<byte>, error) MarshalIndent(any v, @string prefix, @string 
 
 // Marshaler is the interface implemented by types that
 // can marshal themselves into valid JSON.
-[GoType] partial interface Marshaler {
+partial interface Marshaler {
     (slice<byte>, error) MarshalJSON();
 }
 
 // An UnsupportedTypeError is returned by [Marshal] when attempting
 // to encode an unsupported value type.
-[GoType] partial struct UnsupportedTypeError {
+partial struct UnsupportedTypeError {
     public reflectꓸType Type;
 }
 
-[GoRecv] public static @string Error(this ref UnsupportedTypeError e) {
+public static @string Error(this ref UnsupportedTypeError e) {
     return "json: unsupported type: "u8 + e.Type.String();
 }
 
 // An UnsupportedValueError is returned by [Marshal] when attempting
 // to encode an unsupported value.
-[GoType] partial struct UnsupportedValueError {
+partial struct UnsupportedValueError {
     public reflectꓸValue Value;
     public @string Str;
 }
 
-[GoRecv] public static @string Error(this ref UnsupportedValueError e) {
+public static @string Error(this ref UnsupportedValueError e) {
     return "json: unsupported value: "u8 + e.Str;
 }
 
@@ -236,17 +236,17 @@ public static (slice<byte>, error) MarshalIndent(any v, @string prefix, @string 
 // replacing invalid bytes with the Unicode replacement rune U+FFFD.
 //
 // Deprecated: No longer used; kept for compatibility.
-[GoType] partial struct InvalidUTF8Error {
+partial struct InvalidUTF8Error {
     public @string S; // the whole string value that caused the error
 }
 
-[GoRecv] public static @string Error(this ref InvalidUTF8Error e) {
+public static @string Error(this ref InvalidUTF8Error e) {
     return "json: invalid UTF-8 in string: "u8 + strconv.Quote(e.S);
 }
 
 // A MarshalerError represents an error from calling a
 // [Marshaler.MarshalJSON] or [encoding.TextMarshaler.MarshalText] method.
-[GoType] partial struct MarshalerError {
+partial struct MarshalerError {
     public reflectꓸType Type;
     public error Err;
     internal @string sourceFunc;
@@ -255,7 +255,7 @@ public static (slice<byte>, error) MarshalIndent(any v, @string prefix, @string 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string marshalJSONˢ = "MarshalJSON"u8;
 
-[GoRecv] public static @string Error(this ref MarshalerError e) {
+public static @string Error(this ref MarshalerError e) {
     @string srcFunc = e.sourceFunc;
     if (srcFunc == ""u8) {
         srcFunc = marshalJSONˢ;
@@ -264,14 +264,14 @@ internal static readonly @string marshalJSONˢ = "MarshalJSON"u8;
 }
 
 // Unwrap returns the underlying error.
-[GoRecv] public static error Unwrap(this ref MarshalerError e) {
+public static error Unwrap(this ref MarshalerError e) {
     return e.Err;
 }
 
 internal static readonly @string hex = "0123456789abcdef"u8;
 
 // An encodeState encodes JSON into a bytes.Buffer.
-[GoType] partial struct encodeState {
+partial struct encodeState {
     public partial ref bytes_package.Buffer Buffer { get; } // accumulated output
     // Keep track of what pointers we've seen in the current recursive call
     // path, to avoid cycles that could lead to a stack overflow. Only do
@@ -305,8 +305,8 @@ internal static ж<encodeState> newEncodeState() {
 // jsonError is an error wrapper type for internal use only.
 // Panics with errors are wrapped in jsonError so that the top-level recover
 // can distinguish intentional panics from this package.
-[GoType] partial struct jsonError {
-    [GoEmbedded] internal error error;
+partial struct jsonError {
+    /*embed*/ internal error error;
 }
 
 internal static error /*err*/ marshal(this ж<encodeState> Ꮡe, any v, encOpts opts) {
@@ -336,7 +336,7 @@ internal static error /*err*/ marshal(this ж<encodeState> Ꮡe, any v, encOpts 
 }
 
 // error aborts the encoding by panicking with err wrapped in jsonError.
-[GoRecv] internal static void error(this ref encodeState e, error err) {
+internal static void error(this ref encodeState e, error err) {
     throw panic(new jsonError(err));
 }
 
@@ -356,7 +356,7 @@ internal static void reflectValue(this ж<encodeState> Ꮡe, reflectꓸValue v, 
     valueEncoder(v)(Ꮡe, v, opts);
 }
 
-[GoType] partial struct encOpts {
+partial struct encOpts {
     // quoted causes primitive fields to be encoded inside JSON strings.
     internal bool quoted;
     // escapeHTML causes '<', '>', and '&' to be escaped in JSON strings.
@@ -576,7 +576,7 @@ internal static void uintEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpt
     Ꮡe.of(encodeState.ᏑBuffer).Write(b);
 }
 
-[GoType("num:nint")] partial struct floatEncoder;
+partial struct floatEncoder /*num:nint*/;
 
 internal static void encode(this floatEncoder bits, ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
     ref var e = ref Ꮡe.DerefOrNull();
@@ -725,11 +725,11 @@ internal static void unsupportedTypeEncoder(ж<encodeState> Ꮡe, reflectꓸValu
     e.error(new UnsupportedTypeErrorжerror(Ꮡ(new UnsupportedTypeError(v.Type()))));
 }
 
-[GoType] partial struct structEncoder {
+partial struct structEncoder {
     internal structFields fields;
 }
 
-[GoType] partial struct structFields {
+partial struct structFields {
     internal slice<field> list;
     internal map<@string, ж<field>> byExactName;
     internal map<@string, ж<field>> byFoldedName;
@@ -779,7 +779,7 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newStructEncod
     return (ж<encodeState> p1, reflectꓸValue p2, encOpts p3) => seʗ1.encode(p1, p2, p3);
 }
 
-[GoType] partial struct mapEncoder {
+partial struct mapEncoder {
     internal Action<ж<encodeState>, reflectꓸValue, encOpts> elemEnc;
 }
 
@@ -866,11 +866,11 @@ internal static void encodeByteSlice(ж<encodeState> Ꮡe, reflectꓸValue v, en
 }
 
 // sliceEncoder just wraps an arrayEncoder, checking to make sure the value isn't nil.
-[GoType] partial struct sliceEncoder {
+partial struct sliceEncoder {
     internal Action<ж<encodeState>, reflectꓸValue, encOpts> arrayEnc;
 }
 
-[GoType("dyn")] internal partial struct encode_ptr {
+internal partial struct encode_ptr /*dyn*/ {
     internal any ptr; // always an unsafe.Pointer, but avoids a dependency on package unsafe
     internal nint len;
 }
@@ -921,7 +921,7 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newSliceEncode
     return (ж<encodeState> p1, reflectꓸValue p2, encOpts p3) => encʗ1.encode(p1, p2, p3);
 }
 
-[GoType] partial struct arrayEncoder {
+partial struct arrayEncoder {
     internal Action<ж<encodeState>, reflectꓸValue, encOpts> elemEnc;
 }
 
@@ -943,7 +943,7 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newArrayEncode
     return (ж<encodeState> p1, reflectꓸValue p2, encOpts p3) => encʗ1.encode(p1, p2, p3);
 }
 
-[GoType] partial struct ptrEncoder {
+partial struct ptrEncoder {
     internal Action<ж<encodeState>, reflectꓸValue, encOpts> elemEnc;
 }
 
@@ -983,7 +983,7 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newPtrEncoder(
     return (ж<encodeState> p1, reflectꓸValue p2, encOpts p3) => encʗ1.encode(p1, p2, p3);
 }
 
-[GoType] partial struct condAddrEncoder {
+partial struct condAddrEncoder {
     internal Action<ж<encodeState>, reflectꓸValue, encOpts> canAddrEnc, elseEnc;
 }
 
@@ -1033,7 +1033,7 @@ internal static reflectꓸType typeByIndex(reflectꓸType t, slice<nint> index) 
     return t;
 }
 
-[GoType] partial struct reflectWithString {
+partial struct reflectWithString {
     internal reflectꓸValue v;
     internal @string ks;
 }
@@ -1153,7 +1153,7 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
 }
 
 // A field represents a single field found in a struct.
-[GoType] partial struct field {
+partial struct field {
     internal @string name;
     internal slice<byte> nameBytes; // []byte(name)
     internal @string nameNonEsc; // `"` + name + `":`
@@ -1168,7 +1168,7 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
     internal Action<ж<encodeState>, reflectꓸValue, encOpts> encoder;
 }
 
-[GoType] public partial interface isZeroer {
+public partial interface isZeroer {
     bool IsZero();
 }
 

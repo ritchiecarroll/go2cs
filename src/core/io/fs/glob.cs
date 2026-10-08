@@ -8,7 +8,7 @@ using path = path_package;
 partial class fs_package {
 
 // A GlobFS is a file system with a Glob method.
-[GoType] partial interface GlobFS :
+partial interface GlobFS :
     FS
 {
     // Glob returns the names of all files matching pattern,

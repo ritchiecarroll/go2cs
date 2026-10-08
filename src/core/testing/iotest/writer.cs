@@ -13,12 +13,12 @@ public static io.Writer TruncateWriter(io.Writer w, int64 n) {
     return new truncateWriterжWriter(Ꮡ(new truncateWriter(w, n)));
 }
 
-[GoType] partial struct truncateWriter {
+partial struct truncateWriter {
     internal io.Writer w;
     internal int64 n;
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref truncateWriter t, slice<byte> p) {
+internal static (nint n, error err) Write(this ref truncateWriter t, slice<byte> p) {
     nint n = default!;
     error err = default!;
 

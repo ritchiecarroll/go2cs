@@ -436,14 +436,14 @@ internal static void convertWords(this nat q, slice<byte> s, Word b, nint ndigit
 //	8 and 16 effective on 2.66 GHz Core 2 Duo "Penryn" CPU
 internal static nint leafSize = 8; // number of Word-size binary values treat as a monolithic block
 
-[GoType] partial struct divisor {
+partial struct divisor {
     internal nat bbb; // divisor
     internal nint nbits; // bit length of divisor (discounting leading zeros) ~= log2(bbb)
     internal nint ndigits; // digit length of divisor in terms of output base digits
 }
 
 
-[GoType("dyn")] partial struct cacheBase10ᴛ1 {
+partial struct cacheBase10ᴛ1 /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; }
     internal array<divisor> table = new(64); // cached divisors for base 10
 }

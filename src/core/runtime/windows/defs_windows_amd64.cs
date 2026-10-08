@@ -7,12 +7,12 @@ partial class runtime_package {
 
 internal static UntypedInt _CONTEXT_CONTROL => 0x100001;
 
-[GoType] partial struct m128a {
+partial struct m128a {
     internal uint64 low;
     internal int64 high;
 }
 
-[GoType] partial struct context {
+partial struct context {
     internal uint64 p1home;
     internal uint64 p2home;
     internal uint64 p3home;
@@ -61,31 +61,31 @@ internal static UntypedInt _CONTEXT_CONTROL => 0x100001;
     internal uint64 lastexceptionfromrip;
 }
 
-[GoRecv] internal static uintptr ip(this ref context c) {
+internal static uintptr ip(this ref context c) {
     return (uintptr)c.rip;
 }
 
-[GoRecv] internal static uintptr sp(this ref context c) {
+internal static uintptr sp(this ref context c) {
     return (uintptr)c.rsp;
 }
 
 // AMD64 does not have link register, so this returns 0.
-[GoRecv] internal static uintptr lr(this ref context c) {
+internal static uintptr lr(this ref context c) {
     return 0;
 }
 
-[GoRecv] internal static void set_lr(this ref context c, uintptr x) {
+internal static void set_lr(this ref context c, uintptr x) {
 }
 
-[GoRecv] internal static void set_ip(this ref context c, uintptr x) {
+internal static void set_ip(this ref context c, uintptr x) {
     c.rip = (uint64)x;
 }
 
-[GoRecv] internal static void set_sp(this ref context c, uintptr x) {
+internal static void set_sp(this ref context c, uintptr x) {
     c.rsp = (uint64)x;
 }
 
-[GoRecv] internal static void set_fp(this ref context c, uintptr x) {
+internal static void set_fp(this ref context c, uintptr x) {
     c.rbp = (uint64)x;
 }
 
@@ -118,7 +118,7 @@ internal static void dumpregs(ref context r) {
     print((@string)"gs      "u8, ((Δhex)(uint64)r.seggs), (@string)"\n"u8);
 }
 
-[GoType] partial struct _DISPATCHER_CONTEXT {
+partial struct _DISPATCHER_CONTEXT {
     internal uint64 controlPc;
     internal uint64 imageBase;
     internal uintptr functionEntry;
@@ -129,7 +129,7 @@ internal static void dumpregs(ref context r) {
     internal uintptr handlerData;
 }
 
-[GoRecv] internal static ж<context> ctx(this ref _DISPATCHER_CONTEXT c) {
+internal static ж<context> ctx(this ref _DISPATCHER_CONTEXT c) {
     return c.context;
 }
 

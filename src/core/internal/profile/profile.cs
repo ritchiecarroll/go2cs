@@ -18,7 +18,7 @@ using compress;
 partial class profile_package {
 
 // Profile is an in-memory representation of profile.proto.
-[GoType] partial struct Profile {
+partial struct Profile {
     public slice<ж<ValueType>> SampleType;
     public @string DefaultSampleType;
     public slice<ж<Sample>> Sample;
@@ -40,7 +40,7 @@ partial class profile_package {
 }
 
 // ValueType corresponds to Profile.ValueType
-[GoType] partial struct ValueType {
+partial struct ValueType {
     public @string Type; // cpu, wall, inuse_space, etc
     public @string Unit; // seconds, nanoseconds, bytes, etc
     internal int64 typeX;
@@ -48,7 +48,7 @@ partial class profile_package {
 }
 
 // Sample corresponds to Profile.Sample
-[GoType] partial struct Sample {
+partial struct Sample {
     public slice<ж<Location>> Location;
     public slice<int64> Value;
     public map<@string, slice<@string>> Label;
@@ -59,7 +59,7 @@ partial class profile_package {
 }
 
 // Label corresponds to Profile.Label
-[GoType] partial struct Label {
+partial struct Label {
     internal int64 keyX;
     // Exactly one of the two following values must be set
     internal int64 strX;
@@ -67,7 +67,7 @@ partial class profile_package {
 }
 
 // Mapping corresponds to Profile.Mapping
-[GoType] partial struct Mapping {
+partial struct Mapping {
     public uint64 ID;
     public uint64 Start;
     public uint64 Limit;
@@ -83,7 +83,7 @@ partial class profile_package {
 }
 
 // Location corresponds to Profile.Location
-[GoType] partial struct Location {
+partial struct Location {
     public uint64 ID;
     public ж<Mapping> Mapping;
     public uint64 Address;
@@ -93,14 +93,14 @@ partial class profile_package {
 }
 
 // Line corresponds to Profile.Line
-[GoType] partial struct Line {
+partial struct Line {
     public ж<Function> Function;
     public int64 ΔLine;
     internal uint64 functionIDX;
 }
 
 // Function corresponds to Profile.Function
-[GoType] partial struct Function {
+partial struct Function {
     public uint64 ID;
     public @string Name;
     public @string SystemName;
@@ -185,7 +185,7 @@ public static error Write(this ж<Profile> Ꮡp, io.Writer w) {
 // not limited to:
 //   - len(Profile.Sample[n].value) == len(Profile.value_unit)
 //   - Sample.id has a corresponding Profile.Location
-[GoRecv] public static error CheckValid(this ref Profile p) {
+public static error CheckValid(this ref Profile p) {
     // Check that sample values are consistent
     nint sampleLen = len(p.SampleType);
     if (sampleLen == 0 && len(p.Sample) != 0) {
@@ -250,7 +250,7 @@ public static error Write(this ж<Profile> Ꮡp, io.Writer w) {
 // Aggregate merges the locations in the profile into equivalence
 // classes preserving the request attributes. It also updates the
 // samples to point to the merged locations.
-[GoRecv] public static error Aggregate(this ref Profile p, bool inlineFrame, bool function, bool filename, bool linenumber, bool address) {
+public static error Aggregate(this ref Profile p, bool inlineFrame, bool function, bool filename, bool linenumber, bool address) {
     foreach (var (_, m) in p.Mapping) {
         m.Value.HasInlineFrames = (~m).HasInlineFrames && inlineFrame;
         m.Value.HasFunctions = (~m).HasFunctions && function;
@@ -293,7 +293,7 @@ internal static readonly @string labelHeaderᶜ = "                "u8;
 
 // Print dumps a text representation of a profile. Intended mainly
 // for debugging purposes.
-[GoRecv] public static @string String(this ref Profile p) {
+public static @string String(this ref Profile p) {
     var ss = new slice<@string>(0, len(p.Sample) + len(p.Mapping) + len(p.Location));
     {
         var pt = p.PeriodType; if (pt != nil) {
@@ -398,7 +398,7 @@ internal static readonly @string labelHeaderᶜ = "                "u8;
 // must be compatible (same Type and SampleType).
 // TODO(rsilvera): consider normalizing the profiles based on the
 // total samples collected.
-[GoRecv] public static error Merge(this ref Profile p, ж<Profile> Ꮡpb, float64 r) {
+public static error Merge(this ref Profile p, ж<Profile> Ꮡpb, float64 r) {
     ref var pb = ref Ꮡpb.DerefOrNull();
 
     {
@@ -438,7 +438,7 @@ internal static readonly @string labelHeaderᶜ = "                "u8;
 // Compatible determines if two profiles can be compared/merged.
 // returns nil if the profiles are compatible; otherwise an error with
 // details on the incompatibility.
-[GoRecv] public static error Compatible(this ref Profile p, ж<Profile> Ꮡpb) {
+public static error Compatible(this ref Profile p, ж<Profile> Ꮡpb) {
     ref var pb = ref Ꮡpb.DerefOrNull();
 
     if (!compatibleValueTypes(p.PeriodType, pb.PeriodType)) {
@@ -457,7 +457,7 @@ internal static readonly @string labelHeaderᶜ = "                "u8;
 
 // HasFunctions determines if all locations in this profile have
 // symbolized function information.
-[GoRecv] public static bool HasFunctions(this ref Profile p) {
+public static bool HasFunctions(this ref Profile p) {
     foreach (var (_, l) in p.Location) {
         if ((~l).Mapping == nil || !(~(~l).Mapping).HasFunctions) {
             return false;
@@ -468,7 +468,7 @@ internal static readonly @string labelHeaderᶜ = "                "u8;
 
 // HasFileLines determines if all locations in this profile have
 // symbolized file and line number information.
-[GoRecv] public static bool HasFileLines(this ref Profile p) {
+public static bool HasFileLines(this ref Profile p) {
     foreach (var (_, l) in p.Location) {
         if ((~l).Mapping == nil || (!(~(~l).Mapping).HasFilenames || !(~(~l).Mapping).HasLineNumbers)) {
             return false;
@@ -512,7 +512,7 @@ public static ж<Profile> Copy(this ж<Profile> Ꮡp) {
 // Demangle attempts to demangle and optionally simplify any function
 // names referenced in the profile. It works on a best-effort basis:
 // it will silently preserve the original names in case of any errors.
-[GoRecv] public static error Demangle(this ref Profile p, Func<slice<@string>, (map<@string, @string>, error)> d) {
+public static error Demangle(this ref Profile p, Func<slice<@string>, (map<@string, @string>, error)> d) {
     // Collect names to demangle.
     slice<@string> names = default!;
     foreach (var (_, fn) in p.Function) {
@@ -534,12 +534,12 @@ public static ж<Profile> Copy(this ж<Profile> Ꮡp) {
 }
 
 // Empty reports whether the profile contains no samples.
-[GoRecv] public static bool Empty(this ref Profile p) {
+public static bool Empty(this ref Profile p) {
     return len(p.Sample) == 0;
 }
 
 // Scale multiplies all sample values in a profile by a constant.
-[GoRecv] public static void Scale(this ref Profile p, float64 ratio) {
+public static void Scale(this ref Profile p, float64 ratio) {
     if (ratio == 1D) {
         return;
     }
@@ -551,7 +551,7 @@ public static ж<Profile> Copy(this ж<Profile> Ꮡp) {
 }
 
 // ScaleN multiplies each sample values in a sample by a different amount.
-[GoRecv] public static error ScaleN(this ref Profile p, slice<float64> ratios) {
+public static error ScaleN(this ref Profile p, slice<float64> ratios) {
     if (len(p.SampleType) != len(ratios)) {
         return fmt.Errorf("mismatched scale ratios, got %d, want %d"u8, len(ratios), len(p.SampleType));
     }

@@ -38,7 +38,7 @@ partial class reflect_package {
 // To compare two Values, compare the results of the Interface method.
 // Using == on two Values does not compare the underlying values
 // they represent.
-[GoType] partial struct ΔValue {
+partial struct ΔValue {
     // typ_ holds the type of the value represented by a Value.
     // Access using the typ method to avoid escape of v.
     internal ж<abi.Type> typ_;
@@ -62,7 +62,7 @@ partial class reflect_package {
     internal partial ref flag flag { get; }
 }
 
-[GoType("num:uintptr")] partial struct flag;
+partial struct flag /*num:uintptr*/;
 
 // A method value represents a curried method invocation
 // like r.Read for some receiver r. The typ+val+flag bits describe
@@ -161,12 +161,12 @@ internal static any packEface(ΔValue v) {
 // A ValueError occurs when a Value method is invoked on
 // a [Value] that does not support it. Such cases are documented
 // in the description of each method.
-[GoType] partial struct ValueError {
+partial struct ValueError {
     public @string Method;
     public ΔKind Kind;
 }
 
-[GoRecv] public static @string Error(this ref ValueError e) {
+public static @string Error(this ref ValueError e) {
     if (e.Kind == 0) {
         return "reflect: call of "u8 + e.Method + " on zero Value"u8;
     }
@@ -176,7 +176,7 @@ internal static any packEface(ΔValue v) {
 // go2cs generated this placeholder — func valueMethodName is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // nonEmptyInterface is the header for an interface value with methods.
-[GoType] partial struct nonEmptyInterface {
+partial struct nonEmptyInterface {
     internal ж<abi.ITab> itab;
     internal @unsafe.Pointer word;
 }
@@ -1621,7 +1621,7 @@ public static bool CanUint(this ΔValue v) {
 // a separate, correctly typed pointer to the underlying data.
 //
 // Deprecated: Use unsafe.String or unsafe.StringData instead.
-[GoType] partial struct StringHeader {
+partial struct StringHeader {
     public uintptr Data;
     public nint Len;
 }
@@ -1634,7 +1634,7 @@ public static bool CanUint(this ΔValue v) {
 // a separate, correctly typed pointer to the underlying data.
 //
 // Deprecated: Use unsafe.Slice or unsafe.SliceData instead.
-[GoType] partial struct SliceHeader {
+partial struct SliceHeader {
     public uintptr Data;
     public nint Len;
     public nint Cap;
@@ -1694,7 +1694,7 @@ internal static void grow(this ΔValue v, nint n) {
 
 // A runtimeSelect is a single case passed to rselect.
 // This must match ../runtime/select.go:/runtimeSelect
-[GoType] partial struct runtimeSelect {
+partial struct runtimeSelect {
     internal SelectDir dir;      // SelectSend, SelectRecv or SelectDefault
     internal ж<rtype> typ;      // channel type
     internal @unsafe.Pointer ch; // channel
@@ -1714,7 +1714,7 @@ internal static void grow(this ΔValue v, nint n) {
 //go:noescape
 internal static partial (nint chosen, bool recvOK) rselect(slice<runtimeSelect> _);
 
-[GoType("num:nint")] partial struct SelectDir;
+partial struct SelectDir /*num:nint*/;
 
 // NOTE: These values must match ../runtime/select.go:/selectDir.
 internal static SelectDir _ᴛ1ʗ => /* iota */ 0;
@@ -1738,7 +1738,7 @@ public static SelectDir SelectDefault => 3; // default
 // Normally Chan's underlying value must be a channel and Send must be a zero Value.
 // If Chan is a zero Value, then the case is ignored, but Send must still be a zero Value.
 // When a receive operation is selected, the received Value is returned by Select.
-[GoType] partial struct SelectCase {
+partial struct SelectCase {
     public SelectDir Dir; // direction of case
     public ΔValue Chan;     // channel to use (for send or receive)
     public ΔValue Send;     // value to send (for send)
@@ -2498,7 +2498,7 @@ internal static void escapes(any x) {
 }
 
 
-[GoType("dyn")] partial struct dummyᴛ1 {
+partial struct dummyᴛ1 /*dyn*/ {
     internal bool b;
     internal any x;
 }

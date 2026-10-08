@@ -39,7 +39,7 @@ internal const bool testSmallBuf = false;
 // This is closely related to a "sequential store buffer" (SSB),
 // except that SSBs are usually used for maintaining remembered sets,
 // while this is used for marking.
-[GoType] partial struct wbBuf {
+partial struct wbBuf {
     // next points to the next slot in buf. It must not be a
     // pointer type because it can point past the end of buf and
     // must be updated without write barriers.
@@ -62,7 +62,7 @@ internal static UntypedInt wbMaxEntriesPerCall => 8;
 internal static readonly @string badWriteBarrierBufferˢ = "bad write barrier buffer bounds"u8;
 
 // reset empties b by resetting its next and end pointers.
-[GoRecv] internal static void reset(this ref wbBuf b) {
+internal static void reset(this ref wbBuf b) {
     var start = (uintptr)@unsafe.Pointer.FromBox(Ꮡ(b.buf, 0));
     b.next = start;
     if (testSmallBuf){
@@ -83,12 +83,12 @@ internal static readonly @string badWriteBarrierBufferˢ = "bad write barrier bu
 // This must be nosplit because it's called by wbBufFlush.
 //
 //go:nosplit
-[GoRecv] internal static void discard(this ref wbBuf b) {
+internal static void discard(this ref wbBuf b) {
     b.next = (uintptr)@unsafe.Pointer.FromBox(Ꮡ(b.buf, 0));
 }
 
 // empty reports whether b contains no pointers.
-[GoRecv] internal static bool empty(this ref wbBuf b) {
+internal static bool empty(this ref wbBuf b) {
     return b.next == (uintptr)@unsafe.Pointer.FromBox(Ꮡ(b.buf, 0));
 }
 
@@ -114,7 +114,7 @@ internal static readonly @string badWriteBarrierBufferˢ = "bad write barrier bu
 //
 //go:nowritebarrierrec
 //go:nosplit
-[GoRecv] internal static ж<array<uintptr>> get1(this ref wbBuf b) {
+internal static ж<array<uintptr>> get1(this ref wbBuf b) {
     if (b.next + (uintptr)goarch.PtrSize > b.end) {
         wbBufFlush();
     }
@@ -125,7 +125,7 @@ internal static readonly @string badWriteBarrierBufferˢ = "bad write barrier bu
 
 //go:nowritebarrierrec
 //go:nosplit
-[GoRecv] internal static ж<array<uintptr>> get2(this ref wbBuf b) {
+internal static ж<array<uintptr>> get2(this ref wbBuf b) {
     if (b.next + (uintptr)(2 * goarch.PtrSize) > b.end) {
         wbBufFlush();
     }

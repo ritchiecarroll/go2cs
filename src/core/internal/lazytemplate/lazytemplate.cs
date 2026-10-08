@@ -18,7 +18,7 @@ partial class lazytemplate_package {
 
 // Template is a wrapper around text/template.Template, where the underlying
 // template will be parsed the first time it is needed.
-[GoType] partial struct Template {
+partial struct Template {
     internal @string name, text;
     internal sync.Once once;
     internal ж<template.Template> tmpl;
@@ -31,7 +31,7 @@ internal static ж<template.Template> tp(this ж<Template> Ꮡr) {
     return r.tmpl;
 }
 
-[GoRecv] internal static void build(this ref Template r) {
+internal static void build(this ref Template r) {
     var (ᴛ1, ᴛ2) = template.New(r.name).Parse(r.text);
     r.tmpl = template.Must(ᴛ1, ᴛ2);
     (r.name, r.text) = ("", "");

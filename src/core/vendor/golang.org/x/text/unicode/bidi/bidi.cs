@@ -19,7 +19,7 @@ using bytes = bytes_package;
 
 partial class bidi_package {
 
-[GoType("num:nint")] partial struct ΔDirection;
+partial struct ΔDirection /*num:nint*/;
 
 // This API tries to avoid dealing with embedding levels for now. Under the hood
 // these will be computed, but the question is to which extent the user should
@@ -30,7 +30,7 @@ public static ΔDirection RightToLeft => 1;
 public static ΔDirection Mixed => 2;
 public static ΔDirection Neutral => 3;
 
-[GoType] public partial struct options {
+public partial struct options {
     internal ΔDirection defaultDirection;
 }
 
@@ -54,7 +54,7 @@ public static Action<ж<options>> DefaultDirection(ΔDirection d) {
 }
 
 // A Paragraph holds a single Paragraph for Bidi processing.
-[GoType] partial struct Paragraph {
+partial struct Paragraph {
     internal slice<byte> p;
     internal Ordering o;
     internal slice<Action<ж<options>>> opts;
@@ -74,7 +74,7 @@ public static Action<ж<options>> DefaultDirection(ΔDirection d) {
 // separator, the whole input needs to be processed anyway and should not be done twice.
 //
 // The function has the same return values as SetBytes() / SetString()
-[GoRecv] internal static (nint n, error err) prepareInput(this ref Paragraph p) {
+internal static (nint n, error err) prepareInput(this ref Paragraph p) {
     p.runes = bytes.Runes(p.p);
     nint bytecount = 0;
     // clear slices from previous SetString or SetBytes
@@ -111,7 +111,7 @@ public static Action<ж<options>> DefaultDirection(ΔDirection d) {
 // it will only process the first paragraph and report the number of bytes
 // consumed from b including this separator. Error may be non-nil if options are
 // given.
-[GoRecv] public static (nint n, error err) SetBytes(this ref Paragraph p, slice<byte> b, params Span<Action<ж<options>>> optsʗp) {
+public static (nint n, error err) SetBytes(this ref Paragraph p, slice<byte> b, params Span<Action<ж<options>>> optsʗp) {
     var opts = optsʗp.slice();
 
     p.p = b;
@@ -124,7 +124,7 @@ public static Action<ж<options>> DefaultDirection(ΔDirection d) {
 // it will only process the first paragraph and report the number of bytes
 // consumed from s including this separator. Error may be non-nil if options are
 // given.
-[GoRecv] public static (nint n, error err) SetString(this ref Paragraph p, @string s, params Span<Action<ж<options>>> optsʗp) {
+public static (nint n, error err) SetString(this ref Paragraph p, @string s, params Span<Action<ж<options>>> optsʗp) {
     var opts = optsʗp.slice();
 
     p.p = slice<byte>(s);
@@ -135,14 +135,14 @@ public static Action<ж<options>> DefaultDirection(ΔDirection d) {
 // IsLeftToRight reports whether the principle direction of rendering for this
 // paragraphs is left-to-right. If this returns false, the principle direction
 // of rendering is right-to-left.
-[GoRecv] public static bool IsLeftToRight(this ref Paragraph p) {
+public static bool IsLeftToRight(this ref Paragraph p) {
     return p.Direction() == LeftToRight;
 }
 
 // Direction returns the direction of the text of this paragraph.
 //
 // The direction may be LeftToRight, RightToLeft, Mixed, or Neutral.
-[GoRecv] public static ΔDirection Direction(this ref Paragraph p) {
+public static ΔDirection Direction(this ref Paragraph p) {
     return p.o.Direction();
 }
 
@@ -151,7 +151,7 @@ public static Action<ж<options>> DefaultDirection(ΔDirection d) {
 // RunAt reports the Run at the given position of the input text.
 //
 // This method can be used for computing line breaks on paragraphs.
-[GoRecv] public static ΔRun RunAt(this ref Paragraph p, nint pos) {
+public static ΔRun RunAt(this ref Paragraph p, nint pos) {
     nint c = 0;
     nint runNumber = 0;
     foreach (var (i, r) in p.o.runes) {
@@ -217,7 +217,7 @@ public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) {
 
 // Line computes the visual ordering of runs for a single line starting and
 // ending at the given positions in the original text.
-[GoRecv] public static (Ordering, error) Line(this ref Paragraph p, nint start, nint end) {
+public static (Ordering, error) Line(this ref Paragraph p, nint start, nint end) {
     var lineTypes = p.types.slice(start, end);
     var (para, err) = newParagraph(lineTypes, p.pairTypes.slice(start, end), p.pairValues.slice(start, end), (level)(-1));
     if (err != default!) {
@@ -231,7 +231,7 @@ public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) {
 // An Ordering holds the computed visual order of runs of a Paragraph. Calling
 // SetBytes or SetString on the originating Paragraph invalidates an Ordering.
 // The methods of an Ordering should only be called by one goroutine at a time.
-[GoType] partial struct Ordering {
+partial struct Ordering {
     internal slice<slice<rune>> runes;
     internal slice<ΔDirection> directions;
     internal slice<nint> startpos;
@@ -240,17 +240,17 @@ public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) {
 // Direction reports the directionality of the runs.
 //
 // The direction may be LeftToRight, RightToLeft, Mixed, or Neutral.
-[GoRecv] public static ΔDirection Direction(this ref Ordering o) {
+public static ΔDirection Direction(this ref Ordering o) {
     return o.directions[0];
 }
 
 // NumRuns returns the number of runs.
-[GoRecv] public static nint NumRuns(this ref Ordering o) {
+public static nint NumRuns(this ref Ordering o) {
     return len(o.runes);
 }
 
 // Run returns the ith run within the ordering.
-[GoRecv] public static ΔRun Run(this ref Ordering o, nint i) {
+public static ΔRun Run(this ref Ordering o, nint i) {
     var r = new ΔRun(
         runes: o.runes[i],
         direction: o.directions[i],
@@ -267,19 +267,19 @@ public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) {
 // }
 
 // A Run is a continuous sequence of characters of a single direction.
-[GoType] partial struct ΔRun {
+partial struct ΔRun {
     internal slice<rune> runes;
     internal ΔDirection direction;
     internal nint startpos;
 }
 
 // String returns the text of the run in its original order.
-[GoRecv] public static @string String(this ref ΔRun r) {
+public static @string String(this ref ΔRun r) {
     return ((@string)r.runes);
 }
 
 // Bytes returns the text of the run in its original order.
-[GoRecv] public static slice<byte> Bytes(this ref ΔRun r) {
+public static slice<byte> Bytes(this ref ΔRun r) {
     return slice<byte>(r.String());
 }
 
@@ -289,13 +289,13 @@ public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) {
 // - bracket replacement.
 
 // Direction reports the direction of the run.
-[GoRecv] public static ΔDirection Direction(this ref ΔRun r) {
+public static ΔDirection Direction(this ref ΔRun r) {
     return r.direction;
 }
 
 // Pos returns the position of the Run within the text passed to SetBytes or SetString of the
 // originating Paragraph value.
-[GoRecv] public static (nint start, nint end) Pos(this ref ΔRun r) {
+public static (nint start, nint end) Pos(this ref ΔRun r) {
     return (r.startpos, r.startpos + len(r.runes) - 1);
 }
 

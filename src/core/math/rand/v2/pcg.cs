@@ -16,7 +16,7 @@ partial class rand_package {
 
 // A PCG is a PCG generator with 128 bits of internal state.
 // A zero PCG is equivalent to NewPCG(0, 0).
-[GoType] partial struct PCG {
+partial struct PCG {
     internal uint64 hi;
     internal uint64 lo;
 }
@@ -27,13 +27,13 @@ public static ж<PCG> NewPCG(uint64 seed1, uint64 seed2) {
 }
 
 // Seed resets the PCG to behave the same way as NewPCG(seed1, seed2).
-[GoRecv] public static void Seed(this ref PCG p, uint64 seed1, uint64 seed2) {
+public static void Seed(this ref PCG p, uint64 seed1, uint64 seed2) {
     p.hi = seed1;
     p.lo = seed2;
 }
 
 // AppendBinary implements the [encoding.BinaryAppender] interface.
-[GoRecv] public static (slice<byte>, error) AppendBinary(this ref PCG p, slice<byte> b) {
+public static (slice<byte>, error) AppendBinary(this ref PCG p, slice<byte> b) {
     b = append(b, ((@string)"pcg:"u8).ꓸꓸꓸ);
     b = byteorder.BEAppendUint64(b, p.hi);
     b = byteorder.BEAppendUint64(b, p.lo);
@@ -41,14 +41,14 @@ public static ж<PCG> NewPCG(uint64 seed1, uint64 seed2) {
 }
 
 // MarshalBinary implements the [encoding.BinaryMarshaler] interface.
-[GoRecv] public static (slice<byte>, error) MarshalBinary(this ref PCG p) {
+public static (slice<byte>, error) MarshalBinary(this ref PCG p) {
     return p.AppendBinary(new slice<byte>(0, 20));
 }
 
 internal static error errUnmarshalPCG = errors.New("invalid PCG encoding"u8);
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
-[GoRecv] public static error UnmarshalBinary(this ref PCG p, slice<byte> data) {
+public static error UnmarshalBinary(this ref PCG p, slice<byte> data) {
     if (len(data) != 20 || ((sstring)(data[..4])) != "pcg:"u8) {
         return errUnmarshalPCG;
     }
@@ -57,7 +57,7 @@ internal static error errUnmarshalPCG = errors.New("invalid PCG encoding"u8);
     return default!;
 }
 
-[GoRecv] internal static (uint64 hi, uint64 lo) next(this ref PCG p) {
+internal static (uint64 hi, uint64 lo) next(this ref PCG p) {
     uint64 hi = default!;
     uint64 lo = default!;
 
@@ -87,7 +87,7 @@ internal static error errUnmarshalPCG = errors.New("invalid PCG encoding"u8);
 }
 
 // Uint64 return a uniformly-distributed random uint64 value.
-[GoRecv] public static uint64 Uint64(this ref PCG p) {
+public static uint64 Uint64(this ref PCG p) {
     var (hi, lo) = p.next();
     // XSL-RR would be
     //	hi, lo := p.next()

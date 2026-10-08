@@ -79,13 +79,13 @@ public static UntypedInt CLONE_NEWTIME => 0x00000080; // New time namespace
 // Note that User Namespaces are not available on a number of popular Linux
 // versions (due to security issues), or are available but subject to AppArmor
 // restrictions like in Ubuntu 24.04.
-[GoType] partial struct SysProcIDMap {
+partial struct SysProcIDMap {
     public nint ContainerID; // Container ID.
     public nint HostID; // Host ID.
     public nint Size; // Size.
 }
 
-[GoType] partial struct SysProcAttr {
+partial struct SysProcAttr {
     public @string Chroot;     // Chroot.
     public ж<Credential> Credential; // Credential.
     // Ptrace tells the child to call ptrace(PTRACE_TRACEME).
@@ -198,18 +198,18 @@ internal static (nint pid, Errno err) forkAndExecInChild(ж<byte> Ꮡargv0, slic
 
 internal static UntypedInt _LINUX_CAPABILITY_VERSION_3 => 0x20080522;
 
-[GoType] partial struct capHeader {
+partial struct capHeader {
     internal uint32 version;
     internal int32 pid;
 }
 
-[GoType] partial struct capData {
+partial struct capData {
     internal uint32 effective;
     internal uint32 permitted;
     internal uint32 inheritable;
 }
 
-[GoType] partial struct caps {
+partial struct caps {
     internal capHeader hdr;
     internal array<capData> data = new(2);
 }
@@ -225,7 +225,7 @@ internal static uint32 capToMask(uintptr cap) {
 }
 
 // cloneArgs holds arguments for clone3 Linux syscall.
-[GoType] partial struct cloneArgs {
+partial struct cloneArgs {
     internal uint64 flags; // Flags bit mask
     internal uint64 pidFD; // Where to store PID file descriptor (int *)
     internal uint64 childTID; // Where to store child TID, in child's memory (pid_t *)

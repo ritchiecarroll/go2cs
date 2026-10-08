@@ -22,7 +22,7 @@ partial class pkgbits_package {
 
 // A PkgDecoder provides methods for decoding a package's Unified IR
 // export data.
-[GoType] partial struct PkgDecoder {
+partial struct PkgDecoder {
     // version is the file format version.
     internal ΔVersion version;
     // sync indicates whether the file uses sync markers.
@@ -57,12 +57,12 @@ partial class pkgbits_package {
 // PkgPath returns the package path for the package
 //
 // TODO(mdempsky): Remove; unneeded since CL 391014.
-[GoRecv] public static @string PkgPath(this ref PkgDecoder pr) {
+public static @string PkgPath(this ref PkgDecoder pr) {
     return pr.pkgPath;
 }
 
 // SyncMarkers reports whether pr uses sync markers.
-[GoRecv] public static bool SyncMarkers(this ref PkgDecoder pr) {
+public static bool SyncMarkers(this ref PkgDecoder pr) {
     return pr.sync;
 }
 
@@ -99,7 +99,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 }
 
 // NumElems returns the number of elements in section k.
-[GoRecv] public static nint NumElems(this ref PkgDecoder pr, RelocKind k) {
+public static nint NumElems(this ref PkgDecoder pr, RelocKind k) {
     nint count = (nint)pr.elemEndsEnds[k];
     if (k > 0) {
         count -= (nint)pr.elemEndsEnds[k - 1];
@@ -108,12 +108,12 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 }
 
 // TotalElems returns the total number of elements across all sections.
-[GoRecv] public static nint TotalElems(this ref PkgDecoder pr) {
+public static nint TotalElems(this ref PkgDecoder pr) {
     return len(pr.elemEnds);
 }
 
 // Fingerprint returns the package fingerprint.
-[GoRecv] public static array<byte> Fingerprint(this ref PkgDecoder pr) {
+public static array<byte> Fingerprint(this ref PkgDecoder pr) {
     array<byte> fp = new(8);
     copy(fp[..], pr.elemData.slice(len(pr.elemData) - 8));
     return fp.Clone();
@@ -121,7 +121,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 
 // AbsIdx returns the absolute index for the given (section, index)
 // pair.
-[GoRecv] public static nint AbsIdx(this ref PkgDecoder pr, RelocKind k, Index idx) {
+public static nint AbsIdx(this ref PkgDecoder pr, RelocKind k, Index idx) {
     nint absIdx = (nint)(int32)idx;
     if (k > 0) {
         absIdx += (nint)pr.elemEndsEnds[k - 1];
@@ -134,7 +134,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 
 // DataIdx returns the raw element bitstream for the given (section,
 // index) pair.
-[GoRecv] public static @string DataIdx(this ref PkgDecoder pr, RelocKind k, Index idx) {
+public static @string DataIdx(this ref PkgDecoder pr, RelocKind k, Index idx) {
     nint absIdx = pr.AbsIdx(k, idx);
     uint32 start = default!;
     if (absIdx > 0) {
@@ -145,7 +145,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 }
 
 // StringIdx returns the string value for the given string index.
-[GoRecv] public static @string StringIdx(this ref PkgDecoder pr, Index idx) {
+public static @string StringIdx(this ref PkgDecoder pr, Index idx) {
     return pr.DataIdx(RelocString, idx);
 }
 
@@ -169,7 +169,7 @@ public static Decoder TempDecoder(this ж<PkgDecoder> Ꮡpr, RelocKind k, Index 
     return r;
 }
 
-[GoRecv] public static void RetireDecoder(this ref PkgDecoder pr, ж<Decoder> Ꮡd) {
+public static void RetireDecoder(this ref PkgDecoder pr, ж<Decoder> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     pr.scratchRelocEnt = d.Relocs;
@@ -225,7 +225,7 @@ public static Decoder TempDecoderRaw(this ж<PkgDecoder> Ꮡpr, RelocKind k, Ind
 
 // A Decoder provides methods for decoding an individual element's
 // bitstream data.
-[GoType] partial struct Decoder {
+partial struct Decoder {
     internal ж<PkgDecoder> common;
     public slice<RelocEnt> Relocs;
     public strings.Reader Data;
@@ -233,7 +233,7 @@ public static Decoder TempDecoderRaw(this ж<PkgDecoder> Ꮡpr, RelocKind k, Ind
     public Index Idx;
 }
 
-[GoRecv] internal static void checkErr(this ref Decoder r, error err) {
+internal static void checkErr(this ref Decoder r, error err) {
     if (err != default!) {
         panicf("unexpected decoding error: %w"u8, err);
     }
@@ -287,7 +287,7 @@ internal static int64 rawVarint(this ж<Decoder> Ꮡr) {
     return x;
 }
 
-[GoRecv] internal static Index rawReloc(this ref Decoder r, RelocKind k, nint idx) {
+internal static Index rawReloc(this ref Decoder r, RelocKind k, nint idx) {
     var e = r.Relocs[idx];
     assert(e.Kind == k);
     return e.Idx;
@@ -538,7 +538,7 @@ public static (@string, @string, CodeObj) PeekObj(this ж<PkgDecoder> Ꮡpr, Ind
 }
 
 // Version reports the version of the bitstream.
-[GoRecv] public static ΔVersion Version(this ref Decoder w) {
+public static ΔVersion Version(this ref Decoder w) {
     return (~w.common).version;
 }
 

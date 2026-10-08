@@ -59,7 +59,7 @@ internal static readonly @string failedToReservePageˢ = "failed to reserve page
 // sysInit performs architecture-dependent initialization of fields
 // in pageAlloc. pageAlloc should be uninitialized except for sysStat
 // if any runtime statistic should be updated.
-[GoRecv] internal static void sysInit(this ref pageAlloc Δp, bool test) {
+internal static void sysInit(this ref pageAlloc Δp, bool test) {
     // Reserve memory for each level. This will get mapped in
     // as R/W by setArenas.
     foreach (var (l, shift) in levelShift.ΔRangeSnapshot()) {
@@ -230,7 +230,7 @@ internal static uintptr sysGrow(this ж<scavengeIndex> Ꮡs, uintptr @base, uint
 // sysInit initializes the scavengeIndex' chunks array.
 //
 // Returns the amount of memory added to sysStat.
-[GoRecv] internal static uintptr sysInit(this ref scavengeIndex s, bool test, ж<sysMemStat> ᏑsysStat) {
+internal static uintptr sysInit(this ref scavengeIndex s, bool test, ж<sysMemStat> ᏑsysStat) {
     var n = (uintptr)(((uintptr)1 << (int)(heapAddrBits))) / (uintptr)pallocChunkBytes;
     var nbytes = n * /* unsafe.Sizeof(atomicScavChunkData{}) */ (uintptr)8;
     @unsafe.Pointer r = (uintptr)sysReserve(nil, nbytes);

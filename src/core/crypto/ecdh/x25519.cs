@@ -29,13 +29,13 @@ public static ΔCurve X25519() {
 
 internal static ж<x25519Curve> x25519 = Ꮡ(new x25519Curve(nil));
 
-[GoType] partial struct x25519Curve {
+partial struct x25519Curve {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string x25519ˢ = "X25519"u8;
 
-[GoRecv] internal static @string String(this ref x25519Curve c) {
+internal static @string String(this ref x25519Curve c) {
     return x25519ˢ;
 }
 
@@ -95,7 +95,7 @@ internal static (ж<ΔPublicKey>, error) NewPublicKey(this ж<x25519Curve> Ꮡc,
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string cryptoEcdhBadX25519ˢ = "crypto/ecdh: bad X25519 remote ECDH input: low order point"u8;
 
-[GoRecv] internal static (slice<byte>, error) ecdh(this ref x25519Curve c, ж<PrivateKey> Ꮡlocal, ж<ΔPublicKey> Ꮡremote) {
+internal static (slice<byte>, error) ecdh(this ref x25519Curve c, ж<PrivateKey> Ꮡlocal, ж<ΔPublicKey> Ꮡremote) {
     ref var local = ref Ꮡlocal.DerefOrNull();
     ref var remote = ref Ꮡremote.DerefOrNull();
 

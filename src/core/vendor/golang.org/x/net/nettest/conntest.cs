@@ -644,12 +644,12 @@ internal static partial void resyncConn(ж<testing.T> Ꮡt, net.Conn c) {
     }
 }
 
-[GoType("dyn")] internal partial struct chunkedCopy_dst {
-    [GoEmbedded] public io_package.Writer Writer;
+internal partial struct chunkedCopy_dst /*dyn*/ {
+    /*embed*/ public io_package.Writer Writer;
 }
 
-[GoType("dyn")] internal partial struct chunkedCopy_src {
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct chunkedCopy_src /*dyn*/ {
+    /*embed*/ public io_package.Reader Reader;
 }
 
 // chunkedCopy copies from r to w in fixed-width chunks to avoid

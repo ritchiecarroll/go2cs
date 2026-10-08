@@ -10,23 +10,23 @@ using syscall = syscall_package;
 partial class signal_package {
 
 // Defined by the runtime package.
-[global::System.Diagnostics.StackTraceHidden] internal static void signal_disable(uint32 _) {
+/*linkname*/ internal static partial void signal_disable(uint32 _) {
     go.runtime_package.signal_disable(_);
 }
 
-[global::System.Diagnostics.StackTraceHidden] internal static void signal_enable(uint32 _) {
+/*linkname*/ internal static partial void signal_enable(uint32 _) {
     go.runtime_package.signal_enable(_);
 }
 
-[global::System.Diagnostics.StackTraceHidden] internal static void signal_ignore(uint32 _) {
+/*linkname*/ internal static partial void signal_ignore(uint32 _) {
     go.runtime_package.signal_ignore(_);
 }
 
-[global::System.Diagnostics.StackTraceHidden] internal static bool signal_ignored(uint32 _) {
+/*linkname*/ internal static partial bool signal_ignored(uint32 _) {
     return go.runtime_package.signal_ignored(_);
 }
 
-[global::System.Diagnostics.StackTraceHidden] internal static uint32 signal_recv() {
+/*linkname*/ internal static partial uint32 signal_recv() {
     return go.runtime_package.signal_recv();
 }
 

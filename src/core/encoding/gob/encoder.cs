@@ -13,7 +13,7 @@ partial class gob_package {
 // An Encoder manages the transmission of type and data information to the
 // other side of a connection.  It is safe for concurrent use by multiple
 // goroutines.
-[GoType] partial struct Encoder {
+partial struct Encoder {
     internal sync.Mutex mutex;              // each item must be sent atomically
     internal slice<io.Writer> w;        // where to send the data
     internal map<reflectꓸType, typeId> sent; // which types we've already sent
@@ -40,21 +40,21 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
 }
 
 // writer returns the innermost writer the encoder is using.
-[GoRecv] internal static io.Writer writer(this ref Encoder enc) {
+internal static io.Writer writer(this ref Encoder enc) {
     return enc.w[len(enc.w) - 1];
 }
 
 // pushWriter adds a writer to the encoder.
-[GoRecv] internal static void pushWriter(this ref Encoder enc, io.Writer w) {
+internal static void pushWriter(this ref Encoder enc, io.Writer w) {
     enc.w = append(enc.w, w);
 }
 
 // popWriter pops the innermost writer.
-[GoRecv] internal static void popWriter(this ref Encoder enc) {
+internal static void popWriter(this ref Encoder enc) {
     enc.w = enc.w.slice(0, len(enc.w) - 1);
 }
 
-[GoRecv] internal static void setError(this ref Encoder enc, error err) {
+internal static void setError(this ref Encoder enc, error err) {
     if (enc.err == default!) {
         // remember the first.
         enc.err = err;
@@ -65,7 +65,7 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
 internal static readonly @string gobEncoderMessageTooBigˢ = "gob: encoder: message too big"u8;
 
 // writeMessage sends the data item preceded by an unsigned count of its length.
-[GoRecv] internal static void writeMessage(this ref Encoder enc, io.Writer w, ж<encBuffer> Ꮡb) {
+internal static void writeMessage(this ref Encoder enc, io.Writer w, ж<encBuffer> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Space has been reserved for the length at the head of the message.
@@ -247,7 +247,7 @@ internal static void sendTypeDescriptor(this ж<Encoder> Ꮡenc, io.Writer w, ж
 }
 
 // sendTypeId sends the id, which must have already been defined.
-[GoRecv] internal static void sendTypeId(this ref Encoder enc, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut) {
+internal static void sendTypeId(this ref Encoder enc, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut) {
     ref var state = ref Ꮡstate.DerefOrNull();
     ref var ut = ref Ꮡut.DerefOrNull();
 

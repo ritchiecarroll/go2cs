@@ -26,29 +26,29 @@ partial class types_package {
 // an element of the type set described by the terms and the comparable bit.
 // If the term list describes the set of all types and comparable is true,
 // only comparable types are meant; in all other cases comparable is false.
-[GoType] partial struct _TypeSet {
+partial struct _TypeSet {
     internal slice<ж<Func>> methods; // all methods of the interface; sorted by unique ID
     internal termlist terms; // type terms of the type set
     internal bool comparable;     // invariant: !comparable || terms.isAll()
 }
 
 // IsEmpty reports whether s is the empty set.
-[GoRecv] internal static bool IsEmpty(this ref _TypeSet s) {
+internal static bool IsEmpty(this ref _TypeSet s) {
     return s.terms.isEmpty();
 }
 
 // IsAll reports whether s is the set of all types (corresponding to the empty interface).
-[GoRecv] internal static bool IsAll(this ref _TypeSet s) {
+internal static bool IsAll(this ref _TypeSet s) {
     return s.IsMethodSet() && len(s.methods) == 0;
 }
 
 // IsMethodSet reports whether the interface t is fully described by its method set.
-[GoRecv] internal static bool IsMethodSet(this ref _TypeSet s) {
+internal static bool IsMethodSet(this ref _TypeSet s) {
     return !s.comparable && s.terms.isAll();
 }
 
 // IsComparable reports whether each type in the set is comparable.
-[GoRecv] internal static bool IsComparable(this ref _TypeSet s, map<ΔType, bool> seen) {
+internal static bool IsComparable(this ref _TypeSet s, map<ΔType, bool> seen) {
     if (s.terms.isAll()) {
         return s.comparable;
     }
@@ -57,25 +57,25 @@ partial class types_package {
 }
 
 // NumMethods returns the number of methods available.
-[GoRecv] internal static nint NumMethods(this ref _TypeSet s) {
+internal static nint NumMethods(this ref _TypeSet s) {
     return len(s.methods);
 }
 
 // Method returns the i'th method of s for 0 <= i < s.NumMethods().
 // The methods are ordered by their unique ID.
-[GoRecv] internal static ж<Func> Method(this ref _TypeSet s, nint i) {
+internal static ж<Func> Method(this ref _TypeSet s, nint i) {
     return s.methods[i];
 }
 
 // LookupMethod returns the index of and method with matching package and name, or (-1, nil).
-[GoRecv] internal static (nint, ж<Func>) LookupMethod(this ref _TypeSet s, ж<Package> Ꮡpkg, @string name, bool foldCase) {
+internal static (nint, ж<Func>) LookupMethod(this ref _TypeSet s, ж<Package> Ꮡpkg, @string name, bool foldCase) {
     return methodIndex(s.methods, Ꮡpkg, name, foldCase);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string comparableˢ = "comparable"u8;
 
-[GoRecv] internal static @string String(this ref _TypeSet s) {
+internal static @string String(this ref _TypeSet s) {
     switch (ᐧ) {
     case {} when s.IsEmpty(): {
         return "∅"u8;
@@ -114,12 +114,12 @@ internal static readonly @string comparableˢ = "comparable"u8;
 // Implementation
 
 // hasTerms reports whether s has specific type terms.
-[GoRecv] internal static bool hasTerms(this ref _TypeSet s) {
+internal static bool hasTerms(this ref _TypeSet s) {
     return !s.terms.isEmpty() && !s.terms.isAll();
 }
 
 // subsetOf reports whether s1 ⊆ s2.
-[GoRecv] internal static bool subsetOf(this ref _TypeSet s1, ж<_TypeSet> Ꮡs2) {
+internal static bool subsetOf(this ref _TypeSet s1, ж<_TypeSet> Ꮡs2) {
     ref var s2 = ref Ꮡs2.DerefOrNull();
 
     return s1.terms.subsetOf(s2.terms);
@@ -128,7 +128,7 @@ internal static readonly @string comparableˢ = "comparable"u8;
 // typeset is an iterator over the (type/underlying type) pairs in s.
 // If s has no specific terms, typeset calls yield with (nil, nil).
 // In any case, typeset is guaranteed to call yield at least once.
-[GoRecv] internal static void typeset(this ref _TypeSet s, Func<ΔType, ΔType, bool> yield) {
+internal static void typeset(this ref _TypeSet s, Func<ΔType, ΔType, bool> yield) {
     if (!s.hasTerms()) {
         yield(default!, default!);
         return;
@@ -152,7 +152,7 @@ internal static readonly @string comparableˢ = "comparable"u8;
 // is calls f with the specific type terms of s and reports whether
 // all calls to f returned true. If there are no specific terms, is
 // returns the result of f(nil).
-[GoRecv] internal static bool @is(this ref _TypeSet s, Func<ж<Δterm>, bool> f) {
+internal static bool @is(this ref _TypeSet s, Func<ж<Δterm>, bool> f) {
     if (!s.hasTerms()) {
         return f(nil);
     }

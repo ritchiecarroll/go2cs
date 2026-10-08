@@ -101,7 +101,7 @@ internal static void setComment(this ж<printer> Ꮡp, ж<ast.CommentGroup> Ꮡg
     }
 }
 
-[GoType("num:nuint")] partial struct exprListMode;
+partial struct exprListMode /*num:nuint*/;
 
 internal static exprListMode commaTerm => /* 1 << iota */ 1;     // list is optionally terminated by a comma
 internal static exprListMode noIndent => 2;      // no extra indentation in multi-line lists
@@ -309,7 +309,7 @@ internal static void exprList(this ж<printer> Ꮡp, tokenꓸPos prev0, slice<as
     }
 }
 
-[GoType("num:nint")] partial struct paramMode;
+partial struct paramMode /*num:nint*/;
 
 internal static paramMode funcParam => /* iota */ 0;
 internal static paramMode funcTParam => 1;
@@ -478,7 +478,7 @@ internal static nint /*size*/ identListSize(slice<ж<ast.Ident>> list, nint maxS
     return size;
 }
 
-[GoRecv] internal static bool isOneLineFieldList(this ref printer p, slice<ж<ast.Field>> list) {
+internal static bool isOneLineFieldList(this ref printer p, slice<ж<ast.Field>> list) {
     if (len(list) != 1) {
         return false; // allow only one field
     }
@@ -1408,7 +1408,7 @@ internal static void controlClause(this ж<printer> Ꮡp, bool isForStmt, ast.St
 // indentList reports whether an expression list would look better if it
 // were indented wholesale (starting with the very first element, rather
 // than starting at the first line break).
-[GoRecv] internal static bool indentList(this ref printer p, slice<ast.Expr> list) {
+internal static bool indentList(this ref printer p, slice<ast.Expr> list) {
     // Heuristic: indentList reports whether there are more than one multi-
     // line element in the list, or if there is any element that is not
     // starting on the same line as the previous one ends.
@@ -1924,12 +1924,12 @@ internal static void genDecl(this ж<printer> Ꮡp, ж<ast.GenDecl> Ꮡd) {
 
 // sizeCounter is an io.Writer which counts the number of bytes written,
 // as well as whether a newline character was seen.
-[GoType] partial struct sizeCounter {
+partial struct sizeCounter {
     internal bool hasNewline;
     internal nint size;
 }
 
-[GoRecv] internal static (nint, error) Write(this ref sizeCounter c, slice<byte> p) {
+internal static (nint, error) Write(this ref sizeCounter c, slice<byte> p) {
     if (!c.hasNewline) {
         foreach (var (_, b) in p) {
             if (b == (rune)'\n' || b == (rune)'\f') {
@@ -1946,7 +1946,7 @@ internal static void genDecl(this ж<printer> Ꮡp, ж<ast.GenDecl> Ꮡd) {
 // The result is <= maxSize if the node fits on one line with at
 // most maxSize chars and the formatted output doesn't contain
 // any control chars. Otherwise, the result is > maxSize.
-[GoRecv] internal static nint /*size*/ nodeSize(this ref printer p, ast.Node n, nint maxSize) {
+internal static nint /*size*/ nodeSize(this ref printer p, ast.Node n, nint maxSize) {
     nint size = default!;
 
     // nodeSize invokes the printer, which may invoke nodeSize
@@ -1980,7 +1980,7 @@ internal static void genDecl(this ж<printer> Ꮡp, ж<ast.GenDecl> Ꮡd) {
 }
 
 // numLines returns the number of lines spanned by node n in the original source.
-[GoRecv] internal static nint numLines(this ref printer p, ast.Node n) {
+internal static nint numLines(this ref printer p, ast.Node n) {
     {
         tokenꓸPos from = n.Pos(); if (from.IsValid()) {
             {
@@ -2073,7 +2073,7 @@ internal static void funcBody(this ж<printer> Ꮡp, nint headerSize, whiteSpace
 // distanceFrom returns the column difference between p.out (the current output
 // position) and startOutCol. If the start position is on a different line from
 // the current position (or either is unknown), the result is infinity.
-[GoRecv] internal static nint distanceFrom(this ref printer p, tokenꓸPos startPos, nint startOutCol) {
+internal static nint distanceFrom(this ref printer p, tokenꓸPos startPos, nint startOutCol) {
     if (startPos.IsValid() && p.pos.IsValid() && p.posFor(startPos).Line == p.pos.Line) {
         return p.@out.Column - startOutCol;
     }

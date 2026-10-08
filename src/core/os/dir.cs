@@ -15,7 +15,7 @@ using go.io;
 
 partial class os_package {
 
-[GoType("num:nint")] partial struct readdirMode;
+partial struct readdirMode /*num:nint*/;
 
 internal static readdirMode readdirName => /* iota */ 0;
 internal static readdirMode readdirDirEntry => 1;

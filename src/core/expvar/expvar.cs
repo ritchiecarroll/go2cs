@@ -43,20 +43,20 @@ using unicode;
 partial class expvar_package {
 
 // Var is an abstract type for all exported variables.
-[GoType] partial interface Var {
+partial interface Var {
     // String returns a valid JSON value for the variable.
     // Types with String methods that do not return valid JSON
     // (such as time.Time) must not be used as a Var.
     @string String();
 }
 
-[GoType] partial interface jsonVar {
+partial interface jsonVar {
     // appendJSON appends the JSON representation of the receiver to b.
     slice<byte> appendJSON(slice<byte> b);
 }
 
 // Int is a 64-bit integer variable that satisfies the [Var] interface.
-[GoType] partial struct Int {
+partial struct Int {
     internal atomic.Int64 i;
 }
 
@@ -81,7 +81,7 @@ public static void Set(this ж<Int> Ꮡv, int64 value) {
 }
 
 // Float is a 64-bit float variable that satisfies the [Var] interface.
-[GoType] partial struct Float {
+partial struct Float {
     internal atomic.Uint64 f;
 }
 
@@ -116,14 +116,14 @@ public static void Set(this ж<Float> Ꮡv, float64 value) {
 }
 
 // Map is a string-to-Var map variable that satisfies the [Var] interface.
-[GoType] partial struct Map {
+partial struct Map {
     internal Δsync.Map m; // map[string]Var
     internal Δsync.RWMutex keysMu;
     internal slice<@string> keys; // sorted
 }
 
 // KeyValue represents a single entry in a [Map].
-[GoType] partial struct KeyValue {
+partial struct KeyValue {
     public @string Key;
     public Var Value;
 }
@@ -311,7 +311,7 @@ public static void Do(this ж<Map> Ꮡv, Action<KeyValue> f) {
 }
 
 // String is a string variable, and satisfies the [Var] interface.
-[GoType] partial struct ΔString {
+partial struct ΔString {
     internal atomic.Value s; // string
 }
 

@@ -59,7 +59,7 @@ internal static partial bool resetTimer(ж<Timer> t, int64 when, int64 period);
 // When the Timer expires, the current time will be sent on C,
 // unless the Timer was created by [AfterFunc].
 // A Timer must be created with [NewTimer] or AfterFunc.
-[GoType] partial struct Timer {
+partial struct Timer {
     public /*<-*/channel<Time> C = /*<-*/channel<Time>.RecvOnly;
     internal bool initTimer;
 }

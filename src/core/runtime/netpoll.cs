@@ -72,7 +72,7 @@ internal static UntypedInt pollBlockSize => /* 4 * 1024 */ 4096;
 // Network poller descriptor.
 //
 // No heap pointers.
-[GoType] partial struct pollDesc {
+partial struct pollDesc {
     internal sys.NotInHeap _;
     internal ж<pollDesc> link;   // in pollcache, protected by pollcache.lock
     internal uintptr fd;        // constant for pollDesc usage lifetime
@@ -111,7 +111,7 @@ internal static UntypedInt pollBlockSize => /* 4 * 1024 */ 4096;
     internal ж<pollDesc> self; // storage for indirect interface. See (*pollDesc).makeArg.
 }
 
-[GoType("num:uint32")] partial struct pollInfo;
+partial struct pollInfo /*num:uint32*/;
 
 internal static UntypedInt pollClosing => /* 1 << iota */ 1;
 internal static UntypedInt pollEventErr => 2;
@@ -190,7 +190,7 @@ internal static void setEventErr(this ж<pollDesc> Ꮡpd, bool b, uintptr seq) {
     }
 }
 
-[GoType] partial struct pollCache {
+partial struct pollCache {
     internal mutex @lock;
     internal ж<pollDesc> first;
 }

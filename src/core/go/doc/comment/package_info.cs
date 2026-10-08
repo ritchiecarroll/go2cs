@@ -62,8 +62,8 @@ using static go.go.doc.comment_package;
 
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("go/doc/comment/html.go", "html.cs", "ABIqwoKCgpT4sqS2gpSCtoKCgoCCgoKkgoKCgraCgraCgpSCgoKCgoCCgoKCgpSkgoKClJSCzKKCgoKClJTYsoKUtIKCtIKCgoK0goKCgpSCggALEtKCgpSCgrSCgrSCgrSCgrSCgsY=")]
-[assembly: global::go.GoPositionMap("go/doc/comment/markdown.go", "markdown.cs", "ABMs0rqCgoKUlNjCpLaCtoKCgIKCgqS2goKCgoKClMiCgoKUgIKCgpSkgoKClILuwoKCgoKUlrSCkpSUgoLGrNKClLSCgrSCgoKCtIKClIKCgoKCggAGEtKCgp6CgoIAAxCCgoIADwY=")]
-[assembly: global::go.GoPositionMap("go/doc/comment/parse.go", "parse.cs", "ACdSABs6AAIS8gACEuKClILKpgASKAAKFAAKFsoACRIAEiYAOYwBAAsCkoKUlJSAgramgoIAAhYACAKClKrCgu6CmqKCgpikpKSkAAITAAIYgpSogpS0goKC3AATLoIABxKEgoKClIKUgpSAgqaCgoLugoKCgpSogoIADiCCloKUuIKClAAJFoKcgoLCAAQQgvaCgrqCkoKUqIK2qqKu1IKUgpSCqIKCgqiCooKClJSClIKUqJKokoKClKiSgoKUqqKClpaCgqiCgqiCqIKCgIKkgrqCgoCCpIKoqJKokq6SqJKCgqqkkoKCgpSUgoKCpoKEAAIQ0oKUgoKWkpKCgt6qooKqgoKAgraWooCkhIKCpIKCgoKUlIKu8oKCqICCkoKCgpSClJSmgpassoIAAhoADAKCgoKCgqiCgoKCgpSUtIKAgoKCuJKAgoKCgsaCtIKoggACEgAJAoKCgqaCgoKmgqKCgpSCgIK2gIK2yqzigoKClIKUAAIS4oKCgoKUkoKCgqaCgoKAktyCgoKkgIKSgoKUgoKUlIKCtpSUgoKUlIKCgrSCgoK0xoIAAhDYspSktLS0tKSCqIK6goKUgoKCgpSUAAcSgoKCgoKUgpSUtLS0gpS0gsissgABEKTaqgAPGKyqAAoQ2poAGzCqkoKClIIAAhDkgoKAgoKClKSCgoKUlNiaAAkMrKKClIKUgpSClIKUgoKCgpSmpoKClIKCptaKAA0U", "291-291:1;703-710:1;787-792:1;899-902:1;903-909:2")]
+[assembly: global::go.GoPositionMap("go/doc/comment/markdown.go", "markdown.cs", "ABMs0rqCgoKUlNjCpLaCtoKCgIKCgqS2goKCgoKClMiCgoKUgIKCgpSkgoKClILuwoKCgoKUlrSCkpSUgoLGrNKClLSCgrSCgoKCtIKClIKCgoKCggAGEtKCgp6CgoIAAxCCgoIADwY=", "", "", "26=headingLevel/1/1/2,Repeat/1/1/2")]
+[assembly: global::go.GoPositionMap("go/doc/comment/parse.go", "parse.cs", "ACdSABs6AAIS8gACEuKClILKpgASKAAKFAAKFsoACRIAEiYAOYwBAAsCkoKUlJSAgramgoIAAhYACAKClKrCgu6CmqKCgpikpKSkAAITAAIYgpSogpS0goKC3AATLoIABxKEgoKClIKUgpSAgqaCgoLugoKCgpSogoIADiCCloKUuIKClAAJFoKcgoLCAAQQgvaCgrqCkoKUqIK2qqKu1IKUgpSCqIKCgqiCooKClJSClIKUqJKokoKClKiSgoKUqqKClpaCgqiCgqiCqIKCgIKkgrqCgoCCpIKoqJKokq6SqJKCgqqkkoKCgpSUgoKCpoKEAAIQ0oKUgoKWkpKCgt6qooKqgoKAgraWooCkhIKCpIKCgoKUlIKu8oKCqICCkoKCgpSClJSmgpassoIAAhoADAKCgoKCgqiCgoKCgpSUtIKAgoKCuJKAgoKCgsaCtIKoggACEgAJAoKCgqaCgoKmgqKCgpSCgIK2gIK2yqzigoKClIKUAAIS4oKCgoKUkoKCgqaCgoKAktyCgoKkgIKSgoKUgoKUlIKCtpSUgoKUlIKCgrSCgoK0xoIAAhDYspSktLS0tKSCqIK6goKUgoKCgpSUAAcSgoKCgoKUgpSUtLS0gpS0gsissgABEKTaqgAPGKyqAAoQ2poAGzCqkoKClIIAAhDkgoKAgoKClKSCgoKUlNiaAAkMrKKClIKUgpSClIKUgoKCgpSmpoKClIKCptaKAA0U", "291-291:1;703-710:1;787-792:1;899-902:1;903-909:2", "", "625=TrimSpace/1/1/3;816=parseText/1/1/1")]
 [assembly: global::go.GoPositionMap("go/doc/comment/print.go", "print.cs", "ADN0goKUpqKClKaigpQAAioAEgKCgoKUlJSkpLaClAAFFPaigoKCgpSCgoKClKYABhLCgoKCgpQABhCCgoKCgoKClIKCgoK6qqKAgqTYsqS2graCgraCgoKCgoKUyIKCgpSCgpSClIKCgpSC7rKClLS0gpSCgsaCgt7CgoKCgoKU")]
 [assembly: global::go.GoPositionMap("go/doc/comment/std.go", "std.cs", "AAkU")]
 [assembly: global::go.GoPositionMap("go/doc/comment/text.go", "text.cs", "ABg00tyClIKWgoKCgpSUgoKCgqaCgoKCuKrUgoKClIKU2MKktoK2goK2goKCgoKClMiCgoKClIKCgpSClIKCgoKClO7CgoKEgoKUlIKCgpSCgpSUvrKClLS0tAAMKAAsPoqClKSkpKS6goKCqLSCgt6CgoKUzJKksqKClIKUqIKCgoKCgoKClIKUgriCuJaCgpSCgoKUqJKUpA==", "231-231:1;232-244:2;255-272:3;278-278:4;280-289:5;281-284:5.1")]
@@ -75,7 +75,7 @@ namespace go.go.doc;
 public static partial class comment_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

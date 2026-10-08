@@ -10,7 +10,7 @@ partial class dwarf_package {
 
 // DWARF debug info is split into a sequence of compilation units.
 // Each unit has its own abbreviation table and address size.
-[GoType] partial struct unit {
+partial struct unit {
     internal Offset @base; // byte offset of header within the aggregate info
     internal Offset off; // byte offset of data within the aggregate info
     internal slice<byte> data;
@@ -22,15 +22,15 @@ partial class dwarf_package {
 }
 
 // Implement the dataFormat interface.
-[GoRecv] internal static nint version(this ref unit u) {
+internal static nint version(this ref unit u) {
     return u.vers;
 }
 
-[GoRecv] internal static (bool, bool) dwarf64(this ref unit u) {
+internal static (bool, bool) dwarf64(this ref unit u) {
     return (u.is64, true);
 }
 
-[GoRecv] internal static nint addrsize(this ref unit u) {
+internal static nint addrsize(this ref unit u) {
     return u.asize;
 }
 

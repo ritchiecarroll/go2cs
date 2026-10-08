@@ -33,16 +33,16 @@ using ꓸꓸꓸany = Span<any>;
 partial class textproto_package {
 
 // An Error represents a numeric error response from a server.
-[GoType] partial struct ΔError {
+partial struct ΔError {
     public nint Code;
     public @string Msg;
 }
 
-[GoRecv] public static @string Error(this ref ΔError e) {
+public static @string Error(this ref ΔError e) {
     return fmt.Sprintf("%03d %s"u8, e.Code, e.Msg);
 }
 
-[GoType("@string")] partial struct ProtocolError;
+partial struct ProtocolError /*@string*/;
 
 public static @string Error(this ProtocolError p) {
     return ((@string)p);
@@ -53,7 +53,7 @@ public static @string Error(this ProtocolError p) {
 // and a [Pipeline] to sequence concurrent requests on the connection.
 // These embedded types carry methods with them;
 // see the documentation of those types for details.
-[GoType] partial struct Conn {
+partial struct Conn {
     public partial ref Reader Reader { get; }
     public partial ref Writer Writer { get; }
     public partial ref Pipeline Pipeline { get; }
@@ -70,7 +70,7 @@ public static ж<Conn> NewConn(io.ReadWriteCloser conn) {
 }
 
 // Close closes the connection.
-[GoRecv] public static error Close(this ref Conn c) {
+public static error Close(this ref Conn c) {
     return c.conn.Close();
 }
 

@@ -8,7 +8,7 @@ using go.unicode;
 
 partial class norm_package {
 
-[GoType] partial struct input {
+partial struct input {
     internal @string str;
     internal slice<byte> bytes;
 }
@@ -21,24 +21,24 @@ internal static input inputString(@string str) {
     return new input(str: str);
 }
 
-[GoRecv] internal static void setBytes(this ref input @in, slice<byte> str) {
+internal static void setBytes(this ref input @in, slice<byte> str) {
     @in.str = ""u8;
     @in.bytes = str;
 }
 
-[GoRecv] internal static void setString(this ref input @in, @string str) {
+internal static void setString(this ref input @in, @string str) {
     @in.str = str;
     @in.bytes = default!;
 }
 
-[GoRecv] internal static byte _byte(this ref input @in, nint p) {
+internal static byte _byte(this ref input @in, nint p) {
     if (@in.bytes == default!) {
         return @in.str[p];
     }
     return @in.bytes[p];
 }
 
-[GoRecv] internal static nint skipASCII(this ref input @in, nint p, nint max) {
+internal static nint skipASCII(this ref input @in, nint p, nint max) {
     if (@in.bytes == default!){
         for (; p < max && @in.str[p] < utf8.RuneSelf; p++) {
         }
@@ -49,7 +49,7 @@ internal static input inputString(@string str) {
     return p;
 }
 
-[GoRecv] internal static nint skipContinuationBytes(this ref input @in, nint p) {
+internal static nint skipContinuationBytes(this ref input @in, nint p) {
     if (@in.bytes == default!){
         for (; p < len(@in.str) && !utf8.RuneStart(@in.str[p]); p++) {
         }
@@ -60,7 +60,7 @@ internal static input inputString(@string str) {
     return p;
 }
 
-[GoRecv] internal static slice<byte> appendSlice(this ref input @in, slice<byte> buf, nint b, nint e) {
+internal static slice<byte> appendSlice(this ref input @in, slice<byte> buf, nint b, nint e) {
     if (@in.bytes != default!) {
         return appendꓸꓸꓸ(buf, @in.bytes.slice(b, e));
     }
@@ -70,28 +70,28 @@ internal static input inputString(@string str) {
     return buf;
 }
 
-[GoRecv] internal static nint copySlice(this ref input @in, slice<byte> buf, nint b, nint e) {
+internal static nint copySlice(this ref input @in, slice<byte> buf, nint b, nint e) {
     if (@in.bytes == default!) {
         return copy(buf, @in.str.slice(b, e));
     }
     return copy(buf, @in.bytes.slice(b, e));
 }
 
-[GoRecv] internal static (uint16, nint) charinfoNFC(this ref input @in, nint p) {
+internal static (uint16, nint) charinfoNFC(this ref input @in, nint p) {
     if (@in.bytes == default!) {
         return nfcData.lookupString(@in.str.slice(p));
     }
     return nfcData.lookup(@in.bytes.slice(p));
 }
 
-[GoRecv] internal static (uint16, nint) charinfoNFKC(this ref input @in, nint p) {
+internal static (uint16, nint) charinfoNFKC(this ref input @in, nint p) {
     if (@in.bytes == default!) {
         return nfkcData.lookupString(@in.str.slice(p));
     }
     return nfkcData.lookup(@in.bytes.slice(p));
 }
 
-[GoRecv] internal static rune /*r*/ hangul(this ref input @in, nint p) {
+internal static rune /*r*/ hangul(this ref input @in, nint p) {
     rune r = default!;
 
     nint size = default!;

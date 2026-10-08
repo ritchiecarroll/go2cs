@@ -49,35 +49,32 @@ internal static byte _ELF_ST_TYPE(byte val) {
     return (byte)(val & 0xf);
 }
 
-[GoType] partial struct vdsoSymbolKey {
+partial struct vdsoSymbolKey {
     internal @string name;
     internal uint32 symHash;
     internal uint32 gnuHash;
     internal ж<uintptr> ptr;
 }
 
-[GoType] partial struct vdsoVersionKey {
+partial struct vdsoVersionKey {
     internal @string version;
     internal uint32 verHash;
 }
 
-[GoType] partial struct vdsoInfo {
+partial struct vdsoInfo {
     internal bool valid;
     /* Load information */
     internal uintptr loadAddr;
     internal uintptr loadOffset; /* loadAddr - recorded vaddr */
     /* Symbol table */
-    [GoArrayDims(46912496118442)]
-    internal ж<array<elfSym>> symtab;
-    [GoArrayDims(1125899906842623)]
-    internal ж<array<byte>> symstrings;
+    internal /*[46912496118442]*/ ж<array<elfSym>> symtab;
+    internal /*[1125899906842623]*/ ж<array<byte>> symstrings;
     internal slice<uint32> chain;
     internal slice<uint32> bucket;
     internal uint32 symOff;
     internal bool isGNUHash;
     /* Version table */
-    [GoArrayDims(562949953421311)]
-    internal ж<array<uint16>> versym;
+    internal /*[562949953421311]*/ ж<array<uint16>> versym;
     internal ж<elfVerdef> verdef;
 }
 

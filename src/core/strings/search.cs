@@ -10,7 +10,7 @@ partial class strings_package {
 // https://en.wikipedia.org/wiki/Boyer-Moore_string_search_algorithm
 // https://www.cs.utexas.edu/~moore/publications/fstrpos.pdf (note: this aged
 // document uses 1-based indexing)
-[GoType] partial struct stringFinder {
+partial struct stringFinder {
     // pattern is the string that we are searching for in the text.
     internal @string pattern;
     // badCharSkip[b] contains the distance between the last byte of pattern
@@ -97,7 +97,7 @@ internal static nint /*i*/ longestCommonSuffix(@string a, @string b) {
 
 // next returns the index in text of the first occurrence of the pattern. If
 // the pattern is not found, it returns -1.
-[GoRecv] internal static nint next(this ref stringFinder f, @string text) {
+internal static nint next(this ref stringFinder f, @string text) {
     nint i = len(f.pattern) - 1;
     while (i < len(text)) {
         // Compare backwards from the end until the first unmatching character.

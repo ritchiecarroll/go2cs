@@ -156,7 +156,7 @@ public static (uint8, uint8, uint8) YCbCrToRGB(uint8 y, uint8 cb, uint8 cr) {
 // Conversion between RGB and Y'CbCr is lossy and there are multiple, slightly
 // different formulae for converting between the two. This package follows
 // the JFIF specification at https://www.w3.org/Graphics/JPEG/jfif3.pdf.
-[GoType] partial struct YCbCr {
+partial struct YCbCr {
     public uint8 Y, Cb, Cr;
 }
 
@@ -228,7 +228,7 @@ internal static Color yCbCrModel(Color c) {
 
 // NYCbCrA represents a non-alpha-premultiplied Y'CbCr-with-alpha color, having
 // 8 bits each for one luma, two chroma and one alpha component.
-[GoType] partial struct NYCbCrA {
+partial struct NYCbCrA {
     public partial ref YCbCr YCbCr { get; }
     public uint8 A;
 }
@@ -329,7 +329,7 @@ public static (uint8, uint8, uint8) CMYKToRGB(uint8 c, uint8 m, uint8 y, uint8 k
 // magenta, yellow and black.
 //
 // It is not associated with any particular color profile.
-[GoType] partial struct CMYK {
+partial struct CMYK {
     public uint8 C, M, Y, K;
 }
 

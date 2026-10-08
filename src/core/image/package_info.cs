@@ -85,9 +85,9 @@ using static go.image_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("image/format.go", "format.cs", "AA8gAA8q4oKCggAJFJKAgqSokoKUgoKmqJKCgoKCpq7CgoKClIKuwoKCgpSC")]
 [assembly: go.GoPositionMap("image/geom.go", "geom.cs", "ABImkqiSqJKokqiSqJKsopKCgoKUgoKUqJIABxKSAA4gkqiSqJKokt6S3pIABRKygoKUgpSCgpSClKqigpSClIKUgtyClKiSgpSClIKUgpSClIKUqJKqoqiSrJKCuKyigpSClKiSgpSokoKUqJKokgAHFrKClIKUqqKClIKClIKClIKClKqigpSCgpQ=")]
-[assembly: go.GoPositionMap("image/image.go", "image.cs", "AFi6AfKCgpQADRyApICkgqaCgpSCgoKCgoIABxCCgpSCgqqipoKClIKCgoKCgqaCgpSCgoKCgqaCgpSCgoKCgqqiuIKUggAGEJKClJKCgoKmgpTYkgARJICkgKSCpoKClIKCAAcUoqaCgpSCgoKCgoKCgoKCpoKClIKCgoKCgoKCgqqiuIKUggAGEJKClJKCgoKmgpTYkgARJICkgKSCpoKCpoKClIKCqqKmgoKUgoKCgoKCpoKClIKCgoKUgoKCgoKmgoKUgoKCgoKqoriClIIABhCSgpSSgoKCpoKU2JIAESSApICkgqaCgqaCgpSCggAHFKKmgoKUgoKCgoKCgoKCgqaCgpSCgoKClIKCgoKCgoKCgqaCgpSCgoKCgoKCgoKqoriClIIABhCSgpSSgoKCpoKU2JIAESSApICkgqaCgoKmgoKUgqqipoKClIKmgoKUgqaCgpSCqqK4gpSCAAYQkoKUkoKCgqaClNiSABEkgKSApIKmgoKmgoKUgqqipoKClIKCgqaCgpSCgqaCgpSCgqqiuIKUggAGEJKClJKCgoKmgpTYkgARJICkgKSCpoKCgqaCgpSCqqKmgoKUgqaCgqaCgqaCgpSCqqK4gpSCAAYQktiSABEkgKSApIKmgoKmgoKUgqqipoKClIKCgqaCgqaCgoKmgoKUgoKqoriClIIABhCS2JIAESSApICkgqaCgqaCgpSCgqqipoKClIKCgoKCgqaCgpSCgoKCgoKmgoKUgoKCgoKqoriClIIABhCS2JIAEyiApICkgoKUgpSCpoKClIKClIKUggAHFKKmgoKUgqaCgpSCpoKClIKmgoKUgqqiuIK4ggAHEpKCkoKClIKUgoKUgoKm2qI=")]
+[assembly: go.GoPositionMap("image/image.go", "image.cs", "AFi6AfKCgpQADRyApICkgqaCgpSCgoKCgoIABxCCgpSCgqqipoKClIKCgoKCgqaCgpSCgoKCgqaCgpSCgoKCgqqiuIKUggAGEJKClJKCgoKmgpTYkgARJICkgKSCpoKClIKCAAcUoqaCgpSCgoKCgoKCgoKCpoKClIKCgoKCgoKCgqqiuIKUggAGEJKClJKCgoKmgpTYkgARJICkgKSCpoKCpoKClIKCqqKmgoKUgoKCgoKCpoKClIKCgoKUgoKCgoKmgoKUgoKCgoKqoriClIIABhCSgpSSgoKCpoKU2JIAESSApICkgqaCgqaCgpSCggAHFKKmgoKUgoKCgoKCgoKCgqaCgpSCgoKClIKCgoKCgoKCgqaCgpSCgoKCgoKCgoKqoriClIIABhCSgpSSgoKCpoKU2JIAESSApICkgqaCgoKmgoKUgqqipoKClIKmgoKUgqaCgpSCqqK4gpSCAAYQkoKUkoKCgqaClNiSABEkgKSApIKmgoKmgoKUgqqipoKClIKCgqaCgpSCgqaCgpSCgqqiuIKUggAGEJKClJKCgoKmgpTYkgARJICkgKSCpoKCgqaCgpSCqqKmgoKUgqaCgqaCgqaCgpSCqqK4gpSCAAYQktiSABEkgKSApIKmgoKmgoKUgqqipoKClIKCgqaCgqaCgoKmgoKUgoKqoriClIIABhCS2JIAESSApICkgqaCgqaCgpSCgqqipoKClIKCgoKCgqaCgpSCgoKCgoKmgoKUgoKCgoKqoriClIIABhCS2JIAEyiApICkgoKUgpSCpoKClIKClIKUggAHFKKmgoKUgqaCgpSCpoKClIKmgoKUgqqiuIK4ggAHEpKCkoKClIKUgoKUgoKm2qI=", "", "", "239=pixelBufferLength/1/1/1,Dx/1/1/2;364=pixelBufferLength/1/1/1,Dx/1/1/2;499=pixelBufferLength/1/1/1,Dx/1/1/2;651=pixelBufferLength/1/1/1,Dx/1/1/2;767=pixelBufferLength/1/1/1,Dx/1/1/2;886=pixelBufferLength/1/1/1,Dx/1/1/2;990=pixelBufferLength/1/1/1,Dx/1/1/2;1097=pixelBufferLength/1/1/1,Dx/1/1/2;1213=pixelBufferLength/1/1/1,Dx/1/1/2;1323=Intersect/1/1/3;1361=pixelBufferLength/1/1/1,Dx/1/1/2")]
 [assembly: go.GoPositionMap("image/names.go", "names.cs", "AAoahISEAAcSgqaCpoKmgKSApIKCqJKCqJI=")]
-[assembly: go.GoPositionMap("image/ycbcr.go", "ycbcr.cs", "ABsugpSkpKSkpKQAGDKCpoKmgqaCgqaCgpSCggAGEqKqopSkpKSktqqiuIK4goIAChaCptKClIKkgqSCpIKkgqaCtKqitqiCloKCgoIAEyiCpoKmgoKmgoKUgoKCAAkYoqqiuILcgoKCAA4gkoKUkoKCgqaClKqipqiCloKCgoKC")]
+[assembly: go.GoPositionMap("image/ycbcr.go", "ycbcr.cs", "ABsugpSkpKSkpKQAGDKCpoKmgqaCgqaCgpSCggAGEqKqopSkpKSktqqiuIK4goIAChaCptKClIKkgqSCpIKkgqaCtKqitqiCloKCgoIAEyiCpoKmgoKmgoKUgoKCAAkYoqqiuILcgoKCAA4gkoKUkoKCgqaClKqipqiCloKCgoKC", "", "", "207=mul3NonNeg/1/2/1,mul3NonNeg/2/2/2;330=mul3NonNeg/1/2/1,mul3NonNeg/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -96,7 +96,7 @@ namespace go;
 public static partial class image_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

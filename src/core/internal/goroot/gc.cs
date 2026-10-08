@@ -47,7 +47,7 @@ public static bool IsStandardPackage(@string goroot, @string compiler, @string p
 }
 
 // gccgoSearch holds the gccgo search directories.
-[GoType] partial struct gccgoDirs {
+partial struct gccgoDirs {
     internal sync.Once once;
     internal slice<@string> dirs;
 }
@@ -68,7 +68,7 @@ private static readonly @string dumpmachineˢ = "-dumpmachine"u8;
 private static readonly @string prefixᶜ = "libraries: ="u8;
 
 // init finds the gccgo search directories. If this fails it leaves dirs == nil.
-[GoRecv] internal static void init(this ref gccgoDirs gd) {
+internal static void init(this ref gccgoDirs gd) {
     @string gccgo = os.Getenv(gccgoˢ);
     if (gccgo == ""u8) {
         gccgo = gccgoˢ2;

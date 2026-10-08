@@ -33,7 +33,7 @@ public static io.Reader NewChunkedReader(io.Reader r) {
     return new chunkedReaderжReader(Ꮡ(new chunkedReader(r: br)));
 }
 
-[GoType] partial struct chunkedReader {
+partial struct chunkedReader {
     internal ж<bufio.Reader> r;
     internal uint64 n; // unread bytes in chunk
     internal error err;
@@ -45,7 +45,7 @@ public static io.Reader NewChunkedReader(io.Reader r) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string chunkedEncodingContainsˢ = "chunked encoding contains too much non-data"u8;
 
-[GoRecv] internal static void beginChunk(this ref chunkedReader cr) {
+internal static void beginChunk(this ref chunkedReader cr) {
     // chunk-size CRLF
     slice<byte> line = default!;
     (line, cr.err) = readChunkLine(cr.r);
@@ -87,7 +87,7 @@ internal static readonly @string chunkedEncodingContainsˢ = "chunked encoding c
     }
 }
 
-[GoRecv] internal static bool chunkHeaderAvailable(this ref chunkedReader cr) {
+internal static bool chunkHeaderAvailable(this ref chunkedReader cr) {
     nint n = cr.r.Buffered();
     if (n > 0) {
         var (peek, _) = cr.r.Peek(n);
@@ -99,7 +99,7 @@ internal static readonly @string chunkedEncodingContainsˢ = "chunked encoding c
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string malformedChunkedEncodingˢ = "malformed chunked encoding"u8;
 
-[GoRecv] internal static (nint n, error err) Read(this ref chunkedReader cr, slice<uint8> b) {
+internal static (nint n, error err) Read(this ref chunkedReader cr, slice<uint8> b) {
     nint n = default!;
 
     while (cr.err == default!) {
@@ -246,14 +246,14 @@ public static io.WriteCloser NewChunkedWriter(io.Writer w) {
 
 // Writing to chunkedWriter translates to writing in HTTP chunked Transfer
 // Encoding wire format to the underlying Wire chunkedWriter.
-[GoType] partial struct chunkedWriter {
+partial struct chunkedWriter {
     public io.Writer Wire;
 }
 
 // Write the contents of data as one chunk to Wire.
 // NOTE: Note that the corresponding chunk-writing procedure in Conn.Write has
 // a bug since it does not check for success of [io.WriteString]
-[GoRecv] internal static (nint n, error err) Write(this ref chunkedWriter cw, slice<byte> data) {
+internal static (nint n, error err) Write(this ref chunkedWriter cw, slice<byte> data) {
     nint n = default!;
     error err = default!;
 
@@ -288,7 +288,7 @@ public static io.WriteCloser NewChunkedWriter(io.Writer w) {
     return (n, err);
 }
 
-[GoRecv] internal static error Close(this ref chunkedWriter cw) {
+internal static error Close(this ref chunkedWriter cw) {
     var (_, err) = io.WriteString(cw.Wire, "0\r\n"u8);
     return err;
 }
@@ -298,7 +298,7 @@ public static io.WriteCloser NewChunkedWriter(io.Writer w) {
 // [net/http.Transport] code to keep the buffering behavior for headers and
 // trailers, but flush out chunks aggressively in the middle for
 // request bodies which may be generated slowly. See Issue 6574.
-[GoType] partial struct FlushAfterChunkWriter {
+partial struct FlushAfterChunkWriter {
     public partial ref ж<bufio_package.Writer> Writer { get; }
 }
 

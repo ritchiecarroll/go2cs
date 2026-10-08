@@ -7,7 +7,7 @@ namespace go.@internal;
 
 partial class goarch_package {
 
-[GoType("num:nint")] partial struct ArchFamilyType;
+partial struct ArchFamilyType /*num:nint*/;
 
 // The next line makes 'go generate' write the zgoarch*.go files with
 // per-arch information, including constants named $GOARCH for every

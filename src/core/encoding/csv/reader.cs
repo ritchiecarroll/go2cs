@@ -65,14 +65,14 @@ partial class csv_package {
 
 // A ParseError is returned for parsing errors.
 // Line and column numbers are 1-indexed.
-[GoType] partial struct ParseError {
+partial struct ParseError {
     public nint StartLine;  // Line where the record starts
     public nint Line;  // Line where the error occurred
     public nint Column;  // Column (1-based byte index) where the error occurred
     public error Err; // The actual error
 }
 
-[GoRecv] public static @string Error(this ref ParseError e) {
+public static @string Error(this ref ParseError e) {
     if (AreEqual(e.Err, ErrFieldCount)) {
         return fmt.Sprintf("record on line %d: %v"u8, e.Line, e.Err);
     }
@@ -82,7 +82,7 @@ partial class csv_package {
     return fmt.Sprintf("parse error on line %d, column %d: %v"u8, e.Line, e.Column, e.Err);
 }
 
-[GoRecv] public static error Unwrap(this ref ParseError e) {
+public static error Unwrap(this ref ParseError e) {
     return e.Err;
 }
 
@@ -110,7 +110,7 @@ internal static bool validDelim(rune r) {
 // The Reader converts all \r\n sequences in its input to plain \n,
 // including in multiline field values, so that the returned data does
 // not depend on which line-ending convention an input file uses.
-[GoType] partial struct Reader {
+partial struct Reader {
     // Comma is the field delimiter.
     // It is set to comma (',') by NewReader.
     // Comma must be a valid rune and must not be \r, \n,
@@ -182,7 +182,7 @@ public static ж<Reader> NewReader(io.Reader r) {
 // If there is no data left to be read, Read returns nil, [io.EOF].
 // If [Reader.ReuseRecord] is true, the returned slice may be shared
 // between multiple calls to Read.
-[GoRecv] public static (slice<@string> record, error err) Read(this ref Reader r) {
+public static (slice<@string> record, error err) Read(this ref Reader r) {
     slice<@string> record = default!;
     error err = default!;
 
@@ -201,7 +201,7 @@ public static ж<Reader> NewReader(io.Reader r) {
 // columns are counted in bytes, not runes.
 //
 // If this is called with an out-of-bounds index, it panics.
-[GoRecv] public static (nint line, nint column) FieldPos(this ref Reader r, nint field) {
+public static (nint line, nint column) FieldPos(this ref Reader r, nint field) {
     if (field < 0 || field >= len(r.fieldPositions)) {
         throw panic("out of range index passed to FieldPos");
     }
@@ -212,12 +212,12 @@ public static ж<Reader> NewReader(io.Reader r) {
 // InputOffset returns the input stream byte offset of the current reader
 // position. The offset gives the location of the end of the most recently
 // read row and the beginning of the next row.
-[GoRecv] public static int64 InputOffset(this ref Reader r) {
+public static int64 InputOffset(this ref Reader r) {
     return r.offset;
 }
 
 // pos holds the position of a field in the current line.
-[GoType] partial struct position {
+partial struct position {
     internal nint line, col;
 }
 
@@ -226,7 +226,7 @@ public static ж<Reader> NewReader(io.Reader r) {
 // A successful call returns err == nil, not err == [io.EOF]. Because ReadAll is
 // defined to read until EOF, it does not treat end of file as an error to be
 // reported.
-[GoRecv] public static (slice<slice<@string>> records, error err) ReadAll(this ref Reader r) {
+public static (slice<slice<@string>> records, error err) ReadAll(this ref Reader r) {
     slice<slice<@string>> records = default!;
 
     while (ᐧ) {
@@ -245,7 +245,7 @@ public static ж<Reader> NewReader(io.Reader r) {
 // If EOF is hit without a trailing endline, it will be omitted.
 // If some bytes were read, then the error is never [io.EOF].
 // The result is only valid until the next call to readLine.
-[GoRecv] internal static (slice<byte>, error) readLine(this ref Reader r) {
+internal static (slice<byte>, error) readLine(this ref Reader r) {
     var (line, err) = r.r.ReadSlice((rune)'\n');
     if (AreEqual(err, bufio.ErrBufferFull)) {
         r.rawBuffer = appendꓸꓸꓸ(r.rawBuffer[..0], line);
@@ -289,7 +289,7 @@ internal static rune nextRune(slice<byte> b) {
     return r;
 }
 
-[GoRecv] internal static (slice<@string>, error) readRecord(this ref Reader r, slice<@string> dst) {
+internal static (slice<@string>, error) readRecord(this ref Reader r, slice<@string> dst) {
     if (r.Comma == r.Comment || !validDelim(r.Comma) || (r.Comment != 0 && !validDelim(r.Comment))) {
         return (default!, errInvalidDelim);
     }

@@ -54,7 +54,7 @@ using static go.crypto.x509.pkix_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/x509/pkix/pkix.go", "pkix.cs", "ABw0AAscooKCgoKUgoKWgoKCgoKClpaChIKElLa2toKUqKgAMGjSgoKWgoKCgpaCgpS0tLS0tLS0tAAIEIKCgoKCgoKCnsKCloKCgpYAAh4ADgKCgoKCgoKCgpSClIKWqqKmgoKCgpb6poKqooKCpgANHpI=")]
+[assembly: go.GoPositionMap("crypto/x509/pkix/pkix.go", "pkix.cs", "ABs0AAscooKCgoKUgoKWgoKCgoKClpaChIKElLa2toKUqKgALmjSgoKWgoKCgpaCgpS0tLS0tLS0tAAIEIKCgoKCgoKCnsKCloKCgpYAAh4ADgKCgoKCgoKCgpSClIKWqqKmgoKCgpb6poKqooKCpgANHpI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.x509;
@@ -63,7 +63,7 @@ namespace go.crypto.x509;
 public static partial class pkix_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

@@ -31,7 +31,7 @@ using go.debug;
 partial class pe_package {
 
 // A File represents an open PE file.
-[GoType] partial struct File {
+partial struct File {
     public partial ref FileHeader FileHeader { get; }
     public any OptionalHeader; // of type *OptionalHeader32 or *OptionalHeader64
     public slice<ж<ΔSection>> Sections;
@@ -59,7 +59,7 @@ public static (ж<File>, error) Open(@string name) {
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
-[GoRecv] public static error Close(this ref File f) {
+public static error Close(this ref File f) {
     error err = default!;
     if (f.closer != default!) {
         err = f.closer.Close();
@@ -176,13 +176,13 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     return (f, default!);
 }
 
-[GoType] partial struct nobitsSectionReader {
+partial struct nobitsSectionReader {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unexpectedReadFromˢ = "unexpected read from section with uninitialized data"u8;
 
-[GoRecv] internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) {
+internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) {
     return (0, errors.New(unexpectedReadFromˢ));
 }
 
@@ -201,7 +201,7 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
 
 // Section returns the first section with the given name, or nil if no such
 // section exists.
-[GoRecv] public static ж<ΔSection> Section(this ref File f, @string name) {
+public static ж<ΔSection> Section(this ref File f, @string name) {
     foreach (var (_, s) in f.Sections) {
         if ((~s).Name == name) {
             return s;
@@ -219,7 +219,7 @@ internal static readonly @string lineˢ = "line"u8;
 internal static readonly @string rangesˢ = "ranges"u8;
 internal static readonly @string strˢ = "str"u8;
 
-[GoRecv] public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
+public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
     @string dwarfSuffix(ж<ΔSection> s) {
         switch (ᐧ) {
         case {} when strings.HasPrefix((~s).Name, debugˢ): {
@@ -316,7 +316,7 @@ internal static readonly @string strˢ = "str"u8;
 }
 
 // TODO(brainman): document ImportDirectory once we decide what to do with it.
-[GoType] partial struct ImportDirectory {
+partial struct ImportDirectory {
     public uint32 OriginalFirstThunk;
     public uint32 TimeDateStamp;
     public uint32 ForwarderChain;
@@ -329,7 +329,7 @@ internal static readonly @string strˢ = "str"u8;
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
 // It does not return weak symbols.
-[GoRecv] public static (slice<@string>, error) ImportedSymbols(this ref File f) {
+public static (slice<@string>, error) ImportedSymbols(this ref File f) {
     if (f.OptionalHeader == default!) {
         return (default!, default!);
     }
@@ -447,7 +447,7 @@ internal static readonly @string strˢ = "str"u8;
 // ImportedLibraries returns the names of all libraries
 // referred to by the binary f that are expected to be
 // linked with the binary at dynamic link time.
-[GoRecv] public static (slice<@string>, error) ImportedLibraries(this ref File f) {
+public static (slice<@string>, error) ImportedLibraries(this ref File f) {
     // TODO
     // cgo -dynimport don't use this for windows PE, so just return.
     return (default!, default!);
@@ -455,13 +455,13 @@ internal static readonly @string strˢ = "str"u8;
 
 // FormatError is unused.
 // The type is retained for compatibility.
-[GoType] partial struct FormatError {
+partial struct FormatError {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unknownErrorˢ = "unknown error"u8;
 
-[GoRecv] public static @string Error(this ref FormatError e) {
+public static @string Error(this ref FormatError e) {
     return unknownErrorˢ;
 }
 

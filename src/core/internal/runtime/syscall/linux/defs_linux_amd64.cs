@@ -14,7 +14,7 @@ public static UntypedInt SYS_EPOLL_PWAIT2 => 441;
 public static UntypedInt SYS_EVENTFD2 => 290;
 public static UntypedInt EFD_NONBLOCK => 0x800;
 
-[GoType] partial struct EpollEvent {
+partial struct EpollEvent {
     public uint32 Events;
     public array<byte> Data = new(8); // unaligned uintptr
 }

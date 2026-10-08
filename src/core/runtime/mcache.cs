@@ -16,7 +16,7 @@ partial class runtime_package {
 //
 // mcaches are allocated from non-GC'd memory, so any heap pointers
 // must be specially handled.
-[GoType] partial struct mcache {
+partial struct mcache {
     internal sys.NotInHeap _;
     // The following members are accessed on every malloc,
     // so they are grouped here for better caching.
@@ -54,11 +54,11 @@ partial class runtime_package {
 // and the compiler does not emit write barriers for assignments
 // of gclinkptr values. Code should store references to gclinks
 // as gclinkptr, not as *gclink.
-[GoType] partial struct gclink {
+partial struct gclink {
     internal gclinkptr next;
 }
 
-[GoType("num:uintptr")] partial struct gclinkptr;
+partial struct gclinkptr /*num:uintptr*/;
 
 // ptr returns the *gclink form of p.
 // The result should be used for accessing fields, not stored
@@ -67,7 +67,7 @@ internal static ж<gclink> ptr(this gclinkptr Δp) {
     return (ж<gclink>)(uintptr)(((@unsafe.Pointer)(uintptr)Δp));
 }
 
-[GoType] partial struct stackfreelist {
+partial struct stackfreelist {
     internal gclinkptr list; // linked list of free stacks
     internal uintptr size;   // total size of stacks in list
 }
@@ -143,7 +143,7 @@ internal static readonly @string spanHasNoFreeSpaceˢ = "span has no free space"
 //
 // Must run in a non-preemptible context since otherwise the owner of
 // c could change.
-[GoRecv] internal static void refill(this ref mcache c, spanClass spc) {
+internal static void refill(this ref mcache c, spanClass spc) {
     // Return the current cached span to the central lists.
     var s = c.alloc[spc];
     if ((~s).allocCount != (~s).nelems) {
@@ -204,7 +204,7 @@ internal static readonly @string spanHasNoFreeSpaceˢ = "span has no free space"
 }
 
 // allocLarge allocates a span for a large object.
-[GoRecv] internal static ж<mspan> allocLarge(this ref mcache c, uintptr size, bool noscan) {
+internal static ж<mspan> allocLarge(this ref mcache c, uintptr size, bool noscan) {
     if (size + (uintptr)_PageSize < size) {
         @throw(outOfMemoryˢ);
     }
@@ -245,7 +245,7 @@ internal static readonly @string spanHasNoFreeSpaceˢ = "span has no free space"
     return s;
 }
 
-[GoRecv] internal static void releaseAll(this ref mcache c) {
+internal static void releaseAll(this ref mcache c) {
     // Take this opportunity to flush scanAlloc.
     var scanAlloc = (int64)c.scanAlloc;
     c.scanAlloc = 0;

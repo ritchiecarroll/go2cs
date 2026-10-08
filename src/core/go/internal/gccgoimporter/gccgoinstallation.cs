@@ -20,7 +20,7 @@ using ꓸꓸꓸstring = Span<@string>;
 partial class gccgoimporter_package {
 
 // Information about a specific installation of gccgo.
-[GoType] partial struct GccgoInstallation {
+partial struct GccgoInstallation {
     // Version of gcc (e.g. 4.8.0).
     public @string GccVersion;
     // Target triple (e.g. x86_64-unknown-linux-gnu).
@@ -34,7 +34,7 @@ internal static readonly @string targetˢ = "Target: "u8;
 
 // Ask the driver at the given path for information for this GccgoInstallation.
 // The given arguments are passed directly to the call of the driver.
-[GoRecv] public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @string gccgoPath, params ꓸꓸꓸstring argsʗp) {
+public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @string gccgoPath, params ꓸꓸꓸstring argsʗp) {
     error err = default!;
     var args = argsʗp.sslice();
 
@@ -77,7 +77,7 @@ internal static readonly @string targetˢ = "Target: "u8;
 }
 
 // Return the list of export search paths for this GccgoInstallation.
-[GoRecv] public static slice<@string> /*paths*/ SearchPaths(this ref GccgoInstallation inst) {
+public static slice<@string> /*paths*/ SearchPaths(this ref GccgoInstallation inst) {
     slice<@string> paths = default!;
 
     foreach (var (_, lpath) in inst.LibPaths) {
@@ -100,7 +100,7 @@ internal static readonly @string targetˢ = "Target: "u8;
 
 // Return an importer that searches incpaths followed by the gcc installation's
 // built-in search paths and the current directory.
-[GoRecv] public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> GetImporter(this ref GccgoInstallation inst, slice<@string> incpaths, map<ж<types.Package>, InitData> initmap) {
+public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> GetImporter(this ref GccgoInstallation inst, slice<@string> incpaths, map<ж<types.Package>, InitData> initmap) {
     return GetImporter(append(appendꓸꓸꓸ(incpaths, inst.SearchPaths()), "."u8), initmap);
 }
 

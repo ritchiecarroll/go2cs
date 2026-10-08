@@ -5,7 +5,7 @@ namespace go.@internal.syscall;
 
 partial class windows_package {
 
-[GoType] partial struct PROCESS_MEMORY_COUNTERS {
+partial struct PROCESS_MEMORY_COUNTERS {
     public uint32 CB;
     public uint32 PageFaultCount;
     public uintptr PeakWorkingSetSize;

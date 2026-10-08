@@ -140,7 +140,7 @@ internal static void defPredeclaredTypes() {
 }
 
 
-[GoType("dyn")] partial struct predeclaredConstsᴛ1 {
+partial struct predeclaredConstsᴛ1 /*dyn*/ {
     internal @string name;
     internal BasicKind kind;
     internal constant.Value val;
@@ -161,7 +161,7 @@ internal static void defPredeclaredNil() {
     def(new NilжObject(Ꮡ(new Nil(new @object(name: "nil"u8, typ: new BasicжΔType(Typ[UntypedNil]), color_: black)))));
 }
 
-[GoType("num:nint")] partial struct builtinId;
+partial struct builtinId /*num:nint*/;
 
 internal static builtinId _Append => /* iota */ 0;
 internal static builtinId _Cap => 1;
@@ -194,7 +194,7 @@ internal static builtinId _Trace => 27;
 
 // To disable max/min, remove the next two lines.
 
-[GoType("dyn")] partial struct predeclaredFuncsᴛ1 {
+partial struct predeclaredFuncsᴛ1 /*dyn*/ {
     internal @string name;
     internal nint nargs;
     internal bool variadic;

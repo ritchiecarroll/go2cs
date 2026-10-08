@@ -12,7 +12,7 @@ using math;
 partial class image_package {
 
 // A Point is an X, Y coordinate pair. The axes increase right and down.
-[GoType] partial struct Point {
+partial struct Point {
     public nint X, Y;
 }
 
@@ -86,7 +86,7 @@ public static Point Pt(nint X, nint Y) {
 // A Rectangle is also an [Image] whose bounds are the rectangle itself. At
 // returns color.Opaque for points in the rectangle and color.Transparent
 // otherwise.
-[GoType] partial struct Rectangle {
+partial struct Rectangle {
     public Point Min, Max;
 }
 

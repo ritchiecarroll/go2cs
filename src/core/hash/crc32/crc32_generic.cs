@@ -53,7 +53,7 @@ internal static uint32 simpleUpdate(uint32 crc, ref Table tab, slice<byte> p) {
 // Use slicing-by-8 when payload >= this value.
 internal static UntypedInt slicing8Cutoff => 16;
 
-[GoType("[8]Table")] partial struct slicing8Table;
+partial struct slicing8Table /*[8]Table*/;
 
 // slicingMakeTable constructs a slicing8Table for the specified polynomial. The
 // table is suitable for use with the slicing-by-8 algorithm (slicingUpdate).

@@ -79,10 +79,10 @@ using static go.archive.zip_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("archive/zip/reader.go", "reader.cs", "ABwyloKCggAhXAAJAoKClIKCgpSCgIKCpIIABRoACgKClIKCgIKkpqKCgpSC7oKUgoKAgqTMgoKCgpSClIKUtpSCgpS4goK4rLKClKaCgoKUqJIAAhAACAKCgpSqwoKClAAJFIKUpoKCgoKUgoKClNyqooKClILugqaCAAsYgqaygpSCgoKClIKUgoKUgoCCgpSkguyCuIKmgKiigoCCpIKAgqSCgoKssoKAgqSCgIKkgoKCgoKCgoKCgoKCgoKCgoKCgIKkgoKWgoKWtrwACQaCgoqygpKCgoKUhJSMwoKClJSCgoKUlIKCgpS2gpSCkoKCgpSCgpaCgoKCgraClIKCpIKUgtiCgoIACBSCAAoYhIKWpoIAChaAgqSCgqaUgIKkgoIABhLWpJKCooKUgoCCpICCgoKkgrqCAAgSgoKUloKCgoKUgqiCgpaWgIIABxCCgoKSqKyygoKUgoCCpIKAgqSSlIKSlKqigoCCpoKAgqaCgoKCgoKEpoKUlIK4lKbKgoKCpoKCgqaCgoKmgoKCpoKCggARIqKClIKUqJCAooCigKKAooCigKSCgpSmgKSCqJKChISClqaiuIKohIKCgoKWgIKCpICCgqaCgoCClKSClJaCyoKClKaCgIKAgpTK2ryCgoKClK7ihIKUgoKUgpSCgpSmooKCgpSmlIKCloKCgoKClJSCgoKmpoKCgoKCppSCgoKmlAAIEoCigNSCpoKCgpSCgpSUgoKCgpSUgg==", "806-877:1;874-876:1.1;931-937:1;949-956:1;957-964:2")]
+[assembly: go.GoPositionMap("archive/zip/reader.go", "reader.cs", "ABwyloKCggAhXAAJAoKClIKCgpSCgIKCpIIABRoACgKClIKCgIKkpqKCgpSC7oKUgoKAgqTMgoKCgpSClIKUtpSCgpS4goK4rLKClKaCgoKUqJIAAhAACAKCgpSqwoKClAAJFIKUpoKCgoKUgoKClNyqooKClILugqaCAAsYgqaygpSCgoKClIKUgoKUgoCCgpSkguyCuIKmgKiigoCCpIKAgqSCgoKssoKAgqSCgIKkgoKCgoKCgoKCgoKCgoKCgoKCgIKkgoKWgoKWtrwACQaCgoqygpKCgoKUhJSMwoKClJSCgoKUlIKCgpS2gpSCkoKCgpSCgpaCgoKCgraClIKCpIKUgtiCgoIACBSCAAoYhIKWpoIAChaAgqSCgqaUgIKkgoIABhLWpJKCooKUgoCCpICCgoKkgrqCAAgSgoKUloKCgoKUgqiCgpaWgIIABxCCgoKSqKyygoKUgoCCpIKAgqSSlIKSlKqigoCCpoKAgqaCgoKCgoKEpoKUlIK4lKbKgoKCpoKCgqaCgoKmgoKCpoKCggARIqKClIKUqJCAooCigKKAooCigKSCgpSmgKSCqJKChISClqaiuIKohIKCgoKWgIKCpICCgqaCgoCClKSClJaCyoKClKaCgIKAgpTK2ryCgoKClK7ihIKUgoKUgpSCgpSmooKCgpSmlIKCloKCgoKClJSCgoKmpoKCgoKCppSCgoKmlAAIEoCigNSCpoKCgpSCgpSUgoKCgpSUgg==", "806-877:1;874-876:1.1;931-937:1;949-956:1;957-964:2", "", "265=NewIEEE/1/1/2;640=uint16/1/5/1,uint16/2/5/2,uint16/3/5/3,uint16/4/5/4,uint32/1/2/5,uint32/2/2/6,uint16/5/5/7")]
 [assembly: go.GoPositionMap("archive/zip/register.go", "register.cs", "ABQ8goKClJQAChDigoKClObSgoKCgoKClAAICoKCgpSUAAoQ4oKCgpTm0oKCgoKCgpQAChCCgoSCqqKAgsyigILIgoKClKaCgoKU", "110-110:1;111-111:2")]
-[assembly: go.GoPositionMap("archive/zip/struct.go", "struct.cs", "AIMByAKSAAcQgKKCgpSkgKKCgpSkgKKAooCkgKSCAAIU8oK4goKClJQADSCiqoKClKyyAA0m4oKCrsKuwoKCABAuspSkpIKUqJKCloKUgrqSpoKmooKUlIKUpoKCmKSkpKSkAAIXAAIcgpSClIKUpoKClKSkpKTItIKUgpSClA==")]
-[assembly: go.GoPositionMap("archive/zip/writer.go", "writer.cs", "ABYoggAUMJKuwoKUqqLaooKUgtqigoCCpJSClJaCgoKCgoKCgoKCgoK4goaSgoKCgoKClIKWgoKCgoKClJSAgqSAgqSAgqSAgraEgoKEgIKmgoKWgoKCgoKCgoKCloKCgoSAgsqCgpiSgoKCgoKCgoKAgqSAgqYAAhoACgK4rNKCgu6CgpSm2qKCgIK2lJQAAhQACQKAggASJoKClLS2gpYACBIAABDigoKCgoKClpi6yoKWgoKChJSEyoKClIKCgpSCgpSCgIK2gqaigoKUgpaCgoKCgoKCuIKCgriCgpSCgoCCpICCpIIAAhoADAKAgqaChMqCgIKmgoKWuIKqwoKCuJKCgpSCrLKClNyyooKUgpSCgpSClIKClIKClIKCgpSClIKClJKC6IKCgpQACAqCgpQADxqCgpSClILWgoKUgoKUgIK4goKChIKCgpSClqaCgp7SgpSUgoKCgoKUgpSCAAcQgoKC7oLKgoKmgoKmgoKmgoI=", "504-541:1")]
+[assembly: go.GoPositionMap("archive/zip/struct.go", "struct.cs", "AIMByAKSAAcQgKKCgpSkgKKCgpSkgKKAooCkgKSCAAIU8oK4goKClJQADSCiqoKClKyyAA0m4oKCrsKuwoKCABAuspSkpIKUqJKCloKUgrqSpoKmooKUlIKUpoKCmKSkpKSkAAIXAAIcgpSClIKUpoKClKSkpKTItIKUgpSClA==", "", "", "193=Name/1/1/1")]
+[assembly: go.GoPositionMap("archive/zip/writer.go", "writer.cs", "ABYoggAUMJKuwoKUqqLaooKUgtqigoCCpJSClJaCgoKCgoKCgoKCgoK4goaSgoKCgoKClIKWgoKCgoKClJSAgqSAgqSAgqSAgraEgoKEgIKmgoKWgoKCgoKCgoKCloKCgoSAgsqCgpiSgoKCgoKCgoKAgqSAgqYAAhoACgK4rNKCgu6CgpSm2qKCgIK2lJQAAhQACQKAggASJoKClLS2gpYACBIAABDigoKCgoKClpi6yoKWgoKChJSEyoKClIKCgpSCgpSCgIK2gqaigoKUgpaCgoKCgoKCuIKCgriCgpSCgoCCpICCpIIAAhoADAKAgqaChMqCgIKmgoKWuIKqwoKCuJKCgpSCrLKClNyyooKUgpSCgpSClIKClIKClIKCgpSClIKClJKC6IKCgpQACAqCgpQADxqCgpSClILWgoKUgoKUgIK4goKChIKCgpSClqaCgp7SgpSUgoKCgoKUgpSCAAcQgoKC7oLKgoKmgoKmgoKmgoI=", "504-541:1", "", "378=NewIEEE/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go.archive;
@@ -91,7 +91,7 @@ namespace go.archive;
 public static partial class zip_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

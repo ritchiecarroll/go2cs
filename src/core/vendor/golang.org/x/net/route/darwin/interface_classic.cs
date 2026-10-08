@@ -9,7 +9,7 @@ using syscall = syscall_package;
 
 partial class route_package {
 
-[GoRecv] internal static (Message, error) parseInterfaceMessage(this ref wireFormat w, RIBType _, slice<byte> b) {
+internal static (Message, error) parseInterfaceMessage(this ref wireFormat w, RIBType _, slice<byte> b) {
     if (len(b) < w.bodyOff) {
         return (default!, errMessageTooShort);
     }
@@ -39,7 +39,7 @@ partial class route_package {
     return (new InterfaceMessageжMessage(m), default!);
 }
 
-[GoRecv] internal static (Message, error) parseInterfaceAddrMessage(this ref wireFormat w, RIBType _, slice<byte> b) {
+internal static (Message, error) parseInterfaceAddrMessage(this ref wireFormat w, RIBType _, slice<byte> b) {
     if (len(b) < w.bodyOff) {
         return (default!, errMessageTooShort);
     }

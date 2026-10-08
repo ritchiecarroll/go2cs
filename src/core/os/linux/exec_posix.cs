@@ -80,30 +80,30 @@ internal static error kill(this ж<Process> Ꮡp) {
 }
 
 // ProcessState stores information about a process, as reported by Wait.
-[GoType] partial struct ProcessState {
+partial struct ProcessState {
     internal nint pid;               // The process's id.
     internal syscall.WaitStatus status; // System-dependent status info.
     internal ж<syscall.Rusage> rusage;
 }
 
 // Pid returns the process id of the exited process.
-[GoRecv] public static nint Pid(this ref ProcessState p) {
+public static nint Pid(this ref ProcessState p) {
     return p.pid;
 }
 
-[GoRecv] internal static bool exited(this ref ProcessState p) {
+internal static bool exited(this ref ProcessState p) {
     return p.status.Exited();
 }
 
-[GoRecv] internal static bool success(this ref ProcessState p) {
+internal static bool success(this ref ProcessState p) {
     return p.status.ExitStatus() == 0;
 }
 
-[GoRecv] internal static any sys(this ref ProcessState p) {
+internal static any sys(this ref ProcessState p) {
     return p.status;
 }
 
-[GoRecv] internal static any sysUsage(this ref ProcessState p) {
+internal static any sysUsage(this ref ProcessState p) {
     return p.rusage.OrTypedNil();
 }
 

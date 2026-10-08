@@ -18,12 +18,12 @@ using go.crypto.@internal.fips140;
 
 partial class sha3_package {
 
-[GoType("num:nint")] partial struct spongeDirection;
+partial struct spongeDirection /*num:nint*/;
 
 internal static spongeDirection spongeAbsorbing => /* iota */ 0;
 internal static spongeDirection spongeSqueezing => 1;
 
-[GoType] partial struct Digest {
+partial struct Digest {
     internal array<byte> a = new(1600 / 8); // main state of the hash
     // a[n:rate] is the buffer. If absorbing, it's the remaining space to XOR
     // into before running the permutation. If squeezing, it's the remaining
@@ -47,17 +47,17 @@ internal static spongeDirection spongeSqueezing => 1;
 }
 
 // BlockSize returns the rate of sponge underlying this hash function.
-[GoRecv] public static nint BlockSize(this ref Digest d) {
+public static nint BlockSize(this ref Digest d) {
     return d.rate;
 }
 
 // Size returns the output size of the hash function in bytes.
-[GoRecv] public static nint Size(this ref Digest d) {
+public static nint Size(this ref Digest d) {
     return d.outputLen;
 }
 
 // Reset resets the Digest to its initial state.
-[GoRecv] public static void Reset(this ref Digest d) {
+public static void Reset(this ref Digest d) {
     // Zero the permutation's state.
     foreach (var (i, _) in d.a) {
         d.a[i] = 0;
@@ -66,7 +66,7 @@ internal static spongeDirection spongeSqueezing => 1;
     d.n = 0;
 }
 
-[GoRecv] public static ж<Digest> Clone(this ref Digest d) {
+public static ж<Digest> Clone(this ref Digest d) {
     ref var ret = ref heap<Digest>(out var Ꮡret);
     ret = d.ΔClone();
     return Ꮡret;
@@ -151,12 +151,12 @@ internal static (nint n, error err) readGeneric(this ж<Digest> Ꮡd, slice<byte
 
 // Sum appends the current hash to b and returns the resulting slice.
 // It does not change the underlying hash state.
-[GoRecv] public static slice<byte> Sum(this ref Digest d, slice<byte> b) {
+public static slice<byte> Sum(this ref Digest d, slice<byte> b) {
     fips140.RecordApproved();
     return d.sum(b);
 }
 
-[GoRecv] internal static slice<byte> sumGeneric(this ref Digest d, slice<byte> b) {
+internal static slice<byte> sumGeneric(this ref Digest d, slice<byte> b) {
     if (d.state != spongeAbsorbing) {
         throw panic("sha3: Sum after Read");
     }
@@ -174,11 +174,11 @@ internal static readonly @string magicCShake = "sha\x0a"u8;
 internal static readonly @string magicKeccak = "sha\x0b"u8;
 internal const nint marshaledSize = /* len(magicSHA3) + 1 + 200 + 1 + 1 */ 207;
 
-[GoRecv] public static (slice<byte>, error) MarshalBinary(this ref Digest d) {
+public static (slice<byte>, error) MarshalBinary(this ref Digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
-[GoRecv] public static (slice<byte>, error) AppendBinary(this ref Digest d, slice<byte> b) {
+public static (slice<byte>, error) AppendBinary(this ref Digest d, slice<byte> b) {
     var exprᴛ1 = d.dsbyte;
     if (exprᴛ1 == dsbyteSHA3) {
         b = append(b, magicSHA3.ꓸꓸꓸ);
@@ -208,7 +208,7 @@ private static readonly @string sha3InvalidHashStateˢ = "sha3: invalid hash sta
 private static readonly @string sha3InvalidHashStateˢ2 = "sha3: invalid hash state identifier"u8;
 private static readonly @string sha3InvalidHashStateˢ3 = "sha3: invalid hash state function"u8;
 
-[GoRecv] public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
+public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
     if (len(b) != marshaledSize) {
         return errors.New(sha3InvalidHashStateˢ);
     }

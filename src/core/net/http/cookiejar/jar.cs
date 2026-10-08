@@ -35,7 +35,7 @@ partial class cookiejar_package {
 //
 // A public suffix list implementation is in the package
 // golang.org/x/net/publicsuffix.
-[GoType] partial interface PublicSuffixList :
+partial interface PublicSuffixList :
     fmt.Stringer
 {
     // PublicSuffix returns the public suffix of domain.
@@ -47,7 +47,7 @@ partial class cookiejar_package {
 }
 
 // Options are the options for creating a new Jar.
-[GoType] partial struct Options {
+partial struct Options {
     // PublicSuffixList is the public suffix list that determines whether
     // an HTTP server can set a cookie for a domain.
     //
@@ -58,7 +58,7 @@ partial class cookiejar_package {
 }
 
 // Jar implements the http.CookieJar interface from the net/http package.
-[GoType] partial struct Jar {
+partial struct Jar {
     internal PublicSuffixList psList;
     // mu locks the remaining fields.
     internal sync.Mutex mu;
@@ -88,7 +88,7 @@ public static (ж<Jar>, error) New(ж<Options> Ꮡo) {
 //
 // This struct type is not used outside of this package per se, but the exported
 // fields are those of RFC 6265.
-[GoType] partial struct entry {
+partial struct entry {
     public @string Name;
     public @string Value;
     public bool Quoted;
@@ -109,21 +109,21 @@ public static (ж<Jar>, error) New(ж<Options> Ꮡo) {
 }
 
 // id returns the domain;path;name triple of e as an id.
-[GoRecv] internal static @string id(this ref entry e) {
+internal static @string id(this ref entry e) {
     return fmt.Sprintf("%s;%s;%s"u8, e.Domain, e.Path, e.Name);
 }
 
 // shouldSend determines whether e's cookie qualifies to be included in a
 // request to host/path. It is the caller's responsibility to check if the
 // cookie is expired.
-[GoRecv] internal static bool shouldSend(this ref entry e, bool https, @string host, @string path) {
+internal static bool shouldSend(this ref entry e, bool https, @string host, @string path) {
     return e.domainMatch(host) && e.pathMatch(path) && (https || !e.Secure);
 }
 
 // domainMatch checks whether e's Domain allows sending e back to host.
 // It differs from "domain-match" of RFC 6265 section 5.1.3 because we treat
 // a cookie with an IP address in the Domain always as a host cookie.
-[GoRecv] internal static bool domainMatch(this ref entry e, @string host) {
+internal static bool domainMatch(this ref entry e, @string host) {
     if (e.Domain == host) {
         return true;
     }
@@ -131,7 +131,7 @@ public static (ж<Jar>, error) New(ж<Options> Ꮡo) {
 }
 
 // pathMatch implements "path-match" according to RFC 6265 section 5.1.4.
-[GoRecv] internal static bool pathMatch(this ref entry e, @string requestPath) {
+internal static bool pathMatch(this ref entry e, @string requestPath) {
     if (requestPath == e.Path) {
         return true;
     }
@@ -414,7 +414,7 @@ internal static readonly @string sameSiteLaxˢ = "SameSite=Lax"u8;
 // be valid to call e.id (which depends on e's Name, Domain and Path).
 //
 // A malformed c.Domain will result in an error.
-[GoRecv] internal static (entry e, bool remove, error err) newEntry(this ref Jar j, ж<httpꓸCookie> Ꮡc, time.Time now, @string defPath, @string host) {
+internal static (entry e, bool remove, error err) newEntry(this ref Jar j, ж<httpꓸCookie> Ꮡc, time.Time now, @string defPath, @string host) {
     entry e = default!;
     error err = default!;
 
@@ -475,7 +475,7 @@ internal static error errMalformedDomain = errors.New("cookiejar: malformed cook
 internal static time.Time endOfTime = time.Date(9999, 12, 31, 23, 59, 59, 0, time.ΔUTC);
 
 // domainAndType determines the cookie's domain and hostOnly attribute.
-[GoRecv] internal static (@string, bool, error) domainAndType(this ref Jar j, @string host, @string domain) {
+internal static (@string, bool, error) domainAndType(this ref Jar j, @string host, @string domain) {
     if (domain == ""u8) {
         // No domain attribute in the SetCookie header indicates a
         // host cookie.

@@ -10,7 +10,7 @@ using Δsyscall = syscall_package;
 partial class poll_package {
 
 //go:linkname writev syscall.writev
-[global::System.Diagnostics.StackTraceHidden] internal static (uintptr, error) writev(nint fd, slice<Δsyscall.Iovec> iovecs) {
+/*linkname*/ internal static partial (uintptr, error) writev(nint fd, slice<Δsyscall.Iovec> iovecs) {
     var (ᴛ1, ᴛ2) = Δsyscall.writev(fd, iovecs);
     return ((uintptr)(uintptr)ᴛ1, ᴛ2);
 }

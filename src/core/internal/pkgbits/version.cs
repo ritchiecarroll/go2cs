@@ -5,14 +5,14 @@ namespace go.@internal;
 
 partial class pkgbits_package {
 
-[GoType("num:uint32")] partial struct ΔVersion;
+partial struct ΔVersion /*num:uint32*/;
 
 public static ΔVersion V0 => /* iota */ 0;
 public static ΔVersion V1 => 1;
 public static ΔVersion V2 => 2;
 internal static UntypedInt numVersions => /* iota */ 3;
 
-[GoType("num:nint")] partial struct Field;
+partial struct Field /*num:nint*/;
 
 public static Field Flags => /* iota */ 0;
 public static Field HasInit => 1;

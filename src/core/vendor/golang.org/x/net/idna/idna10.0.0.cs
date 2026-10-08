@@ -186,7 +186,7 @@ public static Action<ж<options>> MapForLookup() {
     };
 }
 
-[GoType] public partial struct options {
+public partial struct options {
     internal bool transitional;
     internal bool useSTD3Rules;
     internal bool checkHyphens;
@@ -205,7 +205,7 @@ public static Action<ж<options>> MapForLookup() {
 }
 
 // A Profile defines the configuration of an IDNA mapper.
-[GoType] partial struct Profile {
+partial struct Profile {
     internal partial ref options options { get; }
 }
 
@@ -243,7 +243,7 @@ public static (@string, error) ToASCII(this ж<Profile> Ꮡp, @string s) {
 // ToUnicode("xn--bcher-kva.example.com") is "bücher.example.com", and
 // ToUnicode("golang") is "golang". If an error is encountered it will return
 // an error and a (partially) processed result.
-[GoRecv] public static (@string, error) ToUnicode(this ref Profile p, @string s) {
+public static (@string, error) ToUnicode(this ref Profile p, @string s) {
     ref var pp = ref heap<Profile>(out var Ꮡpp);
     pp = p;
     pp.transitional = false;
@@ -256,7 +256,7 @@ private static readonly @string nonTransitionalˢ = "NonTransitional"u8;
 
 // String reports a string with a description of the profile for debugging
 // purposes. The string format may change with different versions.
-[GoRecv] public static @string String(this ref Profile p) {
+public static @string String(this ref Profile p) {
     @string s = ""u8;
     if (p.transitional){
         s = transitionalˢ;
@@ -326,7 +326,7 @@ internal static void initᴛregistration() { registration = Ꮡ(new Profile(new 
 // TODO: profiles
 // Register: recommended for approving domain names: don't do any mappings
 // but rather reject on invalid input. Bundle or block deviation characters.
-[GoType] partial struct labelError {
+partial struct labelError {
     internal @string label, code_;
 }
 
@@ -338,7 +338,7 @@ internal static @string Error(this labelError e) {
     return fmt.Sprintf("idna: invalid label %q"u8, e.label);
 }
 
-[GoType("num:rune")] partial struct runeError;
+partial struct runeError /*num:rune*/;
 
 internal static @string code(this runeError e) {
     return "P1"u8;
@@ -573,7 +573,7 @@ internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> �
 }
 
 // A labelIter allows iterating over domain name labels.
-[GoType] partial struct labelIter {
+partial struct labelIter {
     internal @string orig;
     internal slice<@string> Δslice;
     internal nint curStart;
@@ -581,24 +581,24 @@ internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> �
     internal nint i;
 }
 
-[GoRecv] internal static void reset(this ref labelIter l) {
+internal static void reset(this ref labelIter l) {
     l.curStart = 0;
     l.curEnd = 0;
     l.i = 0;
 }
 
-[GoRecv] internal static bool done(this ref labelIter l) {
+internal static bool done(this ref labelIter l) {
     return l.curStart >= len(l.orig);
 }
 
-[GoRecv] internal static @string result(this ref labelIter l) {
+internal static @string result(this ref labelIter l) {
     if (l.Δslice != default!) {
         return strings.Join(l.Δslice, "."u8);
     }
     return l.orig;
 }
 
-[GoRecv] internal static @string label(this ref labelIter l) {
+internal static @string label(this ref labelIter l) {
     if (l.Δslice != default!) {
         return l.Δslice[l.i];
     }
@@ -611,7 +611,7 @@ internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> �
 }
 
 // next sets the value to the next label. It skips the last label if it is empty.
-[GoRecv] internal static void next(this ref labelIter l) {
+internal static void next(this ref labelIter l) {
     l.i++;
     if (l.Δslice != default!){
         if (l.i >= len(l.Δslice) || l.i == len(l.Δslice) - 1 && l.Δslice[l.i] == "") {
@@ -625,7 +625,7 @@ internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> �
     }
 }
 
-[GoRecv] internal static void set(this ref labelIter l, @string s) {
+internal static void set(this ref labelIter l, @string s) {
     if (l.Δslice == default!) {
         l.Δslice = strings.Split(l.orig, "."u8);
     }
@@ -635,7 +635,7 @@ internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> �
 // acePrefix is the ASCII Compatible Encoding prefix.
 internal static readonly @string acePrefix = "xn--"u8;
 
-[GoRecv] internal static Δcategory simplify(this ref Profile p, Δcategory cat) {
+internal static Δcategory simplify(this ref Profile p, Δcategory cat) {
     var exprᴛ1 = cat;
     if (exprᴛ1 == disallowedSTD3Mapped) {
         if (p.useSTD3Rules){
@@ -690,7 +690,7 @@ internal static error validateFromPunycode(ж<Profile> Ꮡp, @string s) {
 internal static readonly @string zwnj = "\u200c"u8;
 internal static readonly @string zwj = "\u200d"u8;
 
-[GoType("num:int8")] partial struct joinState;
+partial struct joinState /*num:int8*/;
 
 internal static joinState stateStart => /* iota */ 0;
 internal static joinState stateVirama => 1;
@@ -742,7 +742,7 @@ internal static slice<array<joinState>> joinStates = GoReflect.WithElemDims(new 
 
 // validateLabel validates the criteria from Section 4.1. Item 1, 4, and 6 are
 // already implicitly satisfied by the overall implementation.
-[GoRecv] internal static error /*err*/ validateLabel(this ref Profile p, @string s) {
+internal static error /*err*/ validateLabel(this ref Profile p, @string s) {
     if (s == ""u8) {
         if (p.verifyDNSLength) {
             return new labelErrorжerror(Ꮡ(new labelError(s, "A4"u8)));

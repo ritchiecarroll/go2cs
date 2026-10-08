@@ -18,14 +18,14 @@ partial class gcm_package {
 //	the coefficient of x⁶³ can be obtained by v.low & 1.
 //	the coefficient of x⁶⁴ can be obtained by v.high >> 63.
 //	the coefficient of x¹²⁷ can be obtained by v.high & 1.
-[GoType] partial struct gcmFieldElement {
+partial struct gcmFieldElement {
     internal uint64 low, high;
 }
 
 // GHASH is exposed to allow crypto/cipher to implement non-AES GCM modes.
 // It is not allowed as a stand-alone operation in FIPS mode because it
 // is not ACVP tested.
-public static slice<byte> GHASH([GoArrayDims(16)] ж<array<byte>> Ꮡkey, params Span<slice<byte>> inputsʗp) {
+public static slice<byte> GHASH(/*[16]*/ ж<array<byte>> Ꮡkey, params Span<slice<byte>> inputsʗp) {
     var inputs = inputsʗp.sslice();
 
     fips140.RecordNonApproved();
@@ -38,7 +38,7 @@ public static slice<byte> GHASH([GoArrayDims(16)] ж<array<byte>> Ꮡkey, params
 // be used on any architecture with hardware support for AES-GCM.
 //
 // Each input is zero-padded to 128-bit before being absorbed.
-internal static void ghash([GoArrayDims(16)] ж<array<byte>> Ꮡout, [GoArrayDims(16)] ж<array<byte>> ᏑH, params Span<slice<byte>> inputsʗp) {
+internal static void ghash(/*[16]*/ ж<array<byte>> Ꮡout, /*[16]*/ ж<array<byte>> ᏑH, params Span<slice<byte>> inputsʗp) {
     var inputs = inputsʗp.sslice();
 
     ref var @out = ref Ꮡout.DerefOrNull();

@@ -28,7 +28,7 @@ partial class httpproxy_package {
 
 // Config holds configuration for HTTP proxy settings. See
 // FromEnvironment for details.
-[GoType] partial struct Config {
+partial struct Config {
     // HTTPProxy represents the value of the HTTP_PROXY or
     // http_proxy environment variable. It will be used as the proxy
     // URL for HTTP requests unless overridden by NoProxy.
@@ -61,7 +61,7 @@ partial class httpproxy_package {
 }
 
 // config holds the parsed configuration for HTTP proxy settings.
-[GoType] partial struct config {
+partial struct config {
     // Config represents the original configuration as defined above.
     public partial ref Config Config { get; }
     // httpsProxy is the parsed URL of the HTTPSProxy if defined.
@@ -124,7 +124,7 @@ internal static @string getEnvAny(params ꓸꓸꓸstring namesʗp) {
 //
 // As a special case, if req.URL.Host is "localhost" or a loopback address
 // (with or without a port number), then a nil URL and nil error will be returned.
-[GoRecv] public static Func<ж<url.URL>, (ж<url.URL>, error)> ProxyFunc(this ref Config cfg) {
+public static Func<ж<url.URL>, (ж<url.URL>, error)> ProxyFunc(this ref Config cfg) {
     // Preprocess the Config settings for more efficient evaluation.
     var cfg1 = Ꮡ(new config(
         Config: cfg
@@ -136,7 +136,7 @@ internal static @string getEnvAny(params ꓸꓸꓸstring namesʗp) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string refusingToUseHttpProxyˢ = "refusing to use HTTP_PROXY value in CGI environment; see golang.org/s/cgihttpproxy"u8;
 
-[GoRecv] internal static (ж<url.URL>, error) proxyForURL(this ref config cfg, ж<url.URL> ᏑreqURL) {
+internal static (ж<url.URL>, error) proxyForURL(this ref config cfg, ж<url.URL> ᏑreqURL) {
     ref var reqURL = ref ᏑreqURL.DerefOrNull();
 
     ж<url.URL> proxy = default!;
@@ -182,7 +182,7 @@ internal static (ж<url.URL>, error) parseProxy(@string proxy) {
 // useProxy reports whether requests to addr should use a proxy,
 // according to the NO_PROXY or no_proxy environment variable.
 // addr is always a canonicalAddr with a host and port.
-[GoRecv] internal static bool useProxy(this ref config cfg, @string addr) {
+internal static bool useProxy(this ref config cfg, @string addr) {
     if (len(addr) == 0) {
         return true;
     }
@@ -217,7 +217,7 @@ internal static (ж<url.URL>, error) parseProxy(@string proxy) {
     return true;
 }
 
-[GoRecv] internal static void init(this ref config c) {
+internal static void init(this ref config c) {
     {
         var (parsed, err) = parseProxy(c.HTTPProxy); if (err == default!) {
             c.httpProxy = parsed;
@@ -347,21 +347,21 @@ internal static bool isASCII(@string s) {
 }
 
 // matcher represents the matching rule for a given value in the NO_PROXY list
-[GoType] partial interface matcher {
+partial interface matcher {
     // match returns true if the host and optional port or ip and optional port
     // are allowed
     bool match(@string host, @string port, net.IP ip);
 }
 
 // allMatch matches on all possible inputs
-[GoType] partial struct allMatch {
+partial struct allMatch {
 }
 
 internal static bool match(this allMatch a, @string host, @string port, net.IP ip) {
     return true;
 }
 
-[GoType] partial struct cidrMatch {
+partial struct cidrMatch {
     internal ж<net.IPNet> cidr;
 }
 
@@ -369,7 +369,7 @@ internal static bool match(this cidrMatch m, @string host, @string port, net.IP 
     return m.cidr.Contains(ip);
 }
 
-[GoType] partial struct ipMatch {
+partial struct ipMatch {
     internal net.IP ip;
     internal @string port;
 }
@@ -381,7 +381,7 @@ internal static bool match(this ipMatch m, @string host, @string port, net.IP ip
     return false;
 }
 
-[GoType] partial struct domainMatch {
+partial struct domainMatch {
     internal @string host;
     internal @string port;
     internal bool matchHost;

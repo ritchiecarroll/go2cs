@@ -29,7 +29,7 @@ partial class maphash_package {
 //
 // Each Seed value is local to a single process and cannot be serialized
 // or otherwise recreated in a different process.
-[GoType] partial struct ΔSeed {
+partial struct ΔSeed {
     internal uint64 s;
 }
 
@@ -99,7 +99,7 @@ public static uint64 String(ΔSeed seed, @string s) {
 // A Hash is not safe for concurrent use by multiple goroutines, but a Seed is.
 // If multiple goroutines must compute the same seeded hash,
 // each can declare its own Hash and call SetSeed with a common Seed.
-[GoType] partial struct Hash {
+partial struct Hash {
     internal array<Action> _ = new(0); // not comparable
     internal ΔSeed seed;          // initial seed used for this hash
     internal ΔSeed state;          // current hash of all flushed bytes
@@ -118,7 +118,7 @@ internal static UntypedInt bufSize => 128;
 // Note that this does not include Write/WriteByte/WriteString in the case
 // where they only add to h.buf. (If they write too much, they call h.flush,
 // which does call h.initSeed.)
-[GoRecv] internal static void initSeed(this ref Hash h) {
+internal static void initSeed(this ref Hash h) {
     if (h.seed.s == 0) {
         var seed = MakeSeed();
         h.seed = seed;
@@ -128,7 +128,7 @@ internal static UntypedInt bufSize => 128;
 
 // WriteByte adds b to the sequence of bytes hashed by h.
 // It never fails; the error result is for implementing [io.ByteWriter].
-[GoRecv] public static error WriteByte(this ref Hash h, byte b) {
+public static error WriteByte(this ref Hash h, byte b) {
     if (h.n == len(h.buf)) {
         h.flush();
     }
@@ -139,7 +139,7 @@ internal static UntypedInt bufSize => 128;
 
 // Write adds b to the sequence of bytes hashed by h.
 // It always writes all of b and never fails; the count and error result are for implementing [io.Writer].
-[GoRecv] public static (nint, error) Write(this ref Hash h, slice<byte> b) {
+public static (nint, error) Write(this ref Hash h, slice<byte> b) {
     nint size = len(b);
     // Deal with bytes left over in h.buf.
     // h.n <= bufSize is always true.
@@ -171,7 +171,7 @@ internal static UntypedInt bufSize => 128;
 
 // WriteString adds the bytes of s to the sequence of bytes hashed by h.
 // It always writes all of s and never fails; the count and error result are for implementing [io.StringWriter].
-[GoRecv] public static (nint, error) WriteString(this ref Hash h, @string s) {
+public static (nint, error) WriteString(this ref Hash h, @string s) {
     // WriteString mirrors Write. See Write for comments.
     nint size = len(s);
     if (h.n > 0 && h.n <= bufSize) {
@@ -196,7 +196,7 @@ internal static UntypedInt bufSize => 128;
 }
 
 // Seed returns h's seed value.
-[GoRecv] public static ΔSeed Seed(this ref Hash h) {
+public static ΔSeed Seed(this ref Hash h) {
     h.initSeed();
     return h.seed;
 }
@@ -206,7 +206,7 @@ internal static UntypedInt bufSize => 128;
 // Two [Hash] objects with the same seed behave identically.
 // Two [Hash] objects with different seeds will very likely behave differently.
 // Any bytes added to h before this call will be discarded.
-[GoRecv] public static void SetSeed(this ref Hash h, ΔSeed seed) {
+public static void SetSeed(this ref Hash h, ΔSeed seed) {
     if (seed.s == 0) {
         throw panic("maphash: use of uninitialized Seed");
     }
@@ -217,14 +217,14 @@ internal static UntypedInt bufSize => 128;
 
 // Reset discards all bytes added to h.
 // (The seed remains the same.)
-[GoRecv] public static void Reset(this ref Hash h) {
+public static void Reset(this ref Hash h) {
     h.initSeed();
     h.state = h.seed;
     h.n = 0;
 }
 
 // precondition: buffer is full.
-[GoRecv] internal static void flush(this ref Hash h) {
+internal static void flush(this ref Hash h) {
     if (h.n != len(h.buf)) {
         throw panic("maphash: flush of partially full buffer");
     }
@@ -240,7 +240,7 @@ internal static UntypedInt bufSize => 128;
 // All bits of the Sum64 result are close to uniformly and
 // independently distributed, so it can be safely reduced
 // by using bit masking, shifting, or modular arithmetic.
-[GoRecv] public static uint64 Sum64(this ref Hash h) {
+public static uint64 Sum64(this ref Hash h) {
     h.initSeed();
     return rthash(h.buf.slice(0, h.n), h.state.s);
 }
@@ -262,7 +262,7 @@ public static ΔSeed MakeSeed() {
 // Sum appends the hash's current 64-bit value to b.
 // It exists for implementing [hash.Hash].
 // For direct calls, it is more efficient to use [Hash.Sum64].
-[GoRecv] public static slice<byte> Sum(this ref Hash h, slice<byte> b) {
+public static slice<byte> Sum(this ref Hash h, slice<byte> b) {
     var x = h.Sum64();
     return append(b,
         (byte)((x >> (int)(0))),
@@ -276,12 +276,12 @@ public static ΔSeed MakeSeed() {
 }
 
 // Size returns h's hash value size, 8 bytes.
-[GoRecv] public static nint Size(this ref Hash h) {
+public static nint Size(this ref Hash h) {
     return 8;
 }
 
 // BlockSize returns h's block size.
-[GoRecv] public static nint BlockSize(this ref Hash h) {
+public static nint BlockSize(this ref Hash h) {
     return len(h.buf);
 }
 
@@ -323,7 +323,7 @@ public static void WriteComparable<T>(ж<Hash> Ꮡh, T x) {
     writeComparable(Ꮡh, x);
 }
 
-[GoRecv] internal static void float64(this ref Hash h, float64 f) {
+internal static void float64(this ref Hash h, float64 f) {
     if (f == 0D) {
         h.WriteByte(0);
         return;

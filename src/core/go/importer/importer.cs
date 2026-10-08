@@ -101,18 +101,18 @@ public static types.Importer Default() {
 }
 
 // gc importer
-[GoType] partial struct gcimports {
+partial struct gcimports {
     internal ж<token.FileSet> fset;
     internal map<@string, ж<types.Package>> packages;
     internal Func<@string, (io.ReadCloser, error)> lookup;
 }
 
-[GoRecv] internal static (ж<types.Package>, error) Import(this ref gcimports m, @string path) {
+internal static (ж<types.Package>, error) Import(this ref gcimports m, @string path) {
     return m.ImportFrom(path, ""u8, /* no vendoring */
  0);
 }
 
-[GoRecv] internal static (ж<types.Package>, error) ImportFrom(this ref gcimports m, @string path, @string srcDir, types.ImportMode mode) {
+internal static (ж<types.Package>, error) ImportFrom(this ref gcimports m, @string path, @string srcDir, types.ImportMode mode) {
     if (mode != 0) {
         throw panic("mode must be 0");
     }
@@ -120,18 +120,18 @@ public static types.Importer Default() {
 }
 
 // gccgo importer
-[GoType] partial struct gccgoimports {
+partial struct gccgoimports {
     internal map<@string, ж<types.Package>> packages;
     internal Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> importer;
     internal Func<@string, (io.ReadCloser, error)> lookup;
 }
 
-[GoRecv] internal static (ж<types.Package>, error) Import(this ref gccgoimports m, @string path) {
+internal static (ж<types.Package>, error) Import(this ref gccgoimports m, @string path) {
     return m.ImportFrom(path, ""u8, /* no vendoring */
  0);
 }
 
-[GoRecv] internal static (ж<types.Package>, error) ImportFrom(this ref gccgoimports m, @string path, @string srcDir, types.ImportMode mode) {
+internal static (ж<types.Package>, error) ImportFrom(this ref gccgoimports m, @string path, @string srcDir, types.ImportMode mode) {
     if (mode != 0) {
         throw panic("mode must be 0");
     }

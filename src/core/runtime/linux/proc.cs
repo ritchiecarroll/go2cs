@@ -973,7 +973,7 @@ public static partial slice<uintptr> pprof_makeProfStack() {
     return makeProfStack();
 }
 
-[GoRecv] internal static void becomeSpinning(this ref m mp) {
+internal static void becomeSpinning(this ref m mp) {
     mp.spinning = true;
     Ꮡsched.of(schedt.Ꮡnmspinning).Add(1);
     Ꮡsched.of(schedt.Ꮡneedspinning).Store(0);
@@ -986,7 +986,7 @@ public static partial slice<uintptr> pprof_makeProfStack() {
 // alive.
 //
 //go:yeswritebarrierrec
-[GoRecv] internal static slice<ж<Δp>> snapshotAllp(this ref m mp) {
+internal static slice<ж<Δp>> snapshotAllp(this ref m mp) {
     mp.allpSnapshot = allp;
     return mp.allpSnapshot;
 }
@@ -997,11 +997,11 @@ public static partial slice<uintptr> pprof_makeProfStack() {
 // Must be called after reacquiring a P, as it requires a write barrier.
 //
 //go:yeswritebarrierrec
-[GoRecv] internal static void clearAllpSnapshot(this ref m mp) {
+internal static void clearAllpSnapshot(this ref m mp) {
     mp.allpSnapshot = default!;
 }
 
-[GoRecv] internal static bool hasCgoOnStack(this ref m mp) {
+internal static bool hasCgoOnStack(this ref m mp) {
     return mp.ncgo > 0 || mp.isextra;
 }
 
@@ -1332,7 +1332,7 @@ internal static bool casGFromPreempted(ж<g> Ꮡgp, uint32 old, uint32 @new) {
     return true;
 }
 
-[GoType("num:uint8")] partial struct stwReason;
+partial struct stwReason /*num:uint8*/;
 
 // Reasons to stop-the-world.
 //
@@ -1404,7 +1404,7 @@ internal static array<@string> stwReasonStrings = new golib.SparseArray<@string>
 
 // worldStop provides context from the stop-the-world required by the
 // start-the-world.
-[GoType] partial struct worldStop {
+partial struct worldStop {
     internal stwReason reason;
     internal int64 startedStopping;
     internal int64 finishedStopping;
@@ -2108,7 +2108,7 @@ internal static void runSafePointFn() {
 // foreign code.
 internal static @unsafe.Pointer cgoThreadStart;
 
-[GoType] partial struct cgothreadstart {
+partial struct cgothreadstart {
     internal Δguintptr g;
     internal ж<uint64> tls;
     internal @unsafe.Pointer fn;
@@ -2642,7 +2642,7 @@ internal static readonly @string failallocatestack = "runtime: failed to allocat
 // This is used by newm in situations where newm itself can't safely
 // start an OS thread.
 
-[GoType("dyn")] partial struct newmHandoffᴛ1 {
+partial struct newmHandoffᴛ1 /*dyn*/ {
     internal mutex @lock;
     // newm points to a list of M structures that need new OS
     // threads. The list is linked through m.schedlink.
@@ -4925,7 +4925,7 @@ internal static int32 mcount() {
 }
 
 
-[GoType("dyn")] partial struct profᴛ1 {
+partial struct profᴛ1 /*dyn*/ {
     internal atomic.Uint32 signalLock;
     // Must hold signalLock to write. Reads may be lock-free, but
     // signalLock should be taken to synchronize with changes.
@@ -5753,7 +5753,7 @@ internal static void sysmon() {
     }
 }
 
-[GoType] partial struct sysmontick {
+partial struct sysmontick {
     internal uint32 schedtick;
     internal uint32 syscalltick;
     internal int64 schedwhen;
@@ -6111,7 +6111,7 @@ internal static ж<g> globrunqget(ж<Δp> Ꮡpp, int32 max) {
     return gp;
 }
 
-[GoType("[]uint32")] partial struct pMask;
+partial struct pMask /*[]uint32*/;
 
 // read returns true if P id's bit is set.
 internal static bool read(this pMask Δp, uint32 id) {
@@ -6433,7 +6433,7 @@ retry:
 // Batch is a ring buffer starting at batchHead.
 // Returns number of grabbed goroutines.
 // Can be executed by any P.
-internal static uint32 runqgrab(ж<Δp> Ꮡpp, [GoArrayDims(256)] ж<array<Δguintptr>> Ꮡbatch, uint32 batchHead, bool stealRunNextG) {
+internal static uint32 runqgrab(ж<Δp> Ꮡpp, /*[256]*/ ж<array<Δguintptr>> Ꮡbatch, uint32 batchHead, bool stealRunNextG) {
     ref var pp = ref Ꮡpp.DerefOrNull();
     ref var batch = ref Ꮡbatch.DerefOrNull();
 
@@ -6521,18 +6521,18 @@ internal static ж<g> runqsteal(ж<Δp> Ꮡpp, ж<Δp> Ꮡp2, bool stealRunNextG
 
 // A gQueue is a dequeue of Gs linked through g.schedlink. A G can only
 // be on one gQueue or gList at a time.
-[GoType] partial struct gQueue {
+partial struct gQueue {
     internal Δguintptr head;
     internal Δguintptr tail;
 }
 
 // empty reports whether q is empty.
-[GoRecv] internal static bool empty(this ref gQueue q) {
+internal static bool empty(this ref gQueue q) {
     return q.head == 0;
 }
 
 // push adds gp to the head of q.
-[GoRecv] internal static void push(this ref gQueue q, ж<g> Ꮡgp) {
+internal static void push(this ref gQueue q, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     gp.schedlink = q.head;
@@ -6543,7 +6543,7 @@ internal static ж<g> runqsteal(ж<Δp> Ꮡpp, ж<Δp> Ꮡp2, bool stealRunNextG
 }
 
 // pushBack adds gp to the tail of q.
-[GoRecv] internal static void pushBack(this ref gQueue q, ж<g> Ꮡgp) {
+internal static void pushBack(this ref gQueue q, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     gp.schedlink = 0;
@@ -6557,7 +6557,7 @@ internal static ж<g> runqsteal(ж<Δp> Ꮡpp, ж<Δp> Ꮡp2, bool stealRunNextG
 
 // pushBackAll adds all Gs in q2 to the tail of q. After this q2 must
 // not be used.
-[GoRecv] internal static void pushBackAll(this ref gQueue q, gQueue q2) {
+internal static void pushBackAll(this ref gQueue q, gQueue q2) {
     if (q2.tail == 0) {
         return;
     }
@@ -6572,7 +6572,7 @@ internal static ж<g> runqsteal(ж<Δp> Ꮡpp, ж<Δp> Ꮡp2, bool stealRunNextG
 
 // pop removes and returns the head of queue q. It returns nil if
 // q is empty.
-[GoRecv] internal static ж<g> pop(this ref gQueue q) {
+internal static ж<g> pop(this ref gQueue q) {
     var gp = q.head.ptr();
     if (gp != nil) {
         q.head = gp.Value.schedlink;
@@ -6584,7 +6584,7 @@ internal static ж<g> runqsteal(ж<Δp> Ꮡpp, ж<Δp> Ꮡp2, bool stealRunNextG
 }
 
 // popList takes all Gs in q and returns them as a gList.
-[GoRecv] internal static gList popList(this ref gQueue q) {
+internal static gList popList(this ref gQueue q) {
     var Δstack = new gList(q.head);
     q = new gQueue(nil);
     return Δstack;
@@ -6592,17 +6592,17 @@ internal static ж<g> runqsteal(ж<Δp> Ꮡpp, ж<Δp> Ꮡp2, bool stealRunNextG
 
 // A gList is a list of Gs linked through g.schedlink. A G can only be
 // on one gQueue or gList at a time.
-[GoType] partial struct gList {
+partial struct gList {
     internal Δguintptr head;
 }
 
 // empty reports whether l is empty.
-[GoRecv] internal static bool empty(this ref gList l) {
+internal static bool empty(this ref gList l) {
     return l.head == 0;
 }
 
 // push adds gp to the head of l.
-[GoRecv] internal static void push(this ref gList l, ж<g> Ꮡgp) {
+internal static void push(this ref gList l, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     gp.schedlink = l.head;
@@ -6610,7 +6610,7 @@ internal static ж<g> runqsteal(ж<Δp> Ꮡpp, ж<Δp> Ꮡp2, bool stealRunNextG
 }
 
 // pushAll prepends all Gs in q to l.
-[GoRecv] internal static void pushAll(this ref gList l, gQueue q) {
+internal static void pushAll(this ref gList l, gQueue q) {
     if (!q.empty()) {
         q.tail.ptr().Value.schedlink = l.head;
         l.head = q.head;
@@ -6618,7 +6618,7 @@ internal static ж<g> runqsteal(ж<Δp> Ꮡpp, ж<Δp> Ꮡp2, bool stealRunNextG
 }
 
 // pop removes and returns the head of l. If l is empty, it returns nil.
-[GoRecv] internal static ж<g> pop(this ref gList l) {
+internal static ж<g> pop(this ref gList l) {
     var gp = l.head.ptr();
     if (gp != nil) {
         l.head = gp.Value.schedlink;
@@ -6771,19 +6771,19 @@ internal static ref randomOrder stealOrder => ref ᏑstealOrder.Value;
 // They allow to enumerate all Ps in different pseudo-random orders without repetitions.
 // The algorithm is based on the fact that if we have X such that X and GOMAXPROCS
 // are coprime, then a sequences of (i + X) % GOMAXPROCS gives the required enumeration.
-[GoType] partial struct randomOrder {
+partial struct randomOrder {
     internal uint32 count;
     internal slice<uint32> coprimes;
 }
 
-[GoType] partial struct randomEnum {
+partial struct randomEnum {
     internal uint32 i;
     internal uint32 count;
     internal uint32 pos;
     internal uint32 inc;
 }
 
-[GoRecv] internal static void reset(this ref randomOrder ord, uint32 count) {
+internal static void reset(this ref randomOrder ord, uint32 count) {
     ord.count = count;
     ord.coprimes = ord.coprimes[..0];
     for (var i = (uint32)1; i <= count; i++) {
@@ -6793,7 +6793,7 @@ internal static ref randomOrder stealOrder => ref ᏑstealOrder.Value;
     }
 }
 
-[GoRecv] internal static randomEnum start(this ref randomOrder ord, uint32 i) {
+internal static randomEnum start(this ref randomOrder ord, uint32 i) {
     return new randomEnum(
         count: ord.count,
         pos: i % ord.count,
@@ -6801,16 +6801,16 @@ internal static ref randomOrder stealOrder => ref ᏑstealOrder.Value;
     );
 }
 
-[GoRecv] internal static bool done(this ref randomEnum @enum) {
+internal static bool done(this ref randomEnum @enum) {
     return @enum.i == @enum.count;
 }
 
-[GoRecv] internal static void next(this ref randomEnum @enum) {
+internal static void next(this ref randomEnum @enum) {
     @enum.i++;
     @enum.pos = (@enum.pos + @enum.inc) % @enum.count;
 }
 
-[GoRecv] internal static uint32 position(this ref randomEnum @enum) {
+internal static uint32 position(this ref randomEnum @enum) {
     return @enum.pos;
 }
 
@@ -6823,7 +6823,7 @@ internal static uint32 gcd(uint32 a, uint32 b) {
 
 // An initTask represents the set of initializations that need to be done for a package.
 // Keep in sync with ../../test/noinit.go:initTask
-[GoType] partial struct initTask {
+partial struct initTask {
     internal uint32 state; // 0 = uninitialized, 1 = in progress, 2 = done
     internal uint32 nfns;
 }
@@ -6834,7 +6834,7 @@ internal static uint32 gcd(uint32 a, uint32 b) {
 // updated by malloc and newproc when active is true.
 internal static tracestat inittrace;
 
-[GoType] partial struct tracestat {
+partial struct tracestat {
     internal bool active;   // init tracing activation status
     internal uint64 id; // init goroutine id
     internal uint64 allocs; // heap allocations

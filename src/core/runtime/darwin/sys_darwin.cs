@@ -11,7 +11,7 @@ using @internal.runtime;
 
 partial class runtime_package {
 
-[GoType("dyn")] internal partial struct syscall_syscall_args {
+internal partial struct syscall_syscall_args /*dyn*/ {
     internal uintptr fn, a1, a2, a3, r1, r2, err;
 }
 
@@ -42,7 +42,7 @@ internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscall(uintptr fn
 
 internal static partial void syscall();
 
-[GoType("dyn")] internal partial struct syscall_syscallX_args {
+internal partial struct syscall_syscallX_args /*dyn*/ {
     internal uintptr fn, a1, a2, a3, r1, r2, err;
 }
 
@@ -63,7 +63,7 @@ internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscallX(uintptr f
 
 internal static partial void syscallX();
 
-[GoType("dyn")] internal partial struct syscall_syscall6_args {
+internal partial struct syscall_syscall6_args /*dyn*/ {
     internal uintptr fn, a1, a2, a3, a4, a5, a6, r1, r2, err;
 }
 
@@ -95,7 +95,7 @@ internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscall6(uintptr f
 
 internal static partial void syscall6();
 
-[GoType("dyn")] internal partial struct syscall_syscall9_args {
+internal partial struct syscall_syscall9_args /*dyn*/ {
     internal uintptr fn;
     internal uintptr a1;
     internal uintptr a2;
@@ -129,7 +129,7 @@ internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscall9(uintptr f
 
 internal static partial void syscall9();
 
-[GoType("dyn")] internal partial struct syscall_syscall6X_args {
+internal partial struct syscall_syscall6X_args /*dyn*/ {
     internal uintptr fn, a1, a2, a3, a4, a5, a6, r1, r2, err;
 }
 
@@ -150,7 +150,7 @@ internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscall6X(uintptr 
 
 internal static partial void syscall6X();
 
-[GoType("dyn")] internal partial struct syscall_syscallPtr_args {
+internal partial struct syscall_syscallPtr_args /*dyn*/ {
     internal uintptr fn, a1, a2, a3, r1, r2, err;
 }
 
@@ -175,7 +175,7 @@ internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscallPtr(uintptr
 
 internal static partial void syscallPtr();
 
-[GoType("dyn")] internal partial struct syscall_rawSyscall_args {
+internal partial struct syscall_rawSyscall_args /*dyn*/ {
     internal uintptr fn, a1, a2, a3, r1, r2, err;
 }
 
@@ -196,7 +196,7 @@ internal static (uintptr r1, uintptr r2, uintptr err) syscall_rawSyscall(uintptr
     return (args.r1, args.r2, args.err);
 }
 
-[GoType("dyn")] internal partial struct syscall_rawSyscall6_args {
+internal partial struct syscall_rawSyscall6_args /*dyn*/ {
     internal uintptr fn, a1, a2, a3, a4, a5, a6, r1, r2, err;
 }
 
@@ -217,7 +217,7 @@ internal static (uintptr r1, uintptr r2, uintptr err) syscall_rawSyscall6(uintpt
     return (args.r1, args.r2, args.err);
 }
 
-[GoType("dyn")] internal partial struct crypto_x509_syscall_args {
+internal partial struct crypto_x509_syscall_args /*dyn*/ {
     internal uintptr fn, a1, a2, a3, a4, a5;
     internal float64 f1;
     internal uintptr r1;
@@ -240,7 +240,7 @@ internal static uintptr /*r1*/ crypto_x509_syscall(uintptr fn, uintptr a1, uintp
 
 internal static partial void syscall_x509();
 
-[GoType("dyn")] internal partial struct pthread_attr_init_args {
+internal partial struct pthread_attr_init_args /*dyn*/ {
     internal uintptr attr;
 }
 
@@ -259,7 +259,7 @@ internal static int32 pthread_attr_init(ж<pthreadattr> Ꮡattr) {
 
 internal static partial void pthread_attr_init_trampoline();
 
-[GoType("dyn")] internal partial struct pthread_attr_getstacksize_args {
+internal partial struct pthread_attr_getstacksize_args /*dyn*/ {
     internal uintptr attr;
     internal uintptr size;
 }
@@ -277,7 +277,7 @@ internal static int32 pthread_attr_getstacksize(ж<pthreadattr> Ꮡattr, ж<uint
 
 internal static partial void pthread_attr_getstacksize_trampoline();
 
-[GoType("dyn")] internal partial struct pthread_attr_setdetachstate_args {
+internal partial struct pthread_attr_setdetachstate_args /*dyn*/ {
     internal uintptr attr;
     internal nint state;
 }
@@ -294,7 +294,7 @@ internal static int32 pthread_attr_setdetachstate(ж<pthreadattr> Ꮡattr, nint 
 
 internal static partial void pthread_attr_setdetachstate_trampoline();
 
-[GoType("dyn")] internal partial struct pthread_create_args {
+internal partial struct pthread_create_args /*dyn*/ {
     internal uintptr attr;
     internal uintptr start;
     internal uintptr arg;
@@ -313,7 +313,7 @@ internal static int32 pthread_create(ж<pthreadattr> Ꮡattr, uintptr start, @un
 
 internal static partial void pthread_create_trampoline();
 
-[GoType("dyn")] internal partial struct raise_args {
+internal partial struct raise_args /*dyn*/ {
     internal uint32 sig;
 }
 
@@ -338,7 +338,7 @@ internal static pthread /*t*/ pthread_self() {
 
 internal static partial void pthread_self_trampoline();
 
-[GoType("dyn")] internal partial struct pthread_kill_args {
+internal partial struct pthread_kill_args /*dyn*/ {
     internal uintptr t;
     internal uint32 sig;
 }
@@ -397,7 +397,7 @@ internal static void osinit_hack() {
 
 internal static partial void osinit_hack_trampoline();
 
-[GoType("dyn")] internal partial struct mmap_args {
+internal partial struct mmap_args /*dyn*/ {
     internal @unsafe.Pointer addr;
     internal uintptr n;
     internal int32 prot, flags, fd;
@@ -420,7 +420,7 @@ internal static (@unsafe.Pointer, nint) mmap(@unsafe.Pointer addr, uintptr n, in
 
 internal static partial void mmap_trampoline();
 
-[GoType("dyn")] internal partial struct munmap_args {
+internal partial struct munmap_args /*dyn*/ {
     internal uintptr addr;
     internal uintptr n;
 }
@@ -436,7 +436,7 @@ internal static void munmap(@unsafe.Pointer addr, uintptr n) {
 
 internal static partial void munmap_trampoline();
 
-[GoType("dyn")] internal partial struct madvise_args {
+internal partial struct madvise_args /*dyn*/ {
     internal uintptr addr;
     internal uintptr n;
     internal int32 flags;
@@ -453,7 +453,7 @@ internal static void madvise(@unsafe.Pointer addr, uintptr n, int32 flags) {
 
 internal static partial void madvise_trampoline();
 
-[GoType("dyn")] internal partial struct mlock_args {
+internal partial struct mlock_args /*dyn*/ {
     internal uintptr addr;
     internal uintptr n;
 }
@@ -477,7 +477,7 @@ internal static partial void read_trampoline();
 
 internal static partial void pipe_trampoline();
 
-[GoType("dyn")] internal partial struct closefd_args {
+internal partial struct closefd_args /*dyn*/ {
     internal int32 fd;
 }
 
@@ -491,7 +491,7 @@ internal static int32 closefd(int32 fd) {
 
 internal static partial void close_trampoline();
 
-[GoType("dyn")] internal partial struct exit_args {
+internal partial struct exit_args /*dyn*/ {
     internal int32 code;
 }
 
@@ -508,7 +508,7 @@ internal static void exit(int32 code) {
 
 internal static partial void exit_trampoline();
 
-[GoType("dyn")] internal partial struct usleep_args {
+internal partial struct usleep_args /*dyn*/ {
     internal uint32 usec;
 }
 
@@ -534,7 +534,7 @@ internal static void usleep_no_g(uint32 usecʗp) {
 
 internal static partial void write_trampoline();
 
-[GoType("dyn")] internal partial struct open_args {
+internal partial struct open_args /*dyn*/ {
     internal uintptr name;
     internal int32 mode;
     internal int32 perm;
@@ -584,7 +584,7 @@ internal static partial void sigaction_trampoline();
 
 internal static partial void sigprocmask_trampoline();
 
-[GoType("dyn")] internal partial struct sigaltstack_args {
+internal partial struct sigaltstack_args /*dyn*/ {
     internal uintptr @new;
     internal uintptr old;
 }
@@ -609,7 +609,7 @@ internal static void sigaltstack(ж<stackt> Ꮡnew, ж<stackt> Ꮡold) {
 
 internal static partial void sigaltstack_trampoline();
 
-[GoType("dyn")] internal partial struct raiseproc_args {
+internal partial struct raiseproc_args /*dyn*/ {
     internal uint32 sig;
 }
 
@@ -623,7 +623,7 @@ internal static void raiseproc(uint32 sig) {
 
 internal static partial void raiseproc_trampoline();
 
-[GoType("dyn")] internal partial struct setitimer_args {
+internal partial struct setitimer_args /*dyn*/ {
     internal int32 mode;
     internal uintptr @new;
     internal uintptr old;
@@ -641,7 +641,7 @@ internal static void setitimer(int32 mode, ж<itimerval> Ꮡnew, ж<itimerval> �
 
 internal static partial void setitimer_trampoline();
 
-[GoType("dyn")] internal partial struct sysctl_args {
+internal partial struct sysctl_args /*dyn*/ {
     internal uintptr mib;
     internal uint32 miblen;
     internal uintptr oldp;
@@ -665,7 +665,7 @@ internal static int32 sysctl(ж<uint32> Ꮡmib, uint32 miblen, ж<byte> Ꮡoldp,
 
 internal static partial void sysctl_trampoline();
 
-[GoType("dyn")] internal partial struct sysctlbyname_args {
+internal partial struct sysctlbyname_args /*dyn*/ {
     internal uintptr name;
     internal uintptr oldp;
     internal uintptr oldlenp;
@@ -688,7 +688,7 @@ internal static int32 sysctlbyname(ж<byte> Ꮡname, ж<byte> Ꮡoldp, ж<uintpt
 
 internal static partial void sysctlbyname_trampoline();
 
-[GoType("dyn")] internal partial struct fcntl_args {
+internal partial struct fcntl_args /*dyn*/ {
     internal int32 fd, cmd, arg;
     internal int32 ret, errno;
 }
@@ -713,7 +713,7 @@ internal static int32 kqueue() {
 
 internal static partial void kqueue_trampoline();
 
-[GoType("dyn")] internal partial struct kevent_args {
+internal partial struct kevent_args /*dyn*/ {
     internal int32 kq;
     internal uintptr ch;
     internal int32 nch;
@@ -736,7 +736,7 @@ internal static int32 kevent(int32 kq, ж<keventt> Ꮡch, int32 nch, ж<keventt>
 
 internal static partial void kevent_trampoline();
 
-[GoType("dyn")] internal partial struct pthread_mutex_init_args {
+internal partial struct pthread_mutex_init_args /*dyn*/ {
     internal uintptr m;
     internal uintptr attr;
 }
@@ -754,7 +754,7 @@ internal static int32 pthread_mutex_init(ж<pthreadmutex> Ꮡm, ж<pthreadmutexa
 
 internal static partial void pthread_mutex_init_trampoline();
 
-[GoType("dyn")] internal partial struct pthread_mutex_lock_args {
+internal partial struct pthread_mutex_lock_args /*dyn*/ {
     internal uintptr m;
 }
 
@@ -770,7 +770,7 @@ internal static int32 pthread_mutex_lock(ж<pthreadmutex> Ꮡm) {
 
 internal static partial void pthread_mutex_lock_trampoline();
 
-[GoType("dyn")] internal partial struct pthread_mutex_unlock_args {
+internal partial struct pthread_mutex_unlock_args /*dyn*/ {
     internal uintptr m;
 }
 
@@ -786,7 +786,7 @@ internal static int32 pthread_mutex_unlock(ж<pthreadmutex> Ꮡm) {
 
 internal static partial void pthread_mutex_unlock_trampoline();
 
-[GoType("dyn")] internal partial struct pthread_cond_init_args {
+internal partial struct pthread_cond_init_args /*dyn*/ {
     internal uintptr c;
     internal uintptr attr;
 }
@@ -804,7 +804,7 @@ internal static int32 pthread_cond_init(ж<pthreadcond> Ꮡc, ж<pthreadcondattr
 
 internal static partial void pthread_cond_init_trampoline();
 
-[GoType("dyn")] internal partial struct pthread_cond_wait_args {
+internal partial struct pthread_cond_wait_args /*dyn*/ {
     internal uintptr c;
     internal uintptr m;
 }
@@ -822,7 +822,7 @@ internal static int32 pthread_cond_wait(ж<pthreadcond> Ꮡc, ж<pthreadmutex> �
 
 internal static partial void pthread_cond_wait_trampoline();
 
-[GoType("dyn")] internal partial struct pthread_cond_timedwait_relative_np_args {
+internal partial struct pthread_cond_timedwait_relative_np_args /*dyn*/ {
     internal uintptr c;
     internal uintptr m;
     internal uintptr t;
@@ -842,7 +842,7 @@ internal static int32 pthread_cond_timedwait_relative_np(ж<pthreadcond> Ꮡc, �
 
 internal static partial void pthread_cond_timedwait_relative_np_trampoline();
 
-[GoType("dyn")] internal partial struct pthread_cond_signal_args {
+internal partial struct pthread_cond_signal_args /*dyn*/ {
     internal uintptr c;
 }
 
@@ -858,7 +858,7 @@ internal static int32 pthread_cond_signal(ж<pthreadcond> Ꮡc) {
 
 internal static partial void pthread_cond_signal_trampoline();
 
-[GoType("dyn")] internal partial struct arc4random_buf_args {
+internal partial struct arc4random_buf_args /*dyn*/ {
     internal uintptr Δp;
     internal int32 n;
 }
@@ -897,7 +897,7 @@ internal static int32 issetugid() {
 
 internal static partial void issetugid_trampoline();
 
-[GoType("dyn")] internal partial struct mach_vm_region_args {
+internal partial struct mach_vm_region_args /*dyn*/ {
     internal ж<uint64> address;
     internal ж<uint64> size;
     internal machVMRegionFlavour flavor;
@@ -939,7 +939,7 @@ internal static int32 mach_vm_region(ж<uint64> Ꮡaddress, ж<uint64> Ꮡregion
 
 internal static partial void mach_vm_region_trampoline();
 
-[GoType("dyn")] internal partial struct proc_regionfilename_args {
+internal partial struct proc_regionfilename_args /*dyn*/ {
     internal nint pid;
     internal uint64 address;
     internal ж<byte> buf;

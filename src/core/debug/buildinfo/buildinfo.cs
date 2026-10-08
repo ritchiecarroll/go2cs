@@ -112,7 +112,7 @@ public static (ж<BuildInfo>, error) Read(io.ReaderAt r) {
     return (bi, default!);
 }
 
-[GoType] partial interface exe {
+partial interface exe {
     // DataStart returns the virtual address and size of the segment or section that
     // should contain build information. This is either a specially named section
     // or the first writable non-zero data segment.
@@ -455,11 +455,11 @@ internal static (nint, error) readDataInto(exe x, uint64 addr, slice<byte> b) {
 }
 
 // elfExe is the ELF implementation of the exe interface.
-[GoType] partial struct elfExe {
+partial struct elfExe {
     internal ж<elf.File> f;
 }
 
-[GoRecv] internal static (io.ReaderAt, error) DataReader(this ref elfExe x, uint64 addr) {
+internal static (io.ReaderAt, error) DataReader(this ref elfExe x, uint64 addr) {
     foreach (var (_, prog) in (~x.f).Progs) {
         if ((~prog).Vaddr <= addr && addr <= (~prog).Vaddr + (~prog).Filesz - 1) {
             var remaining = (~prog).Vaddr + (~prog).Filesz - addr;
@@ -469,7 +469,7 @@ internal static (nint, error) readDataInto(exe x, uint64 addr, slice<byte> b) {
     return (default!, errUnrecognizedFormat);
 }
 
-[GoRecv] internal static (uint64, uint64) DataStart(this ref elfExe x) {
+internal static (uint64, uint64) DataStart(this ref elfExe x) {
     foreach (var (_, s) in (~x.f).Sections) {
         if ((~s).Name == ".go.buildinfo"u8) {
             return ((~s).Addr, (~s).Size);
@@ -484,11 +484,11 @@ internal static (nint, error) readDataInto(exe x, uint64 addr, slice<byte> b) {
 }
 
 // peExe is the PE (Windows Portable Executable) implementation of the exe interface.
-[GoType] partial struct peExe {
+partial struct peExe {
     internal ж<pe.File> f;
 }
 
-[GoRecv] internal static uint64 imageBase(this ref peExe x) {
+internal static uint64 imageBase(this ref peExe x) {
     switch ((~x.f).OptionalHeader.type()) {
     case ж<pe.OptionalHeader32> oh: {
         return (uint64)(~oh).ImageBase;
@@ -499,7 +499,7 @@ internal static (nint, error) readDataInto(exe x, uint64 addr, slice<byte> b) {
     return 0;
 }
 
-[GoRecv] internal static (io.ReaderAt, error) DataReader(this ref peExe x, uint64 addr) {
+internal static (io.ReaderAt, error) DataReader(this ref peExe x, uint64 addr) {
     addr -= x.imageBase();
     foreach (var (_, sect) in (~x.f).Sections) {
         if ((uint64)(~sect).VirtualAddress <= addr && addr <= (uint64)((~sect).VirtualAddress + (~sect).Size - 1)) {
@@ -510,7 +510,7 @@ internal static (nint, error) readDataInto(exe x, uint64 addr, slice<byte> b) {
     return (default!, errUnrecognizedFormat);
 }
 
-[GoRecv] internal static (uint64, uint64) DataStart(this ref peExe x) {
+internal static (uint64, uint64) DataStart(this ref peExe x) {
     // Assume data is first writable section.
     UntypedInt IMAGE_SCN_CNT_CODE = 0x00000020;
     
@@ -538,11 +538,11 @@ internal static (nint, error) readDataInto(exe x, uint64 addr, slice<byte> b) {
 }
 
 // machoExe is the Mach-O (Apple macOS/iOS) implementation of the exe interface.
-[GoType] partial struct machoExe {
+partial struct machoExe {
     internal ж<macho.File> f;
 }
 
-[GoRecv] internal static (io.ReaderAt, error) DataReader(this ref machoExe x, uint64 addr) {
+internal static (io.ReaderAt, error) DataReader(this ref machoExe x, uint64 addr) {
     foreach (var (_, load) in (~x.f).Loads) {
         var (seg, ok) = load._<ж<machoꓸSegment>>(ᐧ);
         if (!ok) {
@@ -559,7 +559,7 @@ internal static (nint, error) readDataInto(exe x, uint64 addr, slice<byte> b) {
     return (default!, errUnrecognizedFormat);
 }
 
-[GoRecv] internal static (uint64, uint64) DataStart(this ref machoExe x) {
+internal static (uint64, uint64) DataStart(this ref machoExe x) {
     // Look for section named "__go_buildinfo".
     foreach (var (_, sec) in (~x.f).Sections) {
         if ((~sec).Name == "__go_buildinfo"u8) {
@@ -578,14 +578,14 @@ internal static (nint, error) readDataInto(exe x, uint64 addr, slice<byte> b) {
 }
 
 // xcoffExe is the XCOFF (AIX eXtended COFF) implementation of the exe interface.
-[GoType] partial struct xcoffExe {
+partial struct xcoffExe {
     internal ж<xcoff.File> f;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string addressNotMappedˢ = "address not mapped"u8;
 
-[GoRecv] internal static (io.ReaderAt, error) DataReader(this ref xcoffExe x, uint64 addr) {
+internal static (io.ReaderAt, error) DataReader(this ref xcoffExe x, uint64 addr) {
     foreach (var (_, sect) in (~x.f).Sections) {
         if ((~sect).VirtualAddress <= addr && addr <= (~sect).VirtualAddress + (~sect).Size - 1) {
             var remaining = (~sect).VirtualAddress + (~sect).Size - addr;
@@ -595,7 +595,7 @@ internal static readonly @string addressNotMappedˢ = "address not mapped"u8;
     return (default!, errors.New(addressNotMappedˢ));
 }
 
-[GoRecv] internal static (uint64, uint64) DataStart(this ref xcoffExe x) {
+internal static (uint64, uint64) DataStart(this ref xcoffExe x) {
     {
         var s = x.f.SectionByType(xcoff.STYP_DATA); if (s != nil) {
             return ((~s).VirtualAddress, (~s).Size);
@@ -605,14 +605,14 @@ internal static readonly @string addressNotMappedˢ = "address not mapped"u8;
 }
 
 // plan9objExe is the Plan 9 a.out implementation of the exe interface.
-[GoType] partial struct plan9objExe {
+partial struct plan9objExe {
     internal ж<plan9obj.File> f;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string dataˢ = "data"u8;
 
-[GoRecv] internal static (uint64, uint64) DataStart(this ref plan9objExe x) {
+internal static (uint64, uint64) DataStart(this ref plan9objExe x) {
     {
         var s = x.f.Section(dataˢ); if (s != nil) {
             return ((uint64)(~s).Offset, (uint64)(~s).Size);
@@ -621,7 +621,7 @@ internal static readonly @string dataˢ = "data"u8;
     return (0, 0);
 }
 
-[GoRecv] internal static (io.ReaderAt, error) DataReader(this ref plan9objExe x, uint64 addr) {
+internal static (io.ReaderAt, error) DataReader(this ref plan9objExe x, uint64 addr) {
     foreach (var (_, sect) in (~x.f).Sections) {
         if ((uint64)(~sect).Offset <= addr && addr <= (uint64)((~sect).Offset + (~sect).Size - 1)) {
             var remaining = (uint64)((~sect).Offset + (~sect).Size) - addr;

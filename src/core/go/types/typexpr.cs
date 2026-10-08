@@ -502,7 +502,7 @@ internal static void setDefType(ж<TypeName> Ꮡdef, ΔType typ) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string instantiatingTypeSWithSˢ = "-- instantiating type %s with %s"u8;
 
-[GoType("dyn")] internal partial interface instantiatedType_type {
+internal partial interface instantiatedType_type /*dyn*/ {
     ж<TypeName> Obj();
 }
 

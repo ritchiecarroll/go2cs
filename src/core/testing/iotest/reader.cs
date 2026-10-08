@@ -18,11 +18,11 @@ public static io.Reader OneByteReader(io.Reader r) {
     return new oneByteReaderжReader(Ꮡ(new oneByteReader(r)));
 }
 
-[GoType] partial struct oneByteReader {
+partial struct oneByteReader {
     internal io.Reader r;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref oneByteReader r, slice<byte> p) {
+internal static (nint, error) Read(this ref oneByteReader r, slice<byte> p) {
     if (len(p) == 0) {
         return (0, default!);
     }
@@ -35,11 +35,11 @@ public static io.Reader HalfReader(io.Reader r) {
     return new halfReaderжReader(Ꮡ(new halfReader(r)));
 }
 
-[GoType] partial struct halfReader {
+partial struct halfReader {
     internal io.Reader r;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref halfReader r, slice<byte> p) {
+internal static (nint, error) Read(this ref halfReader r, slice<byte> p) {
     return r.r.Read(p.slice(0, (len(p) + 1) / 2));
 }
 
@@ -52,13 +52,13 @@ public static io.Reader DataErrReader(io.Reader r) {
     return new dataErrReaderжReader(Ꮡ(new dataErrReader(r, default!, new slice<byte>(1024))));
 }
 
-[GoType] partial struct dataErrReader {
+partial struct dataErrReader {
     internal io.Reader r;
     internal slice<byte> unread;
     internal slice<byte> data;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref dataErrReader r, slice<byte> p) {
+internal static (nint n, error err) Read(this ref dataErrReader r, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -88,12 +88,12 @@ public static io.Reader TimeoutReader(io.Reader r) {
     return new timeoutReaderжReader(Ꮡ(new timeoutReader(r, 0)));
 }
 
-[GoType] partial struct timeoutReader {
+partial struct timeoutReader {
     internal io.Reader r;
     internal nint count;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref timeoutReader r, slice<byte> p) {
+internal static (nint, error) Read(this ref timeoutReader r, slice<byte> p) {
     r.count++;
     if (r.count == 2) {
         return (0, ErrTimeout);
@@ -106,21 +106,21 @@ public static io.Reader ErrReader(error err) {
     return new errReaderжReader(Ꮡ(new errReader(err: err)));
 }
 
-[GoType] partial struct errReader {
+partial struct errReader {
     internal error err;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref errReader r, slice<byte> p) {
+internal static (nint, error) Read(this ref errReader r, slice<byte> p) {
     return (0, r.err);
 }
 
-[GoType] partial struct smallByteReader {
+partial struct smallByteReader {
     internal io.Reader r;
     internal nint off;
     internal nint n;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref smallByteReader r, slice<byte> p) {
+internal static (nint, error) Read(this ref smallByteReader r, slice<byte> p) {
     if (len(p) == 0) {
         return (0, default!);
     }

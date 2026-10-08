@@ -46,20 +46,20 @@ internal static ж<template.Template> debug = template.Must(tupleᴛ1ʗ.Item1, t
 // If set, print log statements for internal and I/O errors.
 internal static bool debugLog = false;
 
-[GoType] public partial struct debugMethod {
+public partial struct debugMethod {
     public ж<methodType> Type;
     public @string Name;
 }
 
-[GoType("[]debugMethod")] partial struct methodArray;
+partial struct methodArray /*[]debugMethod*/;
 
-[GoType] partial struct debugService {
+partial struct debugService {
     public ж<service> Service;
     public @string Name;
     public slice<debugMethod> Method;
 }
 
-[GoType("[]debugService")] partial struct serviceArray;
+partial struct serviceArray /*[]debugService*/;
 
 internal static nint Len(this serviceArray s) {
     return len(s);
@@ -85,7 +85,7 @@ internal static void Swap(this methodArray m, nint i, nint j) {
     (m[i], m[j]) = (m[j], m[i]);
 }
 
-[GoType] partial struct debugHTTP {
+partial struct debugHTTP {
     public partial ref ж<Server> Server { get; }
 }
 

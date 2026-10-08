@@ -14,7 +14,7 @@ using encoding;
 partial class pe_package {
 
 // SectionHeader32 represents real PE COFF section header.
-[GoType] partial struct SectionHeader32 {
+partial struct SectionHeader32 {
     public array<uint8> Name = new(8);
     public uint32 VirtualSize;
     public uint32 VirtualAddress;
@@ -30,7 +30,7 @@ partial class pe_package {
 // fullName finds real name of section sh. Normally name is stored
 // in sh.Name, but if it is longer then 8 characters, it is stored
 // in COFF string table st instead.
-[GoRecv] internal static (@string, error) fullName(this ref SectionHeader32 sh, StringTable st) {
+internal static (@string, error) fullName(this ref SectionHeader32 sh, StringTable st) {
     if (sh.Name[0] != (rune)'/') {
         return (cstring(sh.Name[..]), default!);
     }
@@ -45,7 +45,7 @@ partial class pe_package {
 
 // Reloc represents a PE COFF relocation.
 // Each section contains its own relocation list.
-[GoType] partial struct Reloc {
+partial struct Reloc {
     public uint32 VirtualAddress;
     public uint32 SymbolTableIndex;
     public uint16 Type;
@@ -71,7 +71,7 @@ internal static (slice<Reloc>, error) readRelocs(ж<SectionHeader> Ꮡsh, io.Rea
 
 // SectionHeader is similar to [SectionHeader32] with Name
 // field replaced by Go string.
-[GoType] partial struct SectionHeader {
+partial struct SectionHeader {
     public @string Name;
     public uint32 VirtualSize;
     public uint32 VirtualAddress;
@@ -85,7 +85,7 @@ internal static (slice<Reloc>, error) readRelocs(ж<SectionHeader> Ꮡsh, io.Rea
 }
 
 // Section provides access to PE COFF section.
-[GoType] partial struct ΔSection {
+partial struct ΔSection {
     public partial ref SectionHeader SectionHeader { get; }
     public slice<Reloc> Relocs;
     // Embed ReaderAt for ReadAt method.
@@ -94,7 +94,7 @@ internal static (slice<Reloc>, error) readRelocs(ж<SectionHeader> Ꮡsh, io.Rea
     // If a client wants Read and Seek it must use
     // Open() to avoid fighting over the seek offset
     // with other clients.
-    [GoEmbedded] public io_package.ReaderAt ReaderAt;
+    /*embed*/ public io_package.ReaderAt ReaderAt;
     internal ж<io.SectionReader> sr;
 }
 
@@ -102,7 +102,7 @@ internal static (slice<Reloc>, error) readRelocs(ж<SectionHeader> Ꮡsh, io.Rea
 //
 // If s.Offset is 0, the section has no contents,
 // and Data will always return a non-nil error.
-[GoRecv] public static (slice<byte>, error) Data(this ref ΔSection s) {
+public static (slice<byte>, error) Data(this ref ΔSection s) {
     return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), (uint64)s.Size, 0);
 }
 
@@ -110,7 +110,7 @@ internal static (slice<Reloc>, error) readRelocs(ж<SectionHeader> Ꮡsh, io.Rea
 //
 // If s.Offset is 0, the section has no contents, and all calls
 // to the returned reader will return a non-nil error.
-[GoRecv] public static io.ReadSeeker Open(this ref ΔSection s) {
+public static io.ReadSeeker Open(this ref ΔSection s) {
     return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
 }
 

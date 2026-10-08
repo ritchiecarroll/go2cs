@@ -40,18 +40,18 @@ public static (ж<ΔScope>, Object) LookupParent(this ж<ΔScope> Ꮡs, @string 
 // The results are guaranteed to be valid only if the type-checked
 // AST has complete position information. The extent is undefined
 // for Universe and package scopes.
-[GoRecv] public static tokenꓸPos Pos(this ref ΔScope s) {
+public static tokenꓸPos Pos(this ref ΔScope s) {
     return s.pos;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref ΔScope s) {
+public static tokenꓸPos End(this ref ΔScope s) {
     return s.end;
 }
 
 // Contains reports whether pos is within the scope's extent.
 // The result is guaranteed to be valid only if the type-checked
 // AST has complete position information.
-[GoRecv] public static bool Contains(this ref ΔScope s, tokenꓸPos pos) {
+public static bool Contains(this ref ΔScope s, tokenꓸPos pos) {
     return cmpPos(s.pos, pos) <= 0 && cmpPos(pos, s.end) < 0;
 }
 

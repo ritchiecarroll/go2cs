@@ -20,7 +20,7 @@ partial class draw_package {
 internal static UntypedInt m => /* 1<<16 - 1 */ 65535;
 
 // Image is an image.Image with a Set method to change a single pixel.
-[GoType] partial interface Image :
+partial interface Image :
     image.Image
 {
     void Set(nint x, nint y, color.Color c);
@@ -30,7 +30,7 @@ internal static UntypedInt m => /* 1<<16 - 1 */ 65535;
 // SetRGBA64 method to change a single pixel. SetRGBA64 is equivalent to
 // calling Set, but it can avoid allocations from converting concrete color
 // types to the [color.Color] interface type.
-[GoType] partial interface RGBA64Image :
+partial interface RGBA64Image :
     image.RGBA64Image
 {
     void Set(nint x, nint y, color.Color c);
@@ -38,13 +38,13 @@ internal static UntypedInt m => /* 1<<16 - 1 */ 65535;
 }
 
 // Quantizer produces a palette for an image.
-[GoType] partial interface Quantizer {
+partial interface Quantizer {
     // Quantize appends up to cap(p) - len(p) colors to p and returns the
     // updated palette suitable for converting m to a paletted image.
     color.Palette Quantize(color.Palette p, image.Image m);
 }
 
-[GoType("num:nint")] partial struct Op;
+partial struct Op /*num:nint*/;
 
 public static Op Over => /* iota */ 0;
 public static Op Src => 1;
@@ -56,7 +56,7 @@ public static void Draw(this Op op, Image dst, image.Rectangle r, image.Image sr
 }
 
 // Drawer contains the [Draw] method.
-[GoType] partial interface Drawer {
+partial interface Drawer {
     // Draw aligns r.Min in dst with sp in src and then replaces the
     // rectangle r in dst with the result of drawing src on dst.
     void Draw(Image dst, image.Rectangle r, image.Image src, image.Point sp);
@@ -66,7 +66,7 @@ public static void Draw(this Op op, Image dst, image.Rectangle r, image.Image sr
 // diffusion.
 public static Drawer FloydSteinberg = new floydSteinberg(nil);
 
-[GoType] partial struct floydSteinberg {
+partial struct floydSteinberg {
 }
 
 internal static void Draw(this floydSteinberg _, Image dst, image.Rectangle rʗp, image.Image src, image.Point sp) {

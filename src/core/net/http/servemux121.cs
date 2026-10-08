@@ -35,14 +35,14 @@ internal static bool use121;
 }
 
 // serveMux121 holds the state of a ServeMux needed for Go 1.21 behavior.
-[GoType] partial struct serveMux121 {
+partial struct serveMux121 {
     internal sync.RWMutex mu;
     internal map<@string, muxEntry> m;
     internal slice<muxEntry> es; // slice of entries sorted from longest to shortest.
     internal bool hosts;       // whether any patterns contain hostnames
 }
 
-[GoType] partial struct muxEntry {
+partial struct muxEntry {
     internal ΔHandler h;
     internal @string pattern;
 }
@@ -172,7 +172,7 @@ internal static (ΔHandler h, @string pattern) handler(this ж<serveMux121> Ꮡm
 
 // Find a handler on a handler map given a path string.
 // Most-specific (longest) pattern wins.
-[GoRecv] internal static (ΔHandler h, @string pattern) match(this ref serveMux121 mux, @string path) {
+internal static (ΔHandler h, @string pattern) match(this ref serveMux121 mux, @string path) {
     // Check for exact match first.
     var (v, ok) = mux.m[path, ꟷ];
     if (ok) {
@@ -210,7 +210,7 @@ internal static (ж<url.URL>, bool) redirectToPathSlash(this ж<serveMux121> Ꮡ
 // shouldRedirectRLocked reports whether the given path and host should be redirected to
 // path+"/". This should happen if a handler is registered for path+"/" but
 // not path -- see comments at ServeMux.
-[GoRecv] internal static bool shouldRedirectRLocked(this ref serveMux121 mux, @string host, @string path) {
+internal static bool shouldRedirectRLocked(this ref serveMux121 mux, @string host, @string path) {
     var p = new @string[]{path, host + path}.slice();
     foreach (var (_, c) in p) {
         {

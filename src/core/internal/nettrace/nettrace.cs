@@ -12,7 +12,7 @@ partial class nettrace_package {
 
 // TraceKey is a context.Context Value key. Its associated value should
 // be a *Trace struct.
-[GoType] partial struct TraceKey {
+partial struct TraceKey {
 }
 
 // LookupIPAltResolverKey is a context.Context Value key used by tests to
@@ -21,12 +21,12 @@ partial class nettrace_package {
 // The value should be the same type as lookupIP:
 //
 //	func lookupIP(ctx context.Context, host string) ([]IPAddr, error)
-[GoType] partial struct LookupIPAltResolverKey {
+partial struct LookupIPAltResolverKey {
 }
 
 // Trace contains a set of hooks for tracing events within
 // the net package. Any specific hook may be nil.
-[GoType] partial struct Trace {
+partial struct Trace {
     // DNSStart is called with the hostname of a DNS lookup
     // before it begins.
     public Action<@string> DNSStart;

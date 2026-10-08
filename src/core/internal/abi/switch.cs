@@ -5,7 +5,7 @@ namespace go.@internal;
 
 partial class abi_package {
 
-[GoType] partial struct InterfaceSwitch {
+partial struct InterfaceSwitch {
     public ж<InterfaceSwitchCache> Cache;
     public nint NCases;
     // Array of NCases elements.
@@ -13,12 +13,12 @@ partial class abi_package {
     public array<ж<ΔInterfaceType>> Cases = new(1);
 }
 
-[GoType] partial struct InterfaceSwitchCache {
+partial struct InterfaceSwitchCache {
     public uintptr Mask;                      // mask for index. Must be a power of 2 minus 1
     public array<InterfaceSwitchCacheEntry> Entries = new(1); // Mask+1 entries total
 }
 
-[GoType] partial struct InterfaceSwitchCacheEntry {
+partial struct InterfaceSwitchCacheEntry {
     // type of source value (a *Type)
     public uintptr Typ;
     // case # to dispatch to
@@ -45,18 +45,18 @@ public static bool UseInterfaceSwitchCache(@string goarch) {
 
 }
 
-[GoType] partial struct TypeAssert {
+partial struct TypeAssert {
     public ж<TypeAssertCache> Cache;
     public ж<ΔInterfaceType> Inter;
     public bool CanFail;
 }
 
-[GoType] partial struct TypeAssertCache {
+partial struct TypeAssertCache {
     public uintptr Mask;
     public array<TypeAssertCacheEntry> Entries = new(1);
 }
 
-[GoType] partial struct TypeAssertCacheEntry {
+partial struct TypeAssertCacheEntry {
     // type of source value (a *runtime._type)
     public uintptr Typ;
     // itab to use for result (a *runtime.itab)

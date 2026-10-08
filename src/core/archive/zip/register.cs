@@ -28,7 +28,7 @@ internal static io.WriteCloser newFlateWriter(io.Writer w) {
     return new pooledFlateWriterжWriteCloser(Ꮡ(new pooledFlateWriter(fw: fw)));
 }
 
-[GoType] partial struct pooledFlateWriter {
+partial struct pooledFlateWriter {
     internal sync.Mutex mu; // guards Close and Write
     internal ж<flate.Writer> fw;
 }
@@ -88,7 +88,7 @@ internal static io.ReadCloser newFlateReader(io.Reader r) {
     return new pooledFlateReaderжReadCloser(Ꮡ(new pooledFlateReader(fr: fr)));
 }
 
-[GoType] partial struct pooledFlateReader {
+partial struct pooledFlateReader {
     internal sync.Mutex mu; // guards Close and Read
     internal io.ReadCloser fr;
 }

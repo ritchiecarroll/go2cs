@@ -38,7 +38,7 @@ using math;
 
 partial class tls_package {
 
-[GoType] partial struct clientHandshakeState {
+partial struct clientHandshakeState {
     internal ж<Conn> c;
     internal context.Context ctx;
     internal ж<serverHelloMsg> serverHello;
@@ -267,7 +267,7 @@ internal static (ж<clientHelloMsg>, ж<keySharePrivateKeys>, ж<echClientContex
     return (hello, keyShareKeys, ech, default!);
 }
 
-[GoType] partial struct echClientContext {
+partial struct echClientContext {
     internal ж<echConfig> config;
     internal ж<hpke.Sender> hpkeContext;
     internal slice<byte> encapsulatedKey;
@@ -690,7 +690,7 @@ internal static error handshake(this ж<clientHandshakeState> Ꮡhs) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tlsServerChoseAnˢ = "tls: server chose an unconfigured cipher suite"u8;
 
-[GoRecv] internal static error pickCipherSuite(this ref clientHandshakeState hs) {
+internal static error pickCipherSuite(this ref clientHandshakeState hs) {
     {
         hs.suite = mutualCipherSuite((~hs.hello).cipherSuites, (~hs.serverHello).cipherSuite); if (hs.suite == nil) {
             hs.c.sendAlert(alertHandshakeFailure);
@@ -892,7 +892,7 @@ internal static error doFullHandshake(this ж<clientHandshakeState> Ꮡhs) {
     return default!;
 }
 
-[GoRecv] internal static error establishKeys(this ref clientHandshakeState hs) {
+internal static error establishKeys(this ref clientHandshakeState hs) {
     var c = hs.c;
     var (clientMAC, serverMAC, clientKey, serverKey, clientIV, serverIV) = keysFromMasterSecret((~c).vers, ref (hs.suite).DerefOrNull(), hs.masterSecret, (~hs.hello).random, (~hs.serverHello).random, (~hs.suite).macLen, (~hs.suite).keyLen, (~hs.suite).ivLen);
     any clientCipher = default!;
@@ -915,7 +915,7 @@ internal static error doFullHandshake(this ж<clientHandshakeState> Ꮡhs) {
     return default!;
 }
 
-[GoRecv] internal static bool serverResumedSession(this ref clientHandshakeState hs) {
+internal static bool serverResumedSession(this ref clientHandshakeState hs) {
     // If the server responded with the same sessionId then it means the
     // sessionTicket is being used to resume a TLS session.
     return hs.session != nil && (~hs.hello).sessionId != default! && bytes.Equal((~hs.serverHello).sessionId, (~hs.hello).sessionId);
@@ -929,7 +929,7 @@ internal static readonly @string tlsServerResumedASessionˢ = "tls: server resum
 internal static readonly @string tlsServerResumedASessionˢ2 = "tls: server resumed a session with a different cipher suite"u8;
 internal static readonly @string tlsServerResumedASessionˢ3 = "tls: server resumed a session with a different EMS extension"u8;
 
-[GoRecv] internal static (bool, error) processServerHello(this ref clientHandshakeState hs) {
+internal static (bool, error) processServerHello(this ref clientHandshakeState hs) {
     var c = hs.c;
     {
         var err = hs.pickCipherSuite(); if (err != default!) {
@@ -1086,7 +1086,7 @@ internal static error readSessionTicket(this ж<clientHandshakeState> Ꮡhs) {
     return default!;
 }
 
-[GoRecv] internal static error saveSessionTicket(this ref clientHandshakeState hs) {
+internal static error saveSessionTicket(this ref clientHandshakeState hs) {
     if (hs.ticket == default!) {
         return default!;
     }
@@ -1330,7 +1330,7 @@ internal static ж<CertificateRequestInfo> certificateRequestInfoFromMsg(context
     return cri;
 }
 
-[GoRecv] internal static (ж<Certificate>, error) getClientCertificate(this ref Conn c, ж<CertificateRequestInfo> Ꮡcri) {
+internal static (ж<Certificate>, error) getClientCertificate(this ref Conn c, ж<CertificateRequestInfo> Ꮡcri) {
     ref var cri = ref Ꮡcri.DerefOrNull();
 
     if ((~c.config).GetClientCertificate != default!) {
@@ -1353,7 +1353,7 @@ internal static ж<CertificateRequestInfo> certificateRequestInfoFromMsg(context
 
 // clientSessionCacheKey returns a key used to cache sessionTickets that could
 // be used to resume previously negotiated TLS sessions with a server.
-[GoRecv] internal static @string clientSessionCacheKey(this ref Conn c) {
+internal static @string clientSessionCacheKey(this ref Conn c) {
     if (len((~c.config).ServerName) > 0) {
         return (~c.config).ServerName;
     }

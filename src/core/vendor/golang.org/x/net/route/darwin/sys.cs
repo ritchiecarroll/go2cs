@@ -23,7 +23,7 @@ internal static nint roundup(nint l) {
     return (nint)((l + kernelAlign - 1) & ~(kernelAlign - 1));
 }
 
-[GoType] partial struct wireFormat {
+partial struct wireFormat {
     internal nint extOff; // offset of header extension
     internal nint bodyOff; // offset of message body
     internal Func<RIBType, slice<byte>, (Message, error)> parse;

@@ -64,7 +64,7 @@ internal static slice<@string> osDefaultInheritEnv = ((Func<slice<@string>>)(() 
 }))();
 
 // Handler runs an executable in a subprocess with a CGI environment.
-[GoType] partial struct Handler {
+partial struct Handler {
     public @string Path; // path to the CGI executable
     public @string Root; // root URI prefix of handler or empty for "/"
     // Dir specifies the CGI executable's working directory.
@@ -88,7 +88,7 @@ internal static slice<@string> osDefaultInheritEnv = ((Func<slice<@string>>)(() 
     public httpꓸHandler PathLocationHandler;
 }
 
-[GoRecv] internal static io.Writer stderr(this ref Handler h) {
+internal static io.Writer stderr(this ref Handler h) {
     if (h.Stderr != default!) {
         return h.Stderr;
     }
@@ -377,7 +377,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
     finally { ᒐ.Run(); }
 }
 
-[GoRecv] internal static void printf(this ref Handler h, @string format, params ꓸꓸꓸany vʗp) {
+internal static void printf(this ref Handler h, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     if (h.Logger != nil){
@@ -387,7 +387,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
     }
 }
 
-[GoRecv] internal static void handleInternalRedirect(this ref Handler h, http.ResponseWriter rw, ж<http.Request> Ꮡreq, @string path) {
+internal static void handleInternalRedirect(this ref Handler h, http.ResponseWriter rw, ж<http.Request> Ꮡreq, @string path) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var (url, err) = req.URL.Parse(path);

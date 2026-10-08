@@ -6,7 +6,7 @@ namespace go.vendor.golang.org.x.crypto.@internal;
 
 partial class poly1305_package {
 
-[GoType] partial struct mac {
+partial struct mac {
     internal partial ref macGeneric macGeneric { get; }
 }
 

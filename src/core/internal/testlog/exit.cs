@@ -29,7 +29,7 @@ public static bool PanicOnExit0() {
 // because the value can be cleared via a timer call that may race
 // with calls to os.Exit
 
-[GoType("dyn")] partial struct panicOnExit0ᴛ1 {
+partial struct panicOnExit0ᴛ1 /*dyn*/ {
     internal sync.Mutex mu;
     internal bool val;
 }

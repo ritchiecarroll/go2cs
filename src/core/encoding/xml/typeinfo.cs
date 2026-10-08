@@ -11,13 +11,13 @@ using sync = sync_package;
 partial class xml_package {
 
 // typeInfo holds details for the xml representation of a type.
-[GoType] partial struct typeInfo {
+partial struct typeInfo {
     internal ж<fieldInfo> xmlname;
     internal slice<fieldInfo> fields;
 }
 
 // fieldInfo holds details for the xml representation of a single field.
-[GoType] partial struct fieldInfo {
+partial struct fieldInfo {
     internal slice<nint> idx;
     internal @string name;
     internal @string xmlns;
@@ -25,7 +25,7 @@ partial class xml_package {
     internal slice<@string> parents;
 }
 
-[GoType("num:nint")] partial struct fieldFlags;
+partial struct fieldFlags /*num:nint*/;
 
 internal static fieldFlags fElement => /* 1 << iota */ 1;
 internal static fieldFlags fAttr => 2;
@@ -335,13 +335,13 @@ break_Loop:;
 
 // A TagPathError represents an error in the unmarshaling process
 // caused by the use of field tags with conflicting paths.
-[GoType] partial struct TagPathError {
+partial struct TagPathError {
     public reflectꓸType Struct;
     public @string Field1, Tag1;
     public @string Field2, Tag2;
 }
 
-[GoRecv] public static @string Error(this ref TagPathError e) {
+public static @string Error(this ref TagPathError e) {
     return fmt.Sprintf("%s field %q with tag %q conflicts with field %q with tag %q"u8, e.Struct, e.Field1, e.Tag1, e.Field2, e.Tag2);
 }
 
@@ -353,7 +353,7 @@ internal const bool dontInitNilPointers = false;
 // initNilPointers, it initializes and dereferences pointers as necessary.
 // When passed dontInitNilPointers and a nil pointer is reached, the function
 // returns a zero reflect.Value.
-[GoRecv] internal static reflectꓸValue value(this ref fieldInfo finfo, reflectꓸValue v, bool shouldInitNilPointers) {
+internal static reflectꓸValue value(this ref fieldInfo finfo, reflectꓸValue v, bool shouldInitNilPointers) {
     foreach (var (i, x) in finfo.idx) {
         if (i > 0) {
             var t = v.Type();

@@ -14,7 +14,7 @@ internal static dloggerFake dlog1() {
     return dlogFake();
 }
 
-[GoType] partial struct dlogPerM {
+partial struct dlogPerM {
 }
 
 internal static ж<dloggerImpl> getCachedDlogger() {

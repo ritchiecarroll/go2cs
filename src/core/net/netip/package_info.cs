@@ -53,7 +53,7 @@ using static go.net.netip_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/netip/netip.go", "netip.cs", "AEWMAZKaoKigppCmkKaQprIABRLSAAgYsoKUpKjWqqKCgpQACBKCgoKUpoKSgoKCgoKUgoKCpLiCpoKUgoKClKaClIKosoKCgpSoksyCgoKClKiCloKClIK6gqaCgoKCgpKCkoKUlJSUlKaUqIKUlJSWgoKUgoKUgoKogoKWgoKogpKClJaCkpSCgpLMgqiCgpSCgpSSlJSsspSkpKqiqqKqogACEPassK7SlKSkqJKClKyykoKUgpSCgpSClIKClIKUgpKClIKmrLCqsqyyqqKuwoKUrLKClIKClIKqooKUgqiSqJKCuoK4gpSokoK6griClKiSgrqCuIKUqsaClKiSgrqCuIKUAAIYAAkClJaCuoKWAAIUwoKoppqmlq7CAAUQ0oKUgpSkgpSkgraCAAIQ8oKCrNKCgpSClKiSlKSCgqSCgoLMooKClKaUpqqigoKkgpSCAAUeAAwClKSkgpTOspSkpIKUAAgSuIKUgpSouIKUgpSClKiSpoKCgoKmgoKCgoKCgoKmgoKCgqaCgoKCgpQAAhAABRDygoKmgoKCgoKUgIK4goKCgoKkgpaWgoKUrLKUpoKCgoKWlqaClKqirLKCtoK0goKClIK0AAIQ0oKClIKCqJK2pIKCpKaClKSkAAQQwtqigpSCpIKkgqSCpAAIFqCmkKaQAAgOAAkCgoKWgoKUgpSCgpSClq7CgoKClIKClIKCgpSCkoKUqqKCgpSqoKqygIKk1oKClKSCgqSCgoKClIKCgpSkgoKsspSkpIKClJSkgoKqoqyygraCpIKkrLKCgpSCgqyygoKUrLKqooKUgoKClIIADS4ACAKCgpTekKqwqrCkgKaQAAIUAAgCgIKkgIKkAAcQggACFPKCgpSCgqaClpaCloKClIKClIKUqqKCgpSuwoIAAhTygpSAkqQACBLKAAMS0oKUgpSClIKAkpSkgpzCgIKkgIKkrLKClIKogpSCgpSogoKqoqyygraCpIKkrLKCgpSCgqyygoKUrMSqooKUgoKClILYkoKU")]
+[assembly: go.GoPositionMap("net/netip/netip.go", "netip.cs", "AEWMAZKaoKigppCmkKaQprIABRLSAAgYsoKUpKjWqqKCgpQACBKCgoKUpoKSgoKCgoKUgoKCpLiCpoKUgoKClKaClIKosoKCgpSoksyCgoKClKiCloKClIK6gqaCgoKCgpKCkoKUlJSUlKaUqIKUlJSWgoKUgoKUgoKogoKWgoKogpKClJaCkpSCgpLMgqiCgpSCgpSSlJSsspSkpKqiqqKqogACEPassK7SlKSkqJKClKyykoKUgpSCgpSClIKClIKUgpKClIKmrLCqsqyyqqKuwoKUrLKClIKClIKqooKUgqiSqJKCuoK4gpSokoK6griClKiSgrqCuIKUqsaClKiSgrqCuIKUAAIYAAkClJaCuoKWAAIUwoKoppqmlq7CAAUQ0oKUgpSkgpSkgraCAAIQ8oKCrNKCgpSClKiSlKSCgqSCgoLMooKClKaUpqqigoKkgpSCAAUeAAwClKSkgpTOspSkpIKUAAgSuIKUgpSouIKUgpSClKiSpoKCgoKmgoKCgoKCgoKmgoKCgqaCgoKCgpQAAhAABRDygoKmgoKCgoKUgIK4goKCgoKkgpaWgoKUrLKUpoKCgoKWlqaClKqirLKCtoK0goKClIK0AAIQ0oKClIKCqJK2pIKCpKaClKSkAAQQwtqigpSCpIKkgqSCpAAIFqCmkKaQAAgOAAkCgoKWgoKUgpSCgpSClq7CgoKClIKClIKCgpSCkoKUqqKCgpSqoKqygIKk1oKClKSCgqSCgoKClIKCgpSkgoKsspSkpIKClJSkgoKqoqyygraCpIKkrLKCgpSCgqyygoKUrLKqooKUgoKClIIADS4ACAKCgpTekKqwqrCkgKaQAAIUAAgCgIKkgIKkAAcQggACFPKCgpSCgqaClpaCloKClIKClIKUqqKCgpSuwoIAAhTygpSAkqQACBLKAAMS0oKUgpSClIKAkpSkgpzCgIKkgIKkrLKClIKogpSCgpSogoKqoqyygraCpIKkrLKCgpSCgqyygoKUrMSqooKUgoKClILYkoKU", "", "", "117=BEUint64/1/2/2,BEUint64/2/2/3;649=IsLoopback/1/1/1,IsMulticast/1/1/2,IsLinkLocalUnicast/1/1/3;664=v4/2/5/1,v4/3/5/1,v4/4/5/2,v4/5/5/2;1386=withoutZone/1/1/1")]
 [assembly: go.GoPositionMap("net/netip/uint128.go", "uint128.cs", "ABMoogACENCmkqiSqJKokqiSgqiSgq7CqqKqog==")]
 // </GoSourcePositionMaps>
 
@@ -63,7 +63,7 @@ namespace go.net;
 public static partial class netip_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

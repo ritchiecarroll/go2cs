@@ -19,7 +19,7 @@ partial class tls_package {
 
 // A keyAgreement implements the client and server side of a TLS 1.0–1.2 key
 // agreement protocol by generating and processing key exchange messages.
-[GoType] partial interface keyAgreement {
+partial interface keyAgreement {
 // On the server side, the first two methods are called in order.
 
     // In the case that the key agreement protocol doesn't use a
@@ -41,7 +41,7 @@ internal static error errServerKeyExchange = errors.New("tls: invalid ServerKeyE
 
 // rsaKeyAgreement implements the standard TLS key agreement where the client
 // encrypts the pre-master secret to the server's public key.
-[GoType] partial struct rsaKeyAgreement {
+partial struct rsaKeyAgreement {
 }
 
 internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange(this rsaKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> Ꮡhello) {
@@ -174,7 +174,7 @@ internal static slice<byte> hashForServerKeyExchange(uint8 sigType, crypto.Hash 
 // generates an ephemeral EC public/private key pair and signs it. The
 // pre-master secret is then calculated using ECDH. The signature may
 // be ECDSA, Ed25519 or RSA.
-[GoType] partial struct ecdheKeyAgreement {
+partial struct ecdheKeyAgreement {
     internal uint16 version;
     internal bool isRSA;
     internal ж<ecdh.PrivateKey> key;
@@ -188,7 +188,7 @@ internal static slice<byte> hashForServerKeyExchange(uint8 sigType, crypto.Hash 
 internal static readonly @string tlsNoSupportedEllipticˢ2 = "tls: no supported elliptic curves offered"u8;
 internal static readonly @string tlsCertificateCannotBeˢ = "tls: certificate cannot be used with the selected cipher suite"u8;
 
-[GoRecv] internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> Ꮡhello) {
+internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> Ꮡhello) {
     ref var config = ref Ꮡconfig.DerefOrNull();
     ref var cert = ref Ꮡcert.DerefOrNull();
     ref var clientHello = ref ᏑclientHello.DerefOrNull();
@@ -275,7 +275,7 @@ internal static readonly @string tlsCertificateCannotBeˢ = "tls: certificate ca
     return (skx, default!);
 }
 
-[GoRecv] internal static (slice<byte>, error) processClientKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientKeyExchangeMsg> Ꮡckx, uint16 version) {
+internal static (slice<byte>, error) processClientKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientKeyExchangeMsg> Ꮡckx, uint16 version) {
     ref var ckx = ref Ꮡckx.DerefOrNull();
 
     if (len(ckx.ciphertext) == 0 || (nint)ckx.ciphertext[0] != len(ckx.ciphertext) - 1) {
@@ -295,7 +295,7 @@ internal static readonly @string tlsCertificateCannotBeˢ = "tls: certificate ca
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tlsServerSelectedˢ4 = "tls: server selected unsupported curve"u8;
 
-[GoRecv] internal static error processServerKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> ᏑserverHello, ж<Δx509.Certificate> Ꮡcert, ж<serverKeyExchangeMsg> Ꮡskx) {
+internal static error processServerKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> ᏑserverHello, ж<Δx509.Certificate> Ꮡcert, ж<serverKeyExchangeMsg> Ꮡskx) {
     ref var config = ref Ꮡconfig.DerefOrNull();
     ref var clientHello = ref ᏑclientHello.DerefOrNull();
     ref var serverHello = ref ᏑserverHello.DerefOrNull();
@@ -384,7 +384,7 @@ internal static readonly @string tlsServerSelectedˢ4 = "tls: server selected un
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tlsMissingˢ = "tls: missing ServerKeyExchange message"u8;
 
-[GoRecv] internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<Δx509.Certificate> Ꮡcert) {
+internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<Δx509.Certificate> Ꮡcert) {
     if (ka.ckx == nil) {
         return (default!, default!, errors.New(tlsMissingˢ));
     }

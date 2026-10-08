@@ -17,20 +17,20 @@ using encoding;
 partial class dwarf_package {
 
 // a single entry's description: a sequence of attributes
-[GoType] partial struct abbrev {
+partial struct abbrev {
     internal Tag tag;
     internal bool children;
     internal slice<afield> field;
 }
 
-[GoType] partial struct afield {
+partial struct afield {
     internal Attr attr;
     internal format fmt;
     internal Class @class;
     internal int64 val; // for formImplicitConst
 }
 
-[GoType("map[uint32, abbrev]")] partial struct abbrevTable;
+partial struct abbrevTable /*map[uint32, abbrev]*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string abbrevˢ = "abbrev"u8;
@@ -241,7 +241,7 @@ internal static Class formToClass(format form, Attr attr, nint vers, ж<buf> Ꮡ
 }
 
 // An entry is a sequence of attribute/value pairs.
-[GoType] partial struct Entry {
+partial struct Entry {
     public Offset Offset; // offset of Entry in DWARF info
     public Tag Tag;    // tag (kind of Entry)
     public bool Children;   // whether Entry is followed by children
@@ -271,13 +271,13 @@ internal static Class formToClass(format form, Attr attr, nint vers, ж<buf> Ꮡ
 //
 // For unrecognized or vendor-defined attributes, [Class] may be
 // [ClassUnknown].
-[GoType] partial struct Field {
+partial struct Field {
     public Attr Attr;
     public any Val;
     public Class Class;
 }
 
-[GoType("num:nint")] partial struct Class;
+partial struct Class /*num:nint*/;
 
 public static Class ClassUnknown => /* iota */ 0;
 public static Class ClassAddress => 1;
@@ -312,7 +312,7 @@ public static @string GoString(this Class i) {
 // the check that the value has the expected dynamic type, as in:
 //
 //	v, ok := e.Val(AttrSibling).(int64)
-[GoRecv] public static any Val(this ref Entry e, Attr a) {
+public static any Val(this ref Entry e, Attr a) {
     {
         var f = e.AttrField(a); if (f != nil) {
             return (~f).Val;
@@ -323,7 +323,7 @@ public static @string GoString(this Class i) {
 
 // AttrField returns the [Field] associated with attribute [Attr] in
 // [Entry], or nil if there is no such attribute.
-[GoRecv] public static ж<Field> AttrField(this ref Entry e, Attr a) {
+public static ж<Field> AttrField(this ref Entry e, Attr a) {
     foreach (var (i, f) in e.Field) {
         if (f.Attr == a) {
             return Ꮡ(e.Field, i);
@@ -332,7 +332,7 @@ public static @string GoString(this Class i) {
     return default!;
 }
 
-[GoType("num:uint32")] partial struct Offset;
+partial struct Offset /*num:uint32*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unknownAbbreviationTableˢ = "unknown abbreviation table index"u8;
@@ -357,7 +357,7 @@ internal static readonly @string unknownSizeForDwFormStrpˢ2 = "unknown size for
 // If we are currently parsing the compilation unit,
 // we can't evaluate Addrx or Strx until we've seen the
 // relevant base entry.
-[GoType("dyn")] internal partial struct entry_delayed {
+internal partial struct entry_delayed /*dyn*/ {
     internal nint idx;
     internal uint64 off;
     internal format fmt;
@@ -785,7 +785,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
 // return successive entries from a pre-order traversal of the tree.
 // If an entry has children, its Children field will be true, and the children
 // follow, terminated by an [Entry] with [Tag] 0.
-[GoType] partial struct ΔReader {
+partial struct ΔReader {
     internal buf b;
     internal ж<Data> d;
     internal error err;
@@ -806,12 +806,12 @@ public static ж<ΔReader> Reader(this ж<Data> Ꮡd) {
 
 // AddressSize returns the size in bytes of addresses in the current compilation
 // unit.
-[GoRecv] public static nint AddressSize(this ref ΔReader r) {
+public static nint AddressSize(this ref ΔReader r) {
     return (~r.d).unit[r.unit].asize;
 }
 
 // ByteOrder returns the byte order in the current compilation unit.
-[GoRecv] public static binary.ByteOrder ByteOrder(this ref ΔReader r) {
+public static binary.ByteOrder ByteOrder(this ref ΔReader r) {
     return r.b.order;
 }
 
@@ -821,7 +821,7 @@ internal static readonly @string offsetOutOfRangeˢ = "offset out of range"u8;
 
 // Seek positions the [Reader] at offset off in the encoded entry stream.
 // Offset 0 can be used to denote the first entry.
-[GoRecv] public static void Seek(this ref ΔReader r, Offset off) {
+public static void Seek(this ref ΔReader r, Offset off) {
     var d = r.d;
     r.err = default!;
     r.lastChildren = false;
@@ -849,14 +849,14 @@ internal static readonly @string offsetOutOfRangeˢ = "offset out of range"u8;
 }
 
 // maybeNextUnit advances to the next unit if this one is finished.
-[GoRecv] internal static void maybeNextUnit(this ref ΔReader r) {
+internal static void maybeNextUnit(this ref ΔReader r) {
     while (len(r.b.data) == 0 && r.unit + 1 < len((~r.d).unit)) {
         r.nextUnit();
     }
 }
 
 // nextUnit advances to the next unit.
-[GoRecv] internal static void nextUnit(this ref ΔReader r) {
+internal static void nextUnit(this ref ΔReader r) {
     r.unit++;
     var u = Ꮡ((~r.d).unit, r.unit);
     r.b = makeBuf(r.d, new unitжdataFormat(u), infoˢ, (~u).off, (~u).data);
@@ -933,13 +933,13 @@ public static void SkipChildren(this ж<ΔReader> Ꮡr) {
 
 // clone returns a copy of the reader. This is used by the typeReader
 // interface.
-[GoRecv] internal static typeReader clone(this ref ΔReader r) {
+internal static typeReader clone(this ref ΔReader r) {
     return new ΔReaderжtypeReader(r.d.Reader());
 }
 
 // offset returns the current buffer offset. This is used by the
 // typeReader interface.
-[GoRecv] internal static Offset offset(this ref ΔReader r) {
+internal static Offset offset(this ref ΔReader r) {
     return r.b.off;
 }
 

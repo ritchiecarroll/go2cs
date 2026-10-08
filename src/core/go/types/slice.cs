@@ -8,7 +8,7 @@ namespace go.go;
 partial class types_package {
 
 // A Slice represents a slice type.
-[GoType] partial struct Slice {
+partial struct Slice {
     internal ΔType elem;
 }
 
@@ -18,7 +18,7 @@ public static ж<Slice> NewSlice(ΔType elem) {
 }
 
 // Elem returns the element type of slice s.
-[GoRecv] public static ΔType Elem(this ref Slice s) {
+public static ΔType Elem(this ref Slice s) {
     return s.elem;
 }
 

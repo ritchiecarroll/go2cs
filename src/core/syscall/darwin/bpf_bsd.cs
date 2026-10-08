@@ -81,7 +81,7 @@ public static error FlushBpf(nint fd) {
     return default!;
 }
 
-[GoType] partial struct ivalue {
+partial struct ivalue {
     internal array<byte> name = new(IFNAMSIZ);
     internal int16 value;
 }

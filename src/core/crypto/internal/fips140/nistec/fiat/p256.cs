@@ -15,7 +15,7 @@ partial class fiat_package {
 // P256Element is an integer modulo 2^256 - 2^224 + 2^192 + 2^96 - 1.
 //
 // The zero value is a valid zero element.
-[GoType] partial struct P256Element {
+partial struct P256Element {
     // Values are represented internally always in the Montgomery domain, and
     // converted in Bytes and SetBytes.
     internal p256MontgomeryDomainFieldElement x;
@@ -62,7 +62,7 @@ public static slice<byte> Bytes(this ж<P256Element> Ꮡe) {
     return Ꮡe.bytes(Ꮡout);
 }
 
-internal static slice<byte> bytes(this ж<P256Element> Ꮡe, [GoArrayDims(32)] ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes(this ж<P256Element> Ꮡe, /*[32]*/ ж<array<byte>> Ꮡout) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 

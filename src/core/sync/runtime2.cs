@@ -10,7 +10,7 @@ partial class sync_package {
 
 // Approximation of notifyList in runtime/sema.go. Size and alignment must
 // agree.
-[GoType] partial struct notifyList {
+partial struct notifyList {
     internal uint32 wait;
     internal uint32 notify;
     internal uintptr @lock; // key field of the mutex

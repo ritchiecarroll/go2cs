@@ -114,7 +114,7 @@ public static http.HandlerFunc SVGProfileHandlerFunc(Func<ж<http.Request>, (sli
     };
 }
 
-[GoType] partial struct ProfileRecord {
+partial struct ProfileRecord {
     public slice<ж<trace.Frame>> Stack;
     public uint64 Count;
     public time.Duration Time;

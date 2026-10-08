@@ -86,14 +86,14 @@ internal static trace.UtilFlags requestUtilFlags(ж<http.Request> Ꮡr) {
     return flags;
 }
 
-[GoType] partial struct mmuCacheEntry {
+partial struct mmuCacheEntry {
     internal sync.Once init;
     internal slice<slice<trace.MutatorUtil>> util;
     internal ж<trace.MMUCurve> mmuCurve;
     internal error err;
 }
 
-[GoType] partial struct mmu {
+partial struct mmu {
     internal sync.Mutex mu;
     internal map<trace.UtilFlags, ж<mmuCacheEntry>> cache;
     internal Func<trace.UtilFlags, (slice<slice<trace.MutatorUtil>>, error)> f;
@@ -415,12 +415,12 @@ internal static void HandleDetails(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<
     }
 }
 
-[GoType] partial struct linkedUtilWindow {
+partial struct linkedUtilWindow {
     public partial ref go.@internal.trace_package.UtilWindow UtilWindow { get; }
     public @string URL;
 }
 
-[GoRecv] internal static linkedUtilWindow newLinkedUtilWindow(this ref mmu m, trace.UtilWindow ui, time.Duration window) {
+internal static linkedUtilWindow newLinkedUtilWindow(this ref mmu m, trace.UtilWindow ui, time.Duration window) {
     // Find the range containing this window.
     Range r = default!;
     foreach (var (_, vᴛ1) in m.ranges) {

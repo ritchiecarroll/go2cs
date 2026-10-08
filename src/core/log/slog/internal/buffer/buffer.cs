@@ -9,7 +9,7 @@ using sync = sync_package;
 
 partial class buffer_package {
 
-[GoType("[]byte")] partial struct Buffer;
+partial struct Buffer /*[]byte*/;
 
 // Having an initial size gives a dramatic speedup.
 internal static ж<sync.Pool> ᏑbufPool = new StandardBox<sync.Pool>(new sync.Pool(
@@ -35,34 +35,34 @@ public static void Free(this ж<Buffer> Ꮡb) {
     }
 }
 
-[GoRecv] public static void Reset(this ref Buffer b) {
+public static void Reset(this ref Buffer b) {
     b.SetLen(0);
 }
 
-[GoRecv] public static (nint, error) Write(this ref Buffer b, slice<byte> p) {
+public static (nint, error) Write(this ref Buffer b, slice<byte> p) {
     b = appendꓸꓸꓸ(b, p);
     return (len(p), default!);
 }
 
-[GoRecv] public static (nint, error) WriteString(this ref Buffer b, @string s) {
+public static (nint, error) WriteString(this ref Buffer b, @string s) {
     b = append(b, s.ꓸꓸꓸ);
     return (len(s), default!);
 }
 
-[GoRecv] public static error WriteByte(this ref Buffer b, byte c) {
+public static error WriteByte(this ref Buffer b, byte c) {
     b = append(b, c);
     return default!;
 }
 
-[GoRecv] public static @string String(this ref Buffer b) {
+public static @string String(this ref Buffer b) {
     return ((@string)(slice<byte>)b);
 }
 
-[GoRecv] public static nint Len(this ref Buffer b) {
+public static nint Len(this ref Buffer b) {
     return len(b);
 }
 
-[GoRecv] public static void SetLen(this ref Buffer b, nint n) {
+public static void SetLen(this ref Buffer b, nint n) {
     b = (b).slice(0, n);
 }
 

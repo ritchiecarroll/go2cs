@@ -21,7 +21,7 @@ partial class quick_package {
 internal static ж<nint> defaultMaxCount = flag.Int("quickchecks"u8, 100, "The default number of iterations for each check"u8);
 
 // A Generator can generate random values of its own type.
-[GoType] partial interface Generator {
+partial interface Generator {
     // Generate returns a random instance of the type on which it is a
     // method using the size as a size hint.
     reflectꓸValue Generate(ж<rand.Rand> rand, nint size);
@@ -210,7 +210,7 @@ internal static (reflectꓸValue value, bool ok) sizedValue(reflectꓸType t, ж
 }
 
 // A Config structure contains options for running a test.
-[GoType] partial struct Config {
+partial struct Config {
     // MaxCount sets the maximum number of iterations.
     // If zero, MaxCountScale is used.
     public nint MaxCount;
@@ -233,7 +233,7 @@ internal static ж<Config> ᏑdefaultConfig = new StandardBox<Config>(default(Co
 internal static ref Config defaultConfig => ref ᏑdefaultConfig.Value;
 
 // getRand returns the *rand.Rand to use for a given Config.
-[GoRecv] internal static ж<rand.Rand> getRand(this ref Config c) {
+internal static ж<rand.Rand> getRand(this ref Config c) {
     if (c.Rand == nil) {
         return rand.New(rand.NewSource(time.Now().UnixNano()));
     }
@@ -242,7 +242,7 @@ internal static ref Config defaultConfig => ref ᏑdefaultConfig.Value;
 
 // getMaxCount returns the maximum number of iterations to run for a given
 // Config.
-[GoRecv] internal static nint /*maxCount*/ getMaxCount(this ref Config c) {
+internal static nint /*maxCount*/ getMaxCount(this ref Config c) {
     nint maxCount = default!;
 
     maxCount = c.MaxCount;
@@ -256,30 +256,30 @@ internal static ref Config defaultConfig => ref ᏑdefaultConfig.Value;
     return maxCount;
 }
 
-[GoType("@string")] partial struct SetupError;
+partial struct SetupError /*@string*/;
 
 public static @string Error(this SetupError s) {
     return ((@string)s);
 }
 
 // A CheckError is the result of Check finding an error.
-[GoType] partial struct CheckError {
+partial struct CheckError {
     public nint Count;
     public slice<any> In;
 }
 
-[GoRecv] public static @string Error(this ref CheckError s) {
+public static @string Error(this ref CheckError s) {
     return fmt.Sprintf("#%d: failed on input %s"u8, s.Count, toString(s.In));
 }
 
 // A CheckEqualError is the result [CheckEqual] finding an error.
-[GoType] partial struct CheckEqualError {
+partial struct CheckEqualError {
     public partial ref CheckError CheckError { get; }
     public slice<any> Out1;
     public slice<any> Out2;
 }
 
-[GoRecv] public static @string Error(this ref CheckEqualError s) {
+public static @string Error(this ref CheckEqualError s) {
     return fmt.Sprintf("#%d: failed on input %s. Output 1: %s. Output 2: %s"u8, s.Count, toString(s.In), toString(s.Out1), toString(s.Out2));
 }
 

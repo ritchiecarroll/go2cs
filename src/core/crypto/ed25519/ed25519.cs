@@ -34,7 +34,7 @@ public static UntypedInt PrivateKeySize => 64;
 public static UntypedInt SignatureSize => 64;
 public static UntypedInt SeedSize => 32;
 
-[GoType("[]byte")] partial struct PublicKey;
+partial struct PublicKey /*[]byte*/;
 
 // Any methods implemented on PublicKey might need to also be implemented on
 // PrivateKey, as the latter embeds the former and will expose its methods.
@@ -48,7 +48,7 @@ public static bool Equal(this PublicKey pub, cryptoꓸPublicKey x) {
     return subtle.ConstantTimeCompare(pub, xx) == 1;
 }
 
-[GoType("[]byte")] partial struct PrivateKey;
+partial struct PrivateKey /*[]byte*/;
 
 // Public returns the [PublicKey] corresponding to priv.
 public static cryptoꓸPublicKey Public(this PrivateKey priv) {
@@ -127,7 +127,7 @@ public static (slice<byte> signature, error err) Sign(this PrivateKey priv, io.R
 
 // Options can be used with [PrivateKey.Sign] or [VerifyWithOptions]
 // to select Ed25519 variants.
-[GoType] partial struct Options {
+partial struct Options {
     // Hash can be zero for regular Ed25519, or crypto.SHA512 for Ed25519ph.
     public crypto.Hash Hash;
     // Context, if not empty, selects Ed25519ctx or provides the context string
@@ -136,7 +136,7 @@ public static (slice<byte> signature, error err) Sign(this PrivateKey priv, io.R
 }
 
 // HashFunc returns o.Hash.
-[GoRecv] public static crypto.Hash HashFunc(this ref Options o) {
+public static crypto.Hash HashFunc(this ref Options o) {
     return o.Hash;
 }
 

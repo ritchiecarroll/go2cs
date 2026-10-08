@@ -46,7 +46,7 @@ internal static int64 time_runtimeNano() {
 // Timer accesses are protected by the lock t.mu, with a snapshot of
 // t's state bits published in t.astate to enable certain fast paths to make
 // decisions about a timer without acquiring the lock.
-[GoType] partial struct timer {
+partial struct timer {
     // mu protects reads and writes to all fields, with exceptions noted below.
     internal mutex mu;
     internal atomic.Uint8 astate; // atomic copy of state bits at last unlock
@@ -117,7 +117,7 @@ internal static void init(this ж<timer> Ꮡt, Action<any, uintptr, int64> f, an
 }
 
 // A timers is a per-P set of timers.
-[GoType] partial struct timers {
+partial struct timers {
     // mu protects timers; timers are per-P, but the scheduler can
     // access the timers of another P, so we have to lock.
     internal mutex mu;
@@ -143,7 +143,7 @@ internal static void init(this ж<timer> Ꮡt, Action<any, uintptr, int64> f, an
     internal ж<synctestGroup> syncGroup;
 }
 
-[GoType] partial struct timerWhen {
+partial struct timerWhen {
     internal ж<timer> timer;
     internal int64 when;
 }
@@ -348,7 +348,7 @@ internal static bool resetForSleep(ж<g> Ꮡgp, @unsafe.Pointer _) {
 // A timeTimer is a runtime-allocated time.Timer or time.Ticker
 // with the additional runtime state following it.
 // The runtime state is inaccessible to package time.
-[GoType] partial struct timeTimer {
+partial struct timeTimer {
     internal @unsafe.Pointer c; // <-chan time.Time
     internal bool init;
     internal partial ref timer timer { get; }
@@ -1336,7 +1336,7 @@ internal static UntypedInt timerHeapN => 4;
 
 // siftUp puts the timer at position i in the right place
 // in the heap by moving it up toward the top of the heap.
-[GoRecv] internal static void siftUp(this ref timers ts, nint i) {
+internal static void siftUp(this ref timers ts, nint i) {
     var heap = ts.heap;
     if (i >= len(heap)) {
         badTimer();
@@ -1361,7 +1361,7 @@ internal static UntypedInt timerHeapN => 4;
 
 // siftDown puts the timer at position i in the right place
 // in the heap by moving it down toward the bottom of the heap.
-[GoRecv] internal static void siftDown(this ref timers ts, nint i) {
+internal static void siftDown(this ref timers ts, nint i) {
     var heap = ts.heap;
     nint n = len(heap);
     if (i >= n) {
@@ -1401,7 +1401,7 @@ internal static UntypedInt timerHeapN => 4;
 
 // initHeap reestablishes the heap order in the slice ts.heap.
 // It takes O(n) time for n=len(ts.heap), not the O(n log n) of n repeated add operations.
-[GoRecv] internal static void initHeap(this ref timers ts) {
+internal static void initHeap(this ref timers ts) {
     // Last possible element that needs sifting down is parent of last element;
     // last element is len(t)-1; parent of last element is (len(t)-1-1)/timerHeapN.
     if (len(ts.heap) <= 1) {

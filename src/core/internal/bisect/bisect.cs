@@ -314,7 +314,7 @@ public static (ж<Matcher>, error) New(@string pattern) {
 
 // A Matcher is the parsed, compiled form of a PATTERN string.
 // The nil *Matcher is valid: it has all changes enabled but none reported.
-[GoType] partial struct Matcher {
+partial struct Matcher {
     internal bool verbose;   // annotate reporting with human-helpful information
     internal bool quiet;   // disables all reporting.  reset if verbose is true. use case is -d=fmahash=qn
     internal bool enable;   // when true, list is for “enable and report” (when false, “disable and report”)
@@ -324,7 +324,7 @@ public static (ж<Matcher>, error) New(@string pattern) {
 
 // A cond is a single condition in the matcher.
 // Given an input id, if id&mask == bits, return the result.
-[GoType] partial struct cond {
+partial struct cond {
     internal uint64 mask;
     internal uint64 bits;
     internal bool result;
@@ -334,7 +334,7 @@ public static (ж<Matcher>, error) New(@string pattern) {
 // a given change, omitting the identifying information.
 // MarkerOnly returns true when bisect is using the printed reports
 // only for an intermediate search step, not for showing to users.
-[GoRecv] public static bool MarkerOnly(this ref Matcher m) {
+public static bool MarkerOnly(this ref Matcher m) {
     return !m.verbose;
 }
 
@@ -359,7 +359,7 @@ public static bool ShouldPrint(this ж<Matcher> Ꮡm, uint64 id) {
 }
 
 // matchResult returns the result from the first condition that matches id.
-[GoRecv] internal static bool matchResult(this ref Matcher m, uint64 id) {
+internal static bool matchResult(this ref Matcher m, uint64 id) {
     for (nint i = len(m.list) - 1; i >= 0; i--) {
         var c = Ꮡ(m.list, i);
         if ((uint64)(id & (~c).mask) == (~c).bits) {
@@ -484,7 +484,7 @@ internal static partial bool stack(this ж<Matcher> Ꮡm, Writer w) {
 
 // Writer is the same interface as io.Writer.
 // It is duplicated here to avoid importing io.
-[GoType] partial interface Writer {
+partial interface Writer {
     (nint, error) Write(slice<byte> _);
 }
 
@@ -758,11 +758,11 @@ public static uint64 Hash(params ꓸꓸꓸany dataʗp) {
 
 // parseError is a trivial error implementation,
 // defined here to avoid importing errors.
-[GoType] partial struct parseError {
+partial struct parseError {
     internal @string text;
 }
 
-[GoRecv] internal static @string Error(this ref parseError e) {
+internal static @string Error(this ref parseError e) {
     return e.text;
 }
 
@@ -811,7 +811,7 @@ internal static uint64 fnvUint32(uint64 h, uint32 x) {
 // It has two modes: an approximate but lock-free mode that
 // may still emit some duplicates, and a precise mode that uses
 // a lock and never emits duplicates.
-[GoType] partial struct dedup {
+partial struct dedup {
     // 128-entry 4-way, lossy cache for seenLossy
     internal array<array<uint64>> recent = new(128, () => new(4));
     // complete history for seen
@@ -838,7 +838,7 @@ internal static bool seen(this ж<dedup> Ꮡd, uint64 h) {
 // Each cache entry is N-way set-associative: h can appear in any of the slots.
 // If h does not appear in any of them, then it is inserted into a random slot,
 // overwriting whatever was there before.
-[GoRecv] internal static bool seenLossy(this ref dedup d, uint64 h) {
+internal static bool seenLossy(this ref dedup d, uint64 h) {
     var cache = Ꮡ(d.recent, (nuint)h % (nuint)len(d.recent));
     for (nint i = 0; i < 4; i++) {
         if (atomic.LoadUint64(cache.at<uint64>(i)) == h) {

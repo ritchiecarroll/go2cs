@@ -96,7 +96,7 @@ internal static array<uint8> first = new uint8[]{
 
 // acceptRange gives the range of valid values for the second byte in a UTF-8
 // sequence.
-[GoType] partial struct acceptRange {
+partial struct acceptRange {
     internal uint8 lo; // lowest value for second byte.
     internal uint8 hi; // highest value for second byte.
 }
@@ -210,7 +210,7 @@ public static (rune r, nint size) DecodeRune(slice<byte> p) {
 // An encoding is invalid if it is incorrect UTF-8, encodes a rune that is
 // out of range, or is not the shortest possible UTF-8 encoding for the
 // value. No other validation is performed.
-[GoStr] public static (rune r, nint size) DecodeRuneInString(sstring s) {
+public static (rune r, nint size) DecodeRuneInString(sstring s) {
     nint n = len(s);
     if (n < 1) {
         return (RuneError, 0);
@@ -461,7 +461,7 @@ public static nint RuneCount(slice<byte> p) {
 }
 
 // RuneCountInString is like [RuneCount] but its input is a string.
-[GoStr] public static nint /*n*/ RuneCountInString(sstring s) {
+public static nint /*n*/ RuneCountInString(sstring s) {
     nint n = default!;
 
     foreach ((_, _) in s) {

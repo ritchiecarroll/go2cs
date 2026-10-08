@@ -16,7 +16,7 @@ using go.@internal.trace.traceviewer;
 
 partial class traceviewer_package {
 
-[GoType] partial struct TraceConsumer {
+partial struct TraceConsumer {
     public Action<@string> ConsumeTimeUnit;
     public Action<ж<format.Event>, bool> ConsumeViewerEvent;
     public Action<@string, format.Frame> ConsumeViewerFrame;
@@ -94,7 +94,7 @@ public static TraceConsumer ViewerDataTraceConsumer(io.Writer w, int64 startIdx,
     );
 }
 
-[GoType("dyn")] internal partial struct SplittingTraceConsumer_eventSz {
+internal partial struct SplittingTraceConsumer_eventSz /*dyn*/ {
     public float64 Time;
     public nint Sz;
     public slice<nint> Frames;
@@ -223,15 +223,15 @@ public static (ж<splitter>, TraceConsumer) SplittingTraceConsumer(nint max) {
     ));
 }
 
-[GoType] public partial struct splitter {
+public partial struct splitter {
     public slice<Range> Ranges;
 }
 
-[GoType] partial struct countingWriter {
+partial struct countingWriter {
     internal nint size;
 }
 
-[GoRecv] internal static (nint, error) Write(this ref countingWriter cw, slice<byte> data) {
+internal static (nint, error) Write(this ref countingWriter cw, slice<byte> data) {
     cw.size += len(data);
     return (len(data), default!);
 }
@@ -284,7 +284,7 @@ public static void WalkStackFrames(map<@string, format.Frame> allFrames, nint id
     }
 }
 
-[GoType("num:nint")] partial struct Mode;
+partial struct Mode /*num:nint*/;
 
 public static Mode ModeGoroutineOriented => /* 1 << iota */ 1;
 public static Mode ModeTaskOriented => 2;
@@ -304,7 +304,7 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
     ));
 }
 
-[GoType] partial struct Emitter {
+partial struct Emitter {
     internal TraceConsumer c;
     internal time.Duration rangeStart;
     internal time.Duration rangeEnd;
@@ -325,48 +325,48 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
     internal uint64 asyncSliceSeq;
 }
 
-[GoType] partial struct task {
+partial struct task {
     internal @string name;
     internal nint sortIndex;
 }
 
-[GoRecv] public static void Gomaxprocs(this ref Emitter e, uint64 v) {
+public static void Gomaxprocs(this ref Emitter e, uint64 v) {
     if (v > e.gomaxprocs) {
         e.gomaxprocs = v;
     }
 }
 
-[GoRecv] public static void Resource(this ref Emitter e, uint64 id, @string name) {
+public static void Resource(this ref Emitter e, uint64 id, @string name) {
     if (e.filter != default! && !e.filter(id)) {
         return;
     }
     e.resources[id] = name;
 }
 
-[GoRecv] public static void SetResourceType(this ref Emitter e, @string name) {
+public static void SetResourceType(this ref Emitter e, @string name) {
     e.resourceType = name;
 }
 
-[GoRecv] public static void SetResourceFilter(this ref Emitter e, Func<uint64, bool> filter) {
+public static void SetResourceFilter(this ref Emitter e, Func<uint64, bool> filter) {
     e.filter = filter;
 }
 
-[GoRecv] public static void Task(this ref Emitter e, uint64 id, @string name, nint sortIndex) {
+public static void Task(this ref Emitter e, uint64 id, @string name, nint sortIndex) {
     e.tasks[id] = new task(name, sortIndex);
 }
 
-[GoRecv] public static void Slice(this ref Emitter e, SliceEvent s) {
+public static void Slice(this ref Emitter e, SliceEvent s) {
     if (e.filter != default! && !e.filter(s.Resource)) {
         return;
     }
     e.Δslice(s, format.ProcsSection, ""u8);
 }
 
-[GoRecv] public static void TaskSlice(this ref Emitter e, SliceEvent s) {
+public static void TaskSlice(this ref Emitter e, SliceEvent s) {
     e.Δslice(s, format.TasksSection, pickTaskColor(s.Resource));
 }
 
-[GoRecv] internal static void Δslice(this ref Emitter e, SliceEvent s, uint64 sectionID, @string cname) {
+internal static void Δslice(this ref Emitter e, SliceEvent s, uint64 sectionID, @string cname) {
     if (!e.tsWithinRange(s.Ts) && !e.tsWithinRange(s.Ts + s.Dur)) {
         return;
     }
@@ -384,7 +384,7 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
     )));
 }
 
-[GoType] partial struct SliceEvent {
+partial struct SliceEvent {
     public @string Name;
     public time.Duration Ts;
     public time.Duration Dur;
@@ -394,7 +394,7 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
     public any Arg;
 }
 
-[GoRecv] public static void AsyncSlice(this ref Emitter e, AsyncSliceEvent s) {
+public static void AsyncSlice(this ref Emitter e, AsyncSliceEvent s) {
     if (!e.tsWithinRange(s.Ts) && !e.tsWithinRange(s.Ts + s.Dur)) {
         return;
     }
@@ -432,14 +432,14 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
     )));
 }
 
-[GoType] partial struct AsyncSliceEvent {
+partial struct AsyncSliceEvent {
     public partial ref SliceEvent SliceEvent { get; }
     public @string Category;
     public @string Scope;
     public uint64 TaskColorIndex; // Take on the same color as the task with this ID.
 }
 
-[GoRecv] public static void Instant(this ref Emitter e, InstantEvent i) {
+public static void Instant(this ref Emitter e, InstantEvent i) {
     if (!e.tsWithinRange(i.Ts)) {
         return;
     }
@@ -462,7 +462,7 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
     )));
 }
 
-[GoType] partial struct InstantEvent {
+partial struct InstantEvent {
     public time.Duration Ts;
     public @string Name;
     public @string Category;
@@ -471,18 +471,18 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
     public any Arg;
 }
 
-[GoRecv] public static void Arrow(this ref Emitter e, ArrowEvent a) {
+public static void Arrow(this ref Emitter e, ArrowEvent a) {
     if (e.filter != default! && (!e.filter(a.FromResource) || !e.filter(a.ToResource))) {
         return;
     }
     e.arrow(a, format.ProcsSection);
 }
 
-[GoRecv] public static void TaskArrow(this ref Emitter e, ArrowEvent a) {
+public static void TaskArrow(this ref Emitter e, ArrowEvent a) {
     e.arrow(a, format.TasksSection);
 }
 
-[GoRecv] internal static void arrow(this ref Emitter e, ArrowEvent a, uint64 sectionID) {
+internal static void arrow(this ref Emitter e, ArrowEvent a, uint64 sectionID) {
     if (!e.tsWithinRange(a.Start) || !e.tsWithinRange(a.End)) {
         return;
     }
@@ -506,7 +506,7 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
     )));
 }
 
-[GoType] partial struct ArrowEvent {
+partial struct ArrowEvent {
     public @string Name;
     public time.Duration Start;
     public time.Duration End;
@@ -515,20 +515,20 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
     public uint64 ToResource;
 }
 
-[GoRecv] public static void Event(this ref Emitter e, ж<format.Event> Ꮡev) {
+public static void Event(this ref Emitter e, ж<format.Event> Ꮡev) {
     e.c.ConsumeViewerEvent(Ꮡev, true);
 }
 
-[GoRecv] public static void HeapAlloc(this ref Emitter e, time.Duration ts, uint64 v) {
+public static void HeapAlloc(this ref Emitter e, time.Duration ts, uint64 v) {
     e.heapStats.heapAlloc = v;
     e.emitHeapCounters(ts);
 }
 
-[GoRecv] public static void Focus(this ref Emitter e, uint64 id) {
+public static void Focus(this ref Emitter e, uint64 id) {
     e.focusResource = id;
 }
 
-[GoRecv] public static void GoroutineTransition(this ref Emitter e, time.Duration ts, GState from, GState to) {
+public static void GoroutineTransition(this ref Emitter e, time.Duration ts, GState from, GState to) {
     e.gstates[from]--;
     e.gstates[to]++;
     if (e.prevGstates == e.gstates) {
@@ -550,7 +550,7 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
     e.prevGstates = e.gstates.Clone();
 }
 
-[GoRecv] public static void IncThreadStateCount(this ref Emitter e, time.Duration ts, ThreadState state, int64 delta) {
+public static void IncThreadStateCount(this ref Emitter e, time.Duration ts, ThreadState state, int64 delta) {
     e.threadStats[state] += delta;
     if (e.prevThreadStats == e.threadStats) {
         return;
@@ -571,7 +571,7 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
     e.prevThreadStats = e.threadStats.Clone();
 }
 
-[GoRecv] public static void HeapGoal(this ref Emitter e, time.Duration ts, uint64 v) {
+public static void HeapGoal(this ref Emitter e, time.Duration ts, uint64 v) {
     // This cutoff at 1 PiB is a Workaround for https://github.com/golang/go/issues/63864.
     //
     // TODO(mknyszek): Remove this once the problem has been fixed.
@@ -583,7 +583,7 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
     e.emitHeapCounters(ts);
 }
 
-[GoRecv] internal static void emitHeapCounters(this ref Emitter e, time.Duration ts) {
+internal static void emitHeapCounters(this ref Emitter e, time.Duration ts) {
     if (e.prevHeapStats == e.heapStats) {
         return;
     }
@@ -605,7 +605,7 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
 }
 
 // Err returns an error if the emitter is in an invalid state.
-[GoRecv] public static error Err(this ref Emitter e) {
+public static error Err(this ref Emitter e) {
     if (e.gstates[GRunnable] < 0 || e.gstates[GRunning] < 0 || e.threadStats[ThreadStateInSyscall] < 0 || e.threadStats[ThreadStateInSyscallRuntime] < 0) {
         return fmt.Errorf(
             "runnable=%d running=%d insyscall=%d insyscallRuntime=%d"u8,
@@ -617,13 +617,13 @@ public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, 
     return default!;
 }
 
-[GoRecv] internal static bool tsWithinRange(this ref Emitter e, time.Duration ts) {
+internal static bool tsWithinRange(this ref Emitter e, time.Duration ts) {
     return e.rangeStart <= ts && ts <= e.rangeEnd;
 }
 
 // OptionalEvent emits ev if it's within the time range of the consumer, i.e.
 // the selected trace split range.
-[GoRecv] public static void OptionalEvent(this ref Emitter e, ж<format.Event> Ꮡev) {
+public static void OptionalEvent(this ref Emitter e, ж<format.Event> Ꮡev) {
     e.c.ConsumeViewerEvent(Ꮡev, false);
 }
 
@@ -634,7 +634,7 @@ private static readonly @string networkˢ = "Network"u8;
 private static readonly @string timersˢ = "Timers"u8;
 private static readonly @string syscallsˢ = "Syscalls"u8;
 
-[GoRecv] public static void Flush(this ref Emitter e) {
+public static void Flush(this ref Emitter e) {
     e.processMeta(format.StatsSection, statsˢ, 0);
     if (len(e.tasks) != 0) {
         e.processMeta(format.TasksSection, tasksˢ, 1);
@@ -658,7 +658,7 @@ private static readonly @string syscallsˢ = "Syscalls"u8;
     e.c.Flush();
 }
 
-[GoRecv] internal static void threadMeta(this ref Emitter e, uint64 sectionID, uint64 tid, @string name, nint priority) {
+internal static void threadMeta(this ref Emitter e, uint64 sectionID, uint64 tid, @string name, nint priority) {
     e.Event(Ꮡ(new format.Event(
         Name: "thread_name"u8,
         Phase: "M"u8,
@@ -675,7 +675,7 @@ private static readonly @string syscallsˢ = "Syscalls"u8;
     )));
 }
 
-[GoRecv] internal static void processMeta(this ref Emitter e, uint64 sectionID, @string name, nint priority) {
+internal static void processMeta(this ref Emitter e, uint64 sectionID, @string name, nint priority) {
     e.Event(Ꮡ(new format.Event(
         Name: "process_name"u8,
         Phase: "M"u8,
@@ -692,12 +692,12 @@ private static readonly @string syscallsˢ = "Syscalls"u8;
 
 // Stack emits the given frames and returns a unique id for the stack. No
 // pointers to the given data are being retained beyond the call to Stack.
-[GoRecv] public static nint Stack(this ref Emitter e, slice<ж<trace.Frame>> stk) {
+public static nint Stack(this ref Emitter e, slice<ж<trace.Frame>> stk) {
     return e.buildBranch(e.frameTree, stk);
 }
 
 // buildBranch builds one branch in the prefix tree rooted at ctx.frameTree.
-[GoRecv] internal static nint buildBranch(this ref Emitter e, frameNode parent, slice<ж<trace.Frame>> stk) {
+internal static nint buildBranch(this ref Emitter e, frameNode parent, slice<ж<trace.Frame>> stk) {
     if (len(stk) == 0) {
         return parent.id;
     }
@@ -715,7 +715,7 @@ private static readonly @string syscallsˢ = "Syscalls"u8;
     return e.buildBranch(node, stk);
 }
 
-[GoType] partial struct heapStats {
+partial struct heapStats {
     internal uint64 heapAlloc;
     internal uint64 nextGC;
 }
@@ -724,7 +724,7 @@ internal static float64 viewerTime(time.Duration t) {
     return (float64)(int64)t / (float64)(int64)time.Microsecond;
 }
 
-[GoType("num:nint")] partial struct GState;
+partial struct GState /*num:nint*/;
 
 public static GState GDead => /* iota */ 0;
 public static GState GRunnable => 1;
@@ -733,14 +733,14 @@ public static GState GWaiting => 3;
 public static GState GWaitingGC => 4;
 internal static GState gStateCount => 5;
 
-[GoType("num:nint")] partial struct ThreadState;
+partial struct ThreadState /*num:nint*/;
 
 public static ThreadState ThreadStateInSyscall => /* iota */ 0;
 public static ThreadState ThreadStateInSyscallRuntime => 1;
 public static ThreadState ThreadStateRunning => 2;
 internal static ThreadState threadStateCount => 3;
 
-[GoType] partial struct frameNode {
+partial struct frameNode {
     internal nint id;
     internal map<uint64, frameNode> children;
 }

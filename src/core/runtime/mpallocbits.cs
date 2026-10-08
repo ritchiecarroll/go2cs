@@ -8,26 +8,26 @@ using @internal.runtime;
 
 partial class runtime_package {
 
-[GoType("[8]uint64")] /* [pallocChunkPages / 64]uint64 */
-partial struct pageBits;
+/* [pallocChunkPages / 64]uint64 */
+partial struct pageBits /*[8]uint64*/;
 
 // get returns the value of the i'th bit in the bitmap.
-[GoRecv] internal static nuint get(this ref pageBits b, nuint i) {
+internal static nuint get(this ref pageBits b, nuint i) {
     return (nuint)((uint64)(((b.Value[i / 64] >> (int)((i % 64)))) & 1));
 }
 
 // block64 returns the 64-bit aligned block of bits containing the i'th bit.
-[GoRecv] internal static uint64 block64(this ref pageBits b, nuint i) {
+internal static uint64 block64(this ref pageBits b, nuint i) {
     return b.Value[i / 64];
 }
 
 // set sets bit i of pageBits.
-[GoRecv] internal static void set(this ref pageBits b, nuint i) {
+internal static void set(this ref pageBits b, nuint i) {
     b.Value[i / 64] |= (uint64)(((uint64)1 << (int)((i % 64))));
 }
 
 // setRange sets bits in the range [i, i+n).
-[GoRecv] internal static void setRange(this ref pageBits b, nuint i, nuint n) {
+internal static void setRange(this ref pageBits b, nuint i, nuint n) {
     _ = b.Value[i / 64];
     if (n == 1) {
         // Fast path for the n == 1 case.
@@ -51,7 +51,7 @@ partial struct pageBits;
 }
 
 // setAll sets all the bits of b.
-[GoRecv] internal static void setAll(this ref pageBits b) {
+internal static void setAll(this ref pageBits b) {
     foreach (var (i, _) in b.Value) {
         b.Value[i] = ~(uint64)0;
     }
@@ -59,17 +59,17 @@ partial struct pageBits;
 
 // setBlock64 sets the 64-bit aligned block of bits containing the i'th bit that
 // are set in v.
-[GoRecv] internal static void setBlock64(this ref pageBits b, nuint i, uint64 v) {
+internal static void setBlock64(this ref pageBits b, nuint i, uint64 v) {
     b.Value[i / 64] |= (uint64)(v);
 }
 
 // clear clears bit i of pageBits.
-[GoRecv] internal static void clear(this ref pageBits b, nuint i) {
+internal static void clear(this ref pageBits b, nuint i) {
     b.Value[i / 64] &= unchecked((uint64)~(uint64)(((uint64)1 << (int)((i % 64)))));
 }
 
 // clearRange clears bits in the range [i, i+n).
-[GoRecv] internal static void clearRange(this ref pageBits b, nuint i, nuint n) {
+internal static void clearRange(this ref pageBits b, nuint i, nuint n) {
     _ = b.Value[i / 64];
     if (n == 1) {
         // Fast path for the n == 1 case.
@@ -91,19 +91,19 @@ partial struct pageBits;
 }
 
 // clearAll frees all the bits of b.
-[GoRecv] internal static void clearAll(this ref pageBits b) {
+internal static void clearAll(this ref pageBits b) {
     builtin.clear(b.Value[..]);
 }
 
 // clearBlock64 clears the 64-bit aligned block of bits containing the i'th bit that
 // are set in v.
-[GoRecv] internal static void clearBlock64(this ref pageBits b, nuint i, uint64 v) {
+internal static void clearBlock64(this ref pageBits b, nuint i, uint64 v) {
     b.Value[i / 64] &= unchecked((uint64)~(uint64)(v));
 }
 
 // popcntRange counts the number of set bits in the
 // range [i, i+n).
-[GoRecv] internal static nuint /*s*/ popcntRange(this ref pageBits b, nuint i, nuint n) {
+internal static nuint /*s*/ popcntRange(this ref pageBits b, nuint i, nuint n) {
     nuint s = default!;
 
     if (n == 1) {
@@ -123,7 +123,7 @@ partial struct pageBits;
     return s;
 }
 
-[GoType("pageBits")] partial struct pallocBits;
+partial struct pallocBits /*pageBits*/;
 
 // summarize returns a packed summary of the bitmap in pallocBits.
 internal static pallocSum summarize(this ж<pallocBits> Ꮡb) {
@@ -427,7 +427,7 @@ internal static nuint findBitRange64(uint64 c, nuint n) {
 //
 // Update the comment on (*pageAlloc).chunks should this
 // structure change.
-[GoType] partial struct pallocData {
+partial struct pallocData {
     internal partial ref pallocBits pallocBits { get; }
     internal pageBits scavenged;
 }

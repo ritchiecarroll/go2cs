@@ -16,7 +16,7 @@ partial class raw_package {
 
 // Reader parses trace bytes with only very basic validation
 // into an event stream.
-[GoType] partial struct Reader {
+partial struct Reader {
     internal ж<bufio.Reader> r;
     internal version.Version v;
     internal slice<Δevent.Spec> specs;
@@ -34,12 +34,12 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
 }
 
 // Version returns the version of the trace that we're reading.
-[GoRecv] public static version.Version Version(this ref Reader r) {
+public static version.Version Version(this ref Reader r) {
     return r.v;
 }
 
 // ReadEvent reads and returns the next trace event in the byte stream.
-[GoRecv] public static (Event, error) ReadEvent(this ref Reader r) {
+public static (Event, error) ReadEvent(this ref Reader r) {
     var (evb, err) = r.r.ReadByte();
     if (AreEqual(err, io.EOF)) {
         return (new Event(nil), io.EOF);
@@ -82,7 +82,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
     ), default!);
 }
 
-[GoRecv] internal static (slice<uint64>, error) readArgs(this ref Reader r, nint n) {
+internal static (slice<uint64>, error) readArgs(this ref Reader r, nint n) {
     slice<uint64> args = default!;
     for (nint i = 0; i < n; i++) {
         var (val, err) = binary.ReadUvarint(new bufio_ReaderжByteReader(r.r));
@@ -94,7 +94,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
     return (args, default!);
 }
 
-[GoRecv] internal static (slice<byte>, error) readData(this ref Reader r) {
+internal static (slice<byte>, error) readData(this ref Reader r) {
     var (len, err) = binary.ReadUvarint(new bufio_ReaderжByteReader(r.r));
     if (err != default!) {
         return (default!, err);

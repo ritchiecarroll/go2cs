@@ -9,8 +9,8 @@ using os = os_package;
 partial class elf_package {
 
 // errorReader returns error from all operations.
-[GoType] partial struct errorReader {
-    [GoEmbedded] internal error error;
+partial struct errorReader {
+    /*embed*/ internal error error;
 }
 
 internal static (nint n, error err) Read(this errorReader r, slice<byte> p) {
@@ -33,14 +33,14 @@ internal static error Close(this errorReader r) {
 // In general Seek may not be efficient, but it is optimized for
 // common cases such as seeking to the end to find the length of the
 // data.
-[GoType] partial struct readSeekerFromReader {
+partial struct readSeekerFromReader {
     internal Func<(io.Reader, error)> reset;
     internal io.Reader r;
     internal int64 size;
     internal int64 offset;
 }
 
-[GoRecv] internal static void start(this ref readSeekerFromReader r) {
+internal static void start(this ref readSeekerFromReader r) {
     var (x, err) = r.reset();
     if (err != default!){
         r.r = new errorReader(err);
@@ -50,7 +50,7 @@ internal static error Close(this errorReader r) {
     r.offset = 0;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref readSeekerFromReader r, slice<byte> p) {
+internal static (nint n, error err) Read(this ref readSeekerFromReader r, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -62,7 +62,7 @@ internal static error Close(this errorReader r) {
     return (n, err);
 }
 
-[GoRecv] internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offset, nint whence) {
+internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offset, nint whence) {
     int64 newOffset = default!;
     var exprᴛ1 = whence;
     if (exprᴛ1 == io.SeekStart) {

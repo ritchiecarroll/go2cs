@@ -52,7 +52,7 @@ public static UntypedInt FILE_ATTRIBUTE_RECALL_ON_OPEN => 0x00040000;
 public static UntypedInt FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS => 0x00400000;
 public static UntypedInt INVALID_FILE_ATTRIBUTES => 0xffffffff;
 
-[GoType("num:uint32")] partial struct ACCESS_MASK;
+partial struct ACCESS_MASK /*num:uint32*/;
 
 // Constants for type ACCESS_MASK
 public static UntypedInt DELETE => 0x00010000;
@@ -90,7 +90,7 @@ public static UntypedInt GENERIC_EXECUTE => 0x20000000;
 public static UntypedInt GENERIC_ALL => 0x10000000;
 
 // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/ns-wdm-_acl
-[GoType] partial struct ACL {
+partial struct ACL {
     public byte AclRevision;
     public byte Sbz1;
     public uint16 AclSize;
@@ -99,13 +99,13 @@ public static UntypedInt GENERIC_ALL => 0x10000000;
 }
 
 // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/ns-wdm-_io_status_block
-[GoType] partial struct IO_STATUS_BLOCK {
+partial struct IO_STATUS_BLOCK {
     public NTStatus Status;
     public uintptr Information;
 }
 
 // https://learn.microsoft.com/en-us/windows/win32/api/ntdef/ns-ntdef-_object_attributes
-[GoType] partial struct OBJECT_ATTRIBUTES {
+partial struct OBJECT_ATTRIBUTES {
     public uint32 Length;
     public syscallꓸHandle RootDirectory;
     public ж<NTUnicodeString> ObjectName;
@@ -115,7 +115,7 @@ public static UntypedInt GENERIC_ALL => 0x10000000;
 }
 
 // init sets o's RootDirectory, ObjectName, and Length.
-[GoRecv] internal static error init(this ref OBJECT_ATTRIBUTES o, syscallꓸHandle root, @string name) {
+internal static error init(this ref OBJECT_ATTRIBUTES o, syscallꓸHandle root, @string name) {
     if (name == "."u8) {
         name = ""u8;
     }
@@ -155,7 +155,7 @@ public static UntypedInt OBJ_DONT_REPARSE => 0x00001000;
 public static UntypedInt OBJ_VALID_ATTRIBUTES => 0x00001FF2;
 
 // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_security_descriptor
-[GoType] partial struct SECURITY_DESCRIPTOR {
+partial struct SECURITY_DESCRIPTOR {
     internal byte revision;
     internal byte sbz1;
     internal SECURITY_DESCRIPTOR_CONTROL control;
@@ -165,10 +165,10 @@ public static UntypedInt OBJ_VALID_ATTRIBUTES => 0x00001FF2;
     internal ж<ACL> dacl;
 }
 
-[GoType("num:uint16")] partial struct SECURITY_DESCRIPTOR_CONTROL;
+partial struct SECURITY_DESCRIPTOR_CONTROL /*num:uint16*/;
 
 // https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-security_quality_of_service
-[GoType] partial struct SECURITY_QUALITY_OF_SERVICE {
+partial struct SECURITY_QUALITY_OF_SERVICE {
     public uint32 Length;
     public uint32 ImpersonationLevel; // type SECURITY_IMPERSONATION_LEVEL
     public byte ContextTrackingMode;   // type SECURITY_CONTEXT_TRACKING_MODE
@@ -206,12 +206,12 @@ public static UntypedInt FILE_OPEN_NO_RECALL => 0x00400000;
 public static UntypedInt FILE_OPEN_FOR_FREE_SPACE_QUERY => 0x00800000;
 
 // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/ns-ntddk-_file_disposition_information
-[GoType] partial struct FILE_DISPOSITION_INFORMATION {
+partial struct FILE_DISPOSITION_INFORMATION {
     public bool DeleteFile;
 }
 
 // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/ns-ntddk-_file_disposition_information_ex
-[GoType] partial struct FILE_DISPOSITION_INFORMATION_EX {
+partial struct FILE_DISPOSITION_INFORMATION_EX {
     public uint32 Flags;
 }
 

@@ -93,7 +93,7 @@ internal static UntypedInt itNone => 0;
 internal static UntypedInt itAdam7 => 1;
 
 // interlaceScan defines the placement and size of a pass for Adam7 interlacing.
-[GoType] partial struct interlaceScan {
+partial struct interlaceScan {
     internal nint xFactor, yFactor, xOffset, yOffset;
 }
 
@@ -129,7 +129,7 @@ internal static UntypedInt dsSeenIEND => 5;
 
 internal static readonly @string pngHeader = ((@string)(new byte[]{0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a}));
 
-[GoType] partial struct decoder {
+partial struct decoder {
     internal io.Reader r;
     internal image.Image img;
     internal hash.Hash32 crc;
@@ -147,7 +147,7 @@ internal static readonly @string pngHeader = ((@string)(new byte[]{0x89, 0x50, 0
     internal array<byte> transparent = new(6);
 }
 
-[GoType("@string")] partial struct FormatError;
+partial struct FormatError /*@string*/;
 
 public static @string Error(this FormatError e) {
     return "png: invalid format: "u8 + ((@string)e);
@@ -155,7 +155,7 @@ public static @string Error(this FormatError e) {
 
 internal static FormatError chunkOrderError = ((FormatError)(@string)"chunk out of order"u8);
 
-[GoType("@string")] partial struct UnsupportedError;
+partial struct UnsupportedError /*@string*/;
 
 public static @string Error(this UnsupportedError e) {
     return "png: unsupported feature: "u8 + ((@string)e);
@@ -169,7 +169,7 @@ internal static readonly @string invalidInterlaceMethodˢ = "invalid interlace m
 internal static readonly @string nonPositiveDimensionˢ = "non-positive dimension"u8;
 internal static readonly @string dimensionOverflowˢ = "dimension overflow"u8;
 
-[GoRecv] internal static error parseIHDR(this ref decoder d, uint32 length) {
+internal static error parseIHDR(this ref decoder d, uint32 length) {
     if (length != 13) {
         return ((FormatError)(@string)badIhdrLengthˢ);
     }
@@ -288,7 +288,7 @@ internal static readonly @string dimensionOverflowˢ = "dimension overflow"u8;
 internal static readonly @string badPlteLengthˢ = "bad PLTE length"u8;
 internal static readonly @string plteColorTypeMismatchˢ = "PLTE, color type mismatch"u8;
 
-[GoRecv] internal static error parsePLTE(this ref decoder d, uint32 length) {
+internal static error parsePLTE(this ref decoder d, uint32 length) {
     nint np = (nint)(length / 3); // The number of palette entries.
     if (length % 3 != 0 || np <= 0 || np > 256 || np > ((nint)1).Lsh((nuint)d.depth)) {
         return ((FormatError)(@string)badPlteLengthˢ);
@@ -329,7 +329,7 @@ internal static readonly @string plteColorTypeMismatchˢ = "PLTE, color type mis
 internal static readonly @string badTRNSLengthˢ = "bad tRNS length"u8;
 internal static readonly @string tRNSColorTypeMismatchˢ = "tRNS, color type mismatch"u8;
 
-[GoRecv] internal static error parsetRNS(this ref decoder d, uint32 length) {
+internal static error parsetRNS(this ref decoder d, uint32 length) {
     var exprᴛ1 = d.cb;
     if (exprᴛ1 == cbG1 || exprᴛ1 == cbG2 || exprᴛ1 == cbG4 || exprᴛ1 == cbG8 || exprᴛ1 == cbG16) {
         if (length != 2) {
@@ -403,7 +403,7 @@ internal static readonly @string idatChunkLengthOverflowˢ = "IDAT chunk length 
 // immediately before the first Read call is that d.r is positioned between the
 // first IDAT and xxx, and the decoder state immediately after the last Read
 // call is that d.r is positioned between yy and crc1.
-[GoRecv] internal static (nint, error) Read(this ref decoder d, slice<byte> p) {
+internal static (nint, error) Read(this ref decoder d, slice<byte> p) {
     if (len(p) == 0) {
         return (0, default!);
     }
@@ -499,7 +499,7 @@ internal static (image.Image, error) decode(this ж<decoder> Ꮡd) {
 internal static readonly @string badFilterTypeˢ = "bad filter type"u8;
 
 // readImagePass reads a single image pass, sized according to the pass number.
-[GoRecv] internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader r, nint pass, bool allocateOnly) {
+internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader r, nint pass, bool allocateOnly) {
     nint bitsPerPixel = 0;
     nint pixOffset = 0;
     ж<image.Gray> gray = default!;
@@ -903,7 +903,7 @@ internal static readonly @string badFilterTypeˢ = "bad filter type"u8;
 }
 
 // mergePassInto merges a single pass into a full sized image.
-[GoRecv] internal static void mergePassInto(this ref decoder d, image.Image dst, image.Image src, nint pass) {
+internal static void mergePassInto(this ref decoder d, image.Image dst, image.Image src, nint pass) {
     var p = interlacing[pass];
     slice<uint8> srcPix = default!;
     slice<uint8> dstPix = default!;
@@ -1000,7 +1000,7 @@ internal static error /*err*/ parseIDAT(this ж<decoder> Ꮡd, uint32 length) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string badIendLengthˢ = "bad IEND length"u8;
 
-[GoRecv] internal static error parseIEND(this ref decoder d, uint32 length) {
+internal static error parseIEND(this ref decoder d, uint32 length) {
     if (length != 0) {
         return ((FormatError)(@string)badIendLengthˢ);
     }
@@ -1099,7 +1099,7 @@ internal static error parseChunk(this ж<decoder> Ꮡd, bool configOnly) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string invalidChecksumˢ = "invalid checksum"u8;
 
-[GoRecv] internal static error verifyChecksum(this ref decoder d) {
+internal static error verifyChecksum(this ref decoder d) {
     {
         var (_, err) = io.ReadFull(d.r, d.tmp[..4]); if (err != default!) {
             return err;
@@ -1114,7 +1114,7 @@ internal static readonly @string invalidChecksumˢ = "invalid checksum"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string notAPngFileˢ = "not a PNG file"u8;
 
-[GoRecv] internal static error checkHeader(this ref decoder d) {
+internal static error checkHeader(this ref decoder d) {
     var (_, err) = io.ReadFull(d.r, d.tmp[..(int)(len(pngHeader))]);
     if (err != default!) {
         return err;

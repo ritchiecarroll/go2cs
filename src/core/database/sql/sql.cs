@@ -109,7 +109,7 @@ public static slice<@string> Drivers() {
 //
 // For a more concise way to create NamedArg values, see
 // the [Named] function.
-[GoType] partial struct NamedArg {
+partial struct NamedArg {
     internal EmptyStruct _NamedFieldsRequired;
     // Name is the name of the parameter placeholder.
     //
@@ -144,7 +144,7 @@ public static NamedArg Named(@string name, any value) {
     return new NamedArg(Name: name, Value: value);
 }
 
-[GoType("num:nint")] partial struct IsolationLevel;
+partial struct IsolationLevel /*num:nint*/;
 
 // Various isolation levels that drivers may support in [DB.BeginTx].
 // If a driver does not support a given isolation level an error may be returned.
@@ -212,14 +212,14 @@ public static @string String(this IsolationLevel i) {
 internal static fmt.Stringer _ᴛ1ʗ = ((IsolationLevel)LevelDefault);
 
 // TxOptions holds the transaction options to be used in [DB.BeginTx].
-[GoType] partial struct TxOptions {
+partial struct TxOptions {
     // Isolation is the transaction isolation level.
     // If zero, the driver or database's default level is used.
     public IsolationLevel Isolation;
     public bool ReadOnly;
 }
 
-[GoType("[]byte")] partial struct RawBytes;
+partial struct RawBytes /*[]byte*/;
 
 // NullString represents a string that may be null.
 // NullString implements the [Scanner] interface so
@@ -233,7 +233,7 @@ internal static fmt.Stringer _ᴛ1ʗ = ((IsolationLevel)LevelDefault);
 //	} else {
 //	   // NULL value
 //	}
-[GoType] partial struct NullString {
+partial struct NullString {
     public @string String;
     public bool Valid; // Valid is true if String is not NULL
 }
@@ -261,7 +261,7 @@ public static (driverꓸValue, error) Value(this NullString ns) {
 // NullInt64 represents an int64 that may be null.
 // NullInt64 implements the [Scanner] interface so
 // it can be used as a scan destination, similar to [NullString].
-[GoType] partial struct NullInt64 {
+partial struct NullInt64 {
     public int64 Int64;
     public bool Valid; // Valid is true if Int64 is not NULL
 }
@@ -289,7 +289,7 @@ public static (driverꓸValue, error) Value(this NullInt64 n) {
 // NullInt32 represents an int32 that may be null.
 // NullInt32 implements the [Scanner] interface so
 // it can be used as a scan destination, similar to [NullString].
-[GoType] partial struct NullInt32 {
+partial struct NullInt32 {
     public int32 Int32;
     public bool Valid; // Valid is true if Int32 is not NULL
 }
@@ -317,7 +317,7 @@ public static (driverꓸValue, error) Value(this NullInt32 n) {
 // NullInt16 represents an int16 that may be null.
 // NullInt16 implements the [Scanner] interface so
 // it can be used as a scan destination, similar to [NullString].
-[GoType] partial struct NullInt16 {
+partial struct NullInt16 {
     public int16 Int16;
     public bool Valid; // Valid is true if Int16 is not NULL
 }
@@ -346,7 +346,7 @@ public static (driverꓸValue, error) Value(this NullInt16 n) {
 // NullByte represents a byte that may be null.
 // NullByte implements the [Scanner] interface so
 // it can be used as a scan destination, similar to [NullString].
-[GoType] partial struct NullByte {
+partial struct NullByte {
     public byte Byte;
     public bool Valid; // Valid is true if Byte is not NULL
 }
@@ -375,7 +375,7 @@ public static (driverꓸValue, error) Value(this NullByte n) {
 // NullFloat64 represents a float64 that may be null.
 // NullFloat64 implements the [Scanner] interface so
 // it can be used as a scan destination, similar to [NullString].
-[GoType] partial struct NullFloat64 {
+partial struct NullFloat64 {
     public float64 Float64;
     public bool Valid; // Valid is true if Float64 is not NULL
 }
@@ -403,7 +403,7 @@ public static (driverꓸValue, error) Value(this NullFloat64 n) {
 // NullBool represents a bool that may be null.
 // NullBool implements the [Scanner] interface so
 // it can be used as a scan destination, similar to [NullString].
-[GoType] partial struct NullBool {
+partial struct NullBool {
     public bool Bool;
     public bool Valid; // Valid is true if Bool is not NULL
 }
@@ -431,7 +431,7 @@ public static (driverꓸValue, error) Value(this NullBool n) {
 // NullTime represents a [time.Time] that may be null.
 // NullTime implements the [Scanner] interface so
 // it can be used as a scan destination, similar to [NullString].
-[GoType] partial struct NullTime {
+partial struct NullTime {
     public time.Time Time;
     public bool Valid; // Valid is true if Time is not NULL
 }
@@ -470,7 +470,7 @@ public static (driverꓸValue, error) Value(this NullTime n) {
 //	}
 //
 // T should be one of the types accepted by [driver.Value].
-[GoType] partial struct Null<T> {
+partial struct Null<T> {
     public T V;
     public bool Valid;
 }
@@ -506,7 +506,7 @@ public static (driverꓸValue, error) Value<T>(this Null<T> n) {
 }
 
 // Scanner is an interface used by [Rows.Scan].
-[GoType] partial interface Scanner {
+partial interface Scanner {
     // Scan assigns a value from a database driver.
     //
     // The src value will be of one of the following types:
@@ -536,7 +536,7 @@ public static (driverꓸValue, error) Value<T>(this Null<T> n) {
 //
 //	var outArg string
 //	_, err := db.ExecContext(ctx, "ProcName", sql.Named("Arg1", sql.Out{Dest: &outArg}))
-[GoType] partial struct Out {
+partial struct Out {
     internal EmptyStruct _NamedFieldsRequired;
     // Dest is a pointer to the value that will be set to the result of the
     // stored procedure's OUTPUT parameter.
@@ -564,7 +564,7 @@ public static error ErrNoRows = errors.New("sql: no rows in result set"u8);
 // [Tx.Rollback] is called on the transaction, that transaction's
 // connection is returned to [DB]'s idle connection pool. The pool size
 // can be controlled with [DB.SetMaxIdleConns].
-[GoType] partial struct DB {
+partial struct DB {
     // Total time waited for new connections.
     internal atomic.Int64 waitDuration;
     internal driver.Connector connector;
@@ -597,7 +597,7 @@ public static error ErrNoRows = errors.New("sql: no rows in result set"u8);
     internal Action stop; // stop cancels the connection opener.
 }
 
-[GoType("num:uint8")] partial struct connReuseStrategy;
+partial struct connReuseStrategy /*num:uint8*/;
 
 internal static connReuseStrategy alwaysNewConn => /* iota */ 0;
 internal static connReuseStrategy cachedOrNewConn => 1;
@@ -606,7 +606,7 @@ internal static connReuseStrategy cachedOrNewConn => 1;
 // be held during all calls into the Conn. (including any calls onto
 // interfaces returned via that Conn, such as calls on Tx, Stmt,
 // Result, Rows)
-[GoType] partial struct driverConn {
+partial struct driverConn {
     internal ж<DB> db;
     internal time.Time createdAt;
     public partial ref sync_package.Mutex Mutex { get; }  // guards following
@@ -642,7 +642,7 @@ internal static void removeOpenStmt(this ж<driverConn> Ꮡdc, ж<driverStmt> �
     finally { if (ᒐd1) Ꮡdc.of(driverConn.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-[GoRecv] internal static bool expired(this ref driverConn dc, time.Duration timeout) {
+internal static bool expired(this ref driverConn dc, time.Duration timeout) {
     if (timeout <= 0) {
         return false;
     }
@@ -795,8 +795,8 @@ internal static error finalClose(this ж<driverConn> Ꮡdc) {
 // driverStmt associates a driver.Stmt with the
 // *driverConn from which it came, so the driverConn's lock can be
 // held during calls.
-[GoType] partial struct driverStmt {
-    [GoEmbedded] public sync_package.Locker Locker; // the *driverConn
+partial struct driverStmt {
+    /*embed*/ public sync_package.Locker Locker; // the *driverConn
     internal driver.Stmt si;
     internal bool closed;
     internal error closeErr; // return value of previous Close call
@@ -823,11 +823,11 @@ internal static error Close(this ж<driverStmt> Ꮡds) {
     finally { if (ᒐd1) Ꮡds.DerefOrNull().Locker.Unlock(); ᒐ.Run(); }
 }
 
-[GoType("map[any, bool]")] partial struct depSet;
+partial struct depSet /*map[any, bool]*/;
 
 // The finalCloser interface is used by (*DB).addDep and related
 // dependency reference counting.
-[GoType] partial interface finalCloser {
+partial interface finalCloser {
     // finalClose is called when the reference count of an object
     // goes to zero. (*DB).mu is not held while calling it.
     error finalClose();
@@ -849,7 +849,7 @@ internal static void addDep(this ж<DB> Ꮡdb, finalCloser x, any dep) {
     finally { if (ᒐd1) Ꮡdb.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[GoRecv] internal static void addDepLocked(this ref DB db, finalCloser x, any dep) {
+internal static void addDepLocked(this ref DB db, finalCloser x, any dep) {
     if (db.dep == default!) {
         db.dep = new map<finalCloser, depSet>();
     }
@@ -874,7 +874,7 @@ internal static error removeDep(this ж<DB> Ꮡdb, finalCloser x, any dep) {
     return fn();
 }
 
-[GoRecv] internal static Func<error> removeDepLocked(this ref DB db, finalCloser x, any dep) {
+internal static Func<error> removeDepLocked(this ref DB db, finalCloser x, any dep) {
     var (xdep, ok) = db.dep[x, ꟷ];
     if (!ok) {
         throw panic(fmt.Sprintf("unpaired removeDep: no deps for %T"u8, x));
@@ -907,7 +907,7 @@ internal static error removeDep(this ж<DB> Ꮡdb, finalCloser x, any dep) {
 // to block until the connectionOpener can satisfy the backlog of requests.
 internal static nint connectionRequestQueueSize = 1000000;
 
-[GoType] partial struct dsnConnector {
+partial struct dsnConnector {
     internal @string dsn;
     internal driver.Driver driver;
 }
@@ -985,7 +985,7 @@ public static (ж<DB>, error) Open(@string driverName, @string dataSourceName) {
     return (OpenDB(new dsnConnector(dsn: dataSourceName, driver: driveri)), default!);
 }
 
-[GoRecv] internal static error pingDC(this ref DB db, context.Context ctx, ж<driverConn> Ꮡdc, Action<error> release) {
+internal static error pingDC(this ref DB db, context.Context ctx, ж<driverConn> Ꮡdc, Action<error> release) {
     ref var dc = ref Ꮡdc.DerefOrNull();
 
     ref var err = ref heap<error>(out var Ꮡerr);
@@ -1074,7 +1074,7 @@ public static error Close(this ж<DB> Ꮡdb) {
 
 internal static UntypedInt defaultMaxIdleConns => 2;
 
-[GoRecv] internal static nint maxIdleConnsLocked(this ref DB db) {
+internal static nint maxIdleConnsLocked(this ref DB db) {
     nint n = db.maxIdleCount;
     switch (ᐧ) {
     case {} when n is 0: {
@@ -1090,7 +1090,7 @@ internal static UntypedInt defaultMaxIdleConns => 2;
 }
 
 // TODO(bradfitz): ask driver, if supported, for its default preference
-[GoRecv] internal static time.Duration shortestIdleTimeLocked(this ref DB db) {
+internal static time.Duration shortestIdleTimeLocked(this ref DB db) {
     if (db.maxIdleTime <= 0) {
         return db.maxLifetime;
     }
@@ -1284,7 +1284,7 @@ internal static void connectionCleaner(this ж<DB> Ꮡdb, time.Duration d) {
 // connectionCleanerRunLocked removes connections that should be closed from
 // freeConn and returns them along side an updated duration to the next check
 // if a quicker check is required to ensure connections are checked appropriately.
-[GoRecv] internal static (time.Duration, slice<ж<driverConn>>) connectionCleanerRunLocked(this ref DB db, time.Duration d) {
+internal static (time.Duration, slice<ж<driverConn>>) connectionCleanerRunLocked(this ref DB db, time.Duration d) {
     int64 idleClosing = default!;
     slice<ж<driverConn>> closing = default!;
     if (db.maxIdleTime > 0) {
@@ -1342,7 +1342,7 @@ internal static void connectionCleaner(this ж<DB> Ꮡdb, time.Duration d) {
 }
 
 // DBStats contains database statistics.
-[GoType] partial struct DBStats {
+partial struct DBStats {
     public nint MaxOpenConnections; // Maximum number of open connections to the database.
     // Pool Status
     public nint OpenConnections; // The number of established connections both in use and idle.
@@ -1386,7 +1386,7 @@ public static DBStats Stats(this ж<DB> Ꮡdb) {
 // Assumes db.mu is locked.
 // If there are connRequests and the connection limit hasn't been reached,
 // then tell the connectionOpener to open new connections.
-[GoRecv] internal static void maybeOpenNewConnections(this ref DB db) {
+internal static void maybeOpenNewConnections(this ref DB db) {
     nint numRequests = db.connRequests.Len();
     if (db.maxOpen > 0) {
         nint numCanOpen = db.maxOpen - db.numOpen;
@@ -1468,7 +1468,7 @@ internal static void openNewConnection(this ж<DB> Ꮡdb, context.Context ctx) {
 // connRequest represents one request for a new connection
 // When there are no idle connections available, DB.conn will create
 // a new connRequest and put it on the db.connRequests list.
-[GoType] partial struct connRequest {
+partial struct connRequest {
     internal ж<driverConn> conn;
     internal error err;
 }
@@ -1754,7 +1754,7 @@ internal static bool putConnDBLocked(this ж<DB> Ꮡdb, ж<driverConn> Ꮡdc, er
 // connection to be opened.
 internal static UntypedInt maxBadConnRetries => 2;
 
-[GoRecv] internal static error retry(this ref DB db, Func<connReuseStrategy, error> fn) {
+internal static error retry(this ref DB db, Func<connReuseStrategy, error> fn) {
     for (var i = (int64)0; i < maxBadConnRetries; i++) {
         var err = fn(cachedOrNewConn);
         // retry if err is driver.ErrBadConn
@@ -1887,7 +1887,7 @@ internal static (Result, error) exec(this ж<DB> Ꮡdb, context.Context ctx, @st
     return db.execDC(ctx, dc, dc.releaseConn, query, args);
 }
 
-[GoRecv] internal static (Result res, error err) execDC(this ref DB db, context.Context ctx, ж<driverConn> Ꮡdc, Action<error> release, @string query, slice<any> args) {
+internal static (Result res, error err) execDC(this ref DB db, context.Context ctx, ж<driverConn> Ꮡdc, Action<error> release, @string query, slice<any> args) {
     Result res = default!;
     error err = default!;
     GoFrame ᒐ = default;
@@ -1980,7 +1980,7 @@ internal static (ж<Rows>, error) query(this ж<DB> Ꮡdb, context.Context ctx, 
 // The connection gets released by the releaseConn function.
 // The ctx context is from a query method and the txctx context is from an
 // optional transaction context.
-[GoRecv] internal static (ж<Rows>, error) queryDC(this ref DB db, context.Context ctx, context.Context txctx, ж<driverConn> Ꮡdc, Action<error> ΔreleaseConn, @string query, slice<any> args) {
+internal static (ж<Rows>, error) queryDC(this ref DB db, context.Context ctx, context.Context txctx, ж<driverConn> Ꮡdc, Action<error> ΔreleaseConn, @string query, slice<any> args) {
     ref var dc = ref Ꮡdc.DerefOrNull();
 
     var (queryerCtx, ok) = dc.ci._<driver.QueryerContext>(ᐧ);
@@ -2151,7 +2151,7 @@ internal static partial (ж<Tx> tx, error err) beginDC(this ж<DB> Ꮡdb, contex
 }
 
 // Driver returns the database's underlying driver.
-[GoRecv] public static driver.Driver Driver(this ref DB db) {
+public static driver.Driver Driver(this ref DB db) {
     return db.connector.Driver();
 }
 
@@ -2196,7 +2196,7 @@ public static (ж<ΔConn>, error) Conn(this ж<DB> Ꮡdb, context.Context ctx) {
 //
 // After a call to [Conn.Close], all operations on the
 // connection fail with [ErrConnDone].
-[GoType] partial struct ΔConn {
+partial struct ΔConn {
     internal ж<DB> db;
     // closemu prevents the connection from closing while there
     // is an active query. It is held for read during queries
@@ -2364,7 +2364,7 @@ internal static void closemuRUnlockCondReleaseConn(this ж<ΔConn> Ꮡc, error e
     }
 }
 
-[GoRecv] internal static context.Context txCtx(this ref ΔConn c) {
+internal static context.Context txCtx(this ref ΔConn c) {
     return default!;
 }
 
@@ -2399,7 +2399,7 @@ public static error Close(this ж<ΔConn> Ꮡc) {
     return Ꮡc.close(default!);
 }
 
-[GoType("dyn")] partial struct Tx_stmts {
+partial struct Tx_stmts /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; }
     internal slice<ж<ΔStmt>> v;
 }
@@ -2414,7 +2414,7 @@ public static error Close(this ж<ΔConn> Ꮡc) {
 // The statements prepared for a transaction by calling
 // the transaction's [Tx.Prepare] or [Tx.Stmt] methods are closed
 // by the call to [Tx.Commit] or [Tx.Rollback].
-[GoType] partial struct Tx {
+partial struct Tx {
     internal ж<DB> db;
     // closemu prevents the transaction from closing while there
     // is an active query. It is held for read during queries
@@ -2473,7 +2473,7 @@ public static error ErrTxDone = errors.New("sql: transaction has already been co
 // close returns the connection to the pool and
 // must only be called by Tx.rollback or Tx.Commit while
 // tx is already canceled and won't be executed concurrently.
-[GoRecv] internal static void close(this ref Tx tx, error err) {
+internal static void close(this ref Tx tx, error err) {
     tx.releaseConn(err);
     tx.dc = default!;
     tx.txi = default!;
@@ -2508,7 +2508,7 @@ internal static (ж<driverConn>, Action<error>, error) grabConn(this ж<Tx> Ꮡt
     return (tx.dc, Ꮡtx.closemuRUnlockRelease, default!);
 }
 
-[GoRecv] internal static context.Context txCtx(this ref Tx tx) {
+internal static context.Context txCtx(this ref Tx tx) {
     return tx.ctx;
 }
 
@@ -2849,14 +2849,14 @@ public static ж<Row> QueryRow(this ж<Tx> Ꮡtx, @string query, params ꓸꓸ�
 }
 
 // connStmt is a prepared statement on a particular connection.
-[GoType] partial struct ΔconnStmt {
+partial struct ΔconnStmt {
     internal ж<driverConn> dc;
     internal ж<driverStmt> ds;
 }
 
 // stmtConnGrabber represents a Tx or Conn that will return the underlying
 // driverConn and release function.
-[GoType] partial interface stmtConnGrabber {
+partial interface stmtConnGrabber {
     // grabConn returns the driverConn and the associated release function
     // that must be called when the operation completes.
     (ж<driverConn>, Action<error>, error) grabConn(context.Context _);
@@ -2878,7 +2878,7 @@ internal static stmtConnGrabber _ᴛ3ʗ = new ΔConnжstmtConnGrabber(Ꮡ(new Δ
 // If a Stmt is prepared on a [DB], it will remain usable for the lifetime of the
 // [DB]. When the Stmt needs to execute on a new underlying connection, it will
 // prepare itself on the new connection automatically.
-[GoType] partial struct ΔStmt {
+partial struct ΔStmt {
     // Immutable:
     internal ж<DB> db; // where we came from
     internal @string query; // that created the Stmt
@@ -2975,7 +2975,7 @@ internal static (Result, error) resultFromStatement(context.Context ctx, driver.
 //
 // To avoid lock contention on DB.mu, we do it only when
 // s.db.numClosed - s.lastNum is large enough.
-[GoRecv] internal static void removeClosedStmtLocked(this ref ΔStmt s) {
+internal static void removeClosedStmtLocked(this ref ΔStmt s) {
     nint t = len(s.css) / 2 + 1;
     if (t > 10) {
         t = 10;
@@ -3250,7 +3250,7 @@ internal static error finalClose(this ж<ΔStmt> Ꮡs) {
 
 // Rows is the result of a query. Its cursor starts before the first row
 // of the result set. Use [Rows.Next] to advance from row to row.
-[GoType] partial struct Rows {
+partial struct Rows {
     internal ж<driverConn> dc; // owned; must call releaseConn when closed to release
     internal Action<error> releaseConn;
     internal driver.Rows rowsi;
@@ -3291,7 +3291,7 @@ internal static error finalClose(this ж<ΔStmt> Ꮡs) {
 
 // lasterrOrErrLocked returns either lasterr or the provided err.
 // rs.closemu must be read-locked.
-[GoRecv] internal static error lasterrOrErrLocked(this ref Rows rs, error err) {
+internal static error lasterrOrErrLocked(this ref Rows rs, error err) {
     if (rs.lasterr != default! && !AreEqual(rs.lasterr, io.EOF)) {
         return rs.lasterr;
     }
@@ -3585,7 +3585,7 @@ public static (slice<ж<ColumnType>>, error) ColumnTypes(this ж<Rows> Ꮡrs) {
 }
 
 // ColumnType contains the name and type of a column.
-[GoType] partial struct ColumnType {
+partial struct ColumnType {
     internal @string name;
     internal bool hasNullable;
     internal bool hasLength;
@@ -3599,7 +3599,7 @@ public static (slice<ж<ColumnType>>, error) ColumnTypes(this ж<Rows> Ꮡrs) {
 }
 
 // Name returns the name or alias of the column.
-[GoRecv] public static @string Name(this ref ColumnType ci) {
+public static @string Name(this ref ColumnType ci) {
     return ci.name;
 }
 
@@ -3608,26 +3608,26 @@ public static (slice<ж<ColumnType>>, error) ColumnTypes(this ж<Rows> Ꮡrs) {
 // be [math.MaxInt64] (any database limits will still apply).
 // If the column type is not variable length, such as an int, or if not supported
 // by the driver ok is false.
-[GoRecv] public static (int64 length, bool ok) Length(this ref ColumnType ci) {
+public static (int64 length, bool ok) Length(this ref ColumnType ci) {
     return (ci.length, ci.hasLength);
 }
 
 // DecimalSize returns the scale and precision of a decimal type.
 // If not applicable or if not supported ok is false.
-[GoRecv] public static (int64 precision, int64 scale, bool ok) DecimalSize(this ref ColumnType ci) {
+public static (int64 precision, int64 scale, bool ok) DecimalSize(this ref ColumnType ci) {
     return (ci.precision, ci.scale, ci.hasPrecisionScale);
 }
 
 // ScanType returns a Go type suitable for scanning into using [Rows.Scan].
 // If a driver does not support this property ScanType will return
 // the type of an empty interface.
-[GoRecv] public static reflectꓸType ScanType(this ref ColumnType ci) {
+public static reflectꓸType ScanType(this ref ColumnType ci) {
     return ci.scanType;
 }
 
 // Nullable reports whether the column may be null.
 // If a driver does not support this property ok will be false.
-[GoRecv] public static (bool nullable, bool ok) Nullable(this ref ColumnType ci) {
+public static (bool nullable, bool ok) Nullable(this ref ColumnType ci) {
     return (ci.nullable, ci.hasNullable);
 }
 
@@ -3637,7 +3637,7 @@ public static (slice<ж<ColumnType>>, error) ColumnTypes(this ж<Rows> Ꮡrs) {
 // are not included.
 // Common type names include "VARCHAR", "TEXT", "NVARCHAR", "DECIMAL", "BOOL",
 // "INT", and "BIGINT".
-[GoRecv] public static @string DatabaseTypeName(this ref ColumnType ci) {
+public static @string DatabaseTypeName(this ref ColumnType ci) {
     return ci.databaseType;
 }
 
@@ -3865,7 +3865,7 @@ internal static error close(this ж<Rows> Ꮡrs, error errʗp) {
 }
 
 // Row is the result of calling [DB.QueryRow] to select a single row.
-[GoType] partial struct Row {
+partial struct Row {
     // One of these two will be non-nil:
     internal error err; // deferred error for easy chaining
     internal ж<Rows> rows;
@@ -3928,12 +3928,12 @@ public static error Scan(this ж<Row> Ꮡr, params ꓸꓸꓸany destʗp) {
 // query errors without calling [Row.Scan].
 // Err returns the error, if any, that was encountered while running the query.
 // If this error is not nil, this error will also be returned from [Row.Scan].
-[GoRecv] public static error Err(this ref Row r) {
+public static error Err(this ref Row r) {
     return r.err;
 }
 
 // A Result summarizes an executed SQL command.
-[GoType] partial interface Result {
+partial interface Result {
     // LastInsertId returns the integer generated by the database
     // in response to a command. Typically this will be from an
     // "auto increment" column when inserting a new row. Not all
@@ -3946,8 +3946,8 @@ public static error Scan(this ж<Row> Ꮡr, params ꓸꓸꓸany destʗp) {
     (int64, error) RowsAffected();
 }
 
-[GoType] partial struct driverResult {
-    [GoEmbedded] public sync_package.Locker Locker; // the *driverConn
+partial struct driverResult {
+    /*embed*/ public sync_package.Locker Locker; // the *driverConn
     internal driver.Result resi;
 }
 
@@ -4002,12 +4002,12 @@ internal static void withLock(sync.Locker lk, Action fn) {
 // We previously used a map for this but the take of a random element
 // was expensive, making mapiters. This type avoids a map entirely
 // and just uses a slice.
-[GoType] partial struct connRequestSet {
+partial struct connRequestSet {
     // s are the elements in the set.
     internal slice<connRequestAndIndex> s;
 }
 
-[GoType] partial struct connRequestAndIndex {
+partial struct connRequestAndIndex {
     // req is the element in the set.
     internal channel<connRequest> req;
     // curIdx points to the current location of this element in
@@ -4017,7 +4017,7 @@ internal static void withLock(sync.Locker lk, Action fn) {
 
 // CloseAndRemoveAll closes all channels in the set
 // and clears the set.
-[GoRecv] internal static void CloseAndRemoveAll(this ref connRequestSet s) {
+internal static void CloseAndRemoveAll(this ref connRequestSet s) {
     foreach (var (_, v) in s.s) {
         v.curIdx.Value = -1;
         builtin.close(v.req);
@@ -4026,20 +4026,20 @@ internal static void withLock(sync.Locker lk, Action fn) {
 }
 
 // Len returns the length of the set.
-[GoRecv] internal static nint Len(this ref connRequestSet s) {
+internal static nint Len(this ref connRequestSet s) {
     return len(s.s);
 }
 
 // connRequestDelHandle is an opaque handle to delete an
 // item from calling Add.
-[GoType] partial struct connRequestDelHandle {
+partial struct connRequestDelHandle {
     internal ж<nint> idx; // pointer to index; or -1 if not in slice
 }
 
 // Add adds v to the set of waiting requests.
 // The returned connRequestDelHandle can be used to remove the item from
 // the set.
-[GoRecv] internal static connRequestDelHandle Add(this ref connRequestSet s, channel<connRequest> v) {
+internal static connRequestDelHandle Add(this ref connRequestSet s, channel<connRequest> v) {
     ref var idx = ref heap<nint>(out var Ꮡidx);
     idx = len(s.s);
     // TODO(bradfitz): for simplicity, this always allocates a new int-sized
@@ -4059,7 +4059,7 @@ internal static void withLock(sync.Locker lk, Action fn) {
 //
 // It reports whether the element was deleted. (It can return false if a caller
 // of TakeRandom took it meanwhile, or upon the second call to Delete)
-[GoRecv] internal static bool Delete(this ref connRequestSet s, connRequestDelHandle h) {
+internal static bool Delete(this ref connRequestSet s, connRequestDelHandle h) {
     nint idx = h.idx.Value;
     if (idx < 0) {
         return false;
@@ -4068,7 +4068,7 @@ internal static void withLock(sync.Locker lk, Action fn) {
     return true;
 }
 
-[GoRecv] internal static void deleteIndex(this ref connRequestSet s, nint idx) {
+internal static void deleteIndex(this ref connRequestSet s, nint idx) {
     // Mark item as deleted.
     (s.s[idx].curIdx).Value = -1;
     // Copy last element, updating its position
@@ -4086,7 +4086,7 @@ internal static void withLock(sync.Locker lk, Action fn) {
 // TakeRandom returns and removes a random element from s
 // and reports whether there was one to take. (It returns ok=false
 // if the set is empty.)
-[GoRecv] internal static (channel<connRequest> v, bool ok) TakeRandom(this ref connRequestSet s) {
+internal static (channel<connRequest> v, bool ok) TakeRandom(this ref connRequestSet s) {
     if (len(s.s) == 0) {
         return (default!, false);
     }

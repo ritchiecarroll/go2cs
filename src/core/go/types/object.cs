@@ -27,7 +27,7 @@ partial class types_package {
 //
 // The environment, which is structured as a tree of Scopes,
 // maps each name to the unique Object that it denotes.
-[GoType] partial interface Object :
+partial interface Object :
     fmt.Stringer
 {
     ж<ΔScope> Parent(); // scope in which this object is declared; nil for methods and struct fields
@@ -90,7 +90,7 @@ public static @string Id(ж<Package> Ꮡpkg, @string name) {
 }
 
 // An object implements the common parts of an Object.
-[GoType] partial struct @object {
+partial struct @object {
     internal ж<ΔScope> parent;
     internal tokenꓸPos pos;
     internal ж<Package> pkg;
@@ -101,7 +101,7 @@ public static @string Id(ж<Package> Ꮡpkg, @string name) {
     internal tokenꓸPos scopePos_;
 }
 
-[GoType("num:uint32")] public partial struct Δcolor;
+public partial struct Δcolor /*num:uint32*/;
 
 // An object may be painted in one of three colors.
 // Color values other than white or black are considered grey.
@@ -141,84 +141,84 @@ internal static Δcolor colorFor(ΔType t) {
 
 // Parent returns the scope in which the object is declared.
 // The result is nil for methods and struct fields.
-[GoRecv] internal static ж<ΔScope> Parent(this ref @object obj) {
+internal static ж<ΔScope> Parent(this ref @object obj) {
     return obj.parent;
 }
 
 // Pos returns the declaration position of the object's identifier.
-[GoRecv] internal static tokenꓸPos Pos(this ref @object obj) {
+internal static tokenꓸPos Pos(this ref @object obj) {
     return obj.pos;
 }
 
 // Pkg returns the package to which the object belongs.
 // The result is nil for labels and objects in the Universe scope.
-[GoRecv] internal static ж<Package> Pkg(this ref @object obj) {
+internal static ж<Package> Pkg(this ref @object obj) {
     return obj.pkg;
 }
 
 // Name returns the object's (package-local, unqualified) name.
-[GoRecv] internal static @string Name(this ref @object obj) {
+internal static @string Name(this ref @object obj) {
     return obj.name;
 }
 
 // Type returns the object's type.
-[GoRecv] internal static ΔType Type(this ref @object obj) {
+internal static ΔType Type(this ref @object obj) {
     return obj.typ;
 }
 
 // Exported reports whether the object is exported (starts with a capital letter).
 // It doesn't take into account whether the object is in a local (function) scope
 // or not.
-[GoRecv] internal static bool Exported(this ref @object obj) {
+internal static bool Exported(this ref @object obj) {
     return isExported(obj.name);
 }
 
 // Id is a wrapper for Id(obj.Pkg(), obj.Name()).
-[GoRecv] internal static @string Id(this ref @object obj) {
+internal static @string Id(this ref @object obj) {
     return Id(obj.pkg, obj.name);
 }
 
-[GoRecv] internal static @string String(this ref @object obj) {
+internal static @string String(this ref @object obj) {
     throw panic("abstract");
 }
 
-[GoRecv] internal static uint32 order(this ref @object obj) {
+internal static uint32 order(this ref @object obj) {
     return obj.order_;
 }
 
-[GoRecv] internal static Δcolor color(this ref @object obj) {
+internal static Δcolor color(this ref @object obj) {
     return obj.color_;
 }
 
-[GoRecv] internal static tokenꓸPos scopePos(this ref @object obj) {
+internal static tokenꓸPos scopePos(this ref @object obj) {
     return obj.scopePos_;
 }
 
-[GoRecv] internal static void setParent(this ref @object obj, ж<ΔScope> Ꮡparent) {
+internal static void setParent(this ref @object obj, ж<ΔScope> Ꮡparent) {
     ref var parent = ref Ꮡparent.DerefOrNull();
 
     obj.parent = Ꮡparent;
 }
 
-[GoRecv] internal static void setType(this ref @object obj, ΔType typ) {
+internal static void setType(this ref @object obj, ΔType typ) {
     obj.typ = typ;
 }
 
-[GoRecv] internal static void setOrder(this ref @object obj, uint32 order) {
+internal static void setOrder(this ref @object obj, uint32 order) {
     assert(order > 0);
     obj.order_ = order;
 }
 
-[GoRecv] internal static void setColor(this ref @object obj, Δcolor Δcolor) {
+internal static void setColor(this ref @object obj, Δcolor Δcolor) {
     assert(Δcolor != white);
     obj.color_ = Δcolor;
 }
 
-[GoRecv] internal static void setScopePos(this ref @object obj, tokenꓸPos pos) {
+internal static void setScopePos(this ref @object obj, tokenꓸPos pos) {
     obj.scopePos_ = pos;
 }
 
-[GoRecv] internal static bool sameId(this ref @object obj, ж<Package> Ꮡpkg, @string name, bool foldCase) {
+internal static bool sameId(this ref @object obj, ж<Package> Ꮡpkg, @string name, bool foldCase) {
     ref var pkg = ref Ꮡpkg.DerefOrNull();
 
     // If we don't care about capitalization, we also ignore packages.
@@ -285,7 +285,7 @@ internal static nint cmp(this ж<@object> Ꮡa, ж<@object> Ꮡb) {
 
 // A PkgName represents an imported Go package.
 // PkgNames don't have a type.
-[GoType] partial struct PkgName {
+partial struct PkgName {
     internal partial ref @object @object { get; }
     internal ж<Package> imported;
 }
@@ -298,12 +298,12 @@ public static ж<PkgName> NewPkgName(tokenꓸPos pos, ж<Package> Ꮡpkg, @strin
 
 // Imported returns the package that was imported.
 // It is distinct from Pkg(), which is the package containing the import statement.
-[GoRecv] public static ж<Package> Imported(this ref PkgName obj) {
+public static ж<Package> Imported(this ref PkgName obj) {
     return obj.imported;
 }
 
 // A Const represents a declared constant.
-[GoType] partial struct Const {
+partial struct Const {
     internal partial ref @object @object { get; }
     internal constant.Value val;
 }
@@ -315,11 +315,11 @@ public static ж<Const> NewConst(tokenꓸPos pos, ж<Package> Ꮡpkg, @string na
 }
 
 // Val returns the constant's value.
-[GoRecv] public static constant.Value Val(this ref Const obj) {
+public static constant.Value Val(this ref Const obj) {
     return obj.val;
 }
 
-[GoRecv] internal static void isDependency(this ref Const _) {
+internal static void isDependency(this ref Const _) {
 }
 
 // a constant may be a dependency of an initialization expression
@@ -329,7 +329,7 @@ public static ж<Const> NewConst(tokenꓸPos pos, ж<Package> Ꮡpkg, @string na
 // an alias type ([Alias]),
 // a type parameter ([TypeParam]),
 // or a predeclared type such as int or error.
-[GoType] partial struct TypeName {
+partial struct TypeName {
     internal partial ref @object @object { get; }
 }
 
@@ -389,7 +389,7 @@ public static bool IsAlias(this ж<TypeName> Ꮡobj) {
 // are aliases but have the same names (for better error messages).
 
 // A Variable represents a declared variable (including function parameters and results, and struct fields).
-[GoType] partial struct Var {
+partial struct Var {
     internal partial ref @object @object { get; }
     internal ж<Var> origin; // if non-nil, the Var from which this one was instantiated
     internal bool embedded; // if set, the variable is an embedded struct field, and name is the type name
@@ -417,17 +417,17 @@ public static ж<Var> NewField(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name
 
 // Anonymous reports whether the variable is an embedded field.
 // Same as Embedded; only present for backward-compatibility.
-[GoRecv] public static bool Anonymous(this ref Var obj) {
+public static bool Anonymous(this ref Var obj) {
     return obj.embedded;
 }
 
 // Embedded reports whether the variable is an embedded field.
-[GoRecv] public static bool Embedded(this ref Var obj) {
+public static bool Embedded(this ref Var obj) {
     return obj.embedded;
 }
 
 // IsField reports whether the variable is a struct field.
-[GoRecv] public static bool IsField(this ref Var obj) {
+public static bool IsField(this ref Var obj) {
     return obj.isField;
 }
 
@@ -447,7 +447,7 @@ public static ж<Var> Origin(this ж<Var> Ꮡobj) {
     return Ꮡobj;
 }
 
-[GoRecv] internal static void isDependency(this ref Var _) {
+internal static void isDependency(this ref Var _) {
 }
 
 // a variable may be a dependency of an initialization expression
@@ -455,7 +455,7 @@ public static ж<Var> Origin(this ж<Var> Ꮡobj) {
 // A Func represents a declared function, concrete method, or abstract
 // (interface) method. Its Type() is always a *Signature.
 // An abstract method may belong to many interfaces due to embedding.
-[GoType] partial struct Func {
+partial struct Func {
     internal partial ref @object @object { get; }
     internal bool hasPtrRecv_;  // only valid for methods that don't have a type yet; use hasPtrRecv() to read
     internal ж<Func> origin; // if non-nil, the Func from which this one was instantiated
@@ -477,7 +477,7 @@ public static ж<Func> NewFunc(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name
 }
 
 // Signature returns the signature (type) of the function or method.
-[GoRecv] public static ж<ΔSignature> Signature(this ref Func obj) {
+public static ж<ΔSignature> Signature(this ref Func obj) {
     if (obj.typ != default!) {
         return obj.typ._<ж<ΔSignature>>(); // normal case
     }
@@ -503,7 +503,7 @@ public static @string FullName(this ж<Func> Ꮡobj) {
 // Scope returns the scope of the function's body block.
 // The result is nil for imported or instantiated functions and methods
 // (but there is also no mechanism to get to an instantiated function).
-[GoRecv] public static ж<ΔScope> Scope(this ref Func obj) {
+public static ж<ΔScope> Scope(this ref Func obj) {
     return (~obj.typ._<ж<ΔSignature>>()).scope;
 }
 
@@ -527,12 +527,12 @@ public static ж<Func> Origin(this ж<Func> Ꮡobj) {
 //
 // The result is nil for methods of types in the Universe scope,
 // like method Error of the error built-in interface type.
-[GoRecv] public static ж<Package> Pkg(this ref Func obj) {
+public static ж<Package> Pkg(this ref Func obj) {
     return obj.@object.Pkg();
 }
 
 // hasPtrRecv reports whether the receiver is of the form *T for the given method obj.
-[GoRecv] internal static bool hasPtrRecv(this ref Func obj) {
+internal static bool hasPtrRecv(this ref Func obj) {
     // If a method's receiver type is set, use that as the source of truth for the receiver.
     // Caution: Checker.funcDecl (decl.go) marks a function by setting its type to an empty
     // signature. We may reach here before the signature is fully set up: we must explicitly
@@ -551,14 +551,14 @@ public static ж<Func> Origin(this ж<Func> Ꮡobj) {
     return obj.hasPtrRecv_;
 }
 
-[GoRecv] internal static void isDependency(this ref Func _) {
+internal static void isDependency(this ref Func _) {
 }
 
 // a function may be a dependency of an initialization expression
 
 // A Label represents a declared label.
 // Labels don't have a type.
-[GoType] partial struct Label {
+partial struct Label {
     internal partial ref @object @object { get; }
     internal bool used; // set if the label was used
 }
@@ -570,7 +570,7 @@ public static ж<Label> NewLabel(tokenꓸPos pos, ж<Package> Ꮡpkg, @string na
 
 // A Builtin represents a built-in function.
 // Builtins don't have a valid type.
-[GoType] partial struct Builtin {
+partial struct Builtin {
     internal partial ref @object @object { get; }
     internal builtinId id;
 }
@@ -580,7 +580,7 @@ internal static ж<Builtin> newBuiltin(builtinId id) {
 }
 
 // Nil represents the predeclared value nil.
-[GoType] partial struct Nil {
+partial struct Nil {
     internal partial ref @object @object { get; }
 }
 

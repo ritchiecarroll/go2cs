@@ -18,7 +18,7 @@ using go.crypto.@internal.fips140;
 
 partial class ecdh_package {
 
-[GoType] partial interface ΔCurve {
+partial interface ΔCurve {
     // GenerateKey generates a random PrivateKey.
     //
     // Most applications should use [crypto/rand.Reader] as rand. Note that the
@@ -57,7 +57,7 @@ partial class ecdh_package {
 // These keys can be parsed with [crypto/x509.ParsePKIXPublicKey] and encoded
 // with [crypto/x509.MarshalPKIXPublicKey]. For NIST curves, they then need to
 // be converted with [crypto/ecdsa.PublicKey.ECDH] after parsing.
-[GoType] partial struct ΔPublicKey {
+partial struct ΔPublicKey {
     internal ΔCurve curve;
     internal slice<byte> publicKey;
     internal ж<boring.PublicKeyECDH> boring;
@@ -65,7 +65,7 @@ partial class ecdh_package {
 }
 
 // Bytes returns a copy of the encoding of the public key.
-[GoRecv] public static slice<byte> Bytes(this ref ΔPublicKey k) {
+public static slice<byte> Bytes(this ref ΔPublicKey k) {
     // Copy the public key to a fixed size buffer that can get allocated on the
     // caller's stack after inlining.
     array<byte> buf = new(133);
@@ -79,7 +79,7 @@ partial class ecdh_package {
 //
 // This check is performed in constant time as long as the key types and their
 // curve match.
-[GoRecv] public static bool Equal(this ref ΔPublicKey k, cryptoꓸPublicKey x) {
+public static bool Equal(this ref ΔPublicKey k, cryptoꓸPublicKey x) {
     var (xx, ok) = x._<ж<ΔPublicKey>>(ᐧ);
     if (!ok) {
         return false;
@@ -87,7 +87,7 @@ partial class ecdh_package {
     return AreEqual(k.curve, (~xx).curve) && subtle.ConstantTimeCompare(k.publicKey, (~xx).publicKey) == 1;
 }
 
-[GoRecv] public static ΔCurve Curve(this ref ΔPublicKey k) {
+public static ΔCurve Curve(this ref ΔPublicKey k) {
     return k.curve;
 }
 
@@ -96,7 +96,7 @@ partial class ecdh_package {
 // These keys can be parsed with [crypto/x509.ParsePKCS8PrivateKey] and encoded
 // with [crypto/x509.MarshalPKCS8PrivateKey]. For NIST curves, they then need to
 // be converted with [crypto/ecdsa.PrivateKey.ECDH] after parsing.
-[GoType] partial struct PrivateKey {
+partial struct PrivateKey {
     internal ΔCurve curve;
     internal slice<byte> privateKey;
     internal ж<ΔPublicKey> publicKey;
@@ -129,7 +129,7 @@ public static (slice<byte>, error) ECDH(this ж<PrivateKey> Ꮡk, ж<ΔPublicKey
 }
 
 // Bytes returns a copy of the encoding of the private key.
-[GoRecv] public static slice<byte> Bytes(this ref PrivateKey k) {
+public static slice<byte> Bytes(this ref PrivateKey k) {
     // Copy the private key to a fixed size buffer that can get allocated on the
     // caller's stack after inlining.
     array<byte> buf = new(66);
@@ -143,7 +143,7 @@ public static (slice<byte>, error) ECDH(this ж<PrivateKey> Ꮡk, ж<ΔPublicKey
 //
 // This check is performed in constant time as long as the key types and their
 // curve match.
-[GoRecv] public static bool Equal(this ref PrivateKey k, cryptoꓸPrivateKey x) {
+public static bool Equal(this ref PrivateKey k, cryptoꓸPrivateKey x) {
     var (xx, ok) = x._<ж<PrivateKey>>(ᐧ);
     if (!ok) {
         return false;
@@ -151,17 +151,17 @@ public static (slice<byte>, error) ECDH(this ж<PrivateKey> Ꮡk, ж<ΔPublicKey
     return AreEqual(k.curve, (~xx).curve) && subtle.ConstantTimeCompare(k.privateKey, (~xx).privateKey) == 1;
 }
 
-[GoRecv] public static ΔCurve Curve(this ref PrivateKey k) {
+public static ΔCurve Curve(this ref PrivateKey k) {
     return k.curve;
 }
 
-[GoRecv] public static ж<ΔPublicKey> PublicKey(this ref PrivateKey k) {
+public static ж<ΔPublicKey> PublicKey(this ref PrivateKey k) {
     return k.publicKey;
 }
 
 // Public implements the implicit interface of all standard library private
 // keys. See the docs of [crypto.PrivateKey].
-[GoRecv] public static cryptoꓸPublicKey Public(this ref PrivateKey k) {
+public static cryptoꓸPublicKey Public(this ref PrivateKey k) {
     return k.PublicKey().OrTypedNil();
 }
 

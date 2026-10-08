@@ -28,7 +28,7 @@ partial class hpke_package {
 // a fixed test key to use when checking the RFC 9180 vectors.
 internal static Func<(ж<ecdh.PrivateKey>, error)> testingOnlyGenerateKey;
 
-[GoType] public partial struct hkdfKDF {
+public partial struct hkdfKDF {
     internal crypto.Hash hash;
 }
 
@@ -58,20 +58,20 @@ public static slice<byte> LabeledExpand(this ж<hkdfKDF> Ꮡkdf, slice<byte> sui
 }
 
 // dhKEM implements the KEM specified in RFC 9180, Section 4.1.
-[GoType] partial struct dhKEM {
+partial struct dhKEM {
     internal ecdhꓸCurve dh;
     internal hkdfKDF kdf;
     internal slice<byte> suiteID;
     internal uint16 nSecret;
 }
 
-[GoType("num:uint16")] partial struct KemID;
+partial struct KemID /*num:uint16*/;
 
 public static UntypedInt DHKEM_X25519_HKDF_SHA256 => 0x0020;
 
 // RFC 9180 Section 7.1
 
-[GoType("dyn")] partial struct SupportedKEMsᴛ1 {
+partial struct SupportedKEMsᴛ1 /*dyn*/ {
     internal ecdhꓸCurve curve;
     internal crypto.Hash hash;
     internal uint16 nSecret;
@@ -147,7 +147,7 @@ internal static (slice<byte>, error) Decap(this ж<dhKEM> Ꮡdh, slice<byte> enc
     return (Ꮡdh.ExtractAndExpand(dhVal, kemContext), default!);
 }
 
-[GoType] partial struct context {
+partial struct context {
     internal cipher.AEAD aead;
     internal slice<byte> sharedSecret;
     internal slice<byte> suiteID;
@@ -157,11 +157,11 @@ internal static (slice<byte>, error) Decap(this ж<dhKEM> Ꮡdh, slice<byte> enc
     internal uint128 seqNum;
 }
 
-[GoType] partial struct Sender {
+partial struct Sender {
     internal partial ref ж<context> context { get; }
 }
 
-[GoType] partial struct Receipient {
+partial struct Receipient {
     internal partial ref ж<context> context { get; }
 }
 
@@ -173,7 +173,7 @@ internal static Func<slice<byte>, (cipher.AEAD, error)> aesGCMNew = (slice<byte>
     return cipher.NewGCM(block);
 };
 
-[GoType("num:uint16")] partial struct AEADID;
+partial struct AEADID /*num:uint16*/;
 
 public static UntypedInt AEAD_AES_128_GCM => 0x0001;
 public static UntypedInt AEAD_AES_256_GCM => 0x0002;
@@ -181,7 +181,7 @@ public static UntypedInt AEAD_ChaCha20Poly1305 => 0x0003;
 
 // RFC 9180, Section 7.3
 
-[GoType("dyn")] partial struct SupportedAEADsᴛ1 {
+partial struct SupportedAEADsᴛ1 /*dyn*/ {
     internal nint keySize;
     internal nint nonceSize;
     internal Func<slice<byte>, (cipher.AEAD, error)> aead;
@@ -192,7 +192,7 @@ public static map<uint16, SupportedAEADsᴛ1> SupportedAEADs = new map<uint16, S
     [AEAD_ChaCha20Poly1305] = new(keySize: chacha20poly1305.KeySize, nonceSize: chacha20poly1305.ΔNonceSize, aead: chacha20poly1305.New)
 };
 
-[GoType("num:uint16")] partial struct KDFID;
+partial struct KDFID /*num:uint16*/;
 
 public static UntypedInt KDF_HKDF_SHA256 => 0x0001;
 
@@ -279,7 +279,7 @@ public static (ж<Receipient>, error) SetupReceipient(uint16 kemID, uint16 kdfID
     return (Ꮡ(new Receipient(context)), default!);
 }
 
-[GoRecv] internal static slice<byte> nextNonce(this ref context ctx) {
+internal static slice<byte> nextNonce(this ref context ctx) {
     var nonce = ctx.seqNum.bytes().slice(16 - ctx.aead.NonceSize());
     foreach (var (i, _) in ctx.baseNonce) {
         nonce[i] ^= (byte)(ctx.baseNonce[i]);
@@ -287,7 +287,7 @@ public static (ж<Receipient>, error) SetupReceipient(uint16 kemID, uint16 kdfID
     return nonce;
 }
 
-[GoRecv] internal static void incrementNonce(this ref context ctx) {
+internal static void incrementNonce(this ref context ctx) {
     // Message limit is, according to the RFC, 2^95+1, which
     // is somewhat confusing, but we do as we're told.
     if (ctx.seqNum.bitLen() >= (ctx.aead.NonceSize() * 8) - 1) {
@@ -296,13 +296,13 @@ public static (ж<Receipient>, error) SetupReceipient(uint16 kemID, uint16 kdfID
     ctx.seqNum = ctx.seqNum.addOne();
 }
 
-[GoRecv] public static (slice<byte>, error) Seal(this ref Sender s, slice<byte> aad, slice<byte> plaintext) {
+public static (slice<byte>, error) Seal(this ref Sender s, slice<byte> aad, slice<byte> plaintext) {
     var ciphertext = s.aead.Seal(default!, s.nextNonce(), plaintext, aad);
     s.incrementNonce();
     return (ciphertext, default!);
 }
 
-[GoRecv] public static (slice<byte>, error) Open(this ref Receipient r, slice<byte> aad, slice<byte> ciphertext) {
+public static (slice<byte>, error) Open(this ref Receipient r, slice<byte> aad, slice<byte> ciphertext) {
     var (plaintext, err) = r.aead.Open(default!, r.nextNonce(), ciphertext, aad);
     if (err != default!) {
         return (default!, err);
@@ -339,7 +339,7 @@ public static (ж<ecdh.PrivateKey>, error) ParseHPKEPrivateKey(uint16 kemID, sli
     return kemInfo.curve.NewPrivateKey(bytes);
 }
 
-[GoType] partial struct uint128 {
+partial struct uint128 {
     internal uint64 hi, lo;
 }
 

@@ -11,19 +11,19 @@ using @internal.runtime;
 partial class runtime_package {
 
 // gTraceState is per-G state for the tracer.
-[GoType] partial struct gTraceState {
+partial struct gTraceState {
     internal partial ref traceSchedResourceState traceSchedResourceState { get; }
 }
 
 // reset resets the gTraceState for a new goroutine.
-[GoRecv] internal static void reset(this ref gTraceState s) {
+internal static void reset(this ref gTraceState s) {
     s.seq = new uint64[]{}.array(2);
 }
 
 // N.B. s.statusTraced is managed and cleared separately.
 
 // mTraceState is per-M state for the tracer.
-[GoType] partial struct mTraceState {
+partial struct mTraceState {
     internal atomic.Uintptr seqlock;                    // seqlock indicating that this M is writing to a trace buffer.
     internal array<array<ж<traceBuf>>> buf = new(2, () => new(2)); // Per-M traceBuf for writing. Indexed by trace.gen%2.
     internal ж<m> link;                             // Snapshot of alllink or freelink.
@@ -32,7 +32,7 @@ partial class runtime_package {
 }
 
 // pTraceState is per-P state for the tracer.
-[GoType] partial struct pTraceState {
+partial struct pTraceState {
     internal partial ref traceSchedResourceState traceSchedResourceState { get; }
     // mSyscallID is the ID of the M this was bound to before entering a syscall.
     internal int64 mSyscallID;
@@ -72,7 +72,7 @@ internal static void lockRankMayTraceFlush() {
     lockWithRankMayAcquire(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock), getLockRank(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock)));
 }
 
-[GoType("num:uint8")] partial struct traceBlockReason;
+partial struct traceBlockReason /*num:uint8*/;
 
 internal static traceBlockReason traceBlockGeneric => /* iota */ 0;
 internal static traceBlockReason traceBlockForever => 1;
@@ -112,7 +112,7 @@ internal static array<@string> traceBlockReasonStrings = new golib.SparseArray<@
     [traceBlockSynctest] = "synctest"u8
 }.array();
 
-[GoType("num:uint8")] partial struct traceGoStopReason;
+partial struct traceGoStopReason /*num:uint8*/;
 
 internal static traceGoStopReason traceGoStopGeneric => /* iota */ 0;
 internal static traceGoStopReason traceGoStopGoSched => 1;
@@ -147,7 +147,7 @@ internal static bool traceShuttingDown() {
 // traceLocker represents an M writing trace events. While a traceLocker value
 // is valid, the tracer observes all operations on the G/M/P or trace events being
 // written as happening atomically.
-[GoType] partial struct traceLocker {
+partial struct traceLocker {
     internal ж<m> mp;
     internal uintptr gen;
 }

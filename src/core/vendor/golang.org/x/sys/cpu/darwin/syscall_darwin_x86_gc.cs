@@ -13,10 +13,10 @@ using @unsafe = unsafe_package;
 
 partial class cpu_package {
 
-[GoType("num:int32")] partial struct _C_int;
+partial struct _C_int /*num:int32*/;
 
 // adapted from unix.Uname() at x/sys/unix/syscall_darwin.go L419
-internal static error darwinOSRelease([GoArrayDims(256)] ж<array<byte>> Ꮡrelease) {
+internal static error darwinOSRelease(/*[256]*/ ж<array<byte>> Ꮡrelease) {
     ref var release = ref Ꮡrelease.DerefOrNull();
 
     // from x/sys/unix/zerrors_openbsd_amd64.go
@@ -94,7 +94,7 @@ internal static error sysctlbyname(ж<byte> Ꮡname, ж<byte> Ꮡold, ж<uintptr
 //go:cgo_import_dynamic libc_sysctlbyname sysctlbyname "/usr/lib/libSystem.B.dylib"
 
 // Implemented in the runtime package (runtime/sys_darwin.go)
-[global::System.Diagnostics.StackTraceHidden] internal static (uintptr r1, uintptr r2, Errno err) syscall_syscall6(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
+/*linkname*/ internal static partial (uintptr r1, uintptr r2, Errno err) syscall_syscall6(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
     var (ᴛ1, ᴛ2, ᴛ3) = syscall.Syscall6((uintptr)fn, (uintptr)a1, (uintptr)a2, (uintptr)a3, (uintptr)a4, (uintptr)a5, (uintptr)a6);
     return ((uintptr)(uintptr)ᴛ1, (uintptr)(uintptr)ᴛ2, (Errno)(uintptr)ᴛ3);
 }

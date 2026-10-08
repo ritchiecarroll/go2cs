@@ -28,7 +28,7 @@ partial class runtime_package {
 
 // trace is global tracing context.
 
-[GoType("dyn")] partial struct Δtraceᴛ1 {
+partial struct Δtraceᴛ1 /*dyn*/ {
     // trace.lock must only be acquired on the system stack where
     // stack splits cannot happen while it is held.
     internal mutex @lock;
@@ -143,7 +143,7 @@ internal static readonly @string traceNonEmptyFullTraceˢ2 = "trace: non-empty f
 internal static readonly @string traceReadingAfterˢ = "trace: reading after shutdown"u8;
 
 // Collect all the untraced Gs.
-[GoType("dyn")] internal partial struct traceAdvance_untracedG {
+internal partial struct traceAdvance_untracedG /*dyn*/ {
     internal ж<g> gp;
     internal uint64 goid;
     internal int64 mid;
@@ -712,7 +712,7 @@ internal static ж<g> traceReaderAvailable() {
 internal static ж<traceAdvancerState> ᏑtraceAdvancer = new StandardBox<traceAdvancerState>(default(traceAdvancerState));
 internal static ref traceAdvancerState traceAdvancer => ref ᏑtraceAdvancer.Value;
 
-[GoType] partial struct traceAdvancerState {
+partial struct traceAdvancerState {
     internal ж<wakeableSleep> timer;
     internal channel<EmptyStruct> done;
 }
@@ -736,7 +736,7 @@ internal static partial void start(this ж<traceAdvancerState> Ꮡs) {
 }
 
 // stop stops a traceAdvancer and blocks until it exits.
-[GoRecv] internal static void stop(this ref traceAdvancerState s) {
+internal static void stop(this ref traceAdvancerState s) {
     s.timer.wake();
     ᐸꟷ(s.done);
     builtin.close(s.done);
@@ -752,7 +752,7 @@ internal static UntypedFloat defaultTraceAdvancePeriod => 1e9; // 1 second.
 // Users of this type must call init before first use and
 // close to free up resources. Once close is called, init
 // must be called before another use.
-[GoType] partial struct wakeableSleep {
+partial struct wakeableSleep {
     internal ж<timer> timer;
     // lock protects access to wakeup, but not send/recv on it.
     internal mutex @lock;

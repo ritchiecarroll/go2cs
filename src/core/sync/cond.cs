@@ -34,7 +34,7 @@ partial class sync_package {
 // [the Go memory model]: https://go.dev/ref/mem
 // [Roberto Clapis's series on advanced concurrency patterns]: https://blogtitle.github.io/categories/concurrency/
 // [Bryan Mills's talk on concurrency patterns]: https://drive.google.com/file/d/1nPdvhB0PutEJzdCq5ms6UI58dp50fcAN/view
-[GoType] partial struct Cond {
+partial struct Cond {
     internal noCopy noCopy;
     // L is held while observing or changing the condition
     public Locker L;
@@ -93,7 +93,7 @@ public static void Broadcast(this ж<Cond> Ꮡc) {
     runtime_notifyListNotifyAll(Ꮡc.of(Cond.Ꮡnotify));
 }
 
-[GoType("num:uintptr")] partial struct copyChecker;
+partial struct copyChecker /*num:uintptr*/;
 
 // go2cs generated this placeholder — func check is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -104,14 +104,14 @@ public static void Broadcast(this ж<Cond> Ꮡc) {
 // for details.
 //
 // Note that it must not be embedded, due to the Lock and Unlock methods.
-[GoType] partial struct noCopy {
+partial struct noCopy {
 }
 
 // Lock is a no-op used by -copylocks checker from `go vet`.
-[GoRecv] internal static void Lock(this ref noCopy _) {
+internal static void Lock(this ref noCopy _) {
 }
 
-[GoRecv] internal static void Unlock(this ref noCopy _) {
+internal static void Unlock(this ref noCopy _) {
 }
 
 } // end sync_package

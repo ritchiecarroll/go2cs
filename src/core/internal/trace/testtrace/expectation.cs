@@ -14,7 +14,7 @@ using io = io_package;
 partial class testtrace_package {
 
 // Expectation represents the expected result of some operation.
-[GoType] partial struct Expectation {
+partial struct Expectation {
     internal bool failure;
     internal ж<regexp.Regexp> errorMatcher;
 }
@@ -29,7 +29,7 @@ public static ж<Expectation> ExpectSuccess() {
 //
 // Conformance means that if failure is true, then err must be non-nil.
 // If err is non-nil, then it must match errorMatcher.
-[GoRecv] public static error Check(this ref Expectation e, error err) {
+public static error Check(this ref Expectation e, error err) {
     if (!e.failure && err != default!) {
         return fmt.Errorf("unexpected error while reading the trace: %v"u8, err);
     }

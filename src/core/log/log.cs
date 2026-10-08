@@ -63,7 +63,7 @@ public static UntypedInt LstdFlags => /* Ldate | Ltime */ 3; // initial values f
 // output to an [io.Writer]. Each logging operation makes a single call to
 // the Writer's Write method. A Logger can be used simultaneously from
 // multiple goroutines; it guarantees to serialize access to the Writer.
-[GoType] partial struct Logger {
+partial struct Logger {
     internal Δsync.Mutex outMu;
     internal Δio.Writer @out; // destination for output
     internal atomic.Pointer<@string> prefix; // prefix on each line to identify the logger (but see Lmsgprefix)

@@ -13,7 +13,7 @@ using go;
 partial class singleflight_package {
 
 // call is an in-flight or completed singleflight.Do call
-[GoType] partial struct call {
+partial struct call {
     internal sync.WaitGroup wg;
     // These fields are written once before the WaitGroup is done
     // and are only read after the WaitGroup is done.
@@ -28,14 +28,14 @@ partial class singleflight_package {
 
 // Group represents a class of work and forms a namespace in
 // which units of work can be executed with duplicate suppression.
-[GoType] partial struct Group {
+partial struct Group {
     internal sync.Mutex mu;       // protects m
     internal map<@string, ж<call>> m; // lazily initialized
 }
 
 // Result holds the results of Do, so they can be passed
 // on a channel.
-[GoType] partial struct Result {
+partial struct Result {
     public any Val;
     public error Err;
     public bool Shared;

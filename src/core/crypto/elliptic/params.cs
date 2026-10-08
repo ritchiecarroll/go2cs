@@ -14,7 +14,7 @@ partial class elliptic_package {
 // The generic Curve implementation is deprecated, and using custom curves
 // (those not returned by [P224], [P256], [P384], and [P521]) is not guaranteed
 // to provide any security property.
-[GoType] partial struct CurveParams {
+partial struct CurveParams {
     public ж<bigꓸInt> P; // the order of the underlying field
     public ж<bigꓸInt> N; // the order of the base point
     public ж<bigꓸInt> B; // the constant of the curve equation
@@ -35,7 +35,7 @@ public static ж<CurveParams> Params(this ж<CurveParams> Ꮡcurve) {
 // reverse the transform than to operate in affine coordinates.
 
 // polynomial returns x³ - 3x + b.
-[GoRecv] internal static ж<bigꓸInt> polynomial(this ref CurveParams curve, ж<bigꓸInt> Ꮡx) {
+internal static ж<bigꓸInt> polynomial(this ref CurveParams curve, ж<bigꓸInt> Ꮡx) {
     var x3 = @new<bigꓸInt>().Mul(Ꮡx, Ꮡx);
     x3.Mul(x3, Ꮡx);
     var threeX = @new<bigꓸInt>().Lsh(Ꮡx, 1);
@@ -89,7 +89,7 @@ internal static ж<bigꓸInt> zForAffine(ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy)
 
 // affineFromJacobian reverses the Jacobian transform. See the comment at the
 // top of the file. If the point is ∞ it returns 0, 0.
-[GoRecv] internal static (ж<bigꓸInt> xOut, ж<bigꓸInt> yOut) affineFromJacobian(this ref CurveParams curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy, ж<bigꓸInt> Ꮡz) {
+internal static (ж<bigꓸInt> xOut, ж<bigꓸInt> yOut) affineFromJacobian(this ref CurveParams curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy, ж<bigꓸInt> Ꮡz) {
     ж<bigꓸInt> xOut = default!;
     ж<bigꓸInt> yOut = default!;
 
@@ -133,7 +133,7 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) Add(this ж<CurveParams> Ꮡcurve, 
 
 // addJacobian takes two points in Jacobian coordinates, (x1, y1, z1) and
 // (x2, y2, z2) and returns their sum, also in Jacobian form.
-[GoRecv] internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) addJacobian(this ref CurveParams curve, ж<bigꓸInt> Ꮡx1, ж<bigꓸInt> Ꮡy1, ж<bigꓸInt> Ꮡz1, ж<bigꓸInt> Ꮡx2, ж<bigꓸInt> Ꮡy2, ж<bigꓸInt> Ꮡz2) {
+internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) addJacobian(this ref CurveParams curve, ж<bigꓸInt> Ꮡx1, ж<bigꓸInt> Ꮡy1, ж<bigꓸInt> Ꮡz1, ж<bigꓸInt> Ꮡx2, ж<bigꓸInt> Ꮡy2, ж<bigꓸInt> Ꮡz2) {
     ref var z1 = ref Ꮡz1.DerefOrNull();
     ref var z2 = ref Ꮡz2.DerefOrNull();
 
@@ -229,7 +229,7 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) Double(this ж<CurveParams> Ꮡcurv
 
 // doubleJacobian takes a point in Jacobian coordinates, (x, y, z), and
 // returns its double, also in Jacobian form.
-[GoRecv] internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) doubleJacobian(this ref CurveParams curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy, ж<bigꓸInt> Ꮡz) {
+internal static (ж<bigꓸInt>, ж<bigꓸInt>, ж<bigꓸInt>) doubleJacobian(this ref CurveParams curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy, ж<bigꓸInt> Ꮡz) {
     // See https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-3.html#doubling-dbl-2001-b
     var delta = @new<bigꓸInt>().Mul(Ꮡz, Ꮡz);
     delta.Mod(delta, curve.P);

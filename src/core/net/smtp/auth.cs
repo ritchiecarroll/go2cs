@@ -13,7 +13,7 @@ using hash = hash_package;
 partial class smtp_package {
 
 // Auth is implemented by an SMTP authentication mechanism.
-[GoType] partial interface ΔAuth {
+partial interface ΔAuth {
     // Start begins an authentication with a server.
     // It returns the name of the authentication protocol
     // and optionally data to include in the initial AUTH message
@@ -31,13 +31,13 @@ partial class smtp_package {
 }
 
 // ServerInfo records information about an SMTP server.
-[GoType] partial struct ServerInfo {
+partial struct ServerInfo {
     public @string Name;  // SMTP server name
     public bool TLS;     // using TLS, with valid certificate for Name
     public slice<@string> Auth; // advertised authentication mechanisms
 }
 
-[GoType] partial struct plainAuth {
+partial struct plainAuth {
     internal @string identity, username, password;
     internal @string host;
 }
@@ -63,7 +63,7 @@ internal static readonly @string unencryptedConnectionˢ = "unencrypted connecti
 internal static readonly @string wrongHostNameˢ = "wrong host name"u8;
 internal static readonly @string plainˢ = "PLAIN"u8;
 
-[GoRecv] internal static (@string, slice<byte>, error) Start(this ref plainAuth a, ж<ServerInfo> Ꮡserver) {
+internal static (@string, slice<byte>, error) Start(this ref plainAuth a, ж<ServerInfo> Ꮡserver) {
     ref var server = ref Ꮡserver.DerefOrNull();
 
     // Must have TLS, or else localhost server.
@@ -84,7 +84,7 @@ internal static readonly @string plainˢ = "PLAIN"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unexpectedServerˢ = "unexpected server challenge"u8;
 
-[GoRecv] internal static (slice<byte>, error) Next(this ref plainAuth a, slice<byte> fromServer, bool more) {
+internal static (slice<byte>, error) Next(this ref plainAuth a, slice<byte> fromServer, bool more) {
     if (more) {
         // We've already sent everything.
         return (default!, errors.New(unexpectedServerˢ));
@@ -92,7 +92,7 @@ internal static readonly @string unexpectedServerˢ = "unexpected server challen
     return (default!, default!);
 }
 
-[GoType] partial struct cramMD5Auth {
+partial struct cramMD5Auth {
     internal @string username, secret;
 }
 
@@ -107,11 +107,11 @@ public static ΔAuth CRAMMD5Auth(@string username, @string secret) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string cramMd5ˢ = "CRAM-MD5"u8;
 
-[GoRecv] internal static (@string, slice<byte>, error) Start(this ref cramMD5Auth a, ж<ServerInfo> Ꮡserver) {
+internal static (@string, slice<byte>, error) Start(this ref cramMD5Auth a, ж<ServerInfo> Ꮡserver) {
     return (cramMd5ˢ, default!, default!);
 }
 
-[GoRecv] internal static (slice<byte>, error) Next(this ref cramMD5Auth a, slice<byte> fromServer, bool more) {
+internal static (slice<byte>, error) Next(this ref cramMD5Auth a, slice<byte> fromServer, bool more) {
     if (more) {
         var d = hmac.New(md5.New, slice<byte>(a.secret));
         d.Write(fromServer);

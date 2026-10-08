@@ -7,25 +7,25 @@ using fmt = fmt_package;
 
 partial class trace_package {
 
-[GoType("num:int64")] partial struct ThreadID;
+partial struct ThreadID /*num:int64*/;
 
 // NoThread indicates that the relevant events don't correspond to any
 // thread in particular.
 public static ThreadID NoThread => /* ThreadID(-1) */ -1;
 
-[GoType("num:int64")] partial struct ProcID;
+partial struct ProcID /*num:int64*/;
 
 // NoProc indicates that the relevant events don't correspond to any
 // P in particular.
 public static ProcID NoProc => /* ProcID(-1) */ -1;
 
-[GoType("num:int64")] partial struct GoID;
+partial struct GoID /*num:int64*/;
 
 // NoGoroutine indicates that the relevant events don't correspond to any
 // goroutine in particular.
 public static GoID NoGoroutine => /* GoID(-1) */ -1;
 
-[GoType("num:uint8")] partial struct GoState;
+partial struct GoState /*num:uint8*/;
 
 public static GoState GoUndetermined => /* iota */ 0;  // No information is known about the goroutine.
 public static GoState GoNotExist => 1;      // Goroutine does not exist.
@@ -73,7 +73,7 @@ public static @string String(this GoState s) {
     return badˢ;
 }
 
-[GoType("num:uint8")] partial struct ProcState;
+partial struct ProcState /*num:uint8*/;
 
 public static ProcState ProcUndetermined => /* iota */ 0;  // No information is known about the proc.
 public static ProcState ProcNotExist => 1;      // Proc does not exist.
@@ -110,7 +110,7 @@ public static @string String(this ProcState s) {
     return badˢ;
 }
 
-[GoType("num:uint8")] partial struct ResourceKind;
+partial struct ResourceKind /*num:uint8*/;
 
 public static ResourceKind ResourceNone => /* iota */ 0;       // No resource.
 public static ResourceKind ResourceGoroutine => 1;  // Goroutine.
@@ -145,7 +145,7 @@ public static @string String(this ResourceKind r) {
 }
 
 // ResourceID represents a generic resource ID.
-[GoType] partial struct ResourceID {
+partial struct ResourceID {
     // Kind is the kind of resource this ID is for.
     public ResourceKind Kind;
     internal int64 id;
@@ -216,7 +216,7 @@ public static @string String(this ResourceID r) {
 }
 
 // StateTransition provides details about a StateTransition event.
-[GoType] partial struct ΔStateTransition {
+partial struct ΔStateTransition {
     // Resource is the resource this state transition is for.
     public ResourceID Resource;
     // Reason is a human-readable reason for the state transition.

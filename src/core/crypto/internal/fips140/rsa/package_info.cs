@@ -54,7 +54,7 @@ using static go.crypto.@internal.fips140.rsa_package;
 [assembly: go.GoPositionMap("crypto/internal/fips140/rsa/cast.go", "cast.cs", "ABAglAAgQgAgQgAQIgAQIgAQIgAQIgAQIgAJFIKCgtwAIUSCgpSAgqSClA==")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/rsa/keygen.go", "keygen.cs", "ABciooKUgoKWgoKClIKCloKClIKCloKWgoKUggANHoKUlIKWgoIABxCWggANIIKCloKS3IKClKjK5sIABRCSgpSWgoKUggAGEIKUgpSAgqbaooKWgoKAgqSAgu6AgpSCuAAOJIIABBjygpSWpoKCpgAPIoKClLS0tLS0tLS2goKCgIKkgpSUgpSCggALGAAQHqKWgoKUgpSWgoKUqIKCgpYACgyUgpSCgIKkggAGEoKCqIKCgpSUqA==", "114-126:1")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v15.go", "pkcs1v15.cs", "ABgyABAqwoKChKaCgoKW1qSSgoKCgrqCgpSCgoKUgoKuwoKChKaigIKSgtyCloKCloKClIKWpoK4")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v22.go", "pkcs1v22.cs", "ABVIAA4CgIKkgIKkgIKkqqKChIKCgoKChIKClOiWgoIABRCCqoKWgoKCAAoahIKCgoQABRCCvKqWlvqWgoKCAAYQgqiCuoK6goqygsyoloKCgpS6gt6CgoKmgqgABhCCgoKChJaSlKrCgoK4gpTYsoKCAAUQgriClIKAgqaCgoIACBSAkoKCpqiSqJKClKaigoKCgIKSgqaCloKCgoIABhCCgpSWpoLm2gAIDoKCgoCCkoKkgoKWgoKEgoKEgoKEgIKmgoSosoKChIKEloKCloKChISChIKEzI7ygoSCgoKCgpaClg==")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v22.go", "pkcs1v22.cs", "ABVIAA4CgIKkgIKkgIKkqqKChIKCgoKChIKClOiWgoIABRCCqoKWgoKCAAoahIKCgoQABRCCvKqWlvqWgoKCAAYQgqiCuoK6goqygsyoloKCgpS6gt6CgoKmgqgABhCCgoKChJaSlKrCgoK4gpTYsoKCAAUQgriClIKAgqaCgoIACBSAkoKCpqiSqJKClKaigoKCgIKSgqaCloKCgoIABhCCgpSWpoLm2gAIDoKCgoCCkoKkgoKWgoKEgoKEgoKEgIKmgoSosoKChIKEloKCloKChISChIKEzI7ygoSCgoKCgpaClg==", "", "", "413=Size/1/1/1")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/rsa/rsa.go", "rsa.cs", "ABMqogAVLIKuwoKClIKClIKClIKClNaygoKClISCgoKUqJSUgoKE7oCCpKqigoKUgoKUgoKUgoKUgoKW7oCCpKyygoKUgoKU3ICCpK4ADQKCgoKClIKCgoKCAAsKooSAgpKCppSCloKCloKogoCCpIKAgqSCAAoYgoKUgoKUgoKCgpaCgpSCgpSCgoKogpSUggAHEoKAlIKCprjIggAHEoKWAAkGooKClILKgpSClIK4griC3IKUqJKCgIKkpoKCgpSmkpLckoKqooKssoKWgpSCgpaUgpaClJSUlJSUloKCgqg=")]
 // </GoSourcePositionMaps>
 
@@ -64,7 +64,7 @@ namespace go.crypto.@internal.fips140;
 public static partial class rsa_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

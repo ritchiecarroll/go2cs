@@ -18,7 +18,7 @@ using global::go.net;
 
 partial class jsonrpc_package {
 
-[GoType] partial struct clientCodec {
+partial struct clientCodec {
     internal ж<json.Decoder> dec; // for reading JSON values
     internal ж<json.Encoder> enc; // for writing JSON values
     internal io.Closer c;
@@ -43,13 +43,10 @@ public static rpc.ClientCodec NewClientCodec(io.ReadWriteCloser conn) {
     )));
 }
 
-[GoType] partial struct clientRequest {
-    [GoTag(@"json:""method""")]
-    public @string Method;
-    [GoTag(@"json:""params""")]
-    public array<any> Params = new(1);
-    [GoTag(@"json:""id""")]
-    public uint64 Id;
+partial struct clientRequest {
+    public @string Method; /*`json:"method"`*/
+    public array<any> Params = new(1); /*`json:"params"`*/
+    public uint64 Id; /*`json:"id"`*/
 }
 
 internal static error WriteRequest(this ж<clientCodec> Ꮡc, ж<rpc.Request> Ꮡr, any param) {
@@ -65,16 +62,13 @@ internal static error WriteRequest(this ж<clientCodec> Ꮡc, ж<rpc.Request> �
     return c.enc.Encode(Ꮡc.of(clientCodec.Ꮡreq));
 }
 
-[GoType] partial struct clientResponse {
-    [GoTag(@"json:""id""")]
-    public uint64 Id;
-    [GoTag(@"json:""result""")]
-    public ж<json.RawMessage> Result;
-    [GoTag(@"json:""error""")]
-    public any Error;
+partial struct clientResponse {
+    public uint64 Id; /*`json:"id"`*/
+    public ж<json.RawMessage> Result; /*`json:"result"`*/
+    public any Error; /*`json:"error"`*/
 }
 
-[GoRecv] internal static void reset(this ref clientResponse r) {
+internal static void reset(this ref clientResponse r) {
     r.Id = 0;
     r.Result = default!;
     r.Error = default!;
@@ -112,14 +106,14 @@ internal static error ReadResponseHeader(this ж<clientCodec> Ꮡc, ж<rpc.Respo
     return default!;
 }
 
-[GoRecv] internal static error ReadResponseBody(this ref clientCodec c, any x) {
+internal static error ReadResponseBody(this ref clientCodec c, any x) {
     if (x == default!) {
         return default!;
     }
     return json.Unmarshal(c.resp.Result.ValueSlot, x);
 }
 
-[GoRecv] internal static error Close(this ref clientCodec c) {
+internal static error Close(this ref clientCodec c) {
     return c.c.Close();
 }
 

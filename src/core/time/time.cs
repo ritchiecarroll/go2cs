@@ -138,7 +138,7 @@ partial class time_package {
 // to t == u, since t.Equal uses the most accurate comparison available and
 // correctly handles the case when only one of its arguments has a monotonic
 // clock reading.
-[GoType] partial struct Time {
+partial struct Time {
     // wall and ext encode the wall time seconds, wall time nanoseconds,
     // and optional monotonic clock reading in nanoseconds.
     //
@@ -171,12 +171,12 @@ internal static UntypedInt nsecShift => 30;
 // to make them cheaper to call.
 
 // nsec returns the time's nanoseconds.
-[GoRecv] internal static int32 nsec(this ref Time t) {
+internal static int32 nsec(this ref Time t) {
     return (int32)((uint64)(t.wall & (uint64)nsecMask));
 }
 
 // sec returns the time's seconds since Jan 1 year 1.
-[GoRecv] internal static int64 sec(this ref Time t) {
+internal static int64 sec(this ref Time t) {
     if ((uint64)(t.wall & (uint64)hasMonotonic) != 0) {
         return wallToInternal + (int64)(((t.wall << (int)(1)) >> (int)((nsecShift + 1))));
     }
@@ -184,12 +184,12 @@ internal static UntypedInt nsecShift => 30;
 }
 
 // unixSec returns the time's seconds since Jan 1 1970 (Unix time).
-[GoRecv] internal static int64 unixSec(this ref Time t) {
+internal static int64 unixSec(this ref Time t) {
     return t.sec() + internalToUnix;
 }
 
 // addSec adds d seconds to the time.
-[GoRecv] internal static void addSec(this ref Time t, int64 d) {
+internal static void addSec(this ref Time t, int64 d) {
     if ((uint64)(t.wall & (uint64)hasMonotonic) != 0) {
         var sec = (int64)(((t.wall << (int)(1)) >> (int)((nsecShift + 1))));
         var dsec = sec + d;
@@ -214,7 +214,7 @@ internal static UntypedInt nsecShift => 30;
 }
 
 // setLoc sets the location associated with the time.
-[GoRecv] internal static void setLoc(this ref Time t, ж<ΔLocation> Ꮡloc) {
+internal static void setLoc(this ref Time t, ж<ΔLocation> Ꮡloc) {
     ref var loc = ref Ꮡloc.DerefOrNull();
 
     if (Ꮡloc == ᏑutcLoc) {
@@ -225,7 +225,7 @@ internal static UntypedInt nsecShift => 30;
 }
 
 // stripMono strips the monotonic clock reading in t.
-[GoRecv] internal static void stripMono(this ref Time t) {
+internal static void stripMono(this ref Time t) {
     if ((uint64)(t.wall & (uint64)hasMonotonic) != 0) {
         t.ext = t.sec();
         t.wall &= (uint64)(nsecMask);
@@ -236,7 +236,7 @@ internal static UntypedInt nsecShift => 30;
 // If t cannot hold a monotonic clock reading,
 // because its wall time is too large,
 // setMono is a no-op.
-[GoRecv] internal static void setMono(this ref Time t, int64 m) {
+internal static void setMono(this ref Time t, int64 m) {
     if ((uint64)(t.wall & (uint64)hasMonotonic) == 0) {
         var sec = t.ext;
         if (sec < minWall || maxWall < sec) {
@@ -252,7 +252,7 @@ internal static UntypedInt nsecShift => 30;
 // This function is used only for testing,
 // so it's OK that technically 0 is a valid
 // monotonic clock reading as well.
-[GoRecv] internal static int64 mono(this ref Time t) {
+internal static int64 mono(this ref Time t) {
     if ((uint64)(t.wall & (uint64)hasMonotonic) == 0) {
         return 0;
     }
@@ -321,7 +321,7 @@ public static bool Equal(this Time t, Time u) {
     return t.sec() == u.sec() && t.nsec() == u.nsec();
 }
 
-[GoType("num:nint")] partial struct ΔMonth;
+partial struct ΔMonth /*num:nint*/;
 
 public static ΔMonth January => /* 1 + iota */ 1;
 public static ΔMonth February => 2;
@@ -346,7 +346,7 @@ public static @string String(this ΔMonth m) {
     return "%!Month("u8 + ((sstring)(buf.slice(n))) + ")"u8;
 }
 
-[GoType("num:nint")] partial struct ΔWeekday;
+partial struct ΔWeekday /*num:nint*/;
 
 public static ΔWeekday Sunday => /* iota */ 0;
 public static ΔWeekday Monday => 1;
@@ -557,21 +557,21 @@ internal const int64 unixToAbsolute = /* unixToInternal + internalToAbsolute */ 
 
 internal const int64 wallToInternal = /* (1884*365 + 1884/4 - 1884/100 + 1884/400) * secondsPerDay */ 59453308800;
 
-[GoType("num:uint64")] partial struct absSeconds;
+partial struct absSeconds /*num:uint64*/;
 
-[GoType("num:uint64")] partial struct absDays;
+partial struct absDays /*num:uint64*/;
 
-[GoType("num:uint64")] partial struct absCentury;
+partial struct absCentury /*num:uint64*/;
 
-[GoType("num:nint")] partial struct absCyear;
+partial struct absCyear /*num:nint*/;
 
-[GoType("num:nint")] partial struct absYday;
+partial struct absYday /*num:nint*/;
 
-[GoType("num:nint")] partial struct absMonth;
+partial struct absMonth /*num:nint*/;
 
-[GoType("num:nint")] partial struct absLeap;
+partial struct absLeap /*num:nint*/;
 
-[GoType("num:nint")] partial struct absJanFeb;
+partial struct absJanFeb /*num:nint*/;
 
 // dateToAbsDays takes a standard year/month/day and returns the
 // number of days from the absolute epoch to that day.
@@ -907,7 +907,7 @@ public static nint YearDay(this Time t) {
     return yday;
 }
 
-[GoType("num:int64")] partial struct Duration;
+partial struct Duration /*num:int64*/;
 
 internal static Duration minDuration => /* -1 << 63 */ -9223372036854775808;
 internal static Duration maxDuration => /* 1<<63 - 1 */ 9223372036854775807;
@@ -950,7 +950,7 @@ public static @string String(this Duration d) {
 
 // format formats the representation of d into the end of buf and
 // returns the offset of the first character.
-internal static nint format(this Duration d, [GoArrayDims(32)] ж<array<byte>> Ꮡbuf) {
+internal static nint format(this Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     // Largest time is 2540400h10m10.000000000s
@@ -1545,7 +1545,7 @@ internal static readonly @string timeUnmarshalBinaryˢ = "Time.UnmarshalBinary: 
 internal static readonly @string timeUnmarshalBinaryˢ2 = "Time.UnmarshalBinary: invalid length"u8;
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
-[GoRecv] public static error UnmarshalBinary(this ref Time t, slice<byte> data) {
+public static error UnmarshalBinary(this ref Time t, slice<byte> data) {
     var buf = data;
     if (len(buf) == 0) {
         return errors.New(timeUnmarshalBinaryNoˢ);
@@ -1600,7 +1600,7 @@ public static (slice<byte>, error) GobEncode(this Time t) {
 }
 
 // GobDecode implements the gob.GobDecoder interface.
-[GoRecv] public static error GobDecode(this ref Time t, slice<byte> data) {
+public static error GobDecode(this ref Time t, slice<byte> data) {
     return t.UnmarshalBinary(data);
 }
 
@@ -1624,7 +1624,7 @@ internal static readonly @string timeUnmarshalJSONInputIsˢ = "Time.UnmarshalJSO
 
 // UnmarshalJSON implements the [encoding/json.Unmarshaler] interface.
 // The time must be a quoted string in the RFC 3339 format.
-[GoRecv] public static error UnmarshalJSON(this ref Time t, slice<byte> data) {
+public static error UnmarshalJSON(this ref Time t, slice<byte> data) {
     if (((sstring)data) == "null"u8) {
         return default!;
     }
@@ -1670,7 +1670,7 @@ public static (slice<byte>, error) MarshalText(this Time t) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 // The time must be in the RFC 3339 format.
-[GoRecv] public static error UnmarshalText(this ref Time t, slice<byte> data) {
+public static error UnmarshalText(this ref Time t, slice<byte> data) {
     error err = default!;
     (t, err) = parseStrictRFC3339(data);
     return err;

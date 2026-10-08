@@ -134,7 +134,7 @@ internal static void dump(this ж<Checker> Ꮡcheck, @string format, params ꓸ�
     fmt.Println(sprintf(check.fset, new Func<ж<Package>, @string>(Ꮡcheck.qualifier), true, format, args.ꓸꓸꓸ));
 }
 
-[GoRecv] internal static @string qualifier(this ref Checker check, ж<Package> Ꮡpkg) {
+internal static @string qualifier(this ref Checker check, ж<Package> Ꮡpkg) {
     ref var pkg = ref Ꮡpkg.DerefOrNull();
 
     // Qualify the package unless it's the package being type-checked.
@@ -155,7 +155,7 @@ internal static void dump(this ж<Checker> Ꮡcheck, @string format, params ꓸ�
 
 // markImports recursively walks pkg and its imports, to record unique import
 // paths in pkgPathMap.
-[GoRecv] internal static void markImports(this ref Checker check, ж<Package> Ꮡpkg) {
+internal static void markImports(this ref Checker check, ж<Package> Ꮡpkg) {
     ref var pkg = ref Ꮡpkg.DerefOrNull();
 
     if (check.seenPkgMap[Ꮡpkg]) {

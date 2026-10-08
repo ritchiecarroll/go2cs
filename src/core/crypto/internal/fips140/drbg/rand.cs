@@ -70,7 +70,7 @@ public static void Read(slice<byte> b) {
 // DefaultReader is a sentinel type, embedded in the default
 // [crypto/rand.Reader], used to recognize it when passed to
 // APIs that accept a rand io.Reader.
-[GoType] partial interface DefaultReader {
+partial interface DefaultReader {
     void defaultReader();
 }
 

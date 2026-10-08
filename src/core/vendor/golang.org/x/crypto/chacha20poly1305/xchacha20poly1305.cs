@@ -11,7 +11,7 @@ using go.vendor.golang.org.x.crypto;
 
 partial class chacha20poly1305_package {
 
-[GoType] partial struct xchacha20poly1305 {
+partial struct xchacha20poly1305 {
     internal array<byte> key = new(KeySize);
 }
 
@@ -30,15 +30,15 @@ public static (cipher.AEAD, error) NewX(slice<byte> key) {
     return (new xchacha20poly1305жAEAD(ret), default!);
 }
 
-[GoRecv] internal static nint NonceSize(this ref xchacha20poly1305 _) {
+internal static nint NonceSize(this ref xchacha20poly1305 _) {
     return NonceSizeX;
 }
 
-[GoRecv] internal static nint Overhead(this ref xchacha20poly1305 _) {
+internal static nint Overhead(this ref xchacha20poly1305 _) {
     return ΔOverhead;
 }
 
-[GoRecv] internal static slice<byte> Seal(this ref xchacha20poly1305 x, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static slice<byte> Seal(this ref xchacha20poly1305 x, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     if (len(nonce) != NonceSizeX) {
         throw panic("chacha20poly1305: bad nonce length passed to Seal");
     }
@@ -59,7 +59,7 @@ public static (cipher.AEAD, error) NewX(slice<byte> key) {
     return c.seal(dst, cNonce[..], plaintext, additionalData);
 }
 
-[GoRecv] internal static (slice<byte>, error) Open(this ref xchacha20poly1305 x, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) Open(this ref xchacha20poly1305 x, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     if (len(nonce) != NonceSizeX) {
         throw panic("chacha20poly1305: bad nonce length passed to Open");
     }

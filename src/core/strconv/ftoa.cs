@@ -13,7 +13,7 @@ using Δmath = math_package;
 partial class strconv_package {
 
 // TODO: move elsewhere?
-[GoType] partial struct floatInfo {
+partial struct floatInfo {
     internal nuint mantbits;
     internal nuint expbits;
     internal nint bias;
@@ -417,7 +417,7 @@ internal static void roundShortest(ж<@decimal> Ꮡd, uint64 mant, nint exp, ref
     }
 }
 
-[GoType] partial struct decimalSlice {
+partial struct decimalSlice {
     internal slice<byte> d;
     internal nint nd, dp;
 }

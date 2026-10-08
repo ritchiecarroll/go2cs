@@ -18,7 +18,7 @@ internal static UntypedInt nAttrsInline => 5;
 // Do not modify a Record after handing out a copy to it.
 // Call [NewRecord] to create a new Record.
 // Use [Record.Clone] to create a copy with no shared state.
-[GoType] partial struct Record {
+partial struct Record {
     // The time at which the output method (Log, Info, etc.) was called.
     public time.Time Time;
     // The log message.
@@ -99,7 +99,7 @@ internal static readonly @string addAttrsUnsafelyCalledOnˢ = "AddAttrs unsafely
 
 // AddAttrs appends the given Attrs to the [Record]'s list of Attrs.
 // It omits empty groups.
-[GoRecv] public static void AddAttrs(this ref Record r, params ꓸꓸꓸAttr attrsʗp) {
+public static void AddAttrs(this ref Record r, params ꓸꓸꓸAttr attrsʗp) {
     var attrs = attrsʗp.slice();
 
     nint i = default!;
@@ -133,7 +133,7 @@ internal static readonly @string addAttrsUnsafelyCalledOnˢ = "AddAttrs unsafely
 // Add converts the args to Attrs as described in [Logger.Log],
 // then appends the Attrs to the [Record]'s list of Attrs.
 // It omits empty groups.
-[GoRecv] public static void Add(this ref Record r, params ꓸꓸꓸany argsʗp) {
+public static void Add(this ref Record r, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
     Attr a = default!;
@@ -194,18 +194,15 @@ internal static (Attr, slice<any>) argsToAttr(slice<any> args) {
 }
 
 // Source describes the location of a line of source code.
-[GoType] partial struct Source {
+partial struct Source {
     // Function is the package path-qualified function name containing the
     // source line. If non-empty, this string uniquely identifies a single
     // function in the program. This may be the empty string if not known.
-    [GoTag(@"json:""function""")]
-    public @string Function;
+    public @string Function; /*`json:"function"`*/
     // File and Line are the file name and line number (1-based) of the source
     // line. These may be the empty string and zero, respectively, if not known.
-    [GoTag(@"json:""file""")]
-    public @string File;
-    [GoTag(@"json:""line""")]
-    public nint Line;
+    public @string File; /*`json:"file"`*/
+    public nint Line; /*`json:"line"`*/
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -217,7 +214,7 @@ internal static readonly @string lineˢ = "line"u8;
 // It is similar to a LogValue method, but we don't want Source
 // to implement LogValuer because it would be resolved before
 // the ReplaceAttr function was called.
-[GoRecv] internal static Value group(this ref Source s) {
+internal static Value group(this ref Source s) {
     slice<Attr> @as = default!;
     if (s.Function != ""u8) {
         @as = builtin.append(@as, String(functionˢ, s.Function));

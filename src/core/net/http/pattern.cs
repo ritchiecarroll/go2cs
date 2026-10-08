@@ -15,7 +15,7 @@ partial class http_package {
 
 // A pattern is something that can be matched against an HTTP request.
 // It has an optional method, an optional host, and a path.
-[GoType] partial struct pattern {
+partial struct pattern {
     internal @string str; // original string
     internal @string method;
     internal @string host;
@@ -33,11 +33,11 @@ partial class http_package {
     internal @string loc; // source location of registering call, for helpful messages
 }
 
-[GoRecv] internal static @string String(this ref pattern p) {
+internal static @string String(this ref pattern p) {
     return p.str;
 }
 
-[GoRecv] internal static segment lastSegment(this ref pattern p) {
+internal static segment lastSegment(this ref pattern p) {
     return p.segments[builtin.len(p.segments) - 1];
 }
 
@@ -59,7 +59,7 @@ partial class http_package {
 // Example:
 //
 //	"{rest...}" => segment{s: "rest", wild: true, multi: true}
-[GoType] partial struct segment {
+partial struct segment {
     internal @string s; // literal or wildcard name or "/" for "/{$}".
     internal bool wild;
     internal bool multi; // "..." wildcard
@@ -230,7 +230,7 @@ internal static @string pathUnescape(@string path) {
     return u;
 }
 
-[GoType("@string")] partial struct relationship;
+partial struct relationship /*@string*/;
 
 internal static readonly relationship equivalent = "equivalent"u8;              // both match the same requests
 internal static readonly relationship moreGeneral = "moreGeneral"u8;             // p1 matches everything p2 does & more
@@ -251,7 +251,7 @@ internal static readonly relationship overlaps = "overlaps"u8;                //
 // If rule 1 doesn't apply, then two patterns conflict if their relationship
 // is either equivalence (they match the same set of requests) or overlap
 // (they both match some requests, but neither is more specific than the other).
-[GoRecv] internal static bool conflictsWith(this ref pattern p1, ж<pattern> Ꮡp2) {
+internal static bool conflictsWith(this ref pattern p1, ж<pattern> Ꮡp2) {
     ref var p2 = ref Ꮡp2.DerefOrNull();
 
     if (p1.host != p2.host) {
@@ -264,7 +264,7 @@ internal static readonly relationship overlaps = "overlaps"u8;                //
     return rel == equivalent || rel == overlaps;
 }
 
-[GoRecv] internal static relationship comparePathsAndMethods(this ref pattern p1, ж<pattern> Ꮡp2) {
+internal static relationship comparePathsAndMethods(this ref pattern p1, ж<pattern> Ꮡp2) {
     relationship mrel = p1.compareMethods(Ꮡp2);
     // Optimization: avoid a call to comparePaths.
     if (mrel == disjoint) {
@@ -281,7 +281,7 @@ internal static readonly relationship overlaps = "overlaps"u8;                //
 // The empty string matches any method, so it is the most general.
 // "GET" matches both GET and HEAD.
 // Anything else matches only itself.
-[GoRecv] internal static relationship compareMethods(this ref pattern p1, ж<pattern> Ꮡp2) {
+internal static relationship compareMethods(this ref pattern p1, ж<pattern> Ꮡp2) {
     ref var p2 = ref Ꮡp2.DerefOrNull();
 
     if (p1.method == p2.method) {
@@ -306,7 +306,7 @@ internal static readonly relationship overlaps = "overlaps"u8;                //
 
 // comparePaths determines the relationship between the path
 // part of two patterns.
-[GoRecv] internal static relationship comparePaths(this ref pattern p1, ж<pattern> Ꮡp2) {
+internal static relationship comparePaths(this ref pattern p1, ж<pattern> Ꮡp2) {
     ref var p2 = ref Ꮡp2.DerefOrNull();
 
     // Optimization: if a path pattern doesn't end in a multi ("...") wildcard, then it

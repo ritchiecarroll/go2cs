@@ -11,7 +11,7 @@ using time = time_package;
 partial class net_package {
 
 // pipeDeadline is an abstraction for handling timeouts.
-[GoType] partial struct pipeDeadline {
+partial struct pipeDeadline {
     internal Δsync.Mutex mu; // Guards timer and cancel
     internal ж<time.Timer> timer;
     internal channel<EmptyStruct> cancel; // Must be non-nil
@@ -94,7 +94,7 @@ internal static bool isClosedChan(/*<-*/channel<EmptyStruct> c) {
     }}
 }
 
-[GoType] partial struct pipeAddr {
+partial struct pipeAddr {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -108,7 +108,7 @@ internal static @string String(this pipeAddr _) {
     return pipeˢ;
 }
 
-[GoType] partial struct pipe {
+partial struct pipe {
     internal Δsync.Mutex wrMu; // Serialize Write operations
     // Used by local Read to interact with remote Write.
     // Successful receive on rdRx is always followed by send on rdTx.
@@ -154,11 +154,11 @@ public static (Conn, Conn) Pipe() {
     return (new pipeжConn(p1), new pipeжConn(p2));
 }
 
-[GoRecv] internal static ΔAddr LocalAddr(this ref pipe _) {
+internal static ΔAddr LocalAddr(this ref pipe _) {
     return new pipeAddr(nil);
 }
 
-[GoRecv] internal static ΔAddr RemoteAddr(this ref pipe _) {
+internal static ΔAddr RemoteAddr(this ref pipe _) {
     return new pipeAddr(nil);
 }
 

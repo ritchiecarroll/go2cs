@@ -61,7 +61,7 @@ internal static error rename(@string oldname, @string newname) {
 // The extra level of indirection ensures that no clients of os
 // can overwrite this data, which could cause the finalizer
 // to close the wrong file descriptor.
-[GoType] partial struct @file {
+partial struct @file {
     internal poll.FD pfd;
     internal @string name;
     internal atomic.Pointer<dirInfo> dirinfo; // nil unless directory being read
@@ -139,7 +139,7 @@ public static ж<File> net_newUnixFile(nint fd, @string name) {
     return newFile(fd, name, kindSock, true);
 }
 
-[GoType("num:nint")] partial struct newFileKind;
+partial struct newFileKind /*num:nint*/;
 
 internal static newFileKind kindNewFile => /* iota */ 0;
 internal static newFileKind kindOpenFile => 1;
@@ -239,7 +239,7 @@ internal static ж<File> newFile(nint fd, @string name, newFileKind kind, bool n
     return f;
 }
 
-[global::System.Diagnostics.StackTraceHidden] internal static void sigpipe() {
+/*linkname*/ internal static partial void sigpipe() {
     runtime.os_sigpipe();
 }
 
@@ -459,26 +459,26 @@ internal static (@string, error) readlink(@string name) {
     }
 }
 
-[GoType] partial struct unixDirent {
+partial struct unixDirent {
     internal @string parent;
     internal @string name;
     internal FileMode typ;
     internal FileInfo info;
 }
 
-[GoRecv] internal static @string Name(this ref unixDirent d) {
+internal static @string Name(this ref unixDirent d) {
     return d.name;
 }
 
-[GoRecv] internal static bool IsDir(this ref unixDirent d) {
+internal static bool IsDir(this ref unixDirent d) {
     return d.typ.IsDir();
 }
 
-[GoRecv] internal static FileMode Type(this ref unixDirent d) {
+internal static FileMode Type(this ref unixDirent d) {
     return d.typ;
 }
 
-[GoRecv] internal static (FileInfo, error) Info(this ref unixDirent d) {
+internal static (FileInfo, error) Info(this ref unixDirent d) {
     if (d.info != default!) {
         return (d.info, default!);
     }

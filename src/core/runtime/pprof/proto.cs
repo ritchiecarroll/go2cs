@@ -27,7 +27,7 @@ internal static void lostProfileEvent() {
 
 // A profileBuilder writes a profile incrementally from a
 // stream of profile samples delivered by the runtime.
-[GoType] partial struct profileBuilder {
+partial struct profileBuilder {
     internal time.Time start;
     internal time.Time end;
     internal bool havePeriod;
@@ -45,7 +45,7 @@ internal static void lostProfileEvent() {
     internal pcDeck deck;
 }
 
-[GoType] partial struct memMap {
+partial struct memMap {
     // initialized as reading mapping
     internal uintptr start; // Address at which the binary (or DLL) is loaded into memory.
     internal uintptr end; // The limit of the address range occupied by this mapping.
@@ -56,7 +56,7 @@ internal static void lostProfileEvent() {
     internal bool fake; // map entry was faked; /proc/self/maps wasn't available
 }
 
-[GoType("num:uint8")] partial struct symbolizeFlag;
+partial struct symbolizeFlag /*num:uint8*/;
 
 internal static symbolizeFlag lookupTried => /* 1 << iota */ 1;
 internal static symbolizeFlag lookupFailed => /* 1 << iota */ 2;
@@ -107,7 +107,7 @@ internal static UntypedInt tagFunction_StartLine => 5; // int64
 
 // stringIndex adds s to the string table if not already present
 // and returns the index of s in the string table.
-[GoRecv] internal static int64 stringIndex(this ref profileBuilder b, @string s) {
+internal static int64 stringIndex(this ref profileBuilder b, @string s) {
     var (id, ok) = b.stringMap[s, ꟷ];
     if (!ok) {
         id = len(b.strings);
@@ -117,7 +117,7 @@ internal static UntypedInt tagFunction_StartLine => 5; // int64
     return (int64)id;
 }
 
-[GoRecv] internal static void flush(this ref profileBuilder b) {
+internal static void flush(this ref profileBuilder b) {
     const nint dataFlush = 4096;
     if (b.pb.nest == 0 && len(b.pb.data) > dataFlush) {
         b.zw.Write(b.pb.data);
@@ -126,7 +126,7 @@ internal static UntypedInt tagFunction_StartLine => 5; // int64
 }
 
 // pbValueType encodes a ValueType message to b.pb.
-[GoRecv] internal static void pbValueType(this ref profileBuilder b, nint tag, @string typ, @string unit) {
+internal static void pbValueType(this ref profileBuilder b, nint tag, @string typ, @string unit) {
     msgOffset start = b.pb.startMessage();
     b.pb.int64(tagValueType_Type, b.stringIndex(typ));
     b.pb.int64(tagValueType_Unit, b.stringIndex(unit));
@@ -134,7 +134,7 @@ internal static UntypedInt tagFunction_StartLine => 5; // int64
 }
 
 // pbSample encodes a Sample message to b.pb.
-[GoRecv] internal static void pbSample(this ref profileBuilder b, slice<int64> values, slice<uint64> locs, Action labels) {
+internal static void pbSample(this ref profileBuilder b, slice<int64> values, slice<uint64> locs, Action labels) {
     msgOffset start = b.pb.startMessage();
     b.pb.int64s(tagSample_Value, values);
     b.pb.uint64s(tagSample_Location, locs);
@@ -146,7 +146,7 @@ internal static UntypedInt tagFunction_StartLine => 5; // int64
 }
 
 // pbLabel encodes a Label message to b.pb.
-[GoRecv] internal static void pbLabel(this ref profileBuilder b, nint tag, @string key, @string str, int64 num) {
+internal static void pbLabel(this ref profileBuilder b, nint tag, @string key, @string str, int64 num) {
     msgOffset start = b.pb.startMessage();
     b.pb.int64Opt(tagLabel_Key, b.stringIndex(key));
     b.pb.int64Opt(tagLabel_Str, b.stringIndex(str));
@@ -155,7 +155,7 @@ internal static UntypedInt tagFunction_StartLine => 5; // int64
 }
 
 // pbLine encodes a Line message to b.pb.
-[GoRecv] internal static void pbLine(this ref profileBuilder b, nint tag, uint64 funcID, int64 line) {
+internal static void pbLine(this ref profileBuilder b, nint tag, uint64 funcID, int64 line) {
     msgOffset start = b.pb.startMessage();
     b.pb.uint64Opt(tagLine_FunctionID, funcID);
     b.pb.int64Opt(tagLine_Line, line);
@@ -163,7 +163,7 @@ internal static UntypedInt tagFunction_StartLine => 5; // int64
 }
 
 // pbMapping encodes a Mapping message to b.pb.
-[GoRecv] internal static void pbMapping(this ref profileBuilder b, nint tag, uint64 id, uint64 @base, uint64 limit, uint64 offset, @string @file, @string buildID, bool hasFuncs) {
+internal static void pbMapping(this ref profileBuilder b, nint tag, uint64 id, uint64 @base, uint64 limit, uint64 offset, @string @file, @string buildID, bool hasFuncs) {
     msgOffset start = b.pb.startMessage();
     b.pb.uint64Opt(tagMapping_ID, id);
     b.pb.uint64Opt(tagMapping_Start, @base);
@@ -212,7 +212,7 @@ internal static (slice<runtime.Frame>, symbolizeFlag) allFrames(uintptr addr) {
     return (ret, symbolizeResult);
 }
 
-[GoType] partial struct locInfo {
+partial struct locInfo {
     // location id assigned by the profileBuilder
     internal uint64 id;
     // sequence of PCs, including the fake PCs returned by the traceback
@@ -248,7 +248,7 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
 //
 // The data must be a whole number of records, as delivered by the runtime.
 // len(tags) must be equal to the number of records in data.
-[GoRecv] internal static error addCPUData(this ref profileBuilder b, slice<uint64> data, slice<@unsafe.Pointer> tags) {
+internal static error addCPUData(this ref profileBuilder b, slice<uint64> data, slice<@unsafe.Pointer> tags) {
     if (!b.havePeriod) {
         // first record is period
         if (len(data) < 3) {
@@ -507,7 +507,7 @@ internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ж<profileBuil
 // As reading and processing the pcs in a stack trace one by one (from leaf to the root),
 // we use pcDeck to temporarily hold the observed pcs and their expanded frames
 // until we observe the entry function frame.
-[GoType] partial struct pcDeck {
+partial struct pcDeck {
     internal slice<uintptr> pcs;
     internal slice<runtime.Frame> frames;
     internal symbolizeFlag symbolizeResult;
@@ -519,7 +519,7 @@ internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ж<profileBuil
     internal symbolizeFlag firstPCSymbolizeResult;
 }
 
-[GoRecv] internal static void reset(this ref pcDeck d) {
+internal static void reset(this ref pcDeck d) {
     d.pcs = d.pcs[..0];
     d.frames = d.frames[..0];
     d.symbolizeResult = 0;
@@ -530,7 +530,7 @@ internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ж<profileBuil
 // tryAdd tries to add the pc and Frames expanded from it (most likely one,
 // since the stack trace is already fully expanded) and the symbolizeResult
 // to the deck. If it fails the caller needs to flush the deck and retry.
-[GoRecv] internal static bool /*success*/ tryAdd(this ref pcDeck d, uintptr pc, slice<runtime.Frame> frames, symbolizeFlag symbolizeResult) {
+internal static bool /*success*/ tryAdd(this ref pcDeck d, uintptr pc, slice<runtime.Frame> frames, symbolizeFlag symbolizeResult) {
     {
         nint existing = len(d.frames); if (existing > 0) {
             // 'd.frames' are all expanded from one 'pc' and represent all
@@ -570,7 +570,7 @@ internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ж<profileBuil
 // We can't write out functions while in the middle of the
 // Location message, so record new functions we encounter and
 // write them out after the Location.
-[GoType("dyn")] internal partial struct emitLocation_newFunc {
+internal partial struct emitLocation_newFunc /*dyn*/ {
     internal uint64 id;
     internal @string name, @file;
     internal int64 startLine;
@@ -741,11 +741,11 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
     }
 }
 
-[GoRecv] internal static void addMapping(this ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID) {
+internal static void addMapping(this ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID) {
     b.addMappingEntry(lo, hi, offset, @file, buildID, false);
 }
 
-[GoRecv] internal static void addMappingEntry(this ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID, bool fake) {
+internal static void addMappingEntry(this ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID, bool fake) {
     b.mem = append(b.mem, new memMap(
         start: (uintptr)lo,
         end: (uintptr)hi,

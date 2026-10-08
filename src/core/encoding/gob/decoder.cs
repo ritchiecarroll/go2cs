@@ -25,7 +25,7 @@ internal static UntypedInt tooBig => /* (1 << 30) << (^uint(0) >> 62) */ 8589934
 // The Decoder does only basic sanity checking on decoded input sizes,
 // and its limits are not configurable. Take caution when decoding gob data
 // from untrusted sources.
-[GoType] partial struct Decoder {
+partial struct Decoder {
     internal sync.Mutex mutex;                              // each item must be received atomically
     internal io.Reader r;                               // source of the data
     internal decBuffer buf;                               // buffer for more efficient i/o from r
@@ -84,7 +84,7 @@ internal static error errBadCount = errors.New("invalid message length"u8);
 
 // recvMessage reads the next count-delimited item from the input. It is the converse
 // of Encoder.writeMessage. It returns false on EOF or other error reading the message.
-[GoRecv] internal static bool recvMessage(this ref Decoder dec) {
+internal static bool recvMessage(this ref Decoder dec) {
     // Read a count.
     var (nbytes, _, err) = decodeUintReader(dec.r, dec.countBuf);
     if (err != default!) {
@@ -100,7 +100,7 @@ internal static error errBadCount = errors.New("invalid message length"u8);
 }
 
 // readMessage reads the next nbytes bytes from the input.
-[GoRecv] internal static void readMessage(this ref Decoder dec, nint nbytes) {
+internal static void readMessage(this ref Decoder dec, nint nbytes) {
     if (dec.buf.Len() != 0) {
         // The buffer should always be empty now.
         throw panic("non-empty decoder buffer");

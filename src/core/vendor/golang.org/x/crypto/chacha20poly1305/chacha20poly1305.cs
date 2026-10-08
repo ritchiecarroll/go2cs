@@ -18,7 +18,7 @@ public static UntypedInt ΔNonceSize => 12;
 public static UntypedInt NonceSizeX => 24;
 public static UntypedInt ΔOverhead => 16;
 
-[GoType] partial struct chacha20poly1305 {
+partial struct chacha20poly1305 {
     internal array<byte> key = new(KeySize);
 }
 
@@ -35,15 +35,15 @@ public static (cipher.AEAD, error) New(slice<byte> key) {
     return (new chacha20poly1305жAEAD(ret), default!);
 }
 
-[GoRecv] internal static nint NonceSize(this ref chacha20poly1305 c) {
+internal static nint NonceSize(this ref chacha20poly1305 c) {
     return ΔNonceSize;
 }
 
-[GoRecv] internal static nint Overhead(this ref chacha20poly1305 c) {
+internal static nint Overhead(this ref chacha20poly1305 c) {
     return ΔOverhead;
 }
 
-[GoRecv] internal static slice<byte> Seal(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static slice<byte> Seal(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     if (len(nonce) != ΔNonceSize) {
         throw panic("chacha20poly1305: bad nonce length passed to Seal");
     }
@@ -55,7 +55,7 @@ public static (cipher.AEAD, error) New(slice<byte> key) {
 
 internal static error errOpen = errors.New("chacha20poly1305: message authentication failed"u8);
 
-[GoRecv] internal static (slice<byte>, error) Open(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) Open(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     if (len(nonce) != ΔNonceSize) {
         throw panic("chacha20poly1305: bad nonce length passed to Open");
     }

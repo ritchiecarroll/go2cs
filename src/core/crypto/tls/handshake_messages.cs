@@ -77,7 +77,7 @@ internal static bool readUint24LengthPrefixed(ж<cryptobyte.String> Ꮡs, ж<sli
     return s.ReadUint24LengthPrefixed(Ꮡout.Reinterpret<slice<byte>, cryptobyte.String>());
 }
 
-[GoType] partial struct clientHelloMsg {
+partial struct clientHelloMsg {
     internal slice<byte> original;
     internal uint16 vers;
     internal slice<byte> random;
@@ -428,7 +428,7 @@ internal static readonly @string tlsInternalErrorˢ5 = "tls: internal error: psk
 
 // updateBinders updates the m.pskBinders field. The supplied binders must have
 // the same length as the current m.pskBinders.
-[GoRecv] internal static error updateBinders(this ref clientHelloMsg m, slice<slice<byte>> pskBinders) {
+internal static error updateBinders(this ref clientHelloMsg m, slice<slice<byte>> pskBinders) {
     if (len(pskBinders) != len(m.pskBinders)) {
         return errors.New(tlsInternalErrorˢ5);
     }
@@ -727,11 +727,11 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
     return true;
 }
 
-[GoRecv] internal static slice<byte> originalBytes(this ref clientHelloMsg m) {
+internal static slice<byte> originalBytes(this ref clientHelloMsg m) {
     return m.original;
 }
 
-[GoRecv] internal static ж<clientHelloMsg> clone(this ref clientHelloMsg m) {
+internal static ж<clientHelloMsg> clone(this ref clientHelloMsg m) {
     return Ꮡ(new clientHelloMsg(
         original: slices.Clone<slice<byte>, byte>(m.original),
         vers: m.vers,
@@ -764,7 +764,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
     ));
 }
 
-[GoType] partial struct serverHelloMsg {
+partial struct serverHelloMsg {
     internal slice<byte> original;
     internal uint16 vers;
     internal slice<byte> random;
@@ -1058,11 +1058,11 @@ internal static bool unmarshal(this ж<serverHelloMsg> Ꮡm, slice<byte> data) {
     return true;
 }
 
-[GoRecv] internal static slice<byte> originalBytes(this ref serverHelloMsg m) {
+internal static slice<byte> originalBytes(this ref serverHelloMsg m) {
     return m.original;
 }
 
-[GoType] partial struct encryptedExtensionsMsg {
+partial struct encryptedExtensionsMsg {
     internal @string alpnProtocol;
     internal slice<byte> quicTransportParameters;
     internal bool earlyData;
@@ -1108,7 +1108,7 @@ internal static (slice<byte>, error) marshal(this ж<encryptedExtensionsMsg> Ꮡ
     return b.Bytes();
 }
 
-[GoRecv] internal static bool unmarshal(this ref encryptedExtensionsMsg m, slice<byte> data) {
+internal static bool unmarshal(this ref encryptedExtensionsMsg m, slice<byte> data) {
     m = new encryptedExtensionsMsg(nil);
     var s = ((cryptobyte.String)data);
     ref var extensions = ref heap<cryptobyte.String>(out var Ꮡextensions);
@@ -1167,20 +1167,20 @@ internal static (slice<byte>, error) marshal(this ж<encryptedExtensionsMsg> Ꮡ
     return true;
 }
 
-[GoType] partial struct endOfEarlyDataMsg {
+partial struct endOfEarlyDataMsg {
 }
 
-[GoRecv] internal static (slice<byte>, error) marshal(this ref endOfEarlyDataMsg m) {
+internal static (slice<byte>, error) marshal(this ref endOfEarlyDataMsg m) {
     var x = new slice<byte>(4);
     x[0] = typeEndOfEarlyData;
     return (x, default!);
 }
 
-[GoRecv] internal static bool unmarshal(this ref endOfEarlyDataMsg m, slice<byte> data) {
+internal static bool unmarshal(this ref endOfEarlyDataMsg m, slice<byte> data) {
     return len(data) == 4;
 }
 
-[GoType] partial struct keyUpdateMsg {
+partial struct keyUpdateMsg {
     internal bool updateRequested;
 }
 
@@ -1197,7 +1197,7 @@ internal static (slice<byte>, error) marshal(this ж<keyUpdateMsg> Ꮡm) {
     return b.Bytes();
 }
 
-[GoRecv] internal static bool unmarshal(this ref keyUpdateMsg m, slice<byte> data) {
+internal static bool unmarshal(this ref keyUpdateMsg m, slice<byte> data) {
     var s = ((cryptobyte.String)data);
     ref var updateRequested = ref heap(new uint8(), out var ᏑupdateRequested);
     if (!s.Skip(4) || !s.ReadUint8(ᏑupdateRequested) || !s.Empty()) {
@@ -1220,7 +1220,7 @@ internal static (slice<byte>, error) marshal(this ж<keyUpdateMsg> Ꮡm) {
     return true;
 }
 
-[GoType] partial struct newSessionTicketMsgTLS13 {
+partial struct newSessionTicketMsgTLS13 {
     internal uint32 lifetime;
     internal uint32 ageAdd;
     internal slice<byte> nonce;
@@ -1289,7 +1289,7 @@ internal static bool unmarshal(this ж<newSessionTicketMsgTLS13> Ꮡm, slice<byt
     return true;
 }
 
-[GoType] partial struct certificateRequestMsgTLS13 {
+partial struct certificateRequestMsgTLS13 {
     internal bool ocspStapling;
     internal bool scts;
     internal slice<SignatureScheme> supportedSignatureAlgorithms;
@@ -1356,7 +1356,7 @@ internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13>
     return b.Bytes();
 }
 
-[GoRecv] internal static bool unmarshal(this ref certificateRequestMsgTLS13 m, slice<byte> data) {
+internal static bool unmarshal(this ref certificateRequestMsgTLS13 m, slice<byte> data) {
     m = new certificateRequestMsgTLS13(nil);
     var s = ((cryptobyte.String)data);
     ref var context = ref heap<cryptobyte.String>(out var Ꮡcontext);
@@ -1437,11 +1437,11 @@ internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13>
     return true;
 }
 
-[GoType] partial struct certificateMsg {
+partial struct certificateMsg {
     internal slice<slice<byte>> certificates;
 }
 
-[GoRecv] internal static (slice<byte>, error) marshal(this ref certificateMsg m) {
+internal static (slice<byte>, error) marshal(this ref certificateMsg m) {
     nint i = default!;
     foreach (var (_, Δslice) in m.certificates) {
         i += len(Δslice);
@@ -1467,7 +1467,7 @@ internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13>
     return (x, default!);
 }
 
-[GoRecv] internal static bool unmarshal(this ref certificateMsg m, slice<byte> data) {
+internal static bool unmarshal(this ref certificateMsg m, slice<byte> data) {
     if (len(data) < 7) {
         return false;
     }
@@ -1499,7 +1499,7 @@ internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13>
     return true;
 }
 
-[GoType] partial struct certificateMsgTLS13 {
+partial struct certificateMsgTLS13 {
     internal Certificate certificate;
     internal bool ocspStapling;
     internal bool scts;
@@ -1645,11 +1645,11 @@ internal static bool unmarshalCertificate(ж<cryptobyte.String> Ꮡs, ж<Certifi
     return true;
 }
 
-[GoType] partial struct serverKeyExchangeMsg {
+partial struct serverKeyExchangeMsg {
     internal slice<byte> key;
 }
 
-[GoRecv] internal static (slice<byte>, error) marshal(this ref serverKeyExchangeMsg m) {
+internal static (slice<byte>, error) marshal(this ref serverKeyExchangeMsg m) {
     nint length = len(m.key);
     var x = new slice<byte>(length + 4);
     x[0] = typeServerKeyExchange;
@@ -1660,7 +1660,7 @@ internal static bool unmarshalCertificate(ж<cryptobyte.String> Ꮡs, ж<Certifi
     return (x, default!);
 }
 
-[GoRecv] internal static bool unmarshal(this ref serverKeyExchangeMsg m, slice<byte> data) {
+internal static bool unmarshal(this ref serverKeyExchangeMsg m, slice<byte> data) {
     if (len(data) < 4) {
         return false;
     }
@@ -1668,7 +1668,7 @@ internal static bool unmarshalCertificate(ж<cryptobyte.String> Ꮡs, ж<Certifi
     return true;
 }
 
-[GoType] partial struct certificateStatusMsg {
+partial struct certificateStatusMsg {
     internal slice<byte> response;
 }
 
@@ -1697,24 +1697,24 @@ internal static bool unmarshal(this ж<certificateStatusMsg> Ꮡm, slice<byte> d
     return true;
 }
 
-[GoType] partial struct serverHelloDoneMsg {
+partial struct serverHelloDoneMsg {
 }
 
-[GoRecv] internal static (slice<byte>, error) marshal(this ref serverHelloDoneMsg m) {
+internal static (slice<byte>, error) marshal(this ref serverHelloDoneMsg m) {
     var x = new slice<byte>(4);
     x[0] = typeServerHelloDone;
     return (x, default!);
 }
 
-[GoRecv] internal static bool unmarshal(this ref serverHelloDoneMsg m, slice<byte> data) {
+internal static bool unmarshal(this ref serverHelloDoneMsg m, slice<byte> data) {
     return len(data) == 4;
 }
 
-[GoType] partial struct clientKeyExchangeMsg {
+partial struct clientKeyExchangeMsg {
     internal slice<byte> ciphertext;
 }
 
-[GoRecv] internal static (slice<byte>, error) marshal(this ref clientKeyExchangeMsg m) {
+internal static (slice<byte>, error) marshal(this ref clientKeyExchangeMsg m) {
     nint length = len(m.ciphertext);
     var x = new slice<byte>(length + 4);
     x[0] = typeClientKeyExchange;
@@ -1725,7 +1725,7 @@ internal static bool unmarshal(this ж<certificateStatusMsg> Ꮡm, slice<byte> d
     return (x, default!);
 }
 
-[GoRecv] internal static bool unmarshal(this ref clientKeyExchangeMsg m, slice<byte> data) {
+internal static bool unmarshal(this ref clientKeyExchangeMsg m, slice<byte> data) {
     if (len(data) < 4) {
         return false;
     }
@@ -1737,7 +1737,7 @@ internal static bool unmarshal(this ж<certificateStatusMsg> Ꮡm, slice<byte> d
     return true;
 }
 
-[GoType] partial struct finishedMsg {
+partial struct finishedMsg {
     internal slice<byte> verifyData;
 }
 
@@ -1756,7 +1756,7 @@ internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
     return s.Skip(1) && readUint24LengthPrefixed(Ꮡs, Ꮡm.of(finishedMsg.ᏑverifyData)) && s.Empty();
 }
 
-[GoType] partial struct certificateRequestMsg {
+partial struct certificateRequestMsg {
     // hasSignatureAlgorithm indicates whether this message includes a list of
     // supported signature algorithms. This change was introduced with TLS 1.2.
     internal bool hasSignatureAlgorithm;
@@ -1765,7 +1765,7 @@ internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
     internal slice<slice<byte>> certificateAuthorities;
 }
 
-[GoRecv] internal static (slice<byte>, error) marshal(this ref certificateRequestMsg m) {
+internal static (slice<byte>, error) marshal(this ref certificateRequestMsg m) {
     // See RFC 4346, Section 7.4.4.
     nint length = 1 + len(m.certificateTypes) + 2;
     nint casLength = 0;
@@ -1808,7 +1808,7 @@ internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
     return (x, default!);
 }
 
-[GoRecv] internal static bool unmarshal(this ref certificateRequestMsg m, slice<byte> data) {
+internal static bool unmarshal(this ref certificateRequestMsg m, slice<byte> data) {
     if (len(data) < 5) {
         return false;
     }
@@ -1872,7 +1872,7 @@ internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
     return len(data) == 0;
 }
 
-[GoType] partial struct certificateVerifyMsg {
+partial struct certificateVerifyMsg {
     internal bool hasSignatureAlgorithm; // format change introduced in TLS 1.2
     internal SignatureScheme signatureAlgorithm;
     internal slice<byte> signature;
@@ -1909,11 +1909,11 @@ internal static bool unmarshal(this ж<certificateVerifyMsg> Ꮡm, slice<byte> d
     return readUint16LengthPrefixed(Ꮡs, Ꮡm.of(certificateVerifyMsg.Ꮡsignature)) && s.Empty();
 }
 
-[GoType] partial struct newSessionTicketMsg {
+partial struct newSessionTicketMsg {
     internal slice<byte> ticket;
 }
 
-[GoRecv] internal static (slice<byte>, error) marshal(this ref newSessionTicketMsg m) {
+internal static (slice<byte>, error) marshal(this ref newSessionTicketMsg m) {
     // See RFC 5077, Section 3.3.
     nint ticketLen = len(m.ticket);
     nint length = 2 + 4 + ticketLen;
@@ -1928,7 +1928,7 @@ internal static bool unmarshal(this ж<certificateVerifyMsg> Ꮡm, slice<byte> d
     return (x, default!);
 }
 
-[GoRecv] internal static bool unmarshal(this ref newSessionTicketMsg m, slice<byte> data) {
+internal static bool unmarshal(this ref newSessionTicketMsg m, slice<byte> data) {
     if (len(data) < 10) {
         return false;
     }
@@ -1944,18 +1944,18 @@ internal static bool unmarshal(this ж<certificateVerifyMsg> Ꮡm, slice<byte> d
     return true;
 }
 
-[GoType] partial struct helloRequestMsg {
+partial struct helloRequestMsg {
 }
 
-[GoRecv] internal static (slice<byte>, error) marshal(this ref helloRequestMsg _) {
+internal static (slice<byte>, error) marshal(this ref helloRequestMsg _) {
     return (new byte[]{typeHelloRequest, 0, 0, 0}.slice(), default!);
 }
 
-[GoRecv] internal static bool unmarshal(this ref helloRequestMsg _, slice<byte> data) {
+internal static bool unmarshal(this ref helloRequestMsg _, slice<byte> data) {
     return len(data) == 4;
 }
 
-[GoType] partial interface transcriptHash {
+partial interface transcriptHash {
     (nint, error) Write(slice<byte> _);
 }
 

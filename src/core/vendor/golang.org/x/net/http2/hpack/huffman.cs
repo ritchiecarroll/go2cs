@@ -124,13 +124,12 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
     return default!;
 }
 
-[GoType("[0]Action")] partial struct incomparable;
+partial struct incomparable /*[0]Action*/;
 
-[GoType] partial struct node {
+partial struct node {
     internal incomparable _;
     // children is non-nil for internal nodes
-    [GoArrayDims(256)]
-    internal ж<array<ж<node>>> children;
+    internal /*[256]*/ ж<array<ж<node>>> children;
     // The following are only valid if children is nil:
     internal uint8 codeLen; // number of bits that led to the output of sym
     internal byte sym;  // output symbol

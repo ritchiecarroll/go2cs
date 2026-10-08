@@ -37,7 +37,7 @@ internal static uintptr floatRegSize = (uintptr)abi.EffectiveFloatRegSize;
 // abiStep represents an ABI "instruction." Each instruction
 // describes one part of how to translate between a Go value
 // in memory and a call frame.
-[GoType] partial struct abiStep {
+partial struct abiStep {
     internal abiStepKind kind;
     // offset and size together describe a part of a Go value
     // in memory.
@@ -49,7 +49,7 @@ internal static uintptr floatRegSize = (uintptr)abi.EffectiveFloatRegSize;
     internal nint freg;    // FP register index, used if kind == abiStepFloatReg
 }
 
-[GoType("num:nint")] partial struct abiStepKind;
+partial struct abiStepKind /*num:nint*/;
 
 internal static abiStepKind abiStepBad => /* iota */ 0;
 internal static abiStepKind abiStepStack => 1; // copy to/from stack
@@ -62,7 +62,7 @@ internal static abiStepKind abiStepFloatReg => 4; // copy to/from FP register
 // or vice-versa (for call results).
 //
 // An abiSeq should be populated by calling its addArg method.
-[GoType] partial struct abiSeq {
+partial struct abiSeq {
     // steps is the set of instructions.
     //
     // The instructions are grouped together by whole arguments,
@@ -83,7 +83,7 @@ internal static abiStepKind abiStepFloatReg => 4; // copy to/from FP register
     internal nint iregs, fregs;    // registers used
 }
 
-[GoRecv] internal static void dump(this ref abiSeq a) {
+internal static void dump(this ref abiSeq a) {
     foreach (var (i, p) in a.steps) {
         println((@string)"part"u8, i, p.kind, p.offset, p.size, p.stkOff, p.ireg, p.freg);
     }
@@ -100,7 +100,7 @@ internal static abiStepKind abiStepFloatReg => 4; // copy to/from FP register
 // stepsForValue returns the ABI instructions for translating
 // the i'th Go argument or return value represented by this
 // abiSeq to the Go ABI.
-[GoRecv] internal static slice<abiStep> stepsForValue(this ref abiSeq a, nint i) {
+internal static slice<abiStep> stepsForValue(this ref abiSeq a, nint i) {
     nint s = a.valueStart[i];
     nint e = default!;
     if (i == len(a.valueStart) - 1){
@@ -115,7 +115,7 @@ internal static abiStepKind abiStepFloatReg => 4; // copy to/from FP register
 //
 // If the value was stack-assigned, returns the single
 // abiStep describing that translation, and nil otherwise.
-[GoRecv] internal static ж<abiStep> addArg(this ref abiSeq a, ж<abi.Type> Ꮡt) {
+internal static ж<abiStep> addArg(this ref abiSeq a, ж<abi.Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // We'll always be adding a new value, so do that first.
@@ -158,7 +158,7 @@ internal static abiStepKind abiStepFloatReg => 4; // copy to/from FP register
 // If the receiver was stack-assigned, returns the single
 // abiStep describing that translation, and nil otherwise.
 // Returns true if the receiver is a pointer.
-[GoRecv] internal static (ж<abiStep>, bool) addRcvr(this ref abiSeq a, ж<abi.Type> Ꮡrcvr) {
+internal static (ж<abiStep>, bool) addRcvr(this ref abiSeq a, ж<abi.Type> Ꮡrcvr) {
     ref var rcvr = ref Ꮡrcvr.DerefOrNull();
 
     // The receiver is always one word.
@@ -196,7 +196,7 @@ internal static abiStepKind abiStepFloatReg => 4; // copy to/from FP register
 // n must be <= 8.
 //
 // Returns whether assignment succeeded.
-[GoRecv] internal static bool assignIntN(this ref abiSeq a, uintptr offset, uintptr size, nint n, uint8 ptrMap) {
+internal static bool assignIntN(this ref abiSeq a, uintptr offset, uintptr size, nint n, uint8 ptrMap) {
     if (n > 8 || n < 0) {
         throw panic("invalid n");
     }
@@ -228,7 +228,7 @@ internal static abiStepKind abiStepFloatReg => 4; // copy to/from FP register
 // next n floating-point registers.
 //
 // Returns whether assignment succeeded.
-[GoRecv] internal static bool assignFloatN(this ref abiSeq a, uintptr offset, uintptr size, nint n) {
+internal static bool assignFloatN(this ref abiSeq a, uintptr offset, uintptr size, nint n) {
     if (n < 0) {
         throw panic("invalid n");
     }
@@ -251,7 +251,7 @@ internal static abiStepKind abiStepFloatReg => 4; // copy to/from FP register
 // large with alignment "alignment" to the stack.
 //
 // Should not be called directly; use addArg instead.
-[GoRecv] internal static void stackAssign(this ref abiSeq a, uintptr size, uintptr alignment) {
+internal static void stackAssign(this ref abiSeq a, uintptr size, uintptr alignment) {
     a.stackBytes = align(a.stackBytes, alignment);
     a.steps = builtin.append(a.steps, new abiStep(
         kind: abiStepStack,
@@ -264,7 +264,7 @@ internal static abiStepKind abiStepFloatReg => 4; // copy to/from FP register
 }
 
 // abiDesc describes the ABI for a function or method.
-[GoType] partial struct abiDesc {
+partial struct abiDesc {
     // call and ret represent the translation steps for
     // the call and return paths of a Go function.
     internal abiSeq call, ret;
@@ -293,7 +293,7 @@ internal static abiStepKind abiStepFloatReg => 4; // copy to/from FP register
     internal abi.IntArgRegBitmap inRegPtrs, outRegPtrs;
 }
 
-[GoRecv] internal static void dump(this ref abiDesc a) {
+internal static void dump(this ref abiDesc a) {
     println((@string)"ABI"u8);
     println((@string)"call"u8);
     a.call.dump();

@@ -7,13 +7,13 @@ partial class event_package {
 
 // SchedReqs is a set of constraints on what the scheduling
 // context must look like.
-[GoType] partial struct SchedReqs {
+partial struct SchedReqs {
     public Constraint Thread;
     public Constraint Proc;
     public Constraint Goroutine;
 }
 
-[GoType("num:uint8")] partial struct Constraint;
+partial struct Constraint /*num:uint8*/;
 
 public static Constraint MustNotHave => /* iota */ 0;
 public static Constraint MayHave => 1;

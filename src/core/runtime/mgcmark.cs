@@ -1055,7 +1055,7 @@ internal static void scanframeworker(ж<stkframe> Ꮡframe, ж<stackScanState> �
     }
 }
 
-[GoType("num:nint")] partial struct gcDrainFlags;
+partial struct gcDrainFlags /*num:nint*/;
 
 internal static gcDrainFlags gcDrainUntilPreempt => /* 1 << iota */ 1;
 internal static gcDrainFlags gcDrainFlushBgCredit => 2;

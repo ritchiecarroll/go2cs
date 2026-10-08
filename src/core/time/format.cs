@@ -908,7 +908,7 @@ internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string lay
 internal static error errBad = errors.New("bad value for field"u8); // placeholder not passed to user
 
 // ParseError describes a problem parsing a time string.
-[GoType] partial struct ParseError {
+partial struct ParseError {
     public @string Layout;
     public @string Value;
     public @string LayoutElem;
@@ -971,7 +971,7 @@ internal static @string quote(@string s) {
 }
 
 // Error returns the string representation of a ParseError.
-[GoRecv] public static @string Error(this ref ParseError e) {
+public static @string Error(this ref ParseError e) {
     if (e.Message == ""u8) {
         return "parsing time "u8 + quote(e.Value) + " as "u8 + quote(e.Layout) + ": cannot parse "u8 + quote(e.ValueElem) + " as "u8 + quote(e.LayoutElem);
     }

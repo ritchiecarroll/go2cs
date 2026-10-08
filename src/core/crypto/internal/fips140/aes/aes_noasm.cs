@@ -6,7 +6,7 @@ namespace go.crypto.@internal.fips140;
 
 partial class aes_package {
 
-[GoType] partial struct block {
+partial struct block {
     internal partial ref blockExpanded blockExpanded { get; }
 }
 

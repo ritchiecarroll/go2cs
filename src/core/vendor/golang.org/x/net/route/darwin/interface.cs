@@ -7,7 +7,7 @@ namespace go.vendor.golang.org.x.net;
 partial class route_package {
 
 // An InterfaceMessage represents an interface message.
-[GoType] partial struct InterfaceMessage {
+partial struct InterfaceMessage {
     public nint Version;   // message version
     public nint Type;   // message type
     public nint Flags;   // interface flags
@@ -19,7 +19,7 @@ partial class route_package {
 }
 
 // An InterfaceAddrMessage represents an interface address message.
-[GoType] partial struct InterfaceAddrMessage {
+partial struct InterfaceAddrMessage {
     public nint Version;   // message version
     public nint Type;   // message type
     public nint Flags;   // interface flags
@@ -29,13 +29,13 @@ partial class route_package {
 }
 
 // Sys implements the Sys method of Message interface.
-[GoRecv] public static slice<ΔSys> Sys(this ref InterfaceAddrMessage m) {
+public static slice<ΔSys> Sys(this ref InterfaceAddrMessage m) {
     return default!;
 }
 
 // An InterfaceMulticastAddrMessage represents an interface multicast
 // address message.
-[GoType] partial struct InterfaceMulticastAddrMessage {
+partial struct InterfaceMulticastAddrMessage {
     public nint Version;   // message version
     public nint Type;   // message type
     public nint Flags;   // interface flags
@@ -45,13 +45,13 @@ partial class route_package {
 }
 
 // Sys implements the Sys method of Message interface.
-[GoRecv] public static slice<ΔSys> Sys(this ref InterfaceMulticastAddrMessage m) {
+public static slice<ΔSys> Sys(this ref InterfaceMulticastAddrMessage m) {
     return default!;
 }
 
 // An InterfaceAnnounceMessage represents an interface announcement
 // message.
-[GoType] partial struct InterfaceAnnounceMessage {
+partial struct InterfaceAnnounceMessage {
     public nint Version;   // message version
     public nint Type;   // message type
     public nint Index;   // interface index
@@ -61,7 +61,7 @@ partial class route_package {
 }
 
 // Sys implements the Sys method of Message interface.
-[GoRecv] public static slice<ΔSys> Sys(this ref InterfaceAnnounceMessage m) {
+public static slice<ΔSys> Sys(this ref InterfaceAnnounceMessage m) {
     return default!;
 }
 

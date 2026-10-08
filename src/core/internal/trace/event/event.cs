@@ -5,11 +5,11 @@ namespace go.@internal.trace;
 
 partial class event_package {
 
-[GoType("num:uint8")] partial struct Type;
+partial struct Type /*num:uint8*/;
 
 // Spec is a specification for a trace event. It contains sufficient information
 // to perform basic parsing of any trace event for any version of Go.
-[GoType] partial struct Spec {
+partial struct Spec {
     // Name is the human-readable name of the trace event.
     public @string Name;
     // Args contains the names of each trace event's argument.
@@ -97,7 +97,7 @@ public static map<@string, Type> Names(slice<Spec> specs) {
     return nameToType;
 }
 
-[GoType("num:nuint")] partial struct Experiment;
+partial struct Experiment /*num:nuint*/;
 
 // NoExperiment is the reserved ID 0 indicating no experiment.
 public static Experiment NoExperiment => 0;

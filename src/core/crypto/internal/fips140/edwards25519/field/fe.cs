@@ -24,7 +24,7 @@ partial class field_package {
 // are allowed to alias.
 //
 // The zero value is a valid zero element.
-[GoType] partial struct Element {
+partial struct Element {
     // An element t represents the integer
     //     t.l0 + t.l1*2^51 + t.l2*2^102 + t.l3*2^153 + t.l4*2^204
     //
@@ -238,14 +238,14 @@ public static (ж<Element>, error) SetBytes(this ж<Element> Ꮡv, slice<byte> x
 }
 
 // Bytes returns the canonical 32-byte little-endian encoding of v.
-[GoRecv] public static slice<byte> Bytes(this ref Element v) {
+public static slice<byte> Bytes(this ref Element v) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(32), out var Ꮡout);
     return v.bytes(Ꮡout);
 }
 
-[GoRecv] internal static slice<byte> bytes(this ref Element v, [GoArrayDims(32)] ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes(this ref Element v, /*[32]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     ref var t = ref heap<Element>(out var Ꮡt);
@@ -267,7 +267,7 @@ public static (ж<Element>, error) SetBytes(this ж<Element> Ꮡv, slice<byte> x
 }
 
 // Equal returns 1 if v and u are equal, and 0 otherwise.
-[GoRecv] public static nint Equal(this ref Element v, ж<Element> Ꮡu) {
+public static nint Equal(this ref Element v, ж<Element> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     var (sa, sv) = (u.Bytes(), v.Bytes());
@@ -295,7 +295,7 @@ public static ж<Element> Select(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Ele
 }
 
 // Swap swaps v and u if cond == 1 or leaves them unchanged if cond == 0, and returns v.
-[GoRecv] public static void Swap(this ref Element v, ж<Element> Ꮡu, nint cond) {
+public static void Swap(this ref Element v, ж<Element> Ꮡu, nint cond) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     var m = mask64Bits(cond);
@@ -317,7 +317,7 @@ public static ж<Element> Select(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Ele
 }
 
 // IsNegative returns 1 if v is negative, and 0 otherwise.
-[GoRecv] public static nint IsNegative(this ref Element v) {
+public static nint IsNegative(this ref Element v) {
     return (nint)((byte)(v.Bytes()[0] & 1));
 }
 

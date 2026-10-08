@@ -12,7 +12,7 @@ using global::go.unicode;
 partial class comment_package {
 
 // A Doc is a parsed Go doc comment.
-[GoType] partial struct Doc {
+partial struct Doc {
     // Content is the sequence of content blocks in the comment.
     public slice<Block> Content;
     // Links is the link definitions in the comment.
@@ -20,7 +20,7 @@ partial class comment_package {
 }
 
 // A LinkDef is a single link definition.
-[GoType] partial struct LinkDef {
+partial struct LinkDef {
     public @string Text; // the link text
     public @string URL; // the link URL
     public bool Used;   // whether the comment uses the definition
@@ -28,23 +28,23 @@ partial class comment_package {
 
 // A Block is block-level content in a doc comment,
 // one of [*Code], [*Heading], [*List], or [*Paragraph].
-[GoType] partial interface Block {
+partial interface Block {
     void block();
 }
 
 // A Heading is a doc comment heading.
-[GoType] partial struct Heading {
+partial struct Heading {
     public slice<ΔText> Text; // the heading text
 }
 
-[GoRecv] internal static void block(this ref Heading _) {
+internal static void block(this ref Heading _) {
 }
 
 // A List is a numbered or bullet list.
 // Lists are always non-empty: len(Items) > 0.
 // In a numbered list, every Items[i].Number is a non-empty string.
 // In a bullet list, every Items[i].Number is an empty string.
-[GoType] partial struct List {
+partial struct List {
     // Items is the list items.
     public slice<ж<ListItem>> Items;
     // ForceBlankBefore indicates that the list must be
@@ -65,7 +65,7 @@ partial class comment_package {
     public bool ForceBlankBetween;
 }
 
-[GoRecv] internal static void block(this ref List _) {
+internal static void block(this ref List _) {
 }
 
 // BlankBefore reports whether a reformatting of the comment
@@ -75,7 +75,7 @@ partial class comment_package {
 // (meaning at least one item has multiple paragraphs)
 // then the list itself must be preceded by a blank line.
 // A preceding blank line can be forced by setting [List].ForceBlankBefore.
-[GoRecv] public static bool BlankBefore(this ref List l) {
+public static bool BlankBefore(this ref List l) {
     return l.ForceBlankBefore || l.BlankBetween();
 }
 
@@ -85,7 +85,7 @@ partial class comment_package {
 // (meaning at least one item has multiple paragraphs)
 // then list items must themselves be separated by blank lines.
 // Blank line separators can be forced by setting [List].ForceBlankBetween.
-[GoRecv] public static bool BlankBetween(this ref List l) {
+public static bool BlankBetween(this ref List l) {
     if (l.ForceBlankBetween) {
         return true;
     }
@@ -102,7 +102,7 @@ partial class comment_package {
 }
 
 // A ListItem is a single item in a numbered or bullet list.
-[GoType] partial struct ListItem {
+partial struct ListItem {
     // Number is a decimal string in a numbered list
     // or an empty string in a bullet list.
     public @string Number; // "1", "2", ...; "" for bullet list
@@ -113,52 +113,52 @@ partial class comment_package {
 }
 
 // A Paragraph is a paragraph of text.
-[GoType] partial struct Paragraph {
+partial struct Paragraph {
     public slice<ΔText> Text;
 }
 
-[GoRecv] internal static void block(this ref Paragraph _) {
+internal static void block(this ref Paragraph _) {
 }
 
 // A Code is a preformatted code block.
-[GoType] partial struct Code {
+partial struct Code {
     // Text is the preformatted text, ending with a newline character.
     // It may be multiple lines, each of which ends with a newline character.
     // It is never empty, nor does it start or end with a blank line.
     public @string Text;
 }
 
-[GoRecv] internal static void block(this ref Code _) {
+internal static void block(this ref Code _) {
 }
 
 // A Text is text-level content in a doc comment,
 // one of [Plain], [Italic], [*Link], or [*DocLink].
-[GoType] partial interface ΔText {
+partial interface ΔText {
     void text();
 }
 
-[GoType("@string")] partial struct Plain;
+partial struct Plain /*@string*/;
 
 internal static void text(this Plain _) {
 }
 
-[GoType("@string")] partial struct Italic;
+partial struct Italic /*@string*/;
 
 internal static void text(this Italic _) {
 }
 
 // A Link is a link to a specific URL.
-[GoType] partial struct Link {
+partial struct Link {
     public bool Auto;   // is this an automatic (implicit) link of a literal URL?
     public slice<ΔText> Text; // text of link
     public @string URL; // target URL of link
 }
 
-[GoRecv] internal static void text(this ref Link _) {
+internal static void text(this ref Link _) {
 }
 
 // A DocLink is a link to documentation for a Go package or symbol.
-[GoType] partial struct DocLink {
+partial struct DocLink {
     public slice<ΔText> Text; // text of link
     // ImportPath, Recv, and Name identify the Go package or symbol
     // that is the link target. The potential combinations of
@@ -173,13 +173,13 @@ internal static void text(this Italic _) {
     public @string Name; // const, func, type, var, or method name
 }
 
-[GoRecv] internal static void text(this ref DocLink _) {
+internal static void text(this ref DocLink _) {
 }
 
 // A Parser is a doc comment parser.
 // The fields in the struct can be filled in before calling [Parser.Parse]
 // in order to customize the details of the parsing process.
-[GoType] partial struct Parser {
+partial struct Parser {
     // Words is a map of Go identifier words that
     // should be italicized and potentially linked.
     // If Words[w] is the empty string, then the word w
@@ -223,7 +223,7 @@ internal static void text(this Italic _) {
 }
 
 // parseDoc is parsing state for a single doc comment.
-[GoType] partial struct parseDoc {
+partial struct parseDoc {
     public partial ref ж<Parser> Parser { get; }
     public partial ref ж<Doc> Doc { get; }
     internal map<@string, ж<LinkDef>> links;
@@ -242,7 +242,7 @@ internal static void text(this Italic _) {
 // like "math" are full import paths but don't contain slashes. We let d.LookupPackage have
 // the first chance to resolve it, in case there's a different package imported as math,
 // and otherwise we refer to a built-in list of single-element standard library package names.
-[GoRecv] internal static (@string importPath, bool ok) lookupPkg(this ref parseDoc d, @string pkg) {
+internal static (@string importPath, bool ok) lookupPkg(this ref parseDoc d, @string pkg) {
     if (strings.Contains(pkg, "/"u8)) {
         // assume a full import path
         if (validImportPath(pkg)) {
@@ -349,13 +349,13 @@ public static ж<Doc> Parse(this ж<Parser> Ꮡp, @string text) {
 
 // A span represents a single span of comment lines (lines[start:end])
 // of an identified kind (code, heading, paragraph, and so on).
-[GoType] partial struct span {
+partial struct span {
     internal nint start;
     internal nint end;
     internal spanKind kind;
 }
 
-[GoType("num:nint")] partial struct spanKind;
+partial struct spanKind /*num:nint*/;
 
 internal static spanKind _ᴛ1ʗ => /* iota */ 0;
 internal static spanKind spanCode => 1;
@@ -616,7 +616,7 @@ internal static bool isOldHeading(@string line, slice<@string> all, nint off) {
 }
 
 // oldHeading returns the *Heading for the given old-style section heading line.
-[GoRecv] internal static Block oldHeading(this ref parseDoc d, @string line) {
+internal static Block oldHeading(this ref parseDoc d, @string line) {
     return new HeadingжBlock(Ꮡ(new Heading(Text: new ΔText[]{((Plain)strings.TrimSpace(line))}.slice())));
 }
 
@@ -626,12 +626,12 @@ internal static bool isHeading(@string line) {
 }
 
 // heading returns the *Heading for the given new-style section heading line.
-[GoRecv] internal static Block heading(this ref parseDoc d, @string line) {
+internal static Block heading(this ref parseDoc d, @string line) {
     return new HeadingжBlock(Ꮡ(new Heading(Text: new ΔText[]{((Plain)strings.TrimSpace(line[1..]))}.slice())));
 }
 
 // code returns a code block built from the lines.
-[GoRecv] internal static ж<Code> code(this ref parseDoc d, slice<@string> lines) {
+internal static ж<Code> code(this ref parseDoc d, slice<@string> lines) {
     var body = unindent(lines);
     body = append(body, ""u8); // to get final \n from Join
     return Ꮡ(new Code(Text: strings.Join(body, "\n"u8)));
@@ -639,7 +639,7 @@ internal static bool isHeading(@string line) {
 
 // paragraph returns a paragraph block built from the lines.
 // If the lines are link definitions, paragraph adds them to d and returns nil.
-[GoRecv] internal static Block paragraph(this ref parseDoc d, slice<@string> lines) {
+internal static Block paragraph(this ref parseDoc d, slice<@string> lines) {
     // Is this a block of known links? Handle.
     slice<ж<LinkDef>> defs = default!;
     foreach (var (_, line) in lines) {
@@ -848,7 +848,7 @@ internal static slice<ΔText> parseLinkedText(this ж<parseDoc> Ꮡd, @string te
 // The before and after strings are the text before the [ and after the ]
 // on the same line. Doc links must be preceded and followed by
 // punctuation, spaces, tabs, or the start or end of a line.
-[GoRecv] internal static (ж<DocLink> link, bool ok) docLink(this ref parseDoc d, @string text, @string before, @string after) {
+internal static (ж<DocLink> link, bool ok) docLink(this ref parseDoc d, @string text, @string before, @string after) {
     ж<DocLink> link = default!;
     bool ok = default!;
 
@@ -917,7 +917,7 @@ internal static (@string before, @string name, bool foundDot) splitDocName(@stri
 // those are handled by parseLinkedText.
 // If autoLink is true, then parseText recognizes URLs and words from d.Words
 // and converts those to links as appropriate.
-[GoRecv] internal static slice<ΔText> parseText(this ref parseDoc d, slice<ΔText> @out, @string s, bool autoLink) {
+internal static slice<ΔText> parseText(this ref parseDoc d, slice<ΔText> @out, @string s, bool autoLink) {
     ref var w = ref heap(new strings.Builder(), out var Ꮡw);
     nint wrote = 0;
     void writeUntil(nint i) {

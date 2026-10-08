@@ -8,18 +8,18 @@ using ꓸꓸꓸWriter = Span<io_package.Writer>;
 
 partial class io_package {
 
-[GoType] partial struct eofReader {
+partial struct eofReader {
 }
 
 internal static (nint, error) Read(this eofReader _Δp0, slice<byte> _Δp1) {
     return (0, EOF);
 }
 
-[GoType] partial struct multiReader {
+partial struct multiReader {
     internal slice<Reader> readers;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref multiReader mr, slice<byte> p) {
+internal static (nint n, error err) Read(this ref multiReader mr, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -51,11 +51,11 @@ internal static (nint, error) Read(this eofReader _Δp0, slice<byte> _Δp1) {
     return (0, EOF);
 }
 
-[GoRecv] internal static (int64 sum, error err) WriteTo(this ref multiReader mr, Writer w) {
+internal static (int64 sum, error err) WriteTo(this ref multiReader mr, Writer w) {
     return mr.writeToWithBuffer(w, new slice<byte>(1024 * 32));
 }
 
-[GoRecv] internal static (int64 sum, error err) writeToWithBuffer(this ref multiReader mr, Writer w, slice<byte> buf) {
+internal static (int64 sum, error err) writeToWithBuffer(this ref multiReader mr, Writer w, slice<byte> buf) {
     int64 sum = default!;
     error err = default!;
 
@@ -94,11 +94,11 @@ public static Reader MultiReader(params ꓸꓸꓸReader readersʗp) {
     return new multiReaderжReader(Ꮡ(new multiReader(r)));
 }
 
-[GoType] partial struct multiWriter {
+partial struct multiWriter {
     internal slice<Writer> writers;
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref multiWriter t, slice<byte> p) {
+internal static (nint n, error err) Write(this ref multiWriter t, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -117,7 +117,7 @@ public static Reader MultiReader(params ꓸꓸꓸReader readersʗp) {
 
 internal static StringWriter _ᴛ3ʗ = new multiWriterжStringWriter(((ж<multiWriter>)nil));
 
-[GoRecv] internal static (nint n, error err) WriteString(this ref multiWriter t, @string s) {
+internal static (nint n, error err) WriteString(this ref multiWriter t, @string s) {
     nint n = default!;
     error err = default!;
 

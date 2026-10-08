@@ -135,7 +135,7 @@ internal static ж<Group> buildGroup(ref _C_struct_group grp) {
     return g;
 }
 
-[GoType("num:int32")] partial struct bufferKind;
+partial struct bufferKind /*num:int32*/;
 
 internal static bufferKind userBuffer = ((bufferKind)_C__SC_GETPW_R_SIZE_MAX);
 internal static bufferKind groupBuffer = ((bufferKind)_C__SC_GETGR_R_SIZE_MAX);

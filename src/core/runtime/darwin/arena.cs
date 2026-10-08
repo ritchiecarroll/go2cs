@@ -178,7 +178,7 @@ internal static uintptr userArenaChunkReserveBytes() {
     return (uintptr)((uintptr)(userArenaChunkBytes / (uintptr)goarch.PtrSize) / 8) + /* unsafe.Sizeof(_type{}) */ (uintptr)48;
 }
 
-[GoType] partial struct userArena {
+partial struct userArena {
     // fullList is a list of full chunks that have not enough free memory left, and
     // that we'll free once this user arena is freed.
     //
@@ -214,7 +214,7 @@ internal static uintptr userArenaChunkReserveBytes() {
 // in a new chunk. If cap is negative, the type will be taken literally, otherwise
 // it will be considered as an element type for a slice backing store with capacity
 // cap.
-[GoRecv] internal static @unsafe.Pointer alloc(this ref userArena a, ж<_type> Ꮡtyp, nint cap) {
+internal static @unsafe.Pointer alloc(this ref userArena a, ж<_type> Ꮡtyp, nint cap) {
     var s = a.active;
     @unsafe.Pointer x = default!;
     while (ᐧ) {
@@ -233,7 +233,7 @@ internal static readonly @string outOfMemoryˢ = "out of memory"u8;
 
 // refill inserts the current arena chunk onto the full list and obtains a new
 // one, either from the partial list or allocating a new one, both from mheap.
-[GoRecv] internal static ж<mspan> refill(this ref userArena a) {
+internal static ж<mspan> refill(this ref userArena a) {
     // If there's an active chunk, assume it's full.
     var s = a.active;
     if (s != nil) {
@@ -274,14 +274,14 @@ internal static readonly @string outOfMemoryˢ = "out of memory"u8;
     return s;
 }
 
-[GoType] partial struct liveUserArenaChunk {
+partial struct liveUserArenaChunk {
     internal partial ref ж<mspan> mspan { get; } // Must represent a user arena chunk.
     // Reference to mspan.base() to keep the chunk alive.
     internal @unsafe.Pointer x;
 }
 
 
-[GoType("dyn")] partial struct userArenaStateᴛ1 {
+partial struct userArenaStateᴛ1 /*dyn*/ {
     internal mutex @lock;
     // reuse contains a list of partially-used and already-live
     // user arena chunks that can be quickly reused for another
@@ -451,14 +451,14 @@ internal static void userArenaHeapBitsSetType(ж<_type> Ꮡtyp, @unsafe.Pointer 
     }
 }
 
-[GoType] partial struct ΔwriteUserArenaHeapBits {
+partial struct ΔwriteUserArenaHeapBits {
     internal uintptr offset; // offset in span that the low bit of mask represents the pointer state of.
     internal uintptr mask; // some pointer bits starting at the address addr.
     internal uintptr valid; // number of bits in buf that are valid (including low)
     internal uintptr low; // number of low-order bits to not overwrite
 }
 
-[GoRecv] internal static ΔwriteUserArenaHeapBits /*h*/ writeUserArenaHeapBits(this ref mspan s, uintptr addr) {
+internal static ΔwriteUserArenaHeapBits /*h*/ writeUserArenaHeapBits(this ref mspan s, uintptr addr) {
     ΔwriteUserArenaHeapBits h = default!;
 
     var offset = addr - s.@base();
@@ -693,7 +693,7 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
 // This is really only meant to be used by accounting tests in the runtime to
 // distinguish when a span shouldn't be counted (since mSpanInUse might not be
 // enough).
-[GoRecv] internal static bool isUnusedUserArenaChunk(this ref mspan s) {
+internal static bool isUnusedUserArenaChunk(this ref mspan s) {
     return s.isUserArenaChunk && s.spanclass == makeSpanClass(0, true);
 }
 

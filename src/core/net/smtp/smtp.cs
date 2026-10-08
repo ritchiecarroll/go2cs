@@ -34,7 +34,7 @@ using ꓸꓸꓸany = Span<any>;
 partial class smtp_package {
 
 // A Client represents a client connection to an SMTP server.
-[GoType] partial struct Client {
+partial struct Client {
     // Text is the textproto.Conn used by the Client. It is exported to allow for
     // clients to add extensions.
     public ж<textproto.Conn> Text;
@@ -82,7 +82,7 @@ public static (ж<Client>, error) NewClient(net.Conn conn, @string host) {
 }
 
 // Close closes the connection.
-[GoRecv] public static error Close(this ref Client c) {
+public static error Close(this ref Client c) {
     return c.Text.Close();
 }
 
@@ -213,7 +213,7 @@ public static error StartTLS(this ж<Client> Ꮡc, ж<tls.Config> Ꮡconfig) {
 // TLSConnectionState returns the client's TLS connection state.
 // The return values are their zero values if [Client.StartTLS] did
 // not succeed.
-[GoRecv] public static (tlsꓸConnectionState state, bool ok) TLSConnectionState(this ref Client c) {
+public static (tlsꓸConnectionState state, bool ok) TLSConnectionState(this ref Client c) {
     tlsꓸConnectionState state = default!;
     bool ok = default!;
 
@@ -359,16 +359,16 @@ public static error Rcpt(this ж<Client> Ꮡc, @string to) {
     return err;
 }
 
-[GoType] partial struct dataCloser {
+partial struct dataCloser {
     internal ж<Client> c;
-    [GoEmbedded] public io_package.WriteCloser WriteCloser;
+    /*embed*/ public io_package.WriteCloser WriteCloser;
 }
 
 // Go method set entry for the promoted 'WriteCloser.Write()' - provided ONLY by the embedded
 // interface field in *dataCloser's method set; see the pointer-only satisfaction record.
 internal static (nint, error) Write(this dataCloser recvᴛ, slice<byte> p) => recvᴛ.WriteCloser.Write(p);
 
-[GoRecv] internal static error Close(this ref dataCloser d) {
+internal static error Close(this ref dataCloser d) {
     d.WriteCloser.Close();
     var (_, _, err) = (~d.c).Text.of(textproto.Conn.ᏑReader).ReadResponse(250);
     return err;

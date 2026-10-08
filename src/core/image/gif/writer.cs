@@ -37,7 +37,7 @@ internal static nint log2(nint x) {
 }
 
 // writer is a buffered writer.
-[GoType] partial interface writer :
+partial interface writer :
     io.Writer,
     io.ByteWriter
 {
@@ -45,7 +45,7 @@ internal static nint log2(nint x) {
 }
 
 // encoder encodes an image to the GIF format.
-[GoType] partial struct encoder {
+partial struct encoder {
     // w is the writer to write to. err is the first error encountered during
     // writing. All attempted writes after the first error become no-ops.
     internal writer w;
@@ -64,7 +64,7 @@ internal static nint log2(nint x) {
 // comprises (n, (n bytes)) blocks, with 1 <= n <= 255. It is the
 // writer given to the LZW encoder, which is thus immune to the
 // blocking.
-[GoType] partial struct blockWriter {
+partial struct blockWriter {
     internal ж<encoder> e;
 }
 
@@ -118,21 +118,21 @@ internal static void close(this blockWriter b) {
     b.e.flush();
 }
 
-[GoRecv] internal static void flush(this ref encoder e) {
+internal static void flush(this ref encoder e) {
     if (e.err != default!) {
         return;
     }
     e.err = e.w.Flush();
 }
 
-[GoRecv] internal static void write(this ref encoder e, slice<byte> p) {
+internal static void write(this ref encoder e, slice<byte> p) {
     if (e.err != default!) {
         return;
     }
     (_, e.err) = e.w.Write(p);
 }
 
-[GoRecv] internal static void writeByte(this ref encoder e, byte b) {
+internal static void writeByte(this ref encoder e, byte b) {
     if (e.err != default!) {
         return;
     }
@@ -143,7 +143,7 @@ internal static void close(this blockWriter b) {
 internal static readonly @string gif89aˢ = "GIF89a"u8;
 internal static readonly @string netscape20ˢ = "NETSCAPE2.0"u8;
 
-[GoRecv] internal static void writeHeader(this ref encoder e) {
+internal static void writeHeader(this ref encoder e) {
     if (e.err != default!) {
         return;
     }
@@ -234,7 +234,7 @@ internal static (nint, error) encodeColorTable(slice<byte> dst, Δcolor.Palette 
     return (3 * n, default!);
 }
 
-[GoRecv] internal static bool colorTablesMatch(this ref encoder e, nint localLen, nint transparentIndex) {
+internal static bool colorTablesMatch(this ref encoder e, nint localLen, nint transparentIndex) {
     nint localSize = 3 * localLen;
     if (transparentIndex >= 0) {
         nint trOff = 3 * transparentIndex;
@@ -364,7 +364,7 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
 }
 
 // Options are the encoding parameters.
-[GoType] partial struct Options {
+partial struct Options {
     // NumColors is the maximum number of colors used in the image.
     // It ranges from 1 to 256.
     public nint NumColors;

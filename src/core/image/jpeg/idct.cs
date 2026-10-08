@@ -37,8 +37,8 @@ partial class jpeg_package {
  */
 internal static UntypedInt blockSize => 64; // A DCT block is 8x8.
 
-[GoType("[64]int32")] /* [blockSize]int32 */
-partial struct block;
+/* [blockSize]int32 */
+partial struct block /*[64]int32*/;
 
 internal static UntypedInt w1 => 2841; // 2048*sqrt(2)*cos(1*pi/16)
 internal static UntypedInt w2 => 2676; // 2048*sqrt(2)*cos(2*pi/16)

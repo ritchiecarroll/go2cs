@@ -16,7 +16,7 @@ partial class gcm_package {
 // It is optimized for use in Counter KDF (SP 800-108r1) and XAES-256-GCM
 // (https://c2sp.org/XAES-256-GCM), rather than for exposing it to applications
 // as a stand-alone MAC.
-[GoType] partial struct CMAC {
+partial struct CMAC {
     internal aes.Block b;
     internal array<byte> k1 = new(aes.ΔBlockSize);
     internal array<byte> k2 = new(aes.ΔBlockSize);
@@ -74,7 +74,7 @@ public static array<byte> MAC(this ж<CMAC> Ꮡc, slice<byte> m) {
 }
 
 // shiftLeft sets x to x << 1, and returns MSB₁(x).
-internal static byte shiftLeft([GoArrayDims(16)] ж<array<byte>> Ꮡx) {
+internal static byte shiftLeft(/*[16]*/ ж<array<byte>> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     byte msb = default!;

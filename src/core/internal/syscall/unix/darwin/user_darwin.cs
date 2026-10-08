@@ -26,7 +26,7 @@ public static error Getgrouplist(ж<byte> Ꮡname, uint32 gid, ж<uint32> Ꮡgid
 public static UntypedInt SC_GETGR_R_SIZE_MAX => 0x46;
 public static UntypedInt SC_GETPW_R_SIZE_MAX => 0x47;
 
-[GoType] partial struct Passwd {
+partial struct Passwd {
     public ж<byte> Name;
     public ж<byte> ΔPasswd;
     public uint32 Uid; // uid_t
@@ -39,7 +39,7 @@ public static UntypedInt SC_GETPW_R_SIZE_MAX => 0x47;
     public int64 Expire; // time_t
 }
 
-[GoType] partial struct Group {
+partial struct Group {
     public ж<byte> Name;
     public ж<byte> Passwd;
     public uint32 Gid; // gid_t

@@ -21,7 +21,7 @@ partial class regexp_package {
 
 // A onePassProg is a compiled one-pass regular expression program.
 // It is the same as syntax.Prog except for the use of onePassInst.
-[GoType] partial struct onePassProg {
+partial struct onePassProg {
     public slice<onePassInst> Inst;
     public nint Start; // index of start instruction
     public nint NumCap; // number of InstCapture insts in re
@@ -29,7 +29,7 @@ partial class regexp_package {
 
 // A onePassInst is a single instruction in a one-pass regular expression program.
 // It is the same as syntax.Inst except for the new 'Next' field.
-[GoType] public partial struct onePassInst {
+public partial struct onePassInst {
     public partial ref regexp.syntax_package.Inst Inst { get; }
     public slice<uint32> Next;
 }
@@ -98,17 +98,17 @@ internal static syntax.InstOp iop(ref syntax.Inst i) {
 }
 
 // Sparse Array implementation is used as a queueOnePass.
-[GoType] partial struct queueOnePass {
+partial struct queueOnePass {
     internal slice<uint32> sparse;
     internal slice<uint32> dense;
     internal uint32 size, nextIndex;
 }
 
-[GoRecv] internal static bool empty(this ref queueOnePass q) {
+internal static bool empty(this ref queueOnePass q) {
     return q.nextIndex >= q.size;
 }
 
-[GoRecv] internal static uint32 /*n*/ next(this ref queueOnePass q) {
+internal static uint32 /*n*/ next(this ref queueOnePass q) {
     uint32 n = default!;
 
     n = q.dense[q.nextIndex];
@@ -116,25 +116,25 @@ internal static syntax.InstOp iop(ref syntax.Inst i) {
     return n;
 }
 
-[GoRecv] internal static void clear(this ref queueOnePass q) {
+internal static void clear(this ref queueOnePass q) {
     q.size = 0;
     q.nextIndex = 0;
 }
 
-[GoRecv] internal static bool contains(this ref queueOnePass q, uint32 u) {
+internal static bool contains(this ref queueOnePass q, uint32 u) {
     if (u >= (uint32)len(q.sparse)) {
         return false;
     }
     return q.sparse[u] < q.size && q.dense[q.sparse[u]] == u;
 }
 
-[GoRecv] internal static void insert(this ref queueOnePass q, uint32 u) {
+internal static void insert(this ref queueOnePass q, uint32 u) {
     if (!q.contains(u)) {
         q.insertNew(u);
     }
 }
 
-[GoRecv] internal static void insertNew(this ref queueOnePass q, uint32 u) {
+internal static void insertNew(this ref queueOnePass q, uint32 u) {
     if (u >= (uint32)len(q.sparse)) {
         return;
     }

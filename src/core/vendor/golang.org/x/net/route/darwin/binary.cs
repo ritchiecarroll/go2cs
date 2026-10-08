@@ -14,7 +14,7 @@ partial class route_package {
 internal static binaryLittleEndian littleEndian;
 internal static binaryBigEndian bigEndian;
 
-[GoType] partial interface binaryByteOrder {
+partial interface binaryByteOrder {
     uint16 Uint16(slice<byte> _);
     uint32 Uint32(slice<byte> _);
     void PutUint16(slice<byte> _Δp0, uint16 _Δp1);
@@ -22,7 +22,7 @@ internal static binaryBigEndian bigEndian;
     uint64 Uint64(slice<byte> _);
 }
 
-[GoType] partial struct binaryLittleEndian {
+partial struct binaryLittleEndian {
 }
 
 internal static uint16 Uint16(this binaryLittleEndian _Δp0, slice<byte> b) {
@@ -54,7 +54,7 @@ internal static uint64 Uint64(this binaryLittleEndian _Δp0, slice<byte> b) {
     return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)b[0] | ((uint64)b[1] << (int)(8))) | ((uint64)b[2] << (int)(16))) | ((uint64)b[3] << (int)(24))) | ((uint64)b[4] << (int)(32))) | ((uint64)b[5] << (int)(40))) | ((uint64)b[6] << (int)(48))) | ((uint64)b[7] << (int)(56)));
 }
 
-[GoType] partial struct binaryBigEndian {
+partial struct binaryBigEndian {
 }
 
 internal static uint16 Uint16(this binaryBigEndian _Δp0, slice<byte> b) {

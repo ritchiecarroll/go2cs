@@ -14,7 +14,7 @@ using math;
 
 partial class sha3_package {
 
-[GoType] partial struct SHAKE {
+partial struct SHAKE {
     internal Digest d; // SHA-3 state context and Read/Write operations
     // initBlock is the cSHAKE specific initialization set of bytes. It is initialized
     // by newCShake function and stores concatenation of N followed by S, encoded
@@ -61,11 +61,11 @@ internal static ж<SHAKE> newCShake(slice<byte> N, slice<byte> S, nint rate, nin
     return c;
 }
 
-[GoRecv] public static nint BlockSize(this ref SHAKE s) {
+public static nint BlockSize(this ref SHAKE s) {
     return s.d.BlockSize();
 }
 
-[GoRecv] public static nint Size(this ref SHAKE s) {
+public static nint Size(this ref SHAKE s) {
     return s.d.Size();
 }
 
@@ -73,7 +73,7 @@ internal static ж<SHAKE> newCShake(slice<byte> N, slice<byte> S, nint rate, nin
 // output length is selected to provide full-strength generic security: 32 bytes
 // for SHAKE128 and 64 bytes for SHAKE256. It does not change the underlying
 // state. It panics if any output has already been read.
-[GoRecv] public static slice<byte> Sum(this ref SHAKE s, slice<byte> @in) {
+public static slice<byte> Sum(this ref SHAKE s, slice<byte> @in) {
     return s.d.Sum(@in);
 }
 
@@ -101,17 +101,17 @@ public static void Reset(this ж<SHAKE> Ꮡs) {
 }
 
 // Clone returns a copy of the SHAKE context in its current state.
-[GoRecv] public static ж<SHAKE> Clone(this ref SHAKE s) {
+public static ж<SHAKE> Clone(this ref SHAKE s) {
     ref var ret = ref heap<SHAKE>(out var Ꮡret);
     ret = s.ΔClone();
     return Ꮡret;
 }
 
-[GoRecv] public static (slice<byte>, error) MarshalBinary(this ref SHAKE s) {
+public static (slice<byte>, error) MarshalBinary(this ref SHAKE s) {
     return s.AppendBinary(new slice<byte>(0, marshaledSize + len(s.initBlock)));
 }
 
-[GoRecv] public static (slice<byte>, error) AppendBinary(this ref SHAKE s, slice<byte> b) {
+public static (slice<byte>, error) AppendBinary(this ref SHAKE s, slice<byte> b) {
     (b, var err) = s.d.AppendBinary(b);
     if (err != default!) {
         return (default!, err);
@@ -120,7 +120,7 @@ public static void Reset(this ж<SHAKE> Ꮡs) {
     return (b, default!);
 }
 
-[GoRecv] public static error UnmarshalBinary(this ref SHAKE s, slice<byte> b) {
+public static error UnmarshalBinary(this ref SHAKE s, slice<byte> b) {
     if (len(b) < marshaledSize) {
         return errors.New(sha3InvalidHashStateˢ);
     }

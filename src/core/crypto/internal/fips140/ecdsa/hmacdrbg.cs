@@ -19,7 +19,7 @@ partial class ecdsa_package {
 //
 // Per Table 2, it has a reseed interval of 2^48 requests, and a maximum request
 // size of 2^19 bits (2^16 bytes, 64 KiB).
-[GoType] public partial struct hmacDRBG {
+public partial struct hmacDRBG {
     internal Func<slice<byte>, ж<hmac.HMAC>> newHMAC;
     internal ж<hmac.HMAC> hK;
     public slice<byte> V;
@@ -29,17 +29,17 @@ partial class ecdsa_package {
 internal static UntypedInt reseedInterval => /* 1 << 48 */ 281474976710656;
 internal static UntypedInt maxRequestSize => /* (1 << 19) / 8 */ 65536;
 
-[GoType("[]byte")] partial struct plainPersonalizationString;
+partial struct plainPersonalizationString /*[]byte*/;
 
 internal static void isPersonalizationString(this plainPersonalizationString _) {
 }
 
-[GoType("[]slice<byte>")] partial struct blockAlignedPersonalizationString;
+partial struct blockAlignedPersonalizationString /*[]slice<byte>*/;
 
 internal static void isPersonalizationString(this blockAlignedPersonalizationString _) {
 }
 
-[GoType] partial interface personalizationString {
+partial interface personalizationString {
     void isPersonalizationString();
 }
 
@@ -135,7 +135,7 @@ internal static void pad000(ж<hmac.HMAC> Ꮡh, nint writtenSoFar) {
 }
 
 // Generate produces at most maxRequestSize bytes of random data in out.
-[GoRecv] public static void Generate(this ref hmacDRBG d, slice<byte> @out) {
+public static void Generate(this ref hmacDRBG d, slice<byte> @out) {
     // HMAC_DRBG_Generate_algorithm, per Section 10.1.2.5.
     fips140.RecordApproved();
     if (len(@out) > maxRequestSize) {

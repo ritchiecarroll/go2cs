@@ -13,7 +13,7 @@ partial class buildcfg_package {
 
 // ExperimentFlags represents a set of GOEXPERIMENT flags relative to a baseline
 // (platform-default) experiment configuration.
-[GoType] partial struct ExperimentFlags {
+partial struct ExperimentFlags {
     public partial ref go.@internal.goexperiment_package.Flags Flags { get; }
     internal goexperiment.Flags baseline;
 }

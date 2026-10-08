@@ -36,14 +36,14 @@ internal static partial void runtime_pollUnblock(uintptr ctx);
 
 internal static partial bool runtime_isPollServerDescriptor(uintptr fd);
 
-[GoType] partial struct pollDesc {
+partial struct pollDesc {
     internal uintptr runtimeCtx;
 }
 
 internal static ж<sync.Once> ᏑserverInit = new StandardBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once serverInit => ref ᏑserverInit.Value;
 
-[GoRecv] internal static error init(this ref pollDesc pd, ж<FD> Ꮡfd) {
+internal static error init(this ref pollDesc pd, ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     ᏑserverInit.Do(runtime_pollServerInit);
@@ -55,7 +55,7 @@ internal static ref sync.Once serverInit => ref ᏑserverInit.Value;
     return default!;
 }
 
-[GoRecv] internal static void close(this ref pollDesc pd) {
+internal static void close(this ref pollDesc pd) {
     if (pd.runtimeCtx == 0) {
         return;
     }
@@ -64,14 +64,14 @@ internal static ref sync.Once serverInit => ref ᏑserverInit.Value;
 }
 
 // Evict evicts fd from the pending list, unblocking any I/O running on fd.
-[GoRecv] internal static void evict(this ref pollDesc pd) {
+internal static void evict(this ref pollDesc pd) {
     if (pd.runtimeCtx == 0) {
         return;
     }
     runtime_pollUnblock(pd.runtimeCtx);
 }
 
-[GoRecv] internal static error prepare(this ref pollDesc pd, nint mode, bool isFile) {
+internal static error prepare(this ref pollDesc pd, nint mode, bool isFile) {
     if (pd.runtimeCtx == 0) {
         return default!;
     }
@@ -79,18 +79,18 @@ internal static ref sync.Once serverInit => ref ᏑserverInit.Value;
     return convertErr(res, isFile);
 }
 
-[GoRecv] internal static error prepareRead(this ref pollDesc pd, bool isFile) {
+internal static error prepareRead(this ref pollDesc pd, bool isFile) {
     return pd.prepare((rune)'r', isFile);
 }
 
-[GoRecv] internal static error prepareWrite(this ref pollDesc pd, bool isFile) {
+internal static error prepareWrite(this ref pollDesc pd, bool isFile) {
     return pd.prepare((rune)'w', isFile);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string waitingForUnsupportedˢ = "waiting for unsupported file type"u8;
 
-[GoRecv] internal static error wait(this ref pollDesc pd, nint mode, bool isFile) {
+internal static error wait(this ref pollDesc pd, nint mode, bool isFile) {
     if (pd.runtimeCtx == 0) {
         return errors.New(waitingForUnsupportedˢ);
     }
@@ -98,22 +98,22 @@ internal static readonly @string waitingForUnsupportedˢ = "waiting for unsuppor
     return convertErr(res, isFile);
 }
 
-[GoRecv] internal static error waitRead(this ref pollDesc pd, bool isFile) {
+internal static error waitRead(this ref pollDesc pd, bool isFile) {
     return pd.wait((rune)'r', isFile);
 }
 
-[GoRecv] internal static error waitWrite(this ref pollDesc pd, bool isFile) {
+internal static error waitWrite(this ref pollDesc pd, bool isFile) {
     return pd.wait((rune)'w', isFile);
 }
 
-[GoRecv] internal static void waitCanceled(this ref pollDesc pd, nint mode) {
+internal static void waitCanceled(this ref pollDesc pd, nint mode) {
     if (pd.runtimeCtx == 0) {
         return;
     }
     runtime_pollWaitCanceled(pd.runtimeCtx, mode);
 }
 
-[GoRecv] internal static bool pollable(this ref pollDesc pd) {
+internal static bool pollable(this ref pollDesc pd) {
     return pd.runtimeCtx != 0;
 }
 

@@ -19,12 +19,12 @@ partial class ecdsa_package {
 // PrivateKey and PublicKey are not generic to make it possible to use them
 // in other types without instantiating them with a specific point type.
 // They are tied to one of the Curve types below through the curveID field.
-[GoType] partial struct PrivateKey {
+partial struct PrivateKey {
     internal ΔPublicKey pub;
     internal slice<byte> d; // bigmod.(*Nat).Bytes output (same length as the curve order)
 }
 
-[GoRecv] public static slice<byte> Bytes(this ref PrivateKey priv) {
+public static slice<byte> Bytes(this ref PrivateKey priv) {
     return priv.d;
 }
 
@@ -32,23 +32,23 @@ public static ж<ΔPublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
     return Ꮡpriv.of(PrivateKey.Ꮡpub);
 }
 
-[GoType] partial struct ΔPublicKey {
+partial struct ΔPublicKey {
     internal curveID curve;
     internal slice<byte> q; // uncompressed nistec Point.Bytes output
 }
 
-[GoRecv] public static slice<byte> Bytes(this ref ΔPublicKey pub) {
+public static slice<byte> Bytes(this ref ΔPublicKey pub) {
     return pub.q;
 }
 
-[GoType("@string")] partial struct curveID;
+partial struct curveID /*@string*/;
 
 internal static readonly curveID p224 = "P-224"u8;
 internal static readonly curveID p256 = "P-256"u8;
 internal static readonly curveID p384 = "P-384"u8;
 internal static readonly curveID p521 = "P-521"u8;
 
-[GoType] partial struct Curve<P>
+partial struct Curve<P>
     where P : Point<P>
 {
     internal curveID curve;
@@ -59,7 +59,7 @@ internal static readonly curveID p521 = "P-521"u8;
 }
 
 // Point is a generic constraint for the [nistec] Point types.
-[GoType] partial interface Point<P> {
+partial interface Point<P> {
     //  Type constraints: *nistec.P224Point | *nistec.P256Point | *nistec.P384Point | *nistec.P521Point
     // Derived operators: none
     slice<byte> Bytes();
@@ -283,7 +283,7 @@ internal static Action testingOnlyRejectionSamplingLooped;
 
 // Signature is an ECDSA signature, where r and s are represented as big-endian
 // byte slices of the same length as the curve order.
-[GoType] partial struct Signature {
+partial struct Signature {
     public slice<byte> R, S;
 }
 

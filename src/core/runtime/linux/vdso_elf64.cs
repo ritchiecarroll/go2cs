@@ -7,7 +7,7 @@ namespace go;
 partial class runtime_package {
 
 // ELF64 structure definitions for use by the vDSO loader
-[GoType] partial struct elfSym {
+partial struct elfSym {
     internal uint32 st_name;
     internal byte st_info;
     internal byte st_other;
@@ -16,7 +16,7 @@ partial class runtime_package {
     internal uint64 st_size;
 }
 
-[GoType] partial struct elfVerdef {
+partial struct elfVerdef {
     internal uint16 vd_version; /* Version revision */
     internal uint16 vd_flags; /* Version information */
     internal uint16 vd_ndx; /* Version Index */
@@ -26,7 +26,7 @@ partial class runtime_package {
     internal uint32 vd_next; /* Offset in bytes to next verdef entry */
 }
 
-[GoType] partial struct elfEhdr {
+partial struct elfEhdr {
     internal array<byte> e_ident = new(_EI_NIDENT); /* Magic number and other info */
     internal uint16 e_type;           /* Object file type */
     internal uint16 e_machine;           /* Architecture */
@@ -43,7 +43,7 @@ partial class runtime_package {
     internal uint16 e_shstrndx;           /* Section header string table index */
 }
 
-[GoType] partial struct elfPhdr {
+partial struct elfPhdr {
     internal uint32 p_type; /* Segment type */
     internal uint32 p_flags; /* Segment flags */
     internal uint64 p_offset; /* Segment file offset */
@@ -54,7 +54,7 @@ partial class runtime_package {
     internal uint64 p_align; /* Segment alignment */
 }
 
-[GoType] partial struct elfShdr {
+partial struct elfShdr {
     internal uint32 sh_name; /* Section name (string tbl index) */
     internal uint32 sh_type; /* Section type */
     internal uint64 sh_flags; /* Section flags */
@@ -67,12 +67,12 @@ partial class runtime_package {
     internal uint64 sh_entsize; /* Entry size if section holds table */
 }
 
-[GoType] partial struct elfDyn {
+partial struct elfDyn {
     internal int64 d_tag;  /* Dynamic entry type */
     internal uint64 d_val; /* Integer value */
 }
 
-[GoType] partial struct elfVerdaux {
+partial struct elfVerdaux {
     internal uint32 vda_name; /* Version or dependency names */
     internal uint32 vda_next; /* Offset in bytes to next verdaux entry */
 }

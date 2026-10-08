@@ -9,7 +9,7 @@ using math;
 partial class zstd_package {
 
 // fseEntry is one entry in an FSE table.
-[GoType] partial struct fseEntry {
+partial struct fseEntry {
     internal uint8 sym;  // value that this entry records
     internal uint8 bits;  // number of bits to read to determine next state
     internal uint16 @base; // add those bits to this state to get the next state
@@ -152,7 +152,7 @@ internal static readonly @string fseStateErrorˢ = "FSE state error"u8;
 // buildFSE builds an FSE decoding table from a list of probabilities.
 // The probabilities are in norm. next is scratch space. The number of bits
 // in the table is tableBits.
-[GoRecv] internal static error buildFSE(this ref Reader r, nint off, slice<int16> norm, slice<fseEntry> table, nint tableBits) {
+internal static error buildFSE(this ref Reader r, nint off, slice<int16> norm, slice<fseEntry> table, nint tableBits) {
     nint tableSize = ((nint)1).Lsh((int64)(tableBits));
     nint highThreshold = tableSize - 1;
     array<uint16> next = new(256);
@@ -201,7 +201,7 @@ internal static readonly @string fseStateErrorˢ = "FSE state error"u8;
 // and then reading zero or more bits and adding the value to the baseline.
 // Rather than looking these up in separate tables,
 // we convert the FSE table to an FSE baseline table.
-[GoType] partial struct fseBaselineEntry {
+partial struct fseBaselineEntry {
     internal uint32 baseline; // baseline for value that this entry represents
     internal uint8 basebits;  // number of bits to read to add to baseline
     internal uint8 bits;  // number of bits to read to determine next state
@@ -240,7 +240,7 @@ internal static slice<uint32> literalLengthBase = new uint32[]{
 internal static readonly @string fseBaselineSymbolˢ = "FSE baseline symbol overflow"u8;
 
 // makeLiteralBaselineFSE converts the literal length fseTable to baselineTable.
-[GoRecv] internal static error makeLiteralBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
+internal static error makeLiteralBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
     foreach (var (i, e) in fseTable) {
         var be = new fseBaselineEntry(
             bits: e.bits,
@@ -267,7 +267,7 @@ internal static readonly @string fseBaselineSymbolˢ = "FSE baseline symbol over
 internal static readonly @string fseOffsetSymbolOverflowˢ = "FSE offset symbol overflow"u8;
 
 // makeOffsetBaselineFSE converts the offset length fseTable to baselineTable.
-[GoRecv] internal static error makeOffsetBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
+internal static error makeOffsetBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
     foreach (var (i, e) in fseTable) {
         var be = new fseBaselineEntry(
             bits: e.bits,
@@ -333,7 +333,7 @@ internal static slice<uint32> matchLengthBase = new uint32[]{
 }.slice();
 
 // makeMatchBaselineFSE converts the match length fseTable to baselineTable.
-[GoRecv] internal static error makeMatchBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
+internal static error makeMatchBaselineFSE(this ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
     foreach (var (i, e) in fseTable) {
         var be = new fseBaselineEntry(
             bits: e.bits,

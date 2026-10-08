@@ -49,12 +49,12 @@ internal static error checkValid(slice<byte> data, ж<scanner> Ꮡscan) {
 
 // A SyntaxError is a description of a JSON syntax error.
 // [Unmarshal] will return a SyntaxError if the JSON can't be parsed.
-[GoType] partial struct SyntaxError {
+partial struct SyntaxError {
     internal @string msg; // description of error
     public int64 Offset;  // error occurred after reading Offset bytes
 }
 
-[GoRecv] public static @string Error(this ref SyntaxError e) {
+public static @string Error(this ref SyntaxError e) {
     return e.msg;
 }
 
@@ -70,7 +70,7 @@ internal static error checkValid(slice<byte> data, ж<scanner> Ꮡscan) {
 // just got passed in.  (The indication must be delayed in order
 // to recognize the end of numbers: is 123 a whole value or
 // the beginning of 12345e+6?).
-[GoType] partial struct scanner {
+partial struct scanner {
     // The step is a func to be called to execute the next transition.
     // Also tried using an integer constant and a single func
     // with a switch, but using the func directly was 10% faster
@@ -157,7 +157,7 @@ internal static UntypedInt maxNestingDepth => 10000;
 
 // reset prepares the scanner for use.
 // It must be called before calling s.step.
-[GoRecv] internal static void reset(this ref scanner s) {
+internal static void reset(this ref scanner s) {
     s.step = stateBeginValue;
     s.parseState = s.parseState[0..0];
     s.err = default!;
@@ -190,7 +190,7 @@ internal static readonly @string exceededMaxDepthˢ = "exceeded max depth"u8;
 
 // pushParseState pushes a new parse state p onto the parse stack.
 // an error state is returned if maxNestingDepth was exceeded, otherwise successState is returned.
-[GoRecv] internal static nint pushParseState(this ref scanner s, byte c, nint newParseState, nint successState) {
+internal static nint pushParseState(this ref scanner s, byte c, nint newParseState, nint successState) {
     s.parseState = append(s.parseState, newParseState);
     if (len(s.parseState) <= maxNestingDepth) {
         return successState;
@@ -200,7 +200,7 @@ internal static readonly @string exceededMaxDepthˢ = "exceeded max depth"u8;
 
 // popParseState pops a parse state (already obtained) off the stack
 // and updates s.step accordingly.
-[GoRecv] internal static void popParseState(this ref scanner s) {
+internal static void popParseState(this ref scanner s) {
     nint n = len(s.parseState) - 1;
     s.parseState = s.parseState.slice(0, n);
     if (n == 0){
@@ -736,7 +736,7 @@ internal static nint stateError(ж<scanner> Ꮡs, byte c) {
 }
 
 // error records an error and switches to the error state.
-[GoRecv] internal static nint error(this ref scanner s, byte c, @string context) {
+internal static nint error(this ref scanner s, byte c, @string context) {
     s.step = stateError;
     s.err = new SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character "u8 + quoteChar(c) + " "u8 + context, s.bytes)));
     return scanError;

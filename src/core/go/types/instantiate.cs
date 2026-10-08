@@ -18,7 +18,7 @@ using global::go.go;
 partial class types_package {
 
 // A genericType implements access to its type parameters.
-[GoType] partial interface ΔgenericType :
+partial interface ΔgenericType :
     ΔType
 {
     ж<TypeParamList> TypeParams();

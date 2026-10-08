@@ -9,15 +9,15 @@ using go;
 
 partial class poll_package {
 
-[GoType] partial struct SysFile {
+partial struct SysFile {
     // Writev cache.
     internal ж<slice<Δsyscall.Iovec>> iovecs;
 }
 
-[GoRecv] internal static void init(this ref SysFile s) {
+internal static void init(this ref SysFile s) {
 }
 
-[GoRecv] internal static error destroy(this ref SysFile s, nint fd) {
+internal static error destroy(this ref SysFile s, nint fd) {
     // We don't use ignoringEINTR here because POSIX does not define
     // whether the descriptor is closed if close returns EINTR.
     // If the descriptor is indeed closed, using a loop would race

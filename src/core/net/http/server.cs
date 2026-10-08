@@ -75,7 +75,7 @@ public static error ErrWriteAfterFlush = errors.New("unused"u8);
 // RST_STREAM, depending on the HTTP protocol. To abort a handler so
 // the client sees an interrupted response but the server doesn't log
 // an error, panic with the value [ErrAbortHandler].
-[GoType] partial interface ΔHandler {
+partial interface ΔHandler {
     void ServeHTTP(ResponseWriter _Δp0, ж<Request> _Δp1);
 }
 
@@ -83,7 +83,7 @@ public static error ErrWriteAfterFlush = errors.New("unused"u8);
 // construct an HTTP response.
 //
 // A ResponseWriter may not be used after [Handler.ServeHTTP] has returned.
-[GoType] partial interface ResponseWriter :
+partial interface ResponseWriter :
     io.Writer
 {
     // Header returns the header map that will be sent by
@@ -139,7 +139,7 @@ public static error ErrWriteAfterFlush = errors.New("unused"u8);
 // if the client is connected through an HTTP proxy,
 // the buffered data may not reach the client until the response
 // completes.
-[GoType] partial interface Flusher {
+partial interface Flusher {
     // Flush sends any buffered data to the client.
     void Flush();
 }
@@ -151,7 +151,7 @@ public static error ErrWriteAfterFlush = errors.New("unused"u8);
 // Hijacker, but HTTP/2 connections intentionally do not.
 // ResponseWriter wrappers may also not support Hijacker. Handlers
 // should always test for this ability at runtime.
-[GoType] partial interface Hijacker {
+partial interface Hijacker {
     // Hijack lets the caller take over the connection.
     // After a call to Hijack the HTTP server library
     // will not do anything else with the connection.
@@ -182,7 +182,7 @@ public static error ErrWriteAfterFlush = errors.New("unused"u8);
 //
 // Deprecated: the CloseNotifier interface predates Go's context package.
 // New code should use [Request.Context] instead.
-[GoType] partial interface CloseNotifier {
+partial interface CloseNotifier {
     // CloseNotify returns a channel that receives at most a
     // single value (true) when the client connection has gone
     // away.
@@ -208,7 +208,7 @@ public static ж<contextKey> ServerContextKey = Ꮡ(new contextKey("http-server"
 public static ж<contextKey> LocalAddrContextKey = Ꮡ(new contextKey("local-addr"u8));
 
 // A conn represents the server side of an HTTP connection.
-[GoType] partial struct conn {
+partial struct conn {
     // server is the server on which the connection arrived.
     // Immutable; never nil.
     internal ж<Server> server;
@@ -304,7 +304,7 @@ internal static UntypedInt bufferBeforeChunkingSize => 2048;
 // size. It also conditionally adds chunk headers, when in chunking mode.
 //
 // See the comment above (*response).Write for the entire write flow.
-[GoType] partial struct chunkWriter {
+partial struct chunkWriter {
     internal ж<response> res;
     // header is either nil or a deep clone of res.handlerHeader
     // at the time of res.writeHeader, if res.writeHeader is
@@ -323,7 +323,7 @@ internal static UntypedInt bufferBeforeChunkingSize => 2048;
 internal static slice<byte> crlf = slice<byte>("\r\n"u8);
 internal static slice<byte> colonSpace = slice<byte>(": "u8);
 
-[GoRecv] internal static (nint n, error err) Write(this ref chunkWriter cw, slice<byte> p) {
+internal static (nint n, error err) Write(this ref chunkWriter cw, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -351,14 +351,14 @@ internal static slice<byte> colonSpace = slice<byte>(": "u8);
     return (n, err);
 }
 
-[GoRecv] internal static error flush(this ref chunkWriter cw) {
+internal static error flush(this ref chunkWriter cw) {
     if (!cw.wroteHeader) {
         cw.writeHeader(default!);
     }
     return (~(~cw.res).conn).bufw.Flush();
 }
 
-[GoRecv] internal static void close(this ref chunkWriter cw) {
+internal static void close(this ref chunkWriter cw) {
     if (!cw.wroteHeader) {
         cw.writeHeader(default!);
     }
@@ -378,7 +378,7 @@ internal static slice<byte> colonSpace = slice<byte>(": "u8);
 }
 
 // A response represents the server side of an HTTP response.
-[GoType] partial struct response {
+partial struct response {
     internal ж<conn> conn;
     internal ж<Request> req; // request for this response
     internal io.ReadCloser reqBody;
@@ -439,15 +439,15 @@ internal static slice<byte> colonSpace = slice<byte>(": "u8);
     internal atomic.Bool didCloseNotify; // atomic (only false->true winner should send)
 }
 
-[GoRecv] internal static error SetReadDeadline(this ref response c, time.Time deadline) {
+internal static error SetReadDeadline(this ref response c, time.Time deadline) {
     return (~c.conn).rwc.SetReadDeadline(deadline);
 }
 
-[GoRecv] internal static error SetWriteDeadline(this ref response c, time.Time deadline) {
+internal static error SetWriteDeadline(this ref response c, time.Time deadline) {
     return (~c.conn).rwc.SetWriteDeadline(deadline);
 }
 
-[GoRecv] internal static error EnableFullDuplex(this ref response c) {
+internal static error EnableFullDuplex(this ref response c) {
     c.fullDuplex = true;
     return default!;
 }
@@ -469,7 +469,7 @@ public static readonly @string TrailerPrefix = "Trailer:"u8;
 
 // finalTrailers is called after the Handler exits and returns a non-nil
 // value if the Handler set any trailers.
-[GoRecv] internal static ΔHeader finalTrailers(this ref response w) {
+internal static ΔHeader finalTrailers(this ref response w) {
     ΔHeader t = default!;
     foreach (var (k, vv) in w.handlerHeader) {
         {
@@ -495,7 +495,7 @@ public static readonly @string TrailerPrefix = "Trailer:"u8;
 // declareTrailer is called for each Trailer header when the
 // response header is written. It notes that a header will need to be
 // written in the trailers at the end of the response.
-[GoRecv] internal static void declareTrailer(this ref response w, @string k) {
+internal static void declareTrailer(this ref response w, @string k) {
     k = CanonicalHeaderKey(k);
     if (!httpguts.ValidTrailerHeader(k)) {
         // Forbidden by RFC 7230, section 4.1.2
@@ -506,7 +506,7 @@ public static readonly @string TrailerPrefix = "Trailer:"u8;
 
 // requestTooLarge is called by maxBytesReader when too much input has
 // been read from the client.
-[GoRecv] internal static void requestTooLarge(this ref response w) {
+internal static void requestTooLarge(this ref response w) {
     w.closeAfterReply = true;
     w.requestBodyLimitHit = true;
     if (!w.wroteHeader) {
@@ -526,8 +526,8 @@ internal static void disableWriteContinue(this ж<response> Ꮡw) {
 
 // writerOnly hides an io.Writer value's optional ReadFrom method
 // from io.Copy.
-[GoType] partial struct writerOnly {
-    [GoEmbedded] public io_package.Writer Writer;
+partial struct writerOnly {
+    /*embed*/ public io_package.Writer Writer;
 }
 
 // ReadFrom is here to optimize copying from an [*os.File] regular file
@@ -596,7 +596,7 @@ internal static ж<conn> newConn(this ж<Server> Ꮡs, net.Conn rwc) {
     return c;
 }
 
-[GoType] public partial struct readResult {
+public partial struct readResult {
     internal incomparable _;
     internal nint n;
     internal error err;
@@ -608,7 +608,7 @@ internal static ж<conn> newConn(this ж<Server> Ꮡs, net.Conn rwc) {
 // read sizes) with support for selectively keeping an io.Reader.Read
 // call blocked in a background goroutine to wait for activity and
 // trigger a CloseNotifier channel.
-[GoType] partial struct connReader {
+partial struct connReader {
     internal ж<conn> conn;
     internal sync.Mutex mu; // guards following
     internal bool hasByte;
@@ -723,15 +723,15 @@ internal static void abortPendingRead(this ж<connReader> Ꮡcr) {
     finally { if (ᒐd1) Ꮡcr.unlock(); ᒐ.Run(); }
 }
 
-[GoRecv] internal static void setReadLimit(this ref connReader cr, int64 remain) {
+internal static void setReadLimit(this ref connReader cr, int64 remain) {
     cr.remain = remain;
 }
 
-[GoRecv] internal static void setInfiniteReadLimit(this ref connReader cr) {
+internal static void setInfiniteReadLimit(this ref connReader cr) {
     cr.remain = maxInt64;
 }
 
-[GoRecv] internal static bool hitReadLimit(this ref connReader cr) {
+internal static bool hitReadLimit(this ref connReader cr) {
     return cr.remain <= 0;
 }
 
@@ -745,13 +745,13 @@ internal static void abortPendingRead(this ж<connReader> Ꮡcr) {
 // down its context.
 //
 // It may be called from multiple goroutines.
-[GoRecv] internal static void handleReadError(this ref connReader cr, error _) {
+internal static void handleReadError(this ref connReader cr, error _) {
     (~cr.conn).cancelCtx();
     cr.closeNotify();
 }
 
 // may be called from multiple goroutines.
-[GoRecv] internal static void closeNotify(this ref connReader cr) {
+internal static void closeNotify(this ref connReader cr) {
     var res = cr.conn.of(conn.ᏑcurReq).Load();
     if (res != nil && !res.of(response.ᏑdidCloseNotify).Swap(true)) {
         (~res).closeNotifyCh.ᐸꟷ(true);
@@ -921,14 +921,14 @@ internal static void putBufioWriter(ж<bufio.Writer> Ꮡbw) {
 // This can be overridden by setting [Server.MaxHeaderBytes].
 public static UntypedInt DefaultMaxHeaderBytes => /* 1 << 20 */ 1048576; // 1 MB
 
-[GoRecv] internal static nint maxHeaderBytes(this ref Server s) {
+internal static nint maxHeaderBytes(this ref Server s) {
     if (s.MaxHeaderBytes > 0) {
         return s.MaxHeaderBytes;
     }
     return DefaultMaxHeaderBytes;
 }
 
-[GoRecv] internal static int64 initialReadLimitSize(this ref Server s) {
+internal static int64 initialReadLimitSize(this ref Server s) {
     return (int64)s.maxHeaderBytes() + 4096; // bufio slop
 }
 
@@ -937,7 +937,7 @@ public static UntypedInt DefaultMaxHeaderBytes => /* 1 << 20 */ 1048576; // 1 MB
 //
 // It returns the minimum of any positive ReadHeaderTimeout,
 // ReadTimeout, or WriteTimeout.
-[GoRecv] internal static time.Duration tlsHandshakeTimeout(this ref Server s) {
+internal static time.Duration tlsHandshakeTimeout(this ref Server s) {
     time.Duration ret = default!;
     foreach (var (_, v) in new time.Duration[]{
         s.ReadHeaderTimeout,
@@ -956,7 +956,7 @@ public static UntypedInt DefaultMaxHeaderBytes => /* 1 << 20 */ 1048576; // 1 MB
 
 // wrapper around io.ReadCloser which on first read, sends an
 // HTTP/1.1 100 Continue header
-[GoType] partial struct expectContinueReader {
+partial struct expectContinueReader {
     internal ж<response> resp;
     internal io.ReadCloser readCloser;
     internal atomic.Bool closed;
@@ -1164,7 +1164,7 @@ internal static bool http1ServerSupportsRequest(ref Request req) {
     return false;
 }
 
-[GoRecv] internal static ΔHeader Header(this ref response w) {
+internal static ΔHeader Header(this ref response w) {
     if (w.cw.header == default! && w.wroteHeader && !w.cw.wroteHeader) {
         // Accessing the header between logically writing it
         // and physically writing it means we need to allocate
@@ -1276,7 +1276,7 @@ internal static void WriteHeader(this ж<response> Ꮡw, nint code) {
 // extraHeader is the set of headers sometimes added by chunkWriter.writeHeader.
 // This type is used to avoid extra allocations from cloning and/or populating
 // the response Header map and all its 1-element slices.
-[GoType] partial struct extraHeader {
+partial struct extraHeader {
     internal @string contentType;
     internal @string connection;
     internal @string transferEncoding;
@@ -1333,7 +1333,7 @@ internal static readonly @string chunkedˢ = "chunked"u8;
 // set explicitly. It's also used to set the Content-Length, if the
 // total body size was small and the handler has already finished
 // running.
-[GoRecv] internal static void writeHeader(this ref chunkWriter cw, slice<byte> p) {
+internal static void writeHeader(this ref chunkWriter cw, slice<byte> p) {
     if (cw.wroteHeader) {
         return;
     }
@@ -1667,7 +1667,7 @@ internal static void writeStatusLine(ж<bufio.Writer> Ꮡbw, bool is11, nint cod
 
 // bodyAllowed reports whether a Write is allowed for this response type.
 // It's illegal to call this before the header has been flushed.
-[GoRecv] internal static bool bodyAllowed(this ref response w) {
+internal static bool bodyAllowed(this ref response w) {
     if (!w.wroteHeader) {
         throw panic("");
     }
@@ -1773,7 +1773,7 @@ internal static void finishRequest(this ж<response> Ꮡw) {
 
 // shouldReuseConnection reports whether the underlying TCP connection can be reused.
 // It must only be called after the handler is done executing.
-[GoRecv] internal static bool shouldReuseConnection(this ref response w) {
+internal static bool shouldReuseConnection(this ref response w) {
     if (w.closeAfterReply) {
         // The request or something set while executing the
         // handler indicated we shouldn't reuse this
@@ -1795,7 +1795,7 @@ internal static void finishRequest(this ж<response> Ꮡw) {
     return true;
 }
 
-[GoRecv] internal static bool closedRequestBodyEarly(this ref response w) {
+internal static bool closedRequestBodyEarly(this ref response w) {
     var (body, ok) = (~w.req).Body._<ж<body>>(ᐧ);
     return ok && body.didEarlyClose();
 }
@@ -1818,7 +1818,7 @@ internal static error FlushError(this ж<response> Ꮡw) {
     return err;
 }
 
-[GoRecv] internal static void finalFlush(this ref conn c) {
+internal static void finalFlush(this ref conn c) {
     if (c.bufr != nil) {
         // Steal the bufio.Reader (~4KB worth of memory) and its associated
         // reader for a future connection.
@@ -1835,7 +1835,7 @@ internal static error FlushError(this ж<response> Ꮡw) {
 }
 
 // Close the connection.
-[GoRecv] internal static void close(this ref conn c) {
+internal static void close(this ref conn c) {
     c.finalFlush();
     c.rwc.Close();
 }
@@ -1853,7 +1853,7 @@ internal static error FlushError(this ж<response> Ꮡw) {
 // not a hard-coded value.
 internal static time.Duration rstAvoidanceDelay = 500 * time.Millisecond;
 
-[GoType] partial interface closeWriter {
+partial interface closeWriter {
     error CloseWrite();
 }
 
@@ -1865,7 +1865,7 @@ internal static closeWriter _ᴛ9ʗ = new net_TCPConnжcloseWriter(((ж<net.TCPC
 // subsequent RST.
 //
 // See https://golang.org/issue/3595
-[GoRecv] internal static void closeWriteAndWait(this ref conn c) {
+internal static void closeWriteAndWait(this ref conn c) {
     c.finalFlush();
     {
         var (tcp, ok) = c.rwc._<closeWriter>(ᐧ); if (ok) {
@@ -1951,7 +1951,7 @@ internal static error badRequestError(@string e) {
 
 // statusError is an error used to respond to a request with an HTTP status.
 // The text should be plain text without user info or other embedded errors.
-[GoType] partial struct statusError {
+partial struct statusError {
     internal nint code;
     internal @string text;
 }
@@ -2227,7 +2227,7 @@ internal static void serve(this ж<conn> Ꮡc, context.Context ctx) {
 // certain uninitialized fields in its *Request.
 //
 // It's the unencrypted version of initALPNRequest.
-[GoType] partial struct unencryptedHTTP2Request {
+partial struct unencryptedHTTP2Request {
     internal context.Context ctx;
     internal net.Conn c;
     internal serverHandler h;
@@ -2251,8 +2251,8 @@ internal static void ServeHTTP(this unencryptedHTTP2Request h, ResponseWriter rw
 
 // unencryptedNetConnInTLSConn is used to pass an unencrypted net.Conn to
 // functions that only accept a *tls.Conn.
-[GoType] partial struct unencryptedNetConnInTLSConn {
-    [GoEmbedded] public net_package.Conn Conn; // panic on all net.Conn methods
+partial struct unencryptedNetConnInTLSConn {
+    /*embed*/ public net_package.Conn Conn; // panic on all net.Conn methods
     internal net.Conn conn;
 }
 
@@ -2552,12 +2552,12 @@ internal static @string htmlEscape(@string s) {
 }
 
 // Redirect to a fixed URL
-[GoType] partial struct redirectHandler {
+partial struct redirectHandler {
     internal @string url;
     internal nint code;
 }
 
-[GoRecv] internal static void ServeHTTP(this ref redirectHandler rh, ResponseWriter w, ж<Request> Ꮡr) {
+internal static void ServeHTTP(this ref redirectHandler rh, ResponseWriter w, ж<Request> Ꮡr) {
     Redirect(w, Ꮡr, rh.url, rh.code);
 }
 
@@ -2690,7 +2690,7 @@ public static ΔHandler RedirectHandler(@string url, nint code) {
 //   - When matching patterns to paths, in 1.22 each segment of the path is unescaped; in 1.21, the entire path is unescaped.
 //     This change mostly affects how paths with %2F escapes adjacent to slashes are treated.
 //     See https://go.dev/issue/21955 for details.
-[GoType] partial struct ServeMux {
+partial struct ServeMux {
     internal sync.RWMutex mu;
     internal routingNode tree;
     internal routingIndex index;
@@ -3110,7 +3110,7 @@ public static error ServeTLS(net.Listener l, ΔHandler handler, @string certFile
 
 // A Server defines parameters for running an HTTP server.
 // The zero value for Server is a valid configuration.
-[GoType] partial struct Server {
+partial struct Server {
     // Addr optionally specifies the TCP address for the server to listen on,
     // in the form "host:port". If empty, ":http" (port 80) is used.
     // The service names are defined in RFC 6335 and assigned by IANA.
@@ -3378,7 +3378,7 @@ internal static bool closeIdleConns(this ж<Server> Ꮡs) {
     finally { if (ᒐd1) Ꮡs.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[GoRecv] internal static error closeListenersLocked(this ref Server s) {
+internal static error closeListenersLocked(this ref Server s) {
     error err = default!;
     foreach (var (ln, _) in s.listeners) {
         {
@@ -3390,7 +3390,7 @@ internal static bool closeIdleConns(this ж<Server> Ꮡs) {
     return err;
 }
 
-[GoType("num:nint")] partial struct ConnState;
+partial struct ConnState /*num:nint*/;
 
 public static ConnState StateNew => /* iota */ 0;
 public static ConnState StateActive => 1;
@@ -3412,7 +3412,7 @@ public static @string String(this ConnState c) {
 
 // serverHandler delegates to either the server's Handler or
 // DefaultServeMux and also handles "OPTIONS *" requests.
-[GoType] partial struct serverHandler {
+partial struct serverHandler {
     internal ж<Server> srv;
 }
 
@@ -3496,7 +3496,7 @@ internal static Action<ж<Server>, net.Listener> testHookServerServe;           
 
 // shouldConfigureHTTP2ForServe reports whether Server.Serve should configure
 // automatic HTTP/2. (which sets up the s.TLSNextProto map)
-[GoRecv] internal static bool shouldConfigureHTTP2ForServe(this ref Server s) {
+internal static bool shouldConfigureHTTP2ForServe(this ref Server s) {
     if (s.TLSConfig == nil) {
         // Compatibility with Go 1.6:
         // If there's no TLSConfig, it's possible that the user just
@@ -3649,7 +3649,7 @@ public static error ServeTLS(this ж<Server> Ꮡs, net.Listener l, @string certF
     return Ꮡs.Serve(tlsListener);
 }
 
-[GoRecv] internal static Protocols protocols(this ref Server s) {
+internal static Protocols protocols(this ref Server s) {
     if (s.Protocols != nil) {
         return s.Protocols.Value; // user-configured set
     }
@@ -3766,14 +3766,14 @@ internal static void trackConn(this ж<Server> Ꮡs, ж<conn> Ꮡc, bool add) {
     finally { if (ᒐd1) Ꮡs.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[GoRecv] internal static time.Duration idleTimeout(this ref Server s) {
+internal static time.Duration idleTimeout(this ref Server s) {
     if (s.IdleTimeout != 0) {
         return s.IdleTimeout;
     }
     return s.ReadTimeout;
 }
 
-[GoRecv] internal static time.Duration readHeaderTimeout(this ref Server s) {
+internal static time.Duration readHeaderTimeout(this ref Server s) {
     if (s.ReadHeaderTimeout != 0) {
         return s.ReadHeaderTimeout;
     }
@@ -3803,7 +3803,7 @@ public static void SetKeepAlivesEnabled(this ж<Server> Ꮡs, bool v) {
 }
 
 // TODO: Issue 26303: close HTTP/2 conns as soon as they become idle.
-[GoRecv] internal static void logf(this ref Server s, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void logf(this ref Server s, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     if (s.ErrorLog != nil){
@@ -3979,7 +3979,7 @@ public static ΔHandler TimeoutHandler(ΔHandler h, time.Duration dt, @string ms
 // in handlers which have timed out.
 public static error ErrHandlerTimeout = errors.New("http: Handler timeout"u8);
 
-[GoType] partial struct timeoutHandler {
+partial struct timeoutHandler {
     internal ΔHandler handler;
     internal @string body;
     internal time.Duration dt;
@@ -3991,7 +3991,7 @@ public static error ErrHandlerTimeout = errors.New("http: Handler timeout"u8);
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string htmlHeadTitleTimeoutˢ = "<html><head><title>Timeout</title></head><body><h1>Timeout</h1></body></html>"u8;
 
-[GoRecv] internal static @string errorBody(this ref timeoutHandler h) {
+internal static @string errorBody(this ref timeoutHandler h) {
     if (h.body != ""u8) {
         return h.body;
     }
@@ -4085,7 +4085,7 @@ internal static partial void ServeHTTP(this ж<timeoutHandler> Ꮡh, ResponseWri
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct timeoutWriter {
+partial struct timeoutWriter {
     internal ResponseWriter w;
     internal ΔHeader h;
     internal bytes.Buffer wbuf;
@@ -4099,7 +4099,7 @@ internal static partial void ServeHTTP(this ж<timeoutHandler> Ꮡh, ResponseWri
 internal static Pusher _ᴛ10ʗ = new timeoutWriterжPusher(((ж<timeoutWriter>)nil));
 
 // Push implements the [Pusher] interface.
-[GoRecv] internal static error Push(this ref timeoutWriter tw, @string target, ж<PushOptions> Ꮡopts) {
+internal static error Push(this ref timeoutWriter tw, @string target, ж<PushOptions> Ꮡopts) {
     {
         var (pusher, ok) = tw.w._<Pusher>(ᐧ); if (ok) {
             return pusher.Push(target, Ꮡopts);
@@ -4108,7 +4108,7 @@ internal static Pusher _ᴛ10ʗ = new timeoutWriterжPusher(((ж<timeoutWriter>)
     return new ProtocolErrorжerror(ErrNotSupported);
 }
 
-[GoRecv] internal static ΔHeader Header(this ref timeoutWriter tw) {
+internal static ΔHeader Header(this ref timeoutWriter tw) {
     return tw.h;
 }
 
@@ -4132,7 +4132,7 @@ internal static (nint, error) Write(this ж<timeoutWriter> Ꮡtw, slice<byte> p)
     finally { if (ᒐd1) Ꮡtw.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[GoRecv] internal static void writeHeaderLocked(this ref timeoutWriter tw, nint code) {
+internal static void writeHeaderLocked(this ref timeoutWriter tw, nint code) {
     checkWriteHeaderCode(code);
     switch (ᐧ) {
     case {} when tw.err != default!: {
@@ -4169,8 +4169,8 @@ internal static void WriteHeader(this ж<timeoutWriter> Ꮡtw, nint code) {
 
 // onceCloseListener wraps a net.Listener, protecting it from
 // multiple Close calls.
-[GoType] partial struct onceCloseListener {
-    [GoEmbedded] public net_package.Listener Listener;
+partial struct onceCloseListener {
+    /*embed*/ public net_package.Listener Listener;
     internal sync.Once once;
     internal error closeErr;
 }
@@ -4190,12 +4190,12 @@ internal static error Close(this ж<onceCloseListener> Ꮡoc) {
     return oc.closeErr;
 }
 
-[GoRecv] internal static void close(this ref onceCloseListener oc) {
+internal static void close(this ref onceCloseListener oc) {
     oc.closeErr = oc.Listener.Close();
 }
 
 // globalOptionsHandler responds to "OPTIONS *" requests.
-[GoType] partial struct globalOptionsHandler {
+partial struct globalOptionsHandler {
 }
 
 internal static void ServeHTTP(this globalOptionsHandler _, ResponseWriter w, ж<Request> Ꮡr) {
@@ -4216,7 +4216,7 @@ internal static void ServeHTTP(this globalOptionsHandler _, ResponseWriter w, ж
 // initALPNRequest is an HTTP handler that initializes certain
 // uninitialized fields in its *Request. Such partially-initialized
 // Requests come from ALPN protocol handlers.
-[GoType] partial struct initALPNRequest {
+partial struct initALPNRequest {
     internal context.Context ctx;
     internal ж<tls.Conn> c;
     internal serverHandler h;
@@ -4247,9 +4247,9 @@ internal static void ServeHTTP(this initALPNRequest h, ResponseWriter rw, ж<Req
 }
 
 // loggingConn is used for debugging.
-[GoType] partial struct loggingConn {
+partial struct loggingConn {
     internal @string name;
-    [GoEmbedded] public net_package.Conn Conn;
+    /*embed*/ public net_package.Conn Conn;
 }
 
 // Go method set entry for the promoted 'Conn.LocalAddr()' - provided ONLY by the embedded
@@ -4291,7 +4291,7 @@ internal static net.Conn newLoggingConn(@string baseName, net.Conn c) {
     finally { ᒐ.Run(); }
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref loggingConn c, slice<byte> p) {
+internal static (nint n, error err) Write(this ref loggingConn c, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -4301,7 +4301,7 @@ internal static net.Conn newLoggingConn(@string baseName, net.Conn c) {
     return (n, err);
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref loggingConn c, slice<byte> p) {
+internal static (nint n, error err) Read(this ref loggingConn c, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -4311,7 +4311,7 @@ internal static net.Conn newLoggingConn(@string baseName, net.Conn c) {
     return (n, err);
 }
 
-[GoRecv] internal static error /*err*/ Close(this ref loggingConn c) {
+internal static error /*err*/ Close(this ref loggingConn c) {
     error err = default!;
 
     log.Printf("%s.Close() = ..."u8, c.name);
@@ -4323,7 +4323,7 @@ internal static net.Conn newLoggingConn(@string baseName, net.Conn c) {
 // checkConnErrorWriter writes to c.rwc and records any write errors to c.werr.
 // It only contains one field (and a pointer field at that), so it
 // fits in an interface value without an extra allocation.
-[GoType] partial struct checkConnErrorWriter {
+partial struct checkConnErrorWriter {
     internal ж<conn> c;
 }
 
@@ -4354,7 +4354,7 @@ internal static nint /*n*/ numLeadingCRorLF(slice<byte> v) {
 
 // tlsRecordHeaderLooksLikeHTTP reports whether a TLS record header
 // looks like it might've been a misdirected plaintext HTTP request.
-internal static bool tlsRecordHeaderLooksLikeHTTP([GoArrayDims(5)] array<byte> hdr) {
+internal static bool tlsRecordHeaderLooksLikeHTTP(/*[5]*/ array<byte> hdr) {
     hdr = hdr.Clone();
 
     var exprᴛ1 = ((sstring)(hdr[..]));

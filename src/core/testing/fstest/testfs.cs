@@ -108,7 +108,7 @@ internal static error testFS(fs.FS fsys, params ꓸꓸꓸstring expectedʗp) {
 }
 
 // An fsTester holds state for running the test.
-[GoType] partial struct fsTester {
+partial struct fsTester {
     internal fs.FS fsys;
     internal slice<error> errors;
     internal slice<@string> dirs;
@@ -116,13 +116,13 @@ internal static error testFS(fs.FS fsys, params ꓸꓸꓸstring expectedʗp) {
 }
 
 // errorf adds an error to the list of errors.
-[GoRecv] internal static void errorf(this ref fsTester t, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf(this ref fsTester t, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     t.errors = append(t.errors, fmt.Errorf(format, args.ꓸꓸꓸ));
 }
 
-[GoRecv] internal static fs.ReadDirFile openDir(this ref fsTester t, @string dir) {
+internal static fs.ReadDirFile openDir(this ref fsTester t, @string dir) {
     var (f, err) = t.fsys.Open(dir);
     if (err != default!) {
         t.errorf("%s: Open: %w"u8, dir, err);
@@ -317,7 +317,7 @@ internal static @string formatInfo(fs.FileInfo info) {
 }
 
 // checkGlob checks that various glob patterns work if the file system implements GlobFS.
-[GoRecv] internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEntry> list) {
+internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEntry> list) {
     {
         var (_, ok) = t.fsys._<fs.GlobFS>(ᐧ); if (!ok) {
             return;
@@ -429,7 +429,7 @@ internal static @string formatInfo(fs.FileInfo info) {
 
 // checkStat checks that a direct stat of path matches entry,
 // which was found in the parent's directory listing.
-[GoRecv] internal static void checkStat(this ref fsTester t, @string path, fs.DirEntry entry) {
+internal static void checkStat(this ref fsTester t, @string path, fs.DirEntry entry) {
     var (@file, err) = t.fsys.Open(path);
     if (err != default!) {
         t.errorf("%s: Open: %w"u8, path, err);
@@ -624,7 +624,7 @@ internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) {
     finally { ᒐ.Run(); }
 }
 
-[GoRecv] internal static void checkFileRead(this ref fsTester t, @string @file, @string desc, slice<byte> data1, slice<byte> data2) {
+internal static void checkFileRead(this ref fsTester t, @string @file, @string desc, slice<byte> data1, slice<byte> data2) {
     if (((sstring)data1) != ((sstring)data2)) {
         t.errorf("%s: %s: different data returned\n\t%q\n\t%q"u8, @file, desc, data1, data2);
         return;
@@ -648,7 +648,7 @@ internal static void checkOpen(this ж<fsTester> Ꮡt, @string @file) {
 }
 
 // checkBadPath checks that various invalid forms of file's name cannot be opened using open.
-[GoRecv] internal static void checkBadPath(this ref fsTester t, @string @file, @string desc, Func<@string, error> open) {
+internal static void checkBadPath(this ref fsTester t, @string @file, @string desc, Func<@string, error> open) {
     var bad = new @string[]{
         "/"u8 + @file,
         @file + "/."u8

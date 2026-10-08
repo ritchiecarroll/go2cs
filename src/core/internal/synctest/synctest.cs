@@ -29,7 +29,7 @@ internal static partial void inBubble(any _Δp0, Action _Δp1);
 // A Bubble is a synctest bubble.
 //
 // Not a public API. Used by syscall/js to propagate bubble membership through syscalls.
-[GoType] partial struct Bubble {
+partial struct Bubble {
     internal any b;
 }
 

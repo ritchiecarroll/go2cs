@@ -12,7 +12,7 @@ using go.@internal;
 
 partial class macOS_package {
 
-[GoType("num:int32")] partial struct SecTrustSettingsResult;
+partial struct SecTrustSettingsResult /*num:int32*/;
 
 // Security.framework linker flags for the external linker. See Issue 42459.
 //
@@ -25,7 +25,7 @@ public static SecTrustSettingsResult SecTrustSettingsResultTrustAsRoot => 2;
 public static SecTrustSettingsResult SecTrustSettingsResultDeny => 3;
 public static SecTrustSettingsResult SecTrustSettingsResultUnspecified => 4;
 
-[GoType("num:int32")] partial struct SecTrustResultType;
+partial struct SecTrustResultType /*num:int32*/;
 
 public static SecTrustResultType SecTrustResultInvalid => /* iota */ 0;
 public static SecTrustResultType SecTrustResultProceed => 1;
@@ -36,7 +36,7 @@ public static SecTrustResultType SecTrustResultRecoverableTrustFailure => 5;
 public static SecTrustResultType SecTrustResultFatalTrustFailure => 6;
 public static SecTrustResultType SecTrustResultOtherError => 7;
 
-[GoType("num:int32")] partial struct SecTrustSettingsDomain;
+partial struct SecTrustSettingsDomain /*num:int32*/;
 
 public static SecTrustSettingsDomain SecTrustSettingsDomainUser => /* iota */ 0;
 public static SecTrustSettingsDomain SecTrustSettingsDomainAdmin => 1;
@@ -46,7 +46,7 @@ public static UntypedInt ErrSecCertificateExpired => -67818;
 public static UntypedInt ErrSecHostNameMismatch => -67602;
 public static UntypedInt ErrSecNotTrusted => -67843;
 
-[GoType] partial struct OSStatus {
+partial struct OSStatus {
     internal @string call;
     internal int32 status;
 }

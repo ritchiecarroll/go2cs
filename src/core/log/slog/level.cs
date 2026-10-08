@@ -12,7 +12,7 @@ using go.sync;
 
 partial class slog_package {
 
-[GoType("num:nint")] partial struct ΔLevel;
+partial struct ΔLevel /*num:nint*/;
 
 // Names for common levels.
 //
@@ -188,7 +188,7 @@ public static ΔLevel Level(this ΔLevel l) {
 // It implements [Leveler] as well as a Set method,
 // and it is safe for use by multiple goroutines.
 // The zero LevelVar corresponds to [LevelInfo].
-[GoType] partial struct LevelVar {
+partial struct LevelVar {
     internal atomic.Int64 val;
 }
 
@@ -237,7 +237,7 @@ public static error UnmarshalText(this ж<LevelVar> Ꮡv, slice<byte> data) {
 // a Level value wherever a Leveler is needed, such as in [HandlerOptions].
 // Clients who need to vary the level dynamically can provide a more complex
 // Leveler implementation such as *[LevelVar].
-[GoType] partial interface Leveler {
+partial interface Leveler {
     ΔLevel Level();
 }
 

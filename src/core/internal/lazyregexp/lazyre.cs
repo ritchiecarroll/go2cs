@@ -16,7 +16,7 @@ partial class lazyregexp_package {
 
 // Regexp is a wrapper around regexp.Regexp, where the underlying regexp will be
 // compiled the first time it is needed.
-[GoType] partial struct Regexp {
+partial struct Regexp {
     internal @string str;
     internal sync.Once once;
     internal ж<regexp.Regexp> rx;
@@ -29,7 +29,7 @@ internal static ж<regexp.Regexp> re(this ж<Regexp> Ꮡr) {
     return r.rx;
 }
 
-[GoRecv] internal static void build(this ref Regexp r) {
+internal static void build(this ref Regexp r) {
     r.rx = regexp.MustCompile(r.str);
     r.str = ""u8;
 }
