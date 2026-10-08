@@ -17,6 +17,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"unicode/utf8"
 )
 
 // THE CLASS THIS GUARDS, and it cost a build on 2026-09-08.
@@ -123,6 +124,12 @@ var (
 	// crypto/internal/fips140/edwards25519/scalar_test.cs's notZeroScalar). The attribute group
 	// excludes newlines so it cannot run past the end of its own line.
 	goTypeWrapperRe = regexp.MustCompile(`\[GoType\([^)]*\)\][\t ]*(?:\[[^\]\n]*\][\t ]*)*(?:(?:public|internal|private|protected)[\t ]+)?partial\s+(?:struct|class)\s+([\p{L}_][\p{L}\p{N}_]*)[\t ]*;`)
+
+	// Face lift B/C writes the wrapper's definition as a comment after its name rather than as
+	// `[GoType("…")]` (`partial struct IpMaskString /*IpAddressString*/;`). Blanking erases that comment,
+	// so this form is matched on the RAW text, and a match counts only where the declared name survives
+	// blanking: a wrapper-shaped line inside a comment or a string is not a declaration.
+	goTypeCommentWrapperRe = regexp.MustCompile(`partial\s+(?:struct|class)\s+([\p{L}_][\p{L}\p{N}_]*)[\t ]*/\*(?:[^*\n]|\*[^/\n])+\*/[\t ]*;`)
 
 	// The enclosing `partial class <pkg>_package` a declaration sits in — the q102 key.
 	//
@@ -423,6 +430,7 @@ func newValueCloneTypeIndex() *valueCloneTypeIndex {
 // declaration SEQUENCE differs between raw and blanked text is ZERO. TestValueCloneIndexControls
 // carries the arm that would catch that ceasing to be true.
 func (x *valueCloneTypeIndex) addFile(dir, text string) {
+	raw := text
 	text = blankCSharpLiterals(text)
 	enclosing := newValueCloneEnclosing(text)
 
@@ -444,14 +452,50 @@ func (x *valueCloneTypeIndex) addFile(dir, text string) {
 	}
 
 	for _, m := range goTypeWrapperRe.FindAllStringSubmatchIndex(text, -1) {
-		key := valueCloneTypeKey{Enclosing: enclosing.keyAt(m[0]), Name: text[m[2]:m[3]]}
-
-		if x.wrappers[dir] == nil {
-			x.wrappers[dir] = map[valueCloneTypeKey]bool{}
-		}
-
-		x.wrappers[dir][key] = true
+		x.addWrapper(dir, valueCloneTypeKey{Enclosing: enclosing.keyAt(m[0]), Name: text[m[2]:m[3]]})
 	}
+
+	// Blanking preserves RUNES, not bytes (a blanked `ж` becomes one space), so the raw matches are read
+	// against a byte-aligned blanking, which also supplies their enclosing class.
+	aligned := blankAligned(raw, text)
+	alignedEnclosing := newValueCloneEnclosing(aligned)
+
+	for _, m := range goTypeCommentWrapperRe.FindAllStringSubmatchIndex(raw, -1) {
+		if aligned[m[2]:m[3]] == raw[m[2]:m[3]] {
+			x.addWrapper(dir, valueCloneTypeKey{Enclosing: alignedEnclosing.keyAt(m[0]), Name: raw[m[2]:m[3]]})
+		}
+	}
+}
+
+// blankAligned widens every rune blankCSharpLiterals blanked to its UTF-8 length in spaces, so a byte offset
+// into raw is a byte offset into the result. If the two do not pair rune for rune it returns blanked spaces
+// for all of raw, which admits no wrapper: the scan then reports rather than hides.
+func blankAligned(raw, blanked string) string {
+	rawRunes, blankRunes := []rune(raw), []rune(blanked)
+
+	if len(rawRunes) != len(blankRunes) {
+		return strings.Repeat(" ", len(raw))
+	}
+
+	var b strings.Builder
+
+	for i, r := range rawRunes {
+		if blankRunes[i] == r {
+			b.WriteRune(r)
+		} else {
+			b.WriteString(strings.Repeat(" ", utf8.RuneLen(r)))
+		}
+	}
+
+	return b.String()
+}
+
+func (x *valueCloneTypeIndex) addWrapper(dir string, key valueCloneTypeKey) {
+	if x.wrappers[dir] == nil {
+		x.wrappers[dir] = map[valueCloneTypeKey]bool{}
+	}
+
+	x.wrappers[dir][key] = true
 }
 
 // valueCloneScope returns the directories a stamp in `dir` resolves against.
@@ -781,6 +825,35 @@ func TestValueCloneStampScannerFiresAndAdmits(t *testing.T) {
 	}
 }
 
+// TestValueCloneCommentWrapperIsReadOnlyAsADeclaration is the other half of the face-lift wrapper shape: the
+// definition comment is matched on the raw text because blanking erases it, so a wrapper-shaped line that is
+// itself inside a comment or a string must not count. With no real wrapper, the stamp's Value is a finding.
+func TestValueCloneCommentWrapperIsReadOnlyAsADeclaration(t *testing.T) {
+	dir := t.TempDir()
+
+	files := map[string]string{
+		"types.cs": "namespace go;\npartial class p {\n    // partial struct IpMaskString /*IpAddressString*/;\n" +
+			"    const string s = \"partial struct IpMaskString /*IpAddressString*/;\";\n}\n",
+		"package_info.cs": "namespace go;\npartial class p { [GoValueClone(\"Value\")] public partial struct IpMaskString {} }\n",
+	}
+
+	for name, body := range files {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(body), 0o600); err != nil {
+			t.Fatalf("planting %s: %v", name, err)
+		}
+	}
+
+	scan, err := scanValueCloneStamps(dir)
+
+	if err != nil {
+		t.Fatalf("scanning the planted tree: %v", err)
+	}
+
+	if len(scan.Findings) != 1 || scan.Findings[0].Member != "Value" {
+		t.Fatalf("a wrapper declaration inside a comment or a string must not admit Value: got %v", scan.Findings)
+	}
+}
+
 // TestValueCloneScannerAdmitsTheFourCorpusShapes is the ANTI-OVER-MATCH control, and it is the arm
 // the corpus reading rests on. Each shape below is one that a naive scanner reports as a defect
 // while the build is perfectly happy, and each was found by measuring false positives DOWN against
@@ -817,6 +890,13 @@ func TestValueCloneScannerAdmitsTheFourCorpusShapes(t *testing.T) {
 			name: "minted: a bodiless [GoType(\"target\")] wrapper carries Value",
 			files: map[string]string{
 				"writer.cs": "namespace go;\npartial class p {\n    [GoType(\"encoder\")] partial struct EncoderBuffer;\n    [GoValueClone(\"Value\")] public partial struct EncoderBuffer {}\n}\n",
+			},
+		},
+		{
+			name: "minted, face-lift spelling: the wrapper's definition rides a comment after its name",
+			files: map[string]string{
+				"types.cs":        "namespace go;\npartial class p {\n    partial class Pointer /*ж<EmptyStruct>*/;\n    partial struct IpMaskString /*IpAddressString*/;\n}\n",
+				"package_info.cs": "namespace go;\npartial class p { [GoValueClone(\"Value\")] public partial struct IpMaskString {} }\n",
 			},
 		},
 	} {
