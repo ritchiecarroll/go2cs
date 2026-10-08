@@ -24,10 +24,11 @@ import (
 // output the converter does not produce, and nothing else fails when that happens: the page builds,
 // the links resolve, and the reader is told something false.
 //
-// THE LIST IS docsRetiredAttributes, AND IT GROWS. A seat that stops the converter writing an attribute
-// adds its row in the same change. The list is EMPTY until the first face-lift seat lands, so
-// TestDocsShowNoRetiredAttribute cannot go red on today's tree; TestRetiredAttributeGuardFiresOnAPlantedPage
-// is its control, run against docsFaceLiftAttributes, the set the plan rules out of converted code.
+// THE LIST IS docsRetiredAttributes, AND IT GROWS. A change that stops the converter writing an
+// attribute adds its row, with the pages regenerated in the same change. It holds the face lift's seven
+// rows, added with the pages regenerated from the face lift's emission (TRAIN FL).
+// TestRetiredAttributeGuardFiresOnAPlantedPage is its control, run against docsFaceLiftAttributes, the
+// set the plan rules out of converted code, so the control does not depend on what the list holds.
 //
 // WHAT COUNTS AS SHOWING ONE: the attribute written as an attribute, "[Name]", "[Name(" or "[Name,",
 // in a fenced sample, a code span or plain prose. A row may name one form: plain "[GoType]" and
@@ -78,7 +79,15 @@ func (a retiredAttribute) String() string {
 
 // docsRetiredAttributes is the guard's list. Add a row in the change that stops the converter writing
 // the attribute; never remove one.
-var docsRetiredAttributes = []retiredAttribute{}
+var docsRetiredAttributes = []retiredAttribute{
+	{"GoRecv", "", "face lift A"},
+	{"GoType", "plain", "face lift B"},
+	{"GoType", "arg", "face lift C"},
+	{"GoEmbedded", "", "face lift F"},
+	{"GoTag", "", "face lift E"},
+	{"GoArrayDims", "", "face lift D"},
+	{"GoStr", "", "face lift S"},
+}
 
 // docsFaceLiftAttributes is the set docs/PLAN-marker-comment-parity.md sections 5.1 to 5.7 rule out of
 // converted code. The planted control runs against it, and the guard reads it over the real pages to
