@@ -100,6 +100,7 @@ type outcome struct {
 	reason  string
 	changed bool // the source file differs between base and target
 	recited bool // the comment's lines were corrected to where the sample is
+	drifted bool // the sample differed from its file at the base ref by a line or two
 	review  bool
 }
 
@@ -191,9 +192,11 @@ func (s *sample) parseSpec() bool {
 	return len(s.ranges) > 0
 }
 
-// runs splits a sample's body at its ellipsis lines. Each run is the body indices of its lines, with
-// the blank lines at either end left out.
-func runs(body []string) [][2]int {
+// runs splits a sample's body into runs, each the body indices of its lines, with the blank lines at
+// either end left out. At level 0 a run ends at an ellipsis line; at level 1 at a blank line too, for
+// a sample that skips lines across a blank line; at level 2 every line is its own run, for a sample
+// that leaves the file's blank lines out.
+func runs(body []string, level int) [][2]int {
 	var out [][2]int
 	start := 0
 
@@ -214,9 +217,13 @@ func runs(body []string) [][2]int {
 	}
 
 	for i, b := range body {
-		if isEllipsis(b) {
+		switch {
+		case isEllipsis(b) || (level >= 1 && strings.TrimSpace(b) == ""):
 			flush(i)
 			start = i + 1
+		case level >= 2:
+			flush(i)
+			start = i
 		}
 	}
 
@@ -271,6 +278,20 @@ func reindentOf(sampleLines, fileLines []string) (reindent, bool) {
 	}
 
 	return reindent{}, true
+}
+
+// differing counts the lines of a that are not b's, trailing whitespace aside. The two are of one
+// length.
+func differing(a, b []string) int {
+	n := 0
+
+	for i := range a {
+		if strings.TrimRight(a[i], " \t") != strings.TrimRight(b[i], " \t") {
+			n++
+		}
+	}
+
+	return n
 }
 
 func sameLines(a, b []string) bool {
@@ -633,28 +654,37 @@ func regenerate(page string, lines []string, base, target fileReader, recite boo
 		}
 
 		body := lines[s.open+1 : s.close]
-		rs := runs(body)
-
 		// Each run's lines in the base file. The envelope reading is tried first: every run found, as
 		// written, in order, inside the cited stretch.
-		at := make([]span, len(rs))
+		var rs [][2]int
+		var at []span
 		lo, hi := s.ranges[0].lo, s.ranges[0].hi
 
 		for _, r := range s.ranges {
 			lo, hi = min(lo, r.lo), max(hi, r.hi)
 		}
 
+		// drifted is how many lines of a run may differ from the file's and the run still be that
+		// stretch of the file: none, unless the sample is being read as drifted, then one line in
+		// eight of a run of three lines or more.
+		drifted := false
+
 		align := func(lo, hi int) int {
 			pos := lo
 
 			for x, r := range rs {
 				n, found := r[1]-r[0], -1
+				allow := 0
+
+				if drifted && n >= 3 {
+					allow = (n + 7) / 8
+				}
 
 				for start := pos; start+n-1 <= hi; start++ {
 					fileLines := baseFile[start-1 : start-1+n]
 					rule, ok := reindentOf(body[r[0]:r[1]], fileLines)
 
-					if ok && sameLines(render(rule, fileLines), body[r[0]:r[1]]) {
+					if ok && differing(render(rule, fileLines), body[r[0]:r[1]]) <= allow {
 						found = start
 						break
 					}
@@ -671,15 +701,53 @@ func regenerate(page string, lines []string, base, target fileReader, recite boo
 			return -1
 		}
 
-		failed := align(lo, hi)
+		// The coarsest runs that fit are taken: whole runs between ellipsis lines first.
+		alignAny := func(lo, hi int) bool {
+			for level := 0; level <= 2; level++ {
+				rs = runs(body, level)
+				at = make([]span, len(rs))
 
-		// With -recite, a sample that is in the file as written but not on the cited lines is taken
-		// where it is, and its comment is rewritten to the stretch it spans.
-		if failed >= 0 && recite && len(rs) > 0 && align(1, len(baseFile)) < 0 {
-			failed = -1
-			s.ranges = []span{{at[0].lo, at[len(rs)-1].hi}}
-			s.rangeText = "0-0"
-			o.recited = true
+				if len(rs) > 0 && align(lo, hi) < 0 {
+					return true
+				}
+			}
+
+			return false
+		}
+
+		failed := -1
+
+		if !alignAny(lo, hi) {
+			// A sample that fits its cited stretch but for a line or two has drifted from its file,
+			// and is rewritten from it.
+			drifted = true
+
+			for level := 0; level <= 1 && !o.drifted; level++ {
+				rs = runs(body, level)
+				at = make([]span, len(rs))
+				o.drifted = len(rs) > 0 && align(lo, hi) < 0
+			}
+
+			drifted = false
+		}
+
+		if !o.drifted && !alignAny(lo, hi) {
+			// With -recite, a sample that is in the file as written but not on the cited lines is
+			// taken where it is, and its comment is rewritten to the stretch it spans.
+			if recite && alignAny(1, len(baseFile)) {
+				s.ranges = []span{{at[0].lo, at[len(rs)-1].hi}}
+				s.rangeText = "0-0"
+				o.recited = true
+			} else {
+				rs = runs(body, 0)
+				at = make([]span, len(rs))
+				failed = max(align(lo, hi), 0)
+			}
+		}
+
+		if failed >= 0 && len(rs) == 0 {
+			refuse("the sample is empty")
+			continue
 		}
 
 		if failed >= 0 {
@@ -730,10 +798,18 @@ func regenerate(page string, lines []string, base, target fileReader, recite boo
 			to, inside := lmap.carry(at[x])
 			o.review = o.review || inside
 
-			if to.lo < 1 || to.hi > len(targetFile) || to.hi < to.lo {
-				refuse("the lines of the run at %s:%d-%d are gone at the target ref", s.path, at[x].lo, at[x].hi)
+			if to.lo < 1 || to.hi > len(targetFile) {
+				refuse("the lines of the run at %s:%d-%d are past the end of the file at the target ref", s.path, at[x].lo, at[x].hi)
 				ok = false
 				break
+			}
+
+			// A run whose lines are all gone at the target leaves the sample; it is listed for review
+			// unless it was one line of a longer stretch, where its neighbours show what replaced it.
+			if to.hi < to.lo {
+				o.review = o.review || r[1]-r[0] > 1
+				newBody = append(newBody[:r[0]], newBody[r[1]:]...)
+				continue
 			}
 
 			replacement := render(rule, targetFile[to.lo-1:to.hi])
@@ -938,6 +1014,10 @@ func main() {
 	}
 
 	for _, o := range rewritten {
+		if o.drifted {
+			fmt.Printf("DRIFTED   %s:%d: the sample differed from its file at the base ref; rewritten from the file\n", o.page, o.line)
+		}
+
 		if o.recited {
 			fmt.Printf("RECITED   %s:%d\n", o.page, o.line)
 		} else {
