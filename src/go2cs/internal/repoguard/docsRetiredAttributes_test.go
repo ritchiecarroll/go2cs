@@ -77,7 +77,8 @@ var docsRetiredAttributes = []retiredAttribute{}
 
 // docsFaceLiftAttributes is the set docs/PLAN-marker-comment-parity.md sections 5.1 to 5.7 rule out of
 // converted code. The planted control runs against it, and the guard reads it over the real pages to
-// show its scanner reaches them.
+// show its scanner reaches them. The records go2cs-gen writes on a generated part ([GoMemberRecord],
+// [GoParamDims]) are not in it: the converter never wrote them, and a page may show them.
 var docsFaceLiftAttributes = []retiredAttribute{
 	{"GoRecv", "", "face lift A"},
 	{"GoType", "plain", "face lift B"},
@@ -85,7 +86,6 @@ var docsFaceLiftAttributes = []retiredAttribute{
 	{"GoEmbedded", "", "face lift F"},
 	{"GoTag", "", "face lift E"},
 	{"GoArrayDims", "", "face lift D"},
-	{"GoParamDims", "", "face lift D"},
 	{"GoStr", "", "face lift S"},
 }
 
@@ -407,13 +407,13 @@ func TestRetiredAttributeGuardFiresOnAPlantedPage(t *testing.T) {
 		"",            // 16
 		"| Go | C# |", // 17
 		"|---|---|",   // 18
-		"| `type Float float64` | `[GoType(\"num:float64\")] public partial struct Float;` |", // 19 table, GoType with an argument
-		"| a parameter | `[GoParamDims(4)] array<byte> a` |",                                  // 20 table, GoParamDims
+		"| `type Float float64` | `[GoType(\"num:float64\")] public partial struct Float;` |",             // 19 table, GoType with an argument
+		"| the generated record | `[GoParamDims(\"hash\", new Type[] { typeof(array<byte>) }, 0, 32)]` |", // 20 written by go2cs-gen: not a finding
 	}, "\n")
 
 	want := map[int]string{
 		3: "[GoRecv]", 6: "[GoType]", 7: "[GoEmbedded]", 8: "[GoTag]", 11: "[GoType(...)]", 12: "[GoRecv]",
-		13: "[GoArrayDims]", 14: "[GoStr]", 19: "[GoType(...)]", 20: "[GoParamDims]",
+		13: "[GoArrayDims]", 14: "[GoStr]", 19: "[GoType(...)]",
 	}
 
 	findings, _ := retiredAttributesShown(planted, docsFaceLiftAttributes)
