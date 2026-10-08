@@ -171,13 +171,17 @@ NU1102). The input is refused on any other stage and must be four numeric parts.
 ### `aot-smoke` — a Native AOT publish of a package consumer
 
 The same `pack` job, then ONE Native AOT publish and run of `PackageSymbols` (a hand-written consumer that sets no trim
-mode of its own) on all four shipped RIDs: `test-package-symbols.ps1 -AotOnly`. The executable must exit 0 and print
+mode of its own) on THREE shipped RIDs (win-x64, linux-x64, osx-x64): `test-package-symbols.ps1 -AotOnly`. The executable must exit 0 and print
 its `PACKAGE-SYMBOLS` line (the value printed, not judged); the publish wall time is a `READ` line. A consumer takes
 go.lib's `TrimMode=partial` default, under which the publish compiles every referenced go.* assembly whole: about 70
 min on hosted linux for this fixture's 31 assemblies, which is why it is its own stage and not a release-smoke arm.
 Without that default, the published 1.24.13.4 crashed such an executable at startup (a full trim removed the field
 metadata golib reads). **Non-gating on its first train (Q)**; from the release after, read before every release like
 the census, and a red holds the release. It reads this tree's pack only: `published_version` is refused for it.
+**osx-arm64 is NOT MEASURED, and every leg's summary says so**: on a hosted `macos-15` (3-core arm64) runner the publish did not
+finish inside the 6 hours a hosted job may run (37523439849, cancelled at 6h00m), and 360 minutes is GitHub's ceiling, so no
+budget reaches it. osx-x64, the same darwin build, read 293 min; linux-x64 56 min; win-x64 71 min (and an open defect: the
+executable fails at startup with "no metadata token available"). A larger or self-hosted Apple-silicon runner is the owner's call.
 
 ## Results flow
 
@@ -247,7 +251,7 @@ disclosure count is half of what makes a row honest.
 | `behavioral-smoke` | 90 min | 135 min | Converter `go build` plus a filtered four-phase run whose shared core closure is built from nothing. |
 | `sweep-shard` | 210 min | 315 min | One convert/build/run/compare cycle per matched row; the sweep's own per-package floors are the reason this is the largest. |
 | `release-smoke` | 90 min | 135 min | The leg only: converter `go build` plus four small restore/build/run arms. The `pack` job (windows, 240 min) is separate. Provisional. |
-| `aot-smoke` | 240 min | 360 min | The leg only: one Native AOT publish of a 31-package consumer under `TrimMode=partial` (~70 min on hosted linux, 37495989079). Provisional until its first four-RID run. |
+| `aot-smoke` | 240 min | 360 min | The leg only, three RIDs: one Native AOT publish of a 31-package consumer under `TrimMode=partial` -- linux 56, windows 71, osx-x64 293 min (37523439849). osx-arm64 is not run: it did not finish in 360, GitHub's ceiling. |
 
 The macOS multiplier is 1.5x because `macos-15` (arm64) is a 3-core runner and every phase here is
 parallel-MSBuild bound. GitHub's hard ceiling for a hosted job is 360 minutes and every value stays

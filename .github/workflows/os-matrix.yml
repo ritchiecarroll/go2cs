@@ -210,7 +210,7 @@ jobs:
           # the packages a release would publish carry what this tree's converter emits, on every OS they
           # ship for (C2, ec147f1d7f: N's converter emits unsafe.ArrayPointer, which the published 1.24.13.3
           # lacks). Three dispatches would be three packs of the same tree; one pack feeds all four legs.
-          # aot-smoke reads the same pack on the same four RIDs.
+          # aot-smoke reads the same pack, on THREE of the four RIDs (osx-arm64 below).
           if ($env:INPUT_STAGE -in 'release-smoke', 'aot-smoke') {
               $targets = @(
                   @{ goos = 'windows'; runner = 'windows-latest';  rid = 'win-x64'   },
@@ -218,6 +218,15 @@ jobs:
                   @{ goos = 'darwin';  runner = 'macos-15';        rid = 'osx-arm64' },
                   @{ goos = 'darwin';  runner = 'macos-15-intel';  rid = 'osx-x64'   })
               Write-Host "$($env:INPUT_STAGE): all four shipped RIDs from one pack (goos '$($env:INPUT_GOOS)' does not narrow it)"
+          }
+
+          # aot-smoke does NOT read osx-arm64, and every leg's summary says so: on a hosted macos-15 (3-core arm64) runner the
+          # Native AOT publish of the consumer's 31-assembly closure did not finish inside the 6 hours a hosted job may run
+          # (37523439849, cancelled at 6h00m; osx-x64, the same darwin build, read 293 min). COORD ruling 2026-10-07: three RIDs,
+          # the fourth stated, never a silent absence. A larger or self-hosted Apple-silicon runner is the owner's call.
+          if ($env:INPUT_STAGE -eq 'aot-smoke') {
+              $targets = @($targets | Where-Object { $_.rid -ne 'osx-arm64' })
+              Write-Host "aot-smoke: osx-arm64 NOT MEASURED (a hosted job cannot finish the publish inside GitHub's 6-hour limit)"
           }
 
           # Job budgets, in MINUTES, scaled from CLAUDE.md's measured rows for a ~4-core runner.
@@ -260,7 +269,7 @@ jobs:
                                          # go build + four small restore/build/run arms against the
                                          # feed, each restoring into a fresh cache. PROVISIONAL
                                          # until the first run.
-              'aot-smoke'        = 240   # the LEG only: ONE Native AOT publish + run of PackageSymbols
+              'aot-smoke'        = 240   # the LEG only (three RIDs: no osx-arm64): ONE Native AOT publish + run of PackageSymbols
                                          # under go.lib's TrimMode=partial, which compiles the whole
                                          # go.* closure (31 assemblies): ~70 min on hosted linux
                                          # (37495989079), and the windows/mac legs of that run passed
@@ -1352,7 +1361,8 @@ jobs:
       # aot-smoke — ONE Native AOT publish and run of a hand-written consumer of the pack's packages.
       # A consumer with no trim mode of its own takes go.lib's TrimMode=partial, so the publish compiles
       # every referenced go.* assembly whole (COORD ruling 2026-10-06: its own stage, out of release-smoke).
-      # The executable must exit 0 and print its PACKAGE-SYMBOLS line; the publish wall time is a READ line.
+      # The executable must exit 0 and print its PACKAGE-SYMBOLS line; the publish wall time is a READ line. THREE RIDs: the plan
+      # drops osx-arm64 (a hosted job cannot finish its publish in 6 hours) and every leg's summary says so.
       # Non-gating on its first train; from the release after, read before a release like the census.
       # -------------------------------------------------------------------------------------
       - name: AOT smoke — Native AOT publish and run of a package consumer
@@ -1383,6 +1393,8 @@ jobs:
               "## AOT smoke -- GOOS=$goos ($rid)"
               ''
               "exit ``$aotExit`` -- go.* $version from the pack"
+              ''
+              'NOT MEASURED: osx-arm64 -- this stage reads three RIDs; a hosted macos-15 (3-core arm64) job cannot finish this publish inside GitHub''s 6-hour limit (run 37523439849 was cancelled at 6h00m; osx-x64, the same darwin build, read 293 min)'
               ''
               '```'
           ) + @(Get-Content -LiteralPath $log | Where-Object { $_ -match '^(Package symbols gate|PASS|FAIL|READ|\s+AOT:)' }) + @('```')
