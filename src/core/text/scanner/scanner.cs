@@ -27,7 +27,7 @@ partial class scanner_package {
 
 // Position is a value that represents a source position.
 // A position is valid if Line > 0.
-[GoType] partial struct Position {
+partial struct Position {
     public @string Filename; // filename, if any
     public nint Offset;   // byte offset, starting at 0
     public nint Line;   // line number, starting at 1
@@ -35,7 +35,7 @@ partial class scanner_package {
 }
 
 // IsValid reports whether the position is valid.
-[GoRecv] public static bool IsValid(this ref Position pos) {
+public static bool IsValid(this ref Position pos) {
     return pos.Line > 0;
 }
 
@@ -132,7 +132,7 @@ public static UntypedInt GoWhitespace => /* 1<<'\t' | 1<<'\n' | 1<<'\r' | 1<<' '
 internal static UntypedInt bufLen => 1024; // at least utf8.UTFMax
 
 // A Scanner implements reading of Unicode characters and tokens from an [io.Reader].
-[GoType] partial struct Scanner {
+partial struct Scanner {
     // Input
     internal io.Reader src;
     // Source buffer
@@ -363,7 +363,7 @@ internal static void errorf(this ж<Scanner> Ꮡs, @string format, params ꓸꓸ
     Ꮡs.error(fmt.Sprintf(format, args.ꓸꓸꓸ));
 }
 
-[GoRecv] internal static bool isIdentRune(this ref Scanner s, rune ch, nint i) {
+internal static bool isIdentRune(this ref Scanner s, rune ch, nint i) {
     if (s.IsIdentRune != default!) {
         return ch != EOF && s.IsIdentRune(ch, i);
     }
@@ -844,7 +844,7 @@ break_redo:;
 // the character or token returned by the last call to [Scanner.Next] or [Scanner.Scan].
 // Use the [Scanner.Position] field for the start position of the most
 // recently scanned token.
-[GoRecv] public static Position /*pos*/ Pos(this ref Scanner s) {
+public static Position /*pos*/ Pos(this ref Scanner s) {
     Position pos = default!;
 
     pos.Filename = s.Filename;

@@ -55,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "AAtAgNSygoCCtoLoggArBoKCgoyCgoKYnoKCgoKUnMqCgoKmmIKCgpSCppjKggACEIK4gq64roK8goKUhpCSkJKAkqKUkpSC", "35-39:1;164-164:1;165-165:2;166-166:3;167-169:4;170-172:5;173-175:6")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "AAtAgNSygoCCtoLoggArBoKCgoyCgoKYnoKCgoKUnMqCgoKmmIKCgpSCppjKggACEIK4gq64roK8goKUhpCSkJKAkqKUkpSC", "35-39:1;164-164:1;165-165:2;166-166:3;167-169:4;170-172:5;173-175:6", "", "92=Kind/1/1/1,Name/1/1/1,PkgPath/1/1/1,NumField/1/1/1,Size/1/1/1,Align/1/1/1;98=StructOf/2/2/1;100=Size/1/2/1,Size/2/2/1;102=field/1/3/1,ArrayOf/1/3/2,field/2/3/2,ArrayOf/2/3/3,ArrayOf/3/3/3,field/3/3/3;113=Field/3/3/1,Elem/1/1/1,Len/3/3/1;121=Interface/1/1/1,Type/1/1/1,Field/1/3/1,Int/1/1/1,Field/2/3/1,Index/1/3/1,Uint/1/2/1,Field/3/3/2,Index/2/3/2,Index/3/3/2,Uint/2/2/2;124=Zero/2/2/1,Interface/2/3/1,New/1/1/1,Elem/1/1/1,Interface/3/3/1,DeepEqual/1/1/1;132=Field/1/5/1,Field/2/5/1,Field/3/5/1,Field/4/5/2,Get/1/2/2,Field/5/5/2,Get/2/2/2;136=TypeOf/1/1/1,field/1/1/2;141=Field/3/5/1,Field/4/5/1,Field/5/5/2,NumField/1/1/2;148=Field/1/4/1,Field/2/4/1,Field/3/4/2,IsExported/1/2/2,Field/4/4/2,IsExported/2/2/2;152=TypeOf/1/2/1,Elem/1/1/1,Implements/2/3/1,Comparable/1/1/2,TypeOf/2/2/3,Implements/3/3/3")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -65,7 +65,7 @@ namespace go;
 public static partial class main_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

@@ -14,13 +14,13 @@ using slices = slices_package;
 
 partial class fmtsort_package {
 
-[GoType("[]KeyValue")] partial struct SortedMap;
+partial struct SortedMap /*[]KeyValue*/;
 
 // Note: Throughout this package we avoid calling reflect.Value.Interface as
 // it is not always legal to do so and it's easier to avoid the issue than to face it.
 
 // KeyValue holds a single key and value pair found in a map.
-[GoType] partial struct KeyValue {
+partial struct KeyValue {
     public reflectꓸValue Key, Value;
 }
 

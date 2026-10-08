@@ -75,8 +75,8 @@ using static go.net.http.cgi_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("net/http/cgi/cgi_main.go", "cgi_main.cs", "ABgmgpSCpPqigoKWgoKWgoKCloKCgoSClpSCgpSWhIKWgoKWgsqCgpQADAiSlJSUpIKkgqSCgoKUgoKClICCgqSCgoKmgoKCpoKm", "105-134:1")]
-[assembly: go.GoPositionMap("net/http/cgi/child.go", "child.cs", "ABc4woKClIKUpoKCgoCCtgAQCqKCgoKWgoKCgpaCgoSEgIKCgpSmgIK4goKUgIK4gpSCgoLMgIKmlIKClJSCgpS4goKClLqChK7CgoKUgpSClMqCgoCCpAALGIKmgqaCgpSClKaClIKUgq7CgpSCgoCCpIKC")]
-[assembly: go.GoPositionMap("net/http/cgi/host.go", "host.cs", "ACdIlIKUpKSkpKSkABs+goKUAAIUAAkCgoKAgoKCgoLIgqb20oKCgpaChIKClICCpgAMHICCpqaAgpSmgpaigpSUgoKUloKUgIKmgoKUhIKAgriCgIK4gpaEkoKClJSCloKClu6ClIKCgpaCgoKUgIKkkpSCgoKCgoKCgoKClIKUgoKClIKClIKCgoKUgoKUgpSCgpSCgoKClLTGgoKCloCCgoKUgriCgoKWgsyCgqiEgoLutKSigpS4ooKCgoIAChYAChamgpSkquY=", "221-224:1")]
+[assembly: go.GoPositionMap("net/http/cgi/child.go", "child.cs", "ABc4woKClIKUpoKCgoCCtgAQCqKCgoKWgoKCgpaCgoSEgIKCgpSmgIK4goKUgIK4gpSCgoLMgIKmlIKClJSCgpS4goKClLqChK7CgoKUgpSClMqCgoCCpAALGIKmgqaCgpSClKaClIKUgq7CgpSCgoCCpIKC", "", "", "169=NewWriter/1/1/3")]
+[assembly: go.GoPositionMap("net/http/cgi/host.go", "host.cs", "ACdIlIKUpKSkpKSkABs+goKUAAIUAAkCgoKAgoKCgoLIgqb20oKCgpaChIKClICCpgAMHICCpqaAgpSmgpaigpSUgoKUloKUgIKmgoKUhIKAgriCgIK4gpaEkoKClJSCloKClu6ClIKCgpaCgoKUgIKkkpSCgoKCgoKCgoKClIKUgoKClIKClIKCgoKUgoKUgpSCgpSCgoKClLTGgoKCloCCgoKUgriCgoKWgsyCgqiEgoLutKSigpS4ooKCgoIAChYAChamgpSkquY=", "221-224:1", "", "155=RequestURI/1/1/7;246=stderr/1/1/5")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -85,7 +85,7 @@ namespace go.net.http;
 public static partial class cgi_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

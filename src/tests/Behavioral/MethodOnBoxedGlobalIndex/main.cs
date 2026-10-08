@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct buf {
+partial struct buf {
     internal nint n;
 }
 
@@ -19,11 +19,11 @@ internal static void bump(this ж<buf> Ꮡb) {
     add(ref nonnil(ref b).n, 1);
 }
 
-[GoRecv] internal static nint get(this ref buf b) {
+internal static nint get(this ref buf b) {
     return b.n;
 }
 
-[GoType] partial struct tracer {
+partial struct tracer {
     internal slice<buf> tabs;
 }
 

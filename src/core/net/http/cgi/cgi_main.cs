@@ -80,7 +80,7 @@ internal static void testCGI() {
     fmt.Printf("cwd=%s\r\n"u8, cwd);
 }
 
-[GoType("num:byte")] partial struct neverEnding;
+partial struct neverEnding /*num:byte*/;
 
 internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) {
     foreach (var (i, _) in p) {

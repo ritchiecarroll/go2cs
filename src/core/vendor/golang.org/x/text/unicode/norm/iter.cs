@@ -15,7 +15,7 @@ public static UntypedInt MaxSegmentSize => /* maxByteBufferSize */ 128;
 
 // An Iter iterates over a string or byte slice, while normalizing it
 // to a given Form.
-[GoType] partial struct Iter {
+partial struct Iter {
     internal reorderBuffer rb;
     internal array<byte> buf = new(maxByteBufferSize);
     internal ΔProperties info; // first character saved from previous iteration
@@ -28,7 +28,7 @@ public static UntypedInt MaxSegmentSize => /* maxByteBufferSize */ 128;
 // type iterFunc is a methodless func type — rendered inline as its base delegate
 
 // Init initializes i to iterate over src after normalizing it to Form f.
-[GoRecv] public static void Init(this ref Iter i, Form f, slice<byte> src) {
+public static void Init(this ref Iter i, Form f, slice<byte> src) {
     i.p = 0;
     if (len(src) == 0) {
         i.setDone();
@@ -44,7 +44,7 @@ public static UntypedInt MaxSegmentSize => /* maxByteBufferSize */ 128;
 }
 
 // InitString initializes i to iterate over src after normalizing it to Form f.
-[GoRecv] public static void InitString(this ref Iter i, Form f, @string src) {
+public static void InitString(this ref Iter i, Form f, @string src) {
     i.p = 0;
     if (len(src) == 0) {
         i.setDone();
@@ -62,7 +62,7 @@ public static UntypedInt MaxSegmentSize => /* maxByteBufferSize */ 128;
 // Seek sets the segment to be returned by the next call to Next to start
 // at position p.  It is the responsibility of the caller to set p to the
 // start of a segment.
-[GoRecv] public static (int64, error) Seek(this ref Iter i, int64 offset, nint whence) {
+public static (int64, error) Seek(this ref Iter i, int64 offset, nint whence) {
     int64 abs = default!;
     switch (whence) {
     case 0: {
@@ -100,7 +100,7 @@ public static UntypedInt MaxSegmentSize => /* maxByteBufferSize */ 128;
 // If the underlying is of type []byte, it will simply return a slice.
 // If the underlying is of type string, it will copy the slice to the buffer
 // and return that.
-[GoRecv] internal static slice<byte> returnSlice(this ref Iter i, nint a, nint b) {
+internal static slice<byte> returnSlice(this ref Iter i, nint a, nint b) {
     if (i.rb.src.bytes == default!) {
         return i.buf.slice(0, copy(i.buf[..], i.rb.src.str.slice(a, b)));
     }
@@ -108,17 +108,17 @@ public static UntypedInt MaxSegmentSize => /* maxByteBufferSize */ 128;
 }
 
 // Pos returns the byte position at which the next call to Next will commence processing.
-[GoRecv] public static nint Pos(this ref Iter i) {
+public static nint Pos(this ref Iter i) {
     return i.p;
 }
 
-[GoRecv] internal static void setDone(this ref Iter i) {
+internal static void setDone(this ref Iter i) {
     i.next = nextDone;
     i.p = i.rb.nsrc;
 }
 
 // Done returns true if there is no more input to process.
-[GoRecv] public static bool Done(this ref Iter i) {
+public static bool Done(this ref Iter i) {
     return i.p >= i.rb.nsrc;
 }
 

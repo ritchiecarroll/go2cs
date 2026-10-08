@@ -10,7 +10,7 @@ using strings = strings_package;
 
 partial class impl_package {
 
-[GoType] partial struct implementation {
+partial struct implementation {
     public @string Package;
     public @string Name;
     public bool Available;

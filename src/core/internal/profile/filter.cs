@@ -11,7 +11,7 @@ partial class profile_package {
 // FilterSamplesByTag removes all samples from the profile, except
 // those that match focus and do not match the ignore regular
 // expression.
-[GoRecv] public static (bool fm, bool im) FilterSamplesByTag(this ref Profile p, Func<@string, @string, int64, bool> focus, Func<@string, @string, int64, bool> ignore) {
+public static (bool fm, bool im) FilterSamplesByTag(this ref Profile p, Func<@string, @string, int64, bool> focus, Func<@string, @string, int64, bool> ignore) {
     bool fm = default!;
     bool im = default!;
 

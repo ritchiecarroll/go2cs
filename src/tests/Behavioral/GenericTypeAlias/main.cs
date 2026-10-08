@@ -8,7 +8,7 @@ using GenericTypeAliasLib = GenericTypeAliasLib_package;
 
 partial class main_package {
 
-[GoType] partial struct Pair<K, V> {
+partial struct Pair<K, V> {
     public K Key;
     public V Val;
 }

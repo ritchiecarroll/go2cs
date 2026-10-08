@@ -5,26 +5,26 @@ using time = time_package;
 
 partial class main_package {
 
-[GoType] partial interface Abser {
+partial interface Abser {
     float64 Abs();
 }
 
-[GoType] partial struct MyError {
+partial struct MyError {
     public time.Time When;
     public @string What;
 }
 
-[GoType] partial struct MyCustomError {
+partial struct MyCustomError {
     public @string Message;
-    [GoEmbedded] public Abser Abser;
+    /*embed*/ public Abser Abser;
     public partial ref MyError MyError { get; }
-    [GoEmbedded] internal error error;
+    /*embed*/ internal error error;
 }
 
-[GoType] partial struct MyAbser {
+partial struct MyAbser {
 }
 
-[GoRecv] public static float64 Abs(this ref MyCustomError myErr) {
+public static float64 Abs(this ref MyCustomError myErr) {
     return 0.0D;
 }
 

@@ -98,7 +98,7 @@ internal static slice<byte> sumSHAKE256(slice<byte> @out, slice<byte> data, nint
 }
 
 // SHA3 is an instance of a SHA-3 hash. It implements [hash.Hash].
-[GoType] partial struct SHA3 {
+partial struct SHA3 {
     internal sha3.Digest s;
 }
 
@@ -133,42 +133,42 @@ public static (nint n, error err) Write(this ж<SHA3> Ꮡs, slice<byte> p) {
 }
 
 // Sum appends the current hash to b and returns the resulting slice.
-[GoRecv] public static slice<byte> Sum(this ref SHA3 s, slice<byte> b) {
+public static slice<byte> Sum(this ref SHA3 s, slice<byte> b) {
     return s.s.Sum(b);
 }
 
 // Reset resets the hash to its initial state.
-[GoRecv] public static void Reset(this ref SHA3 s) {
+public static void Reset(this ref SHA3 s) {
     s.s.Reset();
 }
 
 // Size returns the number of bytes Sum will produce.
-[GoRecv] public static nint Size(this ref SHA3 s) {
+public static nint Size(this ref SHA3 s) {
     return s.s.Size();
 }
 
 // BlockSize returns the hash's rate.
-[GoRecv] public static nint BlockSize(this ref SHA3 s) {
+public static nint BlockSize(this ref SHA3 s) {
     return s.s.BlockSize();
 }
 
 // MarshalBinary implements [encoding.BinaryMarshaler].
-[GoRecv] public static (slice<byte>, error) MarshalBinary(this ref SHA3 s) {
+public static (slice<byte>, error) MarshalBinary(this ref SHA3 s) {
     return s.s.MarshalBinary();
 }
 
 // AppendBinary implements [encoding.BinaryAppender].
-[GoRecv] public static (slice<byte>, error) AppendBinary(this ref SHA3 s, slice<byte> p) {
+public static (slice<byte>, error) AppendBinary(this ref SHA3 s, slice<byte> p) {
     return s.s.AppendBinary(p);
 }
 
 // UnmarshalBinary implements [encoding.BinaryUnmarshaler].
-[GoRecv] public static error UnmarshalBinary(this ref SHA3 s, slice<byte> data) {
+public static error UnmarshalBinary(this ref SHA3 s, slice<byte> data) {
     return s.s.UnmarshalBinary(data);
 }
 
 // SHAKE is an instance of a SHAKE extendable output function.
-[GoType] partial struct SHAKE {
+partial struct SHAKE {
     internal sha3.SHAKE s;
 }
 
@@ -220,22 +220,22 @@ public static void Reset(this ж<SHAKE> Ꮡs) {
 }
 
 // BlockSize returns the rate of the XOF.
-[GoRecv] public static nint BlockSize(this ref SHAKE s) {
+public static nint BlockSize(this ref SHAKE s) {
     return s.s.BlockSize();
 }
 
 // MarshalBinary implements [encoding.BinaryMarshaler].
-[GoRecv] public static (slice<byte>, error) MarshalBinary(this ref SHAKE s) {
+public static (slice<byte>, error) MarshalBinary(this ref SHAKE s) {
     return s.s.MarshalBinary();
 }
 
 // AppendBinary implements [encoding.BinaryAppender].
-[GoRecv] public static (slice<byte>, error) AppendBinary(this ref SHAKE s, slice<byte> p) {
+public static (slice<byte>, error) AppendBinary(this ref SHAKE s, slice<byte> p) {
     return s.s.AppendBinary(p);
 }
 
 // UnmarshalBinary implements [encoding.BinaryUnmarshaler].
-[GoRecv] public static error UnmarshalBinary(this ref SHAKE s, slice<byte> data) {
+public static error UnmarshalBinary(this ref SHAKE s, slice<byte> data) {
     return s.s.UnmarshalBinary(data);
 }
 

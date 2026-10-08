@@ -21,7 +21,7 @@ internal static ref uintptr zero => ref Ꮡzero.Value;
 // Two handles compare equal exactly if the two values used to create the handles
 // would have also compared equal. The comparison of two handles is trivial and
 // typically much more efficient than comparing the values used to create them.
-[GoType] partial struct Handle<T> {
+partial struct Handle<T> {
     internal ж<T> value;
 }
 
@@ -97,7 +97,7 @@ internal static ref Δsync.Mutex cleanupFuncsMu => ref ᏑcleanupFuncsMu.Value;
 internal static slice<Action> cleanupFuncs;
 internal static slice<Action> cleanupNotify; // One-time notifications when cleanups finish.
 
-[GoType] partial struct uniqueMap<T> {
+partial struct uniqueMap<T> {
     public partial ref @internal.sync_package.HashTrieMap<T, weak_package.Pointer<T>> HashTrieMap { get; }
     internal partial ref cloneSeq cloneSeq { get; }
 }
@@ -159,7 +159,7 @@ internal static void registerCleanup() {
 // Implemented in runtime.
 
 //go:linkname runtime_registerUniqueMapCleanup
-[global::System.Diagnostics.StackTraceHidden] internal static void runtime_registerUniqueMapCleanup(Action cleanup) {
+/*linkname*/ internal static partial void runtime_registerUniqueMapCleanup(Action cleanup) {
     runtime.unique_runtime_registerUniqueMapCleanup(cleanup);
 }
 

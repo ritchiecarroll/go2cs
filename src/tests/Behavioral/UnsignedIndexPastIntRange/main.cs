@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[]byte")] partial struct bytes;
+partial struct bytes /*[]byte*/;
 
-[GoType("@string")] partial struct path;
+partial struct path /*@string*/;
 
-[GoType("[4]byte")] partial struct block;
+partial struct block /*[4]byte*/;
 
 internal static void @try(@string name, Func<byte> f) {
     GoFrame ᒐ = default;

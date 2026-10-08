@@ -408,15 +408,15 @@ internal static nint firstInSrc(slice<Object> path) {
     return fst;
 }
 
-[GoType] partial interface decl {
+partial interface decl {
     ast.Node node();
 }
 
-[GoType] partial struct importDecl {
+partial struct importDecl {
     internal ж<ast.ImportSpec> spec;
 }
 
-[GoType] partial struct ΔconstDecl {
+partial struct ΔconstDecl {
     internal ж<ast.ValueSpec> spec;
     internal nint iota;
     internal ast.Expr typ;
@@ -424,15 +424,15 @@ internal static nint firstInSrc(slice<Object> path) {
     internal bool inherited;
 }
 
-[GoType] partial struct ΔvarDecl {
+partial struct ΔvarDecl {
     internal ж<ast.ValueSpec> spec;
 }
 
-[GoType] partial struct ΔtypeDecl {
+partial struct ΔtypeDecl {
     internal ж<ast.TypeSpec> spec;
 }
 
-[GoType] partial struct ΔfuncDecl {
+partial struct ΔfuncDecl {
     internal ж<ast.FuncDecl> decl;
 }
 
@@ -633,7 +633,7 @@ internal static void varDecl(this ж<Checker> Ꮡcheck, ж<Var> Ꮡobj, slice<ж
 }
 
 // isImportedConstraint reports whether typ is an imported type constraint.
-[GoRecv] internal static bool isImportedConstraint(this ref Checker check, ΔType typ) {
+internal static bool isImportedConstraint(this ref Checker check, ΔType typ) {
     var named = asNamed(typ);
     if (named == nil || (~(~named).obj).pkg == check.pkg || (~(~named).obj).pkg == nil) {
         return false;

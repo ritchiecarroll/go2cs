@@ -21,7 +21,7 @@ partial class slog_package {
 
 // TextHandler is a [Handler] that writes Records to an [io.Writer] as a
 // sequence of key=value pairs separated by spaces and followed by a newline.
-[GoType] partial struct TextHandler {
+partial struct TextHandler {
     internal partial ref ж<commonHandler> commonHandler { get; }
 }
 
@@ -46,17 +46,17 @@ public static ж<TextHandler> NewTextHandler(io.Writer w, ж<HandlerOptions> Ꮡ
 
 // Enabled reports whether the handler handles records at the given level.
 // The handler ignores records whose level is lower.
-[GoRecv] public static bool Enabled(this ref TextHandler h, context.Context _, ΔLevel level) {
+public static bool Enabled(this ref TextHandler h, context.Context _, ΔLevel level) {
     return h.commonHandler.enabled(level);
 }
 
 // WithAttrs returns a new [TextHandler] whose attributes consists
 // of h's attributes followed by attrs.
-[GoRecv] public static ΔHandler WithAttrs(this ref TextHandler h, slice<Attr> attrs) {
+public static ΔHandler WithAttrs(this ref TextHandler h, slice<Attr> attrs) {
     return new TextHandlerжΔHandler(Ꮡ(new TextHandler(commonHandler: h.commonHandler.withAttrs(attrs))));
 }
 
-[GoRecv] public static ΔHandler WithGroup(this ref TextHandler h, @string name) {
+public static ΔHandler WithGroup(this ref TextHandler h, @string name) {
     return new TextHandlerжΔHandler(Ꮡ(new TextHandler(commonHandler: h.commonHandler.withGroup(name))));
 }
 
@@ -96,7 +96,7 @@ public static ж<TextHandler> NewTextHandler(io.Writer w, ж<HandlerOptions> Ꮡ
 //
 // Each call to Handle results in a single serialized call to
 // io.Writer.Write.
-[GoRecv] public static error Handle(this ref TextHandler h, context.Context _, Record r) {
+public static error Handle(this ref TextHandler h, context.Context _, Record r) {
     r = r.ΔClone();
 
     return h.commonHandler.handle(r);

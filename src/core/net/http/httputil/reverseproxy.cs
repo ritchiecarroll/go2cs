@@ -31,7 +31,7 @@ using ꓸꓸꓸany = Span<any>;
 partial class httputil_package {
 
 // A ProxyRequest contains a request to be rewritten by a [ReverseProxy].
-[GoType] partial struct ProxyRequest {
+partial struct ProxyRequest {
     // In is the request received by the proxy.
     // The Rewrite function must not modify In.
     public ж<http.Request> In;
@@ -54,7 +54,7 @@ partial class httputil_package {
 //		r.SetURL(url)
 //		r.Out.Host = r.In.Host
 //	}
-[GoRecv] public static void SetURL(this ref ProxyRequest r, ж<url.URL> Ꮡtarget) {
+public static void SetURL(this ref ProxyRequest r, ж<url.URL> Ꮡtarget) {
     rewriteRequestURL(ref (r.Out).DerefOrNull(), Ꮡtarget);
     r.Out.Value.Host = ""u8;
 }
@@ -84,7 +84,7 @@ internal static readonly @string httpsˢ2 = "https"u8;
 //		r.Out.Header["X-Forwarded-For"] = r.In.Header["X-Forwarded-For"]
 //		r.SetXForwarded()
 //	}
-[GoRecv] public static void SetXForwarded(this ref ProxyRequest r) {
+public static void SetXForwarded(this ref ProxyRequest r) {
     var (clientIP, _, err) = net.SplitHostPort((~r.In).RemoteAddr);
     if (err == default!){
         var prior = (~r.Out).Header[xForwardedForˢ];
@@ -109,7 +109,7 @@ internal static readonly @string httpsˢ2 = "https"u8;
 //
 // 1xx responses are forwarded to the client if the underlying
 // transport supports ClientTrace.Got1xxResponse.
-[GoType] partial struct ReverseProxy {
+partial struct ReverseProxy {
     // Rewrite must be a function which modifies
     // the request into a new request to be sent
     // using Transport. Its response is then copied
@@ -203,7 +203,7 @@ internal static readonly @string httpsˢ2 = "https"u8;
 
 // A BufferPool is an interface for getting and returning temporary
 // byte slices for use by [io.CopyBuffer].
-[GoType] partial interface BufferPool {
+partial interface BufferPool {
     slice<byte> Get();
     void Put(slice<byte> _Δp0);
 }
@@ -315,7 +315,7 @@ internal static slice<@string> hopHeaders = new @string[]{
     "Upgrade"u8
 }.slice();
 
-[GoRecv] internal static void defaultErrorHandler(this ref ReverseProxy p, http.ResponseWriter rw, ж<http.Request> Ꮡreq, error err) {
+internal static void defaultErrorHandler(this ref ReverseProxy p, http.ResponseWriter rw, ж<http.Request> Ꮡreq, error err) {
     p.logf("http: proxy error: %v"u8, err);
     rw.WriteHeader(http.StatusBadGateway);
 }
@@ -637,7 +637,7 @@ internal static readonly @string contentTypeˢ = "Content-Type"u8;
 
 // flushInterval returns the p.FlushInterval value, conditionally
 // overriding its value for a specific request/response.
-[GoRecv] internal static time.Duration flushInterval(this ref ReverseProxy p, ж<http.Response> Ꮡres) {
+internal static time.Duration flushInterval(this ref ReverseProxy p, ж<http.Response> Ꮡres) {
     ref var res = ref Ꮡres.DerefOrNull();
 
     @string resCT = res.Header.Get(contentTypeˢ);
@@ -688,7 +688,7 @@ internal static error copyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWrit
 
 // copyBuffer returns any write errors or non-EOF read errors, and the amount
 // of bytes written.
-[GoRecv] internal static (int64, error) copyBuffer(this ref ReverseProxy p, io.Writer dst, io.Reader src, slice<byte> buf) {
+internal static (int64, error) copyBuffer(this ref ReverseProxy p, io.Writer dst, io.Reader src, slice<byte> buf) {
     if (len(buf) == 0) {
         buf = new slice<byte>(32 * 1024);
     }
@@ -719,7 +719,7 @@ internal static error copyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWrit
     }
 }
 
-[GoRecv] internal static void logf(this ref ReverseProxy p, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void logf(this ref ReverseProxy p, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     if (p.ErrorLog != nil){
@@ -729,7 +729,7 @@ internal static error copyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWrit
     }
 }
 
-[GoType] partial struct maxLatencyWriter {
+partial struct maxLatencyWriter {
     internal io.Writer dst;
     internal Func<error> flush;
     internal time.Duration latency; // non-zero; negative means to flush immediately
@@ -892,7 +892,7 @@ internal static partial void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, h
 
 // switchProtocolCopier exists so goroutines proxying data back and
 // forth have nice names in stacks.
-[GoType] partial struct switchProtocolCopier {
+partial struct switchProtocolCopier {
     internal io.ReadWriter user, backend;
 }
 

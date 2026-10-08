@@ -9,7 +9,7 @@ partial class pprof_package {
 
 // A profMap is a map from (stack, tag) to mapEntry.
 // It grows without bound, but that's assumed to be OK.
-[GoType] partial struct profMap {
+partial struct profMap {
     internal map<uintptr, ж<profMapEntry>> hash;
     internal ж<profMapEntry> all;
     internal ж<profMapEntry> last;
@@ -18,7 +18,7 @@ partial class pprof_package {
 }
 
 // A profMapEntry is a single entry in the profMap.
-[GoType] partial struct profMapEntry {
+partial struct profMapEntry {
     internal ж<profMapEntry> nextHash; // next in hash list
     internal ж<profMapEntry> nextAll; // next in list of all entries
     internal slice<uintptr> stk;
@@ -26,7 +26,7 @@ partial class pprof_package {
     internal int64 count;
 }
 
-[GoRecv] internal static ж<profMapEntry> lookup(this ref profMap m, slice<uint64> stk, @unsafe.Pointer tag) {
+internal static ж<profMapEntry> lookup(this ref profMap m, slice<uint64> stk, @unsafe.Pointer tag) {
     // Compute hash of (stk, tag).
     var h = (uintptr)0;
     foreach (var (_, x) in stk) {

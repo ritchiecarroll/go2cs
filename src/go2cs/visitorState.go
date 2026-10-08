@@ -327,7 +327,7 @@ type Visitor struct {
 	// currentFuncName/currentFuncPrefix are owned by visitFuncDecl and are STALE at package level
 	// (see convFuncLit's package-level lift block).
 	packageInitLiftName string
-	// promotedInterfaceForwarders collects the [GoRecv] forwarders a DUAL-embed struct owes for
+	// promotedInterfaceForwarders collects the `this ref` forwarders a DUAL-embed struct owes for
 	// methods only its embedded-interface field provides in *T's method set (the pointer-only
 	// satisfaction arm in visitStructType); emitted immediately after the struct declaration
 	// closes, so the extension surface is complete before go2cs-gen composes the pointer-form

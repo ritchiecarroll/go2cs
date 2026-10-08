@@ -6,9 +6,9 @@ using os = os_package;
 
 partial class main_package {
 
-[GoType("num:int64")] partial struct word;
+partial struct word /*num:int64*/;
 
-[GoType("num:int32")] partial struct small;
+partial struct small /*num:int32*/;
 
 internal static nint i = Δmath.MinInt;
 internal static int32 i32 = Δmath.MinInt32;
@@ -23,12 +23,12 @@ internal static nint m1 = -1;
 internal static nint zero = 0;
 internal static nint calls = 0;
 
-[GoType] partial struct cell {
+partial struct cell {
     internal int64 x;
     internal nint n;
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal partial ref ж<cell> cell { get; }
 }
 

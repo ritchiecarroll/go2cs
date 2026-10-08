@@ -57,8 +57,8 @@ using static go.@internal.coverage.decodemeta_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/decodemeta/decode.go", "decode.cs", "AB4+goK4gIKkgIKkpqKAgqSClKaUgoCCuIKCpoKmgqaCpoKqwoKogoCCpJaCqIKAgriCgoSCloKClIIACBKCgg==")]
-[assembly: go.GoPositionMap("internal/coverage/decodemeta/decodefile.go", "decodefile.cs", "ACla4syAgqSmooSWgIK4goKCuoKogoKAgqSCuIKCgIKkgsyCgoKUgpSSgoSClqaCgoKCgpSClIKqoqyyrLKssgACFPKCgoKCpoKUgoKUAAIUAAgGgpSChIKWgpaCgpSCgIKkgIKk")]
+[assembly: go.GoPositionMap("internal/coverage/decodemeta/decode.go", "decode.cs", "AB4+goK4gIKkgIKkpqKAgqSClKaUgoCCuIKCpoKmgqaCpoKqwoKogoCCpJaCqIKAgriCgoSCloKClIIACBKCgg==", "", "", "133=ReadULEB128/1/5/2,ReadULEB128/2/5/3,ReadULEB128/3/5/4,ReadULEB128/4/5/5,ReadULEB128/5/5/6")]
+[assembly: go.GoPositionMap("internal/coverage/decodemeta/decodefile.go", "decodefile.cs", "ACla4syAgqSmooSWgIK4goKCuoKogoKAgqSCuIKCgIKkgsyCgoKUgpSSgoSClqaCgoKCgpSClIKqoqyyrLKssgACFPKCgoKCpoKUgoKUAAIUAAgGgpSChIKWgpaCgpSCgIKkgIKk", "", "", "181=Sum/1/1/1,Sprintf/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
@@ -67,7 +67,7 @@ namespace go.@internal.coverage;
 public static partial class decodemeta_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

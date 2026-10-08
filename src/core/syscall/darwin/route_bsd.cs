@@ -68,7 +68,7 @@ internal static (ж<SockaddrDatalink>, error) parseSockaddrLink(slice<byte> b) {
 // +----------------------------+
 // | Data            (variable) |
 // +----------------------------+
-[GoType("dyn")] internal partial struct parseLinkLayerAddr_linkLayerAddr {
+internal partial struct parseLinkLayerAddr_linkLayerAddr /*dyn*/ {
     public byte Type;
     public byte Nlen;
     public byte Alen;
@@ -208,13 +208,13 @@ public static (slice<byte>, error) RouteRIB(nint facility, nint param) {
 // RoutingMessage represents a routing message.
 //
 // Deprecated: Use golang.org/x/net/route instead.
-[GoType] partial interface RoutingMessage {
+partial interface RoutingMessage {
     (slice<Sockaddr>, error) sockaddr();
 }
 
 internal const nint anyMessageLen = /* int(unsafe.Sizeof(anyMessage{})) */ 4;
 
-[GoType] partial struct anyMessage {
+partial struct anyMessage {
     public uint16 Msglen;
     public uint8 Version;
     public uint8 Type;
@@ -224,12 +224,12 @@ internal const nint anyMessageLen = /* int(unsafe.Sizeof(anyMessage{})) */ 4;
 // entries.
 //
 // Deprecated: Use golang.org/x/net/route instead.
-[GoType] partial struct RouteMessage {
+partial struct RouteMessage {
     public RtMsghdr Header;
     public slice<byte> Data;
 }
 
-[GoRecv] internal static (slice<Sockaddr>, error) sockaddr(this ref RouteMessage m) {
+internal static (slice<Sockaddr>, error) sockaddr(this ref RouteMessage m) {
     array<Sockaddr> sas = new(8); /* RTAX_MAX */
     var b = m.Data[..];
     var family = (uint8)AF_UNSPEC;
@@ -273,12 +273,12 @@ internal const nint anyMessageLen = /* int(unsafe.Sizeof(anyMessage{})) */ 4;
 // network interface entries.
 //
 // Deprecated: Use golang.org/x/net/route instead.
-[GoType] partial struct InterfaceMessage {
+partial struct InterfaceMessage {
     public IfMsghdr Header;
     public slice<byte> Data;
 }
 
-[GoRecv] internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMessage m) {
+internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMessage m) {
     array<Sockaddr> sas = new(8); /* RTAX_MAX */
     if ((int32)(m.Header.Addrs & (int32)RTA_IFP) == 0) {
         return (default!, default!);
@@ -295,12 +295,12 @@ internal const nint anyMessageLen = /* int(unsafe.Sizeof(anyMessage{})) */ 4;
 // network interface address entries.
 //
 // Deprecated: Use golang.org/x/net/route instead.
-[GoType] partial struct InterfaceAddrMessage {
+partial struct InterfaceAddrMessage {
     public IfaMsghdr Header;
     public slice<byte> Data;
 }
 
-[GoRecv] internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceAddrMessage m) {
+internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceAddrMessage m) {
     array<Sockaddr> sas = new(8); /* RTAX_MAX */
     var b = m.Data[..];
     var family = (uint8)AF_UNSPEC;

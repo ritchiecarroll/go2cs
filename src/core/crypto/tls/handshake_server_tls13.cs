@@ -38,7 +38,7 @@ partial class tls_package {
 // messages cause too much work in session ticket decryption attempts.
 internal static UntypedInt maxClientPSKIdentities => 5;
 
-[GoType] partial struct echServerContext {
+partial struct echServerContext {
     internal ж<hpke.Receipient> hpkeContext;
     internal uint8 configID;
     internal echCipher ciphersuite;
@@ -50,7 +50,7 @@ internal static UntypedInt maxClientPSKIdentities => 5;
     internal bool inner;
 }
 
-[GoType] partial struct serverHandshakeStateTLS13 {
+partial struct serverHandshakeStateTLS13 {
     internal ж<Conn> c;
     internal context.Context ctx;
     internal ж<clientHelloMsg> clientHello;
@@ -359,7 +359,7 @@ internal static readonly @string tlsInvalidOrMissingPskˢ = "tls: invalid or mis
 internal static readonly @string tlsInternalErrorFailedToˢ = "tls: internal error: failed to clone hash"u8;
 internal static readonly @string tlsInvalidPskBinderˢ = "tls: invalid PSK binder"u8;
 
-[GoRecv] internal static error checkForResumption(this ref serverHandshakeStateTLS13 hs) {
+internal static error checkForResumption(this ref serverHandshakeStateTLS13 hs) {
     var c = hs.c;
     if ((~(~c).config).SessionTicketsDisabled) {
         return default!;
@@ -495,7 +495,7 @@ internal static readonly @string tlsInvalidPskBinderˢ = "tls: invalid PSK binde
 }
 
 // Recreate the interface to avoid importing encoding.
-[GoType("dyn")] internal partial interface cloneHash_binaryMarshaler {
+internal partial interface cloneHash_binaryMarshaler /*dyn*/ {
     (slice<byte> data, error err) MarshalBinary();
     error UnmarshalBinary(slice<byte> data);
 }
@@ -525,7 +525,7 @@ internal static hash.Hash cloneHash(hash.Hash @in, crypto.Hash h) {
     return @out;
 }
 
-[GoRecv] internal static error pickCertificate(this ref serverHandshakeStateTLS13 hs) {
+internal static error pickCertificate(this ref serverHandshakeStateTLS13 hs) {
     var c = hs.c;
     // Only one of PSK and certificates are used at a time.
     if (hs.usingPSK) {
@@ -557,7 +557,7 @@ internal static hash.Hash cloneHash(hash.Hash @in, crypto.Hash h) {
 
 // sendDummyChangeCipherSpec sends a ChangeCipherSpec record for compatibility
 // with middleboxes that didn't implement TLS correctly. See RFC 8446, Appendix D.4.
-[GoRecv] internal static error sendDummyChangeCipherSpec(this ref serverHandshakeStateTLS13 hs) {
+internal static error sendDummyChangeCipherSpec(this ref serverHandshakeStateTLS13 hs) {
     if ((~hs.c).quic != nil) {
         return default!;
     }
@@ -580,7 +580,7 @@ internal static readonly @string tlsClientSentUnexpectedˢ2 = "tls: client sent 
 internal static readonly @string tlsClientIndicatedEarlyˢ = "tls: client indicated early data in second ClientHello"u8;
 internal static readonly @string tlsClientIllegallyˢ = "tls: client illegally modified second ClientHello"u8;
 
-[GoRecv] internal static (ж<keyShare>, error) doHelloRetryRequest(this ref serverHandshakeStateTLS13 hs, CurveID selectedGroup) {
+internal static (ж<keyShare>, error) doHelloRetryRequest(this ref serverHandshakeStateTLS13 hs, CurveID selectedGroup) {
     var c = hs.c;
     // Make sure the client didn't send extra handshake messages alongside
     // their initial client_hello. If they sent two client_hello messages,
@@ -742,7 +742,7 @@ internal static bool illegalClientHelloChange(ref clientHelloMsg ch, ref clientH
     return ch.vers != ch1.vers || !bytes.Equal(ch.random, ch1.random) || !bytes.Equal(ch.sessionId, ch1.sessionId) || !bytes.Equal(ch.compressionMethods, ch1.compressionMethods) || ch.serverName != ch1.serverName || ch.ocspStapling != ch1.ocspStapling || !bytes.Equal(ch.supportedPoints, ch1.supportedPoints) || ch.ticketSupported != ch1.ticketSupported || !bytes.Equal(ch.sessionTicket, ch1.sessionTicket) || ch.secureRenegotiationSupported != ch1.secureRenegotiationSupported || !bytes.Equal(ch.secureRenegotiation, ch1.secureRenegotiation) || ch.scts != ch1.scts || !bytes.Equal(ch.cookie, ch1.cookie) || !bytes.Equal(ch.pskModes, ch1.pskModes);
 }
 
-[GoRecv] internal static error sendServerParameters(this ref serverHandshakeStateTLS13 hs) {
+internal static error sendServerParameters(this ref serverHandshakeStateTLS13 hs) {
     var c = hs.c;
     if (hs.echContext != nil) {
         copy((~hs.hello).random[(int)(32 - 8)..], new slice<byte>(8));
@@ -838,11 +838,11 @@ internal static bool illegalClientHelloChange(ref clientHelloMsg ch, ref clientH
     return default!;
 }
 
-[GoRecv] internal static bool requestClientCert(this ref serverHandshakeStateTLS13 hs) {
+internal static bool requestClientCert(this ref serverHandshakeStateTLS13 hs) {
     return (~(~hs.c).config).ClientAuth >= RequestClientCert && !hs.usingPSK;
 }
 
-[GoRecv] internal static error sendServerCertificate(this ref serverHandshakeStateTLS13 hs) {
+internal static error sendServerCertificate(this ref serverHandshakeStateTLS13 hs) {
     var c = hs.c;
     // Only one of PSK and certificates are used at a time.
     if (hs.usingPSK) {
@@ -907,7 +907,7 @@ internal static bool illegalClientHelloChange(ref clientHelloMsg ch, ref clientH
     return default!;
 }
 
-[GoRecv] internal static error sendServerFinished(this ref serverHandshakeStateTLS13 hs) {
+internal static error sendServerFinished(this ref serverHandshakeStateTLS13 hs) {
     var c = hs.c;
     var finished = Ꮡ(new finishedMsg(
         verifyData: hs.suite.finishedHash((~c).@out.trafficSecret, hs.transcript)
@@ -949,7 +949,7 @@ internal static bool illegalClientHelloChange(ref clientHelloMsg ch, ref clientH
     return default!;
 }
 
-[GoRecv] internal static bool shouldSendSessionTickets(this ref serverHandshakeStateTLS13 hs) {
+internal static bool shouldSendSessionTickets(this ref serverHandshakeStateTLS13 hs) {
     if ((~(~hs.c).config).SessionTicketsDisabled) {
         return false;
     }
@@ -966,7 +966,7 @@ internal static bool illegalClientHelloChange(ref clientHelloMsg ch, ref clientH
     return false;
 }
 
-[GoRecv] internal static error sendSessionTickets(this ref serverHandshakeStateTLS13 hs) {
+internal static error sendSessionTickets(this ref serverHandshakeStateTLS13 hs) {
     var c = hs.c;
     hs.clientFinished = hs.suite.finishedHash((~c).@in.trafficSecret, hs.transcript);
     var finishedMsg = Ꮡ(new finishedMsg(
@@ -1043,7 +1043,7 @@ internal static error sendSessionTicket(this ж<Conn> Ꮡc, bool earlyData, slic
     return default!;
 }
 
-[GoRecv] internal static error readClientCertificate(this ref serverHandshakeStateTLS13 hs) {
+internal static error readClientCertificate(this ref serverHandshakeStateTLS13 hs) {
     var c = hs.c;
     if (!hs.requestClientCert()) {
         // Make sure the connection is still being verified whether or not
@@ -1135,7 +1135,7 @@ internal static error sendSessionTicket(this ж<Conn> Ꮡc, bool earlyData, slic
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tlsInvalidClientFinishedˢ = "tls: invalid client finished hash"u8;
 
-[GoRecv] internal static error readClientFinished(this ref serverHandshakeStateTLS13 hs) {
+internal static error readClientFinished(this ref serverHandshakeStateTLS13 hs) {
     var c = hs.c;
     // finishedMsg is not included in the transcript.
     var (msg, err) = c.readHandshake(default!);

@@ -7,7 +7,7 @@ using ForeignIfaceFieldPointer;
 
 partial class main_package {
 
-[GoType("dyn")] internal partial struct main_type {
+internal partial struct main_type /*dyn*/ {
     internal addrlib.Addr got, want;
 }
 

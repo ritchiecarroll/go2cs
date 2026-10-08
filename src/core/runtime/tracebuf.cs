@@ -22,7 +22,7 @@ internal static UntypedInt traceBytesPerNumber => 10;
 // the compiler can destructure this value and pass it between calls as
 // just regular arguments. However, this style is not load-bearing, and
 // we can change it if it's deemed too error-prone.
-[GoType] partial struct traceWriter {
+partial struct traceWriter {
     internal partial ref traceLocker traceLocker { get; }
     internal traceExperiment exp;
     internal partial ref ж<traceBuf> traceBuf { get; }
@@ -200,12 +200,12 @@ internal static traceWriter refill(this traceWriter w) {
 }
 
 // traceBufQueue is a FIFO of traceBufs.
-[GoType] partial struct traceBufQueue {
+partial struct traceBufQueue {
     internal ж<traceBuf> head, tail;
 }
 
 // push queues buf into queue of buffers.
-[GoRecv] internal static void push(this ref traceBufQueue q, ж<traceBuf> Ꮡbuf) {
+internal static void push(this ref traceBufQueue q, ж<traceBuf> Ꮡbuf) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     buf.link = default!;
@@ -218,7 +218,7 @@ internal static traceWriter refill(this traceWriter w) {
 }
 
 // pop dequeues from the queue of buffers.
-[GoRecv] internal static ж<traceBuf> pop(this ref traceBufQueue q) {
+internal static ж<traceBuf> pop(this ref traceBufQueue q) {
     var buf = q.head;
     if (buf == nil) {
         return default!;
@@ -231,12 +231,12 @@ internal static traceWriter refill(this traceWriter w) {
     return buf;
 }
 
-[GoRecv] internal static bool empty(this ref traceBufQueue q) {
+internal static bool empty(this ref traceBufQueue q) {
     return q.head == nil;
 }
 
 // traceBufHeader is per-P tracing buffer.
-[GoType] partial struct traceBufHeader {
+partial struct traceBufHeader {
     internal ж<traceBuf> link; // in trace.empty/full
     internal traceTime lastTime; // when we wrote the last event
     internal nint pos;      // next write offset in arr
@@ -246,7 +246,7 @@ internal static traceWriter refill(this traceWriter w) {
 // traceBuf is per-M tracing buffer.
 //
 // TODO(mknyszek): Rename traceBuf to traceBatch, since they map 1:1 with event batches.
-[GoType] partial struct traceBuf {
+partial struct traceBuf {
     internal sys.NotInHeap _;
     internal partial ref traceBufHeader traceBufHeader { get; }
     internal array<byte> arr = new(((uintptr)64 << (int)(10)) - /* unsafe.Sizeof(traceBufHeader{}) */ (uintptr)32); // underlying buffer for traceBufHeader.buf
@@ -258,7 +258,7 @@ internal static traceWriter refill(this traceWriter w) {
 // have any stack growth.
 //
 //go:nosplit
-[GoRecv] internal static void @byte(this ref traceBuf buf, byte v) {
+internal static void @byte(this ref traceBuf buf, byte v) {
     buf.arr[buf.pos] = v;
     buf.pos++;
 }
@@ -269,7 +269,7 @@ internal static traceWriter refill(this traceWriter w) {
 // have any stack growth.
 //
 //go:nosplit
-[GoRecv] internal static void varint(this ref traceBuf buf, uint64 v) {
+internal static void varint(this ref traceBuf buf, uint64 v) {
     nint pos = buf.pos;
     var arr = buf.arr.slice(pos, pos + (nint)traceBytesPerNumber);
     foreach (var (i, _) in arr) {
@@ -292,7 +292,7 @@ internal static traceWriter refill(this traceWriter w) {
 // have any stack growth.
 //
 //go:nosplit
-[GoRecv] internal static nint varintReserve(this ref traceBuf buf) {
+internal static nint varintReserve(this ref traceBuf buf) {
     nint Δp = buf.pos;
     buf.pos += traceBytesPerNumber;
     return Δp;
@@ -304,7 +304,7 @@ internal static traceWriter refill(this traceWriter w) {
 // have any stack growth.
 //
 //go:nosplit
-[GoRecv] internal static void stringData(this ref traceBuf buf, @string s) {
+internal static void stringData(this ref traceBuf buf, @string s) {
     buf.pos += copy(buf.arr.slice(buf.pos), s);
 }
 
@@ -312,7 +312,7 @@ internal static traceWriter refill(this traceWriter w) {
 // have any stack growth.
 //
 //go:nosplit
-[GoRecv] internal static bool available(this ref traceBuf buf, nint size) {
+internal static bool available(this ref traceBuf buf, nint size) {
     return len(buf.arr) - buf.pos >= size;
 }
 
@@ -328,7 +328,7 @@ internal static readonly @string vCouldNotFitInˢ = "v could not fit in traceByt
 // have any stack growth.
 //
 //go:nosplit
-[GoRecv] internal static void varintAt(this ref traceBuf buf, nint pos, uint64 v) {
+internal static void varintAt(this ref traceBuf buf, nint pos, uint64 v) {
     for (nint i = 0; i < traceBytesPerNumber; i++) {
         if (i < (nint)(traceBytesPerNumber - 1)){
             buf.arr[pos] = (byte)(0x80 | (byte)v);

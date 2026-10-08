@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("@string")] partial struct version;
+partial struct version /*@string*/;
 
 internal static bool isValid(this version v) {
     return v != ""u8;

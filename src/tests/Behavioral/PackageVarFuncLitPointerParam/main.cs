@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct request {
+partial struct request {
     internal @string path;
     internal bool closed;
     internal nint depth;
@@ -19,7 +19,7 @@ internal static Action<ж<request>> deepen = (ж<request> r) => {
 
 internal static Func<ж<request>, @string> pathOf = (ж<request> r) => (~r).path;
 
-[GoRecv] internal static @string label(this ref request r) {
+internal static @string label(this ref request r) {
     return "["u8 + r.path + "]"u8;
 }
 

@@ -8,7 +8,7 @@ namespace go.vendor.golang.org.x.crypto.cryptobyte;
 
 partial class asn1_package {
 
-[GoType("num:uint8")] partial struct Tag;
+partial struct Tag /*num:uint8*/;
 
 internal static UntypedInt classConstructed => 0x20;
 internal static UntypedInt classContextSpecific => 0x80;

@@ -20,7 +20,7 @@ partial class gover_package {
 // but at the time this code was written, there was an existing test that used
 // go1.99999999999, which does not fit in an int on 32-bit platforms.
 // The "big decimal" representation avoids the problem entirely.)
-[GoType] partial struct Version {
+partial struct Version {
     public @string Major; // decimal
     public @string Minor; // decimal or ""
     public @string Patch; // decimal or ""

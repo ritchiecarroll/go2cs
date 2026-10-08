@@ -4,12 +4,12 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface TB {
+partial interface TB {
     @string Name();
     void @private();
 }
 
-[GoType] partial struct harness {
+partial struct harness {
     internal @string name;
     internal nint deadline;
 }
@@ -30,7 +30,7 @@ private static readonly object nameˢ = (@string)"Name:"u8;
 private static readonly object deadlineˢ = (@string)"deadline:"u8;
 private static readonly object noDeadlineˢ = (@string)"no deadline"u8;
 
-[GoType("dyn")] internal partial interface commandContext_type :
+internal partial interface commandContext_type /*dyn*/ :
     TB
 {
     (nint, bool) Deadline();
@@ -47,7 +47,7 @@ internal static void commandContext(TB t) {
     }
 }
 
-[GoType] partial struct gate {
+partial struct gate {
     internal @string name;
 }
 
@@ -66,7 +66,7 @@ internal static @string Kind(this gate g) {
 private static readonly object directˢ = (@string)"direct:"u8;
 private static readonly object noDirectˢ = (@string)"no direct"u8;
 
-[GoType("dyn")] internal partial interface direct_type {
+internal partial interface direct_type /*dyn*/ {
     void @private();
     @string Kind();
 }

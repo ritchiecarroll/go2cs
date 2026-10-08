@@ -97,12 +97,13 @@ public sealed class ChanDirMarkerFinder : ISyntaxReceiver
 /// </summary>
 /// <remarks>
 /// Not carried, and recorded as such: a func LITERAL (a lambda or local function compiles to a
-/// compiler-named method that source cannot key), a generic method or one whose signature mentions a
-/// type parameter (an attribute argument cannot name one), a method of a type with an enclosing type that
-/// is not partial everywhere, and a signature with an unmanaged pointer (typeof of a pointer needs an
-/// unsafe context). A NESTED type is carried by repeating its enclosing partials around the generated one:
-/// every converted Go interface is nested in its package class. A <c>[GoRecv]</c> method with a
-/// <c>ref</c> receiver gets a second entry keyed on <c>ж&lt;T&gt;</c>, the receiver of the overload
+/// compiler-named method that source cannot key), a method of a type with an enclosing type that is not
+/// partial everywhere, and a signature with an unmanaged pointer (typeof of a pointer needs an unsafe
+/// context). A generic method IS carried (face lift D2): its key spells a type built from a type parameter
+/// by its open definition and a bare type parameter as null (GeneratedPartials.TypeOf), and a key that
+/// would also match another method of the type is refused here, by name (GO2CS0003). A NESTED type is carried by repeating its enclosing partials around the generated one:
+/// every converted Go interface is nested in its package class. A pointer-receiver method (an unmarked
+/// <c>this ref</c>, or <c>[GoRecv]</c>) gets a second entry keyed on <c>ж&lt;T&gt;</c>, the receiver of the overload
 /// RecvGenerator adds for it, since a generator cannot see another generator's output.
 /// </remarks>
 [Generator]
@@ -126,9 +127,8 @@ public class ChanDirSigGenerator : ISourceGenerator
 
             if (semanticModel.GetDeclaredSymbol(methodSyntax) is not IMethodSymbol symbol ||
                 symbol.ContainingType is not { } declaringType ||
-                symbol.IsGenericMethod ||
-                symbol.Parameters.Any(parameter => !IsNameable(parameter.Type)) ||
-                !EnclosingChain(declaringType).All(IsPartialEverywhere))
+                symbol.Parameters.Any(parameter => !GeneratedPartials.IsNameable(parameter.Type)) ||
+                !GeneratedPartials.CanReopen(declaringType))
             {
                 continue;
             }
@@ -140,7 +140,16 @@ public class ChanDirSigGenerator : ISourceGenerator
 
             byte[] parameterDirs = ChanDirMarkers.ParameterDirs(methodSyntax);
             byte[] resultDirs = ChanDirMarkers.ResultDirs(methodSyntax);
-            string[] parameterTypes = symbol.Parameters.Select(parameter => TypeOf(parameter.Type)).ToArray();
+            // A key that would also match another method of this type is refused here, naming both, never written for
+            // golib to refuse at run time (face lift D2).
+            if (GeneratedPartials.KeyCollisions(symbol).FirstOrDefault() is { } collision)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, methodSyntax.GetLocation(),
+                    $"The channel-direction record for {symbol.ToDisplayString()}", $"its key also matches {collision.ToDisplayString()}"));
+                continue;
+            }
+
+            string[] parameterTypes = symbol.Parameters.Select(parameter => GeneratedPartials.TypeOf(parameter.Type)).ToArray();
 
             if (!byType.TryGetValue(declaringType, out (string ns, List<string> entries) slot))
             {
@@ -150,53 +159,21 @@ public class ChanDirSigGenerator : ISourceGenerator
 
             slot.entries.Add(Entry(symbol.Name, parameterTypes, parameterDirs, resultDirs));
 
-            bool isGoRecv = symbol.GetAttributes().Any(attribute => attribute.AttributeClass?.Name is "GoRecvAttribute" or "GoRecv");
-
-            if (isGoRecv && symbol.Parameters.Length > 0 && symbol.Parameters[0].RefKind == RefKind.Ref)
+            // A pointer receiver by RecvGenerator's own rule (an unmarked `this ref`, or [GoRecv]), so the
+            // entry follows exactly the methods that get the ж<T> overload.
+            if (symbol.IsPointerSetMethod() && symbol.Parameters.Length > 0 && symbol.Parameters[0].RefKind == RefKind.Ref)
             {
                 string[] boxed = (string[])parameterTypes.Clone();
-                boxed[0] = $"typeof(global::go.ж<{symbol.Parameters[0].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>)";
+                boxed[0] = GeneratedPartials.BoxedTypeOf(symbol.Parameters[0].Type);
                 slot.entries.Add(Entry(symbol.Name, boxed, parameterDirs, resultDirs));
             }
         }
 
         HashSet<string> hintNames = new(System.StringComparer.OrdinalIgnoreCase);
 
+        // The entries sit on the method's declaring type, reopened inside each enclosing partial.
         foreach (KeyValuePair<INamedTypeSymbol, (string ns, List<string> entries)> pair in byType)
-        {
-            INamedTypeSymbol type = pair.Key;
-            List<INamedTypeSymbol> chain = EnclosingChain(type).Reverse().ToList();
-
-            StringBuilder source = new();
-            source.Append("// <auto-generated/>\r\n#nullable enable\r\n\r\n");
-            source.Append($"namespace {pair.Value.ns};\r\n\r\n");
-
-            // Every enclosing type opens around the decorated one, outermost first; the entries sit on
-            // the innermost declaration, which is the method's declaring type.
-            for (int depth = 0; depth < chain.Count; depth++)
-            {
-                string indent = new(' ', depth * 4);
-
-                if (depth == chain.Count - 1)
-                {
-                    foreach (string entry in pair.Value.entries.Distinct())
-                        source.Append(indent).Append(entry).Append("\r\n");
-                }
-
-                source.Append($"{indent}partial {Keyword(chain[depth])} {EscapeIdentifier(chain[depth].Name)}{TypeParameters(chain[depth])}\r\n{indent}{{\r\n");
-            }
-
-            for (int depth = chain.Count - 1; depth >= 0; depth--)
-                source.Append(new string(' ', depth * 4)).Append("}\r\n");
-
-            string hint = $"{pair.Value.ns}.{string.Join(".", chain.Select(item => item.MetadataName))}.chandir.g.cs";
-            string unique = hint;
-
-            for (int index = 1; !hintNames.Add(unique); index++)
-                unique = $"{index}.{hint}";
-
-            context.AddSource(GetValidFileName(unique), source.ToString());
-        }
+            context.AddSource(GeneratedPartials.HintName(hintNames, pair.Value.ns, pair.Key, "chandir"), GeneratedPartials.Source(pair.Value.ns, pair.Key, pair.Value.entries));
     }
 
     private static string Entry(string name, string[] parameterTypes, byte[] parameterDirs, byte[] resultDirs) =>
@@ -210,43 +187,4 @@ public class ChanDirSigGenerator : ISourceGenerator
         ChanDirMarkers.Send => "global::go.GoChanDir.Send",
         _ => "global::go.GoChanDir.Unstamped"
     };
-
-    // The declaring type and every type enclosing it, innermost first.
-    private static IEnumerable<INamedTypeSymbol> EnclosingChain(INamedTypeSymbol type)
-    {
-        for (INamedTypeSymbol? current = type; current is not null; current = current.ContainingType)
-            yield return current;
-    }
-
-    private static string Keyword(INamedTypeSymbol type) => type.TypeKind switch
-    {
-        TypeKind.Interface => "interface",
-        TypeKind.Struct => "struct",
-        _ => "class"
-    };
-
-    private static string TypeParameters(INamedTypeSymbol type) =>
-        type.TypeParameters.Length == 0 ? "" : $"<{string.Join(", ", type.TypeParameters.Select(parameter => parameter.Name))}>";
-
-    private static string TypeOf(ITypeSymbol type) => $"typeof({type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
-
-    // A type an attribute argument can name: no type parameter anywhere in it, and no unmanaged pointer.
-    private static bool IsNameable(ITypeSymbol type) => type switch
-    {
-        ITypeParameterSymbol => false,
-        IPointerTypeSymbol or IFunctionPointerTypeSymbol => false,
-        IArrayTypeSymbol array => IsNameable(array.ElementType),
-        INamedTypeSymbol named => named.TypeArguments.All(IsNameable) && (named.ContainingType is null || IsNameable(named.ContainingType)),
-        _ => true
-    };
-
-    // A generated `partial` part is legal only when every declaration of the type is partial (CS0260).
-    private static bool IsPartialEverywhere(INamedTypeSymbol type) =>
-        type.DeclaringSyntaxReferences.Length > 0 &&
-        type.DeclaringSyntaxReferences.All(reference =>
-            reference.GetSyntax() is TypeDeclarationSyntax declaration &&
-            declaration.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword)));
-
-    private static string EscapeIdentifier(string name) =>
-        SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
 }

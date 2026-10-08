@@ -11,7 +11,7 @@ using Δsync = sync_package;
 partial class io_package {
 
 // onceError is an object that will only store an error once.
-[GoType] partial struct onceError {
+partial struct onceError {
     public partial ref sync_package.Mutex Mutex { get; } // guards following
     internal error err;
 }
@@ -51,7 +51,7 @@ internal static error Load(this ж<onceError> Ꮡa) {
 public static error ErrClosedPipe = errors.New("io: read/write on closed pipe"u8);
 
 // A pipe is the shared pipe structure underlying PipeReader and PipeWriter.
-[GoType] partial struct pipe {
+partial struct pipe {
     internal Δsync.Mutex wrMu; // Serializes Write operations
     internal channel<slice<byte>> wrCh;
     internal channel<nint> rdCh;
@@ -169,7 +169,7 @@ internal static error writeCloseError(this ж<pipe> Ꮡp) {
 }
 
 // A PipeReader is the read half of a pipe.
-[GoType] partial struct PipeReader {
+partial struct PipeReader {
     internal partial ref pipe pipe { get; }
 }
 
@@ -198,7 +198,7 @@ public static error CloseWithError(this ж<PipeReader> Ꮡr, error err) {
 }
 
 // A PipeWriter is the write half of a pipe.
-[GoType] partial struct PipeWriter {
+partial struct PipeWriter {
     internal PipeReader r;
 }
 

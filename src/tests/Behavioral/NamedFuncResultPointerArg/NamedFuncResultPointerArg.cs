@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct State {
+partial struct State {
     internal nint sum;
 }
 

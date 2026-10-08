@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[]nint")] partial struct IntSlice;
+partial struct IntSlice /*[]nint*/;
 
-[GoType("map[@string, nint]")] partial struct StrIntMap;
+partial struct StrIntMap /*map[@string, nint]*/;
 
-[GoType("chan nint")] partial struct IntChan;
+partial struct IntChan /*chan nint*/;
 
 internal static void probe(@string name, bool isNil) {
     fmt.Println(name, isNil);

@@ -36,9 +36,9 @@ internal static void sortSeq<S, E>(S x, Func<E, E, bool> less)
     insertionSort(new slice<E>(x), less);
 }
 
-[GoType("[]nint")] partial struct numbers;
+partial struct numbers /*[]nint*/;
 
-[GoType("[]nint")] partial struct sortedMap;
+partial struct sortedMap /*[]nint*/;
 
 internal static void Main() {
     var a = new nint[]{1, 2, 3, 4, 5}.slice();

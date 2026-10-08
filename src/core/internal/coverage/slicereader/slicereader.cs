@@ -14,7 +14,7 @@ partial class slicereader_package {
 // This file contains the helper "SliceReader", a utility for
 // reading values from a byte slice that may or may not be backed
 // by a read-only mmap'd region.
-[GoType] partial struct Reader {
+partial struct Reader {
     internal slice<byte> b;
     internal bool @readonly;
     internal int64 off;
@@ -29,7 +29,7 @@ public static ж<Reader> NewReader(slice<byte> b, bool @readonly) {
     return Ꮡr;
 }
 
-[GoRecv] public static (nint, error) Read(this ref Reader r, slice<byte> b) {
+public static (nint, error) Read(this ref Reader r, slice<byte> b) {
     nint amt = len(b);
     var toread = r.b.slice((nint)(r.off));
     if (len(toread) < amt) {
@@ -40,7 +40,7 @@ public static ж<Reader> NewReader(slice<byte> b, bool @readonly) {
     return (amt, default!);
 }
 
-[GoRecv] public static (int64 ret, error err) Seek(this ref Reader r, int64 offset, nint whence) {
+public static (int64 ret, error err) Seek(this ref Reader r, int64 offset, nint whence) {
     var exprᴛ1 = whence;
     if (exprᴛ1 == io.SeekStart) {
         if (offset < 0 || offset > (int64)len(r.b)) {
@@ -70,31 +70,31 @@ public static ж<Reader> NewReader(slice<byte> b, bool @readonly) {
     return (0, fmt.Errorf("unsupported seek mode %d"u8, whence));
 }
 
-[GoRecv] public static int64 Offset(this ref Reader r) {
+public static int64 Offset(this ref Reader r) {
     return r.off;
 }
 
-[GoRecv] public static uint8 ReadUint8(this ref Reader r) {
+public static uint8 ReadUint8(this ref Reader r) {
     var rv = (uint8)r.b[(nint)r.off];
     r.off += 1;
     return rv;
 }
 
-[GoRecv] public static uint32 ReadUint32(this ref Reader r) {
+public static uint32 ReadUint32(this ref Reader r) {
     nint end = (nint)r.off + 4;
     var rv = binary.LittleEndian.Uint32(r.b.slice((nint)r.off, end, end));
     r.off += 4;
     return rv;
 }
 
-[GoRecv] public static uint64 ReadUint64(this ref Reader r) {
+public static uint64 ReadUint64(this ref Reader r) {
     nint end = (nint)r.off + 8;
     var rv = binary.LittleEndian.Uint64(r.b.slice((nint)r.off, end, end));
     r.off += 8;
     return rv;
 }
 
-[GoRecv] public static uint64 /*value*/ ReadULEB128(this ref Reader r) {
+public static uint64 /*value*/ ReadULEB128(this ref Reader r) {
     uint64 value = default!;
 
     nuint shift = default!;
@@ -110,7 +110,7 @@ public static ж<Reader> NewReader(slice<byte> b, bool @readonly) {
     return value;
 }
 
-[GoRecv] public static @string ReadString(this ref Reader r, int64 len) {
+public static @string ReadString(this ref Reader r, int64 len) {
     var b = r.b.slice((nint)(r.off), (nint)(r.off + len));
     r.off += len;
     if (r.@readonly) {

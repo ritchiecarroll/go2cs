@@ -20,7 +20,7 @@ using go.@internal;
 partial class xcoff_package {
 
 // SectionHeader holds information about an XCOFF section header.
-[GoType] partial struct SectionHeader {
+partial struct SectionHeader {
     public @string Name;
     public uint64 VirtualAddress;
     public uint64 Size;
@@ -29,26 +29,26 @@ partial class xcoff_package {
     public uint32 Nreloc;
 }
 
-[GoType] partial struct ΔSection {
+partial struct ΔSection {
     public partial ref SectionHeader SectionHeader { get; }
     public slice<Reloc> Relocs;
-    [GoEmbedded] public io_package.ReaderAt ReaderAt;
+    /*embed*/ public io_package.ReaderAt ReaderAt;
     internal ж<io.SectionReader> sr;
 }
 
 // AuxiliaryCSect holds information about an XCOFF symbol in an AUX_CSECT entry.
-[GoType] partial struct AuxiliaryCSect {
+partial struct AuxiliaryCSect {
     public int64 Length;
     public nint StorageMappingClass;
     public nint SymbolType;
 }
 
 // AuxiliaryFcn holds information about an XCOFF symbol in an AUX_FCN entry.
-[GoType] partial struct AuxiliaryFcn {
+partial struct AuxiliaryFcn {
     public int64 Size;
 }
 
-[GoType] partial struct Symbol {
+partial struct Symbol {
     public @string Name;
     public uint64 Value;
     public nint SectionNumber;
@@ -57,7 +57,7 @@ partial class xcoff_package {
     public AuxiliaryCSect AuxCSect;
 }
 
-[GoType] partial struct Reloc {
+partial struct Reloc {
     public uint64 VirtualAddress;
     public ж<Symbol> Symbol;
     public bool Signed;
@@ -67,18 +67,18 @@ partial class xcoff_package {
 }
 
 // ImportedSymbol holds information about an imported XCOFF symbol.
-[GoType] partial struct ImportedSymbol {
+partial struct ImportedSymbol {
     public @string Name;
     public @string Library;
 }
 
 // FileHeader holds information about an XCOFF file header.
-[GoType] partial struct FileHeader {
+partial struct FileHeader {
     public uint16 TargetMachine;
 }
 
 // A File represents an open XCOFF file.
-[GoType] partial struct File {
+partial struct File {
     public partial ref FileHeader FileHeader { get; }
     public slice<ж<ΔSection>> Sections;
     public slice<ж<Symbol>> Symbols;
@@ -105,7 +105,7 @@ public static (ж<File>, error) Open(@string name) {
 // Close closes the File.
 // If the File was created using NewFile directly instead of Open,
 // Close has no effect.
-[GoRecv] public static error Close(this ref File f) {
+public static error Close(this ref File f) {
     error err = default!;
     if (f.closer != default!) {
         err = f.closer.Close();
@@ -118,7 +118,7 @@ public static (ж<File>, error) Open(@string name) {
 // section exists.
 // Xcoff have section's name limited to 8 bytes. Some sections like .gosymtab
 // can be trunked but this method will still find them.
-[GoRecv] public static ж<ΔSection> Section(this ref File f, @string name) {
+public static ж<ΔSection> Section(this ref File f, @string name) {
     foreach (var (_, s) in f.Sections) {
         if ((~s).Name == name || (len(name) > 8 && (~s).Name == name[..8])) {
             return s;
@@ -129,7 +129,7 @@ public static (ж<File>, error) Open(@string name) {
 
 // SectionByType returns the first section in f with the
 // given type, or nil if there is no such section.
-[GoRecv] public static ж<ΔSection> SectionByType(this ref File f, uint32 typ) {
+public static ж<ΔSection> SectionByType(this ref File f, uint32 typ) {
     foreach (var (_, s) in f.Sections) {
         if ((~s).Type == typ) {
             return s;
@@ -494,18 +494,18 @@ skip:
     return (f, default!);
 }
 
-[GoType] partial struct nobitsSectionReader {
+partial struct nobitsSectionReader {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unexpectedReadFromˢ = "unexpected read from section with uninitialized data"u8;
 
-[GoRecv] internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) {
+internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) {
     return (0, errors.New(unexpectedReadFromˢ));
 }
 
 // Data reads and returns the contents of the XCOFF section s.
-[GoRecv] public static (slice<byte>, error) Data(this ref ΔSection s) {
+public static (slice<byte>, error) Data(this ref ΔSection s) {
     var dat = new slice<byte>((nint)(s.sr.Size()));
     var (n, err) = s.sr.ReadAt(dat, 0);
     if (n == len(dat)) {
@@ -515,7 +515,7 @@ internal static readonly @string unexpectedReadFromˢ = "unexpected read from se
 }
 
 // CSect reads and returns the contents of a csect.
-[GoRecv] public static slice<byte> CSect(this ref File f, @string name) {
+public static slice<byte> CSect(this ref File f, @string name) {
     foreach (var (_, sym) in f.Symbols) {
         if ((~sym).Name == name && (~sym).AuxCSect.SymbolType == XTY_SD) {
             {
@@ -537,7 +537,7 @@ internal static readonly @string unexpectedReadFromˢ = "unexpected read from se
     return default!;
 }
 
-[GoRecv] public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
+public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
     // There are many other DWARF sections, but these
     // are the ones the debug/dwarf package uses.
     // Don't bother loading others.
@@ -559,7 +559,7 @@ internal static readonly @string unexpectedReadFromˢ = "unexpected read from se
 
 // readImportID returns the import file IDs stored inside the .loader section.
 // Library name pattern is either path/base/member or base/member
-[GoRecv] internal static (slice<@string>, error) readImportIDs(this ref File f, ж<ΔSection> Ꮡs) {
+internal static (slice<@string>, error) readImportIDs(this ref File f, ж<ΔSection> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Read loader header
@@ -635,7 +635,7 @@ internal static readonly @string unexpectedReadFromˢ = "unexpected read from se
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
 // It does not return weak symbols.
-[GoRecv] public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
+public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
     var s = f.SectionByType(STYP_LOADER);
     if (s == nil) {
         return (default!, default!);
@@ -757,7 +757,7 @@ internal static readonly @string unexpectedReadFromˢ = "unexpected read from se
 // ImportedLibraries returns the names of all libraries
 // referred to by the binary f that are expected to be
 // linked with the binary at dynamic link time.
-[GoRecv] public static (slice<@string>, error) ImportedLibraries(this ref File f) {
+public static (slice<@string>, error) ImportedLibraries(this ref File f) {
     var s = f.SectionByType(STYP_LOADER);
     if (s == nil) {
         return (default!, default!);

@@ -4,9 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:nuint")] partial struct idx;
+partial struct idx /*num:nuint*/;
 
-[GoType("num:nint")] partial struct cnt;
+partial struct cnt /*num:nint*/;
 
 internal static void Main() {
     var a = new nint[]{10, 20, 30, 40, 50}.slice();

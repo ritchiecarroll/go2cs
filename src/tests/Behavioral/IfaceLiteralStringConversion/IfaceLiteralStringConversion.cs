@@ -6,7 +6,7 @@ partial class main_package {
 
 internal static readonly @string named = "n1"u8;
 
-[GoType("@string")] partial struct sname;
+partial struct sname /*@string*/;
 
 internal static readonly sname typed = "t1"u8;
 

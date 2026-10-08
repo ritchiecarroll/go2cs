@@ -41,8 +41,8 @@ internal static ж<godebug.Setting> multipartmaxparts = godebug.New("multipartma
 internal static readonly @string multipartˢ = "multipart-"u8;
 
 // os.File.ReadFrom will allocate its own copy buffer if we let io.Copy use it.
-[GoType("dyn")] internal partial struct readForm_writerOnly {
-    [GoEmbedded] public io_package.Writer Writer;
+internal partial struct readForm_writerOnly /*dyn*/ {
+    /*embed*/ public io_package.Writer Writer;
 }
 
 internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMemory) {
@@ -250,13 +250,13 @@ internal static int64 /*size*/ mimeHeaderSize(textproto.MIMEHeader h) {
 // and are accessible via the [*FileHeader]'s Open method.
 // Its Value parts are stored as strings.
 // Both are keyed by field name.
-[GoType] partial struct Form {
+partial struct Form {
     public map<@string, slice<@string>> Value;
     public map<@string, slice<ж<FileHeader>>> File;
 }
 
 // RemoveAll removes any temporary files associated with a [Form].
-[GoRecv] public static error RemoveAll(this ref Form f) {
+public static error RemoveAll(this ref Form f) {
     error err = default!;
     foreach (var (_, fhs) in f.File) {
         foreach (var (_, fh) in fhs) {
@@ -272,7 +272,7 @@ internal static int64 /*size*/ mimeHeaderSize(textproto.MIMEHeader h) {
 }
 
 // A FileHeader describes a file part of a multipart request.
-[GoType] partial struct FileHeader {
+partial struct FileHeader {
     public @string Filename;
     public textproto.MIMEHeader Header;
     public int64 Size;
@@ -283,7 +283,7 @@ internal static int64 /*size*/ mimeHeaderSize(textproto.MIMEHeader h) {
 }
 
 // Open opens and returns the [FileHeader]'s associated File.
-[GoRecv] public static (File, error) Open(this ref FileHeader fh) {
+public static (File, error) Open(this ref FileHeader fh) {
     {
         var b = fh.content; if (b != default!) {
             var r = io.NewSectionReader(new bytes_ReaderжReaderAt(bytes.NewReader(b)), 0, (int64)len(b));
@@ -305,7 +305,7 @@ internal static int64 /*size*/ mimeHeaderSize(textproto.MIMEHeader h) {
 // File is an interface to access the file part of a multipart message.
 // Its contents may be either stored in memory or on disk.
 // If stored on disk, the File's underlying concrete type will be an *os.File.
-[GoType] partial interface File :
+partial interface File :
     io.Reader,
     io.ReaderAt,
     io.Seeker,
@@ -315,9 +315,9 @@ internal static int64 /*size*/ mimeHeaderSize(textproto.MIMEHeader h) {
 }
 
 // helper types to turn a []byte into a File
-[GoType] partial struct sectionReadCloser {
+partial struct sectionReadCloser {
     public partial ref ж<io_package.SectionReader> SectionReader { get; }
-    [GoEmbedded] public io_package.Closer Closer;
+    /*embed*/ public io_package.Closer Closer;
 }
 
 internal static error Close(this sectionReadCloser rc) {

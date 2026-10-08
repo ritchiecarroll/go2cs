@@ -74,7 +74,7 @@ namespace go;
 partial class plugin_package {
 
 // Plugin is a loaded Go plugin.
-[GoType] partial struct Plugin {
+partial struct Plugin {
     internal @string pluginpath;
     internal @string err;       // set if plugin failed to load
     internal channel<EmptyStruct> loaded; // closed when loaded
@@ -95,8 +95,5 @@ public static (ж<Plugin>, error) Open(@string path) {
 public static (Symbol, error) Lookup(this ж<Plugin> Ꮡp, @string symName) {
     return lookup(ref (Ꮡp).DerefOrNull(), symName);
 }
-// Descriptor carrier for `Symbol` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("Symbol")] public interface Symbolᴅ { }
-
 
 } // end plugin_package

@@ -16,24 +16,20 @@ using go.math;
 partial class x509_package {
 
 // pkcs1PrivateKey is a structure which mirrors the PKCS #1 ASN.1 for an RSA private key.
-[GoType] partial struct pkcs1PrivateKey {
+partial struct pkcs1PrivateKey {
     public nint Version;
     public ж<bigꓸInt> N;
     public nint E;
     public ж<bigꓸInt> D;
     public ж<bigꓸInt> P;
     public ж<bigꓸInt> Q;
-    [GoTag(@"asn1:""optional""")]
-    public ж<bigꓸInt> Dp;
-    [GoTag(@"asn1:""optional""")]
-    public ж<bigꓸInt> Dq;
-    [GoTag(@"asn1:""optional""")]
-    public ж<bigꓸInt> Qinv;
-    [GoTag(@"asn1:""optional,omitempty""")]
-    public slice<pkcs1AdditionalRSAPrime> AdditionalPrimes;
+    public ж<bigꓸInt> Dp; /*`asn1:"optional"`*/
+    public ж<bigꓸInt> Dq; /*`asn1:"optional"`*/
+    public ж<bigꓸInt> Qinv; /*`asn1:"optional"`*/
+    public slice<pkcs1AdditionalRSAPrime> AdditionalPrimes; /*`asn1:"optional,omitempty"`*/
 }
 
-[GoType] public partial struct pkcs1AdditionalRSAPrime {
+public partial struct pkcs1AdditionalRSAPrime {
     public ж<bigꓸInt> Prime;
     // We ignore these values because rsa will calculate them.
     public ж<bigꓸInt> Exp;
@@ -41,7 +37,7 @@ partial class x509_package {
 }
 
 // pkcs1PublicKey reflects the ASN.1 structure of a PKCS #1 public key.
-[GoType] partial struct pkcs1PublicKey {
+partial struct pkcs1PublicKey {
     public ж<bigꓸInt> N;
     public nint E;
 }

@@ -18,7 +18,7 @@ using go.@internal;
 
 partial class macOS_package {
 
-[GoType("num:uintptr")] partial struct CFRef;
+partial struct CFRef /*num:uintptr*/;
 
 // Core Foundation linker flags for the external linker. See Issue 42459.
 //
@@ -52,7 +52,7 @@ public static CFRef TimeToCFDateRef(time.Time t) {
     return @ref;
 }
 
-[GoType("num:uintptr")] partial struct CFString;
+partial struct CFString /*num:uintptr*/;
 
 internal static UntypedInt kCFAllocatorDefault => 0;
 

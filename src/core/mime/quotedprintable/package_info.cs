@@ -49,7 +49,7 @@ using static go.mime.quotedprintable_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("mime/quotedprintable/reader.go", "reader.cs", "ABYwksqClKSmtKaigpSSgIKkgIKkpoKUpKiCgpgADRSCgoKUloKCgoKCgoKEpIKClKaUhJSCgpSClJS0uLTEgoKClA==")]
+[assembly: go.GoPositionMap("mime/quotedprintable/reader.go", "reader.cs", "ABYwksqClKSmtKaigpSSgIKkgIKkpoKUpKiCgpgADRSCgoKUloKCgoKCgoKEpIKClKaUhJSCgpSClJS0uLTEgoKClA==", "", "", "25=NewReader/1/1/1")]
 [assembly: go.GoPositionMap("mime/quotedprintable/writer.go", "writer.cs", "ABYwkqzSgpa0xoKAgqSWgIKkloKWgIKmqqKAgqaokoKUgoKWgpaAgqSAgqSWgoCCuIKClqaCgoCCuIKCgoTMkoKWgoKCgIK4poKChKaCgoKEpoKAgqaCpoI=")]
 // </GoSourcePositionMaps>
 
@@ -59,7 +59,7 @@ namespace go.mime;
 public static partial class quotedprintable_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

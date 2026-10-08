@@ -20,7 +20,7 @@ using global::go.unicode;
 
 partial class doc_package {
 
-[GoType("map[@string, ж<Func>]")] partial struct methodSet;
+partial struct methodSet /*map[@string, ж<Func>]*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string badrecvˢ = "BADRECV"u8;
@@ -174,12 +174,12 @@ internal static (@string name, bool imported) baseTypeName(ast.Expr x) {
     return ("", false);
 }
 
-[GoType("map[ж<namedType>, bool]")] partial struct embeddedSet;
+partial struct embeddedSet /*map[ж<namedType>, bool]*/;
 
 // A namedType represents a named unqualified (package local, or possibly
 // predeclared) type. The namedType for a type name is always found via
 // reader.lookupType.
-[GoType] partial struct namedType {
+partial struct namedType {
     internal @string doc;      // doc comment for type
     internal @string name;      // type name
     internal ж<ast.GenDecl> decl; // nil if declaration hasn't been seen yet
@@ -201,7 +201,7 @@ internal static (@string name, bool imported) baseTypeName(ast.Expr x) {
 // in the respective AST nodes so that they are not printed
 // twice (once when printing the documentation and once when
 // printing the corresponding AST node).
-[GoType] partial struct reader {
+partial struct reader {
     internal Mode mode;
     // package properties
     internal @string doc; // package documentation, if any
@@ -221,7 +221,7 @@ internal static (@string name, bool imported) baseTypeName(ast.Expr x) {
     internal map<@string, slice<ж<ast.InterfaceType>>> fixmap;
 }
 
-[GoRecv] internal static bool isVisible(this ref reader r, @string name) {
+internal static bool isVisible(this ref reader r, @string name) {
     return (Mode)(r.mode & AllDecls) != 0 || token.IsExported(name);
 }
 
@@ -229,7 +229,7 @@ internal static (@string name, bool imported) baseTypeName(ast.Expr x) {
 // If the base type has not been encountered yet, a new
 // type with the given name but no associated declaration
 // is added to the type map.
-[GoRecv] internal static ж<namedType> lookupType(this ref reader r, @string name) {
+internal static ж<namedType> lookupType(this ref reader r, @string name) {
     if (name == ""u8 || name == "_"u8) {
         return default!; // no type docs for anonymous types
     }
@@ -253,7 +253,7 @@ internal static (@string name, bool imported) baseTypeName(ast.Expr x) {
 // anonymous field in the parent type. If the field is imported
 // (qualified name) or the parent is nil, the field is ignored.
 // The function returns the field name.
-[GoRecv] internal static @string /*fname*/ recordAnonymousField(this ref reader r, ж<namedType> Ꮡparent, ast.Expr fieldType) {
+internal static @string /*fname*/ recordAnonymousField(this ref reader r, ж<namedType> Ꮡparent, ast.Expr fieldType) {
     @string fname = default!;
 
     ref var parent = ref Ꮡparent.DerefOrNull();
@@ -271,7 +271,7 @@ internal static (@string name, bool imported) baseTypeName(ast.Expr x) {
     return fname;
 }
 
-[GoRecv] internal static void readDoc(this ref reader r, ж<ast.CommentGroup> Ꮡcomment) {
+internal static void readDoc(this ref reader r, ж<ast.CommentGroup> Ꮡcomment) {
     ref var comment = ref Ꮡcomment.DerefOrNull();
 
     // By convention there should be only one package comment
@@ -284,7 +284,7 @@ internal static (@string name, bool imported) baseTypeName(ast.Expr x) {
     r.doc += "\n"u8 + text;
 }
 
-[GoRecv] internal static void remember(this ref reader r, @string predecl, ж<ast.InterfaceType> Ꮡtyp) {
+internal static void remember(this ref reader r, @string predecl, ж<ast.InterfaceType> Ꮡtyp) {
     if (r.fixmap == default!) {
         r.fixmap = new map<@string, slice<ж<ast.InterfaceType>>>();
     }
@@ -406,7 +406,7 @@ internal static (slice<ж<ast.Field>> list, bool isStruct) fields(ast.Expr typ) 
 }
 
 // readType processes a type declaration.
-[GoRecv] internal static void readType(this ref reader r, ж<ast.GenDecl> Ꮡdecl, ж<ast.TypeSpec> Ꮡspec) {
+internal static void readType(this ref reader r, ж<ast.GenDecl> Ꮡdecl, ж<ast.TypeSpec> Ꮡspec) {
     ref var decl = ref Ꮡdecl.DerefOrNull();
     ref var spec = ref Ꮡspec.DerefOrNull();
 
@@ -441,12 +441,12 @@ internal static (slice<ж<ast.Field>> list, bool isStruct) fields(ast.Expr typ) 
 }
 
 // isPredeclared reports whether n denotes a predeclared type.
-[GoRecv] internal static bool isPredeclared(this ref reader r, @string n) {
+internal static bool isPredeclared(this ref reader r, @string n) {
     return predeclaredTypes[n] && r.types[n] == nil;
 }
 
 // readFunc processes a func or method declaration.
-[GoRecv] internal static void readFunc(this ref reader r, ж<ast.FuncDecl> Ꮡfun) {
+internal static void readFunc(this ref reader r, ж<ast.FuncDecl> Ꮡfun) {
     ref var fun = ref Ꮡfun.DerefOrNull();
 
     // strip function body if requested.
@@ -570,7 +570,7 @@ internal static @string clean(@string s) {
 }
 
 // readNote collects a single note from a sequence of comments.
-[GoRecv] internal static void readNote(this ref reader r, slice<ж<ast.Comment>> list) {
+internal static void readNote(this ref reader r, slice<ж<ast.Comment>> list) {
     @string text = (Ꮡ(new ast.CommentGroup(List: list))).Text();
     {
         var m = noteMarkerRx.FindStringSubmatchIndex(text); if (m != default!) {
@@ -598,7 +598,7 @@ internal static @string clean(@string s) {
 // and is followed by the note body (e.g., "// BUG(gri): fix this").
 // The note ends at the end of the comment group or at the start of
 // another note in the same comment group, whichever comes first.
-[GoRecv] internal static void readNotes(this ref reader r, slice<ж<ast.CommentGroup>> comments) {
+internal static void readNotes(this ref reader r, slice<ж<ast.CommentGroup>> comments) {
     foreach (var (_, group) in comments) {
         nint i = -1; // comment index of most recent note start, valid if >= 0
         var list = group.Value.List;
@@ -806,7 +806,7 @@ internal static ж<Func> customizeRecv(ж<Func> Ꮡf, @string recvTypeName, bool
 }
 
 // collectEmbeddedMethods collects the embedded methods of typ in mset.
-[GoRecv] internal static void collectEmbeddedMethods(this ref reader r, methodSet mset, ж<namedType> Ꮡtyp, @string recvTypeName, bool embeddedIsPtr, nint level, embeddedSet visited) {
+internal static void collectEmbeddedMethods(this ref reader r, methodSet mset, ж<namedType> Ꮡtyp, @string recvTypeName, bool embeddedIsPtr, nint level, embeddedSet visited) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     visited[Ꮡtyp] = true;
@@ -831,7 +831,7 @@ internal static ж<Func> customizeRecv(ж<Func> Ꮡf, @string recvTypeName, bool
 }
 
 // computeMethodSets determines the actual method sets for each type encountered.
-[GoRecv] internal static void computeMethodSets(this ref reader r) {
+internal static void computeMethodSets(this ref reader r) {
     foreach (var (_, t) in r.types) {
         // collect embedded methods for t
         if ((~t).isStruct){
@@ -855,7 +855,7 @@ internal static ж<Func> customizeRecv(ж<Func> Ꮡf, @string recvTypeName, bool
 // types that have no declaration. Instead, these functions and methods
 // are shown at the package level. It also removes types with missing
 // declarations or which are not visible.
-[GoRecv] internal static void cleanupTypes(this ref reader r) {
+internal static void cleanupTypes(this ref reader r) {
     foreach (var (_, t) in r.types) {
         var visible = r.isVisible((~t).name);
         var predeclared = predeclaredTypes[(~t).name];

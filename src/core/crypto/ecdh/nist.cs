@@ -15,7 +15,7 @@ using nistec = go.crypto.@internal.fips140.nistec_package;
 
 partial class ecdh_package {
 
-[GoType] partial struct nistCurve {
+partial struct nistCurve {
     internal @string name;
     internal Func<io.Reader, (ж<ecdh.PrivateKey>, error)> generate;
     internal Func<slice<byte>, (ж<ecdh.PrivateKey>, error)> newPrivateKey;
@@ -23,7 +23,7 @@ partial class ecdh_package {
     internal Func<ж<ecdh.PrivateKey>, ж<ecdhꓸPublicKey>, (slice<byte> sharedSecret, error err)> sharedSecret;
 }
 
-[GoRecv] internal static @string String(this ref nistCurve c) {
+internal static @string String(this ref nistCurve c) {
     return c.name;
 }
 
@@ -153,7 +153,7 @@ internal static (ж<ΔPublicKey>, error) NewPublicKey(this ж<nistCurve> Ꮡc, s
     return (k, default!);
 }
 
-[GoRecv] internal static (slice<byte>, error) ecdh(this ref nistCurve c, ж<PrivateKey> Ꮡlocal, ж<ΔPublicKey> Ꮡremote) {
+internal static (slice<byte>, error) ecdh(this ref nistCurve c, ж<PrivateKey> Ꮡlocal, ж<ΔPublicKey> Ꮡremote) {
     ref var local = ref Ꮡlocal.DerefOrNull();
     ref var remote = ref Ꮡremote.DerefOrNull();
 

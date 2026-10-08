@@ -49,7 +49,7 @@ partial class net_package {
 // constants.
 
 // conf is used to determine name resolution configuration.
-[GoType] partial struct conf {
+partial struct conf {
     internal bool netGo; // prefer go approach, based on build tag and GODEBUG
     internal bool netCgo; // prefer cgo approach, based on build tag and GODEBUG
     internal nint dnsDebugLevel; // from GODEBUG
@@ -58,7 +58,7 @@ partial class net_package {
     internal mdnsTest mdnsTest; // assume /etc/mdns.allow exists, for testing
 }
 
-[GoType("num:nint")] partial struct mdnsTest;
+partial struct mdnsTest /*num:nint*/;
 
 internal static mdnsTest mdnsFromSystem => /* iota */ 0;
 internal static mdnsTest mdnsAssumeExists => 1;
@@ -200,7 +200,7 @@ internal static bool goosPrefersCgo() {
 // mustUseGoResolver reports whether a DNS lookup of any sort is
 // required to use the go resolver. The provided Resolver is optional.
 // This will report true if the cgo resolver is not available.
-[GoRecv] internal static bool mustUseGoResolver(this ref conf c, ж<Resolver> Ꮡr) {
+internal static bool mustUseGoResolver(this ref conf c, ж<Resolver> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (!cgoAvailable) {
@@ -272,7 +272,7 @@ internal static readonly @string localˢ = ".local"u8;
 internal static readonly @string etcMdnsAllowˢ = "/etc/mdns.allow"u8;
 internal static readonly @string dnsˢ = "dns"u8;
 
-[GoRecv] internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this ref conf c, ж<Resolver> Ꮡr, @string hostname) {
+internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this ref conf c, ж<Resolver> Ꮡr, @string hostname) {
     ж<dnsConfig> dnsConf = default!;
 
     // fallbackOrder is the order we return if we can't figure it out.

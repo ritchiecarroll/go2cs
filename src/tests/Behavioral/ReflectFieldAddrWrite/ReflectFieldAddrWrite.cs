@@ -6,7 +6,7 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-[GoType] partial struct conf {
+partial struct conf {
     internal @string name;
     internal bool trace;
     internal @string version;

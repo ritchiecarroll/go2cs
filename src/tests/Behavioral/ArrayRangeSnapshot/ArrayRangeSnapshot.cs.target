@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[4]nint")] partial struct Row;
+partial struct Row /*[4]nint*/;
 
-[GoType("[]nint")] partial struct Digits;
+partial struct Digits /*[]nint*/;
 
-[GoType] partial struct holder {
+partial struct holder {
     internal array<nint> arr = new(4);
 }
 

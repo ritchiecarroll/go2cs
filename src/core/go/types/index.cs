@@ -457,7 +457,7 @@ internal static bool isValidIndex(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, e
 //
 // TODO(rfindley): remove this helper, in favor of just having a helper
 // function that returns indices.
-[GoType] partial struct indexedExpr {
+partial struct indexedExpr {
     internal ast.Expr orig;   // the wrapped expr, which may be distinct from the IndexListExpr below.
     internal ast.Expr x;   // expression
     internal tokenꓸPos lbrack;  // position of "["
@@ -465,7 +465,7 @@ internal static bool isValidIndex(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, e
     internal tokenꓸPos rbrack;  // position of "]"
 }
 
-[GoRecv] internal static tokenꓸPos Pos(this ref indexedExpr x) {
+internal static tokenꓸPos Pos(this ref indexedExpr x) {
     return x.orig.Pos();
 }
 

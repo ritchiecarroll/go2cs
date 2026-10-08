@@ -8,7 +8,7 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-[GoType] partial struct Type {
+partial struct Type {
     public uintptr Size_;
     public uintptr PtrBytes;
     public uint32 Hash;
@@ -22,7 +22,7 @@ partial class main_package {
     public TypeOff PtrToThis;
 }
 
-[GoType("num:uint8")] partial struct ΔKind;
+partial struct ΔKind /*num:uint8*/;
 
 public static ΔKind Invalid => /* iota */ 0;
 public static ΔKind Bool => 1;
@@ -56,7 +56,7 @@ public static ΔKind KindDirectIface => /* 1 << 5 */ 32;
 public static ΔKind KindGCProg => /* 1 << 6 */ 64;
 public static ΔKind KindMask => /* (1 << 5) - 1 */ 31;
 
-[GoType("num:uint8")] partial struct TFlag;
+partial struct TFlag /*num:uint8*/;
 
 public static TFlag TFlagUncommon => /* 1 << 0 */ 1;
 public static TFlag TFlagExtraStar => /* 1 << 1 */ 2;
@@ -64,11 +64,11 @@ public static TFlag TFlagNamed => /* 1 << 2 */ 4;
 public static TFlag TFlagRegularMemory => /* 1 << 3 */ 8;
 public static TFlag TFlagUnrolledBitmap => /* 1 << 4 */ 16;
 
-[GoType("num:int32")] partial struct NameOff;
+partial struct NameOff /*num:int32*/;
 
-[GoType("num:int32")] partial struct TypeOff;
+partial struct TypeOff /*num:int32*/;
 
-[GoType("num:int32")] partial struct TextOff;
+partial struct TextOff /*num:int32*/;
 
 public static @string String(this ΔKind k) {
     if ((nint)(uint8)k < len(kindNames)) {
@@ -124,38 +124,38 @@ public static ж<Type> TypeFor<T>() {
     return TypeOf(((ж<T>)nil)).Elem();
 }
 
-[GoRecv] public static ΔKind Kind(this ref Type t) {
+public static ΔKind Kind(this ref Type t) {
     return (ΔKind)(t.Kind_ & KindMask);
 }
 
-[GoRecv] public static bool HasName(this ref Type t) {
+public static bool HasName(this ref Type t) {
     return (TFlag)(t.TFlag & TFlagNamed) != 0;
 }
 
-[GoRecv] public static bool Pointers(this ref Type t) {
+public static bool Pointers(this ref Type t) {
     return t.PtrBytes != 0;
 }
 
-[GoRecv] public static bool IfaceIndir(this ref Type t) {
+public static bool IfaceIndir(this ref Type t) {
     return (ΔKind)(t.Kind_ & KindDirectIface) == 0;
 }
 
-[GoRecv] public static bool IsDirectIface(this ref Type t) {
+public static bool IsDirectIface(this ref Type t) {
     return (ΔKind)(t.Kind_ & KindDirectIface) != 0;
 }
 
-[GoRecv] public static slice<byte> GcSlice(this ref Type t, uintptr begin, uintptr end) {
+public static slice<byte> GcSlice(this ref Type t, uintptr begin, uintptr end) {
     return @unsafe.Slice(t.GCData, (nint)end).slice((nint)(begin));
 }
 
-[GoType] partial struct Method {
+partial struct Method {
     public NameOff Name;
     public TypeOff Mtyp;
     public TextOff Ifn;
     public TextOff Tfn;
 }
 
-[GoType] partial struct UncommonType {
+partial struct UncommonType {
     public NameOff PkgPath;
     public uint16 Mcount;
     public uint16 Xcount;
@@ -191,12 +191,12 @@ internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string
     return (@unsafe.Pointer)((uintptr)p + x);
 }
 
-[GoType] partial struct Imethod {
+partial struct Imethod {
     public NameOff Name;
     public TypeOff Typ;
 }
 
-[GoType] partial struct ΔArrayType {
+partial struct ΔArrayType {
     public partial ref Type Type { get; }
     public ж<Type> Elem;
     public ж<Type> Slice;
@@ -216,20 +216,20 @@ public static ж<Type> Common(this ж<Type> Ꮡt) {
     return Ꮡt;
 }
 
-[GoType("num:nint")] partial struct ΔChanDir;
+partial struct ΔChanDir /*num:nint*/;
 
 public static ΔChanDir RecvDir => /* 1 << iota */ 1;
 public static ΔChanDir SendDir => 2;
 public static ΔChanDir BothDir => /* RecvDir | SendDir */ 3;
 public static ΔChanDir InvalidDir => 0;
 
-[GoType] partial struct ChanType {
+partial struct ChanType {
     public partial ref Type Type { get; }
     public ж<Type> Elem;
     public ΔChanDir Dir;
 }
 
-[GoType] partial struct structTypeUncommon {
+partial struct structTypeUncommon {
     public partial ref ΔStructType StructType { get; }
     internal UncommonType u;
 }
@@ -244,42 +244,42 @@ public static ΔChanDir ChanDir(this ж<Type> Ꮡt) {
     return InvalidDir;
 }
 
-[GoType("dyn")] internal partial struct Uncommon_u {
+internal partial struct Uncommon_u /*dyn*/ {
     public partial ref PtrType PtrType { get; }
     internal UncommonType u;
 }
 
-[GoType("dyn")] internal partial struct Uncommon_uᴛ1 {
+internal partial struct Uncommon_uᴛ1 /*dyn*/ {
     public partial ref ΔFuncType FuncType { get; }
     internal UncommonType u;
 }
 
-[GoType("dyn")] internal partial struct Uncommon_uᴛ2 {
+internal partial struct Uncommon_uᴛ2 /*dyn*/ {
     public partial ref SliceType SliceType { get; }
     internal UncommonType u;
 }
 
-[GoType("dyn")] internal partial struct Uncommon_uᴛ3 {
+internal partial struct Uncommon_uᴛ3 /*dyn*/ {
     public partial ref ΔArrayType ArrayType { get; }
     internal UncommonType u;
 }
 
-[GoType("dyn")] internal partial struct Uncommon_uᴛ4 {
+internal partial struct Uncommon_uᴛ4 /*dyn*/ {
     public partial ref ChanType ChanType { get; }
     internal UncommonType u;
 }
 
-[GoType("dyn")] internal partial struct Uncommon_uᴛ5 {
+internal partial struct Uncommon_uᴛ5 /*dyn*/ {
     public partial ref ΔMapType MapType { get; }
     internal UncommonType u;
 }
 
-[GoType("dyn")] internal partial struct Uncommon_uᴛ6 {
+internal partial struct Uncommon_uᴛ6 /*dyn*/ {
     public partial ref ΔInterfaceType InterfaceType { get; }
     internal UncommonType u;
 }
 
-[GoType("dyn")] internal partial struct Uncommon_uᴛ7 {
+internal partial struct Uncommon_uᴛ7 /*dyn*/ {
     public partial ref Type Type { get; }
     internal UncommonType u;
 }
@@ -394,19 +394,19 @@ public static ж<ΔInterfaceType> InterfaceType(this ж<Type> Ꮡt) {
     return Ꮡt.Reinterpret<Type, ΔInterfaceType>();
 }
 
-[GoRecv] public static uintptr Size(this ref Type t) {
+public static uintptr Size(this ref Type t) {
     return t.Size_;
 }
 
-[GoRecv] public static nint Align(this ref Type t) {
+public static nint Align(this ref Type t) {
     return (nint)t.Align_;
 }
 
-[GoRecv] public static nint FieldAlign(this ref Type t) {
+public static nint FieldAlign(this ref Type t) {
     return (nint)t.FieldAlign_;
 }
 
-[GoType] partial struct ΔInterfaceType {
+partial struct ΔInterfaceType {
     public partial ref Type Type { get; }
     public ΔName PkgPath;
     public slice<Imethod> Methods;
@@ -430,11 +430,11 @@ public static nint NumMethod(this ж<Type> Ꮡt) {
     return len(Ꮡt.ExportedMethods());
 }
 
-[GoRecv] public static nint NumMethod(this ref ΔInterfaceType t) {
+public static nint NumMethod(this ref ΔInterfaceType t) {
     return len(t.Methods);
 }
 
-[GoType] partial struct ΔMapType {
+partial struct ΔMapType {
     public partial ref Type Type { get; }
     public ж<Type> Key;
     public ж<Type> Elem;
@@ -446,23 +446,23 @@ public static nint NumMethod(this ж<Type> Ꮡt) {
     public uint32 Flags;
 }
 
-[GoRecv] public static bool IndirectKey(this ref ΔMapType mt) {
+public static bool IndirectKey(this ref ΔMapType mt) {
     return (uint32)(mt.Flags & 1) != 0;
 }
 
-[GoRecv] public static bool IndirectElem(this ref ΔMapType mt) {
+public static bool IndirectElem(this ref ΔMapType mt) {
     return (uint32)(mt.Flags & 2) != 0;
 }
 
-[GoRecv] public static bool ReflexiveKey(this ref ΔMapType mt) {
+public static bool ReflexiveKey(this ref ΔMapType mt) {
     return (uint32)(mt.Flags & 4) != 0;
 }
 
-[GoRecv] public static bool NeedKeyUpdate(this ref ΔMapType mt) {
+public static bool NeedKeyUpdate(this ref ΔMapType mt) {
     return (uint32)(mt.Flags & 8) != 0;
 }
 
-[GoRecv] public static bool HashMightPanic(this ref ΔMapType mt) {
+public static bool HashMightPanic(this ref ΔMapType mt) {
     return (uint32)(mt.Flags & 16) != 0;
 }
 
@@ -475,12 +475,12 @@ public static ж<Type> Key(this ж<Type> Ꮡt) {
     return default!;
 }
 
-[GoType] partial struct SliceType {
+partial struct SliceType {
     public partial ref Type Type { get; }
     public ж<Type> Elem;
 }
 
-[GoType] partial struct ΔFuncType {
+partial struct ΔFuncType {
     public partial ref Type Type { get; }
     public uint16 InCount;
     public uint16 OutCount;
@@ -490,11 +490,11 @@ public static ж<Type> In(this ж<ΔFuncType> Ꮡt, nint i) {
     return Ꮡt.InSlice()[i];
 }
 
-[GoRecv] public static nint NumIn(this ref ΔFuncType t) {
+public static nint NumIn(this ref ΔFuncType t) {
     return (nint)t.InCount;
 }
 
-[GoRecv] public static nint NumOut(this ref ΔFuncType t) {
+public static nint NumOut(this ref ΔFuncType t) {
     return (nint)((uint16)(t.OutCount & ((1 << (int)(15)) - 1)));
 }
 
@@ -535,32 +535,32 @@ public static slice<ж<Type>> OutSlice(this ж<ΔFuncType> Ꮡt) {
     return (false ? default(slice<ж<Type>>) : throw panic("go2cs: a slice view (*[N]*Type)(p)[...] over a managed element has no managed aliasing pair (type.go:562)"));
 }
 
-[GoRecv] public static bool IsVariadic(this ref ΔFuncType t) {
+public static bool IsVariadic(this ref ΔFuncType t) {
     return (uint16)(t.OutCount & ((uint16)(1 << (int)(15)))) != 0;
 }
 
-[GoType] partial struct PtrType {
+partial struct PtrType {
     public partial ref Type Type { get; }
     public ж<Type> Elem;
 }
 
-[GoType] partial struct StructField {
+partial struct StructField {
     public ΔName Name;
     public ж<Type> Typ;
     public uintptr Offset;
 }
 
-[GoRecv] public static bool Embedded(this ref StructField f) {
+public static bool Embedded(this ref StructField f) {
     return f.Name.IsEmbedded();
 }
 
-[GoType] partial struct ΔStructType {
+partial struct ΔStructType {
     public partial ref Type Type { get; }
     public ΔName PkgPath;
     public slice<StructField> Fields;
 }
 
-[GoType] partial struct ΔName {
+partial struct ΔName {
     public ж<byte> Bytes;
 }
 

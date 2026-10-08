@@ -13,7 +13,7 @@ partial class types_package {
 //	 𝓤:  &term{}          == 𝓤                      // set of all types (𝓤niverse)
 //	 T:  &term{false, T}  == {T}                    // set of type T
 //	~t:  &term{true, t}   == {t' | under(t') == t}  // set of types with underlying type t
-[GoType] public partial struct Δterm {
+public partial struct Δterm {
     internal bool tilde; // valid if typ != nil
     internal ΔType typ;
 }
@@ -180,7 +180,7 @@ internal static bool subsetOf(this ж<Δterm> Ꮡx, ж<Δterm> Ꮡy) {
 
 // disjoint reports whether x ∩ y == ∅.
 // x.typ and y.typ must not be nil.
-[GoRecv] internal static bool disjoint(this ref Δterm x, ж<Δterm> Ꮡy) {
+internal static bool disjoint(this ref Δterm x, ж<Δterm> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     if (debug && (x.typ == default! || y.typ == default!)) {

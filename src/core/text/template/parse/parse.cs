@@ -18,7 +18,7 @@ using ꓸꓸꓸany = Span<any>;
 partial class parse_package {
 
 // Tree is the representation of a single parsed template.
-[GoType] partial struct Tree {
+partial struct Tree {
     public @string Name;   // name of the template represented by the tree.
     public @string ParseName;   // name of the top-level template during parsing, for error messages.
     public ж<ListNode> Root; // top-level root of the tree.
@@ -35,7 +35,7 @@ partial class parse_package {
     internal nint rangeDepth;
 }
 
-[GoType("num:nuint")] partial struct Mode;
+partial struct Mode /*num:nuint*/;
 
 public static Mode ParseComments => /* 1 << iota */ 1;       // parse comments and add them to AST
 public static Mode SkipFuncCheck => 2;       // do not check that functions are defined
@@ -70,7 +70,7 @@ public static (map<@string, ж<Tree>>, error) Parse(@string name, @string text, 
 }
 
 // next returns the next token.
-[GoRecv] internal static item next(this ref Tree t) {
+internal static item next(this ref Tree t) {
     if (t.peekCount > 0){
         t.peekCount--;
     } else {
@@ -80,20 +80,20 @@ public static (map<@string, ж<Tree>>, error) Parse(@string name, @string text, 
 }
 
 // backup backs the input stream up one token.
-[GoRecv] internal static void backup(this ref Tree t) {
+internal static void backup(this ref Tree t) {
     t.peekCount++;
 }
 
 // backup2 backs the input stream up two tokens.
 // The zeroth token is already there.
-[GoRecv] internal static void backup2(this ref Tree t, item t1) {
+internal static void backup2(this ref Tree t, item t1) {
     t.token[1] = t1;
     t.peekCount = 2;
 }
 
 // backup3 backs the input stream up three tokens
 // The zeroth token is already there.
-[GoRecv] internal static void backup3(this ref Tree t, item t2, item t1) {
+internal static void backup3(this ref Tree t, item t2, item t1) {
     // Reverse order: we're pushing back.
     t.token[1] = t1;
     t.token[2] = t2;
@@ -101,7 +101,7 @@ public static (map<@string, ж<Tree>>, error) Parse(@string name, @string text, 
 }
 
 // peek returns but does not consume the next token.
-[GoRecv] internal static item peek(this ref Tree t) {
+internal static item peek(this ref Tree t) {
     if (t.peekCount > 0) {
         return t.token[t.peekCount - 1];
     }
@@ -111,7 +111,7 @@ public static (map<@string, ж<Tree>>, error) Parse(@string name, @string text, 
 }
 
 // nextNonSpace returns the next non-space token.
-[GoRecv] internal static item /*token*/ nextNonSpace(this ref Tree t) {
+internal static item /*token*/ nextNonSpace(this ref Tree t) {
     item token = default!;
 
     while (ᐧ) {
@@ -124,7 +124,7 @@ public static (map<@string, ж<Tree>>, error) Parse(@string name, @string text, 
 }
 
 // peekNonSpace returns but does not consume the next non-space token.
-[GoRecv] internal static item peekNonSpace(this ref Tree t) {
+internal static item peekNonSpace(this ref Tree t) {
     var token = t.nextNonSpace();
     t.backup();
     return token;
@@ -167,7 +167,7 @@ public static (@string location, @string context) ErrorContext(this ж<Tree> Ꮡ
 }
 
 // errorf formats the error and terminates processing.
-[GoRecv] internal static void errorf(this ref Tree t, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf(this ref Tree t, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     t.Root = default!;
@@ -176,12 +176,12 @@ public static (@string location, @string context) ErrorContext(this ж<Tree> Ꮡ
 }
 
 // error terminates processing.
-[GoRecv] internal static void error(this ref Tree t, error err) {
+internal static void error(this ref Tree t, error err) {
     t.errorf("%s"u8, err);
 }
 
 // expect consumes the next token and guarantees it has the required type.
-[GoRecv] internal static item expect(this ref Tree t, itemType expected, @string context) {
+internal static item expect(this ref Tree t, itemType expected, @string context) {
     var token = t.nextNonSpace();
     if (token.typ != expected) {
         t.unexpected(token, context);
@@ -190,7 +190,7 @@ public static (@string location, @string context) ErrorContext(this ж<Tree> Ꮡ
 }
 
 // expectOneOf consumes the next token and guarantees it has one of the required types.
-[GoRecv] internal static item expectOneOf(this ref Tree t, itemType expected1, itemType expected2, @string context) {
+internal static item expectOneOf(this ref Tree t, itemType expected1, itemType expected2, @string context) {
     var token = t.nextNonSpace();
     if (token.typ != expected1 && token.typ != expected2) {
         t.unexpected(token, context);
@@ -202,7 +202,7 @@ public static (@string location, @string context) ErrorContext(this ж<Tree> Ꮡ
 internal static readonly @string actionˢ = " action"u8;
 
 // unexpected complains about the token and terminates processing.
-[GoRecv] internal static void unexpected(this ref Tree t, item token, @string context) {
+internal static void unexpected(this ref Tree t, item token, @string context) {
     if (token.typ == itemError) {
         @string extra = ""u8;
         if (t.actionLine != 0 && t.actionLine != token.line) {
@@ -245,7 +245,7 @@ internal static readonly @string breakˢ2 = "break"u8;
 internal static readonly @string continueˢ2 = "continue"u8;
 
 // startParse initializes the parser, using the lexer.
-[GoRecv] internal static void startParse(this ref Tree t, slice<map<@string, any>> funcs, ж<lexer> Ꮡlex, map<@string, ж<Tree>> treeSet) {
+internal static void startParse(this ref Tree t, slice<map<@string, any>> funcs, ж<lexer> Ꮡlex, map<@string, ж<Tree>> treeSet) {
     ref var lex = ref Ꮡlex.DerefOrNull();
 
     t.Root = default!;
@@ -261,7 +261,7 @@ internal static readonly @string continueˢ2 = "continue"u8;
 }
 
 // stopParse terminates parsing.
-[GoRecv] internal static void stopParse(this ref Tree t) {
+internal static void stopParse(this ref Tree t) {
     t.lex = default!;
     t.vars = default!;
     t.funcs = default!;
@@ -478,7 +478,7 @@ internal static Node textOrAction(this ж<Tree> Ꮡt) {
     finally { if (ᒐd1) Ꮡt.DerefOrNull().clearActionLine(); ᒐ.Run(); }
 }
 
-[GoRecv] internal static void clearActionLine(this ref Tree t) {
+internal static void clearActionLine(this ref Tree t) {
     t.actionLine = 0;
 }
 
@@ -649,7 +649,7 @@ decls:
     }
 }
 
-[GoRecv] internal static void checkPipeline(this ref Tree t, ж<PipeNode> Ꮡpipe, @string context) {
+internal static void checkPipeline(this ref Tree t, ж<PipeNode> Ꮡpipe, @string context) {
     ref var pipe = ref Ꮡpipe.DerefOrNull();
 
     // Reject empty pipelines
@@ -852,7 +852,7 @@ internal static Node templateControl(this ж<Tree> Ꮡt) {
     return new TemplateNodeжNode(Ꮡt.newTemplate(token.pos, token.line, name, pipe));
 }
 
-[GoRecv] internal static @string /*name*/ parseTemplateName(this ref Tree t, item token, @string context) {
+internal static @string /*name*/ parseTemplateName(this ref Tree t, item token, @string context) {
     @string name = default!;
 
     var exprᴛ1 = token.typ;
@@ -1022,7 +1022,7 @@ internal static Node term(this ж<Tree> Ꮡt) {
 }
 
 // hasFunction reports if a function name exists in the Tree's maps.
-[GoRecv] internal static bool hasFunction(this ref Tree t, @string name) {
+internal static bool hasFunction(this ref Tree t, @string name) {
     foreach (var (_, funcMap) in t.funcs) {
         if (funcMap == default!) {
             continue;
@@ -1035,7 +1035,7 @@ internal static Node term(this ж<Tree> Ꮡt) {
 }
 
 // popVars trims the variable list to the specified length
-[GoRecv] internal static void popVars(this ref Tree t, nint n) {
+internal static void popVars(this ref Tree t, nint n) {
     t.vars = t.vars.slice(0, n);
 }
 

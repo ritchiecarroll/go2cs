@@ -24,7 +24,7 @@ partial class textproto_package {
 //
 // A pipelined server can use the same calls to ensure that
 // responses computed in parallel are written in the correct order.
-[GoType] partial struct Pipeline {
+partial struct Pipeline {
     internal sync.Mutex mu;
     internal nuint id;
     internal sequencer request;
@@ -70,7 +70,7 @@ public static void EndResponse(this ж<Pipeline> Ꮡp, nuint id) {
 // happen in order, one after the other. The event numbering must start
 // at 0 and increment without skipping. The event number wraps around
 // safely as long as there are not 2^32 simultaneous events pending.
-[GoType] partial struct sequencer {
+partial struct sequencer {
     internal sync.Mutex mu;
     internal nuint id;
     internal map<nuint, channel<EmptyStruct>> wait;

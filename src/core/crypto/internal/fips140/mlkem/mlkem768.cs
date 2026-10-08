@@ -65,7 +65,7 @@ internal static UntypedInt decapsulationKeySize1024 => /* k1024*encodingSize12 +
 
 // A DecapsulationKey768 is the secret key used to decapsulate a shared key from a
 // ciphertext. It includes various precomputed values.
-[GoType] partial struct DecapsulationKey768 {
+partial struct DecapsulationKey768 {
     internal array<byte> d = new(32); // decapsulation key seed
     internal array<byte> z = new(32); // implicit rejection sampling seed
     internal array<byte> ρ = new(32); // sampleNTT seed for A, stored for the encapsulation key
@@ -77,7 +77,7 @@ internal static UntypedInt decapsulationKeySize1024 => /* k1024*encodingSize12 +
 // Bytes returns the decapsulation key as a 64-byte seed in the "d || z" form.
 //
 // The decapsulation key must be kept secret.
-[GoRecv] public static slice<byte> Bytes(this ref DecapsulationKey768 dk) {
+public static slice<byte> Bytes(this ref DecapsulationKey768 dk) {
     array<byte> b = new(64); /* SeedSize */
     copy(b[..], dk.d[..]);
     copy(b[32..], dk.z[..]);
@@ -110,7 +110,7 @@ public static slice<byte> TestingOnlyExpandedBytes768(ж<DecapsulationKey768> �
 
 // EncapsulationKey returns the public encapsulation key necessary to produce
 // ciphertexts.
-[GoRecv] public static ж<EncapsulationKey768> EncapsulationKey(this ref DecapsulationKey768 dk) {
+public static ж<EncapsulationKey768> EncapsulationKey(this ref DecapsulationKey768 dk) {
     return Ꮡ(new EncapsulationKey768(
         ρ: dk.ρ.Clone(),
         h: dk.h.Clone(),
@@ -120,20 +120,20 @@ public static slice<byte> TestingOnlyExpandedBytes768(ж<DecapsulationKey768> �
 
 // An EncapsulationKey768 is the public key used to produce ciphertexts to be
 // decapsulated by the corresponding [DecapsulationKey768].
-[GoType] partial struct EncapsulationKey768 {
+partial struct EncapsulationKey768 {
     internal array<byte> ρ = new(32); // sampleNTT seed for A
     internal array<byte> h = new(32); // H(ek)
     internal partial ref encryptionKey encryptionKey { get; }
 }
 
 // Bytes returns the encapsulation key as a byte slice.
-[GoRecv] public static slice<byte> Bytes(this ref EncapsulationKey768 ek) {
+public static slice<byte> Bytes(this ref EncapsulationKey768 ek) {
     // The actual logic is in a separate function to outline this allocation.
     var b = new slice<byte>(0, EncapsulationKeySize768);
     return ek.bytes(b);
 }
 
-[GoRecv] internal static slice<byte> bytes(this ref EncapsulationKey768 ek, slice<byte> b) {
+internal static slice<byte> bytes(this ref EncapsulationKey768 ek, slice<byte> b) {
     foreach (var (i, _) in ek.t) {
         b = polyByteEncode(b, ek.t[i]);
     }
@@ -142,13 +142,13 @@ public static slice<byte> TestingOnlyExpandedBytes768(ж<DecapsulationKey768> �
 }
 
 // encryptionKey is the parsed and expanded form of a PKE encryption key.
-[GoType] partial struct encryptionKey {
+partial struct encryptionKey {
     internal array<nttElement> t = new(k); // ByteDecode₁₂(ek[:384k])
     internal array<nttElement> a = new(k * k); // A[i*k+j] = sampleNTT(ρ, j, i)
 }
 
 // decryptionKey is the parsed and expanded form of a PKE decryption key.
-[GoType] partial struct decryptionKey {
+partial struct decryptionKey {
     internal array<nttElement> s = new(k); // ByteDecode₁₂(dk[:decryptionKeySize])
 }
 
@@ -173,7 +173,7 @@ internal static (ж<DecapsulationKey768>, error) generateKey(ж<DecapsulationKey
 
 // GenerateKeyInternal768 is a derandomized version of GenerateKey768,
 // exclusively for use in tests.
-public static ж<DecapsulationKey768> GenerateKeyInternal768([GoArrayDims(32)] ж<array<byte>> Ꮡd, [GoArrayDims(32)] ж<array<byte>> Ꮡz) {
+public static ж<DecapsulationKey768> GenerateKeyInternal768(/*[32]*/ ж<array<byte>> Ꮡd, /*[32]*/ ж<array<byte>> Ꮡz) {
     var dk = Ꮡ(new DecapsulationKey768(nil));
     kemKeyGen(dk, Ꮡd, ref (Ꮡz).DerefOrNull());
     return dk;
@@ -244,7 +244,7 @@ public static (ж<DecapsulationKey768>, error) TestingOnlyNewDecapsulationKey768
 // It implements ML-KEM.KeyGen_internal according to FIPS 203, Algorithm 16, and
 // K-PKE.KeyGen according to FIPS 203, Algorithm 13. The two are merged to save
 // copies and allocations.
-internal static void kemKeyGen(ж<DecapsulationKey768> Ꮡdk, [GoArrayDims(32)] ж<array<byte>> Ꮡd, ref array<byte> z) {
+internal static void kemKeyGen(ж<DecapsulationKey768> Ꮡdk, /*[32]*/ ж<array<byte>> Ꮡd, ref array<byte> z) {
     ref var dk = ref Ꮡdk.DerefOrNull();
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -320,7 +320,7 @@ public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this �
     return Ꮡek.encapsulate(Ꮡcc);
 }
 
-internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulate(this ж<EncapsulationKey768> Ꮡek, [GoArrayDims(1088)] ж<array<byte>> Ꮡcc) {
+internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulate(this ж<EncapsulationKey768> Ꮡek, /*[1088]*/ ж<array<byte>> Ꮡcc) {
     ref var m = ref heap(new array<byte>(32), out var Ꮡm);
     drbg.Read(m[..]);
     // Note that the modulus check (step 2 of the encapsulation key check from
@@ -331,7 +331,7 @@ internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulate(this
 
 // EncapsulateInternal is a derandomized version of Encapsulate, exclusively for
 // use in tests.
-public static (slice<byte> sharedKey, slice<byte> ciphertext) EncapsulateInternal(this ж<EncapsulationKey768> Ꮡek, [GoArrayDims(32)] ж<array<byte>> Ꮡm) {
+public static (slice<byte> sharedKey, slice<byte> ciphertext) EncapsulateInternal(this ж<EncapsulationKey768> Ꮡek, /*[32]*/ ж<array<byte>> Ꮡm) {
     var cc = Ꮡ(new byte[]{}.array(1088));
     return kemEncaps(cc, ref (Ꮡek).DerefOrNull(), Ꮡm);
 }
@@ -339,7 +339,7 @@ public static (slice<byte> sharedKey, slice<byte> ciphertext) EncapsulateInterna
 // kemEncaps generates a shared key and an associated ciphertext.
 //
 // It implements ML-KEM.Encaps_internal according to FIPS 203, Algorithm 17.
-internal static (slice<byte> K, slice<byte> c) kemEncaps([GoArrayDims(1088)] ж<array<byte>> Ꮡcc, ref EncapsulationKey768 ek, [GoArrayDims(32)] ж<array<byte>> Ꮡm) {
+internal static (slice<byte> K, slice<byte> c) kemEncaps(/*[1088]*/ ж<array<byte>> Ꮡcc, ref EncapsulationKey768 ek, /*[32]*/ ж<array<byte>> Ꮡm) {
     slice<byte> K = default!;
     slice<byte> c = default!;
 
@@ -396,7 +396,7 @@ internal static (ж<EncapsulationKey768>, error) parseEK(ж<EncapsulationKey768>
 //
 // It implements K-PKE.Encrypt according to FIPS 203, Algorithm 14, although the
 // computation of t and AT is done in parseEK.
-internal static slice<byte> pkeEncrypt([GoArrayDims(1088)] ж<array<byte>> Ꮡcc, ref encryptionKey ex, [GoArrayDims(32)] ж<array<byte>> Ꮡm, slice<byte> rnd) {
+internal static slice<byte> pkeEncrypt(/*[1088]*/ ж<array<byte>> Ꮡcc, ref encryptionKey ex, /*[32]*/ ж<array<byte>> Ꮡm, slice<byte> rnd) {
     ref var cc = ref Ꮡcc.DerefOrNull();
 
     byte N = default!;
@@ -452,7 +452,7 @@ public static (slice<byte> sharedKey, error err) Decapsulate(this ж<Decapsulati
 // kemDecaps produces a shared key from a ciphertext.
 //
 // It implements ML-KEM.Decaps_internal according to FIPS 203, Algorithm 18.
-internal static slice<byte> /*K*/ kemDecaps(ref DecapsulationKey768 dk, [GoArrayDims(1088)] ж<array<byte>> Ꮡc) {
+internal static slice<byte> /*K*/ kemDecaps(ref DecapsulationKey768 dk, /*[1088]*/ ж<array<byte>> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     fips140.RecordApproved();
@@ -477,7 +477,7 @@ internal static slice<byte> /*K*/ kemDecaps(ref DecapsulationKey768 dk, [GoArray
 //
 // It implements K-PKE.Decrypt according to FIPS 203, Algorithm 15,
 // although s is retained from kemKeyGen.
-internal static slice<byte> pkeDecrypt(ref decryptionKey dx, [GoArrayDims(1088)] ж<array<byte>> Ꮡc) {
+internal static slice<byte> pkeDecrypt(ref decryptionKey dx, /*[1088]*/ ж<array<byte>> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var u = GoReflect.WithElemDims(new slice<ringElement>(k), 256);

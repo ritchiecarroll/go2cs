@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:nint")] partial struct bucketType;
+partial struct bucketType /*num:nint*/;
 
 internal static bucketType memProfile => /* iota */ 0;
 internal static bucketType blockProfile => 1;

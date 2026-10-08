@@ -71,9 +71,9 @@ using static go.mime.multipart_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("mime/multipart/formdata.go", "formdata.cs", "ABQoAAEYAAoCqIIACQbigpiCgoKmgoCCgIKCxoSSgoCCtoKCgriCgoIAECSCgpSCgoKUpoKCgoKUgpSClISCgpSasoKCppaElIKClIKClIKYkoKCgoKUgpS4goKUgoKCgqaCgIKkgpaEgpSCgoKCgoCCpKaCgoKUluaigoKCgoKmAAwckoKCgoKCgsoADSCSgIKCpIKCgpSClAAVKIKClA==", "62-81:1")]
-[assembly: go.GoPositionMap("mime/multipart/multipart.go", "multipart.cs", "AC9YABxAxoKUgpTcsoKUgoK41oKCgoKCAAMU4oIAEiaigpSCAAgGgriAgqSWgoKCgqamgoKCgqaClKqiAAgSgoKogoKClIKCzIKUgoKUgoKCgpQAAhoACgKUgpSkpLaCuoCClKSkxoLegoKUAAIeAAwCgoKUlISCqIKClJSUgqimgoIAFzSUgoCCgIKCxgACEuIAAhDSpqKClIKUgoKE3JSCloKCgoKUgpaUloKWlN6Cgpa+soKUgoKm7oKUgrqCgpSuwoKU")]
+[assembly: go.GoPositionMap("mime/multipart/multipart.go", "multipart.cs", "AC9YABxAxoKUgpTcsoKUgoK41oKCgoKCAAMU4oIAEiaigpSCAAgGgriAgqSWgoKCgqamgoKCgqaClKqiAAgSgoKogoKClIKCzIKUgoKUgoKCgpQAAhoACgKUgpSkpLaCuoCClKSkxoLegoKUAAIeAAwCgoKUlISCqIKClJSUgqimgoIAFzSUgoCCgIKCxgACEuIAAhDSpqKClIKUgoKE3JSCloKCgoKUgpaUloKWlN6Cgpa+soKUgoKm7oKUgrqCgpSuwoKU", "", "", "130=NewReaderSize/1/1/1")]
 [assembly: go.GoPositionMap("mime/multipart/readmimeheader.go", "readmimeheader.cs", "AAse")]
-[assembly: go.GoPositionMap("mime/multipart/writer.go", "writer.cs", "ABs4ot6SAAcS4oKmgpSCgoKUlLSCxpSCqqKmgpSmgoKCgpSu4oKAgraCgpSWgoKmgoKClKaCppSC6qKCpoKqooKUqJKCgpSCqqKCgIKklIIACBKCgtaygpSCgpQ=")]
+[assembly: go.GoPositionMap("mime/multipart/writer.go", "writer.cs", "ABs4ot6SAAcS4oKmgpSCgoKUlLSCxpSCqqKmgpSmgoKCgpSu4oKAgraCgpSWgoKmgoKClKaCppSC6qKCpoKqooKUqJKCgpSCqqKCgIKklIIACBKCgtaygpSCgpQ=", "", "", "31=randomBoundary/1/1/2;156=escapeQuotes/1/2/2,escapeQuotes/2/2/2,Sprintf/1/1/1;167=escapeQuotes/1/1/1,Sprintf/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.mime;
@@ -82,7 +82,7 @@ namespace go.mime;
 public static partial class multipart_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

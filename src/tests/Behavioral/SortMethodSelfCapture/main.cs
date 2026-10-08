@@ -5,7 +5,7 @@ using sort = sort_package;
 
 partial class main_package {
 
-[GoType("[]@string")] partial struct words;
+partial struct words /*[]@string*/;
 
 internal static nint Len(this words w) {
     return len(w);

@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 partial class types_package {
 
-[GoType] partial struct gcSizes {
+partial struct gcSizes {
     public int64 WordSize; // word size in bytes - must be >= 4 (32bits)
     public int64 MaxAlign; // maximum alignment in bytes - must be >= 1
 }

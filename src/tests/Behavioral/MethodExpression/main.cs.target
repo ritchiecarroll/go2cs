@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
-[GoRecv] internal static nint add(this ref counter c, nint d) {
+internal static nint add(this ref counter c, nint d) {
     c.n += d;
     return c.n;
 }
@@ -42,7 +42,7 @@ internal static void Main() {
     fmt.Println(((@string)mapRunes((rune p1) => shʗ1.shift(p1), slice<rune>((@string)"AB"))));
 }
 
-[GoType] partial struct shifter {
+partial struct shifter {
     internal rune delta;
 }
 
@@ -64,7 +64,7 @@ internal static nint sum(this reader f, nint extra) {
     return f() + extra;
 }
 
-[GoType] partial struct dispatcher {
+partial struct dispatcher {
     internal Func<nint, nint> compute;
 }
 

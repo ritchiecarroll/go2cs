@@ -6,7 +6,7 @@ using ꓸꓸꓸstring = Span<@string>;
 
 partial class main_package {
 
-[GoType] partial struct Context {
+partial struct Context {
     public @string Name;
     public Funcꓸꓸꓸ<@string, @string> JoinPath;
     public Actionꓸꓸꓸ<@string, any> Log;
@@ -25,7 +25,7 @@ internal static @string slashJoin(params ꓸꓸꓸstring elemʗp) {
     return joined;
 }
 
-[GoRecv] internal static @string join(this ref Context c, params ꓸꓸꓸstring elemʗp) {
+internal static @string join(this ref Context c, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.sslice();
 
     if (c.JoinPath != default!) {

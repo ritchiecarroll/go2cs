@@ -8,7 +8,7 @@ internal static slice<@string> take(slice<@string> s) {
     return s;
 }
 
-[GoType("dyn")] internal partial struct main_rec {
+internal partial struct main_rec /*dyn*/ {
     internal @string a, b;
 }
 

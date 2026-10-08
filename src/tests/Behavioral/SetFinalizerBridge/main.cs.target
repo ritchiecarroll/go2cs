@@ -6,7 +6,7 @@ using time = time_package;
 
 partial class main_package {
 
-[GoType] partial struct payload {
+partial struct payload {
     internal nint n;
 }
 

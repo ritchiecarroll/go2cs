@@ -12,7 +12,7 @@ partial class abi_package {
 // is implementing (Inter), and some ancillary information.
 //
 // allocated in non-garbage-collected memory
-[GoType] partial struct ITab {
+partial struct ITab {
     public ж<ΔInterfaceType> Inter;
     public ж<Type> Type;
     public uint32 Hash;     // copy of Type.Hash. Used for type switches.
@@ -22,7 +22,7 @@ partial class abi_package {
 // EmptyInterface describes the layout of a "interface{}" or a "any."
 // These are represented differently than non-empty interface, as the first
 // word always points to an abi.Type.
-[GoType] partial struct EmptyInterface {
+partial struct EmptyInterface {
     public ж<Type> Type;
     public @unsafe.Pointer Data;
 }

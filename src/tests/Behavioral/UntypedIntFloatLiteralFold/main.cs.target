@@ -14,7 +14,7 @@ internal static UntypedInt procs => 14;
 
 internal static UntypedFloat capacityPerProc => 1e9;
 
-[GoType("num:int64")] partial struct duration;
+partial struct duration /*num:int64*/;
 
 internal static int64 advance(duration d) {
     return (int64)d;

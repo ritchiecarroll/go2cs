@@ -16,7 +16,7 @@ partial class template_package {
 // produces an HTML fragment as defined at
 // https://www.w3.org/TR/html5/syntax.html#the-end
 // where the context element is null.
-[GoType] partial struct context {
+partial struct context {
     internal state state;
     internal delim delim;
     internal urlPart urlPart;
@@ -71,7 +71,7 @@ internal static @string mangle(this context c, @string templateName) {
     return s;
 }
 
-[GoType("num:uint8")] partial struct state;
+partial struct state /*num:uint8*/;
 
 //go:generate stringer -type state
 internal static state stateText => /* iota */ 0;
@@ -140,7 +140,7 @@ internal static bool isInScriptLiteral(state s) {
     return false;
 }
 
-[GoType("num:uint8")] partial struct delim;
+partial struct delim /*num:uint8*/;
 
 //go:generate stringer -type delim
 internal static delim delimNone => /* iota */ 0;
@@ -148,7 +148,7 @@ internal static delim delimDoubleQuote => 1;
 internal static delim delimSingleQuote => 2;
 internal static delim delimSpaceOrTagEnd => 3;
 
-[GoType("num:uint8")] partial struct urlPart;
+partial struct urlPart /*num:uint8*/;
 
 //go:generate stringer -type urlPart
 internal static urlPart urlPartNone => /* iota */ 0;
@@ -156,14 +156,14 @@ internal static urlPart urlPartPreQuery => 1;
 internal static urlPart urlPartQueryOrFrag => 2;
 internal static urlPart urlPartUnknown => 3;
 
-[GoType("num:uint8")] partial struct jsCtx;
+partial struct jsCtx /*num:uint8*/;
 
 //go:generate stringer -type jsCtx
 internal static jsCtx jsCtxRegexp => /* iota */ 0;
 internal static jsCtx jsCtxDivOp => 1;
 internal static jsCtx jsCtxUnknown => 2;
 
-[GoType("num:uint8")] partial struct element;
+partial struct element /*num:uint8*/;
 
 //go:generate stringer -type element
 internal static element elementNone => /* iota */ 0;
@@ -172,7 +172,7 @@ internal static element elementStyle => 2;
 internal static element elementTextarea => 3;
 internal static element elementTitle => 4;
 
-[GoType("num:uint8")] partial struct attr;
+partial struct attr /*num:uint8*/;
 
 //go:generate stringer -type attr
 internal static attr attrNone => /* iota */ 0;

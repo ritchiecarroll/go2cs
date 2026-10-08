@@ -42,11 +42,11 @@ internal static void Main() {
     fmt.Println(invoke(new Func<nint, @string, @string>(handler), 7, "g"u8));
 }
 
-[GoType] partial struct screen {
+partial struct screen {
     internal @string prefix;
 }
 
-[GoRecv] internal static @string render(this ref screen s, nint n, @string msg) {
+internal static @string render(this ref screen s, nint n, @string msg) {
     return fmt.Sprintf("%s%d-%s"u8, s.prefix, n, msg);
 }
 

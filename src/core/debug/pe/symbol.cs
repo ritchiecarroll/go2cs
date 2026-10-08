@@ -17,7 +17,7 @@ partial class pe_package {
 public static UntypedInt COFFSymbolSize => 18;
 
 // COFFSymbol represents single COFF symbol table record.
-[GoType] partial struct COFFSymbol {
+partial struct COFFSymbol {
     public array<uint8> Name = new(8);
     public uint32 Value;
     public int16 SectionNumber;
@@ -29,7 +29,7 @@ public static UntypedInt COFFSymbolSize => 18;
 // go2cs generated this placeholder — func readCOFFSymbols is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // isSymNameOffset checks symbol name if it is encoded as offset into string table.
-internal static (bool, uint32) isSymNameOffset([GoArrayDims(8)] array<byte> name) {
+internal static (bool, uint32) isSymNameOffset(/*[8]*/ array<byte> name) {
     name = name.Clone();
 
     if (name[0] == 0 && name[1] == 0 && name[2] == 0 && name[3] == 0) {
@@ -46,7 +46,7 @@ internal static (bool, uint32) isSymNameOffset([GoArrayDims(8)] array<byte> name
 // FullName finds real name of symbol sym. Normally name is stored
 // in sym.Name, but if it is longer then 8 characters, it is stored
 // in COFF string table st instead.
-[GoRecv] public static (@string, error) FullName(this ref COFFSymbol sym, StringTable st) {
+public static (@string, error) FullName(this ref COFFSymbol sym, StringTable st) {
     {
         var (ok, offset) = isSymNameOffset(sym.Name); if (ok) {
             return st.String(offset);
@@ -88,7 +88,7 @@ internal static (slice<ж<Symbol>>, error) removeAuxSymbols(slice<COFFSymbol> al
 
 // Symbol is similar to [COFFSymbol] with Name field replaced
 // by Go string. Symbol also does not have NumberOfAuxSymbols.
-[GoType] partial struct Symbol {
+partial struct Symbol {
     public @string Name;
     public uint32 Value;
     public int16 SectionNumber;
@@ -104,7 +104,7 @@ internal static (slice<ж<Symbol>>, error) removeAuxSymbols(slice<COFFSymbol> al
 // number of relocations + line numbers, as well as COMDAT info. See
 // https://docs.microsoft.com/en-us/windows/win32/debug/pe-format#auxiliary-format-5-section-definitions
 // for more on what's going on here.
-[GoType] partial struct COFFSymbolAuxFormat5 {
+partial struct COFFSymbolAuxFormat5 {
     public uint32 Size;
     public uint16 NumRelocs;
     public uint16 NumLineNumbers;

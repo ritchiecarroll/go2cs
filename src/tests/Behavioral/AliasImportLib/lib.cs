@@ -14,7 +14,7 @@ using ꓸꓸꓸnint = Span<nint>;
 
 partial class AliasImportLib_package {
 
-[GoType] partial struct Box {
+partial struct Box {
     public nint V;
 }
 

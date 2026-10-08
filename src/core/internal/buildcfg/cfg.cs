@@ -144,7 +144,7 @@ internal static (@string rest, bool ok) skipNum(@string s) {
     return (s.slice(i), i > 0);
 }
 
-[GoType] partial struct GoarmFeatures {
+partial struct GoarmFeatures {
     public nint Version;
     public bool SoftFloat;
 }
@@ -211,7 +211,7 @@ internal static GoarmFeatures /*g*/ goarm() {
     return g;
 }
 
-[GoType] partial struct Goarm64Features {
+partial struct Goarm64Features {
     public @string Version;
     // Large Systems Extension
     public bool LSE;
@@ -392,7 +392,7 @@ internal static nint goriscv64() {
     return year;
 }
 
-[GoType] public partial struct gowasmFeatures {
+public partial struct gowasmFeatures {
     public bool SatConv;
     public bool SignExt;
 }

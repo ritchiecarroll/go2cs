@@ -6,16 +6,15 @@ using AnonStructNamedConversion;
 
 partial class main_package {
 
-[GoType] partial struct local {
+partial struct local {
     public nint A;
 }
 
-[GoType] partial struct tagged {
-    [GoTag(@"json:""a""")]
-    public nint A;
+partial struct tagged {
+    public nint A; /*`json:"a"`*/
 }
 
-[GoType("dyn")] internal partial struct main_type {
+internal partial struct main_type /*dyn*/ {
     public nint A;
 }
 

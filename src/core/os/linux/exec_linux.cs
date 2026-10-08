@@ -7,7 +7,7 @@ using syscall = syscall_package;
 
 partial class os_package {
 
-[GoRecv] internal static void closeHandle(this ref Process p) {
+internal static void closeHandle(this ref Process p) {
     syscall.Close((nint)p.handle);
 }
 

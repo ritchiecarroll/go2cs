@@ -4,13 +4,13 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct CaseRange {
+partial struct CaseRange {
     public uint32 Lo, Hi;
 }
 
-[GoType("[]CaseRange")] partial struct SpecialCase;
+partial struct SpecialCase /*[]CaseRange*/;
 
-[GoType("[]nint")] partial struct ints;
+partial struct ints /*[]nint*/;
 
 internal static nint count(slice<CaseRange> rs) {
     return len(rs);

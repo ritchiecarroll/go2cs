@@ -18,7 +18,7 @@ using @internal;
 
 partial class syscall_package {
 
-[GoType("num:uintptr")] partial struct ΔHandle;
+partial struct ΔHandle /*num:uintptr*/;
 
 public static ΔHandle InvalidHandle => /* ^Handle(0) */ unchecked((ΔHandle)18446744073709551615);
 
@@ -128,7 +128,7 @@ public static (ж<uint16>, error) UTF16PtrFromString(@string s) {
     return (Ꮡ(a, 0), default!);
 }
 
-[GoType("num:uintptr")] partial struct Errno;
+partial struct Errno /*num:uintptr*/;
 
 internal static uint32 langid(uint16 pri, uint16 sub) {
     return (uint32)(((uint32)sub << (int)(10)) | (uint32)pri);
@@ -655,7 +655,7 @@ public static (@string name, error err) ComputerName() {
     return (UTF16ToString(b.slice(0, (nint)(n))), default!);
 }
 
-[GoType("dyn")] internal partial struct Ftruncate__FILE_END_OF_FILE_INFO {
+internal partial struct Ftruncate__FILE_END_OF_FILE_INFO /*dyn*/ {
     public int64 EndOfFile;
 }
 
@@ -832,14 +832,14 @@ internal static uintptr socket_error => /* uintptr(^uint32(0)) */ unchecked((uin
 // creation of IPv6 sockets to return [EAFNOSUPPORT].
 public static bool SocketDisableIPv6;
 
-[GoType] partial struct RawSockaddrInet4 {
+partial struct RawSockaddrInet4 {
     public uint16 Family;
     public uint16 Port;
     public array<byte> Addr = new(4); /* in_addr */
     public array<uint8> Zero = new(8);
 }
 
-[GoType] partial struct RawSockaddrInet6 {
+partial struct RawSockaddrInet6 {
     public uint16 Family;
     public uint16 Port;
     public uint32 Flowinfo;
@@ -847,21 +847,21 @@ public static bool SocketDisableIPv6;
     public uint32 Scope_id;
 }
 
-[GoType] partial struct RawSockaddr {
+partial struct RawSockaddr {
     public uint16 Family;
     public array<int8> Data = new(14);
 }
 
-[GoType] partial struct RawSockaddrAny {
+partial struct RawSockaddrAny {
     public RawSockaddr Addr;
     public array<int8> Pad = new(100);
 }
 
-[GoType] partial interface ΔSockaddr {
+partial interface ΔSockaddr {
     (@unsafe.Pointer ptr, int32 len, error err) sockaddr(); // lowercase; only we can define Sockaddrs
 }
 
-[GoType] partial struct SockaddrInet4 {
+partial struct SockaddrInet4 {
     public nint Port;
     public array<byte> Addr = new(4);
     internal RawSockaddrInet4 raw;
@@ -869,7 +869,7 @@ public static bool SocketDisableIPv6;
 
 // go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoType] partial struct SockaddrInet6 {
+partial struct SockaddrInet6 {
     public nint Port;
     public uint32 ZoneId;
     public array<byte> Addr = new(16);
@@ -878,12 +878,12 @@ public static bool SocketDisableIPv6;
 
 // go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoType] partial struct RawSockaddrUnix {
+partial struct RawSockaddrUnix {
     public uint16 Family;
     public array<int8> Path = new(UNIX_PATH_MAX);
 }
 
-[GoType] partial struct SockaddrUnix {
+partial struct SockaddrUnix {
     public @string Name;
     internal RawSockaddrUnix raw;
 }
@@ -1011,7 +1011,7 @@ public static error LoadGetAddrInfo() {
 }
 
 
-[GoType("dyn")] partial struct connectExFuncᴛ1 {
+partial struct connectExFuncᴛ1 /*dyn*/ {
     internal Δsync.Once once;
     internal uintptr addr;
     internal error err;
@@ -1046,14 +1046,14 @@ internal static error /*err*/ connectEx(ΔHandle s, @unsafe.Pointer name, int32 
 // go2cs generated this placeholder — func ConnectEx is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Invented structures to support what package os expects.
-[GoType] partial struct Rusage {
+partial struct Rusage {
     public Filetime CreationTime;
     public Filetime ExitTime;
     public Filetime KernelTime;
     public Filetime UserTime;
 }
 
-[GoType] partial struct WaitStatus {
+partial struct WaitStatus {
     public uint32 ExitCode;
 }
 
@@ -1095,7 +1095,7 @@ public static nint TrapCause(this WaitStatus w) {
 
 // Timespec is an invented structure on Windows, but here for
 // consistency with the syscall package for other operating systems.
-[GoType] partial struct Timespec {
+partial struct Timespec {
     public int64 Sec;
     public int64 Nsec;
 }
@@ -1134,22 +1134,22 @@ public static error /*err*/ SetsockoptTimeval(ΔHandle fd, nint level, nint opt,
 // BUG(brainman): The definition of Linger is not appropriate for direct use
 // with Setsockopt and Getsockopt.
 // Use SetsockoptLinger instead.
-[GoType] partial struct Linger {
+partial struct Linger {
     public int32 Onoff;
     public int32 ΔLinger;
 }
 
-[GoType] partial struct sysLinger {
+partial struct sysLinger {
     public uint16 Onoff;
     public uint16 Linger;
 }
 
-[GoType] partial struct IPMreq {
+partial struct IPMreq {
     public array<byte> Multiaddr = new(4); /* in_addr */
     public array<byte> Interface = new(4); /* in_addr */
 }
 
-[GoType] partial struct IPv6Mreq {
+partial struct IPv6Mreq {
     public array<byte> Multiaddr = new(16); /* in6_addr */
     public uint32 Interface;
 }
@@ -1171,7 +1171,7 @@ public static error /*err*/ SetsockoptLinger(ΔHandle fd, nint level, nint opt, 
     return Setsockopt(fd, (int32)level, (int32)opt, Ꮡsys.Reinterpret<sysLinger, byte>(), (int32)/* unsafe.Sizeof(sys) */ (uintptr)4);
 }
 
-public static error /*err*/ SetsockoptInet4Addr(ΔHandle fd, nint level, nint opt, [GoArrayDims(4)] array<byte> valueʗp) {
+public static error /*err*/ SetsockoptInet4Addr(ΔHandle fd, nint level, nint opt, /*[4]*/ array<byte> valueʗp) {
     ref var value = ref heap(valueʗp.Clone(), out var Ꮡvalue);
 
     return Setsockopt(fd, (int32)level, (int32)opt, Ꮡvalue.at<byte>(0), 4);
@@ -1340,7 +1340,7 @@ public static (slice<nint> gids, error err) Getgroups() {
     return (default!, EWINDOWS);
 }
 
-[GoType("num:nint")] partial struct ΔSignal;
+partial struct ΔSignal /*num:nint*/;
 
 public static void Signal(this ΔSignal s) {
 }

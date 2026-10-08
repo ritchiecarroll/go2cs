@@ -25,7 +25,7 @@ partial class dwarf_package {
 
 // Data represents the DWARF debugging information
 // loaded from an executable file (for example, an ELF or Mach-O executable).
-[GoType] partial struct Data {
+partial struct Data {
     // raw data
     internal slice<byte> abbrev;
     internal slice<byte> aranges;
@@ -126,7 +126,7 @@ public static error AddTypes(this ж<Data> Ꮡd, @string name, slice<byte> types
 // DWARF section name such as ".debug_addr", ".debug_str_offsets", and
 // so forth. This approach is used for new DWARF sections added in
 // DWARF 5 and later.
-[GoRecv] public static error AddSection(this ref Data d, @string name, slice<byte> contents) {
+public static error AddSection(this ref Data d, @string name, slice<byte> contents) {
     error err = default!;
     var exprᴛ1 = name;
     if (exprᴛ1 == ".debug_addr"u8) {

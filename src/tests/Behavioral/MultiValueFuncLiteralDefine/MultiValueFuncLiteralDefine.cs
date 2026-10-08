@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct box {
+partial struct box {
     internal nint n;
 }
 
@@ -12,7 +12,7 @@ internal static nint get(this box b) {
     return b.n;
 }
 
-[GoRecv] internal static void bump(this ref box b, nint d) {
+internal static void bump(this ref box b, nint d) {
     b.n += d;
 }
 

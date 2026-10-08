@@ -4,17 +4,17 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Δp {
+partial struct Δp {
     internal nint id;
 }
 
-[GoType] partial struct tagger {
+partial struct tagger {
 }
 
 internal static void p(this tagger _) {
 }
 
-[GoType] partial struct box {
+partial struct box {
     internal nint n;
 }
 

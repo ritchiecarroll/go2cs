@@ -15,7 +15,7 @@ using strconv = strconv_package;
 partial class macho_package {
 
 // A FileHeader represents a Mach-O file header.
-[GoType] partial struct FileHeader {
+partial struct FileHeader {
     public uint32 Magic;
     public Cpu Cpu;
     public uint32 SubCpu;
@@ -32,7 +32,7 @@ public const uint32 Magic32 = 0xfeedface;
 public const uint32 Magic64 = 0xfeedfacf;
 public const uint32 MagicFat = 0xcafebabe;
 
-[GoType("num:uint32")] partial struct Type;
+partial struct Type /*num:uint32*/;
 
 public static Type TypeObj => 1;
 public static Type TypeExec => 2;
@@ -54,7 +54,7 @@ public static @string GoString(this Type t) {
     return stringName((uint32)t, typeStrings, true);
 }
 
-[GoType("num:uint32")] partial struct Cpu;
+partial struct Cpu /*num:uint32*/;
 
 internal static UntypedInt cpuArch64 => 0x01000000;
 
@@ -82,7 +82,7 @@ public static @string GoString(this Cpu i) {
     return stringName((uint32)i, cpuStrings, true);
 }
 
-[GoType("num:uint32")] partial struct LoadCmd;
+partial struct LoadCmd /*num:uint32*/;
 
 public static LoadCmd LoadCmdSegment => 0x1;
 public static LoadCmd LoadCmdSymtab => 0x2;
@@ -111,7 +111,7 @@ public static @string GoString(this LoadCmd i) {
     return stringName((uint32)i, cmdStrings, true);
 }
 
-[GoType] partial struct Segment32 {
+partial struct Segment32 {
     public LoadCmd Cmd;
     public uint32 Len;
     public array<byte> Name = new(16);
@@ -125,7 +125,7 @@ public static @string GoString(this LoadCmd i) {
     public uint32 Flag;
 }
 
-[GoType] partial struct Segment64 {
+partial struct Segment64 {
     public LoadCmd Cmd;
     public uint32 Len;
     public array<byte> Name = new(16);
@@ -139,7 +139,7 @@ public static @string GoString(this LoadCmd i) {
     public uint32 Flag;
 }
 
-[GoType] partial struct SymtabCmd {
+partial struct SymtabCmd {
     public LoadCmd Cmd;
     public uint32 Len;
     public uint32 Symoff;
@@ -148,7 +148,7 @@ public static @string GoString(this LoadCmd i) {
     public uint32 Strsize;
 }
 
-[GoType] partial struct DysymtabCmd {
+partial struct DysymtabCmd {
     public LoadCmd Cmd;
     public uint32 Len;
     public uint32 Ilocalsym;
@@ -171,7 +171,7 @@ public static @string GoString(this LoadCmd i) {
     public uint32 Nlocrel;
 }
 
-[GoType] partial struct DylibCmd {
+partial struct DylibCmd {
     public LoadCmd Cmd;
     public uint32 Len;
     public uint32 Name;
@@ -180,13 +180,13 @@ public static @string GoString(this LoadCmd i) {
     public uint32 CompatVersion;
 }
 
-[GoType] partial struct RpathCmd {
+partial struct RpathCmd {
     public LoadCmd Cmd;
     public uint32 Len;
     public uint32 Path;
 }
 
-[GoType] partial struct Thread {
+partial struct Thread {
     public LoadCmd Cmd;
     public uint32 Len;
     public uint32 Type;
@@ -221,7 +221,7 @@ public const uint32 FlagNoHeapExecution = 0x1000000;
 public const uint32 FlagAppExtensionSafe = 0x2000000;
 
 // A Section32 is a 32-bit Mach-O section header.
-[GoType] partial struct Section32 {
+partial struct Section32 {
     public array<byte> Name = new(16);
     public array<byte> Seg = new(16);
     public uint32 Addr;
@@ -236,7 +236,7 @@ public const uint32 FlagAppExtensionSafe = 0x2000000;
 }
 
 // A Section64 is a 64-bit Mach-O section header.
-[GoType] partial struct Section64 {
+partial struct Section64 {
     public array<byte> Name = new(16);
     public array<byte> Seg = new(16);
     public uint64 Addr;
@@ -252,7 +252,7 @@ public const uint32 FlagAppExtensionSafe = 0x2000000;
 }
 
 // An Nlist32 is a Mach-O 32-bit symbol table entry.
-[GoType] partial struct Nlist32 {
+partial struct Nlist32 {
     public uint32 Name;
     public uint8 Type;
     public uint8 Sect;
@@ -261,7 +261,7 @@ public const uint32 FlagAppExtensionSafe = 0x2000000;
 }
 
 // An Nlist64 is a Mach-O 64-bit symbol table entry.
-[GoType] partial struct Nlist64 {
+partial struct Nlist64 {
     public uint32 Name;
     public uint8 Type;
     public uint8 Sect;
@@ -270,7 +270,7 @@ public const uint32 FlagAppExtensionSafe = 0x2000000;
 }
 
 // Regs386 is the Mach-O 386 register structure.
-[GoType] partial struct Regs386 {
+partial struct Regs386 {
     public uint32 AX;
     public uint32 BX;
     public uint32 CX;
@@ -290,7 +290,7 @@ public const uint32 FlagAppExtensionSafe = 0x2000000;
 }
 
 // RegsAMD64 is the Mach-O AMD64 register structure.
-[GoType] partial struct RegsAMD64 {
+partial struct RegsAMD64 {
     public uint64 AX;
     public uint64 BX;
     public uint64 CX;
@@ -314,7 +314,7 @@ public const uint32 FlagAppExtensionSafe = 0x2000000;
     public uint64 GS;
 }
 
-[GoType] partial struct intName {
+partial struct intName {
     internal uint32 i;
     internal @string s;
 }

@@ -6,7 +6,7 @@ partial class main_package {
 
 // type applyFunc is a methodless func type — rendered inline as its base delegate
 
-[GoType] partial struct machine {
+partial struct machine {
     internal Func<nint, Func<nint, (nint, error)>, (nint, error)> apply;
     internal Func<nint, Func<nint, (nint, error)>, (nint, error)> named;
     internal Func<@string, (@string val, bool ok)> lookup;

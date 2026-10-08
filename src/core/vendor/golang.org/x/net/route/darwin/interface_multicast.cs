@@ -6,7 +6,7 @@ namespace go.vendor.golang.org.x.net;
 
 partial class route_package {
 
-[GoRecv] internal static (Message, error) parseInterfaceMulticastAddrMessage(this ref wireFormat w, RIBType _, slice<byte> b) {
+internal static (Message, error) parseInterfaceMulticastAddrMessage(this ref wireFormat w, RIBType _, slice<byte> b) {
     if (len(b) < w.bodyOff) {
         return (default!, errMessageTooShort);
     }

@@ -10,7 +10,7 @@ internal static UntypedInt ucb => 200;
 
 internal const uint16 tcw = 40000;
 
-[GoType("num:byte")] partial struct nb;
+partial struct nb /*num:byte*/;
 
 internal static void Main() {
     nuint k = 1;

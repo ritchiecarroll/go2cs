@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class renamedlib_package {
 
-[GoType] partial struct ΔMarker {
+partial struct ΔMarker {
     public @string Name;
     public nint Size;
 }
@@ -13,7 +13,7 @@ public static @string Marker(this ΔMarker m) {
     return fmt.Sprintf("%s/%d"u8, m.Name, m.Size);
 }
 
-[GoType] partial struct ΔDetail {
+partial struct ΔDetail {
     public @string Label;
     public nint Rank;
 }
@@ -26,7 +26,7 @@ public static ΔDetail Detail(this ΔMarker m) {
     return new ΔDetail(Label: m.Name, Rank: m.Size);
 }
 
-[GoType] partial struct Plain {
+partial struct Plain {
     public @string Note;
 }
 

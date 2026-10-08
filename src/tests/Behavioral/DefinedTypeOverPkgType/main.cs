@@ -7,13 +7,13 @@ using sync;
 
 partial class main_package {
 
-[GoType("global::go.unsafe_package.Pointer")] partial struct stdFunction;
+partial struct stdFunction /*global::go.unsafe_package.Pointer*/;
 
 internal static stdFunction handler;
 
 internal static stdFunction other;
 
-[GoType("global::go.sync.atomic_package.Uint32")] partial struct counter;
+partial struct counter /*global::go.sync.atomic_package.Uint32*/;
 
 internal static uint32 Load(this ж<counter> Ꮡc) {
     return (Ꮡc.Reinterpret<counter, atomic.Uint32>()).Load();
@@ -45,9 +45,9 @@ internal static void Main() {
     fmt.Println(back == h);
 }
 
-[GoType("num:uintptr")] partial struct handleT;
+partial struct handleT /*num:uintptr*/;
 
-[GoType("num:uintptr")] partial struct keyT;
+partial struct keyT /*num:uintptr*/;
 
 internal static keyT openKey(handleT h) {
     return ((keyT)(uintptr)h);

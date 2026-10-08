@@ -11,7 +11,7 @@ using io = io_package;
 partial class comment_package {
 
 // An mdPrinter holds the state needed for printing a Doc as Markdown.
-[GoType] partial struct mdPrinter {
+partial struct mdPrinter {
     public partial ref ж<Printer> Printer { get; }
     internal @string headingPrefix;
     internal bytes.Buffer raw;
@@ -147,7 +147,7 @@ internal static void text(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slic
 // rawText prints the text sequence x to out,
 // without worrying about escaping characters
 // that have special meaning at the start of a Markdown line.
-[GoRecv] internal static void rawText(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slice<ΔText> x) {
+internal static void rawText(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slice<ΔText> x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     foreach (var (_, t) in x) {
@@ -191,7 +191,7 @@ internal static void text(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slic
 // escape prints s to out as plain text,
 // escaping special characters to avoid being misinterpreted
 // as Markdown markup sequences.
-[GoRecv] internal static void escape(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
+internal static void escape(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     nint start = 0;

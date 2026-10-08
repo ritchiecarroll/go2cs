@@ -9,7 +9,7 @@ namespace go.debug;
 partial class plan9obj_package {
 
 // Plan 9 Program header.
-[GoType] partial struct prog {
+partial struct prog {
     public uint32 Magic; /* magic number */
     public uint32 Text; /* size of text segment */
     public uint32 Data; /* size of initialized data */
@@ -21,7 +21,7 @@ partial class plan9obj_package {
 }
 
 // Plan 9 symbol table entries.
-[GoType] partial struct sym {
+partial struct sym {
     internal uint64 value;
     internal byte typ;
     internal slice<byte> name;

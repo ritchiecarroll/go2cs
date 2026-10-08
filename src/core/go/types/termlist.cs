@@ -9,7 +9,7 @@ using strings = strings_package;
 
 partial class types_package {
 
-[GoType("[]ж<Δterm>")] partial struct termlist;
+partial struct termlist /*[]ж<Δterm>*/;
 
 // allTermlist represents the set of all types.
 // It is in normal form.

@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct tally {
+partial struct tally {
     internal nint n;
     internal @string log;
 }

@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct T {
+partial struct T {
     internal nint n;
 }
 
@@ -15,7 +15,7 @@ internal static nint valueMethod(this T t) {
     return t.n;
 }
 
-[GoRecv] internal static nint pointerMethod(this ref T t) {
+internal static nint pointerMethod(this ref T t) {
     return t.n;
 }
 
@@ -92,7 +92,7 @@ internal static partial void Main() {
     fmt.Println(interfaceMethodValueˢ, nameOf(s.String));
 }
 
-[GoType("num:nint")] partial struct named;
+partial struct named /*num:nint*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string namedˢ = "named"u8;

@@ -14,7 +14,7 @@ partial class runtime_package {
 // A Pinner is a set of Go objects each pinned to a fixed location in memory. The
 // [Pinner.Pin] method pins one object, while [Pinner.Unpin] unpins all pinned
 // objects. See their comments for more information.
-[GoType] partial struct Pinner {
+partial struct Pinner {
     internal partial ref ж<pinner> pinner { get; }
 }
 
@@ -25,7 +25,7 @@ partial class runtime_package {
 internal static UntypedInt pinnerSize => 64;
 internal static uintptr pinnerRefStoreSize => /* (pinnerSize - unsafe.Sizeof([]unsafe.Pointer{})) / unsafe.Sizeof(unsafe.Pointer(nil)) */ 5;
 
-[GoType] partial struct pinner {
+partial struct pinner {
     internal slice<@unsafe.Pointer> refs;
     internal array<@unsafe.Pointer> refStore = new(pinnerRefStoreSize);
 }
@@ -145,7 +145,7 @@ internal static bool setPinned(@unsafe.Pointer ptr, bool pin) {
     return true;
 }
 
-[GoType] partial struct pinState {
+partial struct pinState {
     internal ж<uint8> bytep;
     internal uint8 byteVal;
     internal uint8 mask;
@@ -154,25 +154,25 @@ internal static bool setPinned(@unsafe.Pointer ptr, bool pin) {
 // nosplit, because it's called by isPinned, which is nosplit
 //
 //go:nosplit
-[GoRecv] internal static bool isPinned(this ref pinState v) {
+internal static bool isPinned(this ref pinState v) {
     return ((uint8)(v.byteVal & v.mask)) != 0;
 }
 
-[GoRecv] internal static bool isMultiPinned(this ref pinState v) {
+internal static bool isMultiPinned(this ref pinState v) {
     return ((uint8)(v.byteVal & ((uint8)(v.mask << (int)(1))))) != 0;
 }
 
-[GoRecv] internal static void setPinned(this ref pinState v, bool val) {
+internal static void setPinned(this ref pinState v, bool val) {
     v.set(val, false);
 }
 
-[GoRecv] internal static void setMultiPinned(this ref pinState v, bool val) {
+internal static void setMultiPinned(this ref pinState v, bool val) {
     v.set(val, true);
 }
 
 // set sets the pin bit of the pinState to val. If multipin is true, it
 // sets/unsets the multipin bit instead.
-[GoRecv] internal static void set(this ref pinState v, bool val, bool multipin) {
+internal static void set(this ref pinState v, bool val, bool multipin) {
     var mask = v.mask;
     if (multipin) {
         mask <<= (int)(1);
@@ -184,7 +184,7 @@ internal static bool setPinned(@unsafe.Pointer ptr, bool pin) {
     }
 }
 
-[GoType("gcBits")] partial struct pinnerBits;
+partial struct pinnerBits /*gcBits*/;
 
 // ofObject returns the pinState of the n'th object.
 // nosplit, because it's called by isPinned, which is nosplit
@@ -196,14 +196,14 @@ internal static pinState ofObject(this ж<pinnerBits> Ꮡp, uintptr n) {
     return new pinState(bytep, byteVal, mask);
 }
 
-[GoRecv] internal static uintptr pinnerBitSize(this ref mspan s) {
+internal static uintptr pinnerBitSize(this ref mspan s) {
     return divRoundUp((uintptr)s.nelems * 2, 8);
 }
 
 // newPinnerBits returns a pointer to 8 byte aligned bytes to be used for this
 // span's pinner bits. newPinnerBits is used to mark objects that are pinned.
 // They are copied when the span is swept.
-[GoRecv] internal static ж<pinnerBits> newPinnerBits(this ref mspan s) {
+internal static ж<pinnerBits> newPinnerBits(this ref mspan s) {
     return newMarkBits((uintptr)s.nelems * 2).Reinterpret<gcBits, pinnerBits>();
 }
 

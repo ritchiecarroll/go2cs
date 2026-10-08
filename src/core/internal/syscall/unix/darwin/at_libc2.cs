@@ -22,18 +22,18 @@ public static error Fstatat(nint dirfd, @string path, ж<syscall.Stat_t> Ꮡstat
 }
 
 //go:linkname unlinkat syscall.unlinkat
-[global::System.Diagnostics.StackTraceHidden] internal static error unlinkat(nint dirfd, @string path, nint flags) {
+/*linkname*/ internal static partial error unlinkat(nint dirfd, @string path, nint flags) {
     return syscall.unlinkat(dirfd, path, flags);
 }
 
 //go:linkname openat syscall.openat
-[global::System.Diagnostics.StackTraceHidden] internal static (nint, error) openat(nint dirfd, @string path, nint flags, uint32 perm) {
+/*linkname*/ internal static partial (nint, error) openat(nint dirfd, @string path, nint flags, uint32 perm) {
     var (ᴛ1, ᴛ2) = syscall.openat(dirfd, path, flags, perm);
     return (ᴛ1, ᴛ2);
 }
 
 //go:linkname fstatat syscall.fstatat
-[global::System.Diagnostics.StackTraceHidden] internal static error fstatat(nint dirfd, @string path, ж<syscall.Stat_t> stat, nint flags) {
+/*linkname*/ internal static partial error fstatat(nint dirfd, @string path, ж<syscall.Stat_t> stat, nint flags) {
     return syscall.fstatat(dirfd, path, stat, flags);
 }
 

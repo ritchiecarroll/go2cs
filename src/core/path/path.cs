@@ -21,20 +21,20 @@ partial class path_package {
 // It supports append, reading previously appended bytes,
 // and retrieving the final string. It does not allocate a buffer
 // to hold the output until that output diverges from s.
-[GoType] partial struct lazybuf {
+partial struct lazybuf {
     internal @string s;
     internal slice<byte> buf;
     internal nint w;
 }
 
-[GoRecv] internal static byte index(this ref lazybuf b, nint i) {
+internal static byte index(this ref lazybuf b, nint i) {
     if (b.buf != default!) {
         return b.buf[i];
     }
     return b.s[i];
 }
 
-[GoRecv] internal static void append(this ref lazybuf b, byte c) {
+internal static void append(this ref lazybuf b, byte c) {
     if (b.buf == default!) {
         if (b.w < len(b.s) && b.s[b.w] == c) {
             b.w++;
@@ -47,7 +47,7 @@ partial class path_package {
     b.w++;
 }
 
-[GoRecv] internal static @string @string(this ref lazybuf b) {
+internal static @string @string(this ref lazybuf b) {
     if (b.buf == default!) {
         return b.s.slice(0, b.w);
     }

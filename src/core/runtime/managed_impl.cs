@@ -2571,8 +2571,69 @@ partial class runtime_package
     private static (string file, int line) goILPosition(System.Reflection.MethodBase method, int ilOffset)
     {
         (string? csFile, int csLine) = ilOffset >= 0 ? methodSourcePosition(method, ilOffset) : (null, 0);
-        return goSourcePosition(method, csFile, csLine);
+        (string file, int line) = goSourcePosition(method, csFile, csLine);
+
+        return (file, line + goCallLineDelta(method, csFile, csLine, ilOffset));
     }
+
+    // THE CALL'S OWN LINE inside a multi-line statement. Go answers a caller's line with the line of the
+    // call's own `(`; a frame inside a C# statement reports the statement's sequence point, so the map
+    // alone answers the statement's first line for every call in it. The record's per-call table
+    // (GoPositionMapAttribute.Calls) names, for a statement with calls on later lines, each such call by
+    // its callee, its ordinal among the statement's calls to that name and their total, in evaluation
+    // order. Here the frame's call (the instruction at ilOffset) is named by its target, and the
+    // statement's same-name calls are counted in its IL, from the statement's sequence point to the next
+    // one: the call's ordinal is its place among them. Only an entry whose ordinal AND total match
+    // answers, so a statement the emission split or hoisted, whose IL counts differently, keeps its
+    // statement line rather than naming another call's. 0 whenever anything is missing: no record, no
+    // entry for the statement, an offset that is not a call, no IL (Native AOT).
+    private static int goCallLineDelta(System.Reflection.MethodBase method, string? csFile, int csLine, int ilOffset)
+    {
+        if (ilOffset < 0 || csLine <= 0)
+            return 0;
+
+        string csPath = goSourcePath(csFile);
+
+        if (csPath.Length == 0 || goPositionMapRecord(method, csPath) is not { } record || !record.HasCallsAt(csLine))
+            return 0;
+
+        if (callSiteOffsets(method) is not { } calls || Array.BinarySearch(calls, ilOffset) < 0)
+            return 0;
+
+        if (sequencePointOffsets(method) is not { Length: > 0 } statements || callTarget(method, ilOffset) is not { } target)
+            return 0;
+
+        int index = Array.BinarySearch(statements, ilOffset);
+
+        if (index < 0)
+            index = ~index - 1;
+
+        if (index < 0)
+            return 0;
+
+        int start = statements[index];
+        int end = index + 1 < statements.Length ? statements[index + 1] : int.MaxValue;
+        string name = goCalleeName(target);
+        int ordinal = 0, total = 0;
+
+        foreach (int call in calls)
+        {
+            if (call < start || call >= end || callTarget(method, call) is not { } other || goCalleeName(other) != name)
+                continue;
+
+            total++;
+
+            if (call <= ilOffset)
+                ordinal++;
+        }
+
+        return record.CallLineDelta(csLine, name, ordinal, total) ?? 0;
+    }
+
+    // The Go name a call target is recorded under: its method name less the converter's `@` keyword
+    // escape (never in metadata) and `Δ` collision or reserved-word prefix.
+    private static string goCalleeName(System.Reflection.MethodBase target) =>
+        target.Name.TrimStart('Δ');
 
     // The mapping itself, from a C# position however it was read: a live frame's file info, or a PDB
     // sequence point read at print time (goCreatorPosition).
@@ -2637,7 +2698,7 @@ partial class runtime_package
             foreach (object attribute in assembly.GetCustomAttributes(typeof(GoPositionMapAttribute), false))
             {
                 if (attribute is GoPositionMapAttribute map && map.CsFile.Length > 0)
-                    records[map.CsFile] = new GoPositionMapRecord(map.GoFile, map.Table, map.FuncLits, map.MethodValues);
+                    records[map.CsFile] = new GoPositionMapRecord(map.GoFile, map.Table, map.FuncLits, map.MethodValues, map.Calls);
             }
         }
         catch (Exception)
@@ -2673,10 +2734,152 @@ partial class runtime_package
     public static string GoResolveRecordedFileProbe(string goFile, string csPath, string linkRoot) =>
         resolveRecordedGoFile(goFile, csPath, linkRoot);
 
+    // THE MODULE UNDER TEST'S STAGED COPY. A -recurse module's records name the absolute Go source the
+    // converter read, the module-cache file. `go test` runs the package IN that directory, so a Go test's
+    // working directory and its Caller's directory agree. The test host runs it in a staged COPY of the
+    // module instead (testing's TestHost, PackageAncestry.TryStageModule), so the host registers
+    // module root -> copy here, and a frame of the module under test names the file its test's working
+    // directory holds: logrus's TestNestedLoggingReportsCorrectCaller compares the two strings.
+    //
+    // Only the test host registers one, so a converted PROGRAM's frames are unchanged. A dependency
+    // module sits under its own root and is unchanged, as Go names it in the cache too. A record resolved
+    // BEFORE registration keeps the cache path, because the resolution is cached per record
+    // (GoPositionMapRecord.ResolveGoFile) and per call site; measured 2026-10-06, no banked module row
+    // and none of ten other module versions reads a caller path or the working directory at init.
+    //
+    // Both ends are held forward-slashed with no trailing separator, the form every recorded path has.
+    // The entry is immutable and the property answers a value tuple, so a caller that saves the previous
+    // value and restores it holds a copy, never a reference to state a later run replaces.
+    private sealed record ModuleSourceRemapEntry(string From, string To);
+
+    private static ModuleSourceRemapEntry? s_moduleSourceRemap;
+
+    /// <summary>
+    /// The module root whose recorded frames are answered under a staged copy, and that copy, or null
+    /// for none (every process that is not a test host). Set by testing's TestHost after it stages a
+    /// module, and restored when its run ends.
+    /// </summary>
+    public static (string From, string To)? GoModuleSourceRemap
+    {
+        get => Volatile.Read(ref s_moduleSourceRemap) is { } entry ? (entry.From, entry.To) : null;
+        set => Volatile.Write(ref s_moduleSourceRemap, normalizeModuleSourceRemap(value));
+    }
+
+    private static ModuleSourceRemapEntry? normalizeModuleSourceRemap((string From, string To)? remap)
+    {
+        if (remap is not { } pair || string.IsNullOrWhiteSpace(pair.From) || string.IsNullOrWhiteSpace(pair.To))
+            return null;
+
+        string from = pair.From.Replace('\\', '/').TrimEnd('/');
+        string to = pair.To.Replace('\\', '/').TrimEnd('/');
+
+        return from.Length == 0 || to.Length == 0 ? null : new ModuleSourceRemapEntry(from, to);
+    }
+
+    // remapModuleSource answers a resolved Go file under the staged copy when it lies under the module
+    // root, at a path boundary; every other file as it is. Case-insensitively on Windows, where one
+    // directory is legitimately spelled several ways (the converter's sameDirectory).
+    private static string remapModuleSource(string goFile, (string From, string To)? remap)
+    {
+        if (remap is not { } pair || goFile.Length <= pair.From.Length || goFile[pair.From.Length] != '/')
+            return goFile;
+
+        StringComparison comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+        return goFile.StartsWith(pair.From, comparison) ? string.Concat(pair.To, goFile.AsSpan(pair.From.Length)) : goFile;
+    }
+
+    /// <summary>
+    /// GolibTests' probe (ModuleSourceRemapTests): how a resolved Go file is answered under the remap
+    /// <paramref name="moduleRoot"/> -> <paramref name="stagedRoot"/>, without touching the process's own.
+    /// </summary>
+    public static string GoRemapModuleSourceProbe(string goFile, string moduleRoot, string stagedRoot) =>
+        remapModuleSource(goFile, normalizeModuleSourceRemap((moduleRoot, stagedRoot)) is { } entry ? (entry.From, entry.To) : null);
+
     // One converted file's recorded position map.
-    private sealed class GoPositionMapRecord(string goFile, string table, string funcLits = "", string methodValues = "")
+    private sealed class GoPositionMapRecord(string goFile, string table, string funcLits = "", string methodValues = "", string calls = "")
     {
         private Dictionary<int, string[]>? m_methodValues;
+
+        // One later-line call of a statement (GoPositionMapAttribute.Calls).
+        private readonly record struct CallLine(string Name, int Ordinal, int Total, int Delta);
+
+        private Dictionary<int, CallLine[]>? m_calls;
+
+        // HasCalls is false for a record without a per-call table, so every frame of such a file pays
+        // nothing beyond this test.
+        public bool HasCalls => calls.Length > 0;
+
+        // CallLineDelta answers the Go line, less the statement's, of the call recorded for the statement
+        // whose sequence point starts on csLine under the callee `name` at `ordinal` of `total` same-name
+        // calls, or null when no entry matches (a statement without later-line calls, a call on the
+        // statement's own line, a count the IL disagrees with). A malformed entry drops the whole table:
+        // the frame then keeps its statement's line, today's answer, rather than a plausible-but-wrong one.
+        public int? CallLineDelta(int csLine, string name, int ordinal, int total)
+        {
+            if (!decodedCalls().TryGetValue(csLine, out CallLine[]? recorded))
+                return null;
+
+            foreach (CallLine call in recorded)
+            {
+                if (call.Ordinal == ordinal && call.Total == total && call.Name == name)
+                    return call.Delta;
+            }
+
+            return null;
+        }
+
+        // HasCallsAt answers whether the statement whose sequence point starts on csLine has a recorded
+        // later-line call, so a frame anywhere else never reads its IL for one.
+        public bool HasCallsAt(int csLine) => HasCalls && decodedCalls().ContainsKey(csLine);
+
+        private Dictionary<int, CallLine[]> decodedCalls()
+        {
+            if (m_calls is null)
+            {
+                Dictionary<int, CallLine[]> decoded = new();
+
+                foreach (string group in calls.Split(';', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    int equals = group.IndexOf('=');
+
+                    if (equals <= 0 || !int.TryParse(group.AsSpan(0, equals), out int line) || line <= 0)
+                    {
+                        decoded.Clear();
+                        break;
+                    }
+
+                    List<CallLine> entries = [];
+
+                    foreach (string entry in group[(equals + 1)..].Split(','))
+                    {
+                        string[] parts = entry.Split('/');
+
+                        if (parts.Length != 4 || parts[0].Length == 0 ||
+                            !int.TryParse(parts[1], out int entryOrdinal) || !int.TryParse(parts[2], out int entryTotal) ||
+                            !int.TryParse(parts[3], out int delta) || entryOrdinal <= 0 || entryTotal < entryOrdinal)
+                        {
+                            entries.Clear();
+                            break;
+                        }
+
+                        entries.Add(new CallLine(parts[0], entryOrdinal, entryTotal, delta));
+                    }
+
+                    if (entries.Count == 0)
+                    {
+                        decoded.Clear();
+                        break;
+                    }
+
+                    decoded[line] = entries.ToArray();
+                }
+
+                Interlocked.CompareExchange(ref m_calls, decoded, null);
+            }
+
+            return m_calls;
+        }
 
         // MethodValuesFor answers the `pkg.Recv.Method` names of the value-receiver method values taken on
         // goLine (GoPositionMapAttribute.MethodValues), or null when none is recorded there. A malformed
@@ -2738,9 +2941,11 @@ partial class runtime_package
         //     With no link-time root, the recorded form is answered as recorded, which is Go's
         //     -trimpath form;
         //   - an already-absolute path, verbatim.
+        // A file of the module under test is then answered under its staged copy when the test host
+        // has registered one (GoModuleSourceRemap).
         public string ResolveGoFile(string csPath)
         {
-            return m_resolvedGoFile ??= resolveRecordedGoFile(goFile, csPath, defaultGOROOT.ToString());
+            return m_resolvedGoFile ??= remapModuleSource(resolveRecordedGoFile(goFile, csPath, defaultGOROOT.ToString()), GoModuleSourceRemap);
         }
 
         // GoLineFor answers the Go line the given emitted C# line was converted for — a PREDECESSOR
@@ -3235,6 +3440,10 @@ partial class runtime_package
         public int ILOffset;
         public bool ReturnAddress;
 
+        // The frame is suspended in the call AT ILOffset itself, read at capture from the callee (see
+        // suspendedAtReportedCall), so the line is that call's rather than returnSiteILOffset's answer.
+        public bool SuspendedAtReportedCall;
+
         // A method value's `-fm` wrapper (goMethodValueName): Go's traceback never shows one, so
         // Frames.Next skips it. Known at RESOLVE time only -- it needs the PDB, which capture never reads
         // -- so runtime.Callers still COUNTS the wrapper's pc where Go's does not.
@@ -3265,7 +3474,7 @@ partial class runtime_package
                     // The LINE is the call's (Go's pc-1): see returnSiteILOffset. The NAME below is read
                     // at the REPORTED offset, as it always was -- a literal is named by the frame's own
                     // line, never by the method's first sequence point.
-                    int callSite = ReturnAddress ? returnSiteILOffset(Method, ILOffset) : -1;
+                    int callSite = !ReturnAddress ? -1 : SuspendedAtReportedCall ? ILOffset : returnSiteILOffset(Method, ILOffset);
                     (string file, int line) = goILPosition(Method, callSite >= 0 ? callSite : ILOffset);
                     File = file;
                     Line = line;
@@ -3291,7 +3500,7 @@ partial class runtime_package
     // TieredCompilation=0 default a site has one pc for the life of the process (pinned by GolibTests'
     // LazyCallersTests.ACallSiteHasOnePcAcrossCalls); only a tiering promotion, which recompiles the
     // method, can give the same site a second one.
-    private readonly record struct CallSiteKey(System.Reflection.Module Module, int MethodToken, int ILOffset, bool ReturnAddress);
+    private readonly record struct CallSiteKey(System.Reflection.Module Module, int MethodToken, int ILOffset, bool ReturnAddress, bool SuspendedAtReportedCall);
 
     private static readonly object s_callerTableLock = new();
     private static readonly Dictionary<string, nuint> s_callerTokens = new();
@@ -3437,7 +3646,7 @@ partial class runtime_package
             if (count >= len(pc))
                 return count;
 
-            pc[count++] = root is null ? internCallerFrame(method, frame) : internRootFrame(root.Function, root.File, root.Line);
+            pc[count++] = root is null ? internCallerFrame(method, frame, callee: i > 0 ? frames[i - 1].GetMethod() : null) : internRootFrame(root.Function, root.File, root.Line);
         }
 
         // GO'S BOTTOM FRAME. Go's unwinder ends every goroutine at runtime.goexit, the return address
@@ -3628,13 +3837,13 @@ partial class runtime_package
                 site.RemoveAt(site.Count - 1);
 
                 foreach (StackFrame siteFrame in site)
-                    spliced.Add(internCallerFrame(siteFrame.GetMethod()!, siteFrame, returnAddress: !isFaultingFrame(siteFrame, raw)));
+                    spliced.Add(internCallerFrame(siteFrame.GetMethod()!, siteFrame, returnAddress: !isFaultingFrame(siteFrame, raw), callee: rawCalleeOf(siteFrame, raw)));
 
                 return spliced;
             }
 
             foreach (StackFrame siteFrame in site)
-                spliced.Add(internCallerFrame(siteFrame.GetMethod()!, siteFrame, returnAddress: !isFaultingFrame(siteFrame, raw)));
+                spliced.Add(internCallerFrame(siteFrame.GetMethod()!, siteFrame, returnAddress: !isFaultingFrame(siteFrame, raw), callee: rawCalleeOf(siteFrame, raw)));
         }
 
         return spliced;
@@ -3840,23 +4049,35 @@ partial class runtime_package
     // of every frame of a panic site but its innermost, the faulting instruction. Go resolves such a
     // PC at pc-1, the call instruction, so its line is the line of the call; see returnSiteILOffset for
     // why the CLR's own answer is not that line under the full-opt JIT. The key carries the mode, so one
-    // IL offset seen both ways is two sites.
-    private static uintptr internCallerFrame(System.Reflection.MethodBase method, StackFrame frame, bool returnAddress = true)
+    // IL offset seen both ways is two sites. `callee` is the raw frame directly inside this one (the method
+    // this frame is suspended calling, or its generated forwarder), null where none is known; see
+    // suspendedAtReportedCall. It joins the key too: one reported offset can be either kind of mapping.
+    private static uintptr internCallerFrame(System.Reflection.MethodBase method, StackFrame frame, bool returnAddress = true, System.Reflection.MethodBase? callee = null)
     {
         int ilOffset = frame.GetILOffset();
-        CallSiteKey key = new(method.Module, method.MetadataToken, ilOffset, returnAddress);
+        bool atReportedCall = returnAddress && callee is not null && suspendedAtReportedCall(method, ilOffset, callee);
+        CallSiteKey key = new(method.Module, method.MetadataToken, ilOffset, returnAddress, atReportedCall);
 
         lock (s_callerTableLock)
         {
             if (s_callSiteTokens.TryGetValue(key, out nuint token))
                 return token;
 
-            s_callerRecords.Add(new CallerFrameRecord { Method = method, ILOffset = ilOffset, ReturnAddress = returnAddress });
+            s_callerRecords.Add(new CallerFrameRecord { Method = method, ILOffset = ilOffset, ReturnAddress = returnAddress, SuspendedAtReportedCall = atReportedCall });
             // The middle of the new site's span; never 0, so Go's zero-pc sentinel stays invalid.
             token = callerSpanStart(s_callerRecords.Count - 1) + ((nuint)1 << (CallerSpanShift - 1));
             s_callSiteTokens[key] = token;
             return token;
         }
+    }
+
+    // The method of the raw frame directly inside `siteFrame` in `raw` (the frame it is suspended calling),
+    // or null when `siteFrame` is the innermost or is not in `raw`.
+    private static System.Reflection.MethodBase? rawCalleeOf(StackFrame siteFrame, StackFrame[] raw)
+    {
+        int index = Array.IndexOf(raw, siteFrame);
+
+        return index > 0 ? raw[index - 1].GetMethod() : null;
     }
 
     // Whether a panic site's frame is the exception's TOP frame -- the faulting instruction (a throw, a
@@ -3907,6 +4128,64 @@ partial class runtime_package
 
         return index < calls.Length ? calls[index] : -1;
     }
+
+    // THE REPORTED CALL ITSELF. returnSiteILOffset reads a reported offset that is not a statement boundary
+    // as a PREVIOUS call's record, which is the CLR's usual answer. It is not the only one: when the last
+    // call-like IL instruction before the suspended call in its statement is a value-type `newobj` (a struct
+    // literal `P{1, 2}`, or the params wrapper of a variadic call), the CLR reports the SUSPENDED call's own
+    // offset, under the tiered and the full-opt JIT alike. "Strictly after" then skips to the next
+    // statement's first call, and the caller's line lands one statement late (logrus's
+    // TestNestedLoggingReportsCorrectCaller at `llog.Info(looksDeliciousˢ)`; measured 2026-10-06 on a probe
+    // whose struct-arg and one-literal-variadic shapes, method and plain function alike, read the next
+    // statement while a literal argument with no `newobj` read right).
+    //
+    // The IL alone cannot tell the two readings apart; the CALLEE can. The frame is suspended calling the
+    // method of the raw frame directly inside it, so when the call at the reported offset targets that
+    // method (or, for a virtual or interface call, a method of the same name the callee implements), the
+    // reported offset IS the suspended call. Anything else, including a callee the JIT inlined away and so
+    // left no frame for, keeps returnSiteILOffset's reading.
+    private static bool suspendedAtReportedCall(System.Reflection.MethodBase method, int ilOffset, System.Reflection.MethodBase callee)
+    {
+        if (ilOffset < 0 || callSiteOffsets(method) is not { } calls || Array.BinarySearch(calls, ilOffset) < 0)
+            return false;
+
+        if (callTarget(method, ilOffset) is not { } target)
+            return false;
+
+        if (target.Module == callee.Module && target.MetadataToken == callee.MetadataToken)
+            return true;
+
+        // A virtual or interface call names the slot; the frame is the override or the implementation.
+        return (target.IsVirtual || target.IsAbstract) &&
+            (callee.Name == target.Name || callee.Name.EndsWith("." + target.Name, StringComparison.Ordinal));
+    }
+
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<(System.Reflection.MethodBase, int), System.Reflection.MethodBase?> s_callTargets = new();
+
+    // The method a call-like instruction at `ilOffset` names (call, callvirt or newobj; calli names none),
+    // resolved in the caller's generic context, or null when it cannot be read. Cached per site.
+    private static System.Reflection.MethodBase? callTarget(System.Reflection.MethodBase method, int ilOffset) =>
+        s_callTargets.GetOrAdd((method, ilOffset), static key =>
+        {
+            (System.Reflection.MethodBase m, int offset) = key;
+
+            try
+            {
+                byte[]? il = m.GetMethodBody()?.GetILAsByteArray();
+
+                if (il is null || offset + 5 > il.Length || il[offset] is not (0x28 or 0x6F or 0x73))
+                    return null;
+
+                Type[]? typeArguments = m.DeclaringType is { IsGenericType: true } declaring ? declaring.GetGenericArguments() : null;
+                Type[]? methodArguments = m.IsGenericMethod ? m.GetGenericArguments() : null;
+
+                return m.Module.ResolveMethod(BitConverter.ToInt32(il, offset + 1), typeArguments, methodArguments);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        });
 
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MethodBase, int[]?> s_callSiteOffsets = new();
 

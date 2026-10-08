@@ -4,9 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("map[@string, any]")] partial struct Map;
+partial struct Map /*map[@string, any]*/;
 
-[GoType] partial struct point {
+partial struct point {
     internal nint x, y;
 }
 

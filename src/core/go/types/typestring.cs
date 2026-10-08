@@ -56,7 +56,7 @@ public static void WriteSignature(ж<bytes.Buffer> Ꮡbuf, ж<ΔSignature> Ꮡsi
     newTypeWriter(Ꮡbuf, qf).signature(Ꮡsig);
 }
 
-[GoType] partial struct typeWriter {
+partial struct typeWriter {
     internal ж<bytes.Buffer> buf;
     internal map<ΔType, bool> seen;
     internal Func<ж<Package>, @string> qf;
@@ -76,7 +76,7 @@ internal static ж<typeWriter> newTypeHasher(ж<bytes.Buffer> Ꮡbuf, ж<Context
     return Ꮡ(new typeWriter(Ꮡbuf, new map<ΔType, bool>(), default!, Ꮡctxt, nil, false, false, false));
 }
 
-[GoRecv] internal static void @byte(this ref typeWriter w, byte b) {
+internal static void @byte(this ref typeWriter w, byte b) {
     if (w.ctxt != nil) {
         if (b == (rune)' ') {
             b = (rune)'#';
@@ -90,11 +90,11 @@ internal static ж<typeWriter> newTypeHasher(ж<bytes.Buffer> Ꮡbuf, ж<Context
     }
 }
 
-[GoRecv] internal static void @string(this ref typeWriter w, @string s) {
+internal static void @string(this ref typeWriter w, @string s) {
     w.buf.WriteString(s);
 }
 
-[GoRecv] internal static void error(this ref typeWriter w, @string msg) {
+internal static void error(this ref typeWriter w, @string msg) {
     if (w.ctxt != nil) {
         throw panic(msg);
     }
@@ -488,7 +488,7 @@ internal static void tParamList(this ж<typeWriter> Ꮡw, slice<ж<TypeParam>> l
     w.@byte((rune)']');
 }
 
-[GoRecv] internal static void typeName(this ref typeWriter w, ж<TypeName> Ꮡobj) {
+internal static void typeName(this ref typeWriter w, ж<TypeName> Ꮡobj) {
     ref var obj = ref Ꮡobj.DerefOrNull();
 
     w.@string(packagePrefix(obj.pkg, w.qf));

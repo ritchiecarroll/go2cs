@@ -4,22 +4,22 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[2]array<nint>")] [GoArrayDims(2, 3)] partial struct nn;
+/*[2][3]*/ partial struct nn /*[2]array<nint>*/;
 
-[GoType] partial struct wa {
+partial struct wa {
     internal array<nint> a = new(3);
     internal nint n;
 }
 
-[GoType("[2]wa")] partial struct ns;
+partial struct ns /*[2]wa*/;
 
-[GoType("[4]byte")] partial struct nb;
+partial struct nb /*[4]byte*/;
 
-[GoType("[3]nint")] partial struct ni;
+partial struct ni /*[3]nint*/;
 
-[GoType("[2]ni")] partial struct no;
+partial struct no /*[2]ni*/;
 
-[GoType] partial struct holder {
+partial struct holder {
     internal nn f;
     internal ns g;
 }

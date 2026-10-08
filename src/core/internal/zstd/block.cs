@@ -56,7 +56,7 @@ internal static error compressedBlock(this ж<Reader> Ꮡr, nint blockSize) {
     return Ꮡr.execSeqs(data, off, litbuf, seqCount);
 }
 
-[GoType("num:nint")] partial struct seqCode;
+partial struct seqCode /*num:nint*/;
 
 internal static seqCode seqLiteral => /* iota */ 0;
 internal static seqCode seqOffset => 1;
@@ -64,7 +64,7 @@ internal static seqCode seqMatch => 2;
 
 // seqCodeInfoData is the information needed to set up seqTables and
 // seqTableBits for a particular kind of sequence code.
-[GoType] partial struct seqCodeInfoData {
+partial struct seqCodeInfoData {
     internal slice<fseBaselineEntry> predefTable; // predefined FSE
     internal nint predefTableBits;               // number of bits in predefTable
     internal nint maxSym;               // max symbol value in FSE
@@ -379,7 +379,7 @@ internal static readonly @string invalidZeroOffsetˢ = "invalid zero offset"u8;
 internal static readonly @string offsetPastWindowˢ = "offset past window"u8;
 
 // Copy match bytes from the decoded output, or the window, at offset.
-[GoRecv] internal static error copyFromWindow(this ref Reader r, ж<reverseBitReader> Ꮡrbr, uint32 offset, uint32 match) {
+internal static error copyFromWindow(this ref Reader r, ж<reverseBitReader> Ꮡrbr, uint32 offset, uint32 match) {
     ref var rbr = ref Ꮡrbr.DerefOrNull();
 
     if (offset == 0) {

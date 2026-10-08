@@ -7,7 +7,7 @@ partial class main_package {
 
 internal static error errNilArg = errors.New("nil argument"u8);
 
-[GoType] partial struct node {
+partial struct node {
     internal @string name;
     internal nint n;
     internal ж<node> next;

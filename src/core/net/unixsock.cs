@@ -17,14 +17,14 @@ partial class net_package {
 // and UnixListener don't work for "unixgram" and "unixpacket".
 
 // UnixAddr represents the address of a Unix domain socket end point.
-[GoType] partial struct UnixAddr {
+partial struct UnixAddr {
     public @string Name;
     public @string Net;
 }
 
 // Network returns the address's network name, "unix", "unixgram" or
 // "unixpacket".
-[GoRecv] public static @string Network(this ref UnixAddr a) {
+public static @string Network(this ref UnixAddr a) {
     return a.Net;
 }
 
@@ -69,7 +69,7 @@ public static (ж<UnixAddr>, error) ResolveUnixAddr(@string network, @string add
 
 // UnixConn is an implementation of the [Conn] interface for connections
 // to Unix domain sockets.
-[GoType] partial struct UnixConn {
+partial struct UnixConn {
     internal partial ref conn conn { get; }
 }
 
@@ -255,7 +255,7 @@ public static (ж<UnixConn>, error) DialUnix(@string network, ж<UnixAddr> Ꮡla
 // UnixListener is a Unix domain socket listener. Clients should
 // typically use variables of type [Listener] instead of assuming Unix
 // domain sockets.
-[GoType] partial struct UnixListener {
+partial struct UnixListener {
     internal ж<netFD> fd;
     internal @string path;
     internal bool unlink;
@@ -331,7 +331,7 @@ public static error Close(this ж<UnixListener> Ꮡl) {
 // Addr returns the listener's network address.
 // The Addr returned is shared by all invocations of Addr, so
 // do not modify it.
-[GoRecv] public static ΔAddr Addr(this ref UnixListener l) {
+public static ΔAddr Addr(this ref UnixListener l) {
     return (~l.fd).laddr;
 }
 

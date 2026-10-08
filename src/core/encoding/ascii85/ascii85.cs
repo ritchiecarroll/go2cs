@@ -97,7 +97,7 @@ public static io.WriteCloser NewEncoder(io.Writer w) {
     return new encoderжWriteCloser(Ꮡ(new encoder(w: w)));
 }
 
-[GoType] partial struct encoder {
+partial struct encoder {
     internal error err;
     internal io.Writer w;
     internal array<byte> buf = new(4); // buffered data waiting to be encoded
@@ -105,7 +105,7 @@ public static io.WriteCloser NewEncoder(io.Writer w) {
     internal array<byte> @out = new(1024); // output buffer
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
+internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -159,7 +159,7 @@ public static io.WriteCloser NewEncoder(io.Writer w) {
 
 // Close flushes any pending output from the encoder.
 // It is an error to call Write after calling Close.
-[GoRecv] internal static error Close(this ref encoder e) {
+internal static error Close(this ref encoder e) {
     // If there's anything left in the buffer, flush it out
     if (e.err == default! && e.nbuf > 0) {
         nint nout = Encode(e.@out[0..], e.buf.slice(0, e.nbuf));
@@ -169,7 +169,7 @@ public static io.WriteCloser NewEncoder(io.Writer w) {
     return e.err;
 }
 
-[GoType("num:int64")] partial struct CorruptInputError;
+partial struct CorruptInputError /*num:int64*/;
 
 /*
  * Decoder
@@ -263,7 +263,7 @@ public static io.Reader NewDecoder(io.Reader r) {
     return new decoderжReader(Ꮡ(new decoder(r: r)));
 }
 
-[GoType] partial struct decoder {
+partial struct decoder {
     internal error err;
     internal error readErr;
     internal io.Reader r;
@@ -273,7 +273,7 @@ public static io.Reader NewDecoder(io.Reader r) {
     internal array<byte> outbuf = new(1024);
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
+internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     nint n = default!;
     error err = default!;
 

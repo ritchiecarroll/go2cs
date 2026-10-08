@@ -15,7 +15,7 @@ partial class scanner_package {
 // The position Pos, if valid, points to the beginning of
 // the offending token, and the error condition is described
 // by Msg.
-[GoType] partial struct ΔError {
+partial struct ΔError {
     public tokenꓸPosition Pos;
     public @string Msg;
 }
@@ -30,15 +30,15 @@ public static @string Error(this ΔError e) {
     return e.Msg;
 }
 
-[GoType("[]ж<ΔError>")] partial struct ErrorList;
+partial struct ErrorList /*[]ж<ΔError>*/;
 
 // Add adds an [Error] with given position and error message to an [ErrorList].
-[GoRecv] public static void Add(this ref ErrorList p, tokenꓸPosition pos, @string msg) {
+public static void Add(this ref ErrorList p, tokenꓸPosition pos, @string msg) {
     p = append(p, Ꮡ(new ΔError(pos, msg)));
 }
 
 // Reset resets an [ErrorList] to no errors.
-[GoRecv] public static void Reset(this ref ErrorList p) {
+public static void Reset(this ref ErrorList p) {
     p = (p)[0..0];
 }
 

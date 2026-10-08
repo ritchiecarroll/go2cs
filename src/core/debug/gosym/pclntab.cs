@@ -14,7 +14,7 @@ using encoding;
 
 partial class gosym_package {
 
-[GoType("num:nint")] partial struct version;
+partial struct version /*num:nint*/;
 
 internal static version verUnknown => /* iota */ 0;
 internal static version ver11 => 1;
@@ -36,7 +36,7 @@ internal static version ver120 => 5;
 //
 // For the most part, LineTable's methods should be treated as an internal
 // detail of the package; callers should use the methods on [Table] instead.
-[GoType] partial struct LineTable {
+partial struct LineTable {
     public slice<byte> Data;
     public uint64 PC;
     public nint Line;
@@ -71,7 +71,7 @@ internal static version ver120 => 5;
 // fixing.
 internal static UntypedInt oldQuantum => 1;
 
-[GoRecv] internal static (slice<byte> b, uint64 pc, nint line) parse(this ref LineTable t, uint64 targetPC, nint targetLine) {
+internal static (slice<byte> b, uint64 pc, nint line) parse(this ref LineTable t, uint64 targetPC, nint targetLine) {
     slice<byte> b = default!;
     uint64 pc = default!;
     nint line = default!;
@@ -118,7 +118,7 @@ internal static UntypedInt oldQuantum => 1;
     return (b, pc, line);
 }
 
-[GoRecv] internal static ж<LineTable> Δslice(this ref LineTable t, uint64 pc) {
+internal static ж<LineTable> Δslice(this ref LineTable t, uint64 pc) {
     ref var line = ref heap<nint>(out var Ꮡline);
     (var data, pc, line) = t.parse(pc, -1);
     return Ꮡ(new LineTable(Data: data, PC: pc, Line: line));
@@ -193,7 +193,7 @@ internal static UntypedInt go120magic => 0xfffffff1;
 
 // uintptr returns the pointer-sized value encoded at b.
 // The pointer size is dictated by the table being read.
-[GoRecv] internal static uint64 uintptr(this ref LineTable t, slice<byte> b) {
+internal static uint64 uintptr(this ref LineTable t, slice<byte> b) {
     if (t.ptrsize == 4) {
         return (uint64)t.binary.Uint32(b);
     }
@@ -378,7 +378,7 @@ internal static ΔfuncData findFunc(this ж<LineTable> Ꮡt, uint64 pc) {
 }
 
 // readvarint reads, removes, and returns a varint from *pp.
-[GoRecv] internal static uint32 readvarint(this ref LineTable t, ж<slice<byte>> Ꮡpp) {
+internal static uint32 readvarint(this ref LineTable t, ж<slice<byte>> Ꮡpp) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     uint32 v = default!;
@@ -397,7 +397,7 @@ internal static ΔfuncData findFunc(this ж<LineTable> Ꮡt, uint64 pc) {
 }
 
 // funcName returns the name of the function found at off.
-[GoRecv] internal static @string funcName(this ref LineTable t, uint32 off) {
+internal static @string funcName(this ref LineTable t, uint32 off) {
     {
         var (sΔ1, ok) = t.funcNames[off, ꟷ]; if (ok) {
             return sΔ1;
@@ -410,7 +410,7 @@ internal static ΔfuncData findFunc(this ж<LineTable> Ꮡt, uint64 pc) {
 }
 
 // stringFrom returns a Go string found at off from a position.
-[GoRecv] internal static @string stringFrom(this ref LineTable t, slice<byte> arr, uint32 off) {
+internal static @string stringFrom(this ref LineTable t, slice<byte> arr, uint32 off) {
     {
         var (sΔ1, ok) = t.strings[off, ꟷ]; if (ok) {
             return sΔ1;
@@ -423,12 +423,12 @@ internal static ΔfuncData findFunc(this ж<LineTable> Ꮡt, uint64 pc) {
 }
 
 // string returns a Go string found at off.
-[GoRecv] internal static @string @string(this ref LineTable t, uint32 off) {
+internal static @string @string(this ref LineTable t, uint32 off) {
     return t.stringFrom(t.funcdata, off);
 }
 
 // functabFieldSize returns the size in bytes of a single functab field.
-[GoRecv] internal static nint functabFieldSize(this ref LineTable t) {
+internal static nint functabFieldSize(this ref LineTable t) {
     if (t.version >= ver118) {
         return 4;
     }
@@ -444,7 +444,7 @@ internal static ΔfuncTab funcTab(this ж<LineTable> Ꮡt) {
 
 // funcTab is memory corresponding to a slice of functab structs, followed by an invalid PC.
 // A functab struct is a PC and a func offset.
-[GoType] partial struct ΔfuncTab {
+partial struct ΔfuncTab {
     public partial ref ж<LineTable> LineTable { get; }
     internal nint sz; // cached result of t.functabFieldSize
 }
@@ -477,7 +477,7 @@ internal static uint64 @uint(this ΔfuncTab f, slice<byte> b) {
 }
 
 // funcData is memory corresponding to an _func struct.
-[GoType] partial struct ΔfuncData {
+partial struct ΔfuncData {
     internal ж<LineTable> t; // LineTable this data is a part of
     internal slice<byte> data; // raw memory for the function
 }
@@ -496,7 +496,7 @@ internal static bool IsZero(this ΔfuncData f) {
 }
 
 // entryPC returns the func's entry PC.
-[GoRecv] internal static uint64 entryPC(this ref ΔfuncData f) {
+internal static uint64 entryPC(this ref ΔfuncData f) {
     // In Go 1.18, the first field of _func changed
     // from a uintptr entry PC to a uint32 entry offset.
     if ((~f.t).version >= ver118) {
@@ -546,7 +546,7 @@ internal static uint32 field(this ΔfuncData f, uint32 n) {
 }
 
 // step advances to the next pc, value pair in the encoded table.
-[GoRecv] internal static bool step(this ref LineTable t, ж<slice<byte>> Ꮡp, ж<uint64> Ꮡpc, ж<int32> Ꮡval, bool first) {
+internal static bool step(this ref LineTable t, ж<slice<byte>> Ꮡp, ж<uint64> Ꮡpc, ж<int32> Ꮡval, bool first) {
     ref var pc = ref Ꮡpc.DerefOrNull();
     ref var val = ref Ꮡval.DerefOrNull();
 
@@ -569,7 +569,7 @@ internal static uint32 field(this ΔfuncData f, uint32 n) {
 // pcvalue reports the value associated with the target pc.
 // off is the offset to the beginning of the pc-value table,
 // and entry is the start PC for the corresponding function.
-[GoRecv] internal static int32 pcvalue(this ref LineTable t, uint32 off, uint64 entry, uint64 targetpc) {
+internal static int32 pcvalue(this ref LineTable t, uint32 off, uint64 entry, uint64 targetpc) {
     ref var p = ref heap<slice<byte>>(out var Ꮡp);
     p = t.pctab.slice((nint)(off));
     ref var val = ref heap<int32>(out var Ꮡval);
@@ -590,7 +590,7 @@ internal static uint32 field(this ΔfuncData f, uint32 n) {
 // to file number. Since most functions come from a single file, these
 // are usually short and quick to scan. If a file match is found, then the
 // code goes to the expense of looking for a simultaneous line number match.
-[GoRecv] internal static uint64 findFileLine(this ref LineTable t, uint64 entry, uint32 filetab, uint32 linetab, int32 filenum, int32 line, slice<byte> cutab) {
+internal static uint64 findFileLine(this ref LineTable t, uint64 entry, uint32 filetab, uint32 linetab, int32 filenum, int32 line, slice<byte> cutab) {
     if (filetab == 0 || linetab == 0) {
         return 0;
     }

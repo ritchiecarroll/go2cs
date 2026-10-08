@@ -21,7 +21,7 @@ partial class types_package {
 
 // A Signature represents a (non-builtin) function or method type.
 // The receiver is ignored when comparing signatures for identity.
-[GoType] partial struct ΔSignature {
+partial struct ΔSignature {
     // We need to keep the scope in Signature (rather than passing it around
     // and store it in the Func Object) because when type-checking a function
     // literal we call the general type checker which returns a general Type.
@@ -88,32 +88,32 @@ public static ж<ΔSignature> NewSignatureType(ж<Var> Ꮡrecv, slice<ж<TypePar
 // For an abstract method, Recv returns the enclosing interface either
 // as a *[Named] or an *[Interface]. Due to embedding, an interface may
 // contain methods whose receiver type is a different interface.
-[GoRecv] public static ж<Var> Recv(this ref ΔSignature s) {
+public static ж<Var> Recv(this ref ΔSignature s) {
     return s.recv;
 }
 
 // TypeParams returns the type parameters of signature s, or nil.
-[GoRecv] public static ж<TypeParamList> TypeParams(this ref ΔSignature s) {
+public static ж<TypeParamList> TypeParams(this ref ΔSignature s) {
     return s.tparams;
 }
 
 // RecvTypeParams returns the receiver type parameters of signature s, or nil.
-[GoRecv] public static ж<TypeParamList> RecvTypeParams(this ref ΔSignature s) {
+public static ж<TypeParamList> RecvTypeParams(this ref ΔSignature s) {
     return s.rparams;
 }
 
 // Params returns the parameters of signature s, or nil.
-[GoRecv] public static ж<Tuple> Params(this ref ΔSignature s) {
+public static ж<Tuple> Params(this ref ΔSignature s) {
     return s.@params;
 }
 
 // Results returns the results of signature s, or nil.
-[GoRecv] public static ж<Tuple> Results(this ref ΔSignature s) {
+public static ж<Tuple> Results(this ref ΔSignature s) {
     return s.results;
 }
 
 // Variadic reports whether the signature s is variadic.
-[GoRecv] public static bool Variadic(this ref ΔSignature s) {
+public static bool Variadic(this ref ΔSignature s) {
     return s.variadic;
 }
 
@@ -372,7 +372,7 @@ internal static ΔType unpointer(ΔType t) {
 //	 *(T[P])         *T[P]
 //	  (T[P])          T[P]
 //	   T[P]           T[P]
-[GoRecv] internal static void recordParenthesizedRecvTypes(this ref Checker check, ast.Expr expr, ΔType typ) {
+internal static void recordParenthesizedRecvTypes(this ref Checker check, ast.Expr expr, ΔType typ) {
     while (ᐧ) {
         check.recordTypeAndValue(expr, typexpr, typ, default!);
         switch (expr.type()) {

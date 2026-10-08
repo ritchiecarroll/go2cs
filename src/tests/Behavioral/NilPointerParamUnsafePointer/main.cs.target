@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType("num:uintptr")] partial struct Handle;
+partial struct Handle /*num:uintptr*/;
 
 internal static partial uintptr addrOfNamed(ж<Handle> Ꮡh) {
     return (uintptr)Ꮡh;
@@ -27,7 +27,7 @@ internal static partial (uintptr, Handle) liveAlias(ж<Handle> Ꮡh) {
     return ((uintptr)Ꮡh, h);
 }
 
-[GoType] partial struct node {
+partial struct node {
     internal nint id;
     internal ж<node> parent;
 }

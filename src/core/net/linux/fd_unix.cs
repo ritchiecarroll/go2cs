@@ -42,7 +42,7 @@ internal static error init(this ж<netFD> Ꮡfd) {
     return Ꮡfd.of(netFD.Ꮡpfd).Init(fd.net, true);
 }
 
-[GoRecv] internal static @string name(this ref netFD fd) {
+internal static @string name(this ref netFD fd) {
     @string ls = default!;
     @string rs = default!;
     if (fd.laddr != default!) {
@@ -255,7 +255,7 @@ internal static (ж<netFD> netfd, error err) accept(this ж<netFD> Ꮡfd) {
 }
 
 // Defined in os package.
-[global::System.Diagnostics.StackTraceHidden] internal static ж<os.File> newUnixFile(nint fd, @string name) {
+/*linkname*/ internal static partial ж<os.File> newUnixFile(nint fd, @string name) {
     return os.net_newUnixFile(fd, name);
 }
 

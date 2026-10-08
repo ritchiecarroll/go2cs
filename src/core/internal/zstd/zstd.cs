@@ -19,7 +19,7 @@ partial class zstd_package {
 internal static bool fuzzing = false;
 
 // Reader implements [io.Reader] to read a zstd compressed stream.
-[GoType] partial struct Reader {
+partial struct Reader {
     // The underlying Reader.
     internal io.Reader r;
     // Whether we have read the frame header.
@@ -77,7 +77,7 @@ public static ж<Reader> NewReader(io.Reader input) {
 
 // Reset discards the current state and starts reading a new stream from r.
 // This permits reusing a Reader rather than allocating a new one.
-[GoRecv] public static void Reset(this ref Reader r, io.Reader input) {
+public static void Reset(this ref Reader r, io.Reader input) {
     r.r = input;
     // Several fields are preserved to avoid allocation.
     // Others are always set before they are used.
@@ -169,7 +169,7 @@ internal static readonly @string windowSizeTooLargeˢ = "windowSize too large"u8
 internal static readonly @string dictionariesAreNotˢ = "dictionaries are not supported"u8;
 
 // readFrameHeader reads the frame header and prepares to read a block.
-[GoRecv] internal static error readFrameHeader(this ref Reader r) {
+internal static error readFrameHeader(this ref Reader r) {
 retry:
     nint relativeOffset = 0;
     // Read magic number. RFC 3.1.1.
@@ -323,7 +323,7 @@ retry:
 }
 
 // skipFrame skips a skippable frame. RFC 3.1.2.
-[GoRecv] internal static error skipFrame(this ref Reader r) {
+internal static error skipFrame(this ref Reader r) {
     nint relativeOffset = 0;
     {
         var (_, errΔ1) = io.ReadFull(r.r, r.scratch[..4]); if (errΔ1 != default!) {
@@ -477,7 +477,7 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
 
 // setBufferSize sets the decompressed buffer size.
 // When this is called the buffer is empty.
-[GoRecv] internal static void setBufferSize(this ref Reader r, nint size) {
+internal static void setBufferSize(this ref Reader r, nint size) {
     if (cap(r.buffer) < size) {
         nint need = size - cap(r.buffer);
         r.buffer = appendꓸꓸꓸ(r.buffer.slice(0, cap(r.buffer)), makeꓸꓸꓸ<byte>(need));
@@ -486,35 +486,35 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
 }
 
 // zstdError is an error while decompressing.
-[GoType] partial struct zstdError {
+partial struct zstdError {
     internal int64 offset;
     internal error err;
 }
 
-[GoRecv] internal static @string Error(this ref zstdError ze) {
+internal static @string Error(this ref zstdError ze) {
     return fmt.Sprintf("zstd decompression error at %d: %v"u8, ze.offset, ze.err);
 }
 
-[GoRecv] internal static error Unwrap(this ref zstdError ze) {
+internal static error Unwrap(this ref zstdError ze) {
     return ze.err;
 }
 
-[GoRecv] internal static error makeEOFError(this ref Reader r, nint off) {
+internal static error makeEOFError(this ref Reader r, nint off) {
     return r.wrapError(off, io.ErrUnexpectedEOF);
 }
 
-[GoRecv] internal static error wrapNonEOFError(this ref Reader r, nint off, error err) {
+internal static error wrapNonEOFError(this ref Reader r, nint off, error err) {
     if (AreEqual(err, io.EOF)) {
         err = io.ErrUnexpectedEOF;
     }
     return r.wrapError(off, err);
 }
 
-[GoRecv] internal static error makeError(this ref Reader r, nint off, @string msg) {
+internal static error makeError(this ref Reader r, nint off, @string msg) {
     return r.wrapError(off, errors.New(msg));
 }
 
-[GoRecv] internal static error wrapError(this ref Reader r, nint off, error err) {
+internal static error wrapError(this ref Reader r, nint off, error err) {
     if (AreEqual(err, io.EOF)) {
         return err;
     }

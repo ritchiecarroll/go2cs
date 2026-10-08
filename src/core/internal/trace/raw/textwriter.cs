@@ -11,7 +11,7 @@ using go.@internal.trace;
 partial class raw_package {
 
 // TextWriter emits the text format of a trace.
-[GoType] partial struct TextWriter {
+partial struct TextWriter {
     internal io.Writer w;
     internal version.Version v;
 }
@@ -26,7 +26,7 @@ public static (ж<TextWriter>, error) NewTextWriter(io.Writer w, version.Version
 }
 
 // WriteEvent writes a single event to the stream.
-[GoRecv] public static error WriteEvent(this ref TextWriter w, Event e) {
+public static error WriteEvent(this ref TextWriter w, Event e) {
     // Check version.
     if (e.Version != w.v) {
         return fmt.Errorf("mismatched version between writer (go 1.%d) and event (go 1.%d)"u8, w.v, e.Version);

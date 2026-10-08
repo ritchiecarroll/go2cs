@@ -4,15 +4,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct pointerErr {
+partial struct pointerErr {
     internal @string msg;
 }
 
-[GoRecv] internal static @string Error(this ref pointerErr p) {
+internal static @string Error(this ref pointerErr p) {
     return p.msg;
 }
 
-[GoType] partial struct valueErr {
+partial struct valueErr {
     internal @string msg;
 }
 
@@ -20,14 +20,14 @@ internal static @string Error(this valueErr v) {
     return v.msg;
 }
 
-[GoType("dyn")] internal partial struct main_cases {
+internal partial struct main_cases /*dyn*/ {
     internal error err;
     internal @string want;
 }
 
-[GoType("dyn")] internal partial struct main_ptrCases {
+internal partial struct main_ptrCases /*dyn*/ {
     internal @string want;
-    [GoEmbedded] internal error error;
+    /*embed*/ internal error error;
 }
 
 internal static void Main() {

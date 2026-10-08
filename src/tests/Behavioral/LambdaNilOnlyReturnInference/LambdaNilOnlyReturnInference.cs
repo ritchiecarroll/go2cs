@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Value {
+partial struct Value {
     public nint N;
 }
 

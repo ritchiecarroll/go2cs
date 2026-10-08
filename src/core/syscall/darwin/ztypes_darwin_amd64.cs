@@ -10,31 +10,31 @@ internal static UntypedInt sizeofInt => 0x4;
 internal static UntypedInt sizeofLong => 0x8;
 internal static UntypedInt sizeofLongLong => 0x8;
 
-[GoType("num:int16")] partial struct _C_short;
+partial struct _C_short /*num:int16*/;
 
-[GoType("num:int32")] partial struct _C_int;
+partial struct _C_int /*num:int32*/;
 
-[GoType("num:int64")] partial struct _C_long;
+partial struct _C_long /*num:int64*/;
 
-[GoType("num:int64")] partial struct _C_long_long;
+partial struct _C_long_long /*num:int64*/;
 
-[GoType] partial struct Timespec {
+partial struct Timespec {
     public int64 Sec;
     public int64 Nsec;
 }
 
-[GoType] partial struct Timeval {
+partial struct Timeval {
     public int64 Sec;
     public int32 Usec;
     public array<byte> Pad_cgo_0 = new(4);
 }
 
-[GoType] partial struct Timeval32 {
+partial struct Timeval32 {
     public int32 Sec;
     public int32 Usec;
 }
 
-[GoType] partial struct Rusage {
+partial struct Rusage {
     public Timeval Utime;
     public Timeval Stime;
     public int64 Maxrss;
@@ -53,14 +53,14 @@ internal static UntypedInt sizeofLongLong => 0x8;
     public int64 Nivcsw;
 }
 
-[GoType] partial struct Rlimit {
+partial struct Rlimit {
     public uint64 Cur;
     public uint64 Max;
 }
 
-[GoType("num:uint32")] partial struct _Gid_t;
+partial struct _Gid_t /*num:uint32*/;
 
-[GoType] partial struct Stat_t {
+partial struct Stat_t {
     public int32 Dev;
     public uint16 Mode;
     public uint16 Nlink;
@@ -82,7 +82,7 @@ internal static UntypedInt sizeofLongLong => 0x8;
     public array<int64> Qspare = new(2);
 }
 
-[GoType] partial struct Statfs_t {
+partial struct Statfs_t {
     public uint32 Bsize;
     public int32 Iosize;
     public uint64 Blocks;
@@ -101,7 +101,7 @@ internal static UntypedInt sizeofLongLong => 0x8;
     public array<uint32> Reserved = new(8);
 }
 
-[GoType] partial struct Flock_t {
+partial struct Flock_t {
     public int64 Start;
     public int64 Len;
     public int32 Pid;
@@ -109,7 +109,7 @@ internal static UntypedInt sizeofLongLong => 0x8;
     public int16 Whence;
 }
 
-[GoType] partial struct Fstore_t {
+partial struct Fstore_t {
     public uint32 Flags;
     public int32 Posmode;
     public int64 Offset;
@@ -117,29 +117,29 @@ internal static UntypedInt sizeofLongLong => 0x8;
     public int64 Bytesalloc;
 }
 
-[GoType] partial struct Radvisory_t {
+partial struct Radvisory_t {
     public int64 Offset;
     public int32 Count;
     public array<byte> Pad_cgo_0 = new(4);
 }
 
-[GoType] partial struct Fbootstraptransfer_t {
+partial struct Fbootstraptransfer_t {
     public int64 Offset;
     public uint64 Length;
     public ж<byte> Buffer;
 }
 
-[GoType] partial struct Log2phys_t {
+partial struct Log2phys_t {
     public uint32 Flags;
     public int64 Contigbytes;
     public int64 Devoffset;
 }
 
-[GoType] partial struct Fsid {
+partial struct Fsid {
     public array<int32> Val = new(2);
 }
 
-[GoType] partial struct Dirent {
+partial struct Dirent {
     public uint64 Ino;
     public uint64 Seekoff;
     public uint16 Reclen;
@@ -151,7 +151,7 @@ internal static UntypedInt sizeofLongLong => 0x8;
 
 internal static UntypedInt pathMax => 0x400;
 
-[GoType] partial struct RawSockaddrInet4 {
+partial struct RawSockaddrInet4 {
     public uint8 Len;
     public uint8 Family;
     public uint16 Port;
@@ -159,7 +159,7 @@ internal static UntypedInt pathMax => 0x400;
     public array<int8> Zero = new(8);
 }
 
-[GoType] partial struct RawSockaddrInet6 {
+partial struct RawSockaddrInet6 {
     public uint8 Len;
     public uint8 Family;
     public uint16 Port;
@@ -168,13 +168,13 @@ internal static UntypedInt pathMax => 0x400;
     public uint32 Scope_id;
 }
 
-[GoType] partial struct RawSockaddrUnix {
+partial struct RawSockaddrUnix {
     public uint8 Len;
     public uint8 Family;
     public array<int8> Path = new(104);
 }
 
-[GoType] partial struct RawSockaddrDatalink {
+partial struct RawSockaddrDatalink {
     public uint8 Len;
     public uint8 Family;
     public uint16 Index;
@@ -185,40 +185,40 @@ internal static UntypedInt pathMax => 0x400;
     public array<int8> Data = new(12);
 }
 
-[GoType] partial struct RawSockaddr {
+partial struct RawSockaddr {
     public uint8 Len;
     public uint8 Family;
     public array<int8> Data = new(14);
 }
 
-[GoType] partial struct RawSockaddrAny {
+partial struct RawSockaddrAny {
     public RawSockaddr Addr;
     public array<int8> Pad = new(92);
 }
 
-[GoType("num:uint32")] public partial struct _Socklen;
+public partial struct _Socklen /*num:uint32*/;
 
-[GoType] partial struct Linger {
+partial struct Linger {
     public int32 Onoff;
     public int32 ΔLinger;
 }
 
-[GoType] partial struct Iovec {
+partial struct Iovec {
     public ж<byte> Base;
     public uint64 Len;
 }
 
-[GoType] partial struct IPMreq {
+partial struct IPMreq {
     public array<byte> Multiaddr = new(4); /* in_addr */
     public array<byte> Interface = new(4); /* in_addr */
 }
 
-[GoType] partial struct IPv6Mreq {
+partial struct IPv6Mreq {
     public array<byte> Multiaddr = new(16); /* in6_addr */
     public uint32 Interface;
 }
 
-[GoType] partial struct Msghdr {
+partial struct Msghdr {
     public ж<byte> Name;
     public uint32 Namelen;
     public array<byte> Pad_cgo_0 = new(4);
@@ -230,29 +230,29 @@ internal static UntypedInt pathMax => 0x400;
     public int32 Flags;
 }
 
-[GoType] partial struct Cmsghdr {
+partial struct Cmsghdr {
     public uint32 Len;
     public int32 Level;
     public int32 Type;
 }
 
-[GoType] partial struct Inet4Pktinfo {
+partial struct Inet4Pktinfo {
     public uint32 Ifindex;
     public array<byte> Spec_dst = new(4); /* in_addr */
     public array<byte> Addr = new(4); /* in_addr */
 }
 
-[GoType] partial struct Inet6Pktinfo {
+partial struct Inet6Pktinfo {
     public array<byte> Addr = new(16); /* in6_addr */
     public uint32 Ifindex;
 }
 
-[GoType] partial struct IPv6MTUInfo {
+partial struct IPv6MTUInfo {
     public RawSockaddrInet6 Addr;
     public uint32 Mtu;
 }
 
-[GoType] partial struct ICMPv6Filter {
+partial struct ICMPv6Filter {
     public array<uint32> Filt = new(8);
 }
 
@@ -275,7 +275,7 @@ public static UntypedInt PTRACE_TRACEME => 0x0;
 public static UntypedInt PTRACE_CONT => 0x7;
 public static UntypedInt PTRACE_KILL => 0x8;
 
-[GoType] partial struct Kevent_t {
+partial struct Kevent_t {
     public uint64 Ident;
     public int16 Filter;
     public uint16 Flags;
@@ -284,7 +284,7 @@ public static UntypedInt PTRACE_KILL => 0x8;
     public ж<byte> Udata;
 }
 
-[GoType] partial struct FdSet {
+partial struct FdSet {
     public array<int32> Bits = new(32);
 }
 
@@ -296,7 +296,7 @@ public static UntypedInt SizeofIfmaMsghdr2 => 0x14;
 public static UntypedInt SizeofRtMsghdr => 0x5c;
 public static UntypedInt SizeofRtMetrics => 0x38;
 
-[GoType] partial struct IfMsghdr {
+partial struct IfMsghdr {
     public uint16 Msglen;
     public uint8 Version;
     public uint8 Type;
@@ -307,7 +307,7 @@ public static UntypedInt SizeofRtMetrics => 0x38;
     public IfData Data;
 }
 
-[GoType] partial struct IfData {
+partial struct IfData {
     public uint8 Type;
     public uint8 Typelen;
     public uint8 Physical;
@@ -339,7 +339,7 @@ public static UntypedInt SizeofRtMetrics => 0x38;
     public uint32 Reserved2;
 }
 
-[GoType] partial struct IfaMsghdr {
+partial struct IfaMsghdr {
     public uint16 Msglen;
     public uint8 Version;
     public uint8 Type;
@@ -350,7 +350,7 @@ public static UntypedInt SizeofRtMetrics => 0x38;
     public int32 Metric;
 }
 
-[GoType] partial struct IfmaMsghdr {
+partial struct IfmaMsghdr {
     public uint16 Msglen;
     public uint8 Version;
     public uint8 Type;
@@ -360,7 +360,7 @@ public static UntypedInt SizeofRtMetrics => 0x38;
     public array<byte> Pad_cgo_0 = new(2);
 }
 
-[GoType] partial struct IfmaMsghdr2 {
+partial struct IfmaMsghdr2 {
     public uint16 Msglen;
     public uint8 Version;
     public uint8 Type;
@@ -371,7 +371,7 @@ public static UntypedInt SizeofRtMetrics => 0x38;
     public int32 Refcount;
 }
 
-[GoType] partial struct RtMsghdr {
+partial struct RtMsghdr {
     public uint16 Msglen;
     public uint8 Version;
     public uint8 Type;
@@ -387,7 +387,7 @@ public static UntypedInt SizeofRtMetrics => 0x38;
     public RtMetrics Rmx;
 }
 
-[GoType] partial struct RtMetrics {
+partial struct RtMetrics {
     public uint32 Locks;
     public uint32 Mtu;
     public uint32 Hopcount;
@@ -407,30 +407,30 @@ public static UntypedInt SizeofBpfProgram => 0x10;
 public static UntypedInt SizeofBpfInsn => 0x8;
 public static UntypedInt SizeofBpfHdr => 0x14;
 
-[GoType] partial struct BpfVersion {
+partial struct BpfVersion {
     public uint16 Major;
     public uint16 Minor;
 }
 
-[GoType] partial struct BpfStat {
+partial struct BpfStat {
     public uint32 Recv;
     public uint32 Drop;
 }
 
-[GoType] partial struct BpfProgram {
+partial struct BpfProgram {
     public uint32 Len;
     public array<byte> Pad_cgo_0 = new(4);
     public ж<BpfInsn> Insns;
 }
 
-[GoType] partial struct BpfInsn {
+partial struct BpfInsn {
     public uint16 Code;
     public uint8 Jt;
     public uint8 Jf;
     public uint32 K;
 }
 
-[GoType] partial struct BpfHdr {
+partial struct BpfHdr {
     public Timeval32 Tstamp;
     public uint32 Caplen;
     public uint32 Datalen;
@@ -440,7 +440,7 @@ public static UntypedInt SizeofBpfHdr => 0x14;
 
 internal static UntypedInt _AT_FDCWD => /* -0x2 */ -2;
 
-[GoType] partial struct Termios {
+partial struct Termios {
     public uint64 Iflag;
     public uint64 Oflag;
     public uint64 Cflag;

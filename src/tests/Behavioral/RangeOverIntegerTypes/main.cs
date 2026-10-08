@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:uintptr")] partial struct myLen;
+partial struct myLen /*num:uintptr*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object uintptrBlankKeyˢ = (@string)"uintptr blank-key iterations:"u8;

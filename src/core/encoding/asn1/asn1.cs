@@ -38,7 +38,7 @@ partial class asn1_package {
 
 // A StructuralError suggests that the ASN.1 data is valid, but the Go type
 // which is receiving it doesn't match.
-[GoType] partial struct StructuralError {
+partial struct StructuralError {
     public @string Msg;
 }
 
@@ -47,7 +47,7 @@ public static @string Error(this StructuralError e) {
 }
 
 // A SyntaxError suggests that the ASN.1 data is invalid.
-[GoType] partial struct SyntaxError {
+partial struct SyntaxError {
     public @string Msg;
 }
 
@@ -176,7 +176,7 @@ internal static (ж<bigꓸInt>, error) parseBigInt(slice<byte> bytes) {
 // BitString is the structure to use when you want an ASN.1 BIT STRING type. A
 // bit string is padded up to the nearest byte in memory and the number of
 // valid bits is recorded. Padding bits will be zero.
-[GoType] partial struct BitString {
+partial struct BitString {
     public slice<byte> Bytes; // bits packed into bytes.
     public nint BitLength;   // length in bits.
 }
@@ -235,7 +235,7 @@ public static RawValue NullRawValue = new RawValue(Tag: TagNull);
 // NullBytes contains bytes representing the DER-encoded ASN.1 NULL type.
 public static slice<byte> NullBytes = new byte[]{TagNull, 0}.slice();
 
-[GoType("[]nint")] partial struct ObjectIdentifier;
+partial struct ObjectIdentifier /*[]nint*/;
 
 // OBJECT IDENTIFIER
 
@@ -298,9 +298,9 @@ internal static (ObjectIdentifier s, error err) parseObjectIdentifier(slice<byte
     return (s, err);
 }
 
-[GoType("num:nint")] partial struct Enumerated;
+partial struct Enumerated /*num:nint*/;
 
-[GoType("bool")] partial struct Flag;
+partial struct Flag /*bool*/;
 
 // ENUMERATED
 // FLAG
@@ -432,9 +432,9 @@ internal static (@string ret, error err) parsePrintableString(slice<byte> bytes)
     return (ret, err);
 }
 
-[GoType("bool")] partial struct asteriskFlag;
+partial struct asteriskFlag /*bool*/;
 
-[GoType("bool")] partial struct ampersandFlag;
+partial struct ampersandFlag /*bool*/;
 
 internal static asteriskFlag allowAsterisk => true;
 internal static asteriskFlag rejectAsterisk => false;
@@ -521,14 +521,14 @@ internal static (@string, error) parseBMPString(slice<byte> bmpString) {
 }
 
 // A RawValue represents an undecoded ASN.1 object.
-[GoType] partial struct RawValue {
+partial struct RawValue {
     public nint Class, Tag;
     public bool IsCompound;
     public slice<byte> Bytes;
     public slice<byte> FullBytes; // includes the tag and length
 }
 
-[GoType("[]byte")] partial struct RawContent;
+partial struct RawContent /*[]byte*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string asn1InternalErrorInˢ = "asn1: internal error in parseTagAndLength"u8;
@@ -1148,14 +1148,14 @@ public static (slice<byte> rest, error err) Unmarshal(slice<byte> b, any val) {
 
 // An invalidUnmarshalError describes an invalid argument passed to Unmarshal.
 // (The argument to Unmarshal must be a non-nil pointer.)
-[GoType] partial struct invalidUnmarshalError {
+partial struct invalidUnmarshalError {
     public reflectꓸType Type;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string asn1UnmarshalRecipientˢ = "asn1: Unmarshal recipient value is nil"u8;
 
-[GoRecv] internal static @string Error(this ref invalidUnmarshalError e) {
+internal static @string Error(this ref invalidUnmarshalError e) {
     if (e.Type == default!) {
         return asn1UnmarshalRecipientˢ;
     }

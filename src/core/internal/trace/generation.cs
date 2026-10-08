@@ -23,7 +23,7 @@ partial class trace_package {
 // trace generation. It is purely data: it does not
 // track any parse state nor does it contain a cursor
 // into the generation.
-[GoType] partial struct generation {
+partial struct generation {
     internal uint64 gen;
     internal map<ThreadID, slice<batch>> batches;
     internal slice<ThreadID> batchMs;
@@ -34,7 +34,7 @@ partial class trace_package {
 // spilledBatch represents a batch that was read out for the next generation,
 // while reading the previous one. It's passed on when parsing the next
 // generation.
-[GoType] partial struct spilledBatch {
+partial struct spilledBatch {
     internal uint64 gen;
     internal partial ref ж<batch> batch { get; }
 }

@@ -6,13 +6,13 @@ using CrossPackageArrayZeroValue;
 
 partial class main_package {
 
-[GoType] partial struct Holder {
+partial struct Holder {
     internal bufpkg.State state;
     internal array<byte> readBuf = new(8);
     internal @string tag;
 }
 
-[GoType] partial struct Deep {
+partial struct Deep {
     internal bufpkg.Nested nested;
 }
 

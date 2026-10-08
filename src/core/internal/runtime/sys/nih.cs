@@ -7,7 +7,7 @@ partial class sys_package {
 
 // NOTE: keep in sync with cmd/compile/internal/types.CalcSize
 // to make the compiler recognize this as an intrinsic type.
-[GoType] partial struct nih {
+partial struct nih {
 }
 
 // NotInHeap is a type must never be allocated from the GC'd heap or on the stack,
@@ -40,7 +40,7 @@ partial class sys_package {
 // scheduler and the memory allocator where they are illegal or simply
 // inefficient. This mechanism is reasonably safe and does not compromise
 // the readability of the runtime.
-[GoType] partial struct NotInHeap {
+partial struct NotInHeap {
     internal nih _;
 }
 

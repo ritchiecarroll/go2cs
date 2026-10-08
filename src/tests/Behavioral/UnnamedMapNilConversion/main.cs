@@ -5,9 +5,9 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType("map[@string, nint]")] partial struct myMap;
+partial struct myMap /*map[@string, nint]*/;
 
-[GoType("[]byte")] partial struct mySlice;
+partial struct mySlice /*[]byte*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object lenˢ = (@string)"len:"u8;
@@ -33,11 +33,11 @@ internal static void Main() {
     fmt.Println(copyLenˢ, len(((map<@string, nint>)populated)));
 }
 
-[GoType] partial struct Key {
+partial struct Key {
     public @string K;
 }
 
-[GoType] partial struct Header {
+partial struct Header {
     public @string N;
 }
 

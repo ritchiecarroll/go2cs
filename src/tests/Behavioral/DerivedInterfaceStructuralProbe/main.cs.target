@@ -4,30 +4,30 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct tempErr {
+partial struct tempErr {
     internal @string msg;
 }
 
-[GoRecv] internal static @string Error(this ref tempErr e) {
+internal static @string Error(this ref tempErr e) {
     return e.msg;
 }
 
-[GoRecv] internal static bool Temporary(this ref tempErr e) {
+internal static bool Temporary(this ref tempErr e) {
     return true;
 }
 
-[GoType] partial struct plainErr {
+partial struct plainErr {
     internal @string msg;
 }
 
-[GoRecv] internal static @string Error(this ref plainErr e) {
+internal static @string Error(this ref plainErr e) {
     return e.msg;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string notTemporaryˢ = "not temporary"u8;
 
-[GoType("dyn")] internal partial interface classify_type :
+internal partial interface classify_type /*dyn*/ :
     error
 {
     bool Temporary();
@@ -42,48 +42,48 @@ internal static @string classify(error err) {
     return notTemporaryˢ;
 }
 
-[GoType] partial interface stringish {
+partial interface stringish {
     @string String();
 }
 
-[GoType] partial interface named :
+partial interface named :
     stringish
 {
     @string Name();
 }
 
-[GoType] partial struct node {
+partial struct node {
     internal @string id;
 }
 
-[GoRecv] internal static @string String(this ref node n) {
+internal static @string String(this ref node n) {
     return "node:"u8 + n.id;
 }
 
-[GoRecv] internal static @string Name(this ref node n) {
+internal static @string Name(this ref node n) {
     return n.id;
 }
 
-[GoRecv] internal static nint Depth(this ref node n) {
+internal static nint Depth(this ref node n) {
     return 3;
 }
 
-[GoType] partial struct shallow {
+partial struct shallow {
     internal @string id;
 }
 
-[GoRecv] internal static @string String(this ref shallow s) {
+internal static @string String(this ref shallow s) {
     return "shallow:"u8 + s.id;
 }
 
-[GoRecv] internal static @string Name(this ref shallow s) {
+internal static @string Name(this ref shallow s) {
     return s.id;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string notDeepˢ = "not deep"u8;
 
-[GoType("dyn")] internal partial interface describe_type :
+internal partial interface describe_type /*dyn*/ :
     named
 {
     nint Depth();

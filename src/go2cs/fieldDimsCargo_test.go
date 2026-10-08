@@ -11,6 +11,8 @@ package main
 import (
 	"go/token"
 	"go/types"
+	"regexp"
+	"strings"
 	"testing"
 )
 
@@ -102,9 +104,24 @@ func TestFieldDimsCargo(t *testing.T) {
 		{"nil type", nil, ""},
 	}
 
+	// Each row states the cargo in its attribute spelling; the emission writes both as dims comments: the element
+	// dims before the field's type, the map key's before the key type argument (emitFieldDims, section 11 row 4).
+	elemCargo := regexp.MustCompile(`GoArrayDims\(([^)]*)\)`)
+	keyCargo := regexp.MustCompile(`GoMapKeyDims\(([^)]*)\)`)
+
 	for _, c := range cases {
-		if got := emitFieldDimsAttributes(c.typ); got != c.want {
-			t.Errorf("%s: emitFieldDimsAttributes(%s) = %q, want %q", c.name, c.typ, got, c.want)
+		wantKey, wantComment := "", ""
+
+		if key := keyCargo.FindStringSubmatch(c.want); key != nil {
+			wantKey = "/*[" + strings.ReplaceAll(key[1], ", ", "][") + "]*/ "
+		}
+
+		if elem := elemCargo.FindStringSubmatch(c.want); elem != nil {
+			wantComment = "/*[" + strings.ReplaceAll(elem[1], ", ", "][") + "]*/ "
+		}
+
+		if gotKey, gotComment := emitFieldDims(c.typ); gotKey != wantKey || gotComment != wantComment {
+			t.Errorf("%s: emitFieldDims(%s) = (%q, %q), want (%q, %q)", c.name, c.typ, gotKey, gotComment, wantKey, wantComment)
 		}
 	}
 

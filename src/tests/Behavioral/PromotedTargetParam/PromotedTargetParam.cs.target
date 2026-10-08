@@ -6,7 +6,7 @@ using PromotedTargetParam;
 
 partial class main_package {
 
-[GoType] partial struct Base {
+partial struct Base {
     internal @string name;
 }
 
@@ -14,23 +14,23 @@ public static @string Pair(this Base b, @string target) {
     return b.name + "->"u8 + target;
 }
 
-[GoRecv] public static void Rename(this ref Base b, @string target) {
+public static void Rename(this ref Base b, @string target) {
     b.name = target;
 }
 
-[GoType] partial struct ByValue {
+partial struct ByValue {
     public partial ref Base Base { get; }
 }
 
-[GoType] partial struct ByPointer {
+partial struct ByPointer {
     public partial ref ж<Base> Base { get; }
 }
 
-[GoType] partial struct ForeignByValue {
+partial struct ForeignByValue {
     public partial ref PromotedTargetParam.targetlib_package.Finder Finder { get; }
 }
 
-[GoType] partial struct ForeignByPointer {
+partial struct ForeignByPointer {
     public partial ref ж<PromotedTargetParam.targetlib_package.Finder> Finder { get; }
 }
 

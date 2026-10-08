@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct simpleErr {
+partial struct simpleErr {
     internal @string msg;
 }
 
@@ -12,7 +12,7 @@ internal static @string Error(this simpleErr e) {
     return e.msg;
 }
 
-[GoType] partial struct multiWrap {
+partial struct multiWrap {
     internal slice<error> errs;
 }
 
@@ -20,7 +20,7 @@ internal static slice<error> Unwrap(this multiWrap m) {
     return m.errs;
 }
 
-[GoType] partial struct singleWrap {
+partial struct singleWrap {
     internal error err;
 }
 
@@ -28,11 +28,11 @@ internal static error Unwrap(this singleWrap s) {
     return s.err;
 }
 
-[GoType("dyn")] internal partial interface classify_type {
+internal partial interface classify_type /*dyn*/ {
     error Unwrap();
 }
 
-[GoType("dyn")] internal partial interface classify_typeᴛ1 {
+internal partial interface classify_typeᴛ1 /*dyn*/ {
     slice<error> Unwrap();
 }
 

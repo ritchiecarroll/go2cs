@@ -22,7 +22,7 @@ partial class http_package {
 
 // A routingNode is a node in the decision tree.
 // The same struct is used for leaf and interior nodes.
-[GoType] partial struct routingNode {
+partial struct routingNode {
     // A leaf node holds a single pattern and the Handler it was registered
     // with.
     internal ж<pattern> pattern;
@@ -77,7 +77,7 @@ internal static void addSegments(this ж<routingNode> Ꮡn, slice<segment> segs,
 
 // set sets the pattern and handler for n, which
 // must be a leaf node.
-[GoRecv] internal static void set(this ref routingNode n, ж<pattern> Ꮡp, ΔHandler h) {
+internal static void set(this ref routingNode n, ж<pattern> Ꮡp, ΔHandler h) {
     if (n.pattern != nil || n.handler != default!) {
         throw panic("non-nil leaf fields");
     }

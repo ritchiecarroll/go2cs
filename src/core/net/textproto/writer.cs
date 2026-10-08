@@ -12,7 +12,7 @@ partial class textproto_package {
 
 // A Writer implements convenience methods for writing
 // requests or responses to a text protocol network connection.
-[GoType] partial struct Writer {
+partial struct Writer {
     public ж<bufio.Writer> W;
     internal ж<dotWriter> dot;
 }
@@ -27,7 +27,7 @@ internal static slice<byte> crnl = new byte[]{(rune)'\r', (rune)'\n'}.slice();
 internal static slice<byte> dotcrnl = new byte[]{(rune)'.', (rune)'\r', (rune)'\n'}.slice();
 
 // PrintfLine writes the formatted output followed by \r\n.
-[GoRecv] public static error PrintfLine(this ref Writer w, @string format, params ꓸꓸꓸany argsʗp) {
+public static error PrintfLine(this ref Writer w, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     w.closeDot();
@@ -51,13 +51,13 @@ public static io.WriteCloser DotWriter(this ж<Writer> Ꮡw) {
     return new dotWriterжWriteCloser(w.dot);
 }
 
-[GoRecv] internal static void closeDot(this ref Writer w) {
+internal static void closeDot(this ref Writer w) {
     if (w.dot != nil) {
         w.dot.Close(); // sets w.dot = nil
     }
 }
 
-[GoType] partial struct dotWriter {
+partial struct dotWriter {
     internal ж<Writer> w;
     internal nint state;
 }
@@ -67,7 +67,7 @@ internal static UntypedInt wstateBeginLine => 1; // beginning of line
 internal static UntypedInt wstateCR => 2; // wrote \r (possibly at end of line)
 internal static UntypedInt wstateData => 3; // writing data in middle of line
 
-[GoRecv] internal static (nint n, error err) Write(this ref dotWriter d, slice<byte> b) {
+internal static (nint n, error err) Write(this ref dotWriter d, slice<byte> b) {
     nint n = default!;
     error err = default!;
 

@@ -10,7 +10,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Header {
+partial struct Header {
     public @string Name;
     public int64 Size;
 }
@@ -24,11 +24,11 @@ private static readonly object writeˢ = (@string)"write:"u8;
 private static readonly object closeˢ = (@string)"close:"u8;
 private static readonly object writeOpsOpsˢ = (@string)"writeOps ops:"u8;
 
-[GoType("dyn")] internal partial struct writeOps_opWrite {
+internal partial struct writeOps_opWrite /*dyn*/ {
     internal @string str;
 }
 
-[GoType("dyn")] internal partial struct writeOps_opClose {
+internal partial struct writeOps_opClose /*dyn*/ {
     internal @string err;
 }
 
@@ -53,11 +53,11 @@ private static readonly object fileOpsMakersˢ = (@string)"fileOps makers:"u8;
 private static readonly object testsˢ = (@string)"tests:"u8;
 private static readonly object totalˢ = (@string)"total:"u8;
 
-[GoType("dyn")] internal partial struct fileOps_makeReg {
+internal partial struct fileOps_makeReg /*dyn*/ {
     internal int64 size;
 }
 
-[GoType("dyn")] internal partial struct fileOps_makeSparse {
+internal partial struct fileOps_makeSparse /*dyn*/ {
     internal int64 size;
     internal int64 holes;
 }
@@ -89,7 +89,7 @@ internal static void localAliases() {
     fmt.Println(localAliasesˢ, h, plain, plain.String(), new Header(Name: "raw"u8, Size: 1));
 }
 
-[GoType] partial interface namer {
+partial interface namer {
     @string String();
 }
 

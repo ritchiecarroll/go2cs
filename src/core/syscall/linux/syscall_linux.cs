@@ -422,7 +422,7 @@ internal static @unsafe.Pointer cgo_libc_setgroups; // non-nil if cgo linked.
 
 // go2cs generated this placeholder — func Setgroups is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoType("num:uint32")] partial struct WaitStatus;
+partial struct WaitStatus /*num:uint32*/;
 
 // Wait status is 7 bits at bottom, either 0 (exited),
 // 0x7F (stopped), or a signal number that caused an exit.
@@ -537,7 +537,7 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrUnix.Ꮡraw)), sl, default!);
 }
 
-[GoType] partial struct SockaddrLinklayer {
+partial struct SockaddrLinklayer {
     public uint16 Protocol;
     public nint Ifindex;
     public uint16 Hatype;
@@ -563,7 +563,7 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrLink
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrLinklayer.Ꮡraw)), SizeofSockaddrLinklayer, default!);
 }
 
-[GoType] partial struct SockaddrNetlink {
+partial struct SockaddrNetlink {
     public uint16 Family;
     public uint16 Pad;
     public uint32 Pid;

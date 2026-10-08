@@ -8,15 +8,15 @@ using runtime = runtime_package;
 partial class cpu_package {
 
 // byteOrder is a subset of encoding/binary.ByteOrder.
-[GoType] partial interface byteOrder {
+partial interface byteOrder {
     uint32 Uint32(slice<byte> _);
     uint64 Uint64(slice<byte> _);
 }
 
-[GoType] partial struct littleEndian {
+partial struct littleEndian {
 }
 
-[GoType] partial struct bigEndian {
+partial struct bigEndian {
 }
 
 internal static uint32 Uint32(this littleEndian _Δp0, slice<byte> b) {

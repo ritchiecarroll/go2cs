@@ -39,11 +39,11 @@ public static error Join(params ꓸꓸꓸerror errsʗp) {
     return new joinErrorжerror(e);
 }
 
-[GoType] partial struct joinError {
+partial struct joinError {
     internal slice<error> errs;
 }
 
-[GoRecv] internal static @string Error(this ref joinError e) {
+internal static @string Error(this ref joinError e) {
     // Since Join returns nil if every value in errs is nil,
     // e.errs cannot be empty.
     if (len(e.errs) == 1) {
@@ -58,7 +58,7 @@ public static error Join(params ꓸꓸꓸerror errsʗp) {
     return @unsafe.String(Ꮡ(b, 0), len(b));
 }
 
-[GoRecv] internal static slice<error> Unwrap(this ref joinError e) {
+internal static slice<error> Unwrap(this ref joinError e) {
     return e.errs;
 }
 

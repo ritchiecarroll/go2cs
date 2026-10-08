@@ -30,7 +30,7 @@ internal static void writeUint64(ж<poly1305.MAC> Ꮡp, nint n) {
     Ꮡp.Write(buf[..]);
 }
 
-[GoRecv] internal static slice<byte> sealGeneric(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static slice<byte> sealGeneric(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     var (ret, @out) = sliceForAppend(dst, len(plaintext) + (nint)poly1305.TagSize);
     var (ciphertext, tag) = (@out.slice(0, len(plaintext)), @out.slice(len(plaintext)));
     if (alias.InexactOverlap(@out, plaintext)) {
@@ -50,7 +50,7 @@ internal static void writeUint64(ж<poly1305.MAC> Ꮡp, nint n) {
     return ret;
 }
 
-[GoRecv] internal static (slice<byte>, error) openGeneric(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) openGeneric(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     var tag = ciphertext.slice(len(ciphertext) - 16);
     ciphertext = ciphertext.slice(0, len(ciphertext) - 16);
     ref var polyKey = ref heap(new array<byte>(32), out var ᏑpolyKey);

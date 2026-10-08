@@ -31,7 +31,7 @@ internal static bool groupImplemented = true;
 internal static bool groupListImplemented = true;
 
 // User represents a user account.
-[GoType] partial struct User {
+partial struct User {
     // Uid is the user ID.
     // On POSIX systems, this is a decimal number representing the uid.
     // On Windows, this is a security identifier (SID) in a string format.
@@ -58,30 +58,30 @@ internal static bool groupListImplemented = true;
 // Group represents a grouping of users.
 //
 // On POSIX systems Gid contains a decimal number representing the group ID.
-[GoType] partial struct Group {
+partial struct Group {
     public @string Gid; // group ID
     public @string Name; // group name
 }
 
-[GoType("num:nint")] partial struct UnknownUserIdError;
+partial struct UnknownUserIdError /*num:nint*/;
 
 public static @string Error(this UnknownUserIdError e) {
     return "user: unknown userid "u8 + strconv.Itoa((nint)e);
 }
 
-[GoType("@string")] partial struct UnknownUserError;
+partial struct UnknownUserError /*@string*/;
 
 public static @string Error(this UnknownUserError e) {
     return "user: unknown user "u8 + ((@string)e);
 }
 
-[GoType("@string")] partial struct UnknownGroupIdError;
+partial struct UnknownGroupIdError /*@string*/;
 
 public static @string Error(this UnknownGroupIdError e) {
     return "group: unknown groupid "u8 + ((@string)e);
 }
 
-[GoType("@string")] partial struct UnknownGroupError;
+partial struct UnknownGroupError /*@string*/;
 
 public static @string Error(this UnknownGroupError e) {
     return "group: unknown group "u8 + ((@string)e);

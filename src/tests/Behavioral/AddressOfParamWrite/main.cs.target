@@ -4,18 +4,18 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Rect {
+partial struct Rect {
     public nint Min, Max;
 }
 
-[GoType] partial struct Box {
+partial struct Box {
     public Rect R;
     public nint Tag;
 }
 
-[GoType("[]nint")] partial struct Nums;
+partial struct Nums /*[]nint*/;
 
-[GoType("[3]nint")] partial struct Trio;
+partial struct Trio /*[3]nint*/;
 
 internal static void clip(ref Rect r, nint lo, nint hi) {
     if (r.Min < lo) {
@@ -40,7 +40,7 @@ internal static Box bumpParamField(Box b) {
     return b;
 }
 
-internal static array<nint> bumpParamElem([GoArrayDims(3)] array<nint> a) {
+internal static array<nint> bumpParamElem(/*[3]*/ array<nint> a) {
     a = a.Clone();
 
     bump(ref a[1]);
@@ -112,7 +112,7 @@ public static nint PlainRecv(this Box b) {
     return b.Tag;
 }
 
-[GoType] partial interface Bumper {
+partial interface Bumper {
     nint BumpedRecv();
 }
 

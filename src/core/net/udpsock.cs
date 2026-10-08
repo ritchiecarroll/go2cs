@@ -20,7 +20,7 @@ partial class net_package {
 // implemented.
 
 // UDPAddr represents the address of a UDP end point.
-[GoType] partial struct UDPAddr {
+partial struct UDPAddr {
     public IP IP;
     public nint Port;
     public @string Zone; // IPv6 scoped addressing zone
@@ -43,7 +43,7 @@ public static netip.AddrPort AddrPort(this ж<UDPAddr> Ꮡa) {
 }
 
 // Network returns the address's network name, "udp".
-[GoRecv] public static @string Network(this ref UDPAddr a) {
+public static @string Network(this ref UDPAddr a) {
     return udpˢ;
 }
 
@@ -122,7 +122,7 @@ public static ж<UDPAddr> UDPAddrFromAddrPort(netip.AddrPort addr) {
 }
 
 // An addrPortUDPAddr is a netip.AddrPort-based UDP address that satisfies the Addr interface.
-[GoType] partial struct addrPortUDPAddr {
+partial struct addrPortUDPAddr {
     public partial ref net.netip_package.AddrPort AddrPort { get; }
 }
 
@@ -132,7 +132,7 @@ internal static @string Network(this addrPortUDPAddr _) {
 
 // UDPConn is the implementation of the [Conn] and [PacketConn] interfaces
 // for UDP network connections.
-[GoType] partial struct UDPConn {
+partial struct UDPConn {
     internal partial ref conn conn { get; }
 }
 

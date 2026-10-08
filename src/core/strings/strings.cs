@@ -450,7 +450,7 @@ public static slice<@string> Fields(@string s) {
 
 // A span is used to record a slice of s of the form s[start:end].
 // The start index is inclusive and the end index is exclusive.
-[GoType("dyn")] internal partial struct FieldsFunc_span {
+internal partial struct FieldsFunc_span /*dyn*/ {
     internal nint start;
     internal nint end;
 }
@@ -954,7 +954,7 @@ internal static nint lastIndexFunc(@string s, Func<rune, bool> f, bool truth) {
     return -1;
 }
 
-[GoType("[8]uint32")] partial struct asciiSet;
+partial struct asciiSet /*[8]uint32*/;
 
 // makeASCIISet creates a set of ASCII characters and reports whether all
 // characters in chars are ASCII.
@@ -972,7 +972,7 @@ internal static (asciiSet @as, bool ok) makeASCIISet(@string chars) {
 }
 
 // contains reports whether c is inside the set.
-[GoRecv] internal static bool contains(this ref asciiSet @as, byte c) {
+internal static bool contains(this ref asciiSet @as, byte c) {
     return ((uint32)(@as.Value[c / 32] & (((uint32)1 << (int)((c % 32)))))) != 0;
 }
 

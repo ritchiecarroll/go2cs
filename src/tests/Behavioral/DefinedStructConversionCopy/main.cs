@@ -4,19 +4,19 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] public partial struct counts {
+public partial struct counts {
     internal array<nint> vals = new(4);
     internal nint n;
 }
 
-[GoType("counts")] partial struct Counts;
+partial struct Counts /*counts*/;
 
-[GoType] public partial struct grid {
+public partial struct grid {
     internal array<array<nint>> cells = new(2, () => new(3));
     internal array<counts> tags = new(2, () => new());
 }
 
-[GoType("grid")] partial struct Grid;
+partial struct Grid /*grid*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object toBaseˢ = (@string)"to base:"u8;

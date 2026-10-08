@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct node {
+partial struct node {
     internal any inner;
 }
 
-[GoType] partial struct pair {
+partial struct pair {
     internal @string label;
     internal any value;
 }

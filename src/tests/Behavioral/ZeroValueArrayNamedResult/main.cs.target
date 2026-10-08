@@ -5,13 +5,13 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct ticket {
+partial struct ticket {
     internal array<byte> aesKey = new(16);
     internal array<byte> hmacKey = new(16);
     internal nint seq;
 }
 
-[GoType] partial struct box {
+partial struct box {
     internal nint id;
     internal ticket t;
 }
@@ -30,7 +30,7 @@ internal static void putUint64(slice<byte> b, uint64 v) {
     }
 }
 
-internal static partial ticket /*key*/ ticketFromBytes([GoArrayDims(32)] array<byte> b) {
+internal static partial ticket /*key*/ ticketFromBytes(/*[32]*/ array<byte> b) {
     ticket key = new();
 
     b = b.Clone();

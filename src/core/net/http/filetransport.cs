@@ -12,7 +12,7 @@ using go.io;
 partial class http_package {
 
 // fileTransport implements RoundTripper for the 'file' protocol.
-[GoType] partial struct fileTransport {
+partial struct fileTransport {
     internal fileHandler fh;
 }
 
@@ -87,7 +87,7 @@ internal static (ж<populateResponse>, /*<-*/channel<ж<Response>>) newPopulateR
 // in res, and writes its body to a pipe connected to the response
 // body. Once writes begin or finish() is called, the response is sent
 // on ch.
-[GoType] partial struct populateResponse {
+partial struct populateResponse {
     internal ж<Response> res;
     internal channel<ж<Response>> ch;
     internal bool wroteHeader;
@@ -96,7 +96,7 @@ internal static (ж<populateResponse>, /*<-*/channel<ж<Response>>) newPopulateR
     internal ж<io.PipeWriter> pw;
 }
 
-[GoRecv] internal static void finish(this ref populateResponse pr) {
+internal static void finish(this ref populateResponse pr) {
     if (!pr.wroteHeader) {
         pr.WriteHeader(500);
     }
@@ -106,7 +106,7 @@ internal static (ж<populateResponse>, /*<-*/channel<ж<Response>>) newPopulateR
     pr.pw.Close();
 }
 
-[GoRecv] internal static void sendResponse(this ref populateResponse pr) {
+internal static void sendResponse(this ref populateResponse pr) {
     if (pr.sentResponse) {
         return;
     }
@@ -117,11 +117,11 @@ internal static (ж<populateResponse>, /*<-*/channel<ж<Response>>) newPopulateR
     pr.ch.ᐸꟷ(pr.res);
 }
 
-[GoRecv] internal static ΔHeader Header(this ref populateResponse pr) {
+internal static ΔHeader Header(this ref populateResponse pr) {
     return (~pr.res).Header;
 }
 
-[GoRecv] internal static void WriteHeader(this ref populateResponse pr, nint code) {
+internal static void WriteHeader(this ref populateResponse pr, nint code) {
     if (pr.wroteHeader) {
         return;
     }
@@ -130,7 +130,7 @@ internal static (ж<populateResponse>, /*<-*/channel<ж<Response>>) newPopulateR
     pr.res.Value.Status = fmt.Sprintf("%d %s"u8, code, StatusText(code));
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref populateResponse pr, slice<byte> p) {
+internal static (nint n, error err) Write(this ref populateResponse pr, slice<byte> p) {
     if (!pr.wroteHeader) {
         pr.WriteHeader(StatusOK);
     }

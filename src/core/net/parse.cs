@@ -15,17 +15,17 @@ using go.io;
 
 partial class net_package {
 
-[GoType] partial struct Δfile {
+partial struct Δfile {
     internal ж<os.File> ΔΔfile;
     internal slice<byte> data;
     internal bool atEOF;
 }
 
-[GoRecv] internal static void close(this ref Δfile f) {
+internal static void close(this ref Δfile f) {
     f.ΔΔfile.Close();
 }
 
-[GoRecv] internal static (@string s, bool ok) getLineFromData(this ref Δfile f) {
+internal static (@string s, bool ok) getLineFromData(this ref Δfile f) {
     @string s = default!;
     bool ok = default!;
 
@@ -52,7 +52,7 @@ partial class net_package {
     return (s, ok);
 }
 
-[GoRecv] internal static (@string s, bool ok) readLine(this ref Δfile f) {
+internal static (@string s, bool ok) readLine(this ref Δfile f) {
     @string s = default!;
     bool ok = default!;
 
@@ -75,7 +75,7 @@ partial class net_package {
     return (s, ok);
 }
 
-[GoRecv] internal static (time.Time mtime, int64 size, error err) stat(this ref Δfile f) {
+internal static (time.Time mtime, int64 size, error err) stat(this ref Δfile f) {
     error err = default!;
 
     (var st, err) = f.ΔΔfile.Stat();

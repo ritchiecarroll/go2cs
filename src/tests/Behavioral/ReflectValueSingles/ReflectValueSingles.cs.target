@@ -23,25 +23,25 @@ internal static void expectPanic(@string label, @string want, Action f) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct gA {
+partial struct gA {
 }
 
-[GoType] partial struct gB<T> {
+partial struct gB<T> {
 }
 
-[GoType("num:nint")] partial struct integer;
+partial struct integer /*num:nint*/;
 
-[GoType("[]byte")] partial struct MyBytes;
+partial struct MyBytes /*[]byte*/;
 
-[GoType("[0]byte")] partial struct MyBytesArray0;
+partial struct MyBytesArray0 /*[0]byte*/;
 
-[GoType("[4]byte")] partial struct MyBytesArray;
+partial struct MyBytesArray /*[4]byte*/;
 
-[GoType("ж<array<byte>>")] [GoArrayDims(0)] partial class MyBytesArrayPtr0;
+/*[0]*/ partial class MyBytesArrayPtr0 /*ж<array<byte>>*/;
 
-[GoType("ж<array<byte>>")] [GoArrayDims(4)] partial class MyBytesArrayPtr;
+/*[4]*/ partial class MyBytesArrayPtr /*ж<array<byte>>*/;
 
-[GoType("global::go.bytes_package.Buffer")] partial struct MyBuffer;
+partial struct MyBuffer /*global::go.bytes_package.Buffer*/;
 
 internal static void convRow(@string label, any x, any want) {
     GoFrame ᒐ = default;
@@ -60,11 +60,11 @@ internal static void convRow(@string label, any x, any want) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("chan nint")] partial struct IntChan;
+partial struct IntChan /*chan nint*/;
 
-[GoType("chan nint")] [GoChanDir(GoChanDir.Recv)] partial struct IntChanRecv;
+partial struct IntChanRecv /*<-chan nint*/;
 
-[GoType("chan nint")] [GoChanDir(GoChanDir.Send)] partial struct IntChanSend;
+partial struct IntChanSend /*chan<- nint*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string setLen10ˢ = "SetLen(10)"u8;
@@ -171,28 +171,28 @@ private static readonly object myBytesArrayPtrIdentityˢ = (@string)"MyBytesArra
 private static readonly object myBytesArrayPtr0Identityˢ = (@string)"MyBytesArrayPtr0 identity value/slot/elem:"u8;
 private static readonly object ptrSlotNewReDescribesˢ = (@string)"ptr slot New re-describes:"u8;
 
-[GoLocalName("S")] [GoType("[]byte")] internal partial struct main_S;
+internal partial struct main_S /*[]byte*/;
 
-[GoLocalName("A")] [GoType("[4]byte")] internal partial struct main_A;
+internal partial struct main_A /*[4]byte*/;
 
-[GoLocalName("B")] [GoType("num:byte")] internal partial struct main_B;
+internal partial struct main_B /*num:byte*/;
 
-[GoLocalName("SB")] [GoType("[]main_B")] internal partial struct main_SB;
+internal partial struct main_SB /*[]main_B*/;
 
-[GoLocalName("AB")] [GoType("[4]main_B")] internal partial struct main_AB;
+internal partial struct main_AB /*[4]main_B*/;
 
-[GoLocalName("MyBuffer")] [GoType("global::go.bytes_package.Buffer")] internal partial struct main_MyBuffer;
+internal partial struct main_MyBuffer /*global::go.bytes_package.Buffer*/;
 
-[GoType("dyn")] internal partial struct main_holder {
+internal partial struct main_holder /*dyn*/ {
     internal ж<nint> p;
 }
 
-[GoType("dyn")] internal partial struct main_chanSlots {
+internal partial struct main_chanSlots /*dyn*/ {
     public IntChanRecv R;
     public IntChanSend S;
 }
 
-[GoType("dyn")] internal partial struct main_ptrSlots {
+internal partial struct main_ptrSlots /*dyn*/ {
     public MyBytesArrayPtr P;
     public MyBytesArrayPtr0 Z;
 }

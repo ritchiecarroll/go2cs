@@ -4,19 +4,19 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface shape {
+partial interface shape {
     @string name();
 }
 
-[GoType] partial struct circle {
+partial struct circle {
     internal nint r;
 }
 
-[GoType] partial struct square {
+partial struct square {
     internal nint s;
 }
 
-[GoType] partial struct dot {
+partial struct dot {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

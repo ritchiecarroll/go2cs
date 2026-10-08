@@ -6,43 +6,43 @@ using Δsync = sync_package;
 
 partial class main_package {
 
-[GoType] partial struct point {
+partial struct point {
     internal nint x, y;
     internal slice<@string> tags;
 }
 
-[GoType] partial struct node {
+partial struct node {
     internal nint val;
     internal ж<node> next;
 }
 
-[GoType("map[@string, nint]")] partial struct named;
+partial struct named /*map[@string, nint]*/;
 
-[GoType("map[any, nint]")] partial struct namedAny;
+partial struct namedAny /*map[any, nint]*/;
 
-[GoType("map[@string, slice<nint>]")] partial struct namedSlices;
+partial struct namedSlices /*map[@string, slice<nint>]*/;
 
-[GoType("[]byte")] partial struct charData;
+partial struct charData /*[]byte*/;
 
-[GoType("num:byte")] partial struct myByte;
+partial struct myByte /*num:byte*/;
 
-[GoType("[]myByte")] partial struct myBytes;
+partial struct myBytes /*[]myByte*/;
 
-[GoType("[]@string")] partial struct names;
+partial struct names /*[]@string*/;
 
-[GoType("[]any")] partial struct recur;
+partial struct recur /*[]any*/;
 
-[GoType] partial struct wrap {
+partial struct wrap {
     internal named m;
 }
 
-[GoType] partial struct hooks {
+partial struct hooks {
     internal @string name;
     internal Func<nint, nint> fill;
     internal Action step;
 }
 
-[GoType] partial struct guarded {
+partial struct guarded {
     internal Δsync.Mutex mu;
     internal Δsync.RWMutex rw;
     internal Δsync.Once once;

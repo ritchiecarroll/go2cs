@@ -95,27 +95,27 @@ internal static UntypedInt _O_TRUNC => 0x400;
 internal static UntypedInt _VM_REGION_BASIC_INFO_COUNT_64 => 0x9;
 internal static UntypedInt _VM_REGION_BASIC_INFO_64 => 0x9;
 
-[GoType] partial struct stackt {
+partial struct stackt {
     internal ж<byte> ss_sp;
     internal uintptr ss_size;
     internal int32 ss_flags;
     internal array<byte> pad_cgo_0 = new(4);
 }
 
-[GoType] partial struct sigactiont {
+partial struct sigactiont {
     internal array<byte> __sigaction_u = new(8);
     internal @unsafe.Pointer sa_tramp;
     internal uint32 sa_mask;
     internal int32 sa_flags;
 }
 
-[GoType] partial struct usigactiont {
+partial struct usigactiont {
     internal array<byte> __sigaction_u = new(8);
     internal uint32 sa_mask;
     internal int32 sa_flags;
 }
 
-[GoType] partial struct siginfo {
+partial struct siginfo {
     internal int32 si_signo;
     internal int32 si_errno;
     internal int32 si_code;
@@ -128,50 +128,50 @@ internal static UntypedInt _VM_REGION_BASIC_INFO_64 => 0x9;
     internal array<uint64> __pad = new(7);
 }
 
-[GoType] partial struct timeval {
+partial struct timeval {
     internal int64 tv_sec;
     internal int32 tv_usec;
     internal array<byte> pad_cgo_0 = new(4);
 }
 
-[GoRecv] internal static void set_usec(this ref timeval tv, int32 x) {
+internal static void set_usec(this ref timeval tv, int32 x) {
     tv.tv_usec = x;
 }
 
-[GoType] partial struct itimerval {
+partial struct itimerval {
     internal timeval it_interval;
     internal timeval it_value;
 }
 
-[GoType] partial struct timespec {
+partial struct timespec {
     internal int64 tv_sec;
     internal int64 tv_nsec;
 }
 
 //go:nosplit
-[GoRecv] internal static void setNsec(this ref timespec ts, int64 ns) {
+internal static void setNsec(this ref timespec ts, int64 ns) {
     ts.tv_sec = ns / 1000000000;
     ts.tv_nsec = ns % 1000000000;
 }
 
-[GoType] partial struct fpcontrol {
+partial struct fpcontrol {
     internal array<byte> pad_cgo_0 = new(2);
 }
 
-[GoType] partial struct fpstatus {
+partial struct fpstatus {
     internal array<byte> pad_cgo_0 = new(2);
 }
 
-[GoType] partial struct regmmst {
+partial struct regmmst {
     internal array<int8> mmst_reg = new(10);
     internal array<int8> mmst_rsrv = new(6);
 }
 
-[GoType] partial struct regxmm {
+partial struct regxmm {
     internal array<int8> xmm_reg = new(16);
 }
 
-[GoType] partial struct regs64 {
+partial struct regs64 {
     internal uint64 rax;
     internal uint64 rbx;
     internal uint64 rcx;
@@ -195,7 +195,7 @@ internal static UntypedInt _VM_REGION_BASIC_INFO_64 => 0x9;
     internal uint64 gs;
 }
 
-[GoType] partial struct floatstate64 {
+partial struct floatstate64 {
     internal array<int32> fpu_reserved = new(2);
     internal fpcontrol fpu_fcw;
     internal fpstatus fpu_fsw;
@@ -238,21 +238,21 @@ internal static UntypedInt _VM_REGION_BASIC_INFO_64 => 0x9;
     internal int32 fpu_reserved1;
 }
 
-[GoType] partial struct exceptionstate64 {
+partial struct exceptionstate64 {
     internal uint16 trapno;
     internal uint16 cpu;
     internal uint32 err;
     internal uint64 faultvaddr;
 }
 
-[GoType] partial struct mcontext64 {
+partial struct mcontext64 {
     internal exceptionstate64 es;
     internal regs64 ss;
     internal floatstate64 fs;
     internal array<byte> pad_cgo_0 = new(4);
 }
 
-[GoType] partial struct regs32 {
+partial struct regs32 {
     internal uint32 eax;
     internal uint32 ebx;
     internal uint32 ecx;
@@ -271,7 +271,7 @@ internal static UntypedInt _VM_REGION_BASIC_INFO_64 => 0x9;
     internal uint32 gs;
 }
 
-[GoType] partial struct floatstate32 {
+partial struct floatstate32 {
     internal array<int32> fpu_reserved = new(2);
     internal fpcontrol fpu_fcw;
     internal fpstatus fpu_fsw;
@@ -306,20 +306,20 @@ internal static UntypedInt _VM_REGION_BASIC_INFO_64 => 0x9;
     internal int32 fpu_reserved1;
 }
 
-[GoType] partial struct exceptionstate32 {
+partial struct exceptionstate32 {
     internal uint16 trapno;
     internal uint16 cpu;
     internal uint32 err;
     internal uint32 faultvaddr;
 }
 
-[GoType] partial struct mcontext32 {
+partial struct mcontext32 {
     internal exceptionstate32 es;
     internal regs32 ss;
     internal floatstate32 fs;
 }
 
-[GoType] partial struct ucontext {
+partial struct ucontext {
     internal int32 uc_onstack;
     internal uint32 uc_sigmask;
     internal stackt uc_stack;
@@ -328,7 +328,7 @@ internal static UntypedInt _VM_REGION_BASIC_INFO_64 => 0x9;
     internal ж<mcontext64> uc_mcontext;
 }
 
-[GoType] partial struct keventt {
+partial struct keventt {
     internal uint64 ident;
     internal int16 filter;
     internal uint16 flags;
@@ -337,50 +337,50 @@ internal static UntypedInt _VM_REGION_BASIC_INFO_64 => 0x9;
     internal ж<byte> udata;
 }
 
-[GoType("num:uintptr")] partial struct pthread;
+partial struct pthread /*num:uintptr*/;
 
-[GoType] partial struct pthreadattr {
+partial struct pthreadattr {
     public int64 X__sig;
     public array<int8> X__opaque = new(56);
 }
 
-[GoType] partial struct pthreadmutex {
+partial struct pthreadmutex {
     public int64 X__sig;
     public array<int8> X__opaque = new(56);
 }
 
-[GoType] partial struct pthreadmutexattr {
+partial struct pthreadmutexattr {
     public int64 X__sig;
     public array<int8> X__opaque = new(8);
 }
 
-[GoType] partial struct pthreadcond {
+partial struct pthreadcond {
     public int64 X__sig;
     public array<int8> X__opaque = new(40);
 }
 
-[GoType] partial struct pthreadcondattr {
+partial struct pthreadcondattr {
     public int64 X__sig;
     public array<int8> X__opaque = new(8);
 }
 
-[GoType] partial struct machTimebaseInfo {
+partial struct machTimebaseInfo {
     internal uint32 numer;
     internal uint32 denom;
 }
 
-[GoType("num:uint32")] partial struct machPort;
+partial struct machPort /*num:uint32*/;
 
-[GoType("num:uint32")] partial struct machVMMapRead;
+partial struct machVMMapRead /*num:uint32*/;
 
-[GoType("num:uint64")] partial struct machVMAddress;
+partial struct machVMAddress /*num:uint64*/;
 
-[GoType("num:uint64")] partial struct machVMSize;
+partial struct machVMSize /*num:uint64*/;
 
-[GoType("num:int32")] partial struct machVMRegionFlavour;
+partial struct machVMRegionFlavour /*num:int32*/;
 
-[GoType("ж<int32>")] partial class machVMRegionInfo;
+partial class machVMRegionInfo /*ж<int32>*/;
 
-[GoType("num:uint32")] partial struct machMsgTypeNumber;
+partial struct machMsgTypeNumber /*num:uint32*/;
 
 } // end runtime_package

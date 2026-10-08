@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct box {
+partial struct box {
     internal nint x;
     internal nint y;
 }
@@ -22,7 +22,7 @@ internal static void set(ref box p) {
     p.x = 42;
 }
 
-[GoType] partial struct payload {
+partial struct payload {
     internal slice<nint> vals;
 }
 

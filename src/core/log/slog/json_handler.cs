@@ -22,7 +22,7 @@ partial class slog_package {
 
 // JSONHandler is a [Handler] that writes Records to an [io.Writer] as
 // line-delimited JSON objects.
-[GoType] partial struct JSONHandler {
+partial struct JSONHandler {
     internal partial ref ж<commonHandler> commonHandler { get; }
 }
 
@@ -47,17 +47,17 @@ public static ж<JSONHandler> NewJSONHandler(io.Writer w, ж<HandlerOptions> Ꮡ
 
 // Enabled reports whether the handler handles records at the given level.
 // The handler ignores records whose level is lower.
-[GoRecv] public static bool Enabled(this ref JSONHandler h, context.Context _, ΔLevel level) {
+public static bool Enabled(this ref JSONHandler h, context.Context _, ΔLevel level) {
     return h.commonHandler.enabled(level);
 }
 
 // WithAttrs returns a new [JSONHandler] whose attributes consists
 // of h's attributes followed by attrs.
-[GoRecv] public static ΔHandler WithAttrs(this ref JSONHandler h, slice<Attr> attrs) {
+public static ΔHandler WithAttrs(this ref JSONHandler h, slice<Attr> attrs) {
     return new JSONHandlerжΔHandler(Ꮡ(new JSONHandler(commonHandler: h.commonHandler.withAttrs(attrs))));
 }
 
-[GoRecv] public static ΔHandler WithGroup(this ref JSONHandler h, @string name) {
+public static ΔHandler WithGroup(this ref JSONHandler h, @string name) {
     return new JSONHandlerжΔHandler(Ꮡ(new JSONHandler(commonHandler: h.commonHandler.withGroup(name))));
 }
 
@@ -91,7 +91,7 @@ public static ж<JSONHandler> NewJSONHandler(io.Writer w, ж<HandlerOptions> Ꮡ
 // Instead, the error message is formatted as a string.
 //
 // Each call to Handle results in a single serialized call to io.Writer.Write.
-[GoRecv] public static error Handle(this ref JSONHandler h, context.Context _, Record r) {
+public static error Handle(this ref JSONHandler h, context.Context _, Record r) {
     r = r.ΔClone();
 
     return h.commonHandler.handle(r);

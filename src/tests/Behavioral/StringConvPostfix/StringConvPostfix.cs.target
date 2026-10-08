@@ -36,6 +36,6 @@ internal static void Main() {
     fmt.Println(glyphs[frakˢ], glyphs["ae"u8], ((@string)glyphs[frakˢ]));
 }
 
-[GoType("[]byte")] partial struct sink;
+partial struct sink /*[]byte*/;
 
 } // end main_package

@@ -5,9 +5,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:nint")] partial struct ctxKey;
+partial struct ctxKey /*num:nint*/;
 
-[GoType] partial struct namedKey {
+partial struct namedKey {
     internal nint id;
 }
 

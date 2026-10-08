@@ -20,7 +20,7 @@ using go.net;
 partial class httptrace_package {
 
 // unique type to prevent assignment.
-[GoType] partial struct clientEventContextKey {
+partial struct clientEventContextKey {
 }
 
 // ContextClientTrace returns the [ClientTrace] associated with the
@@ -82,7 +82,7 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
 // of redirected requests.
 //
 // See https://blog.golang.org/http-tracing for more.
-[GoType] partial struct ClientTrace {
+partial struct ClientTrace {
     // GetConn is called before a connection is created or
     // retrieved from an idle pool. The hostPort is the
     // "host:port" of the target or proxy. GetConn is called even
@@ -155,7 +155,7 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
 
 // WroteRequestInfo contains information provided to the WroteRequest
 // hook.
-[GoType] partial struct WroteRequestInfo {
+partial struct WroteRequestInfo {
     // Err is any error encountered while writing the Request.
     public error Err;
 }
@@ -200,12 +200,12 @@ internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> Ꮡold) 
 }
 
 // DNSStartInfo contains information about a DNS request.
-[GoType] partial struct DNSStartInfo {
+partial struct DNSStartInfo {
     public @string Host;
 }
 
 // DNSDoneInfo contains information about the results of a DNS lookup.
-[GoType] partial struct DNSDoneInfo {
+partial struct DNSDoneInfo {
     // Addrs are the IPv4 and/or IPv6 addresses found in the DNS
     // lookup. The contents of the slice should not be mutated.
     public slice<net.IPAddr> Addrs;
@@ -227,7 +227,7 @@ internal static bool hasNetHooks(this ж<ClientTrace> Ꮡt) {
 
 // GotConnInfo is the argument to the [ClientTrace.GotConn] function and
 // contains information about the obtained connection.
-[GoType] partial struct GotConnInfo {
+partial struct GotConnInfo {
     // Conn is the connection that was obtained. It is owned by
     // the http.Transport and should not be read, written or
     // closed by users of ClientTrace.

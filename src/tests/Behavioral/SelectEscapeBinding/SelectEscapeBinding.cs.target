@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct boxedResult {
+partial struct boxedResult {
     internal nint value;
     internal @string tag;
 }

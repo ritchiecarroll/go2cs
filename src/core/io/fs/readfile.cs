@@ -9,7 +9,7 @@ partial class fs_package {
 
 // ReadFileFS is the interface implemented by a file system
 // that provides an optimized implementation of [ReadFile].
-[GoType] partial interface ReadFileFS :
+partial interface ReadFileFS :
     FS
 {
     // ReadFile reads the named file and returns its contents.

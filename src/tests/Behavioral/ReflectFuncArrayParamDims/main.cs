@@ -5,17 +5,17 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType] partial struct filler {
+partial struct filler {
 }
 
-internal static void FillPtr(this filler _, nint i, [GoArrayDims(3)] ж<array<nint>> Ꮡreply) {
+internal static void FillPtr(this filler _, nint i, /*[3]*/ ж<array<nint>> Ꮡreply) {
     ref var reply = ref Ꮡreply.DerefOrNull();
 
     reply[0] = i;
     reply[2] = i * 2;
 }
 
-internal static nint SumArray(this filler _, [GoArrayDims(4)] array<nint> @in) {
+internal static nint SumArray(this filler _, /*[4]*/ array<nint> @in) {
     @in = @in.Clone();
 
     nint total = 0;
@@ -25,11 +25,11 @@ internal static nint SumArray(this filler _, [GoArrayDims(4)] array<nint> @in) {
     return total;
 }
 
-[GoType] partial struct wrap {
+partial struct wrap {
     public array<byte> Buf = new(8);
 }
 
-internal static nint declared([GoArrayDims(16)] array<byte> @in) {
+internal static nint declared(/*[16]*/ array<byte> @in) {
     @in = @in.Clone();
 
     return len(@in);

@@ -5,14 +5,14 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct inner {
+partial struct inner {
     internal int64 a;
     internal int64 b;
 }
 
-[GoType("inner")] partial struct wrapper;
+partial struct wrapper /*inner*/;
 
-[GoType] partial struct box {
+partial struct box {
     internal wrapper w;
 }
 
@@ -35,7 +35,7 @@ internal static partial void bump(ref int64 p) {
     p = p + 7;
 }
 
-[GoType] partial struct @base {
+partial struct @base {
     internal int64 id;
 }
 
@@ -43,21 +43,21 @@ internal static int64 twice(this @base b) {
     return b.id * 2;
 }
 
-[GoType] partial struct derived {
+partial struct derived {
     internal partial ref @base @base { get; }
     internal int64 tag;
 }
 
-[GoType] partial struct @file {
+partial struct @file {
     internal int64 fd;
 }
 
-[GoRecv] internal static int64 bump(this ref @file f) {
+internal static int64 bump(this ref @file f) {
     f.fd += 2;
     return f.fd;
 }
 
-[GoType] partial struct mixed {
+partial struct mixed {
     public nint Pub;
     internal nint sec;
 }
@@ -98,11 +98,11 @@ internal static void Main() {
     fmt.Println(fl.bump(), (~fl).fd);
 }
 
-[GoType] partial struct ctxt {
+partial struct ctxt {
     internal nint fn, tag;
 }
 
-[GoType] partial struct shadowed {
+partial struct shadowed {
     internal partial ref ctxt ctxt { get; }
     internal nint fn;
 }

@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct T1 {
+partial struct T1 {
     internal @string name;
 }
 
@@ -22,7 +22,7 @@ public static @string Error(this T1 t) {
     return ""u8;
 }
 
-[GoType] partial struct T2 {
+partial struct T2 {
     internal @string name;
 }
 
@@ -40,11 +40,11 @@ public static @string Error(this T2 t) {
     return ""u8;
 }
 
-[GoType] partial interface I {
+partial interface I {
     void M();
 }
 
-[GoType] partial interface V :
+partial interface V :
     I,
     fmt.Stringer,
     error

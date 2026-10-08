@@ -44,7 +44,10 @@ public class ChanDirSigGeneratorTests
     private const string Send = "global::go.GoChanDir.Send";
     private const string Unstamped = "global::go.GoChanDir.Unstamped";
 
-    private static readonly Lazy<string[]> s_generated = new(RunOverFixture);
+    private static readonly Lazy<string[]> s_generated = new(() => RunOverFixture(FixtureSource()));
+
+    // The same fixture as face lift A's converter emits it: a Go pointer receiver is an unmarked `this ref T`.
+    private static readonly Lazy<string[]> s_generatedUnmarked = new(() => RunOverFixture(FixtureSource().Replace("[GoRecv] ", "")));
 
     // The committed fixture emission, found by walking up from the test binary to the repository's src.
     private static string FixtureSource()
@@ -60,15 +63,18 @@ public class ChanDirSigGeneratorTests
         throw new FileNotFoundException("src/tests/Behavioral/ReflectFuncChanDir/main.cs not found above " + AppContext.BaseDirectory);
     }
 
-    private static string[] RunOverFixture()
+    private static string[] RunOverFixture(string fixture) => RunWithDiagnostics(fixture).generated;
+
+    private static (string[] generated, Diagnostic[] diagnostics) RunWithDiagnostics(string source)
     {
         CSharpCompilation compilation = CSharpCompilation.Create("test",
-            [CSharpSyntaxTree.ParseText(FixtureSource()), CSharpSyntaxTree.ParseText(Stubs)],
+            [CSharpSyntaxTree.ParseText(source), CSharpSyntaxTree.ParseText(Stubs)],
             [MetadataReference.CreateFromFile(typeof(object).Assembly.Location)],
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new ChanDirSigGenerator());
-        return driver.RunGenerators(compilation).GetRunResult().GeneratedTrees.Select(tree => tree.ToString()).ToArray();
+        GeneratorDriverRunResult result = driver.RunGenerators(compilation).GetRunResult();
+        return (result.GeneratedTrees.Select(tree => tree.ToString()).ToArray(), result.Diagnostics.ToArray());
     }
 
     private static string Entry(string method, string[] parameterTypes, string[] parameterDirs, string[] resultDirs) =>
@@ -76,8 +82,10 @@ public class ChanDirSigGeneratorTests
         $"new global::go.GoChanDir[] {{ {string.Join(", ", parameterDirs)} }}, " +
         $"new global::go.GoChanDir[] {{ {string.Join(", ", resultDirs)} }})]";
 
-    private static string PackageClassPart() =>
-        s_generated.Value.Single(source => source.Contains("partial class main_package") && !source.Contains("partial interface"));
+    private static string PackageClassPart() => PackageClassPart(s_generated.Value);
+
+    private static string PackageClassPart(string[] generated) =>
+        generated.Single(source => source.Contains("partial class main_package") && !source.Contains("partial interface"));
 
     [TestMethod]
     public void ARecvParameterIsReadBeforeTheType()
@@ -131,5 +139,64 @@ public class ChanDirSigGeneratorTests
         string part = PackageClassPart();
         StringAssert.Contains(part, Entry("Feed", ["typeof(global::go.main_package.S)", "typeof(global::go.channel<nint>)"], [Unstamped, Send], []));
         StringAssert.Contains(part, Entry("Feed", ["typeof(global::go.ж<global::go.main_package.S>)", "typeof(global::go.channel<nint>)"], [Unstamped, Send], []));
+    }
+
+    // Face lift A: the converter writes no [GoRecv], so a pointer receiver is known by its unmarked `this ref`
+    // alone (MethodDeclarationSyntaxExtensions.IsPointerSetMethod), and still gets its boxed-receiver entry.
+    [TestMethod]
+    public void AnUnmarkedRefReceiverIsAlsoKeyedOnItsBoxedReceiverOverload()
+    {
+        string part = PackageClassPart(s_generatedUnmarked.Value);
+        StringAssert.Contains(part, Entry("Feed", ["typeof(global::go.main_package.S)", "typeof(global::go.channel<nint>)"], [Unstamped, Send], []));
+        StringAssert.Contains(part, Entry("Feed", ["typeof(global::go.ж<global::go.main_package.S>)", "typeof(global::go.channel<nint>)"], [Unstamped, Send], []));
+    }
+
+    // Face lift D2: a generic method is carried. A type built from a type parameter is keyed by its open definition,
+    // a bare type parameter by null, and a generic pointer receiver's boxed overload by the open ж<>.
+    [TestMethod]
+    public void AGenericMethodIsKeyedByOpenDefinitions()
+    {
+        const string source = """
+            namespace go;
+
+            public static partial class gen_package {
+                public partial struct Box<T> { }
+
+                internal static void Take<T>(/*<-*/channel<T> c) { }
+
+                internal static void Put<T>(this ref Box<T> b, T x, channel/*<-*/<T> c) { }
+            }
+            """;
+
+        (string[] generated, Diagnostic[] diagnostics) = RunWithDiagnostics(source);
+        Assert.AreEqual(0, diagnostics.Length, string.Join("\n", diagnostics.Select(diagnostic => diagnostic.ToString())));
+
+        string part = generated.Single(text => text.Contains("partial class gen_package"));
+        StringAssert.Contains(part, Entry("Take", ["typeof(global::go.channel<>)"], [Recv], []));
+        StringAssert.Contains(part, Entry("Put", ["typeof(global::go.gen_package.Box<>)", "null", "typeof(global::go.channel<>)"], [Unstamped, Unstamped, Send], []));
+        StringAssert.Contains(part, Entry("Put", ["typeof(global::go.ж<>)", "null", "typeof(global::go.channel<>)"], [Unstamped, Unstamped, Send], []));
+    }
+
+    // A key that would also match another method of the declaring type is refused at compile time, naming both,
+    // never written for golib to refuse at run time.
+    [TestMethod]
+    public void AKeyThatMatchesTwoMethodsIsAnErrorNamingBoth()
+    {
+        const string source = """
+            namespace go;
+
+            public static partial class gen_package {
+                internal static void Take<T>(/*<-*/channel<T> c) { }
+
+                internal static void Take(channel<nint> c) { }
+            }
+            """;
+
+        (string[] generated, Diagnostic[] diagnostics) = RunWithDiagnostics(source);
+        Diagnostic refusal = diagnostics.Single(diagnostic => diagnostic.Id == "GO2CS0003");
+        Assert.AreEqual(DiagnosticSeverity.Error, refusal.Severity);
+        StringAssert.Contains(refusal.GetMessage(), "Take<T>");
+        StringAssert.Contains(refusal.GetMessage(), "Take(go.channel<nint>)");
+        Assert.IsFalse(generated.Any(text => text.Contains("GoSigChanDir(\"Take\"")), "no entry is written for a refused key");
     }
 }

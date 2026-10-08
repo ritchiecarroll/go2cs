@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface sizer {
+partial interface sizer {
     nint size(@string of);
 }
 
-[GoType] partial struct flat {
+partial struct flat {
     internal nint n;
 }
 
@@ -16,13 +16,13 @@ internal static nint size(this flat f, @string of) {
     return f.n + len(of);
 }
 
-[GoType] partial struct config {
+partial struct config {
     internal sizer s;
 }
 
 internal static sizer std = new flat(n: 100);
 
-[GoRecv] internal static Func<@string, nint> pickSizer(this ref config c) {
+internal static Func<@string, nint> pickSizer(this ref config c) {
     var f = std.size;
     if (c.s != default!) {
         f = c.s.size;

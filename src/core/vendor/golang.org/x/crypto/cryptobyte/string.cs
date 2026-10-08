@@ -19,11 +19,11 @@ namespace go.vendor.golang.org.x.crypto;
 
 partial class cryptobyte_package {
 
-[GoType("[]byte")] partial struct String;
+partial struct String /*[]byte*/;
 
 // read advances a String by n bytes and returns them. If less than n bytes
 // remain, it returns nil.
-[GoRecv] internal static slice<byte> read(this ref String s, nint n) {
+internal static slice<byte> read(this ref String s, nint n) {
     if (len(s) < n || n < 0) {
         return default!;
     }
@@ -33,13 +33,13 @@ partial class cryptobyte_package {
 }
 
 // Skip advances the String by n byte and reports whether it was successful.
-[GoRecv] public static bool Skip(this ref String s, nint n) {
+public static bool Skip(this ref String s, nint n) {
     return s.read(n) != default!;
 }
 
 // ReadUint8 decodes an 8-bit value into out and advances over it.
 // It reports whether the read was successful.
-[GoRecv] public static bool ReadUint8(this ref String s, ж<uint8> Ꮡout) {
+public static bool ReadUint8(this ref String s, ж<uint8> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(1);
@@ -52,7 +52,7 @@ partial class cryptobyte_package {
 
 // ReadUint16 decodes a big-endian, 16-bit value into out and advances over it.
 // It reports whether the read was successful.
-[GoRecv] public static bool ReadUint16(this ref String s, ж<uint16> Ꮡout) {
+public static bool ReadUint16(this ref String s, ж<uint16> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(2);
@@ -65,7 +65,7 @@ partial class cryptobyte_package {
 
 // ReadUint24 decodes a big-endian, 24-bit value into out and advances over it.
 // It reports whether the read was successful.
-[GoRecv] public static bool ReadUint24(this ref String s, ж<uint32> Ꮡout) {
+public static bool ReadUint24(this ref String s, ж<uint32> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(3);
@@ -78,7 +78,7 @@ partial class cryptobyte_package {
 
 // ReadUint32 decodes a big-endian, 32-bit value into out and advances over it.
 // It reports whether the read was successful.
-[GoRecv] public static bool ReadUint32(this ref String s, ж<uint32> Ꮡout) {
+public static bool ReadUint32(this ref String s, ж<uint32> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(4);
@@ -91,7 +91,7 @@ partial class cryptobyte_package {
 
 // ReadUint48 decodes a big-endian, 48-bit value into out and advances over it.
 // It reports whether the read was successful.
-[GoRecv] public static bool ReadUint48(this ref String s, ж<uint64> Ꮡout) {
+public static bool ReadUint48(this ref String s, ж<uint64> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(6);
@@ -104,7 +104,7 @@ partial class cryptobyte_package {
 
 // ReadUint64 decodes a big-endian, 64-bit value into out and advances over it.
 // It reports whether the read was successful.
-[GoRecv] public static bool ReadUint64(this ref String s, ж<uint64> Ꮡout) {
+public static bool ReadUint64(this ref String s, ж<uint64> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(8);
@@ -115,7 +115,7 @@ partial class cryptobyte_package {
     return true;
 }
 
-[GoRecv] internal static bool readUnsigned(this ref String s, ж<uint32> Ꮡout, nint length) {
+internal static bool readUnsigned(this ref String s, ж<uint32> Ꮡout, nint length) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(length);
@@ -131,7 +131,7 @@ partial class cryptobyte_package {
     return true;
 }
 
-[GoRecv] internal static bool readLengthPrefixed(this ref String s, nint lenLen, ж<String> ᏑoutChild) {
+internal static bool readLengthPrefixed(this ref String s, nint lenLen, ж<String> ᏑoutChild) {
     ref var outChild = ref ᏑoutChild.DerefOrNull();
 
     var lenBytes = s.read(lenLen);
@@ -153,27 +153,27 @@ partial class cryptobyte_package {
 
 // ReadUint8LengthPrefixed reads the content of an 8-bit length-prefixed value
 // into out and advances over it. It reports whether the read was successful.
-[GoRecv] public static bool ReadUint8LengthPrefixed(this ref String s, ж<String> Ꮡout) {
+public static bool ReadUint8LengthPrefixed(this ref String s, ж<String> Ꮡout) {
     return s.readLengthPrefixed(1, Ꮡout);
 }
 
 // ReadUint16LengthPrefixed reads the content of a big-endian, 16-bit
 // length-prefixed value into out and advances over it. It reports whether the
 // read was successful.
-[GoRecv] public static bool ReadUint16LengthPrefixed(this ref String s, ж<String> Ꮡout) {
+public static bool ReadUint16LengthPrefixed(this ref String s, ж<String> Ꮡout) {
     return s.readLengthPrefixed(2, Ꮡout);
 }
 
 // ReadUint24LengthPrefixed reads the content of a big-endian, 24-bit
 // length-prefixed value into out and advances over it. It reports whether
 // the read was successful.
-[GoRecv] public static bool ReadUint24LengthPrefixed(this ref String s, ж<String> Ꮡout) {
+public static bool ReadUint24LengthPrefixed(this ref String s, ж<String> Ꮡout) {
     return s.readLengthPrefixed(3, Ꮡout);
 }
 
 // ReadBytes reads n bytes into out and advances over them. It reports
 // whether the read was successful.
-[GoRecv] public static bool ReadBytes(this ref String s, ж<slice<byte>> Ꮡout, nint n) {
+public static bool ReadBytes(this ref String s, ж<slice<byte>> Ꮡout, nint n) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(n);
@@ -186,7 +186,7 @@ partial class cryptobyte_package {
 
 // CopyBytes copies len(out) bytes into out and advances over them. It reports
 // whether the copy operation was successful
-[GoRecv] public static bool CopyBytes(this ref String s, slice<byte> @out) {
+public static bool CopyBytes(this ref String s, slice<byte> @out) {
     nint n = len(@out);
     var v = s.read(n);
     if (v == default!) {

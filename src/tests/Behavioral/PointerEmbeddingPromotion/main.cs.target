@@ -4,28 +4,28 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct leaf {
+partial struct leaf {
     internal nint n;
 }
 
-[GoRecv] internal static void bump(this ref leaf l) {
+internal static void bump(this ref leaf l) {
     l.n++;
 }
 
-[GoRecv] internal static nint get(this ref leaf l) {
+internal static nint get(this ref leaf l) {
     return l.n;
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal partial ref ж<leaf> leaf { get; }
     internal @string tag;
 }
 
-[GoType] partial struct mid {
+partial struct mid {
     internal partial ref ж<leaf> leaf { get; }
 }
 
-[GoType] partial struct top {
+partial struct top {
     internal partial ref mid mid { get; }
     internal @string label;
 }

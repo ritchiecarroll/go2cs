@@ -47,11 +47,11 @@ public static error ErrMissingFile = errors.New("http: no such file"u8);
 //
 // Deprecated: Not all errors in the http package related to protocol errors
 // are of type ProtocolError.
-[GoType] partial struct ProtocolError {
+partial struct ProtocolError {
     public @string ErrorString;
 }
 
-[GoRecv] public static @string Error(this ref ProtocolError pe) {
+public static @string Error(this ref ProtocolError pe) {
     return pe.ErrorString;
 }
 
@@ -88,7 +88,7 @@ internal static map<@string, bool> reqWriteExcludeHeader = new map<@string, bool
 // The field semantics differ slightly between client and server
 // usage. In addition to the notes on the fields below, see the
 // documentation for [Request.Write] and [RoundTripper].
-[GoType] partial struct Request {
+partial struct Request {
     // Method specifies the HTTP method (GET, POST, PUT, etc.).
     // For client requests, an empty string means GET.
     public @string Method;
@@ -306,7 +306,7 @@ internal static map<@string, bool> reqWriteExcludeHeader = new map<@string, bool
 // For incoming server requests, the context is canceled when the
 // client's connection closes, the request is canceled (with HTTP/2),
 // or when the ServeHTTP method returns.
-[GoRecv] public static context.Context Context(this ref Request r) {
+public static context.Context Context(this ref Request r) {
     if (r.ctx != default!) {
         return r.ctx;
     }
@@ -322,7 +322,7 @@ internal static map<@string, bool> reqWriteExcludeHeader = new map<@string, bool
 //
 // To create a new request with a context, use [NewRequestWithContext].
 // To make a deep copy of a request with a new context, use [Request.Clone].
-[GoRecv] public static ж<Request> WithContext(this ref Request r, context.Context ctx) {
+public static ж<Request> WithContext(this ref Request r, context.Context ctx) {
     if (ctx == default!) {
         throw panic("nil context");
     }
@@ -340,7 +340,7 @@ internal static map<@string, bool> reqWriteExcludeHeader = new map<@string, bool
 // For an outgoing client request, the context controls the entire
 // lifetime of a request and its response: obtaining a connection,
 // sending the request, and reading the response headers and body.
-[GoRecv] public static ж<Request> Clone(this ref Request r, context.Context ctx) {
+public static ж<Request> Clone(this ref Request r, context.Context ctx) {
     if (ctx == default!) {
         throw panic("nil context");
     }
@@ -374,7 +374,7 @@ internal static map<@string, bool> reqWriteExcludeHeader = new map<@string, bool
 
 // ProtoAtLeast reports whether the HTTP protocol used
 // in the request is at least major.minor.
-[GoRecv] public static bool ProtoAtLeast(this ref Request r, nint major, nint minor) {
+public static bool ProtoAtLeast(this ref Request r, nint major, nint minor) {
     return r.ProtoMajor > major || r.ProtoMajor == major && r.ProtoMinor >= minor;
 }
 
@@ -382,18 +382,18 @@ internal static map<@string, bool> reqWriteExcludeHeader = new map<@string, bool
 internal static readonly @string userAgentˢ2 = "User-Agent"u8;
 
 // UserAgent returns the client's User-Agent, if sent in the request.
-[GoRecv] public static @string UserAgent(this ref Request r) {
+public static @string UserAgent(this ref Request r) {
     return r.Header.Get(userAgentˢ2);
 }
 
 // Cookies parses and returns the HTTP cookies sent with the request.
-[GoRecv] public static slice<ж<ΔCookie>> Cookies(this ref Request r) {
+public static slice<ж<ΔCookie>> Cookies(this ref Request r) {
     return readCookies(r.Header, ""u8);
 }
 
 // CookiesNamed parses and returns the named HTTP cookies sent with the request
 // or an empty slice if none matched.
-[GoRecv] public static slice<ж<ΔCookie>> CookiesNamed(this ref Request r, @string name) {
+public static slice<ж<ΔCookie>> CookiesNamed(this ref Request r, @string name) {
     if (name == ""u8) {
         return new ж<ΔCookie>[]{}.slice();
     }
@@ -407,7 +407,7 @@ public static error ErrNoCookie = errors.New("http: named cookie not present"u8)
 // [ErrNoCookie] if not found.
 // If multiple cookies match the given name, only one cookie will
 // be returned.
-[GoRecv] public static (ж<ΔCookie>, error) Cookie(this ref Request r, @string name) {
+public static (ж<ΔCookie>, error) Cookie(this ref Request r, @string name) {
     if (name == ""u8) {
         return (default!, ErrNoCookie);
     }
@@ -423,7 +423,7 @@ public static error ErrNoCookie = errors.New("http: named cookie not present"u8)
 // separated by semicolon.
 // AddCookie only sanitizes c's name and value, and does not sanitize
 // a Cookie header already present in the request.
-[GoRecv] public static void AddCookie(this ref Request r, ж<ΔCookie> Ꮡc) {
+public static void AddCookie(this ref Request r, ж<ΔCookie> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     @string s = fmt.Sprintf("%s=%s"u8, sanitizeCookieName(c.Name), sanitizeCookieValue(c.Value, c.Quoted));
@@ -444,7 +444,7 @@ public static error ErrNoCookie = errors.New("http: named cookie not present"u8)
 // as a method is that the compiler can diagnose programs that use the
 // alternate (correct English) spelling req.Referrer() but cannot
 // diagnose programs that use Header["Referrer"].
-[GoRecv] public static @string Referer(this ref Request r) {
+public static @string Referer(this ref Request r) {
     return r.Header.Get(refererˢ);
 }
 
@@ -464,7 +464,7 @@ internal static readonly @string httpMultipartHandledByˢ = "http: multipart han
 // multipart/form-data or a multipart/mixed POST request, else returns nil and an error.
 // Use this function instead of [Request.ParseMultipartForm] to
 // process the request body as a stream.
-[GoRecv] public static (ж<multipart.Reader>, error) MultipartReader(this ref Request r) {
+public static (ж<multipart.Reader>, error) MultipartReader(this ref Request r) {
     if (r.MultipartForm == multipartByReader) {
         return (default!, errors.New(httpMultipartReaderˢ));
     }
@@ -479,7 +479,7 @@ internal static readonly @string httpMultipartHandledByˢ = "http: multipart han
 internal static readonly @string missingFormBodyˢ = "missing form body"u8;
 internal static readonly @string boundaryˢ = "boundary"u8;
 
-[GoRecv] internal static (ж<multipart.Reader>, error) multipartReader(this ref Request r, bool allowMixed) {
+internal static (ж<multipart.Reader>, error) multipartReader(this ref Request r, bool allowMixed) {
     @string v = r.Header.Get(contentTypeˢ);
     if (v == ""u8) {
         return (default!, new ProtocolErrorжerror(ErrNotMultipart));
@@ -500,7 +500,7 @@ internal static readonly @string boundaryˢ = "boundary"u8;
 
 // isH2Upgrade reports whether r represents the http2 "client preface"
 // magic string.
-[GoRecv] internal static bool isH2Upgrade(this ref Request r) {
+internal static bool isH2Upgrade(this ref Request r) {
     return r.Method == "PRI"u8 && builtin.len(r.Header) == 0 && (~r.URL).Path == "*"u8 && r.Proto == "HTTP/2.0"u8;
 }
 
@@ -760,8 +760,8 @@ internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usi
 // requestBodyReadError wraps an error from (*Request).write to indicate
 // that the error came from a Read call on the Request.Body.
 // This error type should not escape the net/http package to users.
-[GoType] partial struct requestBodyReadError {
-    [GoEmbedded] internal error error;
+partial struct requestBodyReadError {
+    /*embed*/ internal error error;
 }
 
 internal static (@string, error) idnaASCII(@string v) {
@@ -978,7 +978,7 @@ public static (ж<Request>, error) NewRequestWithContext(context.Context ctx, @s
 // BasicAuth returns the username and password provided in the request's
 // Authorization header, if the request uses HTTP Basic Authentication.
 // See RFC 2617, Section 2.
-[GoRecv] public static (@string username, @string password, bool ok) BasicAuth(this ref Request r) {
+public static (@string username, @string password, bool ok) BasicAuth(this ref Request r) {
     @string auth = r.Header.Get(authorizationˢ);
     if (auth == ""u8) {
         return ("", "", false);
@@ -1034,7 +1034,7 @@ internal static (@string username, @string password, bool ok) parseBasicAuth(@st
 // additional requirements on pre-escaping the username and
 // password. For instance, when used with OAuth2, both arguments must
 // be URL encoded first with [url.QueryEscape].
-[GoRecv] public static void SetBasicAuth(this ref Request r, @string username, @string password) {
+public static void SetBasicAuth(this ref Request r, @string username, @string password) {
     r.Header.Set(authorizationˢ, "Basic "u8 + basicAuth(username, password));
 }
 
@@ -1223,19 +1223,19 @@ public static io.ReadCloser MaxBytesReader(ResponseWriter w, io.ReadCloser r, in
 }
 
 // MaxBytesError is returned by [MaxBytesReader] when its read limit is exceeded.
-[GoType] partial struct MaxBytesError {
+partial struct MaxBytesError {
     public int64 Limit;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string httpRequestBodyTooLargeˢ = "http: request body too large"u8;
 
-[GoRecv] public static @string Error(this ref MaxBytesError e) {
+public static @string Error(this ref MaxBytesError e) {
     // Due to Hyrum's law, this text cannot be changed.
     return httpRequestBodyTooLargeˢ;
 }
 
-[GoType] partial struct maxBytesReader {
+partial struct maxBytesReader {
     internal ResponseWriter w;
     internal io.ReadCloser r; // underlying reader
     internal int64 i;         // max bytes initially, for MaxBytesError
@@ -1250,11 +1250,11 @@ internal static readonly @string httpRequestBodyTooLargeˢ = "http: request body
 // cmd/go) from also linking in the HTTP server, don't
 // use a static type assertion to the server
 // "*response" type. Check this interface instead:
-[GoType("dyn")] internal partial interface Read_requestTooLarger {
+internal partial interface Read_requestTooLarger /*dyn*/ {
     void requestTooLarge();
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref maxBytesReader l, slice<byte> p) {
+internal static (nint n, error err) Read(this ref maxBytesReader l, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -1288,7 +1288,7 @@ internal static readonly @string httpRequestBodyTooLargeˢ = "http: request body
     return (n, l.err);
 }
 
-[GoRecv] internal static error Close(this ref maxBytesReader l) {
+internal static error Close(this ref maxBytesReader l) {
     return l.r.Close();
 }
 
@@ -1531,7 +1531,7 @@ public static (multipart.File, ж<multipart.FileHeader>, error) FormFile(this ж
 // that matched the request.
 // It returns the empty string if the request was not matched against a pattern
 // or there is no such wildcard in the pattern.
-[GoRecv] public static @string PathValue(this ref Request r, @string name) {
+public static @string PathValue(this ref Request r, @string name) {
     {
         nint i = r.patIndex(name); if (i >= 0) {
             return r.matches[i];
@@ -1542,7 +1542,7 @@ public static (multipart.File, ж<multipart.FileHeader>, error) FormFile(this ж
 
 // SetPathValue sets name to value, so that subsequent calls to r.PathValue(name)
 // return value.
-[GoRecv] public static void SetPathValue(this ref Request r, @string name, @string value) {
+public static void SetPathValue(this ref Request r, @string name, @string value) {
     {
         nint i = r.patIndex(name); if (i >= 0){
             r.matches[i] = value;
@@ -1557,7 +1557,7 @@ public static (multipart.File, ж<multipart.FileHeader>, error) FormFile(this ж
 
 // patIndex returns the index of name in the list of named wildcards of the
 // request's pattern, or -1 if there is no such name.
-[GoRecv] internal static nint patIndex(this ref Request r, @string name) {
+internal static nint patIndex(this ref Request r, @string name) {
     // The linear search seems expensive compared to a map, but just creating the map
     // takes a lot of time, and most patterns will just have a couple of wildcards.
     if (r.pat == nil) {
@@ -1575,25 +1575,25 @@ public static (multipart.File, ж<multipart.FileHeader>, error) FormFile(this ж
     return -1;
 }
 
-[GoRecv] internal static bool expectsContinue(this ref Request r) {
+internal static bool expectsContinue(this ref Request r) {
     return hasToken(r.Header.get(expectˢ), continueˢ);
 }
 
-[GoRecv] internal static bool wantsHttp10KeepAlive(this ref Request r) {
+internal static bool wantsHttp10KeepAlive(this ref Request r) {
     if (r.ProtoMajor != 1 || r.ProtoMinor != 0) {
         return false;
     }
     return hasToken(r.Header.get(connectionˢ), keepAliveˢ);
 }
 
-[GoRecv] internal static bool wantsClose(this ref Request r) {
+internal static bool wantsClose(this ref Request r) {
     if (r.Close) {
         return true;
     }
     return hasToken(r.Header.get(connectionˢ), closeˢ);
 }
 
-[GoRecv] internal static error closeBody(this ref Request r) {
+internal static error closeBody(this ref Request r) {
     if (r.Body == default!) {
         return default!;
     }
@@ -1604,7 +1604,7 @@ public static (multipart.File, ж<multipart.FileHeader>, error) FormFile(this ж
 internal static readonly @string idempotencyKeyˢ = "Idempotency-Key"u8;
 internal static readonly @string xIdempotencyKeyˢ = "X-Idempotency-Key"u8;
 
-[GoRecv] internal static bool isReplayable(this ref Request r) {
+internal static bool isReplayable(this ref Request r) {
     if (r.Body == default! || AreEqual(r.Body, NoBody) || r.GetBody != default!) {
         var exprᴛ1 = valueOrDefault(r.Method, getˢ);
         if (exprᴛ1 == "GET"u8 || exprᴛ1 == "HEAD"u8 || exprᴛ1 == "OPTIONS"u8 || exprᴛ1 == "TRACE"u8) {
@@ -1623,7 +1623,7 @@ internal static readonly @string xIdempotencyKeyˢ = "X-Idempotency-Key"u8;
 
 // outgoingLength reports the Content-Length of this outgoing (Client) request.
 // It maps 0 into -1 (unknown) when the Body is non-nil.
-[GoRecv] internal static int64 outgoingLength(this ref Request r) {
+internal static int64 outgoingLength(this ref Request r) {
     if (r.Body == default! || AreEqual(r.Body, NoBody)) {
         return 0;
     }
@@ -1654,7 +1654,7 @@ internal static readonly @string websocketˢ = "websocket"u8;
 
 // requiresHTTP1 reports whether this request requires being sent on
 // an HTTP/1 connection.
-[GoRecv] internal static bool requiresHTTP1(this ref Request r) {
+internal static bool requiresHTTP1(this ref Request r) {
     return hasToken(r.Header.Get(connectionˢ), upgradeˢ2) && ascii.EqualFold(r.Header.Get(upgradeˢ), websocketˢ);
 }
 

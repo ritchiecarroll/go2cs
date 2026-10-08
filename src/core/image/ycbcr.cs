@@ -8,7 +8,7 @@ using image;
 
 partial class image_package {
 
-[GoType("num:nint")] partial struct YCbCrSubsampleRatio;
+partial struct YCbCrSubsampleRatio /*num:nint*/;
 
 public static YCbCrSubsampleRatio YCbCrSubsampleRatio444 => /* iota */ 0;
 public static YCbCrSubsampleRatio YCbCrSubsampleRatio422 => 1;
@@ -63,7 +63,7 @@ public static @string String(this YCbCrSubsampleRatio s) {
 //	For 4:4:0, CStride == YStride/1 && len(Cb) == len(Cr) == len(Y)/2.
 //	For 4:1:1, CStride == YStride/4 && len(Cb) == len(Cr) == len(Y)/4.
 //	For 4:1:0, CStride == YStride/4 && len(Cb) == len(Cr) == len(Y)/8.
-[GoType] partial struct YCbCr {
+partial struct YCbCr {
     public slice<uint8> Y, Cb, Cr;
     public nint YStride;
     public nint CStride;
@@ -71,24 +71,24 @@ public static @string String(this YCbCrSubsampleRatio s) {
     public Rectangle Rect;
 }
 
-[GoRecv] public static color.Model ColorModel(this ref YCbCr p) {
+public static color.Model ColorModel(this ref YCbCr p) {
     return color.YCbCrModel;
 }
 
-[GoRecv] public static Rectangle Bounds(this ref YCbCr p) {
+public static Rectangle Bounds(this ref YCbCr p) {
     return p.Rect;
 }
 
-[GoRecv] public static color.Color At(this ref YCbCr p, nint x, nint y) {
+public static color.Color At(this ref YCbCr p, nint x, nint y) {
     return p.YCbCrAt(x, y);
 }
 
-[GoRecv] public static color.RGBA64 RGBA64At(this ref YCbCr p, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this ref YCbCr p, nint x, nint y) {
     var (r, g, b, a) = p.YCbCrAt(x, y).RGBA();
     return new color.RGBA64((uint16)r, (uint16)g, (uint16)b, (uint16)a);
 }
 
-[GoRecv] public static color.YCbCr YCbCrAt(this ref YCbCr p, nint x, nint y) {
+public static color.YCbCr YCbCrAt(this ref YCbCr p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
         return new color.YCbCr(nil);
     }
@@ -103,13 +103,13 @@ public static @string String(this YCbCrSubsampleRatio s) {
 
 // YOffset returns the index of the first element of Y that corresponds to
 // the pixel at (x, y).
-[GoRecv] public static nint YOffset(this ref YCbCr p, nint x, nint y) {
+public static nint YOffset(this ref YCbCr p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.YStride + (x - p.Rect.Min.X);
 }
 
 // COffset returns the index of the first element of Cb or Cr that corresponds
 // to the pixel at (x, y).
-[GoRecv] public static nint COffset(this ref YCbCr p, nint x, nint y) {
+public static nint COffset(this ref YCbCr p, nint x, nint y) {
     var exprᴛ1 = p.SubsampleRatio;
     if (exprᴛ1 == YCbCrSubsampleRatio422) {
         return (y - p.Rect.Min.Y) * p.CStride + (x / 2 - p.Rect.Min.X / 2);
@@ -133,7 +133,7 @@ public static @string String(this YCbCrSubsampleRatio s) {
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-[GoRecv] public static Image SubImage(this ref YCbCr p, Rectangle r) {
+public static Image SubImage(this ref YCbCr p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -156,7 +156,7 @@ public static @string String(this YCbCrSubsampleRatio s) {
     )));
 }
 
-[GoRecv] public static bool Opaque(this ref YCbCr p) {
+public static bool Opaque(this ref YCbCr p) {
     return true;
 }
 
@@ -228,26 +228,26 @@ public static ж<YCbCr> NewYCbCr(Rectangle r, YCbCrSubsampleRatio subsampleRatio
 // NYCbCrA is an in-memory image of non-alpha-premultiplied Y'CbCr-with-alpha
 // colors. A and AStride are analogous to the Y and YStride fields of the
 // embedded YCbCr.
-[GoType] partial struct NYCbCrA {
+partial struct NYCbCrA {
     public partial ref YCbCr YCbCr { get; }
     public slice<uint8> A;
     public nint AStride;
 }
 
-[GoRecv] public static color.Model ColorModel(this ref NYCbCrA p) {
+public static color.Model ColorModel(this ref NYCbCrA p) {
     return color.NYCbCrAModel;
 }
 
-[GoRecv] public static color.Color At(this ref NYCbCrA p, nint x, nint y) {
+public static color.Color At(this ref NYCbCrA p, nint x, nint y) {
     return p.NYCbCrAAt(x, y);
 }
 
-[GoRecv] public static color.RGBA64 RGBA64At(this ref NYCbCrA p, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this ref NYCbCrA p, nint x, nint y) {
     var (r, g, b, a) = p.NYCbCrAAt(x, y).RGBA();
     return new color.RGBA64((uint16)r, (uint16)g, (uint16)b, (uint16)a);
 }
 
-[GoRecv] public static color.NYCbCrA NYCbCrAAt(this ref NYCbCrA p, nint x, nint y) {
+public static color.NYCbCrA NYCbCrAAt(this ref NYCbCrA p, nint x, nint y) {
     if (!(new Point(X: x, Y: y).In(p.Rect))) {
         return new color.NYCbCrA(nil);
     }
@@ -266,13 +266,13 @@ public static ж<YCbCr> NewYCbCr(Rectangle r, YCbCrSubsampleRatio subsampleRatio
 
 // AOffset returns the index of the first element of A that corresponds to the
 // pixel at (x, y).
-[GoRecv] public static nint AOffset(this ref NYCbCrA p, nint x, nint y) {
+public static nint AOffset(this ref NYCbCrA p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.AStride + (x - p.Rect.Min.X);
 }
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-[GoRecv] public static Image SubImage(this ref NYCbCrA p, Rectangle r) {
+public static Image SubImage(this ref NYCbCrA p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -303,7 +303,7 @@ public static ж<YCbCr> NewYCbCr(Rectangle r, YCbCrSubsampleRatio subsampleRatio
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
-[GoRecv] public static bool Opaque(this ref NYCbCrA p) {
+public static bool Opaque(this ref NYCbCrA p) {
     if (p.Rect.Empty()) {
         return true;
     }

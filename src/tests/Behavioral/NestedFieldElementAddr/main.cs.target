@@ -5,26 +5,26 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct wbBuf {
+partial struct wbBuf {
     internal uintptr next;
     internal array<uintptr> buf = new(4);
 }
 
-[GoType] partial struct pstate {
+partial struct pstate {
     internal nint id;
     internal wbBuf wbBuf;
 }
 
-[GoType] partial struct cacheT {
+partial struct cacheT {
     internal array<array<nint>> entries = new(2, () => new(3));
 }
 
-[GoType] partial struct store {
+partial struct store {
     internal nint id;
     internal slice<uintptr> data;
 }
 
-[GoRecv] internal static slice<uintptr> stk(this ref store s) {
+internal static slice<uintptr> stk(this ref store s) {
     return s.data;
 }
 

@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct named {
+partial struct named {
     internal @string n;
 }
 
@@ -16,7 +16,7 @@ internal static @string Label(this named v) {
     return "label:"u8 + v.n;
 }
 
-[GoType("dyn")] public partial interface Report_r {
+public partial interface Report_r /*dyn*/ {
     @string Name();
     @string Label();
 }
@@ -25,7 +25,7 @@ public static @string Report(Report_r r) {
     return r.Name() + ","u8 + r.Label();
 }
 
-[GoType("dyn")] internal partial interface report_r {
+internal partial interface report_r /*dyn*/ {
     @string Label();
 }
 

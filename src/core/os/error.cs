@@ -45,26 +45,26 @@ internal static error errDeadlineExceeded() {
     return poll.ErrDeadlineExceeded;
 }
 
-[GoType] partial interface timeout {
+partial interface timeout {
     bool Timeout();
 }
 
 // SyscallError records an error from a specific system call.
-[GoType] partial struct SyscallError {
+partial struct SyscallError {
     public @string Syscall;
     public error Err;
 }
 
-[GoRecv] public static @string Error(this ref SyscallError e) {
+public static @string Error(this ref SyscallError e) {
     return e.Syscall + ": "u8 + e.Err.Error();
 }
 
-[GoRecv] public static error Unwrap(this ref SyscallError e) {
+public static error Unwrap(this ref SyscallError e) {
     return e.Err;
 }
 
 // Timeout reports whether this error represents a timeout.
-[GoRecv] public static bool Timeout(this ref SyscallError e) {
+public static bool Timeout(this ref SyscallError e) {
     var (t, ok) = e.Err._<timeout>(ᐧ);
     return ok && t.Timeout();
 }

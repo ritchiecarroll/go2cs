@@ -9,7 +9,7 @@ partial class main_package {
 private static readonly object typeSwitchUnwrapˢ = (@string)"TypeSwitch: Unwrap ="u8;
 private static readonly object typeSwitchNoMatchˢ = (@string)"TypeSwitch: No match"u8;
 
-[GoType("dyn")] internal partial interface testTypeSwitch_type {
+internal partial interface testTypeSwitch_type /*dyn*/ {
     error Unwrap();
 }
 
@@ -30,7 +30,7 @@ internal static void testTypeSwitch(error err) {
 private static readonly object typeAssertionIsNilˢ = (@string)"TypeAssertion: Is(nil) ="u8;
 private static readonly object typeAssertionNoMatchˢ = (@string)"TypeAssertion: No match"u8;
 
-[GoType("dyn")] internal partial interface testTypeAssertion_type {
+internal partial interface testTypeAssertion_type /*dyn*/ {
     bool Is(error _);
 }
 
@@ -47,7 +47,7 @@ internal static void testTypeAssertion(error err) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object funcParamReadˢ = (@string)"FuncParam: Read ="u8;
 
-[GoType("dyn")] internal partial interface takesReader_r {
+internal partial interface takesReader_r /*dyn*/ {
     (nint, error) Read(slice<byte> _Δp0);
 }
 
@@ -67,11 +67,11 @@ internal static void testCompositeLiteral() {
     fmt.Println(compositeLiteralReadˢ, ((@string)(buf.slice(0, n))));
 }
 
-[GoType("dyn")] partial interface WithInlineField_R {
+partial interface WithInlineField_R /*dyn*/ {
     (nint, error) Read(slice<byte> _Δp0);
 }
 
-[GoType] partial struct WithInlineField {
+partial struct WithInlineField {
     public WithInlineField_R R;
 }
 
@@ -85,16 +85,16 @@ internal static void testInlineField() {
     fmt.Println(inlineFieldReadˢ, ((@string)(buf.slice(0, n))));
 }
 
-[GoType("dyn")] partial interface Δtype {
+partial interface Δtype /*dyn*/ {
     error Close();
 }
 
-[GoType] partial interface InlineEmbed :
+partial interface InlineEmbed :
     Δtype
 {    error Flush();
 }
 
-[GoType] partial struct embeddedImpl {
+partial struct embeddedImpl {
 }
 
 internal static error Close(this embeddedImpl _) {
@@ -114,7 +114,7 @@ internal static void testInterfaceEmbedding(InlineEmbed x) {
     fmt.Println(interfaceEmbedCloseAndˢ);
 }
 
-[GoType] partial struct fakeReader {
+partial struct fakeReader {
 }
 
 internal static (nint, error) Read(this fakeReader _, slice<byte> b) {
@@ -122,7 +122,7 @@ internal static (nint, error) Read(this fakeReader _, slice<byte> b) {
     return (4, default!);
 }
 
-[GoType] partial struct fakeError {
+partial struct fakeError {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -140,28 +140,28 @@ internal static bool Is(this fakeError _, error err) {
     return AreEqual(err, Δio.EOF);
 }
 
-[GoType] partial struct tally {
+partial struct tally {
     internal nint total;
 }
 
-[GoRecv] internal static (nint, error) Write(this ref tally t, slice<byte> p) {
+internal static (nint, error) Write(this ref tally t, slice<byte> p) {
     t.total += len(p);
     return (len(p), default!);
 }
 
-[GoType("dyn")] internal partial struct fill_dst {
-    [GoEmbedded] public io_package.Writer Writer;
+internal partial struct fill_dst /*dyn*/ {
+    /*embed*/ public io_package.Writer Writer;
 }
 
 internal static (int64, error) fill(this ж<tally> Ꮡt, Δio.Reader r) {
     return Δio.Copy(new fill_dst(new tallyжWriter(Ꮡt)), r);
 }
 
-[GoType] partial struct byteRepeat {
+partial struct byteRepeat {
     internal nint left;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref byteRepeat b, slice<byte> p) {
+internal static (nint, error) Read(this ref byteRepeat b, slice<byte> p) {
     if (b.left == 0) {
         return (0, Δio.EOF);
     }
@@ -177,9 +177,9 @@ internal static (int64, error) fill(this ж<tally> Ꮡt, Δio.Reader r) {
     return (n, default!);
 }
 
-[GoType("[4]byte")] partial struct quad;
+partial struct quad /*[4]byte*/;
 
-[GoType] partial struct frame {
+partial struct frame {
     internal quad data;
 }
 

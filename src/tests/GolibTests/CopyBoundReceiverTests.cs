@@ -8,19 +8,21 @@ using static go.builtin;
 
 namespace GolibTests;
 
-// A `this ref X` extension method WITHOUT [GoRecv] is a method of X's VALUE method set whose emitted
-// receiver happens to be by reference: the generated forwarder of a pointer-receiver method promoted
-// through an embedded POINTER (bufio.ReadWriter's ReadString, through *Reader). Go puts that method
-// in the outer type's value set, and a by-ref receiver fits no delegate, so every run-time binder
-// refused it — the reflect method table (Type.Method(i)) threw building its func type, a method value
-// threw binding it, and the interface shell skipped it while the structural probe counted it.
+// A `this ref X` extension method marked [GoCopyBound] is a method of X's VALUE method set whose
+// emitted receiver happens to be by reference: the generated forwarder of a pointer-receiver method
+// promoted through an embedded POINTER (bufio.ReadWriter's ReadString, through *Reader). Go puts that
+// method in the outer type's value set, and a by-ref receiver fits no delegate, so every run-time
+// binder refused it — the reflect method table (Type.Method(i)) threw building its func type, a method
+// value threw binding it, and the interface shell skipped it while the structural probe counted it.
 //
 // The rule under test (TypeExtensions.IsCopyBoundReceiver): such a method is bound through a COPY of
-// its receiver, which is exactly Go's value-receiver semantics; a [GoRecv] by-ref receiver is a
-// POINTER-set method and is never copied.
+// its receiver, which is exactly Go's value-receiver semantics. Every OTHER by-ref receiver is a
+// POINTER-set method and is never copied: an unmarked one, which is how converted code emits a Go
+// pointer receiver since face lift A (docs/PLAN-marker-comment-parity.md, 5.1), and a [GoRecv] one,
+// which hand-written files keep.
 //
-// The fixture is shaped like the emission: `Bump` is the unmarked by-ref forwarder beside its ж twin,
-// and it deliberately writes BOTH through the embedded pointer (shared by a copy) and to its own
+// The fixture is shaped like the emission: `Bump` is the [GoCopyBound] by-ref forwarder beside its ж
+// twin, and it deliberately writes BOTH through the embedded pointer (shared by a copy) and to its own
 // receiver (not shared), so a test can tell a copy from a reference.
 [TestClass]
 public class CopyBoundReceiverTests
@@ -31,13 +33,13 @@ public class CopyBoundReceiverTests
     private static string[] Names(Type t) =>
         [.. Enumerable.Range(0, GoReflect.GoMethodCount(t)).Select(i => GoReflect.GoMethodName(t, i))];
 
-    // Go: the value set holds Bump (pointer hop) and not Poke ([GoRecv], pointer set only); the
-    // pointer set holds both.
+    // Go: the value set holds Bump (pointer hop) and neither Poke ([GoRecv]) nor Prod (unmarked), both
+    // pointer set only; the pointer set holds all three.
     [TestMethod]
-    public void TheValueSetHoldsTheCopyBoundMethodAndNotTheGoRecvOne()
+    public void TheValueSetHoldsTheCopyBoundMethodAndNeitherPointerSetOne()
     {
         CollectionAssert.AreEqual(new[] { "Bump" }, Names(typeof(copybound_package.Holder)));
-        CollectionAssert.AreEqual(new[] { "Bump", "Poke" }, Names(typeof(ж<copybound_package.Holder>)));
+        CollectionAssert.AreEqual(new[] { "Bump", "Poke", "Prod" }, Names(typeof(ж<copybound_package.Holder>)));
     }
 
     // Type.Method(i).Type: func(Holder) int, the receiver BY VALUE. This is the call the reflect walk
@@ -114,6 +116,28 @@ public class CopyBoundReceiverTests
         Assert.AreEqual((nint)0, holder.own);
     }
 
+    // The unmarked by-ref method — a converted Go pointer receiver — never becomes a value form either:
+    // Go rejects the assertion, and so do the probe and the binder.
+    [TestMethod]
+    public void AnUnmarkedByRefMethodIsPointerSetAndNeverBoundThroughACopy()
+    {
+        Assert.IsFalse(typeof(copybound_package.Holder).StructurallyImplements(typeof(copybound_package.Prodder)));
+        Assert.IsTrue(typeof(ж<copybound_package.Holder>).StructurallyImplements(typeof(copybound_package.Prodder)));
+
+        AdapterBinder.ResolveReceiverMethods(typeof(copybound_package.Holder), "Prod", out MethodInfo? byPtr, out MethodInfo? byVal);
+
+        Assert.IsNotNull(byPtr);
+        Assert.IsNull(byVal, "an unmarked by-ref receiver has no value form");
+        Assert.IsTrue(GoReflect.GoMethodIndex(typeof(copybound_package.Holder), "Prod") < 0, "the value method table does not list it");
+
+        ж<copybound_package.Holder> box = Ꮡ(NewHolder());
+        Type pointer = typeof(ж<copybound_package.Holder>);
+        Delegate bound = GoReflect.GoMethodValue(pointer, GoReflect.GoMethodIndex(pointer, "Prod"), box);
+
+        Assert.AreEqual((nint)1000, bound.DynamicInvoke());
+        Assert.AreEqual((nint)1000, box.Value.own, "the pointer set's method runs on the pointee");
+    }
+
     // The [GoRecv] method never becomes a value form: Go rejects the assertion, and so does the probe.
     [TestMethod]
     public void AGoRecvMethodIsNeverBoundThroughACopy()
@@ -146,8 +170,18 @@ public class CopyBoundReceiverTests
         StringAssert.Contains(panic.Message, "takes its receiver by reference");
     }
 
+    // The hand-owned testing package opts out of the receiver rule ([assembly: GoHandOwnedPackage]), so
+    // inside it a method is a pointer receiver by [GoRecv] alone; a converted package says nothing.
+    [TestMethod]
+    public void TheHandOwnedTestingPackageOptsOutAndAConvertedPackageDoesNot()
+    {
+        Assert.IsTrue(typeof(testing_package).Assembly.IsDefined(typeof(GoHandOwnedPackageAttribute), false));
+        Assert.IsFalse(typeof(runtime_package).Assembly.IsDefined(typeof(GoHandOwnedPackageAttribute), false));
+    }
+
     // The committed by-ref receivers that are NOT Go methods (the allowlist the corpus guard
-    // TestByRefReceiversCarryGoRecv keeps) never surface in a Go method-set walk, each for its class.
+    // TestByRefReceiversFollowTheReceiverRule keeps) never surface in a Go method-set walk, each for its
+    // class.
     [TestMethod]
     public void TheAllowlistedHelpersNeverSurfaceInAMethodSetWalk()
     {
@@ -163,14 +197,6 @@ public class CopyBoundReceiverTests
         MethodInfo toUtf8 = typeof(builtin).GetMethods().Single(m => m.Name == "ToUTF8Bytes" && m.GetParameters()[0].ParameterType.IsByRef);
 
         Assert.IsTrue(toUtf8.GetParameters()[0].ParameterType.GetElementType()!.IsByRefLike);
-
-        // runtime's userArenaKeep: a private, unexported hand-owned helper.
-        Type userArena = typeof(runtime_package).GetNestedType("userArena", BindingFlags.Public | BindingFlags.NonPublic)!;
-
-        Assert.IsNotNull(userArena);
-
-        foreach (Type t in new[] { userArena, typeof(ж<>).MakeGenericType(userArena) })
-            CollectionAssert.DoesNotContain(Names(t), "userArenaKeep");
     }
 }
 
@@ -200,13 +226,18 @@ public static class copybound_package
         nint Poke();
     }
 
+    public interface Prodder
+    {
+        nint Prod();
+    }
+
     public delegate nint BumpByVal(Holder target);
 
     public delegate nint PokeByVal(Holder target);
 
     // The generated forwarder's shape for a pointer-receiver method promoted through *Inner: by-ref,
-    // NO [GoRecv], with its ж twin beside it.
-    public static nint Bump(this ref Holder target)
+    // [GoCopyBound], with its ж twin beside it.
+    [GoCopyBound] public static nint Bump(this ref Holder target)
     {
         target.own++;
         ref Inner inner = ref target.Inner.Value;
@@ -231,6 +262,19 @@ public static class copybound_package
     {
         ref Holder target = ref Ꮡtarget.Value;
         return target.Poke();
+    }
+
+    // A pointer-receiver method of Holder as converted code emits it: by-ref and UNMARKED, with its ж twin.
+    public static nint Prod(this ref Holder target)
+    {
+        target.own += 1000;
+        return target.own;
+    }
+
+    public static nint Prod(this ж<Holder> Ꮡtarget)
+    {
+        ref Holder target = ref Ꮡtarget.Value;
+        return target.Prod();
     }
 
     // [GoRecv] with NO twin: nothing a delegate can bind.

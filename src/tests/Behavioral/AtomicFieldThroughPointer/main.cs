@@ -4,28 +4,28 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct atom {
+partial struct atom {
     internal int64 v;
 }
 
-[GoRecv] internal static void add(this ref atom a, int64 d) {
+internal static void add(this ref atom a, int64 d) {
     a.v += d;
 }
 
-[GoRecv] internal static int64 get(this ref atom a) {
+internal static int64 get(this ref atom a) {
     return a.v;
 }
 
-[GoType] partial struct profile {
+partial struct profile {
     internal atom wait;
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal atom wait;
     internal profile prof;
 }
 
-[GoType] partial struct owner {
+partial struct owner {
     internal ж<holder> h;
     internal ж<holder> deep;
 }

@@ -6,7 +6,7 @@ namespace go.@internal.syscall;
 
 partial class unix_package {
 
-[GoType] partial struct siErrnoCode {
+partial struct siErrnoCode {
     public int32 Errno;
     public int32 Code;
 }

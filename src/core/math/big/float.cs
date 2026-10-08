@@ -61,7 +61,7 @@ internal const bool debugFloat = false; // enable for debugging
 // an existing (or newly allocated) Float must be set to
 // a new value using the [Float.Set] method; shallow copies
 // of Floats are not supported and may lead to errors.
-[GoType] partial struct Float {
+partial struct Float {
     internal uint32 prec;
     internal RoundingMode mode;
     internal Accuracy acc;
@@ -73,7 +73,7 @@ internal const bool debugFloat = false; // enable for debugging
 
 // An ErrNaN panic is raised by a [Float] operation that would lead to
 // a NaN under IEEE 754 rules. An ErrNaN implements the error interface.
-[GoType] partial struct ErrNaN {
+partial struct ErrNaN {
     internal @string msg;
 }
 
@@ -98,7 +98,7 @@ public static UntypedInt MinExp => /* math.MinInt32 */ -2147483648; // smallest 
 
 public static UntypedInt MaxPrec => /* math.MaxUint32 */ 4294967295; // largest (theoretically) supported precision; likely memory-limited
 
-[GoType("num:byte")] partial struct form;
+partial struct form /*num:byte*/;
 
 // Internal representation: The mantissa bits x.mant of a nonzero finite
 // Float x are stored in a nat slice long enough to hold up to x.prec bits;
@@ -124,7 +124,7 @@ internal static form finite => 1;
 
 internal static form inf => 2;
 
-[GoType("num:byte")] partial struct RoundingMode;
+partial struct RoundingMode /*num:byte*/;
 
 // These constants define supported rounding modes.
 public static RoundingMode ToNearestEven => /* iota */ 0;  // == IEEE 754-2008 roundTiesToEven
@@ -139,7 +139,7 @@ public static RoundingMode ToNegativeInf => 4;  // == IEEE 754-2008 roundTowardN
 
 public static RoundingMode ToPositiveInf => 5;  // == IEEE 754-2008 roundTowardPositive
 
-[GoType("num:int8")] partial struct Accuracy;
+partial struct Accuracy /*num:int8*/;
 
 //go:generate stringer -type=RoundingMode
 
@@ -203,14 +203,14 @@ public static ж<Float> SetMode(this ж<Float> Ꮡz, RoundingMode mode) {
 
 // Prec returns the mantissa precision of x in bits.
 // The result may be 0 for |x| == 0 and |x| == Inf.
-[GoRecv] public static nuint Prec(this ref Float x) {
+public static nuint Prec(this ref Float x) {
     return (nuint)x.prec;
 }
 
 // MinPrec returns the minimum precision required to represent x exactly
 // (i.e., the smallest prec before x.SetPrec(prec) would start rounding x).
 // The result is 0 for |x| == 0 and |x| == Inf.
-[GoRecv] public static nuint MinPrec(this ref Float x) {
+public static nuint MinPrec(this ref Float x) {
     if (x.form != finite) {
         return 0;
     }
@@ -218,14 +218,14 @@ public static ж<Float> SetMode(this ж<Float> Ꮡz, RoundingMode mode) {
 }
 
 // Mode returns the rounding mode of x.
-[GoRecv] public static RoundingMode Mode(this ref Float x) {
+public static RoundingMode Mode(this ref Float x) {
     return x.mode;
 }
 
 // Acc returns the accuracy of x produced by the most recent
 // operation, unless explicitly documented otherwise by that
 // operation.
-[GoRecv] public static Accuracy Acc(this ref Float x) {
+public static Accuracy Acc(this ref Float x) {
     return x.acc;
 }
 
@@ -337,12 +337,12 @@ public static ж<Float> SetMantExp(this ж<Float> Ꮡz, ж<Float> Ꮡmant, nint 
 }
 
 // Signbit reports whether x is negative or negative zero.
-[GoRecv] public static bool Signbit(this ref Float x) {
+public static bool Signbit(this ref Float x) {
     return x.neg;
 }
 
 // IsInf reports whether x is +Inf or -Inf.
-[GoRecv] public static bool IsInf(this ref Float x) {
+public static bool IsInf(this ref Float x) {
     return x.form == inf;
 }
 
@@ -1771,7 +1771,7 @@ public static nint Cmp(this ж<Float> Ꮡx, ж<Float> Ꮡy) {
 //	 0 if x == 0 (signed or unsigned)
 //	+1 if 0 < x < +Inf
 //	+2 if x == +Inf
-[GoRecv] internal static nint ord(this ref Float x) {
+internal static nint ord(this ref Float x) {
     nint m = default!;
     var exprᴛ1 = x.form;
     if (exprᴛ1 == finite) {

@@ -83,7 +83,7 @@ using static go.syscall_package;
 [assembly: go.GoPositionMap("syscall/sockcmsg_unix.go", "sockcmsg_unix.cs", "AAwioqqipqIACBaigoKCgoKUgoKUpoKCgpSqwoKCgoKCgoKUqsKClIKUgoKClA==")]
 [assembly: go.GoPositionMap("syscall/sockcmsg_unix_other.go", "sockcmsg_unix_other.cs", "AAockqiWqsK4kpaSuA==")]
 [assembly: go.GoPositionMap("syscall/syscall.go", "syscall.cs", "ACBK8oKClKyygpSCggACENCqsoKClAAHEJKokqiSqJKqopai")]
-[assembly: go.GoPositionMap("syscall/syscall_bsd.go", "syscall_bsd.cs", "ABIsgoKCgpSCgpQAAhQACAKCgpSCqIKWgoKClIKClKaCgpaCgpSmisIADyiApIKClKaApIKCgpSmgKSApICkgoKUpoCo0oKCgpQAD1CigoKClIKCgpSmooKUgoKCgoKCgoIACMoBsoKSgqaykoKmgoKSgqaCgpKCpoKCkoKmgoKSggAHTMKCgoKCgoKUgpSCgpSClIKCgIKkgpSqkpKClIKUprSCgqiSgIKkgqiCgIK4gpSmtIKCqJKCgIKkgpSqkoKUpoKClIKCuMiqkoKUAAcQ3IKmgg==")]
+[assembly: go.GoPositionMap("syscall/syscall_bsd.go", "syscall_bsd.cs", "ABIsgoKCgpSCgpQAAhQACAKCgpSCqIKWgoKClIKClKaCgpaCgpSmisIADyiApIKClKaApIKCgpSmgKSApICkgoKUpoCo0oKCgpQAD1CigoKClIKCgpSmooKUgoKCgoKCgoIACMoBsoKSgqaykoKmgoKSgqaCgpKCpoKCkoKmgoKSggAHTMKCgoKCgoKUgpSCgpSClIKCgIKkgpSqkpKClIKUprSCgqiSgIKkgqiCgIK4gpSmtIKCqJKCgIKkgpSqkoKUpoKClIKCuMiqkoKUAAcQ3IKmgg==", "", "", "390=TimespecToNsec/1/2/1,NsecToTimeval/1/2/1,TimespecToNsec/2/2/2,NsecToTimeval/2/2/2")]
 [assembly: go.GoPositionMap("syscall/syscall_darwin.go", "syscall_darwin.cs", "ABIokpKSlAANHsIAABLylIKCgrqAgqSmgqaCpoKmgKKAqLKClIKCgoKUprKCgoKClKKCgpSmAAEqAA4AAALCAQBeAqaygoKClKaYwqKCgpSmAA0QkoIABxKCgpSCgoKUhIKCgoKCgpSClIKCgpSCyqaCgoK4koKW6KKSkpKS")]
 [assembly: go.GoPositionMap("syscall/syscall_darwin_amd64.go", "syscall_darwin_amd64.cs", "AAsYgqaCAAIYAAoCgoKmgqaCpoKmsqSkhIKUpprE")]
 [assembly: go.GoPositionMap("syscall/syscall_unix.go", "syscall_unix.cs", "ABtEkoCCpAAKGOKCqIKCqJaCgoKC5tKCqIKCgoKCqICCpIIACCaCgoKCpqaClKSkpKSmgqaCAAoaopSkpKSkzqSCgoKCpqaygoKClIKmgpSClKaygpSCgoKmlIKUgpSClKaygoKClIKmgpSClKaygpSCgpSClIKUACJsooKSggAEHrKCkoCCpIKCgoKmsoKSgIKkgoKCgoKm0oKCgpSCgoKCptKCgoKUgoKCgoKm4oKUgpSmooIABB6igoKUpqKCgpSmooKClKaigoKUAAQioqaCoqaipoKmgqaCpoKmgoKClKaiprKClIKmsoKCgoKUpoKClA==")]
@@ -235,7 +235,7 @@ namespace go;
 public static partial class syscall_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

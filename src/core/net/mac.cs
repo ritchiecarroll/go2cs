@@ -7,7 +7,7 @@ partial class net_package {
 
 internal static readonly @string hexDigit = "0123456789abcdef"u8;
 
-[GoType("[]byte")] partial struct HardwareAddr;
+partial struct HardwareAddr /*[]byte*/;
 
 public static @string String(this HardwareAddr a) {
     if (len(a) == 0) {

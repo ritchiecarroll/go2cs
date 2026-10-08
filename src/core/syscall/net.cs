@@ -6,7 +6,7 @@ namespace go;
 partial class syscall_package {
 
 // A RawConn is a raw network connection.
-[GoType] partial interface RawConn {
+partial interface RawConn {
     // Control invokes f on the underlying connection's file
     // descriptor or handle.
     // The file descriptor fd is guaranteed to remain valid while
@@ -27,7 +27,7 @@ partial class syscall_package {
 
 // Conn is implemented by some types in the net and os packages to provide
 // access to the underlying file descriptor or handle.
-[GoType] partial interface Conn {
+partial interface Conn {
     // SyscallConn returns a raw network connection.
     (RawConn, error) SyscallConn();
 }

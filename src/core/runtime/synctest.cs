@@ -9,7 +9,7 @@ using @internal.runtime;
 partial class runtime_package {
 
 // A synctestGroup is a group of goroutines started by synctest.Run.
-[GoType] partial struct synctestGroup {
+partial struct synctestGroup {
     internal mutex mu;
     internal timers timers;
     internal int64 now; // current fake time
@@ -135,7 +135,7 @@ internal static void decActive(this ж<synctestGroup> Ꮡsg) {
 }
 
 // maybeWakeLocked returns a g to wake if the group is durably blocked.
-[GoRecv] internal static ж<g> maybeWakeLocked(this ref synctestGroup sg) {
+internal static ж<g> maybeWakeLocked(this ref synctestGroup sg) {
     if (sg.running > 0 || sg.active > 0) {
         return default!;
     }

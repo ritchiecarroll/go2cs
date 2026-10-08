@@ -9,7 +9,7 @@ using syscall = syscall_package;
 
 partial class route_package {
 
-[GoRecv] internal static (slice<byte>, error) marshal(this ref RouteMessage m) {
+internal static (slice<byte>, error) marshal(this ref RouteMessage m) {
     var (w, ok) = wireFormats[m.Type, ꟷ];
     if (!ok) {
         return (default!, errUnsupportedMessage);
@@ -42,7 +42,7 @@ partial class route_package {
     return (b, default!);
 }
 
-[GoRecv] internal static (Message, error) parseRouteMessage(this ref wireFormat w, RIBType typ, slice<byte> b) {
+internal static (Message, error) parseRouteMessage(this ref wireFormat w, RIBType typ, slice<byte> b) {
     if (len(b) < w.bodyOff) {
         return (default!, errMessageTooShort);
     }

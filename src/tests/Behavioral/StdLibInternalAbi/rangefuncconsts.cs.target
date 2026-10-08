@@ -6,7 +6,7 @@ namespace go;
 
 partial class main_package {
 
-[GoType("num:nint")] partial struct RF_State;
+partial struct RF_State /*num:nint*/;
 
 public static RF_State RF_DONE => /* RF_State(iota) */ 0;
 public static RF_State RF_READY => 1;

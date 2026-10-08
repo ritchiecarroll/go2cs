@@ -27,7 +27,7 @@ internal static void enableWER() {
 // winlibcall is not implemented on non-Windows systems,
 // but it is used in non-OS-specific parts of the runtime.
 // Define it as an empty struct to avoid wasting stack space.
-[GoType] partial struct winlibcall {
+partial struct winlibcall {
 }
 
 } // end runtime_package

@@ -16,7 +16,7 @@ partial class gob_package {
 // panic to report an error or are guaranteed error-free.
 
 // A gobError is used to distinguish errors (panics) generated in this package.
-[GoType] partial struct gobError {
+partial struct gobError {
     internal error err;
 }
 

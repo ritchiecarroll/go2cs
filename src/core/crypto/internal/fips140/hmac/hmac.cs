@@ -24,12 +24,12 @@ partial class hmac_package {
 // marshalable is the combination of encoding.BinaryMarshaler and
 // encoding.BinaryUnmarshaler. Their method definitions are repeated here to
 // avoid a dependency on the encoding package.
-[GoType] partial interface marshalable {
+partial interface marshalable {
     (slice<byte>, error) MarshalBinary();
     error UnmarshalBinary(slice<byte> _);
 }
 
-[GoType] partial struct HMAC {
+partial struct HMAC {
     internal slice<byte> opad, ipad;
     internal fips140.Hash outer, inner;
     // If marshaled is true, then opad and ipad do not contain a padded
@@ -41,7 +41,7 @@ partial class hmac_package {
     internal nint keyLen;
 }
 
-[GoRecv] public static slice<byte> Sum(this ref HMAC h, slice<byte> @in) {
+public static slice<byte> Sum(this ref HMAC h, slice<byte> @in) {
     // Per FIPS 140-3 IG C.M, key lengths below 112 bits are only allowed for
     // legacy use (i.e. verification only) and we don't support that. However,
     // HKDF uses the HMAC key for the salt, which is allowed to be shorter.
@@ -75,19 +75,19 @@ partial class hmac_package {
     return h.outer.Sum(@in.slice(0, origLen));
 }
 
-[GoRecv] public static (nint n, error err) Write(this ref HMAC h, slice<byte> p) {
+public static (nint n, error err) Write(this ref HMAC h, slice<byte> p) {
     return h.inner.Write(p);
 }
 
-[GoRecv] public static nint Size(this ref HMAC h) {
+public static nint Size(this ref HMAC h) {
     return h.outer.Size();
 }
 
-[GoRecv] public static nint BlockSize(this ref HMAC h) {
+public static nint BlockSize(this ref HMAC h) {
     return h.inner.BlockSize();
 }
 
-[GoRecv] public static void Reset(this ref HMAC h) {
+public static void Reset(this ref HMAC h) {
     if (h.marshaled) {
         {
             var errΔ1 = h.inner._<marshalable>().UnmarshalBinary(h.ipad); if (errΔ1 != default!) {

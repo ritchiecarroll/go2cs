@@ -20,7 +20,7 @@ using math;
 partial class nistec_package {
 
 // P256Point is a P-256 point. The zero value is NOT valid.
-[GoType] partial struct P256Point {
+partial struct P256Point {
     // The point is represented in projective coordinates (X:Y:Z), where x = X/Z
     // and y = Y/Z. Infinity is (0:1:0).
     //
@@ -169,7 +169,7 @@ public static slice<byte> Bytes(this ж<P256Point> Ꮡp) {
     return Ꮡp.bytes(Ꮡout);
 }
 
-internal static slice<byte> bytes(this ж<P256Point> Ꮡp, [GoArrayDims(65)] ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes(this ж<P256Point> Ꮡp, /*[65]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     // The SEC 1 representation of the point at infinity is a single zero byte,
@@ -198,7 +198,7 @@ public static (slice<byte>, error) BytesX(this ж<P256Point> Ꮡp) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string p256PointIsThePointAtˢ = "P256 point is the point at infinity"u8;
 
-internal static (slice<byte>, error) bytesX(this ж<P256Point> Ꮡp, [GoArrayDims(32)] ж<array<byte>> Ꮡout) {
+internal static (slice<byte>, error) bytesX(this ж<P256Point> Ꮡp, /*[32]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (Ꮡp.of(P256Point.Ꮡz).IsZero() == 1) {
@@ -219,7 +219,7 @@ public static slice<byte> BytesCompressed(this ж<P256Point> Ꮡp) {
     return Ꮡp.bytesCompressed(Ꮡout);
 }
 
-internal static slice<byte> bytesCompressed(this ж<P256Point> Ꮡp, [GoArrayDims(33)] ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytesCompressed(this ж<P256Point> Ꮡp, /*[33]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (Ꮡp.of(P256Point.Ꮡz).IsZero() == 1) {
@@ -335,11 +335,11 @@ public static ж<P256Point> Double(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp) 
 
 // p256AffinePoint is a point in affine coordinates (x, y). x and y are still
 // Montgomery domain elements. The point can't be the point at infinity.
-[GoType] public partial struct p256AffinePoint {
+public partial struct p256AffinePoint {
     internal fiat.P256Element x, y;
 }
 
-[GoRecv] public static ж<P256Point> Projective(this ref p256AffinePoint p) {
+public static ж<P256Point> Projective(this ref p256AffinePoint p) {
     var pp = Ꮡ(new P256Point(x: p.x.ΔClone(), y: p.y.ΔClone()));
     pp.of(P256Point.Ꮡz).One();
     return pp;
@@ -403,7 +403,7 @@ public static ж<P256Point> Select(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp1,
     return Ꮡq;
 }
 
-[GoType("[4]uint64")] partial struct p256OrdElement;
+partial struct p256OrdElement /*[4]uint64*/;
 
 // SetBytes sets s to the big-endian value of x, reducing it as necessary.
 internal static (ж<p256OrdElement>, error) SetBytes(this ж<p256OrdElement> Ꮡs, slice<byte> x) {
@@ -431,7 +431,7 @@ internal static (ж<p256OrdElement>, error) SetBytes(this ж<p256OrdElement> Ꮡ
     return (Ꮡs, default!);
 }
 
-[GoRecv] internal static slice<byte> Bytes(this ref p256OrdElement s) {
+internal static slice<byte> Bytes(this ref p256OrdElement s) {
     array<byte> @out = new(32);
     byteorder.BEPutUint64(@out[24..], s.Value[0]);
     byteorder.BEPutUint64(@out[16..], s.Value[1]);
@@ -457,11 +457,11 @@ internal static uint64 Rsh(this ж<p256OrdElement> Ꮡs, nint n) {
     return res;
 }
 
-[GoType("[16]P256Point")] partial struct p256Table;
+partial struct p256Table /*[16]P256Point*/;
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time. n must be in [0, 16]. If n is 0, p is set to the identity point.
-[GoRecv] internal static void Select(this ref p256Table table, ж<P256Point> Ꮡp, uint8 n) {
+internal static void Select(this ref p256Table table, ж<P256Point> Ꮡp, uint8 n) {
     if (n > 16) {
         throw panic("nistec: internal error: p256Table called with out-of-bounds value");
     }
@@ -544,12 +544,12 @@ public static ж<P256Point> Negate(this ж<P256Point> Ꮡp, nint cond) {
     return Ꮡp;
 }
 
-[GoType("[32]p256AffinePoint")] partial struct p256AffineTable;
+partial struct p256AffineTable /*[32]p256AffinePoint*/;
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time. n can be in [0, 32], but (unlike p256Table.Select) if n is 0,
 // p is set to an undefined value.
-[GoRecv] internal static void Select(this ref p256AffineTable table, ж<p256AffinePoint> Ꮡp, uint8 n) {
+internal static void Select(this ref p256AffineTable table, ж<p256AffinePoint> Ꮡp, uint8 n) {
     if (n > 32) {
         throw panic("nistec: internal error: p256AffineTable.Select called with out-of-bounds value");
     }

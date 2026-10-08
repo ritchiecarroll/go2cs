@@ -20,7 +20,7 @@ partial class decodecounter_package {
 
 // This file contains helpers for reading counter data files created
 // during the executions of a coverage-instrumented binary.
-[GoType] partial struct CounterDataReader {
+partial struct CounterDataReader {
     internal ж<stringtab.Reader> stab;
     internal map<@string, @string> args;
     internal slice<@string> osargs;
@@ -80,7 +80,7 @@ public static (ж<CounterDataReader>, error) NewCounterDataReader(@string fn, io
     return (cdr, default!);
 }
 
-internal static bool checkMagic([GoArrayDims(4)] array<byte> v) {
+internal static bool checkMagic(/*[4]*/ array<byte> v) {
     v = v.Clone();
 
     var g = coverage.CovCounterMagic.Clone();
@@ -156,7 +156,7 @@ internal static error readSegmentPreamble(this ж<CounterDataReader> Ꮡcdr) {
     return default!;
 }
 
-[GoRecv] internal static error readStringTable(this ref CounterDataReader cdr) {
+internal static error readStringTable(this ref CounterDataReader cdr) {
     var b = new slice<byte>((nint)(cdr.shdr.StrTabLen));
     var (nr, err) = cdr.mr.Read(b);
     if (err != default!) {
@@ -248,7 +248,7 @@ internal static error readArgs(this ж<CounterDataReader> Ꮡcdr) {
 // for example, if a data file is produced by merging coverage
 // data from two distinct runs, no os args will be available (an
 // empty list is returned).
-[GoRecv] public static slice<@string> OsArgs(this ref CounterDataReader cdr) {
+public static slice<@string> OsArgs(this ref CounterDataReader cdr) {
     return cdr.osargs;
 }
 
@@ -256,7 +256,7 @@ internal static error readArgs(this ж<CounterDataReader> Ꮡcdr) {
 // that produced this counter data file. The GOOS value may be
 // empty in the case where the counter data file was produced
 // from a merge in which more than one GOOS value was present.
-[GoRecv] public static @string Goos(this ref CounterDataReader cdr) {
+public static @string Goos(this ref CounterDataReader cdr) {
     return cdr.goos;
 }
 
@@ -264,20 +264,20 @@ internal static error readArgs(this ж<CounterDataReader> Ꮡcdr) {
 // that produced this counter data file. The GOARCH value may be
 // empty in the case where the counter data file was produced
 // from a merge in which more than one GOARCH value was present.
-[GoRecv] public static @string Goarch(this ref CounterDataReader cdr) {
+public static @string Goarch(this ref CounterDataReader cdr) {
     return cdr.goarch;
 }
 
 // FuncPayload encapsulates the counter data payload for a single
 // function as read from a counter data file.
-[GoType] partial struct FuncPayload {
+partial struct FuncPayload {
     public uint32 PkgIdx;
     public uint32 FuncIdx;
     public slice<uint32> Counters;
 }
 
 // NumSegments returns the number of execution segments in the file.
-[GoRecv] public static uint32 NumSegments(this ref CounterDataReader cdr) {
+public static uint32 NumSegments(this ref CounterDataReader cdr) {
     return cdr.ftr.NumSegments;
 }
 
@@ -311,7 +311,7 @@ public static (bool, error) BeginNextSegment(this ж<CounterDataReader> Ꮡcdr) 
 
 // NumFunctionsInSegment returns the number of live functions
 // in the currently selected segment.
-[GoRecv] public static uint32 NumFunctionsInSegment(this ref CounterDataReader cdr) {
+public static uint32 NumFunctionsInSegment(this ref CounterDataReader cdr) {
     return (uint32)cdr.shdr.FcnEntries;
 }
 

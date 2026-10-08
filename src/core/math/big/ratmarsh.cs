@@ -48,7 +48,7 @@ internal static readonly @string ratGobDecodeBufferTooˢ = "Rat.GobDecode: buffe
 internal static readonly @string ratGobDecodeInvalidˢ = "Rat.GobDecode: invalid length"u8;
 
 // GobDecode implements the [encoding/gob.GobDecoder] interface.
-[GoRecv] public static error GobDecode(this ref ΔRat z, slice<byte> buf) {
+public static error GobDecode(this ref ΔRat z, slice<byte> buf) {
     if (len(buf) == 0) {
         // Other side sent a nil or default value.
         z = new ΔRat(nil);

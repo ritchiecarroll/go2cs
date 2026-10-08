@@ -8,7 +8,7 @@ partial class chacha20_package {
 
 internal static UntypedInt bufSize => /* blockSize */ 64;
 
-[GoRecv] internal static void xorKeyStreamBlocks(this ref Cipher s, slice<byte> dst, slice<byte> src) {
+internal static void xorKeyStreamBlocks(this ref Cipher s, slice<byte> dst, slice<byte> src) {
     s.xorKeyStreamBlocksGeneric(dst, src);
 }
 

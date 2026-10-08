@@ -30,7 +30,7 @@ partial class rand_package {
 // pseudo-random int64 values in the range [0, 1<<63).
 //
 // A Source is not safe for concurrent use by multiple goroutines.
-[GoType] partial interface Source {
+partial interface Source {
     int64 Int63();
     void Seed(int64 seed);
 }
@@ -41,7 +41,7 @@ partial class rand_package {
 // If a [Rand] r's underlying [Source] s implements Source64,
 // then r.Uint64 returns the result of one call to s.Uint64
 // instead of making two calls to s.Int63.
-[GoType] partial interface Source64 :
+partial interface Source64 :
     Source
 {
     uint64 Uint64();
@@ -62,7 +62,7 @@ internal static ж<rngSource> newSource(int64 seed) {
 }
 
 // A Rand is a source of random numbers.
-[GoType] partial struct Rand {
+partial struct Rand {
     internal Source src;
     internal Source64 s64; // non-nil if src is source64
     // readVal contains remainder of 63-bit integer used for bytes
@@ -98,17 +98,17 @@ public static void Seed(this ж<Rand> Ꮡr, int64 seed) {
 }
 
 // Int63 returns a non-negative pseudo-random 63-bit integer as an int64.
-[GoRecv] public static int64 Int63(this ref Rand r) {
+public static int64 Int63(this ref Rand r) {
     return r.src.Int63();
 }
 
 // Uint32 returns a pseudo-random 32-bit value as a uint32.
-[GoRecv] public static uint32 Uint32(this ref Rand r) {
+public static uint32 Uint32(this ref Rand r) {
     return (uint32)((r.Int63() >> (int)(31)));
 }
 
 // Uint64 returns a pseudo-random 64-bit value as a uint64.
-[GoRecv] public static uint64 Uint64(this ref Rand r) {
+public static uint64 Uint64(this ref Rand r) {
     if (r.s64 != default!) {
         return r.s64.Uint64();
     }
@@ -116,19 +116,19 @@ public static void Seed(this ж<Rand> Ꮡr, int64 seed) {
 }
 
 // Int31 returns a non-negative pseudo-random 31-bit integer as an int32.
-[GoRecv] public static int32 Int31(this ref Rand r) {
+public static int32 Int31(this ref Rand r) {
     return (int32)((r.Int63() >> (int)(32)));
 }
 
 // Int returns a non-negative pseudo-random int.
-[GoRecv] public static nint Int(this ref Rand r) {
+public static nint Int(this ref Rand r) {
     nuint u = (nuint)r.Int63();
     return (nint)(((u << (int)(1)) >> (int)(1))); // clear sign bit if int == int32
 }
 
 // Int63n returns, as an int64, a non-negative pseudo-random number in the half-open interval [0,n).
 // It panics if n <= 0.
-[GoRecv] public static int64 Int63n(this ref Rand r, int64 n) {
+public static int64 Int63n(this ref Rand r, int64 n) {
     if (n <= 0) {
         throw panic("invalid argument to Int63n");
     }
@@ -146,7 +146,7 @@ public static void Seed(this ж<Rand> Ꮡr, int64 seed) {
 
 // Int31n returns, as an int32, a non-negative pseudo-random number in the half-open interval [0,n).
 // It panics if n <= 0.
-[GoRecv] public static int32 Int31n(this ref Rand r, int32 n) {
+public static int32 Int31n(this ref Rand r, int32 n) {
     if (n <= 0) {
         throw panic("invalid argument to Int31n");
     }
@@ -171,7 +171,7 @@ public static void Seed(this ж<Rand> Ꮡr, int64 seed) {
 // For implementation details, see:
 // https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction
 // https://lemire.me/blog/2016/06/30/fast-random-shuffling
-[GoRecv] internal static int32 int31n(this ref Rand r, int32 n) {
+internal static int32 int31n(this ref Rand r, int32 n) {
     var v = r.Uint32();
     var prod = (uint64)v * (uint64)n;
     var low = (uint32)prod;
@@ -188,7 +188,7 @@ public static void Seed(this ж<Rand> Ꮡr, int64 seed) {
 
 // Intn returns, as an int, a non-negative pseudo-random number in the half-open interval [0,n).
 // It panics if n <= 0.
-[GoRecv] public static nint Intn(this ref Rand r, nint n) {
+public static nint Intn(this ref Rand r, nint n) {
     if (n <= 0) {
         throw panic("invalid argument to Intn");
     }
@@ -199,7 +199,7 @@ public static void Seed(this ж<Rand> Ꮡr, int64 seed) {
 }
 
 // Float64 returns, as a float64, a pseudo-random number in the half-open interval [0.0,1.0).
-[GoRecv] public static float64 Float64(this ref Rand r) {
+public static float64 Float64(this ref Rand r) {
     // A clearer, simpler implementation would be:
     //	return float64(r.Int63n(1<<53)) / (1<<53)
     // However, Go 1 shipped with
@@ -225,7 +225,7 @@ again:
 }
 
 // Float32 returns, as a float32, a pseudo-random number in the half-open interval [0.0,1.0).
-[GoRecv] public static float32 Float32(this ref Rand r) {
+public static float32 Float32(this ref Rand r) {
     // Same rationale as in Float64: we want to preserve the Go 1 value
     // stream except we want to fix it not to return 1.0
     // This only happens 1/2²⁴ of the time (plus the 1/2⁵³ of the time in Float64).
@@ -239,7 +239,7 @@ again:
 
 // Perm returns, as a slice of n ints, a pseudo-random permutation of the integers
 // in the half-open interval [0,n).
-[GoRecv] public static slice<nint> Perm(this ref Rand r, nint n) {
+public static slice<nint> Perm(this ref Rand r, nint n) {
     var m = new slice<nint>(n);
     // In the following loop, the iteration when i=0 always swaps m[0] with m[0].
     // A change to remove this useless iteration is to assign 1 to i in the init
@@ -257,7 +257,7 @@ again:
 // Shuffle pseudo-randomizes the order of elements.
 // n is the number of elements. Shuffle panics if n < 0.
 // swap swaps the elements with indexes i and j.
-[GoRecv] public static void Shuffle(this ref Rand r, nint n, Action<nint, nint> swap) {
+public static void Shuffle(this ref Rand r, nint n, Action<nint, nint> swap) {
     if (n < 0) {
         throw panic("invalid argument to Shuffle");
     }
@@ -372,20 +372,20 @@ internal static partial uint64 runtime_rand();
 
 // runtimeSource is an implementation of Source64 that uses the runtime
 // fastrand functions.
-[GoType] partial struct runtimeSource {
+partial struct runtimeSource {
     // The mutex is used to avoid race conditions in Read.
     internal sync.Mutex mu;
 }
 
-[GoRecv] internal static int64 Int63(this ref runtimeSource _) {
+internal static int64 Int63(this ref runtimeSource _) {
     return (int64)((uint64)(runtime_rand() & (uint64)rngMask));
 }
 
-[GoRecv] internal static void Seed(this ref runtimeSource _Δp0, int64 _Δp1) {
+internal static void Seed(this ref runtimeSource _Δp0, int64 _Δp1) {
     throw panic("internal error: call to runtimeSource.Seed");
 }
 
-[GoRecv] internal static uint64 Uint64(this ref runtimeSource _) {
+internal static uint64 Uint64(this ref runtimeSource _) {
     return runtime_rand();
 }
 
@@ -556,7 +556,7 @@ public static float64 ExpFloat64() {
     return globalRand().ExpFloat64();
 }
 
-[GoType] partial struct lockedSource {
+partial struct lockedSource {
     internal sync.Mutex lk;
     internal ж<rngSource> s;
 }
@@ -602,7 +602,7 @@ internal static void seedPos(this ж<lockedSource> Ꮡr, int64 seed, ж<int8> �
 
 // seed seeds the underlying source.
 // The caller must have locked r.lk.
-[GoRecv] internal static void seed(this ref lockedSource r, int64 seed) {
+internal static void seed(this ref lockedSource r, int64 seed) {
     if (r.s == nil){
         r.s = newSource(seed);
     } else {

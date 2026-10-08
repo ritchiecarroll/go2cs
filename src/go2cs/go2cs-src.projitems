@@ -17,6 +17,7 @@
     <None Include="$(MSBuildThisFileDirectory)aliasPublicization_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasReferenceImports_test.go" />
     <None Include="$(MSBuildThisFileDirectory)allocInliningFrames_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)bridgeTypeAccess_test.go" />
     <None Include="$(MSBuildThisFileDirectory)corpusRelease.go" />
     <None Include="$(MSBuildThisFileDirectory)genericAllocCallerFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)anonInterfaceParamPublic_test.go" />
@@ -46,6 +47,7 @@
     <None Include="$(MSBuildThisFileDirectory)elidedAnyCompositeElems_test.go" />
     <None Include="$(MSBuildThisFileDirectory)embedDirective.go" />
     <None Include="$(MSBuildThisFileDirectory)embedDirective_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)embedMark_test.go" />
     <None Include="$(MSBuildThisFileDirectory)embedPromotedClosure_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\corpusRelease_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetPackage.go" />
@@ -65,6 +67,7 @@
     <None Include="$(MSBuildThisFileDirectory)cgoUnsafeArgsLift_test.go" />
     <None Include="$(MSBuildThisFileDirectory)cgoDynamicImports_test.go" />
     <None Include="$(MSBuildThisFileDirectory)chainedCallScaling_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)chanDirComment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)chanDirectionCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)childEnvGo2CSPath_test.go" />
     <None Include="$(MSBuildThisFileDirectory)collapsedLambdaTrailingComment_test.go" />
@@ -168,12 +171,14 @@
     <None Include="$(MSBuildThisFileDirectory)foreignWrittenRHS_test.go" />
     <None Include="$(MSBuildThisFileDirectory)funcResultProjection_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericDefinedMapChan_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)genericFuncInstantiationArg_test.go" />
     <None Include="$(MSBuildThisFileDirectory)genericTypeAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)globalAddressOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go.mod" />
     <None Include="$(MSBuildThisFileDirectory)go.sum" />
     <None Include="$(MSBuildThisFileDirectory)goFrameOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)goStmtReceiverBoxMethodGroup_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)goTypeMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)godebugDefault.go" />
     <None Include="$(MSBuildThisFileDirectory)godebugDefault_test.go" />
     <None Include="$(MSBuildThisFileDirectory)goModFile.go" />
@@ -262,6 +267,9 @@
     <None Include="$(MSBuildThisFileDirectory)manualConversionScope_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualTypeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)managedSliceViewRefusal_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)markerComments_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)memberMarkGuard_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)memberMarkers.go" />
     <None Include="$(MSBuildThisFileDirectory)methodExpressionWrapper_test.go" />
     <None Include="$(MSBuildThisFileDirectory)mixedKeyedComposite_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleAncestryEmission_test.go" />
@@ -329,6 +337,8 @@
     <None Include="$(MSBuildThisFileDirectory)platformProject.go" />
     <None Include="$(MSBuildThisFileDirectory)platformProject_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformScopedDisclosures_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)pointerReceiverMark_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)positionCalls_test.go" />
     <None Include="$(MSBuildThisFileDirectory)positionMapOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)positionMap_test.go" />
     <None Include="$(MSBuildThisFileDirectory)processGroupUnix.go" />
@@ -378,9 +388,11 @@
     <None Include="$(MSBuildThisFileDirectory)seededAliasNameCollision_test.go" />
     <None Include="$(MSBuildThisFileDirectory)sameNameImportAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)sameNamePackageInterface_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)s11Records_test.go" />
     <None Include="$(MSBuildThisFileDirectory)samePackageImplements.go" />
     <None Include="$(MSBuildThisFileDirectory)samePackageImplements_test.go" />
     <None Include="$(MSBuildThisFileDirectory)sanitization_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)section11AttributesGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)shadowedImportAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)siblingAddressedGlobals_test.go" />
     <None Include="$(MSBuildThisFileDirectory)siblingPackageNamespace_test.go" />
@@ -390,6 +402,7 @@
     <None Include="$(MSBuildThisFileDirectory)solutionGenerator_test.go" />
     <None Include="$(MSBuildThisFileDirectory)sstringHoistOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)sstringTwinGuard_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)sstringTwinMarkGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)sstringTwinOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)sstringTwin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)Stack.go" />
@@ -410,6 +423,9 @@
     <None Include="$(MSBuildThisFileDirectory)testHostGoTargetOS_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testHostLaunchDir_test.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\hostlaunch\fixture\keys\k" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\markercomments\main.cs" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\markercomments\main.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\s11records\main.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\validationproof\expected.md" />
     <None Include="$(MSBuildThisFileDirectory)testOnlyPackageEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)ToDo.md" />
@@ -419,6 +435,7 @@
     <None Include="$(MSBuildThisFileDirectory)transitiveAliasRename_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeAccessibilityInterface_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeAccessibilityOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)typeAccessibilityProse_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typedNilInterfaceBoxing.go" />
     <None Include="$(MSBuildThisFileDirectory)typedNilUnsafePointer_test.go" />
     <None Include="$(MSBuildThisFileDirectory)typeNameResolution.go" />

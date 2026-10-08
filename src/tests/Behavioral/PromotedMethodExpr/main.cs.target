@@ -6,15 +6,15 @@ using strings = strings_package;
 
 partial class main_package {
 
-[GoType] partial struct myType {
+partial struct myType {
     public partial ref bytes_package.Buffer Buffer { get; }
 }
 
-[GoType] partial struct inner {
+partial struct inner {
     internal nint n;
 }
 
-[GoRecv] internal static nint Add(this ref inner i, nint d) {
+internal static nint Add(this ref inner i, nint d) {
     i.n += d;
     return i.n;
 }
@@ -23,11 +23,11 @@ internal static nint Get(this inner i) {
     return i.n;
 }
 
-[GoType] partial struct outer {
+partial struct outer {
     internal partial ref inner inner { get; }
 }
 
-[GoType] partial struct own {
+partial struct own {
     internal @string s;
 }
 

@@ -2,7 +2,7 @@ namespace go.IoLike;
 
 partial class FsLike_package {
 
-[GoType] partial struct Info {
+partial struct Info {
     public @string Name;
     public nint Size;
 }

@@ -15,11 +15,11 @@ public static ж<Uniform> ΔOpaque = NewUniform(color.Opaque);
 
 // Uniform is an infinite-sized [Image] of uniform color.
 // It implements the [color.Color], [color.Model], and [Image] interfaces.
-[GoType] partial struct Uniform {
+partial struct Uniform {
     public color.Color C;
 }
 
-[GoRecv] public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this ref Uniform c) {
+public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this ref Uniform c) {
     return c.C.RGBA();
 }
 
@@ -27,25 +27,25 @@ public static color.Model ColorModel(this ж<Uniform> Ꮡc) {
     return new UniformжModel(Ꮡc);
 }
 
-[GoRecv] public static color.Color Convert(this ref Uniform c, color.Color _) {
+public static color.Color Convert(this ref Uniform c, color.Color _) {
     return c.C;
 }
 
-[GoRecv] public static Rectangle Bounds(this ref Uniform c) {
+public static Rectangle Bounds(this ref Uniform c) {
     return new Rectangle(new Point(-1000000000, -1000000000), new Point(1000000000, 1000000000));
 }
 
-[GoRecv] public static color.Color At(this ref Uniform c, nint x, nint y) {
+public static color.Color At(this ref Uniform c, nint x, nint y) {
     return c.C;
 }
 
-[GoRecv] public static color.RGBA64 RGBA64At(this ref Uniform c, nint x, nint y) {
+public static color.RGBA64 RGBA64At(this ref Uniform c, nint x, nint y) {
     var (r, g, b, a) = c.C.RGBA();
     return new color.RGBA64((uint16)r, (uint16)g, (uint16)b, (uint16)a);
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
-[GoRecv] public static bool Opaque(this ref Uniform c) {
+public static bool Opaque(this ref Uniform c) {
     var (_, _, _, a) = c.C.RGBA();
     return a == 0xffff;
 }

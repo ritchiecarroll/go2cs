@@ -317,7 +317,7 @@ internal static bool filterPackage(ref Package pkg, Func<@string, bool> f, bool 
     return hasDecls;
 }
 
-[GoType("num:nuint")] partial struct MergeMode;
+partial struct MergeMode /*num:nuint*/;
 
 // ----------------------------------------------------------------------------
 // Merging of package files

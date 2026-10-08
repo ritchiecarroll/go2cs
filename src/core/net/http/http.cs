@@ -26,7 +26,7 @@ partial class http_package {
 //   - HTTP2 is the HTTP/2 protcol over a TLS connection.
 //
 //   - UnencryptedHTTP2 is the HTTP/2 protocol over an unsecured TCP connection.
-[GoType] partial struct Protocols {
+partial struct Protocols {
     internal uint8 bits;
 }
 
@@ -40,7 +40,7 @@ public static bool HTTP1(this Protocols p) {
 }
 
 // SetHTTP1 adds or removes HTTP/1 from p.
-[GoRecv] public static void SetHTTP1(this ref Protocols p, bool ok) {
+public static void SetHTTP1(this ref Protocols p, bool ok) {
     p.setBit(protoHTTP1, ok);
 }
 
@@ -50,7 +50,7 @@ public static bool HTTP2(this Protocols p) {
 }
 
 // SetHTTP2 adds or removes HTTP/2 from p.
-[GoRecv] public static void SetHTTP2(this ref Protocols p, bool ok) {
+public static void SetHTTP2(this ref Protocols p, bool ok) {
     p.setBit(protoHTTP2, ok);
 }
 
@@ -60,11 +60,11 @@ public static bool UnencryptedHTTP2(this Protocols p) {
 }
 
 // SetUnencryptedHTTP2 adds or removes unencrypted HTTP/2 from p.
-[GoRecv] public static void SetUnencryptedHTTP2(this ref Protocols p, bool ok) {
+public static void SetUnencryptedHTTP2(this ref Protocols p, bool ok) {
     p.setBit(protoUnencryptedHTTP2, ok);
 }
 
-[GoRecv] internal static void setBit(this ref Protocols p, uint8 bit, bool ok) {
+internal static void setBit(this ref Protocols p, uint8 bit, bool ok) {
     if (ok){
         p.bits |= (uint8)(bit);
     } else {
@@ -86,7 +86,7 @@ public static @string String(this Protocols p) {
     return "{"u8 + strings.Join(s, ","u8) + "}"u8;
 }
 
-[GoType("[0]Action")] partial struct incomparable;
+partial struct incomparable /*[0]Action*/;
 
 // maxInt64 is the effective "infinite" value for the Server and
 // Transport's byte-limiting readers.
@@ -106,11 +106,11 @@ internal static bool omitBundledHTTP2;
 
 // contextKey is a value for use with context.WithValue. It's used as
 // a pointer so it fits in an interface{} without allocation.
-[GoType] public partial struct contextKey {
+public partial struct contextKey {
     internal @string name;
 }
 
-[GoRecv] public static @string String(this ref contextKey k) {
+public static @string String(this ref contextKey k) {
     return "net/http context value "u8 + k.name;
 }
 
@@ -180,7 +180,7 @@ internal static @string hexEscapeNonASCII(@string s) {
 // An alternative, however, is to simply set [Request.Body] to nil.
 public static noBody NoBody = new noBody(nil);
 
-[GoType] public partial struct noBody {
+public partial struct noBody {
 }
 
 public static (nint, error) Read(this noBody _Δp0, slice<byte> _Δp1) {
@@ -199,7 +199,7 @@ internal static io.WriterTo _ᴛ7ʗ = NoBody;
 internal static io.ReadCloser _ᴛ8ʗ = NoBody;
 
 // PushOptions describes options for [Pusher.Push].
-[GoType] partial struct PushOptions {
+partial struct PushOptions {
     // Method specifies the HTTP method for the promised request.
     // If set, it must be "GET" or "HEAD". Empty means "GET".
     public @string Method;
@@ -212,7 +212,7 @@ internal static io.ReadCloser _ᴛ8ʗ = NoBody;
 // Pusher is the interface implemented by ResponseWriters that support
 // HTTP/2 server push. For more background, see
 // https://tools.ietf.org/html/rfc7540#section-8.2.
-[GoType] partial interface Pusher {
+partial interface Pusher {
     // Push initiates an HTTP/2 server push. This constructs a synthetic
     // request using the given target and options, serializes that request
     // into a PUSH_PROMISE frame, then dispatches that request using the
@@ -242,7 +242,7 @@ internal static io.ReadCloser _ᴛ8ʗ = NoBody;
 
 // HTTP2Config defines HTTP/2 configuration parameters common to
 // both [Transport] and [Server].
-[GoType] partial struct HTTP2Config {
+partial struct HTTP2Config {
     // MaxConcurrentStreams optionally specifies the number of
     // concurrent streams that a peer may have open at a time.
     // If zero, MaxConcurrentStreams defaults to at least 100.

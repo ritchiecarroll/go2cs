@@ -15,7 +15,7 @@ partial class runtime_package {
 
 // traceTypeTable maps stack traces (arrays of PC's) to unique uint32 ids.
 // It is lock-free for reading.
-[GoType] partial struct traceTypeTable {
+partial struct traceTypeTable {
     internal traceMap tab;
 }
 

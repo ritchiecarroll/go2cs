@@ -17,13 +17,13 @@ public static UntypedInt ΔBlockSize => 16;
 
 // A Block is an instance of AES using a particular key.
 // It is safe for concurrent use.
-[GoType] partial struct Block {
+partial struct Block {
     internal partial ref block block { get; }
 }
 
 // blockExpanded is the block type used for all architectures except s390x,
 // which feeds the raw key directly to its instructions.
-[GoType] partial struct blockExpanded {
+partial struct blockExpanded {
     internal nint rounds;
     // Round keys, where only the first (rounds + 1) × (128 ÷ 32) words are used.
     internal array<uint32> enc = new(60);
@@ -44,11 +44,11 @@ internal static UntypedInt aes192Rounds => 12;
 internal static UntypedInt aes256Rounds => 14;
 
 // roundKeysSize returns the number of uint32 of c.end or c.dec that are used.
-[GoRecv] internal static nint roundKeysSize(this ref blockExpanded b) {
+internal static nint roundKeysSize(this ref blockExpanded b) {
     return (b.rounds + 1) * (128 / 32);
 }
 
-[GoType("num:nint")] partial struct KeySizeError;
+partial struct KeySizeError /*num:nint*/;
 
 public static @string Error(this KeySizeError k) {
     return "crypto/aes: invalid key size "u8 + strconv.Itoa((nint)k);
@@ -94,7 +94,7 @@ internal static void newBlockExpanded(ж<blockExpanded> Ꮡc, slice<byte> key) {
     expandKeyGeneric(Ꮡc, key);
 }
 
-[GoRecv] public static nint BlockSize(this ref Block c) {
+public static nint BlockSize(this ref Block c) {
     return ΔBlockSize;
 }
 

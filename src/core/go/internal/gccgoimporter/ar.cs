@@ -183,7 +183,7 @@ internal static io.ReaderAt readerAtFromSeeker(io.ReadSeeker rs) {
     return new seekerReadAt(rs);
 }
 
-[GoType] partial struct seekerReadAt {
+partial struct seekerReadAt {
     internal io.ReadSeeker seeker;
 }
 

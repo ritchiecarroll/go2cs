@@ -12,7 +12,7 @@ partial class cipher_package {
 
 // StreamReader wraps a [Stream] into an [io.Reader]. It calls XORKeyStream
 // to process each slice of data which passes through.
-[GoType] partial struct StreamReader {
+partial struct StreamReader {
     public Stream S;
     public io.Reader R;
 }
@@ -31,7 +31,7 @@ public static (nint n, error err) Read(this StreamReader r, slice<byte> dst) {
 // call returns short then the StreamWriter is out of sync and must be discarded.
 // A StreamWriter has no internal buffering; [StreamWriter.Close] does not need
 // to be called to flush write data.
-[GoType] partial struct StreamWriter {
+partial struct StreamWriter {
     public Stream S;
     public io.Writer W;
     public error Err; // unused

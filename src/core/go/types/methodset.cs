@@ -14,7 +14,7 @@ partial class types_package {
 // A MethodSet is an ordered set of concrete or abstract (interface) methods;
 // a method is a [MethodVal] selection, and they are ordered by ascending m.Obj().Id().
 // The zero value for a MethodSet is a ready-to-use empty method set.
-[GoType] partial struct MethodSet {
+partial struct MethodSet {
     internal slice<ж<Selection>> list;
 }
 
@@ -22,7 +22,7 @@ partial class types_package {
 internal static readonly @string methodSetˢ = "MethodSet {}"u8;
 internal static readonly object methodSetˢ2 = (@string)"MethodSet {"u8;
 
-[GoRecv] public static @string String(this ref MethodSet s) {
+public static @string String(this ref MethodSet s) {
     if (s.Len() == 0) {
         return methodSetˢ;
     }
@@ -36,12 +36,12 @@ internal static readonly object methodSetˢ2 = (@string)"MethodSet {"u8;
 }
 
 // Len returns the number of methods in s.
-[GoRecv] public static nint Len(this ref MethodSet s) {
+public static nint Len(this ref MethodSet s) {
     return len(s.list);
 }
 
 // At returns the i'th method in s for 0 <= i < s.Len().
-[GoRecv] public static ж<Selection> At(this ref MethodSet s, nint i) {
+public static ж<Selection> At(this ref MethodSet s, nint i) {
     return s.list[i];
 }
 
@@ -209,7 +209,7 @@ public static ж<MethodSet> NewMethodSet(ΔType T) {
     return Ꮡ(new MethodSet(list));
 }
 
-[GoType("map[@string, ж<Selection>]")] partial struct methodSet;
+partial struct methodSet /*map[@string, ж<Selection>]*/;
 
 // Add adds all functions in list to the method set s.
 // If multiples is set, every function in list appears multiple times

@@ -15,34 +15,34 @@ using go.@internal.trace.@event;
 
 partial class trace_package {
 
-[GoType("num:uint64")] partial struct timestamp;
+partial struct timestamp /*num:uint64*/;
 
 // batch represents a batch of trace events.
 // It is unparsed except for its header.
-[GoType] partial struct batch {
+partial struct batch {
     internal ThreadID m;
     internal timestamp time;
     internal slice<byte> data;
     internal @event.Experiment exp;
 }
 
-[GoRecv] internal static bool isStringsBatch(this ref batch b) {
+internal static bool isStringsBatch(this ref batch b) {
     return b.exp == @event.NoExperiment && len(b.data) > 0 && ((@event.Type)b.data[0]) == go122.EvStrings;
 }
 
-[GoRecv] internal static bool isStacksBatch(this ref batch b) {
+internal static bool isStacksBatch(this ref batch b) {
     return b.exp == @event.NoExperiment && len(b.data) > 0 && ((@event.Type)b.data[0]) == go122.EvStacks;
 }
 
-[GoRecv] internal static bool isCPUSamplesBatch(this ref batch b) {
+internal static bool isCPUSamplesBatch(this ref batch b) {
     return b.exp == @event.NoExperiment && len(b.data) > 0 && ((@event.Type)b.data[0]) == go122.EvCPUSamples;
 }
 
-[GoRecv] internal static bool isFreqBatch(this ref batch b) {
+internal static bool isFreqBatch(this ref batch b) {
     return b.exp == @event.NoExperiment && len(b.data) > 0 && ((@event.Type)b.data[0]) == go122.EvFrequency;
 }
 
-[GoType("dyn")] internal partial interface readBatch_r :
+internal partial interface readBatch_r /*dyn*/ :
     io.Reader,
     io.ByteReader
 {

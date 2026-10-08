@@ -54,7 +54,7 @@ using static go.crypto.@internal.fips140.tls13_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/tls13/cast.go", "cast.cs", "AA8egoK43IKCgoKCgIKk", "16-36:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/tls13/tls13.go", "tls13.cs", "ABEo8gAIEpSCgoKCgoKCpqKClKaigpQAESii3IKqogAKEIKCAAUQoqqiAAcQgoIABRCiqqKqogAHFKIABRCiAAgMgoKCgqai", "76-76:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/tls13/tls13.go", "tls13.cs", "ABEo8gAIEpSCgoKCgoKCpqKClKaigpQAESii3IKqogAKEIKCAAUQoqqiAAcQgoIABRCiqqKqogAHFKIABRCiAAgMgoKCgqai", "76-76:1", "", "83=extract/1/1/1;109=extract/1/1/1;134=extract/1/1/1;166=deriveSecret/1/1/1;175=deriveSecret/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -63,7 +63,7 @@ namespace go.crypto.@internal.fips140;
 public static partial class tls13_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

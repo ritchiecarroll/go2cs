@@ -4,9 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[4]uint32")] partial struct row;
+partial struct row /*[4]uint32*/;
 
-[GoType("[3]row")] partial struct grid;
+partial struct grid /*[3]row*/;
 
 internal static void populate(ж<row> Ꮡt, uint32 @base) {
     ref var t = ref Ꮡt.DerefOrNull();

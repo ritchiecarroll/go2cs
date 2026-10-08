@@ -30,27 +30,27 @@ partial class ast_package {
 // when printing the construct.
 
 // All node types implement the Node interface.
-[GoType] partial interface Node {
+partial interface Node {
     tokenꓸPos Pos(); // position of first character belonging to the node
     tokenꓸPos End(); // position of first character immediately after the node
 }
 
 // All expression nodes implement the Expr interface.
-[GoType] partial interface Expr :
+partial interface Expr :
     Node
 {
     void exprNode();
 }
 
 // All statement nodes implement the Stmt interface.
-[GoType] partial interface Stmt :
+partial interface Stmt :
     Node
 {
     void stmtNode();
 }
 
 // All declaration nodes implement the Decl interface.
-[GoType] partial interface Decl :
+partial interface Decl :
     Node
 {
     void declNode();
@@ -65,30 +65,30 @@ partial class ast_package {
 // may have been present in the source. Because a comment's end position is
 // computed using len(Text), the position reported by [Comment.End] does not match the
 // true source end position for comments containing carriage returns.
-[GoType] partial struct Comment {
+partial struct Comment {
     public tokenꓸPos Slash; // position of "/" starting the comment
     public @string Text;   // comment text (excluding '\n' for //-style comments)
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref Comment c) {
+public static tokenꓸPos Pos(this ref Comment c) {
     return c.Slash;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref Comment c) {
+public static tokenꓸPos End(this ref Comment c) {
     return ((tokenꓸPos)((nint)c.Slash + len(c.Text)));
 }
 
 // A CommentGroup represents a sequence of comments
 // with no other tokens and no empty lines between.
-[GoType] partial struct CommentGroup {
+partial struct CommentGroup {
     public slice<ж<Comment>> List; // len(List) > 0
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref CommentGroup g) {
+public static tokenꓸPos Pos(this ref CommentGroup g) {
     return g.List[0].Pos();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref CommentGroup g) {
+public static tokenꓸPos End(this ref CommentGroup g) {
     return g.List[len(g.List) - 1].End();
 }
 
@@ -216,7 +216,7 @@ internal static bool isDirective(@string c) {
 // in a signature.
 // [Field.Names] is nil for unnamed parameters (parameter lists which only contain types)
 // and embedded struct fields. In the latter case, the field name is the type name.
-[GoType] partial struct Field {
+partial struct Field {
     public ж<CommentGroup> Doc; // associated documentation; or nil
     public slice<ж<Ident>> Names; // field/method/(type) parameter names; or nil
     public Expr Type;          // field/method/parameter type; or nil
@@ -224,7 +224,7 @@ internal static bool isDirective(@string c) {
     public ж<CommentGroup> Comment; // line comments; or nil
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref Field f) {
+public static tokenꓸPos Pos(this ref Field f) {
     if (len(f.Names) > 0) {
         return f.Names[0].Pos();
     }
@@ -234,7 +234,7 @@ internal static bool isDirective(@string c) {
     return token.NoPos;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref Field f) {
+public static tokenꓸPos End(this ref Field f) {
     if (f.Tag != nil) {
         return f.Tag.End();
     }
@@ -249,13 +249,13 @@ internal static bool isDirective(@string c) {
 
 // A FieldList represents a list of Fields, enclosed by parentheses,
 // curly braces, or square brackets.
-[GoType] partial struct FieldList {
+partial struct FieldList {
     public tokenꓸPos Opening; // position of opening parenthesis/brace/bracket, if any
     public slice<ж<Field>> List; // field list; or nil
     public tokenꓸPos Closing; // position of closing parenthesis/brace/bracket, if any
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref FieldList f) {
+public static tokenꓸPos Pos(this ref FieldList f) {
     if (f.Opening.IsValid()) {
         return f.Opening;
     }
@@ -267,7 +267,7 @@ internal static bool isDirective(@string c) {
     return token.NoPos;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref FieldList f) {
+public static tokenꓸPos End(this ref FieldList f) {
     if (f.Closing.IsValid()) {
         return f.Closing + 1;
     }
@@ -300,38 +300,38 @@ public static nint NumFields(this ж<FieldList> Ꮡf) {
 
 // An expression is represented by a tree consisting of one
 // or more of the following concrete expression nodes.
-[GoType] partial struct BadExpr {
+partial struct BadExpr {
     public tokenꓸPos From, To; // position range of bad expression
 }
 
 
-[GoType] partial struct Ident {
+partial struct Ident {
     public tokenꓸPos NamePos; // identifier position
     public @string Name;   // identifier name
     public ж<Object> Obj; // denoted object, or nil. Deprecated: see Object.
 }
 
 
-[GoType] partial struct Ellipsis {
+partial struct Ellipsis {
     public tokenꓸPos ΔEllipsis; // position of "..."
     public Expr Elt;      // ellipsis element type (parameter lists only); or nil
 }
 
 
-[GoType] partial struct BasicLit {
+partial struct BasicLit {
     public tokenꓸPos ValuePos;   // literal position
     public token.Token Kind; // token.INT, token.FLOAT, token.IMAG, token.CHAR, or token.STRING
     public @string Value;     // literal string; e.g. 42, 0x7f, 3.14, 1e-9, 2.4i, 'a', '\x7f', "foo" or `\m\n\o`
 }
 
 
-[GoType] partial struct FuncLit {
+partial struct FuncLit {
     public ж<FuncType> Type; // function type
     public ж<BlockStmt> Body; // function body
 }
 
 
-[GoType] partial struct CompositeLit {
+partial struct CompositeLit {
     public Expr Type;      // literal type; or nil
     public tokenꓸPos Lbrace; // position of "{"
     public slice<Expr> Elts; // list of composite elements; or nil
@@ -340,20 +340,20 @@ public static nint NumFields(this ж<FieldList> Ꮡf) {
 }
 
 
-[GoType] partial struct ParenExpr {
+partial struct ParenExpr {
     public tokenꓸPos Lparen; // position of "("
     public Expr X;      // parenthesized expression
     public tokenꓸPos Rparen; // position of ")"
 }
 
 
-[GoType] partial struct SelectorExpr {
+partial struct SelectorExpr {
     public Expr X;   // expression
     public ж<Ident> Sel; // field selector
 }
 
 
-[GoType] partial struct IndexExpr {
+partial struct IndexExpr {
     public Expr X;      // expression
     public tokenꓸPos Lbrack; // position of "["
     public Expr Index;      // index expression
@@ -361,7 +361,7 @@ public static nint NumFields(this ж<FieldList> Ꮡf) {
 }
 
 
-[GoType] partial struct IndexListExpr {
+partial struct IndexListExpr {
     public Expr X;      // expression
     public tokenꓸPos Lbrack; // position of "["
     public slice<Expr> Indices; // index expressions
@@ -369,7 +369,7 @@ public static nint NumFields(this ж<FieldList> Ꮡf) {
 }
 
 
-[GoType] partial struct SliceExpr {
+partial struct SliceExpr {
     public Expr X;      // expression
     public tokenꓸPos Lbrack; // position of "["
     public Expr Low;      // begin of slice range; or nil
@@ -380,7 +380,7 @@ public static nint NumFields(this ж<FieldList> Ꮡf) {
 }
 
 
-[GoType] partial struct TypeAssertExpr {
+partial struct TypeAssertExpr {
     public Expr X;      // expression
     public tokenꓸPos Lparen; // position of "("
     public Expr Type;      // asserted type; nil means type switch X.(type)
@@ -388,7 +388,7 @@ public static nint NumFields(this ж<FieldList> Ꮡf) {
 }
 
 
-[GoType] partial struct CallExpr {
+partial struct CallExpr {
     public Expr Fun;      // function expression
     public tokenꓸPos Lparen; // position of "("
     public slice<Expr> Args; // function arguments; or nil
@@ -397,20 +397,20 @@ public static nint NumFields(this ж<FieldList> Ꮡf) {
 }
 
 
-[GoType] partial struct StarExpr {
+partial struct StarExpr {
     public tokenꓸPos Star; // position of "*"
     public Expr X;      // operand
 }
 
 
-[GoType] partial struct UnaryExpr {
+partial struct UnaryExpr {
     public tokenꓸPos OpPos;   // position of Op
     public token.Token Op; // operator
     public Expr X;        // operand
 }
 
 
-[GoType] partial struct BinaryExpr {
+partial struct BinaryExpr {
     public Expr X;        // left operand
     public tokenꓸPos OpPos;   // position of Op
     public token.Token Op; // operator
@@ -418,13 +418,13 @@ public static nint NumFields(this ж<FieldList> Ꮡf) {
 }
 
 
-[GoType] partial struct KeyValueExpr {
+partial struct KeyValueExpr {
     public Expr Key;
     public tokenꓸPos Colon; // position of ":"
     public Expr Value;
 }
 
-[GoType("num:nint")] partial struct ChanDir;
+partial struct ChanDir /*num:nint*/;
 
 public static ChanDir SEND => /* 1 << iota */ 1;
 public static ChanDir RECV => 2;
@@ -432,14 +432,14 @@ public static ChanDir RECV => 2;
 // A type is represented by a tree consisting of one
 // or more of the following type-specific expression
 // nodes.
-[GoType] partial struct ArrayType {
+partial struct ArrayType {
     public tokenꓸPos Lbrack; // position of "["
     public Expr Len;      // Ellipsis node for [...]T array types, nil for slice types
     public Expr Elt;      // element type
 }
 
 
-[GoType] partial struct StructType {
+partial struct StructType {
     public tokenꓸPos Struct;  // position of "struct" keyword
     public ж<FieldList> Fields; // list of field declarations
     public bool Incomplete;       // true if (source) fields are missing in the Fields list
@@ -447,7 +447,7 @@ public static ChanDir RECV => 2;
 
 // Pointer types are represented via StarExpr nodes.
 
-[GoType] partial struct FuncType {
+partial struct FuncType {
     public tokenꓸPos Func;  // position of "func" keyword (token.NoPos if there is no "func")
     public ж<FieldList> TypeParams; // type parameters; or nil
     public ж<FieldList> Params; // (incoming) parameters; non-nil
@@ -455,21 +455,21 @@ public static ChanDir RECV => 2;
 }
 
 
-[GoType] partial struct InterfaceType {
+partial struct InterfaceType {
     public tokenꓸPos Interface;  // position of "interface" keyword
     public ж<FieldList> Methods; // list of embedded interfaces, methods, or types
     public bool Incomplete;       // true if (source) methods or types are missing in the Methods list
 }
 
 
-[GoType] partial struct MapType {
+partial struct MapType {
     public tokenꓸPos Map; // position of "map" keyword
     public Expr Key;
     public Expr Value;
 }
 
 
-[GoType] partial struct ChanType {
+partial struct ChanType {
     public tokenꓸPos Begin; // position of "chan" keyword or "<-" (whichever comes first)
     public tokenꓸPos Arrow; // position of "<-" (token.NoPos if there is no "<-")
     public ChanDir Dir;   // channel direction
@@ -477,86 +477,86 @@ public static ChanDir RECV => 2;
 }
 
 // Pos and End implementations for expression/type nodes.
-[GoRecv] public static tokenꓸPos Pos(this ref BadExpr x) {
+public static tokenꓸPos Pos(this ref BadExpr x) {
     return x.From;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref Ident x) {
+public static tokenꓸPos Pos(this ref Ident x) {
     return x.NamePos;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref Ellipsis x) {
+public static tokenꓸPos Pos(this ref Ellipsis x) {
     return x.ΔEllipsis;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref BasicLit x) {
+public static tokenꓸPos Pos(this ref BasicLit x) {
     return x.ValuePos;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref FuncLit x) {
+public static tokenꓸPos Pos(this ref FuncLit x) {
     return x.Type.Pos();
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref CompositeLit x) {
+public static tokenꓸPos Pos(this ref CompositeLit x) {
     if (x.Type != default!) {
         return x.Type.Pos();
     }
     return x.Lbrace;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref ParenExpr x) {
+public static tokenꓸPos Pos(this ref ParenExpr x) {
     return x.Lparen;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref SelectorExpr x) {
+public static tokenꓸPos Pos(this ref SelectorExpr x) {
     return x.X.Pos();
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref IndexExpr x) {
+public static tokenꓸPos Pos(this ref IndexExpr x) {
     return x.X.Pos();
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref IndexListExpr x) {
+public static tokenꓸPos Pos(this ref IndexListExpr x) {
     return x.X.Pos();
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref SliceExpr x) {
+public static tokenꓸPos Pos(this ref SliceExpr x) {
     return x.X.Pos();
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref TypeAssertExpr x) {
+public static tokenꓸPos Pos(this ref TypeAssertExpr x) {
     return x.X.Pos();
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref CallExpr x) {
+public static tokenꓸPos Pos(this ref CallExpr x) {
     return x.Fun.Pos();
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref StarExpr x) {
+public static tokenꓸPos Pos(this ref StarExpr x) {
     return x.Star;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref UnaryExpr x) {
+public static tokenꓸPos Pos(this ref UnaryExpr x) {
     return x.OpPos;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref BinaryExpr x) {
+public static tokenꓸPos Pos(this ref BinaryExpr x) {
     return x.X.Pos();
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref KeyValueExpr x) {
+public static tokenꓸPos Pos(this ref KeyValueExpr x) {
     return x.Key.Pos();
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref ArrayType x) {
+public static tokenꓸPos Pos(this ref ArrayType x) {
     return x.Lbrack;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref StructType x) {
+public static tokenꓸPos Pos(this ref StructType x) {
     return x.Struct;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref FuncType x) {
+public static tokenꓸPos Pos(this ref FuncType x) {
     if (x.Func.IsValid() || x.Params == nil) {
         // see issue 3870
         return x.Func;
@@ -564,185 +564,185 @@ public static ChanDir RECV => 2;
     return x.Params.Pos(); // interface method declarations have no "func" keyword
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref InterfaceType x) {
+public static tokenꓸPos Pos(this ref InterfaceType x) {
     return x.Interface;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref MapType x) {
+public static tokenꓸPos Pos(this ref MapType x) {
     return x.Map;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref ChanType x) {
+public static tokenꓸPos Pos(this ref ChanType x) {
     return x.Begin;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref BadExpr x) {
+public static tokenꓸPos End(this ref BadExpr x) {
     return x.To;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref Ident x) {
+public static tokenꓸPos End(this ref Ident x) {
     return ((tokenꓸPos)((nint)x.NamePos + len(x.Name)));
 }
 
-[GoRecv] public static tokenꓸPos End(this ref Ellipsis x) {
+public static tokenꓸPos End(this ref Ellipsis x) {
     if (x.Elt != default!) {
         return x.Elt.End();
     }
     return x.ΔEllipsis + 3; // len("...")
 }
 
-[GoRecv] public static tokenꓸPos End(this ref BasicLit x) {
+public static tokenꓸPos End(this ref BasicLit x) {
     return ((tokenꓸPos)((nint)x.ValuePos + len(x.Value)));
 }
 
-[GoRecv] public static tokenꓸPos End(this ref FuncLit x) {
+public static tokenꓸPos End(this ref FuncLit x) {
     return x.Body.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref CompositeLit x) {
+public static tokenꓸPos End(this ref CompositeLit x) {
     return x.Rbrace + 1;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref ParenExpr x) {
+public static tokenꓸPos End(this ref ParenExpr x) {
     return x.Rparen + 1;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref SelectorExpr x) {
+public static tokenꓸPos End(this ref SelectorExpr x) {
     return x.Sel.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref IndexExpr x) {
+public static tokenꓸPos End(this ref IndexExpr x) {
     return x.Rbrack + 1;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref IndexListExpr x) {
+public static tokenꓸPos End(this ref IndexListExpr x) {
     return x.Rbrack + 1;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref SliceExpr x) {
+public static tokenꓸPos End(this ref SliceExpr x) {
     return x.Rbrack + 1;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref TypeAssertExpr x) {
+public static tokenꓸPos End(this ref TypeAssertExpr x) {
     return x.Rparen + 1;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref CallExpr x) {
+public static tokenꓸPos End(this ref CallExpr x) {
     return x.Rparen + 1;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref StarExpr x) {
+public static tokenꓸPos End(this ref StarExpr x) {
     return x.X.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref UnaryExpr x) {
+public static tokenꓸPos End(this ref UnaryExpr x) {
     return x.X.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref BinaryExpr x) {
+public static tokenꓸPos End(this ref BinaryExpr x) {
     return x.Y.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref KeyValueExpr x) {
+public static tokenꓸPos End(this ref KeyValueExpr x) {
     return x.Value.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref ArrayType x) {
+public static tokenꓸPos End(this ref ArrayType x) {
     return x.Elt.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref StructType x) {
+public static tokenꓸPos End(this ref StructType x) {
     return x.Fields.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref FuncType x) {
+public static tokenꓸPos End(this ref FuncType x) {
     if (x.Results != nil) {
         return x.Results.End();
     }
     return x.Params.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref InterfaceType x) {
+public static tokenꓸPos End(this ref InterfaceType x) {
     return x.Methods.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref MapType x) {
+public static tokenꓸPos End(this ref MapType x) {
     return x.Value.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref ChanType x) {
+public static tokenꓸPos End(this ref ChanType x) {
     return x.Value.End();
 }
 
 // exprNode() ensures that only expression/type nodes can be
 // assigned to an Expr.
-[GoRecv] internal static void exprNode(this ref BadExpr _) {
+internal static void exprNode(this ref BadExpr _) {
 }
 
-[GoRecv] internal static void exprNode(this ref Ident _) {
+internal static void exprNode(this ref Ident _) {
 }
 
-[GoRecv] internal static void exprNode(this ref Ellipsis _) {
+internal static void exprNode(this ref Ellipsis _) {
 }
 
-[GoRecv] internal static void exprNode(this ref BasicLit _) {
+internal static void exprNode(this ref BasicLit _) {
 }
 
-[GoRecv] internal static void exprNode(this ref FuncLit _) {
+internal static void exprNode(this ref FuncLit _) {
 }
 
-[GoRecv] internal static void exprNode(this ref CompositeLit _) {
+internal static void exprNode(this ref CompositeLit _) {
 }
 
-[GoRecv] internal static void exprNode(this ref ParenExpr _) {
+internal static void exprNode(this ref ParenExpr _) {
 }
 
-[GoRecv] internal static void exprNode(this ref SelectorExpr _) {
+internal static void exprNode(this ref SelectorExpr _) {
 }
 
-[GoRecv] internal static void exprNode(this ref IndexExpr _) {
+internal static void exprNode(this ref IndexExpr _) {
 }
 
-[GoRecv] internal static void exprNode(this ref IndexListExpr _) {
+internal static void exprNode(this ref IndexListExpr _) {
 }
 
-[GoRecv] internal static void exprNode(this ref SliceExpr _) {
+internal static void exprNode(this ref SliceExpr _) {
 }
 
-[GoRecv] internal static void exprNode(this ref TypeAssertExpr _) {
+internal static void exprNode(this ref TypeAssertExpr _) {
 }
 
-[GoRecv] internal static void exprNode(this ref CallExpr _) {
+internal static void exprNode(this ref CallExpr _) {
 }
 
-[GoRecv] internal static void exprNode(this ref StarExpr _) {
+internal static void exprNode(this ref StarExpr _) {
 }
 
-[GoRecv] internal static void exprNode(this ref UnaryExpr _) {
+internal static void exprNode(this ref UnaryExpr _) {
 }
 
-[GoRecv] internal static void exprNode(this ref BinaryExpr _) {
+internal static void exprNode(this ref BinaryExpr _) {
 }
 
-[GoRecv] internal static void exprNode(this ref KeyValueExpr _) {
+internal static void exprNode(this ref KeyValueExpr _) {
 }
 
-[GoRecv] internal static void exprNode(this ref ArrayType _) {
+internal static void exprNode(this ref ArrayType _) {
 }
 
-[GoRecv] internal static void exprNode(this ref StructType _) {
+internal static void exprNode(this ref StructType _) {
 }
 
-[GoRecv] internal static void exprNode(this ref FuncType _) {
+internal static void exprNode(this ref FuncType _) {
 }
 
-[GoRecv] internal static void exprNode(this ref InterfaceType _) {
+internal static void exprNode(this ref InterfaceType _) {
 }
 
-[GoRecv] internal static void exprNode(this ref MapType _) {
+internal static void exprNode(this ref MapType _) {
 }
 
-[GoRecv] internal static void exprNode(this ref ChanType _) {
+internal static void exprNode(this ref ChanType _) {
 }
 
 // ----------------------------------------------------------------------------
@@ -760,7 +760,7 @@ public static bool IsExported(@string name) {
 }
 
 // IsExported reports whether id starts with an upper-case letter.
-[GoRecv] public static bool IsExported(this ref Ident id) {
+public static bool IsExported(this ref Ident id) {
     return token.IsExported(id.Name);
 }
 
@@ -781,49 +781,49 @@ public static @string String(this ж<Ident> Ꮡid) {
 
 // A statement is represented by a tree consisting of one
 // or more of the following concrete statement nodes.
-[GoType] partial struct BadStmt {
+partial struct BadStmt {
     public tokenꓸPos From, To; // position range of bad statement
 }
 
 
-[GoType] partial struct DeclStmt {
+partial struct DeclStmt {
     public Decl Decl; // *GenDecl with CONST, TYPE, or VAR token
 }
 
 
-[GoType] partial struct EmptyStmt {
+partial struct EmptyStmt {
     public tokenꓸPos Semicolon; // position of following ";"
     public bool Implicit;      // if set, ";" was omitted in the source
 }
 
 
-[GoType] partial struct LabeledStmt {
+partial struct LabeledStmt {
     public ж<Ident> Label;
     public tokenꓸPos Colon; // position of ":"
     public Stmt Stmt;
 }
 
 
-[GoType] partial struct ExprStmt {
+partial struct ExprStmt {
     public Expr X; // expression
 }
 
 
-[GoType] partial struct SendStmt {
+partial struct SendStmt {
     public Expr Chan;
     public tokenꓸPos Arrow; // position of "<-"
     public Expr Value;
 }
 
 
-[GoType] partial struct IncDecStmt {
+partial struct IncDecStmt {
     public Expr X;
     public tokenꓸPos TokPos;   // position of Tok
     public token.Token Tok; // INC or DEC
 }
 
 
-[GoType] partial struct AssignStmt {
+partial struct AssignStmt {
     public slice<Expr> Lhs;
     public tokenꓸPos TokPos;   // position of Tok
     public token.Token Tok; // assignment token, DEFINE
@@ -831,39 +831,39 @@ public static @string String(this ж<Ident> Ꮡid) {
 }
 
 
-[GoType] partial struct GoStmt {
+partial struct GoStmt {
     public tokenꓸPos Go; // position of "go" keyword
     public ж<CallExpr> Call;
 }
 
 
-[GoType] partial struct DeferStmt {
+partial struct DeferStmt {
     public tokenꓸPos Defer; // position of "defer" keyword
     public ж<CallExpr> Call;
 }
 
 
-[GoType] partial struct ReturnStmt {
+partial struct ReturnStmt {
     public tokenꓸPos Return; // position of "return" keyword
     public slice<Expr> Results; // result expressions; or nil
 }
 
 
-[GoType] partial struct BranchStmt {
+partial struct BranchStmt {
     public tokenꓸPos TokPos;   // position of Tok
     public token.Token Tok; // keyword token (BREAK, CONTINUE, GOTO, FALLTHROUGH)
     public ж<Ident> Label;   // label name; or nil
 }
 
 
-[GoType] partial struct BlockStmt {
+partial struct BlockStmt {
     public tokenꓸPos Lbrace; // position of "{"
     public slice<Stmt> List;
     public tokenꓸPos Rbrace; // position of "}", if any (may be absent due to syntax error)
 }
 
 
-[GoType] partial struct IfStmt {
+partial struct IfStmt {
     public tokenꓸPos If; // position of "if" keyword
     public Stmt Init;      // initialization statement; or nil
     public Expr Cond;      // condition
@@ -872,7 +872,7 @@ public static @string String(this ж<Ident> Ꮡid) {
 }
 
 
-[GoType] partial struct CaseClause {
+partial struct CaseClause {
     public tokenꓸPos Case; // position of "case" or "default" keyword
     public slice<Expr> List; // list of expressions or types; nil means default case
     public tokenꓸPos Colon; // position of ":"
@@ -880,7 +880,7 @@ public static @string String(this ж<Ident> Ꮡid) {
 }
 
 
-[GoType] partial struct SwitchStmt {
+partial struct SwitchStmt {
     public tokenꓸPos Switch;  // position of "switch" keyword
     public Stmt Init;       // initialization statement; or nil
     public Expr Tag;       // tag expression; or nil
@@ -888,7 +888,7 @@ public static @string String(this ж<Ident> Ꮡid) {
 }
 
 
-[GoType] partial struct TypeSwitchStmt {
+partial struct TypeSwitchStmt {
     public tokenꓸPos Switch;  // position of "switch" keyword
     public Stmt Init;       // initialization statement; or nil
     public Stmt Assign;       // x := y.(type) or y.(type)
@@ -896,7 +896,7 @@ public static @string String(this ж<Ident> Ꮡid) {
 }
 
 
-[GoType] partial struct CommClause {
+partial struct CommClause {
     public tokenꓸPos Case; // position of "case" or "default" keyword
     public Stmt Comm;      // send or receive statement; nil means default case
     public tokenꓸPos Colon; // position of ":"
@@ -904,13 +904,13 @@ public static @string String(this ж<Ident> Ꮡid) {
 }
 
 
-[GoType] partial struct SelectStmt {
+partial struct SelectStmt {
     public tokenꓸPos Select;  // position of "select" keyword
     public ж<BlockStmt> Body; // CommClauses only
 }
 
 
-[GoType] partial struct ForStmt {
+partial struct ForStmt {
     public tokenꓸPos For; // position of "for" keyword
     public Stmt Init;      // initialization statement; or nil
     public Expr Cond;      // condition; or nil
@@ -919,7 +919,7 @@ public static @string String(this ж<Ident> Ꮡid) {
 }
 
 
-[GoType] partial struct RangeStmt {
+partial struct RangeStmt {
     public tokenꓸPos For;   // position of "for" keyword
     public Expr Key, Value;        // Key, Value may be nil
     public tokenꓸPos TokPos;   // position of Tok; invalid if Key == nil
@@ -930,134 +930,134 @@ public static @string String(this ж<Ident> Ꮡid) {
 }
 
 // Pos and End implementations for statement nodes.
-[GoRecv] public static tokenꓸPos Pos(this ref BadStmt s) {
+public static tokenꓸPos Pos(this ref BadStmt s) {
     return s.From;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref DeclStmt s) {
+public static tokenꓸPos Pos(this ref DeclStmt s) {
     return s.Decl.Pos();
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref EmptyStmt s) {
+public static tokenꓸPos Pos(this ref EmptyStmt s) {
     return s.Semicolon;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref LabeledStmt s) {
+public static tokenꓸPos Pos(this ref LabeledStmt s) {
     return s.Label.Pos();
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref ExprStmt s) {
+public static tokenꓸPos Pos(this ref ExprStmt s) {
     return s.X.Pos();
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref SendStmt s) {
+public static tokenꓸPos Pos(this ref SendStmt s) {
     return s.Chan.Pos();
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref IncDecStmt s) {
+public static tokenꓸPos Pos(this ref IncDecStmt s) {
     return s.X.Pos();
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref AssignStmt s) {
+public static tokenꓸPos Pos(this ref AssignStmt s) {
     return s.Lhs[0].Pos();
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref GoStmt s) {
+public static tokenꓸPos Pos(this ref GoStmt s) {
     return s.Go;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref DeferStmt s) {
+public static tokenꓸPos Pos(this ref DeferStmt s) {
     return s.Defer;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref ReturnStmt s) {
+public static tokenꓸPos Pos(this ref ReturnStmt s) {
     return s.Return;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref BranchStmt s) {
+public static tokenꓸPos Pos(this ref BranchStmt s) {
     return s.TokPos;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref BlockStmt s) {
+public static tokenꓸPos Pos(this ref BlockStmt s) {
     return s.Lbrace;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref IfStmt s) {
+public static tokenꓸPos Pos(this ref IfStmt s) {
     return s.If;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref CaseClause s) {
+public static tokenꓸPos Pos(this ref CaseClause s) {
     return s.Case;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref SwitchStmt s) {
+public static tokenꓸPos Pos(this ref SwitchStmt s) {
     return s.Switch;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref TypeSwitchStmt s) {
+public static tokenꓸPos Pos(this ref TypeSwitchStmt s) {
     return s.Switch;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref CommClause s) {
+public static tokenꓸPos Pos(this ref CommClause s) {
     return s.Case;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref SelectStmt s) {
+public static tokenꓸPos Pos(this ref SelectStmt s) {
     return s.Select;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref ForStmt s) {
+public static tokenꓸPos Pos(this ref ForStmt s) {
     return s.For;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref RangeStmt s) {
+public static tokenꓸPos Pos(this ref RangeStmt s) {
     return s.For;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref BadStmt s) {
+public static tokenꓸPos End(this ref BadStmt s) {
     return s.To;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref DeclStmt s) {
+public static tokenꓸPos End(this ref DeclStmt s) {
     return s.Decl.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref EmptyStmt s) {
+public static tokenꓸPos End(this ref EmptyStmt s) {
     if (s.Implicit) {
         return s.Semicolon;
     }
     return s.Semicolon + 1; /* len(";") */
 }
 
-[GoRecv] public static tokenꓸPos End(this ref LabeledStmt s) {
+public static tokenꓸPos End(this ref LabeledStmt s) {
     return s.Stmt.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref ExprStmt s) {
+public static tokenꓸPos End(this ref ExprStmt s) {
     return s.X.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref SendStmt s) {
+public static tokenꓸPos End(this ref SendStmt s) {
     return s.Value.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref IncDecStmt s) {
+public static tokenꓸPos End(this ref IncDecStmt s) {
     return s.TokPos + 2; /* len("++") */
 }
 
-[GoRecv] public static tokenꓸPos End(this ref AssignStmt s) {
+public static tokenꓸPos End(this ref AssignStmt s) {
     return s.Rhs[len(s.Rhs) - 1].End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref GoStmt s) {
+public static tokenꓸPos End(this ref GoStmt s) {
     return s.Call.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref DeferStmt s) {
+public static tokenꓸPos End(this ref DeferStmt s) {
     return s.Call.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref ReturnStmt s) {
+public static tokenꓸPos End(this ref ReturnStmt s) {
     {
         nint n = len(s.Results); if (n > 0) {
             return s.Results[n - 1].End();
@@ -1066,14 +1066,14 @@ public static @string String(this ж<Ident> Ꮡid) {
     return s.Return + 6; // len("return")
 }
 
-[GoRecv] public static tokenꓸPos End(this ref BranchStmt s) {
+public static tokenꓸPos End(this ref BranchStmt s) {
     if (s.Label != nil) {
         return s.Label.End();
     }
     return ((tokenꓸPos)((nint)s.TokPos + len(s.Tok.String())));
 }
 
-[GoRecv] public static tokenꓸPos End(this ref BlockStmt s) {
+public static tokenꓸPos End(this ref BlockStmt s) {
     if (s.Rbrace.IsValid()) {
         return s.Rbrace + 1;
     }
@@ -1085,14 +1085,14 @@ public static @string String(this ж<Ident> Ꮡid) {
     return s.Lbrace + 1;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref IfStmt s) {
+public static tokenꓸPos End(this ref IfStmt s) {
     if (s.Else != default!) {
         return s.Else.End();
     }
     return s.Body.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref CaseClause s) {
+public static tokenꓸPos End(this ref CaseClause s) {
     {
         nint n = len(s.Body); if (n > 0) {
             return s.Body[n - 1].End();
@@ -1101,15 +1101,15 @@ public static @string String(this ж<Ident> Ꮡid) {
     return s.Colon + 1;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref SwitchStmt s) {
+public static tokenꓸPos End(this ref SwitchStmt s) {
     return s.Body.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref TypeSwitchStmt s) {
+public static tokenꓸPos End(this ref TypeSwitchStmt s) {
     return s.Body.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref CommClause s) {
+public static tokenꓸPos End(this ref CommClause s) {
     {
         nint n = len(s.Body); if (n > 0) {
             return s.Body[n - 1].End();
@@ -1118,81 +1118,81 @@ public static @string String(this ж<Ident> Ꮡid) {
     return s.Colon + 1;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref SelectStmt s) {
+public static tokenꓸPos End(this ref SelectStmt s) {
     return s.Body.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref ForStmt s) {
+public static tokenꓸPos End(this ref ForStmt s) {
     return s.Body.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref RangeStmt s) {
+public static tokenꓸPos End(this ref RangeStmt s) {
     return s.Body.End();
 }
 
 // stmtNode() ensures that only statement nodes can be
 // assigned to a Stmt.
-[GoRecv] internal static void stmtNode(this ref BadStmt _) {
+internal static void stmtNode(this ref BadStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref DeclStmt _) {
+internal static void stmtNode(this ref DeclStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref EmptyStmt _) {
+internal static void stmtNode(this ref EmptyStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref LabeledStmt _) {
+internal static void stmtNode(this ref LabeledStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref ExprStmt _) {
+internal static void stmtNode(this ref ExprStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref SendStmt _) {
+internal static void stmtNode(this ref SendStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref IncDecStmt _) {
+internal static void stmtNode(this ref IncDecStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref AssignStmt _) {
+internal static void stmtNode(this ref AssignStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref GoStmt _) {
+internal static void stmtNode(this ref GoStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref DeferStmt _) {
+internal static void stmtNode(this ref DeferStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref ReturnStmt _) {
+internal static void stmtNode(this ref ReturnStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref BranchStmt _) {
+internal static void stmtNode(this ref BranchStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref BlockStmt _) {
+internal static void stmtNode(this ref BlockStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref IfStmt _) {
+internal static void stmtNode(this ref IfStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref CaseClause _) {
+internal static void stmtNode(this ref CaseClause _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref SwitchStmt _) {
+internal static void stmtNode(this ref SwitchStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref TypeSwitchStmt _) {
+internal static void stmtNode(this ref TypeSwitchStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref CommClause _) {
+internal static void stmtNode(this ref CommClause _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref SelectStmt _) {
+internal static void stmtNode(this ref SelectStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref ForStmt _) {
+internal static void stmtNode(this ref ForStmt _) {
 }
 
-[GoRecv] internal static void stmtNode(this ref RangeStmt _) {
+internal static void stmtNode(this ref RangeStmt _) {
 }
 
 // ----------------------------------------------------------------------------
@@ -1200,14 +1200,14 @@ public static @string String(this ж<Ident> Ꮡid) {
 
 // A Spec node represents a single (non-parenthesized) import,
 // constant, type, or variable declaration.
-[GoType] partial interface Spec :
+partial interface Spec :
     Node
 {
     void specNode();
 }
 
 
-[GoType] partial struct ImportSpec {
+partial struct ImportSpec {
     public ж<CommentGroup> Doc; // associated documentation; or nil
     public ж<Ident> Name;     // local package name (including "."); or nil
     public ж<BasicLit> Path;  // import path
@@ -1216,7 +1216,7 @@ public static @string String(this ж<Ident> Ꮡid) {
 }
 
 
-[GoType] partial struct ValueSpec {
+partial struct ValueSpec {
     public ж<CommentGroup> Doc; // associated documentation; or nil
     public slice<ж<Ident>> Names; // value names (len(Names) > 0)
     public Expr Type;          // value type; or nil
@@ -1225,7 +1225,7 @@ public static @string String(this ж<Ident> Ꮡid) {
 }
 
 
-[GoType] partial struct TypeSpec {
+partial struct TypeSpec {
     public ж<CommentGroup> Doc; // associated documentation; or nil
     public ж<Ident> Name;     // type name
     public ж<FieldList> TypeParams; // type parameters; or nil
@@ -1235,29 +1235,29 @@ public static @string String(this ж<Ident> Ꮡid) {
 }
 
 // Pos and End implementations for spec nodes.
-[GoRecv] public static tokenꓸPos Pos(this ref ImportSpec s) {
+public static tokenꓸPos Pos(this ref ImportSpec s) {
     if (s.Name != nil) {
         return s.Name.Pos();
     }
     return s.Path.Pos();
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref ValueSpec s) {
+public static tokenꓸPos Pos(this ref ValueSpec s) {
     return s.Names[0].Pos();
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref TypeSpec s) {
+public static tokenꓸPos Pos(this ref TypeSpec s) {
     return s.Name.Pos();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref ImportSpec s) {
+public static tokenꓸPos End(this ref ImportSpec s) {
     if (s.EndPos != 0) {
         return s.EndPos;
     }
     return s.Path.End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref ValueSpec s) {
+public static tokenꓸPos End(this ref ValueSpec s) {
     {
         nint n = len(s.Values); if (n > 0) {
             return s.Values[n - 1].End();
@@ -1269,28 +1269,28 @@ public static @string String(this ж<Ident> Ꮡid) {
     return s.Names[len(s.Names) - 1].End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref TypeSpec s) {
+public static tokenꓸPos End(this ref TypeSpec s) {
     return s.Type.End();
 }
 
 // specNode() ensures that only spec nodes can be
 // assigned to a Spec.
-[GoRecv] internal static void specNode(this ref ImportSpec _) {
+internal static void specNode(this ref ImportSpec _) {
 }
 
-[GoRecv] internal static void specNode(this ref ValueSpec _) {
+internal static void specNode(this ref ValueSpec _) {
 }
 
-[GoRecv] internal static void specNode(this ref TypeSpec _) {
+internal static void specNode(this ref TypeSpec _) {
 }
 
 // A declaration is represented by one of the following declaration nodes.
-[GoType] partial struct BadDecl {
+partial struct BadDecl {
     public tokenꓸPos From, To; // position range of bad declaration
 }
 
 
-[GoType] partial struct GenDecl {
+partial struct GenDecl {
     public ж<CommentGroup> Doc; // associated documentation; or nil
     public tokenꓸPos TokPos;     // position of Tok
     public token.Token Tok;   // IMPORT, CONST, TYPE, or VAR
@@ -1300,7 +1300,7 @@ public static @string String(this ж<Ident> Ꮡid) {
 }
 
 
-[GoType] partial struct FuncDecl {
+partial struct FuncDecl {
     public ж<CommentGroup> Doc; // associated documentation; or nil
     public ж<FieldList> Recv; // receiver (methods); or nil (functions)
     public ж<Ident> Name;     // function/method name
@@ -1309,30 +1309,30 @@ public static @string String(this ж<Ident> Ꮡid) {
 }
 
 // Pos and End implementations for declaration nodes.
-[GoRecv] public static tokenꓸPos Pos(this ref BadDecl d) {
+public static tokenꓸPos Pos(this ref BadDecl d) {
     return d.From;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref GenDecl d) {
+public static tokenꓸPos Pos(this ref GenDecl d) {
     return d.TokPos;
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref FuncDecl d) {
+public static tokenꓸPos Pos(this ref FuncDecl d) {
     return d.Type.Pos();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref BadDecl d) {
+public static tokenꓸPos End(this ref BadDecl d) {
     return d.To;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref GenDecl d) {
+public static tokenꓸPos End(this ref GenDecl d) {
     if (d.Rparen.IsValid()) {
         return d.Rparen + 1;
     }
     return d.Specs[0].End();
 }
 
-[GoRecv] public static tokenꓸPos End(this ref FuncDecl d) {
+public static tokenꓸPos End(this ref FuncDecl d) {
     if (d.Body != nil) {
         return d.Body.End();
     }
@@ -1341,13 +1341,13 @@ public static @string String(this ж<Ident> Ꮡid) {
 
 // declNode() ensures that only declaration nodes can be
 // assigned to a Decl.
-[GoRecv] internal static void declNode(this ref BadDecl _) {
+internal static void declNode(this ref BadDecl _) {
 }
 
-[GoRecv] internal static void declNode(this ref GenDecl _) {
+internal static void declNode(this ref GenDecl _) {
 }
 
-[GoRecv] internal static void declNode(this ref FuncDecl _) {
+internal static void declNode(this ref FuncDecl _) {
 }
 
 // ----------------------------------------------------------------------------
@@ -1374,7 +1374,7 @@ public static @string String(this ж<Ident> Ꮡid) {
 //
 // [#18593]: https://go.dev/issue/18593
 // [#20744]: https://go.dev/issue/20744
-[GoType] partial struct File {
+partial struct File {
     public ж<CommentGroup> Doc; // associated documentation; or nil
     public tokenꓸPos Package;     // position of "package" keyword
     public ж<Ident> Name;     // package name
@@ -1391,7 +1391,7 @@ public static @string String(this ж<Ident> Ꮡid) {
 // It may be invalid, for example in an empty file.
 //
 // (Use FileStart for the start of the entire file. It is always valid.)
-[GoRecv] public static tokenꓸPos Pos(this ref File f) {
+public static tokenꓸPos Pos(this ref File f) {
     return f.Package;
 }
 
@@ -1399,7 +1399,7 @@ public static @string String(this ж<Ident> Ꮡid) {
 // It may be invalid, for example in an empty file.
 //
 // (Use FileEnd for the end of the entire file. It is always valid.)
-[GoRecv] public static tokenꓸPos End(this ref File f) {
+public static tokenꓸPos End(this ref File f) {
     {
         nint n = len(f.Decls); if (n > 0) {
             return f.Decls[n - 1].End();
@@ -1412,18 +1412,18 @@ public static @string String(this ж<Ident> Ꮡid) {
 // collectively building a Go package.
 //
 // Deprecated: use the type checker [go/types] instead; see [Object].
-[GoType] partial struct Package {
+partial struct Package {
     public @string Name;            // package name
     public ж<Scope> Scope;          // package scope across all files
     public map<@string, ж<Object>> Imports; // map of package id -> package object
     public map<@string, ж<File>> Files; // Go source files by filename
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref Package p) {
+public static tokenꓸPos Pos(this ref Package p) {
     return token.NoPos;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref Package p) {
+public static tokenꓸPos End(this ref Package p) {
     return token.NoPos;
 }
 

@@ -1266,7 +1266,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					// and this path is the one a `*[N]T` parameter always takes, because HAVING a
 					// pointer parameter is what triggers the rebuild. So the pointee dims of
 					// net/rpc's every reply argument could only ever be stamped here.
-					updatedSignature.WriteString(emitGoArrayDimsAttribute(param.Type()))
+					updatedSignature.WriteString(emitParamDims(param.Type(), true))
 
 					updatedSignature.WriteString(v.getCSharpTypeName(param.Type()))
 					updatedSignature.WriteRune(' ')
@@ -1379,7 +1379,24 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	runtimeBootstrapInit := isModuleInitializer && v.pkg.Path() == "runtime"
 	noInliningPartial := false
 
+	// A linkname or assembly-trampoline FORWARDER is not a Go frame: Go binds the name to the target's
+	// symbol (or JMPs to it), so the puller never appears on a stack. It is emitted as a partial method's
+	// IMPLEMENTING part marked `/*linkname*/`, and go2cs-gen's NoInliningPartialGenerator writes the
+	// declaring part carrying [StackTraceHidden] instead of the no-inline mark, so runtime.Callers
+	// (managed_impl.cs, isGoSourceFrame) and Exception.StackTrace skip it (docs/PLAN-marker-comment-parity.md,
+	// section 11, owner ruling (b') 2026-10-08). The marker, never Go's own //go:linkname line, is the signal:
+	// that line also stands above BODIED functions that are no-inline carriers (runtime's mutexevent).
+	linknameForwarder := hasLinknameForward && linknamePanic == ""
+
 	if funcDecl.Body == nil && !hasLinknameForward {
+		v.replaceMarker(functionPartialMarker, " partial")
+	} else if linknameForwarder {
+		// One generated declaring part carries one of the two marks, so a forwarder that also needs the
+		// no-inline mark has no spelling; none does (census 2026-10-08, 0 of 55).
+		if fnObj := v.info.ObjectOf(funcDecl.Name); fnObj != nil && v.needsNoInlining[fnObj] {
+			panic(fmt.Sprintf("@visitFuncDecl - the linkname forwarder %s also needs the no-inline mark, which its generated declaring part cannot carry beside [StackTraceHidden] (docs/PLAN-marker-comment-parity.md, section 11)", funcDecl.Name.Name))
+		}
+
 		v.replaceMarker(functionPartialMarker, " partial")
 	} else if fnObj := v.info.ObjectOf(funcDecl.Name); fnObj != nil && v.needsNoInlining[fnObj] && !isModuleInitializer {
 		noInliningPartial = true
@@ -1398,28 +1415,24 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	}
 
 	// An sstring TWIN (sstringTwinOperations.go): this declaration is the member that carries the
-	// Go body, each registered parameter typed sstring and marked [GoStr]. go2cs-gen's
-	// StrGenerator emits its companions (the @string forwarder, and a package-level twin's
-	// canonical value delegate), so the visible file keeps one method per Go function.
+	// Go body, each registered parameter typed sstring and no mark: go2cs-gen's StrGenerator selects
+	// it by its sstring parameter (docs/PLAN-marker-comment-parity.md, 5.7) and emits its companions
+	// (the @string forwarder, and a package-level twin's canonical value delegate), so the visible
+	// file keeps one method per Go function.
 	twinFunc, _ := v.info.ObjectOf(funcDecl.Name).(*types.Func)
-	twinMarker := ""
 
 	if twinIndices := sstringTwinIndices(twinFunc); len(twinIndices) > 0 {
 		v.validateSStringTwin(funcDecl, twinFunc, twinIndices)
 		v.replaceMarker(functionParametersMarker, sstringTwinSignature(sstringTwinKey(twinFunc), parameterSignature, twinIndices, funcDecl.Recv != nil))
-		twinMarker = "[GoStr] "
 	} else {
 		v.replaceMarker(functionParametersMarker, parameterSignature)
 	}
 
-	// A linkname or assembly-trampoline forwarder is not a Go frame: Go binds the name to the
-	// target's symbol (or JMPs to it), so the puller never appears on a stack. Marked
-	// [StackTraceHidden], it is skipped by runtime.Callers (managed_impl.cs, isGoSourceFrame) and
-	// omitted from Exception.StackTrace. Fully qualified so it needs no using.
+	// The forwarder's marker, the first token of its declaration line (see linknameForwarder above).
 	forwarderPrefix := ""
 
-	if hasLinknameForward && linknamePanic == "" {
-		forwarderPrefix = "[global::System.Diagnostics.StackTraceHidden] "
+	if linknameForwarder {
+		forwarderPrefix = linknameMarker + " "
 	}
 
 	if isModuleInitializer {
@@ -1435,10 +1448,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		} else {
 			v.replaceMarker(functionAttributeMarker, forwarderPrefix+noInliningAttribute+"[GoInit] ")
 		}
-	} else if strings.HasPrefix(parameterSignature, "this ref ") {
-		v.replaceMarker(functionAttributeMarker, forwarderPrefix+twinMarker+noInliningAttribute+"[GoRecv] ")
 	} else {
-		v.replaceMarker(functionAttributeMarker, forwarderPrefix+twinMarker+noInliningAttribute)
+		// A Go pointer receiver is emitted `this ref T` (getRefParameterTypeName) and carries no
+		// mark: golib's method-set readers, RecvGenerator and TypeGenerator all read an unmarked
+		// by-ref receiver as a POINTER-set method (docs/PLAN-marker-comment-parity.md, 5.1). Only a
+		// generated forwarder that is VALUE-set while by-ref is marked, [GoCopyBound].
+		v.replaceMarker(functionAttributeMarker, forwarderPrefix+noInliningAttribute)
 	}
 
 	var funcExecutionContext string
@@ -1805,7 +1820,8 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 			// One emission point serves all three signature builders (declarations/methods here,
 			// func literals and func types through convFuncType, interface methods through
 			// visitInterfaceType), so a Go func type's parameter dims are stated wherever its
-			// C# shape is written.
+			// C# shape is written: as the `/*[N]*/` comment on a declaration a go2cs-gen record can
+			// key, and as the attribute everywhere else (emitParamDims).
 			// A func-literal parameter at a CONSTRAINT-PROXY delegate position is DECLARED at the
 			// proxy under a synthesized incoming name; the literal's body prologue re-declares the
 			// Go name at this natural type (see constraintProxyLitParamTypes). Handled here rather
@@ -1818,7 +1834,8 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 				continue
 			}
 
-			result.WriteString(emitGoArrayDimsAttribute(param.Type()))
+			// addRecv is set for a func or method DECLARATION only (visitFuncDecl), the one signature a record keys.
+			result.WriteString(emitParamDims(param.Type(), addRecv))
 
 			// A FUNC-LITERAL parameter typed as a `string | []byte`-union TYPE PARAMETER
 			// renders as the type parameter itself (`(T part) => ...`): the enclosing

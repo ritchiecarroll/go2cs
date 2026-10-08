@@ -35,7 +35,7 @@ internal static Func<@string, (@string, error)> loadFromEmbeddedTZData;
 // so 10MB is overkill.
 internal static UntypedInt maxFileSize => /* 10 << 20 */ 10485760;
 
-[GoType("@string")] partial struct fileSizeError;
+partial struct fileSizeError /*@string*/;
 
 internal static @string Error(this fileSizeError f) {
     return "time: file "u8 + ((@string)f) + " is too large"u8;
@@ -49,12 +49,12 @@ internal static UntypedInt seekCurrent => 1;
 internal static UntypedInt seekEnd => 2;
 
 // Simple I/O interface to binary blob of data.
-[GoType] partial struct dataIO {
+partial struct dataIO {
     internal slice<byte> p;
     internal bool error;
 }
 
-[GoRecv] internal static slice<byte> read(this ref dataIO d, nint n) {
+internal static slice<byte> read(this ref dataIO d, nint n) {
     if (len(d.p) < n) {
         d.p = default!;
         d.error = true;
@@ -65,7 +65,7 @@ internal static UntypedInt seekEnd => 2;
     return p;
 }
 
-[GoRecv] internal static (uint32 n, bool ok) big4(this ref dataIO d) {
+internal static (uint32 n, bool ok) big4(this ref dataIO d) {
     var p = d.read(4);
     if (len(p) < 4) {
         d.error = true;
@@ -74,7 +74,7 @@ internal static UntypedInt seekEnd => 2;
     return ((uint32)((uint32)((uint32)((uint32)p[3] | ((uint32)p[2] << (int)(8))) | ((uint32)p[1] << (int)(16))) | ((uint32)p[0] << (int)(24))), true);
 }
 
-[GoRecv] internal static (uint64 n, bool ok) big8(this ref dataIO d) {
+internal static (uint64 n, bool ok) big8(this ref dataIO d) {
     var (n1, ok1) = d.big4();
     var (n2, ok2) = d.big4();
     if (!ok1 || !ok2) {
@@ -84,7 +84,7 @@ internal static UntypedInt seekEnd => 2;
     return ((uint64)((((uint64)n1 << (int)(32))) | (uint64)n2), true);
 }
 
-[GoRecv] internal static (byte n, bool ok) @byte(this ref dataIO d) {
+internal static (byte n, bool ok) @byte(this ref dataIO d) {
     var p = d.read(1);
     if (len(p) < 1) {
         d.error = true;
@@ -94,7 +94,7 @@ internal static UntypedInt seekEnd => 2;
 }
 
 // rest returns the rest of the data in the buffer.
-[GoRecv] internal static slice<byte> rest(this ref dataIO d) {
+internal static slice<byte> rest(this ref dataIO d) {
     var r = d.p;
     d.p = default!;
     return r;

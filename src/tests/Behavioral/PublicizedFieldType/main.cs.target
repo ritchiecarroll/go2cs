@@ -4,31 +4,31 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[3]rune")] public partial struct d;
+public partial struct d /*[3]rune*/;
 
-[GoType] public partial struct inner {
+public partial struct inner {
     internal nint v;
 }
 
-[GoType("num:nint")] public partial struct level;
+public partial struct level /*num:nint*/;
 
-[GoType] partial struct CaseRange {
+partial struct CaseRange {
     public uint32 Lo;
     public d Delta;
     public inner Item;
     public level Lvl;
 }
 
-[GoType] public partial struct coder {
+public partial struct coder {
     internal @string tag;
     internal nint seq;
 }
 
-[GoType("coder")] partial struct EncBuffer;
+partial struct EncBuffer /*coder*/;
 
-[GoType("num:nint")] public partial struct tally;
+public partial struct tally /*num:nint*/;
 
-[GoType("num:nint")] public partial struct weight;
+public partial struct weight /*num:nint*/;
 
 public static tally Tally(this CaseRange cr) {
     cr = cr.ΔClone();

@@ -38,7 +38,7 @@ internal static UntypedInt _EXCEPTION_CONTINUE_EXECUTION => /* -0x1 */ -1;
 internal static UntypedInt _EXCEPTION_CONTINUE_SEARCH => 0x0;
 internal static UntypedInt _EXCEPTION_CONTINUE_SEARCH_SEH => 0x1;
 
-[GoType] partial struct systeminfo {
+partial struct systeminfo {
     internal array<byte> anon0 = new(4);
     internal uint32 dwpagesize;
     internal ж<byte> lpminimumapplicationaddress;
@@ -51,12 +51,12 @@ internal static UntypedInt _EXCEPTION_CONTINUE_SEARCH_SEH => 0x1;
     internal uint16 wprocessorrevision;
 }
 
-[GoType] partial struct exceptionpointers {
+partial struct exceptionpointers {
     internal ж<exceptionrecord> record;
     internal ж<context> context;
 }
 
-[GoType] partial struct exceptionrecord {
+partial struct exceptionrecord {
     internal uint32 exceptioncode;
     internal uint32 exceptionflags;
     internal ж<exceptionrecord> Δexceptionrecord;
@@ -65,14 +65,14 @@ internal static UntypedInt _EXCEPTION_CONTINUE_SEARCH_SEH => 0x1;
     internal array<uintptr> exceptioninformation = new(15);
 }
 
-[GoType] partial struct overlapped {
+partial struct overlapped {
     internal uintptr @internal;
     internal uintptr internalhigh;
     internal array<byte> anon0 = new(8);
     internal ж<byte> hevent;
 }
 
-[GoType] partial struct memoryBasicInformation {
+partial struct memoryBasicInformation {
     internal uintptr baseAddress;
     internal uintptr allocationBase;
     internal uint32 allocationProtect;
@@ -83,7 +83,7 @@ internal static UntypedInt _EXCEPTION_CONTINUE_SEARCH_SEH => 0x1;
 }
 
 // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/ns-wdm-_osversioninfow
-[GoType] partial struct _OSVERSIONINFOW {
+partial struct _OSVERSIONINFOW {
     internal uint32 osVersionInfoSize;
     internal uint32 majorVersion;
     internal uint32 minorVersion;

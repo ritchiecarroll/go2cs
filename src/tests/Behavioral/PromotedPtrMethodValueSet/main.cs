@@ -8,11 +8,11 @@ using strings = strings_package;
 
 partial class main_package {
 
-[GoType] partial struct Inner {
+partial struct Inner {
     internal nint n;
 }
 
-[GoRecv] public static nint Bump(this ref Inner i) {
+public static nint Bump(this ref Inner i) {
     i.n++;
     return i.n;
 }
@@ -21,35 +21,35 @@ public static nint Get(this Inner i) {
     return i.n;
 }
 
-[GoType] partial struct SameP {
+partial struct SameP {
     public partial ref ж<Inner> Inner { get; }
 }
 
-[GoType] partial struct SameV {
+partial struct SameV {
     public partial ref Inner Inner { get; }
 }
 
-[GoType] partial struct MidP {
+partial struct MidP {
     public partial ref ж<Inner> Inner { get; }
 }
 
-[GoType] partial struct OuterVP {
+partial struct OuterVP {
     public partial ref MidP MidP { get; }
 }
 
-[GoType] partial struct MidV {
+partial struct MidV {
     public partial ref Inner Inner { get; }
 }
 
-[GoType] partial struct OuterPV {
+partial struct OuterPV {
     public partial ref ж<MidV> MidV { get; }
 }
 
-[GoType] partial struct OuterVV {
+partial struct OuterVV {
     public partial ref MidV MidV { get; }
 }
 
-[GoType] partial interface bumper {
+partial interface bumper {
     nint Bump();
 }
 

@@ -20,7 +20,7 @@ partial class tar_package {
 // Writer provides sequential writing of a tar archive.
 // [Writer.WriteHeader] begins a new file with the provided [Header],
 // and then Writer can be treated as an io.Writer to supply that file's data.
-[GoType] partial struct Writer {
+partial struct Writer {
     internal io.Writer w;
     internal int64 pad;      // Amount of padding to write after current file entry
     internal fileWriter curr; // Writer for current file entry
@@ -37,7 +37,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
     return Ꮡ(new Writer(w: w, curr: new regFileWriterжfileWriter(Ꮡ(new regFileWriter(w, 0)))));
 }
 
-[GoType] partial interface fileWriter :
+partial interface fileWriter :
     io.Writer,
     fileState,
     io.ReaderFrom
@@ -49,7 +49,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
 //
 // This is unnecessary as the next call to [Writer.WriteHeader] or [Writer.Close]
 // will implicitly flush out the file's padding.
-[GoRecv] public static error Flush(this ref Writer tw) {
+public static error Flush(this ref Writer tw) {
     if (tw.err != default!) {
         return tw.err;
     }
@@ -419,7 +419,7 @@ internal static error writeRawFile(this ж<Writer> Ꮡtw, @string name, @string 
 // writeRawHeader writes the value of blk, regardless of its value.
 // It sets up the Writer such that it can accept a file of the given size.
 // If the flag is a special header-only flag, then the size is treated as zero.
-[GoRecv] internal static error writeRawHeader(this ref Writer tw, ж<block> Ꮡblk, int64 size, byte flag) {
+internal static error writeRawHeader(this ref Writer tw, ж<block> Ꮡblk, int64 size, byte flag) {
     ref var blk = ref Ꮡblk.DerefOrNull();
 
     {
@@ -523,7 +523,7 @@ internal static (@string prefix, @string suffix, bool ok) splitUSTARPath(@string
 // Calling Write on special types like [TypeLink], [TypeSymlink], [TypeChar],
 // [TypeBlock], [TypeDir], and [TypeFifo] returns (0, [ErrWriteTooLong]) regardless
 // of what the [Header.Size] claims.
-[GoRecv] public static (nint, error) Write(this ref Writer tw, slice<byte> b) {
+public static (nint, error) Write(this ref Writer tw, slice<byte> b) {
     if (tw.err != default!) {
         return (0, tw.err);
     }
@@ -544,7 +544,7 @@ internal static (@string prefix, @string suffix, bool ok) splitUSTARPath(@string
 //
 // TODO(dsnet): Re-export this when adding sparse file support.
 // See https://golang.org/issue/22735
-[GoRecv] internal static (int64, error) readFrom(this ref Writer tw, io.Reader r) {
+internal static (int64, error) readFrom(this ref Writer tw, io.Reader r) {
     if (tw.err != default!) {
         return (0, tw.err);
     }
@@ -558,7 +558,7 @@ internal static (@string prefix, @string suffix, bool ok) splitUSTARPath(@string
 // Close closes the tar archive by flushing the padding, and writing the footer.
 // If the current file (from a prior call to [Writer.WriteHeader]) is not fully written,
 // then this returns an error.
-[GoRecv] public static error Close(this ref Writer tw) {
+public static error Close(this ref Writer tw) {
     if (AreEqual(tw.err, ErrWriteAfterClose)) {
         return default!;
     }
@@ -576,12 +576,12 @@ internal static (@string prefix, @string suffix, bool ok) splitUSTARPath(@string
 }
 
 // regFileWriter is a fileWriter for writing data to a regular file entry.
-[GoType] partial struct regFileWriter {
+partial struct regFileWriter {
     internal io.Writer w; // Underlying Writer
     internal int64 nb;     // Number of remaining bytes to write
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref regFileWriter fw, slice<byte> b) {
+internal static (nint n, error err) Write(this ref regFileWriter fw, slice<byte> b) {
     nint n = default!;
     error err = default!;
 
@@ -606,8 +606,8 @@ internal static (@string prefix, @string suffix, bool ok) splitUSTARPath(@string
 
 }
 
-[GoType("dyn")] internal partial struct ReadFrom_dst {
-    [GoEmbedded] public io_package.Writer Writer;
+internal partial struct ReadFrom_dst /*dyn*/ {
+    /*embed*/ public io_package.Writer Writer;
 }
 
 internal static (int64, error) ReadFrom(this ж<regFileWriter> Ꮡfw, io.Reader r) {
@@ -625,13 +625,13 @@ internal static int64 physicalRemaining(this regFileWriter fw) {
 }
 
 // sparseFileWriter is a fileWriter for writing data to a sparse file entry.
-[GoType] partial struct sparseFileWriter {
+partial struct sparseFileWriter {
     internal fileWriter fw;  // Underlying fileWriter
     internal sparseDatas sp; // Normalized list of data fragments
     internal int64 pos;       // Current position in sparse file
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref sparseFileWriter sw, slice<byte> b) {
+internal static (nint n, error err) Write(this ref sparseFileWriter sw, slice<byte> b) {
     nint n = default!;
     error err = default!;
 
@@ -753,7 +753,7 @@ internal static int64 physicalRemaining(this sparseFileWriter sw) {
 }
 
 // zeroWriter may only be written with NULs, otherwise it returns errWriteHole.
-[GoType] partial struct zeroWriter {
+partial struct zeroWriter {
 }
 
 internal static (nint, error) Write(this zeroWriter _, slice<byte> b) {

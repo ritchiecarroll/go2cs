@@ -15,7 +15,7 @@ using net;
 
 partial class net_package {
 
-[GoType("dyn")] internal partial struct probe_type {
+internal partial struct probe_type /*dyn*/ {
     internal TCPAddr laddr;
     internal nint value;
 }

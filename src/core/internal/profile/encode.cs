@@ -9,14 +9,14 @@ using sort = sort_package;
 
 partial class profile_package {
 
-[GoRecv] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Profile p) {
+internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Profile p) {
     return profileDecoder;
 }
 
 // preEncode populates the unexported fields to be used by encode
 // (with suffix X) from the corresponding exported fields. The
 // exported fields are cleared up to facilitate testing.
-[GoRecv] internal static void preEncode(this ref Profile p) {
+internal static void preEncode(this ref Profile p) {
     var strings = new map<@string, nint>();
     addString(strings, ""u8);
     foreach (var (_, st) in p.SampleType) {
@@ -97,7 +97,7 @@ partial class profile_package {
     }
 }
 
-[GoRecv] internal static void encode(this ref Profile p, ж<buffer> Ꮡb) {
+internal static void encode(this ref Profile p, ж<buffer> Ꮡb) {
     foreach (var (_, x) in p.SampleType) {
         encodeMessage(Ꮡb, 1, new ValueTypeжmessage(x));
     }
@@ -294,11 +294,11 @@ internal static error postDecode(this ж<Profile> Ꮡp) {
     return err;
 }
 
-[GoRecv] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref ValueType p) {
+internal static slice<Func<ж<buffer>, message, error>> decoder(this ref ValueType p) {
     return valueTypeDecoder;
 }
 
-[GoRecv] internal static void encode(this ref ValueType p, ж<buffer> Ꮡb) {
+internal static void encode(this ref ValueType p, ж<buffer> Ꮡb) {
     encodeInt64Opt(ref (Ꮡb).DerefOrNull(), 1, p.typeX);
     encodeInt64Opt(ref (Ꮡb).DerefOrNull(), 2, p.unitX);
 }
@@ -313,11 +313,11 @@ internal static void initᴛvalueTypeDecoder() { valueTypeDecoder = new Func<ж<
     (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<ж<ValueType>>().of(ValueType.ᏑunitX))
 }.slice(); }
 
-[GoRecv] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Sample p) {
+internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Sample p) {
     return sampleDecoder;
 }
 
-[GoRecv] internal static void encode(this ref Sample p, ж<buffer> Ꮡb) {
+internal static void encode(this ref Sample p, ж<buffer> Ꮡb) {
     encodeUint64s(ref (Ꮡb).DerefOrNull(), 1, p.locationIDX);
     foreach (var (_, x) in p.Value) {
         encodeInt64(ref (Ꮡb).DerefOrNull(), 2, x);
@@ -366,11 +366,11 @@ internal static void initᴛlabelDecoder() { labelDecoder = new Func<ж<buffer>,
     (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<ж<Label>>().of(Label.ᏑnumX))
 }.slice(); }
 
-[GoRecv] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Mapping p) {
+internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Mapping p) {
     return mappingDecoder;
 }
 
-[GoRecv] internal static void encode(this ref Mapping p, ж<buffer> Ꮡb) {
+internal static void encode(this ref Mapping p, ж<buffer> Ꮡb) {
     encodeUint64Opt(ref (Ꮡb).DerefOrNull(), 1, p.ID);
     encodeUint64Opt(ref (Ꮡb).DerefOrNull(), 2, p.Start);
     encodeUint64Opt(ref (Ꮡb).DerefOrNull(), 3, p.Limit);
@@ -409,11 +409,11 @@ internal static void initᴛmappingDecoder() { mappingDecoder = new Func<ж<buff
     (ж<buffer> b, message m) => decodeBool(ref (b).DerefOrNull(), m._<ж<Mapping>>().of(Mapping.ᏑHasInlineFrames))
 }.slice(); }
 
-[GoRecv] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Location p) {
+internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Location p) {
     return locationDecoder;
 }
 
-[GoRecv] internal static void encode(this ref Location p, ж<buffer> Ꮡb) {
+internal static void encode(this ref Location p, ж<buffer> Ꮡb) {
     encodeUint64Opt(ref (Ꮡb).DerefOrNull(), 1, p.ID);
     encodeUint64Opt(ref (Ꮡb).DerefOrNull(), 2, p.mappingIDX);
     encodeUint64Opt(ref (Ꮡb).DerefOrNull(), 3, p.Address);
@@ -441,11 +441,11 @@ internal static void initᴛlocationDecoder() { locationDecoder = new Func<ж<bu
     }
 }.slice(); }
 
-[GoRecv] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Line p) {
+internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Line p) {
     return lineDecoder;
 }
 
-[GoRecv] internal static void encode(this ref Line p, ж<buffer> Ꮡb) {
+internal static void encode(this ref Line p, ж<buffer> Ꮡb) {
     encodeUint64Opt(ref (Ꮡb).DerefOrNull(), 1, p.functionIDX);
     encodeInt64Opt(ref (Ꮡb).DerefOrNull(), 2, p.ΔLine);
 }
@@ -460,11 +460,11 @@ internal static void initᴛlineDecoder() { lineDecoder = new Func<ж<buffer>, m
     (ж<buffer> b, message m) => decodeInt64(ref (b).DerefOrNull(), m._<ж<Line>>().of(Line.ᏑΔLine))
 }.slice(); }
 
-[GoRecv] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Function p) {
+internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Function p) {
     return functionDecoder;
 }
 
-[GoRecv] internal static void encode(this ref Function p, ж<buffer> Ꮡb) {
+internal static void encode(this ref Function p, ж<buffer> Ꮡb) {
     encodeUint64Opt(ref (Ꮡb).DerefOrNull(), 1, p.ID);
     encodeInt64Opt(ref (Ꮡb).DerefOrNull(), 2, p.nameX);
     encodeInt64Opt(ref (Ꮡb).DerefOrNull(), 3, p.systemNameX);

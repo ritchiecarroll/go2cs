@@ -6,12 +6,12 @@ using sync;
 
 partial class main_package {
 
-[GoType] partial struct sync {
+partial struct sync {
     internal @string label;
     internal int32 hits;
 }
 
-[GoRecv] internal static void bump(this ref sync s, ж<atomic.Int32> Ꮡc) {
+internal static void bump(this ref sync s, ж<atomic.Int32> Ꮡc) {
     s.hits = Ꮡc.Add(1);
 }
 

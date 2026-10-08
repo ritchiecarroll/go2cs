@@ -4,23 +4,23 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct inner {
+partial struct inner {
     internal uint32 v;
 }
 
-[GoType] partial struct outer {
+partial struct outer {
     internal inner @in;
 }
 
-[GoType] partial struct core {
+partial struct core {
     internal uint32 sema;
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal core c;
 }
 
-[GoType] partial struct wrapper {
+partial struct wrapper {
     internal partial ref ж<holder> holder { get; }
 }
 

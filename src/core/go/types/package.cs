@@ -11,7 +11,7 @@ using token = global::go.go.token_package;
 partial class types_package {
 
 // A Package describes a Go package.
-[GoType] partial struct Package {
+partial struct Package {
     internal @string path;
     internal @string name;
     internal ж<ΔScope> scope;
@@ -30,17 +30,17 @@ public static ж<Package> NewPackage(@string path, @string name) {
 }
 
 // Path returns the package path.
-[GoRecv] public static @string Path(this ref Package pkg) {
+public static @string Path(this ref Package pkg) {
     return pkg.path;
 }
 
 // Name returns the package name.
-[GoRecv] public static @string Name(this ref Package pkg) {
+public static @string Name(this ref Package pkg) {
     return pkg.name;
 }
 
 // SetName sets the package name.
-[GoRecv] public static void SetName(this ref Package pkg, @string name) {
+public static void SetName(this ref Package pkg, @string name) {
     pkg.name = name;
 }
 
@@ -48,7 +48,7 @@ public static ж<Package> NewPackage(@string path, @string name) {
 // If the minimum version is unknown, GoVersion returns the empty string.
 // Individual source files may specify a different minimum Go version,
 // as reported in the [go/ast.File.GoVersion] field.
-[GoRecv] public static @string GoVersion(this ref Package pkg) {
+public static @string GoVersion(this ref Package pkg) {
     return pkg.goVersion;
 }
 
@@ -67,12 +67,12 @@ public static ж<ΔScope> Scope(this ж<Package> Ꮡpkg) {
 
 // A package is complete if its scope contains (at least) all
 // exported objects; otherwise it is incomplete.
-[GoRecv] public static bool Complete(this ref Package pkg) {
+public static bool Complete(this ref Package pkg) {
     return pkg.complete;
 }
 
 // MarkComplete marks a package as complete.
-[GoRecv] public static void MarkComplete(this ref Package pkg) {
+public static void MarkComplete(this ref Package pkg) {
     pkg.complete = true;
 }
 
@@ -85,17 +85,17 @@ public static ж<ΔScope> Scope(this ж<Package> Ꮡpkg) {
 //
 // If pkg uses cgo and the FakeImportC configuration option
 // was enabled, the imports list may contain a fake "C" package.
-[GoRecv] public static slice<ж<Package>> Imports(this ref Package pkg) {
+public static slice<ж<Package>> Imports(this ref Package pkg) {
     return pkg.imports;
 }
 
 // SetImports sets the list of explicitly imported packages to list.
 // It is the caller's responsibility to make sure list elements are unique.
-[GoRecv] public static void SetImports(this ref Package pkg, slice<ж<Package>> list) {
+public static void SetImports(this ref Package pkg, slice<ж<Package>> list) {
     pkg.imports = list;
 }
 
-[GoRecv] public static @string String(this ref Package pkg) {
+public static @string String(this ref Package pkg) {
     return fmt.Sprintf("package %s (%q)"u8, pkg.name, pkg.path);
 }
 

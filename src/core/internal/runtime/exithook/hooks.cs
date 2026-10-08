@@ -23,7 +23,7 @@ partial class exithook_package {
 // (when someone invokes os.Exit, or when main.main returns).
 // Hooks are run in reverse order of registration:
 // the first hook added is the last one run.
-[GoType] partial struct Hook {
+partial struct Hook {
     public Action F; // func to run
     public bool RunOnFailure;   // whether to run on non-zero exit code
 }
@@ -88,7 +88,7 @@ public static void Run(nint code) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("@string")] partial struct exitError;
+partial struct exitError /*@string*/;
 
 internal static @string Error(this exitError e) {
     return ((@string)e);

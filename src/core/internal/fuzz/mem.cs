@@ -19,7 +19,7 @@ partial class fuzz_package {
 // Care must be taken to manage access to shared memory across processes;
 // sharedMem provides no synchronization on its own. See workerComm for an
 // explanation.
-[GoType] partial struct sharedMem {
+partial struct sharedMem {
     // f is the file mapped into memory.
     internal ж<os.File> f;
     // region is the mapped region of virtual memory for f. The content of f may
@@ -32,7 +32,7 @@ partial class fuzz_package {
 }
 
 // sharedMemHeader stores metadata in shared memory.
-[GoType] partial struct sharedMemHeader {
+partial struct sharedMemHeader {
     // count is the number of times the worker has called the fuzz function.
     // May be reset by coordinator.
     internal int64 count;
@@ -94,20 +94,20 @@ internal static (ж<sharedMem> m, error err) sharedMemTempFile(nint size) {
 }
 
 // header returns a pointer to metadata within the shared memory region.
-[GoRecv] internal static ж<sharedMemHeader> header(this ref sharedMem m) {
+internal static ж<sharedMemHeader> header(this ref sharedMem m) {
     return Ꮡ(m.region, 0).Reinterpret<byte, sharedMemHeader>();
 }
 
 // valueRef returns the value currently stored in shared memory. The returned
 // slice points to shared memory; it is not a copy.
-[GoRecv] internal static slice<byte> valueRef(this ref sharedMem m) {
+internal static slice<byte> valueRef(this ref sharedMem m) {
     nint length = m.header().Value.valueLen;
     nint valueOffset = (nint)/* unsafe.Sizeof(sharedMemHeader{}) */ (uintptr)40;
     return m.region.slice(valueOffset, valueOffset + length);
 }
 
 // valueCopy returns a copy of the value stored in shared memory.
-[GoRecv] internal static slice<byte> valueCopy(this ref sharedMem m) {
+internal static slice<byte> valueCopy(this ref sharedMem m) {
     var @ref = m.valueRef();
     return bytes.Clone(@ref);
 }
@@ -115,7 +115,7 @@ internal static (ж<sharedMem> m, error err) sharedMemTempFile(nint size) {
 // setValue copies the data in b into the shared memory buffer and sets
 // the length. len(b) must be less than or equal to the capacity of the buffer
 // (as returned by cap(m.value())).
-[GoRecv] internal static void setValue(this ref sharedMem m, slice<byte> b) {
+internal static void setValue(this ref sharedMem m, slice<byte> b) {
     var v = m.valueRef();
     if (len(b) > builtin.cap(v)) {
         throw panic(fmt.Sprintf("value length %d larger than shared memory capacity %d"u8, len(b), builtin.cap(v)));
@@ -130,7 +130,7 @@ internal static (ж<sharedMem> m, error err) sharedMemTempFile(nint size) {
 // Note that we can only store the length in the shared memory header. The full
 // slice header contains a pointer, which is likely only valid for one process,
 // since each process can map shared memory at a different virtual address.
-[GoRecv] internal static void setValueLen(this ref sharedMem m, nint n) {
+internal static void setValueLen(this ref sharedMem m, nint n) {
     var v = m.valueRef();
     if (n > builtin.cap(v)) {
         throw panic(fmt.Sprintf("length %d larger than shared memory capacity %d"u8, n, builtin.cap(v)));

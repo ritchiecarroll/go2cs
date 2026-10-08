@@ -67,13 +67,16 @@ func (v *Visitor) visitIdent(ident *ast.Ident, identType types.Type, name string
 		target.WriteString(v.newline)
 	}
 
+	// A lifted function-local type's Go name rides its accessibility record where one is written.
+	localName, localNameRecord := v.recordedLocalName(identType, getSanitizedIdentifier(name))
+	definition := rootGoTypeDescriptor(csTypeName)
+
 	if isNumericType(underlyingIdentType) {
-		// Handle numeric type
-		v.writeString(target, "%s[GoType(\"num:%s\")]", v.localNameAttrFor(identType), rootGoTypeDescriptor(csTypeName))
-	} else {
-		// Handle other types
-		v.writeString(target, "%s[GoType(\"%s\")]", v.localNameAttrFor(identType), rootGoTypeDescriptor(csTypeName))
+		definition = "num:" + definition
 	}
+
+	goTypeAttr, goTypeComment := goTypeMarker(definition)
+	v.writeString(target, "%s%s", localName, goTypeAttr)
 
 	// Consume any pending publicized-type access modifier (an unexported type used as an
 	// exported field — CS0051/CS0052).
@@ -81,8 +84,8 @@ func (v *Visitor) visitIdent(ident *ast.Ident, identType types.Type, name string
 
 	if strings.HasPrefix(name, PointerPrefix) {
 		// Handle pointer types
-		v.recordTypeAccessibility("class", getSanitizedIdentifier(name), "", access, "")
-		v.writeString(target, " %spartial class %s;", access, getSanitizedIdentifier(name))
+		v.recordTypeAccessibility("class", getSanitizedIdentifier(name), "", access, localNameRecord)
+		v.writeString(target, "%spartial class %s%s;", access, getSanitizedIdentifier(name), goTypeComment)
 		usesUnsafeCode = true
 	} else {
 		// A defined type over a struct that carries fixed-size ARRAY fields inherits the by-value
@@ -90,12 +93,12 @@ func (v *Visitor) visitIdent(ident *ast.Ident, identType types.Type, name string
 		// `type IpMaskString IpAddressString` wraps a `[16]byte`, and `IpAddrString`'s own clone
 		// needs a strongly-typed `Clone()` on it. The stamp rides the accessibility record where one
 		// is written, so the declaration here reads as the bare `[GoType]` wrapper it is.
-		inlineAttrs := v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), "", access, wrapperValueCloneAttr(identType))
+		inlineAttrs := v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), "", access, localNameRecord+wrapperValueCloneAttr(identType))
 
 		// The type-parameter list rides the DECLARATION only: the recorded name stays the bare
 		// identifier so the accessibility record, the lifted-type map and every use site keep
 		// their existing spelling (uses render the parameters through their own type resolution).
-		v.writeString(target, " %s%spartial struct %s;", inlineAttrs, access, getSanitizedIdentifier(name))
+		v.writeString(target, "%s%spartial struct %s%s;", inlineAttrs, access, getSanitizedIdentifier(name), goTypeComment)
 	}
 
 	target.WriteString(v.newline)

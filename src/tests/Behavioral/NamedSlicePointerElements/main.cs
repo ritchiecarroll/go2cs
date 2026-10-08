@@ -4,15 +4,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct item {
+partial struct item {
     internal nint v;
 }
 
-[GoType] partial struct Array {
+partial struct Array {
     internal @string label;
 }
 
-[GoType("[]ж<item>")] partial struct queue;
+partial struct queue /*[]ж<item>*/;
 
 internal static void Main() {
     var q = new queue(new ж<item>[]{Ꮡ(new item(v: 1)), Ꮡ(new item(v: 2))}.slice());

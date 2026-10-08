@@ -5,11 +5,11 @@ using ꓸꓸꓸbyte = Span<byte>;
 
 partial class main_package {
 
-[GoType] partial struct sink {
+partial struct sink {
     internal slice<byte> buf;
 }
 
-[GoRecv] internal static void add(this ref sink s, params ꓸꓸꓸbyte bytesʗp) {
+internal static void add(this ref sink s, params ꓸꓸꓸbyte bytesʗp) {
     var bytes = bytesʗp.sslice();
 
     s.buf = appendꓸꓸꓸ(s.buf, bytes);

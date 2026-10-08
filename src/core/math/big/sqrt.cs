@@ -9,7 +9,7 @@ using sync = sync_package;
 partial class big_package {
 
 
-[GoType("dyn")] partial struct threeOnceᴛ1 {
+partial struct threeOnceᴛ1 /*dyn*/ {
     public partial ref sync_package.Once Once { get; }
     internal ж<Float> v;
 }

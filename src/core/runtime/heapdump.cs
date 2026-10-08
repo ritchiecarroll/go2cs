@@ -93,7 +93,7 @@ internal static UntypedInt typeCacheBuckets => 256;
 
 internal static UntypedInt typeCacheAssoc => 4;
 
-[GoType] partial struct typeCacheBucket {
+partial struct typeCacheBucket {
     internal array<ж<_type>> t = new(typeCacheAssoc);
 }
 
@@ -213,7 +213,7 @@ internal static void dumpfinalizer(@unsafe.Pointer obj, ж<funcval> Ꮡfn, ж<_t
     dumpint((uint64)(uintptr)Ꮡot);
 }
 
-[GoType] partial struct childInfo {
+partial struct childInfo {
     // Information passed up from the callee frame about
     // the layout of the outargs region.
     internal uintptr argoff;   // where the arguments start in the frame

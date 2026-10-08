@@ -155,7 +155,7 @@ public static ж<exec.Cmd> CleanCmdEnv(ж<exec.Cmd> Ꮡcmd) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string goTestTimeoutScaleˢ = "GO_TEST_TIMEOUT_SCALE"u8;
 
-[GoType("dyn")] internal partial interface CommandContext_type :
+internal partial interface CommandContext_type /*dyn*/ :
     testing.TB
 {
     (time.Time, bool) Deadline();

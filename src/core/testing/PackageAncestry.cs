@@ -189,8 +189,7 @@ internal static class PackageAncestry
         if (!ownGoMod && (string.IsNullOrWhiteSpace(goMod) || !File.Exists(goMod)))
             return false;
 
-        string[] moduleSegments = modulePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
-        string mirrorRoot = Path.Combine([runRoot, "src", .. moduleSegments]);
+        string mirrorRoot = ModuleMirrorRoot(runRoot, modulePath);
 
         try
         {
@@ -211,6 +210,13 @@ internal static class PackageAncestry
             return false;
         }
     }
+
+    /// <summary>
+    /// Where <see cref="TryStageModule"/> stages a module's copy: <c>runRoot/src/&lt;modulePath&gt;</c>. The test
+    /// host answers the module's recorded frames under it (runtime's GoModuleSourceRemap).
+    /// </summary>
+    public static string ModuleMirrorRoot(string runRoot, string modulePath) =>
+        Path.Combine([runRoot, "src", .. modulePath.Split('/', StringSplitOptions.RemoveEmptyEntries)]);
 
     // Copies one level of the module tree, recursing into its directories, minus .git and the sandbox.
     private static void CopyModuleTree(DirectoryInfo real, string mirror, string sandbox)

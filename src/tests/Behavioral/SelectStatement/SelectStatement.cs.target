@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType("[]nint")] partial struct IntSlice;
+partial struct IntSlice /*[]nint*/;
 
 internal static void g1(channel<nint> ch) {
     ch.ᐸꟷ(12);
@@ -241,7 +241,7 @@ internal static @string poll(channel<EmptyStruct> done) {
     return pendingˢ;
 }
 
-[GoType] partial struct raceResult {
+partial struct raceResult {
     internal nint value;
     internal bool primary;
 }

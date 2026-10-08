@@ -4,16 +4,16 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct box {
+partial struct box {
     internal @string label;
     internal nint n;
 }
 
-[GoRecv] internal static nint Size(this ref box b) {
+internal static nint Size(this ref box b) {
     return b.n;
 }
 
-[GoRecv] internal static @string Name(this ref box b) {
+internal static @string Name(this ref box b) {
     return b.label;
 }
 

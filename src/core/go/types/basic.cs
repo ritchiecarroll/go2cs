@@ -7,7 +7,7 @@ namespace go.go;
 
 partial class types_package {
 
-[GoType("num:nint")] partial struct BasicKind;
+partial struct BasicKind /*num:nint*/;
 
 public static BasicKind Invalid => /* iota */ 0;  // type is invalid
 public static BasicKind Bool => 1;
@@ -38,7 +38,7 @@ public static BasicKind UntypedNil => 25;
 public static BasicKind Byte => /* Uint8 */ 8;
 public static BasicKind Rune => /* Int32 */ 5;
 
-[GoType("num:nint")] partial struct BasicInfo;
+partial struct BasicInfo /*num:nint*/;
 
 // Properties of basic types.
 public static BasicInfo IsBoolean => /* 1 << iota */ 1;
@@ -62,24 +62,24 @@ public static BasicInfo IsNumeric => /* IsInteger | IsFloat | IsComplex */ 26;
 public static BasicInfo IsConstType => /* IsBoolean | IsNumeric | IsString */ 59;
 
 // A Basic represents a basic type.
-[GoType] partial struct Basic {
+partial struct Basic {
     internal BasicKind kind;
     internal BasicInfo info;
     internal @string name;
 }
 
 // Kind returns the kind of basic type b.
-[GoRecv] public static BasicKind Kind(this ref Basic b) {
+public static BasicKind Kind(this ref Basic b) {
     return b.kind;
 }
 
 // Info returns information about properties of basic type b.
-[GoRecv] public static BasicInfo Info(this ref Basic b) {
+public static BasicInfo Info(this ref Basic b) {
     return b.info;
 }
 
 // Name returns the name of basic type b.
-[GoRecv] public static @string Name(this ref Basic b) {
+public static @string Name(this ref Basic b) {
     return b.name;
 }
 

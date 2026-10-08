@@ -7,26 +7,26 @@ using System.Runtime.InteropServices;
 
 partial class main_package {
 
-[GoType] public partial struct nocopy {
+public partial struct nocopy {
 }
 
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Counter {
+[StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Counter {
     [FieldOffset(0)] internal readonly nocopy _;
     [FieldOffset(0)] internal int32 v;
 }
 
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Wide {
+[StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Wide {
     [FieldOffset(0)] internal readonly nocopy _;
     [FieldOffset(0)] internal readonly nocopy __;
     [FieldOffset(0)] internal int64 v;
 }
 
-[GoType] partial struct Plain {
+partial struct Plain {
     internal int32 a;
     internal int64 b;
 }
 
-[GoType] partial struct Managed {
+partial struct Managed {
     internal nocopy _;
     internal @string s;
 }
@@ -61,12 +61,12 @@ internal static void Main() {
     namedZeroSizeWrites();
 }
 
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Carrier {
+[StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Carrier {
     [FieldOffset(0)] public readonly nocopy Z;
     [FieldOffset(0)] public uint64 V;
 }
 
-[GoType] partial struct Outer {
+partial struct Outer {
     public Carrier C;
 }
 

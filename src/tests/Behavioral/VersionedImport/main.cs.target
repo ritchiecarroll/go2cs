@@ -6,7 +6,7 @@ using go.vlib;
 
 partial class main_package {
 
-[GoType] partial struct wrapper {
+partial struct wrapper {
     internal ж<Δvlib.Rand> r;
 }
 

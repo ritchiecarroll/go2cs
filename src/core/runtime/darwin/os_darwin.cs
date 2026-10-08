@@ -10,7 +10,7 @@ using @internal;
 
 partial class runtime_package {
 
-[GoType] partial struct mOS {
+partial struct mOS {
     internal bool initialized;
     internal pthreadmutex mutex;
     internal pthreadcond cond;
@@ -394,7 +394,7 @@ internal static UntypedInt _SIG_UNBLOCK => 2;
 internal static UntypedInt _SIG_SETMASK => 3;
 internal static UntypedInt _SS_DISABLE => 4;
 
-[GoType("num:uint32")] partial struct sigset;
+partial struct sigset /*num:uint32*/;
 
 //extern SigTabTT runtime·sigtab[];
 internal static ж<sigset> Ꮡsigset_all = new StandardBox<sigset>(~((sigset)((sigset)0)));

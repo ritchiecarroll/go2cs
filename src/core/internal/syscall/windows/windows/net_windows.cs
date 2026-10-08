@@ -16,7 +16,7 @@ public static UntypedInt SIO_TCP_INITIAL_RTO => /* syscall.IOC_IN | syscall.IOC_
 public const uint16 TCP_INITIAL_RTO_UNSPECIFIED_RTT = /* ^uint16(0) */ 65535;
 public const uint8 TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS = /* ^uint8(1) */ 254;
 
-[GoType] partial struct TCP_INITIAL_RTO_PARAMETERS {
+partial struct TCP_INITIAL_RTO_PARAMETERS {
     public uint16 Rtt;
     public uint8 MaxSynRetransmissions;
 }

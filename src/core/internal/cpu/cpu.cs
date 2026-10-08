@@ -16,7 +16,7 @@ partial class cpu_package {
 public static bool DebugOptions;
 
 // CacheLinePad is used to pad structs to avoid false sharing.
-[GoType] partial struct CacheLinePad {
+partial struct CacheLinePad {
     internal array<byte> _ = new(CacheLinePadSize);
 }
 
@@ -30,7 +30,7 @@ public static uintptr CacheLineSize = CacheLinePadSize;
 // in addition to the cpuid feature bit being set.
 // The struct is padded to avoid false sharing.
 
-[GoType("dyn")] partial struct X86ᴛ1 {
+partial struct X86ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasAES;
     public bool HasADX;
@@ -61,7 +61,7 @@ public static ref X86ᴛ1 X86 => ref ᏑX86.Value;
 // The booleans in ARM contain the correspondingly named cpu feature bit.
 // The struct is padded to avoid false sharing.
 
-[GoType("dyn")] partial struct ARMᴛ1 {
+partial struct ARMᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasVFPv4;
     public bool HasIDIVA;
@@ -73,7 +73,7 @@ public static ARMᴛ1 ARM;
 // The booleans in ARM64 contain the correspondingly named cpu feature bit.
 // The struct is padded to avoid false sharing.
 
-[GoType("dyn")] partial struct ARM64ᴛ1 {
+partial struct ARM64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasAES;
     public bool HasPMULL;
@@ -92,7 +92,7 @@ public static ARM64ᴛ1 ARM64;
 // The booleans in Loong64 contain the correspondingly named cpu feature bit.
 // The struct is padded to avoid false sharing.
 
-[GoType("dyn")] partial struct Loong64ᴛ1 {
+partial struct Loong64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasLSX; // support 128-bit vector extension
     public bool HasCRC32; // support CRC instruction
@@ -103,7 +103,7 @@ public static ARM64ᴛ1 ARM64;
 public static Loong64ᴛ1 Loong64;
 
 
-[GoType("dyn")] partial struct MIPS64Xᴛ1 {
+partial struct MIPS64Xᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasMSA; // MIPS SIMD architecture
     internal CacheLinePad __;
@@ -116,7 +116,7 @@ public static MIPS64Xᴛ1 MIPS64X;
 // those as well. The minimum processor requirement is POWER8 (ISA 2.07).
 // The struct is padded to avoid false sharing.
 
-[GoType("dyn")] partial struct PPC64ᴛ1 {
+partial struct PPC64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasDARN; // Hardware random number generator (requires kernel enablement)
     public bool HasSCV; // Syscall vectored (requires kernel enablement)
@@ -128,7 +128,7 @@ public static MIPS64Xᴛ1 MIPS64X;
 public static PPC64ᴛ1 PPC64;
 
 
-[GoType("dyn")] partial struct S390Xᴛ1 {
+partial struct S390Xᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasZARCH; // z architecture mode is active [mandatory]
     public bool HasSTFLE; // store facility list extended [mandatory]
@@ -180,7 +180,7 @@ public static void Initialize(@string env) {
 internal static slice<option> options;
 
 // Option names should be lower case. e.g. avx instead of AVX.
-[GoType] partial struct option {
+partial struct option {
     public @string Name;
     public ж<bool> Feature;
     public bool Specified; // whether feature value was specified in GODEBUG

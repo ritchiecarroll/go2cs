@@ -40,7 +40,7 @@ partial class elf_package {
  */
 
 // A FileHeader represents an ELF file header.
-[GoType] partial struct FileHeader {
+partial struct FileHeader {
     public Class Class;
     public ΔData Data;
     public Version Version;
@@ -53,7 +53,7 @@ partial class elf_package {
 }
 
 // A File represents an open ELF file.
-[GoType] partial struct File {
+partial struct File {
     public partial ref FileHeader FileHeader { get; }
     public slice<ж<ΔSection>> Sections;
     public slice<ж<Prog>> Progs;
@@ -64,7 +64,7 @@ partial class elf_package {
 }
 
 // A SectionHeader represents a single ELF section header.
-[GoType] partial struct SectionHeader {
+partial struct SectionHeader {
     public @string Name;
     public SectionType Type;
     public SectionFlag Flags;
@@ -83,7 +83,7 @@ partial class elf_package {
 }
 
 // A Section represents a single section in an ELF file.
-[GoType] partial struct ΔSection {
+partial struct ΔSection {
     public partial ref SectionHeader SectionHeader { get; }
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly
@@ -95,7 +95,7 @@ partial class elf_package {
     // ReaderAt may be nil if the section is not easily available
     // in a random-access form. For example, a compressed section
     // may have a nil ReaderAt.
-    [GoEmbedded] public io_package.ReaderAt ReaderAt;
+    /*embed*/ public io_package.ReaderAt ReaderAt;
     internal ж<io.SectionReader> sr;
     internal CompressionType compressionType;
     internal int64 compressionOffset;
@@ -117,7 +117,7 @@ internal static readonly @string sectionHasInvalidStringˢ = "section has invali
 
 // stringTable reads and returns the string table given by the
 // specified link value.
-[GoRecv] internal static (slice<byte>, error) stringTable(this ref File f, uint32 link) {
+internal static (slice<byte>, error) stringTable(this ref File f, uint32 link) {
     if (link <= 0 || link >= (uint32)len(f.Sections)) {
         return (default!, errors.New(sectionHasInvalidStringˢ));
     }
@@ -181,7 +181,7 @@ public static io.ReadSeeker Open(this ж<ΔSection> Ꮡs) {
 }
 
 // A ProgHeader represents a single ELF program header.
-[GoType] partial struct ProgHeader {
+partial struct ProgHeader {
     public ProgType Type;
     public ProgFlag Flags;
     public uint64 Off;
@@ -193,7 +193,7 @@ public static io.ReadSeeker Open(this ж<ΔSection> Ꮡs) {
 }
 
 // A Prog represents a single ELF program header in an ELF binary.
-[GoType] partial struct Prog {
+partial struct Prog {
     public partial ref ProgHeader ProgHeader { get; }
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly
@@ -201,17 +201,17 @@ public static io.ReadSeeker Open(this ж<ΔSection> Ꮡs) {
     // If a client wants Read and Seek it must use
     // Open() to avoid fighting over the seek offset
     // with other clients.
-    [GoEmbedded] public io_package.ReaderAt ReaderAt;
+    /*embed*/ public io_package.ReaderAt ReaderAt;
     internal ж<io.SectionReader> sr;
 }
 
 // Open returns a new ReadSeeker reading the ELF program body.
-[GoRecv] public static io.ReadSeeker Open(this ref Prog p) {
+public static io.ReadSeeker Open(this ref Prog p) {
     return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(p.sr), 0, 9223372036854775807L));
 }
 
 // A Symbol represents an entry in an ELF symbol table section.
-[GoType] partial struct Symbol {
+partial struct Symbol {
     public @string Name;
     public byte Info, Other;
     // HasVersion reports whether the symbol has any version information.
@@ -231,13 +231,13 @@ public static io.ReadSeeker Open(this ж<ΔSection> Ꮡs) {
 /*
  * ELF reader
  */
-[GoType] partial struct FormatError {
+partial struct FormatError {
     internal int64 off;
     internal @string msg;
     internal any val;
 }
 
-[GoRecv] public static @string Error(this ref FormatError e) {
+public static @string Error(this ref FormatError e) {
     @string msg = e.msg;
     if (e.val != default!) {
         msg += fmt.Sprintf(" '%v' "u8, e.val);
@@ -264,7 +264,7 @@ public static (ж<File>, error) Open(@string name) {
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
-[GoRecv] public static error Close(this ref File f) {
+public static error Close(this ref File f) {
     error err = default!;
     if (f.closer != default!) {
         err = f.closer.Close();
@@ -275,7 +275,7 @@ public static (ж<File>, error) Open(@string name) {
 
 // SectionByType returns the first section in f with the
 // given type, or nil if there is no such section.
-[GoRecv] public static ж<ΔSection> SectionByType(this ref File f, SectionType typ) {
+public static ж<ΔSection> SectionByType(this ref File f, SectionType typ) {
     foreach (var (_, s) in f.Sections) {
         if ((~s).Type == typ) {
             return s;
@@ -641,7 +641,7 @@ internal static readonly @string notImplementedˢ = "not implemented"u8;
 
 // getSymbols returns a slice of Symbols from parsing the symbol table
 // with the given type, along with the associated string table.
-[GoRecv] internal static (slice<Symbol>, slice<byte>, error) getSymbols(this ref File f, SectionType typ) {
+internal static (slice<Symbol>, slice<byte>, error) getSymbols(this ref File f, SectionType typ) {
     var exprᴛ1 = f.Class;
     if (exprᴛ1 == ELFCLASS64) {
         return f.getSymbols64(typ);
@@ -661,7 +661,7 @@ public static error ErrNoSymbols = errors.New("no symbol section"u8);
 internal static readonly @string symbolSectionIsEmptyˢ = "symbol section is empty"u8;
 internal static readonly @string lengthOfSymbolSectionIsˢ = "length of symbol section is not a multiple of SymSize"u8;
 
-[GoRecv] internal static (slice<Symbol>, slice<byte>, error) getSymbols32(this ref File f, SectionType typ) {
+internal static (slice<Symbol>, slice<byte>, error) getSymbols32(this ref File f, SectionType typ) {
     var symtabSection = f.SectionByType(typ);
     if (symtabSection == nil) {
         return (default!, default!, ErrNoSymbols);
@@ -708,7 +708,7 @@ internal static readonly @string lengthOfSymbolSectionIsˢ = "length of symbol s
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string lengthOfSymbolSectionIsˢ2 = "length of symbol section is not a multiple of Sym64Size"u8;
 
-[GoRecv] internal static (slice<Symbol>, slice<byte>, error) getSymbols64(this ref File f, SectionType typ) {
+internal static (slice<Symbol>, slice<byte>, error) getSymbols64(this ref File f, SectionType typ) {
     var symtabSection = f.SectionByType(typ);
     if (symtabSection == nil) {
         return (default!, default!, ErrNoSymbols);
@@ -764,7 +764,7 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
 
 // Section returns a section with the given name, or nil if no such
 // section exists.
-[GoRecv] public static ж<ΔSection> Section(this ref File f, @string name) {
+public static ж<ΔSection> Section(this ref File f, @string name) {
     foreach (var (_, s) in f.Sections) {
         if ((~s).Name == name) {
             return s;
@@ -778,7 +778,7 @@ internal static readonly @string applyRelocationsNotˢ = "applyRelocations: not 
 
 // applyRelocations applies relocations to dst. rels is a relocations section
 // in REL or RELA format.
-[GoRecv] internal static error applyRelocations(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocations(this ref File f, slice<byte> dst, slice<byte> rels) {
     switch (ᐧ) {
     case {} when f.Class == ELFCLASS64 && f.Machine == EM_X86_64: {
         return f.applyRelocationsAMD64(dst, rels);
@@ -835,7 +835,7 @@ internal static bool canApplyRelocation(ref Symbol sym) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string lengthOfRelocationˢ = "length of relocation section is not a multiple of 24"u8;
 
-[GoRecv] internal static error applyRelocationsAMD64(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsAMD64(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -883,7 +883,7 @@ internal static readonly @string lengthOfRelocationˢ = "length of relocation se
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string lengthOfRelocationˢ2 = "length of relocation section is not a multiple of 8"u8;
 
-[GoRecv] internal static error applyRelocations386(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocations386(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 8 is the size of Rel32.
     if (len(rels) % 8 != 0) {
         return errors.New(lengthOfRelocationˢ2);
@@ -914,7 +914,7 @@ internal static readonly @string lengthOfRelocationˢ2 = "length of relocation s
     return default!;
 }
 
-[GoRecv] internal static error applyRelocationsARM(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsARM(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 8 is the size of Rel32.
     if (len(rels) % 8 != 0) {
         return errors.New(lengthOfRelocationˢ2);
@@ -947,7 +947,7 @@ internal static readonly @string lengthOfRelocationˢ2 = "length of relocation s
     return default!;
 }
 
-[GoRecv] internal static error applyRelocationsARM64(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsARM64(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -995,7 +995,7 @@ internal static readonly @string lengthOfRelocationˢ2 = "length of relocation s
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string lengthOfRelocationˢ3 = "length of relocation section is not a multiple of 12"u8;
 
-[GoRecv] internal static error applyRelocationsPPC(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsPPC(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 12 is the size of Rela32.
     if (len(rels) % 12 != 0) {
         return errors.New(lengthOfRelocationˢ3);
@@ -1030,7 +1030,7 @@ internal static readonly @string lengthOfRelocationˢ3 = "length of relocation s
     return default!;
 }
 
-[GoRecv] internal static error applyRelocationsPPC64(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsPPC64(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1072,7 +1072,7 @@ internal static readonly @string lengthOfRelocationˢ3 = "length of relocation s
     return default!;
 }
 
-[GoRecv] internal static error applyRelocationsMIPS(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsMIPS(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 8 is the size of Rel32.
     if (len(rels) % 8 != 0) {
         return errors.New(lengthOfRelocationˢ2);
@@ -1105,7 +1105,7 @@ internal static readonly @string lengthOfRelocationˢ3 = "length of relocation s
     return default!;
 }
 
-[GoRecv] internal static error applyRelocationsMIPS64(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsMIPS64(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1154,7 +1154,7 @@ internal static readonly @string lengthOfRelocationˢ3 = "length of relocation s
     return default!;
 }
 
-[GoRecv] internal static error applyRelocationsLOONG64(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsLOONG64(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1198,7 +1198,7 @@ internal static readonly @string lengthOfRelocationˢ3 = "length of relocation s
     return default!;
 }
 
-[GoRecv] internal static error applyRelocationsRISCV64(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsRISCV64(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1240,7 +1240,7 @@ internal static readonly @string lengthOfRelocationˢ3 = "length of relocation s
     return default!;
 }
 
-[GoRecv] internal static error applyRelocationss390x(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationss390x(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1282,7 +1282,7 @@ internal static readonly @string lengthOfRelocationˢ3 = "length of relocation s
     return default!;
 }
 
-[GoRecv] internal static error applyRelocationsSPARC64(this ref File f, slice<byte> dst, slice<byte> rels) {
+internal static error applyRelocationsSPARC64(this ref File f, slice<byte> dst, slice<byte> rels) {
     // 24 is the size of Rela64.
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
@@ -1442,7 +1442,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
 // For compatibility with Go 1.0, Symbols omits the null symbol at index 0.
 // After retrieving the symbols as symtab, an externally supplied index x
 // corresponds to symtab[x-1], not symtab[x].
-[GoRecv] public static (slice<Symbol>, error) Symbols(this ref File f) {
+public static (slice<Symbol>, error) Symbols(this ref File f) {
     var (sym, _, err) = f.getSymbols(SHT_SYMTAB);
     return (sym, err);
 }
@@ -1456,7 +1456,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
 // For compatibility with [File.Symbols], [File.DynamicSymbols] omits the null symbol at index 0.
 // After retrieving the symbols as symtab, an externally supplied index x
 // corresponds to symtab[x-1], not symtab[x].
-[GoRecv] public static (slice<Symbol>, error) DynamicSymbols(this ref File f) {
+public static (slice<Symbol>, error) DynamicSymbols(this ref File f) {
     var (sym, str, err) = f.getSymbols(SHT_DYNSYM);
     if (err != default!) {
         return (default!, err);
@@ -1473,7 +1473,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
     return (sym, default!);
 }
 
-[GoType] partial struct ImportedSymbol {
+partial struct ImportedSymbol {
     public @string Name;
     public @string Version;
     public @string Library;
@@ -1483,7 +1483,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
 // It does not return weak symbols.
-[GoRecv] public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
+public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
     var (sym, str, err) = f.getSymbols(SHT_DYNSYM);
     if (err != default!) {
         return (default!, err);
@@ -1504,7 +1504,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
     return (all, default!);
 }
 
-[GoType("num:uint16")] partial struct VersionIndex;
+partial struct VersionIndex /*num:uint16*/;
 
 // IsHidden reports whether the symbol is hidden within the version.
 // This means that the symbol can only be seen by specifying the exact version.
@@ -1534,7 +1534,7 @@ public static uint16 Index(this VersionIndex vi) {
 // We assume that the vd_version field is 1.
 // Note that the name of the version appears here;
 // it is not in the first Deps entry as it is in the ELF file.
-[GoType] partial struct DynamicVersion {
+partial struct DynamicVersion {
     public @string Name; // Name of version defined by this index.
     public uint16 Index; // Version index.
     public DynamicVersionFlag Flags;
@@ -1545,20 +1545,20 @@ public static uint16 Index(this VersionIndex vi) {
 // with a list of the versions needed from that shared library.
 // This describes entries in the ELF SHT_GNU_verneed section.
 // We assume that the vn_version field is 1.
-[GoType] partial struct DynamicVersionNeed {
+partial struct DynamicVersionNeed {
     public @string Name;             // Shared library name.
     public slice<DynamicVersionDep> Needs; // Dependencies.
 }
 
 // DynamicVersionDep is a version needed from some shared library.
-[GoType] partial struct DynamicVersionDep {
+partial struct DynamicVersionDep {
     public DynamicVersionFlag Flags;
     public uint16 Index; // Version index.
     public @string Dep; // Name of required version.
 }
 
 // dynamicVersions returns version information for a dynamic object.
-[GoRecv] internal static error dynamicVersions(this ref File f, slice<byte> str) {
+internal static error dynamicVersions(this ref File f, slice<byte> str) {
     if (f.dynVers != default!) {
         // Already initialized.
         return default!;
@@ -1625,7 +1625,7 @@ public static uint16 Index(this VersionIndex vi) {
 internal static readonly @string dynamicVersionsMissingˢ = "DynamicVersions: missing version table"u8;
 
 // DynamicVersions returns version information for a dynamic object.
-[GoRecv] public static (slice<DynamicVersion>, error) DynamicVersions(this ref File f) {
+public static (slice<DynamicVersion>, error) DynamicVersions(this ref File f) {
     if (f.dynVers == default!) {
         var (_, str, err) = f.getSymbols(SHT_DYNSYM);
         if (err != default!) {
@@ -1643,7 +1643,7 @@ internal static readonly @string dynamicVersionsMissingˢ = "DynamicVersions: mi
 }
 
 // dynamicVersionNeeds returns version dependencies for a dynamic object.
-[GoRecv] internal static error dynamicVersionNeeds(this ref File f, slice<byte> str) {
+internal static error dynamicVersionNeeds(this ref File f, slice<byte> str) {
     if (f.dynVerNeeds != default!) {
         // Already initialized.
         return default!;
@@ -1708,7 +1708,7 @@ internal static readonly @string dynamicVersionsMissingˢ = "DynamicVersions: mi
 internal static readonly @string dynamicVersionNeedsˢ = "DynamicVersionNeeds: missing version table"u8;
 
 // DynamicVersionNeeds returns version dependencies for a dynamic object.
-[GoRecv] public static (slice<DynamicVersionNeed>, error) DynamicVersionNeeds(this ref File f) {
+public static (slice<DynamicVersionNeed>, error) DynamicVersionNeeds(this ref File f) {
     if (f.dynVerNeeds == default!) {
         var (_, str, err) = f.getSymbols(SHT_DYNSYM);
         if (err != default!) {
@@ -1728,7 +1728,7 @@ internal static readonly @string dynamicVersionNeedsˢ = "DynamicVersionNeeds: m
 // gnuVersionInit parses the GNU version tables
 // for use by calls to gnuVersion.
 // It reports whether any version tables were found.
-[GoRecv] internal static (bool, error) gnuVersionInit(this ref File f, slice<byte> str) {
+internal static (bool, error) gnuVersionInit(this ref File f, slice<byte> str) {
     // Versym parallels symbol table, indexing into verneed.
     var vs = f.SectionByType(SHT_GNU_VERSYM);
     if (vs == nil) {
@@ -1751,7 +1751,7 @@ internal static readonly @string dynamicVersionNeedsˢ = "DynamicVersionNeeds: m
 
 // gnuVersion adds Library and Version information to sym,
 // which came from offset i of the symbol table.
-[GoRecv] internal static (bool hasVersion, VersionIndex versionIndex, @string version, @string library) gnuVersion(this ref File f, nint i) {
+internal static (bool hasVersion, VersionIndex versionIndex, @string version, @string library) gnuVersion(this ref File f, nint i) {
     // Each entry is two bytes; skip undef entry at beginning.
     i = (i + 1) * 2;
     if (i >= len(f.gnuVersym)) {
@@ -1784,7 +1784,7 @@ internal static readonly @string dynamicVersionNeedsˢ = "DynamicVersionNeeds: m
 // ImportedLibraries returns the names of all libraries
 // referred to by the binary f that are expected to be
 // linked with the binary at dynamic link time.
-[GoRecv] public static (slice<@string>, error) ImportedLibraries(this ref File f) {
+public static (slice<@string>, error) ImportedLibraries(this ref File f) {
     return f.DynString(DT_NEEDED);
 }
 
@@ -1796,7 +1796,7 @@ internal static readonly @string lengthOfDynamicSectionIsˢ = "length of dynamic
 //
 // The tag must be one that takes string values: [DT_NEEDED], [DT_SONAME], [DT_RPATH], or
 // [DT_RUNPATH].
-[GoRecv] public static (slice<@string>, error) DynString(this ref File f, DynTag tag) {
+public static (slice<@string>, error) DynString(this ref File f, DynTag tag) {
     var exprᴛ1 = tag;
     if (exprᴛ1 == DT_NEEDED || exprᴛ1 == DT_SONAME || exprᴛ1 == DT_RPATH || exprᴛ1 == DT_RUNPATH) {
     }
@@ -1852,7 +1852,7 @@ internal static readonly @string lengthOfDynamicSectionIsˢ = "length of dynamic
 
 // DynValue returns the values listed for the given tag in the file's dynamic
 // section.
-[GoRecv] public static (slice<uint64>, error) DynValue(this ref File f, DynTag tag) {
+public static (slice<uint64>, error) DynValue(this ref File f, DynTag tag) {
     var ds = f.SectionByType(SHT_DYNAMIC);
     if (ds == nil) {
         return (default!, default!);
@@ -1892,13 +1892,13 @@ internal static readonly @string lengthOfDynamicSectionIsˢ = "length of dynamic
     return (vals, default!);
 }
 
-[GoType] partial struct nobitsSectionReader {
+partial struct nobitsSectionReader {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unexpectedReadFromShtˢ = "unexpected read from SHT_NOBITS section"u8;
 
-[GoRecv] internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) {
+internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) {
     return (0, errors.New(unexpectedReadFromShtˢ));
 }
 

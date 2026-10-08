@@ -9,7 +9,7 @@ using io = io_package;
 
 partial class bzip2_package {
 
-[GoType("@string")] partial struct StructuralError;
+partial struct StructuralError /*@string*/;
 
 // There's no RFC for bzip2. I used the Wikipedia page for reference and a lot
 // of guessing: https://en.wikipedia.org/wiki/Bzip2
@@ -20,7 +20,7 @@ public static @string Error(this StructuralError s) {
 }
 
 // A reader decompresses bzip2 compressed data.
-[GoType] partial struct reader {
+partial struct reader {
     internal bitReader br;
     internal uint32 fileCRC;
     internal uint32 blockCRC;
@@ -112,7 +112,7 @@ internal static (nint n, error err) Read(this ж<reader> Ꮡbz2, slice<byte> buf
     return (n, err);
 }
 
-[GoRecv] internal static nint readFromBlock(this ref reader bz2, slice<byte> buf) {
+internal static nint readFromBlock(this ref reader bz2, slice<byte> buf) {
     // bzip2 is a block based compressor, except that it has a run-length
     // preprocessing step. The block based nature means that we can
     // preallocate fixed-size buffers and reuse them. However, the RLE

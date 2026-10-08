@@ -81,7 +81,7 @@ public static error Print(ж<token.FileSet> Ꮡfset, any x) {
     return Fprint(new os.FileжWriter(os.Stdout), Ꮡfset, x, new Func<@string, reflectꓸValue, bool>(NotNilFilter));
 }
 
-[GoType] partial struct printer {
+partial struct printer {
     internal io.Writer output;
     internal ж<token.FileSet> fset;
     internal Func<@string, reflectꓸValue, bool> filter;
@@ -93,7 +93,7 @@ public static error Print(ж<token.FileSet> Ꮡfset, any x) {
 
 internal static slice<byte> indent = slice<byte>(".  "u8);
 
-[GoRecv] internal static (nint n, error err) Write(this ref printer p, slice<byte> data) {
+internal static (nint n, error err) Write(this ref printer p, slice<byte> data) {
     nint n = default!;
     error err = default!;
 
@@ -131,7 +131,7 @@ internal static slice<byte> indent = slice<byte>(".  "u8);
 
 // localError wraps locally caught errors so we can distinguish
 // them from genuine panics which we don't want to return as errors.
-[GoType] partial struct localError {
+partial struct localError {
     internal error err;
 }
 

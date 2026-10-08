@@ -13,22 +13,22 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class ast_package {
 
-[GoType] partial struct pkgBuilder {
+partial struct pkgBuilder {
     internal ж<token.FileSet> fset;
     internal scanner.ErrorList errors;
 }
 
-[GoRecv] internal static void error(this ref pkgBuilder p, tokenꓸPos pos, @string msg) {
+internal static void error(this ref pkgBuilder p, tokenꓸPos pos, @string msg) {
     p.errors.Add(p.fset.Position(pos), msg);
 }
 
-[GoRecv] internal static void errorf(this ref pkgBuilder p, tokenꓸPos pos, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf(this ref pkgBuilder p, tokenꓸPos pos, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     p.error(pos, fmt.Sprintf(format, args.ꓸꓸꓸ));
 }
 
-[GoRecv] internal static void declare(this ref pkgBuilder p, ж<Scope> Ꮡscope, ж<Scope> ᏑaltScope, ж<Object> Ꮡobj) {
+internal static void declare(this ref pkgBuilder p, ж<Scope> Ꮡscope, ж<Scope> ᏑaltScope, ж<Object> Ꮡobj) {
     ref var scope = ref Ꮡscope.DerefOrNull();
     ref var altScope = ref ᏑaltScope.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();

@@ -14,7 +14,7 @@ using global::go.os;
 
 partial class fuzz_package {
 
-[GoType] partial struct sharedMemSys {
+partial struct sharedMemSys {
 }
 
 internal static (ж<sharedMem>, error) sharedMemMapFile(ж<os.File> Ꮡf, nint size, bool removeOnClose) {
@@ -29,7 +29,7 @@ internal static (ж<sharedMem>, error) sharedMemMapFile(ж<os.File> Ꮡf, nint s
 
 // Close unmaps the shared memory and closes the temporary file. If this
 // sharedMem was created with sharedMemTempFile, Close also removes the file.
-[GoRecv] internal static error Close(this ref sharedMem m) {
+internal static error Close(this ref sharedMem m) {
     // Attempt all operations, even if we get an error for an earlier operation.
     // os.File.Close may fail due to I/O errors, but we still want to delete
     // the temporary file.

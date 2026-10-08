@@ -17,7 +17,7 @@ partial class poll_package {
 
 // FD is a file descriptor. The net and os packages use this type as a
 // field of a larger type representing a network connection or OS file.
-[GoType] partial struct FD {
+partial struct FD {
     // Lock sysfd and serialize access to Read and Write methods.
     internal fdMutex fdmu;
     // System file descriptor. Immutable until Close.
@@ -942,7 +942,7 @@ public static (nint, @string, error) Dup(this ж<FD> Ꮡfd) {
 // On Unix variants only, expose the IO event for the net code.
 
 // WaitWrite waits until data can be written to fd.
-[GoRecv] public static error WaitWrite(this ref FD fd) {
+public static error WaitWrite(this ref FD fd) {
     return fd.pd.waitWrite(fd.isFile);
 }
 

@@ -17,7 +17,7 @@ using global::go.net;
 
 partial class rpc_package {
 
-[GoType("@string")] partial struct ServerError;
+partial struct ServerError /*@string*/;
 
 public static @string Error(this ServerError e) {
     return ((@string)e);
@@ -26,7 +26,7 @@ public static @string Error(this ServerError e) {
 public static error ErrShutdown = errors.New("connection is shut down"u8);
 
 // Call represents an active RPC.
-[GoType] partial struct ΔCall {
+partial struct ΔCall {
     public @string ServiceMethod;    // The name of the service and method to call.
     public any Args;        // The argument to the function (*struct).
     public any Reply;        // The reply from the function (*struct).
@@ -38,7 +38,7 @@ public static error ErrShutdown = errors.New("connection is shut down"u8);
 // There may be multiple outstanding Calls associated
 // with a single Client, and a Client may be used by
 // multiple goroutines simultaneously.
-[GoType] partial struct Client {
+partial struct Client {
     internal ClientCodec codec;
     internal sync.Mutex reqMutex; // protects following
     internal Request request;
@@ -58,7 +58,7 @@ public static error ErrShutdown = errors.New("connection is shut down"u8);
 // argument to force the body of the response to be read and then
 // discarded.
 // See [NewClient]'s comment for information about concurrent access.
-[GoType] partial interface ClientCodec :
+partial interface ClientCodec :
     io.Closer
 {
     error WriteRequest(ж<Request> _Δp0, any _Δp1);
@@ -232,14 +232,14 @@ public static partial ж<Client> NewClientWithCodec(ClientCodec codec) {
     return client;
 }
 
-[GoType] partial struct gobClientCodec {
+partial struct gobClientCodec {
     internal io.ReadWriteCloser rwc;
     internal ж<gob.Decoder> dec;
     internal ж<gob.Encoder> enc;
     internal ж<bufio.Writer> encBuf;
 }
 
-[GoRecv] internal static error /*err*/ WriteRequest(this ref gobClientCodec c, ж<Request> Ꮡr, any body) {
+internal static error /*err*/ WriteRequest(this ref gobClientCodec c, ж<Request> Ꮡr, any body) {
     error err = default!;
 
     {
@@ -255,15 +255,15 @@ public static partial ж<Client> NewClientWithCodec(ClientCodec codec) {
     return c.encBuf.Flush();
 }
 
-[GoRecv] internal static error ReadResponseHeader(this ref gobClientCodec c, ж<Response> Ꮡr) {
+internal static error ReadResponseHeader(this ref gobClientCodec c, ж<Response> Ꮡr) {
     return c.dec.Decode(Ꮡr.OrTypedNil());
 }
 
-[GoRecv] internal static error ReadResponseBody(this ref gobClientCodec c, any body) {
+internal static error ReadResponseBody(this ref gobClientCodec c, any body) {
     return c.dec.Decode(body);
 }
 
-[GoRecv] internal static error Close(this ref gobClientCodec c) {
+internal static error Close(this ref gobClientCodec c) {
     return c.rwc.Close();
 }
 

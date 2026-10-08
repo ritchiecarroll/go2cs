@@ -29,7 +29,7 @@ internal static UntypedInt maxAlign => 8;
 internal static uintptr hchanSize => /* unsafe.Sizeof(hchan{}) + uintptr(-int(unsafe.Sizeof(hchan{}))&(maxAlign-1)) */ 104;
 internal const bool debugChan = false;
 
-[GoType] partial struct Δhchan {
+partial struct Δhchan {
     internal nuint qcount;          // total data in the queue
     internal nuint dataqsiz;          // size of the circular queue
     internal @unsafe.Pointer buf; // points to an array of dataqsiz elements
@@ -51,7 +51,7 @@ internal const bool debugChan = false;
     internal mutex @lock;
 }
 
-[GoType] partial struct waitq {
+partial struct waitq {
     internal ж<sudog> first;
     internal ж<sudog> last;
 }
@@ -889,7 +889,7 @@ internal static void reflect_chanclose(ж<Δhchan> Ꮡc) {
     closechan(Ꮡc);
 }
 
-[GoRecv] internal static void enqueue(this ref waitq q, ж<sudog> Ꮡsgp) {
+internal static void enqueue(this ref waitq q, ж<sudog> Ꮡsgp) {
     ref var sgp = ref Ꮡsgp.DerefOrNull();
 
     sgp.next = default!;
@@ -905,7 +905,7 @@ internal static void reflect_chanclose(ж<Δhchan> Ꮡc) {
     q.last = Ꮡsgp;
 }
 
-[GoRecv] internal static ж<sudog> dequeue(this ref waitq q) {
+internal static ж<sudog> dequeue(this ref waitq q) {
     while (ᐧ) {
         var sgp = q.first;
         if (sgp == nil) {

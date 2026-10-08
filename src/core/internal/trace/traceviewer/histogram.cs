@@ -14,7 +14,7 @@ using io = io_package;
 partial class traceviewer_package {
 
 // TimeHistogram is an high-dynamic-range histogram for durations.
-[GoType] partial struct TimeHistogram {
+partial struct TimeHistogram {
     public nint Count;
     public slice<nint> Buckets;
     public nint MinBucket, MaxBucket;
@@ -24,7 +24,7 @@ partial class traceviewer_package {
 internal static float64 logDiv = math.Log(math.Pow(10D, 1.0D / 5D));
 
 // Add adds a single sample to the histogram.
-[GoRecv] public static void Add(this ref TimeHistogram h, time.Duration d) {
+public static void Add(this ref TimeHistogram h, time.Duration d) {
     nint bucket = default!;
     if (d > 0) {
         bucket = (nint)(math.Log((float64)(int64)d) / logDiv);
@@ -44,7 +44,7 @@ internal static float64 logDiv = math.Log(math.Pow(10D, 1.0D / 5D));
 }
 
 // BucketMin returns the minimum duration value for a provided bucket.
-[GoRecv] public static time.Duration BucketMin(this ref TimeHistogram h, nint bucket) {
+public static time.Duration BucketMin(this ref TimeHistogram h, nint bucket) {
     return ((time.Duration)(int64)math.Exp((float64)bucket * logDiv));
 }
 

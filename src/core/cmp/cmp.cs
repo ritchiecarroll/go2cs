@@ -17,8 +17,7 @@ partial class cmp_package {
 // An operator such as == or < will always report false when
 // comparing a NaN value with any other value, NaN or not.
 // See the [Compare] function for a consistent way to compare NaN values.
-[GoType("operators = Sum, Comparable, Ordered")]
-partial interface Ordered<ΔT> {
+partial interface Ordered<ΔT> /*operators = Sum, Comparable, Ordered*/ {
     //  Type constraints: ~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr | ~float32 | ~float64 | ~string
     // Derived operators: +, ==, !=, <, <=, >, >=
 }

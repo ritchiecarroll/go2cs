@@ -79,34 +79,76 @@ namespace go;
 /// calls the same method on the same line is the one shape it cannot tell apart. Kept apart from
 /// <paramref name="funcLits"/>, whose reader drops its whole map on an entry it does not know.
 /// </para>
+/// <para>
+/// <paramref name="calls"/> is the PER-CALL table, emitted only when a statement of the file has a call
+/// on a LATER line than the statement's own: one <c>&lt;csLine&gt;=&lt;entries&gt;</c> group per such
+/// statement, keyed by the C# line its sequence point starts on, semicolon-joined; the entries
+/// comma-joined, each <c>&lt;name&gt;/&lt;ordinal&gt;/&lt;total&gt;/&lt;delta&gt;</c>. Go answers a
+/// caller's line with the line of the call's own <c>(</c>, while a frame inside a C# statement can only
+/// report the statement's line. An entry names the call by its callee (the Go name, which is the C#
+/// method name less <c>@</c>/<c>Δ</c>; <c>Invoke</c> for a func value), its ordinal among the statement's
+/// calls to that name, the total of them, both in evaluation order, and its Go line less the statement's.
+/// The runtime counts the same-name calls of the statement's IL up to the frame's call: when the ordinal
+/// and the total both match, the frame answers the call's line, and otherwise the statement's.
+/// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-public sealed class GoPositionMapAttribute(string goFile, string csFile, string table, string funcLits = "", string methodValues = "") : Attribute
+public sealed class GoPositionMapAttribute : Attribute
 {
+    /// <summary>
+    /// Initializes a record without a per-call table. Kept as its own constructor rather than folded into
+    /// the six-argument one with a default, because an attribute binds the CONSTRUCTOR it was compiled
+    /// against: an assembly built with this signature must still read its records against a golib that
+    /// added the sixth argument, and a record that fails to read answers no Go position at all.
+    /// </summary>
+    public GoPositionMapAttribute(string goFile, string csFile, string table, string funcLits = "", string methodValues = "")
+        : this(goFile, csFile, table, funcLits, methodValues, "")
+    {
+    }
+
+    /// <summary>
+    /// Initializes a record carrying a per-call table.
+    /// </summary>
+    public GoPositionMapAttribute(string goFile, string csFile, string table, string funcLits, string methodValues, string calls)
+    {
+        GoFile = goFile;
+        CsFile = csFile;
+        Table = table;
+        FuncLits = funcLits;
+        MethodValues = methodValues;
+        Calls = calls;
+    }
+
     /// <summary>
     /// Gets the identity of the Go source file this C# file was converted from.
     /// </summary>
-    public string GoFile => goFile;
+    public string GoFile { get; }
 
     /// <summary>
     /// Gets the file name of the emitted C# file this record describes.
     /// </summary>
-    public string CsFile => csFile;
+    public string CsFile { get; }
 
     /// <summary>
     /// Gets the encoded C#-line to Go-line table.
     /// </summary>
-    public string Table => table;
+    public string Table { get; }
 
     /// <summary>
     /// Gets the encoded function-literal name map, or an empty string when the file declares no
     /// recorded literals.
     /// </summary>
-    public string FuncLits => funcLits;
+    public string FuncLits { get; }
 
     /// <summary>
     /// Gets the encoded method-value map, or an empty string when the file takes no value-receiver
     /// method value.
     /// </summary>
-    public string MethodValues => methodValues;
+    public string MethodValues { get; }
+
+    /// <summary>
+    /// Gets the encoded per-call table, or an empty string when no statement of the file has a call on a
+    /// later line than its own.
+    /// </summary>
+    public string Calls { get; }
 }

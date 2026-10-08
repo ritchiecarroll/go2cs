@@ -11,15 +11,15 @@ internal static void set(ref nint p) {
 internal static ж<slice<byte>> Ꮡnull = new StandardBox<slice<byte>>(slice<byte>("null"u8));
 internal static ref slice<byte> @null => ref Ꮡnull.ValueSlot;
 
-[GoType] partial struct @decimal {
+partial struct @decimal {
     internal nint d;
 }
 
-[GoRecv] internal static @string String(this ref @decimal a) {
+internal static @string String(this ref @decimal a) {
     return fmt.Sprint(a.d);
 }
 
-[GoRecv] internal static void Assign(this ref @decimal a, nint v) {
+internal static void Assign(this ref @decimal a, nint v) {
     a.d = v;
 }
 

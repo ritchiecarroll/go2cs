@@ -7,11 +7,8 @@ using os = os_package;
 using ꓸꓸꓸany = Span<any>;
 
 partial class main_package {
-// Descriptor carrier for `I` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("I")] public interface Iᴅ { }
 
-
-[GoType] partial struct holder {
+partial struct holder {
     internal any v;
 }
 

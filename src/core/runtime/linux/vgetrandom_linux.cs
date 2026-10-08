@@ -14,7 +14,7 @@ partial class runtime_package {
 internal static partial nint vgetrandom1(ж<byte> buf, uintptr length, uint32 flags, uintptr state, uintptr stateSize);
 
 
-[GoType("dyn")] partial struct vgetrandomAllocᴛ1 {
+partial struct vgetrandomAllocᴛ1 /*dyn*/ {
     internal slice<uintptr> states;
     internal mutex statesLock;
     internal uintptr stateSize;
@@ -24,7 +24,7 @@ internal static partial nint vgetrandom1(ж<byte> buf, uintptr length, uint32 fl
 internal static ж<vgetrandomAllocᴛ1> ᏑvgetrandomAlloc = new StandardBox<vgetrandomAllocᴛ1>(new vgetrandomAllocᴛ1());
 internal static ref vgetrandomAllocᴛ1 vgetrandomAlloc => ref ᏑvgetrandomAlloc.Value;
 
-[GoType("dyn")] internal partial struct vgetrandomInit_params {
+internal partial struct vgetrandomInit_params /*dyn*/ {
     public uint32 SizeOfOpaqueState;
     public uint32 MmapProt;
     public uint32 MmapFlags;

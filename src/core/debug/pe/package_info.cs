@@ -65,7 +65,7 @@ using static go.debug.pe_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("debug/pe/file.go", "file.cs", "ACtWkoKClIKCgpSCrLKCgoKUrLKChIKAgqSCgoKCgoKUlJSCgIKkAAMWtpaCgqiCgpSCgqiCgqiCgqiCgoKAgqSCgpSCAAsYgpKUgoKUgoKCgqgACAqCqJKCloKCpqqigoKmAAsGgoKUpKTMgoKCloKWgoKCgoKUgIKkgIKklJyygoKClICCpoKClJaCgqiCgoKUgJSmgoKWgpSUgqgADCbCgpaGkoKUuoKYkoKUmJKCgoLKgoK6gpaCgqiGkoKCgoKCgoKCgpQABxCCgqKClIKCkoKCgpS2graCgoKUyILMrNYAChCCrtSClgACEoKYkoKCloKYlK6CmIIAATqWgoKWhKSugpiCAAE4loKCloSkzrKCgpaCgIKm", "215-225:1;228-254:2;488-491:1")]
+[assembly: go.GoPositionMap("debug/pe/file.go", "file.cs", "ACtWkoKClIKCgpSCrLKCgoKUrLKChIKAgqSCgoKCgoKUlJSCgIKkAAMWtpaCgqiCgpSCgqiCgqiCgqiCgoKAgqSCgpSCAAsYgpKUgoKUgoKCgqgACAqCqJKCloKCpqqigoKmAAsGgoKUpKTMgoKCloKWgoKCgoKUgIKkgIKklJyygoKClICCpoKClJaCgqiCgoKUgJSmgoKWgpSUgqgADCbCgpaGkoKUuoKYkoKUmJKCgoLKgoK6gpaCgqiGkoKCgoKCgoKCgpQABxCCgqKClIKCkoKCgpS2graCgoKUyILMrNYAChCCrtSClgACEoKYkoKCloKYlK6CmIIAATqWgoKWhKSugpiCAAE4loKCloSkzrKCgpaCgIKm", "215-225:1;228-254:2;488-491:1", "", "501=Invoke/2/29/1,Invoke/3/29/2,Invoke/4/29/3,Invoke/5/29/4,Invoke/6/29/5,Invoke/7/29/6,Invoke/8/29/7,Invoke/9/29/8,Invoke/10/29/9,Invoke/11/29/10,Invoke/12/29/11,Invoke/13/29/12,Invoke/14/29/13,Invoke/15/29/14,Invoke/16/29/15,Invoke/17/29/16,Invoke/18/29/17,Invoke/19/29/18,Invoke/20/29/19,Invoke/21/29/20,Invoke/22/29/21,Invoke/23/29/22,Invoke/24/29/23,Invoke/25/29/24,Invoke/26/29/25,Invoke/27/29/26,Invoke/28/29/27,Invoke/29/29/28;520=Invoke/2/28/1,Invoke/3/28/2,Invoke/4/28/3,Invoke/5/28/4,Invoke/6/28/5,Invoke/7/28/6,Invoke/8/28/7,Invoke/9/28/8,Invoke/10/28/9,Invoke/11/28/10,Invoke/12/28/11,Invoke/13/28/12,Invoke/14/28/13,Invoke/15/28/14,Invoke/16/28/15,Invoke/17/28/16,Invoke/18/28/17,Invoke/19/28/18,Invoke/20/28/19,Invoke/21/28/20,Invoke/22/28/21,Invoke/23/28/22,Invoke/24/28/23,Invoke/25/28/24,Invoke/26/28/25,Invoke/27/28/26,Invoke/28/28/27")]
 [assembly: go.GoPositionMap("debug/pe/section.go", "section.cs", "AB1AsoKUgoKUAAwaooKUgoKUgoKClAAfSsKuwg==")]
 [assembly: go.GoPositionMap("debug/pe/string.go", "string.cs", "AA8iooKClMyUgpSCgoKUgoKCpoKUhIKClKzEgpSCgpQ=")]
 [assembly: go.GoPositionMap("debug/pe/symbol.go", "symbol.cs", "AB7GAbKCgpSUlKyygIKkpoKClIKCooKClJKClILulA==")]
@@ -77,7 +77,7 @@ namespace go.debug;
 public static partial class pe_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

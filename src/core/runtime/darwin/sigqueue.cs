@@ -47,7 +47,7 @@ partial class runtime_package {
 // as there is no connection between handling a signal and receiving one,
 // but atomic instructions should minimize it.
 
-[GoType("dyn")] partial struct sigᴛ1 {
+partial struct sigᴛ1 /*dyn*/ {
     internal note note;
     internal array<uint32> mask = new(1);
     internal array<uint32> wanted = new(1);

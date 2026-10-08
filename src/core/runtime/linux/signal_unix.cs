@@ -19,7 +19,7 @@ partial class runtime_package {
 // but sigTabT is the same for all Unixy systems.
 // The sigtable array is indexed by a system signal number to get the flags
 // and printable name of each signal.
-[GoType] partial struct sigTabT {
+partial struct sigTabT {
     internal int32 flags;
     internal @string name;
 }
@@ -1304,7 +1304,7 @@ internal static bool blockableSig(uint32 sig) {
 
 // gsignalStack saves the fields of the gsignal stack changed by
 // setGsignalStack.
-[GoType] partial struct gsignalStack {
+partial struct gsignalStack {
     internal Δstack stack;
     internal uintptr stackguard0;
     internal uintptr stackguard1;

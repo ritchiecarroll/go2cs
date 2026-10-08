@@ -32,7 +32,7 @@ internal static uint16 _ᴛ1ʗ = (uint16)maxTableCapacity;
 // prefix) is used to select the table to use for a specific key. Using
 // multiple tables enables incremental growth by growing only one table at a
 // time.
-[GoType] public partial struct table {
+public partial struct table {
     // The number of filled slots (i.e. the number of elements in the table).
     internal uint16 used;
     // The total number of slots (always 2^N). Equal to
@@ -90,7 +90,7 @@ internal static ж<table> newTable(ж<abi.SwissMapType> Ꮡtyp, uint64 capacity,
 
 // reset resets the table with new, empty groups with the specified new total
 // capacity.
-[GoRecv] internal static void reset(this ref table t, ж<abi.SwissMapType> Ꮡtyp, uint16 capacity) {
+internal static void reset(this ref table t, ж<abi.SwissMapType> Ꮡtyp, uint16 capacity) {
     var groupCount = (uint64)capacity / (uint64)abi.SwissMapGroupSlots;
     t.groups = newGroups(ref (Ꮡtyp).DerefOrNull(), groupCount);
     t.capacity = capacity;
@@ -102,7 +102,7 @@ internal static ж<table> newTable(ж<abi.SwissMapType> Ꮡtyp, uint64 capacity,
 }
 
 // Preconditions: table must be empty.
-[GoRecv] internal static void resetGrowthLeft(this ref table t) {
+internal static void resetGrowthLeft(this ref table t) {
     uint16 growthLeft = default!;
     if (t.capacity == 0){
         // No real reason to support zero capacity table, since an
@@ -127,13 +127,13 @@ internal static ж<table> newTable(ж<abi.SwissMapType> Ꮡtyp, uint64 capacity,
     t.growthLeft = growthLeft;
 }
 
-[GoRecv] public static uint64 Used(this ref table t) {
+public static uint64 Used(this ref table t) {
     return (uint64)t.used;
 }
 
 // Get performs a lookup of the key that key points to. It returns a pointer to
 // the element, or false if the key doesn't exist.
-[GoRecv] public static (@unsafe.Pointer, bool) Get(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm, @unsafe.Pointer key) {
+public static (@unsafe.Pointer, bool) Get(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -157,7 +157,7 @@ internal static ж<table> newTable(ж<abi.SwissMapType> Ꮡtyp, uint64 capacity,
 // expose updated elements. For NeedsKeyUpdate keys, iteration also must return
 // the new key value, not the old key value.
 // hash must be the hash of the key.
-[GoRecv] internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref table t, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref table t, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     // To find the location of a key in the table, we compute hash(key). From
@@ -215,7 +215,7 @@ internal static ж<table> newTable(ж<abi.SwissMapType> Ꮡtyp, uint64 capacity,
     }
 }
 
-[GoRecv] internal static (@unsafe.Pointer, bool) getWithoutKey(this ref table t, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+internal static (@unsafe.Pointer, bool) getWithoutKey(this ref table t, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
@@ -354,7 +354,7 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abi.SwissM
 // requires the caller to ensure that the referenced memory never
 // changes (by sourcing those pointers from another indirect key/elem
 // map).
-[GoRecv] internal static void uncheckedPutSlot(this ref table t, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key, @unsafe.Pointer elem) {
+internal static void uncheckedPutSlot(this ref table t, ж<abi.SwissMapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key, @unsafe.Pointer elem) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (t.growthLeft == 0) {
@@ -390,7 +390,7 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abi.SwissM
     }
 }
 
-[GoRecv] public static void Delete(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uintptr hash, @unsafe.Pointer key) {
+public static void Delete(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -460,12 +460,12 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abi.SwissM
 // tombstones returns the number of deleted (tombstone) entries in the table. A
 // tombstone is a slot that has been deleted but is still considered occupied
 // so as not to violate the probing invariant.
-[GoRecv] internal static uint16 tombstones(this ref table t) {
+internal static uint16 tombstones(this ref table t) {
     return (uint16)((uint16)(t.capacity * (uint16)maxAvgGroupLoad) / (uint16)abi.SwissMapGroupSlots - t.used - t.growthLeft);
 }
 
 // Clear deletes all entries from the map resulting in an empty map.
-[GoRecv] public static void Clear(this ref table t, ж<abi.SwissMapType> Ꮡtyp) {
+public static void Clear(this ref table t, ж<abi.SwissMapType> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
@@ -477,7 +477,7 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abi.SwissM
     t.resetGrowthLeft();
 }
 
-[GoType] partial struct Iter {
+partial struct Iter {
     internal @unsafe.Pointer key; // Must be in first position.  Write nil to indicate iteration end (see cmd/compile/internal/walk/range.go).
     internal @unsafe.Pointer elem; // Must be in second position (see cmd/compile/internal/walk/range.go).
     internal ж<abi.SwissMapType> typ;
@@ -507,7 +507,7 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abi.SwissM
 }
 
 // Init initializes Iter for iteration.
-[GoRecv] public static void Init(this ref Iter it, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+public static void Init(this ref Iter it, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -531,19 +531,19 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abi.SwissM
     it.clearSeq = m.clearSeq;
 }
 
-[GoRecv] public static bool Initialized(this ref Iter it) {
+public static bool Initialized(this ref Iter it) {
     return it.typ != nil;
 }
 
 // Map returns the map this iterator is iterating over.
-[GoRecv] public static ж<ΔMap> Map(this ref Iter it) {
+public static ж<ΔMap> Map(this ref Iter it) {
     return it.m;
 }
 
 // Key returns a pointer to the current key. nil indicates end of iteration.
 //
 // Must not be called prior to Next.
-[GoRecv] public static @unsafe.Pointer Key(this ref Iter it) {
+public static @unsafe.Pointer Key(this ref Iter it) {
     return it.key;
 }
 
@@ -551,11 +551,11 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abi.SwissM
 // iteration.
 //
 // Must not be called prior to Next.
-[GoRecv] public static @unsafe.Pointer Elem(this ref Iter it) {
+public static @unsafe.Pointer Elem(this ref Iter it) {
     return it.elem;
 }
 
-[GoRecv] internal static void nextDirIdx(this ref Iter it) {
+internal static void nextDirIdx(this ref Iter it) {
     // Skip other entries in the directory that refer to the same
     // logical table. There are two cases of this:
     //
@@ -591,7 +591,7 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abi.SwissM
 
 // Return the appropriate key/elem for key at slotIdx index within it.group, if
 // any.
-[GoRecv] internal static (@unsafe.Pointer, @unsafe.Pointer, bool) grownKeyElem(this ref Iter it, @unsafe.Pointer key, uintptr slotIdx) {
+internal static (@unsafe.Pointer, @unsafe.Pointer, bool) grownKeyElem(this ref Iter it, @unsafe.Pointer key, uintptr slotIdx) {
     var (newKey, newElem, ok) = it.m.getWithKey(it.typ, key);
     if (!ok) {
         // Key has likely been deleted, and
@@ -640,7 +640,7 @@ internal static readonly @string concurrentMapIterationˢ = "concurrent map iter
 // the mutations will be visible to the iteration.
 //
 // Init must be called prior to Next.
-[GoRecv] public static void Next(this ref Iter it) {
+public static void Next(this ref Iter it) {
     if (it.m == nil) {
         // Map was empty at Iter.Init.
         it.key = default!;
@@ -1022,7 +1022,7 @@ internal static void split(this ж<table> Ꮡt, ж<abi.SwissMapType> Ꮡtyp, ж<
 // and uncheckedPutting each element of the table into the new table (we know
 // that no insertion here will Put an already-present value), and discard the
 // old table.
-[GoRecv] internal static void grow(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uint16 newCapacity) {
+internal static void grow(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm, uint16 newCapacity) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -1064,7 +1064,7 @@ internal static void split(this ж<table> Ꮡt, ж<abi.SwissMapType> Ꮡtyp, ж<
 // It turns out that this probe sequence visits every group exactly once if
 // the number of groups is a power of two, since (i^2+i)/2 is a bijection in
 // Z/(2^m). See https://en.wikipedia.org/wiki/Quadratic_probing
-[GoType] partial struct probeSeq {
+partial struct probeSeq {
     internal uint64 mask;
     internal uint64 offset;
     internal uint64 index;

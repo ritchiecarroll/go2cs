@@ -16,7 +16,7 @@ partial class reflect_package {
 // The first three words of this type must be kept in sync with
 // methodValue and runtime.reflectMethodValue.
 // Any changes should be reflected in all three.
-[GoType] partial struct makeFuncImpl {
+partial struct makeFuncImpl {
     internal partial ref makeFuncCtxt makeFuncCtxt { get; }
     internal ж<funcType> ftyp;
     internal Func<slice<ΔValue>, slice<ΔValue>> fn;
@@ -34,7 +34,7 @@ internal static partial void makeFuncStub();
 // The first 3 words of this type must be kept in sync with
 // makeFuncImpl and runtime.reflectMethodValue.
 // Any changes should be reflected in all three.
-[GoType] partial struct methodValue {
+partial struct methodValue {
     internal partial ref makeFuncCtxt makeFuncCtxt { get; }
     internal nint method;
     internal ΔValue rcvr;
@@ -91,7 +91,7 @@ internal static partial void methodValueCall();
 
 // This structure must be kept in sync with runtime.reflectMethodValue.
 // Any changes should be reflected in all both.
-[GoType] partial struct makeFuncCtxt {
+partial struct makeFuncCtxt {
     internal uintptr fn;
     internal ж<bitVector> stack; // ptrmap for both stack args and results
     internal uintptr argLen;    // just args

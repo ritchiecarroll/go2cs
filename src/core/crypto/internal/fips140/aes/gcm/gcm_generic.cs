@@ -47,7 +47,7 @@ internal static error openGeneric(slice<byte> @out, ж<GCM> Ꮡg, slice<byte> no
 // deriveCounterGeneric computes the initial GCM counter state from the given nonce.
 // See NIST SP 800-38D, section 7.1. This assumes that counter is filled with
 // zeros on entry.
-internal static void deriveCounterGeneric([GoArrayDims(16)] ж<array<byte>> ᏑH, [GoArrayDims(16)] ж<array<byte>> Ꮡcounter, slice<byte> nonce) {
+internal static void deriveCounterGeneric(/*[16]*/ ж<array<byte>> ᏑH, /*[16]*/ ж<array<byte>> Ꮡcounter, slice<byte> nonce) {
     ref var counter = ref Ꮡcounter.DerefOrNull();
 
     // GCM has two modes of operation with respect to the initial counter
@@ -69,7 +69,7 @@ internal static void deriveCounterGeneric([GoArrayDims(16)] ж<array<byte>> ᏑH
 // gcmCounterCryptGeneric encrypts src using AES in counter mode with 32-bit
 // wrapping (which is different from AES-CTR) and places the result into out.
 // counter is the initial value and will be updated with the next value.
-internal static void gcmCounterCryptGeneric(ж<aes.Block> Ꮡb, slice<byte> @out, slice<byte> src, [GoArrayDims(16)] ж<array<byte>> Ꮡcounter) {
+internal static void gcmCounterCryptGeneric(ж<aes.Block> Ꮡb, slice<byte> @out, slice<byte> src, /*[16]*/ ж<array<byte>> Ꮡcounter) {
     ref var counter = ref Ꮡcounter.DerefOrNull();
 
     array<byte> mask = new(16); /* gcmBlockSize */
@@ -89,7 +89,7 @@ internal static void gcmCounterCryptGeneric(ж<aes.Block> Ꮡb, slice<byte> @out
 
 // gcmInc32 treats the final four bytes of counterBlock as a big-endian value
 // and increments it.
-internal static void gcmInc32([GoArrayDims(16)] ж<array<byte>> ᏑcounterBlock) {
+internal static void gcmInc32(/*[16]*/ ж<array<byte>> ᏑcounterBlock) {
     ref var counterBlock = ref ᏑcounterBlock.DerefOrNull();
 
     var ctr = counterBlock[(int)(16 - 4)..];
@@ -98,7 +98,7 @@ internal static void gcmInc32([GoArrayDims(16)] ж<array<byte>> ᏑcounterBlock)
 
 // gcmAuthGeneric calculates GHASH(additionalData, ciphertext), masks the result
 // with tagMask and writes the result to out.
-internal static void gcmAuthGeneric(slice<byte> @out, [GoArrayDims(16)] ж<array<byte>> ᏑH, [GoArrayDims(16)] ж<array<byte>> ᏑtagMask, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static void gcmAuthGeneric(slice<byte> @out, /*[16]*/ ж<array<byte>> ᏑH, /*[16]*/ ж<array<byte>> ᏑtagMask, slice<byte> ciphertext, slice<byte> additionalData) {
     ref var tagMask = ref ᏑtagMask.DerefOrNull();
 
     checkGenericIsExpected();

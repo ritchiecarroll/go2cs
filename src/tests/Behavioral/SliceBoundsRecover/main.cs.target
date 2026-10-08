@@ -4,15 +4,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[]nint")] partial struct named;
+partial struct named /*[]nint*/;
 
-[GoType("@string")] partial struct namedStr;
+partial struct namedStr /*@string*/;
 
-[GoType("[3]nint")] partial struct namedArr;
+partial struct namedArr /*[3]nint*/;
 
 internal static any sink;
 
-[GoType("dyn")] internal partial interface try_type {
+internal partial interface try_type /*dyn*/ {
     void RuntimeError();
 }
 
@@ -36,7 +36,7 @@ private static readonly object lenˢ = (@string)"len"u8;
 private static readonly object capˢ = (@string)"cap"u8;
 private static readonly object doneˢ = (@string)"done"u8;
 
-[GoType("dyn")] internal partial struct main_cases {
+internal partial struct main_cases /*dyn*/ {
     internal @string name;
     internal Action f;
 }

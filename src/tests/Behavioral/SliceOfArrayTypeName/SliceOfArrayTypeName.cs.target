@@ -5,7 +5,7 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType("[3]nint")] partial struct Grid;
+partial struct Grid /*[3]nint*/;
 
 internal static void show(@string label, any v) {
     fmt.Printf("%-16s %%T=%-18T String()=%s\n"u8, label, v, reflect.TypeOf(v).String());
@@ -24,11 +24,11 @@ private static readonly object ifaceUnexportedˢ = (@string)"iface unexported:"u
 private static readonly object ifaceMixedˢ = (@string)"iface mixed     :"u8;
 private static readonly object ifaceEmptyˢ = (@string)"iface empty     :"u8;
 
-[GoType("dyn")] internal partial interface main_unexportedOnly {
+internal partial interface main_unexportedOnly /*dyn*/ {
     @string a(nint _);
 }
 
-[GoType("dyn")] internal partial interface main_mixedExportedness {
+internal partial interface main_mixedExportedness /*dyn*/ {
     void zeta();
     void Alpha(nint x);
 }

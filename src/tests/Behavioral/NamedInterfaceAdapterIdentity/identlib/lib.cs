@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class identlib_package {
 
-[GoType] partial interface Greeter {
+partial interface Greeter {
     @string Greet();
 }
 

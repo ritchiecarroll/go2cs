@@ -5,11 +5,11 @@ using System.Runtime.CompilerServices;
 
 partial class XpkgPromotedInnerLib_package {
 
-[GoType] partial struct Token {
+partial struct Token {
     public nint N;
 }
 
-[GoType] partial struct Inner {
+partial struct Inner {
     public nint X;
 }
 
@@ -28,7 +28,7 @@ public static (nint, error) Pair(this Inner i) {
     return (i.X, default!);
 }
 
-[GoRecv] public static void Set(this ref Inner i, nint v) {
+public static void Set(this ref Inner i, nint v) {
     i.X = v;
 }
 

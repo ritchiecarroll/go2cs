@@ -62,7 +62,7 @@ public static UntypedInt ClassContextSpecific => 2;
 
 public static UntypedInt ClassPrivate => 3;
 
-[GoType] partial struct tagAndLength {
+partial struct tagAndLength {
     internal nint @class, tag, length;
     internal bool isCompound;
 }
@@ -86,7 +86,7 @@ public static UntypedInt ClassPrivate => 3;
 // tagging with tag strings on the fields of a structure.
 
 // fieldParameters is the parsed representation of tag string from a structure field.
-[GoType] partial struct fieldParameters {
+partial struct fieldParameters {
     internal bool optional;   // true iff the field is OPTIONAL
     internal bool @explicit;   // true iff an EXPLICIT tag is in use.
     internal bool application;   // true iff an APPLICATION tag is in use.

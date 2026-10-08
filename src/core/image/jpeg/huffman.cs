@@ -17,7 +17,7 @@ internal static UntypedInt maxNCodes => 256;
 internal static UntypedInt lutSize => 8;
 
 // huffman is a Huffman decoder, specified in section C.
-[GoType] partial struct huffman {
+partial struct huffman {
     // length is the number of codes in the tree.
     internal int32 nCodes;
     // lut is the look-up table for the next lutSize bits in the bit-stream.
@@ -44,7 +44,7 @@ internal static FormatError errShortHuffmanData = ((FormatError)(@string)"short 
 // ensureNBits reads bytes from the byte buffer to ensure that d.bits.n is at
 // least n. For best performance (avoiding function calls inside hot loops),
 // the caller is the one responsible for first checking that d.bits.n < n.
-[GoRecv] internal static error ensureNBits(this ref decoder d, int32 n) {
+internal static error ensureNBits(this ref decoder d, int32 n) {
     while (ᐧ) {
         var (c, err) = d.readByteStuffedByte();
         if (err != default!) {
@@ -69,7 +69,7 @@ internal static FormatError errShortHuffmanData = ((FormatError)(@string)"short 
 
 // receiveExtend is the composition of RECEIVE and EXTEND, specified in section
 // F.2.2.1.
-[GoRecv] internal static (int32, error) receiveExtend(this ref decoder d, uint8 t) {
+internal static (int32, error) receiveExtend(this ref decoder d, uint8 t) {
     if (d.bits.n < (int32)t) {
         {
             var err = d.ensureNBits((int32)t); if (err != default!) {
@@ -96,7 +96,7 @@ internal static readonly @string huffmanTableHasExcessiveˢ = "Huffman table has
 
 // processDHT processes a Define Huffman Table marker, and initializes a huffman
 // struct from its contents. Specified in section B.2.4.2.
-[GoRecv] internal static error processDHT(this ref decoder d, nint n) {
+internal static error processDHT(this ref decoder d, nint n) {
     while (n > 0) {
         if (n < 17) {
             return ((FormatError)(@string)dhtHasWrongLengthˢ);
@@ -188,7 +188,7 @@ internal static readonly @string badHuffmanCodeˢ = "bad Huffman code"u8;
 
 // decodeHuffman returns the next Huffman-coded value from the bit-stream,
 // decoded according to h.
-[GoRecv] internal static (uint8, error) decodeHuffman(this ref decoder d, ж<huffman> Ꮡh) {
+internal static (uint8, error) decodeHuffman(this ref decoder d, ж<huffman> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (h.nCodes == 0) {
@@ -242,7 +242,7 @@ break_slowPath:;
     return (0, ((FormatError)(@string)badHuffmanCodeˢ));
 }
 
-[GoRecv] internal static (bool, error) decodeBit(this ref decoder d) {
+internal static (bool, error) decodeBit(this ref decoder d) {
     if (d.bits.n == 0) {
         {
             var err = d.ensureNBits(1); if (err != default!) {
@@ -256,7 +256,7 @@ break_slowPath:;
     return (ret, default!);
 }
 
-[GoRecv] internal static (uint32, error) decodeBits(this ref decoder d, int32 n) {
+internal static (uint32, error) decodeBits(this ref decoder d, int32 n) {
     if (d.bits.n < n) {
         {
             var err = d.ensureNBits(n); if (err != default!) {

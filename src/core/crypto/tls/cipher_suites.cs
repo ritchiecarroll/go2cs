@@ -31,7 +31,7 @@ partial class tls_package {
 
 // CipherSuite is a TLS cipher suite. Note that most functions in this package
 // accept and expose cipher suite IDs instead of this type.
-[GoType] partial struct CipherSuite {
+partial struct CipherSuite {
     public uint16 ID;
     public @string Name;
     // Supported versions is the list of TLS protocol versions that can
@@ -119,7 +119,7 @@ internal static UntypedInt suiteSHA384 => 8;
 
 // A cipherSuite is a TLS 1.0–1.2 cipher suite, and defines the key exchange
 // mechanism, as well as the cipher+MAC pair or the AEAD.
-[GoType] partial struct cipherSuite {
+partial struct cipherSuite {
     internal uint16 id;
     // the lengths, in bytes, of the key material needed for each component.
     internal nint keyLen;
@@ -178,7 +178,7 @@ internal static ж<cipherSuite> selectCipherSuite(slice<uint16> ids, slice<uint1
 
 // A cipherSuiteTLS13 defines only the pair of the AEAD algorithm and hash
 // algorithm to be used with HKDF. See RFC 8446, Appendix B.4.
-[GoType] partial struct cipherSuiteTLS13 {
+partial struct cipherSuiteTLS13 {
     internal uint16 id;
     internal nint keyLen;
     internal Func<slice<byte>, slice<byte>, aead> aead;
@@ -416,7 +416,7 @@ internal static hash.Hash macSHA256(slice<byte> key) {
     return hmac.New(sha256.New, key);
 }
 
-[GoType] partial interface aead :
+partial interface aead :
     cipher.AEAD
 {
     // explicitNonceLen returns the number of bytes of explicit nonce
@@ -430,54 +430,54 @@ internal static UntypedInt noncePrefixLength => 4;
 
 // prefixNonceAEAD wraps an AEAD and prefixes a fixed portion of the nonce to
 // each call.
-[GoType] partial struct prefixNonceAEAD {
+partial struct prefixNonceAEAD {
     // nonce contains the fixed part of the nonce in the first four bytes.
     internal array<byte> nonce = new(aeadNonceLength);
     internal cipher.AEAD aead;
 }
 
-[GoRecv] internal static nint NonceSize(this ref prefixNonceAEAD f) {
+internal static nint NonceSize(this ref prefixNonceAEAD f) {
     return aeadNonceLength - noncePrefixLength;
 }
 
-[GoRecv] internal static nint Overhead(this ref prefixNonceAEAD f) {
+internal static nint Overhead(this ref prefixNonceAEAD f) {
     return f.aead.Overhead();
 }
 
-[GoRecv] internal static nint explicitNonceLen(this ref prefixNonceAEAD f) {
+internal static nint explicitNonceLen(this ref prefixNonceAEAD f) {
     return f.NonceSize();
 }
 
-[GoRecv] internal static slice<byte> Seal(this ref prefixNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static slice<byte> Seal(this ref prefixNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     copy(f.nonce[4..], nonce);
     return f.aead.Seal(@out, f.nonce[..], plaintext, additionalData);
 }
 
-[GoRecv] internal static (slice<byte>, error) Open(this ref prefixNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) Open(this ref prefixNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     copy(f.nonce[4..], nonce);
     return f.aead.Open(@out, f.nonce[..], ciphertext, additionalData);
 }
 
 // xorNonceAEAD wraps an AEAD by XORing in a fixed pattern to the nonce
 // before each call.
-[GoType] partial struct xorNonceAEAD {
+partial struct xorNonceAEAD {
     internal array<byte> nonceMask = new(aeadNonceLength);
     internal cipher.AEAD aead;
 }
 
-[GoRecv] internal static nint NonceSize(this ref xorNonceAEAD f) {
+internal static nint NonceSize(this ref xorNonceAEAD f) {
     return 8; // 64-bit sequence number
 }
 
-[GoRecv] internal static nint Overhead(this ref xorNonceAEAD f) {
+internal static nint Overhead(this ref xorNonceAEAD f) {
     return f.aead.Overhead();
 }
 
-[GoRecv] internal static nint explicitNonceLen(this ref xorNonceAEAD f) {
+internal static nint explicitNonceLen(this ref xorNonceAEAD f) {
     return 0;
 }
 
-[GoRecv] internal static slice<byte> Seal(this ref xorNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static slice<byte> Seal(this ref xorNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     foreach (var (i, b) in nonce) {
         f.nonceMask[4 + i] ^= (byte)(b);
     }
@@ -488,7 +488,7 @@ internal static UntypedInt noncePrefixLength => 4;
     return result;
 }
 
-[GoRecv] internal static (slice<byte>, error) Open(this ref xorNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) Open(this ref xorNonceAEAD f, slice<byte> @out, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     foreach (var (i, b) in nonce) {
         f.nonceMask[4 + i] ^= (byte)(b);
     }
@@ -570,7 +570,7 @@ internal static aead aeadChaCha20Poly1305(slice<byte> key, slice<byte> nonceMask
     return new xorNonceAEADжaead(ret);
 }
 
-[GoType] partial interface constantTimeHash :
+partial interface constantTimeHash :
     hash.Hash
 {
     slice<byte> ConstantTimeSum(slice<byte> b);
@@ -578,27 +578,27 @@ internal static aead aeadChaCha20Poly1305(slice<byte> key, slice<byte> nonceMask
 
 // cthWrapper wraps any hash.Hash that implements ConstantTimeSum, and replaces
 // with that all calls to Sum. It's used to obtain a ConstantTimeSum-based HMAC.
-[GoType] partial struct cthWrapper {
+partial struct cthWrapper {
     internal constantTimeHash h;
 }
 
-[GoRecv] internal static nint Size(this ref cthWrapper c) {
+internal static nint Size(this ref cthWrapper c) {
     return c.h.Size();
 }
 
-[GoRecv] internal static nint BlockSize(this ref cthWrapper c) {
+internal static nint BlockSize(this ref cthWrapper c) {
     return c.h.BlockSize();
 }
 
-[GoRecv] internal static void Reset(this ref cthWrapper c) {
+internal static void Reset(this ref cthWrapper c) {
     c.h.Reset();
 }
 
-[GoRecv] internal static (nint, error) Write(this ref cthWrapper c, slice<byte> p) {
+internal static (nint, error) Write(this ref cthWrapper c, slice<byte> p) {
     return c.h.Write(p);
 }
 
-[GoRecv] internal static slice<byte> Sum(this ref cthWrapper c, slice<byte> b) {
+internal static slice<byte> Sum(this ref cthWrapper c, slice<byte> b) {
     return c.h.ConstantTimeSum(b);
 }
 

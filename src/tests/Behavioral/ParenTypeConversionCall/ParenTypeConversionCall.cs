@@ -5,9 +5,9 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-[GoType("num:float64")] partial struct Celsius;
+partial struct Celsius /*num:float64*/;
 
-[GoType("num:nint")] partial struct Counter;
+partial struct Counter /*num:nint*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object a1ParenFreshAllocationˢ = (@string)"A1 paren, fresh allocation, non-nil:"u8;
@@ -25,7 +25,7 @@ private static readonly object c4StringBothSpellingsˢ = (@string)"C4 string bot
 private static readonly object c5ParenPointerConversionˢ = (@string)"C5 paren pointer conversion:"u8;
 private static readonly object c6UintptrOfParenPointerˢ = (@string)"C6 uintptr of paren pointer is non-zero:"u8;
 
-[GoType("dyn")] internal partial struct main_table {
+internal partial struct main_table /*dyn*/ {
     internal any v;
     internal bool want;
 }

@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface Greeter {
+partial interface Greeter {
     @string Greet();
 }
 
-[GoType] partial struct namedGreeter {
+partial struct namedGreeter {
     internal @string name;
 }
 
@@ -17,13 +17,13 @@ internal static @string Greet(this namedGreeter g) {
 }
 
 
-[GoType("dyn")] partial struct makersᴛ1 {
+partial struct makersᴛ1 /*dyn*/ {
     internal @string label;
     internal Func<@string, Greeter> build;
 }
 
-[GoType("dyn")] internal partial struct makers_type {
-    [GoEmbedded] public Greeter Greeter;
+internal partial struct makers_type /*dyn*/ {
+    /*embed*/ public Greeter Greeter;
 }
 internal static slice<makersᴛ1> makers = new makersᴛ1[]{
     new("direct"u8, (@string s) => new namedGreeter(s)),

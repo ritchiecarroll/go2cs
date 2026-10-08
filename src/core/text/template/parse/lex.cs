@@ -13,7 +13,7 @@ using ꓸꓸꓸany = Span<any>;
 partial class parse_package {
 
 // item represents a token or text string returned from the scanner.
-[GoType] partial struct item {
+partial struct item {
     internal itemType typ; // The type of this item.
     internal Pos pos;      // The starting position, in bytes, of this item in the input string.
     internal @string val;  // The value of this item.
@@ -41,7 +41,7 @@ internal static @string String(this item i) {
     return fmt.Sprintf("%q"u8, i.val);
 }
 
-[GoType("num:nint")] partial struct itemType;
+partial struct itemType /*num:nint*/;
 
 internal static itemType itemError => /* iota */ 0;       // error occurred; value is text of error
 internal static itemType itemBool => 1;        // boolean constant
@@ -113,7 +113,7 @@ internal static Pos trimMarkerLen => /* Pos(1 + 1) */ 2; // marker plus space be
 internal delegate stateFn stateFn(ж<lexer> _);
 
 // lexer holds the state of the scanner.
-[GoType] partial struct lexer {
+partial struct lexer {
     internal @string name; // the name of the input; used only for error reports
     internal @string input; // the string being scanned
     internal @string leftDelim; // start of action marker
@@ -130,14 +130,14 @@ internal delegate stateFn stateFn(ж<lexer> _);
 }
 
 // lexOptions control behavior of the lexer. All default to false.
-[GoType] partial struct lexOptions {
+partial struct lexOptions {
     internal bool emitComment; // emit itemComment tokens.
     internal bool breakOK; // break keyword allowed
     internal bool continueOK; // continue keyword allowed
 }
 
 // next returns the next rune in the input.
-[GoRecv] internal static rune next(this ref lexer l) {
+internal static rune next(this ref lexer l) {
     if ((nint)l.pos >= len(l.input)) {
         l.atEOF = true;
         return eof;
@@ -151,14 +151,14 @@ internal delegate stateFn stateFn(ж<lexer> _);
 }
 
 // peek returns but does not consume the next rune in the input.
-[GoRecv] internal static rune peek(this ref lexer l) {
+internal static rune peek(this ref lexer l) {
     var r = l.next();
     l.backup();
     return r;
 }
 
 // backup steps back one rune.
-[GoRecv] internal static void backup(this ref lexer l) {
+internal static void backup(this ref lexer l) {
     if (!l.atEOF && l.pos > 0) {
         var (r, w) = utf8.DecodeLastRuneInString(l.input.slice(0, l.pos));
         l.pos -= ((Pos)w);
@@ -171,7 +171,7 @@ internal delegate stateFn stateFn(ж<lexer> _);
 
 // thisItem returns the item at the current input point with the specified type
 // and advances the input.
-[GoRecv] internal static item thisItem(this ref lexer l, itemType t) {
+internal static item thisItem(this ref lexer l, itemType t) {
     var i = new item(t, l.start, l.input.slice(l.start, l.pos), l.startLine);
     l.start = l.pos;
     l.startLine = l.line;
@@ -179,12 +179,12 @@ internal delegate stateFn stateFn(ж<lexer> _);
 }
 
 // emit passes the trailing text as an item back to the parser.
-[GoRecv] internal static stateFn emit(this ref lexer l, itemType t) {
+internal static stateFn emit(this ref lexer l, itemType t) {
     return l.emitItem(l.thisItem(t));
 }
 
 // emitItem passes the specified item to the parser.
-[GoRecv] internal static stateFn emitItem(this ref lexer l, item i) {
+internal static stateFn emitItem(this ref lexer l, item i) {
     l.item = i;
     return default!;
 }
@@ -192,14 +192,14 @@ internal delegate stateFn stateFn(ж<lexer> _);
 // ignore skips over the pending input before this point.
 // It tracks newlines in the ignored text, so use it only
 // for text that is skipped without calling l.next.
-[GoRecv] internal static void ignore(this ref lexer l) {
+internal static void ignore(this ref lexer l) {
     l.line += strings.Count(l.input.slice(l.start, l.pos), "\n"u8);
     l.start = l.pos;
     l.startLine = l.line;
 }
 
 // accept consumes the next rune if it's from the valid set.
-[GoRecv] internal static bool accept(this ref lexer l, @string valid) {
+internal static bool accept(this ref lexer l, @string valid) {
     if (strings.ContainsRune(valid, l.next())) {
         return true;
     }
@@ -208,7 +208,7 @@ internal delegate stateFn stateFn(ж<lexer> _);
 }
 
 // acceptRun consumes a run of runes from the valid set.
-[GoRecv] internal static void acceptRun(this ref lexer l, @string valid) {
+internal static void acceptRun(this ref lexer l, @string valid) {
     while (strings.ContainsRune(valid, l.next())) {
     }
     l.backup();
@@ -216,7 +216,7 @@ internal delegate stateFn stateFn(ж<lexer> _);
 
 // errorf returns an error token and terminates the scan by passing
 // back a nil pointer that will be the next state, terminating l.nextItem.
-[GoRecv] internal static stateFn errorf(this ref lexer l, @string format, params ꓸꓸꓸany argsʗp) {
+internal static stateFn errorf(this ref lexer l, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.item = new item(itemError, l.start, fmt.Sprintf(format, args.ꓸꓸꓸ), l.startLine);
@@ -311,7 +311,7 @@ internal static Pos rightTrimLength(@string s) {
 }
 
 // atRightDelim reports whether the lexer is at a right delimiter, possibly preceded by a trim marker.
-[GoRecv] internal static (bool delim, bool trimSpaces) atRightDelim(this ref lexer l) {
+internal static (bool delim, bool trimSpaces) atRightDelim(this ref lexer l) {
     if (hasRightTrimMarker(l.input.slice(l.pos)) && strings.HasPrefix(l.input.slice(l.pos + trimMarkerLen), l.rightDelim)) {
         // With trim marker.
         return (true, true);
@@ -607,7 +607,7 @@ internal static stateFn lexFieldOrVariable(ж<lexer> Ꮡl, itemType typ) {
 // appear after an identifier. Breaks .X.Y into two pieces. Also catches cases
 // like "$x+2" not being acceptable without a space, in case we decide one
 // day to implement arithmetic.
-[GoRecv] internal static bool atTerminator(this ref lexer l) {
+internal static bool atTerminator(this ref lexer l) {
     var r = l.peek();
     if (isSpace(r)) {
         return true;
@@ -674,7 +674,7 @@ internal static stateFn lexNumber(ж<lexer> Ꮡl) {
     return l.emit(itemNumber);
 }
 
-[GoRecv] internal static bool scanNumber(this ref lexer l) {
+internal static bool scanNumber(this ref lexer l) {
     // Optional leading sign.
     l.accept("+-"u8);
     // Is it hex?

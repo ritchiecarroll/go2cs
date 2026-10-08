@@ -5,19 +5,19 @@ using strings = strings_package;
 
 partial class main_package {
 
-[GoType("map[@string, @string]")] partial struct Env;
+partial struct Env /*map[@string, @string]*/;
 
 public static void Set(this Env e, @string k, @string v) {
     e[strings.ToLower(k)] = v;
 }
 
-[GoType("map[@string, nint]")] partial struct Bag;
+partial struct Bag /*map[@string, nint]*/;
 
 public static void Add(this Bag b, @string k, nint v) {
     b[k] += v;
 }
 
-[GoType("map[@string, nint]")] partial struct Cache;
+partial struct Cache /*map[@string, nint]*/;
 
 internal static nint cleared;
 
@@ -38,13 +38,13 @@ public static bool ContainsKey(this Cache c, @string k) {
     return k == "always"u8;
 }
 
-[GoType("map[@string, @string]")] partial struct PEnv;
+partial struct PEnv /*map[@string, @string]*/;
 
-[GoRecv] public static void Set(this ref PEnv p, @string k, @string v) {
+public static void Set(this ref PEnv p, @string k, @string v) {
     (p)[strings.ToUpper(k)] = v;
 }
 
-[GoType("map[T, EmptyStruct]")] partial struct Uniq<T>;
+partial struct Uniq<T> /*map[T, EmptyStruct]*/;
 
 public static bool Remove<T>(this Uniq<T> u, T item) {
     var (_, ok) = u[item, ꟷ];
@@ -52,7 +52,7 @@ public static bool Remove<T>(this Uniq<T> u, T item) {
     return !ok;
 }
 
-[GoType("chan nint")] partial struct Pipe;
+partial struct Pipe /*chan nint*/;
 
 internal static nint sends;
 
@@ -61,9 +61,9 @@ public static void Send(this Pipe p, nint v) {
     p.ᐸꟷ(v * 10);
 }
 
-[GoType("map[@string, nint]")] partial struct ΔSet;
+partial struct ΔSet /*map[@string, nint]*/;
 
-[GoType("map[@string, slice<@string>]")] partial struct Hdr;
+partial struct Hdr /*map[@string, slice<@string>]*/;
 
 public static void Set(this Hdr h, @string k, @string v) {
     h[strings.ToUpper(k)] = new @string[]{v}.slice();
@@ -93,7 +93,7 @@ private static readonly object genericRemoveˢ = (@string)"generic Remove:"u8;
 private static readonly object exactSendˢ = (@string)"exact Send:"u8;
 private static readonly object namedSetNestedˢ = (@string)"named Set nested:"u8;
 
-[GoType("dyn")] internal partial struct main_named {
+internal partial struct main_named /*dyn*/ {
     internal map<@string, Env> m;
 }
 

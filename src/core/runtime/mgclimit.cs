@@ -32,7 +32,7 @@ partial class runtime_package {
 internal static ж<gcCPULimiterState> ᏑgcCPULimiter = new StandardBox<gcCPULimiterState>(default(gcCPULimiterState));
 internal static ref gcCPULimiterState gcCPULimiter => ref ᏑgcCPULimiter.Value;
 
-[GoType("dyn")] partial struct gcCPULimiterState_bucket {
+partial struct gcCPULimiterState_bucket /*dyn*/ {
     // Invariants:
     // - fill >= 0
     // - capacity >= 0
@@ -40,7 +40,7 @@ internal static ref gcCPULimiterState gcCPULimiter => ref ᏑgcCPULimiter.Value;
     internal uint64 fill, capacity;
 }
 
-[GoType] partial struct gcCPULimiterState {
+partial struct gcCPULimiterState {
     internal atomic.Uint32 @lock;
     internal atomic.Bool enabled;
     // gcEnabled is an internal copy of gcBlackenEnabled that determines
@@ -367,7 +367,7 @@ internal static void resetCapacity(this ж<gcCPULimiterState> Ꮡl, int64 now, i
     Ꮡl.unlock();
 }
 
-[GoType("num:uint8")] partial struct limiterEventType;
+partial struct limiterEventType /*num:uint8*/;
 
 internal static limiterEventType limiterEventNone => /* iota */ 0;          // None of the following events.
 internal static limiterEventType limiterEventIdleMarkWork => 1;  // Refers to an idle mark worker (see gcMarkWorkerMode).
@@ -382,7 +382,7 @@ internal const uint64 limiterEventTypeMask = /* uint64((1<<limiterEventBits)-1) 
 
 internal static limiterEventStamp limiterEventStampNone => /* limiterEventStamp(0) */ 0;
 
-[GoType("num:uint64")] partial struct limiterEventStamp;
+partial struct limiterEventStamp /*num:uint64*/;
 
 // makeLimiterEventStamp creates a new stamp from the event type and the current timestamp.
 internal static limiterEventStamp makeLimiterEventStamp(limiterEventType typ, int64 now) {
@@ -409,7 +409,7 @@ internal static limiterEventType typ(this limiterEventStamp s) {
 }
 
 // limiterEvent represents tracking state for an event tracked by the GC CPU limiter.
-[GoType] partial struct limiterEvent {
+partial struct limiterEvent {
     internal atomic.Uint64 stamp; // Stores a limiterEventStamp.
 }
 

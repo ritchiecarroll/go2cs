@@ -20,7 +20,7 @@ public static readonly @string AIAMAGBIG = "<bigaf>\n"u8;
 public static UntypedInt FL_HSZ_BIG => 0x80;
 public static UntypedInt AR_HSZ_BIG => 0x70;
 
-[GoType] partial struct bigarFileHeader {
+partial struct bigarFileHeader {
     public array<byte> Flmagic = new(SAIAMAG); // Archive magic string
     public array<byte> Flmemoff = new(20);   // Member table offset
     public array<byte> Flgstoff = new(20);   // 32-bits global symtab offset
@@ -30,7 +30,7 @@ public static UntypedInt AR_HSZ_BIG => 0x70;
     public array<byte> Flfreeoff = new(20);   // First member on free list offset
 }
 
-[GoType] partial struct bigarMemberHeader {
+partial struct bigarMemberHeader {
     public array<byte> Arsize = new(20); // File member size
     public array<byte> Arnxtmem = new(20); // Next member pointer
     public array<byte> Arprvmem = new(20); // Previous member pointer
@@ -44,25 +44,25 @@ public static UntypedInt AR_HSZ_BIG => 0x70;
 // _ar_nam is removed because it's easier to get name without it.
 
 // Archive represents an open AIX big archive.
-[GoType] partial struct Archive {
+partial struct Archive {
     public partial ref ArchiveHeader ArchiveHeader { get; }
     public slice<ж<Member>> Members;
     internal io.Closer closer;
 }
 
 // ArchiveHeader holds information about a big archive file header
-[GoType] partial struct ArchiveHeader {
+partial struct ArchiveHeader {
     internal @string magic;
 }
 
 // Member represents a member of an AIX big archive.
-[GoType] partial struct Member {
+partial struct Member {
     public partial ref MemberHeader MemberHeader { get; }
     internal ж<io.SectionReader> sr;
 }
 
 // MemberHeader holds information about a big archive member
-[GoType] partial struct MemberHeader {
+partial struct MemberHeader {
     public @string Name;
     public uint64 Size;
 }
@@ -86,7 +86,7 @@ public static (ж<Archive>, error) OpenArchive(@string name) {
 // Close closes the Archive.
 // If the Archive was created using NewArchive directly instead of OpenArchive,
 // Close has no effect.
-[GoRecv] public static error Close(this ref Archive a) {
+public static error Close(this ref Archive a) {
     error err = default!;
     if (a.closer != default!) {
         err = a.closer.Close();
@@ -212,7 +212,7 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
 // GetFile returns the XCOFF file defined by member name.
 // FIXME: This doesn't work if an archive has two members with the same
 // name which can occur if an archive has both 32-bits and 64-bits files.
-[GoRecv] public static (ж<File>, error) GetFile(this ref Archive arch, @string name) {
+public static (ж<File>, error) GetFile(this ref Archive arch, @string name) {
     foreach (var (_, mem) in arch.Members) {
         if ((~mem).Name == name) {
             return NewFile(new io.SectionReaderжReaderAt((~mem).sr));

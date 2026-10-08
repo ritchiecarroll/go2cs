@@ -20,7 +20,7 @@ using go.@internal.coverage;
 partial class decodemeta_package {
 
 // See comments in the encodecovmeta package for details on the format.
-[GoType] partial struct CoverageMetaDataDecoder {
+partial struct CoverageMetaDataDecoder {
     internal ж<slicereader.Reader> r;
     internal coverage.MetaSymbolHeader hdr;
     internal ж<stringtab.Reader> strtab;
@@ -61,7 +61,7 @@ internal static error readHeader(this ж<CoverageMetaDataDecoder> Ꮡd) {
     return default!;
 }
 
-[GoRecv] internal static error readStringTable(this ref CoverageMetaDataDecoder d) {
+internal static error readStringTable(this ref CoverageMetaDataDecoder d) {
     // Seek to the correct location to read the string table.
     var stringTableLocation = (int64)((uint32)coverage.CovMetaHeaderSize + 4 * d.hdr.NumFuncs);
     {
@@ -75,25 +75,25 @@ internal static error readHeader(this ж<CoverageMetaDataDecoder> Ꮡd) {
     return default!;
 }
 
-[GoRecv] public static @string PackagePath(this ref CoverageMetaDataDecoder d) {
+public static @string PackagePath(this ref CoverageMetaDataDecoder d) {
     return d.strtab.Get(d.hdr.PkgPath);
 }
 
-[GoRecv] public static @string PackageName(this ref CoverageMetaDataDecoder d) {
+public static @string PackageName(this ref CoverageMetaDataDecoder d) {
     return d.strtab.Get(d.hdr.PkgName);
 }
 
-[GoRecv] public static @string ModulePath(this ref CoverageMetaDataDecoder d) {
+public static @string ModulePath(this ref CoverageMetaDataDecoder d) {
     return d.strtab.Get(d.hdr.ModulePath);
 }
 
-[GoRecv] public static uint32 NumFuncs(this ref CoverageMetaDataDecoder d) {
+public static uint32 NumFuncs(this ref CoverageMetaDataDecoder d) {
     return d.hdr.NumFuncs;
 }
 
 // ReadFunc reads the coverage meta-data for the function with index
 // 'findex', filling it into the FuncDesc pointed to by 'f'.
-[GoRecv] public static error ReadFunc(this ref CoverageMetaDataDecoder d, uint32 fidx, ж<coverage.FuncDesc> Ꮡf) {
+public static error ReadFunc(this ref CoverageMetaDataDecoder d, uint32 fidx, ж<coverage.FuncDesc> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (fidx >= d.hdr.NumFuncs) {

@@ -5,23 +5,23 @@ using time = time_package;
 
 partial class main_package {
 
-[GoType] partial struct Stamp {
+partial struct Stamp {
     public partial ref time_package.Time Time { get; }
 }
 
-[GoType] partial struct PtrStamp {
+partial struct PtrStamp {
     public partial ref ж<time_package.Time> Time { get; }
 }
 
-[GoType] partial struct inner {
+partial struct inner {
     public partial ref time_package.Time Time { get; }
 }
 
-[GoType] partial struct Outer {
+partial struct Outer {
     internal partial ref inner inner { get; }
 }
 
-[GoType] partial struct localBase {
+partial struct localBase {
     internal nint n;
 }
 
@@ -29,7 +29,7 @@ internal static nint Twice(this localBase b) {
     return b.n * 2;
 }
 
-[GoType] partial struct Wrap {
+partial struct Wrap {
     internal partial ref localBase localBase { get; }
 }
 

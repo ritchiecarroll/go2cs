@@ -10,11 +10,11 @@ public static ref sync.RWMutex Boxed => ref ᏑBoxed.Value;
 public static ж<sync.RWMutex> ᏑPlain = new StandardBox<sync.RWMutex>(default(sync.RWMutex));
 public static ref sync.RWMutex Plain => ref ᏑPlain.Value;
 
-[GoType] partial struct Counter {
+partial struct Counter {
     internal nint n;
 }
 
-[GoRecv] public static void Inc(this ref Counter c) {
+public static void Inc(this ref Counter c) {
     c.n++;
 }
 

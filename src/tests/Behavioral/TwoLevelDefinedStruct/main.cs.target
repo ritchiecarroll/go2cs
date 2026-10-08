@@ -4,16 +4,16 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] public partial struct counts {
+public partial struct counts {
     internal array<nint> vals = new(4);
     internal nint n;
 }
 
-[GoType("counts")] partial struct Counts;
+partial struct Counts /*counts*/;
 
-[GoType("Counts")] partial struct Tally;
+partial struct Tally /*Counts*/;
 
-[GoType("Tally")] partial struct Score;
+partial struct Score /*Tally*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object zeroˢ = (@string)"zero:"u8;

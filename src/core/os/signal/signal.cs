@@ -13,7 +13,7 @@ using ꓸꓸꓸosꓸSignal = Span<osꓸSignal>;
 partial class signal_package {
 
 
-[GoType("dyn")] partial struct handlersᴛ1 {
+partial struct handlersᴛ1 /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; }
     // Map a channel to the signals that should be sent to it.
     internal map<channel/*<-*/<osꓸSignal>, ж<handler>> m;
@@ -29,24 +29,24 @@ partial class signal_package {
 internal static ж<handlersᴛ1> Ꮡhandlers = new StandardBox<handlersᴛ1>(new handlersᴛ1(nil));
 internal static ref handlersᴛ1 handlers => ref Ꮡhandlers.Value;
 
-[GoType] partial struct stopping {
+partial struct stopping {
     internal channel/*<-*/<osꓸSignal> c = channel/*<-*/<osꓸSignal>.SendOnly;
     internal ж<handler> h;
 }
 
-[GoType] partial struct handler {
+partial struct handler {
     internal array<uint32> mask = new((numSig + 31) / 32);
 }
 
-[GoRecv] internal static bool want(this ref handler h, nint sig) {
+internal static bool want(this ref handler h, nint sig) {
     return (uint32)((h.mask[sig / 32].Rsh((nuint)((nint)(sig & 31)))) & 1) != 0;
 }
 
-[GoRecv] internal static void set(this ref handler h, nint sig) {
+internal static void set(this ref handler h, nint sig) {
     h.mask[sig / 32] |= (uint32)(((uint32)1).Lsh((nuint)((nint)(sig & 31))));
 }
 
-[GoRecv] internal static void clear(this ref handler h, nint sig) {
+internal static void clear(this ref handler h, nint sig) {
     h.mask[sig / 32] &= unchecked((uint32)~(uint32)(((uint32)1).Lsh((nuint)((nint)(sig & 31)))));
 }
 
@@ -226,7 +226,7 @@ public static void Stop(channel/*<-*/<osꓸSignal> c) {
 
 // Wait until there are no more signals waiting to be delivered.
 // Defined by the runtime package.
-[global::System.Diagnostics.StackTraceHidden] internal static void signalWaitUntilIdle() {
+/*linkname*/ internal static partial void signalWaitUntilIdle() {
     go.runtime_package.signalWaitUntilIdle();
 }
 
@@ -315,23 +315,23 @@ public static partial (context.Context ctx, Action stop) NotifyContext(context.C
     return (new signalCtxжContext(c), c.stop);
 }
 
-[GoType] partial struct signalCtx {
-    [GoEmbedded] public context_package.Context Context;
+partial struct signalCtx {
+    /*embed*/ public context_package.Context Context;
     internal Action cancel;
     internal slice<osꓸSignal> signals;
     internal channel<osꓸSignal> ch;
 }
 
-[GoRecv] internal static void stop(this ref signalCtx c) {
+internal static void stop(this ref signalCtx c) {
     c.cancel();
     Stop(c.ch.WithDirection(GoChanDir.Send));
 }
 
-[GoType] partial interface stringer {
+partial interface stringer {
     @string String();
 }
 
-[GoRecv] internal static @string String(this ref signalCtx c) {
+internal static @string String(this ref signalCtx c) {
     slice<byte> buf = default!;
     // We know that the type of c.Context is context.cancelCtx, and we know that the
     // String method of cancelCtx returns a string that ends with ".WithCancel".

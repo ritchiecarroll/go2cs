@@ -11,7 +11,7 @@ using text;
 
 partial class printer_package {
 
-[GoRecv] internal static void fixGoBuildLines(this ref printer p) {
+internal static void fixGoBuildLines(this ref printer p) {
     if (len(p.goBuild) + len(p.plusBuild) == 0) {
         return;
     }
@@ -144,7 +144,7 @@ internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
     return appendꓸꓸꓸ(x, y);
 }
 
-[GoRecv] internal static slice<byte> lineAt(this ref printer p, nint start) {
+internal static slice<byte> lineAt(this ref printer p, nint start) {
     nint pos = start;
     while (pos < len(p.output) && !isNL(p.output[pos])) {
         pos++;
@@ -155,7 +155,7 @@ internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
     return p.output.slice(start, pos);
 }
 
-[GoRecv] internal static @string commentTextAt(this ref printer p, nint start) {
+internal static @string commentTextAt(this ref printer p, nint start) {
     if (start < len(p.output) && p.output[start] == tabwriter.Escape) {
         start++;
     }

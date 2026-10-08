@@ -10,11 +10,11 @@ internal static void describe(any f) {
     fmt.Println((@string)"ok"u8);
 }
 
-[GoType("dyn")] internal partial struct main_a {
+internal partial struct main_a /*dyn*/ {
     public nint X;
 }
 
-[GoType("dyn")] internal partial struct main_point {
+internal partial struct main_point /*dyn*/ {
     public nint X, Y;
 }
 
@@ -34,21 +34,21 @@ internal static void Main() {
     localInterfaceEmbed();
 }
 
-[GoLocalName("myInt")] [GoType("num:nint")] internal partial struct embeddedLocalTypes_myInt;
+internal partial struct embeddedLocalTypes_myInt /*num:nint*/;
 
-[GoLocalName("MyInt")] [GoType("num:nint")] internal partial struct embeddedLocalTypes_MyInt;
+internal partial struct embeddedLocalTypes_MyInt /*num:nint*/;
 
-[GoType("dyn")] internal partial struct embeddedLocalTypes_embed {
+internal partial struct embeddedLocalTypes_embed /*dyn*/ {
     public nint Q;
 }
 
-[GoType("dyn")] internal partial struct embeddedLocalTypes_holder {
+internal partial struct embeddedLocalTypes_holder /*dyn*/ {
     internal partial ref embeddedLocalTypes_myInt myInt { get; }
     public partial ref embeddedLocalTypes_MyInt MyInt { get; }
     internal partial ref embeddedLocalTypes_embed embed { get; }
 }
 
-[GoType("dyn")] internal partial struct embeddedLocalTypes_ptrHolder {
+internal partial struct embeddedLocalTypes_ptrHolder /*dyn*/ {
     internal partial ref ж<embeddedLocalTypes_myInt> myInt { get; }
     internal partial ref ж<embeddedLocalTypes_embed> embed { get; }
 }
@@ -75,11 +75,11 @@ internal static void embeddedLocalTypes() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string sevenˢ = "seven"u8;
 
-[GoLocalName("myTime")] [GoType("global::go.time_package.Time")] internal partial struct foreignUnderlyingLocalTypes_myTime;
+internal partial struct foreignUnderlyingLocalTypes_myTime /*global::go.time_package.Time*/;
 
-[GoLocalName("myDur")] [GoType("global::go.time_package.Duration")] internal partial struct foreignUnderlyingLocalTypes_myDur;
+internal partial struct foreignUnderlyingLocalTypes_myDur /*global::go.time_package.Duration*/;
 
-[GoLocalName("inner")] [GoType("global::go.time_package.Time")] internal partial struct foreignUnderlyingLocalTypes_inner;
+internal partial struct foreignUnderlyingLocalTypes_inner /*global::go.time_package.Time*/;
 
 internal static void foreignUnderlyingLocalTypes() {
     var m = new map<ж<foreignUnderlyingLocalTypes_myTime>, @string>();
@@ -96,9 +96,9 @@ internal static void foreignUnderlyingLocalTypes() {
     }
 }
 
-[GoLocalName("myTime")] [GoType("global::go.time_package.Time")] internal partial struct foreignUnderlyingLocalTypesAgain_myTime;
+internal partial struct foreignUnderlyingLocalTypesAgain_myTime /*global::go.time_package.Time*/;
 
-[GoLocalName("myDur")] [GoType("global::go.time_package.Duration")] internal partial struct foreignUnderlyingLocalTypesAgain_myDur;
+internal partial struct foreignUnderlyingLocalTypesAgain_myDur /*global::go.time_package.Duration*/;
 
 internal static void foreignUnderlyingLocalTypesAgain() {
     var t = @new<foreignUnderlyingLocalTypesAgain_myTime>();
@@ -107,11 +107,11 @@ internal static void foreignUnderlyingLocalTypesAgain() {
     fmt.Println(t != nil, d == d2);
 }
 
-[GoType("dyn")] internal partial interface localInterfaceEmbed_I {
+internal partial interface localInterfaceEmbed_I /*dyn*/ {
     nint x();
 }
 
-[GoType("dyn")] internal partial interface localInterfaceEmbed_i :
+internal partial interface localInterfaceEmbed_i /*dyn*/ :
     localInterfaceEmbed_I
 {
     nint y();
@@ -122,7 +122,7 @@ internal static void localInterfaceEmbed() {
     fmt.Println(v.x(), v.y(), v.x() + v.y());
 }
 
-[GoType] partial struct embedImpl {
+partial struct embedImpl {
 }
 
 internal static nint x(this embedImpl _) {

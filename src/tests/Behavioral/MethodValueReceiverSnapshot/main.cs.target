@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct frame {
+partial struct frame {
     public @string Name;
     public bool Inlined;
 }
@@ -13,15 +13,15 @@ internal static @string label(this frame f) {
     return f.Name;
 }
 
-[GoRecv] internal static void bump(this ref frame f) {
+internal static void bump(this ref frame f) {
     f.Name += "!"u8;
 }
 
-[GoType] partial interface namer {
+partial interface namer {
     @string label();
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal frame f;
     internal namer i;
 }

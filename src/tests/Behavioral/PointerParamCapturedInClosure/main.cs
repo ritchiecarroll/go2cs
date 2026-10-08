@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct config {
+partial struct config {
     internal nint size;
     internal nint tag;
 }

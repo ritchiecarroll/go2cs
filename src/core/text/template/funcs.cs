@@ -19,7 +19,7 @@ using ꓸꓸꓸreflectꓸValue = Span<reflectꓸValue>;
 
 partial class template_package {
 
-[GoType("map[@string, any]")] partial struct FuncMap;
+partial struct FuncMap /*map[@string, any]*/;
 
 // builtins returns the FuncMap.
 // It is not a global variable so the linker can dead code eliminate
@@ -57,7 +57,7 @@ internal static FuncMap builtins() {
 
 // !=
 
-[GoType("dyn")] partial struct builtinFuncsOnceᴛ1 {
+partial struct builtinFuncsOnceᴛ1 /*dyn*/ {
     public partial ref sync_package.Once Once { get; }
     internal map<@string, reflectꓸValue> v;
 }
@@ -480,7 +480,7 @@ internal static error errBadComparisonType = errors.New("invalid type for compar
 internal static error errBadComparison = errors.New("incompatible types for comparison"u8);
 internal static error errNoComparison = errors.New("missing argument for comparison"u8);
 
-[GoType("num:nint")] partial struct kind;
+partial struct kind /*num:nint*/;
 
 internal static kind invalidKind => /* iota */ 0;
 internal static kind boolKind => 1;

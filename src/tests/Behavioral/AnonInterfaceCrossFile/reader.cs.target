@@ -4,15 +4,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface Sizer {
+partial interface Sizer {
     nint Size();
 }
 
-[GoType] partial interface Namer {
+partial interface Namer {
     @string Name();
 }
 
-[GoType("dyn")] internal partial interface describe_thing :
+internal partial interface describe_thing /*dyn*/ :
     Sizer,
     Namer
 {

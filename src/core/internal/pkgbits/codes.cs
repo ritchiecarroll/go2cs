@@ -9,14 +9,14 @@ partial class pkgbits_package {
 //
 // Code types are preferable for enum types, because they allow
 // Decoder to detect desyncs.
-[GoType] partial interface ΔCode {
+partial interface ΔCode {
     // Marker returns the SyncMarker for the Code's dynamic type.
     SyncMarker Marker();
     // Value returns the Code's ordinal value.
     nint Value();
 }
 
-[GoType("num:nint")] partial struct CodeVal;
+partial struct CodeVal /*num:nint*/;
 
 public static SyncMarker Marker(this CodeVal c) {
     return SyncVal;
@@ -35,7 +35,7 @@ public static CodeVal ValBigInt => 3;
 public static CodeVal ValBigRat => 4;
 public static CodeVal ValBigFloat => 5;
 
-[GoType("num:nint")] partial struct CodeType;
+partial struct CodeType /*num:nint*/;
 
 public static SyncMarker Marker(this CodeType c) {
     return SyncType;
@@ -60,7 +60,7 @@ public static CodeType TypeInterface => 9;
 public static CodeType TypeUnion => 10;
 public static CodeType TypeTypeParam => 11;
 
-[GoType("num:nint")] partial struct CodeObj;
+partial struct CodeObj /*num:nint*/;
 
 public static SyncMarker Marker(this CodeObj c) {
     return SyncCodeObj;

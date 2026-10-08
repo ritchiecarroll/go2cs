@@ -23,7 +23,7 @@ internal static S growGeneric<S, E>(S s, nint n)
     return appendꓸꓸꓸ<S, E>(s, makeꓸꓸꓸ<E>(n));
 }
 
-[GoType] partial struct point {
+partial struct point {
     public nint X, Y;
 }
 

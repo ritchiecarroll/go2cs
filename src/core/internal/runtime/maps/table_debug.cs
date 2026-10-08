@@ -13,7 +13,7 @@ partial class maps_package {
 
 internal const bool debugLog = false;
 
-[GoRecv] internal static void checkInvariants(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+internal static void checkInvariants(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -87,7 +87,7 @@ internal const bool debugLog = false;
     }
 }
 
-[GoRecv] public static void Print(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+public static void Print(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     print((@string)"""

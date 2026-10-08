@@ -5,7 +5,7 @@ namespace go.@internal;
 
 partial class abi_package {
 
-[GoType("num:nint")] partial struct RF_State;
+partial struct RF_State /*num:nint*/;
 
 // These constants are shared between the compiler, which uses them for state functions
 // and panic indicators, and the runtime, which turns them into more meaningful strings

@@ -2,9 +2,9 @@ namespace go.ForeignPairNumericConv;
 
 partial class convlib_package {
 
-[GoType("num:uintptr")] partial struct Handle;
+partial struct Handle /*num:uintptr*/;
 
-[GoType("num:uintptr")] partial struct Token;
+partial struct Token /*num:uintptr*/;
 
 public static Token NewToken(uintptr v) {
     return ((Token)v);

@@ -5,19 +5,19 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType] partial struct s {
+partial struct s {
     internal nint i;
 }
 
-[GoType("ж<s>")] partial class sPtr;
+partial class sPtr /*ж<s>*/;
 
-[GoType] partial struct pub {
+partial struct pub {
     public nint I;
 }
 
-[GoType("ж<pub>")] partial class pubPtr;
+partial class pubPtr /*ж<pub>*/;
 
-[GoType("ж<array<nint>>")] [GoArrayDims(3)] partial class arrPtr;
+/*[3]*/ partial class arrPtr /*ж<array<nint>>*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object addrOfElemˢ = (@string)"Addr of Elem:"u8;

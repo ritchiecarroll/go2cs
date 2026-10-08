@@ -5,7 +5,7 @@ namespace go.@internal.syscall;
 
 partial class windows_package {
 
-[GoType] partial struct MemoryBasicInformation {
+partial struct MemoryBasicInformation {
     // A pointer to the base address of the region of pages.
     public uintptr BaseAddress;
     // A pointer to the base address of a range of pages allocated by the VirtualAlloc function.

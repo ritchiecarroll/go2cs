@@ -25,7 +25,7 @@ partial class big_package {
 //
 // As of Go 1.8, ProbablyPrime(0) is allowed and applies only a Baillie-PSW test.
 // Before Go 1.8, ProbablyPrime applied only the Miller-Rabin tests, and ProbablyPrime(0) panicked.
-[GoRecv] public static bool ProbablyPrime(this ref ΔInt x, nint n) {
+public static bool ProbablyPrime(this ref ΔInt x, nint n) {
     // Note regarding the doc comment above:
     // It would be more precise to say that the Baillie-PSW test uses the
     // extra strong Lucas test as its Lucas test, but since no one knows

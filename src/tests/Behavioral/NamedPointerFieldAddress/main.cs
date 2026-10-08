@@ -5,13 +5,13 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType] partial struct pub {
+partial struct pub {
     public nint I;
 }
 
-[GoType("ж<pub>")] partial class pubPtr;
+partial class pubPtr /*ж<pub>*/;
 
-[GoType] partial struct holder {
+partial struct holder {
     internal pubPtr p;
 }
 

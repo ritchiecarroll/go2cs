@@ -19,7 +19,7 @@ internal static readonly @string nssConfigPath = "/etc/nsswitch.conf"u8;
 internal static ж<nsswitchConfig> ᏑnssConfig = new StandardBox<nsswitchConfig>(default(nsswitchConfig));
 internal static ref nsswitchConfig nssConfig => ref ᏑnssConfig.Value;
 
-[GoType] partial struct nsswitchConfig {
+partial struct nsswitchConfig {
     internal Δsync.Once initOnce; // guards init of nsswitchConfig
     // ch is used as a semaphore that only allows one lookup at a
     // time to recheck nsswitch.conf
@@ -41,7 +41,7 @@ internal static ж<nssConf> getSystemNSS() {
 internal static readonly @string etcNsswitchConfˢ = "/etc/nsswitch.conf"u8;
 
 // init initializes conf and is only called via conf.initOnce.
-[GoRecv] internal static void init(this ref nsswitchConfig conf) {
+internal static void init(this ref nsswitchConfig conf) {
     conf.nssConf = parseNSSConfFile(etcNsswitchConfˢ);
     conf.lastChecked = time.Now();
     conf.ch = new channel<EmptyStruct>(1);
@@ -83,11 +83,11 @@ internal static void tryUpdate(this ж<nsswitchConfig> Ꮡconf) {
     finally { if (ᒐd1) Ꮡconf.DerefOrNull().releaseSema(); ᒐ.Run(); }
 }
 
-[GoRecv] internal static void acquireSema(this ref nsswitchConfig conf) {
+internal static void acquireSema(this ref nsswitchConfig conf) {
     conf.ch.ᐸꟷ(new EmptyStruct());
 }
 
-[GoRecv] internal static bool tryAcquireSema(this ref nsswitchConfig conf) {
+internal static bool tryAcquireSema(this ref nsswitchConfig conf) {
     var selᴛ21 = conf.ch.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
     switch (trySelect(selᴛ21)) {
     case 0: {
@@ -98,18 +98,18 @@ internal static void tryUpdate(this ж<nsswitchConfig> Ꮡconf) {
     }}
 }
 
-[GoRecv] internal static void releaseSema(this ref nsswitchConfig conf) {
+internal static void releaseSema(this ref nsswitchConfig conf) {
     ᐸꟷ(conf.ch);
 }
 
 // nssConf represents the state of the machine's /etc/nsswitch.conf file.
-[GoType] partial struct nssConf {
+partial struct nssConf {
     internal time.Time mtime;              // time of nsswitch.conf modification
     internal error err;                  // any error encountered opening or parsing the file
     internal map<@string, slice<nssSource>> sources; // keyed by database (e.g. "hosts")
 }
 
-[GoType] partial struct nssSource {
+partial struct nssSource {
     internal @string source; // e.g. "compat", "files", "mdns4_minimal"
     internal slice<nssCriterion> criteria;
 }
@@ -127,7 +127,7 @@ internal static bool standardCriteria(this nssSource s) {
 
 // nssCriterion is the parsed structure of one of the criteria in brackets
 // after an NSS source name.
-[GoType] partial struct nssCriterion {
+partial struct nssCriterion {
     internal bool negate;   // if "!" was present
     internal @string status; // e.g. "success", "unavail" (lowercase)
     internal @string action; // e.g. "return", "continue" (lowercase)

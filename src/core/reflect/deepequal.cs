@@ -14,7 +14,7 @@ partial class reflect_package {
 // in progress. The comparison algorithm assumes that all
 // checks in progress are true when it reencounters them.
 // Visited comparisons are stored in a map indexed by visit.
-[GoType] partial struct visit {
+partial struct visit {
     internal @unsafe.Pointer a1;
     internal @unsafe.Pointer a2;
     internal ΔType typ;

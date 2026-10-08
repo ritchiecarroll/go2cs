@@ -14,7 +14,7 @@ partial class http_package {
 // goroutines.
 //
 // The net/http/cookiejar package provides a CookieJar implementation.
-[GoType] partial interface CookieJar {
+partial interface CookieJar {
     // SetCookies handles the receipt of the cookies in a reply for the
     // given URL.  It may or may not choose to save the cookies, depending
     // on the jar's policy and implementation.

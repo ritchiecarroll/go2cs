@@ -8,12 +8,12 @@ partial class http_package {
 // A mapping is a collection of key-value pairs where the keys are unique.
 // A zero mapping is empty and ready to use.
 // A mapping tries to pick a representation that makes [mapping.find] most efficient.
-[GoType] partial struct mapping<K, V> {
+partial struct mapping<K, V> {
     internal slice<entry<K, V>> s; // for few pairs
     internal map<K, V> m;     // for many pairs
 }
 
-[GoType] partial struct entry<K, V> {
+partial struct entry<K, V> {
     internal K key;
     internal V value;
 }
@@ -23,7 +23,7 @@ partial class http_package {
 internal static nint maxSlice = 8;
 
 // add adds a key-value pair to the mapping.
-[GoRecv] internal static void add<K, V>(this ref mapping<K, V> h, K k, V v) {
+internal static void add<K, V>(this ref mapping<K, V> h, K k, V v) {
     if (h.m == default! && builtin.len(h.s) < maxSlice){
         h.s = append(h.s, new entry<K, V>(k, v));
     } else {

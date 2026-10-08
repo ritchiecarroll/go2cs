@@ -10,7 +10,7 @@ partial class bzip2_package {
 
 // A huffmanTree is a binary tree which is navigated, bit-by-bit to reach a
 // symbol.
-[GoType] partial struct huffmanTree {
+partial struct huffmanTree {
     // nodes contains all the non-leaf nodes in the tree. nodes[0] is the
     // root of the tree and nextNode contains the index of the next element
     // of nodes to use when the tree is being constructed.
@@ -25,7 +25,7 @@ partial class bzip2_package {
 // The symbols are uint16s because bzip2 encodes not only MTF indexes in the
 // tree, but also two magic values for run-length encoding and an EOF symbol.
 // Thus there are more than 256 possible symbols.
-[GoType] partial struct huffmanNode {
+partial struct huffmanNode {
     internal uint16 left, right;
     internal uint16 leftValue, rightValue;
 }
@@ -35,7 +35,7 @@ internal static UntypedInt invalidNodeValue => 0xffff;
 
 // Decode reads bits from the given bitReader and navigates the tree until a
 // symbol is found.
-[GoRecv] internal static uint16 /*v*/ Decode(this ref huffmanTree t, ж<bitReader> Ꮡbr) {
+internal static uint16 /*v*/ Decode(this ref huffmanTree t, ж<bitReader> Ꮡbr) {
     uint16 v = default!;
 
     ref var br = ref Ꮡbr.DerefOrNull();
@@ -131,13 +131,13 @@ internal static (huffmanTree, error) newHuffmanTree(slice<uint8> lengths) {
 }
 
 // huffmanSymbolLengthPair contains a symbol and its code length.
-[GoType] partial struct huffmanSymbolLengthPair {
+partial struct huffmanSymbolLengthPair {
     internal uint16 value;
     internal uint8 length;
 }
 
 // huffmanCode contains a symbol, its code and code length.
-[GoType] partial struct huffmanCode {
+partial struct huffmanCode {
     internal uint32 code;
     internal uint8 codeLen;
     internal uint16 value;

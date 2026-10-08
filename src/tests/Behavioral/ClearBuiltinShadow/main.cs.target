@@ -4,22 +4,22 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("map[@string, slice<@string>]")] partial struct header;
+partial struct header /*map[@string, slice<@string>]*/;
 
-[GoType] partial struct cell {
+partial struct cell {
     internal array<int32> v = new(4);
     internal map<@string, nint> m;
 }
 
-[GoType] partial struct box {
+partial struct box {
     internal slice<nint> data;
 }
 
-[GoRecv] internal static void clear(this ref box b) {
+internal static void clear(this ref box b) {
     b.data = default!;
 }
 
-[GoType] partial struct guard {
+partial struct guard {
     internal error err;
 }
 

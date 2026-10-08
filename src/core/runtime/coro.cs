@@ -24,7 +24,7 @@ partial class runtime_package {
 // Coros are heap allocated and garbage collected, so that user code
 // can hold a pointer to a coro without causing potential dangling
 // pointer errors.
-[GoType] partial struct coro {
+partial struct coro {
     internal Δguintptr gp;
     internal Action<ж<coro>> f;
     // State for validating thread-lock interactions.

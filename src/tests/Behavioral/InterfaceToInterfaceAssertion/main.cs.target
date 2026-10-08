@@ -4,33 +4,33 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface Stringish {
+partial interface Stringish {
     @string Str();
 }
 
-[GoType] partial interface Marshaler {
+partial interface Marshaler {
     @string Marshal();
 }
 
-[GoType] partial struct widget {
+partial struct widget {
     internal nint n;
 }
 
-[GoRecv] internal static @string Str(this ref widget w) {
+internal static @string Str(this ref widget w) {
     return fmt.Sprintf("widget(%d)"u8, w.n);
 }
 
-[GoRecv] internal static @string Marshal(this ref widget w) {
+internal static @string Marshal(this ref widget w) {
     return fmt.Sprintf("<%d>"u8, w.n);
 }
 
-[GoType] partial struct other {
+partial struct other {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string otherˢ = "other"u8;
 
-[GoRecv] internal static @string Str(this ref other o) {
+internal static @string Str(this ref other o) {
     return otherˢ;
 }
 

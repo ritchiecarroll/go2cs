@@ -5,7 +5,7 @@ namespace go;
 
 partial class runtime_package {
 
-[GoType("num:uint64")] partial struct taggedPointer;
+partial struct taggedPointer /*num:uint64*/;
 
 // minTagBits is the minimum number of tag bits that we expect.
 internal static UntypedInt minTagBits => 10;

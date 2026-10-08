@@ -4,36 +4,36 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface grabber {
+partial interface grabber {
     @string tag();
 }
 
-[GoType] partial struct connGrab {
+partial struct connGrab {
     internal @string name;
 }
 
-[GoRecv] internal static @string tag(this ref connGrab c) {
+internal static @string tag(this ref connGrab c) {
     return c.name;
 }
 
-[GoType] partial struct dep {
+partial struct dep {
     internal @string label;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object noteˢ = (@string)"note:"u8;
 
-[GoRecv] internal static void note(this ref dep d, any x) {
+internal static void note(this ref dep d, any x) {
     fmt.Println(noteˢ, d.label, x != default!);
 }
 
-[GoType] partial struct stmt {
+partial struct stmt {
     internal ж<dep> d;
     internal grabber cg;
     internal nint id;
 }
 
-[GoRecv] internal static void runWith(this ref stmt s, Action fn) {
+internal static void runWith(this ref stmt s, Action fn) {
     fn();
 }
 

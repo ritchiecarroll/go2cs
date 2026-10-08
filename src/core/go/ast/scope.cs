@@ -17,7 +17,7 @@ partial class ast_package {
 // scope.
 //
 // Deprecated: use the type checker [go/types] instead; see [Object].
-[GoType] partial struct Scope {
+partial struct Scope {
     public ж<Scope> Outer;
     public map<@string, ж<Object>> Objects;
 }
@@ -31,7 +31,7 @@ public static ж<Scope> NewScope(ж<Scope> Ꮡouter) {
 // Lookup returns the object with the given name if it is
 // found in scope s, otherwise it returns nil. Outer scopes
 // are ignored.
-[GoRecv] public static ж<Object> Lookup(this ref Scope s, @string name) {
+public static ж<Object> Lookup(this ref Scope s, @string name) {
     return s.Objects[name];
 }
 
@@ -39,7 +39,7 @@ public static ж<Scope> NewScope(ж<Scope> Ꮡouter) {
 // If the scope already contains an object alt with the same name,
 // Insert leaves the scope unchanged and returns alt. Otherwise
 // it inserts obj and returns nil.
-[GoRecv] public static ж<Object> /*alt*/ Insert(this ref Scope s, ж<Object> Ꮡobj) {
+public static ж<Object> /*alt*/ Insert(this ref Scope s, ж<Object> Ꮡobj) {
     ж<Object> alt = default!;
 
     ref var obj = ref Ꮡobj.DerefOrNull();
@@ -91,7 +91,7 @@ public static @string String(this ж<Scope> Ꮡs) {
 // and memory), and instead use the type checker [go/types] if object
 // resolution is desired. See the Defs, Uses, and Implicits fields of
 // the [types.Info] struct for details.
-[GoType] partial struct Object {
+partial struct Object {
     public ObjKind Kind;
     public @string Name; // declared name
     public any Decl;    // corresponding Field, XxxSpec, FuncDecl, LabeledStmt, AssignStmt, Scope; or nil
@@ -107,7 +107,7 @@ public static ж<Object> NewObj(ObjKind kind, @string name) {
 // Pos computes the source position of the declaration of an object name.
 // The result may be an invalid position if it cannot be computed
 // (obj.Decl may be nil or not correct).
-[GoRecv] public static tokenꓸPos Pos(this ref Object obj) {
+public static tokenꓸPos Pos(this ref Object obj) {
     @string name = obj.Name;
     switch (obj.Decl.type()) {
     case ж<Field> d: {
@@ -167,7 +167,7 @@ public static ж<Object> NewObj(ObjKind kind, @string name) {
     return token.NoPos;
 }
 
-[GoType("num:nint")] partial struct ObjKind;
+partial struct ObjKind /*num:nint*/;
 
 // The list of possible [Object] kinds.
 public static ObjKind Bad => /* iota */ 0;  // for error handling

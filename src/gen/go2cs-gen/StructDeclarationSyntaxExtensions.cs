@@ -410,7 +410,8 @@ public static class StructDeclarationSyntaxExtensions
         // must be the test for a struct of THIS compilation: its generated operator does not exist
         // yet while this generator is running, so a member scan cannot see it.
         if (namedType.OriginalDefinition.GetAttributes().Any(attribute =>
-                attribute.AttributeClass is { Name: "GoTypeAttribute", ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true } }))
+                attribute.AttributeClass is { Name: "GoTypeAttribute", ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true } }) ||
+            namedType.OriginalDefinition.IsConvertedGoTypeSymbol())
         {
             return true;
         }
@@ -824,7 +825,7 @@ public static class StructDeclarationSyntaxExtensions
 
     /// <summary>
     /// Ref-receiver counterpart to <see cref="GetBoxReceiverMethodNamesBySimpleName"/>: gets the
-    /// names of <c>[GoRecv]</c>-style ref extension methods (<c>static M(this ref T, …)</c>)
+    /// names of pointer-receiver ref extension methods (<c>static M(this ref T, …)</c>)
     /// declared anywhere in the CURRENT compilation whose receiver's simple type name matches
     /// <paramref name="simpleTypeName"/>.
     /// </summary>

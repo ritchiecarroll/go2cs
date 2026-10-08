@@ -18,7 +18,7 @@ public static UntypedInt MaxLatin1 => /* '\u00FF' */ 255; // maximum Latin-1 val
 // to save space: a slice of 16-bit ranges and a slice of 32-bit ranges.
 // The two slices must be in sorted order and non-overlapping.
 // Also, R32 should contain only values >= 0x10000 (1<<16).
-[GoType] partial struct RangeTable {
+partial struct RangeTable {
     public slice<Range16> R16;
     public slice<Range32> R32;
     public nint LatinOffset; // number of entries in R16 with Hi <= MaxLatin1
@@ -26,7 +26,7 @@ public static UntypedInt MaxLatin1 => /* '\u00FF' */ 255; // maximum Latin-1 val
 
 // Range16 represents of a range of 16-bit Unicode code points. The range runs from Lo to Hi
 // inclusive and has the specified stride.
-[GoType] partial struct Range16 {
+partial struct Range16 {
     public uint16 Lo;
     public uint16 Hi;
     public uint16 Stride;
@@ -35,7 +35,7 @@ public static UntypedInt MaxLatin1 => /* '\u00FF' */ 255; // maximum Latin-1 val
 // Range32 represents of a range of Unicode code points and is used when one or
 // more of the values will not fit in 16 bits. The range runs from Lo to Hi
 // inclusive and has the specified stride. Lo and Hi must always be >= 1<<16.
-[GoType] partial struct Range32 {
+partial struct Range32 {
     public uint32 Lo;
     public uint32 Hi;
     public uint32 Stride;
@@ -53,13 +53,13 @@ public static UntypedInt MaxLatin1 => /* '\u00FF' */ 255; // maximum Latin-1 val
 //	{UpperLower, UpperLower, UpperLower}
 //
 // The constant UpperLower has an otherwise impossible delta value.
-[GoType] partial struct CaseRange {
+partial struct CaseRange {
     public uint32 Lo;
     public uint32 Hi;
     public d Delta;
 }
 
-[GoType("[]CaseRange")] partial struct SpecialCase;
+partial struct SpecialCase /*[]CaseRange*/;
 
 // BUG(r): There is no mechanism for full case folding, that is, for
 // characters that involve multiple runes in the input or output.
@@ -73,8 +73,8 @@ public static UntypedInt TitleCase => 2;
 
 public static UntypedInt MaxCase => 3;
 
-[GoType("[3]rune")] /* [MaxCase]rune */
-public partial struct d; // to make the CaseRanges text shorter
+/* [MaxCase]rune */
+public partial struct d /*[3]rune*/; // to make the CaseRanges text shorter
 
 // If the Delta field of a [CaseRange] is UpperLower, it means
 // this CaseRange represents a sequence of the form (say)
@@ -331,7 +331,7 @@ public static rune ToLower(this SpecialCase special, rune r) {
 // entries fit in uint16, so use uint16. If that changes, compilation
 // will fail (the constants in the composite literal will not fit in uint16)
 // and the types here can change to uint32.
-[GoType] partial struct foldPair {
+partial struct foldPair {
     public uint16 From;
     public uint16 To;
 }

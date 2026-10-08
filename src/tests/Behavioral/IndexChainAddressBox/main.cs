@@ -6,22 +6,22 @@ using sync;
 
 partial class main_package {
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
-[GoRecv] internal static void inc(this ref counter c) {
+internal static void inc(this ref counter c) {
     c.n++;
 }
 
-[GoType] partial struct hist {
+partial struct hist {
     internal array<atomic.Uint64> counts = new(4);
     internal array<counter> local = new(2);
     internal array<nint> plain = new(3);
     internal slice<nint> sl;
 }
 
-[GoType] partial struct wrap {
+partial struct wrap {
     internal hist h;
 }
 

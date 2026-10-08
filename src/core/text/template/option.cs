@@ -9,13 +9,13 @@ using ꓸꓸꓸstring = Span<@string>;
 
 partial class template_package {
 
-[GoType("num:nint")] partial struct missingKeyAction;
+partial struct missingKeyAction /*num:nint*/;
 
 internal static missingKeyAction mapInvalid => /* iota */ 0;  // Return an invalid reflect.Value.
 internal static missingKeyAction mapZeroValue => 1; // Return the zero value for the map element.
 internal static missingKeyAction mapError => 2;    // Error out
 
-[GoType] partial struct option {
+partial struct option {
     internal missingKeyAction missingKey;
 }
 
@@ -48,7 +48,7 @@ public static ж<Template> Option(this ж<Template> Ꮡt, params ꓸꓸꓸstring
     return Ꮡt;
 }
 
-[GoRecv] internal static void setOption(this ref Template t, @string opt) {
+internal static void setOption(this ref Template t, @string opt) {
     if (opt == ""u8) {
         throw panic("empty option string");
     }

@@ -46,7 +46,7 @@ internal class AdapterImplTemplate : TemplateBase
 
     // Maps an interface member's simple name to its forwarding receiver expression:
     // "m_box" when the struct method binds on the box (direct-ж primary form, or a
-    // [GoRecv] ref extension whose RecvGenerator ж-twin exists), or "m_box.Value" for
+    // pointer-receiver ref extension whose RecvGenerator ж-twin exists), or "m_box.Value" for
     // a plain value-receiver method (Go copies the value at the call, matching ref-return
     // property access semantics here).
     public required Dictionary<string, string> ForwardReceivers;

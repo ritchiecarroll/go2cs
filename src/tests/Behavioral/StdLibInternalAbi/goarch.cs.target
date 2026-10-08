@@ -6,7 +6,7 @@ namespace go;
 
 partial class main_package {
 
-[GoType("num:nint")] partial struct ArchFamilyType;
+partial struct ArchFamilyType /*num:nint*/;
 
 public static ArchFamilyType AMD64 => /* iota */ 0;
 public static ArchFamilyType ARM => 1;

@@ -6,7 +6,7 @@ partial class main_package {
 
 internal delegate stateFn stateFn(ж<machine> _);
 
-[GoType] partial struct machine {
+partial struct machine {
     internal nint steps;
 }
 

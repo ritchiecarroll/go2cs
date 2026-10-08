@@ -27,7 +27,7 @@ partial class tls_package {
 
 // A Conn represents a secured connection.
 // It implements the net.Conn interface.
-[GoType] partial struct Conn {
+partial struct Conn {
     // constant
     internal net.Conn conn;
     internal bool isClient;
@@ -121,45 +121,45 @@ partial class tls_package {
 // export the struct field too.
 
 // LocalAddr returns the local network address.
-[GoRecv] public static netꓸAddr LocalAddr(this ref Conn c) {
+public static netꓸAddr LocalAddr(this ref Conn c) {
     return c.conn.LocalAddr();
 }
 
 // RemoteAddr returns the remote network address.
-[GoRecv] public static netꓸAddr RemoteAddr(this ref Conn c) {
+public static netꓸAddr RemoteAddr(this ref Conn c) {
     return c.conn.RemoteAddr();
 }
 
 // SetDeadline sets the read and write deadlines associated with the connection.
 // A zero value for t means [Conn.Read] and [Conn.Write] will not time out.
 // After a Write has timed out, the TLS state is corrupt and all future writes will return the same error.
-[GoRecv] public static error SetDeadline(this ref Conn c, time.Time t) {
+public static error SetDeadline(this ref Conn c, time.Time t) {
     return c.conn.SetDeadline(t);
 }
 
 // SetReadDeadline sets the read deadline on the underlying connection.
 // A zero value for t means [Conn.Read] will not time out.
-[GoRecv] public static error SetReadDeadline(this ref Conn c, time.Time t) {
+public static error SetReadDeadline(this ref Conn c, time.Time t) {
     return c.conn.SetReadDeadline(t);
 }
 
 // SetWriteDeadline sets the write deadline on the underlying connection.
 // A zero value for t means [Conn.Write] will not time out.
 // After a [Conn.Write] has timed out, the TLS state is corrupt and all future writes will return the same error.
-[GoRecv] public static error SetWriteDeadline(this ref Conn c, time.Time t) {
+public static error SetWriteDeadline(this ref Conn c, time.Time t) {
     return c.conn.SetWriteDeadline(t);
 }
 
 // NetConn returns the underlying connection that is wrapped by c.
 // Note that writing to or reading from this connection directly will corrupt the
 // TLS session.
-[GoRecv] public static net.Conn NetConn(this ref Conn c) {
+public static net.Conn NetConn(this ref Conn c) {
     return c.conn;
 }
 
 // A halfConn represents one direction of the record layer
 // connection, either sending or receiving.
-[GoType] partial struct halfConn {
+partial struct halfConn {
     public partial ref sync_package.Mutex Mutex { get; }
     internal error err;  // first permanent error
     internal uint16 version; // protocol version
@@ -173,27 +173,27 @@ partial class tls_package {
     internal slice<byte> trafficSecret;         // current TLS 1.3 traffic secret
 }
 
-[GoType] partial struct permanentError {
+partial struct permanentError {
     internal netꓸError err;
 }
 
-[GoRecv] internal static @string Error(this ref permanentError e) {
+internal static @string Error(this ref permanentError e) {
     return e.err.Error();
 }
 
-[GoRecv] internal static error Unwrap(this ref permanentError e) {
+internal static error Unwrap(this ref permanentError e) {
     return new net_ΔErrorᴠerror(e.err);
 }
 
-[GoRecv] internal static bool Timeout(this ref permanentError e) {
+internal static bool Timeout(this ref permanentError e) {
     return e.err.Timeout();
 }
 
-[GoRecv] internal static bool Temporary(this ref permanentError e) {
+internal static bool Temporary(this ref permanentError e) {
     return false;
 }
 
-[GoRecv] internal static error setErrorLocked(this ref halfConn hc, error err) {
+internal static error setErrorLocked(this ref halfConn hc, error err) {
     {
         var (e, ok) = err._<netꓸError>(ᐧ); if (ok){
             hc.err = new permanentErrorжerror(Ꮡ(new permanentError(err: e)));
@@ -206,7 +206,7 @@ partial class tls_package {
 
 // prepareCipherSpec sets the encryption and MAC states
 // that a subsequent changeCipherSpec will use.
-[GoRecv] internal static void prepareCipherSpec(this ref halfConn hc, uint16 version, any cipher, hash.Hash mac) {
+internal static void prepareCipherSpec(this ref halfConn hc, uint16 version, any cipher, hash.Hash mac) {
     hc.version = version;
     hc.nextCipher = cipher;
     hc.nextMac = mac;
@@ -214,7 +214,7 @@ partial class tls_package {
 
 // changeCipherSpec changes the encryption and MAC states
 // to the ones previously passed to prepareCipherSpec.
-[GoRecv] internal static error changeCipherSpec(this ref halfConn hc) {
+internal static error changeCipherSpec(this ref halfConn hc) {
     if (hc.nextCipher == default! || hc.version == VersionTLS13) {
         return alertInternalError;
     }
@@ -231,7 +231,7 @@ partial class tls_package {
 // setTrafficSecret sets the traffic secret for the given encryption level. setTrafficSecret
 // should not be called directly, but rather through the Conn setWriteTrafficSecret and
 // setReadTrafficSecret wrapper methods.
-[GoRecv] internal static void setTrafficSecret(this ref halfConn hc, ж<cipherSuiteTLS13> Ꮡsuite, QUICEncryptionLevel level, slice<byte> secret) {
+internal static void setTrafficSecret(this ref halfConn hc, ж<cipherSuiteTLS13> Ꮡsuite, QUICEncryptionLevel level, slice<byte> secret) {
     ref var suite = ref Ꮡsuite.DerefOrNull();
 
     hc.trafficSecret = secret;
@@ -244,7 +244,7 @@ partial class tls_package {
 }
 
 // incSeq increments the sequence number.
-[GoRecv] internal static void incSeq(this ref halfConn hc) {
+internal static void incSeq(this ref halfConn hc) {
     for (nint i = 7; i >= 0; i--) {
         hc.seq[i]++;
         if (hc.seq[i] != 0) {
@@ -260,7 +260,7 @@ partial class tls_package {
 // explicitNonceLen returns the number of bytes of explicit nonce or IV included
 // in each record. Explicit nonces are present only in CBC modes after TLS 1.0
 // and in certain AEAD modes in TLS 1.2.
-[GoRecv] internal static nint explicitNonceLen(this ref halfConn hc) {
+internal static nint explicitNonceLen(this ref halfConn hc) {
     if (hc.cipher == default!) {
         return 0;
     }
@@ -337,7 +337,7 @@ internal static nint roundUp(nint a, nint b) {
 }
 
 // cbcMode is an interface for block ciphers using cipher block chaining.
-[GoType] partial interface cbcMode :
+partial interface cbcMode :
     cipher.BlockMode
 {
     void SetIV(slice<byte> _);
@@ -345,7 +345,7 @@ internal static nint roundUp(nint a, nint b) {
 
 // decrypt authenticates and decrypts the record if protection is active at
 // this stage. The returned plaintext might overlap with the input.
-[GoRecv] internal static (slice<byte>, recordType, error) decrypt(this ref halfConn hc, slice<byte> record) {
+internal static (slice<byte>, recordType, error) decrypt(this ref halfConn hc, slice<byte> record) {
     slice<byte> plaintext = default!;
     var typ = ((recordType)record[0]);
     var payload = record[(int)(recordHeaderLen)..];
@@ -484,7 +484,7 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
 
 // encrypt encrypts payload, adding the appropriate nonce and/or MAC, and
 // appends it to record, which must already contain the record header.
-[GoRecv] internal static (slice<byte>, error) encrypt(this ref halfConn hc, slice<byte> record, slice<byte> payload, io.Reader rand) {
+internal static (slice<byte>, error) encrypt(this ref halfConn hc, slice<byte> record, slice<byte> payload, io.Reader rand) {
     if (hc.cipher == default!) {
         return (appendꓸꓸꓸ(record, payload), default!);
     }
@@ -576,7 +576,7 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
 }
 
 // RecordHeaderError is returned when a TLS record header is invalid.
-[GoType] partial struct RecordHeaderError {
+partial struct RecordHeaderError {
     // Msg contains a human readable string that describes the error.
     public @string Msg;
     // RecordHeader contains the five bytes of TLS record header that
@@ -595,7 +595,7 @@ public static @string Error(this RecordHeaderError e) {
     return "tls: "u8 + e.Msg;
 }
 
-[GoRecv] internal static RecordHeaderError /*err*/ newRecordHeaderError(this ref Conn c, net.Conn conn, @string msg) {
+internal static RecordHeaderError /*err*/ newRecordHeaderError(this ref Conn c, net.Conn conn, @string msg) {
     RecordHeaderError err = new();
 
     err.Msg = msg;
@@ -830,12 +830,12 @@ internal static error retryReadRecord(this ж<Conn> Ꮡc, bool expectChangeCiphe
 // atLeastReader reads from R, stopping with EOF once at least N bytes have been
 // read. It is different from an io.LimitedReader in that it doesn't cut short
 // the last Read call, and in that it considers an early EOF an error.
-[GoType] partial struct atLeastReader {
+partial struct atLeastReader {
     public io.Reader R;
     public int64 N;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref atLeastReader r, slice<byte> p) {
+internal static (nint, error) Read(this ref atLeastReader r, slice<byte> p) {
     if (r.N <= 0) {
         return (0, io.EOF);
     }
@@ -852,7 +852,7 @@ internal static error retryReadRecord(this ж<Conn> Ꮡc, bool expectChangeCiphe
 
 // readFromUntil reads from r into c.rawInput until c.rawInput contains
 // at least n bytes or else returns an error.
-[GoRecv] internal static error readFromUntil(this ref Conn c, io.Reader r, nint n) {
+internal static error readFromUntil(this ref Conn c, io.Reader r, nint n) {
     if (c.rawInput.Len() >= n) {
         return default!;
     }
@@ -921,7 +921,7 @@ internal static UntypedInt recordSizeBoostThreshold => /* 128 * 1024 */ 131072;
 //
 // In the interests of simplicity and determinism, this code does not attempt
 // to reset the record size once the connection is idle, however.
-[GoRecv] internal static nint maxPayloadSizeForWrite(this ref Conn c, recordType typ) {
+internal static nint maxPayloadSizeForWrite(this ref Conn c, recordType typ) {
     if ((~c.config).DynamicRecordSizingDisabled || typ != recordTypeApplicationData) {
         return maxPlaintext;
     }
@@ -972,7 +972,7 @@ internal static UntypedInt recordSizeBoostThreshold => /* 128 * 1024 */ 131072;
     return n;
 }
 
-[GoRecv] internal static (nint, error) write(this ref Conn c, slice<byte> data) {
+internal static (nint, error) write(this ref Conn c, slice<byte> data) {
     if (c.buffering) {
         c.sendBuf = appendꓸꓸꓸ(c.sendBuf, data);
         return (len(data), default!);
@@ -982,7 +982,7 @@ internal static UntypedInt recordSizeBoostThreshold => /* 128 * 1024 */ 131072;
     return (n, err);
 }
 
-[GoRecv] internal static (nint, error) flush(this ref Conn c) {
+internal static (nint, error) flush(this ref Conn c) {
     if (len(c.sendBuf) == 0) {
         return (0, default!);
     }
@@ -1902,7 +1902,7 @@ internal static error setReadTrafficSecret(this ж<Conn> Ꮡc, ж<cipherSuiteTLS
 // setWriteTrafficSecret sets the write traffic secret for the given encryption level. If
 // being called at the same time as setReadTrafficSecret, the caller must ensure the call
 // to setWriteTrafficSecret happens first so any alerts are sent at the write level.
-[GoRecv] internal static void setWriteTrafficSecret(this ref Conn c, ж<cipherSuiteTLS13> Ꮡsuite, QUICEncryptionLevel level, slice<byte> secret) {
+internal static void setWriteTrafficSecret(this ref Conn c, ж<cipherSuiteTLS13> Ꮡsuite, QUICEncryptionLevel level, slice<byte> secret) {
     c.@out.setTrafficSecret(Ꮡsuite, level, secret);
 }
 

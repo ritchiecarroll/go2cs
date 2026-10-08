@@ -8,12 +8,12 @@ namespace go;
 
 partial class main_package {
 
-[GoType("dyn")] partial struct schedlike_disable {
+partial struct schedlike_disable /*dyn*/ {
     internal bool user;
     internal int32 n;
 }
 
-[GoType] partial struct schedlike {
+partial struct schedlike {
     internal schedlike_disable disable;
     internal @string label;
 }

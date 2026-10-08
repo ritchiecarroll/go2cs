@@ -13,7 +13,7 @@ partial class runtime_package {
 
 // traceRegionAlloc is a thread-safe region allocator.
 // It holds a linked list of traceRegionAllocBlock.
-[GoType] partial struct traceRegionAlloc {
+partial struct traceRegionAlloc {
     internal mutex @lock;
     internal atomic.Bool dropping;          // For checking invariants.
     internal atomic.UnsafePointer current; // *traceRegionAllocBlock
@@ -25,13 +25,13 @@ partial class runtime_package {
 // traceRegionAllocBlock is allocated from non-GC'd memory, so it must not
 // contain heap pointers. Writes to pointers to traceRegionAllocBlocks do
 // not need write barriers.
-[GoType] partial struct traceRegionAllocBlock {
+partial struct traceRegionAllocBlock {
     internal sys.NotInHeap _;
     internal partial ref traceRegionAllocBlockHeader traceRegionAllocBlockHeader { get; }
     internal array<byte> data = new(traceRegionAllocBlockData);
 }
 
-[GoType] partial struct traceRegionAllocBlockHeader {
+partial struct traceRegionAllocBlockHeader {
     internal ж<traceRegionAllocBlock> next;
     internal atomic.Uintptr off;
 }

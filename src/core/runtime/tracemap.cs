@@ -23,7 +23,7 @@ using @internal.runtime;
 
 partial class runtime_package {
 
-[GoType] partial struct traceMap {
+partial struct traceMap {
     internal atomic.UnsafePointer root; // *traceMapNode (can't use generics because it's notinheap)
     internal cpu.CacheLinePad _;
     internal atomic.Uint64 seq;
@@ -43,7 +43,7 @@ partial class runtime_package {
 //   - No deletion or rebalancing.
 //   - Intentionally devolves into a linked list on hash collisions (the hash bits will all
 //     get shifted out during iteration, and new nodes will just be appended to the 0th child).
-[GoType] partial struct traceMapNode {
+partial struct traceMapNode {
     internal sys.NotInHeap _;
     internal array<atomic.UnsafePointer> children = new(4); // *traceMapNode (can't use generics because it's notinheap)
     internal uintptr hash;

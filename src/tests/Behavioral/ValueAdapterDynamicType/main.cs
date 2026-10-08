@@ -6,15 +6,15 @@ using ValueAdapterDynamicType;
 
 partial class main_package {
 
-[GoType] partial struct Img {
+partial struct Img {
     internal colorlike.NRGBA px;
 }
 
-[GoRecv] public static colorlike.Color At(this ref Img p) {
+public static colorlike.Color At(this ref Img p) {
     return p.px;
 }
 
-[GoRecv] public static colorlike.Color Alt(this ref Img p) {
+public static colorlike.Color Alt(this ref Img p) {
     return new colorlike.Gray(Y: 7);
 }
 

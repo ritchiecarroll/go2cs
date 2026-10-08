@@ -10,7 +10,7 @@ partial class net_package {
 
 // A sockaddr represents a TCP, UDP, IP or Unix network endpoint
 // address that can be converted into a syscall.Sockaddr.
-[GoType] partial interface Δsockaddr :
+partial interface Δsockaddr :
     ΔAddr
 {
     // family returns the platform-dependent address family
@@ -28,7 +28,7 @@ partial class net_package {
     Δsockaddr toLocal(@string net);
 }
 
-[GoRecv] internal static Func<syscallꓸSockaddr, ΔAddr> addrFunc(this ref netFD fd) {
+internal static Func<syscallꓸSockaddr, ΔAddr> addrFunc(this ref netFD fd) {
     var exprᴛ1 = fd.family;
     if (exprᴛ1 == syscall.AF_INET || exprᴛ1 == syscall.AF_INET6) {
         var exprᴛ2 = fd.sotype;

@@ -139,7 +139,7 @@ internal static void Main() {
     fmt.Println(doneˢ);
 }
 
-[GoType] partial struct task {
+partial struct task {
     internal Func<nint> fn;
     internal @string name;
 }

@@ -4,15 +4,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct cycle {
+partial struct cycle {
     internal nint n;
 }
 
-[GoType] partial struct rec {
+partial struct rec {
     internal array<cycle> future = new(3);
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal ж<rec> r;
 }
 

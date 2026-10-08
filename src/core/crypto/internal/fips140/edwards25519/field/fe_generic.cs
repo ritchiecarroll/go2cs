@@ -10,7 +10,7 @@ partial class field_package {
 
 // uint128 holds a 128-bit number as two 64-bit limbs, for use with the
 // bits.Mul64 and bits.Add64 intrinsics.
-[GoType] partial struct uint128 {
+partial struct uint128 {
     internal uint64 lo, hi;
 }
 

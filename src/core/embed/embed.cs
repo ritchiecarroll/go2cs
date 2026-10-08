@@ -150,7 +150,7 @@ partial class embed_package {
 // file system interfaces, including net/http, text/template, and html/template.
 //
 // See the package documentation for more details about initializing an FS.
-[GoType] partial struct FS {
+partial struct FS {
     // The compiler knows the layout of this struct.
     // See cmd/compile/internal/staticdata's WriteEmbed.
     //
@@ -205,7 +205,7 @@ internal static fs.ReadFileFS _ᴛ2ʗ = new FS(nil);
 
 // A file is a single file in the FS.
 // It implements fs.FileInfo and fs.DirEntry.
-[GoType] partial struct @file {
+partial struct @file {
     // The compiler knows the layout of this struct.
     // See cmd/compile/internal/staticdata's WriteEmbed.
     internal @string name;
@@ -216,29 +216,29 @@ internal static fs.ReadFileFS _ᴛ2ʗ = new FS(nil);
 internal static fs.FileInfo _ᴛ3ʗ = new fileжFileInfo(((ж<@file>)nil));
 internal static fs.DirEntry _ᴛ4ʗ = new fileжDirEntry(((ж<@file>)nil));
 
-[GoRecv] internal static @string Name(this ref @file f) {
+internal static @string Name(this ref @file f) {
     var (_, elem, _) = split(f.name);
     return elem;
 }
 
-[GoRecv] internal static int64 Size(this ref @file f) {
+internal static int64 Size(this ref @file f) {
     return (int64)len(f.data);
 }
 
-[GoRecv] internal static time.Time ModTime(this ref @file f) {
+internal static time.Time ModTime(this ref @file f) {
     return new time.Time(nil);
 }
 
-[GoRecv] internal static bool IsDir(this ref @file f) {
+internal static bool IsDir(this ref @file f) {
     var (_, _, isDir) = split(f.name);
     return isDir;
 }
 
-[GoRecv] internal static any Sys(this ref @file f) {
+internal static any Sys(this ref @file f) {
     return default!;
 }
 
-[GoRecv] internal static fs.FileMode Type(this ref @file f) {
+internal static fs.FileMode Type(this ref @file f) {
     return f.Mode().Type();
 }
 
@@ -246,7 +246,7 @@ internal static (fs.FileInfo, error) Info(this ж<@file> Ꮡf) {
     return (new fileжFileInfo(Ꮡf), default!);
 }
 
-[GoRecv] internal static fs.FileMode Mode(this ref @file f) {
+internal static fs.FileMode Mode(this ref @file f) {
     if (f.IsDir()) {
         return (fs.FileMode)(fs.ModeDir | 365);
     }
@@ -362,7 +362,7 @@ public static (slice<byte>, error) ReadFile(this FS f, @string name) {
 }
 
 // An openFile is a regular file open for reading.
-[GoType] partial struct openFile {
+partial struct openFile {
     internal ж<@file> f; // the file itself
     internal int64 offset; // current read offset
 }
@@ -370,15 +370,15 @@ public static (slice<byte>, error) ReadFile(this FS f, @string name) {
 internal static Δio.Seeker _ᴛ5ʗ = new openFileжSeeker(((ж<openFile>)nil));
 internal static Δio.ReaderAt _ᴛ6ʗ = new openFileжReaderAt(((ж<openFile>)nil));
 
-[GoRecv] internal static error Close(this ref openFile f) {
+internal static error Close(this ref openFile f) {
     return default!;
 }
 
-[GoRecv] internal static (fs.FileInfo, error) Stat(this ref openFile f) {
+internal static (fs.FileInfo, error) Stat(this ref openFile f) {
     return (new fileжFileInfo(f.f), default!);
 }
 
-[GoRecv] internal static (nint, error) Read(this ref openFile f, slice<byte> b) {
+internal static (nint, error) Read(this ref openFile f, slice<byte> b) {
     if (f.offset >= (int64)len((~f.f).data)) {
         return (0, Δio.EOF);
     }
@@ -390,7 +390,7 @@ internal static Δio.ReaderAt _ᴛ6ʗ = new openFileжReaderAt(((ж<openFile>)ni
     return (n, default!);
 }
 
-[GoRecv] internal static (int64, error) Seek(this ref openFile f, int64 offset, nint whence) {
+internal static (int64, error) Seek(this ref openFile f, int64 offset, nint whence) {
     switch (whence) {
     case 0: {
         break;
@@ -412,7 +412,7 @@ internal static Δio.ReaderAt _ᴛ6ʗ = new openFileжReaderAt(((ж<openFile>)ni
     return (offset, default!);
 }
 
-[GoRecv] internal static (nint, error) ReadAt(this ref openFile f, slice<byte> b, int64 offset) {
+internal static (nint, error) ReadAt(this ref openFile f, slice<byte> b, int64 offset) {
     if (offset < 0 || offset > (int64)len((~f.f).data)) {
         return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: (~f.f).name, Err: fs.ErrInvalid))));
     }
@@ -424,25 +424,25 @@ internal static Δio.ReaderAt _ᴛ6ʗ = new openFileжReaderAt(((ж<openFile>)ni
 }
 
 // An openDir is a directory open for reading.
-[GoType] partial struct openDir {
+partial struct openDir {
     internal ж<@file> f; // the directory file itself
     internal slice<@file> files; // the directory contents
     internal nint offset;   // the read offset, an index into the files slice
 }
 
-[GoRecv] internal static error Close(this ref openDir d) {
+internal static error Close(this ref openDir d) {
     return default!;
 }
 
-[GoRecv] internal static (fs.FileInfo, error) Stat(this ref openDir d) {
+internal static (fs.FileInfo, error) Stat(this ref openDir d) {
     return (new fileжFileInfo(d.f), default!);
 }
 
-[GoRecv] internal static (nint, error) Read(this ref openDir d, slice<byte> _) {
+internal static (nint, error) Read(this ref openDir d, slice<byte> _) {
     return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: (~d.f).name, Err: errors.New(isADirectoryˢ)))));
 }
 
-[GoRecv] internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint count) {
+internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint count) {
     nint n = len(d.files) - d.offset;
     if (n == 0) {
         if (count <= 0) {

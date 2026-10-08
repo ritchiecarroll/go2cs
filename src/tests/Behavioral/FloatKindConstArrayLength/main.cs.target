@@ -23,24 +23,24 @@ internal static array<byte> pkgExprArr = new(100);
 
 internal static array<byte> pkgIntArr = new(100);
 
-[GoType("[10]byte")] /* [namedLen]byte */
-partial struct floatLenArr;
+/* [namedLen]byte */
+partial struct floatLenArr /*[10]byte*/;
 
-[GoType("[10]int32")] /* [cplxLen]int32 */
-partial struct cplxLenArr;
+/* [cplxLen]int32 */
+partial struct cplxLenArr /*[10]int32*/;
 
-[GoType("[100]byte")] /* [exprLen]byte */
-partial struct exprLenArr;
+/* [exprLen]byte */
+partial struct exprLenArr /*[100]byte*/;
 
-[GoType("[100]byte")] /* [intLen]byte */
-partial struct intLenArr;
+/* [intLen]byte */
+partial struct intLenArr /*[100]byte*/;
 
-[GoType] partial struct holder {
+partial struct holder {
     internal array<byte> buf = new(globalLen);
     internal array<array<byte>> nest = new(namedLen, () => new(10));
 }
 
-internal static array<byte> roundTrip([GoArrayDims(10)] array<byte> a) {
+internal static array<byte> roundTrip(/*[10]*/ array<byte> a) {
     a = a.Clone();
 
     a[0] = 7;

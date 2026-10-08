@@ -24,7 +24,7 @@ internal static error errTooMuch = errors.New("gif: too much image data"u8);
 internal static error errBadPixel = errors.New("gif: invalid pixel value"u8);
 
 // If the io.Reader does not also have ReadByte, then decode will introduce its own buffering.
-[GoType] partial interface reader :
+partial interface reader :
     io.Reader,
     io.ByteReader
 {
@@ -81,7 +81,7 @@ internal static (byte, error) readByte(io.ByteReader r) {
 }
 
 // decoder is the type used to decode a GIF file.
-[GoType] partial struct decoder {
+partial struct decoder {
     internal reader r;
     // From header.
     internal @string vers;
@@ -113,13 +113,13 @@ internal static (byte, error) readByte(io.ByteReader r) {
 //
 // To avoid the allocation of a bufio.Reader for the lzw Reader, blockReader
 // implements io.ByteReader and buffers blocks into the decoder's "tmp" buffer.
-[GoType] partial struct blockReader {
+partial struct blockReader {
     internal ж<decoder> d;
     internal uint8 i, j; // d.tmp[i:j] contains the buffered bytes
     internal error err;
 }
 
-[GoRecv] internal static void fill(this ref blockReader b) {
+internal static void fill(this ref blockReader b) {
     if (b.err != default!) {
         return;
     }
@@ -137,7 +137,7 @@ internal static (byte, error) readByte(io.ByteReader r) {
     }
 }
 
-[GoRecv] internal static (byte, error) ReadByte(this ref blockReader b) {
+internal static (byte, error) ReadByte(this ref blockReader b) {
     if (b.i == b.j) {
         b.fill();
         if (b.err != default!) {
@@ -151,7 +151,7 @@ internal static (byte, error) readByte(io.ByteReader r) {
 
 // blockReader must implement io.Reader, but its Read shouldn't ever actually
 // be called in practice. The compress/lzw package will only call [blockReader.ReadByte].
-[GoRecv] internal static (nint, error) Read(this ref blockReader b, slice<byte> p) {
+internal static (nint, error) Read(this ref blockReader b, slice<byte> p) {
     if (len(p) == 0 || b.err != default!) {
         return (0, b.err);
     }
@@ -174,7 +174,7 @@ internal static (byte, error) readByte(io.ByteReader r) {
 // most one more sub-block of length 1 may exist before the block-terminator.
 // These accommodations allow us to support GIFs created by less strict encoders.
 // See https://golang.org/issue/16146.
-[GoRecv] internal static error close(this ref blockReader b) {
+internal static error close(this ref blockReader b) {
     if (AreEqual(b.err, io.EOF)){
         // A clean block-sequence terminator was encountered while reading.
         return default!;
@@ -265,7 +265,7 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
     }
 }
 
-[GoRecv] internal static error readHeaderAndScreenDescriptor(this ref decoder d) {
+internal static error readHeaderAndScreenDescriptor(this ref decoder d) {
     var err = readFull(d.r, d.tmp[..13]);
     if (err != default!) {
         return fmt.Errorf("gif: reading header: %v"u8, err);
@@ -291,7 +291,7 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
     return default!;
 }
 
-[GoRecv] internal static (Δcolor.Palette, error) readColorTable(this ref decoder d, byte fields) {
+internal static (Δcolor.Palette, error) readColorTable(this ref decoder d, byte fields) {
     nint n = ((nint)1).Lsh((1 + (nuint)((byte)(fields & (byte)fColorTableBitsMask))));
     var err = readFull(d.r, d.tmp.slice(0, 3 * n));
     if (err != default!) {
@@ -306,7 +306,7 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
     return (p, default!);
 }
 
-[GoRecv] internal static error readExtension(this ref decoder d) {
+internal static error readExtension(this ref decoder d) {
     var (extension, err) = readByte(d.r);
     if (err != default!) {
         return fmt.Errorf("gif: reading extension: %v"u8, err);
@@ -366,7 +366,7 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
     }
 }
 
-[GoRecv] internal static error readGraphicControl(this ref decoder d) {
+internal static error readGraphicControl(this ref decoder d) {
     {
         var err = readFull(d.r, d.tmp[..6]); if (err != default!) {
             return fmt.Errorf("gif: can't read graphic control: %s"u8, err);
@@ -514,7 +514,7 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string gifFrameBoundsLargerThanˢ = "gif: frame bounds larger than image bounds"u8;
 
-[GoRecv] internal static (ж<image.Paletted>, error) newImageFromDescriptor(this ref decoder d) {
+internal static (ж<image.Paletted>, error) newImageFromDescriptor(this ref decoder d) {
     {
         var err = readFull(d.r, d.tmp[..9]); if (err != default!) {
             return (default!, fmt.Errorf("gif: can't read image descriptor: %s"u8, err));
@@ -550,7 +550,7 @@ internal static readonly @string gifFrameBoundsLargerThanˢ = "gif: frame bounds
     ), default!), default!);
 }
 
-[GoRecv] internal static (nint, error) readBlock(this ref decoder d) {
+internal static (nint, error) readBlock(this ref decoder d) {
     var (n, err) = readByte(d.r);
     if (n == 0 || err != default!) {
         return (0, err);
@@ -564,7 +564,7 @@ internal static readonly @string gifFrameBoundsLargerThanˢ = "gif: frame bounds
 }
 
 // interlaceScan defines the ordering for a pass of the interlace algorithm.
-[GoType] partial struct interlaceScan {
+partial struct interlaceScan {
     internal nint skip, start;
 }
 
@@ -613,7 +613,7 @@ public static (image.Image, error) Decode(io.Reader r) {
 }
 
 // GIF represents the possibly multiple images stored in a GIF file.
-[GoType] partial struct GIF {
+partial struct GIF {
     public slice<ж<image.Paletted>> Image; // The successive images.
     public slice<nint> Delay;       // The successive delay times, one per frame, in 100ths of a second.
     // LoopCount controls the number of times an animation will be

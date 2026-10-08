@@ -19,11 +19,11 @@ internal static nint f(nint x) {
     return z;
 }
 
-[GoType] partial struct tagErr {
+partial struct tagErr {
     internal @string tag;
 }
 
-[GoRecv] internal static @string Error(this ref tagErr e) {
+internal static @string Error(this ref tagErr e) {
     return "tag:"u8 + e.tag;
 }
 
@@ -74,12 +74,12 @@ internal static (nint, @string) pkgParamShadow(ж<strings.Reader> Ꮡstrings) {
     return (n, ((@string)buf));
 }
 
-[GoType] partial struct @file {
+partial struct @file {
     internal ж<strings.Reader> ΔΔfile;
     internal nint n;
 }
 
-[GoRecv] internal static nint readOne(this ref @file f) {
+internal static nint readOne(this ref @file f) {
     var buf = new slice<byte>(1);
     var (k, _) = f.ΔΔfile.Read(buf);
     f.n += k;

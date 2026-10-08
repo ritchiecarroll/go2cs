@@ -5,7 +5,7 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType] partial struct Holder {
+partial struct Holder {
     public @string Name;
     public /*<-*/channel<EmptyStruct> Done = /*<-*/channel<EmptyStruct>.RecvOnly;
 }

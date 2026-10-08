@@ -4,12 +4,12 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct @base {
+partial struct @base {
     internal int64 a;
     internal int64 b;
 }
 
-[GoType("@base")] partial struct view;
+partial struct view /*@base*/;
 
 internal static ж<@base> makeBase() {
     ref var x = ref heap<@base>(out var Ꮡx);
@@ -17,11 +17,11 @@ internal static ж<@base> makeBase() {
     return Ꮡx;
 }
 
-[GoType("ж<int64>")] partial class intRef;
+partial class intRef /*ж<int64>*/;
 
-[GoType("@string")] partial struct tail;
+partial struct tail /*@string*/;
 
-[GoRecv] internal static byte chop(this ref tail t) {
+internal static byte chop(this ref tail t) {
     var b = (t)[0];
     t = (t)[1..];
     return b;

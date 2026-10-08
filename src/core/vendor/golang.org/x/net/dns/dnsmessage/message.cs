@@ -16,7 +16,7 @@ using errors = errors_package;
 
 partial class dnsmessage_package {
 
-[GoType("num:uint16")] partial struct Type;
+partial struct Type /*num:uint16*/;
 
 // Message formats
 public static Type TypeA => 1;
@@ -73,7 +73,7 @@ public static @string GoString(this Type t) {
     return printUint16((uint16)t);
 }
 
-[GoType("num:uint16")] partial struct Class;
+partial struct Class /*num:uint16*/;
 
 public static Class ClassINET => 1;
 public static Class ClassCSNET => 2;
@@ -109,14 +109,14 @@ public static @string GoString(this Class c) {
     return printUint16((uint16)c);
 }
 
-[GoType("num:uint16")] partial struct OpCode;
+partial struct OpCode /*num:uint16*/;
 
 // GoString implements fmt.GoStringer.GoString.
 public static @string GoString(this OpCode o) {
     return printUint16((uint16)o);
 }
 
-[GoType("num:uint16")] partial struct RCode;
+partial struct RCode /*num:uint16*/;
 
 // Header.RCode values.
 public static RCode RCodeSuccess => 0;      // NoError
@@ -274,7 +274,7 @@ internal static UntypedInt uint32Len => 4;
 
 internal static UntypedInt headerLen => /* 6 * uint16Len */ 12;
 
-[GoType] partial struct nestedError {
+partial struct nestedError {
     // s is the current level's error message.
     internal @string s;
     // err is the nested error.
@@ -282,12 +282,12 @@ internal static UntypedInt headerLen => /* 6 * uint16Len */ 12;
 }
 
 // nestedError implements error.Error.
-[GoRecv] internal static @string Error(this ref nestedError e) {
+internal static @string Error(this ref nestedError e) {
     return e.s + ": "u8 + e.err.Error();
 }
 
 // Header is a representation of a DNS message header.
-[GoType] partial struct Header {
+partial struct Header {
     public uint16 ID;
     public bool Response;
     public OpCode OpCode;
@@ -300,7 +300,7 @@ internal static UntypedInt headerLen => /* 6 * uint16Len */ 12;
     public RCode RCode;
 }
 
-[GoRecv] internal static (uint16 id, uint16 bits) pack(this ref Header m) {
+internal static (uint16 id, uint16 bits) pack(this ref Header m) {
     uint16 id = default!;
     uint16 bits = default!;
 
@@ -331,12 +331,12 @@ internal static UntypedInt headerLen => /* 6 * uint16Len */ 12;
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoRecv] public static @string GoString(this ref Header m) {
+public static @string GoString(this ref Header m) {
     return "dnsmessage.Header{"u8 + "ID: "u8 + printUint16(m.ID) + ", "u8 + "Response: "u8 + printBool(m.Response) + ", "u8 + "OpCode: "u8 + m.OpCode.GoString() + ", "u8 + "Authoritative: "u8 + printBool(m.Authoritative) + ", "u8 + "Truncated: "u8 + printBool(m.Truncated) + ", "u8 + "RecursionDesired: "u8 + printBool(m.RecursionDesired) + ", "u8 + "RecursionAvailable: "u8 + printBool(m.RecursionAvailable) + ", "u8 + "AuthenticData: "u8 + printBool(m.AuthenticData) + ", "u8 + "CheckingDisabled: "u8 + printBool(m.CheckingDisabled) + ", "u8 + "RCode: "u8 + m.RCode.GoString() + "}"u8;
 }
 
 // Message is a representation of a DNS message.
-[GoType] partial struct Message {
+partial struct Message {
     public partial ref Header Header { get; }
     public slice<ΔQuestion> Questions;
     public slice<Resource> Answers;
@@ -344,7 +344,7 @@ internal static UntypedInt headerLen => /* 6 * uint16Len */ 12;
     public slice<Resource> Additionals;
 }
 
-[GoType("num:uint8")] partial struct section;
+partial struct section /*num:uint8*/;
 
 internal static section sectionNotStarted => /* iota */ 0;
 internal static section sectionHeader => 1;
@@ -370,7 +370,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 };
 
 // header is the wire format for a DNS message header.
-[GoType] partial struct Δheader {
+partial struct Δheader {
     internal uint16 id;
     internal uint16 bits;
     internal uint16 questions;
@@ -379,7 +379,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     internal uint16 additionals;
 }
 
-[GoRecv] internal static uint16 count(this ref Δheader h, section sec) {
+internal static uint16 count(this ref Δheader h, section sec) {
     var exprᴛ1 = sec;
     if (exprᴛ1 == sectionQuestions) {
         return h.questions;
@@ -398,7 +398,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 }
 
 // pack appends the wire format of the header to msg.
-[GoRecv] internal static slice<byte> pack(this ref Δheader h, slice<byte> msg) {
+internal static slice<byte> pack(this ref Δheader h, slice<byte> msg) {
     msg = packUint16(msg, h.id);
     msg = packUint16(msg, h.bits);
     msg = packUint16(msg, h.questions);
@@ -407,7 +407,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     return packUint16(msg, h.additionals);
 }
 
-[GoRecv] internal static (nint, error) unpack(this ref Δheader h, slice<byte> msg, nint off) {
+internal static (nint, error) unpack(this ref Δheader h, slice<byte> msg, nint off) {
     nint newOff = off;
     error err = default!;
     {
@@ -443,7 +443,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     return (newOff, default!);
 }
 
-[GoRecv] internal static Header header(this ref Δheader h) {
+internal static Header header(this ref Δheader h) {
     return new Header(
         ID: h.id,
         Response: ((uint16)(h.bits & (uint16)headerBitQR)) != 0,
@@ -459,17 +459,17 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 }
 
 // A Resource is a DNS resource record.
-[GoType] partial struct Resource {
+partial struct Resource {
     public ResourceHeader Header;
     public ResourceBody Body;
 }
 
-[GoRecv] public static @string GoString(this ref Resource r) {
+public static @string GoString(this ref Resource r) {
     return "dnsmessage.Resource{"u8 + "Header: "u8 + r.Header.GoString() + ", Body: &"u8 + r.Body.GoString() + "}"u8;
 }
 
 // A ResourceBody is a DNS resource record minus the header.
-[GoType] partial interface ResourceBody {
+partial interface ResourceBody {
     // pack packs a Resource except for its header.
     (slice<byte>, error) pack(slice<byte> msg, map<@string, uint16> compression, nint compressionOff);
     // realType returns the actual type of the Resource. This is used to
@@ -480,7 +480,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 }
 
 // pack appends the wire format of the Resource to msg.
-[GoRecv] internal static (slice<byte>, error) pack(this ref Resource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref Resource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     if (r.Body == default!) {
         return (msg, errNilResouceBody);
     }
@@ -517,7 +517,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 // Parser is safe to copy to preserve the parsing state.
 //
 // Note that there is no requirement to fully skip or parse the message.
-[GoType] partial struct Parser {
+partial struct Parser {
     internal slice<byte> msg;
     internal Δheader header;
     internal section section;
@@ -530,7 +530,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 }
 
 // Start parses the header and enables the parsing of Questions.
-[GoRecv] public static (Header, error) Start(this ref Parser p, slice<byte> msg) {
+public static (Header, error) Start(this ref Parser p, slice<byte> msg) {
     if (p.msg != default!) {
         p = new Parser(nil);
     }
@@ -545,7 +545,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     return (p.header.header(), default!);
 }
 
-[GoRecv] internal static error checkAdvance(this ref Parser p, section sec) {
+internal static error checkAdvance(this ref Parser p, section sec) {
     if (p.section < sec) {
         return ErrNotStarted;
     }
@@ -561,7 +561,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     return default!;
 }
 
-[GoRecv] internal static (Resource, error) resource(this ref Parser p, section sec) {
+internal static (Resource, error) resource(this ref Parser p, section sec) {
     Resource r = new();
     error err = default!;
     (r.Header, err) = p.resourceHeader(sec);
@@ -577,7 +577,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     return (r.ΔClone(), default!);
 }
 
-[GoRecv] internal static (ResourceHeader, error) resourceHeader(this ref Parser p, section sec) {
+internal static (ResourceHeader, error) resourceHeader(this ref Parser p, section sec) {
     if (p.resHeaderValid) {
         p.off = p.resHeaderOffset;
     }
@@ -599,7 +599,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     return (hdr.ΔClone(), default!);
 }
 
-[GoRecv] internal static error skipResource(this ref Parser p, section sec) {
+internal static error skipResource(this ref Parser p, section sec) {
     if (p.resHeaderValid && p.section == sec) {
         nint newOff = p.off + (nint)p.resHeaderLength;
         if (newOff > len(p.msg)) {
@@ -625,7 +625,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 }
 
 // Question parses a single Question.
-[GoRecv] public static (ΔQuestion, error) Question(this ref Parser p) {
+public static (ΔQuestion, error) Question(this ref Parser p) {
     {
         var errΔ1 = p.checkAdvance(sectionQuestions); if (errΔ1 != default!) {
             return (new ΔQuestion(nil), errΔ1);
@@ -650,7 +650,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 }
 
 // AllQuestions parses all Questions.
-[GoRecv] public static (slice<ΔQuestion>, error) AllQuestions(this ref Parser p) {
+public static (slice<ΔQuestion>, error) AllQuestions(this ref Parser p) {
     // Multiple questions are valid according to the spec,
     // but servers don't actually support them. There will
     // be at most one question here.
@@ -671,7 +671,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 }
 
 // SkipQuestion skips a single Question.
-[GoRecv] public static error SkipQuestion(this ref Parser p) {
+public static error SkipQuestion(this ref Parser p) {
     {
         var errΔ1 = p.checkAdvance(sectionQuestions); if (errΔ1 != default!) {
             return errΔ1;
@@ -697,7 +697,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 }
 
 // SkipAllQuestions skips all Questions.
-[GoRecv] public static error SkipAllQuestions(this ref Parser p) {
+public static error SkipAllQuestions(this ref Parser p) {
     while (ᐧ) {
         {
             var err = p.SkipQuestion(); if (AreEqual(err, ErrSectionDone)){
@@ -711,17 +711,17 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 }
 
 // AnswerHeader parses a single Answer ResourceHeader.
-[GoRecv] public static (ResourceHeader, error) AnswerHeader(this ref Parser p) {
+public static (ResourceHeader, error) AnswerHeader(this ref Parser p) {
     return p.resourceHeader(sectionAnswers);
 }
 
 // Answer parses a single Answer Resource.
-[GoRecv] public static (Resource, error) Answer(this ref Parser p) {
+public static (Resource, error) Answer(this ref Parser p) {
     return p.resource(sectionAnswers);
 }
 
 // AllAnswers parses all Answer Resources.
-[GoRecv] public static (slice<Resource>, error) AllAnswers(this ref Parser p) {
+public static (slice<Resource>, error) AllAnswers(this ref Parser p) {
     // The most common query is for A/AAAA, which usually returns
     // a handful of IPs.
     //
@@ -748,12 +748,12 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 //
 // It does not perform a complete validation of the resource header, which means
 // it may return a nil error when the [AnswerHeader] would actually return an error.
-[GoRecv] public static error SkipAnswer(this ref Parser p) {
+public static error SkipAnswer(this ref Parser p) {
     return p.skipResource(sectionAnswers);
 }
 
 // SkipAllAnswers skips all Answer Resources.
-[GoRecv] public static error SkipAllAnswers(this ref Parser p) {
+public static error SkipAllAnswers(this ref Parser p) {
     while (ᐧ) {
         {
             var err = p.SkipAnswer(); if (AreEqual(err, ErrSectionDone)){
@@ -767,17 +767,17 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 }
 
 // AuthorityHeader parses a single Authority ResourceHeader.
-[GoRecv] public static (ResourceHeader, error) AuthorityHeader(this ref Parser p) {
+public static (ResourceHeader, error) AuthorityHeader(this ref Parser p) {
     return p.resourceHeader(sectionAuthorities);
 }
 
 // Authority parses a single Authority Resource.
-[GoRecv] public static (Resource, error) Authority(this ref Parser p) {
+public static (Resource, error) Authority(this ref Parser p) {
     return p.resource(sectionAuthorities);
 }
 
 // AllAuthorities parses all Authority Resources.
-[GoRecv] public static (slice<Resource>, error) AllAuthorities(this ref Parser p) {
+public static (slice<Resource>, error) AllAuthorities(this ref Parser p) {
     // Authorities contains SOA in case of NXDOMAIN and friends,
     // otherwise it is empty.
     //
@@ -804,12 +804,12 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 //
 // It does not perform a complete validation of the resource header, which means
 // it may return a nil error when the [AuthorityHeader] would actually return an error.
-[GoRecv] public static error SkipAuthority(this ref Parser p) {
+public static error SkipAuthority(this ref Parser p) {
     return p.skipResource(sectionAuthorities);
 }
 
 // SkipAllAuthorities skips all Authority Resources.
-[GoRecv] public static error SkipAllAuthorities(this ref Parser p) {
+public static error SkipAllAuthorities(this ref Parser p) {
     while (ᐧ) {
         {
             var err = p.SkipAuthority(); if (AreEqual(err, ErrSectionDone)){
@@ -823,17 +823,17 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 }
 
 // AdditionalHeader parses a single Additional ResourceHeader.
-[GoRecv] public static (ResourceHeader, error) AdditionalHeader(this ref Parser p) {
+public static (ResourceHeader, error) AdditionalHeader(this ref Parser p) {
     return p.resourceHeader(sectionAdditionals);
 }
 
 // Additional parses a single Additional Resource.
-[GoRecv] public static (Resource, error) Additional(this ref Parser p) {
+public static (Resource, error) Additional(this ref Parser p) {
     return p.resource(sectionAdditionals);
 }
 
 // AllAdditionals parses all Additional Resources.
-[GoRecv] public static (slice<Resource>, error) AllAdditionals(this ref Parser p) {
+public static (slice<Resource>, error) AllAdditionals(this ref Parser p) {
     // Additionals usually contain OPT, and sometimes A/AAAA
     // glue records.
     //
@@ -860,12 +860,12 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 //
 // It does not perform a complete validation of the resource header, which means
 // it may return a nil error when the [AdditionalHeader] would actually return an error.
-[GoRecv] public static error SkipAdditional(this ref Parser p) {
+public static error SkipAdditional(this ref Parser p) {
     return p.skipResource(sectionAdditionals);
 }
 
 // SkipAllAdditionals skips all Additional Resources.
-[GoRecv] public static error SkipAllAdditionals(this ref Parser p) {
+public static error SkipAllAdditionals(this ref Parser p) {
     while (ᐧ) {
         {
             var err = p.SkipAdditional(); if (AreEqual(err, ErrSectionDone)){
@@ -882,7 +882,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-[GoRecv] public static (ΔCNAMEResource, error) CNAMEResource(this ref Parser p) {
+public static (ΔCNAMEResource, error) CNAMEResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeCNAME) {
         return (new ΔCNAMEResource(nil), ErrNotStarted);
     }
@@ -900,7 +900,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-[GoRecv] public static (ΔMXResource, error) MXResource(this ref Parser p) {
+public static (ΔMXResource, error) MXResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeMX) {
         return (new ΔMXResource(nil), ErrNotStarted);
     }
@@ -918,7 +918,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-[GoRecv] public static (ΔNSResource, error) NSResource(this ref Parser p) {
+public static (ΔNSResource, error) NSResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeNS) {
         return (new ΔNSResource(nil), ErrNotStarted);
     }
@@ -936,7 +936,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-[GoRecv] public static (ΔPTRResource, error) PTRResource(this ref Parser p) {
+public static (ΔPTRResource, error) PTRResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypePTR) {
         return (new ΔPTRResource(nil), ErrNotStarted);
     }
@@ -954,7 +954,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-[GoRecv] public static (ΔSOAResource, error) SOAResource(this ref Parser p) {
+public static (ΔSOAResource, error) SOAResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeSOA) {
         return (new ΔSOAResource(nil), ErrNotStarted);
     }
@@ -972,7 +972,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-[GoRecv] public static (ΔTXTResource, error) TXTResource(this ref Parser p) {
+public static (ΔTXTResource, error) TXTResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeTXT) {
         return (new ΔTXTResource(nil), ErrNotStarted);
     }
@@ -990,7 +990,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-[GoRecv] public static (ΔSRVResource, error) SRVResource(this ref Parser p) {
+public static (ΔSRVResource, error) SRVResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeSRV) {
         return (new ΔSRVResource(nil), ErrNotStarted);
     }
@@ -1008,7 +1008,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-[GoRecv] public static (ΔAResource, error) AResource(this ref Parser p) {
+public static (ΔAResource, error) AResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeA) {
         return (new ΔAResource(nil), ErrNotStarted);
     }
@@ -1026,7 +1026,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-[GoRecv] public static (ΔAAAAResource, error) AAAAResource(this ref Parser p) {
+public static (ΔAAAAResource, error) AAAAResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeAAAA) {
         return (new ΔAAAAResource(nil), ErrNotStarted);
     }
@@ -1044,7 +1044,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-[GoRecv] public static (ΔOPTResource, error) OPTResource(this ref Parser p) {
+public static (ΔOPTResource, error) OPTResource(this ref Parser p) {
     if (!p.resHeaderValid || p.resHeaderType != TypeOPT) {
         return (new ΔOPTResource(nil), ErrNotStarted);
     }
@@ -1062,7 +1062,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-[GoRecv] public static (ΔUnknownResource, error) UnknownResource(this ref Parser p) {
+public static (ΔUnknownResource, error) UnknownResource(this ref Parser p) {
     if (!p.resHeaderValid) {
         return (new ΔUnknownResource(nil), ErrNotStarted);
     }
@@ -1077,7 +1077,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 }
 
 // Unpack parses a full Message.
-[GoRecv] public static error Unpack(this ref Message m, slice<byte> msg) {
+public static error Unpack(this ref Message m, slice<byte> msg) {
     Parser p = default!;
     error err = default!;
     {
@@ -1109,13 +1109,13 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 }
 
 // Pack packs a full Message.
-[GoRecv] public static (slice<byte>, error) Pack(this ref Message m) {
+public static (slice<byte>, error) Pack(this ref Message m) {
     return m.AppendPack(new slice<byte>(0, packStartingCap));
 }
 
 // AppendPack is like Pack but appends the full Message to b and returns the
 // extended buffer.
-[GoRecv] public static (slice<byte>, error) AppendPack(this ref Message m, slice<byte> b) {
+public static (slice<byte>, error) AppendPack(this ref Message m, slice<byte> b) {
     // Validate the lengths. It is very unlikely that anyone will try to
     // pack more than 65535 of any particular type, but it is possible and
     // we should fail gracefully.
@@ -1184,7 +1184,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoRecv] public static @string GoString(this ref Message m) {
+public static @string GoString(this ref Message m) {
     @string s = "dnsmessage.Message{Header: "u8 + m.Header.GoString() + ", "u8 + "Questions: []dnsmessage.Question{"u8;
     if (len(m.Questions) > 0) {
         s += m.Questions[0].GoString();
@@ -1235,7 +1235,7 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
 //	// Repeat adding sections as necessary.
 //	buf, err := b.Finish()
 //	// If err is nil, buf[2:] will contain the built bytes.
-[GoType] partial struct Builder {
+partial struct Builder {
     // msg is the storage for the message being built.
     internal slice<byte> msg;
     // section keeps track of the current section being built.
@@ -1283,11 +1283,11 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
 // messages.
 //
 // Compression should be enabled before any sections are added for best results.
-[GoRecv] public static void EnableCompression(this ref Builder b) {
+public static void EnableCompression(this ref Builder b) {
     b.compression = new map<@string, uint16>{};
 }
 
-[GoRecv] internal static error startCheck(this ref Builder b, section s) {
+internal static error startCheck(this ref Builder b, section s) {
     if (b.section <= sectionNotStarted) {
         return ErrNotStarted;
     }
@@ -1298,7 +1298,7 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
 }
 
 // StartQuestions prepares the builder for packing Questions.
-[GoRecv] public static error StartQuestions(this ref Builder b) {
+public static error StartQuestions(this ref Builder b) {
     {
         var err = b.startCheck(sectionQuestions); if (err != default!) {
             return err;
@@ -1309,7 +1309,7 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
 }
 
 // StartAnswers prepares the builder for packing Answers.
-[GoRecv] public static error StartAnswers(this ref Builder b) {
+public static error StartAnswers(this ref Builder b) {
     {
         var err = b.startCheck(sectionAnswers); if (err != default!) {
             return err;
@@ -1320,7 +1320,7 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
 }
 
 // StartAuthorities prepares the builder for packing Authorities.
-[GoRecv] public static error StartAuthorities(this ref Builder b) {
+public static error StartAuthorities(this ref Builder b) {
     {
         var err = b.startCheck(sectionAuthorities); if (err != default!) {
             return err;
@@ -1331,7 +1331,7 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
 }
 
 // StartAdditionals prepares the builder for packing Additionals.
-[GoRecv] public static error StartAdditionals(this ref Builder b) {
+public static error StartAdditionals(this ref Builder b) {
     {
         var err = b.startCheck(sectionAdditionals); if (err != default!) {
             return err;
@@ -1395,7 +1395,7 @@ public static error Question(this ж<Builder> Ꮡb, ΔQuestion q) {
     return default!;
 }
 
-[GoRecv] internal static error checkResourceSection(this ref Builder b) {
+internal static error checkResourceSection(this ref Builder b) {
     if (b.section < sectionAnswers) {
         return ErrNotStarted;
     }
@@ -1799,7 +1799,7 @@ public static error UnknownResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔU
 }
 
 // Finish ends message building and generates a binary message.
-[GoRecv] public static (slice<byte>, error) Finish(this ref Builder b) {
+public static (slice<byte>, error) Finish(this ref Builder b) {
     if (b.section < sectionHeader) {
         return (default!, ErrNotStarted);
     }
@@ -1811,7 +1811,7 @@ public static error UnknownResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔU
 
 // A ResourceHeader is the header of a DNS resource record. There are
 // many types of DNS resource records, but they all share the same header.
-[GoType] partial struct ResourceHeader {
+partial struct ResourceHeader {
     // Name is the domain name for which this resource record pertains.
     public Name Name;
     // Type is the type of DNS resource record.
@@ -1832,14 +1832,14 @@ public static error UnknownResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔU
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoRecv] public static @string GoString(this ref ResourceHeader h) {
+public static @string GoString(this ref ResourceHeader h) {
     return "dnsmessage.ResourceHeader{"u8 + "Name: "u8 + h.Name.GoString() + ", "u8 + "Type: "u8 + h.Type.GoString() + ", "u8 + "Class: "u8 + h.Class.GoString() + ", "u8 + "TTL: "u8 + printUint32(h.TTL) + ", "u8 + "Length: "u8 + printUint16(h.Length) + "}"u8;
 }
 
 // pack appends the wire format of the ResourceHeader to oldMsg.
 //
 // lenOff is the offset in msg where the Length field was packed.
-[GoRecv] internal static (slice<byte> msg, nint lenOff, error err) pack(this ref ResourceHeader h, slice<byte> oldMsg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte> msg, nint lenOff, error err) pack(this ref ResourceHeader h, slice<byte> oldMsg, map<@string, uint16> compression, nint compressionOff) {
     slice<byte> msg = default!;
     nint lenOff = default!;
     error err = default!;
@@ -1858,7 +1858,7 @@ public static error UnknownResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔU
     return (msg, lenOff, default!);
 }
 
-[GoRecv] internal static (nint, error) unpack(this ref ResourceHeader h, slice<byte> msg, nint off) {
+internal static (nint, error) unpack(this ref ResourceHeader h, slice<byte> msg, nint off) {
     nint newOff = off;
     error err = default!;
     {
@@ -1895,7 +1895,7 @@ public static error UnknownResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔU
 // lenOff is the offset of the ResourceHeader.Length field in msg.
 //
 // preLen is the length that msg was before the ResourceBody was packed.
-[GoRecv] internal static error fixLen(this ref ResourceHeader h, slice<byte> msg, nint lenOff, nint preLen) {
+internal static error fixLen(this ref ResourceHeader h, slice<byte> msg, nint lenOff, nint preLen) {
     nint conLen = len(msg) - preLen;
     if (conLen > (nint)(unchecked((uint16)(~(uint16)0)))) {
         return errResTooLong;
@@ -1918,7 +1918,7 @@ internal static UntypedInt edns0DNSSECOKMask => 0x00ff8000;
 // SetEDNS0 configures h for EDNS(0).
 //
 // The provided extRCode must be an extended RCode.
-[GoRecv] public static error SetEDNS0(this ref ResourceHeader h, nint udpPayloadLen, RCode extRCode, bool dnssecOK) {
+public static error SetEDNS0(this ref ResourceHeader h, nint udpPayloadLen, RCode extRCode, bool dnssecOK) {
     h.Name = new Name(Data: new byte[]{(rune)'.'}.array(255), Length: 1); // RFC 6891 section 6.1.2
     h.Type = TypeOPT;
     h.Class = ((Class)(uint16)udpPayloadLen);
@@ -1930,14 +1930,14 @@ internal static UntypedInt edns0DNSSECOKMask => 0x00ff8000;
 }
 
 // DNSSECAllowed reports whether the DNSSEC OK bit is set.
-[GoRecv] public static bool DNSSECAllowed(this ref ResourceHeader h) {
+public static bool DNSSECAllowed(this ref ResourceHeader h) {
     return (uint32)(h.TTL & (uint32)edns0DNSSECOKMask) == edns0DNSSECOK; // RFC 6891 section 6.1.3
 }
 
 // ExtendedRCode returns an extended RCode.
 //
 // The provided rcode must be the RCode in DNS message header.
-[GoRecv] public static RCode ExtendedRCode(this ref ResourceHeader h, RCode rcode) {
+public static RCode ExtendedRCode(this ref ResourceHeader h, RCode rcode) {
     if ((uint32)(h.TTL & (uint32)ednsVersionMask) == edns0Version) {
         // RFC 6891 section 6.1.3
         return (RCode)(((RCode)(uint16)(((h.TTL >> (int)(24)) << (int)(4)))) | rcode);
@@ -2090,7 +2090,7 @@ internal static UntypedInt nonEncodedNameMax => 254;
 
 // A Name is a non-encoded and non-escaped domain name. It is used instead of strings to avoid
 // allocations.
-[GoType] partial struct Name {
+partial struct Name {
     public array<byte> Data = new(255);
     public uint8 Length;
 }
@@ -2124,7 +2124,7 @@ public static @string String(this Name n) {
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoRecv] public static @string GoString(this ref Name n) {
+public static @string GoString(this ref Name n) {
     return @"dnsmessage.MustNewName("""u8 + printString(n.Data.slice(0, n.Length)) + @""")"u8;
 }
 
@@ -2135,7 +2135,7 @@ public static @string String(this Name n) {
 //
 // The compression map will be updated with new domain suffixes. If compression
 // is nil, compression will not be used.
-[GoRecv] internal static (slice<byte>, error) pack(this ref Name n, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref Name n, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     var oldMsg = msg;
     if (n.Length > nonEncodedNameMax) {
         return (default!, errNameTooLong);
@@ -2198,7 +2198,7 @@ public static @string String(this Name n) {
 }
 
 // unpack unpacks a domain name.
-[GoRecv] internal static (nint, error) unpack(this ref Name n, slice<byte> msg, nint off) {
+internal static (nint, error) unpack(this ref Name n, slice<byte> msg, nint off) {
     // currOff is the current working offset.
     nint currOff = off;
     // newOff is the offset where the next record will start. Pointers lead
@@ -2324,14 +2324,14 @@ break_Loop:;
 }
 
 // A Question is a DNS query.
-[GoType] partial struct ΔQuestion {
+partial struct ΔQuestion {
     public Name Name;
     public Type Type;
     public Class Class;
 }
 
 // pack appends the wire format of the Question to msg.
-[GoRecv] internal static (slice<byte>, error) pack(this ref ΔQuestion q, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref ΔQuestion q, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     (msg, var err) = q.Name.pack(msg, compression, compressionOff);
     if (err != default!) {
         return (msg, new nestedErrorжerror(Ꮡ(new nestedError("Name"u8, err))));
@@ -2341,7 +2341,7 @@ break_Loop:;
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoRecv] public static @string GoString(this ref ΔQuestion q) {
+public static @string GoString(this ref ΔQuestion q) {
     return "dnsmessage.Question{"u8 + "Name: "u8 + q.Name.GoString() + ", "u8 + "Type: "u8 + q.Type.GoString() + ", "u8 + "Class: "u8 + q.Class.GoString() + "}"u8;
 }
 
@@ -2436,21 +2436,21 @@ internal static (ResourceBody, nint, error) unpackResourceBody(slice<byte> msg, 
 }
 
 // A CNAMEResource is a CNAME Resource record.
-[GoType] partial struct ΔCNAMEResource {
+partial struct ΔCNAMEResource {
     public Name CNAME;
 }
 
-[GoRecv] internal static Type realType(this ref ΔCNAMEResource r) {
+internal static Type realType(this ref ΔCNAMEResource r) {
     return TypeCNAME;
 }
 
 // pack appends the wire format of the CNAMEResource to msg.
-[GoRecv] internal static (slice<byte>, error) pack(this ref ΔCNAMEResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref ΔCNAMEResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     return r.CNAME.pack(msg, compression, compressionOff);
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoRecv] public static @string GoString(this ref ΔCNAMEResource r) {
+public static @string GoString(this ref ΔCNAMEResource r) {
     return "dnsmessage.CNAMEResource{CNAME: "u8 + r.CNAME.GoString() + "}"u8;
 }
 
@@ -2465,17 +2465,17 @@ internal static (ΔCNAMEResource, error) unpackCNAMEResource(slice<byte> msg, ni
 }
 
 // An MXResource is an MX Resource record.
-[GoType] partial struct ΔMXResource {
+partial struct ΔMXResource {
     public uint16 Pref;
     public Name MX;
 }
 
-[GoRecv] internal static Type realType(this ref ΔMXResource r) {
+internal static Type realType(this ref ΔMXResource r) {
     return TypeMX;
 }
 
 // pack appends the wire format of the MXResource to msg.
-[GoRecv] internal static (slice<byte>, error) pack(this ref ΔMXResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref ΔMXResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     var oldMsg = msg;
     msg = packUint16(msg, r.Pref);
     (msg, var err) = r.MX.pack(msg, compression, compressionOff);
@@ -2486,7 +2486,7 @@ internal static (ΔCNAMEResource, error) unpackCNAMEResource(slice<byte> msg, ni
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoRecv] public static @string GoString(this ref ΔMXResource r) {
+public static @string GoString(this ref ΔMXResource r) {
     return "dnsmessage.MXResource{"u8 + "Pref: "u8 + printUint16(r.Pref) + ", "u8 + "MX: "u8 + r.MX.GoString() + "}"u8;
 }
 
@@ -2505,21 +2505,21 @@ internal static (ΔMXResource, error) unpackMXResource(slice<byte> msg, nint off
 }
 
 // An NSResource is an NS Resource record.
-[GoType] partial struct ΔNSResource {
+partial struct ΔNSResource {
     public Name NS;
 }
 
-[GoRecv] internal static Type realType(this ref ΔNSResource r) {
+internal static Type realType(this ref ΔNSResource r) {
     return TypeNS;
 }
 
 // pack appends the wire format of the NSResource to msg.
-[GoRecv] internal static (slice<byte>, error) pack(this ref ΔNSResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref ΔNSResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     return r.NS.pack(msg, compression, compressionOff);
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoRecv] public static @string GoString(this ref ΔNSResource r) {
+public static @string GoString(this ref ΔNSResource r) {
     return "dnsmessage.NSResource{NS: "u8 + r.NS.GoString() + "}"u8;
 }
 
@@ -2534,21 +2534,21 @@ internal static (ΔNSResource, error) unpackNSResource(slice<byte> msg, nint off
 }
 
 // A PTRResource is a PTR Resource record.
-[GoType] partial struct ΔPTRResource {
+partial struct ΔPTRResource {
     public Name PTR;
 }
 
-[GoRecv] internal static Type realType(this ref ΔPTRResource r) {
+internal static Type realType(this ref ΔPTRResource r) {
     return TypePTR;
 }
 
 // pack appends the wire format of the PTRResource to msg.
-[GoRecv] internal static (slice<byte>, error) pack(this ref ΔPTRResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref ΔPTRResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     return r.PTR.pack(msg, compression, compressionOff);
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoRecv] public static @string GoString(this ref ΔPTRResource r) {
+public static @string GoString(this ref ΔPTRResource r) {
     return "dnsmessage.PTRResource{PTR: "u8 + r.PTR.GoString() + "}"u8;
 }
 
@@ -2563,7 +2563,7 @@ internal static (ΔPTRResource, error) unpackPTRResource(slice<byte> msg, nint o
 }
 
 // An SOAResource is an SOA Resource record.
-[GoType] partial struct ΔSOAResource {
+partial struct ΔSOAResource {
     public Name NS;
     public Name MBox;
     public uint32 Serial;
@@ -2576,12 +2576,12 @@ internal static (ΔPTRResource, error) unpackPTRResource(slice<byte> msg, nint o
     public uint32 MinTTL;
 }
 
-[GoRecv] internal static Type realType(this ref ΔSOAResource r) {
+internal static Type realType(this ref ΔSOAResource r) {
     return TypeSOA;
 }
 
 // pack appends the wire format of the SOAResource to msg.
-[GoRecv] internal static (slice<byte>, error) pack(this ref ΔSOAResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref ΔSOAResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     var oldMsg = msg;
     (msg, var err) = r.NS.pack(msg, compression, compressionOff);
     if (err != default!) {
@@ -2599,7 +2599,7 @@ internal static (ΔPTRResource, error) unpackPTRResource(slice<byte> msg, nint o
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoRecv] public static @string GoString(this ref ΔSOAResource r) {
+public static @string GoString(this ref ΔSOAResource r) {
     return "dnsmessage.SOAResource{"u8 + "NS: "u8 + r.NS.GoString() + ", "u8 + "MBox: "u8 + r.MBox.GoString() + ", "u8 + "Serial: "u8 + printUint32(r.Serial) + ", "u8 + "Refresh: "u8 + printUint32(r.Refresh) + ", "u8 + "Retry: "u8 + printUint32(r.Retry) + ", "u8 + "Expire: "u8 + printUint32(r.Expire) + ", "u8 + "MinTTL: "u8 + printUint32(r.MinTTL) + "}"u8;
 }
 
@@ -2639,16 +2639,16 @@ internal static (ΔSOAResource, error) unpackSOAResource(slice<byte> msg, nint o
 }
 
 // A TXTResource is a TXT Resource record.
-[GoType] partial struct ΔTXTResource {
+partial struct ΔTXTResource {
     public slice<@string> TXT;
 }
 
-[GoRecv] internal static Type realType(this ref ΔTXTResource r) {
+internal static Type realType(this ref ΔTXTResource r) {
     return TypeTXT;
 }
 
 // pack appends the wire format of the TXTResource to msg.
-[GoRecv] internal static (slice<byte>, error) pack(this ref ΔTXTResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref ΔTXTResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     var oldMsg = msg;
     foreach (var (_, s) in r.TXT) {
         error err = default!;
@@ -2664,7 +2664,7 @@ internal static (ΔSOAResource, error) unpackSOAResource(slice<byte> msg, nint o
 private static readonly @string dnsmessageTXTResourceTxtˢ = "dnsmessage.TXTResource{TXT: []string{"u8;
 
 // GoString implements fmt.GoStringer.GoString.
-[GoRecv] public static @string GoString(this ref ΔTXTResource r) {
+public static @string GoString(this ref ΔTXTResource r) {
     @string s = dnsmessageTXTResourceTxtˢ;
     if (len(r.TXT) == 0) {
         return s + "}}"u8;
@@ -2697,19 +2697,19 @@ internal static (ΔTXTResource, error) unpackTXTResource(slice<byte> msg, nint o
 }
 
 // An SRVResource is an SRV Resource record.
-[GoType] partial struct ΔSRVResource {
+partial struct ΔSRVResource {
     public uint16 Priority;
     public uint16 Weight;
     public uint16 Port;
     public Name Target; // Not compressed as per RFC 2782.
 }
 
-[GoRecv] internal static Type realType(this ref ΔSRVResource r) {
+internal static Type realType(this ref ΔSRVResource r) {
     return TypeSRV;
 }
 
 // pack appends the wire format of the SRVResource to msg.
-[GoRecv] internal static (slice<byte>, error) pack(this ref ΔSRVResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref ΔSRVResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     var oldMsg = msg;
     msg = packUint16(msg, r.Priority);
     msg = packUint16(msg, r.Weight);
@@ -2722,7 +2722,7 @@ internal static (ΔTXTResource, error) unpackTXTResource(slice<byte> msg, nint o
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoRecv] public static @string GoString(this ref ΔSRVResource r) {
+public static @string GoString(this ref ΔSRVResource r) {
     return "dnsmessage.SRVResource{"u8 + "Priority: "u8 + printUint16(r.Priority) + ", "u8 + "Weight: "u8 + printUint16(r.Weight) + ", "u8 + "Port: "u8 + printUint16(r.Port) + ", "u8 + "Target: "u8 + r.Target.GoString() + "}"u8;
 }
 
@@ -2749,21 +2749,21 @@ internal static (ΔSRVResource, error) unpackSRVResource(slice<byte> msg, nint o
 }
 
 // An AResource is an A Resource record.
-[GoType] partial struct ΔAResource {
+partial struct ΔAResource {
     public array<byte> A = new(4);
 }
 
-[GoRecv] internal static Type realType(this ref ΔAResource r) {
+internal static Type realType(this ref ΔAResource r) {
     return TypeA;
 }
 
 // pack appends the wire format of the AResource to msg.
-[GoRecv] internal static (slice<byte>, error) pack(this ref ΔAResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref ΔAResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     return (packBytes(msg, r.A[..]), default!);
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoRecv] public static @string GoString(this ref ΔAResource r) {
+public static @string GoString(this ref ΔAResource r) {
     return "dnsmessage.AResource{"u8 + "A: [4]byte{"u8 + printByteSlice(r.A[..]) + "}}"u8;
 }
 
@@ -2778,21 +2778,21 @@ internal static (ΔAResource, error) unpackAResource(slice<byte> msg, nint off) 
 }
 
 // An AAAAResource is an AAAA Resource record.
-[GoType] partial struct ΔAAAAResource {
+partial struct ΔAAAAResource {
     public array<byte> AAAA = new(16);
 }
 
-[GoRecv] internal static Type realType(this ref ΔAAAAResource r) {
+internal static Type realType(this ref ΔAAAAResource r) {
     return TypeAAAA;
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoRecv] public static @string GoString(this ref ΔAAAAResource r) {
+public static @string GoString(this ref ΔAAAAResource r) {
     return "dnsmessage.AAAAResource{"u8 + "AAAA: [16]byte{"u8 + printByteSlice(r.AAAA[..]) + "}}"u8;
 }
 
 // pack appends the wire format of the AAAAResource to msg.
-[GoRecv] internal static (slice<byte>, error) pack(this ref ΔAAAAResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref ΔAAAAResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     return (packBytes(msg, r.AAAA[..]), default!);
 }
 
@@ -2810,7 +2810,7 @@ internal static (ΔAAAAResource, error) unpackAAAAResource(slice<byte> msg, nint
 //
 // The pseudo resource record is part of the extension mechanisms for DNS
 // as defined in RFC 6891.
-[GoType] partial struct ΔOPTResource {
+partial struct ΔOPTResource {
     public slice<Option> Options;
 }
 
@@ -2818,21 +2818,21 @@ internal static (ΔAAAAResource, error) unpackAAAAResource(slice<byte> msg, nint
 //
 // The message option is part of the extension mechanisms for DNS as
 // defined in RFC 6891.
-[GoType] partial struct Option {
+partial struct Option {
     public uint16 Code; // option code
     public slice<byte> Data;
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoRecv] public static @string GoString(this ref Option o) {
+public static @string GoString(this ref Option o) {
     return "dnsmessage.Option{"u8 + "Code: "u8 + printUint16(o.Code) + ", "u8 + "Data: []byte{"u8 + printByteSlice(o.Data) + "}}"u8;
 }
 
-[GoRecv] internal static Type realType(this ref ΔOPTResource r) {
+internal static Type realType(this ref ΔOPTResource r) {
     return TypeOPT;
 }
 
-[GoRecv] internal static (slice<byte>, error) pack(this ref ΔOPTResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref ΔOPTResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     foreach (var (_, opt) in r.Options) {
         msg = packUint16(msg, opt.Code);
         var l = (uint16)len(opt.Data);
@@ -2846,7 +2846,7 @@ internal static (ΔAAAAResource, error) unpackAAAAResource(slice<byte> msg, nint
 private static readonly @string dnsmessageOPTResourceˢ = "dnsmessage.OPTResource{Options: []dnsmessage.Option{"u8;
 
 // GoString implements fmt.GoStringer.GoString.
-[GoRecv] public static @string GoString(this ref ΔOPTResource r) {
+public static @string GoString(this ref ΔOPTResource r) {
     @string s = dnsmessageOPTResourceˢ;
     if (len(r.Options) == 0) {
         return s + "}}"u8;
@@ -2885,22 +2885,22 @@ internal static (ΔOPTResource, error) unpackOPTResource(slice<byte> msg, nint o
 }
 
 // An UnknownResource is a catch-all container for unknown record types.
-[GoType] partial struct ΔUnknownResource {
+partial struct ΔUnknownResource {
     public Type Type;
     public slice<byte> Data;
 }
 
-[GoRecv] internal static Type realType(this ref ΔUnknownResource r) {
+internal static Type realType(this ref ΔUnknownResource r) {
     return r.Type;
 }
 
 // pack appends the wire format of the UnknownResource to msg.
-[GoRecv] internal static (slice<byte>, error) pack(this ref ΔUnknownResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
+internal static (slice<byte>, error) pack(this ref ΔUnknownResource r, slice<byte> msg, map<@string, uint16> compression, nint compressionOff) {
     return (packBytes(msg, r.Data[..]), default!);
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoRecv] public static @string GoString(this ref ΔUnknownResource r) {
+public static @string GoString(this ref ΔUnknownResource r) {
     return "dnsmessage.UnknownResource{"u8 + "Type: "u8 + r.Type.GoString() + ", "u8 + "Data: []byte{"u8 + printByteSlice(r.Data) + "}}"u8;
 }
 

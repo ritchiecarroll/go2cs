@@ -61,7 +61,7 @@ internal static void applyTo<S>(S v, Action<S> f) {
     f(v);
 }
 
-[GoType("[]nint")] partial struct namedInts;
+partial struct namedInts /*[]nint*/;
 
 internal static bool sliceEq<S, E>(S a, S b)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
@@ -77,7 +77,7 @@ internal static bool sliceEq<S, E>(S a, S b)
     return true;
 }
 
-[GoType("[]nint")] partial struct row;
+partial struct row /*[]nint*/;
 
 internal static bool rowsEqual(slice<row> a, slice<row> b) {
     return pairEqual<slice<row>, slice<row>, row, row>(a, b, sliceEq<row, nint>);

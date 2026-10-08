@@ -5,15 +5,15 @@ using fmt = fmt_package;
 partial class main_package {
 
 
-    [GoType("dyn")] partial struct Δtype {
+    partial struct Δtype /*dyn*/ {
         internal nint bx;
     }
 internal static ж<Δtype> bReserved = ((ж<Δtype>)nil);
 
-[GoType] partial struct Bee {
+partial struct Bee {
 }
 
-[GoType("dyn")] internal partial struct probe_inner {
+internal partial struct probe_inner /*dyn*/ {
     internal nint n;
 }
 

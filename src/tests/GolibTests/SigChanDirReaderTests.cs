@@ -22,6 +22,10 @@ public class SigChanDirReaderTests
     [GoSigChanDir("NotAChannel", new[] { typeof(nint) }, new[] { GoChanDir.Recv }, new GoChanDir[0])]
     [GoSigChanDir("WrongCount", new[] { typeof(channel<nint>) }, new[] { GoChanDir.Recv }, new[] { GoChanDir.Recv })]
     [GoSigChanDir("Bidirectional", new[] { typeof(channel<nint>) }, new[] { GoChanDir.Unstamped }, new GoChanDir[0])]
+    // A generic method (face lift D2): a type built from a type parameter is keyed by its open definition, a bare
+    // type parameter by null.
+    [GoSigChanDir("GenericRecv", new[] { typeof(channel<>) }, new[] { GoChanDir.Recv }, new GoChanDir[0])]
+    [GoSigChanDir("GenericSend", new Type?[] { null, typeof(channel<>) }, new[] { GoChanDir.Unstamped, GoChanDir.Send }, new GoChanDir[0])]
     public static class Holder
     {
         public static void Recv(channel<nint> c) { }
@@ -31,6 +35,8 @@ public class SigChanDirReaderTests
         public static void WrongCount(channel<nint> c) { }
         public static void Bidirectional(channel<nint> c) { }
         public static void Unlisted(channel<nint> c) { }
+        public static void GenericRecv<T>(channel<T> c) { }
+        public static void GenericSend<T>(T x, channel<T> c) { }
     }
 
     private static MethodInfo M(string name) => typeof(Holder).GetMethod(name)!;
@@ -63,6 +69,13 @@ public class SigChanDirReaderTests
     {
         Assert.AreEqual((null, null), GoReflect.MethodSigChanDirs(M("Unlisted")));
         Assert.AreEqual((null, null), GoReflect.MethodSigChanDirs(M("Bidirectional")));
+    }
+
+    [TestMethod]
+    public void AGenericMethodIsReadThroughItsOpenKey()
+    {
+        CollectionAssert.AreEqual(new[] { GoChanDir.Recv }, GoReflect.FuncChanDirs((Action<channel<nint>>)Holder.GenericRecv<nint>).ins);
+        CollectionAssert.AreEqual(new[] { GoChanDir.Unstamped, GoChanDir.Send }, GoReflect.FuncChanDirs((Action<@string, channel<@string>>)Holder.GenericSend<@string>).ins);
     }
 
     [TestMethod]

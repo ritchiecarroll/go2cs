@@ -23,7 +23,7 @@ internal static @string cstring(slice<byte> b) {
     return ((@string)(b.slice(0, i)));
 }
 
-[GoType("[]byte")] partial struct StringTable;
+partial struct StringTable /*[]byte*/;
 
 internal static (StringTable, error) readStringTable(ref FileHeader fh, io.ReadSeeker r) {
     // COFF string table is located right after COFF symbol table.

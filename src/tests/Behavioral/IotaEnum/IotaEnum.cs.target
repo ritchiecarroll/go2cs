@@ -5,7 +5,7 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-[GoType] partial struct Type {
+partial struct Type {
     public uintptr Size_;
     public uintptr PtrBytes;
     public uint32 Hash;
@@ -19,7 +19,7 @@ partial class main_package {
     public TypeOff PtrToThis;
 }
 
-[GoType("num:uint8")] partial struct ΔKind;
+partial struct ΔKind /*num:uint8*/;
 
 public static ΔKind Invalid => /* iota */ 0;
 public static ΔKind Bool => 1;
@@ -86,17 +86,17 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [UnsafePointer] = "unsafe.Pointer"u8
 }.slice();
 
-[GoType("num:int32")] partial struct NameOff;
+partial struct NameOff /*num:int32*/;
 
-[GoType("num:int32")] partial struct TypeOff;
+partial struct TypeOff /*num:int32*/;
 
-[GoType("num:int32")] partial struct TextOff;
+partial struct TextOff /*num:int32*/;
 
 public static ΔKind KindDirectIface => /* 1 << 5 */ 32;
 public static ΔKind KindGCProg => /* 1 << 6 */ 64;
 public static ΔKind KindMask => /* (1 << 5) - 1 */ 31;
 
-[GoType("num:uint8")] partial struct TFlag;
+partial struct TFlag /*num:uint8*/;
 
 public static TFlag TFlagUncommon => /* 1 << 0 */ 1;
 public static TFlag TFlagExtraStar => /* 1 << 1 */ 2;
@@ -109,7 +109,7 @@ public static @unsafe.Pointer NoEscape(@unsafe.Pointer p) {
     return (@unsafe.Pointer)((uintptr)(x ^ 0));
 }
 
-[GoType] partial struct EmptyInterface {
+partial struct EmptyInterface {
     public ж<Type> Type;
     public @unsafe.Pointer Data;
 }
@@ -131,11 +131,11 @@ public static ж<Type> TypeFor<T>() {
     return TypeOf(((ж<T>)nil)).Elem();
 }
 
-[GoRecv] public static ΔKind Kind(this ref Type t) {
+public static ΔKind Kind(this ref Type t) {
     return (ΔKind)(t.Kind_ & KindMask);
 }
 
-[GoRecv] public static bool HasName(this ref Type t) {
+public static bool HasName(this ref Type t) {
     return (TFlag)(t.TFlag & TFlagNamed) != 0;
 }
 
@@ -155,7 +155,7 @@ public static ж<Type> Elem(this ж<Type> Ꮡt) {
     return default!;
 }
 
-[GoType] partial struct ΔMapType {
+partial struct ΔMapType {
     public partial ref Type Type { get; }
     public ж<Type> Key;
     public ж<Type> Elem;
@@ -176,7 +176,7 @@ public static ж<ΔMapType> MapType(this ж<Type> Ꮡt) {
     return Ꮡt.Reinterpret<Type, ΔMapType>();
 }
 
-[GoType] partial struct ΔArrayType {
+partial struct ΔArrayType {
     public partial ref Type Type { get; }
     public ж<Type> Elem;
     public ж<Type> Slice;

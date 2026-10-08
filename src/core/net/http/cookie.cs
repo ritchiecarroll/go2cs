@@ -25,7 +25,7 @@ internal static ж<godebug.Setting> httpcookiemaxnum = godebug.New("httpcookiema
 // HTTP response or the Cookie header of an HTTP request.
 //
 // See https://tools.ietf.org/html/rfc6265 for details.
-[GoType] partial struct ΔCookie {
+partial struct ΔCookie {
     public @string Name;
     public @string Value;
     public bool Quoted; // indicates whether the Value was originally quoted
@@ -45,7 +45,7 @@ internal static ж<godebug.Setting> httpcookiemaxnum = godebug.New("httpcookiema
     public slice<@string> Unparsed; // Raw text of unparsed attribute-value pairs
 }
 
-[GoType("num:nint")] partial struct SameSite;
+partial struct SameSite /*num:nint*/;
 
 public static SameSite SameSiteDefaultMode => /* iota + 1 */ 1;
 public static SameSite SameSiteLaxMode => 2;

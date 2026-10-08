@@ -15,7 +15,7 @@ partial class runtime_package {
 // This is a variant of sync.RWMutex, for the runtime package.
 // Like mutex, rwmutex blocks the calling M.
 // It does not interact with the goroutine scheduler.
-[GoType] partial struct rwmutex {
+partial struct rwmutex {
     internal mutex rLock;    // protects readers, readerPass, writer
     internal muintptr readers; // list of pending readers
     internal uint32 readerPass;   // number of pending readers to skip readers list

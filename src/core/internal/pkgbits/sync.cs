@@ -46,7 +46,7 @@ internal static void walkFrames(slice<uintptr> pcs, Action<@string, nint, @strin
     }
 }
 
-[GoType("num:nint")] partial struct SyncMarker;
+partial struct SyncMarker /*num:nint*/;
 
 //go:generate stringer -type=SyncMarker -trimprefix=Sync
 internal static SyncMarker _ᴛ1ʗ => /* iota */ 0;

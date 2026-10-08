@@ -13,7 +13,7 @@ using @unsafe = unsafe_package;
 partial class runtime_package {
 
 // The Error interface identifies a run time error.
-[GoType] partial interface ΔError :
+partial interface ΔError :
     error
 {
     // RuntimeError is a no-op function but
@@ -24,20 +24,20 @@ partial class runtime_package {
 }
 
 // A TypeAssertionError explains a failed type assertion.
-[GoType] partial struct TypeAssertionError {
+partial struct TypeAssertionError {
     internal ж<_type> _interface;
     internal ж<_type> concrete;
     internal ж<_type> asserted;
     internal @string missingMethod; // one method needed by Interface, missing from Concrete
 }
 
-[GoRecv] public static void RuntimeError(this ref TypeAssertionError _) {
+public static void RuntimeError(this ref TypeAssertionError _) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string interfaceˢ = "interface"u8;
 
-[GoRecv] public static @string Error(this ref TypeAssertionError e) {
+public static @string Error(this ref TypeAssertionError e) {
     @string inter = interfaceˢ;
     if (e._interface != nil) {
         inter = toRType(e._interface).@string();
@@ -78,7 +78,7 @@ internal static slice<byte> itoa(slice<byte> buf, uint64 val) {
     return buf.slice(i);
 }
 
-[GoType("@string")] partial struct errorString;
+partial struct errorString /*@string*/;
 
 internal static void RuntimeError(this errorString e) {
 }
@@ -87,7 +87,7 @@ internal static @string Error(this errorString e) {
     return "runtime error: "u8 + ((@string)e);
 }
 
-[GoType] partial struct errorAddressString {
+partial struct errorAddressString {
     internal @string msg; // error message
     internal uintptr addr; // memory address where the error occurred
 }
@@ -108,7 +108,7 @@ internal static uintptr Addr(this errorAddressString e) {
     return e.addr;
 }
 
-[GoType("@string")] partial struct plainError;
+partial struct plainError /*@string*/;
 
 internal static void RuntimeError(this plainError e) {
 }
@@ -118,7 +118,7 @@ internal static @string Error(this plainError e) {
 }
 
 // A boundsError represents an indexing or slicing operation gone wrong.
-[GoType] partial struct boundsError {
+partial struct boundsError {
     internal int64 x;
     internal nint y;
     // Values in an index or slice expression can be signed or unsigned.
@@ -129,7 +129,7 @@ internal static @string Error(this plainError e) {
     internal boundsErrorCode code;
 }
 
-[GoType("num:uint8")] partial struct boundsErrorCode;
+partial struct boundsErrorCode /*num:uint8*/;
 
 internal static boundsErrorCode boundsIndex => /* iota */ 0; // s[x], 0 <= x < len(s) failed
 internal static boundsErrorCode boundsSliceAlen => 1; // s[?:x], 0 <= x <= len(s) failed
@@ -213,7 +213,7 @@ internal static @string Error(this boundsError e) {
     return ((@string)b);
 }
 
-[GoType] partial interface stringer {
+partial interface stringer {
     @string String();
 }
 

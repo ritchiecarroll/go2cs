@@ -184,7 +184,7 @@ internal static void debugCallWrap(uintptr dispatch) {
     gp.Value.asyncSafePoint = false;
 }
 
-[GoType] partial struct debugCallWrapArgs {
+partial struct debugCallWrapArgs {
     internal uintptr dispatch;
     internal ж<g> callingG;
 }

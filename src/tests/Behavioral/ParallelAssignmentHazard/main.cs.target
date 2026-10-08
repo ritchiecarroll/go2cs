@@ -32,7 +32,7 @@ internal static void Main() {
     fmt.Println(left, right);
 }
 
-[GoType] partial struct edge {
+partial struct edge {
     internal nint @out;
     internal nint arg;
 }

@@ -5,9 +5,9 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType("@string")] public partial struct named;
+public partial struct named /*@string*/;
 
-[GoType] partial struct box {
+partial struct box {
     public named S;
     public slice<byte> B;
 }

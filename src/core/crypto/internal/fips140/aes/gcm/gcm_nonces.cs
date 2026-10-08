@@ -58,7 +58,7 @@ public static (ж<GCMWithCounterNonce>, error) NewGCMWithCounterNonce(ж<aes.Blo
     return (Ꮡ(new GCMWithCounterNonce(g: g.Value)), default!);
 }
 
-[GoType] partial struct GCMWithCounterNonce {
+partial struct GCMWithCounterNonce {
     internal GCM g;
     internal bool ready;
     internal uint32 fixedName;
@@ -66,11 +66,11 @@ public static (ж<GCMWithCounterNonce>, error) NewGCMWithCounterNonce(ж<aes.Blo
     internal uint64 next;
 }
 
-[GoRecv] public static nint NonceSize(this ref GCMWithCounterNonce g) {
+public static nint NonceSize(this ref GCMWithCounterNonce g) {
     return gcmStandardNonceSize;
 }
 
-[GoRecv] public static nint Overhead(this ref GCMWithCounterNonce g) {
+public static nint Overhead(this ref GCMWithCounterNonce g) {
     return gcmTagSize;
 }
 
@@ -121,16 +121,16 @@ public static (ж<GCMForTLS12>, error) NewGCMForTLS12(ж<aes.Block> Ꮡcipher) {
     return (Ꮡ(new GCMForTLS12(g: g.Value)), default!);
 }
 
-[GoType] partial struct GCMForTLS12 {
+partial struct GCMForTLS12 {
     internal GCM g;
     internal uint64 next;
 }
 
-[GoRecv] public static nint NonceSize(this ref GCMForTLS12 g) {
+public static nint NonceSize(this ref GCMForTLS12 g) {
     return gcmStandardNonceSize;
 }
 
-[GoRecv] public static nint Overhead(this ref GCMForTLS12 g) {
+public static nint Overhead(this ref GCMForTLS12 g) {
     return gcmTagSize;
 }
 
@@ -168,18 +168,18 @@ public static (ж<GCMForTLS13>, error) NewGCMForTLS13(ж<aes.Block> Ꮡcipher) {
     return (Ꮡ(new GCMForTLS13(g: g.Value)), default!);
 }
 
-[GoType] partial struct GCMForTLS13 {
+partial struct GCMForTLS13 {
     internal GCM g;
     internal bool ready;
     internal uint64 mask;
     internal uint64 next;
 }
 
-[GoRecv] public static nint NonceSize(this ref GCMForTLS13 g) {
+public static nint NonceSize(this ref GCMForTLS13 g) {
     return gcmStandardNonceSize;
 }
 
-[GoRecv] public static nint Overhead(this ref GCMForTLS13 g) {
+public static nint Overhead(this ref GCMForTLS13 g) {
     return gcmTagSize;
 }
 
@@ -225,18 +225,18 @@ public static (ж<GCMForSSH>, error) NewGCMForSSH(ж<aes.Block> Ꮡcipher) {
     return (Ꮡ(new GCMForSSH(g: g.Value)), default!);
 }
 
-[GoType] partial struct GCMForSSH {
+partial struct GCMForSSH {
     internal GCM g;
     internal bool ready;
     internal uint64 start;
     internal uint64 next;
 }
 
-[GoRecv] public static nint NonceSize(this ref GCMForSSH g) {
+public static nint NonceSize(this ref GCMForSSH g) {
     return gcmStandardNonceSize;
 }
 
-[GoRecv] public static nint Overhead(this ref GCMForSSH g) {
+public static nint Overhead(this ref GCMForSSH g) {
     return gcmTagSize;
 }
 

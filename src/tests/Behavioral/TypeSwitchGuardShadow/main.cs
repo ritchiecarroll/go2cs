@@ -4,15 +4,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct A {
+partial struct A {
     internal nint v;
 }
 
-[GoType] partial struct B {
+partial struct B {
     internal nint v;
 }
 
-[GoType] partial struct C {
+partial struct C {
     internal nint v;
 }
 

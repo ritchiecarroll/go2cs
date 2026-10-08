@@ -6,7 +6,7 @@ using time = time_package;
 
 partial class main_package {
 
-[GoType] partial struct T {
+partial struct T {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

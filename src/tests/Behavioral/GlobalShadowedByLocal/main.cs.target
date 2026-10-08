@@ -5,13 +5,13 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct snapshot {
+partial struct snapshot {
     internal nint addr;
 }
 
 internal static snapshot Δtrace = new snapshot(addr: 42);
 
-[GoType] partial struct acquirer {
+partial struct acquirer {
     internal nint n;
 }
 
@@ -82,7 +82,7 @@ internal static partial nint constNestedInitShadow() {
     return -1;
 }
 
-[GoType] partial struct qbox {
+partial struct qbox {
     internal nint v;
 }
 
@@ -113,7 +113,7 @@ internal static void Main() {
     fmt.Println(mainFieldˢ, bi.Main, mainField(bi));
 }
 
-[GoType] partial struct buildRec {
+partial struct buildRec {
     public @string Main;
     public @string Path;
 }

@@ -14,7 +14,7 @@ namespace go.container;
 partial class list_package {
 
 // Element is an element of a linked list.
-[GoType] partial struct Element {
+partial struct Element {
     // Next and previous pointers in the doubly-linked list of elements.
     // To simplify the implementation, internally a list l is implemented
     // as a ring, such that &l.root is both the next element of the last
@@ -28,7 +28,7 @@ partial class list_package {
 }
 
 // Next returns the next list element or nil.
-[GoRecv] public static ж<Element> Next(this ref Element e) {
+public static ж<Element> Next(this ref Element e) {
     {
         var p = e.next; if (e.list != nil && p != e.list.of(List.Ꮡroot)) {
             return p;
@@ -38,7 +38,7 @@ partial class list_package {
 }
 
 // Prev returns the previous list element or nil.
-[GoRecv] public static ж<Element> Prev(this ref Element e) {
+public static ж<Element> Prev(this ref Element e) {
     {
         var p = e.prev; if (e.list != nil && p != e.list.of(List.Ꮡroot)) {
             return p;
@@ -49,7 +49,7 @@ partial class list_package {
 
 // List represents a doubly linked list.
 // The zero value for List is an empty list ready to use.
-[GoType] partial struct List {
+partial struct List {
     internal Element root; // sentinel list element, only &root, root.prev, and root.next are used
     internal nint len;    // current list length excluding (this) sentinel element
 }
@@ -71,12 +71,12 @@ public static ж<List> New() {
 
 // Len returns the number of elements of list l.
 // The complexity is O(1).
-[GoRecv] public static nint Len(this ref List l) {
+public static nint Len(this ref List l) {
     return l.len;
 }
 
 // Front returns the first element of list l or nil if the list is empty.
-[GoRecv] public static ж<Element> Front(this ref List l) {
+public static ж<Element> Front(this ref List l) {
     if (l.len == 0) {
         return default!;
     }
@@ -84,7 +84,7 @@ public static ж<List> New() {
 }
 
 // Back returns the last element of list l or nil if the list is empty.
-[GoRecv] public static ж<Element> Back(this ref List l) {
+public static ж<Element> Back(this ref List l) {
     if (l.len == 0) {
         return default!;
     }
@@ -121,7 +121,7 @@ internal static ж<Element> insertValue(this ж<List> Ꮡl, any v, ж<Element> �
 }
 
 // remove removes e from its list, decrements l.len
-[GoRecv] internal static void remove(this ref List l, ж<Element> Ꮡe) {
+internal static void remove(this ref List l, ж<Element> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     e.prev.Value.next = e.next;
@@ -133,7 +133,7 @@ internal static ж<Element> insertValue(this ж<List> Ꮡl, any v, ж<Element> �
 }
 
 // move moves e to next to at.
-[GoRecv] internal static void move(this ref List l, ж<Element> Ꮡe, ж<Element> Ꮡat) {
+internal static void move(this ref List l, ж<Element> Ꮡe, ж<Element> Ꮡat) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var at = ref Ꮡat.DerefOrNull();
 

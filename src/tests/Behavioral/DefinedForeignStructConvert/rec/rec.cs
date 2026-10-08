@@ -2,12 +2,12 @@ namespace go.DefinedForeignStructConvert;
 
 partial class rec_package {
 
-[GoType] partial struct Hidden {
+partial struct Hidden {
     public nint N;
     internal @string s;
 }
 
-[GoType] partial struct Open {
+partial struct Open {
     public nint N;
     public @string S;
 }

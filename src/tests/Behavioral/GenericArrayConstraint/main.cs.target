@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:uint16")] partial struct fieldElement;
+partial struct fieldElement /*num:uint16*/;
 
-[GoType("[4]fieldElement")] partial struct ringElement;
+partial struct ringElement /*[4]fieldElement*/;
 
-[GoType("[4]fieldElement")] partial struct nttElement;
+partial struct nttElement /*[4]fieldElement*/;
 
 internal static T /*s*/ addPoly<T>(T a, T b)
     where T : /* ~[4]go2cs/GenericArrayConstraint.fieldElement */ IArray<fieldElement>, new()

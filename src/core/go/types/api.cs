@@ -45,7 +45,7 @@ partial class types_package {
 // A "soft" error is an error that still permits a valid interpretation of a
 // package (such as "unused variable"); "hard" errors may lead to unpredictable
 // behavior if ignored.
-[GoType] partial struct ΔError {
+partial struct ΔError {
     public ж<token.FileSet> Fset; // file set for interpretation of Pos
     public tokenꓸPos Pos;      // error position
     public @string Msg;        // error message
@@ -67,16 +67,16 @@ public static @string Error(this ΔError err) {
 }
 
 // An ArgumentError holds an error associated with an argument index.
-[GoType] partial struct ArgumentError {
+partial struct ArgumentError {
     public nint Index;
     public error Err;
 }
 
-[GoRecv] public static @string Error(this ref ArgumentError e) {
+public static @string Error(this ref ArgumentError e) {
     return e.Err.Error();
 }
 
-[GoRecv] public static error Unwrap(this ref ArgumentError e) {
+public static error Unwrap(this ref ArgumentError e) {
     return e.Err;
 }
 
@@ -85,19 +85,19 @@ public static @string Error(this ΔError err) {
 // CAUTION: This interface does not support the import of locally
 // vendored packages. See https://golang.org/s/go15vendor.
 // If possible, external implementations should implement [ImporterFrom].
-[GoType] partial interface Importer {
+partial interface Importer {
     // Import returns the imported package for the given import path.
     // The semantics is like for ImporterFrom.ImportFrom except that
     // dir and mode are ignored (since they are not present).
     (ж<Package>, error) Import(@string path);
 }
 
-[GoType("num:nint")] partial struct ImportMode;
+partial struct ImportMode /*num:nint*/;
 
 // An ImporterFrom resolves import paths to packages; it
 // supports vendoring per https://golang.org/s/go15vendor.
 // Use go/importer to obtain an ImporterFrom implementation.
-[GoType] partial interface ImporterFrom :
+partial interface ImporterFrom :
     Importer
 {
     // ImportFrom returns the imported package for the given import
@@ -114,7 +114,7 @@ public static @string Error(this ΔError err) {
 
 // A Config specifies the configuration for type checking.
 // The zero value for Config is a ready-to-use default configuration.
-[GoType] partial struct Config {
+partial struct Config {
     // Context is the context used for resolving global identifiers. If nil, the
     // type checker will initialize this field with a newly created context.
     public ж<Context> Context;
@@ -194,7 +194,7 @@ public static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
 // Only the information for which a map is provided is collected.
 // If the package has type errors, the collected information may
 // be incomplete.
-[GoType] partial struct ΔInfo {
+partial struct ΔInfo {
     // Types maps expressions to their types, and for constant
     // expressions, also their values. Invalid expressions are
     // omitted.
@@ -311,13 +311,13 @@ public static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
     public map<ж<ast.File>, @string> FileVersions;
 }
 
-[GoRecv] internal static bool recordTypes(this ref ΔInfo info) {
+internal static bool recordTypes(this ref ΔInfo info) {
     return info.Types != default!;
 }
 
 // TypeOf returns the type of expression e, or nil if not found.
 // Precondition: the Types, Uses and Defs maps are populated.
-[GoRecv] public static ΔType TypeOf(this ref ΔInfo info, ast.Expr e) {
+public static ΔType TypeOf(this ref ΔInfo info, ast.Expr e) {
     {
         var (t, ok) = info.Types[e, ꟷ]; if (ok) {
             return t.Type;
@@ -342,7 +342,7 @@ public static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
 // it defines, not the type (*[TypeName]) it uses.
 //
 // Precondition: the Uses and Defs maps are populated.
-[GoRecv] public static Object ObjectOf(this ref ΔInfo info, ж<ast.Ident> Ꮡid) {
+public static Object ObjectOf(this ref ΔInfo info, ж<ast.Ident> Ꮡid) {
     {
         var obj = info.Defs[Ꮡid]; if (obj != default!) {
             return obj;
@@ -357,7 +357,7 @@ public static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
 // For dot-imports, the package name is ".".
 //
 // Precondition: the Defs and Implicts maps are populated.
-[GoRecv] public static ж<PkgName> PkgNameOf(this ref ΔInfo info, ж<ast.ImportSpec> Ꮡimp) {
+public static ж<PkgName> PkgNameOf(this ref ΔInfo info, ж<ast.ImportSpec> Ꮡimp) {
     ref var imp = ref Ꮡimp.DerefOrNull();
 
     Object obj = default!;
@@ -372,7 +372,7 @@ public static void srcimporter_setUsesCgo(ж<Config> Ꮡconf) {
 
 // TypeAndValue reports the type and value (for constants)
 // of the corresponding expression.
-[GoType] partial struct TypeAndValue {
+partial struct TypeAndValue {
     internal operandMode mode;
     public ΔType Type;
     public constant.Value Value;
@@ -435,7 +435,7 @@ public static bool HasOk(this TypeAndValue tv) {
 // function instantiations. For type instantiations, [Type] will be of dynamic
 // type *[Named]. For function instantiations, [Type] will be of dynamic type
 // *Signature.
-[GoType] partial struct Instance {
+partial struct Instance {
     public ж<TypeList> TypeArgs;
     public ΔType Type;
 }
@@ -443,12 +443,12 @@ public static bool HasOk(this TypeAndValue tv) {
 // An Initializer describes a package-level variable, or a list of variables in case
 // of a multi-valued initialization expression, and the corresponding initialization
 // expression.
-[GoType] partial struct Initializer {
+partial struct Initializer {
     public slice<ж<Var>> Lhs; // var Lhs = Rhs
     public ast.Expr Rhs;
 }
 
-[GoRecv] public static @string String(this ref Initializer init) {
+public static @string String(this ref Initializer init) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     foreach (var (i, lhs) in init.Lhs) {
         if (i > 0) {

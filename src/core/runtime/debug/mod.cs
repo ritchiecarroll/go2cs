@@ -36,7 +36,7 @@ public static (ж<BuildInfo> info, bool ok) ReadBuildInfo() {
 }
 
 // BuildInfo represents the build information read from a Go binary.
-[GoType] partial struct BuildInfo {
+partial struct BuildInfo {
     // GoVersion is the version of the Go toolchain that built the binary
     // (for example, "go1.19.2").
     public @string GoVersion;
@@ -53,7 +53,7 @@ public static (ж<BuildInfo> info, bool ok) ReadBuildInfo() {
 }
 
 // A Module describes a single module included in a build.
-[GoType] partial struct Module {
+partial struct Module {
     public @string Path; // module path
     public @string Version; // module version
     public @string Sum; // checksum
@@ -80,7 +80,7 @@ public static (ж<BuildInfo> info, bool ok) ReadBuildInfo() {
 //   - vcs.revision: the revision identifier for the current commit or checkout
 //   - vcs.time: the modification time associated with vcs.revision, in RFC3339 format
 //   - vcs.modified: true or false indicating whether the source tree had local modifications
-[GoType] partial struct BuildSetting {
+partial struct BuildSetting {
     // Key and Value describe the build setting.
     // Key must not contain an equals sign, space, tab, or newline.
     // Value must not contain newlines ('\n').
@@ -102,7 +102,7 @@ private static readonly @string modˢ = "mod"u8;
 private static readonly @string depˢ = "dep"u8;
 
 // String returns a string representation of a [BuildInfo].
-[GoRecv] public static @string String(this ref BuildInfo bi) {
+public static @string String(this ref BuildInfo bi) {
     var buf = @new<strings.Builder>();
     if (bi.GoVersion != ""u8) {
         fmt.Fprintf(new strings_BuilderжWriter(buf), "go\t%s\n"u8, bi.GoVersion);

@@ -95,7 +95,7 @@ internal static void usage(this ж<Checker> Ꮡcheck, ж<ΔScope> Ꮡscope) {
     }
 }
 
-[GoType("num:nuint")] partial struct stmtContext;
+partial struct stmtContext /*num:nuint*/;
 
 internal static stmtContext breakOk => /* 1 << iota */ 1;
 internal static stmtContext continueOk => 2;
@@ -170,13 +170,13 @@ internal static void multipleDefaults(this ж<Checker> Ꮡcheck, slice<ast.Stmt>
     }
 }
 
-[GoRecv] internal static void openScope(this ref Checker check, ast.Node node, @string comment) {
+internal static void openScope(this ref Checker check, ast.Node node, @string comment) {
     var scope = NewScope(check.scope, node.Pos(), node.End(), comment);
     check.recordScope(node, scope);
     check.scope = scope;
 }
 
-[GoRecv] internal static void closeScope(this ref Checker check) {
+internal static void closeScope(this ref Checker check) {
     check.scope = check.scope.Parent();
 }
 
@@ -255,7 +255,7 @@ internal static any goVal(constant.Value val) {
     return default!;
 }
 
-[GoType("map[any, slice<valueType>]")] partial struct valueMap;
+partial struct valueMap /*map[any, slice<valueType>]*/;
 
 // A valueMap maps a case value (of a basic Go type) to a list of positions
 // where the same case value appeared, together with the corresponding case
@@ -263,7 +263,7 @@ internal static any goVal(constant.Value val) {
 // Since two case values may have the same "underlying" value but different
 // types we need to also check the value's types (e.g., byte(1) vs myByte(1))
 // when the switch expression is of interface type.
-[GoType] partial struct valueType {
+partial struct valueType {
     internal tokenꓸPos pos;
     internal ΔType typ;
 }
@@ -315,7 +315,7 @@ break_L:;
 }
 
 // isNil reports whether the expression e denotes the predeclared value nil.
-[GoRecv] internal static bool isNil(this ref Checker check, ast.Expr e) {
+internal static bool isNil(this ref Checker check, ast.Expr e) {
     // The only way to express the nil value is by literally writing nil (possibly in parentheses).
     {
         var (name, _) = ast.Unparen(e)._<ж<ast.Ident>>(ᐧ); if (name != nil) {

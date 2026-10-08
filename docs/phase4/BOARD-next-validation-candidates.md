@@ -26503,5 +26503,115 @@ not (the standing ruling).
 `hooks/slog` read failing on the control and validated on the seat, in the same runs; its reason is not read here.
 
 — G
+## 2026-10-07, G: two caller-frame findings from the per-call seat (claude/g-caller-line-per-call)
+
+Both read on the windows box, Release, on CallerLineMultiLine as first written (`752753ceda`, all shapes printed). Neither is caused by the per-call table; both read identically without it.
+
+**2026-10-07, OPEN (G), THE INTERFACE-DISPATCH FRAME: a method called through an INTERFACE reports the go2cs-gen dispatch shim as its caller's frame.** Shape: `type liner interface{ Line() int }`, `type impl struct{}` whose value method `Line` reads `runtime.Caller(1)`, then `var li liner = impl{}` and `li.Line()` twice, one call per line. Go reads 99 and 100, the calling statement's lines. The converted program read 24 and 24: an unrelated line of `main.go`, the same for both calls, tiered and at TC0 alike. The call goes through the generated interface implementation's forwarder (a go2cs-gen emitted member), so `Caller(1)` lands on that frame, which maps to no Go line of its own. Go's itab dispatch adds no frame. The S5 shape was replaced in CallerLineMultiLine by a direct method call, so that guard stays single-cause. Not sized. Candidates: skip the dispatch forwarder's frame, as Go has none, or attribute it to its caller. The S5 shape is the repro.
+
+**2026-10-07, OPEN (G), PRE-EXISTING TC0 DRIFT INTO THE PREVIOUS STATEMENT.** At `DOTNET_TieredCompilation=0` (Release), a call inside a multi-line package var initializer, or inside a multi-line local sum, reads a line of the PREVIOUS statement. CallerLineMultiLine: `pkgSum` (three calls, one per line) read 141 = 3 x 47, pkgSlice's line, where tiered read 156 (its own statement, three times) and Go 159; the local sum S3 read 246 = 3 x 82, S2's line, where tiered read 261 and Go 264. Identical at `752753ceda` (no per-call table) and with it. Mechanism not read. The candidate is `returnSiteILOffset`'s "previous call's record" reading, meeting a full-opt layout whose reported offset falls before the statement's boundary. **The default `-tests` configuration IS Release with tiering off**, so default rows are exposed to it.
+## 2026-10-07, G: the caller-line family after TRAIN Q -- (b) the call-site record, (a) the launch directory, the third shape
+
+Three entries for the seats ruled for the train after Q, most important first. Every reading is G's own, on the windows box, Release; logrus readings are at local merges of TRAIN Q's union `13c0800c21` with the symbol-check follow-up `fbcd37f3e9`.
+
+**2026-10-07, OPEN, SIZED (G), the THIRD SHAPE: a call inside a MULTI-LINE statement reports the statement's first line.** Go answers a call's own line, the line of its `(` (measured, go1.24.13: `T{}.` / `M().` / `M(` / `)` reports 16 and 17; `f(1,` / `f(2))` reports 19 and 20; `f(` / `1)` reports 21). The converted frame answers the statement's line, because the position map carries one sentinel per statement and .NET line data is one sequence point per statement. logrus `TestNestedLoggingReportsCorrectCaller`'s second assert reads it (Go 475, C# 465, a six-call chain opened on 465). **This is the class of runtime `TestLineNumber`'s DISCLOSED structural entry** (census A2 D1b, owner ruling 2026-09-28: disclose, no emission change), whose named, unscheduled retirement plan is the owner's: "extra PDB sequence points written in the BUILD at each such call, never in the emitted C#". COUNTED (a parse-only census, controlled 4/4/1 on a planted file; invoked literals excluded; a compound statement counted by its header only): the standard library without `cmd`, production 2,795 files: **1,035** statements carry **3,190** calls on a later line than the statement's own, **1,936** of them AMBIGUOUS by callee name within their statement; tests 1,209 files: 1,151 / 6,506 / 5,150. Modules (production + test): logrus 5+39 statements / 11+72 calls, testify 28+122 / 54+697, cobra 17+27 / 40+58, pflag 4+9 / 5+75, x/sync 0+4 / 0+10. TODAY's records, for scale: the production `package_info.cs` position tables hold 2,165 records in 420,260 table bytes; all info files 3,070 records, 646,344 bytes; every `package_info.cs` together 2.94 MB. THE EMISSION'S LAYOUT matters to one route and not the other: the converted `symtab_test.cs` keeps a multi-line call's arguments on their own C# lines (`recordLines(lineNumber(), // 38` ... `lineNumber()); // 40`) but collapses a multi-line sum onto ONE C# line (`intLit = lineNumber() + lineNumber() + lineNumber(); // 36`, Go lines 34-36). TWO ROUTES, sized: (1) **the owner's: build-time PDB sequence points** at each such call. The build step must find each later-line call's IL offset (a re-derivation of the compiler's call order), the converter must ALSO record the call's C# line -> Go line (today's predecessor search answers the statement's Go line for every line inside it), and a call on a collapsed line can be told apart only by COLUMN, so the map would need a column key. Its reach is the widest: every consumer of sequence points (the debugger, `StackTrace` file and line, possibly Native AOT's symbols) reads it. Its cost is a build step in every converted project plus per-line sentinels. (2) **a per-call table in the record, read by the runtime**: entries (C# statement line, callee name, ordinal among same-name calls in the statement) -> Go line, written ONLY for calls on a later line than their statement. The reader consults it only for a frame whose statement line has entries; the callee is the call-site target the (b) fix already resolves, and the ordinal is a count of same-target calls from the statement's sequence point to the call site. That holds while the converter keeps same-name calls in source order within a statement, which is to be read at cut. It is layout-independent (the collapsed sum included) and needs no build step. Cost, about 10.8 bytes raw per entry: **about 46 KB of base64 over the production standard library**, +11% of today's production tables and +1.6% of `package_info.cs`; about 94 KB in the test-variant info files. A name-only key (no ordinal) is smaller but resolves only 1,254 of the 3,190 production calls; logrus's site is among them (`Print` is unique in its chain). Native AOT has no IL, so route (2) keeps today's statement line there. **RECOMMENDATION (G): route (2), the per-call table with the same-name ordinal**, because it fits the existing record-and-reader design and covers the collapsed layout that route (1) cannot reach by line. It needs the owner's word, because D1b's retirement plan is the owner's and names route (1). If (2) is cut, D1b's TestLineNumber disclosure is its acceptance row (it retires when the row reads green), with logrus's nested row beside it.
+
+**2026-10-07, CUT (G), (a) THE LAUNCH DIRECTORY, ruled (ii): `claude/g-launch-dir-remap` (`bc20fb77cb`, one commit on (b)).** A frame of the MODULE UNDER TEST names its staged copy (`runRoot/src/<modulePath>`), so a test's working directory and its Caller agree as they do under `go test`. Registered by the test host only, after staging; inherited by a re-exec'd helper; restored when the run ends. READ: logrus's nested row loses its directory mismatch (control: both asserts fail, directory differs; seat: only the third shape's line remains, directory the same); GolibTests, CNR 836, the full behavioral suite and `go test` unchanged against (b). **LATENT, recorded and NOT fixed (the ruling's scope):** the standard library has the same split. A stdlib host's cwd is its sandbox (`runRoot/src/<pkg>`, the GOROOT ancestry staged by link), while its frames root at the link-time root (`defaultGOROOT/src/<pkg>/...`). No banked stdlib row is known to compare the two. A row that does would read this entry, and the remap would extend to it by registering GOROOT/src -> runRoot/src.
+
+**2026-10-07, ACCEPTED IN SUBSTANCE for the train after Q (COORD), (b) THE CALL-SITE RECORD: `claude/g-caller-line-callee` (`b107d02e2c`).** Three failures read in BOTH arms of its gates, and of (a)'s, are PRE-EXISTING and named here so nobody re-finds them. (1)-(2) GolibTests at `DOTNET_TieredCompilation=0`, **2 failures**: `PanicFramesRound3Tests.Div32sOverflowKeepsItsGoSourceFrame` ("Different number of elements") and `PanicFramesRound4Tests.AnIntrinsifiedAtomicOnANilAddressSplicesNothing` ("expected NO splice; got runtime.gopanic | runtime.panicmem | runtime.sigpanic | panicframesprobe.atomicOnNil"). Arm counts: master `0457242046` 1557 passed / 2 failed / 23 skipped; (b) the same; (a) 1566 / 2 / 23. Tiered, all arms 0 failed. The fail sets are equal both ways in every pair. Unowned: they are TC0-only panic-frame reads. (3) runtime `-test-filter ^TestLineNumber$`, 1 C# fail in both arms: this is the **disclosed** D1b structural entry above, and the row reads **validated**. It is not a defect of (b).
+
+## 2026-10-07 — C1: the AOT-cost row ("Native AOT under `TrimMode=partial` compiles a package consumer's WHOLE go.* closure", 2026-10-06) on its other three RIDs — open
+
+**2026-10-07, the other three RIDs (C1):** the same publish on every shipped RID, `aot-smoke` run 37523439849 (`claude/c1-aot-smoke` `44f29d50e6`), one hosted job each:
+
+| RID | Native AOT publish | executable |
+|:--|--:|:--|
+| linux-x64 | 56 min (3,371 s) | exit 0, `PACKAGE-SYMBOLS: none` |
+| win-x64 | 71 min (4,272 s) | **exit 2**: "There is no metadata token available for the given member" -- a second Native AOT defect behind the trim one; the i9 read the stack (the converted runtime's call-site key at the first `runtime.Caller`), its fix a seat at the front of the train after Q |
+| osx-x64 | **293 min (17,598 s)** | exit 0, `PACKAGE-SYMBOLS: none` |
+| osx-arm64 | **did not finish**: cancelled at 6 h 00 m, GitHub's ceiling for a hosted job | not measured |
+
+The macOS figure is the one a user needs to see: on a hosted 3-core Apple-silicon runner the publish of this 31-assembly closure does not fit in six hours, and on Intel it takes nearly five. `aot-smoke` therefore reads three RIDs and prints osx-arm64 as NOT MEASURED on every leg (COORD ruling 2026-10-07, option 2; `claude/c1-aot-smoke-three-rids`); a larger or self-hosted Apple-silicon runner is the owner's call. The route above (golib's reflection annotated, then a full trim) is also the route to a macOS number that fits.
+
+
+## 2026-10-06 — C2: generated twins carry no Go array dims — RECORDED
+
+**What it is.** Several go2cs-gen emitters write a method whose parameter list mirrors a converted
+method: RecvGenerator's `this ж<T>` overload of a pointer-receiver method, StrGenerator's `@string`
+forwarder, and StructTypeTemplate's promoted forwarders and interface adapters. They rebuild each
+parameter from its type and name, so a `[GoArrayDims]` on the source parameter has never reached the
+twin. Face lift D (the `/*[N]*/` comment and the `[GoParamDims]` record) keeps that unchanged: its
+records name the converted method, never a twin. Before D and after it, a func value bound to a twin
+reads no dims for an array parameter. `reflect.TypeOf(f).In(i)` then answers a dims-less array, with
+`Len()` 0 and `String()` `[]uint8` for a `[N]uint8` parameter, the shape `reflect/value_impl.cs`
+records for the missing-cargo case.
+
+**Count**, from committed text at the record branch's base for D (`0a7280d5d4`), counting non-generic
+declarations that carry a dims stamp: production common 103 declarations, of which 17 have a pointer
+receiver (a `ж<T>` twin) and 3 an `@string` parameter (a string twin); production linux and darwin add
+3 and 2 string twins; tests 26, with 1 and 1; behavioral 18, with 1 pointer receiver. Promoted
+forwarders and adapters cannot be counted from text; a count needs the generated output of a build.
+
+**Trigger.** The first banked or module row whose verdict reads `In(i)` (or `reflect.New` of it) of a
+func value that resolves to a twin rather than to the converted method: a method value through a
+pointer, or a string-twin call path, taken as a func value and handed to reflection.
+
+— C2
+
+
+## 2026-10-06 — C2: two amendments after face lift D2 (dated; the rows above stand as written)
+
+**1. NEW-1b residuals, item 4 ("methods the generator skips"): the GENERIC half is LIFTED.** COORD ruled
+(2026-10-06 20:29Z) that a generic method moves. D2 keys it: a type built from a type parameter is spelled
+by its open definition (`typeof(channel<>)`), and a bare type parameter as null. The key is matched in golib
+by `SignatureMatches`, and go2cs-gen refuses at compile time (GO2CS0003, naming both methods) any key that
+would also match another method of the type. The other half of item 4 stands: a declaring type that is not
+partial everywhere, and an unmanaged pointer in the signature. Census at the cut: 0 generic signatures with
+a channel-direction marker in production, tests or behavioral.
+
+**2. The generated-twins row above gains a second shape: a method VALUE the converter lowers to a
+lambda.** `bb.Peek` for a value-receiver method is emitted as `(array<byte> p1) => bbʗ1.Peek(p1)`. A
+lambda the converter synthesizes carries no dims, so `reflect.TypeOf(bb.Peek).In(0).Len()` reads 0 where Go
+reads 6. Measured with a probe on two trees, with identical C# output on both (2 3 / 0 / 0 0 against Go's
+2 3 / 4 / 5 6): the pre-face-lift tree `3196a93cdc` and the record branch at D2. So the shape predates D,
+and D neither fixes nor worsens it, exactly as with the twins. The `ж` method value (`Ꮡbb.Put`) is the
+twins row's own case. **Trigger:** the first banked or module row whose verdict reads the parameter
+types of a method value.
+
+— C2
+
+
+## 2026-10-07 — C2: a func type's String() drops its array lengths, and a func type assertion ignores them — RECORDED
+
+**What it is.** P1 reported (`1166725b5a`, at master) that `reflect.TypeOf` of an instantiated generic
+function with an array parameter prints `func([]string) string` where Go prints `func([3]string) string`.
+Face lift D2 does not close it, and it is not about generics. Measured with probes converted, built and
+run on the record branch at `dfe0991c07` and on the pre-face-lift tree `3196a93cdc`, identical on both:
+
+| Go source | Go | go2cs |
+|---|---|---|
+| `reflect.TypeOf(pick[string]).String()`, `pick[T any](a [3]T) T` | `func([3]string) string` | `func([]string) string` |
+| `reflect.TypeOf(first[int]).String()`, `first[T any](x T, a [2]T) T` | `func(int, [2]int) int` | `func(int, []int) int` |
+| `reflect.TypeOf(plain).String()`, `plain(a [3]string) string` (not generic) | `func([3]string) string` | `func([]string) string` |
+| `reflect.TypeOf(s.Fill).String()`, `(*Stack[T]) Fill(a [4]T)` | `func([4]uint8)` | `func([]uint8)` |
+| `TypeOf(three) == TypeOf(four)`, `[3]string` against `[4]string` | `false` | `false` |
+| `TypeOf(three).In(0).Len()`, `TypeOf(four).In(0).Len()` | `3 4` | `3 4` |
+| `any(three).(func([4]string) string)`, its `ok` | `false` | `true` |
+
+**Why.** `GoReflect.TypeNaming.cs`, `goFuncTypeString`, names each position from the CLR delegate's
+parameter type. `array<T>` there carries no length, so it prints `[]T`. `In(i)` is right because it reads
+the recorded dims through the method (`paramDims`, face lift D); type identity measured right too (its
+mechanism not read here). The type assertion is a CLR delegate type test, and `Func<array<string>, string>`
+is one type for every array length, so it accepts a func value whose array length differs.
+
+**The fix's shape, not cut.** Build the func string from the same `In(i)`/`Out(i)` descriptors
+`rtype` hands out, so the name and the signature cannot disagree (the method's own remark already
+promises that). The assertion needs the dims in the check, which is a converter or golib change to the
+type-assertion path, sized separately.
+
+**Trigger.** A banked or module row whose verdict prints a func type holding an array (a `%T` or
+`reflect.Type.String()`), or asserts an `any` to a func type whose only difference is an array length.
+
+— C2
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -8,7 +8,7 @@ namespace go.go;
 partial class types_package {
 
 // TypeParamList holds a list of type parameters.
-[GoType] partial struct TypeParamList {
+partial struct TypeParamList {
     internal slice<ж<TypeParam>> tparams;
 }
 
@@ -19,7 +19,7 @@ public static nint Len(this ж<TypeParamList> Ꮡl) {
 }
 
 // At returns the i'th type parameter in the list.
-[GoRecv] public static ж<TypeParam> At(this ref TypeParamList l, nint i) {
+public static ж<TypeParam> At(this ref TypeParamList l, nint i) {
     return l.tparams[i];
 }
 
@@ -36,7 +36,7 @@ internal static slice<ж<TypeParam>> list(this ж<TypeParamList> Ꮡl) {
 }
 
 // TypeList holds a list of types.
-[GoType] partial struct TypeList {
+partial struct TypeList {
     internal slice<ΔType> types;
 }
 
@@ -55,7 +55,7 @@ public static nint Len(this ж<TypeList> Ꮡl) {
 }
 
 // At returns the i'th type in the list.
-[GoRecv] public static ΔType At(this ref TypeList l, nint i) {
+public static ΔType At(this ref TypeList l, nint i) {
     return l.types[i];
 }
 

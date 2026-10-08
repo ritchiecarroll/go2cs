@@ -26,9 +26,9 @@ internal static UntypedInt nmax => 5552;
 // The size of an Adler-32 checksum in bytes.
 public static UntypedInt ΔSize => 4;
 
-[GoType("num:uint32")] partial struct digest;
+partial struct digest /*num:uint32*/;
 
-[GoRecv] internal static void Reset(this ref digest d) {
+internal static void Reset(this ref digest d) {
     d = 1;
 }
 
@@ -43,24 +43,24 @@ public static hash.Hash32 New() {
     return new digestжHash32(d);
 }
 
-[GoRecv] internal static nint Size(this ref digest d) {
+internal static nint Size(this ref digest d) {
     return ΔSize;
 }
 
-[GoRecv] internal static nint BlockSize(this ref digest d) {
+internal static nint BlockSize(this ref digest d) {
     return 4;
 }
 
 internal static readonly @string magic = "adl\x01"u8;
 internal const nint marshaledSize = /* len(magic) + 4 */ 8;
 
-[GoRecv] internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) {
     b = append(b, magic.ꓸꓸꓸ);
     b = byteorder.BEAppendUint32(b, (uint32)(d));
     return (b, default!);
 }
 
-[GoRecv] internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
+internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
@@ -68,7 +68,7 @@ internal const nint marshaledSize = /* len(magic) + 4 */ 8;
 internal static readonly @string hashAdler32InvalidHashˢ = "hash/adler32: invalid hash state identifier"u8;
 internal static readonly @string hashAdler32InvalidHashˢ2 = "hash/adler32: invalid hash state size"u8;
 
-[GoRecv] internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
+internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
         return errors.New(hashAdler32InvalidHashˢ);
     }
@@ -109,16 +109,16 @@ internal static digest update(digest d, slice<byte> p) {
     return ((digest)((uint32)((s2 << (int)(16)) | s1)));
 }
 
-[GoRecv] internal static (nint nn, error err) Write(this ref digest d, slice<byte> p) {
+internal static (nint nn, error err) Write(this ref digest d, slice<byte> p) {
     d = update(d, p);
     return (len(p), default!);
 }
 
-[GoRecv] internal static uint32 Sum32(this ref digest d) {
+internal static uint32 Sum32(this ref digest d) {
     return (uint32)(d);
 }
 
-[GoRecv] internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
+internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     var s = (uint32)(d);
     return append(@in, (byte)((s >> (int)(24))), (byte)((s >> (int)(16))), (byte)((s >> (int)(8))), (byte)s);
 }

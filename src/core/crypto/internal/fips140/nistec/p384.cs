@@ -18,7 +18,7 @@ partial class nistec_package {
 internal static UntypedInt p384ElementLength => 48;
 
 // P384Point is a P384 point. The zero value is NOT valid.
-[GoType] partial struct P384Point {
+partial struct P384Point {
     // The point is represented in projective coordinates (X:Y:Z),
     // where x = X/Z and y = Y/Z.
     internal ж<fiat.P384Element> x, y, z;
@@ -159,14 +159,14 @@ internal static error p384CheckOnCurve(ж<fiat.P384Element> Ꮡx, ж<fiat.P384El
 // Bytes returns the uncompressed or infinity encoding of p, as specified in
 // SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the point at
 // infinity is shorter than all other encodings.
-[GoRecv] public static slice<byte> Bytes(this ref P384Point p) {
+public static slice<byte> Bytes(this ref P384Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(97), out var Ꮡout);
     return p.bytes(Ꮡout);
 }
 
-[GoRecv] internal static slice<byte> bytes(this ref P384Point p, [GoArrayDims(97)] ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes(this ref P384Point p, /*[97]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -183,7 +183,7 @@ internal static error p384CheckOnCurve(ж<fiat.P384Element> Ꮡx, ж<fiat.P384El
 
 // BytesX returns the encoding of the x-coordinate of p, as specified in SEC 1,
 // Version 2.0, Section 2.3.5, or an error if p is the point at infinity.
-[GoRecv] public static (slice<byte>, error) BytesX(this ref P384Point p) {
+public static (slice<byte>, error) BytesX(this ref P384Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(48), out var Ꮡout);
@@ -193,7 +193,7 @@ internal static error p384CheckOnCurve(ж<fiat.P384Element> Ꮡx, ж<fiat.P384El
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string p384PointIsThePointAtˢ = "P384 point is the point at infinity"u8;
 
-[GoRecv] internal static (slice<byte>, error) bytesX(this ref P384Point p, [GoArrayDims(48)] ж<array<byte>> Ꮡout) {
+internal static (slice<byte>, error) bytesX(this ref P384Point p, /*[48]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -207,14 +207,14 @@ internal static readonly @string p384PointIsThePointAtˢ = "P384 point is the po
 // BytesCompressed returns the compressed or infinity encoding of p, as
 // specified in SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the
 // point at infinity is shorter than all other encodings.
-[GoRecv] public static slice<byte> BytesCompressed(this ref P384Point p) {
+public static slice<byte> BytesCompressed(this ref P384Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(49), out var Ꮡout);
     return p.bytesCompressed(Ꮡout);
 }
 
-[GoRecv] internal static slice<byte> bytesCompressed(this ref P384Point p, [GoArrayDims(49)] ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytesCompressed(this ref P384Point p, /*[49]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -347,11 +347,11 @@ public static ж<P384Point> Select(this ж<P384Point> Ꮡq, ж<P384Point> Ꮡp1,
     return Ꮡq;
 }
 
-[GoType("[15]ж<P384Point>")] partial struct p384Table;
+partial struct p384Table /*[15]ж<P384Point>*/;
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time by iterating over every entry of the table. n must be in [0, 15].
-[GoRecv] internal static void Select(this ref p384Table table, ж<P384Point> Ꮡp, uint8 n) {
+internal static void Select(this ref p384Table table, ж<P384Point> Ꮡp, uint8 n) {
     if (n >= 16) {
         throw panic("nistec: internal error: p384Table called with out-of-bounds value");
     }
@@ -413,7 +413,7 @@ internal static ref sync.Once p384GeneratorTableOnce => ref Ꮡp384GeneratorTabl
 // generatorTable returns a sequence of p384Tables. The first table contains
 // multiples of G. Each successive table is the previous table doubled four
 // times.
-[GoRecv] internal static ж<array<p384Table>> generatorTable(this ref P384Point p) {
+internal static ж<array<p384Table>> generatorTable(this ref P384Point p) {
     Ꮡp384GeneratorTableOnce.Do(() => {
         p384GeneratorTable = Ꮡ(new array<p384Table>(96));
         var @base = NewP384Point().SetGenerator();

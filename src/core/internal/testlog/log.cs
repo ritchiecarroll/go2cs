@@ -16,7 +16,7 @@ partial class testlog_package {
 // The os package will invoke the interface's methods to indicate that
 // it is inspecting the given environment variables or files.
 // Multiple goroutines may call these methods simultaneously.
-[GoType] partial interface Interface {
+partial interface Interface {
     void Getenv(@string key);
     void Stat(@string @file);
     void Open(@string @file);

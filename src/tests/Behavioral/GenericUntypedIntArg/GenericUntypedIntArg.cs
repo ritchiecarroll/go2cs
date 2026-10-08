@@ -23,7 +23,7 @@ internal static S appendAll<S, E>(S s, params Span<E> vʗp)
     return appendꓸꓸꓸ<S, E>(s, v);
 }
 
-[GoType("[]nint")] partial struct numbers;
+partial struct numbers /*[]nint*/;
 
 internal static void Main() {
     var ints = new nint[]{10, 20, 30, 40}.slice();

@@ -4,15 +4,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:float64")] partial struct rf;
+partial struct rf /*num:float64*/;
 
-[GoType("num:float32")] partial struct rf32;
+partial struct rf32 /*num:float32*/;
 
-[GoType("num:nint")] partial struct ri;
+partial struct ri /*num:nint*/;
 
-[GoType("num:complex64")] partial struct rc64;
+partial struct rc64 /*num:complex64*/;
 
-[GoType("num:complex128")] partial struct rc128;
+partial struct rc128 /*num:complex128*/;
 
 internal static rf divA = ((rf)(3 / 2));
 internal static rf divB = ((rf)(7 / 2));

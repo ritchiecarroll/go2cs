@@ -23,16 +23,16 @@ internal static UntypedInt maxPhysHugePageSize => /* pallocChunkBytes */ 4194304
 internal static UntypedInt pagesPerReclaimerChunk => 512;
 internal const bool physPageAlignedStacks = /* GOOS == "openbsd" */ false;
 
-[GoType("dyn")] partial struct mheap_curArena {
+partial struct mheap_curArena /*dyn*/ {
     internal uintptr @base, end;
 }
 
-[GoType("dyn")] partial struct mheap_central {
+partial struct mheap_central /*dyn*/ {
     internal mcentral mcentral;
     internal array<byte> pad = new(24);
 }
 
-[GoType("dyn")] partial struct mheap_userArena {
+partial struct mheap_userArena /*dyn*/ {
     // arenaHints is a list of addresses at which to attempt to
     // add more heap arenas for user arena chunks. This is initially
     // populated with a set of general hint addresses, and grown with
@@ -52,7 +52,7 @@ internal const bool physPageAlignedStacks = /* GOOS == "openbsd" */ false;
 //
 // mheap must not be heap-allocated because it contains mSpanLists,
 // which must not be heap-allocated.
-[GoType] partial struct mheap {
+partial struct mheap {
     internal sys.NotInHeap _;
     // lock must only be acquired on the system stack, otherwise a g
     // could self-deadlock if its stack grows with the lock held.
@@ -198,7 +198,7 @@ internal static ref mheap mheap_ => ref Ꮡmheap_.Value;
 
 // A heapArena stores metadata for a heap arena. heapArenas are stored
 // outside of the Go heap and accessed via the mheap_.arenas index.
-[GoType] partial struct heapArena {
+partial struct heapArena {
     internal sys.NotInHeap _;
     // spans maps from virtual address page ID within this arena to *mspan.
     // For allocated spans, their pages map to the span itself.
@@ -260,14 +260,14 @@ internal static ref mheap mheap_ => ref Ꮡmheap_.Value;
 
 // arenaHint is a hint for where to grow the heap arenas. See
 // mheap_.arenaHints.
-[GoType] partial struct arenaHint {
+partial struct arenaHint {
     internal sys.NotInHeap _;
     internal uintptr addr;
     internal bool down;
     internal ж<arenaHint> next;
 }
 
-[GoType("num:uint8")] partial struct mSpanState;
+partial struct mSpanState /*num:uint8*/;
 
 // An mspan is a run of pages.
 //
@@ -295,7 +295,7 @@ internal static slice<@string> mSpanStateNames = new @string[]{
 // mSpanStateBox holds an atomic.Uint8 to provide atomic operations on
 // an mSpanState. This is a separate type to disallow accidental comparison
 // or assignment with mSpanState.
-[GoType] partial struct mSpanStateBox {
+partial struct mSpanStateBox {
     internal atomic.Uint8 s;
 }
 
@@ -315,13 +315,13 @@ internal static mSpanState get(this ж<mSpanStateBox> Ꮡb) {
 }
 
 // mSpanList heads a linked list of spans.
-[GoType] partial struct mSpanList {
+partial struct mSpanList {
     internal sys.NotInHeap _;
     internal ж<mspan> first; // first span in list, or nil if none
     internal ж<mspan> last; // last span in list, or nil if none
 }
 
-[GoType] partial struct mspan {
+partial struct mspan {
     internal sys.NotInHeap _;
     internal ж<mspan> next;  // next span in list, or nil if none
     internal ж<mspan> prev;  // previous span in list, or nil if none
@@ -410,11 +410,11 @@ internal static mSpanState get(this ж<mSpanStateBox> Ꮡb) {
     internal ж<_type> largeType;     // malloc header for large objects.
 }
 
-[GoRecv] internal static uintptr @base(this ref mspan s) {
+internal static uintptr @base(this ref mspan s) {
     return s.startAddr;
 }
 
-[GoRecv] internal static (uintptr size, uintptr n, uintptr total) layout(this ref mspan s) {
+internal static (uintptr size, uintptr n, uintptr total) layout(this ref mspan s) {
     uintptr size = default!;
     uintptr n = default!;
     uintptr total = default!;
@@ -473,7 +473,7 @@ internal static void recordspan(@unsafe.Pointer vh, @unsafe.Pointer Δp) {
     h.Value.allspans[len((~h).allspans) - 1] = s;
 }
 
-[GoType("num:uint8")] partial struct spanClass;
+partial struct spanClass /*num:uint8*/;
 
 internal static UntypedInt numSpanClasses => /* _NumSizeClasses << 1 */ 136;
 internal static spanClass tinySpanClass => /* spanClass(tinySizeClass<<1 | 1) */ 5;
@@ -514,7 +514,7 @@ internal static uintptr arenaBase(arenaIdx i) {
     return (uintptr)(nuint)i * (uintptr)heapArenaBytes + (uintptr)arenaBaseOffset;
 }
 
-[GoType("num:nuint")] partial struct arenaIdx;
+partial struct arenaIdx /*num:nuint*/;
 
 // l1 returns the "l1" portion of an arenaIdx.
 //
@@ -805,7 +805,7 @@ internal static uintptr reclaimChunk(this ж<mheap> Ꮡh, slice<arenaIdx> arenas
     return nFreed;
 }
 
-[GoType("num:uint8")] partial struct spanAllocType;
+partial struct spanAllocType /*num:uint8*/;
 
 internal static spanAllocType spanAllocHeap => /* iota */ 0;         // heap span
 internal static spanAllocType spanAllocStack => 1;        // stack span
@@ -868,7 +868,7 @@ internal static ж<mspan> allocManual(this ж<mheap> Ꮡh, uintptr npages, spanA
 
 // setSpans modifies the span map so [spanOf(base), spanOf(base+npage*pageSize))
 // is s.
-[GoRecv] internal static void setSpans(this ref mheap h, uintptr @base, uintptr npage, ж<mspan> Ꮡs) {
+internal static void setSpans(this ref mheap h, uintptr @base, uintptr npage, ж<mspan> Ꮡs) {
     var Δp = @base / (uintptr)pageSize;
     arenaIdx ai = arenaIndex(@base);
     var ha = h.arenas[ai.l1()].Value[ai.l2()];
@@ -895,7 +895,7 @@ internal static readonly @string potentiallyOverlappingInˢ = "potentially overl
 // critical for future page allocations.
 //
 // There are no locking constraints on this method.
-[GoRecv] internal static bool /*needZero*/ allocNeedsZero(this ref mheap h, uintptr @base, uintptr npage) {
+internal static bool /*needZero*/ allocNeedsZero(this ref mheap h, uintptr @base, uintptr npage) {
     bool needZero = default!;
 
     while (npage > 0) {
@@ -959,7 +959,7 @@ internal static readonly @string potentiallyOverlappingInˢ = "potentially overl
 // may be relaxed if its use is necessary elsewhere.
 //
 //go:systemstack
-[GoRecv] internal static ж<mspan> tryAllocMSpan(this ref mheap h) {
+internal static ж<mspan> tryAllocMSpan(this ref mheap h) {
     var pp = (~(~getg()).m).p.ptr();
     // If we don't have a p or the cache is empty, we can't do
     // anything here.
@@ -1607,12 +1607,12 @@ internal static void init(this ж<mspan> Ꮡspan, uintptr @base, uintptr npages)
     lockInit(Ꮡspan.of(mspan.Ꮡspeciallock), lockRankMspanSpecial);
 }
 
-[GoRecv] internal static bool inList(this ref mspan span) {
+internal static bool inList(this ref mspan span) {
     return span.list != nil;
 }
 
 // Initialize an empty doubly-linked list.
-[GoRecv] internal static void init(this ref mSpanList list) {
+internal static void init(this ref mSpanList list) {
     list.first = default!;
     list.last = default!;
 }
@@ -1644,7 +1644,7 @@ internal static void remove(this ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
     span.list = default!;
 }
 
-[GoRecv] internal static bool isEmpty(this ref mSpanList list) {
+internal static bool isEmpty(this ref mSpanList list) {
     return list.first == nil;
 }
 
@@ -1727,7 +1727,7 @@ internal static UntypedInt _KindSpecialReachable => 4;
 internal static UntypedInt _KindSpecialPinCounter => 5;
 internal static UntypedInt _KindSpecialCleanup => 6;
 
-[GoType] partial struct special {
+partial struct special {
     internal sys.NotInHeap _;
     internal ж<special> next; // linked list in span
     internal uintptr offset;  // span offset of object
@@ -1856,7 +1856,7 @@ internal static (ж<ж<special>>, bool) specialFindSplicePoint(this ж<mspan> �
 //
 // specialfinalizer is allocated from non-GC'd memory, so any heap
 // pointers must be specially handled.
-[GoType] partial struct specialfinalizer {
+partial struct specialfinalizer {
     internal sys.NotInHeap _;
     internal special special;
     internal ж<funcval> fn; // May be a heap pointer.
@@ -1918,7 +1918,7 @@ internal static void removefinalizer(@unsafe.Pointer Δp) {
 }
 
 // The described object has a cleanup set for it.
-[GoType] partial struct specialCleanup {
+partial struct specialCleanup {
     internal sys.NotInHeap _;
     internal special special;
     internal ж<funcval> fn;
@@ -1985,7 +1985,7 @@ internal static uint64 addCleanup(@unsafe.Pointer Δp, ж<funcval> Ꮡf) {
 //
 // specialWeakHandle is allocated from non-GC'd memory, so any heap
 // pointers must be specially handled.
-[GoType] partial struct specialWeakHandle {
+partial struct specialWeakHandle {
     internal sys.NotInHeap _;
     internal special special;
     // handle is a reference to the actual weak pointer.
@@ -2178,7 +2178,7 @@ internal static ж<atomic.Uintptr> getWeakHandle(@unsafe.Pointer Δp) {
 }
 
 // The described object is being heap profiled.
-[GoType] partial struct specialprofile {
+partial struct specialprofile {
     internal sys.NotInHeap _;
     internal special special;
     internal ж<bucket> b;
@@ -2203,20 +2203,20 @@ internal static void setprofilebucket(@unsafe.Pointer Δp, ж<bucket> Ꮡb) {
 
 // specialReachable tracks whether an object is reachable on the next
 // GC cycle. This is used by testing.
-[GoType] partial struct specialReachable {
+partial struct specialReachable {
     internal special special;
     internal bool done;
     internal bool reachable;
 }
 
 // specialPinCounter tracks whether an object is pinned multiple times.
-[GoType] partial struct specialPinCounter {
+partial struct specialPinCounter {
     internal special special;
     internal uintptr counter;
 }
 
 // specialsIter helps iterate over specials lists.
-[GoType] partial struct specialsIter {
+partial struct specialsIter {
     internal ж<ж<special>> pprev;
     internal ж<special> s;
 }
@@ -2227,18 +2227,18 @@ internal static specialsIter newSpecialsIter(ж<mspan> Ꮡspan) {
     return new specialsIter(Ꮡspan.of(mspan.Ꮡspecials), span.specials);
 }
 
-[GoRecv] internal static bool valid(this ref specialsIter i) {
+internal static bool valid(this ref specialsIter i) {
     return i.s != nil;
 }
 
-[GoRecv] internal static void next(this ref specialsIter i) {
+internal static void next(this ref specialsIter i) {
     i.pprev = i.s.of(special.Ꮡnext);
     i.s = i.pprev.ValueSlot;
 }
 
 // unlinkAndNext removes the current special from the list and moves
 // the iterator to the next special. It returns the unlinked special.
-[GoRecv] internal static ж<special> unlinkAndNext(this ref specialsIter i) {
+internal static ж<special> unlinkAndNext(this ref specialsIter i) {
     var cur = i.s;
     i.s = cur.Value.next;
     i.pprev.ValueSlot = i.s;
@@ -2303,7 +2303,7 @@ internal static void freeSpecial(ж<special> Ꮡs, @unsafe.Pointer Δp, uintptr 
 }
 
 // gcBits is an alloc/mark bitmap. This is always used as gcBits.x.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 1)] partial struct gcBits {
+[StructLayout(LayoutKind.Explicit, Size = 1)] partial struct gcBits {
     [FieldOffset(0)] internal readonly sys.NotInHeap _;
     [FieldOffset(0)] internal uint8 x;
 }
@@ -2323,12 +2323,12 @@ internal static uintptr gcBitsChunkBytes => /* uintptr(64 << 10) */ 65536;
 
 internal static uintptr gcBitsHeaderBytes => /* unsafe.Sizeof(gcBitsHeader{}) */ 16;
 
-[GoType] partial struct gcBitsHeader {
+partial struct gcBitsHeader {
     internal uintptr free; // free is the index into bits of the next free byte.
     internal uintptr next; // *gcBits triggers recursive type bug. (issue 14620)
 }
 
-[GoType] partial struct gcBitsArena {
+partial struct gcBitsArena {
     internal sys.NotInHeap _;
     // gcBitsHeader // side step recursive type bug (issue 14620) by including fields by hand.
     internal uintptr free; // free is the index into bits of the next free byte; read/write atomically
@@ -2337,7 +2337,7 @@ internal static uintptr gcBitsHeaderBytes => /* unsafe.Sizeof(gcBitsHeader{}) */
 }
 
 
-[GoType("dyn")] partial struct gcBitsArenasᴛ1 {
+partial struct gcBitsArenasᴛ1 /*dyn*/ {
     internal mutex @lock;
     internal ж<gcBitsArena> free;
     internal ж<gcBitsArena> next; // Read atomically. Write atomically under lock.

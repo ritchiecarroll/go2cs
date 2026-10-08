@@ -12,7 +12,7 @@ using go.@internal.trace.@event;
 
 partial class version_package {
 
-[GoType("num:uint32")] partial struct Version;
+partial struct Version /*num:uint32*/;
 
 public static Version Go111 => 11;
 public static Version Go119 => 19;

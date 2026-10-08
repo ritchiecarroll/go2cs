@@ -29,7 +29,7 @@ using go.path;
 
 partial class http_package {
 
-[GoType("@string")] partial struct Dir;
+partial struct Dir /*@string*/;
 
 // mapOpenError maps the provided non-nil error from opening name
 // to a possibly better non-nil error. In particular, it turns OS-specific errors
@@ -87,7 +87,7 @@ public static (File, error) Open(this Dir d, @string name) {
 //
 // This interface predates the [fs.FS] interface, which can be used instead:
 // the [FS] adapter function converts an fs.FS to a FileSystem.
-[GoType] partial interface FileSystem {
+partial interface FileSystem {
     (File, error) Open(@string name);
 }
 
@@ -95,7 +95,7 @@ public static (File, error) Open(this Dir d, @string name) {
 // served by the [FileServer] implementation.
 //
 // The methods should behave the same as those on an [*os.File].
-[GoType] partial interface File :
+partial interface File :
     io.Closer,
     io.Reader,
     io.Seeker,
@@ -105,13 +105,13 @@ public static (File, error) Open(this Dir d, @string name) {
     (slice<fs.FileInfo>, error) Readdir(nint count);
 }
 
-[GoType] partial interface anyDirs {
+partial interface anyDirs {
     nint len();
     @string name(nint i);
     bool isDir(nint i);
 }
 
-[GoType("[]global::go.io.fs_package.FileInfo")] partial struct fileInfoDirs;
+partial struct fileInfoDirs /*[]global::go.io.fs_package.FileInfo*/;
 
 internal static nint len(this fileInfoDirs d) {
     return builtin.len(d);
@@ -125,7 +125,7 @@ internal static @string name(this fileInfoDirs d, nint i) {
     return d[i].Name();
 }
 
-[GoType("[]global::go.io.fs_package.DirEntry")] partial struct dirEntryDirs;
+partial struct dirEntryDirs /*[]global::go.io.fs_package.DirEntry*/;
 
 internal static nint len(this dirEntryDirs d) {
     return builtin.len(d);
@@ -509,7 +509,7 @@ internal static bool etagWeakMatch(@string a, @string b) {
     return strings.TrimPrefix(a, "W/"u8) == strings.TrimPrefix(b, "W/"u8);
 }
 
-[GoType("num:nint")] partial struct condResult;
+partial struct condResult /*num:nint*/;
 
 internal static condResult condNone => /* iota */ 0;
 internal static condResult condTrue => 1;
@@ -956,15 +956,15 @@ internal static bool isSlashRune(rune r) {
     return r == (rune)'/' || r == (rune)'\\';
 }
 
-[GoType] partial struct fileHandler {
+partial struct fileHandler {
     internal FileSystem root;
 }
 
-[GoType] partial struct ioFS {
+partial struct ioFS {
     internal fs.FS fsys;
 }
 
-[GoType] partial struct ioFile {
+partial struct ioFile {
     internal fs.File @file;
 }
 
@@ -1077,7 +1077,7 @@ public static ΔHandler FileServerFS(fs.FS root) {
     return FileServer(FS(root));
 }
 
-[GoRecv] internal static void ServeHTTP(this ref fileHandler f, ResponseWriter w, ж<Request> Ꮡr) {
+internal static void ServeHTTP(this ref fileHandler f, ResponseWriter w, ж<Request> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     @string upath = r.URL.Value.Path;
@@ -1089,7 +1089,7 @@ public static ΔHandler FileServerFS(fs.FS root) {
 }
 
 // httpRange specifies the byte range to be sent to the client.
-[GoType] partial struct httpRange {
+partial struct httpRange {
     internal int64 start, length;
 }
 
@@ -1188,9 +1188,9 @@ internal static (slice<httpRange>, error) parseRange(@string s, int64 size) {
     return (ranges, default!);
 }
 
-[GoType("num:int64")] partial struct countingWriter;
+partial struct countingWriter /*num:int64*/;
 
-[GoRecv] internal static (nint n, error err) Write(this ref countingWriter w, slice<byte> p) {
+internal static (nint n, error err) Write(this ref countingWriter w, slice<byte> p) {
     w += ((countingWriter)(int64)builtin.len(p));
     return (builtin.len(p), default!);
 }

@@ -5,12 +5,12 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[4]byte")] partial struct Sum;
+partial struct Sum /*[4]byte*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string bWasReadBeforeItWasˢ = "B was read before it was initialized"u8;
 
-internal static (Sum, error) build([GoArrayDims(4)] array<byte> src) {
+internal static (Sum, error) build(/*[4]*/ array<byte> src) {
     src = src.Clone();
 
     if (src[0] == 0) {

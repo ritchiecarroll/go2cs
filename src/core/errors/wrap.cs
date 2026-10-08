@@ -9,7 +9,7 @@ using abi = @internal.abi_package;
 
 partial class errors_package {
 
-[GoType("dyn")] internal partial interface Unwrap_type {
+internal partial interface Unwrap_type /*dyn*/ {
     error Unwrap();
 }
 
@@ -52,11 +52,11 @@ public static bool Is(error err, error target) {
     return @is(err, target, isComparable);
 }
 
-[GoType("dyn")] internal partial interface is_type {
+internal partial interface is_type /*dyn*/ {
     bool Is(error _);
 }
 
-[GoType("dyn")] internal partial interface is_typeᴛ1 {
+internal partial interface is_typeᴛ1 /*dyn*/ {
     slice<error> Unwrap();
 }
 
@@ -129,7 +129,7 @@ public static bool As(error err, any target) {
     return @as(err, target, val, targetType);
 }
 
-[GoType("dyn")] internal partial interface as_type {
+internal partial interface as_type /*dyn*/ {
     bool As(any _);
 }
 

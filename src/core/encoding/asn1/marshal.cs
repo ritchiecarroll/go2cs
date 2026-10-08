@@ -20,14 +20,14 @@ internal static encoder byte00Encoder = ((byteEncoder)0x00);
 internal static encoder byteFFEncoder = ((byteEncoder)0xff);
 
 // encoder represents an ASN.1 element that is waiting to be marshaled.
-[GoType] partial interface encoder {
+partial interface encoder {
     // Len returns the number of bytes needed to marshal this element.
     nint Len();
     // Encode encodes this element by writing Len() bytes to dst.
     void Encode(slice<byte> dst);
 }
 
-[GoType("num:byte")] partial struct byteEncoder;
+partial struct byteEncoder /*num:byte*/;
 
 internal static nint Len(this byteEncoder c) {
     return 1;
@@ -37,7 +37,7 @@ internal static void Encode(this byteEncoder c, slice<byte> dst) {
     dst[0] = (byte)c;
 }
 
-[GoType("[]byte")] partial struct bytesEncoder;
+partial struct bytesEncoder /*[]byte*/;
 
 internal static nint Len(this bytesEncoder b) {
     return len(b);
@@ -49,7 +49,7 @@ internal static void Encode(this bytesEncoder b, slice<byte> dst) {
     }
 }
 
-[GoType("@string")] partial struct stringEncoder;
+partial struct stringEncoder /*@string*/;
 
 internal static nint Len(this stringEncoder s) {
     return len(s);
@@ -61,7 +61,7 @@ internal static void Encode(this stringEncoder s, slice<byte> dst) {
     }
 }
 
-[GoType("[]encoder")] partial struct multiEncoder;
+partial struct multiEncoder /*[]encoder*/;
 
 internal static nint Len(this multiEncoder m) {
     nint size = default!;
@@ -79,7 +79,7 @@ internal static void Encode(this multiEncoder m, slice<byte> dst) {
     }
 }
 
-[GoType("[]encoder")] partial struct setEncoder;
+partial struct setEncoder /*[]encoder*/;
 
 internal static nint Len(this setEncoder s) {
     nint size = default!;
@@ -117,7 +117,7 @@ internal static void Encode(this setEncoder s, slice<byte> dst) {
     }
 }
 
-[GoType] partial struct taggedEncoder {
+partial struct taggedEncoder {
     // scratch contains temporary space for encoding the tag and length of
     // an element in order to avoid extra allocations.
     internal array<byte> scratch = new(8);
@@ -125,16 +125,16 @@ internal static void Encode(this setEncoder s, slice<byte> dst) {
     internal encoder body;
 }
 
-[GoRecv] internal static nint Len(this ref taggedEncoder t) {
+internal static nint Len(this ref taggedEncoder t) {
     return t.tag.Len() + t.body.Len();
 }
 
-[GoRecv] internal static void Encode(this ref taggedEncoder t, slice<byte> dst) {
+internal static void Encode(this ref taggedEncoder t, slice<byte> dst) {
     t.tag.Encode(dst);
     t.body.Encode(dst.slice(t.tag.Len()));
 }
 
-[GoType("num:int64")] partial struct int64Encoder;
+partial struct int64Encoder /*num:int64*/;
 
 internal static nint Len(this int64Encoder i) {
     nint n = 1;
@@ -258,7 +258,7 @@ internal static slice<byte> appendTagAndLength(slice<byte> dst, tagAndLength t) 
     return dst;
 }
 
-[GoType("BitString")] partial struct bitStringEncoder;
+partial struct bitStringEncoder /*BitString*/;
 
 internal static nint Len(this bitStringEncoder b) {
     return len(b.Bytes) + 1;
@@ -271,7 +271,7 @@ internal static void Encode(this bitStringEncoder b, slice<byte> dst) {
     }
 }
 
-[GoType("[]nint")] partial struct oidEncoder;
+partial struct oidEncoder /*[]nint*/;
 
 internal static nint Len(this oidEncoder oid) {
     nint l = base128IntLength((int64)(oid[0] * 40 + oid[1]));

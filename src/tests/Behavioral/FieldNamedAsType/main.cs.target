@@ -4,13 +4,13 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Node {
+partial struct Node {
     public slice<Node> Nodes;
     public ж<Node> ΔNode;
     internal nint value;
 }
 
-[GoType("dyn")] internal partial struct localCollision_u {
+internal partial struct localCollision_u /*dyn*/ {
     internal nint u;
 }
 

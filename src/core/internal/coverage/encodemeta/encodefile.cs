@@ -23,7 +23,7 @@ partial class encodemeta_package {
 // This package contains APIs and helpers for writing out a meta-data
 // file (composed of a file header, offsets/lengths, and then a series of
 // meta-data blobs emitted by the compiler, one per Go package).
-[GoType] partial struct CoverageMetaFileWriter {
+partial struct CoverageMetaFileWriter {
     internal stringtab.Writer stab;
     internal @string mfname;
     internal ж<bufio.Writer> w;
@@ -42,7 +42,7 @@ public static ж<CoverageMetaFileWriter> NewCoverageMetaFileWriter(@string mfnam
     return r;
 }
 
-public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, [GoArrayDims(16)] array<byte> finalHash, slice<slice<byte>> blobs, coverage.CounterMode mode, coverage.CounterGranularity granularity) {
+public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<byte> finalHash, slice<slice<byte>> blobs, coverage.CounterMode mode, coverage.CounterGranularity granularity) {
     finalHash = finalHash.Clone();
 
     ref var m = ref Ꮡm.DerefOrNull();

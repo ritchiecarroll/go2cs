@@ -4,9 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("@string")] partial struct Kind;
+partial struct Kind /*@string*/;
 
-[GoType] partial struct parser {
+partial struct parser {
     internal nint n;
 }
 
@@ -40,7 +40,7 @@ internal static Kind named() {
     return k;
 }
 
-[GoLocalName("tag")] [GoType("@string")] internal partial struct localKind_tag;
+internal partial struct localKind_tag /*@string*/;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 private static readonly localKind_tag tᶜ = "local-tag"u8;
@@ -158,7 +158,7 @@ internal static @string genericLabel<T>(T v) {
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 private static readonly @string methodᶜ = "parser-method"u8;
 
-[GoRecv] internal static @string name(this ref parser p) {
+internal static @string name(this ref parser p) {
     @string method = methodᶜ;
     p.n++;
     return fmt.Sprintf("%s#%d"u8, method, p.n);

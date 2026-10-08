@@ -5,17 +5,17 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-[GoType("[3]nint")] partial struct Row;
+partial struct Row /*[3]nint*/;
 
 internal static Row typedCastDeref(ж<Row> Ꮡp) {
     return (~Ꮡp).Clone();
 }
 
-internal static array<uintptr> typedCastDerefDirect([GoArrayDims(2)] ж<array<uintptr>> Ꮡp) {
+internal static array<uintptr> typedCastDerefDirect(/*[2]*/ ж<array<uintptr>> Ꮡp) {
     return (~Ꮡp).Clone();
 }
 
-[GoType] partial struct holder {
+partial struct holder {
     internal Row r;
 }
 

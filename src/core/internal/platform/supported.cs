@@ -7,7 +7,7 @@ namespace go.@internal;
 partial class platform_package {
 
 // An OSArch is a pair of GOOS and GOARCH values indicating a platform.
-[GoType] partial struct OSArch {
+partial struct OSArch {
     public @string GOOS, GOARCH;
 }
 
@@ -279,7 +279,7 @@ public static bool ExecutableHasDWARF(@string goos, @string goarch) {
 
 // osArchInfo describes information about an OSArch extracted from cmd/dist and
 // stored in the generated distInfo map.
-[GoType] partial struct osArchInfo {
+partial struct osArchInfo {
     public bool CgoSupported;
     public bool FirstClass;
     public bool Broken;

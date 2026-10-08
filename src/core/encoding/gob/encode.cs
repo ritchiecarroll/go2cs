@@ -25,7 +25,7 @@ internal static UntypedInt uint64Size => 8;
 // Field numbers are delta encoded and always increase. The field
 // number is initialized to -1 so 0 comes out as delta(1). A delta of
 // 0 terminates the structure.
-[GoType] partial struct encoderState {
+partial struct encoderState {
     internal ж<Encoder> enc;
     internal ж<encBuffer> b;
     internal bool sendZero;                 // encoding an array element or map key/value pair; send zero values
@@ -36,7 +36,7 @@ internal static UntypedInt uint64Size => 8;
 
 // encBuffer is an extremely simple, fast implementation of a write-only byte buffer.
 // It never returns a non-nil error, but Write returns an error value so it matches io.Writer.
-[GoType] partial struct encBuffer {
+partial struct encBuffer {
     internal slice<byte> data;
     internal array<byte> scratch = new(64);
 }
@@ -50,28 +50,28 @@ internal static ж<sync.Pool> ᏑencBufferPool = new StandardBox<sync.Pool>(new 
 ));
 internal static ref sync.Pool encBufferPool => ref ᏑencBufferPool.Value;
 
-[GoRecv] internal static void writeByte(this ref encBuffer e, byte c) {
+internal static void writeByte(this ref encBuffer e, byte c) {
     e.data = append(e.data, c);
 }
 
-[GoRecv] internal static (nint, error) Write(this ref encBuffer e, slice<byte> p) {
+internal static (nint, error) Write(this ref encBuffer e, slice<byte> p) {
     e.data = appendꓸꓸꓸ(e.data, p);
     return (len(p), default!);
 }
 
-[GoRecv] internal static void WriteString(this ref encBuffer e, @string s) {
+internal static void WriteString(this ref encBuffer e, @string s) {
     e.data = append(e.data, s.ꓸꓸꓸ);
 }
 
-[GoRecv] internal static nint Len(this ref encBuffer e) {
+internal static nint Len(this ref encBuffer e) {
     return len(e.data);
 }
 
-[GoRecv] internal static slice<byte> Bytes(this ref encBuffer e) {
+internal static slice<byte> Bytes(this ref encBuffer e) {
     return e.data;
 }
 
-[GoRecv] internal static void Reset(this ref encBuffer e) {
+internal static void Reset(this ref encBuffer e) {
     if (len(e.data) >= tooBig){
         e.data = e.scratch[0..0];
     } else {
@@ -99,7 +99,7 @@ internal static ж<encoderState> newEncoderState(this ж<Encoder> Ꮡenc, ж<enc
     return e;
 }
 
-[GoRecv] internal static void freeEncoderState(this ref Encoder enc, ж<encoderState> Ꮡe) {
+internal static void freeEncoderState(this ref Encoder enc, ж<encoderState> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     e.next = enc.freeList;
@@ -112,7 +112,7 @@ internal static ж<encoderState> newEncoderState(this ж<Encoder> Ꮡenc, ж<enc
 // by the byte length, negated.
 
 // encodeUint writes an encoded unsigned integer to state.b.
-[GoRecv] internal static void encodeUint(this ref encoderState state, uint64 x) {
+internal static void encodeUint(this ref encoderState state, uint64 x) {
     if (x <= 0x7F) {
         state.b.writeByte((uint8)x);
         return;
@@ -126,7 +126,7 @@ internal static ж<encoderState> newEncoderState(this ж<Encoder> Ꮡenc, ж<enc
 // encodeInt writes an encoded signed integer to state.w.
 // The low bit of the encoding says whether to bit complement the (other bits of the)
 // uint to recover the int.
-[GoRecv] internal static void encodeInt(this ref encoderState state, int64 i) {
+internal static void encodeInt(this ref encoderState state, int64 i) {
     uint64 x = default!;
     if (i < 0){
         x = (uint64)((uint64)((~i << (int)(1))) | 1);
@@ -139,7 +139,7 @@ internal static ж<encoderState> newEncoderState(this ж<Encoder> Ꮡenc, ж<enc
 // type encOp is a methodless func type — rendered inline as its base delegate
 
 // The 'instructions' of the encoding machine
-[GoType] partial struct encInstr {
+partial struct encInstr {
     internal Action<ж<encInstr>, ж<encoderState>, reflectꓸValue> op;
     internal nint field;  // field number in input
     internal slice<nint> index; // struct index
@@ -148,7 +148,7 @@ internal static ж<encoderState> newEncoderState(this ж<Encoder> Ꮡenc, ж<enc
 
 // update emits a field number and updates the state to record its value for delta encoding.
 // If the instruction pointer is nil, it does nothing
-[GoRecv] internal static void update(this ref encoderState state, ж<encInstr> Ꮡinstr) {
+internal static void update(this ref encoderState state, ж<encInstr> Ꮡinstr) {
     ref var instr = ref Ꮡinstr.DerefOrNull();
 
     if (Ꮡinstr != nil) {
@@ -291,7 +291,7 @@ internal static void encStructTerminator(ж<encInstr> Ꮡi, ж<encoderState> Ꮡ
 
 // encEngine an array of instructions indexed by field number of the encoding
 // data, typically a struct. It is executed top to bottom, walking the struct.
-[GoType] partial struct encEngine {
+partial struct encEngine {
     internal slice<encInstr> instr;
 }
 

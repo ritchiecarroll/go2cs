@@ -13,6 +13,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"sort"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -43,6 +44,42 @@ import (
 // Reset per package/variant by resetPackageState; written under packageLock.
 var packageEmittedTypeAccess hashset.HashSet[string]
 
+// packageBridgeTypeAccess holds, per declaring class, the attribute-bearing partial declarations the -tests
+// white-box BRIDGE unit's types would otherwise carry inline (testInlineTypeAccess): `[GoLocalName("file")]
+// partial struct FuzzReader_file {}`. They carry NO modifier, since the bridge keeps its accessibility on the
+// declaration, and they land in the TypeAccessibility section of the metadata file whose first class is the
+// bridge (package_info_internal_test.cs, or package_test_info.cs for an internal-only suite). Keyed by class so
+// a line whose class is not that anchor is refused by name rather than declaring a phantom type in another
+// class (bridgeTypeAccessFor). Reset per package/variant by resetPackageState; written under packageLock.
+var packageBridgeTypeAccess map[string]hashset.HashSet[string]
+
+// bridgeTypeAccessFor returns the bridge lines recorded for anchorClass, and an error naming every line
+// recorded for any other class: such a line would declare an empty partial type in the anchor's class while
+// the type it describes keeps no record at all, so the attribute it carries would be silently lost.
+func bridgeTypeAccessFor(anchorClass string) (hashset.HashSet[string], error) {
+	lines := hashset.HashSet[string]{}
+	var strays []string
+
+	for class, classLines := range packageBridgeTypeAccess {
+		if class == anchorClass {
+			lines.UnionWithSet(classLines)
+			continue
+		}
+
+		for _, line := range classLines.Keys() {
+			strays = append(strays, class+": "+line)
+		}
+	}
+
+	if len(strays) > 0 {
+		sort.Strings(strays)
+
+		return nil, fmt.Errorf("bridge type records whose declaring class is not the metadata anchor %s (the record would declare a second type there):\n  %s", anchorClass, strings.Join(strays, "\n  "))
+	}
+
+	return lines, nil
+}
+
 // TypeAccessibilitySection names the package_info.cs marker section that carries the condensed
 // accessibility-pinning partial declarations (see packageEmittedTypeAccess).
 const TypeAccessibilitySection = "TypeAccessibility"
@@ -60,7 +97,7 @@ const typeAccessibilityIndent = "    "
 func typeAccessibilityProseLines() []string {
 	return []string{
 		typeAccessibilityIndent + "// C# nested types declared with no access modifier are always private, and the",
-		typeAccessibilityIndent + "// `[GoType]` declarations in this package's converted sources are deliberately",
+		typeAccessibilityIndent + "// Go type declarations in this package's converted sources are deliberately",
 		typeAccessibilityIndent + "// bare so they read more like the original Go code. The real accessibility for",
 		typeAccessibilityIndent + "// the types - public for a Go-exported name, internal otherwise - are defined",
 		typeAccessibilityIndent + "// via declarations below.",
@@ -105,8 +142,14 @@ func ensureTypeAccessibilitySection(packageInfoLines []string) []string {
 	}
 
 	if markerIndex >= 0 {
-		// Section already present; converge its prose on the current wording (migrateProseBlock).
-		return migrateProseBlock(packageInfoLines, legacyTypeAccessibilityFirstLine, openTag, typeAccessibilityProseLines())
+		// Section already present; converge its prose on the current wording (migrateProseBlock), from the
+		// ORIGINAL block and from any block that opens with the current first line, so a rewrite that keeps
+		// that line (the face lift's "Go type declarations") reaches every persisted file. Idempotent: a
+		// block already current is rewritten to the identical text.
+		prose := typeAccessibilityProseLines()
+		packageInfoLines = migrateProseBlock(packageInfoLines, legacyTypeAccessibilityFirstLine, openTag, prose)
+
+		return migrateProseBlock(packageInfoLines, strings.TrimSpace(prose[0]), openTag, prose)
 	}
 
 	insertIndex := classBodyInsertIndex(packageInfoLines)
@@ -468,13 +511,31 @@ func attributeGroupEnd(line string) int {
 // is skipped: the converter's emission for it goes to the non-compiled `.cs.auto` sibling, so the
 // declarations that actually compile are the hand-written ones — their kind, name and modifier are
 // the author's to choose, and a generated section entry could contradict them (CS0261/CS0262) or
-// conjure a phantom empty type the hand-written file never declares. A -tests bridge unit
-// (testInlineTypeAccess) is skipped for its own reason: its metadata anchor can be a different test
-// class, where an accessibility-only partial would declare a second type. Both keep the attributes
-// on the declaration, where they read as they always have.
+// conjure a phantom empty type the hand-written file never declares; it keeps the attributes on the
+// declaration, where they read as they always have. A -tests BRIDGE unit (testInlineTypeAccess) keeps
+// its accessibility on the declaration, and its attributes ride an attribute-only partial with no
+// modifier in the bridge's own metadata file (packageBridgeTypeAccess).
 func (v *Visitor) recordTypeAccessibility(kind string, identifier string, typeParams string, access string, attrs string) string {
-	if v.manualConversion || v.options.testInlineTypeAccess || identifier == "" {
+	if !v.typeAccessibilityAbsorbs(identifier) {
 		return attrs
+	}
+
+	if v.options.testInlineTypeAccess {
+		if attrs != "" {
+			line := fmt.Sprintf("%spartial %s %s%s {}", attrs, kind, identifier, typeParams)
+			class := v.options.testClassNameOverride
+
+			packageLock.Lock()
+
+			if packageBridgeTypeAccess[class] == nil {
+				packageBridgeTypeAccess[class] = hashset.HashSet[string]{}
+			}
+
+			packageBridgeTypeAccess[class].Add(line)
+			packageLock.Unlock()
+		}
+
+		return ""
 	}
 
 	if access == "" {
@@ -488,6 +549,31 @@ func (v *Visitor) recordTypeAccessibility(kind string, identifier string, typePa
 	packageLock.Unlock()
 
 	return ""
+}
+
+// typeAccessibilityAbsorbs reports whether recordTypeAccessibility writes a record for identifier, and so
+// absorbs the attributes handed to it; when it does not, they stay on the declaration.
+func (v *Visitor) typeAccessibilityAbsorbs(identifier string) bool {
+	return !v.manualConversion && identifier != "" && (!v.options.testInlineTypeAccess || v.options.testClassNameOverride != "")
+}
+
+// descriptorMemberRecord renders the member record that carries a struct field's DESCRIPTOR CARRIER on its
+// type's accessibility record, trailing-spaced like the other attributes the record carries. fieldName is the
+// field's emitted C# name; the record names it as reflection sees it, without a keyword escape.
+func descriptorMemberRecord(fieldName string, carrier string) string {
+	return fmt.Sprintf("[GoMemberRecord(%q, GoMemberFact.Descriptor, typeof(%s))] ", strings.TrimPrefix(fieldName, "@"), carrier)
+}
+
+// hasBlankFieldName reports whether a field group declares a blank (`_`) field, whose emitted member name is
+// settled only as it is written (each blank is renamed in turn).
+func hasBlankFieldName(names []*ast.Ident) bool {
+	for _, ident := range names {
+		if ident.Name == "_" {
+			return true
+		}
+	}
+
+	return false
 }
 
 // localTypeAccess returns the access modifier a FUNCTION-LOCAL type must carry in the internal

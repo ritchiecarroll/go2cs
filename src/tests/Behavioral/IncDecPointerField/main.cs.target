@@ -5,11 +5,11 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct inner {
+partial struct inner {
     internal nint k;
 }
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
     internal inner sub;
 }

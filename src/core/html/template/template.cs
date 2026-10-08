@@ -24,7 +24,7 @@ partial class template_package {
 
 // Template is a specialized Template from "text/template" that produces a safe
 // HTML document fragment.
-[GoType] partial struct Template {
+partial struct Template {
     // Sticky error if escaping fails, or escapeOK if succeeded.
     internal error escapeErr;
     // We could embed the text/template field, but it's safer not to because
@@ -40,7 +40,7 @@ partial class template_package {
 internal static error escapeOK = fmt.Errorf("template escaped correctly"u8);
 
 // nameSpace is the data structure shared by all templates in an association.
-[GoType] partial struct nameSpace {
+partial struct nameSpace {
     internal sync.Mutex mu;
     internal map<@string, ж<Template>> set;
     internal bool escaped;
@@ -215,7 +215,7 @@ internal static (ж<Template> tmpl, error err) lookupAndEscapeTemplate(this ж<T
 // DefinedTemplates returns a string listing the defined templates,
 // prefixed by the string "; defined templates are: ". If there are none,
 // it returns the empty string. Used to generate an error message.
-[GoRecv] public static @string DefinedTemplates(this ref Template t) {
+public static @string DefinedTemplates(this ref Template t) {
     return t.text.DefinedTemplates();
 }
 
@@ -384,7 +384,7 @@ public static ж<Template> New(this ж<Template> Ꮡt, @string name) {
 }
 
 // new is the implementation of New, without the lock.
-[GoRecv] internal static ж<Template> @new(this ref Template t, @string name) {
+internal static ж<Template> @new(this ref Template t, @string name) {
     var tmpl = Ꮡ(new Template(
         default!,
         t.text.New(name),
@@ -402,7 +402,7 @@ public static ж<Template> New(this ж<Template> Ꮡt, @string name) {
 }
 
 // Name returns the name of the template.
-[GoRecv] public static @string Name(this ref Template t) {
+public static @string Name(this ref Template t) {
     return t.text.Name();
 }
 

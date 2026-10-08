@@ -21,7 +21,7 @@ internal static readonly @string unbalancedLabelScopesˢ = "unbalanced label sco
 internal static readonly @string objectAlreadyResolvedˢ = "object already resolved"u8;
 internal static readonly @string resolvedSVToPackageˢ = "resolved %s@%v to package object %v"u8;
 
-[GoType("dyn")] internal partial interface resolveFile_type {
+internal partial interface resolveFile_type /*dyn*/ {
     tokenꓸPos Pos();
 }
 
@@ -66,7 +66,7 @@ internal static void resolveFile(ref ast.File @file, ж<tokenꓸFile> Ꮡhandle,
 
 internal const nint maxScopeDepth = 1000;
 
-[GoType] partial struct resolver {
+partial struct resolver {
     internal ж<tokenꓸFile> handle;
     internal Action<tokenꓸPos, @string> declErr;
     // Ordinary identifier scopes
@@ -80,13 +80,13 @@ internal const nint maxScopeDepth = 1000;
     internal slice<slice<ж<ast.Ident>>> targetStack; // stack of unresolved labels
 }
 
-[GoRecv] internal static void trace(this ref resolver r, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void trace(this ref resolver r, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     fmt.Println(strings.Repeat(". "u8, r.depth) + r.sprintf(format, args.ꓸꓸꓸ));
 }
 
-[GoRecv] internal static @string sprintf(this ref resolver r, @string format, params ꓸꓸꓸany argsʗp) {
+internal static @string sprintf(this ref resolver r, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     foreach (var (i, arg) in args) {
@@ -102,7 +102,7 @@ internal const nint maxScopeDepth = 1000;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string openingScopeVˢ = "opening scope @%v"u8;
 
-[GoRecv] internal static void openScope(this ref resolver r, tokenꓸPos pos) {
+internal static void openScope(this ref resolver r, tokenꓸPos pos) {
     r.depth++;
     if (r.depth > maxScopeDepth) {
         throw panic(new bailout(pos: pos, msg: "exceeded max scope depth during object resolution"u8));
@@ -116,7 +116,7 @@ internal static readonly @string openingScopeVˢ = "opening scope @%v"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string closingScopeˢ = "closing scope"u8;
 
-[GoRecv] internal static void closeScope(this ref resolver r) {
+internal static void closeScope(this ref resolver r) {
     r.depth--;
     if (debugResolve) {
         r.trace(closingScopeˢ);
@@ -124,12 +124,12 @@ internal static readonly @string closingScopeˢ = "closing scope"u8;
     r.topScope = r.topScope.Value.Outer;
 }
 
-[GoRecv] internal static void openLabelScope(this ref resolver r) {
+internal static void openLabelScope(this ref resolver r) {
     r.labelScope = ast.NewScope(r.labelScope);
     r.targetStack = append(r.targetStack, (slice<ж<ast.Ident>>)(default!));
 }
 
-[GoRecv] internal static void closeLabelScope(this ref resolver r) {
+internal static void closeLabelScope(this ref resolver r) {
     // resolve labels
     nint n = len(r.targetStack) - 1;
     var scope = r.labelScope;
@@ -147,7 +147,7 @@ internal static readonly @string closingScopeˢ = "closing scope"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string declaringSVˢ = "declaring %s@%v"u8;
 
-[GoRecv] internal static void declare(this ref resolver r, any decl, any data, ж<ast.Scope> Ꮡscope, ast.ObjKind kind, params ꓸꓸꓸжastꓸIdent identsʗp) {
+internal static void declare(this ref resolver r, any decl, any data, ж<ast.Scope> Ꮡscope, ast.ObjKind kind, params ꓸꓸꓸжastꓸIdent identsʗp) {
     var idents = identsʗp.sslice();
 
     ref var scope = ref Ꮡscope.DerefOrNull();
@@ -190,7 +190,7 @@ internal static readonly @string declaringSVˢ = "declaring %s@%v"u8;
 internal static readonly @string identifierAlreadyˢ = "identifier already declared or resolved"u8;
 internal static readonly @string noNewVariablesOnLeftSideˢ = "no new variables on left side of :="u8;
 
-[GoRecv] internal static void shortVarDecl(this ref resolver r, ж<ast.AssignStmt> Ꮡdecl) {
+internal static void shortVarDecl(this ref resolver r, ж<ast.AssignStmt> Ꮡdecl) {
     ref var decl = ref Ꮡdecl.DerefOrNull();
 
     // Go spec: A short variable declaration may redeclare variables
@@ -238,7 +238,7 @@ internal static readonly @string objWithNoNameˢ = "obj with no name"u8;
 // the object it denotes. If no object is found and collectUnresolved is
 // set, x is marked as unresolved and collected in the list of unresolved
 // identifiers.
-[GoRecv] internal static void resolve(this ref resolver r, ж<ast.Ident> Ꮡident, bool collectUnresolved) {
+internal static void resolve(this ref resolver r, ж<ast.Ident> Ꮡident, bool collectUnresolved) {
     ref var ident = ref Ꮡident.DerefOrNull();
 
     if (ident.Obj != nil) {
@@ -620,7 +620,7 @@ internal static void resolveList(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡli
     }
 }
 
-[GoRecv] internal static void declareList(this ref resolver r, ж<ast.FieldList> Ꮡlist, ast.ObjKind kind) {
+internal static void declareList(this ref resolver r, ж<ast.FieldList> Ꮡlist, ast.ObjKind kind) {
     ref var list = ref Ꮡlist.DerefOrNull();
 
     if (Ꮡlist == nil) {

@@ -28,7 +28,7 @@ using ꓸꓸꓸany = Span<any>;
 partial class parser_package {
 
 // The parser structure holds the parser's internal state.
-[GoType] partial struct parser {
+partial struct parser {
     internal ж<tokenꓸFile> @file;
     internal scanner.ErrorList errors;
     internal scanner.Scanner scanner;
@@ -81,7 +81,7 @@ internal static readonly @string dotsᶜ = ". . . . . . . . . . . . . . . . . . 
 
 // ----------------------------------------------------------------------------
 // Parsing support
-[GoRecv] internal static void printTrace(this ref parser p, params ꓸꓸꓸany aʗp) {
+internal static void printTrace(this ref parser p, params ꓸꓸꓸany aʗp) {
     var a = aʗp.sslice();
 
     @string dots = dotsᶜ;
@@ -141,7 +141,7 @@ internal static void decNestLev(ref parser p) {
 internal static readonly @string goBuildˢ = "//go:build"u8;
 
 // Advance to the next token.
-[GoRecv] internal static void next0(this ref parser p) {
+internal static void next0(this ref parser p) {
     // Because of one-token look-ahead, print the previous token
     // when tracing as it provides a more readable output. The
     // very first token (!p.pos.IsValid()) is not initialized
@@ -185,7 +185,7 @@ internal static readonly @string goBuildˢ = "//go:build"u8;
 }
 
 // Consume a comment and return it and the line on which it ends.
-[GoRecv] internal static (ж<ast.Comment> comment, nint endline) consumeComment(this ref parser p) {
+internal static (ж<ast.Comment> comment, nint endline) consumeComment(this ref parser p) {
     ж<ast.Comment> comment = default!;
     nint endline = default!;
 
@@ -209,7 +209,7 @@ internal static readonly @string goBuildˢ = "//go:build"u8;
 // comments list, and return it together with the line at which
 // the last comment in the group ends. A non-comment token or n
 // empty lines terminate a comment group.
-[GoRecv] internal static (ж<ast.CommentGroup> comments, nint endline) consumeCommentGroup(this ref parser p, nint n) {
+internal static (ж<ast.CommentGroup> comments, nint endline) consumeCommentGroup(this ref parser p, nint n) {
     ж<ast.CommentGroup> comments = default!;
     nint endline = default!;
 
@@ -240,7 +240,7 @@ internal static readonly @string goBuildˢ = "//go:build"u8;
 //
 // Lead and line comments may be considered documentation that is
 // stored in the AST.
-[GoRecv] internal static void next(this ref parser p) {
+internal static void next(this ref parser p) {
     p.leadComment = default!;
     p.lineComment = default!;
     tokenꓸPos prev = p.pos;
@@ -273,7 +273,7 @@ internal static readonly @string goBuildˢ = "//go:build"u8;
 
 // A bailout panic is raised to indicate early termination. pos and msg are
 // only populated when bailing out of object resolution.
-[GoType] partial struct bailout {
+partial struct bailout {
     internal tokenꓸPos pos;
     internal @string msg;
 }
@@ -432,7 +432,7 @@ internal static void assert(bool cond, @string msg) {
 
 // advance consumes tokens until the current token p.tok
 // is in the 'to' set, or token.EOF. For error recovery.
-[GoRecv] internal static void advance(this ref parser p, map<token.Token, bool> to) {
+internal static void advance(this ref parser p, map<token.Token, bool> to) {
     for (; p.tok != token.EOF; p.next()) {
         if (to[p.tok]) {
             // Return only if parser made some progress since last
@@ -952,7 +952,7 @@ internal static ж<ast.Ellipsis> parseDotsType(this ж<parser> Ꮡp) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct field {
+partial struct field {
     internal ж<ast.Ident> name;
     internal ast.Expr typ;
 }
@@ -2334,7 +2334,7 @@ Star: pos, X: x)));
     finally { ᒐ.Run(); }
 }
 
-[GoRecv] internal static (token.Token, nint) tokPrec(this ref parser p) {
+internal static (token.Token, nint) tokPrec(this ref parser p) {
     token.Token tok = p.tok;
     if (p.inRhs && tok == token.ASSIGN) {
         tok = token.EQL;
@@ -2661,7 +2661,7 @@ internal static readonly @string varDeclarationNotAllowedˢ = "var declaration n
 internal static readonly @string booleanExpressionˢ = "boolean expression"u8;
 internal static readonly @string unexpectedNewlineˢ = "unexpected newline, expecting { after if clause"u8;
 
-[GoType("dyn")] internal partial struct parseIfHeader_semi {
+internal partial struct parseIfHeader_semi /*dyn*/ {
     internal tokenꓸPos pos;
     internal @string lit; // ";" or "\n"; valid if pos.IsValid()
 }

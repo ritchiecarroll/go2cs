@@ -58,7 +58,7 @@ using static go.log.slog.@internal.benchmarks_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("log/slog/internal/benchmarks/benchmarks.go", "benchmarks.cs", "ACJGuJY=")]
+[assembly: go.GoPositionMap("log/slog/internal/benchmarks/benchmarks.go", "benchmarks.cs", "ACJGuJY=", "", "", "41=String/1/1/1,Int/1/1/2,Duration/1/1/3,Time/1/1/4,Any/1/1/5")]
 [assembly: go.GoPositionMap("log/slog/internal/benchmarks/handlers.go", "handlers.cs", "AB08gqaA9NKClIKCgpSCgoKCgpKCgoKClIKC1qKUpKSkpKSkpIKUxMbIoqaCpoIADyCCpoCkooKCpoKmguyAooCkgqaC", "50-56:1")]
 // </GoSourcePositionMaps>
 
@@ -68,7 +68,7 @@ namespace go.log.slog.@internal;
 public static partial class benchmarks_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

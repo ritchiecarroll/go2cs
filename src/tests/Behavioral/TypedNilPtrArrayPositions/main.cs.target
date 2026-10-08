@@ -5,11 +5,10 @@ using reflect = reflect_package;
 
 partial class main_package {
 
-[GoType("[2]uint32")] partial struct Sigset;
+partial struct Sigset /*[2]uint32*/;
 
-[GoType] partial struct holder {
-    [GoArrayDims(3)]
-    internal ж<array<uint16>> versym;
+partial struct holder {
+    internal /*[3]*/ ж<array<uint16>> versym;
 }
 
 internal static nint takeArg(ж<Sigset> Ꮡp) {

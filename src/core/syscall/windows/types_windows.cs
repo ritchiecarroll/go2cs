@@ -251,15 +251,15 @@ public static slice<byte> OID_PKIX_KP_SERVER_AUTH = slice<byte>("1.3.6.1.5.5.7.3
 public static slice<byte> OID_SERVER_GATED_CRYPTO = slice<byte>("1.3.6.1.4.1.311.10.3.3\x00"u8);
 public static slice<byte> OID_SGC_NETSCAPE = slice<byte>("2.16.840.1.113730.4.1\x00"u8);
 
-[GoType("ж<EmptyStruct>")] partial class Pointer;
+partial class Pointer /*ж<EmptyStruct>*/;
 
 // Invented values to support what package os expects.
-[GoType] partial struct Timeval {
+partial struct Timeval {
     public int32 Sec;
     public int32 Usec;
 }
 
-[GoRecv] public static int64 Nanoseconds(this ref Timeval tv) {
+public static int64 Nanoseconds(this ref Timeval tv) {
     return ((int64)tv.Sec * 1000000 + (int64)tv.Usec) * 1000;
 }
 
@@ -271,13 +271,13 @@ public static Timeval /*tv*/ NsecToTimeval(int64 nsec) {
     return tv;
 }
 
-[GoType] partial struct SecurityAttributes {
+partial struct SecurityAttributes {
     public uint32 Length;
     public uintptr SecurityDescriptor;
     public uint32 InheritHandle;
 }
 
-[GoType] partial struct Overlapped {
+partial struct Overlapped {
     public uintptr Internal;
     public uintptr InternalHigh;
     public uint32 Offset;
@@ -285,21 +285,21 @@ public static Timeval /*tv*/ NsecToTimeval(int64 nsec) {
     public ΔHandle HEvent;
 }
 
-[GoType] partial struct FileNotifyInformation {
+partial struct FileNotifyInformation {
     public uint32 NextEntryOffset;
     public uint32 Action;
     public uint32 FileNameLength;
     public uint16 FileName;
 }
 
-[GoType] partial struct Filetime {
+partial struct Filetime {
     public uint32 LowDateTime;
     public uint32 HighDateTime;
 }
 
 // Nanoseconds returns Filetime ft in nanoseconds
 // since Epoch (00:00:00 UTC, January 1, 1970).
-[GoRecv] public static int64 Nanoseconds(this ref Filetime ft) {
+public static int64 Nanoseconds(this ref Filetime ft) {
     // 100-nanosecond intervals since January 1, 1601
     var nsec = ((int64)ft.HighDateTime << (int)(32)) + (int64)ft.LowDateTime;
     // change starting time to the Epoch (00:00:00 UTC, January 1, 1970)
@@ -322,7 +322,7 @@ public static Filetime /*ft*/ NsecToFiletime(int64 nsec) {
     return ft;
 }
 
-[GoType] partial struct Win32finddata {
+partial struct Win32finddata {
     public uint32 FileAttributes;
     public Filetime CreationTime;
     public Filetime LastAccessTime;
@@ -337,7 +337,7 @@ public static Filetime /*ft*/ NsecToFiletime(int64 nsec) {
 
 // This is the actual system call structure.
 // Win32finddata is what we committed to in Go 1.
-[GoType] partial struct win32finddata1 {
+partial struct win32finddata1 {
     public uint32 FileAttributes;
     public Filetime CreationTime;
     public Filetime LastAccessTime;
@@ -371,7 +371,7 @@ internal static void copyFindData(ref Win32finddata dst, ref win32finddata1 src)
     copy(dst.AlternateFileName[..], src.AlternateFileName[..]);
 }
 
-[GoType] partial struct ByHandleFileInformation {
+partial struct ByHandleFileInformation {
     public uint32 FileAttributes;
     public Filetime CreationTime;
     public Filetime LastAccessTime;
@@ -387,7 +387,7 @@ internal static void copyFindData(ref Win32finddata dst, ref win32finddata1 src)
 public static UntypedInt GetFileExInfoStandard => 0;
 public static UntypedInt GetFileExMaxInfoLevel => 1;
 
-[GoType] partial struct Win32FileAttributeData {
+partial struct Win32FileAttributeData {
     public uint32 FileAttributes;
     public Filetime CreationTime;
     public Filetime LastAccessTime;
@@ -425,7 +425,7 @@ public static UntypedInt SW_SHOWDEFAULT => 10;
 
 public static UntypedInt SW_FORCEMINIMIZE => 11;
 
-[GoType] partial struct StartupInfo {
+partial struct StartupInfo {
     public uint32 Cb;
     internal ж<uint16> _;
     public ж<uint16> Desktop;
@@ -446,28 +446,28 @@ public static UntypedInt SW_FORCEMINIMIZE => 11;
     public ΔHandle StdErr;
 }
 
-[GoType] public partial struct _PROC_THREAD_ATTRIBUTE_LIST {
+public partial struct _PROC_THREAD_ATTRIBUTE_LIST {
     internal array<byte> _ = new(1);
 }
 
 internal static UntypedInt _PROC_THREAD_ATTRIBUTE_PARENT_PROCESS => 0x00020000;
 internal static UntypedInt _PROC_THREAD_ATTRIBUTE_HANDLE_LIST => 0x00020002;
 
-[GoType] partial struct _STARTUPINFOEXW {
+partial struct _STARTUPINFOEXW {
     public partial ref StartupInfo StartupInfo { get; }
     public ж<_PROC_THREAD_ATTRIBUTE_LIST> ProcThreadAttributeList;
 }
 
 internal static UntypedInt _EXTENDED_STARTUPINFO_PRESENT => 0x00080000;
 
-[GoType] partial struct ProcessInformation {
+partial struct ProcessInformation {
     public ΔHandle Process;
     public ΔHandle Thread;
     public uint32 ProcessId;
     public uint32 ThreadId;
 }
 
-[GoType] partial struct ProcessEntry32 {
+partial struct ProcessEntry32 {
     public uint32 Size;
     public uint32 Usage;
     public uint32 ProcessID;
@@ -480,7 +480,7 @@ internal static UntypedInt _EXTENDED_STARTUPINFO_PRESENT => 0x00080000;
     public array<uint16> ExeFile = new(MAX_PATH);
 }
 
-[GoType] partial struct Systemtime {
+partial struct Systemtime {
     public uint16 Year;
     public uint16 Month;
     public uint16 DayOfWeek;
@@ -491,7 +491,7 @@ internal static UntypedInt _EXTENDED_STARTUPINFO_PRESENT => 0x00080000;
     public uint16 Milliseconds;
 }
 
-[GoType] partial struct Timezoneinformation {
+partial struct Timezoneinformation {
     public int32 Bias;
     public array<uint16> StandardName = new(32);
     public Systemtime StandardDate;
@@ -556,7 +556,7 @@ public static UntypedInt SHUT_RDWR => 2;
 public static UntypedInt WSADESCRIPTION_LEN => 256;
 public static UntypedInt WSASYS_STATUS_LEN => 128;
 
-[GoType] partial struct WSABuf {
+partial struct WSABuf {
     public uint32 Len;
     public ж<byte> Buf;
 }
@@ -598,7 +598,7 @@ public static UntypedInt FILE_TYPE_PIPE => 0x0003;
 public static UntypedInt FILE_TYPE_REMOTE => 0x8000;
 public static UntypedInt FILE_TYPE_UNKNOWN => 0x0000;
 
-[GoType] partial struct Hostent {
+partial struct Hostent {
     public ж<byte> Name;
     public ж<ж<byte>> Aliases;
     public uint16 AddrType;
@@ -606,7 +606,7 @@ public static UntypedInt FILE_TYPE_UNKNOWN => 0x0000;
     public ж<ж<byte>> AddrList;
 }
 
-[GoType] partial struct Protoent {
+partial struct Protoent {
     public ж<byte> Name;
     public ж<ж<byte>> Aliases;
     public uint16 Proto;
@@ -682,7 +682,7 @@ public static UntypedInt DnsSectionAnswer => 0x0001;
 public static UntypedInt DnsSectionAuthority => 0x0002;
 public static UntypedInt DnsSectionAdditional => 0x0003;
 
-[GoType] partial struct DNSSRVData {
+partial struct DNSSRVData {
     public ж<uint16> Target;
     public uint16 Priority;
     public uint16 Weight;
@@ -690,22 +690,22 @@ public static UntypedInt DnsSectionAdditional => 0x0003;
     public uint16 Pad;
 }
 
-[GoType] partial struct DNSPTRData {
+partial struct DNSPTRData {
     public ж<uint16> Host;
 }
 
-[GoType] partial struct DNSMXData {
+partial struct DNSMXData {
     public ж<uint16> NameExchange;
     public uint16 Preference;
     public uint16 Pad;
 }
 
-[GoType] partial struct DNSTXTData {
+partial struct DNSTXTData {
     public uint16 StringCount;
     public array<ж<uint16>> StringArray = new(1);
 }
 
-[GoType] partial struct DNSRecord {
+partial struct DNSRecord {
     public ж<DNSRecord> Next;
     public ж<uint16> Name;
     public uint16 Type;
@@ -723,7 +723,7 @@ public static UntypedInt TF_USE_DEFAULT_WORKER => 0;
 public static UntypedInt TF_USE_SYSTEM_THREAD => 16;
 public static UntypedInt TF_USE_KERNEL_APC => 32;
 
-[GoType] partial struct TransmitFileBuffers {
+partial struct TransmitFileBuffers {
     public uintptr Head;
     public uint32 HeadLength;
     public uintptr Tail;
@@ -738,24 +738,24 @@ public static UntypedInt IFF_MULTICAST => 16;
 
 public static UntypedInt SIO_GET_INTERFACE_LIST => 0x4004747F;
 
-[GoType("[24]byte")] partial struct SockaddrGen;
+partial struct SockaddrGen /*[24]byte*/;
 
 // TODO(mattn): SockaddrGen is union of sockaddr/sockaddr_in/sockaddr_in6_old.
 // will be fixed to change variable type as suitable.
-[GoType] partial struct InterfaceInfo {
+partial struct InterfaceInfo {
     public uint32 Flags;
     public SockaddrGen Address;
     public SockaddrGen BroadcastAddress;
     public SockaddrGen Netmask;
 }
 
-[GoType] partial struct IpAddressString {
+partial struct IpAddressString {
     public array<byte> String = new(16);
 }
 
-[GoType("IpAddressString")] partial struct IpMaskString;
+partial struct IpMaskString /*IpAddressString*/;
 
-[GoType] partial struct IpAddrString {
+partial struct IpAddrString {
     public ж<IpAddrString> Next;
     public IpAddressString IpAddress;
     public IpMaskString IpMask;
@@ -768,7 +768,7 @@ public static UntypedInt MAX_ADAPTER_DESCRIPTION_LENGTH => 128;
 
 public static UntypedInt MAX_ADAPTER_ADDRESS_LENGTH => 8;
 
-[GoType] partial struct IpAdapterInfo {
+partial struct IpAdapterInfo {
     public ж<IpAdapterInfo> Next;
     public uint32 ComboIndex;
     public array<byte> AdapterName = new(MAX_ADAPTER_NAME_LENGTH + 4);
@@ -795,7 +795,7 @@ public static UntypedInt MAX_INTERFACE_NAME_LEN => 256;
 
 public static UntypedInt MAXLEN_IFDESCR => 256;
 
-[GoType] partial struct MibIfRow {
+partial struct MibIfRow {
     public array<uint16> Name = new(MAX_INTERFACE_NAME_LEN);
     public uint32 Index;
     public uint32 Type;
@@ -822,11 +822,11 @@ public static UntypedInt MAXLEN_IFDESCR => 256;
     public array<byte> Descr = new(MAXLEN_IFDESCR);
 }
 
-[GoType] partial struct CertInfo {
+partial struct CertInfo {
 }
 
 // Not implemented
-[GoType] partial struct CertContext {
+partial struct CertContext {
     public uint32 EncodingType;
     public ж<byte> EncodedCert;
     public uint32 Length;
@@ -834,7 +834,7 @@ public static UntypedInt MAXLEN_IFDESCR => 256;
     public ΔHandle Store;
 }
 
-[GoType] partial struct CertChainContext {
+partial struct CertChainContext {
     public uint32 Size;
     public CertTrustStatus TrustStatus;
     public uint32 ChainCount;
@@ -845,11 +845,11 @@ public static UntypedInt MAXLEN_IFDESCR => 256;
     public uint32 RevocationFreshnessTime;
 }
 
-[GoType] partial struct CertTrustListInfo {
+partial struct CertTrustListInfo {
 }
 
 // Not implemented
-[GoType] partial struct CertSimpleChain {
+partial struct CertSimpleChain {
     public uint32 Size;
     public CertTrustStatus TrustStatus;
     public uint32 NumElements;
@@ -859,7 +859,7 @@ public static UntypedInt MAXLEN_IFDESCR => 256;
     public uint32 RevocationFreshnessTime;
 }
 
-[GoType] partial struct CertChainElement {
+partial struct CertChainElement {
     public uint32 Size;
     public ж<CertContext> CertContext;
     public CertTrustStatus TrustStatus;
@@ -869,11 +869,11 @@ public static UntypedInt MAXLEN_IFDESCR => 256;
     public ж<uint16> ExtendedErrorInfo;
 }
 
-[GoType] partial struct CertRevocationCrlInfo {
+partial struct CertRevocationCrlInfo {
 }
 
 // Not implemented
-[GoType] partial struct CertRevocationInfo {
+partial struct CertRevocationInfo {
     public uint32 Size;
     public uint32 RevocationResult;
     public ж<byte> RevocationOid;
@@ -883,22 +883,22 @@ public static UntypedInt MAXLEN_IFDESCR => 256;
     public ж<CertRevocationCrlInfo> CrlInfo;
 }
 
-[GoType] partial struct CertTrustStatus {
+partial struct CertTrustStatus {
     public uint32 ErrorStatus;
     public uint32 InfoStatus;
 }
 
-[GoType] partial struct CertUsageMatch {
+partial struct CertUsageMatch {
     public uint32 Type;
     public CertEnhKeyUsage Usage;
 }
 
-[GoType] partial struct CertEnhKeyUsage {
+partial struct CertEnhKeyUsage {
     public uint32 Length;
     public ж<ж<byte>> UsageIdentifiers;
 }
 
-[GoType] partial struct CertChainPara {
+partial struct CertChainPara {
     public uint32 Size;
     public CertUsageMatch RequestedUsage;
     public CertUsageMatch RequstedIssuancePolicy;
@@ -908,20 +908,20 @@ public static UntypedInt MAXLEN_IFDESCR => 256;
     public ж<Filetime> CacheResync;
 }
 
-[GoType] partial struct CertChainPolicyPara {
+partial struct CertChainPolicyPara {
     public uint32 Size;
     public uint32 Flags;
     public Pointer ExtraPolicyPara;
 }
 
-[GoType] partial struct SSLExtraCertChainPolicyPara {
+partial struct SSLExtraCertChainPolicyPara {
     public uint32 Size;
     public uint32 AuthType;
     public uint32 Checks;
     public ж<uint16> ServerName;
 }
 
-[GoType] partial struct CertChainPolicyStatus {
+partial struct CertChainPolicyStatus {
     public uint32 Size;
     public uint32 Error;
     public uint32 ChainIndex;
@@ -964,7 +964,7 @@ public static UntypedInt REG_QWORD_LITTLE_ENDIAN => 11;
 public static UntypedInt REG_DWORD => /* REG_DWORD_LITTLE_ENDIAN */ 4;
 public static UntypedInt REG_QWORD => /* REG_QWORD_LITTLE_ENDIAN */ 11;
 
-[GoType] partial struct AddrinfoW {
+partial struct AddrinfoW {
     public int32 Flags;
     public int32 Family;
     public int32 Socktype;
@@ -979,7 +979,7 @@ public static UntypedInt AI_PASSIVE => 1;
 public static UntypedInt AI_CANONNAME => 2;
 public static UntypedInt AI_NUMERICHOST => 4;
 
-[GoType] partial struct GUID {
+partial struct GUID {
     public uint32 Data1;
     public uint16 Data2;
     public uint16 Data3;
@@ -1026,7 +1026,7 @@ public static UntypedInt PFL_HIDDEN => 0x00000004;
 public static UntypedInt PFL_MATCHES_PROTOCOL_ZERO => 0x00000008;
 public static UntypedInt PFL_NETWORKDIRECT_PROVIDER => 0x00000010;
 
-[GoType] partial struct WSAProtocolInfo {
+partial struct WSAProtocolInfo {
     public uint32 ServiceFlags1;
     public uint32 ServiceFlags2;
     public uint32 ServiceFlags3;
@@ -1049,18 +1049,18 @@ public static UntypedInt PFL_NETWORKDIRECT_PROVIDER => 0x00000010;
     public array<uint16> ProtocolName = new(WSAPROTOCOL_LEN + 1);
 }
 
-[GoType] partial struct WSAProtocolChain {
+partial struct WSAProtocolChain {
     public int32 ChainLen;
     public array<uint32> ChainEntries = new(MAX_PROTOCOL_CHAIN);
 }
 
-[GoType] partial struct TCPKeepalive {
+partial struct TCPKeepalive {
     public uint32 OnOff;
     public uint32 Time;
     public uint32 Interval;
 }
 
-[GoType] partial struct symbolicLinkReparseBuffer {
+partial struct symbolicLinkReparseBuffer {
     public uint16 SubstituteNameOffset;
     public uint16 SubstituteNameLength;
     public uint16 PrintNameOffset;
@@ -1069,7 +1069,7 @@ public static UntypedInt PFL_NETWORKDIRECT_PROVIDER => 0x00000010;
     public array<uint16> PathBuffer = new(1);
 }
 
-[GoType] partial struct mountPointReparseBuffer {
+partial struct mountPointReparseBuffer {
     public uint16 SubstituteNameOffset;
     public uint16 SubstituteNameLength;
     public uint16 PrintNameOffset;
@@ -1077,7 +1077,7 @@ public static UntypedInt PFL_NETWORKDIRECT_PROVIDER => 0x00000010;
     public array<uint16> PathBuffer = new(1);
 }
 
-[GoType] partial struct reparseDataBuffer {
+partial struct reparseDataBuffer {
     public uint32 ReparseTag;
     public uint16 ReparseDataLength;
     public uint16 Reserved;

@@ -13,7 +13,7 @@ partial class dwarf_package {
 
 // A Type conventionally represents a pointer to any of the
 // specific Type structures ([CharType], [StructType], etc.).
-[GoType] partial interface ΔType :
+partial interface ΔType :
     fmt.Stringer
 {
     ж<CommonType> Common();
@@ -23,7 +23,7 @@ partial class dwarf_package {
 // A CommonType holds fields common to multiple types.
 // If a field is not known or not applicable for a given type,
 // the zero value is used.
-[GoType] partial struct CommonType {
+partial struct CommonType {
     public int64 ByteSize;  // size of value of this type, in bytes
     public @string Name; // name that can be used to refer to type
 }
@@ -32,7 +32,7 @@ public static ж<CommonType> Common(this ж<CommonType> Ꮡc) {
     return Ꮡc;
 }
 
-[GoRecv] public static int64 Size(this ref CommonType c) {
+public static int64 Size(this ref CommonType c) {
     return c.ByteSize;
 }
 
@@ -42,7 +42,7 @@ public static ж<CommonType> Common(this ж<CommonType> Ꮡc) {
 //
 // See the documentation for [StructField] for more info on the interpretation of
 // the BitSize/BitOffset/DataBitOffset fields.
-[GoType] partial struct BasicType {
+partial struct BasicType {
     public partial ref CommonType CommonType { get; }
     public int64 BitSize;
     public int64 BitOffset;
@@ -53,7 +53,7 @@ public static ж<BasicType> Basic(this ж<BasicType> Ꮡb) {
     return Ꮡb;
 }
 
-[GoRecv] public static @string String(this ref BasicType t) {
+public static @string String(this ref BasicType t) {
     if (t.Name != ""u8) {
         return t.Name;
     }
@@ -61,80 +61,80 @@ public static ж<BasicType> Basic(this ж<BasicType> Ꮡb) {
 }
 
 // A CharType represents a signed character type.
-[GoType] partial struct CharType {
+partial struct CharType {
     public partial ref BasicType BasicType { get; }
 }
 
 // A UcharType represents an unsigned character type.
-[GoType] partial struct UcharType {
+partial struct UcharType {
     public partial ref BasicType BasicType { get; }
 }
 
 // An IntType represents a signed integer type.
-[GoType] partial struct IntType {
+partial struct IntType {
     public partial ref BasicType BasicType { get; }
 }
 
 // A UintType represents an unsigned integer type.
-[GoType] partial struct UintType {
+partial struct UintType {
     public partial ref BasicType BasicType { get; }
 }
 
 // A FloatType represents a floating point type.
-[GoType] partial struct FloatType {
+partial struct FloatType {
     public partial ref BasicType BasicType { get; }
 }
 
 // A ComplexType represents a complex floating point type.
-[GoType] partial struct ComplexType {
+partial struct ComplexType {
     public partial ref BasicType BasicType { get; }
 }
 
 // A BoolType represents a boolean type.
-[GoType] partial struct BoolType {
+partial struct BoolType {
     public partial ref BasicType BasicType { get; }
 }
 
 // An AddrType represents a machine address type.
-[GoType] partial struct AddrType {
+partial struct AddrType {
     public partial ref BasicType BasicType { get; }
 }
 
 // An UnspecifiedType represents an implicit, unknown, ambiguous or nonexistent type.
-[GoType] partial struct UnspecifiedType {
+partial struct UnspecifiedType {
     public partial ref BasicType BasicType { get; }
 }
 
 // qualifiers
 
 // A QualType represents a type that has the C/C++ "const", "restrict", or "volatile" qualifier.
-[GoType] partial struct QualType {
+partial struct QualType {
     public partial ref CommonType CommonType { get; }
     public @string Qual;
     public ΔType Type;
 }
 
-[GoRecv] public static @string String(this ref QualType t) {
+public static @string String(this ref QualType t) {
     return t.Qual + " "u8 + t.Type.String();
 }
 
-[GoRecv] public static int64 Size(this ref QualType t) {
+public static int64 Size(this ref QualType t) {
     return t.Type.Size();
 }
 
 // An ArrayType represents a fixed size array type.
-[GoType] partial struct ArrayType {
+partial struct ArrayType {
     public partial ref CommonType CommonType { get; }
     public ΔType Type;
     public int64 StrideBitSize; // if > 0, number of bits to hold each element
     public int64 Count; // if == -1, an incomplete array, like char x[].
 }
 
-[GoRecv] public static @string String(this ref ArrayType t) {
+public static @string String(this ref ArrayType t) {
     return "["u8 + strconv.FormatInt(t.Count, 10) + "]"u8 + t.Type.String();
 }
 
-[GoRecv] public static int64 Size(this ref ArrayType t) {
+public static int64 Size(this ref ArrayType t) {
     if (t.Count == -1) {
         return 0;
     }
@@ -142,29 +142,29 @@ public static ж<BasicType> Basic(this ж<BasicType> Ꮡb) {
 }
 
 // A VoidType represents the C void type.
-[GoType] partial struct VoidType {
+partial struct VoidType {
     public partial ref CommonType CommonType { get; }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string voidˢ = "void"u8;
 
-[GoRecv] public static @string String(this ref VoidType t) {
+public static @string String(this ref VoidType t) {
     return voidˢ;
 }
 
 // A PtrType represents a pointer type.
-[GoType] partial struct PtrType {
+partial struct PtrType {
     public partial ref CommonType CommonType { get; }
     public ΔType Type;
 }
 
-[GoRecv] public static @string String(this ref PtrType t) {
+public static @string String(this ref PtrType t) {
     return "*"u8 + t.Type.String();
 }
 
 // A StructType represents a struct, union, or C++ class type.
-[GoType] partial struct StructType {
+partial struct StructType {
     public partial ref CommonType CommonType { get; }
     public @string StructName;
     public @string Kind; // "struct", "union", or "class".
@@ -245,7 +245,7 @@ internal static readonly @string voidˢ = "void"u8;
 // non-zero bit size and bit offset, so this information is also
 // captured for base types, but it is worth noting that it is not
 // possible to trigger this behavior using mainstream languages.
-[GoType] partial struct StructField {
+partial struct StructField {
     public @string Name;
     public ΔType Type;
     public int64 ByteOffset;
@@ -255,21 +255,21 @@ internal static readonly @string voidˢ = "void"u8;
     public int64 BitSize; // zero if not a bit field
 }
 
-[GoRecv] public static @string String(this ref StructType t) {
+public static @string String(this ref StructType t) {
     if (t.StructName != ""u8) {
         return t.Kind + " "u8 + t.StructName;
     }
     return t.Defn();
 }
 
-[GoRecv] internal static int64 bitOffset(this ref StructField f) {
+internal static int64 bitOffset(this ref StructField f) {
     if (f.BitOffset != 0) {
         return f.BitOffset;
     }
     return f.DataBitOffset;
 }
 
-[GoRecv] public static @string Defn(this ref StructType t) {
+public static @string Defn(this ref StructType t) {
     @string s = t.Kind;
     if (t.StructName != ""u8) {
         s += " "u8 + t.StructName;
@@ -297,14 +297,14 @@ internal static readonly @string voidˢ = "void"u8;
 // An EnumType represents an enumerated type.
 // The only indication of its native integer type is its ByteSize
 // (inside [CommonType]).
-[GoType] partial struct EnumType {
+partial struct EnumType {
     public partial ref CommonType CommonType { get; }
     public @string EnumName;
     public slice<ж<EnumValue>> Val;
 }
 
 // An EnumValue represents a single enumeration value.
-[GoType] partial struct EnumValue {
+partial struct EnumValue {
     public @string Name;
     public int64 Val;
 }
@@ -312,7 +312,7 @@ internal static readonly @string voidˢ = "void"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string enumˢ = "enum"u8;
 
-[GoRecv] public static @string String(this ref EnumType t) {
+public static @string String(this ref EnumType t) {
     @string s = enumˢ;
     if (t.EnumName != ""u8) {
         s += " "u8 + t.EnumName;
@@ -329,7 +329,7 @@ internal static readonly @string enumˢ = "enum"u8;
 }
 
 // A FuncType represents a function type.
-[GoType] partial struct FuncType {
+partial struct FuncType {
     public partial ref CommonType CommonType { get; }
     public ΔType ReturnType;
     public slice<ΔType> ParamType;
@@ -338,7 +338,7 @@ internal static readonly @string enumˢ = "enum"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string funcˢ = "func("u8;
 
-[GoRecv] public static @string String(this ref FuncType t) {
+public static @string String(this ref FuncType t) {
     @string s = funcˢ;
     foreach (var (i, tΔ1) in t.ParamType) {
         if (i > 0) {
@@ -354,36 +354,36 @@ internal static readonly @string funcˢ = "func("u8;
 }
 
 // A DotDotDotType represents the variadic ... function parameter.
-[GoType] partial struct DotDotDotType {
+partial struct DotDotDotType {
     public partial ref CommonType CommonType { get; }
 }
 
-[GoRecv] public static @string String(this ref DotDotDotType t) {
+public static @string String(this ref DotDotDotType t) {
     return "..."u8;
 }
 
 // A TypedefType represents a named type.
-[GoType] partial struct TypedefType {
+partial struct TypedefType {
     public partial ref CommonType CommonType { get; }
     public ΔType Type;
 }
 
-[GoRecv] public static @string String(this ref TypedefType t) {
+public static @string String(this ref TypedefType t) {
     return t.Name;
 }
 
-[GoRecv] public static int64 Size(this ref TypedefType t) {
+public static int64 Size(this ref TypedefType t) {
     return t.Type.Size();
 }
 
 // An UnsupportedType is a placeholder returned in situations where we
 // encounter a type that isn't supported.
-[GoType] partial struct UnsupportedType {
+partial struct UnsupportedType {
     public partial ref CommonType CommonType { get; }
     public Tag Tag;
 }
 
-[GoRecv] public static @string String(this ref UnsupportedType t) {
+public static @string String(this ref UnsupportedType t) {
     if (t.Name != ""u8) {
         return t.Name;
     }
@@ -392,7 +392,7 @@ internal static readonly @string funcˢ = "func("u8;
 
 // typeReader is used to read from either the info section or the
 // types section.
-[GoType] partial interface typeReader {
+partial interface typeReader {
     void Seek(Offset _);
     (ж<Entry>, error) Next();
     typeReader clone();
@@ -409,12 +409,12 @@ public static (ΔType, error) Type(this ж<Data> Ꮡd, Offset off) {
     return Ꮡd.readType(infoˢ, new ΔReaderжtypeReader(Ꮡd.Reader()), off, d.typeCache, nil);
 }
 
-[GoType] partial struct typeFixer {
+partial struct typeFixer {
     internal slice<ж<TypedefType>> typedefs;
     internal slice<ж<ΔType>> arraytypes;
 }
 
-[GoRecv] internal static void recordArrayType(this ref typeFixer tf, ж<ΔType> Ꮡt) {
+internal static void recordArrayType(this ref typeFixer tf, ж<ΔType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt == nil) {
@@ -426,7 +426,7 @@ public static (ΔType, error) Type(this ж<Data> Ꮡd, Offset off) {
     }
 }
 
-[GoRecv] internal static void apply(this ref typeFixer tf) {
+internal static void apply(this ref typeFixer tf) {
     foreach (var (_, t) in tf.typedefs) {
         t.of(TypedefType.ᏑCommonType).Common().Value.ByteSize = (~t).Type.Size();
     }
@@ -446,7 +446,7 @@ internal static readonly @string constˢ = "const"u8;
 internal static readonly @string restrictˢ = "restrict"u8;
 internal static readonly @string volatileˢ = "volatile"u8;
 
-[GoType("dyn")] internal partial interface readType_type {
+internal partial interface readType_type /*dyn*/ {
     ж<BasicType> Basic();
 }
 

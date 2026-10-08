@@ -10,29 +10,29 @@ using syscall = syscall_package;
 partial class route_package {
 
 // An Addr represents an address associated with packet routing.
-[GoType] partial interface Addr {
+partial interface Addr {
     // Family returns an address family.
     nint Family();
 }
 
 // A LinkAddr represents a link-layer address.
-[GoType] partial struct LinkAddr {
+partial struct LinkAddr {
     public nint Index;   // interface index when attached
     public @string Name; // interface name when attached
     public slice<byte> Addr; // link-layer address when attached
 }
 
 // Family implements the Family method of Addr interface.
-[GoRecv] public static nint Family(this ref LinkAddr a) {
+public static nint Family(this ref LinkAddr a) {
     return syscall.AF_LINK;
 }
 
-[GoRecv] internal static (nint, nint) lenAndSpace(this ref LinkAddr a) {
+internal static (nint, nint) lenAndSpace(this ref LinkAddr a) {
     nint l = 8 + len(a.Name) + len(a.Addr);
     return (l, roundup(l));
 }
 
-[GoRecv] internal static (nint, error) marshal(this ref LinkAddr a, slice<byte> b) {
+internal static (nint, error) marshal(this ref LinkAddr a, slice<byte> b) {
     var (l, ll) = a.lenAndSpace();
     if (len(b) < ll) {
         return (0, errShortBuffer);
@@ -122,20 +122,20 @@ internal static (nint, Addr, error) parseKernelLinkAddr(nint _, slice<byte> b) {
 }
 
 // An Inet4Addr represents an internet address for IPv4.
-[GoType] partial struct Inet4Addr {
+partial struct Inet4Addr {
     public array<byte> IP = new(4); // IP address
 }
 
 // Family implements the Family method of Addr interface.
-[GoRecv] public static nint Family(this ref Inet4Addr a) {
+public static nint Family(this ref Inet4Addr a) {
     return syscall.AF_INET;
 }
 
-[GoRecv] internal static (nint, nint) lenAndSpace(this ref Inet4Addr a) {
+internal static (nint, nint) lenAndSpace(this ref Inet4Addr a) {
     return (sizeofSockaddrInet, roundup(sizeofSockaddrInet));
 }
 
-[GoRecv] internal static (nint, error) marshal(this ref Inet4Addr a, slice<byte> b) {
+internal static (nint, error) marshal(this ref Inet4Addr a, slice<byte> b) {
     var (l, ll) = a.lenAndSpace();
     if (len(b) < ll) {
         return (0, errShortBuffer);
@@ -147,21 +147,21 @@ internal static (nint, Addr, error) parseKernelLinkAddr(nint _, slice<byte> b) {
 }
 
 // An Inet6Addr represents an internet address for IPv6.
-[GoType] partial struct Inet6Addr {
+partial struct Inet6Addr {
     public array<byte> IP = new(16); // IP address
     public nint ZoneID;     // zone identifier
 }
 
 // Family implements the Family method of Addr interface.
-[GoRecv] public static nint Family(this ref Inet6Addr a) {
+public static nint Family(this ref Inet6Addr a) {
     return syscall.AF_INET6;
 }
 
-[GoRecv] internal static (nint, nint) lenAndSpace(this ref Inet6Addr a) {
+internal static (nint, nint) lenAndSpace(this ref Inet6Addr a) {
     return (sizeofSockaddrInet6, roundup(sizeofSockaddrInet6));
 }
 
-[GoRecv] internal static (nint, error) marshal(this ref Inet6Addr a, slice<byte> b) {
+internal static (nint, error) marshal(this ref Inet6Addr a, slice<byte> b) {
     var (l, ll) = a.lenAndSpace();
     if (len(b) < ll) {
         return (0, errShortBuffer);
@@ -301,22 +301,22 @@ internal static (nint, Addr, error) parseKernelInetAddr(nint af, slice<byte> b) 
 
 // A DefaultAddr represents an address of various operating
 // system-specific features.
-[GoType] partial struct DefaultAddr {
+partial struct DefaultAddr {
     internal nint af;
     public slice<byte> Raw; // raw format of address
 }
 
 // Family implements the Family method of Addr interface.
-[GoRecv] public static nint Family(this ref DefaultAddr a) {
+public static nint Family(this ref DefaultAddr a) {
     return a.af;
 }
 
-[GoRecv] internal static (nint, nint) lenAndSpace(this ref DefaultAddr a) {
+internal static (nint, nint) lenAndSpace(this ref DefaultAddr a) {
     nint l = len(a.Raw);
     return (l, roundup(l));
 }
 
-[GoRecv] internal static (nint, error) marshal(this ref DefaultAddr a, slice<byte> b) {
+internal static (nint, error) marshal(this ref DefaultAddr a, slice<byte> b) {
     var (l, ll) = a.lenAndSpace();
     if (len(b) < ll) {
         return (0, errShortBuffer);

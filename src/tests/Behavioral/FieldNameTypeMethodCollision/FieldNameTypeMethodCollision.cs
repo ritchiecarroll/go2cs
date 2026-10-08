@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct @event {
+partial struct @event {
     internal nint kind;
     internal @string label;
 }
@@ -13,7 +13,7 @@ internal static ΔLabel Label(this @event e) {
     return new ΔLabel(ΔΔLabel: e.label, Resource: e.kind);
 }
 
-[GoType] partial struct ΔLabel {
+partial struct ΔLabel {
     public @string ΔΔLabel;
     public nint Resource;
 }

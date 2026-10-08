@@ -9,7 +9,7 @@ partial class types_package {
 
 // A Type represents a type of Go.
 // All types implement the Type interface.
-[GoType] partial interface ΔType :
+partial interface ΔType :
     fmt.Stringer
 {
     // Underlying returns the underlying type of a type.

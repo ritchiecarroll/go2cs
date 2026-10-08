@@ -20,7 +20,7 @@ using go.math;
 
 partial class big_package {
 
-[GoType("[]Word")] partial struct nat;
+partial struct nat /*[]Word*/;
 
 internal static nat natOne = new nat(new Word[]{1}.slice());
 internal static nat natTwo = new nat(new Word[]{2}.slice());

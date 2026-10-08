@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:int8")] partial struct level;
+partial struct level /*num:int8*/;
 
 internal static level neg() {
     return ((level)(-1));

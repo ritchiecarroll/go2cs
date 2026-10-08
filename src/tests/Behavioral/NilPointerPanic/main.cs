@@ -4,12 +4,12 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct node {
+partial struct node {
     internal @string name;
     internal ж<node> next;
 }
 
-[GoRecv] internal static @string label(this ref node n) {
+internal static @string label(this ref node n) {
     return "node:"u8 + n.name;
 }
 
@@ -17,7 +17,7 @@ internal static bool isNil(this ж<node> Ꮡn) {
     return Ꮡn == nil;
 }
 
-[GoType] partial struct box {
+partial struct box {
     internal ж<node> p;
 }
 

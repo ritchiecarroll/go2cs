@@ -63,9 +63,9 @@ using static go.@internal.coverage.cfile_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/coverage/cfile/apis.go", "apis.cs", "ABEikoKUqJKClIKUgqiSgpSokoKUgqaCgpSCloK4qJKCgpSCADl4goKUgoKmgoKmpg==")]
-[assembly: go.GoPositionMap("internal/coverage/cfile/emit.go", "emit.cs", "ACNKAESgAbKClIKCgoKmgoKWgoKCloCCgoLagoKUgoKUpoKCgpSsxN6Clt6EgoKCooKClJSCgoK6goKigIKkgoKClIKCuoKWgoKChKqigoKUgpaE3oCCuIKAgrassoKUgIKCgtykgpSWgqiCAAYQgIKkgqiAgqSAgsqAgqaokoCCpAACEAAIBoKCgpSCgoKCpqzSgoKCgoKCgpQAAhwADQKCgpSCloKAgraCgIK2rNKAgqSAgsqAgqasstaihIKigpSmgoSCgoKUloKCgpSCgqiCgoKCuoKCgoKmlIKWgoKCpgAHEoKCgpKCgIKUggAIEJaCgIK4lIKmAAcQ0oKCgpSCgqrCgoCCpAACENKmgoKEgpSCgoKCooKClJSCgg==", "455-461:1")]
+[assembly: go.GoPositionMap("internal/coverage/cfile/emit.go", "emit.cs", "ACNKAESgAbKClIKCgoKmgoKWgoKCloCCgoLagoKUgoKUpoKCgpSsxN6Clt6EgoKCooKClJSCgoK6goKigIKkgoKClIKCuoKWgoKChKqigoKUgpaE3oCCuIKAgrassoKUgIKCgtykgpSWgqiCAAYQgIKkgqiAgqSAgsqAgqaokoCCpAACEAAIBoKCgpSCgoKCpqzSgoKCgoKCgpQAAhwADQKCgpSCloKAgraCgIK2rNKAgqSAgsqAgqasstaihIKigpSmgoSCgoKUloKCgpSCgqiCgoKCuoKCgoKmlIKWgoKCpgAHEoKCgpKCgIKUggAIEJaCgIK4lIKmAAcQ0oKCgpSCgqrCgoCCpAACENKmgoKEgpSCgoKCooKClJSCgg==", "455-461:1", "", "171=Getenv/1/1/2;239=Getenv/1/1/2;291=Getenv/1/1/4")]
 [assembly: go.GoPositionMap("internal/coverage/cfile/hooks.go", "hooks.cs", "AAo4ABYIgoKU")]
-[assembly: go.GoPositionMap("internal/coverage/cfile/testsupport.go", "testsupport.cs", "AB484pKCqILKgIKkgIIABxCCgpiSgoKCgoKUkoKCzAAIEoKCgoKUgIK4goCCgILagIK4goCCpIKAgrgADBbkgoKUkpSCgoKUgoKUgoCCuJaygoKUkoKCgpSCgoKClIKogoCUgILGgoKU2IKAgsqCgoKCgoKUgoKCgoKAgraCgoKmgpSCgpS4AAkOhqKCgpSAggAHEIKCgIKkgoKAgrYAAhLigpSWgoKCgoKUgqaChIKUgoKCpqaClA==", "69-74:1;138-140:1;159-193:2")]
+[assembly: go.GoPositionMap("internal/coverage/cfile/testsupport.go", "testsupport.cs", "AB484pKCqILKgIKkgIIABxCCgpiSgoKCgoKUkoKCzAAIEoKCgoKUgIK4goCCgILagIK4goCCpIKAgrgADBbkgoKUkpSCgoKUgoKUgoCCuJaygoKUkoKCgpSCgoKClIKogoCUgILGgoKU2IKAgsqCgoKCgoKUgoKCgoKAgraCgoKmgpSCgpS4AAkOhqKCgpSAggAHEIKCgIKkgoKAgrYAAhLigpSWgoKCgoKUgqaChIKUgoKCpqaClA==", "69-74:1;138-140:1;159-193:2", "", "87=NewFormatter/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
@@ -74,7 +74,7 @@ namespace go.@internal.coverage;
 public static partial class cfile_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

@@ -33,7 +33,7 @@ internal static nint maxData32 = realMaxData32;
 internal static UntypedInt realMaxData32 => /* math.MaxInt32 */ 2147483647;
 
 // Index implements a suffix array for fast substring search.
-[GoType] partial struct Index {
+partial struct Index {
     internal slice<byte> data;
     internal ints sa; // suffix array for data; sa.len() == len(data)
 }
@@ -41,23 +41,23 @@ internal static UntypedInt realMaxData32 => /* math.MaxInt32 */ 2147483647;
 // An ints is either an []int32 or an []int64.
 // That is, one of them is empty, and one is the real data.
 // The int64 form is used when len(data) > maxData32
-[GoType] partial struct ints {
+partial struct ints {
     internal slice<int32> int32;
     internal slice<int64> int64;
 }
 
-[GoRecv] internal static nint len(this ref ints a) {
+internal static nint len(this ref ints a) {
     return builtin.len(a.int32) + builtin.len(a.int64);
 }
 
-[GoRecv] internal static int64 get(this ref ints a, nint i) {
+internal static int64 get(this ref ints a, nint i) {
     if (a.int32 != default!) {
         return (int64)a.int32[i];
     }
     return a.int64[i];
 }
 
-[GoRecv] internal static void set(this ref ints a, nint i, int64 v) {
+internal static void set(this ref ints a, nint i, int64 v) {
     if (a.int32 != default!){
         a.int32[i] = (int32)v;
     } else {
@@ -65,7 +65,7 @@ internal static UntypedInt realMaxData32 => /* math.MaxInt32 */ 2147483647;
     }
 }
 
-[GoRecv] internal static ints Δslice(this ref ints a, nint i, nint j) {
+internal static ints Δslice(this ref ints a, nint i, nint j) {
     if (a.int32 != default!) {
         return new ints(a.int32.slice(i, j), default!);
     }
@@ -156,7 +156,7 @@ internal static (nint n, error err) readSlice(io.Reader r, slice<byte> buf, ints
 internal static UntypedInt bufSize => /* 16 << 10 */ 16384; // reasonable for BenchmarkSaveRestore
 
 // Read reads the index from r into x; x must not be nil.
-[GoRecv] public static error Read(this ref Index x, io.Reader r) {
+public static error Read(this ref Index x, io.Reader r) {
     // buffer for all reads
     var buf = new slice<byte>(bufSize);
     // read length
@@ -204,7 +204,7 @@ internal static UntypedInt bufSize => /* 16 << 10 */ 16384; // reasonable for Be
 }
 
 // Write writes the index x to w.
-[GoRecv] public static error Write(this ref Index x, io.Writer w) {
+public static error Write(this ref Index x, io.Writer w) {
     // buffer for all writes
     var buf = new slice<byte>(bufSize);
     // write length
@@ -233,11 +233,11 @@ internal static UntypedInt bufSize => /* 16 << 10 */ 16384; // reasonable for Be
 
 // Bytes returns the data over which the index was created.
 // It must not be modified.
-[GoRecv] public static slice<byte> Bytes(this ref Index x) {
+public static slice<byte> Bytes(this ref Index x) {
     return x.data;
 }
 
-[GoRecv] internal static slice<byte> at(this ref Index x, nint i) {
+internal static slice<byte> at(this ref Index x, nint i) {
     return x.data.slice((nint)(x.sa.get(i)));
 }
 

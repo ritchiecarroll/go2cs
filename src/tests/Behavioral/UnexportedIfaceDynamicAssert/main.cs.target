@@ -5,11 +5,11 @@ using Δio = io_package;
 
 partial class main_package {
 
-[GoType] partial interface buffersWriter {
+partial interface buffersWriter {
     (int64, error) writeBuffers(ж<Buffers> _);
 }
 
-[GoType("[]slice<byte>")] partial struct Buffers;
+partial struct Buffers /*[]slice<byte>*/;
 
 public static (int64, error) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w) {
     ref var v = ref Ꮡv.DerefOrNull();
@@ -30,12 +30,12 @@ public static (int64, error) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w) {
     return (n, default!);
 }
 
-[GoType] partial struct sink {
+partial struct sink {
     internal slice<byte> bytes;
     internal @string mode;
 }
 
-[GoType] partial struct conn {
+partial struct conn {
     internal ж<sink> fd;
 }
 
@@ -78,11 +78,11 @@ internal static (int64, error) writeBuffers(this ж<conn> Ꮡc, ж<Buffers> Ꮡv
     return (n, default!);
 }
 
-[GoType] partial struct TCPConn {
+partial struct TCPConn {
     internal partial ref conn conn { get; }
 }
 
-[GoType] partial struct plainConn {
+partial struct plainConn {
     internal ж<sink> fd;
 }
 
@@ -103,11 +103,11 @@ internal static (nint, error) Write(this ж<plainConn> Ꮡc, slice<byte> b) {
     return (len(b), default!);
 }
 
-[GoType] partial struct PlainConn {
+partial struct PlainConn {
     internal partial ref plainConn plainConn { get; }
 }
 
-[GoType] partial struct valueSink {
+partial struct valueSink {
     internal ж<sink> fd;
 }
 
@@ -129,7 +129,7 @@ internal static (int64, error) writeBuffers(this valueSink s, ж<Buffers> Ꮡv) 
     return (n, default!);
 }
 
-[GoType] partial struct ValueSink {
+partial struct ValueSink {
     internal partial ref valueSink valueSink { get; }
 }
 

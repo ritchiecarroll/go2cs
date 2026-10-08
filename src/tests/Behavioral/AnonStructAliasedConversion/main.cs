@@ -7,7 +7,7 @@ using structs = AnonStructAliasedConversion.structs_package;
 
 partial class main_package {
 
-[GoType("dyn")] internal partial struct main_type {
+internal partial struct main_type /*dyn*/ {
     public nint A;
 }
 

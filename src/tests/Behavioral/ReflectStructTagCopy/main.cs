@@ -6,43 +6,41 @@ using System.Runtime.InteropServices;
 
 partial class main_package {
 
-[GoType] partial struct record {
+partial struct record {
     public nint Version;
-    [GoTag(@"json:""name"" asn1:""optional,explicit,tag:0""")]
-    public @string Name;
-    [GoTag(@"json:""data,omitempty""")]
-    public slice<byte> Data;
+    public @string Name; /*`json:"name" asn1:"optional,explicit,tag:0"`*/
+    public slice<byte> Data; /*`json:"data,omitempty"`*/
     public bool Untagged;
 }
 
-[GoType("[]nint")] partial struct intSET;
+partial struct intSET /*[]nint*/;
 
-[GoType("[4]byte")] partial struct byteArray;
+partial struct byteArray /*[4]byte*/;
 
-[GoType("map[@string, nint]")] partial struct stringMap;
+partial struct stringMap /*map[@string, nint]*/;
 
-[GoType("chan nint")] partial struct intChan;
+partial struct intChan /*chan nint*/;
 
-[GoType("ж<nint>")] partial class intPtr;
+partial class intPtr /*ж<nint>*/;
 
-[GoType("num:nint")] partial struct counter;
+partial struct counter /*num:nint*/;
 
-[GoType] partial struct empty {
+partial struct empty {
 }
 
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 24)] partial struct layout {
+[StructLayout(LayoutKind.Explicit, Size = 24)] partial struct layout {
     [FieldOffset(0)] internal readonly empty pad;
     [FieldOffset(0)] internal uint32 small;
     [FieldOffset(8)] internal int64 big;
     [FieldOffset(16)] internal uint8 tail;
 }
 
-[GoType] partial struct inner {
+partial struct inner {
     public uint32 X;
     public int64 Y;
 }
 
-[GoType] partial struct outer {
+partial struct outer {
     public uint16 Head;
     internal partial ref inner inner { get; }
 }

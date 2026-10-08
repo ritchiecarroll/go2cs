@@ -18,14 +18,14 @@ internal static UntypedInt chunk => 32; // each chunk produced by block is 32 ui
 internal static UntypedInt reseed => 4; // reseed with 4 words
 
 // block is the chacha8rand block function.
-internal static partial void block([GoArrayDims(4)] ж<array<uint64>> seed, [GoArrayDims(32)] ж<array<uint64>> blocks, uint32 counter);
+internal static partial void block(/*[4]*/ ж<array<uint64>> seed, /*[32]*/ ж<array<uint64>> blocks, uint32 counter);
 
 // A State holds the state for a single random generator.
 // It must be used from one goroutine at a time.
 // If used by multiple goroutines at a time, the goroutines
 // may see the same random values, but the code will not
 // crash or cause out-of-bounds memory accesses.
-[GoType] partial struct State {
+partial struct State {
     internal array<uint64> buf = new(32);
     internal array<uint64> seed = new(4);
     internal uint32 i;
@@ -42,7 +42,7 @@ internal static partial void block([GoArrayDims(4)] ж<array<uint64>> seed, [GoA
 // with per-m data without holding the per-m lock.
 //
 //go:nosplit
-[GoRecv] public static (uint64, bool) Next(this ref State s) {
+public static (uint64, bool) Next(this ref State s) {
     var i = s.i;
     if (i >= s.n) {
         return (0, false);
@@ -52,7 +52,7 @@ internal static partial void block([GoArrayDims(4)] ж<array<uint64>> seed, [GoA
 }
 
 // Init seeds the State with the given seed value.
-public static void Init(this ж<State> Ꮡs, [GoArrayDims(32)] array<byte> seed) {
+public static void Init(this ж<State> Ꮡs, /*[32]*/ array<byte> seed) {
     seed = seed.Clone();
 
     Ꮡs.Init64(new uint64[]{
@@ -64,7 +64,7 @@ public static void Init(this ж<State> Ꮡs, [GoArrayDims(32)] array<byte> seed)
 }
 
 // Init64 seeds the state with the given seed value.
-public static void Init64(this ж<State> Ꮡs, [GoArrayDims(4)] array<uint64> seed) {
+public static void Init64(this ж<State> Ꮡs, /*[4]*/ array<uint64> seed) {
     seed = seed.Clone();
 
     ref var s = ref Ꮡs.DerefOrNull();
@@ -143,13 +143,13 @@ public static slice<byte> Marshal(ж<State> Ꮡs) {
     return data;
 }
 
-[GoType] partial struct errUnmarshalChaCha8 {
+partial struct errUnmarshalChaCha8 {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string invalidChaCha8Encodingˢ = "invalid ChaCha8 encoding"u8;
 
-[GoRecv] internal static @string Error(this ref errUnmarshalChaCha8 _) {
+internal static @string Error(this ref errUnmarshalChaCha8 _) {
     return invalidChaCha8Encodingˢ;
 }
 

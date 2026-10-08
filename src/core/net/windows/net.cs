@@ -114,7 +114,7 @@ partial class net_package {
 // The two methods [Addr.Network] and [Addr.String] conventionally return strings
 // that can be passed as the arguments to [Dial], but the exact form
 // and meaning of the strings is up to the implementation.
-[GoType] partial interface ΔAddr {
+partial interface ΔAddr {
     @string Network(); // name of the network (for example, "tcp", "udp")
     @string String(); // string form of address (for example, "192.0.2.1:25", "[2001:db8::1]:80")
 }
@@ -122,7 +122,7 @@ partial class net_package {
 // Conn is a generic stream-oriented network connection.
 //
 // Multiple goroutines may invoke methods on a Conn simultaneously.
-[GoType] partial interface Conn :
+partial interface Conn :
     Δio.ReadWriteCloser
 {
     // LocalAddr returns the local network address, if known.
@@ -163,7 +163,7 @@ partial class net_package {
     error SetWriteDeadline(time.Time t);
 }
 
-[GoType] partial struct conn {
+partial struct conn {
     internal ж<netFD> fd;
 }
 
@@ -325,7 +325,7 @@ internal static error SetWriteBuffer(this ж<conn> Ꮡc, nint bytes) {
 // The returned os.File's file descriptor is different from the connection's.
 // Attempting to change properties of the original using this duplicate
 // may or may not have the desired effect.
-[GoRecv] internal static (ж<os.File> f, error err) File(this ref conn c) {
+internal static (ж<os.File> f, error err) File(this ref conn c) {
     ж<os.File> f = default!;
     error err = default!;
 
@@ -339,7 +339,7 @@ internal static error SetWriteBuffer(this ж<conn> Ꮡc, nint bytes) {
 // PacketConn is a generic packet-oriented network connection.
 //
 // Multiple goroutines may invoke methods on a PacketConn simultaneously.
-[GoType] partial interface PacketConn :
+partial interface PacketConn :
     Δio.Closer
 {
     // ReadFrom reads a packet from the connection,
@@ -394,7 +394,7 @@ internal static error SetWriteBuffer(this ж<conn> Ꮡc, nint bytes) {
 }
 
 
-[GoType("dyn")] partial struct listenerBacklogCacheᴛ1 {
+partial struct listenerBacklogCacheᴛ1 /*dyn*/ {
     public partial ref sync_package.Once Once { get; }
     internal nint val;
 }
@@ -424,7 +424,7 @@ internal static nint listenerBacklog() {
 // A Listener is a generic network listener for stream-oriented protocols.
 //
 // Multiple goroutines may invoke methods on a Listener simultaneously.
-[GoType] partial interface Listener :
+partial interface Listener :
     Δio.Closer
 {
     // Accept waits for and returns the next connection to the listener.
@@ -434,7 +434,7 @@ internal static nint listenerBacklog() {
 }
 
 // An Error represents a network error.
-[GoType] partial interface ΔError :
+partial interface ΔError :
     error
 {
     bool Timeout(); // Is the error a timeout?
@@ -455,7 +455,7 @@ public static error ErrWriteToConnected = errors.New("use of WriteTo with pre-co
 
 // canceledError lets us return the same error string we have always
 // returned, while still being Is context.Canceled.
-[GoType] partial struct canceledError {
+partial struct canceledError {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -488,7 +488,7 @@ internal static error mapErr(error err) {
 // OpError is the error type usually returned by functions in the net
 // package. It describes the operation, network type, and address of
 // an error.
-[GoType] partial struct OpError {
+partial struct OpError {
     // Op is the operation which caused the error, such as
     // "read" or "write".
     public @string Op;
@@ -511,7 +511,7 @@ internal static error mapErr(error err) {
     public error Err;
 }
 
-[GoRecv] public static error Unwrap(this ref OpError e) {
+public static error Unwrap(this ref OpError e) {
     return e.Err;
 }
 
@@ -544,11 +544,11 @@ internal static time.Time aLongTimeAgo = time.Unix(1, 0);
 internal static time.Time noDeadline = new time.Time(nil);
 internal static channel<EmptyStruct> noCancel = (channel<EmptyStruct>)(default!);
 
-[GoType] partial interface timeout {
+partial interface timeout {
     bool Timeout();
 }
 
-[GoRecv] public static bool Timeout(this ref OpError e) {
+public static bool Timeout(this ref OpError e) {
     {
         var (ne, okΔ1) = e.Err._<ж<os.SyscallError>>(ᐧ); if (okΔ1) {
             var (tΔ1, okΔ2) = (~ne).Err._<timeout>(ᐧ);
@@ -559,11 +559,11 @@ internal static channel<EmptyStruct> noCancel = (channel<EmptyStruct>)(default!)
     return ok && t.Timeout();
 }
 
-[GoType] partial interface temporary {
+partial interface temporary {
     bool Temporary();
 }
 
-[GoRecv] public static bool Temporary(this ref OpError e) {
+public static bool Temporary(this ref OpError e) {
     // Treat ECONNRESET and ECONNABORTED as temporary errors when
     // they come from calling accept. See issue 6163.
     if (e.Op == "accept"u8 && isConnError(e.Err)) {
@@ -580,7 +580,7 @@ internal static channel<EmptyStruct> noCancel = (channel<EmptyStruct>)(default!)
 }
 
 // A ParseError is the error type of literal network address parsers.
-[GoType] partial struct ParseError {
+partial struct ParseError {
     // Type is the type of string that was expected, such as
     // "IP address", "CIDR address".
     public @string Type;
@@ -588,19 +588,19 @@ internal static channel<EmptyStruct> noCancel = (channel<EmptyStruct>)(default!)
     public @string Text;
 }
 
-[GoRecv] public static @string Error(this ref ParseError e) {
+public static @string Error(this ref ParseError e) {
     return "invalid "u8 + e.Type + ": "u8 + e.Text;
 }
 
-[GoRecv] public static bool Timeout(this ref ParseError e) {
+public static bool Timeout(this ref ParseError e) {
     return false;
 }
 
-[GoRecv] public static bool Temporary(this ref ParseError e) {
+public static bool Temporary(this ref ParseError e) {
     return false;
 }
 
-[GoType] partial struct AddrError {
+partial struct AddrError {
     public @string Err;
     public @string Addr;
 }
@@ -618,15 +618,15 @@ public static @string Error(this ж<AddrError> Ꮡe) {
     return s;
 }
 
-[GoRecv] public static bool Timeout(this ref AddrError e) {
+public static bool Timeout(this ref AddrError e) {
     return false;
 }
 
-[GoRecv] public static bool Temporary(this ref AddrError e) {
+public static bool Temporary(this ref AddrError e) {
     return false;
 }
 
-[GoType("@string")] partial struct UnknownNetworkError;
+partial struct UnknownNetworkError /*@string*/;
 
 public static @string Error(this UnknownNetworkError e) {
     return "unknown network "u8 + ((@string)e);
@@ -640,7 +640,7 @@ public static bool Temporary(this UnknownNetworkError e) {
     return false;
 }
 
-[GoType("@string")] partial struct InvalidAddrError;
+partial struct InvalidAddrError /*@string*/;
 
 public static @string Error(this InvalidAddrError e) {
     return ((@string)e);
@@ -667,47 +667,47 @@ public static bool Temporary(this InvalidAddrError e) {
 // return true.
 internal static error errTimeout = new timeoutErrorжerror(Ꮡ(new timeoutError(nil)));
 
-[GoType] partial struct timeoutError {
+partial struct timeoutError {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string iOTimeoutˢ = "i/o timeout"u8;
 
-[GoRecv] internal static @string Error(this ref timeoutError e) {
+internal static @string Error(this ref timeoutError e) {
     return iOTimeoutˢ;
 }
 
-[GoRecv] internal static bool Timeout(this ref timeoutError e) {
+internal static bool Timeout(this ref timeoutError e) {
     return true;
 }
 
-[GoRecv] internal static bool Temporary(this ref timeoutError e) {
+internal static bool Temporary(this ref timeoutError e) {
     return true;
 }
 
-[GoRecv] internal static bool Is(this ref timeoutError e, error err) {
+internal static bool Is(this ref timeoutError e, error err) {
     return AreEqual(err, context.DeadlineExceeded);
 }
 
 // DNSConfigError represents an error reading the machine's DNS configuration.
 // (No longer used; kept for compatibility.)
-[GoType] partial struct DNSConfigError {
+partial struct DNSConfigError {
     public error Err;
 }
 
-[GoRecv] public static error Unwrap(this ref DNSConfigError e) {
+public static error Unwrap(this ref DNSConfigError e) {
     return e.Err;
 }
 
-[GoRecv] public static @string Error(this ref DNSConfigError e) {
+public static @string Error(this ref DNSConfigError e) {
     return "error reading DNS config: "u8 + e.Err.Error();
 }
 
-[GoRecv] public static bool Timeout(this ref DNSConfigError e) {
+public static bool Timeout(this ref DNSConfigError e) {
     return false;
 }
 
-[GoRecv] public static bool Temporary(this ref DNSConfigError e) {
+public static bool Temporary(this ref DNSConfigError e) {
     return false;
 }
 
@@ -718,34 +718,34 @@ internal static ж<notFoundError> errUnknownPort = Ꮡ(new notFoundError("unknow
 
 // notFoundError is a special error understood by the newDNSError function,
 // which causes a creation of a DNSError with IsNotFound field set to true.
-[GoType] partial struct notFoundError {
+partial struct notFoundError {
     internal @string s;
 }
 
-[GoRecv] internal static @string Error(this ref notFoundError e) {
+internal static @string Error(this ref notFoundError e) {
     return e.s;
 }
 
 // temporaryError is an error type that implements the [Error] interface.
 // It returns true from the Temporary method.
-[GoType] partial struct temporaryError {
+partial struct temporaryError {
     internal @string s;
 }
 
-[GoRecv] internal static @string Error(this ref temporaryError e) {
+internal static @string Error(this ref temporaryError e) {
     return e.s;
 }
 
-[GoRecv] internal static bool Temporary(this ref temporaryError e) {
+internal static bool Temporary(this ref temporaryError e) {
     return true;
 }
 
-[GoRecv] internal static bool Timeout(this ref temporaryError e) {
+internal static bool Timeout(this ref temporaryError e) {
     return false;
 }
 
 // DNSError represents a DNS lookup error.
-[GoType] partial struct DNSError {
+partial struct DNSError {
     public error UnwrapErr;  // error returned by the [DNSError.Unwrap] method, might be nil
     public @string Err; // description of the error
     public @string Name; // name looked for
@@ -789,7 +789,7 @@ internal static ж<DNSError> newDNSError(error err, @string name, @string server
 }
 
 // Unwrap returns e.UnwrapErr.
-[GoRecv] public static error Unwrap(this ref DNSError e) {
+public static error Unwrap(this ref DNSError e) {
     return e.UnwrapErr;
 }
 
@@ -810,14 +810,14 @@ public static @string Error(this ж<DNSError> Ꮡe) {
 // Timeout reports whether the DNS lookup is known to have timed out.
 // This is not always known; a DNS lookup may fail due to a timeout
 // and return a [DNSError] for which Timeout returns false.
-[GoRecv] public static bool Timeout(this ref DNSError e) {
+public static bool Timeout(this ref DNSError e) {
     return e.IsTimeout;
 }
 
 // Temporary reports whether the DNS error is known to be temporary.
 // This is not always known; a DNS lookup may fail due to a temporary
 // error and return a [DNSError] for which Temporary returns false.
-[GoRecv] public static bool Temporary(this ref DNSError e) {
+public static bool Temporary(this ref DNSError e) {
     return e.IsTimeout || e.IsTemporary;
 }
 
@@ -834,7 +834,7 @@ public static error ErrClosed = errClosed;
 
 // noReadFrom can be embedded alongside another type to
 // hide the ReadFrom method of that other type.
-[GoType] partial struct noReadFrom {
+partial struct noReadFrom {
 }
 
 // ReadFrom hides another ReadFrom method.
@@ -846,7 +846,7 @@ internal static (int64, error) ReadFrom(this noReadFrom _Δp0, Δio.Reader _Δp1
 // tcpConnWithoutReadFrom implements all the methods of *TCPConn other
 // than ReadFrom. This is used to permit ReadFrom to call io.Copy
 // without leading to a recursive call to ReadFrom.
-[GoType] partial struct tcpConnWithoutReadFrom {
+partial struct tcpConnWithoutReadFrom {
     internal partial ref noReadFrom noReadFrom { get; }
     public partial ref ж<TCPConn> TCPConn { get; }
 }
@@ -860,7 +860,7 @@ internal static (int64 n, error err) genericReadFrom(ж<TCPConn> Ꮡc, Δio.Read
 
 // noWriteTo can be embedded alongside another type to
 // hide the WriteTo method of that other type.
-[GoType] partial struct noWriteTo {
+partial struct noWriteTo {
 }
 
 // WriteTo hides another WriteTo method.
@@ -872,7 +872,7 @@ internal static (int64, error) WriteTo(this noWriteTo _Δp0, Δio.Writer _Δp1) 
 // tcpConnWithoutWriteTo implements all the methods of *TCPConn other
 // than WriteTo. This is used to permit WriteTo to call io.Copy
 // without leading to a recursive call to WriteTo.
-[GoType] partial struct tcpConnWithoutWriteTo {
+partial struct tcpConnWithoutWriteTo {
     internal partial ref noWriteTo noWriteTo { get; }
     public partial ref ж<TCPConn> TCPConn { get; }
 }
@@ -917,11 +917,11 @@ internal static void releaseThread() {
 // "writev"-like batch write optimization.
 // writeBuffers should fully consume and write all chunks from the
 // provided Buffers, else it should report a non-nil error.
-[GoType] partial interface buffersWriter {
+partial interface buffersWriter {
     (int64, error) writeBuffers(ж<Buffers> _);
 }
 
-[GoType("[]slice<byte>")] partial struct Buffers;
+partial struct Buffers /*[]slice<byte>*/;
 
 internal static Δio.WriterTo _ᴛ2ʗ = new BuffersжWriterTo(((ж<Buffers>)nil));
 internal static Δio.Reader _ᴛ3ʗ = new BuffersжReader(((ж<Buffers>)nil));
@@ -959,7 +959,7 @@ public static (int64 n, error err) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w)
 //
 // Read modifies the slice v as well as v[i] for 0 <= i < len(v),
 // but does not modify v[i][j] for any i, j.
-[GoRecv] public static (nint n, error err) Read(this ref Buffers v, slice<byte> p) {
+public static (nint n, error err) Read(this ref Buffers v, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -975,7 +975,7 @@ public static (int64 n, error err) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w)
     return (n, err);
 }
 
-[GoRecv] internal static void consume(this ref Buffers v, int64 n) {
+internal static void consume(this ref Buffers v, int64 n) {
     while (len(v) > 0) {
         var ln0 = (int64)len((v)[0]);
         if (ln0 > n) {

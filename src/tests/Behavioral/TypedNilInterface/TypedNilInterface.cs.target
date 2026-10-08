@@ -4,19 +4,19 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct AErr {
+partial struct AErr {
     internal nint n;
 }
 
-[GoRecv] public static @string Error(this ref AErr e) {
+public static @string Error(this ref AErr e) {
     return "a"u8;
 }
 
-[GoType] partial struct BErr {
+partial struct BErr {
     internal nint n;
 }
 
-[GoRecv] public static @string Error(this ref BErr e) {
+public static @string Error(this ref BErr e) {
     return "b"u8;
 }
 
@@ -48,19 +48,19 @@ private static readonly object assertOkˢ = (@string)"assert-ok"u8;
 private static readonly object assertFailedˢ = (@string)"assert-failed"u8;
 private static readonly object deleteˢ = (@string)"delete"u8;
 
-[GoType("dyn")] internal partial struct main_type {
+internal partial struct main_type /*dyn*/ {
     internal nint r;
 }
 
-[GoType("dyn")] internal partial struct main_st {
+internal partial struct main_st /*dyn*/ {
     public ж<AErr> P;
 }
 
-[GoType("dyn")] internal partial struct main_holder {
+internal partial struct main_holder /*dyn*/ {
     public any V;
 }
 
-[GoType("dyn")] internal partial struct main_rows {
+internal partial struct main_rows /*dyn*/ {
     internal any value;
     internal bool want;
 }

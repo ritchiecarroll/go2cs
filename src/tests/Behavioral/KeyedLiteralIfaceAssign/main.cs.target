@@ -4,13 +4,13 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:uint32")] public partial struct code;
+public partial struct code /*num:uint32*/;
 
 public static @string String(this code c) {
     return fmt.Sprintf("code(%d)"u8, (uint32)c);
 }
 
-[GoType] partial struct failure {
+partial struct failure {
     public code Code;
     public @string Msg;
 }

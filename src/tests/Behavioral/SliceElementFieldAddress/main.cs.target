@@ -5,21 +5,21 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct header {
+partial struct header {
     public uint32 Out;
     public uint32 Arg;
 }
 
-[GoType] public partial struct inst {
+public partial struct inst {
     internal partial ref header header { get; }
     public @string Name;
 }
 
-[GoType] partial struct prog {
+partial struct prog {
     public slice<inst> Inst;
 }
 
-[GoType] partial struct cell {
+partial struct cell {
     internal nint n, m;
 }
 

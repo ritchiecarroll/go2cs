@@ -8,7 +8,7 @@ using syscall = syscall_package;
 partial class windows_package {
 
 // NTUnicodeString is a UTF-16 string for NT native APIs, corresponding to UNICODE_STRING.
-[GoType] partial struct NTUnicodeString {
+partial struct NTUnicodeString {
     public uint16 Length;
     public uint16 MaximumLength;
     public ж<uint16> Buffer;

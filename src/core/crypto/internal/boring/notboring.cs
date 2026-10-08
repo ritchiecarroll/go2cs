@@ -29,7 +29,7 @@ public static void Unreachable() {
 public static void UnreachableExceptTests() {
 }
 
-[GoType("num:nint")] public partial struct randReader;
+public partial struct randReader /*num:nint*/;
 
 public static (nint, error) Read(this randReader _, slice<byte> b) {
     throw panic("boringcrypto: not available");
@@ -93,11 +93,11 @@ public static (cipher.AEAD, error) NewGCMTLS13(cipher.Block _) {
     throw panic("boringcrypto: not available");
 }
 
-[GoType] partial struct PublicKeyECDSA {
+partial struct PublicKeyECDSA {
     internal nint _;
 }
 
-[GoType] partial struct PrivateKeyECDSA {
+partial struct PrivateKeyECDSA {
     internal nint _;
 }
 
@@ -121,11 +121,11 @@ public static bool VerifyECDSA(ж<PublicKeyECDSA> Ꮡpub, slice<byte> hash, slic
     throw panic("boringcrypto: not available");
 }
 
-[GoType] partial struct PublicKeyRSA {
+partial struct PublicKeyRSA {
     internal nint _;
 }
 
-[GoType] partial struct PrivateKeyRSA {
+partial struct PrivateKeyRSA {
     internal nint _;
 }
 
@@ -181,10 +181,10 @@ public static error VerifyRSAPSS(ж<PublicKeyRSA> Ꮡpub, crypto.Hash h, slice<b
     throw panic("boringcrypto: not available");
 }
 
-[GoType] partial struct PublicKeyECDH {
+partial struct PublicKeyECDH {
 }
 
-[GoType] partial struct PrivateKeyECDH {
+partial struct PrivateKeyECDH {
 }
 
 public static (slice<byte>, error) ECDH(ж<PrivateKeyECDH> _Δp0, ж<PublicKeyECDH> _Δp1) {
@@ -203,11 +203,11 @@ public static (ж<PublicKeyECDH>, error) NewPublicKeyECDH(@string _Δp0, slice<b
     throw panic("boringcrypto: not available");
 }
 
-[GoRecv] public static slice<byte> Bytes(this ref PublicKeyECDH _) {
+public static slice<byte> Bytes(this ref PublicKeyECDH _) {
     throw panic("boringcrypto: not available");
 }
 
-[GoRecv] public static (ж<PublicKeyECDH>, error) PublicKey(this ref PrivateKeyECDH _) {
+public static (ж<PublicKeyECDH>, error) PublicKey(this ref PrivateKeyECDH _) {
     throw panic("boringcrypto: not available");
 }
 

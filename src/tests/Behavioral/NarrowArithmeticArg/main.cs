@@ -16,11 +16,11 @@ internal static uint16 takeU16(uint16 x) {
     return x;
 }
 
-[GoType] partial struct box {
+partial struct box {
     internal uint8 b;
 }
 
-[GoType] partial struct pix {
+partial struct pix {
     public uint8 Y;
     public uint8 A;
 }

@@ -5,11 +5,11 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct heap {
+partial struct heap {
     internal nint count;
 }
 
-[GoRecv] internal static nint alloc(this ref heap h) {
+internal static nint alloc(this ref heap h) {
     h.count++;
     return h.count;
 }

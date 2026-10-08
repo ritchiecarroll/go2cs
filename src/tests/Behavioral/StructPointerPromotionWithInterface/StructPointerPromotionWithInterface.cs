@@ -5,22 +5,22 @@ using time = time_package;
 
 partial class main_package {
 
-[GoType] partial interface Abser {
+partial interface Abser {
     float64 Abs();
 }
 
-[GoType] partial struct MyError {
+partial struct MyError {
     public time.Time When;
     public @string What;
 }
 
-[GoType] partial struct MyCustomError {
+partial struct MyCustomError {
     public @string Message;
-    [GoEmbedded] public Abser Abser;
+    /*embed*/ public Abser Abser;
     public partial ref ж<MyError> MyError { get; }
 }
 
-[GoRecv] public static float64 Time(this ref MyCustomError myErr) {
+public static float64 Time(this ref MyCustomError myErr) {
     return 0.0D;
 }
 
@@ -28,36 +28,36 @@ public static float64 Time(this MyError myErr) {
     return (float64)myErr.When.Unix();
 }
 
-[GoType] partial struct core {
+partial struct core {
     internal nint pings;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string pongˢ = "pong"u8;
 
-[GoRecv] internal static @string Ping(this ref core c) {
+internal static @string Ping(this ref core c) {
     c.pings++;
     return pongˢ;
 }
 
-[GoType] partial struct Station {
+partial struct Station {
     internal partial ref core core { get; }
     internal @string id;
 }
 
-[GoType] partial struct noop {
+partial struct noop {
 }
 
-[GoType] partial struct link {
+partial struct link {
     internal partial ref noop noop { get; }
     public partial ref ж<Station> Station { get; }
 }
 
-[GoType] partial interface Pinger {
+partial interface Pinger {
     @string Ping();
 }
 
-[GoType] partial struct Device {
+partial struct Device {
     internal @string name;
     internal nint hits;
 }
@@ -66,43 +66,43 @@ public static ж<nint> Tag(this ж<Device> Ꮡd) {
     return Ꮡd.of(Device.Ꮡhits);
 }
 
-[GoRecv] public static @string Describe(this ref Device d) {
+public static @string Describe(this ref Device d) {
     return d.name;
 }
 
-[GoType] partial struct meta {
+partial struct meta {
     internal @string label;
     internal nint count;
 }
 
-[GoRecv] internal static @string Stamp(this ref meta m) {
+internal static @string Stamp(this ref meta m) {
     m.count++;
     return m.label;
 }
 
-[GoRecv] internal static nint Hits(this ref meta m) {
+internal static nint Hits(this ref meta m) {
     return m.count;
 }
 
-[GoType] partial struct kindBase {
+partial struct kindBase {
     internal partial ref meta meta { get; }
 }
 
-[GoType] partial struct counterKind {
+partial struct counterKind {
     internal partial ref kindBase kindBase { get; }
 }
 
-[GoType] partial interface stamper {
+partial interface stamper {
     @string Stamp();
     nint Hits();
 }
 
-[GoType] partial interface Describer {
+partial interface Describer {
     @string Describe();
     ж<nint> Tag();
 }
 
-[GoType] partial struct rig {
+partial struct rig {
     internal Device dev;
 }
 
@@ -112,11 +112,11 @@ internal static nint probeRig(rig rʗp) {
     return Ꮡr.of(rig.Ꮡdev).Tag().Value;
 }
 
-[GoType] partial struct deviceHandle {
+partial struct deviceHandle {
     public partial ref ж<Device> Device { get; }
 }
 
-[GoType] partial struct leftSide {
+partial struct leftSide {
     internal @string tag;
 }
 
@@ -124,7 +124,7 @@ internal static @string Ping(this leftSide l) {
     return "L"u8;
 }
 
-[GoType] partial struct rightSide {
+partial struct rightSide {
     internal @string tag;
 }
 
@@ -132,20 +132,20 @@ internal static @string Ping(this rightSide r) {
     return "R"u8;
 }
 
-[GoType] partial struct pair {
+partial struct pair {
     internal partial ref leftSide leftSide { get; }
     internal partial ref rightSide rightSide { get; }
 }
 
-[GoType] partial struct Inner {
+partial struct Inner {
     public @string Value;
 }
 
-[GoType] partial struct Middle {
+partial struct Middle {
     public partial ref ж<Inner> Inner { get; }
 }
 
-[GoType] partial struct Outer {
+partial struct Outer {
     internal ж<ж<Inner>> ptr;
 }
 

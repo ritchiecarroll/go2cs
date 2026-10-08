@@ -5,7 +5,7 @@ namespace go;
 
 partial class GenericTypeAliasLib_package {
 
-[GoType] partial struct Box<T> {
+partial struct Box<T> {
     public T V;
 }
 
@@ -13,7 +13,7 @@ public static T Get<T>(this Box<T> b) {
     return b.V;
 }
 
-[GoRecv] public static void Set<T>(this ref Box<T> b, T v) {
+public static void Set<T>(this ref Box<T> b, T v) {
     b.V = v;
 }
 
@@ -26,8 +26,7 @@ public static Box<T> NewBox<T>(T v) {
 // type Mapper[T any] = func(T) T
 // type Ptr[T any] = *Box[T]
 
-[GoType("operators = Sum, Arithmetic, Comparable, Ordered")]
-partial interface Number<ΔT> {
+partial interface Number<ΔT> /*operators = Sum, Arithmetic, Comparable, Ordered*/ {
     //  Type constraints: ~int | ~float64
     // Derived operators: +, -, *, /, ==, !=, <, <=, >, >=
 }

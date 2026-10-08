@@ -19,7 +19,7 @@ internal static void sortComments(slice<ж<CommentGroup>> list) {
     slices.SortFunc(list, (ж<CommentGroup> a, ж<CommentGroup> b) => cmp.Compare(a.Pos(), b.Pos()));
 }
 
-[GoType("map[Node, slice<ж<CommentGroup>>]")] partial struct CommentMap;
+partial struct CommentMap /*map[Node, slice<ж<CommentGroup>>]*/;
 
 internal static void addComment(this CommentMap cmap, Node n, ж<CommentGroup> Ꮡc) {
     var list = cmap[n];
@@ -61,7 +61,7 @@ internal static slice<Node> nodeList(Node n) {
 }
 
 // A commentListReader helps iterating through a list of comment groups.
-[GoType] partial struct commentListReader {
+partial struct commentListReader {
     internal ж<token.FileSet> fset;
     internal slice<ж<CommentGroup>> list;
     internal nint index;
@@ -69,11 +69,11 @@ internal static slice<Node> nodeList(Node n) {
     internal tokenꓸPosition pos, end; // source interval of comment group at current index
 }
 
-[GoRecv] internal static bool eol(this ref commentListReader r) {
+internal static bool eol(this ref commentListReader r) {
     return r.index >= len(r.list);
 }
 
-[GoRecv] internal static void next(this ref commentListReader r) {
+internal static void next(this ref commentListReader r) {
     if (!r.eol()) {
         r.comment = r.list[r.index];
         r.pos = r.fset.Position(r.comment.Pos());
@@ -82,11 +82,11 @@ internal static slice<Node> nodeList(Node n) {
     }
 }
 
-[GoType("[]Node")] partial struct nodeStack;
+partial struct nodeStack /*[]Node*/;
 
 // push pops all nodes that appear lexically before n
 // and then pushes n on the stack.
-[GoRecv] internal static void push(this ref nodeStack s, Node n) {
+internal static void push(this ref nodeStack s, Node n) {
     s.pop(n.Pos());
     s = append((s), n);
 }
@@ -94,7 +94,7 @@ internal static slice<Node> nodeList(Node n) {
 // pop pops all nodes that appear lexically before pos
 // (i.e., whose lexical extent has ended before or at pos).
 // It returns the last node popped.
-[GoRecv] internal static Node /*top*/ pop(this ref nodeStack s, tokenꓸPos pos) {
+internal static Node /*top*/ pop(this ref nodeStack s, tokenꓸPos pos) {
     Node top = default!;
 
     nint i = len(s);

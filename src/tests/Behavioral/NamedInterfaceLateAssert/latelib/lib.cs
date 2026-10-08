@@ -2,23 +2,23 @@ namespace go.NamedInterfaceLateAssert;
 
 partial class latelib_package {
 
-[GoType] partial interface Base {
+partial interface Base {
     @string Name();
 }
 
-[GoType] partial interface Mid :
+partial interface Mid :
     Base
 {
     @string Kind();
 }
 
-[GoType] partial interface Top :
+partial interface Top :
     Mid
 {
     @string Detail(@string prefix);
 }
 
-[GoType] partial interface quiet {
+partial interface quiet {
     @string Whisper();
 }
 

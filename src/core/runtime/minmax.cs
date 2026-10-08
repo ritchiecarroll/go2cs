@@ -37,8 +37,7 @@ internal static float64 fmax64(float64 x, float64 y) {
     return fmax(x, y);
 }
 
-[GoType("operators = Sum, Arithmetic, Comparable, Ordered")]
-partial interface floaty<ΔT> {
+partial interface floaty<ΔT> /*operators = Sum, Arithmetic, Comparable, Ordered*/ {
     //  Type constraints: ~float32 | ~float64
     // Derived operators: +, -, *, /, ==, !=, <, <=, >, >=
 }

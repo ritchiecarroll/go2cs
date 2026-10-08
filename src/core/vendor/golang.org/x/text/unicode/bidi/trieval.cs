@@ -3,7 +3,7 @@ namespace go.vendor.golang.org.x.text.unicode;
 
 partial class bidi_package {
 
-[GoType("num:nuint")] partial struct ΔClass;
+partial struct ΔClass /*num:nuint*/;
 
 public static ΔClass L => /* iota */ 0;      // LeftToRight
 public static ΔClass R => 1;      // RightToLeft

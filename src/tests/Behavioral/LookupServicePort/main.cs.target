@@ -5,7 +5,7 @@ using Δnet = net_package;
 
 partial class main_package {
 
-[GoType("dyn")] internal partial struct main_queries {
+internal partial struct main_queries /*dyn*/ {
     internal @string network;
     internal @string service;
 }

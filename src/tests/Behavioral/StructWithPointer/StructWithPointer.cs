@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct ColorList {
+partial struct ColorList {
     public nint Total;
     public @string Color;
     public ж<ColorList> Next;

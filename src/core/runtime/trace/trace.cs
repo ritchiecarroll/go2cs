@@ -161,7 +161,7 @@ public static void Stop() {
 }
 
 
-[GoType("dyn")] partial struct tracingᴛ1 {
+partial struct tracingᴛ1 /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; } // gate mutators (Start, Stop)
     internal atomic.Bool enabled;
 }

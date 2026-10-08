@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct item {
+partial struct item {
     internal @string name;
 }
 
-[GoType] partial struct entry {
+partial struct entry {
     internal Func<(ж<item>, error)> get;
 }
 

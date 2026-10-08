@@ -24,12 +24,12 @@ public static UntypedInt IPv4len => 4;
 
 public static UntypedInt IPv6len => 16;
 
-[GoType("[]byte")] partial struct IP;
+partial struct IP /*[]byte*/;
 
-[GoType("[]byte")] partial struct IPMask;
+partial struct IPMask /*[]byte*/;
 
 // An IPNet represents an IP network.
-[GoType] partial struct IPNet {
+partial struct IPNet {
     public IP IP;     // network number
     public IPMask Mask; // network mask
 }
@@ -370,7 +370,7 @@ public static (slice<byte>, error) MarshalText(this IP ip) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 // The IP address is expected in a form accepted by [ParseIP].
-[GoRecv] public static error UnmarshalText(this ref IP ip, slice<byte> text) {
+public static error UnmarshalText(this ref IP ip, slice<byte> text) {
     if (len(text) == 0) {
         ip = default!;
         return default!;
@@ -514,7 +514,7 @@ public static bool Contains(this ж<IPNet> Ꮡn, IP ip) {
 internal static readonly @string ipNetˢ = "ip+net"u8;
 
 // Network returns the address's network name, "ip+net".
-[GoRecv] public static @string Network(this ref IPNet n) {
+public static @string Network(this ref IPNet n) {
     return ipNetˢ;
 }
 

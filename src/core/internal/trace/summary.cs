@@ -12,14 +12,14 @@ using iter = iter_package;
 partial class trace_package {
 
 // Summary is the analysis result produced by the summarizer.
-[GoType] partial struct Summary {
+partial struct Summary {
     public map<GoID, ж<GoroutineSummary>> Goroutines;
     public map<TaskID, ж<UserTaskSummary>> Tasks;
 }
 
 // GoroutineSummary contains statistics and execution details of a single goroutine.
 // (For v2 traces.)
-[GoType] partial struct GoroutineSummary {
+partial struct GoroutineSummary {
     public GoID ID;
     public @string Name; // A non-unique human-friendly identifier for the goroutine.
     public uint64 PC; // The first PC we saw for the entry function of the goroutine
@@ -39,7 +39,7 @@ partial class trace_package {
 }
 
 // UserTaskSummary represents a task in the trace.
-[GoType] partial struct UserTaskSummary {
+partial struct UserTaskSummary {
     public TaskID ID;
     public @string Name;
     public ж<UserTaskSummary> Parent; // nil if the parent is unknown.
@@ -58,7 +58,7 @@ partial class trace_package {
 
 // Complete returns true if we have complete information about the task
 // from the trace: both a start and an end.
-[GoRecv] public static bool Complete(this ref UserTaskSummary s) {
+public static bool Complete(this ref UserTaskSummary s) {
     return s.Start != nil && s.End != nil;
 }
 
@@ -76,7 +76,7 @@ public static slice<ж<UserTaskSummary>> Descendents(this ж<UserTaskSummary> �
 
 // UserRegionSummary represents a region and goroutine execution stats
 // while the region was active. (For v2 traces.)
-[GoType] partial struct UserRegionSummary {
+partial struct UserRegionSummary {
     public TaskID TaskID;
     public @string Name;
     // Region start event. Normally EventRegionBegin event or nil,
@@ -93,7 +93,7 @@ public static slice<ж<UserTaskSummary>> Descendents(this ж<UserTaskSummary> �
 
 // GoroutineExecStats contains statistics about a goroutine's execution
 // during a period of time.
-[GoType] partial struct GoroutineExecStats {
+partial struct GoroutineExecStats {
     // These stats are all non-overlapping.
     public time.Duration ExecTime;
     public time.Duration SchedWaitTime;
@@ -175,7 +175,7 @@ internal static GoroutineExecStats /*r*/ clone(this GoroutineExecStats s) {
 // snapshotStat returns the snapshot of the goroutine execution statistics.
 // This is called as we process the ordered trace event stream. lastTs is used
 // to process pending statistics if this is called before any goroutine end event.
-[GoRecv] internal static GoroutineExecStats /*ret*/ snapshotStat(this ref GoroutineSummary g, ΔTime lastTs) {
+internal static GoroutineExecStats /*ret*/ snapshotStat(this ref GoroutineSummary g, ΔTime lastTs) {
     GoroutineExecStats ret = default!;
 
     ret = g.GoroutineExecStats.clone();
@@ -211,7 +211,7 @@ internal static GoroutineExecStats /*r*/ clone(this GoroutineExecStats s) {
 // finalize is called when processing a goroutine end event or at
 // the end of trace processing. This finalizes the execution stat
 // and any active regions in the goroutine, in which case trigger is nil.
-[GoRecv] internal static void finalize(this ref GoroutineSummary g, ΔTime lastTs, ж<ΔEvent> Ꮡtrigger) {
+internal static void finalize(this ref GoroutineSummary g, ΔTime lastTs, ж<ΔEvent> Ꮡtrigger) {
     ref var trigger = ref Ꮡtrigger.DerefOrNull();
 
     if (Ꮡtrigger != nil) {
@@ -234,7 +234,7 @@ internal static GoroutineExecStats /*r*/ clone(this GoroutineExecStats s) {
 }
 
 // goroutineSummary is a private part of GoroutineSummary that is required only during analysis.
-[GoType] partial struct goroutineSummary {
+partial struct goroutineSummary {
     internal ΔTime lastStartTime;
     internal ΔTime lastRunnableTime;
     internal ΔTime lastBlockTime;
@@ -246,7 +246,7 @@ internal static GoroutineExecStats /*r*/ clone(this GoroutineExecStats s) {
 }
 
 // Summarizer constructs per-goroutine time statistics for v2 traces.
-[GoType] partial struct Summarizer {
+partial struct Summarizer {
     // gs contains the map of goroutine summaries we're building up to return to the caller.
     internal map<GoID, ж<GoroutineSummary>> gs;
     // tasks contains the map of task summaries we're building up to return to the caller.
@@ -275,13 +275,13 @@ public static ж<Summarizer> NewSummarizer() {
     ));
 }
 
-[GoType] partial struct rangeP {
+partial struct rangeP {
     internal ProcID id;
     internal @string name;
 }
 
 // Event feeds a single event into the stats summarizer.
-[GoRecv] public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
+public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     if (s.syncTs == 0) {
@@ -590,7 +590,7 @@ ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
 
 }
 
-[GoRecv] internal static ж<UserTaskSummary> getOrAddTask(this ref Summarizer s, TaskID id) {
+internal static ж<UserTaskSummary> getOrAddTask(this ref Summarizer s, TaskID id) {
     var task = s.tasks[id];
     if (task == nil) {
         task = Ꮡ(new UserTaskSummary(ID: id, Goroutines: new map<GoID, ж<GoroutineSummary>>()));
@@ -601,7 +601,7 @@ ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
 
 // Finalize indicates to the summarizer that we're done processing the trace.
 // It cleans up any remaining state and returns the full summary.
-[GoRecv] public static ж<Summary> ΔFinalize(this ref Summarizer s) {
+public static ж<Summary> ΔFinalize(this ref Summarizer s) {
     foreach (var (_, g) in s.gs) {
         g.finalize(s.lastTs, nil);
         // Sort based on region start time.
@@ -631,7 +631,7 @@ ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
 // out of GoWaiting. If there was an active goroutine when this
 // happened, then we know that active goroutine unblocked another.
 // Scribble all these down so we can process them.
-[GoType("dyn")] internal partial struct RelatedGoroutinesV2_unblockEdge {
+internal partial struct RelatedGoroutinesV2_unblockEdge /*dyn*/ {
     internal GoID @operator;
     internal GoID operand;
 }

@@ -22,7 +22,7 @@ using ꓸꓸꓸжastꓸFile = Span<ж<global::go.go.ast_package.File>>;
 partial class doc_package {
 
 // An Example represents an example function found in a test source file.
-[GoType] partial struct Example {
+partial struct Example {
     public @string Name; // name of the item being exemplified (including optional suffix)
     public @string Suffix; // example suffix, without leading '_' (only populated by NewFromFiles)
     public @string Doc; // example function doc string

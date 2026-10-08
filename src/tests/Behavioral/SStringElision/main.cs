@@ -153,7 +153,7 @@ internal static @string labelValue() {
     return "q"u8;
 }
 
-[GoType] partial struct config {
+partial struct config {
     internal @string name;
 }
 

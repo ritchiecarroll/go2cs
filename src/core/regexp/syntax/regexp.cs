@@ -13,7 +13,7 @@ using unicode = unicode_package;
 partial class syntax_package {
 
 // A Regexp is a node in a regular expression syntax tree.
-[GoType] partial struct Regexp {
+partial struct Regexp {
     public Op Op; // operator
     public Flags Flags;
     public slice<ж<Regexp>> Sub; // subexpressions, if any
@@ -25,7 +25,7 @@ partial class syntax_package {
     public @string Name;    // capturing name, for OpCapture
 }
 
-[GoType("num:uint8")] partial struct Op;
+partial struct Op /*num:uint8*/;
 
 //go:generate stringer -type Op -trimprefix Op
 // Operators are listed in precedence order, tightest binding to weakest.
@@ -96,7 +96,7 @@ public static bool Equal(this ж<Regexp> Ꮡx, ж<Regexp> Ꮡy) {
     return true;
 }
 
-[GoType("num:uint8")] partial struct printFlags;
+partial struct printFlags /*num:uint8*/;
 
 internal static printFlags flagI => /* 1 << iota */ 1;        // (?i:
 internal static printFlags flagM => 2;        // (?m:
@@ -485,7 +485,7 @@ internal static void escape(ж<strings.Builder> Ꮡb, rune r, bool force) {
 }
 
 // MaxCap walks the regexp to find the maximum capture index.
-[GoRecv] public static nint MaxCap(this ref Regexp re) {
+public static nint MaxCap(this ref Regexp re) {
     nint m = 0;
     if (re.Op == OpCapture) {
         m = re.Cap;
@@ -501,13 +501,13 @@ internal static void escape(ж<strings.Builder> Ꮡb, rune r, bool force) {
 }
 
 // CapNames walks the regexp to find the names of capturing groups.
-[GoRecv] public static slice<@string> CapNames(this ref Regexp re) {
+public static slice<@string> CapNames(this ref Regexp re) {
     var names = new slice<@string>(re.MaxCap() + 1);
     re.capNames(names);
     return names;
 }
 
-[GoRecv] internal static void capNames(this ref Regexp re, slice<@string> names) {
+internal static void capNames(this ref Regexp re, slice<@string> names) {
     if (re.Op == OpCapture) {
         names[re.Cap] = re.Name;
     }

@@ -6,11 +6,11 @@ using SamePackageImplementNoWitness;
 
 partial class main_package {
 
-[GoType] partial interface Marker {
+partial interface Marker {
     @string Mark();
 }
 
-[GoType] partial struct Stamp {
+partial struct Stamp {
     public @string S;
 }
 

@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Counter {
+partial struct Counter {
     internal int32 n;
 }
 
@@ -23,7 +23,7 @@ public static void Set(this ж<Counter> Ꮡc, int32 v) {
     (Ꮡc.of(Counter.Ꮡn)).Value = v;
 }
 
-[GoRecv] public static int32 Get(this ref Counter c) {
+public static int32 Get(this ref Counter c) {
     return c.n;
 }
 

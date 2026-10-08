@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct T {
+partial struct T {
     internal nint n;
 }
 
@@ -20,11 +20,11 @@ public static nint ValueMethod(this T t) {
     return t.n + 1;
 }
 
-[GoRecv] internal static nint pointerMethod(this ref T t) {
+internal static nint pointerMethod(this ref T t) {
     return t.n;
 }
 
-[GoType] partial struct W {
+partial struct W {
     public partial ref bytes_package.Buffer Buffer { get; }
 }
 
@@ -39,7 +39,7 @@ internal static @string nameOf(any fn) {
     return f.Name();
 }
 
-[GoType("dyn")] internal partial struct table_rows {
+internal partial struct table_rows /*dyn*/ {
     internal any fn;
     internal @string label;
 }

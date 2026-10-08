@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("@string")] partial struct relationship;
+partial struct relationship /*@string*/;
 
 internal static readonly relationship equivalent = "equivalent"u8;
 internal static readonly relationship moreGeneral = "moreGeneral"u8;

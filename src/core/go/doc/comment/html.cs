@@ -11,7 +11,7 @@ using io = io_package;
 partial class comment_package {
 
 // An htmlPrinter holds the state needed for printing a [Doc] as HTML.
-[GoType] partial struct htmlPrinter {
+partial struct htmlPrinter {
     public partial ref ж<Printer> Printer { get; }
     internal bool tight;
 }
@@ -35,7 +35,7 @@ internal static readonly @string preˢ2 = "</pre>\n"u8;
 internal static readonly @string valueˢ = @" value="""u8;
 
 // block prints the block x to out.
-[GoRecv] internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
+internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     switch (x.type()) {
@@ -128,7 +128,7 @@ internal static @string inc(@string s) {
 internal static readonly @string aHrefˢ = @"<a href="""u8;
 
 // text prints the text sequence x to out.
-[GoRecv] internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<ΔText> x) {
+internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<ΔText> x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     foreach (var (_, t) in x) {
@@ -175,7 +175,7 @@ internal static readonly @string aposˢ = "&apos;"u8;
 // escape prints s to out as plain text,
 // escaping < & " ' and > to avoid being misinterpreted
 // in larger HTML constructs.
-[GoRecv] internal static void escape(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
+internal static void escape(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     nint start = 0;

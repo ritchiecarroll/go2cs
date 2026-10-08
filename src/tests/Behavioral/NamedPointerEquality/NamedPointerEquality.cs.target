@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct item {
+partial struct item {
     internal nint n;
 }
 
-[GoType("ж<item>")] partial class itemPtr;
+partial class itemPtr /*ж<item>*/;
 
 internal static void Main() {
     var pi = Ꮡ(new item(2));

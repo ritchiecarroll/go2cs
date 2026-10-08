@@ -17,11 +17,11 @@ internal static partial int32 clampI(int32 d) {
     return max(d, (int32)(floor));
 }
 
-[GoType("num:uint16")] partial struct fieldElement;
+partial struct fieldElement /*num:uint16*/;
 
-[GoType("num:float64")] partial struct ratio;
+partial struct ratio /*num:float64*/;
 
-[GoType("num:int8")] partial struct delta;
+partial struct delta /*num:int8*/;
 
 internal static partial fieldElement spread(fieldElement a, fieldElement b) {
     return min((fieldElement)(a - b), (fieldElement)(b - a), (fieldElement)(a - b + 3329), (fieldElement)(b - a + 3329));

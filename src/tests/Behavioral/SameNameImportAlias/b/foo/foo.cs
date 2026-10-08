@@ -4,13 +4,13 @@ namespace go.SameNameImportAlias.b;
 
 partial class foo_package {
 
-[GoType] partial struct Other {
+partial struct Other {
     public @string S;
 }
 
-[GoType("@string")] partial struct ΔKind;
+partial struct ΔKind /*@string*/;
 
-[GoType] partial struct S {
+partial struct S {
 }
 
 public static ΔKind Kind(this S _) {

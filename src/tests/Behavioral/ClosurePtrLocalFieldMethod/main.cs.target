@@ -5,19 +5,19 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
-[GoRecv] internal static void bump(this ref counter c, nint delta) {
+internal static void bump(this ref counter c, nint delta) {
     c.n += delta;
 }
 
-[GoRecv] internal static nint get(this ref counter c) {
+internal static nint get(this ref counter c) {
     return c.n;
 }
 
-[GoType] partial struct cachelike {
+partial struct cachelike {
     internal counter flush;
     internal nint pad;
 }
@@ -41,7 +41,7 @@ internal static (nint, nint) allocShape() {
     return (c.of(cachelike.Ꮡflush).get(), (~c).pad);
 }
 
-[GoType] partial struct gauge {
+partial struct gauge {
     internal counter v;
 }
 

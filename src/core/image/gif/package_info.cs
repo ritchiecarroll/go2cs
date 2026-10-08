@@ -57,7 +57,7 @@ using static go.image.gif_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("image/gif/reader.go", "reader.cs", "ABUqgoIAKlaCgoKUpoKCgpQAKV6CgpSCgpSCloKCgriCgoKCqIKCqqKClIKCgqiCggACFgAIApSSlJamgoKSgpKCzIKCkoKWqMSAgpSmhIKClIKWgoKClJSAgsiAgqaCuIKUptqCgoKUgoKUgoKAgpSAgtimgoKCgpSSgoKUpoKCgpSClKTIgpKWpLSCgILcgoKClIKUgqaCgoKUgsqCgIKkgpSCgoKCgpSClNbCgoKUgoKCgqaClJSClJSAgtyCgoKUtoKClIKmgoKSgIKClAANGoCCgpTKgIKSgriCgoLMgpaCgoLKgoIACAaCgIKkgoKCggAQJIKU3IKCgpSAgqQADBIABhCygoKCgoKCgoKCgqaqooKAgqQAIEaigoCCpAALGKqigoCCpO6C")]
-[assembly: go.GoPositionMap("image/gif/writer.go", "writer.cs", "ABs0lIKCgqYAIkSCpoKmgoKogoKCqIKCqqKCgIK2pqaClIKClKaCgpSmgoKUpoKClOaCgpSCgqiCgoSAgoKCgoKCgoKCgpS4goKCuIKCgoKCgoKClIKCgoL4goKUgoKUxoCClIKkgoKUgpSUpoKCgoKW9rKCloKCloKCgpSCgpaCgoKClICCgriCgoKCgpSUloKUlIKUgoKCgoLMgoCClIKCgpTKgqaCuIKClISCgoKAgoKCgqaCgoKCyIIAFSjCgpaClsiClIKCgpKCgIK4gIKUpoKCgoKUlIKC2MSCgpaCgpSClIKWgoKAgoKCgtrKgoKUzIKSgpY=")]
+[assembly: go.GoPositionMap("image/gif/writer.go", "writer.cs", "ABs0lIKCgqYAIkSCpoKmgoKogoKCqIKCqqKCgIK2pqaClIKClKaCgpSmgoKUpoKClOaCgpSCgqiCgoSAgoKCgoKCgoKCgpS4goKCuIKCgoKCgoKClIKCgoL4goKUgoKUxoCClIKkgoKUgpSUpoKCgoKW9rKCloKCloKCgpSCgpaCgoKClICCgriCgoKCgpSUloKUlIKUgoKCgoLMgoCClIKCgpTKgqaCuIKClISCgoKAgoKCgqaCgoKCyIIAFSjCgpaClsiClIKCgpKCgIK4gIKUpoKCgoKUlIKC2MSCgpaCgpSClIKWgoKAgoKCgtrKgoKUzIKSgpY=", "", "", "241=Equal/2/2/1;491=Dx/1/1/5,Dy/1/1/6")]
 // </GoSourcePositionMaps>
 
 namespace go.image;
@@ -66,7 +66,7 @@ namespace go.image;
 public static partial class gif_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

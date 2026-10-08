@@ -5,11 +5,11 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct inner {
+partial struct inner {
     internal uintptr hi, lo;
 }
 
-[GoType] partial struct outer {
+partial struct outer {
     internal inner stack;
     internal uintptr guard;
 }

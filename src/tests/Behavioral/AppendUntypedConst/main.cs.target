@@ -6,7 +6,7 @@ partial class main_package {
 
 internal static UntypedInt marker => 0xFFFD;
 
-[GoType("[]uint16")] partial struct words;
+partial struct words /*[]uint16*/;
 
 internal static void Main() {
     slice<uint16> a = default!;

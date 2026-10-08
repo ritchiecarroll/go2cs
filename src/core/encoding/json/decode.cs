@@ -112,13 +112,13 @@ public static error Unmarshal(slice<byte> data, any v) {
 // The input can be assumed to be a valid encoding of
 // a JSON value. UnmarshalJSON must copy the JSON data
 // if it wishes to retain the data after returning.
-[GoType] partial interface Unmarshaler {
+partial interface Unmarshaler {
     error UnmarshalJSON(slice<byte> _);
 }
 
 // An UnmarshalTypeError describes a JSON value that was
 // not appropriate for a value of a specific Go type.
-[GoType] partial struct UnmarshalTypeError {
+partial struct UnmarshalTypeError {
     public @string Value;      // description of JSON value - "bool", "array", "number -5"
     public reflectꓸType Type; // type of Go value it could not be assigned to
     public int64 Offset;        // error occurred after reading Offset bytes
@@ -126,7 +126,7 @@ public static error Unmarshal(slice<byte> data, any v) {
     public @string Field;      // the full path from root node to the field, include embedded struct
 }
 
-[GoRecv] public static @string Error(this ref UnmarshalTypeError e) {
+public static @string Error(this ref UnmarshalTypeError e) {
     if (e.Struct != ""u8 || e.Field != ""u8) {
         return "json: cannot unmarshal "u8 + e.Value + " into Go struct field "u8 + e.Struct + "."u8 + e.Field + " of type "u8 + e.Type.String();
     }
@@ -137,26 +137,26 @@ public static error Unmarshal(slice<byte> data, any v) {
 // led to an unexported (and therefore unwritable) struct field.
 //
 // Deprecated: No longer used; kept for compatibility.
-[GoType] partial struct UnmarshalFieldError {
+partial struct UnmarshalFieldError {
     public @string Key;
     public reflectꓸType Type;
     public reflect.StructField Field;
 }
 
-[GoRecv] public static @string Error(this ref UnmarshalFieldError e) {
+public static @string Error(this ref UnmarshalFieldError e) {
     return "json: cannot unmarshal object key "u8 + strconv.Quote(e.Key) + " into unexported field "u8 + e.Field.Name + " of type "u8 + e.Type.String();
 }
 
 // An InvalidUnmarshalError describes an invalid argument passed to [Unmarshal].
 // (The argument to [Unmarshal] must be a non-nil pointer.)
-[GoType] partial struct InvalidUnmarshalError {
+partial struct InvalidUnmarshalError {
     public reflectꓸType Type;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string jsonUnmarshalNilˢ = "json: Unmarshal(nil)"u8;
 
-[GoRecv] public static @string Error(this ref InvalidUnmarshalError e) {
+public static @string Error(this ref InvalidUnmarshalError e) {
     if (e.Type == default!) {
         return jsonUnmarshalNilˢ;
     }
@@ -184,7 +184,7 @@ internal static error unmarshal(this ж<decodeState> Ꮡd, any v) {
     return d.savedError;
 }
 
-[GoType("@string")] partial struct Number;
+partial struct Number /*@string*/;
 
 // String returns the literal text of the number.
 public static @string String(this Number n) {
@@ -202,13 +202,13 @@ public static (int64, error) Int64(this Number n) {
 }
 
 // An errorContext provides context for type errors during decoding.
-[GoType] partial struct errorContext {
+partial struct errorContext {
     public reflectꓸType Struct;
     public slice<@string> FieldStack;
 }
 
 // decodeState represents the state while decoding a JSON value.
-[GoType] partial struct decodeState {
+partial struct decodeState {
     internal slice<byte> data;
     internal nint off; // next read offset in data
     internal nint opcode; // last read result
@@ -220,7 +220,7 @@ public static (int64, error) Int64(this Number n) {
 }
 
 // readIndex returns the position of the last byte read.
-[GoRecv] internal static nint readIndex(this ref decodeState d) {
+internal static nint readIndex(this ref decodeState d) {
     return d.off - 1;
 }
 
@@ -245,14 +245,14 @@ internal static ж<decodeState> init(this ж<decodeState> Ꮡd, slice<byte> data
 
 // saveError saves the first err it is called with,
 // for reporting at the end of the unmarshal.
-[GoRecv] internal static void saveError(this ref decodeState d, error err) {
+internal static void saveError(this ref decodeState d, error err) {
     if (d.savedError == default!) {
         d.savedError = d.addErrorContext(err);
     }
 }
 
 // addErrorContext returns a new error enhanced with information from d.errorContext
-[GoRecv] internal static error addErrorContext(this ref decodeState d, error err) {
+internal static error addErrorContext(this ref decodeState d, error err) {
     if (d.errorContext != nil && ((~d.errorContext).Struct != default! || len((~d.errorContext).FieldStack) > 0)) {
         switch (err.type()) {
         case ж<UnmarshalTypeError> errΔ1: {
@@ -443,7 +443,7 @@ internal static error value(this ж<decodeState> Ꮡd, reflectꓸValue v) {
     return default!;
 }
 
-[GoType] partial struct unquotedValue {
+partial struct unquotedValue {
 }
 
 // valueQuoted is like value but decodes a
@@ -907,7 +907,7 @@ Value: "object"u8, Type: t, Offset: (int64)d.off))));
 
 // convertNumber converts the number literal s to a float64 or a Number
 // depending on the setting of d.useNumber.
-[GoRecv] internal static (any, error) convertNumber(this ref decodeState d, @string s) {
+internal static (any, error) convertNumber(this ref decodeState d, @string s) {
     if (d.useNumber) {
         return (((Number)s), default!);
     }
@@ -930,7 +930,7 @@ internal static readonly @string boolˢ = "bool"u8;
 // fromQuoted indicates whether this literal came from unwrapping a
 // string from the ",string" struct tag option. this is used only to
 // produce more helpful error messages.
-[GoRecv] internal static error literalStore(this ref decodeState d, slice<byte> item, reflectꓸValue v, bool fromQuoted) {
+internal static error literalStore(this ref decodeState d, slice<byte> item, reflectꓸValue v, bool fromQuoted) {
     // Check for unmarshaler.
     if (len(item) == 0) {
         // Empty string given.

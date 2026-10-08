@@ -8,12 +8,12 @@ using log = log_package;
 
 partial class iotest_package {
 
-[GoType] partial struct writeLogger {
+partial struct writeLogger {
     internal @string prefix;
     internal io.Writer w;
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref writeLogger l, slice<byte> p) {
+internal static (nint n, error err) Write(this ref writeLogger l, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -33,12 +33,12 @@ public static io.Writer NewWriteLogger(@string prefix, io.Writer w) {
     return new writeLoggerжWriter(Ꮡ(new writeLogger(prefix, w)));
 }
 
-[GoType] partial struct readLogger {
+partial struct readLogger {
     internal @string prefix;
     internal io.Reader r;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref readLogger l, slice<byte> p) {
+internal static (nint n, error err) Read(this ref readLogger l, slice<byte> p) {
     nint n = default!;
     error err = default!;
 

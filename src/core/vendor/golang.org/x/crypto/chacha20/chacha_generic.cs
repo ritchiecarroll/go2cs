@@ -24,7 +24,7 @@ public static UntypedInt NonceSizeX => 24;
 
 // Cipher is a stateful instance of ChaCha20 or XChaCha20 using a particular key
 // and nonce. A *Cipher implements the cipher.Stream interface.
-[GoType] partial struct Cipher {
+partial struct Cipher {
     // The ChaCha20 state is 16 words: 4 constant, 8 of key, 1 of counter
     // (incremented after each block), and 3 of nonce.
     internal array<uint32> key = new(8);
@@ -144,7 +144,7 @@ internal static (uint32, uint32, uint32, uint32) quarterRound(uint32 a, uint32 b
 //
 // Note that the execution time of XORKeyStream is not independent of the
 // counter value.
-[GoRecv] public static void SetCounter(this ref Cipher s, uint32 counter) {
+public static void SetCounter(this ref Cipher s, uint32 counter) {
     // Internally, s may buffer multiple blocks, which complicates this
     // implementation slightly. When checking whether the counter has rolled
     // back, we must use both s.counter and s.len to determine how many blocks
@@ -175,7 +175,7 @@ internal static (uint32, uint32, uint32, uint32) quarterRound(uint32 a, uint32 b
 // Multiple calls to XORKeyStream behave as if the concatenation of
 // the src buffers was passed in a single run. That is, Cipher
 // maintains state and does not reset at each XORKeyStream call.
-[GoRecv] public static void XORKeyStream(this ref Cipher s, slice<byte> dst, slice<byte> src) {
+public static void XORKeyStream(this ref Cipher s, slice<byte> dst, slice<byte> src) {
     if (len(src) == 0) {
         return;
     }
@@ -242,7 +242,7 @@ internal static (uint32, uint32, uint32, uint32) quarterRound(uint32 a, uint32 b
     }
 }
 
-[GoRecv] internal static void xorKeyStreamBlocksGeneric(this ref Cipher s, slice<byte> dst, slice<byte> src) {
+internal static void xorKeyStreamBlocksGeneric(this ref Cipher s, slice<byte> dst, slice<byte> src) {
     if (len(dst) != len(src) || len(dst) % (nint)blockSize != 0) {
         throw panic("chacha20: internal error: wrong dst and/or src length");
     }

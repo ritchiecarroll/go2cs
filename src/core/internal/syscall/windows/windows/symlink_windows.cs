@@ -28,7 +28,7 @@ public static UntypedInt FileIdInfo => 0x12; // FILE_ID_INFO
 public static UntypedInt FileIdExtdDirectoryInfo => 0x13; // FILE_ID_EXTD_DIR_INFO
 public static UntypedInt FileIdExtdDirectoryRestartInfo => 0x14; // FILE_ID_EXTD_DIR_INFO
 
-[GoType] partial struct FILE_ATTRIBUTE_TAG_INFO {
+partial struct FILE_ATTRIBUTE_TAG_INFO {
     public uint32 FileAttributes;
     public uint32 ReparseTag;
 }

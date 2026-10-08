@@ -49,7 +49,7 @@ internal static (slice<byte>, error) readSource(@string filename, any src) {
     return os.ReadFile(filename);
 }
 
-[GoType("num:nuint")] partial struct Mode;
+partial struct Mode /*num:nuint*/;
 
 public static Mode PackageClauseOnly => /* 1 << iota */ 1;                      // stop parsing after package clause
 public static Mode ImportsOnly => 2;                            // stop parsing after import declarations

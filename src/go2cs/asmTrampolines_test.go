@@ -271,16 +271,23 @@ func convertAsmTrampolineFixture(t *testing.T, target string) string {
 	return strings.ReplaceAll(readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "tramp", "main.cs")), "\r\n", "\n")
 }
 
+// isBodylessStub reports whether an emittedFunction result is a bodyless partial STUB (one line ending in `;`),
+// which is what a shape that does not forward keeps. A forwarder is a partial method too since section 11 row 6
+// (`/*linkname*/ ... static partial ...(...) {`), so the word `partial` alone no longer tells them apart.
+func isBodylessStub(body string) bool {
+	return strings.Contains(body, " partial ") && strings.HasSuffix(strings.TrimSpace(body), ";")
+}
+
 // emittedFunction returns the emitted DECLARATION of the named function through the end of its body
 // (a bodyless partial is one line). Comment lines never match, so a doc comment that mentions the name
-// cannot stand in for the declaration.
+// cannot stand in for the declaration; a forwarder's `/*linkname*/` marker opens its declaration line.
 func emittedFunction(t *testing.T, mainCs string, name string) string {
 	t.Helper()
 
 	lines := strings.Split(mainCs, "\n")
 
 	for i, line := range lines {
-		trimmed := strings.TrimSpace(line)
+		trimmed := strings.TrimPrefix(strings.TrimSpace(line), linknameMarker+" ")
 
 		if strings.HasPrefix(trimmed, "//") || strings.HasPrefix(trimmed, "*") || strings.HasPrefix(trimmed, "/*") {
 			continue
@@ -361,7 +368,7 @@ func TestAsmTrampolinesForwardByShape(t *testing.T) {
 	for name, calls := range forwards {
 		body := emittedFunction(t, linux, name)
 
-		if strings.Contains(body, " partial ") {
+		if isBodylessStub(body) {
 			t.Errorf("shape %s: still a partial stub, not a forwarder:\n%s", name, body)
 		}
 
@@ -383,7 +390,7 @@ func TestAsmTrampolinesForwardByShape(t *testing.T) {
 	// cross-package target with no asmJumpForwardTargets row, machine code that is not an exact NoError
 	// block, and a same-package target whose parameter Phase A lowered.
 	for _, name := range []string{"LoadUintptr", "gettimeofdayNarrow", "gettimeofdaySwapped", "rawNoError", "SyscallNoErrorShort", "derefAlias"} {
-		if body := emittedFunction(t, linux, name); !strings.Contains(body, " partial ") {
+		if body := emittedFunction(t, linux, name); !isBodylessStub(body) {
 			t.Errorf("shape %s: must stay a partial stub:\n%s", name, body)
 		}
 	}
@@ -393,7 +400,7 @@ func TestAsmTrampolinesForwardByShape(t *testing.T) {
 	windows := convertAsmTrampolineFixture(t, "windows/amd64")
 
 	for _, name := range []string{"Syscall", "LoadUintptr", "gettimeofday", "rawNoError", "SyscallNoError", "RawSyscallNoError", "localAlias", "derefAlias"} {
-		if body := emittedFunction(t, windows, name); !strings.Contains(body, " partial ") {
+		if body := emittedFunction(t, windows, name); !isBodylessStub(body) {
 			t.Errorf("windows control: %s forwarded although its assembly is not in the windows build:\n%s", name, body)
 		}
 	}
@@ -540,12 +547,12 @@ func TestAsmTrampolinesSkipGoRootPackages(t *testing.T) {
 	// CONTROL: outside GOROOT the exported identical shape forwards.
 	control := convert(realGoRoot, filepath.Join(t.TempDir(), "tramp"))
 
-	if body := emittedFunction(t, control, "Syscall"); strings.Contains(body, " partial ") {
+	if body := emittedFunction(t, control, "Syscall"); isBodylessStub(body) {
 		t.Fatalf("control: outside GOROOT the Syscall trampoline must forward, so this arm proves nothing:\n%s", body)
 	}
 
 	// The same control for the authorized unexported jump: outside GOROOT gettimeofday forwards.
-	if body := emittedFunction(t, control, "gettimeofday"); strings.Contains(body, " partial ") {
+	if body := emittedFunction(t, control, "gettimeofday"); isBodylessStub(body) {
 		t.Fatalf("control: outside GOROOT the authorized gettimeofday jump must forward, so this arm proves nothing:\n%s", body)
 	}
 
@@ -556,7 +563,7 @@ func TestAsmTrampolinesSkipGoRootPackages(t *testing.T) {
 	underGoRoot := convert(fakeGoRoot, filepath.Join(fakeGoRoot, "src", "tramp"))
 
 	for _, name := range []string{"Syscall", "localAlias", "gettimeofday", "SyscallNoError"} {
-		if body := emittedFunction(t, underGoRoot, name); !strings.Contains(body, " partial ") {
+		if body := emittedFunction(t, underGoRoot, name); !isBodylessStub(body) {
 			t.Errorf("%s forwarded in a package under GOROOT's src/:\n%s", name, body)
 		}
 	}

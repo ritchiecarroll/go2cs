@@ -19,14 +19,14 @@ partial class des_package {
 // The DES block size in bytes.
 public static UntypedInt ΔBlockSize => 8;
 
-[GoType("num:nint")] partial struct KeySizeError;
+partial struct KeySizeError /*num:nint*/;
 
 public static @string Error(this KeySizeError k) {
     return "crypto/des: invalid key size "u8 + strconv.Itoa((nint)k);
 }
 
 // desCipher is an instance of DES encryption.
-[GoType] partial struct desCipher {
+partial struct desCipher {
     internal array<uint64> subkeys = new(16);
 }
 
@@ -46,11 +46,11 @@ public static (cipher.Block, error) NewCipher(slice<byte> key) {
     return (new desCipherжBlock(c), default!);
 }
 
-[GoRecv] internal static nint BlockSize(this ref desCipher c) {
+internal static nint BlockSize(this ref desCipher c) {
     return ΔBlockSize;
 }
 
-[GoRecv] internal static void Encrypt(this ref desCipher c, slice<byte> dst, slice<byte> src) {
+internal static void Encrypt(this ref desCipher c, slice<byte> dst, slice<byte> src) {
     if (len(src) < ΔBlockSize) {
         throw panic("crypto/des: input not full block");
     }
@@ -63,7 +63,7 @@ public static (cipher.Block, error) NewCipher(slice<byte> key) {
     cryptBlock(c.subkeys[..], dst, src, false);
 }
 
-[GoRecv] internal static void Decrypt(this ref desCipher c, slice<byte> dst, slice<byte> src) {
+internal static void Decrypt(this ref desCipher c, slice<byte> dst, slice<byte> src) {
     if (len(src) < ΔBlockSize) {
         throw panic("crypto/des: input not full block");
     }
@@ -77,7 +77,7 @@ public static (cipher.Block, error) NewCipher(slice<byte> key) {
 }
 
 // A tripleDESCipher is an instance of TripleDES encryption.
-[GoType] partial struct tripleDESCipher {
+partial struct tripleDESCipher {
     internal desCipher cipher1, cipher2, cipher3;
 }
 
@@ -99,11 +99,11 @@ public static (cipher.Block, error) NewTripleDESCipher(slice<byte> key) {
     return (new tripleDESCipherжBlock(c), default!);
 }
 
-[GoRecv] internal static nint BlockSize(this ref tripleDESCipher c) {
+internal static nint BlockSize(this ref tripleDESCipher c) {
     return ΔBlockSize;
 }
 
-[GoRecv] internal static void Encrypt(this ref tripleDESCipher c, slice<byte> dst, slice<byte> src) {
+internal static void Encrypt(this ref tripleDESCipher c, slice<byte> dst, slice<byte> src) {
     if (len(src) < ΔBlockSize) {
         throw panic("crypto/des: input not full block");
     }
@@ -133,7 +133,7 @@ public static (cipher.Block, error) NewTripleDESCipher(slice<byte> key) {
     byteorder.BEPutUint64(dst, permuteFinalBlock(preOutput));
 }
 
-[GoRecv] internal static void Decrypt(this ref tripleDESCipher c, slice<byte> dst, slice<byte> src) {
+internal static void Decrypt(this ref tripleDESCipher c, slice<byte> dst, slice<byte> src) {
     if (len(src) < ΔBlockSize) {
         throw panic("crypto/des: input not full block");
     }

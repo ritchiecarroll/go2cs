@@ -5,7 +5,7 @@ using @unsafe = unsafe_package;
 
 partial class main_package {
 
-[GoType] partial struct holder {
+partial struct holder {
     internal @unsafe.Pointer p;
 }
 

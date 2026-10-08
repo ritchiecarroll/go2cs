@@ -6,7 +6,7 @@ namespace go.@internal;
 partial class dag_package {
 
 // Transpose reverses all edges in g.
-[GoRecv] public static void Transpose(this ref Graph g) {
+public static void Transpose(this ref Graph g) {
     var old = g.edges;
     g.edges = new map<@string, map<@string, bool>>();
     foreach (var (_, n) in g.Nodes) {
@@ -49,7 +49,7 @@ public static slice<@string> Topo(this ж<Graph> Ꮡg) {
 
 // TransitiveReduction removes edges from g that are transitively
 // reachable. g must be transitively closed.
-[GoRecv] public static void TransitiveReduction(this ref Graph g) {
+public static void TransitiveReduction(this ref Graph g) {
     // For i -> j -> k, if i -> k exists, delete it.
     foreach (var (_, i) in g.Nodes) {
         foreach (var (_, j) in g.Nodes) {

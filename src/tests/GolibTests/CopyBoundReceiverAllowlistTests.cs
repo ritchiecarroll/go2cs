@@ -9,28 +9,24 @@ using go;
 
 namespace GolibTests;
 
-// golib binds ANY `this ref X` receiver without [GoRecv] as a Go value-receiver method, through a copy
-// (see CopyBoundReceiverTests). That is right for exactly one emitted shape — the forwarder of a
-// pointer-receiver method promoted through an embedded POINTER — and silently wrong for anything
-// else: a pointer-set method left unmarked would be counted in a value method set Go does not give
-// it, and called on a copy. So the population is PINNED. Every by-ref receiver without [GoRecv] in a
-// converted package this test can load must be listed in CopyBoundReceivers.allowlist.txt, where each
-// row was classified VALUE independently, from the Go sources.
+// golib binds a `this ref X` receiver marked [GoCopyBound] as a Go value-receiver method, through a
+// copy (see CopyBoundReceiverTests), and reads every other by-ref receiver as a POINTER-set method.
+// The mark is right for exactly one emitted shape — the forwarder of a pointer-receiver method
+// promoted through an embedded POINTER — and both ways of getting it wrong are silent: a pointer-set
+// method marked would be counted in a value method set Go does not give it and called on a copy, and
+// a value-set forwarder left unmarked would be missing from the value set, so an assertion Go accepts
+// would fail. So the population is PINNED. Every [GoCopyBound] by-ref receiver in a converted package
+// this test can load must be listed in CopyBoundReceivers.allowlist.txt, where each row was classified
+// VALUE independently, from the Go sources, and every listed receiver it meets must carry the mark.
 //
 // What it reads is what the PROCESS can load: the converted packages GolibTests references, directly
 // and transitively. The count is asserted, so the guard cannot pass by reading nothing. The whole
 // standard library's population is measured when the list is regenerated (see the list's header); the
-// committed, hand-written by-ref helpers are pinned by the corpus guard TestByRefReceiversCarryGoRecv.
+// committed, hand-written by-ref receivers are pinned by the corpus guard
+// TestByRefReceiversFollowTheReceiverRule.
 [TestClass]
 public class CopyBoundReceiverAllowlistTests
 {
-    // A hand-owned by-ref helper inside a converted package class: no Go counterpart, private and
-    // unexported, so no method table lists it (asserted in CopyBoundReceiverTests).
-    private static readonly HashSet<string> s_helpers = new(StringComparer.Ordinal)
-    {
-        "runtime\tuserArena\tuserArenaKeep"
-    };
-
     [TestMethod]
     public void EveryCopyBoundReceiverInALoadedPackageIsAllowlisted()
     {
@@ -39,6 +35,7 @@ public class CopyBoundReceiverAllowlistTests
         Assert.IsTrue(allowlist.Count >= 201, $"the allowlist holds {allowlist.Count} rows; it lists at least the 201 windows rows");
 
         List<string> unlisted = [];
+        List<string> unmarked = [];
         HashSet<string> seen = new(StringComparer.Ordinal);
         int packages = 0;
 
@@ -58,7 +55,7 @@ public class CopyBoundReceiverAllowlistTests
 
                 foreach (MethodInfo method in packageClass.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
                 {
-                    if (!method.IsDefined(typeof(ExtensionAttribute), false) || method.IsDefined(typeof(GoRecvAttribute), false))
+                    if (!method.IsDefined(typeof(ExtensionAttribute), false))
                         continue;
 
                     ParameterInfo[] parameters = method.GetParameters();
@@ -74,8 +71,14 @@ public class CopyBoundReceiverAllowlistTests
 
                     string key = $"{package}\t{receiver}\t{method.Name}";
 
-                    if (s_helpers.Contains(key))
+                    if (!method.IsDefined(typeof(GoCopyBoundAttribute), false))
+                    {
+                        // Read as POINTER-set: a listed (value-set) receiver must not land here.
+                        if (allowlist.Contains(key))
+                            unmarked.Add($"{package}.{receiver}.{method.Name}");
+
                         continue;
+                    }
 
                     if (allowlist.Contains(key))
                         seen.Add(key);
@@ -86,9 +89,13 @@ public class CopyBoundReceiverAllowlistTests
         }
 
         Assert.AreEqual(0, unlisted.Count,
-            "by-ref receiver(s) without [GoRecv] that the allowlist does not hold — a pointer-set method must carry " +
-            "[GoRecv]; a value-set forwarder must be added to CopyBoundReceivers.allowlist.txt with its go/types class: " +
+            "[GoCopyBound] by-ref receiver(s) that the allowlist does not hold — a pointer-set method must not carry " +
+            "the mark; a value-set forwarder must be added to CopyBoundReceivers.allowlist.txt with its go/types class: " +
             string.Join(", ", unlisted.Take(20)));
+
+        Assert.AreEqual(0, unmarked.Count,
+            "allowlisted value-set receiver(s) without [GoCopyBound] — golib reads an unmarked by-ref receiver as a " +
+            "POINTER-set method, so the value set loses it: " + string.Join(", ", unmarked.Take(20)));
 
         // Not vacuous: runtime alone carries dozens of these, and it is always loaded here.
         Assert.IsTrue(packages >= 20 && seen.Count >= 40,
@@ -100,8 +107,9 @@ public class CopyBoundReceiverAllowlistTests
     // A method promoted through ANOTHER package's embed is forwarded from a sibling class,
     // `{pkg}ᴛ{Struct}ᴛxpkg`, and the generator settles its method set where it mints it: a
     // pointer-receiver method through value hops is `[GoRecv] this ref` (pointer set only), and one
-    // through a pointer hop is by value. So NO sibling-class forwarder is a by-ref receiver without
-    // [GoRecv] — the allowlist has no rows for these classes, and none may be added.
+    // through a pointer hop is by value. So NO sibling-class forwarder is a by-ref receiver marked
+    // [GoCopyBound], or a by-ref receiver without [GoRecv] — the allowlist has no rows for these
+    // classes, and none may be added.
     [TestMethod]
     public void NoCrossPackageForwarderIsACopyBoundReceiver()
     {
@@ -128,7 +136,7 @@ public class CopyBoundReceiverAllowlistTests
                     if (!method.GetParameters()[0].ParameterType.IsByRef)
                         continue;
 
-                    if (method.IsDefined(typeof(GoRecvAttribute), false))
+                    if (method.IsDefined(typeof(GoRecvAttribute), false) && !method.IsDefined(typeof(GoCopyBoundAttribute), false))
                         pointerSetOnly++;
                     else
                         unmarked.Add($"{siblingClass.FullName}.{method.Name}");
@@ -137,7 +145,7 @@ public class CopyBoundReceiverAllowlistTests
         }
 
         Assert.AreEqual(0, unmarked.Count,
-            "cross-package forwarder(s) with a by-ref receiver and no [GoRecv] — golib would bind each as a VALUE-set method through a copy: " +
+            "cross-package forwarder(s) with a by-ref receiver that is not [GoRecv] alone — the generator forwards a value-set one by value: " +
             string.Join(", ", unmarked.Take(20)));
 
         // Not vacuous: the loaded closure holds sibling classes, with forwarders of both kinds.

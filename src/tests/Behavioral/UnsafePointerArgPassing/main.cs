@@ -6,11 +6,11 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
-[GoRecv] internal static void add(this ref counter c, uintptr d) {
+internal static void add(this ref counter c, uintptr d) {
     c.n += (nint)d;
 }
 

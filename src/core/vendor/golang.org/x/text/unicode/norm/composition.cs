@@ -14,23 +14,23 @@ internal static UntypedInt maxNFCExpansion => 3; // NFC(0x1D160)
 internal static UntypedInt maxNFKCExpansion => 18; // NFKC(0xFDFA)
 internal static UntypedInt maxByteBufferSize => /* utf8.UTFMax * maxBufferSize */ 128; // 128
 
-[GoType("num:nint")] partial struct ssState;
+partial struct ssState /*num:nint*/;
 
 internal static ssState ssSuccess => /* iota */ 0;
 internal static ssState ssStarter => 1;
 internal static ssState ssOverflow => 2;
 
-[GoType("num:uint8")] partial struct streamSafe;
+partial struct streamSafe /*num:uint8*/;
 
 // first inserts the first rune of a segment. It is a faster version of next if
 // it is known p represents the first rune in a segment.
-[GoRecv] internal static void first(this ref streamSafe ss, ΔProperties p) {
+internal static void first(this ref streamSafe ss, ΔProperties p) {
     ss = ((streamSafe)p.nTrailingNonStarters());
 }
 
 // insert returns a ssState value to indicate whether a rune represented by p
 // can be inserted.
-[GoRecv] internal static ssState next(this ref streamSafe ss, ΔProperties p) {
+internal static ssState next(this ref streamSafe ss, ΔProperties p) {
     if (ss > maxNonStarters) {
         throw panic("streamSafe was not reset");
     }
@@ -59,7 +59,7 @@ internal static ssState ssOverflow => 2;
 // when traversing a string backwards. Users do not need to call first
 // for the first rune. The state of the streamSafe retains the count of
 // the non-starters loaded.
-[GoRecv] internal static ssState backwards(this ref streamSafe ss, ΔProperties p) {
+internal static ssState backwards(this ref streamSafe ss, ΔProperties p) {
     if (ss > maxNonStarters) {
         throw panic("streamSafe was not reset");
     }
@@ -86,7 +86,7 @@ public static readonly @string GraphemeJoiner = "\u034F"u8;
 // be used to recombine characters.  Note that the byte buffer does not hold
 // the UTF-8 characters in order.  Only the rune array is maintained in sorted
 // order. flush writes the resulting segment to a byte array.
-[GoType] partial struct reorderBuffer {
+partial struct reorderBuffer {
     internal array<ΔProperties> rune = new(maxBufferSize); // Per character info.
     internal array<byte> @byte = new(maxByteBufferSize); // UTF-8 buffer. Referenced by runeInfo.pos.
     internal uint8 nbyte;                     // Number or bytes.
@@ -100,27 +100,27 @@ public static readonly @string GraphemeJoiner = "\u034F"u8;
     internal Func<ж<reorderBuffer>, bool> flushF;
 }
 
-[GoRecv] internal static void init(this ref reorderBuffer rb, Form f, slice<byte> src) {
+internal static void init(this ref reorderBuffer rb, Form f, slice<byte> src) {
     rb.f = formTable[f].Value;
     rb.src.setBytes(src);
     rb.nsrc = len(src);
     rb.ss = 0;
 }
 
-[GoRecv] internal static void initString(this ref reorderBuffer rb, Form f, @string src) {
+internal static void initString(this ref reorderBuffer rb, Form f, @string src) {
     rb.f = formTable[f].Value;
     rb.src.setString(src);
     rb.nsrc = len(src);
     rb.ss = 0;
 }
 
-[GoRecv] internal static void setFlusher(this ref reorderBuffer rb, slice<byte> @out, Func<ж<reorderBuffer>, bool> f) {
+internal static void setFlusher(this ref reorderBuffer rb, slice<byte> @out, Func<ж<reorderBuffer>, bool> f) {
     rb.@out = @out;
     rb.flushF = f;
 }
 
 // reset discards all characters from the buffer.
-[GoRecv] internal static void reset(this ref reorderBuffer rb) {
+internal static void reset(this ref reorderBuffer rb) {
     rb.nrune = 0;
     rb.nbyte = 0;
 }
@@ -149,7 +149,7 @@ internal static bool appendFlush(ж<reorderBuffer> Ꮡrb) {
 }
 
 // flush appends the normalized segment to out and resets rb.
-[GoRecv] internal static slice<byte> flush(this ref reorderBuffer rb, slice<byte> @out) {
+internal static slice<byte> flush(this ref reorderBuffer rb, slice<byte> @out) {
     for (nint i = 0; i < rb.nrune; i++) {
         var start = rb.rune[i].pos;
         var end = (uint8)(start + rb.rune[i].size);
@@ -161,7 +161,7 @@ internal static bool appendFlush(ж<reorderBuffer> Ꮡrb) {
 
 // flushCopy copies the normalized segment to buf and resets rb.
 // It returns the number of bytes written to buf.
-[GoRecv] internal static nint flushCopy(this ref reorderBuffer rb, slice<byte> buf) {
+internal static nint flushCopy(this ref reorderBuffer rb, slice<byte> buf) {
     nint p = 0;
     for (nint i = 0; i < rb.nrune; i++) {
         var runep = rb.rune[i];
@@ -174,7 +174,7 @@ internal static bool appendFlush(ж<reorderBuffer> Ꮡrb) {
 // insertOrdered inserts a rune in the buffer, ordered by Canonical Combining Class.
 // It returns false if the buffer is not large enough to hold the rune.
 // It is used internally by insert and insertString only.
-[GoRecv] internal static void insertOrdered(this ref reorderBuffer rb, ΔProperties info) {
+internal static void insertOrdered(this ref reorderBuffer rb, ΔProperties info) {
     nint n = rb.nrune;
     var b = rb.rune[..];
     var cc = info.ccc;
@@ -194,7 +194,7 @@ internal static bool appendFlush(ж<reorderBuffer> Ꮡrb) {
     b[n] = info;
 }
 
-[GoType("num:nint")] partial struct insertErr;
+partial struct insertErr /*num:nint*/;
 
 internal static insertErr iSuccess => /* -iota */ 0;
 internal static insertErr iShortDst => -1;
@@ -263,18 +263,18 @@ internal static insertErr insertDecomposed(this ж<reorderBuffer> Ꮡrb, slice<b
 
 // insertSingle inserts an entry in the reorderBuffer for the rune at
 // position i. info is the runeInfo for the rune at position i.
-[GoRecv] internal static void insertSingle(this ref reorderBuffer rb, input src, nint i, ΔProperties info) {
+internal static void insertSingle(this ref reorderBuffer rb, input src, nint i, ΔProperties info) {
     src.copySlice(rb.@byte.slice(rb.nbyte), i, i + (nint)info.size);
     rb.insertOrdered(info);
 }
 
 // insertCGJ inserts a Combining Grapheme Joiner (0x034f) into rb.
-[GoRecv] internal static void insertCGJ(this ref reorderBuffer rb) {
+internal static void insertCGJ(this ref reorderBuffer rb) {
     rb.insertSingle(new input(str: GraphemeJoiner), 0, new ΔProperties(size: (uint8)len(GraphemeJoiner)));
 }
 
 // appendRune inserts a rune at the end of the buffer. It is used for Hangul.
-[GoRecv] internal static void appendRune(this ref reorderBuffer rb, rune r) {
+internal static void appendRune(this ref reorderBuffer rb, rune r) {
     var bn = rb.nbyte;
     nint sz = utf8.EncodeRune(rb.@byte.slice(bn), (rune)r);
     rb.nbyte += utf8.UTFMax;
@@ -283,14 +283,14 @@ internal static insertErr insertDecomposed(this ж<reorderBuffer> Ꮡrb, slice<b
 }
 
 // assignRune sets a rune at position pos. It is used for Hangul and recomposition.
-[GoRecv] internal static void assignRune(this ref reorderBuffer rb, nint pos, rune r) {
+internal static void assignRune(this ref reorderBuffer rb, nint pos, rune r) {
     var bn = rb.rune[pos].pos;
     nint sz = utf8.EncodeRune(rb.@byte.slice(bn), (rune)r);
     rb.rune[pos] = new ΔProperties(pos: bn, size: (uint8)sz);
 }
 
 // runeAt returns the rune at position n. It is used for Hangul and recomposition.
-[GoRecv] internal static rune runeAt(this ref reorderBuffer rb, nint n) {
+internal static rune runeAt(this ref reorderBuffer rb, nint n) {
     var inf = rb.rune[n];
     var (r, _) = utf8.DecodeRune(rb.@byte.slice(inf.pos, (uint8)(inf.pos + inf.size)));
     return r;
@@ -298,7 +298,7 @@ internal static insertErr insertDecomposed(this ж<reorderBuffer> Ꮡrb, slice<b
 
 // bytesAt returns the UTF-8 encoding of the rune at position n.
 // It is used for Hangul and recomposition.
-[GoRecv] internal static slice<byte> bytesAt(this ref reorderBuffer rb, nint n) {
+internal static slice<byte> bytesAt(this ref reorderBuffer rb, nint n) {
     var inf = rb.rune[n];
     return rb.@byte.slice(inf.pos, (nint)inf.pos + (nint)inf.size);
 }
@@ -429,7 +429,7 @@ internal static nint decomposeHangul(slice<byte> buf, rune r) {
 // decomposeHangul algorithmically decomposes a Hangul rune into
 // its Jamo components.
 // See https://unicode.org/reports/tr15/#Hangul for details on decomposing Hangul.
-[GoRecv] internal static void decomposeHangul(this ref reorderBuffer rb, rune r) {
+internal static void decomposeHangul(this ref reorderBuffer rb, rune r) {
     r -= hangulBase;
     var x = r % (rune)jamoTCount;
     r /= jamoTCount;
@@ -442,7 +442,7 @@ internal static nint decomposeHangul(slice<byte> buf, rune r) {
 
 // combineHangul algorithmically combines Jamo character components into Hangul.
 // See https://unicode.org/reports/tr15/#Hangul for details on combining Hangul.
-[GoRecv] internal static void combineHangul(this ref reorderBuffer rb, nint s, nint i, nint k) {
+internal static void combineHangul(this ref reorderBuffer rb, nint s, nint i, nint k) {
     var b = rb.rune[..];
     nint bn = rb.nrune;
     for (; i < bn; i++) {
@@ -483,7 +483,7 @@ internal static nint decomposeHangul(slice<byte> buf, rune r) {
 // compose recombines the runes in the buffer.
 // It should only be used to recompose a single segment, as it will not
 // handle alternations between Hangul and non-Hangul characters correctly.
-[GoRecv] internal static void compose(this ref reorderBuffer rb) {
+internal static void compose(this ref reorderBuffer rb) {
     // Lazily load the map used by the combine func below, but do
     // it outside of the loop.
     ᏑrecompMapOnce.Do(buildRecompMap);

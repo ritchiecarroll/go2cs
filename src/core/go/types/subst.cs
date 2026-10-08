@@ -11,7 +11,7 @@ using global::go.go;
 
 partial class types_package {
 
-[GoType("map[ж<TypeParam>, ΔType]")] partial struct substMap;
+partial struct substMap /*map[ж<TypeParam>, ΔType]*/;
 
 // makeSubstMap creates a new substitution map mapping tpars[i] to targs[i].
 // If targs[i] is nil, tpars[i] is not substituted.
@@ -80,7 +80,7 @@ internal static ΔType subst(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔType 
     return Ꮡsubst.typ(typ);
 }
 
-[GoType] partial struct subster {
+partial struct subster {
     internal tokenꓸPos pos;
     internal substMap smap;
     internal ж<Checker> check; // nil if called via Instantiate

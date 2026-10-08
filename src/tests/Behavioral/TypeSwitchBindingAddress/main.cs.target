@@ -4,25 +4,25 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct name {
+partial struct name {
     internal @string space;
     internal @string local;
 }
 
-[GoType] partial struct start {
+partial struct start {
     internal name n;
     internal slice<name> attr;
 }
 
-[GoType] partial struct end {
+partial struct end {
     internal name n;
 }
 
-[GoType] partial struct resolver {
+partial struct resolver {
     internal map<@string, @string> ns;
 }
 
-[GoRecv] internal static void fix(this ref resolver r, ж<name> Ꮡn) {
+internal static void fix(this ref resolver r, ж<name> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     {
@@ -35,7 +35,7 @@ partial class main_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string resetˢ = "reset"u8;
 
-[GoRecv] internal static void reset(this ref resolver r, ж<end> Ꮡe) {
+internal static void reset(this ref resolver r, ж<end> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     e.n.space = resetˢ;

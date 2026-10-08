@@ -2,11 +2,11 @@ namespace go.NamedInterfacePointerMethodSet;
 
 partial class pmslib_package {
 
-[GoType] partial interface Speaker {
+partial interface Speaker {
     @string Speak();
 }
 
-[GoType] partial interface Getter {
+partial interface Getter {
     @string Get();
 }
 

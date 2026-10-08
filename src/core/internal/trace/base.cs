@@ -21,12 +21,12 @@ partial class trace_package {
 // i.e. anything that could reasonably be represented as a baseEvent.
 internal static UntypedInt maxArgs => 5;
 
-[GoType("[4]uint64")] /* [maxArgs - 1]uint64 */
-partial struct timedEventArgs;
+/* [maxArgs - 1]uint64 */
+partial struct timedEventArgs /*[4]uint64*/;
 
 // baseEvent is the basic unprocessed event. This serves as a common
 // fundamental data structure across.
-[GoType] partial struct baseEvent {
+partial struct baseEvent {
     internal @event.Type typ;
     internal ΔTime time;
     internal timedEventArgs args;
@@ -34,7 +34,7 @@ partial struct timedEventArgs;
 
 // extra returns a slice representing extra available space in args
 // that the parser can use to pass data up into Event.
-[GoRecv] internal static slice<uint64> extra(this ref baseEvent e, version.Version v) {
+internal static slice<uint64> extra(this ref baseEvent e, version.Version v) {
     var exprᴛ1 = v;
     if (exprᴛ1 == version.Go122) {
         return e.args.slice(len(go122.Specs()[e.typ].Args) - 1);
@@ -45,7 +45,7 @@ partial struct timedEventArgs;
 
 // evTable contains the per-generation data necessary to
 // interpret an individual event.
-[GoType] partial struct evTable {
+partial struct evTable {
     internal frequency freq;
     internal dataTable<stringID, @string> strings;
     internal dataTable<stackID, stack> stacks;
@@ -63,7 +63,7 @@ partial struct timedEventArgs;
 
 // addExtraString adds an extra string to the evTable and returns
 // a unique ID for the string in the table.
-[GoRecv] internal static extraStringID addExtraString(this ref evTable t, @string s) {
+internal static extraStringID addExtraString(this ref evTable t, @string s) {
     if (s == ""u8) {
         return 0;
     }
@@ -84,7 +84,7 @@ partial struct timedEventArgs;
 
 // getExtraString returns the extra string for the provided ID.
 // The ID must have been produced by addExtraString for this evTable.
-[GoRecv] internal static @string getExtraString(this ref evTable t, extraStringID id) {
+internal static @string getExtraString(this ref evTable t, extraStringID id) {
     if (id == 0) {
         return ""u8;
     }
@@ -92,7 +92,7 @@ partial struct timedEventArgs;
 }
 
 // dataTable is a mapping from EIs to Es.
-[GoType] partial struct dataTable<EI, E>
+partial struct dataTable<EI, E>
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     internal slice<uint8> present;
@@ -105,7 +105,7 @@ partial struct timedEventArgs;
 // Returns an error if a mapping for id already exists, regardless
 // of whether or not s is the same in content. This should be used
 // for validation during parsing.
-[GoRecv] internal static error insert<EI, E>(this ref dataTable<EI, E> d, EI id, E data)
+internal static error insert<EI, E>(this ref dataTable<EI, E> d, EI id, E data)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     if (d.sparse == default!) {
@@ -123,7 +123,7 @@ partial struct timedEventArgs;
 // compactify attempts to compact sparse into dense.
 //
 // This is intended to be called only once after insertions are done.
-[GoRecv] internal static void compactify<EI, E>(this ref dataTable<EI, E> d)
+internal static void compactify<EI, E>(this ref dataTable<EI, E> d)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     if (d.sparse == default! || len(d.dense) != 0) {
@@ -164,7 +164,7 @@ partial struct timedEventArgs;
 
 // get returns the E for id or false if it doesn't
 // exist. This should be used for validation during parsing.
-[GoRecv] internal static (E, bool) get<EI, E>(this ref dataTable<EI, E> d, EI id)
+internal static (E, bool) get<EI, E>(this ref dataTable<EI, E> d, EI id)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     if (AreEqual(id, ConvertToType<EI>(0))) {
@@ -186,7 +186,7 @@ partial struct timedEventArgs;
 }
 
 // forEach iterates over all ID/value pairs in the data table.
-[GoRecv] internal static bool forEach<EI, E>(this ref dataTable<EI, E> d, Func<EI, E, bool> yield)
+internal static bool forEach<EI, E>(this ref dataTable<EI, E> d, Func<EI, E, bool> yield)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     foreach (var (id, value) in d.dense) {
@@ -211,7 +211,7 @@ partial struct timedEventArgs;
 // mustGet returns the E for id or panics if it fails.
 //
 // This should only be used if id has already been validated.
-[GoRecv] internal static E mustGet<EI, E>(this ref dataTable<EI, E> d, EI id)
+internal static E mustGet<EI, E>(this ref dataTable<EI, E> d, EI id)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     var (data, ok) = d.get(id);
@@ -221,21 +221,21 @@ partial struct timedEventArgs;
     return data;
 }
 
-[GoType("num:float64")] partial struct frequency;
+partial struct frequency /*num:float64*/;
 
 // mul multiplies an unprocessed to produce a time in nanoseconds.
 internal static ΔTime mul(this frequency f, timestamp t) {
     return ((ΔTime)(int64)((float64)(uint64)t * (float64)f));
 }
 
-[GoType("num:uint64")] partial struct stringID;
+partial struct stringID /*num:uint64*/;
 
-[GoType("num:uint64")] partial struct extraStringID;
+partial struct extraStringID /*num:uint64*/;
 
-[GoType("num:uint64")] partial struct stackID;
+partial struct stackID /*num:uint64*/;
 
 // cpuSample represents a CPU profiling sample captured by the trace.
-[GoType] partial struct cpuSample {
+partial struct cpuSample {
     internal partial ref schedCtx schedCtx { get; }
     internal ΔTime time;
     internal stackID stack;
@@ -262,7 +262,7 @@ internal static ΔEvent asEvent(this cpuSample s, ж<evTable> Ꮡtable) {
 }
 
 // stack represents a goroutine stack sample.
-[GoType] partial struct stack {
+partial struct stack {
     internal slice<uint64> pcs;
 }
 
@@ -275,7 +275,7 @@ internal static @string String(this stack s) {
 }
 
 // frame represents a single stack frame.
-[GoType] partial struct frame {
+partial struct frame {
     internal uint64 pc;
     internal stringID funcID;
     internal stringID fileID;

@@ -24,18 +24,18 @@ using strings = strings_package;
 partial class profile_package {
 
 // Options encodes the options for constructing a graph
-[GoType] partial struct Options {
+partial struct Options {
     public Func<slice<int64>, int64> SampleValue; // Function to compute the value of a sample
     public Func<slice<int64>, int64> SampleMeanDivisor; // Function to compute the divisor for mean graphs, or nil
     public bool DropNegative; // Drop nodes with overall negative values
     public NodeSet KeptNodes; // If non-nil, only use nodes in this set
 }
 
-[GoType("[]ж<Node>")] partial struct Nodes;
+partial struct Nodes /*[]ж<Node>*/;
 
 // Node is an entry on a profiling report. It represents a unique
 // program location.
-[GoType] partial struct Node {
+partial struct Node {
     // Info describes the source location associated to this node.
     public NodeInfo Info;
     // Function represents the function that this node belongs to. On
@@ -54,13 +54,13 @@ partial class profile_package {
 
 // Graph summarizes a performance profile into a format that is
 // suitable for visualization.
-[GoType] partial struct Graph {
+partial struct Graph {
     public Nodes Nodes;
 }
 
 // FlatValue returns the exclusive value for this node, computing the
 // mean if a divisor is available.
-[GoRecv] public static int64 FlatValue(this ref Node n) {
+public static int64 FlatValue(this ref Node n) {
     if (n.FlatDiv == 0) {
         return n.Flat;
     }
@@ -69,7 +69,7 @@ partial class profile_package {
 
 // CumValue returns the inclusive value for this node, computing the
 // mean if a divisor is available.
-[GoRecv] public static int64 CumValue(this ref Node n) {
+public static int64 CumValue(this ref Node n) {
     if (n.CumDiv == 0) {
         return n.Cum;
     }
@@ -107,19 +107,19 @@ public static void AddToEdgeDiv(this ж<Node> Ꮡn, ж<Node> Ꮡto, int64 dv, in
 }
 
 // NodeInfo contains the attributes for a node.
-[GoType] partial struct NodeInfo {
+partial struct NodeInfo {
     public @string Name;
     public uint64 Address;
     public nint StartLine, Lineno;
 }
 
 // PrintableName calls the Node's Formatter function with a single space separator.
-[GoRecv] public static @string PrintableName(this ref NodeInfo i) {
+public static @string PrintableName(this ref NodeInfo i) {
     return strings.Join(i.NameComponents(), " "u8);
 }
 
 // NameComponents returns the components of the printable name to be used for a node.
-[GoRecv] public static slice<@string> NameComponents(this ref NodeInfo i) {
+public static slice<@string> NameComponents(this ref NodeInfo i) {
     slice<@string> name = default!;
     if (i.Address != 0) {
         name = append(name, fmt.Sprintf("%016x"u8, i.Address));
@@ -148,11 +148,11 @@ public static void AddToEdgeDiv(this ж<Node> Ꮡn, ж<Node> Ꮡto, int64 dv, in
     return name;
 }
 
-[GoType("map[NodeInfo, ж<Node>]")] partial struct NodeMap;
+partial struct NodeMap /*map[NodeInfo, ж<Node>]*/;
 
-[GoType("map[NodeInfo, bool]")] partial struct NodeSet;
+partial struct NodeSet /*map[NodeInfo, bool]*/;
 
-[GoType("map[ж<Node>, bool]")] partial struct NodePtrSet;
+partial struct NodePtrSet /*map[ж<Node>, bool]*/;
 
 // FindOrInsertNode takes the info for a node and either returns a matching node
 // from the node map if one exists, or adds one to the map if one does not.
@@ -187,7 +187,7 @@ public static ж<Node> FindOrInsertNode(this NodeMap nm, NodeInfo info, NodeSet 
     return n;
 }
 
-[GoType("[]ж<Edge>")] partial struct EdgeMap;
+partial struct EdgeMap /*[]ж<Edge>*/;
 
 public static ж<Edge> FindTo(this EdgeMap em, ж<Node> Ꮡn) {
     foreach (var (_, e) in em) {
@@ -198,11 +198,11 @@ public static ж<Edge> FindTo(this EdgeMap em, ж<Node> Ꮡn) {
     return default!;
 }
 
-[GoRecv] public static void Add(this ref EdgeMap em, ж<Edge> Ꮡe) {
+public static void Add(this ref EdgeMap em, ж<Edge> Ꮡe) {
     em = append(em, Ꮡe);
 }
 
-[GoRecv] public static void Delete(this ref EdgeMap em, ж<Edge> Ꮡe) {
+public static void Delete(this ref EdgeMap em, ж<Edge> Ꮡe) {
     foreach (var (i, edge) in em) {
         if (edge == Ꮡe) {
             (em)[i] = (em)[len(em) - 1];
@@ -213,7 +213,7 @@ public static ж<Edge> FindTo(this EdgeMap em, ж<Node> Ꮡn) {
 }
 
 // Edge contains any attributes to be represented about edges in a graph.
-[GoType] partial struct Edge {
+partial struct Edge {
     public ж<Node> Src, Dest;
     // The summary weight of the edge
     public int64 Weight, WeightDiv;
@@ -226,7 +226,7 @@ public static ж<Edge> FindTo(this EdgeMap em, ж<Node> Ꮡn) {
 
 // WeightValue returns the weight value for this edge, normalizing if a
 // divisor is available.
-[GoRecv] public static int64 WeightValue(this ref Edge e) {
+public static int64 WeightValue(this ref Edge e) {
     if (e.WeightDiv == 0) {
         return e.Weight;
     }
@@ -323,7 +323,7 @@ internal static ж<Graph> selectNodesForGraph(Nodes nodes, bool dropNegative) {
     return Ꮡ(new Graph(gNodes));
 }
 
-[GoType] partial struct nodePair {
+partial struct nodePair {
     internal ж<Node> src, dest;
 }
 
@@ -343,12 +343,12 @@ internal static bool isNegative(ref Node n) {
 
 }
 
-[GoType] public partial struct locationMap {
+public partial struct locationMap {
     internal slice<Nodes> s;     // a slice for small sequential IDs
     internal map<uint64, Nodes> m; // fallback for large IDs (unlikely)
 }
 
-[GoRecv] internal static void add(this ref locationMap l, uint64 id, Nodes n) {
+internal static void add(this ref locationMap l, uint64 id, Nodes n) {
     if (id < (uint64)len(l.s)){
         l.s[id] = n;
     } else {
@@ -437,7 +437,7 @@ public static (int64 flat, int64 cum) Sum(this Nodes ns) {
     return (flat, cum);
 }
 
-[GoRecv] internal static void addSample(this ref Node n, int64 dw, int64 w, bool flat) {
+internal static void addSample(this ref Node n, int64 dw, int64 w, bool flat) {
     // Update sample value
     if (flat){
         n.FlatDiv += dw;
@@ -449,7 +449,7 @@ public static (int64 flat, int64 cum) Sum(this Nodes ns) {
 }
 
 // String returns a text representation of a graph, for debugging purposes.
-[GoRecv] public static @string String(this ref Graph g) {
+public static @string String(this ref Graph g) {
     slice<@string> s = default!;
     var nodeIndex = new map<ж<Node>, nint>(len(g.Nodes));
     foreach (var (i, n) in g.Nodes) {
@@ -491,7 +491,7 @@ public static int64 Sum(this EdgeMap em) {
     return ret;
 }
 
-[GoType("[]ж<Edge>")] partial struct edgeList;
+partial struct edgeList /*[]ж<Edge>*/;
 
 internal static nint Len(this edgeList el) {
     return len(el);

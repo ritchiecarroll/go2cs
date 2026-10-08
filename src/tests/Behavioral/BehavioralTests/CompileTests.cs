@@ -199,6 +199,12 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckByteTableStringVar() => CheckTarget("ByteTableStringVar");
 
     [TestMethod]
+    public void CheckCallerLineCallSite() => CheckTarget("CallerLineCallSite");
+
+    [TestMethod]
+    public void CheckCallerLineMultiLine() => CheckTarget("CallerLineMultiLine");
+
+    [TestMethod]
     public void CheckCanonicalTypeIdentity() => CheckTarget("CanonicalTypeIdentity");
 
     [TestMethod]
@@ -710,6 +716,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGenericFuncDecl() => CheckTarget("GenericFuncDecl");
+
+    [TestMethod]
+    public void CheckGenericFuncInstantiationArg() => CheckTarget("GenericFuncInstantiationArg");
 
     [TestMethod]
     public void CheckGenericInterfaceConstraint() => CheckTarget("GenericInterfaceConstraint");

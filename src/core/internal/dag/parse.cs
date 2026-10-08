@@ -49,7 +49,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class dag_package {
 
-[GoType] partial struct Graph {
+partial struct Graph {
     public slice<@string> Nodes;
     internal map<@string, nint> byLabel;
     internal map<@string, map<@string, bool>> edges;
@@ -59,7 +59,7 @@ internal static ж<Graph> newGraph() {
     return Ꮡ(new Graph(byLabel: new map<@string, nint>{}, edges: new map<@string, map<@string, bool>>{}));
 }
 
-[GoRecv] internal static bool addNode(this ref Graph g, @string label) {
+internal static bool addNode(this ref Graph g, @string label) {
     {
         var (_, ok) = g.byLabel[label, ꟷ]; if (ok) {
             return false;
@@ -71,15 +71,15 @@ internal static ж<Graph> newGraph() {
     return true;
 }
 
-[GoRecv] public static void AddEdge(this ref Graph g, @string from, @string to) {
+public static void AddEdge(this ref Graph g, @string from, @string to) {
     g.edges[from].Set(to, true);
 }
 
-[GoRecv] public static void DelEdge(this ref Graph g, @string from, @string to) {
+public static void DelEdge(this ref Graph g, @string from, @string to) {
     delete(g.edges[from], to);
 }
 
-[GoRecv] public static bool HasEdge(this ref Graph g, @string from, @string to) {
+public static bool HasEdge(this ref Graph g, @string from, @string to) {
     return g.edges[from] != default! && g.edges[from][to];
 }
 
@@ -178,13 +178,13 @@ public static (ж<Graph>, error) Parse(@string dag) {
 }
 
 // A rule is a line in the DAG language where "less < def" or "less !< def".
-[GoType] partial struct rule {
+partial struct rule {
     internal slice<@string> less;
     internal @string op; // Either "<" or "!<"
     internal slice<@string> def;
 }
 
-[GoType("@string")] partial struct ΔsyntaxError;
+partial struct ΔsyntaxError /*@string*/;
 
 internal static @string Error(this ΔsyntaxError e) {
     return ((@string)e);
@@ -248,14 +248,14 @@ internal static (slice<rule> @out, error err) parseRules(@string rules) {
 }
 
 // A rulesParser parses the depsRules syntax described above.
-[GoType] partial struct rulesParser {
+partial struct rulesParser {
     internal nint lineno;
     internal @string lastWord;
     internal @string text;
 }
 
 // syntaxError reports a parsing error.
-[GoRecv] internal static void syntaxError(this ref rulesParser p, @string msg) {
+internal static void syntaxError(this ref rulesParser p, @string msg) {
     throw panic(((ΔsyntaxError)fmt.Sprintf("parsing graph: line %d: syntax error: %s near %s"u8, p.lineno, msg, p.lastWord)));
 }
 
@@ -263,7 +263,7 @@ internal static (slice<rule> @out, error err) parseRules(@string rules) {
 internal static readonly @string badListSyntaxˢ = "bad list syntax"u8;
 
 // nextList parses and returns a comma-separated list of names.
-[GoRecv] internal static (slice<@string> list, @string token) nextList(this ref rulesParser p) {
+internal static (slice<@string> list, @string token) nextList(this ref rulesParser p) {
     slice<@string> list = default!;
 
     while (ᐧ) {
@@ -293,7 +293,7 @@ internal static readonly @string unexpectedTokenˢ = "unexpected token !"u8;
 
 // nextToken returns the next token in the deps rules,
 // one of ";" "," "<" "!<" or a name.
-[GoRecv] internal static @string nextToken(this ref rulesParser p) {
+internal static @string nextToken(this ref rulesParser p) {
     while (ᐧ) {
         if (p.text == ""u8) {
             return ""u8;

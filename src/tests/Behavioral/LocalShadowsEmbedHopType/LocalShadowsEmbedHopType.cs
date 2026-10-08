@@ -4,17 +4,17 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct inner {
+partial struct inner {
     internal nint total;
 }
 
-[GoRecv] internal static void Add(this ref inner g, slice<byte> p) {
+internal static void Add(this ref inner g, slice<byte> p) {
     foreach (var (_, b) in p) {
         g.total += (nint)b;
     }
 }
 
-[GoRecv] internal static void Store(this ref inner g, [GoArrayDims(4)] ж<array<byte>> Ꮡout) {
+internal static void Store(this ref inner g, /*[4]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     @out[0] = (byte)g.total;
@@ -23,35 +23,35 @@ partial class main_package {
     @out[3] = (byte)((g.total >> (int)(24)));
 }
 
-[GoType] partial struct acc {
+partial struct acc {
     internal partial ref inner inner { get; }
 }
 
-[GoType] partial struct deep {
+partial struct deep {
     internal partial ref acc acc { get; }
 }
 
-[GoType] partial struct Hash {
+partial struct Hash {
     internal partial ref acc acc { get; }
     internal bool finalized;
 }
 
-[GoType] partial struct DeepHash {
+partial struct DeepHash {
     internal partial ref deep deep { get; }
 }
 
-[GoRecv] public static void Write(this ref Hash h, slice<byte> p) {
+public static void Write(this ref Hash h, slice<byte> p) {
     h.acc.inner.Add(p);
 }
 
-[GoRecv] public static slice<byte> Sum(this ref Hash h, slice<byte> b) {
+public static slice<byte> Sum(this ref Hash h, slice<byte> b) {
     ref var acc = ref heap(new array<byte>(4), out var Ꮡacc);
     h.acc.inner.Store(Ꮡacc);
     h.finalized = true;
     return appendꓸꓸꓸ(b, acc[..]);
 }
 
-[GoRecv] public static bool Verify(this ref DeepHash d, slice<byte> expected) {
+public static bool Verify(this ref DeepHash d, slice<byte> expected) {
     nint acc = 0;
     {
         ref var deep = ref heap(new array<byte>(4), out var Ꮡdeep);

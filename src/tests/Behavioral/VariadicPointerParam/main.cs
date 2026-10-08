@@ -7,7 +7,7 @@ using ꓸꓸꓸжbox = Span<ж<main_package.box>>;
 
 partial class main_package {
 
-[GoType] partial struct box {
+partial struct box {
     internal nint v;
 }
 

@@ -7,14 +7,14 @@ using errors = errors_package;
 
 partial class oldtrace_package {
 
-[GoType] partial struct orderEvent {
+partial struct orderEvent {
     internal Event ev;
     internal ж<proc> proc;
 }
 
-[GoType("num:nint")] partial struct gStatus;
+partial struct gStatus /*num:nint*/;
 
-[GoType] partial struct gState {
+partial struct gState {
     internal uint64 seq;
     internal gStatus status;
 }
@@ -136,9 +136,9 @@ internal static error transition(map<uint64, gState> gs, uint64 g, gState init, 
     return default!;
 }
 
-[GoType("[]orderEvent")] partial struct orderEventList;
+partial struct orderEventList /*[]orderEvent*/;
 
-[GoRecv] internal static bool Less(this ref orderEventList l, nint i, nint j) {
+internal static bool Less(this ref orderEventList l, nint i, nint j) {
     return (l)[i].ev.Ts < (l)[j].ev.Ts;
 }
 

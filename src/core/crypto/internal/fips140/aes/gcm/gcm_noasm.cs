@@ -9,7 +9,7 @@ partial class gcm_package {
 internal static void checkGenericIsExpected() {
 }
 
-[GoType] partial struct gcmPlatformData {
+partial struct gcmPlatformData {
 }
 
 internal static void initGCM(ref GCM g) {

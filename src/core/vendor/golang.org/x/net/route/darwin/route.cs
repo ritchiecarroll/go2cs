@@ -66,7 +66,7 @@ internal static error errShortBuffer = errors.New("short buffer"u8);
 //
 // The Err field on a response message contains an error value on the
 // requested operation. If non-nil, the requested operation is failed.
-[GoType] partial struct RouteMessage {
+partial struct RouteMessage {
     public nint Version;    // message version
     public nint Type;    // message type
     public nint Flags;    // route flags
@@ -80,11 +80,11 @@ internal static error errShortBuffer = errors.New("short buffer"u8);
 }
 
 // Marshal returns the binary encoding of m.
-[GoRecv] public static (slice<byte>, error) Marshal(this ref RouteMessage m) {
+public static (slice<byte>, error) Marshal(this ref RouteMessage m) {
     return m.marshal();
 }
 
-[GoType("num:nint")] partial struct RIBType;
+partial struct RIBType /*num:nint*/;
 
 public static RIBType RIBTypeRoute => /* syscall.NET_RT_DUMP */ 1;
 public static RIBType RIBTypeInterface => /* syscall.NET_RT_IFLIST */ 3;

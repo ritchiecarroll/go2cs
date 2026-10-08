@@ -9,29 +9,29 @@ using go.crypto.@internal.fips140;
 partial class edwards25519_package {
 
 // A dynamic lookup table for variable-base, constant-time scalar muls.
-[GoType] partial struct projLookupTable {
+partial struct projLookupTable {
     internal array<projCached> points = new(8);
 }
 
 // A precomputed lookup table for fixed-base, constant-time scalar muls.
-[GoType] partial struct affineLookupTable {
+partial struct affineLookupTable {
     internal array<affineCached> points = new(8);
 }
 
 // A dynamic lookup table for variable-base, variable-time scalar muls.
-[GoType] partial struct nafLookupTable5 {
+partial struct nafLookupTable5 {
     internal array<projCached> points = new(8);
 }
 
 // A precomputed lookup table for fixed-base, variable-time scalar muls.
-[GoType] partial struct nafLookupTable8 {
+partial struct nafLookupTable8 {
     internal array<affineCached> points = new(64);
 }
 
 // Constructors.
 
 // Builds a lookup table at runtime. Fast.
-[GoRecv] internal static void FromP3(this ref projLookupTable v, ж<Point> Ꮡq) {
+internal static void FromP3(this ref projLookupTable v, ж<Point> Ꮡq) {
     // Goal: v.points[i] = (i+1)*Q, i.e., Q, 2Q, ..., 8Q
     // This allows lookup of -8Q, ..., -Q, 0, Q, ..., 8Q
     Ꮡ(v.points, 0).FromP3(Ꮡq);
@@ -48,7 +48,7 @@ partial class edwards25519_package {
 }
 
 // This is not optimised for speed; fixed-base tables should be precomputed.
-[GoRecv] internal static void FromP3(this ref affineLookupTable v, ж<Point> Ꮡq) {
+internal static void FromP3(this ref affineLookupTable v, ж<Point> Ꮡq) {
     // Goal: v.points[i] = (i+1)*Q, i.e., Q, 2Q, ..., 8Q
     // This allows lookup of -8Q, ..., -Q, 0, Q, ..., 8Q
     Ꮡ(v.points, 0).FromP3(Ꮡq);
@@ -63,7 +63,7 @@ partial class edwards25519_package {
 }
 
 // Builds a lookup table at runtime. Fast.
-[GoRecv] internal static void FromP3(this ref nafLookupTable5 v, ж<Point> Ꮡq) {
+internal static void FromP3(this ref nafLookupTable5 v, ж<Point> Ꮡq) {
     // Goal: v.points[i] = (2*i+1)*Q, i.e., Q, 3Q, 5Q, ..., 15Q
     // This allows lookup of -15Q, ..., -3Q, -Q, 0, Q, 3Q, ..., 15Q
     Ꮡ(v.points, 0).FromP3(Ꮡq);
@@ -80,7 +80,7 @@ partial class edwards25519_package {
 }
 
 // This is not optimised for speed; fixed-base tables should be precomputed.
-[GoRecv] internal static void FromP3(this ref nafLookupTable8 v, ж<Point> Ꮡq) {
+internal static void FromP3(this ref nafLookupTable8 v, ж<Point> Ꮡq) {
     Ꮡ(v.points, 0).FromP3(Ꮡq);
     ref var q2 = ref heap<Point>(out var Ꮡq2);
     q2 = new Point(nil);
@@ -97,7 +97,7 @@ partial class edwards25519_package {
 // Selectors.
 
 // Set dest to x*Q, where -8 <= x <= 8, in constant time.
-[GoRecv] internal static void SelectInto(this ref projLookupTable v, ж<projCached> Ꮡdest, int8 x) {
+internal static void SelectInto(this ref projLookupTable v, ж<projCached> Ꮡdest, int8 x) {
     ref var dest = ref Ꮡdest.DerefOrNull();
 
     // Compute xabs = |x|
@@ -114,7 +114,7 @@ partial class edwards25519_package {
 }
 
 // Set dest to x*Q, where -8 <= x <= 8, in constant time.
-[GoRecv] internal static void SelectInto(this ref affineLookupTable v, ж<affineCached> Ꮡdest, int8 x) {
+internal static void SelectInto(this ref affineLookupTable v, ж<affineCached> Ꮡdest, int8 x) {
     ref var dest = ref Ꮡdest.DerefOrNull();
 
     // Compute xabs = |x|
@@ -131,14 +131,14 @@ partial class edwards25519_package {
 }
 
 // Given odd x with 0 < x < 2^4, return x*Q (in variable time).
-[GoRecv] internal static void SelectInto(this ref nafLookupTable5 v, ж<projCached> Ꮡdest, int8 x) {
+internal static void SelectInto(this ref nafLookupTable5 v, ж<projCached> Ꮡdest, int8 x) {
     ref var dest = ref Ꮡdest.DerefOrNull();
 
     dest = v.points[(int8)(x / 2)];
 }
 
 // Given odd x with 0 < x < 2^7, return x*Q (in variable time).
-[GoRecv] internal static void SelectInto(this ref nafLookupTable8 v, ж<affineCached> Ꮡdest, int8 x) {
+internal static void SelectInto(this ref nafLookupTable8 v, ж<affineCached> Ꮡdest, int8 x) {
     ref var dest = ref Ꮡdest.DerefOrNull();
 
     dest = v.points[(int8)(x / 2)];

@@ -64,8 +64,8 @@ using static go.crypto.ecdsa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa.go", "ecdsa.cs", "ADlm4oKClIKUAAIQ0oKClAAQIrKCgpSCgpSmgpSkpKTKkqyygoKUqtIAAiIADgKClAACENKEgoKClJSElKSkpKT4ooKUgoKUygABFAAKAoSCgoKUlISUpKSkpMiigsqCgsqCgpT2goKUgoKUlKSkpKT4ooKClJKClIKClKaCgqKClNrCgpSCgpSSgpQAAxLygoKClJSElKSkpKTIooKClIKClICCpNaygoKKlKaigoKUpqKCgpSmooKClKaigoKU6MKUgpSCpoKCgoKC2MKUlIKCgg==", "298-301:1;315-320:1", "285=crypto.Hash.New")]
-[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa_legacy.go", "ecdsa_legacy.cs", "ABksooKWgoKWgoKCgqyygoKCloKCgpSmzgAJAoKCloKCgoqUpqKCloaSgIKkgpSClJaCgpSygoKCgpaEgoKCqIKCgoKCgqgAAhIACQKClIKClKaCgpaCgpSEgoSClIKogoSCgoKEgoKEgpSCppjSgoKCgIKkgIKkgoI=")]
+[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa.go", "ecdsa.cs", "ADlm4oKClIKUAAIQ0oKClAAQIrKCgpSCgpSmgpSkpKTKkqyygoKUqtIAAiIADgKClAACENKEgoKClJSElKSkpKT4ooKUgoKUygABFAAKAoSCgoKUlISUpKSkpMiigsqCgsqCgpT2goKUgoKUlKSkpKT4ooKClJKClIKClKaCgqKClNrCgpSCgpSSgpQAAxLygoKClJSElKSkpKTIooKClIKClICCpNaygoKKlKaigoKUpqKCgpSmooKClKaigoKU6MKUgpSCpoKCgoKC2MKUlIKCgg==", "298-301:1;315-320:1", "285=crypto.Hash.New", "448=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
+[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa_legacy.go", "ecdsa_legacy.cs", "ABksooKWgoKWgoKCgqyygoKCloKCgpSmzgAJAoKCloKCgoqUpqKCloaSgIKkgpSClJaCgpSygoKCgpaEgoKCqIKCgoKCgqgAAhIACQKClIKClKaCgpaCgpSEgoSClIKogoSCgoKEgoKEgpSCppjSgoKCgIKkgIKkgoI=", "", "", "82=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
 [assembly: go.GoPositionMap("crypto/ecdsa/notboring.go", "notboring.cs", "AAsWgqSC")]
 // </GoSourcePositionMaps>
 
@@ -75,7 +75,7 @@ namespace go.crypto;
 public static partial class ecdsa_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

@@ -39,7 +39,7 @@ internal static UntypedInt buckHashSize => 179999;
 internal static UntypedInt maxSkip => 6;
 internal static UntypedInt maxProfStackDepth => 1024;
 
-[GoType("num:nint")] partial struct bucketType;
+partial struct bucketType /*num:nint*/;
 
 // A bucket holds per-call-stack profiling information.
 // The representation is a bit sleazy, inherited from C.
@@ -54,7 +54,7 @@ internal static UntypedInt maxProfStackDepth => 1024;
 // creation, including its next and allnext links.
 //
 // No heap pointers.
-[GoType] partial struct bucket {
+partial struct bucket {
     internal sys.NotInHeap _;
     internal ж<bucket> next;
     internal ж<bucket> allnext;
@@ -66,7 +66,7 @@ internal static UntypedInt maxProfStackDepth => 1024;
 
 // A memRecord is the bucket data for a bucket of type memProfile,
 // part of the memory profile.
-[GoType] partial struct memRecord {
+partial struct memRecord {
 // The following complex 3-stage scheme of stats accumulation
 // is required to obtain a consistent picture of mallocs and frees
 // for some point in time.
@@ -126,13 +126,13 @@ internal static UntypedInt maxProfStackDepth => 1024;
 }
 
 // memRecordCycle
-[GoType] partial struct memRecordCycle {
+partial struct memRecordCycle {
     internal uintptr allocs, frees;
     internal uintptr alloc_bytes, free_bytes;
 }
 
 // add accumulates b into a. It does not zero b.
-[GoRecv] internal static void add(this ref memRecordCycle a, ж<memRecordCycle> Ꮡb) {
+internal static void add(this ref memRecordCycle a, ж<memRecordCycle> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     a.allocs += b.allocs;
@@ -143,7 +143,7 @@ internal static UntypedInt maxProfStackDepth => 1024;
 
 // A blockRecord is the bucket data for a bucket of type blockProfile,
 // which is used in blocking and mutex profiles.
-[GoType] partial struct blockRecord {
+partial struct blockRecord {
     internal float64 count;
     internal int64 cycles;
 }
@@ -159,8 +159,8 @@ internal static ref atomic.UnsafePointer buckhash => ref Ꮡbuckhash.Value;     
 internal static ж<mProfCycleHolder> ᏑmProfCycle = new StandardBox<mProfCycleHolder>(default(mProfCycleHolder));
 internal static ref mProfCycleHolder mProfCycle => ref ᏑmProfCycle.Value;
 
-[GoType("[179999]global::go.@internal.runtime.atomic_package.UnsafePointer")] /* [buckHashSize]@internal.runtime.atomic_package.UnsafePointer */
-partial struct buckhashArray; // *bucket
+/* [buckHashSize]@internal.runtime.atomic_package.UnsafePointer */
+partial struct buckhashArray /*[179999]global::go.@internal.runtime.atomic_package.UnsafePointer*/; // *bucket
 
 internal const uint32 mProfCycleWrap = /* uint32(len(memRecord{}.future)) * (2 << 24) */ 100663296;
 
@@ -168,7 +168,7 @@ internal const uint32 mProfCycleWrap = /* uint32(len(memRecord{}.future)) * (2 <
 // mProfCycleWrap, stored starting at bit 1), and a flag (stored at bit 0) to
 // indicate whether future[cycle] in all buckets has been queued to flush into
 // the active profile.
-[GoType] partial struct mProfCycleHolder {
+partial struct mProfCycleHolder {
     internal atomic.Uint32 value;
 }
 
@@ -501,14 +501,14 @@ internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, sli
 // contention that it experiences while adding samples to the profile will be
 // recorded later as "additional contention" and not include a call stack, to
 // avoid an echo.
-[GoType] partial struct lockTimer {
+partial struct lockTimer {
     internal ж<mutex> @lock;
     internal int64 timeRate;
     internal int64 timeStart;
     internal int64 tickStart;
 }
 
-[GoRecv] internal static void begin(this ref lockTimer lt) {
+internal static void begin(this ref lockTimer lt) {
     var rate = (int64)atomic.Load64(Ꮡmutexprofilerate);
     lt.timeRate = gTrackingPeriod;
     if (rate != 0 && rate < lt.timeRate) {
@@ -522,7 +522,7 @@ internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, sli
     }
 }
 
-[GoRecv] internal static void end(this ref lockTimer lt) {
+internal static void end(this ref lockTimer lt) {
     var gp = getg();
     if (lt.timeStart != 0) {
         var nowTime = nanotime();
@@ -534,7 +534,7 @@ internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, sli
     }
 }
 
-[GoType] partial struct mLockProfile {
+partial struct mLockProfile {
     internal atomic.Int64 waitTime; // total nanoseconds spent waiting in runtime.lockWithRank
     internal slice<uintptr> stack; // stack that experienced contention in runtime.lockWithRank
     internal uintptr pending;      // *mutex that experienced contention (to be traceback-ed)
@@ -544,7 +544,7 @@ internal static nint fpTracebackPartialExpand(nint skip, @unsafe.Pointer fp, sli
     internal bool disabled;         // attribute all time to "lost"
 }
 
-[GoRecv] internal static void recordLock(this ref mLockProfile prof, int64 cycles, ж<mutex> Ꮡl) {
+internal static void recordLock(this ref mLockProfile prof, int64 cycles, ж<mutex> Ꮡl) {
     if (cycles < 0) {
         cycles = 0;
     }
@@ -647,7 +647,7 @@ internal static void captureStack(this ж<mLockProfile> Ꮡprof) {
     }
 }
 
-[GoRecv] internal static void store(this ref mLockProfile prof) {
+internal static void store(this ref mLockProfile prof) {
     // Report any contention we experience within this function as "lost"; it's
     // important that the act of reporting a contention event not lead to a
     // reportable contention event. This also means we can use prof.stack
@@ -736,13 +736,13 @@ internal static partial void mutexevent(int64 cycles, nint skip) {
 // Go interface to profile data.
 
 // A StackRecord describes a single execution stack.
-[GoType] partial struct StackRecord {
+partial struct StackRecord {
     public array<uintptr> Stack0 = new(32); // stack trace for this record; ends at first 0 entry
 }
 
 // Stack returns the stack trace associated with the record,
 // a prefix of r.Stack0.
-[GoRecv] public static slice<uintptr> Stack(this ref StackRecord r) {
+public static slice<uintptr> Stack(this ref StackRecord r) {
     foreach (var (i, v) in r.Stack0.ΔRangeSnapshot()) {
         if (v == 0) {
             return r.Stack0.slice(0, i);
@@ -775,25 +775,25 @@ internal static bool disableMemoryProfiling;
 
 // A MemProfileRecord describes the live objects allocated
 // by a particular call sequence (stack trace).
-[GoType] partial struct MemProfileRecord {
+partial struct MemProfileRecord {
     public int64 AllocBytes, FreeBytes;       // number of bytes allocated, freed
     public int64 AllocObjects, FreeObjects;       // number of objects allocated, freed
     public array<uintptr> Stack0 = new(32); // stack trace for this record; ends at first 0 entry
 }
 
 // InUseBytes returns the number of bytes in use (AllocBytes - FreeBytes).
-[GoRecv] public static int64 InUseBytes(this ref MemProfileRecord r) {
+public static int64 InUseBytes(this ref MemProfileRecord r) {
     return r.AllocBytes - r.FreeBytes;
 }
 
 // InUseObjects returns the number of objects in use (AllocObjects - FreeObjects).
-[GoRecv] public static int64 InUseObjects(this ref MemProfileRecord r) {
+public static int64 InUseObjects(this ref MemProfileRecord r) {
     return r.AllocObjects - r.FreeObjects;
 }
 
 // Stack returns the stack trace associated with the record,
 // a prefix of r.Stack0.
-[GoRecv] public static slice<uintptr> Stack(this ref MemProfileRecord r) {
+public static slice<uintptr> Stack(this ref MemProfileRecord r) {
     foreach (var (i, v) in r.Stack0.ΔRangeSnapshot()) {
         if (v == 0) {
             return r.Stack0.slice(0, i);
@@ -943,7 +943,7 @@ internal static void iterate_memprof(Action<ж<bucket>, uintptr, ж<uintptr>, ui
 
 // BlockProfileRecord describes blocking events originated
 // at a particular call sequence (stack trace).
-[GoType] partial struct BlockProfileRecord {
+partial struct BlockProfileRecord {
     public int64 Count;
     public int64 Cycles;
     public partial ref StackRecord StackRecord { get; }
@@ -1167,7 +1167,7 @@ public static (nint n, bool ok) pprof_goroutineProfileWithLabels(slice<profilere
 // go2cs generated this placeholder — func goroutineProfileWithLabels is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 
-[GoType("dyn")] partial struct goroutineProfileᴛ1 {
+partial struct goroutineProfileᴛ1 /*dyn*/ {
     internal uint32 sema;
     internal bool active;
     internal atomic.Int64 offset;
@@ -1179,13 +1179,13 @@ internal static ж<goroutineProfileᴛ1> ᏑgoroutineProfile = new StandardBox<g
 ));
 internal static ref goroutineProfileᴛ1 goroutineProfile => ref ᏑgoroutineProfile.Value;
 
-[GoType("num:uint32")] partial struct goroutineProfileState;
+partial struct goroutineProfileState /*num:uint32*/;
 
 internal static goroutineProfileState goroutineProfileAbsent => /* iota */ 0;
 internal static goroutineProfileState goroutineProfileInProgress => 1;
 internal static goroutineProfileState goroutineProfileSatisfied => 2;
 
-[GoType("global::go.@internal.runtime.atomic_package.Uint32")] partial struct goroutineProfileStateHolder;
+partial struct goroutineProfileStateHolder /*global::go.@internal.runtime.atomic_package.Uint32*/;
 
 internal static goroutineProfileState Load(this ж<goroutineProfileStateHolder> Ꮡp) {
     return ((goroutineProfileState)(Ꮡp.Reinterpret<goroutineProfileStateHolder, atomic.Uint32>()).Load());

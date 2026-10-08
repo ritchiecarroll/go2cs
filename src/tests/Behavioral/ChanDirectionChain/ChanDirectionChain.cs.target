@@ -32,7 +32,7 @@ private static readonly object assignableChan3IntChan4ˢ = (@string)"assignable 
 private static readonly object assignableChan3IntChan3ˢ = (@string)"assignable chan [3]int -> chan [3]int:"u8;
 private static readonly object convertibleChan3IntChan4ˢ = (@string)"convertible chan [3]int -> chan [4]int:"u8;
 
-[GoType("dyn")] internal partial struct main_i {
+internal partial struct main_i /*dyn*/ {
     internal channel/*<-*/</*<-*/channel<nint>> x = channel/*<-*/</*<-*/channel<nint>>.Nil(ChanCargo.Of(new GoChanDir[] { GoChanDir.Send, GoChanDir.Recv }, null));
 }
 

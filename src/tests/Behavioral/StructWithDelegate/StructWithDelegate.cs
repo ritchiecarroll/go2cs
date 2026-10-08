@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Person {
+partial struct Person {
     internal Action work;
     internal @string name;
     internal int32 age;

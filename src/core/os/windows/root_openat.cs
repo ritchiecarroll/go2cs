@@ -14,7 +14,7 @@ partial class os_package {
 
 // root implementation for platforms with a function to open a file
 // relative to a directory.
-[GoType] partial struct root {
+partial struct root {
     internal @string name;
     // refs is incremented while an operation is using fd.
     // closed is set when Close is called.
@@ -82,7 +82,7 @@ internal static void decref(this ж<root> Ꮡr) {
     finally { if (ᒐd1) Ꮡr.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[GoRecv] internal static @string Name(this ref root r) {
+internal static @string Name(this ref root r) {
     return r.name;
 }
 
@@ -243,7 +243,7 @@ internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, Func<sy
     ᒐdone: return (ret, err);
 }
 
-[GoType("@string")] partial struct errSymlink;
+partial struct errSymlink /*@string*/;
 
 internal static @string Error(this errSymlink _) {
     throw panic("errSymlink is not user-visible");

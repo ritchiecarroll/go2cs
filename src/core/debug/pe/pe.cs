@@ -5,7 +5,7 @@ namespace go.debug;
 
 partial class pe_package {
 
-[GoType] partial struct FileHeader {
+partial struct FileHeader {
     public uint16 Machine;
     public uint16 NumberOfSections;
     public uint32 TimeDateStamp;
@@ -15,12 +15,12 @@ partial class pe_package {
     public uint16 Characteristics;
 }
 
-[GoType] partial struct DataDirectory {
+partial struct DataDirectory {
     public uint32 VirtualAddress;
     public uint32 Size;
 }
 
-[GoType] partial struct OptionalHeader32 {
+partial struct OptionalHeader32 {
     public uint16 Magic;
     public uint8 MajorLinkerVersion;
     public uint8 MinorLinkerVersion;
@@ -54,7 +54,7 @@ partial class pe_package {
     public array<DataDirectory> DataDirectory = new(16);
 }
 
-[GoType] partial struct OptionalHeader64 {
+partial struct OptionalHeader64 {
     public uint16 Magic;
     public uint8 MajorLinkerVersion;
     public uint8 MinorLinkerVersion;

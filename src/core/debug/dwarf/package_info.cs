@@ -89,8 +89,8 @@ using static go.debug.dwarf_package;
 [assembly: go.GoPositionMap("debug/dwarf/line.go", "line.cs", "AHyeAvKUqIKUlIK4loKUAAcQgIK4hKrCloKCgoKUgtyUgoKUgpSCgpSUgoKUgoKUlJSCgpaClIKUgqiCgoKogpSCgIK4lIKCgoKUgpSmlLqCgoCCkoLIgoKCgoKClJSCgoKCooKUqIQAChiSgoKCgpSo0oKCgoKUpIKClJSClIKClJSCgoK4kpS4pKSkpKSkpKSkpKS2lKSClKSk7IKWrLKSgpSClIKCgoKUlJLugoKUgqaCqqKClAADFAAIAoK6goKUgoKUggAJDgAMJtKElIKCgoKWloKChJSCgqaUtLS0tNiAkoKSgoKkqKaEkrqmpqaCpqampqaopqaqwraEgoKCgoKCqqKCggAOIJKuwoKCgoKqtIKWlqi2AAwaggACHgAMAsoAARwADgKAgqSUgoCCpJSCuoKCgoCCgpSkgpS4gpQAAxTigqqigsqClKaCgqa4goKClJSqooKAgraUlIKUgoK4")]
 [assembly: go.GoPositionMap("debug/dwarf/open.go", "open.cs", "ADNqAAEUAAgCAA8igpSCgoKUpoKUpIK0grSmgoKUgq7CrsKClKSkpLY=")]
 [assembly: go.GoPositionMap("debug/dwarf/tag_string.go", "tag_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIACRqCgoKWgpSCpKSCpKSCpIKk")]
-[assembly: go.GoPositionMap("debug/dwarf/type.go", "type.cs", "AB46gKSAAA8egKSCgpQAOHKApIAAChSCpoKClAAKEIAACBCAAF68AYKClKaCgpSmgoKClIKClIKCgpSCgoKCpoIAFCSCgoKUgoKClJSCAAwUgoKCgpSUgoKUAAcQgAAIEICkgAAJEoKClAAOILIABxCigpSCgriCgpSCABIQAAkCgIKkgpKClIKCAAYQgoKClJy0lpKC7oKCgoKUgoKUgoKClJSClIKUzJKCgpSAgtaAguiklgABFIKCgoAACAKkhpKmlIKUgoKSgqakgraUloKCAAMegoIACwKClJykpIK4gKS0+KSkpKQAAjmCAAI8goaCgoKCgoKCggADJoKCgpSkpKSCgoKCgoKCgpSCgIKkmKKCgpSCgoLGpoKCgoKCgoKClIKEppSCgpSCgpQABBCCgoKAsqSUpKQABBiCgoKCgoKCgoKCgoKCgpSCAAUSgoKCwoKUAAMYgoKCgAAJAqSCgoKYgILGqwACEAADEIKCgoKsgoKCrIKCgoIADAaCloKCgoKa5LaUhIiy1oKCgqaSgg==", "428-430:1;442-476:2;480-497:3")]
-[assembly: go.GoPositionMap("debug/dwarf/typeunit.go", "typeunit.cs", "ABs0soKCgoKCgpSCgoKClIKClJSCgpSChIKClIKCgpSWggAMGoKmqLKCgpSClpKCgoKWggAKGJKCgoKClKiSqLKClIKUgoKClKiSAAYQkg==")]
+[assembly: go.GoPositionMap("debug/dwarf/type.go", "type.cs", "AB46gKSAAA8egKSCgpQAOHKApIAAChSCpoKClAAKEIAACBCAAF68AYKClKaCgpSmgoKClIKClIKCgpSCgoKCpoIAFCSCgoKUgoKClJSCAAwUgoKCgpSUgoKUAAcQgAAIEICkgAAJEoKClAAOILIABxCigpSCgriCgpSCABIQAAkCgIKkgpKClIKCAAYQgoKClJy0lpKC7oKCgoKUgoKUgoKClJSClIKUzJKCgpSAgtaAguiklgABFIKCgoAACAKkhpKmlIKUgoKSgqakgraUloKCAAMegoIACwKClJykpIK4gKS0+KSkpKQAAjmCAAI8goaCgoKCgoKCggADJoKCgpSkpKSCgoKCgoKCgpSCgIKkmKKCgpSCgoLGpoKCgoKCgoKClIKEppSCgpSCgpQABBCCgoKAsqSUpKQABBiCgoKCgoKCgoKCgoKCgpSCAAUSgoKCwoKUAAMYgoKCgAAJAqSCgoKYgILGqwACEAADEIKCgoKsgoKCrIKCgoIADAaCloKCgoKa5LaUhIiy1oKCgqaSgg==", "428-430:1;442-476:2;480-497:3", "", "683=Basic/1/1/2")]
+[assembly: go.GoPositionMap("debug/dwarf/typeunit.go", "typeunit.cs", "ABs0soKCgoKCgpSCgoKClIKClJSCgpSChIKClIKCgpSWggAMGoKmqLKCgpSClpKCgoKWggAKGJKCgoKClKiSqLKClIKUgoKClKiSAAYQkg==", "", "", "70=bytes/1/1/4;156=makeBuf/1/1/3")]
 [assembly: go.GoPositionMap("debug/dwarf/unit.go", "unit.cs", "ABc4kqaCpoLWtIKCgoKCgpSCgqaCqIKCgoKCgoKUgpSCgoKClIKCgpSCgpSUgoKClJSCgpaUpIKSlLiClIKUqtSGgpSCgpQ=", "126-128:1")]
 // </GoSourcePositionMaps>
 
@@ -100,7 +100,7 @@ namespace go.debug;
 public static partial class dwarf_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

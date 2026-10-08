@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:nint")] partial struct reply;
+partial struct reply /*num:nint*/;
 
 internal static reply statusOK => 0x00;
 

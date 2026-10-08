@@ -10,7 +10,7 @@ namespace go.@internal;
 partial class godebugs_package {
 
 // An Info describes a single known GODEBUG setting.
-[GoType] partial struct Info {
+partial struct Info {
     public @string Name; // name of the setting ("panicnil")
     public @string Package; // package that uses the setting ("runtime")
     public nint Changed;   // minor version when default changed, if any; 21 means Go 1.21

@@ -178,7 +178,7 @@ partial class pprof_package {
 // runtime-internal locks can be obtained by setting
 // `GODEBUG=runtimecontentionstacks=1` (see package [runtime] docs for
 // caveats).
-[GoType] partial struct Profile {
+partial struct Profile {
     internal @string name;
     internal sync.Mutex mu;
     internal map<any, slice<uintptr>> m;
@@ -188,7 +188,7 @@ partial class pprof_package {
 
 // profiles records all registered profiles.
 
-[GoType("dyn")] partial struct profilesᴛ1 {
+partial struct profilesᴛ1 /*dyn*/ {
     internal sync.Mutex mu;
     internal map<@string, ж<Profile>> m;
 }
@@ -315,7 +315,7 @@ public static slice<ж<Profile>> Profiles() {
 }
 
 // Name returns this profile's name, which can be passed to [Lookup] to reobtain the profile.
-[GoRecv] public static @string Name(this ref Profile p) {
+public static @string Name(this ref Profile p) {
     return p.name;
 }
 
@@ -436,7 +436,7 @@ public static error WriteTo(this ж<Profile> Ꮡp, io.Writer w, nint debug) {
     return printCountProfile(w, debug, p.name, ((stackProfile)all));
 }
 
-[GoType("[]slice<uintptr>")] partial struct stackProfile;
+partial struct stackProfile /*[]slice<uintptr>*/;
 
 internal static nint Len(this stackProfile x) {
     return len(x);
@@ -454,7 +454,7 @@ internal static ж<labelMap> Label(this stackProfile x, nint i) {
 // grouped by stack trace. There are multiple implementations:
 // all that matters is that we can find out how many traces there are
 // and obtain each trace in turn.
-[GoType] partial interface countProfile {
+partial interface countProfile {
     nint Len();
     slice<uintptr> Stack(nint i);
     ж<labelMap> Label(nint i);
@@ -583,20 +583,20 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
 }
 
 // keysByCount sorts keys with higher counts first, breaking ties by key string order.
-[GoType] partial struct keysByCount {
+partial struct keysByCount {
     internal slice<@string> keys;
     internal map<@string, nint> count;
 }
 
-[GoRecv] internal static nint Len(this ref keysByCount x) {
+internal static nint Len(this ref keysByCount x) {
     return len(x.keys);
 }
 
-[GoRecv] internal static void Swap(this ref keysByCount x, nint i, nint j) {
+internal static void Swap(this ref keysByCount x, nint i, nint j) {
     (x.keys[i], x.keys[j]) = (x.keys[j], x.keys[i]);
 }
 
-[GoRecv] internal static bool Less(this ref keysByCount x, nint i, nint j) {
+internal static bool Less(this ref keysByCount x, nint i, nint j) {
     @string ki = x.keys[i];
     @string kj = x.keys[j];
     nint ci = x.count[ki];
@@ -862,25 +862,25 @@ internal static error writeRuntimeProfile(io.Writer w, nint debug, @string name,
     return printCountProfile(w, debug, name, new runtimeProfileжcountProfile(Ꮡ(new runtimeProfile(p, labels))));
 }
 
-[GoType] partial struct runtimeProfile {
+partial struct runtimeProfile {
     internal slice<profilerecord.StackRecord> stk;
     internal slice<@unsafe.Pointer> labels;
 }
 
-[GoRecv] internal static nint Len(this ref runtimeProfile p) {
+internal static nint Len(this ref runtimeProfile p) {
     return len(p.stk);
 }
 
-[GoRecv] internal static slice<uintptr> Stack(this ref runtimeProfile p, nint i) {
+internal static slice<uintptr> Stack(this ref runtimeProfile p, nint i) {
     return p.stk[i].Stack;
 }
 
-[GoRecv] internal static ж<labelMap> Label(this ref runtimeProfile p, nint i) {
+internal static ж<labelMap> Label(this ref runtimeProfile p, nint i) {
     return (ж<labelMap>)(uintptr)(p.labels[i]);
 }
 
 
-[GoType("dyn")] partial struct cpuᴛ1 {
+partial struct cpuᴛ1 /*dyn*/ {
     public partial ref go.sync_package.Mutex Mutex { get; }
     internal bool profiling;
     internal channel<bool> done;
@@ -935,7 +935,7 @@ public static partial error StartCPUProfile(io.Writer w) {
 // If profiling is turned off and all the profile data accumulated while it was
 // on has been returned, readProfile returns eof=true.
 // The caller must save the returned data and tags before calling readProfile again.
-[global::System.Diagnostics.StackTraceHidden] internal static (slice<uint64> data, slice<@unsafe.Pointer> tags, bool eof) readProfile() {
+/*linkname*/ internal static partial (slice<uint64> data, slice<@unsafe.Pointer> tags, bool eof) readProfile() {
     var (ᴛ1, ᴛ2, ᴛ3) = runtime.runtime_pprof_readProfile();
     return (ᴛ1, ᴛ2, ᴛ3);
 }
@@ -1060,47 +1060,47 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
 }
 
 //go:linkname pprof_goroutineProfileWithLabels runtime.pprof_goroutineProfileWithLabels
-[global::System.Diagnostics.StackTraceHidden] internal static (nint n, bool ok) pprof_goroutineProfileWithLabels(slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> labels) {
+/*linkname*/ internal static partial (nint n, bool ok) pprof_goroutineProfileWithLabels(slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> labels) {
     var (ᴛ1, ᴛ2) = runtime.pprof_goroutineProfileWithLabels(p, labels);
     return (ᴛ1, ᴛ2);
 }
 
 //go:linkname pprof_cyclesPerSecond runtime/pprof.runtime_cyclesPerSecond
-[global::System.Diagnostics.StackTraceHidden] internal static int64 pprof_cyclesPerSecond() {
+/*linkname*/ internal static partial int64 pprof_cyclesPerSecond() {
     return runtime.pprof_cyclesPerSecond();
 }
 
 //go:linkname pprof_memProfileInternal runtime.pprof_memProfileInternal
-[global::System.Diagnostics.StackTraceHidden] internal static (nint n, bool ok) pprof_memProfileInternal(slice<profilerecord.MemProfileRecord> p, bool inuseZero) {
+/*linkname*/ internal static partial (nint n, bool ok) pprof_memProfileInternal(slice<profilerecord.MemProfileRecord> p, bool inuseZero) {
     var (ᴛ1, ᴛ2) = runtime.pprof_memProfileInternal(p, inuseZero);
     return (ᴛ1, ᴛ2);
 }
 
 //go:linkname pprof_blockProfileInternal runtime.pprof_blockProfileInternal
-[global::System.Diagnostics.StackTraceHidden] internal static (nint n, bool ok) pprof_blockProfileInternal(slice<profilerecord.BlockProfileRecord> p) {
+/*linkname*/ internal static partial (nint n, bool ok) pprof_blockProfileInternal(slice<profilerecord.BlockProfileRecord> p) {
     var (ᴛ1, ᴛ2) = runtime.pprof_blockProfileInternal(p);
     return (ᴛ1, ᴛ2);
 }
 
 //go:linkname pprof_mutexProfileInternal runtime.pprof_mutexProfileInternal
-[global::System.Diagnostics.StackTraceHidden] internal static (nint n, bool ok) pprof_mutexProfileInternal(slice<profilerecord.BlockProfileRecord> p) {
+/*linkname*/ internal static partial (nint n, bool ok) pprof_mutexProfileInternal(slice<profilerecord.BlockProfileRecord> p) {
     var (ᴛ1, ᴛ2) = runtime.pprof_mutexProfileInternal(p);
     return (ᴛ1, ᴛ2);
 }
 
 //go:linkname pprof_threadCreateInternal runtime.pprof_threadCreateInternal
-[global::System.Diagnostics.StackTraceHidden] internal static (nint n, bool ok) pprof_threadCreateInternal(slice<profilerecord.StackRecord> p) {
+/*linkname*/ internal static partial (nint n, bool ok) pprof_threadCreateInternal(slice<profilerecord.StackRecord> p) {
     var (ᴛ1, ᴛ2) = runtime.pprof_threadCreateInternal(p);
     return (ᴛ1, ᴛ2);
 }
 
 //go:linkname pprof_fpunwindExpand runtime.pprof_fpunwindExpand
-[global::System.Diagnostics.StackTraceHidden] internal static nint pprof_fpunwindExpand(slice<uintptr> dst, slice<uintptr> src) {
+/*linkname*/ internal static partial nint pprof_fpunwindExpand(slice<uintptr> dst, slice<uintptr> src) {
     return runtime.pprof_fpunwindExpand(dst, src);
 }
 
 //go:linkname pprof_makeProfStack runtime.pprof_makeProfStack
-[global::System.Diagnostics.StackTraceHidden] internal static slice<uintptr> pprof_makeProfStack() {
+/*linkname*/ internal static partial slice<uintptr> pprof_makeProfStack() {
     return runtime.pprof_makeProfStack();
 }
 

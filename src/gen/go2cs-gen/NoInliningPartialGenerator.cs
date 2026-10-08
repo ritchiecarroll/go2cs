@@ -33,6 +33,27 @@ public static class NoInliningPartials
     public const string Attribute =
         "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]";
 
+    /// <summary>What a FORWARDER's declaring part carries instead: it is not a Go frame, so stack walks skip it.</summary>
+    public const string ForwarderAttribute = "[global::System.Diagnostics.StackTraceHidden]";
+
+    /// <summary>The converter's mark on a linkname or assembly-trampoline forwarder.</summary>
+    public const string LinknameMarker = "/*linkname*/";
+
+    /// <summary>
+    /// Whether <paramref name="method"/> is a FORWARDER: <c>/*linkname*/</c> followed by one space is the last trivia before its first
+    /// token, the one position the converter writes it in (<c>/*linkname*/ internal static partial slice&lt;@string&gt; runtime_args() {</c>).
+    /// Go's own <c>//go:linkname</c> line is never read: it also stands above bodied functions that are no-inline carriers
+    /// (docs/PLAN-marker-comment-parity.md, section 11).
+    /// </summary>
+    public static bool IsForwarder(MethodDeclarationSyntax method)
+    {
+        SyntaxTriviaList trivia = method.GetFirstToken().LeadingTrivia;
+
+        return trivia.Count >= 2 &&
+            trivia[trivia.Count - 1].IsKind(SyntaxKind.WhitespaceTrivia) && trivia[trivia.Count - 1].ToString() == " " &&
+            trivia[trivia.Count - 2].IsKind(SyntaxKind.MultiLineCommentTrivia) && trivia[trivia.Count - 2].ToString() == LinknameMarker;
+    }
+
     /// <summary>Syntax half: a <c>partial</c> method that has a body. Cheap; the receiver's filter.</summary>
     public static bool IsPartialWithBody(MethodDeclarationSyntax method) =>
         method.Modifiers.Any(SyntaxKind.PartialKeyword) && (method.Body is not null || method.ExpressionBody is not null);
@@ -70,7 +91,8 @@ public sealed class NoInliningPartialFinder : ISyntaxReceiver
 /// Writes the declaring part of every <see cref="NoInliningPartials.IsCarrier">no-inline carrier</see>:
 /// the implementing part's signature copied exactly (modifiers, return type, name, type parameters,
 /// parameters, constraints), its attributes (its parameters' and type parameters' too) and body removed, carrying
-/// <c>[MethodImpl(MethodImplOptions.NoInlining)]</c>.
+/// <c>[MethodImpl(MethodImplOptions.NoInlining)]</c>, or <c>[StackTraceHidden]</c> for a forwarder the converter marks
+/// <c>/*linkname*/</c> (<see cref="NoInliningPartials.IsForwarder"/>).
 /// </summary>
 /// <remarks>
 /// The copy is TEXTUAL, so tuple element names, parameter names, <c>this</c>/<c>ref</c>/<c>params</c>,
@@ -181,7 +203,8 @@ public class NoInliningPartialGenerator : ISourceGenerator
                         .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
                         .WithoutTrivia();
 
-                    source.Append(memberIndent).Append(NoInliningPartials.Attribute).Append("\r\n");
+                    // A forwarder's declaring part carries [StackTraceHidden]; every other carrier's the no-inline mark.
+                    source.Append(memberIndent).Append(NoInliningPartials.IsForwarder(method) ? NoInliningPartials.ForwarderAttribute : NoInliningPartials.Attribute).Append("\r\n");
                     source.Append(memberIndent).Append(declaring.ToFullString().TrimEnd()).Append("\r\n");
                 }
 

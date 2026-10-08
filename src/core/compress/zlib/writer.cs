@@ -29,7 +29,7 @@ public static UntypedInt HuffmanOnly => /* flate.HuffmanOnly */ -2;
 
 // A Writer takes data written to it and writes the compressed
 // form of that data to an underlying writer (see NewWriter).
-[GoType] partial struct Writer {
+partial struct Writer {
     internal io.Writer w;
     internal nint level;
     internal slice<byte> dict;
@@ -79,7 +79,7 @@ public static (ж<Writer>, error) NewWriterLevelDict(io.Writer w, nint level, sl
 // Reset clears the state of the Writer z such that it is equivalent to its
 // initial state from NewWriterLevel or NewWriterLevelDict, but instead writing
 // to w.
-[GoRecv] public static void Reset(this ref Writer z, io.Writer w) {
+public static void Reset(this ref Writer z, io.Writer w) {
     z.w = w;
     // z.level and z.dict left unchanged.
     if (z.compressor != nil) {
@@ -94,7 +94,7 @@ public static (ж<Writer>, error) NewWriterLevelDict(io.Writer w, nint level, sl
 }
 
 // writeHeader writes the ZLIB header.
-[GoRecv] internal static error /*err*/ writeHeader(this ref Writer z) {
+internal static error /*err*/ writeHeader(this ref Writer z) {
     error err = default!;
 
     z.wroteHeader = true;
@@ -156,7 +156,7 @@ public static (ж<Writer>, error) NewWriterLevelDict(io.Writer w, nint level, sl
 // Write writes a compressed form of p to the underlying io.Writer. The
 // compressed bytes are not necessarily flushed until the Writer is closed or
 // explicitly flushed.
-[GoRecv] public static (nint n, error err) Write(this ref Writer z, slice<byte> p) {
+public static (nint n, error err) Write(this ref Writer z, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -179,7 +179,7 @@ public static (ж<Writer>, error) NewWriterLevelDict(io.Writer w, nint level, sl
 }
 
 // Flush flushes the Writer to its underlying io.Writer.
-[GoRecv] public static error Flush(this ref Writer z) {
+public static error Flush(this ref Writer z) {
     if (!z.wroteHeader) {
         z.err = z.writeHeader();
     }
@@ -192,7 +192,7 @@ public static (ж<Writer>, error) NewWriterLevelDict(io.Writer w, nint level, sl
 
 // Close closes the Writer, flushing any unwritten data to the underlying
 // io.Writer, but does not close the underlying io.Writer.
-[GoRecv] public static error Close(this ref Writer z) {
+public static error Close(this ref Writer z) {
     if (!z.wroteHeader) {
         z.err = z.writeHeader();
     }

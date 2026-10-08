@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] public partial interface describer {
+public partial interface describer {
     @string Describe();
 }
 
-[GoType] partial struct Label {
+partial struct Label {
     internal @string text;
 }
 

@@ -5,17 +5,17 @@ using sort = sort_package;
 
 partial class main_package {
 
-[GoType("map[nint, @string]")] partial struct Names;
+partial struct Names /*map[nint, @string]*/;
 
-[GoType("[]float64")] partial struct Scores;
+partial struct Scores /*[]float64*/;
 
-[GoType("chan nint")] partial struct Feed;
+partial struct Feed /*chan nint*/;
 
 // type Pred is a methodless func type — rendered inline as its base delegate
 
-[GoType("[2]nint")] partial struct Grid;
+partial struct Grid /*[2]nint*/;
 
-internal static T first<T>([GoArrayDims(2)] array<T> a) {
+internal static T first<T>(/*[2]*/ array<T> a) {
     a = a.Clone();
 
     return a[0];

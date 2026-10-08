@@ -58,7 +58,7 @@ using static go.crypto.@internal.fips140.aes_package;
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/cbc.go", "cbc.cs", "ABIo0qaApKKClIKUgpSCgpSmgoKUpqKClIKWgoKoAAcU0qaApKKClIKUgpSCgpSmgoKUptiCgpaChIKEgqaWgoI=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/cbc_noasm.go", "cbc_noasm.cs", "AAgSgqaC")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/const.go", "const.cs", "ABImABMoABMoABQsACJEACJEACJEACRMACJEACJEACJE")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/ctr.go", "ctr.cs", "ABcquJKkgoKWAAcQooSCgoK8woCCgoKCAAUS4oKUgoKUhISAhKKCgoKCgqaCgoKCqIKCgoKUgoKCgpSCgoKCloSigoIAAxLCgoKCgoKmgqaCgoI=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/aes/ctr.go", "ctr.cs", "ABcquJKkgoKWAAcQooSCgoK8woCCgoKCAAUS4oKUgoKUhISAhKKCgoKCgqaCgoKCqIKCgoKUgoKCgpSCgoKCloSigoIAAxLCgoKCgoKmgqaCgoI=", "", "", "37=BEUint64/1/2/2,BEUint64/2/2/3")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/aes/ctr_noasm.go", "ctr_noasm.cs", "AAgSsqayprKmsg==")]
 // </GoSourcePositionMaps>
 
@@ -68,7 +68,7 @@ namespace go.crypto.@internal.fips140;
 public static partial class aes_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

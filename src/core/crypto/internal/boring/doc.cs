@@ -15,6 +15,6 @@ partial class boring_package {
 // BoringCrypto is only available on linux/amd64 and linux/arm64 systems.
 public const bool Enabled = /* available */ false;
 
-[GoType("[]nuint")] partial struct BigInt;
+partial struct BigInt /*[]nuint*/;
 
 } // end boring_package

@@ -257,12 +257,12 @@ internal static (ж<template.Template>, error) tupleᴛ1ʗ = template.New(""u8).
 """);
 internal static ж<template.Template> templMain = template.Must(tupleᴛ1ʗ.Item1, tupleᴛ1ʗ.Item2);
 
-[GoType] partial struct View {
+partial struct View {
     public ViewType Type;
     public slice<Range> Ranges;
 }
 
-[GoType("@string")] partial struct ViewType;
+partial struct ViewType /*@string*/;
 
 public static readonly ViewType ViewProc = "proc"u8;
 public static readonly ViewType ViewThread = "thread"u8;
@@ -274,7 +274,7 @@ public static @string URL(this View v, nint rangeIdx) {
     return v.Ranges[rangeIdx].URL(v.Type);
 }
 
-[GoType] partial struct Range {
+partial struct Range {
     public @string Name;
     public nint Start;
     public nint End;

@@ -34,7 +34,7 @@ partial class reflectlite_package {
 // To compare two Values, compare the results of the Interface method.
 // Using == on two Values does not compare the underlying values
 // they represent.
-[GoType] partial struct Value {
+partial struct Value {
     // typ_ holds the type of the value represented by a Value.
     // Access using the typ method to avoid escape of v.
     internal ж<abi.Type> typ_;
@@ -56,7 +56,7 @@ partial class reflectlite_package {
     internal partial ref flag flag { get; }
 }
 
-[GoType("num:uintptr")] partial struct flag;
+partial struct flag /*num:uintptr*/;
 
 // A method value represents a curried method invocation
 // like r.Read for some receiver r. The typ+val+flag bits describe
@@ -151,12 +151,12 @@ internal static any packEface(Value v) {
 // A ValueError occurs when a Value method is invoked on
 // a Value that does not support it. Such cases are documented
 // in the description of each method.
-[GoType] partial struct ValueError {
+partial struct ValueError {
     public @string Method;
     public abiꓸKind Kind;
 }
 
-[GoRecv] public static @string Error(this ref ValueError e) {
+public static @string Error(this ref ValueError e) {
     if (e.Kind == 0) {
         return "reflect: call of "u8 + e.Method + " on zero Value"u8;
     }
@@ -333,7 +333,7 @@ internal static void escapes(any x) {
 }
 
 
-[GoType("dyn")] partial struct dummyᴛ1 {
+partial struct dummyᴛ1 /*dyn*/ {
     internal bool b;
     internal any x;
 }

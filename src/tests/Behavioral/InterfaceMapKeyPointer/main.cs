@@ -4,15 +4,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface Node {
+partial interface Node {
     nint Pos();
 }
 
-[GoType] partial struct Item {
+partial struct Item {
     internal nint pos;
 }
 
-[GoRecv] public static nint Pos(this ref Item i) {
+public static nint Pos(this ref Item i) {
     return i.pos;
 }
 

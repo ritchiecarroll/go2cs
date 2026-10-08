@@ -11,7 +11,7 @@ using go.crypto.@internal.fips140deps;
 
 partial class mlkem_package {
 
-[GoType("num:uint16")] public partial struct fieldElement;
+public partial struct fieldElement /*num:uint16*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unreducedFieldElementˢ = "unreduced field element"u8;
@@ -116,8 +116,8 @@ internal static fieldElement decompress(uint16 y, uint8 d) {
     return ((fieldElement)(uint16)quotient);
 }
 
-[GoType("[256]fieldElement")] /* [n]fieldElement */
-partial struct ringElement;
+/* [n]fieldElement */
+partial struct ringElement /*[256]fieldElement*/;
 
 // polyAdd adds two ringElements or nttElements.
 internal static T /*s*/ polyAdd<T>(T a, T b)
@@ -307,7 +307,7 @@ internal static slice<byte> ringCompressAndEncode10(slice<byte> s, ringElement f
 //
 // It implements ByteDecode₁₀, according to FIPS 203, Algorithm 6,
 // followed by Decompress₁₀, according to FIPS 203, Definition 4.8.
-internal static ringElement ringDecodeAndDecompress10([GoArrayDims(320)] ж<array<byte>> Ꮡbb) {
+internal static ringElement ringDecodeAndDecompress10(/*[320]*/ ж<array<byte>> Ꮡbb) {
     ref var bb = ref Ꮡbb.DerefOrNull();
 
     var b = bb[..];
@@ -400,7 +400,7 @@ internal static slice<byte> ringCompressAndEncode5(slice<byte> s, ringElement f)
 //
 // It implements ByteDecode₅, according to FIPS 203, Algorithm 6,
 // followed by Decompress₅, according to FIPS 203, Definition 4.8.
-internal static ringElement ringDecodeAndDecompress5([GoArrayDims(160)] ж<array<byte>> Ꮡbb) {
+internal static ringElement ringDecodeAndDecompress5(/*[160]*/ ж<array<byte>> Ꮡbb) {
     ref var bb = ref Ꮡbb.DerefOrNull();
 
     return ringDecodeAndDecompress(bb[..], 5);
@@ -422,7 +422,7 @@ internal static slice<byte> ringCompressAndEncode11(slice<byte> s, ringElement f
 //
 // It implements ByteDecode₁₁, according to FIPS 203, Algorithm 6,
 // followed by Decompress₁₁, according to FIPS 203, Definition 4.8.
-internal static ringElement ringDecodeAndDecompress11([GoArrayDims(352)] ж<array<byte>> Ꮡbb) {
+internal static ringElement ringDecodeAndDecompress11(/*[352]*/ ж<array<byte>> Ꮡbb) {
     ref var bb = ref Ꮡbb.DerefOrNull();
 
     return ringDecodeAndDecompress(bb[..], 11);
@@ -450,8 +450,8 @@ internal static ringElement samplePolyCBD(slice<byte> s, byte b) {
     return f.Clone();
 }
 
-[GoType("[256]fieldElement")] /* [n]fieldElement */
-partial struct nttElement;
+/* [n]fieldElement */
+partial struct nttElement /*[256]fieldElement*/;
 
 // gammas are the values ζ^2BitRev7(i)+1 mod q for each index i, according to
 // FIPS 203, Appendix A (with negative values reduced to positive).

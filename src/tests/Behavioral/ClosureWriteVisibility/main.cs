@@ -5,12 +5,12 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct Tally {
+partial struct Tally {
     internal nint total;
     internal @string log;
 }
 
-[GoRecv] public static void Add(this ref Tally t, nint n) {
+public static void Add(this ref Tally t, nint n) {
     t.total += n;
     t.log += "+"u8;
 }

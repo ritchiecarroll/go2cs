@@ -4,27 +4,27 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("dyn")] internal partial struct main_Point {
+internal partial struct main_Point /*dyn*/ {
     public nint X, Y;
 }
 
-[GoLocalName("Points")] [GoType("[]main_Point")] internal partial struct main_Points;
+internal partial struct main_Points /*[]main_Point*/;
 
-[GoLocalName("Tally")] [GoType("map[@string, nint]")] internal partial struct main_Tally;
+internal partial struct main_Tally /*map[@string, nint]*/;
 
-[GoLocalName("Stream")] [GoType("chan nint")] internal partial struct main_Stream;
+internal partial struct main_Stream /*chan nint*/;
 
-[GoLocalName("Triple")] [GoType("[3]nint")] internal partial struct main_Triple;
+internal partial struct main_Triple /*[3]nint*/;
 
-[GoType("dyn")] internal partial struct main_Node {
+internal partial struct main_Node /*dyn*/ {
     public nint V;
 }
 
-[GoLocalName("NodePtr")] [GoType("ж<main_Node>")] internal partial class main_NodePtr;
+internal partial class main_NodePtr /*ж<main_Node>*/;
 
-[GoLocalName("recursiveSlice")] [GoType("[]main_recursiveSlice")] internal partial struct main_recursiveSlice;
+internal partial struct main_recursiveSlice /*[]main_recursiveSlice*/;
 
-[GoLocalName("recursiveMap")] [GoType("map[@string, main_recursiveMap]")] internal partial struct main_recursiveMap;
+internal partial struct main_recursiveMap /*map[@string, main_recursiveMap]*/;
 
 internal static void Main() {
     var pts = new main_Points(new main_Point[]{new(1, 2), new(3, 4), new(5, 6)}.slice());

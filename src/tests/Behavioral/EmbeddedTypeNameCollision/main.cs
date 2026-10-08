@@ -6,7 +6,7 @@ using EmbeddedTypeNameCollision;
 
 partial class main_package {
 
-[GoType] partial struct Buffer {
+partial struct Buffer {
     public partial ref EmbeddedTypeNameCollision.inner_package.Buffer ΔBuffer { get; }
     public @string Tag;
 }

@@ -23,7 +23,7 @@ internal static ж<array<affineLookupTable>> basepointTable() {
 }
 
 
-[GoType("dyn")] partial struct basepointTablePrecompᴛ1 {
+partial struct basepointTablePrecompᴛ1 /*dyn*/ {
     internal array<affineLookupTable> table = new(32, () => new());
     internal sync.Once initOnce;
 }
@@ -132,7 +132,7 @@ internal static ж<nafLookupTable8> basepointNafTable() {
 }
 
 
-[GoType("dyn")] partial struct basepointNafTablePrecompᴛ1 {
+partial struct basepointNafTablePrecompᴛ1 /*dyn*/ {
     internal nafLookupTable8 table;
     internal sync.Once initOnce;
 }

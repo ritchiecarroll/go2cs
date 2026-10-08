@@ -19,7 +19,7 @@ partial class fmt_package {
 // order they appear in the arguments.
 // It is invalid to supply the %w verb with an operand that does not implement
 // the error interface. The %w verb is otherwise a synonym for %v.
-[GoStr] public static error Errorf(sstring format, params ꓸꓸꓸany aʗp) {
+public static error Errorf(sstring format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
 
     var p = newPrinter();
@@ -62,29 +62,29 @@ partial class fmt_package {
     return err;
 }
 
-[GoType] partial struct wrapError {
+partial struct wrapError {
     internal @string msg;
     internal error err;
 }
 
-[GoRecv] internal static @string Error(this ref wrapError e) {
+internal static @string Error(this ref wrapError e) {
     return e.msg;
 }
 
-[GoRecv] internal static error Unwrap(this ref wrapError e) {
+internal static error Unwrap(this ref wrapError e) {
     return e.err;
 }
 
-[GoType] partial struct wrapErrors {
+partial struct wrapErrors {
     internal @string msg;
     internal slice<error> errs;
 }
 
-[GoRecv] internal static @string Error(this ref wrapErrors e) {
+internal static @string Error(this ref wrapErrors e) {
     return e.msg;
 }
 
-[GoRecv] internal static slice<error> Unwrap(this ref wrapErrors e) {
+internal static slice<error> Unwrap(this ref wrapErrors e) {
     return e.errs;
 }
 

@@ -12,7 +12,7 @@ using io = io_package;
 partial class json_package {
 
 // A Decoder reads and decodes JSON values from an input stream.
-[GoType] partial struct Decoder {
+partial struct Decoder {
     internal io.Reader r;
     internal slice<byte> buf;
     internal decodeState d;
@@ -34,14 +34,14 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
 
 // UseNumber causes the Decoder to unmarshal a number into an
 // interface value as a [Number] instead of as a float64.
-[GoRecv] public static void UseNumber(this ref Decoder dec) {
+public static void UseNumber(this ref Decoder dec) {
     dec.d.useNumber = true;
 }
 
 // DisallowUnknownFields causes the Decoder to return an error when the destination
 // is a struct and the input contains object keys which do not match any
 // non-ignored, exported fields in the destination.
-[GoRecv] public static void DisallowUnknownFields(this ref Decoder dec) {
+public static void DisallowUnknownFields(this ref Decoder dec) {
     dec.d.disallowUnknownFields = true;
 }
 
@@ -82,7 +82,7 @@ public static error Decode(this ж<Decoder> Ꮡdec, any v) {
 
 // Buffered returns a reader of the data remaining in the Decoder's
 // buffer. The reader is valid until the next call to [Decoder.Decode].
-[GoRecv] public static io.Reader Buffered(this ref Decoder dec) {
+public static io.Reader Buffered(this ref Decoder dec) {
     return new bytes_ReaderжReader(bytes.NewReader(dec.buf.slice(dec.scanp)));
 }
 
@@ -148,7 +148,7 @@ break_Input:;
     return (scanp - dec.scanp, default!);
 }
 
-[GoRecv] internal static error refill(this ref Decoder dec) {
+internal static error refill(this ref Decoder dec) {
     // Make room to read more into the buffer.
     // First slide down data already consumed.
     if (dec.scanp > 0) {
@@ -180,7 +180,7 @@ internal static bool nonSpace(slice<byte> b) {
 }
 
 // An Encoder writes JSON values to an output stream.
-[GoType] partial struct Encoder {
+partial struct Encoder {
     internal io.Writer w;
     internal error err;
     internal bool escapeHTML;
@@ -243,7 +243,7 @@ public static error Encode(this ж<Encoder> Ꮡenc, any v) {
 // SetIndent instructs the encoder to format each subsequent encoded
 // value as if indented by the package-level function Indent(dst, src, prefix, indent).
 // Calling SetIndent("", "") disables indentation.
-[GoRecv] public static void SetIndent(this ref Encoder enc, @string prefix, @string indent) {
+public static void SetIndent(this ref Encoder enc, @string prefix, @string indent) {
     enc.indentPrefix = prefix;
     enc.indentValue = indent;
 }
@@ -255,11 +255,11 @@ public static error Encode(this ж<Encoder> Ꮡenc, any v) {
 //
 // In non-HTML settings where the escaping interferes with the readability
 // of the output, SetEscapeHTML(false) disables this behavior.
-[GoRecv] public static void SetEscapeHTML(this ref Encoder enc, bool on) {
+public static void SetEscapeHTML(this ref Encoder enc, bool on) {
     enc.escapeHTML = on;
 }
 
-[GoType("[]byte")] partial struct RawMessage;
+partial struct RawMessage /*[]byte*/;
 
 // MarshalJSON returns m as the JSON encoding of m.
 public static (slice<byte>, error) MarshalJSON(this RawMessage m) {
@@ -286,9 +286,6 @@ public static error UnmarshalJSON(this ж<RawMessage> Ꮡm, slice<byte> data) {
 internal static Marshaler _ᴛ1ʗ = new RawMessageжMarshaler(((ж<RawMessage>)nil));
 
 internal static Unmarshaler _ᴛ2ʗ = new RawMessageжUnmarshaler(((ж<RawMessage>)nil));
-// Descriptor carrier for `Token` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("Token")] public interface ΔTokenᴅ { }
-
 
 internal static UntypedInt tokenTopValue => iota;
 internal static UntypedInt tokenArrayStart => 1;
@@ -301,7 +298,7 @@ internal static UntypedInt tokenObjectValue => 7;
 internal static UntypedInt tokenObjectComma => 8;
 
 // advance tokenstate from a separator state to a value state
-[GoRecv] internal static error tokenPrepareForDecode(this ref Decoder dec) {
+internal static error tokenPrepareForDecode(this ref Decoder dec) {
     // Note: Not calling peek before switch, to avoid
     // putting peek into the standard Decode path.
     // peek is only called when using the Token API.
@@ -332,7 +329,7 @@ internal static UntypedInt tokenObjectComma => 8;
     return default!;
 }
 
-[GoRecv] internal static bool tokenValueAllowed(this ref Decoder dec) {
+internal static bool tokenValueAllowed(this ref Decoder dec) {
     var exprᴛ1 = dec.tokenState;
     if (exprᴛ1 == tokenTopValue || exprᴛ1 == tokenArrayStart || exprᴛ1 == tokenArrayValue || exprᴛ1 == tokenObjectValue) {
         return true;
@@ -341,7 +338,7 @@ internal static UntypedInt tokenObjectComma => 8;
     return false;
 }
 
-[GoRecv] internal static void tokenValueEnd(this ref Decoder dec) {
+internal static void tokenValueEnd(this ref Decoder dec) {
     var exprᴛ1 = dec.tokenState;
     if (exprᴛ1 == tokenArrayStart || exprᴛ1 == tokenArrayValue) {
         dec.tokenState = tokenArrayComma;
@@ -352,7 +349,7 @@ internal static UntypedInt tokenObjectComma => 8;
 
 }
 
-[GoType("num:rune")] partial struct Delim;
+partial struct Delim /*num:rune*/;
 
 public static @string String(this Delim d) {
     return ((@string)(rune)d);
@@ -476,7 +473,7 @@ internal static readonly @string lookingForBeginningOfˢ4 = " looking for beginn
 internal static readonly @string afterObjectKeyˢ2 = " after object key"u8;
 internal static readonly @string afterObjectKeyValuePairˢ2 = " after object key:value pair"u8;
 
-[GoRecv] internal static (ΔToken, error) tokenError(this ref Decoder dec, byte c) {
+internal static (ΔToken, error) tokenError(this ref Decoder dec, byte c) {
     @string context = default!;
     var exprᴛ1 = dec.tokenState;
     if (exprᴛ1 == tokenTopValue) {
@@ -503,12 +500,12 @@ internal static readonly @string afterObjectKeyValuePairˢ2 = " after object key
 
 // More reports whether there is another element in the
 // current array or object being parsed.
-[GoRecv] public static bool More(this ref Decoder dec) {
+public static bool More(this ref Decoder dec) {
     var (c, err) = dec.peek();
     return err == default! && c != (rune)']' && c != (rune)'}';
 }
 
-[GoRecv] internal static (byte, error) peek(this ref Decoder dec) {
+internal static (byte, error) peek(this ref Decoder dec) {
     error err = default!;
     while (ᐧ) {
         for (nint i = dec.scanp; i < len(dec.buf); i++) {
@@ -530,7 +527,7 @@ internal static readonly @string afterObjectKeyValuePairˢ2 = " after object key
 // InputOffset returns the input stream byte offset of the current decoder position.
 // The offset gives the location of the end of the most recently returned token
 // and the beginning of the next token.
-[GoRecv] public static int64 InputOffset(this ref Decoder dec) {
+public static int64 InputOffset(this ref Decoder dec) {
     return dec.scanned + (int64)dec.scanp;
 }
 

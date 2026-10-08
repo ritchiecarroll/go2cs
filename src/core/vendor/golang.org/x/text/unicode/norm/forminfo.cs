@@ -35,7 +35,7 @@ internal static UntypedInt headerLenMask => 0x3F; // extract the length value fr
 internal static UntypedInt headerFlagsMask => 0xC0; // extract the qcInfo bits from the header byte
 
 // Properties provides access to normalization properties of a rune.
-[GoType] partial struct ΔProperties {
+partial struct ΔProperties {
     internal uint8 pos;  // start position in reorderBuffer; used in composition.go
     internal uint8 size;  // length of UTF-8 encoding of this rune
     internal uint8 ccc;  // leading canonical combining class (ccc if not decomposition)
@@ -48,7 +48,7 @@ internal static UntypedInt headerFlagsMask => 0xC0; // extract the qcInfo bits f
 // type lookupFunc is a methodless func type — rendered inline as its base delegate
 
 // formInfo holds Form-specific functions and tables.
-[GoType] partial struct formInfo {
+partial struct formInfo {
     internal Form form;
     internal bool composing, compatibility; // form type
     internal Func<input, nint, ΔProperties> info;
@@ -104,7 +104,7 @@ public static bool BoundaryAfter(this ΔProperties p) {
     return p.isInert();
 }
 
-[GoType("num:uint8")] partial struct qcInfo;
+partial struct qcInfo /*num:uint8*/;
 
 internal static bool isYesC(this ΔProperties p) {
     return (qcInfo)(p.flags & 0x10) == 0;

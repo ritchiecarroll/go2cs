@@ -43,7 +43,7 @@ public static error ErrChecksum = errors.New("zlib: invalid checksum"u8);
 public static error ErrDictionary = errors.New("zlib: invalid dictionary"u8);
 public static error ErrHeader = errors.New("zlib: invalid header"u8);
 
-[GoType] partial struct reader {
+partial struct reader {
     internal flate.Reader r;
     internal io.ReadCloser decompressor;
     internal hash.Hash32 digest;
@@ -54,7 +54,7 @@ public static error ErrHeader = errors.New("zlib: invalid header"u8);
 // Resetter resets a ReadCloser returned by [NewReader] or [NewReaderDict]
 // to switch to a new underlying Reader. This permits reusing a ReadCloser
 // instead of allocating a new one.
-[GoType] partial interface Resetter {
+partial interface Resetter {
     // Reset discards any buffered data and resets the Resetter as if it was
     // newly initialized with the given reader.
     error Reset(io.Reader r, slice<byte> dict);
@@ -85,7 +85,7 @@ public static (io.ReadCloser, error) NewReaderDict(io.Reader r, slice<byte> dict
     return (new readerжReadCloser(z), default!);
 }
 
-[GoRecv] internal static (nint, error) Read(this ref reader z, slice<byte> p) {
+internal static (nint, error) Read(this ref reader z, slice<byte> p) {
     if (z.err != default!) {
         return (0, z.err);
     }
@@ -118,7 +118,7 @@ public static (io.ReadCloser, error) NewReaderDict(io.Reader r, slice<byte> dict
 // Calling Close does not close the wrapped [io.Reader] originally passed to [NewReader].
 // In order for the ZLIB checksum to be verified, the reader must be
 // fully consumed until the [io.EOF].
-[GoRecv] internal static error Close(this ref reader z) {
+internal static error Close(this ref reader z) {
     if (z.err != default! && !AreEqual(z.err, io.EOF)) {
         return z.err;
     }
@@ -126,7 +126,7 @@ public static (io.ReadCloser, error) NewReaderDict(io.Reader r, slice<byte> dict
     return z.err;
 }
 
-[GoRecv] internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) {
+internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) {
     z = new reader(decompressor: z.decompressor);
     {
         var (fr, ok) = r._<flate.Reader>(ᐧ); if (ok){

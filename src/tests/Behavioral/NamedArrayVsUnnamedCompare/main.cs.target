@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[4]byte")] partial struct Hash;
+partial struct Hash /*[4]byte*/;
 
 internal static array<byte> sum(slice<byte> b) {
     array<byte> @out = new(4);

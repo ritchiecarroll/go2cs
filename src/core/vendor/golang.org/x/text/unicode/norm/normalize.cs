@@ -17,7 +17,7 @@ using ꓸꓸꓸbyte = Span<byte>;
 
 partial class norm_package {
 
-[GoType("num:nint")] partial struct Form;
+partial struct Form /*num:nint*/;
 
 public static Form NFC => /* iota */ 0;
 public static Form NFD => 1;
@@ -318,7 +318,7 @@ public static (nint n, error err) SpanString(this Form f, @string s, bool atEOF)
 // whether any non-normalized parts were found. If atEOF is false, n will
 // not point past the last segment if this segment might be become
 // non-normalized by appending other runes.
-[GoRecv] internal static (nint n, bool ok) quickSpan(this ref formInfo f, input src, nint i, nint end, bool atEOF) {
+internal static (nint n, bool ok) quickSpan(this ref formInfo f, input src, nint i, nint end, bool atEOF) {
     nint n = default!;
 
     uint8 lastCC = default!;

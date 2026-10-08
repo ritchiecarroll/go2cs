@@ -719,7 +719,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 
 							methodName := packageInitMethodName(csIDName)
 							v.outputBuilder.WriteString(v.newline)
-							v.writePositionSentinel(ident.Pos())
+							v.writePositionSentinelCalls(ident.Pos(), specValueCallRoots(valueSpec, i)...)
 
 							if globalHoist.Len() > 0 {
 								// The spilled tuple locals precede the assignment that reads them:
@@ -742,7 +742,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 
 							recordMovedInitMethod(ordinal, methodName)
 						} else {
-							v.writePositionSentinel(ident.Pos())
+							v.writePositionSentinelCalls(ident.Pos(), specValueCallRoots(valueSpec, i)...)
 
 							if globalHoist.Len() > 0 {
 								v.outputBuilder.WriteString(globalHoist.String())

@@ -58,7 +58,7 @@ public static void ΔMain(Action<ж<Trace>> f) {
 // and stack batches are valid. That last part can be controlled by a few options.
 //
 // Otherwise, it performs no validation on the trace at all.
-[GoType] partial struct Trace {
+partial struct Trace {
     // Trace data state.
     internal version.Version ver;
     internal map<@string, @event.Type> names;
@@ -83,20 +83,20 @@ public static ж<Trace> NewTrace() {
 
 // ExpectFailure writes down that the trace should be broken. The caller
 // must provide a pattern matching the expected error produced by the parser.
-[GoRecv] public static void ExpectFailure(this ref Trace t, @string pattern) {
+public static void ExpectFailure(this ref Trace t, @string pattern) {
     t.bad = true;
     t.badMatch = regexp.MustCompile(pattern);
 }
 
 // ExpectSuccess writes down that the trace should successfully parse.
-[GoRecv] public static void ExpectSuccess(this ref Trace t) {
+public static void ExpectSuccess(this ref Trace t) {
     t.bad = false;
 }
 
 // RawEvent emits an event into the trace. name must correspond to one
 // of the names in Specs() result for the version that was passed to
 // this trace.
-[GoRecv] public static void RawEvent(this ref Trace t, @event.Type typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
+public static void RawEvent(this ref Trace t, @event.Type typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
     var args = argsʗp.sslice();
 
     t.events = append(t.events, t.createEvent(typ, data, args.ꓸꓸꓸ));
@@ -105,7 +105,7 @@ public static ж<Trace> NewTrace() {
 // DisableTimestamps makes the timestamps for all events generated after
 // this call zero. Raw events are exempted from this because the caller
 // has to pass their own timestamp into those events anyway.
-[GoRecv] public static void DisableTimestamps(this ref Trace t) {
+public static void DisableTimestamps(this ref Trace t) {
     t.validTimestamps = false;
 }
 
@@ -127,7 +127,7 @@ public static ж<ΔGeneration> Generation(this ж<Trace> Ꮡt, uint64 gen) {
 }
 
 // Generate creates a test file for the trace.
-[GoRecv] public static slice<byte> Generate(this ref Trace t) {
+public static slice<byte> Generate(this ref Trace t) {
     // Trace file contents.
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var (tw, err) = raw.NewTextWriter(new bytes_BufferжWriter(Ꮡbuf), version.Go122);
@@ -156,7 +156,7 @@ public static ж<ΔGeneration> Generation(this ж<Trace> Ꮡt, uint64 gen) {
     )));
 }
 
-[GoRecv] internal static raw.Event createEvent(this ref Trace t, @event.Type ev, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
+internal static raw.Event createEvent(this ref Trace t, @event.Type ev, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
     var args = argsʗp.slice();
 
     var spec = t.specs[ev];
@@ -175,7 +175,7 @@ public static ж<ΔGeneration> Generation(this ж<Trace> Ꮡt, uint64 gen) {
     );
 }
 
-[GoType] partial struct stack {
+partial struct stack {
     internal array<trace.StackFrame> stk = new(32);
     internal nint len;
 }
@@ -184,7 +184,7 @@ public static @string NoString = ""u8;
 public static slice<trace.StackFrame> NoStack = new trace.StackFrame[]{}.slice();
 
 // Generation represents a single generation in the trace.
-[GoType] partial struct ΔGeneration {
+partial struct ΔGeneration {
     internal ж<Trace> trace;
     internal uint64 gen;
     internal slice<ж<ΔBatch>> batches;
@@ -217,7 +217,7 @@ public static ж<ΔBatch> Batch(this ж<ΔGeneration> Ꮡg, trace.ThreadID threa
 //
 // This is a convenience function for easily adding correct
 // strings to traces.
-[GoRecv] public static uint64 String(this ref ΔGeneration g, @string s) {
+public static uint64 String(this ref ΔGeneration g, @string s) {
     if (len(s) == 0) {
         return 0;
     }
@@ -235,7 +235,7 @@ public static ж<ΔBatch> Batch(this ж<ΔGeneration> Ꮡg, trace.ThreadID threa
 //
 // This is a convenience function for easily adding correct
 // stacks to traces.
-[GoRecv] public static uint64 Stack(this ref ΔGeneration g, slice<trace.StackFrame> stk) {
+public static uint64 Stack(this ref ΔGeneration g, slice<trace.StackFrame> stk) {
     if (len(stk) == 0) {
         return 0;
     }
@@ -305,7 +305,7 @@ internal static ж<ΔBatch> newStructuralBatch(this ж<ΔGeneration> Ꮡg) {
 }
 
 // Batch represents an event batch.
-[GoType] partial struct ΔBatch {
+partial struct ΔBatch {
     internal ж<ΔGeneration> gen;
     internal trace.ThreadID thread;
     internal Time timestamp;
@@ -316,7 +316,7 @@ internal static ж<ΔBatch> newStructuralBatch(this ж<ΔGeneration> Ꮡg) {
 // Event emits an event into a batch. name must correspond to one
 // of the names in Specs() result for the version that was passed to
 // this trace. Callers must omit the timestamp delta.
-[GoRecv] public static void Event(this ref ΔBatch b, @string name, params ꓸꓸꓸany argsʗp) {
+public static void Event(this ref ΔBatch b, @string name, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var (ev, ok) = (~(~b.gen).trace).names[name, ꟷ];
@@ -345,7 +345,7 @@ internal static ж<ΔBatch> newStructuralBatch(this ж<ΔGeneration> Ꮡg) {
     b.RawEvent(ev, default!, uintArgs.ꓸꓸꓸ);
 }
 
-[GoRecv] internal static uint64 uintArgFor(this ref ΔBatch b, any arg, @string argSpec) {
+internal static uint64 uintArgFor(this ref ΔBatch b, any arg, @string argSpec) {
     var components = strings.SplitN(argSpec, "_"u8, 2);
     @string typStr = components[0];
     if (len(components) == 2) {
@@ -393,7 +393,7 @@ internal static ж<ΔBatch> newStructuralBatch(this ж<ΔGeneration> Ꮡg) {
 // RawEvent emits an event into a batch. name must correspond to one
 // of the names in Specs() result for the version that was passed to
 // this trace.
-[GoRecv] public static void RawEvent(this ref ΔBatch b, @event.Type typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
+public static void RawEvent(this ref ΔBatch b, @event.Type typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
     var args = argsʗp.sslice();
 
     var ev = (~b.gen).trace.createEvent(typ, data, args.ꓸꓸꓸ);
@@ -412,7 +412,7 @@ internal static ж<ΔBatch> newStructuralBatch(this ж<ΔGeneration> Ꮡg) {
 }
 
 // writeEventsTo emits events in the batch, including the batch header, to tw.
-[GoRecv] internal static void writeEventsTo(this ref ΔBatch b, ж<raw.TextWriter> Ꮡtw) {
+internal static void writeEventsTo(this ref ΔBatch b, ж<raw.TextWriter> Ꮡtw) {
     ref var tw = ref Ꮡtw.DerefOrNull();
 
     tw.WriteEvent(new raw.Event(
@@ -425,8 +425,8 @@ internal static ж<ΔBatch> newStructuralBatch(this ж<ΔGeneration> Ꮡg) {
     }
 }
 
-[GoType("num:uint64")] partial struct Seq;
+partial struct Seq /*num:uint64*/;
 
-[GoType("num:uint64")] partial struct Time;
+partial struct Time /*num:uint64*/;
 
 } // end testkit_package

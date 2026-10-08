@@ -87,22 +87,36 @@ func claimPositionMapTarget(target string) string {
 }
 
 
-// PositionSentinel delimits an in-text Go-line sentinel: SENTINEL <decimal Go line> SENTINEL. NUL
-// is the one byte that cannot occur in emitted C#, because the Go compiler disallows it in source
-// text, so a sentinel can never collide with converted content — and a sentinel that somehow
-// survived stripping would be a hard compile error rather than silent corruption.
+// PositionSentinel delimits an in-text Go-line sentinel: SENTINEL <decimal Go line> SENTINEL, or
+// SENTINEL <decimal Go line> ; <call payload> SENTINEL for a statement whose calls sit on later lines
+// (writePositionSentinelCalls). NUL is the one byte that cannot occur in emitted C#, because the Go
+// compiler disallows it in source text, so a sentinel can never collide with converted content — and a
+// sentinel that somehow survived stripping would be a hard compile error rather than silent corruption.
 const PositionSentinel = "\x00"
 
-// positionEntry is one mapped line: the emitted C# line, and the Go line it was emitted for.
+// positionEntry is one mapped line: the emitted C# line, the Go line it was emitted for, and the
+// statement's later-line call payload when it has one (see writePositionSentinelCalls).
 type positionEntry struct {
 	csLine int
 	goLine int
+	calls  string
 }
 
 // writePositionSentinel records that what is emitted next came from goPos. Called at the points
 // that HAVE a Go position and can hold a frame — every statement (visitStmt) and every function
 // declaration (visitFuncDecl).
 func (v *Visitor) writePositionSentinel(goPos token.Pos) {
+	v.writePositionSentinelCalls(goPos)
+}
+
+// writePositionSentinelCalls is writePositionSentinel for a construct whose calls can sit on LATER
+// lines than its own: a statement, a package var's initializer. Go answers a call's caller with the
+// line of the call's own `(`; the converted frame's line is its statement's sequence point, which C#
+// writes once per statement, so the map's statement line is all a frame inside one has. The sentinel
+// therefore carries, after the Go line, one entry per call of `roots` whose `(` sits on a later line:
+// enough for the runtime to tell which call of the statement a frame is suspended in, and answer that
+// call's line (laterLineCallPayload has the entry shape).
+func (v *Visitor) writePositionSentinelCalls(goPos token.Pos, roots ...ast.Node) {
 	if !goPos.IsValid() || v.fset == nil {
 		return
 	}
@@ -113,7 +127,192 @@ func (v *Visitor) writePositionSentinel(goPos token.Pos) {
 		return
 	}
 
-	v.outputBuilder.WriteString(PositionSentinel + strconv.Itoa(line) + PositionSentinel)
+	content := strconv.Itoa(line)
+
+	if payload := v.laterLineCallPayload(line, roots...); payload != "" {
+		content += ";" + payload
+	}
+
+	v.outputBuilder.WriteString(PositionSentinel + content + PositionSentinel)
+}
+
+// laterLineCallPayload answers the entries for the calls under roots whose `(` is on a later Go line
+// than stmtLine, comma-joined, or "" when there are none or the statement cannot be described.
+//
+// An entry is `name/ordinal/total/delta`: the callee's Go name (the C# name the IL call names, less the
+// converter's `@`/`Δ` decoration, which the runtime strips too; `Invoke` for a call of a func VALUE,
+// since that is a delegate invocation); the call's ordinal among the statement's calls to that name and
+// the total of them, both in EVALUATION order (a call's arguments before the call: post-order), which
+// is the order of the IL call instructions; and the call's Go line less stmtLine. The runtime finds the
+// frame's call instruction, counts its same-name calls in the statement's IL, and answers the entry
+// whose ordinal AND total match. The total is the check: a statement the emission splits or hoists
+// counts differently in its IL than here, and then nothing matches and the frame keeps the
+// statement's line, today's answer, rather than another call's.
+//
+// Calls inside a function literal are not the statement's (the literal's statements carry their own
+// sentinels). A conversion and a builtin are not calls a frame can be suspended in, so they are not
+// counted. A statement that invokes a function literal is not described at all: what such a call emits
+// is not a named call this can count.
+func (v *Visitor) laterLineCallPayload(stmtLine int, roots ...ast.Node) string {
+	if len(roots) == 0 || v.info == nil {
+		return ""
+	}
+
+	type countedCall struct {
+		name string
+		line int
+	}
+
+	var calls []countedCall
+	describable := true
+
+	for _, root := range roots {
+		if root == nil {
+			continue
+		}
+
+		var visit func(node ast.Node)
+
+		visit = func(node ast.Node) {
+			ast.Inspect(node, func(n ast.Node) bool {
+				if !describable {
+					return false
+				}
+
+				switch n := n.(type) {
+				case *ast.FuncLit:
+					return false
+				case *ast.CallExpr:
+					// Post-order: the callee expression and the arguments are evaluated first.
+					visit(n.Fun)
+
+					for _, arg := range n.Args {
+						visit(arg)
+					}
+
+					name, counted, ok := v.laterLineCallName(n)
+
+					if !ok {
+						describable = false
+					} else if counted {
+						calls = append(calls, countedCall{name: name, line: v.fset.Position(n.Lparen).Line})
+					}
+
+					return false
+				}
+
+				return true
+			})
+		}
+
+		visit(root)
+	}
+
+	if !describable {
+		return ""
+	}
+
+	totals := map[string]int{}
+
+	for _, call := range calls {
+		totals[call.name]++
+	}
+
+	seen := map[string]int{}
+	var entries []string
+
+	for _, call := range calls {
+		seen[call.name]++
+
+		if call.line > stmtLine {
+			entries = append(entries, call.name+"/"+strconv.Itoa(seen[call.name])+"/"+strconv.Itoa(totals[call.name])+"/"+strconv.Itoa(call.line-stmtLine))
+		}
+	}
+
+	return strings.Join(entries, ",")
+}
+
+// sentinelCallRoots answers the parts of a statement whose calls belong to the statement's own
+// sentinel (writePositionSentinelCalls): the whole of a simple statement, the header of an `if` or
+// `switch` with no init clause. Nothing for any other statement: a block's statements carry their own
+// sentinels; a `for` header's clauses are separate sequence points; `go` and `defer` run their call
+// elsewhere; and a statement the emission splits into several (an init clause, a var block of more than
+// one name) would key its later calls to the wrong C# statement.
+func sentinelCallRoots(stmt ast.Stmt) []ast.Node {
+	switch stmt := stmt.(type) {
+	case *ast.ExprStmt, *ast.AssignStmt, *ast.ReturnStmt, *ast.SendStmt, *ast.IncDecStmt:
+		return []ast.Node{stmt}
+	case *ast.DeclStmt:
+		if decl, ok := stmt.Decl.(*ast.GenDecl); ok && decl.Tok == token.VAR && len(decl.Specs) == 1 {
+			if spec, ok := decl.Specs[0].(*ast.ValueSpec); ok && len(spec.Names) == 1 {
+				return []ast.Node{spec}
+			}
+		}
+	case *ast.IfStmt:
+		if stmt.Init == nil {
+			return []ast.Node{stmt.Cond}
+		}
+	case *ast.SwitchStmt:
+		if stmt.Init == nil && stmt.Tag != nil {
+			return []ast.Node{stmt.Tag}
+		}
+	}
+
+	return nil
+}
+
+// specValueCallRoots answers the initializer of a package var spec's name at index, whose C# is that
+// name's own field initializer (or init method), when the spec pairs each name with one value; nothing
+// for a spec whose names share a multi-value call.
+func specValueCallRoots(spec *ast.ValueSpec, index int) []ast.Node {
+	if len(spec.Values) != len(spec.Names) || index < 0 || index >= len(spec.Values) {
+		return nil
+	}
+
+	return []ast.Node{spec.Values[index]}
+}
+
+// laterLineCallName answers the name a call is counted under (see laterLineCallPayload), whether it is
+// counted at all, and false when the call cannot be described.
+func (v *Visitor) laterLineCallName(call *ast.CallExpr) (name string, counted bool, ok bool) {
+	if tv, found := v.info.Types[call.Fun]; found && tv.IsType() {
+		return "", false, true
+	}
+
+	fun := ast.Unparen(call.Fun)
+
+	switch generic := fun.(type) {
+	case *ast.IndexExpr:
+		fun = ast.Unparen(generic.X)
+	case *ast.IndexListExpr:
+		fun = ast.Unparen(generic.X)
+	}
+
+	var obj types.Object
+
+	switch fun := fun.(type) {
+	case *ast.FuncLit:
+		return "", false, false
+	case *ast.Ident:
+		obj = v.info.Uses[fun]
+	case *ast.SelectorExpr:
+		if selection := v.info.Selections[fun]; selection != nil {
+			obj = selection.Obj()
+		} else {
+			obj = v.info.Uses[fun.Sel]
+		}
+	}
+
+	switch obj := obj.(type) {
+	case *types.Builtin:
+		return "", false, true
+	case *types.Func:
+		return obj.Name(), true, true
+	}
+
+	// A func-typed variable, field or parameter, or any other expression yielding a func value: a
+	// delegate, invoked through Invoke.
+	return "Invoke", true, true
 }
 
 // positionSentinelText is writePositionSentinel's text, for an emission built as a string before it is
@@ -321,19 +520,23 @@ func (v *Visitor) finalizePositionMap(outputFileName string) {
 	// The FUNCTION-LITERAL half rides the same record, as an optional fourth argument emitted
 	// only when the file declares literals — a three-argument record stays exactly what it was,
 	// and an older artifact without the argument simply answers the runtime's fallback derivation.
-	funcLits := ""
-
-	if encoded := encodeFuncLitNames(v.funcLitEntries); encoded != "" {
-		funcLits = ", " + csharpStringLiteral(encoded)
+	//
+	// The METHOD-VALUE half is the optional fifth argument and the PER-CALL half the optional sixth, so a
+	// file that records a later one passes an empty string for each earlier one it lacks; a file that
+	// records none keeps exactly the record it had.
+	optional := []string{
+		encodeFuncLitNames(v.funcLitEntries),
+		encodeMethodValueNames(v.methodValueEntries),
+		encodePositionCalls(entries),
 	}
 
-	// The METHOD-VALUE half is the optional fifth argument, so a file that records one but declares no
-	// literal passes an empty fourth; a file with neither keeps exactly the record it had.
-	if encoded := encodeMethodValueNames(v.methodValueEntries); encoded != "" {
-		if funcLits == "" {
-			funcLits = ", " + csharpStringLiteral("")
-		}
+	for len(optional) > 0 && optional[len(optional)-1] == "" {
+		optional = optional[:len(optional)-1]
+	}
 
+	funcLits := ""
+
+	for _, encoded := range optional {
 		funcLits += ", " + csharpStringLiteral(encoded)
 	}
 
@@ -481,7 +684,8 @@ func extractPositionSentinels(text string) (string, []positionEntry) {
 			}
 
 			end += open + 1
-			goLine, err := strconv.Atoi(remainder[open+1 : end])
+			lineText, calls, _ := strings.Cut(remainder[open+1:end], ";")
+			goLine, err := strconv.Atoi(lineText)
 
 			rebuilt.WriteString(remainder[:open])
 			remainder = remainder[end+1:]
@@ -490,6 +694,7 @@ func extractPositionSentinels(text string) (string, []positionEntry) {
 				marks = append(marks, positionMark{
 					goLine:  goLine,
 					ownLine: strings.TrimSpace(stripPositionSentinels(remainder)) != "",
+					calls:   calls,
 				})
 			}
 		}
@@ -510,18 +715,35 @@ func extractPositionSentinels(text string) (string, []positionEntry) {
 			}
 
 			bound = csLine
-			entries = append(entries, positionEntry{csLine: csLine, goLine: mark.goLine})
+			entries = append(entries, positionEntry{csLine: csLine, goLine: mark.goLine, calls: mark.calls})
 		}
 	}
 
 	return strings.Join(lines, "\n"), entries
 }
 
-// positionMark is one sentinel read off a line: the Go line it carries, and whether the construct it
-// marks starts on that same emitted line or on the next one.
+// positionMark is one sentinel read off a line: the Go line it carries, whether the construct it
+// marks starts on that same emitted line or on the next one, and its later-line call payload.
 type positionMark struct {
 	goLine  int
 	ownLine bool
+	calls   string
+}
+
+// encodePositionCalls renders the PER-CALL table: one `<csLine>=<entries>` group per mapped line whose
+// statement has calls on later Go lines, semicolon-joined in ascending C# line order, the entries as
+// laterLineCallPayload wrote them. Keyed by the C# line the statement's sequence point starts on, which
+// is the line a frame inside it reports; "" when no statement of the file has one.
+func encodePositionCalls(entries []positionEntry) string {
+	var groups []string
+
+	for _, entry := range entries {
+		if entry.calls != "" {
+			groups = append(groups, strconv.Itoa(entry.csLine)+"="+entry.calls)
+		}
+	}
+
+	return strings.Join(groups, ";")
 }
 
 // stripPositionSentinels removes any remaining sentinel pairs from a line fragment, so the test for

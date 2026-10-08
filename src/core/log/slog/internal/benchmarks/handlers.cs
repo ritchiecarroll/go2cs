@@ -23,7 +23,7 @@ partial class benchmarks_package {
 //
 // It is intended to represent a high-performance Handler that synchronously
 // writes text (as opposed to binary).
-[GoType] partial struct fastTextHandler {
+partial struct fastTextHandler {
     internal io.Writer w;
 }
 
@@ -31,7 +31,7 @@ internal static slogꓸHandler newFastTextHandler(io.Writer w) {
     return new fastTextHandlerжΔHandler(Ꮡ(new fastTextHandler(w: w)));
 }
 
-[GoRecv] internal static bool Enabled(this ref fastTextHandler h, context.Context _Δp1, slogꓸLevel _Δp2) {
+internal static bool Enabled(this ref fastTextHandler h, context.Context _Δp1, slogꓸLevel _Δp2) {
     return true;
 }
 
@@ -75,7 +75,7 @@ internal static error Handle(this ж<fastTextHandler> Ꮡh, context.Context _Δp
     finally { ᒐ.Run(); }
 }
 
-[GoRecv] internal static void appendValue(this ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, slog.Value v) {
+internal static void appendValue(this ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, slog.Value v) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     var exprᴛ1 = v.Kind();
@@ -119,17 +119,17 @@ internal static error Handle(this ж<fastTextHandler> Ꮡh, context.Context _Δp
 
 }
 
-[GoRecv] internal static void appendTime(this ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, time.Time t) {
+internal static void appendTime(this ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, time.Time t) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     buf = strconv.AppendInt(buf, t.Unix(), 10);
 }
 
-[GoRecv] internal static slogꓸHandler WithAttrs(this ref fastTextHandler h, slice<slog.Attr> _) {
+internal static slogꓸHandler WithAttrs(this ref fastTextHandler h, slice<slog.Attr> _) {
     throw panic("fastTextHandler: With unimplemented");
 }
 
-[GoRecv] internal static slogꓸHandler WithGroup(this ref fastTextHandler _Δp0, @string _Δp1) {
+internal static slogꓸHandler WithGroup(this ref fastTextHandler _Δp0, @string _Δp1) {
     throw panic("fastTextHandler: WithGroup unimplemented");
 }
 
@@ -141,7 +141,7 @@ internal static error Handle(this ж<fastTextHandler> Ꮡh, context.Context _Δp
 // but that is a worthwhile thing to measure because Records are on the large
 // side. Since nothing actually reads from the ring buffer, it can handle an
 // arbitrary number of Records without either blocking or allocation.
-[GoType] partial struct asyncHandler {
+partial struct asyncHandler {
     internal array<slog.Record> ringBuffer = new(100, () => new());
     internal nint next;
 }
@@ -150,11 +150,11 @@ internal static ж<asyncHandler> newAsyncHandler() {
     return Ꮡ(new asyncHandler(nil));
 }
 
-[GoRecv] internal static bool Enabled(this ref asyncHandler _Δp0, context.Context _Δp1, slogꓸLevel _Δp2) {
+internal static bool Enabled(this ref asyncHandler _Δp0, context.Context _Δp1, slogꓸLevel _Δp2) {
     return true;
 }
 
-[GoRecv] internal static error Handle(this ref asyncHandler h, context.Context _, slog.Record r) {
+internal static error Handle(this ref asyncHandler h, context.Context _, slog.Record r) {
     r = r.ΔClone();
 
     h.ringBuffer[h.next] = r.Clone();
@@ -162,16 +162,16 @@ internal static ж<asyncHandler> newAsyncHandler() {
     return default!;
 }
 
-[GoRecv] internal static slogꓸHandler WithAttrs(this ref asyncHandler _Δp0, slice<slog.Attr> _Δp1) {
+internal static slogꓸHandler WithAttrs(this ref asyncHandler _Δp0, slice<slog.Attr> _Δp1) {
     throw panic("asyncHandler: With unimplemented");
 }
 
-[GoRecv] internal static slogꓸHandler WithGroup(this ref asyncHandler _Δp0, @string _Δp1) {
+internal static slogꓸHandler WithGroup(this ref asyncHandler _Δp0, @string _Δp1) {
     throw panic("asyncHandler: WithGroup unimplemented");
 }
 
 // A disabledHandler's Enabled method always returns false.
-[GoType] partial struct disabledHandler {
+partial struct disabledHandler {
 }
 
 internal static bool Enabled(this disabledHandler _Δp0, context.Context _Δp1, slogꓸLevel _Δp2) {

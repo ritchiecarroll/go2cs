@@ -15,7 +15,7 @@ partial class structs_package {
 //
 // By convention, HostLayout should be used as the type of a field
 // named "_", placed at the beginning of the struct type definition.
-[GoType] partial struct HostLayout {
+partial struct HostLayout {
     internal hostLayout _; // prevent accidental conversion with plain struct{}
 }
 
@@ -27,7 +27,7 @@ partial class structs_package {
 //	type HL structs.HostLayout
 //
 // It also prevents unintentional conversion of struct{} to a named marker type.
-[GoType] partial struct hostLayout {
+partial struct hostLayout {
 }
 
 } // end structs_package

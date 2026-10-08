@@ -5,19 +5,19 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial struct root {
+partial struct root {
     internal nint fd;
     internal channel<nint> done;
 }
 
-[GoRecv] internal static void release(this ref root r) {
+internal static void release(this ref root r) {
     r.fd = -r.fd;
     if (r.done != default!) {
         r.done.ᐸꟷ(r.fd);
     }
 }
 
-[GoType] partial struct Root {
+partial struct Root {
     internal ж<root> root;
 }
 

@@ -27,7 +27,7 @@ partial class fs_package {
 //
 // [testing/fstest.TestFS] may be used to test implementations of an FS for
 // correctness.
-[GoType] partial interface FS {
+partial interface FS {
     // Open opens the named file.
     // [File.Close] must be called to release any associated resources.
     //
@@ -83,7 +83,7 @@ public static bool ValidPath(@string name) {
 // The File interface is the minimum implementation required of the file.
 // Directory files should also implement [ReadDirFile].
 // A file may implement [io.ReaderAt] or [io.Seeker] as optimizations.
-[GoType] partial interface File :
+partial interface File :
     io.ReadCloser
 {
     (FileInfo, error) Stat();
@@ -91,7 +91,7 @@ public static bool ValidPath(@string name) {
 
 // A DirEntry is an entry read from a directory
 // (using the [ReadDir] function or a [ReadDirFile]'s ReadDir method).
-[GoType] partial interface DirEntry {
+partial interface DirEntry {
     // Name returns the name of the file (or subdirectory) described by the entry.
     // This name is only the final element of the path (the base name), not the entire path.
     // For example, Name would return "hello.go" not "home/gopher/hello.go".
@@ -114,7 +114,7 @@ public static bool ValidPath(@string name) {
 // Every directory file should implement this interface.
 // (It is permissible for any file to implement this interface,
 // but if so ReadDir should return an error for non-directories.)
-[GoType] partial interface ReadDirFile :
+partial interface ReadDirFile :
     File
 {
     // ReadDir reads the contents of the directory and returns
@@ -169,7 +169,7 @@ internal static error errClosed() {
 }
 
 // A FileInfo describes a file and is returned by [Stat].
-[GoType] partial interface FileInfo {
+partial interface FileInfo {
     @string Name();      // base name of the file
     int64 Size();        // length in bytes for regular files; system-dependent for others
     FileMode Mode();     // file mode bits
@@ -178,7 +178,7 @@ internal static error errClosed() {
     any Sys();           // underlying data source (can return nil)
 }
 
-[GoType("num:uint32")] partial struct FileMode;
+partial struct FileMode /*num:uint32*/;
 
 // The defined file mode bits are the most significant bits of the [FileMode].
 // The nine least-significant bits are the standard Unix rwxrwxrwx permissions.
@@ -270,26 +270,26 @@ public static FileMode Type(this FileMode m) {
 }
 
 // PathError records an error and the operation and file path that caused it.
-[GoType] partial struct PathError {
+partial struct PathError {
     public @string Op;
     public @string Path;
     public error Err;
 }
 
-[GoRecv] public static @string Error(this ref PathError e) {
+public static @string Error(this ref PathError e) {
     return e.Op + " "u8 + e.Path + ": "u8 + e.Err.Error();
 }
 
-[GoRecv] public static error Unwrap(this ref PathError e) {
+public static error Unwrap(this ref PathError e) {
     return e.Err;
 }
 
-[GoType("dyn")] internal partial interface Timeout_type {
+internal partial interface Timeout_type /*dyn*/ {
     bool Timeout();
 }
 
 // Timeout reports whether this error represents a timeout.
-[GoRecv] public static bool Timeout(this ref PathError e) {
+public static bool Timeout(this ref PathError e) {
     var (t, ok) = e.Err._<Timeout_type>(ᐧ);
     return ok && t.Timeout();
 }

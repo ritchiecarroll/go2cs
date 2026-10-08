@@ -9,7 +9,7 @@ using @internal.runtime;
 
 partial class runtime_package {
 
-[GoType("num:uint8")] partial struct traceGoStatus;
+partial struct traceGoStatus /*num:uint8*/;
 
 internal static traceGoStatus traceGoBad => /* iota */ 0;
 internal static traceGoStatus traceGoRunnable => 1;
@@ -17,7 +17,7 @@ internal static traceGoStatus traceGoRunning => 2;
 internal static traceGoStatus traceGoSyscall => 3;
 internal static traceGoStatus traceGoWaiting => 4;
 
-[GoType("num:uint8")] partial struct traceProcStatus;
+partial struct traceProcStatus /*num:uint8*/;
 
 internal static traceProcStatus traceProcBad => /* iota */ 0;
 internal static traceProcStatus traceProcRunning => 1;
@@ -179,7 +179,7 @@ internal static traceGoStatus goStatusToTraceGoStatus(uint32 status, waitReason 
 
 // traceSchedResourceState is shared state for scheduling resources (i.e. fields common to
 // both Gs and Ps).
-[GoType] partial struct traceSchedResourceState {
+partial struct traceSchedResourceState {
     // statusTraced indicates whether a status event was traced for this resource
     // a particular generation.
     //
@@ -203,7 +203,7 @@ internal static traceGoStatus goStatusToTraceGoStatus(uint32 status, waitReason 
 // have any stack growth.
 //
 //go:nosplit
-[GoRecv] internal static bool acquireStatus(this ref traceSchedResourceState r, uintptr gen) {
+internal static bool acquireStatus(this ref traceSchedResourceState r, uintptr gen) {
     if (!Ꮡ(r.statusTraced, gen % 3).CompareAndSwap(0, 1)) {
         return false;
     }
@@ -212,25 +212,25 @@ internal static traceGoStatus goStatusToTraceGoStatus(uint32 status, waitReason 
 }
 
 // readyNextGen readies r for the generation following gen.
-[GoRecv] internal static void readyNextGen(this ref traceSchedResourceState r, uintptr gen) {
+internal static void readyNextGen(this ref traceSchedResourceState r, uintptr gen) {
     var nextGen = traceNextGen(gen);
     r.seq[nextGen % 2] = 0;
     Ꮡ(r.statusTraced, nextGen % 3).Store(0);
 }
 
 // statusWasTraced returns true if the sched resource's status was already acquired for tracing.
-[GoRecv] internal static bool statusWasTraced(this ref traceSchedResourceState r, uintptr gen) {
+internal static bool statusWasTraced(this ref traceSchedResourceState r, uintptr gen) {
     return Ꮡ(r.statusTraced, gen % 3).Load() != 0;
 }
 
 // setStatusTraced indicates that the resource's status was already traced, for example
 // when a goroutine is created.
-[GoRecv] internal static void setStatusTraced(this ref traceSchedResourceState r, uintptr gen) {
+internal static void setStatusTraced(this ref traceSchedResourceState r, uintptr gen) {
     Ꮡ(r.statusTraced, gen % 3).Store(1);
 }
 
 // nextSeq returns the next sequence number for the resource.
-[GoRecv] internal static traceArg nextSeq(this ref traceSchedResourceState r, uintptr gen) {
+internal static traceArg nextSeq(this ref traceSchedResourceState r, uintptr gen) {
     r.seq[gen % 2]++;
     return ((traceArg)r.seq[gen % 2]);
 }

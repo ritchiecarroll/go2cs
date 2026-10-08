@@ -13,7 +13,7 @@ partial class diff_package {
 
 // A pair is a pair of values tracked for both the x and y side of a diff.
 // It is typically a pair of line indexes.
-[GoType] partial struct pair {
+partial struct pair {
     internal nint x, y;
 }
 

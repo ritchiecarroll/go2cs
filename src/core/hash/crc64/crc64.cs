@@ -23,7 +23,7 @@ public static UntypedInt ISO => 0xD800000000000000;
 
 public static UntypedInt ECMA => 0xC96C5795D7870F42;
 
-[GoType("[256]uint64")] partial struct Table;
+partial struct Table /*[256]uint64*/;
 
 internal static ж<ж<array<Table>>> Ꮡslicing8TableISO = new StandardBox<ж<array<Table>>>(default(ж<array<Table>>));
 internal static ref ж<array<Table>> slicing8TableISO => ref Ꮡslicing8TableISO.ValueSlot;
@@ -84,7 +84,7 @@ internal static ж<array<Table>> makeSlicingBy8Table(ref Table t) {
 }
 
 // digest represents the partial evaluation of a checksum.
-[GoType] partial struct digest {
+partial struct digest {
     internal uint64 crc;
     internal ж<Table> tab;
 }
@@ -98,29 +98,29 @@ public static hash.Hash64 New(ж<Table> Ꮡtab) {
     return new digestжHash64(Ꮡ(new digest(0, Ꮡtab)));
 }
 
-[GoRecv] internal static nint Size(this ref digest d) {
+internal static nint Size(this ref digest d) {
     return ΔSize;
 }
 
-[GoRecv] internal static nint BlockSize(this ref digest d) {
+internal static nint BlockSize(this ref digest d) {
     return 1;
 }
 
-[GoRecv] internal static void Reset(this ref digest d) {
+internal static void Reset(this ref digest d) {
     d.crc = 0;
 }
 
 internal static readonly @string magic = "crc\x02"u8;
 internal const nint marshaledSize = /* len(magic) + 8 + 8 */ 20;
 
-[GoRecv] internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) {
     b = append(b, magic.ꓸꓸꓸ);
     b = byteorder.BEAppendUint64(b, tableSum(d.tab));
     b = byteorder.BEAppendUint64(b, d.crc);
     return (b, default!);
 }
 
-[GoRecv] internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
+internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
@@ -129,7 +129,7 @@ internal static readonly @string hashCrc64InvalidHashˢ = "hash/crc64: invalid h
 internal static readonly @string hashCrc64InvalidHashˢ2 = "hash/crc64: invalid hash state size"u8;
 internal static readonly @string hashCrc64TablesDoNotˢ = "hash/crc64: tables do not match"u8;
 
-[GoRecv] internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
+internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
         return errors.New(hashCrc64InvalidHashˢ);
     }
@@ -182,16 +182,16 @@ public static uint64 Update(uint64 crc, ж<Table> Ꮡtab, slice<byte> p) {
     return update(crc, ref (Ꮡtab).DerefOrNull(), p);
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref digest d, slice<byte> p) {
+internal static (nint n, error err) Write(this ref digest d, slice<byte> p) {
     d.crc = update(d.crc, ref (d.tab).DerefOrNull(), p);
     return (len(p), default!);
 }
 
-[GoRecv] internal static uint64 Sum64(this ref digest d) {
+internal static uint64 Sum64(this ref digest d) {
     return d.crc;
 }
 
-[GoRecv] internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
+internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     var s = d.Sum64();
     return append(@in, (byte)((s >> (int)(56))), (byte)((s >> (int)(48))), (byte)((s >> (int)(40))), (byte)((s >> (int)(32))), (byte)((s >> (int)(24))), (byte)((s >> (int)(16))), (byte)((s >> (int)(8))), (byte)s);
 }

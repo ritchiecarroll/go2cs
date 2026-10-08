@@ -45,36 +45,36 @@ internal static (io.ReadCloser r1, io.ReadCloser r2, error err) drainBody(io.Rea
 }
 
 // dumpConn is a net.Conn which writes to Writer and reads from Reader
-[GoType] partial struct dumpConn {
-    [GoEmbedded] public io_package.Writer Writer;
-    [GoEmbedded] public io_package.Reader Reader;
+partial struct dumpConn {
+    /*embed*/ public io_package.Writer Writer;
+    /*embed*/ public io_package.Reader Reader;
 }
 
-[GoRecv] internal static error Close(this ref dumpConn c) {
+internal static error Close(this ref dumpConn c) {
     return default!;
 }
 
-[GoRecv] internal static netꓸAddr LocalAddr(this ref dumpConn c) {
+internal static netꓸAddr LocalAddr(this ref dumpConn c) {
     return default!;
 }
 
-[GoRecv] internal static netꓸAddr RemoteAddr(this ref dumpConn c) {
+internal static netꓸAddr RemoteAddr(this ref dumpConn c) {
     return default!;
 }
 
-[GoRecv] internal static error SetDeadline(this ref dumpConn c, time.Time t) {
+internal static error SetDeadline(this ref dumpConn c, time.Time t) {
     return default!;
 }
 
-[GoRecv] internal static error SetReadDeadline(this ref dumpConn c, time.Time t) {
+internal static error SetReadDeadline(this ref dumpConn c, time.Time t) {
     return default!;
 }
 
-[GoRecv] internal static error SetWriteDeadline(this ref dumpConn c, time.Time t) {
+internal static error SetWriteDeadline(this ref dumpConn c, time.Time t) {
     return default!;
 }
 
-[GoType("num:byte")] partial struct neverEnding;
+partial struct neverEnding /*num:byte*/;
 
 internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) {
     foreach (var (i, _) in p) {
@@ -210,13 +210,13 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
 
 // delegateReader is a reader that delegates to another reader,
 // once it arrives on a channel.
-[GoType] partial struct delegateReader {
+partial struct delegateReader {
     internal channel<io.Reader> c;
     internal error err;     // only used if r is nil and c is closed.
     internal io.Reader r; // nil until received from c
 }
 
-[GoRecv] internal static (nint, error) Read(this ref delegateReader r, slice<byte> p) {
+internal static (nint, error) Read(this ref delegateReader r, slice<byte> p) {
     if (r.r == default!) {
         bool ok = default!;
         {
@@ -335,7 +335,7 @@ internal static error errNoBody = errors.New("sentinel error value"u8);
 // Read. It's swapped in when we don't actually want to consume
 // the body, but need a non-nil one, and want to distinguish the
 // error from reading the dummy body.
-[GoType] partial struct failureToReadBody {
+partial struct failureToReadBody {
 }
 
 internal static (nint, error) Read(this failureToReadBody _Δp0, slice<byte> _Δp1) {

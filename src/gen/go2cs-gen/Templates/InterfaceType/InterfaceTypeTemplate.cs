@@ -46,7 +46,7 @@ internal class InterfaceTypeTemplate : TemplateBase
 
     public override string TemplateBody =>
         $$"""
-              {{ShellAttribute}}[{{GeneratedCodeAttribute}}]
+              {{GoTypeAttributePrefix}}{{ShellAttribute}}[{{GeneratedCodeAttribute}}]
               {{Scope}} partial interface {{InterfaceName}}{{AppliedOperatorConstraints}}
               {
               }{{RuntimeInterfaceShells}}

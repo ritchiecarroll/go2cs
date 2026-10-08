@@ -6,7 +6,7 @@ using NamedInterfaceAdapterIdentity;
 
 partial class main_package {
 
-[GoType] partial struct mark {
+partial struct mark {
     internal nint n;
 }
 
@@ -14,11 +14,11 @@ internal static @string Greet(this mark m) {
     return fmt.Sprintf("mark%d"u8, m.n);
 }
 
-[GoType] partial struct loud {
+partial struct loud {
     internal nint n;
 }
 
-[GoRecv] internal static @string Greet(this ref loud l) {
+internal static @string Greet(this ref loud l) {
     return fmt.Sprintf("loud%d"u8, l.n);
 }
 

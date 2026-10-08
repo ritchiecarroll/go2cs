@@ -24,7 +24,7 @@ internal static error errRange = errors.New("gob: bad data: field numbers out of
 
 // decoderState is the execution state of an instance of the decoder. A new state
 // is created for nested objects.
-[GoType] partial struct decoderState {
+partial struct decoderState {
     internal ж<Decoder> dec;
     // The buffer is stored with an extra indirection because it may be replaced
     // if we load a type during decode (when reading an interface value).
@@ -35,12 +35,12 @@ internal static error errRange = errors.New("gob: bad data: field numbers out of
 
 // decBuffer is an extremely simple, fast implementation of a read-only byte buffer.
 // It is initialized by calling Size and then copying the data into the slice returned by Bytes().
-[GoType] partial struct decBuffer {
+partial struct decBuffer {
     internal slice<byte> data;
     internal nint offset; // Read offset.
 }
 
-[GoRecv] internal static (nint, error) Read(this ref decBuffer d, slice<byte> p) {
+internal static (nint, error) Read(this ref decBuffer d, slice<byte> p) {
     nint n = copy(p, d.data.slice(d.offset));
     if (n == 0 && len(p) != 0) {
         return (0, io.EOF);
@@ -49,14 +49,14 @@ internal static error errRange = errors.New("gob: bad data: field numbers out of
     return (n, default!);
 }
 
-[GoRecv] internal static void Drop(this ref decBuffer d, nint n) {
+internal static void Drop(this ref decBuffer d, nint n) {
     if (n > d.Len()) {
         throw panic("drop");
     }
     d.offset += n;
 }
 
-[GoRecv] internal static (byte, error) ReadByte(this ref decBuffer d) {
+internal static (byte, error) ReadByte(this ref decBuffer d) {
     if (d.offset >= len(d.data)) {
         return (0, io.EOF);
     }
@@ -65,21 +65,21 @@ internal static error errRange = errors.New("gob: bad data: field numbers out of
     return (c, default!);
 }
 
-[GoRecv] internal static nint Len(this ref decBuffer d) {
+internal static nint Len(this ref decBuffer d) {
     return len(d.data) - d.offset;
 }
 
-[GoRecv] internal static slice<byte> Bytes(this ref decBuffer d) {
+internal static slice<byte> Bytes(this ref decBuffer d) {
     return d.data.slice(d.offset);
 }
 
 // SetBytes sets the buffer to the bytes, discarding any existing data.
-[GoRecv] internal static void SetBytes(this ref decBuffer d, slice<byte> data) {
+internal static void SetBytes(this ref decBuffer d, slice<byte> data) {
     d.data = data;
     d.offset = 0;
 }
 
-[GoRecv] internal static void Reset(this ref decBuffer d) {
+internal static void Reset(this ref decBuffer d) {
     d.data = d.data[0..0];
     d.offset = 0;
 }
@@ -100,7 +100,7 @@ internal static ж<decoderState> newDecoderState(this ж<Decoder> Ꮡdec, ж<dec
     return d;
 }
 
-[GoRecv] internal static void freeDecoderState(this ref Decoder dec, ж<decoderState> Ꮡd) {
+internal static void freeDecoderState(this ref Decoder dec, ж<decoderState> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     d.next = dec.freeList;
@@ -149,7 +149,7 @@ internal static (uint64 x, nint width, error err) decodeUintReader(io.Reader r, 
 
 // decodeUint reads an encoded unsigned integer from state.r.
 // Does not check for overflow.
-[GoRecv] internal static uint64 /*x*/ decodeUint(this ref decoderState state) {
+internal static uint64 /*x*/ decodeUint(this ref decoderState state) {
     uint64 x = default!;
 
     var (b, err) = state.b.ReadByte();
@@ -178,7 +178,7 @@ internal static (uint64 x, nint width, error err) decodeUintReader(io.Reader r, 
 
 // decodeInt reads an encoded signed integer from state.r.
 // Does not check for overflow.
-[GoRecv] internal static int64 decodeInt(this ref decoderState state) {
+internal static int64 decodeInt(this ref decoderState state) {
     var x = state.decodeUint();
     if ((uint64)(x & 1) != 0) {
         return ~(int64)((x >> (int)(1)));
@@ -189,7 +189,7 @@ internal static (uint64 x, nint width, error err) decodeUintReader(io.Reader r, 
 // getLength decodes the next uint and makes sure it is a possible
 // size for a data item that follows, which means it must fit in a
 // non-negative int and fit in the buffer.
-[GoRecv] internal static (nint, bool) getLength(this ref decoderState state) {
+internal static (nint, bool) getLength(this ref decoderState state) {
     nint n = (nint)state.decodeUint();
     if (n < 0 || state.b.Len() < n || tooBig <= n) {
         return (0, false);
@@ -200,7 +200,7 @@ internal static (uint64 x, nint width, error err) decodeUintReader(io.Reader r, 
 // type decOp is a methodless func type — rendered inline as its base delegate
 
 // The 'instructions' of the decoding machine
-[GoType] partial struct decInstr {
+partial struct decInstr {
     internal Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> op;
     internal nint field;  // field number of the wire type
     internal slice<nint> index; // field access indices for destination type
@@ -497,7 +497,7 @@ internal static void ignoreUint8Array(ж<decInstr> Ꮡi, ж<decoderState> Ꮡsta
 
 // The encoder engine is an array of instructions indexed by field number of the incoming
 // decoder. It is executed with random access according to field number.
-[GoType] partial struct decEngine {
+partial struct decEngine {
     internal slice<decInstr> instr;
     internal nint numInstr; // the number of active instructions
 }
@@ -622,7 +622,7 @@ internal static void ignoreSingle(this ж<Decoder> Ꮡdec, ж<decEngine> Ꮡengi
 }
 
 // decodeArrayHelper does the work for decoding arrays and slices.
-[GoRecv] internal static void decodeArrayHelper(this ref Decoder dec, ж<decoderState> Ꮡstate, reflectꓸValue value, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, nint length, error ovfl, Func<ж<decoderState>, reflectꓸValue, nint, error, bool> helper) {
+internal static void decodeArrayHelper(this ref Decoder dec, ж<decoderState> Ꮡstate, reflectꓸValue value, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, nint length, error ovfl, Func<ж<decoderState>, reflectꓸValue, nint, error, bool> helper) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     if (helper != default! && helper(Ꮡstate, value, length, ovfl)) {
@@ -657,7 +657,7 @@ internal static void ignoreSingle(this ж<Decoder> Ꮡdec, ж<decEngine> Ꮡengi
 // decodeArray decodes an array and stores it in value.
 // The length is an unsigned integer preceding the elements. Even though the length is redundant
 // (it's part of the type), it's a useful check and is included in the encoding.
-[GoRecv] internal static void decodeArray(this ref Decoder dec, ж<decoderState> Ꮡstate, reflectꓸValue value, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, nint length, error ovfl, Func<ж<decoderState>, reflectꓸValue, nint, error, bool> helper) {
+internal static void decodeArray(this ref Decoder dec, ж<decoderState> Ꮡstate, reflectꓸValue value, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, nint length, error ovfl, Func<ж<decoderState>, reflectꓸValue, nint, error, bool> helper) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     {
@@ -682,7 +682,7 @@ internal static reflectꓸValue decodeIntoValue(ж<decoderState> Ꮡstate, Actio
 // Maps are encoded as a length followed by key:value pairs.
 // Because the internals of maps are not visible to us, we must
 // use reflection rather than pointer magic.
-[GoRecv] internal static void decodeMap(this ref Decoder dec, reflectꓸType mtyp, ж<decoderState> Ꮡstate, reflectꓸValue value, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> keyOp, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, error ovfl) {
+internal static void decodeMap(this ref Decoder dec, reflectꓸType mtyp, ж<decoderState> Ꮡstate, reflectꓸValue value, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> keyOp, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, error ovfl) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     nint n = (nint)state.decodeUint();
@@ -708,7 +708,7 @@ internal static reflectꓸValue decodeIntoValue(ж<decoderState> Ꮡstate, Actio
 internal static readonly @string noErrorˢ = "no error"u8;
 
 // ignoreArrayHelper does the work for discarding arrays and slices.
-[GoRecv] internal static void ignoreArrayHelper(this ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, nint length) {
+internal static void ignoreArrayHelper(this ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, nint length) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     var instr = Ꮡ(new decInstr(elemOp, 0, default!, errors.New(noErrorˢ)));
@@ -721,7 +721,7 @@ internal static readonly @string noErrorˢ = "no error"u8;
 }
 
 // ignoreArray discards the data for an array value with no destination.
-[GoRecv] internal static void ignoreArray(this ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, nint length) {
+internal static void ignoreArray(this ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, nint length) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     {
@@ -733,7 +733,7 @@ internal static readonly @string noErrorˢ = "no error"u8;
 }
 
 // ignoreMap discards the data for a map value with no destination.
-[GoRecv] internal static void ignoreMap(this ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> keyOp, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp) {
+internal static void ignoreMap(this ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> keyOp, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     nint n = (nint)state.decodeUint();
@@ -747,7 +747,7 @@ internal static readonly @string noErrorˢ = "no error"u8;
 
 // decodeSlice decodes a slice and stores it in value.
 // Slices are encoded as an unsigned length followed by the elements.
-[GoRecv] internal static void decodeSlice(this ref Decoder dec, ж<decoderState> Ꮡstate, reflectꓸValue value, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, error ovfl, Func<ж<decoderState>, reflectꓸValue, nint, error, bool> helper) {
+internal static void decodeSlice(this ref Decoder dec, ж<decoderState> Ꮡstate, reflectꓸValue value, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, error ovfl, Func<ж<decoderState>, reflectꓸValue, nint, error, bool> helper) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     var u = state.decodeUint();
@@ -774,7 +774,7 @@ internal static readonly @string noErrorˢ = "no error"u8;
 }
 
 // ignoreSlice skips over the data for a slice value with no destination.
-[GoRecv] internal static void ignoreSlice(this ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp) {
+internal static void ignoreSlice(this ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     dec.ignoreArrayHelper(Ꮡstate, elemOp, (nint)state.decodeUint());
@@ -866,7 +866,7 @@ internal static void ignoreInterface(this ж<Decoder> Ꮡdec, ж<decoderState> �
 
 // decodeGobDecoder decodes something implementing the GobDecoder interface.
 // The data is encoded as a byte slice.
-[GoRecv] internal static void decodeGobDecoder(this ref Decoder dec, ж<userTypeInfo> Ꮡut, ж<decoderState> Ꮡstate, reflectꓸValue value) {
+internal static void decodeGobDecoder(this ref Decoder dec, ж<userTypeInfo> Ꮡut, ж<decoderState> Ꮡstate, reflectꓸValue value) {
     ref var ut = ref Ꮡut.DerefOrNull();
     ref var state = ref Ꮡstate.DerefOrNull();
 
@@ -900,7 +900,7 @@ internal static void ignoreInterface(this ж<Decoder> Ꮡdec, ж<decoderState> �
 }
 
 // ignoreGobDecoder discards the data for a GobDecoder value with no destination.
-[GoRecv] internal static void ignoreGobDecoder(this ref Decoder dec, ж<decoderState> Ꮡstate) {
+internal static void ignoreGobDecoder(this ref Decoder dec, ж<decoderState> Ꮡstate) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
     // Read the bytes for the value.
@@ -1164,7 +1164,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decI
 
 // gobDecodeOpFor returns the op for a type that is known to implement
 // GobDecoder.
-[GoRecv] internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> gobDecodeOpFor(this ref Decoder dec, ж<userTypeInfo> Ꮡut) {
+internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> gobDecodeOpFor(this ref Decoder dec, ж<userTypeInfo> Ꮡut) {
     ref var ut = ref Ꮡut.DerefOrNull();
 
     var rcvrType = ut.user;
@@ -1192,7 +1192,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decI
 // Answers the question for basic types, arrays, maps and slices, plus
 // GobEncoder/Decoder pairs.
 // Structs are considered ok; fields will be checked later.
-[GoRecv] internal static bool compatibleType(this ref Decoder dec, reflectꓸType fr, typeId fw, map<reflectꓸType, typeId> inProgress) {
+internal static bool compatibleType(this ref Decoder dec, reflectꓸType fr, typeId fw, map<reflectꓸType, typeId> inProgress) {
     {
         var (rhs, okΔ1) = inProgress[fr, ꟷ]; if (okΔ1) {
             return rhs == fw;
@@ -1432,7 +1432,7 @@ internal static (ж<ж<decEngine>> enginePtr, error err) getDecEnginePtr(this ж
 }
 
 // emptyStruct is the type we compile into when ignoring a struct value.
-[GoType] partial struct emptyStruct {
+partial struct emptyStruct {
 }
 
 internal static reflectꓸType emptyStructType = reflect.TypeFor<emptyStruct>();

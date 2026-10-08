@@ -4,9 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[3]rune")] partial struct triple;
+partial struct triple /*[3]rune*/;
 
-[GoType("[]nint")] partial struct nums;
+partial struct nums /*[]nint*/;
 
 internal static void Main() {
     var t = new triple(new rune[]{7, 32, 9}.array());

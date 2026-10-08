@@ -17,9 +17,9 @@ internal static partial uint32 load32(ж<uint32> Ꮡp) {
     return p;
 }
 
-[GoType("num:uint64")] partial struct lfstack;
+partial struct lfstack /*num:uint64*/;
 
-[GoType("num:uint32")] partial struct sweepClass;
+partial struct sweepClass /*num:uint32*/;
 
 internal static uint64 peek(this ж<lfstack> Ꮡhead) {
     return load64(Ꮡhead.Reinterpret<lfstack, uint64>());
@@ -33,7 +33,7 @@ internal static uint64 peekVia(ж<lfstack> Ꮡp) {
     return load64(Ꮡp.Reinterpret<lfstack, uint64>());
 }
 
-[GoType("num:uint64")] partial struct hexval;
+partial struct hexval /*num:uint64*/;
 
 internal static partial uint64 describe(hexval v) {
     return (uint64)v;
@@ -45,24 +45,24 @@ internal static partial void storeInt(ж<nint> Ꮡp, nint v) {
     p = v;
 }
 
-[GoType("num:nint")] partial struct gobber;
+partial struct gobber /*num:nint*/;
 
 internal static void set(this ж<gobber> Ꮡg, nint v) {
     storeInt(Ꮡg.Reinterpret<gobber, nint>(), v);
 }
 
-[GoType] partial struct coord {
+partial struct coord {
     public nint X, Y;
 }
 
-[GoType("coord")] partial struct point;
+partial struct point /*coord*/;
 
 internal static partial void bump(ж<coord> Ꮡc) {
     var p = Ꮡc.Reinterpret<coord, point>();
     (p.Value.X, p.Value.Y) = (3, 4);
 }
 
-[GoType("@string")] partial struct namedString;
+partial struct namedString /*@string*/;
 
 internal static partial void setStr(ref namedString s, @string v) {
     s = ((namedString)v);

@@ -24,7 +24,7 @@ internal static ж<itabTableType> ᏑitabTableInit = new StandardBox<itabTableTy
 internal static ref itabTableType itabTableInit => ref ᏑitabTableInit.Value; // starter table
 
 // Note: change the formula in the mallocgc call in itabAdd if you change these fields.
-[GoType] partial struct itabTableType {
+partial struct itabTableType {
     internal uintptr size;             // length of entries array. Always a power of 2.
     internal uintptr count;             // current number of filled entries.
     internal array<ж<itab>> entries = new(itabInitSize); // really [size] large
@@ -314,15 +314,15 @@ internal static void panicnildottype(ж<_type> Ꮡwant) {
     throw panic(Ꮡ(new TypeAssertionError(nil, nil, Ꮡwant, ""u8)));
 }
 
-[GoType("num:uint16")] partial struct uint16InterfacePtr;
+partial struct uint16InterfacePtr /*num:uint16*/;
 
-[GoType("num:uint32")] partial struct uint32InterfacePtr;
+partial struct uint32InterfacePtr /*num:uint32*/;
 
-[GoType("num:uint64")] partial struct uint64InterfacePtr;
+partial struct uint64InterfacePtr /*num:uint64*/;
 
-[GoType("@string")] partial struct stringInterfacePtr;
+partial struct stringInterfacePtr /*@string*/;
 
-[GoType("[]byte")] partial struct sliceInterfacePtr;
+partial struct sliceInterfacePtr /*[]byte*/;
 
 // TODO: Add the static type we're converting from as well.
 // It might generate a better error message.

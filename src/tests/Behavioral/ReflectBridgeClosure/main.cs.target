@@ -7,38 +7,36 @@ using ꓸꓸꓸnint = Span<nint>;
 
 partial class main_package {
 
-[GoType] public partial struct inner {
+public partial struct inner {
     public nint X;
 }
 
-[GoType] partial struct tagged {
+partial struct tagged {
     public nint Y;
 }
 
-[GoType] partial struct nested {
+partial struct nested {
     internal nint hidden;
 }
 
-[GoType] partial struct clashA {
+partial struct clashA {
     public nint Y;
 }
 
-[GoType] partial struct clashB {
+partial struct clashB {
     public nint Y;
 }
 
-[GoType] partial struct clash {
+partial struct clash {
     internal partial ref clashA clashA { get; }
     internal partial ref clashB clashB { get; }
 }
 
-[GoType] partial struct host {
+partial struct host {
     public nint Plain;
     internal partial ref inner inner { get; }
-    [GoTag(@"json:""t""")]
-    internal partial ref tagged tagged { get; }
-    [GoTag(@"json:""n""")]
-    public inner Named;
+    internal partial ref tagged tagged { get; } /*`json:"t"`*/
+    public inner Named; /*`json:"n"`*/
 }
 
 internal delegate error handler(nint _);
@@ -68,21 +66,21 @@ internal static (bool, error) mixed(nint a, @string b) {
     return (false, default!);
 }
 
-[GoType("num:byte")] partial struct definedByte;
+partial struct definedByte /*num:byte*/;
 
-[GoType("[]definedByte")] partial struct definedBytes;
+partial struct definedBytes /*[]definedByte*/;
 
-[GoType("[]byte")] partial struct namedPlainBytes;
+partial struct namedPlainBytes /*[]byte*/;
 
-[GoType] partial struct holder {
+partial struct holder {
     public slice<ж<inner>> Ps;
 }
 
-[GoType] partial struct mapHolder {
+partial struct mapHolder {
     public map<@string, ж<inner>> Ms;
 }
 
-[GoType] partial struct sliceKey {
+partial struct sliceKey {
     internal any ptr;
     internal nint len;
 }

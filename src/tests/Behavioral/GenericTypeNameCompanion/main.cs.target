@@ -8,16 +8,10 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 
 partial class main_package {
-// Descriptor carrier for `eface` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("eface")] internal interface efaceᴅ { }
 
-// Descriptor carrier for `namedIface` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("namedIface")] internal interface namedIfaceᴅ { }
+partial struct ordinary /*@string*/;
 
-
-[GoType("@string")] partial struct ordinary;
-
-[GoType] partial interface inlineIface {
+partial interface inlineIface {
     void Do();
 }
 

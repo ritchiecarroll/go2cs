@@ -7,28 +7,28 @@ using System.Runtime.CompilerServices;
 
 partial class main_package {
 
-[GoType] partial interface closer {
+partial interface closer {
     error Close();
 }
 
-[GoType] partial struct conn {
+partial struct conn {
     internal @string name;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object closeˢ = (@string)"close"u8;
 
-[GoRecv] internal static error Close(this ref conn c) {
+internal static error Close(this ref conn c) {
     fmt.Println(closeˢ, c.name);
     return default!;
 }
 
-[GoType] partial struct asyncConn {
+partial struct asyncConn {
     internal @string name;
     internal channel<@string> @out;
 }
 
-[GoRecv] internal static error Close(this ref asyncConn a) {
+internal static error Close(this ref asyncConn a) {
     a.@out.ᐸꟷ(a.name);
     return default!;
 }

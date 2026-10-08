@@ -11,11 +11,11 @@ using go.math;
 partial class flate_package {
 
 // hcode is a huffman code with a bit code and bit length.
-[GoType] partial struct hcode {
+partial struct hcode {
     internal uint16 code, len;
 }
 
-[GoType] partial struct huffmanEncoder {
+partial struct huffmanEncoder {
     internal slice<hcode> codes;
     internal slice<literalNode> freqcache;
     internal array<int32> bitCount = new(17);
@@ -23,13 +23,13 @@ partial class flate_package {
     internal byFreq lfs;    // stored to avoid repeated allocation in generate
 }
 
-[GoType] partial struct literalNode {
+partial struct literalNode {
     internal uint16 literal;
     internal int32 freq;
 }
 
 // A levelInfo describes the state of the constructed tree for a given depth.
-[GoType] partial struct levelInfo {
+partial struct levelInfo {
     // Our level.  for better printing
     internal int32 level;
     // The frequency of the last node at this level
@@ -45,7 +45,7 @@ partial class flate_package {
 }
 
 // set sets the code and length of an hcode.
-[GoRecv] internal static void set(this ref hcode h, uint16 code, uint16 length) {
+internal static void set(this ref hcode h, uint16 code, uint16 length) {
     h.len = length;
     h.code = code;
 }
@@ -110,7 +110,7 @@ internal static ж<huffmanEncoder> fixedLiteralEncoding = generateFixedLiteralEn
 
 internal static ж<huffmanEncoder> fixedOffsetEncoding = generateFixedOffsetEncoding();
 
-[GoRecv] internal static nint bitLength(this ref huffmanEncoder h, slice<int32> freq) {
+internal static nint bitLength(this ref huffmanEncoder h, slice<int32> freq) {
     nint total = default!;
     foreach (var (i, f) in freq) {
         if (f != 0) {
@@ -136,7 +136,7 @@ internal static UntypedInt maxBitsLimit => 16;
 //
 // bitCounts returns an integer slice in which slice[i] indicates the number of literals
 // that should be encoded in i bits.
-[GoRecv] internal static slice<int32> bitCounts(this ref huffmanEncoder h, slice<literalNode> list, int32 maxBits) {
+internal static slice<int32> bitCounts(this ref huffmanEncoder h, slice<literalNode> list, int32 maxBits) {
     if (maxBits >= maxBitsLimit) {
         throw panic("flate: maxBits too large");
     }
@@ -308,7 +308,7 @@ internal static void generate(this ж<huffmanEncoder> Ꮡh, slice<int32> freq, i
     Ꮡh.assignEncodingAndSize(bitCount, list);
 }
 
-[GoType("[]literalNode")] partial struct byLiteral;
+partial struct byLiteral /*[]literalNode*/;
 
 internal static void sort(this ж<byLiteral> Ꮡs, slice<literalNode> a) {
     ref var s = ref Ꮡs.DerefOrNull();
@@ -329,7 +329,7 @@ internal static void Swap(this byLiteral s, nint i, nint j) {
     (s[i], s[j]) = (s[j], s[i]);
 }
 
-[GoType("[]literalNode")] partial struct byFreq;
+partial struct byFreq /*[]literalNode*/;
 
 internal static void sort(this ж<byFreq> Ꮡs, slice<literalNode> a) {
     ref var s = ref Ꮡs.DerefOrNull();

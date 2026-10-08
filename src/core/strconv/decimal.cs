@@ -11,7 +11,7 @@ namespace go;
 
 partial class strconv_package {
 
-[GoType] public partial struct @decimal {
+public partial struct @decimal {
     internal array<byte> d = new(800); // digits, big-endian representation
     internal nint nd;      // number of digits used
     internal nint dp;      // decimal point
@@ -19,7 +19,7 @@ partial class strconv_package {
     internal bool trunc;      // discarded nonzero digits beyond d[:nd]
 }
 
-[GoRecv] public static @string String(this ref @decimal a) {
+public static @string String(this ref @decimal a) {
     nint n = 10 + a.nd;
     if (a.dp > 0) {
         n += a.dp;
@@ -169,7 +169,7 @@ internal static void rightShift(ref @decimal a, nuint k) {
 // if the string prefix is "000" through "624".
 //
 // Credit for this trick goes to Ken.
-[GoType] partial struct leftCheat {
+partial struct leftCheat {
     internal nint delta;   // number of new digits
     internal @string cutoff; // minus one digit if original < a.
 }
@@ -442,7 +442,7 @@ public static void RoundDown(this ж<@decimal> Ꮡa, nint nd) {
 }
 
 // Round a up to nd digits (or fewer).
-[GoRecv] public static void RoundUp(this ref @decimal a, nint nd) {
+public static void RoundUp(this ref @decimal a, nint nd) {
     if (nd < 0 || nd >= a.nd) {
         return;
     }

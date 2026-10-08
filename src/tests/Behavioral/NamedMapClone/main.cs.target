@@ -5,9 +5,9 @@ using maps = maps_package;
 
 partial class main_package {
 
-[GoType("map[@string, any]")] partial struct Fields;
+partial struct Fields /*map[@string, any]*/;
 
-[GoType("map[@string, Tree]")] partial struct Tree;
+partial struct Tree /*map[@string, Tree]*/;
 
 internal static void Main() {
     var f = new Fields(new map<@string, any>{["a"u8] = (nint)(1)});

@@ -6,16 +6,16 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("dyn")] public partial struct entryᴛ1 {
+public partial struct entryᴛ1 /*dyn*/ {
     public nint ID;
     public @string Name;
 }
 
-[GoType] public partial interface deps {
+public partial interface deps {
     entry Process(entry e);
 }
 
-[GoType] partial struct impl {
+partial struct impl {
 }
 
 internal static entry Process(this impl _, entry e) {

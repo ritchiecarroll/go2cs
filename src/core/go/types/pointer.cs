@@ -8,7 +8,7 @@ namespace go.go;
 partial class types_package {
 
 // A Pointer represents a pointer type.
-[GoType] partial struct Pointer {
+partial struct Pointer {
     internal ΔType @base; // element type
 }
 
@@ -18,7 +18,7 @@ public static ж<Pointer> NewPointer(ΔType elem) {
 }
 
 // Elem returns the element type for the given pointer p.
-[GoRecv] public static ΔType Elem(this ref Pointer p) {
+public static ΔType Elem(this ref Pointer p) {
     return p.@base;
 }
 

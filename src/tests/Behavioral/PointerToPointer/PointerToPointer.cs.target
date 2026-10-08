@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Buffer {
+partial struct Buffer {
     internal slice<byte> buf;
     internal nint off;
     internal int8 lastRead;
@@ -42,7 +42,7 @@ internal static void Main() {
     derefElements();
 }
 
-[GoRecv] public static (nint n, error err) Read(this ref Buffer b, slice<byte> p) {
+public static (nint n, error err) Read(this ref Buffer b, slice<byte> p) {
     nint n = default!;
 
     b.lastRead = opInvalid;

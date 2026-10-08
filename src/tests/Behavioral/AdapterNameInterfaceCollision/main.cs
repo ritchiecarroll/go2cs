@@ -5,18 +5,18 @@ using Δio = io_package;
 
 partial class main_package {
 
-[GoType] partial interface Reader :
+partial interface Reader :
     Δio.Reader
 {
     nint Remaining();
 }
 
-[GoType] partial struct src {
+partial struct src {
     internal slice<byte> data;
     internal nint pos;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref src s, slice<byte> p) {
+internal static (nint, error) Read(this ref src s, slice<byte> p) {
     if (s.pos >= len(s.data)) {
         return (0, Δio.EOF);
     }
@@ -25,7 +25,7 @@ partial class main_package {
     return (n, default!);
 }
 
-[GoRecv] internal static nint Remaining(this ref src s) {
+internal static nint Remaining(this ref src s) {
     return len(s.data) - s.pos;
 }
 

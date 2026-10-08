@@ -63,7 +63,7 @@ using static go.net.textproto_package;
 [assembly: go.GoPositionMap("net/textproto/header.go", "header.cs", "AAkaooKssgACENKClIKClAACENKClKiS")]
 [assembly: go.GoPositionMap("net/textproto/pipeline.go", "pipeline.cs", "ACFIsoKCgoKqoqqiqqKqogAMINKCgoKUgoKUgoKs0oKCgpSCgoKUgoKUgoI=")]
 [assembly: go.GoPositionMap("net/textproto/reader.go", "reader.cs", "ABQsAAke0qqigqiSgoKUrLKCgoKCgpSCpoKUgoKmAAIqABICgqqigoKUgoKUqqKCgpQAAhDSgqiCgpSSloCC7oKChMyEgpSWgoKClIKClJSokoKCgpSUgoKUlKbSgoKUptKCgpSCgoKClIKGlAACKAAVAoKClAACOgAeAoKCgoKCgoKWgoKCgoKCgpSClIKUlAACJgASAoKCAAcS2AANEIKCgoKCgpSUlIKClIKClKaCgpSCgpSmgoKYgoK2ooKWgoK2koKUgraClIKUgpSqooKUgqa+sq7IsoKCgoKCgpSogoKUlJSmAAEqABMCAAIQ+LKCgoKUlrqCloCCgoKClKaCgoKogoKUgoKUgoKogoKohIKCgpSCgpTKgoKUloLOoKqygpSmmNSCgoKUgoKCgpSUlJSUAAIWAAkEgoKCgpSCgpSCgpSUAAcaAAgKABcmAAUgAAwMAAsIAAIcAAoCgqiCgoKmuIKUlIKWguqCkoKUgpS4gIKkAAgQgoIAKFI=")]
-[assembly: go.GoPositionMap("net/textproto/textproto.go", "textproto.cs", "AChQgs6CAA4gkgAGEJKqooKClAACNgAcAoKCgoKClKiSgpSClKiSgpSClKaCpoKC")]
+[assembly: go.GoPositionMap("net/textproto/textproto.go", "textproto.cs", "AChQgs6CAA4gkgAGEJKqooKClAACNgAcAoKCgoKClKiSgpSClKiSgpSClKaCpoKC", "", "", "65=NewReader/1/1/1,NewWriter/1/1/2")]
 [assembly: go.GoPositionMap("net/textproto/writer.go", "writer.cs", "ABMqkqaSlrKCgoIAAhQACQKCgqaCggANILKCgoKkgpSUpoKUgoK4goK2gIKklKaigpSCtIKkgqSk")]
 // </GoSourcePositionMaps>
 
@@ -73,7 +73,7 @@ namespace go.net;
 public static partial class textproto_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

@@ -306,6 +306,6 @@ internal static void Main() {
 
 }
 
-[GoType("num:int64")] partial struct pace;
+partial struct pace /*num:int64*/;
 
 } // end main_package

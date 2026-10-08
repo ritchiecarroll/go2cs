@@ -49,7 +49,7 @@ partial class reflect_package {
 // Type values are comparable, such as with the == operator,
 // so they can be used as map keys.
 // Two Type values are equal if they represent identical types.
-[GoType] partial interface ΔType {
+partial interface ΔType {
 // Methods applicable to all types.
 
     // Align returns the alignment in bytes of a value of
@@ -229,7 +229,7 @@ partial class reflect_package {
     ж<uncommonType> uncommon();
 }
 
-[GoType("num:nuint")] partial struct ΔKind;
+partial struct ΔKind /*num:nuint*/;
 
 // BUG(rsc): FieldByName and related functions consider struct field names to be equal
 // if the names are equal, even if they are unexported names originating
@@ -275,13 +275,13 @@ public static ΔKind ΔUnsafePointer => 26;
 public static ΔKind Ptr => /* Pointer */ 22;
 
 // Embed this type to get common/uncommon
-[GoType] partial struct Δcommon {
+partial struct Δcommon {
     public partial ref @internal.abi_package.Type Type { get; }
 }
 
 // rtype is the common implementation of most values.
 // It is embedded in other struct types.
-[GoType] partial struct rtype {
+partial struct rtype {
     internal abi.Type t;
 }
 
@@ -293,14 +293,14 @@ internal static ж<abi.UncommonType> uncommon(this ж<rtype> Ꮡt) {
     return Ꮡt.of(rtype.Ꮡt).Uncommon();
 }
 
-[GoType("num:nint")] partial struct ΔChanDir;
+partial struct ΔChanDir /*num:nint*/;
 
 public static ΔChanDir RecvDir => /* 1 << iota */ 1;                 // <-chan
 public static ΔChanDir SendDir => 2;                 // chan<-
 public static ΔChanDir BothDir => /* RecvDir | SendDir */ 3; // chan
 
 // interfaceType represents an interface type.
-[GoType] partial struct interfaceType {
+partial struct interfaceType {
     public partial ref @internal.abi_package.ΔInterfaceType InterfaceType { get; } // can embed directly because not a public type.
 }
 
@@ -329,17 +329,17 @@ internal static ж<abi.UncommonType> uncommon(this ж<interfaceType> Ꮡt) {
 }
 
 // ptrType represents a pointer type.
-[GoType] partial struct ptrType {
+partial struct ptrType {
     public partial ref @internal.abi_package.PtrType PtrType { get; }
 }
 
 // sliceType represents a slice type.
-[GoType] partial struct sliceType {
+partial struct sliceType {
     public partial ref @internal.abi_package.SliceType SliceType { get; }
 }
 
 // structType represents a struct type.
-[GoType] partial struct structType {
+partial struct structType {
     public partial ref @internal.abi_package.ΔStructType StructType { get; }
 }
 
@@ -375,7 +375,7 @@ internal static abiꓸName newName(@string n, @string tag, bool exported, bool e
  */
 
 // Method represents a single method.
-[GoType] partial struct ΔMethod {
+partial struct ΔMethod {
     // Name is the method name.
     public @string Name;
     // PkgPath is the package path that qualifies a lower case (unexported)
@@ -437,7 +437,7 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
 // Implemented in the runtime package.
 //
 //go:noescape
-[global::System.Diagnostics.StackTraceHidden] internal static @unsafe.Pointer resolveNameOff(@unsafe.Pointer ptrInModule, int32 off) {
+/*linkname*/ internal static partial @unsafe.Pointer resolveNameOff(@unsafe.Pointer ptrInModule, int32 off) {
     return runtime.reflect_resolveNameOff(ptrInModule, off);
 }
 
@@ -446,7 +446,7 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
 // Implemented in the runtime package.
 //
 //go:noescape
-[global::System.Diagnostics.StackTraceHidden] internal static @unsafe.Pointer resolveTypeOff(@unsafe.Pointer rtype, int32 off) {
+/*linkname*/ internal static partial @unsafe.Pointer resolveTypeOff(@unsafe.Pointer rtype, int32 off) {
     return runtime.reflect_resolveTypeOff(rtype, off);
 }
 
@@ -455,7 +455,7 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
 // Implemented in the runtime package.
 //
 //go:noescape
-[global::System.Diagnostics.StackTraceHidden] internal static @unsafe.Pointer resolveTextOff(@unsafe.Pointer rtype, int32 off) {
+/*linkname*/ internal static partial @unsafe.Pointer resolveTextOff(@unsafe.Pointer rtype, int32 off) {
     return runtime.reflect_resolveTextOff(rtype, off);
 }
 
@@ -473,7 +473,7 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
 //
 //go:linkname addReflectOff
 //go:noescape
-[global::System.Diagnostics.StackTraceHidden] internal static int32 addReflectOff(@unsafe.Pointer ptr) {
+/*linkname*/ internal static partial int32 addReflectOff(@unsafe.Pointer ptr) {
     return runtime.reflect_addReflectOff(ptr);
 }
 
@@ -520,7 +520,7 @@ internal static @unsafe.Pointer textOffFor(ж<abi.Type> Ꮡt, aTextOff off) {
 
 // go2cs generated this placeholder — func String is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoRecv] internal static uintptr Size(this ref rtype t) {
+internal static uintptr Size(this ref rtype t) {
     return t.t.Size();
 }
 
@@ -537,15 +537,15 @@ internal static nint Bits(this ж<rtype> Ꮡt) {
     return (nint)t.t.Size_ * 8;
 }
 
-[GoRecv] internal static nint Align(this ref rtype t) {
+internal static nint Align(this ref rtype t) {
     return t.t.Align();
 }
 
-[GoRecv] internal static nint FieldAlign(this ref rtype t) {
+internal static nint FieldAlign(this ref rtype t) {
     return t.t.FieldAlign();
 }
 
-[GoRecv] internal static ΔKind Kind(this ref rtype t) {
+internal static ΔKind Kind(this ref rtype t) {
     return ((ΔKind)(nuint)(uint8)t.t.Kind());
 }
 
@@ -814,7 +814,7 @@ internal static ΔMethod /*m*/ Method(this ж<interfaceType> Ꮡt, nint i) {
 }
 
 // NumMethod returns the number of interface methods in the type's method set.
-[GoRecv] internal static nint NumMethod(this ref interfaceType t) {
+internal static nint NumMethod(this ref interfaceType t) {
     return len(t.Methods);
 }
 
@@ -838,7 +838,7 @@ internal static (ΔMethod m, bool ok) MethodByName(this ж<interfaceType> Ꮡt, 
 }
 
 // A StructField describes a single field in a struct.
-[GoType] partial struct StructField {
+partial struct StructField {
     // Name is the field name.
     public @string Name;
     // PkgPath is the package path that qualifies a lower case (unexported)
@@ -857,7 +857,7 @@ public static bool IsExported(this StructField f) {
     return f.PkgPath == ""u8;
 }
 
-[GoType("@string")] partial struct StructTag;
+partial struct StructTag /*@string*/;
 
 // Get returns the value associated with key in the tag string.
 // If there is no such key in the tag, Get returns the empty string.
@@ -926,7 +926,7 @@ public static (@string value, bool ok) Lookup(this StructTag tag, @string key) {
 }
 
 // Field returns the i'th struct field.
-[GoRecv] internal static StructField /*f*/ Field(this ref structType t, nint i) {
+internal static StructField /*f*/ Field(this ref structType t, nint i) {
     StructField f = default!;
 
     if (i < 0 || i >= len(t.Fields)) {
@@ -996,7 +996,7 @@ internal static StructField /*f*/ FieldByIndex(this ж<structType> Ꮡt, slice<n
 }
 
 // A fieldScan represents an item on the fieldByNameFunc scan work list.
-[GoType] partial struct fieldScan {
+partial struct fieldScan {
     internal ж<structType> typ;
     internal slice<nint> index;
 }
@@ -1233,7 +1233,7 @@ internal static bool ConvertibleTo(this ж<rtype> Ꮡt, ΔType u) {
     return convertOp(u.common(), Ꮡt.common()) != default!;
 }
 
-[GoRecv] internal static bool Comparable(this ref rtype t) {
+internal static bool Comparable(this ref rtype t) {
     return t.t.Equal != default!;
 }
 
@@ -1367,7 +1367,7 @@ internal static ref Δsync.Map lookupCache => ref ᏑlookupCache.Value; // map[c
 // A cacheKey is the key for use in the lookupCache.
 // Four values describe any of the types we are looking for:
 // type kind, one or two subtypes, and an extra integer.
-[GoType] partial struct cacheKey {
+partial struct cacheKey {
     internal ΔKind kind;
     internal ж<abi.Type> t1;
     internal ж<abi.Type> t2;
@@ -1378,7 +1378,7 @@ internal static ref Δsync.Map lookupCache => ref ᏑlookupCache.Value; // map[c
 // FuncOf does not share the common lookupCache since cacheKey is not
 // sufficient to represent functions unambiguously.
 
-[GoType("dyn")] partial struct funcLookupCacheᴛ1 {
+partial struct funcLookupCacheᴛ1 /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; } // Guards stores (but not loads) on m.
     // m is a map[uint32][]*rtype keyed by the hash calculated in FuncOf.
     // Elements of m are append-only and thus safe for concurrent reading.
@@ -1587,7 +1587,7 @@ internal static void emitGCMask(slice<byte> @out, uintptr @base, ж<abi.Type> �
 internal static ж<funcLookupCacheᴛ1> ᏑstructLookupCache = new StandardBox<funcLookupCacheᴛ1>(new funcLookupCacheᴛ1(nil));
 internal static ref funcLookupCacheᴛ1 structLookupCache => ref ᏑstructLookupCache.Value;
 
-[GoType] partial struct structTypeUncommon {
+partial struct structTypeUncommon {
     internal partial ref structType structType { get; }
     internal uncommonType u;
 }
@@ -1737,12 +1737,12 @@ internal static slice<byte> appendVarint(slice<byte> x, uintptr v) {
 
 // go2cs generated this placeholder — func toType is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoType] partial struct layoutKey {
+partial struct layoutKey {
     internal ж<funcType> ftyp; // function signature
     internal ж<abi.Type> rcvr; // receiver type, or nil if none
 }
 
-[GoType] partial struct layoutType {
+partial struct layoutType {
     internal ж<abi.Type> t;
     internal ж<Δsync.Pool> framePool;
     internal abiDesc abid;
@@ -1813,13 +1813,13 @@ internal static (ж<abi.Type> frametype, ж<Δsync.Pool> framePool, abiDesc abid
 }
 
 // Note: this type must agree with runtime.bitvector.
-[GoType] partial struct bitVector {
+partial struct bitVector {
     internal uint32 n; // number of bits
     internal slice<byte> data;
 }
 
 // append a bit to the bitmap.
-[GoRecv] internal static void append(this ref bitVector bv, uint8 bit) {
+internal static void append(this ref bitVector bv, uint8 bit) {
     if (bv.n % (uint32)(8 * goarch.PtrSize) == 0) {
         // Runtime needs pointer masks to be a multiple of uintptr in size.
         // Since reflect passes bv.data directly to the runtime as a pointer mask,

@@ -4,35 +4,35 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial interface shape {
+partial interface shape {
     @string name();
     void grow(nint n);
 }
 
-[GoType] partial interface sizer {
+partial interface sizer {
     nint size();
 }
 
-[GoType] partial struct circle {
+partial struct circle {
     internal nint r;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string circleˢ = "circle"u8;
 
-[GoRecv] internal static @string name(this ref circle c) {
+internal static @string name(this ref circle c) {
     return circleˢ;
 }
 
-[GoRecv] internal static void grow(this ref circle c, nint n) {
+internal static void grow(this ref circle c, nint n) {
     c.r += n;
 }
 
-[GoRecv] internal static nint size(this ref circle c) {
+internal static nint size(this ref circle c) {
     return c.r;
 }
 
-[GoType] partial struct dot {
+partial struct dot {
     internal nint tag;
 }
 
@@ -47,11 +47,11 @@ internal static void grow(this dot d, nint n) {
     d.tag += n;
 }
 
-[GoType] partial struct errMark {
+partial struct errMark {
     internal nint code;
 }
 
-[GoRecv] internal static @string Error(this ref errMark e) {
+internal static @string Error(this ref errMark e) {
     return fmt.Sprintf("errMark(%d)"u8, e.code);
 }
 

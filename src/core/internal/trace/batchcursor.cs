@@ -14,7 +14,7 @@ using go.@internal.trace.@event;
 
 partial class trace_package {
 
-[GoType] partial struct batchCursor {
+partial struct batchCursor {
     internal ThreadID m;
     internal ΔTime lastTs;
     internal nint idx;      // next index into []batch
@@ -55,7 +55,7 @@ internal static (bool ok, error err) nextEvent(this ж<batchCursor> Ꮡb, slice<
     return (true, default!);
 }
 
-[GoRecv] internal static nint compare(this ref batchCursor b, ж<batchCursor> Ꮡa) {
+internal static nint compare(this ref batchCursor b, ж<batchCursor> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     return cmp.Compare(b.ev.time, a.ev.time);

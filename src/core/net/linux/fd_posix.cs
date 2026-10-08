@@ -13,7 +13,7 @@ using @internal;
 partial class net_package {
 
 // Network file descriptor.
-[GoType] partial struct netFD {
+partial struct netFD {
     internal poll.FD pfd;
     // immutable until Close
     internal nint family;

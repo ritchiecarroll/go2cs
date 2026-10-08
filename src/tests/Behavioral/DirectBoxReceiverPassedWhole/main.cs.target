@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct mc {
+partial struct mc {
     internal nint n;
 }
 
@@ -23,7 +23,7 @@ internal static void reset(this ж<mc> Ꮡc) {
     clearViaPtr(ref (Ꮡc).DerefOrNull());
 }
 
-[GoType] partial struct wrap {
+partial struct wrap {
     internal ж<mc> p;
     internal nint tag;
 }

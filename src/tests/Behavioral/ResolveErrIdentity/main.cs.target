@@ -11,7 +11,7 @@ private static readonly @string l2tpˢ = "l2tp"u8;
 private static readonly @string l2tpGreˢ = "l2tp:gre"u8;
 private static readonly @string tcpˢ = "tcp"u8;
 
-[GoType("dyn")] internal partial struct main_rows {
+internal partial struct main_rows /*dyn*/ {
     internal @string network;
     internal @string addr;
     internal error want;

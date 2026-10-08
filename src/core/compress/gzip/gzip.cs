@@ -29,7 +29,7 @@ public static UntypedInt HuffmanOnly => /* flate.HuffmanOnly */ -2;
 
 // A Writer is an io.WriteCloser.
 // Writes to a Writer are compressed and written to w.
-[GoType] partial struct Writer {
+partial struct Writer {
     public partial ref Header Header { get; }      // written at first call to Write, Flush, or Close
     internal io.Writer w;
     internal nint level;
@@ -70,7 +70,7 @@ public static (ж<Writer>, error) NewWriterLevel(io.Writer w, nint level) {
     return (z, default!);
 }
 
-[GoRecv] internal static void init(this ref Writer z, io.Writer w, nint level) {
+internal static void init(this ref Writer z, io.Writer w, nint level) {
     var compressor = z.compressor;
     if (compressor != nil) {
         compressor.Reset(w);
@@ -90,7 +90,7 @@ public static (ж<Writer>, error) NewWriterLevel(io.Writer w, nint level) {
 // result of its original state from [NewWriter] or [NewWriterLevel], but
 // writing to w instead. This permits reusing a [Writer] rather than
 // allocating a new one.
-[GoRecv] public static void Reset(this ref Writer z, io.Writer w) {
+public static void Reset(this ref Writer z, io.Writer w) {
     z.init(w, z.level);
 }
 
@@ -98,7 +98,7 @@ public static (ж<Writer>, error) NewWriterLevel(io.Writer w, nint level) {
 internal static readonly @string gzipWriteExtraDataIsTooˢ = "gzip.Write: Extra data is too large"u8;
 
 // writeBytes writes a length-prefixed byte slice to z.w.
-[GoRecv] internal static error writeBytes(this ref Writer z, slice<byte> b) {
+internal static error writeBytes(this ref Writer z, slice<byte> b) {
     if (len(b) > 0xffff) {
         return errors.New(gzipWriteExtraDataIsTooˢ);
     }
@@ -116,7 +116,7 @@ internal static readonly @string gzipWriteNonLatin1Headerˢ = "gzip.Write: non-L
 
 // writeString writes a UTF-8 string s in GZIP's format to z.w.
 // GZIP (RFC 1952) specifies that strings are NUL-terminated ISO 8859-1 (Latin-1).
-[GoRecv] internal static error /*err*/ writeString(this ref Writer z, @string s) {
+internal static error /*err*/ writeString(this ref Writer z, @string s) {
     error err = default!;
 
     // GZIP stores Latin-1 strings; error if non-Latin-1; convert if non-ASCII.
@@ -149,7 +149,7 @@ internal static readonly @string gzipWriteNonLatin1Headerˢ = "gzip.Write: non-L
 
 // Write writes a compressed form of p to the underlying [io.Writer]. The
 // compressed bytes are not necessarily flushed until the [Writer] is closed.
-[GoRecv] public static (nint, error) Write(this ref Writer z, slice<byte> p) {
+public static (nint, error) Write(this ref Writer z, slice<byte> p) {
     if (z.err != default!) {
         return (0, z.err);
     }
@@ -219,7 +219,7 @@ internal static readonly @string gzipWriteNonLatin1Headerˢ = "gzip.Write: non-L
 // writer returns an error, Flush returns that error.
 //
 // In the terminology of the zlib library, Flush is equivalent to Z_SYNC_FLUSH.
-[GoRecv] public static error Flush(this ref Writer z) {
+public static error Flush(this ref Writer z) {
     if (z.err != default!) {
         return z.err;
     }
@@ -239,7 +239,7 @@ internal static readonly @string gzipWriteNonLatin1Headerˢ = "gzip.Write: non-L
 // Close closes the [Writer] by flushing any unwritten data to the underlying
 // [io.Writer] and writing the GZIP footer.
 // It does not close the underlying [io.Writer].
-[GoRecv] public static error Close(this ref Writer z) {
+public static error Close(this ref Writer z) {
     if (z.err != default!) {
         return z.err;
     }

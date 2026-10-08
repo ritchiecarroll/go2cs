@@ -139,7 +139,7 @@ internal static (int64 written, bool handled, error err) copyFileRange(this ж<F
     return (written, handled, wrapSyscallError(copyFileRangeˢ, err));
 }
 
-[GoType("dyn")] internal partial interface getPollFDAndNetwork_type {
+internal partial interface getPollFDAndNetwork_type /*dyn*/ {
     ж<poll.FD> PollFD();
     poll.String Network();
 }

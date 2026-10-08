@@ -10,7 +10,9 @@
 // probe b919919c96). A registered function keeps an `@string` member and gains an `sstring` member of the
 // same name, and overload resolution prefers the sstring member:
 //
-//   - the SSTRING member carries the converted body. The converter emits it, marked [GoStr].
+//   - the SSTRING member carries the converted body. The converter emits it with no mark: go2cs-gen
+//     selects it by its sstring parameter, since nothing else in converted code takes one
+//     (docs/PLAN-marker-comment-parity.md, 5.7).
 //     Every direct call binds it: a u8 literal (through golib's implicit ReadOnlySpan<byte> → sstring
 //     operator), an @string (a zero-copy view) and a C# string alike (probe forms a/b/c), so a literal
 //     argument no longer materializes an @string per call;

@@ -108,7 +108,7 @@ internal class StructTypeTemplate : TemplateBase
 
     public override string TemplateBody =>
         $$"""
-            [{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
+            {{GoTypeAttributePrefix}}[{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
             {{Scope}} partial struct {{StructName}}{{ValueCloneBaseList}}
             {
                 // Promoted Struct Fields
@@ -1086,12 +1086,15 @@ internal class StructTypeTemplate : TemplateBase
                 // method. Through VALUE embeds only, the method is in the enclosing type's pointer set
                 // alone, so the forwarder says so with [GoRecv] — exactly what its source carries —
                 // and the run-time method set (GetGoMethodSetCandidates) leaves it out of the value
-                // set. Unmarked, it read as a VALUE-receiver method: reflect counted a method Go does
-                // not have and an interface assertion Go rejects succeeded. Through a POINTER embed
-                // the method IS in the value set, so that forwarder stays unmarked and golib binds
-                // it through a copy of the receiver (TypeExtensions.IsCopyBoundReceiver). The pointer
-                // forwarder below is the form every pointer-set consumer binds, in both cases.
-                string goRecv = method.IsRefRecv && !method.PathHasPointer ? "[global::go.GoRecv] " : "";
+                // set. Unmarked, it once read as a VALUE-receiver method: reflect counted a method Go
+                // does not have and an interface assertion Go rejects succeeded. Through a POINTER
+                // embed the method IS in the value set, so that forwarder is
+                // marked [GoCopyBound] and golib binds it through a copy of the receiver
+                // (TypeExtensions.IsCopyBoundReceiver): a by-ref receiver is otherwise read as a
+                // pointer-set method, since converted code no longer writes [GoRecv]
+                // (docs/PLAN-marker-comment-parity.md, 5.1). The pointer forwarder below is the form
+                // every pointer-set consumer binds, in both cases.
+                string goRecv = !method.IsRefRecv ? "" : method.PathHasPointer ? "[global::go.GoCopyBound] " : "[global::go.GoRecv] ";
                 string receiver = ReceiverName(method.Parameters);
 
                 result.Append($"\r\n    {goRecv}{methodScope} static {returnType} {method.Name}{methodTypeParams}(this {recvMod}{StructName} {receiver}");
@@ -1211,7 +1214,7 @@ internal class StructTypeTemplate : TemplateBase
     // "a metadata embed promotes FIELDS only") — minting cross-package forwarders here would be a
     // corpus-wide generated-code change this deliberately is not. What it serves is the `-tests`
     // reference model's white-box shape: net's resolvConfTest embeds *resolverConfig, whose
-    // init (box primary) and tryAcquireSema/releaseSema ([GoRecv] ref) live in the referenced
+    // init (box primary) and tryAcquireSema/releaseSema (pointer-receiver ref) live in the referenced
     // production assembly and are reachable through the friend grant, so Go's same-package
     // promotion must survive the assembly seam. Transitive promotion through the metadata type's
     // own embeds is not chased, matching the field scan's documented single-hop stance.
@@ -1370,7 +1373,7 @@ internal class StructTypeTemplate : TemplateBase
             (isBoxReceiver ? boxMethods : valueMethods).Add(info with { IsCrossPackage = isCross });
         }
 
-        // ONE Go method, TWO metadata members: a `[GoRecv]` value-receiver method (`this ref T`) is
+        // ONE Go method, TWO metadata members: a pointer-receiver method's `this ref T` form is
         // compiled beside the pointer twin RecvGenerator emits for it (`M(this ж<T>)`,
         // [GeneratedCode]), and a POINTER embed harvests both lists -- so the count pass saw the name
         // twice at one depth, read it as ANNIHILATED inside the embed, and emitted no forwarder at all.
@@ -1498,7 +1501,9 @@ internal class StructTypeTemplate : TemplateBase
                 add(name);
         }
 
-        static bool isGoEmbedded(ISymbol symbol) => symbol.GetAttributes().Any(a => a.AttributeClass?.Name == "GoEmbeddedAttribute");
+        // A Go embedded field: [GoEmbedded] (hand-written), the converter's `/*embed*/` comment in source, or
+        // the [GoMemberRecord] MemberRecordGenerator wrote on a metadata type's assembly.
+        static bool isGoEmbedded(ISymbol symbol) => symbol is IFieldSymbol field && MemberMarkers.IsGoEmbedded(field);
 
         void walkSource(StructDeclarationSyntax decl, Compilation comp, bool isRoot, HashSet<string> seen)
         {
@@ -2178,28 +2183,14 @@ internal class StructTypeTemplate : TemplateBase
     // definitions to forward a multi-level defined type's fields.
     internal static string? InheritedStructDefinition(StructDeclarationSyntax structDecl)
     {
-        foreach (AttributeSyntax attribute in structDecl.AttributeLists.SelectMany(list => list.Attributes))
-        {
-            string name = attribute.Name.ToString();
+        // The [GoType("…")] argument, or the converted declaration's definition comment.
+        string? definition = structDecl.GetGoTypeDefinitionText();
 
-            if (name != GoTypeAttributeName && name != $"{GoTypeAttributeName}Attribute")
-                continue;
+        if (definition is null || definition.Length == 0 || definition == "dyn" || definition.StartsWith("[") ||
+            definition.StartsWith("map[") || definition.StartsWith("chan ") || definition.StartsWith("num:"))
+            return null;
 
-            (string _, string value)[] arguments = attribute.GetArgumentValues();
-
-            if (arguments.Length == 0 || arguments[0].value.Length <= 2)
-                return null;
-
-            string definition = arguments[0].value[1..^1].Trim();
-
-            if (definition.Length == 0 || definition == "dyn" || definition.StartsWith("[") ||
-                definition.StartsWith("map[") || definition.StartsWith("chan ") || definition.StartsWith("num:"))
-                return null;
-
-            return definition;
-        }
-
-        return null;
+        return definition;
     }
 
     // Symbol-based counterpart of the syntax walk above, for a type that reached us as compiled

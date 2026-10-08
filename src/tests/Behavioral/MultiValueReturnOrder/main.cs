@@ -4,11 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct oid {
+partial struct oid {
     internal slice<byte> der;
 }
 
-[GoRecv] internal static error fill(this ref oid o, @string text) {
+internal static error fill(this ref oid o, @string text) {
     o.der = slice<byte>(text);
     return default!;
 }
@@ -19,11 +19,11 @@ internal static (oid, error) parseOID(@string text) {
     return (o, ᴛ1);
 }
 
-[GoType] partial struct counter {
+partial struct counter {
     internal nint n;
 }
 
-[GoRecv] internal static nint bump(this ref counter c) {
+internal static nint bump(this ref counter c) {
     c.n++;
     return c.n;
 }
@@ -87,11 +87,11 @@ internal static nint peek(this counter c) {
     return c.n;
 }
 
-[GoType] partial struct thing {
+partial struct thing {
     internal @string name;
 }
 
-[GoRecv] internal static @string String(this ref thing t) {
+internal static @string String(this ref thing t) {
     return "thing("u8 + t.name + ")"u8;
 }
 
@@ -170,7 +170,7 @@ internal static void Main() {
     fmt.Println(assertThingˢ2, notValue);
 }
 
-[GoType] partial struct node {
+partial struct node {
     internal nint handler;
     internal ж<counter> pat;
 }

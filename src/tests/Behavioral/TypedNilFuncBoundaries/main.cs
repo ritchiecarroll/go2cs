@@ -4,14 +4,14 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct holder {
+partial struct holder {
     internal Func<nint, nint> fn;
 }
 
 internal static void method(this holder h) {
 }
 
-[GoType] partial struct row {
+partial struct row {
     internal any v;
     internal bool ok;
 }
