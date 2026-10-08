@@ -21,6 +21,12 @@ internal abstract class TemplateBase
     public string? Scope = null;
     public string? PackageFooter = null;
 
+    // A converted Go type the converter no longer marks gets its [GoType] back on the generated part,
+    // so reflection reads the type exactly as it did when the converter wrote the attribute.
+    public bool EmitGoTypeAttribute;
+
+    protected string GoTypeAttributePrefix => EmitGoTypeAttribute ? "[GoType] " : "";
+
     private readonly HashSet<string> m_usings = new(
     [
         "using System;",

@@ -108,7 +108,7 @@ internal class StructTypeTemplate : TemplateBase
 
     public override string TemplateBody =>
         $$"""
-            [{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
+            {{GoTypeAttributePrefix}}[{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
             {{Scope}} partial struct {{StructName}}{{ValueCloneBaseList}}
             {
                 // Promoted Struct Fields
