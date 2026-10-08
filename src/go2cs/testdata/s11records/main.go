@@ -23,6 +23,14 @@ type holder struct {
 }
 
 func main() {
+	// Function-local defined types of each wrapper kind keep their Go name in a record.
+	type local []byte
+	type localMap map[string]int
+	type localNum int
+	type localPtr *int
+
+	fmt.Println(reflect.TypeFor[local]().Name(), reflect.TypeFor[localMap]().Name(), reflect.TypeFor[localNum]().Name(), reflect.TypeFor[localPtr]().Name())
+
 	t := reflect.TypeFor[holder]()
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)

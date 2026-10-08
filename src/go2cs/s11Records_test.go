@@ -122,3 +122,33 @@ func TestDescriptorCarriersAreRecordedOnTheType(t *testing.T) {
 		t.Errorf("a field of a plain interface type has no carrier to record:\n%s", record)
 	}
 }
+
+// TestLocalNamesAreRecordedOnTheType holds row 1: converted code carries no [GoLocalName]. A descriptor carrier is
+// declared whole on the package's accessibility record, and a lifted function-local defined type of each wrapper
+// kind (slice, map, number, pointer) carries its Go name on its accessibility record.
+func TestLocalNamesAreRecordedOnTheType(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: runs the real converter over a module fixture")
+	}
+
+	mainCs, packageInfo := convertS11Fixture(t)
+
+	for _, gone := range []string{"[GoLocalName(", "interface Tokenᴅ", "interface Namedᴅ", "Descriptor carrier for"} {
+		if strings.Contains(mainCs, gone) {
+			t.Errorf("converted code still carries %q:\n%s", gone, mainCs)
+		}
+	}
+
+	for _, want := range []string{
+		`[GoLocalName("Token")] public partial interface Tokenᴅ {}`,
+		`[GoLocalName("Named")] public partial interface Namedᴅ {}`,
+		`[GoLocalName("local")] internal partial struct main_local {}`,
+		`[GoLocalName("localMap")] internal partial struct main_localMap {}`,
+		`[GoLocalName("localNum")] internal partial struct main_localNum {}`,
+		`[GoLocalName("localPtr")] internal partial class main_localPtr {}`,
+	} {
+		if !strings.Contains(packageInfo, want) {
+			t.Errorf("want %s in package_info.cs:\n%s", want, packageInfo)
+		}
+	}
+}

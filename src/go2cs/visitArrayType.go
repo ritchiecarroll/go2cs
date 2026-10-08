@@ -104,9 +104,12 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, identType types.Type,
 		target.WriteString(v.newline)
 	}
 
+	// A lifted function-local type's Go name rides its accessibility record where one is written.
+	localName, localNameRecord := v.recordedLocalName(identType, getSanitizedIdentifier(name))
+
 	if arrayType.Len == nil {
 		// Handle slice type
-		v.writeString(target, "%s[GoType(\"[]%s\")] ", v.localNameAttrFor(identType), rootGoTypeDescriptor(csTypeName))
+		v.writeString(target, "%s[GoType(\"[]%s\")] ", localName, rootGoTypeDescriptor(csTypeName))
 	} else {
 		// Handle array type
 		var arrayLenValue string
@@ -132,9 +135,9 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, identType types.Type,
 			// W2c). Strip the embedded delimiters; the readable Go text between them is unaffected,
 			// now sitting directly inside the one outer comment instead of a redundant nested one.
 			annotatedLenExpr := strings.NewReplacer("/*", "", "*/", "").Replace(arrayLenExpr)
-			v.writeString(target, "%s[GoType(\"[%s]%s\")] /* [%s]%s */%s", v.localNameAttrFor(identType), arrayLenValue, rootGoTypeDescriptor(csTypeName), annotatedLenExpr, csTypeName, v.newline)
+			v.writeString(target, "%s[GoType(\"[%s]%s\")] /* [%s]%s */%s", localName, arrayLenValue, rootGoTypeDescriptor(csTypeName), annotatedLenExpr, csTypeName, v.newline)
 		} else {
-			v.writeString(target, "%s[GoType(\"[%s]%s\")] ", v.localNameAttrFor(identType), arrayLenExpr, rootGoTypeDescriptor(csTypeName))
+			v.writeString(target, "%s[GoType(\"[%s]%s\")] ", localName, arrayLenExpr, rootGoTypeDescriptor(csTypeName))
 		}
 	}
 
@@ -143,7 +146,7 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, identType types.Type,
 	// type-wide to the generated array-backed partial (whose element type may require them).
 	typeParams, constraints := v.getGenericDefinition(identType)
 
-	v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), typeParams, access, "")
+	v.recordTypeAccessibility("struct", getSanitizedIdentifier(name), typeParams, access, localNameRecord)
 	v.writeString(target, "%s%spartial struct %s%s%s;", namedArrayElemDimsAttr(identType), access, getSanitizedIdentifier(name), typeParams, constraints)
 	v.writeCommentString(target, comment, arrayType.Elt.End()+typeLenDeviation)
 	target.WriteString(v.newline)
