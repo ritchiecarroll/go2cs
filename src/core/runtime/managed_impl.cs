@@ -4138,7 +4138,7 @@ partial class runtime_package
     }
 
     // The Go method a RecvGenerator forwarder forwards to, or null when the method is not one. The
-    // forwarder is the `this ж<T>` overload of a pointer-receiver method (`[GoRecv] this ref T`), in
+    // forwarder is the `this ж<T>` overload of a pointer-receiver method (`this ref T`), in
     // the same package class under the same name; Go has no overloading, so the receiver TYPE is what
     // tells two receivers' methods of one name apart.
     private static System.Reflection.MethodBase? goRecvForwardee(System.Reflection.MethodBase method)
@@ -4158,13 +4158,19 @@ partial class runtime_package
 
         foreach (System.Reflection.MethodInfo candidate in declaring.GetMethods(anyStatic))
         {
-            if (candidate.Name != forwarder.Name || candidate == forwarder || !candidate.IsDefined(typeof(GoRecvAttribute), inherit: false))
+            if (candidate.Name != forwarder.Name || candidate == forwarder)
                 continue;
 
             System.Reflection.ParameterInfo[] candidateParameters = candidate.GetParameters();
 
-            if (candidateParameters.Length != parameters.Length || !candidateParameters[0].ParameterType.IsByRef)
+            // The forwardee is a POINTER-receiver method by golib's receiver rule, not by [GoRecv]: since face
+            // lift A a converted pointer receiver is an unmarked `this ref T`, and a `this ref` marked
+            // [GoCopyBound] (outside a hand-owned package) is a value receiver bound through a copy.
+            if (candidateParameters.Length != parameters.Length || !candidateParameters[0].ParameterType.IsByRef ||
+                !go.golib.TypeExtensions.IsPointerSetByRefReceiver(candidate, candidateParameters[0].ParameterType))
+            {
                 continue;
+            }
 
             Type receiver = candidateParameters[0].ParameterType.GetElementType()!;
 
