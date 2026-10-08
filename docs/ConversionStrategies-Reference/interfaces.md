@@ -1098,6 +1098,7 @@ so an exported func taking an anonymous interface emitted its lift `internal` be
 `func Reporter(r interface{ PushStep(PathStep); Report(Result); PopStep() }) Option` was CS0051 in production.
 `visitInterfaceType` now consults `isPublicizedLiftedType` too, ahead of the function-local `internal` default:
 
+<!-- source: src/tests/Behavioral/AnonInterfaceParamPublic/AnonInterfaceParamPublic.cs.target:19 -->
 ```csharp
 [GoType("dyn")] public partial interface Report_r {
 ```

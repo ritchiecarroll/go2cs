@@ -370,6 +370,7 @@ func (cw closeWaiter) Close() { close(cw) }
 func (cw closeWaiter) Wait()  { <-cw }
 ```
 
+<!-- source: src/tests/Behavioral/NamedChannelType/main.cs.target:8-20 -->
 ```csharp
 [GoType("chan EmptyStruct")] partial struct closeWaiter;
 
@@ -407,6 +408,7 @@ A generic defined map or channel type declares its type parameters, and their co
 forward declaration AND on the accessibility line, exactly as a generic defined array or slice
 already did. `type Set[T comparable] map[T]void` (the hashset module's exported shape) emits:
 
+<!-- source: src/tests/Behavioral/GenericDefinedMapChan/GenericDefinedMapChan.cs.target:11 and :46-48 -->
 ```csharp
 [GoType("map[T, @void]")] partial struct Set<T>;
 

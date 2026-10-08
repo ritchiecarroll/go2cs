@@ -1883,6 +1883,7 @@ The converter emits a tagged field's Go struct tag verbatim at the declaration:
 ```go
 NamedCurveOID asn1.ObjectIdentifier `asn1:"optional,explicit,tag:0"`
 ```
+<!-- source: src/core/crypto/x509/sec1.cs:32-33 -->
 ```csharp
 [GoTag(@"asn1:""optional,explicit,tag:0""")]
 public asn1.ObjectIdentifier NamedCurveOID;
@@ -1979,6 +1980,7 @@ type stringMap map[string]int
 type intChan chan int
 type intPtr *int
 ```
+<!-- source: src/tests/Behavioral/ReflectStructTagCopy/main.cs.target:18-26 -->
 ```csharp
 [GoType("[]nint")] partial struct intSET;
 [GoType("[4]byte")] partial struct byteArray;

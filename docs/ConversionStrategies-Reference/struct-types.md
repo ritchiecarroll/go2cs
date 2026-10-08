@@ -3,6 +3,7 @@
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#struct-types)
 Go structs are converted to C# `struct` types and used on the stack to optimize memory use and reduce GC pressure; when an instance must escape the stack it is wrapped in a heap box, [`ж<T>`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/%D0%B6.cs) (see [Pointers](pointers.md#pointers)). Rather than spell out the whole struct body, the converter emits a partial struct carrying a `[GoType]` attribute, and the `TypeGenerator` source generator synthesizes the members (equality, `ISupportMake`, embedding promotion, etc.):
 
+<!-- source: src/tests/Behavioral/AnonymousStructs/AnonymousStructs.cs.target:7-10 -->
 ```csharp
 [GoType] partial struct Person {
     public @string Name;

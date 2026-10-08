@@ -493,6 +493,7 @@ promotion shape, which already reports Anonymous:
 ```go
 func test() struct { string; *int; P; M } {   // TypeConversionReturnType: P = *bool, M = map[int]int
 ```
+<!-- source: src/tests/Behavioral/TypeConversionReturnType/TypeConversionReturnType.cs.target:10-15 -->
 ```csharp
 [GoType("dyn")] internal partial struct test_R0 {
     [GoEmbedded] internal @string @string;
