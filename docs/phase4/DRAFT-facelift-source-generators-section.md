@@ -13,7 +13,8 @@
 >
 > **Open before it moves into the page** (each is checked at the ref COORD names):
 > 1. Every sample regenerated from that ref's emission; the OWED ones first.
-> 2. The "what stays" table re-counted: the section 11 kinds that have moved by then leave it.
+> 2. The "not yet moved" table re-read against that ref: a kind that has moved by then leaves it (C2's review
+>    counted six still inline at the refs above; whether the chain cuts them is COORD's open question to C2).
 > 3. The page's present "Extended attributes" table rules `[GoTag]`, `[GoRecv]`, `[GoStr]` and `[GoArrayDims]`
 >    as "must stay". This section replaces those four rows; the rest of that table stands.
 > 4. The names of the generated records (`GoMemberRecord`, `GoParamDims`, `GoCopyBound`) confirmed at that ref.
@@ -39,7 +40,7 @@ stays the code a person reads; the attributes live where nobody has to.
 | `func (b *Reader) Read(p []byte)` | `Read(this ref Reader b, slice<byte> p)` | the `ref` on the receiver |
 | `type Scanner struct { … }` | `partial struct Scanner {` | its place in the package class |
 | `type Duration int64` | `partial struct Duration /*num:int64*/;` | the comment after the name |
-| `struct { Reader }` | `/*embed*/ public Reader Reader;` | the comment before the field |
+| `struct { io.Reader }` (an embedded interface) | `/*embed*/ public Reader Reader;` | the comment before the field |
 | ``Method string `json:"method"` `` | ``public @string Method; /*`json:"method"`*/`` | the comment after the field |
 | `func hash(b [32]byte)` | `hash(/*[32]*/ array<byte> b)` | the comment before the type |
 | `func DecodeRuneInString(s string)` | `DecodeRuneInString(sstring s)` | the `sstring` parameter |
@@ -74,8 +75,10 @@ partial struct Duration /*num:int64*/;
 ```
 
 **An embedded field says `/*embed*/`.** Go embeds a field by leaving out its name; C# needs the name, and a
-Go field may share its type's name without being embedded, so the name alone cannot say it. The comment does.
-Promotion of the embedded type's methods, and `reflect`'s `Anonymous`, follow from it.
+Go field may share its type's name without being embedded, so the name alone cannot say it. The comment does,
+on an embedded interface, an embedded predeclared type, and a pointer to one. Promotion of the embedded
+type's methods, and `reflect`'s `Anonymous`, follow from it. An embedded struct value needs no comment: it is
+a `partial ref` property (`public partial ref Inner Inner { get; }`).
 
 <!-- source: src/go2cs/testdata/markercomments/main.cs:41-42 at claude/c2-facelift-record-q 5665b1d96f -->
 ```csharp
@@ -85,8 +88,10 @@ Promotion of the embedded type's methods, and `reflect`'s `Anonymous`, follow fr
 
 **A struct tag keeps Go's spelling, at the end of the field's line.** The tag sits where Go puts it and reads
 as Go wrote it, backquotes included. `encoding/json` and every other package that reads tags through `reflect`
-receives the same string. A tag that a comment cannot hold as written (it contains a backquote, a `*/` or a
-control character) uses Go's quoted spelling instead. A grouped declaration carries the tag once, as Go does.
+receives the same string. A tag that a comment cannot hold as written uses Go's quoted spelling instead: one
+that contains a backquote, a `*/`, or any character Go does not count as printable (a tab, or U+2028), or that
+is not valid UTF-8. Inside the quoted spelling a `*/` is written `*\x2f`, so the tag cannot end the comment
+early. A grouped declaration carries the tag once, as Go does.
 
 <!-- source: src/go2cs/testdata/markercomments/main.cs:46-47,50 at claude/c2-facelift-record-q 5665b1d96f -->
 ```csharp
@@ -138,29 +143,49 @@ tools on both sides.
 
 ### What stays an attribute, and why
 
-Everything that can move out of converted code has. What remains is there because the C# compiler or the .NET
-runtime reads it as an attribute from that exact declaration, or because the declaration has no name a
-generated record could use.
+An attribute stays in converted code when the C# compiler or the .NET runtime reads it as an attribute from
+that exact declaration, or when the declaration has no name a generated record could use.
 
+<!-- attribute-shown: a converted func literal or local function keeps [GoArrayDims] on its parameters -->
 | Still an attribute | Where | Why it cannot move |
 |---|---|---|
 | `[GoInit]` | a package's `init` functions | It is .NET's module-initializer attribute under a Go name. The C# compiler acts on it, and initializers run in declaration order, which is Go's package initialization order. |
 | `[StructLayout]`, `[FieldOffset]`, `[DllImport]` | a struct or function that describes native memory or calls the operating system | The .NET runtime lays out memory and binds native calls from them. |
-| `[MethodImpl(MethodImplOptions.NoInlining)]` | a func literal, a local function, or an `init` | The JIT reads it from the method itself. A declared method carries the same mark as the word `partial` (see [The no-inline mark rides a generated declaring part](#the-no-inline-mark-rides-a-generated-declaring-part)); a lambda or a local function cannot be partial, and an `init` keeps its place in the file. |
+| `[MethodImpl(MethodImplOptions.NoInlining)]` | a func literal, a local function, an `init`, or a declaration with no body | The JIT reads it from the method itself. A declared method carries the same mark as the word `partial` (see [The no-inline mark rides a generated declaring part](#the-no-inline-mark-rides-a-generated-declaring-part)); a lambda or a local function cannot be partial, an `init` keeps its place in the file, and a declaration with no body is already the declaring part. |
 | `[GoArrayDims(N)]` | an array parameter of a func literal or a local function | The compiler names those methods, so no record can refer to them. |
 | `[GoWrapper]` | the lambda that wraps a method expression | The runtime reads it from the lambda's own method, which has no declaration to attach a record to. |
 
 A package's bookkeeping attributes (`[GoPackage]`, `[GoImplement]`, `[GoImplicitConv]`, `[GoTypeAlias]` and
 the rest) are in `package_info.cs`, not in the code a reader opens.
 
+Six more kinds are still written inline today and are ruled to move by the same routes. Until each does, it
+appears in converted code as an attribute:
+
+| Not yet moved | Where it appears | Where it is going |
+|---|---|---|
+| `[GoLocalName]` | a type lifted out of a function, mostly in converted tests | the package's record in `package_info.cs`, which already holds it for production structs |
+| `[GoValueClone]` | a struct in a converted test file | the same record |
+| `[GoChanDir]` | a defined channel type | beside the type's definition comment |
+| `[GoMapKeyDims]` | a field or parameter whose map key is an array | the record that carries array lengths |
+| `[GoDescriptorType]` | a field or parameter whose interface type a descriptor stands for | the same record |
+| `[StackTraceHidden]` | a forwarder method for a linked or trampolined function | a generated declaring part, as the no-inline mark |
+
 ### Hand-written code
 
+<!-- attribute-shown: hand-written code keeps the attributes -->
 A hand-written file (a `*_impl.cs` companion, or a whole file marked as a manual conversion) keeps the
 attributes: `[GoRecv]`, `[GoType]`, `[GoType("…")]`, `[GoEmbedded]`, `[GoTag]`, `[GoArrayDims]` and `[GoStr]`
 all mean what they always have, and every generator and the runtime accept either spelling. Nobody writing C#
-by hand has to adopt a comment. In a package written entirely by hand (`testing` and `unsafe`), marked
-`[assembly: GoHandOwnedPackage]`, the attributes are the only spelling read, so nothing is inferred from a
-signature there.
+by hand has to adopt a comment.
+
+Inside a converted package the signature rules read a hand-written file too: an unmarked `this ref` receiver
+is a pointer receiver, and an `sstring` parameter makes a twin. The repository's guards require the attribute
+on such a method, so a hand-written file always says what it means.
+
+<!-- attribute-shown: a hand-owned package reads the attributes only -->
+In a package written entirely by hand (`testing` and `unsafe`), marked `[assembly: GoHandOwnedPackage]`,
+nothing is inferred from a signature or from where a type is declared: `[GoRecv]`, `[GoType]` and `[GoStr]`
+are the only way to say those things there.
 
 <!-- source: src/core/internal/poll/fd_mutex_impl.cs:150 at master 541766413e -->
 <!-- attribute-shown: a hand-written file keeps the attribute -->
