@@ -23,6 +23,23 @@
 Written 22:50 on the i7's clock by the outgoing COORD session. Section 1i below holds TRAIN Q's state (its dated
 paragraphs at the top are the newest); this section holds what changed with the roll and what to do first.
 
+**STATE 2026-10-07 22:55 (newest; the ledger wins over everything below it).** TRAIN Q LANDED (master de97fb2d6a,
+13:04), then docs + the stricter identifier census + the save-state comms item: master = 541766413e. No release after
+Q (owner). THE FACE-LIFT TRAIN is being cut; scope FINAL by owner rulings: C2's chain restated on Q's head
+(claude/c2-facelift-a-recv-q 541bc5c22d, claude/c2-facelift-record-q 5665b1d96f); G's B/C generator refs merge clean
+(f464628bf5, 6efdecafd1) and its converter half + section 11 row 3 [GoChanDir] ride claude/g-facelift-bc-converter-q
+(local until its batteries read, then pushed); ALL SIX section 11 rows fold in ("do it now, do it right", owner's
+standing philosophy): C2 cuts rows 1, 2, 4, 5 and then 6 on one new ref on record-q (row 4 spelling ruled
+`map</*[32]*/ array<byte>, bool>`; row 6 = option (b), a plain converter marker on the 18 forwarders without a
+//go:linkname, spelling to COORD for sign-off). THEN: C2's ONE regeneration ref on the union (A-q, B/C ref,
+record-q, s11 ref) covering -stdlib, behavioral goldens and metadata (committed -tests sources refresh at LANDING from
+the battery and the i9's shard; every step names its -tests hunk CLASS for the refresh classifier, which the next
+train's scripts owe); section 9 there; the i9's shard + windows full behavioral; C1's darwin legs; R's docs seat
+(claude/r-facelift-docs, guard + draft + sources done, waiting for the emission ref) regenerates samples LAST.
+FRONT SEATS accepted: the i9 dcd82dc87d; G b107d02e2c, bc20fb77cb, 7ead2cf761, 77caa9d156; C1 4224258807 and
+d6bc86ffc3 (supersedes 2e983cf84a); P1 ec68a9baf3 (windows-read green 20:02). Release estimate 10-13/14. Owner pings by
+Slack (#fleet, @mention) per 1j.5.
+
 **UPDATE 2026-10-07 02:05: read 1j.5 FIRST** -- the comms test is done, the routes are measured, and the Slack
 hybrid is ruled; 1j.1 and 1j.2 are history.
 
