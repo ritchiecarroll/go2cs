@@ -26520,4 +26520,17 @@ Three entries for the seats ruled for the train after Q, most important first. E
 
 **2026-10-07, ACCEPTED IN SUBSTANCE for the train after Q (COORD), (b) THE CALL-SITE RECORD: `claude/g-caller-line-callee` (`b107d02e2c`).** Three failures read in BOTH arms of its gates, and of (a)'s, are PRE-EXISTING and named here so nobody re-finds them. (1)-(2) GolibTests at `DOTNET_TieredCompilation=0`, **2 failures**: `PanicFramesRound3Tests.Div32sOverflowKeepsItsGoSourceFrame` ("Different number of elements") and `PanicFramesRound4Tests.AnIntrinsifiedAtomicOnANilAddressSplicesNothing` ("expected NO splice; got runtime.gopanic | runtime.panicmem | runtime.sigpanic | panicframesprobe.atomicOnNil"). Arm counts: master `0457242046` 1557 passed / 2 failed / 23 skipped; (b) the same; (a) 1566 / 2 / 23. Tiered, all arms 0 failed. The fail sets are equal both ways in every pair. Unowned: they are TC0-only panic-frame reads. (3) runtime `-test-filter ^TestLineNumber$`, 1 C# fail in both arms: this is the **disclosed** D1b structural entry above, and the row reads **validated**. It is not a defect of (b).
 
+## 2026-10-07 — C1: the AOT-cost row ("Native AOT under `TrimMode=partial` compiles a package consumer's WHOLE go.* closure", 2026-10-06) on its other three RIDs — open
+
+**2026-10-07, the other three RIDs (C1):** the same publish on every shipped RID, `aot-smoke` run 37523439849 (`claude/c1-aot-smoke` `44f29d50e6`), one hosted job each:
+
+| RID | Native AOT publish | executable |
+|:--|--:|:--|
+| linux-x64 | 56 min (3,371 s) | exit 0, `PACKAGE-SYMBOLS: none` |
+| win-x64 | 71 min (4,272 s) | **exit 2**: "There is no metadata token available for the given member" -- a second Native AOT defect behind the trim one; the i9 read the stack (the converted runtime's call-site key at the first `runtime.Caller`), its fix a seat at the front of the train after Q |
+| osx-x64 | **293 min (17,598 s)** | exit 0, `PACKAGE-SYMBOLS: none` |
+| osx-arm64 | **did not finish**: cancelled at 6 h 00 m, GitHub's ceiling for a hosted job | not measured |
+
+The macOS figure is the one a user needs to see: on a hosted 3-core Apple-silicon runner the publish of this 31-assembly closure does not fit in six hours, and on Intel it takes nearly five. `aot-smoke` therefore reads three RIDs and prints osx-arm64 as NOT MEASURED on every leg (COORD ruling 2026-10-07, option 2; `claude/c1-aot-smoke-three-rids`); a larger or self-hosted Apple-silicon runner is the owner's call. The route above (golib's reflection annotated, then a full trim) is also the route to a macOS number that fits.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
