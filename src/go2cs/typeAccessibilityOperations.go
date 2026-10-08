@@ -473,7 +473,7 @@ func attributeGroupEnd(line string) int {
 // class, where an accessibility-only partial would declare a second type. Both keep the attributes
 // on the declaration, where they read as they always have.
 func (v *Visitor) recordTypeAccessibility(kind string, identifier string, typeParams string, access string, attrs string) string {
-	if v.manualConversion || v.options.testInlineTypeAccess || identifier == "" {
+	if !v.typeAccessibilityAbsorbs(identifier) {
 		return attrs
 	}
 
@@ -488,6 +488,31 @@ func (v *Visitor) recordTypeAccessibility(kind string, identifier string, typePa
 	packageLock.Unlock()
 
 	return ""
+}
+
+// typeAccessibilityAbsorbs reports whether recordTypeAccessibility writes a record for identifier, and so
+// absorbs the attributes handed to it; when it does not, they stay on the declaration.
+func (v *Visitor) typeAccessibilityAbsorbs(identifier string) bool {
+	return !v.manualConversion && !v.options.testInlineTypeAccess && identifier != ""
+}
+
+// descriptorMemberRecord renders the member record that carries a struct field's DESCRIPTOR CARRIER on its
+// type's accessibility record, trailing-spaced like the other attributes the record carries. fieldName is the
+// field's emitted C# name; the record names it as reflection sees it, without a keyword escape.
+func descriptorMemberRecord(fieldName string, carrier string) string {
+	return fmt.Sprintf("[GoMemberRecord(%q, GoMemberFact.Descriptor, typeof(%s))] ", strings.TrimPrefix(fieldName, "@"), carrier)
+}
+
+// hasBlankFieldName reports whether a field group declares a blank (`_`) field, whose emitted member name is
+// settled only as it is written (each blank is renamed in turn).
+func hasBlankFieldName(names []*ast.Ident) bool {
+	for _, ident := range names {
+		if ident.Name == "_" {
+			return true
+		}
+	}
+
+	return false
 }
 
 // localTypeAccess returns the access modifier a FUNCTION-LOCAL type must carry in the internal

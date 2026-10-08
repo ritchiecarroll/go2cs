@@ -1109,7 +1109,9 @@ public static partial class GoReflect
     /// <remarks>
     /// Read off the <see cref="FieldInfo"/> exactly as <see cref="FieldStampedDims"/> reads
     /// <c>[GoArrayDims]</c>, and for the same reason: the datum cannot live in the managed field
-    /// type, so the converter puts it in the emitted C#. Only <c>Self</c> is read — the
+    /// type. A hand-written field states it with the attribute; the converter records it on the
+    /// declaring type instead (<see cref="GoMemberFact.Descriptor"/>), in the package's metadata
+    /// file, so converted code carries neither. Only <c>Self</c> is read — the
     /// <c>Elem</c>/<c>Key</c> slots need the carrier on the descriptor rather than at the access,
     /// which is a descriptor-shape change sequenced after this one.
     /// </remarks>
@@ -1117,7 +1119,7 @@ public static partial class GoReflect
     {
         return field.GetCustomAttributes(typeof(GoDescriptorTypeAttribute), false) is [GoDescriptorTypeAttribute { Self: { } carrier }]
             ? carrier
-            : null;
+            : RecordedDescriptorCarrier(field);
     }
 
     /// <summary>

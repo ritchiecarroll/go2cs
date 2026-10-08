@@ -26,7 +26,14 @@ public enum GoMemberFact : byte
     /// The named field carries Go array dims in <see cref="GoMemberRecordAttribute.Dims"/>: what
     /// <see cref="GoArrayDimsAttribute"/> says on a field (the dims its pointer or map hop hands down).
     /// </summary>
-    Dims = 3
+    Dims = 3,
+
+    /// <summary>
+    /// The named field's Go type is a defined type over an interface that the emission erased to a <c>using</c>
+    /// alias, and <see cref="GoMemberRecordAttribute.Carrier"/> is its DESCRIPTOR CARRIER: what
+    /// <see cref="GoDescriptorTypeAttribute"/>'s <c>Self</c> says on a field.
+    /// </summary>
+    Descriptor = 4
 }
 
 /// <summary>
@@ -35,10 +42,16 @@ public enum GoMemberFact : byte
 /// </summary>
 /// <remarks>
 /// <para>
-/// Never written by the converter. go2cs-gen's <c>MemberRecordGenerator</c> reads the comment and emits
-/// this on a GENERATED partial of the member's declaring type, since a generated file can add an attribute
-/// to a type but not to a field, so converted code reads as the comment alone. The member is named by its
-/// C# name.
+/// go2cs-gen's <c>MemberRecordGenerator</c> reads the comment and emits this on a GENERATED partial of the
+/// member's declaring type, since a generated file can add an attribute to a type but not to a field, so
+/// converted code reads as the comment alone. The member is named by its C# name.
+/// </para>
+/// <para>
+/// A <see cref="GoMemberFact.Descriptor"/> fact has no comment: the field is already spelled with the Go
+/// type's name, and only the converter knows the carrier that name stands for. The converter writes that
+/// record on the type's accessibility declaration in the package's metadata file (<c>package_info.cs</c>'s
+/// <c>TypeAccessibility</c> section), out of the converted code (docs/PLAN-marker-comment-parity.md,
+/// section 11).
 /// </para>
 /// <para>
 /// golib reads the member attribute OR this record: hand-written files keep the attribute. A record whose
@@ -68,6 +81,12 @@ public sealed class GoMemberRecordAttribute : Attribute
         Dims = dims;
     }
 
+    /// <summary>Records a fact whose value is a type: a <see cref="GoMemberFact.Descriptor"/> fact's carrier.</summary>
+    public GoMemberRecordAttribute(string member, GoMemberFact fact, Type carrier) : this(member, fact)
+    {
+        Carrier = carrier;
+    }
+
     /// <summary>The C# name of the member the fact is about.</summary>
     public string Member { get; }
 
@@ -79,4 +98,7 @@ public sealed class GoMemberRecordAttribute : Attribute
 
     /// <summary>A <see cref="GoMemberFact.Dims"/> fact's dims, outermost first, or null for any other fact.</summary>
     public long[]? Dims { get; }
+
+    /// <summary>A <see cref="GoMemberFact.Descriptor"/> fact's carrier interface, or null for any other fact.</summary>
+    public Type? Carrier { get; }
 }

@@ -57,6 +57,15 @@ public static partial class GoReflect
 
                         break;
 
+                    case GoMemberFact.Descriptor:
+                        if (declaring.GetField(record.Member, DeclaredFields) is null)
+                            throw new InvalidOperationException($"go2cs: [GoMemberRecord] on {declaring.FullName} records a descriptor carrier for '{record.Member}', but {declaring.Name} declares no field of that name");
+
+                        if (record.Carrier is not { IsInterface: true })
+                            throw new InvalidOperationException($"go2cs: [GoMemberRecord] on {declaring.FullName} records a descriptor carrier for '{record.Member}' that is not an interface ({record.Carrier?.FullName ?? "none"})");
+
+                        break;
+
                     default:
                         throw new InvalidOperationException($"go2cs: [GoMemberRecord] on {declaring.FullName} for '{record.Member}' carries an unknown fact ({(byte)record.Fact})");
                 }
@@ -114,6 +123,24 @@ public static partial class GoReflect
         {
             if (record.Fact == GoMemberFact.Dims && record.Member == field.Name)
                 return record.Dims;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// The DESCRIPTOR CARRIER <paramref name="field"/>'s Go type has, which the converter records on its declaring
+    /// type (<see cref="GoMemberFact.Descriptor"/>), or null when there is no such record.
+    /// </summary>
+    internal static Type? RecordedDescriptorCarrier(FieldInfo field)
+    {
+        if (field.DeclaringType is not { } declaring)
+            return null;
+
+        foreach (GoMemberRecordAttribute record in MemberRecords(declaring))
+        {
+            if (record.Fact == GoMemberFact.Descriptor && record.Member == field.Name)
+                return record.Carrier;
         }
 
         return null;

@@ -382,9 +382,11 @@
     <None Include="$(MSBuildThisFileDirectory)seededAliasNameCollision_test.go" />
     <None Include="$(MSBuildThisFileDirectory)sameNameImportAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)sameNamePackageInterface_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)s11Records_test.go" />
     <None Include="$(MSBuildThisFileDirectory)samePackageImplements.go" />
     <None Include="$(MSBuildThisFileDirectory)samePackageImplements_test.go" />
     <None Include="$(MSBuildThisFileDirectory)sanitization_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)section11AttributesGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)shadowedImportAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)siblingAddressedGlobals_test.go" />
     <None Include="$(MSBuildThisFileDirectory)siblingPackageNamespace_test.go" />
@@ -417,6 +419,7 @@
     <None Include="$(MSBuildThisFileDirectory)testdata\hostlaunch\fixture\keys\k" />
     <None Include="$(MSBuildThisFileDirectory)testdata\markercomments\main.cs" />
     <None Include="$(MSBuildThisFileDirectory)testdata\markercomments\main.go" />
+    <None Include="$(MSBuildThisFileDirectory)testdata\s11records\main.go" />
     <None Include="$(MSBuildThisFileDirectory)testdata\validationproof\expected.md" />
     <None Include="$(MSBuildThisFileDirectory)testOnlyPackageEmission_test.go" />
     <None Include="$(MSBuildThisFileDirectory)ToDo.md" />

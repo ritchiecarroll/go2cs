@@ -366,7 +366,19 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	// symbol's declarations, golib's reflection bridge reads the runtime Type), and C# unions the
 	// attributes of every partial declaration — so they belong on the package_info.cs accessibility
 	// record, out of the reader's way, and the `[GoType]` declaration keeps only what identifies it.
-	inlineAttrs := v.recordTypeAccessibility("struct", structTypeName, typeParams, access, localNameAttr+valueCloneAttr)
+	// The record is written after the fields, since the fields add member records to it
+	// (memberRecords); where no record is written they stay inline (recordTypeAccessibility).
+	recordAbsorbs := v.typeAccessibilityAbsorbs(structTypeName)
+	inlineAttrs := localNameAttr + valueCloneAttr
+
+	if recordAbsorbs {
+		inlineAttrs = ""
+	}
+
+	// The member records the fields add to the type's accessibility record: facts about a field the
+	// converter alone knows and converted code does not show (docs/PLAN-marker-comment-parity.md,
+	// section 11), each naming its field by the field's CLR name.
+	var memberRecords strings.Builder
 
 	// A struct carrying a ZERO-SIZE Go field is LARGER in C# than in Go unless it is laid out
 	// explicitly at Go's own offsets — see zeroSizeFieldLayout.go for why that matters (Reinterpret's
@@ -432,9 +444,33 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		// field's OWN type is stamped here; what Elem()/Key() hand down needs the carrier on the
 		// DESCRIPTOR rather than at the access, which is a descriptor-shape change sequenced after
 		// this one.
+		//
+		// The carrier rides the type's accessibility record as [GoMemberRecord(field, Descriptor,
+		// typeof(carrier))], out of the converted code: the field is already spelled with the Go type's
+		// name, and only the converter knows the carrier that name stands for. An embedded field's record
+		// is added where its member name is settled (embedCarrier). Where no record is written (a
+		// hand-owned file, the -tests bridge unit), or a blank field's renamed member cannot be named, the
+		// field keeps the [GoDescriptorType] attribute a hand-written field uses.
+		var embedCarrier string
+
 		if carrier := v.descriptorCarrierFor(v.getType(field.Type, false)); carrier != "" {
-			v.writeString(target, "[GoDescriptorType(Self = typeof(%s))]", carrier)
-			target.WriteString(v.newline)
+			switch {
+			case recordAbsorbs && len(field.Names) == 0:
+				embedCarrier = carrier
+			case recordAbsorbs && !hasBlankFieldName(field.Names):
+				for _, ident := range field.Names {
+					fieldName := getCoreSanitizedIdentifier(ident.Name)
+
+					if strings.TrimPrefix(fieldName, "@") == strings.TrimPrefix(strings.TrimPrefix(structTypeName, ShadowVarMarker), "@") {
+						fieldName = typeCollidingFieldName(fieldName)
+					}
+
+					memberRecords.WriteString(descriptorMemberRecord(fieldName, carrier))
+				}
+			default:
+				v.writeString(target, "[GoDescriptorType(Self = typeof(%s))]", carrier)
+				target.WriteString(v.newline)
+			}
 		}
 
 		var indentOffset int
@@ -732,6 +768,10 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				embedName = typeCollidingFieldName(embedName)
 			}
 
+			if embedCarrier != "" {
+				memberRecords.WriteString(descriptorMemberRecord(embedName, embedCarrier))
+			}
+
 			if ifaceType, ok := identType.(*types.Interface); ok {
 				// Record the promoted pair ONLY when Go itself says the struct implements the
 				// embedded interface — the samePackageImplements doctrine ("record what Go already
@@ -984,6 +1024,10 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 	v.indentLevel--
 	v.writeStringLn(target, "}")
+
+	if recordAbsorbs {
+		v.recordTypeAccessibility("struct", structTypeName, typeParams, access, localNameAttr+valueCloneAttr+memberRecords.String())
+	}
 
 	v.emitPromotedInterfaceForwarders(target, forwarderMark)
 

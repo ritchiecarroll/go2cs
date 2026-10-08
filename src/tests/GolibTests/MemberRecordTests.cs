@@ -136,6 +136,36 @@ public class MemberRecordTests
         InvalidOperationException ambiguous = Assert.ThrowsException<InvalidOperationException>(() => GoReflect.FuncParamDims((Action<array<byte>>)paramdims_twice.twin));
         StringAssert.Contains(ambiguous.Message, "more than one");
     }
+
+    // Section 11 (docs/PLAN-marker-comment-parity.md): a field whose Go type is a defined type over an interface,
+    // erased to a `using` alias, has its descriptor carrier recorded on the declaring type as
+    // [GoMemberRecord(member, Descriptor, typeof(carrier))], which the converter writes in the package's metadata
+    // file. A hand-written field keeps [GoDescriptorType(Self = ...)].
+
+    [TestMethod]
+    public void TheRecordGivesAFieldItsDescriptorCarrier()
+    {
+        Assert.AreEqual(typeof(memberrecord_package.Tokenᴅ), Field(typeof(memberrecord_package.DescriptorRecorded), "tok").DescriptorSelf);
+        Assert.IsNull(Field(typeof(memberrecord_package.DescriptorRecorded), "plain").DescriptorSelf, "an unrecorded field has none");
+    }
+
+    [TestMethod]
+    public void TheHandWrittenAttributeStillGivesAFieldItsDescriptorCarrier()
+    {
+        Assert.AreEqual(typeof(memberrecord_package.Tokenᴅ), Field(typeof(memberrecord_package.DescriptorStamped), "tok").DescriptorSelf);
+    }
+
+    [TestMethod]
+    public void ADescriptorRecordThatCannotHoldItsFactIsRefusedByName()
+    {
+        InvalidOperationException missing = Assert.ThrowsException<InvalidOperationException>(() => GoReflect.GoFields(typeof(memberrecord_package.DescriptorMisrecorded)));
+        StringAssert.Contains(missing.Message, "'vanished'");
+        StringAssert.Contains(missing.Message, "DescriptorMisrecorded");
+
+        InvalidOperationException notInterface = Assert.ThrowsException<InvalidOperationException>(() => GoReflect.GoFields(typeof(memberrecord_package.DescriptorNotInterface)));
+        StringAssert.Contains(notInterface.Message, "'tok'");
+        StringAssert.Contains(notInterface.Message, "not an interface");
+    }
 }
 
 // "package paramdims" -- converted funcs whose array parameters' dims are recorded on the package class, one
@@ -253,5 +283,33 @@ public static class memberrecord_package
     public struct Misrecorded
     {
         public nint present;
+    }
+
+    // The converter's descriptor carrier for `type Token any`: uninhabited, carrying the Go name.
+    [GoLocalName("Token")]
+    public interface Tokenᴅ { }
+
+    [GoMemberRecord("tok", GoMemberFact.Descriptor, typeof(Tokenᴅ))]
+    public struct DescriptorRecorded
+    {
+        public object tok;
+        public object plain;
+    }
+
+    public struct DescriptorStamped
+    {
+        [GoDescriptorType(Self = typeof(Tokenᴅ))] public object tok;
+    }
+
+    [GoMemberRecord("vanished", GoMemberFact.Descriptor, typeof(Tokenᴅ))]
+    public struct DescriptorMisrecorded
+    {
+        public object present;
+    }
+
+    [GoMemberRecord("tok", GoMemberFact.Descriptor, typeof(Tagged))]
+    public struct DescriptorNotInterface
+    {
+        public object tok;
     }
 }
