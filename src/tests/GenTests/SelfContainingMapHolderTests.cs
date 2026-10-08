@@ -6,6 +6,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -97,14 +98,22 @@ public class SelfContainingMapHolderTests
         }
         """;
 
+    // The same fixture in the converter's face-lift B/C spelling: no plain [GoType], and each definition
+    // as a comment after the name (`partial struct ViaNamed /*map[nint, namedSlice]*/;`).
+    private static readonly string CommentSource = Regex.Replace(
+        Regex.Replace(Source, @"\[GoType\(""([^""]*)""\)\] (partial struct \w+(?:<\w+>)?);", "$2 /*$1*/;"),
+        @"\[GoType\] ", "");
+
     private const string Holder = "private readonly global::System.Runtime.CompilerServices.StrongBox<map<";
 
-    private static Dictionary<string, string> RunTypeGenerator()
+    private static Dictionary<string, string> RunTypeGenerator() => RunTypeGenerator(Source);
+
+    private static Dictionary<string, string> RunTypeGenerator(string source)
     {
         string coreDir = System.IO.Path.GetDirectoryName(typeof(object).Assembly.Location)!;
 
         CSharpCompilation compilation = CSharpCompilation.Create("self-containing-map-holder-test",
-            [CSharpSyntaxTree.ParseText(Source, new CSharpParseOptions(LanguageVersion.Latest))],
+            [CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Latest))],
             [
                 MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
                 MetadataReference.CreateFromFile(System.IO.Path.Combine(coreDir, "System.Runtime.dll"))
@@ -208,6 +217,35 @@ public class SelfContainingMapHolderTests
     [TestMethod]
     public void AnOrdinaryMapKeepsItsMapInline() =>
         AssertInline(RunTypeGenerator(), "PlainMap", "map<nint, nint>");
+
+    // Face lift B/C moved a converted declaration's definition into a comment, and the walk read only the
+    // attribute: it stopped at the named slice wrapper, so ViaNamed kept its map inline and the behavioral
+    // SelfContainingMapHolder died with a TypeLoadException on ViaNamed and namedSlice. Every verdict above
+    // must hold with the definitions in the comment spelling.
+    [TestMethod]
+    public void EveryVerdictHoldsWhenTheDefinitionRidesAComment()
+    {
+        Assert.IsFalse(CommentSource.Contains("[GoType"), $"the fixture must be wholly in the comment spelling:\n{CommentSource}");
+        StringAssert.Contains(CommentSource, "partial struct ViaNamed /*map[nint, namedSlice]*/;");
+        StringAssert.Contains(CommentSource, "partial struct Generic<T> /*map[nint, Generic<T>]*/;");
+
+        Dictionary<string, string> sources = RunTypeGenerator(CommentSource);
+
+        AssertHolder(sources, "Direct", "map<nint, Direct>");
+        AssertHolder(sources, "ViaStruct", "map<nint, viaStructV>");
+        AssertHolder(sources, "ViaNested", "map<nint, viaNestedA>");
+        AssertHolder(sources, "ViaArray", "map<nint, array<ViaArray>>");
+        AssertHolder(sources, "ViaSlice", "map<nint, slice<ViaSlice>>");
+        AssertHolder(sources, "ViaMap", "map<nint, map<nint, ViaMap>>");
+        AssertHolder(sources, "ViaNamed", "map<nint, namedSlice>");
+        AssertHolder(sources, "Generic", "map<nint, Generic<T>>");
+        AssertInline(sources, "ViaPtr", "map<nint, ж<ViaPtr>>");
+        AssertInline(sources, "ViaChan", "map<nint, channel<ViaChan>>");
+        AssertInline(sources, "ViaFunc", "map<nint, System.Func<ViaFunc>>");
+        AssertInline(sources, "ViaIface", "map<nint, viaIfaceI>");
+        AssertInline(sources, "ViaPtrStruct", "map<nint, viaPtrStruct>");
+        AssertInline(sources, "PlainMap", "map<nint, nint>");
+    }
 
     // A nested map assignment `m[k1][k2] = v` emits `m[k1].Set(k2, v)` (an indexer setter on the rvalue
     // element is CS1612), so every map wrapper declares Set, writing through the SAME map read its other
