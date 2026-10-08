@@ -779,6 +779,11 @@ public static partial class GoReflect
 
     // First entry of a map through its non-generic enumerator; the boxed KeyValuePair is read by
     // reflection so IMap (more than one implementer) need not widen for a path only TypeOf takes.
+    // A map's entry is a KeyValuePair<,> (golib's map implements only the generic dictionary), whose two
+    // properties the dependency keeps in a trimmed publish (trim stage 1, docs/PLAN-golib-full-trim.md).
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(System.Collections.Generic.KeyValuePair<,>))]
+    [UnconditionalSuppressMessage("Trimming", "IL2075",
+        Justification = "The entry is a KeyValuePair<,>, whose Key and Value the DynamicDependency on this method keeps.")]
     private static bool firstMapEntry(object? map, out object? key, out object? value)
     {
         key = null;
@@ -1289,7 +1294,7 @@ public static partial class GoReflect
         if (!typeof(Delegate).IsAssignableFrom(delegateType))
             return false;
 
-        MethodInfo? invoke = delegateType.GetMethod("Invoke");
+        MethodInfo? invoke = DelegateInvoke(delegateType);
 
         if (invoke is null)
             return false;
@@ -1566,7 +1571,7 @@ public static partial class GoReflect
 
     private static VariadicInvoker buildVariadicInvoker(Type delegateType)
     {
-        MethodInfo? invoke = delegateType.GetMethod("Invoke");
+        MethodInfo? invoke = DelegateInvoke(delegateType);
         ParameterInfo[] parameters = invoke?.GetParameters() ?? [];
 
         if (invoke is null || parameters.Length == 0 ||
@@ -1608,11 +1613,23 @@ public static partial class GoReflect
         return new VariadicInvoker(familyType, trampoline.CreateDelegate<Func<Delegate, object?[], Array, object?>>());
     }
 
+    /// <summary>
+    /// The <c>Invoke</c> method of a delegate type, or null when <paramref name="delegateType"/> is not one.
+    /// </summary>
+    /// <remarks>
+    /// The one place golib reads a delegate's signature by reflection (trim stage 1, docs/PLAN-golib-full-trim.md). A
+    /// delegate type's <c>Invoke</c> is the method the runtime itself calls through: a delegate type cannot be
+    /// constructed without it, and every delegate golib is handed was constructed.
+    /// </remarks>
+    [UnconditionalSuppressMessage("Trimming", "IL2070",
+        Justification = "Invoke is the method the runtime calls a delegate through; no constructed delegate type lacks it.")]
+    internal static MethodInfo? DelegateInvoke(Type delegateType) => delegateType.GetMethod("Invoke");
+
     private static Delegate rebindToVariadicFamily(Delegate del, Type familyType)
     {
         try
         {
-            return Delegate.CreateDelegate(familyType, del, "Invoke");
+            return Delegate.CreateDelegate(familyType, del, DelegateInvoke(del.GetType())!);
         }
         catch (Exception ex) when (ex is ArgumentException or MethodAccessException or MissingMethodException)
         {

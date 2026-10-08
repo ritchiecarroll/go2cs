@@ -451,7 +451,7 @@ public static partial class GoReflect
             !RefusedByGoAssignability(relation, srcDelegate.GetType(), dstType) &&
             haveIdenticalDelegateSignature(srcDelegate.GetType(), dstType))
         {
-            marshalled = Delegate.CreateDelegate(dstType, srcDelegate, srcDelegate.GetType().GetMethod("Invoke")!);
+            marshalled = Delegate.CreateDelegate(dstType, srcDelegate, DelegateInvoke(srcDelegate.GetType())!);
             return true;
         }
 
@@ -465,7 +465,7 @@ public static partial class GoReflect
         if (a == b)
             return true;
 
-        MethodInfo? ia = a.GetMethod("Invoke"), ib = b.GetMethod("Invoke");
+        MethodInfo? ia = DelegateInvoke(a), ib = DelegateInvoke(b);
 
         if (ia is null || ib is null || ia.ReturnType != ib.ReturnType)
             return false;
