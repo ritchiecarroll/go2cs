@@ -164,16 +164,26 @@ type Composed struct {
 	ByKey map[string]struct{ Count int }
 }
 ```
-<!-- illustration: not converter output -->
+<!-- source: src/tests/Behavioral/AnonStructArrayElement/main.cs.target:29-31, 37-39, 45-46, 48, 50 -->
 ```csharp
-partial struct Composed_Ptrs /*dyn*/  { public uint32 Size; }
-partial struct Composed_ByKey /*dyn*/ { public nint Count; }
-
-partial struct Composed {                     // package_info.cs records [GoValueClone("Ptrs")]
+partial struct Composed_Ptrs /*dyn*/ {
+    public uint32 Size;
+}
+…
+partial struct Composed_ByKey /*dyn*/ {
+    public nint Count;
+}
+…
+partial struct Composed {
     public array<ж<Composed_Ptrs>> Ptrs = new(2);
-    public map<@string, Composed_ByKey> ByKey;          // was: map<@string, struct{Count int}>
+…
+    public map<@string, Composed_ByKey> ByKey;
+…
 }
 ```
+
+`package_info.cs` records `[GoValueClone("Ptrs")]` for `Composed`, and `ByKey`'s value type, once the
+inline `struct{Count int}`, is the lifted `Composed_ByKey`.
 
 Two properties keep the shared helper faithful to what the arm did before. The lift name stays
 `<struct>_<field>`, which is well-defined for every shape because a field type carrying an anonymous

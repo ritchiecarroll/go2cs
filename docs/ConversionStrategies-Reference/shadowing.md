@@ -76,13 +76,19 @@ A **struct field** named like a colliding package-level identifier is *not* rena
 
 One case *does* rename the field: when its name equals its **enclosing type's** name *and* that type is itself `Δ`-renamed for a type-vs-method collision. internal/trace's `type Label struct{ Label string }` sits alongside `func (e Event) Label() Label`, so the type becomes `ΔLabel`; the field, whose name equals the type, is renamed to differ (CS0542 — a member cannot share its type's name). The existing rename prefixed a single `Δ`, but that yields `ΔLabel` — *equal* to the renamed type, so the collision persisted. `typeCollidingFieldName` now **doubles** the marker (`ΔΔLabel`) when the name is a package-level collision, exactly as it already did for the keyword-family case (a reserved-word type is `Δ`-renamed too). Deterministic from the name, so the field declaration, the keyed composite-literal key, and every access site all agree:
 
-<!-- illustration: not converter output -->
+Go's `type Label struct{ Label string }` keeps its field under a doubled name, which the composite
+literal's key and each access then use:
+
+<!-- source: src/tests/Behavioral/FieldNameTypeMethodCollision/FieldNameTypeMethodCollision.cs.target:13, 16-17, 19, 22 -->
 ```csharp
-partial struct ΔLabel {                 // Go `type Label struct{ Label string }`
-    public @string ΔΔLabel;                      // field name == type name, doubled to differ
+    return new ΔLabel(ΔΔLabel: e.label, Resource: e.kind);
+…
+partial struct ΔLabel {
+    public @string ΔΔLabel;
+…
 }
-… new ΔLabel(ΔΔLabel: e.label, …)                // composite key
-… l.ΔΔLabel                                      // access
+…
+    return fmt.Sprintf("%s@%d"u8, l.ΔΔLabel, l.Resource);
 ```
 (Guarded by `FieldNameTypeMethodCollision` — a `Label` field in a `Label` struct with a colliding `Label()` method, read/written through a value, the method result, and a composite literal.)
 

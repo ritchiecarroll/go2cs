@@ -4,22 +4,22 @@
 [Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#interfaces)
 Go interfaces are duck-typed: a type implements an interface simply by having the methods. The converter emits each **user-defined** interface as a bare partial interface, and the **`ImplementGenerator`** source generator discovers which concrete types satisfy it and emits the implementing glue plus the implicit conversions. As a result, assigning a concrete value to an interface variable is direct — no reflection lookup or `.As(...)` call is needed:
 
+<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.go:17-19, 21-25, 49-50 -->
 ```go
 type Stringer interface {
-    String() string
+	String() string
 }
+…
+type Named Stringer
 
 type point struct{ x, y int }
 
-func (p point) String() string {
-    return fmt.Sprintf("(%d, %d)", p.x, p.y)
-}
-
-func describe() Stringer {
-    return point{1, 2}    // point implements Stringer -> assignable directly
-}
+func (p point) String() string { return fmt.Sprintf("(%d,%d)", p.x, p.y) }
+…
+	var n Named = point{3, 4} // concrete point -> Named (defined over the Stringer interface)
+	fmt.Println(n.String())
 ```
-<!-- illustration: not converter output -->
+<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:10-20, 46-47 -->
 ```csharp
 partial interface Stringer {
     @string String();
@@ -29,14 +29,16 @@ partial struct point {
     internal nint x, y;
 }
 
-internal static @string String(this ref point p) {
-    return fmt.Sprintf("(%d, %d)"u8, p.x, p.y);
+internal static @string String(this point p) {
+    return fmt.Sprintf("(%d,%d)"u8, p.x, p.y);
 }
-
-internal static Stringer describe() {
-    return new point(1, 2);   // implicit conversion emitted by ImplementGenerator
-}
+…
+    Named n = new point(3, 4);
+    fmt.Println(n.String());
 ```
+
+`Named` is defined over `Stringer`, so in C# it is another name for that interface. Assigning
+`new point(3, 4)` to it needs no cast: `ImplementGenerator` emits the implicit conversion.
 
 The well-known built-in interfaces (`error`, `fmt.Stringer`, etc.) are hand-written in `golib`/the baseline rather than generated from a converted declaration, but concrete types implement them the same duck-typed way. (Earlier strategies used a generic `As`/reflection mechanism; that has been superseded by the compile-time source generators.)
 
@@ -408,11 +410,19 @@ A Go **type** whose name is a C# reserved keyword (`type fixed struct{…}`, `ty
    above rely on: a keyword + suffix is never a keyword).
 
 Emitted form (from the `KeywordNamedTypes` goldens and its generated adapters):
+At a cast site the converter composes the adapter's name, with no marker:
+
+<!-- source: src/tests/Behavioral/KeywordNamedTypes/main.cs.target:99, 103 -->
+```csharp
+sizer p = new fixedжsizer(Ꮡf);
+…
+@lock lp = new fixedжlock(Ꮡf);
+```
+
+The generated value form escapes the declaration, and the adapter escapes each reference to the type:
+
 <!-- illustration: not converter output -->
 ```csharp
-sizer p = new fixedжsizer(Ꮡf);                          // converter cast site — composed, no marker
-@lock lp = new fixedжlock(Ꮡf);
-
 partial struct @fixed : global::go.main_package.@lock   // generator value-form — escaped declaration
 
 internal sealed class fixedжlock : global::go.main_package.@lock, IжAdapter

@@ -463,11 +463,12 @@ type (
     holder struct{ myInt; MyInt }
 )
 ```
-<!-- illustration: not converter output -->
+<!-- source: src/tests/Behavioral/LiftedLocalTypes/main.cs.target:45-47, 49 -->
 ```csharp
-partial struct embeddedLocalTypes_holder /*dyn*/ {
+internal partial struct embeddedLocalTypes_holder /*dyn*/ {
     internal partial ref embeddedLocalTypes_myInt myInt { get; }
     public partial ref embeddedLocalTypes_MyInt MyInt { get; }
+…
 }
 ```
 
