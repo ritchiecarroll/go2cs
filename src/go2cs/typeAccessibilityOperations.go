@@ -105,8 +105,14 @@ func ensureTypeAccessibilitySection(packageInfoLines []string) []string {
 	}
 
 	if markerIndex >= 0 {
-		// Section already present; converge its prose on the current wording (migrateProseBlock).
-		return migrateProseBlock(packageInfoLines, legacyTypeAccessibilityFirstLine, openTag, typeAccessibilityProseLines())
+		// Section already present; converge its prose on the current wording (migrateProseBlock), from the
+		// ORIGINAL block and from any block that opens with the current first line, so a rewrite that keeps
+		// that line (the face lift's "Go type declarations") reaches every persisted file. Idempotent: a
+		// block already current is rewritten to the identical text.
+		prose := typeAccessibilityProseLines()
+		packageInfoLines = migrateProseBlock(packageInfoLines, legacyTypeAccessibilityFirstLine, openTag, prose)
+
+		return migrateProseBlock(packageInfoLines, strings.TrimSpace(prose[0]), openTag, prose)
 	}
 
 	insertIndex := classBodyInsertIndex(packageInfoLines)
