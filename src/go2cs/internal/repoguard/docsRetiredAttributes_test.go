@@ -32,7 +32,9 @@ import (
 // WHAT COUNTS AS SHOWING ONE: the attribute written as an attribute, "[Name]", "[Name(" or "[Name,",
 // in a fenced sample, a code span or plain prose. A row may name one form: plain "[GoType]" and
 // "[GoType("num:int64")]" leave in different seats. The class name without its bracket (a generator's
-// name, "GoRecvAttribute") is not a showing.
+// name, "GoRecvAttribute") is not a showing. The converter writes each attribute in its own brackets,
+// so an attribute second in a list ("[GoInit, GoRecv]") or behind a target ("[param: ...]") is not read;
+// neither occurs in converted code or in the pages.
 //
 // WHAT IS NOT READ:
 //   - an HTML comment, which a visitor never sees and which holds the dated derivation of a rule;
@@ -40,15 +42,18 @@ import (
 //     (frozenSnapshot), and the pages retiredAttributeHistory names, which describe an earlier state
 //     and say so.
 //
-// THE DECLARED EXCEPTION. Hand-written files keep these attributes for good, and a generated part
-// carries some of them, so a page may still have to show one. It says so with a marker comment on the
-// line before the block:
+// THE DECLARED EXCEPTION. A page may still have to show one, for three reasons: hand-written files
+// keep these attributes for good; a generated part carries some of them; and a converted func literal
+// or local function keeps [GoArrayDims] on its parameters, because no record can name it. The page says
+// so with a marker comment, alone on the line before the block:
 //
 //	<!-- attribute-shown: hand-written code keeps it -->
 //
 // The marker covers the block that follows it: the fenced sample if one opens next, otherwise the
-// lines up to the next blank line. It needs a reason, and a marker that covers no showing is itself a
-// finding, so the exceptions cannot outlive what they excuse.
+// lines up to the next blank line. It needs a reason, its line holds nothing else, and a marker that
+// covers no showing is itself a finding, so the exceptions cannot outlive what they excuse. "Covers" is
+// judged against docsFaceLiftAttributes as well as the list, so a marker is right on any tree, whether
+// or not its attribute's row has landed yet.
 //
 // SCOPE: the living pages under docs/ (livingMarkdownPages, less retiredAttributeHistory), and every
 // tracked Markdown file under .claude/rules/ and .claude/skills/.
@@ -111,17 +116,24 @@ func retiredAttributePattern(name string) *regexp.Regexp {
 }
 
 // retiredAttributesShown returns, by 1-based line, each showing of a listed attribute in text, and a
-// finding for each marker that has no reason or covers no showing. exceptions counts the markers used.
+// finding for each marker that has no reason, shares its line, or covers no showing of an attribute in
+// retired or in docsFaceLiftAttributes. exceptions counts the markers used.
 func retiredAttributesShown(text string, retired []retiredAttribute) (findings []retiredFinding, exceptions int) {
 	type compiled struct {
-		attr retiredAttribute
-		re   *regexp.Regexp
+		attr   retiredAttribute
+		re     *regexp.Regexp
+		listed bool // in retired: a showing outside a marker is a finding
 	}
 
 	var patterns []compiled
 
 	for _, a := range retired {
-		patterns = append(patterns, compiled{a, retiredAttributePattern(a.name)})
+		patterns = append(patterns, compiled{a, retiredAttributePattern(a.name), true})
+	}
+
+	// The face-lift rows are read too, for what a marker covers only.
+	for _, a := range docsFaceLiftAttributes {
+		patterns = append(patterns, compiled{a, retiredAttributePattern(a.name), false})
 	}
 
 	lines := strings.Split(strings.ReplaceAll(text, "\r\n", "\n"), "\n")
@@ -214,6 +226,10 @@ func retiredAttributesShown(text string, retired []retiredAttribute) (findings [
 					findings = append(findings, retiredFinding{i + 1, "an attribute-shown marker gives no reason"})
 				}
 
+				if strings.TrimSpace(line) != m[0] {
+					findings = append(findings, retiredFinding{i + 1, "an attribute-shown marker shares its line, and nothing else on that line is read -- put the marker alone on the line before the block"})
+				}
+
 				pending, markerLine = true, i+1
 				continue
 			}
@@ -238,6 +254,10 @@ func retiredAttributesShown(text string, retired []retiredAttribute) (findings [
 
 				if open {
 					covered++
+					continue
+				}
+
+				if !p.listed {
 					continue
 				}
 
@@ -295,6 +315,11 @@ func TestRetiredAttributeRuleReadsEachShape(t *testing.T) {
 		{"a marker with no reason", all, "<!-- attribute-shown: -->\n`[GoRecv]`\n", []int{1}, 1},
 		{"a marker that covers nothing", all, "<!-- attribute-shown: hand-written -->\nNo attribute here.\n", []int{1}, 1},
 		{"a marker at the end of the page", all, "text\n\n<!-- attribute-shown: hand-written -->\n", []int{3}, 0},
+		{"a marker is right before its attribute's row lands", nil, "<!-- attribute-shown: hand-written -->\n```csharp\n[GoRecv] void M(this ref T t) {\n```\n", nil, 1},
+		{"a marker covers a form the list does not hold yet", plainOnly, "<!-- attribute-shown: a lambda keeps it -->\n`([GoArrayDims(32)] array<byte> a) => {`\n", nil, 1},
+		{"a marker that covers nothing, on an empty list", nil, "<!-- attribute-shown: hand-written -->\nNo attribute here.\n", []int{1}, 1},
+		{"text after a marker on its line is refused", all, "<!-- attribute-shown: x --> `[GoRecv]`\n", []int{1, 1}, 0},
+		{"text before a marker on its line is refused", all, "See <!-- attribute-shown: x -->\n`[GoRecv]`\n", []int{1}, 1},
 	}
 
 	for _, c := range cases {
