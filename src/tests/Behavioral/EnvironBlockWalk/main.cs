@@ -9,7 +9,7 @@ using syscall = syscall_package;
 partial class main_package {
 
 
-[GoType("dyn")] partial struct sentinelsᴛ1 {
+partial struct sentinelsᴛ1 /*dyn*/ {
     internal @string name;
     internal @string value;
 }
