@@ -1,0 +1,5 @@
+# TRAIN FL -- RULED LOST LINES of the precheck's BOTH arm (tFL-helpers.py). One line per (row, path):
+#   row|path|lost-count|digest|ruling
+# digest = the first 12 hex of sha256 over the lost lines, each stripped, sorted, joined by newlines (the arm prints
+# 'lost-digest=<d>' on a FAIL). A line here admits EXACTLY those lost lines on that pair and nothing else; a line no
+# merge uses is itself a FAIL. Q's three lines (trainQ/tQ-ruled-both.txt) were Q's rows and are not carried.

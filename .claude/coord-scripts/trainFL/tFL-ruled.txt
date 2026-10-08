@@ -1,0 +1,32 @@
+# TRAIN FL -- the RULED resolutions the map and the assembly may make (tFL-resolve.py reads this file; nothing else does).
+# One line per (row, file):  ref|sha10|path|kind|hunks=N|ruling
+#   ref    the row's ref as the seat table writes it (no claude/ prefix)
+#   sha10  the first ten characters of the row's SEATED sha: a re-cut under the same name does NOT inherit the ruling
+#   path   the one file the ruling covers
+#   kind   append-both        = an insert against an insert at one point (EMPTY base in the diff3 form), both sides kept
+#                               whole, the union's lines first, the row's below them (merge order)
+#          append-both-sorted = the same shape, both sides' lines of each hunk written in sorted order (stripped,
+#                               case-insensitive): an alphabetical registration list (FL7). No other kind exists.
+#   hunks  how many such hunks the file holds in that merge
+# ANY conflict that no line here names ABORTS the map row and the assembly, with the row and every hunk named.
+# A line that no merge uses is printed as UNUSED by both scripts (the order moved, or the row merges clean now).
+# The file's content hash is stamped by the map and compared by the assembly: edit it BEFORE the map, never between.
+#
+# --- ROWS 1-10 WERE MERGED BY HAND (COORD, 2026-10-08, signed, pushed: claude/coord-trainFL-union 14c543bb06). Their
+#     three hand resolutions are RECORDS here, commented out: the map starts AT the hand union (MAP_FROM, FL8) and never
+#     merges those rows again. Read from the objects (tFL-resolve-controls.sh arms C10, C10n; the BOARD pair at the derive: tFL-CHANGES.md FL7): row 8's projitems IS
+#     append-both-sorted byte for byte; rows 3 and 4's BOARD are append-both less ONE separator blank line the hand
+#     merge dropped (26515 lines by rule, 26514 by hand at 06d951c084), so no kind reproduces them: that is why the map
+#     starts at the hand union and not at BASE.
+#g-caller-line-per-call|7ead2cf761|docs/phase4/BOARD-next-validation-candidates.md|append-both|hunks=1|HAND at 06d951c084 (one blank line dropped); RECORD
+#g-board-caller-line-rows|77caa9d156|docs/phase4/BOARD-next-validation-candidates.md|append-both|hunks=1|HAND at 06fa3940d5 (one blank line dropped); RECORD
+#c2-facelift-chain-q|18e9323dc3|src/go2cs/go2cs-src.projitems|append-both-sorted|hunks=1|HAND at 4613dfe676 'kept both in alphabetical order' (ledger 04:11 10-08); RECORD, reproduced by the kind
+#
+# --- ROW 11 (i9-aot-metadata-token-on-g cfe3d6bae7, 3 own commits on 7ead2cf761, 9 files): MERGES CLEAN on the
+#     union 14c543bb06 (git merge-tree, read 2026-10-08 after the derive's table check fetched it: no conflict marker in
+#     any file, the BOARD and src/core/runtime/managed_impl.cs included). No ruling is owed. Its predecessor dcd82dc87d
+#     met the union's BOARD and managed_impl.cs twice: that is what the restatement on G's per-call tip closed.
+#
+# --- ROW 12 (R's docs seat): its tip at the derive (6ae0918484, cut on the base) merges CLEAN on 14c543bb06 (merge-tree).
+#     Its final tip is OWED (the seat table's header line 4). A conflict at the map is written here, with the row's sha,
+#     BEFORE the map runs again.
