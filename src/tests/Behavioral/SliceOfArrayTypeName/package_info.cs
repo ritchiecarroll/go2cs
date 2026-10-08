@@ -56,7 +56,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("SliceOfArrayTypeName.go", "SliceOfArrayTypeName.cs", "AAkmggAYBoKCgoKCgoKCAAAWgoiCgoY=")]
+[assembly: go.GoPositionMap("SliceOfArrayTypeName.go", "SliceOfArrayTypeName.cs", "AAkmggAYBoKCgoKCgoKCAAAWgoiCgoY=", "", "", "50=TypeOf/1/2/1,Elem/1/2/1,String/1/1/1,TypeOf/2/2/2,Elem/2/2/2,Len/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -2571,8 +2571,69 @@ partial class runtime_package
     private static (string file, int line) goILPosition(System.Reflection.MethodBase method, int ilOffset)
     {
         (string? csFile, int csLine) = ilOffset >= 0 ? methodSourcePosition(method, ilOffset) : (null, 0);
-        return goSourcePosition(method, csFile, csLine);
+        (string file, int line) = goSourcePosition(method, csFile, csLine);
+
+        return (file, line + goCallLineDelta(method, csFile, csLine, ilOffset));
     }
+
+    // THE CALL'S OWN LINE inside a multi-line statement. Go answers a caller's line with the line of the
+    // call's own `(`; a frame inside a C# statement reports the statement's sequence point, so the map
+    // alone answers the statement's first line for every call in it. The record's per-call table
+    // (GoPositionMapAttribute.Calls) names, for a statement with calls on later lines, each such call by
+    // its callee, its ordinal among the statement's calls to that name and their total, in evaluation
+    // order. Here the frame's call (the instruction at ilOffset) is named by its target, and the
+    // statement's same-name calls are counted in its IL, from the statement's sequence point to the next
+    // one: the call's ordinal is its place among them. Only an entry whose ordinal AND total match
+    // answers, so a statement the emission split or hoisted, whose IL counts differently, keeps its
+    // statement line rather than naming another call's. 0 whenever anything is missing: no record, no
+    // entry for the statement, an offset that is not a call, no IL (Native AOT).
+    private static int goCallLineDelta(System.Reflection.MethodBase method, string? csFile, int csLine, int ilOffset)
+    {
+        if (ilOffset < 0 || csLine <= 0)
+            return 0;
+
+        string csPath = goSourcePath(csFile);
+
+        if (csPath.Length == 0 || goPositionMapRecord(method, csPath) is not { } record || !record.HasCallsAt(csLine))
+            return 0;
+
+        if (callSiteOffsets(method) is not { } calls || Array.BinarySearch(calls, ilOffset) < 0)
+            return 0;
+
+        if (sequencePointOffsets(method) is not { Length: > 0 } statements || callTarget(method, ilOffset) is not { } target)
+            return 0;
+
+        int index = Array.BinarySearch(statements, ilOffset);
+
+        if (index < 0)
+            index = ~index - 1;
+
+        if (index < 0)
+            return 0;
+
+        int start = statements[index];
+        int end = index + 1 < statements.Length ? statements[index + 1] : int.MaxValue;
+        string name = goCalleeName(target);
+        int ordinal = 0, total = 0;
+
+        foreach (int call in calls)
+        {
+            if (call < start || call >= end || callTarget(method, call) is not { } other || goCalleeName(other) != name)
+                continue;
+
+            total++;
+
+            if (call <= ilOffset)
+                ordinal++;
+        }
+
+        return record.CallLineDelta(csLine, name, ordinal, total) ?? 0;
+    }
+
+    // The Go name a call target is recorded under: its method name less the converter's `@` keyword
+    // escape (never in metadata) and `Δ` collision or reserved-word prefix.
+    private static string goCalleeName(System.Reflection.MethodBase target) =>
+        target.Name.TrimStart('Δ');
 
     // The mapping itself, from a C# position however it was read: a live frame's file info, or a PDB
     // sequence point read at print time (goCreatorPosition).
@@ -2637,7 +2698,7 @@ partial class runtime_package
             foreach (object attribute in assembly.GetCustomAttributes(typeof(GoPositionMapAttribute), false))
             {
                 if (attribute is GoPositionMapAttribute map && map.CsFile.Length > 0)
-                    records[map.CsFile] = new GoPositionMapRecord(map.GoFile, map.Table, map.FuncLits, map.MethodValues);
+                    records[map.CsFile] = new GoPositionMapRecord(map.GoFile, map.Table, map.FuncLits, map.MethodValues, map.Calls);
             }
         }
         catch (Exception)
@@ -2736,9 +2797,89 @@ partial class runtime_package
         remapModuleSource(goFile, normalizeModuleSourceRemap((moduleRoot, stagedRoot)) is { } entry ? (entry.From, entry.To) : null);
 
     // One converted file's recorded position map.
-    private sealed class GoPositionMapRecord(string goFile, string table, string funcLits = "", string methodValues = "")
+    private sealed class GoPositionMapRecord(string goFile, string table, string funcLits = "", string methodValues = "", string calls = "")
     {
         private Dictionary<int, string[]>? m_methodValues;
+
+        // One later-line call of a statement (GoPositionMapAttribute.Calls).
+        private readonly record struct CallLine(string Name, int Ordinal, int Total, int Delta);
+
+        private Dictionary<int, CallLine[]>? m_calls;
+
+        // HasCalls is false for a record without a per-call table, so every frame of such a file pays
+        // nothing beyond this test.
+        public bool HasCalls => calls.Length > 0;
+
+        // CallLineDelta answers the Go line, less the statement's, of the call recorded for the statement
+        // whose sequence point starts on csLine under the callee `name` at `ordinal` of `total` same-name
+        // calls, or null when no entry matches (a statement without later-line calls, a call on the
+        // statement's own line, a count the IL disagrees with). A malformed entry drops the whole table:
+        // the frame then keeps its statement's line, today's answer, rather than a plausible-but-wrong one.
+        public int? CallLineDelta(int csLine, string name, int ordinal, int total)
+        {
+            if (!decodedCalls().TryGetValue(csLine, out CallLine[]? recorded))
+                return null;
+
+            foreach (CallLine call in recorded)
+            {
+                if (call.Ordinal == ordinal && call.Total == total && call.Name == name)
+                    return call.Delta;
+            }
+
+            return null;
+        }
+
+        // HasCallsAt answers whether the statement whose sequence point starts on csLine has a recorded
+        // later-line call, so a frame anywhere else never reads its IL for one.
+        public bool HasCallsAt(int csLine) => HasCalls && decodedCalls().ContainsKey(csLine);
+
+        private Dictionary<int, CallLine[]> decodedCalls()
+        {
+            if (m_calls is null)
+            {
+                Dictionary<int, CallLine[]> decoded = new();
+
+                foreach (string group in calls.Split(';', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    int equals = group.IndexOf('=');
+
+                    if (equals <= 0 || !int.TryParse(group.AsSpan(0, equals), out int line) || line <= 0)
+                    {
+                        decoded.Clear();
+                        break;
+                    }
+
+                    List<CallLine> entries = [];
+
+                    foreach (string entry in group[(equals + 1)..].Split(','))
+                    {
+                        string[] parts = entry.Split('/');
+
+                        if (parts.Length != 4 || parts[0].Length == 0 ||
+                            !int.TryParse(parts[1], out int entryOrdinal) || !int.TryParse(parts[2], out int entryTotal) ||
+                            !int.TryParse(parts[3], out int delta) || entryOrdinal <= 0 || entryTotal < entryOrdinal)
+                        {
+                            entries.Clear();
+                            break;
+                        }
+
+                        entries.Add(new CallLine(parts[0], entryOrdinal, entryTotal, delta));
+                    }
+
+                    if (entries.Count == 0)
+                    {
+                        decoded.Clear();
+                        break;
+                    }
+
+                    decoded[line] = entries.ToArray();
+                }
+
+                Interlocked.CompareExchange(ref m_calls, decoded, null);
+            }
+
+            return m_calls;
+        }
 
         // MethodValuesFor answers the `pkg.Recv.Method` names of the value-receiver method values taken on
         // goLine (GoPositionMapAttribute.MethodValues), or null when none is recorded there. A malformed

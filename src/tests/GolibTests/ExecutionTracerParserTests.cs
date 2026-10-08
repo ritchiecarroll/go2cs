@@ -108,7 +108,7 @@ public class ExecutionTracerParserTests
         }
     }
 
-    private static (string? Go, string? Skip) Oracle() =>
+    internal static (string? Go, string? Skip) Oracle() =>
         ResolveOracle(Environment.GetEnvironmentVariable("GOROOT"), Environment.GetEnvironmentVariable("PATH"), PinnedRelease(), VersionOf);
 
     // Runs the toolchain's parser on `trace`: (exit code, stdout, stderr).

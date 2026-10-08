@@ -202,6 +202,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckCallerLineCallSite() => CheckTarget("CallerLineCallSite");
 
     [TestMethod]
+    public void CheckCallerLineMultiLine() => CheckTarget("CallerLineMultiLine");
+
+    [TestMethod]
     public void CheckCanonicalTypeIdentity() => CheckTarget("CanonicalTypeIdentity");
 
     [TestMethod]

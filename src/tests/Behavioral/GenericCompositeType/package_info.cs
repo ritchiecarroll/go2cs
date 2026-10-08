@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("GenericCompositeType.go", "GenericCompositeType.cs", "AAsWgtyCgtyEuIbKhsqGgoKC")]
+[assembly: go.GoPositionMap("GenericCompositeType.go", "GenericCompositeType.cs", "AAsWgtyCgtyEuIbKhsqGgoKC", "", "", "33=NewOption/1/2/1,NewEmptyOption/1/1/2,NewOption/2/2/3;39=NewOption/1/2/1,NewOption/2/2/2,NewEmptyOption/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go;

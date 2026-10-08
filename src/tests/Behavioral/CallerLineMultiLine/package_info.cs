@@ -10,11 +10,12 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
+global using osꓸDirEntry = go.io.fs_package.DirEntry;
+global using osꓸFileInfo = go.io.fs_package.FileInfo;
+global using osꓸFileMode = go.io.fs_package.FileMode;
+global using osꓸPathError = go.io.fs_package.PathError;
+global using osꓸSignal = go.os_package.ΔSignal;
+global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -32,6 +33,7 @@ using static go.main_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoDynamicTypeLift("7374727563747b6120696e743b206220696e747d", "pkgStructsᴛ1")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -41,8 +43,6 @@ using static go.main_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<Blob, Encoder>(Pointer = true)]
-[assembly: GoImplement<Tag, Encoder>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -56,7 +56,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "ABM+ooKUAAkOooKUAA4gooKU2qKClL6CgoKCgoKCABMIhIKCgoKYgoKCgpiCgoKagoKCmIKIgoiOgoKCmIKCjoKCgoiCjoKCgoKAgpQ=", "166-166:1", "", "75=ValueOf/1/1/1,IsValid/1/1/1,TypeOf/1/1/1,Sprint/1/1/1;137=Kind/1/2/1,IsNil/1/2/1,IsZero/1/1/1,Elem/1/2/1,Kind/2/2/1,Elem/2/2/1,IsNil/2/2/1")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "AAoilKKCuIKC6qKCgqaCgoLagoKmgMiCgqbK2AAHEIIACQqCgoKGjKqGhoKYgpiEmKaG", "", "", "63=line/2/4/1,line/3/4/1,line/4/4/2;68=line/2/3/1,line/3/3/2;74=line/1/4/1,line/2/4/1,line/3/4/3,line/4/4/4;83=line/2/3/1,line/3/3/2;97=Add/2/3/1,Add/3/3/2,Done/1/1/3;98=line/2/3/1,line/3/3/2;101=line/2/3/1,line/3/3/2;104=Invoke/2/2/1;107=Line/2/2/1;109=line/2/2/1,rec/2/2/1;112=line/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -72,14 +72,9 @@ public static partial class main_package
     // via declarations below.
 
     // <TypeAccessibility>
-    internal partial struct holder {}
-    internal partial struct main_sh {}
-    internal partial struct main_si {}
-    internal partial struct main_sp {}
-    public partial interface Encoder {}
-    public partial struct Blob {}
-    public partial struct Stamp {}
-    public partial struct Tag {}
+    internal partial struct chain {}
+    internal partial struct impl {}
+    internal partial struct pkgStructsᴛ1 {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -90,6 +85,7 @@ public static partial class main_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
-    [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
+    [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
+    [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     // </ImportInitializers>
 }

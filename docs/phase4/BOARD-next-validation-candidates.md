@@ -26503,5 +26503,12 @@ not (the standing ruling).
 `hooks/slog` read failing on the control and validated on the seat, in the same runs; its reason is not read here.
 
 — G
+## 2026-10-07, G: two caller-frame findings from the per-call seat (claude/g-caller-line-per-call)
+
+Both read on the windows box, Release, on CallerLineMultiLine as first written (`752753ceda`, all shapes printed). Neither is caused by the per-call table; both read identically without it.
+
+**2026-10-07, OPEN (G), THE INTERFACE-DISPATCH FRAME: a method called through an INTERFACE reports the go2cs-gen dispatch shim as its caller's frame.** Shape: `type liner interface{ Line() int }`, `type impl struct{}` whose value method `Line` reads `runtime.Caller(1)`, then `var li liner = impl{}` and `li.Line()` twice, one call per line. Go reads 99 and 100, the calling statement's lines. The converted program read 24 and 24: an unrelated line of `main.go`, the same for both calls, tiered and at TC0 alike. The call goes through the generated interface implementation's forwarder (a go2cs-gen emitted member), so `Caller(1)` lands on that frame, which maps to no Go line of its own. Go's itab dispatch adds no frame. The S5 shape was replaced in CallerLineMultiLine by a direct method call, so that guard stays single-cause. Not sized. Candidates: skip the dispatch forwarder's frame, as Go has none, or attribute it to its caller. The S5 shape is the repro.
+
+**2026-10-07, OPEN (G), PRE-EXISTING TC0 DRIFT INTO THE PREVIOUS STATEMENT.** At `DOTNET_TieredCompilation=0` (Release), a call inside a multi-line package var initializer, or inside a multi-line local sum, reads a line of the PREVIOUS statement. CallerLineMultiLine: `pkgSum` (three calls, one per line) read 141 = 3 x 47, pkgSlice's line, where tiered read 156 (its own statement, three times) and Go 159; the local sum S3 read 246 = 3 x 82, S2's line, where tiered read 261 and Go 264. Identical at `752753ceda` (no per-call table) and with it. Mechanism not read. The candidate is `returnSiteILOffset`'s "previous call's record" reading, meeting a full-opt layout whose reported offset falls before the statement's boundary. **The default `-tests` configuration IS Release with tiering off**, so default rows are exposed to it.
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
