@@ -1,0 +1,2 @@
+# module-path	nuget-id	status	source-repo	registered	contact
+github.com/google/uuid	nugetgo.github.com.google.uuid	community	https://github.com/ritchiecarroll/uuid-cs	2026-10-09	owner
