@@ -33,7 +33,7 @@ using static go.encoding.base32_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/base32/base32_test.go", "base32_test.cs", "ABkqABEqyqKCgoKU5oKCgoKCuIKCgoKCggAJCIKCgoKCgoKClIKClIKC6IKCgoKEgoKEgpTKgoKCgoKEgoKEgpQADwqCgoKCgoKClISCgoSCgoSCgoKCAAoKgoKCgoKClIKCgpQACiTygoKUgpSClIKCgpSCAA0KooIAMXCygoKCgpSUgoKCgoKCgqiC/KKCgoKSgoKCgIIACQ6igoKSgoKCgoKCgoKC6IKCgoKCgoKCgpSClAANCIIAGDiCgoKCgpSUlMQACAqCgoKCgpSCgoKClIKClIKCloKCgoKmuIKCgoKClICCAAkKlAAKFpa41oIADBaEgoKCloKCgoKWgriigoKCgriigoKCuKKCgoKCgraigoKCuIKCgoKEgpSCyoKCgoKEgpSCyoLMgoSChIKCloIACAyChIKCloKCAAkIggAvcoKClqKClJaChIIACgyCABU8gpKCooKUloKEgpKCAAoKgoIAFTaUgqSCpIKAggALCoKCABAslIKkgqSCgILagrqChIKCgoSCgpaEgtyCuoKCgoKWgoKWgtyCuoKCgoKCloSEgoKCgoKUgqiC", "663-668:1;714-719:1")]
+[assembly: go.GoPositionMap("encoding/base32/base32_test.go", "base32_test.cs", "ABkqABEqyqKCgoKU5oKCgoKCuIKCgoKCggAJCIKCgoKCgoKClIKClIKC6IKCgoKEgoKEgpTKgoKCgoKEgoKEgpQADwqCgoKCgoKClISCgoSCgoSCgoKCAAoKgoKCgoKClIKCgpQACiTygoKUgpSClIKCgpSCAA0KooIAMXCygoKCgpSUgoKCgoKCgqiC/KKCgoKSgoKCgIIACQ6igoKSgoKCgoKCgoKC6IKCgoKCgoKCgpSClAANCIIAGDiCgoKCgpSUlMQACAqCgoKCgpSCgoKClIKClIKCloKCgoKmuIKCgoKClICCAAkKlAAKFpa41oIADBaEgoKCloKCgoKWgriigoKCgriigoKCuKKCgoKCgraigoKCuIKCgoKEgpSCyoKCgoKEgpSCyoLMgoSChIKCloIACAyChIKCloKCAAkIggAvcoKClqKClJaChIIACgyCABU8gpKCooKUloKEgpKCAAoKgoIAFTaUgqSCpIKAggALCoKCABAslIKkgqSCgILagrqChIKCgoSCgpaEgtyCuoKCgoKWgoKWgtyCuoKCgoKCloSEgoKCgoKUgqiC", "663-668:1;714-719:1", "", "638=WithPadding/1/2/2,WithPadding/2/2/3;894=WithPadding/1/1/2;917=WithPadding/1/1/2;939=WithPadding/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -42,12 +42,14 @@ namespace go.encoding;
 public static partial class base32_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
 
     // <TypeAccessibility>
+    [GoLocalName("test")] partial struct TestDecodedLen_test {}
+    [GoLocalName("test")] partial struct TestEncodedLen_test {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

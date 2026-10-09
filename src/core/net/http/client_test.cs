@@ -118,14 +118,14 @@ internal static void testClientHead(ж<testing.T> Ꮡt, testMode mode) {
     }
 }
 
-[GoType] partial struct recordingTransport {
+partial struct recordingTransport {
     internal ж<Δhttp.Request> req;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string dummyImplˢ = "dummy impl"u8;
 
-[GoRecv] internal static (ж<Δhttp.Response> resp, error err) RoundTrip(this ref recordingTransport t, ж<Δhttp.Request> Ꮡreq) {
+internal static (ж<Δhttp.Response> resp, error err) RoundTrip(this ref recordingTransport t, ж<Δhttp.Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     t.req = Ꮡreq;
@@ -430,7 +430,7 @@ internal static void testClientRedirectsContext(ж<testing.T> Ꮡt, testMode mod
     }
 }
 
-[GoType] partial struct redirectTest {
+partial struct redirectTest {
     internal @string suffix;
     internal nint want; // response code
     internal @string redirectBody;
@@ -529,7 +529,7 @@ internal static readonly @string contentLengthˢ = "Content-Length"u8;
 internal static readonly @string codeˢ = "code"u8;
 internal static readonly @string nextˢ = "next"u8;
 
-[GoType("dyn")] internal partial struct testRedirectsByMethod_log {
+internal partial struct testRedirectsByMethod_log /*dyn*/ {
     public partial ref global::go.sync_package.Mutex Mutex { get; }
     public partial ref bytes_package.Buffer Buffer { get; }
 }
@@ -796,7 +796,7 @@ public static void TestClientSendsCookieFromJar(ж<testing.T> Ꮡt) {
 
 // Just enough correctness for our redirect tests. Uses the URL.Host as the
 // scope of all cookies.
-[GoType] partial struct TestJar {
+partial struct TestJar {
     internal sync.Mutex m;
     internal map<@string, slice<ж<httpꓸCookie>>> perURL;
 }
@@ -924,7 +924,7 @@ internal static void testJarCalls(ж<testing.T> Ꮡt, testMode mode) {
 
 // RecordingJar keeps a log of calls made to it, without
 // tracking any cookies.
-[GoType] partial struct RecordingJar {
+partial struct RecordingJar {
     internal sync.Mutex mu;
     internal bytes.Buffer log;
 }
@@ -994,8 +994,8 @@ internal static void testStreamingGet(ж<testing.T> Ꮡt, testMode mode) {
     }
 }
 
-[GoType] partial struct writeCountingConn {
-    [GoEmbedded] public net_package.Conn Conn;
+partial struct writeCountingConn {
+    /*embed*/ public net_package.Conn Conn;
     internal ж<nint> count;
 }
 
@@ -1027,7 +1027,7 @@ internal static error SetReadDeadline(this writeCountingConn recvᴛ, time.Time 
 // interface field in *writeCountingConn's method set; see the pointer-only satisfaction record.
 internal static error SetWriteDeadline(this writeCountingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetWriteDeadline(t);
 
-[GoRecv] internal static (nint, error) Write(this ref writeCountingConn c, slice<byte> p) {
+internal static (nint, error) Write(this ref writeCountingConn c, slice<byte> p) {
     c.count.Value++;
     return c.Conn.Write(p);
 }
@@ -1283,7 +1283,7 @@ public static void TestClientHeadContentLength(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testClientHeadContentLength(Δp0, Δp1));
 }
 
-[GoType("dyn")] internal partial struct testClientHeadContentLength_tests {
+internal partial struct testClientHeadContentLength_tests /*dyn*/ {
     internal @string suffix;
     internal int64 want;
 }
@@ -1458,7 +1458,7 @@ public static void TestBasicAuthHeadersPreserved(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestStripPasswordFromError_testCases {
+internal partial struct TestStripPasswordFromError_testCases /*dyn*/ {
     internal @string desc;
     internal @string @in;
     internal @string @out;
@@ -1801,7 +1801,7 @@ internal static (nint n, error err) Read(this eofReaderFunc f, slice<byte> p) {
     return (0, io.EOF);
 }
 
-[GoType("dyn")] internal partial struct TestReferer_tests {
+internal partial struct TestReferer_tests /*dyn*/ {
     internal @string lastReq, newReq, explicitRef; // from -> to URLs, explicitly set Referer value
     internal @string want;
 }
@@ -1847,7 +1847,7 @@ public static void TestReferer(ж<testing.T> Ꮡt) {
 
 // issue15577Tripper returns a Response with a redirect response
 // header and doesn't populate its Response.Request field.
-[GoType] partial struct issue15577Tripper {
+partial struct issue15577Tripper {
 }
 
 internal static (ж<Δhttp.Response>, error) RoundTrip(this issue15577Tripper _Δp0, ж<Δhttp.Request> _Δp1) {
@@ -2236,7 +2236,7 @@ internal static void testClientAltersCookiesOnRedirect(ж<testing.T> Ꮡt, testM
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestShouldCopyHeaderOnRedirect_tests {
+internal partial struct TestShouldCopyHeaderOnRedirect_tests /*dyn*/ {
     internal @string initialURL;
     internal @string destURL;
     internal bool want;
@@ -2296,7 +2296,7 @@ public static void TestClientRedirectTypes(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testClientRedirectTypes(Δp0, Δp1));
 }
 
-[GoType("dyn")] internal partial struct testClientRedirectTypes_tests {
+internal partial struct testClientRedirectTypes_tests /*dyn*/ {
     internal @string method;
     internal nint serverStatus;
     internal @string wantMethod; // desired subsequent client method
@@ -2383,7 +2383,7 @@ internal static void testClientRedirectTypes(ж<testing.T> Ꮡt, testMode mode) 
 // issue18239Body is an io.ReadCloser for TestTransportBodyReadError.
 // Its Read returns readErr and increments *readCalls atomically.
 // Its Close returns nil and increments *closeCalls atomically.
-[GoType] partial struct issue18239Body {
+partial struct issue18239Body {
     internal ж<int32> readCalls;
     internal ж<int32> closeCalls;
     internal error readErr;
@@ -2456,7 +2456,7 @@ internal static void testTransportBodyReadError(ж<testing.T> Ꮡt, testMode mod
     }
 }
 
-[GoType] partial struct roundTripperWithoutCloseIdle {
+partial struct roundTripperWithoutCloseIdle {
 }
 
 internal static (ж<Δhttp.Response>, error) RoundTrip(this roundTripperWithoutCloseIdle _Δp0, ж<Δhttp.Request> _Δp1) {
@@ -2585,7 +2585,7 @@ internal static void testClientDoCanceledVsTimeout(ж<testing.T> Ꮡt, testMode 
     }
 }
 
-[GoType] partial struct nilBodyRoundTripper {
+partial struct nilBodyRoundTripper {
 }
 
 internal static (ж<Δhttp.Response>, error) RoundTrip(this nilBodyRoundTripper _, ж<Δhttp.Request> Ꮡreq) {
@@ -2660,13 +2660,13 @@ internal static void testClientCallsCloseOnlyOnce(ж<testing.T> Ꮡt, testMode m
 // issue40382Body is an io.ReadCloser for TestClientCallsCloseOnlyOnce.
 // Its Read reads n bytes before returning io.EOF.
 // Its Close returns nil but fails the test if called more than once.
-[GoType] partial struct issue40382Body {
+partial struct issue40382Body {
     internal ж<testing.T> t;
     internal nint n;
     internal int32 closeCallsAtomic;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref issue40382Body b, slice<byte> p) {
+internal static (nint, error) Read(this ref issue40382Body b, slice<byte> p) {
     var matchᴛ1 = false;
     if (b.n is 0) { matchᴛ1 = true;
         return (0, io.EOF);

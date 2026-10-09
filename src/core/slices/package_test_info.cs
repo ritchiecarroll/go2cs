@@ -39,8 +39,8 @@ using static global::go.slices_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("slices/iter_test.go", "iter_test.cs", "AA0cgoKCgpSSgoKClIKClILKgoKCgpSSgoKClIKClILKgoKCgpSCgoKClIKUgsqCgoLKlIKCgoK4goKCgsgABxCCgoKCgoLcgoKCgsqCgoKCuIKCgoK4opKCgpSEgoKUgqgABhSCgpSCAAoIggAlWLKSgoKWgpaCuoKCggALDIIACRaQksqEkoKUlpaAgsii", "143-143:1;167-175:1;168-174:1.1;232-253:1;269-269:1")]
-[assembly: go.GoPositionMap("slices/slices_test.go", "slices_test.cs", "ABsoABw0AA4mooKAgraCgILckqiSgqiSpqKCgIK2goCCpICCuIKCgpSCloKCgpaGguiihoKCoAAJCAA5cAA0cIKCgpSUgoCCtoKAgriCgIK2goCC2oKCgpS4goKClJSCgIK2goCCuIKAgraCgIK4goKAgqaCgoCCpoaAgqaGgIIACggAG0CCgoCC2oLaooaCuIKCgIK4goCCpICC+KKGgpLKooKAgtqigoCCuIKAgqSAgqSAggALCAAaQIKCgIKkgoKAgriEkoKCgqaCyoKCgoKSkpKSgpSCgoKCgoIADhCCgoIADiSQkgAKCgAgSoKCgoCCAAsKACBKgoKCgILasoKAgraCAAwGgoKChAAMHJCSyoKChISUlIK4goKChIiUlIK4goKCgpSCgoKUgIKkgIIACggAIEqCgoKAgtqCspKCgoKCAAsMgoaCgoKCpoKCgpSCgsqCgoKAgriCgoKAgsiC8oKChISAgqaUlIK4ggALAoKChIKClJaAgqaUlIK4grKSgoKCgtyChoKCgoKmgoKClIKCyoKEgoKClIKogoKClIKCqICQkqSAkJKSgpSokrKAkqKSgriCgoKClIKUgoKUgviCgoKAgqaCgoCCpoKCgIKmgoKAgqao0oKC9oIAECaCgoKC7oKCgoIACgqCgoKEAAgUgrCSysYACwKCgoKClpKEgIKmgpaUuIIACwKCgoSyhICCppSUgriCgoKCkpKSkpKClIKCgoKCggAIEoKClJKEgoCCAAoIggAPOrKSgoKCppKCgoLegoKCgoKCgoKCpoKCuIKCgoKCgoKCgqaCgriCyJKCgoCCpoSCgIIACQiCABEqsoKClIKSlIKCkoKUAA0KhAAdRIKCkoKClKKClKKSgIIAEgyUABY2gILcAAoegIIADAyCAAcSkJL6goKClA==", "85-85:1;124-126:1;138-138:1;255-260:1;285-290:1;294-299:1;334-336:2;341-343:3;390-392:1;425-427:1;505-510:1;563-563:1;662-666:1;690-690:1;716-718:1;796-803:1;811-817:1;818-827:2;873-878:1;895-902:1;900-900:1.1;910-916:1;914-914:1.1;917-926:2;924-924:2.1;953-953:1;956-956:2;966-969:3;967-967:3.1;1047-1053:1;1084-1084:1;1188-1190:1;1191-1193:2;1199-1201:3;1202-1204:4;1211-1217:5;1218-1224:6;1313-1315:1;1370-1375:1;1371-1373:1.1;1451-1451:1")]
-[assembly: go.GoPositionMap("slices/sort_test.go", "sort_test.cs", "ABEkkpKUgoKCgoK4goKCgoK4goKCgoK4goKCgoK4ooKClIKClIKUgoIACRaSqJKCvKKSgoKCgpSCgqaCppSmopKClJaClIKUgoKClIKogoKClIKogpSCgoKUggAIEoIACAaChAAKHrKigoKWgoKWgoKWgoK63oKCgpaCgoK4goKClIK6goKEgoKWgoLKgoKEkJKWkJKWoJKWoJIACgiCgoKClpaEACNespKCgoKogoKCAAwOgoIABRSyooKCgqiChoKCAAwOgoIABxiyooKCgu6CgoaCgg==", "33-33:1;175-175:1;193-213:2;264-264:1;267-267:2;271-271:3;275-275:4;279-279:5;344-358:1;375-392:1;384-386:1.1;411-418:1;424-426:1")]
+[assembly: go.GoPositionMap("slices/slices_test.go", "slices_test.cs", "ABsoABw0AA4mooKAgraCgILckqiSgqiSpqKCgIK2goCCpICCuIKCgpSCloKCgpaGguiihoKCoAAJCAA5cAA0cIKCgpSUgoCCtoKAgriCgIK2goCC2oKCgpS4goKClJSCgIK2goCCuIKAgraCgIK4goKAgqaCgoCCpoaAgqaGgIIACggAG0CCgoCC2oLaooaCuIKCgIK4goCCpICC+KKGgpLKooKAgtqigoCCuIKAgqSAgqSAggALCAAaQIKCgIKkgoKAgriEkoKCgqaCyoKCgoKSkpKSgpSCgoKCgoIADhCCgoIADiSQkgAKCgAgSoKCgoCCAAsKACBKgoKCgILasoKAgraCAAwGgoKChAAMHJCSyoKChISUlIK4goKChIiUlIK4goKCgpSCgoKUgIKkgIIACggAIEqCgoKAgtqCspKCgoKCAAsMgoaCgoKCpoKCgpSCgsqCgoKAgriCgoKAgsiC8oKChISAgqaUlIK4ggALAoKChIKClJaAgqaUlIK4grKSgoKCgtyChoKCgoKmgoKClIKCyoKEgoKClIKogoKClIKCqICQkqSAkJKSgpSokrKAkqKSgriCgoKClIKUgoKUgviCgoKAgqaCgoCCpoKCgIKmgoKAgqao0oKC9oIAECaCgoKC7oKCgoIACgqCgoKEAAgUgrCSysYACwKCgoKClpKEgIKmgpaUuIIACwKCgoSyhICCppSUgriCgoKCkpKSkpKClIKCgoKCggAIEoKClJKEgoCCAAoIggAPOrKSgoKCppKCgoLegoKCgoKCgoKCpoKCuIKCgoKCgoKCgqaCgriCyJKCgoCCpoSCgIIACQiCABEqsoKClIKSlIKCkoKUAA0KhAAdRIKCkoKClKKClKKSgIIAEgyUABY2gILcAAoegIIADAyCAAcSkJL6goKClA==", "85-85:1;124-126:1;138-138:1;255-260:1;285-290:1;294-299:1;334-336:2;341-343:3;390-392:1;425-427:1;505-510:1;563-563:1;662-666:1;690-690:1;716-718:1;796-803:1;811-817:1;818-827:2;873-878:1;895-902:1;900-900:1.1;910-916:1;914-914:1.1;917-926:2;924-924:2.1;953-953:1;956-956:2;966-969:3;967-967:3.1;1047-1053:1;1084-1084:1;1188-1190:1;1191-1193:2;1199-1201:3;1202-1204:4;1211-1217:5;1218-1224:6;1313-1315:1;1370-1375:1;1371-1373:1.1;1451-1451:1", "", "57=NaN/1/2/12,NaN/2/2/13;228=NaN/1/13/15,NaN/2/13/16,NaN/3/13/20,NaN/4/13/21,NaN/5/13/25,NaN/6/13/26,NaN/7/13/30,NaN/8/13/35,NaN/9/13/36,NaN/10/13/41,NaN/11/13/46,NaN/12/13/50,NaN/13/13/51")]
+[assembly: go.GoPositionMap("slices/sort_test.go", "sort_test.cs", "ABEkkpKUgoKCgoK4goKCgoK4goKCgoK4goKCgoK4ooKClIKClIKUgoIACRaSqJKCvKKSgoKCgpSCgqaCppSmopKClJaClIKUgoKClIKogoKClIKogpSCgoKUggAIEoIACAaChAAKHrKigoKWgoKWgoKWgoK63oKCgpaCgoK4goKClIK6goKEgoKWgoLKgoKEkJKWkJKWoJKWoJIACgiCgoKClpaEACNespKCgoKogoKCAAwOgoIABRSyooKCgqiChoKCAAwOgoIABxiyooKCgu6CgoaCgg==", "33-33:1;175-175:1;193-213:2;264-264:1;267-267:2;271-271:3;275-275:4;279-279:5;344-358:1;375-392:1;384-386:1.1;411-418:1;424-426:1", "", "416=NaN/1/1/5,Inf/1/1/6")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -49,16 +49,16 @@ namespace go;
 public static partial class slices_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
 
     // <TypeAccessibility>
-    internal partial struct BenchmarkCompact_Large_Large {}
-    internal partial struct BenchmarkEqualFunc_Large_Large {}
-    internal partial struct BenchmarkIndexFunc_Large_Large {}
-    internal partial struct BenchmarkIndex_Large_Large {}
+    [GoLocalName("Large")] internal partial struct BenchmarkCompact_Large_Large {}
+    [GoLocalName("Large")] internal partial struct BenchmarkEqualFunc_Large_Large {}
+    [GoLocalName("Large")] internal partial struct BenchmarkIndexFunc_Large_Large {}
+    [GoLocalName("Large")] internal partial struct BenchmarkIndex_Large_Large {}
     internal partial struct BenchmarkReplace_cases {}
     internal partial struct TestBinarySearchFloats_tests {}
     internal partial struct TestBinarySearchInts_tests {}
@@ -69,7 +69,7 @@ public static partial class slices_test_package
     internal partial struct TestConcat_too_large_cases {}
     [GoLocalName("void")] internal partial struct TestConcat_too_large_void {}
     internal partial struct TestDeletePanics_type {}
-    internal partial struct TestInference_S {}
+    [GoLocalName("S")] internal partial struct TestInference_S {}
     internal partial struct TestInsertPanics_type {}
     internal partial struct TestMinMax_tests {}
     internal partial struct TestRepeatPanics_type {}

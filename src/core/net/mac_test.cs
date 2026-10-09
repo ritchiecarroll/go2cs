@@ -14,7 +14,7 @@ partial class net_internal_test_package {
 // See RFC 7042, Section 2.2.2.
 // See RFC 4391, Section 9.1.1.
 
-[GoType("dyn")] partial struct parseMACTestsᴛ1 {
+partial struct parseMACTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal global::go.net_package.HardwareAddr @out;
     internal @string err;

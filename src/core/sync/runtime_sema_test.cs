@@ -12,7 +12,7 @@ using static go.sync_internal_test_package;
 
 partial class sync_test_package {
 
-[GoType("dyn")] internal partial struct BenchmarkSemaUncontended_PaddedSem {
+internal partial struct BenchmarkSemaUncontended_PaddedSem /*dyn*/ {
     internal uint32 sem;
     internal array<uint32> pad = new(32);
 }

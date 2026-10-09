@@ -26,7 +26,7 @@ partial class regexp_internal_test_package {
 // overlap from below
 // out of order []rune
 
-[GoType("dyn")] partial struct runeMergeTestsᴛ1 {
+partial struct runeMergeTestsᴛ1 /*dyn*/ {
     internal slice<rune> left, right, merged;
     internal slice<uint32> next;
     internal uint32 leftPC, rightPC;
@@ -141,7 +141,7 @@ public static void TestMergeRuneSet(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct onePassTestsᴛ1 {
+partial struct onePassTestsᴛ1 /*dyn*/ {
     internal @string re;
     internal bool isOnePass;
 }
@@ -214,7 +214,7 @@ public static void TestCompileOnePass(ж<testing.T> Ꮡt) {
 // golang.org/issue/11905
 // TODO(cespare): Unify with onePassTests and rationalize one-pass test cases.
 
-[GoType("dyn")] partial struct onePassTests1ᴛ1 {
+partial struct onePassTests1ᴛ1 /*dyn*/ {
     internal @string re;
     internal @string match;
 }

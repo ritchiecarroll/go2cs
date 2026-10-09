@@ -146,7 +146,7 @@ internal static void installBat(ж<testing.T> Ꮡt, @string dstPath) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct lookPathTest {
+partial struct lookPathTest {
     internal @string name;
     public @string PATHEXT; // empty to use default
     internal slice<@string> files;
@@ -389,7 +389,7 @@ public static void TestLookPathWindows(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct commandTest {
+partial struct commandTest {
     internal @string name;
     public slice<@string> PATH;
     internal slice<@string> files;

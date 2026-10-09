@@ -127,30 +127,30 @@ public static void TestEncodeIntSlice(ж<testing.T> Ꮡt) {
     });
 }
 
-[GoType] public partial struct ET0 {
+public partial struct ET0 {
     public nint A;
     public @string B;
 }
 
-[GoType] public partial struct ET2 {
+public partial struct ET2 {
     public @string X;
 }
 
-[GoType] public partial struct ET1 {
+public partial struct ET1 {
     public nint A;
     public ж<ET2> Et2;
     public ж<ET1> Next;
 }
 
 // Like ET1 but with a different name for a field
-[GoType] public partial struct ET3 {
+public partial struct ET3 {
     public nint A;
     public ж<ET2> Et2;
     public ж<ET1> DifferentNext;
 }
 
 // Like ET1 but with a different type for a field
-[GoType] public partial struct ET4 {
+public partial struct ET4 {
     public nint A;
     public float64 Et2;
     public nint Next;
@@ -310,7 +310,7 @@ internal static error encAndDec(any @in, any @out) {
 }
 
 // Encode a T, decode a *T
-[GoType("dyn")] [GoLocalName("Type0")] internal partial struct TestTypeToPtrType_Type0 {
+internal partial struct TestTypeToPtrType_Type0 /*dyn*/ {
     public nint A;
 }
 
@@ -325,7 +325,7 @@ public static void TestTypeToPtrType(ж<testing.T> Ꮡt) {
 }
 
 // Encode a *T, decode a T
-[GoType("dyn")] [GoLocalName("Type1")] internal partial struct TestPtrTypeToType_Type1 {
+internal partial struct TestPtrTypeToType_Type1 /*dyn*/ {
     public nuint A;
 }
 
@@ -339,7 +339,7 @@ public static void TestPtrTypeToType(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("Type2")] internal partial struct TestTypeToPtrPtrPtrPtrType_Type2 {
+internal partial struct TestTypeToPtrPtrPtrPtrType_Type2 /*dyn*/ {
     public ж<ж<ж<ж<float64>>>> A;
 }
 
@@ -361,7 +361,7 @@ public static void TestTypeToPtrPtrPtrPtrType(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("Type3")] internal partial struct TestSlice_Type3 {
+internal partial struct TestSlice_Type3 /*dyn*/ {
     public slice<@string> A;
 }
 
@@ -380,7 +380,7 @@ internal static readonly @string pointerˢ = "pointer"u8;
 internal static readonly object expectedErrorAboutˢ = (@string)"expected error about pointer; got"u8;
 
 // Encode a *T, decode a T
-[GoType("dyn")] [GoLocalName("Type4")] internal partial struct TestValueError_Type4 {
+internal partial struct TestValueError_Type4 /*dyn*/ {
     public nint A;
 }
 
@@ -397,12 +397,12 @@ public static void TestValueError(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object shouldFailWithMismatchedˢ = (@string)"should fail with mismatched array sizes"u8;
 
-[GoType("dyn")] [GoLocalName("Type5")] [GoValueClone("A", "B")] internal partial struct TestArray_Type5 {
+internal partial struct TestArray_Type5 /*dyn*/ {
     public array<@string> A = new(3);
     public array<byte> B = new(3);
 }
 
-[GoType("dyn")] [GoLocalName("Type6")] [GoValueClone("A")] internal partial struct TestArray_Type6 {
+internal partial struct TestArray_Type6 /*dyn*/ {
     public array<@string> A = new(2); // can't hold t5.a
 }
 
@@ -422,7 +422,7 @@ public static void TestArray(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoLocalName("recursiveMap")] [GoType("map[@string, TestRecursiveMapType_recursiveMap]")] internal partial struct TestRecursiveMapType_recursiveMap;
+internal partial struct TestRecursiveMapType_recursiveMap /*map[@string, TestRecursiveMapType_recursiveMap]*/;
 
 public static void TestRecursiveMapType(ж<testing.T> Ꮡt) {
     var r1 = new TestRecursiveMapType_recursiveMap(new map<@string, TestRecursiveMapType_recursiveMap>{["A"u8] = new TestRecursiveMapType_recursiveMap(new map<@string, TestRecursiveMapType_recursiveMap>{["B"u8] = default!, ["C"u8] = default!}), ["D"u8] = default!});
@@ -435,7 +435,7 @@ public static void TestRecursiveMapType(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoLocalName("recursiveSlice")] [GoType("[]TestRecursiveSliceType_recursiveSlice")] internal partial struct TestRecursiveSliceType_recursiveSlice;
+internal partial struct TestRecursiveSliceType_recursiveSlice /*[]TestRecursiveSliceType_recursiveSlice*/;
 
 public static void TestRecursiveSliceType(ж<testing.T> Ꮡt) {
     var r1 = new TestRecursiveSliceType_recursiveSlice(new array<TestRecursiveSliceType_recursiveSlice>(2){[0] = new TestRecursiveSliceType_recursiveSlice(new array<TestRecursiveSliceType_recursiveSlice>(1){[0] = default!}), [1] = default!});
@@ -448,7 +448,7 @@ public static void TestRecursiveSliceType(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("Type7")] internal partial struct TestDefaultsInArray_Type7 {
+internal partial struct TestDefaultsInArray_Type7 /*dyn*/ {
     public slice<bool> B;
     public slice<nint> I;
     public slice<@string> S;
@@ -489,7 +489,7 @@ internal static ref map<@string, nint> testMap => ref ᏑtestMap.ValueSlot;
 internal static ж<array<nint>> ᏑtestArray = new StandardBox<array<nint>>(new array<nint>(7));
 internal static ref array<nint> testArray => ref ᏑtestArray.Value;
 
-[GoType] public partial struct SingleTest {
+public partial struct SingleTest {
     internal any @in;
     internal any @out;
     internal @string err;
@@ -554,11 +554,11 @@ internal static readonly object forStructNonStructˢ = (@string)"for struct/non-
 internal static readonly object shouldGetErrorForNonˢ = (@string)"should get error for non-struct/struct"u8;
 internal static readonly object forNonStructStructˢ = (@string)"for non-struct/struct expected type error; got"u8;
 
-[GoType("dyn")] [GoLocalName("Struct")] internal partial struct TestStructNonStruct_Struct {
+internal partial struct TestStructNonStruct_Struct /*dyn*/ {
     public @string A;
 }
 
-[GoLocalName("NonStruct")] [GoType("@string")] internal partial struct TestStructNonStruct_NonStruct;
+internal partial struct TestStructNonStruct_NonStruct /*@string*/;
 
 public static void TestStructNonStruct(ж<testing.T> Ꮡt) {
     ref var s = ref heap<TestStructNonStruct_Struct>(out var Ꮡs);
@@ -595,14 +595,14 @@ public static void TestStructNonStruct(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial interface interfaceIndirectTestI {
+internal partial interface interfaceIndirectTestI {
     bool F();
 }
 
-[GoType] internal partial struct interfaceIndirectTestT {
+internal partial struct interfaceIndirectTestT {
 }
 
-[GoRecv] internal static bool F(this ref interfaceIndirectTestT @this) {
+internal static bool F(this ref interfaceIndirectTestT @this) {
     return true;
 }
 
@@ -634,15 +634,15 @@ public static void TestInterfaceIndirect(ж<testing.T> Ꮡt) {
 // the encoder/decoder pair to send a value afterwards. If an interface
 // is sent, its type in the test is always NewType0, so this checks that the
 // encoder and decoder don't skew with respect to type definitions.
-[GoType] public partial struct Struct0 {
+public partial struct Struct0 {
     public any I;
 }
 
-[GoType] public partial struct NewType0 {
+public partial struct NewType0 {
     public @string S;
 }
 
-[GoType] internal partial struct ignoreTest {
+internal partial struct ignoreTest {
     internal any @in, @out;
 }
 
@@ -653,7 +653,7 @@ public static void TestInterfaceIndirect(ж<testing.T> Ꮡt) {
 // Decode struct containing an interface into a nil.
 // Decode singleton slice of interfaces into a nil.
 
-    [GoType("dyn")] partial struct Δtype {
+    partial struct Δtype /*dyn*/ {
         public nint A;
     }
 internal static slice<ignoreTest> ignoreTests = new ignoreTest[]{
@@ -726,11 +726,11 @@ public static void TestIgnoreRecursiveType(ж<testing.T> Ꮡt) {
 }
 
 // Another bug from golang-nuts, involving nested interfaces.
-[GoType] public partial struct Bug0Outer {
+public partial struct Bug0Outer {
     public any Bug0Field;
 }
 
-[GoType] public partial struct Bug0Inner {
+public partial struct Bug0Inner {
     public nint A;
 }
 
@@ -775,12 +775,12 @@ public static void TestNestedInterfaces(ж<testing.T> Ꮡt) {
 }
 
 // The bugs keep coming. We forgot to send map subtypes before the map.
-[GoType] public partial struct Bug1Elem {
+public partial struct Bug1Elem {
     public @string Name;
     public nint Id;
 }
 
-[GoType("map[@string, Bug1Elem]")] public partial struct Bug1StructMap;
+public partial struct Bug1StructMap /*map[@string, Bug1Elem]*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string val1ˢ = "val1"u8;
@@ -942,7 +942,7 @@ public static void TestSequentialDecoder(ж<testing.T> Ꮡt) {
 }
 
 // Should be able to have unrepresentable fields (chan, func, *chan etc.); we just ignore them.
-[GoType] public partial struct Bug2 {
+public partial struct Bug2 {
     public nint A;
     public channel<nint> C;
     public ж<channel<nint>> CP;
@@ -997,7 +997,7 @@ public static void TestSliceIncompatibility(ж<testing.T> Ꮡt) {
 }
 
 // Mutually recursive slices of structs caused problems.
-[GoType] public partial struct Bug3 {
+public partial struct Bug3 {
     public nint Num;
     public slice<ж<Bug3>> Children;
 }
@@ -1118,7 +1118,7 @@ internal static (error encodeErr, error panicErr) encodeAndRecover(any value) {
     return (encodeErr, panicErr);
 }
 
-[GoType("dyn")] internal partial struct TestNilPointerPanics_testCases {
+internal partial struct TestNilPointerPanics_testCases /*dyn*/ {
     internal any value;
     internal bool mustPanic;
 }
@@ -1167,7 +1167,7 @@ internal static readonly object expectedErrorGotNoneˢ2 = (@string)"expected err
 internal static readonly @string interfaceˢ = "interface"u8;
 internal static readonly object expectedErrorAboutNilˢ = (@string)"expected error about nil pointer and interface, got:"u8;
 
-[GoType("dyn")] internal partial struct TestNilPointerInsideInterface_si {
+internal partial struct TestNilPointerInsideInterface_si /*dyn*/ {
     public any I;
 }
 
@@ -1187,12 +1187,12 @@ public static void TestNilPointerInsideInterface(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct Bug4Public {
+public partial struct Bug4Public {
     public @string Name;
     public Bug4Secret Secret;
 }
 
-[GoType] public partial struct Bug4Secret {
+public partial struct Bug4Secret {
     internal nint a; // error: no exported fields.
 }
 
@@ -1229,7 +1229,7 @@ public static void TestMultipleEncodingsOfBadType(ж<testing.T> Ꮡt) {
 // length of the slice being decoded. It was wrong because the next
 // thing in the input might be a type definition, which would lead to
 // an incorrect length check. This test reproduces the corner case.
-[GoType] public partial struct Z {
+public partial struct Z {
 }
 
 public static void Test29ElementSlice(ж<testing.T> Ꮡt) {
@@ -1279,7 +1279,7 @@ public static void TestErrorForHugeSlice(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct badDataTest {
+internal partial struct badDataTest {
     internal @string input; // The input encoded as a hex string.
     internal @string error; // A substring of the error that should result.
     internal any data;    // What to decode into.
@@ -1324,7 +1324,7 @@ public static void TestBadData(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string duplicateTypeˢ = "duplicate type"u8;
 
-[GoType("dyn")] [GoLocalName("Test")] internal partial struct TestDecodeErrorMultipleTypes_Test {
+internal partial struct TestDecodeErrorMultipleTypes_Test /*dyn*/ {
     public @string A;
     public nint B;
 }
@@ -1350,7 +1350,7 @@ public static void TestDecodeErrorMultipleTypes(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("mapEntry")] internal partial struct TestMarshalFloatMap_mapEntry {
+internal partial struct TestMarshalFloatMap_mapEntry /*dyn*/ {
     internal uint64 keyBits;
     internal @string value;
 }
@@ -1400,7 +1400,7 @@ public static void TestMarshalFloatMap(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("T")] internal partial struct TestDecodePartial_T {
+internal partial struct TestDecodePartial_T /*dyn*/ {
     public slice<nint> X;
     public @string Y;
 }

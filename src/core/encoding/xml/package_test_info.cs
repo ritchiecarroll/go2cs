@@ -69,8 +69,8 @@ using static global::go.encoding.xml_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/xml/example_marshaling_test.go", "example_marshaling_test.cs", "ABQsooKAgqSYpKeu9oKCmKSnrAAWBoIAABaGgIKmgoKW")]
-[assembly: go.GoPositionMap("encoding/xml/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABQsgpikp6z2goKYpKesABYGggAAFoaAgqaCgpY=")]
+[assembly: go.GoPositionMap("encoding/xml/example_marshaling_test.go", "example_marshaling_test.cs", "ABQsooKAgqSYpKeu9oKCmKSnrAAVBoIAABaGgIKmgoKW")]
+[assembly: go.GoPositionMap("encoding/xml/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABQsgpikp6z2goKYpKesABUGggAAFoaAgqaCgpY=")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -79,7 +79,7 @@ namespace go.encoding;
 public static partial class xml_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

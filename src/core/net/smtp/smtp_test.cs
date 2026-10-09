@@ -25,7 +25,7 @@ using static go.net.smtp_package;
 
 partial class smtp_internal_test_package {
 
-[GoType] internal partial struct authTest {
+internal partial struct authTest {
     internal global::go.net.smtp_package.ΔAuth auth;
     internal slice<@string> challenges;
     internal @string name;
@@ -74,7 +74,7 @@ internal static readonly @string fooˢ = "foo"u8;
 internal static readonly @string barˢ = "bar"u8;
 internal static readonly @string bazˢ = "baz"u8;
 
-[GoType("dyn")] internal partial struct TestAuthPlain_tests {
+internal partial struct TestAuthPlain_tests /*dyn*/ {
     internal @string authName;
     internal ж<global::go.net.smtp_package.ServerInfo> server;
     internal @string err;
@@ -128,9 +128,9 @@ public static void TestAuthPlain(ж<testing.T> Ꮡt) {
 internal static readonly @string fakeHostˢ = "fake.host"u8;
 internal static readonly @string authFooauthQuitˢ = "AUTH FOOAUTH\r\n*\r\nQUIT\r\n"u8;
 
-[GoType("dyn")] internal partial struct TestClientAuthTrimSpace_fake {
-    [GoEmbedded] public io_package.Reader Reader;
-    [GoEmbedded] public io_package.Writer Writer;
+internal partial struct TestClientAuthTrimSpace_fake /*dyn*/ {
+    /*embed*/ public io_package.Reader Reader;
+    /*embed*/ public io_package.Writer Writer;
 }
 
 // Issue 17794: don't send a trailing space on AUTH command when there's no password.
@@ -162,7 +162,7 @@ public static void TestClientAuthTrimSpace(ж<testing.T> Ꮡt) {
 // the Start method, and returns "FOOAUTH", nil, nil. Notably, it returns
 // zero bytes for "toServer" so we can test that we don't send spaces at
 // the end of the line. See TestClientAuthTrimSpace.
-[GoType] internal partial struct toServerEmptyAuth {
+internal partial struct toServerEmptyAuth {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -176,8 +176,8 @@ internal static (slice<byte> toServer, error err) Next(this toServerEmptyAuth _,
     throw panic("unexpected call");
 }
 
-[GoType] internal partial struct faker {
-    [GoEmbedded] public io_package.ReadWriter ReadWriter;
+internal partial struct faker {
+    /*embed*/ public io_package.ReadWriter ReadWriter;
 }
 
 internal static error Close(this faker f) {
@@ -1393,7 +1393,7 @@ internal static net.Listener newLocalListener(ж<testing.T> Ꮡt) {
     return ln;
 }
 
-[GoType] internal partial struct smtpSender {
+internal partial struct smtpSender {
     internal io.Writer w;
 }
 

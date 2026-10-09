@@ -35,7 +35,7 @@ internal static slice<byte> decodeBase64(@string @in) {
     return @out.slice(0, n);
 }
 
-[GoType] partial struct DecryptPKCS1v15Test {
+partial struct DecryptPKCS1v15Test {
     internal @string @in, @out;
 }
 
@@ -186,7 +186,7 @@ public static void TestNonZeroRandomBytes(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct signPKCS1v15Test {
+partial struct signPKCS1v15Test {
     internal @string @in, @out;
 }
 

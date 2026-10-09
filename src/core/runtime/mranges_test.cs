@@ -111,7 +111,7 @@ public static void TestAddrRangesAdd(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddrRangesFindSucc_testt {
+internal partial struct TestAddrRangesFindSucc_testt /*dyn*/ {
     internal @string name;
     internal uintptr @base;
     internal nint expect;

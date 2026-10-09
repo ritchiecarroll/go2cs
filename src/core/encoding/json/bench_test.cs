@@ -28,28 +28,19 @@ using static go.encoding.json_package;
 
 partial class json_internal_test_package {
 
-[GoType] internal partial struct codeResponse {
-    [GoTag(@"json:""tree""")]
-    public ж<codeNode> Tree;
-    [GoTag(@"json:""username""")]
-    public @string Username;
+internal partial struct codeResponse {
+    public ж<codeNode> Tree; /*`json:"tree"`*/
+    public @string Username; /*`json:"username"`*/
 }
 
-[GoType] public partial struct codeNode {
-    [GoTag(@"json:""name""")]
-    public @string Name;
-    [GoTag(@"json:""kids""")]
-    public slice<ж<codeNode>> Kids;
-    [GoTag(@"json:""cl_weight""")]
-    public float64 CLWeight;
-    [GoTag(@"json:""touches""")]
-    public nint Touches;
-    [GoTag(@"json:""min_t""")]
-    public int64 MinT;
-    [GoTag(@"json:""max_t""")]
-    public int64 MaxT;
-    [GoTag(@"json:""mean_t""")]
-    public int64 MeanT;
+public partial struct codeNode {
+    public @string Name; /*`json:"name"`*/
+    public slice<ж<codeNode>> Kids; /*`json:"kids"`*/
+    public float64 CLWeight; /*`json:"cl_weight"`*/
+    public nint Touches; /*`json:"touches"`*/
+    public int64 MinT; /*`json:"min_t"`*/
+    public int64 MaxT; /*`json:"max_t"`*/
+    public int64 MeanT; /*`json:"mean_t"`*/
 }
 
 internal static slice<byte> codeJSON;
@@ -131,7 +122,7 @@ public static void BenchmarkCodeEncoder(ж<testing.B> Ꮡb) {
 internal static readonly object marshalErrorGotNilWantˢ = (@string)"Marshal error: got nil, want non-nil"u8;
 
 // Trigger an error in Marshal with cyclic data.
-[GoType("dyn")] [GoLocalName("Dummy")] internal partial struct BenchmarkCodeEncoderError_Dummy {
+internal partial struct BenchmarkCodeEncoderError_Dummy /*dyn*/ {
     public @string Name;
     public ж<BenchmarkCodeEncoderError_Dummy> Next;
 }
@@ -188,7 +179,7 @@ public static void BenchmarkCodeMarshal(ж<testing.B> Ꮡb) {
 }
 
 // Trigger an error in Marshal with cyclic data.
-[GoType("dyn")] [GoLocalName("Dummy")] internal partial struct BenchmarkCodeMarshalError_Dummy {
+internal partial struct BenchmarkCodeMarshalError_Dummy /*dyn*/ {
     public @string Name;
     public ж<BenchmarkCodeMarshalError_Dummy> Next;
 }
@@ -222,7 +213,7 @@ public static void BenchmarkCodeMarshalError(ж<testing.B> Ꮡb) {
     b.SetBytes((int64)len(codeJSON));
 }
 
-[GoType("dyn")] internal partial struct benchMarshalBytes_v {
+internal partial struct benchMarshalBytes_v /*dyn*/ {
     public slice<byte> Bytes;
 }
 
@@ -245,12 +236,12 @@ internal static Action<ж<testing.B>> benchMarshalBytes(nint n) {
     };
 }
 
-[GoType("dyn")] internal partial struct benchMarshalBytesError_v {
+internal partial struct benchMarshalBytesError_v /*dyn*/ {
     public slice<byte> Bytes;
 }
 
 // Trigger an error in Marshal with cyclic data.
-[GoType("dyn")] [GoLocalName("Dummy")] internal partial struct benchMarshalBytesError_Dummy {
+internal partial struct benchMarshalBytesError_Dummy /*dyn*/ {
     public @string Name;
     public ж<benchMarshalBytesError_Dummy> Next;
 }
@@ -553,9 +544,8 @@ public static void BenchmarkIssue10335(ж<testing.B> Ꮡb) {
     });
 }
 
-[GoType("dyn")] internal partial struct BenchmarkIssue34127_j {
-    [GoTag(@"json:""bar,string""")]
-    public @string Bar;
+internal partial struct BenchmarkIssue34127_j /*dyn*/ {
+    public @string Bar; /*`json:"bar,string"`*/
 }
 
 public static void BenchmarkIssue34127(ж<testing.B> Ꮡb) {
@@ -663,7 +653,7 @@ public static void BenchmarkTypeFieldsCache(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkEncodeMarshaler_m {
+internal partial struct BenchmarkEncodeMarshaler_m /*dyn*/ {
     public nint A;
     public global::go.encoding.json_package.RawMessage B;
 }
@@ -686,7 +676,7 @@ public static void BenchmarkEncodeMarshaler(ж<testing.B> Ꮡb) {
     });
 }
 
-[GoType("dyn")] [GoLocalName("T")] internal partial struct BenchmarkEncoderEncode_T {
+internal partial struct BenchmarkEncoderEncode_T /*dyn*/ {
     public @string X, Y;
 }
 

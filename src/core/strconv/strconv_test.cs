@@ -17,7 +17,7 @@ internal static @string nextToOne = "1.00000000000000011102230246251565404236316
 // In practice we see 7 for the next one, but allow some slop.
 // Before pre-allocation in appendQuotedWith, we saw 39.
 
-[GoType("dyn")] partial struct mallocTestᴛ1 {
+partial struct mallocTestᴛ1 /*dyn*/ {
     internal nint count;
     internal @string desc;
     internal Action fn;
@@ -85,7 +85,7 @@ public static void TestCountMallocs(ж<testing.T> Ꮡt) {
 
 // Sink makes sure the compiler cannot optimize away the benchmarks.
 
-[GoType("dyn")] partial struct Sinkᴛ1 {
+partial struct Sinkᴛ1 /*dyn*/ {
     public bool Bool;
     public nint Int;
     public int64 Int64;
@@ -107,7 +107,7 @@ internal static readonly @string appendQuoteˢ = "AppendQuote"u8;
 internal static readonly @string appendQuoteToASCIIˢ = "AppendQuoteToASCII"u8;
 internal static readonly @string appendQuoteToGraphicˢ = "AppendQuoteToGraphic"u8;
 
-[GoType("dyn")] internal partial struct TestAllocationsFromBytes_bytes {
+internal partial struct TestAllocationsFromBytes_bytes /*dyn*/ {
     public slice<byte> Bool, Number, String, Buffer;
 }
 
@@ -173,7 +173,7 @@ public static void TestAllocationsFromBytes(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string invalidˢ = "INVALID"u8;
 
-[GoType("dyn")] internal partial struct TestErrorPrefixes_vectors {
+internal partial struct TestErrorPrefixes_vectors /*dyn*/ {
     internal error err;  // Input error
     internal @string want; // Function name wanted
 }

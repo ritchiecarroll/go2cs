@@ -55,7 +55,7 @@ internal static @string testGetenv(@string s) {
 // invalid syntax; eat up the characters
 // invalid syntax; eat up the characters
 
-[GoType("dyn")] partial struct expandTestsᴛ1 {
+partial struct expandTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
 }
 internal static slice<expandTestsᴛ1> expandTests = new expandTestsᴛ1[]{

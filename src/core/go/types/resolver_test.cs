@@ -17,17 +17,17 @@ using types = global::go.go.types_package;
 
 partial class types_test_package {
 
-[GoType] partial struct resolveTestImporter {
+partial struct resolveTestImporter {
     internal ж<token.FileSet> fset;
     internal types.ImporterFrom importer;
     internal map<@string, bool> imported;
 }
 
-[GoRecv] internal static (ж<types.Package>, error) Import(this ref resolveTestImporter imp, @string _) {
+internal static (ж<types.Package>, error) Import(this ref resolveTestImporter imp, @string _) {
     throw panic("should not be called");
 }
 
-[GoRecv] internal static (ж<types.Package>, error) ImportFrom(this ref resolveTestImporter imp, @string path, @string srcDir, types.ImportMode mode) {
+internal static (ж<types.Package>, error) ImportFrom(this ref resolveTestImporter imp, @string path, @string srcDir, types.ImportMode mode) {
     if (mode != 0) {
         throw panic("mode must be 0");
     }

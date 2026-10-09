@@ -110,8 +110,8 @@ internal static error checkOpenSSLVersion() {
 // recordingConn is a net.Conn that records the traffic that passes through it.
 // WriteTo can be used to produce output that can be later be loaded with
 // ParseTestData.
-[GoType] internal partial struct recordingConn {
-    [GoEmbedded] public net_package.Conn Conn;
+internal partial struct recordingConn {
+    /*embed*/ public net_package.Conn Conn;
     public partial ref sync_package.Mutex Mutex { get; }
     internal slice<slice<byte>> flows;
     internal bool reading;
@@ -204,7 +204,7 @@ internal static (nint n, error err) Write(this ж<recordingConn> Ꮡr, slice<byt
 }
 
 // WriteTo writes Go source code to w that contains the recorded traffic.
-[GoRecv] internal static (int64, error) WriteTo(this ref recordingConn r, io.Writer w) {
+internal static (int64, error) WriteTo(this ref recordingConn r, io.Writer w) {
     // TLS always starts with a client to server flow.
     var clientToServer = true;
     int64 written = default!;
@@ -282,7 +282,7 @@ internal static (slice<slice<byte>> flows, error err) parseTestData(io.Reader r)
 }
 
 // replayingConn is a net.Conn that replays flows recorded by recordingConn.
-[GoType] internal partial struct replayingConn {
+internal partial struct replayingConn {
     internal testing.TB t;
     public partial ref sync_package.Mutex Mutex { get; }
     internal slice<slice<byte>> flows;
@@ -368,23 +368,23 @@ internal static error Close(this ж<replayingConn> Ꮡr) {
     finally { if (ᒐd1) Ꮡr.of(replayingConn.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-[GoRecv] internal static netꓸAddr LocalAddr(this ref replayingConn r) {
+internal static netꓸAddr LocalAddr(this ref replayingConn r) {
     return default!;
 }
 
-[GoRecv] internal static netꓸAddr RemoteAddr(this ref replayingConn r) {
+internal static netꓸAddr RemoteAddr(this ref replayingConn r) {
     return default!;
 }
 
-[GoRecv] internal static error SetDeadline(this ref replayingConn r, time.Time t) {
+internal static error SetDeadline(this ref replayingConn r, time.Time t) {
     return default!;
 }
 
-[GoRecv] internal static error SetReadDeadline(this ref replayingConn r, time.Time t) {
+internal static error SetReadDeadline(this ref replayingConn r, time.Time t) {
     return default!;
 }
 
-[GoRecv] internal static error SetWriteDeadline(this ref replayingConn r, time.Time t) {
+internal static error SetWriteDeadline(this ref replayingConn r, time.Time t) {
     return default!;
 }
 
@@ -406,7 +406,7 @@ internal static @string tempFile(@string contents) {
 // localListener is set up by TestMain and used by localPipe to create Conn
 // pairs like net.Pipe, but connected by an actual buffered TCP connection.
 
-[GoType("dyn")] partial struct localListenerᴛ1 {
+partial struct localListenerᴛ1 /*dyn*/ {
     internal sync.Mutex mu;
     internal netꓸAddr addr;
     internal channel<net.Conn> ch;
@@ -497,7 +497,7 @@ break_Dialing:;
 }
 
 // zeroSource is an io.Reader that returns an unlimited number of zero bytes.
-[GoType] internal partial struct zeroSource {
+internal partial struct zeroSource {
 }
 
 internal static (nint n, error err) Read(this zeroSource _, slice<byte> b) {

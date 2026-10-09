@@ -282,7 +282,7 @@ public static void TestParse(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestEmptyTemplate_cases {
+internal partial struct TestEmptyTemplate_cases /*dyn*/ {
     internal slice<@string> defn;
     internal @string @in;
     internal @string want;

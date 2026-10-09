@@ -139,7 +139,7 @@ public static void BenchmarkSliceByteToString(ж<testing.B> Ꮡb) {
 }
 
 
-[GoType("dyn")] partial struct stringdataᴛ1 {
+partial struct stringdataᴛ1 /*dyn*/ {
     internal @string name, data;
 }
 internal static slice<stringdataᴛ1> stringdata = new stringdataᴛ1[]{
@@ -489,7 +489,7 @@ public static void TestString2Slice(ж<testing.T> Ꮡt) {
 
 internal static UntypedInt intSize => /* 32 << (^uint(0) >> 63) */ 64;
 
-[GoType] partial struct atoi64Test {
+partial struct atoi64Test {
     internal @string @in;
     internal int64 @out;
     internal bool ok;
@@ -545,7 +545,7 @@ public static void TestAtoi(ж<testing.T> Ꮡt) {
 
 }
 
-[GoType] partial struct atoi32Test {
+partial struct atoi32Test {
     internal @string @in;
     internal int32 @out;
     internal bool ok;
@@ -585,7 +585,7 @@ public static void TestAtoi32(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestParseByteCount_type {
+internal partial struct TestParseByteCount_type /*dyn*/ {
     internal @string @in;
     internal int64 @out;
     internal bool ok;

@@ -36,7 +36,7 @@ internal static Func<@string, netip.AddrPort> mustIPPort = MustParseAddrPort;
 internal static readonly @string eth0ˢ = "eth0"u8;
 internal static readonly @string eth1ˢ = "eth1"u8;
 
-[GoType("dyn")] internal partial struct TestParseAddr_type {
+internal partial struct TestParseAddr_type /*dyn*/ {
     internal @string @in;
     internal netipꓸAddr ip;   // output of ParseAddr()
     internal @string str; // output of String(). If "", use in.
@@ -320,7 +320,7 @@ public static void TestParseAddr(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fe8001ˢ = "fe80::01"u8;
 
-[GoType("dyn")] internal partial struct TestAddrFromSlice_tests {
+internal partial struct TestAddrFromSlice_tests /*dyn*/ {
     internal slice<byte> ip;
     internal netipꓸAddr wantAddr;
     internal bool wantOK;
@@ -370,7 +370,7 @@ internal static readonly @string fd7a115cA1e0Ab124843Cd96ˢ = "fd7a:115c:a1e0:ab
 internal static readonly @string ffff192168140255ˢ = "::ffff:192.168.140.255"u8;
 internal static readonly @string ffff192168140255En0ˢ = "::ffff:192.168.140.255%en0"u8;
 
-[GoType("dyn")] internal partial struct TestAddrAppendText_tests {
+internal partial struct TestAddrAppendText_tests /*dyn*/ {
     internal netipꓸAddr ip;
     internal @string want;
 }
@@ -398,7 +398,7 @@ public static void TestAddrAppendText(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddrMarshalUnmarshalBinary_tests {
+internal partial struct TestAddrMarshalUnmarshalBinary_tests /*dyn*/ {
     internal @string ip;
     internal nint wantSize;
 }
@@ -469,7 +469,7 @@ internal static readonly @string cafeEn080ˢ = "[1::CAFE%en0]:80"u8;
 internal static readonly @string ffff19216814025580ˢ = "[::FFFF:192.168.140.255]:80"u8;
 internal static readonly @string ffff192168140255En080ˢ = "[::FFFF:192.168.140.255%en0]:80"u8;
 
-[GoType("dyn")] internal partial struct TestAddrPortMarshalTextString_tests {
+internal partial struct TestAddrPortMarshalTextString_tests /*dyn*/ {
     internal netip.AddrPort @in;
     internal @string want;
 }
@@ -510,7 +510,7 @@ public static void TestAddrPortMarshalTextString(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddrPortMarshalUnmarshalBinary_tests {
+internal partial struct TestAddrPortMarshalUnmarshalBinary_tests /*dyn*/ {
     internal @string ipport;
     internal nint wantSize;
 }
@@ -579,7 +579,7 @@ internal static readonly @string ffffC000028096ˢ = "::ffff:c000:0280/96"u8;
 internal static readonly @string ffff1921681402558ˢ = "::ffff:192.168.140.255/8"u8;
 internal static readonly @string ffffC0000280ˢ = "::ffff:c000:0280"u8;
 
-[GoType("dyn")] internal partial struct TestPrefixMarshalTextString_tests {
+internal partial struct TestPrefixMarshalTextString_tests /*dyn*/ {
     internal netipꓸPrefix @in;
     internal @string want;
 }
@@ -620,7 +620,7 @@ public static void TestPrefixMarshalTextString(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPrefixMarshalUnmarshalBinary_testCase {
+internal partial struct TestPrefixMarshalUnmarshalBinary_testCase /*dyn*/ {
     internal netipꓸPrefix prefix;
     internal nint wantSize;
 }
@@ -708,7 +708,7 @@ public static void TestAddrMarshalUnmarshal(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddrFrom16_tests {
+internal partial struct TestAddrFrom16_tests /*dyn*/ {
     internal @string name;
     internal array<byte> @in = new(16);
     internal netipꓸAddr want;
@@ -756,7 +756,7 @@ internal static readonly @string ffff10001ˢ = "::ffff:10.0.0.1"u8;
 internal static readonly @string ffff1721601ˢ = "::ffff:172.16.0.1"u8;
 internal static readonly @string ffff19216811ˢ = "::ffff:192.168.1.1"u8;
 
-[GoType("dyn")] internal partial struct TestIPProperties_tests {
+internal partial struct TestIPProperties_tests /*dyn*/ {
     internal @string name;
     internal netipꓸAddr ip;
     internal bool globalUnicast;
@@ -993,7 +993,7 @@ public static void TestIPProperties(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddrWellKnown_tests {
+internal partial struct TestAddrWellKnown_tests /*dyn*/ {
     internal @string name;
     internal netipꓸAddr ip;
     internal net.IP std;
@@ -1047,7 +1047,7 @@ internal static readonly @string fooˢ = "::1%foo"u8;
 internal static readonly @string ffff111112ˢ = "::ffff:11.1.1.12"u8;
 internal static readonly @string invalidIp1234888811Foo2ˢ = @"[invalid IP 1.2.3.4 8.8.8.8 ::1 ::1%foo ::2]"u8;
 
-[GoType("dyn")] internal partial struct TestAddrLessCompare_tests {
+internal partial struct TestAddrLessCompare_tests /*dyn*/ {
     internal netipꓸAddr a, b;
     internal bool want;
 }
@@ -1132,7 +1132,7 @@ public static void TestAddrLessCompare(ж<testing.T> Ꮡt) {
 internal static readonly @string foo1024ˢ = "[::1%foo]:1024"u8;
 internal static readonly @string invalidAddrPort123444388ˢ = @"[invalid AddrPort 1.2.3.4:443 8.8.8.8:8080 [::1]:80 [::1%foo]:1024 [::2]:80]"u8;
 
-[GoType("dyn")] internal partial struct TestAddrPortCompare_tests {
+internal partial struct TestAddrPortCompare_tests /*dyn*/ {
     internal netip.AddrPort a, b;
     internal nint want;
 }
@@ -1188,7 +1188,7 @@ internal static readonly @string fe8048ˢ = "fe80::/48"u8;
 internal static readonly @string fe808ˢ = "fe80::/8"u8;
 internal static readonly @string invalidPrefix1200161200ˢ = @"[invalid Prefix 1.2.0.0/16 1.2.0.0/24 1.2.3.0/24 fe80::/48 fe80::/64 fe90::/64]"u8;
 
-[GoType("dyn")] internal partial struct TestPrefixCompare_tests {
+internal partial struct TestPrefixCompare_tests /*dyn*/ {
     internal netipꓸPrefix a, b;
     internal nint want;
 }
@@ -1241,7 +1241,7 @@ public static void TestPrefixCompare(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string ffff192021ˢ = "::ffff:192.0.2.1"u8;
 
-[GoType("dyn")] internal partial struct TestIPStringExpanded_tests {
+internal partial struct TestIPStringExpanded_tests /*dyn*/ {
     internal netipꓸAddr ip;
     internal @string s;
 }
@@ -1290,14 +1290,14 @@ internal static readonly @string fe80DeadBeef0096ˢ = "fe80::dead:beef:0:0/96"u8
 internal static readonly @string a0004ˢ = "a000::/4"u8;
 internal static readonly object expectedAnErrorButNoneˢ = (@string)"expected an error, but none occurred"u8;
 
-[GoType("dyn")] internal partial struct TestPrefixMasking_subtest {
+internal partial struct TestPrefixMasking_subtest /*dyn*/ {
     internal netipꓸAddr ip;
     internal uint8 bits;
     internal netipꓸPrefix p;
     internal bool ok;
 }
 
-[GoType("dyn")] internal partial struct TestPrefixMasking_tests {
+internal partial struct TestPrefixMasking_tests /*dyn*/ {
     internal @string family;
     internal slice<TestPrefixMasking_subtest> subtests;
 }
@@ -1479,7 +1479,7 @@ internal static readonly @string ffff19202128ˢ = "::ffff:192.0.2.128"u8;
 internal static readonly @string fffeC0000280ˢ = "::fffe:c000:0280"u8;
 internal static readonly @string eth0ˢ2 = "::1%eth0"u8;
 
-[GoType("dyn")] internal partial struct TestIs4AndIs6_tests {
+internal partial struct TestIs4AndIs6_tests /*dyn*/ {
     internal netipꓸAddr ip;
     internal bool is4;
     internal bool is6;
@@ -1514,7 +1514,7 @@ internal static readonly @string ffff7f010203ˢ = "::ffff:7f01:0203"u8;
 internal static readonly @string ffff127123ˢ2 = "0:0:0:0:0000:ffff:127.1.2.3"u8;
 internal static readonly @string ffff127123ˢ3 = "0:0:0:0::ffff:127.1.2.3"u8;
 
-[GoType("dyn")] internal partial struct TestIs4In6_tests {
+internal partial struct TestIs4In6_tests /*dyn*/ {
     internal netipꓸAddr ip;
     internal bool want;
     internal netipꓸAddr wantUnmap;
@@ -1546,7 +1546,7 @@ public static void TestIs4In6(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPrefixMasked_tests {
+internal partial struct TestPrefixMasked_tests /*dyn*/ {
     internal netipꓸPrefix prefix;
     internal netipꓸPrefix masked;
 }
@@ -1590,7 +1590,7 @@ internal static readonly @string db8AaaaBbbbˢ = "2001:db8::aaaa:bbbb"u8;
 internal static readonly @string db81AaaaBbbbˢ = "2001:db8::1:aaaa:bbbb"u8;
 internal static readonly @string db9ˢ = "2001:db9::"u8;
 
-[GoType("dyn")] internal partial struct TestPrefix_tests {
+internal partial struct TestPrefix_tests /*dyn*/ {
     internal @string prefix;
     internal netipꓸAddr ip;
     internal nint bits;
@@ -1692,7 +1692,7 @@ public static void TestPrefix(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPrefixFromInvalidBits_tests {
+internal partial struct TestPrefixFromInvalidBits_tests /*dyn*/ {
     internal netipꓸAddr ip;
     internal nint @in, want;
 }
@@ -1725,7 +1725,7 @@ public static void TestPrefixFromInvalidBits(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestParsePrefixAllocs_tests {
+internal partial struct TestParsePrefixAllocs_tests /*dyn*/ {
     internal @string ip;
     internal @string slash;
 }
@@ -1761,7 +1761,7 @@ public static void TestParsePrefixAllocs(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object noErrorˢ = (@string)"no error"u8;
 
-[GoType("dyn")] internal partial struct TestParsePrefixError_tests {
+internal partial struct TestParsePrefixError_tests /*dyn*/ {
     internal @string prefix;
     internal @string errstr;
 }
@@ -1837,7 +1837,7 @@ public static void TestParsePrefixError(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPrefixIsSingleIP_tests {
+internal partial struct TestPrefixIsSingleIP_tests /*dyn*/ {
     internal netipꓸPrefix ipp;
     internal bool want;
 }
@@ -1870,7 +1870,7 @@ internal static slice<netipꓸAddr> mustIPs(params ꓸꓸꓸstring strsʗp) {
     return res;
 }
 
-[GoType("dyn")] internal partial struct BenchmarkBinaryMarshalRoundTrip_tests {
+internal partial struct BenchmarkBinaryMarshalRoundTrip_tests /*dyn*/ {
     internal @string name;
     internal @string ip;
 }
@@ -1938,7 +1938,7 @@ public static void BenchmarkIPv4(ж<testing.B> Ꮡb) {
 // ip4i was one of the possible representations of IP that came up in
 // discussions, inlining IPv4 addresses, but having an "overflow"
 // interface for IPv6 or IPv6 + zone. This is here for benchmarking.
-[GoType] partial struct ip4i {
+partial struct ip4i {
     internal array<byte> ip4 = new(4);
     internal byte flags1;
     internal byte flags2;
@@ -2017,7 +2017,7 @@ public static void BenchmarkIPv6Contains(ж<testing.B> Ꮡb) {
 }
 
 
-[GoType("dyn")] partial struct parseBenchInputsᴛ1 {
+partial struct parseBenchInputsᴛ1 /*dyn*/ {
     internal @string name;
     internal @string ip;
 }
@@ -2132,7 +2132,7 @@ public static void BenchmarkAddrPortMarshalText(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkPrefixMasking_tests {
+internal partial struct BenchmarkPrefixMasking_tests /*dyn*/ {
     internal @string name;
     internal netipꓸAddr ip;
     internal nint bits;
@@ -2227,7 +2227,7 @@ public static void BenchmarkParseAddrPort(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAs4_tests {
+internal partial struct TestAs4_tests /*dyn*/ {
     internal netipꓸAddr ip;
     internal array<byte> want = new(4);
     internal bool wantPanic;
@@ -2289,7 +2289,7 @@ public static void TestAs4(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPrefixOverlaps_tests {
+internal partial struct TestPrefixOverlaps_tests /*dyn*/ {
     internal netipꓸPrefix a, b;
     internal bool want;
 }
@@ -2631,7 +2631,7 @@ public static void TestNoAllocs(ж<testing.T> Ꮡt) {
 internal static readonly @string ffff19216811Eth0ˢ = "::ffff:192.168.1.1%eth0"u8;
 internal static readonly @string ipv4InIpv6ˢ = "ipv4-in-ipv6"u8;
 
-[GoType("dyn")] internal partial struct TestAddrStringAllocs_tests {
+internal partial struct TestAddrStringAllocs_tests /*dyn*/ {
     internal @string name;
     internal netipꓸAddr ip;
     internal nint wantAllocs;
@@ -2668,7 +2668,7 @@ public static void TestAddrStringAllocs(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPrefixString_tests {
+internal partial struct TestPrefixString_tests /*dyn*/ {
     internal netipꓸPrefix ipp;
     internal @string want;
 }
@@ -2691,7 +2691,7 @@ public static void TestPrefixString(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string ffff18080ˢ = "[FFFF::1]:8080"u8;
 
-[GoType("dyn")] internal partial struct TestAddrPortString_tests {
+internal partial struct TestAddrPortString_tests /*dyn*/ {
     internal netip.AddrPort ipp;
     internal @string want;
 }
@@ -2716,7 +2716,7 @@ public static void TestAddrPortString(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string ffff1ˢ = "ffff::1"u8;
 
-[GoType("dyn")] internal partial struct TestAsSlice_tests {
+internal partial struct TestAsSlice_tests /*dyn*/ {
     internal netipꓸAddr @in;
     internal slice<byte> want;
 }

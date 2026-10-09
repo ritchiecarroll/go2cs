@@ -32,7 +32,7 @@ partial class metrics_test_package {
 // Implemented in the runtime.
 //
 //go:linkname runtime_readMetricNames
-[global::System.Diagnostics.StackTraceHidden] internal static slice<@string> runtime_readMetricNames() {
+/*linkname*/ internal static partial slice<@string> runtime_readMetricNames() {
     return global::go.runtime_package.readMetricNames();
 }
 

@@ -22,7 +22,7 @@ using static go.sync_internal_test_package;
 
 partial class sync_test_package {
 
-[GoType("@string")] partial struct mapOp;
+partial struct mapOp /*@string*/;
 
 internal static readonly mapOp opLoad = "Load"u8;
 internal static readonly mapOp opStore = "Store"u8;
@@ -47,7 +47,7 @@ internal static array<mapOp> mapOps = new mapOp[]{
 }.array();
 
 // mapCall is a quick.Generator for calls on mapInterface.
-[GoType] partial struct mapCall {
+partial struct mapCall {
     internal mapOp op;
     internal any k, v;
 }
@@ -101,7 +101,7 @@ internal static (any, bool) apply(this mapCall c, mapInterface m) {
 
 }
 
-[GoType] partial struct mapResult {
+partial struct mapResult {
     internal any value;
     internal bool ok;
 }

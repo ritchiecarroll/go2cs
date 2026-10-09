@@ -44,7 +44,7 @@ using static go.runtime_internal_test_package;
 [assembly: global::go.GoPositionMap("runtime/align_runtime_test.go", "align_runtime_test.cs", "AA8eABo0")]
 [assembly: global::go.GoPositionMap("runtime/export_debuglog_test.go", "export_debuglog_test.cs", "ABIigqaAooCigKKAooCigKKAooCigKSCgoKCgoSmgoKCgoKClKaCgoKClII=")]
 [assembly: global::go.GoPositionMap("runtime/export_map_swiss_test.go", "export_map_swiss_test.cs", "AAoS")]
-[assembly: global::go.GoPositionMap("runtime/export_test.go", "export_test.cs", "ABwkkpKSkpKSkpKkopKSpKSUkpKUoqKkoqSUkqT+kqS8ggAJFIKmgqSCpoKCuKKClPaCgoKCgoCCpIKUgoCCgraAggAICoKCgoKCgoKClIKCgoKUgoKClIKUgoKClJSCgoKmgoL6yoKCgoKCgoKCgoKylIKClJSUgoKCuoKCgoKCgpKSppSigsyykpS2oqKilICigNiasoKmkpSyhISCgqiEpoCigKKAyIKmggAFEIKmgqqCpoKogoSm3sy6lpSEttjSlpSEqIKCgoKCgpqCgpSClICCgpSCgrqShpKCgoKClIKEhIKCloKCgpSClIKClpaCrNKCgJKEgpK4oqqypoKCgu6CpoKmgqaCpoKmgoKCgqaCpgAGRgAKAoKCgoKUlIKCppSmgq6CpoKmoraWkqiSAAQkgoKm3oKCgpbMhIKCuoKCAAocgKKAooCigMqCpICigKKAooCowqSCgpSClIKCgpSUlKiQqKKChIKSgoKClJSClKaClKyygoKClKbMgqSAooKkgqSCqJDugqSAooCigKKAooKkgoKExoKCAAcWgoSStoKClKSChIK2goKUpIKEtoKCtoKkooKSlKSCgoKUqJKCAAcSkqiSqJKokqiS/gAHIgAJApKCAAIQAAwMgoKCgpQABhKigoKUqqLe4oKUqJIABywADgKWgoKClpKCgqiClrqCloKAgqaC7qaClrqSgoKorLKWgoKmgoKUqMyCloKAgpQACxaCgoKUlIKClKqiAAcQspaSloKCgoKClNyCgoKCgpTK2ISUpqKWgqaCqIKmoqiilJSCgraiAAoekoKCgoKssoKCgpTOkoKCgoKUqJKCgoK4goKCgoKCAAoiwoKClIKClKaCppSCgoKClIKmgtyYwgACEuIADiLKgoKCpqKCgpSCgoKCpoKmgqaCpoKmggAKFoKCgoKCgqaCgoKCpoKmgqaCpoLsgoKUqJKmgqbcggAJEoIACRjKgoKCpoKmgqaCpoKmgqaCpoKmgqaCpoIADyKigqiCgoKWgoKCgrSCgoKkgsaCgoKUgqaSAAMUAA0MgoKCgoKClJSokqiSqsKCgoKClIKC7oIACxiCgoKCgqaCgqaCkpSUpoKClLiCkpSUpoKClLiigoKClJSmgqaCpoLcgoLaAAcQggAEGoKmgqaCgoKCgpSUpoKmlIKmoqqiqqLckpaCpILKgoK4goKClKSopKIACBCCpoKmgqaUgoKClIKCpoKCgoKClILugqaCpII=", "92-94:1;98-100:1;186-194:1;227-229:1;313-338:1;352-424:1;435-435:1;439-441:2;609-612:1;769-775:1;789-795:1;802-808:1;814-820:1;827-829:1;988-992:1;1033-1037:2;1117-1153:1;1231-1235:1;1241-1245:1;1550-1569:1;1753-1759:1;1806-1808:1")]
+[assembly: global::go.GoPositionMap("runtime/export_test.go", "export_test.cs", "ABwkkpKSkpKSkpKkopKSpKSUkpKUoqKkoqSUkqT+kqS8ggAJFIKmgqSCpoKCuKKClPaCgoKCgoCCpIKUgoCCgraAggAICoKCgoKCgoKClIKCgoKUgoKClIKUgoKClJSCgoKmgoL6yoKCgoKCgoKCgoKylIKClJSUgoKCuoKCgoKCgpKSppSigsyykpS2oqKilICigNiasoKmkpSyhISCgqiEpoCigKKAyIKmggAFEIKmgqqCpoKogoSm3sy6lpSEttjSlpSEqIKCgoKCgpqCgpSClICCgpSCgrqShpKCgoKClIKEhIKCloKCgpSClIKClpaCrNKCgJKEgpK4oqqypoKCgu6CpoKmgqaCpoKmgoKCgqaCpgAGRgAKAoKCgoKUlIKCppSmgq6CpoKmoraWkqiSAAQkgoKm3oKCgpbMhIKCuoKCAAocgKKAooCigMqCpICigKKAooCowqSCgpSClIKCgpSUlKiQqKKChIKSgoKClJSClKaClKyygoKClKbMgqSAooKkgqSCqJDugqSAooCigKKAooKkgoKExoKCAAcWgoSStoKClKSChIK2goKUpIKEtoKCtoKkooKSlKSCgoKUqJKCAAcSkqiSqJKokqiS/gAHIgAJApKCAAIQAAwMgoKCgpQABhKigoKUqqLe4oKUqJIABywADgKWgoKClpKCgqiClrqCloKAgqaC7qaClrqSgoKorLKWgoKmgoKUqMyCloKAgpQACxaCgoKUlIKClKqiAAcQspaSloKCgoKClNyCgoKCgpTK2ISUpqKWgqaCqIKmoqiilJSCgraiAAoekoKCgoKssoKCgpTOkoKCgoKUqJKCgoK4goKCgoKCAAoiwoKClIKClKaCppSCgoKClIKmgtyYwgACEuIADiLKgoKCpqKCgpSCgoKCpoKmgqaCpoKmggAKFoKCgoKCgqaCgoKCpoKmgqaCpoLsgoKUqJKmgqbcggAJEoIACRjKgoKCpoKmgqaCpoKmgqaCpoKmgqaCpoIADyKigqiCgoKWgoKCgrSCgoKkgsaCgoKUgqaSAAMUAA0MgoKCgoKClJSokqiSqsKCgoKClIKC7oIACxiCgoKCgqaCgqaCkpSUpoKClLiCkpSUpoKClLiigoKClJSmgqaCpoLcgoLaAAcQggAEGoKmgqaCgoKCgpSUpoKmlIKmoqqiqqLckpaCpILKgoK4goKClKSopKIACBCCpoKmgqaUgoKClIKCpoKCgoKClILugqaCpII=", "92-94:1;98-100:1;186-194:1;227-229:1;313-338:1;352-424:1;435-435:1;439-441:2;609-612:1;769-775:1;789-795:1;802-808:1;814-820:1;827-829:1;988-992:1;1033-1037:2;1117-1153:1;1231-1235:1;1241-1245:1;1550-1569:1;1753-1759:1;1806-1808:1", "", "1240=chunkBase/1/1/1")]
 [assembly: global::go.GoPositionMap("runtime/export_windows_test.go", "export_windows_test.cs", "ABAikgAHGoI=")]
 [assembly: global::go.GoPositionMap("runtime/proc_runtime_test.go", "proc_runtime_test.cs", "AAoSgoKCgoKUgoKCgoKCgpSClILcgoKmgoKCgoKU")]
 [assembly: global::go.GoPositionMap("runtime/symtabinl_test.go", "symtabinl_test.cs", "ABgagoKWgoKCltzegoKCgoAABxCkgoKCgpaEgoKClIKWgoKUgpaClJaChISAgtyCgsqCgsrEkqSigqSigoI=")]
@@ -57,12 +57,15 @@ namespace go;
 public static partial class runtime_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
 
     // <TypeAccessibility>
+    [GoValueClone("Value")] partial struct PageAlloc {}
+    [GoValueClone("Value")] partial struct TimeHistogram {}
+    [GoValueClone("Value")] partial struct ΔPallocData {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

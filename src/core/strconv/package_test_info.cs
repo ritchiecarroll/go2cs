@@ -48,13 +48,13 @@ using static global::go.strconv_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("strconv/atob_test.go", "atob_test.cs", "ABMmABAiooKClIKmgriClILcyoKCgIIACxbKgoKCgg==")]
-[assembly: go.GoPositionMap("strconv/atoc_test.go", "atoc_test.cs", "ABAggoKChIKCggAHEoIAkgG2AoKCgpSCgpSCloKCgpSCggAIDpKChIKCgpSC")]
-[assembly: go.GoPositionMap("strconv/atof_test.go", "atof_test.cs", "AF0uAKkCjAUARL4BgqamgoKCpoKCgrqClJSCgoKCloKCgpaCgriCgoKCyoKCgoKUgtyCgoKCgoKCgqiCgoKCgpSCgsqCgoKCgpSCgrimgKSApIKCgoKUAAoKAA0GAAQcgoKCgoKUgoKUgoKClIKClLqSgoKUgoKCgpSEgoKUtLS0lNqigoSCgoKUgsqigriigriigriigriigoKCuKKCgoK4ooKCgpSCgoKCgoLKooK4ooK4ooK4ooKCgoKUgoK4ooKCgoKUgoI=")]
-[assembly: go.GoPositionMap("strconv/atoi_test.go", "atoi_test.cs", "ABYqACU2AFW8AQAqRgBGogEAGC4AIEDcpoKCgqaCgoKmgoKCpoKCgqaCgoKmgoKCyoKCgoKC3IKCgoKC3IKCgoKC3IKCgoKC3IKCgoKC3IKCgoKC3IKUgoKCgtqCgoKC/oKUgoKCgtqCgoKC/oKUgoKCgoKUgtqCgoKCgpSC/oKmgqaCAAcQ/gAJEoKClIKU1oKCgoKCggAIDIKCgoKCgtyCgoKCgoLcgoKCgoKCAAgMgoLKgIIACAqCgoL4goKUggAIEoLuspKCgoLcgoKUgriCyoLKspKCgoI=", "615-617:1;618-620:2;637-643:1;648-650:1;651-653:2;669-675:1")]
+[assembly: go.GoPositionMap("strconv/atoc_test.go", "atoc_test.cs", "ABAggoKChIKCggAHEoIAkgG2AoKCgpSCgpSCloKCgpSCggAIDpKChIKCgpSC", "", "", "33=NaN/1/4/26,NaN/2/4/27,NaN/3/4/28,NaN/4/4/28")]
+[assembly: go.GoPositionMap("strconv/atof_test.go", "atof_test.cs", "AF0uAKkCjAUARL4BgqamgoKCpoKCgrqClJSCgoKCloKCgpaCgriCgoKCyoKCgoKUgtyCgoKCgoKCgqiCgoKCgpSCgsqCgoKCgpSCgrimgKSApIKCgoKUAAoKAA0GAAQcgoKCgoKUgoKUgoKClIKClLqSgoKUgoKCgpSEgoKUtLS0lNqigoSCgoKUgsqigriigriigriigriigoKCuKKCgoK4ooKCgpSCgoKCgoLKooK4ooK4ooK4ooKCgoKUgoK4ooKCgoKUgoI=", "", "", "94=Repeat/1/4/257,Repeat/2/4/260,Repeat/3/4/274,Repeat/4/4/275;392=Repeat/1/2/19,Repeat/2/2/20")]
+[assembly: go.GoPositionMap("strconv/atoi_test.go", "atoi_test.cs", "ABYqACU2AFW8AQAqRgBGogEAGC4AIEDcpoKCgqaCgoKmgoKCpoKCgqaCgoKmgoKCyoKCgoKC3IKCgoKC3IKCgoKC3IKCgoKC3IKCgoKC3IKCgoKC3IKUgoKCgtqCgoKC/oKUgoKCgtqCgoKC/oKUgoKCgoKUgtqCgoKCgpSC/oKmgqaCAAcQ/gAJEoKClIKU1oKCgoKCggAIDIKCgoKCgtyCgoKCgoLcgoKCgoKCAAgMgoLKgIIACAqCgoL4goKUggAIEoLuspKCgoLcgoKUgriCyoLKspKCgoI=", "615-617:1;618-620:2;637-643:1;648-650:1;651-653:2;669-675:1", "", "619=New/1/1/3")]
 [assembly: go.GoPositionMap("strconv/ctoa_test.go", "ctoa_test.cs", "ABMYggAOMIKCgtyigoCCtqI=", "47-51:1")]
 [assembly: go.GoPositionMap("strconv/decimal_test.go", "decimal_test.cs", "ABIkAA0cgoKCgoKCggAMGgAQJIKCgoKCgoKmgoKCgqaCgoKCAAsYAAwagoKCgoKCgg==")]
 [assembly: go.GoPositionMap("strconv/fp_test.go", "fp_test.cs", "ABAggpSkpKSqooCCgoKUgoKClKaCgoKCgpSUgoKCgoKUlKSCgpSqooCCgoKClIKCgpSkgoKClAANBqKCgpSUhIKCgpSCgoKUgoKUgoKCgpSkgoKClIKkgriCtA==")]
-[assembly: go.GoPositionMap("strconv/ftoa_test.go", "ftoa_test.cs", "ABUqgAASDgB8qgKCgoKCgpSCgpSCgoKUgoLcgoKCgoKAgraCgoKAguyCgoKUgoKChIKCgoKCloKCgoKCgsqigoCCtqIAEgQAHF6CspKC3IKCsqKC", "250-254:1;307-311:1;318-322:1")]
+[assembly: go.GoPositionMap("strconv/ftoa_test.go", "ftoa_test.cs", "ABUqgAASDgB8qgKCgoKCgpSCgpSCgoKUgoLcgoKCgoKAgraCgoKAguyCgoKUgoKChIKCgoKCloKCgoKCgsqigoCCtqIAEgQAHF6CspKC3IKCsqKC", "250-254:1;307-311:1;318-322:1", "", "42=fdiv/1/2/86,fdiv/2/2/87,NaN/1/2/95,NaN/2/2/96,Inf/1/3/97,Inf/2/3/98,Inf/3/3/99;273=Ldexp/1/5/22,Ldexp/2/5/23,Ldexp/3/5/32,Ldexp/4/5/33,Ldexp/5/5/34")]
 [assembly: go.GoPositionMap("strconv/ftoaryu_test.go", "ftoaryu_test.cs", "AAwagoKCgoLKgoKCgoI=")]
 [assembly: go.GoPositionMap("strconv/itoa_test.go", "itoa_test.cs", "ABEkACpYooKCgqaCgqiCgoKmgoK6goKC3oKAgraiAAgQAAgSgoKCgqaCggAKDgAWNIKCgoLKooKCgsqigoKCgsqigoKCyqKCgoKCyoKCgoKCgtyigoKCgriCspKCgoI=", "98-102:1;213-218:1;233-239:1")]
 [assembly: go.GoPositionMap("strconv/quote_test.go", "quote_test.cs", "AA0esoKCgoKCgt6ygoKCgoKCAA0aAAoYgoKAgqSAgtqCgoCCpICC2oKCgIKkgILaooK4ooLcooLcooIACxYADyKCgoCCpICC2oKCgIKkgILagoKAgqSAggALFAAtXIKCgIIAChQAJVAAHj6CgpSClIIACgqyAAYagri0goLMgpSCgpSCgoKClILoooLoooI=")]
@@ -67,7 +67,7 @@ namespace go;
 public static partial class strconv_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

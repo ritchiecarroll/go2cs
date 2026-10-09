@@ -13,7 +13,7 @@ using static go.encoding.gob_package;
 
 partial class gob_internal_test_package {
 
-[GoType] public partial struct Bench {
+public partial struct Bench {
     public nint A;
     public float64 B;
     public @string C;
@@ -208,12 +208,12 @@ public static void BenchmarkEncodeInterfaceSlice(ж<testing.B> Ꮡb) {
 }
 
 // benchmarkBuf is a read buffer we can reset
-[GoType] internal partial struct benchmarkBuf {
+internal partial struct benchmarkBuf {
     internal nint offset;
     internal slice<byte> data;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref benchmarkBuf b, slice<byte> p) {
+internal static (nint n, error err) Read(this ref benchmarkBuf b, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -225,7 +225,7 @@ public static void BenchmarkEncodeInterfaceSlice(ж<testing.B> Ꮡb) {
     return (n, err);
 }
 
-[GoRecv] internal static (byte c, error err) ReadByte(this ref benchmarkBuf b) {
+internal static (byte c, error err) ReadByte(this ref benchmarkBuf b) {
     byte c = default!;
     error err = default!;
 
@@ -237,7 +237,7 @@ public static void BenchmarkEncodeInterfaceSlice(ж<testing.B> Ꮡb) {
     return (c, err);
 }
 
-[GoRecv] internal static void reset(this ref benchmarkBuf b) {
+internal static void reset(this ref benchmarkBuf b) {
     b.offset = 0;
 }
 

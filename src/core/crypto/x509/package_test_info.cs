@@ -89,7 +89,7 @@ using static global::go.crypto.x509_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/x509/hybrid_pool_test.go", "hybrid_pool_test.cs", "AB8qgoKClIKUAAoYgoKCgoKClIKClMyCgpSEAAcQgoKUgoKUgoKWgoKUhIKCloSCgpbcgoKUgoKWgoI=")]
+[assembly: go.GoPositionMap("crypto/x509/hybrid_pool_test.go", "hybrid_pool_test.cs", "AB8qgoKClIKUAAoYgoKCgoKClIKClMyCgpSEAAcQgoKUgoKUgoKWgoKUhIKCloSCgpbcgoKUgoKWgoI=", "", "", "73=NewInt/1/1/1,Now/1/2/5,Add/1/2/5,Now/2/2/6,Add/2/2/6;107=NewInt/1/1/1,Now/1/2/2,Add/1/2/2,Now/2/2/3,Add/2/2/3")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -98,7 +98,7 @@ namespace go.crypto;
 public static partial class x509_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

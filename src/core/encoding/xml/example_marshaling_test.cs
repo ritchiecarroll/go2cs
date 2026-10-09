@@ -12,13 +12,13 @@ using static go.encoding.xml_internal_test_package;
 
 partial class xml_test_package {
 
-[GoType("num:nint")] partial struct Animal;
+partial struct Animal /*num:nint*/;
 
 public static Animal Unknown => /* iota */ 0;
 public static Animal Gopher => 1;
 public static Animal Zebra => 2;
 
-[GoRecv] public static error UnmarshalXML(this ref Animal a, ж<xml.Decoder> Ꮡd, xml.StartElement startʗp) {
+public static error UnmarshalXML(this ref Animal a, ж<xml.Decoder> Ꮡd, xml.StartElement startʗp) {
     ref var start = ref heap(startʗp, out var Ꮡstart);
 
     ref var s = ref heap(new @string(), out var Ꮡs);
@@ -77,9 +77,8 @@ internal static readonly @string animalsAnimalGopherˢ = """
 	</animals>
 """u8;
 
-[GoType("dyn")] internal partial struct Example_customMarshalXML_zoo {
-    [GoTag(@"xml:""animal""")]
-    public slice<Animal> Animals;
+internal partial struct Example_customMarshalXML_zoo /*dyn*/ {
+    public slice<Animal> Animals; /*`xml:"animal"`*/
 }
 
 public static void Example_customMarshalXML() {

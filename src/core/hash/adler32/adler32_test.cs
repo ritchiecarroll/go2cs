@@ -13,7 +13,7 @@ using static go.hash.adler32_package;
 partial class adler32_internal_test_package {
 
 
-[GoType("dyn")] partial struct goldenᴛ1 {
+partial struct goldenᴛ1 /*dyn*/ {
     internal uint32 @out;
     internal @string @in;
     internal @string halfState; // marshaled hash state after first half of in written, used by TestGoldenMarshal

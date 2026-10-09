@@ -309,7 +309,7 @@ public static void TestGroupIdsTestUser(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct serviceAccountsᴛ1 {
+partial struct serviceAccountsᴛ1 /*dyn*/ {
     internal @string sid;
     internal @string name;
 }

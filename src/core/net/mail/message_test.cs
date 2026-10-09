@@ -22,7 +22,7 @@ partial class mail_internal_test_package {
 // RFC 4155 mbox format. We've historically permitted this,
 // so we continue to permit it. Issue #60332.
 
-[GoType("dyn")] partial struct parseTestsᴛ1 {
+partial struct parseTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal global::go.net.mail_package.Header header;
     internal @string body;
@@ -136,7 +136,7 @@ internal static bool headerEq(global::go.net.mail_package.Header a, global::go.n
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string gmtˢ = "GMT"u8;
 
-[GoType("dyn")] internal partial struct TestDateParsing_tests {
+internal partial struct TestDateParsing_tests /*dyn*/ {
     internal @string dateStr;
     internal time.Time exp;
 }
@@ -193,7 +193,7 @@ public static void TestDateParsing(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestDateParsingCFWS_tests {
+internal partial struct TestDateParsingCFWS_tests /*dyn*/ {
     internal @string dateStr;
     internal time.Time exp;
     internal bool valid;
@@ -397,7 +397,7 @@ public static void TestDateParsingCFWS(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string customWordDecoderˢ = "CustomWordDecoder"u8;
 
-[GoType("dyn")] internal partial struct TestAddressParsingError_mustErrTestCases {
+internal partial struct TestAddressParsingError_mustErrTestCases /*dyn*/ {
     internal @string text;
     internal @string wantErrText;
 }
@@ -449,7 +449,7 @@ public static void TestAddressParsingError(ж<testing.T> Ꮡt) {
     });
 }
 
-[GoType("dyn")] internal partial struct TestAddressParsing_tests {
+internal partial struct TestAddressParsing_tests /*dyn*/ {
     internal @string addrsStr;
     internal slice<ж<global::go.net.mail_package.Address>> exp;
 }
@@ -842,7 +842,7 @@ public static void TestAddressParsing(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddressParser_tests {
+internal partial struct TestAddressParser_tests /*dyn*/ {
     internal @string addrsStr;
     internal slice<ж<global::go.net.mail_package.Address>> exp;
 }
@@ -1013,7 +1013,7 @@ public static void TestAddressParser(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddressString_tests {
+internal partial struct TestAddressString_tests /*dyn*/ {
     internal ж<global::go.net.mail_package.Address> addr;
     internal @string exp;
 }

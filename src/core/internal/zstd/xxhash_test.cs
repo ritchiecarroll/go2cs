@@ -14,7 +14,7 @@ using static go.@internal.zstd_package;
 partial class zstd_internal_test_package {
 
 
-[GoType("dyn")] partial struct xxHashTestsᴛ1 {
+partial struct xxHashTestsᴛ1 /*dyn*/ {
     internal @string data;
     internal uint64 hash;
 }

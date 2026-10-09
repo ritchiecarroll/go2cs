@@ -15,7 +15,7 @@ using static global::go.net.http_package;
 
 partial class http_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestServerTLSHandshakeTimeout_tests {
+internal partial struct TestServerTLSHandshakeTimeout_tests /*dyn*/ {
     internal ж<global::go.net.http_package.Server> s;
     internal time.Duration want;
 }
@@ -69,7 +69,7 @@ public static void TestServerTLSHandshakeTimeout(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct Δhandler {
+internal partial struct Δhandler {
     internal nint i;
 }
 
@@ -79,12 +79,12 @@ internal static void ServeHTTP(this Δhandler _Δp0, global::go.net.http_package
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string exampleComˢ = "example.com"u8;
 
-[GoType("dyn")] internal partial struct TestFindHandler_type {
+internal partial struct TestFindHandler_type /*dyn*/ {
     internal @string pat;
     internal global::go.net.http_package.ΔHandler h;
 }
 
-[GoType("dyn")] internal partial struct TestFindHandler_typeᴛ1 {
+internal partial struct TestFindHandler_typeᴛ1 /*dyn*/ {
     internal @string method;
     internal @string path;
     internal @string wantHandler;
@@ -149,7 +149,7 @@ public static void TestEmptyServeMux(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object gotNilErrorˢ = (@string)"got nil error"u8;
 
-[GoType("dyn")] internal partial struct TestRegisterErr_type {
+internal partial struct TestRegisterErr_type /*dyn*/ {
     internal @string pattern;
     internal global::go.net.http_package.ΔHandler handler;
     internal @string wantRegexp;
@@ -186,7 +186,7 @@ public static void TestRegisterErr(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestExactMatch_type {
+internal partial struct TestExactMatch_type /*dyn*/ {
     internal @string pattern;
     internal @string path;
     internal bool want;
@@ -220,7 +220,7 @@ public static void TestExactMatch(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string latestˢ = "latest"u8;
 
-[GoType("dyn")] internal partial struct TestEscapedPathsAndPatterns_matches {
+internal partial struct TestEscapedPathsAndPatterns_matches /*dyn*/ {
     internal @string pattern;
     internal slice<@string> paths; // paths that match the pattern
     internal slice<@string> paths121; // paths that matched the pattern in Go 1.21.
@@ -304,7 +304,7 @@ public static void TestEscapedPathsAndPatterns(ж<testing.T> Ꮡt) {
     });
 }
 
-[GoType("dyn")] internal partial struct TestCleanPath_type {
+internal partial struct TestCleanPath_type /*dyn*/ {
     internal @string @in, want;
 }
 

@@ -22,7 +22,7 @@ internal static readonly @string greetingH69Addresseeˢ = @"greeting=H%69,&addre
 internal static readonly @string greetingH69Addresseeˢ2 = @"greeting=H%69,&addressee=(World) 2x, https://golang.org/favicon.ico 500.5w"u8;
 internal static readonly @string fooˢ = @",foo/,"u8;
 
-[GoType("dyn")] internal partial struct TestTypedContent_tests {
+internal partial struct TestTypedContent_tests /*dyn*/ {
     // A template containing a single {{.}}.
     internal @string input;
     internal slice<@string> want;
@@ -420,19 +420,19 @@ public static void TestTypedContent(ж<testing.T> Ꮡt) {
 }
 
 // Test that we print using the String method. Was issue 3073.
-[GoType] internal partial struct myStringer {
+internal partial struct myStringer {
     internal nint v;
 }
 
-[GoRecv] internal static @string String(this ref myStringer s) {
+internal static @string String(this ref myStringer s) {
     return fmt.Sprintf("string=%d"u8, s.v);
 }
 
-[GoType] internal partial struct errorer {
+internal partial struct errorer {
     internal nint v;
 }
 
-[GoRecv] internal static @string Error(this ref errorer s) {
+internal static @string Error(this ref errorer s) {
     return fmt.Sprintf("error=%d"u8, s.v);
 }
 
@@ -467,11 +467,11 @@ public static void TestStringer(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestEscapingNilNonemptyInterfaces_testData {
+internal partial struct TestEscapingNilNonemptyInterfaces_testData /*dyn*/ {
     public error E;
 }
 
-[GoType("dyn")] internal partial struct TestEscapingNilNonemptyInterfaces_data {
+internal partial struct TestEscapingNilNonemptyInterfaces_data /*dyn*/ {
     public any E;
 }
 

@@ -38,7 +38,7 @@ public static void TestTempFile(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestTempFile_pattern_tests {
+internal partial struct TestTempFile_pattern_tests /*dyn*/ {
     internal @string pattern, prefix, suffix;
 }
 
@@ -75,7 +75,7 @@ internal static readonly @string patternHasSeparator = "pattern contains path se
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 private static readonly @string sepᶜ = "\\";
 
-[GoType("dyn")] internal partial struct TestTempFile_BadPattern_tests {
+internal partial struct TestTempFile_BadPattern_tests /*dyn*/ {
     internal @string pattern;
     internal bool wantErr;
 }
@@ -138,7 +138,7 @@ public static void TestTempFile_BadPattern(ж<testing.T> Ꮡt) {
 private static readonly @string notExistsˢ2 = "/_not_exists_"u8;
 private static readonly @string xyzˢ = "*xyz"u8;
 
-[GoType("dyn")] internal partial struct TestTempDir_tests {
+internal partial struct TestTempDir_tests /*dyn*/ {
     internal @string pattern;
     internal @string wantPrefix, wantSuffix;
 }
@@ -225,7 +225,7 @@ public static void TestTempDir_BadDir(ж<testing.T> Ꮡt) {
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 private static readonly @string sepᶜ1 = "\\";
 
-[GoType("dyn")] internal partial struct TestTempDir_BadPattern_tests {
+internal partial struct TestTempDir_BadPattern_tests /*dyn*/ {
     internal @string pattern;
     internal bool wantErr;
 }

@@ -14,7 +14,7 @@ partial class template_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object blankTokensˢ = (@string)"Blank tokens"u8;
 
-[GoType("dyn")] internal partial struct TestNextJsCtx_tests {
+internal partial struct TestNextJsCtx_tests /*dyn*/ {
     internal global::go.html.template_package.jsCtx jsCtx;
     internal @string s;
 }
@@ -113,23 +113,23 @@ public static void TestNextJsCtx(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct jsonErrType {
+internal partial struct jsonErrType {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string aBScriptCScriptDESCrIpTFˢ = "a */ b <script c </script d <!-- e <sCrIpT f </sCrIpT"u8;
 
-[GoRecv] internal static (slice<byte>, error) MarshalJSON(this ref jsonErrType e) {
+internal static (slice<byte>, error) MarshalJSON(this ref jsonErrType e) {
     return (default!, errors.New(aBScriptCScriptDESCrIpTFˢ));
 }
 
-[GoType("dyn")] internal partial struct TestJSValEscaper_tests {
+internal partial struct TestJSValEscaper_tests /*dyn*/ {
     internal any x;
     internal @string js;
     internal bool skipNest;
 }
 
-[GoType("dyn")] internal partial struct TestJSValEscaper_type {
+internal partial struct TestJSValEscaper_type /*dyn*/ {
     public nint X, Y;
 }
 
@@ -205,7 +205,7 @@ public static void TestJSValEscaper(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestJSStrEscaper_tests {
+internal partial struct TestJSStrEscaper_tests /*dyn*/ {
     internal any x;
     internal @string esc;
 }
@@ -263,7 +263,7 @@ public static void TestJSStrEscaper(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestJSRegexpEscaper_tests {
+internal partial struct TestJSRegexpEscaper_tests /*dyn*/ {
     internal any x;
     internal @string esc;
 }
@@ -310,7 +310,7 @@ public static void TestJSRegexpEscaper(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestEscapersOnLower7AndSelectHighCodepoints_tests {
+internal partial struct TestEscapersOnLower7AndSelectHighCodepoints_tests /*dyn*/ {
     internal @string name;
     internal Funcꓸꓸꓸ<any, @string> escaper;
     internal @string escaped;
@@ -354,7 +354,7 @@ public static void TestEscapersOnLower7AndSelectHighCodepoints(ж<testing.T> Ꮡ
     }
 }
 
-[GoType("dyn")] internal partial struct TestIsJsMimeType_tests {
+internal partial struct TestIsJsMimeType_tests /*dyn*/ {
     internal @string @in;
     internal bool @out;
 }
@@ -403,7 +403,7 @@ public static void BenchmarkJSValEscaperWithStrNoSpecials(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkJSValEscaperWithObj_o {
+internal partial struct BenchmarkJSValEscaperWithObj_o /*dyn*/ {
     public @string S;
     public nint N;
 }
@@ -420,7 +420,7 @@ public static void BenchmarkJSValEscaperWithObj(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkJSValEscaperWithObjNoSpecials_o {
+internal partial struct BenchmarkJSValEscaperWithObjNoSpecials_o /*dyn*/ {
     public @string S;
     public nint N;
 }

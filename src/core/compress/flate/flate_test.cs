@@ -85,7 +85,7 @@ public static void TestInvalidBits(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStreams_testCases {
+internal partial struct TestStreams_testCases /*dyn*/ {
     internal @string desc; // Description of the stream
     internal @string stream; // Hexstring of the input DEFLATE stream
     internal @string want; // Expected result. Use "fail" to expect failure

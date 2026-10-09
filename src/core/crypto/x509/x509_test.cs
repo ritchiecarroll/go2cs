@@ -45,7 +45,7 @@ using static go.crypto.x509_package;
 
 partial class x509_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestParsePKCS1PrivateKey_val {
+internal partial struct TestParsePKCS1PrivateKey_val /*dyn*/ {
     public nint Version;
     public ж<bigꓸInt> N;
     public nint E;
@@ -364,7 +364,7 @@ public static void TestMarshalRSAPrivateKeyInvalid(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestMarshalRSAPublicKey_publicKeys {
+internal partial struct TestMarshalRSAPublicKey_publicKeys /*dyn*/ {
     internal slice<byte> derBytes;
     internal @string expectedErrSubstr;
 }
@@ -505,7 +505,7 @@ public static void TestMarshalRSAPublicKey(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct matchHostnamesTest {
+internal partial struct matchHostnamesTest {
     internal @string pattern, host;
     internal bool ok;
 }
@@ -714,7 +714,7 @@ internal static readonly @string httpsFooComWibbleFooˢ = "https://foo.com/wibbl
 internal static readonly @string db848ˢ = "2001:db8::/48"u8;
 internal static readonly object sanExtensionIsMarkedˢ = (@string)"SAN extension is marked critical"u8;
 
-[GoType("dyn")] internal partial struct TestCreateSelfSignedCertificate_tests {
+internal partial struct TestCreateSelfSignedCertificate_tests /*dyn*/ {
     internal @string name;
     internal any pub, priv;
     internal bool checkSig;
@@ -997,7 +997,7 @@ kBg71w/iEcSY3wUKgHGcJJrObZw7wys91I5kENljqw/Samdr3ka+jBJa
 """u8;
 
 
-[GoType("dyn")] partial struct ecdsaTestsᴛ1 {
+partial struct ecdsaTestsᴛ1 /*dyn*/ {
     internal global::go.crypto.x509_package.SignatureAlgorithm sigAlgo;
     internal @string pemCert;
 }
@@ -1362,7 +1362,7 @@ MC4CAQAwBQYDK2VwBCIEINdKh2096vUBYu4EIFpjShsUSh3vimKya1sQ1YTT4RZG
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string ozAtlantisˢ = "Oz/Atlantis"u8;
 
-[GoType("dyn")] internal partial struct TestCRLCreation_tests {
+internal partial struct TestCRLCreation_tests /*dyn*/ {
     internal @string name;
     internal any priv;
     internal ж<global::go.crypto.x509_package.Certificate> cert;
@@ -1505,7 +1505,7 @@ internal static readonly @string derCRLBase64 = "MIINqzCCDJMCAQEwDQYJKoZIhvcNAQE
 
 internal static readonly @string pemCRLBase64 = "LS0tLS1CRUdJTiBYNTA5IENSTC0tLS0tDQpNSUlCOWpDQ0FWOENBUUV3RFFZSktvWklodmNOQVFFRkJRQXdiREVhTUJnR0ExVUVDaE1SVWxOQklGTmxZM1Z5DQphWFI1SUVsdVl5NHhIakFjQmdOVkJBTVRGVkpUUVNCUWRXSnNhV01nVW05dmRDQkRRU0IyTVRFdU1Dd0dDU3FHDQpTSWIzRFFFSkFSWWZjbk5oYTJWdmJuSnZiM1J6YVdkdVFISnpZWE5sWTNWeWFYUjVMbU52YlJjTk1URXdNakl6DQpNVGt5T0RNd1doY05NVEV3T0RJeU1Ua3lPRE13V2pDQmpEQktBaEVBckRxb2g5RkhKSFhUN09QZ3V1bjQrQmNODQpNRGt4TVRBeU1UUXlOekE1V2pBbU1Bb0dBMVVkRlFRRENnRUpNQmdHQTFVZEdBUVJHQTh5TURBNU1URXdNakUwDQpNalExTlZvd1BnSVJBTEd6blowOTVQQjVhQU9MUGc1N2ZNTVhEVEF5TVRBeU16RTBOVEF4TkZvd0dqQVlCZ05WDQpIUmdFRVJnUE1qQXdNakV3TWpNeE5EVXdNVFJhb0RBd0xqQWZCZ05WSFNNRUdEQVdnQlQxVERGNlVRTS9MTmVMDQpsNWx2cUhHUXEzZzltekFMQmdOVkhSUUVCQUlDQUlRd0RRWUpLb1pJaHZjTkFRRUZCUUFEZ1lFQUZVNUFzNk16DQpxNVBSc2lmYW9iUVBHaDFhSkx5QytNczVBZ2MwYld5QTNHQWR4dXI1U3BQWmVSV0NCamlQL01FSEJXSkNsQkhQDQpHUmNxNXlJZDNFakRrYUV5eFJhK2k2N0x6dmhJNmMyOUVlNks5cFNZd2ppLzdSVWhtbW5Qclh0VHhsTDBsckxyDQptUVFKNnhoRFJhNUczUUE0Q21VZHNITnZicnpnbUNZcHZWRT0NCi0tLS0tRU5EIFg1MDkgQ1JMLS0tLS0NCg0K"u8;
 
-[GoType("dyn")] internal partial struct TestCreateCertificateRequest_tests {
+internal partial struct TestCreateCertificateRequest_tests /*dyn*/ {
     internal @string name;
     internal any priv;
     internal global::go.crypto.x509_package.SignatureAlgorithm sigAlgo;
@@ -1701,7 +1701,7 @@ internal static readonly @string awIChAˢ = "AwIChA=="u8;
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string csrBase64ᶜ = "MIICrTCCAZUCAQIwMzEgMB4GA1UEAwwXU0NFUCBDQSBmb3IgRGV2ZWxlciBTcmwxDzANBgNVBAsMBjQzNTk3MTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALFMAJ7Zy9YyfgbNlbUWAW0LalNRMPs7aXmLANsCpjhnw3lLlfDPaLeWyKh1nK5I5ojaJOW6KIOSAcJkDUe3rrE0wR0RVt3UxArqs0R/ND3u5Q+bDQY2X1HAFUHzUzcdm5JRAIA355v90teMckaWAIlkRQjDE22Lzc6NAl64KOd1rqOUNj8+PfX6fSo20jm94Pp1+a6mfk3G/RUWVuSm7owO5DZI/Fsi2ijdmb4NUar6K/bDKYTrDFkzcqAyMfP3TitUtBp19Mp3B1yAlHjlbp/r5fSSXfOGHZdgIvp0WkLuK2u5eQrX5l7HMB/5epgUs3HQxKY6ljhh5wAjDwz//LsCAwEAAaA1MDMGCSqGSIb3DQEJDjEmMCQwEgYDVR0TAQH/BAgwBgEB/wIBADAOBgNVHQ8BAf8EBAMCAoQwDQYJKoZIhvcNAQEFBQADggEBAAMq3bxJSPQEgzLYR/yaVvgjCDrc3zUbIwdOis6Go06Q4RnjH5yRaSZAqZQTDsPurQcnz2I39VMGEiSkFJFavf4QHIZ7QFLkyXadMtALc87tm17Ej719SbHcBSSZayR9VYJUNXRLayI6HvyUrmqcMKh+iX3WY3ICr59/wlM0tYa8DYN4yzmOa2Onb29gy3YlaF5A2AKAMmk003cRT9gY26mjpv7d21czOSSeNyVIoZ04IR9ee71vWTMdv0hu/af5kSjQ+ZG5/Qgc0+mnECLz/1gtxt1srLYbtYQ/qAY8oX1DCSGFS61tN/vl+4cxGMD/VGcGzADRLRHSlVqy2Qgss6Q="u8;
 
-[GoType("dyn")] internal partial struct TestCriticalFlagInCSRRequestedExtensions_expected {
+internal partial struct TestCriticalFlagInCSRRequestedExtensions_expected /*dyn*/ {
     public asn1.ObjectIdentifier Id;
     public slice<byte> Value;
 }
@@ -1900,7 +1900,7 @@ public static void TestNoSubjectKeyIdInCert(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestASN1BitLength_tests {
+internal partial struct TestASN1BitLength_tests /*dyn*/ {
     internal slice<byte> bytes;
     internal nint bitLen;
 }
@@ -1933,7 +1933,7 @@ public static void TestVerifyEmptyCertificate(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestInsecureAlgorithmErrorString_tests {
+internal partial struct TestInsecureAlgorithmErrorString_tests /*dyn*/ {
     internal global::go.crypto.x509_package.SignatureAlgorithm sa;
     internal @string want;
 }
@@ -2255,7 +2255,7 @@ public static void TestEmptyNameConstraints(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPKIXNameString_tests {
+internal partial struct TestPKIXNameString_tests /*dyn*/ {
     internal pkix.Name dn;
     internal @string want;
 }
@@ -2345,7 +2345,7 @@ public static void TestPKIXNameString(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestRDNSequenceString_tests {
+internal partial struct TestRDNSequenceString_tests /*dyn*/ {
     internal pkix.RDNSequence seq;
     internal @string want;
 }
@@ -2649,7 +2649,7 @@ public static void TestPKCS1MismatchKeyFormat(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCreateRevocationList_tests {
+internal partial struct TestCreateRevocationList_tests /*dyn*/ {
     internal @string name;
     internal crypto.Signer key;
     internal ж<global::go.crypto.x509_package.Certificate> issuer;
@@ -3206,13 +3206,13 @@ public static void TestUnknownExtKey(ж<testing.T> Ꮡt) {
 internal static readonly @string httpsExampleComˢ = "https://example.com/"u8;
 internal static readonly object expectedˢ4 = (@string)"expected CreateCertificate to fail"u8;
 
-[GoType("dyn")] internal partial struct TestIA5SANEnforcement_marshalTests {
+internal partial struct TestIA5SANEnforcement_marshalTests /*dyn*/ {
     internal @string name;
     internal ж<global::go.crypto.x509_package.Certificate> template;
     internal @string expectedError;
 }
 
-[GoType("dyn")] internal partial struct TestIA5SANEnforcement_unmarshalTests {
+internal partial struct TestIA5SANEnforcement_unmarshalTests /*dyn*/ {
     internal @string name;
     internal @string cert;
     internal @string expectedError;
@@ -3302,7 +3302,7 @@ public static void TestIA5SANEnforcement(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkCreateCertificate_tests {
+internal partial struct BenchmarkCreateCertificate_tests /*dyn*/ {
     internal @string name;
     internal Func<crypto.Signer> gen;
 }
@@ -3352,16 +3352,15 @@ public static void BenchmarkCreateCertificate(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType] internal partial struct brokenSigner {
-    [GoDescriptorType(Self = typeof(go.crypto_package.PublicKeyᴅ))]
+internal partial struct brokenSigner {
     internal cryptoꓸPublicKey pub;
 }
 
-[GoRecv] internal static cryptoꓸPublicKey Public(this ref brokenSigner bs) {
+internal static cryptoꓸPublicKey Public(this ref brokenSigner bs) {
     return bs.pub;
 }
 
-[GoRecv] internal static (slice<byte>, error) Sign(this ref brokenSigner bs, io.Reader _Δp1, slice<byte> _Δp2, crypto.SignerOpts _Δp3) {
+internal static (slice<byte>, error) Sign(this ref brokenSigner bs, io.Reader _Δp1, slice<byte> _Δp2, crypto.SignerOpts _Δp3) {
     return (new byte[]{1, 2, 3}.slice(), default!);
 }
 
@@ -3401,7 +3400,7 @@ public static void TestCreateCertificateLegacy(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoRecv] internal static ж<global::go.crypto.x509_package.Certificate> mustCert(this ref global::go.crypto.x509_package.CertPool s, ж<testing.T> Ꮡt, nint n) {
+internal static ж<global::go.crypto.x509_package.Certificate> mustCert(this ref global::go.crypto.x509_package.CertPool s, ж<testing.T> Ꮡt, nint n) {
     var (c, err) = s.lazyCerts[n].getCert();
     if (err != default!) {
         Ꮡt.Fatalf("failed to load cert %d: %v"u8, n, err);
@@ -3488,7 +3487,7 @@ public static void TestCertificateRequestRoundtripFields(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkParseCertificate_cases {
+internal partial struct BenchmarkParseCertificate_cases /*dyn*/ {
     internal @string name;
     internal @string pem;
 }
@@ -3959,7 +3958,7 @@ public static void TestParseRevocationList(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestRevocationListCheckSignatureFrom_tests {
+internal partial struct TestRevocationListCheckSignatureFrom_tests /*dyn*/ {
     internal @string name;
     internal ж<global::go.crypto.x509_package.Certificate> issuer;
     internal @string err;

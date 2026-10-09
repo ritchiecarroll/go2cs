@@ -12,17 +12,17 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-[GoType] partial struct response {
+partial struct response {
 }
 
-[GoType] partial struct myError {
+partial struct myError {
 }
 
 internal static @string Error(this myError _) {
     return ""u8;
 }
 
-[GoType("dyn")] internal partial struct doRequest_async {
+internal partial struct doRequest_async /*dyn*/ {
     internal ж<response> resp;
     internal error err;
 }

@@ -113,7 +113,7 @@ internal static @string checkErrorPredicate(@string predName, Func<error, bool> 
     return ""u8;
 }
 
-[GoType] partial struct isExistTest {
+partial struct isExistTest {
     internal error err;
     internal bool @is;
     internal bool isnot;
@@ -160,7 +160,7 @@ public static void TestIsExist(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct isPermissionTest {
+partial struct isPermissionTest {
     internal error err;
     internal bool want;
 }
@@ -232,8 +232,8 @@ public static void TestPathErrorUnwrap(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct myErrorIs {
-    [GoEmbedded] internal error error;
+partial struct myErrorIs {
+    /*embed*/ internal error error;
 }
 
 internal static bool Is(this myErrorIs e, error target) {

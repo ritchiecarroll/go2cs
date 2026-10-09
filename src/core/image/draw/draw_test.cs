@@ -20,25 +20,25 @@ partial class draw_internal_test_package {
 // therefore does not trigger the draw.go fastest code paths.
 //
 // Unlike slowerRGBA, it does not implement the draw.RGBA64Image interface.
-[GoType] internal partial struct slowestRGBA {
+internal partial struct slowestRGBA {
     public slice<uint8> Pix;
     public nint Stride;
     public image.Rectangle Rect;
 }
 
-[GoRecv] internal static color.Model ColorModel(this ref slowestRGBA p) {
+internal static color.Model ColorModel(this ref slowestRGBA p) {
     return color.RGBAModel;
 }
 
-[GoRecv] internal static image.Rectangle Bounds(this ref slowestRGBA p) {
+internal static image.Rectangle Bounds(this ref slowestRGBA p) {
     return p.Rect;
 }
 
-[GoRecv] internal static color.Color At(this ref slowestRGBA p, nint x, nint y) {
+internal static color.Color At(this ref slowestRGBA p, nint x, nint y) {
     return p.RGBA64At(x, y);
 }
 
-[GoRecv] internal static color.RGBA64 RGBA64At(this ref slowestRGBA p, nint x, nint y) {
+internal static color.RGBA64 RGBA64At(this ref slowestRGBA p, nint x, nint y) {
     if (!(new image.Point(x, y).In(p.Rect))) {
         return new color.RGBA64(nil);
     }
@@ -56,7 +56,7 @@ partial class draw_internal_test_package {
     );
 }
 
-[GoRecv] internal static void Set(this ref slowestRGBA p, nint x, nint y, color.Color c) {
+internal static void Set(this ref slowestRGBA p, nint x, nint y, color.Color c) {
     if (!(new image.Point(x, y).In(p.Rect))) {
         return;
     }
@@ -69,7 +69,7 @@ partial class draw_internal_test_package {
     s[3] = c1.A;
 }
 
-[GoRecv] internal static nint PixOffset(this ref slowestRGBA p, nint x, nint y) {
+internal static nint PixOffset(this ref slowestRGBA p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 4;
 }
 
@@ -105,25 +105,25 @@ internal static ж<slowestRGBA> convertToSlowestRGBA(image.Image m) {
 // therefore does not trigger the draw.go fastest code paths.
 //
 // Unlike slowestRGBA, it still implements the draw.RGBA64Image interface.
-[GoType] internal partial struct slowerRGBA {
+internal partial struct slowerRGBA {
     public slice<uint8> Pix;
     public nint Stride;
     public image.Rectangle Rect;
 }
 
-[GoRecv] internal static color.Model ColorModel(this ref slowerRGBA p) {
+internal static color.Model ColorModel(this ref slowerRGBA p) {
     return color.RGBAModel;
 }
 
-[GoRecv] internal static image.Rectangle Bounds(this ref slowerRGBA p) {
+internal static image.Rectangle Bounds(this ref slowerRGBA p) {
     return p.Rect;
 }
 
-[GoRecv] internal static color.Color At(this ref slowerRGBA p, nint x, nint y) {
+internal static color.Color At(this ref slowerRGBA p, nint x, nint y) {
     return p.RGBA64At(x, y);
 }
 
-[GoRecv] internal static color.RGBA64 RGBA64At(this ref slowerRGBA p, nint x, nint y) {
+internal static color.RGBA64 RGBA64At(this ref slowerRGBA p, nint x, nint y) {
     if (!(new image.Point(x, y).In(p.Rect))) {
         return new color.RGBA64(nil);
     }
@@ -141,7 +141,7 @@ internal static ж<slowestRGBA> convertToSlowestRGBA(image.Image m) {
     );
 }
 
-[GoRecv] internal static void Set(this ref slowerRGBA p, nint x, nint y, color.Color c) {
+internal static void Set(this ref slowerRGBA p, nint x, nint y, color.Color c) {
     if (!(new image.Point(x, y).In(p.Rect))) {
         return;
     }
@@ -154,7 +154,7 @@ internal static ж<slowestRGBA> convertToSlowestRGBA(image.Image m) {
     s[3] = c1.A;
 }
 
-[GoRecv] internal static void SetRGBA64(this ref slowerRGBA p, nint x, nint y, color.RGBA64 c) {
+internal static void SetRGBA64(this ref slowerRGBA p, nint x, nint y, color.RGBA64 c) {
     if (!(new image.Point(x, y).In(p.Rect))) {
         return;
     }
@@ -166,7 +166,7 @@ internal static ж<slowestRGBA> convertToSlowestRGBA(image.Image m) {
     s[3] = (uint8)((c.A >> (int)(8)));
 }
 
-[GoRecv] internal static nint PixOffset(this ref slowerRGBA p, nint x, nint y) {
+internal static nint PixOffset(this ref slowerRGBA p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.Stride + (x - p.Rect.Min.X) * 4;
 }
 
@@ -300,7 +300,7 @@ internal static global::go.image.draw_package.Image gradYellow(nint alpha) {
     return new draw_test_package.image_ΔRGBAжImage(m);
 }
 
-[GoType] internal partial struct drawTest {
+internal partial struct drawTest {
     internal @string desc;
     internal image.Image src;
     internal image.Image mask;
@@ -762,7 +762,7 @@ public static void TestFloydSteinbergCheckerboard(ж<testing.T> Ꮡt) {
 
 // embeddedPaletted is an Image that behaves like an *image.Paletted but whose
 // type is not *image.Paletted.
-[GoType] internal partial struct embeddedPaletted {
+internal partial struct embeddedPaletted {
     public partial ref ж<image_package.Paletted> Paletted { get; }
 }
 

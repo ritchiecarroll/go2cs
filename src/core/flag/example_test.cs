@@ -30,11 +30,11 @@ internal static ref @string gopherType => ref ᏑgopherType.Value;
     flag.StringVar(ᏑgopherType, "g"u8, defaultGopher, usage + " (shorthand)");
 }
 
-[GoType("[]global::go.time_package.Duration")] partial struct interval;
+partial struct interval /*[]global::go.time_package.Duration*/;
 
 // String is the method to format the flag's value, part of the flag.Value interface.
 // The String method's output will be used in diagnostics.
-[GoRecv] internal static @string ΔString(this ref interval i) {
+internal static @string ΔString(this ref interval i) {
     return fmt.Sprint(i);
 }
 
@@ -44,7 +44,7 @@ internal static readonly @string intervalFlagAlreadySetˢ = "interval flag alrea
 // Set is the method to set the flag value, part of the flag.Value interface.
 // Set's argument is a string to be parsed to set the flag.
 // It's a comma-separated list, so we split it.
-[GoRecv] internal static error ΔSet(this ref interval i, @string value) {
+internal static error ΔSet(this ref interval i, @string value) {
     // If we wanted to allow the flag to be set multiple times,
     // accumulating values, we would delete this if statement.
     // That would permit usages such as

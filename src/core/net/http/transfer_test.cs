@@ -66,7 +66,7 @@ public static void TestFinalChunkedBodyReadEOF(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestDetectInMemoryReaders_tests {
+internal partial struct TestDetectInMemoryReaders_tests /*dyn*/ {
     internal io.Reader r;
     internal bool want;
 }
@@ -91,19 +91,19 @@ public static void TestDetectInMemoryReaders(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct mockTransferWriter {
+internal partial struct mockTransferWriter {
     public io.Reader CalledReader;
     public bool WriteCalled;
 }
 
 internal static io.ReaderFrom _ᴛ1ʗ = new http_internal_test_package.mockTransferWriterжReaderFrom(((ж<mockTransferWriter>)nil));
 
-[GoRecv] internal static (int64, error) ReadFrom(this ref mockTransferWriter w, io.Reader r) {
+internal static (int64, error) ReadFrom(this ref mockTransferWriter w, io.Reader r) {
     w.CalledReader = r;
     return io.Copy(io.Discard, r);
 }
 
-[GoRecv] internal static (nint, error) Write(this ref mockTransferWriter w, slice<byte> p) {
+internal static (nint, error) Write(this ref mockTransferWriter w, slice<byte> p) {
     w.WriteCalled = true;
     return io.Discard.Write(p);
 }
@@ -113,7 +113,7 @@ internal static readonly @string netHttpNewfilefuncˢ = "net-http-newfilefunc"u8
 internal static readonly object didNotCallReadFromˢ = (@string)"did not call ReadFrom"u8;
 internal static readonly object didNotInvokeWriteˢ = (@string)"did not invoke Write"u8;
 
-[GoType("dyn")] internal partial struct TestTransferWriterWriteBodyReaderTypes_cases {
+internal partial struct TestTransferWriterWriteBodyReaderTypes_cases /*dyn*/ {
     internal @string name;
     internal Func<(io.Reader, Action, error)> bodyFunc;
     internal @string method;
@@ -296,7 +296,7 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestParseTransferEncoding_tests {
+internal partial struct TestParseTransferEncoding_tests /*dyn*/ {
     internal global::go.net.http_package.ΔHeader hdr;
     internal error wantErr;
 }
@@ -345,7 +345,7 @@ public static void TestParseTransferEncoding(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestParseContentLength_tests {
+internal partial struct TestParseContentLength_tests /*dyn*/ {
     internal @string cl;
     internal error wantErr;
 }

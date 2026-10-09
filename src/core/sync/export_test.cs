@@ -18,7 +18,7 @@ public static Func<nint> Runtime_procPin = runtime_procPin;
 public static Action Runtime_procUnpin = runtime_procUnpin;
 
 // PoolDequeue exports an interface for pollDequeue testing.
-[GoType] public partial interface PoolDequeue {
+public partial interface PoolDequeue {
     bool PushHead(any val);
     (any, bool) PopHead();
     (any, bool) PopTail();
@@ -55,7 +55,7 @@ internal static bool PushHead(this ж<global::go.sync_package.poolChain> Ꮡc, a
     return true;
 }
 
-[GoRecv] internal static (any, bool) PopHead(this ref global::go.sync_package.poolChain c) {
+internal static (any, bool) PopHead(this ref global::go.sync_package.poolChain c) {
     return c.popHead();
 }
 

@@ -18,7 +18,7 @@ using Δio = io_package;
 
 partial class image_test_package {
 
-[GoType] partial struct imageTest {
+partial struct imageTest {
     internal @string goldenFilename;
     internal @string filename;
     internal nint tolerance;

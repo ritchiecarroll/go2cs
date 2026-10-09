@@ -33,7 +33,7 @@ using static go.text.template_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("text/template/exec_test.go", "exec_test.cs", "ABgoAEuYAYIADRaigpQACQ6igpSm5AAtVLLGAAkOAAgOlrKmoqaigoKCqJKmgqaCpoKmgoKCpoKCgpSmlpKClKiS1oKClKaCAA0ekgA/BgDrApIHgoKCgtyCgoKCAAcQooKCgpTWgqaCpoKmoqiSgpSCkoKUlNiS2JKokqaigoKUpoKmooKUgoKUpoKmgqaygsgADRqCgoKClJSCgpSCgpSCtIK2ksaCgsqC9gASEIKCgoKCgoKCgpKUkpSUlJSCgpSCgoKUggAIDJKCgoKClIKCkoKClAAVGpKCgpSCgoKUgoKCAAkMgNaShriChIKC+IIACRiCgoIAJDiCACNIgoKUgpSCgpSCgqaCgoKUgoIACAiUlIKCgoIACwqUgoKCgpSCgoKmgoKUgoKClIKCgqaCguiCgoKUgoKCABgUAIEB9AGCggAKIoKCgoKUgoKCgpSCgpSCAAwKgqaCgpSUgoKUgoKCpoKCgoKUgoKCpoKCgoKUgoKCpoKCgqaCgoL8ooKClIKC3LiCAAgGtIKClIKClIKmgoKUgoKUgoKUgoK4gqaC7oK6gsqCyoK4ooKClN6iABIEgryCgpSSgpaCgIKkgIKmgoCCpICCAA4IogAoWrKSkoKCgpSCAAwMgoKUkoKCgpSCgrjcuIKSgoKClIIADAruAB9IgpKCAAcUgoKClJSCgpSCAAsMspSmAB9KgoKCgpSCgpKCgpQACwqiADBugoKCgpSCgpKCgpQADgyUkoKCgpSCgpSCqIKCgoKYkoKCgoKUggAICpKCkoKCgpKCAAgKkoSCgpaCgpaChIKCwoKCgoKUgoLGpgAOCqKOgpSUgpSC", "737-743:1;747-753:1;789-794:1;850-850:1;996-998:1;1498-1500:1;1591-1601:1;1691-1693:1;1720-1722:1;1871-1871:1;1923-1935:1")]
+[assembly: go.GoPositionMap("text/template/exec_test.go", "exec_test.cs", "ABgoAEuYAYIADRaigpQACQ6igpSm5AAtVLLGAAkOAAgOlrKmoqaigoKCqJKmgqaCpoKmgoKCpoKCgpSmlpKClKiS1oKClKaCAA0ekgA/BgDrApIHgoKCgtyCgoKCAAcQooKCgpTWgqaCpoKmoqiSgpSCkoKUlNiS2JKokqaigoKUpoKmooKUgoKUpoKmgqaygsgADRqCgoKClJSCgpSCgpSCtIK2ksaCgsqC9gASEIKCgoKCgoKCgpKUkpSUlJSCgpSCgoKUggAIDJKCgoKClIKCkoKClAAVGpKCgpSCgoKUgoKCAAkMgNaShriChIKC+IIACRiCgoIAJDiCACNIgoKUgpSCgpSCgqaCgoKUgoIACAiUlIKCgoIACwqUgoKCgpSCgoKmgoKUgoKClIKCgqaCguiCgoKUgoKCABgUAIEB9AGCggAKIoKCgoKUgoKCgpSCgpSCAAwKgqaCgpSUgoKUgoKCpoKCgoKUgoKCpoKCgoKUgoKCpoKCgqaCgoL8ooKClIKC3LiCAAgGtIKClIKClIKmgoKUgoKUgoKUgoK4gqaC7oK6gsqCyoK4ooKClN6iABIEgryCgpSSgpaCgIKkgIKmgoCCpICCAA4IogAoWrKSkoKCgpSCAAwMgoKUkoKCgpSCgrjcuIKSgoKClIIADAruAB9IgpKCAAcUgoKClJSCgpSCAAsMspSmAB9KgoKCgpSCgpKCgpQACwqiADBugoKCgpSCgpKCgpQADgyUkoKCgpSCgpSCqIKCgoKYkoKCgoKUggAICpKCkoKCgpKCAAgKkoSCgpaCgpaChIKCwoKCgoKUgoLGpgAOCqKOgpSUgpSC", "737-743:1;747-753:1;789-794:1;850-850:1;996-998:1;1498-1500:1;1591-1601:1;1691-1693:1;1720-1722:1;1871-1871:1;1923-1935:1", "", "148=NewBuffer/1/1/36,New/1/2/37,newInt/1/1/38,newString/1/1/39,newIntSlice/1/1/40,New/2/2/50,Parse/1/1/50,Must/1/1/50;383=NewBufferString/1/1/121,fVal1/1/5/329,fVal1/2/5/330,fVal1/3/5/331,fVal2/1/6/332,fVal2/2/6/333,fVal2/3/6/334,fVal2/4/6/335,fVal2/5/6/336,fVal1/4/5/337,fVal1/5/5/338,fVal2/6/6/339,rangeTestData/1/12/340,rangeTestData/2/12/341,rangeTestData/3/12/342,rangeTestData/4/12/343,rangeTestData/5/12/344,rangeTestData/6/12/345,rangeTestData/7/12/346,rangeTestData/8/12/347,rangeTestData/9/12/348,rangeTestData/10/12/349,rangeTestData/11/12/350,rangeTestData/12/12/352;1079=Parse/1/1/2")]
 [assembly: go.GoPositionMap("text/template/multi_test.go", "multi_test.cs", "AB48ABEmooKClIK0graSlLSClJKClIKCgoKUgoL8ABw2lIKClIKClAAIBoKCgpSCgoKU5oKCgpSCgpSCgoKUAAgGgoSCgoKogoKCgpSWgoKCgpTM+IKCgpTWgoKClAAMFJSCgpSCgpSkgoKUgoKmgoKUgqiSgoKUgqaCgoKUguiUgoKUgoKmgoKUgoKWkoKClIL6koKCgoKUggAIBoKCgoCCpICCpICC+pKCAAgIkoKClIKClIKCAAoItIKEgpSClIKWgoKClIKmgvimgoCCpICCpICCAAoIggAHGoKEmIKCgqaCgIKCpIIACRDa+IKCgoKUgoKCpoKCgsySgoKUgg==")]
 // </GoSourcePositionMaps>
 
@@ -43,12 +43,15 @@ namespace go.text;
 public static partial class template_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
 
     // <TypeAccessibility>
+    [GoValueClone("AI")] partial struct T {}
+    [GoLocalName("A")] partial struct TestIssue48215_A {}
+    [GoLocalName("B")] partial struct TestIssue48215_B {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

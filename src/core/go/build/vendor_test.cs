@@ -72,7 +72,7 @@ internal static bool isAllowed(@string pkg) {
     return false;
 }
 
-[GoType("dyn")] internal partial struct TestIsAllowed_type {
+internal partial struct TestIsAllowed_type /*dyn*/ {
     internal @string @in;
     internal bool want;
 }

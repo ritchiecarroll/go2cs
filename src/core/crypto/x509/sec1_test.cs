@@ -20,7 +20,7 @@ partial class x509_internal_test_package {
 // This was generated using an old version of OpenSSL and is missing a
 // leading zero byte in the private key that should be present.
 
-[GoType("dyn")] partial struct ecKeyTestsᴛ1 {
+partial struct ecKeyTestsᴛ1 /*dyn*/ {
     internal @string derHex;
     internal bool shouldReserialize;
 }

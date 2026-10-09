@@ -38,25 +38,25 @@ internal static ref sync.Once httpOnce => ref ᏑhttpOnce.Value;
 
 internal static readonly @string newHttpPath = "/foo"u8;
 
-[GoType] public partial struct Args {
+public partial struct Args {
     public nint A, B;
 }
 
-[GoType] public partial struct Reply {
+public partial struct Reply {
     public nint C;
 }
 
-[GoType("num:nint")] public partial struct Arith;
+public partial struct Arith /*num:nint*/;
 
 // Some of Arith's methods have value args, some have pointer args. That's deliberate.
-[GoRecv] public static error Add(this ref Arith t, Args args, ж<Reply> Ꮡreply) {
+public static error Add(this ref Arith t, Args args, ж<Reply> Ꮡreply) {
     ref var reply = ref Ꮡreply.DerefOrNull();
 
     reply.C = args.A + args.B;
     return default!;
 }
 
-[GoRecv] public static error Mul(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
+public static error Mul(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
     ref var args = ref Ꮡargs.DerefOrNull();
     ref var reply = ref Ꮡreply.DerefOrNull();
 
@@ -67,7 +67,7 @@ internal static readonly @string newHttpPath = "/foo"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string divideByZeroˢ = "divide by zero"u8;
 
-[GoRecv] public static error Div(this ref Arith t, Args args, ж<Reply> Ꮡreply) {
+public static error Div(this ref Arith t, Args args, ж<Reply> Ꮡreply) {
     ref var reply = ref Ꮡreply.DerefOrNull();
 
     if (args.B == 0) {
@@ -77,7 +77,7 @@ internal static readonly @string divideByZeroˢ = "divide by zero"u8;
     return default!;
 }
 
-[GoRecv] public static error String(this ref Arith t, ж<Args> Ꮡargs, ж<@string> Ꮡreply) {
+public static error String(this ref Arith t, ж<Args> Ꮡargs, ж<@string> Ꮡreply) {
     ref var args = ref Ꮡargs.DerefOrNull();
     ref var reply = ref Ꮡreply.DerefOrNull();
 
@@ -85,38 +85,38 @@ internal static readonly @string divideByZeroˢ = "divide by zero"u8;
     return default!;
 }
 
-[GoRecv] public static error /*err*/ Scan(this ref Arith t, @string args, ж<Reply> Ꮡreply) {
+public static error /*err*/ Scan(this ref Arith t, @string args, ж<Reply> Ꮡreply) {
     error err = default!;
 
     (_, err) = fmt.Sscan(args, Ꮡreply.of(Reply.ᏑC));
     return err;
 }
 
-[GoRecv] public static error Error(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
+public static error Error(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
     throw panic("ERROR");
 }
 
-[GoRecv] public static error SleepMilli(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
+public static error SleepMilli(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
     ref var args = ref Ꮡargs.DerefOrNull();
 
     time.Sleep(((time.Duration)(int64)args.A) * time.Millisecond);
     return default!;
 }
 
-[GoType("num:nint")] internal partial struct hidden;
+internal partial struct hidden /*num:nint*/;
 
-[GoRecv] internal static error Exported(this ref hidden t, Args args, ж<Reply> Ꮡreply) {
+internal static error Exported(this ref hidden t, Args args, ж<Reply> Ꮡreply) {
     ref var reply = ref Ꮡreply.DerefOrNull();
 
     reply.C = args.A + args.B;
     return default!;
 }
 
-[GoType] public partial struct Embed {
+public partial struct Embed {
     internal partial ref hidden hidden { get; }
 }
 
-[GoType] public partial struct BuiltinTypes {
+public partial struct BuiltinTypes {
 }
 
 public static error Map(this BuiltinTypes _, ж<Args> Ꮡargs, ж<map<nint, nint>> Ꮡreply) {
@@ -135,7 +135,7 @@ public static error Slice(this BuiltinTypes _, ж<Args> Ꮡargs, ж<slice<nint>>
     return default!;
 }
 
-public static error Array(this BuiltinTypes _, ж<Args> Ꮡargs, [GoArrayDims(2)] ж<array<nint>> Ꮡreply) {
+public static error Array(this BuiltinTypes _, ж<Args> Ꮡargs, /*[2]*/ ж<array<nint>> Ꮡreply) {
     ref var args = ref Ꮡargs.DerefOrNull();
     ref var reply = ref Ꮡreply.DerefOrNull();
 
@@ -489,7 +489,7 @@ public static void TestBuiltinTypes(ж<testing.T> Ꮡt) {
 
 // CodecEmulator provides a client-like api and a ServerCodec interface.
 // Can be used to test ServeRequest.
-[GoType] public partial struct CodecEmulator {
+public partial struct CodecEmulator {
     internal ж<global::go.net.rpc_package.Server> server;
     internal @string serviceMethod;
     internal ж<Args> args;
@@ -518,7 +518,7 @@ public static error Call(this ж<CodecEmulator> Ꮡcodec, @string serviceMethod,
     return codec.err;
 }
 
-[GoRecv] public static error ReadRequestHeader(this ref CodecEmulator codec, ж<global::go.net.rpc_package.Request> Ꮡreq) {
+public static error ReadRequestHeader(this ref CodecEmulator codec, ж<global::go.net.rpc_package.Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     req.ServiceMethod = codec.serviceMethod;
@@ -526,7 +526,7 @@ public static error Call(this ж<CodecEmulator> Ꮡcodec, @string serviceMethod,
     return default!;
 }
 
-[GoRecv] public static error ReadRequestBody(this ref CodecEmulator codec, any argv) {
+public static error ReadRequestBody(this ref CodecEmulator codec, any argv) {
     if (codec.args == nil) {
         return io.ErrUnexpectedEOF;
     }
@@ -534,7 +534,7 @@ public static error Call(this ж<CodecEmulator> Ꮡcodec, @string serviceMethod,
     return default!;
 }
 
-[GoRecv] public static error WriteResponse(this ref CodecEmulator codec, ж<global::go.net.rpc_package.Response> Ꮡresp, any reply) {
+public static error WriteResponse(this ref CodecEmulator codec, ж<global::go.net.rpc_package.Response> Ꮡresp, any reply) {
     ref var resp = ref Ꮡresp.DerefOrNull();
 
     if (resp.Error != ""u8){
@@ -545,7 +545,7 @@ public static error Call(this ж<CodecEmulator> Ꮡcodec, @string serviceMethod,
     return default!;
 }
 
-[GoRecv] public static error Close(this ref CodecEmulator codec) {
+public static error Close(this ref CodecEmulator codec) {
     return default!;
 }
 
@@ -580,30 +580,30 @@ internal static void testServeRequest(ж<testing.T> Ꮡt, ж<global::go.net.rpc_
     finally { ᒐ.Run(); }
 }
 
-[GoType("num:nint")] public partial struct ΔReplyNotPointer;
+public partial struct ΔReplyNotPointer /*num:nint*/;
 
-[GoType("num:nint")] public partial struct ΔArgNotPublic;
+public partial struct ΔArgNotPublic /*num:nint*/;
 
-[GoType("num:nint")] public partial struct ΔReplyNotPublic;
+public partial struct ΔReplyNotPublic /*num:nint*/;
 
-[GoType("num:nint")] public partial struct ΔNeedsPtrType;
+public partial struct ΔNeedsPtrType /*num:nint*/;
 
-[GoType] public partial struct local {
+public partial struct local {
 }
 
-[GoRecv] public static error ReplyNotPointer(this ref ΔReplyNotPointer t, ж<Args> Ꮡargs, Reply reply) {
+public static error ReplyNotPointer(this ref ΔReplyNotPointer t, ж<Args> Ꮡargs, Reply reply) {
     return default!;
 }
 
-[GoRecv] public static error ArgNotPublic(this ref ΔArgNotPublic t, ж<local> Ꮡargs, ж<Reply> Ꮡreply) {
+public static error ArgNotPublic(this ref ΔArgNotPublic t, ж<local> Ꮡargs, ж<Reply> Ꮡreply) {
     return default!;
 }
 
-[GoRecv] public static error ReplyNotPublic(this ref ΔReplyNotPublic t, ж<Args> Ꮡargs, ж<local> Ꮡreply) {
+public static error ReplyNotPublic(this ref ΔReplyNotPublic t, ж<Args> Ꮡargs, ж<local> Ꮡreply) {
     return default!;
 }
 
-[GoRecv] public static error NeedsPtrType(this ref ΔNeedsPtrType t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
+public static error NeedsPtrType(this ref ΔNeedsPtrType t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
     return default!;
 }
 
@@ -638,7 +638,7 @@ public static void TestRegistrationError(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("num:nint")] public partial struct WriteFailCodec;
+public partial struct WriteFailCodec /*num:nint*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string failˢ = "fail"u8;
@@ -772,7 +772,7 @@ public static void TestCountMallocsOverHTTP(ж<testing.T> Ꮡt) {
     fmt.Printf("mallocs per HTTP rpc round trip: %v\n"u8, countMallocs(dialHTTP, Ꮡt));
 }
 
-[GoType] internal partial struct writeCrasher {
+internal partial struct writeCrasher {
     internal channel<bool> done;
 }
 
@@ -780,7 +780,7 @@ internal static error Close(this writeCrasher _) {
     return default!;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref writeCrasher w, slice<byte> p) {
+internal static (nint, error) Read(this ref writeCrasher w, slice<byte> p) {
     ᐸꟷ(w.done);
     return (0, io.EOF);
 }

@@ -38,7 +38,7 @@ partial class types_test_package {
 // constant
 // no tests for trace since it produces output as a side-effect
 
-[GoType("dyn")] partial struct builtinCallsᴛ1 {
+partial struct builtinCallsᴛ1 /*dyn*/ {
     internal @string name, src, sig;
 }
 internal static slice<builtinCallsᴛ1> builtinCalls = new builtinCallsᴛ1[]{

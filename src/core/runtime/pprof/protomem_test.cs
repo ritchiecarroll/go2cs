@@ -21,7 +21,7 @@ using static go.runtime.pprof_package;
 
 partial class pprof_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestConvertMemProfile_type {
+internal partial struct TestConvertMemProfile_type /*dyn*/ {
     internal @string name;
     internal @string defaultSampleType;
 }
@@ -181,11 +181,11 @@ public static void TestGenericsHashKeyInPprofBuilder(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] [GoValueClone("buf")] internal partial struct opAlloc {
+internal partial struct opAlloc {
     internal array<byte> buf = new(128);
 }
 
-[GoType] internal partial struct opCall {
+internal partial struct opCall {
 }
 
 internal static slice<byte> sink;

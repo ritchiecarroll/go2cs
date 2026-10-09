@@ -9,7 +9,7 @@ using static go.math.big_package;
 
 partial class big_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestDecimalString_type {
+internal partial struct TestDecimalString_type /*dyn*/ {
     internal global::go.math.big_package.@decimal x;
     internal @string want;
 }
@@ -34,7 +34,7 @@ public static void TestDecimalString(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestDecimalInit_type {
+internal partial struct TestDecimalInit_type /*dyn*/ {
     internal global::go.math.big_package.Word x;
     internal nint shift;
     internal @string want;
@@ -64,7 +64,7 @@ public static void TestDecimalInit(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestDecimalRounding_type {
+internal partial struct TestDecimalRounding_type /*dyn*/ {
     internal uint64 x;
     internal nint n;
     internal @string down, even, up;

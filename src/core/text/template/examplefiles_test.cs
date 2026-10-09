@@ -15,7 +15,7 @@ using static go.text.template_internal_test_package;
 partial class template_test_package {
 
 // templateFile defines the contents of a template to be stored in a file, for testing.
-[GoType] partial struct templateFile {
+partial struct templateFile {
     internal @string name;
     internal @string contents;
 }

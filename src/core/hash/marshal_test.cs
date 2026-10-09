@@ -34,7 +34,7 @@ internal static slice<byte> fromHex(@string s) {
 }
 
 
-[GoType("dyn")] partial struct marshalTestsᴛ1 {
+partial struct marshalTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal Func<Δhash.Hash> @new;
     internal slice<byte> golden;

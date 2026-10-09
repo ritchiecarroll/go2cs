@@ -16,7 +16,7 @@ using static go.compress.lzw_package;
 
 partial class lzw_internal_test_package {
 
-[GoType] internal partial struct lzwTest {
+internal partial struct lzwTest {
     internal @string desc;
     internal @string raw;
     internal @string compressed;
@@ -184,7 +184,7 @@ public static void TestReaderReset(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct devZero {
+internal partial struct devZero {
 }
 
 internal static (nint, error) Read(this devZero _, slice<byte> p) {
@@ -211,7 +211,7 @@ public static void TestHiCodeDoesNotOverflow(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestNoLongerSavingPriorExpansions_iterations {
+internal partial struct TestNoLongerSavingPriorExpansions_iterations /*dyn*/ {
     internal nint width, n;
 }
 

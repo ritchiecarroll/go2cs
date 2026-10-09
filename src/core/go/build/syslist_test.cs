@@ -28,7 +28,7 @@ internal static @string anotherArch() {
     return "386"u8;
 }
 
-[GoType] public partial struct GoodFileTest {
+public partial struct GoodFileTest {
     internal @string name;
     internal bool result;
 }

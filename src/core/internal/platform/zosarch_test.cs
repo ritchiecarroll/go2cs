@@ -34,7 +34,7 @@ private static readonly @string gofmtˢ = "gofmt"u8;
 private static readonly @string zosarchGoˢ = "zosarch.go"u8;
 private static readonly @string wantˢ = "want"u8;
 
-[GoType("dyn")] internal partial struct TestGenerated_listEntry {
+internal partial struct TestGenerated_listEntry /*dyn*/ {
     public @string GOOS, GOARCH;
     public bool CgoSupported;
     public bool FirstClass;

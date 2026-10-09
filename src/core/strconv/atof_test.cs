@@ -16,7 +16,7 @@ using strconv = strconv_package;
 
 partial class strconv_test_package {
 
-[GoType] partial struct atofTest {
+partial struct atofTest {
     internal @string @in;
     internal @string @out;
     internal error err;
@@ -447,7 +447,7 @@ internal static ж<slice<atofTest>> Ꮡatof32tests = new StandardBox<slice<atofT
 }.slice());
 internal static ref slice<atofTest> atof32tests => ref Ꮡatof32tests.ValueSlot;
 
-[GoType] partial struct atofSimpleTest {
+partial struct atofSimpleTest {
     internal float64 x;
     internal @string s;
 }
@@ -598,7 +598,7 @@ public static void TestAtofRandom(ж<testing.T> Ꮡt) {
 // thread with 80-bit precision and the Go runtime didn't
 // fix the FP control word.
 
-[GoType("dyn")] partial struct roundTripCasesᴛ1 {
+partial struct roundTripCasesᴛ1 /*dyn*/ {
     internal float64 f;
     internal @string s;
 }

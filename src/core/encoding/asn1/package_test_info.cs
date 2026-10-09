@@ -44,8 +44,8 @@ using static global::go.encoding.asn1_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/asn1/asn1_test.go", "asn1_test.cs", "ABw2AAcQgoKCgpSCAAoWAA4egoKCgpSCAAoWAA4egoKCgpSCAAoKAAsggoKCgpSCgpSCgoKUgoKCAAwaAAgSgoKCgpSCggANDIKCgpSClIKUgpSClIIACRQACBKCgoKCggAKFgAIEoKCgoKUgoK6gIIADBQAIkSCgoKCgpSUgoKUgoKCguoAGjqCgoKClIKCABIYABU6goKCgpSCAAkUoKSgpKCkoKQAEiaCgoKCACxGABY2goKCgoKClIIACgqCAAQUgoKCgpSAkgAsVoSSgIKkgujIgoCCAAkSgoKEgoKClIKClIKUggAJFAARJKKCgILaADZuAC1cAH+AAu6CgoKCloKCgpaCAA4SAAYUpoKCgoKUggAJEsqCgoCCpICCAAwQlAAJDoKAggAPEIKCgoSCgpKC+IK4goCCAA8egoSCgpaCgpSCgoK4goKClIKWkoCCpoKUloIACgiCioKCloKAgqaCgoIAEQiCjoQABhaCgoCCqJKAggAMCgAFFoKCgoKWhIKCloKCyoKCgpSCgoK4ooKCAAoIyoKClISCgoKEioKCloKogg==")]
-[assembly: go.GoPositionMap("encoding/asn1/marshal_test.go", "marshal_test.cs", "AHPEAe6CgoKUxgA3kAGigoKClIKCAAoY3KKCgoKUgoIACRbugoKCgoKWgsqCgoK4ogAKDoKCgpSCgsqCgpSCgoKUgoKWgoKCloKCloKCgoKUgriCgoKCgpaCgoKClILKooSCggAMCoIABBKCgpaChoKClIKUgtiCrIKCloKCgoKUgpSCAAgIooSKgoKCgoTMgoKC")]
+[assembly: go.GoPositionMap("encoding/asn1/asn1_test.go", "asn1_test.cs", "ABw2AAcQgoKCgpSCAAoWAA4egoKCgpSCAAoWAA4egoKCgpSCAAoKAAsggoKCgpSCgpSCgoKUgoKCAAwaAAgSgoKCgpSCggANDIKCgpSClIKUgpSClIIACRQACBKCgoKCggAKFgAIEoKCgoKUgoK6gIIADBQAIkSCgoKCgpSUgoKUgoKCguoAGjqCgoKClIKCABIYABU6goKCgpSCAAkUoKSgpKCkoKQAEiaCgoKCAChGABY2goKCgoKClIIACgqCAAQUgoKCgpSAkgArVoSSgIKkgujIgoCCAAkSgoKEgoKClIKClIKUggAJFAARJKKCgILaADZuAC1cAH+AAu6CgoKCloKCgpaCAA0SAAYUpoKCgoKUggAIEsqCgoCCpICCAAsQlAAJDoKAggAOEIKCgoSCgpKC+IK4goCCAA8egoSCgpaCgpSCgoK4goKClIKWkoCCpoKUloIACAiCioKCloKAgqaCgoIAEAiCjoQABhaCgoCCqJKAggAMCgAFFoKCgoKWhIKCloKCyoKCgpSCgoK4ooKCAAkIyoKClISCgoKEioKCloKogg==", "", "", "284=FixedZone/1/2/1,Date/1/5/1,FixedZone/2/2/2,Date/2/5/2,Date/3/5/3,Date/4/5/4,Date/5/5/5;343=Date/1/4/1,Date/2/4/3,FixedZone/1/2/7,Date/3/4/7,FixedZone/2/2/8,Date/4/4/8;460=newInt64/1/3/12,newInt/1/3/13,newInt64/2/3/14,newInt/2/3/14,newInt64/3/3/15,newInt/3/3/15;524=newInt/1/2/4,newInt/2/2/9,newString/1/4/10,newString/2/4/11,newString/3/4/13,newBool/1/2/19,newBool/2/2/20,NewInt/1/1/22,newString/4/4/24;716=Date/1/2/14,Date/2/2/15;978=Date/1/2/5,FixedZone/1/1/7,Date/2/2/7")]
+[assembly: go.GoPositionMap("encoding/asn1/marshal_test.go", "marshal_test.cs", "AGPEAe6CgoKUxgA3kAGigoKClIKCAAoY3KKCgoKUgoIACRbugoKCgoKWgsqCgoK4ogAKDoKCgpSCgsqCgpSCgoKUgoKWgoKCloKCloKCgoKUgriCgoKCgpaCgoKClILKooSCggALCoIABBKCgpaChoKClIKUgtiCrIKCloKCgoKUgpSCAAgIooSKgoKCgoTMgoKC", "", "", "117=NewInt/1/1/7,Unix/1/4/15,UTC/1/3/15,Unix/2/4/16,UTC/2/3/16,Unix/3/4/17,In/1/1/17,farFuture/1/1/18,Unix/4/4/19,UTC/3/3/19")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -54,12 +54,17 @@ namespace go.encoding;
 public static partial class asn1_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
 
     // <TypeAccessibility>
+    [GoLocalName("testCase")] partial struct BenchmarkUnmarshal_testCase {}
+    [GoLocalName("foo")] partial struct TestExplicitTagRawValueStruct_foo {}
+    [GoLocalName("testSetSET")] partial struct TestSetEncoderSETSliceSuffix_testSetSET {}
+    [GoLocalName("taggedRawValue")] partial struct TestTaggedRawValue_taggedRawValue {}
+    [GoLocalName("untaggedRawValue")] partial struct TestTaggedRawValue_untaggedRawValue {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

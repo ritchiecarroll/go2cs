@@ -21,10 +21,10 @@ using Δio = io_package;
 partial class io_test_package {
 
 // A version of bytes.Buffer without ReadFrom and WriteTo
-[GoType] partial struct Buffer {
+partial struct Buffer {
     public partial ref bytes_package.Buffer ΔBuffer { get; }
-    [GoEmbedded] public io_package.ReaderFrom ReaderFrom; // conflicts with and hides bytes.Buffer's ReaderFrom.
-    [GoEmbedded] public io_package.WriterTo WriterTo;   // conflicts with and hides bytes.Buffer's WriterTo.
+    /*embed*/ public io_package.ReaderFrom ReaderFrom; // conflicts with and hides bytes.Buffer's ReaderFrom.
+    /*embed*/ public io_package.WriterTo WriterTo;   // conflicts with and hides bytes.Buffer's WriterTo.
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -99,12 +99,12 @@ public static void TestCopyWriteTo(ж<testing.T> Ꮡt) {
 }
 
 // Version of bytes.Buffer that checks whether WriteTo was called or not
-[GoType] partial struct writeToChecker {
+partial struct writeToChecker {
     public partial ref bytes_package.Buffer Buffer { get; }
     internal bool writeToCalled;
 }
 
-[GoRecv] internal static (int64, error) WriteTo(this ref writeToChecker wt, Δio.Writer w) {
+internal static (int64, error) WriteTo(this ref writeToChecker wt, Δio.Writer w) {
     wt.writeToCalled = true;
     return wt.Buffer.WriteTo(w);
 }
@@ -125,7 +125,7 @@ public static void TestCopyPriority(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct zeroErrReader {
+partial struct zeroErrReader {
     internal error err;
 }
 
@@ -133,7 +133,7 @@ internal static (nint, error) Read(this zeroErrReader r, slice<byte> p) {
     return (copy(p, new byte[]{0}.slice()), r.err);
 }
 
-[GoType] partial struct errWriter {
+partial struct errWriter {
     internal error err;
 }
 
@@ -213,15 +213,15 @@ public static void BenchmarkCopyNLarge(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType] partial struct noReadFrom {
+partial struct noReadFrom {
     internal Δio.Writer w;
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref noReadFrom w, slice<byte> p) {
+internal static (nint n, error err) Write(this ref noReadFrom w, slice<byte> p) {
     return w.w.Write(p);
 }
 
-[GoType] partial struct wantedAndErrReader {
+partial struct wantedAndErrReader {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -271,12 +271,12 @@ public static void TestReadAtLeast(ж<testing.T> Ꮡt) {
 
 // A version of bytes.Buffer that returns n > 0, err on Read
 // when the input is exhausted.
-[GoType] partial struct dataAndErrorBuffer {
+partial struct dataAndErrorBuffer {
     internal error err;
     public partial ref bytes_package.Buffer Buffer { get; }
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref dataAndErrorBuffer r, slice<byte> p) {
+internal static (nint n, error err) Read(this ref dataAndErrorBuffer r, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -382,7 +382,7 @@ public static void TestTeeReader(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string aLongSampleDataˢ = "a long sample data, 1234567890"u8;
 
-[GoType("dyn")] internal partial struct TestSectionReader_ReadAt_tests {
+internal partial struct TestSectionReader_ReadAt_tests /*dyn*/ {
     internal @string data;
     internal nint off;
     internal nint n;
@@ -450,7 +450,7 @@ public static void TestSectionReader_Seek(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestSectionReader_Size_tests {
+internal partial struct TestSectionReader_Size_tests /*dyn*/ {
     internal @string data;
     internal int64 want;
 }
@@ -495,7 +495,7 @@ public static void TestSectionReader_Max(ж<testing.T> Ꮡt) {
 
 // largeWriter returns an invalid count that is larger than the number
 // of bytes provided (issue 39978).
-[GoType] partial struct largeWriter {
+partial struct largeWriter {
     internal error err;
 }
 
@@ -527,14 +527,14 @@ public static void TestCopyLargeWriter(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestNopCloserWriterToForwarding_type {
+internal partial struct TestNopCloserWriterToForwarding_type /*dyn*/ {
     public @string Name;
     internal Δio.Reader r;
 }
 
-[GoType("dyn")] internal partial struct TestNopCloserWriterToForwarding_typeᴛ1 {
-    [GoEmbedded] public io_package.Reader Reader;
-    [GoEmbedded] public io_package.WriterTo WriterTo;
+internal partial struct TestNopCloserWriterToForwarding_typeᴛ1 /*dyn*/ {
+    /*embed*/ public io_package.Reader Reader;
+    /*embed*/ public io_package.WriterTo WriterTo;
 }
 
 public static void TestNopCloserWriterToForwarding(ж<testing.T> Ꮡt) {
@@ -559,7 +559,7 @@ internal static readonly @string errWhenceˢ = "errWhence"u8;
 internal static readonly @string errOffsetˢ = "errOffset"u8;
 internal static readonly @string normalˢ = "normal"u8;
 
-[GoType("dyn")] internal partial struct TestOffsetWriter_Seek_tests {
+internal partial struct TestOffsetWriter_Seek_tests /*dyn*/ {
     internal int64 offset;
     internal nint whence;
     internal int64 returnOff;

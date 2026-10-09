@@ -495,7 +495,7 @@ internal static void testAfterQueuing(ж<Δtesting.T> Ꮡt, Func<Δtime.Duration
 
 internal static slice<nint> slots = new nint[]{5, 3, 6, 6, 6, 1, 1, 2, 7, 9, 4, 8, 0}.slice();
 
-[GoType] partial struct afterResult {
+partial struct afterResult {
     internal nint slot;
     internal Δtime.Time t;
 }
@@ -1080,7 +1080,7 @@ internal static readonly @string nsOpˢ = "ns/op"u8;
 internal static readonly @string avgLateNsˢ = "avg-late-ns"u8;
 internal static readonly @string maxLateNsˢ = "max-late-ns"u8;
 
-[GoType("dyn")] internal partial struct BenchmarkParallelTimerLatency_type {
+internal partial struct BenchmarkParallelTimerLatency_type /*dyn*/ {
     internal float64 sum;
     internal Δtime.Duration max;
     internal int64 count;

@@ -10,7 +10,7 @@ using static go.database.sql.driver_package;
 
 partial class driver_internal_test_package {
 
-[GoType] internal partial struct valueConverterTest {
+internal partial struct valueConverterTest {
     internal global::go.database.sql.driver_package.ValueConverter c;
     internal any @in;
     internal any @out;
@@ -23,19 +23,19 @@ internal static ref time.Time now => ref Ꮡnow.Value;
 internal static ж<int64> Ꮡanswer = new StandardBox<int64>(42);
 internal static ref int64 answer => ref Ꮡanswer.Value;
 
-[GoType("num:int64")] internal partial struct i;
+internal partial struct i /*num:int64*/;
 
-[GoType("num:float64")] internal partial struct f;
+internal partial struct f /*num:float64*/;
 
-[GoType("bool")] internal partial struct b;
+internal partial struct b /*bool*/;
 
-[GoType("[]byte")] internal partial struct bs;
+internal partial struct bs /*[]byte*/;
 
-[GoType("@string")] internal partial struct s;
+internal partial struct s /*@string*/;
 
-[GoType("global::go.time_package.Time")] internal partial struct t;
+internal partial struct t /*global::go.time_package.Time*/;
 
-[GoType("[]nint")] internal partial struct @is;
+internal partial struct @is /*[]nint*/;
 
 internal static slice<valueConverterTest> valueConverterTests;
 internal static void initᴛvalueConverterTests() { valueConverterTests = new valueConverterTest[]{
@@ -90,7 +90,7 @@ public static void TestValueConverters(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] [GoValueClone("coefficient")] internal partial struct dec {
+internal partial struct dec {
     internal byte form;
     internal bool neg;
     internal array<byte> coefficient = new(16);

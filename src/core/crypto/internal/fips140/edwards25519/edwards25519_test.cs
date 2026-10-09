@@ -139,7 +139,7 @@ public static void TestInvalidEncodings(ж<testing.T> Ꮡt) {
     checkOnCurve(Ꮡt, p);
 }
 
-[GoType("dyn")] [GoLocalName("test")] internal partial struct TestNonCanonicalPoints_test {
+internal partial struct TestNonCanonicalPoints_test /*dyn*/ {
     internal @string name;
     internal @string encoding, canonical;
 }

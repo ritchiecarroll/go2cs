@@ -31,16 +31,16 @@ public static @string TypeString(reflectliteꓸType t) {
     return fmt.Sprintf("%T"u8, reflectlite_internal_test_package.ToInterface(reflectlite_internal_test_package.Zero(t)));
 }
 
-[GoType("num:nint")] partial struct integer;
+partial struct integer /*num:nint*/;
 
-[GoType] partial struct T {
+partial struct T {
     internal nint a;
     internal float64 b;
     internal @string c;
     internal ж<nint> d;
 }
 
-[GoType] partial struct pair {
+partial struct pair {
     internal any i;
     internal @string s;
 }
@@ -61,130 +61,130 @@ internal static void assert(ж<testing.T> Ꮡt, @string s, @string want) {
 // 	"interface { reflectlite_test.a(func(func(int) int) func(func(int)) int); reflectlite_test.b() }",
 // },
 
-    [GoType("dyn")] partial struct Δtype {
+    partial struct Δtype /*dyn*/ {
         internal nint x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ1 {
+    partial struct Δtypeᴛ1 /*dyn*/ {
         internal int8 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ2 {
+    partial struct Δtypeᴛ2 /*dyn*/ {
         internal int16 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ3 {
+    partial struct Δtypeᴛ3 /*dyn*/ {
         internal int32 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ4 {
+    partial struct Δtypeᴛ4 /*dyn*/ {
         internal int64 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ5 {
+    partial struct Δtypeᴛ5 /*dyn*/ {
         internal nuint x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ6 {
+    partial struct Δtypeᴛ6 /*dyn*/ {
         internal uint8 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ7 {
+    partial struct Δtypeᴛ7 /*dyn*/ {
         internal uint16 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ8 {
+    partial struct Δtypeᴛ8 /*dyn*/ {
         internal uint32 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ9 {
+    partial struct Δtypeᴛ9 /*dyn*/ {
         internal uint64 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ10 {
+    partial struct Δtypeᴛ10 /*dyn*/ {
         internal float32 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ11 {
+    partial struct Δtypeᴛ11 /*dyn*/ {
         internal float64 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ12 {
+    partial struct Δtypeᴛ12 /*dyn*/ {
         internal ж<ж<int8>> x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ13 {
+    partial struct Δtypeᴛ13 /*dyn*/ {
         internal ж<ж<integer>> x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ14 {
+    partial struct Δtypeᴛ14 /*dyn*/ {
         internal array<int32> x = new(32);
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ15 {
+    partial struct Δtypeᴛ15 /*dyn*/ {
         internal slice<int8> x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ16 {
+    partial struct Δtypeᴛ16 /*dyn*/ {
         internal map<@string, int32> x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ17 {
+    partial struct Δtypeᴛ17 /*dyn*/ {
         internal channel/*<-*/<@string> x = channel/*<-*/<@string>.SendOnly;
     }
 
-    [GoType("dyn")] partial struct typeᴛ18_x {
+    partial struct typeᴛ18_x /*dyn*/ {
         internal channel<ж<int32>> c;
         internal float32 d;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ18 {
+    partial struct Δtypeᴛ18 /*dyn*/ {
         internal typeᴛ18_x x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ19 {
+    partial struct Δtypeᴛ19 /*dyn*/ {
         internal Action<int8, int32> x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ20_x {
+    partial struct typeᴛ20_x /*dyn*/ {
         internal Action<channel<ж<integer>>, ж<int8>> c;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ20 {
+    partial struct Δtypeᴛ20 /*dyn*/ {
         internal typeᴛ20_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ21_x {
+    partial struct typeᴛ21_x /*dyn*/ {
         internal int8 a;
         internal int32 b;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ21 {
+    partial struct Δtypeᴛ21 /*dyn*/ {
         internal typeᴛ21_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ22_x {
+    partial struct typeᴛ22_x /*dyn*/ {
         internal int8 a;
         internal int8 b;
         internal int32 c;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ22 {
+    partial struct Δtypeᴛ22 /*dyn*/ {
         internal typeᴛ22_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ23_x {
+    partial struct typeᴛ23_x /*dyn*/ {
         internal int8 a;
         internal int8 b;
         internal int8 c;
         internal int32 d;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ23 {
+    partial struct Δtypeᴛ23 /*dyn*/ {
         internal typeᴛ23_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ24_x {
+    partial struct typeᴛ24_x /*dyn*/ {
         internal int8 a;
         internal int8 b;
         internal int8 c;
@@ -192,11 +192,11 @@ internal static void assert(ж<testing.T> Ꮡt, @string s, @string want) {
         internal int32 e;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ24 {
+    partial struct Δtypeᴛ24 /*dyn*/ {
         internal typeᴛ24_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ25_x {
+    partial struct typeᴛ25_x /*dyn*/ {
         internal int8 a;
         internal int8 b;
         internal int8 c;
@@ -205,42 +205,40 @@ internal static void assert(ж<testing.T> Ꮡt, @string s, @string want) {
         internal int32 f;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ25 {
+    partial struct Δtypeᴛ25 /*dyn*/ {
         internal typeᴛ25_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ26_x {
-        [GoTag(@"reflect:""hi there""")]
-        internal int8 a;
+    partial struct typeᴛ26_x /*dyn*/ {
+        internal int8 a; /*`reflect:"hi there"`*/
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ26 {
+    partial struct Δtypeᴛ26 /*dyn*/ {
         internal typeᴛ26_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ27_x {
-        [GoTag(@"reflect:""hi \x00there\t\n\""\\""")]
-        internal int8 a;
+    partial struct typeᴛ27_x /*dyn*/ {
+        internal int8 a; /*`reflect:"hi \x00there\t\n\"\\"`*/
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ27 {
+    partial struct Δtypeᴛ27 /*dyn*/ {
         internal typeᴛ27_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ28_x {
+    partial struct typeᴛ28_x /*dyn*/ {
         internal Actionꓸꓸꓸ<nint> f;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ28 {
+    partial struct Δtypeᴛ28 /*dyn*/ {
         internal typeᴛ28_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ29_x {
-        [GoEmbedded] internal int32 int32;
-        [GoEmbedded] internal int64 int64;
+    partial struct typeᴛ29_x /*dyn*/ {
+        /*embed*/ internal int32 int32;
+        /*embed*/ internal int64 int64;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ29 {
+    partial struct Δtypeᴛ29 /*dyn*/ {
         internal typeᴛ29_x x;
     }
 internal static slice<pair> typeTests = new pair[]{
@@ -420,46 +418,46 @@ public static void TestSetValue(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCanSetField_embed {
+internal partial struct TestCanSetField_embed /*dyn*/ {
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] internal partial struct TestCanSetField_Embed {
+internal partial struct TestCanSetField_Embed /*dyn*/ {
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] internal partial struct TestCanSetField_S1 {
+internal partial struct TestCanSetField_S1 /*dyn*/ {
     internal partial ref TestCanSetField_embed embed { get; }
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] internal partial struct TestCanSetField_S2 {
+internal partial struct TestCanSetField_S2 /*dyn*/ {
     internal partial ref ж<TestCanSetField_embed> embed { get; }
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] internal partial struct TestCanSetField_S3 {
+internal partial struct TestCanSetField_S3 /*dyn*/ {
     public partial ref TestCanSetField_Embed Embed { get; }
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] internal partial struct TestCanSetField_S4 {
+internal partial struct TestCanSetField_S4 /*dyn*/ {
     public partial ref ж<TestCanSetField_Embed> Embed { get; }
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] internal partial struct TestCanSetField_testCase {
+internal partial struct TestCanSetField_testCase /*dyn*/ {
     internal slice<nint> index;
     internal bool canSet;
 }
 
-[GoType("dyn")] internal partial struct TestCanSetField_tests {
+internal partial struct TestCanSetField_tests /*dyn*/ {
     internal reflectlite.Value val;
     internal slice<TestCanSetField_testCase> cases;
 }
@@ -592,7 +590,7 @@ public static void TestAll(ж<testing.T> Ꮡt) {
 internal static readonly @string float64ˢ = "float64"u8;
 internal static readonly object v2InterfaceDidNotReturnˢ = (@string)"v2.Interface() did not return float64, got "u8;
 
-[GoType("dyn")] internal partial struct TestInterfaceValue_inter {
+internal partial struct TestInterfaceValue_inter /*dyn*/ {
     public any E;
 }
 
@@ -628,7 +626,7 @@ public static void TestFunctionValue(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct appendTestsᴛ1 {
+partial struct appendTestsᴛ1 /*dyn*/ {
     internal slice<nint> orig, extra;
 }
 internal static slice<appendTestsᴛ1> appendTests = new appendTestsᴛ1[]{
@@ -648,7 +646,7 @@ internal static bool sameInts(slice<nint> x, slice<nint> y) {
     return true;
 }
 
-[GoType("dyn")] internal partial struct TestBigUnnamedStruct_b {
+internal partial struct TestBigUnnamedStruct_b /*dyn*/ {
     internal int64 a, b, c, d;
 }
 
@@ -661,7 +659,7 @@ public static void TestBigUnnamedStruct(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct big {
+partial struct big {
     internal int64 a, b, c, d, e;
 }
 
@@ -674,14 +672,14 @@ public static void TestBigStruct(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct Basic {
+partial struct Basic {
     internal nint x;
     internal float32 y;
 }
 
-[GoType("Basic")] partial struct NotBasic;
+partial struct NotBasic /*Basic*/;
 
-[GoType] partial struct DeepEqualTest {
+partial struct DeepEqualTest {
     internal any a, b;
     internal bool eq;
 }
@@ -695,13 +693,10 @@ internal static Action fn3 = () => {
     fn1();
 }; // Not nil.
 
-[GoType] partial struct self {
+partial struct self {
 }
 
-[GoType("ж<Loop>")] partial class Loop;
-// Descriptor carrier for `Loopy` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("Loopy")] public interface Loopyᴅ { }
-
+partial class Loop /*ж<Loop>*/;
 
 internal static ж<Loop> Ꮡloop1 = new StandardBox<Loop>(default(Loop));
 internal static ref Loop loop1 => ref Ꮡloop1.ValueSlot;
@@ -815,43 +810,43 @@ public static void NotNil(any a, ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_doNil {
+internal partial struct TestIsNil_doNil /*dyn*/ {
     internal ж<nint> x;
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_doNilᴛ1 {
+internal partial struct TestIsNil_doNilᴛ1 /*dyn*/ {
     internal any x;
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_doNilᴛ2 {
+internal partial struct TestIsNil_doNilᴛ2 /*dyn*/ {
     internal map<@string, nint> x;
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_doNilᴛ3 {
+internal partial struct TestIsNil_doNilᴛ3 /*dyn*/ {
     internal Func<bool> x;
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_doNilᴛ4 {
+internal partial struct TestIsNil_doNilᴛ4 /*dyn*/ {
     internal channel<nint> x;
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_doNilᴛ5 {
+internal partial struct TestIsNil_doNilᴛ5 /*dyn*/ {
     internal slice<@string> x;
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_doNilᴛ6 {
+internal partial struct TestIsNil_doNilᴛ6 /*dyn*/ {
     internal @unsafe.Pointer x;
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_si {
+internal partial struct TestIsNil_si /*dyn*/ {
     internal slice<nint> x;
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_mi {
+internal partial struct TestIsNil_mi /*dyn*/ {
     internal map<nint, nint> x;
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_fi {
+internal partial struct TestIsNil_fi /*dyn*/ {
     internal Action<ж<testing.T>> x;
 }
 
@@ -921,7 +916,7 @@ public static void TestNilPtrValueSub(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct Point {
+partial struct Point {
     internal nint x, y;
 }
 
@@ -961,15 +956,15 @@ public static nint TotalDist(this Point p, params ꓸꓸꓸPoint pointsʗp) {
     return tot;
 }
 
-[GoType] partial struct D1 {
+partial struct D1 {
     internal nint d;
 }
 
-[GoType] partial struct D2 {
+partial struct D2 {
     internal nint d;
 }
 
-[GoType("dyn")] internal partial struct TestImportPath_tests {
+internal partial struct TestImportPath_tests /*dyn*/ {
     internal reflectliteꓸType t;
     internal @string path;
 }
@@ -1059,21 +1054,21 @@ public static void TestAllocations(ж<testing.T> Ꮡt) {
     });
 }
 
-[GoType("dyn")] internal partial struct TestSetPanic_t0 {
+internal partial struct TestSetPanic_t0 /*dyn*/ {
     public nint W;
 }
 
-[GoType("dyn")] internal partial struct TestSetPanic_t1 {
+internal partial struct TestSetPanic_t1 /*dyn*/ {
     public nint Y;
     internal partial ref TestSetPanic_t0 t0 { get; }
 }
 
-[GoType("dyn")] internal partial struct TestSetPanic_T2 {
+internal partial struct TestSetPanic_T2 /*dyn*/ {
     public nint Z;
     internal TestSetPanic_t0 namedT0;
 }
 
-[GoType("dyn")] internal partial struct TestSetPanic_T {
+internal partial struct TestSetPanic_T /*dyn*/ {
     public nint X;
     internal partial ref TestSetPanic_t1 t1 { get; }
     public partial ref TestSetPanic_T2 T2 { get; }
@@ -1312,7 +1307,7 @@ internal static void shouldPanic(Action f) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct S {
+partial struct S {
     internal int64 i1;
     internal int64 i2;
 }
@@ -1329,7 +1324,7 @@ public static void TestBigZero(ж<testing.T> Ꮡt) {
 }
 
 // Used to have inconsistency between IsValid() and Kind() != Invalid.
-[GoType("dyn")] internal partial struct TestInvalid_T {
+internal partial struct TestInvalid_T /*dyn*/ {
     internal any v;
 }
 
@@ -1344,21 +1339,21 @@ public static void TestInvalid(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("num:nint")] partial struct TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678;
+partial struct TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678 /*num:nint*/;
 
-[GoType] partial struct nameTest {
+partial struct nameTest {
     internal any v;
     internal @string want;
 }
 
-[GoType] partial struct A {
+partial struct A {
 }
 
-[GoType] partial struct B<T> {
+partial struct B<T> {
 }
 
 
-        [GoType("dyn")] partial interface Δtypeᴛ30 {
+        partial interface Δtypeᴛ30 /*dyn*/ {
             void F();
         }
 internal static slice<nameTest> nameTests = new nameTest[]{
@@ -1387,7 +1382,7 @@ public static void TestNames(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestUnaddressableField_localBuffer {
+internal partial struct TestUnaddressableField_localBuffer /*dyn*/ {
     internal slice<byte> buf;
 }
 
@@ -1410,19 +1405,19 @@ public static void TestUnaddressableField(ж<testing.T> Ꮡt) {
     });
 }
 
-[GoType("num:nint")] partial struct Tint;
+partial struct Tint /*num:nint*/;
 
-[GoType] partial struct Talias1 {
-    [GoEmbedded] internal byte @byte;
-    [GoEmbedded] internal uint8 uint8;
-    [GoEmbedded] internal nint @int;
-    [GoEmbedded] internal int32 int32;
-    [GoEmbedded] internal rune rune;
+partial struct Talias1 {
+    /*embed*/ internal byte @byte;
+    /*embed*/ internal uint8 uint8;
+    /*embed*/ internal nint @int;
+    /*embed*/ internal int32 int32;
+    /*embed*/ internal rune rune;
 }
 
-[GoType] partial struct Talias2 {
+partial struct Talias2 {
     public partial ref Tint Tint { get; }
-    [GoEmbedded] public Tint2 Tint2;
+    /*embed*/ public Tint2 Tint2;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

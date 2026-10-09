@@ -80,12 +80,12 @@ public static void TestInt(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct countingReader {
+partial struct countingReader {
     internal io.Reader r;
     internal nint n;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref countingReader r, slice<byte> p) {
+internal static (nint n, error err) Read(this ref countingReader r, slice<byte> p) {
     nint n = default!;
     error err = default!;
 

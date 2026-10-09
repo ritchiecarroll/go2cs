@@ -11,7 +11,7 @@ partial class net_internal_test_package {
 // Decimal number literals
 // Others
 
-[GoType("dyn")] partial struct parsePortTestsᴛ1 {
+partial struct parsePortTestsᴛ1 /*dyn*/ {
     internal @string service;
     internal nint port;
     internal bool needsLookup;

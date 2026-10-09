@@ -39,7 +39,7 @@ internal static nint tokenclass(token.Token tok) {
     return special;
 }
 
-[GoType] internal partial struct elt {
+internal partial struct elt {
     internal token.Token tok;
     internal @string lit;
     internal nint @class;
@@ -305,7 +305,7 @@ public static void TestScan(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStripCR_type {
+internal partial struct TestStripCR_type /*dyn*/ {
     internal @string have, want;
 }
 
@@ -370,7 +370,7 @@ internal static void checkSemi(ж<testing.T> Ꮡt, @string input, @string want, 
 
 // first BOM is ignored
 
-[GoType("dyn")] partial struct semicolonTestsᴛ1 {
+partial struct semicolonTestsᴛ1 /*dyn*/ {
     internal @string input, want;
 }
 internal static array<semicolonTestsᴛ1> semicolonTests = new semicolonTestsᴛ1[]{
@@ -492,7 +492,7 @@ public static void TestSemicolons(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct segment {
+internal partial struct segment {
     internal @string srcline; // a line of source text
     internal @string filename; // filename for current token; error message for invalid line directives
     internal nint line, column;   // line and column for current token; error position for invalid line directives
@@ -717,7 +717,7 @@ public static void TestStdErrorHandler(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct errorCollector {
+internal partial struct errorCollector {
     internal nint cnt;           // number of errors encountered
     internal @string msg;        // last error message encountered
     internal tokenꓸPosition pos; // last error position encountered
@@ -761,7 +761,7 @@ internal static void checkError(ж<testing.T> Ꮡt, @string src, token.Token tok
 // only first BOM is ignored
 // only first BOM is ignored
 
-[GoType("dyn")] partial struct errorsᴛ1 {
+partial struct errorsᴛ1 /*dyn*/ {
     internal @string src;
     internal token.Token tok;
     internal nint pos;
@@ -953,7 +953,7 @@ public static void BenchmarkScanFiles(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestNumbers_type {
+internal partial struct TestNumbers_type /*dyn*/ {
     internal token.Token tok;
     internal @string src, tokens, err;
 }

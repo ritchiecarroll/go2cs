@@ -44,8 +44,8 @@ using static global::go.@internal.coverage.cfile_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/cfile/emitdata_test.go", "emitdata_test.cs", "ACowgoKUgpSCgoKCgrqCgoKCgpSCgoSCqIKClIKClIKClIKClIKClIKClIKClIKClIKCAAMW8oKUgoKUlIKCgoCCAAkKsoKCgoKUgoCCpKaCgoCCpNyygoKigoKUgpSUgpSmooKCgoKUpoKUgoKCgpSCgoKCgpSUgoKCpoKUppSCgoKCgpS4goKCgtaCgoKClIKCzIKClIKCgoKUgpKCpoKCgpSClIK4goKCgoKCgpSCgoCCpIK4goKCgoKCgpSC6IKkgpaAgqSEgoKClIKitoKCgoKCgoKUgriCgoKCgoKClIK4goKCgpSCgpSCgoCCgqSC+IKCgoKogoKWgoKCpoLmgoKCgqiCgpaCgoKoguaCgoKCqIKCloKCgqiCAAkGgoKUgpaCgoKCgpSCggAKCKKClIK6goTMgoKCgqiCgoKCAA0KgoKUhIKEgoKCgpaCgoKWgoKCgoKCyoKUgoKCgqaCgpSC", "57-60:1;61-64:2;65-68:3;69-72:4;73-76:5;77-80:6;81-84:7;85-88:8;89-92:9;226-265:1;269-284:1;288-298:1;302-320:1;324-334:1;338-348:1;352-369:1")]
-[assembly: go.GoPositionMap("internal/coverage/cfile/ts_test.go", "ts_test.cs", "AB4qgoCCgILG7sKClIKUgpaCgpSCqICClLiCgoKCAAMiAA0CgpSCgIIAEx7EgoCCpIKCgoCCuIKClIKCpoLmgoKUgpSCgpa6goCCpJaCuIKClICCqJKClIKUgIK4goKClIKC")]
+[assembly: go.GoPositionMap("internal/coverage/cfile/emitdata_test.go", "emitdata_test.cs", "ACowgoKUgpSCgoKCgrqCgoKCgpSCgoSCqIKClIKClIKClIKClIKClIKClIKClIKClIKCAAMW8oKUgoKUlIKCgoCCAAkKsoKCgoKUgoCCpKaCgoCCpNyygoKigoKUgpSUgpSmooKCgoKUpoKUgoKCgpSCgoKCgpSUgoKCpoKUppSCgoKCgpS4goKCgtaCgoKClIKCzIKClIKCgoKUgpKCpoKCgpSClIK4goKCgoKCgpSCgoCCpIK4goKCgoKCgpSC6IKkgpaAgqSEgoKClIKitoKCgoKCgoKUgriCgoKCgoKClIK4goKCgpSCgpSCgoCCgqSC+IKCgoKogoKWgoKCpoLmgoKCgqiCgpaCgoKoguaCgoKCqIKCloKCgqiCAAkGgoKUgpaCgoKCgpSCggAKCKKClIK6goTMgoKCgqiCgoKCAA0KgoKUhIKEgoKCgpaCgoKWgoKCgoKCyoKUgoKCgqaCgpSC", "57-60:1;61-64:2;65-68:3;69-72:4;73-76:5;77-80:6;81-84:7;85-88:8;89-92:9;226-265:1;269-284:1;288-298:1;302-320:1;324-334:1;338-348:1;352-369:1", "", "543=HasCGO/1/1/1")]
+[assembly: go.GoPositionMap("internal/coverage/cfile/ts_test.go", "ts_test.cs", "AB4qgoCCgILG7sKClIKUgpaCgpSCqICClLiCgoKCAAMiAA0CgpSCgIIAEx7EgoCCpIKCgoCCuIKClIKCpoLmgoKUgpSCgpa6goCCpJaCuIKClICCqJKClIKUgIK4goKClIKC", "", "", "60=CoverMode/1/1/1;64=CoverMode/1/1/1;172=CoverMode/1/1/1;203=CoverMode/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
@@ -54,7 +54,7 @@ namespace go.@internal.coverage;
 public static partial class cfile_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

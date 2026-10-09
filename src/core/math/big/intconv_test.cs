@@ -19,7 +19,7 @@ partial class big_internal_test_package {
 // valid input with separators
 // (smoke tests only - a comprehensive set of tests is in natconv_test.go)
 
-[GoType("dyn")] partial struct stringTestsᴛ1 {
+partial struct stringTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string @out;
     internal nint @base;
@@ -223,7 +223,7 @@ public static void TestSetString(ж<testing.T> Ꮡt) {
 
 // 2**24 - 1
 
-[GoType("dyn")] partial struct formatTestsᴛ1 {
+partial struct formatTestsᴛ1 /*dyn*/ {
     internal @string input;
     internal @string format;
     internal @string output;
@@ -381,7 +381,7 @@ public static void TestFormat(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct scanTestsᴛ1 {
+partial struct scanTestsᴛ1 /*dyn*/ {
     internal @string input;
     internal @string format;
     internal @string output;

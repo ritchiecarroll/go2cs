@@ -45,7 +45,7 @@ public static void TestNoPos(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct testsᴛ1 {
+partial struct testsᴛ1 /*dyn*/ {
     internal @string filename;
     internal slice<byte> source; // may be nil
     internal nint size;
@@ -428,7 +428,7 @@ public static void TestRemoveFile(ж<testing.T> Ꮡt) {
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string filenameᶜ1 = "test.go"u8;
 
-[GoType("dyn")] internal partial struct TestFileAddLineColumnInfo_tests {
+internal partial struct TestFileAddLineColumnInfo_tests /*dyn*/ {
     internal @string name;
     internal slice<global::go.go.token_package.lineInfo> infos;
     internal slice<global::go.go.token_package.lineInfo> want;

@@ -235,7 +235,7 @@ internal static T negativeZero<T>()
     return f;
 }
 
-[GoType("dyn")] internal partial struct TestComparable_v {
+internal partial struct TestComparable_v /*dyn*/ {
     internal nint i;
     internal nuint u;
     internal bool b;
@@ -244,15 +244,15 @@ internal static T negativeZero<T>()
     internal any a;
 }
 
-[GoType("dyn")] [GoLocalName("S")] internal partial struct TestComparable_S {
+internal partial struct TestComparable_S /*dyn*/ {
     internal @string s;
 }
 
-[GoType("dyn")] internal partial struct TestComparable_v1 {
+internal partial struct TestComparable_v1 /*dyn*/ {
     internal @string a, b;
 }
 
-[GoType("dyn")] internal partial struct TestComparable_v1ᴛ1 {
+internal partial struct TestComparable_v1ᴛ1 /*dyn*/ {
     internal any a, b;
 }
 
@@ -347,7 +347,7 @@ internal static partial void stackGrow(nint dep) {
     stackGrow(dep - 1);
 }
 
-[GoType("dyn")] [GoLocalName("S")] internal partial struct TestWriteComparable_S {
+internal partial struct TestWriteComparable_S /*dyn*/ {
     internal @string s;
 }
 
@@ -482,7 +482,7 @@ public static void TestWriteComparableNoncommute(ж<testing.T> Ꮡt) {
 internal static readonly object skipAllocationTestInˢ = (@string)"skip allocation test in purego mode - reflect-based implementation allocates more"u8;
 internal static readonly object skipAllocationTestUnderˢ = (@string)"skip allocation test under -asan"u8;
 
-[GoType("dyn")] [GoLocalName("S")] internal partial struct TestComparableAllocations_S {
+internal partial struct TestComparableAllocations_S /*dyn*/ {
     internal nint a;
     internal @string b;
 }
@@ -576,7 +576,7 @@ internal static void benchmarkComparable<T, Tᴺ>(ж<testing.B> Ꮡb, T v) {
     });
 }
 
-[GoType("dyn")] [GoLocalName("testStruct")] internal partial struct BenchmarkComparable_testStruct {
+internal partial struct BenchmarkComparable_testStruct /*dyn*/ {
     internal nint i;
     internal nuint u;
     internal bool b;

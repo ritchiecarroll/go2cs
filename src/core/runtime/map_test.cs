@@ -198,7 +198,7 @@ public static void TestGrowWithNaN(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct FloatInt {
+partial struct FloatInt {
     internal float64 x;
     internal nint y;
 }
@@ -445,7 +445,7 @@ public static void TestBigItems(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoLocalName("T")] [GoType("[4000]byte")] internal partial struct TestMapHugeZero_T;
+internal partial struct TestMapHugeZero_T /*[4000]byte*/;
 
 public static void TestMapHugeZero(ж<testing.T> Ꮡt) {
     var m = new map<nint, TestMapHugeZero_T>{};
@@ -462,7 +462,7 @@ public static void TestMapHugeZero(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct empty {
+partial struct empty {
 }
 
 public static void TestEmptyKeyAndValue(ж<testing.T> Ꮡt) {
@@ -668,8 +668,8 @@ public static void TestMapStringBytesLookup(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoLocalName("T")] [GoType("[64]nint")] /* [N]nint */
-internal partial struct TestMapLargeKeyNoPointer_T;
+/* [N]nint */
+internal partial struct TestMapLargeKeyNoPointer_T /*[64]nint*/;
 
 public static void TestMapLargeKeyNoPointer(ж<testing.T> Ꮡt) {
     const nint I = 1000;
@@ -694,8 +694,8 @@ public static void TestMapLargeKeyNoPointer(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoLocalName("T")] [GoType("[64]nint")] /* [N]nint */
-internal partial struct TestMapLargeValNoPointer_T;
+/* [N]nint */
+internal partial struct TestMapLargeValNoPointer_T /*[64]nint*/;
 
 public static void TestMapLargeValNoPointer(ж<testing.T> Ꮡt) {
     const nint I = 1000;
@@ -916,18 +916,18 @@ public static void TestMapTombstones(ж<testing.T> Ꮡt) {
     runtime_internal_test_package.MapTombstoneCheck(m);
 }
 
-[GoType("num:nint")] partial struct canString;
+partial struct canString /*num:nint*/;
 
 internal static @string String(this canString c) {
     return fmt.Sprintf("%d"u8, (nint)c);
 }
 
-[GoType("dyn")] internal partial interface TestMapInterfaceKey_GrabBag_i1 {
+internal partial interface TestMapInterfaceKey_GrabBag_i1 /*dyn*/ {
     @string String();
 }
 
 // Test all the special cases in runtime.typehash.
-[GoType("dyn")] internal partial struct TestMapInterfaceKey_GrabBag {
+internal partial struct TestMapInterfaceKey_GrabBag /*dyn*/ {
     internal float32 f32;
     internal float64 f64;
     internal complex64 c64;
@@ -979,7 +979,7 @@ public static void TestMapInterfaceKey(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct panicStructKey {
+partial struct panicStructKey {
     internal slice<nint> sli;
 }
 
@@ -990,7 +990,7 @@ internal static @string String(this panicStructKey p) {
     return panicˢ;
 }
 
-[GoType] partial struct structKey {
+partial struct structKey {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1193,7 +1193,7 @@ public static void TestEmptyMapWithInterfaceKey(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object mapkeysNotImplementedForˢ = (@string)"mapkeys not implemented for swissmaps"u8;
 
-[GoType("dyn")] internal partial struct TestMapKeys_key {
+internal partial struct TestMapKeys_key /*dyn*/ {
     internal @string s;
     internal array<byte> pad = new(128); // sizeof(key) > abi.MapMaxKeyBytes
 }
@@ -1218,7 +1218,7 @@ public static void TestMapKeys(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object mapvaluesNotImplementedˢ = (@string)"mapvalues not implemented for swissmaps"u8;
 
-[GoType("dyn")] internal partial struct TestMapValues_val {
+internal partial struct TestMapValues_val /*dyn*/ {
     internal @string s;
     internal array<byte> pad = new(128); // sizeof(val) > abi.MapMaxElemBytes
 }

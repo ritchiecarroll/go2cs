@@ -8,7 +8,7 @@ using static go.net.http.@internal.ascii_package;
 
 partial class ascii_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestEqualFold_type {
+internal partial struct TestEqualFold_type /*dyn*/ {
     internal @string name;
     internal @string a, b;
     internal bool want;
@@ -55,7 +55,7 @@ public static void TestEqualFold(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIsPrint_type {
+internal partial struct TestIsPrint_type /*dyn*/ {
     internal @string name;
     internal @string @in;
     internal bool want;

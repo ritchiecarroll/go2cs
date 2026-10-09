@@ -9,7 +9,7 @@ using static go.html_package;
 
 partial class html_internal_test_package {
 
-[GoType] internal partial struct unescapeTest {
+internal partial struct unescapeTest {
     // A short description of the test case.
     internal @string desc;
     // The HTML text.

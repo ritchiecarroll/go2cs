@@ -17,12 +17,12 @@ using static go.crypto.mlkem_package;
 
 partial class mlkem_internal_test_package {
 
-[GoType] internal partial interface encapsulationKey {
+internal partial interface encapsulationKey {
     slice<byte> Bytes();
     (slice<byte>, slice<byte>) Encapsulate();
 }
 
-[GoType] internal partial interface decapsulationKey<E> 
+internal partial interface decapsulationKey<E> 
     where E : encapsulationKey{
     slice<byte> Bytes();
     (slice<byte>, error) Decapsulate(slice<byte> _);

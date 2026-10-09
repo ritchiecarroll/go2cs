@@ -42,7 +42,7 @@ public static void TestResolveGoogle(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct dialGoogleTestsᴛ1 {
+partial struct dialGoogleTestsᴛ1 /*dyn*/ {
     internal Func<@string, @string, (global::go.net_package.Conn, error)> dial;
     internal @string unreachableNetwork;
     internal slice<@string> networks;

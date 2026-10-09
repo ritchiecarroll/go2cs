@@ -19,7 +19,7 @@ partial class http_internal_test_package {
 // Tests header sorting when over the insertion sort threshold side:
 // Tests invalid characters in headers.
 
-[GoType("dyn")] partial struct headerWriteTestsᴛ1 {
+partial struct headerWriteTestsᴛ1 /*dyn*/ {
     internal global::go.net.http_package.ΔHeader h;
     internal map<@string, bool> exclude;
     internal @string expected;
@@ -118,7 +118,7 @@ public static void TestHeaderWrite(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct parseTimeTestsᴛ1 {
+partial struct parseTimeTestsᴛ1 /*dyn*/ {
     internal global::go.net.http_package.ΔHeader h;
     internal bool err;
 }
@@ -151,7 +151,7 @@ public static void TestParseTime(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct hasTokenTest {
+internal partial struct hasTokenTest {
     internal @string header;
     internal @string token;
     internal bool want;
@@ -250,7 +250,7 @@ public static void TestHeaderWriteSubsetAllocs(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object unexpectedNilHeaderˢ = (@string)"unexpected nil Header"u8;
 
-[GoType("dyn")] internal partial struct TestCloneOrMakeHeader_tests {
+internal partial struct TestCloneOrMakeHeader_tests /*dyn*/ {
     internal @string name;
     internal global::go.net.http_package.ΔHeader @in, want;
 }

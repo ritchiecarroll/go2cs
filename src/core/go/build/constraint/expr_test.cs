@@ -14,7 +14,7 @@ using static global::go.go.build.constraint_package;
 partial class constraint_internal_test_package {
 
 
-[GoType("dyn")] partial struct exprStringTestsᴛ1 {
+partial struct exprStringTestsᴛ1 /*dyn*/ {
     internal global::go.go.build.constraint_package.Expr x;
     internal @string @out;
 }
@@ -57,7 +57,7 @@ public static void TestExprString(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct lexTestsᴛ1 {
+partial struct lexTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string @out;
 }
@@ -137,7 +137,7 @@ internal static (@string tok, error err) lexHelp(ж<global::go.go.build.constrai
 }
 
 
-[GoType("dyn")] partial struct parseExprTestsᴛ1 {
+partial struct parseExprTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal global::go.go.build.constraint_package.Expr x;
 }
@@ -172,7 +172,7 @@ public static void TestParseExpr(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct parseExprErrorTestsᴛ1 {
+partial struct parseExprErrorTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal error err;
 }
@@ -205,7 +205,7 @@ public static void TestParseError(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct exprEvalTestsᴛ1 {
+partial struct exprEvalTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal bool ok;
     internal @string tags;
@@ -278,7 +278,7 @@ public static void TestParsePlusBuildExpr(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct constraintTestsᴛ1 {
+partial struct constraintTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal global::go.go.build.constraint_package.Expr x;
     internal @string err;
@@ -328,7 +328,7 @@ public static void TestParse(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct plusBuildLinesTestsᴛ1 {
+partial struct plusBuildLinesTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal slice<@string> @out;
     internal error err;
@@ -384,7 +384,7 @@ public static void TestPlusBuildLines(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expressionDidNotTriggerˢ = (@string)"expression did not trigger limit"u8;
 
-[GoType("dyn")] internal partial struct TestSizeLimits_type {
+internal partial struct TestSizeLimits_type /*dyn*/ {
     internal @string name;
     internal @string expr;
 }
@@ -430,7 +430,7 @@ public static void TestSizeLimits(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPlusSizeLimits_type {
+internal partial struct TestPlusSizeLimits_type /*dyn*/ {
     internal @string name;
     internal @string expr;
 }

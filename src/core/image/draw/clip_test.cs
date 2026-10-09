@@ -9,7 +9,7 @@ using static go.image.draw_package;
 
 partial class draw_internal_test_package {
 
-[GoType] internal partial struct clipTest {
+internal partial struct clipTest {
     internal @string desc;
     internal image.Rectangle r, dr, sr, mr;
     internal image.Point sp, mp;

@@ -14,7 +14,7 @@ using static go.crypto.des_internal_test_package;
 
 partial class des_test_package {
 
-[GoType] partial struct CryptTest {
+partial struct CryptTest {
     internal slice<byte> key;
     internal slice<byte> @in;
     internal slice<byte> @out;

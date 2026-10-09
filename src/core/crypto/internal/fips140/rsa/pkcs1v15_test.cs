@@ -14,7 +14,7 @@ using static go.crypto.@internal.fips140.rsa_package;
 
 partial class rsa_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestHashPrefixes_val {
+internal partial struct TestHashPrefixes_val /*dyn*/ {
     public pkix.AlgorithmIdentifier HashAlgorithm;
     public slice<byte> Hash;
 }

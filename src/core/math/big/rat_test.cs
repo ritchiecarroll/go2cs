@@ -80,7 +80,7 @@ public static void TestRatSign(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct ratCmpTestsᴛ1 {
+partial struct ratCmpTestsᴛ1 /*dyn*/ {
     internal @string rat1, rat2;
     internal nint @out;
 }
@@ -175,7 +175,7 @@ public static void TestRatInv(ж<testing.T> Ꮡt) {
 
 // type ratBinFun is a methodless func type — rendered inline as its base delegate
 
-[GoType] internal partial struct ratBinArg {
+internal partial struct ratBinArg {
     internal @string x, y, z;
 }
 
@@ -190,7 +190,7 @@ internal static void testRatBin(ж<testing.T> Ꮡt, nint i, @string name, Func<�
 }
 
 
-[GoType("dyn")] partial struct ratBinTestsᴛ1 {
+partial struct ratBinTestsᴛ1 /*dyn*/ {
     internal @string x, y;
     internal @string sum, prod;
 }
@@ -274,7 +274,7 @@ public static void TestIssue820(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct setFrac64Testsᴛ1 {
+partial struct setFrac64Testsᴛ1 /*dyn*/ {
     internal int64 a, b;
     internal @string @out;
 }
@@ -714,7 +714,7 @@ public static void BenchmarkRatCmp(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIssue34919_type {
+internal partial struct TestIssue34919_type /*dyn*/ {
     internal @string name;
     internal Action<ж<global::go.math.big_package.ΔRat>> f;
 }

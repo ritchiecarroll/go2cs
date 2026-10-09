@@ -102,7 +102,7 @@ public static void ExampleStripPrefix() {
     Δhttp.Handle(tmpfilesˢ, Δhttp.StripPrefix(tmpfilesˢ, Δhttp.FileServer(((Δhttp.Dir)(@string)tmpˢ))));
 }
 
-[GoType] partial struct apiHandler {
+partial struct apiHandler {
 }
 
 internal static void ServeHTTP(this apiHandler _Δp0, Δhttp.ResponseWriter _Δp1, ж<Δhttp.Request> _Δp2) {

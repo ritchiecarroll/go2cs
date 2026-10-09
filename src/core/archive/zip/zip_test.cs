@@ -189,7 +189,7 @@ public static void TestFileHeaderRoundTripWithoutModified(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct repeatedByte {
+internal partial struct repeatedByte {
     internal int64 off;
     internal byte b;
     internal int64 n;
@@ -198,11 +198,11 @@ public static void TestFileHeaderRoundTripWithoutModified(ж<testing.T> Ꮡt) {
 // rleBuffer is a run-length-encoded byte buffer.
 // It's an io.Writer (like a bytes.Buffer) and also an io.ReaderAt,
 // allowing random-access reads.
-[GoType] internal partial struct rleBuffer {
+internal partial struct rleBuffer {
     internal slice<repeatedByte> buf;
 }
 
-[GoRecv] internal static int64 Size(this ref rleBuffer r) {
+internal static int64 Size(this ref rleBuffer r) {
     if (len(r.buf) == 0) {
         return 0;
     }
@@ -210,7 +210,7 @@ public static void TestFileHeaderRoundTripWithoutModified(ж<testing.T> Ꮡt) {
     return (~last).off + (~last).n;
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref rleBuffer r, slice<byte> p) {
+internal static (nint n, error err) Write(this ref rleBuffer r, slice<byte> p) {
     ж<repeatedByte> rp = default!;
     if (len(r.buf) > 0) {
         rp = Ꮡ(r.buf, len(r.buf) - 1);
@@ -247,7 +247,7 @@ internal static void memset(slice<byte> a, byte b) {
     }
 }
 
-[GoRecv] internal static (nint n, error err) ReadAt(this ref rleBuffer r, slice<byte> p, int64 off) {
+internal static (nint n, error err) ReadAt(this ref rleBuffer r, slice<byte> p, int64 off) {
     nint n = default!;
     error err = default!;
 
@@ -301,8 +301,8 @@ public static void TestRLEBuffer(ж<testing.T> Ꮡt) {
 }
 
 // fakeHash32 is a dummy Hash32 that always returns 0.
-[GoType] internal partial struct fakeHash32 {
-    [GoEmbedded] public hash_package.Hash32 Hash32;
+internal partial struct fakeHash32 {
+    /*embed*/ public hash_package.Hash32 Hash32;
 }
 
 internal static (nint, error) Write(this fakeHash32 _, slice<byte> p) {
@@ -449,20 +449,20 @@ public static void TestZip64ManyRecords(ж<testing.T> Ꮡt) {
 // suffixSaver is an io.Writer & io.ReaderAt that remembers the last 0
 // to 'keep' bytes of data written to it. Call Suffix to get the
 // suffix bytes.
-[GoType] internal partial struct suffixSaver {
+internal partial struct suffixSaver {
     internal nint keep;
     internal slice<byte> buf;
     internal nint start;
     internal int64 size;
 }
 
-[GoRecv] internal static int64 Size(this ref suffixSaver ss) {
+internal static int64 Size(this ref suffixSaver ss) {
     return ss.size;
 }
 
 internal static error errDiscardedBytes = errors.New("ReadAt of discarded bytes"u8);
 
-[GoRecv] internal static (nint n, error err) ReadAt(this ref suffixSaver ss, slice<byte> p, int64 off) {
+internal static (nint n, error err) ReadAt(this ref suffixSaver ss, slice<byte> p, int64 off) {
     nint n = default!;
     error err = default!;
 
@@ -478,7 +478,7 @@ internal static error errDiscardedBytes = errors.New("ReadAt of discarded bytes"
     return (n, err);
 }
 
-[GoRecv] internal static slice<byte> Suffix(this ref suffixSaver ss) {
+internal static slice<byte> Suffix(this ref suffixSaver ss) {
     if (len(ss.buf) < ss.keep) {
         return ss.buf;
     }
@@ -488,7 +488,7 @@ internal static error errDiscardedBytes = errors.New("ReadAt of discarded bytes"
     return buf;
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref suffixSaver ss, slice<byte> p) {
+internal static (nint n, error err) Write(this ref suffixSaver ss, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -523,7 +523,7 @@ internal static bool generatesZip64(ж<testing.T> Ꮡt, Action<ж<global::go.arc
     return suffixIsZip64(Ꮡt, new zip_internal_test_package.suffixSaverжsizedReaderAt(ss));
 }
 
-[GoType] internal partial interface sizedReaderAt :
+internal partial interface sizedReaderAt :
     io.ReaderAt
 {
     int64 Size();
@@ -804,7 +804,7 @@ public static void TestHeaderTooShort(ж<testing.T> Ꮡt) {
     testValidHeader(Ꮡh, Ꮡt);
 }
 
-[GoType("dyn")] internal partial struct TestHeaderTooLongErr_type {
+internal partial struct TestHeaderTooLongErr_type /*dyn*/ {
     internal @string name;
     internal slice<byte> extra;
     internal error wanterr;
@@ -935,7 +935,7 @@ public static void TestSuffixSaver(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct zeros {
+internal partial struct zeros {
 }
 
 internal static (nint, error) Read(this zeros _, slice<byte> p) {

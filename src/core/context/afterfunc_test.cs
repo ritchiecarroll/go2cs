@@ -15,7 +15,7 @@ partial class context_test_package {
 
 // afterFuncContext is a context that's not one of the types
 // defined in context.go, that supports registering AfterFuncs.
-[GoType] partial struct afterFuncContext {
+partial struct afterFuncContext {
     internal Δsync.Mutex mu;
     internal map<ж<byte>, Action> afterFuncs;
     internal channel<EmptyStruct> done;
@@ -26,7 +26,7 @@ internal static context.Context newAfterFuncContext() {
     return new context_test_package.afterFuncContextжContext(Ꮡ(new afterFuncContext(nil)));
 }
 
-[GoRecv] internal static (time.Time, bool) Deadline(this ref afterFuncContext c) {
+internal static (time.Time, bool) Deadline(this ref afterFuncContext c) {
     return (new time.Time(nil), false);
 }
 
@@ -61,7 +61,7 @@ internal static error Err(this ж<afterFuncContext> Ꮡc) {
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[GoRecv] internal static any Value(this ref afterFuncContext c, any key) {
+internal static any Value(this ref afterFuncContext c, any key) {
     return default!;
 }
 

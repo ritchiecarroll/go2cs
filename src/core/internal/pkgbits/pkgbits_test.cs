@@ -42,7 +42,7 @@ internal static array<bool> _ᴛ1ʗ = new bool[]{}.array();
 
 internal static array<bool> _ᴛ2ʗ = new bool[]{}.array(1);
 
-[GoType("dyn")] internal partial struct TestVersions_vfpair {
+internal partial struct TestVersions_vfpair /*dyn*/ {
     internal pkgbitsꓸVersion v;
     internal pkgbits.Field f;
 }

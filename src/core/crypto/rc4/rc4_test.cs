@@ -14,7 +14,7 @@ using static go.crypto.rc4_package;
 
 partial class rc4_internal_test_package {
 
-[GoType] internal partial struct rc4Test {
+internal partial struct rc4Test {
     internal slice<byte> key, keystream;
 }
 

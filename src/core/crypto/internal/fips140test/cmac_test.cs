@@ -15,7 +15,7 @@ partial class fipstest_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string abf7158809cf4f3cˢ = "2B7E1516 28AED2A6 ABF71588 09CF4F3C"u8;
 
-[GoType("dyn")] internal partial struct TestCMAC_tests {
+internal partial struct TestCMAC_tests /*dyn*/ {
     internal @string @in, @out;
 }
 

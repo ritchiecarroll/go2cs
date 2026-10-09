@@ -275,23 +275,23 @@ internal static readonly object numberOfGoroutinesIsLessˢ = (@string)"number of
 internal static readonly object allocsBySizeAndFreesByˢ = (@string)"allocs-by-size and frees-by-size buckets don't match in length"u8;
 internal static readonly object allocsBySizeAndFreesByˢ2 = (@string)"allocs-by-size and frees-by-size counts don't match in length"u8;
 
-[GoType("dyn")] internal partial struct TestReadMetricsConsistency_totalVirtual {
+internal partial struct TestReadMetricsConsistency_totalVirtual /*dyn*/ {
     internal uint64 got, want;
 }
 
-[GoType("dyn")] internal partial struct TestReadMetricsConsistency_objects {
+internal partial struct TestReadMetricsConsistency_objects /*dyn*/ {
     internal ж<metricsꓸFloat64Histogram> alloc, free;
     internal uint64 allocs, frees;
     internal uint64 allocdBytes, freedBytes;
     internal uint64 total, totalBytes;
 }
 
-[GoType("dyn")] internal partial struct TestReadMetricsConsistency_gc {
+internal partial struct TestReadMetricsConsistency_gc /*dyn*/ {
     internal uint64 numGC;
     internal uint64 pauses;
 }
 
-[GoType("dyn")] internal partial struct TestReadMetricsConsistency_cpu {
+internal partial struct TestReadMetricsConsistency_cpu /*dyn*/ {
     internal float64 gcAssist;
     internal float64 gcDedicated;
     internal float64 gcIdle;
@@ -712,14 +712,14 @@ public static void TestMutexWaitTimeMetric(ж<testing.T> Ꮡt) {
 // locking the same resource, but through different APIs. It's intended
 // to abstract over the relationship of two Lock calls or an RLock
 // and a Lock call.
-[GoType] partial interface locker2 {
+partial interface locker2 {
     void Lock1();
     void Unlock1();
     void Lock2();
     void Unlock2();
 }
 
-[GoType] partial struct mutex {
+partial struct mutex {
     internal Δsync.Mutex mu;
 }
 
@@ -747,7 +747,7 @@ internal static void Unlock2(this ж<mutex> Ꮡm) {
     m.mu.Unlock();
 }
 
-[GoType] partial struct rwmutexWrite {
+partial struct rwmutexWrite {
     internal Δsync.RWMutex mu;
 }
 
@@ -767,7 +767,7 @@ internal static void Unlock2(this ж<rwmutexWrite> Ꮡm) {
     Ꮡm.of(rwmutexWrite.Ꮡmu).Unlock();
 }
 
-[GoType] partial struct rwmutexReadWrite {
+partial struct rwmutexReadWrite {
     internal Δsync.RWMutex mu;
 }
 
@@ -787,7 +787,7 @@ internal static void Unlock2(this ж<rwmutexReadWrite> Ꮡm) {
     Ꮡm.of(rwmutexReadWrite.Ꮡmu).Unlock();
 }
 
-[GoType] partial struct rwmutexWriteRead {
+partial struct rwmutexWriteRead {
     internal Δsync.RWMutex mu;
 }
 
@@ -1021,7 +1021,7 @@ internal static readonly object writeHeapDumpNotˢ = (@string)"WriteHeapDump not
 internal static readonly @string heapdumptestˢ = "heapdumptest"u8;
 internal static readonly object tracingAlreadyEnabledˢ = (@string)"tracing already enabled"u8;
 
-[GoType("dyn")] internal partial struct TestSchedPauseMetrics_tests {
+internal partial struct TestSchedPauseMetrics_tests /*dyn*/ {
     internal @string name;
     internal bool isGC;
     internal Action<ж<testing.T>> fn;
@@ -1519,7 +1519,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
 }
 
 // contentionWorker provides cleaner call stacks for lock contention profile tests
-[GoType] partial struct contentionWorker {
+partial struct contentionWorker {
     internal Action before;
     internal Func<bool> fn;
     internal Action after;

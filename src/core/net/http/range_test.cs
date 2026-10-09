@@ -10,7 +10,7 @@ partial class http_internal_test_package {
 
 // Match Apache laxity:
 
-[GoType("dyn")] partial struct ParseRangeTestsᴛ1 {
+partial struct ParseRangeTestsᴛ1 /*dyn*/ {
     internal @string s;
     internal int64 length;
     internal slice<global::go.net.http_package.httpRange> r;

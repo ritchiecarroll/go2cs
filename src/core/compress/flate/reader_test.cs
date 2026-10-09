@@ -25,7 +25,7 @@ public static void TestNlitOutOfRange(ж<testing.T> Ꮡt) {
 // reasonably compressible.
 // Newton is Isaac Newtons's educational text on Opticks.
 
-[GoType("dyn")] partial struct suitesᴛ1 {
+partial struct suitesᴛ1 /*dyn*/ {
     internal @string name, @file;
 }
 internal static slice<suitesᴛ1> suites = new suitesᴛ1[]{
@@ -61,7 +61,7 @@ public static void BenchmarkDecode(ж<testing.B> Ꮡb) {
 }
 
 
-[GoType("dyn")] partial struct levelTestsᴛ1 {
+partial struct levelTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal nint level;
 }
@@ -73,7 +73,7 @@ internal static slice<levelTestsᴛ1> levelTests = new levelTestsᴛ1[]{
 }.slice();
 
 
-[GoType("dyn")] partial struct sizesᴛ1 {
+partial struct sizesᴛ1 /*dyn*/ {
     internal @string name;
     internal nint n;
 }

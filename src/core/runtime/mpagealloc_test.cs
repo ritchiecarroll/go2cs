@@ -47,7 +47,7 @@ internal static void checkPageAlloc(ж<testing.T> Ꮡt, ж<global::go.runtime_in
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string extremelyDiscontiguousˢ = "ExtremelyDiscontiguous"u8;
 
-[GoType("dyn")] internal partial struct TestPageAllocGrow_test {
+internal partial struct TestPageAllocGrow_test /*dyn*/ {
     internal slice<global::go.runtime_internal_test_package.ChunkIdx> chunks;
     internal slice<global::go.runtime_internal_test_package.AddrRange> inUse;
 }
@@ -237,11 +237,11 @@ public static void TestPageAllocGrow(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPageAllocAlloc_hit {
+internal partial struct TestPageAllocAlloc_hit /*dyn*/ {
     internal uintptr npages, @base, scav;
 }
 
-[GoType("dyn")] internal partial struct TestPageAllocAlloc_test {
+internal partial struct TestPageAllocAlloc_test /*dyn*/ {
     internal map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>> scav;
     internal map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>> before;
     internal map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>> after;
@@ -777,7 +777,7 @@ public static void TestPageAllocExhaust(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPageAllocFree_tests {
+internal partial struct TestPageAllocFree_tests /*dyn*/ {
     internal map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>> before;
     internal map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>> after;
     internal uintptr npages;
@@ -1016,13 +1016,13 @@ public static void TestPageAllocFree(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPageAllocAllocAndFree_hit {
+internal partial struct TestPageAllocAllocAndFree_hit /*dyn*/ {
     internal bool alloc;
     internal uintptr npages;
     internal uintptr @base;
 }
 
-[GoType("dyn")] internal partial struct TestPageAllocAllocAndFree_tests {
+internal partial struct TestPageAllocAllocAndFree_tests /*dyn*/ {
     internal map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>> init;
     internal slice<TestPageAllocAllocAndFree_hit> hits;
 }

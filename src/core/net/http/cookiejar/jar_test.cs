@@ -24,7 +24,7 @@ internal static time.Time tNow = time.Date(2013, 1, 1, 12, 0, 0, 0, time.ΔUTC);
 //
 //	PublicSuffix("www.buggy.psl") == "xy"
 //	PublicSuffix("www2.buggy.psl") == "com"
-[GoType] internal partial struct testPSL {
+internal partial struct testPSL {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -62,7 +62,7 @@ internal static ж<global::go.net.http.cookiejar_package.Jar> newTestJar() {
 }
 
 
-[GoType("dyn")] partial struct hasDotSuffixTestsᴛ1 {
+partial struct hasDotSuffixTestsᴛ1 /*dyn*/ {
     internal @string s, suffix;
 }
 internal static array<hasDotSuffixTestsᴛ1> hasDotSuffixTests = new hasDotSuffixTestsᴛ1[]{
@@ -318,7 +318,7 @@ public static void TestDefaultPath(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct domainAndTypeTestsᴛ1 {
+partial struct domainAndTypeTestsᴛ1 /*dyn*/ {
     internal @string host; // host Set-Cookie header was received from
     internal @string domain; // domain attribute in Set-Cookie header
     internal @string wantDomain; // expected domain of cookie
@@ -399,7 +399,7 @@ internal static ж<url.URL> mustParseURL(@string s) {
 //  3. For each query in tests: Check that Cookies with toURL yields the
 //     cookies in want.
 //     (Query n done at tNow + (n+2)*1001 ms.)
-[GoType] internal partial struct jarTest {
+internal partial struct jarTest {
     internal @string description;  // The description of what this test is supposed to test
     internal @string fromURL;  // The full URL of the request from which Set-Cookie headers where received
     internal slice<@string> setCookies; // All the cookies received from fromURL
@@ -408,7 +408,7 @@ internal static ж<url.URL> mustParseURL(@string s) {
 }
 
 // query contains one test of the cookies returned from Jar.Cookies.
-[GoType] internal partial struct query {
+internal partial struct query {
     internal @string toURL; // the URL in the Cookies call
     internal @string want; // the expected list of cookies (order matters)
 }

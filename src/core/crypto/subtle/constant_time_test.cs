@@ -10,7 +10,7 @@ using static go.crypto.subtle_package;
 
 partial class subtle_internal_test_package {
 
-[GoType] public partial struct TestConstantTimeCompareStruct {
+public partial struct TestConstantTimeCompareStruct {
     internal slice<byte> a, b;
     internal nint @out;
 }
@@ -33,7 +33,7 @@ public static void TestConstantTimeCompare(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct TestConstantTimeByteEqStruct {
+public partial struct TestConstantTimeByteEqStruct {
     internal uint8 a, b;
     internal nint @out;
 }
@@ -112,7 +112,7 @@ public static void TestConstantTimeCopy(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct lessOrEqTestsᴛ1 {
+partial struct lessOrEqTestsᴛ1 /*dyn*/ {
     internal nint x, y, result;
 }
 internal static slice<lessOrEqTestsᴛ1> lessOrEqTests = new lessOrEqTestsᴛ1[]{

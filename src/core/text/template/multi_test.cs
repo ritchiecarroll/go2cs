@@ -19,7 +19,7 @@ partial class template_internal_test_package {
 internal const bool noError = true;
 internal const bool hasError = false;
 
-[GoType] internal partial struct multiParseTest {
+internal partial struct multiParseTest {
     internal @string name;
     internal @string input;
     internal bool ok;
@@ -464,7 +464,7 @@ public static void TestParse(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestEmptyTemplate_cases {
+internal partial struct TestEmptyTemplate_cases /*dyn*/ {
     internal slice<@string> defn;
     internal @string @in;
     internal @string want;

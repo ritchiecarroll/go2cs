@@ -14,7 +14,7 @@ using fs = go.io.fs_package;
 partial class fs_test_package {
 
 
-[GoType("dyn")] partial struct globTestsᴛ1 {
+partial struct globTestsᴛ1 /*dyn*/ {
     internal fs.FS fs;
     internal @string pattern, result;
 }
@@ -68,8 +68,8 @@ public static void TestCVE202230630(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct globOnly {
-    [GoEmbedded] public go.io.fs_package.GlobFS GlobFS;
+partial struct globOnly {
+    /*embed*/ public go.io.fs_package.GlobFS GlobFS;
 }
 
 internal static (fs.File, error) Open(this globOnly _, @string name) {

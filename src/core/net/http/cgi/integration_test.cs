@@ -70,16 +70,16 @@ public static void TestHostingOurselves(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct customWriterRecorder {
+internal partial struct customWriterRecorder {
     internal io.Writer w;
     public partial ref ж<net.http.httptest_package.ResponseRecorder> ResponseRecorder { get; }
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref customWriterRecorder r, slice<byte> p) {
+internal static (nint n, error err) Write(this ref customWriterRecorder r, slice<byte> p) {
     return r.w.Write(p);
 }
 
-[GoType] internal partial struct limitWriter {
+internal partial struct limitWriter {
     internal io.Writer w;
     internal nint n;
 }
@@ -87,7 +87,7 @@ public static void TestHostingOurselves(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string pastWriteLimitˢ = "past write limit"u8;
 
-[GoRecv] internal static (nint n, error err) Write(this ref limitWriter w, slice<byte> p) {
+internal static (nint n, error err) Write(this ref limitWriter w, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -168,7 +168,7 @@ public static void TestNilRequestBody(ж<testing.T> Ꮡt) {
     _ = runCgiTest(Ꮡt, h, postTestGoNilRequestBodyˢ2, expectedMap);
 }
 
-[GoType("dyn")] internal partial struct TestChildContentType_type {
+internal partial struct TestChildContentType_type /*dyn*/ {
     internal @string name;
     internal @string body;
     internal @string wantCT;

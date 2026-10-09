@@ -18,7 +18,7 @@ using static go.crypto.ed25519_internal_test_package;
 
 partial class ed25519_test_package {
 
-[GoType("dyn")] internal partial struct TestEd25519Vectors_vectors {
+internal partial struct TestEd25519Vectors_vectors /*dyn*/ {
     public @string A, R, S, M;
     public slice<@string> Flags;
 }

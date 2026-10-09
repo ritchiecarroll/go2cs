@@ -14,7 +14,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class context_internal_test_package {
 
-[GoType] public partial interface testingT {
+public partial interface testingT {
     (time.Time, bool) Deadline();
     void Error(params ꓸꓸꓸany argsʗp);
     void Errorf(@string format, params ꓸꓸꓸany argsʗp);
@@ -292,12 +292,12 @@ public static void XTestCancelRemoves(testingT t) {
     checkChildren(afterStoppingAfterFuncˢ, ctx, 0);
 }
 
-[GoType] internal partial struct myCtx {
-    [GoEmbedded] public global::go.context_package.Context Context;
+internal partial struct myCtx {
+    /*embed*/ public global::go.context_package.Context Context;
 }
 
-[GoType] internal partial struct myDoneCtx {
-    [GoEmbedded] public global::go.context_package.Context Context;
+internal partial struct myDoneCtx {
+    /*embed*/ public global::go.context_package.Context Context;
 }
 
 // Go method set entry for the promoted 'Context.Deadline()' - provided ONLY by the embedded
@@ -312,7 +312,7 @@ internal static error Err(this myDoneCtx recvᴛ) => recvᴛ.Context.Err();
 // interface field in *myDoneCtx's method set; see the pointer-only satisfaction record.
 internal static any Value(this myDoneCtx recvᴛ, any key) => recvᴛ.Context.Value(key);
 
-[GoRecv] internal static /*<-*/channel<EmptyStruct> Done(this ref myDoneCtx d) {
+internal static /*<-*/channel<EmptyStruct> Done(this ref myDoneCtx d) {
     var c = new channel<EmptyStruct>(0);
     return c.WithDirection(GoChanDir.Recv);
 }

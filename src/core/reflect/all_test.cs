@@ -64,9 +64,9 @@ public static void TestBool(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("num:nint")] partial struct integer;
+partial struct integer /*num:nint*/;
 
-[GoType] partial struct T {
+partial struct T {
     internal nint a;
     internal float64 b;
     internal @string c;
@@ -75,7 +75,7 @@ public static void TestBool(ж<Δtesting.T> Ꮡt) {
 
 internal static bool _ᴛ1ʗ = new T(nil) == new T(nil); // tests depend on T being comparable
 
-[GoType] partial struct pair {
+partial struct pair {
     internal any i;
     internal @string s;
 }
@@ -87,146 +87,146 @@ internal static void assert(ж<Δtesting.T> Ꮡt, @string s, @string want) {
 }
 
 
-    [GoType("dyn")] partial struct Δtype {
+    partial struct Δtype /*dyn*/ {
         internal nint x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ1 {
+    partial struct Δtypeᴛ1 /*dyn*/ {
         internal int8 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ2 {
+    partial struct Δtypeᴛ2 /*dyn*/ {
         internal int16 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ3 {
+    partial struct Δtypeᴛ3 /*dyn*/ {
         internal int32 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ4 {
+    partial struct Δtypeᴛ4 /*dyn*/ {
         internal int64 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ5 {
+    partial struct Δtypeᴛ5 /*dyn*/ {
         internal nuint x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ6 {
+    partial struct Δtypeᴛ6 /*dyn*/ {
         internal uint8 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ7 {
+    partial struct Δtypeᴛ7 /*dyn*/ {
         internal uint16 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ8 {
+    partial struct Δtypeᴛ8 /*dyn*/ {
         internal uint32 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ9 {
+    partial struct Δtypeᴛ9 /*dyn*/ {
         internal uint64 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ10 {
+    partial struct Δtypeᴛ10 /*dyn*/ {
         internal float32 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ11 {
+    partial struct Δtypeᴛ11 /*dyn*/ {
         internal float64 x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ12 {
+    partial struct Δtypeᴛ12 /*dyn*/ {
         internal ж<ж<int8>> x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ13 {
+    partial struct Δtypeᴛ13 /*dyn*/ {
         internal ж<ж<integer>> x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ14 {
+    partial struct Δtypeᴛ14 /*dyn*/ {
         internal array<int32> x = new(32);
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ15 {
+    partial struct Δtypeᴛ15 /*dyn*/ {
         internal slice<int8> x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ16 {
+    partial struct Δtypeᴛ16 /*dyn*/ {
         internal map<@string, int32> x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ17 {
+    partial struct Δtypeᴛ17 /*dyn*/ {
         internal channel/*<-*/<@string> x = channel/*<-*/<@string>.SendOnly;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ18 {
+    partial struct Δtypeᴛ18 /*dyn*/ {
         internal channel/*<-*/<channel<@string>> x = channel/*<-*/<channel<@string>>.SendOnly;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ19 {
+    partial struct Δtypeᴛ19 /*dyn*/ {
         internal channel/*<-*/</*<-*/channel<@string>> x = channel/*<-*/</*<-*/channel<@string>>.Nil(ChanCargo.Of(new GoChanDir[] { GoChanDir.Send, GoChanDir.Recv }, null));
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ20 {
+    partial struct Δtypeᴛ20 /*dyn*/ {
         internal /*<-*/channel</*<-*/channel<@string>> x = /*<-*/channel</*<-*/channel<@string>>.Nil(ChanCargo.Of(new GoChanDir[] { GoChanDir.Recv, GoChanDir.Recv }, null));
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ21 {
+    partial struct Δtypeᴛ21 /*dyn*/ {
         internal channel</*<-*/channel<@string>> x = channel</*<-*/channel<@string>>.Nil(ChanCargo.Of(new GoChanDir[] { GoChanDir.Both, GoChanDir.Recv }, null));
     }
 
-    [GoType("dyn")] partial struct typeᴛ22_x {
+    partial struct typeᴛ22_x /*dyn*/ {
         internal channel<ж<int32>> c;
         internal float32 d;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ22 {
+    partial struct Δtypeᴛ22 /*dyn*/ {
         internal typeᴛ22_x x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ23 {
+    partial struct Δtypeᴛ23 /*dyn*/ {
         internal Action<int8, int32> x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ24_x {
+    partial struct typeᴛ24_x /*dyn*/ {
         internal Action<channel<ж<integer>>, ж<int8>> c;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ24 {
+    partial struct Δtypeᴛ24 /*dyn*/ {
         internal typeᴛ24_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ25_x {
+    partial struct typeᴛ25_x /*dyn*/ {
         internal int8 a;
         internal int32 b;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ25 {
+    partial struct Δtypeᴛ25 /*dyn*/ {
         internal typeᴛ25_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ26_x {
+    partial struct typeᴛ26_x /*dyn*/ {
         internal int8 a;
         internal int8 b;
         internal int32 c;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ26 {
+    partial struct Δtypeᴛ26 /*dyn*/ {
         internal typeᴛ26_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ27_x {
+    partial struct typeᴛ27_x /*dyn*/ {
         internal int8 a;
         internal int8 b;
         internal int8 c;
         internal int32 d;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ27 {
+    partial struct Δtypeᴛ27 /*dyn*/ {
         internal typeᴛ27_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ28_x {
+    partial struct typeᴛ28_x /*dyn*/ {
         internal int8 a;
         internal int8 b;
         internal int8 c;
@@ -234,11 +234,11 @@ internal static void assert(ж<Δtesting.T> Ꮡt, @string s, @string want) {
         internal int32 e;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ28 {
+    partial struct Δtypeᴛ28 /*dyn*/ {
         internal typeᴛ28_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ29_x {
+    partial struct typeᴛ29_x /*dyn*/ {
         internal int8 a;
         internal int8 b;
         internal int8 c;
@@ -247,51 +247,49 @@ internal static void assert(ж<Δtesting.T> Ꮡt, @string s, @string want) {
         internal int32 f;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ29 {
+    partial struct Δtypeᴛ29 /*dyn*/ {
         internal typeᴛ29_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ30_x {
-        [GoTag(@"reflect:""hi there""")]
-        internal int8 a;
+    partial struct typeᴛ30_x /*dyn*/ {
+        internal int8 a; /*`reflect:"hi there"`*/
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ30 {
+    partial struct Δtypeᴛ30 /*dyn*/ {
         internal typeᴛ30_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ31_x {
-        [GoTag(@"reflect:""hi \x00there\t\n\""\\""")]
-        internal int8 a;
+    partial struct typeᴛ31_x /*dyn*/ {
+        internal int8 a; /*`reflect:"hi \x00there\t\n\"\\"`*/
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ31 {
+    partial struct Δtypeᴛ31 /*dyn*/ {
         internal typeᴛ31_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ32_x {
+    partial struct typeᴛ32_x /*dyn*/ {
         internal Actionꓸꓸꓸ<nint> f;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ32 {
+    partial struct Δtypeᴛ32 /*dyn*/ {
         internal typeᴛ32_x x;
     }
 
-    [GoType("dyn")] partial interface typeᴛ33_x {
+    partial interface typeᴛ33_x /*dyn*/ {
         void a(Func<Func<nint, nint>, Func<Action<nint>, nint>> _);
         void b();
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ33 {
+    partial struct Δtypeᴛ33 /*dyn*/ {
         internal typeᴛ33_x x;
     }
 
-    [GoType("dyn")] partial struct typeᴛ34_x {
-        [GoEmbedded] internal int32 int32;
-        [GoEmbedded] internal int64 int64;
+    partial struct typeᴛ34_x /*dyn*/ {
+        /*embed*/ internal int32 int32;
+        /*embed*/ internal int64 int64;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ34 {
+    partial struct Δtypeᴛ34 /*dyn*/ {
         internal typeᴛ34_x x;
     }
 internal static slice<pair> typeTests = new pair[]{
@@ -588,20 +586,20 @@ public static void TestMapIterSet(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoLocalName("integer")] [GoType("num:nint")] internal partial struct TestCanIntUintFloatComplex_integer;
+internal partial struct TestCanIntUintFloatComplex_integer /*num:nint*/;
 
-[GoLocalName("uinteger")] [GoType("num:nuint")] internal partial struct TestCanIntUintFloatComplex_uinteger;
+internal partial struct TestCanIntUintFloatComplex_uinteger /*num:nuint*/;
 
-[GoLocalName("float")] [GoType("num:float64")] internal partial struct TestCanIntUintFloatComplex_float;
+internal partial struct TestCanIntUintFloatComplex_float /*num:float64*/;
 
-[GoLocalName("complex")] [GoType("num:complex128")] internal partial struct TestCanIntUintFloatComplex_complex;
+internal partial struct TestCanIntUintFloatComplex_complex /*num:complex128*/;
 
-[GoType("dyn")] internal partial struct TestCanIntUintFloatComplex_type {
+internal partial struct TestCanIntUintFloatComplex_type /*dyn*/ {
     internal any i;
     internal array<bool> want = new(4);
 }
 
-[GoType("dyn")] internal partial struct TestCanIntUintFloatComplex_typeᴛ1 {
+internal partial struct TestCanIntUintFloatComplex_typeᴛ1 /*dyn*/ {
     internal nint i;
 }
 
@@ -666,47 +664,47 @@ public static void TestCanIntUintFloatComplex(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCanSetField_embed {
+internal partial struct TestCanSetField_embed /*dyn*/ {
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] internal partial struct TestCanSetField_Embed {
+internal partial struct TestCanSetField_Embed /*dyn*/ {
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] internal partial struct TestCanSetField_S1 {
+internal partial struct TestCanSetField_S1 /*dyn*/ {
     internal partial ref TestCanSetField_embed embed { get; }
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] internal partial struct TestCanSetField_S2 {
+internal partial struct TestCanSetField_S2 /*dyn*/ {
     internal partial ref ж<TestCanSetField_embed> embed { get; }
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] internal partial struct TestCanSetField_S3 {
+internal partial struct TestCanSetField_S3 /*dyn*/ {
     public partial ref TestCanSetField_Embed Embed { get; }
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] internal partial struct TestCanSetField_S4 {
+internal partial struct TestCanSetField_S4 /*dyn*/ {
     public partial ref ж<TestCanSetField_Embed> Embed { get; }
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] internal partial struct TestCanSetField_testCase {
+internal partial struct TestCanSetField_testCase /*dyn*/ {
     // -1 means Addr().Elem() of current value
     internal slice<nint> index;
     internal bool canSet;
 }
 
-[GoType("dyn")] internal partial struct TestCanSetField_tests {
+internal partial struct TestCanSetField_tests /*dyn*/ {
     internal reflectꓸValue val;
     internal slice<TestCanSetField_testCase> cases;
 }
@@ -911,9 +909,8 @@ internal static readonly @string int32ˢ3 = "*int32"u8;
 internal static readonly @string chanStringˢ = "chan<- string"u8;
 internal static readonly @string uint32ˢ = "[]uint32"u8;
 
-[GoType("dyn")] internal partial struct TestAll_i {
-    [GoTag(@"reflect:""TAG""")]
-    internal slice<uint32> d;
+internal partial struct TestAll_i /*dyn*/ {
+    internal slice<uint32> d; /*`reflect:"TAG"`*/
 }
 
 public static void TestAll(ж<Δtesting.T> Ꮡt) {
@@ -955,7 +952,7 @@ public static void TestAll(ж<Δtesting.T> Ꮡt) {
 internal static readonly @string interfaceˢ = "interface {}"u8;
 internal static readonly @string float64ˢ = "float64"u8;
 
-[GoType("dyn")] internal partial struct TestInterfaceGet_inter {
+internal partial struct TestInterfaceGet_inter /*dyn*/ {
     public any E;
 }
 
@@ -973,7 +970,7 @@ public static void TestInterfaceGet(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object v2InterfaceDidNotReturnˢ = (@string)"v2.Interface() did not return float64, got "u8;
 
-[GoType("dyn")] internal partial struct TestInterfaceValue_inter {
+internal partial struct TestInterfaceValue_inter /*dyn*/ {
     public any E;
 }
 
@@ -1086,7 +1083,7 @@ public static void TestGrow(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct appendTestsᴛ1 {
+partial struct appendTestsᴛ1 /*dyn*/ {
     internal slice<nint> orig, extra;
 }
 internal static slice<appendTestsᴛ1> appendTests = new appendTestsᴛ1[]{
@@ -1105,7 +1102,7 @@ internal static slice<appendTestsᴛ1> appendTests = new appendTestsᴛ1[]{
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string usingUnexportedFieldˢ = "using unexported field"u8;
 
-[GoType("dyn")] internal partial struct TestAppend_i {
+internal partial struct TestAppend_i /*dyn*/ {
     internal slice<nint> x;
 }
 
@@ -1297,7 +1294,7 @@ public static void TestCopyArray(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestBigUnnamedStruct_b {
+internal partial struct TestBigUnnamedStruct_b /*dyn*/ {
     internal int64 a, b, c, d;
 }
 
@@ -1310,7 +1307,7 @@ public static void TestBigUnnamedStruct(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct big {
+partial struct big {
     internal int64 a, b, c, d, e;
 }
 
@@ -1323,14 +1320,14 @@ public static void TestBigStruct(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct Basic {
+partial struct Basic {
     internal nint x;
     internal float32 y;
 }
 
-[GoType("Basic")] partial struct NotBasic;
+partial struct NotBasic /*Basic*/;
 
-[GoType] partial struct DeepEqualTest {
+partial struct DeepEqualTest {
     internal any a, b;
     internal bool eq;
 }
@@ -1344,13 +1341,10 @@ internal static Action fn3 = () => {
     fn1();
 }; // Not nil.
 
-[GoType] partial struct self {
+partial struct self {
 }
 
-[GoType("ж<Loop>")] partial class Loop;
-// Descriptor carrier for `Loopy` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("Loopy")] public interface Loopyᴅ { }
-
+partial class Loop /*ж<Loop>*/;
 
 internal static ж<Loop> Ꮡloop1 = new StandardBox<Loop>(default(Loop));
 internal static ref Loop loop1 => ref Ꮡloop1.ValueSlot;
@@ -1369,7 +1363,7 @@ internal static ref map<@string, any> cycleMap2 => ref ᏑcycleMap2.ValueSlot;
 internal static ж<map<@string, any>> ᏑcycleMap3 = new StandardBox<map<@string, any>>(default(map<@string, any>));
 internal static ref map<@string, any> cycleMap3 => ref ᏑcycleMap3.ValueSlot;
 
-[GoType] partial struct structWithSelfPtr {
+partial struct structWithSelfPtr {
     internal ж<structWithSelfPtr> p;
     internal @string s;
 }
@@ -1497,7 +1491,7 @@ public static void TestTypeOf(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct Recursive {
+partial struct Recursive {
     internal nint x;
     internal ж<Recursive> r;
 }
@@ -1514,7 +1508,7 @@ public static void TestDeepEqualRecursiveStruct(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct _Complex {
+partial struct _Complex {
     internal nint a;
     internal array<ж<_Complex>> b = new(3);
     internal ж<@string> c;
@@ -1556,7 +1550,7 @@ public static void TestDeepEqualComplexStructInequality(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct UnexpT {
+partial struct UnexpT {
     internal map<nint, nint> m;
 }
 
@@ -1581,7 +1575,7 @@ public static void TestDeepEqualUnexportedMap(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct deepEqualPerfTestsᴛ1 {
+partial struct deepEqualPerfTestsᴛ1 /*dyn*/ {
     internal any x, y;
 }
 internal static slice<deepEqualPerfTestsᴛ1> deepEqualPerfTests = new deepEqualPerfTestsᴛ1[]{
@@ -1666,20 +1660,20 @@ internal static void check2ndField(any x, uintptr offs, ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAlignment_T1inner {
+internal partial struct TestAlignment_T1inner /*dyn*/ {
     internal nint a;
 }
 
-[GoType("dyn")] internal partial struct TestAlignment_T1 {
+internal partial struct TestAlignment_T1 /*dyn*/ {
     public partial ref TestAlignment_T1inner T1inner { get; }
     internal nint f;
 }
 
-[GoType("dyn")] internal partial struct TestAlignment_T2inner {
+internal partial struct TestAlignment_T2inner /*dyn*/ {
     internal nint a, b;
 }
 
-[GoType("dyn")] internal partial struct TestAlignment_T2 {
+internal partial struct TestAlignment_T2 /*dyn*/ {
     public partial ref TestAlignment_T2inner T2inner { get; }
     internal nint f;
 }
@@ -1709,39 +1703,39 @@ public static void NotNil(any a, ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_doNil {
+internal partial struct TestIsNil_doNil /*dyn*/ {
     internal ж<nint> x;
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_doNilᴛ1 {
+internal partial struct TestIsNil_doNilᴛ1 /*dyn*/ {
     internal any x;
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_doNilᴛ2 {
+internal partial struct TestIsNil_doNilᴛ2 /*dyn*/ {
     internal map<@string, nint> x;
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_doNilᴛ3 {
+internal partial struct TestIsNil_doNilᴛ3 /*dyn*/ {
     internal Func<bool> x;
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_doNilᴛ4 {
+internal partial struct TestIsNil_doNilᴛ4 /*dyn*/ {
     internal channel<nint> x;
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_doNilᴛ5 {
+internal partial struct TestIsNil_doNilᴛ5 /*dyn*/ {
     internal slice<@string> x;
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_doNilᴛ6 {
+internal partial struct TestIsNil_doNilᴛ6 /*dyn*/ {
     internal @unsafe.Pointer x;
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_mi {
+internal partial struct TestIsNil_mi /*dyn*/ {
     internal map<nint, nint> x;
 }
 
-[GoType("dyn")] internal partial struct TestIsNil_fi {
+internal partial struct TestIsNil_fi /*dyn*/ {
     internal Action<ж<Δtesting.T>> x;
 }
 
@@ -1799,44 +1793,44 @@ internal static S /*out*/ setField<S, V>(S @inʗp, uintptr offset, V value) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object shouldPanicForInvalidˢ = (@string)"should panic for invalid value"u8;
 
-[GoType("dyn")] internal partial struct TestIsZero_type {
+internal partial struct TestIsZero_type /*dyn*/ {
     internal any x;
     internal bool want;
 }
 
-[GoType("dyn")] internal partial struct TestIsZero_typeᴛ1 {
+internal partial struct TestIsZero_typeᴛ1 /*dyn*/ {
     internal ж<nint> p;
 }
 
-[GoType("dyn")] internal partial struct TestIsZero_typeᴛ2 {
+internal partial struct TestIsZero_typeᴛ2 /*dyn*/ {
     internal slice<nint> s;
 }
 
-[GoType("dyn")] internal partial struct TestIsZero_typeᴛ3 {
+internal partial struct TestIsZero_typeᴛ3 /*dyn*/ {
     public partial ref reflect_package.ΔValue Value { get; }
 }
 
-[GoType("dyn")] internal partial struct TestIsZero_typeᴛ4 {
+internal partial struct TestIsZero_typeᴛ4 /*dyn*/ {
     internal uintptr _;
     internal uintptr a;
     internal uintptr __;
 }
 
-[GoType("dyn")] internal partial struct TestIsZero_typeᴛ5 {
+internal partial struct TestIsZero_typeᴛ5 /*dyn*/ {
     internal Action _;
     internal Action a;
     internal Action __;
 }
 
-[GoType("dyn")] internal partial struct TestIsZero_typeᴛ6 {
+internal partial struct TestIsZero_typeᴛ6 /*dyn*/ {
     internal array<S> a = new(256);
 }
 
-[GoType("dyn")] internal partial struct TestIsZero_typeᴛ7 {
+internal partial struct TestIsZero_typeᴛ7 /*dyn*/ {
     internal array<float32> a = new(256);
 }
 
-[GoType("dyn")] internal partial struct TestIsZero_typeᴛ8 {
+internal partial struct TestIsZero_typeᴛ8 /*dyn*/ {
     internal array<S> _ = new(256);
     internal array<S> a = new(256);
 }
@@ -2017,7 +2011,7 @@ public static void TestInternalIsZero(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object interfaceOnInterfaceˢ = (@string)"Interface() on interface: "u8;
 
-[GoType("dyn")] internal partial struct TestInterfaceExtraction_s {
+internal partial struct TestInterfaceExtraction_s /*dyn*/ {
     public Δio.Writer W;
 }
 
@@ -2047,7 +2041,7 @@ internal static readonly object notPresentˢ = (@string)"not-present"u8;
 internal static readonly @string notAssignableˢ = "not assignable"u8;
 internal static readonly @string keyˢ = "key"u8;
 
-[GoLocalName("S")] [GoType("@string")] internal partial struct TestMap_S;
+internal partial struct TestMap_S /*@string*/;
 
 public static void TestMap(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -2265,7 +2259,7 @@ public static void TestChan(ж<Δtesting.T> Ꮡt) {
 }
 
 // caseInfo describes a single case in a select test.
-[GoType] partial struct caseInfo {
+partial struct caseInfo {
     internal @string desc;
     internal bool canSelect;
     internal reflectꓸValue recv;
@@ -2578,7 +2572,7 @@ public static void TestSelectNop(ж<Δtesting.T> Ꮡt) {
 // If the selectWatcher notices that the select has been blocked for >1 second, it prints
 // an error describing the select and panics the entire test binary.
 
-[GoType("dyn")] partial struct selectWatchᴛ1 {
+partial struct selectWatchᴛ1 /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; }
     internal Δsync.Once once;
     internal time.Time now;
@@ -2647,7 +2641,7 @@ internal static @string fmtSelect(slice<caseInfo> info) {
     return buf.String();
 }
 
-[GoType("[2]uintptr")] partial struct two;
+partial struct two /*[2]uintptr*/;
 
 // Difficult test for function call because of
 // implicit padding between arguments.
@@ -2696,10 +2690,10 @@ public static void TestCallConvert(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct emptyStruct {
+partial struct emptyStruct {
 }
 
-[GoType] partial struct nonEmptyStruct {
+partial struct nonEmptyStruct {
     internal nint member;
 }
 
@@ -2847,23 +2841,23 @@ public static void TestMakeFuncVariadic(ж<Δtesting.T> Ꮡt) {
 }
 
 // Dummy type that implements io.WriteCloser
-[GoType] partial struct WC {
+partial struct WC {
 }
 
-[GoRecv] public static (nint n, error err) Write(this ref WC w, slice<byte> p) {
+public static (nint n, error err) Write(this ref WC w, slice<byte> p) {
     return (0, default!);
 }
 
-[GoRecv] public static error Close(this ref WC w) {
+public static error Close(this ref WC w) {
     return default!;
 }
 
 // Unnamed types should be promotable to named types.
-[GoType("dyn")] internal partial struct TestMakeFuncValidReturnAssignments_T {
+internal partial struct TestMakeFuncValidReturnAssignments_T /*dyn*/ {
     internal nint a, b, c;
 }
 
-[GoType("dyn")] internal partial struct TestMakeFuncValidReturnAssignments_i {
+internal partial struct TestMakeFuncValidReturnAssignments_i /*dyn*/ {
     internal nint a, b, c;
 }
 
@@ -2892,11 +2886,11 @@ public static void TestMakeFuncValidReturnAssignments(ж<Δtesting.T> Ꮡt) {
     i();
 }
 
-[GoType("dyn")] internal partial struct TestMakeFuncInvalidReturnAssignments_T {
+internal partial struct TestMakeFuncInvalidReturnAssignments_T /*dyn*/ {
     internal nint a, b, c;
 }
 
-[GoType("dyn")] internal partial struct TestMakeFuncInvalidReturnAssignments_U {
+internal partial struct TestMakeFuncInvalidReturnAssignments_U /*dyn*/ {
     internal nint a, b, c;
 }
 
@@ -2937,7 +2931,7 @@ public static void TestMakeFuncInvalidReturnAssignments(ж<Δtesting.T> Ꮡt) {
     });
 }
 
-[GoType] partial struct Point {
+partial struct Point {
     internal nint x, y;
 }
 
@@ -2978,12 +2972,12 @@ public static nint TotalDist(this Point p, params ꓸꓸꓸPoint pointsʗp) {
 }
 
 // This will be index 5.
-[GoRecv] public static int64 Int64Method(this ref Point p, int64 x) {
+public static int64 Int64Method(this ref Point p, int64 x) {
     return x;
 }
 
 // This will be index 6.
-[GoRecv] public static int32 Int32Method(this ref Point p, int32 x) {
+public static int32 Int32Method(this ref Point p, int32 x) {
     return x;
 }
 
@@ -2991,7 +2985,7 @@ public static nint TotalDist(this Point p, params ꓸꓸꓸPoint pointsʗp) {
 internal static readonly @string distˢ = "Dist"u8;
 internal static readonly @string noArgsˢ = "NoArgs"u8;
 
-[GoType("dyn")] internal partial interface TestMethod_x {
+internal partial interface TestMethod_x /*dyn*/ {
     nint Dist(nint _Δp0);
 }
 
@@ -3128,7 +3122,7 @@ public static void TestMethod(ж<Δtesting.T> Ꮡt) {
 internal static readonly @string int64Methodˢ = "Int64Method"u8;
 internal static readonly @string int32Methodˢ = "Int32Method"u8;
 
-[GoType("dyn")] internal partial struct TestMethodValue_type {
+internal partial struct TestMethodValue_type /*dyn*/ {
     public TestMethod_x X;
 }
 
@@ -3294,7 +3288,7 @@ public static void TestVariadicMethodValue(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct DirectIfaceT {
+partial struct DirectIfaceT {
     internal ж<nint> p;
 }
 
@@ -3338,35 +3332,35 @@ public static void TestDirectIfaceMethod(ж<Δtesting.T> Ꮡt) {
 // Concrete types implementing M method.
 // Smaller than a word, word-sized, larger than a word.
 // Value and pointer receivers.
-[GoType] partial interface Tinter {
+partial interface Tinter {
     (byte, nint) M(nint _Δp0, byte _Δp1);
 }
 
-[GoType("num:byte")] partial struct Tsmallv;
+partial struct Tsmallv /*num:byte*/;
 
 public static (byte, nint) M(this Tsmallv v, nint x, byte b) {
     return (b, x + (nint)(byte)v);
 }
 
-[GoType("num:byte")] partial struct Tsmallp;
+partial struct Tsmallp /*num:byte*/;
 
-[GoRecv] public static (byte, nint) M(this ref Tsmallp p, nint x, byte b) {
+public static (byte, nint) M(this ref Tsmallp p, nint x, byte b) {
     return (b, x + (nint)(byte)(p));
 }
 
-[GoType("num:uintptr")] partial struct Twordv;
+partial struct Twordv /*num:uintptr*/;
 
 public static (byte, nint) M(this Twordv v, nint x, byte b) {
     return (b, x + (nint)(uintptr)v);
 }
 
-[GoType("num:uintptr")] partial struct Twordp;
+partial struct Twordp /*num:uintptr*/;
 
-[GoRecv] public static (byte, nint) M(this ref Twordp p, nint x, byte b) {
+public static (byte, nint) M(this ref Twordp p, nint x, byte b) {
     return (b, x + (nint)(uintptr)(p));
 }
 
-[GoType("[2]uintptr")] partial struct Tbigv;
+partial struct Tbigv /*[2]uintptr*/;
 
 public static (byte, nint) M(this Tbigv v, nint x, byte b) {
     v = v.Clone();
@@ -3374,30 +3368,30 @@ public static (byte, nint) M(this Tbigv v, nint x, byte b) {
     return (b, x + (nint)v[0] + (nint)v[1]);
 }
 
-[GoType("[2]uintptr")] partial struct Tbigp;
+partial struct Tbigp /*[2]uintptr*/;
 
-[GoRecv] public static (byte, nint) M(this ref Tbigp p, nint x, byte b) {
+public static (byte, nint) M(this ref Tbigp p, nint x, byte b) {
     return (b, x + (nint)p.Value[0] + (nint)p.Value[1]);
 }
 
-[GoType] partial interface tinter {
+partial interface tinter {
     (byte, nint) m(nint _Δp0, byte _Δp1);
 }
 
 // Embedding via pointer.
-[GoType] partial struct Tm1 {
+partial struct Tm1 {
     public partial ref Tm2 Tm2 { get; }
 }
 
-[GoType] partial struct Tm2 {
+partial struct Tm2 {
     public partial ref ж<Tm3> Tm3 { get; }
 }
 
-[GoType] partial struct Tm3 {
+partial struct Tm3 {
     public partial ref ж<Tm4> Tm4 { get; }
 }
 
-[GoType] partial struct Tm4 {
+partial struct Tm4 {
 }
 
 public static (byte, nint) M(this Tm4 t4, nint x, byte b) {
@@ -3478,7 +3472,7 @@ public static void TestMethod5(ж<Δtesting.T> Ꮡt) {
     });
 }
 
-[GoType("dyn")] internal partial struct TestInterfaceSet_s {
+internal partial struct TestInterfaceSet_s /*dyn*/ {
     public any I;
     public TestMethod_x P;
 }
@@ -3506,9 +3500,9 @@ public static void TestInterfaceSet(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct T1 {
+partial struct T1 {
     internal @string a;
-    [GoEmbedded] internal nint @int;
+    /*embed*/ internal nint @int;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -3531,109 +3525,109 @@ public static void TestAnonymousFields(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct FTest {
+partial struct FTest {
     internal any s;
     internal @string name;
     internal slice<nint> index;
     internal nint value;
 }
 
-[GoType] partial struct D1 {
+partial struct D1 {
     internal nint d;
 }
 
-[GoType] partial struct D2 {
+partial struct D2 {
     internal nint d;
 }
 
-[GoType] partial struct S0 {
+partial struct S0 {
     public nint A, B, C;
     public partial ref D1 D1 { get; }
     public partial ref D2 D2 { get; }
 }
 
-[GoType] partial struct S1 {
+partial struct S1 {
     public nint B;
     public partial ref S0 S0 { get; }
 }
 
-[GoType] partial struct S2 {
+partial struct S2 {
     public nint A;
     public partial ref ж<S1> S1 { get; }
 }
 
-[GoType] partial struct S1x {
+partial struct S1x {
     public partial ref S1 S1 { get; }
 }
 
-[GoType] partial struct S1y {
+partial struct S1y {
     public partial ref S1 S1 { get; }
 }
 
-[GoType] partial struct S3 {
+partial struct S3 {
     public partial ref S1x S1x { get; }
     public partial ref S2 S2 { get; }
     public nint D, E;
     public partial ref ж<S1y> S1y { get; }
 }
 
-[GoType] partial struct S4 {
+partial struct S4 {
     public partial ref ж<S4> ΔS4 { get; }
     public nint A;
 }
 
 // The X in S6 and S7 annihilate, but they also block the X in S8.S9.
-[GoType] partial struct S5 {
+partial struct S5 {
     public partial ref S6 S6 { get; }
     public partial ref S7 S7 { get; }
     public partial ref S8 S8 { get; }
 }
 
-[GoType] partial struct S6 {
+partial struct S6 {
     public nint X;
 }
 
-[GoType("S6")] partial struct S7;
+partial struct S7 /*S6*/;
 
-[GoType] partial struct S8 {
+partial struct S8 {
     public partial ref S9 S9 { get; }
 }
 
-[GoType] partial struct S9 {
+partial struct S9 {
     public nint X;
     public nint Y;
 }
 
 // The X in S11.S6 and S12.S6 annihilate, but they also block the X in S13.S8.S9.
-[GoType] partial struct S10 {
+partial struct S10 {
     public partial ref S11 S11 { get; }
     public partial ref S12 S12 { get; }
     public partial ref S13 S13 { get; }
 }
 
-[GoType] partial struct S11 {
+partial struct S11 {
     public partial ref S6 S6 { get; }
 }
 
-[GoType] partial struct S12 {
+partial struct S12 {
     public partial ref S6 S6 { get; }
 }
 
-[GoType] partial struct S13 {
+partial struct S13 {
     public partial ref S8 S8 { get; }
 }
 
 // The X in S15.S11.S1 and S16.S11.S1 annihilate.
-[GoType] partial struct S14 {
+partial struct S14 {
     public partial ref S15 S15 { get; }
     public partial ref S16 S16 { get; }
 }
 
-[GoType] partial struct S15 {
+partial struct S15 {
     public partial ref S11 S11 { get; }
 }
 
-[GoType] partial struct S16 {
+partial struct S16 {
     public partial ref S11 S11 { get; }
 }
 
@@ -3742,7 +3736,7 @@ public static void TestFieldByName(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestImportPath_tests {
+internal partial struct TestImportPath_tests /*dyn*/ {
     internal reflectꓸType t;
     internal @string path;
 }
@@ -3794,24 +3788,24 @@ public static void TestImportPath(ж<Δtesting.T> Ꮡt) {
 internal static readonly @string testStructˢ = "testStruct"u8;
 internal static readonly @string localOtherPkgFieldsˢ = "localOtherPkgFields"u8;
 
-[GoLocalName("x")] [GoType("num:nint")] internal partial struct TestFieldPkgPath_x;
+internal partial struct TestFieldPkgPath_x /*num:nint*/;
 
-[GoType("dyn")] internal partial struct TestFieldPkgPath_i {
+internal partial struct TestFieldPkgPath_i /*dyn*/ {
     public @string Exported;
     internal @string unexported;
     public partial ref global::go.reflect_internal_test_package.OtherPkgFields OtherPkgFields { get; }
-    [GoEmbedded] internal nint @int; // issue 21702
+    /*embed*/ internal nint @int; // issue 21702
     internal partial ref ж<TestFieldPkgPath_x> x { get; } // issue 21122
 }
 
-[GoType("dyn")] internal partial struct TestFieldPkgPath_pkgpathTest {
+internal partial struct TestFieldPkgPath_pkgpathTest /*dyn*/ {
     internal slice<nint> index;
     internal @string pkgPath;
     internal bool embedded;
     internal bool exported;
 }
 
-[GoLocalName("localOtherPkgFields")] [GoType("global::go.reflect_internal_test_package.OtherPkgFields")] internal partial struct TestFieldPkgPath_localOtherPkgFields;
+internal partial struct TestFieldPkgPath_localOtherPkgFields /*global::go.reflect_internal_test_package.OtherPkgFields*/;
 
 public static void TestFieldPkgPath(ж<Δtesting.T> Ꮡt) {
     ref var typ = ref heap<reflectꓸType>(out var Ꮡtyp);
@@ -3861,19 +3855,19 @@ public static void TestFieldPkgPath(ж<Δtesting.T> Ꮡt) {
     }.slice());
 }
 
-[GoType("dyn")] internal partial interface TestMethodPkgPath_I {
+internal partial interface TestMethodPkgPath_I /*dyn*/ {
     void x();
     void X();
 }
 
-[GoType("dyn")] internal partial interface TestMethodPkgPath_i :
+internal partial interface TestMethodPkgPath_i /*dyn*/ :
     TestMethodPkgPath_I
 {
     void y();
     void Y();
 }
 
-[GoType("dyn")] internal partial struct TestMethodPkgPath_tests {
+internal partial struct TestMethodPkgPath_tests /*dyn*/ {
     internal @string name;
     internal @string pkgPath;
     internal bool exported;
@@ -3926,19 +3920,19 @@ public static void TestVariadicType(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Error(s);
 }
 
-[GoType] partial struct inner {
+partial struct inner {
     internal nint x;
 }
 
-[GoType] partial struct outer {
+partial struct outer {
     internal nint y;
     internal partial ref inner inner { get; }
 }
 
-[GoRecv] internal static void M(this ref inner _) {
+internal static void M(this ref inner _) {
 }
 
-[GoRecv] internal static void M(this ref outer _) {
+internal static void M(this ref outer _) {
 }
 
 public static void TestNestedMethods(ж<Δtesting.T> Ꮡt) {
@@ -3954,18 +3948,18 @@ public static void TestNestedMethods(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct unexp {
+partial struct unexp {
 }
 
-[GoRecv] internal static (int32, int8) f(this ref unexp _) {
+internal static (int32, int8) f(this ref unexp _) {
     return (7, 7);
 }
 
-[GoRecv] internal static (int64, int8) g(this ref unexp _) {
+internal static (int64, int8) g(this ref unexp _) {
     return (8, 8);
 }
 
-[GoType] partial interface unexpI {
+partial interface unexpI {
     (int32, int8) f();
 }
 
@@ -3984,16 +3978,16 @@ public static void TestUnexportedMethods(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct InnerInt {
+partial struct InnerInt {
     public nint X;
 }
 
-[GoType] partial struct OuterInt {
+partial struct OuterInt {
     public nint Y;
     public partial ref InnerInt InnerInt { get; }
 }
 
-[GoRecv] public static nint M(this ref InnerInt i) {
+public static nint M(this ref InnerInt i) {
     return i.X;
 }
 
@@ -4064,7 +4058,7 @@ public static void TestPtrTo(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoLocalName("T")] [GoType("ж<uintptr>")] internal partial class TestPtrToGC_T;
+internal partial class TestPtrToGC_T /*ж<uintptr>*/;
 
 public static void TestPtrToGC(ж<Δtesting.T> Ꮡt) {
     var tt = TypeOf(((TestPtrToGC_T)nil));
@@ -4088,11 +4082,11 @@ public static void TestPtrToGC(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddr_p {
+internal partial struct TestAddr_p /*dyn*/ {
     public nint X, Y;
 }
 
-[GoType("dyn")] internal partial struct TestAddr_s {
+internal partial struct TestAddr_s /*dyn*/ {
     public ж<bool> B;
 }
 
@@ -4172,7 +4166,7 @@ internal static void noAlloc(ж<Δtesting.T> Ꮡt, nint n, Action<nint> f) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAllocations_type {
+internal partial struct TestAllocations_type /*dyn*/ {
     internal nint f;
 }
 
@@ -4438,7 +4432,7 @@ public static void TestFuncArg(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStructArg_padded {
+internal partial struct TestStructArg_padded /*dyn*/ {
     public @string B;
     public int32 C;
 }
@@ -4458,7 +4452,7 @@ public static void TestStructArg(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct tagGetTestsᴛ1 {
+partial struct tagGetTestsᴛ1 /*dyn*/ {
     public Δreflect.StructTag Tag;
     public @string Key;
     public @string Value;
@@ -4489,15 +4483,15 @@ internal static readonly @string ofNonByteSliceˢ = "of non-byte slice"u8;
 internal static readonly @string unaddressableˢ = "unaddressable"u8;
 internal static readonly @string onPtrValueˢ = "on ptr Value"u8;
 
-[GoLocalName("S")] [GoType("[]byte")] internal partial struct TestBytes_S;
+internal partial struct TestBytes_S /*[]byte*/;
 
-[GoLocalName("A")] [GoType("[4]byte")] internal partial struct TestBytes_A;
+internal partial struct TestBytes_A /*[4]byte*/;
 
-[GoLocalName("B")] [GoType("num:byte")] internal partial struct TestBytes_B;
+internal partial struct TestBytes_B /*num:byte*/;
 
-[GoLocalName("SB")] [GoType("[]TestBytes_B")] internal partial struct TestBytes_SB;
+internal partial struct TestBytes_SB /*[]TestBytes_B*/;
 
-[GoLocalName("AB")] [GoType("[4]TestBytes_B")] internal partial struct TestBytes_AB;
+internal partial struct TestBytes_AB /*[4]TestBytes_B*/;
 
 public static void TestBytes(ж<Δtesting.T> Ꮡt) {
     shouldPanic(onIntValueˢ, () => {
@@ -4535,7 +4529,7 @@ public static void TestBytes(ж<Δtesting.T> Ꮡt) {
     ValueOf(@new<TestBytes_AB>()).Elem().Bytes(); // should not panic
 }
 
-[GoLocalName("B")] [GoType("[]byte")] internal partial struct TestSetBytes_B;
+internal partial struct TestSetBytes_B /*[]byte*/;
 
 public static void TestSetBytes(ж<Δtesting.T> Ꮡt) {
     ref var x = ref heap<TestSetBytes_B>(out var Ꮡx);
@@ -4549,16 +4543,16 @@ public static void TestSetBytes(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct Private {
+partial struct Private {
     internal nint x;
     internal ж<ж<nint>> y;
     public nint Z;
 }
 
-[GoRecv] internal static void m(this ref Private p) {
+internal static void m(this ref Private p) {
 }
 
-[GoType] partial struct @private {
+partial struct @private {
     public nint Z;
     internal nint z;
     public @string S;
@@ -4566,16 +4560,16 @@ public static void TestSetBytes(ж<Δtesting.T> Ꮡt) {
     public slice<Private> T;
 }
 
-[GoRecv] internal static void P(this ref @private p) {
+internal static void P(this ref @private p) {
 }
 
-[GoType] partial struct Public {
+partial struct Public {
     public nint X;
     public ж<ж<nint>> Y;
     internal partial ref @private @private { get; }
 }
 
-[GoRecv] public static void M(this ref Public p) {
+public static void M(this ref Public p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -4639,21 +4633,21 @@ public static void TestUnexported(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string setˢ = "Set"u8;
 
-[GoType("dyn")] internal partial struct TestSetPanic_t0 {
+internal partial struct TestSetPanic_t0 /*dyn*/ {
     public nint W;
 }
 
-[GoType("dyn")] internal partial struct TestSetPanic_t1 {
+internal partial struct TestSetPanic_t1 /*dyn*/ {
     public nint Y;
     internal partial ref TestSetPanic_t0 t0 { get; }
 }
 
-[GoType("dyn")] internal partial struct TestSetPanic_T2 {
+internal partial struct TestSetPanic_T2 /*dyn*/ {
     public nint Z;
     internal TestSetPanic_t0 namedT0;
 }
 
-[GoType("dyn")] internal partial struct TestSetPanic_T {
+internal partial struct TestSetPanic_T /*dyn*/ {
     public nint X;
     internal partial ref TestSetPanic_t1 t1 { get; }
     public partial ref TestSetPanic_T2 T2 { get; }
@@ -4880,7 +4874,7 @@ public static void TestSetPanic(ж<Δtesting.T> Ꮡt) {
     });
 }
 
-[GoType("num:nint")] partial struct timp;
+partial struct timp /*num:nint*/;
 
 internal static void W(this timp t) {
 }
@@ -4897,24 +4891,24 @@ internal static void y(this timp t) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string callˢ = "Call"u8;
 
-[GoType("dyn")] internal partial interface TestCallPanic_t0 {
+internal partial interface TestCallPanic_t0 /*dyn*/ {
     void W();
     void w();
 }
 
-[GoType("dyn")] internal partial interface TestCallPanic_T1 {
+internal partial interface TestCallPanic_T1 /*dyn*/ {
     void Y();
     void y();
 }
 
-[GoType("dyn")] internal partial struct TestCallPanic_T2 {
-    [GoEmbedded] public TestCallPanic_T1 T1;
-    [GoEmbedded] internal TestCallPanic_t0 t0;
+internal partial struct TestCallPanic_T2 /*dyn*/ {
+    /*embed*/ public TestCallPanic_T1 T1;
+    /*embed*/ internal TestCallPanic_t0 t0;
 }
 
-[GoType("dyn")] internal partial struct TestCallPanic_T {
-    [GoEmbedded] internal TestCallPanic_t0 t0; // 0
-    [GoEmbedded] public TestCallPanic_T1 T1; // 1
+internal partial struct TestCallPanic_T /*dyn*/ {
+    /*embed*/ internal TestCallPanic_t0 t0; // 0
+    /*embed*/ public TestCallPanic_T1 T1; // 1
     public TestCallPanic_t0 NamedT0; // 2
     public TestCallPanic_T1 NamedT1; // 3
     public TestCallPanic_T2 NamedT2; // 4
@@ -5400,61 +5394,58 @@ public static reflectꓸValue ReadWriterV(Δio.ReadWriter xʗp) {
     return ValueOf(Ꮡx).Elem();
 }
 
-[GoType] partial struct Empty {
+partial struct Empty {
 }
 
-[GoType] partial struct MyStruct {
-    [GoTag(@"some:""tag""")]
-    internal nint x;
+partial struct MyStruct {
+    internal nint x; /*`some:"tag"`*/
 }
 
-[GoType("dyn")] partial struct MyStruct1_x {
-    [GoTag(@"some:""bar""")]
-    [GoEmbedded] internal nint @int;
+partial struct MyStruct1_x /*dyn*/ {
+    /*embed*/ internal nint @int; /*`some:"bar"`*/
 }
 
-[GoType] partial struct MyStruct1 {
+partial struct MyStruct1 {
     internal MyStruct1_x x;
 }
 
-[GoType("dyn")] partial struct MyStruct2_x {
-    [GoTag(@"some:""foo""")]
-    [GoEmbedded] internal nint @int;
+partial struct MyStruct2_x /*dyn*/ {
+    /*embed*/ internal nint @int; /*`some:"foo"`*/
 }
 
-[GoType] partial struct MyStruct2 {
+partial struct MyStruct2 {
     internal MyStruct2_x x;
 }
 
-[GoType("@string")] partial struct MyString;
+partial struct MyString /*@string*/;
 
-[GoType("[]byte")] partial struct MyBytes;
+partial struct MyBytes /*[]byte*/;
 
-[GoType("ж<array<byte>>")] [GoArrayDims(0)] partial class MyBytesArrayPtr0;
+/*[0]*/ partial class MyBytesArrayPtr0 /*ж<array<byte>>*/;
 
-[GoType("ж<array<byte>>")] [GoArrayDims(4)] partial class MyBytesArrayPtr;
+/*[4]*/ partial class MyBytesArrayPtr /*ж<array<byte>>*/;
 
-[GoType("[0]byte")] partial struct MyBytesArray0;
+partial struct MyBytesArray0 /*[0]byte*/;
 
-[GoType("[4]byte")] partial struct MyBytesArray;
+partial struct MyBytesArray /*[4]byte*/;
 
-[GoType("[]int32")] partial struct MyRunes;
+partial struct MyRunes /*[]int32*/;
 
 // type MyFunc is a methodless func type — rendered inline as its base delegate
 
-[GoType("num:byte")] partial struct MyByte;
+partial struct MyByte /*num:byte*/;
 
-[GoType("chan nint")] partial struct IntChan;
+partial struct IntChan /*chan nint*/;
 
-[GoType("chan nint")] [GoChanDir(GoChanDir.Recv)] partial struct IntChanRecv;
+partial struct IntChanRecv /*<-chan nint*/;
 
-[GoType("chan nint")] [GoChanDir(GoChanDir.Send)] partial struct IntChanSend;
+partial struct IntChanSend /*chan<- nint*/;
 
-[GoType("chan slice<byte>")] partial struct BytesChan;
+partial struct BytesChan /*chan slice<byte>*/;
 
-[GoType("chan slice<byte>")] [GoChanDir(GoChanDir.Recv)] partial struct BytesChanRecv;
+partial struct BytesChanRecv /*<-chan slice<byte>*/;
 
-[GoType("chan slice<byte>")] [GoChanDir(GoChanDir.Send)] partial struct BytesChanSend;
+partial struct BytesChanSend /*chan<- slice<byte>*/;
 
 // numbers
 /*
@@ -5506,19 +5497,17 @@ public static reflectꓸValue ReadWriterV(Δio.ReadWriter xʗp) {
 // cannot convert other instances (channels)
 // interfaces
 
-[GoType("dyn")] partial struct convertTestsᴛ1 {
+partial struct convertTestsᴛ1 /*dyn*/ {
     internal reflectꓸValue @in;
     internal reflectꓸValue @out;
 }
 
-        [GoType("dyn")] partial struct iᴛ1 {
-            [GoTag(@"some:""foo""")]
-            internal nint x;
+        partial struct iᴛ1 /*dyn*/ {
+            internal nint x; /*`some:"foo"`*/
         }
 
-        [GoType("dyn")] partial struct iᴛ2 {
-            [GoTag(@"some:""bar""")]
-            internal nint x;
+        partial struct iᴛ2 /*dyn*/ {
+            internal nint x; /*`some:"bar"`*/
         }
 internal static slice<convertTestsᴛ1> convertTests = new convertTestsᴛ1[]{
     new(V((int8)1), V((int8)1)),
@@ -6036,7 +6025,7 @@ internal static float32 gFloat32;
 
 internal const uint32 snan = 0x7f800001;
 
-[GoLocalName("myFloat32")] [GoType("num:float32")] internal partial struct TestConvertNaNs_myFloat32;
+internal partial struct TestConvertNaNs_myFloat32 /*num:float32*/;
 
 public static void TestConvertNaNs(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -6060,17 +6049,17 @@ public static void TestConvertNaNs(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct ComparableStruct {
+partial struct ComparableStruct {
     public nint X;
 }
 
-[GoType] partial struct NonComparableStruct {
+partial struct NonComparableStruct {
     public nint X;
     public map<@string, nint> Y;
 }
 
 
-[GoType("dyn")] partial struct comparableTestsᴛ1 {
+partial struct comparableTestsᴛ1 /*dyn*/ {
     internal reflectꓸType typ;
     internal bool ok;
 }
@@ -6216,47 +6205,47 @@ internal static void checkSameType(ж<Δtesting.T> Ꮡt, reflectꓸType x, any y
     }
 }
 
-[GoType("dyn")] internal partial struct TestArrayOf_tests {
+internal partial struct TestArrayOf_tests /*dyn*/ {
     internal nint n;
     internal Func<nint, any> value;
     internal bool comparable;
     internal @string want;
 }
 
-[GoLocalName("Tint")] [GoType("num:nint")] internal partial struct TestArrayOf_Tint;
+internal partial struct TestArrayOf_Tint /*num:nint*/;
 
-[GoLocalName("Tint")] [GoType("num:nint")] internal partial struct TestArrayOf_Tintᴛ1;
+internal partial struct TestArrayOf_Tintᴛ1 /*num:nint*/;
 
-[GoLocalName("Tfloat")] [GoType("num:float64")] internal partial struct TestArrayOf_Tfloat;
+internal partial struct TestArrayOf_Tfloat /*num:float64*/;
 
-[GoLocalName("Tstring")] [GoType("@string")] internal partial struct TestArrayOf_Tstring;
+internal partial struct TestArrayOf_Tstring /*@string*/;
 
-[GoType("dyn")] internal partial struct TestArrayOf_Tstruct {
+internal partial struct TestArrayOf_Tstruct /*dyn*/ {
     public nint V;
 }
 
-[GoLocalName("Tint")] [GoType("num:nint")] internal partial struct TestArrayOf_Tintᴛ2;
+internal partial struct TestArrayOf_Tintᴛ2 /*num:nint*/;
 
-[GoLocalName("Tint")] [GoType("num:nint")] internal partial struct TestArrayOf_Tintᴛ3;
+internal partial struct TestArrayOf_Tintᴛ3 /*num:nint*/;
 
-[GoType("dyn")] internal partial struct TestArrayOf_Tstructᴛ1 {
+internal partial struct TestArrayOf_Tstructᴛ1 /*dyn*/ {
     public array<nint> V = new(1);
 }
 
-[GoType("dyn")] internal partial struct TestArrayOf_Tstructᴛ2 {
+internal partial struct TestArrayOf_Tstructᴛ2 /*dyn*/ {
     public slice<nint> V;
 }
 
-[GoType("dyn")] internal partial struct TestArrayOf_TstructUV {
+internal partial struct TestArrayOf_TstructUV /*dyn*/ {
     public nint U, V;
 }
 
-[GoType("dyn")] internal partial struct TestArrayOf_TstructUVᴛ1 {
+internal partial struct TestArrayOf_TstructUVᴛ1 /*dyn*/ {
     public nint U;
     public float64 V;
 }
 
-[GoLocalName("T")] [GoType("num:nint")] internal partial struct TestArrayOf_T;
+internal partial struct TestArrayOf_T /*num:nint*/;
 
 public static void TestArrayOf(ж<Δtesting.T> Ꮡt) {
     // check construction and use of type not in binary
@@ -6389,7 +6378,7 @@ public static void TestArrayOf(ж<Δtesting.T> Ꮡt) {
     checkSameType(Ꮡt, ArrayOf(5, TypeOf(((TestArrayOf_T)1))), new TestArrayOf_T[]{}.array(5));
 }
 
-[GoLocalName("T")] [GoType("ж<uintptr>")] internal partial class TestArrayOfGC_T;
+internal partial class TestArrayOfGC_T /*ж<uintptr>*/;
 
 public static void TestArrayOfGC(ж<Δtesting.T> Ꮡt) {
     var tt = TypeOf(((TestArrayOfGC_T)nil));
@@ -6474,9 +6463,9 @@ public static void TestArrayOfGenericAlg(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoLocalName("T")] [GoType("[1]ж<byte>")] internal partial struct TestArrayOfDirectIface_T;
+internal partial struct TestArrayOfDirectIface_T /*[1]ж<byte>*/;
 
-[GoLocalName("T")] [GoType("[0]ж<byte>")] internal partial struct TestArrayOfDirectIface_Tᴛ1;
+internal partial struct TestArrayOfDirectIface_Tᴛ1 /*[0]ж<byte>*/;
 
 public static void TestArrayOfDirectIface(ж<Δtesting.T> Ꮡt) {
     {
@@ -6527,9 +6516,9 @@ public static void TestArrayOfPanicOnNegativeLength(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string reflectTestTˢ = "[]reflect_test.T"u8;
 
-[GoLocalName("T")] [GoType("num:nint")] internal partial struct TestSliceOf_T;
+internal partial struct TestSliceOf_T /*num:nint*/;
 
-[GoLocalName("T1")] [GoType("num:nint")] internal partial struct TestSliceOf_T1;
+internal partial struct TestSliceOf_T1 /*num:nint*/;
 
 public static void TestSliceOf(ж<Δtesting.T> Ꮡt) {
     var st = SliceOf(TypeOf(((TestSliceOf_T)1)));
@@ -6581,7 +6570,7 @@ public static void TestSliceOverflow(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoLocalName("T")] [GoType("ж<uintptr>")] internal partial class TestSliceOfGC_T;
+internal partial class TestSliceOfGC_T /*ж<uintptr>*/;
 
 public static void TestSliceOfGC(ж<Δtesting.T> Ꮡt) {
     var tt = TypeOf(((TestSliceOfGC_T)nil));
@@ -6668,23 +6657,23 @@ internal static readonly @string duplicateFieldˢ = "duplicate field"u8;
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string stStrᶜ = @"struct { S string ""s""; X uint8 ""x""; Y uint64; Z [3]uint16 }"u8;
 
-[GoType("dyn")] internal partial struct TestStructOf_i {
+internal partial struct TestStructOf_i /*dyn*/ {
     public @string String;
     public byte X;
     public uint64 Y;
     public array<uint16> Z = new(3);
 }
 
-[GoType("dyn")] internal partial struct TestStructOf_iᴛ1 {
+internal partial struct TestStructOf_iᴛ1 /*dyn*/ {
     public byte G1;
     public array<ж<byte>> G2 = new(0);
 }
 
-[GoType("dyn")] internal partial struct TestStructOf_y {
+internal partial struct TestStructOf_y /*dyn*/ {
     public uint64 Y;
 }
 
-[GoType("dyn")] internal partial struct TestStructOf_yᴛ1 {
+internal partial struct TestStructOf_yᴛ1 /*dyn*/ {
     public TestStructOf_structFieldType F;
 }
 
@@ -6805,19 +6794,19 @@ public static void TestStructOf(ж<Δtesting.T> Ꮡt) {
         new TestStructOf_yᴛ1());
 }
 
-[GoType("dyn")] internal partial struct TestStructOfExportRules_S1 {
+internal partial struct TestStructOfExportRules_S1 /*dyn*/ {
 }
 
-[GoType("dyn")] internal partial struct TestStructOfExportRules_s2 {
+internal partial struct TestStructOfExportRules_s2 /*dyn*/ {
 }
 
-[GoType("dyn")] internal partial struct TestStructOfExportRules_ΦType {
+internal partial struct TestStructOfExportRules_ΦType /*dyn*/ {
 }
 
-[GoType("dyn")] internal partial struct TestStructOfExportRules_φType {
+internal partial struct TestStructOfExportRules_φType /*dyn*/ {
 }
 
-[GoType("dyn")] internal partial struct TestStructOfExportRules_tests {
+internal partial struct TestStructOfExportRules_tests /*dyn*/ {
     internal Δreflect.StructField field;
     internal bool mustPanic;
     internal bool exported;
@@ -6976,7 +6965,7 @@ public static void TestStructOfExportRules(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoLocalName("T")] [GoType("ж<uintptr>")] internal partial class TestStructOfGC_T;
+internal partial class TestStructOfGC_T /*ж<uintptr>*/;
 
 public static void TestStructOfGC(ж<Δtesting.T> Ꮡt) {
     var tt = TypeOf(((TestStructOfGC_T)nil));
@@ -7033,7 +7022,7 @@ public static void TestStructOfAlg(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object defˢ = (@string)"def"u8;
 
-[GoType("dyn")] internal partial struct TestStructOfGenericAlg_tests {
+internal partial struct TestStructOfGenericAlg_tests /*dyn*/ {
     internal reflectꓸType rt;
     internal slice<nint> idx;
 }
@@ -7163,11 +7152,11 @@ public static void TestStructOfGenericAlg(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStructOfDirectIface_T {
+internal partial struct TestStructOfDirectIface_T /*dyn*/ {
     public array<ж<byte>> X = new(1);
 }
 
-[GoType("dyn")] internal partial struct TestStructOfDirectIface_Tᴛ1 {
+internal partial struct TestStructOfDirectIface_Tᴛ1 /*dyn*/ {
     public array<ж<byte>> X = new(0);
 }
 
@@ -7216,15 +7205,15 @@ public static void TestStructOfDirectIface(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("num:nint")] partial struct StructI;
+partial struct StructI /*num:nint*/;
 
 public static nint Get(this StructI i) {
     return (nint)i;
 }
 
-[GoType("num:nint")] partial struct StructIPtr;
+partial struct StructIPtr /*num:nint*/;
 
-[GoRecv] public static nint Get(this ref StructIPtr i) {
+public static nint Get(this ref StructIPtr i) {
     return (nint)(i);
 }
 
@@ -7232,34 +7221,34 @@ public static void Set(this ж<StructIPtr> Ꮡi, nint v) {
     (Ꮡi.Reinterpret<StructIPtr, nint>()).Value = v;
 }
 
-[GoType] partial struct SettableStruct {
+partial struct SettableStruct {
     public nint SettableField;
 }
 
-[GoRecv] public static void Set(this ref SettableStruct p, nint v) {
+public static void Set(this ref SettableStruct p, nint v) {
     p.SettableField = v;
 }
 
-[GoType] partial struct SettablePointer {
+partial struct SettablePointer {
     public ж<nint> SettableField;
 }
 
-[GoRecv] public static void Set(this ref SettablePointer p, nint v) {
+public static void Set(this ref SettablePointer p, nint v) {
     p.SettableField.Value = v;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string getˢ = "Get"u8;
 
-[GoType("dyn")] internal partial interface TestStructOfWithInterface_Iface {
+internal partial interface TestStructOfWithInterface_Iface /*dyn*/ {
     nint Get();
 }
 
-[GoType("dyn")] internal partial interface TestStructOfWithInterface_IfaceSet {
+internal partial interface TestStructOfWithInterface_IfaceSet /*dyn*/ {
     void Set(nint _Δp0);
 }
 
-[GoType("dyn")] internal partial struct TestStructOfWithInterface_tests {
+internal partial struct TestStructOfWithInterface_tests /*dyn*/ {
     internal @string name;
     internal reflectꓸType typ;
     internal reflectꓸValue val;
@@ -7483,7 +7472,7 @@ public static void TestStructOfDifferentPkgPath(ж<Δtesting.T> Ꮡt) {
     });
 }
 
-[GoType("dyn")] internal partial struct TestStructOfTooLarge_test {
+internal partial struct TestStructOfTooLarge_test /*dyn*/ {
     internal bool shouldPanic;
     internal slice<Δreflect.StructField> fields;
 }
@@ -7576,7 +7565,7 @@ public static void TestStructOfTooLarge(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStructOfAnonymous_type {
+internal partial struct TestStructOfAnonymous_type /*dyn*/ {
     public partial ref D1 D1 { get; }
 }
 
@@ -7593,9 +7582,9 @@ public static void TestStructOfAnonymous(ж<Δtesting.T> Ꮡt) {
     _ = dt.Interface()._<TestStructOfAnonymous_type>();
 }
 
-[GoLocalName("T")] [GoType("@string")] internal partial struct TestChanOf_T;
+internal partial struct TestChanOf_T /*@string*/;
 
-[GoLocalName("T1")] [GoType("num:nint")] internal partial struct TestChanOf_T1;
+internal partial struct TestChanOf_T1 /*num:nint*/;
 
 public static void TestChanOf(ж<Δtesting.T> Ꮡt) {
     var ct = ChanOf(BothDir, TypeOf(((TestChanOf_T)(@string)""u8)));
@@ -7630,9 +7619,9 @@ public static void TestChanOf(ж<Δtesting.T> Ꮡt) {
 internal static readonly object chanˢ = (@string)"<-chan"u8;
 internal static readonly object chanˢ2 = (@string)"chan<-"u8;
 
-[GoLocalName("T")] [GoType("@string")] internal partial struct TestChanOfDir_T;
+internal partial struct TestChanOfDir_T /*@string*/;
 
-[GoLocalName("T1")] [GoType("num:nint")] internal partial struct TestChanOfDir_T1;
+internal partial struct TestChanOfDir_T1 /*num:nint*/;
 
 public static void TestChanOfDir(ж<Δtesting.T> Ꮡt) {
     var crt = ChanOf(RecvDir, TypeOf(((TestChanOfDir_T)(@string)""u8)));
@@ -7648,7 +7637,7 @@ public static void TestChanOfDir(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoLocalName("T")] [GoType("ж<uintptr>")] internal partial class TestChanOfGC_T;
+internal partial class TestChanOfGC_T /*ж<uintptr>*/;
 
 public static partial void TestChanOfGC(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
@@ -7709,9 +7698,9 @@ public static partial void TestChanOfGC(ж<Δtesting.T> Ꮡt) {
 internal static readonly @string mapA1ˢ = "map[a:1]"u8;
 internal static readonly @string invalidKeyTypeˢ = "invalid key type"u8;
 
-[GoLocalName("K")] [GoType("@string")] internal partial struct TestMapOf_K;
+internal partial struct TestMapOf_K /*@string*/;
 
-[GoLocalName("V")] [GoType("num:float64")] internal partial struct TestMapOf_V;
+internal partial struct TestMapOf_V /*num:float64*/;
 
 public static void TestMapOf(ж<Δtesting.T> Ꮡt) {
     var v = MakeMap(MapOf(TypeOf(((TestMapOf_K)(@string)""u8)), TypeOf(((TestMapOf_V)0D))));
@@ -7731,7 +7720,7 @@ public static void TestMapOf(ж<Δtesting.T> Ꮡt) {
     });
 }
 
-[GoLocalName("T")] [GoType("ж<uintptr>")] internal partial class TestMapOfGCKeys_T;
+internal partial class TestMapOfGCKeys_T /*ж<uintptr>*/;
 
 public static void TestMapOfGCKeys(ж<Δtesting.T> Ꮡt) {
     var tt = TypeOf(((TestMapOfGCKeys_T)nil));
@@ -7768,7 +7757,7 @@ public static void TestMapOfGCKeys(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestMapOfGCBigKey_KV {
+internal partial struct TestMapOfGCBigKey_KV /*dyn*/ {
     internal int64 i;
     internal int64 j;
 }
@@ -7792,7 +7781,7 @@ public static void TestMapOfGCBigKey(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoLocalName("T")] [GoType("ж<uintptr>")] internal partial class TestMapOfGCValues_T;
+internal partial class TestMapOfGCValues_T /*ж<uintptr>*/;
 
 public static void TestMapOfGCValues(ж<Δtesting.T> Ꮡt) {
     var tt = TypeOf(((TestMapOfGCValues_T)nil));
@@ -7839,13 +7828,13 @@ public static void TestTypelinksSorted(ж<Δtesting.T> Ꮡt) {
 internal static readonly @string gopherˢ = "gopher"u8;
 internal static readonly @string mustBeSliceˢ = "must be slice"u8;
 
-[GoLocalName("K")] [GoType("@string")] internal partial struct TestFuncOf_K;
+internal partial struct TestFuncOf_K /*@string*/;
 
-[GoLocalName("V")] [GoType("num:float64")] internal partial struct TestFuncOf_V;
+internal partial struct TestFuncOf_V /*num:float64*/;
 
-[GoLocalName("T1")] [GoType("num:nint")] internal partial struct TestFuncOf_T1;
+internal partial struct TestFuncOf_T1 /*num:nint*/;
 
-[GoType("dyn")] internal partial struct TestFuncOf_testCases {
+internal partial struct TestFuncOf_testCases /*dyn*/ {
     internal slice<reflectꓸType> @in, @out;
     internal bool variadic;
     internal any want;
@@ -7902,87 +7891,87 @@ public static void TestFuncOf(ж<Δtesting.T> Ꮡt) {
     FuncOf(@in, default!, false);
 }
 
-[GoType] partial struct R0 {
+partial struct R0 {
     public partial ref ж<R1> R1 { get; }
     public partial ref ж<R2> R2 { get; }
     public partial ref ж<R3> R3 { get; }
     public partial ref ж<R4> R4 { get; }
 }
 
-[GoType] partial struct R1 {
+partial struct R1 {
     public partial ref ж<R5> R5 { get; }
     public partial ref ж<R6> R6 { get; }
     public partial ref ж<R7> R7 { get; }
     public partial ref ж<R8> R8 { get; }
 }
 
-[GoType("R1")] partial struct R2;
+partial struct R2 /*R1*/;
 
-[GoType("R1")] partial struct R3;
+partial struct R3 /*R1*/;
 
-[GoType("R1")] partial struct R4;
+partial struct R4 /*R1*/;
 
-[GoType] partial struct R5 {
+partial struct R5 {
     public partial ref ж<R9> R9 { get; }
     public partial ref ж<R10> R10 { get; }
     public partial ref ж<R11> R11 { get; }
     public partial ref ж<R12> R12 { get; }
 }
 
-[GoType("R5")] partial struct R6;
+partial struct R6 /*R5*/;
 
-[GoType("R5")] partial struct R7;
+partial struct R7 /*R5*/;
 
-[GoType("R5")] partial struct R8;
+partial struct R8 /*R5*/;
 
-[GoType] partial struct R9 {
+partial struct R9 {
     public partial ref ж<R13> R13 { get; }
     public partial ref ж<R14> R14 { get; }
     public partial ref ж<R15> R15 { get; }
     public partial ref ж<R16> R16 { get; }
 }
 
-[GoType("R9")] partial struct R10;
+partial struct R10 /*R9*/;
 
-[GoType("R9")] partial struct R11;
+partial struct R11 /*R9*/;
 
-[GoType("R9")] partial struct R12;
+partial struct R12 /*R9*/;
 
-[GoType] partial struct R13 {
+partial struct R13 {
     public partial ref ж<R17> R17 { get; }
     public partial ref ж<R18> R18 { get; }
     public partial ref ж<R19> R19 { get; }
     public partial ref ж<R20> R20 { get; }
 }
 
-[GoType("R13")] partial struct R14;
+partial struct R14 /*R13*/;
 
-[GoType("R13")] partial struct R15;
+partial struct R15 /*R13*/;
 
-[GoType("R13")] partial struct R16;
+partial struct R16 /*R13*/;
 
-[GoType] partial struct R17 {
+partial struct R17 {
     public partial ref ж<R21> R21 { get; }
     public partial ref ж<R22> R22 { get; }
     public partial ref ж<R23> R23 { get; }
     public partial ref ж<R24> R24 { get; }
 }
 
-[GoType("R17")] partial struct R18;
+partial struct R18 /*R17*/;
 
-[GoType("R17")] partial struct R19;
+partial struct R19 /*R17*/;
 
-[GoType("R17")] partial struct R20;
+partial struct R20 /*R17*/;
 
-[GoType] partial struct R21 {
+partial struct R21 {
     public nint X;
 }
 
-[GoType("R21")] partial struct R22;
+partial struct R22 /*R21*/;
 
-[GoType("R21")] partial struct R23;
+partial struct R23 /*R21*/;
 
-[GoType("R21")] partial struct R24;
+partial struct R24 /*R21*/;
 
 public static void TestEmbed(ж<Δtesting.T> Ꮡt) {
     var typ = TypeOf(new R0(nil));
@@ -8069,19 +8058,19 @@ public static void TestAllocsInterfaceSmall(ж<Δtesting.T> Ꮡt) {
 //	[false false false false]
 //	...
 //	[true true true true]
-[GoType] partial struct exhaustive {
+partial struct exhaustive {
     internal ж<rand.Rand> r;
     internal nint pos;
     internal slice<choice> last;
 }
 
-[GoType] partial struct choice {
+partial struct choice {
     internal nint off;
     internal nint n;
     internal nint max;
 }
 
-[GoRecv] internal static bool Next(this ref exhaustive x) {
+internal static bool Next(this ref exhaustive x) {
     if (x.r == nil) {
         x.r = rand.New(rand.NewSource(time.Now().UnixNano()));
     }
@@ -8101,7 +8090,7 @@ public static void TestAllocsInterfaceSmall(ж<Δtesting.T> Ꮡt) {
     return false;
 }
 
-[GoRecv] internal static nint Choose(this ref exhaustive x, nint max) {
+internal static nint Choose(this ref exhaustive x, nint max) {
     if (x.pos >= len(x.last)) {
         x.last = append(x.last, new choice(x.r.Intn(max), 0, max));
     }
@@ -8113,7 +8102,7 @@ public static void TestAllocsInterfaceSmall(ж<Δtesting.T> Ꮡt) {
     return rem(((~c).n + (~c).off), max);
 }
 
-[GoRecv] internal static bool Maybe(this ref exhaustive x) {
+internal static bool Maybe(this ref exhaustive x) {
     return x.Choose(2) == 1;
 }
 
@@ -8140,7 +8129,7 @@ public static void TestReflectMethodTraceback(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoLocalName("T")] [GoType("[10]byte")] internal partial struct TestSmallZero_T;
+internal partial struct TestSmallZero_T /*[10]byte*/;
 
 public static void TestSmallZero(ж<Δtesting.T> Ꮡt) {
     var typ = TypeOf(new TestSmallZero_T(new byte[10].array()));
@@ -8165,9 +8154,9 @@ public static void TestBigZero(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoLocalName("T")] [GoType("[16]byte")] internal partial struct TestZeroSet_T;
+internal partial struct TestZeroSet_T /*[16]byte*/;
 
-[GoType("dyn")] internal partial struct TestZeroSet_S {
+internal partial struct TestZeroSet_S /*dyn*/ {
     internal uint64 a;
     public TestZeroSet_T T;
     internal uint64 b;
@@ -8194,11 +8183,11 @@ public static void TestZeroSet(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string nilPointerToEmbeddedˢ = "nil pointer to embedded struct"u8;
 
-[GoType("dyn")] internal partial struct TestFieldByIndexNil_P {
+internal partial struct TestFieldByIndexNil_P /*dyn*/ {
     public nint F;
 }
 
-[GoType("dyn")] internal partial struct TestFieldByIndexNil_T {
+internal partial struct TestFieldByIndexNil_T /*dyn*/ {
     public partial ref ж<TestFieldByIndexNil_P> P { get; }
 }
 
@@ -8264,12 +8253,12 @@ public static void TestFieldByIndexNil(ж<Δtesting.T> Ꮡt) {
 // deference Inner.P1, causing a crash during garbage collection.
 //
 // This came up in a real program in issue 7725.
-[GoType] partial struct Outer {
+partial struct Outer {
     public partial ref ж<Inner> Inner { get; }
     public Δio.Reader R;
 }
 
-[GoType] partial struct Inner {
+partial struct Inner {
     public ж<Outer> X;
     public uintptr P1;
     public uintptr P2;
@@ -8303,7 +8292,7 @@ public static void TestCallMethodJump(ж<Δtesting.T> Ꮡt) {
     reflect_internal_test_package.CallGC.Value = false;
 }
 
-[GoType("dyn")] internal partial struct TestCallArgLive_T {
+internal partial struct TestCallArgLive_T /*dyn*/ {
     public ж<@string> X, Y;
 }
 
@@ -8350,7 +8339,7 @@ internal static void useStack(nint n) {
     useStack(n - 1 + (nint)b[99]);
 }
 
-[GoType] partial struct Impl {
+partial struct Impl {
 }
 
 public static void F(this Impl _) {
@@ -8372,7 +8361,7 @@ public static void TestValueString(ж<Δtesting.T> Ꮡt) {
 }
 
 // Used to have inconsistency between IsValid() and Kind() != Invalid.
-[GoType("dyn")] internal partial struct TestInvalid_T {
+internal partial struct TestInvalid_T /*dyn*/ {
     internal any v;
 }
 
@@ -8408,11 +8397,11 @@ internal static any /*recovered*/ fieldIndexRecover(reflectꓸType t, nint i) {
     return recovered;
 }
 
-[GoType("dyn")] internal partial struct TestTypeFieldOutOfRangePanic_i {
+internal partial struct TestTypeFieldOutOfRangePanic_i /*dyn*/ {
     public nint X;
 }
 
-[GoType("dyn")] internal partial struct TestTypeFieldOutOfRangePanic_testIndices {
+internal partial struct TestTypeFieldOutOfRangePanic_testIndices /*dyn*/ {
     internal nint i;
     internal bool mustPanic;
 }
@@ -8530,7 +8519,7 @@ public static void TestKeepFuncLive(ж<Δtesting.T> Ꮡt) {
     MakeFunc(typ, f).Call(new reflectꓸValue[]{ValueOf((nint)(10))}.slice());
 }
 
-[GoType("num:nint")] partial struct UnExportedFirst;
+partial struct UnExportedFirst /*num:nint*/;
 
 public static void ΦExported(this UnExportedFirst i) {
 }
@@ -8561,7 +8550,7 @@ public static void TestMethodByNameUnExportedFirst(ж<Δtesting.T> Ꮡt) {
 }
 
 // Issue 18635 (method version).
-[GoType] partial struct KeepMethodLive {
+partial struct KeepMethodLive {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -8600,12 +8589,12 @@ internal static void clobber() {
     Δruntime.GC();
 }
 
-[GoType("dyn")] internal partial struct TestFuncLayout_S {
+internal partial struct TestFuncLayout_S /*dyn*/ {
     internal uintptr a, b;
     internal ж<byte> c, d;
 }
 
-[GoType("dyn")] internal partial struct TestFuncLayout_test {
+internal partial struct TestFuncLayout_test /*dyn*/ {
     internal reflectꓸType rcvr, typ;
     internal uintptr size, argsize, retOffset;
     internal slice<byte> stack, gc, inRegs, outRegs; // pointer bitmap: 1 is pointer, 0 is scalar
@@ -8796,25 +8785,25 @@ internal static partial void verifyGCBitsSlice(ж<Δtesting.T> Ꮡt, reflectꓸT
 // Building blocks for types seen by the compiler (like [2]Xscalar).
 // The compiler will create the type structures for the derived types,
 // including their GC metadata.
-[GoType] partial struct Xscalar {
+partial struct Xscalar {
     internal uintptr x;
 }
 
-[GoType] partial struct Xptr {
+partial struct Xptr {
     internal ж<byte> x;
 }
 
-[GoType] partial struct Xptrscalar {
-    [GoEmbedded] internal ж<byte> @byte;
-    [GoEmbedded] internal uintptr uintptr;
+partial struct Xptrscalar {
+    /*embed*/ internal ж<byte> @byte;
+    /*embed*/ internal uintptr uintptr;
 }
 
-[GoType] partial struct Xscalarptr {
-    [GoEmbedded] internal uintptr uintptr;
-    [GoEmbedded] internal ж<byte> @byte;
+partial struct Xscalarptr {
+    /*embed*/ internal uintptr uintptr;
+    /*embed*/ internal ж<byte> @byte;
 }
 
-[GoType] partial struct Xbigptrscalar {
+partial struct Xbigptrscalar {
     internal array<ж<byte>> _ = new(100);
     internal array<uintptr> __ = new(100);
 }
@@ -8833,30 +8822,30 @@ public static reflectꓸType Tbigptrscalar;
 // (for example, [2]Scalar must NOT appear in the program),
 // or else reflect will use it instead of having to construct one.
 // The goal is to test the construction.
-[GoType("dyn")] internal partial struct init_Scalar {
+internal partial struct init_Scalar /*dyn*/ {
     internal uintptr x;
 }
 
-[GoType("dyn")] internal partial struct init_Ptr {
+internal partial struct init_Ptr /*dyn*/ {
     internal ж<byte> x;
 }
 
-[GoType("dyn")] internal partial struct init_Ptrscalar {
-    [GoEmbedded] internal ж<byte> @byte;
-    [GoEmbedded] internal uintptr uintptr;
+internal partial struct init_Ptrscalar /*dyn*/ {
+    /*embed*/ internal ж<byte> @byte;
+    /*embed*/ internal uintptr uintptr;
 }
 
-[GoType("dyn")] internal partial struct init_Scalarptr {
-    [GoEmbedded] internal uintptr uintptr;
-    [GoEmbedded] internal ж<byte> @byte;
+internal partial struct init_Scalarptr /*dyn*/ {
+    /*embed*/ internal uintptr uintptr;
+    /*embed*/ internal ж<byte> @byte;
 }
 
-[GoType("dyn")] internal partial struct init_Bigptrscalar {
+internal partial struct init_Bigptrscalar /*dyn*/ {
     internal array<ж<byte>> _ = new(100);
     internal array<uintptr> __ = new(100);
 }
 
-[GoLocalName("Int64")] [GoType("num:int64")] internal partial struct init_Int64;
+internal partial struct init_Int64 /*num:int64*/;
 
 [GoInit] internal static void initΔ1() {
     Tscalar = TypeOf(new init_Scalar(nil));
@@ -8969,8 +8958,8 @@ internal static readonly @string mapOfˢ = "MapOf"u8;
 internal static readonly @string ptrToˢ = "PtrTo"u8;
 internal static readonly @string sliceOfˢ = "SliceOf"u8;
 
-[GoType("dyn")] internal partial struct TestTypeOfTypeOf_T {
-    [GoEmbedded] internal nint @int;
+internal partial struct TestTypeOfTypeOf_T /*dyn*/ {
+    /*embed*/ internal nint @int;
 }
 
 public static void TestTypeOfTypeOf(ж<Δtesting.T> Ꮡt) {
@@ -8995,18 +8984,18 @@ public static void TestTypeOfTypeOf(ж<Δtesting.T> Ꮡt) {
     check(sliceOfˢ, SliceOf(TypeOf(new TestTypeOfTypeOf_T(nil))));
 }
 
-[GoType] partial struct XM {
+partial struct XM {
     internal bool _;
 }
 
-[GoRecv] public static @string String(this ref XM _) {
+public static @string String(this ref XM _) {
     return ""u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object doesNotImplementStringerˢ = (@string)"does not implement Stringer, but should"u8;
 
-[GoType("dyn")] internal partial struct TestPtrToMethods_y {
+internal partial struct TestPtrToMethods_y /*dyn*/ {
     public partial ref XM XM { get; }
 }
 
@@ -9081,18 +9070,18 @@ public static void TestChanAlloc(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("num:nint")] partial struct TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678;
+partial struct TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678 /*num:nint*/;
 
 // Note: there is one allocation in reflect.recv which seems to be
 // a limitation of escape analysis. If that is ever fixed the
 // allocs < 0.5 condition will trigger and this test should be fixed.
-[GoType] partial struct nameTest {
+partial struct nameTest {
     internal any v;
     internal @string want;
 }
 
 
-        [GoType("dyn")] partial interface Δtypeᴛ35 {
+        partial interface Δtypeᴛ35 /*dyn*/ {
             void F();
         }
 internal static slice<nameTest> nameTests = new nameTest[]{
@@ -9119,23 +9108,23 @@ public static void TestNames(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestExported_ΦExported {
+internal partial struct TestExported_ΦExported /*dyn*/ {
 }
 
-[GoType("dyn")] internal partial struct TestExported_φUnexported {
+internal partial struct TestExported_φUnexported /*dyn*/ {
 }
 
-[GoLocalName("BigP")] [GoType("ж<big>")] internal partial class TestExported_BigP;
+internal partial class TestExported_BigP /*ж<big>*/;
 
-[GoLocalName("P")] [GoType("num:nint")] internal partial struct TestExported_P;
+internal partial struct TestExported_P /*num:nint*/;
 
-[GoLocalName("p")] [GoType("ж<TestExported_P>")] internal partial class TestExported_p;
+internal partial class TestExported_p /*ж<TestExported_P>*/;
 
-[GoLocalName("P2")] [GoType("TestExported_p")] internal partial struct TestExported_P2;
+internal partial struct TestExported_P2 /*TestExported_p*/;
 
-[GoLocalName("p3")] [GoType("TestExported_p")] internal partial struct TestExported_p3;
+internal partial struct TestExported_p3 /*TestExported_p*/;
 
-[GoType("dyn")] internal partial struct TestExported_exportTest {
+internal partial struct TestExported_exportTest /*dyn*/ {
     internal any v;
     internal bool want;
 }
@@ -9165,7 +9154,7 @@ public static void TestExported(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestTypeStrings_stringTest {
+internal partial struct TestTypeStrings_stringTest /*dyn*/ {
     internal reflectꓸType typ;
     internal @string want;
 }
@@ -9209,20 +9198,20 @@ public static partial void TestOffsetLock(ж<Δtesting.T> Ꮡt) {
     Ꮡwg.Wait();
 }
 
-[GoLocalName("I")] [GoType("num:nint")] internal partial struct TestSwapper_I;
+internal partial struct TestSwapper_I /*num:nint*/;
 
-[GoType("dyn")] internal partial struct TestSwapper_pair {
+internal partial struct TestSwapper_pair /*dyn*/ {
     internal nint x, y;
 }
 
-[GoType("dyn")] internal partial struct TestSwapper_pairPtr {
+internal partial struct TestSwapper_pairPtr /*dyn*/ {
     internal nint x, y;
     internal ж<TestSwapper_I> p;
 }
 
-[GoLocalName("S")] [GoType("@string")] internal partial struct TestSwapper_S;
+internal partial struct TestSwapper_S /*@string*/;
 
-[GoType("dyn")] internal partial struct TestSwapper_tests {
+internal partial struct TestSwapper_tests /*dyn*/ {
     internal any @in;
     internal nint i, j;
     internal any want;
@@ -9297,7 +9286,7 @@ public static void TestSwapper(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestUnaddressableField_localBuffer {
+internal partial struct TestUnaddressableField_localBuffer /*dyn*/ {
     internal slice<byte> buf;
 }
 
@@ -9320,19 +9309,19 @@ public static void TestUnaddressableField(ж<Δtesting.T> Ꮡt) {
     });
 }
 
-[GoType("num:nint")] partial struct Tint;
+partial struct Tint /*num:nint*/;
 
-[GoType] partial struct Talias1 {
-    [GoEmbedded] internal byte @byte;
-    [GoEmbedded] internal uint8 uint8;
-    [GoEmbedded] internal nint @int;
-    [GoEmbedded] internal int32 int32;
-    [GoEmbedded] internal rune rune;
+partial struct Talias1 {
+    /*embed*/ internal byte @byte;
+    /*embed*/ internal uint8 uint8;
+    /*embed*/ internal nint @int;
+    /*embed*/ internal int32 int32;
+    /*embed*/ internal rune rune;
 }
 
-[GoType] partial struct Talias2 {
+partial struct Talias2 {
     public partial ref Tint Tint { get; }
-    [GoEmbedded] public Tint2 Tint2;
+    /*embed*/ public Tint2 Tint2;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -9354,17 +9343,17 @@ public static void TestAliasNames(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIssue22031_s {
+internal partial struct TestIssue22031_s /*dyn*/ {
     public nint C;
 }
 
-[GoLocalName("s")] [GoType("[]TestIssue22031_s")] internal partial struct TestIssue22031_sᴛ1;
+internal partial struct TestIssue22031_sᴛ1 /*[]TestIssue22031_s*/;
 
-[GoType("dyn")] internal partial struct TestIssue22031_t1 {
+internal partial struct TestIssue22031_t1 /*dyn*/ {
     internal partial ref TestIssue22031_sᴛ1 s { get; }
 }
 
-[GoType("dyn")] internal partial struct TestIssue22031_t2 {
+internal partial struct TestIssue22031_t2 /*dyn*/ {
     internal TestIssue22031_sᴛ1 f;
 }
 
@@ -9380,7 +9369,7 @@ public static void TestIssue22031(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("num:nint")] partial struct NonExportedFirst;
+partial struct NonExportedFirst /*num:nint*/;
 
 public static void ΦExported(this NonExportedFirst i) {
 }
@@ -9723,7 +9712,7 @@ internal static readonly @string valueOfTypeStringIsNotˢ2 = "value of type stri
 internal static readonly @string valueOfTypeIntIsNotˢ = "value of type int is not assignable to type string"u8;
 internal static readonly @string usingValueObtainedUsingˢ = "using value obtained using unexported field"u8;
 
-[GoType("dyn")] internal partial struct TestSetIter_i {
+internal partial struct TestSetIter_i /*dyn*/ {
     internal map<@string, nint> m;
 }
 
@@ -9846,10 +9835,10 @@ public static void TestMethodCallValueCodePtr(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct A {
+partial struct A {
 }
 
-[GoType] partial struct B<T> {
+partial struct B<T> {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -9883,9 +9872,9 @@ public static void TestNegativeKindString(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("bool")] partial struct namedBool;
+partial struct namedBool /*bool*/;
 
-[GoType("[]byte")] partial struct namedBytes;
+partial struct namedBytes /*[]byte*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string reflectCallOfReflectˢ = "reflect: call of reflect.Value.Cap on ptr to non-array Value"u8;
@@ -9973,17 +9962,17 @@ public static void TestValue_Len(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestValue_Comparable_type {
+internal partial struct TestValue_Comparable_type /*dyn*/ {
     public any I;
 }
 
-[GoType("dyn")] internal partial struct TestValue_Comparable_typeᴛ1 {
+internal partial struct TestValue_Comparable_typeᴛ1 /*dyn*/ {
     internal reflectꓸValue value;
     internal bool comparable;
     internal bool deref;
 }
 
-[GoType("dyn")] internal partial struct TestValue_Comparable_typeᴛ2 {
+internal partial struct TestValue_Comparable_typeᴛ2 /*dyn*/ {
     public nint I;
 }
 
@@ -10179,7 +10168,7 @@ public static void TestValue_Comparable(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct ValueEqualTest {
+partial struct ValueEqualTest {
     internal any v, u;
     internal bool eq;
     internal bool vDeref, uDeref;
@@ -10196,7 +10185,7 @@ internal static ref any nilInterface => ref ᏑnilInterface.ValueSlot;
 internal static any mapInterface = new map<nint, nint>{};
 
 
-        [GoType("dyn")] partial struct Δtypeᴛ36 {
+        partial struct Δtypeᴛ36 /*dyn*/ {
             internal nint i;
         }
 internal static slice<ValueEqualTest> valueEqualTests = new ValueEqualTest[]{
@@ -10365,7 +10354,7 @@ public static void TestValue_Equal(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string areNotComparableˢ = "are not comparable"u8;
 
-[GoType("dyn")] internal partial struct TestValue_EqualNonComparable_type {
+internal partial struct TestValue_EqualNonComparable_type /*dyn*/ {
     public any I;
 }
 
@@ -10434,7 +10423,7 @@ public static partial void TestInitFuncTypes(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string reflectValueClearˢ = "reflect.Value.Clear"u8;
 
-[GoType("dyn")] internal partial struct TestClear_tests {
+internal partial struct TestClear_tests /*dyn*/ {
     internal @string name;
     internal reflectꓸValue value;
     internal Func<reflectꓸValue, bool> testFunc;
@@ -10491,7 +10480,7 @@ public static void TestClear(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fooˢ = "foo"u8;
 
-[GoType("dyn")] internal partial struct TestValuePointerAndUnsafePointer_tests {
+internal partial struct TestValuePointerAndUnsafePointer_tests /*dyn*/ {
     internal @string name;
     internal reflectꓸValue val;
     internal @unsafe.Pointer wantUnsafePointer;

@@ -48,7 +48,7 @@ public static void TestGcSys(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoLocalName("T")] [GoType("[2]array<array<array<array<array<array<array<array<array<ж<nint>>>>>>>>>>")] [GoArrayDims(2, 2, 2, 2, 2, 2, 2, 2, 2, 2)] internal partial struct TestGcDeepNesting_T;
+/*[2][2][2][2][2][2][2][2][2][2]*/ internal partial struct TestGcDeepNesting_T /*[2]array<array<array<array<array<array<array<array<array<ж<nint>>>>>>>>>>*/;
 
 public static void TestGcDeepNesting(ж<testing.T> Ꮡt) {
     var a = @new<TestGcDeepNesting_T>();
@@ -63,7 +63,7 @@ public static void TestGcDeepNesting(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestGcMapIndirection_T {
+internal partial struct TestGcMapIndirection_T /*dyn*/ {
     internal array<nint> a = new(256);
 }
 
@@ -86,7 +86,7 @@ public static void TestGcMapIndirection(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object corruptedHeapˢ = (@string)"corrupted heap"u8;
 
-[GoType("dyn")] internal partial struct TestGcArraySlice_X {
+internal partial struct TestGcArraySlice_X /*dyn*/ {
     internal array<byte> buf = new(1);
     internal slice<byte> nextbuf;
     internal ж<TestGcArraySlice_X> next;
@@ -111,12 +111,12 @@ public static void TestGcArraySlice(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestGcRescan_X {
+internal partial struct TestGcRescan_X /*dyn*/ {
     internal channel<error> c;
     internal ж<TestGcRescan_X> nextx;
 }
 
-[GoType("dyn")] internal partial struct TestGcRescan_Y {
+internal partial struct TestGcRescan_Y /*dyn*/ {
     public partial ref TestGcRescan_X X { get; }
     internal ж<TestGcRescan_Y> nexty;
     internal ж<nint> p;
@@ -166,13 +166,13 @@ public static void TestGcLastTime(ж<testing.T> Ꮡt) {
 
 internal static any hugeSink;
 
-[GoType("dyn")] internal partial struct TestHugeGCInfo_type {
+internal partial struct TestHugeGCInfo_type /*dyn*/ {
     internal float64 x;
     internal array<ж<byte>> y = new(4398465941504);
     internal slice<@string> z;
 }
 
-[GoType("dyn")] internal partial struct TestHugeGCInfo_typeᴛ1 {
+internal partial struct TestHugeGCInfo_typeᴛ1 /*dyn*/ {
     internal float64 x;
     internal array<uintptr> y = new(4398465941504);
     internal slice<@string> z;
@@ -378,7 +378,7 @@ public static void TestGCTestPointerClass(ж<testing.T> Ꮡt) {
     check(nil, otherˢ);
 }
 
-[GoType("dyn")] internal partial struct BenchmarkAllocation_T {
+internal partial struct BenchmarkAllocation_T /*dyn*/ {
     internal ж<byte> x, y;
 }
 
@@ -577,7 +577,7 @@ public static void BenchmarkReadMemStats(ж<testing.B> Ꮡb) {
 internal static readonly object thisBenchmarkCanOnlyBeˢ = (@string)"This benchmark can only be run with GOMAXPROCS > 1"u8;
 
 // Code to build a big tree with lots of pointers.
-[GoType("dyn")] internal partial struct applyGCLoad_node {
+internal partial struct applyGCLoad_node /*dyn*/ {
     internal array<ж<applyGCLoad_node>> children = new(16);
 }
 
@@ -742,7 +742,7 @@ internal static readonly object needGomaxprocs2ˢ = (@string)"need GOMAXPROCS >=
 
 // Construct a large tree both so the GC runs for a while and
 // so we have a data structure to manipulate the pointers of.
-[GoType("dyn")] internal partial struct BenchmarkWriteBarrier_node {
+internal partial struct BenchmarkWriteBarrier_node /*dyn*/ {
     internal ж<BenchmarkWriteBarrier_node> l, r;
 }
 
@@ -797,7 +797,7 @@ public static void BenchmarkWriteBarrier(ж<testing.B> Ꮡb) {
     Δruntime.KeepAlive(wbRoots);
 }
 
-[GoLocalName("obj")] [GoType("[16]ж<byte>")] internal partial struct BenchmarkBulkWriteBarrier_obj;
+internal partial struct BenchmarkBulkWriteBarrier_obj /*[16]ж<byte>*/;
 
 public static void BenchmarkBulkWriteBarrier(ж<testing.B> Ꮡb) {
     if (Δruntime.GOMAXPROCS(-1) < 2) {
@@ -933,7 +933,7 @@ public static void TestMyGenericFunc(ж<testing.T> Ꮡt) {
     runtime_internal_test_package.MyGenericFunc<nint>();
 }
 
-[GoType("dyn")] internal partial struct TestWeakToStrongMarkTermination_T {
+internal partial struct TestWeakToStrongMarkTermination_T /*dyn*/ {
     internal ж<nint> a;
     internal nint b;
 }

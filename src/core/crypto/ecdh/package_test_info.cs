@@ -71,10 +71,10 @@ using static go.crypto.ecdh_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/ecdh/ecdh.go", "ecdh.cs", "AEKIAZaiAAIU8oKClKiCABI2AA4CgpSolqIAAhTygoKUqIKmgqqi")]
-[assembly: go.GoPositionMap("crypto/ecdh/ecdh_test.go", "ecdh_test.cs", "ACc85uqCgoKClIKCloKClIKUgpaCgpSClIKWgoKUgoKWggAJFIKCgqaCgoKCggAGEICSABAKAB1UgoKCgoKUgpSCgpSCgpSCAAgMgoKClKaCgoKCAAgKgoKCgoSgkqDmgoKClIKClIKClIIADQgAK2yCgoKCgpKCkoIAEQwAIVyCgoKCgpKCkoIACwyCgJKAkoCSgLaCgoKClKiCgpSCgoSEgoKClIKCgpSCgpTKgoCSgJKAkoDskoKmACUwsoKUhIKCgoKWkoKCgoKUloKCgIKqooKCgoKUgqaCAAsIggAFFIKCgpaygpSigoKUgoKC", "39-83:1;98-113:1;159-180:1;192-197:1;206-206:1;207-207:2;283-294:1;344-355:1;359-359:1;360-360:2;361-361:3;362-362:4;366-401:1;405-405:1;406-406:2;407-407:3;408-408:4;456-464:1;511-521:1")]
-[assembly: go.GoPositionMap("crypto/ecdh/nist.go", "nist.cs", "ABkwgtaigoKClIKClNyWgpaCgpYACRSCgoKUgoKUgpTWooKCgpSCgpTcloKClAAJFNbGgpS4goKClJSCgpSUpgAJEIKUAAIQ0KQABRgAAxLQpAAFGAADEtCkAAUY")]
-[assembly: go.GoPositionMap("crypto/ecdh/x25519.go", "x25519.cs", "ABQ20KT4gtaCgpSCgoCCpNaCgpSClIKCuO6CgpSClAAIDLKCgoKUpoKEgoKChOKCgoKEgoKCgoKCgoSCgoKCgoKCgoKCgoKEgoKCgpaChIKCqJKCgpQ=")]
+[assembly: go.GoPositionMap("crypto/ecdh/ecdh.go", "ecdh.cs", "AEKIAZaiAAIU8oKClKiCABI2AA4CgpSolqIAAhTygoKUqIKmgqqi", "", "", "87=ConstantTimeCompare/1/1/1;151=ConstantTimeCompare/1/1/1")]
+[assembly: go.GoPositionMap("crypto/ecdh/ecdh_test.go", "ecdh_test.cs", "ACc85uqCgoKClIKCloKClIKUgpaCgpSClIKWgoKUgoKWggAJFIKCgqaCgoKCggAGEICSABAKAB1UgoKCgoKUgpSCgpSCgpSCAAgMgoKClKaCgoKCAAgKgoKCgoSgkqDmgoKClIKClIKClIIADQgAK2yCgoKCgpKCkoIAEQwAIVyCgoKCgpKCkoIACwyCgJKAkoCSgLaCgoKClKiCgpSCgoSEgoKClIKCgpSCgpTKgoCSgJKAkoDskoKmACUwsoKUhIKCgoKWkoKCgoKUloKCgIKqooKCgoKUgqaCAAsIggAFFIKCgpaygpSigoKUgoKC", "39-83:1;98-113:1;159-180:1;192-197:1;206-206:1;207-207:2;283-294:1;344-355:1;359-359:1;360-360:2;361-361:3;362-362:4;366-401:1;405-405:1;406-406:2;407-407:3;408-408:4;456-464:1;511-521:1", "", "141=P256/1/1/6,P384/1/1/14,P521/1/1/25,X25519/1/1/34;190=hexDecode/1/1/1,Sum256/2/2/1;268=P256/1/1/1,Repeat/1/4/7,P384/1/1/15,Repeat/2/4/21,P521/1/1/29,Repeat/3/4/35,X25519/1/1/44,Repeat/4/4/50;341=P256/1/1/1,Repeat/1/3/5,P384/1/1/15,Repeat/2/3/19,P521/1/1/29,Repeat/3/3/33,X25519/1/1/43;569=P256/1/1/4,P384/1/1/5,P521/1/1/6,X25519/1/1/7")]
+[assembly: go.GoPositionMap("crypto/ecdh/nist.go", "nist.cs", "ABkwgtaigoKClIKClNyWgpaCgpYACRSCgoKUgoKUgpTWooKCgpSCgpTcloKClAAJFNbGgpS4goKClJSCgpSUpgAJEIKUAAIQ0KQABRgAAxLQpAAFGAADEtCkAAUY", "", "", "45=Bytes/1/1/3;60=Bytes/1/2/2,PublicKey/1/2/6,Bytes/2/2/6,PublicKey/2/2/7;100=Clone/1/1/2,Bytes/1/1/3;112=Clone/1/1/2,PublicKey/1/2/6,Bytes/1/1/6,PublicKey/2/2/7;136=Clone/1/1/2")]
+[assembly: go.GoPositionMap("crypto/ecdh/x25519.go", "x25519.cs", "ABQ20KT4gtaCgpSCgoCCpNaCgpSClIKCuO6CgpSClAAIDLKCgoKUpoKEgoKChOKCgoKEgoKCgoKCgoSCgoKCgoKCgoKCgoKEgoKCgpaChIKCqJKCgpQ=", "", "", "75=Clone/1/1/2;89=Clone/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -83,7 +83,7 @@ namespace go.crypto;
 public static partial class ecdh_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

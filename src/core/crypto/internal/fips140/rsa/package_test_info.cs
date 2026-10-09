@@ -45,7 +45,7 @@ using static global::go.crypto.@internal.fips140.rsa_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/rsa/keygen_test.go", "keygen_test.cs", "ABgkgoKCloKSgoKCgoKCloKUlKSkxqSEgoKUgpaCgoKCloKCgoKWgoKCyLaAggAKCKKCgpaygoKCgoKCloKUpKSkhIKClIKWgoKChJSCgIK4goKClJSClICC2LaAgsiCgoKmgoKCpoKCgpSCgpQ=", "51-78:1;115-149:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v15_test.go", "pkcs1v15_test.cs", "ABUeggAlUIIABhSClIKCgg==")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v15_test.go", "pkcs1v15_test.cs", "ABUeggAlUIIABhSClIKCgg==", "", "", "62=Size/1/1/8")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v22_test.go", "pkcs1v22_test.cs", "AA8alAANHLgADiCCgoSCgpSCloCC")]
 // </GoSourcePositionMaps>
 
@@ -55,7 +55,7 @@ namespace go.crypto.@internal.fips140;
 public static partial class rsa_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

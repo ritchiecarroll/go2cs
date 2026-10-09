@@ -12,13 +12,13 @@ using static go.encoding.json_internal_test_package;
 
 partial class json_test_package {
 
-[GoType("num:nint")] partial struct Size;
+partial struct Size /*num:nint*/;
 
 public static Size Unrecognized => /* iota */ 0;
 public static Size Small => 1;
 public static Size Large => 2;
 
-[GoRecv] public static error UnmarshalText(this ref Size s, slice<byte> text) {
+public static error UnmarshalText(this ref Size s, slice<byte> text) {
     var exprᴛ1 = strings.ToLower(((@string)text));
     if (exprᴛ1 == "small"u8) {
         s = Small;

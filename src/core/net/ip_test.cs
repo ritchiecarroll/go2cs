@@ -17,7 +17,7 @@ partial class net_internal_test_package {
 //5 zeroes in one group edge case
 // Issue 6628
 
-[GoType("dyn")] partial struct parseIPTestsᴛ1 {
+partial struct parseIPTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal global::go.net_package.IP @out;
 }
@@ -182,11 +182,11 @@ public static void TestMarshalEmptyIP(ж<testing.T> Ꮡt) {
 // IP wildcard equivalent address in Dial/Listen API
 // Opaque byte sequence
 
-[GoType("dyn")] partial struct ipStringTestsᴛ1 {
+partial struct ipStringTestsᴛ1 /*dyn*/ {
     internal global::go.net_package.IP @in;     // see RFC 791 and RFC 4291
     internal @string str; // see RFC 791, RFC 4291 and RFC 5952
     internal slice<byte> byt;
-    [GoEmbedded] internal error error;
+    /*embed*/ internal error error;
 }
 internal static slice<ж<ipStringTestsᴛ1>> ipStringTests;
 internal static void initᴛipStringTests() { ipStringTests = new ж<ipStringTestsᴛ1>[]{
@@ -362,7 +362,7 @@ internal static void benchmarkIPString(ж<testing.B> Ꮡb, nint size) {
 }
 
 
-[GoType("dyn")] partial struct ipMaskTestsᴛ1 {
+partial struct ipMaskTestsᴛ1 /*dyn*/ {
     internal global::go.net_package.IP @in;
     internal global::go.net_package.IPMask mask;
     internal global::go.net_package.IP @out;
@@ -388,7 +388,7 @@ public static void TestIPMask(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct ipMaskStringTestsᴛ1 {
+partial struct ipMaskStringTestsᴛ1 /*dyn*/ {
     internal global::go.net_package.IPMask @in;
     internal @string @out;
 }
@@ -422,7 +422,7 @@ public static void BenchmarkIPMaskString(ж<testing.B> Ꮡb) {
 }
 
 
-[GoType("dyn")] partial struct parseCIDRTestsᴛ1 {
+partial struct parseCIDRTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal global::go.net_package.IP ip;
     internal ж<global::go.net_package.IPNet> net;
@@ -473,7 +473,7 @@ public static void TestParseCIDR(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct ipNetContainsTestsᴛ1 {
+partial struct ipNetContainsTestsᴛ1 /*dyn*/ {
     internal global::go.net_package.IP ip;
     internal ж<global::go.net_package.IPNet> net;
     internal bool ok;
@@ -501,7 +501,7 @@ public static void TestIPNetContains(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct ipNetStringTestsᴛ1 {
+partial struct ipNetStringTestsᴛ1 /*dyn*/ {
     internal ж<global::go.net_package.IPNet> @in;
     internal @string @out;
 }
@@ -525,7 +525,7 @@ public static void TestIPNetString(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct cidrMaskTestsᴛ1 {
+partial struct cidrMaskTestsᴛ1 /*dyn*/ {
     internal nint ones;
     internal nint bits;
     internal global::go.net_package.IPMask @out;
@@ -566,7 +566,7 @@ internal static global::go.net_package.IPMask badmask = new IPMask(new byte[]{25
 internal static global::go.net_package.IPMask v4maskzero = new IPMask(new byte[]{0, 0, 0, 0}.slice());
 
 
-[GoType("dyn")] partial struct networkNumberAndMaskTestsᴛ1 {
+partial struct networkNumberAndMaskTestsᴛ1 /*dyn*/ {
     internal global::go.net_package.IPNet @in;
     internal global::go.net_package.IPNet @out;
 }
@@ -601,13 +601,13 @@ public static void TestNetworkNumberAndMask(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestSplitHostPort_type {
+internal partial struct TestSplitHostPort_type /*dyn*/ {
     internal @string hostPort;
     internal @string host;
     internal @string port;
 }
 
-[GoType("dyn")] internal partial struct TestSplitHostPort_typeᴛ1 {
+internal partial struct TestSplitHostPort_typeᴛ1 /*dyn*/ {
     internal @string hostPort;
     internal @string err;
 }
@@ -691,7 +691,7 @@ public static void TestSplitHostPort(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestJoinHostPort_type {
+internal partial struct TestJoinHostPort_type /*dyn*/ {
     internal @string host;
     internal @string port;
     internal @string hostPort;
@@ -738,7 +738,7 @@ public static void TestJoinHostPort(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct ipAddrFamilyTestsᴛ1 {
+partial struct ipAddrFamilyTestsᴛ1 /*dyn*/ {
     internal global::go.net_package.IP @in;
     internal bool af4;
     internal bool af6;
@@ -778,7 +778,7 @@ public static void TestIPAddrFamily(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct ipAddrScopeTestsᴛ1 {
+partial struct ipAddrScopeTestsᴛ1 /*dyn*/ {
     internal Func<global::go.net_package.IP, bool> scope;
     internal global::go.net_package.IP @in;
     internal bool ok;

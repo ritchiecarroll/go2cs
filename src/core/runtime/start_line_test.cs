@@ -63,7 +63,7 @@ internal static nint inlineClosure() {
     }))();
 }
 
-[GoType("dyn")] internal partial struct TestStartLine_testCases {
+internal partial struct TestStartLine_testCases /*dyn*/ {
     internal @string name;
     internal Func<nint> fn;
     internal nint want;

@@ -11,8 +11,8 @@ using static go.net_package;
 
 partial class net_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestSpuriousENOTAVAIL_type {
-    [GoEmbedded] internal error error;
+internal partial struct TestSpuriousENOTAVAIL_type /*dyn*/ {
+    /*embed*/ internal error error;
     internal bool ok;
 }
 

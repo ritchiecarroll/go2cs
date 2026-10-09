@@ -56,7 +56,7 @@ internal static slice<byte> lzwEncode(slice<byte> @in) {
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string extraᶜ = "\x02\x02\x02\x02"u8;
 
-[GoType("dyn")] internal partial struct TestDecode_testCases {
+internal partial struct TestDecode_testCases /*dyn*/ {
     internal nint nPix; // The number of pixels in the image data.
     // If non-zero, write this many extra bytes inside the data sub-block
     // containing the LZW end code.
@@ -319,7 +319,7 @@ public static void TestTransparentPixelOutsidePaletteRange(ж<testing.T> Ꮡt) {
 internal static readonly object decodeAllˢ = (@string)"DecodeAll:"u8;
 internal static readonly object encodeAllˢ = (@string)"EncodeAll:"u8;
 
-[GoType("dyn")] internal partial struct TestLoopCount_testCases {
+internal partial struct TestLoopCount_testCases /*dyn*/ {
     internal @string name;
     internal slice<byte> data;
     internal nint loopCount;

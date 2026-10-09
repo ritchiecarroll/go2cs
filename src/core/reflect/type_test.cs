@@ -11,9 +11,9 @@ using static global::go.reflect_internal_test_package;
 
 partial class reflect_test_package {
 
-[GoLocalName("mystring")] [GoType("@string")] internal partial struct TestTypeFor_mystring;
+internal partial struct TestTypeFor_mystring /*@string*/;
 
-[GoType("dyn")] internal partial struct TestTypeFor_testcases {
+internal partial struct TestTypeFor_testcases /*dyn*/ {
     internal any wantFrom;
     internal reflectꓸType got;
 }
@@ -38,7 +38,7 @@ public static void TestTypeFor(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string structOfDoesNotSupportˢ = "StructOf does not support methods of embedded interfaces"u8;
 
-[GoType("dyn")] internal partial interface TestStructOfEmbeddedIfaceMethodCall_Named {
+internal partial interface TestStructOfEmbeddedIfaceMethodCall_Named /*dyn*/ {
     @string Name();
 }
 
@@ -60,45 +60,45 @@ public static void TestStructOfEmbeddedIfaceMethodCall(ж<Δtesting.T> Ꮡt) {
     });
 }
 
-[GoType("dyn")] internal partial struct TestIsRegularMemory_args {
+internal partial struct TestIsRegularMemory_args /*dyn*/ {
     internal reflectꓸType t;
 }
 
-[GoType("dyn")] internal partial struct TestIsRegularMemory_S {
-    [GoEmbedded] internal nint @int;
+internal partial struct TestIsRegularMemory_S /*dyn*/ {
+    /*embed*/ internal nint @int;
 }
 
-[GoType("dyn")] internal partial struct TestIsRegularMemory_tests {
+internal partial struct TestIsRegularMemory_tests /*dyn*/ {
     internal @string name;
     internal TestIsRegularMemory_args args;
     internal bool want;
 }
 
-[GoType("dyn")] internal partial struct TestIsRegularMemory_i {
+internal partial struct TestIsRegularMemory_i /*dyn*/ {
     internal nint i;
     internal TestIsRegularMemory_S s;
 }
 
-[GoType("dyn")] internal partial struct TestIsRegularMemory_iᴛ1 {
+internal partial struct TestIsRegularMemory_iᴛ1 /*dyn*/ {
     internal TestIsRegularMemory_S _;
 }
 
-[GoType("dyn")] internal partial struct TestIsRegularMemory_iᴛ2 {
+internal partial struct TestIsRegularMemory_iᴛ2 /*dyn*/ {
     internal nint i;
     internal TestIsRegularMemory_S _;
 }
 
-[GoType("dyn")] internal partial struct TestIsRegularMemory_iᴛ3 {
+internal partial struct TestIsRegularMemory_iᴛ3 /*dyn*/ {
     internal int16 a;
     internal int32 b;
 }
 
-[GoType("dyn")] internal partial struct TestIsRegularMemory_iᴛ4 {
+internal partial struct TestIsRegularMemory_iᴛ4 /*dyn*/ {
     internal int32 x;
     internal int16 y;
 }
 
-[GoType("dyn")] internal partial struct TestIsRegularMemory_iᴛ5 {
+internal partial struct TestIsRegularMemory_iᴛ5 /*dyn*/ {
     internal int32 _;
 }
 
@@ -155,7 +155,7 @@ public static void BenchmarkTypeForError(ж<Δtesting.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestType_CanSeq_tests {
+internal partial struct TestType_CanSeq_tests /*dyn*/ {
     internal @string name;
     internal reflectꓸType tr;
     internal bool want;
@@ -190,7 +190,7 @@ public static void TestType_CanSeq(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestType_CanSeq2_tests {
+internal partial struct TestType_CanSeq2_tests /*dyn*/ {
     internal @string name;
     internal reflectꓸType tr;
     internal bool want;

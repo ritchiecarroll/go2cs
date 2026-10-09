@@ -54,8 +54,8 @@ using static global::go.image.gif_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("image/gif/fuzz_test.go", "fuzz_test.cs", "ABggooKWgoKUgoKUgoKUloKCgpSClIKClKKCgoKUgoKUgoKC", "36-64:1")]
-[assembly: go.GoPositionMap("image/gif/reader_test.go", "reader_test.cs", "ACRClpKCgoCCpICCpAAPBoi0ABM4goKCyoKCgoKUqJaolpSClIKEgoKogpQABhKC3IKCgoKClIKCpoKCgpSCgpSEgoKUgoKCyoKUgoKCAA0MAA0ggoKCgpSC6JSClIKCqIKCgpaCgpSmgqiClpaCgoKEhNaCgpaClpaCgoKEloKClLiCloIABxKWloKCgoSEAAwGggAcRLKSgoKUgoKClIKClIKUggAJDIKCgoKUgoKUgvyygoLKgoKUgoCCpIKCgoKAgqSCgILE1KKCgpSCgpSCgoKCuIKCgpSCgpSCgg==", "357-377:1")]
-[assembly: go.GoPositionMap("image/gif/writer_test.go", "writer_test.cs", "ABcqooKClJKC1qKCgpSS1oKCgpSqooKqopKCgoKCgoKCgoKmyuQABRKCgoKCgpSCgoKClIKCgpSCgqaCgoLKgoKClIKCgoKUgoKUgpSCvKKCgpSCgqaCgoKmgoKCpqb6gpTKgoKClIKCpu6CgpSCgoKUypaCgIKkgoKClIKCloKUgpSAkqaClIKUgpSClIKWgoKClJKClIKClILKgKKAooDkgoKClriAgqbKgpSAgviCgILIgsqCAAgSgoKCpoLcou6CuIKAgoKkgoKClICC3IKCuIKCgoKChIKAgoKkgoKClICCgqaSlLqAgqSAgtoACRSCpriCgoKmgtyCkgAPJgAOIIKAgqSCgpSClIKAgtqikoKCgoKCqAALGoKCggAJDIKCgoCCyoKEgoKCgIKkgIKkgpSCuKaCAAoWgoKCgIKCpICCAAoUgqaCgoKogoKCgpSCgpSCgqgACRSCgoKClIKClgAJFIKCuKKCgoKWgoKCgriigoKCgoIABxKCgoKC6KKCgpSCgoSCgoKCuKKCgpTKgoSCgoKC", "398-402:1")]
+[assembly: go.GoPositionMap("image/gif/reader_test.go", "reader_test.cs", "ACRClpKCgoCCpICCpAAPBoi0ABM4goKCyoKCgoKUqJaolpSClIKEgoKogpQABhKC3IKCgoKClIKCpoKCgpSCgpSEgoKUgoKCyoKUgoKCAA0MAA0ggoKCgpSC6JSClIKCqIKCgpaCgpSmgqiClpaCgoKEhNaCgpaClpaCgoKEloKClLiCloIABxKWloKCgoSEAAwGggAcRLKSgoKUgoKClIKClIKUggAJDIKCgoKUgoKUgvyygoLKgoKUgoCCpIKCgoKAgqSCgILE1KKCgpSCgpSCgoKCuIKCgpSCgpSCgg==", "357-377:1", "", "133=Rect/1/1/3")]
+[assembly: go.GoPositionMap("image/gif/writer_test.go", "writer_test.cs", "ABcqooKClJKC1qKCgpSS1oKCgpSqooKqopKCgoKCgoKCgoKmyuQABRKCgoKCgpSCgoKClIKCgpSCgqaCgoLKgoKClIKCgoKUgoKUgpSCvKKCgpSCgqaCgoKmgoKCpqb6gpTKgoKClIKCpu6CgpSCgoKUypaCgIKkgoKClIKCloKUgpSAkqaClIKUgpSClIKWgoKClJKClIKClILKgKKAooDkgoKClriAgqbKgpSAgviCgILIgsqCAAgSgoKCpoLcou6CuIKAgoKkgoKClICC3IKCuIKCgoKChIKAgoKkgoKClICCgqaSlLqAgqSAgtoACRSCpriCgoKmgtyCkgAPJgAOIIKAgqSCgpSClIKAgtqikoKCgoKCqAALGoKCggAJDIKCgoCCyoKEgoKCgIKkgIKkgpSCuKaCAAoWgoKCgIKCpICCAAoUgqaCgoKogoKCgpSCgpSCgqgACRSCgoKClIKClgAJFIKCuKKCgoKWgoKCgriigoKCgoIABxKCgoKC6KKCgpSCgoSCgoKCuKKCgpTKgoSCgoKC", "398-402:1", "", "209=Bounds/1/1/1;354=Rect/1/3/1,NewPaletted/1/3/1,Rect/2/3/2,NewPaletted/2/3/2,Rect/3/3/3,NewPaletted/3/3/3;393=Add/1/1/2;419=Add/1/1/2;479=Rect/1/1/1,NewPaletted/1/1/1;518=Rect/1/4/2,NewPaletted/1/4/2,Rect/2/4/3,NewPaletted/2/4/3,Rect/3/4/4,NewPaletted/3/4/4,Rect/4/4/5,NewPaletted/4/4/5;568=Rect/1/1/2,NewPaletted/1/1/2;630=Rect/1/9/1,Rect/2/9/2,Rect/3/9/3,Rect/4/9/4,Rect/5/9/5,Rect/6/9/6,Rect/7/9/7,Rect/8/9/8,Rect/9/9/9;748=Intn/1/3/1,Intn/2/3/2,Intn/3/3/3")]
 // </GoSourcePositionMaps>
 
 namespace go.image;
@@ -64,7 +64,7 @@ namespace go.image;
 public static partial class gif_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

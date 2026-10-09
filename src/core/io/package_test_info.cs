@@ -83,7 +83,7 @@ using static global::go.io_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("io/io_test.go", "io_test.cs", "ACA4koKCgoKC6IKCgoKCgpaCgriCgoKCgoK4goKCgoKCuIKCgoKCgriCgoKCgoIACRSCgqyygoKCgoKSggAHEILuguyygoKCgriCgoKCgoK4goKCgoKCuIKCgoKCgriigoKChIKCuKKCgoKEgoIABxCCAAgKgtaohIKCloKCloKCloKCloKCloKCuIKCAAkUsoKClKaCgoKmgoKCpoKCgoKClIKUgoKUgpSCgpSClIKClIKUgoKCgIKkgpSCuIKCgoKCgoCCpIKUgpSAgqSCgoKCgIIAEQiCggANLIKCgoKAgqSAgtqUgoSCgoKCgt6CgpaCggAICIIAAxCCgoKAggAICoKCgoKCgpSCgpSAggAKFILWgoKCgoKAgqaCgoKCgIIADgiiAAMUhIKCggAQCqKCgoKUkpaSgoKCgt6SgoKCggAGEJIACBqCgoLq1IKCgoSigoKClJSClIKCooSCgoKUoqSWgoKClIKCxpKCgvqigoKCgpSmlIKCgoK0AAoEgoKChIKCgoKUlJSCgoKUgoK6goLmgpKCgoKmqIKCkoKiuILCgpKCog==", "515-524:1;527-537:2;540-561:3;569-606:1;582-591:1.1;639-646:1;647-659:2;663-683:3;688-693:4")]
-[assembly: go.GoPositionMap("io/multi_test.go", "multi_test.cs", "ABsmgoKCgoKCgoKCgpSCgoKCpoKCpoKmlJKCgoKUkoKCgpSSuILegoKUgoKClIKUgIIACQiClKyC+qKSiJKUgvyCgqaC1oKCgoKCAA0IiIKEgoKEgpaCloKCloLegqiygoKCgqKCgpaUgpaChJLKgoaCgpSCgoLqkoKCgoKCupKCgoKCgoKUgt6CqLKCgoKClNiygoKCgqKCgqiCloSSAAYSgqaUgtiSgoKUgoK+soKCgoLoooK4koKCgpKogoCCpoLmpoCCyIKChIKEqIKAgsqCgII=", "23-30:1;31-48:2;49-54:3;55-60:4;61-63:5;112-114:1;182-186:1;204-206:1;207-210:2;268-272:1;331-338:1;335-337:1.1")]
+[assembly: go.GoPositionMap("io/multi_test.go", "multi_test.cs", "ABsmgoKCgoKCgoKCgpSCgoKCpoKCpoKmlJKCgoKUkoKCgpSSuILegoKUgoKClIKUgIIACQiClKyC+qKSiJKUgvyCgqaC1oKCgoKCAA0IiIKEgoKEgpaCloKCloLegqiygoKCgqKCgpaUgpaChJLKgoaCgpSCgoLqkoKCgoKCupKCgoKCgoKUgt6CqLKCgoKClNiygoKCgqKCgqiCloSSAAYSgqaUgtiSgoKUgoK+soKCgoLoooK4koKCgpKogoCCpoLmpoCCyIKChIKEqIKAgsqCgII=", "23-30:1;31-48:2;49-54:3;55-60:4;61-63:5;112-114:1;182-186:1;204-206:1;207-210:2;268-272:1;331-338:1;335-337:1.1", "", "79=NewReader/1/3/1,NewReader/2/3/3,NewReader/3/3/4,MultiReader/1/2/2")]
 [assembly: go.GoPositionMap("io/pipe_test.go", "pipe_test.cs", "ABMigoKClIKUqJKCgoKCgoKSgpSCgqaCgoKCgoKUgpS6koKCgoKCgoKClIKUgoKmgoKCAAgUkoKCpoKCgoKClIKCgoKCgqiCgpKCgoKmgpSUgoKUgpSCggARJIKmAAgSgoKCgpSUgpSmgrKCgoKUlIKCgoKClIKUgpSAgtySgoKCgoKC7JKygoKClJSCgoKClIKUgpSAgtySgoKCgoKCuIKCkoKUgoKmgoKSgpSCgqaigpKCgqKCgpSCgpaCgoKClIKEgpSCtAAKBIKIgoCCpIKAgqaCgoCCpIKAggAKCIKsgoSCkoKAgsqCgoCC3IKCgqiChIKCooKCgIKkqIKAgtyCgpSCgoKCyoKCgoKUggAFEIKCuoKC", "267-270:1;278-281:1;292-300:1;351-377:1;355-360:1.1;379-412:2;384-391:2.1;431-433:1")]
 // </GoSourcePositionMaps>
 
@@ -93,7 +93,7 @@ namespace go;
 public static partial class io_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

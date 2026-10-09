@@ -70,7 +70,7 @@ public static void TestFakeTime(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct fakeTimeFrame {
+partial struct fakeTimeFrame {
     internal uint64 time;
     internal @string data;
 }

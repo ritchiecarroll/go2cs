@@ -62,9 +62,9 @@ using static global::go.net.http.cgi_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/cgi/child_test.go", "child_test.cs", "ABwkggAMGoKClICSpICSpICSpICCpICSpIKUgJKkgJKkgJKkgpSClICS+IIACRSCgpSAkqSC6ILugoKUgpSAkviCAAgSgoKUgpSAksiCAAcQgoKUgJIADQiCABQyspKCyoKClICCpIKCgIKkgg==", "184-206:1")]
-[assembly: go.GoPositionMap("net/http/cgi/host_test.go", "host_test.cs", "ACM6tIKClqaCgoKClIKmpoKCgoLWxoKCgoKCgpS0tIKCgoKmtoKClIKCgqaCpoL4goK4ABImhICSpICS+IKCuAASKIKCgoKmgpKClIK4ytaCgrgABxDWgoK47qaCgqbcAAYYsoKmyqyAggAICoKCuO4ADAaCgoy47qaC6JKC/riCgoCSAAkKgoK4goCSpICS+IKCgoKUyrgABhDyhLiClIKClIKCgpSCgpSSgoKCloKUgoSCgoKCgpS02KKCgoKCgrjogoKSyqaEgoK4ptaCgoSSAAgS3OaCgoLMgoKCgJIACQiCAAkagoKC", "260-264:1;348-351:1")]
-[assembly: go.GoPositionMap("net/http/cgi/integration_test.go", "integration_test.cs", "AB42ooS4ABImhICSpICSAAkSggAKELKClIKClIKU2qKEuIKCgoKEgoLsooS4poKAkgAIDKKEuKaCAAgGgoS4ABQysqKCgoKAggAJDpDSgNKApIK4poKC", "179-186:1")]
+[assembly: go.GoPositionMap("net/http/cgi/child_test.go", "child_test.cs", "ABwkggAMGoKClICSpICSpICSpICCpICSpIKUgJKkgJKkgJKkgpSClICS+IIACRSCgpSAkqSC6ILugoKUgpSAkviCAAgSgoKUgpSAksiCAAcQgoKUgJIADQiCABQyspKCyoKClICCpIKCgIKkgg==", "184-206:1", "", "225=Repeat/1/2/16,Repeat/2/2/21;253=NewRequest/1/1/1,NewWriter/1/1/3")]
+[assembly: go.GoPositionMap("net/http/cgi/host_test.go", "host_test.cs", "ACM6tIKClqaCgoKClIKmpoKCgoLWxoKCgoKCgpS0tIKCgoKmtoKClIKCgqaCpoL4goK4ABImhICSpICS+IKCuAASKIKCgoKmgpKClIK4ytaCgrgABxDWgoK47qaCgqbcAAYYsoKmyqyAggAICoKCuO4ADAaCgoy47qaC6JKC/riCgoCSAAkKgoK4goCSpICS+IKCgoKUyrgABhDyhLiClIKClIKCgpSCgpSSgoKCloKUgoSCgoKCgpS02KKCgoKCgrjogoKSyqaEgoK4ptaCgoSSAAgS3OaCgoLMgoKCgJIACQiCAAkagoKC", "260-264:1;348-351:1", "", "357=chunk/1/4/5,chunk/2/4/5,chunk/3/4/5,chunk/4/4/5")]
+[assembly: go.GoPositionMap("net/http/cgi/integration_test.go", "integration_test.cs", "AB42ooS4ABImhICSpICSAAkSggAKELKClIKClIKU2qKEuIKCgoKEgoLsooS4poKAkgAIDKKEuKaCAAgGgoS4ABQysqKCgoKAggAJDpDSgNKApIK4poKC", "179-186:1", "", "183=Repeat/1/2/16,Repeat/2/2/21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -73,7 +73,7 @@ namespace go.net.http;
 public static partial class cgi_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

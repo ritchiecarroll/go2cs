@@ -337,12 +337,12 @@ internal static readonly @string tmpˢ = "{{tmp}}"u8;
 internal static readonly @string tmpvolˢ = "{{tmpvol}}"u8;
 internal static readonly @string tmpnovolˢ = "{{tmpnovol}}"u8;
 
-[GoType("dyn")] internal partial struct TestToNorm_tests {
+internal partial struct TestToNorm_tests /*dyn*/ {
     internal @string arg;
     internal @string want;
 }
 
-[GoType("dyn")] internal partial struct TestToNorm_testsDir {
+internal partial struct TestToNorm_testsDir /*dyn*/ {
     internal @string wd;
     internal @string arg;
     internal @string want;
@@ -697,7 +697,7 @@ public static void TestNTNamespaceSymlink(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIssue52476_tests {
+internal partial struct TestIssue52476_tests /*dyn*/ {
     internal @string lhs, rhs;
     internal @string want;
 }
@@ -724,7 +724,7 @@ public static void TestIssue52476(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAbsWindows_type {
+internal partial struct TestAbsWindows_type /*dyn*/ {
     internal @string path;
     internal @string want;
 }

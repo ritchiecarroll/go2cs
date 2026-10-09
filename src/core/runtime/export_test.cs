@@ -103,7 +103,7 @@ public static Action<any, @unsafe.Pointer> MapValues = values;
 internal static slice<slice<global::go.runtime_package.lockRank>> LockPartialOrder;
 internal static void initᴛLockPartialOrder() { LockPartialOrder = lockPartialOrder; }
 
-[GoType("num:nint")] public partial struct LockRank;
+public partial struct LockRank /*num:nint*/;
 
 public static @string String(this LockRank l) {
     return ((global::go.runtime_package.lockRank)(nint)l).String();
@@ -111,7 +111,7 @@ public static @string String(this LockRank l) {
 
 public const bool PreemptMSupported = /* preemptMSupported */ true;
 
-[GoType] public partial struct LFNode {
+public partial struct LFNode {
     public uint64 Next;
     public uintptr Pushcnt;
 }
@@ -362,7 +362,7 @@ public static uint32 Fastrandn(uint32 n) {
     return randn(n);
 }
 
-[GoType("global::go.runtime_package.profBuf")] public partial struct ProfBuf;
+public partial struct ProfBuf /*global::go.runtime_package.profBuf*/;
 
 public static ж<ProfBuf> NewProfBuf(nint hdrsize, nint bufwords, nint tags) {
     return newProfBuf(hdrsize, bufwords, tags).Reinterpret<global::go.runtime_package.profBuf, ProfBuf>();
@@ -422,7 +422,7 @@ public static void ReadMetricsSlow(ж<global::go.runtime_package.MemStats> Ꮡme
 public static ж<bool> DoubleCheckReadMemStats;
 internal static void initᴛDoubleCheckReadMemStats() { DoubleCheckReadMemStats = ᏑdoubleCheckReadMemStats; }
 
-[GoType("dyn")] internal partial struct ReadMemStatsSlow_bySize {
+internal partial struct ReadMemStatsSlow_bySize /*dyn*/ {
     public uint64 Mallocs, Frees;
 }
 
@@ -539,7 +539,7 @@ internal static void blockOnSystemStackInternal() {
     @lock(Ꮡdeadlock);
 }
 
-[GoType] public partial struct RWMutex {
+public partial struct RWMutex {
     internal global::go.runtime_package.rwmutex rw;
 }
 
@@ -682,7 +682,7 @@ public static UntypedInt PallocChunkPages => /* pallocChunkPages */ 512;
 public static UntypedInt PageAlloc64Bit => /* pageAlloc64Bit */ 1;
 public static uintptr PallocSumBytes => /* pallocSumBytes */ 8;
 
-[GoType("num:uint64")] public partial struct PallocSum;
+public partial struct PallocSum /*num:uint64*/;
 
 public static PallocSum PackPallocSum(nuint start, nuint max, nuint end) {
     return ((PallocSum)(uint64)packPallocSum(start, max, end));
@@ -700,7 +700,7 @@ public static nuint End(this PallocSum m) {
     return ((global::go.runtime_package.pallocSum)(uint64)m).end();
 }
 
-[GoType("global::go.runtime_package.pallocBits")] public partial struct ΔPallocBits;
+public partial struct ΔPallocBits /*global::go.runtime_package.pallocBits*/;
 
 public static (nuint, nuint) Find(this ж<ΔPallocBits> Ꮡb, uintptr npages, nuint searchIdx) {
     return (Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pallocBits>()).find(npages, searchIdx);
@@ -796,7 +796,7 @@ public static @string StringifyPallocBits(ж<ΔPallocBits> Ꮡb, BitRange r) {
     return str;
 }
 
-[GoType("global::go.runtime_package.pallocData")] [GoValueClone("Value")] public partial struct ΔPallocData;
+public partial struct ΔPallocData /*global::go.runtime_package.pallocData*/;
 
 public static (nuint, nuint) FindScavengeCandidate(this ж<ΔPallocData> Ꮡd, nuint searchIdx, uintptr min, uintptr max) {
     return (Ꮡd.Reinterpret<ΔPallocData, global::go.runtime_package.pallocData>()).findScavengeCandidate(searchIdx, min, max);
@@ -823,7 +823,7 @@ public static uint64 FillAligned(uint64 x, nuint m) {
     return fillAligned(x, m);
 }
 
-[GoType("global::go.runtime_package.pageCache")] public partial struct PageCache;
+public partial struct PageCache /*global::go.runtime_package.pageCache*/;
 
 public static uintptr PageCachePages => /* pageCachePages */ 64;
 
@@ -865,9 +865,9 @@ public static void Flush(this ж<PageCache> Ꮡc, ж<PageAlloc> Ꮡs) {
     });
 }
 
-[GoType("num:nuint")] public partial struct ChunkIdx;
+public partial struct ChunkIdx /*num:nuint*/;
 
-[GoType("global::go.runtime_package.pageAlloc")] [GoValueClone("Value")] public partial struct PageAlloc;
+public partial struct PageAlloc /*global::go.runtime_package.pageAlloc*/;
 
 public static (uintptr, uintptr) Alloc(this ж<PageAlloc> Ꮡp, uintptr npages) {
     var pp = Ꮡp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>();
@@ -925,7 +925,7 @@ public static uintptr /*r*/ Scavenge(this ж<PageAlloc> Ꮡp, uintptr nbytes) {
     return r;
 }
 
-[GoRecv] public static slice<AddrRange> InUse(this ref PageAlloc Δp) {
+public static slice<AddrRange> InUse(this ref PageAlloc Δp) {
     var ranges = new slice<AddrRange>(0, () => new(nil), len(Δp.inUse.ranges));
     foreach (var (_, r) in Δp.inUse.ranges) {
         ranges = append(ranges, new AddrRange(r));
@@ -940,7 +940,7 @@ public static ж<ΔPallocData> PallocData(this ж<PageAlloc> Ꮡp, ChunkIdx i) {
 }
 
 // AddrRange is a wrapper around addrRange for testing.
-[GoType] public partial struct AddrRange {
+public partial struct AddrRange {
     internal partial ref global::go.runtime_package.addrRange addrRange { get; }
 }
 
@@ -977,7 +977,7 @@ internal static ж<global::go.runtime_package.sysMemStat> testSysStat;
 internal static void initᴛtestSysStat() { testSysStat = Ꮡmemstats.of(global::go.runtime_package.mstats.Ꮡother_sys); }
 
 // AddrRanges is a wrapper around addrRanges for testing.
-[GoType] public partial struct AddrRanges {
+public partial struct AddrRanges {
     internal partial ref global::go.runtime_package.addrRanges addrRanges { get; }
     internal bool mutable;
 }
@@ -1026,7 +1026,7 @@ public static AddrRanges MakeAddrRanges(params ꓸꓸꓸAddrRange aʗp) {
 
 // Ranges returns a copy of the ranges described by the
 // addrRanges.
-[GoRecv] public static slice<AddrRange> Ranges(this ref AddrRanges a) {
+public static slice<AddrRange> Ranges(this ref AddrRanges a) {
     var result = new slice<AddrRange>(0, () => new(nil), len(a.addrRanges.ranges));
     foreach (var (_, r) in a.addrRanges.ranges) {
         result = append(result, new AddrRange(r));
@@ -1036,7 +1036,7 @@ public static AddrRanges MakeAddrRanges(params ꓸꓸꓸAddrRange aʗp) {
 
 // FindSucc returns the successor to base. See addrRanges.findSucc
 // for more details.
-[GoRecv] public static nint FindSucc(this ref AddrRanges a, uintptr @base) {
+public static nint FindSucc(this ref AddrRanges a, uintptr @base) {
     return a.addrRanges.findSucc(@base);
 }
 
@@ -1057,12 +1057,12 @@ public static void Add(this ж<AddrRanges> Ꮡa, AddrRange r) {
 }
 
 // TotalBytes returns the totalBytes field of the addrRanges.
-[GoRecv] public static uintptr TotalBytes(this ref AddrRanges a) {
+public static uintptr TotalBytes(this ref AddrRanges a) {
     return a.addrRanges.totalBytes;
 }
 
 // BitRange represents a range over a bitmap.
-[GoType] public partial struct BitRange {
+public partial struct BitRange {
     public nuint I, N; // bit index and length in bits
 }
 
@@ -1202,7 +1202,7 @@ public static uintptr PageBase(ChunkIdx c, nuint pageIdx) {
     return chunkBase(((global::go.runtime_package.chunkIdx)(nuint)c)) + (uintptr)pageIdx * (uintptr)pageSize;
 }
 
-[GoType] public partial struct BitsMismatch {
+public partial struct BitsMismatch {
     public uintptr Base;
     public uint64 Got, Want;
 }
@@ -1300,12 +1300,12 @@ internal static void initᴛSemrelease1() { Semrelease1 = semrelease1; }
 public static UntypedInt SemTableSize => /* semTabSize */ 251;
 
 // SemTable is a wrapper around semTable exported for testing.
-[GoType] public partial struct SemTable {
+public partial struct SemTable {
     internal partial ref global::go.runtime_package.semTable semTable { get; }
 }
 
 // Enqueue simulates enqueuing a waiter for a semaphore (or lock) at addr.
-[GoRecv] public static void Enqueue(this ref SemTable t, ж<uint32> Ꮡaddr) {
+public static void Enqueue(this ref SemTable t, ж<uint32> Ꮡaddr) {
     var s = acquireSudog();
     s.Value.releasetime = 0;
     s.Value.acquiretime = 0;
@@ -1316,7 +1316,7 @@ public static UntypedInt SemTableSize => /* semTabSize */ 251;
 // Dequeue simulates dequeuing a waiter for a semaphore (or lock) at addr.
 //
 // Returns true if there actually was a waiter to be dequeued.
-[GoRecv] public static bool Dequeue(this ref SemTable t, ж<uint32> Ꮡaddr) {
+public static bool Dequeue(this ref SemTable t, ж<uint32> Ꮡaddr) {
     var (s, _, _) = t.semTable.rootFor(Ꮡaddr).dequeue(Ꮡaddr);
     if (s != nil) {
         releaseSudog(s);
@@ -1325,7 +1325,7 @@ public static UntypedInt SemTableSize => /* semTabSize */ 251;
     return false;
 }
 
-[GoType("global::go.runtime_package.mspan")] public partial struct MSpan;
+public partial struct MSpan /*global::go.runtime_package.mspan*/;
 
 // Allocate an mspan for testing.
 public static ж<MSpan> AllocMSpan() {
@@ -1362,7 +1362,7 @@ public static UntypedInt TimeHistNumBuckets => /* timeHistNumBuckets */ 40;
 public static UntypedInt TimeHistMinBucketBits => /* timeHistMinBucketBits */ 9;
 public static UntypedInt TimeHistMaxBucketBits => /* timeHistMaxBucketBits */ 48;
 
-[GoType("global::go.runtime_package.timeHistogram")] [GoValueClone("Value")] public partial struct TimeHistogram;
+public partial struct TimeHistogram /*global::go.runtime_package.timeHistogram*/;
 
 // Count returns the counts for the given bucket, subBucket indices.
 // Returns true if the bucket was valid, otherwise returns the counts
@@ -1431,7 +1431,7 @@ public static UntypedInt DefaultHeapMinimum => /* defaultHeapMinimum */ 4194304;
 public static UntypedInt MemoryLimitHeapGoalHeadroomPercent => /* memoryLimitHeapGoalHeadroomPercent */ 3;
 public static UntypedInt MemoryLimitMinHeapGoalHeadroom => /* memoryLimitMinHeapGoalHeadroom */ 1048576;
 
-[GoType] public partial struct GCController {
+public partial struct GCController {
     internal partial ref global::go.runtime_package.gcControllerState gcControllerState { get; }
 }
 
@@ -1472,15 +1472,15 @@ public static uint64 HeapLive(this ж<GCController> Ꮡc) {
     return Ꮡc.of(GCController.ᏑheapLive).Load();
 }
 
-[GoRecv] public static uint64 HeapMarked(this ref GCController c) {
+public static uint64 HeapMarked(this ref GCController c) {
     return c.heapMarked;
 }
 
-[GoRecv] public static uint64 Triggered(this ref GCController c) {
+public static uint64 Triggered(this ref GCController c) {
     return c.triggered;
 }
 
-[GoType] public partial struct GCControllerReviseDelta {
+public partial struct GCControllerReviseDelta {
     public int64 HeapLive;
     public int64 HeapScan;
     public int64 HeapScanWork;
@@ -1542,7 +1542,7 @@ public static void Releasem() {
 
 public static Func<int64, int32, ж<int32>, int32> Timediv = timediv;
 
-[GoType] public partial struct PIController {
+public partial struct PIController {
     internal partial ref global::go.runtime_package.piController piController { get; }
 }
 
@@ -1557,14 +1557,14 @@ public static partial ж<PIController> NewPIController(float64 kp, float64 ti, f
     ));
 }
 
-[GoRecv] public static (float64, bool) Next(this ref PIController c, float64 input, float64 setpoint, float64 period) {
+public static (float64, bool) Next(this ref PIController c, float64 input, float64 setpoint, float64 period) {
     return c.piController.next(input, setpoint, period);
 }
 
 public static UntypedFloat CapacityPerProc => /* capacityPerProc */ 1e+09;
 public static UntypedFloat GCCPULimiterUpdatePeriod => /* gcCPULimiterUpdatePeriod */ 1e+07;
 
-[GoType] public partial struct GCCPULimiter {
+public partial struct GCCPULimiter {
     internal global::go.runtime_package.gcCPULimiterState limiter;
 }
 
@@ -1579,15 +1579,15 @@ public static ж<GCCPULimiter> NewGCCPULimiter(int64 now, int32 gomaxprocs) {
     return l;
 }
 
-[GoRecv] public static uint64 Fill(this ref GCCPULimiter l) {
+public static uint64 Fill(this ref GCCPULimiter l) {
     return l.limiter.bucket.fill;
 }
 
-[GoRecv] public static uint64 Capacity(this ref GCCPULimiter l) {
+public static uint64 Capacity(this ref GCCPULimiter l) {
     return l.limiter.bucket.capacity;
 }
 
-[GoRecv] public static uint64 Overflow(this ref GCCPULimiter l) {
+public static uint64 Overflow(this ref GCCPULimiter l) {
     return l.limiter.overflow;
 }
 
@@ -1621,7 +1621,7 @@ public static void ResetCapacity(this ж<GCCPULimiter> Ꮡl, int64 now, int32 np
 
 public static UntypedInt ScavengePercent => /* scavengePercent */ 1;
 
-[GoType] public partial struct Scavenger {
+public partial struct Scavenger {
     public Func<int64, int64> Sleep;
     public Func<uintptr, (uintptr, int64)> Scavenge;
     public Func<bool> ShouldStop;
@@ -1732,7 +1732,7 @@ public static void Stop(this ж<Scavenger> Ꮡs) {
     ᐸꟷ(s.done);
 }
 
-[GoType] public partial struct ScavengeIndex {
+public partial struct ScavengeIndex {
     internal global::go.runtime_package.scavengeIndex i;
 }
 
@@ -1762,7 +1762,7 @@ public static (ChunkIdx, nuint) Find(this ж<ScavengeIndex> Ꮡs, bool force) {
     return (((ChunkIdx)(nuint)ci), off);
 }
 
-[GoRecv] public static void AllocRange(this ref ScavengeIndex s, uintptr @base, uintptr limit) {
+public static void AllocRange(this ref ScavengeIndex s, uintptr @base, uintptr limit) {
     global::go.runtime_package.chunkIdx sc = chunkIndex(@base);
     global::go.runtime_package.chunkIdx ec = chunkIndex(limit - 1);
     nuint si = chunkPageIndex(@base);
@@ -1815,7 +1815,7 @@ public static void NextGen(this ж<ScavengeIndex> Ꮡs) {
     Ꮡs.of(ScavengeIndex.Ꮡi).nextGen();
 }
 
-[GoRecv] public static void SetEmpty(this ref ScavengeIndex s, ChunkIdx ci) {
+public static void SetEmpty(this ref ScavengeIndex s, ChunkIdx ci) {
     s.i.setEmpty(((global::go.runtime_package.chunkIdx)(nuint)ci));
 }
 
@@ -1838,7 +1838,7 @@ internal static void initᴛZeroBase() { ZeroBase = @unsafe.Pointer.FromBox(Ꮡz
 
 public static uintptr UserArenaChunkBytes => /* userArenaChunkBytes */ 4194304;
 
-[GoType] public partial struct UserArena {
+public partial struct UserArena {
     internal ж<global::go.runtime_package.userArena> arena;
 }
 
@@ -1848,11 +1848,11 @@ public static partial ж<UserArena> NewUserArena() {
 
 // go2cs generated this placeholder — func New is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoRecv] public static void Slice(this ref UserArena a, any sl, nint cap) {
+public static void Slice(this ref UserArena a, any sl, nint cap) {
     a.arena.Δslice(sl, cap);
 }
 
-[GoRecv] public static void Free(this ref UserArena a) {
+public static void Free(this ref UserArena a) {
     a.arena.free();
 }
 
@@ -1941,7 +1941,7 @@ public static bool UnsafePoint(uintptr pc) {
 
 }
 
-[GoType] public partial struct TraceMap {
+public partial struct TraceMap {
     internal partial ref global::go.runtime_package.traceMap traceMap { get; }
 }
 
@@ -1980,7 +1980,7 @@ public static void GCMarkDoneResetRestartFlag() {
     releasem(ref (mp).DerefOrNull());
 }
 
-[GoType] public partial struct BitCursor {
+public partial struct BitCursor {
     internal global::go.runtime_package.bitCursor b;
 }
 

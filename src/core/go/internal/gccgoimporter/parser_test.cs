@@ -16,7 +16,7 @@ using text;
 partial class gccgoimporter_internal_test_package {
 
 
-[GoType("dyn")] partial struct typeParserTestsᴛ1 {
+partial struct typeParserTestsᴛ1 /*dyn*/ {
     internal @string id, typ, want, underlying, methods;
 }
 internal static slice<typeParserTestsᴛ1> typeParserTests = new typeParserTestsᴛ1[]{

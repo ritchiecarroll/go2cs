@@ -33,7 +33,7 @@ using static global::go.crypto.sha512_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/sha512/sha512_test.go", "sha512_test.cs", "ABo0AJ0BvAIAnQG8AgCdAbwCAJ0BvAKCgIKCpoKClIKCloCCpOiCggAKCIIAAxCA/ID8gPyA2oKCgsqCggAJCIIABRaykoKChISCgoKWgoKClISCgpaCgpaAgoKmgoSAgv6C3oKCgpaChIKCgpaAguyCgoCCpIKAgqSCgIKkgoCCyIKCgIIAEiIAChjCgoCCuOaChIKAgoKmgoKCloLKgoKAgoKEgoKCgpSCgoKClIKCgoKUgoKCgpaCgoKUAAoIgoKCpoKCpoKCpoKCypLkgoKSgoKCgoKmgoKCgqaCgoKCyoKmgqaC", "681-683:1;695-695:1;701-701:2;707-707:3;713-713:4;727-729:1;745-787:1;873-877:1;905-938:1;944-948:1;945-947:1.1;949-953:2;950-952:2.1;954-958:3;955-957:3.1;959-963:4;960-962:4.1;971-979:1;980-986:2;987-993:3")]
+[assembly: go.GoPositionMap("crypto/sha512/sha512_test.go", "sha512_test.cs", "ABo0AJ0BvAIAnQG8AgCdAbwCAJ0BvAKCgIKCpoKClIKCloCCpOiCggAKCIIAAxCA/ID8gPyA2oKCgsqCggAJCIIABRaykoKChISCgoKWgoKClISCgpaCgpaAgoKmgoSAgv6C3oKCgpaChIKCgpaAguyCgoCCpIKAgqSCgIKkgoCCyIKCgIIAEiIAChjCgoCCuOaChIKAgoKmgoKCloLKgoKAgoKEgoKCgpSCgoKClIKCgoKUgoKCgpaCgoKUAAoIgoKCpoKCpoKCpoKCypLkgoKSgoKCgoKmgoKCgqaCgoKCyoKmgqaC", "681-683:1;695-695:1;701-701:2;707-707:3;713-713:4;727-729:1;745-787:1;873-877:1;905-938:1;944-948:1;945-947:1.1;949-953:2;950-952:2.1;954-958:3;955-957:3.1;959-963:4;960-962:4.1;971-979:1;980-986:2;987-993:3", "", "700=New512_224/1/1/9,New512_256/1/1/15,New384/1/1/21,New/1/1/27")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -42,7 +42,7 @@ namespace go.crypto;
 public static partial class sha512_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

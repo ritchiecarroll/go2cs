@@ -31,7 +31,7 @@ public static void TestConstants(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct Utf8Map {
+partial struct Utf8Map {
     internal rune r;
     internal @string str;
 }
@@ -346,7 +346,7 @@ public static void TestDecodeInvalidSequence(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct testSequence_info {
+internal partial struct testSequence_info /*dyn*/ {
     internal nint index;
     internal rune r;
 }
@@ -418,7 +418,7 @@ public static void TestNegativeRune(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct RuneCountTest {
+partial struct RuneCountTest {
     internal @string @in;
     internal nint @out;
 }
@@ -458,7 +458,7 @@ public static void TestRuneCountNonASCIIAllocation(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct RuneLenTest {
+partial struct RuneLenTest {
     internal rune r;
     internal nint size;
 }
@@ -486,7 +486,7 @@ public static void TestRuneLen(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct ValidTest {
+partial struct ValidTest {
     internal @string @in;
     internal bool @out;
 }
@@ -530,7 +530,7 @@ public static void TestValid(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct ValidRuneTest {
+partial struct ValidRuneTest {
     internal rune r;
     internal bool ok;
 }
@@ -849,7 +849,7 @@ public static void BenchmarkDecodeJapaneseRune(ж<testing.B> Ꮡb) {
 // functions to avoid dead code elimination.
 internal static bool boolSink;
 
-[GoType("dyn")] internal partial struct BenchmarkFullRune_benchmarks {
+internal partial struct BenchmarkFullRune_benchmarks /*dyn*/ {
     internal @string name;
     internal slice<byte> data;
 }

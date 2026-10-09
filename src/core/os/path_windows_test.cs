@@ -24,7 +24,7 @@ internal static readonly object cannotGetCwdˢ = (@string)"cannot get cwd"u8;
 internal static readonly @string longˢ = "long"u8;
 internal static readonly @string cwdˢ = "cwd"u8;
 
-[GoType("dyn")] internal partial struct TestAddExtendedPrefix_type {
+internal partial struct TestAddExtendedPrefix_type /*dyn*/ {
     internal @string @in, want;
 }
 

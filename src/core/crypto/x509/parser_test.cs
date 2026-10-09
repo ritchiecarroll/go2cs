@@ -19,7 +19,7 @@ using static go.crypto.x509_package;
 
 partial class x509_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestParseASN1String_tests {
+internal partial struct TestParseASN1String_tests /*dyn*/ {
     internal @string name;
     internal cryptobyte_asn1.Tag tag;
     internal slice<byte> value;
@@ -209,7 +209,7 @@ public static void TestParsePolicies(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestDomainNameValid_type {
+internal partial struct TestDomainNameValid_type /*dyn*/ {
     internal @string name;
     internal @string dnsName;
     internal bool constraint;

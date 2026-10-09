@@ -15,7 +15,7 @@ using Δruntime = runtime_package;
 
 partial class runtime_test_package {
 
-[GoType] partial struct MyNode {
+partial struct MyNode {
     public partial ref global::go.runtime_internal_test_package.LFNode LFNode { get; }
     internal nint data;
 }

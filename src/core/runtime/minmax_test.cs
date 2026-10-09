@@ -18,7 +18,7 @@ internal static float64 negInf = Δmath.Inf(-1);
 internal static float64 nan = Δmath.NaN();
 
 
-[GoType("dyn")] partial struct testsᴛ1 {
+partial struct testsᴛ1 /*dyn*/ {
     internal float64 min, max;
 }
 internal static slice<testsᴛ1> tests = new testsᴛ1[]{

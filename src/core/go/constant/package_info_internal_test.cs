@@ -30,7 +30,7 @@ using static go.go.constant_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/constant/value_test.go", "value_test.cs", "ABYgACFcACZqAA4kgoKCgoKWgoKClICCgoKUpIKogoKCgpaCloLOooKCAAsGAGuSAoKCgoSSyoK0oraCgpaEgoKCgpaCgpaCgsqCgoKClMwADwYAI2KCgoKAgqSAggAFEKKClpSkpKaAlIKCpoKApIK0tLSC2KYAFDLC2LTExKTihIKWlKSCpAAKDgALGKKCyoKCgoLK7oKCgpaCloCCpoCC2oKCAAIUgoKCgpSAgqSAguyCggALGIKCqIKCuoKCgoIACRSApIIAChqCgoLcgpKCgoKCgoKClJSCAAoMAAkagoKAgg==", "692-706:1")]
+[assembly: global::go.GoPositionMap("go/constant/value_test.go", "value_test.cs", "ABYgACFcACZqAA4kgoKCgoKWgoKClICCgoKUpIKogoKCgpaCloLOooKCAAsGAGuSAoKCgoSSyoK0oraCgpaEgoKCgpaCgpaCgsqCgoKClMwADwYAI2KCgoKAgqSAggAFEKKClpSkpKaAlIKCpoKApIK0tLSC2KYAFDLC2LTExKTihIKWlKSCpAAKDgALGKKCyoKCgoLK7oKCgpaCloCCpoCC2oKCAAIUgoKCgpSAgqSAguyCggALGIKCqIKCuoKCgoIACRSApIIAChqCgoLcgpKCgoKCgoKClJSCAAoMAAkagoKAgg==", "692-706:1", "", "593=MakeBool/1/1/2,MakeString/1/1/3,MakeInt64/1/1/4,MakeFromLiteral/1/2/5,MakeFromLiteral/2/2/6,MakeFloat64/1/2/7,MakeFloat64/2/2/8,MakeImag/1/1/8;674=Kind/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -39,7 +39,7 @@ namespace go.go;
 public static partial class constant_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

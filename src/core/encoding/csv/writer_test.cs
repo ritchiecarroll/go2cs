@@ -13,7 +13,7 @@ using static go.encoding.csv_package;
 partial class csv_internal_test_package {
 
 
-[GoType("dyn")] partial struct writeTestsᴛ1 {
+partial struct writeTestsᴛ1 /*dyn*/ {
     public slice<slice<@string>> Input;
     public @string Output;
     public error Error;
@@ -72,7 +72,7 @@ public static void TestWrite(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct errorWriter {
+internal partial struct errorWriter {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

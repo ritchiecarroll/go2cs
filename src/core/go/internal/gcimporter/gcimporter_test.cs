@@ -436,7 +436,7 @@ public static void TestImportStdLib(ж<testing.T> Ꮡt) {
 // non-interfaces
 // interfaces
 
-[GoType("dyn")] partial struct importedObjectTestsᴛ1 {
+partial struct importedObjectTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal @string want;
 }
@@ -850,7 +850,7 @@ internal static types.Object lookupObj(ж<testing.T> Ꮡt, ж<typesꓸScope> Ꮡ
     return default!;
 }
 
-[GoType("map[@string, ж<types.Package>]")] partial struct importMap;
+partial struct importMap /*map[@string, ж<types.Package>]*/;
 
 internal static (ж<types.Package>, error) ΔImport(this importMap m, @string path) {
     return (m[path], default!);

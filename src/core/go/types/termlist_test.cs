@@ -85,7 +85,7 @@ public static void TestTermlistIsAll(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestTermlistNorm_type {
+internal partial struct TestTermlistNorm_type /*dyn*/ {
     internal @string xl, want;
 }
 
@@ -112,7 +112,7 @@ public static void TestTermlistNorm(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestTermlistUnion_type {
+internal partial struct TestTermlistUnion_type /*dyn*/ {
     internal @string xl, yl, want;
 }
 
@@ -142,7 +142,7 @@ public static void TestTermlistUnion(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestTermlistIntersect_type {
+internal partial struct TestTermlistIntersect_type /*dyn*/ {
     internal @string xl, yl, want;
 }
 
@@ -174,7 +174,7 @@ public static void TestTermlistIntersect(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestTermlistEqual_type {
+internal partial struct TestTermlistEqual_type /*dyn*/ {
     internal @string xl, yl;
     internal bool want;
 }
@@ -200,7 +200,7 @@ public static void TestTermlistEqual(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestTermlistIncludes_type {
+internal partial struct TestTermlistIncludes_type /*dyn*/ {
     internal @string xl, typ;
     internal bool want;
 }
@@ -228,7 +228,7 @@ public static void TestTermlistIncludes(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestTermlistSupersetOf_type {
+internal partial struct TestTermlistSupersetOf_type /*dyn*/ {
     internal @string xl, typ;
     internal bool want;
 }
@@ -266,7 +266,7 @@ public static void TestTermlistSupersetOf(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestTermlistSubsetOf_type {
+internal partial struct TestTermlistSubsetOf_type /*dyn*/ {
     internal @string xl, yl;
     internal bool want;
 }

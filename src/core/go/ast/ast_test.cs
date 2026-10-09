@@ -9,7 +9,7 @@ using static global::go.go.ast_package;
 partial class ast_internal_test_package {
 
 
-[GoType("dyn")] partial struct commentsᴛ1 {
+partial struct commentsᴛ1 /*dyn*/ {
     internal slice<@string> list;
     internal @string text;
 }
@@ -55,7 +55,7 @@ public static void TestCommentText(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct isDirectiveTestsᴛ1 {
+partial struct isDirectiveTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal bool ok;
 }

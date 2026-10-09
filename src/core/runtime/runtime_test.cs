@@ -331,23 +331,23 @@ public static void TestEqString(ж<testing.T> Ꮡt) {
 }
 
 // make sure we add padding for structs with trailing zero-sized fields
-[GoType("dyn")] internal partial struct TestTrailingZero_T1 {
+internal partial struct TestTrailingZero_T1 /*dyn*/ {
     internal int32 n;
     internal array<byte> z = new(0);
 }
 
-[GoType("dyn")] [StructLayout(LayoutKind.Explicit, Size = 16)] internal partial struct TestTrailingZero_T2 {
+[StructLayout(LayoutKind.Explicit, Size = 16)] internal partial struct TestTrailingZero_T2 /*dyn*/ {
     [FieldOffset(0)] internal int64 n;
     [FieldOffset(8)] internal readonly EmptyStruct z;
 }
 
-[GoType("dyn")] internal partial struct TestTrailingZero_T3 {
+internal partial struct TestTrailingZero_T3 /*dyn*/ {
     internal byte n;
     internal array<EmptyStruct> z = new(4);
 }
 
 // make sure padding can double for both zerosize and alignment
-[GoType("dyn")] [StructLayout(LayoutKind.Explicit, Size = 8)] internal partial struct TestTrailingZero_T4 {
+[StructLayout(LayoutKind.Explicit, Size = 8)] internal partial struct TestTrailingZero_T4 /*dyn*/ {
     [FieldOffset(0)] internal int32 a;
     [FieldOffset(4)] internal int16 b;
     [FieldOffset(6)] internal int8 c;
@@ -355,7 +355,7 @@ public static void TestEqString(ж<testing.T> Ꮡt) {
 }
 
 // make sure we don't pad a zero-sized thing
-[GoType("dyn")] internal partial struct TestTrailingZero_T5 {
+internal partial struct TestTrailingZero_T5 /*dyn*/ {
 }
 
 public static void TestTrailingZero(ж<testing.T> Ꮡt) {
@@ -546,7 +546,7 @@ public static void TestVersion(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestTimediv_type {
+internal partial struct TestTimediv_type /*dyn*/ {
     internal int64 num;
     internal int32 div;
     internal int32 ret;
@@ -650,7 +650,7 @@ public static void BenchmarkOSYield(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkMutexContention_state {
+internal partial struct BenchmarkMutexContention_state /*dyn*/ {
     internal cpu.CacheLinePad _;
     internal Mutex @lock;
     internal cpu.CacheLinePad __;
@@ -703,7 +703,7 @@ internal static readonly @string nsStreakP90ˢ = "ns/streak-p90"u8;
 internal static readonly @string nsStarveP100ˢ = "ns/starve-p100"u8;
 internal static readonly @string nsStarveP90ˢ = "ns/starve-p90"u8;
 
-[GoType("dyn")] internal partial struct BenchmarkMutexCapture_state {
+internal partial struct BenchmarkMutexCapture_state /*dyn*/ {
     internal cpu.CacheLinePad _;
     internal Mutex @lock;
     internal cpu.CacheLinePad __;
@@ -808,7 +808,7 @@ internal static readonly @string soloˢ = "Solo"u8;
 internal static readonly @string fastPingPongˢ = "FastPingPong"u8;
 internal static readonly @string slowPingPongˢ = "SlowPingPong"u8;
 
-[GoType("dyn")] internal partial struct BenchmarkMutexHandoff_state {
+internal partial struct BenchmarkMutexHandoff_state /*dyn*/ {
     internal cpu.CacheLinePad _;
     internal Mutex @lock;
     internal cpu.CacheLinePad __;

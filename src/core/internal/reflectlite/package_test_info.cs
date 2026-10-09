@@ -105,7 +105,7 @@ using static global::go.@internal.reflectlite_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("internal/reflectlite/all_test.go", "all_test.cs", "ABkmgqaCABAggoKCAMIBCAA3+gEAJWCCgoK4goKCuIKC6IKCgpSkpKSkpKSkpKSkpKSkpKSkgoIAMAqCACWAAbKSgoKCgpSUgIIAChIADBqCgoKCyoKSkoKCgriCkoKCggAICIKChIiCggAKBqKGgoKUgoSCgIL4gpKCgpTmzoKClIKCpuaCgoKGggAHEIKCgoKCABQogAAUFoKChIL2ADiEAZSAgqSCgoKUgoLKgoKCuIKCggArCKYACBKCgoKYloKChIaCgoSGgoKEhoKChIaCgoSGgoKssoKU1oKCgIIACBKSqKSokoKoutKCgoKClgAPFKIAHkSCgIIACQqCgpSClIKCgpSCuIKCgoSCgoKmgoKEgoKCABwKgoCSgoCUAAAykpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCmgpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpC2ooKCpqL+goKCgoKCAAkKhIaClIKCABQcAA4igoKCgIIACRTSgoaSkqIAFiqCgoKCgpaCgoKC", "350-363:1;441-441:1;798-801:1;808-817:1;818-827:2;822-822:2.1;831-831:1;833-833:2;861-861:3;862-862:4;863-863:5;864-864:6;865-865:7;866-866:8;867-867:9;868-868:10;869-869:11;870-870:12;871-871:13;872-872:14;873-873:15;874-874:16;875-875:17;876-876:18;877-877:19;878-878:20;879-879:21;880-880:22;881-881:23;882-882:24;883-883:25;884-884:26;885-885:27;889-889:28;890-890:29;891-891:30;892-892:31;893-893:32;894-894:33;895-895:34;896-896:35;897-897:36;898-898:37;899-899:38;900-900:39;901-901:40;902-902:41;903-903:42;904-904:43;905-905:44;906-906:45;907-907:46;908-908:47;909-909:48;910-910:49;911-911:50;912-912:51;913-913:52;917-921:1;1003-1005:1")]
+[assembly: global::go.GoPositionMap("internal/reflectlite/all_test.go", "all_test.cs", "ABkmgqaCABAggoKCAMABCAA3+gEAJWCCgoK4goKCuIKC6IKCgpSkpKSkpKSkpKSkpKSkpKSkgoIAMAqCACWAAbKSgoKCgpSUgIIAChIADBqCgoKCyoKSkoKCgriCkoKCggAICIKChIiCggAKBqKGgoKUgoSCgIL4gpKCgpTmzoKClIKCpuaCgoKGggAHEIKCgoKCABQogAARFoKChIL2ADiEAZSAgqSCgoKUgoLKgoKCuIKCggArCKYACBKCgoKYloKChIaCgoSGgoKEhoKChIaCgoSGgoKssoKU1oKCgIIACBKSqKSokoKoutKCgoKClgAPFKIAHkSCgIIACQqCgpSClIKCgpSCuIKCgoSCgoKmgoKEgoKCABwKgoCSgoCUAAAykpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCmgpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpCSkJKQkpC2ooKCpqL+goKCgoKCAAkKhIaClIKCABQcAA4igoKCgIIACRTSgoaSkqIAFiqCgoKCgpaCgoKC", "350-363:1;441-441:1;798-801:1;808-817:1;818-827:2;822-822:2.1;831-831:1;833-833:2;861-861:3;862-862:4;863-863:5;864-864:6;865-865:7;866-866:8;867-867:9;868-868:10;869-869:11;870-870:12;871-871:13;872-872:14;873-873:15;874-874:16;875-875:17;876-876:18;877-877:19;878-878:20;879-879:21;880-880:22;881-881:23;882-882:24;883-883:25;884-884:26;885-885:27;889-889:28;890-890:29;891-891:30;892-892:31;893-893:32;894-894:33;895-895:34;896-896:35;897-897:36;898-898:37;899-899:38;900-900:39;901-901:40;902-902:41;903-903:42;904-904:43;905-905:44;906-906:45;907-907:46;908-908:47;909-909:48;910-910:49;911-911:50;912-912:51;913-913:52;917-921:1;1003-1005:1", "", "723=NaN/1/10/34,NaN/2/10/34,NaN/3/10/35,NaN/4/10/35,NaN/5/10/36,NaN/6/10/37,NaN/7/10/37,NaN/8/10/38,NaN/9/10/39,NaN/10/10/40;975=TypeOf/1/29/4,Elem/1/4/4,TypeOf/2/29/5,TypeOf/3/29/6,TypeOf/4/29/7,TypeOf/5/29/8,TypeOf/6/29/9,TypeOf/7/29/10,TypeOf/8/29/11,TypeOf/9/29/12,TypeOf/10/29/13,TypeOf/11/29/14,TypeOf/12/29/15,TypeOf/13/29/16,TypeOf/14/29/17,TypeOf/15/29/18,TypeOf/16/29/19,TypeOf/17/29/20,TypeOf/18/29/21,TypeOf/19/29/22,TypeOf/20/29/23,TypeOf/21/29/24,TypeOf/22/29/25,Elem/2/4/25,TypeOf/23/29/26,TypeOf/24/29/27,TypeOf/25/29/28,TypeOf/26/29/29,TypeOf/27/29/30,Elem/3/4/30,TypeOf/28/29/31,TypeOf/29/29/32,Elem/4/4/32")]
 [assembly: global::go.GoPositionMap("internal/reflectlite/reflect_mirror_test.go", "reflect_mirror_test.cs", "ABoqAA4egoKEpIKCgqamgpSCgIKCgoKClOqmgoSGgoKWhIIADAiUgoKApqaChL6SgrKCoqSEgpaCgoKUgoCC", "73-75:1;110-113:1")]
 [assembly: global::go.GoPositionMap("internal/reflectlite/set_test.go", "set_test.cs", "ABIghqKCgoKCAAkIABAogKKAogANFICkkpSigoKCgILqAA4kooKCgoCC")]
 [assembly: global::go.GoPositionMap("internal/reflectlite/tostring_test.go", "tostring_test.cs", "ABAmovaCgoKUgpSkpKSCpKSClLaCgoKUlIKkgoKCgoKUlIKkgoKCgqSCpIKCgoKCgpSUgqSkpA==")]
@@ -117,7 +117,7 @@ namespace go.@internal;
 public static partial class reflectlite_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
@@ -176,6 +176,7 @@ public static partial class reflectlite_test_package
     public partial class IntPtr {}
     public partial class IntPtr1 {}
     public partial class Loop {}
+    [GoLocalName("Loopy")] public partial interface Loopyᴅ {}
     public partial interface Δtypeᴛ30 {}
     public partial struct A {}
     public partial struct B<T> {}

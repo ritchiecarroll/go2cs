@@ -12,7 +12,7 @@ using static go.strconv_internal_test_package;
 
 partial class strconv_test_package {
 
-[GoType] partial struct ftoaTest {
+partial struct ftoaTest {
     internal float64 f;
     internal byte fmt;
     internal nint prec;
@@ -263,7 +263,7 @@ public static void TestFormatFloatInvalidBitSize(ж<testing.T> Ꮡt) {
 // 622666234635.321497e-320 ~= 622666234635.3215e-320
 // making it hard to find the 3rd digit
 
-[GoType("dyn")] partial struct ftoaBenchesᴛ1 {
+partial struct ftoaBenchesᴛ1 /*dyn*/ {
     internal @string name;
     internal float64 @float;
     internal byte fmt;

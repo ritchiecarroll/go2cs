@@ -88,7 +88,7 @@ internal static @string pkgName(@string src) {
     throw panic("missing package header: " + src);
 }
 
-[GoType("dyn")] internal partial struct TestValuesInfo_type {
+internal partial struct TestValuesInfo_type /*dyn*/ {
     internal @string src;
     internal @string expr; // constant expression
     internal @string typ; // constant type
@@ -203,7 +203,7 @@ public static void TestValuesInfo(ж<testing.T> Ꮡt) {
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string brokenᶜ = "package broken_"u8;
 
-[GoType("dyn")] internal partial struct TestTypesInfo_type {
+internal partial struct TestTypesInfo_type /*dyn*/ {
     internal @string src;
     internal @string expr; // expression
     internal @string typ; // value type
@@ -566,18 +566,18 @@ type T[P any] []P
 
 """u8;
 
-[GoType("dyn")] internal partial struct TestInstanceInfo_testInst {
+internal partial struct TestInstanceInfo_testInst /*dyn*/ {
     internal @string name;
     internal slice<@string> targs;
     internal @string typ;
 }
 
-[GoType("dyn")] internal partial struct TestInstanceInfo_type {
+internal partial struct TestInstanceInfo_type /*dyn*/ {
     internal @string src;
     internal slice<TestInstanceInfo_testInst> instances; // recorded instances in source order
 }
 
-[GoType("dyn")] internal partial interface TestInstanceInfo_typeᴛ1 {
+internal partial interface TestInstanceInfo_typeᴛ1 /*dyn*/ {
     ж<types.TypeParamList> TypeParams();
 }
 
@@ -818,7 +818,7 @@ public static void TestInstanceInfo(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct recordedInstance {
+partial struct recordedInstance {
     public ж<ast.Ident> Ident;
     public types.Instance Inst;
 }
@@ -833,7 +833,7 @@ internal static slice<recordedInstance> /*instances*/ sortedInstances(map<ж<ast
     return instances;
 }
 
-[GoType("dyn")] internal partial struct TestDefsInfo_type {
+internal partial struct TestDefsInfo_type /*dyn*/ {
     internal @string src;
     internal @string obj;
     internal @string want;
@@ -882,7 +882,7 @@ public static void TestDefsInfo(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestUsesInfo_type {
+internal partial struct TestUsesInfo_type /*dyn*/ {
     internal @string src;
     internal @string obj;
     internal @string want;
@@ -1053,7 +1053,7 @@ internal static readonly @string importSpecˢ = "importSpec"u8;
 internal static readonly @string caseClauseˢ = "caseClause"u8;
 internal static readonly @string fieldˢ = "field"u8;
 
-[GoType("dyn")] internal partial struct TestImplicitsInfo_type {
+internal partial struct TestImplicitsInfo_type /*dyn*/ {
     internal @string src;
     internal @string want;
 }
@@ -1154,7 +1154,7 @@ var (
 
 """u8;
 
-[GoType("dyn")] internal partial struct TestPkgNameOf_type {
+internal partial struct TestPkgNameOf_type /*dyn*/ {
     internal @string path; // path string enclosed in "'s
     internal @string want;
 }
@@ -1252,7 +1252,7 @@ internal static @string predString(types.TypeAndValue tv) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string missingˢ = "<missing>"u8;
 
-[GoType("dyn")] internal partial struct TestPredicatesInfo_type {
+internal partial struct TestPredicatesInfo_type /*dyn*/ {
     internal @string src;
     internal @string expr;
     internal @string pred;
@@ -1343,7 +1343,7 @@ internal static readonly @string commˢ = "comm"u8;
 internal static readonly @string forˢ = "for"u8;
 internal static readonly @string rangeˢ = "range"u8;
 
-[GoType("dyn")] internal partial struct TestScopesInfo_type {
+internal partial struct TestScopesInfo_type /*dyn*/ {
     internal @string src;
     internal slice<@string> scopes; // list of scope descriptors of the form kind:varlist
 }
@@ -1481,7 +1481,7 @@ public static void TestScopesInfo(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestInitOrderInfo_type {
+internal partial struct TestInitOrderInfo_type /*dyn*/ {
     internal @string src;
     internal slice<@string> inits;
 }
@@ -1658,7 +1658,7 @@ internal static readonly @string packageMainVarA1ˢ = @"package main; var a = 1"
 internal static readonly @string packageMainVarB2ˢ = @"package main; var b = 2"u8;
 internal static readonly @string mainˢ = "main"u8;
 
-[GoType("dyn")] internal partial struct TestMultiFileInitOrder_type {
+internal partial struct TestMultiFileInitOrder_type /*dyn*/ {
     internal slice<ж<ast.File>> files;
     internal @string want;
 }
@@ -1722,7 +1722,7 @@ public static void TestFiles(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("map[@string, ж<types.Package>]")] partial struct testImporter;
+partial struct testImporter /*map[@string, ж<types.Package>]*/;
 
 internal static (ж<types.Package>, error) Import(this testImporter m, @string path) {
     {
@@ -2027,7 +2027,7 @@ public static void TestLookupFieldOrMethodOnNil(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestLookupFieldOrMethod_type {
+internal partial struct TestLookupFieldOrMethod_type /*dyn*/ {
     internal @string src;
     internal bool found;
     internal slice<nint> index;
@@ -2149,7 +2149,7 @@ internal static ж<types.Named> newDefined(typesꓸType underlying) {
     return NewNamed(tname, underlying, default!);
 }
 
-[GoType("dyn")] internal partial struct TestConvertibleTo_type {
+internal partial struct TestConvertibleTo_type /*dyn*/ {
     internal typesꓸType v, t;
     internal bool want;
 }
@@ -2180,7 +2180,7 @@ public static void TestConvertibleTo(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAssignableTo_type {
+internal partial struct TestAssignableTo_type /*dyn*/ {
     internal typesꓸType v, t;
     internal bool want;
 }
@@ -2212,7 +2212,7 @@ public static void TestAssignableTo(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object testMustDeclareBothXAndYˢ = (@string)"test must declare both X and Y"u8;
 
-[GoType("dyn")] internal partial struct TestIdentical_tests {
+internal partial struct TestIdentical_tests /*dyn*/ {
     internal @string src;
     internal bool want;
 }
@@ -2258,7 +2258,7 @@ public static void TestIdentical(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIdentical_issue15173_type {
+internal partial struct TestIdentical_issue15173_type /*dyn*/ {
     internal typesꓸType x, y;
     internal bool want;
 }
@@ -2284,7 +2284,7 @@ public static void TestIdentical_issue15173(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string myIntˢ = "myInt"u8;
 
-[GoType("dyn")] internal partial struct TestIdenticalUnions_type {
+internal partial struct TestIdenticalUnions_type /*dyn*/ {
     internal @string x, y;
     internal bool want;
 }
@@ -2389,7 +2389,7 @@ public static void TestIssue15305(ж<testing.T> Ꮡt) {
     Ꮡt.Errorf("CallExpr has no type"u8);
 }
 
-[GoType("dyn")] internal partial struct TestCompositeLitTypes_type {
+internal partial struct TestCompositeLitTypes_type /*dyn*/ {
     internal @string lit, typ;
 }
 
@@ -2689,7 +2689,7 @@ public static partial void TestInstantiateConcurrent(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestInstantiateErrors_tests {
+internal partial struct TestInstantiateErrors_tests /*dyn*/ {
     internal @string src; // by convention, T must be the type being instantiated
     internal slice<typesꓸType> targs;
     internal nint wantAt; // -1 indicates no error
@@ -2804,7 +2804,7 @@ func fn() {
 
 """u8;
 
-[GoType("dyn")] internal partial struct TestInstantiatedObjects_tests {
+internal partial struct TestInstantiatedObjects_tests /*dyn*/ {
     internal @string name;
     internal types.Object obj;
 }
@@ -2960,7 +2960,7 @@ type Bad Bad // invalid type
 
 """u8;
 
-[GoType("dyn")] internal partial struct TestImplements_tests {
+internal partial struct TestImplements_tests /*dyn*/ {
     public typesꓸType V;
     public ж<types.Interface> T;
     internal bool want;
@@ -3157,7 +3157,7 @@ public static void TestModuleVersion(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFileVersions_type {
+internal partial struct TestFileVersions_type /*dyn*/ {
     internal @string goVersion;
     internal @string fileVersion;
     internal @string wantVersion;
@@ -3276,7 +3276,7 @@ internal static readonly @string types2ˢ = "types2"u8;
 internal static readonly @string typesˢ = "types"u8;
 internal static readonly @string fTypesFuncˢ = "f:*types.Func"u8;
 
-[GoType("dyn")] internal partial struct TestTooNew_type {
+internal partial struct TestTooNew_type /*dyn*/ {
     internal @string goVersion; // package's Go version (as if derived from go.mod file)
     internal @string fileVersion; // file's Go version (becomes a build tag)
     internal @string wantErr; // expected substring of concatenation of all errors

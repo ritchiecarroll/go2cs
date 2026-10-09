@@ -19,7 +19,7 @@ partial class cipher_test_package {
 
 // NIST SP 800-38A pp 27-29
 
-[GoType("dyn")] partial struct cbcAESTestsᴛ1 {
+partial struct cbcAESTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal slice<byte> key;
     internal slice<byte> iv;

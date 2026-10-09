@@ -9,7 +9,7 @@ using static go.@internal.xcoff_package;
 
 partial class xcoff_internal_test_package {
 
-[GoType] internal partial struct archiveTest {
+internal partial struct archiveTest {
     internal @string @file;
     internal global::go.@internal.xcoff_package.ArchiveHeader hdr;
     internal slice<ж<global::go.@internal.xcoff_package.MemberHeader>> members;

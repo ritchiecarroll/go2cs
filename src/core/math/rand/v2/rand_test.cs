@@ -37,7 +37,7 @@ internal static array<uint32> ke = tupleᴛ2ʗ.Item2;
 internal static array<float32> we = tupleᴛ2ʗ.Item3;
 internal static array<float32> fe = tupleᴛ2ʗ.Item4;
 
-[GoType] partial struct statsResults {
+partial struct statsResults {
     internal float64 mean;
     internal float64 stddev;
     internal float64 closeEnough;
@@ -57,7 +57,7 @@ internal static slice<uint64> testSeeds = new uint64[]{1, 1754801282, 1698661970
 
 // checkSimilarDistribution returns success if the mean and stddev of the
 // two statsResults are similar.
-[GoRecv] internal static error checkSimilarDistribution(this ref statsResults sr, ж<statsResults> Ꮡexpected) {
+internal static error checkSimilarDistribution(this ref statsResults sr, ж<statsResults> Ꮡexpected) {
     ref var expected = ref Ꮡexpected.DerefOrNull();
 
     if (!nearEqual(sr.mean, expected.mean, expected.closeEnough, expected.maxError)) {
@@ -416,7 +416,7 @@ internal static nint encodePerm(slice<nint> s) {
     return m;
 }
 
-[GoType("dyn")] internal partial struct TestUniformFactorial_tests {
+internal partial struct TestUniformFactorial_tests /*dyn*/ {
     internal @string name;
     internal Func<nint> fn;
 }

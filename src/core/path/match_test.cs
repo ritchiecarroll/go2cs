@@ -8,7 +8,7 @@ using testing = testing_package;
 
 partial class path_test_package {
 
-[GoType] partial struct MatchTest {
+partial struct MatchTest {
     internal @string pattern, s;
     internal bool match;
     internal error err;

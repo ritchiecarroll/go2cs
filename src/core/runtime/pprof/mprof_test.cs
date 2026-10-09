@@ -23,7 +23,7 @@ partial class pprof_internal_test_package {
 
 internal static any memSink;
 
-[GoType("dyn")] [GoValueClone("x")] internal partial struct allocateTransient1M_type {
+internal partial struct allocateTransient1M_type /*dyn*/ {
     internal array<byte> x = new(1024);
 }
 
@@ -42,7 +42,7 @@ internal static partial void allocateTransient2MInline() {
     memSink = new slice<byte>((2 << (int)(20)));
 }
 
-[GoType] [GoValueClone("pad")] public partial struct Obj32 {
+public partial struct Obj32 {
     internal ж<Obj32> link;
     internal array<byte> pad = new(32 - /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8);
 }
@@ -75,7 +75,7 @@ internal static readonly @string debug1ˢ = "debug=1"u8;
 internal static readonly @string heapˢ = "heap"u8;
 internal static readonly @string protoˢ = "proto"u8;
 
-[GoType("dyn")] internal partial struct TestMemoryProfiler_tests {
+internal partial struct TestMemoryProfiler_tests /*dyn*/ {
     internal slice<@string> stk;
     internal @string legacy;
 }

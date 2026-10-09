@@ -23,7 +23,7 @@ internal static readonly @string xExeˢ = "x.exe"u8;
 internal static readonly @string buildˢ = "build"u8;
 internal static readonly @string toolˢ = "tool"u8;
 
-[GoType("dyn")] internal partial struct TestLinkerGC_tests {
+internal partial struct TestLinkerGC_tests /*dyn*/ {
     internal @string name;
     internal @string program;
     internal slice<@string> want;

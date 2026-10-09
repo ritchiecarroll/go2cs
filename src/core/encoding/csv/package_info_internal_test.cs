@@ -32,7 +32,7 @@ using static go.encoding.csv_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("encoding/csv/fuzz_test.go", "fuzz_test.cs", "AA8egoKEggAIEoKCgoKCgoKCgoSCgpSEgoKCgoKCgpSmlISCgoKCgoKCgoKogoLcmIKWgg==", "16-95:1;83-85:1.1")]
-[assembly: go.GoPositionMap("encoding/csv/reader_test.go", "reader_test.cs", "AC5QAPEC3gWCgoKEgpSCgpSUgoKClrKigoKAgoKUgqaClILKgoKCqIKCgoKCkoKUgqaCgpSUgIKkgoKUgoKAggAIFrKCgqamgoKClIKUgoKUkoKCggACFPKCgoKShIKClIKCtIKUtIK0tIK0lAAJFLKCgpSCgoKCgoKUgs7CgoKClIKCgpSCABIigqaCgLaCgAAMBoKugoC2goCAtoKAgLaCgA==", "408-425:1;428-488:2;625-625:1;629-629:1;641-641:1;645-645:1;649-649:1;653-653:1")]
+[assembly: go.GoPositionMap("encoding/csv/reader_test.go", "reader_test.cs", "AC5QAPEC3gWCgoKEgpSCgpSUgoKClrKigoKAgoKUgqaClILKgoKCqIKCgoKCkoKUgqaCgpSUgIKkgoKUgoKAggAIFrKCgqamgoKClIKUgoKUkoKCggACFPKCgoKShIKClIKCtIKUtIK0tIK0lAAJFLKCgpSCgoKCgoKUgs7CgoKClIKCgpSCABIigqaCgLaCgAAMBoKugoC2goCAtoKAgLaCgA==", "408-425:1;428-488:2;625-625:1;629-629:1;641-641:1;645-645:1;649-649:1;653-653:1", "", "47=Repeat/1/5/303,Repeat/2/5/303,Repeat/3/5/303,Repeat/4/5/304,Repeat/5/5/304")]
 [assembly: go.GoPositionMap("encoding/csv/writer_test.go", "writer_test.cs", "ABccAB9MgoKCgoKClIKClIKCAAoOgtaCgoKCgoSCloKCgoSCuNyigoKCgpQ=")]
 // </GoSourcePositionMaps>
 
@@ -42,7 +42,7 @@ namespace go.encoding;
 public static partial class csv_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

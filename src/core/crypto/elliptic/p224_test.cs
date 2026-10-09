@@ -13,7 +13,7 @@ using static go.crypto.elliptic_package;
 
 partial class elliptic_internal_test_package {
 
-[GoType] internal partial struct baseMultTest {
+internal partial struct baseMultTest {
     internal @string k;
     internal @string x, y;
 }

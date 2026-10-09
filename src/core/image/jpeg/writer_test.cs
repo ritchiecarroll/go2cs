@@ -99,7 +99,7 @@ public static void TestUnscaledQuant(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct testCaseᴛ1 {
+partial struct testCaseᴛ1 /*dyn*/ {
     internal @string filename;
     internal nint quality;
     internal int64 tolerance;

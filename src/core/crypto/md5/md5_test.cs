@@ -18,7 +18,7 @@ using static go.crypto.md5_package;
 
 partial class md5_internal_test_package {
 
-[GoType] internal partial struct md5Test {
+internal partial struct md5Test {
     internal @string @out;
     internal @string @in;
     internal @string halfState; // marshaled hash state after first half of in written, used by TestGoldenMarshal
@@ -178,7 +178,7 @@ public static void TestBlockGeneric(ж<testing.T> Ꮡt) {
 // the data length has a 1 in the 32nd bit. When casted to int, this changes
 // the sign of the value, and causes the modulus operation to return a
 // different result.
-[GoType] internal partial struct unmarshalTest {
+internal partial struct unmarshalTest {
     internal @string state;
     internal @string sum;
 }

@@ -30,7 +30,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class sql_internal_test_package {
 
-[GoType("dyn")] [GoLocalName("dbConn")] internal partial struct init_dbConn {
+internal partial struct init_dbConn /*dyn*/ {
     internal ж<global::go.database.sql_package.DB> db;
     internal ж<global::go.database.sql_package.driverConn> c;
 }
@@ -349,13 +349,13 @@ internal static void clearAllConns(this ж<global::go.database.sql_package.DB> �
     }
 }
 
-[GoRecv] internal static void dumpDeps(this ref global::go.database.sql_package.DB db, ж<testing.T> Ꮡt) {
+internal static void dumpDeps(this ref global::go.database.sql_package.DB db, ж<testing.T> Ꮡt) {
     foreach (var (fc, _) in db.dep) {
         db.dumpDep(Ꮡt, 0, fc, new map<global::go.database.sql_package.finalCloser, bool>{});
     }
 }
 
-[GoRecv] internal static void dumpDep(this ref global::go.database.sql_package.DB db, ж<testing.T> Ꮡt, nint depth, global::go.database.sql_package.finalCloser dep, map<global::go.database.sql_package.finalCloser, bool> seen) {
+internal static void dumpDep(this ref global::go.database.sql_package.DB db, ж<testing.T> Ꮡt, nint depth, global::go.database.sql_package.finalCloser dep, map<global::go.database.sql_package.finalCloser, bool> seen) {
     seen[dep] = true;
     @string indent = strings.Repeat("  "u8, depth);
     var ds = db.dep[dep];
@@ -375,7 +375,7 @@ internal static void clearAllConns(this ж<global::go.database.sql_package.DB> �
 internal static readonly @string peopleˢ = "people"u8;
 internal static readonly @string selectPeopleAgeNameˢ = "SELECT|people|age,name|"u8;
 
-[GoType("dyn")] [GoLocalName("row")] internal partial struct TestQuery_row {
+internal partial struct TestQuery_row /*dyn*/ {
     internal nint age;
     internal @string name;
 }
@@ -430,7 +430,7 @@ public static void TestQuery(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] [GoLocalName("row")] internal partial struct TestQueryContext_row {
+internal partial struct TestQueryContext_row /*dyn*/ {
     internal nint age;
     internal @string name;
 }
@@ -505,7 +505,7 @@ public static void TestQueryContext(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] [GoLocalName("deadliner")] internal partial interface waitCondition_deadliner {
+internal partial interface waitCondition_deadliner /*dyn*/ {
     (time.Time, bool) Deadline();
 }
 
@@ -675,12 +675,12 @@ public static void TestUnsupportedOptions(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string selectPeopleAgeNameˢ2 = "SELECT|people|age,name|;SELECT|people|name|"u8;
 
-[GoType("dyn")] [GoLocalName("row1")] internal partial struct TestMultiResultSetQuery_row1 {
+internal partial struct TestMultiResultSetQuery_row1 /*dyn*/ {
     internal nint age;
     internal @string name;
 }
 
-[GoType("dyn")] [GoLocalName("row2")] internal partial struct TestMultiResultSetQuery_row2 {
+internal partial struct TestMultiResultSetQuery_row2 /*dyn*/ {
     internal @string name;
 }
 
@@ -761,7 +761,7 @@ internal static readonly @string ageˢ = "age"u8;
 internal static readonly @string nameˢ = "name"u8;
 internal static readonly object bobˢ = (@string)"Bob"u8;
 
-[GoType("dyn")] [GoLocalName("row")] internal partial struct TestQueryNamedArg_row {
+internal partial struct TestQueryNamedArg_row /*dyn*/ {
     internal nint age;
     internal @string name;
 }
@@ -1137,7 +1137,7 @@ public static void TestStatementErrorAfterClose(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestStatementQueryRow_type {
+internal partial struct TestStatementQueryRow_type /*dyn*/ {
     internal @string name;
     internal nint want;
 }
@@ -1173,7 +1173,7 @@ public static void TestStatementQueryRow(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct stubDriverStmt {
+internal partial struct stubDriverStmt {
     internal error err;
 }
 
@@ -1196,7 +1196,7 @@ internal static (driver.Rows, error) Query(this stubDriverStmt s, slice<driver�
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string stmtErrorˢ = "STMT ERROR"u8;
 
-[GoType("dyn")] internal partial struct TestStatementClose_tests {
+internal partial struct TestStatementClose_tests /*dyn*/ {
     internal ж<global::go.database.sql_package.ΔStmt> stmt;
     internal @string msg;
 }
@@ -1281,7 +1281,7 @@ public static void TestBogusPreboundParameters(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string insertT1NameAgeˢ2 = "INSERT|t1|name=?,age=?"u8;
 
-[GoType("dyn")] [GoLocalName("execTest")] internal partial struct TestExec_execTest {
+internal partial struct TestExec_execTest /*dyn*/ {
     internal slice<any> args;
     internal @string wantErr;
 }
@@ -1882,7 +1882,7 @@ public static void TestCursorFake(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedErrorWhenˢ = (@string)"expected error when querying nil column, but succeeded"u8;
 
-[GoType("dyn")] internal partial struct TestInvalidNilValues_tests {
+internal partial struct TestInvalidNilValues_tests /*dyn*/ {
     internal @string name;
     internal any input;
     internal @string expectedError;
@@ -2218,13 +2218,13 @@ public static void TestIssue6651(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct nullTestRow {
+internal partial struct nullTestRow {
     internal any nullParam;
     internal any notNullParam;
     internal any scanNullVal;
 }
 
-[GoType] [GoValueClone("rows")] internal partial struct nullTestSpec {
+internal partial struct nullTestSpec {
     internal @string nullType;
     internal @string notNullType;
     internal array<nullTestRow> rows = new(6);
@@ -3206,7 +3206,7 @@ public static void TestRowsImplicitClose(ж<testing.T> Ꮡt) {
 internal static readonly object notUsingRowsCursorˢ = (@string)"not using *rowsCursor"u8;
 internal static readonly @string rowsCursorFailedToCloseˢ = "rowsCursor: failed to close"u8;
 
-[GoType("dyn")] [GoLocalName("row")] internal partial struct TestRowsCloseError_row {
+internal partial struct TestRowsCloseError_row /*dyn*/ {
     internal nint age;
     internal @string name;
 }
@@ -3552,7 +3552,7 @@ public static void TestTxStmtDeadlock(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestConnExpiresFreshOutOfPool_execCases {
+internal partial struct TestConnExpiresFreshOutOfPool_execCases /*dyn*/ {
     internal bool expired;
     internal bool badReset;
 }
@@ -3959,27 +3959,27 @@ public static void TestTxEndBadConn(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial interface concurrentTest {
+internal partial interface concurrentTest {
     void init(testing.TB t, ж<global::go.database.sql_package.DB> db);
     void finish(testing.TB t);
     error test(testing.TB t);
 }
 
-[GoType] internal partial struct concurrentDBQueryTest {
+internal partial struct concurrentDBQueryTest {
     internal ж<global::go.database.sql_package.DB> db;
 }
 
-[GoRecv] internal static void init(this ref concurrentDBQueryTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
+internal static void init(this ref concurrentDBQueryTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     c.db = Ꮡdb;
 }
 
-[GoRecv] internal static void finish(this ref concurrentDBQueryTest c, testing.TB t) {
+internal static void finish(this ref concurrentDBQueryTest c, testing.TB t) {
     c.db = default!;
 }
 
-[GoRecv] internal static error test(this ref concurrentDBQueryTest c, testing.TB t) {
+internal static error test(this ref concurrentDBQueryTest c, testing.TB t) {
     var (rows, err) = c.db.Query(selectPeopleNameˢ);
     if (err != default!) {
         t.Error(err);
@@ -3993,24 +3993,24 @@ public static void TestTxEndBadConn(ж<testing.T> Ꮡt) {
     return default!;
 }
 
-[GoType] internal partial struct concurrentDBExecTest {
+internal partial struct concurrentDBExecTest {
     internal ж<global::go.database.sql_package.DB> db;
 }
 
-[GoRecv] internal static void init(this ref concurrentDBExecTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
+internal static void init(this ref concurrentDBExecTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     c.db = Ꮡdb;
 }
 
-[GoRecv] internal static void finish(this ref concurrentDBExecTest c, testing.TB t) {
+internal static void finish(this ref concurrentDBExecTest c, testing.TB t) {
     c.db = default!;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|name=Chris,age=?,photo=CPHOTO,bdate=?"u8;
 
-[GoRecv] internal static error test(this ref concurrentDBExecTest c, testing.TB t) {
+internal static error test(this ref concurrentDBExecTest c, testing.TB t) {
     var (_, err) = c.db.Exec(nosertPeopleNameChrisAgeˢ, (nint)(3), chrisBirthday);
     if (err != default!) {
         t.Error(err);
@@ -4019,12 +4019,12 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     return default!;
 }
 
-[GoType] internal partial struct concurrentStmtQueryTest {
+internal partial struct concurrentStmtQueryTest {
     internal ж<global::go.database.sql_package.DB> db;
     internal ж<global::go.database.sql_package.ΔStmt> stmt;
 }
 
-[GoRecv] internal static void init(this ref concurrentStmtQueryTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
+internal static void init(this ref concurrentStmtQueryTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     c.db = Ꮡdb;
@@ -4035,7 +4035,7 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     }
 }
 
-[GoRecv] internal static void finish(this ref concurrentStmtQueryTest c, testing.TB t) {
+internal static void finish(this ref concurrentStmtQueryTest c, testing.TB t) {
     if (c.stmt != nil) {
         c.stmt.Close();
         c.stmt = default!;
@@ -4043,7 +4043,7 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     c.db = default!;
 }
 
-[GoRecv] internal static error test(this ref concurrentStmtQueryTest c, testing.TB t) {
+internal static error test(this ref concurrentStmtQueryTest c, testing.TB t) {
     var (rows, err) = c.stmt.Query();
     if (err != default!) {
         t.Errorf("error on query:  %v"u8, err);
@@ -4057,12 +4057,12 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     return default!;
 }
 
-[GoType] internal partial struct concurrentStmtExecTest {
+internal partial struct concurrentStmtExecTest {
     internal ж<global::go.database.sql_package.DB> db;
     internal ж<global::go.database.sql_package.ΔStmt> stmt;
 }
 
-[GoRecv] internal static void init(this ref concurrentStmtExecTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
+internal static void init(this ref concurrentStmtExecTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     c.db = Ꮡdb;
@@ -4073,7 +4073,7 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     }
 }
 
-[GoRecv] internal static void finish(this ref concurrentStmtExecTest c, testing.TB t) {
+internal static void finish(this ref concurrentStmtExecTest c, testing.TB t) {
     if (c.stmt != nil) {
         c.stmt.Close();
         c.stmt = default!;
@@ -4081,7 +4081,7 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     c.db = default!;
 }
 
-[GoRecv] internal static error test(this ref concurrentStmtExecTest c, testing.TB t) {
+internal static error test(this ref concurrentStmtExecTest c, testing.TB t) {
     var (_, err) = c.stmt.Exec((nint)(3), chrisBirthday);
     if (err != default!) {
         t.Errorf("error on exec:  %v"u8, err);
@@ -4090,12 +4090,12 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     return default!;
 }
 
-[GoType] internal partial struct concurrentTxQueryTest {
+internal partial struct concurrentTxQueryTest {
     internal ж<global::go.database.sql_package.DB> db;
     internal ж<global::go.database.sql_package.Tx> tx;
 }
 
-[GoRecv] internal static void init(this ref concurrentTxQueryTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
+internal static void init(this ref concurrentTxQueryTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     c.db = Ꮡdb;
@@ -4106,7 +4106,7 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     }
 }
 
-[GoRecv] internal static void finish(this ref concurrentTxQueryTest c, testing.TB t) {
+internal static void finish(this ref concurrentTxQueryTest c, testing.TB t) {
     if (c.tx != nil) {
         c.tx.Rollback();
         c.tx = default!;
@@ -4114,7 +4114,7 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     c.db = default!;
 }
 
-[GoRecv] internal static error test(this ref concurrentTxQueryTest c, testing.TB t) {
+internal static error test(this ref concurrentTxQueryTest c, testing.TB t) {
     var (rows, err) = c.db.Query(selectPeopleNameˢ);
     if (err != default!) {
         t.Error(err);
@@ -4128,12 +4128,12 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     return default!;
 }
 
-[GoType] internal partial struct concurrentTxExecTest {
+internal partial struct concurrentTxExecTest {
     internal ж<global::go.database.sql_package.DB> db;
     internal ж<global::go.database.sql_package.Tx> tx;
 }
 
-[GoRecv] internal static void init(this ref concurrentTxExecTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
+internal static void init(this ref concurrentTxExecTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     c.db = Ꮡdb;
@@ -4144,7 +4144,7 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     }
 }
 
-[GoRecv] internal static void finish(this ref concurrentTxExecTest c, testing.TB t) {
+internal static void finish(this ref concurrentTxExecTest c, testing.TB t) {
     if (c.tx != nil) {
         c.tx.Rollback();
         c.tx = default!;
@@ -4152,7 +4152,7 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     c.db = default!;
 }
 
-[GoRecv] internal static error test(this ref concurrentTxExecTest c, testing.TB t) {
+internal static error test(this ref concurrentTxExecTest c, testing.TB t) {
     var (_, err) = c.tx.Exec(nosertPeopleNameChrisAgeˢ, (nint)(3), chrisBirthday);
     if (err != default!) {
         t.Error(err);
@@ -4161,13 +4161,13 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     return default!;
 }
 
-[GoType] internal partial struct concurrentTxStmtQueryTest {
+internal partial struct concurrentTxStmtQueryTest {
     internal ж<global::go.database.sql_package.DB> db;
     internal ж<global::go.database.sql_package.Tx> tx;
     internal ж<global::go.database.sql_package.ΔStmt> stmt;
 }
 
-[GoRecv] internal static void init(this ref concurrentTxStmtQueryTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
+internal static void init(this ref concurrentTxStmtQueryTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     c.db = Ꮡdb;
@@ -4182,7 +4182,7 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     }
 }
 
-[GoRecv] internal static void finish(this ref concurrentTxStmtQueryTest c, testing.TB t) {
+internal static void finish(this ref concurrentTxStmtQueryTest c, testing.TB t) {
     if (c.stmt != nil) {
         c.stmt.Close();
         c.stmt = default!;
@@ -4194,7 +4194,7 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     c.db = default!;
 }
 
-[GoRecv] internal static error test(this ref concurrentTxStmtQueryTest c, testing.TB t) {
+internal static error test(this ref concurrentTxStmtQueryTest c, testing.TB t) {
     var (rows, err) = c.stmt.Query();
     if (err != default!) {
         t.Errorf("error on query:  %v"u8, err);
@@ -4208,13 +4208,13 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     return default!;
 }
 
-[GoType] internal partial struct concurrentTxStmtExecTest {
+internal partial struct concurrentTxStmtExecTest {
     internal ж<global::go.database.sql_package.DB> db;
     internal ж<global::go.database.sql_package.Tx> tx;
     internal ж<global::go.database.sql_package.ΔStmt> stmt;
 }
 
-[GoRecv] internal static void init(this ref concurrentTxStmtExecTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
+internal static void init(this ref concurrentTxStmtExecTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     c.db = Ꮡdb;
@@ -4229,7 +4229,7 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     }
 }
 
-[GoRecv] internal static void finish(this ref concurrentTxStmtExecTest c, testing.TB t) {
+internal static void finish(this ref concurrentTxStmtExecTest c, testing.TB t) {
     if (c.stmt != nil) {
         c.stmt.Close();
         c.stmt = default!;
@@ -4241,7 +4241,7 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     c.db = default!;
 }
 
-[GoRecv] internal static error test(this ref concurrentTxStmtExecTest c, testing.TB t) {
+internal static error test(this ref concurrentTxStmtExecTest c, testing.TB t) {
     var (_, err) = c.stmt.Exec((nint)(3), chrisBirthday);
     if (err != default!) {
         t.Errorf("error on exec:  %v"u8, err);
@@ -4250,11 +4250,11 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     return default!;
 }
 
-[GoType] internal partial struct concurrentRandomTest {
+internal partial struct concurrentRandomTest {
     internal slice<concurrentTest> tests;
 }
 
-[GoRecv] internal static void init(this ref concurrentRandomTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
+internal static void init(this ref concurrentRandomTest c, testing.TB t, ж<global::go.database.sql_package.DB> Ꮡdb) {
     c.tests = new concurrentTest[]{new sql_internal_test_package.concurrentDBQueryTestжconcurrentTest(@new<concurrentDBQueryTest>()), new sql_internal_test_package.concurrentDBExecTestжconcurrentTest(@new<concurrentDBExecTest>()), new sql_internal_test_package.concurrentStmtQueryTestжconcurrentTest(@new<concurrentStmtQueryTest>()), new sql_internal_test_package.concurrentStmtExecTestжconcurrentTest(@new<concurrentStmtExecTest>()), new sql_internal_test_package.concurrentTxQueryTestжconcurrentTest(@new<concurrentTxQueryTest>()), new sql_internal_test_package.concurrentTxExecTestжconcurrentTest(@new<concurrentTxExecTest>()), new sql_internal_test_package.concurrentTxStmtQueryTestжconcurrentTest(@new<concurrentTxStmtQueryTest>()), new sql_internal_test_package.concurrentTxStmtExecTestжconcurrentTest(@new<concurrentTxStmtExecTest>())
     }.slice();
     foreach (var (_, ct) in c.tests) {
@@ -4262,13 +4262,13 @@ internal static readonly @string nosertPeopleNameChrisAgeˢ = "NOSERT|people|nam
     }
 }
 
-[GoRecv] internal static void finish(this ref concurrentRandomTest c, testing.TB t) {
+internal static void finish(this ref concurrentRandomTest c, testing.TB t) {
     foreach (var (_, ct) in c.tests) {
         ct.finish(t);
     }
 }
 
-[GoRecv] internal static error test(this ref concurrentRandomTest c, testing.TB t) {
+internal static error test(this ref concurrentRandomTest c, testing.TB t) {
     var ct = c.tests[rand.Intn(len(c.tests))];
     return ct.test(t);
 }
@@ -4575,7 +4575,7 @@ public static void TestIssue20647(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestConcurrency_list {
+internal partial struct TestConcurrency_list /*dyn*/ {
     internal @string name;
     internal concurrentTest ct;
 }
@@ -4749,7 +4749,7 @@ internal static time.Time testUseConns(ж<testing.T> Ꮡt, nint count, time.Time
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object freeConnIsNotOrderedByˢ = (@string)"freeConn is not ordered by returnedAt"u8;
 
-[GoType("dyn")] internal partial struct TestMaxIdleTime_list {
+internal partial struct TestMaxIdleTime_list /*dyn*/ {
     internal time.Duration wantMaxIdleTime;
     internal time.Duration wantMaxLifetime;
     internal time.Duration wantNextCheck;
@@ -4870,7 +4870,7 @@ public static void TestMaxIdleTime(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct nvcDriver {
+internal partial struct nvcDriver {
     internal partial ref fakeDriver fakeDriver { get; }
     internal bool skipNamedValueCheck;
 }
@@ -4884,16 +4884,16 @@ internal static (driver.Conn, error) Open(this ж<nvcDriver> Ꮡd, @string dsn) 
     return (new sql_internal_test_package.nvcConnжConn(Ꮡ(new nvcConn(fc, d.skipNamedValueCheck))), err);
 }
 
-[GoType] internal partial struct nvcConn {
+internal partial struct nvcConn {
     internal partial ref ж<fakeConn> fakeConn { get; }
     internal bool skipNamedValueCheck;
 }
 
-[GoType] internal partial struct decimalInt {
+internal partial struct decimalInt {
     internal nint value;
 }
 
-[GoType] internal partial struct doNotInclude {
+internal partial struct doNotInclude {
 }
 
 internal static driver.NamedValueChecker _ᴛ3ʗ = new sql_internal_test_package.nvcConnжNamedValueChecker(Ꮡ(new nvcConn(nil)));
@@ -4903,7 +4903,7 @@ internal static readonly @string unknownNameValueCheckˢ = "unknown NameValueChe
 internal static readonly @string fromServerˢ = "from-server"u8;
 internal static readonly object outStringˢ = (@string)"OUT:*string"u8;
 
-[GoRecv] internal static error CheckNamedValue(this ref nvcConn c, ж<driver.NamedValue> Ꮡnv) {
+internal static error CheckNamedValue(this ref nvcConn c, ж<driver.NamedValue> Ꮡnv) {
     ref var nv = ref Ꮡnv.DerefOrNull();
 
     if (c.skipNamedValueCheck) {
@@ -4948,7 +4948,7 @@ internal static readonly object execInsertˢ = (@string)"exec insert"u8;
 internal static readonly @string selectKeysDec1Str1Array1ˢ = "SELECT|keys|dec1,str1,array1|"u8;
 internal static readonly object selectˢ = (@string)"select"u8;
 
-[GoType("dyn")] internal partial struct TestNamedValueChecker_list {
+internal partial struct TestNamedValueChecker_list /*dyn*/ {
     internal any got, want;
 }
 
@@ -5069,7 +5069,7 @@ public static void TestOpenConnector(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct ctxOnlyDriver {
+internal partial struct ctxOnlyDriver {
     internal partial ref fakeDriver fakeDriver { get; }
 }
 
@@ -5085,36 +5085,36 @@ internal static driver.Conn _ᴛ4ʗ = new sql_internal_test_package.ctxOnlyConn�
 internal static driver.QueryerContext _ᴛ5ʗ = new sql_internal_test_package.ctxOnlyConnжQueryerContext(Ꮡ(new ctxOnlyConn(nil)));
 internal static driver.ExecerContext _ᴛ6ʗ = new sql_internal_test_package.ctxOnlyConnжExecerContext(Ꮡ(new ctxOnlyConn(nil)));
 
-[GoType] internal partial struct ctxOnlyConn {
+internal partial struct ctxOnlyConn {
     internal ж<fakeConn> fc;
     internal bool queryCtxCalled;
     internal bool execCtxCalled;
 }
 
-[GoRecv] internal static (driver.Tx, error) Begin(this ref ctxOnlyConn c) {
+internal static (driver.Tx, error) Begin(this ref ctxOnlyConn c) {
     return c.fc.Begin();
 }
 
-[GoRecv] internal static error Close(this ref ctxOnlyConn c) {
+internal static error Close(this ref ctxOnlyConn c) {
     return c.fc.Close();
 }
 
 // Prepare is still part of the Conn interface, so while it isn't used
 // must be defined for compatibility.
-[GoRecv] internal static (driver.Stmt, error) Prepare(this ref ctxOnlyConn c, @string q) {
+internal static (driver.Stmt, error) Prepare(this ref ctxOnlyConn c, @string q) {
     throw panic("not used");
 }
 
-[GoRecv] internal static (driver.Stmt, error) PrepareContext(this ref ctxOnlyConn c, context.Context ctx, @string q) {
+internal static (driver.Stmt, error) PrepareContext(this ref ctxOnlyConn c, context.Context ctx, @string q) {
     return c.fc.PrepareContext(ctx, q);
 }
 
-[GoRecv] internal static (driver.Rows, error) QueryContext(this ref ctxOnlyConn c, context.Context ctx, @string q, slice<driver.NamedValue> args) {
+internal static (driver.Rows, error) QueryContext(this ref ctxOnlyConn c, context.Context ctx, @string q, slice<driver.NamedValue> args) {
     c.queryCtxCalled = true;
     return c.fc.QueryContext(ctx, q, args);
 }
 
-[GoRecv] internal static (driver.Result, error) ExecContext(this ref ctxOnlyConn c, context.Context ctx, @string q, slice<driver.NamedValue> args) {
+internal static (driver.Result, error) ExecContext(this ref ctxOnlyConn c, context.Context ctx, @string q, slice<driver.NamedValue> args) {
     c.execCtxCalled = true;
     return c.fc.ExecContext(ctx, q, args);
 }
@@ -5206,7 +5206,7 @@ public static void TestQueryExecContextOnly(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct alwaysErrScanner {
+internal partial struct alwaysErrScanner {
 }
 
 internal static error errTestScanWrap = errors.New("errTestScanWrap"u8);
@@ -5248,7 +5248,7 @@ public static void TestRowsScanProperlyWrapsErrors(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct alwaysErrValuer {
+internal partial struct alwaysErrValuer {
 }
 
 // errEmpty is returned when an empty value is found
@@ -5427,7 +5427,7 @@ public static void TestContextCancelBetweenNextAndErr(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct testScanner {
+internal partial struct testScanner {
     internal Func<any, error> scanf;
 }
 
@@ -5569,7 +5569,7 @@ public static void TestRawBytesReuse(ж<testing.T> Ꮡt) {
 
 // badConn implements a bad driver.Conn, for TestBadDriver.
 // The Exec method panics.
-[GoType] internal partial struct badConn {
+internal partial struct badConn {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -5595,7 +5595,7 @@ internal static (driver.Result, error) Exec(this badConn bc, @string query, slic
 }
 
 // badDriver is a driver.Driver that uses badConn.
-[GoType] internal partial struct badDriver {
+internal partial struct badDriver {
 }
 
 internal static (driver.Conn, error) Open(this badDriver bd, @string name) {
@@ -5637,11 +5637,11 @@ public static void TestBadDriver(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct pingDriver {
+internal partial struct pingDriver {
     internal bool fails;
 }
 
-[GoType] internal partial struct pingConn {
+internal partial struct pingConn {
     internal partial ref badConn badConn { get; }
     internal ж<pingDriver> driver;
 }
@@ -5685,7 +5685,7 @@ public static void TestPing(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoLocalName("Str")] [GoType("@string")] internal partial struct TestTypedString_Str;
+internal partial struct TestTypedString_Str /*@string*/;
 
 // Issue 18101.
 public static void TestTypedString(ж<testing.T> Ꮡt) {
@@ -6030,7 +6030,7 @@ public static void TestIssue69837(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct issue69728Type {
+internal partial struct issue69728Type {
     public nint ID;
     public @string Name;
 }

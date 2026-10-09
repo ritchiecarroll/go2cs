@@ -10,7 +10,7 @@ using static go.sort_internal_test_package;
 partial class sort_test_package {
 
 // A Change is a record of source code changes, recording user, language, and delta size.
-[GoType] partial struct Change {
+partial struct Change {
     internal @string user;
     internal @string language;
     internal nint lines;
@@ -19,7 +19,7 @@ partial class sort_test_package {
 // type lessFunc is a methodless func type — rendered inline as its base delegate
 
 // multiSorter implements the Sort interface, sorting the changes within.
-[GoType] public partial struct multiSorter {
+public partial struct multiSorter {
     internal slice<Change> changes;
     internal slice<Func<ж<Change>, ж<Change>, bool>> less;
 }
@@ -43,12 +43,12 @@ public static ж<multiSorter> OrderedBy(params Span<Func<ж<Change>, ж<Change>,
 }
 
 // Len is part of sort.Interface.
-[GoRecv] public static nint Len(this ref multiSorter ms) {
+public static nint Len(this ref multiSorter ms) {
     return len(ms.changes);
 }
 
 // Swap is part of sort.Interface.
-[GoRecv] public static void Swap(this ref multiSorter ms, nint i, nint j) {
+public static void Swap(this ref multiSorter ms, nint i, nint j) {
     (ms.changes[i], ms.changes[j]) = (ms.changes[j], ms.changes[i]);
 }
 
@@ -58,7 +58,7 @@ public static ж<multiSorter> OrderedBy(params Span<Func<ж<Change>, ж<Change>,
 // less functions twice per call. We could change the functions to return
 // -1, 0, 1 and reduce the number of calls for greater efficiency: an
 // exercise for the reader.
-[GoRecv] public static bool Less(this ref multiSorter ms, nint i, nint j) {
+public static bool Less(this ref multiSorter ms, nint i, nint j) {
     var (p, q) = (Ꮡ(ms.changes, i), Ꮡ(ms.changes, j));
     // Try all but the last comparison.
     nint k = default!;

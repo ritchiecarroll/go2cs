@@ -73,7 +73,7 @@ internal static void randBytes(ж<rand.Rand> Ꮡr, slice<byte> b) {
 }
 
 // A hashSet measures the frequency of hash collisions.
-[GoType] internal partial struct hashSet {
+internal partial struct hashSet {
     internal slice<uint64> list; // list of hashes added
 }
 
@@ -81,26 +81,26 @@ internal static ж<hashSet> newHashSet() {
     return Ꮡ(new hashSet(list: new slice<uint64>(0, 1024)));
 }
 
-[GoRecv] internal static void add(this ref hashSet s, uint64 h) {
+internal static void add(this ref hashSet s, uint64 h) {
     s.list = append(s.list, h);
 }
 
-[GoRecv] internal static void addS(this ref hashSet s, @string x) {
+internal static void addS(this ref hashSet s, @string x) {
     s.add(stringHash(x));
 }
 
-[GoRecv] internal static void addB(this ref hashSet s, slice<byte> x) {
+internal static void addB(this ref hashSet s, slice<byte> x) {
     s.add(bytesHash(x));
 }
 
-[GoRecv] internal static void addS_seed(this ref hashSet s, @string x, global::go.hash.maphash_package.ΔSeed seed) {
+internal static void addS_seed(this ref hashSet s, @string x, global::go.hash.maphash_package.ΔSeed seed) {
     global::go.hash.maphash_package.Hash h = new();
     h.SetSeed(seed);
     h.WriteString(x);
     s.add(h.Sum64());
 }
 
-[GoRecv] internal static void check(this ref hashSet s, ж<testing.T> Ꮡt) {
+internal static void check(this ref hashSet s, ж<testing.T> Ꮡt) {
     Ꮡt.Helper();
     var list = s.list;
     slices.Sort<slice<uint64>, uint64>(list);
@@ -334,7 +334,7 @@ internal static void genPerm(ж<hashSet> Ꮡh, slice<byte> b, slice<uint32> s, n
     }
 }
 
-[GoType] internal partial interface key {
+internal partial interface key {
     void clear();          // set bits all to 0
     void random(ж<rand.Rand> r); // set key to something random
     nint bits();          // how many bits key has
@@ -343,31 +343,31 @@ internal static void genPerm(ж<hashSet> Ꮡh, slice<byte> b, slice<uint32> s, n
     @string name();       // for error reporting
 }
 
-[GoType] internal partial struct bytesKey {
+internal partial struct bytesKey {
     internal slice<byte> b;
 }
 
-[GoRecv] internal static void clear(this ref bytesKey k) {
+internal static void clear(this ref bytesKey k) {
     builtin.clear(k.b);
 }
 
-[GoRecv] internal static void random(this ref bytesKey k, ж<rand.Rand> Ꮡr) {
+internal static void random(this ref bytesKey k, ж<rand.Rand> Ꮡr) {
     randBytes(Ꮡr, k.b);
 }
 
-[GoRecv] internal static nint bits(this ref bytesKey k) {
+internal static nint bits(this ref bytesKey k) {
     return len(k.b) * 8;
 }
 
-[GoRecv] internal static void flipBit(this ref bytesKey k, nint i) {
+internal static void flipBit(this ref bytesKey k, nint i) {
     k.b[(i >> (int)(3))] ^= (byte)((byte)(((byte)1).Lsh((nuint)((nint)(i & 7)))));
 }
 
-[GoRecv] internal static uint64 hash(this ref bytesKey k) {
+internal static uint64 hash(this ref bytesKey k) {
     return bytesHash(k.b);
 }
 
-[GoRecv] internal static @string name(this ref bytesKey k) {
+internal static @string name(this ref bytesKey k) {
     return fmt.Sprintf("bytes%d"u8, len(k.b));
 }
 

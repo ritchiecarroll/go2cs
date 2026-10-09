@@ -23,18 +23,18 @@ internal static time.Time testTime = time_package.Date(2000, 1, 2, 3, 4, 5, 0, t
 internal static readonly @string quOˢ = @"qu""o"u8;
 internal static readonly @string aMessageˢ = "a message"u8;
 
-[GoType("dyn")] internal partial struct TestTextHandler_type {
+internal partial struct TestTextHandler_type /*dyn*/ {
     internal @string name;
     internal global::go.log.slog_package.Attr attr;
     internal @string wantKey, wantVal;
 }
 
-[GoType("dyn")] internal partial struct TestTextHandler_typeᴛ1 {
+internal partial struct TestTextHandler_typeᴛ1 /*dyn*/ {
     public nint A;
     internal nint b;
 }
 
-[GoType("dyn")] internal partial struct TestTextHandler_typeᴛ2 {
+internal partial struct TestTextHandler_typeᴛ2 /*dyn*/ {
     internal @string name;
     internal global::go.log.slog_package.HandlerOptions opts;
     internal @string wantPrefix;
@@ -128,7 +128,7 @@ public static void TestTextHandler(ж<testing.T> Ꮡt) {
 }
 
 // for testing fmt.Sprint
-[GoType] internal partial struct name {
+internal partial struct name {
     public @string First, Last;
 }
 
@@ -137,7 +137,7 @@ internal static @string String(this name n) {
 }
 
 // for testing TextMarshaler
-[GoType] internal partial struct text {
+internal partial struct text {
     internal @string s;
 }
 
@@ -198,7 +198,7 @@ public static void TestTextHandlerAlloc(ж<testing.T> Ꮡt) {
     });
 }
 
-[GoType("dyn")] internal partial struct TestNeedsQuoting_type {
+internal partial struct TestNeedsQuoting_type /*dyn*/ {
     internal @string @in;
     internal bool want;
 }

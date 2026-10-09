@@ -103,7 +103,7 @@ public static void TestAtomicAlignment(ж<testing.T> Ꮡt) {
     ast.Walk(new runtime_test_package.VisitorжVisitor(Ꮡv), new ast.PackageжNode(pkg));
 }
 
-[GoType] partial struct Visitor {
+partial struct Visitor {
     internal ж<token.FileSet> fset;
     internal map<ast.Expr, types.TypeAndValue> types;
     internal map<@string, bool> @checked;
@@ -147,7 +147,7 @@ public static ast.Visitor Visit(this ж<Visitor> Ꮡv, ast.Node n) {
 }
 
 // checkAddr checks to make sure n is a properly aligned address for a 64-bit atomic operation.
-[GoRecv] internal static void checkAddr(this ref Visitor v, ast.Node n) {
+internal static void checkAddr(this ref Visitor v, ast.Node n) {
     switch (n.type()) {
     case ж<ast.IndexExpr> nΔ1: {
         v.checkAddr((~nΔ1).X);
@@ -193,7 +193,7 @@ public static ast.Visitor Visit(this ж<Visitor> Ꮡv, ast.Node n) {
     }}
 }
 
-[GoRecv] internal static @string print(this ref Visitor v, ast.Node n) {
+internal static @string print(this ref Visitor v, ast.Node n) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     printer.Fprint(new runtime_test_package.strings_BuilderжWriter(Ꮡb), v.fset, n);
     return b.String();

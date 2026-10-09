@@ -143,13 +143,13 @@ internal static slice<byte> trimDead(slice<byte> mask) {
 
 internal static slice<byte> infoPtr = new byte[]{typePointer}.slice();
 
-[GoType] partial struct Ptr {
-    [GoEmbedded] internal ж<byte> @byte;
+partial struct Ptr {
+    /*embed*/ internal ж<byte> @byte;
 }
 
 internal static slice<byte> infoPtr10 = new byte[]{typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer}.slice();
 
-[GoType] partial struct ScalarPtr {
+partial struct ScalarPtr {
     internal nint q;
     internal ж<nint> w;
     internal nint e;
@@ -162,7 +162,7 @@ internal static slice<byte> infoScalarPtr = new byte[]{typeScalar, typePointer, 
 
 internal static slice<byte> infoScalarPtr4 = appendꓸꓸꓸ(appendꓸꓸꓸ(appendꓸꓸꓸ(appendꓸꓸꓸ(slice<byte>(default!), infoScalarPtr), infoScalarPtr), infoScalarPtr), infoScalarPtr);
 
-[GoType] partial struct PtrScalar {
+partial struct PtrScalar {
     internal ж<nint> q;
     internal nint w;
     internal ж<nint> e;
@@ -173,7 +173,7 @@ internal static slice<byte> infoScalarPtr4 = appendꓸꓸꓸ(appendꓸꓸꓸ(app
 
 internal static slice<byte> infoPtrScalar = new byte[]{typePointer, typeScalar, typePointer, typeScalar, typePointer, typeScalar}.slice();
 
-[GoType] partial struct BigStruct {
+partial struct BigStruct {
     internal ж<nint> q;
     internal byte w;
     internal array<byte> e = new(17);
@@ -220,11 +220,11 @@ internal static slice<byte> infoBigStruct() {
 }
 
 // i string
-[GoType] partial interface Iface {
+partial interface Iface {
     void f();
 }
 
-[GoType("num:nint")] partial struct IfaceImpl;
+partial struct IfaceImpl /*num:nint*/;
 
 internal static void f(this IfaceImpl _) {
 }

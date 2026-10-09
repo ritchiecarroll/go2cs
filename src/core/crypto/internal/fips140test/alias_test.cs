@@ -13,7 +13,7 @@ internal static array<byte> a = new(100);
 internal static array<byte> b = new(100);
 
 
-[GoType("dyn")] partial struct aliasingTestsᴛ1 {
+partial struct aliasingTestsᴛ1 /*dyn*/ {
     internal slice<byte> x, y;
     internal bool anyOverlap, inexactOverlap;
 }

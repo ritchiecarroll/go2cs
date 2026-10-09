@@ -12,7 +12,7 @@ using static go.log.slog_package;
 
 partial class slog_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestLevelString_type {
+internal partial struct TestLevelString_type /*dyn*/ {
     internal global::go.log.slog_package.ΔLevel @in;
     internal @string want;
 }
@@ -117,7 +117,7 @@ public static void TestLevelAppendText(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestLevelParse_type {
+internal partial struct TestLevelParse_type /*dyn*/ {
     internal @string @in;
     internal global::go.log.slog_package.ΔLevel want;
 }
@@ -146,7 +146,7 @@ public static void TestLevelParse(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestLevelParseError_type {
+internal partial struct TestLevelParseError_type /*dyn*/ {
     internal @string @in;
     internal @string want; // error string should contain this
 }

@@ -11,7 +11,7 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-[GoType("dyn")] internal partial struct TestSizeof_type {
+internal partial struct TestSizeof_type /*dyn*/ {
     internal any val;     // type as a value
     internal uintptr _32bit; // size on 32bit platforms
     internal uintptr _64bit; // size on 64bit platforms

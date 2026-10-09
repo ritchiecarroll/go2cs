@@ -22,20 +22,20 @@ using static go.fmt_internal_test_package;
 
 partial class fmt_test_package {
 
-[GoType] partial struct ScanTest {
+partial struct ScanTest {
     internal @string text;
     internal any @in;
     internal any @out;
 }
 
-[GoType] partial struct ScanfTest {
+partial struct ScanfTest {
     internal @string format;
     internal @string text;
     internal any @in;
     internal any @out;
 }
 
-[GoType] partial struct ScanfMultiTest {
+partial struct ScanfMultiTest {
     internal @string format;
     internal @string text;
     internal slice<any> @in;
@@ -118,12 +118,12 @@ internal static ref renamedComplex64 renamedComplex64Val => ref ᏑrenamedComple
 internal static ж<renamedComplex128> ᏑrenamedComplex128Val = new StandardBox<renamedComplex128>(default(renamedComplex128));
 internal static ref renamedComplex128 renamedComplex128Val => ref ᏑrenamedComplex128Val.Value;
 
-[GoType("@string")] partial struct Xs;
+partial struct Xs /*@string*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string syntaxErrorForXsˢ = "syntax error for xs"u8;
 
-[GoRecv] public static error Scan(this ref Xs x, fmt.ScanState state, rune verb) {
+public static error Scan(this ref Xs x, fmt.ScanState state, rune verb) {
     var (tok, err) = state.Token(true, (rune r) => r == verb);
     if (err != default!) {
         return err;
@@ -141,7 +141,7 @@ internal static ref Xs xVal => ref ᏑxVal.Value;
 
 // IntString accepts an integer followed immediately by a string.
 // It tests the embedding of a scan within a scan.
-[GoType] partial struct IntString {
+partial struct IntString {
     internal nint i;
     internal @string s;
 }
@@ -567,13 +567,13 @@ internal static slice<ScanfMultiTest> multiTests = new ScanfMultiTest[]{
 }.slice();
 
 
-[GoType("dyn")] partial struct readersᴛ1 {
+partial struct readersᴛ1 /*dyn*/ {
     internal @string name;
     internal Func<@string, Δio.Reader> f;
 }
 
-[GoType("dyn")] internal partial struct readers_type {
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct readers_type /*dyn*/ {
+    /*embed*/ public io_package.Reader Reader;
 }
 internal static slice<readersᴛ1> readers = new readersᴛ1[]{
     new("StringReader"u8, (@string s) => new fmt_test_package.strings_ReaderжReader(strings.NewReader(s))),
@@ -896,12 +896,12 @@ public static void TestScanlnWithMiddleNewline(ж<Δtesting.T> Ꮡt) {
 }
 
 // eofCounter is a special Reader that counts reads at end of file.
-[GoType] partial struct eofCounter {
+partial struct eofCounter {
     internal ж<strings.Reader> reader;
     internal nint eofCount;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref eofCounter ec, slice<byte> b) {
+internal static (nint n, error err) Read(this ref eofCounter ec, slice<byte> b) {
     nint n = default!;
     error err = default!;
 
@@ -978,7 +978,7 @@ public static void TestEOFAtEndOfInput(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct eofTestsᴛ1 {
+partial struct eofTestsᴛ1 /*dyn*/ {
     internal @string format;
     internal any v;
 }
@@ -1039,11 +1039,11 @@ public static void TestUnreadRuneWithBufio(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("@string")] partial struct TwoLines;
+partial struct TwoLines /*@string*/;
 
 // Scan attempts to read two lines into the object. Scanln should prevent this
 // because it stops at newline; Scan and Scanf should be fine.
-[GoRecv] public static error Scan(this ref TwoLines t, fmt.ScanState state, rune verb) {
+public static error Scan(this ref TwoLines t, fmt.ScanState state, rune verb) {
     var chars = new slice<rune>(0, 100);
     for (nint nlCount = 0; nlCount < 2; ) {
         var (c, _, err) = state.ReadRune();
@@ -1103,8 +1103,8 @@ public static void TestMultiLine(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestLineByLineFscanf_r {
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct TestLineByLineFscanf_r /*dyn*/ {
+    /*embed*/ public io_package.Reader Reader;
 }
 
 // TestLineByLineFscanf tests that Fscanf does not read past newline. Issue
@@ -1129,12 +1129,12 @@ public static void TestLineByLineFscanf(ж<Δtesting.T> Ꮡt) {
 // TestScanStateCount verifies the correct byte count is returned. Issue 8512.
 
 // runeScanner implements the Scanner interface for TestScanStateCount.
-[GoType] partial struct runeScanner {
+partial struct runeScanner {
     internal rune rune;
     internal nint size;
 }
 
-[GoRecv] internal static error Scan(this ref runeScanner rs, fmt.ScanState state, rune verb) {
+internal static error Scan(this ref runeScanner rs, fmt.ScanState state, rune verb) {
     var (r, size, err) = state.ReadRune();
     rs.rune = r;
     rs.size = size;
@@ -1163,7 +1163,7 @@ public static void TestScanStateCount(ж<Δtesting.T> Ꮡt) {
 // RecursiveInt accepts a string matching %d.%d.%d....
 // and parses it into a linked list.
 // It allows us to benchmark recursive descent style scanners.
-[GoType] partial struct RecursiveInt {
+partial struct RecursiveInt {
     internal nint i;
     internal ж<RecursiveInt> next;
 }
@@ -1289,8 +1289,8 @@ public static void BenchmarkScanRecursiveInt(ж<Δtesting.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkScanRecursiveIntReaderWrapper_buf {
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct BenchmarkScanRecursiveIntReaderWrapper_buf /*dyn*/ {
+    /*embed*/ public io_package.Reader Reader;
 }
 
 public static void BenchmarkScanRecursiveIntReaderWrapper(ж<Δtesting.B> Ꮡb) {
@@ -1366,7 +1366,7 @@ public static void TestHexBytes(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestScanNewlinesAreSpaces_type {
+internal partial struct TestScanNewlinesAreSpaces_type /*dyn*/ {
     internal @string name;
     internal @string text;
     internal nint count;
@@ -1392,7 +1392,7 @@ public static void TestScanNewlinesAreSpaces(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestScanlnNewlinesTerminate_type {
+internal partial struct TestScanlnNewlinesTerminate_type /*dyn*/ {
     internal @string name;
     internal @string text;
     internal nint count;
@@ -1422,7 +1422,7 @@ public static void TestScanlnNewlinesTerminate(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestScanfNewlineMatchFormat_type {
+internal partial struct TestScanfNewlineMatchFormat_type /*dyn*/ {
     internal @string name;
     internal @string text;
     internal @string format;
@@ -1500,10 +1500,10 @@ public static void TestScanfNewlineMatchFormat(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("[2]byte")] partial struct hexBytes;
+partial struct hexBytes /*[2]byte*/;
 
 // Test for issue 12090: Was unreading at EOF, double-scanning a byte.
-[GoRecv] internal static error Scan(this ref hexBytes h, fmt.ScanState ss, rune verb) {
+internal static error Scan(this ref hexBytes h, fmt.ScanState ss, rune verb) {
     ref var b = ref heap<slice<byte>>(out var Ꮡb);
     var (_, err) = Fscanf(new fmt_test_package.fmt_ScanStateᴠReader(ss), "%4x"u8, Ꮡb);
     if (err != default!) {

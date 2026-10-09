@@ -10,7 +10,7 @@ using strconv = strconv_package;
 
 partial class strconv_test_package {
 
-[GoType] partial struct shiftTest {
+partial struct shiftTest {
     internal uint64 i;
     internal nint shift;
     internal @string @out;
@@ -43,7 +43,7 @@ public static void TestDecimalShift(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct roundTest {
+partial struct roundTest {
     internal uint64 i;
     internal nint nd;
     internal @string down, round, up;
@@ -94,7 +94,7 @@ public static void TestDecimalRound(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct roundIntTest {
+partial struct roundIntTest {
     internal uint64 i;
     internal nint shift;
     internal uint64 @int;

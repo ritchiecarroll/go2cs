@@ -69,7 +69,7 @@ using static global::go.@internal.trace_test_package;
 [assembly: go.GoPositionMap("internal/trace/gc_test.go", "gc_test.cs", "ABEkooKUgoIACAaC3gAHEIQACRyAgqTKgpSCgoIACg7GlJSiqIKCgoIABhCAkoKCgoKCgoKCgtiSkoKCgpSCgoKUgoKClIKUpriigIKmqIKCgoKCgpSClJSSgoKUuqaCgpSCgoKUlJSC", "87-118:1;104-104:1.1;119-142:2;154-166:1;167-174:2")]
 [assembly: go.GoPositionMap("internal/trace/oldtrace_test.go", "oldtrace_test.cs", "ABcgooKClIKCgoKClKKCgpSUgoKWgoKCgoKClJSAgqaCggAKFpSAgsaCtoKC+qSC", "28-84:1")]
 [assembly: go.GoPositionMap("internal/trace/reader_test.go", "reader_test.cs", "ABgwgtaCgoKUgoKCgpSCgoKUyoi0goKClIKCgpaCppSkpKSkgqSkpAAMEqKCgoCCpJSCgoKClIKAgqSUgpSAgraAgsiChIKClIKCgpSCgoKUgpSAgrbmooSCgpSCgoKUkoCCpA==", "39-45:1;55-93:1")]
-[assembly: go.GoPositionMap("internal/trace/summary_test.go", "summary_test.cs", "ABgcgoKsgoSCgoKAgqSAgraClIKUggALCIKCAAwggoKCgoKUgqaCAA4IgoIAABCCgpQAR5ABgoKClIKogoKSgqSCqIKClIKAgpS2goK6gpSCgsyClIKCgoKUgsyUgriCgoKm1qKCgpSElIKUgoK4goKCppaCgqaCkoKUgpSU5qKUgraClIKClIKCpoKClIKUgILYppSCtoKUgoKUgoKmgoKUgpSAgtgACwiigpSClIKUgpSClIKCpoKCyoKCgoKogoKYkoKCgpSClKiCguyCgIKUtoKC", "89-93:1")]
+[assembly: go.GoPositionMap("internal/trace/summary_test.go", "summary_test.cs", "ABgcgoKsgoSCgoKAgqSAgraClIKUggALCIKCAAwggoKCgoKUgqaCAA4IgoIAABCCgpQAR5ABgoKClIKogoKSgqSCqIKClIKAgpS2goK6gpSCgsyClIKCgoKUgsyUgriCgoKm1qKCgpSElIKUgoK4goKCppaCgqaCkoKUgpSU5qKUgraClIKClIKCpoKClIKUgILYppSCtoKUgoKUgoKmgoKUgpSAgtgACwiigpSClIKUgpSClIKCpoKCyoKCgoKogoKYkoKCgpSClKiCguyCgIKUtoKC", "89-93:1", "", "114=Invoke/1/3/29,Invoke/2/3/47,Invoke/3/3/65")]
 [assembly: go.GoPositionMap("internal/trace/trace_test.go", "trace_test.cs", "ACYwgoIACiCCgpSCgoKUgpSCgpSClIKkgqSCpIKCgriCggAIDILWgoSUpOaipoKCgoKCgoKClIKUgIKkgt6CgoKCgpSCgoKSgpSClIKUgoKCgoKCgqaCpoKmgpKCAAYQgoKCgqiCgoKClIK4goKCqIKCgpQACAqijgAMDIKCgoKUgoKClILKgoKUggAJFIKUgoKUgoKClIKUgpS2gpS2gpS2gpS2lIL6gtaCABAGooIAARYAT54B7siUggASJoKCgpSAgraUgoKUgoKClIKUgoKUgpSCgpSCpKSCpIKkgoKCgriCggAIDIKUpNaClKTWgtaClIKk1oKmgpKEgoKUgoKClIKUlpaChICSpKKCgJKCABMKgpaChIKClIKClIKUgpSUlJSM0oKUgIKClKSWloKouIKC7pSklKaSlJKClJSSgpQ=", "25-82:1;100-209:1;213-302:1;314-496:1;438-448:1.1;533-552:1;578-644:1;645-647:2;648-653:3;654-659:4")]
 // </GoSourcePositionMaps>
 
@@ -79,7 +79,7 @@ namespace go.@internal;
 public static partial class trace_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

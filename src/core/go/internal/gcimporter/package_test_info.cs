@@ -52,7 +52,7 @@ using static global::go.go.@internal.gcimporter_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/internal/gcimporter/gcimporter_test.go", "gcimporter_test.cs", "ACU+goIACAz0goKUgoSCgoKWgoKCgoKClKaCgoKCgoKUgqbUgoKClICCgqTWtIKWhLiEgoKEgoSAuIKCgvr0woKogsyCgIKAgsiEgqiCgoKWgpSWkoKCgpS4uoKCgoSCgoKUhIKChIKClIKEgqiCgpTYqrKCgoKUlKaCgoKClLaCgpQADQbCloKWgoKCloKCgoCCpoSCgoKUgpSEgqiClIKW2oIAARLagpTIgrqCgqamgoKmgqaCgpaCgpKAgtYACQSCgpSWgpiSgoKCgpSEgoKCgriCgpYACQYAFDCCloKWgoKCgpSChIKCgpaCgoKWgoKWgILe1IKCloKCqIKCgoKClIK6lICCAAgKgpaCloSCgoKClICCgoKCggANEJKWgpaCgoKCloKCgoKAkgAKCMKWgpaCgrqCgpaClpaCgsbkopaCloKChJaiAAgEgpaCqIKCgoKYkoKCgqaCqIKCgqiCgqiC+KKWgpaChAAMHIKCgoCC1tSCloKW1oKWgqiCgoCC9oKWgpbWgpaCltaCloKWpoKCgoKClKaigoKCgtaigIKkgoLMgAASBIKWgpaCgoCCpoSEgoKWkoKClKaaAAIQpoKCgsKCgILEpA==", "165-214:1;380-384:1;794-803:1;821-826:2")]
+[assembly: global::go.GoPositionMap("go/internal/gcimporter/gcimporter_test.go", "gcimporter_test.cs", "ACU+goIACAz0goKUgoSCgoKWgoKCgoKClKaCgoKCgoKUgqbUgoKClICCgqTWtIKWhLiEgoKEgoSAuIKCgvr0woKogsyCgIKAgsiEgqiCgoKWgpSWkoKCgpS4uoKCgoSCgoKUhIKChIKClIKEgqiCgpTYqrKCgoKUlKaCgoKClLaCgpQADQbCloKWgoKCloKCgoCCpoSCgoKUgpSEgqiClIKW2oIAARLagpTIgrqCgqamgoKmgqaCgpaCgpKAgtYACQSCgpSWgpiSgoKCgpSEgoKCgriCgpYACQYAFDCCloKWgoKCgpSChIKCgpaCgoKWgoKWgILe1IKCloKCqIKCgoKClIK6lICCAAgKgpaCloSCgoKClICCgoKCggANEJKWgpaCgoKCloKCgoKAkgAKCMKWgpaCgrqCgpaClpaCgsbkopaCloKChJaiAAgEgpaCqIKCgoKYkoKCgqaCqIKCgqiCgqiC+KKWgpaChAAMHIKCgoCC1tSCloKW1oKWgqiCgoCC9oKWgpbWgpaCltaCloKWpoKCgoKClKaigoKCgtaigIKkgoLMgAASBIKWgpaCgoCCpoSEgoKWkoKClKaaAAIQpoKCgsKCgILEpA==", "165-214:1;380-384:1;794-803:1;821-826:2", "", "267=Default/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;
@@ -61,7 +61,7 @@ namespace go.go.@internal;
 public static partial class gcimporter_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

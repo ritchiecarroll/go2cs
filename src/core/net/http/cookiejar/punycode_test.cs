@@ -29,7 +29,7 @@ partial class cookiejar_internal_test_package {
 // (R) <sono><supiido><de>
 // (S) -> $1.00 <-
 
-[GoType("dyn")] partial struct punycodeTestCasesᴛ1 {
+partial struct punycodeTestCasesᴛ1 /*dyn*/ {
     internal @string s, encoded;
 }
 internal static array<punycodeTestCasesᴛ1> punycodeTestCases = new punycodeTestCasesᴛ1[]{

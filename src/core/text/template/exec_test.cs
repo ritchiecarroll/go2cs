@@ -25,7 +25,7 @@ partial class template_internal_test_package {
 internal static ж<bool> debug = flag.Bool("debug"u8, false, "show the errors produced by the tests"u8);
 
 // T has lots of interesting pieces to use to test execution.
-[GoType] [GoValueClone("AI")] public partial struct T {
+public partial struct T {
     // Basics
     public bool True;
     public nint I;
@@ -96,17 +96,17 @@ internal static ж<bool> debug = flag.Bool("debug"u8, false, "show the errors pr
     internal nint unexported;
 }
 
-[GoType("[]@string")] public partial struct S;
+public partial struct S /*[]@string*/;
 
 public static @string Method0(this S _) {
     return "M0"u8;
 }
 
-[GoType] public partial struct U {
+public partial struct U {
     public @string V;
 }
 
-[GoType] public partial struct V {
+public partial struct V {
     internal nint j;
 }
 
@@ -122,7 +122,7 @@ public static @string String(this ж<V> Ꮡv) {
     return fmt.Sprintf("<%d>"u8, v.j);
 }
 
-[GoType] public partial struct W {
+public partial struct W {
     internal nint k;
 }
 
@@ -213,7 +213,7 @@ internal static void initᴛtVal() {
 internal static slice<ж<T>> tSliceOfNil = new ж<T>[]{default!}.slice();
 
 // A non-empty interface.
-[GoType] public partial interface I {
+public partial interface I {
     @string Method0();
 }
 
@@ -244,29 +244,29 @@ internal static ж<slice<nint>> newIntSlice(params ꓸꓸꓸnint nʗp) {
 }
 
 // Simple methods with and without arguments.
-[GoRecv] public static @string Method0(this ref T t) {
+public static @string Method0(this ref T t) {
     return "M0"u8;
 }
 
-[GoRecv] public static nint Method1(this ref T t, nint a) {
+public static nint Method1(this ref T t, nint a) {
     return a;
 }
 
-[GoRecv] public static @string Method2(this ref T t, uint16 a, @string b) {
+public static @string Method2(this ref T t, uint16 a, @string b) {
     return fmt.Sprintf("Method2: %d %s"u8, a, b);
 }
 
-[GoRecv] public static @string Method3(this ref T t, any v) {
+public static @string Method3(this ref T t, any v) {
     return fmt.Sprintf("Method3: %v"u8, v);
 }
 
-[GoRecv] public static ж<T> Copy(this ref T t) {
+public static ж<T> Copy(this ref T t) {
     var n = @new<T>();
     n.Value = t.ΔClone();
     return n;
 }
 
-[GoRecv] public static slice<nint> MAdd(this ref T t, nint a, slice<nint> b) {
+public static slice<nint> MAdd(this ref T t, nint a, slice<nint> b) {
     var v = new slice<nint>(len(b));
     foreach (var (i, x) in b) {
         v[i] = x + a;
@@ -277,7 +277,7 @@ internal static ж<slice<nint>> newIntSlice(params ꓸꓸꓸnint nʗp) {
 internal static error myError = errors.New("my error"u8);
 
 // MyError returns a value and an error according to its argument.
-[GoRecv] public static (bool, error) MyError(this ref T t, bool error) {
+public static (bool, error) MyError(this ref T t, bool error) {
     if (error) {
         return (true, myError);
     }
@@ -285,14 +285,14 @@ internal static error myError = errors.New("my error"u8);
 }
 
 // A few methods to test chaining.
-[GoRecv] public static ж<U> GetU(this ref T t) {
+public static ж<U> GetU(this ref T t) {
     return t.U;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string trueˢ = "true"u8;
 
-[GoRecv] public static @string TrueFalse(this ref U u, bool b) {
+public static @string TrueFalse(this ref U u, bool b) {
     if (b) {
         return trueˢ;
     }
@@ -303,7 +303,7 @@ internal static @string typeOf(any arg) {
     return fmt.Sprintf("%T"u8, arg);
 }
 
-[GoType] internal partial struct execTest {
+internal partial struct execTest {
     internal @string name;
     internal @string input;
     internal @string output;
@@ -375,7 +375,7 @@ internal static @string bigUint = fmt.Sprintf("0x%x"u8, (nuint)(((nuint)1).Lsh((
 // More variadic function corner cases. Some runes would get evaluated
 // as constant floats instead of ints. Issue 34483.
 
-    [GoType("dyn")] partial struct Δtype {
+    partial struct Δtype /*dyn*/ {
         internal nint a;
         internal @string b;
     }
@@ -958,7 +958,7 @@ internal static readonly @string delimsˢ = "delims"u8;
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string helloᶜ = "Hello, world"u8;
 
-[GoType("dyn")] internal partial struct TestDelims_type {
+internal partial struct TestDelims_type /*dyn*/ {
     public @string Str;
 }
 
@@ -1060,13 +1060,13 @@ public static void TestExecError(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct CustomError {
+public partial struct CustomError {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string heyoˢ = "heyo !"u8;
 
-[GoRecv] public static @string Error(this ref CustomError _) {
+public static @string Error(this ref CustomError _) {
     return heyoˢ;
 }
 
@@ -1088,7 +1088,7 @@ public static void TestExecError_CustomError(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestJSEscaping_testCases {
+internal partial struct TestJSEscaping_testCases /*dyn*/ {
     internal @string @in, exp;
 }
 
@@ -1112,7 +1112,7 @@ public static void TestJSEscaping(ж<testing.T> Ꮡt) {
 }
 
 // A nice example: walk a binary tree.
-[GoType] public partial struct Tree {
+public partial struct Tree {
     public nint Val;
     public ж<Tree> Left, Right;
 }
@@ -1282,7 +1282,7 @@ public static void TestFinalForPrintf(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct cmpTest {
+internal partial struct cmpTest {
     internal @string expr;
     internal @string truth;
     internal bool ok;
@@ -1423,7 +1423,7 @@ internal static slice<cmpTest> cmpTests = new cmpTest[]{
     new("eq .NonNilMap .NonNilMap"u8, ""u8, false)
 }.slice();
 
-[GoType("dyn")] internal partial struct TestComparison_type {
+internal partial struct TestComparison_type /*dyn*/ {
     public nuint Uthree, Ufour;
     public nint NegOne, Three;
     public ж<nint> Ptr, NilPtr;
@@ -1554,7 +1554,7 @@ internal static readonly @string alwaysErrorText = "always be failing"u8;
 
 internal static error alwaysError = errors.New(alwaysErrorText);
 
-[GoType("num:nint")] public partial struct ErrorWriter;
+public partial struct ErrorWriter /*num:nint*/;
 
 public static (nint, error) Write(this ErrorWriter e, slice<byte> p) {
     return (0, alwaysError);
@@ -1711,7 +1711,7 @@ public static void TestBlock(ж<testing.T> Ꮡt) {
 internal static readonly @string tmplˢ = "tmpl"u8;
 internal static readonly @string nilˢ = "<nil>"u8;
 
-[GoType("dyn")] internal partial struct TestEvalFieldErrors_tests {
+internal partial struct TestEvalFieldErrors_tests /*dyn*/ {
     internal @string name, src;
     internal any value;
     internal @string want;
@@ -1832,7 +1832,7 @@ public static void TestAddrOfIndex(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string errorˢ2 = "ERROR:"u8;
 
-[GoType("dyn")] internal partial struct TestInterfaceValues_tests {
+internal partial struct TestInterfaceValues_tests /*dyn*/ {
     internal @string text;
     internal @string @out;
 }
@@ -1905,7 +1905,7 @@ public static void TestInterfaceValues(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestExecutePanicDuringCall_tests {
+internal partial struct TestExecutePanicDuringCall_tests /*dyn*/ {
     internal @string name;
     internal @string input;
     internal any data;
@@ -1972,7 +1972,7 @@ public static void TestExecutePanicDuringCall(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFunctionCheckDuringCall_tests {
+internal partial struct TestFunctionCheckDuringCall_tests /*dyn*/ {
     internal @string name;
     internal @string input;
     internal any data;
@@ -2164,11 +2164,11 @@ public static partial void TestIssue39807(ж<testing.T> Ꮡt) {
 internal static readonly object didNotGetErrorForNilˢ = (@string)"did not get error for nil embedded struct"u8;
 internal static readonly @string reflectIndirectionˢ = "reflect: indirection through nil pointer to embedded struct field A"u8;
 
-[GoType("dyn")] [GoLocalName("A")] internal partial struct TestIssue48215_A {
+internal partial struct TestIssue48215_A /*dyn*/ {
     public @string S;
 }
 
-[GoType("dyn")] [GoLocalName("B")] internal partial struct TestIssue48215_B {
+internal partial struct TestIssue48215_B /*dyn*/ {
     public partial ref ж<TestIssue48215_A> A { get; }
 }
 

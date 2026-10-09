@@ -122,7 +122,7 @@ internal static readonly @string preserveHugePageTopˢ = "PreserveHugePageTop"u8
 internal static readonly @string preserveHugePageAllˢ = "PreserveHugePageAll"u8;
 internal static readonly @string preserveHugePageNoneˢ = "PreserveHugePageNone"u8;
 
-[GoType("dyn")] internal partial struct TestPallocDataFindScavengeCandidate_test {
+internal partial struct TestPallocDataFindScavengeCandidate_test /*dyn*/ {
     internal slice<global::go.runtime_internal_test_package.BitRange> alloc, scavenged;
     internal uintptr min, max;
     internal global::go.runtime_internal_test_package.BitRange want;
@@ -312,11 +312,11 @@ public static void TestPallocDataFindScavengeCandidate(ж<testing.T> Ꮡt) {
 internal static readonly object skippingBecauseVirtualˢ = (@string)"skipping because virtual memory is limited; see #36210"u8;
 internal static readonly @string scavAllVeryDiscontiguousˢ = "ScavAllVeryDiscontiguous"u8;
 
-[GoType("dyn")] internal partial struct TestPageAllocScavenge_test {
+internal partial struct TestPageAllocScavenge_test /*dyn*/ {
     internal uintptr request, expect;
 }
 
-[GoType("dyn")] internal partial struct TestPageAllocScavenge_setup {
+internal partial struct TestPageAllocScavenge_setup /*dyn*/ {
     internal map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>> beforeAlloc;
     internal map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>> beforeScav;
     internal slice<TestPageAllocScavenge_test> expect;
@@ -601,7 +601,7 @@ internal static readonly @string bgMarkInterleavedˢ = "Bg/MarkInterleaved"u8;
 internal static readonly @string forceMarkInterleavedˢ = "Force/MarkInterleaved"u8;
 
 // Each of these test cases calls mark and then find once.
-[GoType("dyn")] internal partial struct TestScavengeIndex_testCase {
+internal partial struct TestScavengeIndex_testCase /*dyn*/ {
     internal @string name;
     internal Action<Action<uintptr, uintptr>> mark;
     internal Action<Action<global::go.runtime_internal_test_package.ChunkIdx, nuint>> find;

@@ -36,7 +36,7 @@ internal static map<@string, Func<ж<sha3.SHA3>>> testDigests = new map<@string,
 // testShakes contains functions that return *sha3.SHAKE instances for
 // with output-length equal to the KAT length.
 
-[GoType("dyn")] partial struct testShakesᴛ1 {
+partial struct testShakesᴛ1 /*dyn*/ {
     internal Func<slice<byte>, slice<byte>, ж<sha3.SHAKE>> constructor;
     internal @string defAlgoName;
     internal @string defCustomStr;

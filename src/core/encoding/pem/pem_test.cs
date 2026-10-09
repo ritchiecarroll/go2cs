@@ -14,7 +14,7 @@ using static go.encoding.pem_package;
 
 partial class pem_internal_test_package {
 
-[GoType] public partial struct GetLineTest {
+public partial struct GetLineTest {
     internal @string @in, out1, out2;
 }
 
@@ -121,7 +121,7 @@ Header: 1
 internal static @string pemRepeatingBegin = strings.Repeat("-----BEGIN \n"u8, 10);
 
 
-[GoType("dyn")] partial struct badPEMTestsᴛ1 {
+partial struct badPEMTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal @string input;
 }
@@ -187,7 +187,7 @@ public static void TestEncode(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct lineBreakerTest {
+internal partial struct lineBreakerTest {
     internal @string @in, @out;
 }
 
@@ -669,7 +669,7 @@ internal static @string testingKey(@string s) {
 internal static readonly @string testBlockˢ = "TEST BLOCK"u8;
 internal static readonly object expectedValidBlockˢ = (@string)"expected valid block"u8;
 
-[GoType("dyn")] internal partial struct TestDecodeStrangeCases_type {
+internal partial struct TestDecodeStrangeCases_type /*dyn*/ {
     internal @string name;
     internal @string pem;
 }

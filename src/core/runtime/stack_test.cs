@@ -314,8 +314,8 @@ public static void TestDeferPtrs(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("[4096]byte")] /* [4 * 1024]byte */
-partial struct bigBuf;
+/* [4 * 1024]byte */
+partial struct bigBuf /*[4096]byte*/;
 
 // TestDeferPtrsGoexit is like TestDeferPtrs but exercises the possibility that the
 // stack grows as part of starting the deferred function. It calls Goexit at various
@@ -511,7 +511,7 @@ public static void TestPanicFar(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct xtreeNode {
+partial struct xtreeNode {
     internal ж<xtreeNode> l, r;
 }
 
@@ -773,7 +773,7 @@ internal static nint count23(nint n) {
     return 1 + count1(n - 1);
 }
 
-[GoType] public partial struct stkobjT {
+public partial struct stkobjT {
     internal ж<stkobjT> p;
     internal int64 x;
     internal array<nint> y = new(20); // consume some stack
@@ -844,7 +844,7 @@ internal static void useStackPtrs(nint nʗp, bool b) {
     useStackPtrs(n - 1, b);
 }
 
-[GoType] partial struct structWithMethod {
+partial struct structWithMethod {
 }
 
 internal static @string caller(this structWithMethod s) {
@@ -956,7 +956,7 @@ public static void TestStackWrapperStackInlinePanic(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial interface I {
+partial interface I {
     void M();
 }
 
@@ -1245,7 +1245,7 @@ public static void TestSystemstackFramePointerAdjust(ж<testing.T> Ꮡt) {
 // shrink it again and verify that all frame pointers on the new stack have
 // been correctly adjusted. stackBallast is used to ensure we're not depending
 // on the current heuristics of stack shrinking too much.
-internal static void growAndShrinkStack(nint n, [GoArrayDims(1024)] array<byte> stackBallast) {
+internal static void growAndShrinkStack(nint n, /*[1024]*/ array<byte> stackBallast) {
     stackBallast = stackBallast.Clone();
 
     if (n <= 0) {

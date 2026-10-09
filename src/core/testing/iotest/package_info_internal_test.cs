@@ -31,7 +31,7 @@ using static go.testing.iotest_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("testing/iotest/logger_test.go", "logger_test.cs", "ABQoguaigoKWkoKCloKCgoSCgoCCpoCSpIKAksTUooKClpKCgpaCgoKEgoKAgqaCgJLE1KKCgpaSgoKWgoKChIKCgoSCgpaAgqaCgJLE5KKCgpaSgoKWgoKChIKEgoKCgpaCgJLE", "30-34:1;62-66:1;91-95:1;128-132:1")]
-[assembly: go.GoPositionMap("testing/iotest/reader_test.go", "reader_test.cs", "AA4egoKChIKCgoKWlIKCgoKUgJKklICCpICSyIKEgoKAgqaCgoCCpICSyIKCgpSCgoKCpoKCgoKClICSpJSAgqSAksiChIKCgIKmgoKAgqSAksiCgoKUgoKCgqaCgIKkgJK2goKAgraCgIKkgJLIgpSCgoCCtoKAgqSAkraCgoCCtoKAgqSAksiCgoKEhIKCgoKCgoKCpoKUgJLIgoSCgoCCpoKCgIKkgJIACQiCAAQSgpKSgoKUggAIDIKEgoCC", "242-250:1")]
+[assembly: go.GoPositionMap("testing/iotest/reader_test.go", "reader_test.cs", "AA4egoKChIKCgoKWlIKCgoKUgJKklICCpICSyIKEgoKAgqaCgoCCpICSyIKCgpSCgoKCpoKCgoKClICSpJSAgqSAksiChIKCgIKmgoKAgqSAksiCgoKUgoKCgqaCgIKkgJK2goKAgraCgIKkgJLIgpSCgoCCtoKAgqSAkraCgoCCtoKAgqSAksiCgoKEhIKCgoKCgoKCpoKUgJLIgoSCgoCCpoKCgIKkgJIACQiCAAQSgpKSgoKUggAIDIKEgoCC", "242-250:1", "", "292=New/1/1/5")]
 [assembly: go.GoPositionMap("testing/iotest/writer_test.go", "writer_test.cs", "ABMYAAYYooKCgoKClICSpICS")]
 // </GoSourcePositionMaps>
 
@@ -41,7 +41,7 @@ namespace go.testing;
 public static partial class iotest_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

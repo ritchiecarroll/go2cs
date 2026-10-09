@@ -70,7 +70,7 @@ public static void BenchmarkUDP6LinkLocalUnicast(ж<testing.B> Ꮡb) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct resolveUDPAddrTest {
+internal partial struct resolveUDPAddrTest {
     internal @string network;
     internal @string litAddrOrName;
     internal ж<global::go.net_package.UDPAddr> addr;
@@ -244,7 +244,7 @@ internal static void testWriteToPacketConn(ж<testing.T> Ꮡt, @string raddr) {
 }
 
 
-[GoType("dyn")] partial struct udpConnLocalNameTestsᴛ1 {
+partial struct udpConnLocalNameTestsᴛ1 /*dyn*/ {
     internal @string net;
     internal ж<global::go.net_package.UDPAddr> laddr;
 }
@@ -287,7 +287,7 @@ public static void TestUDPConnLocalName(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestUDPConnLocalAndRemoteNames_type {
+internal partial struct TestUDPConnLocalAndRemoteNames_type /*dyn*/ {
     internal global::go.net_package.ΔAddr got;
     internal bool ok;
 }

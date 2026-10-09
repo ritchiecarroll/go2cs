@@ -35,7 +35,7 @@ internal static slice<@string> typeNames = new @string[]{
     "structType"u8
 }.slice();
 
-[GoType] partial struct visitor {
+partial struct visitor {
     internal map<@string, map<@string, bool>> m;
 }
 
@@ -93,7 +93,7 @@ internal static void loadTypes(@string path, @string pkgName, visitor v) {
 internal static readonly @string srcˢ = "src"u8;
 internal static readonly @string reflectˢ = "reflect"u8;
 
-[GoType("dyn")] internal partial struct TestMirrorWithReflect_type {
+internal partial struct TestMirrorWithReflect_type /*dyn*/ {
     internal @string path, pkg;
     internal visitor v;
 }

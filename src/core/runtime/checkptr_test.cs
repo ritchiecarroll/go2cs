@@ -18,7 +18,7 @@ internal static readonly object skippingTestInShortModeˢ = (@string)"skipping t
 internal static readonly @string testprogˢ = "testprog"u8;
 internal static readonly @string gcflagsAllDCheckptr1ˢ = "-gcflags=all=-d=checkptr=1"u8;
 
-[GoType("dyn")] internal partial struct TestCheckPtr_testCases {
+internal partial struct TestCheckPtr_testCases /*dyn*/ {
     internal @string cmd;
     internal @string want;
 }
@@ -74,7 +74,7 @@ public static void TestCheckPtr(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string gcflagsAllDCheckptr2ˢ = "-gcflags=all=-d=checkptr=2"u8;
 
-[GoType("dyn")] internal partial struct TestCheckPtr2_testCases {
+internal partial struct TestCheckPtr2_testCases /*dyn*/ {
     internal @string cmd;
     internal @string want;
 }

@@ -18,7 +18,7 @@ using static go.crypto.sha512_package;
 
 partial class sha512_internal_test_package {
 
-[GoType] internal partial struct sha512Test {
+internal partial struct sha512Test {
     internal @string @out;
     internal @string @in;
     internal @string halfState; // marshaled hash state after first half of in written, used by TestGoldenMarshal
@@ -689,7 +689,7 @@ public static void TestGolden(ж<testing.T> Ꮡt) {
     });
 }
 
-[GoType("dyn")] internal partial struct testGolden_tests {
+internal partial struct testGolden_tests /*dyn*/ {
     internal @string name;
     internal Func<slice<byte>, slice<byte>> oneShotHash;
     internal hash.Hash digest;
@@ -749,7 +749,7 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
     });
 }
 
-[GoType("dyn")] internal partial struct testGoldenMarshal_tests {
+internal partial struct testGoldenMarshal_tests /*dyn*/ {
     internal @string name;
     internal Func<hash.Hash> newHash;
     internal slice<sha512Test> golden;
@@ -881,7 +881,7 @@ public static void TestBlockSize(ж<testing.T> Ꮡt) {
 // the data length has a 1 in the 32nd bit. When casted to int, this changes
 // the sign of the value, and causes the modulus operation to return a
 // different result.
-[GoType] internal partial struct unmarshalTest {
+internal partial struct unmarshalTest {
     internal @string state;
     internal @string sum;
 }

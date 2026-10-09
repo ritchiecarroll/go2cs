@@ -11,7 +11,7 @@ using static go.net_package;
 
 partial class net_internal_test_package {
 
-[GoType] internal partial struct dnsNameTest {
+internal partial struct dnsNameTest {
     internal @string name;
     internal bool result;
 }

@@ -46,7 +46,7 @@ internal static readonly @string testdataPassRandom2Binˢ = "testdata/pass-rando
 internal static readonly @string testdataPassSawtoothBz2ˢ = "testdata/pass-sawtooth.bz2"u8;
 internal static readonly @string testdataFailIssue5747Bz2ˢ = "testdata/fail-issue5747.bz2"u8;
 
-[GoType("dyn")] internal partial struct TestReader_type {
+internal partial struct TestReader_type /*dyn*/ {
     internal @string desc;
     internal slice<byte> input;
     internal slice<byte> output;
@@ -128,7 +128,7 @@ public static void TestReader(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestBitReader_type {
+internal partial struct TestBitReader_type /*dyn*/ {
     internal nuint nbits; // Number of bits to read
     internal nint value; // Expected output value (0 for error)
     internal bool fail; // Expected operation failure?
@@ -165,7 +165,7 @@ public static void TestBitReader(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestMTF_type {
+internal partial struct TestMTF_type /*dyn*/ {
     internal nint idx;  // Input index
     internal uint8 sym; // Expected output symbol
 }

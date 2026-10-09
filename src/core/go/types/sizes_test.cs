@@ -166,7 +166,7 @@ public static void TestAtomicAlign(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct gcSizeTest {
+partial struct gcSizeTest {
     internal @string name;
     internal @string src;
 }

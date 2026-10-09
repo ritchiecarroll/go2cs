@@ -101,9 +101,9 @@ public static void TestMultiReaderAsWriterTo(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestMultiWriter_sink {
-    [GoEmbedded] public io_package.Writer Writer;
-    [GoEmbedded] public fmt_package.Stringer Stringer;
+internal partial struct TestMultiWriter_sink /*dyn*/ {
+    /*embed*/ public io_package.Writer Writer;
+    /*embed*/ public fmt_package.Stringer Stringer;
 }
 
 public static void TestMultiWriter(ж<testing.T> Ꮡt) {
@@ -116,9 +116,9 @@ public static void TestMultiWriter_String(ж<testing.T> Ꮡt) {
     testMultiWriter(Ꮡt, new bytes_BufferжtestMultiWriter_sink(@new<bytes.Buffer>()));
 }
 
-[GoType("dyn")] internal partial struct TestMultiWriter_WriteStringSingleAlloc_simpleWriter {
+internal partial struct TestMultiWriter_WriteStringSingleAlloc_simpleWriter /*dyn*/ {
 // hide bytes.Buffer's WriteString
-    [GoEmbedded] public io_package.Writer Writer;
+    /*embed*/ public io_package.Writer Writer;
 }
 
 // Test that a multiWriter.WriteString calls results in at most 1 allocation,
@@ -136,16 +136,16 @@ public static void TestMultiWriter_WriteStringSingleAlloc(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct writeStringChecker {
+partial struct writeStringChecker {
     internal bool called;
 }
 
-[GoRecv] internal static (nint n, error err) ΔWriteString(this ref writeStringChecker c, @string s) {
+internal static (nint n, error err) ΔWriteString(this ref writeStringChecker c, @string s) {
     c.called = true;
     return (len(s), default!);
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref writeStringChecker c, slice<byte> p) {
+internal static (nint n, error err) Write(this ref writeStringChecker c, slice<byte> p) {
     return (len(p), default!);
 }
 
@@ -165,7 +165,7 @@ public static void TestMultiWriter_StringCheckCall(ж<testing.T> Ꮡt) {
 internal static readonly @string myInputTextˢ = "My input text."u8;
 internal static readonly object incorrectSha1Valueˢ = (@string)"incorrect sha1 value"u8;
 
-[GoType("dyn")] internal partial interface testMultiWriter_sink :
+internal partial interface testMultiWriter_sink /*dyn*/ :
     Writer,
     fmt.Stringer
 {
@@ -318,7 +318,7 @@ public static partial void TestMultiReaderFlatten(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("num:byte")] partial struct byteAndEOFReader;
+partial struct byteAndEOFReader /*num:byte*/;
 
 internal static (nint n, error err) Read(this byteAndEOFReader b, slice<byte> p) {
     if (len(p) == 0) {

@@ -11,7 +11,7 @@ using static go.@internal.poll_internal_test_package;
 
 partial class poll_test_package {
 
-[GoType("dyn")] internal partial struct TestConsume_tests {
+internal partial struct TestConsume_tests /*dyn*/ {
     internal slice<slice<byte>> @in;
     internal int64 consume;
     internal slice<slice<byte>> want;

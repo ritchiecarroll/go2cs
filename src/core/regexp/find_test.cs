@@ -17,7 +17,7 @@ partial class regexp_internal_test_package {
 // results from the submatched results, the single results from the 'all' results,
 // and the byte results from the string results. Therefore the table includes
 // only the FindAllStringSubmatchIndex result.
-[GoType] public partial struct FindTest {
+public partial struct FindTest {
     internal @string pat;
     internal @string text;
     internal slice<slice<nint>> matches;

@@ -10,7 +10,7 @@ using static global::go.go.doc.comment_package;
 partial class comment_internal_test_package {
 
 
-[GoType("dyn")] partial struct oldHeadingTestsᴛ1 {
+partial struct oldHeadingTestsᴛ1 /*dyn*/ {
     internal @string line;
     internal bool ok;
 }
@@ -45,7 +45,7 @@ public static void TestIsOldHeading(ж<testing.T> Ꮡt) {
 // inner ] causes (]) to be cut off from URL
 // same
 
-[GoType("dyn")] partial struct autoURLTestsᴛ1 {
+partial struct autoURLTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
 }
 internal static slice<autoURLTestsᴛ1> autoURLTests = new autoURLTestsᴛ1[]{

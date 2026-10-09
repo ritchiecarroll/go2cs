@@ -212,7 +212,7 @@ internal static slice<complex128> log10 = new complex128[]{
     (1.0005115362454418D + 1.1383255270407413D.i())
 }.slice();
 
-[GoType] internal partial struct ff {
+internal partial struct ff {
     internal float64 r, theta;
 }
 
@@ -352,7 +352,7 @@ internal static slice<float64> absSC = new float64[]{
 // imaginary sign unspecified
 // imaginary sign unspecified
 
-[GoType("dyn")] partial struct acosSCᴛ1 {
+partial struct acosSCᴛ1 /*dyn*/ {
     internal complex128 @in, want;
 }
 internal static slice<acosSCᴛ1> acosSC;

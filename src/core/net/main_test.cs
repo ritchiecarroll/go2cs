@@ -60,7 +60,7 @@ internal static void mustSetDeadline(testing.TB t, Func<time.Time, error> m, tim
     }
 }
 
-[GoType] internal partial struct ipv6LinkLocalUnicastTest {
+internal partial struct ipv6LinkLocalUnicastTest {
     internal @string network, address;
     internal bool nameLookup;
 }

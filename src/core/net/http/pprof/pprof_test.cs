@@ -48,7 +48,7 @@ public static void TestDescriptions(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string getˢ = "GET"u8;
 
-[GoType("dyn")] internal partial struct TestHandlers_testCases {
+internal partial struct TestHandlers_testCases /*dyn*/ {
     internal @string path;
     internal http.HandlerFunc handler;
     internal nint statusCode;

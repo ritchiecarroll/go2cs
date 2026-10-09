@@ -34,13 +34,13 @@ partial class ecdh_test_package {
 // Check that PublicKey and PrivateKey implement the interfaces documented in
 // crypto.PublicKey and crypto.PrivateKey.
 
-[GoType("dyn")] partial interface _ᴛ1 {
+partial interface _ᴛ1 /*dyn*/ {
     bool Equal(cryptoꓸPublicKey x);
 }
 internal static _ᴛ1 _ᴛ1ʗ = new go.crypto.ecdh_package.ΔPublicKeyж_ᴛ1(Ꮡ(new go.crypto.ecdh_package.ΔPublicKey(nil)));
 
 
-[GoType("dyn")] partial interface _ᴛ2 {
+partial interface _ᴛ2 /*dyn*/ {
     cryptoꓸPublicKey Public();
     bool Equal(cryptoꓸPrivateKey x);
 }
@@ -95,12 +95,12 @@ public static void TestECDH(ж<testing.T> Ꮡt) {
     });
 }
 
-[GoType] partial struct countingReader {
+partial struct countingReader {
     internal io.Reader r;
     internal nint n;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref countingReader r, slice<byte> p) {
+internal static (nint, error) Read(this ref countingReader r, slice<byte> p) {
     var (n, err) = r.r.Read(p);
     r.n += n;
     return (n, err);
@@ -133,7 +133,7 @@ public static void TestGenerateKey(ж<testing.T> Ꮡt) {
 // leading zero bytes (which in big-endian are irrelevant). Removed here.
 // X25519 test vector from RFC 7748, Section 6.1.
 
-[GoType("dyn")] partial struct vectorsᴛ1 {
+partial struct vectorsᴛ1 /*dyn*/ {
     public @string PrivateKey, PublicKey;
     public @string PeerPublicKey;
     public @string SharedSecret;
@@ -461,7 +461,7 @@ internal static void benchmarkAllCurves(ж<testing.B> Ꮡb, Action<ж<testing.B>
     });
 }
 
-[GoType] partial struct zr {
+partial struct zr {
 }
 
 // Read replaces the contents of dst with zeros. It is safe for concurrent use.
@@ -560,7 +560,7 @@ public static void TestLinker(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string cryptoEcdhPrivateKeyAndˢ = "crypto/ecdh: private key and public key curves do not match"u8;
 
-[GoType("dyn")] internal partial struct TestMismatchedCurves_curves {
+internal partial struct TestMismatchedCurves_curves /*dyn*/ {
     internal @string name;
     internal ecdhꓸCurve curve;
 }

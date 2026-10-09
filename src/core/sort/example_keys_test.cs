@@ -9,12 +9,12 @@ using static go.sort_internal_test_package;
 
 partial class sort_test_package {
 
-[GoType("num:float64")] partial struct earthMass;
+partial struct earthMass /*num:float64*/;
 
-[GoType("num:float64")] partial struct au;
+partial struct au /*num:float64*/;
 
 // A Planet defines the properties of a solar system object.
-[GoType] partial struct Planet {
+partial struct Planet {
     internal @string name;
     internal earthMass mass;
     internal au distance;
@@ -33,23 +33,23 @@ public static void ΔSort(this By by, slice<Planet> planets) {
 }
 
 // planetSorter joins a By function and a slice of Planets to be sorted.
-[GoType] partial struct planetSorter {
+partial struct planetSorter {
     internal slice<Planet> planets;
     internal Func<ж<Planet>, ж<Planet>, bool> by; // Closure used in the Less method.
 }
 
 // Len is part of sort.Interface.
-[GoRecv] internal static nint Len(this ref planetSorter s) {
+internal static nint Len(this ref planetSorter s) {
     return len(s.planets);
 }
 
 // Swap is part of sort.Interface.
-[GoRecv] internal static void Swap(this ref planetSorter s, nint i, nint j) {
+internal static void Swap(this ref planetSorter s, nint i, nint j) {
     (s.planets[i], s.planets[j]) = (s.planets[j], s.planets[i]);
 }
 
 // Less is part of sort.Interface. It is implemented by calling the "by" closure in the sorter.
-[GoRecv] internal static bool Less(this ref planetSorter s, nint i, nint j) {
+internal static bool Less(this ref planetSorter s, nint i, nint j) {
     return s.by(Ꮡ(s.planets, i), Ꮡ(s.planets, j));
 }
 

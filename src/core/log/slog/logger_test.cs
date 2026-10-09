@@ -164,7 +164,7 @@ public static void TestConnections(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct wrappingHandler {
+internal partial struct wrappingHandler {
     internal global::go.log.slog_package.ΔHandler h;
 }
 
@@ -435,7 +435,7 @@ public static void TestAlloc(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestSetAttrs_type {
+internal partial struct TestSetAttrs_type /*dyn*/ {
     internal slice<any> args;
     internal slice<global::go.log.slog_package.Attr> want;
 }
@@ -487,7 +487,7 @@ public static partial void TestSetDefault(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestLogLoggerLevelForDefaultHandler_type {
+internal partial struct TestLogLoggerLevelForDefaultHandler_type /*dyn*/ {
     internal global::go.log.slog_package.ΔLevel logLevel;
     internal Actionꓸꓸꓸ<@string, any> logFn;
     internal @string want;
@@ -602,7 +602,7 @@ public static void TestLoggerNoOps(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestContext_type {
+internal partial struct TestContext_type /*dyn*/ {
     internal Actionꓸꓸꓸ<context.Context, @string, any> f;
     internal global::go.log.slog_package.ΔLevel wantLevel;
 }
@@ -661,7 +661,7 @@ internal static @string clean(@string s) {
     return strings.ReplaceAll(s, "\n"u8, "~"u8);
 }
 
-[GoType] [GoValueClone("r")] internal partial struct captureHandler {
+internal partial struct captureHandler {
     internal sync.Mutex mu;
     internal context.Context ctx;
     internal global::go.log.slog_package.Record r;
@@ -686,7 +686,7 @@ internal static error Handle(this ж<captureHandler> Ꮡh, context.Context ctx, 
     finally { if (ᒐd1) Ꮡh.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[GoRecv] internal static bool Enabled(this ref captureHandler _Δp0, context.Context _Δp1, global::go.log.slog_package.ΔLevel _Δp2) {
+internal static bool Enabled(this ref captureHandler _Δp0, context.Context _Δp1, global::go.log.slog_package.ΔLevel _Δp2) {
     return true;
 }
 
@@ -741,7 +741,7 @@ internal static void clear(this ж<captureHandler> Ꮡc) {
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[GoType] internal partial struct discardTestHandler {
+internal partial struct discardTestHandler {
     internal slice<global::go.log.slog_package.Attr> attrs;
 }
 
@@ -866,7 +866,7 @@ internal static void wantAllocs(ж<testing.T> Ꮡt, nint want, Action f) {
 }
 
 // panicTextAndJsonMarshaler is a type that panics in MarshalText and MarshalJSON.
-[GoType] internal partial struct panicTextAndJsonMarshaler {
+internal partial struct panicTextAndJsonMarshaler {
     internal any msg;
 }
 
@@ -878,7 +878,7 @@ internal static (slice<byte>, error) MarshalJSON(this panicTextAndJsonMarshaler 
     throw panic(p.msg);
 }
 
-[GoType("dyn")] internal partial struct TestPanics_type {
+internal partial struct TestPanics_type /*dyn*/ {
     internal any @in;
     internal @string @out;
 }

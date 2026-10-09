@@ -12,13 +12,13 @@ using static go.encoding.json_internal_test_package;
 
 partial class json_test_package {
 
-[GoType("num:nint")] partial struct Animal;
+partial struct Animal /*num:nint*/;
 
 public static Animal Unknown => /* iota */ 0;
 public static Animal Gopher => 1;
 public static Animal Zebra => 2;
 
-[GoRecv] public static error UnmarshalJSON(this ref Animal a, slice<byte> b) {
+public static error UnmarshalJSON(this ref Animal a, slice<byte> b) {
     ref var s = ref heap(new @string(), out var Ꮡs);
     {
         var err = json.Unmarshal(b, Ꮡs); if (err != default!) {

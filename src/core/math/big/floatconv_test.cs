@@ -17,7 +17,7 @@ partial class big_internal_test_package {
 
 internal static float64 zero_;
 
-[GoType("dyn")] internal partial struct TestFloatSetFloat64String_type {
+internal partial struct TestFloatSetFloat64String_type /*dyn*/ {
     internal @string s;
     internal float64 x; // NaNs represent invalid inputs
 }
@@ -190,7 +190,7 @@ internal static readonly GoBigConst below1e23 = /* 99999999999999974834176 */
 internal static readonly GoBigConst above1e23 = /* 100000000000000008388608 */
     GoBigConst.Parse("100000000000000008388608");
 
-[GoType("dyn")] internal partial struct TestFloat64Text_type {
+internal partial struct TestFloat64Text_type /*dyn*/ {
     internal float64 x;
     internal byte format;
     internal nint prec;
@@ -356,7 +356,7 @@ internal static nuint actualPrec(float64 x) {
     return 53;
 }
 
-[GoType("dyn")] internal partial struct TestFloatText_type {
+internal partial struct TestFloatText_type /*dyn*/ {
     internal @string x;
     internal global::go.math.big_package.RoundingMode round;
     internal nuint prec;
@@ -526,7 +526,7 @@ public static void TestFloatText(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatFormat_type {
+internal partial struct TestFloatFormat_type /*dyn*/ {
     internal @string format;
     internal any value; // float32, float64, or string (== 512bit *Float)
     internal @string want;
@@ -734,7 +734,7 @@ public static void BenchmarkParseFloatLargeExp(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatScan_type {
+internal partial struct TestFloatScan_type /*dyn*/ {
     internal @string input;
     internal @string format;
     internal @string output;

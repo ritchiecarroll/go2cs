@@ -48,7 +48,7 @@ using static global::go.unique_internal_test_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("unique/clone_test.go", "clone_test.cs", "AA8cgoKCgoKCgqaipoKCgqKCgg==", "31-36:1")]
 [assembly: go.GoPositionMap("unique/handle_bench_test.go", "handle_bench_test.cs", "AAwagqaCpoKmooKCloKEkoKCgoKCuoSCAAUQgoKUgg==", "34-43:1")]
-[assembly: go.GoPositionMap("unique/handle_test.go", "handle_test.cs", "ADNKgoKCgoKCgoKmgoLmgoKChIKEgpSClIKWgrqShIKWzIKSAAgMgpamlIKCgpSCgoKUgoKU1oKCgpKUloS01taCgoKUgoKCgpSCgpSCgoI=", "55-73:1;91-96:1;127-129:1")]
+[assembly: go.GoPositionMap("unique/handle_test.go", "handle_test.cs", "ADBKgoKCgoKCgoKmgoLmgoKChIKEgpSClIKWgrqShIKWzIKSAAgMgpamlIKCgpSCgoKUgoKU1oKCgpKUloS01taCgoKUgoKCgpSCgpSCgoI=", "55-73:1;91-96:1;127-129:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -57,12 +57,14 @@ namespace go;
 public static partial class unique_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
 
     // <TypeAccessibility>
+    [GoLocalName("testEface")] partial interface testEfaceᴅ {}
+    [GoValueClone("s")] partial struct testStringStructArrayStruct {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

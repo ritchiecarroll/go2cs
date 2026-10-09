@@ -49,8 +49,8 @@ using static global::go.image.jpeg_internal_test_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("image/jpeg/dct_test.go", "dct_test.cs", "ABAeooKCgpSCgriCpoKmgoKWgoKCgoKUzLKygpSCgoKUgsyysoKClIKCurKygoKCAAQS8oKCgqaokoKUACIGACJeAAsCgoKCgoKCqriCAAMaAAsCgoKCgoKCqriCuIKCgoKCgpSUgrg=")]
 [assembly: go.GoPositionMap("image/jpeg/fuzz_test.go", "fuzz_test.cs", "ABggooKWgoKUgoKUgoKUloKCgpSClIKClKKCgoKCpIKCgqSCgoI=", "36-66:1")]
-[assembly: go.GoPositionMap("image/jpeg/reader_test.go", "reader_test.cs", "ABkysgALGIKCgoKUgoKClIKCpoKClpSCgIKCpICCgqSAgoLWgoCCguaC2qKCgpSSAAsSsoKClIKCgoKCuNaUgoKWgoKCgoKUgpTMkoKUgqaCgu6WgoKCgoIABxKmgoKCgoKUlOaCgoKUgoKClIKCgpSCAAkIzgAGRIKClJSCgrQAowEEhAABvAKCgpSAgsiUgoKCgIKkuIKUgJKkgILIgoKUlIKAgqbIloKCgoKUgoKClIKCgsqCgoKWhIKCAAgIgoKCkoKSgpSEAAscgoKEgoKCgoKEgsqigoKUgoKUgoKCgriC1oI=", "252-255:1")]
-[assembly: go.GoPositionMap("image/jpeg/writer_test.go", "writer_test.cs", "ABguAAoWgoKClIIACA4AFDKCgoKCgoKCgriCgoKCgoKCgqaUAAkIAAgagoKClKaigoKUktaClIKCgpaSgoKCpoKCgpSCgqaCgs6igoKUgoCCpIKClIKUgIK2goCCzKKCkoKCgoKCgoKCgqamgoKUgpSCgtyCgoKCgoKqooKCgriigoKCgoIABxCCgoKCgriigoKCgoKCgoKCpoKCgoKC")]
+[assembly: go.GoPositionMap("image/jpeg/reader_test.go", "reader_test.cs", "ABkysgALGIKCgoKUgoKClIKCpoKClpSCgIKCpICCgqSAgoLWgoCCguaC2qKCgpSSAAsSsoKClIKCgoKCuNaUgoKWgoKCgoKUgpTMkoKUgqaCgu6WgoKCgoIABxKmgoKCgoKUlOaCgoKUgoKClIKCgpSCAAkIzgAGRIKClJSCgrQAowEEhAABvAKCgpSAgsiUgoKCgIKkuIKUgJKkgILIgoKUlIKAgqbIloKCgoKUgoKClIKCgsqCgoKWhIKCAAgIgoKCkoKSgpSEAAscgoKEgoKCgoKEgsqigoKUgoKUgoKCgriC1oI=", "252-255:1", "", "194=pixString/1/2/1,pixString/2/2/2")]
+[assembly: go.GoPositionMap("image/jpeg/writer_test.go", "writer_test.cs", "ABguAAoWgoKClIIACA4AFDKCgoKCgoKCgriCgoKCgoKCgqaUAAkIAAgagoKClKaigoKUktaClIKCgpaSgoKCpoKCgpSCgqaCgs6igoKUgoCCpIKClIKUgIK2goCCzKKCkoKCgoKCgoKCgqamgoKUgpSCgtyCgoKCgoKqooKCgriigoKCgoIABxCCgoKCgriigoKCgoKCgoKCpoKCgoKC", "", "", "236=Intn/1/3/1,Intn/2/3/2,Intn/3/3/3;269=Intn/1/3/1,Intn/2/3/2,Intn/3/3/3")]
 // </GoSourcePositionMaps>
 
 namespace go.image;
@@ -59,7 +59,7 @@ namespace go.image;
 public static partial class jpeg_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

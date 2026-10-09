@@ -27,7 +27,7 @@ public static readonly @string Rline = @"(63|65):"u8; // must update if the call
 public static readonly @string Rlongfile = ".*/[A-Za-z0-9_\\-]+\\.go:(63|65):";
 public static readonly @string Rshortfile = "[A-Za-z0-9_\\-]+\\.go:(63|65):";
 
-[GoType] internal partial struct tester {
+internal partial struct tester {
     internal nint flag;
     internal @string prefix;
     internal @string pattern; // regexp that log output must match; we add ^ and expected_text$ always
@@ -300,7 +300,7 @@ public static void BenchmarkPrintlnNoFlags(ж<testing.B> Ꮡb) {
 
 // discard is identical to io.Discard,
 // but copied here to avoid the io.Discard optimization in Logger.
-[GoType] internal partial struct discard {
+internal partial struct discard {
 }
 
 internal static (nint, error) Write(this discard _, slice<byte> p) {

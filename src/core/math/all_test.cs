@@ -344,7 +344,7 @@ internal static slice<float64> fmod = new float64[]{
     1.314075231424398637614104e+00D
 }.slice();
 
-[GoType] partial struct fi {
+partial struct fi {
     internal float64 f;
     internal nint i;
 }
@@ -2354,7 +2354,7 @@ internal static slice<float64> logbBC = new float64[]{
 // http://www.jhauser.us/arithmetic/TestFloat.html.
 // The default rounding mode is selected (nearest/even), and exception flags are ignored.
 
-[GoType("dyn")] partial struct fmaCᴛ1 {
+partial struct fmaCᴛ1 /*dyn*/ {
     internal float64 x, y, z, want;
 }
 internal static slice<fmaCᴛ1> fmaC = new fmaCᴛ1[]{
@@ -3867,7 +3867,7 @@ public static void TestTrigReduce(ж<testing.T> Ꮡt) {
 // Check that math constants are accepted by compiler
 // and have right value (assumes strconv.ParseFloat works).
 // https://golang.org/issue/201
-[GoType] partial struct floatTest {
+partial struct floatTest {
     internal any val;
     internal @string name;
     internal @string str;

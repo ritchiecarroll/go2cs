@@ -15,7 +15,7 @@ using ꓸꓸꓸstring = Span<@string>;
 
 partial class http_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestRoutingFirstSegment_type {
+internal partial struct TestRoutingFirstSegment_type /*dyn*/ {
     internal @string @in;
     internal slice<@string> want;
 }
@@ -109,7 +109,7 @@ public static void TestRoutingAddPattern(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct testCase {
+internal partial struct testCase {
     internal @string method, host, path;
     internal @string wantPat; // "" for nil (no match)
     internal slice<@string> wantMatches;
@@ -245,7 +245,7 @@ internal static readonly @string postFooXˢ = "POST /foo/{x}"u8;
 internal static readonly @string postˢ2 = "POST /"u8;
 internal static readonly @string getˢ3 = "GET /"u8;
 
-[GoType("dyn")] internal partial struct TestMatchingMethods_type {
+internal partial struct TestMatchingMethods_type /*dyn*/ {
     internal @string name;
     internal ж<global::go.net.http_package.routingNode> tree;
     internal @string host, path;

@@ -13,7 +13,7 @@ using path;
 
 partial class windows_test_package {
 
-[GoType("dyn")] internal partial struct TestOpen_tests {
+internal partial struct TestOpen_tests /*dyn*/ {
     internal @string path;
     internal nint flag;
     internal error err;

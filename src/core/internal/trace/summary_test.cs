@@ -57,7 +57,7 @@ public static void TestSummarizeGoroutinesTrace(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testdataTestsGo122ˢ = "testdata/tests/go122-annotations.test"u8;
 
-[GoType("dyn")] internal partial struct TestSummarizeGoroutinesRegionsTrace_region {
+internal partial struct TestSummarizeGoroutinesRegionsTrace_region /*dyn*/ {
     internal Δtrace.EventKind startKind;
     internal Δtrace.EventKind endKind;
 }
@@ -96,7 +96,7 @@ public static void TestSummarizeGoroutinesRegionsTrace(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testdataTestsGo122ˢ2 = "testdata/tests/go122-annotations-stress.test"u8;
 
-[GoType("dyn")] internal partial struct TestSummarizeTasksTrace_task {
+internal partial struct TestSummarizeTasksTrace_task /*dyn*/ {
     internal @string name;
     internal ж<Δtrace.TaskID> parent;
     internal slice<Δtrace.TaskID> children;

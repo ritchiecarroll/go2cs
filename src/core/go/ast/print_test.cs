@@ -19,21 +19,21 @@ partial class ast_internal_test_package {
 // slices
 // structs
 
-[GoType("dyn")] partial struct testsᴛ1 {
+partial struct testsᴛ1 /*dyn*/ {
     internal any x; // x is printed as s
     internal @string s;
 }
 
-    [GoType("dyn")] partial struct Δtype {
+    partial struct Δtype /*dyn*/ {
         internal nint x;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ1 {
+    partial struct Δtypeᴛ1 /*dyn*/ {
         public nint X;
         internal nint y;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ2 {
+    partial struct Δtypeᴛ2 /*dyn*/ {
         public nint X, Y;
     }
 internal static slice<testsᴛ1> tests = new testsᴛ1[]{

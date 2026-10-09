@@ -30,7 +30,7 @@ internal static readonly @string preˢ = "pre"u8;
 internal static readonly @string twoˢ = "two"u8;
 internal static readonly @string messageˢ = "message"u8;
 
-[GoType("dyn")] internal partial struct TestDefaultHandle_type {
+internal partial struct TestDefaultHandle_type /*dyn*/ {
     internal @string name;
     internal Func<global::go.log.slog_package.ΔHandler, global::go.log.slog_package.ΔHandler> with;
     internal slice<global::go.log.slog_package.Attr> attrs;
@@ -200,7 +200,7 @@ internal static readonly object minsˢ = (@string)"mins"u8;
 internal static readonly object secsˢ = (@string)"secs"u8;
 internal static readonly @string lineˢ2 = "$LINE"u8;
 
-[GoType("dyn")] internal partial struct TestJSONAndTextHandlers_type {
+internal partial struct TestJSONAndTextHandlers_type /*dyn*/ {
     internal @string name;
     internal Func<slice<@string>, global::go.log.slog_package.Attr, global::go.log.slog_package.Attr> replace;
     internal bool addSource;
@@ -211,7 +211,7 @@ internal static readonly @string lineˢ2 = "$LINE"u8;
     internal @string wantJSON;
 }
 
-[GoType("dyn")] internal partial struct TestJSONAndTextHandlers_typeᴛ1 {
+internal partial struct TestJSONAndTextHandlers_typeᴛ1 /*dyn*/ {
     internal @string name;
     internal global::go.log.slog_package.ΔHandler h;
     internal @string want;
@@ -650,7 +650,7 @@ internal static global::go.log.slog_package.Attr upperCaseKey(slice<@string> _, 
     return a;
 }
 
-[GoType] internal partial struct logValueName {
+internal partial struct logValueName {
     internal @string first, last;
 }
 
@@ -664,7 +664,7 @@ internal static global::go.log.slog_package.Value LogValue(this logValueName n) 
         go.log.slog_package.String(lastˢ, n.last));
 }
 
-[GoType("dyn")] internal partial struct TestHandlerEnabled_type {
+internal partial struct TestHandlerEnabled_type /*dyn*/ {
     internal global::go.log.slog_package.Leveler leveler;
     internal bool want;
 }
@@ -728,7 +728,7 @@ public static void TestSecondWith(ж<testing.T> Ꮡt) {
 internal static readonly @string nowˢ = "<now>"u8;
 
 // Verify that ReplaceAttr is called with the correct groups.
-[GoType("dyn")] [GoLocalName("ga")] internal partial struct TestReplaceAttrGroups_ga {
+internal partial struct TestReplaceAttrGroups_ga /*dyn*/ {
     internal @string groups;
     internal @string key;
     internal @string val;

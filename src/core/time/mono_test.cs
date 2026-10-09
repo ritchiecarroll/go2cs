@@ -277,7 +277,7 @@ public static void TestMonotonicOverflow(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct monotonicStringTestsᴛ1 {
+partial struct monotonicStringTestsᴛ1 /*dyn*/ {
     internal int64 mono;
     internal @string want;
 }

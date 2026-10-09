@@ -23,17 +23,17 @@ using static go.compress.flate_package;
 
 partial class flate_internal_test_package {
 
-[GoType] internal partial struct deflateTest {
+internal partial struct deflateTest {
     internal slice<byte> @in;
     internal nint level;
     internal slice<byte> @out;
 }
 
-[GoType] internal partial struct deflateInflateTest {
+internal partial struct deflateInflateTest {
     internal slice<byte> @in;
 }
 
-[GoType] internal partial struct reverseBitsTest {
+internal partial struct reverseBitsTest {
     internal uint16 @in;
     internal uint8 bitCount;
     internal uint16 @out;
@@ -168,12 +168,12 @@ public static void TestWriterClose(ж<testing.T> Ꮡt) {
 
 // A sparseReader returns a stream consisting of 0s followed by 1<<16 1s.
 // This tests missing hash references in a very large input.
-[GoType] internal partial struct sparseReader {
+internal partial struct sparseReader {
     internal int64 l;
     internal int64 cur;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref sparseReader r, slice<byte> b) {
+internal static (nint n, error err) Read(this ref sparseReader r, slice<byte> b) {
     nint n = default!;
     error err = default!;
 
@@ -217,7 +217,7 @@ public static void TestVeryLongSparseChunk(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct syncBuffer {
+internal partial struct syncBuffer {
     internal bytes.Buffer buf;
     internal sync.RWMutex mu;
     internal bool closed;
@@ -244,7 +244,7 @@ internal static (nint n, error err) Read(this ж<syncBuffer> Ꮡb, slice<byte> p
     }
 }
 
-[GoRecv] internal static void signal(this ref syncBuffer b) {
+internal static void signal(this ref syncBuffer b) {
     var selᴛ1 = b.ready.ᐸꟷ(true, ꓸꓸꓸ);
     switch (trySelect(selᴛ1)) {
     case 0: {
@@ -255,7 +255,7 @@ internal static (nint n, error err) Read(this ж<syncBuffer> Ꮡb, slice<byte> p
     }}
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref syncBuffer b, slice<byte> p) {
+internal static (nint n, error err) Write(this ref syncBuffer b, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -275,7 +275,7 @@ internal static void ReadMode(this ж<syncBuffer> Ꮡb) {
     b.signal();
 }
 
-[GoRecv] internal static error Close(this ref syncBuffer b) {
+internal static error Close(this ref syncBuffer b) {
     b.closed = true;
     b.signal();
     return default!;
@@ -403,7 +403,7 @@ internal static void testToFromWithLevelAndLimit(ж<testing.T> Ꮡt, nint level,
     testSync(Ꮡt, level, input, name);
 }
 
-internal static void testToFromWithLimit(ж<testing.T> Ꮡt, slice<byte> input, @string name, [GoArrayDims(11)] array<nint> limit) {
+internal static void testToFromWithLimit(ж<testing.T> Ꮡt, slice<byte> input, @string name, /*[11]*/ array<nint> limit) {
     limit = limit.Clone();
 
     for (nint i = 0; i < 10; i++) {
@@ -434,7 +434,7 @@ public static void TestReverseBits(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] [GoValueClone("limit")] internal partial struct deflateInflateStringTest {
+internal partial struct deflateInflateStringTest {
     internal @string filename;
     internal @string label;
     internal array<nint> limit = new(11);
@@ -760,11 +760,11 @@ break_outer:;
 internal static error errIO = errors.New("IO error"u8);
 
 // failWriter fails with errIO exactly at the nth call to Write.
-[GoType] internal partial struct failWriter {
+internal partial struct failWriter {
     internal nint n;
 }
 
-[GoRecv] internal static (nint, error) Write(this ref failWriter w, slice<byte> b) {
+internal static (nint, error) Write(this ref failWriter w, slice<byte> b) {
     w.n--;
     if (w.n == -1) {
         return (0, errIO);
@@ -865,7 +865,7 @@ internal static void checkErrors(slice<error> got, error want, ж<testing.T> Ꮡ
     }
 }
 
-[GoType("dyn")] internal partial struct TestBestSpeedMatch_cases {
+internal partial struct TestBestSpeedMatch_cases /*dyn*/ {
     internal slice<byte> previous, current;
     internal int32 t, s, want;
 }

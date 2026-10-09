@@ -73,7 +73,7 @@ public static void TestTransportPoolConnConnectionBecomesAvailableDuringDial(ж<
 }
 
 // A transportDialTester manages a test of a connection's Dials.
-[GoType] partial struct transportDialTester {
+partial struct transportDialTester {
     internal ж<testing.T> t;
     internal ж<clientServerTest> cst;
     internal channel<ж<transportDialTesterConn>> dials; // each new conn is sent to this channel
@@ -82,7 +82,7 @@ public static void TestTransportPoolConnConnectionBecomesAvailableDuringDial(ж<
 }
 
 // A transportDialTesterRoundTrip is a RoundTrip made as part of a dial test.
-[GoType] partial struct transportDialTesterRoundTrip {
+partial struct transportDialTesterRoundTrip {
     internal ж<testing.T> t;
     internal nint roundTripID;               // distinguishes RoundTrips in logs
     internal Action cancel; // cancels the Request context
@@ -96,11 +96,11 @@ public static void TestTransportPoolConnConnectionBecomesAvailableDuringDial(ж<
 
 // A transportDialTesterConn is a client connection created by the Transport as
 // part of a dial test.
-[GoType] partial struct transportDialTesterConn {
+partial struct transportDialTesterConn {
     internal ж<testing.T> t;
     internal nint connID;       // distinguished Dials in logs
     internal channel<error> ready; // sent on to complete the Dial
-    [GoEmbedded] public net_package.Conn Conn;
+    /*embed*/ public net_package.Conn Conn;
 }
 
 internal static ж<transportDialTester> newTransportDialTester(ж<testing.T> Ꮡt, testMode mode) {
@@ -188,7 +188,7 @@ internal static partial ж<transportDialTesterRoundTrip> roundTrip(this ж<trans
 }
 
 // wantDone indicates that a RoundTrip should have returned.
-[GoRecv] internal static void wantDone(this ref transportDialTesterRoundTrip rt, ж<transportDialTesterConn> Ꮡc) {
+internal static void wantDone(this ref transportDialTesterRoundTrip rt, ж<transportDialTesterConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     rt.t.Helper();
@@ -203,7 +203,7 @@ internal static partial ж<transportDialTesterRoundTrip> roundTrip(this ж<trans
 
 // finish completes a RoundTrip by sending the request body, consuming the response body,
 // and closing the response body.
-[GoRecv] internal static void finish(this ref transportDialTesterRoundTrip rt) {
+internal static void finish(this ref transportDialTesterRoundTrip rt) {
     rt.t.Helper();
     if (rt.finished) {
         return;
@@ -220,7 +220,7 @@ internal static partial ж<transportDialTesterRoundTrip> roundTrip(this ж<trans
 }
 
 // wantDial waits for the Transport to start a Dial.
-[GoRecv] internal static ж<transportDialTesterConn> wantDial(this ref transportDialTester dt) {
+internal static ж<transportDialTesterConn> wantDial(this ref transportDialTester dt) {
     var c = ᐸꟷ(dt.dials);
     c.Value.connID = dt.dialCount;
     dt.dialCount++;
@@ -229,7 +229,7 @@ internal static partial ж<transportDialTesterRoundTrip> roundTrip(this ж<trans
 }
 
 // finish completes a Dial.
-[GoRecv] internal static void finish(this ref transportDialTesterConn c, error err) {
+internal static void finish(this ref transportDialTesterConn c, error err) {
     c.t.Logf("Dial %v: finished (err:%v)"u8, c.connID, err);
     c.ready.ᐸꟷ(err);
     builtin.close(c.ready);

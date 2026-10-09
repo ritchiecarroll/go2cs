@@ -46,7 +46,7 @@ partial class sql_internal_test_package {
 //
 // When opening a fakeDriver's database, it starts empty with no
 // tables. All tables and data are stored in memory only.
-[GoType] internal partial struct fakeDriver {
+internal partial struct fakeDriver {
     internal sync.Mutex mu; // guards 3 following fields
     internal nint openCount;       // conn opens
     internal nint closeCount;       // conn closes
@@ -55,26 +55,26 @@ partial class sql_internal_test_package {
     internal map<@string, ж<fakeDB>> dbs;
 }
 
-[GoType] internal partial struct fakeConnector {
+internal partial struct fakeConnector {
     internal @string name;
     internal Action<context.Context> waiter;
     internal bool closed;
 }
 
-[GoRecv] internal static (driver.Conn, error) Connect(this ref fakeConnector c, context.Context _) {
+internal static (driver.Conn, error) Connect(this ref fakeConnector c, context.Context _) {
     var (conn, err) = fdriver.Open(c.name);
     conn._<ж<fakeConn>>().Value.waiter = c.waiter;
     return (conn, err);
 }
 
-[GoRecv] internal static driver.Driver Driver(this ref fakeConnector c) {
+internal static driver.Driver Driver(this ref fakeConnector c) {
     return fdriver;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fakedbConnectorIsClosedˢ = "fakedb: connector is closed"u8;
 
-[GoRecv] internal static error Close(this ref fakeConnector c) {
+internal static error Close(this ref fakeConnector c) {
     if (c.closed) {
         return errors.New(fakedbConnectorIsClosedˢ);
     }
@@ -82,17 +82,17 @@ internal static readonly @string fakedbConnectorIsClosedˢ = "fakedb: connector 
     return default!;
 }
 
-[GoType] internal partial struct fakeDriverCtx {
+internal partial struct fakeDriverCtx {
     internal partial ref fakeDriver fakeDriver { get; }
 }
 
 internal static driver.DriverContext _ᴛ1ʗ = new sql_internal_test_package.fakeDriverCtxжDriverContext(Ꮡ(new fakeDriverCtx(nil)));
 
-[GoRecv] internal static (driver.Connector, error) OpenConnector(this ref fakeDriverCtx cc, @string name) {
+internal static (driver.Connector, error) OpenConnector(this ref fakeDriverCtx cc, @string name) {
     return (new sql_internal_test_package.fakeConnectorжConnector(Ꮡ(new fakeConnector(name: name))), default!);
 }
 
-[GoType] internal partial struct fakeDB {
+internal partial struct fakeDB {
     internal @string name;
     internal sync.Mutex mu;
     internal map<@string, ж<Δtable>> tables;
@@ -100,7 +100,7 @@ internal static driver.DriverContext _ᴛ1ʗ = new sql_internal_test_package.fak
     internal bool allowAny;
 }
 
-[GoType] internal partial struct fakeError {
+internal partial struct fakeError {
     public @string Message;
     public error Wrapped;
 }
@@ -113,27 +113,27 @@ internal static error Unwrap(this fakeError err) {
     return err.Wrapped;
 }
 
-[GoType] internal partial struct Δtable {
+internal partial struct Δtable {
     internal sync.Mutex mu;
     internal slice<@string> colname;
     internal slice<@string> coltype;
     internal slice<ж<row>> rows;
 }
 
-[GoRecv] internal static nint columnIndex(this ref Δtable t, @string name) {
+internal static nint columnIndex(this ref Δtable t, @string name) {
     return slices.Index(t.colname, name);
 }
 
-[GoType] internal partial struct row {
+internal partial struct row {
     internal slice<any> cols; // must be same size as its table colname + coltype
 }
 
-[GoType] internal partial interface memToucher {
+internal partial interface memToucher {
     // touchMem reads & writes some memory, to help find data races.
     void touchMem();
 }
 
-[GoType] internal partial struct fakeConn {
+internal partial struct fakeConn {
     internal ж<fakeDB> db; // where to return ourselves to
     internal ж<fakeTx> currTx;
     // Every operation writes to line to enable the race detector
@@ -156,7 +156,7 @@ internal static error Unwrap(this fakeError err) {
     internal Action<context.Context> waiter;
 }
 
-[GoRecv] internal static void touchMem(this ref fakeConn c) {
+internal static void touchMem(this ref fakeConn c) {
     c.line++;
 }
 
@@ -169,18 +169,18 @@ internal static void incrStat(this ж<fakeConn> Ꮡc, ж<nint> Ꮡv) {
     c.mu.Unlock();
 }
 
-[GoType] internal partial struct fakeTx {
+internal partial struct fakeTx {
     internal ж<fakeConn> c;
 }
 
-[GoType] internal partial struct boundCol {
+internal partial struct boundCol {
     public @string Column;
     public @string Placeholder;
     public nint Ordinal;
 }
 
-[GoType] internal partial struct fakeStmt {
-    [GoEmbedded] internal memToucher memToucher;
+internal partial struct fakeStmt {
+    /*embed*/ internal memToucher memToucher;
     internal ж<fakeConn> c;
     internal @string q; // just for debugging
     internal @string cmd;
@@ -203,8 +203,8 @@ internal static driver.Driver fdriver = new sql_internal_test_package.fakeDriver
     Register("test"u8, fdriver);
 }
 
-[GoType] public partial struct Dummy {
-    [GoEmbedded] public go.database.sql.driver_package.Driver Driver;
+public partial struct Dummy {
+    /*embed*/ public go.database.sql.driver_package.Driver Driver;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -223,7 +223,7 @@ public static void TestDrivers(ж<testing.T> Ꮡt) {
 
 // hook to simulate connection failures
 
-[GoType("dyn")] partial struct hookOpenErrᴛ1 {
+partial struct hookOpenErrᴛ1 /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; }
     internal Func<error> fn;
 }
@@ -349,7 +349,7 @@ internal static error createTable(this ж<fakeDB> Ꮡdb, @string name, slice<@st
 }
 
 // must be called with db.mu lock held
-[GoRecv] internal static (ж<Δtable>, bool) table(this ref fakeDB db, @string Δtable) {
+internal static (ж<Δtable>, bool) table(this ref fakeDB db, @string Δtable) {
     if (db.tables == default!) {
         return (default!, false);
     }
@@ -382,7 +382,7 @@ internal static (@string typ, bool ok) columnType(this ж<fakeDB> Ꮡdb, @string
     ᒐdone: return (typ, ok);
 }
 
-[GoRecv] internal static bool isBad(this ref fakeConn c) {
+internal static bool isBad(this ref fakeConn c) {
     if (c.stickyBad){
         return true;
     } else 
@@ -398,7 +398,7 @@ internal static (@string typ, bool ok) columnType(this ж<fakeDB> Ꮡdb, @string
     }
 }
 
-[GoRecv] internal static bool isDirtyAndMark(this ref fakeConn c) {
+internal static bool isDirtyAndMark(this ref fakeConn c) {
     if (c.skipDirtySession) {
         return false;
     }
@@ -431,7 +431,7 @@ internal static (driver.Tx, error) Begin(this ж<fakeConn> Ꮡc) {
 }
 
 
-[GoType("dyn")] partial struct hookPostCloseConnᴛ1 {
+partial struct hookPostCloseConnᴛ1 /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; }
     internal Action<ж<fakeConn>, error> fn;
 }
@@ -457,7 +457,7 @@ internal static void setStrictFakeConnClose(ж<testing.T> Ꮡt) {
     testStrictClose = Ꮡt;
 }
 
-[GoRecv] internal static error ResetSession(this ref fakeConn c, context.Context ctx) {
+internal static error ResetSession(this ref fakeConn c, context.Context ctx) {
     c.dirtySession = false;
     c.currTx = default!;
     if (c.isBad()) {
@@ -468,7 +468,7 @@ internal static void setStrictFakeConnClose(ж<testing.T> Ꮡt) {
 
 internal static driver.Validator _ᴛ2ʗ = new sql_internal_test_package.fakeConnжValidator(((ж<fakeConn>)nil));
 
-[GoRecv] internal static bool IsValid(this ref fakeConn c) {
+internal static bool IsValid(this ref fakeConn c) {
     return !c.isBad();
 }
 
@@ -542,12 +542,12 @@ internal static error checkSubsetTypes(bool allowAny, slice<driver.NamedValue> a
     return default!;
 }
 
-[GoRecv] internal static (driver.Result, error) Exec(this ref fakeConn c, @string query, slice<driverꓸValue> args) {
+internal static (driver.Result, error) Exec(this ref fakeConn c, @string query, slice<driverꓸValue> args) {
     // Ensure that ExecContext is called if available.
     throw panic("ExecContext was not called.");
 }
 
-[GoRecv] internal static (driver.Result, error) ExecContext(this ref fakeConn c, context.Context ctx, @string query, slice<driver.NamedValue> args) {
+internal static (driver.Result, error) ExecContext(this ref fakeConn c, context.Context ctx, @string query, slice<driver.NamedValue> args) {
     // This is an optional interface, but it's implemented here
     // just to check that all the args are of the proper types.
     // ErrSkip is returned so the caller acts as if we didn't
@@ -559,12 +559,12 @@ internal static error checkSubsetTypes(bool allowAny, slice<driver.NamedValue> a
     return (default!, driver.ErrSkip);
 }
 
-[GoRecv] internal static (driver.Rows, error) Query(this ref fakeConn c, @string query, slice<driverꓸValue> args) {
+internal static (driver.Rows, error) Query(this ref fakeConn c, @string query, slice<driverꓸValue> args) {
     // Ensure that ExecContext is called if available.
     throw panic("QueryContext was not called.");
 }
 
-[GoRecv] internal static (driver.Rows, error) QueryContext(this ref fakeConn c, context.Context ctx, @string query, slice<driver.NamedValue> args) {
+internal static (driver.Rows, error) QueryContext(this ref fakeConn c, context.Context ctx, @string query, slice<driver.NamedValue> args) {
     // This is an optional interface, but it's implemented here
     // just to check that all the args are of the proper types.
     // ErrSkip is returned so the caller acts as if we didn't
@@ -585,7 +585,7 @@ internal static error errf(@string msg, params ꓸꓸꓸany argsʗp) {
 // parts are table|selectCol1,selectCol2|whereCol=?,whereCol2=?
 // (note that where columns must always contain ? marks,
 // just a limitation for fakedb)
-[GoRecv] internal static (ж<fakeStmt>, error) prepareSelect(this ref fakeConn c, ж<fakeStmt> Ꮡstmt, slice<@string> parts) {
+internal static (ж<fakeStmt>, error) prepareSelect(this ref fakeConn c, ж<fakeStmt> Ꮡstmt, slice<@string> parts) {
     ref var stmt = ref Ꮡstmt.DerefOrNull();
 
     if (len(parts) != 3) {
@@ -622,7 +622,7 @@ internal static error errf(@string msg, params ꓸꓸꓸany argsʗp) {
 }
 
 // parts are table|col=type,col2=type2
-[GoRecv] internal static (ж<fakeStmt>, error) prepareCreate(this ref fakeConn c, ж<fakeStmt> Ꮡstmt, slice<@string> parts) {
+internal static (ж<fakeStmt>, error) prepareCreate(this ref fakeConn c, ж<fakeStmt> Ꮡstmt, slice<@string> parts) {
     ref var stmt = ref Ꮡstmt.DerefOrNull();
 
     if (len(parts) != 2) {
@@ -718,7 +718,7 @@ internal static (ж<fakeStmt>, error) prepareInsert(this ж<fakeConn> Ꮡc, cont
 internal static ж<Func<bool>> ᏑhookPrepareBadConn = new StandardBox<Func<bool>>(default(Func<bool>));
 internal static ref Func<bool> hookPrepareBadConn => ref ᏑhookPrepareBadConn.ValueSlot;
 
-[GoRecv] internal static (driver.Stmt, error) Prepare(this ref fakeConn c, @string query) {
+internal static (driver.Stmt, error) Prepare(this ref fakeConn c, @string query) {
     throw panic("use PrepareContext");
 }
 
@@ -823,7 +823,7 @@ internal static (driver.Stmt, error) PrepareContext(this ж<fakeConn> Ꮡc, cont
     return (new sql_internal_test_package.fakeStmtжStmt(firstStmt), default!);
 }
 
-[GoRecv] internal static driver.ValueConverter ColumnConverter(this ref fakeStmt s, nint idx) {
+internal static driver.ValueConverter ColumnConverter(this ref fakeStmt s, nint idx) {
     if (s.panic == "ColumnConverter"u8) {
         throw panic(s.panic);
     }
@@ -833,7 +833,7 @@ internal static (driver.Stmt, error) PrepareContext(this ж<fakeConn> Ꮡc, cont
     return s.placeholderConverter[idx];
 }
 
-[GoRecv] internal static error Close(this ref fakeStmt s) {
+internal static error Close(this ref fakeStmt s) {
     if (s.panic == "Close"u8) {
         throw panic(s.panic);
     }
@@ -860,7 +860,7 @@ internal static error errClosed = errors.New("fakedb: statement has been closed"
 internal static ж<Func<bool>> ᏑhookExecBadConn = new StandardBox<Func<bool>>(default(Func<bool>));
 internal static ref Func<bool> hookExecBadConn => ref ᏑhookExecBadConn.ValueSlot;
 
-[GoRecv] internal static (driver.Result, error) Exec(this ref fakeStmt s, slice<driverꓸValue> args) {
+internal static (driver.Result, error) Exec(this ref fakeStmt s, slice<driverꓸValue> args) {
     throw panic("Using ExecContext");
 }
 
@@ -998,7 +998,7 @@ internal static (driver.Result, error) execInsert(this ж<fakeStmt> Ꮡs, slice<
 internal static ж<Func<bool>> ᏑhookQueryBadConn = new StandardBox<Func<bool>>(default(Func<bool>));
 internal static ref Func<bool> hookQueryBadConn => ref ᏑhookQueryBadConn.ValueSlot;
 
-[GoRecv] internal static (driver.Rows, error) Query(this ref fakeStmt s, slice<driverꓸValue> args) {
+internal static (driver.Rows, error) Query(this ref fakeStmt s, slice<driverꓸValue> args) {
     throw panic("Use QueryContext");
 }
 
@@ -1151,7 +1151,7 @@ break_rows:;
     return (new sql_internal_test_package.rowsCursorжRows(cursor), default!);
 }
 
-[GoRecv] internal static nint NumInput(this ref fakeStmt s) {
+internal static nint NumInput(this ref fakeStmt s) {
     if (s.panic == "NumInput"u8) {
         throw panic(s.panic);
     }
@@ -1162,7 +1162,7 @@ break_rows:;
 internal static ж<Func<bool>> ᏑhookCommitBadConn = new StandardBox<Func<bool>>(default(Func<bool>));
 internal static ref Func<bool> hookCommitBadConn => ref ᏑhookCommitBadConn.ValueSlot;
 
-[GoRecv] internal static error Commit(this ref fakeTx tx) {
+internal static error Commit(this ref fakeTx tx) {
     tx.c.Value.currTx = default!;
     if (hookCommitBadConn != default! && hookCommitBadConn()) {
         return new fakeError(Message: "Commit: Hook Bad Conn"u8, Wrapped: driver.ErrBadConn);
@@ -1175,7 +1175,7 @@ internal static ref Func<bool> hookCommitBadConn => ref ᏑhookCommitBadConn.Val
 internal static ж<Func<bool>> ᏑhookRollbackBadConn = new StandardBox<Func<bool>>(default(Func<bool>));
 internal static ref Func<bool> hookRollbackBadConn => ref ᏑhookRollbackBadConn.ValueSlot;
 
-[GoRecv] internal static error Rollback(this ref fakeTx tx) {
+internal static error Rollback(this ref fakeTx tx) {
     tx.c.Value.currTx = default!;
     if (hookRollbackBadConn != default! && hookRollbackBadConn()) {
         return new fakeError(Message: "Rollback: Hook Bad Conn"u8, Wrapped: driver.ErrBadConn);
@@ -1184,7 +1184,7 @@ internal static ref Func<bool> hookRollbackBadConn => ref ᏑhookRollbackBadConn
     return default!;
 }
 
-[GoType] internal partial struct rowsCursor {
+internal partial struct rowsCursor {
     internal ж<fakeDB> db;
     internal memToucher parentMem;
     internal slice<slice<@string>> cols;
@@ -1208,12 +1208,12 @@ internal static ref Func<bool> hookRollbackBadConn => ref ᏑhookRollbackBadConn
     internal error closeErr;
 }
 
-[GoRecv] internal static void touchMem(this ref rowsCursor rc) {
+internal static void touchMem(this ref rowsCursor rc) {
     rc.parentMem.touchMem();
     rc.line++;
 }
 
-[GoRecv] internal static void invalidateDriverOwnedMemory(this ref rowsCursor rc) {
+internal static void invalidateDriverOwnedMemory(this ref rowsCursor rc) {
     foreach (var (_, buf) in rc.driverOwnedMemory) {
         foreach (var (i, _) in buf) {
             buf[i] = (rune)'x';
@@ -1222,7 +1222,7 @@ internal static ref Func<bool> hookRollbackBadConn => ref ᏑhookRollbackBadConn
     rc.driverOwnedMemory = default!;
 }
 
-[GoRecv] internal static error Close(this ref rowsCursor rc) {
+internal static error Close(this ref rowsCursor rc) {
     rc.touchMem();
     rc.parentMem.touchMem();
     rc.invalidateDriverOwnedMemory();
@@ -1230,11 +1230,11 @@ internal static ref Func<bool> hookRollbackBadConn => ref ᏑhookRollbackBadConn
     return rc.closeErr;
 }
 
-[GoRecv] internal static slice<@string> Columns(this ref rowsCursor rc) {
+internal static slice<@string> Columns(this ref rowsCursor rc) {
     return rc.cols[rc.posSet];
 }
 
-[GoRecv] internal static reflectꓸType ColumnTypeScanType(this ref rowsCursor rc, nint index) {
+internal static reflectꓸType ColumnTypeScanType(this ref rowsCursor rc, nint index) {
     return colTypeToReflectType(rc.colType[rc.posSet][index]);
 }
 
@@ -1243,7 +1243,7 @@ internal static Func<slice<driverꓸValue>, error> rowsCursorNextHook;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fakedbCursorIsClosedˢ = "fakedb: cursor is closed"u8;
 
-[GoRecv] internal static error Next(this ref rowsCursor rc, slice<driverꓸValue> dest) {
+internal static error Next(this ref rowsCursor rc, slice<driverꓸValue> dest) {
     if (rowsCursorNextHook != default!) {
         return rowsCursorNextHook(dest);
     }
@@ -1282,12 +1282,12 @@ internal static readonly @string fakedbCursorIsClosedˢ = "fakedb: cursor is clo
     return default!;
 }
 
-[GoRecv] internal static bool HasNextResultSet(this ref rowsCursor rc) {
+internal static bool HasNextResultSet(this ref rowsCursor rc) {
     rc.touchMem();
     return rc.posSet < len(rc.rows) - 1;
 }
 
-[GoRecv] internal static error NextResultSet(this ref rowsCursor rc) {
+internal static error NextResultSet(this ref rowsCursor rc) {
     rc.touchMem();
     if (rc.HasNextResultSet()) {
         rc.posSet++;
@@ -1303,7 +1303,7 @@ internal static readonly @string fakedbCursorIsClosedˢ = "fakedb: cursor is clo
 // This could be surprising behavior to retroactively apply to
 // driver.String now that Go1 is out, but this is convenient for
 // our TestPointerParamsAndScans.
-[GoType] internal partial struct fakeDriverString {
+internal partial struct fakeDriverString {
 }
 
 internal static (driverꓸValue, error) ConvertValue(this fakeDriverString _, any v) {
@@ -1322,7 +1322,7 @@ internal static (driverꓸValue, error) ConvertValue(this fakeDriverString _, an
     return (fmt.Sprintf("%v"u8, v), default!);
 }
 
-[GoType] internal partial struct anyTypeConverter {
+internal partial struct anyTypeConverter {
 }
 
 internal static (driverꓸValue, error) ConvertValue(this anyTypeConverter _, any v) {

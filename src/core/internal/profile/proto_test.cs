@@ -9,7 +9,7 @@ using static go.@internal.profile_package;
 
 partial class profile_internal_test_package {
 
-[GoType("dyn")] [GoLocalName("testcase")] internal partial struct TestPackedEncoding_testcase {
+internal partial struct TestPackedEncoding_testcase /*dyn*/ {
     internal slice<uint64> uint64s;
     internal slice<int64> int64s;
     internal slice<byte> encoded;
@@ -59,12 +59,12 @@ public static void TestPackedEncoding(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct packedInts {
+internal partial struct packedInts {
     internal slice<uint64> uint64s;
     internal slice<int64> int64s;
 }
 
-[GoRecv] internal static slice<Func<ж<global::go.@internal.profile_package.buffer>, global::go.@internal.profile_package.message, error>> decoder(this ref packedInts u) {
+internal static slice<Func<ж<global::go.@internal.profile_package.buffer>, global::go.@internal.profile_package.message, error>> decoder(this ref packedInts u) {
     return new Func<ж<global::go.@internal.profile_package.buffer>, global::go.@internal.profile_package.message, error>[]{
         default!,
         (ж<global::go.@internal.profile_package.buffer> b, global::go.@internal.profile_package.message m) => decodeUint64s(ref (b).DerefOrNull(), m._<ж<packedInts>>().of(packedInts.Ꮡuint64s)),
@@ -72,7 +72,7 @@ public static void TestPackedEncoding(ж<testing.T> Ꮡt) {
     }.slice();
 }
 
-[GoRecv] internal static void encode(this ref packedInts u, ж<global::go.@internal.profile_package.buffer> Ꮡb) {
+internal static void encode(this ref packedInts u, ж<global::go.@internal.profile_package.buffer> Ꮡb) {
     encodeUint64s(ref (Ꮡb).DerefOrNull(), 1, u.uint64s);
     encodeInt64s(ref (Ꮡb).DerefOrNull(), 2, u.int64s);
 }

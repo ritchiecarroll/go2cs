@@ -498,7 +498,7 @@ public static partial void TestReader(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct readerErrorsᴛ1 {
+partial struct readerErrorsᴛ1 /*dyn*/ {
     internal @string @file;
     internal @string err;
 }
@@ -816,7 +816,7 @@ public static void TestGray8Transparent(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingTestsWhichˢ = (@string)"skipping tests which allocate large pixel buffers"u8;
 
-[GoType("dyn")] internal partial struct TestDimensionOverflow_testCases {
+internal partial struct TestDimensionOverflow_testCases /*dyn*/ {
     internal slice<byte> src;
     internal bool unsupportedConfig;
     internal nint width;

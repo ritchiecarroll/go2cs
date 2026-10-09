@@ -184,7 +184,7 @@ public static void TestSortedStableFunc(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestChunk_cases {
+internal partial struct TestChunk_cases /*dyn*/ {
     internal @string name;
     internal slice<nint> s;
     internal nint n;
@@ -257,7 +257,7 @@ public static void TestChunk(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestChunkPanics_type {
+internal partial struct TestChunkPanics_type /*dyn*/ {
     internal @string name;
     internal slice<EmptyStruct> x;
     internal nint n;

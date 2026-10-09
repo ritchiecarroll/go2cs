@@ -24,7 +24,7 @@ partial class http_internal_test_package {
 // are disallowed by RFC 6265 but are common in the wild.
 // Quoted values (issue #46443)
 
-[GoType("dyn")] partial struct writeSetCookiesTestsᴛ1 {
+partial struct writeSetCookiesTestsᴛ1 /*dyn*/ {
     public ж<global::go.net.http_package.ΔCookie> Cookie;
     public @string Raw;
 }
@@ -199,7 +199,7 @@ public static void TestWriteSetCookies(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("global::go.net.http_package.ΔHeader")] internal partial struct headerOnlyResponseWriter;
+internal partial struct headerOnlyResponseWriter /*global::go.net.http_package.ΔHeader*/;
 
 internal static global::go.net.http_package.ΔHeader Header(this headerOnlyResponseWriter ho) {
     return ((global::go.net.http_package.ΔHeader)ho);
@@ -242,7 +242,7 @@ public static void TestSetCookie(ж<testing.T> Ꮡt) {
 
 // Quoted values (issue #46443)
 
-[GoType("dyn")] partial struct addCookieTestsᴛ1 {
+partial struct addCookieTestsᴛ1 /*dyn*/ {
     public slice<ж<global::go.net.http_package.ΔCookie>> Cookies;
     public @string Raw;
 }
@@ -301,7 +301,7 @@ public static void TestAddCookie(ж<testing.T> Ꮡt) {
 // again.
 // Header{"Set-Cookie": {"ASP.NET_SessionId=foo; path=/; HttpOnly, .ASPXAUTH=7E3AA; expires=Wed, 07-Mar-2012 14:25:06 GMT; path=/; HttpOnly"}},
 
-[GoType("dyn")] partial struct readSetCookiesTestsᴛ1 {
+partial struct readSetCookiesTestsᴛ1 /*dyn*/ {
     internal global::go.net.http_package.ΔHeader header;
     internal slice<ж<global::go.net.http_package.ΔCookie>> cookies;
     internal @string godebug;
@@ -481,7 +481,7 @@ public static void TestReadSetCookies(ж<testing.T> Ꮡt) {
 // GODEBUG=httpcookiemaxnum should work regardless if all cookies are sent
 // via one "Cookie" field, or multiple fields.
 
-[GoType("dyn")] partial struct readCookiesTestsᴛ1 {
+partial struct readCookiesTestsᴛ1 /*dyn*/ {
     internal global::go.net.http_package.ΔHeader header;
     internal @string filter;
     internal slice<ж<global::go.net.http_package.ΔCookie>> cookies;
@@ -608,7 +608,7 @@ public static void TestSetCookieDoubleQuotes(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string droppingInvalidBytesˢ = "dropping invalid bytes"u8;
 
-[GoType("dyn")] internal partial struct TestCookieSanitizeValue_tests {
+internal partial struct TestCookieSanitizeValue_tests /*dyn*/ {
     internal @string @in;
     internal bool quoted;
     internal @string want;
@@ -654,7 +654,7 @@ public static void TestCookieSanitizeValue(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestCookieSanitizePath_tests {
+internal partial struct TestCookieSanitizePath_tests /*dyn*/ {
     internal @string @in, want;
 }
 
@@ -687,7 +687,7 @@ public static void TestCookieSanitizePath(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestCookieValid_tests {
+internal partial struct TestCookieValid_tests /*dyn*/ {
     internal ж<global::go.net.http_package.ΔCookie> cookie;
     internal bool valid;
 }
@@ -815,7 +815,7 @@ public static void BenchmarkReadCookies(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestParseCookie_tests {
+internal partial struct TestParseCookie_tests /*dyn*/ {
     internal @string line;
     internal slice<ж<global::go.net.http_package.ΔCookie>> cookies;
     internal error err;
@@ -888,7 +888,7 @@ public static void TestParseCookie(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestParseSetCookie_tests {
+internal partial struct TestParseSetCookie_tests /*dyn*/ {
     internal @string line;
     internal ж<global::go.net.http_package.ΔCookie> cookie;
     internal error err;

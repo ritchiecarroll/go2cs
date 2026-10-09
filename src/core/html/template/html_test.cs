@@ -26,7 +26,7 @@ public static void TestHTMLNospaceEscaper(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStripTags_tests {
+internal partial struct TestStripTags_tests /*dyn*/ {
     internal @string input, want;
 }
 

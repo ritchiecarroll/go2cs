@@ -10,7 +10,7 @@ partial class testing_test_package {
 internal static any global;
 
 
-[GoType("dyn")] partial struct allocsPerRunTestsᴛ1 {
+partial struct allocsPerRunTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal Action fn;
     internal float64 allocs;

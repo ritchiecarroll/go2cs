@@ -22,7 +22,7 @@ using static global::go.net.http_package;
 
 partial class http_internal_test_package {
 
-[GoType] internal partial struct reqWriteTest {
+internal partial struct reqWriteTest {
     public global::go.net.http_package.Request Req;
     public any Body; // optional []byte or func() io.ReadCloser to populate Req.Body
     // Any of these three may be empty to skip that test.
@@ -511,7 +511,7 @@ internal static readonly @string contentLength7ˢ = "Content-Length: 7"u8;
 internal static readonly @string transferEncodingChunkedˢ2 = "Transfer-Encoding: chunked"u8;
 internal static readonly @string oobodyˢ = "oobody"u8;
 
-[GoType("dyn")] [GoLocalName("testCase")] internal partial struct TestRequestWriteTransport_testCase {
+internal partial struct TestRequestWriteTransport_testCase /*dyn*/ {
     internal @string method;
     internal int64 clen; // ContentLength
     internal io.ReadCloser body;
@@ -647,12 +647,12 @@ public static void TestRequestWriteTransport(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct closeChecker {
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct closeChecker {
+    /*embed*/ public io_package.Reader Reader;
     internal bool closed;
 }
 
-[GoRecv] internal static error Close(this ref closeChecker rc) {
+internal static error Close(this ref closeChecker rc) {
     rc.closed = true;
     return default!;
 }
@@ -707,9 +707,9 @@ internal static partial (nint, error) Write(this writerFunc f, slice<byte> p) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fakeWriteFailureˢ = "fake write failure"u8;
 
-[GoType("dyn")] internal partial struct TestRequestWriteError_w {
-    [GoEmbedded] public io_package.ByteWriter ByteWriter; // to avoid being wrapped by a bufio.Writer
-    [GoEmbedded] public io_package.Writer Writer;
+internal partial struct TestRequestWriteError_w /*dyn*/ {
+    /*embed*/ public io_package.ByteWriter ByteWriter; // to avoid being wrapped by a bufio.Writer
+    /*embed*/ public io_package.Writer Writer;
 }
 
 // TestRequestWriteError tests the Write err != nil checks in (*Request).write.
@@ -821,12 +821,12 @@ internal static partial (slice<byte>, error) dumpRequestOut(ж<global::go.net.ht
 
 // delegateReader is a reader that delegates to another reader,
 // once it arrives on a channel.
-[GoType] internal partial struct delegateReader {
+internal partial struct delegateReader {
     internal channel<io.Reader> c;
     internal io.Reader r; // nil until received from c
 }
 
-[GoRecv] internal static (nint, error) Read(this ref delegateReader r, slice<byte> p) {
+internal static (nint, error) Read(this ref delegateReader r, slice<byte> p) {
     if (r.r == default!) {
         r.r = ᐸꟷ(r.c);
     }
@@ -834,32 +834,32 @@ internal static partial (slice<byte>, error) dumpRequestOut(ж<global::go.net.ht
 }
 
 // dumpConn is a net.Conn that writes to Writer and reads from Reader.
-[GoType] internal partial struct dumpConn {
-    [GoEmbedded] public io_package.Writer Writer;
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct dumpConn {
+    /*embed*/ public io_package.Writer Writer;
+    /*embed*/ public io_package.Reader Reader;
 }
 
-[GoRecv] internal static error Close(this ref dumpConn c) {
+internal static error Close(this ref dumpConn c) {
     return default!;
 }
 
-[GoRecv] internal static netꓸAddr LocalAddr(this ref dumpConn c) {
+internal static netꓸAddr LocalAddr(this ref dumpConn c) {
     return default!;
 }
 
-[GoRecv] internal static netꓸAddr RemoteAddr(this ref dumpConn c) {
+internal static netꓸAddr RemoteAddr(this ref dumpConn c) {
     return default!;
 }
 
-[GoRecv] internal static error SetDeadline(this ref dumpConn c, time.Time t) {
+internal static error SetDeadline(this ref dumpConn c, time.Time t) {
     return default!;
 }
 
-[GoRecv] internal static error SetReadDeadline(this ref dumpConn c, time.Time t) {
+internal static error SetReadDeadline(this ref dumpConn c, time.Time t) {
     return default!;
 }
 
-[GoRecv] internal static error SetWriteDeadline(this ref dumpConn c, time.Time t) {
+internal static error SetWriteDeadline(this ref dumpConn c, time.Time t) {
     return default!;
 }
 

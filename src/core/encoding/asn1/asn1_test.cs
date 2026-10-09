@@ -20,7 +20,7 @@ using static go.encoding.asn1_package;
 
 partial class asn1_internal_test_package {
 
-[GoType] internal partial struct boolTest {
+internal partial struct boolTest {
     internal slice<byte> @in;
     internal bool ok;
     internal bool @out;
@@ -46,7 +46,7 @@ public static void TestParseBool(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct int64Test {
+internal partial struct int64Test {
     internal slice<byte> @in;
     internal bool ok;
     internal int64 @out;
@@ -79,7 +79,7 @@ public static void TestParseInt64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct int32Test {
+internal partial struct int32Test {
     internal slice<byte> @in;
     internal bool ok;
     internal int32 @out;
@@ -113,7 +113,7 @@ public static void TestParseInt32(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct bigIntTestsᴛ1 {
+partial struct bigIntTestsᴛ1 /*dyn*/ {
     internal slice<byte> @in;
     internal bool ok;
     internal @string base10;
@@ -154,7 +154,7 @@ public static void TestParseBigInt(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct bitStringTest {
+internal partial struct bitStringTest {
     internal slice<byte> @in;
     internal bool ok;
     internal slice<byte> @out;
@@ -214,7 +214,7 @@ public static void TestBitStringAt(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct bitStringRightAlignTest {
+internal partial struct bitStringRightAlignTest {
     internal slice<byte> @in;
     internal nint inlen;
     internal slice<byte> @out;
@@ -239,7 +239,7 @@ public static void TestBitStringRightAlign(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct objectIdentifierTest {
+internal partial struct objectIdentifierTest {
     internal slice<byte> @in;
     internal bool ok;
     internal global::go.encoding.asn1_package.ObjectIdentifier @out; // has base type[]int
@@ -273,7 +273,7 @@ public static void TestObjectIdentifier(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct timeTest {
+internal partial struct timeTest {
     internal @string @in;
     internal bool ok;
     internal time.Time @out;
@@ -381,7 +381,7 @@ public static void TestGeneralizedTime(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct tagAndLengthTest {
+internal partial struct tagAndLengthTest {
     internal slice<byte> @in;
     internal bool ok;
     internal global::go.encoding.asn1_package.tagAndLength @out;
@@ -428,7 +428,7 @@ public static void TestParseTagAndLength(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct parseFieldParametersTest {
+internal partial struct parseFieldParametersTest {
     internal @string @in;
     internal global::go.encoding.asn1_package.fieldParameters @out;
 }
@@ -485,43 +485,39 @@ public static void TestParseFieldParameters(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct TestObjectIdentifierStruct {
+public partial struct TestObjectIdentifierStruct {
     public global::go.encoding.asn1_package.ObjectIdentifier OID;
 }
 
-[GoType] public partial struct TestContextSpecificTags {
-    [GoTag(@"asn1:""tag:1""")]
-    public nint A;
+public partial struct TestContextSpecificTags {
+    public nint A; /*`asn1:"tag:1"`*/
 }
 
-[GoType] public partial struct TestContextSpecificTags2 {
-    [GoTag(@"asn1:""explicit,tag:1""")]
-    public nint A;
+public partial struct TestContextSpecificTags2 {
+    public nint A; /*`asn1:"explicit,tag:1"`*/
     public nint B;
 }
 
-[GoType] public partial struct TestContextSpecificTags3 {
-    [GoTag(@"asn1:""tag:1,utf8""")]
-    public @string S;
+public partial struct TestContextSpecificTags3 {
+    public @string S; /*`asn1:"tag:1,utf8"`*/
 }
 
-[GoType] public partial struct TestElementsAfterString {
+public partial struct TestElementsAfterString {
     public @string S;
     public nint A, B;
 }
 
-[GoType] public partial struct TestBigInt {
+public partial struct TestBigInt {
     public ж<bigꓸInt> X;
 }
 
-[GoType] public partial struct TestSet {
-    [GoTag(@"asn1:""set""")]
-    public slice<nint> Ints;
+public partial struct TestSet {
+    public slice<nint> Ints; /*`asn1:"set"`*/
 }
 
 // Ampersand is allowed in PrintableString due to mistakes by major CAs.
 
-[GoType("dyn")] partial struct unmarshalTestDataᴛ1 {
+partial struct unmarshalTestDataᴛ1 /*dyn*/ {
     internal slice<byte> @in;
     internal any @out;
 }
@@ -562,7 +558,7 @@ public static void TestUnmarshal(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestUnmarshalWithNilOrNonPointer_tests {
+internal partial struct TestUnmarshalWithNilOrNonPointer_tests /*dyn*/ {
     internal slice<byte> b;
     internal any v;
     internal @string want;
@@ -589,15 +585,14 @@ public static void TestUnmarshalWithNilOrNonPointer(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct Certificate {
+public partial struct Certificate {
     public TBSCertificate TBSCertificate;
     public AlgorithmIdentifier SignatureAlgorithm;
     public global::go.encoding.asn1_package.BitString SignatureValue;
 }
 
-[GoType] public partial struct TBSCertificate {
-    [GoTag(@"asn1:""optional,explicit,default:0,tag:0""")]
-    public nint Version;
+public partial struct TBSCertificate {
+    public nint Version; /*`asn1:"optional,explicit,default:0,tag:0"`*/
     public global::go.encoding.asn1_package.RawValue SerialNumber;
     public AlgorithmIdentifier SignatureAlgorithm;
     public RDNSequence Issuer;
@@ -606,24 +601,24 @@ public static void TestUnmarshalWithNilOrNonPointer(ж<testing.T> Ꮡt) {
     public PublicKeyInfo PublicKey;
 }
 
-[GoType] public partial struct AlgorithmIdentifier {
+public partial struct AlgorithmIdentifier {
     public global::go.encoding.asn1_package.ObjectIdentifier Algorithm;
 }
 
-[GoType("[]RelativeDistinguishedNameSET")] public partial struct RDNSequence;
+public partial struct RDNSequence /*[]RelativeDistinguishedNameSET*/;
 
-[GoType("[]AttributeTypeAndValue")] public partial struct RelativeDistinguishedNameSET;
+public partial struct RelativeDistinguishedNameSET /*[]AttributeTypeAndValue*/;
 
-[GoType] public partial struct AttributeTypeAndValue {
+public partial struct AttributeTypeAndValue {
     public global::go.encoding.asn1_package.ObjectIdentifier Type;
     public any Value;
 }
 
-[GoType] public partial struct Validity {
+public partial struct Validity {
     public time.Time NotBefore, NotAfter;
 }
 
-[GoType] public partial struct PublicKeyInfo {
+public partial struct PublicKeyInfo {
     public AlgorithmIdentifier Algorithm;
     public global::go.encoding.asn1_package.BitString PublicKey;
 }
@@ -657,7 +652,7 @@ public static void TestCertificateWithNUL(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct rawStructTest {
+internal partial struct rawStructTest {
     public global::go.encoding.asn1_package.RawContent Raw;
     public nint A;
 }
@@ -682,7 +677,7 @@ public static void TestRawStructs(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct oiEqualTest {
+internal partial struct oiEqualTest {
     internal global::go.encoding.asn1_package.ObjectIdentifier first;
     internal global::go.encoding.asn1_package.ObjectIdentifier second;
     internal bool same;
@@ -971,13 +966,12 @@ public static void TestStringSlice(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct explicitTaggedTimeTest {
-    [GoTag(@"asn1:""explicit,tag:0""")]
-    public time.Time Time;
+internal partial struct explicitTaggedTimeTest {
+    public time.Time Time; /*`asn1:"explicit,tag:0"`*/
 }
 
 
-[GoType("dyn")] partial struct explicitTaggedTimeTestDataᴛ1 {
+partial struct explicitTaggedTimeTestDataᴛ1 /*dyn*/ {
     internal slice<byte> @in;
     internal explicitTaggedTimeTest @out;
 }
@@ -1003,9 +997,8 @@ public static void TestExplicitTaggedTime(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct implicitTaggedTimeTest {
-    [GoTag(@"asn1:""tag:24""")]
-    public time.Time Time;
+internal partial struct implicitTaggedTimeTest {
+    public time.Time Time; /*`asn1:"tag:24"`*/
 }
 
 public static void TestImplicitTaggedTime(ж<testing.T> Ꮡt) {
@@ -1027,9 +1020,8 @@ public static void TestImplicitTaggedTime(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct truncatedExplicitTagTest {
-    [GoTag(@"asn1:""explicit,tag:0""")]
-    public nint Test;
+internal partial struct truncatedExplicitTagTest {
+    public nint Test; /*`asn1:"explicit,tag:0"`*/
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1055,9 +1047,8 @@ public static void TestTruncatedExplicitTag(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct invalidUTF8Test {
-    [GoTag(@"asn1:""utf8""")]
-    public @string Str;
+internal partial struct invalidUTF8Test {
+    public @string Str; /*`asn1:"utf8"`*/
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1079,7 +1070,7 @@ public static void TestUnmarshalInvalidUTF8(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestMarshalNilValue_nilValueTestData {
+internal partial struct TestMarshalNilValue_nilValueTestData /*dyn*/ {
     public any V;
 }
 
@@ -1097,12 +1088,12 @@ public static void TestMarshalNilValue(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct unexported {
+internal partial struct unexported {
     public nint X;
     internal nint y;
 }
 
-[GoType] internal partial struct exported {
+internal partial struct exported {
     public nint X;
     public nint Y;
 }
@@ -1149,11 +1140,9 @@ public static void TestNull(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("foo")] internal partial struct TestExplicitTagRawValueStruct_foo {
-    [GoTag(@"asn1:""optional,explicit,tag:5""")]
-    public global::go.encoding.asn1_package.RawValue A;
-    [GoTag(@"asn1:""optional,explicit,tag:6""")]
-    public slice<byte> B;
+internal partial struct TestExplicitTagRawValueStruct_foo /*dyn*/ {
+    public global::go.encoding.asn1_package.RawValue A; /*`asn1:"optional,explicit,tag:5"`*/
+    public slice<byte> B; /*`asn1:"optional,explicit,tag:6"`*/
 }
 
 public static void TestExplicitTagRawValueStruct(ж<testing.T> Ꮡt) {
@@ -1175,16 +1164,15 @@ public static void TestExplicitTagRawValueStruct(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("taggedRawValue")] internal partial struct TestTaggedRawValue_taggedRawValue {
-    [GoTag(@"asn1:""tag:5""")]
+internal partial struct TestTaggedRawValue_taggedRawValue /*dyn*/ {
+    public global::go.encoding.asn1_package.RawValue A; /*`asn1:"tag:5"`*/
+}
+
+internal partial struct TestTaggedRawValue_untaggedRawValue /*dyn*/ {
     public global::go.encoding.asn1_package.RawValue A;
 }
 
-[GoType("dyn")] [GoLocalName("untaggedRawValue")] internal partial struct TestTaggedRawValue_untaggedRawValue {
-    public global::go.encoding.asn1_package.RawValue A;
-}
-
-[GoType("dyn")] internal partial struct TestTaggedRawValue_tests {
+internal partial struct TestTaggedRawValue_tests /*dyn*/ {
     internal bool shouldMatch;
     internal slice<byte> derBytes;
 }
@@ -1219,7 +1207,7 @@ public static void TestTaggedRawValue(ж<testing.T> Ꮡt) {
 // Example from https://tools.ietf.org/html/rfc7292#appendix-B.
 // Some characters from the "Letterlike Symbols Unicode block".
 
-[GoType("dyn")] partial struct bmpStringTestsᴛ1 {
+partial struct bmpStringTestsᴛ1 /*dyn*/ {
     internal @string decoded;
     internal @string encodedHex;
 }
@@ -1268,10 +1256,9 @@ public static void BenchmarkObjectIdentifierString(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestParsingMemoryConsumption_out {
+internal partial struct TestParsingMemoryConsumption_out /*dyn*/ {
     public slice<nint> Id;
-    [GoTag(@"asn1:""optional""")]
-    public bool Critical;
+    public bool Critical; /*`asn1:"optional"`*/
     public slice<byte> Value;
 }
 

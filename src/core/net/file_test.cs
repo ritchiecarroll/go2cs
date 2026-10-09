@@ -21,7 +21,7 @@ partial class net_internal_test_package {
 //      golang.org/x/net/ipv6
 //      golang.org/x/net/icmp
 
-[GoType("dyn")] partial struct fileConnTestsᴛ1 {
+partial struct fileConnTestsᴛ1 /*dyn*/ {
     internal @string network;
 }
 internal static slice<fileConnTestsᴛ1> fileConnTests = new fileConnTestsᴛ1[]{

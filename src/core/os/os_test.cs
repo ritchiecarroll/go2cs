@@ -60,7 +60,7 @@ internal static slice<@string> dot = new @string[]{
     "stat_linux.go"u8
 }.slice();
 
-[GoType] partial struct sysDir {
+partial struct sysDir {
     internal @string name;
     internal slice<@string> files;
 }
@@ -1321,7 +1321,7 @@ public static void TestRenameToDirFailed(ж<Δtesting.T> Ꮡt) {
 internal static readonly @string renameFROMˢ = "renameFROM"u8;
 internal static readonly @string renamEfromˢ = "RENAMEfrom"u8;
 
-[GoType("dyn")] internal partial struct TestRenameCaseDifference_tests {
+internal partial struct TestRenameCaseDifference_tests /*dyn*/ {
     internal @string name;
     internal Func<error> create;
 }
@@ -1994,7 +1994,7 @@ public static partial void TestProgWideChdir(ж<Δtesting.T> Ꮡt) {
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string dataᶜ = "hello, world\n"u8;
 
-[GoType("dyn")] internal partial struct TestSeek_test {
+internal partial struct TestSeek_test /*dyn*/ {
     internal int64 @in;
     internal nint whence;
     internal int64 @out;
@@ -2083,7 +2083,7 @@ public static void TestOpenError(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fileˢ = "file "u8;
 
-[GoType("dyn")] internal partial struct testOpenError_type {
+internal partial struct testOpenError_type /*dyn*/ {
     internal @string path;
     internal nint mode;
     internal error error;
@@ -2494,7 +2494,7 @@ public static void TestAppend(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingTestWhenRunningˢ = (@string)"skipping test when running as root"u8;
 
-[GoType("dyn")] internal partial struct TestFilePermissions_type {
+internal partial struct TestFilePermissions_type /*dyn*/ {
     internal @string name;
     internal fs.FileMode mode;
 }
@@ -2616,7 +2616,7 @@ public static void TestOpenFileCreateExclDanglingSymlink(ж<Δtesting.T> Ꮡt) {
     });
 }
 
-[GoType("dyn")] internal partial struct TestFileRDWRFlags_type {
+internal partial struct TestFileRDWRFlags_type /*dyn*/ {
     internal @string name;
     internal nint flag;
 }
@@ -3170,7 +3170,7 @@ public static void TestKillFindProcess(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct nilFileMethodTestsᴛ1 {
+partial struct nilFileMethodTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal Func<ж<Δos.File>, error> f;
 }

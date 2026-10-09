@@ -55,8 +55,8 @@ using static global::go.html.template_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("html/template/examplefiles_test.go", "examplefiles_test.cs", "ABoqooKClIKCgpSSgoKmAAgMAAgIAAgSlrqUgoK45gAJCLrMkoLMuJSCgrgACg4ADAjulqikgoKmgoK4goKUgoK6AAwMAAwI7paozIKCpoKCuoKCpoKCuoKClIKCvA==", "90-94:1")]
-[assembly: go.GoPositionMap("html/template/template_test.go", "template_test.cs", "ABogtIKCgpSCloKSgoKClICCAAkIgoKCgqaCgoKCgvaCgoKCgtaCgoKCgtaCgoKCgqaCgoKCgvaCgoK4guaCgoKCgvaCgoKCgIKkgIKkgIL4goKCABIGtAALGKqSsqKCgIKkgoKAgqSCAAkMgoKCgoKClIKClAAHEILcgqaigoK4ooKCuKKCgoKUgg==", "147-160:1")]
+[assembly: go.GoPositionMap("html/template/examplefiles_test.go", "examplefiles_test.cs", "ABoqooKClIKCgpSSgoKmAAgMAAgIAAgSlrqUgoK45gAJCLrMkoLMuJSCgrgACg4ADAjulqikgoKmgoK4goKUgoK6AAwMAAwI7paozIKCpoKCuoKCpoKCuoKClIKCvA==", "90-94:1", "", "121=Join/1/2/1,Join/2/2/2")]
+[assembly: go.GoPositionMap("html/template/template_test.go", "template_test.cs", "ABogtIKCgpSCloKSgoKClICCAAkIgoKCgqaCgoKCgvaCgoKCgtaCgoKCgtaCgoKCgqaCgoKCgvaCgoK4guaCgoKCgvaCgoKCgIKkgIKkgIL4goKCABIGtAALGKqSsqKCgIKkgoKAgqSCAAkMgoKCgoKClIKClAAHEILcgqaigoK4ooKCuKKCgoKUgg==", "147-160:1", "", "269=New/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.html;
@@ -65,7 +65,7 @@ namespace go.html;
 public static partial class template_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

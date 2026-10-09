@@ -11,8 +11,8 @@ using go.io;
 
 partial class fs_test_package {
 
-[GoType] partial struct subOnly {
-    [GoEmbedded] public go.io.fs_package.SubFS SubFS;
+partial struct subOnly {
+    /*embed*/ public go.io.fs_package.SubFS SubFS;
 }
 
 internal static (fs.File, error) Open(this subOnly _, @string name) {

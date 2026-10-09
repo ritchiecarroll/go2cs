@@ -26,7 +26,7 @@ internal static ж<global::go.crypto.elliptic_package.CurveParams> genericParams
     return Ꮡd;
 }
 
-[GoType("dyn")] internal partial struct testAllCurves_tests {
+internal partial struct testAllCurves_tests /*dyn*/ {
     internal @string name;
     internal global::go.crypto.elliptic_package.Curve curve;
 }
@@ -381,7 +381,7 @@ public static void TestLargeIsOnCurve(ж<testing.T> Ꮡt) {
     });
 }
 
-[GoType("dyn")] internal partial struct benchmarkAllCurves_tests {
+internal partial struct benchmarkAllCurves_tests /*dyn*/ {
     internal @string name;
     internal global::go.crypto.elliptic_package.Curve curve;
 }

@@ -30,7 +30,7 @@ partial class zstd_internal_test_package {
 // a small compressed .debug_ranges section.
 // tests holds some simple test cases, including some found by fuzzing.
 
-[GoType("dyn")] partial struct testsᴛ1 {
+partial struct testsᴛ1 /*dyn*/ {
     internal @string name, uncompressed, compressed;
 }
 internal static slice<testsᴛ1> tests = new testsᴛ1[]{

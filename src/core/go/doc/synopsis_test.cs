@@ -9,7 +9,7 @@ using static global::go.go.doc_package;
 partial class doc_internal_test_package {
 
 
-[GoType("dyn")] partial struct testsᴛ1 {
+partial struct testsᴛ1 /*dyn*/ {
     internal @string txt;
     internal nint fsl;
     internal @string syn;

@@ -18,7 +18,7 @@ using static go.crypto.hkdf_package;
 
 partial class hkdf_internal_test_package {
 
-[GoType] internal partial struct hkdfTest {
+internal partial struct hkdfTest {
     internal Func<hash.Hash> hash;
     internal slice<byte> master;
     internal slice<byte> salt;

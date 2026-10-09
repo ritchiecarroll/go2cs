@@ -89,7 +89,7 @@ internal static error isValid(this ж<global::go.net_package.OpError> Ꮡe) {
     return default!;
 }
 
-[GoType("dyn")] internal partial interface parseDialError_type {
+internal partial interface parseDialError_type /*dyn*/ {
     void isAddrinfoErrno();
 }
 
@@ -269,7 +269,7 @@ public static void TestProtocolDialError(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestDialAddrError_type {
+internal partial struct TestDialAddrError_type /*dyn*/ {
     internal @string network;
     internal @string lit;
     internal ж<global::go.net_package.TCPAddr> addr;

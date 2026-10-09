@@ -55,7 +55,7 @@ public static void TestText(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static void indexSetTable(ж<testing.T> Ꮡt, [GoArrayDims(26)] array<map<rune, nint>> indexSet) {
+internal static void indexSetTable(ж<testing.T> Ꮡt, /*[26]*/ array<map<rune, nint>> indexSet) {
     indexSet = indexSet.Clone();
 
     @string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"u8;

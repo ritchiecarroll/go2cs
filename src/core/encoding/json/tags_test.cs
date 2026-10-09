@@ -11,7 +11,7 @@ partial class json_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fieldFoobarFooˢ = "field,foobar,foo"u8;
 
-[GoType("dyn")] internal partial struct TestTagParsing_type {
+internal partial struct TestTagParsing_type /*dyn*/ {
     internal @string opt;
     internal bool want;
 }

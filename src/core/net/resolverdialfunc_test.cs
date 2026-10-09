@@ -135,7 +135,7 @@ internal static Func<context.Context, @string, @string, (global::go.net_package.
     };
 }
 
-[GoType] internal partial struct resolverDialHandler {
+internal partial struct resolverDialHandler {
     // StartDial, if non-nil, is called when Go first calls Resolver.Dial.
     // Any error returned aborts the dial and is returned unwrapped.
     public Func<@string, @string, error> StartDial;
@@ -147,7 +147,7 @@ internal static Func<context.Context, @string, @string, (global::go.net_package.
     public Func<SRVWriter, @string, error> HandleSRV;
 }
 
-[GoType] public partial struct ResponseWriter {
+public partial struct ResponseWriter {
     internal ж<resolverFuncConn> a;
 }
 
@@ -178,11 +178,11 @@ public static void SetTTL(this ResponseWriter w, uint32 seconds) {
     w.a.Value.ttl = seconds;
 }
 
-[GoType] public partial struct AWriter {
+public partial struct AWriter {
     public partial ref ResponseWriter ResponseWriter { get; }
 }
 
-public static void AddIP(this AWriter w, [GoArrayDims(4)] array<byte> v4) {
+public static void AddIP(this AWriter w, /*[4]*/ array<byte> v4) {
     v4 = v4.Clone();
 
     w.a.Value.wrote = true;
@@ -192,11 +192,11 @@ public static void AddIP(this AWriter w, [GoArrayDims(4)] array<byte> v4) {
     }
 }
 
-[GoType] public partial struct AAAAWriter {
+public partial struct AAAAWriter {
     public partial ref ResponseWriter ResponseWriter { get; }
 }
 
-public static void AddIP(this AAAAWriter w, [GoArrayDims(16)] array<byte> v6) {
+public static void AddIP(this AAAAWriter w, /*[16]*/ array<byte> v6) {
     v6 = v6.Clone();
 
     w.a.Value.wrote = true;
@@ -206,7 +206,7 @@ public static void AddIP(this AAAAWriter w, [GoArrayDims(16)] array<byte> v6) {
     }
 }
 
-[GoType] public partial struct SRVWriter {
+public partial struct SRVWriter {
     public partial ref ResponseWriter ResponseWriter { get; }
 }
 
@@ -233,7 +233,7 @@ public static error AddSRV(this SRVWriter w, uint16 priority, uint16 weight, uin
 public static error ErrNotExist = errors.New("name does not exist"u8); // maps to RCode3, NXDOMAIN
 public static error ErrRefused = errors.New("refused"u8);   // maps to RCode5, REFUSED
 
-[GoType] [GoValueClone("q")] internal partial struct resolverFuncConn {
+internal partial struct resolverFuncConn {
     internal ж<resolverDialHandler> h;
     internal @string network;
     internal @string address;
@@ -244,31 +244,31 @@ public static error ErrRefused = errors.New("refused"u8);   // maps to RCode5, R
     internal bytes.Buffer rbuf;
 }
 
-[GoRecv] internal static error Close(this ref resolverFuncConn _) {
+internal static error Close(this ref resolverFuncConn _) {
     return default!;
 }
 
-[GoRecv] internal static global::go.net_package.ΔAddr LocalAddr(this ref resolverFuncConn _) {
+internal static global::go.net_package.ΔAddr LocalAddr(this ref resolverFuncConn _) {
     return new someaddr(nil);
 }
 
-[GoRecv] internal static global::go.net_package.ΔAddr RemoteAddr(this ref resolverFuncConn _) {
+internal static global::go.net_package.ΔAddr RemoteAddr(this ref resolverFuncConn _) {
     return new someaddr(nil);
 }
 
-[GoRecv] internal static error SetDeadline(this ref resolverFuncConn _, time.Time t) {
+internal static error SetDeadline(this ref resolverFuncConn _, time.Time t) {
     return default!;
 }
 
-[GoRecv] internal static error SetReadDeadline(this ref resolverFuncConn _, time.Time t) {
+internal static error SetReadDeadline(this ref resolverFuncConn _, time.Time t) {
     return default!;
 }
 
-[GoRecv] internal static error SetWriteDeadline(this ref resolverFuncConn _, time.Time t) {
+internal static error SetWriteDeadline(this ref resolverFuncConn _, time.Time t) {
     return default!;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref resolverFuncConn a, slice<byte> p) {
+internal static (nint n, error err) Read(this ref resolverFuncConn a, slice<byte> p) {
     return a.rbuf.Read(p);
 }
 
@@ -350,7 +350,7 @@ internal static (nint n, error err) Write(this ж<resolverFuncConn> Ꮡa, slice<
     return (len(packet), default!);
 }
 
-[GoType] internal partial struct someaddr {
+internal partial struct someaddr {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

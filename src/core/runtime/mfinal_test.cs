@@ -15,18 +15,18 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-[GoType("ж<nint>")] partial class Tintptr;
+partial class Tintptr /*ж<nint>*/;
 
-[GoType("num:nint")] partial struct Tint;
+partial struct Tint /*num:nint*/;
 
-[GoRecv] internal static void m(this ref Tint t) {
+internal static void m(this ref Tint t) {
 }
 
-[GoType] partial interface Tinter {
+partial interface Tinter {
     void m();
 }
 
-[GoType("dyn")] internal partial struct TestFinalizerType_type {
+internal partial struct TestFinalizerType_type /*dyn*/ {
     internal Func<ж<nint>, any> convert;
     internal any finalizer;
 }
@@ -34,7 +34,7 @@ partial class runtime_test_package {
 // allocate struct with pointer to avoid hitting tinyalloc.
 // Otherwise we can't be sure when the allocation will
 // be freed.
-[GoType("dyn")] internal partial struct TestFinalizerType_T {
+internal partial struct TestFinalizerType_T /*dyn*/ {
     internal nint v;
     internal @unsafe.Pointer p;
 }
@@ -113,7 +113,7 @@ public static partial void TestFinalizerType(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct bigValue {
+partial struct bigValue {
     internal uint64 fill;
     internal bool it;
     internal @string up;
@@ -151,7 +151,7 @@ public static partial void TestFinalizerInterfaceBig(ж<testing.T> Ꮡt) {
 internal static void fin(ж<nint> Ꮡv) {
 }
 
-[GoType("dyn")] internal partial struct TestFinalizerZeroSizedStruct_Z {
+internal partial struct TestFinalizerZeroSizedStruct_Z /*dyn*/ {
 }
 
 // Verify we don't crash at least. golang.org/issue/6857
@@ -194,8 +194,8 @@ public static void BenchmarkFinalizerRun(ж<testing.B> Ꮡb) {
 // size class 19: 320 byte objects, 25 per page, 1 page alloc at a time
 internal static UntypedInt objsize => 320;
 
-[GoType("[320]byte")] /* [objsize]byte */
-partial struct objtype;
+/* [objsize]byte */
+partial struct objtype /*[320]byte*/;
 
 internal static (ж<objtype>, ж<objtype>) adjChunks() {
     slice<ж<objtype>> s = default!;
@@ -280,18 +280,18 @@ public static void TestFinalizerOnGlobal(ж<testing.T> Ꮡt) {
     Δruntime.SetFinalizer(Foo2.OrTypedNil(), default!);
 }
 
-[GoType] partial struct Object1 {
+partial struct Object1 {
     public slice<byte> Something;
 }
 
-[GoType] partial struct Object2 {
+partial struct Object2 {
     public byte Something;
 }
 
 public static ж<Object2> Foo2 = Ꮡ(new Object2(nil));
 public static ж<Object1> Foo1 = Ꮡ(new Object1(nil));
 
-[GoLocalName("T")] [GoType("ж<nint>")] internal partial class TestDeferKeepAlive_T;
+internal partial class TestDeferKeepAlive_T /*ж<nint>*/;
 
 public static void TestDeferKeepAlive(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;

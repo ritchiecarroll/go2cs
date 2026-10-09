@@ -34,7 +34,7 @@ partial class tar_internal_test_package {
 internal static readonly @string longˢ = "long"u8;
 internal static readonly @string bz2ˢ = ".bz2"u8;
 
-[GoType("dyn")] internal partial struct TestReader_vectors {
+internal partial struct TestReader_vectors /*dyn*/ {
     internal @string @file;   // Test input file
     internal slice<ж<global::go.archive.tar_package.Header>> headers; // Expected output headers
     internal slice<@string> chksums; // CRC32 checksum of files, leave as nil if not checked
@@ -702,12 +702,12 @@ public static void TestReader(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("testCase")] internal partial struct TestPartialRead_testCase {
+internal partial struct TestPartialRead_testCase /*dyn*/ {
     internal nint cnt;   // Number of bytes to read
     internal @string output; // Expected value of string read
 }
 
-[GoType("dyn")] internal partial struct TestPartialRead_vectors {
+internal partial struct TestPartialRead_vectors /*dyn*/ {
     internal @string @file;
     internal slice<TestPartialRead_testCase> cases;
 }
@@ -794,23 +794,23 @@ public static void TestUninitializedRead(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct reader {
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct reader {
+    /*embed*/ public io_package.Reader Reader;
 }
 
-[GoType] internal partial struct readSeeker {
-    [GoEmbedded] public io_package.ReadSeeker ReadSeeker;
+internal partial struct readSeeker {
+    /*embed*/ public io_package.ReadSeeker ReadSeeker;
 }
 
-[GoType] internal partial struct readBadSeeker {
-    [GoEmbedded] public io_package.ReadSeeker ReadSeeker;
+internal partial struct readBadSeeker {
+    /*embed*/ public io_package.ReadSeeker ReadSeeker;
 }
 
 // Go method set entry for the promoted 'ReadSeeker.Read()' - provided ONLY by the embedded
 // interface field in *readBadSeeker's method set; see the pointer-only satisfaction record.
 internal static (nint, error) Read(this readBadSeeker recvᴛ, slice<byte> p) => recvᴛ.ReadSeeker.Read(p);
 
-[GoRecv] internal static (int64, error) Seek(this ref readBadSeeker rbs, int64 _Δp1, nint _Δp2) {
+internal static (int64, error) Seek(this ref readBadSeeker rbs, int64 _Δp1, nint _Δp2) {
     return (0, fmt.Errorf("illegal seek"u8));
 }
 
@@ -822,7 +822,7 @@ internal static readonly @string manualˢ = "manual"u8;
 internal static readonly @string ioReadSeekerˢ = "io.ReadSeeker"u8;
 internal static readonly @string readBadSeekerˢ = "ReadBadSeeker"u8;
 
-[GoType("dyn")] internal partial struct TestReadTruncation_vectors {
+internal partial struct TestReadTruncation_vectors /*dyn*/ {
     internal @string input; // Input stream
     internal nint cnt;   // Expected number of headers read
     internal error err;  // Expected error outcome
@@ -1015,7 +1015,7 @@ public static void TestReadHeaderOnly(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestMergePAX_vectors {
+internal partial struct TestMergePAX_vectors /*dyn*/ {
     internal map<@string, @string> @in;
     internal ж<global::go.archive.tar_package.Header> want;
     internal bool ok;
@@ -1073,7 +1073,7 @@ public static void TestMergePAX(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestParsePAX_vectors {
+internal partial struct TestParsePAX_vectors /*dyn*/ {
     internal @string @in;
     internal map<@string, @string> want;
     internal bool ok;
@@ -1116,7 +1116,7 @@ public static void TestParsePAX(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fewaˢ = "fewa"u8;
 
-[GoType("dyn")] internal partial struct TestReadOldGNUSparseMap_vectors {
+internal partial struct TestReadOldGNUSparseMap_vectors /*dyn*/ {
     internal slice<byte> input;
     internal global::go.archive.tar_package.sparseDatas wantMap;
     internal int64 wantSize;
@@ -1240,7 +1240,7 @@ public static void TestReadOldGNUSparseMap(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestReadGNUSparsePAXHeaders_vectors {
+internal partial struct TestReadGNUSparsePAXHeaders_vectors /*dyn*/ {
     internal @string inputData;
     internal map<@string, @string> inputHdrs;
     internal global::go.archive.tar_package.sparseDatas wantMap;
@@ -1439,8 +1439,8 @@ public static void TestReadGNUSparsePAXHeaders(ж<testing.T> Ꮡt) {
 
 // testNonEmptyReader wraps an io.Reader and ensures that
 // Read is never called with an empty buffer.
-[GoType] internal partial struct testNonEmptyReader {
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct testNonEmptyReader {
+    /*embed*/ public io_package.Reader Reader;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1453,38 +1453,38 @@ internal static (nint, error) Read(this testNonEmptyReader r, slice<byte> b) {
     return r.Reader.Read(b);
 }
 
-[GoType("dyn")] [GoLocalName("testRead")] internal partial struct TestFileReader_testRead {
+internal partial struct TestFileReader_testRead /*dyn*/ {
 // Read(cnt) == (wantStr, wantErr)
     internal nint cnt;
     internal @string wantStr;
     internal error wantErr;
 }
 
-[GoType("dyn")] [GoLocalName("testWriteTo")] internal partial struct TestFileReader_testWriteTo {
+internal partial struct TestFileReader_testWriteTo /*dyn*/ {
 // WriteTo(testFile{ops}) == (wantCnt, wantErr)
     internal fileOps ops;
     internal int64 wantCnt;
     internal error wantErr;
 }
 
-[GoType("dyn")] [GoLocalName("testRemaining")] internal partial struct TestFileReader_testRemaining {
+internal partial struct TestFileReader_testRemaining /*dyn*/ {
 // logicalRemaining() == wantLCnt, physicalRemaining() == wantPCnt
     internal int64 wantLCnt;
     internal int64 wantPCnt;
 }
 
-[GoType("dyn")] [GoLocalName("makeReg")] internal partial struct TestFileReader_makeReg {
+internal partial struct TestFileReader_makeReg /*dyn*/ {
     internal @string str;
     internal int64 size;
 }
 
-[GoType("dyn")] [GoLocalName("makeSparse")] internal partial struct TestFileReader_makeSparse {
+internal partial struct TestFileReader_makeSparse /*dyn*/ {
     internal TestFileReader_makeReg makeReg;
     internal global::go.archive.tar_package.sparseDatas spd;
     internal int64 size;
 }
 
-[GoType("dyn")] internal partial struct TestFileReader_vectors {
+internal partial struct TestFileReader_vectors /*dyn*/ {
     internal TestFileReader_fileMaker maker;
     internal slice<TestFileReader_testFnc> tests;
 }

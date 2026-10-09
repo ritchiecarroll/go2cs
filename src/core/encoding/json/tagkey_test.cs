@@ -8,86 +8,71 @@ using static go.encoding.json_package;
 
 partial class json_internal_test_package {
 
-[GoType] internal partial struct basicLatin2xTag {
-    [GoTag(@"json:""$%-/""")]
-    public @string V;
+internal partial struct basicLatin2xTag {
+    public @string V; /*`json:"$%-/"`*/
 }
 
-[GoType] internal partial struct basicLatin3xTag {
-    [GoTag(@"json:""0123456789""")]
-    public @string V;
+internal partial struct basicLatin3xTag {
+    public @string V; /*`json:"0123456789"`*/
 }
 
-[GoType] internal partial struct basicLatin4xTag {
-    [GoTag(@"json:""ABCDEFGHIJKLMO""")]
-    public @string V;
+internal partial struct basicLatin4xTag {
+    public @string V; /*`json:"ABCDEFGHIJKLMO"`*/
 }
 
-[GoType] internal partial struct basicLatin5xTag {
-    [GoTag(@"json:""PQRSTUVWXYZ_""")]
-    public @string V;
+internal partial struct basicLatin5xTag {
+    public @string V; /*`json:"PQRSTUVWXYZ_"`*/
 }
 
-[GoType] internal partial struct basicLatin6xTag {
-    [GoTag(@"json:""abcdefghijklmno""")]
-    public @string V;
+internal partial struct basicLatin6xTag {
+    public @string V; /*`json:"abcdefghijklmno"`*/
 }
 
-[GoType] internal partial struct basicLatin7xTag {
-    [GoTag(@"json:""pqrstuvwxyz""")]
-    public @string V;
+internal partial struct basicLatin7xTag {
+    public @string V; /*`json:"pqrstuvwxyz"`*/
 }
 
-[GoType] internal partial struct miscPlaneTag {
-    [GoTag(@"json:""色は匂へど""")]
-    public @string V;
+internal partial struct miscPlaneTag {
+    public @string V; /*`json:"色は匂へど"`*/
 }
 
-[GoType] internal partial struct percentSlashTag {
-    [GoTag(@"json:""text/html%""")]
-    public @string V;                    // https://golang.org/issue/2718
+internal partial struct percentSlashTag {
+    public @string V; /*`json:"text/html%"`*/ // https://golang.org/issue/2718
 }
 
-[GoType] internal partial struct punctuationTag {
-    [GoTag(@"json:""!#$%&()*+-./:;<=>?@[]^_{|}~ """)]
-    public @string V;                                      // https://golang.org/issue/3546
+internal partial struct punctuationTag {
+    public @string V; /*`json:"!#$%&()*+-./:;<=>?@[]^_{|}~ "`*/ // https://golang.org/issue/3546
 }
 
-[GoType] internal partial struct dashTag {
-    [GoTag(@"json:""-,""")]
-    public @string V;
+internal partial struct dashTag {
+    public @string V; /*`json:"-,"`*/
 }
 
-[GoType] internal partial struct emptyTag {
+internal partial struct emptyTag {
     public @string W;
 }
 
-[GoType] internal partial struct misnamedTag {
-    [GoTag(@"jsom:""Misnamed""")]
-    public @string X;
+internal partial struct misnamedTag {
+    public @string X; /*`jsom:"Misnamed"`*/
 }
 
-[GoType] internal partial struct badFormatTag {
-    [GoTag(@":""BadFormat""")]
-    public @string Y;
+internal partial struct badFormatTag {
+    public @string Y; /*`:"BadFormat"`*/
 }
 
-[GoType] internal partial struct badCodeTag {
-    [GoTag(@"json:"" !\""#&'()*+,.""")]
-    public @string Z;
+internal partial struct badCodeTag {
+    public @string Z; /*`json:" !\"#&'()*+,."`*/
 }
 
-[GoType] internal partial struct spaceTag {
-    [GoTag(@"json:""With space""")]
-    public @string Q;
+internal partial struct spaceTag {
+    public @string Q; /*`json:"With space"`*/
 }
 
-[GoType] internal partial struct unicodeTag {
-    [GoTag(@"json:""Ελλάδα""")]
-    public @string W;
+internal partial struct unicodeTag {
+    public @string W; /*`json:"Ελλάδα"`*/
 }
 
-[GoType("dyn")] internal partial struct TestStructTagObjectKey_tests {
+internal partial struct TestStructTagObjectKey_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal any raw;
     internal @string value;

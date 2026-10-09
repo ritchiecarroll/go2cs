@@ -40,7 +40,7 @@ using static go.encoding.binary_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/binary/binary_test.go", "binary_test.cs", "AC1aABY2ABEqABEqkpKUgoKCgpSCAAkIvoKC3ISCgpaCgpQADRQABxqCgpTKgoKyooKCyoKCsqKCyoCigKKApICigKKA9IKCgoKWgoKCuIKmgrKSgoKCgoKCgoKCzIKykoKC3AAKFoKysqKCkrKClKSCgpSmgoKClIKCgoKUgoIACxKCspKCgIKmgoKCgpSAgpKCACM+grKSkoKCmJKAgriCqIKCmJKAgqSCABgMtISCgoKClJaCkoKClgAKMoKCloCC2oIAFzCCgIIADxqCgpKAgqaysoKCpoKiyoKykpKCgoKClICCtoKSgpIADQqChKKMgoKUpKSmgIKkgILasoKUgoLmsoKUgoIADAaCioKCAAgSgoKAgqSCgIKkgpaCgoCCpIKAgqSCloKCgIKkgoCCpILcooKUgriCgqaCAAocgoKCggAKCoIABRiykoKClIKCAAkMgoKUgoKSlIKUgrgAFCqCgpSCyJKUggAJFIKCgqaigoKCgoKCgriigoKCgpKCgoKUgoK4ooKCgriigoKEgriigoKCgoKCgpSmooKCgoKClKaigoKCgoKCgriigoKCgoKCgoKCgoKCgoKUgoKCgoKCgoKCgriigoKCgoKCgoKCgoKCgpSCgriigoKCgoKCgoKCgoKClIKCuKKCgoKCgoKClKaigoKCgoKUpqKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgoKCgoKCgpSCgoKCgoKCgoKCgoKCgoKCuKKCgoKCgoKClIKCuKKCgoKCgoKCuKKCgoKCgoKClKaigoKCgoKCgriigoKCgoKCgriCgpKC3IKCkoKAgg==", "190-194:1;201-204:1;217-221:1;223-227:2;236-247:1;254-258:1;277-310:1;280-308:1.1;317-335:1;365-397:1;405-412:1;407-410:1.1;415-419:2;505-513:1;506-510:1.1;520-537:1;521-531:1.1;572-574:1;581-583:1;700-709:1;719-721:1;756-766:1;760-762:1.1;1143-1147:1")]
+[assembly: go.GoPositionMap("encoding/binary/binary_test.go", "binary_test.cs", "AC1aABY2ABEqABEqkpKUgoKCgpSCAAkIvoKC3ISCgpaCgpQADRQABxqCgpTKgoKyooKCyoKCsqKCyoCigKKApICigKKA9IKCgoKWgoKCuIKmgrKSgoKCgoKCgoKCzIKykoKC3AAKFoKysqKCkrKClKSCgpSmgoKClIKCgoKUgoIACxKCspKCgIKmgoKCgpSAgpKCACM+grKSkoKCmJKAgriCqIKCmJKAgqSCABgMtISCgoKClJaCkoKClgAKMoKCloCC2oIAFzCCgIIADxqCgpKAgqaysoKCpoKiyoKykpKCgoKClICCtoKSgpIADQqChKKMgoKUpKSmgIKkgILasoKUgoLmsoKUgoIADAaCioKCAAgSgoKAgqSCgIKkgpaCgoCCpIKAgqSCloKCgIKkgoCCpILcooKUgriCgqaCAAocgoKCggAKCoIABRiykoKClIKCAAkMgoKUgoKSlIKUgrgAFCqCgpSCyJKUggAJFIKCgqaigoKCgoKCgriigoKCgpKCgoKUgoK4ooKCgriigoKEgriigoKCgoKCgpSmooKCgoKClKaigoKCgoKCgriigoKCgoKCgoKCgoKCgoKUgoKCgoKCgoKCgriigoKCgoKCgoKCgoKCgpSCgriigoKCgoKCgoKCgoKClIKCuKKCgoKCgoKClKaigoKCgoKUpqKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgoKCgoKCgpSCgoKCgoKCgoKCgoKCgoKCuKKCgoKCgoKClIKCuKKCgoKCgoKCuKKCgoKCgoKClKaigoKCgoKCgriigoKCgoKCgriCgpKC3IKCkoKAgg==", "190-194:1;201-204:1;217-221:1;223-227:2;236-247:1;254-258:1;277-310:1;280-308:1.1;317-335:1;365-397:1;405-412:1;407-410:1.1;415-419:2;505-513:1;506-510:1.1;520-537:1;521-531:1.1;572-574:1;581-583:1;700-709:1;719-721:1;756-766:1;760-762:1.1;1143-1147:1", "", "46=Float32frombits/1/3/10,Float64frombits/1/3/11,Float32frombits/2/3/13,Float32frombits/3/3/14,Float64frombits/2/3/17,Float64frombits/3/3/18")]
 [assembly: go.GoPositionMap("encoding/binary/varint_test.go", "varint_test.cs", "AA0cgoKCgriCgoKmgoKCgoKUgpaCgoKWgoKUgriCgoKCgpSCloKCgpaCgpSCuAAUKoKCgpSCgriCgpSCuIKCgoKCgpaCgoKUggALDqIAAxKCgpSCABcygpKSgoCSpICC7IKCgpaCgoKClICCyIKCgqaCgoKCuqKCgoKCyqKCgoKC", "152-159:1;185-193:2")]
 // </GoSourcePositionMaps>
 
@@ -50,12 +50,22 @@ namespace go.encoding;
 public static partial class binary_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
 
     // <TypeAccessibility>
+    [GoLocalName("byteOrder")] partial interface TestByteOrder_byteOrder {}
+    [GoValueClone("P1", "P2", "P3")] partial struct BlankFieldsProbe {}
+    [GoValueClone("F")] partial struct BlankFieldsProbe_P3 {}
+    [GoValueClone("f")] partial struct BlankFields__ {}
+    [GoValueClone("Array", "BoolArray")] partial struct Struct {}
+    [GoValueClone("Array")] partial struct T {}
+    [GoLocalName("Person")] partial struct TestNoFixedSize_Person {}
+    [GoLocalName("bar")] [GoValueClone("A", "C")] partial struct TestSizeStructCache_bar {}
+    [GoLocalName("foo")] partial struct TestSizeStructCache_foo {}
+    [GoValueClone("A")] partial struct TestSizeStructCache_type {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

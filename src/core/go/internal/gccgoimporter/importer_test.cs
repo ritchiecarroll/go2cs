@@ -22,7 +22,7 @@ using static global::go.go.@internal.gccgoimporter_package;
 
 partial class gccgoimporter_internal_test_package {
 
-[GoType] internal partial struct importerTest {
+internal partial struct importerTest {
     internal @string pkgpath, name, want, wantval;
     internal slice<@string> wantinits;
     internal nint gccgoVersion; // minimum gccgo version (0 => any)

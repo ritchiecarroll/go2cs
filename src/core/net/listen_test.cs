@@ -18,7 +18,7 @@ using static go.net_package;
 
 partial class net_internal_test_package {
 
-[GoRecv] internal static @string port(this ref global::go.net_package.TCPListener ln) {
+internal static @string port(this ref global::go.net_package.TCPListener ln) {
     var (_, port, err) = SplitHostPort(ln.Addr().String());
     if (err != default!) {
         return ""u8;
@@ -180,7 +180,7 @@ public static void TestUDPListener(ж<testing.T> Ꮡt) {
 // openbsd, kernel version 5.0
 //	net.inet6.ip6.v6only=1 (overriding is prohibited)
 
-[GoType("dyn")] partial struct dualStackTCPListenerTestsᴛ1 {
+partial struct dualStackTCPListenerTestsᴛ1 /*dyn*/ {
     internal @string network1, address1; // first listener
     internal @string network2, address2; // second listener
     internal error xerr;  // expected error value, nil or other
@@ -553,7 +553,7 @@ public static void TestWildWildcardListener(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct ipv4MulticastListenerTestsᴛ1 {
+partial struct ipv4MulticastListenerTestsᴛ1 /*dyn*/ {
     internal @string net;
     internal ж<global::go.net_package.UDPAddr> gaddr; // see RFC 4727
 }

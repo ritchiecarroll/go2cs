@@ -12,9 +12,9 @@ using Δsync = sync_package;
 
 partial class sync_test_package {
 
-[GoType("num:nint")] partial struct one;
+partial struct one /*num:nint*/;
 
-[GoRecv] internal static void Increment(this ref one o) {
+internal static void Increment(this ref one o) {
     o++;
 }
 

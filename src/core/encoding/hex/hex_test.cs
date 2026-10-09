@@ -12,7 +12,7 @@ using static go.encoding.hex_package;
 
 partial class hex_internal_test_package {
 
-[GoType] internal partial struct encDecTest {
+internal partial struct encDecTest {
     internal @string enc;
     internal slice<byte> dec;
 }
@@ -92,7 +92,7 @@ public static void TestDecodeString(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct errTestsᴛ1 {
+partial struct errTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string @out;
     internal error err;
@@ -129,12 +129,12 @@ public static void TestDecodeStringErr(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestEncoderDecoder_r {
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct TestEncoderDecoder_r /*dyn*/ {
+    /*embed*/ public io_package.Reader Reader;
 }
 
-[GoType("dyn")] internal partial struct TestEncoderDecoder_w {
-    [GoEmbedded] public io_package.Writer Writer;
+internal partial struct TestEncoderDecoder_w /*dyn*/ {
+    /*embed*/ public io_package.Writer Writer;
 }
 
 public static void TestEncoderDecoder(ж<testing.T> Ꮡt) {

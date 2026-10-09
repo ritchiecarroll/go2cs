@@ -26,7 +26,7 @@ partial class http_test_package {
 // {"MS.FontObject", []byte("\x00\x00")},
 // Archive types
 
-[GoType("dyn")] partial struct sniffTestsᴛ1 {
+partial struct sniffTestsᴛ1 /*dyn*/ {
     internal @string desc;
     internal slice<byte> data;
     internal @string contentType;
@@ -155,11 +155,11 @@ internal static void testServerIssue5953(ж<testing.T> Ꮡt, testMode mode) {
     (~resp).Body.Close();
 }
 
-[GoType] partial struct byteAtATimeReader {
+partial struct byteAtATimeReader {
     internal slice<byte> buf;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref byteAtATimeReader b, slice<byte> p) {
+internal static (nint n, error err) Read(this ref byteAtATimeReader b, slice<byte> p) {
     if (len(p) < 1) {
         return (0, default!);
     }
@@ -181,14 +181,14 @@ internal static readonly @string inputᶜ = "\n<html>\n\t<head>\n"u8;
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string expectedᶜ = "text/html; charset=utf-8"u8;
 
-[GoType("dyn")] internal partial struct testContentTypeWithVariousSources_type {
+internal partial struct testContentTypeWithVariousSources_type /*dyn*/ {
     internal @string name;
     internal Action<Δhttp.ResponseWriter, ж<Δhttp.Request>> handler;
 }
 
 // Use io.Copy from a plain Reader.
-[GoType("dyn")] internal partial struct testContentTypeWithVariousSources_readerOnly {
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct testContentTypeWithVariousSources_readerOnly /*dyn*/ {
+    /*embed*/ public io_package.Reader Reader;
 }
 
 internal static void testContentTypeWithVariousSources(ж<testing.T> Ꮡt, testMode mode) {

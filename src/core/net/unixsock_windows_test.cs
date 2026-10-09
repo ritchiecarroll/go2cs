@@ -15,7 +15,7 @@ using static go.net_package;
 
 partial class net_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestUnixConnLocalWindows_type {
+internal partial struct TestUnixConnLocalWindows_type /*dyn*/ {
     internal global::go.net_package.ΔAddr got, want;
 }
 

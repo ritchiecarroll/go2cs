@@ -17,105 +17,89 @@ using static go.encoding.asn1_package;
 
 partial class asn1_internal_test_package {
 
-[GoType] public partial struct intStruct {
+public partial struct intStruct {
     public nint A;
 }
 
-[GoType] internal partial struct twoIntStruct {
+internal partial struct twoIntStruct {
     public nint A;
     public nint B;
 }
 
-[GoType] internal partial struct bigIntStruct {
+internal partial struct bigIntStruct {
     public ж<bigꓸInt> A;
 }
 
-[GoType] internal partial struct nestedStruct {
+internal partial struct nestedStruct {
     public intStruct A;
 }
 
-[GoType] internal partial struct rawContentsStruct {
+internal partial struct rawContentsStruct {
     public global::go.encoding.asn1_package.RawContent Raw;
     public nint A;
 }
 
-[GoType] internal partial struct implicitTagTest {
-    [GoTag(@"asn1:""implicit,tag:5""")]
-    public nint A;
+internal partial struct implicitTagTest {
+    public nint A; /*`asn1:"implicit,tag:5"`*/
 }
 
-[GoType] internal partial struct explicitTagTest {
-    [GoTag(@"asn1:""explicit,tag:5""")]
-    public nint A;
+internal partial struct explicitTagTest {
+    public nint A; /*`asn1:"explicit,tag:5"`*/
 }
 
-[GoType] internal partial struct flagTest {
-    [GoTag(@"asn1:""tag:0,optional""")]
-    public global::go.encoding.asn1_package.Flag A;
+internal partial struct flagTest {
+    public global::go.encoding.asn1_package.Flag A; /*`asn1:"tag:0,optional"`*/
 }
 
-[GoType] internal partial struct generalizedTimeTest {
-    [GoTag(@"asn1:""generalized""")]
-    public time.Time A;
+internal partial struct generalizedTimeTest {
+    public time.Time A; /*`asn1:"generalized"`*/
 }
 
-[GoType] internal partial struct ia5StringTest {
-    [GoTag(@"asn1:""ia5""")]
+internal partial struct ia5StringTest {
+    public @string A; /*`asn1:"ia5"`*/
+}
+
+internal partial struct printableStringTest {
+    public @string A; /*`asn1:"printable"`*/
+}
+
+internal partial struct genericStringTest {
     public @string A;
 }
 
-[GoType] internal partial struct printableStringTest {
-    [GoTag(@"asn1:""printable""")]
-    public @string A;
+internal partial struct optionalRawValueTest {
+    public global::go.encoding.asn1_package.RawValue A; /*`asn1:"optional"`*/
 }
 
-[GoType] internal partial struct genericStringTest {
-    public @string A;
+internal partial struct omitEmptyTest {
+    public slice<@string> A; /*`asn1:"omitempty"`*/
 }
 
-[GoType] internal partial struct optionalRawValueTest {
-    [GoTag(@"asn1:""optional""")]
-    public global::go.encoding.asn1_package.RawValue A;
+internal partial struct defaultTest {
+    public nint A; /*`asn1:"optional,default:1"`*/
 }
 
-[GoType] internal partial struct omitEmptyTest {
-    [GoTag(@"asn1:""omitempty""")]
-    public slice<@string> A;
+internal partial struct applicationTest {
+    public nint A; /*`asn1:"application,tag:0"`*/
+    public nint B; /*`asn1:"application,tag:1,explicit"`*/
 }
 
-[GoType] internal partial struct defaultTest {
-    [GoTag(@"asn1:""optional,default:1""")]
-    public nint A;
+internal partial struct privateTest {
+    public nint A; /*`asn1:"private,tag:0"`*/
+    public nint B; /*`asn1:"private,tag:1,explicit"`*/
+    public nint C; /*`asn1:"private,tag:31"`*/  // tag size should be 2 octet
+    public nint D; /*`asn1:"private,tag:128"`*/ // tag size should be 3 octet
 }
 
-[GoType] internal partial struct applicationTest {
-    [GoTag(@"asn1:""application,tag:0""")]
-    public nint A;
-    [GoTag(@"asn1:""application,tag:1,explicit""")]
-    public nint B;
+internal partial struct numericStringTest {
+    public @string A; /*`asn1:"numeric"`*/
 }
 
-[GoType] internal partial struct privateTest {
-    [GoTag(@"asn1:""private,tag:0""")]
-    public nint A;
-    [GoTag(@"asn1:""private,tag:1,explicit""")]
-    public nint B;
-    [GoTag(@"asn1:""private,tag:31""")]
-    public nint C;                         // tag size should be 2 octet
-    [GoTag(@"asn1:""private,tag:128""")]
-    public nint D;                         // tag size should be 3 octet
-}
-
-[GoType] internal partial struct numericStringTest {
-    [GoTag(@"asn1:""numeric""")]
-    public @string A;
-}
-
-[GoType("[]nint")] internal partial struct testSET;
+internal partial struct testSET /*[]nint*/;
 
 public static ж<timeꓸLocation> PST = time.FixedZone("PST"u8, -8 * 60 * 60);
 
-[GoType] internal partial struct marshalTest {
+internal partial struct marshalTest {
     internal any @in;
     internal @string @out; // hex encoded
 }
@@ -201,7 +185,7 @@ public static void TestMarshal(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct marshalWithParamsTest {
+internal partial struct marshalWithParamsTest {
     internal any @in;
     internal @string @params;
     internal @string @out; // hex encoded
@@ -228,7 +212,7 @@ public static void TestMarshalWithParams(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct marshalErrTest {
+internal partial struct marshalErrTest {
     internal any @in;
     internal @string err;
 }
@@ -352,9 +336,8 @@ public static void BenchmarkMarshal(ж<testing.B> Ꮡb) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object unmarshalReturnedExtraˢ = (@string)"Unmarshal returned extra garbage"u8;
 
-[GoType("dyn")] internal partial struct TestSetEncoder_testStruct {
-    [GoTag(@"asn1:""set""")]
-    public slice<@string> Strings;
+internal partial struct TestSetEncoder_testStruct /*dyn*/ {
+    public slice<@string> Strings; /*`asn1:"set"`*/
 }
 
 public static void TestSetEncoder(ж<testing.T> Ꮡt) {
@@ -381,7 +364,7 @@ public static void TestSetEncoder(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoLocalName("testSetSET")] [GoType("[]@string")] internal partial struct TestSetEncoderSETSliceSuffix_testSetSET;
+internal partial struct TestSetEncoderSETSliceSuffix_testSetSET /*[]@string*/;
 
 public static void TestSetEncoderSETSliceSuffix(ж<testing.T> Ꮡt) {
     var testSet = new TestSetEncoderSETSliceSuffix_testSetSET(new @string[]{"a"u8, "aa"u8, "b"u8, "bb"u8, "c"u8, "cc"u8}.slice());
@@ -405,7 +388,7 @@ public static void TestSetEncoderSETSliceSuffix(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("testCase")] internal partial struct BenchmarkUnmarshal_testCase {
+internal partial struct BenchmarkUnmarshal_testCase /*dyn*/ {
     internal slice<byte> @in;
     internal any @out;
 }

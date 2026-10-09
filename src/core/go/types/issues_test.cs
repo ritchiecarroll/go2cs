@@ -541,7 +541,7 @@ public static void TestIssue34151(ж<testing.T> Ꮡt) {
     mustTypecheck(bsrc, Ꮡconf, nil);
 }
 
-[GoType] partial struct importHelper {
+partial struct importHelper {
     internal ж<types.Package> pkg;
     internal types.Importer fallback;
 }
@@ -788,7 +788,7 @@ public static void TestIssue55030(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIssue51093_type {
+internal partial struct TestIssue51093_type /*dyn*/ {
     internal @string typ;
     internal @string val;
 }
@@ -846,7 +846,7 @@ public static void TestIssue51093(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedFailureButItDidˢ = (@string)"Expected failure, but it did not"u8;
 
-[GoType("dyn")] internal partial struct TestIssue54258_tests {
+internal partial struct TestIssue54258_tests /*dyn*/ {
     internal @string main, b, want;
 }
 
@@ -1225,7 +1225,7 @@ internal static readonly @string asrcᶜ2 = @"package a; type S struct{}; func (
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string bsrcᶜ2 = @"package b; type S struct{}; func (S) M() {}"u8;
 
-[GoType("dyn")] internal partial struct TestIssue59831_tests {
+internal partial struct TestIssue59831_tests /*dyn*/ {
     internal ж<types.Package> imported;
     internal @string src, err;
 }

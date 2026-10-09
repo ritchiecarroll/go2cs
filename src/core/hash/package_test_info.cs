@@ -32,7 +32,7 @@ using static global::go.hash_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("hash/marshal_test.go", "marshal_test.cs", "ABs2goKClAAIBgATMIKykoKCloKChIKCgoKUgoKUgoKUgpSCgpSAgqSCgoKCgpSC", "61-105:1")]
+[assembly: go.GoPositionMap("hash/marshal_test.go", "marshal_test.cs", "ABs2goKClAAIBgATMIKykoKCloKChIKCgoKUgoKUgoKUgpSCgpSAgqSCgoKCgpSC", "61-105:1", "", "42=fromHex/1/17/5,fromHex/2/17/6,fromHex/3/17/7,fromHex/4/17/8,fromHex/5/17/9,fromHex/6/17/10,fromHex/7/17/11,fromHex/8/17/12,fromHex/9/17/13,fromHex/10/17/14,fromHex/11/17/15,fromHex/12/17/16,fromHex/13/17/17,fromHex/14/17/18,fromHex/15/17/19,fromHex/16/17/20,fromHex/17/17/21")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -41,7 +41,7 @@ namespace go;
 public static partial class hash_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

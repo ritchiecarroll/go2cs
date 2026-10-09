@@ -23,7 +23,7 @@ internal static complex128 infpm = complex(Δmath.Inf(+1), Δmath.Inf(-1));
 internal static complex128 infmp = complex(Δmath.Inf(-1), Δmath.Inf(+1));
 internal static complex128 infmm = complex(Δmath.Inf(-1), Δmath.Inf(-1));
 
-[GoType] partial struct atocTest {
+partial struct atocTest {
     internal @string @in;
     internal complex128 @out;
     internal error err;

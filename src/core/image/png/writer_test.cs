@@ -90,7 +90,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestWriterPaletted_testCases {
+internal partial struct TestWriterPaletted_testCases /*dyn*/ {
     internal nint plen;
     internal uint8 bitdepth;
     internal nint datalen;
@@ -248,7 +248,7 @@ public static void TestSubImage(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestWriteRGBA_testCases {
+internal partial struct TestWriteRGBA_testCases /*dyn*/ {
     internal @string name;
     internal image.Image img;
 }
@@ -308,15 +308,15 @@ public static void BenchmarkEncodeGray(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType] internal partial struct pool {
+internal partial struct pool {
     internal ж<global::go.image.png_package.EncoderBuffer> b;
 }
 
-[GoRecv] internal static ж<global::go.image.png_package.EncoderBuffer> Get(this ref pool p) {
+internal static ж<global::go.image.png_package.EncoderBuffer> Get(this ref pool p) {
     return p.b;
 }
 
-[GoRecv] internal static void Put(this ref pool p, ж<global::go.image.png_package.EncoderBuffer> Ꮡb) {
+internal static void Put(this ref pool p, ж<global::go.image.png_package.EncoderBuffer> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     p.b = Ꮡb;

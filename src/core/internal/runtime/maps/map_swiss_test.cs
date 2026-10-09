@@ -38,18 +38,18 @@ internal static readonly @string nohintˢ = "nohint"u8;
 internal static readonly @string makemapˢ = "makemap"u8;
 internal static readonly @string makemap64ˢ = "makemap64"u8;
 
-[GoType("dyn")] internal partial struct TestTableGroupCount_mapCount {
+internal partial struct TestTableGroupCount_mapCount /*dyn*/ {
     internal nint tables;
     internal uint64 groups;
 }
 
-[GoType("dyn")] internal partial struct TestTableGroupCount_mapCase {
+internal partial struct TestTableGroupCount_mapCase /*dyn*/ {
     internal TestTableGroupCount_mapCount initialLit;
     internal TestTableGroupCount_mapCount initialHint;
     internal TestTableGroupCount_mapCount after;
 }
 
-[GoType("dyn")] internal partial struct TestTableGroupCount_type {
+internal partial struct TestTableGroupCount_type /*dyn*/ {
     internal nint n;    // n is the number of map elements
     internal TestTableGroupCount_mapCase escape; // expected values for escaping map
 }

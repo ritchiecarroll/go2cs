@@ -41,7 +41,7 @@ internal static readonly @string xBarˢ = "X-Bar"u8;
 internal static readonly @string someBodyˢ = "Some body"u8;
 internal static readonly @string httpFooComˢ = "http://foo.com/"u8;
 
-[GoType("dyn")] internal partial struct TestRecorder_type {
+internal partial struct TestRecorder_type /*dyn*/ {
     internal @string name;
     internal Action<http.ResponseWriter, ж<http.Request>> h;
     internal slice<Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>> checks;
@@ -356,7 +356,7 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestParseContentLength_tests {
+internal partial struct TestParseContentLength_tests /*dyn*/ {
     internal @string cl;
     internal int64 want;
 }

@@ -64,7 +64,7 @@ public static void TestReadLine(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestDtoi_type {
+internal partial struct TestDtoi_type /*dyn*/ {
     internal @string @in;
     internal nint @out;
     internal nint off;

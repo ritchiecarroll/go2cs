@@ -41,11 +41,11 @@ internal static (nint, float32, array<byte>) regFinalizerIface(Tinter v) {
 
 // TintPointer has a pointer member to make sure that it isn't allocated by the
 // tiny allocator, so we know when its finalizer will run
-[GoType] partial struct TintPointer {
+partial struct TintPointer {
     internal ж<Tint> p;
 }
 
-[GoRecv] internal static void m(this ref TintPointer _) {
+internal static void m(this ref TintPointer _) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -56,7 +56,7 @@ internal static readonly @string passˢ = "PASS\n"u8;
 internal static readonly object finalizerNotAsleepˢ = (@string)"finalizer not asleep?"u8;
 internal static readonly object finalizerFailedToExecuteˢ = (@string)"finalizer failed to execute"u8;
 
-[GoType("dyn")] internal partial struct TestFinalizerRegisterABI_tests {
+internal partial struct TestFinalizerRegisterABI_tests /*dyn*/ {
     internal @string name;
     internal any fin;
     internal nint confirmValue;

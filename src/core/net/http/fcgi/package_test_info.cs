@@ -62,7 +62,7 @@ using static global::go.net.http.fcgi_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/fcgi/fcgi_test.go", "fcgi_test.cs", "ABgiAAcWgoKCgoKUgoKUggAQCgATPICkgoKCgoKCgoCCgqSUgoKUgoKUgoKUgoKCgIKCpICCgqSCAAoSgoLWgqaC1oKChIKCgoKWhoCCyIIACBSKgoSCgoIADBQAERoAFjiCpoKs0rKCgoKCuoKCppSUAAgSgqiSAAcQgoIACAgAEyQADi6ysoKCgoKogoCCpIKklIIADAiCABQyspKCgoKCgqiCgpSCgoCCAA8WgqaCgtrChIKiuIKUlKKCloKEmIKUhIKCog==", "245-256:1;335-347:1;380-399:1;386-393:1.1;423-432:1;433-436:2;441-447:3")]
+[assembly: go.GoPositionMap("net/http/fcgi/fcgi_test.go", "fcgi_test.cs", "ABgiAAcWgoKCgoKUgoKUggAQCgATPICkgoKCgoKCgoCCgqSUgoKUgoKUgoKUgoKCgIKCpICCgqSCAAoSgoLWgqaC1oKChIKCgoKWhoCCyIIACBSKgoSCgoIADBQAERoAFjiCpoKs0rKCgoKCuoKCppSUAAgSgqiSAAcQgoIACAgAEyQADi6ysoKCgoKogoCCpIKklIIADAiCABQyspKCgoKCgqiCgpSCgoCCAA8WgqaCgtrChIKiuIKUlKKCloKEmIKUhIKCog==", "245-256:1;335-347:1;380-399:1;386-393:1.1;423-432:1;433-436:2;441-447:3", "", "62=Join/1/1/12;205=makeRecord/1/5/2,nameValuePair11/1/2/5,makeRecord/2/5/5,nameValuePair11/2/2/6,makeRecord/3/5/6,makeRecord/4/5/7,makeRecord/5/5/9;223=makeRecord/1/1/8,Join/1/2/6,Join/2/2/15;315=makeRecord/1/8/2,nameValuePair11/1/4/5,makeRecord/2/8/5,nameValuePair11/2/4/6,makeRecord/3/8/6,nameValuePair11/3/4/8,makeRecord/4/8/8,nameValuePair11/4/4/9,makeRecord/5/8/9,makeRecord/6/8/10,makeRecord/7/8/12,makeRecord/8/8/14;392=Repeat/1/2/16,Repeat/2/2/21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -71,7 +71,7 @@ namespace go.net.http;
 public static partial class fcgi_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

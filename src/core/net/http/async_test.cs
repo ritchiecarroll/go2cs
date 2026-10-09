@@ -14,7 +14,7 @@ partial class http_test_package {
 
 internal static error errStillRunning = errors.New("async op still running"u8);
 
-[GoType] partial struct asyncResult<T> {
+partial struct asyncResult<T> {
     internal channel<EmptyStruct> donec;
     internal T res;
     internal error err;
@@ -43,14 +43,14 @@ internal static partial ж<asyncResult<T>> runAsync<T>(Func<(T, error)> f) {
 }
 
 // done reports whether the function has returned.
-[GoRecv] internal static bool done<T>(this ref asyncResult<T> r) {
+internal static bool done<T>(this ref asyncResult<T> r) {
     var (_, err) = r.result();
     return !AreEqual(err, errStillRunning);
 }
 
 // result returns the result of the function.
 // If the function hasn't completed yet, it returns errStillRunning.
-[GoRecv] internal static (T, error) result<T>(this ref asyncResult<T> r) {
+internal static (T, error) result<T>(this ref asyncResult<T> r) {
     var selᴛ1 = r.donec;
     switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
     case 0 when selᴛ1.ꟷᐳ(out _): {

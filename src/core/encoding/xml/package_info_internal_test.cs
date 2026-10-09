@@ -54,10 +54,10 @@ using static go.encoding.xml_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/xml/atom_test.go", "atom_test.cs", "AAoSABNGgoKClKaC")]
-[assembly: go.GoPositionMap("encoding/xml/marshal_test.go", "marshal_test.cs", "ALUDgAWUgoKCgtyUgqaCAEBmoqaiAIMCpgIAlAe+EYKygpaSgoKCgpSClJSCgpSAkoKUABgeACdMAAwkgoKCgoKUgpSCgILukrKClICCpKyWgoKEspSCgriCgoKUgpSUgILsgoKCgoKUgJIADRSygoKUgoKCgpSCgtaCgoKCgoKCgoK4gqaClIKUguiChIKCguiCgoKAgqSClICCpIK4ooKCgsqigoKSggAQDJIAABS6goKUgIKkgoKCAAsIAP8CxAWCgrKCgoKCgoKCpqKUlIK0grSCtICCgqSAgoL6goKEgIKmgIKmgIIADQiCkoqCgoKCggAMDJKKgoKCgqamggAHEAAKFoKCpoKC/JKCgoCCpICCpICCpICCpICCpICCpIKUgoIACwqSgoaCABMagoKCgIKSgIIAFyCCgoKCgpSCgoK6goKUgrgAGTaCgpKSgoKCgIK2gpS0tLSAgqSCgII=", "1667-1690:1;1798-1820:1;1915-1919:1;1925-1929:1;2330-2332:1;2398-2401:1;2565-2589:1")]
-[assembly: go.GoPositionMap("encoding/xml/read_test.go", "read_test.cs", "ABEokoKAgqSCAHbAAQClAbQCAAcQgoKCgIKkggAuRgAGEqKCgoIAEx6CgoCCpIIAEgiCAAAcgoCCpIKSgpaCgIKkgpaCgIKkgpKCABASACFugoKCgoKCgpSUgoKUgoL6gpKCgpSCgoIAIiQAKYgBgoKCgoKCgpSUgoKUgoL6gpKCgpSCgoKWgoCCpoIABxCigoKSlIKUgIK2ppSC7oKCpgAUFIKOgoCCpoIAEBqSgoKCgoKUgoKUkoIACBKS3IKCgoCCAAwWkoKAgqSClIIAR44BpIKAgqYACQIAEiaCugAIAgAJAvIAGDKAgqYAFCaCADdukpKAgqYAFi6CAE1wkpKAgqYAFi6CAAgKkoqEggALCoKIgoKSggALCKKClIKCgqaGog==", "1118-1123:1")]
-[assembly: go.GoPositionMap("encoding/xml/xml_test.go", "xml_test.cs", "ABYsgoKUgoKClAANBoKCABIusrKCoriGgpSAggAMGIKCpoKUlIKC9qKCgoKCgriChoCCAAgulAAmSgAsUgAMEgApXoKCggAPHAAjSIKCggAHELKCgpSmgoKmgoKCgpSU1oKCgoKUgpSCgpSClIKCyqKCgoKCgoKUgpKAgpSkgIKUpKiUtpKUtLSCgsYAEiQAESSChIKCgpSCyoKChIKCgpSCyoKCgoKUgIIAFAqCAAAWAAwagoKAgoKmgoIAGzYAMV6CgoSClIIADBCCgoKigoCCpICCpICCpIKClIKC+IKCgoSC6IKCgoKCgIKkgpSCgpSCuILcooKCgoCCpIKUgoKUggAICoKCgoKClIKC+IKCgoKClIKUgoL4goKCgoKUgoIACAiCgoKClIKClILogoKCgpSCuIKCgoKUguiCgoKClIIACAgACx6EgoKEgpSCgpSCyoL8goIACgoADSSCooCCpICCAA8cAAkUgoSCgoKUggAIEICkgoKEguiCgoSCgIKkhILYgoSClIIAFgiEAAAYgoKAggAKCIIABRaCgIKAkrYADQqEjvaEigAIBoSeggAIBoSMpoLKgoKCgoKCpoCCAAoKggAFEoKCgoKCgoKUpoKClIIAFgqCAAAegoKCgoKWgpSCloKCgpSClIKUgoKClIKUggAMCISEAAwggoKAgoKSgpKCAAsMggAIGIKCgoKCgoKUpoKClILKggAKGoKCgpTWgoKCggAPCIKCgpSCgsaCgraWhJqAgqaC7ILagtaigoCCuIKipIKCgoKCgoKClIKUgIKklICCpoKCgoKUgpSClIKClJSCuIK4goAAEwiihgAPLIKCgoKCgqaCgpSmgoKUgoIAEB6CgoKCgoKCgoKCgpTuggAnUoKCgoKCgoKCgpSUlIKUgoKUgoI=", "62-76:1;104-118:1;354-359:1;1218-1223:1;1249-1263:1;1294-1298:1;1355-1355:1;1360-1362:1;1423-1439:1")]
+[assembly: go.GoPositionMap("encoding/xml/atom_test.go", "atom_test.cs", "AAoSABNGgoKClKaC", "", "", "11=ParseTime/1/2/4,ParseTime/2/2/13,NewText/1/1/14")]
+[assembly: go.GoPositionMap("encoding/xml/marshal_test.go", "marshal_test.cs", "AMICgAWUgoKCgtyUgqaCADJmoqaiAOMBpgIAlAe+EYKygpaSgoKCgpSClJSCgpSAkoKUABYeACdMAAwkgoKCgoKUgpSCgILukrKClICCpKyWgoKEspSCgriCgoKUgpSUgILsgoKCgoKUgJIADRSygoKUgoKCgpSCgtaCgoKCgoKCgoK4gqaClIKUguiChIKCguiCgoKAgqSClICCpIK4ooKCgsqigoKSggAODJIAABS6goKUgIKkgoKCAAsIAP8CxAWCgrKCgoKCgoKCpqKUlIK0grSCtICCgqSAgoL6goKEgIKmgIKmgIIADQiCkoqCgoKCggALDJKKgoKCgqamggAHEAAKFoKCpoKC/JKCgoCCpICCpICCpICCpICCpICCpIKUgoIACgqSgoaCABEagoKCgIKSgIIAEyCCgoKCgpSCgoK6goKUgrgAGTaCgpKSgoKCgIK2gpS0tLSAgqSCgII=", "1667-1690:1;1798-1820:1;1915-1919:1;1925-1929:1;2330-2332:1;2398-2401:1;2565-2589:1", "", "630=ifaceptr/1/1/34,Unix/1/1/38,UTC/1/1/38,ParseTime/1/1/104,Itoa/1/1/133,stringptr/1/19/745,stringptr/2/19/750,stringptr/3/19/793,stringptr/4/19/797,stringptr/5/19/802,stringptr/6/19/845,stringptr/7/19/849,stringptr/8/19/854,stringptr/9/19/897,stringptr/10/19/902,stringptr/11/19/955,stringptr/12/19/959,stringptr/13/19/994,stringptr/14/19/999,stringptr/15/19/1004,stringptr/16/19/1040,stringptr/17/19/1044,stringptr/18/19/1079,stringptr/19/19/1084")]
+[assembly: go.GoPositionMap("encoding/xml/read_test.go", "read_test.cs", "ABEokoKAgqSCAGHAAQCfAbQCAAcQgoKCgIKkggAmRgAGEqKCgoIAER6CgoCCpIIADwiCAAAcgoCCpIKSgpaCgIKkgpaCgIKkgpKCAA4SACFugoKCgoKCgpSUgoKUgoL6gpKCgpSCgoIAGyQAKYgBgoKCgoKCgpSUgoKUgoL6gpKCgpSCgoKWgoCCpoIABxCigoKSlIKUgIK2ppSC7oKCpgASFIKOgoCCpoIADxqSgoKCgoKUgoKUkoIABxKS3IKCgoCCAAoWkoKAgqSClIIAR44BpIKAgqYACQIAEiaCugAIAgAJAvIAGDKAgqYAFCaCADdukpKAgqYAFi6CADhwkpKAgqYAFi6C+pKKhIIACgqCiIKCkoIACwiigpSCgoKmhqI=", "1118-1123:1", "", "125=ParseTime/1/3/8,ParseTime/2/3/19,ParseTime/3/3/66;341=TypeFor/1/4/3,TypeFor/2/4/4,TypeFor/3/4/5,TypeFor/4/4/6")]
+[assembly: go.GoPositionMap("encoding/xml/xml_test.go", "xml_test.cs", "ABYsgoKUgoKClAAMBoKCABIusrKCoriGgpSAggAMGIKCpoKUlIKC5qKCgoKCgriChoCCAAgulAAmSgAsUgAMEgApXoKCggAPHAAjSIKCggAHELKCgpSmgoKmgoKCgpSU1oKCgoKUgpSCgpSClIKCyqKCgoKCgoKUgpKAgpSkgIKUpKiUtpKUtLSCgsYAEiQAESSChIKCgpSCyoKChIKCgpSCyoKCgoKUgIIAFAqCAAAWAAwagoKAgoKmgoIAGzYAMV6CgoSClIIADBCCgoKigoCCpICCpICCpIKClIKC+IKCgoSC6IKCgoKCgIKkgpSCgpSCuILcooKCgoCCpIKUgoKUggAICoKCgoKClIKC+IKCgoKClIKUgoL4goKCgoKUgoIACAiCgoKClIKClILogoKCgpSCuIKCgoKUguiCgoKClIIACAgACx6EgoKEgpSCgpSCyoL8goIACgoADSSCooCCpICCAA8cAAkUgoSCgoKUggAIEICkgoKEguiCgoSCgIKkhILYgoSClIIAEwiEAAAYgoKAggAKCIIABRaCgIKAkrYACwqEjuaEivaEnoL2hIymgsqCgoKCgoKmgIIACgqCAAUSgoKCgoKCgpSmgoKUggASCoIAAB6CgoKCgpaClIKWgoKClIKUgpSCgoKUgpSCAAwIhIQADCCCgoCCgpKCkoIACwyCAAgYgoKCgoKCgpSmgoKUgsqCAAoagoKClNaCgoKCAA0IgoKClIKCxoKCtpaEmoCCpoLsgtqC1qKCgIK4gqKkgoKCgoKCgoKUgpSAgqSUgIKmgoKCgpSClIKUgoKUlIK4griCgAATCKKGAA8sgoKCgoKCpoKClKaCgpSCggAQHoKCgoKCgoKCgoKClO6CACdSgoKCgoKCgoKClJSUgpSCgpSCgg==", "62-76:1;104-118:1;354-359:1;1218-1223:1;1249-1263:1;1294-1298:1;1355-1355:1;1360-1362:1;1423-1439:1", "", "47=End/1/2/9,End/2/2/18;128=End/1/1/2;1531=Invoke/1/10/4,Invoke/2/10/5,Invoke/3/10/6,Invoke/4/10/7,Invoke/5/10/8,Invoke/6/10/9,Invoke/7/10/10,Invoke/8/10/12,Invoke/9/10/18,Invoke/10/10/19")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -66,12 +66,31 @@ namespace go.encoding;
 public static partial class xml_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
 
     // <TypeAccessibility>
+    [GoLocalName("nested")] partial struct TestCVE202228131_nested {}
+    [GoLocalName("T")] partial struct TestIssue5880_T {}
+    [GoLocalName("A")] partial struct TestIssue7113_A {}
+    [GoLocalName("C")] partial struct TestIssue7113_C {}
+    [GoLocalName("D")] partial struct TestIssue7113_D {}
+    [GoLocalName("ExampleConflict")] partial struct TestIssue8535_ExampleConflict {}
+    [GoLocalName("A")] partial struct TestRace9796_A {}
+    [GoLocalName("B")] partial struct TestRace9796_B {}
+    [GoLocalName("A")] partial struct TestStructPointerMarshal_A {}
+    [GoLocalName("C")] partial struct TestStructPointerMarshal_C {}
+    [GoLocalName("ParamPtr")] partial struct TestUnmarshalAttr_ParamPtr {}
+    [GoLocalName("ParamStringPtr")] partial struct TestUnmarshalAttr_ParamStringPtr {}
+    [GoLocalName("ParamVal")] partial struct TestUnmarshalAttr_ParamVal {}
+    [GoLocalName("T")] partial struct TestUnmarshalIntoNil_T {}
+    [GoLocalName("T")] partial struct encodeXMLNS1_T {}
+    [GoLocalName("Test")] partial struct encodeXMLNS2_Test {}
+    [GoLocalName("Test")] partial struct encodeXMLNS3_Test {}
+    [GoLocalName("Test")] partial struct encodeXMLNS4_Test {}
+    [GoValueClone("expect")] partial struct procInstTestsᴛ1 {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

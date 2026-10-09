@@ -26,7 +26,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class http_internal_test_package {
 
-[GoType] internal partial struct respTest {
+internal partial struct respTest {
     public @string Raw;
     public @string RawOut;
     public global::go.net.http_package.Response Resp;
@@ -544,7 +544,7 @@ public static void TestWriteResponse(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct readResponseCloseInMiddleTestsᴛ1 {
+partial struct readResponseCloseInMiddleTestsᴛ1 /*dyn*/ {
     internal bool chunked, compressed;
 }
 internal static slice<readResponseCloseInMiddleTestsᴛ1> readResponseCloseInMiddleTests = new readResponseCloseInMiddleTestsᴛ1[]{
@@ -553,9 +553,9 @@ internal static slice<readResponseCloseInMiddleTestsᴛ1> readResponseCloseInMid
     new(true, true)
 }.slice();
 
-[GoType] internal partial struct readerAndCloser {
-    [GoEmbedded] public io_package.Reader Reader;
-    [GoEmbedded] public io_package.Closer Closer;
+internal partial struct readerAndCloser {
+    /*embed*/ public io_package.Reader Reader;
+    /*embed*/ public io_package.Closer Closer;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -687,7 +687,7 @@ internal static void diff(ж<testing.T> Ꮡt, @string prefix, any have, any want
     }
 }
 
-[GoType] internal partial struct responseLocationTest {
+internal partial struct responseLocationTest {
     internal @string location; // Response's Location header or ""
     internal @string requrl; // Response.Request.URL or ""
     internal @string want;
@@ -816,7 +816,7 @@ internal static readonly @string contentLength3Contentˢ = "Content-Length: 3\r\
 internal static readonly @string contentLength880Contentˢ = "Content-Length: 880\r\nContent-Length: 1\r\n\r\n"u8;
 internal static readonly @string contentLength961Contentˢ = "Content-Length: 961\r\nContent-Length: 961\r\n\r\n"u8;
 
-[GoType("dyn")] [GoLocalName("testCase")] internal partial struct TestReadResponseErrors_testCase {
+internal partial struct TestReadResponseErrors_testCase /*dyn*/ {
     internal @string name; // optional, defaults to in
     internal @string @in;
     internal any wantErr; // nil, err value, bool value, or string substring

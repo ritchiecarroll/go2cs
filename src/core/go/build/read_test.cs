@@ -15,7 +15,7 @@ partial class build_internal_test_package {
 
 internal static readonly @string quote = "`"u8;
 
-[GoType] internal partial struct readTest {
+internal partial struct readTest {
     // Test input contains ℙ where readGoInfo should stop.
     internal @string @in;
     internal @string err;
@@ -268,7 +268,7 @@ public static void TestReadFailuresIgnored(ж<testing.T> Ꮡt) {
 // no import, no scan
 // no import, no scan
 
-[GoType("dyn")] partial struct readEmbedTestsᴛ1 {
+partial struct readEmbedTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
 }
 internal static slice<readEmbedTestsᴛ1> readEmbedTests = new readEmbedTestsᴛ1[]{

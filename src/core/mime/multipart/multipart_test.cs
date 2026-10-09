@@ -303,7 +303,7 @@ public static void TestVariousTextLineEndings(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct maliciousReader {
+internal partial struct maliciousReader {
     internal ж<testing.T> t;
     internal nint n;
 }
@@ -313,7 +313,7 @@ internal static UntypedInt maxReadThreshold => /* 1 << 20 */ 1048576;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object tooMuchWasReadˢ = (@string)"too much was read"u8;
 
-[GoRecv] internal static (nint n, error err) Read(this ref maliciousReader mr, slice<byte> b) {
+internal static (nint n, error err) Read(this ref maliciousReader mr, slice<byte> b) {
     mr.n += len(b);
     if (mr.n >= maxReadThreshold) {
         mr.t.Fatal(tooMuchWasReadˢ);
@@ -379,23 +379,23 @@ Oh no, premature EOF!
     }
 }
 
-[GoType] internal partial struct slowReader {
+internal partial struct slowReader {
     internal io.Reader r;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref slowReader s, slice<byte> p) {
+internal static (nint, error) Read(this ref slowReader s, slice<byte> p) {
     if (len(p) == 0) {
         return s.r.Read(p);
     }
     return s.r.Read(p[..1]);
 }
 
-[GoType] internal partial struct sentinelReader {
+internal partial struct sentinelReader {
     // done is closed when this reader is read from.
     internal channel<EmptyStruct> done;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref sentinelReader s, slice<byte> _) {
+internal static (nint, error) Read(this ref sentinelReader s, slice<byte> _) {
     if (s.done != default!) {
         builtin.close(s.done);
         s.done = default!;
@@ -657,7 +657,7 @@ public static void TestNested(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct headerBody {
+internal partial struct headerBody {
     internal textproto.MIMEHeader header;
     internal @string body;
 }
@@ -672,7 +672,7 @@ internal static headerBody formData(@string key, @string value) {
     );
 }
 
-[GoType] internal partial struct parseTest {
+internal partial struct parseTest {
     internal @string name;
     internal @string @in, sep;
     internal slice<headerBody> want;

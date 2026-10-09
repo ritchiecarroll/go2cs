@@ -188,7 +188,7 @@ public static void TestPSSNilOpts(ж<testing.T> Ꮡt) {
     SignPSS(rand.Reader, rsaPrivateKey, hash, hashed, nil);
 }
 
-[GoType("dyn")] internal partial struct TestPSSSigning_type {
+internal partial struct TestPSSSigning_type /*dyn*/ {
     internal nint signSaltLength, verifySaltLength;
     internal bool good, fipsGood;
 }

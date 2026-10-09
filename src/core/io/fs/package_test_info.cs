@@ -62,11 +62,11 @@ using static global::go.io.fs_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("io/fs/format_test.go", "format_test.cs", "ABcugqaCpoKmgqaCpoKmgqaCAAgGAC5mgrKCgsqCsoKC")]
+[assembly: go.GoPositionMap("io/fs/format_test.go", "format_test.cs", "ABcugqaCpoKmgqaCpoKmgqaCAAgGAC5mgrKCgsqCsoKC", "", "", "62=Date/1/4/10,Date/2/4/21,Date/3/4/32,Date/4/4/43")]
 [assembly: go.GoPositionMap("io/fs/fs_test.go", "fs_test.cs", "AA8YABk8goKCgg==")]
-[assembly: go.GoPositionMap("io/fs/glob_test.go", "glob_test.cs", "ABQgAAcWgoKCgoKUgqaCgoKClILKgoKCgoLKpoKC/ID0goKCgrqCloI=", "74-79:1")]
-[assembly: go.GoPositionMap("io/fs/readdir_test.go", "readdir_test.cs", "ABUkgNSCgoKCgoKUuoKWgpaCgpSCAAgGggALHgADEoKSooKCloKAgqSAkqSAguyCgoKUAAkGgoKCgoCS", "21-30:1;76-92:1")]
-[assembly: go.GoPositionMap("io/fs/readfile_test.go", "readfile_test.cs", "ABAeABMmgAAKCJSCgqiCgqiCgpSCgriCgoKCgJI=")]
+[assembly: go.GoPositionMap("io/fs/glob_test.go", "glob_test.cs", "ABQgAAcWgoKCgoKUgqaCgoKClILKgoKCgoLKpoKC/ID0goKCgrqCloI=", "74-79:1", "", "21=DirFS/1/5/4,DirFS/2/5/5,DirFS/3/5/6,DirFS/4/5/7,DirFS/5/5/8")]
+[assembly: go.GoPositionMap("io/fs/readdir_test.go", "readdir_test.cs", "ABUkgNSCgoKCgoKUuoKWgpaCgpSCAAgGggALHgADEoKSooKCloKAgqSAkqSAguyCgoKUAAkGgoKCgoCS", "21-30:1;76-92:1", "", "62=Now/1/2/4,Now/2/2/10")]
+[assembly: go.GoPositionMap("io/fs/readfile_test.go", "readfile_test.cs", "ABAeABMmgAAKCJSCgqiCgqiCgpSCgriCgoKCgJI=", "", "", "17=Now/1/2/4,Now/2/2/10")]
 [assembly: go.GoPositionMap("io/fs/stat_test.go", "stat_test.cs", "ABEegOSCgoKCgoKUuoKWgg==", "18-27:1")]
 [assembly: go.GoPositionMap("io/fs/sub_test.go", "sub_test.cs", "ABEegAAKBIKCgoKClIKCloKCgoKUuoKWgoSCgpSCgpSCloKC", "18-37:1")]
 [assembly: go.GoPositionMap("io/fs/walk_test.go", "walk_test.cs", "ABkuABc0ooKCuIKCkoKUpqzSgoKCpoKCgpSUpoKEgpKCmIKClIKUgoKU+KKCgoCCtoKAgqSCgoKClIKUlIKUgoK0", "58-64:1;73-77:1;94-96:1;105-110:2;126-134:1")]
@@ -78,7 +78,7 @@ namespace go.io;
 public static partial class fs_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

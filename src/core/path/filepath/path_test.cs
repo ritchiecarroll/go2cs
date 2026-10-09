@@ -22,7 +22,7 @@ using static go.path.filepath_internal_test_package;
 
 partial class filepath_test_package {
 
-[GoType] partial struct PathTest {
+partial struct PathTest {
     internal @string path, result;
 }
 
@@ -164,7 +164,7 @@ public static void TestClean(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct IsLocalTest {
+partial struct IsLocalTest {
     internal @string path;
     internal bool isLocal;
 }
@@ -246,7 +246,7 @@ public static void TestIsLocal(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct LocalizeTest {
+partial struct LocalizeTest {
     internal @string path;
     internal @string want;
 }
@@ -343,7 +343,7 @@ public static void TestFromAndToSlash(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct SplitListTest {
+partial struct SplitListTest {
     internal @string list;
     internal slice<@string> result;
 }
@@ -390,7 +390,7 @@ public static void TestSplitList(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct SplitTest {
+partial struct SplitTest {
     internal @string path, dir, @file;
 }
 
@@ -430,7 +430,7 @@ public static void TestSplit(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct JoinTest {
+partial struct JoinTest {
     internal slice<@string> elem;
     internal @string path;
 }
@@ -513,7 +513,7 @@ public static void TestJoin(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct ExtTest {
+partial struct ExtTest {
     internal @string path, ext;
 }
 
@@ -535,7 +535,7 @@ public static void TestExt(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct Node {
+partial struct Node {
     internal @string name;
     internal slice<ж<Node>> entries; // nil if the entry is a file
     internal nint mark;
@@ -926,7 +926,7 @@ internal static readonly @string linkˢ = "link"u8;
 internal static readonly @string abslinkˢ = "abslink"u8;
 internal static readonly @string linklinkˢ = "linklink"u8;
 
-[GoType("dyn")] internal partial struct TestWalkSymlinkRoot_type {
+internal partial struct TestWalkSymlinkRoot_type /*dyn*/ {
     internal @string desc;
     internal @string root;
     internal slice<@string> want;
@@ -1130,7 +1130,7 @@ public static void TestDir(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct IsAbsTest {
+partial struct IsAbsTest {
     internal @string path;
     internal bool isAbs;
 }
@@ -1189,7 +1189,7 @@ public static void TestIsAbs(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct EvalSymlinksTest {
+partial struct EvalSymlinksTest {
     // If dest is empty, the path is created; otherwise the dest is symlinked to the path.
     internal @string path, dest;
 }
@@ -1347,7 +1347,7 @@ internal static readonly @string fileˢ = "file"u8;
 internal static readonly @string link1ˢ = "link1"u8;
 internal static readonly @string link2ˢ = "link2"u8;
 
-[GoType("dyn")] internal partial struct TestIssue13582_tests {
+internal partial struct TestIssue13582_tests /*dyn*/ {
     internal @string path, want;
 }
 
@@ -1553,7 +1553,7 @@ public static void TestAbsEmptyString(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct RelTests {
+partial struct RelTests {
     internal @string root, path, want;
 }
 
@@ -1635,7 +1635,7 @@ public static void TestRel(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct VolumeNameTest {
+partial struct VolumeNameTest {
     internal @string path;
     internal @string vol;
 }

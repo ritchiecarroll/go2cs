@@ -61,7 +61,7 @@ using static global::go.@internal.fuzz_internal_test_package;
 [assembly: global::go.GoPositionMap("internal/fuzz/mutator_test.go", "mutator_test.cs", "AA4eooKAkoKEAAcQkoKElIKC2KSigoCSgoQABxCSgoSUgoLYpKKCgJKChAAPIoKigoLYpIKCgoKCgoKClII=", "17-17:1;29-39:2;45-45:1;57-67:2;73-73:1;95-100:2")]
 [assembly: global::go.GoPositionMap("internal/fuzz/mutators_byteslice_test.go", "mutators_byteslice_test.cs", "ABImgoKCpoKCgqaCgoKmgoKCpoKmggAKBoIAceoBkoKClIKCggAKDIIAEzCykpKSgoKC", "169-179:1;209-219:1;211-217:1.1")]
 [assembly: global::go.GoPositionMap("internal/fuzz/queue_test.go", "queue_test.cs", "AAoSpJKAgqSAgriCgoKAgqSAgpKC3IKCgoKAgpKClKSCgIK2goKAgg==")]
-[assembly: global::go.GoPositionMap("internal/fuzz/worker_test.go", "worker_test.cs", "ABcslIKCgoKU1sKClIKAkoS6goKUkoCCuIKChISCgoKChLSowoKUgoKCgIIACA7CgpSCgoKCgriCgpSClIKUAAMQwoK4gpSCgoKCgoKUkoCCtoCCpJKAgramooKSgoCCxNSigpaokoKUgoCCtoSCgoKCgoKCgoKigoKCgpSUgoLY", "38-38:1;42-42:2;50-54:3;137-141:1;145-149:2;156-156:1;175-179:1;191-204:2;193-199:2.1")]
+[assembly: global::go.GoPositionMap("internal/fuzz/worker_test.go", "worker_test.cs", "ABcslIKCgoKU1sKClIKAkoS6goKUkoCCuIKChISCgoKChLSowoKUgoKCgIIACA7CgpSCgoKCgriCgpSClIKUAAMQwoK4gpSCgoKCgoKUkoCCtoCCpJKAgramooKSgoCCxNSigpaokoKUgoCCtoSCgoKCgoKCgoKigoKCgpSUgoLY", "38-38:1;42-42:2;50-54:3;137-141:1;145-149:2;156-156:1;175-179:1;191-204:2;193-199:2.1", "", "142=TypeOf/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -70,12 +70,13 @@ namespace go.@internal;
 public static partial class fuzz_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
 
     // <TypeAccessibility>
+    [GoLocalName("testcase")] partial struct TestMinimizeInput_testcase {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

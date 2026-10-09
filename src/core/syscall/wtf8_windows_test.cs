@@ -28,7 +28,7 @@ partial class syscall_test_package {
 // "Unmatched low surrogate, followed by a surrogate pair, followed by an unmatched low surrogate"
 // 4-byte
 
-[GoType("dyn")] partial struct wtf8testsᴛ1 {
+partial struct wtf8testsᴛ1 /*dyn*/ {
     internal @string str;
     internal slice<uint16> wstr;
 }

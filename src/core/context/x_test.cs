@@ -43,8 +43,8 @@ public static void TestCustomContextGoroutines(ж<testing.T> Ꮡt) {
 // otherContext is a Context that's not one of the types defined in context.go.
 // This lets us test code paths that differ based on the underlying type of the
 // Context.
-[GoType] partial struct otherContext {
-    [GoEmbedded] public context_package.Context Context;
+partial struct otherContext {
+    /*embed*/ public context_package.Context Context;
 }
 
 internal static time.Duration shortDuration => /* 1 * time.Millisecond */ 1000000; // a reasonable duration to block in a test
@@ -275,9 +275,9 @@ public static void TestCanceledTimeout(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("num:nint")] partial struct key1;
+partial struct key1 /*num:nint*/;
 
-[GoType("num:nint")] partial struct key2;
+partial struct key2 /*num:nint*/;
 
 internal static @string String(this key2 k) {
     return fmt.Sprintf("%[1]T(%[1]d)"u8, k);
@@ -358,7 +358,7 @@ public static void TestValues(ж<testing.T> Ꮡt) {
     check(o4, "o4"u8, ""u8, c2k2ˢ, ""u8);
 }
 
-[GoType("dyn")] internal partial struct TestAllocs_type {
+internal partial struct TestAllocs_type /*dyn*/ {
     internal @string desc;
     internal Action f;
     internal float64 limit;
@@ -559,7 +559,7 @@ internal static readonly @string beforeCancelˢ = "before cancel"u8;
 internal static readonly @string afterTimeoutˢ = "after timeout"u8;
 internal static readonly @string afterCancelˢ = "after cancel"u8;
 
-[GoLocalName("value")] [GoType("num:nint")] internal partial struct testLayers_value;
+internal partial struct testLayers_value /*num:nint*/;
 
 internal static void testLayers(ж<testing.T> Ꮡt, int64 seed, bool testTimeout) {
     GoFrame ᒐ = default;
@@ -782,7 +782,7 @@ internal static any /*v*/ recoveredValue(Action fn) {
 internal static readonly object deadlineExceededDoesNotˢ2 = (@string)"DeadlineExceeded does not support Timeout interface"u8;
 internal static readonly object wrongValueForTimeoutˢ = (@string)"wrong value for timeout"u8;
 
-[GoType("dyn")] internal partial interface TestDeadlineExceededSupportsTimeout_type {
+internal partial interface TestDeadlineExceededSupportsTimeout_type /*dyn*/ {
     bool Timeout();
 }
 
@@ -796,7 +796,7 @@ public static void TestDeadlineExceededSupportsTimeout(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCause_type {
+internal partial struct TestCause_type /*dyn*/ {
     internal @string name;
     internal Func<context.Context> ctx;
     internal error err;
@@ -1121,8 +1121,8 @@ public static void TestWithoutCancel(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct customDoneContext {
-    [GoEmbedded] public context_package.Context Context;
+partial struct customDoneContext {
+    /*embed*/ public context_package.Context Context;
     internal channel<EmptyStruct> donec;
 }
 
@@ -1138,7 +1138,7 @@ internal static error Err(this customDoneContext recvᴛ) => recvᴛ.Context.Err
 // interface field in *customDoneContext's method set; see the pointer-only satisfaction record.
 internal static any Value(this customDoneContext recvᴛ, any key) => recvᴛ.Context.Value(key);
 
-[GoRecv] internal static /*<-*/channel<EmptyStruct> Done(this ref customDoneContext c) {
+internal static /*<-*/channel<EmptyStruct> Done(this ref customDoneContext c) {
     return c.donec.WithDirection(GoChanDir.Recv);
 }
 
@@ -1174,14 +1174,14 @@ public static void TestCustomContextPropagation(ж<testing.T> Ꮡt) {
 }
 
 // customCauseContext is a custom Context used to test context.Cause.
-[GoType] partial struct customCauseContext {
+partial struct customCauseContext {
     internal Δsync.Mutex mu;
     internal channel<EmptyStruct> done;
     internal error err;
     internal Action cancelChild;
 }
 
-[GoRecv] internal static (time.Time deadline, bool ok) Deadline(this ref customCauseContext ccc) {
+internal static (time.Time deadline, bool ok) Deadline(this ref customCauseContext ccc) {
     time.Time deadline = default!;
     bool ok = default!;
 
@@ -1216,7 +1216,7 @@ internal static error Err(this ж<customCauseContext> Ꮡccc) {
     finally { if (ᒐd1) Ꮡccc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[GoRecv] internal static any Value(this ref customCauseContext ccc, any key) {
+internal static any Value(this ref customCauseContext ccc, any key) {
     return default!;
 }
 
@@ -1233,7 +1233,7 @@ internal static void cancel(this ж<customCauseContext> Ꮡccc) {
     }
 }
 
-[GoRecv] internal static void setCancelChild(this ref customCauseContext ccc, Action cancelChild) {
+internal static void setCancelChild(this ref customCauseContext ccc, Action cancelChild) {
     ccc.cancelChild = cancelChild;
 }
 

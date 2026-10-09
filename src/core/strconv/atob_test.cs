@@ -11,7 +11,7 @@ using strconv = strconv_package;
 
 partial class strconv_test_package {
 
-[GoType] partial struct atobTest {
+partial struct atobTest {
     internal @string @in;
     internal bool @out;
     internal error err;
@@ -75,7 +75,7 @@ public static void TestFormatBool(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct appendBoolTest {
+partial struct appendBoolTest {
     internal bool b;
     internal slice<byte> @in;
     internal slice<byte> @out;

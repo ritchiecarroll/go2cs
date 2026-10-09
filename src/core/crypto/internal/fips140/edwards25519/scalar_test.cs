@@ -282,7 +282,7 @@ public static void TestScalarNonAdjacentForm(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("global::go.crypto.@internal.fips140.edwards25519_package.Scalar")] [GoValueClone("Value")] internal partial struct notZeroScalar;
+internal partial struct notZeroScalar /*global::go.crypto.@internal.fips140.edwards25519_package.Scalar*/;
 
 internal static reflectꓸValue Generate(this notZeroScalar _, ж<mathrand.Rand> Ꮡrand, nint size) {
     ref var s = ref heap(new global::go.crypto.@internal.fips140.edwards25519_package.Scalar(), out var Ꮡs);

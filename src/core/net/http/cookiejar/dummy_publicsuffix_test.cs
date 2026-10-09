@@ -9,7 +9,7 @@ using static go.net.http.cookiejar_internal_test_package;
 
 partial class cookiejar_test_package {
 
-[GoType] partial struct dummypsl {
+partial struct dummypsl {
     public cookiejar.PublicSuffixList List;
 }
 

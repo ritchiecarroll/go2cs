@@ -74,7 +74,7 @@ public static void TestSameWindowsFile(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct dirLinkTest {
+partial struct dirLinkTest {
     internal @string name;
     internal Func<@string, @string, error> mklink;
     internal bool isMountPoint;
@@ -156,52 +156,52 @@ internal static void testDirLinks(ж<Δtesting.T> Ꮡt, slice<dirLinkTest> tests
 }
 
 // reparseData is used to build reparse buffer data required for tests.
-[GoType] partial struct reparseData {
+partial struct reparseData {
     internal namePosition substituteName;
     internal namePosition printName;
     internal slice<uint16> pathBuf;
 }
 
-[GoType] partial struct namePosition {
+partial struct namePosition {
     internal uint16 offset;
     internal uint16 length;
 }
 
-[GoRecv] internal static uint16 /*offset*/ addUTF16s(this ref reparseData rd, slice<uint16> s) {
+internal static uint16 /*offset*/ addUTF16s(this ref reparseData rd, slice<uint16> s) {
     nint off = len(rd.pathBuf) * 2;
     rd.pathBuf = appendꓸꓸꓸ(rd.pathBuf, s);
     return (uint16)off;
 }
 
-[GoRecv] internal static (uint16 offset, uint16 length) addString(this ref reparseData rd, @string s) {
+internal static (uint16 offset, uint16 length) addString(this ref reparseData rd, @string s) {
     var p = syscall.StringToUTF16(s);
     return (rd.addUTF16s(p), (uint16)((uint16)(len(p) - 1) * 2)); // do not include terminating NUL in the length (as per PrintNameLength and SubstituteNameLength documentation)
 }
 
-[GoRecv] internal static void addSubstituteName(this ref reparseData rd, @string name) {
+internal static void addSubstituteName(this ref reparseData rd, @string name) {
     (rd.substituteName.offset, rd.substituteName.length) = rd.addString(name);
 }
 
-[GoRecv] internal static void addPrintName(this ref reparseData rd, @string name) {
+internal static void addPrintName(this ref reparseData rd, @string name) {
     (rd.printName.offset, rd.printName.length) = rd.addString(name);
 }
 
-[GoRecv] internal static (uint16 offset, uint16 length) addStringNoNUL(this ref reparseData rd, @string s) {
+internal static (uint16 offset, uint16 length) addStringNoNUL(this ref reparseData rd, @string s) {
     var p = syscall.StringToUTF16(s);
     p = p.slice(0, len(p) - 1);
     return (rd.addUTF16s(p), (uint16)((uint16)len(p) * 2));
 }
 
-[GoRecv] internal static void addSubstituteNameNoNUL(this ref reparseData rd, @string name) {
+internal static void addSubstituteNameNoNUL(this ref reparseData rd, @string name) {
     (rd.substituteName.offset, rd.substituteName.length) = rd.addStringNoNUL(name);
 }
 
-[GoRecv] internal static void addPrintNameNoNUL(this ref reparseData rd, @string name) {
+internal static void addPrintNameNoNUL(this ref reparseData rd, @string name) {
     (rd.printName.offset, rd.printName.length) = rd.addStringNoNUL(name);
 }
 
 // pathBuffeLen returns length of rd pathBuf in bytes.
-[GoRecv] internal static uint16 pathBuffeLen(this ref reparseData rd) {
+internal static uint16 pathBuffeLen(this ref reparseData rd) {
     return (uint16)((uint16)len(rd.pathBuf) * 2);
 }
 
@@ -209,7 +209,7 @@ internal static void testDirLinks(ж<Δtesting.T> Ꮡt, slice<dirLinkTest> tests
 // translated into Go directly. _REPARSE_DATA_BUFFER type is to help
 // construct alternative versions of Windows REPARSE_DATA_BUFFER with
 // union part of SymbolicLinkReparseBuffer or MountPointReparseBuffer type.
-[GoType] partial struct _REPARSE_DATA_BUFFER {
+partial struct _REPARSE_DATA_BUFFER {
     internal windows.REPARSE_DATA_BUFFER_HEADER header;
     internal array<byte> detail = new(syscall.MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
 }
@@ -1354,7 +1354,7 @@ internal static @string replaceDriveWithVolumeID(ж<Δtesting.T> Ꮡt, @string p
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string junctionˢ = "junction"u8;
 
-[GoType("dyn")] internal partial struct TestReadlink_tests {
+internal partial struct TestReadlink_tests /*dyn*/ {
     internal bool junction;
     internal bool dir;
     internal bool drive;

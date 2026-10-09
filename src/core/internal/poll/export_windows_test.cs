@@ -13,7 +13,7 @@ partial class poll_internal_test_package {
 public static ж<Action<@string, ж<global::go.@internal.poll_package.FD>, error>> LogInitFD;
 internal static void initᴛLogInitFD() { LogInitFD = ᏑlogInitFD; }
 
-[GoRecv] internal static bool IsPartOfNetpoll(this ref global::go.@internal.poll_package.FD fd) {
+internal static bool IsPartOfNetpoll(this ref global::go.@internal.poll_package.FD fd) {
     return fd.pd.runtimeCtx != 0;
 }
 

@@ -104,7 +104,7 @@ public static void TestVersion3(ж<Δtesting.T> Ꮡt) {
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string formatᶜ = "Mon, 02 Jan 2006 15:04:05 -0700 (MST)"u8;
 
-[GoType("dyn")] internal partial struct TestFirstZone_type {
+internal partial struct TestFirstZone_type /*dyn*/ {
     internal @string zone;
     internal int64 unix;
     internal @string want1;
@@ -255,7 +255,7 @@ public static void TestMalformedTZData(ж<Δtesting.T> Ꮡt) {
 // 2021a slim tzdata for Asia/Gaza.
 // 2021a slim tzdata for Europe/Dublin.
 
-[GoType("dyn")] partial struct slimTestsᴛ1 {
+partial struct slimTestsᴛ1 /*dyn*/ {
     internal @string zoneName;
     internal @string fileName;
     internal Func<ж<timeꓸLocation>, Δtime.Time> date;
@@ -316,7 +316,7 @@ public static void TestLoadLocationFromTZDataSlim(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestTzset_type {
+internal partial struct TestTzset_type /*dyn*/ {
     internal @string inStr;
     internal int64 inEnd;
     internal int64 inSec;
@@ -349,7 +349,7 @@ public static void TestTzset(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestTzsetName_type {
+internal partial struct TestTzsetName_type /*dyn*/ {
     internal @string @in;
     internal @string name;
     internal @string @out;
@@ -374,7 +374,7 @@ public static void TestTzsetName(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestTzsetOffset_type {
+internal partial struct TestTzsetOffset_type /*dyn*/ {
     internal @string @in;
     internal nint off;
     internal @string @out;
@@ -402,7 +402,7 @@ public static void TestTzsetOffset(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestTzsetRule_type {
+internal partial struct TestTzsetRule_type /*dyn*/ {
     internal @string @in;
     internal global::go.time_internal_test_package.Rule r;
     internal @string @out;

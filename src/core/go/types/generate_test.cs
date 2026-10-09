@@ -244,7 +244,7 @@ internal static map<@string, Action<ж<ast.File>>> filemap = new map<@string, Ac
     }
 };
 
-[GoType("map[@string, @string]")] partial struct renameMap;
+partial struct renameMap /*map[@string, @string]*/;
 
 // TODO(gri) We should be able to make these rewriters more configurable/composable.
 //           For now this is a good starting point.

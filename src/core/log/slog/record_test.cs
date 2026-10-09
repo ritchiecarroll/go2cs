@@ -42,7 +42,7 @@ public static void TestRecordAttrs(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestRecordSource_type {
+internal partial struct TestRecordSource_type /*dyn*/ {
     internal nint depth;
     internal @string wantFunction;
     internal @string wantFile;

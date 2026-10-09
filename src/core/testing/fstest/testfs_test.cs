@@ -56,7 +56,7 @@ public static void TestDash(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("global::go.testing.fstest_package.MapFS")] internal partial struct shuffledFS;
+internal partial struct shuffledFS /*global::go.testing.fstest_package.MapFS*/;
 
 internal static (fs.File, error) Open(this shuffledFS fsys, @string name) {
     var (f, err) = ((global::go.testing.fstest_package.MapFS)fsys).Open(name);
@@ -66,11 +66,11 @@ internal static (fs.File, error) Open(this shuffledFS fsys, @string name) {
     return (new fstest_internal_test_package.shuffledFileжFile(Ꮡ(new shuffledFile(File: f))), default!);
 }
 
-[GoType] internal partial struct shuffledFile {
-    [GoEmbedded] public go.io.fs_package.File File;
+internal partial struct shuffledFile {
+    /*embed*/ public go.io.fs_package.File File;
 }
 
-[GoRecv] internal static (slice<fs.DirEntry>, error) ReadDir(this ref shuffledFile f, nint n) {
+internal static (slice<fs.DirEntry>, error) ReadDir(this ref shuffledFile f, nint n) {
     var (dirents, err) = f.File._<fs.ReadDirFile>().ReadDir(n);
     // Shuffle in a deterministic way, all we care about is making sure that the
     // list of directory entries is not is the lexicographic order.
@@ -100,7 +100,7 @@ public static void TestShuffledFS(ж<testing.T> Ꮡt) {
 }
 
 // failPermFS is a filesystem that always fails with fs.ErrPermission.
-[GoType] internal partial struct failPermFS {
+internal partial struct failPermFS {
 }
 
 internal static (fs.File, error) Open(this failPermFS f, @string name) {
@@ -113,7 +113,7 @@ internal static (fs.File, error) Open(this failPermFS f, @string name) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object errorExpectedˢ = (@string)"error expected"u8;
 
-[GoType("dyn")] internal partial interface TestTestFSWrappedErrors_errs {
+internal partial interface TestTestFSWrappedErrors_errs /*dyn*/ {
     slice<error> Unwrap();
 }
 

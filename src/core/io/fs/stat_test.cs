@@ -11,8 +11,8 @@ using go.io;
 
 partial class fs_test_package {
 
-[GoType] partial struct statOnly {
-    [GoEmbedded] public go.io.fs_package.StatFS StatFS;
+partial struct statOnly {
+    /*embed*/ public go.io.fs_package.StatFS StatFS;
 }
 
 internal static (fs.File, error) Open(this statOnly _, @string name) {

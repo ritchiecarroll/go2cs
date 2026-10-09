@@ -33,7 +33,7 @@ using static go.net.http.cookiejar_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/cookiejar/jar_test.go", "jar_test.cs", "ABIkAA0UgvSCgpSClIKUqJKCgpTmAD2AAYKCgoKC+gAVMoKCgoKClJSCgpSCgsoACBKigoCC+gAVMIKCgIL6ABMsgoKAgtoAChaigoCC2gAOHoKCgIIADgoAG0SigoKCgpSUgpSCAAYQkoKokoKClAAYNLKWgoKCgpSUgoaSgoKCloKClKaCloK6goKCgpSAggALDgDiAcYDgoKCAAkMAIsBmAKCgoK4goIAJUIAxAGKA4KCgtwAM2iCgoLMADp2goKC3ACkAcoCgoKCuIKCsoKCgIKkgoCC")]
+[assembly: go.GoPositionMap("net/http/cookiejar/jar_test.go", "jar_test.cs", "ABIkAA0UgvSCgpSClIKUqJKCgpTmAD2AAYKCgoKC+gAVMoKCgoKClJSCgpSCgsoACBKigoCC+gAVMIKCgIL6ABMsgoKAgtoAChaigoCC2gAOHoKCgIIADgoAG0SigoKCgpSUgpSCAAYQkoKokoKClAAYNLKWgoKCgpSUgoaSgoKCloKClKaCloK6goKCgpSAggALDgDiAcYDgoKCAAkMAIsBmAKCgoK4goIAJUIAxAGKA4KCgtwAM2iCgoLMADp2goKC3ACkAcoCgoKCuIKCsoKCgIKkgoCC", "", "", "714=expiresIn/1/3/43,expiresIn/2/3/44,expiresIn/3/3/45;863=expiresIn/1/2/6,expiresIn/2/2/8,run/1/1/19;1167=expiresIn/1/2/25,expiresIn/2/2/53")]
 [assembly: go.GoPositionMap("net/http/cookiejar/punycode_test.go", "punycode_test.cs", "ACIWAFqcAoKCgIKSgg==")]
 // </GoSourcePositionMaps>
 
@@ -43,7 +43,7 @@ namespace go.net.http;
 public static partial class cookiejar_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

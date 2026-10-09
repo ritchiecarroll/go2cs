@@ -9,7 +9,7 @@ using static go.strconv_internal_test_package;
 
 partial class strconv_test_package {
 
-[GoType] partial struct itob64Test {
+partial struct itob64Test {
     internal int64 @in;
     internal nint @base;
     internal @string @out;
@@ -106,7 +106,7 @@ public static void TestItoa(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct uitob64Test {
+partial struct uitob64Test {
     internal uint64 @in;
     internal nint @base;
     internal @string @out;
@@ -137,7 +137,7 @@ public static void TestUitoa(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct varlenUintsᴛ1 {
+partial struct varlenUintsᴛ1 /*dyn*/ {
     internal uint64 @in;
     internal @string @out;
 }

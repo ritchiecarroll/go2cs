@@ -10,7 +10,7 @@ using static go.crypto.elliptic_package;
 
 partial class elliptic_internal_test_package {
 
-[GoType] internal partial struct scalarMultTest {
+internal partial struct scalarMultTest {
     internal @string k;
     internal @string xIn, yIn;
     internal @string xOut, yOut;
@@ -71,8 +71,8 @@ public static void TestP256Mult(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct synthCombinedMult {
-    [GoEmbedded] public global::go.crypto.elliptic_package.Curve Curve;
+internal partial struct synthCombinedMult {
+    /*embed*/ public global::go.crypto.elliptic_package.Curve Curve;
 }
 
 internal static (ж<bigꓸInt> x, ж<bigꓸInt> y) CombinedMult(this synthCombinedMult s, ж<bigꓸInt> ᏑbigX, ж<bigꓸInt> ᏑbigY, slice<byte> baseScalar, slice<byte> scalar) {
@@ -81,7 +81,7 @@ internal static (ж<bigꓸInt> x, ж<bigꓸInt> y) CombinedMult(this synthCombin
     return s.Curve.Add(x1, y1, x2, y2);
 }
 
-[GoType("dyn")] [GoLocalName("combinedMult")] internal partial interface TestP256CombinedMult_combinedMult :
+internal partial interface TestP256CombinedMult_combinedMult /*dyn*/ :
     Curve
 {
     (ж<bigꓸInt> x, ж<bigꓸInt> y) CombinedMult(ж<bigꓸInt> bigX, ж<bigꓸInt> bigY, slice<byte> baseScalar, slice<byte> scalar);

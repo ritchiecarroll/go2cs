@@ -19,34 +19,34 @@ using Δruntime = runtime_package;
 
 partial class runtime_test_package {
 
-[GoType] partial struct smallScalar {
+partial struct smallScalar {
     public uintptr X;
 }
 
-[GoType] public partial struct smallPointer {
+public partial struct smallPointer {
     public ж<smallPointer> X;
 }
 
-[GoType] partial struct smallPointerMix {
+partial struct smallPointerMix {
     public ж<smallPointer> A;
     public byte B;
     public ж<smallPointer> C;
     public array<byte> D = new(11);
 }
 
-[GoType("[8192]byte")] partial struct mediumScalarEven;
+partial struct mediumScalarEven /*[8192]byte*/;
 
-[GoType("[3321]byte")] partial struct mediumScalarOdd;
+partial struct mediumScalarOdd /*[3321]byte*/;
 
-[GoType("[1024]ж<smallPointer>")] partial struct mediumPointerEven;
+partial struct mediumPointerEven /*[1024]ж<smallPointer>*/;
 
-[GoType("[1023]ж<smallPointer>")] partial struct mediumPointerOdd;
+partial struct mediumPointerOdd /*[1023]ж<smallPointer>*/;
 
-[GoType("[4194305]byte")] /* [runtime_internal_test_package.UserArenaChunkBytes + 1]byte */
-partial struct largeScalar;
+/* [runtime_internal_test_package.UserArenaChunkBytes + 1]byte */
+partial struct largeScalar /*[4194305]byte*/;
 
-[GoType("[524289]ж<smallPointer>")] /* [runtime_internal_test_package.UserArenaChunkBytes /  unsafe.Sizeof(&smallPointer{})  (uintptr)8 + 1]ж<smallPointer> */
-partial struct largePointer;
+/* [runtime_internal_test_package.UserArenaChunkBytes /  unsafe.Sizeof(&smallPointer{})  (uintptr)8 + 1]ж<smallPointer> */
+partial struct largePointer /*[524289]ж<smallPointer>*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string allocˢ = "Alloc"u8;

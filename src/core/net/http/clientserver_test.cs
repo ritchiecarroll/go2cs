@@ -48,19 +48,19 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class http_test_package {
 
-[GoType("@string")] partial struct testMode;
+partial struct testMode /*@string*/;
 
 internal static readonly testMode http1Mode = "h1"u8; // HTTP/1.1
 internal static readonly testMode https1Mode = "https1"u8; // HTTPS/1.1
 internal static readonly testMode http2Mode = "h2"u8; // HTTP/2
 internal static readonly testMode http2UnencryptedMode = "h2unencrypted"u8; // HTTP/2
 
-[GoType] partial struct testNotParallelOpt {
+partial struct testNotParallelOpt {
 }
 
 internal static testNotParallelOpt testNotParallel = new testNotParallelOpt(nil);
 
-[GoType] partial interface TBRun<T> :
+partial interface TBRun<T> :
     testing.TB
 {
     bool Run(@string _Δp0, Action<T> _Δp1);
@@ -120,17 +120,17 @@ internal static void run<T>(T t, Action<T, testMode> f, params ꓸꓸꓸany opts
 
 // cleanupT wraps a testing.T and adds its own Cleanup method.
 // Used to execute cleanup functions within a synctest bubble.
-[GoType] partial struct cleanupT {
+partial struct cleanupT {
     public partial ref ж<testing_package.T> T { get; }
     internal slice<Action> cleanups;
 }
 
 // Cleanup replaces T.Cleanup.
-[GoRecv] internal static void Cleanup(this ref cleanupT t, Action f) {
+internal static void Cleanup(this ref cleanupT t, Action f) {
     t.cleanups = append(t.cleanups, f);
 }
 
-[GoRecv] internal static void done(this ref cleanupT t) {
+internal static void done(this ref cleanupT t) {
     foreach (var (_, f) in range<nint, Action>(slices.Backward<slice<Action>, Action>(t.cleanups).Invoke)) {
         f();
     }
@@ -158,7 +158,7 @@ internal static void runSynctest(ж<testing.T> Ꮡt, Action<testing.TB, testMode
     }, opts.ꓸꓸꓸ);
 }
 
-[GoType] partial struct clientServerTest {
+partial struct clientServerTest {
     internal testing.TB t;
     internal bool h2;
     internal httpꓸHandler h;
@@ -168,7 +168,7 @@ internal static void runSynctest(ж<testing.T> Ꮡt, Action<testing.TB, testMode
     internal ж<fakeNetListener> li;
 }
 
-[GoRecv] internal static void close(this ref clientServerTest t) {
+internal static void close(this ref clientServerTest t) {
     t.tr.CloseIdleConnections();
     t.ts.Close();
 }
@@ -194,7 +194,7 @@ internal static @string getURL(this ж<clientServerTest> Ꮡt, @string u) {
     finally { ᒐ.Run(); }
 }
 
-[GoRecv] internal static @string scheme(this ref clientServerTest t) {
+internal static @string scheme(this ref clientServerTest t) {
     if (t.h2) {
         return httpsˢ;
     }
@@ -325,7 +325,7 @@ internal static ж<clientServerTest> newClientServerTest(testing.TB t, testMode 
     return cst;
 }
 
-[GoType] partial struct testLogWriter {
+partial struct testLogWriter {
     internal testing.TB t;
 }
 
@@ -360,7 +360,7 @@ public static void TestNewClientServerTest(ж<testing.T> Ꮡt) {
 internal static readonly @string http11ˢ = "HTTP/1.1"u8;
 internal static readonly @string http20ˢ = "HTTP/2.0"u8;
 
-[GoType("dyn")] internal partial struct testNewClientServerTest_got {
+internal partial struct testNewClientServerTest_got /*dyn*/ {
     public partial ref global::go.sync_package.Mutex Mutex { get; }
     internal @string proto;
     internal bool hasTLS;
@@ -460,7 +460,7 @@ internal static void testChunkedResponseHeaders(ж<testing.T> Ꮡt, testMode mod
 
 // h12Compare is a test that compares HTTP/1 and HTTP/2 behavior
 // against each other.
-[GoType] partial struct h12Compare {
+partial struct h12Compare {
     public Action<Δhttp.ResponseWriter, ж<Δhttp.Request>> Handler; // required
     public Func<ж<Δhttp.Client>, @string, (ж<Δhttp.Response>, error)> ReqFunc;                         // optional
     public Action<@string, ж<Δhttp.Response>> CheckResponse;     // optional
@@ -539,8 +539,8 @@ internal static ж<Δhttp.Response> mostlyCopy(ж<Δhttp.Response> Ꮡr) {
     return Ꮡc;
 }
 
-[GoType] partial struct slurpResult {
-    [GoEmbedded] public io_package.ReadCloser ReadCloser;
+partial struct slurpResult {
+    /*embed*/ public io_package.ReadCloser ReadCloser;
     internal slice<byte> body;
     internal error err;
 }
@@ -867,8 +867,8 @@ public static void TestH12_RequestContentLength_Known_Zero(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string stuffˢ = "Stuff"u8;
 
-[GoType("dyn")] internal partial struct TestH12_RequestContentLength_Unknown_type {
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct TestH12_RequestContentLength_Unknown_type /*dyn*/ {
+    /*embed*/ public io_package.Reader Reader;
 }
 
 public static void TestH12_RequestContentLength_Unknown(ж<testing.T> Ꮡt) {
@@ -1215,7 +1215,7 @@ public static void TestConnectRequest(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testConnectRequest(Δp0, Δp1));
 }
 
-[GoType("dyn")] internal partial struct testConnectRequest_tests {
+internal partial struct testConnectRequest_tests /*dyn*/ {
     internal ж<Δhttp.Request> req;
     internal @string want;
 }
@@ -1278,7 +1278,7 @@ internal static readonly @string goHttpClient11ˢ = @"[""Go-http-client/1.1""]"u
 internal static readonly @string goHttpClient20ˢ = @"[""Go-http-client/2.0""]"u8;
 internal static readonly @string foo123ˢ = "foo/1.2.3"u8;
 
-[GoType("dyn")] internal partial struct testTransportUserAgent_tests {
+internal partial struct testTransportUserAgent_tests /*dyn*/ {
     internal Action<ж<Δhttp.Request>> setup;
     internal @string want;
 }
@@ -1597,7 +1597,7 @@ public static void TestTransportRejectsInvalidHeaders(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testTransportRejectsInvalidHeaders(Δp0, Δp1));
 }
 
-[GoType("dyn")] internal partial struct testTransportRejectsInvalidHeaders_tests {
+internal partial struct testTransportRejectsInvalidHeaders_tests /*dyn*/ {
     internal @string key, val;
     internal bool ok;
 }
@@ -1772,7 +1772,7 @@ internal static void testInterruptWithPanic(ж<testing.T> Ꮡt, testMode mode, a
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct lockedBytesBuffer {
+partial struct lockedBytesBuffer {
     public partial ref global::go.sync_package.Mutex Mutex { get; }
     public partial ref bytes_package.Buffer Buffer { get; }
 }
@@ -1859,8 +1859,8 @@ internal static void testCloseIdleConnections(ж<testing.T> Ꮡt, testMode mode)
     }
 }
 
-[GoType] partial struct noteCloseConn {
-    [GoEmbedded] public net_package.Conn Conn;
+partial struct noteCloseConn {
+    /*embed*/ public net_package.Conn Conn;
     internal Action closeFunc;
 }
 
@@ -1869,7 +1869,7 @@ internal static error Close(this noteCloseConn x) {
     return x.Conn.Close();
 }
 
-[GoType] partial struct testErrorReader {
+partial struct testErrorReader {
     internal ж<testing.T> t;
 }
 

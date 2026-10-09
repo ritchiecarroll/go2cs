@@ -15,7 +15,7 @@ partial class types_test_package {
 
 internal static readonly @string filename = "<src>"u8;
 
-[GoType] partial struct testEntry {
+partial struct testEntry {
     internal @string src, str;
 }
 
@@ -135,7 +135,7 @@ public static void TestTypeString(ж<testing.T> Ꮡt) {
 internal static readonly @string packagePTypeTIntˢ = "package p; type T int"u8;
 internal static readonly @string packageQˢ = "package q"u8;
 
-[GoType("dyn")] internal partial struct TestQualifiedTypeString_type {
+internal partial struct TestQualifiedTypeString_type /*dyn*/ {
     internal typesꓸType typ;
     internal ж<types.Package> @this;
     internal @string want;

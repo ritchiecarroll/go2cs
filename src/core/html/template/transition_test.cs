@@ -11,7 +11,7 @@ using static go.html.template_package;
 
 partial class template_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestFindEndTag_tests {
+internal partial struct TestFindEndTag_tests /*dyn*/ {
     internal @string s, tag;
     internal nint want;
 }
@@ -50,7 +50,7 @@ public static void TestFindEndTag(ж<testing.T> Ꮡt) {
 internal static readonly @string textareaHelloHelloHelloˢ = "<textarea> Hello Hello Hello </textarea> "u8;
 internal static readonly @string textareaPDearNameWithˢ = "<textarea> <p> Dear {{.Name}},\n{{with .Gift}}Thank you for the lovely {{.}}. {{end}}\nBest wishes. </p>\n</textarea>"u8;
 
-[GoType("dyn")] internal partial struct BenchmarkTemplateSpecialTags_r {
+internal partial struct BenchmarkTemplateSpecialTags_r /*dyn*/ {
     public @string Name, Gift;
 }
 

@@ -11,9 +11,9 @@ using static global::go.net.http_package;
 
 partial class http_internal_test_package {
 
-[GoType("num:uint32")] public partial struct externalStreamErrorCode;
+public partial struct externalStreamErrorCode /*num:uint32*/;
 
-[GoType] internal partial struct externalStreamError {
+internal partial struct externalStreamError {
     public uint32 StreamID;
     public externalStreamErrorCode Code;
     public error Cause;

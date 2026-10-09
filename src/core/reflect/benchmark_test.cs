@@ -13,7 +13,7 @@ using Δreflect = reflect_package;
 partial class reflect_test_package {
 
 
-[GoType("dyn")] partial struct sourceAllᴛ1 {
+partial struct sourceAllᴛ1 /*dyn*/ {
     public reflectꓸValue Bool;
     public reflectꓸValue String;
     public reflectꓸValue Bytes;
@@ -33,7 +33,7 @@ internal static sourceAllᴛ1 sourceAll = new sourceAllᴛ1(
 );
 
 
-[GoType("dyn")] partial struct sinkAllᴛ1 {
+partial struct sinkAllᴛ1 /*dyn*/ {
     public bool RawBool;
     public @string RawString;
     public slice<byte> RawBytes;
@@ -150,15 +150,15 @@ public static void BenchmarkMapsDeepEqual(ж<Δtesting.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkIsZero_Int4 {
+internal partial struct BenchmarkIsZero_Int4 /*dyn*/ {
     internal nint a, b, c, d;
 }
 
-[GoType("dyn")] internal partial struct BenchmarkIsZero_Int1024 {
+internal partial struct BenchmarkIsZero_Int1024 /*dyn*/ {
     internal array<nint> a = new(1024);
 }
 
-[GoType("dyn")] internal partial struct BenchmarkIsZero_Int512 {
+internal partial struct BenchmarkIsZero_Int512 /*dyn*/ {
     internal array<S> a1 = new(16);
     internal array<S> a2 = new(16);
     internal array<S> a3 = new(16);
@@ -177,7 +177,7 @@ public static void BenchmarkMapsDeepEqual(ж<Δtesting.B> Ꮡb) {
     internal array<S> a16 = new(16);
 }
 
-[GoType("dyn")] internal partial struct BenchmarkIsZero_s {
+internal partial struct BenchmarkIsZero_s /*dyn*/ {
     public array<T> ArrayComparable = new(4);
     public array<_Complex> ArrayIncomparable = new(4, () => new());
     public T StructComparable;
@@ -208,11 +208,11 @@ public static void BenchmarkIsZero(ж<Δtesting.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial interface BenchmarkSetZero_type_Interface {
+internal partial interface BenchmarkSetZero_type_Interface /*dyn*/ {
     @string String();
 }
 
-[GoType("dyn")] internal partial struct BenchmarkSetZero_type {
+internal partial struct BenchmarkSetZero_type /*dyn*/ {
     public bool Bool;
     public int64 Int;
     public uint64 Uint;
@@ -296,9 +296,9 @@ public static void BenchmarkCall(ж<Δtesting.B> Ꮡb) {
     });
 }
 
-[GoType("num:int64")] partial struct myint;
+partial struct myint /*num:int64*/;
 
-[GoRecv] internal static void inc(this ref myint i) {
+internal static void inc(this ref myint i) {
     i = i + 1;
 }
 
@@ -313,7 +313,7 @@ public static void BenchmarkCallMethod(ж<Δtesting.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkCallArgCopy_sizes {
+internal partial struct BenchmarkCallArgCopy_sizes /*dyn*/ {
     internal reflectꓸValue fv;
     internal reflectꓸValue arg;
 }
@@ -363,8 +363,8 @@ public static void BenchmarkCallArgCopy(ж<Δtesting.B> Ꮡb) {
 internal static readonly @string ptrToThisˢ = "PtrToThis"u8;
 
 // Construct a type with a zero ptrToThis.
-[GoType("dyn")] internal partial struct BenchmarkPtrTo_T {
-    [GoEmbedded] internal nint @int;
+internal partial struct BenchmarkPtrTo_T /*dyn*/ {
+    /*embed*/ internal nint @int;
 }
 
 public static void BenchmarkPtrTo(ж<Δtesting.B> Ꮡb) {
@@ -390,7 +390,7 @@ public static void BenchmarkPtrTo(ж<Δtesting.B> Ꮡb) {
     });
 }
 
-[GoType] partial struct B1 {
+partial struct B1 {
     public nint X;
     public nint Y;
     public nint Z;
@@ -426,7 +426,7 @@ public static void BenchmarkFieldByName3(ж<Δtesting.B> Ꮡb) {
     });
 }
 
-[GoType] partial struct S {
+partial struct S {
     internal int64 i1;
     internal int64 i2;
 }
@@ -470,11 +470,11 @@ public static void BenchmarkNew(ж<Δtesting.B> Ꮡb) {
 internal static readonly @string mapIndexˢ = "MapIndex"u8;
 internal static readonly @string setMapIndexˢ = "SetMapIndex"u8;
 
-[GoLocalName("V")] [GoType("ж<nint>")] internal partial class BenchmarkMap_V;
+internal partial class BenchmarkMap_V /*ж<nint>*/;
 
-[GoLocalName("S")] [GoType("@string")] internal partial struct BenchmarkMap_S;
+internal partial struct BenchmarkMap_S /*@string*/;
 
-[GoType("dyn")] internal partial struct BenchmarkMap_tests {
+internal partial struct BenchmarkMap_tests /*dyn*/ {
     internal @string label;
     internal reflectꓸValue m, keys, value;
 }

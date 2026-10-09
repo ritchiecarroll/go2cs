@@ -48,7 +48,7 @@ using static global::go.image_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("image/decode_example_test.go", "decode_example_test.cs", "ABowgoKCgpQACQYABxCCgoKUjtKCgqaCgoK6gqI=")]
-[assembly: go.GoPositionMap("image/decode_test.go", "decode_test.cs", "AB40AA4mooKClJLWooKClJLWgoKClKaCgoKCgoKCpoKCgpaCgoKCgoKCgoKUlIKCgpSCgoKUgoKClLi4lIKCgpSCgg==", "82-85:1")]
+[assembly: go.GoPositionMap("image/decode_test.go", "decode_test.cs", "AB40AA4mooKClJLWooKClJLWgoKClKaCgoKCgoKCpoKCgpaCgoKCgoKCgoKUlIKCgpSCgoKUgoKClLi4lIKCgpSCgg==", "82-85:1", "", "125=At/1/2/1,Invoke/1/2/1,At/2/2/1,Invoke/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -57,7 +57,7 @@ namespace go;
 public static partial class image_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

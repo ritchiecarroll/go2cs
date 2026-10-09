@@ -15,7 +15,7 @@ partial class runtime_test_package {
 // allocate struct with pointer to avoid hitting tinyalloc.
 // Otherwise we can't be sure when the allocation will
 // be freed.
-[GoType("dyn")] internal partial struct TestCleanup_T {
+internal partial struct TestCleanup_T /*dyn*/ {
     internal nint v;
     internal @unsafe.Pointer p;
 }
@@ -48,7 +48,7 @@ public static partial void TestCleanup(ж<testing.T> Ꮡt) {
 // allocate struct with pointer to avoid hitting tinyalloc.
 // Otherwise we can't be sure when the allocation will
 // be freed.
-[GoType("dyn")] internal partial struct TestCleanupMultiple_T {
+internal partial struct TestCleanupMultiple_T /*dyn*/ {
     internal nint v;
     internal @unsafe.Pointer p;
 }
@@ -82,7 +82,7 @@ public static partial void TestCleanupMultiple(ж<testing.T> Ꮡt) {
     ᐸꟷ(ch);
 }
 
-[GoType("dyn")] internal partial struct TestCleanupZeroSizedStruct_Z {
+internal partial struct TestCleanupZeroSizedStruct_Z /*dyn*/ {
 }
 
 public static void TestCleanupZeroSizedStruct(ж<testing.T> Ꮡt) {
@@ -94,7 +94,7 @@ public static void TestCleanupZeroSizedStruct(ж<testing.T> Ꮡt) {
 // allocate struct with pointer to avoid hitting tinyalloc.
 // Otherwise we can't be sure when the allocation will
 // be freed.
-[GoType("dyn")] internal partial struct TestCleanupAfterFinalizer_T {
+internal partial struct TestCleanupAfterFinalizer_T /*dyn*/ {
     internal nint v;
     internal @unsafe.Pointer p;
 }
@@ -141,7 +141,7 @@ public static partial void TestCleanupAfterFinalizer(ж<testing.T> Ꮡt) {
 // Allocate struct with pointer to avoid hitting tinyalloc.
 // Otherwise we can't be sure when the allocation will
 // be freed.
-[GoType("dyn")] internal partial struct TestCleanupInteriorPointer_T {
+internal partial struct TestCleanupInteriorPointer_T /*dyn*/ {
     internal @unsafe.Pointer p;
     internal nint i;
     internal nint a;
@@ -186,7 +186,7 @@ internal static readonly object cleanupCalledWantNoˢ = (@string)"cleanup called
 // allocate struct with pointer to avoid hitting tinyalloc.
 // Otherwise we can't be sure when the allocation will
 // be freed.
-[GoType("dyn")] internal partial struct TestCleanupStop_T {
+internal partial struct TestCleanupStop_T /*dyn*/ {
     internal nint v;
     internal @unsafe.Pointer p;
 }
@@ -213,7 +213,7 @@ public static partial void TestCleanupStop(ж<testing.T> Ꮡt) {
 // allocate struct with pointer to avoid hitting tinyalloc.
 // Otherwise we can't be sure when the allocation will
 // be freed.
-[GoType("dyn")] internal partial struct TestCleanupStopMultiple_T {
+internal partial struct TestCleanupStopMultiple_T /*dyn*/ {
     internal nint v;
     internal @unsafe.Pointer p;
 }
@@ -242,7 +242,7 @@ public static partial void TestCleanupStopMultiple(ж<testing.T> Ꮡt) {
 // allocate struct with pointer to avoid hitting tinyalloc.
 // Otherwise we can't be sure when the allocation will
 // be freed.
-[GoType("dyn")] internal partial struct TestCleanupStopinterleavedMultiple_T {
+internal partial struct TestCleanupStopinterleavedMultiple_T /*dyn*/ {
     internal nint v;
     internal @unsafe.Pointer p;
 }
@@ -280,7 +280,7 @@ public static partial void TestCleanupStopinterleavedMultiple(ж<testing.T> Ꮡt
 // Allocate struct with pointer to avoid hitting tinyalloc.
 // Otherwise we can't be sure when the allocation will
 // be freed.
-[GoType("dyn")] internal partial struct TestCleanupStopAfterCleanupRuns_T {
+internal partial struct TestCleanupStopAfterCleanupRuns_T /*dyn*/ {
     internal nint v;
     internal @unsafe.Pointer p;
 }
@@ -318,7 +318,7 @@ internal static readonly object wantPanicTestDidNotPanicˢ = (@string)"want pani
 // allocate struct with pointer to avoid hitting tinyalloc.
 // Otherwise we can't be sure when the allocation will
 // be freed.
-[GoType("dyn")] internal partial struct TestCleanupPointerEqualsArg_T {
+internal partial struct TestCleanupPointerEqualsArg_T /*dyn*/ {
     internal nint v;
     internal @unsafe.Pointer p;
 }

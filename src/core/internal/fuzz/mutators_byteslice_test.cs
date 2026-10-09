@@ -10,45 +10,45 @@ using static global::go.@internal.fuzz_package;
 
 partial class fuzz_internal_test_package {
 
-[GoType] internal partial struct mockRand {
+internal partial struct mockRand {
     internal slice<nint> values;
     internal nint counter;
     internal bool b;
 }
 
-[GoRecv] internal static uint32 uint32(this ref mockRand mr) {
+internal static uint32 uint32(this ref mockRand mr) {
     nint c = mr.values[mr.counter];
     mr.counter++;
     return (uint32)c;
 }
 
-[GoRecv] internal static nint intn(this ref mockRand mr, nint n) {
+internal static nint intn(this ref mockRand mr, nint n) {
     nint c = mr.values[mr.counter];
     mr.counter++;
     return rem(c, n);
 }
 
-[GoRecv] internal static uint32 uint32n(this ref mockRand mr, uint32 n) {
+internal static uint32 uint32n(this ref mockRand mr, uint32 n) {
     nint c = mr.values[mr.counter];
     mr.counter++;
     return (uint32)c % n;
 }
 
-[GoRecv] internal static bool @bool(this ref mockRand mr) {
+internal static bool @bool(this ref mockRand mr) {
     var b = mr.b;
     mr.b = !mr.b;
     return b;
 }
 
-[GoRecv] internal static void save(this ref mockRand mr, ж<uint64> _Δp1, ж<uint64> _Δp2) {
+internal static void save(this ref mockRand mr, ж<uint64> _Δp1, ж<uint64> _Δp2) {
     throw panic("unimplemented");
 }
 
-[GoRecv] internal static void restore(this ref mockRand mr, uint64 _Δp1, uint64 _Δp2) {
+internal static void restore(this ref mockRand mr, uint64 _Δp1, uint64 _Δp2) {
     throw panic("unimplemented");
 }
 
-[GoType("dyn")] internal partial struct TestByteSliceMutators_type {
+internal partial struct TestByteSliceMutators_type /*dyn*/ {
     internal @string name;
     internal Func<ж<global::go.@internal.fuzz_package.mutator>, slice<byte>, slice<byte>> mutator;
     internal slice<nint> randVals;
@@ -186,7 +186,7 @@ public static void TestByteSliceMutators(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkByteSliceMutators_tests {
+internal partial struct BenchmarkByteSliceMutators_tests /*dyn*/ {
     internal @string name;
     internal Func<ж<global::go.@internal.fuzz_package.mutator>, slice<byte>, slice<byte>> mutator;
 }

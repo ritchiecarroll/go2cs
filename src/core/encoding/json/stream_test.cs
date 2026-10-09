@@ -28,7 +28,7 @@ partial class json_internal_test_package {
 // TODO(https://go.dev/issue/52751): Replace with native testing support.
 
 // CaseName is a case name annotated with a file and line.
-[GoType] [GoValueClone("Where")] public partial struct CaseName {
+public partial struct CaseName {
     public @string Name;
     public CasePos Where;
 }
@@ -43,7 +43,7 @@ public static partial CaseName /*c*/ Name(@string s) {
 }
 
 // CasePos represents a file and line number.
-[GoType] [GoValueClone("pc")] public partial struct CasePos {
+public partial struct CasePos {
     internal array<uintptr> pc = new(1);
 }
 
@@ -107,12 +107,12 @@ public static void TestEncoder(ж<testing.T> Ꮡt) {
 }
 
 // Trigger an error in Marshal with cyclic data.
-[GoType("dyn")] [GoLocalName("Dummy")] internal partial struct TestEncoderErrorAndReuseEncodeState_Dummy {
+internal partial struct TestEncoderErrorAndReuseEncodeState_Dummy /*dyn*/ {
     public @string Name;
     public ж<TestEncoderErrorAndReuseEncodeState_Dummy> Next;
 }
 
-[GoType("dyn")] [GoLocalName("Data")] internal partial struct TestEncoderErrorAndReuseEncodeState_Data {
+internal partial struct TestEncoderErrorAndReuseEncodeState_Data /*dyn*/ {
     public @string A;
     public nint I;
 }
@@ -188,15 +188,15 @@ public static void TestEncoderIndent(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("@string")] internal partial struct strMarshaler;
+internal partial struct strMarshaler /*@string*/;
 
 internal static (slice<byte>, error) MarshalJSON(this strMarshaler s) {
     return (slice<byte>((@string)s), default!);
 }
 
-[GoType("@string")] internal partial struct strPtrMarshaler;
+internal partial struct strPtrMarshaler /*@string*/;
 
-[GoRecv] internal static (slice<byte>, error) MarshalJSON(this ref strPtrMarshaler s) {
+internal static (slice<byte>, error) MarshalJSON(this ref strPtrMarshaler s) {
     return (slice<byte>((@string)s), default!);
 }
 
@@ -205,24 +205,21 @@ internal static readonly @string tagStructˢ = "tagStruct"u8;
 internal static readonly @string strˢ = @"""<str>"""u8;
 internal static readonly @string stringOptionˢ = "stringOption"u8;
 
-[GoType("dyn")] internal partial struct TestEncoderSetEscapeHTML_tagStruct {
-    [GoTag(@"json:""<>&#! """)]
-    public nint Valid;
-    [GoTag(@"json:""\\""")]
-    public nint Invalid;
+internal partial struct TestEncoderSetEscapeHTML_tagStruct /*dyn*/ {
+    public nint Valid; /*`json:"<>&#! "`*/
+    public nint Invalid; /*`json:"\\"`*/
 }
 
-[GoType("dyn")] internal partial struct TestEncoderSetEscapeHTML_marshalerStruct {
+internal partial struct TestEncoderSetEscapeHTML_marshalerStruct /*dyn*/ {
     public strMarshaler NonPtr;
     public strPtrMarshaler Ptr;
 }
 
-[GoType("dyn")] internal partial struct TestEncoderSetEscapeHTML_stringOption {
-    [GoTag(@"json:""bar,string""")]
-    public @string Bar;
+internal partial struct TestEncoderSetEscapeHTML_stringOption /*dyn*/ {
+    public @string Bar; /*`json:"bar,string"`*/
 }
 
-[GoType("dyn")] internal partial struct TestEncoderSetEscapeHTML_tests {
+internal partial struct TestEncoderSetEscapeHTML_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal any v;
     internal @string wantEscape;
@@ -332,7 +329,7 @@ public static void TestDecoder(ж<testing.T> Ꮡt) {
 internal static readonly @string nameGopherExtraˢ = @"{""Name"": ""Gopher""} extra "u8;
 internal static readonly @string extraˢ = " extra "u8;
 
-[GoType("dyn")] internal partial struct TestDecoderBuffered_m {
+internal partial struct TestDecoderBuffered_m /*dyn*/ {
     public @string Name;
 }
 
@@ -375,7 +372,7 @@ internal static @string nlines(@string s, nint n) {
     return s;
 }
 
-[GoType("dyn")] internal partial struct TestRawMessage_data {
+internal partial struct TestRawMessage_data /*dyn*/ {
     public float64 X;
     public global::go.encoding.json_package.RawMessage Id;
     public float32 Y;
@@ -407,7 +404,7 @@ public static void TestRawMessage(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestNullRawMessage_data {
+internal partial struct TestNullRawMessage_data /*dyn*/ {
     public float64 X;
     public global::go.encoding.json_package.RawMessage Id;
     public ж<global::go.encoding.json_package.RawMessage> IdPtr;
@@ -442,7 +439,7 @@ public static void TestNullRawMessage(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestBlocking_tests {
+internal partial struct TestBlocking_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal @string @in;
 }
@@ -475,11 +472,11 @@ public static void TestBlocking(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct decodeThis {
+internal partial struct decodeThis {
     internal any v;
 }
 
-[GoType("dyn")] internal partial struct TestDecodeInStream_tests {
+internal partial struct TestDecodeInStream_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal @string json;
     internal slice<any> expTokens;
@@ -597,7 +594,7 @@ public static void TestDecodeInStream(ж<testing.T> Ꮡt) {
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string rawᶜ1 = @"{ ""foo"": ""bar"" }"u8;
 
-[GoType("dyn")] internal partial struct TestHTTPDecoding_foo {
+internal partial struct TestHTTPDecoding_foo /*dyn*/ {
     public @string Foo;
 }
 

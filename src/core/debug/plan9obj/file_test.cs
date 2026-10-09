@@ -9,7 +9,7 @@ using static go.debug.plan9obj_package;
 
 partial class plan9obj_internal_test_package {
 
-[GoType] internal partial struct fileTest {
+internal partial struct fileTest {
     internal @string @file;
     internal global::go.debug.plan9obj_package.FileHeader hdr;
     internal slice<ж<global::go.debug.plan9obj_package.SectionHeader>> sections;

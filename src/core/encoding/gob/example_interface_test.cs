@@ -14,7 +14,7 @@ using static go.encoding.gob_internal_test_package;
 
 partial class gob_test_package {
 
-[GoType] partial struct Point {
+partial struct Point {
     public nint X, Y;
 }
 
@@ -22,7 +22,7 @@ public static float64 Hypotenuse(this Point p) {
     return math.Hypot((float64)p.X, (float64)p.Y);
 }
 
-[GoType] partial interface Pythagoras {
+partial interface Pythagoras {
     float64 Hypotenuse();
 }
 

@@ -41,11 +41,11 @@ public static void BenchmarkEncode(ж<testing.B> Ꮡb) {
 }
 
 // errorWriter is a writer that fails after N writes.
-[GoType] internal partial struct errorWriter {
+internal partial struct errorWriter {
     public nint N;
 }
 
-[GoRecv] internal static (nint, error) Write(this ref errorWriter e, slice<byte> b) {
+internal static (nint, error) Write(this ref errorWriter e, slice<byte> b) {
     if (e.N <= 0) {
         return (0, io.ErrClosedPipe);
     }
@@ -62,8 +62,8 @@ internal static readonly object expectedAnErrorOnCloseˢ = (@string)"Expected an
 internal static readonly object gotUnexpectedErrorAfterˢ = (@string)"Got unexpected error after reset:"u8;
 internal static readonly object got0LengthWriteExpected0ˢ = (@string)"Got 0 length write, expected > 0"u8;
 
-[GoType("dyn")] internal partial struct TestWriteError_src {
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct TestWriteError_src /*dyn*/ {
+    /*embed*/ public io_package.Reader Reader;
 }
 
 // Test if errors from the underlying writer is passed upwards.

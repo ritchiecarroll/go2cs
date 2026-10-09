@@ -17,7 +17,7 @@ partial class aes_internal_test_package {
 //	https://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
 
 // Appendix B, C of FIPS 197: Cipher examples, Example vectors.
-[GoType] public partial struct CryptTest {
+public partial struct CryptTest {
     internal slice<byte> key;
     internal slice<byte> @in;
     internal slice<byte> @out;

@@ -147,12 +147,12 @@ public static void TestScanWords(ж<Δtesting.T> Ꮡt) {
 
 // slowReader is a reader that returns only a few bytes at a time, to test the incremental
 // reads in Scanner.Scan.
-[GoType] partial struct slowReader {
+partial struct slowReader {
     internal nint max;
     internal Δio.Reader buf;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref slowReader sr, slice<byte> p) {
+internal static (nint n, error err) Read(this ref slowReader sr, slice<byte> p) {
     if (len(p) > sr.max) {
         p = p.slice(0, sr.max);
     }
@@ -407,7 +407,7 @@ public static void TestErrAtEOF(ж<Δtesting.T> Ꮡt) {
 }
 
 // Test for issue 5268.
-[GoType] partial struct alwaysError {
+partial struct alwaysError {
 }
 
 internal static (nint, error) Read(this alwaysError _, slice<byte> p) {
@@ -429,7 +429,7 @@ public static void TestNonEOFWithEmptyRead(ж<Δtesting.T> Ꮡt) {
 }
 
 // Test that Scan finishes if we have endless empty reads.
-[GoType] partial struct endlessZeros {
+partial struct endlessZeros {
 }
 
 internal static (nint, error) Read(this endlessZeros _, slice<byte> p) {
@@ -562,9 +562,9 @@ public static void TestBlankLines(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("num:nint")] partial struct countdown;
+partial struct countdown /*num:nint*/;
 
-[GoRecv] internal static (nint advance, slice<byte> token, error err) split(this ref countdown c, slice<byte> data, bool atEOF) {
+internal static (nint advance, slice<byte> token, error err) split(this ref countdown c, slice<byte> data, bool atEOF) {
     if (c > 0) {
         c--;
         return (1, data[..1], default!);
@@ -604,9 +604,9 @@ public static void TestHugeBuffer(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("num:nint")] partial struct negativeEOFReader;
+partial struct negativeEOFReader /*num:nint*/;
 
-[GoRecv] internal static (nint, error) Read(this ref negativeEOFReader r, slice<byte> p) {
+internal static (nint, error) Read(this ref negativeEOFReader r, slice<byte> p) {
     if (r > 0) {
         nint c = (nint)(r);
         if (c > len(p)) {
@@ -648,7 +648,7 @@ public static void TestNegativeEOFReader(ж<Δtesting.T> Ꮡt) {
 
 // largeReader returns an invalid count that is larger than the number
 // of bytes requested.
-[GoType] partial struct largeReader {
+partial struct largeReader {
 }
 
 internal static (nint, error) Read(this largeReader _, slice<byte> p) {

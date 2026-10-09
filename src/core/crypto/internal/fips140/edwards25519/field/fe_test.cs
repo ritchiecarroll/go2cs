@@ -160,7 +160,7 @@ public static void TestMul64to128(ж<testing.T> Ꮡt) {
 }
 
 // Check some fixed vectors from dalek
-[GoType("dyn")] [GoLocalName("feRTTest")] internal partial struct TestSetBytesRoundTrip_feRTTest {
+internal partial struct TestSetBytesRoundTrip_feRTTest /*dyn*/ {
     internal global::go.crypto.@internal.fips140.edwards25519.field_package.Element fe;
     internal slice<byte> b;
 }
@@ -280,7 +280,7 @@ internal static ж<global::go.crypto.@internal.fips140.edwards25519.field_packag
 }
 
 // toBig returns v as a big.Int.
-[GoRecv] internal static ж<bigꓸInt> toBig(this ref global::go.crypto.@internal.fips140.edwards25519.field_package.Element v) {
+internal static ж<bigꓸInt> toBig(this ref global::go.crypto.@internal.fips140.edwards25519.field_package.Element v) {
     var buf = v.Bytes();
     var words = new slice<big.Word>(32 * 8 / bits.UintSize);
     foreach (var (n, _) in words) {
@@ -437,7 +437,7 @@ public static void TestMult32(ж<testing.T> Ꮡt) {
 }
 
 // From draft-irtf-cfrg-ristretto255-decaf448-00, Appendix A.4.
-[GoType("dyn")] [GoLocalName("test")] internal partial struct TestSqrtRatio_test {
+internal partial struct TestSqrtRatio_test /*dyn*/ {
     internal slice<byte> u, v;
     internal nint wasSquare;
     internal slice<byte> r;

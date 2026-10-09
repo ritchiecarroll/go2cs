@@ -30,16 +30,16 @@ internal static void initᴛtestFsys() { testFsys = new fstest.MapFS(new map<@st
 internal static ж<nint> ᏑsysValue = new StandardBox<nint>(default(nint));
 internal static ref nint sysValue => ref ᏑsysValue.Value;
 
-[GoType] partial struct readFileOnly {
-    [GoEmbedded] public go.io.fs_package.ReadFileFS ReadFileFS;
+partial struct readFileOnly {
+    /*embed*/ public go.io.fs_package.ReadFileFS ReadFileFS;
 }
 
 internal static (fs.File, error) Open(this readFileOnly _, @string name) {
     return (default!, ErrNotExist);
 }
 
-[GoType] partial struct openOnly {
-    [GoEmbedded] public go.io.fs_package.FS FS;
+partial struct openOnly {
+    /*embed*/ public go.io.fs_package.FS FS;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

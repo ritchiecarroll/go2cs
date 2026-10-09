@@ -48,9 +48,9 @@ using static global::go.sort_test_package;
 [assembly: go.GoPositionMap("sort/example_keys_test.go", "example_keys_test.cs", "ABg2ksgACBSSqJKokqYADBCkhoaGqoKEgoSChII=", "66-68:1;69-71:2;72-74:3;75-77:4")]
 [assembly: go.GoPositionMap("sort/example_multi_test.go", "example_multi_test.cs", "ABo4soKqwsySqJIAAhLihJKCgpa2/KYAEh7EhoaGgqiCloKEgoSChII=", "95-97:1;98-100:2;101-103:3;104-106:4")]
 [assembly: go.GoPositionMap("sort/example_wrapper_test.go", "example_wrapper_test.cs", "AA0cgAAJEoCigAAIDIAACAyA5IIABxKCgoSCggACJgAPAoI=")]
-[assembly: go.GoPositionMap("sort/search_test.go", "search_test.cs", "AA4cgroACAQAGDyCgoKCAAsKgoKCgpaWhAAjYLKSmIKCAAUQooKUpqaCgoKmgpKCgICSgpSCpoLMkvQACBqCgoLKgoKCgoKC5oKClIKUgoK4ooK+soKSgoLe2oKSgoSUlISCgpSClII=", "15-17:1;122-131:1;123-125:1.1;156-156:1;229-229:1;248-251:1")]
+[assembly: go.GoPositionMap("sort/search_test.go", "search_test.cs", "AA4cgroACAQAGDyCgoKCAAsKgoKCgpaWhAAjYLKSmIKCAAUQooKUpqaCgoKmgpKCgICSgpSCpoLMkvQACBqCgoLKgoKCgoKC5oKClIKUgoK4ooK+soKSgoLe2oKSgoSUlISCgpSClII=", "15-17:1;122-131:1;123-125:1.1;156-156:1;229-229:1;248-251:1", "", "29=f/1/12/13,f/2/12/14,f/3/12/15,f/4/12/16,f/5/12/17,f/6/12/18,f/7/12/19,f/8/12/20,f/9/12/21,f/10/12/22,f/11/12/23,f/12/12/24;180=SearchInts/1/1/5,SearchFloat64s/1/1/6,SearchStrings/1/1/7,Search/1/3/8,Search/2/3/9,Search/3/3/10")]
 [assembly: go.GoPositionMap("sort/sort_slices_benchmark_test.go", "sort_slices_benchmark_test.cs", "ABIosoKCgpSmgoKClKaCgoKUpoKCgpSCyqKCgoKCuKKCgoKCuKKCgoKCuKKCgoKCvKKCgoKCgoKClJSmooKCgoK4ooKCgoK4ooKEgriigoSCAAwagKKAooCkgoKCgpSmgoKCgpaChIKCyqKCgoKCuKKCgoKCgg==", "175-175:1;194-194:1")]
-[assembly: go.GoPositionMap("sort/sort_test.go", "sort_test.cs", "ABYokpKUgoKCgoKCuIKCgoKCgrqSgoSCloK4goKCgoKCuIKCgoKCuIKCgoKCuIKCgoKCuIKSlpKCuKKCgpSCgpSClIKCuKKCgoKCgoKCgpSCypSCgpSCgoKmooKCgoKogoKCgoIACBKCpIKClKSCgrjGgoCCuKiCtKSigoKClISCgoKCuKKCgoKUhIKCgpK4ooKCgpSEgoKCgriigoKCgpSCgriigoKCgpSCgriigoKCgpSCgriigoKCgpSCgriigoKClIKCgoKCuKKCgoKUgoKCgpK4ooKCgoKUgoK4ooKCgoKUgpK4ooKCgoKUgoIAGj6AooKCpIKClIKmgoKClKaigoKUgoKSgoKCgoKCgpSkpKSkgoKUgsqCgpSCtoK2gpSCtoKUgraCmKSiuJKCAAoYggAHEIKmgqaCAA4egKSCgpSEgpSCpoKogpKClqaCpoKSgoKUpoKCgoKUgoLKgoKCggAJEpCigKKAppKCupKSgoKCgpSClJSmopKClJaClIKUgoKClIKogoKClIKogpSCgoKUgrjEgoKClIKUguyClILogNKA5KKClIKCgoKCgoKCgpSUgoKCgoKUggAIDICigKKAooCigKKA", "53-53:1;97-99:1;100-100:2;194-198:1;236-236:1;334-334:1;360-360:1;523-523:1;527-527:1;531-531:1")]
+[assembly: go.GoPositionMap("sort/sort_test.go", "sort_test.cs", "ABYokpKUgoKCgoKCuIKCgoKCgrqSgoSCloK4goKCgoKCuIKCgoKCuIKCgoKCuIKCgoKCuIKSlpKCuKKCgpSCgpSClIKCuKKCgoKCgoKCgpSCypSCgpSCgoKmooKCgoKogoKCgoIACBKCpIKClKSCgrjGgoCCuKiCtKSigoKClISCgoKCuKKCgoKUhIKCgpK4ooKCgpSEgoKCgriigoKCgpSCgriigoKCgpSCgriigoKCgpSCgriigoKCgpSCgriigoKClIKCgoKCuKKCgoKUgoKCgpK4ooKCgoKUgoK4ooKCgoKUgpK4ooKCgoKUgoIAGj6AooKCpIKClIKmgoKClKaigoKUgoKSgoKCgoKCgpSkpKSkgoKUgsqCgpSCtoK2gpSCtoKUgraCmKSiuJKCAAoYggAHEIKmgqaCAA4egKSCgpSEgpSCpoKogpKClqaCpoKSgoKUpoKCgoKUgoLKgoKCggAJEpCigKKAppKCupKSgoKCgpSClJSmopKClJaClIKUgoKClIKogoKClIKogpSCgoKUgrjEgoKClIKUguyClILogNKA5KKClIKCgoKCgoKCgpSUgoKCgoKUggAIDICigKKAooCigKKA", "53-53:1;97-99:1;100-100:2;194-198:1;236-236:1;334-334:1;360-360:1;523-523:1;527-527:1;531-531:1", "", "214=NewPCG/1/1/1,New/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -59,7 +59,7 @@ namespace go;
 public static partial class sort_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

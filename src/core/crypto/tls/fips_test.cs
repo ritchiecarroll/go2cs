@@ -586,7 +586,7 @@ internal static ж<ecdsa.PrivateKey> fipsECDSAKey(ж<testing.T> Ꮡt, elliptic.C
     return k;
 }
 
-[GoType] internal partial struct fipsCertificate {
+internal partial struct fipsCertificate {
     internal @string name;
     internal @string org;
     internal @string parentOrg;

@@ -97,13 +97,13 @@ public static Func<any, slice<byte>> GCBits = gcbits;
 // go2cs generated this placeholder — func gcbits is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // provided by runtime
-[GoType] public partial struct EmbedWithUnexpMeth {
+public partial struct EmbedWithUnexpMeth {
 }
 
 internal static void f(this EmbedWithUnexpMeth _) {
 }
 
-[GoType] internal partial interface pinUnexpMeth {
+internal partial interface pinUnexpMeth {
     void f();
 }
 
@@ -123,7 +123,7 @@ public static ж<byte> FirstMethodNameBytes(global::go.reflect_package.ΔType t)
     return mname.Bytes;
 }
 
-[GoType] public partial struct OtherPkgFields {
+public partial struct OtherPkgFields {
     public nint OtherExported;
     internal nint otherUnexported;
 }
@@ -134,7 +134,7 @@ public static void ResolveReflectName(@string s) {
     resolveReflectName(newName(s, ""u8, false, false));
 }
 
-[GoType] public partial struct Buffer {
+public partial struct Buffer {
     internal slice<byte> buf;
 }
 

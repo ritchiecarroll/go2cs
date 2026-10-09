@@ -10,7 +10,7 @@ using static global::go.net.http_package;
 
 partial class http_internal_test_package {
 
-[GoType] internal partial struct respWriteTest {
+internal partial struct respWriteTest {
     public global::go.net.http_package.Response Resp;
     public @string Raw;
 }

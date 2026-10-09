@@ -17,7 +17,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class base32_internal_test_package {
 
-[GoType] internal partial struct testpair {
+internal partial struct testpair {
     internal @string decoded, encoded;
 }
 
@@ -201,7 +201,7 @@ public static void TestDecoder(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct badReader {
+internal partial struct badReader {
     internal slice<byte> data;
     internal slice<error> errs;
     internal nint called;
@@ -215,7 +215,7 @@ public static void TestDecoder(ж<testing.T> Ꮡt) {
 // number of bytes returned is determined by the size of the input buffer
 // the test passes to decoder.Read and will be a multiple of 8, unless
 // badReader.limit is non zero.
-[GoRecv] internal static (nint, error) Read(this ref badReader b, slice<byte> p) {
+internal static (nint, error) Read(this ref badReader b, slice<byte> p) {
     nint lim = len(p);
     if (b.limit != 0 && b.limit < lim) {
         lim = b.limit;
@@ -239,7 +239,7 @@ public static void TestDecoder(ж<testing.T> Ꮡt) {
 internal static readonly @string badReaderErrorˢ = "bad reader error"u8;
 internal static readonly @string decodingOfQErrVExpectedVˢ = "Decoding of %q err = %v, expected %v"u8;
 
-[GoType("dyn")] internal partial struct TestIssue20044_testCases {
+internal partial struct TestIssue20044_testCases /*dyn*/ {
     internal badReader r;
     internal @string res;
     internal error err;
@@ -400,7 +400,7 @@ internal static readonly object decoderWronglyDetectedˢ = (@string)"Decoder wro
 internal static readonly @string corruptionInQAtOffsetVˢ = "Corruption in %q at offset %v, want %v"u8;
 internal static readonly object decoderFailedToDetectˢ = (@string)"Decoder failed to detect corruption in"u8;
 
-[GoType("dyn")] internal partial struct TestDecodeCorrupt_testCases {
+internal partial struct TestDecodeCorrupt_testCases /*dyn*/ {
     internal @string input;
     internal nint offset; // -1 means no corruption.
 }
@@ -670,7 +670,7 @@ public static void TestDecodeWithWrongPadding(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestBufferedDecodingSameError_testcases {
+internal partial struct TestBufferedDecodingSameError_testcases /*dyn*/ {
     internal @string prefix;
     internal slice<slice<@string>> chunkCombinations;
     internal error expected;
@@ -746,7 +746,7 @@ public static partial void TestBufferedDecodingSameError(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestBufferedDecodingPadding_testcases {
+internal partial struct TestBufferedDecodingPadding_testcases /*dyn*/ {
     internal slice<@string> chunks;
     internal @string expectedError;
 }
@@ -797,7 +797,7 @@ public static partial void TestBufferedDecodingPadding(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("test")] internal partial struct TestEncodedLen_test {
+internal partial struct TestEncodedLen_test /*dyn*/ {
     internal ж<global::go.encoding.base32_package.Encoding> enc;
     internal nint n;
     internal int64 want;
@@ -846,7 +846,7 @@ public static void TestEncodedLen(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("test")] internal partial struct TestDecodedLen_test {
+internal partial struct TestDecodedLen_test /*dyn*/ {
     internal ж<global::go.encoding.base32_package.Encoding> enc;
     internal nint n;
     internal int64 want;

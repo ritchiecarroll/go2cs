@@ -153,7 +153,7 @@ public static void TestRWMutex(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkRWMutexUncontended_PaddedRWMutex {
+internal partial struct BenchmarkRWMutexUncontended_PaddedRWMutex /*dyn*/ {
     public partial ref global::go.runtime_internal_test_package.RWMutex RWMutex { get; }
     internal array<uint32> pad = new(32);
 }

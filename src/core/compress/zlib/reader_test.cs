@@ -10,7 +10,7 @@ using static go.compress.zlib_package;
 
 partial class zlib_internal_test_package {
 
-[GoType] internal partial struct zlibTest {
+internal partial struct zlibTest {
     internal @string desc;
     internal @string raw;
     internal slice<byte> compressed;

@@ -26,7 +26,7 @@ public static partial void TestCastagnoliRace(ж<testing.T> Ꮡt) {
     ieee.Write(slice<byte>("hello"u8));
 }
 
-[GoType] internal partial struct test {
+internal partial struct test {
     internal uint32 ieee, castagnoli;
     internal @string @in;
     internal @string halfStateIEEE; // IEEE marshaled hash state after first half of in written, used by TestGoldenMarshal

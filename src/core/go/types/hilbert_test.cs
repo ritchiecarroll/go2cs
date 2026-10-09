@@ -68,7 +68,7 @@ func main() {
     return Ꮡg.of(gen.ᏑBuffer).Bytes();
 }
 
-[GoType] partial struct gen {
+partial struct gen {
     public partial ref bytes_package.Buffer Buffer { get; }
 }
 

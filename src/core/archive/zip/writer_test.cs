@@ -27,7 +27,7 @@ using static go.archive.zip_package;
 partial class zip_internal_test_package {
 
 // TODO(adg): a more sophisticated test suite
-[GoType] public partial struct WriteTest {
+public partial struct WriteTest {
     public @string Name;
     public slice<byte> Data;
     public uint16 Method;
@@ -126,7 +126,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestWriterComment_tests {
+internal partial struct TestWriterComment_tests /*dyn*/ {
     internal @string comment;
     internal bool ok;
 }
@@ -178,7 +178,7 @@ public static void TestWriterComment(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestWriterUTF8_utf8Tests {
+internal partial struct TestWriterUTF8_utf8Tests /*dyn*/ {
     internal @string name;
     internal @string comment;
     internal bool nonUTF8;
@@ -343,8 +343,8 @@ public static void TestWriterOffset(ж<testing.T> Ꮡt) {
 internal static readonly @string fooˢ = "foo"u8;
 internal static readonly object noBytesWrittenAfterFlushˢ = (@string)"No bytes written after Flush"u8;
 
-[GoType("dyn")] internal partial struct TestWriterFlush_w {
-    [GoEmbedded] public io_package.Writer Writer;
+internal partial struct TestWriterFlush_w /*dyn*/ {
+    /*embed*/ public io_package.Writer Writer;
 }
 
 public static void TestWriterFlush(ж<testing.T> Ꮡt) {
@@ -487,7 +487,7 @@ public static void TestWriterCopy(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestWriterCreateRaw_files {
+internal partial struct TestWriterCreateRaw_files /*dyn*/ {
     internal @string name;
     internal slice<byte> content;
     internal uint16 method;

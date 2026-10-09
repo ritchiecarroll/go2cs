@@ -132,7 +132,7 @@ internal static slice<byte> randBytes(ж<testing.T> Ꮡt, ж<rand.Rand> Ꮡr, ni
 
 internal static UntypedInt aesBlockSize => 16;
 
-[GoType] partial interface ctrAble {
+partial interface ctrAble {
     cipher.Stream NewCTR(slice<byte> iv);
 }
 

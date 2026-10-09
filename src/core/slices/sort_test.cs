@@ -77,11 +77,11 @@ public static void TestSortLarge_Random(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct intPair {
+partial struct intPair {
     internal nint a, b;
 }
 
-[GoType("[]intPair")] partial struct intPairs;
+partial struct intPairs /*[]intPair*/;
 
 // Pairs compare on a only.
 internal static nint intPairCmp(intPair x, intPair y) {
@@ -167,7 +167,7 @@ public static void TestStability(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct S {
+partial struct S {
     internal nint a;
     internal @string b;
 }
@@ -176,7 +176,7 @@ internal static nint cmpS(S s1, S s2) {
     return cmp.Compare(s1.a, s2.a);
 }
 
-[GoType("dyn")] internal partial struct TestMinMax_tests {
+internal partial struct TestMinMax_tests /*dyn*/ {
     internal slice<nint> data;
     internal nint wantMin;
     internal nint wantMax;
@@ -293,7 +293,7 @@ public static void TestMinMaxPanics(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestBinarySearch_tests {
+internal partial struct TestBinarySearch_tests /*dyn*/ {
     internal slice<@string> data;
     internal @string target;
     internal nint wantPos;
@@ -367,7 +367,7 @@ public static void TestBinarySearch(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestBinarySearchInts_tests {
+internal partial struct TestBinarySearchInts_tests /*dyn*/ {
     internal nint target;
     internal nint wantPos;
     internal bool wantFound;
@@ -405,7 +405,7 @@ public static void TestBinarySearchInts(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestBinarySearchFloats_tests {
+internal partial struct TestBinarySearchFloats_tests /*dyn*/ {
     internal float64 target;
     internal nint wantPos;
     internal bool wantFound;

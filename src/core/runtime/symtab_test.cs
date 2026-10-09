@@ -92,7 +92,7 @@ internal static nint lineVar2b = lineNumber();
 // 18
 
 // 19
-[GoType("dyn")] partial struct compLitᴛ1 {
+partial struct compLitᴛ1 /*dyn*/ {
     internal nint lineA, lineB; // 6
 }
 internal static slice<compLitᴛ1> compLit = new compLitᴛ1[]{
@@ -161,7 +161,7 @@ internal static void recordLines(nint a, nint b, nint c) {
     l40 = c;
 }
 
-[GoType("dyn")] internal partial struct TestLineNumber_type {
+internal partial struct TestLineNumber_type /*dyn*/ {
     internal @string name;
     internal nint val;
     internal nint want;

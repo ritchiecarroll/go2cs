@@ -32,7 +32,7 @@ using static go.encoding.base64_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/base64/base64_test.go", "base64_test.cs", "AB8yABQ2kqiSgoKokqiS7JSCAAgQAAwayqKCgoKU5oKCgoKCgsqCgoKCgoIACQiCgoKCgoKCgpSCgpSCggANCIKCgoKCgoKChIKChIKChIKCgoIACwyCgoKCgoKUgoKClOiCgoKCgoKCgoKUgpQADQiCABk6goKCgoKUlJTE2qKCgoKAgraCgrQACASCAA0mlIKkgqSCgIIACwqCAAoglIKkgqSCgIIACAqCgoKCgpSCgoKClIKClIKCloKCgoKm6ISSAAwagoKCgpSAggARIoKCgpSCgtiSgoKCgoLIgqKClLSCxgAZCIIAACCEgoKCloKCgoKWguiCgoKClIL4goKCgpSCgpSCgriigoKCuIKCgoKCgoKmgpLKooKCgoL6goKWgoKogoKCqIKCgg==", "269-273:1;442-445:1;530-537:1;539-541:2")]
+[assembly: go.GoPositionMap("encoding/base64/base64_test.go", "base64_test.cs", "AB8yABQ2kqiSgoKokqiS7JSCAAgQAAwayqKCgoKU5oKCgoKCgsqCgoKCgoIACQiCgoKCgoKCgpSCgpSCggANCIKCgoKCgoKChIKChIKChIKCgoIACwyCgoKCgoKUgoKClOiCgoKCgoKCgoKUgpQADQiCABk6goKCgoKUlJTE2qKCgoKAgraCgrQACASCAA0mlIKkgqSCgIIACwqCAAoglIKkgqSCgIIACAqCgoKCgpSCgoKClIKClIKCloKCgoKm6ISSAAwagoKCgpSAggARIoKCgpSCgtiSgoKCgoLIgqKClLSCxgAZCIIAACCEgoKCloKCgoKWguiCgoKClIL4goKCgpSCgpSCgriigoKCuIKCgoKCgoKmgpLKooKCgoL6goKWgoKogoKCqIKCgg==", "269-273:1;442-445:1;530-537:1;539-541:2", "", "91=Strict/1/5/6,Strict/2/5/7,Strict/3/5/8,Strict/4/5/9,Strict/5/5/10")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -41,12 +41,14 @@ namespace go.encoding;
 public static partial class base64_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
 
     // <TypeAccessibility>
+    [GoLocalName("test")] partial struct TestDecodedLen_test {}
+    [GoLocalName("test")] partial struct TestEncodedLen_test {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

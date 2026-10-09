@@ -68,7 +68,7 @@ public static void TestNextStdChunk(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct TimeFormatTest {
+partial struct TimeFormatTest {
     internal Δtime.Time time;
     internal @string formattedValue;
 }
@@ -92,7 +92,7 @@ public static void TestRFC3339Conversion(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAppendInt_tests {
+internal partial struct TestAppendInt_tests /*dyn*/ {
     internal nint @in;
     internal nint width;
     internal @string want;
@@ -139,7 +139,7 @@ public static void TestAppendInt(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct FormatTest {
+partial struct FormatTest {
     internal @string name;
     internal @string format;
     internal @string result;
@@ -191,7 +191,7 @@ public static void TestFormat(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct goStringTestsᴛ1 {
+partial struct goStringTestsᴛ1 /*dyn*/ {
     internal Δtime.Time @in;
     internal @string want;
 }
@@ -258,7 +258,7 @@ public static void TestFormatShortYear(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct ParseTest {
+partial struct ParseTest {
     internal @string name;
     internal @string format;
     internal @string value;
@@ -370,7 +370,7 @@ public static void TestParse(ж<Δtesting.T> Ꮡt) {
 
 // All parsed with ANSIC.
 
-[GoType("dyn")] partial struct dayOutOfRangeTestsᴛ1 {
+partial struct dayOutOfRangeTestsᴛ1 /*dyn*/ {
     internal @string date;
     internal bool ok;
 }
@@ -614,7 +614,7 @@ public static void TestFormatAndParse(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct ParseTimeZoneTest {
+partial struct ParseTimeZoneTest {
     internal @string value;
     internal nint length;
     internal bool ok;
@@ -672,7 +672,7 @@ public static void TestParseTimeZone(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct ParseErrorTest {
+partial struct ParseErrorTest {
     internal @string format;
     internal @string value;
     internal @string expect; // must appear within the error
@@ -838,7 +838,7 @@ public static void TestMinutesInTimeZone(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct SecondsTimeZoneOffsetTest {
+partial struct SecondsTimeZoneOffsetTest {
     internal @string format;
     internal @string value;
     internal nint expectedoffset;
@@ -911,7 +911,7 @@ public static void TestUnderscoreTwoThousand(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string cannotParseˢ = "cannot parse"u8;
 
-[GoType("dyn")] internal partial struct TestStd0xParseError_tests {
+internal partial struct TestStd0xParseError_tests /*dyn*/ {
     internal @string format, value, valueElemPrefix;
 }
 
@@ -939,7 +939,7 @@ public static void TestStd0xParseError(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct monthOutOfRangeTestsᴛ1 {
+partial struct monthOutOfRangeTestsᴛ1 /*dyn*/ {
     internal @string value;
     internal bool ok;
 }
@@ -989,7 +989,7 @@ public static void TestParseYday(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestQuote_tests {
+internal partial struct TestQuote_tests /*dyn*/ {
     internal @string s, want;
 }
 
@@ -1013,7 +1013,7 @@ public static void TestQuote(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFormatFractionalSecondSeparators_tests {
+internal partial struct TestFormatFractionalSecondSeparators_tests /*dyn*/ {
     internal @string s, want;
 }
 
@@ -1042,7 +1042,7 @@ public static void TestFormatFractionalSecondSeparators(ж<Δtesting.T> Ꮡt) {
 // 12 digits, truncates
 // 15 digits, truncates
 
-[GoType("dyn")] partial struct longFractionalDigitsTestsᴛ1 {
+partial struct longFractionalDigitsTestsᴛ1 /*dyn*/ {
     internal @string value;
     internal nint want;
 }

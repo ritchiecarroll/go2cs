@@ -17,7 +17,7 @@ using static go.path.filepath_internal_test_package;
 
 partial class filepath_test_package {
 
-[GoType] partial struct MatchTest {
+partial struct MatchTest {
     internal @string pattern, s;
     internal bool match;
     internal error err;
@@ -112,7 +112,7 @@ public static void TestMatch(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct globTestsᴛ1 {
+partial struct globTestsᴛ1 /*dyn*/ {
     internal @string pattern, result;
 }
 internal static slice<globTestsᴛ1> globTests = new globTestsᴛ1[]{
@@ -179,7 +179,7 @@ public static void TestGlobUNC(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct globSymlinkTestsᴛ1 {
+partial struct globSymlinkTestsᴛ1 /*dyn*/ {
     internal @string path, dest;
     internal bool brokenLink;
 }
@@ -221,12 +221,12 @@ public static void TestGlobSymlink(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct globTest {
+partial struct globTest {
     internal @string pattern;
     internal slice<@string> matches;
 }
 
-[GoRecv] internal static slice<@string> buildWant(this ref globTest test, @string root) {
+internal static slice<@string> buildWant(this ref globTest test, @string root) {
     var want = new slice<@string>(0);
     foreach (var (_, m) in test.matches) {
         want = append(want, root + FromSlash(m));
@@ -235,7 +235,7 @@ public static void TestGlobSymlink(ж<testing.T> Ꮡt) {
     return want;
 }
 
-[GoRecv] internal static error globAbs(this ref globTest test, @string root, @string rootPattern) {
+internal static error globAbs(this ref globTest test, @string root, @string rootPattern) {
     @string p = FromSlash(rootPattern + @"\"u8 + test.pattern);
     var (have, err) = Glob(p);
     if (err != default!) {
@@ -249,7 +249,7 @@ public static void TestGlobSymlink(ж<testing.T> Ꮡt) {
     return fmt.Errorf("Glob(%q) returns %q, but %q expected"u8, p, have, want);
 }
 
-[GoRecv] internal static error globRel(this ref globTest test, @string root) {
+internal static error globRel(this ref globTest test, @string root) {
     @string p = root + FromSlash(test.pattern);
     var (have, err) = Glob(p);
     if (err != default!) {

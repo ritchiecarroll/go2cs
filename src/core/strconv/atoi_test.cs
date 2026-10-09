@@ -13,7 +13,7 @@ using strconv = strconv_package;
 
 partial class strconv_test_package {
 
-[GoType] partial struct parseUint64Test {
+partial struct parseUint64Test {
     internal @string @in;
     internal uint64 @out;
     internal error err;
@@ -41,7 +41,7 @@ internal static ж<slice<parseUint64Test>> ᏑparseUint64Tests = new StandardBox
 }.slice());
 internal static ref slice<parseUint64Test> parseUint64Tests => ref ᏑparseUint64Tests.ValueSlot;
 
-[GoType] partial struct parseUint64BaseTest {
+partial struct parseUint64BaseTest {
     internal @string @in;
     internal nint @base;
     internal uint64 @out;
@@ -137,7 +137,7 @@ internal static ж<slice<parseUint64BaseTest>> ᏑparseUint64BaseTests = new Sta
 }.slice());
 internal static ref slice<parseUint64BaseTest> parseUint64BaseTests => ref ᏑparseUint64BaseTests.ValueSlot;
 
-[GoType] partial struct parseInt64Test {
+partial struct parseInt64Test {
     internal @string @in;
     internal int64 @out;
     internal error err;
@@ -173,7 +173,7 @@ internal static ж<slice<parseInt64Test>> ᏑparseInt64Tests = new StandardBox<s
 }.slice());
 internal static ref slice<parseInt64Test> parseInt64Tests => ref ᏑparseInt64Tests.ValueSlot;
 
-[GoType] partial struct parseInt64BaseTest {
+partial struct parseInt64BaseTest {
     internal @string @in;
     internal nint @base;
     internal int64 @out;
@@ -251,7 +251,7 @@ internal static ж<slice<parseInt64BaseTest>> ᏑparseInt64BaseTests = new Stand
 }.slice());
 internal static ref slice<parseInt64BaseTest> parseInt64BaseTests => ref ᏑparseInt64BaseTests.ValueSlot;
 
-[GoType] partial struct parseUint32Test {
+partial struct parseUint32Test {
     internal @string @in;
     internal uint32 @out;
     internal error err;
@@ -276,7 +276,7 @@ internal static ж<slice<parseUint32Test>> ᏑparseUint32Tests = new StandardBox
 }.slice());
 internal static ref slice<parseUint32Test> parseUint32Tests => ref ᏑparseUint32Tests.ValueSlot;
 
-[GoType] partial struct parseInt32Test {
+partial struct parseInt32Test {
     internal @string @in;
     internal int32 @out;
     internal error err;
@@ -312,7 +312,7 @@ internal static ж<slice<parseInt32Test>> ᏑparseInt32Tests = new StandardBox<s
 }.slice());
 internal static ref slice<parseInt32Test> parseInt32Tests => ref ᏑparseInt32Tests.ValueSlot;
 
-[GoType] partial struct numErrorTest {
+partial struct numErrorTest {
     internal @string num, want;
 }
 
@@ -524,7 +524,7 @@ internal static error noErrStub(@string name, nint arg) {
     return default!;
 }
 
-[GoType] partial struct parseErrorTest {
+partial struct parseErrorTest {
     internal nint arg;
     internal Func<@string, nint, error> errStub;
 }
@@ -652,7 +652,7 @@ public static void BenchmarkParseInt(ж<testing.B> Ꮡb) {
     });
 }
 
-[GoType] partial struct benchCase {
+partial struct benchCase {
     internal @string name;
     internal int64 num;
 }

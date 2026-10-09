@@ -68,14 +68,14 @@ internal static void wrapperMain() {
     }
 }
 
-[GoType] internal partial struct request {
+internal partial struct request {
     internal @string name;
     internal slice<slice<byte>> args;
 }
 
 // type commandHandler is a methodless func type — rendered inline as its base delegate
 
-[GoType] internal partial struct command {
+internal partial struct command {
     // requiredArgs enforces that an exact number of arguments are provided to the handler.
     internal nint requiredArgs;
     internal Func<slice<slice<byte>>, (slice<slice<byte>>, error)> handler;

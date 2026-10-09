@@ -26,7 +26,7 @@ using static go.net_package;
 partial class net_internal_test_package {
 
 
-[GoType("dyn")] partial struct prohibitionaryDialArgTestsᴛ1 {
+partial struct prohibitionaryDialArgTestsᴛ1 /*dyn*/ {
     internal @string network;
     internal @string address;
 }
@@ -219,7 +219,7 @@ internal static readonly @string tcp6ˢ = "tcp6"u8;
 internal static readonly @string tcp4ˢ = "tcp4"u8;
 internal static readonly @string unreachableˢ = "unreachable"u8;
 
-[GoType("dyn")] internal partial struct TestDialParallel_type {
+internal partial struct TestDialParallel_type /*dyn*/ {
     internal slice<@string> primaries;
     internal slice<@string> fallbacks;
     internal @string teardownNetwork;
@@ -366,7 +366,7 @@ internal static (slice<global::go.net_package.IPAddr>, error) lookupSlowFast(con
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string slow6loopback4ˢ = "slow6loopback4"u8;
 
-[GoType("dyn")] internal partial struct TestDialerFallbackDelay_type {
+internal partial struct TestDialerFallbackDelay_type /*dyn*/ {
     internal bool dualstack;
     internal time.Duration delay;
     internal time.Duration expectElapsed;
@@ -551,7 +551,7 @@ public static void TestDialParallelSpuriousConnection(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestDialerPartialDeadline_type {
+internal partial struct TestDialerPartialDeadline_type /*dyn*/ {
     internal time.Time now;
     internal time.Time deadline;
     internal nint addrs;
@@ -591,10 +591,10 @@ public static void TestDialerPartialDeadline(ж<testing.T> Ꮡt) {
 // isEADDRINUSE reports whether err is syscall.EADDRINUSE.
 internal static Func<error, bool> isEADDRINUSE = (error err) => false;
 
-[GoType("dyn")] [GoLocalName("test")] internal partial struct TestDialerLocalAddr_test {
+internal partial struct TestDialerLocalAddr_test /*dyn*/ {
     internal @string network, raddr;
     internal global::go.net_package.ΔAddr laddr;
-    [GoEmbedded] internal error error;
+    /*embed*/ internal error error;
 }
 
 public static void TestDialerLocalAddr(ж<testing.T> Ꮡt) {
@@ -787,7 +787,7 @@ public static void TestDialerDualStack(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestDialerKeepAlive_tests {
+internal partial struct TestDialerKeepAlive_tests /*dyn*/ {
     internal time.Duration ka;
     internal time.Duration expected;
 }
@@ -1277,8 +1277,8 @@ internal static void mustHaveExternalNetwork(ж<testing.T> Ꮡt) {
     testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
 }
 
-[GoType] internal partial struct contextWithNonZeroDeadline {
-    [GoEmbedded] public context_package.Context Context;
+internal partial struct contextWithNonZeroDeadline {
+    /*embed*/ public context_package.Context Context;
 }
 
 internal static (time.Time, bool) Deadline(this contextWithNonZeroDeadline _) {

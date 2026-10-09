@@ -651,7 +651,7 @@ public static partial void TestSelectFairness(ж<testing.T> Ꮡt) {
     Ꮡwg.Wait();
 }
 
-[GoType("dyn")] internal partial struct TestChanSendInterface_mt {
+internal partial struct TestChanSendInterface_mt /*dyn*/ {
 }
 
 public static void TestChanSendInterface(ж<testing.T> Ꮡt) {
@@ -987,7 +987,7 @@ public static partial void TestSelectStackAdjust(ж<testing.T> Ꮡt) {
     ᐸꟷ(ready2);
 }
 
-[GoType] partial struct struct0 {
+partial struct struct0 {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1469,7 +1469,7 @@ public static void BenchmarkChanCreation(ж<testing.B> Ꮡb) {
     });
 }
 
-[GoType("dyn")] internal partial struct BenchmarkChanSem_Empty {
+internal partial struct BenchmarkChanSem_Empty /*dyn*/ {
 }
 
 public static void BenchmarkChanSem(ж<testing.B> Ꮡb) {

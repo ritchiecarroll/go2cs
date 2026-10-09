@@ -21,7 +21,7 @@ using static go.mime.quotedprintable_package;
 
 partial class quotedprintable_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestReader_tests {
+internal partial struct TestReader_tests /*dyn*/ {
     internal @string @in, want;
     internal any err;
 }

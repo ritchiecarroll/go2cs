@@ -208,7 +208,7 @@ public static void TestTimerFromOutsideBubble(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestChannelFromOutsideBubble_type {
+internal partial struct TestChannelFromOutsideBubble_type /*dyn*/ {
     internal @string desc;
     internal Action<channel<nint>> outside;
     internal Action<channel<nint>> inside;
@@ -298,7 +298,7 @@ public static void TestChannelFromOutsideBubble(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestTimerFromInsideBubble_type {
+internal partial struct TestTimerFromInsideBubble_type /*dyn*/ {
     internal @string desc;
     internal Action<ж<time.Timer>> f;
     internal @string wantPanic;

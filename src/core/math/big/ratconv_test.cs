@@ -21,7 +21,7 @@ partial class big_internal_test_package {
 // invalid: no digits
 // invalid: incorrect use of separator
 
-[GoType("dyn")] partial struct exponentTestsᴛ1 {
+partial struct exponentTestsᴛ1 /*dyn*/ {
     internal @string s; // string to be scanned
     internal bool base2ok;   // true if 'p'/'P' exponents are accepted
     internal bool sepOk;   // true if '_' separators are accepted
@@ -87,7 +87,7 @@ public static void TestScanExponent(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct StringTest {
+public partial struct StringTest {
     internal @string @in, @out;
     internal bool ok;
 }
@@ -237,7 +237,7 @@ public static void TestRatScan(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct floatStringTestsᴛ1 {
+partial struct floatStringTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal nint prec;
     internal @string @out;
@@ -601,7 +601,7 @@ public static void TestIssue31184(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIssue45910_type {
+internal partial struct TestIssue45910_type /*dyn*/ {
     internal @string input;
     internal bool want;
 }
@@ -628,7 +628,7 @@ public static void TestIssue45910(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatPrec_type {
+internal partial struct TestFloatPrec_type /*dyn*/ {
     internal @string f;
     internal nint prec;
     internal bool ok;

@@ -11,7 +11,7 @@ using static go.hash.crc64_package;
 
 partial class crc64_internal_test_package {
 
-[GoType] internal partial struct test {
+internal partial struct test {
     internal uint64 outISO;
     internal uint64 outECMA;
     internal @string @in;

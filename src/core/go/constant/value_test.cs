@@ -342,7 +342,7 @@ internal static @string issue14262 = @"""بموجب الشروط التالية 
 // issue #20228
 // Complex
 
-[GoType("dyn")] partial struct stringTestsᴛ1 {
+partial struct stringTestsᴛ1 /*dyn*/ {
     internal @string input, @short, exact;
 }
 internal static slice<stringTestsᴛ1> stringTests = new stringTestsᴛ1[]{
@@ -647,7 +647,7 @@ public static void TestMakeFloat64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct makeTestCase {
+internal partial struct makeTestCase {
     internal global::go.go.constant_package.ΔKind kind;
     internal any arg, want;
 }
@@ -699,7 +699,7 @@ public static void BenchmarkStringAdd(ж<testing.B> Ꮡb) {
 }
 
 
-[GoType("dyn")] partial struct bitLenTestsᴛ1 {
+partial struct bitLenTestsᴛ1 /*dyn*/ {
     internal int64 val;
     internal nint want;
 }

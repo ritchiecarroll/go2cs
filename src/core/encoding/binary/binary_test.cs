@@ -18,7 +18,7 @@ using static go.encoding.binary_package;
 
 partial class binary_internal_test_package {
 
-[GoType] [GoValueClone("Array", "BoolArray")] public partial struct Struct {
+public partial struct Struct {
     public int8 Int8;
     public int16 Int16;
     public int32 Int32;
@@ -36,7 +36,7 @@ partial class binary_internal_test_package {
     public array<bool> BoolArray = new(4);
 }
 
-[GoType] [GoValueClone("Array")] public partial struct T {
+public partial struct T {
     public nint Int;
     public nuint Uint;
     public uintptr Uintptr;
@@ -120,7 +120,7 @@ internal static void checkResult(ж<testing.T> Ꮡt, @string dir, global::go.enc
 }
 
 
-[GoType("dyn")] partial struct encodersᴛ1 {
+partial struct encodersᴛ1 /*dyn*/ {
     internal @string name;
     internal Func<global::go.encoding.binary_package.ByteOrder, any, (slice<byte>, error)> fn;
 }
@@ -155,7 +155,7 @@ internal static void initᴛencoders() { encoders = new encodersᴛ1[]{
 }.slice(); }
 
 
-[GoType("dyn")] partial struct decodersᴛ1 {
+partial struct decodersᴛ1 /*dyn*/ {
     internal @string name;
     internal Func<global::go.encoding.binary_package.ByteOrder, any, slice<byte>, error> fn;
 }
@@ -390,11 +390,11 @@ public static void TestWriteT(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoValueClone("f")] partial struct BlankFields__ {
+partial struct BlankFields__ /*dyn*/ {
     internal array<float32> f = new(8);
 }
 
-[GoType] public partial struct BlankFields {
+public partial struct BlankFields {
     public uint32 A;
     internal int32 _;
     public float64 B;
@@ -404,11 +404,11 @@ public static void TestWriteT(ж<testing.T> Ꮡt) {
     internal BlankFields__ ____;
 }
 
-[GoType("dyn")] [GoValueClone("F")] partial struct BlankFieldsProbe_P3 {
+partial struct BlankFieldsProbe_P3 /*dyn*/ {
     public array<float32> F = new(8);
 }
 
-[GoType] [GoValueClone("P1", "P2", "P3")] public partial struct BlankFieldsProbe {
+public partial struct BlankFieldsProbe {
     public uint32 A;
     public int32 P0;
     public float64 B;
@@ -461,22 +461,22 @@ public static void TestBlankFields(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("foo")] internal partial struct TestSizeStructCache_foo {
+internal partial struct TestSizeStructCache_foo /*dyn*/ {
     public uint32 A;
 }
 
-[GoType("dyn")] [GoLocalName("bar")] [GoValueClone("A", "C")] internal partial struct TestSizeStructCache_bar {
+internal partial struct TestSizeStructCache_bar /*dyn*/ {
     public Struct A;
     public TestSizeStructCache_foo B;
     public Struct C;
 }
 
-[GoType("dyn")] internal partial struct TestSizeStructCache_testcases {
+internal partial struct TestSizeStructCache_testcases /*dyn*/ {
     internal any val;
     internal nint want;
 }
 
-[GoType("dyn")] [GoValueClone("A")] internal partial struct TestSizeStructCache_type {
+internal partial struct TestSizeStructCache_type /*dyn*/ {
     public Struct A;
 }
 
@@ -560,7 +560,7 @@ public static void TestSizeInvalid(ж<testing.T> Ꮡt) {
 // An attempt to read into a struct with an unexported field will
 // panic. This is probably not the best choice, but at this point
 // anything else would be an API change.
-[GoType] public partial struct Unexported {
+public partial struct Unexported {
     internal int32 a;
 }
 
@@ -633,7 +633,7 @@ public static void TestReadErrorMsg(ж<testing.T> Ꮡt) {
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string dataᶜ = "0123456789abcdef"u8;
 
-[GoType("dyn")] internal partial struct TestReadTruncated_b2 {
+internal partial struct TestReadTruncated_b2 /*dyn*/ {
     public byte A, B, C, D;
     public int32 E;
     public float64 F;
@@ -703,7 +703,7 @@ internal static bool /*panicked*/ testPutUint64SmallSliceLengthPanics() {
     return panicked;
 }
 
-[GoType("dyn")] [GoLocalName("byteOrder")] internal partial interface TestByteOrder_byteOrder :
+internal partial interface TestByteOrder_byteOrder /*dyn*/ :
     ByteOrder,
     AppendByteOrder
 {
@@ -811,7 +811,7 @@ internal static void testReadInvalidDestination(ж<testing.T> Ꮡt, global::go.e
     }
 }
 
-[GoType("dyn")] [GoLocalName("Person")] internal partial struct TestNoFixedSize_Person {
+internal partial struct TestNoFixedSize_Person /*dyn*/ {
     public nint Age;
     public float64 Weight;
     public float64 Height;
@@ -906,11 +906,11 @@ public static void TestSizeAllocs(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct byteSliceReader {
+internal partial struct byteSliceReader {
     internal slice<byte> remain;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref byteSliceReader br, slice<byte> p) {
+internal static (nint, error) Read(this ref byteSliceReader br, slice<byte> p) {
     nint n = copy(p, br.remain);
     br.remain = br.remain.slice(n);
     return (n, default!);

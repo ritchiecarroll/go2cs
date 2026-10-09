@@ -128,7 +128,7 @@ public static void TestNISTECAllocations(ж<testing.T> Ꮡt) {
     });
 }
 
-[GoType] internal partial interface nistPoint<T> {
+internal partial interface nistPoint<T> {
     slice<byte> Bytes();
     T SetGenerator();
     (T, error) SetBytes(slice<byte> _Δp0);

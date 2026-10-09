@@ -32,7 +32,7 @@ internal static int64 int64(this ж<global::go.math.big_package.Float> Ꮡx) {
     return i;
 }
 
-[GoType("dyn")] internal partial struct TestFloatZeroValue_type {
+internal partial struct TestFloatZeroValue_type /*dyn*/ {
     internal nint z, x, y, want;
     internal rune opname;
     internal Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>> op;
@@ -101,7 +101,7 @@ internal static ж<global::go.math.big_package.Float> makeFloat(@string s) {
     return x;
 }
 
-[GoType("dyn")] internal partial struct TestFloatSetPrec_type {
+internal partial struct TestFloatSetPrec_type /*dyn*/ {
     internal @string x;
     internal nuint prec;
     internal @string want;
@@ -147,7 +147,7 @@ public static void TestFloatSetPrec(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatMinPrec_type {
+internal partial struct TestFloatMinPrec_type /*dyn*/ {
     internal @string x;
     internal nuint want;
 }
@@ -176,7 +176,7 @@ public static void TestFloatMinPrec(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatSign_type {
+internal partial struct TestFloatSign_type /*dyn*/ {
     internal @string x;
     internal nint s;
 }
@@ -216,7 +216,7 @@ internal static bool alike64(float64 x, float64 y) {
     return x == y && math.Signbit(x) == math.Signbit(y);
 }
 
-[GoType("dyn")] internal partial struct TestFloatMantExp_type {
+internal partial struct TestFloatMantExp_type /*dyn*/ {
     internal @string x;
     internal @string mant;
     internal nint exp;
@@ -258,7 +258,7 @@ public static void TestFloatMantExpAliasing(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatSetMantExp_type {
+internal partial struct TestFloatSetMantExp_type /*dyn*/ {
     internal @string frac;
     internal nint exp;
     internal @string z;
@@ -302,7 +302,7 @@ public static void TestFloatSetMantExp(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatPredicates_type {
+internal partial struct TestFloatPredicates_type /*dyn*/ {
     internal @string x;
     internal nint sign;
     internal bool signbit, inf;
@@ -465,7 +465,7 @@ internal static void testFloatRound(ж<testing.T> Ꮡt, int64 x, int64 r, nuint 
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatRound_type {
+internal partial struct TestFloatRound_type /*dyn*/ {
     internal nuint prec;
     internal @string x, zero, neven, naway, away; // input, results rounded to prec bits
 }
@@ -780,7 +780,7 @@ public static void TestFloatSetRat(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatSetInf_type {
+internal partial struct TestFloatSetInf_type /*dyn*/ {
     internal bool signbit;
     internal nuint prec;
     internal @string want;
@@ -803,7 +803,7 @@ public static void TestFloatSetInf(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatUint64_type {
+internal partial struct TestFloatUint64_type /*dyn*/ {
     internal @string x;
     internal uint64 @out;
     internal global::go.math.big_package.Accuracy acc;
@@ -835,7 +835,7 @@ public static void TestFloatUint64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatInt64_type {
+internal partial struct TestFloatInt64_type /*dyn*/ {
     internal @string x;
     internal int64 @out;
     internal global::go.math.big_package.Accuracy acc;
@@ -877,7 +877,7 @@ public static void TestFloatInt64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatFloat32_type {
+internal partial struct TestFloatFloat32_type /*dyn*/ {
     internal @string x;
     internal float32 @out;
     internal global::go.math.big_package.Accuracy acc;
@@ -1006,7 +1006,7 @@ public static void TestFloatFloat32(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatFloat64_type {
+internal partial struct TestFloatFloat64_type /*dyn*/ {
     internal @string x;
     internal float64 @out;
     internal global::go.math.big_package.Accuracy acc;
@@ -1126,7 +1126,7 @@ public static void TestFloatFloat64(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string nilˢ2 = "nil"u8;
 
-[GoType("dyn")] internal partial struct TestFloatInt_type {
+internal partial struct TestFloatInt_type /*dyn*/ {
     internal @string x;
     internal @string want;
     internal global::go.math.big_package.Accuracy acc;
@@ -1174,7 +1174,7 @@ public static void TestFloatInt(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatRat_type {
+internal partial struct TestFloatRat_type /*dyn*/ {
     internal @string x, want;
     internal global::go.math.big_package.Accuracy acc;
 }
@@ -1442,7 +1442,7 @@ public static void TestFloatAdd64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIssue20490_type {
+internal partial struct TestIssue20490_type /*dyn*/ {
     internal float64 a, b;
 }
 
@@ -1507,7 +1507,7 @@ public static void TestFloatMul(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatMul64_type {
+internal partial struct TestFloatMul64_type /*dyn*/ {
     internal float64 x, y;
 }
 
@@ -1768,7 +1768,7 @@ public static void TestFloatArithmeticSpecialValues(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatArithmeticOverflow_type {
+internal partial struct TestFloatArithmeticOverflow_type /*dyn*/ {
     internal nuint prec;
     internal global::go.math.big_package.RoundingMode mode;
     internal byte op;
@@ -1852,7 +1852,7 @@ public static void TestFloatArithmeticOverflow(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatArithmeticRounding_type {
+internal partial struct TestFloatArithmeticRounding_type /*dyn*/ {
     internal global::go.math.big_package.RoundingMode mode;
     internal nuint prec;
     internal int64 x, y, want;

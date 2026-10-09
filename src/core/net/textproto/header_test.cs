@@ -8,7 +8,7 @@ using static go.net.textproto_package;
 
 partial class textproto_internal_test_package {
 
-[GoType] internal partial struct canonicalHeaderKeyTest {
+internal partial struct canonicalHeaderKeyTest {
     internal @string @in, @out;
 }
 

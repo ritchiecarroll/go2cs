@@ -40,7 +40,7 @@ internal static slice<slice<byte>> collect(ж<testing.T> Ꮡt, iter.Seq<slice<by
     return @out;
 }
 
-[GoType] partial struct LinesTest {
+partial struct LinesTest {
     internal @string a;
     internal slice<@string> b;
 }
@@ -72,7 +72,7 @@ internal static @string commas = "1,2,3,4"u8;
 
 internal static @string dots = "1....2....3....4"u8;
 
-[GoType] partial struct BinOpTest {
+partial struct BinOpTest {
     internal @string a;
     internal @string b;
     internal nint i;
@@ -264,7 +264,7 @@ internal static slice<BinOpTest> lastIndexAnyTests = new BinOpTest[]{
     new(((@string)(new byte[]{0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0xcf, 0x80, 0x61, 0x62, 0x63})), ((@string)(new byte[]{0xcf, 0x62, 0x80})), 10)
 }.slice();
 
-[GoType("dyn")] internal partial struct runIndexTests_type {
+internal partial struct runIndexTests_type /*dyn*/ {
     internal slice<byte> a;
     internal slice<byte> b;
     internal nint i;
@@ -470,7 +470,7 @@ public static void TestIndexByteSmall(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIndexRune_tests {
+internal partial struct TestIndexRune_tests /*dyn*/ {
     internal @string @in;
     internal rune rune;
     internal nint want;
@@ -967,7 +967,7 @@ public static void BenchmarkCountSingle(ж<testing.B> Ꮡb) {
     });
 }
 
-[GoType] partial struct SplitTest {
+partial struct SplitTest {
     internal @string s;
     internal @string sep;
     internal nint n;
@@ -1096,7 +1096,7 @@ public static void TestSplitAfter(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct FieldsTest {
+partial struct FieldsTest {
     internal @string s;
     internal slice<@string> a;
 }
@@ -1193,7 +1193,7 @@ public static void TestFieldsFunc(ж<testing.T> Ꮡt) {
 
 // Test case for any function which accepts and returns a byte slice.
 // For ease of creation, we write the input byte slice as a string.
-[GoType] partial struct StringTest {
+partial struct StringTest {
     internal @string @in;
     internal slice<byte> @out;
 }
@@ -1395,7 +1395,7 @@ public static void BenchmarkToLower(ж<testing.B> Ꮡb) {
 }
 
 
-[GoType("dyn")] partial struct toValidUTF8Testsᴛ1 {
+partial struct toValidUTF8Testsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string repl;
     internal @string @out;
@@ -1433,7 +1433,7 @@ public static void TestTrimSpace(ж<testing.T> Ꮡt) {
     runStringTests(Ꮡt, TrimSpace, trimSpaceˢ, trimSpaceTests);
 }
 
-[GoType] partial struct RepeatTest {
+partial struct RepeatTest {
     internal @string @in, @out;
     internal nint count;
 }
@@ -1495,7 +1495,7 @@ internal static error /*err*/ repeat(slice<byte> b, nint count) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string bitˢ = "64-bit"u8;
 
-[GoType("dyn")] internal partial struct TestRepeatCatchesOverflow_testCase {
+internal partial struct TestRepeatCatchesOverflow_testCase /*dyn*/ {
     internal @string s;
     internal nint count;
     internal @string errStr;
@@ -1536,7 +1536,7 @@ public static void TestRepeatCatchesOverflow(ж<testing.T> Ꮡt) {
     });
 }
 
-[GoType] partial struct RunesTest {
+partial struct RunesTest {
     internal @string @in;
     internal slice<rune> @out;
     internal bool lossy;
@@ -1572,7 +1572,7 @@ public static void TestRunes(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct TrimTest {
+partial struct TrimTest {
     internal @string f;
     internal @string @in, arg, @out;
 }
@@ -1610,7 +1610,7 @@ internal static slice<TrimTest> trimTests = new TrimTest[]{
     new("TrimSuffix"u8, "aabb"u8, "b"u8, "aab"u8)
 }.slice();
 
-[GoType] partial struct TrimNilTest {
+partial struct TrimNilTest {
     internal @string f;
     internal slice<byte> @in;
     internal @string arg;
@@ -1725,7 +1725,7 @@ public static void TestTrim(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct predicate {
+partial struct predicate {
     internal Func<rune, bool> f;
     internal @string name;
 }
@@ -1741,7 +1741,7 @@ internal static predicate isValidRune = new predicate(
     "IsValidRune"u8
 );
 
-[GoType] partial struct TrimFuncTest {
+partial struct TrimFuncTest {
     internal predicate f;
     internal @string @in;
     internal slice<byte> trimOut;
@@ -1798,7 +1798,7 @@ internal static slice<TrimFuncTest> trimFuncTests = new TrimFuncTest[]{
         slice<byte>(""u8))
 }.slice();
 
-[GoType("dyn")] internal partial struct TestTrimFunc_trimmers {
+internal partial struct TestTrimFunc_trimmers /*dyn*/ {
     internal @string name;
     internal Func<slice<byte>, Func<rune, bool>, slice<byte>> trim;
     internal slice<byte> @out;
@@ -1826,7 +1826,7 @@ public static void TestTrimFunc(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct IndexFuncTest {
+partial struct IndexFuncTest {
     internal @string @in;
     internal predicate f;
     internal nint first, last;
@@ -1866,7 +1866,7 @@ public static void TestIndexFunc(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct ReplaceTest {
+partial struct ReplaceTest {
     internal @string @in;
     internal @string old, @new;
     internal nint n;
@@ -1921,7 +1921,7 @@ public static void TestReplace(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct TitleTest {
+partial struct TitleTest {
     internal @string @in, @out;
 }
 
@@ -1968,7 +1968,7 @@ public static void TestToTitle(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct EqualFoldTestsᴛ1 {
+partial struct EqualFoldTestsᴛ1 /*dyn*/ {
     internal @string s, t;
     internal bool @out;
 }
@@ -2004,7 +2004,7 @@ public static void TestEqualFold(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct cutTestsᴛ1 {
+partial struct cutTestsᴛ1 /*dyn*/ {
     internal @string s, sep;
     internal @string before, after;
     internal bool found;
@@ -2031,7 +2031,7 @@ public static void TestCut(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct cutPrefixTestsᴛ1 {
+partial struct cutPrefixTestsᴛ1 /*dyn*/ {
     internal @string s, sep;
     internal @string after;
     internal bool found;
@@ -2056,7 +2056,7 @@ public static void TestCutPrefix(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct cutSuffixTestsᴛ1 {
+partial struct cutSuffixTestsᴛ1 /*dyn*/ {
     internal @string s, sep;
     internal @string before;
     internal bool found;
@@ -2142,7 +2142,7 @@ public static void TestBufferTruncateOutOfRange(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct containsTestsᴛ1 {
+partial struct containsTestsᴛ1 /*dyn*/ {
     internal slice<byte> b, subslice;
     internal bool want;
 }
@@ -2164,7 +2164,7 @@ public static void TestContains(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct ContainsAnyTestsᴛ1 {
+partial struct ContainsAnyTestsᴛ1 /*dyn*/ {
     internal slice<byte> b;
     internal @string substr;
     internal bool expected;
@@ -2193,7 +2193,7 @@ public static void TestContainsAny(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct ContainsRuneTestsᴛ1 {
+partial struct ContainsRuneTestsᴛ1 /*dyn*/ {
     internal slice<byte> b;
     internal rune r;
     internal bool expected;
@@ -2271,7 +2271,7 @@ internal static Func<slice<byte>> makeFieldsInputASCII = () => {
 };
 
 
-[GoType("dyn")] partial struct bytesdataᴛ1 {
+partial struct bytesdataᴛ1 /*dyn*/ {
     internal @string name;
     internal slice<byte> data;
 }
@@ -2326,7 +2326,7 @@ public static void BenchmarkFieldsFunc(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkTrimSpace_tests {
+internal partial struct BenchmarkTrimSpace_tests /*dyn*/ {
     internal @string name;
     internal slice<byte> input;
 }
@@ -2351,7 +2351,7 @@ public static void BenchmarkTrimSpace(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkToValidUTF8_tests {
+internal partial struct BenchmarkToValidUTF8_tests /*dyn*/ {
     internal @string name;
     internal slice<byte> input;
 }

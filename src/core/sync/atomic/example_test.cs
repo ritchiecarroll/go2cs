@@ -48,7 +48,7 @@ public static partial void ExampleValue_config() {
     }
 }
 
-[GoLocalName("Map")] [GoType("map[@string, @string]")] internal partial struct ExampleValue_readMostly_Map;
+internal partial struct ExampleValue_readMostly_Map /*map[@string, @string]*/;
 
 // The following example shows how to maintain a scalable frequently read,
 // but infrequently updated data structure using copy-on-write idiom.

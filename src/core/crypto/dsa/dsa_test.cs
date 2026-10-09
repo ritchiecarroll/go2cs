@@ -111,7 +111,7 @@ public static void TestSignAndVerifyWithBadPublicKey(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestSigningWithDegenerateKeys_badKeys {
+internal partial struct TestSigningWithDegenerateKeys_badKeys /*dyn*/ {
     internal @string p, q, g, y, x;
 }
 

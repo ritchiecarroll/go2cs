@@ -11,7 +11,7 @@ using static go.flag_internal_test_package;
 
 partial class flag_test_package {
 
-[GoType] partial struct URLValue {
+partial struct URLValue {
     public ж<url.URL> URL;
 }
 

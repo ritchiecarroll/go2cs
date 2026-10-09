@@ -10,7 +10,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class runtime_internal_test_package {
 
-[GoType] public partial interface TestingT {
+public partial interface TestingT {
     void Cleanup(Action _);
     void Error(params ꓸꓸꓸany argsʗp);
     void Errorf(@string format, params ꓸꓸꓸany argsʗp);

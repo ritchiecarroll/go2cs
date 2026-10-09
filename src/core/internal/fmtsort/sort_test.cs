@@ -94,7 +94,7 @@ public static void TestCompare(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct sortTest {
+partial struct sortTest {
     internal any data;    // Always a map.
     internal @string print; // Printed result using our custom printer.
 }
@@ -255,7 +255,7 @@ internal static map<channel<nint>, @string> chanMap() {
     return m;
 }
 
-[GoType] partial struct toy {
+partial struct toy {
     public nint A; // Exported.
     internal nint b; // Unexported.
 }
@@ -269,7 +269,7 @@ public static void TestOrder(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestInterface_type {
+internal partial struct TestInterface_type /*dyn*/ {
     internal nint x, y;
 }
 

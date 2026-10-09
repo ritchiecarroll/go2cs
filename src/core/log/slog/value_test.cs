@@ -90,7 +90,7 @@ internal static bool /*b*/ panics(Action f) {
     return b;
 }
 
-[GoType("dyn")] internal partial struct TestValueString_type {
+internal partial struct TestValueString_type /*dyn*/ {
     internal global::go.log.slog_package.Value v;
     internal @string want;
 }
@@ -174,7 +174,7 @@ public static void TestAnyLevelAlloc(ж<testing.T> Ꮡt) {
     _ = a;
 }
 
-[GoType("dyn")] internal partial struct TestAnyValue_type {
+internal partial struct TestAnyValue_type /*dyn*/ {
     internal any @in;
     internal global::go.log.slog_package.Value want;
 }
@@ -323,15 +323,15 @@ public static void TestEmptyGroup(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct replace {
+internal partial struct replace {
     internal global::go.log.slog_package.Value v;
 }
 
-[GoRecv] internal static global::go.log.slog_package.Value LogValue(this ref replace r) {
+internal static global::go.log.slog_package.Value LogValue(this ref replace r) {
     return r.v;
 }
 
-[GoType] internal partial struct panickingLogValue {
+internal partial struct panickingLogValue {
 }
 
 internal static global::go.log.slog_package.Value LogValue(this panickingLogValue _) {

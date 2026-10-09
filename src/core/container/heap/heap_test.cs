@@ -10,28 +10,28 @@ using static go.container.heap_package;
 
 partial class heap_internal_test_package {
 
-[GoType("[]nint")] internal partial struct myHeap;
+internal partial struct myHeap /*[]nint*/;
 
-[GoRecv] internal static bool Less(this ref myHeap h, nint i, nint j) {
+internal static bool Less(this ref myHeap h, nint i, nint j) {
     return (h)[i] < (h)[j];
 }
 
-[GoRecv] internal static void Swap(this ref myHeap h, nint i, nint j) {
+internal static void Swap(this ref myHeap h, nint i, nint j) {
     ((h)[i], (h)[j]) = ((h)[j], (h)[i]);
 }
 
-[GoRecv] internal static nint Len(this ref myHeap h) {
+internal static nint Len(this ref myHeap h) {
     return len(h);
 }
 
-[GoRecv] internal static any /*v*/ Pop(this ref myHeap h) {
+internal static any /*v*/ Pop(this ref myHeap h) {
     any v = default!;
 
     (h, v) = ((h).slice(0, h.Len() - 1), (h)[h.Len() - 1]);
     return v;
 }
 
-[GoRecv] internal static void Push(this ref myHeap h, any v) {
+internal static void Push(this ref myHeap h, any v) {
     h = append(h, v._<nint>());
 }
 

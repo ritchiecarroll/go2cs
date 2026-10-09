@@ -16,7 +16,7 @@ using types = global::go.go.types_package;
 
 partial class types_test_package {
 
-[GoType("dyn")] internal partial struct TestNewMethodSet_method {
+internal partial struct TestNewMethodSet_method /*dyn*/ {
     internal @string name;
     internal slice<nint> index;
     internal bool indirect;

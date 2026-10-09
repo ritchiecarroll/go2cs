@@ -20,7 +20,7 @@ internal static readonly @string foo12ˢ = "foo12"u8;
 internal static readonly @string restˢ = "rest"u8;
 internal static readonly @string barˢ2 = "bar"u8;
 
-[GoType("dyn")] internal partial struct TestParsePattern_type {
+internal partial struct TestParsePattern_type /*dyn*/ {
     internal @string @in;
     internal global::go.net.http_package.pattern want;
 }
@@ -135,7 +135,7 @@ public static void TestParsePattern(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestParsePatternError_type {
+internal partial struct TestParsePatternError_type /*dyn*/ {
     internal @string @in;
     internal @string contains;
 }
@@ -174,7 +174,7 @@ public static void TestParsePatternError(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoRecv] internal static bool equal(this ref global::go.net.http_package.pattern p1, ж<global::go.net.http_package.pattern> Ꮡp2) {
+internal static bool equal(this ref global::go.net.http_package.pattern p1, ж<global::go.net.http_package.pattern> Ꮡp2) {
     ref var p2 = ref Ꮡp2.DerefOrNull();
 
     return p1.method == p2.method && p1.host == p2.host && slices.Equal<slice<global::go.net.http_package.segment>, global::go.net.http_package.segment>(p1.segments, p2.segments);
@@ -189,7 +189,7 @@ internal static ж<global::go.net.http_package.pattern> mustParsePattern(testing
     return p;
 }
 
-[GoType("dyn")] internal partial struct TestCompareMethods_type {
+internal partial struct TestCompareMethods_type /*dyn*/ {
     internal @string p1, p2;
     internal global::go.net.http_package.relationship want;
 }
@@ -219,7 +219,7 @@ public static void TestCompareMethods(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestComparePaths_type {
+internal partial struct TestComparePaths_type /*dyn*/ {
     internal @string p1, p2;
     internal global::go.net.http_package.relationship want;
 }
@@ -371,7 +371,7 @@ public static void TestComparePaths(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestConflictsWith_type {
+internal partial struct TestConflictsWith_type /*dyn*/ {
     internal @string p1, p2;
     internal bool want;
 }
@@ -448,7 +448,7 @@ public static partial void TestRegisterConflict(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestDescribeConflict_type {
+internal partial struct TestDescribeConflict_type /*dyn*/ {
     internal @string p1, p2;
     internal @string want;
 }
@@ -470,7 +470,7 @@ public static void TestDescribeConflict(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCommonPath_type {
+internal partial struct TestCommonPath_type /*dyn*/ {
     internal @string p1, p2;
     internal @string want;
 }
@@ -500,7 +500,7 @@ public static void TestCommonPath(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestDifferencePath_type {
+internal partial struct TestDifferencePath_type /*dyn*/ {
     internal @string p1, p2;
     internal @string want;
 }

@@ -30,8 +30,8 @@ internal static bool containsDotFile(@string name) {
 // dotFileHidingFile is the http.File use in dotFileHidingFileSystem.
 // It is used to wrap the Readdir method of http.File so that we can
 // remove files and directories that start with a period from its output.
-[GoType] partial struct dotFileHidingFile {
-    [GoEmbedded] public global::go.net.http_package.File File;
+partial struct dotFileHidingFile {
+    /*embed*/ public global::go.net.http_package.File File;
 }
 
 // Readdir is a wrapper around the Readdir method of the embedded File
@@ -55,8 +55,8 @@ internal static (slice<fs.FileInfo> fis, error err) Readdir(this dotFileHidingFi
 
 // dotFileHidingFileSystem is an http.FileSystem that hides
 // hidden "dot files" from being served.
-[GoType] partial struct dotFileHidingFileSystem {
-    [GoEmbedded] public global::go.net.http_package.FileSystem FileSystem;
+partial struct dotFileHidingFileSystem {
+    /*embed*/ public global::go.net.http_package.FileSystem FileSystem;
 }
 
 // Open is a wrapper around the Open method of the embedded FileSystem

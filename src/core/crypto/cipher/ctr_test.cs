@@ -16,7 +16,7 @@ using io = io_package;
 
 partial class cipher_test_package {
 
-[GoType("num:nint")] partial struct noopBlock;
+partial struct noopBlock /*num:nint*/;
 
 internal static nint BlockSize(this noopBlock b) {
     return (nint)b;

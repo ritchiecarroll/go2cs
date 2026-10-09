@@ -14,7 +14,7 @@ using static go.hash.fnv_package;
 
 partial class fnv_internal_test_package {
 
-[GoType] internal partial struct golden {
+internal partial struct golden {
     internal slice<byte> @out;
     internal @string @in;
     internal @string halfState; // marshaled hash state after first half of in written, used by TestGoldenMarshal
@@ -104,7 +104,7 @@ internal static void testGolden(ж<testing.T> Ꮡt, hash.Hash hashΔ1, slice<gol
     }
 }
 
-[GoType("dyn")] internal partial struct TestGoldenMarshal_tests {
+internal partial struct TestGoldenMarshal_tests /*dyn*/ {
     internal @string name;
     internal Func<hash.Hash> newHash;
     internal slice<golden> gold;

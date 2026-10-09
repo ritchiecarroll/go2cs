@@ -110,20 +110,20 @@ public static partial void TestStdlib(ж<testing.T> Ꮡt) {
 
 // stdlibChecker implements concurrent type-checking of the packages defined by
 // dirFiles, which must define a closed set of packages (such as GOROOT/src).
-[GoType] partial struct stdlibChecker {
+partial struct stdlibChecker {
     internal map<@string, slice<@string>> dirFiles; // non-test files per directory; must be pre-populated
     internal sync.Mutex mu;
     internal map<@string, ж<futurePackage>> pkgs; // future cache of type-checking results
 }
 
 // A futurePackage is a future result of type-checking.
-[GoType] partial struct futurePackage {
+partial struct futurePackage {
     internal channel<EmptyStruct> done; // guards pkg and err
     internal ж<types.Package> pkg;
     internal error err;
 }
 
-[GoRecv] internal static (ж<types.Package>, error) Import(this ref stdlibChecker c, @string path) {
+internal static (ж<types.Package>, error) Import(this ref stdlibChecker c, @string path) {
     throw panic("unimplemented: use ImportFrom");
 }
 
@@ -575,12 +575,12 @@ internal static void walkPkgDirs(@string dir, Action<@string, slice<@string>> pk
     w.walk(dir);
 }
 
-[GoType] partial struct walker {
+partial struct walker {
     internal Action<@string, slice<@string>> pkgh;
     internal Actionꓸꓸꓸ<any> errh;
 }
 
-[GoRecv] internal static void walk(this ref walker w, @string dir) {
+internal static void walk(this ref walker w, @string dir) {
     var (files, err) = os.ReadDir(dir);
     if (err != default!) {
         w.errh(err);

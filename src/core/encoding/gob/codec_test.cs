@@ -23,7 +23,7 @@ partial class gob_internal_test_package {
 internal static ж<bool> doFuzzTests = flag.Bool("gob.fuzz"u8, false, "run the fuzz tests, which are large and very slow"u8);
 
 // Guarantee encoding format by comparing some encodings to hand-written values
-[GoType] public partial struct EncodeT {
+public partial struct EncodeT {
     internal uint64 x;
     internal slice<byte> b;
 }
@@ -553,29 +553,26 @@ internal static readonly @string string2ˢ = "string2"u8;
 internal static readonly object encodeˢ = (@string)"encode:"u8;
 internal static readonly object decodeˢ = (@string)"decode:"u8;
 
-[GoType("dyn")] [GoLocalName("T2")] internal partial struct TestEndToEnd_T2 {
+internal partial struct TestEndToEnd_T2 /*dyn*/ {
     public @string T;
 }
 
-[GoType("dyn")] [GoLocalName("T3")] internal partial struct TestEndToEnd_T3 {
+internal partial struct TestEndToEnd_T3 /*dyn*/ {
     public float64 X;
     public ж<nint> Z;
 }
 
-[GoType("dyn")] [GoLocalName("T1")] internal partial struct TestEndToEnd_T1 {
+internal partial struct TestEndToEnd_T1 /*dyn*/ {
     public nint A, B, C;
     public map<@string, ж<float64>> M;
     public map<nint, TestEndToEnd_T3> M2;
     public map<@string, @string> Mstring;
     public map<nint, ж<nint>> Mintptr;
     public map<complex128, complex128> Mcomp;
-    [GoArrayDims(2), GoMapKeyDims(2)]
-    public map<array<@string>, array<ж<float64>>> Marr;
+    public /*[2]*/ map</*[2]*/ array<@string>, array<ж<float64>>> Marr;
     public map<@string, nint> EmptyMap; // to check that we receive a non-nil map.
-    [GoArrayDims(3)]
-    public ж<array<float64>> N;
-    [GoArrayDims(2)]
-    public ж<array<@string>> Strs;
+    public /*[3]*/ ж<array<float64>> N;
+    public /*[2]*/ ж<array<@string>> Strs;
     public ж<slice<int64>> Int64s;
     public complex64 RI;
     public @string S;
@@ -666,7 +663,7 @@ internal static readonly object wrongOverflowErrorForˢ6 = (@string)"wrong overf
 internal static readonly object wrongOverflowErrorForˢ7 = (@string)"wrong overflow error for float32:"u8;
 internal static readonly object wrongOverflowErrorForˢ8 = (@string)"wrong overflow error for complex64:"u8;
 
-[GoType("dyn")] [GoLocalName("inputT")] internal partial struct TestOverflow_inputT {
+internal partial struct TestOverflow_inputT /*dyn*/ {
     public int64 Maxi;
     public int64 Mini;
     public uint64 Maxu;
@@ -676,39 +673,39 @@ internal static readonly object wrongOverflowErrorForˢ8 = (@string)"wrong overf
     public complex128 Minc;
 }
 
-[GoType("dyn")] [GoLocalName("outi8")] internal partial struct TestOverflow_outi8 {
+internal partial struct TestOverflow_outi8 /*dyn*/ {
     public int8 Maxi;
     public int8 Mini;
 }
 
-[GoType("dyn")] [GoLocalName("outi16")] internal partial struct TestOverflow_outi16 {
+internal partial struct TestOverflow_outi16 /*dyn*/ {
     public int16 Maxi;
     public int16 Mini;
 }
 
-[GoType("dyn")] [GoLocalName("outi32")] internal partial struct TestOverflow_outi32 {
+internal partial struct TestOverflow_outi32 /*dyn*/ {
     public int32 Maxi;
     public int32 Mini;
 }
 
-[GoType("dyn")] [GoLocalName("outu8")] internal partial struct TestOverflow_outu8 {
+internal partial struct TestOverflow_outu8 /*dyn*/ {
     public uint8 Maxu;
 }
 
-[GoType("dyn")] [GoLocalName("outu16")] internal partial struct TestOverflow_outu16 {
+internal partial struct TestOverflow_outu16 /*dyn*/ {
     public uint16 Maxu;
 }
 
-[GoType("dyn")] [GoLocalName("outu32")] internal partial struct TestOverflow_outu32 {
+internal partial struct TestOverflow_outu32 /*dyn*/ {
     public uint32 Maxu;
 }
 
-[GoType("dyn")] [GoLocalName("outf32")] internal partial struct TestOverflow_outf32 {
+internal partial struct TestOverflow_outf32 /*dyn*/ {
     public float32 Maxf;
     public float32 Minf;
 }
 
-[GoType("dyn")] [GoLocalName("outc64")] internal partial struct TestOverflow_outc64 {
+internal partial struct TestOverflow_outc64 /*dyn*/ {
     public complex64 Maxc;
     public complex64 Minc;
 }
@@ -841,7 +838,7 @@ internal static readonly @string level1ˢ = "level1"u8;
 internal static readonly @string level2ˢ = "level2"u8;
 internal static readonly object decoderErrorˢ = (@string)"decoder error:"u8;
 
-[GoType("dyn")] [GoLocalName("RT")] internal partial struct TestNesting_RT {
+internal partial struct TestNesting_RT /*dyn*/ {
     public @string A;
     public ж<TestNesting_RT> Next;
 }
@@ -871,21 +868,21 @@ public static void TestNesting(ж<testing.T> Ꮡt) {
 }
 
 // These three structures have the same data with different indirections
-[GoType] public partial struct T0 {
+public partial struct T0 {
     public nint A;
     public nint B;
     public nint C;
     public nint D;
 }
 
-[GoType] public partial struct T1 {
+public partial struct T1 {
     public nint A;
     public ж<nint> B;
     public ж<ж<nint>> C;
     public ж<ж<ж<nint>>> D;
 }
 
-[GoType] public partial struct T2 {
+public partial struct T2 {
     public ж<ж<ж<nint>>> A;
     public ж<ж<nint>> B;
     public ж<nint> C;
@@ -963,13 +960,13 @@ public static void TestAutoIndirection(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct RT0 {
+public partial struct RT0 {
     public nint A;
     public @string B;
     public float64 C;
 }
 
-[GoType] public partial struct RT1 {
+public partial struct RT1 {
     public float64 C;
     public @string B;
     public nint A;
@@ -999,7 +996,7 @@ public static void TestReorderedFields(ж<testing.T> Ꮡt) {
 }
 
 // Like an RT0 but with fields we'll ignore on the decode side.
-[GoType] [GoValueClone("Ignore_e")] public partial struct IT0 {
+public partial struct IT0 {
     public int64 A;
     public @string B;
     public slice<nint> Ignore_d;
@@ -1049,7 +1046,7 @@ internal static readonly object expectedErrorGotNoneˢ = (@string)"expected erro
 internal static readonly @string recursiveˢ = "recursive"u8;
 internal static readonly object expectedRecursiveTypeˢ = (@string)"expected recursive type error; got"u8;
 
-[GoLocalName("Rec")] [GoType("ж<ж<ж<TestBadRecursiveType_Rec>>>")] internal partial class TestBadRecursiveType_Rec;
+internal partial class TestBadRecursiveType_Rec /*ж<ж<ж<TestBadRecursiveType_Rec>>>*/;
 
 public static void TestBadRecursiveType(ж<testing.T> Ꮡt) {
     ref var rec = ref heap<TestBadRecursiveType_Rec>(out var Ꮡrec);
@@ -1064,14 +1061,13 @@ public static void TestBadRecursiveType(ж<testing.T> Ꮡt) {
 }
 
 // Can't test decode easily because we can't encode one, so we can't pass one to a Decoder.
-[GoType] public partial struct Indirect {
-    [GoArrayDims(3)]
-    public ж<ж<ж<array<nint>>>> A;
+public partial struct Indirect {
+    public /*[3]*/ ж<ж<ж<array<nint>>>> A;
     public ж<ж<ж<slice<nint>>>> S;
     public ж<ж<ж<ж<map<@string, nint>>>>> M;
 }
 
-[GoType] [GoValueClone("A")] public partial struct Direct {
+public partial struct Direct {
     public array<nint> A = new(3);
     public slice<nint> S;
     public map<@string, nint> M;
@@ -1143,23 +1139,23 @@ public static void TestIndirectSliceMapArray(ж<testing.T> Ꮡt) {
 }
 
 // An interface with several implementations
-[GoType] public partial interface Squarer {
+public partial interface Squarer {
     nint Square();
 }
 
-[GoType("num:nint")] public partial struct Int;
+public partial struct Int /*num:nint*/;
 
 public static nint Square(this Int i) {
     return (nint)(i * i);
 }
 
-[GoType("num:float64")] public partial struct Float;
+public partial struct Float /*num:float64*/;
 
 public static nint Square(this Float f) {
     return (nint)(float64)(f * f);
 }
 
-[GoType("[]nint")] public partial struct Vector;
+public partial struct Vector /*[]nint*/;
 
 public static nint Square(this Vector v) {
     nint sum = 0;
@@ -1169,7 +1165,7 @@ public static nint Square(this Vector v) {
     return sum;
 }
 
-[GoType] public partial struct Point {
+public partial struct Point {
     public nint X, Y;
 }
 
@@ -1178,7 +1174,7 @@ public static nint Square(this Point p) {
 }
 
 // A struct with interfaces in it.
-[GoType] public partial struct InterfaceItem {
+public partial struct InterfaceItem {
     public nint I;
     public Squarer Sq1, Sq2, Sq3;
     public float64 F;
@@ -1186,7 +1182,7 @@ public static nint Square(this Point p) {
 }
 
 // The same struct without interfaces
-[GoType] public partial struct NoInterfaceItem {
+public partial struct NoInterfaceItem {
     public nint I;
     public float64 F;
 }
@@ -1256,7 +1252,7 @@ public static void TestInterface(ж<testing.T> Ꮡt) {
 }
 
 // A struct with all basic types, stored in interfaces.
-[GoType] public partial struct BasicInterfaceItem {
+public partial struct BasicInterfaceItem {
     public any Int, Int8, Int16, Int32, Int64;
     public any Uint, Uint8, Uint16, Uint32, Uint64;
     public any Float32, Float64;
@@ -1306,9 +1302,9 @@ public static void TestInterfaceBasic(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("@string")] public partial struct ΔString;
+public partial struct ΔString /*@string*/;
 
-[GoType] public partial struct PtrInterfaceItem {
+public partial struct PtrInterfaceItem {
     public any Str1; // basic
     public any Str2; // derived
 }
@@ -1387,7 +1383,7 @@ public static void TestIgnoreInterface(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct U {
+public partial struct U {
     public nint A;
     public @string B;
     internal float64 c;
@@ -1447,11 +1443,11 @@ public static void TestDebugSingleton(ж<testing.T> Ꮡt) {
 }
 
 // A type that won't be defined in the gob until we send it in an interface value.
-[GoType] public partial struct OnTheFly {
+public partial struct OnTheFly {
     public nint A;
 }
 
-[GoType] [GoValueClone("T")] public partial struct DT {
+public partial struct DT {
     //	X OnTheFly
     public nint A;
     public @string B;
@@ -1652,23 +1648,23 @@ public static void TestErrorInvalidTypeId(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct LargeSliceByte {
+public partial struct LargeSliceByte {
     public slice<byte> S;
 }
 
-[GoType] public partial struct LargeSliceInt8 {
+public partial struct LargeSliceInt8 {
     public slice<int8> S;
 }
 
-[GoType] public partial struct StringPair {
+public partial struct StringPair {
     public @string A, B;
 }
 
-[GoType] public partial struct LargeSliceStruct {
+public partial struct LargeSliceStruct {
     public slice<StringPair> S;
 }
 
-[GoType] public partial struct LargeSliceString {
+public partial struct LargeSliceString {
     public slice<@string> S;
 }
 

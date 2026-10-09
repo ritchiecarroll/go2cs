@@ -116,13 +116,13 @@ internal static (image.Image, error) decodeFile(@string filename) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct eofReader {
+internal partial struct eofReader {
     internal slice<byte> data; // deliver from Read without EOF
     internal slice<byte> dataEOF; // then deliver from Read with EOF on last chunk
     internal nint lenAtEOF;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref eofReader r, slice<byte> b) {
+internal static (nint n, error err) Read(this ref eofReader r, slice<byte> b) {
     nint n = default!;
     error err = default!;
 

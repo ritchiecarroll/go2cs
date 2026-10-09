@@ -370,7 +370,7 @@ public static partial void TestTLS12OnlyCipherSuites(ж<testing.T> Ꮡt) {
 internal static readonly @string rsaˢ = "RSA"u8;
 internal static readonly object incorrectEcPointFormatˢ = (@string)"incorrect ec_point_format extension from server"u8;
 
-[GoType("dyn")] internal partial struct TestTLSPointFormats_tests {
+internal partial struct TestTLSPointFormats_tests /*dyn*/ {
     internal @string name;
     internal slice<uint16> cipherSuites;
     internal slice<global::go.crypto.tls_package.CurveID> supportedCurves;
@@ -653,7 +653,7 @@ internal static void testCrossVersionResume(ж<testing.T> Ꮡt, uint16 version) 
 
 // serverTest represents a test of the TLS server handshake against a reference
 // implementation.
-[GoType] internal partial struct serverTest {
+internal partial struct serverTest {
     // name is a freeform string identifying the test and the file in which
     // the expected results will be stored.
     internal @string name;
@@ -757,7 +757,7 @@ internal static partial (ж<recordingConn> conn, ж<exec.Cmd> child, error err) 
     ᒐdone: return (conn, child, err);
 }
 
-[GoRecv] internal static @string dataPath(this ref serverTest test) {
+internal static @string dataPath(this ref serverTest test) {
     return filepath.Join(testdataˢ, "Server-" + test.name);
 }
 
@@ -1697,7 +1697,7 @@ public static partial void TestSNIGivenOnFailure(ж<testing.T> Ꮡt) {
 // Setting a maximum version of TLS 1.1 should cause
 // the handshake to fail, as the client MinVersion is TLS 1.2.
 
-[GoType("dyn")] partial struct getConfigForClientTestsᴛ1 {
+partial struct getConfigForClientTestsᴛ1 /*dyn*/ {
     internal Action<ж<global::go.crypto.tls_package.Config>> setup;
     internal Func<ж<global::go.crypto.tls_package.ClientHelloInfo>, (ж<global::go.crypto.tls_package.Config>, error)> callback;
     internal @string errorSubstring;
@@ -1952,7 +1952,7 @@ public static void TestMultipleCertificates(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAESCipherReordering_tests {
+internal partial struct TestAESCipherReordering_tests /*dyn*/ {
     internal @string name;
     internal slice<uint16> clientCiphers;
     internal bool serverHasAESGCM;
@@ -2109,7 +2109,7 @@ public static void TestAESCipherReordering(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestAESCipherReorderingTLS13_tests {
+internal partial struct TestAESCipherReorderingTLS13_tests /*dyn*/ {
     internal @string name;
     internal slice<uint16> clientCiphers;
     internal bool serverHasAESGCM;

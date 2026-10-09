@@ -35,7 +35,7 @@ using static global::go.crypto.dsa_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/dsa/dsa_test.go", "dsa_test.cs", "AA8agoKCgoKWgriCgoKEgoKCloKWgpaCgoKCgpSCgpaCgoKW1oKCloKCgqaCgoKUpoIACximggAIEoL4pr6CAAsYgoCC")]
+[assembly: go.GoPositionMap("crypto/dsa/dsa_test.go", "dsa_test.cs", "AA8agoKCgoKWgriCgoKEgoKCloKWgpaCgoKCgpSCgpaCgoKW1oKCloKCgqaCgoKUpoIACximggAIEoL4pr6CAAsYgoCC", "", "", "84=fromHex/1/5/3,fromHex/2/5/4,fromHex/3/5/5,fromHex/4/5/7,fromHex/5/5/9;100=fromHex/1/4/2,fromHex/2/4/3,fromHex/3/4/4,fromHex/4/4/6;126=fromHex/1/5/3,fromHex/2/5/4,fromHex/3/5/5,fromHex/4/5/7,fromHex/5/5/9")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -44,7 +44,7 @@ namespace go.crypto;
 public static partial class dsa_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

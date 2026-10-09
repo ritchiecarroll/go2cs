@@ -20,25 +20,25 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class template_internal_test_package {
 
-[GoType] internal partial struct badMarshaler {
+internal partial struct badMarshaler {
 }
 
-[GoRecv] internal static (slice<byte>, error) MarshalJSON(this ref badMarshaler x) {
+internal static (slice<byte>, error) MarshalJSON(this ref badMarshaler x) {
     // Keys in valid JSON must be double quoted as must all strings.
     return (slice<byte>("{ foo: 'not quite valid JSON' }"u8), default!);
 }
 
-[GoType] internal partial struct goodMarshaler {
+internal partial struct goodMarshaler {
 }
 
-[GoRecv] internal static (slice<byte>, error) MarshalJSON(this ref goodMarshaler x) {
+internal static (slice<byte>, error) MarshalJSON(this ref goodMarshaler x) {
     return (slice<byte>(@"{ ""<foo>"": ""O'Reilly"" }"u8), default!);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string iexclBClassFooHelloBˢ = @"&iexcl;<b class=""foo"">Hello</b>, <textarea>O'World</textarea>!"u8;
 
-[GoType("dyn")] internal partial struct TestEscape_data {
+internal partial struct TestEscape_data /*dyn*/ {
     public bool F, T;
     public @string C, G, H, I;
     public slice<@string> A, E;
@@ -49,7 +49,7 @@ internal static readonly @string iexclBClassFooHelloBˢ = @"&iexcl;<b class=""fo
     public global::go.html.template_package.HTML W;
 }
 
-[GoType("dyn")] internal partial struct TestEscape_tests {
+internal partial struct TestEscape_tests /*dyn*/ {
     internal @string name;
     internal @string input;
     internal @string output;
@@ -776,7 +776,7 @@ public static void TestEscape(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestEscapeMap_type {
+internal partial struct TestEscapeMap_type /*dyn*/ {
     internal @string desc, input, output;
 }
 
@@ -823,12 +823,12 @@ public static void TestEscapeMap(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string mainˢ = "main"u8;
 
-[GoType("dyn")] [GoLocalName("dataItem")] internal partial struct TestEscapeSet_dataItem {
+internal partial struct TestEscapeSet_dataItem /*dyn*/ {
     public slice<ж<TestEscapeSet_dataItem>> Children;
     public @string X;
 }
 
-[GoType("dyn")] internal partial struct TestEscapeSet_tests {
+internal partial struct TestEscapeSet_tests /*dyn*/ {
     internal map<@string, @string> inputs;
     internal @string want;
 }
@@ -972,7 +972,7 @@ public static void TestEscapeSet(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestErrors_tests {
+internal partial struct TestErrors_tests /*dyn*/ {
     internal @string input;
     internal @string err;
 }
@@ -1230,7 +1230,7 @@ public static void TestErrors(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestEscapeText_tests {
+internal partial struct TestEscapeText_tests /*dyn*/ {
     internal @string input;
     internal global::go.html.template_package.context output;
 }
@@ -1874,7 +1874,7 @@ public static void TestEscapeText(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testˢ = "test"u8;
 
-[GoType("dyn")] internal partial struct TestEnsurePipelineContains_tests {
+internal partial struct TestEnsurePipelineContains_tests /*dyn*/ {
     internal @string input, output;
     internal slice<@string> ids;
 }
@@ -2129,7 +2129,7 @@ public static void TestEmptyTemplateHTML(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("num:nint")] public partial struct Issue7379;
+public partial struct Issue7379 /*num:nint*/;
 
 public static @string SomeMethod(this Issue7379 _, nint x) {
     return fmt.Sprintf("<%d>"u8, x);

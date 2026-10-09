@@ -160,12 +160,12 @@ public static void BenchmarkSlicesSortStrings_Sorted(ж<testing.B> Ꮡb) {
 
 // These benchmarks compare sorting a slice of structs with sort.Sort vs.
 // slices.SortFunc.
-[GoType] partial struct myStruct {
+partial struct myStruct {
     internal @string a, b, c, d;
     internal nint n;
 }
 
-[GoType("[]ж<myStruct>")] partial struct myStructs;
+partial struct myStructs /*[]ж<myStruct>*/;
 
 internal static nint Len(this myStructs s) {
     return len(s);

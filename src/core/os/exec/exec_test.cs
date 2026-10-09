@@ -629,7 +629,7 @@ internal static readonly @string stdinCloseˢ = "stdinClose"u8;
 internal static readonly object canTAccessMethodsOfˢ = (@string)"can't access methods of underlying *os.File"u8;
 internal static readonly @string copyˢ = "Copy"u8;
 
-[GoType("dyn")] internal partial interface TestStdinClose_type {
+internal partial interface TestStdinClose_type /*dyn*/ {
     uintptr Fd();
 }
 
@@ -1021,7 +1021,7 @@ public static partial void TestExtraFilesRace(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct delayedInfiniteReader {
+partial struct delayedInfiniteReader {
 }
 
 internal static (nint, error) Read(this delayedInfiniteReader _, slice<byte> b) {
@@ -1060,10 +1060,10 @@ public static void TestIgnorePipeErrorOnSuccess(ж<testing.T> Ꮡt) {
     Ꮡt.Run(infiniteˢ, testWith(new delayedInfiniteReader(nil)));
 }
 
-[GoType] partial struct badWriter {
+partial struct badWriter {
 }
 
-[GoRecv] internal static (nint, error) Write(this ref badWriter w, slice<byte> data) {
+internal static (nint, error) Write(this ref badWriter w, slice<byte> data) {
     return (0, io.ErrUnexpectedEOF);
 }
 
@@ -1250,7 +1250,7 @@ public static void TestEnvNULCharacter(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestString_tests {
+internal partial struct TestString_tests /*dyn*/ {
     internal @string path;
     internal slice<@string> args;
     internal @string want;
@@ -1458,7 +1458,7 @@ internal static partial void cmdHang(params ꓸꓸꓸstring argsʗp) {
 
 // A tickReader reads an unbounded sequence of timestamps at no more than a
 // fixed interval.
-[GoType] partial struct tickReader {
+partial struct tickReader {
     internal time.Duration interval;
     internal time.Time lastTick;
     internal @string s;
@@ -1468,7 +1468,7 @@ internal static ж<tickReader> newTickReader(time.Duration interval) {
     return Ꮡ(new tickReader(interval: interval));
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref tickReader r, slice<byte> p) {
+internal static (nint n, error err) Read(this ref tickReader r, slice<byte> p) {
     nint n = default!;
 
     if (len(r.s) == 0) {

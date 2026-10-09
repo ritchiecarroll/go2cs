@@ -53,9 +53,9 @@ public static void TestMain(ж<testing.M> Ꮡm) {
     os.Exit(Ꮡm.Run());
 }
 
-[GoType("num:nint")] partial struct T;
+partial struct T /*num:nint*/;
 
-[GoRecv] internal static partial slice<byte> ptrmethod(this ref T t) {
+internal static partial slice<byte> ptrmethod(this ref T t) {
     return Stack();
 }
 

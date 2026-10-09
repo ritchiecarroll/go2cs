@@ -13,7 +13,7 @@ using io;
 partial class errors_test_package {
 
 // MyError is an error implementation that includes a time and message.
-[GoType] partial struct MyError {
+partial struct MyError {
     public time.Time When;
     public @string What;
 }

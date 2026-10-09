@@ -46,7 +46,7 @@ public static void TestWriteHeapDumpNonempty(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct Obj {
+partial struct Obj {
     internal nint x, y;
 }
 
@@ -87,10 +87,10 @@ public static void TestWriteHeapDumpFinalizers(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct G<T> {
+partial struct G<T> {
 }
 
-[GoType] partial interface I {
+partial interface I {
     void M();
 }
 

@@ -36,7 +36,7 @@ public static void TestReset(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestReaderTruncated_vectors {
+internal partial struct TestReaderTruncated_vectors /*dyn*/ {
     internal @string input, output;
 }
 
@@ -95,8 +95,8 @@ public static void TestResetDict(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string bufferIsReusedˢ = "BufferIsReused"u8;
 
-[GoType("dyn")] internal partial struct TestReaderReusesReaderBuffer_encodedNotByteReader {
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct TestReaderReusesReaderBuffer_encodedNotByteReader /*dyn*/ {
+    /*embed*/ public io_package.Reader Reader;
 }
 
 public static void TestReaderReusesReaderBuffer(ж<testing.T> Ꮡt) {

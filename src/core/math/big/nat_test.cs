@@ -14,7 +14,7 @@ using static go.math.big_package;
 partial class big_internal_test_package {
 
 
-[GoType("dyn")] partial struct cmpTestsᴛ1 {
+partial struct cmpTestsᴛ1 /*dyn*/ {
     internal global::go.math.big_package.nat x, y;
     internal nint r;
 }
@@ -46,7 +46,7 @@ public static void TestCmp(ж<testing.T> Ꮡt) {
 
 // type funNN is a methodless func type — rendered inline as its base delegate
 
-[GoType] internal partial struct argNN {
+internal partial struct argNN {
     internal global::go.math.big_package.nat z, x, y;
 }
 
@@ -150,7 +150,7 @@ public static void TestFunNN(ж<testing.T> Ꮡt) {
 // 20!
 // 100!
 
-[GoType("dyn")] partial struct mulRangesNᴛ1 {
+partial struct mulRangesNᴛ1 /*dyn*/ {
     internal uint64 a, b;
     internal @string prod;
 }
@@ -282,7 +282,7 @@ public static void TestNLZ(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct shiftTest {
+internal partial struct shiftTest {
     internal global::go.math.big_package.nat @in;
     internal nuint shift;
     internal global::go.math.big_package.nat @out;
@@ -371,7 +371,7 @@ public static void BenchmarkZeroShifts(ж<testing.B> Ꮡb) {
     });
 }
 
-[GoType] internal partial struct modWTest {
+internal partial struct modWTest {
     internal @string @in;
     internal @string dividend;
     internal @string @out;
@@ -407,7 +407,7 @@ public static void TestModW(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct montgomeryTestsᴛ1 {
+partial struct montgomeryTestsᴛ1 /*dyn*/ {
     internal @string x, y, m;
     internal uint64 k0;
     internal @string out32, out64;
@@ -669,7 +669,7 @@ public static void BenchmarkFibo(ж<testing.B> Ꮡb) {
 }
 
 
-[GoType("dyn")] partial struct bitTestsᴛ1 {
+partial struct bitTestsᴛ1 /*dyn*/ {
     internal @string x;
     internal nuint i;
     internal nuint want;
@@ -794,7 +794,7 @@ public static void BenchmarkNatSqr(ж<testing.B> Ꮡb) {
 // 2^65, 2^66-1, 2^65 - (2^66-1) + 2^67
 // 2^66-1, 2^65, 2^65-1
 
-[GoType("dyn")] partial struct subMod2NTestsᴛ1 {
+partial struct subMod2NTestsᴛ1 /*dyn*/ {
     internal @string x;
     internal @string y;
     internal nuint n;

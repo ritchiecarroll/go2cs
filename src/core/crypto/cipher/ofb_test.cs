@@ -20,7 +20,7 @@ using io = io_package;
 
 partial class cipher_test_package {
 
-[GoType] partial struct ofbTest {
+partial struct ofbTest {
     internal @string name;
     internal slice<byte> key;
     internal slice<byte> iv;

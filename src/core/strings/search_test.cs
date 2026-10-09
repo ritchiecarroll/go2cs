@@ -10,7 +10,7 @@ using static go.strings_internal_test_package;
 
 partial class strings_test_package {
 
-[GoType("dyn")] internal partial struct TestFinderNext_testCases {
+internal partial struct TestFinderNext_testCases /*dyn*/ {
     internal @string pat, text;
     internal nint index;
 }
@@ -42,7 +42,7 @@ public static void TestFinderNext(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFinderCreation_testCases {
+internal partial struct TestFinderCreation_testCases /*dyn*/ {
     internal @string pattern;
     internal array<nint> bad = new(256);
     internal slice<nint> suf;

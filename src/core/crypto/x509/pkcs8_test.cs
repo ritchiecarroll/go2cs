@@ -57,7 +57,7 @@ internal static @string pkcs8Ed25519PrivateKeyHex = @"302e020100300506032b657004
 //	openssl genpkey -algorithm x25519
 internal static @string pkcs8X25519PrivateKeyHex = @"302e020100300506032b656e0422042068ff93a73c5adefd6d498b24e588fd4daa10924d992afed01b43ca5725025a6b"u8;
 
-[GoType("dyn")] internal partial struct TestPKCS8_tests {
+internal partial struct TestPKCS8_tests /*dyn*/ {
     internal @string name;
     internal @string keyHex;
     internal reflectꓸType keyType;
@@ -166,7 +166,7 @@ internal static readonly @string hexPKCS8TestPKCS1Key = "3082025c02010002818100b
 internal static readonly @string hexPKCS8TestECKey = "3081a40201010430bdb9839c08ee793d1157886a7a758a3c8b2a17a4df48f17ace57c72c56b4723cf21dcda21d4e1ad57ff034f19fcfd98ea00706052b81040022a16403620004feea808b5ee2429cfcce13c32160e1c960990bd050bb0fdf7222f3decd0a55008e32a6aa3c9062051c4cba92a7a3b178b24567412d43cdd2f882fa5addddd726fe3e208d2c26d733a773a597abb749714df7256ead5105fa6e7b3650de236b50"u8;
 
 
-[GoType("dyn")] partial struct pkcs8MismatchKeyTestsᴛ1 {
+partial struct pkcs8MismatchKeyTestsᴛ1 /*dyn*/ {
     internal @string hexKey;
     internal @string errorContains;
 }

@@ -19,7 +19,7 @@ public static void TestWriterBinary(ж<testing.T> Ꮡt) {
     testWriter(Ꮡt, true);
 }
 
-[GoType("dyn")] internal partial struct testWriter_tests {
+internal partial struct testWriter_tests /*dyn*/ {
     internal @string @in, want, wantB;
 }
 

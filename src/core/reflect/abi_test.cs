@@ -26,7 +26,7 @@ partial class reflect_test_package {
 // As of early May 2021 this is no longer necessary for amd64,
 // but it remains in case this is needed for the next register abi port.
 // TODO (1.18) If enabling register ABI on additional architectures turns out not to need this, remove it.
-[GoType] partial struct MagicLastTypeNameForTestingRegisterABI {
+partial struct MagicLastTypeNameForTestingRegisterABI {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -126,47 +126,47 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct StructWithMethods {
+partial struct StructWithMethods {
     public nint Value;
 }
 
-[GoType] partial struct StructFewRegs {
+partial struct StructFewRegs {
     internal nint a0, a1, a2, a3;
     internal float64 f0, f1, f2, f3;
 }
 
-[GoType] partial struct StructFillRegs {
+partial struct StructFillRegs {
     internal nint a0, a1, a2, a3, a4, a5, a6, a7, a8;
     internal float64 f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14;
 }
 
-[GoRecv] public static StructFewRegs AllRegsCall(this ref StructWithMethods m, StructFewRegs s, MagicLastTypeNameForTestingRegisterABI _) {
+public static StructFewRegs AllRegsCall(this ref StructWithMethods m, StructFewRegs s, MagicLastTypeNameForTestingRegisterABI _) {
     m.Value = 1;
     return s;
 }
 
-[GoRecv] public static (StructFewRegs, array<uint64>) RegsAndStackCall(this ref StructWithMethods m, StructFewRegs s, [GoArrayDims(4)] array<uint64> a, MagicLastTypeNameForTestingRegisterABI _) {
+public static (StructFewRegs, array<uint64>) RegsAndStackCall(this ref StructWithMethods m, StructFewRegs s, /*[4]*/ array<uint64> a, MagicLastTypeNameForTestingRegisterABI _) {
     a = a.Clone();
 
     m.Value = 2;
     return (s, a.Clone());
 }
 
-[GoRecv] public static StructFillRegs SpillStructCall(this ref StructWithMethods m, StructFillRegs s, MagicLastTypeNameForTestingRegisterABI _) {
+public static StructFillRegs SpillStructCall(this ref StructWithMethods m, StructFillRegs s, MagicLastTypeNameForTestingRegisterABI _) {
     m.Value = 3;
     return s;
 }
 
 // When called as a method value, i is passed on the stack.
 // When called as a method, i is passed in a register.
-[GoRecv] public static (StructFillRegs, nint) ValueRegMethodSpillInt(this ref StructWithMethods m, StructFillRegs s, nint i, MagicLastTypeNameForTestingRegisterABI _) {
+public static (StructFillRegs, nint) ValueRegMethodSpillInt(this ref StructWithMethods m, StructFillRegs s, nint i, MagicLastTypeNameForTestingRegisterABI _) {
     m.Value = 4;
     return (s, i);
 }
 
 // When called as a method value, i is passed on the stack.
 // When called as a method, i is passed in a register.
-[GoRecv] public static (StructFillRegs, ж<byte>) ValueRegMethodSpillPtr(this ref StructWithMethods m, StructFillRegs s, ж<byte> Ꮡi, MagicLastTypeNameForTestingRegisterABI _) {
+public static (StructFillRegs, ж<byte>) ValueRegMethodSpillPtr(this ref StructWithMethods m, StructFillRegs s, ж<byte> Ꮡi, MagicLastTypeNameForTestingRegisterABI _) {
     m.Value = 5;
     return (s, Ꮡi);
 }
@@ -436,7 +436,7 @@ internal static partial complex128 passComplex128(complex128 a) {
 
 //go:registerparams
 //go:noinline
-internal static partial array<uint32> passArray1([GoArrayDims(1)] array<uint32> a) {
+internal static partial array<uint32> passArray1(/*[1]*/ array<uint32> a) {
     a = a.Clone();
 
     return a.Clone();
@@ -444,7 +444,7 @@ internal static partial array<uint32> passArray1([GoArrayDims(1)] array<uint32> 
 
 //go:registerparams
 //go:noinline
-internal static partial array<uintptr> passArray([GoArrayDims(2)] array<uintptr> a) {
+internal static partial array<uintptr> passArray(/*[2]*/ array<uintptr> a) {
     a = a.Clone();
 
     return a.Clone();
@@ -452,7 +452,7 @@ internal static partial array<uintptr> passArray([GoArrayDims(2)] array<uintptr>
 
 //go:registerparams
 //go:noinline
-internal static partial (nint, array<uint32>, float64) passArray1Mix(nint a, [GoArrayDims(1)] array<uint32> b, float64 c) {
+internal static partial (nint, array<uint32>, float64) passArray1Mix(nint a, /*[1]*/ array<uint32> b, float64 c) {
     b = b.Clone();
 
     return (a, b.Clone(), c);
@@ -745,7 +745,7 @@ internal static partial complex128 callArgsComplex128(Func<complex128, MagicLast
 
 //go:registerparams
 //go:noinline
-internal static partial array<uint32> callArgsArray1(Func<array<uint32>, MagicLastTypeNameForTestingRegisterABI, array<uint32>> f, [GoArrayDims(1)] array<uint32> a0) {
+internal static partial array<uint32> callArgsArray1(Func<array<uint32>, MagicLastTypeNameForTestingRegisterABI, array<uint32>> f, /*[1]*/ array<uint32> a0) {
     a0 = a0.Clone();
 
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
@@ -753,7 +753,7 @@ internal static partial array<uint32> callArgsArray1(Func<array<uint32>, MagicLa
 
 //go:registerparams
 //go:noinline
-internal static partial array<uintptr> callArgsArray(Func<array<uintptr>, MagicLastTypeNameForTestingRegisterABI, array<uintptr>> f, [GoArrayDims(2)] array<uintptr> a0) {
+internal static partial array<uintptr> callArgsArray(Func<array<uintptr>, MagicLastTypeNameForTestingRegisterABI, array<uintptr>> f, /*[2]*/ array<uintptr> a0) {
     a0 = a0.Clone();
 
     return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
@@ -761,7 +761,7 @@ internal static partial array<uintptr> callArgsArray(Func<array<uintptr>, MagicL
 
 //go:registerparams
 //go:noinline
-internal static partial (nint, array<uint32>, float64) callArgsArray1Mix(Func<nint, array<uint32>, float64, MagicLastTypeNameForTestingRegisterABI, (nint, array<uint32>, float64)> f, nint a0, [GoArrayDims(1)] array<uint32> a1, float64 a2) {
+internal static partial (nint, array<uint32>, float64) callArgsArray1Mix(Func<nint, array<uint32>, float64, MagicLastTypeNameForTestingRegisterABI, (nint, array<uint32>, float64)> f, nint a0, /*[1]*/ array<uint32> a1, float64 a2) {
     a1 = a1.Clone();
 
     return f(a0, a1, a2, new MagicLastTypeNameForTestingRegisterABI(nil));
@@ -908,27 +908,27 @@ internal static partial (nint, EmptyStruct, float64) callArgsEmptyStruct(Func<ni
 }
 
 // Struct1 is a simple integer-only aggregate struct.
-[GoType] partial struct Struct1 {
+partial struct Struct1 {
     public nuint A, B, C;
 }
 
 // Struct2 is Struct1 but with an array-typed field that will
 // force it to get passed on the stack.
-[GoType] partial struct Struct2 {
+partial struct Struct2 {
     public nuint A, B, C;
     public array<uint32> D = new(2);
 }
 
 // Struct3 is Struct2 but with an anonymous array-typed field.
 // This should act identically to Struct2.
-[GoType] partial struct Struct3 {
+partial struct Struct3 {
     public nuint A, B, C;
     public array<uint32> D = new(2);
 }
 
 // Struct4 has byte-length fields that should
 // each use up a whole registers.
-[GoType] partial struct Struct4 {
+partial struct Struct4 {
     public int8 A, B;
     public uint8 C, D;
     public bool E;
@@ -936,7 +936,7 @@ internal static partial (nint, EmptyStruct, float64) callArgsEmptyStruct(Func<ni
 
 // Struct5 is a relatively large struct
 // with both integer and floating point values.
-[GoType] partial struct Struct5 {
+partial struct Struct5 {
     public uint16 A;
     public int16 B;
     public uint32 C, D;
@@ -945,20 +945,20 @@ internal static partial (nint, EmptyStruct, float64) callArgsEmptyStruct(Func<ni
 }
 
 // Struct6 has a nested struct.
-[GoType] partial struct Struct6 {
+partial struct Struct6 {
     public partial ref Struct1 Struct1 { get; }
 }
 
 // Struct7 is a struct with a nested array-typed field
 // that cannot be passed in registers as a result.
-[GoType] partial struct Struct7 {
+partial struct Struct7 {
     public partial ref Struct1 Struct1 { get; }
     public partial ref Struct2 Struct2 { get; }
 }
 
 // Struct8 is large aggregate struct type that may be
 // passed in registers.
-[GoType] partial struct Struct8 {
+partial struct Struct8 {
     public partial ref Struct5 Struct5 { get; }
     public partial ref Struct1 Struct1 { get; }
 }
@@ -966,33 +966,33 @@ internal static partial (nint, EmptyStruct, float64) callArgsEmptyStruct(Func<ni
 // Struct9 is a type that has an array type nested
 // 2 layers deep, and as a result needs to be passed
 // on the stack.
-[GoType] partial struct Struct9 {
+partial struct Struct9 {
     public partial ref Struct1 Struct1 { get; }
     public partial ref Struct7 Struct7 { get; }
 }
 
 // Struct10 is a struct type that is too large to be
 // passed in registers.
-[GoType] partial struct Struct10 {
+partial struct Struct10 {
     public partial ref Struct5 Struct5 { get; }
     public partial ref Struct8 Struct8 { get; }
 }
 
 // Struct11 is a struct type that has several reference
 // types in it.
-[GoType] partial struct Struct11 {
+partial struct Struct11 {
     public map<@string, nint> X;
 }
 
 // Struct12 has Struct11 embedded into it to test more
 // paths.
-[GoType] partial struct Struct12 {
+partial struct Struct12 {
     public nint A;
     public partial ref Struct11 Struct11 { get; }
 }
 
 // Struct13 tests an empty field.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 16)] partial struct Struct13 {
+[StructLayout(LayoutKind.Explicit, Size = 16)] partial struct Struct13 {
     [FieldOffset(0)] public nint A;
     [FieldOffset(8)] public readonly EmptyStruct X;
     [FieldOffset(8)] public nint B;
@@ -1000,20 +1000,20 @@ internal static partial (nint, EmptyStruct, float64) callArgsEmptyStruct(Func<ni
 
 // Struct14 tests a non-zero-sized (and otherwise register-assignable)
 // struct with a field that is a non-zero length array with zero-sized members.
-[GoType] partial struct Struct14 {
+partial struct Struct14 {
     public uintptr A;
     public array<EmptyStruct> X = new(3);
     public float64 B;
 }
 
-[GoType("dyn")] partial struct Struct15_X {
+partial struct Struct15_X /*dyn*/ {
     public array<EmptyStruct> Y = new(3);
 }
 
 // Struct15 tests a non-zero-sized (and otherwise register-assignable)
 // struct with a struct field that is zero-sized but contains a
 // non-zero length array with zero-sized members.
-[GoType] partial struct Struct15 {
+partial struct Struct15 {
     public uintptr A;
     public Struct15_X X;
     public float64 B;

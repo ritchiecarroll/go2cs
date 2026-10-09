@@ -11,13 +11,13 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-[GoType] partial struct obj {
+partial struct obj {
     internal int64 x;
     internal int64 y;
     internal int64 z;
 }
 
-[GoType] partial struct objWith<T> {
+partial struct objWith<T> {
     internal int64 x;
     internal int64 y;
     internal int64 z;

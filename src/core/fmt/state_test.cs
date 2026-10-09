@@ -9,7 +9,7 @@ using static go.fmt_internal_test_package;
 
 partial class fmt_test_package {
 
-[GoType] partial struct testState {
+partial struct testState {
     internal nint width;
     internal bool widthOK;
     internal nint prec;
@@ -54,7 +54,7 @@ internal static testState mkState(nint w, nint p, @string flags) {
     return s;
 }
 
-[GoType("dyn")] internal partial struct TestFormatString_type {
+internal partial struct TestFormatString_type /*dyn*/ {
     internal nint width, prec;
     internal @string flags;
     internal @string result;

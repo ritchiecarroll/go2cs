@@ -109,7 +109,7 @@ public static void TestImportStdLib(ж<testing.T> Ꮡt) {
 
 // go/types.gcCompatibilityMode is off => interface not flattened
 
-[GoType("dyn")] partial struct importedObjectTestsᴛ1 {
+partial struct importedObjectTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal @string want;
 }

@@ -19,7 +19,7 @@ using static go.compress.gzip_package;
 
 partial class gzip_internal_test_package {
 
-[GoType] internal partial struct gunzipTest {
+internal partial struct gunzipTest {
     internal @string name;
     internal @string desc;
     internal @string raw;
@@ -540,7 +540,7 @@ public static void TestNilStream(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestTruncatedStreams_cases {
+internal partial struct TestTruncatedStreams_cases /*dyn*/ {
     internal @string name;
     internal slice<byte> data;
 }

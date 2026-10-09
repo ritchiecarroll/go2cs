@@ -260,7 +260,7 @@ internal static void slowIDCT(ж<global::go.image.jpeg_package.block> Ꮡb) {
     }
 }
 
-[GoRecv] internal static @string String(this ref global::go.image.jpeg_package.block b) {
+internal static @string String(this ref global::go.image.jpeg_package.block b) {
     var s = Ꮡ(new strings.Builder(nil));
     fmt.Fprintf(new jpeg_internal_test_package.strings_BuilderжWriter(s), "{\n"u8);
     for (nint y = 0; y < 8; y++) {

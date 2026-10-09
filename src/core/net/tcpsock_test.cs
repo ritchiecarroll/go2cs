@@ -351,7 +351,7 @@ internal static partial void benchmarkTCPConcurrentReadWrite(ж<testing.B> Ꮡb,
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct resolveTCPAddrTest {
+internal partial struct resolveTCPAddrTest {
     internal @string network;
     internal @string litAddrOrName;
     internal ж<global::go.net_package.TCPAddr> addr;
@@ -411,7 +411,7 @@ public static void TestResolveTCPAddr(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct tcpListenerNameTestsᴛ1 {
+partial struct tcpListenerNameTestsᴛ1 /*dyn*/ {
     internal @string net;
     internal ж<global::go.net_package.TCPAddr> laddr;
 }

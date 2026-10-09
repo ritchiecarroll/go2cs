@@ -95,7 +95,7 @@ internal static Func<global::go.crypto.@internal.fips140.edwards25519.field_pack
     };
 }
 
-[GoType("dyn")] [GoLocalName("target")] internal partial struct TestAliasing_target {
+internal partial struct TestAliasing_target /*dyn*/ {
     internal @string name;
     internal Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>> oneArgF;
     internal Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>> twoArgsF;

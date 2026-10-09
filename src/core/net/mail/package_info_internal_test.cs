@@ -29,7 +29,7 @@ using static go.net.mail_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/mail/message_test.go", "message_test.cs", "AB0kAEGIAYKCgoKClIKmgoKClIKC3IKClIKCgpSCpgAKBoIAHUKCpoKCkoKWgoKSggAKCqIAmgG6AoKmgoKSlqKSkpaCgpKWspKCAAwKggAbPoKCgqiSgoKCggAKDoIA7AKyBoKCgoKClIKogoKClIIACQqCAHyaApSCgpaUpKa4goKCgoKUgqiCgoKUggAJCoIASJABgoKCgqiCgoKClILexgAePIKCgoKUgoKCgpaCgrwAEyqCgoKCzoIACxqCgoKClIKUgvqCgoKUgoKUgoKUgoI=", "407-415:1;995-1009:1")]
+[assembly: go.GoPositionMap("net/mail/message_test.go", "message_test.cs", "AB0kAEGIAYKCgoKClIKmgoKClIKC3IKClIKCgpSCpgAKBoIAHUKCpoKCkoKWgoKSggAKCqIAmgG6AoKmgoKSlqKSkpaCgpKWspKCAAwKggAbPoKCgqiSgoKCggAKDoIA7AKyBoKCgoKClIKogoKClIIACQqCAHyaApSCgpaUpKa4goKCgoKUgqiCgoKUggAJCoIASJABgoKCgqiCgoKClILexgAePIKCgoKUgoKCgpaCgrwAEyqCgoKCzoIACxqCgoKClIKUgvqCgoKUgoKUgoKUgoI=", "407-415:1;995-1009:1", "", "145=FixedZone/1/5/7,Date/1/6/7,FixedZone/2/5/13,Date/2/6/13,FixedZone/3/5/18,Date/3/6/18,FixedZone/4/5/22,Date/4/6/22,Date/5/6/26,FixedZone/5/5/30,Date/6/6/30;205=FixedZone/1/16/9,Date/1/23/9,FixedZone/2/16/15,Date/2/23/15,FixedZone/3/16/20,Date/3/23/20,FixedZone/4/16/25,Date/4/23/25,FixedZone/5/16/31,Date/5/23/31,FixedZone/6/16/37,Date/6/23/37,FixedZone/7/16/55,Date/7/23/55,FixedZone/8/16/62,Date/8/23/62,FixedZone/9/16/68,Date/9/23/68,FixedZone/10/16/74,Date/10/23/74,FixedZone/11/16/80,Date/11/23/80,FixedZone/12/16/86,Date/12/23/86,FixedZone/13/16/92,Date/13/23/92,FixedZone/14/16/98,Date/14/23/98,FixedZone/15/16/110,Date/15/23/110,FixedZone/16/16/116,Date/16/23/116,Date/17/23/123,Date/18/23/128,Date/19/23/133,Date/20/23/138,Date/21/23/143,Date/22/23/148,Date/23/23/153")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -38,7 +38,7 @@ namespace go.net;
 public static partial class mail_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

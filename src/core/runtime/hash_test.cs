@@ -96,7 +96,7 @@ public static void TestSmhasherSanity(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct HashSet {
+partial struct HashSet {
     internal slice<uintptr> list; // list of hashes added
 }
 
@@ -104,23 +104,23 @@ internal static partial ж<HashSet> newHashSet() {
     return Ꮡ(new HashSet(list: new slice<uintptr>(0, 1024)));
 }
 
-[GoRecv] internal static void add(this ref HashSet s, uintptr h) {
+internal static void add(this ref HashSet s, uintptr h) {
     s.list = append(s.list, h);
 }
 
-[GoRecv] internal static void addS(this ref HashSet s, @string x) {
+internal static void addS(this ref HashSet s, @string x) {
     s.add(runtime_internal_test_package.StringHash(x, 0));
 }
 
-[GoRecv] internal static void addB(this ref HashSet s, slice<byte> x) {
+internal static void addB(this ref HashSet s, slice<byte> x) {
     s.add(runtime_internal_test_package.BytesHash(x, 0));
 }
 
-[GoRecv] internal static void addS_seed(this ref HashSet s, @string x, uintptr seed) {
+internal static void addS_seed(this ref HashSet s, @string x, uintptr seed) {
     s.add(runtime_internal_test_package.StringHash(x, seed));
 }
 
-[GoRecv] internal static void check(this ref HashSet s, ж<testing.T> Ꮡt) {
+internal static void check(this ref HashSet s, ж<testing.T> Ꮡt) {
     var list = s.list;
     slices.Sort<slice<uintptr>, uintptr>(list);
     nint collisions = 0;
@@ -364,7 +364,7 @@ internal static void genPerm(ж<HashSet> Ꮡh, slice<byte> b, slice<uint32> s, n
     }
 }
 
-[GoType] partial interface Key {
+partial interface Key {
     void clear();          // set bits all to 0
     void random(ж<rand.Rand> r); // set key to something random
     nint bits();          // how many bits key has
@@ -373,175 +373,175 @@ internal static void genPerm(ж<HashSet> Ꮡh, slice<byte> b, slice<uint32> s, n
     @string name();       // for error reporting
 }
 
-[GoType] partial struct BytesKey {
+partial struct BytesKey {
     internal slice<byte> b;
 }
 
-[GoRecv] internal static void clear(this ref BytesKey k) {
+internal static void clear(this ref BytesKey k) {
     builtin.clear(k.b);
 }
 
-[GoRecv] internal static void random(this ref BytesKey k, ж<rand.Rand> Ꮡr) {
+internal static void random(this ref BytesKey k, ж<rand.Rand> Ꮡr) {
     randBytes(Ꮡr, k.b);
 }
 
-[GoRecv] internal static nint bits(this ref BytesKey k) {
+internal static nint bits(this ref BytesKey k) {
     return len(k.b) * 8;
 }
 
-[GoRecv] internal static void flipBit(this ref BytesKey k, nint i) {
+internal static void flipBit(this ref BytesKey k, nint i) {
     k.b[(i >> (int)(3))] ^= (byte)((byte)(((byte)1).Lsh((nuint)((nint)(i & 7)))));
 }
 
-[GoRecv] internal static partial uintptr hash(this ref BytesKey k) {
+internal static partial uintptr hash(this ref BytesKey k) {
     return runtime_internal_test_package.BytesHash(k.b, 0);
 }
 
-[GoRecv] internal static @string name(this ref BytesKey k) {
+internal static @string name(this ref BytesKey k) {
     return fmt.Sprintf("bytes%d"u8, len(k.b));
 }
 
-[GoType] partial struct Int32Key {
+partial struct Int32Key {
     internal uint32 i;
 }
 
-[GoRecv] internal static void clear(this ref Int32Key k) {
+internal static void clear(this ref Int32Key k) {
     k.i = 0;
 }
 
-[GoRecv] internal static void random(this ref Int32Key k, ж<rand.Rand> Ꮡr) {
+internal static void random(this ref Int32Key k, ж<rand.Rand> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     k.i = r.Uint32();
 }
 
-[GoRecv] internal static nint bits(this ref Int32Key k) {
+internal static nint bits(this ref Int32Key k) {
     return 32;
 }
 
-[GoRecv] internal static void flipBit(this ref Int32Key k, nint i) {
+internal static void flipBit(this ref Int32Key k, nint i) {
     k.i ^= (uint32)(((uint32)1).Lsh((nuint)i));
 }
 
-[GoRecv] internal static partial uintptr hash(this ref Int32Key k) {
+internal static partial uintptr hash(this ref Int32Key k) {
     return runtime_internal_test_package.Int32Hash(k.i, 0);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string int32ˢ = "int32"u8;
 
-[GoRecv] internal static @string name(this ref Int32Key k) {
+internal static @string name(this ref Int32Key k) {
     return int32ˢ;
 }
 
-[GoType] partial struct Int64Key {
+partial struct Int64Key {
     internal uint64 i;
 }
 
-[GoRecv] internal static void clear(this ref Int64Key k) {
+internal static void clear(this ref Int64Key k) {
     k.i = 0;
 }
 
-[GoRecv] internal static void random(this ref Int64Key k, ж<rand.Rand> Ꮡr) {
+internal static void random(this ref Int64Key k, ж<rand.Rand> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     k.i = (uint64)r.Uint32() + ((uint64)r.Uint32() << (int)(32));
 }
 
-[GoRecv] internal static nint bits(this ref Int64Key k) {
+internal static nint bits(this ref Int64Key k) {
     return 64;
 }
 
-[GoRecv] internal static void flipBit(this ref Int64Key k, nint i) {
+internal static void flipBit(this ref Int64Key k, nint i) {
     k.i ^= (uint64)(((uint64)1).Lsh((nuint)i));
 }
 
-[GoRecv] internal static partial uintptr hash(this ref Int64Key k) {
+internal static partial uintptr hash(this ref Int64Key k) {
     return runtime_internal_test_package.Int64Hash(k.i, 0);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string int64ˢ = "int64"u8;
 
-[GoRecv] internal static @string name(this ref Int64Key k) {
+internal static @string name(this ref Int64Key k) {
     return int64ˢ;
 }
 
-[GoType] partial struct EfaceKey {
+partial struct EfaceKey {
     internal any i;
 }
 
-[GoRecv] internal static void clear(this ref EfaceKey k) {
+internal static void clear(this ref EfaceKey k) {
     k.i = default!;
 }
 
-[GoRecv] internal static void random(this ref EfaceKey k, ж<rand.Rand> Ꮡr) {
+internal static void random(this ref EfaceKey k, ж<rand.Rand> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     k.i = (uint64)r.Int63();
 }
 
-[GoRecv] internal static nint bits(this ref EfaceKey k) {
+internal static nint bits(this ref EfaceKey k) {
     // use 64 bits. This tests inlined interfaces
     // on 64-bit targets and indirect interfaces on
     // 32-bit targets.
     return 64;
 }
 
-[GoRecv] internal static void flipBit(this ref EfaceKey k, nint i) {
+internal static void flipBit(this ref EfaceKey k, nint i) {
     k.i = (uint64)(k.i._<uint64>() ^ ((uint64)1).Lsh((nuint)i));
 }
 
-[GoRecv] internal static partial uintptr hash(this ref EfaceKey k) {
+internal static partial uintptr hash(this ref EfaceKey k) {
     return runtime_internal_test_package.EfaceHash(k.i, 0);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string efaceˢ = "Eface"u8;
 
-[GoRecv] internal static @string name(this ref EfaceKey k) {
+internal static @string name(this ref EfaceKey k) {
     return efaceˢ;
 }
 
 
-[GoType] partial struct IfaceKey {
+partial struct IfaceKey {
     internal ifaceHash_i i;
 }
 
-[GoType("num:uint64")] partial struct fInter;
+partial struct fInter /*num:uint64*/;
 
 internal static void F(this fInter x) {
 }
 
-[GoRecv] internal static void clear(this ref IfaceKey k) {
+internal static void clear(this ref IfaceKey k) {
     k.i = default!;
 }
 
-[GoRecv] internal static void random(this ref IfaceKey k, ж<rand.Rand> Ꮡr) {
+internal static void random(this ref IfaceKey k, ж<rand.Rand> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     k.i = ((fInter)(uint64)r.Int63());
 }
 
-[GoRecv] internal static nint bits(this ref IfaceKey k) {
+internal static nint bits(this ref IfaceKey k) {
     // use 64 bits. This tests inlined interfaces
     // on 64-bit targets and indirect interfaces on
     // 32-bit targets.
     return 64;
 }
 
-[GoRecv] internal static void flipBit(this ref IfaceKey k, nint i) {
+internal static void flipBit(this ref IfaceKey k, nint i) {
     k.i = (fInter)(k.i._<fInter>() ^ (((fInter)1) << (int)((nuint)i)));
 }
 
-[GoRecv] internal static partial uintptr hash(this ref IfaceKey k) {
+internal static partial uintptr hash(this ref IfaceKey k) {
     return runtime_internal_test_package.IfaceHash(k.i, 0);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string ifaceˢ = "Iface"u8;
 
-[GoRecv] internal static @string name(this ref IfaceKey k) {
+internal static @string name(this ref IfaceKey k) {
     return ifaceˢ;
 }
 
@@ -800,7 +800,7 @@ public static void BenchmarkHash65536(ж<testing.B> Ꮡb) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fooˢ2 = "foo"u8;
 
-[GoLocalName("key")] [GoType("[8]@string")] internal partial struct TestArrayHash_key;
+internal partial struct TestArrayHash_key /*[8]@string*/;
 
 public static void TestArrayHash(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -842,7 +842,7 @@ public static void TestArrayHash(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStructHash_key {
+internal partial struct TestStructHash_key /*dyn*/ {
     internal @string a, b, c, d, e, f, g, h;
 }
 

@@ -11,22 +11,22 @@ using static go.debug.buildinfo_package;
 
 partial class buildinfo_internal_test_package {
 
-[GoType] internal partial struct byteExe {
+internal partial struct byteExe {
     internal slice<byte> b;
 }
 
-[GoRecv] internal static (io.ReaderAt, error) DataReader(this ref byteExe x, uint64 addr) {
+internal static (io.ReaderAt, error) DataReader(this ref byteExe x, uint64 addr) {
     if (addr >= (uint64)len(x.b)) {
         return (default!, fmt.Errorf("ReadData(%d) out of bounds of %d-byte slice"u8, addr, len(x.b)));
     }
     return (new buildinfo_test_package.bytes_ReaderжReaderAt(bytes.NewReader(x.b.slice((nint)(addr)))), default!);
 }
 
-[GoRecv] internal static (uint64, uint64) DataStart(this ref byteExe x) {
+internal static (uint64, uint64) DataStart(this ref byteExe x) {
     return (0, (uint64)len(x.b));
 }
 
-[GoType("dyn")] internal partial struct TestSearchMagic_tests {
+internal partial struct TestSearchMagic_tests /*dyn*/ {
     internal @string name;
     internal slice<byte> data;
     internal uint64 want;

@@ -56,7 +56,7 @@ internal static slice<byte> itoa(global::go.math.big_package.nat x, nint @base) 
 }
 
 
-[GoType("dyn")] partial struct strTestsᴛ1 {
+partial struct strTestsᴛ1 /*dyn*/ {
     internal global::go.math.big_package.nat x;    // nat value to be converted
     internal nint b;   // conversion base
     internal @string s; // expected result
@@ -118,7 +118,7 @@ public static void TestString(ж<testing.T> Ꮡt) {
 // valid, with decimal point
 // valid, with separators
 
-[GoType("dyn")] partial struct natScanTestsᴛ1 {
+partial struct natScanTestsᴛ1 /*dyn*/ {
     internal @string s; // string to be scanned
     internal nint @base;   // input base
     internal bool frac;   // fraction ok

@@ -210,7 +210,7 @@ public static void ExampleDB_PingContext() {
 internal static readonly @string insertIntoProjectsIdˢ = "INSERT INTO projects(id, mascot, release, category) VALUES( ?, ?, ?, ? )"u8;
 internal static readonly object openSourceˢ = (@string)"open source"u8;
 
-[GoType("dyn")] internal partial struct ExampleDB_Prepare_projects {
+internal partial struct ExampleDB_Prepare_projects /*dyn*/ {
     internal @string mascot;
     internal nint release;
 }
@@ -242,7 +242,7 @@ public static void ExampleDB_Prepare() {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct ExampleTx_Prepare_projects {
+internal partial struct ExampleTx_Prepare_projects /*dyn*/ {
     internal @string mascot;
     internal nint release;
 }

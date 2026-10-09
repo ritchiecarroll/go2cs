@@ -26,7 +26,7 @@ internal static (slice<byte>, Action) packetConnTestData(ж<testing.T> Ꮡt, @st
     return (slice<byte>("PACKETCONN TEST"u8), default!);
 }
 
-[GoType("dyn")] internal partial struct TestPacketConn_type {
+internal partial struct TestPacketConn_type /*dyn*/ {
     internal @string net;
     internal @string addr1;
     internal @string addr2;
@@ -99,7 +99,7 @@ public static void TestPacketConn(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestConnAndPacketConn_type {
+internal partial struct TestConnAndPacketConn_type /*dyn*/ {
     internal @string net;
     internal @string addr1;
     internal @string addr2;

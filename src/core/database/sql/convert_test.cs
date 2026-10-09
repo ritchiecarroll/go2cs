@@ -24,13 +24,13 @@ internal static time.Time someTime = time.Unix(123, 0);
 internal static ж<int64> Ꮡanswer = new StandardBox<int64>(42);
 internal static ref int64 answer => ref Ꮡanswer.Value;
 
-[GoType("num:float64")] internal partial struct userDefined;
+internal partial struct userDefined /*num:float64*/;
 
-[GoType("[]nint")] internal partial struct userDefinedSlice;
+internal partial struct userDefinedSlice /*[]nint*/;
 
-[GoType("@string")] internal partial struct userDefinedString;
+internal partial struct userDefinedString /*@string*/;
 
-[GoType] internal partial struct conversionTest {
+internal partial struct conversionTest {
     internal any s, d; // source and destination
     // following are used if they're non-zero
     internal int64 wantint;
@@ -328,7 +328,7 @@ public static void TestNullString(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct valueConverterTest {
+internal partial struct valueConverterTest {
     internal driver.ValueConverter c;
     internal any @in, @out;
     internal @string err;
@@ -365,7 +365,7 @@ internal static readonly object testAllocatesMoreWithˢ = (@string)"test allocat
 internal static readonly @string stringˢ = "string"u8;
 internal static readonly @string fooˢ = "foo"u8;
 
-[GoType("dyn")] internal partial struct TestRawBytesAllocs_type {
+internal partial struct TestRawBytesAllocs_type /*dyn*/ {
     internal @string name;
     internal any @in;
     internal @string want;
@@ -449,7 +449,7 @@ public static void TestRawBytesAllocs(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object userDefinedBytesGotˢ = (@string)"userDefinedBytes got potentially dirty driver memory"u8;
 
-[GoLocalName("userDefinedBytes")] [GoType("[]byte")] internal partial struct TestUserDefinedBytes_userDefinedBytes;
+internal partial struct TestUserDefinedBytes_userDefinedBytes /*[]byte*/;
 
 // https://golang.org/issues/13905
 public static void TestUserDefinedBytes(ж<testing.T> Ꮡt) {
@@ -461,13 +461,13 @@ public static void TestUserDefinedBytes(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("@string")] public partial struct Valuer_V;
+public partial struct Valuer_V /*@string*/;
 
 public static (driverꓸValue, error) Value(this Valuer_V v) {
     return (strings.ToUpper(((@string)v)), default!);
 }
 
-[GoType("@string")] public partial struct Valuer_P;
+public partial struct Valuer_P /*@string*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object nilToStrˢ = (@string)"nil-to-str"u8;
@@ -481,7 +481,7 @@ public static (driverꓸValue, error) Value(this ж<Valuer_P> Ꮡp) {
     return (strings.ToUpper(((@string)(p))), default!);
 }
 
-[GoType("dyn")] internal partial struct TestDriverArgs_tests {
+internal partial struct TestDriverArgs_tests /*dyn*/ {
     internal slice<any> args;
     internal slice<driver.NamedValue> want;
 }
@@ -550,7 +550,7 @@ public static void TestDriverArgs(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] [GoValueClone("coefficient")] internal partial struct dec {
+internal partial struct dec {
     internal byte form;
     internal bool neg;
     internal array<byte> coefficient = new(16);
@@ -565,7 +565,7 @@ internal static (byte form, bool negative, slice<byte> coefficient, int32 expone
     return (d.form, d.neg, coef, d.exponent);
 }
 
-[GoRecv] internal static error Compose(this ref dec d, byte form, bool negative, slice<byte> coefficient, int32 exponent) {
+internal static error Compose(this ref dec d, byte form, bool negative, slice<byte> coefficient, int32 exponent) {
     switch (form) {
     default: {
         return fmt.Errorf("unknown form %d"u8, form);
@@ -591,7 +591,7 @@ internal static (byte form, bool negative, slice<byte> coefficient, int32 expone
     return default!;
 }
 
-[GoType] [GoValueClone("coefficient")] internal partial struct decFinite {
+internal partial struct decFinite {
     internal bool neg;
     internal array<byte> coefficient = new(16);
     internal int32 exponent;
@@ -605,7 +605,7 @@ internal static (byte form, bool negative, slice<byte> coefficient, int32 expone
     return (0, d.neg, coef, d.exponent);
 }
 
-[GoRecv] internal static error Compose(this ref decFinite d, byte form, bool negative, slice<byte> coefficient, int32 exponent) {
+internal static error Compose(this ref decFinite d, byte form, bool negative, slice<byte> coefficient, int32 exponent) {
     switch (form) {
     default: {
         return fmt.Errorf("unknown form %d"u8, form);
@@ -628,7 +628,7 @@ internal static (byte form, bool negative, slice<byte> coefficient, int32 expone
     return default!;
 }
 
-[GoType("dyn")] [GoValueClone("@out")] internal partial struct TestDecimal_list {
+internal partial struct TestDecimal_list /*dyn*/ {
     internal @string name;
     internal global::go.database.sql_package.decimalDecompose @in;
     internal dec @out;

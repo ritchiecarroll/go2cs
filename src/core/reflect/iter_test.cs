@@ -12,9 +12,9 @@ using static global::go.reflect_internal_test_package;
 
 partial class reflect_test_package {
 
-[GoType("num:int8")] partial struct N;
+partial struct N /*num:int8*/;
 
-[GoType("dyn")] internal partial struct TestValueSeq_tests {
+internal partial struct TestValueSeq_tests /*dyn*/ {
     internal @string name;
     internal reflectꓸValue val;
     internal Action<ж<Δtesting.T>, iter.Seq<reflectꓸValue>> check;
@@ -222,7 +222,7 @@ public static void TestValueSeq(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestValueSeq2_tests {
+internal partial struct TestValueSeq2_tests /*dyn*/ {
     internal @string name;
     internal reflectꓸValue val;
     internal Action<ж<Δtesting.T>, iter.Seq2<reflectꓸValue, reflectꓸValue>> check;
@@ -409,7 +409,7 @@ public static void TestValueSeq2(ж<Δtesting.T> Ꮡt) {
 
 // methodIter is a type from which we can derive a method
 // value that is an iter.Seq.
-[GoType] partial struct methodIter {
+partial struct methodIter {
 }
 
 internal static void Seq(this methodIter _, Func<nint, bool> yield) {
@@ -422,7 +422,7 @@ internal static void Seq(this methodIter _, Func<nint, bool> yield) {
 
 // methodIter2 is a type from which we can derive a method
 // value that is an iter.Seq2.
-[GoType] partial struct methodIter2 {
+partial struct methodIter2 {
 }
 
 internal static void Seq2(this methodIter2 _, Func<nint, nint, bool> yield) {

@@ -161,7 +161,7 @@ public static void TestFloatGobDecodeShortBuffer(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatGobDecodeInvalid_type {
+internal partial struct TestFloatGobDecodeInvalid_type /*dyn*/ {
     internal slice<byte> buf;
     internal @string msg;
 }

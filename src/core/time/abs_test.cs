@@ -8,7 +8,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class time_internal_test_package {
 
-[GoType] public partial interface testingT {
+public partial interface testingT {
     void Error(params ꓸꓸꓸany argsʗp);
     void Errorf(@string format, params ꓸꓸꓸany argsʗp);
     void Fail();
@@ -25,7 +25,7 @@ partial class time_internal_test_package {
 }
 
 
-[GoType("dyn")] partial struct InternalTestsᴛ1 {
+partial struct InternalTestsᴛ1 /*dyn*/ {
     public @string Name;
     public Action<testingT> Test;
 }

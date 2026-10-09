@@ -1116,9 +1116,9 @@ internal static array<@string> testDataLarge = new(131072);
     }
 }
 
-[GoLocalName("dummy")] [GoType("[32]byte")] internal partial struct TestConcurrentCache_dummy;
+internal partial struct TestConcurrentCache_dummy /*[32]byte*/;
 
-[GoType("dyn")] internal partial struct TestConcurrentCache_cleanupArg {
+internal partial struct TestConcurrentCache_cleanupArg /*dyn*/ {
     internal nint key;
     internal weak.Pointer<TestConcurrentCache_dummy> value;
 }

@@ -46,13 +46,13 @@ partial class http_test_package {
 internal static readonly @string testFile = "testdata/file"u8;
 internal static UntypedInt testFileLen => 11;
 
-[GoType] partial struct wantRange {
+partial struct wantRange {
     internal int64 start, end; // range [start,end)
 }
 
 // ignore wasteful range request
 
-[GoType("dyn")] partial struct ServeFileRangeTestsᴛ1 {
+partial struct ServeFileRangeTestsᴛ1 /*dyn*/ {
     internal @string r;
     internal nint code;
     internal slice<wantRange> ranges;
@@ -232,7 +232,7 @@ continue_Cases:;
 break_Cases:;
 }
 
-[GoType("dyn")] internal partial struct TestServeFile_DotDot_tests {
+internal partial struct TestServeFile_DotDot_tests /*dyn*/ {
     internal @string req;
     internal nint wantStatus;
 }
@@ -304,7 +304,7 @@ public static void TestServeContentWithEmptyContentIgnoreRanges(ж<testing.T> �
 }
 
 
-[GoType("dyn")] partial struct fsRedirectTestDataᴛ1 {
+partial struct fsRedirectTestDataᴛ1 /*dyn*/ {
     internal @string original, redirect;
 }
 internal static slice<fsRedirectTestDataᴛ1> fsRedirectTestData = new fsRedirectTestDataᴛ1[]{
@@ -337,11 +337,11 @@ internal static void testFSRedirect(ж<testing.T> Ꮡt, testMode mode) {
     }
 }
 
-[GoType] partial struct testFileSystem {
+partial struct testFileSystem {
     internal Func<@string, (Δhttp.File, error)> open;
 }
 
-[GoRecv] internal static (Δhttp.File, error) Open(this ref testFileSystem fs, @string name) {
+internal static (Δhttp.File, error) Open(this ref testFileSystem fs, @string name) {
     return fs.open(name);
 }
 
@@ -349,7 +349,7 @@ internal static void testFSRedirect(ж<testing.T> Ꮡt, testMode mode) {
 internal static readonly @string fileDoesNotExistˢ = "file does not exist"u8;
 internal static readonly @string httpExampleComˢ = "http://example.com"u8;
 
-[GoType("dyn")] internal partial struct TestFileServerCleans_tests {
+internal partial struct TestFileServerCleans_tests /*dyn*/ {
     internal @string reqPath, openArg;
 }
 
@@ -395,7 +395,7 @@ internal static readonly @string dirListPrefixᶜ = "<!doctype html>\n<meta name
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string dirListSuffixᶜ = "\n</pre>\n"u8;
 
-[GoType("dyn")] internal partial struct testFileServerEscapesNames_tests {
+internal partial struct testFileServerEscapesNames_tests /*dyn*/ {
     internal @string name, escaped;
 }
 
@@ -977,7 +977,7 @@ internal static void testFileServerNamesEscape(ж<testing.T> Ꮡt, testMode mode
     }
 }
 
-[GoType] partial struct fakeFileInfo {
+partial struct fakeFileInfo {
     internal bool dir;
     internal @string basename;
     internal time.Time modtime;
@@ -986,27 +986,27 @@ internal static void testFileServerNamesEscape(ж<testing.T> Ꮡt, testMode mode
     internal error err;
 }
 
-[GoRecv] internal static @string Name(this ref fakeFileInfo f) {
+internal static @string Name(this ref fakeFileInfo f) {
     return f.basename;
 }
 
-[GoRecv] internal static any Sys(this ref fakeFileInfo f) {
+internal static any Sys(this ref fakeFileInfo f) {
     return default!;
 }
 
-[GoRecv] internal static time.Time ModTime(this ref fakeFileInfo f) {
+internal static time.Time ModTime(this ref fakeFileInfo f) {
     return f.modtime;
 }
 
-[GoRecv] internal static bool IsDir(this ref fakeFileInfo f) {
+internal static bool IsDir(this ref fakeFileInfo f) {
     return f.dir;
 }
 
-[GoRecv] internal static int64 Size(this ref fakeFileInfo f) {
+internal static int64 Size(this ref fakeFileInfo f) {
     return (int64)len(f.contents);
 }
 
-[GoRecv] internal static fs.FileMode Mode(this ref fakeFileInfo f) {
+internal static fs.FileMode Mode(this ref fakeFileInfo f) {
     if (f.dir) {
         return (fs.FileMode)(493 | fs.ModeDir);
     }
@@ -1017,22 +1017,22 @@ internal static @string String(this ж<fakeFileInfo> Ꮡf) {
     return fs.FormatFileInfo(new http_test_package.fakeFileInfoжFileInfo(Ꮡf));
 }
 
-[GoType] partial struct fakeFile {
-    [GoEmbedded] public io_package.ReadSeeker ReadSeeker;
+partial struct fakeFile {
+    /*embed*/ public io_package.ReadSeeker ReadSeeker;
     internal ж<fakeFileInfo> fi;
     internal @string path; // as opened
     internal nint entpos;
 }
 
-[GoRecv] internal static error Close(this ref fakeFile f) {
+internal static error Close(this ref fakeFile f) {
     return default!;
 }
 
-[GoRecv] internal static (fs.FileInfo, error) Stat(this ref fakeFile f) {
+internal static (fs.FileInfo, error) Stat(this ref fakeFile f) {
     return (new http_test_package.fakeFileInfoжFileInfo(f.fi), default!);
 }
 
-[GoRecv] internal static (slice<fs.FileInfo>, error) Readdir(this ref fakeFile f, nint count) {
+internal static (slice<fs.FileInfo>, error) Readdir(this ref fakeFile f, nint count) {
     if (!(~f.fi).dir) {
         return (default!, fs.ErrInvalid);
     }
@@ -1051,7 +1051,7 @@ internal static @string String(this ж<fakeFileInfo> Ꮡf) {
     }
 }
 
-[GoType("map[@string, ж<fakeFileInfo>]")] partial struct fakeFS;
+partial struct fakeFS /*map[@string, ж<fakeFileInfo>]*/;
 
 internal static (Δhttp.File, error) Open(this fakeFS fsys, @string name) {
     name = path.Clean(name);
@@ -1152,7 +1152,7 @@ internal static readonly @string eTagˢ = "ETag"u8;
 internal static readonly @string testdataIndexHtmlˢ = "testdata/index.html"u8;
 internal static readonly @string htmlFooˢ = "<html>foo"u8;
 
-[GoType("dyn")] internal partial struct testServeContent_serveParam {
+internal partial struct testServeContent_serveParam /*dyn*/ {
     internal @string name;
     internal time.Time modtime;
     internal io.ReadSeeker content;
@@ -1160,7 +1160,7 @@ internal static readonly @string htmlFooˢ = "<html>foo"u8;
     internal @string etag;
 }
 
-[GoType("dyn")] internal partial struct testServeContent_testCase {
+internal partial struct testServeContent_testCase /*dyn*/ {
     // One of file or content must be set:
     internal @string @file;
     internal io.ReadSeeker content;
@@ -1501,15 +1501,15 @@ public static void TestServerFileStatError(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct issue12991FS {
+partial struct issue12991FS {
 }
 
 internal static (Δhttp.File, error) Open(this issue12991FS _Δp0, @string _Δp1) {
     return (new issue12991File(nil), default!);
 }
 
-[GoType] partial struct issue12991File {
-    [GoEmbedded] public global::go.net.http_package.File File;
+partial struct issue12991File {
+    /*embed*/ public global::go.net.http_package.File File;
 }
 
 internal static (fs.FileInfo, error) Stat(this issue12991File _) {
@@ -1780,7 +1780,7 @@ internal static void testFileServerNotDirError(ж<testing.T> Ꮡt, testMode mode
     test(absolutePathˢ, newfs(absPath));
 }
 
-[GoType("dyn")] internal partial struct TestFileServerCleanPath_tests {
+internal partial struct TestFileServerCleanPath_tests /*dyn*/ {
     internal @string path;
     internal nint wantCode;
     internal slice<@string> wantOpen;
@@ -1806,7 +1806,7 @@ public static void TestFileServerCleanPath(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct fileServerCleanPathDir {
+partial struct fileServerCleanPathDir {
     internal ж<slice<@string>> log;
 }
 
@@ -1819,11 +1819,11 @@ internal static (Δhttp.File, error) Open(this fileServerCleanPathDir d, @string
     return (default!, fs.ErrNotExist);
 }
 
-[GoType] partial struct panicOnSeek {
-    [GoEmbedded] public io_package.ReadSeeker ReadSeeker;
+partial struct panicOnSeek {
+    /*embed*/ public io_package.ReadSeeker ReadSeeker;
 }
 
-[GoType("dyn")] internal partial struct TestScanETag_tests {
+internal partial struct TestScanETag_tests /*dyn*/ {
     internal @string @in;
     internal @string wantETag;
     internal @string wantRemain;
@@ -1854,7 +1854,7 @@ public static void TestServeFileRejectsInvalidSuffixLengths(ж<testing.T> Ꮡt) 
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testServeFileRejectsInvalidSuffixLengths(Δp0, Δp1), new testMode[]{http1Mode, https1Mode, http2Mode}.slice());
 }
 
-[GoType("dyn")] internal partial struct testServeFileRejectsInvalidSuffixLengths_tests {
+internal partial struct testServeFileRejectsInvalidSuffixLengths_tests /*dyn*/ {
     internal @string r;
     internal nint wantCode;
     internal @string wantBody;
@@ -2082,8 +2082,8 @@ public static void TestServeFileZippingResponseWriter(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct gzipResponseWriter {
-    [GoEmbedded] public global::go.net.http_package.ResponseWriter ResponseWriter;
+partial struct gzipResponseWriter {
+    /*embed*/ public global::go.net.http_package.ResponseWriter ResponseWriter;
     internal ж<gzip.Writer> w;
 }
 

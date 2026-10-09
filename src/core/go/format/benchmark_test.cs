@@ -54,7 +54,7 @@ internal static void array1(ж<bytes.Buffer> Ꮡbuf, nint n) {
 
 // add new test cases here as needed
 
-[GoType("dyn")] partial struct testsᴛ1 {
+partial struct testsᴛ1 /*dyn*/ {
     internal @string name;
     internal Action<ж<bytes.Buffer>, nint> gen;
     internal nint n;

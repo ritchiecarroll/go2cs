@@ -30,7 +30,7 @@ using static global::go.cmp_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("cmp/cmp_test.go", "cmp_test.cs", "ABAkopLkAB9GooKClLC0tLS0gsqCgoKUsLS0tLSCyqaCgoKClIIACQqCAAgYgoCCAAkKpoKEgoIACA7CAAgcvoI=", "160-166:1")]
+[assembly: go.GoPositionMap("cmp/cmp_test.go", "cmp_test.cs", "ABAkopLkAB9GooKClLC0tLS0gsqCgoKUsLS0tLSCyqaCgoKClIIACQqCAAgYgoCCAAkKpoKEgoIACA7CAAgcvoI=", "160-166:1", "", "29=Inf/1/10/13,Inf/2/10/13,Inf/3/10/14,Inf/4/10/14,Inf/5/10/15,Inf/6/10/16,Inf/7/10/17,Inf/8/10/18,NaN/1/6/19,NaN/2/6/19,NaN/3/6/20,NaN/4/6/21,NaN/5/6/22,Inf/9/10/22,Inf/10/10/23,NaN/6/6/23")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -39,7 +39,7 @@ namespace go;
 public static partial class cmp_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

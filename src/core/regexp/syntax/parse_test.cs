@@ -12,7 +12,7 @@ using static go.regexp.syntax_package;
 
 partial class syntax_internal_test_package {
 
-[GoType] internal partial struct parseTest {
+internal partial struct parseTest {
     public @string Regexp;
     public @string Dump;
 }
@@ -613,7 +613,7 @@ public static void TestToStringEquivalentParse(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct stringTestsᴛ1 {
+partial struct stringTestsᴛ1 /*dyn*/ {
     internal @string re;
     internal @string @out;
 }

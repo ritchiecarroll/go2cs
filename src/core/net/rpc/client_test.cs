@@ -14,28 +14,28 @@ using static global::go.net.rpc_package;
 
 partial class rpc_internal_test_package {
 
-[GoType] internal partial struct shutdownCodec {
+internal partial struct shutdownCodec {
     internal channel<nint> responded;
     internal bool closed;
 }
 
-[GoRecv] internal static error WriteRequest(this ref shutdownCodec c, ж<global::go.net.rpc_package.Request> _Δp1, any _Δp2) {
+internal static error WriteRequest(this ref shutdownCodec c, ж<global::go.net.rpc_package.Request> _Δp1, any _Δp2) {
     return default!;
 }
 
-[GoRecv] internal static error ReadResponseBody(this ref shutdownCodec c, any _) {
+internal static error ReadResponseBody(this ref shutdownCodec c, any _) {
     return default!;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string shutdownCodecˢ = "shutdownCodec ReadResponseHeader"u8;
 
-[GoRecv] internal static error ReadResponseHeader(this ref shutdownCodec c, ж<global::go.net.rpc_package.Response> _) {
+internal static error ReadResponseHeader(this ref shutdownCodec c, ж<global::go.net.rpc_package.Response> _) {
     c.responded.ᐸꟷ(1);
     return errors.New(shutdownCodecˢ);
 }
 
-[GoRecv] internal static error Close(this ref shutdownCodec c) {
+internal static error Close(this ref shutdownCodec c) {
     c.closed = true;
     return default!;
 }
@@ -54,14 +54,14 @@ public static void TestCloseCodec(ж<testing.T> Ꮡt) {
 }
 
 // Test that errors in gob shut down the connection. Issue 7689.
-[GoType] public partial struct R {
+public partial struct R {
     internal slice<byte> msg; // Not exported, so R does not work with gob.
 }
 
-[GoType] public partial struct S {
+public partial struct S {
 }
 
-[GoRecv] public static error Recv(this ref S s, ж<EmptyStruct> Ꮡnul, ж<R> Ꮡreply) {
+public static error Recv(this ref S s, ж<EmptyStruct> Ꮡnul, ж<R> Ꮡreply) {
     ref var reply = ref Ꮡreply.DerefOrNull();
 
     reply = new R(slice<byte>("foo"u8));

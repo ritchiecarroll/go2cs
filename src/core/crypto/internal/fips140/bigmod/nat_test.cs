@@ -41,7 +41,7 @@ internal static ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> set
     return Ꮡx;
 }
 
-[GoRecv] internal static ж<bigꓸInt> asBig(this ref global::go.crypto.@internal.fips140.bigmod_package.ΔNat n) {
+internal static ж<bigꓸInt> asBig(this ref global::go.crypto.@internal.fips140.bigmod_package.ΔNat n) {
     var bits = new slice<big.Word>(len(n.limbs));
     foreach (var (i, _) in n.limbs) {
         bits[i] = ((big.Word)n.limbs[i]);
@@ -49,7 +49,7 @@ internal static ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> set
     return @new<bigꓸInt>().SetBits(bits);
 }
 
-[GoRecv] internal static @string String(this ref global::go.crypto.@internal.fips140.bigmod_package.ΔNat n) {
+internal static @string String(this ref global::go.crypto.@internal.fips140.bigmod_package.ΔNat n) {
     slice<@string> limbs = default!;
     foreach (var (i, _) in n.limbs) {
         limbs = append(limbs, fmt.Sprintf("%016X"u8, n.limbs[len(n.limbs) - 1 - i]));
@@ -59,7 +59,7 @@ internal static ж<global::go.crypto.@internal.fips140.bigmod_package.ΔNat> set
 
 // Generate generates an even nat. It's used by testing/quick to produce random
 // *nat values for quick.Check invocations.
-[GoRecv] internal static reflectꓸValue Generate(this ref global::go.crypto.@internal.fips140.bigmod_package.ΔNat _, ж<rand.Rand> Ꮡr, nint size) {
+internal static reflectꓸValue Generate(this ref global::go.crypto.@internal.fips140.bigmod_package.ΔNat _, ж<rand.Rand> Ꮡr, nint size) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var limbs = new slice<nuint>(size);
@@ -129,7 +129,7 @@ public static void TestMontgomeryRoundtrip(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object examplesAreOnlyValidIn64ˢ = (@string)"examples are only valid in 64 bit"u8;
 
-[GoType("dyn")] internal partial struct TestShiftIn_examples {
+internal partial struct TestShiftIn_examples /*dyn*/ {
     internal slice<byte> m, x, expected;
     internal uint64 y;
 }
@@ -185,7 +185,7 @@ public static void TestModulusAndNatSizes(ж<testing.T> Ꮡt) {
     NewNat().SetBytes(xb, m);
 }
 
-[GoType("dyn")] internal partial struct TestSetBytes_tests {
+internal partial struct TestSetBytes_tests /*dyn*/ {
     internal slice<byte> m, b;
     internal bool fail;
 }
@@ -266,7 +266,7 @@ public static void TestSetBytes(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestExpand_examples {
+internal partial struct TestExpand_examples /*dyn*/ {
     internal slice<nuint> @in;
     internal nint n;
     internal slice<nuint> @out;
@@ -736,7 +736,7 @@ internal static slice<nuint> makeTestValue(nint nbits) {
     return x;
 }
 
-[GoType("dyn")] internal partial struct TestAddMulVVWSized_tests {
+internal partial struct TestAddMulVVWSized_tests /*dyn*/ {
     internal nint n;
     internal Func<ж<nuint>, ж<nuint>, nuint, nuint> f;
 }

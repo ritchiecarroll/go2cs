@@ -25,7 +25,7 @@ using static go.net.http.httputil_package;
 
 partial class httputil_internal_test_package {
 
-[GoType] internal partial struct eofReader {
+internal partial struct eofReader {
 }
 
 internal static error Close(this eofReader n) {
@@ -36,7 +36,7 @@ internal static (nint, error) Read(this eofReader n, slice<byte> _) {
     return (0, io.EOF);
 }
 
-[GoType] internal partial struct dumpTest {
+internal partial struct dumpTest {
     // Either Req or GetReq can be set/nil but not both.
     public ж<http.Request> Req;
     public Func<ж<http.Request>> GetReq;
@@ -329,7 +329,7 @@ internal static ж<http.Request> mustReadRequest(@string s) {
 // To verify if headers are not filtered out.
 // to verify we see 0, not empty.
 
-[GoType("dyn")] partial struct dumpResTestsᴛ1 {
+partial struct dumpResTestsᴛ1 /*dyn*/ {
     internal ж<http.Response> res;
     internal bool body;
     internal @string want;

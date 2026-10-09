@@ -122,7 +122,7 @@ kohxS/xfFg/TEwRSSws+roJr4JFKpO2t3/be5OdqmQ==
 
 // golang.org/issue/4477
 
-[GoType("dyn")] partial struct keyPairTestsᴛ1 {
+partial struct keyPairTestsᴛ1 /*dyn*/ {
     internal @string algo;
     internal @string cert;
     internal @string key;
@@ -1239,8 +1239,8 @@ public static void TestCloneNilConfig(ж<testing.T> Ꮡt) {
 
 // changeImplConn is a net.Conn which can change its Write and Close
 // methods.
-[GoType] internal partial struct changeImplConn {
-    [GoEmbedded] public net_package.Conn Conn;
+internal partial struct changeImplConn {
+    /*embed*/ public net_package.Conn Conn;
     internal Func<slice<byte>, (nint, error)> writeFunc;
     internal Func<error> closeFunc;
 }
@@ -1269,14 +1269,14 @@ internal static error SetReadDeadline(this changeImplConn recvᴛ, time.Time t) 
 // interface field in *changeImplConn's method set; see the pointer-only satisfaction record.
 internal static error SetWriteDeadline(this changeImplConn recvᴛ, time.Time t) => recvᴛ.Conn.SetWriteDeadline(t);
 
-[GoRecv] internal static (nint n, error err) Write(this ref changeImplConn w, slice<byte> p) {
+internal static (nint n, error err) Write(this ref changeImplConn w, slice<byte> p) {
     if (w.writeFunc != default!) {
         return w.writeFunc(p);
     }
     return w.Conn.Write(p);
 }
 
-[GoRecv] internal static error Close(this ref changeImplConn w) {
+internal static error Close(this ref changeImplConn w) {
     if (w.closeFunc != default!) {
         return w.closeFunc();
     }
@@ -1367,8 +1367,8 @@ public static void BenchmarkThroughput(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType] internal partial struct slowConn {
-    [GoEmbedded] public net_package.Conn Conn;
+internal partial struct slowConn {
+    /*embed*/ public net_package.Conn Conn;
     internal nint bps;
 }
 
@@ -1400,7 +1400,7 @@ internal static error SetReadDeadline(this slowConn recvᴛ, time.Time t) => rec
 // interface field in *slowConn's method set; see the pointer-only satisfaction record.
 internal static error SetWriteDeadline(this slowConn recvᴛ, time.Time t) => recvᴛ.Conn.SetWriteDeadline(t);
 
-[GoRecv] internal static (nint, error) Write(this ref slowConn c, slice<byte> p) {
+internal static (nint, error) Write(this ref slowConn c, slice<byte> p) {
     if (c.bps == 0) {
         throw panic("too slow");
     }
@@ -1656,7 +1656,7 @@ internal static @string testingKey(@string s) {
     return strings.ReplaceAll(s, "TESTING KEY"u8, "PRIVATE KEY"u8);
 }
 
-[GoType("dyn")] internal partial struct TestClientHelloInfo_SupportsCertificate_tests {
+internal partial struct TestClientHelloInfo_SupportsCertificate_tests /*dyn*/ {
     internal ж<global::go.crypto.tls_package.Certificate> c;
     internal ж<global::go.crypto.tls_package.ClientHelloInfo> chi;
     internal @string wantErr;
@@ -2091,8 +2091,8 @@ internal static bool http2isBadCipher(uint16 cipher) {
 
 }
 
-[GoType] internal partial struct brokenSigner {
-    [GoEmbedded] public crypto_package.Signer Signer;
+internal partial struct brokenSigner {
+    /*embed*/ public crypto_package.Signer Signer;
 }
 
 internal static (slice<byte> signature, error err) Sign(this brokenSigner s, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) {
@@ -2153,7 +2153,7 @@ internal static readonly object verifyPeerCertificatesˢ2 = (@string)"VerifyPeer
 internal static readonly object verifyConnectionDidNotˢ3 = (@string)"VerifyConnection did not get called on the server on resumption"u8;
 internal static readonly object verifyConnectionDidNotˢ4 = (@string)"VerifyConnection did not get called on the client on resumption"u8;
 
-[GoType("dyn")] internal partial struct testVerifyCertificates_tests {
+internal partial struct testVerifyCertificates_tests /*dyn*/ {
     internal @string name;
     public bool InsecureSkipVerify;
     public global::go.crypto.tls_package.ClientAuthType ClientAuth;
@@ -2299,7 +2299,7 @@ internal static readonly object clientDidNotUseHrrˢ = (@string)"client did not 
 internal static readonly object serverUsedHrrˢ = (@string)"server used HRR"u8;
 internal static readonly object clientUsedHrrˢ = (@string)"client used HRR"u8;
 
-[GoType("dyn")] internal partial struct TestHandshakeMLKEM_type {
+internal partial struct TestHandshakeMLKEM_type /*dyn*/ {
     internal @string name;
     internal Action<ж<global::go.crypto.tls_package.Config>> clientConfig;
     internal Action<ж<global::go.crypto.tls_package.Config>> serverConfig;

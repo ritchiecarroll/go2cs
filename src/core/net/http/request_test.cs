@@ -152,7 +152,7 @@ public static void TestParseFormQueryMethods(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestParseFormUnknownContentType_type {
+internal partial struct TestParseFormUnknownContentType_type /*dyn*/ {
     internal @string name;
     internal @string wantErr;
     internal httpꓸHeader contentType;
@@ -217,7 +217,7 @@ public static void TestParseFormInitializeOnError(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestMultipartReader_tests {
+internal partial struct TestMultipartReader_tests /*dyn*/ {
     internal bool shouldError;
     internal @string contentType;
 }
@@ -646,7 +646,7 @@ public static void TestFormFileOrder(ж<testing.T> Ꮡt) {
 // deduplicated if same or reject otherwise
 // See Issue 16490.
 
-[GoType("dyn")] partial struct readRequestErrorTestsᴛ1 {
+partial struct readRequestErrorTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string err;
     internal httpꓸHeader header;
@@ -709,7 +709,7 @@ public static void TestReadRequestErrors(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct newRequestHostTestsᴛ1 {
+partial struct newRequestHostTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
 }
 internal static slice<newRequestHostTestsᴛ1> newRequestHostTests = new newRequestHostTestsᴛ1[]{
@@ -772,13 +772,13 @@ public static void TestRequestInvalidMethod(ж<testing.T> Ꮡt) {
 internal static readonly @string xyzˢ = "xyz"u8;
 internal static readonly @string httpLocalhostˢ = "http://localhost/"u8;
 
-[GoType("dyn")] internal partial struct TestNewRequestContentLength_tests {
+internal partial struct TestNewRequestContentLength_tests /*dyn*/ {
     internal io.Reader r;
     internal int64 want;
 }
 
-[GoType("dyn")] internal partial struct TestNewRequestContentLength_type {
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct TestNewRequestContentLength_type /*dyn*/ {
+    /*embed*/ public io_package.Reader Reader;
 }
 
 public static void TestNewRequestContentLength(ж<testing.T> Ꮡt) {
@@ -812,7 +812,7 @@ public static void TestNewRequestContentLength(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct parseHTTPVersionTestsᴛ1 {
+partial struct parseHTTPVersionTestsᴛ1 /*dyn*/ {
     internal @string vers;
     internal nint major, minor;
     internal bool ok;
@@ -837,7 +837,7 @@ internal static slice<parseHTTPVersionTestsᴛ1> parseHTTPVersionTests = new par
     new("HTTP/12.3"u8, 0, 0, false)
 }.slice();
 
-[GoType("dyn")] internal partial struct TestParseHTTPVersion_version {
+internal partial struct TestParseHTTPVersion_version /*dyn*/ {
     internal nint major, minor;
     internal bool ok;
 }
@@ -851,17 +851,17 @@ public static void TestParseHTTPVersion(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct getBasicAuthTest {
+partial struct getBasicAuthTest {
     internal @string username, password;
     internal bool ok;
 }
 
-[GoType] partial struct basicAuthCredentialsTest {
+partial struct basicAuthCredentialsTest {
     internal @string username, password;
 }
 
 
-[GoType("dyn")] partial struct getBasicAuthTestsᴛ1 {
+partial struct getBasicAuthTestsᴛ1 /*dyn*/ {
     internal @string username, password;
     internal bool ok;
 }
@@ -896,7 +896,7 @@ public static void TestGetBasicAuth(ж<testing.T> Ꮡt) {
 
 // Case doesn't matter:
 
-[GoType("dyn")] partial struct parseBasicAuthTestsᴛ1 {
+partial struct parseBasicAuthTestsᴛ1 /*dyn*/ {
     internal @string header, username, password;
     internal bool ok;
 }
@@ -925,7 +925,7 @@ public static void TestParseBasicAuth(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct logWrites {
+partial struct logWrites {
     internal ж<testing.T> t;
     internal ж<slice<@string>> dst;
 }
@@ -1057,8 +1057,8 @@ public static void TestStarRequest(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct responseWriterJustWriter {
-    [GoEmbedded] public io_package.Writer Writer;
+partial struct responseWriterJustWriter {
+    /*embed*/ public io_package.Writer Writer;
 }
 
 internal static httpꓸHeader Header(this responseWriterJustWriter _) {
@@ -1071,7 +1071,7 @@ internal static void WriteHeader(this responseWriterJustWriter _Δp0, nint _Δp1
 
 // delayedEOFReader never returns (n > 0, io.EOF), instead putting
 // off the io.EOF until a subsequent Read call.
-[GoType] partial struct delayedEOFReader {
+partial struct delayedEOFReader {
     internal io.Reader r;
 }
 
@@ -1097,7 +1097,7 @@ public static void TestIssue10884_MaxBytesEOF(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestMaxBytesReaderStickyError_tests {
+internal partial struct TestMaxBytesReaderStickyError_tests /*dyn*/ {
     internal nint readable;
     internal int64 limit;
 }
@@ -1144,7 +1144,7 @@ public static void TestMaxBytesReaderStickyError(ж<testing.T> Ꮡt) {
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string testStrᶜ = "1234"u8;
 
-[GoType("dyn")] internal partial struct TestMaxBytesReaderDifferentLimits_tests {
+internal partial struct TestMaxBytesReaderDifferentLimits_tests /*dyn*/ {
     internal int64 limit;
     internal nint lenP;
     internal nint wantN;
@@ -1348,7 +1348,7 @@ internal static void testNoPanicWithBasicAuth(ж<testing.T> Ꮡt, testMode mode)
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string httpFooTldˢ = "http://foo.tld/"u8;
 
-[GoType("dyn")] internal partial struct TestNewRequestGetBody_tests {
+internal partial struct TestNewRequestGetBody_tests /*dyn*/ {
     internal io.Reader r;
 }
 
@@ -1504,7 +1504,7 @@ internal static multipart.File testMultipartFile(ж<testing.T> Ꮡt, ж<Δhttp.R
     return f;
 }
 
-[GoType("dyn")] internal partial struct TestRequestCookie_type {
+internal partial struct TestRequestCookie_type /*dyn*/ {
     internal @string name;
     internal @string value;
     internal error expectedErr;
@@ -1546,7 +1546,7 @@ public static void TestRequestCookie(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestRequestCookiesByName_tests {
+internal partial struct TestRequestCookiesByName_tests /*dyn*/ {
     internal slice<ж<httpꓸCookie>> @in;
     internal @string filter;
     internal slice<ж<httpꓸCookie>> want;
@@ -1646,12 +1646,12 @@ internal static void benchmarkReadRequest(ж<testing.B> Ꮡb, @string request) {
 
 // infiniteReader satisfies Read requests as if the contents of buf
 // loop indefinitely.
-[GoType] partial struct infiniteReader {
+partial struct infiniteReader {
     internal slice<byte> buf;
     internal nint offset;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref infiniteReader r, slice<byte> b) {
+internal static (nint, error) Read(this ref infiniteReader r, slice<byte> b) {
     nint n = copy(b, r.buf.slice(r.offset));
     r.offset = (r.offset + n) % len(r.buf);
     return (n, default!);
@@ -1846,7 +1846,7 @@ public static void TestPathValueNoMatch(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPathValueAndPattern_type {
+internal partial struct TestPathValueAndPattern_type /*dyn*/ {
     internal @string pattern;
     internal @string url;
     internal map<@string, @string> want;
@@ -1966,7 +1966,7 @@ internal static readonly @string putRˢ = "PUT /r"u8;
 internal static readonly @string getRˢ = "GET /r/"u8;
 internal static readonly @string allowˢ = "Allow"u8;
 
-[GoType("dyn")] internal partial struct TestStatus_type {
+internal partial struct TestStatus_type /*dyn*/ {
     internal @string method, path;
     internal nint wantStatus;
     internal @string wantAllow;

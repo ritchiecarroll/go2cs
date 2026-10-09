@@ -736,7 +736,7 @@ public static void TestLastLineComment(ж<testing.T> Ꮡt) {
 // Parser nodes: GoStmt, FuncLit
 // Parser nodes: DeferStmt, FuncLit
 
-[GoType("dyn")] partial struct parseDepthTestsᴛ1 {
+partial struct parseDepthTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal @string format;
     // parseMultiplier is used when a single statement may result in more than one
@@ -1026,7 +1026,7 @@ public static void TestParseTypeParamsAsParenExpr(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string aGoˢ = "a.go"u8;
 
-[GoType("dyn")] internal partial struct TestEmptyFileHasValidStartEnd_type {
+internal partial struct TestEmptyFileHasValidStartEnd_type /*dyn*/ {
     internal @string src;
     internal @string want; // "Pos() FileStart FileEnd"
 }

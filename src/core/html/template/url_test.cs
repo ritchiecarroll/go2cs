@@ -8,7 +8,7 @@ using static go.html.template_package;
 
 partial class template_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestURLNormalizer_tests {
+internal partial struct TestURLNormalizer_tests /*dyn*/ {
     internal @string url, want;
 }
 
@@ -41,7 +41,7 @@ public static void TestURLNormalizer(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestURLFilters_tests {
+internal partial struct TestURLFilters_tests /*dyn*/ {
     internal @string name;
     internal Funcꓸꓸꓸ<any, @string> escaper;
     internal @string escaped;
@@ -73,7 +73,7 @@ public static void TestURLFilters(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestSrcsetFilter_tests {
+internal partial struct TestSrcsetFilter_tests /*dyn*/ {
     internal @string name;
     internal @string input;
     internal @string want;

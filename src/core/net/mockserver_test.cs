@@ -109,7 +109,7 @@ internal static global::go.net_package.Listener newLocalListener(testing.TB t, @
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string noDualstackPortAvailableˢ = "no dualstack port available"u8;
 
-[GoType("dyn")] internal partial struct newDualStackListener_type {
+internal partial struct newDualStackListener_type /*dyn*/ {
     internal @string network;
     public partial ref global::go.net_package.TCPAddr TCPAddr { get; }
 }
@@ -145,9 +145,9 @@ internal static (slice<ж<global::go.net_package.TCPListener>> lns, error err) n
     return (default!, errors.New(noDualstackPortAvailableˢ));
 }
 
-[GoType] internal partial struct localServer {
+internal partial struct localServer {
     internal Δsync.RWMutex lnmu;
-    [GoEmbedded] public global::go.net_package.Listener Listener;
+    /*embed*/ public global::go.net_package.Listener Listener;
     internal channel<bool> done; // signal that indicates server stopped
     internal slice<global::go.net_package.Conn> cl; // accepted connection list
 }
@@ -199,17 +199,17 @@ internal static ж<localServer> newLocalServer(testing.TB t, @string network) {
     return Ꮡ(new localServer(Listener: ln, done: new channel<bool>(0)));
 }
 
-[GoType] internal partial struct streamListener {
+internal partial struct streamListener {
     internal @string network, address;
-    [GoEmbedded] public global::go.net_package.Listener Listener;
+    /*embed*/ public global::go.net_package.Listener Listener;
     internal channel<bool> done; // signal that indicates server stopped
 }
 
-[GoRecv] internal static ж<localServer> newLocalServer(this ref streamListener sl) {
+internal static ж<localServer> newLocalServer(this ref streamListener sl) {
     return Ꮡ(new localServer(Listener: sl.Listener, done: new channel<bool>(0)));
 }
 
-[GoType] internal partial struct dualStackServer {
+internal partial struct dualStackServer {
     internal Δsync.RWMutex lnmu;
     internal slice<streamListener> lns;
     internal @string port;
@@ -446,7 +446,7 @@ internal static global::go.net_package.PacketConn newLocalPacketListener(testing
     return default!;
 }
 
-[GoType("dyn")] internal partial struct newDualStackPacketListener_type {
+internal partial struct newDualStackPacketListener_type /*dyn*/ {
     internal @string network;
     public partial ref global::go.net_package.UDPAddr UDPAddr { get; }
 }
@@ -482,9 +482,9 @@ internal static (slice<ж<global::go.net_package.UDPConn>> cs, error err) newDua
     return (default!, errors.New(noDualstackPortAvailableˢ));
 }
 
-[GoType] internal partial struct localPacketServer {
+internal partial struct localPacketServer {
     internal Δsync.RWMutex pcmu;
-    [GoEmbedded] public global::go.net_package.PacketConn PacketConn;
+    /*embed*/ public global::go.net_package.PacketConn PacketConn;
     internal channel<bool> done; // signal that indicates server stopped
 }
 
@@ -522,11 +522,11 @@ internal static ж<localPacketServer> newLocalPacketServer(testing.TB t, @string
     return Ꮡ(new localPacketServer(PacketConn: c, done: new channel<bool>(0)));
 }
 
-[GoType] internal partial struct packetListener {
-    [GoEmbedded] public global::go.net_package.PacketConn PacketConn;
+internal partial struct packetListener {
+    /*embed*/ public global::go.net_package.PacketConn PacketConn;
 }
 
-[GoRecv] internal static ж<localPacketServer> newLocalServer(this ref packetListener pl) {
+internal static ж<localPacketServer> newLocalServer(this ref packetListener pl) {
     return Ꮡ(new localPacketServer(PacketConn: pl.PacketConn, done: new channel<bool>(0)));
 }
 
@@ -661,7 +661,7 @@ internal static partial (global::go.net_package.Conn client, global::go.net_pack
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tmpdirˢ = "TMPDIR"u8;
 
-[GoType("dyn")] internal partial interface startTestSocketPeer_type {
+internal partial interface startTestSocketPeer_type /*dyn*/ {
     (ж<Δos.File>, error) File();
 }
 

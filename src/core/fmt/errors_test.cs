@@ -18,7 +18,7 @@ internal static readonly object suffixˢ = (@string)"suffix"u8;
 internal static readonly object positionalVerbˢ = (@string)"positional verb"u8;
 internal static readonly object notAnErrorˢ = (@string)"not-an-error"u8;
 
-[GoType("dyn")] internal partial struct TestErrorf_type {
+internal partial struct TestErrorf_type /*dyn*/ {
     internal error err;
     internal @string wantText;
     internal error wantUnwrap;
@@ -112,7 +112,7 @@ public static void TestErrorf(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial interface splitErr_type {
+internal partial interface splitErr_type /*dyn*/ {
     slice<error> Unwrap();
 }
 
@@ -125,7 +125,7 @@ internal static slice<error> splitErr(error err) {
     return default!;
 }
 
-[GoType("@string")] partial struct errString;
+partial struct errString /*@string*/;
 
 internal static @string Error(this errString e) {
     return ((@string)e);

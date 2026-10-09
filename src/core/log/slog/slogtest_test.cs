@@ -18,7 +18,7 @@ using static go.log.slog_internal_test_package;
 
 partial class slog_test_package {
 
-[GoType("dyn")] internal partial struct TestSlogtest_type {
+internal partial struct TestSlogtest_type /*dyn*/ {
     internal @string name;
     internal Func<io.Writer, slogꓸHandler> @new;
     internal Func<slice<byte>, (map<@string, any>, error)> parse;

@@ -181,7 +181,7 @@ public static void BenchmarkValueRead(ж<testing.B> Ꮡb) {
 }
 
 
-[GoType("dyn")] partial struct Value_SwapTestsᴛ1 {
+partial struct Value_SwapTestsᴛ1 /*dyn*/ {
     internal any init;
     internal any @new;
     internal any want;
@@ -273,14 +273,14 @@ public static partial void TestValueSwapConcurrent(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct heapAᴛ1 {
-    [GoEmbedded] internal nuint @uint;
+partial struct heapAᴛ1 /*dyn*/ {
+    /*embed*/ internal nuint @uint;
 }
 internal static heapAᴛ1 heapA = new heapAᴛ1(0);
 internal static heapAᴛ1 heapB = new heapAᴛ1(0);
 
 
-[GoType("dyn")] partial struct Value_CompareAndSwapTestsᴛ1 {
+partial struct Value_CompareAndSwapTestsᴛ1 /*dyn*/ {
     internal any init;
     internal any @new;
     internal any old;

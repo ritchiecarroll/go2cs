@@ -14,7 +14,7 @@ public static Func<rune, bool> IsSpace = isSpace;
 
 public static UntypedInt DefaultBufSize => /* defaultBufSize */ 4096;
 
-[GoRecv] internal static void MaxTokenSize(this ref global::go.bufio_package.Scanner s, nint n) {
+internal static void MaxTokenSize(this ref global::go.bufio_package.Scanner s, nint n) {
     if (n < utf8.UTFMax || n > 1000000000) {
         throw panic("bad max token size");
     }
@@ -25,7 +25,7 @@ public static UntypedInt DefaultBufSize => /* defaultBufSize */ 4096;
 }
 
 // ErrOrEOF is like Err, but returns EOF. Used to test a corner case.
-[GoRecv] internal static error ErrOrEOF(this ref global::go.bufio_package.Scanner s) {
+internal static error ErrOrEOF(this ref global::go.bufio_package.Scanner s) {
     return s.err;
 }
 

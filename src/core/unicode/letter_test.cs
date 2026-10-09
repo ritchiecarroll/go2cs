@@ -114,7 +114,7 @@ internal static slice<rune> spaceTest = new rune[]{
     0x3000
 }.slice();
 
-[GoType] partial struct caseT {
+partial struct caseT {
     internal nint cas;
     internal rune @in, @out;
 }

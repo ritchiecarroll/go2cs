@@ -19,7 +19,7 @@ using static go.crypto.sha1_package;
 
 partial class sha1_internal_test_package {
 
-[GoType] internal partial struct sha1Test {
+internal partial struct sha1Test {
     internal @string @out;
     internal @string @in;
     internal @string halfState; // marshaled hash state after first half of in written, used by TestGoldenMarshal
@@ -192,7 +192,7 @@ public static void TestBlockGeneric(ж<testing.T> Ꮡt) {
 // the data length has a 1 in the 32nd bit. When casted to int, this changes
 // the sign of the value, and causes the modulus operation to return a
 // different result.
-[GoType] internal partial struct unmarshalTest {
+internal partial struct unmarshalTest {
     internal @string state;
     internal @string sum;
 }

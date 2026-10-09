@@ -81,7 +81,7 @@ internal static readonly @string foobazˢ = "foobaz"u8;
 internal static readonly @string matchˢ = "[match]"u8;
 internal static readonly @string helloˢ3 = "Hello"u8;
 
-[GoType("dyn")] internal partial struct TestReplacer_testCase {
+internal partial struct TestReplacer_testCase /*dyn*/ {
     internal ж<strings.Replacer> r;
     internal @string @in, @out;
 }
@@ -295,7 +295,7 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct algorithmTestCasesᴛ1 {
+partial struct algorithmTestCasesᴛ1 /*dyn*/ {
     internal ж<strings.Replacer> r;
     internal @string want;
 }
@@ -318,7 +318,7 @@ public static void TestPickAlgorithm(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct errWriter {
+partial struct errWriter {
 }
 
 internal static (nint n, error err) Write(this errWriter _, slice<byte> p) {
@@ -336,7 +336,7 @@ public static void TestWriteStringError(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestGenericTrieBuilding_testCases {
+internal partial struct TestGenericTrieBuilding_testCases /*dyn*/ {
     internal @string @in, @out;
 }
 
@@ -584,7 +584,7 @@ public static void BenchmarkByteByteMap(ж<testing.B> Ꮡb) {
 }
 
 
-[GoType("dyn")] partial struct mapdataᴛ1 {
+partial struct mapdataᴛ1 /*dyn*/ {
     internal @string name, data;
 }
 internal static slice<mapdataᴛ1> mapdata = new mapdataᴛ1[]{

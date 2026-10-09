@@ -256,8 +256,8 @@ internal static void testTLSServerClientTransportType(ж<testing.T> Ꮡt, Func<h
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct onlyCloseListener {
-    [GoEmbedded] public net_package.Listener Listener;
+internal partial struct onlyCloseListener {
+    /*embed*/ public net_package.Listener Listener;
 }
 
 internal static error Close(this onlyCloseListener _) {
@@ -356,7 +356,7 @@ public static partial void TestCloseHijackedConnection(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string xProtoˢ = "X-Proto"u8;
 
-[GoType("dyn")] internal partial struct TestTLSServerWithHTTP2_modes {
+internal partial struct TestTLSServerWithHTTP2_modes /*dyn*/ {
     internal @string name;
     internal @string wantProto;
 }

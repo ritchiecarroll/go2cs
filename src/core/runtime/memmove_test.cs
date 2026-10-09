@@ -475,7 +475,7 @@ public static void BenchmarkGoMemclr(ж<testing.B> Ꮡb) {
     });
 }
 
-[GoType("dyn")] internal partial struct BenchmarkMemclrRange_RunData {
+internal partial struct BenchmarkMemclrRange_RunData /*dyn*/ {
     internal slice<nint> data;
 }
 
@@ -996,7 +996,7 @@ public static void BenchmarkCopyFat1040(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkIssue18740_benchmarks {
+internal partial struct BenchmarkIssue18740_benchmarks /*dyn*/ {
     internal @string name;
     internal nint nbyte;
     internal Func<slice<byte>, uint64> f;

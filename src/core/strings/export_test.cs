@@ -22,7 +22,7 @@ internal static @string PrintTrie(this ж<global::go.strings_package.Replacer> �
     return gen.printNode(gen.of(global::go.strings_package.genericReplacer.Ꮡroot), 0);
 }
 
-[GoRecv] internal static @string /*s*/ printNode(this ref global::go.strings_package.genericReplacer r, ж<global::go.strings_package.trieNode> Ꮡt, nint depth) {
+internal static @string /*s*/ printNode(this ref global::go.strings_package.genericReplacer r, ж<global::go.strings_package.trieNode> Ꮡt, nint depth) {
     @string s = default!;
 
     ref var t = ref Ꮡt.DerefOrNull();

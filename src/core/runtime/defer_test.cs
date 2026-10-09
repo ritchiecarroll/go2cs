@@ -246,13 +246,13 @@ public static void TestRecoverMatching(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("[128]byte")] partial struct nonSSAable;
+partial struct nonSSAable /*[128]byte*/;
 
-[GoType] partial struct bigStruct {
+partial struct bigStruct {
     internal int64 x, y, z, w, p, q;
 }
 
-[GoType] partial struct containsBigStruct {
+partial struct containsBigStruct {
     internal bigStruct element;
 }
 
@@ -445,15 +445,15 @@ public static void TestIssue37688(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct foo {
+partial struct foo {
 }
 
 //go:noinline
-[GoRecv] internal static partial void method1(this ref foo f) {
+internal static partial void method1(this ref foo f) {
 }
 
 //go:noinline
-[GoRecv] internal static partial void method2(this ref foo f) {
+internal static partial void method2(this ref foo f) {
 }
 
 internal static void g2() {
@@ -486,7 +486,7 @@ internal static void g3() {
 }
 
 
-[GoType("dyn")] partial struct globstructᴛ1 {
+partial struct globstructᴛ1 /*dyn*/ {
     internal nint a, b, c, d, e, f, g, h, i;
 }
 internal static globstructᴛ1 globstruct;

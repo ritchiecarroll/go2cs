@@ -51,7 +51,7 @@ using static global::go.debug.buildinfo_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("debug/buildinfo/buildinfo_test.go", "buildinfo_test.cs", "ACI0ABoM4oKUhAAIFJKCgoKCpoKWgoKoiJKCgoKAgqSCgoCCpIKCgoKCgoCCgIKkpJaSgoKAgqSCgoCCpIKCgoKCgoCCgIKkpJaCgoKUgoKUgoCCuIKCgpSCgpSCgoCCuIKC6oKCgpSUlgASIIKCgIKkAAsegoLugoIACxyCgsyCktKClIKCsoKSsoKCgIKCkoCCtoKUgoCCAA8YkoKCloKCloKUgpSC+rKCgpaCgrqCAAMQ9IKCAAMQ4oSYhpSClISEhMqEhIKChICCuKSClqKUgoKEhIKCkoCC7KKCgpSEgoKUhII=", "66-68:1;70-95:2;97-121:3;123-136:4;138-152:5;156-169:6;162-167:6.1;179-181:7;186-193:8;206-210:9;215-219:10;231-235:11;242-273:12;248-271:12.1;251-269:12.1.1;326-328:1;380-395:1;412-414:1")]
+[assembly: go.GoPositionMap("debug/buildinfo/buildinfo_test.go", "buildinfo_test.cs", "ACI0ABoM4oKUhAAIFJKCgoKCpoKWgoKoiJKCgoKAgqSCgoCCpIKCgoKCgoCCgIKkpJaSgoKAgqSCgoCCpIKCgoKCgoCCgIKkpJaCgoKUgoKUgoCCuIKCgpSCgpSCgoCCuIKC6oKCgpSUlgASIIKCgIKkAAsegoLugoIACxyCgsyCktKClIKCsoKSsoKCgIKCkoCCtoKUgoCCAA8YkoKCloKCloKUgpSC+rKCgpaCgrqCAAMQ9IKCAAMQ4oSYhpSClISEhMqEhIKChICCuKSClqKUgoKEhIKCkoCC7KKCgpSEgoKUhII=", "66-68:1;70-95:2;97-121:3;123-136:4;138-152:5;156-169:6;162-167:6.1;179-181:7;186-193:8;206-210:9;215-219:10;231-235:11;242-273:12;248-271:12.1;251-269:12.1.1;326-328:1;380-395:1;412-414:1", "", "425=Len/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;
@@ -60,7 +60,7 @@ namespace go.debug;
 public static partial class buildinfo_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

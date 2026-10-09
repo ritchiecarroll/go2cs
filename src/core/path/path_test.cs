@@ -9,7 +9,7 @@ using testing = testing_package;
 
 partial class path_test_package {
 
-[GoType] partial struct PathTest {
+partial struct PathTest {
     internal @string path, result;
 }
 
@@ -99,7 +99,7 @@ public static void TestCleanMallocs(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct SplitTest {
+partial struct SplitTest {
     internal @string path, dir, @file;
 }
 
@@ -121,7 +121,7 @@ public static void TestSplit(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct JoinTest {
+partial struct JoinTest {
     internal slice<@string> elem;
     internal @string path;
 }
@@ -153,7 +153,7 @@ public static void TestJoin(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct ExtTest {
+partial struct ExtTest {
     internal @string path, ext;
 }
 
@@ -226,7 +226,7 @@ public static void TestDir(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct IsAbsTest {
+partial struct IsAbsTest {
     internal @string path;
     internal bool isAbs;
 }

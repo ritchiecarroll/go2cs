@@ -21,41 +21,24 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class json_internal_test_package {
 
-[GoType] public partial struct OptionalsEmpty {
-    [GoTag(@"json:""sr""")]
-    public @string Sr;
-    [GoTag(@"json:""so,omitempty""")]
-    public @string So;
-    [GoTag(@"json:""-""")]
-    public @string Sw;
-    [GoTag(@"json:""omitempty""")]
-    public nint Ir;                   // actually named omitempty, not an option
-    [GoTag(@"json:""io,omitempty""")]
-    public nint Io;
-    [GoTag(@"json:""slr,random""")]
-    public slice<@string> Slr;
-    [GoTag(@"json:""slo,omitempty""")]
-    public slice<@string> Slo;
-    [GoTag(@"json:""mr""")]
-    public map<@string, any> Mr;
-    [GoTag(@"json:"",omitempty""")]
-    public map<@string, any> Mo;
-    [GoTag(@"json:""fr""")]
-    public float64 Fr;
-    [GoTag(@"json:""fo,omitempty""")]
-    public float64 Fo;
-    [GoTag(@"json:""br""")]
-    public bool Br;
-    [GoTag(@"json:""bo,omitempty""")]
-    public bool Bo;
-    [GoTag(@"json:""ur""")]
-    public nuint Ur;
-    [GoTag(@"json:""uo,omitempty""")]
-    public nuint Uo;
-    [GoTag(@"json:""str""")]
-    public EmptyStruct Str;
-    [GoTag(@"json:""sto,omitempty""")]
-    public EmptyStruct Sto;
+public partial struct OptionalsEmpty {
+    public @string Sr; /*`json:"sr"`*/
+    public @string So; /*`json:"so,omitempty"`*/
+    public @string Sw; /*`json:"-"`*/
+    public nint Ir; /*`json:"omitempty"`*/ // actually named omitempty, not an option
+    public nint Io; /*`json:"io,omitempty"`*/
+    public slice<@string> Slr; /*`json:"slr,random"`*/
+    public slice<@string> Slo; /*`json:"slo,omitempty"`*/
+    public map<@string, any> Mr; /*`json:"mr"`*/
+    public map<@string, any> Mo; /*`json:",omitempty"`*/
+    public float64 Fr; /*`json:"fr"`*/
+    public float64 Fo; /*`json:"fo,omitempty"`*/
+    public bool Br; /*`json:"br"`*/
+    public bool Bo; /*`json:"bo,omitempty"`*/
+    public nuint Ur; /*`json:"ur"`*/
+    public nuint Uo; /*`json:"uo,omitempty"`*/
+    public EmptyStruct Str; /*`json:"str"`*/
+    public EmptyStruct Sto; /*`json:"sto,omitempty"`*/
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -93,85 +76,53 @@ public static void TestOmitEmpty(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct NonZeroStruct {
+public partial struct NonZeroStruct {
 }
 
 public static bool IsZero(this NonZeroStruct nzs) {
     return false;
 }
 
-[GoType] public partial struct NoPanicStruct {
-    [GoTag(@"json:""int,omitzero""")]
-    public nint Int;
+public partial struct NoPanicStruct {
+    public nint Int; /*`json:"int,omitzero"`*/
 }
 
-[GoRecv] public static bool IsZero(this ref NoPanicStruct nps) {
+public static bool IsZero(this ref NoPanicStruct nps) {
     return nps.Int != 0;
 }
 
-[GoType] [GoValueClone("Foo2")] public partial struct OptionalsZero {
-    [GoTag(@"json:""sr""")]
-    public @string Sr;
-    [GoTag(@"json:""so,omitzero""")]
-    public @string So;
-    [GoTag(@"json:""-""")]
-    public @string Sw;
-    [GoTag(@"json:""omitzero""")]
-    public nint Ir;                  // actually named omitzero, not an option
-    [GoTag(@"json:""io,omitzero""")]
-    public nint Io;
-    [GoTag(@"json:""slr,random""")]
-    public slice<@string> Slr;
-    [GoTag(@"json:""slo,omitzero""")]
-    public slice<@string> Slo;
-    [GoTag(@"json:""slononnil,omitzero""")]
-    public slice<@string> SloNonNil;
-    [GoTag(@"json:""mr""")]
-    public map<@string, any> Mr;
-    [GoTag(@"json:"",omitzero""")]
-    public map<@string, any> Mo;
-    [GoTag(@"json:""moo,omitzero""")]
-    public map<@string, any> Moo;
-    [GoTag(@"json:""fr""")]
-    public float64 Fr;
-    [GoTag(@"json:""fo,omitzero""")]
-    public float64 Fo;
-    [GoTag(@"json:""foo,omitzero""")]
-    public float64 Foo;
-    [GoTag(@"json:""foo2,omitzero""")]
-    public array<float64> Foo2 = new(2);
-    [GoTag(@"json:""br""")]
-    public bool Br;
-    [GoTag(@"json:""bo,omitzero""")]
-    public bool Bo;
-    [GoTag(@"json:""ur""")]
-    public nuint Ur;
-    [GoTag(@"json:""uo,omitzero""")]
-    public nuint Uo;
-    [GoTag(@"json:""str""")]
-    public EmptyStruct Str;
-    [GoTag(@"json:""sto,omitzero""")]
-    public EmptyStruct Sto;
-    [GoTag(@"json:""time,omitzero""")]
-    public time.Time Time;
-    [GoTag(@"json:""timelocal,omitzero""")]
-    public time.Time TimeLocal;
-    [GoTag(@"json:""nzs,omitzero""")]
-    public NonZeroStruct Nzs;
-    [GoTag(@"json:""niliszeroer,omitzero""")]
-    public global::go.encoding.json_package.isZeroer NilIsZeroer;                                        // nil interface
-    [GoTag(@"json:""nonniliszeroer,omitzero""")]
-    public global::go.encoding.json_package.isZeroer NonNilIsZeroer;                                        // non-nil interface
-    [GoTag(@"json:""nps0,omitzero""")]
-    public global::go.encoding.json_package.isZeroer NoPanicStruct0;                                        // non-nil interface with nil pointer
-    [GoTag(@"json:""nps1,omitzero""")]
-    public global::go.encoding.json_package.isZeroer NoPanicStruct1;                                        // non-nil interface with non-nil pointer
-    [GoTag(@"json:""nps2,omitzero""")]
-    public ж<NoPanicStruct> NoPanicStruct2;                               // nil pointer
-    [GoTag(@"json:""nps3,omitzero""")]
-    public ж<NoPanicStruct> NoPanicStruct3;                               // non-nil pointer
-    [GoTag(@"json:""nps4,omitzero""")]
-    public NoPanicStruct NoPanicStruct4;                                   // concrete type
+public partial struct OptionalsZero {
+    public @string Sr; /*`json:"sr"`*/
+    public @string So; /*`json:"so,omitzero"`*/
+    public @string Sw; /*`json:"-"`*/
+    public nint Ir; /*`json:"omitzero"`*/ // actually named omitzero, not an option
+    public nint Io; /*`json:"io,omitzero"`*/
+    public slice<@string> Slr; /*`json:"slr,random"`*/
+    public slice<@string> Slo; /*`json:"slo,omitzero"`*/
+    public slice<@string> SloNonNil; /*`json:"slononnil,omitzero"`*/
+    public map<@string, any> Mr; /*`json:"mr"`*/
+    public map<@string, any> Mo; /*`json:",omitzero"`*/
+    public map<@string, any> Moo; /*`json:"moo,omitzero"`*/
+    public float64 Fr; /*`json:"fr"`*/
+    public float64 Fo; /*`json:"fo,omitzero"`*/
+    public float64 Foo; /*`json:"foo,omitzero"`*/
+    public array<float64> Foo2 = new(2); /*`json:"foo2,omitzero"`*/
+    public bool Br; /*`json:"br"`*/
+    public bool Bo; /*`json:"bo,omitzero"`*/
+    public nuint Ur; /*`json:"ur"`*/
+    public nuint Uo; /*`json:"uo,omitzero"`*/
+    public EmptyStruct Str; /*`json:"str"`*/
+    public EmptyStruct Sto; /*`json:"sto,omitzero"`*/
+    public time.Time Time; /*`json:"time,omitzero"`*/
+    public time.Time TimeLocal; /*`json:"timelocal,omitzero"`*/
+    public NonZeroStruct Nzs; /*`json:"nzs,omitzero"`*/
+    public global::go.encoding.json_package.isZeroer NilIsZeroer; /*`json:"niliszeroer,omitzero"`*/    // nil interface
+    public global::go.encoding.json_package.isZeroer NonNilIsZeroer; /*`json:"nonniliszeroer,omitzero"`*/ // non-nil interface
+    public global::go.encoding.json_package.isZeroer NoPanicStruct0; /*`json:"nps0,omitzero"`*/           // non-nil interface with nil pointer
+    public global::go.encoding.json_package.isZeroer NoPanicStruct1; /*`json:"nps1,omitzero"`*/           // non-nil interface with non-nil pointer
+    public ж<NoPanicStruct> NoPanicStruct2; /*`json:"nps2,omitzero"`*/           // nil pointer
+    public ж<NoPanicStruct> NoPanicStruct3; /*`json:"nps3,omitzero"`*/           // non-nil pointer
+    public NoPanicStruct NoPanicStruct4; /*`json:"nps4,omitzero"`*/           // concrete type
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
@@ -252,45 +203,26 @@ public static void TestOmitZeroMap(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct OptionalsEmptyZero {
-    [GoTag(@"json:""sr""")]
-    public @string Sr;
-    [GoTag(@"json:""so,omitempty,omitzero""")]
-    public @string So;
-    [GoTag(@"json:""-""")]
-    public @string Sw;
-    [GoTag(@"json:""io,omitempty,omitzero""")]
-    public nint Io;
-    [GoTag(@"json:""slr,random""")]
-    public slice<@string> Slr;
-    [GoTag(@"json:""slo,omitempty,omitzero""")]
-    public slice<@string> Slo;
-    [GoTag(@"json:""slononnil,omitempty,omitzero""")]
-    public slice<@string> SloNonNil;
-    [GoTag(@"json:""mr""")]
-    public map<@string, any> Mr;
-    [GoTag(@"json:"",omitempty,omitzero""")]
-    public map<@string, any> Mo;
-    [GoTag(@"json:""fr""")]
-    public float64 Fr;
-    [GoTag(@"json:""fo,omitempty,omitzero""")]
-    public float64 Fo;
-    [GoTag(@"json:""br""")]
-    public bool Br;
-    [GoTag(@"json:""bo,omitempty,omitzero""")]
-    public bool Bo;
-    [GoTag(@"json:""ur""")]
-    public nuint Ur;
-    [GoTag(@"json:""uo,omitempty,omitzero""")]
-    public nuint Uo;
-    [GoTag(@"json:""str""")]
-    public EmptyStruct Str;
-    [GoTag(@"json:""sto,omitempty,omitzero""")]
-    public EmptyStruct Sto;
-    [GoTag(@"json:""time,omitempty,omitzero""")]
-    public time.Time Time;
-    [GoTag(@"json:""nzs,omitempty,omitzero""")]
-    public NonZeroStruct Nzs;
+public partial struct OptionalsEmptyZero {
+    public @string Sr; /*`json:"sr"`*/
+    public @string So; /*`json:"so,omitempty,omitzero"`*/
+    public @string Sw; /*`json:"-"`*/
+    public nint Io; /*`json:"io,omitempty,omitzero"`*/
+    public slice<@string> Slr; /*`json:"slr,random"`*/
+    public slice<@string> Slo; /*`json:"slo,omitempty,omitzero"`*/
+    public slice<@string> SloNonNil; /*`json:"slononnil,omitempty,omitzero"`*/
+    public map<@string, any> Mr; /*`json:"mr"`*/
+    public map<@string, any> Mo; /*`json:",omitempty,omitzero"`*/
+    public float64 Fr; /*`json:"fr"`*/
+    public float64 Fo; /*`json:"fo,omitempty,omitzero"`*/
+    public bool Br; /*`json:"br"`*/
+    public bool Bo; /*`json:"bo,omitempty,omitzero"`*/
+    public nuint Ur; /*`json:"ur"`*/
+    public nuint Uo; /*`json:"uo,omitempty,omitzero"`*/
+    public EmptyStruct Str; /*`json:"str"`*/
+    public EmptyStruct Sto; /*`json:"sto,omitempty,omitzero"`*/
+    public time.Time Time; /*`json:"time,omitempty,omitzero"`*/
+    public NonZeroStruct Nzs; /*`json:"nzs,omitempty,omitzero"`*/
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
@@ -325,24 +257,19 @@ public static void TestOmitEmptyZero(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct StringTag {
-    [GoTag(@"json:"",string""")]
-    public bool BoolStr;
-    [GoTag(@"json:"",string""")]
-    public int64 IntStr;
-    [GoTag(@"json:"",string""")]
-    public uintptr UintptrStr;
-    [GoTag(@"json:"",string""")]
-    public @string StrStr;
-    [GoTag(@"json:"",string""")]
-    public global::go.encoding.json_package.Number NumberStr;
+public partial struct StringTag {
+    public bool BoolStr; /*`json:",string"`*/
+    public int64 IntStr; /*`json:",string"`*/
+    public uintptr UintptrStr; /*`json:",string"`*/
+    public @string StrStr; /*`json:",string"`*/
+    public global::go.encoding.json_package.Number NumberStr; /*`json:",string"`*/
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string allTypesˢ = "AllTypes"u8;
 internal static readonly @string stringDoubleEscapesˢ = "StringDoubleEscapes"u8;
 
-[GoType("dyn")] internal partial struct TestRoundtripStringTag_tests {
+internal partial struct TestRoundtripStringTag_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal StringTag @in;
     internal @string want; // empty to just test that we roundtrip
@@ -416,11 +343,11 @@ public static void TestRoundtripStringTag(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("num:byte")] internal partial struct renamedByte;
+internal partial struct renamedByte /*num:byte*/;
 
-[GoType("[]byte")] internal partial struct renamedByteSlice;
+internal partial struct renamedByteSlice /*[]byte*/;
 
-[GoType("[]renamedByte")] internal partial struct renamedRenamedByteSlice;
+internal partial struct renamedRenamedByteSlice /*[]renamedByte*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string ywJjˢ = @"""YWJj"""u8;
@@ -445,23 +372,23 @@ public static void TestEncodeRenamedByteSlice(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct SamePointerNoCycle {
+public partial struct SamePointerNoCycle {
     public ж<SamePointerNoCycle> Ptr1, Ptr2;
 }
 
 internal static ж<SamePointerNoCycle> samePointerNoCycle = Ꮡ(new SamePointerNoCycle(nil));
 
-[GoType] public partial struct PointerCycle {
+public partial struct PointerCycle {
     public ж<PointerCycle> Ptr;
 }
 
 internal static ж<PointerCycle> pointerCycle = Ꮡ(new PointerCycle(nil));
 
-[GoType] public partial struct PointerCycleIndirect {
+public partial struct PointerCycleIndirect {
     public slice<any> Ptrs;
 }
 
-[GoType("[]RecursiveSlice")] public partial struct RecursiveSlice;
+public partial struct RecursiveSlice /*[]RecursiveSlice*/;
 
 internal static ж<PointerCycleIndirect> pointerCycleIndirect = Ꮡ(new PointerCycleIndirect(nil));
 internal static map<@string, any> mapCycle = new map<@string, any>();
@@ -500,7 +427,7 @@ public static void TestSliceNoCycle(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestUnsupportedValues_tests {
+internal partial struct TestUnsupportedValues_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal any @in;
 }
@@ -556,41 +483,41 @@ public static void TestMarshalTextFloatMap(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("num:nint")] public partial struct Ref;
+public partial struct Ref /*num:nint*/;
 
-[GoRecv] public static (slice<byte>, error) MarshalJSON(this ref Ref _) {
+public static (slice<byte>, error) MarshalJSON(this ref Ref _) {
     return (slice<byte>(@"""ref"""u8), default!);
 }
 
-[GoRecv] public static error UnmarshalJSON(this ref Ref r, slice<byte> _) {
+public static error UnmarshalJSON(this ref Ref r, slice<byte> _) {
     r = 12;
     return default!;
 }
 
-[GoType("num:nint")] public partial struct Val;
+public partial struct Val /*num:nint*/;
 
 public static (slice<byte>, error) MarshalJSON(this Val _) {
     return (slice<byte>(@"""val"""u8), default!);
 }
 
-[GoType("num:nint")] public partial struct RefText;
+public partial struct RefText /*num:nint*/;
 
-[GoRecv] public static (slice<byte>, error) MarshalText(this ref RefText _) {
+public static (slice<byte>, error) MarshalText(this ref RefText _) {
     return (slice<byte>(@"""ref"""u8), default!);
 }
 
-[GoRecv] public static error UnmarshalText(this ref RefText r, slice<byte> _) {
+public static error UnmarshalText(this ref RefText r, slice<byte> _) {
     r = 13;
     return default!;
 }
 
-[GoType("num:nint")] public partial struct ValText;
+public partial struct ValText /*num:nint*/;
 
 public static (slice<byte>, error) MarshalText(this ValText _) {
     return (slice<byte>(@"""val"""u8), default!);
 }
 
-[GoType("dyn")] internal partial struct TestRefValMarshal_type {
+internal partial struct TestRefValMarshal_type /*dyn*/ {
     public Ref R0;
     public ж<Ref> R1;
     public RefText R2;
@@ -629,13 +556,13 @@ public static void TestRefValMarshal(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("num:nint")] public partial struct C;
+public partial struct C /*num:nint*/;
 
 public static (slice<byte>, error) MarshalJSON(this C _) {
     return (slice<byte>(@"""<&>"""u8), default!);
 }
 
-[GoType("num:nint")] public partial struct CText;
+public partial struct CText /*num:nint*/;
 
 public static (slice<byte>, error) MarshalText(this CText _) {
     return (slice<byte>(@"""<&>"""u8), default!);
@@ -679,125 +606,125 @@ internal static readonly @string embeddedStructˢ = "EmbeddedStruct"u8;
 internal static readonly @string embeddedStructPointerˢ = "EmbeddedStructPointer"u8;
 internal static readonly @string nestedStructAndIntsˢ = "NestedStructAndInts"u8;
 
-[GoType("dyn")] internal partial struct TestAnonymousFields_tests {
+internal partial struct TestAnonymousFields_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal Func<any> makeInput;  // Function to create input value
     internal @string want;    // Expected JSON output
 }
 
-[GoType("dyn")] [GoLocalName("S1")] internal partial struct TestAnonymousFields_S1 {
+internal partial struct TestAnonymousFields_S1 /*dyn*/ {
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] [GoLocalName("S2")] internal partial struct TestAnonymousFields_S2 {
+internal partial struct TestAnonymousFields_S2 /*dyn*/ {
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] [GoLocalName("S")] internal partial struct TestAnonymousFields_S {
+internal partial struct TestAnonymousFields_S /*dyn*/ {
     public partial ref TestAnonymousFields_S1 S1 { get; }
     public partial ref TestAnonymousFields_S2 S2 { get; }
 }
 
-[GoType("dyn")] [GoLocalName("S1")] internal partial struct TestAnonymousFields_S1ᴛ1 {
+internal partial struct TestAnonymousFields_S1ᴛ1 /*dyn*/ {
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] [GoLocalName("S2")] internal partial struct TestAnonymousFields_S2ᴛ1 {
+internal partial struct TestAnonymousFields_S2ᴛ1 /*dyn*/ {
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] [GoLocalName("S")] internal partial struct TestAnonymousFields_Sᴛ1 {
+internal partial struct TestAnonymousFields_Sᴛ1 /*dyn*/ {
     public partial ref TestAnonymousFields_S1ᴛ1 S1 { get; }
     public partial ref TestAnonymousFields_S2ᴛ1 S2 { get; }
     internal nint x;
     public nint X;
 }
 
-[GoLocalName("myInt")] [GoType("num:nint")] internal partial struct TestAnonymousFields_myInt;
+internal partial struct TestAnonymousFields_myInt /*num:nint*/;
 
-[GoType("dyn")] [GoLocalName("S")] internal partial struct TestAnonymousFields_Sᴛ2 {
+internal partial struct TestAnonymousFields_Sᴛ2 /*dyn*/ {
     internal partial ref TestAnonymousFields_myInt myInt { get; }
 }
 
-[GoLocalName("MyInt")] [GoType("num:nint")] internal partial struct TestAnonymousFields_MyInt;
+internal partial struct TestAnonymousFields_MyInt /*num:nint*/;
 
-[GoType("dyn")] [GoLocalName("S")] internal partial struct TestAnonymousFields_Sᴛ3 {
+internal partial struct TestAnonymousFields_Sᴛ3 /*dyn*/ {
     public partial ref TestAnonymousFields_MyInt MyInt { get; }
 }
 
-[GoLocalName("myInt")] [GoType("num:nint")] internal partial struct TestAnonymousFields_myIntᴛ1;
+internal partial struct TestAnonymousFields_myIntᴛ1 /*num:nint*/;
 
-[GoType("dyn")] [GoLocalName("S")] internal partial struct TestAnonymousFields_Sᴛ4 {
+internal partial struct TestAnonymousFields_Sᴛ4 /*dyn*/ {
     internal partial ref ж<TestAnonymousFields_myIntᴛ1> myInt { get; }
 }
 
-[GoLocalName("MyInt")] [GoType("num:nint")] internal partial struct TestAnonymousFields_MyIntᴛ1;
+internal partial struct TestAnonymousFields_MyIntᴛ1 /*num:nint*/;
 
-[GoType("dyn")] [GoLocalName("S")] internal partial struct TestAnonymousFields_Sᴛ5 {
+internal partial struct TestAnonymousFields_Sᴛ5 /*dyn*/ {
     public partial ref ж<TestAnonymousFields_MyIntᴛ1> MyInt { get; }
 }
 
-[GoType("dyn")] [GoLocalName("s1")] internal partial struct TestAnonymousFields_s1 {
+internal partial struct TestAnonymousFields_s1 /*dyn*/ {
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] [GoLocalName("S2")] internal partial struct TestAnonymousFields_S2ᴛ2 {
+internal partial struct TestAnonymousFields_S2ᴛ2 /*dyn*/ {
     internal nint y;
     public nint Y;
 }
 
-[GoType("dyn")] [GoLocalName("S")] internal partial struct TestAnonymousFields_Sᴛ6 {
+internal partial struct TestAnonymousFields_Sᴛ6 /*dyn*/ {
     internal partial ref TestAnonymousFields_s1 s1 { get; }
     public partial ref TestAnonymousFields_S2ᴛ2 S2 { get; }
 }
 
-[GoType("dyn")] [GoLocalName("s1")] internal partial struct TestAnonymousFields_s1ᴛ1 {
+internal partial struct TestAnonymousFields_s1ᴛ1 /*dyn*/ {
     internal nint x;
     public nint X;
 }
 
-[GoType("dyn")] [GoLocalName("S2")] internal partial struct TestAnonymousFields_S2ᴛ3 {
+internal partial struct TestAnonymousFields_S2ᴛ3 /*dyn*/ {
     internal nint y;
     public nint Y;
 }
 
-[GoType("dyn")] [GoLocalName("S")] internal partial struct TestAnonymousFields_Sᴛ7 {
+internal partial struct TestAnonymousFields_Sᴛ7 /*dyn*/ {
     internal partial ref ж<TestAnonymousFields_s1ᴛ1> s1 { get; }
     public partial ref ж<TestAnonymousFields_S2ᴛ3> S2 { get; }
 }
 
-[GoLocalName("MyInt1")] [GoType("num:nint")] internal partial struct TestAnonymousFields_MyInt1;
+internal partial struct TestAnonymousFields_MyInt1 /*num:nint*/;
 
-[GoLocalName("MyInt2")] [GoType("num:nint")] internal partial struct TestAnonymousFields_MyInt2;
+internal partial struct TestAnonymousFields_MyInt2 /*num:nint*/;
 
-[GoLocalName("myInt")] [GoType("num:nint")] internal partial struct TestAnonymousFields_myIntᴛ2;
+internal partial struct TestAnonymousFields_myIntᴛ2 /*num:nint*/;
 
-[GoType("dyn")] [GoLocalName("s2")] internal partial struct TestAnonymousFields_s2 {
+internal partial struct TestAnonymousFields_s2 /*dyn*/ {
     public partial ref TestAnonymousFields_MyInt2 MyInt2 { get; }
     internal partial ref TestAnonymousFields_myIntᴛ2 myInt { get; }
 }
 
-[GoType("dyn")] [GoLocalName("s1")] internal partial struct TestAnonymousFields_s1ᴛ2 {
+internal partial struct TestAnonymousFields_s1ᴛ2 /*dyn*/ {
     public partial ref TestAnonymousFields_MyInt1 MyInt1 { get; }
     internal partial ref TestAnonymousFields_myIntᴛ2 myInt { get; }
     internal partial ref TestAnonymousFields_s2 s2 { get; }
 }
 
-[GoType("dyn")] [GoLocalName("S")] internal partial struct TestAnonymousFields_Sᴛ8 {
+internal partial struct TestAnonymousFields_Sᴛ8 /*dyn*/ {
     internal partial ref TestAnonymousFields_s1ᴛ2 s1 { get; }
     internal partial ref TestAnonymousFields_myIntᴛ2 myInt { get; }
 }
 
-[GoType("dyn")] [GoLocalName("S2")] internal partial struct TestAnonymousFields_S2ᴛ4 {
+internal partial struct TestAnonymousFields_S2ᴛ4 /*dyn*/ {
     public @string Field;
 }
 
-[GoType("dyn")] [GoLocalName("S")] internal partial struct TestAnonymousFields_Sᴛ9 {
+internal partial struct TestAnonymousFields_Sᴛ9 /*dyn*/ {
     public partial ref ж<TestAnonymousFields_S2ᴛ4> S2 { get; }
 }
 
@@ -907,27 +834,27 @@ public static void TestAnonymousFields(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct BugA {
+public partial struct BugA {
     public @string S;
 }
 
-[GoType] public partial struct BugB {
+public partial struct BugB {
     public partial ref BugA BugA { get; }
     public @string S;
 }
 
-[GoType] public partial struct BugC {
+public partial struct BugC {
     public @string S;
 }
 
 // Legal Go: We never use the repeated embedded field (S).
-[GoType] public partial struct BugX {
+public partial struct BugX {
     public nint A;
     public partial ref BugA BugA { get; }
     public partial ref BugB BugB { get; }
 }
 
-[GoType("@string")] internal partial struct nilJSONMarshaler;
+internal partial struct nilJSONMarshaler /*@string*/;
 
 internal static (slice<byte>, error) MarshalJSON(this ж<nilJSONMarshaler> Ꮡnm) {
     ref var nm = ref Ꮡnm.DerefOrNull();
@@ -938,7 +865,7 @@ internal static (slice<byte>, error) MarshalJSON(this ж<nilJSONMarshaler> Ꮡnm
     return Marshal("zenil:" + ((@string)(nm)));
 }
 
-[GoType("@string")] internal partial struct nilTextMarshaler;
+internal partial struct nilTextMarshaler /*@string*/;
 
 internal static (slice<byte>, error) MarshalText(this ж<nilTextMarshaler> Ꮡnm) {
     ref var nm = ref Ꮡnm.DerefOrNull();
@@ -949,25 +876,25 @@ internal static (slice<byte>, error) MarshalText(this ж<nilTextMarshaler> Ꮡnm
     return (slice<byte>("zenil:" + ((@string)(nm))), default!);
 }
 
-[GoType("dyn")] internal partial struct TestNilMarshal_tests {
+internal partial struct TestNilMarshal_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal any @in;
     internal @string want;
 }
 
-[GoType("dyn")] internal partial struct TestNilMarshal_type {
+internal partial struct TestNilMarshal_type /*dyn*/ {
     public @string M;
 }
 
-[GoType("dyn")] internal partial struct TestNilMarshal_typeᴛ1 {
+internal partial struct TestNilMarshal_typeᴛ1 /*dyn*/ {
     public global::go.encoding.json_package.Marshaler M;
 }
 
-[GoType("dyn")] internal partial struct TestNilMarshal_typeᴛ2 {
+internal partial struct TestNilMarshal_typeᴛ2 /*dyn*/ {
     public any M;
 }
 
-[GoType("dyn")] internal partial struct TestNilMarshal_typeᴛ3 {
+internal partial struct TestNilMarshal_typeᴛ3 /*dyn*/ {
     public encoding.TextMarshaler M;
 }
 
@@ -1045,14 +972,13 @@ public static void TestEmbeddedBug(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct BugD {
+public partial struct BugD {
 // Same as BugA after tagging.
-    [GoTag(@"json:""S""")]
-    public @string XXX;
+    public @string XXX; /*`json:"S"`*/
 }
 
 // BugD's tagged S field should dominate BugA's.
-[GoType] public partial struct BugY {
+public partial struct BugY {
     public partial ref BugA BugA { get; }
     public partial ref BugD BugD { get; }
 }
@@ -1078,7 +1004,7 @@ public static void TestTaggedFieldDominates(ж<testing.T> Ꮡt) {
 }
 
 // There are no tags here, so S should not appear.
-[GoType] public partial struct BugZ {
+public partial struct BugZ {
     public partial ref BugA BugA { get; }
     public partial ref BugC BugC { get; }
     public partial ref BugY BugY { get; } // Contains a tagged S field through BugD; should not dominate.
@@ -1107,7 +1033,7 @@ public static void TestDuplicatedFieldDisappears(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string invalidˢ = @"invalid"u8;
 
-[GoType("dyn")] [GoLocalName("Foo")] internal partial struct TestIssue10281_Foo {
+internal partial struct TestIssue10281_Foo /*dyn*/ {
     public global::go.encoding.json_package.Number N;
 }
 
@@ -1122,12 +1048,12 @@ public static void TestIssue10281(ж<testing.T> Ꮡt) {
 }
 
 // Trigger an error in Marshal with cyclic data.
-[GoType("dyn")] [GoLocalName("Dummy")] internal partial struct TestMarshalErrorAndReuseEncodeState_Dummy {
+internal partial struct TestMarshalErrorAndReuseEncodeState_Dummy /*dyn*/ {
     public @string Name;
     public ж<TestMarshalErrorAndReuseEncodeState_Dummy> Next;
 }
 
-[GoType("dyn")] [GoLocalName("Data")] internal partial struct TestMarshalErrorAndReuseEncodeState_Data {
+internal partial struct TestMarshalErrorAndReuseEncodeState_Data /*dyn*/ {
     public @string A;
     public nint I;
 }
@@ -1179,9 +1105,8 @@ public static void TestHTMLEscape(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string n42ˢ = @"{""n"":""42""}"u8;
 
-[GoType("dyn")] [GoLocalName("stringPointer")] internal partial struct TestEncodePointerString_stringPointer {
-    [GoTag(@"json:""n,string""")]
-    public ж<int64> N;
+internal partial struct TestEncodePointerString_stringPointer /*dyn*/ {
+    public ж<int64> N; /*`json:"n,string"`*/
 }
 
 // golang.org/issue/8582
@@ -1219,7 +1144,7 @@ public static void TestEncodePointerString(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct encodeStringTestsᴛ1 {
+partial struct encodeStringTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string @out;
 }
@@ -1272,7 +1197,7 @@ public static void TestEncodeString(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("num:byte")] internal partial struct jsonbyte;
+internal partial struct jsonbyte /*num:byte*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string jbDˢ = @"{""JB"":%d}"u8;
@@ -1281,7 +1206,7 @@ internal static (slice<byte>, error) MarshalJSON(this jsonbyte b) {
     return tenc(jbDˢ, b);
 }
 
-[GoType("num:byte")] internal partial struct textbyte;
+internal partial struct textbyte /*num:byte*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tbDˢ = @"TB:%d"u8;
@@ -1290,7 +1215,7 @@ internal static (slice<byte>, error) MarshalText(this textbyte b) {
     return tenc(tbDˢ, b);
 }
 
-[GoType("num:nint")] internal partial struct jsonint;
+internal partial struct jsonint /*num:nint*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string jiDˢ = @"{""JI"":%d}"u8;
@@ -1299,7 +1224,7 @@ internal static (slice<byte>, error) MarshalJSON(this jsonint i) {
     return tenc(jiDˢ, i);
 }
 
-[GoType("num:nint")] internal partial struct textint;
+internal partial struct textint /*num:nint*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tiDˢ = @"TI:%d"u8;
@@ -1316,7 +1241,7 @@ internal static (slice<byte>, error) tenc(@string format, params ꓸꓸꓸany a�
     return (buf.Bytes(), default!);
 }
 
-[GoType("num:float64")] internal partial struct textfloat;
+internal partial struct textfloat /*num:float64*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tf02fˢ = @"TF:%0.2f"u8;
@@ -1325,7 +1250,7 @@ internal static (slice<byte>, error) MarshalText(this textfloat f) {
     return tenc(tf02fˢ, f);
 }
 
-[GoType("dyn")] internal partial struct TestEncodeBytekind_tests {
+internal partial struct TestEncodeBytekind_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal any @in;
     internal @string want;
@@ -1521,36 +1446,34 @@ public static void TestMarshalFloat(ж<testing.T> Ꮡt) {
     test(math.Copysign(0D, -1D), 32);
 }
 
-[GoType("dyn")] [GoLocalName("T1")] internal partial struct TestMarshalRawMessageValue_T1 {
-    [GoTag(@"json:"",omitempty""")]
-    public global::go.encoding.json_package.RawMessage M;
+internal partial struct TestMarshalRawMessageValue_T1 /*dyn*/ {
+    public global::go.encoding.json_package.RawMessage M; /*`json:",omitempty"`*/
 }
 
-[GoType("dyn")] [GoLocalName("T2")] internal partial struct TestMarshalRawMessageValue_T2 {
-    [GoTag(@"json:"",omitempty""")]
-    public ж<global::go.encoding.json_package.RawMessage> M;
+internal partial struct TestMarshalRawMessageValue_T2 /*dyn*/ {
+    public ж<global::go.encoding.json_package.RawMessage> M; /*`json:",omitempty"`*/
 }
 
-[GoType("dyn")] internal partial struct TestMarshalRawMessageValue_tests {
+internal partial struct TestMarshalRawMessageValue_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal any @in;
     internal @string want;
     internal bool ok;
 }
 
-[GoType("dyn")] internal partial struct TestMarshalRawMessageValue_type {
+internal partial struct TestMarshalRawMessageValue_type /*dyn*/ {
     public global::go.encoding.json_package.RawMessage M;
 }
 
-[GoType("dyn")] internal partial struct TestMarshalRawMessageValue_typeᴛ1 {
+internal partial struct TestMarshalRawMessageValue_typeᴛ1 /*dyn*/ {
     public ж<global::go.encoding.json_package.RawMessage> M;
 }
 
-[GoType("dyn")] internal partial struct TestMarshalRawMessageValue_typeᴛ2 {
+internal partial struct TestMarshalRawMessageValue_typeᴛ2 /*dyn*/ {
     public global::go.encoding.json_package.RawMessage X;
 }
 
-[GoType("dyn")] internal partial struct TestMarshalRawMessageValue_typeᴛ3 {
+internal partial struct TestMarshalRawMessageValue_typeᴛ3 /*dyn*/ {
     public ж<global::go.encoding.json_package.RawMessage> X;
 }
 
@@ -1659,7 +1582,7 @@ public static void TestMarshalRawMessageValue(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct marshalPanic {
+internal partial struct marshalPanic {
 }
 
 internal static (slice<byte>, error) MarshalJSON(this marshalPanic _) {
@@ -1689,7 +1612,7 @@ public static void TestMarshalPanic(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string a000A0ˢ = @"{""A0"":0,""À"":0,""Aβ"":0}"u8;
 
-[GoType("dyn")] internal partial struct TestMarshalUncommonFieldNames_v {
+internal partial struct TestMarshalUncommonFieldNames_v /*dyn*/ {
     public nint A0, À, Aβ;
 }
 
@@ -1712,7 +1635,7 @@ internal static readonly @string testVariableˢ = "test variable"u8;
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string errTextᶜ = "json: test error"u8;
 
-[GoType("dyn")] internal partial struct TestMarshalerError_tests {
+internal partial struct TestMarshalerError_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal ж<global::go.encoding.json_package.MarshalerError> err;
     internal @string want;
@@ -1746,7 +1669,7 @@ public static void TestMarshalerError(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("@string")] internal partial struct marshaledValue;
+internal partial struct marshaledValue /*@string*/;
 
 internal static (slice<byte>, error) MarshalJSON(this marshaledValue v) {
     return (slice<byte>((@string)v), default!);

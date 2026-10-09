@@ -133,7 +133,7 @@ public static void TestCPUProfileMultithreaded(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object issue35057IsOnlyˢ = (@string)"issue 35057 is only confirmed on Linux"u8;
 
-[GoType("dyn")] internal partial struct TestCPUProfileMultithreadMagnitude_type {
+internal partial struct TestCPUProfileMultithreadMagnitude_type /*dyn*/ {
     internal @string name;
     internal nint workers;
 }
@@ -369,11 +369,11 @@ internal static partial void inlinedCalleeDump(slice<uintptr> pcs) {
     dumpCallers(pcs);
 }
 
-[GoType] internal partial interface inlineWrapperInterface {
+internal partial interface inlineWrapperInterface {
     void dump(slice<uintptr> stack);
 }
 
-[GoType] internal partial struct inlineWrapper {
+internal partial struct inlineWrapper {
 }
 
 internal static partial void dump(this inlineWrapper h, slice<uintptr> pcs) {
@@ -863,7 +863,7 @@ internal static partial void growstack(nint n) {
 }
 
 //go:noinline
-internal static partial void use([GoArrayDims(2097152)] array<byte> x) {
+internal static partial void use(/*[2097152]*/ array<byte> x) {
     x = x.Clone();
 
 }
@@ -872,7 +872,7 @@ internal static partial void use([GoArrayDims(2097152)] array<byte> x) {
 internal static readonly @string blockˢ = "block"u8;
 internal static readonly @string contentionCyclesSecondˢ = "--- contention:\ncycles/second="u8;
 
-[GoType("dyn")] [GoLocalName("TestCase")] internal partial struct TestBlockProfile_TestCase {
+internal partial struct TestBlockProfile_TestCase /*dyn*/ {
     internal @string name;
     internal Action<ж<testing.T>> f;
     internal slice<@string> stk;
@@ -1379,7 +1379,7 @@ internal static void blockInfrequentLong(nint rate) {
 // Used by TestBlockProfileBias.
 //
 //go:linkname blockevent runtime.blockevent
-[global::System.Diagnostics.StackTraceHidden] internal static void blockevent(int64 cycles, nint skip) {
+/*linkname*/ internal static partial void blockevent(int64 cycles, nint skip) {
     runtime.blockevent(cycles, skip);
 }
 
@@ -1742,7 +1742,7 @@ internal static bool containsInOrder(@string s, params ꓸꓸꓸstring allʗp) {
     return true;
 }
 
-[GoType("dyn")] [GoLocalName("nkey")] internal partial struct containsCountsLabels_nkey {
+internal partial struct containsCountsLabels_nkey /*dyn*/ {
     internal int64 count;
     internal @string key, val;
 }
@@ -1799,7 +1799,7 @@ internal static readonly @string finalizerNotPresentˢ = "finalizer not present"
 internal static readonly @string finalizerPresentˢ = "finalizer present"u8;
 internal static readonly @string goroutineLaunchesˢ = "goroutine launches"u8;
 
-[GoLocalName("T")] [GoType("ж<byte>")] internal partial class TestGoroutineProfileConcurrency_T;
+internal partial class TestGoroutineProfileConcurrency_T /*ж<byte>*/;
 
 public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -2084,7 +2084,7 @@ public static partial void TestGoroutineProfileCoro(ж<testing.T> Ꮡt) {
     goroutineProf.WriteTo(io.Discard, 1);
 }
 
-[GoLocalName("T")] [GoType("ж<byte>")] internal partial class TestGoroutineProfileIssue74090_T;
+internal partial class TestGoroutineProfileIssue74090_T /*ж<byte>*/;
 
 // This test tries to provoke a situation wherein the finalizer goroutine is
 // erroneously inspected by the goroutine profiler in such a way that could
@@ -2586,7 +2586,7 @@ public static partial void TestTracebackAll(ж<testing.T> Ꮡt) {
 internal static readonly object canTDetermineWhetherˢ2 = (@string)"Can't determine whether anything was inlined into inlinedCallerDump."u8;
 internal static readonly object canTDetermineWhetherˢ3 = (@string)"Can't determine whether anything was inlined into recursionChainBottom."u8;
 
-[GoType("dyn")] internal partial struct TestTryAdd_testCases {
+internal partial struct TestTryAdd_testCases /*dyn*/ {
     internal @string name;
     internal slice<uint64> input;     // following the input format assumed by profileBuilder.addCPUData.
     internal nint count;              // number of records in input.
@@ -2886,7 +2886,7 @@ public static void TestTimeVDSO(ж<testing.T> Ꮡt) {
 internal static readonly @string goroutineDeepˢ = "goroutineDeep"u8;
 internal static readonly @string runtimePprofˢ = "runtime/pprof.produceProfileEvents"u8;
 
-[GoType("dyn")] internal partial struct TestProfilerStackDepth_tests {
+internal partial struct TestProfilerStackDepth_tests /*dyn*/ {
     internal @string profiler;
     internal slice<@string> prefix;
 }
@@ -3191,7 +3191,7 @@ internal static void inlineF(ж<sync.Mutex> Ꮡmu, ж<sync.WaitGroup> Ꮡwg) {
 internal static readonly @string inlineCˢ = "inlineC"u8;
 internal static readonly object didNotSeeExpectedStackˢ = (@string)"did not see expected stack"u8;
 
-[GoType("dyn")] internal partial struct TestBlockMutexProfileInlineExpansion_tcs {
+internal partial struct TestBlockMutexProfileInlineExpansion_tcs /*dyn*/ {
     public @string Name;
     public Func<slice<runtime.BlockProfileRecord>, (nint, bool)> Collect;
     public @string SubStack;

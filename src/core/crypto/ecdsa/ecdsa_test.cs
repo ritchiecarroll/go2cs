@@ -32,7 +32,7 @@ partial class ecdsa_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string ecdsaˢ = "ecdsa"u8;
 
-[GoType("dyn")] internal partial struct testAllCurves_tests {
+internal partial struct testAllCurves_tests /*dyn*/ {
     internal @string name;
     internal elliptic.Curve curve;
 }
@@ -569,7 +569,7 @@ internal static void testRFC6979(ж<testing.T> Ꮡt, elliptic.Curve curve, @stri
     }
 }
 
-[GoType("dyn")] internal partial struct benchmarkAllCurves_tests {
+internal partial struct benchmarkAllCurves_tests /*dyn*/ {
     internal @string name;
     internal elliptic.Curve curve;
 }

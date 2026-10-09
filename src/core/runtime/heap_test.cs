@@ -10,7 +10,7 @@ using static global::go.runtime_internal_test_package;
 partial class runtime_test_package {
 
 //go:linkname heapObjectsCanMove runtime.heapObjectsCanMove
-[global::System.Diagnostics.StackTraceHidden] internal static bool heapObjectsCanMove() {
+/*linkname*/ internal static partial bool heapObjectsCanMove() {
     return global::go.runtime_package.heapObjectsCanMove();
 }
 

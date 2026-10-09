@@ -9,20 +9,20 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-[GoType] partial interface I1 {
+partial interface I1 {
     void Method1();
 }
 
-[GoType] partial interface I2 {
+partial interface I2 {
     void Method1();
     void Method2();
 }
 
-[GoType("num:uint16")] partial struct TS;
+partial struct TS /*num:uint16*/;
 
-[GoType("num:uintptr")] partial struct TM;
+partial struct TM /*num:uintptr*/;
 
-[GoType("[2]uintptr")] partial struct TL;
+partial struct TL /*[2]uintptr*/;
 
 public static void Method1(this TS _) {
 }
@@ -42,17 +42,17 @@ public static void Method1(this TL _) {
 public static void Method2(this TL _) {
 }
 
-[GoType("num:uint8")] partial struct T8;
+partial struct T8 /*num:uint8*/;
 
-[GoType("num:uint16")] partial struct T16;
+partial struct T16 /*num:uint16*/;
 
-[GoType("num:uint32")] partial struct T32;
+partial struct T32 /*num:uint32*/;
 
-[GoType("num:uint64")] partial struct T64;
+partial struct T64 /*num:uint64*/;
 
-[GoType("@string")] partial struct Tstr;
+partial struct Tstr /*@string*/;
 
-[GoType("[]byte")] partial struct Tslice;
+partial struct Tslice /*[]byte*/;
 
 public static void Method1(this T8 _) {
 }
@@ -374,7 +374,7 @@ public static void TestNonEscapingConvT2I(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object changeˢ = (@string)"change"u8;
 
-[GoType("dyn")] internal partial struct TestZeroConvT2x_tests {
+internal partial struct TestZeroConvT2x_tests /*dyn*/ {
     internal @string name;
     internal Action fn;
 }

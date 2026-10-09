@@ -20,29 +20,26 @@ using weak = weak_package;
 
 partial class unique_internal_test_package {
 
-[GoType("@string")] internal partial struct testString;
+internal partial struct testString /*@string*/;
 
-[GoType("[4]nint")] internal partial struct testIntArray;
-// Descriptor carrier for `testEface` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("testEface")] internal interface testEfaceᴅ { }
+internal partial struct testIntArray /*[4]nint*/;
 
+internal partial struct testStringArray /*[3]@string*/;
 
-[GoType("[3]@string")] internal partial struct testStringArray;
-
-[GoType] internal partial struct testStringStruct {
+internal partial struct testStringStruct {
     internal @string a;
 }
 
-[GoType] [GoValueClone("s")] internal partial struct testStringStructArrayStruct {
+internal partial struct testStringStructArrayStruct {
     internal array<testStringStruct> s = new(2);
 }
 
-[GoType] internal partial struct testStruct {
+internal partial struct testStruct {
     internal float64 z;
     internal @string b;
 }
 
-[GoType] internal partial struct testZeroSize {
+internal partial struct testZeroSize {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

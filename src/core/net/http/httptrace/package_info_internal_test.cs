@@ -28,7 +28,7 @@ using static go.net.http.httptrace_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/httptrace/trace_test.go", "trace_test.cs", "ABAagoKsgqaCpoKEgoKAkgAJCIKChAAFEgATLoKChJKCgpSAgg==", "15-19:1;16-18:1.1;43-50:1;44-49:1.1")]
+[assembly: go.GoPositionMap("net/http/httptrace/trace_test.go", "trace_test.cs", "ABAagoKsgqaCpoKEgoKAkgAJCIKChAAFEgATLoKChJKCgpSAgg==", "15-19:1;16-18:1.1;43-50:1;44-49:1.1", "", "23=Invoke/1/1/1;27=Invoke/1/1/1;56=Invoke/1/4/7,Invoke/2/4/13,Invoke/3/4/15,Invoke/4/4/20")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -37,7 +37,7 @@ namespace go.net.http;
 public static partial class httptrace_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

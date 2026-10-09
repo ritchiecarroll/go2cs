@@ -21,7 +21,7 @@ using ꓸꓸꓸany = Span<any>;
 partial class slices_test_package {
 
 
-[GoType("dyn")] partial struct equalIntTestsᴛ1 {
+partial struct equalIntTestsᴛ1 /*dyn*/ {
     internal slice<nint> s1, s2;
     internal bool want;
 }
@@ -49,7 +49,7 @@ internal static slice<equalIntTestsᴛ1> equalIntTests = new equalIntTestsᴛ1[]
 }.slice();
 
 
-[GoType("dyn")] partial struct equalFloatTestsᴛ1 {
+partial struct equalFloatTestsᴛ1 /*dyn*/ {
     internal slice<float64> s1, s2;
     internal bool wantEqual;
     internal bool wantEqualNaN;
@@ -145,8 +145,8 @@ public static void TestEqualFunc(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoLocalName("Large")] [GoType("[4096]byte")] /* [4 * 1024]byte */
-internal partial struct BenchmarkEqualFunc_Large_Large;
+/* [4 * 1024]byte */
+internal partial struct BenchmarkEqualFunc_Large_Large /*[4096]byte*/;
 
 public static void BenchmarkEqualFunc_Large(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -163,7 +163,7 @@ public static void BenchmarkEqualFunc_Large(ж<testing.B> Ꮡb) {
 }
 
 
-[GoType("dyn")] partial struct compareIntTestsᴛ1 {
+partial struct compareIntTestsᴛ1 /*dyn*/ {
     internal slice<nint> s1, s2;
     internal nint want;
 }
@@ -221,7 +221,7 @@ internal static slice<compareIntTestsᴛ1> compareIntTests = new compareIntTests
 }.slice();
 
 
-[GoType("dyn")] partial struct compareFloatTestsᴛ1 {
+partial struct compareFloatTestsᴛ1 /*dyn*/ {
     internal slice<float64> s1, s2;
     internal nint want;
 }
@@ -388,7 +388,7 @@ public static void TestCompareFunc(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct indexTestsᴛ1 {
+partial struct indexTestsᴛ1 /*dyn*/ {
     internal slice<nint> s;
     internal nint v;
     internal nint want;
@@ -435,8 +435,8 @@ internal static Func<T, bool> equalToIndex<T>(Func<T, T, bool> f, T v1) {
     return (T v2) => f(v1, v2);
 }
 
-[GoLocalName("Large")] [GoType("[4096]byte")] /* [4 * 1024]byte */
-internal partial struct BenchmarkIndex_Large_Large;
+/* [4 * 1024]byte */
+internal partial struct BenchmarkIndex_Large_Large /*[4096]byte*/;
 
 public static void BenchmarkIndex_Large(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -468,8 +468,8 @@ public static void TestIndexFunc(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoLocalName("Large")] [GoType("[4096]byte")] /* [4 * 1024]byte */
-internal partial struct BenchmarkIndexFunc_Large_Large;
+/* [4 * 1024]byte */
+internal partial struct BenchmarkIndexFunc_Large_Large /*[4096]byte*/;
 
 public static void BenchmarkIndexFunc_Large(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -524,7 +524,7 @@ public static void TestContainsFunc(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct insertTestsᴛ1 {
+partial struct insertTestsᴛ1 /*dyn*/ {
     internal slice<nint> s;
     internal nint i;
     internal slice<nint> add;
@@ -616,7 +616,7 @@ public static void TestInsertOverlap(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestInsertPanics_type {
+internal partial struct TestInsertPanics_type /*dyn*/ {
     internal @string name;
     internal slice<nint> s;
     internal nint i;
@@ -651,7 +651,7 @@ public static void TestInsertPanics(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct deleteTestsᴛ1 {
+partial struct deleteTestsᴛ1 /*dyn*/ {
     internal slice<nint> s;
     internal nint i, j;
     internal slice<nint> want;
@@ -701,7 +701,7 @@ public static void TestDelete(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct deleteFuncTestsᴛ1 {
+partial struct deleteFuncTestsᴛ1 /*dyn*/ {
     internal slice<nint> s;
     internal Func<nint, bool> fn;
     internal slice<nint> want;
@@ -769,7 +769,7 @@ internal static bool /*b*/ panics(Action f) {
     return b;
 }
 
-[GoType("dyn")] internal partial struct TestDeletePanics_type {
+internal partial struct TestDeletePanics_type /*dyn*/ {
     internal @string name;
     internal slice<nint> s;
     internal nint i, j;
@@ -852,7 +852,7 @@ public static void TestClone(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct compactTestsᴛ1 {
+partial struct compactTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal slice<nint> s;
     internal slice<nint> want;
@@ -922,7 +922,7 @@ public static void BenchmarkCompact(ж<testing.B> Ꮡb) {
 private static readonly @string allDupˢ = "all_dup"u8;
 private static readonly @string noDupˢ = "no_dup"u8;
 
-[GoLocalName("Large")] [GoType("[16]nint")] internal partial struct BenchmarkCompact_Large_Large;
+internal partial struct BenchmarkCompact_Large_Large /*[16]nint*/;
 
 public static void BenchmarkCompact_Large(ж<testing.B> Ꮡb) {
     const nint N = 1024;
@@ -1191,7 +1191,7 @@ internal static S naiveReplace<S, E>(S s, nint i, nint j, params Span<E> vʗp)
     return s;
 }
 
-[GoType("dyn")] internal partial struct TestReplace_type {
+internal partial struct TestReplace_type /*dyn*/ {
     internal slice<nint> s, v;
     internal nint i, j;
 }
@@ -1234,7 +1234,7 @@ public static void TestReplace(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestReplacePanics_type {
+internal partial struct TestReplacePanics_type /*dyn*/ {
     internal @string name;
     internal slice<nint> s, v;
     internal nint i, j;
@@ -1387,7 +1387,7 @@ public static void TestReplaceEndClearTail(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkReplace_cases {
+internal partial struct BenchmarkReplace_cases /*dyn*/ {
     internal @string name;
     internal Func<slice<nint>> s, v;
     internal nint i, j;
@@ -1473,7 +1473,7 @@ internal static void apply<T>(T v, Action<T> f) {
     f(v);
 }
 
-[GoLocalName("S")] [GoType("[]nint")] internal partial struct TestInference_S;
+internal partial struct TestInference_S /*[]nint*/;
 
 // Test type inference with a named slice type.
 public static void TestInference(ж<testing.T> Ꮡt) {
@@ -1493,7 +1493,7 @@ public static void TestInference(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestConcat_cases {
+internal partial struct TestConcat_cases /*dyn*/ {
     internal slice<slice<nint>> s;
     internal slice<nint> want;
 }
@@ -1543,10 +1543,10 @@ public static void TestConcat(ж<testing.T> Ꮡt) {
 }
 
 // Use zero length element to minimize memory in testing
-[GoType("dyn")] internal partial struct TestConcat_too_large_void {
+internal partial struct TestConcat_too_large_void /*dyn*/ {
 }
 
-[GoType("dyn")] internal partial struct TestConcat_too_large_cases {
+internal partial struct TestConcat_too_large_cases /*dyn*/ {
     internal slice<nint> lengths;
     internal bool shouldPanic;
 }
@@ -1610,13 +1610,13 @@ public static void TestConcat_too_large(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestRepeat_type {
+internal partial struct TestRepeat_type /*dyn*/ {
     internal slice<nint> x;
     internal nint count;
     internal slice<nint> want;
 }
 
-[GoType("dyn")] internal partial struct TestRepeat_typeᴛ1 {
+internal partial struct TestRepeat_typeᴛ1 /*dyn*/ {
     internal slice<EmptyStruct> x;
     internal nint count;
     internal slice<EmptyStruct> want;
@@ -1675,7 +1675,7 @@ public static void TestRepeat(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestRepeatPanics_type {
+internal partial struct TestRepeatPanics_type /*dyn*/ {
     internal @string name;
     internal slice<EmptyStruct> x;
     internal nint count;

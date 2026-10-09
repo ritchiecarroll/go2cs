@@ -22,7 +22,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class base64_internal_test_package {
 
-[GoType] internal partial struct testpair {
+internal partial struct testpair {
     internal @string decoded, encoded;
 }
 
@@ -82,7 +82,7 @@ internal static @string funnyRef(@string @ref) {
     return strings.ReplaceAll(@ref, "="u8, "@"u8);
 }
 
-[GoType] internal partial struct encodingTest {
+internal partial struct encodingTest {
     internal ж<global::go.encoding.base64_package.Encoding> enc;        // Encoding to test
     internal Func<@string, @string> conv; // Reference string converter
 }
@@ -252,7 +252,7 @@ internal static readonly object decoderWronglyDetectedˢ = (@string)"Decoder wro
 internal static readonly @string corruptionInQAtOffsetVˢ = "Corruption in %q at offset %v, want %v"u8;
 internal static readonly object decoderFailedToDetectˢ = (@string)"Decoder failed to detect corruption in"u8;
 
-[GoType("dyn")] internal partial struct TestDecodeCorrupt_testCases {
+internal partial struct TestDecodeCorrupt_testCases /*dyn*/ {
     internal @string input;
     internal nint offset; // -1 means no corruption.
 }
@@ -327,7 +327,7 @@ public static void TestDecodeBounds(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] [GoLocalName("test")] internal partial struct TestEncodedLen_test {
+internal partial struct TestEncodedLen_test /*dyn*/ {
     internal ж<global::go.encoding.base64_package.Encoding> enc;
     internal nint n;
     internal int64 want;
@@ -367,7 +367,7 @@ public static void TestEncodedLen(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("test")] internal partial struct TestDecodedLen_test {
+internal partial struct TestDecodedLen_test /*dyn*/ {
     internal ж<global::go.encoding.base64_package.Encoding> enc;
     internal nint n;
     internal int64 want;
@@ -472,19 +472,19 @@ public static void TestNewLineCharacters(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct nextRead {
+internal partial struct nextRead {
     internal nint n;  // bytes to return
     internal error err; // error to return
 }
 
 // faultInjectReader returns data from source, rate-limited
 // and with the errors as written to nextc.
-[GoType] internal partial struct faultInjectReader {
+internal partial struct faultInjectReader {
     internal @string source;
     internal /*<-*/channel<nextRead> nextc = /*<-*/channel<nextRead>.RecvOnly;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref faultInjectReader r, slice<byte> p) {
+internal static (nint, error) Read(this ref faultInjectReader r, slice<byte> p) {
     var nr = ᐸꟷ(r.nextc);
     if (len(p) > nr.n) {
         p = p.slice(0, nr.n);

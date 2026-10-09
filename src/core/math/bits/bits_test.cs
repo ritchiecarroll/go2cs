@@ -477,7 +477,7 @@ public static void BenchmarkRotateLeft64(ж<testing.B> Ꮡb) {
     Output = (nint)s;
 }
 
-[GoType("dyn")] internal partial struct TestReverse_type {
+internal partial struct TestReverse_type /*dyn*/ {
     internal uint64 x, r;
 }
 
@@ -603,7 +603,7 @@ public static void BenchmarkReverse64(ж<testing.B> Ꮡb) {
     Output = (nint)s;
 }
 
-[GoType("dyn")] internal partial struct TestReverseBytes_type {
+internal partial struct TestReverseBytes_type /*dyn*/ {
     internal uint64 x, r;
 }
 
@@ -762,7 +762,7 @@ internal static readonly @string addIntrinsicSymmetricˢ = "Add intrinsic symmet
 internal static readonly @string subIntrinsicˢ = "Sub intrinsic"u8;
 internal static readonly @string subIntrinsicSymmetricˢ = "Sub intrinsic symmetric"u8;
 
-[GoType("dyn")] internal partial struct TestAddSubUint_type {
+internal partial struct TestAddSubUint_type /*dyn*/ {
     internal nuint x, y, c, z, cout;
 }
 
@@ -807,7 +807,7 @@ internal static readonly @string add32Symmetricˢ = "Add32 symmetric"u8;
 internal static readonly @string sub32ˢ = "Sub32"u8;
 internal static readonly @string sub32Symmetricˢ = "Sub32 symmetric"u8;
 
-[GoType("dyn")] internal partial struct TestAddSubUint32_type {
+internal partial struct TestAddSubUint32_type /*dyn*/ {
     internal uint32 x, y, c, z, cout;
 }
 
@@ -848,7 +848,7 @@ internal static readonly @string add64IntrinsicSymmetricˢ = "Add64 intrinsic sy
 internal static readonly @string sub64Intrinsicˢ = "Sub64 intrinsic"u8;
 internal static readonly @string sub64IntrinsicSymmetricˢ = "Sub64 intrinsic symmetric"u8;
 
-[GoType("dyn")] internal partial struct TestAddSubUint64_type {
+internal partial struct TestAddSubUint64_type /*dyn*/ {
     internal uint64 x, y, c, z, cout;
 }
 
@@ -1049,7 +1049,7 @@ internal static readonly @string mulIntrinsicSymmetricˢ = "Mul intrinsic symmet
 internal static readonly @string divIntrinsicˢ = "Div intrinsic"u8;
 internal static readonly @string divIntrinsicSymmetricˢ = "Div intrinsic symmetric"u8;
 
-[GoType("dyn")] internal partial struct TestMulDiv_type {
+internal partial struct TestMulDiv_type /*dyn*/ {
     internal nuint x, y;
     internal nuint hi, lo, r;
 }
@@ -1092,7 +1092,7 @@ internal static readonly @string mul32Symmetricˢ = "Mul32 symmetric"u8;
 internal static readonly @string div32ˢ = "Div32"u8;
 internal static readonly @string div32Symmetricˢ = "Div32 symmetric"u8;
 
-[GoType("dyn")] internal partial struct TestMulDiv32_type {
+internal partial struct TestMulDiv32_type /*dyn*/ {
     internal uint32 x, y;
     internal uint32 hi, lo, r;
 }
@@ -1132,7 +1132,7 @@ internal static readonly @string mul64IntrinsicSymmetricˢ = "Mul64 intrinsic sy
 internal static readonly @string div64Intrinsicˢ = "Div64 intrinsic"u8;
 internal static readonly @string div64IntrinsicSymmetricˢ = "Div64 intrinsic symmetric"u8;
 
-[GoType("dyn")] internal partial struct TestMulDiv64_type {
+internal partial struct TestMulDiv64_type /*dyn*/ {
     internal uint64 x, y;
     internal uint64 hi, lo, r;
 }
@@ -1370,7 +1370,7 @@ public static void TestRem64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestRem64Overflow_Rem64Tests {
+internal partial struct TestRem64Overflow_Rem64Tests /*dyn*/ {
     internal uint64 hi, lo, y;
     internal uint64 rem;
 }
@@ -1568,7 +1568,7 @@ public static void BenchmarkDiv64(ж<testing.B> Ꮡb) {
 
 // ----------------------------------------------------------------------------
 // Testing support
-[GoType("dyn")] partial struct entryᴛ1 {
+partial struct entryᴛ1 /*dyn*/ {
     internal nint nlz, ntz, pop;
 }
 

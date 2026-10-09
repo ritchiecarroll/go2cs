@@ -21,7 +21,7 @@ partial class fuzz_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object minimizeInputDidnTˢ = (@string)"minimizeInput didn't provide an error"u8;
 
-[GoType("dyn")] [GoLocalName("testcase")] internal partial struct TestMinimizeInput_testcase {
+internal partial struct TestMinimizeInput_testcase /*dyn*/ {
     internal @string name;
     internal Func<CorpusEntry, error> fn;
     internal slice<any> input;

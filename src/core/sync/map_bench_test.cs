@@ -14,7 +14,7 @@ using static go.sync_internal_test_package;
 
 partial class sync_test_package {
 
-[GoType] partial struct bench {
+partial struct bench {
     internal Action<ж<Δtesting.B>, mapInterface> setup;
     internal Action<ж<Δtesting.B>, ж<Δtesting.PB>, nint, mapInterface> perG;
 }

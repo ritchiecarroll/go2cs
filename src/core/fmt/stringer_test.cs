@@ -9,37 +9,37 @@ using static go.fmt_internal_test_package;
 
 partial class fmt_test_package {
 
-[GoType("num:nint")] partial struct TI;
+partial struct TI /*num:nint*/;
 
-[GoType("num:int8")] partial struct TI8;
+partial struct TI8 /*num:int8*/;
 
-[GoType("num:int16")] partial struct TI16;
+partial struct TI16 /*num:int16*/;
 
-[GoType("num:int32")] partial struct TI32;
+partial struct TI32 /*num:int32*/;
 
-[GoType("num:int64")] partial struct TI64;
+partial struct TI64 /*num:int64*/;
 
-[GoType("num:nuint")] partial struct TU;
+partial struct TU /*num:nuint*/;
 
-[GoType("num:uint8")] partial struct TU8;
+partial struct TU8 /*num:uint8*/;
 
-[GoType("num:uint16")] partial struct TU16;
+partial struct TU16 /*num:uint16*/;
 
-[GoType("num:uint32")] partial struct TU32;
+partial struct TU32 /*num:uint32*/;
 
-[GoType("num:uint64")] partial struct TU64;
+partial struct TU64 /*num:uint64*/;
 
-[GoType("num:uintptr")] partial struct TUI;
+partial struct TUI /*num:uintptr*/;
 
-[GoType("num:float64")] partial struct TF;
+partial struct TF /*num:float64*/;
 
-[GoType("num:float32")] partial struct TF32;
+partial struct TF32 /*num:float32*/;
 
-[GoType("num:float64")] partial struct TF64;
+partial struct TF64 /*num:float64*/;
 
-[GoType("bool")] partial struct TB;
+partial struct TB /*bool*/;
 
-[GoType("@string")] partial struct TS;
+partial struct TS /*@string*/;
 
 public static @string String(this TI v) {
     return Sprintf("I: %d"u8, (nint)v);

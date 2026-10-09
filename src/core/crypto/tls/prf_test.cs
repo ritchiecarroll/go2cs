@@ -10,7 +10,7 @@ using static go.crypto.tls_package;
 
 partial class tls_internal_test_package {
 
-[GoType] internal partial struct testSplitPreMasterSecretTest {
+internal partial struct testSplitPreMasterSecretTest {
     internal @string @in, out1, out2;
 }
 
@@ -34,7 +34,7 @@ public static void TestSplitPreMasterSecret(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct testKeysFromTest {
+internal partial struct testKeysFromTest {
     internal uint16 version;
     internal ж<global::go.crypto.tls_package.cipherSuite> suite;
     internal @string preMasterSecret;

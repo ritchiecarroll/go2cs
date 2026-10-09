@@ -20,7 +20,7 @@ partial class types_test_package {
 internal static readonly @string int32ˢ = "int32"u8;
 internal static readonly @string runeˢ = "rune"u8;
 
-[GoType("dyn")] internal partial struct TestIsAlias_type {
+internal partial struct TestIsAlias_type /*dyn*/ {
     internal ж<types.TypeName> name;
     internal bool alias;
 }
@@ -102,7 +102,7 @@ public static void TestEmbeddedMethod(ж<testing.T> Ꮡt) {
 
 // requires GOEXPERIMENT=aliastypeparams
 
-[GoType("dyn")] partial struct testObjectsᴛ1 {
+partial struct testObjectsᴛ1 /*dyn*/ {
     internal @string src;
     internal @string obj;
     internal @string want;

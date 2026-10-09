@@ -33,7 +33,7 @@ partial class syntax_internal_test_package {
 // explicit (?:) in place of non-parenthesized empty strings,
 // to make them easier to spot for other parsers.
 
-[GoType("dyn")] partial struct simplifyTestsᴛ1 {
+partial struct simplifyTestsᴛ1 /*dyn*/ {
     public @string Regexp;
     public @string Simple;
 }

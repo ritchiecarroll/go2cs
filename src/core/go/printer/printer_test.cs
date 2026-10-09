@@ -33,7 +33,7 @@ internal static ж<bool> update = flag.Bool("update"u8, false, "update golden fi
 
 internal static ж<token.FileSet> fset = token.NewFileSet();
 
-[GoType("num:nuint")] internal partial struct checkMode;
+internal partial struct checkMode /*num:nuint*/;
 
 internal static checkMode export => /* 1 << iota */ 1;
 internal static checkMode rawFormat => 2;
@@ -172,7 +172,7 @@ internal static partial void check(ж<testing.T> Ꮡt, @string source, @string g
 }
 
 // test finished within allotted time margin
-[GoType] internal partial struct entry {
+internal partial struct entry {
     internal @string source, golden;
     internal checkMode mode;
 }
@@ -370,7 +370,7 @@ public static void TestBadComments(ж<testing.T> Ꮡt) {
     testComment(Ꮡt, f, len(src), Ꮡ(new ast.Comment(Slash: pos, Text: "/*-style comment \n\n\n */"u8)));
 }
 
-[GoType("chan ж<ast.Ident>")] internal partial struct visitor;
+internal partial struct visitor /*chan ж<ast.Ident>*/;
 
 internal static ast.Visitor /*w*/ Visit(this visitor v, ast.Node n) {
     {
@@ -690,12 +690,12 @@ public static void TestChanType(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct limitWriter {
+internal partial struct limitWriter {
     internal nint remaining;
     internal nint errCount;
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref limitWriter l, slice<byte> buf) {
+internal static (nint n, error err) Write(this ref limitWriter l, slice<byte> buf) {
     nint n = default!;
     error err = default!;
 

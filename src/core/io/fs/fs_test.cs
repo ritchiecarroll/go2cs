@@ -9,7 +9,7 @@ using testing = testing_package;
 partial class fs_test_package {
 
 
-[GoType("dyn")] partial struct isValidPathTestsᴛ1 {
+partial struct isValidPathTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal bool ok;
 }

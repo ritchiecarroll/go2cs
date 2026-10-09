@@ -15,7 +15,7 @@ using static go.strings_internal_test_package;
 
 partial class strings_test_package {
 
-[GoType("dyn")] internal partial struct TestReader_tests {
+internal partial struct TestReader_tests /*dyn*/ {
     internal int64 off;
     internal nint seek;
     internal nint n;
@@ -78,7 +78,7 @@ public static void TestReadAfterBigSeek(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestReaderAt_tests {
+internal partial struct TestReaderAt_tests /*dyn*/ {
     internal int64 off;
     internal nint n;
     internal @string want;

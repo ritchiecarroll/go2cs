@@ -20,7 +20,7 @@ internal static bool isRaceBuilder = strings.HasSuffix(testenv.Builder(), "-race
 
 // type funVV is a methodless func type — rendered inline as its base delegate
 
-[GoType] internal partial struct argVV {
+internal partial struct argVV {
     internal global::go.math.big_package.nat z, x, y;
     internal global::go.math.big_package.Word c;
 }
@@ -137,7 +137,7 @@ public static void BenchmarkSubVV(ж<testing.B> Ꮡb) {
 
 // type funVW is a methodless func type — rendered inline as its base delegate
 
-[GoType] internal partial struct argVW {
+internal partial struct argVW {
     internal global::go.math.big_package.nat z, x;
     internal global::go.math.big_package.Word y;
     internal global::go.math.big_package.Word c;
@@ -299,7 +299,7 @@ public static void TestFunVWExt(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct argVU {
+internal partial struct argVU {
     internal slice<global::go.math.big_package.Word> d; // d is a Word slice, the input parameters x and z come from this array.
     internal nuint l;  // l is the length of the input parameters x and z.
     internal nuint xp;  // xp is the starting position of the input parameter x, x := d[xp:xp+l].
@@ -502,7 +502,7 @@ public static void BenchmarkSubVWext(ж<testing.B> Ꮡb) {
 
 // type funVWW is a methodless func type — rendered inline as its base delegate
 
-[GoType] internal partial struct argVWW {
+internal partial struct argVWW {
     internal global::go.math.big_package.nat z, x;
     internal global::go.math.big_package.Word y, r;
     internal global::go.math.big_package.Word c;
@@ -552,7 +552,7 @@ internal static void testFunVWW(ж<testing.T> Ꮡt, @string msg, Func<slice<glob
 
 // TODO(gri) mulAddVWW and divWVW are symmetric operations but
 // their signature is not symmetric. Try to unify.
-[GoType] internal partial struct argWVW {
+internal partial struct argWVW {
     internal global::go.math.big_package.nat z;
     internal global::go.math.big_package.Word xn;
     internal global::go.math.big_package.nat x;
@@ -593,7 +593,7 @@ public static void TestFunVWW(ж<testing.T> Ꮡt) {
 
 // 32 bit only: {0xc47dfa8c, 50911, 0x98a4, 0x998587f4},
 
-[GoType("dyn")] partial struct mulWWTestsᴛ1 {
+partial struct mulWWTestsᴛ1 /*dyn*/ {
     internal global::go.math.big_package.Word x, y;
     internal global::go.math.big_package.Word q, r;
 }
@@ -614,7 +614,7 @@ public static void TestMulWW(ж<testing.T> Ꮡt) {
 // {15064310297182388543, 0xe7df04d2d35d5d80, 13537600649892366549, 13644450054494335067, 10832252001440893781},
 // {15064310297182388543, 0xdab2f18048baa68d, 13644450054494335067, 12869334219691522700, 14233854684711418382},
 
-[GoType("dyn")] partial struct mulAddWWWTestsᴛ1 {
+partial struct mulAddWWWTestsᴛ1 /*dyn*/ {
     internal global::go.math.big_package.Word x, y, c;
     internal global::go.math.big_package.Word q, r;
 }
@@ -633,7 +633,7 @@ public static void TestMulAddWWW(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct divWWTestsᴛ1 {
+partial struct divWWTestsᴛ1 /*dyn*/ {
     internal global::go.math.big_package.Word x1, x0, y;
     internal global::go.math.big_package.Word q, r;
 }

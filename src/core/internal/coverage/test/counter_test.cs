@@ -18,11 +18,11 @@ using path;
 
 partial class test_internal_test_package {
 
-[GoType] internal partial struct ctrVis {
+internal partial struct ctrVis {
     internal slice<decodecounter.FuncPayload> funcs;
 }
 
-[GoRecv] internal static error VisitFuncs(this ref ctrVis v, Func<uint32, uint32, slice<uint32>, error> f) {
+internal static error VisitFuncs(this ref ctrVis v, Func<uint32, uint32, slice<uint32>, error> f) {
     foreach (var (_, fn) in v.funcs) {
         {
             var err = f(fn.PkgIdx, fn.FuncIdx, fn.Counters); if (err != default!) {

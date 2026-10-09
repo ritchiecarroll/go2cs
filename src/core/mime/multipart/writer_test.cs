@@ -100,7 +100,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object multipartFormDataˢ = (@string)"multipart/form-data"u8;
 
-[GoType("dyn")] internal partial struct TestWriterSetBoundary_tests {
+internal partial struct TestWriterSetBoundary_tests /*dyn*/ {
     internal @string b;
     internal bool ok;
 }

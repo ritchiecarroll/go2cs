@@ -97,7 +97,7 @@ internal static readonly @string key3ˢ = "key3"u8;
 internal static readonly @string key4WithNewlineˢ = "key4WithNewline"u8;
 internal static readonly @string value4ˢ = "\nvalue4"u8;
 
-[GoType("dyn")] internal partial struct TestLabelMapStringer_type {
+internal partial struct TestLabelMapStringer_type /*dyn*/ {
     internal global::go.runtime.pprof_package.labelMap m;
     internal @string expected;
 }

@@ -39,9 +39,9 @@ using static go.image_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/geom_test.go", "geom_test.cs", "AAsYtIKClIKCgoK4lgAOIIKCgoKC3oKCgoCCpICCpICCtoKCgoKCgpSUggAHEoKCgoCCpICCpJSUgoKCgoKCgg==", "14-27:1")]
-[assembly: go.GoPositionMap("image/image_test.go", "image_test.cs", "ABYogoKCAAgGAAwogoKCgoKUgoKUgoKClIKClIKCgpSCgpSCgpSCgoKmgoKCAAgItLKCgqaC1piioqKioqKioqKioqamgoK4gpSCloKCggAGEIKCgoK4gtyCnIKCgoKCppyCgoKCggAUCpSCgqiCAAEgggABILaCgoK2toKC/qK4goKClIKChKjKgrKSgoKCgtyCkrKigoKCgtyigoSCuKKCgoSCuKKChIK4ooKChIK4ooKEgriigoKEgriigoSCuKKCgoSCuKKChIK4ooKChIK4ooKEgriigoKEgriigoSCuKKCgoSCuKKChIK4ooKChII=", "94-102:1;95-99:1.1;108-108:2;109-109:3;110-110:4;111-111:5;112-112:6;113-113:7;114-114:8;115-115:9;116-116:10;117-117:11;118-118:12;119-119:13;197-201:1;283-290:1;297-304:1")]
-[assembly: go.GoPositionMap("image/ycbcr_test.go", "ycbcr_test.cs", "AAwYggAVLAAHENyCgoKmgsqUgpaClLqCgoKCgoK6goKCgoKWgoKCgoKUAAkUgoKCyoKCgqaCgoKC")]
+[assembly: go.GoPositionMap("image/geom_test.go", "geom_test.cs", "AAsYtIKClIKCgoK4lgAOIIKCgoKC3oKCgoCCpICCpICCtoKCgoKCgpSUggAHEoKCgoCCpICCpJSUgoKCgoKCgg==", "14-27:1", "", "30=Rect/1/11/1,Rect/2/11/2,Rect/3/11/3,Rect/4/11/4,Rect/5/11/5,Rect/6/11/6,Rect/7/11/7,Rect/8/11/8,Rect/9/11/9,Rect/10/11/10,Rect/11/11/11")]
+[assembly: go.GoPositionMap("image/image_test.go", "image_test.cs", "ABYogoKCAAgGAAwogoKCgoKUgoKUgoKClIKClIKCgpSCgpSCgpSCgoKmgoKCAAgItLKCgqaC1piioqKioqKioqKioqamgoK4gpSCloKCggAGEIKCgoK4gtyCnIKCgoKCppyCgoKCggAUCpSCgqiCAAEgggABILaCgoK2toKC/qK4goKClIKChKjKgrKSgoKCgtyCkrKigoKCgtyigoSCuKKCgoSCuKKChIK4ooKChIK4ooKEgriigoKEgriigoSCuKKCgoSCuKKChIK4ooKChIK4ooKEgriigoKEgriigoSCuKKCgoSCuKKChIK4ooKChII=", "94-102:1;95-99:1.1;108-108:2;109-109:3;110-110:4;111-111:5;112-112:6;113-113:7;114-114:8;115-115:9;116-116:10;117-117:11;118-118:12;119-119:13;197-201:1;283-290:1;297-304:1", "", "208=Rect/1/4/1,NewRGBA64/1/1/1,Rect/2/4/2,NewNRGBA64/1/1/2,Rect/3/4/3,NewAlpha16/1/1/3,Rect/4/4/4,NewGray16/1/1/4;244=NewAlpha/1/1/1,NewAlpha16/1/1/2,NewCMYK/1/1/3,NewGray/1/1/4,NewGray16/1/1/5,NewNRGBA/1/1/6,NewNRGBA64/1/1/7,NewNYCbCrA/1/1/8,NewPaletted/1/1/9,NewRGBA/1/1/10,NewRGBA64/1/1/11,NewUniform/1/1/12,NewYCbCr/1/1/13")]
+[assembly: go.GoPositionMap("image/ycbcr_test.go", "ycbcr_test.cs", "AAwYggAVLAAHENyCgoKmgsqUgpaClLqCgoKCgoK6goKCgoKWgoKCgoKUAAkUgoKCyoKCgqaCgoKC", "", "", "14=Rect/1/20/1,Rect/2/20/2,Rect/3/20/3,Rect/4/20/4,Rect/5/20/5,Rect/6/20/6,Rect/7/20/7,Rect/8/20/8,Rect/9/20/9,Rect/10/20/10,Rect/11/20/11,Rect/12/20/12,Rect/13/20/13,Rect/14/20/14,Rect/15/20/15,Rect/16/20/16,Rect/17/20/17,Rect/18/20/18,Rect/19/20/19,Rect/20/20/20;44=Pt/1/4/1,Pt/2/4/2,Pt/3/4/3,Pt/4/4/4")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -50,7 +50,7 @@ namespace go;
 public static partial class image_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

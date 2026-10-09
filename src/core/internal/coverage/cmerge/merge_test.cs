@@ -53,7 +53,7 @@ public static void TestClash(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestBasic_scenarios {
+internal partial struct TestBasic_scenarios /*dyn*/ {
     internal coverage.CounterMode cmode;
     internal coverage.CounterGranularity cgran;
     internal slice<uint32> src, dst, res;

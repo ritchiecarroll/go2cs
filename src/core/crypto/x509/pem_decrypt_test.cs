@@ -94,7 +94,7 @@ public static void TestEncrypt(ж<testing.T> Ꮡt) {
 // generated with:
 // openssl genrsa -aes128 -passout pass:asdf -out server.orig.key 128
 
-[GoType("dyn")] partial struct testDataᴛ1 {
+partial struct testDataᴛ1 /*dyn*/ {
     internal global::go.crypto.x509_package.PEMCipher kind;
     internal slice<byte> password;
     internal slice<byte> pemData;

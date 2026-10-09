@@ -32,7 +32,7 @@ using static global::go.hash.adler32_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("hash/adler32/adler32_test.go", "adler32_test.cs", "ABQcAC1oooKCgpSmgoKCgpSCgIKCpICCgtqCgoKEhIKCgpaCgoKUhIKCloKCloCCgqaChILKooKCgpSChIKCgoI=")]
+[assembly: go.GoPositionMap("hash/adler32/adler32_test.go", "adler32_test.cs", "ABQcAC1oooKCgpSmgoKCgpSCgIKCpICCgtqCgoKEhIKCgpaCgoKUhIKCloKCloCCgqaChILKooKCgpSChIKCgoI=", "", "", "21=Repeat/1/11/37,Repeat/2/11/38,Repeat/3/11/39,Repeat/4/11/40,Repeat/5/11/41,Repeat/6/11/42,Repeat/7/11/43,Repeat/8/11/44,Repeat/9/11/45,Repeat/10/11/46,Repeat/11/11/47")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;
@@ -41,7 +41,7 @@ namespace go.hash;
 public static partial class adler32_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

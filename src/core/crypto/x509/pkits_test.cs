@@ -28,7 +28,7 @@ internal static readonly @string testdataNistPkitsCertsˢ = "testdata/nist-pkits
 internal static readonly @string testdataNistPkitsVectorsˢ = "testdata/nist-pkits/vectors.json"u8;
 internal static readonly object expectedPathValidationToˢ = (@string)"Expected path validation to fail"u8;
 
-[GoType("dyn")] internal partial struct TestNISTPKITSPolicy_testcases {
+internal partial struct TestNISTPKITSPolicy_testcases /*dyn*/ {
     public @string Name;
     public slice<@string> CertPath;
     public slice<@string> InitialPolicySet;

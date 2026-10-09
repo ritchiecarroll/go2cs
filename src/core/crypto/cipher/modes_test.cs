@@ -14,16 +14,16 @@ partial class cipher_test_package {
 // methods for crypto/cipher to use from NewCTR, NewCBCEncrypter, etc.
 // This is no longer the case, but for now test that the mechanism is
 // still working until we explicitly decide to remove it.
-[GoType] partial struct block {
-    [GoEmbedded] public go.crypto.cipher_package.Block Block;
+partial struct block {
+    /*embed*/ public go.crypto.cipher_package.Block Block;
 }
 
 internal static nint BlockSize(this block _) {
     return 16;
 }
 
-[GoType] partial struct specialCTR {
-    [GoEmbedded] public go.crypto.cipher_package.Stream Stream;
+partial struct specialCTR {
+    /*embed*/ public go.crypto.cipher_package.Stream Stream;
 }
 
 internal static cipher.Stream ΔNewCTR(this block _, slice<byte> iv) {
@@ -40,8 +40,8 @@ public static void TestCTRAble(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct specialCBC {
-    [GoEmbedded] public go.crypto.cipher_package.BlockMode BlockMode;
+partial struct specialCBC {
+    /*embed*/ public go.crypto.cipher_package.BlockMode BlockMode;
 }
 
 internal static cipher.BlockMode ΔNewCBCEncrypter(this block _, slice<byte> iv) {
@@ -68,8 +68,8 @@ public static void TestCBCAble(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct specialGCM {
-    [GoEmbedded] public go.crypto.cipher_package.AEAD AEAD;
+partial struct specialGCM {
+    /*embed*/ public go.crypto.cipher_package.AEAD AEAD;
 }
 
 internal static (cipher.AEAD, error) ΔNewGCM(this block _, nint nonceSize, nint tagSize) {

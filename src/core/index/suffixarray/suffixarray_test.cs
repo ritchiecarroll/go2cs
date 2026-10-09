@@ -22,7 +22,7 @@ using static go.index.suffixarray_package;
 
 partial class suffixarray_internal_test_package {
 
-[GoType] internal partial struct testCase {
+internal partial struct testCase {
     internal @string name;  // name of test case
     internal @string source;  // source to index
     internal slice<@string> patterns; // patterns to lookup
@@ -212,17 +212,17 @@ internal static void testLookups(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<glob
     }
 }
 
-[GoType("global::go.index.suffixarray_package.Index")] internal partial struct index;
+internal partial struct index /*global::go.index.suffixarray_package.Index*/;
 
-[GoRecv] internal static nint Len(this ref index x) {
+internal static nint Len(this ref index x) {
     return x.sa.len();
 }
 
-[GoRecv] internal static bool Less(this ref index x, nint i, nint j) {
+internal static bool Less(this ref index x, nint i, nint j) {
     return bytes.Compare(x.at(i), x.at(j)) < 0;
 }
 
-[GoRecv] internal static void Swap(this ref index x, nint i, nint j) {
+internal static void Swap(this ref index x, nint i, nint j) {
     if (x.sa.int32 != default!){
         (x.sa.int32[i], x.sa.int32[j]) = (x.sa.int32[j], x.sa.int32[i]);
     } else {
@@ -230,7 +230,7 @@ internal static void testLookups(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<glob
     }
 }
 
-[GoRecv] internal static slice<byte> at(this ref index x, nint i) {
+internal static slice<byte> at(this ref index x, nint i) {
     return x.data.slice((nint)(x.sa.get(i)));
 }
 

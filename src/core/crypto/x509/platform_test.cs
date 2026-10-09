@@ -40,7 +40,7 @@ internal static readonly @string rootKeyPath = "platform_root_key.pem"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object onlyTestedOnWindowsAndˢ = (@string)"only tested on windows and darwin"u8;
 
-[GoType("dyn")] internal partial struct TestPlatformVerifier_tests {
+internal partial struct TestPlatformVerifier_tests /*dyn*/ {
     internal @string name;
     internal ж<global::go.crypto.x509_package.Certificate> cert;
     internal bool selfSigned;

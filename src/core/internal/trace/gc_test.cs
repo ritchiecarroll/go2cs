@@ -26,7 +26,7 @@ internal static bool aeq(float64 x, float64 y) {
     return x * factor <= y && y * factor <= x;
 }
 
-[GoType("dyn")] internal partial struct TestMMU_type {
+internal partial struct TestMMU_type /*dyn*/ {
     internal time.Duration window;
     internal float64 want;
     internal slice<float64> worst;

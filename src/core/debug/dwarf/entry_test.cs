@@ -51,10 +51,9 @@ public static void TestSplit(ж<testing.T> Ꮡt) {
 
 // wantRange maps from a PC to the ranges of the compilation unit
 // containing that PC.
-[GoType] partial struct wantRange {
+partial struct wantRange {
     internal uint64 pc;
-    [GoArrayDims(2)]
-    internal slice<array<uint64>> ranges;
+    internal /*[2]*/ slice<array<uint64>> ranges;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -150,15 +149,14 @@ internal static void testRanges(ж<testing.T> Ꮡt, @string name, slice<wantRang
     }
 }
 
-[GoType("dyn")] internal partial struct TestReaderRanges_subprograms {
+internal partial struct TestReaderRanges_subprograms /*dyn*/ {
     internal @string name;
-    [GoArrayDims(2)]
-    internal slice<array<uint64>> ranges;
+    internal /*[2]*/ slice<array<uint64>> ranges;
 }
 
-[GoLocalName("subprograms")] [GoType("[]TestReaderRanges_subprograms")] internal partial struct TestReaderRanges_subprogramsᴛ1;
+internal partial struct TestReaderRanges_subprogramsᴛ1 /*[]TestReaderRanges_subprograms*/;
 
-[GoType("dyn")] internal partial struct TestReaderRanges_tests {
+internal partial struct TestReaderRanges_tests /*dyn*/ {
     internal @string filename;
     internal TestReaderRanges_subprogramsᴛ1 subprograms;
 }
@@ -232,7 +230,7 @@ public static void TestReaderRanges(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct Test64Bit_tests {
+internal partial struct Test64Bit_tests /*dyn*/ {
     internal @string name;
     internal slice<byte> info;
     internal nint addrSize;

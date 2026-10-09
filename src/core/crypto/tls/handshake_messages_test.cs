@@ -142,7 +142,7 @@ internal static @string randomString(nint n, ж<rand.Rand> Ꮡrand) {
     return ((@string)b);
 }
 
-[GoRecv] internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.clientHelloMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.clientHelloMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new clientHelloMsg(nil));
@@ -238,7 +238,7 @@ internal static @string randomString(nint n, ж<rand.Rand> Ꮡrand) {
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-[GoRecv] internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.serverHelloMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.serverHelloMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new serverHelloMsg(nil));
@@ -295,7 +295,7 @@ internal static @string randomString(nint n, ж<rand.Rand> Ꮡrand) {
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-[GoRecv] internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.encryptedExtensionsMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.encryptedExtensionsMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new encryptedExtensionsMsg(nil));
@@ -308,7 +308,7 @@ internal static @string randomString(nint n, ж<rand.Rand> Ꮡrand) {
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-[GoRecv] internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new certificateMsg(nil));
@@ -320,7 +320,7 @@ internal static @string randomString(nint n, ж<rand.Rand> Ꮡrand) {
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-[GoRecv] internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateRequestMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateRequestMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new certificateRequestMsg(nil));
@@ -331,7 +331,7 @@ internal static @string randomString(nint n, ж<rand.Rand> Ꮡrand) {
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-[GoRecv] internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateVerifyMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateVerifyMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new certificateVerifyMsg(nil));
@@ -341,7 +341,7 @@ internal static @string randomString(nint n, ж<rand.Rand> Ꮡrand) {
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-[GoRecv] internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateStatusMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateStatusMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new certificateStatusMsg(nil));
@@ -349,7 +349,7 @@ internal static @string randomString(nint n, ж<rand.Rand> Ꮡrand) {
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-[GoRecv] internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.clientKeyExchangeMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.clientKeyExchangeMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new clientKeyExchangeMsg(nil));
@@ -357,13 +357,13 @@ internal static @string randomString(nint n, ж<rand.Rand> Ꮡrand) {
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-[GoRecv] internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.finishedMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.finishedMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     var m = Ꮡ(new finishedMsg(nil));
     m.Value.verifyData = randomBytes(12, Ꮡrand);
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-[GoRecv] internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.newSessionTicketMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.newSessionTicketMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new newSessionTicketMsg(nil));
@@ -386,7 +386,7 @@ internal static slice<ж<Δx509.Certificate>> sessionTestCerts;
     sessionTestCerts = append(sessionTestCerts, cert);
 }
 
-[GoRecv] internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.SessionState _, ж<rand.Rand> Ꮡrand, nint size) {
+internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.SessionState _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var s = Ꮡ(new SessionState(nil));
@@ -449,7 +449,7 @@ internal static (slice<byte>, error) marshal(this ж<global::go.crypto.tls_packa
     return Ꮡs.Bytes();
 }
 
-[GoRecv] internal static bool unmarshal(this ref global::go.crypto.tls_package.SessionState s, slice<byte> b) {
+internal static bool unmarshal(this ref global::go.crypto.tls_package.SessionState s, slice<byte> b) {
     var (ss, err) = ParseSessionState(b);
     if (err != default!) {
         return false;
@@ -458,12 +458,12 @@ internal static (slice<byte>, error) marshal(this ж<global::go.crypto.tls_packa
     return true;
 }
 
-[GoRecv] internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.endOfEarlyDataMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.endOfEarlyDataMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     var m = Ꮡ(new endOfEarlyDataMsg(nil));
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-[GoRecv] internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.keyUpdateMsg _, ж<rand.Rand> Ꮡrand, nint size) {
+internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.keyUpdateMsg _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new keyUpdateMsg(nil));
@@ -471,7 +471,7 @@ internal static (slice<byte>, error) marshal(this ж<global::go.crypto.tls_packa
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-[GoRecv] internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.newSessionTicketMsgTLS13 _, ж<rand.Rand> Ꮡrand, nint size) {
+internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.newSessionTicketMsgTLS13 _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new newSessionTicketMsgTLS13(nil));
@@ -485,7 +485,7 @@ internal static (slice<byte>, error) marshal(this ж<global::go.crypto.tls_packa
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-[GoRecv] internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateRequestMsgTLS13 _, ж<rand.Rand> Ꮡrand, nint size) {
+internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateRequestMsgTLS13 _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new certificateRequestMsgTLS13(nil));
@@ -510,7 +510,7 @@ internal static (slice<byte>, error) marshal(this ж<global::go.crypto.tls_packa
     return reflect.ValueOf(m.OrTypedNil());
 }
 
-[GoRecv] internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateMsgTLS13 _, ж<rand.Rand> Ꮡrand, nint size) {
+internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.certificateMsgTLS13 _, ж<rand.Rand> Ꮡrand, nint size) {
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new certificateMsgTLS13(nil));

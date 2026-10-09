@@ -48,7 +48,7 @@ using static go.crypto.tls_package;
 
 partial class tls_internal_test_package {
 
-[GoType("num:nint")] internal partial struct opensslInputEvent;
+internal partial struct opensslInputEvent /*num:nint*/;
 
 // Note: see comment in handshake_test.go for details of how the reference
 // tests work.
@@ -58,7 +58,7 @@ internal static opensslInputEvent opensslKeyUpdate => 2;
 
 internal static readonly @string opensslSentinel = "SENTINEL\n"u8;
 
-[GoType("chan opensslInputEvent")] internal partial struct opensslInput;
+internal partial struct opensslInput /*chan opensslInputEvent*/;
 
 internal static (nint n, error err) Read(this opensslInput i, slice<byte> buf) {
     foreach (var @event in i) {
@@ -83,7 +83,7 @@ internal static (nint n, error err) Read(this opensslInput i, slice<byte> buf) {
 // opensslOutputSink is an io.Writer that receives the stdout and stderr from an
 // `openssl` process and sends a value to handshakeComplete or readKeyUpdate
 // when certain messages are seen.
-[GoType] internal partial struct opensslOutputSink {
+internal partial struct opensslOutputSink {
     internal channel<EmptyStruct> handshakeComplete;
     internal channel<EmptyStruct> readKeyUpdate;
     internal slice<byte> all;
@@ -102,7 +102,7 @@ internal static readonly @string opensslEndOfHandshake = "SSL_accept:SSLv3/TLS w
 // print when a KeyUpdate message is received if run with “-state”.
 internal static readonly @string opensslReadKeyUpdate = "SSL_accept:TLSv1.3 read client key update"u8;
 
-[GoRecv] internal static (nint n, error err) Write(this ref opensslOutputSink o, slice<byte> data) {
+internal static (nint n, error err) Write(this ref opensslOutputSink o, slice<byte> data) {
     o.line = appendꓸꓸꓸ(o.line, data);
     o.all = appendꓸꓸꓸ(o.all, data);
     while (ᐧ) {
@@ -121,13 +121,13 @@ internal static readonly @string opensslReadKeyUpdate = "SSL_accept:TLSv1.3 read
     return (len(data), default!);
 }
 
-[GoRecv] internal static @string String(this ref opensslOutputSink o) {
+internal static @string String(this ref opensslOutputSink o) {
     return ((@string)o.all);
 }
 
 // clientTest represents a test of the TLS client handshake against a reference
 // implementation.
-[GoType] internal partial struct clientTest {
+internal partial struct clientTest {
     // name is a freeform string identifying the test and the file in which
     // the expected results will be stored.
     internal @string name;
@@ -279,7 +279,7 @@ internal static (ж<recordingConn> conn, ж<exec.Cmd> child, opensslInput stdin,
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testdataˢ = "testdata"u8;
 
-[GoRecv] internal static @string dataPath(this ref clientTest test) {
+internal static @string dataPath(this ref clientTest test) {
     return filepath.Join(testdataˢ, "Client-" + test.name);
 }
 
@@ -1109,12 +1109,12 @@ internal static void testResumption(ж<testing.T> Ꮡt, uint16 version) {
     testResumeState(withSerializingCacheˢ, true);
 }
 
-[GoType] internal partial struct serializingClientCache {
+internal partial struct serializingClientCache {
     internal ж<testing.T> t;
     internal slice<byte> ticket, state;
 }
 
-[GoRecv] internal static (ж<global::go.crypto.tls_package.ClientSessionState> session, bool ok) Get(this ref serializingClientCache c, @string sessionKey) {
+internal static (ж<global::go.crypto.tls_package.ClientSessionState> session, bool ok) Get(this ref serializingClientCache c, @string sessionKey) {
     if (c.ticket == default!) {
         return (default!, false);
     }
@@ -1131,7 +1131,7 @@ internal static void testResumption(ж<testing.T> Ꮡt, uint16 version) {
     return (cs, true);
 }
 
-[GoRecv] internal static void Put(this ref serializingClientCache c, @string sessionKey, ж<global::go.crypto.tls_package.ClientSessionState> Ꮡcs) {
+internal static void Put(this ref serializingClientCache c, @string sessionKey, ж<global::go.crypto.tls_package.ClientSessionState> Ꮡcs) {
     if (Ꮡcs == nil) {
         (c.ticket, c.state) = (default!, default!);
         return;
@@ -1549,7 +1549,7 @@ public static void TestHandshakeClientExportKeyingMaterial(ж<testing.T> Ꮡt) {
 // with zone identifier
 // as per RFC 5952 we allow the [] style as IPv6 literal
 
-[GoType("dyn")] partial struct hostnameInSNITestsᴛ1 {
+partial struct hostnameInSNITestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
 }
 internal static slice<hostnameInSNITestsᴛ1> hostnameInSNITests = new hostnameInSNITestsᴛ1[]{
@@ -1673,7 +1673,7 @@ public static void TestVerifyConnection(ж<testing.T> Ꮡt) {
 internal static readonly @string exampleGolangˢ = "example.golang"u8;
 internal static readonly object protocol1ˢ = (@string)"protocol1"u8;
 
-[GoType("dyn")] internal partial struct testVerifyConnection_tests {
+internal partial struct testVerifyConnection_tests /*dyn*/ {
     internal @string name;
     internal Action<ж<global::go.crypto.tls_package.Config>, ж<nint>> configureServer;
     internal Action<ж<global::go.crypto.tls_package.Config>, ж<nint>> configureClient;
@@ -1942,7 +1942,7 @@ public static void TestVerifyPeerCertificate(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string gotLenValidatedChains0ˢ = "got len(validatedChains) = 0, wanted non-zero"u8;
 
-[GoType("dyn")] internal partial struct testVerifyPeerCertificate_tests {
+internal partial struct testVerifyPeerCertificate_tests /*dyn*/ {
     internal Action<ж<global::go.crypto.tls_package.Config>, ж<bool>> configureServer;
     internal Action<ж<global::go.crypto.tls_package.Config>, ж<bool>> configureClient;
     internal Action<ж<testing.T>, nint, bool, bool, error, error> validate;
@@ -2269,8 +2269,8 @@ internal static partial void testVerifyPeerCertificate(ж<testing.T> Ꮡt, uint1
 
 // brokenConn wraps a net.Conn and causes all Writes after a certain number to
 // fail with brokenConnErr.
-[GoType] internal partial struct brokenConn {
-    [GoEmbedded] public net_package.Conn Conn;
+internal partial struct brokenConn {
+    /*embed*/ public net_package.Conn Conn;
     // breakAfter is the number of successful writes that will be allowed
     // before all subsequent writes fail.
     internal nint breakAfter;
@@ -2309,7 +2309,7 @@ internal static error SetWriteDeadline(this brokenConn recvᴛ, time.Time t) => 
 // brokenConnErr is the error that brokenConn returns once exhausted.
 internal static error brokenConnErr = errors.New("too many writes to brokenConn"u8);
 
-[GoRecv] internal static (nint, error) Write(this ref brokenConn b, slice<byte> data) {
+internal static (nint, error) Write(this ref brokenConn b, slice<byte> data) {
     if (b.numWrites >= b.breakAfter) {
         return (0, brokenConnErr);
     }
@@ -2343,8 +2343,8 @@ public static partial void TestFailedWrite(ж<testing.T> Ꮡt) {
 }
 
 // writeCountingConn wraps a net.Conn and counts the number of Write calls.
-[GoType] internal partial struct writeCountingConn {
-    [GoEmbedded] public net_package.Conn Conn;
+internal partial struct writeCountingConn {
+    /*embed*/ public net_package.Conn Conn;
     // numWrites is the number of writes that have been done.
     internal nint numWrites;
 }
@@ -2377,7 +2377,7 @@ internal static error SetReadDeadline(this writeCountingConn recvᴛ, time.Time 
 // interface field in *writeCountingConn's method set; see the pointer-only satisfaction record.
 internal static error SetWriteDeadline(this writeCountingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetWriteDeadline(t);
 
-[GoRecv] internal static (nint, error) Write(this ref writeCountingConn wcc, slice<byte> data) {
+internal static (nint, error) Write(this ref writeCountingConn wcc, slice<byte> data) {
     wcc.numWrites++;
     return wcc.Conn.Write(data);
 }
@@ -2552,7 +2552,7 @@ public static partial void TestHandshakeRace(ж<testing.T> Ꮡt) {
 // Returning an error should abort the handshake with
 // that error.
 
-[GoType("dyn")] partial struct getClientCertificateTestsᴛ1 {
+partial struct getClientCertificateTestsᴛ1 /*dyn*/ {
     internal Action<ж<global::go.crypto.tls_package.Config>, ж<global::go.crypto.tls_package.Config>> setup;
     internal @string expectedClientError;
     internal Action<ж<testing.T>, nint, ж<global::go.crypto.tls_package.ΔConnectionState>> verify;
@@ -2639,7 +2639,7 @@ public static void TestGetClientCertificate(ж<testing.T> Ꮡt) {
     });
 }
 
-[GoType("dyn")] [GoLocalName("serverResult")] internal partial struct testGetClientCertificate_serverResult {
+internal partial struct testGetClientCertificate_serverResult /*dyn*/ {
     internal global::go.crypto.tls_package.ΔConnectionState cs;
     internal error err;
 }
@@ -2999,7 +2999,7 @@ public static partial void TestClientHandshakeContextCancellation(ж<testing.T> 
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestTLS13OnlyClientHelloCipherSuite_tls13Tests {
+internal partial struct TestTLS13OnlyClientHelloCipherSuite_tls13Tests /*dyn*/ {
     internal @string name;
     internal slice<uint16> ciphers;
 }
@@ -3076,8 +3076,8 @@ internal static void testTLS13OnlyClientHelloCipherSuite(ж<testing.T> Ꮡt, sli
 }
 
 // discardConn wraps a net.Conn but discards all writes, but reports that they happened.
-[GoType] internal partial struct discardConn {
-    [GoEmbedded] public net_package.Conn Conn;
+internal partial struct discardConn {
+    /*embed*/ public net_package.Conn Conn;
 }
 
 // Go method set entry for the promoted 'Conn.Close()' - provided ONLY by the embedded
@@ -3108,7 +3108,7 @@ internal static error SetReadDeadline(this discardConn recvᴛ, time.Time t) => 
 // interface field in *discardConn's method set; see the pointer-only satisfaction record.
 internal static error SetWriteDeadline(this discardConn recvᴛ, time.Time t) => recvᴛ.Conn.SetWriteDeadline(t);
 
-[GoRecv] internal static (nint, error) Write(this ref discardConn dc, slice<byte> data) {
+internal static (nint, error) Write(this ref discardConn dc, slice<byte> data) {
     return (len(data), default!);
 }
 
@@ -3187,7 +3187,7 @@ public static void TestHandshakeRSATooBig(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string callbackErrˢ = "callback err"u8;
 
-[GoType("dyn")] internal partial struct TestTLS13ECHRejectionCallbacks_type {
+internal partial struct TestTLS13ECHRejectionCallbacks_type /*dyn*/ {
     internal @string name;
     internal @string expectedErr;
     internal Func<global::go.crypto.tls_package.ΔConnectionState, error> verifyConnection;

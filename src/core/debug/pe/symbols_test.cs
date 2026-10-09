@@ -9,7 +9,7 @@ using static go.debug.pe_package;
 
 partial class pe_internal_test_package {
 
-[GoType] internal partial struct testpoint {
+internal partial struct testpoint {
     internal @string name;
     internal bool ok;
     internal @string err;

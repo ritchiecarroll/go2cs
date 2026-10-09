@@ -24,51 +24,49 @@ using static go.encoding.json_package;
 
 partial class json_internal_test_package {
 
-[GoType] public partial struct T {
+public partial struct T {
     public @string X;
     public nint Y;
-    [GoTag(@"json:""-""")]
-    public nint Z;
+    public nint Z; /*`json:"-"`*/
 }
 
-[GoType] public partial struct U {
-    [GoTag(@"json:""alpha""")]
-    public @string Alphabet;
+public partial struct U {
+    public @string Alphabet; /*`json:"alpha"`*/
 }
 
-[GoType] public partial struct V {
+public partial struct V {
     public any F1;
     public int32 F2;
     public global::go.encoding.json_package.Number F3;
     public ж<VOuter> F4;
 }
 
-[GoType] public partial struct VOuter {
+public partial struct VOuter {
     public V V;
 }
 
-[GoType] public partial struct W {
+public partial struct W {
     public SS S;
 }
 
-[GoType] public partial struct P {
+public partial struct P {
     public PP PP;
 }
 
-[GoType] public partial struct PP {
+public partial struct PP {
     public T T;
     public slice<T> Ts;
 }
 
-[GoType("@string")] public partial struct SS;
+public partial struct SS /*@string*/;
 
-[GoRecv] public static error UnmarshalJSON(this ref SS _, slice<byte> data) {
+public static error UnmarshalJSON(this ref SS _, slice<byte> data) {
     return new global::go.encoding.json_package.UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number"u8, Type: reflect.TypeFor<SS>())));
 }
 
-[GoType("T")] public partial struct TAlias;
+public partial struct TAlias /*T*/;
 
-[GoRecv] public static error UnmarshalJSON(this ref TAlias tt, slice<byte> data) {
+public static error UnmarshalJSON(this ref TAlias tt, slice<byte> data) {
     ref var t = ref heap<T>(out var Ꮡt);
     t = new T(nil);
     {
@@ -80,7 +78,7 @@ partial class json_internal_test_package {
     return default!;
 }
 
-[GoType] public partial struct TOuter {
+public partial struct TOuter {
     public TAlias T;
 }
 
@@ -100,27 +98,27 @@ internal static map<@string, any> ifaceNumAsNumber = new map<@string, any>{
     ["k4"u8] = new map<@string, any>{["kk1"u8] = (@string)"s"u8, ["kk2"u8] = ((global::go.encoding.json_package.Number)(@string)"2"u8)}
 };
 
-[GoType] internal partial struct tx {
+internal partial struct tx {
     internal nint x;
 }
 
-[GoType("num:uint8")] internal partial struct u8;
+internal partial struct u8 /*num:uint8*/;
 
 // A type that can unmarshal itself.
-[GoType] public partial struct unmarshaler {
+public partial struct unmarshaler {
     public bool T;
 }
 
-[GoRecv] public static error UnmarshalJSON(this ref unmarshaler u, slice<byte> b) {
+public static error UnmarshalJSON(this ref unmarshaler u, slice<byte> b) {
     u = new unmarshaler(true); // All we need to see that UnmarshalJSON is called.
     return default!;
 }
 
-[GoType] internal partial struct ustruct {
+internal partial struct ustruct {
     public unmarshaler M;
 }
 
-[GoType] public partial struct unmarshalerText {
+public partial struct unmarshalerText {
     public @string A, B;
 }
 
@@ -132,7 +130,7 @@ public static (slice<byte>, error) MarshalText(this unmarshalerText u) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string missingSeparatorˢ = "missing separator"u8;
 
-[GoRecv] public static error UnmarshalText(this ref unmarshalerText u, slice<byte> b) {
+public static error UnmarshalText(this ref unmarshalerText u, slice<byte> b) {
     nint pos = bytes.IndexByte(b, (rune)':');
     if (pos == -1) {
         return errors.New(missingSeparatorˢ);
@@ -143,11 +141,11 @@ internal static readonly @string missingSeparatorˢ = "missing separator"u8;
 
 internal static encoding.TextUnmarshaler _ᴛ1ʗ = new json_internal_test_package.unmarshalerTextжTextUnmarshaler(((ж<unmarshalerText>)nil));
 
-[GoType] internal partial struct ustructText {
+internal partial struct ustructText {
     public unmarshalerText M;
 }
 
-[GoType("num:uint8")] internal partial struct u8marshal;
+internal partial struct u8marshal /*num:uint8*/;
 
 internal static (slice<byte>, error) MarshalText(this u8marshal u8) {
     return (slice<byte>(fmt.Sprintf("u%d"u8, u8)), default!);
@@ -155,7 +153,7 @@ internal static (slice<byte>, error) MarshalText(this u8marshal u8) {
 
 internal static error errMissingU8Prefix = errors.New("missing 'u' prefix"u8);
 
-[GoRecv] internal static error UnmarshalText(this ref u8marshal u8, slice<byte> b) {
+internal static error UnmarshalText(this ref u8marshal u8, slice<byte> b) {
     if (!bytes.HasPrefix(b, new byte[]{(rune)'u'}.slice())) {
         return errMissingU8Prefix;
     }
@@ -182,139 +180,128 @@ internal static ustructText umstructXY = new ustructText(new unmarshalerText("x"
 internal static map<unmarshalerText, bool> ummapXY = new map<unmarshalerText, bool>{[new("x"u8, "y"u8)] = true};
 
 // Test data structures for anonymous fields.
-[GoType] public partial struct Point {
+public partial struct Point {
     public nint Z;
 }
 
-[GoType] public partial struct Top {
+public partial struct Top {
     public nint Level0;
     public partial ref Embed0 Embed0 { get; }
     public partial ref ж<Embed0a> Embed0a { get; }
-    [GoTag(@"json:""e,omitempty""")]
-    public partial ref ж<Embed0b> Embed0b { get; }                   // treated as named
-    [GoTag(@"json:""-""")]
-    public partial ref Embed0c Embed0c { get; }                       // ignored
+    public partial ref ж<Embed0b> Embed0b { get; } /*`json:"e,omitempty"`*/ // treated as named
+    public partial ref Embed0c Embed0c { get; } /*`json:"-"`*/           // ignored
     public partial ref Loop Loop { get; }
     public partial ref Embed0p Embed0p { get; } // has Point with X, Y, used
     public partial ref Embed0q Embed0q { get; } // has Point with Z, used
     internal partial ref embed embed { get; }   // contains exported field
 }
 
-[GoType] public partial struct Embed0 {
+public partial struct Embed0 {
     public nint Level1a; // overridden by Embed0a's Level1a with json tag
     public nint Level1b; // used because Embed0a's Level1b is renamed
     public nint Level1c; // used because Embed0a's Level1c is ignored
     public nint Level1d; // annihilated by Embed0a's Level1d
-    [GoTag(@"json:""x""")]
-    public nint Level1e;           // annihilated by Embed0a.Level1e
+    public nint Level1e; /*`json:"x"`*/ // annihilated by Embed0a.Level1e
 }
 
-[GoType] public partial struct Embed0a {
-    [GoTag(@"json:""Level1a,omitempty""")]
-    public nint Level1a;
-    [GoTag(@"json:""LEVEL1B,omitempty""")]
-    public nint Level1b;
-    [GoTag(@"json:""-""")]
-    public nint Level1c;
+public partial struct Embed0a {
+    public nint Level1a; /*`json:"Level1a,omitempty"`*/
+    public nint Level1b; /*`json:"LEVEL1B,omitempty"`*/
+    public nint Level1c; /*`json:"-"`*/
     public nint Level1d; // annihilated by Embed0's Level1d
-    [GoTag(@"json:""x""")]
-    public nint Level1f;           // annihilated by Embed0's Level1e
+    public nint Level1f; /*`json:"x"`*/ // annihilated by Embed0's Level1e
 }
 
-[GoType("Embed0")] public partial struct Embed0b;
+public partial struct Embed0b /*Embed0*/;
 
-[GoType("Embed0")] public partial struct Embed0c;
+public partial struct Embed0c /*Embed0*/;
 
-[GoType] public partial struct Embed0p {
+public partial struct Embed0p {
     public partial ref image_package.Point Point { get; }
 }
 
-[GoType] public partial struct Embed0q {
+public partial struct Embed0q {
     public partial ref Point Point { get; }
 }
 
-[GoType] internal partial struct embed {
+internal partial struct embed {
     public nint Q;
 }
 
-[GoType] public partial struct Loop {
-    [GoTag(@"json:"",omitempty""")]
-    public nint Loop1;
-    [GoTag(@"json:"",omitempty""")]
-    public nint Loop2;
+public partial struct Loop {
+    public nint Loop1; /*`json:",omitempty"`*/
+    public nint Loop2; /*`json:",omitempty"`*/
     public partial ref ж<Loop> ΔLoop { get; }
 }
 
 // From reflect test:
 // The X in S6 and S7 annihilate, but they also block the X in S8.S9.
-[GoType] public partial struct S5 {
+public partial struct S5 {
     public partial ref S6 S6 { get; }
     public partial ref S7 S7 { get; }
     public partial ref S8 S8 { get; }
 }
 
-[GoType] public partial struct S6 {
+public partial struct S6 {
     public nint X;
 }
 
-[GoType("S6")] public partial struct S7;
+public partial struct S7 /*S6*/;
 
-[GoType] public partial struct S8 {
+public partial struct S8 {
     public partial ref S9 S9 { get; }
 }
 
-[GoType] public partial struct S9 {
+public partial struct S9 {
     public nint X;
     public nint Y;
 }
 
 // From reflect test:
 // The X in S11.S6 and S12.S6 annihilate, but they also block the X in S13.S8.S9.
-[GoType] public partial struct S10 {
+public partial struct S10 {
     public partial ref S11 S11 { get; }
     public partial ref S12 S12 { get; }
     public partial ref S13 S13 { get; }
 }
 
-[GoType] public partial struct S11 {
+public partial struct S11 {
     public partial ref S6 S6 { get; }
 }
 
-[GoType] public partial struct S12 {
+public partial struct S12 {
     public partial ref S6 S6 { get; }
 }
 
-[GoType] public partial struct S13 {
+public partial struct S13 {
     public partial ref S8 S8 { get; }
 }
 
-[GoType] public partial struct Ambig {
+public partial struct Ambig {
     // Given "hello", the first match should win.
-    [GoTag(@"json:""HELLO""")]
-    public nint First;
-    [GoTag(@"json:""Hello""")]
-    public nint Second;
+    public nint First; /*`json:"HELLO"`*/
+    public nint Second; /*`json:"Hello"`*/
 }
 
-[GoType] public partial struct XYZ {
+public partial struct XYZ {
     public any X;
     public any Y;
     public any Z;
 }
 
-[GoType] internal partial struct unexportedWithMethods {
+internal partial struct unexportedWithMethods {
 }
 
 internal static void F(this unexportedWithMethods _) {
 }
 
-[GoType("num:byte")] internal partial struct byteWithMarshalJSON;
+internal partial struct byteWithMarshalJSON /*num:byte*/;
 
 internal static (slice<byte>, error) MarshalJSON(this byteWithMarshalJSON b) {
     return (slice<byte>(fmt.Sprintf(@"""Z%.2x"""u8, (byte)b)), default!);
 }
 
-[GoRecv] internal static error UnmarshalJSON(this ref byteWithMarshalJSON b, slice<byte> data) {
+internal static error UnmarshalJSON(this ref byteWithMarshalJSON b, slice<byte> data) {
     if (len(data) != 5 || data[0] != (rune)'"' || data[1] != (rune)'Z' || data[4] != (rune)'"') {
         return fmt.Errorf("bad quoted string"u8);
     }
@@ -326,9 +313,9 @@ internal static (slice<byte>, error) MarshalJSON(this byteWithMarshalJSON b) {
     return default!;
 }
 
-[GoType("num:byte")] internal partial struct byteWithPtrMarshalJSON;
+internal partial struct byteWithPtrMarshalJSON /*num:byte*/;
 
-[GoRecv] internal static (slice<byte>, error) MarshalJSON(this ref byteWithPtrMarshalJSON b) {
+internal static (slice<byte>, error) MarshalJSON(this ref byteWithPtrMarshalJSON b) {
     return ((byteWithMarshalJSON)(byte)(b)).MarshalJSON();
 }
 
@@ -336,13 +323,13 @@ internal static error UnmarshalJSON(this ж<byteWithPtrMarshalJSON> Ꮡb, slice<
     return (Ꮡb.Reinterpret<byteWithPtrMarshalJSON, byteWithMarshalJSON>()).UnmarshalJSON(data);
 }
 
-[GoType("num:byte")] internal partial struct byteWithMarshalText;
+internal partial struct byteWithMarshalText /*num:byte*/;
 
 internal static (slice<byte>, error) MarshalText(this byteWithMarshalText b) {
     return (slice<byte>(fmt.Sprintf(@"Z%.2x"u8, (byte)b)), default!);
 }
 
-[GoRecv] internal static error UnmarshalText(this ref byteWithMarshalText b, slice<byte> data) {
+internal static error UnmarshalText(this ref byteWithMarshalText b, slice<byte> data) {
     if (len(data) != 3 || data[0] != (rune)'Z') {
         return fmt.Errorf("bad quoted string"u8);
     }
@@ -354,9 +341,9 @@ internal static (slice<byte>, error) MarshalText(this byteWithMarshalText b) {
     return default!;
 }
 
-[GoType("num:byte")] internal partial struct byteWithPtrMarshalText;
+internal partial struct byteWithPtrMarshalText /*num:byte*/;
 
-[GoRecv] internal static (slice<byte>, error) MarshalText(this ref byteWithPtrMarshalText b) {
+internal static (slice<byte>, error) MarshalText(this ref byteWithPtrMarshalText b) {
     return ((byteWithMarshalText)(byte)(b)).MarshalText();
 }
 
@@ -364,13 +351,13 @@ internal static error UnmarshalText(this ж<byteWithPtrMarshalText> Ꮡb, slice<
     return (Ꮡb.Reinterpret<byteWithPtrMarshalText, byteWithMarshalText>()).UnmarshalText(data);
 }
 
-[GoType("num:nint")] internal partial struct intWithMarshalJSON;
+internal partial struct intWithMarshalJSON /*num:nint*/;
 
 internal static (slice<byte>, error) MarshalJSON(this intWithMarshalJSON b) {
     return (slice<byte>(fmt.Sprintf(@"""Z%.2x"""u8, (nint)b)), default!);
 }
 
-[GoRecv] internal static error UnmarshalJSON(this ref intWithMarshalJSON b, slice<byte> data) {
+internal static error UnmarshalJSON(this ref intWithMarshalJSON b, slice<byte> data) {
     if (len(data) != 5 || data[0] != (rune)'"' || data[1] != (rune)'Z' || data[4] != (rune)'"') {
         return fmt.Errorf("bad quoted string"u8);
     }
@@ -382,9 +369,9 @@ internal static (slice<byte>, error) MarshalJSON(this intWithMarshalJSON b) {
     return default!;
 }
 
-[GoType("num:nint")] internal partial struct intWithPtrMarshalJSON;
+internal partial struct intWithPtrMarshalJSON /*num:nint*/;
 
-[GoRecv] internal static (slice<byte>, error) MarshalJSON(this ref intWithPtrMarshalJSON b) {
+internal static (slice<byte>, error) MarshalJSON(this ref intWithPtrMarshalJSON b) {
     return ((intWithMarshalJSON)(nint)(b)).MarshalJSON();
 }
 
@@ -392,13 +379,13 @@ internal static error UnmarshalJSON(this ж<intWithPtrMarshalJSON> Ꮡb, slice<b
     return (Ꮡb.Reinterpret<intWithPtrMarshalJSON, intWithMarshalJSON>()).UnmarshalJSON(data);
 }
 
-[GoType("num:nint")] internal partial struct intWithMarshalText;
+internal partial struct intWithMarshalText /*num:nint*/;
 
 internal static (slice<byte>, error) MarshalText(this intWithMarshalText b) {
     return (slice<byte>(fmt.Sprintf(@"Z%.2x"u8, (nint)b)), default!);
 }
 
-[GoRecv] internal static error UnmarshalText(this ref intWithMarshalText b, slice<byte> data) {
+internal static error UnmarshalText(this ref intWithMarshalText b, slice<byte> data) {
     if (len(data) != 3 || data[0] != (rune)'Z') {
         return fmt.Errorf("bad quoted string"u8);
     }
@@ -410,9 +397,9 @@ internal static (slice<byte>, error) MarshalText(this intWithMarshalText b) {
     return default!;
 }
 
-[GoType("num:nint")] internal partial struct intWithPtrMarshalText;
+internal partial struct intWithPtrMarshalText /*num:nint*/;
 
-[GoRecv] internal static (slice<byte>, error) MarshalText(this ref intWithPtrMarshalText b) {
+internal static (slice<byte>, error) MarshalText(this ref intWithPtrMarshalText b) {
     return ((intWithMarshalText)(nint)(b)).MarshalText();
 }
 
@@ -420,17 +407,15 @@ internal static error UnmarshalText(this ж<intWithPtrMarshalText> Ꮡb, slice<b
     return (Ꮡb.Reinterpret<intWithPtrMarshalText, intWithMarshalText>()).UnmarshalText(data);
 }
 
-[GoType] internal partial struct mapStringToStringData {
-    [GoTag(@"json:""data""")]
-    public map<@string, @string> Data;
+internal partial struct mapStringToStringData {
+    public map<@string, @string> Data; /*`json:"data"`*/
 }
 
-[GoType] public partial struct B {
-    [GoTag(@"json:"",string""")]
-    public bool ΔB;
+public partial struct B {
+    public bool ΔB; /*`json:",string"`*/
 }
 
-[GoType] public partial struct DoublePtr {
+public partial struct DoublePtr {
     public ж<ж<nint>> I;
     public ж<ж<nint>> J;
 }
@@ -475,7 +460,7 @@ internal static error UnmarshalText(this ж<intWithPtrMarshalText> Ꮡb, slice<b
 // while semantic errors are lazily reported
 // (i.e., allow processing to continue).
 
-[GoType("dyn")] partial struct unmarshalTestsᴛ1 {
+partial struct unmarshalTestsᴛ1 /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal @string @in;
     internal any ptr; // new(type)
@@ -486,22 +471,20 @@ internal static error UnmarshalText(this ж<intWithPtrMarshalText> Ꮡb, slice<b
     internal bool disallowUnknownFields;
 }
 
-            [GoType("dyn")] partial struct Δtype {
+            partial struct Δtype /*dyn*/ {
                 public global::go.encoding.json_package.Number A;
             }
 
-            [GoType("dyn")] partial struct Δtypeᴛ1 {
-                [GoTag(@"json:"",string""")]
-                public global::go.encoding.json_package.Number A;
+            partial struct Δtypeᴛ1 /*dyn*/ {
+                public global::go.encoding.json_package.Number A; /*`json:",string"`*/
             }
 
-            [GoType("dyn")] partial struct Δtypeᴛ2 {
+            partial struct Δtypeᴛ2 /*dyn*/ {
                 public global::go.encoding.json_package.Number N;
             }
 
-            [GoType("dyn")] partial struct Δtypeᴛ3 {
-                [GoTag(@"json:"",string""")]
-                public global::go.encoding.json_package.Number N;
+            partial struct Δtypeᴛ3 /*dyn*/ {
+                public global::go.encoding.json_package.Number N; /*`json:",string"`*/
             }
 internal static slice<unmarshalTestsᴛ1> unmarshalTests;
 internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTestsᴛ1[]{
@@ -1223,7 +1206,7 @@ public static void TestMarshal(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestMarshalInvalidUTF8_tests {
+internal partial struct TestMarshalInvalidUTF8_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal @string @in;
     internal @string want;
@@ -1443,7 +1426,7 @@ public static void TestUnmarshalMarshal(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestNumberAccessors_tests {
+internal partial struct TestNumberAccessors_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal @string @in;
     internal int64 i;
@@ -1512,7 +1495,7 @@ public static void TestLargeByteSlice(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct Xint {
+public partial struct Xint {
     public nint X;
 }
 
@@ -1564,12 +1547,11 @@ public static void TestEscape(ж<testing.T> Ꮡt) {
 }
 
 // WrongString is a struct that's misusing the ,string modifier.
-[GoType("dyn")] [GoLocalName("WrongString")] internal partial struct TestErrorMessageFromMisusedString_WrongString {
-    [GoTag(@"json:""result,string""")]
-    public @string Message;
+internal partial struct TestErrorMessageFromMisusedString_WrongString /*dyn*/ {
+    public @string Message; /*`json:"result,string"`*/
 }
 
-[GoType("dyn")] internal partial struct TestErrorMessageFromMisusedString_tests {
+internal partial struct TestErrorMessageFromMisusedString_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal @string @in, err;
 }
@@ -1602,7 +1584,7 @@ public static void TestErrorMessageFromMisusedString(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct All {
+public partial struct All {
     public bool Bool;
     public nint Int;
     public int8 Int8;
@@ -1617,14 +1599,10 @@ public static void TestErrorMessageFromMisusedString(ж<testing.T> Ꮡt) {
     public uintptr Uintptr;
     public float32 Float32;
     public float64 Float64;
-    [GoTag(@"json:""bar""")]
-    public @string Foo;
-    [GoTag(@"json:""bar2,dummyopt""")]
-    public @string Foo2;
-    [GoTag(@"json:"",string""")]
-    public int64 IntStr;
-    [GoTag(@"json:"",string""")]
-    public uintptr UintptrStr;
+    public @string Foo; /*`json:"bar"`*/
+    public @string Foo2; /*`json:"bar2,dummyopt"`*/
+    public int64 IntStr; /*`json:",string"`*/
+    public uintptr UintptrStr; /*`json:",string"`*/
     public ж<bool> PBool;
     public ж<nint> PInt;
     public ж<int8> PInt8;
@@ -1663,7 +1641,7 @@ public static void TestErrorMessageFromMisusedString(ж<testing.T> Ꮡt) {
     internal nint unexported;
 }
 
-[GoType] public partial struct Small {
+public partial struct Small {
     public @string Tag;
 }
 
@@ -1918,7 +1896,7 @@ internal static @string pallValueIndent = """
 
 internal static @string pallValueCompact = stripWhitespace(pallValueIndent);
 
-[GoType("dyn")] [GoLocalName("S")] internal partial struct TestRefUnmarshal_S {
+internal partial struct TestRefUnmarshal_S /*dyn*/ {
     // Ref is defined in encode_test.go.
     public Ref R0;
     public ж<Ref> R1;
@@ -1949,11 +1927,9 @@ public static void TestRefUnmarshal(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string number11Number2ˢ = @"{""Number1"":""1"", ""Number2"":""""}"u8;
 
-[GoType("dyn")] [GoLocalName("T2")] internal partial struct TestEmptyString_T2 {
-    [GoTag(@"json:"",string""")]
-    public nint Number1;
-    [GoTag(@"json:"",string""")]
-    public nint Number2;
+internal partial struct TestEmptyString_T2 /*dyn*/ {
+    public nint Number1; /*`json:",string"`*/
+    public nint Number2; /*`json:",string"`*/
 }
 
 // Test that the empty string doesn't panic decoding when ,string is specified
@@ -1977,13 +1953,10 @@ public static void TestEmptyString(ж<testing.T> Ꮡt) {
 
 }
 
-[GoType("dyn")] [GoLocalName("T")] internal partial struct TestNullString_T {
-    [GoTag(@"json:"",string""")]
-    public nint A;
-    [GoTag(@"json:"",string""")]
-    public nint B;
-    [GoTag(@"json:"",string""")]
-    public ж<nint> C;
+internal partial struct TestNullString_T /*dyn*/ {
+    public nint A; /*`json:",string"`*/
+    public nint B; /*`json:",string"`*/
+    public ж<nint> C; /*`json:",string"`*/
 }
 
 // Test that a null for ,string is not replaced with the previous quoted string (issue 7046).
@@ -2019,14 +1992,14 @@ internal static ж<T> addr<T>(T vʗp) {
     return Ꮡv;
 }
 
-[GoType("dyn")] internal partial struct TestInterfaceSet_tests {
+internal partial struct TestInterfaceSet_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal any pre;
     internal @string json;
     internal any post;
 }
 
-[GoType("dyn")] internal partial struct TestInterfaceSet_b {
+internal partial struct TestInterfaceSet_b /*dyn*/ {
     public any X;
 }
 
@@ -2101,7 +2074,7 @@ public static void TestInterfaceSet(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct NullTest {
+public partial struct NullTest {
     public bool Bool;
     public nint Int;
     public int8 Int8;
@@ -2255,7 +2228,7 @@ public static void TestUnmarshalNulls(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct MustNotUnmarshalJSON {
+public partial struct MustNotUnmarshalJSON {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -2265,7 +2238,7 @@ public static error UnmarshalJSON(this MustNotUnmarshalJSON x, slice<byte> data)
     return errors.New(mustNotUnmarshalJSONWasˢ);
 }
 
-[GoType] public partial struct MustNotUnmarshalText {
+public partial struct MustNotUnmarshalText {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -2275,7 +2248,7 @@ public static error UnmarshalText(this MustNotUnmarshalText x, slice<byte> text)
     return errors.New(mustNotUnmarshalTextWasˢ);
 }
 
-[GoLocalName("stringKind")] [GoType("@string")] internal partial struct TestStringKind_stringKind;
+internal partial struct TestStringKind_stringKind /*@string*/;
 
 public static void TestStringKind(ж<testing.T> Ꮡt) {
     var want = new map<TestStringKind_stringKind, nint>{["foo"u8] = 42};
@@ -2293,7 +2266,7 @@ public static void TestStringKind(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoLocalName("byteKind")] [GoType("[]byte")] internal partial struct TestByteKind_byteKind;
+internal partial struct TestByteKind_byteKind /*[]byte*/;
 
 // Custom types with []byte as underlying type could not be marshaled
 // and then unmarshaled.
@@ -2314,7 +2287,7 @@ public static void TestByteKind(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoLocalName("Uint8")] [GoType("num:uint8")] internal partial struct TestSliceOfCustomByte_Uint8;
+internal partial struct TestSliceOfCustomByte_Uint8 /*num:uint8*/;
 
 // The fix for issue 8962 introduced a regression.
 // Issue 12921.
@@ -2334,7 +2307,7 @@ public static void TestSliceOfCustomByte(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestUnmarshalTypeError_tests {
+internal partial struct TestUnmarshalTypeError_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal any dest;
     internal @string @in;
@@ -2368,7 +2341,7 @@ public static void TestUnmarshalTypeError(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestUnmarshalSyntax_tests {
+internal partial struct TestUnmarshalSyntax_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal @string @in;
 }
@@ -2404,14 +2377,11 @@ public static void TestUnmarshalSyntax(ж<testing.T> Ꮡt) {
 
 // Test handling of unexported fields that should be ignored.
 // Issue 4660
-[GoType] internal partial struct unexportedFields {
+internal partial struct unexportedFields {
     public @string Name;
-    [GoTag(@"json:""-""")]
-    internal map<@string, any> m;
-    [GoTag(@"json:""abcd""")]
-    internal map<@string, any> m2;
-    [GoTag(@"json:""-""")]
-    internal slice<nint> s;
+    internal map<@string, any> m; /*`json:"-"`*/
+    internal map<@string, any> m2; /*`json:"abcd"`*/
+    internal slice<nint> s; /*`json:"-"`*/
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -2430,9 +2400,9 @@ public static void TestUnmarshalUnexported(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("global::go.time_package.Time")] public partial struct Time3339;
+public partial struct Time3339 /*global::go.time_package.Time*/;
 
-[GoRecv] public static error UnmarshalJSON(this ref Time3339 t, slice<byte> b) {
+public static error UnmarshalJSON(this ref Time3339 t, slice<byte> b) {
     if (len(b) < 2 || b[0] != (rune)'"' || b[len(b) - 1] != (rune)'"') {
         return fmt.Errorf("types: failed to unmarshal non-string value %q as an RFC 3339 time"u8, b);
     }
@@ -2476,7 +2446,7 @@ public static void TestSkipArrayObjects(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPrefilled_tests {
+internal partial struct TestPrefilled_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal @string @in;
     internal any ptr;
@@ -2538,7 +2508,7 @@ public static void TestPrefilled(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestInvalidUnmarshal_tests {
+internal partial struct TestInvalidUnmarshal_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal @string @in;
     internal any v;
@@ -2578,19 +2548,13 @@ public static void TestInvalidUnmarshal(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoValueClone("A")] internal partial struct TestInvalidStringOption_item {
-    [GoTag(@"json:"",string""")]
-    public time.Time T;
-    [GoTag(@"json:"",string""")]
-    public map<@string, @string> M;
-    [GoTag(@"json:"",string""")]
-    public slice<@string> S;
-    [GoTag(@"json:"",string""")]
-    public array<@string> A = new(1);
-    [GoTag(@"json:"",string""")]
-    public any I;
-    [GoTag(@"json:"",string""")]
-    public ж<nint> P;
+internal partial struct TestInvalidStringOption_item /*dyn*/ {
+    public time.Time T; /*`json:",string"`*/
+    public map<@string, @string> M; /*`json:",string"`*/
+    public slice<@string> S; /*`json:",string"`*/
+    public array<@string> A = new(1); /*`json:",string"`*/
+    public any I; /*`json:",string"`*/
+    public ж<nint> P; /*`json:",string"`*/
 }
 
 // Test that string option is ignored for invalid types.
@@ -2610,69 +2574,63 @@ public static void TestInvalidStringOption(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("embed1")] internal partial struct TestUnmarshalEmbeddedUnexported_embed1 {
+internal partial struct TestUnmarshalEmbeddedUnexported_embed1 /*dyn*/ {
     public nint Q;
 }
 
-[GoType("dyn")] [GoLocalName("embed2")] internal partial struct TestUnmarshalEmbeddedUnexported_embed2 {
+internal partial struct TestUnmarshalEmbeddedUnexported_embed2 /*dyn*/ {
     public nint Q;
 }
 
-[GoType("dyn")] [GoLocalName("embed3")] internal partial struct TestUnmarshalEmbeddedUnexported_embed3 {
-    [GoTag(@"json:"",string""")]
-    public int64 Q;
+internal partial struct TestUnmarshalEmbeddedUnexported_embed3 /*dyn*/ {
+    public int64 Q; /*`json:",string"`*/
 }
 
-[GoType("dyn")] [GoLocalName("S1")] internal partial struct TestUnmarshalEmbeddedUnexported_S1 {
+internal partial struct TestUnmarshalEmbeddedUnexported_S1 /*dyn*/ {
     internal partial ref ж<TestUnmarshalEmbeddedUnexported_embed1> embed1 { get; }
     public nint R;
 }
 
-[GoType("dyn")] [GoLocalName("S2")] internal partial struct TestUnmarshalEmbeddedUnexported_S2 {
+internal partial struct TestUnmarshalEmbeddedUnexported_S2 /*dyn*/ {
     internal partial ref ж<TestUnmarshalEmbeddedUnexported_embed1> embed1 { get; }
     public nint Q;
 }
 
-[GoType("dyn")] [GoLocalName("S3")] internal partial struct TestUnmarshalEmbeddedUnexported_S3 {
+internal partial struct TestUnmarshalEmbeddedUnexported_S3 /*dyn*/ {
     internal partial ref TestUnmarshalEmbeddedUnexported_embed1 embed1 { get; }
     public nint R;
 }
 
-[GoType("dyn")] [GoLocalName("S4")] internal partial struct TestUnmarshalEmbeddedUnexported_S4 {
+internal partial struct TestUnmarshalEmbeddedUnexported_S4 /*dyn*/ {
     internal partial ref ж<TestUnmarshalEmbeddedUnexported_embed1> embed1 { get; }
     internal partial ref TestUnmarshalEmbeddedUnexported_embed2 embed2 { get; }
 }
 
-[GoType("dyn")] [GoLocalName("S5")] internal partial struct TestUnmarshalEmbeddedUnexported_S5 {
+internal partial struct TestUnmarshalEmbeddedUnexported_S5 /*dyn*/ {
     internal partial ref ж<TestUnmarshalEmbeddedUnexported_embed3> embed3 { get; }
     public nint R;
 }
 
-[GoType("dyn")] [GoLocalName("S6")] internal partial struct TestUnmarshalEmbeddedUnexported_S6 {
-    [GoTag(@"json:""embed1""")]
-    internal partial ref TestUnmarshalEmbeddedUnexported_embed1 embed1 { get; }
+internal partial struct TestUnmarshalEmbeddedUnexported_S6 /*dyn*/ {
+    internal partial ref TestUnmarshalEmbeddedUnexported_embed1 embed1 { get; } /*`json:"embed1"`*/
 }
 
-[GoType("dyn")] [GoLocalName("S7")] internal partial struct TestUnmarshalEmbeddedUnexported_S7 {
-    [GoTag(@"json:""embed1""")]
-    internal partial ref TestUnmarshalEmbeddedUnexported_embed1 embed1 { get; }
+internal partial struct TestUnmarshalEmbeddedUnexported_S7 /*dyn*/ {
+    internal partial ref TestUnmarshalEmbeddedUnexported_embed1 embed1 { get; } /*`json:"embed1"`*/
     internal partial ref TestUnmarshalEmbeddedUnexported_embed2 embed2 { get; }
 }
 
-[GoType("dyn")] [GoLocalName("S8")] internal partial struct TestUnmarshalEmbeddedUnexported_S8 {
-    [GoTag(@"json:""embed1""")]
-    internal partial ref TestUnmarshalEmbeddedUnexported_embed1 embed1 { get; }
-    [GoTag(@"json:""embed2""")]
-    internal partial ref TestUnmarshalEmbeddedUnexported_embed2 embed2 { get; }
+internal partial struct TestUnmarshalEmbeddedUnexported_S8 /*dyn*/ {
+    internal partial ref TestUnmarshalEmbeddedUnexported_embed1 embed1 { get; } /*`json:"embed1"`*/
+    internal partial ref TestUnmarshalEmbeddedUnexported_embed2 embed2 { get; } /*`json:"embed2"`*/
     public nint Q;
 }
 
-[GoType("dyn")] [GoLocalName("S9")] internal partial struct TestUnmarshalEmbeddedUnexported_S9 {
-    [GoTag(@"json:""embed""")]
-    internal partial ref unexportedWithMethods unexportedWithMethods { get; }
+internal partial struct TestUnmarshalEmbeddedUnexported_S9 /*dyn*/ {
+    internal partial ref unexportedWithMethods unexportedWithMethods { get; } /*`json:"embed"`*/
 }
 
-[GoType("dyn")] internal partial struct TestUnmarshalEmbeddedUnexported_tests {
+internal partial struct TestUnmarshalEmbeddedUnexported_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal @string @in;
     internal any ptr;
@@ -2778,7 +2736,7 @@ public static void TestUnmarshalEmbeddedUnexported(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestUnmarshalErrorAfterMultipleJSON_tests {
+internal partial struct TestUnmarshalErrorAfterMultipleJSON_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal @string @in;
     internal error err;
@@ -2826,7 +2784,7 @@ public static void TestUnmarshalErrorAfterMultipleJSON(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct unmarshalPanic {
+internal partial struct unmarshalPanic {
 }
 
 internal static error UnmarshalJSON(this unmarshalPanic _Δp0, slice<byte> _Δp1) {
@@ -2863,9 +2821,9 @@ public static void TestUnmarshalRecursivePointer(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("@string")] internal partial struct textUnmarshalerString;
+internal partial struct textUnmarshalerString /*@string*/;
 
-[GoRecv] internal static error UnmarshalText(this ref textUnmarshalerString m, slice<byte> text) {
+internal static error UnmarshalText(this ref textUnmarshalerString m, slice<byte> text) {
     m = ((textUnmarshalerString)strings.ToLower(((@string)text)));
     return default!;
 }
@@ -2890,9 +2848,8 @@ public static void TestUnmarshalMapWithTextUnmarshalerStringKey(ж<testing.T> �
 }
 
 // See golang.org/issues/38126.
-[GoType("dyn")] [GoLocalName("T")] internal partial struct TestUnmarshalRescanLiteralMangledUnquote_T {
-    [GoTag(@"json:""F1,string""")]
-    public @string F1;
+internal partial struct TestUnmarshalRescanLiteralMangledUnquote_T /*dyn*/ {
+    public @string F1; /*`json:"F1,string"`*/
 }
 
 public static void TestUnmarshalRescanLiteralMangledUnquote(ж<testing.T> Ꮡt) {
@@ -2949,25 +2906,23 @@ internal static readonly @string typedNamedFieldˢ = "typed named field"u8;
 internal static readonly @string typedMissingFieldˢ = "typed missing field"u8;
 internal static readonly @string customUnmarshalerˢ = "custom unmarshaler"u8;
 
-[GoType("dyn")] internal partial struct TestUnmarshalMaxDepth_tests {
+internal partial struct TestUnmarshalMaxDepth_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal @string data;
     internal bool errMaxDepth;
 }
 
-[GoType("dyn")] internal partial struct TestUnmarshalMaxDepth_targets {
+internal partial struct TestUnmarshalMaxDepth_targets /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal Func<any> newValue;
 }
 
-[GoType("dyn")] internal partial struct TestUnmarshalMaxDepth_v {
-    [GoTag(@"json:""a""")]
-    public any A;
+internal partial struct TestUnmarshalMaxDepth_v /*dyn*/ {
+    public any A; /*`json:"a"`*/
 }
 
-[GoType("dyn")] internal partial struct TestUnmarshalMaxDepth_vᴛ1 {
-    [GoTag(@"json:""b""")]
-    public any B;
+internal partial struct TestUnmarshalMaxDepth_vᴛ1 /*dyn*/ {
+    public any B; /*`json:"b"`*/
 }
 
 public static void TestUnmarshalMaxDepth(ж<testing.T> Ꮡt) {

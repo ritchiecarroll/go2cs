@@ -10,7 +10,7 @@ partial class math_test_package {
 
 public static UntypedInt UintptrSize => /* 32 << (^uintptr(0) >> 63) */ 64;
 
-[GoType] partial struct mulUintptrTest {
+partial struct mulUintptrTest {
     internal uintptr a;
     internal uintptr b;
     internal bool overflow;

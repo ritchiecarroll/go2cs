@@ -33,7 +33,7 @@ internal static bool isNormalized(ж<global::go.math.big_package.ΔInt> Ꮡx) {
 
 // type funZZ is a methodless func type — rendered inline as its base delegate
 
-[GoType] internal partial struct argZZ {
+internal partial struct argZZ {
     internal ж<global::go.math.big_package.ΔInt> z, x, y;
 }
 
@@ -200,7 +200,7 @@ public static void TestMul(ж<testing.T> Ꮡt) {
 // -99!
 // overflow situations
 
-[GoType("dyn")] partial struct mulRangesZᴛ1 {
+partial struct mulRangesZᴛ1 /*dyn*/ {
     internal int64 a, b;
     internal @string prod;
 }
@@ -249,7 +249,7 @@ public static void TestMulRangeZ(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestBinomial_type {
+internal partial struct TestBinomial_type /*dyn*/ {
     internal int64 n, k;
     internal @string want;
 }
@@ -296,7 +296,7 @@ public static void BenchmarkBinomial(ж<testing.B> Ꮡb) {
 
 // Examples from the Go Language Spec, section "Arithmetic operators"
 
-[GoType("dyn")] partial struct divisionSignsTestsᴛ1 {
+partial struct divisionSignsTestsᴛ1 /*dyn*/ {
     internal int64 x, y;
     internal int64 q, r; // T-division
     internal int64 d, m; // Euclidean division
@@ -453,7 +453,7 @@ internal static bool checkQuo(slice<byte> x, slice<byte> y) {
 }
 
 
-[GoType("dyn")] partial struct quoTestsᴛ1 {
+partial struct quoTestsᴛ1 /*dyn*/ {
     internal @string x, y;
     internal @string q, r;
 }
@@ -533,7 +533,7 @@ public static void BenchmarkQuoRem(ж<testing.B> Ꮡb) {
 }
 
 
-[GoType("dyn")] partial struct bitLenTestsᴛ1 {
+partial struct bitLenTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal nint @out;
 }
@@ -576,7 +576,7 @@ public static void TestBitLen(ж<testing.T> Ꮡt) {
 // odd
 // even
 
-[GoType("dyn")] partial struct expTestsᴛ1 {
+partial struct expTestsᴛ1 /*dyn*/ {
     internal @string x, y, m;
     internal @string @out;
 }
@@ -699,7 +699,7 @@ public static void BenchmarkExp(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkExpMont_type {
+internal partial struct BenchmarkExpMont_type /*dyn*/ {
     internal @string name;
     internal @string val;
 }
@@ -825,7 +825,7 @@ internal static bool checkLehmerExtGcd(slice<byte> aBytes, slice<byte> bBytes) {
 
 // a <= 0 || b <= 0
 
-[GoType("dyn")] partial struct gcdTestsᴛ1 {
+partial struct gcdTestsᴛ1 /*dyn*/ {
     internal @string d, x, y, a, b;
 }
 internal static slice<gcdTestsᴛ1> gcdTests = new gcdTestsᴛ1[]{
@@ -949,7 +949,7 @@ public static void TestGcd(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct intShiftTest {
+internal partial struct intShiftTest {
     internal @string @in;
     internal nuint shift;
     internal @string @out;
@@ -1260,7 +1260,7 @@ public static void TestUint64(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct bitwiseTestsᴛ1 {
+partial struct bitwiseTestsᴛ1 /*dyn*/ {
     internal @string x, y;
     internal @string and, or, xor, andNot;
 }
@@ -1390,7 +1390,7 @@ internal static void testBitset(ж<testing.T> Ꮡt, ж<global::go.math.big_packa
 }
 
 
-[GoType("dyn")] partial struct bitsetTestsᴛ1 {
+partial struct bitsetTestsᴛ1 /*dyn*/ {
     internal @string x;
     internal nint i;
     internal nuint b;
@@ -1435,7 +1435,7 @@ public static void TestBitSet(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct tzbTestsᴛ1 {
+partial struct tzbTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal nuint @out;
 }
@@ -1586,7 +1586,7 @@ public static void TestBitwise(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct notTestsᴛ1 {
+partial struct notTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string @out;
 }
@@ -1622,7 +1622,7 @@ public static void TestNot(ж<testing.T> Ꮡt) {
 
 // issue #16984
 
-[GoType("dyn")] partial struct modInverseTestsᴛ1 {
+partial struct modInverseTestsᴛ1 /*dyn*/ {
     internal @string element;
     internal @string modulus;
 }
@@ -1773,7 +1773,7 @@ public static void TestModSqrt(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestJacobi_testCases {
+internal partial struct TestJacobi_testCases /*dyn*/ {
     internal int64 x, y;
     internal nint result;
 }
@@ -2047,7 +2047,7 @@ public static void TestNewIntAllocs(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloat64_type {
+internal partial struct TestFloat64_type /*dyn*/ {
     internal @string istr;
     internal float64 f;
     internal global::go.math.big_package.Accuracy acc;

@@ -29,13 +29,13 @@ internal static void checkPageCache(ж<testing.T> Ꮡt, global::go.runtime_inter
     }
 }
 
-[GoType("dyn")] internal partial struct TestPageCacheAlloc_hit {
+internal partial struct TestPageCacheAlloc_hit /*dyn*/ {
     internal uintptr npages;
     internal uintptr @base;
     internal uintptr scav;
 }
 
-[GoType("dyn")] internal partial struct TestPageCacheAlloc_tests {
+internal partial struct TestPageCacheAlloc_tests /*dyn*/ {
     internal global::go.runtime_internal_test_package.PageCache cache;
     internal slice<TestPageCacheAlloc_hit> hits;
 }
@@ -269,7 +269,7 @@ public static void TestPageCacheFlush(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPageAllocAllocToCache_test {
+internal partial struct TestPageAllocAllocToCache_test /*dyn*/ {
     internal map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>> beforeAlloc;
     internal map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>> beforeScav;
     internal slice<global::go.runtime_internal_test_package.PageCache> hits; // expected base addresses and patterns

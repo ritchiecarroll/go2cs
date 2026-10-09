@@ -55,7 +55,7 @@ internal static (slice<global::go.net_package.IPAddr>, error) lookupLocalhost(co
 // the circumstances.
 // non-standard back door
 
-[GoType("dyn")] partial struct lookupGoogleSRVTestsᴛ1 {
+partial struct lookupGoogleSRVTestsᴛ1 /*dyn*/ {
     internal @string service, proto, name;
     internal @string cname, target;
 }
@@ -125,7 +125,7 @@ public static void TestLookupGoogleSRV(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct lookupGmailMXTestsᴛ1 {
+partial struct lookupGmailMXTestsᴛ1 /*dyn*/ {
     internal @string name, host;
 }
 internal static slice<lookupGmailMXTestsᴛ1> lookupGmailMXTests = new lookupGmailMXTestsᴛ1[]{
@@ -211,7 +211,7 @@ public static void TestLookupGmailNS(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct lookupGmailTXTTestsᴛ1 {
+partial struct lookupGmailTXTTestsᴛ1 /*dyn*/ {
     internal @string name, txt, host;
 }
 internal static slice<lookupGmailTXTTestsᴛ1> lookupGmailTXTTests = new lookupGmailTXTTestsᴛ1[]{
@@ -361,7 +361,7 @@ public static void TestLookupIPv6LinkLocalAddrWithZone(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct lookupCNAMETestsᴛ1 {
+partial struct lookupCNAMETestsᴛ1 /*dyn*/ {
     internal @string name, cname;
 }
 internal static slice<lookupCNAMETestsᴛ1> lookupCNAMETests = new lookupCNAMETestsᴛ1[]{
@@ -407,7 +407,7 @@ public static void TestLookupCNAME(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct lookupGoogleHostTestsᴛ1 {
+partial struct lookupGoogleHostTestsᴛ1 /*dyn*/ {
     internal @string name;
 }
 internal static slice<lookupGoogleHostTestsᴛ1> lookupGoogleHostTests = new lookupGoogleHostTestsᴛ1[]{
@@ -503,7 +503,7 @@ public static void TestLookupGoogleIP(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct revAddrTestsᴛ1 {
+partial struct revAddrTestsᴛ1 /*dyn*/ {
     public @string Addr;
     public @string Reverse;
     public @string ErrPrefix;
@@ -551,7 +551,7 @@ public static void TestReverseAddress(ж<testing.T> Ꮡt) {
 internal static readonly object testDisabledUseDnsfloodˢ = (@string)"test disabled; use -dnsflood to enable"u8;
 internal static readonly object deadlineExceededˢ = (@string)"deadline exceeded"u8;
 
-[GoType("dyn")] internal partial struct TestDNSFlood_qstats {
+internal partial struct TestDNSFlood_qstats /*dyn*/ {
     internal nint succeeded, failed;
     internal nint timeout, temporary, other;
     internal nint unknown;
@@ -843,7 +843,7 @@ internal static @string srvString(slice<ж<global::go.net_package.SRV>> srvs) {
 // Please be careful about adding new test cases.
 // There are platforms which have incomplete mappings for
 // restricted resource access and security reasons.
-[GoType("dyn")] [GoLocalName("test")] internal partial struct TestLookupPort_test {
+internal partial struct TestLookupPort_test /*dyn*/ {
     internal @string network;
     internal @string name;
     internal nint port;
@@ -897,7 +897,7 @@ public static void TestLookupPort(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("test")] internal partial struct TestLookupPort_Minimal_test {
+internal partial struct TestLookupPort_Minimal_test /*dyn*/ {
     internal @string network;
     internal @string name;
     internal nint port;
@@ -926,7 +926,7 @@ public static void TestLookupPort_Minimal(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("test")] internal partial struct TestLookupProtocol_Minimal_test {
+internal partial struct TestLookupProtocol_Minimal_test /*dyn*/ {
     internal @string name;
     internal nint want;
 }
@@ -1131,7 +1131,7 @@ public static void TestLookupHostCancel(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct lookupCustomResolver {
+internal partial struct lookupCustomResolver {
     public partial ref ж<global::go.net_package.Resolver> Resolver { get; }
     internal Δsync.RWMutex mu;
     internal bool dialed;
@@ -1199,7 +1199,7 @@ public static partial void TestConcurrentPreferGoResolversDial(ж<testing.T> Ꮡ
 }
 
 
-[GoType("dyn")] partial struct ipVersionTestsᴛ1 {
+partial struct ipVersionTestsᴛ1 /*dyn*/ {
     internal @string network;
     internal byte version;
 }
@@ -1231,7 +1231,7 @@ public static void TestIPVersion(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string golangOrgˢ = "golang.org"u8;
 
-[GoType("dyn")] internal partial struct TestLookupIPAddrPreservesContextValues_keyValues {
+internal partial struct TestLookupIPAddrPreservesContextValues_keyValues /*dyn*/ {
     internal any key, value;
 }
 
@@ -1425,7 +1425,7 @@ public static void TestLookupNullByte(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object notSupportedˢ = (@string)"not supported"u8;
 
-[GoType("dyn")] internal partial struct TestResolverLookupIP_type {
+internal partial struct TestResolverLookupIP_type /*dyn*/ {
     internal @string name;
     internal Func<Action> fn;
 }
@@ -1768,7 +1768,7 @@ internal static readonly @string testNXDOMAINᶜ = "invalid.invalid."u8;
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string testNODATAᶜ = "_ldap._tcp.google.com."u8;
 
-[GoType("dyn")] internal partial struct TestLookupNoSuchHost_tests {
+internal partial struct TestLookupNoSuchHost_tests /*dyn*/ {
     internal @string name;
     internal Func<error> query;
 }

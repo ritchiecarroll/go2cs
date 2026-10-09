@@ -14,7 +14,7 @@ partial class sync_test_package {
 // This file contains reference map implementations for unit-tests.
 
 // mapInterface is the interface Map implements.
-[GoType] partial interface mapInterface {
+partial interface mapInterface {
     (any value, bool ok) Load(any key);
     void Store(any key, any value);
     (any actual, bool loaded) LoadOrStore(any key, any value);
@@ -32,7 +32,7 @@ internal static mapInterface _ᴛ2ʗ = new sync_test_package.DeepCopyMapжmapInt
 internal static mapInterface _ᴛ3ʗ = new sync_test_package.sync_HashTrieMapжmapInterface(Ꮡ(new isync.HashTrieMap<any, any>(nil)));
 
 // RWMutexMap is an implementation of mapInterface using a sync.RWMutex.
-[GoType] partial struct RWMutexMap {
+partial struct RWMutexMap {
     internal Δsync.RWMutex mu;
     internal map<any, any> dirty;
 }
@@ -199,7 +199,7 @@ public static void Clear(this ж<RWMutexMap> Ꮡm) {
 // DeepCopyMap is an implementation of mapInterface using a Mutex and
 // atomic.Value.  It makes deep copies of the map on every write to avoid
 // acquiring the Mutex in Load.
-[GoType] partial struct DeepCopyMap {
+partial struct DeepCopyMap {
     internal Δsync.Mutex mu;
     internal atomic.Value clean;
 }

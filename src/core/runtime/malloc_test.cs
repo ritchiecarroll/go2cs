@@ -182,7 +182,7 @@ public static void TestTinyAlloc(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct obj12 {
+partial struct obj12 {
     internal uint64 a;
     internal uint32 b;
 }
@@ -278,7 +278,7 @@ public static void TestScavengedBitsCleared(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct acLink {
+partial struct acLink {
     internal array<byte> x = new((1 << (int)(20)));
 }
 
@@ -369,7 +369,7 @@ public static void BenchmarkMalloc16(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkMallocTypeInfo8_type {
+internal partial struct BenchmarkMallocTypeInfo8_type /*dyn*/ {
     internal array<ж<nint>> p = new(1);
 }
 
@@ -382,7 +382,7 @@ public static void BenchmarkMallocTypeInfo8(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkMallocTypeInfo16_type {
+internal partial struct BenchmarkMallocTypeInfo16_type /*dyn*/ {
     internal array<ж<nint>> p = new(2);
 }
 
@@ -395,7 +395,7 @@ public static void BenchmarkMallocTypeInfo16(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType] partial struct LargeStruct {
+partial struct LargeStruct {
     internal array<slice<byte>> x = new(16);
 }
 

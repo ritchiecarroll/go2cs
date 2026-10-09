@@ -18,7 +18,7 @@ partial class doc_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testGoˢ2 = "test.go"u8;
 
-[GoType("dyn")] internal partial struct TestImportGroupStarts_type {
+internal partial struct TestImportGroupStarts_type /*dyn*/ {
     internal @string name;
     internal @string @in;
     internal slice<@string> want; // paths of group-starting imports

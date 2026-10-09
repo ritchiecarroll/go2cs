@@ -18,7 +18,7 @@ using Δio = io_package;
 
 partial class syscall_test_package {
 
-[GoType("dyn")] internal partial struct TestEscapeArg_type {
+internal partial struct TestEscapeArg_type /*dyn*/ {
     internal @string input, output;
 }
 

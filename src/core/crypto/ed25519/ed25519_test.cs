@@ -96,7 +96,7 @@ public static void TestGenerateKey(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct zeroReader {
+internal partial struct zeroReader {
 }
 
 internal static (nint, error) Read(this zeroReader _, slice<byte> buf) {

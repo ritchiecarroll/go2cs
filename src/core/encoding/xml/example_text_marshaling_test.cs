@@ -12,13 +12,13 @@ using static go.encoding.xml_internal_test_package;
 
 partial class xml_test_package {
 
-[GoType("num:nint")] partial struct Size;
+partial struct Size /*num:nint*/;
 
 public static Size Unrecognized => /* iota */ 0;
 public static Size Small => 1;
 public static Size Large => 2;
 
-[GoRecv] public static error UnmarshalText(this ref Size s, slice<byte> text) {
+public static error UnmarshalText(this ref Size s, slice<byte> text) {
     var exprᴛ1 = strings.ToLower(((@string)text));
     if (exprᴛ1 == "small"u8) {
         s = Small;
@@ -69,9 +69,8 @@ internal static readonly @string sizesSizeSmallSizeSizeˢ = """
 	</sizes>
 """u8;
 
-[GoType("dyn")] internal partial struct Example_textMarshalXML_inventory {
-    [GoTag(@"xml:""size""")]
-    public slice<Size> Sizes;
+internal partial struct Example_textMarshalXML_inventory /*dyn*/ {
+    public slice<Size> Sizes; /*`xml:"size"`*/
 }
 
 public static void Example_textMarshalXML() {

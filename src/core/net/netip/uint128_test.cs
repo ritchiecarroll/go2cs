@@ -7,7 +7,7 @@ using testing = testing_package;
 
 partial class netip_package {
 
-[GoType("dyn")] internal partial struct TestUint128AddSub_tests {
+internal partial struct TestUint128AddSub_tests /*dyn*/ {
     internal uint128 @in;
     internal nint op; // +1 or -1 to add vs subtract
     internal uint128 want;
@@ -47,7 +47,7 @@ public static void TestUint128AddSub(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestBitsSetFrom_tests {
+internal partial struct TestBitsSetFrom_tests /*dyn*/ {
     internal uint8 bit;
     internal uint128 want;
 }
@@ -71,7 +71,7 @@ public static void TestBitsSetFrom(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestBitsClearedFrom_tests {
+internal partial struct TestBitsClearedFrom_tests /*dyn*/ {
     internal uint8 bit;
     internal uint128 want;
 }

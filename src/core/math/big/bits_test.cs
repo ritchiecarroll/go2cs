@@ -13,7 +13,7 @@ using static go.math.big_package;
 
 partial class big_internal_test_package {
 
-[GoType("[]nint")] public partial struct ΔBits;
+public partial struct ΔBits /*[]nint*/;
 
 internal static ΔBits add(this ΔBits x, ΔBits y) {
     return appendꓸꓸꓸ(x, y);
@@ -29,7 +29,7 @@ internal static ΔBits mul(this ΔBits x, ΔBits y) {
     return p;
 }
 
-[GoType("dyn")] internal partial struct TestMulBits_type {
+internal partial struct TestMulBits_type /*dyn*/ {
     internal ΔBits x, y, want;
 }
 
@@ -75,7 +75,7 @@ internal static ΔBits norm(this ΔBits x) {
     return z;
 }
 
-[GoType("dyn")] internal partial struct TestNormBits_type {
+internal partial struct TestNormBits_type /*dyn*/ {
     internal ΔBits x, want;
 }
 
@@ -195,7 +195,7 @@ public static ж<global::go.math.big_package.Float> ΔFloat(this ΔBits bits) {
     return z;
 }
 
-[GoType("dyn")] internal partial struct TestFromBits_type {
+internal partial struct TestFromBits_type /*dyn*/ {
     internal ΔBits bits;
     internal @string want;
 }

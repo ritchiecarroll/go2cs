@@ -13,7 +13,7 @@ using static go.crypto.x509_package;
 partial class x509_internal_test_package {
 
 
-[GoType("dyn")] partial struct oidTestsᴛ1 {
+partial struct oidTestsᴛ1 /*dyn*/ {
     internal slice<byte> raw;
     internal bool valid;
     internal @string str;
@@ -92,7 +92,7 @@ public static void TestOID(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestInvalidOID_cases {
+internal partial struct TestInvalidOID_cases /*dyn*/ {
     internal @string str;
     internal slice<uint64> ints;
 }
@@ -123,7 +123,7 @@ public static void TestInvalidOID(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestOIDEqual_type {
+internal partial struct TestOIDEqual_type /*dyn*/ {
     internal global::go.crypto.x509_package.OID oid;
     internal global::go.crypto.x509_package.OID oid2;
     internal bool eq;
@@ -152,7 +152,7 @@ internal static encoding.BinaryUnmarshaler _ᴛ2ʗ = new x509_test_package.x509_
 internal static encoding.TextMarshaler _ᴛ3ʗ = new x509_test_package.x509_OIDᴠTextMarshaler(new OID(nil));
 internal static encoding.TextUnmarshaler _ᴛ4ʗ = new x509_test_package.x509_OIDжTextUnmarshaler(@new<global::go.crypto.x509_package.OID>());
 
-[GoType("dyn")] internal partial struct TestOIDMarshal_cases {
+internal partial struct TestOIDMarshal_cases /*dyn*/ {
     internal @string @in;
     internal global::go.crypto.x509_package.OID @out;
     internal error err;
@@ -255,7 +255,7 @@ public static void TestOIDMarshal(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestOIDEqualASN1OID_type {
+internal partial struct TestOIDEqualASN1OID_type /*dyn*/ {
     internal global::go.crypto.x509_package.OID oid;
     internal asn1.ObjectIdentifier oid2;
     internal bool eq;

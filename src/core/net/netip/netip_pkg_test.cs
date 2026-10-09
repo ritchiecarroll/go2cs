@@ -17,7 +17,7 @@ internal static void initᴛmustPrefix() { mustPrefix = MustParsePrefix; }
 internal static Func<@string, ΔAddr> mustIP;
 internal static void initᴛmustIP() { mustIP = MustParseAddr; }
 
-[GoType("dyn")] internal partial struct TestPrefixValid_tests {
+internal partial struct TestPrefixValid_tests /*dyn*/ {
     internal ΔPrefix ipp;
     internal bool want;
 }
@@ -57,7 +57,7 @@ public static void TestPrefixValid(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct nextPrevTestsᴛ1 {
+partial struct nextPrevTestsᴛ1 /*dyn*/ {
     internal ΔAddr ip;
     internal ΔAddr next;
     internal ΔAddr prev;
@@ -132,7 +132,7 @@ internal static void doNextPrev(testing.TB t) {
 internal static readonly @string fed01ˢ = "fed0::1"u8;
 internal static readonly @string ffff10001ˢ = "::ffff:10.0.0.1"u8;
 
-[GoType("dyn")] internal partial struct TestIPBitLen_tests {
+internal partial struct TestIPBitLen_tests /*dyn*/ {
     internal ΔAddr ip;
     internal nint want;
 }
@@ -154,7 +154,7 @@ public static void TestIPBitLen(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPrefixContains_tests {
+internal partial struct TestPrefixContains_tests /*dyn*/ {
     internal ΔPrefix ipp;
     internal ΔAddr ip;
     internal bool want;
@@ -203,7 +203,7 @@ public static void TestPrefixContains(ж<testing.T> Ꮡt) {
 internal static readonly object noErrorˢ = (@string)"no error"u8;
 internal static readonly @string unableToParseIpˢ = "unable to parse IP"u8;
 
-[GoType("dyn")] internal partial struct TestParseIPError_tests {
+internal partial struct TestParseIPError_tests /*dyn*/ {
     internal @string ip;
     internal @string errstr;
 }
@@ -257,7 +257,7 @@ public static void TestParseIPError(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestParseAddrPort_tests {
+internal partial struct TestParseAddrPort_tests /*dyn*/ {
     internal @string @in;
     internal AddrPort want;
     internal bool wantErr;
@@ -329,7 +329,7 @@ public static void TestParseAddrPort(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddrPortMarshalUnmarshal_tests {
+internal partial struct TestAddrPortMarshalUnmarshal_tests /*dyn*/ {
     internal @string @in;
     internal AddrPort want;
 }
@@ -364,7 +364,7 @@ public static void TestAddrPortMarshalUnmarshal(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial interface appendMarshaler :
+public partial interface appendMarshaler :
     encoding.TextMarshaler
 {
     slice<byte> AppendTo(slice<byte> _);

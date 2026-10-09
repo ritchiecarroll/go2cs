@@ -58,14 +58,14 @@ namespace go;
 public static partial class context_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
 
     // <TypeAccessibility>
     internal partial interface TestDeadlineExceededSupportsTimeout_type {}
-    internal partial struct ExampleWithValue_favContextKey {}
+    [GoLocalName("favContextKey")] internal partial struct ExampleWithValue_favContextKey {}
     internal partial struct TestAllocs_type {}
     internal partial struct TestCause_type {}
     internal partial struct afterFuncContext {}
@@ -74,7 +74,7 @@ public static partial class context_test_package
     internal partial struct key1 {}
     internal partial struct key2 {}
     internal partial struct otherContext {}
-    internal partial struct testLayers_value {}
+    [GoLocalName("value")] internal partial struct testLayers_value {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

@@ -30,7 +30,7 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-[GoType] partial struct DLL {
+partial struct DLL {
     public partial ref ж<syscall_package.DLL> ΔDLL { get; }
     internal ж<testing.T> t;
 }
@@ -59,7 +59,7 @@ internal static readonly @string unionRectˢ = "UnionRect"u8;
 internal static readonly object stdcallUser32UnionRectˢ = (@string)"stdcall USER32.UnionRect returns"u8;
 internal static readonly object resˢ = (@string)"res="u8;
 
-[GoType("dyn")] internal partial struct TestStdCall_Rect {
+internal partial struct TestStdCall_Rect /*dyn*/ {
     internal int32 left, top, right, bottom;
 }
 
@@ -80,7 +80,7 @@ public static void TestStdCall(ж<testing.T> Ꮡt) {
 internal static readonly @string verSetConditionMaskˢ = "VerSetConditionMask"u8;
 internal static readonly @string verifyVersionInfoWˢ = "VerifyVersionInfoW"u8;
 
-[GoType("dyn")] internal partial struct Test64BitReturnStdCall_OSVersionInfoEx {
+internal partial struct Test64BitReturnStdCall_OSVersionInfoEx /*dyn*/ {
     public uint32 OSVersionInfoSize;
     public uint32 MajorVersion;
     public uint32 MinorVersion;
@@ -369,7 +369,7 @@ public static void TestCallbackInAnotherThread(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct cbFunc {
+partial struct cbFunc {
     internal any goFunc;
 }
 
@@ -436,7 +436,7 @@ internal static void testOne(this cbFunc f, ж<testing.T> Ꮡt, ж<syscall.DLL> 
     }
 }
 
-[GoType] partial struct uint8Pair {
+partial struct uint8Pair {
     internal uint8 x, y;
 }
 
@@ -572,7 +572,7 @@ internal static slice<cbFunc> getCallbackTestFuncs() {
     return cbFuncs;
 }
 
-[GoType] partial struct cbDLL {
+partial struct cbDLL {
     internal @string name;
     internal Func<@string, @string, slice<@string>> buildArgs;
 }
@@ -585,7 +585,7 @@ typedef struct { uint8_t x, y; } uint8Pair_t;
 
 """u8;
 
-[GoRecv] internal static void makeSrc(this ref cbDLL d, ж<testing.T> Ꮡt, @string path) {
+internal static void makeSrc(this ref cbDLL d, ж<testing.T> Ꮡt, @string path) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = Δos.Create(path);
@@ -604,7 +604,7 @@ typedef struct { uint8_t x, y; } uint8Pair_t;
     finally { ᒐ.Run(); }
 }
 
-[GoRecv] internal static @string build(this ref cbDLL d, ж<testing.T> Ꮡt, @string dir) {
+internal static @string build(this ref cbDLL d, ж<testing.T> Ꮡt, @string dir) {
     @string srcname = d.name + ".c"u8;
     d.makeSrc(Ꮡt, filepath.Join(dir, srcname));
     @string outname = d.name + ".dll"u8;
@@ -688,7 +688,7 @@ internal static readonly @string testWindowˢ = "test_window"u8;
 internal static readonly @string registerClassExWˢ = "RegisterClassExW"u8;
 internal static readonly @string unregisterClassWˢ = "UnregisterClassW"u8;
 
-[GoType("dyn")] internal partial struct TestRegisterClass_Wndclassex {
+internal partial struct TestRegisterClass_Wndclassex /*dyn*/ {
     public uint32 Size;
     public uint32 Style;
     public uintptr WndProc;
@@ -862,7 +862,7 @@ uintptr_t cfunc(callback f, uintptr_t n) {
 """u8;
 
 // Use a new goroutine so that we get a small stack.
-[GoType("dyn")] internal partial struct TestReturnAfterStackGrowInCallback_result {
+internal partial struct TestReturnAfterStackGrowInCallback_result /*dyn*/ {
     internal uintptr r;
     internal syscall.Errno err;
 }
@@ -1149,7 +1149,7 @@ internal static readonly @string resumeThreadˢ = "ResumeThread"u8;
 internal static readonly @string thread32Firstˢ = "Thread32First"u8;
 internal static readonly @string thread32Nextˢ = "Thread32Next"u8;
 
-[GoType("dyn")] internal partial struct resumeChildThread_ThreadEntry32 {
+internal partial struct resumeChildThread_ThreadEntry32 /*dyn*/ {
     public uint32 Size;
     internal uint32 tUsage;
     public uint32 ThreadID;

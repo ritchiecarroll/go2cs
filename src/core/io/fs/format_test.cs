@@ -13,7 +13,7 @@ partial class fs_test_package {
 
 // formatTest implements FileInfo to test FormatFileInfo,
 // and implements DirEntry to test FormatDirEntry.
-[GoType] partial struct formatTest {
+partial struct formatTest {
     internal @string name;
     internal int64 size;
     internal fs.FileMode mode;
@@ -21,31 +21,31 @@ partial class fs_test_package {
     internal bool isDir;
 }
 
-[GoRecv] internal static @string Name(this ref formatTest fs) {
+internal static @string Name(this ref formatTest fs) {
     return fs.name;
 }
 
-[GoRecv] internal static int64 Size(this ref formatTest fs) {
+internal static int64 Size(this ref formatTest fs) {
     return fs.size;
 }
 
-[GoRecv] internal static fs.FileMode Mode(this ref formatTest fs) {
+internal static fs.FileMode Mode(this ref formatTest fs) {
     return fs.mode;
 }
 
-[GoRecv] internal static time.Time ModTime(this ref formatTest fs) {
+internal static time.Time ModTime(this ref formatTest fs) {
     return fs.modTime;
 }
 
-[GoRecv] internal static bool IsDir(this ref formatTest fs) {
+internal static bool IsDir(this ref formatTest fs) {
     return fs.isDir;
 }
 
-[GoRecv] internal static any Sys(this ref formatTest fs) {
+internal static any Sys(this ref formatTest fs) {
     return default!;
 }
 
-[GoRecv] internal static fs.FileMode Type(this ref formatTest fs) {
+internal static fs.FileMode Type(this ref formatTest fs) {
     return fs.mode.Type();
 }
 
@@ -54,7 +54,7 @@ internal static (fs.FileInfo, error) Info(this ж<formatTest> Ꮡfs) {
 }
 
 
-[GoType("dyn")] partial struct formatTestsᴛ1 {
+partial struct formatTestsᴛ1 /*dyn*/ {
     internal formatTest input;
     internal @string wantFileInfo;
     internal @string wantDirEntry;

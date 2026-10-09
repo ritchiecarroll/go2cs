@@ -15,12 +15,12 @@ using static go.text.scanner_package;
 partial class scanner_internal_test_package {
 
 // A StringReader delivers its data one string segment at a time via Read.
-[GoType] public partial struct StringReader {
+public partial struct StringReader {
     internal slice<@string> data;
     internal nint step;
 }
 
-[GoRecv] public static (nint n, error err) Read(this ref StringReader r, slice<byte> p) {
+public static (nint n, error err) Read(this ref StringReader r, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -67,7 +67,7 @@ public static void TestNext(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct token {
+internal partial struct token {
     internal rune tok;
     internal @string text;
 }
@@ -544,7 +544,7 @@ public static void TestError(ж<testing.T> Ꮡt) {
 }
 
 // An errReader returns (0, err) where err is not io.EOF.
-[GoType] internal partial struct errReader {
+internal partial struct errReader {
 }
 
 internal static (nint, error) Read(this errReader _, slice<byte> b) {
@@ -689,9 +689,9 @@ public static void TestPos(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("num:nint")] internal partial struct countReader;
+internal partial struct countReader /*num:nint*/;
 
-[GoRecv] internal static (nint, error) Read(this ref countReader r, slice<byte> _) {
+internal static (nint, error) Read(this ref countReader r, slice<byte> _) {
     r++;
     return (0, io.EOF);
 }
@@ -752,7 +752,7 @@ public static void TestIssue29723(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestNumbers_type {
+internal partial struct TestNumbers_type /*dyn*/ {
     internal rune tok;
     internal @string src, tokens, err;
 }
@@ -901,7 +901,7 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIssue30320_type {
+internal partial struct TestIssue30320_type /*dyn*/ {
     internal @string @in, want;
     internal nuint mode;
 }

@@ -12,7 +12,7 @@ using static go.sync_internal_test_package;
 
 partial class sync_test_package {
 
-[GoType] partial struct httpPkg {
+partial struct httpPkg {
 }
 
 internal static void Get(this httpPkg _, @string url) {

@@ -16,7 +16,7 @@ using types = global::go.go.types_package;
 
 partial class types_test_package {
 
-[GoType("dyn")] internal partial struct TestInstantiateEquality_tests {
+internal partial struct TestInstantiateEquality_tests /*dyn*/ {
     internal @string src;
     internal @string name1;
     internal slice<typesꓸType> targs1;
@@ -175,7 +175,7 @@ var X T[int]
 
 """u8;
 
-[GoType("dyn")] internal partial struct TestMethodInstantiation_tests {
+internal partial struct TestMethodInstantiation_tests /*dyn*/ {
     internal @string decl;
     internal @string want;
 }

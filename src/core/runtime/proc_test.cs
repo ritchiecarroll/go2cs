@@ -711,7 +711,7 @@ internal static nint bigframe(channel<nint> stop) {
     return small(stop, Ꮡx);
 }
 
-internal static nint small(channel<nint> stop, [GoArrayDims(8192)] ж<array<byte>> Ꮡx) {
+internal static nint small(channel<nint> stop, /*[8192]*/ ж<array<byte>> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     foreach (var (i, _) in x) {
@@ -1024,7 +1024,7 @@ public static void BenchmarkWakeupParallelSyscall(ж<testing.B> Ꮡb) {
     });
 }
 
-[GoType("[]slice<float64>")] partial struct Matrix;
+partial struct Matrix /*[]slice<float64>*/;
 
 public static void BenchmarkMatmult(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();

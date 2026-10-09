@@ -9,7 +9,7 @@ using static go.os.exec_package;
 
 partial class exec_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestPrefixSuffixSaver_tests {
+internal partial struct TestPrefixSuffixSaver_tests /*dyn*/ {
     public nint N;
     internal slice<@string> writes;
     internal @string want;

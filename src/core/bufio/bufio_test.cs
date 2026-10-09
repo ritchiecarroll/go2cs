@@ -28,7 +28,7 @@ using static go.bufio_internal_test_package;
 partial class bufio_test_package {
 
 // Reads from a reader and rot13s the result.
-[GoType] partial struct rot13Reader {
+partial struct rot13Reader {
     internal Δio.Reader r;
 }
 
@@ -38,7 +38,7 @@ internal static ж<rot13Reader> newRot13Reader(Δio.Reader r) {
     return r13;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref rot13Reader r13, slice<byte> p) {
+internal static (nint, error) Read(this ref rot13Reader r13, slice<byte> p) {
     var (n, err) = r13.r.Read(p);
     for (nint i = 0; i < n; i++) {
         var c = (byte)(p[i] | 0x20); // lowercase byte
@@ -93,7 +93,7 @@ public static void TestReaderSimple(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct readMaker {
+partial struct readMaker {
     internal @string name;
     internal Func<Δio.Reader, Δio.Reader> fn;
 }
@@ -141,7 +141,7 @@ internal static @string reads(ж<bufio.Reader> Ꮡbuf, nint m) {
     return ((@string)(b.slice(0, nb)));
 }
 
-[GoType] partial struct bufReader {
+partial struct bufReader {
     internal @string name;
     internal Func<ж<bufio.Reader>, @string> fn;
 }
@@ -194,7 +194,7 @@ public static void TestReader(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct zeroReader {
+partial struct zeroReader {
 }
 
 internal static (nint, error) Read(this zeroReader _, slice<byte> p) {
@@ -235,12 +235,12 @@ public static partial void TestZeroReader(ж<Δtesting.T> Ꮡt) {
 }
 
 // A StringReader delivers its data one string segment at a time via Read.
-[GoType] partial struct StringReader {
+partial struct StringReader {
     internal slice<@string> data;
     internal nint step;
 }
 
-[GoRecv] public static (nint n, error err) Read(this ref StringReader r, slice<byte> p) {
+public static (nint n, error err) Read(this ref StringReader r, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -798,7 +798,7 @@ public static void TestWriterAppend(ж<Δtesting.T> Ꮡt) {
 }
 
 // Check that write errors are returned properly.
-[GoType] partial struct errorWriterTest {
+partial struct errorWriterTest {
     internal nint n, m;
     internal error err;
     internal error expect;
@@ -936,22 +936,22 @@ public static void TestWriteStringStringWriter(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct teststringwriter {
+partial struct teststringwriter {
     internal @string write;
     internal @string writeString;
 }
 
-[GoRecv] internal static (nint, error) Write(this ref teststringwriter w, slice<byte> b) {
+internal static (nint, error) Write(this ref teststringwriter w, slice<byte> b) {
     w.write += ((@string)b);
     return (len(b), default!);
 }
 
-[GoRecv] internal static (nint, error) WriteString(this ref teststringwriter w, @string s) {
+internal static (nint, error) WriteString(this ref teststringwriter w, @string s) {
     w.writeString += s;
     return (len(s), default!);
 }
 
-[GoRecv] internal static void check(this ref teststringwriter w, ж<Δtesting.T> Ꮡt, @string write, @string writeString) {
+internal static void check(this ref teststringwriter w, ж<Δtesting.T> Ꮡt, @string write, @string writeString) {
     Ꮡt.Helper();
     if (w.write != write) {
         Ꮡt.Errorf("write: expected %q, got %q"u8, write, w.write);
@@ -1071,7 +1071,7 @@ public static void TestPeek(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("@string")] partial struct dataAndEOFReader;
+partial struct dataAndEOFReader /*@string*/;
 
 internal static (nint, error) Read(this dataAndEOFReader r, slice<byte> p) {
     return (copy(p, r), Δio.EOF);
@@ -1093,12 +1093,12 @@ internal static slice<byte> testInput = slice<byte>("012\n345\n678\n9ab\ncde\nfg
 internal static slice<byte> testInputrn = slice<byte>("012\r\n345\r\n678\r\n9ab\r\ncde\r\nfgh\r\nijk\r\nlmn\r\nopq\r\nrst\r\nuvw\r\nxy\r\n\n\r\n"u8);
 
 // TestReader wraps a []byte and returns reads of a specific length.
-[GoType] partial struct testReader {
+partial struct testReader {
     internal slice<byte> data;
     internal nint stride;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref testReader t, slice<byte> buf) {
+internal static (nint n, error err) Read(this ref testReader t, slice<byte> buf) {
     nint n = default!;
     error err = default!;
 
@@ -1247,14 +1247,14 @@ public static void TestReadLineNonNilLineOrError(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct readLineResult {
+partial struct readLineResult {
     internal slice<byte> line;
     internal bool isPrefix;
     internal error err;
 }
 
 
-[GoType("dyn")] partial struct readLineNewlinesTestsᴛ1 {
+partial struct readLineNewlinesTestsᴛ1 /*dyn*/ {
     internal @string input;
     internal slice<readLineResult> expect;
 }
@@ -1329,7 +1329,7 @@ public static void TestReaderWriteTo(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct errorWriterToTest {
+partial struct errorWriterToTest {
     internal nint rn, wn;
     internal error rerr, werr;
     internal error expected;
@@ -1398,7 +1398,7 @@ public static void TestWriterReadFrom(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct errorReaderFromTest {
+partial struct errorReaderFromTest {
     internal nint rn, wn;
     internal error rerr, werr;
     internal error expected;
@@ -1479,16 +1479,16 @@ public static void TestWriterReadFromCounts(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("num:nint")] partial struct writeCountingDiscard;
+partial struct writeCountingDiscard /*num:nint*/;
 
-[GoRecv] internal static (nint, error) Write(this ref writeCountingDiscard w, slice<byte> p) {
+internal static (nint, error) Write(this ref writeCountingDiscard w, slice<byte> p) {
     w++;
     return (len(p), default!);
 }
 
-[GoType("num:nint")] partial struct negativeReader;
+partial struct negativeReader /*num:nint*/;
 
-[GoRecv] internal static (nint, error) Read(this ref negativeReader r, slice<byte> _) {
+internal static (nint, error) Read(this ref negativeReader r, slice<byte> _) {
     return (-1, default!);
 }
 
@@ -1529,12 +1529,12 @@ public static void TestNegativeRead(ж<Δtesting.T> Ꮡt) {
 
 internal static error errFake = errors.New("fake error"u8);
 
-[GoType] partial struct errorThenGoodReader {
+partial struct errorThenGoodReader {
     internal bool didErr;
     internal nint nread;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref errorThenGoodReader r, slice<byte> p) {
+internal static (nint, error) Read(this ref errorThenGoodReader r, slice<byte> p) {
     r.nread++;
     if (!r.didErr) {
         r.didErr = true;
@@ -1591,12 +1591,12 @@ public static void TestWriterReadFromWhileFull(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct emptyThenNonEmptyReader {
+partial struct emptyThenNonEmptyReader {
     internal Δio.Reader r;
     internal nint n;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref emptyThenNonEmptyReader r, slice<byte> p) {
+internal static (nint, error) Read(this ref emptyThenNonEmptyReader r, slice<byte> p) {
     if (r.n <= 0) {
         return r.r.Read(p);
     }
@@ -1644,19 +1644,19 @@ public static void TestWriterReadFromErrNoProgress(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct readFromWriter {
+partial struct readFromWriter {
     internal slice<byte> buf;
     internal nint writeBytes;
     internal nint readFromBytes;
 }
 
-[GoRecv] internal static (nint, error) Write(this ref readFromWriter w, slice<byte> p) {
+internal static (nint, error) Write(this ref readFromWriter w, slice<byte> p) {
     w.buf = appendꓸꓸꓸ(w.buf, p);
     w.writeBytes += len(p);
     return (len(p), default!);
 }
 
-[GoRecv] internal static (int64, error) ReadFrom(this ref readFromWriter w, Δio.Reader r) {
+internal static (int64, error) ReadFrom(this ref readFromWriter w, Δio.Reader r) {
     var (b, err) = Δio.ReadAll(r);
     w.buf = appendꓸꓸꓸ(w.buf, b);
     w.readFromBytes += len(b);
@@ -1811,7 +1811,7 @@ public static void TestWriterReset(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string thenErrorˢ = "5-then-error"u8;
 
-[GoType("dyn")] internal partial struct TestReaderDiscard_tests {
+internal partial struct TestReaderDiscard_tests /*dyn*/ {
     internal @string name;
     internal Δio.Reader r;
     internal nint bufSize; // 0 means 16
@@ -1978,18 +1978,18 @@ public static void TestWriterSize(ж<Δtesting.T> Ꮡt) {
 }
 
 // An onlyReader only implements io.Reader, no matter what other methods the underlying implementation may have.
-[GoType] partial struct onlyReader {
-    [GoEmbedded] public io_package.Reader Reader;
+partial struct onlyReader {
+    /*embed*/ public io_package.Reader Reader;
 }
 
 // An onlyWriter only implements io.Writer, no matter what other methods the underlying implementation may have.
-[GoType] partial struct onlyWriter {
-    [GoEmbedded] public io_package.Writer Writer;
+partial struct onlyWriter {
+    /*embed*/ public io_package.Writer Writer;
 }
 
-[GoType("[]Func<slice<byte>, (nint n, error err)>")] partial struct scriptedReader;
+partial struct scriptedReader /*[]Func<slice<byte>, (nint n, error err)>*/;
 
-[GoRecv] internal static (nint n, error err) Read(this ref scriptedReader sr, slice<byte> p) {
+internal static (nint n, error err) Read(this ref scriptedReader sr, slice<byte> p) {
     if (len(sr) == 0) {
         throw panic("too many Read calls on scripted Reader. No steps remain.");
     }
@@ -2007,11 +2007,11 @@ internal static Δio.Reader newScriptedReader(params Span<Func<slice<byte>, (nin
 }
 
 // eofReader returns the number of bytes read and io.EOF for the read that consumes the last of the content.
-[GoType] partial struct eofReader {
+partial struct eofReader {
     internal slice<byte> buf;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref eofReader r, slice<byte> p) {
+internal static (nint, error) Read(this ref eofReader r, slice<byte> p) {
     nint read = copy(p, r.buf);
     r.buf = r.buf.slice(read);
     var exprᴛ1 = read;
@@ -2062,7 +2062,7 @@ public static void TestPartialReadEOF(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct writerWithReadFromError {
+partial struct writerWithReadFromError {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -2095,7 +2095,7 @@ public static void TestWriterReadFromMustSetUnderlyingError(ж<Δtesting.T> Ꮡt
     }
 }
 
-[GoType] partial struct writeErrorOnlyWriter {
+partial struct writeErrorOnlyWriter {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

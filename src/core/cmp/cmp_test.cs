@@ -22,7 +22,7 @@ internal static uintptr nonnilptr = (uintptr)Ꮡnegzero;
 internal static uintptr nilptr = (uintptr)(@unsafe.Pointer)default!;
 
 
-[GoType("dyn")] partial struct testsᴛ1 {
+partial struct testsᴛ1 /*dyn*/ {
     internal any x, y;
     internal nint compare;
 }
@@ -137,7 +137,7 @@ public static void TestSort(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestOr_cases {
+internal partial struct TestOr_cases /*dyn*/ {
     internal slice<nint> @in;
     internal nint want;
 }
@@ -175,7 +175,7 @@ public static void ExampleOr() {
     fmt.Println(cmp.Or(userInput1, userInput2, defaultˢ));
 }
 
-[GoType("dyn")] internal partial struct ExampleOr_sort_Order {
+internal partial struct ExampleOr_sort_Order /*dyn*/ {
     public @string Product;
     public @string Customer;
     public float64 Price;

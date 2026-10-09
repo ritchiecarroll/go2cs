@@ -24,7 +24,7 @@ uint(18446744073709551615)
 """u8;
 internal static readonly object didnTWriteFinalNewlineToˢ = (@string)"didn't write final newline to corpus file"u8;
 
-[GoType("dyn")] internal partial struct TestUnmarshalMarshal_type {
+internal partial struct TestUnmarshalMarshal_type /*dyn*/ {
     internal @string desc;
     internal @string @in;
     internal bool reject;

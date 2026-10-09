@@ -31,7 +31,7 @@ using static go.compress.gzip_internal_test_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("compress/gzip/fuzz_test.go", "fuzz_test.cs", "ABgiooKCgoKClIKClJaCgpSCgpSCgqiCgoKoloKCgoKWhIKAgqaAgqaCgoKUgoKUgIKkgII=", "56-91:1")]
 [assembly: go.GoPositionMap("compress/gzip/gunzip_test.go", "gunzip_test.cs", "ACc0ANQC5AXYhIKUgoKCgpSSgpSCgoKUgoKogoKCgpSClIKCgpSCgsbU/IKClIKClJKCooKClJSUtPgACASUkqKCpoSCgoKAgqiUgoKCloCCpIKCgpaAgsimgoIACAiCABIugoKCgoKUlIKAgqSC3IKUgoKCuIKC", "463-471:1")]
-[assembly: go.GoPositionMap("compress/gzip/gzip_test.go", "gzip_test.cs", "AA8ikoSAgqaCgpSAgqSCgpSClICCAAoMooSCgoKCgoCCpICCpoKClIKClIKUgpSClIKUgpSAgvqSgoKCgoKUgpaCgoCCpIKCAAgMogALHoKEgoKCgoKUgpaCgoKUgoKClIKClICCggAJCoKEgoKCgoSCgpaAgqaCgpaEgoKWgIKmgoKWgIL8koKCgoKCgoSCgpSCgriCgoKCgoKCgoKCggAHEIKAgoKkgqiShKKCgIKmgu6Agg==")]
+[assembly: go.GoPositionMap("compress/gzip/gzip_test.go", "gzip_test.cs", "AA8ikoSAgqaCgpSAgqSCgpSClICCAAoMooSCgoKCgoCCpICCpoKClIKClIKUgpSClIKUgpSAgvqSgoKCgoKUgpaCgoCCpIKCAAgMogALHoKEgoKCgoKUgpaCgoKUgoKClIKClICCggAJCoKEgoKCgoSCgpaAgqaCgpaEgoKWgIKmgoKWgIL8koKCgoKCgoSCgpSCgriCgoKCgoKCgoKCggAHEIKAgoKkgqiShKKCgIKmgu6Agg==", "", "", "295=Now/1/1/3")]
 [assembly: go.GoPositionMap("compress/gzip/issue14937_test.go", "issue14937_test.cs", "ABs0AAwIgpSEgoKUgoKClIKUlIKClJSClIK4ooKCgpSSgoKClJKCtA==", "40-48:1")]
 // </GoSourcePositionMaps>
 
@@ -41,7 +41,7 @@ namespace go.compress;
 public static partial class gzip_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

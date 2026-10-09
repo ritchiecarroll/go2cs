@@ -63,13 +63,13 @@ using ꓸꓸꓸstring = Span<@string>;
 
 partial class http_test_package {
 
-[GoType("@string")] partial struct dummyAddr;
+partial struct dummyAddr /*@string*/;
 
-[GoType] partial struct oneConnListener {
+partial struct oneConnListener {
     internal net.Conn conn;
 }
 
-[GoRecv] internal static (net.Conn c, error err) Accept(this ref oneConnListener l) {
+internal static (net.Conn c, error err) Accept(this ref oneConnListener l) {
     net.Conn c = default!;
     error err = default!;
 
@@ -83,14 +83,14 @@ partial class http_test_package {
     return (c, err);
 }
 
-[GoRecv] internal static error Close(this ref oneConnListener l) {
+internal static error Close(this ref oneConnListener l) {
     return default!;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testAddressˢ = "test-address"u8;
 
-[GoRecv] internal static netꓸAddr Addr(this ref oneConnListener l) {
+internal static netꓸAddr Addr(this ref oneConnListener l) {
     return ((dummyAddr)(@string)testAddressˢ);
 }
 
@@ -102,7 +102,7 @@ internal static @string String(this dummyAddr a) {
     return ((@string)a);
 }
 
-[GoType] partial struct noopConn {
+partial struct noopConn {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -131,15 +131,15 @@ internal static error SetWriteDeadline(this noopConn _, time.Time t) {
     return default!;
 }
 
-[GoType] partial struct rwTestConn {
-    [GoEmbedded] public io_package.Reader Reader;
-    [GoEmbedded] public io_package.Writer Writer;
+partial struct rwTestConn {
+    /*embed*/ public io_package.Reader Reader;
+    /*embed*/ public io_package.Writer Writer;
     internal partial ref noopConn noopConn { get; }
     internal Func<error> closeFunc;  // called if non-nil
     internal channel<bool> closec; // else, if non-nil, send value to it on close
 }
 
-[GoRecv] internal static error Close(this ref rwTestConn c) {
+internal static error Close(this ref rwTestConn c) {
     if (c.closeFunc != default!) {
         return c.closeFunc();
     }
@@ -154,7 +154,7 @@ internal static error SetWriteDeadline(this noopConn _, time.Time t) {
     return default!;
 }
 
-[GoType] partial struct testConn {
+partial struct testConn {
     internal sync.Mutex readMu; // for TestHandlerBodyClose
     internal bytes.Buffer readBuf;
     internal bytes.Buffer writeBuf;
@@ -180,11 +180,11 @@ internal static (nint, error) Read(this ж<testConn> Ꮡc, slice<byte> b) {
     finally { if (ᒐd1) Ꮡc.DerefOrNull().readMu.Unlock(); ᒐ.Run(); }
 }
 
-[GoRecv] internal static (nint, error) Write(this ref testConn c, slice<byte> b) {
+internal static (nint, error) Write(this ref testConn c, slice<byte> b) {
     return c.writeBuf.Write(b);
 }
 
-[GoRecv] internal static error Close(this ref testConn c) {
+internal static error Close(this ref testConn c) {
     var selᴛ36 = c.closec.ᐸꟷ(true, ꓸꓸꓸ);
     switch (trySelect(selᴛ36)) {
     case 0: {
@@ -202,7 +202,7 @@ internal static slice<byte> reqBytes(@string req) {
     return slice<byte>(strings.ReplaceAll(strings.TrimSpace(req), "\n"u8, "\r\n"u8) + "\r\n\r\n");
 }
 
-[GoType] partial struct handlerTest {
+partial struct handlerTest {
     internal bytes.Buffer logbuf;
     internal httpꓸHandler handler;
 }
@@ -286,14 +286,14 @@ public static partial void TestConsumingBodyOnNextConn(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("@string")] partial struct stringHandler;
+partial struct stringHandler /*@string*/;
 
 internal static void ServeHTTP(this stringHandler s, Δhttp.ResponseWriter w, ж<Δhttp.Request> Ꮡr) {
     w.Header().Set(resultˢ, ((@string)s));
 }
 
 
-[GoType("dyn")] partial struct handlersᴛ1 {
+partial struct handlersᴛ1 /*dyn*/ {
     internal @string pattern;
     internal @string msg;
 }
@@ -306,7 +306,7 @@ internal static slice<handlersᴛ1> handlers = new handlersᴛ1[]{
 
 // redirections for trees
 
-[GoType("dyn")] partial struct vtestsᴛ1 {
+partial struct vtestsᴛ1 /*dyn*/ {
     internal @string url;
     internal @string expected;
 }
@@ -385,7 +385,7 @@ internal static void testHostHandlers(ж<testing.T> Ꮡt, testMode mode) {
 }
 
 
-[GoType("dyn")] partial struct serveMuxRegisterᴛ1 {
+partial struct serveMuxRegisterᴛ1 /*dyn*/ {
     internal @string pattern;
     internal httpꓸHandler h;
 }
@@ -424,7 +424,7 @@ internal static void checkQueryStringHandler(Δhttp.ResponseWriter w, ж<Δhttp.
 // The /foo -> /foo/ redirect applies to CONNECT requests
 // but the path canonicalization does not.
 
-[GoType("dyn")] partial struct serveMuxTestsᴛ1 {
+partial struct serveMuxTestsᴛ1 /*dyn*/ {
     internal @string method;
     internal @string host;
     internal @string path;
@@ -504,7 +504,7 @@ public static void TestServeMuxHandleFuncWithNilHandler(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct serveMuxTests2ᴛ1 {
+partial struct serveMuxTests2ᴛ1 /*dyn*/ {
     internal @string method;
     internal @string host;
     internal @string url;
@@ -606,7 +606,7 @@ internal static readonly @string testTwoˢ = "/testTwo/"u8;
 internal static readonly @string testThreeˢ = "/testThree"u8;
 internal static readonly @string testThreeˢ2 = "/testThree/"u8;
 
-[GoType("dyn")] internal partial struct testServeWithSlashRedirectKeepsQueryString_tests {
+internal partial struct testServeWithSlashRedirectKeepsQueryString_tests /*dyn*/ {
     internal @string path;
     internal @string method;
     internal @string want;
@@ -671,7 +671,7 @@ internal static readonly @string exampleCom3000PkgConnectˢ = "example.com:3000/
 internal static readonly @string exampleCom9000ˢ = "example.com:9000/"u8;
 internal static readonly @string pkgBazˢ = "/pkg/baz/"u8;
 
-[GoType("dyn")] internal partial struct TestServeWithSlashRedirectForHostPatterns_tests {
+internal partial struct TestServeWithSlashRedirectForHostPatterns_tests /*dyn*/ {
     internal @string method;
     internal @string url;
     internal nint code;
@@ -791,7 +791,7 @@ public static void BenchmarkServeMux_SkipServe(ж<testing.B> Ꮡb) {
     benchmarkServeMux(Ꮡb, false);
 }
 
-[GoType("dyn")] internal partial struct benchmarkServeMux_test {
+internal partial struct benchmarkServeMux_test /*dyn*/ {
     internal @string path;
     internal nint code;
     internal ж<Δhttp.Request> req;
@@ -1404,8 +1404,8 @@ internal static void testOnlyWriteTimeout(ж<testing.T> Ꮡt, testMode mode) {
 }
 
 // trackLastConnListener tracks the last net.Conn that was accepted.
-[GoType] partial struct trackLastConnListener {
-    [GoEmbedded] public net_package.Listener Listener;
+partial struct trackLastConnListener {
+    /*embed*/ public net_package.Listener Listener;
     internal ж<sync.RWMutex> mu;
     internal ж<net.Conn> last; // destination
 }
@@ -1684,7 +1684,7 @@ public static void TestKeepAliveFinalChunkWithEOF(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object noAddressˢ = (@string)"no address"u8;
 
-[GoType("dyn")] internal partial struct testKeepAliveFinalChunkWithEOF_data {
+internal partial struct testKeepAliveFinalChunkWithEOF_data /*dyn*/ {
     public @string Addr;
 }
 
@@ -1736,8 +1736,8 @@ internal static void testSetsRemoteAddr(ж<testing.T> Ꮡt, testMode mode) {
     }
 }
 
-[GoType] partial struct blockingRemoteAddrListener {
-    [GoEmbedded] public net_package.Listener Listener;
+partial struct blockingRemoteAddrListener {
+    /*embed*/ public net_package.Listener Listener;
     internal channel/*<-*/<net.Conn> conns = channel/*<-*/<net.Conn>.SendOnly;
 }
 
@@ -1749,7 +1749,7 @@ internal static netꓸAddr Addr(this blockingRemoteAddrListener recvᴛ) => recv
 // interface field in *blockingRemoteAddrListener's method set; see the pointer-only satisfaction record.
 internal static error Close(this blockingRemoteAddrListener recvᴛ) => recvᴛ.Listener.Close();
 
-[GoRecv] internal static (net.Conn, error) Accept(this ref blockingRemoteAddrListener l) {
+internal static (net.Conn, error) Accept(this ref blockingRemoteAddrListener l) {
     var (c, err) = l.Listener.Accept();
     if (err != default!) {
         return (default!, err);
@@ -1762,8 +1762,8 @@ internal static error Close(this blockingRemoteAddrListener recvᴛ) => recvᴛ.
     return (new http_test_package.blockingRemoteAddrConnжConn(brac), default!);
 }
 
-[GoType] partial struct blockingRemoteAddrConn {
-    [GoEmbedded] public net_package.Conn Conn;
+partial struct blockingRemoteAddrConn {
+    /*embed*/ public net_package.Conn Conn;
     internal channel<netꓸAddr> addrs;
 }
 
@@ -1795,7 +1795,7 @@ internal static error SetWriteDeadline(this blockingRemoteAddrConn recvᴛ, time
 // interface field in *blockingRemoteAddrConn's method set; see the pointer-only satisfaction record.
 internal static (nint, error) Write(this blockingRemoteAddrConn recvᴛ, slice<byte> b) => recvᴛ.Conn.Write(b);
 
-[GoRecv] internal static netꓸAddr RemoteAddr(this ref blockingRemoteAddrConn c) {
+internal static netꓸAddr RemoteAddr(this ref blockingRemoteAddrConn c) {
     return ᐸꟷ(c.addrs);
 }
 
@@ -1887,8 +1887,8 @@ public static void TestHeadResponses(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testHeadResponses(Δp0, Δp1));
 }
 
-[GoType("dyn")] internal partial struct testHeadResponses_src {
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct testHeadResponses_src /*dyn*/ {
+    /*embed*/ public io_package.Reader Reader;
 }
 
 internal static void testHeadResponses(ж<testing.T> Ꮡt, testMode mode) {
@@ -2353,7 +2353,7 @@ break_Try:;
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct serverExpectTest {
+partial struct serverExpectTest {
     internal nint contentLength; // of request body
     internal bool chunked;
     internal @string expectation; // e.g. "100-continue"
@@ -2406,9 +2406,9 @@ public static void TestServerExpect(ж<testing.T> Ꮡt) {
 internal static readonly @string readbodyTrueˢ = "readbody=true"u8;
 internal static readonly @string transferEncodingChunkedˢ = "Transfer-Encoding: chunked"u8;
 
-[GoType("dyn")] internal partial struct testServerExpect_type {
-    [GoEmbedded] public io_package.Writer Writer;
-    [GoEmbedded] public io_package.Closer Closer;
+internal partial struct testServerExpect_type /*dyn*/ {
+    /*embed*/ public io_package.Writer Writer;
+    /*embed*/ public io_package.Closer Closer;
 }
 
 internal static void testServerExpect(ж<testing.T> Ꮡt, testMode mode) {
@@ -2605,7 +2605,7 @@ public static partial void TestServerUnreadRequestBodyLarge(ж<testing.T> Ꮡt) 
     }
 }
 
-[GoType] partial struct handlerBodyCloseTest {
+partial struct handlerBodyCloseTest {
     internal nint bodySize;
     internal bool bodyChunked;
     internal bool reqConnClose;
@@ -2776,7 +2776,7 @@ internal static partial void testHandlerBodyClose(ж<testing.T> Ꮡt, nint i, ha
 
 // testHandlerBodyConsumer represents a function injected into a test handler to
 // vary work done on a request Body.
-[GoType] partial struct testHandlerBodyConsumer {
+partial struct testHandlerBodyConsumer {
     internal @string name;
     internal Action<io.ReadCloser> f;
 }
@@ -2864,7 +2864,7 @@ public static partial void TestInvalidTrailerClosesConnection(ж<testing.T> Ꮡt
 // slowTestConn is a net.Conn that provides a means to simulate parts of a
 // request being received piecemeal. Deadlines can be set and enforced in both
 // Read and Write.
-[GoType] partial struct slowTestConn {
+partial struct slowTestConn {
     // over multiple calls to Read, time.Durations are slept, strings are read.
     internal slice<any> script;
     internal channel<bool> closec;
@@ -2964,7 +2964,7 @@ restart:
     ᒐdone: return (n, err);
 }
 
-[GoRecv] internal static error Close(this ref slowTestConn c) {
+internal static error Close(this ref slowTestConn c) {
     var selᴛ44 = c.closec.ᐸꟷ(true, ꓸꓸꓸ);
     switch (trySelect(selᴛ44)) {
     case 0: {
@@ -2976,7 +2976,7 @@ restart:
     return default!;
 }
 
-[GoRecv] internal static (nint, error) Write(this ref slowTestConn c, slice<byte> b) {
+internal static (nint, error) Write(this ref slowTestConn c, slice<byte> b) {
     if (!c.wd.IsZero() && time.Now().After(c.wd)) {
         return (0, syscall.ETIMEDOUT);
     }
@@ -3030,8 +3030,8 @@ public static partial void TestRequestBodyTimeoutClosesConnection(ж<testing.T> 
 }
 
 // cancelableTimeoutContext overwrites the error message to DeadlineExceeded
-[GoType] partial struct cancelableTimeoutContext {
-    [GoEmbedded] public context_package.Context Context;
+partial struct cancelableTimeoutContext {
+    /*embed*/ public context_package.Context Context;
 }
 
 internal static error Err(this cancelableTimeoutContext c) {
@@ -3450,7 +3450,7 @@ public static void TestRedirectBadPath(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string httpExampleComQuxˢ = "http://example.com/qux/"u8;
 
-[GoType("dyn")] internal partial struct TestRedirect_type {
+internal partial struct TestRedirect_type /*dyn*/ {
     internal @string @in;
     internal @string want;
 }
@@ -3501,11 +3501,11 @@ public static void TestRedirect(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestRedirectContentTypeAndBody_ctHeader {
+internal partial struct TestRedirectContentTypeAndBody_ctHeader /*dyn*/ {
     public slice<@string> Values;
 }
 
-[GoType("dyn")] internal partial struct TestRedirectContentTypeAndBody_type {
+internal partial struct TestRedirectContentTypeAndBody_type /*dyn*/ {
     internal @string method;
     internal ж<TestRedirectContentTypeAndBody_ctHeader> ct; // Optional Content-Type header to set.
     internal @string wantCT;
@@ -3692,7 +3692,7 @@ internal static partial void testHandlerPanic(ж<testing.T> Ꮡt, bool withHijac
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct terrorWriter {
+partial struct terrorWriter {
     internal ж<testing.T> t;
 }
 
@@ -3788,7 +3788,7 @@ internal static readonly @string xPathˢ = "X-Path"u8;
 internal static readonly @string xRawPathˢ = "X-RawPath"u8;
 internal static readonly @string fooBarˢ2 = "/foo/bar"u8;
 
-[GoType("dyn")] internal partial struct testStripPrefix_cases {
+internal partial struct testStripPrefix_cases /*dyn*/ {
     internal @string reqPath;
     internal @string path; // If empty we want a 404.
     internal @string rawPath;
@@ -3904,7 +3904,7 @@ internal static void testRequestLimit(ж<testing.T> Ꮡt, testMode mode) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("num:byte")] partial struct neverEnding;
+partial struct neverEnding /*num:byte*/;
 
 internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) {
     foreach (var (i, _) in p) {
@@ -3913,7 +3913,7 @@ internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) {
     return (len(p), default!);
 }
 
-[GoType] partial struct bodyLimitReader {
+partial struct bodyLimitReader {
     internal sync.Mutex mu;
     internal nint count;
     internal nint limit;
@@ -4646,7 +4646,7 @@ internal static readonly @string wrongStatusˢ = "wrong status"u8;
 internal static readonly @string shouldnTHaveSeenTooLateˢ = "shouldn't have seen Too-Late"u8;
 internal static readonly @string getHttp11HostGolangOrgˢ = "GET / HTTP/1.1\nHost: golang.org"u8;
 
-[GoType("dyn")] internal partial struct TestHeaderToWire_tests {
+internal partial struct TestHeaderToWire_tests /*dyn*/ {
     internal @string name;
     internal Action<Δhttp.ResponseWriter, ж<Δhttp.Request>> handler;
     internal Func<@string, @string, error> check;
@@ -4829,11 +4829,11 @@ public static void TestHeaderToWire(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct errorListener {
+partial struct errorListener {
     internal slice<error> errs;
 }
 
-[GoRecv] internal static (net.Conn c, error err) Accept(this ref errorListener l) {
+internal static (net.Conn c, error err) Accept(this ref errorListener l) {
     net.Conn c = default!;
     error err = default!;
 
@@ -4845,11 +4845,11 @@ public static void TestHeaderToWire(ж<testing.T> Ꮡt) {
     return (c, err);
 }
 
-[GoRecv] internal static error Close(this ref errorListener l) {
+internal static error Close(this ref errorListener l) {
     return default!;
 }
 
-[GoRecv] internal static netꓸAddr Addr(this ref errorListener l) {
+internal static netꓸAddr Addr(this ref errorListener l) {
     return ((dummyAddr)(@string)testAddressˢ);
 }
 
@@ -4955,7 +4955,7 @@ internal static readonly object dialErrˢ = (@string)"dial err:"u8;
 internal static readonly object connWriteErrˢ = (@string)"conn write err:"u8;
 internal static readonly object readResponseErrˢ = (@string)"ReadResponse err:"u8;
 
-[GoType("dyn")] internal partial struct testHTTP10ConnectionHeader_tests {
+internal partial struct testHTTP10ConnectionHeader_tests /*dyn*/ {
     internal @string req;  // raw http request
     internal slice<@string> expect; // expected Connection header(s)
 }
@@ -5347,7 +5347,7 @@ public static void TestServerConnState(ж<testing.T> Ꮡt) {
 internal static readonly @string bogusRequestˢ = "BOGUS REQUEST\r\n\r\n"u8;
 
 // A stateLog is a log of states over the lifetime of a connection.
-[GoType("dyn")] internal partial struct testServerConnState_stateLog {
+internal partial struct testServerConnState_stateLog /*dyn*/ {
     internal net.Conn active; // The connection for which the log is recorded; set to the first connection seen in StateNew.
     internal slice<Δhttp.ConnState> got;
     internal slice<Δhttp.ConnState> want;
@@ -5640,12 +5640,12 @@ public static void TestServerConnStateNew(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct closeWriteTestConn {
+partial struct closeWriteTestConn {
     internal partial ref rwTestConn rwTestConn { get; }
     internal bool didCloseWrite;
 }
 
-[GoRecv] internal static error CloseWrite(this ref closeWriteTestConn c) {
+internal static error CloseWrite(this ref closeWriteTestConn c) {
     c.didCloseWrite = true;
     return default!;
 }
@@ -6011,7 +6011,7 @@ internal static void testHandlerSetsBodyNil(ж<testing.T> Ꮡt, testMode mode) {
 internal static readonly @string getˢ4 = "GET / "u8;
 internal static readonly @string httpˢ3 = "HTTP/"u8;
 
-[GoType("dyn")] internal partial struct TestServerValidatesHostHeader_tests {
+internal partial struct TestServerValidatesHostHeader_tests /*dyn*/ {
     internal @string proto;
     internal @string host;
     internal nint want;
@@ -6142,7 +6142,7 @@ internal static void testServerHandlersCanHandleH2PRI(ж<testing.T> Ꮡt, testMo
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestServerValidatesHeaders_tests {
+internal partial struct TestServerValidatesHeaders_tests /*dyn*/ {
     internal @string header;
     internal nint want;
 }
@@ -6696,13 +6696,13 @@ public static void BenchmarkServerFakeConnNoKeepAlive(ж<testing.B> Ꮡb) {
 }
 
 // repeatReader reads content count times, then EOFs.
-[GoType] partial struct repeatReader {
+partial struct repeatReader {
     internal slice<byte> content;
     internal nint count;
     internal nint off;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref repeatReader r, slice<byte> p) {
+internal static (nint n, error err) Read(this ref repeatReader r, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -7652,7 +7652,7 @@ internal static void testServerHijackGetsBackgroundByte_big(ж<testing.T> Ꮡt, 
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestServerValidatesMethod_tests {
+internal partial struct TestServerValidatesMethod_tests /*dyn*/ {
     internal @string method;
     internal nint want;
 }
@@ -7680,7 +7680,7 @@ public static partial void TestServerValidatesMethod(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("[]nint")] partial struct eofListenerNotComparable;
+partial struct eofListenerNotComparable /*[]nint*/;
 
 internal static (net.Conn, error) Accept(this eofListenerNotComparable _) {
     return (default!, io.EOF);
@@ -7701,8 +7701,8 @@ public static void TestServerListenNotComparableListener(ж<testing.T> Ꮡt) {
 }
 
 // countCloseListener is a Listener wrapper that counts the number of Close calls.
-[GoType] partial struct countCloseListener {
-    [GoEmbedded] public net_package.Listener Listener;
+partial struct countCloseListener {
+    /*embed*/ public net_package.Listener Listener;
     internal int32 closes; // atomic
 }
 
@@ -7804,10 +7804,10 @@ internal static readonly @string onceCloseˢ = "onceClose"u8;
 internal static readonly @string baseˢ = "base"u8;
 internal static readonly @string connˢ = "conn"u8;
 
-[GoType("dyn")] internal partial struct testServerContexts_baseKey {
+internal partial struct testServerContexts_baseKey /*dyn*/ {
 }
 
-[GoType("dyn")] internal partial struct testServerContexts_connKey {
+internal partial struct testServerContexts_connKey /*dyn*/ {
 }
 
 internal static void testServerContexts(ж<testing.T> Ꮡt, testMode mode) {
@@ -7858,7 +7858,7 @@ public static void TestConnContextNotModifyingAllContexts(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testConnContextNotModifyingAllContexts(Δp0, Δp1));
 }
 
-[GoType("dyn")] internal partial struct testConnContextNotModifyingAllContexts_connKey {
+internal partial struct testConnContextNotModifyingAllContexts_connKey /*dyn*/ {
 }
 
 internal static void testConnContextNotModifyingAllContexts(ж<testing.T> Ꮡt, testMode mode) {
@@ -7927,7 +7927,7 @@ public static void TestContentEncodingNoSniffing(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testContentEncodingNoSniffing(Δp0, Δp1));
 }
 
-[GoType("dyn")] internal partial struct testContentEncodingNoSniffing_setting {
+internal partial struct testContentEncodingNoSniffing_setting /*dyn*/ {
     internal @string name;
     internal slice<byte> body;
     // setting contentEncoding as an interface instead of a string
@@ -8040,7 +8040,7 @@ public static void TestTimeoutHandlerSuperfluousLogs(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string timedOutHereˢ = "timed out here!"u8;
 
-[GoType("dyn")] internal partial struct testTimeoutHandlerSuperfluousLogs_tests {
+internal partial struct testTimeoutHandlerSuperfluousLogs_tests /*dyn*/ {
     internal @string name;
     internal bool mustTimeout;
     internal @string wantResp;
@@ -8252,7 +8252,7 @@ internal static void testDisableKeepAliveUpgrade(ж<testing.T> Ꮡt, testMode mo
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct tlogWriter {
+partial struct tlogWriter {
     internal ж<testing.T> t;
 }
 
@@ -8375,7 +8375,7 @@ public static void TestMuxRedirectRelative(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestQuerySemicolon_tests {
+internal partial struct TestQuerySemicolon_tests /*dyn*/ {
     internal @string query;
     internal @string xNoSemicolons;
     internal @string xWithSemicolons;
@@ -9074,7 +9074,7 @@ internal static partial void testServerTLSNextProtos(ж<testing.T> Ꮡt, testMod
     }
 }
 
-[GoType("dyn")] internal partial struct TestInvalidChunkedBodies_type {
+internal partial struct TestInvalidChunkedBodies_type /*dyn*/ {
     internal @string name;
     internal @string b;
 }

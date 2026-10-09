@@ -9,7 +9,7 @@ using static global::go.go.types_package;
 
 partial class types_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestSizeof_type {
+internal partial struct TestSizeof_type /*dyn*/ {
     internal any val;     // type as a value
     internal uintptr _32bit; // size on 32bit platforms
     internal uintptr _64bit; // size on 64bit platforms

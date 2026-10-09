@@ -23,7 +23,7 @@ using static go.log.slog_package;
 
 partial class slog_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestJSONHandler_type {
+internal partial struct TestJSONHandler_type /*dyn*/ {
     internal @string name;
     internal global::go.log.slog_package.HandlerOptions opts;
     internal @string want;
@@ -64,7 +64,7 @@ public static void TestJSONHandler(ж<testing.T> Ꮡt) {
 }
 
 // for testing json.Marshaler
-[GoType] internal partial struct jsonMarshaler {
+internal partial struct jsonMarshaler {
     internal @string s;
 }
 
@@ -82,7 +82,7 @@ internal static (slice<byte>, error) MarshalJSON(this jsonMarshaler j) {
     return (slice<byte>(fmt.Sprintf(@"[%q]"u8, j.s)), default!);
 }
 
-[GoType] internal partial struct jsonMarshalerError {
+internal partial struct jsonMarshalerError {
     internal partial ref jsonMarshaler jsonMarshaler { get; }
 }
 
@@ -139,7 +139,7 @@ internal static (@string, error) marshalJSON(any x) {
     return (strings.TrimSpace(Ꮡbuf.String()), default!);
 }
 
-[GoType("dyn")] internal partial struct TestJSONAppendAttrValueSpecial_type {
+internal partial struct TestJSONAppendAttrValueSpecial_type /*dyn*/ {
     internal any value;
     internal @string want;
 }
@@ -186,7 +186,7 @@ internal static readonly @string v1234ˢ = "v1.23.4"u8;
 internal static readonly @string countˢ = "count"u8;
 internal static readonly @string numberˢ = "number"u8;
 
-[GoType("dyn")] internal partial struct BenchmarkJSONHandler_type {
+internal partial struct BenchmarkJSONHandler_type /*dyn*/ {
     internal @string name;
     internal global::go.log.slog_package.HandlerOptions opts;
 }
@@ -249,14 +249,14 @@ internal static readonly @string methodˢ = "method"u8;
 internal static readonly @string getˢ = "GET"u8;
 internal static readonly @string addrˢ = "addr"u8;
 
-[GoType("dyn")] [GoLocalName("req")] internal partial struct BenchmarkPreformatting_req {
+internal partial struct BenchmarkPreformatting_req /*dyn*/ {
     public @string Method;
     public @string URL;
     public @string TraceID;
     public @string Addr;
 }
 
-[GoType("dyn")] internal partial struct BenchmarkPreformatting_type {
+internal partial struct BenchmarkPreformatting_type /*dyn*/ {
     internal @string name;
     internal io.Writer wc;
     internal slice<any> attrs;

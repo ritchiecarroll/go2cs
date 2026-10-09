@@ -180,7 +180,7 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string jsStringIsJsonStringˢ = "JS string is JSON string"u8;
 
-[GoType("dyn")] internal partial struct TestStringsInScriptsWithJsonContentTypeAreCorrectlyEscaped_tests {
+internal partial struct TestStringsInScriptsWithJsonContentTypeAreCorrectlyEscaped_tests /*dyn*/ {
     internal @string name, @in;
 }
 
@@ -260,7 +260,7 @@ public static void TestSkipEscapeComments(ж<testing.T> Ꮡt) {
     c.mustExecute((~c).root, default!, "1"u8);
 }
 
-[GoType] partial struct testCase {
+partial struct testCase {
     internal ж<testing.T> t;
     internal ж<template.Template> root;
 }
@@ -272,11 +272,11 @@ internal static ж<testCase> newTestCase(ж<testing.T> Ꮡt) {
     ));
 }
 
-[GoRecv] internal static ж<template.Template> lookup(this ref testCase c, @string name) {
+internal static ж<template.Template> lookup(this ref testCase c, @string name) {
     return c.root.Lookup(name);
 }
 
-[GoRecv] internal static void mustParse(this ref testCase c, ж<template.Template> Ꮡt, @string text) {
+internal static void mustParse(this ref testCase c, ж<template.Template> Ꮡt, @string text) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var (_, err) = Ꮡt.Parse(text);
@@ -285,7 +285,7 @@ internal static ж<testCase> newTestCase(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoRecv] internal static void mustNotParse(this ref testCase c, ж<template.Template> Ꮡt, @string text) {
+internal static void mustNotParse(this ref testCase c, ж<template.Template> Ꮡt, @string text) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var (_, err) = Ꮡt.Parse(text);
@@ -294,7 +294,7 @@ internal static ж<testCase> newTestCase(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoRecv] internal static void mustExecute(this ref testCase c, ж<template.Template> Ꮡt, any val, @string want) {
+internal static void mustExecute(this ref testCase c, ж<template.Template> Ꮡt, any val, @string want) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);

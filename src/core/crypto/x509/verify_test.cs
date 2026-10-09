@@ -37,7 +37,7 @@ using static go.crypto.x509_package;
 
 partial class x509_internal_test_package {
 
-[GoType] internal partial struct verifyTest {
+internal partial struct verifyTest {
     internal @string name;
     internal @string leaf;
     internal slice<@string> intermediates;
@@ -1421,7 +1421,7 @@ ePBQCV1F9sE2q4ZrnsT9TZoNrSe/bMDjzA==
 """u8;
 
 
-[GoType("dyn")] partial struct unknownAuthorityErrorTestsᴛ1 {
+partial struct unknownAuthorityErrorTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal @string cert;
     internal @string expected;
@@ -1462,7 +1462,7 @@ public static void TestUnknownAuthorityError(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct nameConstraintTestsᴛ1 {
+partial struct nameConstraintTestsᴛ1 /*dyn*/ {
     internal @string constraint, domain;
     internal bool expectError;
     internal bool shouldMatch;
@@ -1639,7 +1639,7 @@ CCqGSM49BAMCA0gAMEUCIQClA3d4tdrDu9Eb5ZBpgyC+fU1xTZB0dKQHz6M5fPZA
 -----END CERTIFICATE-----
 """u8;
 
-[GoType("dyn")] internal partial struct TestValidHostname_tests {
+internal partial struct TestValidHostname_tests /*dyn*/ {
     internal @string host;
     internal bool validInput, validPattern;
 }
@@ -1924,7 +1924,7 @@ public static void TestIssue51759(ж<testing.T> Ꮡt) {
     });
 }
 
-[GoType] public partial struct trustGraphEdge {
+public partial struct trustGraphEdge {
     public @string Issuer;
     public @string Subject;
     public nint Type;
@@ -1932,13 +1932,13 @@ public static void TestIssue51759(ж<testing.T> Ꮡt) {
     public Func<slice<ж<global::go.crypto.x509_package.Certificate>>, error> Constraint;
 }
 
-[GoType] public partial struct rootDescription {
+public partial struct rootDescription {
     public @string Subject;
     public Action<ж<global::go.crypto.x509_package.Certificate>> MutateTemplate;
     public Func<slice<ж<global::go.crypto.x509_package.Certificate>>, error> Constraint;
 }
 
-[GoType] internal partial struct trustGraphDescription {
+internal partial struct trustGraphDescription {
     public slice<rootDescription> Roots;
     public @string Leaf;
     public slice<trustGraphEdge> Graph;
@@ -2054,7 +2054,7 @@ internal static slice<@string> chainsToStrings(slice<slice<ж<global::go.crypto.
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string badˢ = "bad"u8;
 
-[GoType("dyn")] internal partial struct TestPathBuilding_tests {
+internal partial struct TestPathBuilding_tests /*dyn*/ {
     internal @string name;
     internal trustGraphDescription graph;
     internal slice<@string> expectedChains;
@@ -2600,12 +2600,12 @@ public static void TestPathBuilding(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string rootˢ = "root"u8;
 
-[GoType("dyn")] [GoLocalName("ekuDescs")] internal partial struct TestEKUEnforcement_ekuDescs {
+internal partial struct TestEKUEnforcement_ekuDescs /*dyn*/ {
     public slice<global::go.crypto.x509_package.ExtKeyUsage> EKUs;
     public slice<asn1.ObjectIdentifier> Unknown;
 }
 
-[GoType("dyn")] internal partial struct TestEKUEnforcement_tests {
+internal partial struct TestEKUEnforcement_tests /*dyn*/ {
     internal @string name;
     internal TestEKUEnforcement_ekuDescs root;
     internal slice<TestEKUEnforcement_ekuDescs> inters;
@@ -2733,7 +2733,7 @@ public static void TestEKUEnforcement(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object verificationSucceedˢ = (@string)"verification succeed"u8;
 
-[GoType("dyn")] internal partial struct TestVerifyEKURootAsLeaf_type {
+internal partial struct TestVerifyEKURootAsLeaf_type /*dyn*/ {
     internal slice<global::go.crypto.x509_package.ExtKeyUsage> rootEKUs;
     internal slice<global::go.crypto.x509_package.ExtKeyUsage> verifyEKUs;
     internal bool succeed;
@@ -2883,7 +2883,7 @@ internal static readonly @string testdataPolicyLeafOid5ˢ = "testdata/policy_lea
 internal static readonly @string testdataPolicyLeafˢ = "testdata/policy_leaf_require.pem"u8;
 internal static readonly @string testdataPolicyLeafˢ2 = "testdata/policy_leaf_require1.pem"u8;
 
-[GoType("dyn")] [GoLocalName("testCase")] internal partial struct TestPoliciesValid_testCase {
+internal partial struct TestPoliciesValid_testCase /*dyn*/ {
     internal slice<ж<global::go.crypto.x509_package.Certificate>> chain;
     internal slice<global::go.crypto.x509_package.OID> policies;
     internal bool requireExplicitPolicy;
@@ -3349,7 +3349,7 @@ public static void TestCertificateChainSignedByECDSA(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("dsaParams")] internal partial struct dsaSelfSignedCNX_dsaParams {
+internal partial struct dsaSelfSignedCNX_dsaParams /*dyn*/ {
     public ж<bigꓸInt> P, Q, G;
 }
 

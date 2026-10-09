@@ -48,11 +48,11 @@ internal static readonly @string buildCompilerˢ = "build\t-compiler="u8;
 internal static readonly @string doesnotexistTxtˢ = "doesnotexist.txt"u8;
 internal static readonly @string emptyˢ = "empty"u8;
 
-[GoType("dyn")] internal partial struct TestReadFile_platform {
+internal partial struct TestReadFile_platform /*dyn*/ {
     internal @string goos, goarch;
 }
 
-[GoType("dyn")] internal partial struct TestReadFile_cases {
+internal partial struct TestReadFile_cases /*dyn*/ {
     internal @string name;
     internal Func<ж<testing.T>, @string, @string, @string, @string> build;
     internal @string want;

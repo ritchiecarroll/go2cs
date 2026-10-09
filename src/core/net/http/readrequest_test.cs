@@ -16,7 +16,7 @@ using static global::go.net.http_package;
 
 partial class http_internal_test_package {
 
-[GoType] internal partial struct reqTest {
+internal partial struct reqTest {
     public @string Raw;
     public ж<global::go.net.http_package.Request> Req;
     public @string Body;
@@ -395,7 +395,7 @@ internal static slice<byte> reqBytes(@string req) {
 
 // golang.org/issue/22464
 
-[GoType("dyn")] partial struct badRequestTestsᴛ1 {
+partial struct badRequestTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal slice<byte> req;
 }

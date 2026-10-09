@@ -29,7 +29,7 @@ public static void TestImplicitSetConversion(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct implementsTestsᴛ1 {
+partial struct implementsTestsᴛ1 /*dyn*/ {
     internal any x;
     internal any t;
     internal bool b;
@@ -48,7 +48,7 @@ internal static slice<implementsTestsᴛ1> implementsTests = new implementsTests
     new(@new<ж<mapError>>(), @new<error>(), true)
 }.slice();
 
-[GoType] partial struct notAnExpr {
+partial struct notAnExpr {
 }
 
 internal static tokenꓸPos Pos(this notAnExpr _) {
@@ -62,13 +62,13 @@ internal static tokenꓸPos End(this notAnExpr _) {
 internal static void exprNode(this notAnExpr _) {
 }
 
-[GoType] partial interface notASTExpr :
+partial interface notASTExpr :
     ast.Node
 {
     void exprNode();
 }
 
-[GoType("map[@string, @string]")] partial struct mapError;
+partial struct mapError /*map[@string, @string]*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string mapErrorˢ = "mapError"u8;
@@ -105,11 +105,11 @@ internal static slice<implementsTestsᴛ1> assignableTests = new implementsTests
     new(@new<Ch>(), Ꮡ(/*<-*/channel<any>.RecvOnly), true)
 }.slice();
 
-[GoType("ж<nint>")] partial class IntPtr;
+partial class IntPtr /*ж<nint>*/;
 
-[GoType("ж<nint>")] partial class IntPtr1;
+partial class IntPtr1 /*ж<nint>*/;
 
-[GoType("chan any")] [GoChanDir(GoChanDir.Recv)] partial struct Ch;
+partial struct Ch /*<-chan any*/;
 
 public static void TestAssignableTo(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();

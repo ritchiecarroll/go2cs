@@ -16,7 +16,7 @@ using static go.encoding.csv_package;
 
 partial class csv_internal_test_package {
 
-[GoType] internal partial struct readTest {
+internal partial struct readTest {
     public @string Name;
     public @string Input;
     public slice<slice<@string>> Output;
@@ -590,13 +590,13 @@ internal static (slice<slice<array<nint>>>, map<nint, array<nint>>, @string) mak
 }
 
 // nTimes is an io.Reader which yields the string s n times.
-[GoType] internal partial struct nTimes {
+internal partial struct nTimes {
     internal @string s;
     internal nint n;
     internal nint off;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref nTimes r, slice<byte> p) {
+internal static (nint n, error err) Read(this ref nTimes r, slice<byte> p) {
     nint n = default!;
     error err = default!;
 

@@ -25,7 +25,7 @@ private static readonly @string fooˢ = "#foo"u8;
 private static readonly @string loooooooongˢ = "#loooooooong"u8;
 private static readonly @string godebugˢ = "GODEBUG"u8;
 
-[GoType("dyn")] internal partial struct TestGet_tests {
+internal partial struct TestGet_tests /*dyn*/ {
     internal @string godebug;
     internal ж<godebug.Setting> setting;
     internal @string want;

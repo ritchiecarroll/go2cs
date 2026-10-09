@@ -36,7 +36,7 @@ partial class x509_internal_test_package {
 internal const bool testNameConstraintsAgainstOpenSSL = false;
 internal const bool debugOpenSSLFailure = false;
 
-[GoType] internal partial struct nameConstraintsTest {
+internal partial struct nameConstraintsTest {
     internal slice<constraintsSpec> roots;
     internal slice<slice<constraintsSpec>> intermediates;
     internal leafSpec leaf;
@@ -46,13 +46,13 @@ internal const bool debugOpenSSLFailure = false;
     internal bool ignoreCN;
 }
 
-[GoType] internal partial struct constraintsSpec {
+internal partial struct constraintsSpec {
     internal slice<@string> ok;
     internal slice<@string> bad;
     internal slice<@string> ekus;
 }
 
-[GoType] internal partial struct leafSpec {
+internal partial struct leafSpec {
     internal slice<@string> sans;
     internal slice<@string> ekus;
     internal @string cn;
@@ -1986,7 +1986,7 @@ internal static (@string, error) testChainAgainstOpenSSL(ж<testing.T> Ꮡt, ж<
 
 // Examples from RFC 3696
 
-[GoType("dyn")] partial struct rfc2821Testsᴛ1 {
+partial struct rfc2821Testsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string localPart, domain;
 }
@@ -2039,7 +2039,7 @@ internal static readonly @string failedToParseˢ = "failed to parse "u8;
 internal static readonly @string constraintˢ = "constraint"u8;
 internal static readonly @string cannotBeEncodedAsAnˢ = "cannot be encoded as an IA5String"u8;
 
-[GoType("dyn")] internal partial struct TestBadNamesInConstraints_badNames {
+internal partial struct TestBadNamesInConstraints_badNames /*dyn*/ {
     internal @string name;
     internal Func<error, bool> matcher;
 }

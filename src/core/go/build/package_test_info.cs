@@ -56,8 +56,8 @@ using static global::go.go.build_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/build/build_test.go", "build_test.cs", "ABgqgoLmgpKCgoKCgpSCpoKCgoKUgqiCgoSCgoKCgoIACAaCgoKUgpaCgpSClIKC+IKCgpSClIL4goKAggAJCIKEgoKUyoKogIKmgIKmgIL4goKWgoKWgoKUggAMCACIAfwCgrKSgoKCggAKFIKCgoKClIIABxCCqIIACAYAECyCspKSgpSUkpSCggAJCoKCloKClIK61gAMHoKCgoKUAAkKogAJGoKCgpSCABEOwoKUhIKEAAUWhIKShIKEgoKCgpSUgriCpoLqAAgEgoSEkoKClIKCgpSCgriihISSgoKUgoKCgoKCAAgKgoSEkoKClIKCgpaCgriChISSgoKUlIKClIKUgoIACw7SqKiCgIKkgIKmgoKSgoSCgIKSgIKUAAgM2IKCloLs2IKCloIACg7SgoKAgqSCgoSShIKCgrq6hICC/rKSgoKClIKCAAsSwpKCgoKClIKClIKCloKCgoKUgpSCguiCgoKUggAOCIKCgpaCgpSCgoKmlJQ=", "29-38:1;39-48:2;346-357:1;411-416:1;417-419:2;521-548:1;814-823:1")]
-[assembly: global::go.GoPositionMap("go/build/deps_test.go", "deps_test.cs", "AIoGjAyUlIKCgpaCgpaCgpaClICCpKaChIKCgpSEgoSCgoKClIKUgoKCgqaCysSCgoKUgoKClIKCgpSCgoKUlIKUyIKClIKCgpSClIKUgoKCgriCqJKCgpSqooSCgoKWgoLMkoKClIKCgoKCgqY=", "779-796:1")]
+[assembly: global::go.GoPositionMap("go/build/build_test.go", "build_test.cs", "ABgqgoLmgpKCgoKCgpSCpoKCgoKUgqiCgoSCgoKCgoIACAaCgoKUgpaCgpSClIKC+IKCgpSClIL4goKAggAJCIKEgoKUyoKogIKmgIKmgIL4goKWgoKWgoKUggAMCACIAfwCgrKSgoKCggAKFIKCgoKClIIABxCCqIIACAYAECyCspKSgpSUkpSCggAJCoKCloKClIK61gAMHoKCgoKUAAkKogAJGoKCgpSCABEOwoKUhIKEAAUWhIKShIKEgoKCgpSUgriCpoLqAAgEgoSEkoKClIKCgpSCgriihISSgoKUgoKCgoKCAAgKgoSEkoKClIKCgpaCgriChISSgoKUlIKClIKUgoIACw7SqKiCgIKkgIKmgoKSgoSCgIKSgIKUAAgM2IKCloLs2IKCloIACg7SgoKAgqSCgoSShIKCgrq6hICC/rKSgoKClIKCAAsSwpKCgoKClIKClIKCloKCgoKUgpSCguiCgoKUggAOCIKCgpaCgpSCgoKmlJQ=", "29-38:1;39-48:2;346-357:1;411-416:1;417-419:2;521-548:1;814-823:1", "", "138=FromSlash/1/1/1;525=Join/1/2/6,Join/2/2/8")]
+[assembly: global::go.GoPositionMap("go/build/deps_test.go", "deps_test.cs", "AIoGjAyUlIKCgpaCgpaCgpaClICCpKaChIKCgpSEgoSCgoKClIKUgoKCgqaCysSCgoKUgoKClIKCgpSCgoKUlIKUyIKClIKCgpSClIKUgoKCgriCqJKCgpSqooSCgoKWgoLMkoKClIKCgoKCgqY=", "779-796:1", "", "869=Join/1/1/1")]
 [assembly: global::go.GoPositionMap("go/build/read_test.go", "read_test.cs", "ABcuADtoADBagoKCgoSAgoKmgoKCgpKClJSCgpaCgsqCgoKCuIKmAEWGAbiCgoKCgqaCgoIACggAWJoBgoKCyIKCgpSCgoKClIKCgg==", "154-158:1;244-248:1")]
 [assembly: global::go.GoPositionMap("go/build/syslist_test.go", "syslist_test.cs", "AA0egpaCgpSmgoKUAAcQABEkgoKC")]
 [assembly: global::go.GoPositionMap("go/build/vendor_test.go", "vendor_test.cs", "ABgoAAsQkoKCgoKClIKCgoKCpoIAChKCgoKm9qIABhSCgg==")]
@@ -69,7 +69,7 @@ namespace go.go;
 public static partial class build_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

@@ -578,7 +578,7 @@ public static void TestHandlerStderr(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestRemoveLeadingDuplicates_tests {
+internal partial struct TestRemoveLeadingDuplicates_tests /*dyn*/ {
     internal slice<@string> env;
     internal slice<@string> want;
 }

@@ -14,7 +14,7 @@ partial class http_internal_test_package {
 // TODO(mattn):
 //	test ProxyAuth
 
-[GoType("dyn")] partial struct cacheKeysTestsᴛ1 {
+partial struct cacheKeysTestsᴛ1 /*dyn*/ {
     internal @string proxy;
     internal @string scheme;
     internal @string addr;

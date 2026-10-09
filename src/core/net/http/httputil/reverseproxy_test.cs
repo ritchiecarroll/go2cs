@@ -592,7 +592,7 @@ public static void TestReverseProxyRewriteStripsForwarded(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct proxyQueryTestsᴛ1 {
+partial struct proxyQueryTestsᴛ1 /*dyn*/ {
     internal @string baseSuffix; // suffix to add to backend URL
     internal @string reqSuffix; // suffix to add to frontend's request URL
     internal @string want; // what backend should see for final request URL (without ?)
@@ -681,20 +681,20 @@ public static void TestReverseProxyFlushInterval(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct mockFlusher {
-    [GoEmbedded] public go.net.http_package.ResponseWriter ResponseWriter;
+internal partial struct mockFlusher {
+    /*embed*/ public go.net.http_package.ResponseWriter ResponseWriter;
     internal bool flushed;
 }
 
-[GoRecv] internal static void Flush(this ref mockFlusher m) {
+internal static void Flush(this ref mockFlusher m) {
     m.flushed = true;
 }
 
-[GoType] internal partial struct wrappedRW {
-    [GoEmbedded] public go.net.http_package.ResponseWriter ResponseWriter;
+internal partial struct wrappedRW {
+    /*embed*/ public go.net.http_package.ResponseWriter ResponseWriter;
 }
 
-[GoRecv] internal static http.ResponseWriter Unwrap(this ref wrappedRW w) {
+internal static http.ResponseWriter Unwrap(this ref wrappedRW w) {
     return w.ResponseWriter;
 }
 
@@ -959,7 +959,7 @@ public static void TestUserAgentHeader(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct bufferPool {
+internal partial struct bufferPool {
     internal Func<slice<byte>> get;
     internal Action<slice<byte>> put;
 }
@@ -1174,7 +1174,7 @@ public static void TestReverseProxy_AllocatedHeader(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string xHitModˢ = "X-Hit-Mod"u8;
 
-[GoType("dyn")] internal partial struct TestReverseProxyModifyResponse_tests {
+internal partial struct TestReverseProxyModifyResponse_tests /*dyn*/ {
     internal @string url;
     internal nint wantCode;
 }
@@ -1223,7 +1223,7 @@ public static void TestReverseProxyModifyResponse(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct failingRoundTripper {
+internal partial struct failingRoundTripper {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1233,7 +1233,7 @@ internal static (ж<http.Response>, error) RoundTrip(this failingRoundTripper _�
     return (default!, errors.New(someErrorˢ));
 }
 
-[GoType] internal partial struct staticResponseRoundTripper {
+internal partial struct staticResponseRoundTripper {
     internal ж<http.Response> res;
 }
 
@@ -1244,7 +1244,7 @@ internal static (ж<http.Response>, error) RoundTrip(this staticResponseRoundTri
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string someErrorToTriggerˢ = "some error to trigger errorHandler"u8;
 
-[GoType("dyn")] internal partial struct TestReverseProxyErrorHandler_tests {
+internal partial struct TestReverseProxyErrorHandler_tests /*dyn*/ {
     internal @string name;
     internal nint wantCode;
     internal Action<http.ResponseWriter, ж<http.Request>, error> errorHandler;
@@ -1402,11 +1402,11 @@ public static void TestReverseProxy_CopyBuffer(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct staticTransport {
+internal partial struct staticTransport {
     internal ж<http.Response> res;
 }
 
-[GoRecv] internal static (ж<http.Response>, error) RoundTrip(this ref staticTransport t, ж<http.Request> Ꮡr) {
+internal static (ж<http.Response>, error) RoundTrip(this ref staticTransport t, ж<http.Request> Ꮡr) {
     return (t.res, default!);
 }
 
@@ -1430,7 +1430,7 @@ public static void BenchmarkServeHTTP(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("result")] internal partial struct TestServeHTTPDeepCopy_result {
+internal partial struct TestServeHTTPDeepCopy_result /*dyn*/ {
     internal @string before, after;
 }
 
@@ -1560,16 +1560,16 @@ public static void TestModifyResponseClosesBody(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct checkCloser {
+internal partial struct checkCloser {
     internal bool closed;
 }
 
-[GoRecv] internal static error Close(this ref checkCloser cc) {
+internal static error Close(this ref checkCloser cc) {
     cc.closed = true;
     return default!;
 }
 
-[GoRecv] internal static (nint, error) Read(this ref checkCloser cc, slice<byte> b) {
+internal static (nint, error) Read(this ref checkCloser cc, slice<byte> b) {
     return (len(b), default!);
 }
 
@@ -1666,7 +1666,7 @@ public static partial void TestReverseProxy_PanicClosesIncomingBody(ж<testing.T
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestSelectFlushInterval_tests {
+internal partial struct TestSelectFlushInterval_tests /*dyn*/ {
     internal @string name;
     internal ж<global::go.net.http.httputil_package.ReverseProxy> p;
     internal ж<http.Response> res;
@@ -2119,7 +2119,7 @@ public static void TestSetURL(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestSingleJoinSlash_tests {
+internal partial struct TestSingleJoinSlash_tests /*dyn*/ {
     internal @string slasha;
     internal @string slashb;
     internal @string expected;
@@ -2146,7 +2146,7 @@ public static void TestSingleJoinSlash(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestJoinURLPath_tests {
+internal partial struct TestJoinURLPath_tests /*dyn*/ {
     internal ж<url.URL> a;
     internal ж<url.URL> b;
     internal @string wantPath;
@@ -2407,7 +2407,7 @@ public static void TestReverseProxyQueryParameterSmugglingRewritePreservesRawQue
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string contentᶜ1 = "response_content"u8;
 
-[GoType("dyn")] internal partial struct testReverseProxyQueryParameterSmuggling_type {
+internal partial struct testReverseProxyQueryParameterSmuggling_type /*dyn*/ {
     internal @string rawQuery;
     internal @string cleanQuery;
 }
@@ -2465,26 +2465,26 @@ internal static void testReverseProxyQueryParameterSmuggling(ж<testing.T> Ꮡt,
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct testResponseWriter {
+internal partial struct testResponseWriter {
     internal httpꓸHeader h;
     internal Action<nint> writeHeader;
     internal Func<slice<byte>, (nint, error)> write;
 }
 
-[GoRecv] internal static httpꓸHeader Header(this ref testResponseWriter rw) {
+internal static httpꓸHeader Header(this ref testResponseWriter rw) {
     if (rw.h == default!) {
         rw.h = new httpꓸHeader(0);
     }
     return rw.h;
 }
 
-[GoRecv] internal static void WriteHeader(this ref testResponseWriter rw, nint statusCode) {
+internal static void WriteHeader(this ref testResponseWriter rw, nint statusCode) {
     if (rw.writeHeader != default!) {
         rw.writeHeader(statusCode);
     }
 }
 
-[GoRecv] internal static (nint, error) Write(this ref testResponseWriter rw, slice<byte> p) {
+internal static (nint, error) Write(this ref testResponseWriter rw, slice<byte> p) {
     if (rw.write != default!) {
         return rw.write(p);
     }

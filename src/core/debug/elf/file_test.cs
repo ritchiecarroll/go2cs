@@ -28,7 +28,7 @@ using static go.debug.elf_package;
 
 partial class elf_internal_test_package {
 
-[GoType] internal partial struct fileTest {
+internal partial struct fileTest {
     internal @string @file;
     internal global::go.debug.elf_package.FileHeader hdr;
     internal slice<global::go.debug.elf_package.SectionHeader> sections;
@@ -562,14 +562,13 @@ internal static (io.ReaderAt, error) decompress(@string gz) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct relocationTestEntry {
+internal partial struct relocationTestEntry {
     internal nint entryNumber;
     internal ж<dwarf.Entry> entry;
-    [GoArrayDims(2)]
-    internal slice<array<uint64>> pcRanges;
+    internal /*[2]*/ slice<array<uint64>> pcRanges;
 }
 
-[GoType] internal partial struct relocationTest {
+internal partial struct relocationTest {
     internal @string @file;
     internal slice<relocationTestEntry> entries;
 }

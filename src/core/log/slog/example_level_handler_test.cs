@@ -16,7 +16,7 @@ partial class slog_test_package {
 
 // A LevelHandler wraps a Handler with an Enabled method
 // that returns false for levels below a minimum.
-[GoType] partial struct LevelHandler {
+partial struct LevelHandler {
     internal Δslog.Leveler level;
     internal slogꓸHandler handler;
 }
@@ -35,29 +35,29 @@ public static ж<LevelHandler> NewLevelHandler(Δslog.Leveler level, slogꓸHand
 
 // Enabled implements Handler.Enabled by reporting whether
 // level is at least as large as h's level.
-[GoRecv] public static bool Enabled(this ref LevelHandler h, context.Context _, slogꓸLevel level) {
+public static bool Enabled(this ref LevelHandler h, context.Context _, slogꓸLevel level) {
     return level >= h.level.Level();
 }
 
 // Handle implements Handler.Handle.
-[GoRecv] public static error Handle(this ref LevelHandler h, context.Context ctx, Δslog.Record r) {
+public static error Handle(this ref LevelHandler h, context.Context ctx, Δslog.Record r) {
     r = r.ΔClone();
 
     return h.handler.Handle(ctx, r);
 }
 
 // WithAttrs implements Handler.WithAttrs.
-[GoRecv] public static slogꓸHandler WithAttrs(this ref LevelHandler h, slice<Δslog.Attr> attrs) {
+public static slogꓸHandler WithAttrs(this ref LevelHandler h, slice<Δslog.Attr> attrs) {
     return new slog_test_package.LevelHandlerжΔHandler(NewLevelHandler(h.level, h.handler.WithAttrs(attrs)));
 }
 
 // WithGroup implements Handler.WithGroup.
-[GoRecv] public static slogꓸHandler WithGroup(this ref LevelHandler h, @string name) {
+public static slogꓸHandler WithGroup(this ref LevelHandler h, @string name) {
     return new slog_test_package.LevelHandlerжΔHandler(NewLevelHandler(h.level, h.handler.WithGroup(name)));
 }
 
 // Handler returns the Handler wrapped by h.
-[GoRecv] public static slogꓸHandler Handler(this ref LevelHandler h) {
+public static slogꓸHandler Handler(this ref LevelHandler h) {
     return h.handler;
 }
 

@@ -116,7 +116,7 @@ public static partial void TestMutex(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct misuseTestsᴛ1 {
+partial struct misuseTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal Action f;
 }
@@ -278,7 +278,7 @@ public static partial void TestMutexFairness(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkMutexUncontended_PaddedMutex {
+internal partial struct BenchmarkMutexUncontended_PaddedMutex /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; }
     internal array<uint8> pad = new(128);
 }

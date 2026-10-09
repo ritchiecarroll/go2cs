@@ -17,7 +17,7 @@ using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOpti
 
 partial class weak_test_package {
 
-[GoType] partial struct T {
+partial struct T {
     // N.B. This must contain a pointer, otherwise the weak handle might get placed
     // in a tiny block making the tests in this package flaky.
     internal ж<T> t;

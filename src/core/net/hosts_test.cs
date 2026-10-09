@@ -10,7 +10,7 @@ using static go.net_package;
 
 partial class net_internal_test_package {
 
-[GoType] internal partial struct staticHostEntry {
+internal partial struct staticHostEntry {
     internal @string @in;
     internal slice<@string> @out;
 }
@@ -19,7 +19,7 @@ partial class net_internal_test_package {
 // see golang.org/issue/8996
 // see golang.org/issue/12806
 
-[GoType("dyn")] partial struct lookupStaticHostTestsᴛ1 {
+partial struct lookupStaticHostTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal slice<staticHostEntry> ents;
 }
@@ -208,7 +208,7 @@ public static void TestHostCacheModification(ж<testing.T> Ꮡt) {
 // 127.0.0.4
 // 127.0.0.5
 
-[GoType("dyn")] partial struct lookupStaticHostAliasesTestᴛ1 {
+partial struct lookupStaticHostAliasesTestᴛ1 /*dyn*/ {
     internal @string lookup, res;
 }
 internal static slice<lookupStaticHostAliasesTestᴛ1> lookupStaticHostAliasesTest = new lookupStaticHostAliasesTestᴛ1[]{

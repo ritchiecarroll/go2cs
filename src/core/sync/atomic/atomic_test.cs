@@ -33,7 +33,7 @@ partial class atomic_test_package {
 internal static UntypedInt magic32 => 0xdedbeef;
 internal static UntypedInt magic64 => 0xdeddeadbeefbeef;
 
-[GoType("dyn")] internal partial struct TestSwapInt32_x {
+internal partial struct TestSwapInt32_x /*dyn*/ {
     internal int32 before;
     internal int32 i;
     internal int32 after;
@@ -56,7 +56,7 @@ public static void TestSwapInt32(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestSwapInt32Method_x {
+internal partial struct TestSwapInt32Method_x /*dyn*/ {
     internal int32 before;
     internal atomic.Int32 i;
     internal int32 after;
@@ -79,7 +79,7 @@ public static void TestSwapInt32Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestSwapUint32_x {
+internal partial struct TestSwapUint32_x /*dyn*/ {
     internal uint32 before;
     internal uint32 i;
     internal uint32 after;
@@ -102,7 +102,7 @@ public static void TestSwapUint32(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestSwapUint32Method_x {
+internal partial struct TestSwapUint32Method_x /*dyn*/ {
     internal uint32 before;
     internal atomic.Uint32 i;
     internal uint32 after;
@@ -125,7 +125,7 @@ public static void TestSwapUint32Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestSwapInt64_x {
+internal partial struct TestSwapInt64_x /*dyn*/ {
     internal int64 before;
     internal int64 i;
     internal int64 after;
@@ -149,7 +149,7 @@ public static void TestSwapInt64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestSwapInt64Method_x {
+internal partial struct TestSwapInt64Method_x /*dyn*/ {
     internal int64 before;
     internal atomic.Int64 i;
     internal int64 after;
@@ -173,7 +173,7 @@ public static void TestSwapInt64Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestSwapUint64_x {
+internal partial struct TestSwapUint64_x /*dyn*/ {
     internal uint64 before;
     internal uint64 i;
     internal uint64 after;
@@ -197,7 +197,7 @@ public static void TestSwapUint64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestSwapUint64Method_x {
+internal partial struct TestSwapUint64Method_x /*dyn*/ {
     internal uint64 before;
     internal atomic.Uint64 i;
     internal uint64 after;
@@ -221,7 +221,7 @@ public static void TestSwapUint64Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestSwapUintptr_x {
+internal partial struct TestSwapUintptr_x /*dyn*/ {
     internal uintptr before;
     internal uintptr i;
     internal uintptr after;
@@ -246,7 +246,7 @@ public static void TestSwapUintptr(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestSwapUintptrMethod_x {
+internal partial struct TestSwapUintptrMethod_x /*dyn*/ {
     internal uintptr before;
     internal atomic.Uintptr i;
     internal uintptr after;
@@ -287,7 +287,7 @@ internal static slice<@unsafe.Pointer> testPointers() {
     return pointers;
 }
 
-[GoType("dyn")] internal partial struct TestSwapPointer_x {
+internal partial struct TestSwapPointer_x /*dyn*/ {
     internal uintptr before;
     internal @unsafe.Pointer i;
     internal uintptr after;
@@ -312,7 +312,7 @@ public static void TestSwapPointer(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestSwapPointerMethod_x {
+internal partial struct TestSwapPointerMethod_x /*dyn*/ {
     internal uintptr before;
     internal atomic.Pointer<byte> i;
     internal uintptr after;
@@ -338,7 +338,7 @@ public static void TestSwapPointerMethod(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddInt32_x {
+internal partial struct TestAddInt32_x /*dyn*/ {
     internal int32 before;
     internal int32 i;
     internal int32 after;
@@ -361,7 +361,7 @@ public static void TestAddInt32(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddInt32Method_x {
+internal partial struct TestAddInt32Method_x /*dyn*/ {
     internal int32 before;
     internal atomic.Int32 i;
     internal int32 after;
@@ -384,7 +384,7 @@ public static void TestAddInt32Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddUint32_x {
+internal partial struct TestAddUint32_x /*dyn*/ {
     internal uint32 before;
     internal uint32 i;
     internal uint32 after;
@@ -407,7 +407,7 @@ public static void TestAddUint32(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddUint32Method_x {
+internal partial struct TestAddUint32Method_x /*dyn*/ {
     internal uint32 before;
     internal atomic.Uint32 i;
     internal uint32 after;
@@ -430,7 +430,7 @@ public static void TestAddUint32Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddInt64_x {
+internal partial struct TestAddInt64_x /*dyn*/ {
     internal int64 before;
     internal int64 i;
     internal int64 after;
@@ -454,7 +454,7 @@ public static void TestAddInt64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddInt64Method_x {
+internal partial struct TestAddInt64Method_x /*dyn*/ {
     internal int64 before;
     internal atomic.Int64 i;
     internal int64 after;
@@ -478,7 +478,7 @@ public static void TestAddInt64Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddUint64_x {
+internal partial struct TestAddUint64_x /*dyn*/ {
     internal uint64 before;
     internal uint64 i;
     internal uint64 after;
@@ -502,7 +502,7 @@ public static void TestAddUint64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddUint64Method_x {
+internal partial struct TestAddUint64Method_x /*dyn*/ {
     internal uint64 before;
     internal atomic.Uint64 i;
     internal uint64 after;
@@ -526,7 +526,7 @@ public static void TestAddUint64Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddUintptr_x {
+internal partial struct TestAddUintptr_x /*dyn*/ {
     internal uintptr before;
     internal uintptr i;
     internal uintptr after;
@@ -551,7 +551,7 @@ public static void TestAddUintptr(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAddUintptrMethod_x {
+internal partial struct TestAddUintptrMethod_x /*dyn*/ {
     internal uintptr before;
     internal atomic.Uintptr i;
     internal uintptr after;
@@ -576,7 +576,7 @@ public static void TestAddUintptrMethod(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAndInt32_x {
+internal partial struct TestAndInt32_x /*dyn*/ {
     internal int32 before;
     internal int32 i;
     internal int32 after;
@@ -601,7 +601,7 @@ public static void TestAndInt32(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAndInt32Method_x {
+internal partial struct TestAndInt32Method_x /*dyn*/ {
     internal int32 before;
     internal atomic.Int32 i;
     internal int32 after;
@@ -626,7 +626,7 @@ public static void TestAndInt32Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAndUint32_x {
+internal partial struct TestAndUint32_x /*dyn*/ {
     internal uint32 before;
     internal uint32 i;
     internal uint32 after;
@@ -651,7 +651,7 @@ public static void TestAndUint32(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAndUint32Method_x {
+internal partial struct TestAndUint32Method_x /*dyn*/ {
     internal uint32 before;
     internal atomic.Uint32 i;
     internal uint32 after;
@@ -676,7 +676,7 @@ public static void TestAndUint32Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAndInt64_x {
+internal partial struct TestAndInt64_x /*dyn*/ {
     internal int64 before;
     internal int64 i;
     internal int64 after;
@@ -702,7 +702,7 @@ public static void TestAndInt64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAndInt64Method_x {
+internal partial struct TestAndInt64Method_x /*dyn*/ {
     internal int64 before;
     internal atomic.Int64 i;
     internal int64 after;
@@ -728,7 +728,7 @@ public static void TestAndInt64Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAndUint64_x {
+internal partial struct TestAndUint64_x /*dyn*/ {
     internal uint64 before;
     internal uint64 i;
     internal uint64 after;
@@ -754,7 +754,7 @@ public static void TestAndUint64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAndUint64Method_x {
+internal partial struct TestAndUint64Method_x /*dyn*/ {
     internal uint64 before;
     internal atomic.Uint64 i;
     internal uint64 after;
@@ -780,7 +780,7 @@ public static void TestAndUint64Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAndUintptr_x {
+internal partial struct TestAndUintptr_x /*dyn*/ {
     internal uintptr before;
     internal uintptr i;
     internal uintptr after;
@@ -807,7 +807,7 @@ public static void TestAndUintptr(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestAndUintptrMethod_x {
+internal partial struct TestAndUintptrMethod_x /*dyn*/ {
     internal uintptr before;
     internal atomic.Uintptr i;
     internal uintptr after;
@@ -834,7 +834,7 @@ public static void TestAndUintptrMethod(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestOrInt32_x {
+internal partial struct TestOrInt32_x /*dyn*/ {
     internal int32 before;
     internal int32 i;
     internal int32 after;
@@ -858,7 +858,7 @@ public static void TestOrInt32(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestOrInt32Method_x {
+internal partial struct TestOrInt32Method_x /*dyn*/ {
     internal int32 before;
     internal atomic.Int32 i;
     internal int32 after;
@@ -882,7 +882,7 @@ public static void TestOrInt32Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestOrUint32_x {
+internal partial struct TestOrUint32_x /*dyn*/ {
     internal uint32 before;
     internal uint32 i;
     internal uint32 after;
@@ -906,7 +906,7 @@ public static void TestOrUint32(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestOrUint32Method_x {
+internal partial struct TestOrUint32Method_x /*dyn*/ {
     internal uint32 before;
     internal atomic.Uint32 i;
     internal uint32 after;
@@ -930,7 +930,7 @@ public static void TestOrUint32Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestOrInt64_x {
+internal partial struct TestOrInt64_x /*dyn*/ {
     internal int64 before;
     internal int64 i;
     internal int64 after;
@@ -955,7 +955,7 @@ public static void TestOrInt64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestOrInt64Method_x {
+internal partial struct TestOrInt64Method_x /*dyn*/ {
     internal int64 before;
     internal atomic.Int64 i;
     internal int64 after;
@@ -980,7 +980,7 @@ public static void TestOrInt64Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestOrUint64_x {
+internal partial struct TestOrUint64_x /*dyn*/ {
     internal uint64 before;
     internal uint64 i;
     internal uint64 after;
@@ -1005,7 +1005,7 @@ public static void TestOrUint64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestOrUint64Method_x {
+internal partial struct TestOrUint64Method_x /*dyn*/ {
     internal uint64 before;
     internal atomic.Uint64 i;
     internal uint64 after;
@@ -1030,7 +1030,7 @@ public static void TestOrUint64Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestOrUintptr_x {
+internal partial struct TestOrUintptr_x /*dyn*/ {
     internal uintptr before;
     internal uintptr i;
     internal uintptr after;
@@ -1056,7 +1056,7 @@ public static void TestOrUintptr(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestOrUintptrMethod_x {
+internal partial struct TestOrUintptrMethod_x /*dyn*/ {
     internal uintptr before;
     internal atomic.Uintptr i;
     internal uintptr after;
@@ -1082,7 +1082,7 @@ public static void TestOrUintptrMethod(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCompareAndSwapInt32_x {
+internal partial struct TestCompareAndSwapInt32_x /*dyn*/ {
     internal int32 before;
     internal int32 i;
     internal int32 after;
@@ -1113,7 +1113,7 @@ public static void TestCompareAndSwapInt32(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCompareAndSwapInt32Method_x {
+internal partial struct TestCompareAndSwapInt32Method_x /*dyn*/ {
     internal int32 before;
     internal atomic.Int32 i;
     internal int32 after;
@@ -1144,7 +1144,7 @@ public static void TestCompareAndSwapInt32Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCompareAndSwapUint32_x {
+internal partial struct TestCompareAndSwapUint32_x /*dyn*/ {
     internal uint32 before;
     internal uint32 i;
     internal uint32 after;
@@ -1175,7 +1175,7 @@ public static void TestCompareAndSwapUint32(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCompareAndSwapUint32Method_x {
+internal partial struct TestCompareAndSwapUint32Method_x /*dyn*/ {
     internal uint32 before;
     internal atomic.Uint32 i;
     internal uint32 after;
@@ -1206,7 +1206,7 @@ public static void TestCompareAndSwapUint32Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCompareAndSwapInt64_x {
+internal partial struct TestCompareAndSwapInt64_x /*dyn*/ {
     internal int64 before;
     internal int64 i;
     internal int64 after;
@@ -1238,7 +1238,7 @@ public static void TestCompareAndSwapInt64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCompareAndSwapInt64Method_x {
+internal partial struct TestCompareAndSwapInt64Method_x /*dyn*/ {
     internal int64 before;
     internal atomic.Int64 i;
     internal int64 after;
@@ -1270,7 +1270,7 @@ public static void TestCompareAndSwapInt64Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct testCompareAndSwapUint64_x {
+internal partial struct testCompareAndSwapUint64_x /*dyn*/ {
     internal uint64 before;
     internal uint64 i;
     internal uint64 after;
@@ -1306,7 +1306,7 @@ public static void TestCompareAndSwapUint64(ж<testing.T> Ꮡt) {
     testCompareAndSwapUint64(Ꮡt, CompareAndSwapUint64);
 }
 
-[GoType("dyn")] internal partial struct TestCompareAndSwapUint64Method_x {
+internal partial struct TestCompareAndSwapUint64Method_x /*dyn*/ {
     internal uint64 before;
     internal atomic.Uint64 i;
     internal uint64 after;
@@ -1338,7 +1338,7 @@ public static void TestCompareAndSwapUint64Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCompareAndSwapUintptr_x {
+internal partial struct TestCompareAndSwapUintptr_x /*dyn*/ {
     internal uintptr before;
     internal uintptr i;
     internal uintptr after;
@@ -1371,7 +1371,7 @@ public static void TestCompareAndSwapUintptr(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCompareAndSwapUintptrMethod_x {
+internal partial struct TestCompareAndSwapUintptrMethod_x /*dyn*/ {
     internal uintptr before;
     internal atomic.Uintptr i;
     internal uintptr after;
@@ -1404,7 +1404,7 @@ public static void TestCompareAndSwapUintptrMethod(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCompareAndSwapPointer_x {
+internal partial struct TestCompareAndSwapPointer_x /*dyn*/ {
     internal uintptr before;
     internal @unsafe.Pointer i;
     internal uintptr after;
@@ -1437,7 +1437,7 @@ public static void TestCompareAndSwapPointer(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCompareAndSwapPointerMethod_x {
+internal partial struct TestCompareAndSwapPointerMethod_x /*dyn*/ {
     internal uintptr before;
     internal atomic.Pointer<byte> i;
     internal uintptr after;
@@ -1471,7 +1471,7 @@ public static void TestCompareAndSwapPointerMethod(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestLoadInt32_x {
+internal partial struct TestLoadInt32_x /*dyn*/ {
     internal int32 before;
     internal int32 i;
     internal int32 after;
@@ -1493,7 +1493,7 @@ public static void TestLoadInt32(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestLoadInt32Method_x {
+internal partial struct TestLoadInt32Method_x /*dyn*/ {
     internal int32 before;
     internal atomic.Int32 i;
     internal int32 after;
@@ -1517,7 +1517,7 @@ public static void TestLoadInt32Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestLoadUint32_x {
+internal partial struct TestLoadUint32_x /*dyn*/ {
     internal uint32 before;
     internal uint32 i;
     internal uint32 after;
@@ -1539,7 +1539,7 @@ public static void TestLoadUint32(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestLoadUint32Method_x {
+internal partial struct TestLoadUint32Method_x /*dyn*/ {
     internal uint32 before;
     internal atomic.Uint32 i;
     internal uint32 after;
@@ -1563,7 +1563,7 @@ public static void TestLoadUint32Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestLoadInt64_x {
+internal partial struct TestLoadInt64_x /*dyn*/ {
     internal int64 before;
     internal int64 i;
     internal int64 after;
@@ -1586,7 +1586,7 @@ public static void TestLoadInt64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestLoadInt64Method_x {
+internal partial struct TestLoadInt64Method_x /*dyn*/ {
     internal int64 before;
     internal atomic.Int64 i;
     internal int64 after;
@@ -1611,7 +1611,7 @@ public static void TestLoadInt64Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestLoadUint64_x {
+internal partial struct TestLoadUint64_x /*dyn*/ {
     internal uint64 before;
     internal uint64 i;
     internal uint64 after;
@@ -1634,7 +1634,7 @@ public static void TestLoadUint64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestLoadUint64Method_x {
+internal partial struct TestLoadUint64Method_x /*dyn*/ {
     internal uint64 before;
     internal atomic.Uint64 i;
     internal uint64 after;
@@ -1659,7 +1659,7 @@ public static void TestLoadUint64Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestLoadUintptr_x {
+internal partial struct TestLoadUintptr_x /*dyn*/ {
     internal uintptr before;
     internal uintptr i;
     internal uintptr after;
@@ -1683,7 +1683,7 @@ public static void TestLoadUintptr(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestLoadUintptrMethod_x {
+internal partial struct TestLoadUintptrMethod_x /*dyn*/ {
     internal uintptr before;
     internal atomic.Uintptr i;
     internal uintptr after;
@@ -1709,7 +1709,7 @@ public static void TestLoadUintptrMethod(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestLoadPointer_x {
+internal partial struct TestLoadPointer_x /*dyn*/ {
     internal uintptr before;
     internal @unsafe.Pointer i;
     internal uintptr after;
@@ -1733,7 +1733,7 @@ public static void TestLoadPointer(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestLoadPointerMethod_x {
+internal partial struct TestLoadPointerMethod_x /*dyn*/ {
     internal uintptr before;
     internal atomic.Pointer<byte> i;
     internal uintptr after;
@@ -1758,7 +1758,7 @@ public static void TestLoadPointerMethod(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStoreInt32_x {
+internal partial struct TestStoreInt32_x /*dyn*/ {
     internal int32 before;
     internal int32 i;
     internal int32 after;
@@ -1781,7 +1781,7 @@ public static void TestStoreInt32(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStoreInt32Method_x {
+internal partial struct TestStoreInt32Method_x /*dyn*/ {
     internal int32 before;
     internal atomic.Int32 i;
     internal int32 after;
@@ -1804,7 +1804,7 @@ public static void TestStoreInt32Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStoreUint32_x {
+internal partial struct TestStoreUint32_x /*dyn*/ {
     internal uint32 before;
     internal uint32 i;
     internal uint32 after;
@@ -1827,7 +1827,7 @@ public static void TestStoreUint32(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStoreUint32Method_x {
+internal partial struct TestStoreUint32Method_x /*dyn*/ {
     internal uint32 before;
     internal atomic.Uint32 i;
     internal uint32 after;
@@ -1850,7 +1850,7 @@ public static void TestStoreUint32Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStoreInt64_x {
+internal partial struct TestStoreInt64_x /*dyn*/ {
     internal int64 before;
     internal int64 i;
     internal int64 after;
@@ -1874,7 +1874,7 @@ public static void TestStoreInt64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStoreInt64Method_x {
+internal partial struct TestStoreInt64Method_x /*dyn*/ {
     internal int64 before;
     internal atomic.Int64 i;
     internal int64 after;
@@ -1898,7 +1898,7 @@ public static void TestStoreInt64Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStoreUint64_x {
+internal partial struct TestStoreUint64_x /*dyn*/ {
     internal uint64 before;
     internal uint64 i;
     internal uint64 after;
@@ -1922,7 +1922,7 @@ public static void TestStoreUint64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStoreUint64Method_x {
+internal partial struct TestStoreUint64Method_x /*dyn*/ {
     internal uint64 before;
     internal atomic.Uint64 i;
     internal uint64 after;
@@ -1946,7 +1946,7 @@ public static void TestStoreUint64Method(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStoreUintptr_x {
+internal partial struct TestStoreUintptr_x /*dyn*/ {
     internal uintptr before;
     internal uintptr i;
     internal uintptr after;
@@ -1971,7 +1971,7 @@ public static void TestStoreUintptr(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStoreUintptrMethod_x {
+internal partial struct TestStoreUintptrMethod_x /*dyn*/ {
     internal uintptr before;
     internal atomic.Uintptr i;
     internal uintptr after;
@@ -1996,7 +1996,7 @@ public static void TestStoreUintptrMethod(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStorePointer_x {
+internal partial struct TestStorePointer_x /*dyn*/ {
     internal uintptr before;
     internal @unsafe.Pointer i;
     internal uintptr after;
@@ -2019,7 +2019,7 @@ public static void TestStorePointer(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestStorePointerMethod_x {
+internal partial struct TestStorePointerMethod_x /*dyn*/ {
     internal uintptr before;
     internal atomic.Pointer<byte> i;
     internal uintptr after;
@@ -3002,7 +3002,7 @@ public static partial void TestStoreLoadSeqCst64(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestStoreLoadRelAcq32_Data {
+internal partial struct TestStoreLoadRelAcq32_Data /*dyn*/ {
     internal int32 signal;
     internal array<int8> pad1 = new(128);
     internal int32 data1;
@@ -3055,7 +3055,7 @@ public static partial void TestStoreLoadRelAcq32(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestStoreLoadRelAcq64_Data {
+internal partial struct TestStoreLoadRelAcq64_Data /*dyn*/ {
     internal int64 signal;
     internal array<int8> pad1 = new(128);
     internal int64 data1;
@@ -3187,12 +3187,12 @@ public static void TestUnaligned64(ж<testing.T> Ꮡt) {
     });
 }
 
-[GoType("dyn")] internal partial struct TestAutoAligned64_signed {
+internal partial struct TestAutoAligned64_signed /*dyn*/ {
     internal uint32 _;
     internal atomic.Int64 i;
 }
 
-[GoType("dyn")] internal partial struct TestAutoAligned64_unsigned {
+internal partial struct TestAutoAligned64_unsigned /*dyn*/ {
     internal uint32 _;
     internal atomic.Uint64 i;
 }
@@ -3418,7 +3418,7 @@ public static void TestNilDeref(ж<testing.T> Ꮡt) {
 
 // Test that this compiles.
 // When atomic.Pointer used _ [0]T, it did not.
-[GoType] partial struct List {
+partial struct List {
     public atomic.Pointer<List> Next;
 }
 

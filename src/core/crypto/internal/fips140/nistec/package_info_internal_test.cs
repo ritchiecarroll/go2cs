@@ -29,7 +29,7 @@ using static go.crypto.@internal.fips140.nistec_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/nistec/p256_table_test.go", "p256_table_test.cs", "AA8ggoSSkpaCyqKChIKWgoKChIQ=", "20-22:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/nistec/p256_table_test.go", "p256_table_test.cs", "AA8ggoSSkpaCyqKChIKWgoKChIQ=", "20-22:1", "", "42=Bytes/3/4/1,Bytes/4/4/1,Equal/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -38,7 +38,7 @@ namespace go.crypto.@internal.fips140;
 public static partial class nistec_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

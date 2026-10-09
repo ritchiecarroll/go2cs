@@ -29,7 +29,7 @@ using static go.archive.zip_package;
 
 partial class zip_internal_test_package {
 
-[GoType] public partial struct ZipTest {
+public partial struct ZipTest {
     public @string Name;
     public Func<(io.ReaderAt r, int64 size)> Source;  // if non-nil, used instead of testdata/<Name> file
     public @string Comment;
@@ -38,7 +38,7 @@ partial class zip_internal_test_package {
     public error Error; // the error that Opening this file should return
 }
 
-[GoType] public partial struct ZipTestFile {
+public partial struct ZipTestFile {
     public @string Name;
     public fs.FileMode Mode;
     public bool NonUTF8;
@@ -1204,7 +1204,7 @@ public static void TestIssue12449(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFS_type {
+internal partial struct TestFS_type /*dyn*/ {
     internal @string @file;
     internal slice<@string> want;
 }
@@ -1249,7 +1249,7 @@ public static void TestFS(ж<testing.T> Ꮡt) {
 internal static readonly object succeededButWantErrorˢ = (@string)"succeeded but want error"u8;
 internal static readonly object unexpectedErrorˢ = (@string)"unexpected error"u8;
 
-[GoType("dyn")] internal partial struct TestFSWalk_type {
+internal partial struct TestFSWalk_type /*dyn*/ {
     internal @string @file;
     internal slice<@string> want;
     internal bool wantErr;
@@ -1312,7 +1312,7 @@ public static void TestFSWalk(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testdataSubdirZipˢ = "testdata/subdir.zip"u8;
 
-[GoType("dyn")] internal partial struct TestFSModTime_type {
+internal partial struct TestFSModTime_type /*dyn*/ {
     internal @string name;
     internal time.Time want;
 }

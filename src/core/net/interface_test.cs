@@ -179,7 +179,7 @@ public static void TestInterfaceMulticastAddrs(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct ifStats {
+internal partial struct ifStats {
     internal nint loop; // # of active loopback interfaces
     internal nint other; // # of active other interfaces
 }
@@ -198,7 +198,7 @@ internal static ж<ifStats> interfaceStats(slice<global::go.net_package.Interfac
     return Ꮡstats;
 }
 
-[GoType] internal partial struct routeStats {
+internal partial struct routeStats {
     internal nint ipv4, ipv6; // # of active connected unicast, anycast or multicast routes
 }
 

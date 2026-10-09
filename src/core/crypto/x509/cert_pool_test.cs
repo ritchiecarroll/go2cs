@@ -8,7 +8,7 @@ using static go.crypto.x509_package;
 
 partial class x509_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestCertPoolEqual_tests {
+internal partial struct TestCertPoolEqual_tests /*dyn*/ {
     internal @string name;
     internal ж<global::go.crypto.x509_package.CertPool> a;
     internal ж<global::go.crypto.x509_package.CertPool> b;

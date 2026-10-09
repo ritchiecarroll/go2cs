@@ -23,7 +23,7 @@ public static void TestConstants(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestRuneLen_type {
+internal partial struct TestRuneLen_type /*dyn*/ {
     internal rune r;
     internal nint length;
 }
@@ -47,7 +47,7 @@ public static void TestRuneLen(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct encodeTest {
+partial struct encodeTest {
     internal slice<rune> @in;
     internal slice<uint16> @out;
 }
@@ -118,7 +118,7 @@ public static void TestEncodeRune(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct decodeTest {
+partial struct decodeTest {
     internal slice<uint16> @in;
     internal slice<rune> @out;
 }
@@ -161,7 +161,7 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
 
 // illegal, replacement rune substituted
 
-[GoType("dyn")] partial struct decodeRuneTestsᴛ1 {
+partial struct decodeRuneTestsᴛ1 /*dyn*/ {
     internal rune r1, r2;
     internal rune want;
 }
@@ -195,7 +195,7 @@ public static void TestDecodeRune(ж<testing.T> Ꮡt) {
 // surr3
 // surr3-1
 
-[GoType("dyn")] partial struct surrogateTestsᴛ1 {
+partial struct surrogateTestsᴛ1 /*dyn*/ {
     internal rune r;
     internal bool want;
 }

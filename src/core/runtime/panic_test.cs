@@ -9,7 +9,7 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-[GoType("dyn")] internal partial struct TestPanicWithDirectlyPrintableCustomTypes_tests {
+internal partial struct TestPanicWithDirectlyPrintableCustomTypes_tests /*dyn*/ {
     internal @string name;
     internal @string wantPanicPrefix;
 }

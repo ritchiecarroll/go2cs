@@ -9,7 +9,7 @@ using Δunicode = unicode_package;
 
 partial class unicode_test_package {
 
-[GoType] partial struct T {
+partial struct T {
     internal rune rune;
     internal @string script;
 }

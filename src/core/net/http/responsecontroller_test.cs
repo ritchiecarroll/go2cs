@@ -358,8 +358,8 @@ internal static void testResponseControllerSetFutureReadDeadline(ж<testing.T> �
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct wrapWriter {
-    [GoEmbedded] public global::go.net.http_package.ResponseWriter ResponseWriter;
+partial struct wrapWriter {
+    /*embed*/ public global::go.net.http_package.ResponseWriter ResponseWriter;
 }
 
 internal static Δhttp.ResponseWriter Unwrap(this wrapWriter w) {

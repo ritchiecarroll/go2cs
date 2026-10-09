@@ -14,7 +14,7 @@ using static go.encoding.gob_package;
 
 partial class gob_internal_test_package {
 
-[GoType] internal partial struct typeT {
+internal partial struct typeT {
     internal global::go.encoding.gob_package.typeId id;
     internal @string str;
 }
@@ -154,12 +154,12 @@ public static void TestMapType(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct Bar {
+public partial struct Bar {
     public @string X;
 }
 
 // This structure has pointers and refers to itself, making it a good test case.
-[GoType] public partial struct Foo {
+public partial struct Foo {
     public nint A;
     public int32 B; // will become int
     public @string C;
@@ -185,7 +185,7 @@ public static void TestStructType(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("T")] internal partial struct TestRegistration_T {
+internal partial struct TestRegistration_T /*dyn*/ {
     internal nint a;
 }
 
@@ -196,13 +196,13 @@ public static void TestRegistration(ж<testing.T> Ꮡt) {
     Register(@new<TestRegistration_T>());
 }
 
-[GoType] public partial struct N1 {
+public partial struct N1 {
 }
 
-[GoType] public partial struct N2 {
+public partial struct N2 {
 }
 
-[GoType("dyn")] internal partial struct TestRegistrationNaming_testCases {
+internal partial struct TestRegistrationNaming_testCases /*dyn*/ {
     internal any t;
     internal @string name;
 }
@@ -234,7 +234,7 @@ public static void TestRegistrationNaming(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("T2")] internal partial struct TestStressParallel_T2 {
+internal partial struct TestStressParallel_T2 /*dyn*/ {
     public nint A;
 }
 

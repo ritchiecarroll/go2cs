@@ -20,41 +20,41 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class fmt_test_package {
 
-[GoType("bool")] partial struct renamedBool;
+partial struct renamedBool /*bool*/;
 
-[GoType("num:nint")] partial struct renamedInt;
+partial struct renamedInt /*num:nint*/;
 
-[GoType("num:int8")] partial struct renamedInt8;
+partial struct renamedInt8 /*num:int8*/;
 
-[GoType("num:int16")] partial struct renamedInt16;
+partial struct renamedInt16 /*num:int16*/;
 
-[GoType("num:int32")] partial struct renamedInt32;
+partial struct renamedInt32 /*num:int32*/;
 
-[GoType("num:int64")] partial struct renamedInt64;
+partial struct renamedInt64 /*num:int64*/;
 
-[GoType("num:nuint")] partial struct renamedUint;
+partial struct renamedUint /*num:nuint*/;
 
-[GoType("num:uint8")] partial struct renamedUint8;
+partial struct renamedUint8 /*num:uint8*/;
 
-[GoType("num:uint16")] partial struct renamedUint16;
+partial struct renamedUint16 /*num:uint16*/;
 
-[GoType("num:uint32")] partial struct renamedUint32;
+partial struct renamedUint32 /*num:uint32*/;
 
-[GoType("num:uint64")] partial struct renamedUint64;
+partial struct renamedUint64 /*num:uint64*/;
 
-[GoType("num:uintptr")] partial struct renamedUintptr;
+partial struct renamedUintptr /*num:uintptr*/;
 
-[GoType("@string")] partial struct renamedString;
+partial struct renamedString /*@string*/;
 
-[GoType("[]byte")] partial struct renamedBytes;
+partial struct renamedBytes /*[]byte*/;
 
-[GoType("num:float32")] partial struct renamedFloat32;
+partial struct renamedFloat32 /*num:float32*/;
 
-[GoType("num:float64")] partial struct renamedFloat64;
+partial struct renamedFloat64 /*num:float64*/;
 
-[GoType("num:complex64")] partial struct renamedComplex64;
+partial struct renamedComplex64 /*num:complex64*/;
 
-[GoType("num:complex128")] partial struct renamedComplex128;
+partial struct renamedComplex128 /*num:complex128*/;
 
 public static void TestFmtInterface(ж<Δtesting.T> Ꮡt) {
     any i1 = default!;
@@ -79,51 +79,51 @@ internal static ref slice<nint> Δslice => ref ᏑΔslice.ValueSlot;
 internal static ж<slice<any>> Ꮡislice = new StandardBox<slice<any>>(iarray[..]);
 internal static ref slice<any> islice => ref Ꮡislice.ValueSlot;
 
-[GoType] partial struct A {
+partial struct A {
     internal nint i;
     internal nuint j;
     internal @string s;
     internal slice<nint> x;
 }
 
-[GoType("num:nint")] partial struct I;
+partial struct I /*num:nint*/;
 
 public static @string String(this I i) {
     return Sprintf("<%d>"u8, (nint)i);
 }
 
-[GoType] partial struct B {
+partial struct B {
     public I I;
     internal nint j;
 }
 
-[GoType] partial struct C {
+partial struct C {
     internal nint i;
     public partial ref B B { get; }
 }
 
-[GoType("num:nint")] partial struct F;
+partial struct F /*num:nint*/;
 
 public static void Format(this F f, fmt.State s, rune c) {
     Fprintf(new fmt_test_package.fmt_StateᴠWriter(s), "<%c=F(%d)>"u8, c, (nint)f);
 }
 
-[GoType("num:nint")] partial struct G;
+partial struct G /*num:nint*/;
 
 public static @string GoString(this G g) {
     return Sprintf("GoString(%d)"u8, (nint)g);
 }
 
-[GoType] partial struct S {
+partial struct S {
     public F F; // a struct field that Formats
     public G G; // a struct field that GoStrings
 }
 
-[GoType] partial struct SI {
+partial struct SI {
     public any I;
 }
 
-[GoType("num:nint")] partial struct P;
+partial struct P /*num:nint*/;
 
 internal static ж<P> ᏑpValue = new StandardBox<P>(default(P));
 internal static ref P pValue => ref ᏑpValue.Value;
@@ -131,7 +131,7 @@ internal static ref P pValue => ref ᏑpValue.Value;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string stringPˢ = "String(p)"u8;
 
-[GoRecv] public static @string String(this ref P p) {
+public static @string String(this ref P p) {
     return stringPˢ;
 }
 
@@ -144,7 +144,7 @@ public static @string String(this Fn fn) {
 internal static Fn fnValue;
 
 // U is a type with two unexported function fields.
-[GoType] partial struct U {
+partial struct U {
     internal Func<@string> u;
     internal Fn fn;
 }
@@ -155,7 +155,7 @@ internal static ref array<renamedUint8> barray => ref Ꮡbarray.Value;
 internal static ж<slice<renamedUint8>> Ꮡbslice = new StandardBox<slice<renamedUint8>>(barray[..]);
 internal static ref slice<renamedUint8> bslice => ref Ꮡbslice.ValueSlot;
 
-[GoType("num:byte")] partial struct byteStringer;
+partial struct byteStringer /*num:byte*/;
 
 internal static @string String(this byteStringer _) {
     return "X"u8;
@@ -163,7 +163,7 @@ internal static @string String(this byteStringer _) {
 
 internal static slice<byteStringer> byteStringerSlice = new byteStringer[]{(rune)'h', (rune)'e', (rune)'l', (rune)'l', (rune)'o'}.slice();
 
-[GoType("num:byte")] partial struct byteFormatter;
+partial struct byteFormatter /*num:byte*/;
 
 internal static void Format(this byteFormatter _Δp0, fmt.State f, rune _Δp2) {
     Fprint(new fmt_test_package.fmt_StateᴠWriter(f), (@string)"X"u8);
@@ -171,7 +171,7 @@ internal static void Format(this byteFormatter _Δp0, fmt.State f, rune _Δp2) {
 
 internal static slice<byteFormatter> byteFormatterSlice = new byteFormatter[]{(rune)'h', (rune)'e', (rune)'l', (rune)'l', (rune)'o'}.slice();
 
-[GoType("@string")] partial struct writeStringFormatter;
+partial struct writeStringFormatter /*@string*/;
 
 internal static void Format(this writeStringFormatter sf, fmt.State f, rune c) {
     {
@@ -340,7 +340,7 @@ internal static void Format(this writeStringFormatter sf, fmt.State f, rune c) {
 // invalid reflect.Value doesn't crash.
 // Tests to check that not supported verbs generate an error string.
 
-[GoType("dyn")] partial struct fmtTestsᴛ1 {
+partial struct fmtTestsᴛ1 /*dyn*/ {
     internal @string fmt;
     internal any val;
     internal @string @out;
@@ -1283,7 +1283,7 @@ public static void TestComplexFormatting(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("[]any")] partial struct SE; // slice of empty; notational compactness.
+partial struct SE /*[]any*/; // slice of empty; notational compactness.
 
 // Explicit version of next line.
 // Explicit version of next line.
@@ -1294,7 +1294,7 @@ public static void TestComplexFormatting(ж<Δtesting.T> Ꮡt) {
 // Issue 10675
 // TODO: Should this set return better error messages?
 
-[GoType("dyn")] partial struct reorderTestsᴛ1 {
+partial struct reorderTestsᴛ1 /*dyn*/ {
     internal @string fmt;
     internal SE val;
     internal @string @out;
@@ -1554,13 +1554,13 @@ internal static ж<nint> mallocPointer; // A pointer so we know the interface va
 // large buffer (>64KB)
 // If the interface value doesn't need to allocate, amortized allocation overhead should be zero.
 
-[GoType("dyn")] partial struct mallocTestᴛ1 {
+partial struct mallocTestᴛ1 /*dyn*/ {
     internal nint count;
     internal @string desc;
     internal Action fn;
 }
 
-[GoType("dyn")] internal partial struct mallocTest_P {
+internal partial struct mallocTest_P /*dyn*/ {
     internal nint x, y;
 }
 internal static slice<mallocTestᴛ1> mallocTest = new mallocTestᴛ1[]{
@@ -1651,7 +1651,7 @@ public static void TestCountMallocs(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct flagPrinter {
+partial struct flagPrinter {
 }
 
 internal static void Format(this flagPrinter _, fmt.State f, rune c) {
@@ -1676,7 +1676,7 @@ internal static void Format(this flagPrinter _, fmt.State f, rune c) {
 }
 
 
-[GoType("dyn")] partial struct flagtestsᴛ1 {
+partial struct flagtestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string @out;
 }
@@ -1710,13 +1710,13 @@ public static void TestFlagParser(ж<Δtesting.T> Ꮡt) {
 internal static readonly @string abcˢ = "abc"u8;
 internal static readonly @string defˢ = "def"u8;
 
-[GoType("dyn")] internal partial struct TestStructPrinter_T {
+internal partial struct TestStructPrinter_T /*dyn*/ {
     internal @string a;
     internal @string b;
     internal nint c;
 }
 
-[GoType("dyn")] internal partial struct TestStructPrinter_type {
+internal partial struct TestStructPrinter_type /*dyn*/ {
     internal @string fmt;
     internal @string @out;
 }
@@ -1869,7 +1869,7 @@ internal static slice<any> args(params ꓸꓸꓸany aʗp) {
 // Huge negative (-inf).
 // Small negative (-1).
 
-[GoType("dyn")] partial struct startestsᴛ1 {
+partial struct startestsᴛ1 /*dyn*/ {
     internal @string fmt;
     internal slice<any> @in;
     internal @string @out;
@@ -1910,7 +1910,7 @@ public static void TestWidthAndPrecision(ж<Δtesting.T> Ꮡt) {
 }
 
 // PanicS is a type that panics in String.
-[GoType] partial struct PanicS {
+partial struct PanicS {
     internal any message;
 }
 
@@ -1920,7 +1920,7 @@ public static @string String(this PanicS p) {
 }
 
 // PanicGo is a type that panics in GoString.
-[GoType] partial struct PanicGo {
+partial struct PanicGo {
     internal any message;
 }
 
@@ -1930,7 +1930,7 @@ public static @string GoString(this PanicGo p) {
 }
 
 // PanicF is a type that panics in Format.
-[GoType] partial struct PanicF {
+partial struct PanicF {
     internal any message;
 }
 
@@ -1947,7 +1947,7 @@ public static void Format(this PanicF p, fmt.State f, rune c) {
 // Format
 // nil pointer special case
 
-[GoType("dyn")] partial struct panictestsᴛ1 {
+partial struct panictestsᴛ1 /*dyn*/ {
     internal @string fmt;
     internal any @in;
     internal @string @out;
@@ -1977,7 +1977,7 @@ public static void TestPanics(ж<Δtesting.T> Ꮡt) {
 // recurCount tests that erroneous String routine doesn't cause fatal recursion.
 internal static nint recurCount = 0;
 
-[GoType] partial struct Recur {
+partial struct Recur {
     internal nint i;
     internal ж<bool> failed;
 }
@@ -2038,10 +2038,10 @@ internal static @string hideFromVet(@string s) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string sSSSSˢ = "%s %s %s %s %s"u8;
 
-[GoType("dyn")] internal partial struct TestNilDoesNotBecomeTyped_A {
+internal partial struct TestNilDoesNotBecomeTyped_A /*dyn*/ {
 }
 
-[GoType("dyn")] internal partial struct TestNilDoesNotBecomeTyped_B {
+internal partial struct TestNilDoesNotBecomeTyped_B /*dyn*/ {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
@@ -2064,7 +2064,7 @@ public static void TestNilDoesNotBecomeTyped(ж<Δtesting.T> Ꮡt) {
 // simple values with the 'v' verb
 // composite values with the 'v' verb.
 
-[GoType("dyn")] partial struct formatterFlagTestsᴛ1 {
+partial struct formatterFlagTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal any val;
     internal @string @out;
@@ -2133,7 +2133,7 @@ public static void TestFormatterFlags(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestParsenum_testCases {
+internal partial struct TestParsenum_testCases /*dyn*/ {
     internal @string s;
     internal nint start, end;
     internal nint num;

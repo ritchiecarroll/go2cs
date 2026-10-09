@@ -20,26 +20,23 @@ using static global::go.net.rpc.jsonrpc_package;
 
 partial class jsonrpc_internal_test_package {
 
-[GoType] public partial struct Args {
+public partial struct Args {
     public nint A, B;
 }
 
-[GoType] public partial struct Reply {
+public partial struct Reply {
     public nint C;
 }
 
-[GoType("num:nint")] public partial struct Arith;
+public partial struct Arith /*num:nint*/;
 
-[GoType] public partial struct ArithAddResp {
-    [GoTag(@"json:""id""")]
-    public any Id;
-    [GoTag(@"json:""result""")]
-    public Reply Result;
-    [GoTag(@"json:""error""")]
-    public any Error;
+public partial struct ArithAddResp {
+    public any Id; /*`json:"id"`*/
+    public Reply Result; /*`json:"result"`*/
+    public any Error; /*`json:"error"`*/
 }
 
-[GoRecv] public static error Add(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
+public static error Add(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
     ref var args = ref Ꮡargs.DerefOrNull();
     ref var reply = ref Ꮡreply.DerefOrNull();
 
@@ -47,7 +44,7 @@ partial class jsonrpc_internal_test_package {
     return default!;
 }
 
-[GoRecv] public static error Mul(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
+public static error Mul(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
     ref var args = ref Ꮡargs.DerefOrNull();
     ref var reply = ref Ꮡreply.DerefOrNull();
 
@@ -58,7 +55,7 @@ partial class jsonrpc_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string divideByZeroˢ = "divide by zero"u8;
 
-[GoRecv] public static error Div(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
+public static error Div(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
     ref var args = ref Ꮡargs.DerefOrNull();
     ref var reply = ref Ꮡreply.DerefOrNull();
 
@@ -69,11 +66,11 @@ internal static readonly @string divideByZeroˢ = "divide by zero"u8;
     return default!;
 }
 
-[GoRecv] public static error Error(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
+public static error Error(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
     throw panic("ERROR");
 }
 
-[GoType] public partial struct BuiltinTypes {
+public partial struct BuiltinTypes {
 }
 
 public static error Map(this BuiltinTypes _, nint i, ж<map<nint, nint>> Ꮡreply) {
@@ -90,7 +87,7 @@ public static error Slice(this BuiltinTypes _, nint i, ж<slice<nint>> Ꮡreply)
     return default!;
 }
 
-public static error Array(this BuiltinTypes _, nint i, [GoArrayDims(1)] ж<array<nint>> Ꮡreply) {
+public static error Array(this BuiltinTypes _, nint i, /*[1]*/ ж<array<nint>> Ꮡreply) {
     ref var reply = ref Ꮡreply.DerefOrNull();
 
     (reply)[0] = i;
@@ -338,10 +335,10 @@ public static partial void TestMalformedOutput(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string methodArithAddId123ˢ = @"{""method"": ""Arith.Add"", ""id"": ""123"", ""params"": []}"u8;
 
-[GoType("dyn")] internal partial struct TestServerErrorHasNullResult_conn {
-    [GoEmbedded] public io_package.Reader Reader;
-    [GoEmbedded] public io_package.Writer Writer;
-    [GoEmbedded] public io_package.Closer Closer;
+internal partial struct TestServerErrorHasNullResult_conn /*dyn*/ {
+    /*embed*/ public io_package.Reader Reader;
+    /*embed*/ public io_package.Writer Writer;
+    /*embed*/ public io_package.Closer Closer;
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
@@ -400,12 +397,12 @@ internal static (ж<pipe>, ж<pipe>) myPipe() {
     return (Ꮡ(new pipe(r1, w2)), Ꮡ(new pipe(r2, w1)));
 }
 
-[GoType] internal partial struct pipe {
+internal partial struct pipe {
     public partial ref ж<io_package.PipeReader> PipeReader { get; }
     public partial ref ж<io_package.PipeWriter> PipeWriter { get; }
 }
 
-[GoType("num:nint")] internal partial struct pipeAddr;
+internal partial struct pipeAddr /*num:nint*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string pipeˢ = "pipe"u8;
@@ -418,7 +415,7 @@ internal static @string String(this pipeAddr _) {
     return pipeˢ;
 }
 
-[GoRecv] internal static error Close(this ref pipe p) {
+internal static error Close(this ref pipe p) {
     var err = p.PipeReader.Close();
     var err1 = p.PipeWriter.Close();
     if (err == default!) {
@@ -427,26 +424,26 @@ internal static @string String(this pipeAddr _) {
     return err;
 }
 
-[GoRecv] internal static netꓸAddr LocalAddr(this ref pipe p) {
+internal static netꓸAddr LocalAddr(this ref pipe p) {
     return ((pipeAddr)0);
 }
 
-[GoRecv] internal static netꓸAddr RemoteAddr(this ref pipe p) {
+internal static netꓸAddr RemoteAddr(this ref pipe p) {
     return ((pipeAddr)0);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string netPipeDoesNotSupportˢ = "net.Pipe does not support timeouts"u8;
 
-[GoRecv] internal static error SetTimeout(this ref pipe p, int64 nsec) {
+internal static error SetTimeout(this ref pipe p, int64 nsec) {
     return errors.New(netPipeDoesNotSupportˢ);
 }
 
-[GoRecv] internal static error SetReadTimeout(this ref pipe p, int64 nsec) {
+internal static error SetReadTimeout(this ref pipe p, int64 nsec) {
     return errors.New(netPipeDoesNotSupportˢ);
 }
 
-[GoRecv] internal static error SetWriteTimeout(this ref pipe p, int64 nsec) {
+internal static error SetWriteTimeout(this ref pipe p, int64 nsec) {
     return errors.New(netPipeDoesNotSupportˢ);
 }
 

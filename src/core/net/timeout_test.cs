@@ -37,7 +37,7 @@ partial class net_internal_test_package {
 // timeout over deadline
 // timeout over deadline
 
-[GoType("dyn")] partial struct dialTimeoutTestsᴛ1 {
+partial struct dialTimeoutTestsᴛ1 /*dyn*/ {
     internal time.Duration initialTimeout;
     internal time.Duration initialDelta; // for deadline
 }
@@ -147,7 +147,7 @@ public static void TestDialTimeout(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestDialTimeoutMaxDuration_type {
+internal partial struct TestDialTimeoutMaxDuration_type /*dyn*/ {
     internal time.Duration timeout;
     internal time.Duration delta; // for deadline
 }
@@ -394,7 +394,7 @@ public static partial void TestAcceptTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
 // Tests that read deadlines work, even if there's data ready
 // to be read.
 
-[GoType("dyn")] [GoValueClone("xerrs")] partial struct readTimeoutTestsᴛ1 {
+partial struct readTimeoutTestsᴛ1 /*dyn*/ {
     internal time.Duration timeout;
     internal array<error> xerrs = new(2); // expected errors in transition
 }

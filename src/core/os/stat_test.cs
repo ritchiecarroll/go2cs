@@ -17,7 +17,7 @@ using static go.os_internal_test_package;
 
 partial class os_test_package {
 
-[GoType] partial struct testStatAndLstatParams {
+partial struct testStatAndLstatParams {
     internal bool isLink;
     internal Action<ж<Δtesting.T>, @string, fs.FileInfo> statCheck;
     internal Action<ж<Δtesting.T>, @string, fs.FileInfo> lstatCheck;

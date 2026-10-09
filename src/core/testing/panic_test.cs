@@ -28,7 +28,7 @@ internal static ж<@string> testPanicCleanupPanic = flag.String("test_panic_clea
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string testRunTestPanicHelperˢ = "-test.run=^TestPanicHelper$"u8;
 
-[GoType("dyn")] internal partial struct TestPanic_testCases {
+internal partial struct TestPanic_testCases /*dyn*/ {
     internal @string desc;
     internal slice<@string> flags;
     internal @string want;
@@ -255,7 +255,7 @@ public static void TestPanicHelper(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestMorePanic_testCases {
+internal partial struct TestMorePanic_testCases /*dyn*/ {
     internal @string desc;
     internal slice<@string> flags;
     internal @string want;

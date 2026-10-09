@@ -30,7 +30,7 @@ internal static array<byte> padding255Bad = new byte[]{}.array(256);
 internal static array<byte> padding255Good = new byte[]{255}.array(256);
 
 
-[GoType("dyn")] partial struct paddingTestsᴛ1 {
+partial struct paddingTestsᴛ1 /*dyn*/ {
     internal slice<byte> @in;
     internal bool good;
     internal nint expectedLen;
@@ -286,8 +286,8 @@ public static void TestDynamicRecordSizingWithTLSv13(ж<testing.T> Ꮡt) {
 
 // hairpinConn is a net.Conn that makes a “hairpin” call when closed, back into
 // the tls.Conn which is calling it.
-[GoType] internal partial struct hairpinConn {
-    [GoEmbedded] public net_package.Conn Conn;
+internal partial struct hairpinConn {
+    /*embed*/ public net_package.Conn Conn;
     internal ж<global::go.crypto.tls_package.Conn> tlsConn;
 }
 
@@ -319,7 +319,7 @@ internal static error SetWriteDeadline(this hairpinConn recvᴛ, time.Time t) =>
 // interface field in *hairpinConn's method set; see the pointer-only satisfaction record.
 internal static (nint, error) Write(this hairpinConn recvᴛ, slice<byte> b) => recvᴛ.Conn.Write(b);
 
-[GoRecv] internal static error Close(this ref hairpinConn conn) {
+internal static error Close(this ref hairpinConn conn) {
     conn.tlsConn.ConnectionState();
     return default!;
 }

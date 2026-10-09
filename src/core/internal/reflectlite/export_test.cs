@@ -38,13 +38,13 @@ public static any /*i*/ ToInterface(global::go.@internal.reflectlite_package.Val
     return valueInterface(v);
 }
 
-[GoType] public partial struct EmbedWithUnexpMeth {
+public partial struct EmbedWithUnexpMeth {
 }
 
 internal static void f(this EmbedWithUnexpMeth _) {
 }
 
-[GoType] internal partial interface pinUnexpMeth {
+internal partial interface pinUnexpMeth {
     void f();
 }
 
@@ -64,7 +64,7 @@ public static ж<byte> FirstMethodNameBytes(global::go.@internal.reflectlite_pac
     return mname.Bytes;
 }
 
-[GoType] public partial struct Buffer {
+public partial struct Buffer {
     internal slice<byte> buf;
 }
 

@@ -29,7 +29,7 @@ public static void TestFloatSqrt64(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatSqrt_type {
+internal partial struct TestFloatSqrt_type /*dyn*/ {
     internal @string x;
     internal @string want;
 }
@@ -87,7 +87,7 @@ public static void TestFloatSqrt(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFloatSqrtSpecial_type {
+internal partial struct TestFloatSqrtSpecial_type /*dyn*/ {
     internal ж<global::go.math.big_package.Float> x;
     internal ж<global::go.math.big_package.Float> want;
 }

@@ -112,9 +112,9 @@ public static void TestCloneNil(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoLocalName("M1")] [GoType("map[nint, bool]")] internal partial struct TestCopy_M1;
+internal partial struct TestCopy_M1 /*map[nint, bool]*/;
 
-[GoLocalName("M2")] [GoType("map[nint, bool]")] internal partial struct TestCopy_M2;
+internal partial struct TestCopy_M2 /*map[nint, bool]*/;
 
 public static void TestCopy(ж<testing.T> Ꮡt) {
     var mc = Clone<map<nint, nint>, nint, nint>(m1);
@@ -194,9 +194,9 @@ public static void TestCloneWithMapAssign(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoLocalName("K")] [GoType("[17]float64")] internal partial struct TestCloneLarge_K; // > 128 bytes
+internal partial struct TestCloneLarge_K /*[17]float64*/; // > 128 bytes
 
-[GoLocalName("V")] [GoType("[17]float64")] internal partial struct TestCloneLarge_V;
+internal partial struct TestCloneLarge_V /*[17]float64*/;
 
 public static void TestCloneLarge(ж<testing.T> Ꮡt) {
     float64 zero = default!;

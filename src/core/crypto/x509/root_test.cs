@@ -33,7 +33,7 @@ internal static readonly @string x509usefallbackroots0ˢ = "x509usefallbackroots
 internal static readonly object systemRootsWasNotSetToˢ = (@string)"systemRoots was not set to fallback pool"u8;
 internal static readonly object systemRootsWasSetToˢ = (@string)"systemRoots was set to fallback pool when it shouldn't have been"u8;
 
-[GoType("dyn")] internal partial struct TestFallback_tests {
+internal partial struct TestFallback_tests /*dyn*/ {
     internal @string name;
     internal ж<global::go.crypto.x509_package.CertPool> systemRoots;
     internal bool systemPool;

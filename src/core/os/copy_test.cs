@@ -246,7 +246,7 @@ internal static error compareReaders(Δio.Reader a, Δio.Reader b) {
     return default!;
 }
 
-[GoType] partial struct zeroReader {
+partial struct zeroReader {
 }
 
 internal static (nint, error) Read(this zeroReader r, slice<byte> p) {
@@ -254,7 +254,7 @@ internal static (nint, error) Read(this zeroReader r, slice<byte> p) {
     return (len(p), default!);
 }
 
-[GoType] partial struct randReader {
+partial struct randReader {
     internal ж<rand.Rand> rand;
 }
 
@@ -262,7 +262,7 @@ internal static ж<randReader> newRandReader() {
     return Ꮡ(new randReader(rand.New(new rand.PCGжSource(rand.NewPCG(0, 0)))));
 }
 
-[GoRecv] internal static (nint, error) Read(this ref randReader r, slice<byte> p) {
+internal static (nint, error) Read(this ref randReader r, slice<byte> p) {
     foreach (var (i, _) in p) {
         p[i] = (byte)((uint32)(r.rand.Uint32() & 0xff));
     }

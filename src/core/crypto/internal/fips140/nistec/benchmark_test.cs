@@ -12,7 +12,7 @@ using static go.crypto.@internal.fips140.nistec_internal_test_package;
 
 partial class nistec_test_package {
 
-[GoType] partial interface nistPoint<T> {
+partial interface nistPoint<T> {
     slice<byte> Bytes();
     T SetGenerator();
     (T, error) SetBytes(slice<byte> _);

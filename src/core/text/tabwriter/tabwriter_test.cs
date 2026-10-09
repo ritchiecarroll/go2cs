@@ -13,19 +13,19 @@ using tabwriter = go.text.tabwriter_package;
 
 partial class tabwriter_test_package {
 
-[GoType] partial struct buffer {
+partial struct buffer {
     internal slice<byte> a;
 }
 
-[GoRecv] internal static void init(this ref buffer b, nint n) {
+internal static void init(this ref buffer b, nint n) {
     b.a = new slice<byte>(0, n);
 }
 
-[GoRecv] internal static void clear(this ref buffer b) {
+internal static void clear(this ref buffer b) {
     b.a = b.a[0..0];
 }
 
-[GoRecv] internal static (nint written, error err) Write(this ref buffer b, slice<byte> buf) {
+internal static (nint written, error err) Write(this ref buffer b, slice<byte> buf) {
     nint n = len(b.a);
     nint m = len(buf);
     if (n + m <= cap(b.a)){
@@ -39,7 +39,7 @@ partial class tabwriter_test_package {
     return (len(buf), default!);
 }
 
-[GoRecv] internal static @string String(this ref buffer b) {
+internal static @string String(this ref buffer b) {
     return ((@string)b.a);
 }
 
@@ -107,7 +107,7 @@ internal static void check(ж<testing.T> Ꮡt, @string testname, nint minwidth, 
 // hard tabs - do not discard column
 // hard tabs - do not discard column
 
-[GoType("dyn")] partial struct testsᴛ1 {
+partial struct testsᴛ1 /*dyn*/ {
     internal @string testname;
     internal nint minwidth, tabwidth, padding;
     internal byte padchar;
@@ -441,7 +441,7 @@ public static void Test(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct panicWriter {
+partial struct panicWriter {
 }
 
 internal static (nint, error) Write(this panicWriter _Δp0, slice<byte> _Δp1) {

@@ -101,7 +101,7 @@ public static void TestConsumeMediaParam(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct mediaTypeTest {
+internal partial struct mediaTypeTest {
     internal @string @in;
     internal @string t;
     internal map<@string, @string> p;
@@ -484,7 +484,7 @@ message/external-body; access-type=URL;
     }
 }
 
-[GoType] internal partial struct badMediaTypeTest {
+internal partial struct badMediaTypeTest {
     internal @string @in;
     internal @string mt;
     internal @string err;
@@ -532,7 +532,7 @@ public static void TestParseMediaTypeBogus(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct formatTest {
+internal partial struct formatTest {
     internal @string typ;
     internal map<@string, @string> @params;
     internal @string want;

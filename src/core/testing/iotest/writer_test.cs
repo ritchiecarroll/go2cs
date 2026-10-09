@@ -11,7 +11,7 @@ using static go.testing.iotest_package;
 partial class iotest_internal_test_package {
 
 
-[GoType("dyn")] partial struct truncateWriterTestsᴛ1 {
+partial struct truncateWriterTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string want;
     internal int64 trunc;

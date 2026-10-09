@@ -182,7 +182,7 @@ public static void TestLocalDirectory(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct shouldBuildTestsᴛ1 {
+partial struct shouldBuildTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal @string content;
     internal map<@string, bool> tags;
@@ -361,8 +361,8 @@ public static void TestGoodOSArchFile(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct readNopCloser {
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct readNopCloser {
+    /*embed*/ public io_package.Reader Reader;
 }
 
 internal static error Close(this readNopCloser r) {
@@ -373,7 +373,7 @@ internal static global::go.go.build_package.Context ctxtP9 = new Context(GOARCH:
 internal static global::go.go.build_package.Context ctxtAndroid = new Context(GOARCH: "arm"u8, GOOS: "android"u8);
 
 
-[GoType("dyn")] partial struct matchFileTestsᴛ1 {
+partial struct matchFileTestsᴛ1 /*dyn*/ {
     internal global::go.go.build_package.Context ctxt;
     internal @string name;
     internal @string data;
@@ -442,7 +442,7 @@ public static void TestImportCmd(ж<testing.T> Ꮡt) {
 internal static @string expandSrcDirPath = filepath.Join(((@string)(rune)filepath.Separator) + "projects"u8, "src", "add");
 
 
-[GoType("dyn")] partial struct expandSrcDirTestsᴛ1 {
+partial struct expandSrcDirTestsᴛ1 /*dyn*/ {
     internal @string input, expected;
 }
 internal static slice<expandSrcDirTestsᴛ1> expandSrcDirTests = new expandSrcDirTestsᴛ1[]{
@@ -469,7 +469,7 @@ public static void TestExpandSrcDir(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestShellSafety_tests {
+internal partial struct TestShellSafety_tests /*dyn*/ {
     internal @string input, srcdir, expected;
     internal bool result;
 }
@@ -505,7 +505,7 @@ internal static readonly @string cannotFindPackageErrorˢ = @"""cannot find pack
 internal static readonly @string isNotInStdˢ = "is not in std"u8;
 internal static readonly @string cannotFindPackageOrIsNotˢ = @"""cannot find package"" or ""is not in std"" error"u8;
 
-[GoType("dyn")] internal partial struct TestImportDirNotExist_tests {
+internal partial struct TestImportDirNotExist_tests /*dyn*/ {
     internal @string label;
     internal @string path, srcDir;
     internal global::go.go.build_package.ImportMode mode;

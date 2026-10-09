@@ -27,19 +27,19 @@ partial class cipher_test_package {
 
 internal static cipher.Block _ᴛ1ʗ = new wrapperжBlock(((ж<wrapper>)nil));
 
-[GoType] partial struct wrapper {
+partial struct wrapper {
     internal cipher.Block block;
 }
 
-[GoRecv] internal static nint BlockSize(this ref wrapper w) {
+internal static nint BlockSize(this ref wrapper w) {
     return w.block.BlockSize();
 }
 
-[GoRecv] internal static void Encrypt(this ref wrapper w, slice<byte> dst, slice<byte> src) {
+internal static void Encrypt(this ref wrapper w, slice<byte> dst, slice<byte> src) {
     w.block.Encrypt(dst, src);
 }
 
-[GoRecv] internal static void Decrypt(this ref wrapper w, slice<byte> dst, slice<byte> src) {
+internal static void Decrypt(this ref wrapper w, slice<byte> dst, slice<byte> src) {
     w.block.Decrypt(dst, src);
 }
 
@@ -110,7 +110,7 @@ internal static void testAllImplementations(ж<testing.T> Ꮡt, Action<ж<testin
 //key=32, plaintext=293
 // These cases test non-standard tag sizes.
 
-[GoType("dyn")] partial struct aesGCMTestsᴛ1 {
+partial struct aesGCMTestsᴛ1 /*dyn*/ {
     internal @string key, nonce, plaintext, ad, result;
 }
 internal static slice<aesGCMTestsᴛ1> aesGCMTests = new aesGCMTestsᴛ1[]{
@@ -610,7 +610,7 @@ public static void TestGCMCounterWrap(ж<testing.T> Ꮡt) {
     testAllImplementations(Ꮡt, testGCMCounterWrap);
 }
 
-[GoType("dyn")] internal partial struct testGCMCounterWrap_tests {
+internal partial struct testGCMCounterWrap_tests /*dyn*/ {
     internal @string nonce, tag;
 }
 
@@ -658,7 +658,7 @@ private static readonly @string authenticationFailedˢ = "authentication failed"
 private static readonly @string incorrectOpenOutputˢ = "incorrect Open output"u8;
 
 // generate permutations
-[GoType("dyn")] internal partial struct TestGCMAsm_pair {
+internal partial struct TestGCMAsm_pair /*dyn*/ {
     internal nint align, length;
 }
 

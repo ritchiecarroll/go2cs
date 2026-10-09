@@ -9,18 +9,18 @@ using static go.sort_internal_test_package;
 
 partial class sort_test_package {
 
-[GoType("num:nint")] partial struct Grams;
+partial struct Grams /*num:nint*/;
 
 public static @string String(this Grams g) {
     return fmt.Sprintf("%dg"u8, (nint)g);
 }
 
-[GoType] partial struct Organ {
+partial struct Organ {
     public @string Name;
     public Grams Weight;
 }
 
-[GoType("[]ж<Organ>")] partial struct Organs;
+partial struct Organs /*[]ж<Organ>*/;
 
 public static nint Len(this Organs s) {
     return len(s);
@@ -32,7 +32,7 @@ public static void Swap(this Organs s, nint i, nint j) {
 
 // ByName implements sort.Interface by providing Less and using the Len and
 // Swap methods of the embedded Organs value.
-[GoType] partial struct ByName {
+partial struct ByName {
     public partial ref Organs Organs { get; }
 }
 
@@ -42,7 +42,7 @@ public static bool Less(this ByName s, nint i, nint j) {
 
 // ByWeight implements sort.Interface by providing Less and using the Len and
 // Swap methods of the embedded Organs value.
-[GoType] partial struct ByWeight {
+partial struct ByWeight {
     public partial ref Organs Organs { get; }
 }
 

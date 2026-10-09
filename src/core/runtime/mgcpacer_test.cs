@@ -739,7 +739,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct gcExecTest {
+partial struct gcExecTest {
     internal @string name;
     internal nint gcPercent;
     internal int64 memoryLimit;
@@ -758,7 +758,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
 // These values just cannot be zero.
 internal static UntypedFloat minRate => 0.0001;
 
-[GoRecv] internal static gcCycle next(this ref gcExecTest e) {
+internal static gcCycle next(this ref gcExecTest e) {
     return new gcCycle(
         allocRate: e.allocRate.min(minRate)(),
         scanRate: e.scanRate.min(minRate)(),
@@ -776,7 +776,7 @@ internal static readonly object gcUtilizationNotWithinˢ = (@string)"GC utilizat
 internal static readonly object heapScannableIsNegativeˢ = (@string)"heapScannable is negative"u8;
 internal static readonly object testSpecificCheckerIsˢ = (@string)"test-specific checker is missing"u8;
 
-[GoRecv] internal static void check(this ref gcExecTest e, ж<testing.T> Ꮡt, slice<gcCycleResult> results) {
+internal static void check(this ref gcExecTest e, ж<testing.T> Ꮡt, slice<gcCycleResult> results) {
     Ꮡt.Helper();
     // Do some basic general checks first.
     nint n = len(results);
@@ -815,7 +815,7 @@ internal static readonly object testSpecificCheckerIsˢ = (@string)"test-specifi
     e.checker(Ꮡt, results);
 }
 
-[GoType] partial struct gcCycle {
+partial struct gcCycle {
     internal float64 allocRate;
     internal float64 scanRate;
     internal float64 growthRate;
@@ -823,7 +823,7 @@ internal static readonly object testSpecificCheckerIsˢ = (@string)"test-specifi
     internal uint64 stackBytes;
 }
 
-[GoType] partial struct gcCycleResult {
+partial struct gcCycleResult {
     internal nint cycle;
     // These come directly from the pacer, so uint64.
     internal uint64 heapLive;
@@ -837,19 +837,19 @@ internal static readonly object testSpecificCheckerIsˢ = (@string)"test-specifi
     internal float64 gcUtilization;
 }
 
-[GoRecv] internal static float64 goalRatio(this ref gcCycleResult r) {
+internal static float64 goalRatio(this ref gcCycleResult r) {
     return (float64)r.heapPeak / (float64)r.heapGoal;
 }
 
-[GoRecv] internal static float64 runway(this ref gcCycleResult r) {
+internal static float64 runway(this ref gcCycleResult r) {
     return (float64)(r.heapGoal - r.heapTrigger);
 }
 
-[GoRecv] internal static float64 triggerRatio(this ref gcCycleResult r) {
+internal static float64 triggerRatio(this ref gcCycleResult r) {
     return (float64)(r.heapTrigger - r.heapLive) / (float64)(r.heapGoal - r.heapLive);
 }
 
-[GoRecv] internal static @string String(this ref gcCycleResult r) {
+internal static @string String(this ref gcCycleResult r) {
     return fmt.Sprintf("%d %2.1f%% %d->%d->%d (goal: %d)"u8, r.cycle, r.gcUtilization * 100D, r.heapLive, r.heapTrigger, r.heapPeak, r.heapGoal);
 }
 

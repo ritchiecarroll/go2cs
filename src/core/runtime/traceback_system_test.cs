@@ -127,7 +127,7 @@ internal static void trap3(ж<nint> Ꮡi) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object canTReadSourceCodeForˢ = (@string)"Can't read source code for this file on Android"u8;
 
-[GoType("dyn")] internal partial struct TestTracebackSystem_tests {
+internal partial struct TestTracebackSystem_tests /*dyn*/ {
     internal @string name;
     internal @string want;
 }

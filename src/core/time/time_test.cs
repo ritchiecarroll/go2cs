@@ -73,7 +73,7 @@ public static void TestZoneData(ж<Δtesting.T> Ꮡt) {
 }
 
 // parsedTime is the struct representing a parsed time value.
-[GoType] partial struct parsedTime {
+partial struct parsedTime {
     public nint Year;
     public timeꓸMonth Month;
     public nint Day;
@@ -84,7 +84,7 @@ public static void TestZoneData(ж<Δtesting.T> Ꮡt) {
     public @string Zone; // e.g., "MST"
 }
 
-[GoType] partial struct TimeTest {
+partial struct TimeTest {
     internal int64 seconds;
     internal parsedTime golden;
 }
@@ -314,7 +314,7 @@ internal static @string absString(Δtime.Time t) {
 
 // 5.8*d rounds to 6*d, but .8*d+.8*d < 0 < d
 
-[GoType("dyn")] partial struct truncateRoundTestsᴛ1 {
+partial struct truncateRoundTestsᴛ1 /*dyn*/ {
     internal Δtime.Time t;
     internal Δtime.Duration d;
 }
@@ -470,7 +470,7 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
     quick.Check((f4).OrTypedNilFunc(), cfg);
 }
 
-[GoType] partial struct ISOWeekTest {
+partial struct ISOWeekTest {
     internal nint year; // year
     internal nint month, day; // month and day
     internal nint yex; // expected year
@@ -533,7 +533,7 @@ public static void TestISOWeek(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct YearDayTest {
+partial struct YearDayTest {
     internal nint year, month, day;
     internal nint yday;
 }
@@ -638,7 +638,7 @@ public static void TestYearDay(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct durationTestsᴛ1 {
+partial struct durationTestsᴛ1 /*dyn*/ {
     internal @string str;
     internal Δtime.Duration d;
 }
@@ -696,7 +696,7 @@ public static void TestDurationString(ж<Δtesting.T> Ꮡt) {
 // large number of days
 // negative Unix time
 
-[GoType("dyn")] partial struct dateTestsᴛ1 {
+partial struct dateTestsᴛ1 /*dyn*/ {
     internal nint year, month, day, hour, min, sec, nsec;
     internal ж<timeꓸLocation> z;
     internal int64 unix;
@@ -742,7 +742,7 @@ public static void TestDate(ж<Δtesting.T> Ꮡt) {
 // to
 // Thu Mar 19 7:56:35 PST 2016
 
-[GoType("dyn")] partial struct addDateTestsᴛ1 {
+partial struct addDateTestsᴛ1 /*dyn*/ {
     internal nint years, months, days;
 }
 internal static slice<addDateTestsᴛ1> addDateTests = new addDateTestsᴛ1[]{
@@ -777,7 +777,7 @@ public static void TestAddDate(ж<Δtesting.T> Ꮡt) {
 // June, 30 days
 // December, last month, 31 days
 
-[GoType("dyn")] partial struct daysInTestsᴛ1 {
+partial struct daysInTestsᴛ1 /*dyn*/ {
     internal nint year, month, di;
 }
 internal static slice<daysInTestsᴛ1> daysInTests = new daysInTestsᴛ1[]{
@@ -856,7 +856,7 @@ public static void TestTimeGob(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct invalidEncodingTestsᴛ1 {
+partial struct invalidEncodingTestsᴛ1 /*dyn*/ {
     internal slice<byte> bytes;
     internal @string want;
 }
@@ -881,7 +881,7 @@ public static void TestInvalidTimeGob(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct notEncodableTimesᴛ1 {
+partial struct notEncodableTimesᴛ1 /*dyn*/ {
     internal Δtime.Time time;
     internal @string want;
 }
@@ -905,7 +905,7 @@ public static void TestNotGobEncodableTime(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct jsonTestsᴛ1 {
+partial struct jsonTestsᴛ1 /*dyn*/ {
     internal Δtime.Time time;
     internal @string json;
 }
@@ -938,7 +938,7 @@ public static void TestTimeJSON(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestUnmarshalInvalidTimes_tests {
+internal partial struct TestUnmarshalInvalidTimes_tests /*dyn*/ {
     internal @string @in;
     internal @string want;
 }
@@ -1040,7 +1040,7 @@ public static void TestMarshalInvalidTimes(ж<Δtesting.T> Ꮡt) {
 // huge string; issue 15011.
 // This value tests the first overflow check in leadingFraction.
 
-[GoType("dyn")] partial struct parseDurationTestsᴛ1 {
+partial struct parseDurationTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal Δtime.Duration want;
 }
@@ -1104,7 +1104,7 @@ public static void TestParseDuration(ж<Δtesting.T> Ꮡt) {
 // utf8.RuneError
 // overflow
 
-[GoType("dyn")] partial struct parseDurationErrorTestsᴛ1 {
+partial struct parseDurationErrorTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string expect;
 }
@@ -1187,7 +1187,7 @@ internal static Δtime.Time t;
 internal static int64 u;
 
 
-[GoType("dyn")] partial struct mallocTestᴛ1 {
+partial struct mallocTestᴛ1 /*dyn*/ {
     internal nint count;
     internal @string desc;
     internal Action fn;
@@ -1256,7 +1256,7 @@ internal static Δtime.Duration minDuration => /* -1 << 63 */ -92233720368547758
 internal static Δtime.Duration maxDuration => /* 1<<63 - 1 */ 9223372036854775807;
 
 
-[GoType("dyn")] partial struct subTestsᴛ1 {
+partial struct subTestsᴛ1 /*dyn*/ {
     internal Δtime.Time t;
     internal Δtime.Time u;
     internal Δtime.Duration d;
@@ -1292,7 +1292,7 @@ public static void TestSub(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct nsDurationTestsᴛ1 {
+partial struct nsDurationTestsᴛ1 /*dyn*/ {
     internal Δtime.Duration d;
     internal int64 want;
 }
@@ -1344,7 +1344,7 @@ public static void TestDurationMilliseconds(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct secDurationTestsᴛ1 {
+partial struct secDurationTestsᴛ1 /*dyn*/ {
     internal Δtime.Duration d;
     internal float64 want;
 }
@@ -1399,7 +1399,7 @@ public static void TestDurationHours(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct durationTruncateTestsᴛ1 {
+partial struct durationTruncateTestsᴛ1 /*dyn*/ {
     internal Δtime.Duration d;
     internal Δtime.Duration m;
     internal Δtime.Duration want;
@@ -1461,7 +1461,7 @@ public static void TestDurationRound(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct durationAbsTestsᴛ1 {
+partial struct durationAbsTestsᴛ1 /*dyn*/ {
     internal Δtime.Duration d;
     internal Δtime.Duration want;
 }
@@ -1491,7 +1491,7 @@ public static void TestDurationAbs(ж<Δtesting.T> Ꮡt) {
 // Using Equal since Add don't modify loc using "==" will cause a fail
 // Original cause for this test case bug 15852
 
-[GoType("dyn")] partial struct defaultLocTestsᴛ1 {
+partial struct defaultLocTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal Func<Δtime.Time, Δtime.Time, bool> f;
 }
@@ -2032,7 +2032,7 @@ public static partial void TestConcurrentTimerResetStop(ж<Δtesting.T> Ꮡt) {
 internal static readonly @string australiaBrisbaneˢ = "Australia/Brisbane"u8;
 internal static readonly @string fixedTimeˢ = "FIXED_TIME"u8;
 
-[GoType("dyn")] internal partial struct TestTimeIsDST_tests {
+internal partial struct TestTimeIsDST_tests /*dyn*/ {
     internal Δtime.Time time;
     internal bool want;
 }
@@ -2103,7 +2103,7 @@ public static void TestTimeAddSecOverflow(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestTimeWithZoneTransition_tests {
+internal partial struct TestTimeWithZoneTransition_tests /*dyn*/ {
     internal Δtime.Time give;
     internal Δtime.Time want;
 }
@@ -2149,7 +2149,7 @@ public static void TestTimeWithZoneTransition(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestZoneBounds_realTests {
+internal partial struct TestZoneBounds_realTests /*dyn*/ {
     internal Δtime.Time giveTime;
     internal Δtime.Time wantStart;
     internal Δtime.Time wantEnd;

@@ -35,7 +35,7 @@ using static go.net.smtp_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/smtp/smtp_test.go", "smtp_test.cs", "ACI83IKCgoKClIKUgpSCgoKCgoKUgoIAEgykABtAgoKCgoKUggANDJKEgoK+goKUgoKCgoCSAA4UgqaC7oCigKKAooCigKKAABkEooKEgoKCgoSAgqSAgqSAgqaCgIKkgIKmgIKmgIKkgIKkgIK4goKAgqaAgqSAgqSAgqSAgqSOgoKUgIKkgIKmgIKmgoKCAD1UgoiKgoKCgoKChICCpICCpIKCggBjCKKyhIKCgoKElpIAARiEgIKkgoCCpICCpoKCgoKokgABGoSAgqSAgqSAgqSAgqSAgqaCgoKCqJIAARyEgIKkgIKkgIKkgIKkgIKmgoKCgqiSAAEchICCpICCpICCpICCpICCpoKCgoKokgABHoSAgqSCgIKkgIKkgIKkgIKmgoKCgsrCgoSCgpKClIKCgoKUkoCCpICCpICCpoKCtAASHMKChIKCgoKCgpSSgIKkgIKmgoKCtAAUIMKCgpaUgoKCgqiygoKClJSCgoK0lIKCgpSUgoKUgrQACASkgpaCgoKCgoKCgoKUkoKElIKClLSCgsa0goK0tIKCxrS0goKCgti0toKWgoKCxgAKEAASIgAWGqKCgoKCgoKUlpLUhIKCgpSUgoKCgoKUgpSCgoKCgoKClILYlIyClo6CloKCgoK0ACY0woKClJSCwoKCgoKUlIKCgoKClIKCgpSCgoK0lIyClIKUgoK05KKCgoKCgoKCgpSUgoKEgpKCloKCgrQAFCCigpSCkoKilIKClJKAgqSAgsSkooKSgoLCgoKCgpSSgILEksKCgoKClJKCgoCCgqSSgoKUgrSSgqLUgoKClIKU7oIACAiykoKCgpSCgqSCgoKUgoKCpLYACQaCkoKClKSkpIIACgyCpLamgoKCkuiCgoLuABIiABIigA==", "323-333:1;335-367:2;369-407:3;409-448:4;450-489:5;491-532:6;541-544:1;637-650:1;793-828:1;891-917:1;988-990:1;1009-1020:1;1021-1043:2;1126-1128:1", "1069=net/smtp.smtpSender.send;1096=net/smtp.smtpSender.send")]
+[assembly: go.GoPositionMap("net/smtp/smtp_test.go", "smtp_test.cs", "ACI83IKCgoKClIKUgpSCgoKCgoKUgoIAEgykABtAgoKCgoKUggANDJKEgoK+goKUgoKCgoCSAA4UgqaC7oCigKKAooCigKKAABkEooKEgoKCgoSAgqSAgqSAgqaCgIKkgIKmgIKmgIKkgIKkgIK4goKAgqaAgqSAgqSAgqSAgqSOgoKUgIKkgIKmgIKmgoKCAD1UgoiKgoKCgoKChICCpICCpIKCggBjCKKyhIKCgoKElpIAARiEgIKkgoCCpICCpoKCgoKokgABGoSAgqSAgqSAgqSAgqSAgqaCgoKCqJIAARyEgIKkgIKkgIKkgIKkgIKmgoKCgqiSAAEchICCpICCpICCpICCpICCpoKCgoKokgABHoSAgqSCgIKkgIKkgIKkgIKmgoKCgsrCgoSCgpKClIKCgoKUkoCCpICCpICCpoKCtAASHMKChIKCgoKCgpSSgIKkgIKmgoKCtAAUIMKCgpaUgoKCgqiygoKClJSCgoK0lIKCgpSUgoKUgrQACASkgpaCgoKCgoKCgoKUkoKElIKClLSCgsa0goK0tIKCxrS0goKCgti0toKWgoKCxgAKEAASIgAWGqKCgoKCgoKUlpLUhIKCgpSUgoKCgoKUgpSCgoKCgoKClILYlIyClo6CloKCgoK0ACY0woKClJSCwoKCgoKUlIKCgoKClIKCgpSCgoK0lIyClIKUgoK05KKCgoKCgoKCgpSUgoKEgpKCloKCgrQAFCCigpSCkoKilIKClJKAgqSAgsSkooKSgoLCgoKCgpSSgILEksKCgoKClJKCgoCCgqSSgoKUgrSSgqLUgoKClIKU7oIACAiykoKCgpSCgqSCgoKUgoKCpLYACQaCkoKClKSkpIIACgyCpLamgoKCkuiCgoLuABIiABIigA==", "323-333:1;335-367:2;369-407:3;409-448:4;450-489:5;491-532:6;541-544:1;637-650:1;793-828:1;891-917:1;988-990:1;1009-1020:1;1021-1043:2;1126-1128:1", "1069=net/smtp.smtpSender.send;1096=net/smtp.smtpSender.send", "35=PlainAuth/1/2/1,PlainAuth/2/2/2,CRAMMD5Auth/1/1/3;141=NewReader/1/1/4")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -44,7 +44,7 @@ namespace go.net;
 public static partial class smtp_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

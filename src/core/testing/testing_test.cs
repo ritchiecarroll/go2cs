@@ -179,7 +179,7 @@ internal static void testTempDir(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestSetenv_tests {
+internal partial struct TestSetenv_tests /*dyn*/ {
     internal @string name;
     internal @string key;
     internal bool initialValueExists;
@@ -361,7 +361,7 @@ public static void TestChdirWithParallelGrandParentBefore(ж<testing.T> Ꮡt) {
 private static readonly @string skipˢ = "skip"u8;
 private static readonly @string pwdˢ = "PWD"u8;
 
-[GoType("dyn")] internal partial struct TestChdir_type {
+internal partial struct TestChdir_type /*dyn*/ {
     internal @string name, dir, pwd;
     internal bool extraChdir;
 }

@@ -16,7 +16,7 @@ partial class strings_test_package {
 
 // test runtime·memeq's chunked implementation
 
-[GoType("dyn")] partial struct compareTestsᴛ1 {
+partial struct compareTestsᴛ1 /*dyn*/ {
     internal @string a, b;
     internal nint i;
 }

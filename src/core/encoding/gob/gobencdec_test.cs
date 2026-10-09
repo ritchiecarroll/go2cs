@@ -18,32 +18,32 @@ using static go.encoding.gob_package;
 partial class gob_internal_test_package {
 
 // Types that implement the GobEncoder/Decoder interfaces.
-[GoType] public partial struct ByteStruct {
+public partial struct ByteStruct {
     internal byte a; // not an exported field
 }
 
-[GoType] public partial struct StringStruct {
+public partial struct StringStruct {
     internal @string s; // not an exported field
 }
 
-[GoType] [GoValueClone("a")] public partial struct ArrayStruct {
+public partial struct ArrayStruct {
     internal array<byte> a = new(8192); // not an exported field
 }
 
-[GoType("num:nint")] public partial struct Gobber;
+public partial struct Gobber /*num:nint*/;
 
-[GoType("@string")] public partial struct ValueGobber;
+public partial struct ValueGobber /*@string*/;
 
-[GoType("num:nint")] public partial struct BinaryGobber;
+public partial struct BinaryGobber /*num:nint*/;
 
-[GoType("@string")] public partial struct BinaryValueGobber;
+public partial struct BinaryValueGobber /*@string*/;
 
-[GoType("num:nint")] public partial struct TextGobber;
+public partial struct TextGobber /*num:nint*/;
 
-[GoType("@string")] public partial struct TextValueGobber;
+public partial struct TextValueGobber /*@string*/;
 
 // The relevant methods
-[GoRecv] public static (slice<byte>, error) GobEncode(this ref ByteStruct g) {
+public static (slice<byte>, error) GobEncode(this ref ByteStruct g) {
     var b = new slice<byte>(3);
     b[0] = g.a;
     b[1] = (byte)(g.a + 1);
@@ -74,11 +74,11 @@ public static error GobDecode(this ж<ByteStruct> Ꮡg, slice<byte> data) {
     return default!;
 }
 
-[GoRecv] public static (slice<byte>, error) GobEncode(this ref StringStruct g) {
+public static (slice<byte>, error) GobEncode(this ref StringStruct g) {
     return (slice<byte>(g.s), default!);
 }
 
-[GoRecv] public static error GobDecode(this ref StringStruct g, slice<byte> data) {
+public static error GobDecode(this ref StringStruct g, slice<byte> data) {
     // Expect N sequential-valued bytes.
     if (len(data) == 0) {
         return io.EOF;
@@ -93,14 +93,14 @@ public static error GobDecode(this ж<ByteStruct> Ꮡg, slice<byte> data) {
     return default!;
 }
 
-[GoRecv] public static (slice<byte>, error) GobEncode(this ref ArrayStruct a) {
+public static (slice<byte>, error) GobEncode(this ref ArrayStruct a) {
     return (a.a[..], default!);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string wrongLengthInArrayDecodeˢ = "wrong length in array decode"u8;
 
-[GoRecv] public static error GobDecode(this ref ArrayStruct a, slice<byte> data) {
+public static error GobDecode(this ref ArrayStruct a, slice<byte> data) {
     if (len(data) != len(a.a)) {
         return errors.New(wrongLengthInArrayDecodeˢ);
     }
@@ -108,7 +108,7 @@ internal static readonly @string wrongLengthInArrayDecodeˢ = "wrong length in a
     return default!;
 }
 
-[GoRecv] public static (slice<byte>, error) GobEncode(this ref Gobber g) {
+public static (slice<byte>, error) GobEncode(this ref Gobber g) {
     return (slice<byte>(fmt.Sprintf("VALUE=%d"u8, g)), default!);
 }
 
@@ -117,7 +117,7 @@ public static error GobDecode(this ж<Gobber> Ꮡg, slice<byte> data) {
     return err;
 }
 
-[GoRecv] public static (slice<byte>, error) MarshalBinary(this ref BinaryGobber g) {
+public static (slice<byte>, error) MarshalBinary(this ref BinaryGobber g) {
     return (slice<byte>(fmt.Sprintf("VALUE=%d"u8, g)), default!);
 }
 
@@ -126,7 +126,7 @@ public static error UnmarshalBinary(this ж<BinaryGobber> Ꮡg, slice<byte> data
     return err;
 }
 
-[GoRecv] public static (slice<byte>, error) MarshalText(this ref TextGobber g) {
+public static (slice<byte>, error) MarshalText(this ref TextGobber g) {
     return (slice<byte>(fmt.Sprintf("VALUE=%d"u8, g)), default!);
 }
 
@@ -163,43 +163,43 @@ public static error UnmarshalText(this ж<TextValueGobber> Ꮡv, slice<byte> dat
 }
 
 // Structs that include GobEncodable fields.
-[GoType] public partial struct GobTest0 {
+public partial struct GobTest0 {
     public nint X; // guarantee we have  something in common with GobTest*
     public ж<ByteStruct> G;
 }
 
-[GoType] public partial struct GobTest1 {
+public partial struct GobTest1 {
     public nint X; // guarantee we have  something in common with GobTest*
     public ж<StringStruct> G;
 }
 
-[GoType] public partial struct GobTest2 {
+public partial struct GobTest2 {
     public nint X;   // guarantee we have  something in common with GobTest*
     public @string G; // not a GobEncoder - should give us errors
 }
 
-[GoType] public partial struct GobTest3 {
+public partial struct GobTest3 {
     public nint X; // guarantee we have  something in common with GobTest*
     public ж<Gobber> G;
     public ж<BinaryGobber> B;
     public ж<TextGobber> T;
 }
 
-[GoType] public partial struct GobTest4 {
+public partial struct GobTest4 {
     public nint X; // guarantee we have  something in common with GobTest*
     public ValueGobber V;
     public BinaryValueGobber BV;
     public TextValueGobber TV;
 }
 
-[GoType] public partial struct GobTest5 {
+public partial struct GobTest5 {
     public nint X; // guarantee we have  something in common with GobTest*
     public ж<ValueGobber> V;
     public ж<BinaryValueGobber> BV;
     public ж<TextValueGobber> TV;
 }
 
-[GoType] public partial struct GobTest6 {
+public partial struct GobTest6 {
     public nint X; // guarantee we have  something in common with GobTest*
     public ValueGobber V;
     public ж<ValueGobber> W;
@@ -209,7 +209,7 @@ public static error UnmarshalText(this ж<TextValueGobber> Ꮡv, slice<byte> dat
     public ж<TextValueGobber> TW;
 }
 
-[GoType] public partial struct GobTest7 {
+public partial struct GobTest7 {
     public nint X; // guarantee we have  something in common with GobTest*
     public ж<ValueGobber> V;
     public ValueGobber W;
@@ -219,26 +219,26 @@ public static error UnmarshalText(this ж<TextValueGobber> Ꮡv, slice<byte> dat
     public TextValueGobber TW;
 }
 
-[GoType] public partial struct GobTestIgnoreEncoder {
+public partial struct GobTestIgnoreEncoder {
     public nint X; // guarantee we have  something in common with GobTest*
 }
 
-[GoType] public partial struct GobTestValueEncDec {
+public partial struct GobTestValueEncDec {
     public nint X;         // guarantee we have  something in common with GobTest*
     public StringStruct G; // not a pointer.
 }
 
-[GoType] public partial struct GobTestIndirectEncDec {
+public partial struct GobTestIndirectEncDec {
     public nint X;            // guarantee we have  something in common with GobTest*
     public ж<ж<ж<StringStruct>>> G; // indirections to the receiver.
 }
 
-[GoType] [GoValueClone("A")] public partial struct GobTestArrayEncDec {
+public partial struct GobTestArrayEncDec {
     public nint X;        // guarantee we have  something in common with GobTest*
     public ArrayStruct A; // not a pointer.
 }
 
-[GoType] public partial struct GobTestIndirectArrayEncDec {
+public partial struct GobTestIndirectArrayEncDec {
     public nint X;           // guarantee we have  something in common with GobTest*
     public ж<ж<ж<ArrayStruct>>> A; // indirections to a large receiver.
 }
@@ -743,19 +743,19 @@ public static void TestGobEncoderIgnoreNilEncoder(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct gobDecoderBug0 {
+internal partial struct gobDecoderBug0 {
     internal @string foo, bar;
 }
 
-[GoRecv] internal static @string String(this ref gobDecoderBug0 br) {
+internal static @string String(this ref gobDecoderBug0 br) {
     return br.foo + "-"u8 + br.bar;
 }
 
-[GoRecv] internal static (slice<byte>, error) GobEncode(this ref gobDecoderBug0 br) {
+internal static (slice<byte>, error) GobEncode(this ref gobDecoderBug0 br) {
     return (slice<byte>(br.String()), default!);
 }
 
-[GoRecv] internal static error GobDecode(this ref gobDecoderBug0 br, slice<byte> b) {
+internal static error GobDecode(this ref gobDecoderBug0 br, slice<byte> b) {
     br.foo = fooˢ;
     br.bar = barˢ;
     return default!;
@@ -787,7 +787,7 @@ public static void TestGobEncoderExtraIndirect(ж<testing.T> Ꮡt) {
 // Another bug: this caused a crash with the new Go1 Time type.
 // We throw in a gob-encoding array, to test another case of isZero,
 // and a struct containing a nil interface, to test a third.
-[GoType] [GoValueClone("A")] internal partial struct isZeroBug {
+internal partial struct isZeroBug {
     public time.Time T;
     public @string S;
     public nint I;
@@ -795,7 +795,7 @@ public static void TestGobEncoderExtraIndirect(ж<testing.T> Ꮡt) {
     public isZeroBugInterface F;
 }
 
-[GoType("[2]uint8")] public partial struct isZeroBugArray;
+public partial struct isZeroBugArray /*[2]uint8*/;
 
 // Receiver is value, not pointer, to test isZero of array.
 public static (slice<byte> b, error e) GobEncode(this isZeroBugArray a) {
@@ -817,7 +817,7 @@ public static error GobDecode(this ж<isZeroBugArray> Ꮡa, slice<byte> data) {
     return default!;
 }
 
-[GoType] public partial struct isZeroBugInterface {
+public partial struct isZeroBugInterface {
     public any I;
 }
 
@@ -825,7 +825,7 @@ public static (slice<byte> b, error e) GobEncode(this isZeroBugInterface i) {
     return (new byte[]{}.slice(), default!);
 }
 
-[GoRecv] public static error GobDecode(this ref isZeroBugInterface i, slice<byte> data) {
+public static error GobDecode(this ref isZeroBugInterface i, slice<byte> data) {
     return default!;
 }
 
@@ -881,7 +881,7 @@ public static void TestNetIP(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIgnoreDepthLimit_output {
+internal partial struct TestIgnoreDepthLimit_output /*dyn*/ {
     public nint Hello;
 }
 

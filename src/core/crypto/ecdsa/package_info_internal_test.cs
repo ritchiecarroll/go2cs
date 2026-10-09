@@ -30,7 +30,7 @@ using static go.crypto.ecdsa_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa_test.go", "ecdsa_test.cs", "ACc2ggAGFIKUsoKikoIABRTCkqaCpoKCgpSCuIKmgoSCgoKCloKWgoK4gqaChIKCgoKWgpaCgriCpoKEgoKCgpaCgoKClpSWgtyApIKCpoKmgoSCgoKCloKCgpaCloK4goKClKaC9t6CloKCloSCgoKCkoSCgoKClJSUgpSEgpaCgoSUpKSkpKaUpKSkpKSmloKWlICC1rS0tLSCgoKCgsbqgqaCgoKWgoKShIK4gqaChIKCqIKCqIK4gqaCgoKWgriCpoKEgoKUgoKWgoK4gqaChIKClIKCloKCuIKmgoSCgpSCgpaCggAMCIKC7gAHEAALGAAHEu4ABxCC7gAHEILuAAkUggAHEIKCgpSCgpSCAAgIggAEEIKCksqCgoKCgpSEgoKCgoKm+oKCgoKClIKCgpaCgoKC3IKCgoKCgoCC", "43-48:1;44-47:1.1;440-455:1;456-491:2;492-507:3;508-523:4;560-562:1;567-585:1;589-608:1;612-621:1")]
+[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa_test.go", "ecdsa_test.cs", "ACc2ggAGFIKUsoKikoIABRTCkqaCpoKCgpSCuIKmgoSCgoKCloKWgoK4gqaChIKCgoKWgpaCgriCpoKEgoKCgpaCgoKClpSWgtyApIKCpoKmgoSCgoKCloKCgpaCloK4goKClKaC9t6CloKCloSCgoKCkoSCgoKClJSUgpSEgpaCgoSUpKSkpKaUpKSkpKSmloKWlICC1rS0tLSCgoKCgsbqgqaCgoKWgoKShIK4gqaChIKCqIKCqIK4gqaCgoKWgriCpoKEgoKUgoKWgoK4gqaChIKClIKCloKCuIKmgoSCgpSCgpaCggAMCIKC7gAHEAALGAAHEu4ABxCC7gAHEILuAAkUggAHEIKCgpSCgpSCAAgIggAEEIKCksqCgoKCgpSEgoKCgoKm+oKCgoKClIKCgpaCgoKC3IKCgoKCgoCC", "43-48:1;44-47:1.1;440-455:1;456-491:2;492-507:3;508-523:4;560-562:1;567-585:1;589-608:1;612-621:1", "", "41=P256/1/2/4,P224/1/1/5,P384/1/1/6,P521/1/1/7,P256/2/2/8,genericParamsForCurve/1/1/8;550=fromHex/1/3/1,fromHex/2/3/4,fromHex/3/3/5;578=P256/1/1/4,P384/1/1/5,P521/1/1/6")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -39,7 +39,7 @@ namespace go.crypto;
 public static partial class ecdsa_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

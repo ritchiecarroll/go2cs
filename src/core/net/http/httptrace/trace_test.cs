@@ -39,7 +39,7 @@ public static void TestWithClientTrace(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCompose_tests {
+internal partial struct TestCompose_tests /*dyn*/ {
     internal ж<global::go.net.http.httptrace_package.ClientTrace> trace, old;
     internal @string want;
 }

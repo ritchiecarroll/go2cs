@@ -52,9 +52,9 @@ using static global::go.errors_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("errors/errors_test.go", "errors_test.cs", "AA8YlIKUgqiCgriCgoI=")]
-[assembly: go.GoPositionMap("errors/example_test.go", "example_test.cs", "ABQqgqaC3IKAgvqSgoLuwpKCggAJCpKCgoKCgpSCAAcS0oCCgpQACBCigIKCgpQACBCigoKC")]
+[assembly: go.GoPositionMap("errors/example_test.go", "example_test.cs", "ABQqgqaC3IKAgvqSgoLuwpKCggAJCpKCgoKCgpSCAAcS0oCCgpQACBCigIKCgpQACBCigoKC", "", "", "26=Date/1/1/1")]
 [assembly: go.GoPositionMap("errors/join_test.go", "join_test.cs", "AAsagoCCpICCpICCAA0IgoKCAAoagoKUggAJCoKCggAKGoKC")]
-[assembly: go.GoPositionMap("errors/wrap_test.go", "wrap_test.cs", "ABUggoKChIS4AB9IspKAggALFpSAooCigpS0tMSUABAGgoKCgoKChABbwAGylJKCooKClIKUgIIACQyCgtyCgsKClIKClKL4ooKEgoL6ooKCgoIACQqCgoQABhSCgIIACQ6A/oCigPiAooAACQyCpoKC", "23-25:1;64-68:2;204-215:1;229-238:1;230-232:1.1")]
+[assembly: go.GoPositionMap("errors/wrap_test.go", "wrap_test.cs", "ABUggoKChIS4AB9IspKAggALFpSAooCigpS0tMSUABAGgoKCgoKChABbwAGylJKCooKClIKUgIIACQyCgtyCgsKClIKClKL4ooKEgoL6ooKCgoIACQqCgoQABhSCgIIACQ6A/oCigPiAooAACQyCpoKC", "23-25:1;64-68:2;204-215:1;229-238:1;230-232:1.1", "", "31=New/1/1/27;135=New/1/4/46,New/2/4/66,New/3/4/71,New/4/4/81")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -63,7 +63,7 @@ namespace go;
 public static partial class errors_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

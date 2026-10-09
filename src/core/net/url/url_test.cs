@@ -19,7 +19,7 @@ using static go.net.url_package;
 
 partial class url_internal_test_package {
 
-[GoType] public partial struct URLTest {
+public partial struct URLTest {
     internal @string @in;
     internal ж<global::go.net.url_package.URL> @out; // expected parse
     internal @string roundtrip; // expected result of reserializing the URL; empty means same as "in".
@@ -711,7 +711,7 @@ internal static readonly @string pathThatLooksSchemeRelative = "//not.a.user@not
 // compressed IPv6 address with path
 // link-local with zone, path, and query
 
-[GoType("dyn")] partial struct parseRequestURLTestsᴛ1 {
+partial struct parseRequestURLTestsᴛ1 /*dyn*/ {
     internal @string url;
     internal bool expectedValid;
 }
@@ -783,7 +783,7 @@ public static void TestParseRequestURI(ж<testing.T> Ꮡt) {
 // Relative path with second element containing ":" should not be prepended with "./"
 // Non-relative path with first element containing ":" should not be prepended with "./"
 
-[GoType("dyn")] partial struct stringURLTestsᴛ1 {
+partial struct stringURLTestsᴛ1 /*dyn*/ {
     internal global::go.net.url_package.URL url;
     internal @string want;
 }
@@ -849,7 +849,7 @@ public static void TestURLString(ж<testing.T> Ꮡt) {
 internal static readonly @string userˢ = "user"u8;
 internal static readonly @string passwordˢ = "password"u8;
 
-[GoType("dyn")] internal partial struct TestURLRedacted_cases {
+internal partial struct TestURLRedacted_cases /*dyn*/ {
     internal @string name;
     internal ж<global::go.net.url_package.URL> url;
     internal @string want;
@@ -924,7 +924,7 @@ public static void TestURLRedacted(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct EscapeTest {
+public partial struct EscapeTest {
     internal @string @in;
     internal @string @out;
     internal error err;
@@ -1138,7 +1138,7 @@ public static void TestPathEscape(ж<testing.T> Ꮡt) {
 //	{"foo:bar", "~!@#$%^&*()_+{}|[]\\-=`:;'\"<>?,./",
 //		"foo%3Abar:~!%40%23$%25%5E&*()_+%7B%7D%7C%5B%5D%5C-=%60%3A;'%22%3C%3E?,.%2F"},
 //}
-[GoType] public partial struct EncodeQueryTest {
+public partial struct EncodeQueryTest {
     internal global::go.net.url_package.Values m;
     internal @string expected;
 }
@@ -1166,7 +1166,7 @@ public static void TestEncodeQuery(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct resolvePathTestsᴛ1 {
+partial struct resolvePathTestsᴛ1 /*dyn*/ {
     internal @string @base, @ref, expected;
 }
 internal static slice<resolvePathTestsᴛ1> resolvePathTests = new resolvePathTestsᴛ1[]{
@@ -1227,7 +1227,7 @@ public static void BenchmarkResolvePath(ж<testing.B> Ꮡb) {
 // Empty path and query but with ForceQuery (issue 46033).
 // Opaque URLs (issue 66084).
 
-[GoType("dyn")] partial struct resolveReferenceTestsᴛ1 {
+partial struct resolveReferenceTestsᴛ1 /*dyn*/ {
     internal @string @base, rel, expected;
 }
 internal static slice<resolveReferenceTestsᴛ1> resolveReferenceTests = new resolveReferenceTestsᴛ1[]{
@@ -1455,7 +1455,7 @@ public static void TestQueryValues(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct parseTest {
+internal partial struct parseTest {
     internal @string query;
     internal global::go.net.url_package.Values @out;
     internal bool ok;
@@ -1594,7 +1594,7 @@ public static void TestParseQuery(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string godebugˢ = "GODEBUG"u8;
 
-[GoType("dyn")] internal partial struct TestParseQueryLimits_type {
+internal partial struct TestParseQueryLimits_type /*dyn*/ {
     internal nint @params;
     internal @string godebug;
     internal bool wantErr;
@@ -1650,7 +1650,7 @@ public static void TestParseQueryLimits(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct RequestURITest {
+public partial struct RequestURITest {
     internal ж<global::go.net.url_package.URL> url;
     internal @string @out;
 }
@@ -1797,7 +1797,7 @@ public static void TestParseFailure(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestParseErrors_tests {
+internal partial struct TestParseErrors_tests /*dyn*/ {
     internal @string @in;
     internal bool wantErr;
 }
@@ -1900,7 +1900,7 @@ public static void TestStarRequest(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct shouldEscapeTest {
+internal partial struct shouldEscapeTest {
     internal byte @in;
     internal global::go.net.url_package.encoding mode;
     internal bool escape;
@@ -1968,37 +1968,37 @@ public static void TestShouldEscape(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct timeoutError {
+internal partial struct timeoutError {
     internal bool timeout;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string timeoutErrorˢ = "timeout error"u8;
 
-[GoRecv] internal static @string Error(this ref timeoutError e) {
+internal static @string Error(this ref timeoutError e) {
     return timeoutErrorˢ;
 }
 
-[GoRecv] internal static bool Timeout(this ref timeoutError e) {
+internal static bool Timeout(this ref timeoutError e) {
     return e.timeout;
 }
 
-[GoType] internal partial struct temporaryError {
+internal partial struct temporaryError {
     internal bool temporary;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string temporaryErrorˢ = "temporary error"u8;
 
-[GoRecv] internal static @string Error(this ref temporaryError e) {
+internal static @string Error(this ref temporaryError e) {
     return temporaryErrorˢ;
 }
 
-[GoRecv] internal static bool Temporary(this ref temporaryError e) {
+internal static bool Temporary(this ref temporaryError e) {
     return e.temporary;
 }
 
-[GoType] internal partial struct timeoutTemporaryError {
+internal partial struct timeoutTemporaryError {
     internal partial ref timeoutError timeoutError { get; }
     internal partial ref temporaryError temporaryError { get; }
 }
@@ -2006,12 +2006,12 @@ internal static readonly @string temporaryErrorˢ = "temporary error"u8;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string timeoutTemporaryErrorˢ = "timeout/temporary error"u8;
 
-[GoRecv] internal static @string Error(this ref timeoutTemporaryError e) {
+internal static @string Error(this ref timeoutTemporaryError e) {
     return timeoutTemporaryErrorˢ;
 }
 
 
-[GoType("dyn")] partial struct netErrorTestsᴛ1 {
+partial struct netErrorTestsᴛ1 /*dyn*/ {
     internal error err;
     internal bool timeout;
     internal bool temporary;
@@ -2073,7 +2073,7 @@ public static void TestURLErrorImplementsNetError(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestURLHostnameAndPort_tests {
+internal partial struct TestURLHostnameAndPort_tests /*dyn*/ {
     internal @string @in; // URL.Host field
     internal @string host;
     internal @string port;
@@ -2255,7 +2255,7 @@ public static void TestRejectControlCharacters(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct escapeBenchmarksᴛ1 {
+partial struct escapeBenchmarksᴛ1 /*dyn*/ {
     internal @string unescaped;
     internal @string query;
     internal @string path;
@@ -2372,7 +2372,7 @@ public static void BenchmarkPathUnescape(ж<testing.B> Ꮡb) {
 internal static readonly @string nilˢ2 = "nil"u8;
 internal static readonly @string nonNilErrorˢ = "non-nil error"u8;
 
-[GoType("dyn")] internal partial struct TestJoinPath_tests {
+internal partial struct TestJoinPath_tests /*dyn*/ {
     internal @string @base;
     internal slice<@string> elem;
     internal @string @out;

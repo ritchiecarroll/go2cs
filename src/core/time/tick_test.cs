@@ -15,7 +15,7 @@ using Δtime = time_package;
 
 partial class time_test_package {
 
-[GoType("dyn")] internal partial struct TestTicker_type {
+internal partial struct TestTicker_type /*dyn*/ {
     internal nint count;
     internal Δtime.Duration delta;
 }
@@ -397,26 +397,26 @@ public static void TestChan(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType] partial interface timer {
+partial interface timer {
     bool Stop();
     bool Reset(Δtime.Duration _);
 }
 
 // tickerTimer is a Timer with Reset and Stop methods that return bools,
 // to have the same signatures as Timer.
-[GoType] partial struct tickerTimer {
+partial struct tickerTimer {
     public partial ref ж<time_package.Ticker> Ticker { get; }
     internal bool stopped;
 }
 
-[GoRecv] internal static bool Stop(this ref tickerTimer t) {
+internal static bool Stop(this ref tickerTimer t) {
     var pending = !t.stopped;
     t.stopped = true;
     t.Ticker.Stop();
     return pending;
 }
 
-[GoRecv] internal static bool Reset(this ref tickerTimer t, Δtime.Duration d) {
+internal static bool Reset(this ref tickerTimer t, Δtime.Duration d) {
     var pending = !t.stopped;
     t.stopped = false;
     t.Ticker.Reset(d);

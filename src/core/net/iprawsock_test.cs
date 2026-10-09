@@ -17,7 +17,7 @@ partial class net_internal_test_package {
 //	golang.org/x/net/ipv4
 //	golang.org/x/net/ipv6
 //	golang.org/x/net/icmp
-[GoType] internal partial struct resolveIPAddrTest {
+internal partial struct resolveIPAddrTest {
     internal @string network;
     internal @string litAddrOrName;
     internal ж<global::go.net_package.IPAddr> addr;
@@ -86,7 +86,7 @@ public static void TestResolveIPAddr(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct ipConnLocalNameTestsᴛ1 {
+partial struct ipConnLocalNameTestsᴛ1 /*dyn*/ {
     internal @string net;
     internal ж<global::go.net_package.IPAddr> laddr;
 }
@@ -159,13 +159,12 @@ public static void TestIPConnRemoteName(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] [GoLocalName("test")] internal partial struct TestDialListenIPArgs_test {
-    [GoArrayDims(2)]
-    internal slice<array<@string>> argLists;
+internal partial struct TestDialListenIPArgs_test /*dyn*/ {
+    internal /*[2]*/ slice<array<@string>> argLists;
     internal bool shouldFail;
 }
 
-[GoType("dyn")] [GoValueClone("args")] internal partial struct TestDialListenIPArgs_type {
+internal partial struct TestDialListenIPArgs_type /*dyn*/ {
     internal @string network, address;
     internal array<@string> args = new(2);
 }

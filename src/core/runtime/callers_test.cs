@@ -29,7 +29,7 @@ internal static partial slice<uintptr> f3(bool pan) {
     return ret.slice(0, Δruntime.Callers(0, ret)); // line 27
 }
 
-[GoType("dyn")] internal partial struct testCallers_want {
+internal partial struct testCallers_want /*dyn*/ {
     internal @string name;
     internal nint line;
 }

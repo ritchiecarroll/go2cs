@@ -17,7 +17,7 @@ using Δreflect = reflect_package;
 
 partial class reflect_test_package {
 
-[GoLocalName("MyBuffer")] [GoType("global::go.bytes_package.Buffer")] internal partial struct TestImplicitMapConversion_MyBuffer;
+internal partial struct TestImplicitMapConversion_MyBuffer /*global::go.bytes_package.Buffer*/;
 
 public static void TestImplicitMapConversion(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -181,7 +181,7 @@ public static void TestImplicitAppendConversion(ж<Δtesting.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct implementsTestsᴛ1 {
+partial struct implementsTestsᴛ1 /*dyn*/ {
     internal any x;
     internal any t;
     internal bool b;
@@ -198,7 +198,7 @@ internal static slice<implementsTestsᴛ1> implementsTests = new implementsTests
     new(@new<ж<notAnExpr>>(), @new<notASTExpr>(), true)
 }.slice();
 
-[GoType] partial struct notAnExpr {
+partial struct notAnExpr {
 }
 
 internal static tokenꓸPos Pos(this notAnExpr _) {
@@ -212,7 +212,7 @@ internal static tokenꓸPos End(this notAnExpr _) {
 internal static void exprNode(this notAnExpr _) {
 }
 
-[GoType] partial interface notASTExpr :
+partial interface notASTExpr :
     ast.Node
 {
     void exprNode();
@@ -242,11 +242,11 @@ internal static slice<implementsTestsᴛ1> assignableTests = new implementsTests
     new(@new<Ch>(), Ꮡ(/*<-*/channel<any>.RecvOnly), true)
 }.slice();
 
-[GoType("ж<nint>")] partial class IntPtr;
+partial class IntPtr /*ж<nint>*/;
 
-[GoType("ж<nint>")] partial class IntPtr1;
+partial class IntPtr1 /*ж<nint>*/;
 
-[GoType("chan any")] [GoChanDir(GoChanDir.Recv)] partial struct Ch;
+partial struct Ch /*<-chan any*/;
 
 public static void TestAssignableTo(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();

@@ -25,10 +25,10 @@ internal static @string testString; // test data for write tests
 
 internal static slice<byte> testBytes; // test data; same as testString but as a slice.
 
-[GoType] partial struct negativeReader {
+partial struct negativeReader {
 }
 
-[GoRecv] internal static (nint, error) Read(this ref negativeReader r, slice<byte> _) {
+internal static (nint, error) Read(this ref negativeReader r, slice<byte> _) {
     return (-1, default!);
 }
 
@@ -332,7 +332,7 @@ public static void TestReadFrom(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct panicReader {
+partial struct panicReader {
     internal bool panic;
 }
 
@@ -563,7 +563,7 @@ public static void TestNext(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct readBytesTestsᴛ1 {
+partial struct readBytesTestsᴛ1 /*dyn*/ {
     internal @string buffer;
     internal byte delim;
     internal slice<@string> expected;

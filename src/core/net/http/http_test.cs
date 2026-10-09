@@ -22,7 +22,7 @@ using static global::go.net.http_package;
 
 partial class http_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestForeachHeaderElement_tests {
+internal partial struct TestForeachHeaderElement_tests /*dyn*/ {
     internal @string @in;
     internal slice<@string> want;
 }

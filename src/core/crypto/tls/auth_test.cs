@@ -12,7 +12,7 @@ using static go.crypto.tls_package;
 
 partial class tls_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestSignatureSelection_tests {
+internal partial struct TestSignatureSelection_tests /*dyn*/ {
     internal ж<global::go.crypto.tls_package.Certificate> cert;
     internal slice<global::go.crypto.tls_package.SignatureScheme> peerSigAlgs;
     internal uint16 tlsVersion;
@@ -21,7 +21,7 @@ partial class tls_internal_test_package {
     internal crypto.Hash expectedHash;
 }
 
-[GoType("dyn")] internal partial struct TestSignatureSelection_badTests {
+internal partial struct TestSignatureSelection_badTests /*dyn*/ {
     internal ж<global::go.crypto.tls_package.Certificate> cert;
     internal slice<global::go.crypto.tls_package.SignatureScheme> peerSigAlgs;
     internal uint16 tlsVersion;

@@ -131,18 +131,18 @@ internal static slice<testCase1<@string, bool>> isValidTests = new testCase1<@st
     new("1"u8, true)
 }.slice();
 
-[GoType] internal partial struct testCase1<In, Out> {
+internal partial struct testCase1<In, Out> {
     internal In @in;
     internal Out @out;
 }
 
-[GoType] internal partial struct testCase2<In1, In2, Out> {
+internal partial struct testCase2<In1, In2, Out> {
     internal In1 in1;
     internal In2 in2;
     internal Out @out;
 }
 
-[GoType] internal partial struct testCase3<In1, In2, In3, Out> {
+internal partial struct testCase3<In1, In2, In3, Out> {
     internal In1 in1;
     internal In2 in2;
     internal In3 in3;

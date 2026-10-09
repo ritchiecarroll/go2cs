@@ -395,7 +395,7 @@ internal static map<global::go.net.http_package.ConnState, nint> ExportAllConnsB
     finally { if (ᒐd1) Ꮡs.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[GoRecv] internal static ж<global::go.net.http_package.Request> WithT(this ref global::go.net.http_package.Request r, ж<testing.T> Ꮡt) {
+internal static ж<global::go.net.http_package.Request> WithT(this ref global::go.net.http_package.Request r, ж<testing.T> Ꮡt) {
     return r.WithContext(context_package.WithValue(r.Context(), new tLogKey(nil), Ꮡt.Logf));
 }
 
@@ -407,7 +407,7 @@ public static Action /*restore*/ ExportSetH2GoawayTimeout(time.Duration d) {
     };
 }
 
-[GoRecv] internal static bool ExportIsReplayable(this ref global::go.net.http_package.Request r) {
+internal static bool ExportIsReplayable(this ref global::go.net.http_package.Request r) {
     return r.isReplayable();
 }
 

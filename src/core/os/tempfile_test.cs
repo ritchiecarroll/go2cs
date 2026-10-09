@@ -29,7 +29,7 @@ public static void TestCreateTemp(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCreateTempPattern_tests {
+internal partial struct TestCreateTempPattern_tests /*dyn*/ {
     internal @string pattern, prefix, suffix;
 }
 
@@ -64,7 +64,7 @@ public static void TestCreateTempPattern(ж<Δtesting.T> Ꮡt) {
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string sepᶜ1 = "\\";
 
-[GoType("dyn")] internal partial struct TestCreateTempBadPattern_tests {
+internal partial struct TestCreateTempBadPattern_tests /*dyn*/ {
     internal @string pattern;
     internal bool wantErr;
 }
@@ -117,7 +117,7 @@ public static void TestCreateTempBadPattern(ж<Δtesting.T> Ꮡt) {
 internal static readonly @string notExistsˢ3 = "/_not_exists_"u8;
 internal static readonly @string xyzˢ = "*xyz"u8;
 
-[GoType("dyn")] internal partial struct TestMkdirTemp_tests {
+internal partial struct TestMkdirTemp_tests /*dyn*/ {
     internal @string pattern;
     internal @string wantPrefix, wantSuffix;
 }
@@ -195,7 +195,7 @@ public static void TestMkdirTempBadDir(ж<Δtesting.T> Ꮡt) {
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string sepᶜ2 = "\\";
 
-[GoType("dyn")] internal partial struct TestMkdirTempBadPattern_tests {
+internal partial struct TestMkdirTempBadPattern_tests /*dyn*/ {
     internal @string pattern;
     internal bool wantErr;
 }

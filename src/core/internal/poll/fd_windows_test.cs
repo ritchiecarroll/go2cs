@@ -19,7 +19,7 @@ using static go.@internal.poll_internal_test_package;
 
 partial class poll_test_package {
 
-[GoType] partial struct loggedFD {
+partial struct loggedFD {
     public @string Net;
     public ж<poll.FD> FD;
     public error Err;
@@ -204,7 +204,7 @@ public static void TestWSASocketConflict(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] partial struct _TCP_INFO_v0 {
+partial struct _TCP_INFO_v0 {
     public uint32 State;
     public uint32 Mss;
     public uint64 ConnectionTimeMs;

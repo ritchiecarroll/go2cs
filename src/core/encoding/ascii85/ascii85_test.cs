@@ -12,7 +12,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class ascii85_internal_test_package {
 
-[GoType] internal partial struct testpair {
+internal partial struct testpair {
     internal @string decoded, encoded;
 }
 
@@ -171,7 +171,7 @@ public static void TestDecoderBuffering(ж<testing.T> Ꮡt) {
 internal static readonly @string corruptionInQAtOffsetVˢ = "Corruption in %q at offset %v, want %v"u8;
 internal static readonly object decoderFailedToDetectˢ = (@string)"Decoder failed to detect corruption in"u8;
 
-[GoType("dyn")] [GoLocalName("corrupt")] internal partial struct TestDecodeCorrupt_corrupt {
+internal partial struct TestDecodeCorrupt_corrupt /*dyn*/ {
     internal @string e;
     internal nint p;
 }

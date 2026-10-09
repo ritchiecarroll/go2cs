@@ -11,7 +11,7 @@ using static go.@internal.poll_package;
 
 partial class poll_internal_test_package {
 
-[GoRecv] internal static error EOFError(this ref global::go.@internal.poll_package.FD fd, nint n, error err) {
+internal static error EOFError(this ref global::go.@internal.poll_package.FD fd, nint n, error err) {
     return fd.eofError(n, err);
 }
 

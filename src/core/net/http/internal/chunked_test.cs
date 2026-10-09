@@ -165,7 +165,7 @@ public static void TestChunkReaderAllocs(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("testCase")] internal partial struct TestParseHexUint_testCase {
+internal partial struct TestParseHexUint_testCase /*dyn*/ {
     internal @string @in;
     internal uint64 want;
     internal @string wantErr;
@@ -332,7 +332,7 @@ public static void TestChunkReaderByteAtATime(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestChunkInvalidInputs_type {
+internal partial struct TestChunkInvalidInputs_type /*dyn*/ {
     internal @string name;
     internal @string b;
 }
@@ -366,14 +366,14 @@ public static void TestChunkInvalidInputs(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct funcReader {
+internal partial struct funcReader {
     internal Func<nint, (slice<byte>, error)> f;
     internal nint i;
     internal slice<byte> b;
     internal error err;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref funcReader r, slice<byte> p) {
+internal static (nint n, error err) Read(this ref funcReader r, slice<byte> p) {
     nint n = default!;
 
     if (len(r.b) == 0 && r.err == default!) {

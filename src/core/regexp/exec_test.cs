@@ -817,7 +817,7 @@ internal static slice<compileBenchDataᴛ1> benchData = new compileBenchDataᴛ1
 }.slice();
 
 
-[GoType("dyn")] partial struct benchSizesᴛ1 {
+partial struct benchSizesᴛ1 /*dyn*/ {
     internal @string name;
     internal nint n;
 }

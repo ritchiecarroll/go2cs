@@ -215,7 +215,7 @@ public static void TestRequestWithoutRemotePort(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string gopherˢ = "gopher"u8;
 
-[GoType("dyn")] internal partial struct TestResponse_type {
+internal partial struct TestResponse_type /*dyn*/ {
     internal @string name;
     internal @string body;
     internal @string wantCT;

@@ -133,7 +133,7 @@ internal static ж<global::go.net.http_package.Request> dummyRequestWithBodyNoGe
 }
 
 // issue22091Error acts like a golang.org/x/net/http2.ErrNoCachedConn.
-[GoType] internal partial struct issue22091Error {
+internal partial struct issue22091Error {
 }
 
 internal static void IsHTTP2NoCachedConnError(this issue22091Error _) {
@@ -146,7 +146,7 @@ internal static @string Error(this issue22091Error _) {
     return issue22091Errorˢ;
 }
 
-[GoType("dyn")] internal partial struct TestTransportShouldRetryRequest_tests {
+internal partial struct TestTransportShouldRetryRequest_tests /*dyn*/ {
     internal ж<global::go.net.http_package.persistConn> pc;
     internal ж<global::go.net.http_package.Request> req;
     internal error err;

@@ -49,14 +49,14 @@ public static (@string, error) LoadFromEmbeddedTZData(@string zone) {
     return loadFromEmbeddedTZData(zone);
 }
 
-[GoType("num:nint")] public partial struct RuleKind;
+public partial struct RuleKind /*num:nint*/;
 
 public static RuleKind RuleJulian => /* RuleKind(ruleJulian) */ 0;
 public static RuleKind RuleDOY => /* RuleKind(ruleDOY) */ 1;
 public static RuleKind RuleMonthWeekDay => /* RuleKind(ruleMonthWeekDay) */ 2;
 public const int64 UnixToInternal = /* unixToInternal */ 62135596800;
 
-[GoType] public partial struct Rule {
+public partial struct Rule {
     public RuleKind Kind;
     public nint Day;
     public nint Week;

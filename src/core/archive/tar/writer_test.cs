@@ -68,32 +68,32 @@ internal static @string bytediff(slice<byte> a, slice<byte> b) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string longnameˢ = "longname/"u8;
 
-[GoType("dyn")] [GoLocalName("testHeader")] internal partial struct TestWriter_testHeader {
+internal partial struct TestWriter_testHeader /*dyn*/ {
 // WriteHeader(hdr) == wantErr
     internal global::go.archive.tar_package.Header hdr;
     internal error wantErr;
 }
 
-[GoType("dyn")] [GoLocalName("testWrite")] internal partial struct TestWriter_testWrite {
+internal partial struct TestWriter_testWrite /*dyn*/ {
 // Write(str) == (wantCnt, wantErr)
     internal @string str;
     internal nint wantCnt;
     internal error wantErr;
 }
 
-[GoType("dyn")] [GoLocalName("testReadFrom")] internal partial struct TestWriter_testReadFrom {
+internal partial struct TestWriter_testReadFrom /*dyn*/ {
 // ReadFrom(testFile{ops}) == (wantCnt, wantErr)
     internal fileOps ops;
     internal int64 wantCnt;
     internal error wantErr;
 }
 
-[GoType("dyn")] [GoLocalName("testClose")] internal partial struct TestWriter_testClose {
+internal partial struct TestWriter_testClose /*dyn*/ {
 // Close() == wantErr
     internal error wantErr;
 }
 
-[GoType("dyn")] internal partial struct TestWriter_vectors {
+internal partial struct TestWriter_vectors /*dyn*/ {
     internal @string @file; // Optional filename of expected output
     internal slice<TestWriter_testFnc> tests;
 }
@@ -907,9 +907,9 @@ public static void TestValidTypeflagWithPAXHeader(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("bool")] internal partial struct failOnceWriter;
+internal partial struct failOnceWriter /*bool*/;
 
-[GoRecv] internal static (nint, error) Write(this ref failOnceWriter w, slice<byte> b) {
+internal static (nint, error) Write(this ref failOnceWriter w, slice<byte> b) {
     if (((failOnceWriter)(!(bool)w))) {
         return (0, io.ErrShortWrite);
     }
@@ -1045,7 +1045,7 @@ public static void TestWriterErrors(ж<testing.T> Ꮡt) {
     });
 }
 
-[GoType("dyn")] internal partial struct TestSplitUSTARPath_vectors {
+internal partial struct TestSplitUSTARPath_vectors /*dyn*/ {
     internal @string input; // Input path
     internal @string prefix; // Expected output prefix
     internal @string suffix; // Expected output suffix
@@ -1130,7 +1130,7 @@ public static void TestIssue12594(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestWriteLongHeader_type {
+internal partial struct TestWriteLongHeader_type /*dyn*/ {
     internal @string name;
     internal ж<global::go.archive.tar_package.Header> h;
 }
@@ -1164,8 +1164,8 @@ public static void TestWriteLongHeader(ж<testing.T> Ꮡt) {
 
 // testNonEmptyWriter wraps an io.Writer and ensures that
 // Write is never called with an empty buffer.
-[GoType] internal partial struct testNonEmptyWriter {
-    [GoEmbedded] public io_package.Writer Writer;
+internal partial struct testNonEmptyWriter {
+    /*embed*/ public io_package.Writer Writer;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1178,38 +1178,38 @@ internal static (nint, error) Write(this testNonEmptyWriter w, slice<byte> b) {
     return w.Writer.Write(b);
 }
 
-[GoType("dyn")] [GoLocalName("testWrite")] internal partial struct TestFileWriter_testWrite {
+internal partial struct TestFileWriter_testWrite /*dyn*/ {
 // Write(str) == (wantCnt, wantErr)
     internal @string str;
     internal nint wantCnt;
     internal error wantErr;
 }
 
-[GoType("dyn")] [GoLocalName("testReadFrom")] internal partial struct TestFileWriter_testReadFrom {
+internal partial struct TestFileWriter_testReadFrom /*dyn*/ {
 // ReadFrom(testFile{ops}) == (wantCnt, wantErr)
     internal fileOps ops;
     internal int64 wantCnt;
     internal error wantErr;
 }
 
-[GoType("dyn")] [GoLocalName("testRemaining")] internal partial struct TestFileWriter_testRemaining {
+internal partial struct TestFileWriter_testRemaining /*dyn*/ {
 // logicalRemaining() == wantLCnt, physicalRemaining() == wantPCnt
     internal int64 wantLCnt;
     internal int64 wantPCnt;
 }
 
-[GoType("dyn")] [GoLocalName("makeReg")] internal partial struct TestFileWriter_makeReg {
+internal partial struct TestFileWriter_makeReg /*dyn*/ {
     internal int64 size;
     internal @string wantStr;
 }
 
-[GoType("dyn")] [GoLocalName("makeSparse")] internal partial struct TestFileWriter_makeSparse {
+internal partial struct TestFileWriter_makeSparse /*dyn*/ {
     internal TestFileWriter_makeReg makeReg;
     internal global::go.archive.tar_package.sparseHoles sph;
     internal int64 size;
 }
 
-[GoType("dyn")] internal partial struct TestFileWriter_vectors {
+internal partial struct TestFileWriter_vectors /*dyn*/ {
     internal TestFileWriter_fileMaker maker;
     internal slice<TestFileWriter_testFnc> tests;
 }

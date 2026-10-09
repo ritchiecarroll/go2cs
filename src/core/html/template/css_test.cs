@@ -10,7 +10,7 @@ using static go.html.template_package;
 
 partial class template_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestEndsWithCSSKeyword_tests {
+internal partial struct TestEndsWithCSSKeyword_tests /*dyn*/ {
     internal @string css, kw;
     internal bool want;
 }
@@ -37,7 +37,7 @@ public static void TestEndsWithCSSKeyword(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIsCSSNmchar_tests {
+internal partial struct TestIsCSSNmchar_tests /*dyn*/ {
     internal rune rune;
     internal bool want;
 }
@@ -75,7 +75,7 @@ public static void TestIsCSSNmchar(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestDecodeCSS_tests {
+internal partial struct TestDecodeCSS_tests /*dyn*/ {
     internal @string css, want;
 }
 
@@ -143,7 +143,7 @@ public static void TestHexDecode(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestSkipCSSSpace_tests {
+internal partial struct TestSkipCSSSpace_tests /*dyn*/ {
     internal @string css, want;
 }
 
@@ -186,7 +186,7 @@ public static void TestCSSEscaper(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCSSValueFilter_tests {
+internal partial struct TestCSSValueFilter_tests /*dyn*/ {
     internal @string css, want;
 }
 

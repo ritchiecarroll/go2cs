@@ -13,16 +13,16 @@ partial class parse_internal_test_package {
 
 internal static ж<bool> debug = flag.Bool("debug"u8, false, "show the errors produced by the main tests"u8);
 
-[GoType] internal partial struct numberTest {
+internal partial struct numberTest {
     internal @string text;
     internal bool isInt;
     internal bool isUint;
     internal bool isFloat;
     internal bool isComplex;
-    [GoEmbedded] internal int64 int64;
-    [GoEmbedded] internal uint64 uint64;
-    [GoEmbedded] internal float64 float64;
-    [GoEmbedded] internal complex128 complex128;
+    /*embed*/ internal int64 int64;
+    /*embed*/ internal uint64 uint64;
+    /*embed*/ internal float64 float64;
+    /*embed*/ internal complex128 complex128;
 }
 
 // basics
@@ -172,7 +172,7 @@ public static void TestNumberParse(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct parseTest {
+internal partial struct parseTest {
     internal @string name;
     internal @string input;
     internal bool ok;
@@ -507,7 +507,7 @@ public static void TestSkipFuncCheck(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType] internal partial struct isEmptyTest {
+internal partial struct isEmptyTest {
     internal @string name;
     internal @string input;
     internal bool empty;

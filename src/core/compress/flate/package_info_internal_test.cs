@@ -42,7 +42,7 @@ using static go.compress.flate_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("compress/flate/deflate_test.go", "deflate_test.cs", "AClKABIqAAgSAAoWgoKClKaCgoKClIKCgoKClIKCgoKSgu6CgoKCgoKUgoKCyoKCgoKWgIKmgIKmhICCpoCCpoCCpoIAChaygpSCgoKClIKClKaC1oKClIKCgpSAgoIACxaCpsKCgoKCgpS4ggAJDLKCgqaCpqKCpoKCgqaCgpaCgoKCgoKClJaCkoKUlIKAgoKkgoCCgraAgraCgoKCgoKUgoIACxiUgoKAgqSClJaCgoKClIKCuIKCgoKClIKCgoKUgpSCgoKClIKCgpSmooKmpoKCgoKUuIKCgIIADBgADxqCgoKUooKClIKCAAoKgpiCgoKUgoKCgoSCgoKUggAJCIKYgoKClIKCgoKEgoKChIK6koKClIKClIKCgIK21qKCgoKUgoKUgoKClIKUhIKCqIKCgpSCgqaWgoKogoKCqJKCggAIDIKCgoKEgoKWgpaCgoKClJSCloKChIKCgoKEgoKUgoKCgpSCgriu4oKCgpSChAARJoKClIKCgoKChIKCgpSCgoCCgqSClICCgraAgoKmgoKCgpSEgoIACA7qgoKClNaCgoKClISCgt6igoSCgoKClIKUgpSm2IKCgpSCgoKmlIKClIKCgoiigoKClIKCloKCpqKCgoIACQqiggBn1AGCgoKCABAKooKSgoKSgqgACBSCgoKUhIKCgoKUgIKCpICCgqaCgoKCgpaCgu6mloKCgrqChIKmloKCqIKogoKogqiCloKCuMaChIKEgpSCsoKCgpSAgqSAgqSixA==", "553-555:1;558-564:2;560-562:2.1;568-580:1;932-935:1;1055-1068:1")]
+[assembly: go.GoPositionMap("compress/flate/deflate_test.go", "deflate_test.cs", "AClKABIqAAgSAAoWgoKClKaCgoKClIKCgoKClIKCgoKSgu6CgoKCgoKUgoKCyoKCgoKWgIKmgIKmhICCpoCCpoCCpoIAChaygpSCgoKClIKClKaC1oKClIKCgpSAgoIACxaCpsKCgoKCgpS4ggAJDLKCgqaCpqKCpoKCgqaCgpaCgoKCgoKClJaCkoKUlIKAgoKkgoCCgraAgraCgoKCgoKUgoIACxiUgoKAgqSClJaCgoKClIKCuIKCgoKClIKCgoKUgpSCgoKClIKCgpSmooKmpoKCgoKUuIKCgIIADBgADxqCgoKUooKClIKCAAoKgpiCgoKUgoKCgoSCgoKUggAJCIKYgoKClIKCgoKEgoKChIK6koKClIKClIKCgIK21qKCgoKUgoKUgoKClIKUhIKCqIKCgpSCgqaWgoKogoKCqJKCggAIDIKCgoKEgoKWgpaCgoKClJSCloKChIKCgoKEgoKUgoKCgpSCgriu4oKCgpSChAARJoKClIKCgoKChIKCgpSCgoCCgqSClICCgraAgoKmgoKCgpSEgoIACA7qgoKClNaCgoKClISCgt6igoSCgoKClIKUgpSm2IKCgpSCgoKmlIKClIKCgoiigoKClIKCloKCpqKCgoIACQqiggBn1AGCgoKCABAKooKSgoKSgqgACBSCgoKUhIKCgoKUgIKCpICCgqaCgoKCgpaCgu6mloKCgrqChIKmloKCqIKogoKogqiCloKCuMaChIKEgpSCsoKCgpSAgqSAgqSixA==", "553-555:1;558-564:2;560-562:2.1;568-580:1;932-935:1;1055-1068:1", "", "61=largeDataChunk/1/1/6")]
 [assembly: go.GoPositionMap("compress/flate/dict_decoder_test.go", "dict_decoder_test.cs", "ABoaggACPAAWNpKChIKCgoKWgoK4goKCgoKCuoKEgoKClJSUhIKEgoKEgoKEgoKEgoKEgoSCgg==", "75-87:1;88-97:2")]
 [assembly: go.GoPositionMap("compress/flate/flate_test.go", "flate_test.cs", "ABIokqaCgrqSlIKCupKCgoKClIL4hJKCmJKEgoL4goKCgoKUggAJCAAGEABxrAKCgoKUgoKCpoKClICCAAkOgoSCgoKCAAQY8oIABxSCgoKogoKCloKClIKEgoKCuIKUhIKCgsqCloKUgpSUgg==")]
 [assembly: go.GoPositionMap("compress/flate/huffman_bit_writer_test.go", "huffman_bit_writer_test.cs", "ABMizNSCgpaCgoKUAAgIooKCgpSCgoKChIKCgpaCgoKCgoCCpKaWgoCCpJSWgoKCgoKCgoCCpJSCAAsYADh2ooLsooLswoKUgoKCgoKCgpaCgoKUkoKWgoKCgpSSgoKWgoKCgoKUgoKClIKChIKCgoCCtpaCgoKCgoKCgIKklIKUgoKCgpSCgoSCgoKAgrSCgpaWgoKCgoKCgoCCpJSCoqSilKSkpoKCloKCgvqSgpSCgoKCgoKmgoKUpKSkpIKCloKCgpSCgoKUgoKU")]
@@ -57,12 +57,13 @@ namespace go.compress;
 public static partial class flate_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
 
     // <TypeAccessibility>
+    [GoValueClone("limit")] partial struct deflateInflateStringTest {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

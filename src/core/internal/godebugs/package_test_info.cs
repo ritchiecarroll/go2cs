@@ -37,7 +37,7 @@ using static global::go.@internal.godebugs_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/godebugs/godebugs_test.go", "godebugs_test.cs", "ABkmgoSCgoKUlISEgoKClISClIKUgpSElILKAAgEyoKCloKCgpSCgpSCgoKUgoKUgrg=")]
+[assembly: go.GoPositionMap("internal/godebugs/godebugs_test.go", "godebugs_test.cs", "ABkmgoSCgoKUlISEgoKClISClIKUgpSElILKAAgEyoKCloKCgpSCgpSCgoKUgoKUgrg=", "", "", "52=Contains/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -46,7 +46,7 @@ namespace go.@internal;
 public static partial class godebugs_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

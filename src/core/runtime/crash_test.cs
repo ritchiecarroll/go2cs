@@ -78,7 +78,7 @@ public static void TestMain(ж<testing.M> Ꮡm) {
 }
 
 
-[GoType("dyn")] partial struct testprogᴛ1 {
+partial struct testprogᴛ1 /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; }
     internal @string dir;
     internal map<@string, ж<buildexe>> target;
@@ -86,7 +86,7 @@ public static void TestMain(ж<testing.M> Ꮡm) {
 internal static ж<testprogᴛ1> Ꮡtestprog = new StandardBox<testprogᴛ1>(new testprogᴛ1(nil));
 internal static ref testprogᴛ1 testprog => ref Ꮡtestprog.Value;
 
-[GoType] partial struct buildexe {
+partial struct buildexe {
     internal Δsync.Once once;
     internal @string exe;
     internal error err;
@@ -247,7 +247,7 @@ public static void TestVDSO(ж<testing.T> Ꮡt) {
 internal static readonly @string crashˢ = "Crash"u8;
 internal static readonly @string mainRecoveredDoneNewˢ = "main: recovered done\nnew-thread: recovered done\nsecond-new-thread: recovered done\nmain-again: recovered done\n"u8;
 
-[GoType("dyn")] internal partial struct testCrashHandler_crashTest {
+internal partial struct testCrashHandler_crashTest /*dyn*/ {
     public bool Cgo;
 }
 
@@ -862,11 +862,11 @@ public static void TestConcurrentMapWritesIssue69447(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct point {
+partial struct point {
     internal ж<nint> x, y;
 }
 
-[GoRecv] internal static void negate(this ref point p) {
+internal static void negate(this ref point p) {
     p.x.Value = p.x.Value * -1;
     p.y.Value = p.y.Value * -1;
 }
@@ -1278,7 +1278,7 @@ public static void TestDoublePanic(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPanicWhilePanicking_tests {
+internal partial struct TestPanicWhilePanicking_tests /*dyn*/ {
     public @string Want;
     public @string Func;
 }

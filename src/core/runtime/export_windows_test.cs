@@ -20,7 +20,7 @@ internal static void initᴛTimeBeginPeriodRetValue() { TimeBeginPeriodRetValue 
 
 // go2cs generated this placeholder — func NumberOfProcessors is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoType] public partial struct ContextStub {
+public partial struct ContextStub {
     internal partial ref global::go.runtime_package.context context { get; }
 }
 

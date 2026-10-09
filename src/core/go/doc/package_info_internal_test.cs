@@ -30,7 +30,7 @@ using static go.go.doc_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("go/doc/comment_test.go", "comment_test.cs", "ACceooKCgpSClIQABxaAgqSAgqSAgqSAgqaEgoKAgqaCgoCCpoCC")]
-[assembly: global::go.GoPositionMap("go/doc/doc_test.go", "doc_test.cs", "ABwwkriUgoLKtoKCgqaCgpSCgIKklKaCgoKClKaCggAIFJSCgoKClLyCgoKogqKCgoKUgoKogpiSgIKkloKCgoK6goKoggAKDIKAkoCSgAAJBoKCgoKUgoKWgpSCgpSCqJSCgoqogpKClILKgoKUggAxXg==", "89-91:1;103-145:2;150-150:1;151-151:2;152-152:3;178-189:1;192-199:2")]
+[assembly: global::go.GoPositionMap("go/doc/doc_test.go", "doc_test.cs", "ABwwkriUgoLKtoKCgqaCgpSCgIKklKaCgoKClKaCggAIFJSCgoKClLyCgoKogqKCgoKUgoKogpiSgIKkloKCgoK6goKoggAKDIKAkoCSgAAJBoKCgoKUgoKWgpSCgpSCqJSCgoqogpKClILKgoKUggAxXg==", "89-91:1;103-145:2;150-150:1;151-151:2;152-152:3;178-189:1;192-199:2", "", "80=Ext/1/1/2")]
 [assembly: global::go.GoPositionMap("go/doc/example_internal_test.go", "example_internal_test.cs", "ABogggBeqAGSgoKClIKCgoKCpoI=", "101-118:1")]
 [assembly: global::go.GoPositionMap("go/doc/synopsis_test.go", "synopsis_test.cs", "ABASABtAgoKCgpSCgg==")]
 // </GoSourcePositionMaps>
@@ -41,7 +41,7 @@ namespace go.go;
 public static partial class doc_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

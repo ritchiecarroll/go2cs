@@ -110,15 +110,15 @@ public static void BenchmarkMakeSliceCopy(ж<testing.B> Ꮡb) {
     });
 }
 
-[GoType] partial struct struct24 {
+partial struct struct24 {
     internal int64 a, b, c;
 }
 
-[GoType] partial struct struct32 {
+partial struct struct32 {
     internal int64 a, b, c, d;
 }
 
-[GoType] partial struct struct40 {
+partial struct struct40 {
     internal int64 a, b, c, d, e;
 }
 

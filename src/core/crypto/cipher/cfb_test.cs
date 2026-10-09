@@ -23,7 +23,7 @@ partial class cipher_test_package {
 // https://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf, section
 // F.3.13.
 
-[GoType("dyn")] partial struct cfbTestsᴛ1 {
+partial struct cfbTestsᴛ1 /*dyn*/ {
     internal @string key, iv, plaintext, ciphertext;
 }
 internal static slice<cfbTestsᴛ1> cfbTests = new cfbTestsᴛ1[]{

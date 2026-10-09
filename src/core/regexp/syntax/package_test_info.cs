@@ -36,7 +36,7 @@ using static global::go.regexp.syntax_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("regexp/syntax/parse_test.go", "parse_test.cs", "AComAKQBkgOC1gAIGIKmuIKm7oKm7oKokoKCgoKUlJSCgs6igoKmABUy0oKUmIKUpIKUlIKCgoIABR8AAyyClIK2graCtqSCpIKClKSCgoKCgoKUyKaCgoKCgoKmgoK4gpSmgoKUgoKClJSmgoKCgpSClJSCuIrCgoKUggAMCAAuXgALGAAIEoKCgIKkgIK2goCCpICCtoKAgqSAgtqigoKCgpSUlIKCgpaC3IKCgpSCgpaCggAKDAASLIKCgoKClIKC")]
+[assembly: go.GoPositionMap("regexp/syntax/parse_test.go", "parse_test.cs", "AComAKQBkgOC1gAIGIKmuIKm7oKm7oKokoKCgoKUlJSCgs6igoKmABUy0oKUmIKUpIKUlIKCgoIABR8AAyyClIK2graCtqSCpIKClKSCgoKCgoKUyKaCgoKCgoKmgoK4gpSmgoKUgoKClJSmgoKCgpSClJSCuIrCgoKUggAMCAAuXgALGAAIEoKCgIKkgIK2goCCpICCtoKAgqSAgtqigoKCgpSUlIKCgpaC3IKCgpSCgpaCggAKDAASLIKCgoKClIKC", "", "", "43=mkCharClass/1/3/90,mkCharClass/2/3/91,mkCharClass/3/3/92,Repeat/1/5/194,Repeat/2/5/194,Repeat/3/5/195,Repeat/4/5/195,Repeat/5/5/196;466=Repeat/1/7/40,Repeat/2/7/40,Repeat/3/7/41,Repeat/4/7/41,Repeat/5/7/42,Repeat/6/7/43,Repeat/7/7/44")]
 [assembly: go.GoPositionMap("regexp/syntax/prog_test.go", "prog_test.cs", "AA8SAIAByAGCgoKCgoLKooKCgoKUAAsMooKCgqaClA==")]
 [assembly: go.GoPositionMap("regexp/syntax/simplify_test.go", "simplify_test.cs", "ACcSAGWIAoKCgoKClIKC")]
 // </GoSourcePositionMaps>
@@ -47,7 +47,7 @@ namespace go.regexp;
 public static partial class syntax_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.

@@ -16,7 +16,7 @@ using static go.crypto.sha256_package;
 
 partial class sha256_internal_test_package {
 
-[GoType] internal partial struct sha256Test {
+internal partial struct sha256Test {
     internal @string @out;
     internal @string @in;
     internal @string halfState; // marshaled hash state after first half of in written, used by TestGoldenMarshal
@@ -146,7 +146,7 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
     cryptotest.TestAllImplementations(Ꮡt, sha256ˢ, testGoldenMarshal);
 }
 
-[GoType("dyn")] internal partial struct testGoldenMarshal_tests {
+internal partial struct testGoldenMarshal_tests /*dyn*/ {
     internal @string name;
     internal Func<hash.Hash> newHash;
     internal slice<sha256Test> gold;
@@ -250,7 +250,7 @@ public static void TestBlockSize(ж<testing.T> Ꮡt) {
 // the data length has a 1 in the 32nd bit. When casted to int, this changes
 // the sign of the value, and causes the modulus operation to return a
 // different result.
-[GoType] internal partial struct unmarshalTest {
+internal partial struct unmarshalTest {
     internal @string state;
     internal @string sum;
 }
@@ -338,7 +338,7 @@ public static void TestAllocations(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] [GoValueClone("Data")] public partial struct cgoData {
+public partial struct cgoData {
     public array<byte> Data = new(16);
     public ж<cgoData> Ptr;
 }

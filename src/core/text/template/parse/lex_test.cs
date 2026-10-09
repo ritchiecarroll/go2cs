@@ -54,7 +54,7 @@ internal static @string String(this global::go.text.template.parse_package.itemT
     return s;
 }
 
-[GoType] internal partial struct lexTest {
+internal partial struct lexTest {
     internal @string name;
     internal @string input;
     internal slice<global::go.text.template.parse_package.item> items;

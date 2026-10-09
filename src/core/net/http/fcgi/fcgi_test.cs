@@ -18,7 +18,7 @@ using static go.net.http.fcgi_package;
 partial class fcgi_internal_test_package {
 
 
-[GoType("dyn")] partial struct sizeTestsᴛ1 {
+partial struct sizeTestsᴛ1 /*dyn*/ {
     internal uint32 size;
     internal slice<byte> bytes;
 }
@@ -52,7 +52,7 @@ public static void TestSize(ж<testing.T> Ꮡt) {
 // header for the second
 // header for the empty record
 
-[GoType("dyn")] partial struct streamTestsᴛ1 {
+partial struct streamTestsᴛ1 /*dyn*/ {
     internal @string desc;
     internal global::go.net.http.fcgi_package.recType recType;
     internal uint16 reqId;
@@ -75,11 +75,11 @@ internal static slice<streamTestsᴛ1> streamTests = new streamTestsᴛ1[]{
     )
 }.slice();
 
-[GoType] internal partial struct nilCloser {
-    [GoEmbedded] public io_package.ReadWriter ReadWriter;
+internal partial struct nilCloser {
+    /*embed*/ public io_package.ReadWriter ReadWriter;
 }
 
-[GoRecv] internal static error Close(this ref nilCloser c) {
+internal static error Close(this ref nilCloser c) {
     return default!;
 }
 
@@ -133,11 +133,11 @@ continue_outer:;
 break_outer:;
 }
 
-[GoType] internal partial struct writeOnlyConn {
+internal partial struct writeOnlyConn {
     internal slice<byte> buf;
 }
 
-[GoRecv] internal static (nint, error) Write(this ref writeOnlyConn c, slice<byte> p) {
+internal static (nint, error) Write(this ref writeOnlyConn c, slice<byte> p) {
     c.buf = appendꓸꓸꓸ(c.buf, p);
     return (len(p), default!);
 }
@@ -145,11 +145,11 @@ break_outer:;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string connIsWriteOnlyˢ = "conn is write-only"u8;
 
-[GoRecv] internal static (nint, error) Read(this ref writeOnlyConn c, slice<byte> p) {
+internal static (nint, error) Read(this ref writeOnlyConn c, slice<byte> p) {
     return (0, errors.New(connIsWriteOnlyˢ));
 }
 
-[GoRecv] internal static error Close(this ref writeOnlyConn c) {
+internal static error Close(this ref writeOnlyConn c) {
     return default!;
 }
 
@@ -215,7 +215,7 @@ internal static slice<byte> streamBeginTypeStdin = bytes.Join(new slice<byte>[]{
 // confirm that child.handleRecord closes req.pw after aborting req
 // confirm that child.serve closes all pipes after error reading record
 
-[GoType("dyn")] partial struct cleanUpTestsᴛ1 {
+partial struct cleanUpTestsᴛ1 /*dyn*/ {
     internal slice<byte> input;
     internal error err;
 }
@@ -239,8 +239,8 @@ internal static void initᴛcleanUpTests() { cleanUpTests = new cleanUpTestsᴛ1
     )
 }.slice(); }
 
-[GoType] internal partial struct nopWriteCloser {
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct nopWriteCloser {
+    /*embed*/ public io_package.Reader Reader;
 }
 
 internal static (nint, error) Write(this nopWriteCloser _, slice<byte> buf) {
@@ -282,9 +282,9 @@ public static void TestChildServeCleansUp(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct rwNopCloser {
-    [GoEmbedded] public io_package.Reader Reader;
-    [GoEmbedded] public io_package.Writer Writer;
+internal partial struct rwNopCloser {
+    /*embed*/ public io_package.Reader Reader;
+    /*embed*/ public io_package.Writer Writer;
 }
 
 internal static error Close(this rwNopCloser _) {
@@ -326,7 +326,7 @@ internal static slice<byte> streamFullRequestStdin = bytes.Join(new slice<byte>[
     default!);
 
 
-[GoType("dyn")] partial struct envVarTestsᴛ1 {
+partial struct envVarTestsᴛ1 /*dyn*/ {
     internal slice<byte> input;
     internal @string envVar;
     internal @string expectedVal;
@@ -382,7 +382,7 @@ public static void TestChildServeReadsEnvVars(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string gopherˢ = "gopher"u8;
 
-[GoType("dyn")] internal partial struct TestResponseWriterSniffsContentType_type {
+internal partial struct TestResponseWriterSniffsContentType_type /*dyn*/ {
     internal @string name;
     internal @string body;
     internal @string wantCT;
@@ -439,8 +439,8 @@ public static void TestResponseWriterSniffsContentType(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct signalingNopWriteCloser {
-    [GoEmbedded] public io_package.ReadCloser ReadCloser;
+internal partial struct signalingNopWriteCloser {
+    /*embed*/ public io_package.ReadCloser ReadCloser;
     internal channel<bool> closed;
 }
 
@@ -448,11 +448,11 @@ public static void TestResponseWriterSniffsContentType(ж<testing.T> Ꮡt) {
 // interface field in *signalingNopWriteCloser's method set; see the pointer-only satisfaction record.
 internal static (nint, error) Read(this signalingNopWriteCloser recvᴛ, slice<byte> p) => recvᴛ.ReadCloser.Read(p);
 
-[GoRecv] internal static (nint, error) Write(this ref signalingNopWriteCloser _, slice<byte> buf) {
+internal static (nint, error) Write(this ref signalingNopWriteCloser _, slice<byte> buf) {
     return (len(buf), default!);
 }
 
-[GoRecv] internal static error Close(this ref signalingNopWriteCloser rc) {
+internal static error Close(this ref signalingNopWriteCloser rc) {
     close(rc.closed);
     return rc.ReadCloser.Close();
 }

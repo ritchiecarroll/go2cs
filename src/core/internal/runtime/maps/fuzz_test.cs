@@ -26,7 +26,7 @@ partial class maps_test_package {
 //
 // Each command is then executed on the map in sequence. Operations with
 // output (e.g., Get) are verified against a reference map.
-[GoType] partial struct fuzzCommand {
+partial struct fuzzCommand {
     public fuzzOp Op;
     // Used for Get, Put, Delete.
     public uint16 Key;
@@ -37,7 +37,7 @@ partial class maps_test_package {
 // Encoded size of fuzzCommand.
 internal static nint fuzzCommandSize = binary.Size(new fuzzCommand(nil));
 
-[GoType("num:uint8")] public partial struct fuzzOp;
+public partial struct fuzzOp /*num:uint8*/;
 
 internal static fuzzOp fuzzOpGet => /* iota */ 0;
 internal static fuzzOp fuzzOpPut => 1;

@@ -19,7 +19,7 @@ using static go.syscall_internal_test_package;
 
 partial class syscall_test_package {
 
-[GoType("dyn")] internal partial struct TestOpen_tests {
+internal partial struct TestOpen_tests /*dyn*/ {
     internal @string path;
     internal nint flag;
     internal error err;
@@ -72,7 +72,7 @@ public static void TestComputerName(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string longNameAndExtensionˢ = "long_name.and_extension"u8;
 
-[GoType("dyn")] internal partial struct TestWin32finddata_X {
+internal partial struct TestWin32finddata_X /*dyn*/ {
     internal syscall.Win32finddata fd;
     internal byte got;
     internal array<byte> pad = new(10); // to protect ourselves

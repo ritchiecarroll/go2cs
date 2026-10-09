@@ -92,7 +92,7 @@ internal static int64 averageDeltaBound(image.Image m0, image.Image m1, image.Re
 internal static global::go.image.gif_package.writer _ᴛ2ʗ = new gif_internal_test_package.gif_blockWriterᴠwriter(new blockWriter(nil));
 
 
-[GoType("dyn")] partial struct testCaseᴛ1 {
+partial struct testCaseᴛ1 /*dyn*/ {
     internal @string filename;
     internal int64 tolerance;
 }
@@ -655,8 +655,8 @@ public static void TestEncodeCroppedSubImages(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct offsetImage {
-    [GoEmbedded] public image_package.Image Image;
+internal partial struct offsetImage {
+    /*embed*/ public image_package.Image Image;
     public image.Rectangle Rect;
 }
 

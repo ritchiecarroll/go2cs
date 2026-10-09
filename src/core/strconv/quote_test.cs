@@ -43,7 +43,7 @@ public static void TestIsGraphic(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct quoteTest {
+partial struct quoteTest {
     internal @string @in;
     internal @string @out;
     internal @string ascii;
@@ -143,7 +143,7 @@ public static void BenchmarkAppendQuoteRune(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType] partial struct quoteRuneTest {
+partial struct quoteRuneTest {
     internal rune @in;
     internal @string @out;
     internal @string ascii;
@@ -212,7 +212,7 @@ public static void TestQuoteRuneToGraphic(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct canBackquoteTest {
+partial struct canBackquoteTest {
     internal @string @in;
     internal bool @out;
 }
@@ -274,7 +274,7 @@ public static void TestCanBackquote(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct unQuoteTest {
+partial struct unQuoteTest {
     internal @string @in;
     internal @string @out;
 }
@@ -360,7 +360,7 @@ public static void TestUnquote(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestUnquoteInvalidUTF8_tests {
+internal partial struct TestUnquoteInvalidUTF8_tests /*dyn*/ {
     internal @string @in;
     // one of:
     internal @string want;

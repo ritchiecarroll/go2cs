@@ -10,7 +10,7 @@ using static go.@internal.xcoff_package;
 
 partial class xcoff_internal_test_package {
 
-[GoType] internal partial struct fileTest {
+internal partial struct fileTest {
     internal @string @file;
     internal global::go.@internal.xcoff_package.FileHeader hdr;
     internal slice<ж<global::go.@internal.xcoff_package.SectionHeader>> sections;

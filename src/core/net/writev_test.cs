@@ -45,7 +45,7 @@ public static void TestBuffers_read(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestBuffers_consume_tests {
+internal partial struct TestBuffers_consume_tests /*dyn*/ {
     internal global::go.net_package.Buffers @in;
     internal int64 consume;
     internal global::go.net_package.Buffers want;
@@ -108,7 +108,7 @@ public static void TestBuffers_WriteTo(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct testBuffer_writeTo_writeLog {
+internal partial struct testBuffer_writeTo_writeLog /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; }
     internal slice<nint> log;
 }

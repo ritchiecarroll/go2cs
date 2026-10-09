@@ -30,7 +30,7 @@ internal static ж<fakeNetListener> fakeNetListen() {
     return li;
 }
 
-[GoType] partial struct fakeNetListener {
+partial struct fakeNetListener {
     internal channel<EmptyStruct> setc, unsetc;
     internal slice<net.Conn> queue;
     internal bool closed;
@@ -41,7 +41,7 @@ internal static ж<fakeNetListener> fakeNetListen() {
     internal slice<ж<fakeNetConn>> conns;
 }
 
-[GoRecv] internal static void @lock(this ref fakeNetListener li) {
+internal static void @lock(this ref fakeNetListener li) {
     var selᴛ16 = li.setc;
     var selᴛ17 = li.unsetc;
     switch (select(ᐸꟷ(selᴛ16, ꓸꓸꓸ), ᐸꟷ(selᴛ17, ꓸꓸꓸ))) {
@@ -53,7 +53,7 @@ internal static ж<fakeNetListener> fakeNetListen() {
     }}
 }
 
-[GoRecv] internal static void unlock(this ref fakeNetListener li) {
+internal static void unlock(this ref fakeNetListener li) {
     if (li.closed || len(li.queue) > 0){
         li.setc.ᐸꟷ(new EmptyStruct());
     } else {
@@ -119,7 +119,7 @@ internal static error Close(this ж<fakeNetListener> Ꮡli) {
     finally { if (ᒐd1) Ꮡli.DerefOrNull().unlock(); ᒐ.Run(); }
 }
 
-[GoRecv] internal static netꓸAddr Addr(this ref fakeNetListener li) {
+internal static netꓸAddr Addr(this ref fakeNetListener li) {
     return new net.TCPAddrжΔAddr(net.TCPAddrFromAddrPort(li.addr));
 }
 
@@ -141,7 +141,7 @@ internal static (ж<fakeNetConn> r, ж<fakeNetConn> w) fakeNetPipe(netip.AddrPor
 }
 
 // A fakeNetConn is one endpoint of the connection created by fakeNetPipe.
-[GoType] partial struct fakeNetConn {
+partial struct fakeNetConn {
     // local and remote connection halves.
     // Each half contains a buffer.
     // Reads pull from the local buffer, and writes push to the remote buffer.
@@ -154,7 +154,7 @@ internal static (ж<fakeNetConn> r, ж<fakeNetConn> w) fakeNetPipe(netip.AddrPor
 }
 
 // Read reads data from the connection.
-[GoRecv] internal static (nint n, error err) Read(this ref fakeNetConn c, slice<byte> b) {
+internal static (nint n, error err) Read(this ref fakeNetConn c, slice<byte> b) {
     if (c.autoWait) {
         synctest.Wait();
     }
@@ -163,7 +163,7 @@ internal static (ж<fakeNetConn> r, ж<fakeNetConn> w) fakeNetPipe(netip.AddrPor
 
 // Peek returns the available unread read buffer,
 // without consuming its contents.
-[GoRecv] internal static slice<byte> Peek(this ref fakeNetConn c) {
+internal static slice<byte> Peek(this ref fakeNetConn c) {
     if (c.autoWait) {
         synctest.Wait();
     }
@@ -209,7 +209,7 @@ internal static bool IsClosedByPeer(this ж<fakeNetConn> Ꮡc) {
 }
 
 // Close closes the connection.
-[GoRecv] internal static error Close(this ref fakeNetConn c) {
+internal static error Close(this ref fakeNetConn c) {
     if (c.onClose != default!) {
         c.onClose();
     }
@@ -232,43 +232,43 @@ internal static bool IsClosedByPeer(this ж<fakeNetConn> Ꮡc) {
 }
 
 // LocalAddr returns the (fake) local network address.
-[GoRecv] internal static netꓸAddr LocalAddr(this ref fakeNetConn c) {
+internal static netꓸAddr LocalAddr(this ref fakeNetConn c) {
     return (~c.loc).addr;
 }
 
 // LocalAddr returns the (fake) remote network address.
-[GoRecv] internal static netꓸAddr RemoteAddr(this ref fakeNetConn c) {
+internal static netꓸAddr RemoteAddr(this ref fakeNetConn c) {
     return (~c.rem).addr;
 }
 
 // SetDeadline sets the read and write deadlines for the connection.
-[GoRecv] internal static error SetDeadline(this ref fakeNetConn c, time.Time t) {
+internal static error SetDeadline(this ref fakeNetConn c, time.Time t) {
     c.SetReadDeadline(t);
     c.SetWriteDeadline(t);
     return default!;
 }
 
 // SetReadDeadline sets the read deadline for the connection.
-[GoRecv] internal static error SetReadDeadline(this ref fakeNetConn c, time.Time t) {
+internal static error SetReadDeadline(this ref fakeNetConn c, time.Time t) {
     c.loc.of(fakeNetConnHalf.Ꮡrctx).setDeadline(t);
     return default!;
 }
 
 // SetWriteDeadline sets the write deadline for the connection.
-[GoRecv] internal static error SetWriteDeadline(this ref fakeNetConn c, time.Time t) {
+internal static error SetWriteDeadline(this ref fakeNetConn c, time.Time t) {
     c.rem.of(fakeNetConnHalf.Ꮡwctx).setDeadline(t);
     return default!;
 }
 
 // SetReadBufferSize sets the read buffer limit for the connection.
 // Writes by the peer will block so long as the buffer is full.
-[GoRecv] internal static void SetReadBufferSize(this ref fakeNetConn c, nint size) {
+internal static void SetReadBufferSize(this ref fakeNetConn c, nint size) {
     c.loc.setReadBufferSize(size);
 }
 
 // fakeNetConnHalf is one data flow in the connection created by fakeNetPipe.
 // Each half contains a buffer. Writes to the half push to the buffer, and reads pull from it.
-[GoType] partial struct fakeNetConnHalf {
+partial struct fakeNetConnHalf {
     internal netꓸAddr addr;
     // Read and write timeouts.
     internal deadlineContext rctx, wctx;
@@ -303,7 +303,7 @@ internal static ж<fakeNetConnHalf> newSynctestNetConnHalf(netꓸAddr addr) {
 }
 
 // lock locks h.
-[GoRecv] internal static void @lock(this ref fakeNetConnHalf h) {
+internal static void @lock(this ref fakeNetConnHalf h) {
     var selᴛ18 = h.lockw;
     var selᴛ19 = h.lockr;
     var selᴛ20 = h.lockrw;
@@ -329,7 +329,7 @@ internal static ж<fakeNetConnHalf> newSynctestNetConnHalf(netꓸAddr addr) {
 // neither readable nor writable
 
 // h unlocks h.
-[GoRecv] internal static void unlock(this ref fakeNetConnHalf h) {
+internal static void unlock(this ref fakeNetConnHalf h) {
     var canRead = h.readErr != default! || h.buf.Len() > 0;
     var canWrite = h.writeErr != default! || h.bufMax > h.buf.Len();
     switch (ᐧ) {
@@ -514,7 +514,7 @@ internal static (nint n, error err) writePartial(this ж<fakeNetConnHalf> Ꮡh, 
 }
 
 // deadlineContext converts a changable deadline (as in net.Conn.SetDeadline) into a Context.
-[GoType] partial struct deadlineContext {
+partial struct deadlineContext {
     internal sync.Mutex mu;
     internal context.Context ctx;
     internal Action<error> cancel;

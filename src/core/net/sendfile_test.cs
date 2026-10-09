@@ -712,7 +712,7 @@ internal static void benchmarkSendFile(ж<testing.B> Ꮡb, @string proto) {
     }
 }
 
-[GoType] internal partial struct sendFileBench {
+internal partial struct sendFileBench {
     internal @string proto;
     internal nint chunkSize;
 }

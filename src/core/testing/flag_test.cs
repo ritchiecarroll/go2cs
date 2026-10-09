@@ -57,7 +57,7 @@ private static readonly object flagLookupTestVFailedˢ = (@string)@"flag.Lookup(
 private static readonly object testVIsBoolFlagReturnedˢ = (@string)"test.v IsBoolFlag() returned false"u8;
 private static readonly object test2jsonˢ = (@string)"test2json"u8;
 
-[GoType("dyn")] internal partial interface testFlagHelper_type {
+internal partial interface testFlagHelper_type /*dyn*/ {
     bool IsBoolFlag();
 }
 

@@ -179,7 +179,7 @@ public static void TestBuilderGrow(ж<testing.T> Ꮡt) {
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string s0ᶜ = "hello 世界"u8;
 
-[GoType("dyn")] internal partial struct TestBuilderWrite2_type {
+internal partial struct TestBuilderWrite2_type /*dyn*/ {
     internal @string name;
     internal Func<ж<strings.Builder>, (nint, error)> fn;
     internal nint n;
@@ -278,7 +278,7 @@ public static void TestBuilderAllocs(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestBuilderCopyPanic_tests {
+internal partial struct TestBuilderCopyPanic_tests /*dyn*/ {
     internal @string name;
     internal Action fn;
     internal bool wantPanic;

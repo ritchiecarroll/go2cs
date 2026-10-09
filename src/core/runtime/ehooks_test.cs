@@ -19,7 +19,7 @@ partial class runtime_test_package {
 internal static readonly object skippingDueToShortˢ = (@string)"skipping due to -short"u8;
 internal static readonly @string testexithooksˢ = "testexithooks"u8;
 
-[GoType("dyn")] internal partial struct TestExitHooks_scenarios {
+internal partial struct TestExitHooks_scenarios /*dyn*/ {
     internal @string mode;
     internal @string expected;
     internal slice<@string> musthave;

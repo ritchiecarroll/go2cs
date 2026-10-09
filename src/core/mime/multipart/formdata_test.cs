@@ -237,13 +237,13 @@ public static void TestReadForm_NoReadAfterEOF(ж<testing.T> Ꮡt) {
 
 // failOnReadAfterErrorReader is an io.Reader wrapping r.
 // It fails t if any Read is called after a failing Read.
-[GoType] internal partial struct failOnReadAfterErrorReader {
+internal partial struct failOnReadAfterErrorReader {
     internal ж<testing.T> t;
     internal io.Reader r;
     internal error sawErr;
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref failOnReadAfterErrorReader r, slice<byte> p) {
+internal static (nint n, error err) Read(this ref failOnReadAfterErrorReader r, slice<byte> p) {
     nint n = default!;
     error err = default!;
 
@@ -308,7 +308,7 @@ Content-Disposition: form-data; name="largetext"
 internal static readonly @string formDataNameAˢ = @"form-data; name=""a"""u8;
 internal static readonly @string xFooˢ = "X-Foo"u8;
 
-[GoType("dyn")] internal partial struct TestReadForm_MetadataTooLarge_type {
+internal partial struct TestReadForm_MetadataTooLarge_type /*dyn*/ {
     internal @string name;
     internal Action<ж<global::go.mime.multipart_package.Writer>> f;
 }
@@ -467,7 +467,7 @@ internal static void testReadFormManyFiles(ж<testing.T> Ꮡt, bool distinct) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestReadFormLimits_type {
+internal partial struct TestReadFormLimits_type /*dyn*/ {
     internal nint values;
     internal nint files;
     internal nint extraKeysPerFile;
@@ -546,7 +546,7 @@ public static void TestReadFormLimits(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string boundaryˢ = "boundary"u8;
 
-[GoType("dyn")] internal partial struct TestReadFormEndlessHeaderLine_type {
+internal partial struct TestReadFormEndlessHeaderLine_type /*dyn*/ {
     internal @string name;
     internal @string prefix;
 }
@@ -588,7 +588,7 @@ public static void TestReadFormEndlessHeaderLine(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("num:byte")] internal partial struct neverendingReader;
+internal partial struct neverendingReader /*num:byte*/;
 
 internal static (nint n, error err) Read(this neverendingReader r, slice<byte> p) {
     foreach (var (i, _) in p) {
@@ -597,7 +597,7 @@ internal static (nint n, error err) Read(this neverendingReader r, slice<byte> p
     return (len(p), default!);
 }
 
-[GoType("dyn")] internal partial struct BenchmarkReadForm_type {
+internal partial struct BenchmarkReadForm_type /*dyn*/ {
     internal @string name;
     internal Action<ж<global::go.mime.multipart_package.Writer>, nint> form;
 }

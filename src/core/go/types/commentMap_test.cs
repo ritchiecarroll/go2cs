@@ -14,7 +14,7 @@ using static global::go.go.types_internal_test_package;
 
 partial class types_test_package {
 
-[GoType] partial struct comment {
+partial struct comment {
     internal nint line, col;   // comment position
     internal @string text; // comment text, excluding "//", "/*", or "*/"
 }

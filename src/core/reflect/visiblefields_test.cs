@@ -11,46 +11,46 @@ using Δreflect = reflect_package;
 
 partial class reflect_test_package {
 
-[GoType] partial struct structField {
+partial struct structField {
     internal @string name;
     internal slice<nint> index;
 }
 
 
-[GoType("dyn")] partial struct fieldsTestsᴛ1 {
+partial struct fieldsTestsᴛ1 /*dyn*/ {
     internal @string testName;
     internal any val;
     internal slice<structField> expect;
 }
 
-    [GoType("dyn")] partial struct Δtypeᴛ37 {
+    partial struct Δtypeᴛ37 /*dyn*/ {
         public nint A;
         public @string B;
         public bool C;
     }
 
-    [GoType("dyn")] partial struct typeᴛ38_A {
+    partial struct typeᴛ38_A /*dyn*/ {
         public nint X;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ38 {
+    partial struct Δtypeᴛ38 /*dyn*/ {
         public typeᴛ38_A A;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ39 {
+    partial struct Δtypeᴛ39 /*dyn*/ {
         public partial ref SFG SFG { get; }
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ40 {
+    partial struct Δtypeᴛ40 /*dyn*/ {
         internal partial ref sFG sFG { get; }
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ41 {
+    partial struct Δtypeᴛ41 /*dyn*/ {
         public partial ref SFG SFG { get; }
         public partial ref SF SF { get; }
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ42 {
+    partial struct Δtypeᴛ42 /*dyn*/ {
         public partial ref SFGH3 SFGH3 { get; }
         public partial ref SG1 SG1 { get; }
         public partial ref SFG2 SFG2 { get; }
@@ -58,11 +58,11 @@ partial class reflect_test_package {
         public nint L;
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ43 {
+    partial struct Δtypeᴛ43 /*dyn*/ {
         public partial ref ж<SF> SF { get; }
     }
 
-    [GoType("dyn")] partial struct Δtypeᴛ44 {
+    partial struct Δtypeᴛ44 /*dyn*/ {
         public partial ref ΔM M { get; }
     }
 internal static slice<fieldsTestsᴛ1> fieldsTests = new fieldsTestsᴛ1[]{new(
@@ -243,82 +243,82 @@ internal static slice<fieldsTestsᴛ1> fieldsTests = new fieldsTestsᴛ1[]{new(
 )
 }.slice();
 
-[GoType] partial struct SFG {
+partial struct SFG {
     public nint F;
     public nint G;
 }
 
-[GoType] partial struct SFG1 {
+partial struct SFG1 {
     public partial ref SFG SFG { get; }
 }
 
-[GoType] partial struct SFG2 {
+partial struct SFG2 {
     public partial ref SFG1 SFG1 { get; }
 }
 
-[GoType] partial struct SFGH {
+partial struct SFGH {
     public nint F;
     public nint G;
     public nint H;
 }
 
-[GoType] partial struct SFGH1 {
+partial struct SFGH1 {
     public partial ref SFGH SFGH { get; }
 }
 
-[GoType] partial struct SFGH2 {
+partial struct SFGH2 {
     public partial ref SFGH1 SFGH1 { get; }
 }
 
-[GoType] partial struct SFGH3 {
+partial struct SFGH3 {
     public partial ref SFGH2 SFGH2 { get; }
 }
 
-[GoType] partial struct SF {
+partial struct SF {
     public nint F;
 }
 
-[GoType] partial struct SF1 {
+partial struct SF1 {
     public partial ref SF SF { get; }
 }
 
-[GoType] partial struct SF2 {
+partial struct SF2 {
     public partial ref SF1 SF1 { get; }
 }
 
-[GoType] partial struct SG {
+partial struct SG {
     public nint G;
 }
 
-[GoType] partial struct SG1 {
+partial struct SG1 {
     public partial ref SG SG { get; }
 }
 
-[GoType] partial struct sFG {
+partial struct sFG {
     public nint F;
     public nint G;
 }
 
-[GoType] partial struct RS1 {
+partial struct RS1 {
     internal nint i;
 }
 
-[GoType] partial struct RS2 {
+partial struct RS2 {
     public partial ref RS1 RS1 { get; }
 }
 
-[GoType] partial struct RS3 {
+partial struct RS3 {
     public partial ref RS2 RS2 { get; }
     public partial ref RS1 RS1 { get; }
 }
 
-[GoType("map[@string, any]")] partial struct ΔM;
+partial struct ΔM /*map[@string, any]*/;
 
-[GoType] partial struct Rec1 {
+partial struct Rec1 {
     public partial ref ж<Rec2> Rec2 { get; }
 }
 
-[GoType] partial struct Rec2 {
+partial struct Rec2 {
     public @string F;
     public partial ref ж<Rec1> Rec1 { get; }
 }
@@ -370,11 +370,11 @@ public static void TestFields(ж<Δtesting.T> Ꮡt) {
 internal static readonly object expectedErrorˢ = (@string)"expected error"u8;
 internal static readonly @string embeddedStructFieldAˢ = "embedded struct field A"u8;
 
-[GoType("dyn")] internal partial struct TestFieldByIndexErr_A {
+internal partial struct TestFieldByIndexErr_A /*dyn*/ {
     public @string S;
 }
 
-[GoType("dyn")] internal partial struct TestFieldByIndexErr_B {
+internal partial struct TestFieldByIndexErr_B /*dyn*/ {
     public partial ref ж<TestFieldByIndexErr_A> A { get; }
 }
 

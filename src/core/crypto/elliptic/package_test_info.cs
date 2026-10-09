@@ -35,7 +35,7 @@ using static global::go.crypto.elliptic_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/elliptic/elliptic_test.go", "elliptic_test.cs", "ABImwpL2ggAJGoKUgoKSgvqCgoKCyoKCgoKCloKCgoKEgoLKgoKmsqaigoSSlJKWkpSSlpKUkpaSuoKCgoKUgoKUgoKWgpaAgsiAgqSCgoKAggAICIKCgoKClIKCgpSCyoKU1oKCuoKChIKCgoSAgqamgoKEgqiChICCAAUQsoIACwaigoKogoKWgoKCloKCgpaCgoKWgoKC3oCCgpQACwiCgoKCgoKUgoKCgpaCgoKCqIKWgoKClPqigpSCgpaCgpaClIK4goKCgoKCAAkKggAFEoKCksqCgoKCgoKUyoKCgoKCgoIACQqCgoKigoKCgoK4ooKCgoKC", "43-46:1;52-56:1;61-77:1;157-170:1;229-233:1;278-283:1;284-289:2;291-297:3;303-309:4;337-343:1;358-360:1;365-374:1;378-386:1;390-412:1;392-401:1.1;402-411:1.2")]
+[assembly: go.GoPositionMap("crypto/elliptic/elliptic_test.go", "elliptic_test.cs", "ABImwpL2ggAJGoKUgoKSgvqCgoKCyoKCgoKCloKCgoKEgoLKgoKmsqaigoSSlJKWkpSSlpKUkpaSuoKCgoKUgoKUgoKWgpaAgsiAgqSCgoKAggAICIKCgoKClIKCgpSCyoKU1oKCuoKChIKCgoSAgqamgoKEgqiChICCAAUQsoIACwaigoKogoKWgoKCloKCgpaCgoKWgoKC3oCCgpQACwiCgoKCgoKUgoKCgpaCgoKCqIKWgoKClPqigpSCgpaCgpaClIK4goKCgoKCAAkKggAFEoKCksqCgoKCgoKUyoKCgoKCgoIACQqCgoKigoKCgoK4ooKCgoKC", "43-46:1;52-56:1;61-77:1;157-170:1;229-233:1;278-283:1;284-289:2;291-297:3;303-309:4;337-343:1;358-360:1;365-374:1;378-386:1;390-412:1;392-401:1.1;402-411:1.2", "", "35=P256/1/2/4,P256/2/2/5,genericParamsForCurve/1/4/5,P224/1/2/6,P224/2/2/7,genericParamsForCurve/2/4/7,P384/1/2/8,P384/2/2/9,genericParamsForCurve/3/4/9,P521/1/2/10,P521/2/2/11,genericParamsForCurve/4/4/11;390=P256/1/1/4,P224/1/1/5,P384/1/1/6,P521/1/1/7")]
 [assembly: go.GoPositionMap("crypto/elliptic/p224_test.go", "p224_test.cs", "ABQmAIYCjgSCgoKCgpSCgpSCypSCgoKClIKClIL6lIKCgoI=")]
 [assembly: go.GoPositionMap("crypto/elliptic/p256_test.go", "p256_test.cs", "ABIkABAigoKEgoKClIKChIKCgoKWgsqCgoKCgoKChIKCAAgSgoKCAAgGgoyCloKEgoKCgpaCgqiCgqiCgqiCgoKWlIKCuIKCgoKCgpSCgg==")]
 // </GoSourcePositionMaps>
@@ -46,12 +46,13 @@ namespace go.crypto;
 public static partial class elliptic_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
 
     // <TypeAccessibility>
+    [GoLocalName("combinedMult")] partial interface TestP256CombinedMult_combinedMult {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

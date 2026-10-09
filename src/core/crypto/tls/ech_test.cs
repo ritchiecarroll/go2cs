@@ -10,7 +10,7 @@ using static go.crypto.tls_package;
 
 partial class tls_internal_test_package {
 
-[GoType("dyn")] internal partial struct TestDecodeECHConfigLists_type {
+internal partial struct TestDecodeECHConfigLists_type /*dyn*/ {
     internal @string list;
     internal nint numConfigs;
 }

@@ -283,7 +283,7 @@ internal static void checkTextMarshalMatchesString(ж<testing.T> Ꮡt, netipType
     }
 }
 
-[GoType] partial interface appendMarshaler :
+partial interface appendMarshaler :
     encoding.TextMarshaler
 {
     slice<byte> AppendTo(slice<byte> _);
@@ -302,7 +302,7 @@ internal static void checkTextMarshalMatchesAppendTo(ж<testing.T> Ꮡt, appendM
     }
 }
 
-[GoType] partial interface netipType :
+partial interface netipType :
     encoding.BinaryMarshaler,
     encoding.TextMarshaler,
     fmt.Stringer
@@ -310,7 +310,7 @@ internal static void checkTextMarshalMatchesAppendTo(ж<testing.T> Ꮡt, appendM
     bool IsValid();
 }
 
-[GoType] partial interface netipTypeCmp :
+partial interface netipTypeCmp :
     netipType
 {
 }

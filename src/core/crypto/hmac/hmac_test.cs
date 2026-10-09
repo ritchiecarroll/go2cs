@@ -18,7 +18,7 @@ using static go.crypto.hmac_package;
 
 partial class hmac_internal_test_package {
 
-[GoType] internal partial struct hmacTest {
+internal partial struct hmacTest {
     internal Func<hash.Hash> hash;
     internal slice<byte> key;
     internal slice<byte> @in;
@@ -604,8 +604,8 @@ public static void TestNonUniqueHash(ж<testing.T> Ꮡt) {
 }
 
 // justHash implements just the hash.Hash methods and nothing else
-[GoType] internal partial struct justHash {
-    [GoEmbedded] public hash_package.Hash Hash;
+internal partial struct justHash {
+    /*embed*/ public hash_package.Hash Hash;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

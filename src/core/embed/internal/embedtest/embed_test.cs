@@ -184,13 +184,13 @@ internal static slice<EmbedUint8> helloEUint8 = go.embed_package.ΔEmbedBytes<Em
 internal static EmbedBytes helloBytes = (EmbedBytes)(go.embed_package.ΔEmbedBytes<byte>(typeof(embedtest_internal_test_package).Assembly, "go.embed/embed/internal/embedtest_test/", "testdata/hello.txt"));
 internal static EmbedString helloString = (EmbedString)(go.embed_package.ΔEmbedString(typeof(embedtest_internal_test_package).Assembly, "go.embed/embed/internal/embedtest_test/", "testdata/hello.txt"));
 
-[GoType("num:byte")] public partial struct T;
+public partial struct T /*num:byte*/;
 
-[GoType("num:uint8")] public partial struct EmbedUint8;
+public partial struct EmbedUint8 /*num:uint8*/;
 
-[GoType("[]byte")] public partial struct EmbedBytes;
+public partial struct EmbedBytes /*[]byte*/;
 
-[GoType("@string")] public partial struct EmbedString;
+public partial struct EmbedString /*@string*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object readFileˢ = (@string)"ReadFile:"u8;

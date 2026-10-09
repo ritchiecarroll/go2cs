@@ -16,7 +16,7 @@ using go.crypto.@internal;
 
 partial class pbkdf2_test_package {
 
-[GoType] partial struct testVector {
+partial struct testVector {
     internal @string password;
     internal @string salt;
     internal nint iter;

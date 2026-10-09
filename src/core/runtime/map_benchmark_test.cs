@@ -48,7 +48,7 @@ public static void BenchmarkHashStringSpeed(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("[17]byte")] partial struct chunk;
+partial struct chunk /*[17]byte*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object badMapEntryForChunkˢ = (@string)"bad map entry for chunk"u8;
@@ -473,7 +473,7 @@ public static void BenchmarkMapPopulate(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType] partial struct ComplexAlgKey {
+partial struct ComplexAlgKey {
     internal int64 a, b, c;
     internal nint _;
     internal int32 d;
@@ -530,11 +530,11 @@ internal static readonly @string simpleˢ = "simple"u8;
 internal static readonly @string structˢ4 = "struct"u8;
 internal static readonly @string arrayˢ = "array"u8;
 
-[GoType("dyn")] internal partial struct BenchmarkMapStringConversion_stringstruct {
+internal partial struct BenchmarkMapStringConversion_stringstruct /*dyn*/ {
     internal @string s;
 }
 
-[GoLocalName("stringarray")] [GoType("[1]@string")] internal partial struct BenchmarkMapStringConversion_stringarray;
+internal partial struct BenchmarkMapStringConversion_stringarray /*[1]@string*/;
 
 public static void BenchmarkMapStringConversion(ж<testing.B> Ꮡb) {
     foreach (var (_, length) in new nint[]{32, 64}.slice()) {
@@ -684,20 +684,20 @@ internal static Action<ж<testing.B>> smallBenchSizes(Action<ж<testing.B>, nint
     };
 }
 
-[GoType("[16]byte")] partial struct smallType;
+partial struct smallType /*[16]byte*/;
 
-[GoType("[512]byte")] /* [(1 << (int)(9))]byte */
-partial struct mediumType;
+/* [(1 << (int)(9))]byte */
+partial struct mediumType /*[512]byte*/;
 
-[GoType("[4096]byte")] /* [(1 << (int)(12))]byte */
-partial struct bigType;
+/* [(1 << (int)(12))]byte */
+partial struct bigType /*[4096]byte*/;
 
-[GoType] partial interface mapBenchmarkKeyType<ΔT> {
+partial interface mapBenchmarkKeyType<ΔT> {
     //  Type constraints: int32 | int64 | string | smallType | mediumType | bigType | *int32
     // Derived operators: none
 }
 
-[GoType] partial interface mapBenchmarkElemType<ΔT> {
+partial interface mapBenchmarkElemType<ΔT> {
     //  Type constraints: mapBenchmarkKeyType | []int32
     // Derived operators: none
 }

@@ -178,22 +178,22 @@ public static void TestReverseRange(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct nonDeterministicTestingData {
+partial struct nonDeterministicTestingData {
     internal ж<rand.Rand> r;
 }
 
-[GoRecv] internal static nint Len(this ref nonDeterministicTestingData t) {
+internal static nint Len(this ref nonDeterministicTestingData t) {
     return 500;
 }
 
-[GoRecv] internal static bool Less(this ref nonDeterministicTestingData t, nint i, nint j) {
+internal static bool Less(this ref nonDeterministicTestingData t, nint i, nint j) {
     if (i < 0 || j < 0 || i >= t.Len() || j >= t.Len()) {
         throw panic("nondeterministic comparison out of bounds");
     }
     return t.r.Float32() < 0.5F;
 }
 
-[GoRecv] internal static void Swap(this ref nonDeterministicTestingData t, nint i, nint j) {
+internal static void Swap(this ref nonDeterministicTestingData t, nint i, nint j) {
     if (i < 0 || j < 0 || i >= t.Len() || j >= t.Len()) {
         throw panic("nondeterministic comparison out of bounds");
     }
@@ -430,7 +430,7 @@ internal static UntypedInt _Sorted => 4;
 internal static UntypedInt _Dither => 5;
 internal static UntypedInt _NMode => 6;
 
-[GoType] partial struct testingData {
+partial struct testingData {
     internal @string desc;
     internal ж<testing.T> t;
     internal slice<nint> data;
@@ -438,16 +438,16 @@ internal static UntypedInt _NMode => 6;
     internal nint ncmp, nswap;
 }
 
-[GoRecv] internal static nint Len(this ref testingData d) {
+internal static nint Len(this ref testingData d) {
     return len(d.data);
 }
 
-[GoRecv] internal static bool Less(this ref testingData d, nint i, nint j) {
+internal static bool Less(this ref testingData d, nint i, nint j) {
     d.ncmp++;
     return d.data[i] < d.data[j];
 }
 
-[GoRecv] internal static void Swap(this ref testingData d, nint i, nint j) {
+internal static void Swap(this ref testingData d, nint i, nint j) {
     if (d.nswap >= d.maxswap) {
         d.t.Fatalf("%s: used %d swaps sorting slice of %d"u8, d.desc, d.nswap, len(d.data));
     }
@@ -585,7 +585,7 @@ public static void TestStableBM(ж<testing.T> Ꮡt) {
 
 // This is based on the "antiquicksort" implementation by M. Douglas McIlroy.
 // See https://www.cs.dartmouth.edu/~doug/mdmspe.pdf for more info.
-[GoType] partial struct adversaryTestingData {
+partial struct adversaryTestingData {
     internal ж<testing.T> t;
     internal slice<nint> data; // item values, initialized to special gas value and changed by Less
     internal nint maxcmp;  // number of comparisons allowed
@@ -595,11 +595,11 @@ public static void TestStableBM(ж<testing.T> Ꮡt) {
     internal nint gas;  // special value for unset elements, higher than everything else
 }
 
-[GoRecv] internal static nint Len(this ref adversaryTestingData d) {
+internal static nint Len(this ref adversaryTestingData d) {
     return len(d.data);
 }
 
-[GoRecv] internal static bool Less(this ref adversaryTestingData d, nint i, nint j) {
+internal static bool Less(this ref adversaryTestingData d, nint i, nint j) {
     if (d.ncmp >= d.maxcmp) {
         d.t.Fatalf("used %d comparisons sorting adversary data with size %d"u8, d.ncmp, len(d.data));
     }
@@ -624,7 +624,7 @@ public static void TestStableBM(ж<testing.T> Ꮡt) {
     return d.data[i] < d.data[j];
 }
 
-[GoRecv] internal static void Swap(this ref adversaryTestingData d, nint i, nint j) {
+internal static void Swap(this ref adversaryTestingData d, nint i, nint j) {
     (d.data[i], d.data[j]) = (d.data[j], d.data[i]);
 }
 
@@ -659,11 +659,11 @@ public static void TestStableInts(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] partial struct intPairsᴛ1 {
+partial struct intPairsᴛ1 /*dyn*/ {
     internal nint a, b;
 }
 
-[GoType("[]intPairsᴛ1")] partial struct intPairs;
+partial struct intPairs /*[]intPairsᴛ1*/;
 
 // IntPairs compare on a only.
 internal static nint Len(this intPairs d) {

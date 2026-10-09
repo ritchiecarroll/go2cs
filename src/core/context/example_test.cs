@@ -135,7 +135,7 @@ internal static readonly object keyNotFoundˢ = (@string)"key not found:"u8;
 internal static readonly @string languageˢ = "language"u8;
 internal static readonly @string colorˢ = "color"u8;
 
-[GoLocalName("favContextKey")] [GoType("@string")] internal partial struct ExampleWithValue_favContextKey;
+internal partial struct ExampleWithValue_favContextKey /*@string*/;
 
 // Output:
 // context deadline exceeded

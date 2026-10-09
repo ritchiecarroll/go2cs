@@ -10,7 +10,7 @@ using static go.archive.tar_package;
 
 partial class tar_internal_test_package {
 
-[GoType("dyn")] [GoLocalName("file")] internal partial struct FuzzReader_file {
+internal partial struct FuzzReader_file /*dyn*/ {
     internal ж<global::go.archive.tar_package.Header> header;
     internal slice<byte> content;
 }

@@ -88,7 +88,7 @@ public static partial void TestPipe2(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct pipeReturn {
+partial struct pipeReturn {
     internal nint n;
     internal error err;
 }
@@ -146,13 +146,13 @@ public static partial void TestPipe3(ж<testing.T> Ꮡt) {
 }
 
 // Test read after/before writer close.
-[GoType] partial interface closer :
+partial interface closer :
     Δio.Closer
 {
     error CloseWithError(error _);
 }
 
-[GoType] partial struct pipeTest {
+partial struct pipeTest {
     internal bool async;
     internal error err;
     internal bool closeWithError;
@@ -340,12 +340,12 @@ public static partial void TestWriteAfterWriterClose(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestPipeCloseError_testError1 {
-    [GoEmbedded] internal error error;
+internal partial struct TestPipeCloseError_testError1 /*dyn*/ {
+    /*embed*/ internal error error;
 }
 
-[GoType("dyn")] internal partial struct TestPipeCloseError_testError2 {
-    [GoEmbedded] internal error error;
+internal partial struct TestPipeCloseError_testError2 /*dyn*/ {
+    /*embed*/ internal error error;
 }
 
 public static void TestPipeCloseError(ж<testing.T> Ꮡt) {

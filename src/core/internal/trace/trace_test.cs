@@ -30,7 +30,7 @@ partial class trace_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string annotationsGoˢ = "annotations.go"u8;
 
-[GoType("dyn")] internal partial struct TestTraceAnnotations_evDesc {
+internal partial struct TestTraceAnnotations_evDesc /*dyn*/ {
     internal Δtrace.EventKind kind;
     internal Δtrace.TaskID task;
     internal slice<@string> args;
@@ -355,12 +355,12 @@ public static void TestTraceGOMAXPROCS(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string stacksGoˢ = "stacks.go"u8;
 
-[GoType("dyn")] internal partial struct TestTraceStacks_frame {
+internal partial struct TestTraceStacks_frame /*dyn*/ {
     internal @string fn;
     internal nint line;
 }
 
-[GoType("dyn")] internal partial struct TestTraceStacks_evDesc {
+internal partial struct TestTraceStacks_evDesc /*dyn*/ {
     internal Δtrace.EventKind kind;
     internal @string match;
     internal slice<TestTraceStacks_frame> frames;

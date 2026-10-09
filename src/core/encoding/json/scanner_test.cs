@@ -27,7 +27,7 @@ internal static @string stripWhitespace(@string s) {
     }, s);
 }
 
-[GoType("dyn")] internal partial struct TestValid_tests {
+internal partial struct TestValid_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal @string data;
     internal bool ok;
@@ -57,7 +57,7 @@ public static void TestValid(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCompactAndIndent_tests {
+internal partial struct TestCompactAndIndent_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal @string compact;
     internal @string indent;
@@ -144,7 +144,7 @@ public static void TestCompactAndIndent(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestCompactSeparators_tests {
+internal partial struct TestCompactSeparators_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal @string @in, compact;
 }
@@ -246,7 +246,7 @@ public static void TestIndentBig(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIndentErrors_tests {
+internal partial struct TestIndentErrors_tests /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal @string @in;
     internal error err;

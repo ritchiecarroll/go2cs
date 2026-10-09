@@ -17,7 +17,7 @@ using go.testing;
 
 partial class fs_test_package {
 
-[GoType] partial struct Node {
+partial struct Node {
     internal @string name;
     internal slice<ж<Node>> entries; // nil if the entry is a file
     internal nint mark;

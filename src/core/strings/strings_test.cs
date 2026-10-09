@@ -32,7 +32,7 @@ internal static slice<@string> collect(ж<testing.T> Ꮡt, iter.Seq<@string> seq
     return @out;
 }
 
-[GoType] partial struct LinesTest {
+partial struct LinesTest {
     internal @string a;
     internal slice<@string> b;
 }
@@ -62,7 +62,7 @@ internal static @string commas = "1,2,3,4"u8;
 
 internal static @string dots = "1....2....3....4"u8;
 
-[GoType] partial struct IndexTest {
+partial struct IndexTest {
     internal @string s;
     internal @string sep;
     internal nint @out;
@@ -337,7 +337,7 @@ public static void TestIndexRandom(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIndexRune_tests {
+internal partial struct TestIndexRune_tests /*dyn*/ {
     internal @string @in;
     internal rune rune;
     internal nint want;
@@ -510,7 +510,7 @@ public static void BenchmarkIndexByte(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType] partial struct SplitTest {
+partial struct SplitTest {
     internal @string s;
     internal @string sep;
     internal nint n;
@@ -611,7 +611,7 @@ public static void TestSplitAfter(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct FieldsTest {
+partial struct FieldsTest {
     internal @string s;
     internal slice<@string> a;
 }
@@ -677,7 +677,7 @@ public static void TestFieldsFunc(ж<testing.T> Ꮡt) {
 }
 
 // Test case for any function which accepts and returns a single string.
-[GoType] partial struct StringTest {
+partial struct StringTest {
     internal @string @in, @out;
 }
 
@@ -883,7 +883,7 @@ public static void TestToLower(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct toValidUTF8Testsᴛ1 {
+partial struct toValidUTF8Testsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string repl;
     internal @string @out;
@@ -994,7 +994,7 @@ public static void TestTrimSpace(ж<testing.T> Ꮡt) {
 
 //empty string tests
 
-[GoType("dyn")] partial struct trimTestsᴛ1 {
+partial struct trimTestsᴛ1 /*dyn*/ {
     internal @string f;
     internal @string @in, arg, @out;
 }
@@ -1097,7 +1097,7 @@ public static void BenchmarkTrim(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkToValidUTF8_tests {
+internal partial struct BenchmarkToValidUTF8_tests /*dyn*/ {
     internal @string name;
     internal @string input;
 }
@@ -1125,7 +1125,7 @@ public static void BenchmarkToValidUTF8(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType] partial struct predicate {
+partial struct predicate {
     internal Func<rune, bool> f;
     internal @string name;
 }
@@ -1150,7 +1150,7 @@ internal static predicate not(predicate p) {
 }
 
 
-[GoType("dyn")] partial struct trimFuncTestsᴛ1 {
+partial struct trimFuncTestsᴛ1 /*dyn*/ {
     internal predicate f;
     internal @string @in;
     internal @string trimOut;
@@ -1196,7 +1196,7 @@ internal static slice<trimFuncTestsᴛ1> trimFuncTests = new trimFuncTestsᴛ1[]
         ""u8)
 }.slice();
 
-[GoType("dyn")] internal partial struct TestTrimFunc_trimmers {
+internal partial struct TestTrimFunc_trimmers /*dyn*/ {
     internal @string name;
     internal Func<@string, Func<rune, bool>, @string> trim;
     internal @string @out;
@@ -1221,7 +1221,7 @@ public static void TestTrimFunc(ж<testing.T> Ꮡt) {
 // last rune in space is 3 bytes
 // tests of invalid UTF-8
 
-[GoType("dyn")] partial struct indexFuncTestsᴛ1 {
+partial struct indexFuncTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal predicate f;
     internal nint first, last;
@@ -1345,7 +1345,7 @@ internal static @string longSpaces = ((Func<@string>)(() => {
 
 // Tests for results over the chunkLimit
 
-[GoType("dyn")] partial struct RepeatTestsᴛ1 {
+partial struct RepeatTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
     internal nint count;
 }
@@ -1410,7 +1410,7 @@ internal static error /*err*/ repeat(@string s, nint count) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string bitˢ = "64-bit"u8;
 
-[GoType("dyn")] internal partial struct TestRepeatCatchesOverflow_testCase {
+internal partial struct TestRepeatCatchesOverflow_testCase /*dyn*/ {
     internal @string s;
     internal nint count;
     internal @string errStr;
@@ -1464,7 +1464,7 @@ internal static bool runesEqual(slice<rune> a, slice<rune> b) {
 }
 
 
-[GoType("dyn")] partial struct RunesTestsᴛ1 {
+partial struct RunesTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal slice<rune> @out;
     internal bool lossy;
@@ -1587,7 +1587,7 @@ public static void TestReadRune(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct UnreadRuneErrorTestsᴛ1 {
+partial struct UnreadRuneErrorTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal Action<ж<strings.Reader>> f;
 }
@@ -1627,7 +1627,7 @@ public static void TestUnreadRuneError(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct ReplaceTestsᴛ1 {
+partial struct ReplaceTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string old, @new;
     internal nint n;
@@ -1672,7 +1672,7 @@ public static void TestReplace(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct TitleTestsᴛ1 {
+partial struct TitleTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
 }
 public static slice<TitleTestsᴛ1> TitleTests = new TitleTestsᴛ1[]{
@@ -1712,7 +1712,7 @@ public static void TestTitle(ж<testing.T> Ꮡt) {
 // 9-15
 // 17-31, issue 15679
 
-[GoType("dyn")] partial struct ContainsTestsᴛ1 {
+partial struct ContainsTestsᴛ1 /*dyn*/ {
     internal @string str, substr;
     internal bool expected;
 }
@@ -1808,7 +1808,7 @@ public static void TestContainsAny(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct ContainsRuneTestsᴛ1 {
+partial struct ContainsRuneTestsᴛ1 /*dyn*/ {
     internal @string str;
     internal rune r;
     internal bool expected;
@@ -1847,7 +1847,7 @@ public static void TestContainsFunc(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct EqualFoldTestsᴛ1 {
+partial struct EqualFoldTestsᴛ1 /*dyn*/ {
     internal @string s, t;
     internal bool @out;
 }
@@ -1929,7 +1929,7 @@ public static void BenchmarkEqualFold(ж<testing.B> Ꮡb) {
 }
 
 
-[GoType("dyn")] partial struct CountTestsᴛ1 {
+partial struct CountTestsᴛ1 /*dyn*/ {
     internal @string s, sep;
     internal nint num;
 }
@@ -1957,7 +1957,7 @@ public static void TestCount(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct cutTestsᴛ1 {
+partial struct cutTestsᴛ1 /*dyn*/ {
     internal @string s, sep;
     internal @string before, after;
     internal bool found;
@@ -1984,7 +1984,7 @@ public static void TestCut(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct cutPrefixTestsᴛ1 {
+partial struct cutPrefixTestsᴛ1 /*dyn*/ {
     internal @string s, sep;
     internal @string after;
     internal bool found;
@@ -2009,7 +2009,7 @@ public static void TestCutPrefix(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct cutSuffixTestsᴛ1 {
+partial struct cutSuffixTestsᴛ1 /*dyn*/ {
     internal @string s, sep;
     internal @string before;
     internal bool found;
@@ -2472,7 +2472,7 @@ public static void BenchmarkJoin(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct BenchmarkTrimSpace_tests {
+internal partial struct BenchmarkTrimSpace_tests /*dyn*/ {
     internal @string name, input;
 }
 

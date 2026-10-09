@@ -119,7 +119,7 @@ internal static @string makefs(ж<Δtesting.T> Ꮡt, slice<@string> fs) {
 }
 
 // A rootTest is a test case for os.Root.
-[GoType] partial struct rootTest {
+partial struct rootTest {
     internal @string name;
     // fs is the test filesystem layout. See makefs above.
     internal slice<@string> fs;
@@ -785,7 +785,7 @@ public static void TestRootLstat(ж<Δtesting.T> Ꮡt) {
 //
 // These tests verify that, for example, Root.Open("file/./") and os.Open("file/./")
 // have the same result, although the specific result may vary by platform.
-[GoType] partial struct rootConsistencyTest {
+partial struct rootConsistencyTest {
     internal @string name;
     // fs is the test filesystem layout. See makefs above.
     // fsFunc is called to modify the test filesystem, or replace it.
@@ -1249,7 +1249,7 @@ public static void TestRootNonPermissionMode(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestRootUseAfterClose_type {
+internal partial struct TestRootUseAfterClose_type /*dyn*/ {
     internal @string name;
     internal Func<ж<Δos.Root>, @string, error> f;
 }

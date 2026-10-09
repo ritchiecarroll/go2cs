@@ -86,61 +86,40 @@ not being used from outside intra_region_diff.py.
 </summary></entry></feed> 	   
 """u8;
 
-[GoType] public partial struct Feed {
-    [GoTag(@"xml:""http://www.w3.org/2005/Atom feed""")]
-    public global::go.encoding.xml_package.Name XMLName;
-    [GoTag(@"xml:""title""")]
-    public @string Title;
-    [GoTag(@"xml:""id""")]
-    public @string ID;
-    [GoTag(@"xml:""link""")]
-    public slice<Link> Link;
-    [GoTag(@"xml:""updated,attr""")]
-    public time.Time Updated;
-    [GoTag(@"xml:""author""")]
-    public Person Author;
-    [GoTag(@"xml:""entry""")]
-    public slice<Entry> Entry;
+public partial struct Feed {
+    public global::go.encoding.xml_package.Name XMLName; /*`xml:"http://www.w3.org/2005/Atom feed"`*/
+    public @string Title; /*`xml:"title"`*/
+    public @string ID; /*`xml:"id"`*/
+    public slice<Link> Link; /*`xml:"link"`*/
+    public time.Time Updated; /*`xml:"updated,attr"`*/
+    public Person Author; /*`xml:"author"`*/
+    public slice<Entry> Entry; /*`xml:"entry"`*/
 }
 
-[GoType] public partial struct Entry {
-    [GoTag(@"xml:""title""")]
-    public @string Title;
-    [GoTag(@"xml:""id""")]
-    public @string ID;
-    [GoTag(@"xml:""link""")]
-    public slice<Link> Link;
-    [GoTag(@"xml:""updated""")]
-    public time.Time Updated;
-    [GoTag(@"xml:""author""")]
-    public Person Author;
-    [GoTag(@"xml:""summary""")]
-    public Text Summary;
+public partial struct Entry {
+    public @string Title; /*`xml:"title"`*/
+    public @string ID; /*`xml:"id"`*/
+    public slice<Link> Link; /*`xml:"link"`*/
+    public time.Time Updated; /*`xml:"updated"`*/
+    public Person Author; /*`xml:"author"`*/
+    public Text Summary; /*`xml:"summary"`*/
 }
 
-[GoType] public partial struct Link {
-    [GoTag(@"xml:""rel,attr,omitempty""")]
-    public @string Rel;
-    [GoTag(@"xml:""href,attr""")]
-    public @string Href;
+public partial struct Link {
+    public @string Rel; /*`xml:"rel,attr,omitempty"`*/
+    public @string Href; /*`xml:"href,attr"`*/
 }
 
-[GoType] public partial struct Person {
-    [GoTag(@"xml:""name""")]
-    public @string Name;
-    [GoTag(@"xml:""uri""")]
-    public @string URI;
-    [GoTag(@"xml:""email""")]
-    public @string Email;
-    [GoTag(@"xml:"",innerxml""")]
-    public @string InnerXML;
+public partial struct Person {
+    public @string Name; /*`xml:"name"`*/
+    public @string URI; /*`xml:"uri"`*/
+    public @string Email; /*`xml:"email"`*/
+    public @string InnerXML; /*`xml:",innerxml"`*/
 }
 
-[GoType] public partial struct Text {
-    [GoTag(@"xml:""type,attr,omitempty""")]
-    public @string Type;
-    [GoTag(@"xml:"",chardata""")]
-    public @string Body;
+public partial struct Text {
+    public @string Type; /*`xml:"type,attr,omitempty"`*/
+    public @string Body; /*`xml:",chardata"`*/
 }
 
 internal static Feed atomFeed = new Feed(
@@ -269,43 +248,37 @@ internal static readonly @string pathTestString = """
 
 """u8;
 
-[GoType] public partial struct PathTestItem {
+public partial struct PathTestItem {
     public @string Value;
 }
 
-[GoType] public partial struct PathTestA {
-    [GoTag(@"xml:"">Item1""")]
-    public slice<PathTestItem> Items;
+public partial struct PathTestA {
+    public slice<PathTestItem> Items; /*`xml:">Item1"`*/
     public @string Before, After;
 }
 
-[GoType] public partial struct PathTestB {
-    [GoTag(@"xml:""Items>Item1""")]
-    public slice<PathTestItem> Other;
+public partial struct PathTestB {
+    public slice<PathTestItem> Other; /*`xml:"Items>Item1"`*/
     public @string Before, After;
 }
 
-[GoType] public partial struct PathTestC {
-    [GoTag(@"xml:""Items>Item1>Value""")]
-    public slice<@string> Values1;
-    [GoTag(@"xml:""Items>Item2>Value""")]
-    public slice<@string> Values2;
+public partial struct PathTestC {
+    public slice<@string> Values1; /*`xml:"Items>Item1>Value"`*/
+    public slice<@string> Values2; /*`xml:"Items>Item2>Value"`*/
     public @string Before, After;
 }
 
-[GoType] public partial struct PathTestSet {
+public partial struct PathTestSet {
     public slice<PathTestItem> Item1;
 }
 
-[GoType] public partial struct PathTestD {
-    [GoTag(@"xml:""Items""")]
-    public PathTestSet Other;
+public partial struct PathTestD {
+    public PathTestSet Other; /*`xml:"Items"`*/
     public @string Before, After;
 }
 
-[GoType] public partial struct PathTestE {
-    [GoTag(@"xml:""Items>_>Value""")]
-    public @string Underline;
+public partial struct PathTestE {
+    public @string Underline; /*`xml:"Items>_>Value"`*/
     public @string Before, After;
 }
 
@@ -331,46 +304,38 @@ public static void TestUnmarshalPaths(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct BadPathTestA {
-    [GoTag(@"xml:""items>item1""")]
-    public @string First;
-    [GoTag(@"xml:""items>item2""")]
-    public @string Other;
-    [GoTag(@"xml:""items""")]
-    public @string Second;
+public partial struct BadPathTestA {
+    public @string First; /*`xml:"items>item1"`*/
+    public @string Other; /*`xml:"items>item2"`*/
+    public @string Second; /*`xml:"items"`*/
 }
 
-[GoType] public partial struct BadPathTestB {
-    [GoTag(@"xml:""items>item2>value""")]
-    public @string Other;
-    [GoTag(@"xml:""items>item1""")]
-    public @string First;
-    [GoTag(@"xml:""items>item1>value""")]
-    public @string Second;
+public partial struct BadPathTestB {
+    public @string Other; /*`xml:"items>item2>value"`*/
+    public @string First; /*`xml:"items>item1"`*/
+    public @string Second; /*`xml:"items>item1>value"`*/
 }
 
-[GoType] public partial struct BadPathTestC {
+public partial struct BadPathTestC {
     public @string First;
-    [GoTag(@"xml:""First""")]
-    public @string Second;
+    public @string Second; /*`xml:"First"`*/
 }
 
-[GoType] public partial struct BadPathTestD {
+public partial struct BadPathTestD {
     public partial ref BadPathEmbeddedA BadPathEmbeddedA { get; }
     public partial ref BadPathEmbeddedB BadPathEmbeddedB { get; }
 }
 
-[GoType] public partial struct BadPathEmbeddedA {
+public partial struct BadPathEmbeddedA {
     public @string First;
 }
 
-[GoType] public partial struct BadPathEmbeddedB {
-    [GoTag(@"xml:""First""")]
-    public @string Second;
+public partial struct BadPathEmbeddedB {
+    public @string Second; /*`xml:"First"`*/
 }
 
 
-[GoType("dyn")] partial struct badPathTestsᴛ1 {
+partial struct badPathTestsᴛ1 /*dyn*/ {
     internal any v, e;
 }
 internal static slice<badPathTestsᴛ1> badPathTests = new badPathTestsᴛ1[]{
@@ -399,11 +364,9 @@ internal static readonly @string withoutNameTypeData = """
 <Test3 Attr="OK" />
 """u8;
 
-[GoType] public partial struct TestThree {
-    [GoTag(@"xml:""Test3""")]
-    public global::go.encoding.xml_package.Name XMLName;
-    [GoTag(@"xml:"",attr""")]
-    public @string Attr;
+public partial struct TestThree {
+    public global::go.encoding.xml_package.Name XMLName; /*`xml:"Test3"`*/
+    public @string Attr; /*`xml:",attr"`*/
 }
 
 public static void TestUnmarshalWithoutNameType(ж<testing.T> Ꮡt) {
@@ -418,19 +381,16 @@ public static void TestUnmarshalWithoutNameType(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("ParamVal")] internal partial struct TestUnmarshalAttr_ParamVal {
-    [GoTag(@"xml:""int,attr""")]
-    public nint Int;
+internal partial struct TestUnmarshalAttr_ParamVal /*dyn*/ {
+    public nint Int; /*`xml:"int,attr"`*/
 }
 
-[GoType("dyn")] [GoLocalName("ParamPtr")] internal partial struct TestUnmarshalAttr_ParamPtr {
-    [GoTag(@"xml:""int,attr""")]
-    public ж<nint> Int;
+internal partial struct TestUnmarshalAttr_ParamPtr /*dyn*/ {
+    public ж<nint> Int; /*`xml:"int,attr"`*/
 }
 
-[GoType("dyn")] [GoLocalName("ParamStringPtr")] internal partial struct TestUnmarshalAttr_ParamStringPtr {
-    [GoTag(@"xml:""int,attr""")]
-    public ж<@string> Int;
+internal partial struct TestUnmarshalAttr_ParamStringPtr /*dyn*/ {
+    public ж<@string> Int; /*`xml:"int,attr"`*/
 }
 
 public static void TestUnmarshalAttr(ж<testing.T> Ꮡt) {
@@ -470,15 +430,13 @@ public static void TestUnmarshalAttr(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct Tables {
-    [GoTag(@"xml:""http://www.w3.org/TR/html4/ table""")]
-    public @string HTable;
-    [GoTag(@"xml:""http://www.w3schools.com/furniture table""")]
-    public @string FTable;
+public partial struct Tables {
+    public @string HTable; /*`xml:"http://www.w3.org/TR/html4/ table"`*/
+    public @string FTable; /*`xml:"http://www.w3schools.com/furniture table"`*/
 }
 
 
-[GoType("dyn")] partial struct tablesᴛ1 {
+partial struct tablesᴛ1 /*dyn*/ {
     internal @string xml;
     internal Tables tab;
     internal @string ns;
@@ -556,25 +514,18 @@ public static void TestMarshalNS(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct TableAttrs {
+public partial struct TableAttrs {
     public TAttr TAttr;
 }
 
-[GoType] public partial struct TAttr {
-    [GoTag(@"xml:""http://www.w3.org/TR/html4/ table,attr""")]
-    public @string HTable;
-    [GoTag(@"xml:""http://www.w3schools.com/furniture table,attr""")]
-    public @string FTable;
-    [GoTag(@"xml:""http://www.w3.org/XML/1998/namespace lang,attr,omitempty""")]
-    public @string Lang;
-    [GoTag(@"xml:""http://golang.org/xml/ other,attr,omitempty""")]
-    public @string Other1;
-    [GoTag(@"xml:""http://golang.org/xmlfoo/ other,attr,omitempty""")]
-    public @string Other2;
-    [GoTag(@"xml:""http://golang.org/json/ other,attr,omitempty""")]
-    public @string Other3;
-    [GoTag(@"xml:""http://golang.org/2/json/ other,attr,omitempty""")]
-    public @string Other4;
+public partial struct TAttr {
+    public @string HTable; /*`xml:"http://www.w3.org/TR/html4/ table,attr"`*/
+    public @string FTable; /*`xml:"http://www.w3schools.com/furniture table,attr"`*/
+    public @string Lang; /*`xml:"http://www.w3.org/XML/1998/namespace lang,attr,omitempty"`*/
+    public @string Other1; /*`xml:"http://golang.org/xml/ other,attr,omitempty"`*/
+    public @string Other2; /*`xml:"http://golang.org/xmlfoo/ other,attr,omitempty"`*/
+    public @string Other3; /*`xml:"http://golang.org/json/ other,attr,omitempty"`*/
+    public @string Other4; /*`xml:"http://golang.org/2/json/ other,attr,omitempty"`*/
 }
 
 // Default space does not apply to attribute names.
@@ -582,7 +533,7 @@ public static void TestMarshalNS(ж<testing.T> Ꮡt) {
 // Default space does not apply to attribute names.
 // Default space does not apply to attribute names.
 
-[GoType("dyn")] partial struct tableAttrsᴛ1 {
+partial struct tableAttrsᴛ1 /*dyn*/ {
     internal @string xml;
     internal TableAttrs tab;
     internal @string ns;
@@ -677,11 +628,11 @@ public static void TestMarshalNSAttr(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct MyCharData {
+public partial struct MyCharData {
     internal @string body;
 }
 
-[GoRecv] public static error UnmarshalXML(this ref MyCharData m, ж<global::go.encoding.xml_package.Decoder> Ꮡd, global::go.encoding.xml_package.StartElement start) {
+public static error UnmarshalXML(this ref MyCharData m, ж<global::go.encoding.xml_package.Decoder> Ꮡd, global::go.encoding.xml_package.StartElement start) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     while (ᐧ) {
@@ -704,28 +655,26 @@ public static void TestMarshalNSAttr(ж<testing.T> Ꮡt) {
 
 internal static global::go.encoding.xml_package.Unmarshaler _ᴛ3ʗ = new xml_internal_test_package.MyCharDataжUnmarshaler(((ж<MyCharData>)nil));
 
-[GoRecv] public static error UnmarshalXMLAttr(this ref MyCharData m, global::go.encoding.xml_package.Attr attr) {
+public static error UnmarshalXMLAttr(this ref MyCharData m, global::go.encoding.xml_package.Attr attr) {
     throw panic("must not call");
 }
 
-[GoType] public partial struct MyAttr {
+public partial struct MyAttr {
     internal @string attr;
 }
 
-[GoRecv] public static error UnmarshalXMLAttr(this ref MyAttr m, global::go.encoding.xml_package.Attr attr) {
+public static error UnmarshalXMLAttr(this ref MyAttr m, global::go.encoding.xml_package.Attr attr) {
     m.attr = attr.Value;
     return default!;
 }
 
 internal static global::go.encoding.xml_package.UnmarshalerAttr _ᴛ4ʗ = new xml_internal_test_package.MyAttrжUnmarshalerAttr(((ж<MyAttr>)nil));
 
-[GoType] public partial struct MyStruct {
+public partial struct MyStruct {
     public ж<MyCharData> Data;
-    [GoTag(@"xml:"",attr""")]
-    public ж<MyAttr> Attr;
+    public ж<MyAttr> Attr; /*`xml:",attr"`*/
     public MyCharData Data2;
-    [GoTag(@"xml:"",attr""")]
-    public MyAttr Attr2;
+    public MyAttr Attr2; /*`xml:",attr"`*/
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -751,13 +700,12 @@ public static void TestUnmarshaler(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct Pea {
+public partial struct Pea {
     public @string Cotelydon;
 }
 
-[GoType] public partial struct Pod {
-    [GoTag(@"xml:""Pea""")]
-    public any Pea;
+public partial struct Pod {
+    public any Pea; /*`xml:"Pea"`*/
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -784,9 +732,8 @@ public static void TestUnmarshalIntoInterface(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct X {
-    [GoTag(@"xml:"",comment""")]
-    public @string D;
+public partial struct X {
+    public @string D; /*`xml:",comment"`*/
 }
 
 // Issue 11112. Unmarshal must reject invalid comments.
@@ -808,11 +755,9 @@ public static void TestMalformedComment(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct IXField {
-    [GoTag(@"xml:""five""")]
-    public nint Five;
-    [GoTag(@"xml:"",innerxml""")]
-    public slice<@string> NotInnerXML;
+public partial struct IXField {
+    public nint Five; /*`xml:"five"`*/
+    public slice<@string> NotInnerXML; /*`xml:",innerxml"`*/
 }
 
 // Issue 15600. ",innerxml" on a field that can't hold it.
@@ -831,19 +776,19 @@ public static void TestInvalidInnerXMLType(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] partial struct Child_G {
+partial struct Child_G /*dyn*/ {
     public nint I;
 }
 
-[GoType] public partial struct Child {
+public partial struct Child {
     public Child_G G;
 }
 
-[GoType] public partial struct ChildToEmbed {
+public partial struct ChildToEmbed {
     public bool X;
 }
 
-[GoType] public partial struct Parent {
+public partial struct Parent {
     public nint I;
     public ж<nint> IPtr;
     public slice<nint> Is;
@@ -1025,7 +970,7 @@ public static void TestUnmarshalEmptyValues(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct WhitespaceValuesParent {
+public partial struct WhitespaceValuesParent {
     public bool BFalse;
     public bool BTrue;
     public nint I;
@@ -1114,49 +1059,28 @@ public static void TestUnmarshalWhitespaceValues(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct WhitespaceAttrsParent {
-    [GoTag(@"xml:"",attr""")]
-    public bool BFalse;
-    [GoTag(@"xml:"",attr""")]
-    public bool BTrue;
-    [GoTag(@"xml:"",attr""")]
-    public nint I;
-    [GoTag(@"xml:"",attr""")]
-    public nint INeg;
-    [GoTag(@"xml:"",attr""")]
-    public int8 I8;
-    [GoTag(@"xml:"",attr""")]
-    public int8 I8Neg;
-    [GoTag(@"xml:"",attr""")]
-    public int16 I16;
-    [GoTag(@"xml:"",attr""")]
-    public int16 I16Neg;
-    [GoTag(@"xml:"",attr""")]
-    public int32 I32;
-    [GoTag(@"xml:"",attr""")]
-    public int32 I32Neg;
-    [GoTag(@"xml:"",attr""")]
-    public int64 I64;
-    [GoTag(@"xml:"",attr""")]
-    public int64 I64Neg;
-    [GoTag(@"xml:"",attr""")]
-    public nuint UI;
-    [GoTag(@"xml:"",attr""")]
-    public uint8 UI8;
-    [GoTag(@"xml:"",attr""")]
-    public uint16 UI16;
-    [GoTag(@"xml:"",attr""")]
-    public uint32 UI32;
-    [GoTag(@"xml:"",attr""")]
-    public uint64 UI64;
-    [GoTag(@"xml:"",attr""")]
-    public float32 F32;
-    [GoTag(@"xml:"",attr""")]
-    public float32 F32Neg;
-    [GoTag(@"xml:"",attr""")]
-    public float64 F64;
-    [GoTag(@"xml:"",attr""")]
-    public float64 F64Neg;
+public partial struct WhitespaceAttrsParent {
+    public bool BFalse; /*`xml:",attr"`*/
+    public bool BTrue; /*`xml:",attr"`*/
+    public nint I; /*`xml:",attr"`*/
+    public nint INeg; /*`xml:",attr"`*/
+    public int8 I8; /*`xml:",attr"`*/
+    public int8 I8Neg; /*`xml:",attr"`*/
+    public int16 I16; /*`xml:",attr"`*/
+    public int16 I16Neg; /*`xml:",attr"`*/
+    public int32 I32; /*`xml:",attr"`*/
+    public int32 I32Neg; /*`xml:",attr"`*/
+    public int64 I64; /*`xml:",attr"`*/
+    public int64 I64Neg; /*`xml:",attr"`*/
+    public nuint UI; /*`xml:",attr"`*/
+    public uint8 UI8; /*`xml:",attr"`*/
+    public uint16 UI16; /*`xml:",attr"`*/
+    public uint32 UI32; /*`xml:",attr"`*/
+    public uint64 UI64; /*`xml:",attr"`*/
+    public float32 F32; /*`xml:",attr"`*/
+    public float32 F32Neg; /*`xml:",attr"`*/
+    public float64 F64; /*`xml:",attr"`*/
+    public float64 F64Neg; /*`xml:",attr"`*/
 }
 
 internal static readonly @string whitespaceAttrsXML = """
@@ -1225,9 +1149,8 @@ public static void TestUnmarshalWhitespaceAttrs(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("T")] internal partial struct TestUnmarshalIntoNil_T {
-    [GoTag(@"xml:""A""")]
-    public nint A;
+internal partial struct TestUnmarshalIntoNil_T /*dyn*/ {
+    public nint A; /*`xml:"A"`*/
 }
 
 // golang.org/issues/53350
@@ -1242,9 +1165,8 @@ public static void TestUnmarshalIntoNil(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object unmarshalDidNotFailˢ = (@string)"Unmarshal did not fail"u8;
 
-[GoType("dyn")] [GoLocalName("nested")] internal partial struct TestCVE202228131_nested {
-    [GoTag(@"xml:"",any""")]
-    public ж<TestCVE202228131_nested> Parent;
+internal partial struct TestCVE202228131_nested /*dyn*/ {
+    public ж<TestCVE202228131_nested> Parent; /*`xml:",any"`*/
 }
 
 public static void TestCVE202228131(ж<testing.T> Ꮡt) {
@@ -1262,7 +1184,7 @@ public static void TestCVE202228131(ж<testing.T> Ꮡt) {
 internal static readonly object testRequiresSignificantˢ = (@string)"test requires significant memory"u8;
 internal static readonly object unmarshalPanickedˢ = (@string)"Unmarshal panicked"u8;
 
-[GoType("dyn")] internal partial struct TestCVE202230633_example {
+internal partial struct TestCVE202230633_example /*dyn*/ {
     public slice<@string> Things;
 }
 

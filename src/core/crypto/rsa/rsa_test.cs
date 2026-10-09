@@ -853,13 +853,13 @@ public static void BenchmarkParsePKCS8PrivateKey(ж<testing.B> Ꮡb) {
     });
 }
 
-[GoType] partial struct testEncryptOAEPMessage {
+partial struct testEncryptOAEPMessage {
     internal slice<byte> @in;
     internal slice<byte> seed;
     internal slice<byte> @out;
 }
 
-[GoType] partial struct testEncryptOAEPStruct {
+partial struct testEncryptOAEPStruct {
     internal @string modulus;
     internal nint e;
     internal @string d;

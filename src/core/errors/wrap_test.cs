@@ -13,7 +13,7 @@ using io;
 
 partial class errors_test_package {
 
-[GoType("dyn")] internal partial struct TestIs_testCases {
+internal partial struct TestIs_testCases /*dyn*/ {
     internal error err;
     internal error target;
     internal bool match;
@@ -75,18 +75,18 @@ public static void TestIs(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct poser {
+partial struct poser {
     internal @string msg;
     internal Func<error, bool> f;
 }
 
 internal static ж<fs.PathError> poserPathErr = Ꮡ(new fs.PathError(Op: "poser"u8));
 
-[GoRecv] internal static @string Error(this ref poser p) {
+internal static @string Error(this ref poser p) {
     return p.msg;
 }
 
-[GoRecv] internal static bool Is(this ref poser p, error err) {
+internal static bool Is(this ref poser p, error err) {
     return p.f(err);
 }
 
@@ -114,11 +114,11 @@ internal static bool As(this ж<poser> Ꮡp, any err) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string errˢ = "err"u8;
 
-[GoType("dyn")] internal partial interface TestAs_timeout {
+internal partial interface TestAs_timeout /*dyn*/ {
     bool Timeout();
 }
 
-[GoType("dyn")] internal partial struct TestAs_testCases {
+internal partial struct TestAs_testCases /*dyn*/ {
     internal error err;
     internal any target;
     internal bool match;
@@ -315,7 +315,7 @@ public static void BenchmarkAs(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestUnwrap_testCases {
+internal partial struct TestUnwrap_testCases /*dyn*/ {
     internal error err;
     internal error want;
 }
@@ -339,7 +339,7 @@ public static void TestUnwrap(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] partial struct errorT {
+partial struct errorT {
     internal @string s;
 }
 
@@ -347,7 +347,7 @@ internal static @string Error(this errorT e) {
     return fmt.Sprintf("errorT(%s)"u8, e.s);
 }
 
-[GoType] partial struct wrapped {
+partial struct wrapped {
     internal @string msg;
     internal error err;
 }
@@ -360,7 +360,7 @@ internal static error Unwrap(this wrapped e) {
     return e.err;
 }
 
-[GoType("[]error")] partial struct multiErr;
+partial struct multiErr /*[]error*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string multiErrorˢ = "multiError"u8;
@@ -373,7 +373,7 @@ internal static slice<error> Unwrap(this multiErr m) {
     return ((slice<error>)m);
 }
 
-[GoType] partial struct errorUncomparable {
+partial struct errorUncomparable {
     internal slice<@string> f;
 }
 

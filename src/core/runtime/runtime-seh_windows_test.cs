@@ -27,7 +27,7 @@ internal static void sehf2() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingAmd64OnlyTestˢ = (@string)"skipping amd64-only test"u8;
 
-[GoType("dyn")] internal partial struct TestSehLookupFunctionEntry_tests {
+internal partial struct TestSehLookupFunctionEntry_tests /*dyn*/ {
     internal @string name;
     internal uintptr pc;
     internal bool hasframe;

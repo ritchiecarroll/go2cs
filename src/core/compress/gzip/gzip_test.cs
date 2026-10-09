@@ -127,7 +127,7 @@ public static void TestLatin1(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestLatin1RoundTrip_testCases {
+internal partial struct TestLatin1RoundTrip_testCases /*dyn*/ {
     internal @string name;
     internal bool ok;
 }
@@ -264,11 +264,11 @@ public static void TestWriterReset(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct limitedWriter {
+internal partial struct limitedWriter {
     public nint N;
 }
 
-[GoRecv] internal static (nint n, error err) Write(this ref limitedWriter l, slice<byte> p) {
+internal static (nint n, error err) Write(this ref limitedWriter l, slice<byte> p) {
     {
         nint nΔ1 = l.N; if (nΔ1 < len(p)) {
             l.N = 0;

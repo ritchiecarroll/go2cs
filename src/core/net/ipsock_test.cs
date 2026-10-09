@@ -12,7 +12,7 @@ partial class net_internal_test_package {
 internal static Func<global::go.net_package.IPAddr, global::go.net_package.ΔAddr> testInetaddr = (global::go.net_package.IPAddr ip) => new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ip.IP, Port: 5682, Zone: ip.Zone)));
 
 
-[GoType("dyn")] partial struct addrListTestsᴛ1 {
+partial struct addrListTestsᴛ1 /*dyn*/ {
     internal Func<global::go.net_package.IPAddr, bool> filter;
     internal slice<global::go.net_package.IPAddr> ips;
     internal Func<global::go.net_package.IPAddr, global::go.net_package.ΔAddr> inetaddr;
@@ -233,7 +233,7 @@ internal static readonly @string fe80ˢ = "fe80::"u8;
 internal static readonly @string fe801ˢ = "fe80::1"u8;
 internal static readonly @string fe802ˢ = "fe80::2"u8;
 
-[GoType("dyn")] internal partial struct TestAddrListPartition_cases {
+internal partial struct TestAddrListPartition_cases /*dyn*/ {
     internal byte lastByte;
     internal global::go.net_package.addrList primaries;
     internal global::go.net_package.addrList fallbacks;

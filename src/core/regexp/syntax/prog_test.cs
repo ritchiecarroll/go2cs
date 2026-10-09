@@ -9,7 +9,7 @@ using static go.regexp.syntax_package;
 partial class syntax_internal_test_package {
 
 
-[GoType("dyn")] partial struct compileTestsᴛ1 {
+partial struct compileTestsᴛ1 /*dyn*/ {
     public @string Regexp;
     public @string Prog;
 }

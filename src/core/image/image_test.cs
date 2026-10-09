@@ -12,7 +12,7 @@ using static go.image_package;
 
 partial class image_internal_test_package {
 
-[GoType] internal partial interface image :
+internal partial interface image :
     Image
 {
     bool Opaque();
@@ -27,7 +27,7 @@ internal static bool cmp(color.Model cm, color.Color c0, color.Color c1) {
 }
 
 
-[GoType("dyn")] partial struct testImagesᴛ1 {
+partial struct testImagesᴛ1 /*dyn*/ {
     internal @string name;
     internal Func<image> image;
 }
@@ -91,7 +91,7 @@ public static void TestImage(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestNewXxxBadRectangle_testCases {
+internal partial struct TestNewXxxBadRectangle_testCases /*dyn*/ {
     internal @string name;
     internal Action<global::go.image_package.Rectangle> f;
 }
@@ -229,7 +229,7 @@ public static void Test16BitsPerColorChannel(ж<testing.T> Ꮡt) {
 //
 // The Uniform and Rectangle types are also special-cased, as they
 // don't have a Set or SetRGBA64 method.
-[GoType("dyn")] internal partial interface TestRGBA64Image_type {
+internal partial interface TestRGBA64Image_type /*dyn*/ {
     void SetRGBA64(nint x, nint y, color.RGBA64 c);
 }
 

@@ -137,12 +137,12 @@ internal static void checkPallocSum(testing.TB t, global::go.runtime_internal_te
     }
 }
 
-[GoType("dyn")] internal partial struct TestMallocBitsPopcntRange_test {
+internal partial struct TestMallocBitsPopcntRange_test /*dyn*/ {
     internal nuint i, n; // bit range to popcnt over.
     internal nuint want; // expected popcnt result on that range.
 }
 
-[GoType("dyn")] internal partial struct TestMallocBitsPopcntRange_tests {
+internal partial struct TestMallocBitsPopcntRange_tests /*dyn*/ {
     internal slice<global::go.runtime_internal_test_package.BitRange> init; // bit ranges to set to 1 in the bitmap.
     internal slice<TestMallocBitsPopcntRange_test> tests; // a set of popcnt tests to run over the bitmap.
 }
@@ -261,7 +261,7 @@ internal static readonly @string multiMaxˢ = "MultiMax"u8;
 internal static readonly @string oneˢ = "One"u8;
 internal static readonly @string allFreeˢ = "AllFree"u8;
 
-[GoType("dyn")] internal partial struct TestPallocBitsSummarize_test {
+internal partial struct TestPallocBitsSummarize_test /*dyn*/ {
     internal slice<global::go.runtime_internal_test_package.BitRange> free; // Ranges of free (zero) bits.
     internal slice<global::go.runtime_internal_test_package.PallocSum> hits;
 }
@@ -373,7 +373,7 @@ public static void BenchmarkPallocBitsSummarize(ж<testing.B> Ꮡb) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPallocBitsAlloc_tests {
+internal partial struct TestPallocBitsAlloc_tests /*dyn*/ {
     internal slice<global::go.runtime_internal_test_package.BitRange> before;
     internal slice<global::go.runtime_internal_test_package.BitRange> after;
     internal uintptr npages;
@@ -490,7 +490,7 @@ public static void TestPallocBitsAlloc(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestPallocBitsFree_tests {
+internal partial struct TestPallocBitsFree_tests /*dyn*/ {
     internal slice<global::go.runtime_internal_test_package.BitRange> beforeInv;
     internal slice<global::go.runtime_internal_test_package.BitRange> afterInv;
     internal slice<nuint> frees;

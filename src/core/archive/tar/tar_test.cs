@@ -26,15 +26,15 @@ using static go.archive.tar_package;
 
 partial class tar_internal_test_package {
 
-[GoType] internal partial struct testError {
-    [GoEmbedded] internal error error;
+internal partial struct testError {
+    /*embed*/ internal error error;
 }
 
-[GoType("[]any")] internal partial struct fileOps; // []T where T is (string | int64)
+internal partial struct fileOps /*[]any*/; // []T where T is (string | int64)
 
 // testFile is an io.ReadWriteSeeker where the IO operations performed
 // on it must match the list of operations in ops.
-[GoType] internal partial struct testFile {
+internal partial struct testFile {
     internal fileOps ops;
     internal int64 pos;
 }
@@ -42,7 +42,7 @@ partial class tar_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unexpectedReadOperationˢ = "unexpected Read operation"u8;
 
-[GoRecv] internal static (nint, error) Read(this ref testFile f, slice<byte> b) {
+internal static (nint, error) Read(this ref testFile f, slice<byte> b) {
     if (len(b) == 0) {
         return (0, default!);
     }
@@ -66,7 +66,7 @@ internal static readonly @string unexpectedReadOperationˢ = "unexpected Read op
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unexpectedWriteOperationˢ = "unexpected Write operation"u8;
 
-[GoRecv] internal static (nint, error) Write(this ref testFile f, slice<byte> b) {
+internal static (nint, error) Write(this ref testFile f, slice<byte> b) {
     if (len(b) == 0) {
         return (0, default!);
     }
@@ -92,7 +92,7 @@ internal static readonly @string unexpectedWriteOperationˢ = "unexpected Write 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unexpectedSeekOperationˢ = "unexpected Seek operation"u8;
 
-[GoRecv] internal static (int64, error) Seek(this ref testFile f, int64 pos, nint whence) {
+internal static (int64, error) Seek(this ref testFile f, int64 pos, nint whence) {
     if (pos == 0 && whence == io.SeekCurrent) {
         return (f.pos, default!);
     }
@@ -111,7 +111,7 @@ internal static readonly @string unexpectedSeekOperationˢ = "unexpected Seek op
     return (f.pos, default!);
 }
 
-[GoType("dyn")] internal partial struct TestSparseEntries_vectors {
+internal partial struct TestSparseEntries_vectors /*dyn*/ {
     internal slice<global::go.archive.tar_package.sparseEntry> @in;
     internal int64 size;
     internal bool wantValid;          // Result of validateSparseEntries
@@ -384,7 +384,7 @@ public static void TestRoundTrip(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct headerRoundTripTest {
+internal partial struct headerRoundTripTest {
     internal ж<global::go.archive.tar_package.Header> h;
     internal fs.FileMode fm;
 }
@@ -603,7 +603,7 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestHeaderAllowedFormats_vectors {
+internal partial struct TestHeaderAllowedFormats_vectors /*dyn*/ {
     internal ж<global::go.archive.tar_package.Header> header;        // Input header
     internal map<@string, @string> paxHdrs; // Expected PAX headers that may be needed
     internal global::go.archive.tar_package.Format formats;            // Expected formats that can encode the header
@@ -851,12 +851,12 @@ public static void TestHeaderAllowedFormats(ж<testing.T> Ꮡt) {
 internal static readonly @string writerˢ = "Writer"u8;
 internal static readonly @string readerˢ = "Reader"u8;
 
-[GoType("dyn")] [GoLocalName("file")] internal partial struct Benchmark_file {
+internal partial struct Benchmark_file /*dyn*/ {
     internal ж<global::go.archive.tar_package.Header> hdr;
     internal slice<byte> body;
 }
 
-[GoType("dyn")] internal partial struct Benchmark_vectors {
+internal partial struct Benchmark_vectors /*dyn*/ {
     internal @string label;
     internal slice<Benchmark_file> files;
 }
@@ -964,41 +964,41 @@ public static void Benchmark(ж<testing.B> Ꮡb) {
 
 internal static fileInfoNames _ᴛ1ʗ = new fileInfoNames(nil);
 
-[GoType] internal partial struct fileInfoNames {
+internal partial struct fileInfoNames {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tmpˢ = "tmp"u8;
 
-[GoRecv] internal static @string Name(this ref fileInfoNames f) {
+internal static @string Name(this ref fileInfoNames f) {
     return tmpˢ;
 }
 
-[GoRecv] internal static int64 Size(this ref fileInfoNames f) {
+internal static int64 Size(this ref fileInfoNames f) {
     return 0;
 }
 
-[GoRecv] internal static fs.FileMode Mode(this ref fileInfoNames f) {
+internal static fs.FileMode Mode(this ref fileInfoNames f) {
     return 511;
 }
 
-[GoRecv] internal static time.Time ModTime(this ref fileInfoNames f) {
+internal static time.Time ModTime(this ref fileInfoNames f) {
     return new time.Time(nil);
 }
 
-[GoRecv] internal static bool IsDir(this ref fileInfoNames f) {
+internal static bool IsDir(this ref fileInfoNames f) {
     return false;
 }
 
-[GoRecv] internal static any Sys(this ref fileInfoNames f) {
+internal static any Sys(this ref fileInfoNames f) {
     return default!;
 }
 
-[GoRecv] internal static (@string, error) Uname(this ref fileInfoNames f) {
+internal static (@string, error) Uname(this ref fileInfoNames f) {
     return (unameˢ, default!);
 }
 
-[GoRecv] internal static (@string, error) Gname(this ref fileInfoNames f) {
+internal static (@string, error) Gname(this ref fileInfoNames f) {
     return (gnameˢ, default!);
 }
 

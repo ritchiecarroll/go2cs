@@ -9,7 +9,7 @@ using static go.debug.elf_package;
 
 partial class elf_internal_test_package {
 
-[GoType] internal partial struct nameTest {
+internal partial struct nameTest {
     internal any val;
     internal @string str;
 }

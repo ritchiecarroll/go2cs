@@ -29,7 +29,7 @@ public static (ж<global::go.@internal.runtime.maps_package.ΔMap>, ж<abi.Swiss
     return (NewMap(mt, hint, nil, maxAllocTest), mt);
 }
 
-[GoRecv] internal static nint TableCount(this ref global::go.@internal.runtime.maps_package.ΔMap m) {
+internal static nint TableCount(this ref global::go.@internal.runtime.maps_package.ΔMap m) {
     if (m.dirLen <= 0) {
         return 0;
     }
@@ -37,7 +37,7 @@ public static (ж<global::go.@internal.runtime.maps_package.ΔMap>, ж<abi.Swiss
 }
 
 // Total group count, summed across all tables.
-[GoRecv] internal static uint64 GroupCount(this ref global::go.@internal.runtime.maps_package.ΔMap m) {
+internal static uint64 GroupCount(this ref global::go.@internal.runtime.maps_package.ΔMap m) {
     if (m.dirLen <= 0) {
         if (m.dirPtr == nil) {
             return 0;
@@ -62,7 +62,7 @@ public static (ж<global::go.@internal.runtime.maps_package.ΔMap>, ж<abi.Swiss
 // Returns nil if there are no full groups.
 // Returns nil if a group is full but contains entirely deleted slots.
 // Returns nil if the map is small.
-[GoRecv] internal static @unsafe.Pointer KeyFromFullGroup(this ref global::go.@internal.runtime.maps_package.ΔMap m, ж<abi.SwissMapType> Ꮡtyp) {
+internal static @unsafe.Pointer KeyFromFullGroup(this ref global::go.@internal.runtime.maps_package.ΔMap m, ж<abi.SwissMapType> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (m.dirLen <= 0) {
@@ -98,7 +98,7 @@ public static (ж<global::go.@internal.runtime.maps_package.ΔMap>, ж<abi.Swiss
 }
 
 // Returns nil if the map is small.
-[GoRecv] internal static ж<global::go.@internal.runtime.maps_package.table> TableFor(this ref global::go.@internal.runtime.maps_package.ΔMap m, ж<abi.SwissMapType> Ꮡtyp, @unsafe.Pointer key) {
+internal static ж<global::go.@internal.runtime.maps_package.table> TableFor(this ref global::go.@internal.runtime.maps_package.ΔMap m, ж<abi.SwissMapType> Ꮡtyp, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (m.dirLen <= 0) {
@@ -109,17 +109,17 @@ public static (ж<global::go.@internal.runtime.maps_package.ΔMap>, ж<abi.Swiss
     return m.directoryAt(idx);
 }
 
-[GoRecv] internal static uint64 GrowthLeft(this ref global::go.@internal.runtime.maps_package.table t) {
+internal static uint64 GrowthLeft(this ref global::go.@internal.runtime.maps_package.table t) {
     return (uint64)t.growthLeft;
 }
 
 // Returns the start address of the groups array.
-[GoRecv] internal static @unsafe.Pointer GroupsStart(this ref global::go.@internal.runtime.maps_package.table t) {
+internal static @unsafe.Pointer GroupsStart(this ref global::go.@internal.runtime.maps_package.table t) {
     return t.groups.data;
 }
 
 // Returns the length of the groups array.
-[GoRecv] internal static uintptr GroupsLength(this ref global::go.@internal.runtime.maps_package.table t) {
+internal static uintptr GroupsLength(this ref global::go.@internal.runtime.maps_package.table t) {
     return (uintptr)(t.groups.lengthMask + 1);
 }
 

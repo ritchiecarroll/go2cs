@@ -35,7 +35,7 @@ internal static slice<@string> goodRe = new @string[]{
     @"\!\\"u8
 }.slice();
 
-[GoType] internal partial struct stringError {
+internal partial struct stringError {
     internal @string re;
     internal @string err;
 }
@@ -163,7 +163,7 @@ public static void TestCopyMatch(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct ReplaceTest {
+public partial struct ReplaceTest {
     internal @string pattern, replacement, input, output;
 }
 
@@ -270,7 +270,7 @@ internal static slice<ReplaceTest> replaceLiteralTests = new ReplaceTest[]{
     new("a+"u8, "$"u8, "aaa"u8, "$"u8)
 }.slice();
 
-[GoType] public partial struct ReplaceFuncTest {
+public partial struct ReplaceFuncTest {
     internal @string pattern;
     internal Func<@string, @string> replacement;
     internal @string input, output;
@@ -372,7 +372,7 @@ public static void TestReplaceAllFunc(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] public partial struct MetaTest {
+public partial struct MetaTest {
     internal @string pattern, output, literal;
     internal bool isLiteral;
 }
@@ -453,12 +453,12 @@ public static void TestLiteralPrefix(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct subexpIndex {
+internal partial struct subexpIndex {
     internal @string name;
     internal nint index;
 }
 
-[GoType] internal partial struct subexpCase {
+internal partial struct subexpCase {
     internal @string input;
     internal nint num;
     internal slice<@string> names;
@@ -511,7 +511,7 @@ public static void TestSubexp(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct splitTestsᴛ1 {
+partial struct splitTestsᴛ1 /*dyn*/ {
     internal @string s;
     internal @string r;
     internal nint n;
@@ -563,7 +563,7 @@ public static void TestSplit(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestParseAndCompile_type {
+internal partial struct TestParseAndCompile_type /*dyn*/ {
     internal syntax.Flags reFlags;
     internal bool expMatch;
 }
@@ -1007,7 +1007,7 @@ public static void BenchmarkQuoteMetaNone(ж<testing.B> Ꮡb) {
 }
 
 
-[GoType("dyn")] partial struct compileBenchDataᴛ1 {
+partial struct compileBenchDataᴛ1 /*dyn*/ {
     internal @string name, re;
 }
 internal static slice<compileBenchDataᴛ1> compileBenchData = new compileBenchDataᴛ1[]{
@@ -1061,7 +1061,7 @@ public static void TestDeepEqual(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct minInputLenTestsᴛ1 {
+partial struct minInputLenTestsᴛ1 /*dyn*/ {
     public @string Regexp;
     internal nint min;
 }

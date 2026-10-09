@@ -13,7 +13,7 @@ partial class bytes_test_package {
 // test runtime·memeq's chunked implementation
 // nil tests
 
-[GoType("dyn")] partial struct compareTestsᴛ1 {
+partial struct compareTestsᴛ1 /*dyn*/ {
     internal slice<byte> a, b;
     internal nint i;
 }

@@ -517,7 +517,7 @@ public static void TestTableIterationGrowDuplicate(ж<testing.T> Ꮡt) {
     });
 }
 
-[GoType("dyn")] internal partial struct TestAlignUpPow2_tests {
+internal partial struct TestAlignUpPow2_tests /*dyn*/ {
     internal uint64 @in;
     internal uint64 want;
     internal bool overflow;
@@ -589,8 +589,8 @@ public static void TestMapZeroSizeSlot(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoLocalName("big")] [GoType("[256]byte")] /* [abi.SwissMapMaxKeyBytes + abi.SwissMapMaxElemBytes]byte */
-internal partial struct TestMapIndirect_big;
+/* [abi.SwissMapMaxKeyBytes + abi.SwissMapMaxElemBytes]byte */
+internal partial struct TestMapIndirect_big /*[256]byte*/;
 
 public static void TestMapIndirect(ж<testing.T> Ꮡt) {
     var (m, typ) = maps_internal_test_package.NewTestMap<TestMapIndirect_big, TestMapIndirect_big>(8);

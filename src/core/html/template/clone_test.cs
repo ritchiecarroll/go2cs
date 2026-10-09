@@ -411,7 +411,7 @@ public static void TestCloneRedefinedName(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string defineARangeVAVEndEndˢ = @"{{define ""a""}}{{range $v := .A}}{{$v}}{{end}}{{end}}"u8;
 
-[GoType("dyn")] internal partial struct TestClonePipe_data {
+internal partial struct TestClonePipe_data /*dyn*/ {
     public slice<@string> A;
 }
 

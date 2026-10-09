@@ -91,7 +91,7 @@ internal static ж<@string> hostName = flag.String("host-name"u8, ""u8, ""u8);
 internal static ж<bool> verifyPeer = flag.Bool("verify-peer"u8, false, ""u8);
 internal static ж<bool> _ᴛ10ʗ = flag.Bool("use-custom-verify-callback"u8, false, ""u8);
 
-[GoType("[]@string")] internal partial struct stringSlice;
+internal partial struct stringSlice /*[]@string*/;
 
 internal static ж<stringSlice> flagStringSlice(@string name, @string usage) {
     var f = Ꮡ(new stringSlice(new @string[]{}.slice()));
@@ -99,11 +99,11 @@ internal static ж<stringSlice> flagStringSlice(@string name, @string usage) {
     return f;
 }
 
-[GoRecv] internal static @string String(this ref stringSlice saf) {
+internal static @string String(this ref stringSlice saf) {
     return strings.Join(saf, ","u8);
 }
 
-[GoRecv] internal static error Set(this ref stringSlice saf, @string s) {
+internal static error Set(this ref stringSlice saf, @string s) {
     saf = append(saf, s);
     return default!;
 }
@@ -501,31 +501,21 @@ public static void TestBogoSuite(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] partial struct bogoResults_Tests {
-    [GoTag(@"json:""actual""")]
-    public @string Actual;
-    [GoTag(@"json:""expected""")]
-    public @string Expected;
-    [GoTag(@"json:""is_unexpected""")]
-    public bool IsUnexpected;
-    [GoTag(@"json:""error,omitempty""")]
-    public @string Error;
+partial struct bogoResults_Tests /*dyn*/ {
+    public @string Actual; /*`json:"actual"`*/
+    public @string Expected; /*`json:"expected"`*/
+    public bool IsUnexpected; /*`json:"is_unexpected"`*/
+    public @string Error; /*`json:"error,omitempty"`*/
 }
 
 // bogoResults is a copy of boringssl.googlesource.com/boringssl/testresults.Results
-[GoType] internal partial struct bogoResults {
-    [GoTag(@"json:""version""")]
-    public nint Version;
-    [GoTag(@"json:""interrupted""")]
-    public bool Interrupted;
-    [GoTag(@"json:""path_delimiter""")]
-    public @string PathDelimiter;
-    [GoTag(@"json:""seconds_since_epoch""")]
-    public float64 SecondsSinceEpoch;
-    [GoTag(@"json:""num_failures_by_type""")]
-    public map<@string, nint> NumFailuresByType;
-    [GoTag(@"json:""tests""")]
-    public map<@string, bogoResults_Tests> Tests;
+internal partial struct bogoResults {
+    public nint Version; /*`json:"version"`*/
+    public bool Interrupted; /*`json:"interrupted"`*/
+    public @string PathDelimiter; /*`json:"path_delimiter"`*/
+    public float64 SecondsSinceEpoch; /*`json:"seconds_since_epoch"`*/
+    public map<@string, nint> NumFailuresByType; /*`json:"num_failures_by_type"`*/
+    public map<@string, bogoResults_Tests> Tests; /*`json:"tests"`*/
 }
 
 } // end tls_internal_test_package

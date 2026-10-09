@@ -107,7 +107,7 @@ internal static void testBlockHuff(ж<testing.T> Ꮡt, @string @in, @string @out
     testWriterEOF(Ꮡt, huffˢ, new huffTest(input: @in), true);
 }
 
-[GoType] internal partial struct huffTest {
+internal partial struct huffTest {
     internal slice<global::go.compress.flate_package.token> tokens;
     internal @string input; // File name of input data matching the tokens.
     internal @string want; // File name of data with the expected output with input available.

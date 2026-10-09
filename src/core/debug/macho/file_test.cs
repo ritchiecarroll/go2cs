@@ -13,7 +13,7 @@ using static go.debug.macho_package;
 
 partial class macho_internal_test_package {
 
-[GoType] internal partial struct fileTest {
+internal partial struct fileTest {
     internal @string @file;
     internal global::go.debug.macho_package.FileHeader hdr;
     internal slice<any> loads;

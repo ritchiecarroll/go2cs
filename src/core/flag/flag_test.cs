@@ -332,13 +332,13 @@ public static void TestFlagSetParse(ж<testing.T> Ꮡt) {
     testParse(NewFlagSet(testˢ, ContinueOnError), Ꮡt);
 }
 
-[GoType("[]@string")] partial struct flagVar;
+partial struct flagVar /*[]@string*/;
 
-[GoRecv] internal static @string ΔString(this ref flagVar f) {
+internal static @string ΔString(this ref flagVar f) {
     return fmt.Sprint(((slice<@string>)(f)));
 }
 
-[GoRecv] internal static error ΔSet(this ref flagVar f, @string value) {
+internal static error ΔSet(this ref flagVar f, @string value) {
     f = append(f, value);
     return default!;
 }
@@ -441,22 +441,22 @@ public static void TestUserDefinedForCommandLine(ж<testing.T> Ꮡt) {
 }
 
 // Declare a user-defined boolean flag type.
-[GoType] partial struct boolFlagVar {
+partial struct boolFlagVar {
     internal nint count;
 }
 
-[GoRecv] internal static @string ΔString(this ref boolFlagVar b) {
+internal static @string ΔString(this ref boolFlagVar b) {
     return fmt.Sprintf("%d"u8, b.count);
 }
 
-[GoRecv] internal static error ΔSet(this ref boolFlagVar b, @string value) {
+internal static error ΔSet(this ref boolFlagVar b, @string value) {
     if (value == "true"u8) {
         b.count++;
     }
     return default!;
 }
 
-[GoRecv] internal static bool IsBoolFlag(this ref boolFlagVar b) {
+internal static bool IsBoolFlag(this ref boolFlagVar b) {
     return b.count < 4;
 }
 
@@ -625,17 +625,17 @@ public static void TestHelp(ж<testing.T> Ꮡt) {
 
 // zeroPanicker is a flag.Value whose String method panics if its dontPanic
 // field is false.
-[GoType] partial struct zeroPanicker {
+partial struct zeroPanicker {
     internal bool dontPanic;
     internal @string v;
 }
 
-[GoRecv] internal static error ΔSet(this ref zeroPanicker f, @string s) {
+internal static error ΔSet(this ref zeroPanicker f, @string s) {
     f.v = s;
     return default!;
 }
 
-[GoRecv] internal static @string ΔString(this ref zeroPanicker f) {
+internal static @string ΔString(this ref zeroPanicker f) {
     if (!f.dontPanic) {
         throw panic("panic!");
     }
@@ -875,7 +875,7 @@ internal static readonly @string goChildFlagˢ = "GO_CHILD_FLAG"u8;
 internal static readonly @string goChildFlagHandleˢ = "GO_CHILD_FLAG_HANDLE"u8;
 internal static readonly @string testRunTestExitCodeˢ = "-test.run=^TestExitCode$"u8;
 
-[GoType("dyn")] internal partial struct TestExitCode_tests {
+internal partial struct TestExitCode_tests /*dyn*/ {
     internal @string flag;
     internal @string flagHandle;
     internal nint expectExit;
@@ -969,7 +969,7 @@ internal static void mustPanic(ж<testing.T> Ꮡt, @string testName, @string exp
     finally { ᒐ.Run(); }
 }
 
-[GoType("dyn")] internal partial struct TestInvalidFlags_tests {
+internal partial struct TestInvalidFlags_tests /*dyn*/ {
     internal @string flag;
     internal @string errorMsg;
 }
@@ -1010,7 +1010,7 @@ public static void TestInvalidFlags(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fooˢ = "foo"u8;
 
-[GoType("dyn")] internal partial struct TestRedefinedFlags_tests {
+internal partial struct TestRedefinedFlags_tests /*dyn*/ {
     internal @string flagSetName;
     internal @string errorMsg;
 }

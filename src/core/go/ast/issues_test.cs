@@ -41,7 +41,7 @@ public static void TestIssue33649(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIssue28089_type {
+internal partial struct TestIssue28089_type /*dyn*/ {
     internal @string src;
     internal bool want;
 }

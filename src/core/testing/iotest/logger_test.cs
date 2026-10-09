@@ -14,7 +14,7 @@ using static go.testing.iotest_package;
 
 partial class iotest_internal_test_package {
 
-[GoType] internal partial struct errWriter {
+internal partial struct errWriter {
     internal error err;
 }
 

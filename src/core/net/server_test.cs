@@ -14,7 +14,7 @@ using time = time_package;
 partial class net_internal_test_package {
 
 
-[GoType("dyn")] partial struct tcpServerTestsᴛ1 {
+partial struct tcpServerTestsᴛ1 /*dyn*/ {
     internal @string snet, saddr; // server endpoint
     internal @string tnet, taddr; // target endpoint for client
 }
@@ -226,7 +226,7 @@ public static partial void TestUnixAndUnixpacketServer(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct udpServerTestsᴛ1 {
+partial struct udpServerTestsᴛ1 /*dyn*/ {
     internal @string snet, saddr; // server endpoint
     internal @string tnet, taddr; // target endpoint for client
     internal bool dial;   // test with Dial
@@ -365,7 +365,7 @@ public static void TestUDPServer(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestUnixgramServer_type {
+internal partial struct TestUnixgramServer_type /*dyn*/ {
     internal @string saddr; // server endpoint
     internal @string caddr; // client endpoint
     internal bool dial;   // test with Dial

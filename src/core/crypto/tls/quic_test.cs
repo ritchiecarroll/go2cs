@@ -12,7 +12,7 @@ using static go.crypto.tls_package;
 
 partial class tls_internal_test_package {
 
-[GoType] internal partial struct testQUICConn {
+internal partial struct testQUICConn {
     internal ж<testing.T> t;
     internal ж<global::go.crypto.tls_package.QUICConn> conn;
     internal map<global::go.crypto.tls_package.QUICEncryptionLevel, suiteSecret> readSecret;
@@ -48,12 +48,12 @@ internal static ж<testQUICConn> newTestQUICServer(ж<testing.T> Ꮡt, ж<global
     return q;
 }
 
-[GoType] internal partial struct suiteSecret {
+internal partial struct suiteSecret {
     internal uint16 suite;
     internal slice<byte> secret;
 }
 
-[GoRecv] internal static void setReadSecret(this ref testQUICConn q, global::go.crypto.tls_package.QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
+internal static void setReadSecret(this ref testQUICConn q, global::go.crypto.tls_package.QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
     {
         var (_, ok) = q.writeSecret[level, ꟷ]; if (!ok && level != QUICEncryptionLevelEarly) {
             q.t.Errorf("SetReadSecret for level %v called before SetWriteSecret"u8, level);
@@ -80,7 +80,7 @@ internal static ж<testQUICConn> newTestQUICServer(ж<testing.T> Ꮡt, ж<global
 
 }
 
-[GoRecv] internal static void setWriteSecret(this ref testQUICConn q, global::go.crypto.tls_package.QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
+internal static void setWriteSecret(this ref testQUICConn q, global::go.crypto.tls_package.QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
     {
         var (_, ok) = q.writeSecret[level, ꟷ]; if (ok) {
             q.t.Errorf("SetWriteSecret for level %v called twice"u8, level);

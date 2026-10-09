@@ -40,7 +40,7 @@ public static void TestNewRequest(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fooˢ = "foo"u8;
 
-[GoType("dyn")] internal partial struct TestNewRequestWithContext_type {
+internal partial struct TestNewRequestWithContext_type /*dyn*/ {
     internal @string name;
     internal @string method, uri;
     internal io.Reader body;
@@ -48,8 +48,8 @@ internal static readonly @string fooˢ = "foo"u8;
     internal @string wantBody;
 }
 
-[GoType("dyn")] internal partial struct TestNewRequestWithContext_typeᴛ1 {
-    [GoEmbedded] public io_package.Reader Reader;
+internal partial struct TestNewRequestWithContext_typeᴛ1 /*dyn*/ {
+    /*embed*/ public io_package.Reader Reader;
 }
 
 public static void TestNewRequestWithContext(ж<testing.T> Ꮡt) {

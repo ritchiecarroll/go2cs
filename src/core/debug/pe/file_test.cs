@@ -26,7 +26,7 @@ using text;
 
 partial class pe_internal_test_package {
 
-[GoType] internal partial struct fileTest {
+internal partial struct fileTest {
     internal @string @file;
     internal global::go.debug.pe_package.FileHeader hdr;
     internal any opthdr;

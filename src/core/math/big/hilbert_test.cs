@@ -12,19 +12,19 @@ using static go.math.big_package;
 
 partial class big_internal_test_package {
 
-[GoType] internal partial struct matrix {
+internal partial struct matrix {
     internal nint n, m;
     internal slice<ж<global::go.math.big_package.ΔRat>> a;
 }
 
-[GoRecv] internal static ж<global::go.math.big_package.ΔRat> at(this ref matrix a, nint i, nint j) {
+internal static ж<global::go.math.big_package.ΔRat> at(this ref matrix a, nint i, nint j) {
     if (!(0 <= i && i < a.n && 0 <= j && j < a.m)) {
         throw panic("index out of range");
     }
     return a.a[i * a.m + j];
 }
 
-[GoRecv] internal static void set(this ref matrix a, nint i, nint j, ж<global::go.math.big_package.ΔRat> Ꮡx) {
+internal static void set(this ref matrix a, nint i, nint j, ж<global::go.math.big_package.ΔRat> Ꮡx) {
     if (!(0 <= i && i < a.n && 0 <= j && j < a.m)) {
         throw panic("index out of range");
     }
@@ -87,7 +87,7 @@ internal static ж<matrix> newInverseHilbert(nint n) {
     return a;
 }
 
-[GoRecv] internal static ж<matrix> mul(this ref matrix a, ж<matrix> Ꮡb) {
+internal static ж<matrix> mul(this ref matrix a, ж<matrix> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (a.m != b.n) {
@@ -106,7 +106,7 @@ internal static ж<matrix> newInverseHilbert(nint n) {
     return c;
 }
 
-[GoRecv] internal static bool eql(this ref matrix a, ж<matrix> Ꮡb) {
+internal static bool eql(this ref matrix a, ж<matrix> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (a.n != b.n || a.m != b.m) {
@@ -122,7 +122,7 @@ internal static ж<matrix> newInverseHilbert(nint n) {
     return true;
 }
 
-[GoRecv] internal static @string String(this ref matrix a) {
+internal static @string String(this ref matrix a) {
     @string s = ""u8;
     for (nint i = 0; i < a.n; i++) {
         for (nint j = 0; j < a.m; j++) {

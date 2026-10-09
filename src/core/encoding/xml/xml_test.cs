@@ -15,12 +15,12 @@ using static go.encoding.xml_package;
 
 partial class xml_internal_test_package {
 
-[GoType] internal partial struct toks {
+internal partial struct toks {
     internal bool earlyEOF;
     internal slice<ΔToken> t;
 }
 
-[GoRecv] internal static (ΔToken, error) Token(this ref toks t) {
+internal static (ΔToken, error) Token(this ref toks t) {
     if (len(t.t) == 0) {
         return (default!, io.EOF);
     }
@@ -32,15 +32,14 @@ partial class xml_internal_test_package {
     return (tok, default!);
 }
 
-[GoType("dyn")] internal partial struct TestDecodeEOF_tests {
+internal partial struct TestDecodeEOF_tests /*dyn*/ {
     internal @string name;
     internal slice<ΔToken> tokens;
     internal bool ok;
 }
 
-[GoType("dyn")] internal partial struct TestDecodeEOF_type {
-    [GoTag(@"xml:""test""")]
-    public global::go.encoding.xml_package.Name XMLName;
+internal partial struct TestDecodeEOF_type /*dyn*/ {
+    public global::go.encoding.xml_package.Name XMLName; /*`xml:"test"`*/
 }
 
 public static void TestDecodeEOF(ж<testing.T> Ꮡt) {
@@ -94,12 +93,12 @@ public static void TestDecodeEOF(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct toksNil {
+internal partial struct toksNil {
     internal bool returnEOF;
     internal slice<ΔToken> t;
 }
 
-[GoRecv] internal static (ΔToken, error) Token(this ref toksNil t) {
+internal static (ΔToken, error) Token(this ref toksNil t) {
     if (len(t.t) == 0) {
         if (!t.returnEOF) {
             // Return nil, nil before returning an EOF. It's legal, but
@@ -114,9 +113,8 @@ public static void TestDecodeEOF(ж<testing.T> Ꮡt) {
     return (tok, default!);
 }
 
-[GoType("dyn")] internal partial struct TestDecodeNilToken_type {
-    [GoTag(@"xml:""test""")]
-    public global::go.encoding.xml_package.Name XMLName;
+internal partial struct TestDecodeNilToken_type /*dyn*/ {
+    public global::go.encoding.xml_package.Name XMLName; /*`xml:"test"`*/
 }
 
 public static void TestDecodeNilToken(ж<testing.T> Ꮡt) {
@@ -346,12 +344,12 @@ public static void TestNonStrictRawToken(ж<testing.T> Ꮡt) {
     testRawToken(Ꮡt, d, nonStrictInput, nonStrictTokens);
 }
 
-[GoType] internal partial struct downCaser {
+internal partial struct downCaser {
     internal ж<testing.T> t;
     internal io.ByteReader r;
 }
 
-[GoRecv] internal static (byte c, error err) ReadByte(this ref downCaser d) {
+internal static (byte c, error err) ReadByte(this ref downCaser d) {
     byte c = default!;
     error err = default!;
 
@@ -362,7 +360,7 @@ public static void TestNonStrictRawToken(ж<testing.T> Ꮡt) {
     return (c, err);
 }
 
-[GoRecv] internal static (nint, error) Read(this ref downCaser d, slice<byte> p) {
+internal static (nint, error) Read(this ref downCaser d, slice<byte> p) {
     d.t.Fatalf("unexpected Read call on downCaser reader"u8);
     throw panic("unreachable");
 }
@@ -583,7 +581,7 @@ public static void TestInputLinePos(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct allScalars {
+internal partial struct allScalars {
     public bool True1;
     public bool True2;
     public bool False1;
@@ -667,7 +665,7 @@ public static void TestAllScalars(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct item {
+internal partial struct item {
     public @string FieldA;
 }
 
@@ -891,7 +889,7 @@ public static void TestEntityInsideCDATA(ж<testing.T> Ꮡt) {
 }
 
 
-[GoType("dyn")] partial struct characterTestsᴛ1 {
+partial struct characterTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string err;
 }
@@ -942,7 +940,7 @@ public static void TestIsInCharacterRange(ж<testing.T> Ꮡt) {
 
 // TODO: what's the right approach to handle these nested cases?
 
-[GoType("dyn")] [GoValueClone("expect")] partial struct procInstTestsᴛ1 {
+partial struct procInstTestsᴛ1 /*dyn*/ {
     internal @string input;
     internal array<@string> expect = new(2);
 }
@@ -1011,7 +1009,7 @@ public static void TestDirectivesWithComments(ж<testing.T> Ꮡt) {
 }
 
 // Writer whose Write method always returns an error.
-[GoType] internal partial struct errWriter {
+internal partial struct errWriter {
 }
 
 internal static (nint n, error err) Write(this errWriter _, slice<byte> p) {
@@ -1044,7 +1042,7 @@ public static void TestEscapeTextInvalidChar(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoLocalName("T")] [GoType("[]byte")] internal partial struct TestIssue5880_T;
+internal partial struct TestIssue5880_T /*[]byte*/;
 
 public static void TestIssue5880(ж<testing.T> Ꮡt) {
     var (data, err) = Marshal(new TestIssue5880_T(new byte[]{192, 168, 0, 1}.slice()));
@@ -1066,13 +1064,10 @@ internal static readonly @string exampleTitleExampleTitleˢ = """
 		</example>
 """u8;
 
-[GoType("dyn")] [GoLocalName("ExampleConflict")] internal partial struct TestIssue8535_ExampleConflict {
-    [GoTag(@"xml:""example""")]
-    public global::go.encoding.xml_package.Name XMLName;
-    [GoTag(@"xml:""link""")]
-    public @string Link;
-    [GoTag(@"xml:""http://www.w3.org/2005/Atom link""")]
-    public @string AtomLink;                                         // Same name in a different name space
+internal partial struct TestIssue8535_ExampleConflict /*dyn*/ {
+    public global::go.encoding.xml_package.Name XMLName; /*`xml:"example"`*/
+    public @string Link; /*`xml:"link"`*/
+    public @string AtomLink; /*`xml:"http://www.w3.org/2005/Atom link"`*/ // Same name in a different name space
 }
 
 public static void TestIssue8535(ж<testing.T> Ꮡt) {
@@ -1086,7 +1081,7 @@ public static void TestIssue8535(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestEncodeXMLNS_testCases {
+internal partial struct TestEncodeXMLNS_testCases /*dyn*/ {
     internal Func<(slice<byte>, error)> f;
     internal @string want;
     internal bool ok;
@@ -1115,11 +1110,9 @@ public static void TestEncodeXMLNS(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("T")] internal partial struct encodeXMLNS1_T {
-    [GoTag(@"xml:""Test""")]
-    public global::go.encoding.xml_package.Name XMLName;
-    [GoTag(@"xml:""xmlns,attr""")]
-    public @string Ns;
+internal partial struct encodeXMLNS1_T /*dyn*/ {
+    public global::go.encoding.xml_package.Name XMLName; /*`xml:"Test"`*/
+    public @string Ns; /*`xml:"xmlns,attr"`*/
     public @string Body;
 }
 
@@ -1128,9 +1121,8 @@ internal static (slice<byte>, error) encodeXMLNS1() {
     return Marshal(s.OrTypedNil());
 }
 
-[GoType("dyn")] [GoLocalName("Test")] internal partial struct encodeXMLNS2_Test {
-    [GoTag(@"xml:""http://example.com/ns body""")]
-    public @string Body;
+internal partial struct encodeXMLNS2_Test /*dyn*/ {
+    public @string Body; /*`xml:"http://example.com/ns body"`*/
 }
 
 internal static (slice<byte>, error) encodeXMLNS2() {
@@ -1138,9 +1130,8 @@ internal static (slice<byte>, error) encodeXMLNS2() {
     return Marshal(s.OrTypedNil());
 }
 
-[GoType("dyn")] [GoLocalName("Test")] internal partial struct encodeXMLNS3_Test {
-    [GoTag(@"xml:""http://example.com/ns Test""")]
-    public global::go.encoding.xml_package.Name XMLName;
+internal partial struct encodeXMLNS3_Test /*dyn*/ {
+    public global::go.encoding.xml_package.Name XMLName; /*`xml:"http://example.com/ns Test"`*/
     public @string Body;
 }
 
@@ -1151,9 +1142,8 @@ internal static (slice<byte>, error) encodeXMLNS3() {
     return Marshal(s.OrTypedNil());
 }
 
-[GoType("dyn")] [GoLocalName("Test")] internal partial struct encodeXMLNS4_Test {
-    [GoTag(@"xml:""xmlns,attr""")]
-    public @string Ns;
+internal partial struct encodeXMLNS4_Test /*dyn*/ {
+    public @string Ns; /*`xml:"xmlns,attr"`*/
     public @string Body;
 }
 
@@ -1185,7 +1175,7 @@ public static void TestIssue11405(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIssue12417_testCases {
+internal partial struct TestIssue12417_testCases /*dyn*/ {
     internal @string s;
     internal bool ok;
 }
@@ -1219,21 +1209,17 @@ public static void TestIssue12417(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] [GoLocalName("C")] internal partial struct TestIssue7113_C {
-    [GoTag(@"xml:""""")]
-    public global::go.encoding.xml_package.Name XMLName;          // Sets empty namespace
+internal partial struct TestIssue7113_C /*dyn*/ {
+    public global::go.encoding.xml_package.Name XMLName; /*`xml:""`*/ // Sets empty namespace
 }
 
-[GoType("dyn")] [GoLocalName("D")] internal partial struct TestIssue7113_D {
-    [GoTag(@"xml:""d""")]
-    public global::go.encoding.xml_package.Name XMLName;
+internal partial struct TestIssue7113_D /*dyn*/ {
+    public global::go.encoding.xml_package.Name XMLName; /*`xml:"d"`*/
 }
 
-[GoType("dyn")] [GoLocalName("A")] internal partial struct TestIssue7113_A {
-    [GoTag(@"xml:""""")]
-    public global::go.encoding.xml_package.Name XMLName;
-    [GoTag(@"xml:""""")]
-    public TestIssue7113_C C;
+internal partial struct TestIssue7113_A /*dyn*/ {
+    public global::go.encoding.xml_package.Name XMLName; /*`xml:""`*/
+    public TestIssue7113_C C; /*`xml:""`*/
     public TestIssue7113_D D;
 }
 
@@ -1280,7 +1266,7 @@ public static void TestIssue7113(ж<testing.T> Ꮡt) {
 internal static readonly @string xmlSyntaxErrorOnLine1ˢ = "XML syntax error on line 1: expected attribute name in element"u8;
 internal static readonly @string xmlSyntaxErrorOnLine1ˢ2 = "XML syntax error on line 1: expected element name after <"u8;
 
-[GoType("dyn")] internal partial struct TestIssue20396_testCases {
+internal partial struct TestIssue20396_testCases /*dyn*/ {
     internal @string s;
     internal error wantErr;
 }
@@ -1318,7 +1304,7 @@ public static void TestIssue20396(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestIssue20685_testCases {
+internal partial struct TestIssue20685_testCases /*dyn*/ {
     internal @string s;
     internal bool ok;
 }
@@ -1362,7 +1348,7 @@ internal static Func<global::go.encoding.xml_package.TokenReader, global::go.enc
         );
 }
 
-[GoType] internal partial struct mapper {
+internal partial struct mapper {
     internal global::go.encoding.xml_package.TokenReader t;
     internal Func<ΔToken, ΔToken> f;
 }
@@ -1391,11 +1377,9 @@ internal static readonly @string quoteReEnterClownWithAˢ = @"<quote>[Re-enter C
 internal static readonly @string blockingˢ = "blocking"u8;
 internal static readonly object gotUnexpectedErrorWhileˢ = (@string)"Got unexpected error while decoding:"u8;
 
-[GoType("dyn")] internal partial struct TestWrapDecoder_o {
-    [GoTag(@"xml:""blocking""")]
-    public global::go.encoding.xml_package.Name XMLName;
-    [GoTag(@"xml:"",chardata""")]
-    public @string Chardata;
+internal partial struct TestWrapDecoder_o /*dyn*/ {
+    public global::go.encoding.xml_package.Name XMLName; /*`xml:"blocking"`*/
+    public @string Chardata; /*`xml:",chardata"`*/
 }
 
 public static void TestWrapDecoder(ж<testing.T> Ꮡt) {
@@ -1431,14 +1415,14 @@ public static void TestWrapDecoder(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType] internal partial struct tokReader {
+internal partial struct tokReader {
 }
 
 internal static (ΔToken, error) Token(this tokReader _) {
     return (new StartElement(nil), default!);
 }
 
-[GoType] public partial struct Failure {
+public partial struct Failure {
 }
 
 public static error UnmarshalXML(this Failure _Δp0, ж<global::go.encoding.xml_package.Decoder> _Δp1, global::go.encoding.xml_package.StartElement _Δp2) {
@@ -1535,7 +1519,7 @@ internal static readonly @string notOkˢ4 = @"<![not ok]>"u8;
 internal static readonly @string zzzFooXmlnsZzzHttpˢ = @"<zzz:foo xmlns:zzz=""http://example.com""><bar>baz</bar></foo>"u8;
 internal static readonly @string okVersionOkˢ = @"<?ok version=""ok""?>"u8;
 
-[GoType("dyn")] internal partial struct TestParseErrors_tests {
+internal partial struct TestParseErrors_tests /*dyn*/ {
     internal @string src;
     internal @string err;
 }

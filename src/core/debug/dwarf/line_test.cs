@@ -404,7 +404,7 @@ internal static void dumpLines(ж<testing.T> Ꮡt, slice<dwarf.LineEntry> lines)
     }
 }
 
-[GoType] partial struct joinTest {
+partial struct joinTest {
     internal @string dirname, filename;
     internal @string path;
 }

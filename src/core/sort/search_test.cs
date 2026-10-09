@@ -20,7 +20,7 @@ internal static Func<nint, bool> f(slice<nint> a, nint x) {
 internal static slice<nint> data = new slice<nint>(14){[0] = -10, [1] = -5, [2] = 0, [3] = 1, [4] = 2, [5] = 3, [6] = 5, [7] = 7, [8] = 11, [9] = 100, [10] = 100, [11] = 100, [12] = 1000, [13] = 10000};
 
 
-[GoType("dyn")] partial struct testsᴛ1 {
+partial struct testsᴛ1 /*dyn*/ {
     internal @string name;
     internal nint n;
     internal Func<nint, bool> f;
@@ -60,7 +60,7 @@ public static void TestSearch(ж<testing.T> Ꮡt) {
     }
 }
 
-[GoType("dyn")] internal partial struct TestFind_tests {
+internal partial struct TestFind_tests /*dyn*/ {
     internal slice<@string> data;
     internal @string target;
     internal nint wantPos;
@@ -172,7 +172,7 @@ internal static slice<float64> fdata = new slice<float64>(5){[0] = -3.14D, [1] =
 internal static slice<@string> sdata = new slice<@string>(4){[0] = "f"u8, [1] = "foo"u8, [2] = "foobar"u8, [3] = "x"u8};
 
 
-[GoType("dyn")] partial struct wrappertestsᴛ1 {
+partial struct wrappertestsᴛ1 /*dyn*/ {
     internal @string name;
     internal nint result;
     internal nint i;

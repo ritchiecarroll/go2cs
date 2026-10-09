@@ -18,7 +18,7 @@ partial class zip_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testdataˢ = "testdata"u8;
 
-[GoType("dyn")] [GoLocalName("file")] internal partial struct FuzzReader_file {
+internal partial struct FuzzReader_file /*dyn*/ {
     internal ж<global::go.archive.zip_package.FileHeader> header;
     internal slice<byte> content;
 }

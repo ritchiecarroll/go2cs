@@ -42,7 +42,7 @@ type Inst = G[int]
 	
 """u8;
 
-[GoType("dyn")] internal partial struct BenchmarkNamed_tests {
+internal partial struct BenchmarkNamed_tests /*dyn*/ {
     internal @string name;
     internal typesꓸType typ;
 }

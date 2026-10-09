@@ -20,7 +20,7 @@ internal static bool equal(ж<bigꓸInt> Ꮡz, ж<bigꓸInt> Ꮡx) {
     return Ꮡz.Cmp(Ꮡx) == 0;
 }
 
-[GoType] partial struct bigInt {
+partial struct bigInt {
     public partial ref ж<math.big_package.ΔInt> Int { get; }
 }
 
@@ -43,7 +43,7 @@ internal static reflectꓸValue Generate(this bigInt _, ж<Δrand.Rand> Ꮡrand,
     return reflect.ValueOf(new bigInt(n));
 }
 
-[GoType] partial struct notZeroInt {
+partial struct notZeroInt {
     public partial ref ж<math.big_package.ΔInt> Int { get; }
 }
 
@@ -60,7 +60,7 @@ internal static reflectꓸValue Generate(this notZeroInt _, ж<Δrand.Rand> Ꮡr
     return reflect.ValueOf(new notZeroInt(n));
 }
 
-[GoType] partial struct positiveInt {
+partial struct positiveInt {
     public partial ref ж<math.big_package.ΔInt> Int { get; }
 }
 
@@ -69,7 +69,7 @@ internal static reflectꓸValue Generate(this positiveInt _, ж<Δrand.Rand> Ꮡ
     return reflect.ValueOf(new positiveInt(n));
 }
 
-[GoType] partial struct prime {
+partial struct prime {
     public partial ref ж<math.big_package.ΔInt> Int { get; }
 }
 
@@ -83,8 +83,8 @@ internal static reflectꓸValue Generate(this prime _, ж<Δrand.Rand> Ꮡr, nin
     return reflect.ValueOf(new prime(n));
 }
 
-[GoType] partial struct zeroOrOne {
-    [GoEmbedded] internal nuint @uint;
+partial struct zeroOrOne {
+    /*embed*/ internal nuint @uint;
 }
 
 internal static reflectꓸValue Generate(this zeroOrOne _, ж<Δrand.Rand> Ꮡrand, nint size) {
@@ -93,8 +93,8 @@ internal static reflectꓸValue Generate(this zeroOrOne _, ж<Δrand.Rand> Ꮡra
     return reflect.ValueOf(new zeroOrOne((nuint)randΔ1.Intn(2)));
 }
 
-[GoType] partial struct smallUint {
-    [GoEmbedded] internal nuint @uint;
+partial struct smallUint {
+    /*embed*/ internal nuint @uint;
 }
 
 internal static reflectꓸValue Generate(this smallUint _, ж<Δrand.Rand> Ꮡrand, nint size) {

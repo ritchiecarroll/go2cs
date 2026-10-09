@@ -81,7 +81,7 @@ internal static bool isGoFile(fs.FileInfo fi) {
 }
 
 // ignore .files
-[GoType] internal partial struct bundle {
+internal partial struct bundle {
     public partial ref ж<global::go.go.doc_package.Package> Package { get; }
     public ж<token.FileSet> FSet;
 }

@@ -37,7 +37,7 @@ using static go.net.url_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/url/url_test.go", "url_test.cs", "AFY0AKQEugmykoKCgIK2uKKCgoKCgoKUgpSCgoKUgoCC2oKCgoKClIIAGw4AK3SCgoKCkoKogoKUggAMCAAeTIKCgoKClIKClIKCqKKAggAPCoIAMnCygpKAkgARGABGiAGCgoKCloKCgoKCgpSCgoKUgqiCgsoAHjiCgoKCqIKCygAlTIKCgoKogoIADiAACxiCgoCCAAkKAA4igoKCgvqigoIAHAgAYo4CgoKCgpSUgoKCgoKAgraCpoKCkoCCkpS2goKmgoKSgpKUAAwKooKCgpSAkraAkqSAkqSAkqSAgqSAgqSAgqSAgqSCgJIACxQAWKoBgrKSgoKCgpSUgpSCgoKClIKClIKAggAREIIAEiyCgoKCgpSCgpSCgoCCpIKUgJIAEBQAceoBgoKCgvqEkoKCggAICIIARFyCgoKClJSCzJKCgpSAkgANFAAycIKCggALEoCigAAJDICigAAKDoAACAQAJlaSgoKCgpSCgpSCAAoKggAaPoKCkoKUgsqSksSigoKUgoIABxSCgoKUgriCgoKUgoKCloKCgpSC6KKCgIK4hIKWgIKmgIKmgILE1IKCgJL4osqCgoKAgsqAggAKCgAbRoKykoKCgpSCgt6CspKCgoKUgoLegrKSgoKClIKC3oKykoKCgpSCggAPDoIAePoBgoKClICCpIKCgoKUgg==", "880-884:1;1290-1296:1;1467-1495:1;2008-2012:1;2098-2109:1;2115-2126:1;2132-2143:1;2149-2160:1")]
+[assembly: go.GoPositionMap("net/url/url_test.go", "url_test.cs", "AFY0AKQEugmykoKCgIK2uKKCgoKCgoKUgpSCgoKUgoCC2oKCgoKClIIAGw4AK3SCgoKCkoKogoKUggAMCAAeTIKCgoKClIKClIKCqKKAggAPCoIAMnCygpKAkgARGABGiAGCgoKCloKCgoKCgpSCgoKUgqiCgsoAHjiCgoKCqIKCygAlTIKCgoKogoIADiAACxiCgoCCAAkKAA4igoKCgvqigoIAHAgAYo4CgoKCgpSUgoKCgoKAgraCpoKCkoCCkpS2goKmgoKSgpKUAAwKooKCgpSAkraAkqSAkqSAkqSAgqSAgqSAgqSAgqSCgJIACxQAWKoBgrKSgoKCgpSUgpSCgoKClIKClIKAggAREIIAEiyCgoKCgpSCgpSCgoCCpIKUgJIAEBQAceoBgoKCgvqEkoKCggAICIIARFyCgoKClJSCzJKCgpSAkgANFAAycIKCggALEoCigAAJDICigAAKDoAACAQAJlaSgoKCgpSCgpSCAAoKggAaPoKCkoKUgsqSksSigoKUgoIABxSCgoKUgriCgoKUgoKCloKCgpSC6KKCgIK4hIKWgIKmgIKmgILE1IKCgJL4osqCgoKAgsqAggAKCgAbRoKykoKCgpSCgt6CspKCgoKUgoLegrKSgoKClIKC3oKykoKCgpSCggAPDoIAePoBgoKClICCpIKCgoKUgg==", "880-884:1;1290-1296:1;1467-1495:1;2008-2012:1;2098-2109:1;2115-2126:1;2132-2143:1;2149-2160:1", "", "87=User/1/3/48,User/2/3/59,User/3/3/180,UserPassword/1/5/203,UserPassword/2/5/213,UserPassword/3/5/223,UserPassword/4/5/232,UserPassword/5/5/315;859=UserPassword/1/2/11,User/1/1/21,UserPassword/2/2/31;2263=Repeat/1/3/29,Repeat/2/3/30,Repeat/3/3/31")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -46,7 +46,7 @@ namespace go.net;
 public static partial class url_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
-    // `[GoType]` declarations in this package's converted sources are deliberately
+    // Go type declarations in this package's converted sources are deliberately
     // bare so they read more like the original Go code. The real accessibility for
     // the types - public for a Go-exported name, internal otherwise - are defined
     // via declarations below.
