@@ -1,0 +1,6 @@
+add 5: true add 1: false
+contains 2: true contains 9: false
+len: 5
+intersect: [3 4 5]
+words: 2 true
+removed odd: 2 left: [4]

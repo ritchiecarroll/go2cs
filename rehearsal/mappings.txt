@@ -1,0 +1,2 @@
+# module-path	nuget-id	status	source-repo	registered	contact
+github.com/ritchiecarroll/hashset	nugetgo.github.com.ritchiecarroll.hashset	canonical	https://github.com/ritchiecarroll/hashset-cs	2026-10-09	owner
