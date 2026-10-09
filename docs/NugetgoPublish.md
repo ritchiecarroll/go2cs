@@ -136,10 +136,13 @@ COORD rules sections 1-3 green before this step.
      project does not restore (NU1015), because `GoStdLibVersion` is set there;
    - the module's LICENSE verbatim (B6), a README, and a `.gitignore` for the build output (`.artifacts/`).
 
-   When the pack wrote no module `Directory.Build.targets`, all of these can sit at the repository root (hashset,
-   2026-10-09). When it wrote one, the root build files must sit in a directory above the module's files, because that
-   file imports the nearest `Directory.Build.targets` above its own directory. This second layout follows from the
-   file and has not been built yet.
+   **The layout (COORD ruling, 2026-10-09).** When the pack wrote no module `Directory.Build.targets` (the upstream
+   holder is The go2cs Authors), the repository is FLAT: everything above sits at its root (hashset). When the pack
+   wrote one (a third-party holder), the repository is NESTED: the root `Directory.Build.props` and
+   `Directory.Build.targets` sit at the repository root and the contents of `PR/src/M` one directory below it. The
+   reason is that the module file imports the nearest `Directory.Build.targets` above its own directory
+   (`GetPathOfFileAbove` from its parent directory), so in a flat repository it would find none inside the repository, and the root file it
+   must import would collide with it by name. The nested layout follows from the file; its first build is uuid's.
 
    Before pushing, build a fresh copy with `dotnet build -c Release -p:GoStdLibVersion=R`. For hashset (2026-10-09)
    the dll it built carried the same version and copyright attributes as the packed one, which is what lets a rebuild

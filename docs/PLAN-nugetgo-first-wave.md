@@ -56,6 +56,7 @@ from the flat container on 2026-10-09.
 | Upstream LICENSE holders | The go2cs Authors | Google Inc. | Dave Grijalva; golang-jwt maintainers |
 | Conversion repository (`RepositoryUrl`) | `https://github.com/ritchiecarroll/hashset-cs` | OWNER to name | OWNER to name |
 | Registry status | `canonical` (the repository is under the module's org) | `community` | `community` |
+| Conversion repository layout (runbook 4.5, COORD ruling) | flat: the pack writes no module `Directory.Build.targets` (the holder is The go2cs Authors) | nested: the pack writes a module `Directory.Build.targets` (holder Google Inc.), so the root build files sit one directory above the module's files | nested, for the same reason (holders Dave Grijalva and the golang-jwt maintainers) |
 | Validation reading | 37 matched, 0 disclosed, 5 Example declarations excluded (the 2026-10-09 rehearsal at `56f0f1f254`) | 54 matched, 0 disclosed, 1 package, `windows/amd64` and `linux/amd64` (`ValidatedModules.md`, banked at `05d40930aa`) | 189 matched, 0 disclosed, 2 packages (root, `request`), `windows/amd64` and `linux/amd64` (`ValidatedModules.md`, banked at `05d40930aa`); `test` and `cmd/jwt` have no tests |
 
 Every reading above is re-read at `T` in runbook section 1; none is carried forward.
