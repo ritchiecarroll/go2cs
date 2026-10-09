@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/ritchiecarroll/hashset"
+	"golang.org/x/mod/module"
 )
 
 // The POSITION MAP is how a converted program answers `runtime.Caller` — and every traceback built
@@ -1063,6 +1064,14 @@ func (v *Visitor) goSourceIdentity(outputFileName string) string {
 		}
 	}
 
+	// A module-cache source: <module>@<version>/<file>, the -trimpath form cmd/go applies to module
+	// packages, rooted by the runtime against the link-time module cache when a host hands it one. A
+	// packed assembly carries this string, so the cache path -- under the user's profile on Windows --
+	// never reaches it.
+	if identity, ok := moduleCacheSourceIdentity(source, goModCacheDir()); ok {
+		return identity
+	}
+
 	// Converted beside its own source: the bare name, rooted by the runtime.
 	if outputFileName != "" {
 		if output, absErr := filepath.Abs(outputFileName); absErr == nil && sameDirectory(filepath.Dir(source), filepath.Dir(output)) {
@@ -1073,6 +1082,48 @@ func (v *Visitor) goSourceIdentity(outputFileName string) string {
 	// Anything else — a -recurse module converted into its own output root — is what Go bakes for an
 	// ordinary build: the absolute source path, forward-slashed as Go spells one everywhere.
 	return filepath.ToSlash(source)
+}
+
+// moduleCacheSourceIdentity spells a source under the module cache as <module>@<version>/<file>: the
+// cache holds a module at <cache>/<escaped path>@<escaped version>, and the escaping (an upper-case
+// letter as '!' and its lower case) is undone, so the identity names the module as go.mod does.
+func moduleCacheSourceIdentity(source string, cache string) (string, bool) {
+	if strings.TrimSpace(cache) == "" || !isPathUnder(source, filepath.Clean(cache)) {
+		return "", false
+	}
+
+	relative, err := filepath.Rel(filepath.Clean(cache), source)
+
+	if err != nil {
+		return "", false
+	}
+
+	relative = filepath.ToSlash(relative)
+	at := strings.Index(relative, "@")
+
+	if at <= 0 {
+		return "", false
+	}
+
+	slash := strings.Index(relative[at:], "/")
+
+	if slash < 0 {
+		return "", false
+	}
+
+	modulePath, err := module.UnescapePath(relative[:at])
+
+	if err != nil {
+		return "", false
+	}
+
+	version, err := module.UnescapeVersion(relative[at+1 : at+slash])
+
+	if err != nil {
+		return "", false
+	}
+
+	return modulePath + "@" + version + relative[at+slash:], true
 }
 
 // sameDirectory compares two directory paths the way the host filesystem does — case-insensitively

@@ -2710,12 +2710,26 @@ partial class runtime_package
     }
 
     // resolveRecordedGoFile roots a recorded Go source identity (see GoPositionMapRecord.ResolveGoFile):
-    // a bare file name against the C# file's directory, a GOROOT-relative form against linkRoot's src
-    // directory when there is a link-time root, an absolute path verbatim.
-    private static string resolveRecordedGoFile(string goFile, string csPath, string linkRoot)
+    // a bare file name against the C# file's directory, a module form against the link-time module cache
+    // when there is one, a GOROOT-relative form against linkRoot's src directory when there is a link-time
+    // root, an absolute path verbatim.
+    private static string resolveRecordedGoFile(string goFile, string csPath, string linkRoot) =>
+        resolveRecordedGoFile(goFile, csPath, linkRoot, s_linkTimeModuleCache);
+
+    private static string resolveRecordedGoFile(string goFile, string csPath, string linkRoot, string linkModuleCache)
     {
         if (goFile.Length == 0 || GoPositionMapRecord.isRootedGoPath(goFile))
             return goFile;
+
+        // <module>@<version>/<file>: a module-cache source in cmd/go's -trimpath form. No standard-library
+        // path holds an '@', so the form is never confused with the GOROOT-relative one.
+        if (goFile.IndexOf('@') is > 0 and var at && goFile.IndexOf('/', at) is > 0 and var slash)
+        {
+            string cache = linkModuleCache.Replace('\\', '/').TrimEnd('/');
+
+            return cache.Length == 0 ? goFile :
+                string.Concat(cache, "/", escapeModuleCachePath(goFile.AsSpan(0, slash)), goFile.AsSpan(slash));
+        }
 
         if (goFile.IndexOf('/') < 0)
         {
@@ -2734,8 +2748,37 @@ partial class runtime_package
     public static string GoResolveRecordedFileProbe(string goFile, string csPath, string linkRoot) =>
         resolveRecordedGoFile(goFile, csPath, linkRoot);
 
-    // THE MODULE UNDER TEST'S STAGED COPY. A -recurse module's records name the absolute Go source the
-    // converter read, the module-cache file. `go test` runs the package IN that directory, so a Go test's
+    /// <summary>
+    /// GolibTests' probe: as above, with the link-time module cache <paramref name="linkModuleCache"/> a module record roots against.
+    /// </summary>
+    public static string GoResolveRecordedFileProbe(string goFile, string csPath, string linkRoot, string linkModuleCache) =>
+        resolveRecordedGoFile(goFile, csPath, linkRoot, linkModuleCache);
+
+    // The link-time module cache a module record roots against: the -tests pipeline hands the host the
+    // cache `go test` built from (GoDefaultModuleCacheVariable, read by goenvs_impl.cs's initializer), as
+    // it hands the link-time GOROOT. Empty for a converted program run outside the pipeline, which then
+    // answers the recorded -trimpath form, as a Go binary built with -trimpath does.
+    private static string s_linkTimeModuleCache = "";
+
+    // escapeModuleCachePath spells <module>@<version> as the module cache stores it: each upper-case
+    // letter as '!' and its lower case (golang.org/x/mod/module's EscapePath and EscapeVersion).
+    private static string escapeModuleCachePath(ReadOnlySpan<char> moduleAtVersion)
+    {
+        System.Text.StringBuilder escaped = new(moduleAtVersion.Length + 8);
+
+        foreach (char c in moduleAtVersion)
+        {
+            if (c is >= 'A' and <= 'Z')
+                escaped.Append('!').Append((char)(c + ('a' - 'A')));
+            else
+                escaped.Append(c);
+        }
+
+        return escaped.ToString();
+    }
+
+    // THE MODULE UNDER TEST'S STAGED COPY. A -recurse module's records resolve, under the link-time module
+    // cache, to the absolute Go source the converter read, the module-cache file. `go test` runs the package IN that directory, so a Go test's
     // working directory and its Caller's directory agree. The test host runs it in a staged COPY of the
     // module instead (testing's TestHost, PackageAncestry.TryStageModule), so the host registers
     // module root -> copy here, and a frame of the module under test names the file its test's working
@@ -2940,6 +2983,9 @@ partial class runtime_package
         //     frames), and it can name another Go install whose files do not match the recorded lines.
         //     With no link-time root, the recorded form is answered as recorded, which is Go's
         //     -trimpath form;
+        //   - the -trimpath form of a module-cache source (`github.com/x/y@v1.2.3/z.go`), against the
+        //     link-time module cache the -tests pipeline hands the host, with the cache's case escaping
+        //     re-applied: the absolute path `go test` prints. With none, the recorded form, as -trimpath;
         //   - an already-absolute path, verbatim.
         // A file of the module under test is then answered under its staged copy when the test host
         // has registered one (GoModuleSourceRemap).
