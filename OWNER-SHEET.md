@@ -38,7 +38,19 @@ Paste each block in order into one pwsh 7 window, started at the root of your go
 
 ### 0. Environment and the two trees
 
+The first seven lines put the .NET 10 SDK and go1.24.13 first on `PATH` for this window and read both back. The
+machine-wide `dotnet` on the i7 does not have the .NET 10 SDK, so without them `dotnet build`, go2cs, `dotnet run` and
+`dotnet nuget verify` would fail or use the wrong SDK. They change only this window.
+
 ```powershell
+$env:DOTNET_ROOT = "$env:USERPROFILE\dotnet10"
+$env:GOROOT = "$env:USERPROFILE\sdk\go1.24.13"
+$env:GOTOOLCHAIN = 'local'
+$env:MSBUILDDISABLENODEREUSE = '1'
+$env:PATH = "$env:DOTNET_ROOT;$env:GOROOT\bin;$env:PATH"
+if ((dotnet --version) -notlike '10.*') { throw 'dotnet is not .NET 10: check the env block' }
+if ((go version) -notmatch 'go1\.24\.13 ') { throw 'go is not go1.24.13: check the env block' }
+
 $Repo = (git rev-parse --show-toplevel)
 $Work = Join-Path ([IO.Path]::GetTempPath()) 'nugetgo-hashset-int1'
 $T    = '7888e4e72f'
@@ -46,7 +58,6 @@ $Kit  = 'claude/c2-nugetgo-hashset-1.0.0'
 $Id   = 'nugetgo.github.com.ritchiecarroll.hashset'
 $PV   = '1.0.0-int.1'
 $Int  = 'https://apiint.nugettest.org/v3/index.json'
-$env:GOTOOLCHAIN = 'local'
 if (Test-Path $Work) { throw "$Work already exists: remove it or choose another folder" }
 New-Item -ItemType Directory $Work | Out-Null
 
@@ -213,7 +224,17 @@ the key's scope, and nuget.org's API keys page sets it.
 
 ### 4.0a Environment and the two trees
 
+The first seven lines are the same environment block as section 3's block 0, for the same reason.
+
 ```powershell
+$env:DOTNET_ROOT = "$env:USERPROFILE\dotnet10"
+$env:GOROOT = "$env:USERPROFILE\sdk\go1.24.13"
+$env:GOTOOLCHAIN = 'local'
+$env:MSBUILDDISABLENODEREUSE = '1'
+$env:PATH = "$env:DOTNET_ROOT;$env:GOROOT\bin;$env:PATH"
+if ((dotnet --version) -notlike '10.*') { throw 'dotnet is not .NET 10: check the env block' }
+if ((go version) -notmatch 'go1\.24\.13 ') { throw 'go is not go1.24.13: check the env block' }
+
 $Repo   = (git rev-parse --show-toplevel)
 $Pub    = Join-Path ([IO.Path]::GetTempPath()) 'nugetgo-hashset-publish'
 $Kit    = 'claude/c2-nugetgo-hashset-1.0.0'
