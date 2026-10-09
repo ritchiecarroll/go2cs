@@ -230,3 +230,54 @@ func TestModuleProofPagesStateTheirBuildTags(t *testing.T) {
 		t.Errorf("a standard-library page must render exactly as before, with no build-tags sentence:\n%s", stdlib)
 	}
 }
+
+// The nugetgo rehearsal (2026-10-09, gap 7): MODULE.md is what a module pack ships as VALIDATION.md, so it lists the
+// declarations each proof page excluded from both sides, not only the counts the pages claim.
+func TestModuleSummaryListsTheExcludedDeclarations(t *testing.T) {
+	temp := t.TempDir()
+	root, _ := fakeCheckout(t, filepath.Join(temp, "repo"))
+	outRoot := filepath.Join(root, "modout")
+
+	emit := func(importPath string, excluded []string) {
+		t.Helper()
+
+		comparison := testComparison{
+			Package: importPath, Status: "validated", Matched: true, Excluded: excluded,
+			Go: map[string]string{"TestA": "pass"}, CSharp: map[string]string{"TestA": "pass"},
+		}
+		manifest := testManifest{PackageImportPath: importPath, ModulePath: "example.com/mod", GoVersion: "go1.24.13"}
+		output := filepath.Join(append([]string{outRoot, "src"}, strings.Split(importPath, "/")...)...)
+
+		if err := emitValidationProofPage(output, comparison, manifest, nil, nil, Options{targetPlatform: "linux/amd64"}); err != nil {
+			t.Fatalf("emitValidationProofPage(%s): %v", importPath, err)
+		}
+	}
+
+	emit("example.com/mod", []string{
+		"ExampleB (example): example execution is deferred to Phase 4D",
+		"ExampleA (example): example execution is deferred to Phase 4D",
+	})
+	emit("example.com/mod/sub", nil)
+
+	data, err := os.ReadFile(filepath.Join(outRoot, "validation", "example.com", "mod", "MODULE.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	module := strings.ReplaceAll(string(data), "\r", "") // the summary is written with CRLF line endings
+
+	for _, want := range []string{
+		"## Excluded declarations",
+		"2 declaration(s) were excluded from both sides of the comparison",
+		"- `example.com/mod`: ExampleA (example): example execution is deferred to Phase 4D\n" +
+			"- `example.com/mod`: ExampleB (example): example execution is deferred to Phase 4D\n",
+	} {
+		if !strings.Contains(module, want) {
+			t.Errorf("MODULE.md: want %q in:\n%s", want, module)
+		}
+	}
+
+	if strings.Contains(module, "`example.com/mod/sub`:") {
+		t.Errorf("MODULE.md lists an exclusion for a package that has none:\n%s", module)
+	}
+}
