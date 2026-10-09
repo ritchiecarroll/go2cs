@@ -142,7 +142,11 @@ COORD rules sections 1-3 green before this step.
    `Directory.Build.targets` sit at the repository root and the contents of `PR/src/M` one directory below it. The
    reason is that the module file imports the nearest `Directory.Build.targets` above its own directory
    (`GetPathOfFileAbove` from its parent directory), so in a flat repository it would find none inside the repository, and the root file it
-   must import would collide with it by name. The nested layout follows from the file; its first build is uuid's.
+   must import would collide with it by name. Measured on uuid (2026-10-09, a local pack with a placeholder
+   repository URL, never shipped): both layouts build, and both dlls carry the packed dll's version and copyright
+   attributes. Only the nested one imports the root file. In the flat one `NugetgoParentBuildTargets` is empty, and
+   the generated-files path falls back to a `Generated` folder in the module's own directory instead of `.artifacts`.
+   A flat repository for such a module therefore builds, but silently differs from `PR`.
 
    Before pushing, build a fresh copy with `dotnet build -c Release -p:GoStdLibVersion=R`. For hashset (2026-10-09)
    the dll it built carried the same version and copyright attributes as the packed one, which is what lets a rebuild
