@@ -185,6 +185,7 @@ public static partial class GoReflect
     /// <c>Value</c>, so asserting a nil-wrapped delegate against its own delegate type has no
     /// runtime instance to pattern-match against either.
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     internal static Type? ValueAdapterWrappedType(Type adapterType)
     {
         return s_valueAdapterFieldTypes.GetOrAdd(adapterType, static t =>
@@ -365,6 +366,7 @@ public static partial class GoReflect
     // transitively (CS0523). Go's "no struct contains itself by value" rule says the same thing about
     // the source language, but it is the C# rule that binds here — the walk reads managed metadata,
     // and it was a managed reference classified as Struct that once made this descend forever.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     private static bool StructFieldsComparable(Type t)
     {
         foreach (FieldInfo f in t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
@@ -384,6 +386,7 @@ public static partial class GoReflect
     /// yields the struct type. Both are recovered from the adapter's single one-parameter
     /// constructor, so no name parsing of the wrapped type is involved.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     public static bool TryAdapterWrappedType(Type? t, [NotNullWhen(true)] out Type? wrapped, out bool pointerSourced)
     {
         wrapped = null;
@@ -536,6 +539,7 @@ public static partial class GoReflect
     // (ISlice<T>/IMap<K,V>/IArray<T>/IChannel<T>/IPointer<T>) and returns its type arguments,
     // or null. The raw golib containers are matched by open generic definition BEFORE this is
     // consulted, so this only ever answers for generated wrapper types.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     private static Type[]? ContainerInterfaceArguments(Type t, Type genericInterfaceDefinition)
     {
         foreach (Type ifc in t.GetInterfaces())

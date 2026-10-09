@@ -88,7 +88,10 @@ public class GoTypeDefinitionCommentTests
             .WithUpdatedParseOptions(options)
             .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out _);
 
-        string[] generated = output.SyntaxTrees.Except(compilation.SyntaxTrees).Select(tree => tree.ToString()).ToArray();
+        // The type's own generated part; the package's trimming registration is a tree of its own (GoTypeRegistrationTests).
+        string[] generated = output.SyntaxTrees.Except(compilation.SyntaxTrees)
+            .Where(tree => !tree.FilePath.EndsWith(".GoTypeRegistry.g.cs", StringComparison.Ordinal))
+            .Select(tree => tree.ToString()).ToArray();
         Diagnostic[] errors = output.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray();
 
         return (generated, errors);

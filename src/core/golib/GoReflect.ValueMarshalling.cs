@@ -78,6 +78,7 @@ public static partial class GoReflect
     /// The canonical typed nil instance for a closed <c>ж&lt;T&gt;</c> pointer type (<see cref="ж{T}.NilBox"/>),
     /// resolved from the runtime <see cref="Type"/> — what <c>reflect.Zero</c> of a pointer kind yields.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     public static object? CanonicalNilPointer(Type pointerType)
     {
         return s_canonicalNils.GetOrAdd(pointerType, static t =>
@@ -174,6 +175,7 @@ public static partial class GoReflect
     /// mirror read one answer: reflectlite's own switch lacked the operator probe, so a nil
     /// slice/chan read out of a struct field answered NOT nil (its TestIsNil rows).
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     public static bool IsNilGoValue(object? cur)
     {
         switch (cur)
@@ -451,7 +453,7 @@ public static partial class GoReflect
             !RefusedByGoAssignability(relation, srcDelegate.GetType(), dstType) &&
             haveIdenticalDelegateSignature(srcDelegate.GetType(), dstType))
         {
-            marshalled = Delegate.CreateDelegate(dstType, srcDelegate, srcDelegate.GetType().GetMethod("Invoke")!);
+            marshalled = Delegate.CreateDelegate(dstType, srcDelegate, DelegateInvoke(srcDelegate.GetType())!);
             return true;
         }
 
@@ -465,7 +467,7 @@ public static partial class GoReflect
         if (a == b)
             return true;
 
-        MethodInfo? ia = a.GetMethod("Invoke"), ib = b.GetMethod("Invoke");
+        MethodInfo? ia = DelegateInvoke(a), ib = DelegateInvoke(b);
 
         if (ia is null || ib is null || ia.ReturnType != ib.ReturnType)
             return false;
@@ -533,6 +535,9 @@ public static partial class GoReflect
     // carrying every field from src by name. A value-type struct boxes through Activator, so the
     // sets land on the box this returns; src and dst share managed field names because the same
     // converter emitted both, so a name miss means the layouts were not identical after all.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2067", Justification = GoTypeRegistry.RegisteredTypeJustification)]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2075", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     private static bool tryCopyGoStructFields(object src, Type dstType, out object? marshalled)
     {
         marshalled = null;
@@ -579,6 +584,7 @@ public static partial class GoReflect
     /// <paramref name="arrayDims"/> when known; everything else a default instance (whose field
     /// initializers ARE the Go zero — a blank `_ [4]byte` field materializes its length).
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2067", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     public static object? ZeroValueOf(Type t, nint[]? arrayDims = null, GoChanDir chanDir = GoChanDir.Unstamped)
     {
         switch (KindOf(t))
@@ -659,6 +665,7 @@ public static partial class GoReflect
     /// (nested dims build nested element factories, mirroring the converter's own
     /// <c>new(128, () =&gt; new(4))</c> field-initializer form).
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2067", Justification = GoTypeRegistry.RegisteredGenericJustification)]
     public static object MakeSizedArray(Type arrayType, nint[] dims, int level)
     {
         Type? elem = ElementType(arrayType);
@@ -931,6 +938,7 @@ public static partial class GoReflect
     // Widening cannot make the scan ambiguous: the emitted wrapper set is exactly {make ctor (arity
     // 3, public), underlying ctor (arity 1), NilType ctor (arity 1, excluded)}, so precisely one
     // candidate qualifies whether or not it is public.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     private static ConstructorInfo? wrapperConstructorOf(Type t)
     {
         return s_wrapperConstructors.GetOrAdd(t, static type =>
@@ -952,6 +960,7 @@ public static partial class GoReflect
     }
 
     /// <summary>Unwraps a generated named-type wrapper value to its single underlying field value.</summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2075", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     public static bool TryUnwrapWrapperValue(object src, [NotNullWhen(true)] out object? underlying)
     {
         underlying = null;

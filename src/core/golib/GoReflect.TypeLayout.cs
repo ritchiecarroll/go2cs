@@ -739,6 +739,7 @@ public static partial class GoReflect
 
     // The `m_value` of a named slice-of-ARRAY wrapper, or null for every other type: a single instance
     // field of that name whose type is a slice<E> (the only ISliceBacking) with an array element.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     private static FieldInfo? namedSliceValueField(Type type)
     {
         return s_namedSliceValueFields.GetOrAdd(type, static t =>
@@ -779,6 +780,11 @@ public static partial class GoReflect
 
     // First entry of a map through its non-generic enumerator; the boxed KeyValuePair is read by
     // reflection so IMap (more than one implementer) need not widen for a path only TypeOf takes.
+    // A map's entry is a KeyValuePair<,> (golib's map implements only the generic dictionary), whose two
+    // properties the dependency keeps in a trimmed publish (trim stage 1, docs/PLAN-golib-full-trim.md).
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(System.Collections.Generic.KeyValuePair<,>))]
+    [UnconditionalSuppressMessage("Trimming", "IL2075",
+        Justification = "The entry is a KeyValuePair<,>, whose Key and Value the DynamicDependency on this method keeps.")]
     private static bool firstMapEntry(object? map, out object? key, out object? value)
     {
         key = null;
@@ -890,6 +896,7 @@ public static partial class GoReflect
     /// <see cref="FieldChanDir"/>, which recovers a channel field's direction the same way and is
     /// untouched by this.
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2067", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     public static nint[]? FieldArrayDims(Type declaringType, FieldInfo field)
     {
         if (FieldStampedDims(field) is { Length: > 0 } stamped)
@@ -1221,6 +1228,7 @@ public static partial class GoReflect
     /// (<c>= channel&lt;@string&gt;.SendOnly</c>) that the generated parameterless constructor runs,
     /// which is the same route <see cref="FieldArrayDims"/> takes for an array field's length.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2067", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     public static GoChanDir FieldChanDir(Type declaringType, FieldInfo field)
     {
         if (!declaringType.IsValueType)
@@ -1262,6 +1270,7 @@ public static partial class GoReflect
     }
 
     /// <summary>The cargo of a channel-typed STRUCT FIELD, off the declaring struct's cached zero instance: the <c>typeTests</c> position.</summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2067", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     public static ChanCargo? FieldChanCargo(Type declaringType, FieldInfo field)
     {
         if (!declaringType.IsValueType)
@@ -1289,7 +1298,7 @@ public static partial class GoReflect
         if (!typeof(Delegate).IsAssignableFrom(delegateType))
             return false;
 
-        MethodInfo? invoke = delegateType.GetMethod("Invoke");
+        MethodInfo? invoke = DelegateInvoke(delegateType);
 
         if (invoke is null)
             return false;
@@ -1379,6 +1388,7 @@ public static partial class GoReflect
 
     // Go's result list as ONE managed return type: none is void, one is itself, and several are the
     // ValueTuple the converter already returns from a multi-result func.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2055", Justification = GoTypeRegistry.RegisteredGenericJustification)]
     private static Type makeGoResultType(Type[] outs)
     {
         // Each definition is named by `typeof` AT its MakeGenericType call: the trim analyzer can
@@ -1564,9 +1574,11 @@ public static partial class GoReflect
         return invoker.Call(bound, fixedArgs, tail);
     }
 
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2055", Justification = GoTypeRegistry.RegisteredGenericJustification)]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2060", Justification = GoTypeRegistry.RegisteredGenericJustification)]
     private static VariadicInvoker buildVariadicInvoker(Type delegateType)
     {
-        MethodInfo? invoke = delegateType.GetMethod("Invoke");
+        MethodInfo? invoke = DelegateInvoke(delegateType);
         ParameterInfo[] parameters = invoke?.GetParameters() ?? [];
 
         if (invoke is null || parameters.Length == 0 ||
@@ -1608,11 +1620,23 @@ public static partial class GoReflect
         return new VariadicInvoker(familyType, trampoline.CreateDelegate<Func<Delegate, object?[], Array, object?>>());
     }
 
+    /// <summary>
+    /// The <c>Invoke</c> method of a delegate type, or null when <paramref name="delegateType"/> is not one.
+    /// </summary>
+    /// <remarks>
+    /// The one place golib reads a delegate's signature by reflection (trim stage 1, docs/PLAN-golib-full-trim.md). A
+    /// delegate type's <c>Invoke</c> is the method the runtime itself calls through: a delegate type cannot be
+    /// constructed without it, and every delegate golib is handed was constructed.
+    /// </remarks>
+    [UnconditionalSuppressMessage("Trimming", "IL2070",
+        Justification = "Invoke is the method the runtime calls a delegate through; no constructed delegate type lacks it.")]
+    internal static MethodInfo? DelegateInvoke(Type delegateType) => delegateType.GetMethod("Invoke");
+
     private static Delegate rebindToVariadicFamily(Delegate del, Type familyType)
     {
         try
         {
-            return Delegate.CreateDelegate(familyType, del, "Invoke");
+            return Delegate.CreateDelegate(familyType, del, DelegateInvoke(del.GetType())!);
         }
         catch (Exception ex) when (ex is ArgumentException or MethodAccessException or MissingMethodException)
         {

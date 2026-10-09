@@ -551,7 +551,7 @@ public static class GoStructSynthesis
                 if (!GoReflect.TryBoxPointee(field.FieldType, out Type? pointee) || !receiver.IsAssignableFrom(pointee))
                     return;
 
-                deref = field.FieldType.GetProperty("Value", BindingFlags.Public | BindingFlags.Instance)?.GetGetMethod();
+                deref = GoReflect.BoxGetter(field.FieldType, valueSlot: false);
 
                 if (deref is null)
                     return;

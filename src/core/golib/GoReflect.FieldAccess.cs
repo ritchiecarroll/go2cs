@@ -381,6 +381,7 @@ public static partial class GoReflect
         });
     }
 
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     private static void collectGoFields(Type t, FieldInfo[] prefixPath, bool[] prefixHops, List<GoFieldInfo> result)
     {
         FieldInfo[] fields = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
@@ -467,6 +468,7 @@ public static partial class GoReflect
     // struct's metadata order IS declaration order (the converter declares every field inline),
     // and a struct with no matching constructor keeps metadata order — today's behavior, never a
     // half-applied guess.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     private static void reorderToGoDeclarationOrder(Type t, List<GoFieldInfo> result, int first)
     {
         int count = result.Count - first;
@@ -560,6 +562,7 @@ public static partial class GoReflect
     // The property is the DECLARATION, so it is asked first (its attribute, then the record naming it);
     // the field keeps the fallback so a future generator that does propagate the attribute needs no
     // change here.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     private static string embedTagOf(Type declaringType, FieldInfo field, string goName)
     {
         PropertyInfo? declaration = declaringType.GetProperty(goName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
@@ -633,6 +636,27 @@ public static partial class GoReflect
     /// </summary>
     internal const string FieldAccessorPrefix = "goref_";
 
+    private static readonly MethodInfo s_openBoxValueGetter = typeof(ж<>).GetProperty(nameof(ж<int>.Value))!.GetGetMethod()!;
+    private static readonly MethodInfo s_openBoxValueSlotGetter = typeof(ж<>).GetProperty(nameof(ж<int>.ValueSlot))!.GetGetMethod()!;
+
+    /// <summary>
+    /// The getter of <c>ж&lt;T&gt;.Value</c> (or <c>.ValueSlot</c>) closed over the <c>ж&lt;T&gt;</c> that
+    /// <paramref name="boxType"/> is or derives from, or null when it is no box. Both are abstract on <c>ж&lt;T&gt;</c>, so
+    /// a <c>callvirt</c> on this getter dispatches to <paramref name="boxType"/>'s own override exactly as the getter
+    /// looked up on it by name did. Closed from the statically named definition, so a trimmer keeps it (trim stage 1,
+    /// docs/PLAN-golib-full-trim.md): a lookup by name on the closed type is one it cannot see.
+    /// </summary>
+    internal static MethodInfo? BoxGetter(Type boxType, bool valueSlot)
+    {
+        for (Type? type = boxType; type is not null; type = type.BaseType)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ж<>))
+                return (MethodInfo?)MethodBase.GetMethodFromHandle((valueSlot ? s_openBoxValueSlotGetter : s_openBoxValueGetter).MethodHandle, type.TypeHandle);
+        }
+
+        return null;
+    }
+
     // DynamicMethod: (object box) => ref ((ж<S>)box).ValueSlot.path... — each plain step is an
     // ldflda; a box-hop step loads the ж<E> reference and re-enters through ITS ValueSlot.
     //
@@ -659,7 +683,7 @@ public static partial class GoReflect
 
         il.Emit(OpCodes.Ldarg_0);
         il.Emit(OpCodes.Castclass, boxType);
-        il.Emit(OpCodes.Callvirt, boxType.GetProperty(nameof(ж<int>.ValueSlot))!.GetGetMethod()!);
+        il.Emit(OpCodes.Callvirt, BoxGetter(boxType, valueSlot: true)!);
 
         for (int i = 0; i < field.Path.Length; i++)
         {
@@ -677,7 +701,7 @@ public static partial class GoReflect
             }
 
             il.Emit(OpCodes.Ldfld, field.Path[i]);
-            il.Emit(OpCodes.Callvirt, field.Path[i].FieldType.GetProperty(nameof(ж<int>.ValueSlot))!.GetGetMethod()!);
+            il.Emit(OpCodes.Callvirt, BoxGetter(field.Path[i].FieldType, valueSlot: true)!);
         }
 
         il.Emit(OpCodes.Ret);

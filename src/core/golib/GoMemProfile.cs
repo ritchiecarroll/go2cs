@@ -79,6 +79,10 @@ public static class GoMemProfile
     // constant AT THE CALL: the compiler does not follow it through a parameter. The entry assembly is asked
     // second, for a program that compiles runtime/pprof's sources into its own assembly rather than
     // referencing runtime.pprof. runtime/pprof's own test binary is not one: it references the assembly.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "The entry-assembly lookup serves a program that compiles runtime/pprof's sources into itself, " +
+                        "which calls pprof_package and so keeps it; missing, the answer is 'not linked', Go's own answer " +
+                        "for a program without pprof (trim stage 1, docs/PLAN-golib-full-trim.md).")]
     private static Type? findPprofPackage() =>
         Type.GetType("go.runtime.pprof_package, runtime.pprof", throwOnError: false) ??
         System.Reflection.Assembly.GetEntryAssembly()?.GetType("go.runtime.pprof_package", throwOnError: false);

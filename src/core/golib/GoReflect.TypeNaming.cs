@@ -477,6 +477,8 @@ public static partial class GoReflect
     /// Property accessors and other special-name members are skipped; a converted Go interface
     /// declares methods alone.
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070", Justification = GoTypeRegistry.RegisteredTypeJustification)]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2075", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     private static string goInterfaceTypeString(Type t)
     {
         List<System.Reflection.MethodInfo> methods = [];

@@ -85,6 +85,9 @@ internal static class Q44RegistryCensus
     // this exactly but needs a generic parameter, and here the type is only known as a `Type` -- so
     // the walk is explicit, and it fails REFERENCE-WARDS on anything it cannot decide, because the
     // consequence of a wrong "blittable" is corruption rather than a wrong answer.
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070",
+        Justification = "A diagnostic census, off by default and switched on only by its environment variable (this file's " +
+                        "header); it never runs in a program, trimmed or not (trim stage 1, docs/PLAN-golib-full-trim.md).")]
     private static bool PointeeContainsReferences(Type t)
     {
         if (!t.IsValueType)

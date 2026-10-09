@@ -327,6 +327,7 @@ public static unsafe class GoLibcCall
     /// block is a named-integer wrapper (<c>pthread</c>: one field) or a scalar box; the first field, or
     /// the scalar itself, receives the register at its own width and is stored back through the box.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2075", Justification = GoTypeRegistry.RegisteredTypeJustification)]
     public static nuint CallStoringResultIntoBlock(nint fn, object? argsBox, nint errnoReader, string symbol)
     {
         if (argsBox is not INilPointer || argsBox is not IUntypedSlotAccess slot)

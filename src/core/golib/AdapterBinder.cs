@@ -251,6 +251,7 @@ public static class AdapterBinder
             : BuildGenericShellFactory(valueType, spec) ?? BuildObjectShellFactory(valueType, spec);
     }
 
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2059", Justification = GoTypeRegistry.RegisteredGenericJustification)]
     private static Func<object, object>? BuildGenericShellFactory(Type valueType, GoInterfaceShellAttribute spec)
     {
         GoTypeExtensions.ResolveReceiverElement(valueType, out Type element, out bool isPointer);

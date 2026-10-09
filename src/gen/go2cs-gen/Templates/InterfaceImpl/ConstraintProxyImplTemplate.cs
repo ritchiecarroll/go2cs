@@ -4,6 +4,8 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+using static go2cs.Common;
+
 namespace go2cs.Templates.InterfaceImpl;
 
 /// <summary>
@@ -42,6 +44,8 @@ internal class ConstraintProxyImplTemplate : TemplateBase
              {
                  private readonly ж<{{ElementName}}> m_box;
 
+                 // The dependency registers this proxy for trimming (golib's GoTypeRegistry) whenever it is constructed.
+                 {{string.Format(AdapterRegistration, ProxyName)}}
                  public {{ProxyName}}(ж<{{ElementName}}> box) => m_box = box;
 
                  public object? Box => m_box;

@@ -103,6 +103,14 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
     /// <summary>Whether the pair (<typeparamref name="T"/>, <typeparamref name="TDst"/>) is a slice → header reinterpretation this box serves.</summary>
     internal static readonly bool Applies;
 
+    // The header's pointer type is unsafe.Pointer, the one IUnsafePointer (no generated type implements it), in an
+    // assembly golib cannot reference; its FromBox is found by name. The dependency keeps that method in a trimmed
+    // publish, and FromBox<T> declares no annotation on T (trim stage 1, docs/PLAN-golib-full-trim.md).
+    [System.Diagnostics.CodeAnalysis.DynamicDependency("FromBox", "go.unsafe_package+Pointer", "unsafe")]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2075",
+        Justification = "pointerType is unsafe.Pointer, whose FromBox the DynamicDependency on this constructor keeps.")]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2060",
+        Justification = "unsafe.Pointer.FromBox<T> declares no DynamicallyAccessedMembers on T, so its instantiation asks nothing of the element type.")]
     static SliceHeaderBox()
     {
         Type source = typeof(T);
