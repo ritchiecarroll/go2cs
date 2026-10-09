@@ -63,6 +63,7 @@ partial class runtime_package
 
         envs = snapshot;
         defaultGOROOT = Environment.GetEnvironmentVariable(GoDefaultGorootVariable) ?? "";
+        s_linkTimeModuleCache = Environment.GetEnvironmentVariable(GoDefaultModuleCacheVariable) ?? "";
 
         // cmd/go's -X=runtime.godebugDefault=...: the program's default GODEBUG, from its module's go line,
         // its go.mod godebug block and its //go:debug directives, which the converter stamps on the entry
@@ -109,6 +110,18 @@ partial class runtime_package
     /// </remarks>
     public const string GoDefaultGorootVariable = "GO2CS_DEFAULT_GOROOT";
 
+    /// <summary>
+    /// The environment variable naming the module cache a recorded module source roots against: the cache
+    /// `go test` built from, the absolute prefix an untrimmed Go build bakes into a module frame's file.
+    /// </summary>
+    /// <remarks>
+    /// The converter records a module-cache source in its -trimpath form, <c>&lt;module&gt;@&lt;version&gt;/&lt;file&gt;</c>,
+    /// so a packed assembly never names the cache of the machine that built it. The -tests pipeline hands
+    /// the host its cache through this variable, and the module initializer above copies it once, as it
+    /// does the link-time GOROOT. Unset, a module frame answers the recorded -trimpath form.
+    /// </remarks>
+    public const string GoDefaultModuleCacheVariable = "GO2CS_DEFAULT_GOMODCACHE";
+
     // TEST SEAMS (pinner_impl.cs's pattern: GolibTests is outside the InternalsVisibleTo grant). They re-run
     // the start sequence over a given environment, as a process started with it would: envs, then
     // parsedebugvars. The call is RAW, not through the fatal wrapper above, so a failure reaches the arm as
@@ -146,6 +159,15 @@ partial class runtime_package
     {
         string previous = defaultGOROOT.ToString();
         defaultGOROOT = root;
+        return previous;
+    }
+
+    // Sets the link-time module cache the module initializer copied from GoDefaultModuleCacheVariable, and
+    // returns the previous value for the caller to restore.
+    public static string GoSetDefaultModuleCache(string cache)
+    {
+        string previous = s_linkTimeModuleCache;
+        s_linkTimeModuleCache = cache;
         return previous;
     }
 }
