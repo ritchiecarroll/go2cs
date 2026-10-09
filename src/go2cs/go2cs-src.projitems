@@ -240,6 +240,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeCallGateWindows_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeFieldArrayViewTranscription_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeRootFieldViewCensus_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nugetgoSuites_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\psQuestionMarkVariable_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\publishedCounterReset_test.go" />
     <None Include="$(MSBuildThisFileDirectory)liftedTypeNames.go" />
