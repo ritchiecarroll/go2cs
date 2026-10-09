@@ -85,32 +85,28 @@ public static partial class GoReflect
     // Field(i)/Index(i) addressability builds on in the next increment. Writes to a structurally
     // nil box panic exactly like Go's nil-pointer store (blessing condition Q1a: the canonical
     // typed-nil singleton is write-protected).
-    private static readonly ConcurrentDictionary<Type, Func<object, object?>> s_slotReaders = new();
-    private static readonly ConcurrentDictionary<Type, Action<object, object?>> s_slotWriters = new();
+    // Which slot face a box type reads through, decided ONCE per box type: a plain ж box takes its own ValueSlot pair
+    // (IGoReflectBox), a generated named-pointer wrapper and unsafe.Pointer the IPointer<T> pair (IGoReflectPointer).
+    // Trim stage 3a: both faces are members of the box itself, compiled for every box the program has, where the bridge
+    // used to close a generic helper over the pointee with MakeGenericMethod (Native AOT cannot; the probe's stop).
+    private static readonly ConcurrentDictionary<Type, bool> s_slotViaInterface = new();
 
     /// <summary>Reads the value held by a pointer box — a closed <c>ж&lt;T&gt;</c> or a generated named-pointer
     /// wrapper (<c>IPointer&lt;T&gt;</c>) — nil-safe (a nil box reads as the zero value).</summary>
     public static object? ReadPointerSlot(object box)
     {
-        return s_slotReaders.GetOrAdd(box.GetType(), static boxType =>
-        {
-            (bool viaInterface, Type elem) = slotAccessorShape(boxType);
-            MethodInfo reader = typeof(GoReflect).GetMethod(viaInterface ? nameof(readSlotViaInterface) : nameof(readSlot), BindingFlags.NonPublic | BindingFlags.Static)!
-                .MakeGenericMethod(elem);
-            return reader.CreateDelegate<Func<object, object?>>();
-        })(box);
+        return s_slotViaInterface.GetOrAdd(box.GetType(), static boxType => slotAccessorShape(boxType).viaInterface)
+            ? ((IGoReflectPointer)box).ReadReflectSlot()
+            : ((IGoReflectBox)box).ReadBoxSlot();
     }
 
     /// <summary>Writes a value through a pointer box's slot ref (panics Go-style on a nil box).</summary>
     public static void WritePointerSlot(object box, object? value)
     {
-        s_slotWriters.GetOrAdd(box.GetType(), static boxType =>
-        {
-            (bool viaInterface, Type elem) = slotAccessorShape(boxType);
-            MethodInfo writer = typeof(GoReflect).GetMethod(viaInterface ? nameof(writeSlotViaInterface) : nameof(writeSlot), BindingFlags.NonPublic | BindingFlags.Static)!
-                .MakeGenericMethod(elem);
-            return writer.CreateDelegate<Action<object, object?>>();
-        })(box, value);
+        if (s_slotViaInterface.GetOrAdd(box.GetType(), static boxType => slotAccessorShape(boxType).viaInterface))
+            ((IGoReflectPointer)box).WriteReflectSlot(value);
+        else
+            ((IGoReflectBox)box).WriteBoxSlot(value);
     }
 
     /// <summary>
@@ -209,47 +205,6 @@ public static partial class GoReflect
             throw new InvalidOperationException($"Not a pointer box type: {boxType}");
 
         return (viaInterface, elemType);
-    }
-
-    private static object? readSlot<T>(object box)
-    {
-        return ((ж<T>)box).ValueSlot;
-    }
-
-    private static void writeSlot<T>(object box, object? value)
-    {
-        ж<T> typed = (ж<T>)box;
-
-        if (typed.IsNilPointer)
-            throw RuntimeErrorPanic.NilPointerDereference();
-
-        typed.ValueSlot = (T)value!;
-    }
-
-    private static object? readSlotViaInterface<T>(object box)
-    {
-        IPointer<T> typed = (IPointer<T>)box;
-
-        // STRUCTURAL nil first: there is no storage to read, so the pointee reads as the zero value.
-        // Every other box resolves its REAL storage through Value — including a struct-field or
-        // array-element reference, whose own `m_val` is an unused default. That default is the trap:
-        // a nil test that PEEKS AT THE VALUE calls such a box nil whenever the referenced field's
-        // type is a reference type, and hands back default(T) in place of the field's actual value.
-        // So ж<T>.IsNull is STRUCTURAL for those kinds, and the case it still answers by value — a
-        // standard box whose reference-typed pointee is legitimately null — has default(T) as the
-        // correct answer anyway, which is why the fallback on the last line is safe.
-        if (box is INilPointer { IsNilPointer: true })
-            return default(T);
-
-        return typed.IsNull ? default(T) : typed.Value;
-    }
-
-    private static void writeSlotViaInterface<T>(object box, object? value)
-    {
-        if (box is INilPointer { IsNilPointer: true })
-            throw RuntimeErrorPanic.NilPointerDereference();
-
-        ((IPointer<T>)box).Value = (T)value!;
     }
 
     // -------- Go struct-field projection (embeds, named-struct wrappers, blanks, companions) --------
@@ -589,7 +544,6 @@ public static partial class GoReflect
     private static readonly ConcurrentDictionary<(Type boxType, string fieldKey), Delegate> s_fieldAccessors = new();
     private static readonly ConcurrentDictionary<Type, Func<object, Delegate, object>> s_fieldBoxMakers = new();
     private static readonly ConcurrentDictionary<(Type boxType, Type elemType), Func<object, nint, object>> s_elementBoxMakers = new();
-    private static readonly ConcurrentDictionary<Type, Func<object, int, object>> s_arrayElementBoxMakers = new();
 
     /// <summary>
     /// A field-alias <c>ж&lt;F&gt;</c> over a parent box's Go field: reads/writes route through the
@@ -641,10 +595,10 @@ public static partial class GoReflect
     // with the field Go puts there, so an ldflda would hand out a ref whose write lands C#'s one byte for the
     // empty struct on that neighbour, where Go stores nothing. The parent ref is still evaluated first (a
     // nil base still faults) and then dropped.
+    // The fact GoZeroSizeFacts<T>.IsZeroSize caches, asked of the Type directly (its one source, GoZeroSizeFacts.Classify):
+    // no generic type is closed per field (trim stage 3a).
     private static bool isReadonlyZeroSizeField(FieldInfo field) =>
-        field.IsInitOnly &&
-        (bool)typeof(GoZeroSizeFacts<>).MakeGenericType(field.FieldType)
-            .GetField(nameof(GoZeroSizeFacts<int>.IsZeroSize), BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null)!;
+        field.IsInitOnly && GoZeroSizeFacts.Classify(field.FieldType);
 
     private static Delegate buildFieldAccessor(Type boxType, GoFieldInfo field)
     {
@@ -715,17 +669,19 @@ public static partial class GoReflect
     /// </summary>
     public static object ElementAliasBoxOfValue(object containerValue, Type elemType, nint index)
     {
-        return s_arrayElementBoxMakers.GetOrAdd(elemType, static et =>
-            typeof(GoReflect).GetMethod(nameof(elementBoxOfArray), BindingFlags.NonPublic | BindingFlags.Static)!
-                .MakeGenericMethod(et).CreateDelegate<Func<object, int, object>>())(containerValue, (int)index);
+        return sequenceOf(containerValue, elemType, nameof(ElementAliasBoxOfValue)).ReflectElementAlias((int)index);
     }
 
-    private static object elementBoxOfArray<E>(object arrayValue, int index)
+    // The sequence face of a container value (trim stage 3a: IArray<T>'s default members, compiled for every sequence
+    // the program has), checked against the element type the caller names: the bridge's generic helpers failed a cast on
+    // a mismatch, and a dispatch that silently ignored one would not.
+    private static IGoReflectSequence sequenceOf(object container, Type elemType, string operation)
     {
-        return new ElemRefBox<E>((IArray)arrayValue, index);
-    }
+        if (container is not IGoReflectSequence sequence || sequence.ReflectElementType != elemType)
+            throw new InvalidOperationException($"{operation}: unsupported container {container.GetType()} for element type {elemType}");
 
-    private static readonly ConcurrentDictionary<Type, Func<object, nint, nint, object>> s_sliceWindowMakers = new();
+        return sequence;
+    }
 
     /// <summary>
     /// A <c>slice&lt;E&gt;</c> window <c>[low:high]</c> over a container value that SHARES the
@@ -735,23 +691,8 @@ public static partial class GoReflect
     /// </summary>
     public static object SliceWindow(object container, Type elemType, nint low, nint high)
     {
-        return s_sliceWindowMakers.GetOrAdd(elemType, static et =>
-            typeof(GoReflect).GetMethod(nameof(sliceWindow), BindingFlags.NonPublic | BindingFlags.Static)!
-                .MakeGenericMethod(et).CreateDelegate<Func<object, nint, nint, object>>())(container, low, high);
+        return sequenceOf(container, elemType, nameof(SliceWindow)).ReflectWindow(low, high);
     }
-
-    private static object sliceWindow<E>(object container, nint low, nint high)
-    {
-        return container switch
-        {
-            slice<E> s => s.slice(low, high),
-            array<E> a => new slice<E>(a, low, high),
-            ISlice<E> view => new slice<E>(view).slice(low, high),
-            _ => throw new InvalidOperationException($"SliceWindow: unsupported container {container.GetType()}")
-        };
-    }
-
-    private static readonly ConcurrentDictionary<Type, Func<object, nint, nint, nint, object>> s_sliceWindow3Makers = new();
 
     /// <summary>
     /// The FULL slice expression's window — <c>[low:high:max]</c>, Go's
@@ -767,24 +708,9 @@ public static partial class GoReflect
     /// </remarks>
     public static object SliceWindow(object container, Type elemType, nint low, nint high, nint max)
     {
-        return s_sliceWindow3Makers.GetOrAdd(elemType, static et =>
-            typeof(GoReflect).GetMethod(nameof(sliceWindow3), BindingFlags.NonPublic | BindingFlags.Static)!
-                .MakeGenericMethod(et).CreateDelegate<Func<object, nint, nint, nint, object>>())(container, low, high, max);
+        return sequenceOf(container, elemType, nameof(SliceWindow)).ReflectWindow(low, high, max);
     }
 
-    private static object sliceWindow3<E>(object container, nint low, nint high, nint max)
-    {
-        return container switch
-        {
-            slice<E> s => s.Reslice(low, high, max),
-            array<E> a => new slice<E>((E[])a, low, high, max),
-            ISlice<E> view => new slice<E>(view).Reslice(low, high, max),
-            _ => throw new InvalidOperationException($"SliceWindow: unsupported container {container.GetType()}")
-        };
-    }
-
-
-    private static readonly ConcurrentDictionary<Type, Func<object?, nint, object?>> s_sliceGrowers = new();
 
     /// <summary>
     /// A slice with room for <paramref name="extra"/> more elements past its LENGTH, preserving
@@ -800,45 +726,39 @@ public static partial class GoReflect
     /// <c>slice&lt;E&gt;</c> even when the source was a named wrapper — the caller converts it
     /// back into the slot's own type, the same single convertibility relation <c>SetLen</c> uses.
     /// </remarks>
+    /// <remarks>
+    /// Trim stage 3a: the body is <see cref="ISlice{T}"/>'s default member (<see cref="IGoReflectSlice"/>), compiled for
+    /// every slice type the program has, where the bridge closed a generic helper over the element with
+    /// <c>MakeGenericMethod</c>. A NULL container has no value to dispatch on. Both callers (<c>reflect.Value.Grow</c> and
+    /// <c>extendSlice</c>, src/core/reflect/value_impl.cs) pass a Slice-kind value's live storage, a boxed struct that is
+    /// never null, so only the null form's no-growth answer is kept (the source, null); growing from null is refused by
+    /// name rather than invented.
+    /// </remarks>
     public static object? GrowSlice(object? container, Type elemType, nint extra)
     {
-        return s_sliceGrowers.GetOrAdd(elemType, static et =>
-            typeof(GoReflect).GetMethod(nameof(growSlice), BindingFlags.NonPublic | BindingFlags.Static)!
-                .MakeGenericMethod(et).CreateDelegate<Func<object?, nint, object?>>())(container, extra);
-    }
-
-    private static object? growSlice<E>(object? container, nint extra)
-    {
-        slice<E> s = container switch
+        if (container is null)
         {
-            null => default,
-            slice<E> raw => raw,
-            ISlice<E> view => new slice<E>(view),
-            _ => throw new InvalidOperationException($"GrowSlice: unsupported container {container.GetType()}")
-        };
+            if (extra <= 0)
+                return null;
 
-        nint length = s.Length;
+            throw new InvalidOperationException($"GrowSlice: no slice value to grow for element type {elemType}");
+        }
 
-        if (length + extra <= s.Capacity)
-            return container;
+        if (container is not IGoReflectSlice slice || ((IGoReflectSequence)container).ReflectElementType != elemType)
+            throw new InvalidOperationException($"GrowSlice: unsupported container {container.GetType()} for element type {elemType}");
 
-        nint capacity = s.Capacity == 0 ? length + extra : s.Capacity;
-
-        while (capacity < length + extra)
-            capacity *= 2;
-
-        // Go's Value.Grow reaches growslice here, which mallocs the new backing; so is this one charged.
-        E[] backing = AllocationCounter.NewArray<E>(capacity);
-
-        // Block copy, not an element loop: the demonstrated consumer (encoding/gob's decUint8Slice)
-        // grows buffers past internal/saferio's 10 MiB chunk, where a per-element ref indexer walk
-        // is orders of magnitude slower than the memmove a Span copy compiles to.
-        s.ToSpan().CopyTo(backing);
-
-        return new slice<E>(backing, 0, length);
+        return slice.ReflectGrow(extra);
     }
 
-    private static readonly ConcurrentDictionary<(Type keyType, Type elemType), Action<object, object?, object?>> s_mapSetters = new();
+    // The map face of a live map (trim stage 3a: IMap<TKey, TValue>'s default members, compiled for every map type the
+    // program has), checked against the key and element types the caller names, as the generic helpers' casts did.
+    private static IGoReflectMap mapOf(object map, Type keyType, Type elemType, string operation)
+    {
+        if (map is not IGoReflectMap typed || typed.ReflectKeyType != keyType || typed.ReflectElemType != elemType)
+            throw new InvalidOperationException($"{operation}: unsupported map {map.GetType()} for map[{keyType}]{elemType}");
+
+        return typed;
+    }
 
     /// <summary>
     /// Stores a key/value pair through a live golib map — raw <c>map&lt;K,V&gt;</c> and named map
@@ -846,17 +766,8 @@ public static partial class GoReflect
     /// </summary>
     public static void SetMapEntry(object map, Type keyType, Type elemType, object? key, object? value)
     {
-        s_mapSetters.GetOrAdd((keyType, elemType), static k =>
-            typeof(GoReflect).GetMethod(nameof(setMapEntry), BindingFlags.NonPublic | BindingFlags.Static)!
-                .MakeGenericMethod(k.keyType, k.elemType).CreateDelegate<Action<object, object?, object?>>())(map, key, value);
+        mapOf(map, keyType, elemType, nameof(SetMapEntry)).ReflectSet(key, value);
     }
-
-    private static void setMapEntry<K, V>(object map, object? key, object? value) where K : notnull
-    {
-        ((IDictionary<K, V>)map)[(K)key!] = (V)value!;
-    }
-
-    private static readonly ConcurrentDictionary<(Type keyType, Type elemType), Action<object, object?>> s_mapDeleters = new();
 
     /// <summary>
     /// Deletes the entry stored under a key in a live golib map — Go's <c>delete(m, k)</c>, reached
@@ -870,19 +781,8 @@ public static partial class GoReflect
     /// </remarks>
     public static void DeleteMapEntry(object map, Type keyType, Type elemType, object? key)
     {
-        s_mapDeleters.GetOrAdd((keyType, elemType), static k =>
-            typeof(GoReflect).GetMethod(nameof(deleteMapEntry), BindingFlags.NonPublic | BindingFlags.Static)!
-                .MakeGenericMethod(k.keyType, k.elemType).CreateDelegate<Action<object, object?>>())(map, key);
+        mapOf(map, keyType, elemType, nameof(DeleteMapEntry)).ReflectDelete(key);
     }
-
-    private static void deleteMapEntry<K, V>(object map, object? key) where K : notnull
-    {
-        // IMap<K,V>'s Remove, not IDictionary's, so golib's dedicated NIL-key slot is reached — the
-        // backing Dictionary cannot hold a null key and the non-generic surface cannot see that entry.
-        ((IMap<K, V>)map).Remove((K)key!);
-    }
-
-    private static readonly ConcurrentDictionary<(Type keyType, Type elemType), Func<object, object?, (bool, object?)>> s_mapGetters = new();
 
     /// <summary>
     /// Reads the value stored under a key in a live golib map, reporting Go's comma-ok presence
@@ -896,17 +796,6 @@ public static partial class GoReflect
     /// </remarks>
     public static bool TryGetMapEntry(object map, Type keyType, Type elemType, object? key, out object? value)
     {
-        (bool present, object? found) = s_mapGetters.GetOrAdd((keyType, elemType), static k =>
-            typeof(GoReflect).GetMethod(nameof(getMapEntry), BindingFlags.NonPublic | BindingFlags.Static)!
-                .MakeGenericMethod(k.keyType, k.elemType).CreateDelegate<Func<object, object?, (bool, object?)>>())(map, key);
-
-        value = found;
-        return present;
-    }
-
-    private static (bool present, object? value) getMapEntry<K, V>(object map, object? key) where K : notnull
-    {
-        (V value, bool present) = ((IMap<K, V>)map)[(K)key!, true];
-        return (present, present ? value : null);
+        return mapOf(map, keyType, elemType, nameof(TryGetMapEntry)).ReflectTryGet(key, out value);
     }
 }

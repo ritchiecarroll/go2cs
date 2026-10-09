@@ -315,11 +315,70 @@ public interface IUnsafePointer
 }
 
 /// <summary>
+/// The object-form slot pair reflect reads and writes a pointer through when it holds the pointer only as
+/// <see cref="object"/> (<c>GoReflect.ReadPointerSlot</c> / <c>WritePointerSlot</c>, for a generated named-pointer
+/// wrapper and <c>unsafe.Pointer</c>). Implemented once, generically, by <see cref="IPointer{T}"/>'s default members.
+/// </summary>
+/// <remarks>
+/// Trim stage 3a (docs/PLAN-golib-full-trim.md, section 9): reflect closed a generic helper over the pointee type with
+/// <c>MakeGenericMethod</c>, which Native AOT cannot do for a value-type pointee it never compiled. A default member
+/// of a generic interface is compiled for every implementing type the program has, and a generated wrapper inherits
+/// it without a generator change. PUBLIC only because <see cref="IPointer{T}"/> is, and a wrapper in another assembly
+/// implements it; nothing outside the reflect bridge calls it.
+/// </remarks>
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+public interface IGoReflectPointer
+{
+    /// <summary>The pointee as <see cref="object"/>; a nil pointer reads as the pointee type's zero value.</summary>
+    object? ReadReflectSlot();
+
+    /// <summary>Stores <paramref name="value"/> through the pointer; a nil pointer panics as Go's nil store does.</summary>
+    void WriteReflectSlot(object? value);
+}
+
+/// <summary>
+/// Reflect's object-form slot pair through a plain <c>ж</c> box's own <c>ValueSlot</c> (<c>GoReflect.ReadPointerSlot</c>
+/// / <c>WritePointerSlot</c>; trim stage 3a), which takes the slot pair where a named-pointer wrapper and
+/// <c>unsafe.Pointer</c> take <see cref="IGoReflectPointer"/>. Implemented by <see cref="ж{T}"/>, so every closed box
+/// the program constructs carries its compiled body.
+/// </summary>
+internal interface IGoReflectBox
+{
+    /// <summary>The pointee through the kind's own <c>ValueSlot</c>.</summary>
+    object? ReadBoxSlot();
+
+    /// <summary>Stores <paramref name="value"/> through the kind's own <c>ValueSlot</c>; a nil box panics as Go's nil store does.</summary>
+    void WriteBoxSlot(object? value);
+}
+
+/// <summary>
 /// Defines an interface that represents a pointer <see cref="ж{T}"/> type.
 /// </summary>
 /// <typeparam name="T">Type for heap based reference.</typeparam>
-public interface IPointer<T>
+public interface IPointer<T> : IGoReflectPointer
 {
+    // STRUCTURAL nil first: there is no storage to read, so the pointee reads as the zero value. Every other box
+    // resolves its REAL storage through Value, including a struct-field or array-element reference, whose own `m_val`
+    // is an unused default. That default is the trap: a nil test that PEEKS AT THE VALUE calls such a box nil whenever
+    // the referenced field's type is a reference type, and hands back default(T) in place of the field's actual value.
+    // So ж<T>.IsNull is STRUCTURAL for those kinds, and the case it still answers by value, a standard box whose
+    // reference-typed pointee is legitimately null, has default(T) as the correct answer anyway.
+    object? IGoReflectPointer.ReadReflectSlot()
+    {
+        if (this is INilPointer { IsNilPointer: true })
+            return default(T);
+
+        return IsNull ? default(T) : Value;
+    }
+
+    void IGoReflectPointer.WriteReflectSlot(object? value)
+    {
+        if (this is INilPointer { IsNilPointer: true })
+            throw RuntimeErrorPanic.NilPointerDereference();
+
+        Value = (T)value!;
+    }
+
     /// <summary>
     /// Gets a reference to the value of type <typeparamref name="T"/>.
     /// </summary>
