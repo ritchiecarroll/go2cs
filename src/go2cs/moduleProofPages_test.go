@@ -264,7 +264,7 @@ func TestModuleSummaryListsTheExcludedDeclarations(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	module := string(data)
+	module := strings.ReplaceAll(string(data), "\r", "") // the summary is written with CRLF line endings
 
 	for _, want := range []string{
 		"## Excluded declarations",

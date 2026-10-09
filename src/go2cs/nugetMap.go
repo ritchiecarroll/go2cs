@@ -317,7 +317,9 @@ func nugetLockDisagreement(locked nugetLockEntry, row nugetMapRow, answeredBy st
 // mapped modules in the lock. Entries for modules outside this run are kept -- one output root can hold
 // several modules' conversions, and the lock is that root's record (the go2cs.modules.lock rule).
 func runNuGetMapResolution(modules []thirdPartyModule, o nugetMapOptions, outRoot string) ([]nugetMapDecision, []string, error) {
-	if !o.active() {
+	// A module with no third-party module has nothing to map: no source is read, so the default registry is not
+	// fetched, and no lock is written (the nugetgo rehearsal, 2026-10-09, gap 8).
+	if !o.active() || len(modules) == 0 {
 		return nil, nil, nil
 	}
 
