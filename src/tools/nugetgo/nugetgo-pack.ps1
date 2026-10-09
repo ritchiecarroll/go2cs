@@ -71,10 +71,10 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+Import-Module (Join-Path $PSScriptRoot 'NugetgoClosure.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoIdentity.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoSelfDescription.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoLicense.psm1') -Force
-Import-Module (Join-Path $PSScriptRoot 'NugetgoClosure.psm1') -Force
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 
 function Refuse([string]$why) { throw "REFUSED: $why" }
