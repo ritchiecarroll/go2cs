@@ -55,8 +55,8 @@ by reflection. Each package now registers the Go types it defines, and the consu
 size: a fully trimmed executable keeps every Go type the program can reach, so it is about twice as large
 as before (12.4 MB to 24.5 MB for the measured consumer), where it used to keep less and fail. The
 default partial trim is unchanged, in size and in behavior. The runtime library's own trim warnings fall
-from 76 to 32 in the same change. This is measured on one development machine so far; the hosted check
-measures the default trim.
+from 76 to 32 in the same change. This is measured on `win-x64`, on one development machine; the hosted
+check measures the default trim.
 
 **Fixes since 1.24.13.4 that a user of the packages or the converter sees:**
 

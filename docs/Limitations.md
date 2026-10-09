@@ -84,10 +84,10 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   [performance comparison](Performance.md) has the numbers. Measure your own hot path, in Release.
 * **Startup, memory and shipping.** A converted program loads .NET and one DLL per converted Go package
   it uses. You ship a .NET app, not Go's small static binary: `dotnet build` output needs the .NET 10
-  runtime, and `dotnet publish -r <runtime>` gives a self-contained folder. Leave the trim mode alone:
-  a full trim removes members the runtime library reaches by reflection. A converted project sets it for
-  you; a C# project you write yourself that references the packages and publishes with Native AOT has to
-  set it too, and a Native AOT publish is slow either way ([Known issues](KnownIssues.md)).
+  runtime, and `dotnet publish -r <runtime>` gives a self-contained folder. The trim mode is set for
+  you: a converted project carries `partial` in its project file, and a C# project you write yourself gets
+  the same default from the packages. A Native AOT publish is slow either way
+  ([Known issues](KnownIssues.md)).
 * **Allocation.** Converted code allocates where Go's compiler doesn't, so expect more garbage and
   failing `testing.AllocsPerRun` assertions.
 * **Crypto, most hashing and `math/big` run Go's portable code**, the way Go builds with `-tags purego`:
