@@ -19,7 +19,7 @@ on both sides of the change. **A C# project that references the `go.*` packages 
 on Windows**, as it does on Linux and on Intel Macs, and a fully trimmed Native AOT build runs for the
 first time. The converted library ships as **NuGet 1.24.13.5**, targeting .NET 10, with every validated
 package at its count on Windows and on Linux. The
-[full announcement](NEWS.md#october-10-2026--converted-code-reads-like-go-and-native-aot-runs-on-windows)
+[full announcement](NEWS.md#october-9-2026--converted-code-reads-like-go-and-native-aot-runs-on-windows)
 has the details.
 
 **➡ All announcements can be found in the [go2cs News Archive](NEWS.md).**

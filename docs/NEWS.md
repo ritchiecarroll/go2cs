@@ -8,8 +8,7 @@ their full text.
 
 ---
 
-<!-- The date in this heading and in the README's link is the release day; set both when the release runs. -->
-## October 10, 2026 — Converted code reads like Go, and Native AOT runs on Windows
+## October 9, 2026 — Converted code reads like Go, and Native AOT runs on Windows
 
 <!-- attribute-shown: the announcement names the attributes that left converted code -->
 **go2cs converts Go into C# that a Go developer can read, and this release removes most of what stood
