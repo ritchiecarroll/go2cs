@@ -1520,7 +1520,10 @@ names each test whose C# result is known to differ from `go test`, with the reas
 without such an entry counts as a mismatch. A third-party module keeps its manifests in the committed tree
 `src/tests/ModuleDisclosures/<module path>@<version>/<package dir>/`, read when the run passes
 `-module-disclosures src/tests/ModuleDisclosures`. A manifest there applies only to that exact module
-version, and a manifest in the package's own output directory still takes precedence.
+version, and a manifest in the package's own output directory still takes precedence. A manifest can also
+carry `notes`, which the package's proof page prints above the verdicts, for a caveat that is not a
+divergence: google/uuid v1.6.0's manifest lists no disclosures and notes an upstream test race that Go
+itself reproduces.
 
 **Full detail:** [Reference → Test suites reference the production project](ConversionStrategies-Reference/shadowing.md#test-suites-reference-the-production-project-instead-of-recompiling-it) — the test-project models and when each applies, the internal bridge class and its metadata files, test-side name collisions, and exactly which test files get no `.cs`.
 
