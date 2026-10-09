@@ -110,7 +110,15 @@ type proofPageProvenance struct {
 	// adds `safe` (defaultModuleBuildTags), so its verdicts are Go's under that tag, not under a bare
 	// `go test`. Unused on a stdlib page, whose purego default is documented once for the whole library.
 	buildTags []string
+
+	// inputDigest is a THIRD-PARTY page's GoInputDigest, as the package's production project records it
+	// (packageInputDigest.go): what the proven conversion was made from, which nugetgo-pack.ps1 compares with the
+	// packed project's. "" renders nothing, so a stdlib page is unchanged.
+	inputDigest string
 }
+
+// proofInputDigestPattern reads a third-party proof page's input digest back, for its MODULE.md row.
+var proofInputDigestPattern = regexp.MustCompile("(?m)^Input digest `(sha256-[0-9a-f]+)`")
 
 // proofBuildTagsPattern reads a third-party proof page's build-tags sentence back, so MODULE.md can state
 // the tags its pages were read with.
@@ -302,6 +310,11 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 
 	if provenance.convertedPath != "" {
 		fmt.Fprintf(&page, "\nBoth sides were built with %s.\n", proofBuildTagsText(provenance.buildTags))
+	}
+
+	if provenance.inputDigest != "" {
+		fmt.Fprintf(&page, "\nInput digest `%s`: the package's Go sources, conversion options, target and converter, as its\n"+
+			"project records them (`%s`).\n", provenance.inputDigest, inputDigestProperty)
 	}
 
 	if skipped > 0 {
@@ -940,6 +953,7 @@ func writeThirdPartyProofPage(outputPath string, pagePath string, comparison tes
 		date:          time.Now().UTC().Format("2006-01-02"),
 		convertedPath: filepath.ToSlash(converted),
 		buildTags:     options.buildTags,
+		inputDigest:   productionProjectInputDigest(outputPath, manifest),
 	}
 
 	if err := os.MkdirAll(filepath.Dir(pagePath), 0o755); err != nil {
@@ -955,14 +969,31 @@ func writeThirdPartyProofPage(outputPath string, pagePath string, comparison tes
 	return writeThirdPartyModuleSummary(moduleDir, manifest.ModulePath)
 }
 
+// productionProjectInputDigest is the GoInputDigest the package's production project in outputPath records: the value
+// this -tests run's own production pass wrote, or "" when the project records none.
+func productionProjectInputDigest(outputPath string, manifest testManifest) string {
+	if manifest.ProjectName == "" {
+		return ""
+	}
+
+	data, err := os.ReadFile(filepath.Join(outputPath, projectFileBaseName(manifest.ProjectName)+".csproj"))
+
+	if err != nil {
+		return ""
+	}
+
+	return projectInputDigest(string(data))
+}
+
 // writeThirdPartyModuleSummary regenerates <moduleDir>/MODULE.md from the package pages beneath it: one
 // row per page (its import path, matched and disclosed counts, a link) and the module's totals.
 func writeThirdPartyModuleSummary(moduleDir string, modulePath string) error {
 	type pageRow struct {
-		importPath string
-		link       string
-		matched    int
-		disclosed  int
+		importPath  string
+		link        string
+		matched     int
+		disclosed   int
+		inputDigest string
 	}
 
 	var rows []pageRow
@@ -996,8 +1027,13 @@ func writeThirdPartyModuleSummary(moduleDir string, modulePath string) error {
 			tagTexts[match[1]] = true
 		}
 
+		inputDigest := ""
+		if match := proofInputDigestPattern.FindStringSubmatch(strings.ReplaceAll(string(data), "\r", "")); match != nil {
+			inputDigest = match[1]
+		}
+
 		link, _ := filepath.Rel(moduleDir, path)
-		rows = append(rows, pageRow{importPath: importPath, link: filepath.ToSlash(link), matched: matched, disclosed: disclosed})
+		rows = append(rows, pageRow{importPath: importPath, link: filepath.ToSlash(link), matched: matched, disclosed: disclosed, inputDigest: inputDigest})
 
 		return nil
 	})
@@ -1024,10 +1060,17 @@ func writeThirdPartyModuleSummary(moduleDir string, modulePath string) error {
 		page.WriteString("The packages were read with different build tags; each proof page states its own.\n\n")
 	}
 
-	page.WriteString("| Package | Matched | Disclosed | Proof |\n|:--|--:|--:|:--|\n")
+	// The input digest is the one each proof page states; nugetgo-pack.ps1 reads it from this table, packed as
+	// VALIDATION.md, and refuses a row whose digest is not the packed project's.
+	page.WriteString("| Package | Matched | Disclosed | Input digest | Proof |\n|:--|--:|--:|:--|:--|\n")
 
 	for _, row := range rows {
-		fmt.Fprintf(&page, "| `%s` | %d | %d | [%s](%s) |\n", row.importPath, row.matched, row.disclosed, row.link, row.link)
+		digest := "none"
+		if row.inputDigest != "" {
+			digest = "`" + row.inputDigest + "`"
+		}
+
+		fmt.Fprintf(&page, "| `%s` | %d | %d | %s | [%s](%s) |\n", row.importPath, row.matched, row.disclosed, digest, row.link, row.link)
 		totalMatched += row.matched
 		totalDisclosed += row.disclosed
 	}

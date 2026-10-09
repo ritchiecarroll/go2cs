@@ -20,7 +20,9 @@
 
     Metadata (B6): upstream's Copyright lines and license file verbatim, under its own name (NugetgoLicense.psm1),
     the PROOF description, RepositoryUrl = the per-module conversion-source repo. D7: the module's MODULE.md ships as
-    VALIDATION.md, with every per-package proof page beside it.
+    VALIDATION.md, with every per-package proof page beside it. The proof must be OF the packed bytes: each MODULE.md
+    row's input digest must be the GoInputDigest its packed project records (NugetgoValidationBinding.psm1), so a proof
+    from other sources, other options, another target or another converter is refused by name.
 
     Assembly copyright (owner ruling 2026-10-04): each packed assembly's own copyright attribute names the UPSTREAM
     holder -- the same Copyright lines, then one go2cs scaffolding line -- and its company and authors are -Authors.
@@ -73,6 +75,7 @@ param(
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'NugetgoIdentity.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoSelfDescription.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'NugetgoValidationBinding.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoLicense.psm1') -Force
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 
@@ -174,6 +177,16 @@ else {
     $validationPage = Join-Path $ValidationDir 'MODULE.md'
     if (-not (Test-Path -LiteralPath $validationPage)) { Refuse "no MODULE.md in $ValidationDir (a validated module is required; D7)" }
     $pages = @(Get-ChildItem -LiteralPath $ValidationDir -Filter '*.md' -Recurse | Where-Object { $_.Name -ne 'MODULE.md' })
+    # The proof must be OF the packed bytes (the nugetgo rehearsal, 2026-10-09, gap 4): every MODULE.md row's input
+    # digest is the GoInputDigest its packed project records. $packed lists the libraries in $libraries' order.
+    $packedDigests = @{}
+    for ($i = 0; $i -lt $libraries.Count; $i++) { $packedDigests[$packed[$i].ImportPath] = Get-NugetgoProjectInputDigest -ProjectFile $libraries[$i].FullName }
+    $proofDigests = Get-NugetgoProofInputDigests -ModuleSummary ([System.IO.File]::ReadAllText($validationPage))
+    $unbound = @(Test-NugetgoValidationBinding -Proof $proofDigests -Packed $packedDigests)
+    if ($unbound.Count) { Refuse "the validation proof is not a proof of the packed tree -- $($unbound -join '; ')" }
+    foreach ($path in @($packedDigests.Keys | Sort-Object)) {
+        Write-Host "  proof: $path $(if ($proofDigests.ContainsKey($path)) { "bound at $($packedDigests[$path])" } else { 'has no proof row (no Go tests)' })"
+    }
 }
 
 # ---- the generated module pack project --------------------------------------------------------------------------------
