@@ -8,6 +8,70 @@ their full text.
 
 ---
 
+<!-- The date in this heading and in the README's link is the release day; set both when the release runs. -->
+## October 10, 2026 — Converted code reads like Go, and Native AOT runs on Windows
+
+<!-- attribute-shown: the announcement names the attributes that left converted code -->
+**go2cs converts Go into C# that a Go developer can read, and this release removes most of what stood
+in the way.** Until now, converted code carried attributes that told the build what Go's own syntax
+already says: `[GoRecv]` on every method with a pointer receiver, `[GoType]` on every type, and others
+on embedded fields, struct tags and array parameters. In the converted standard library they stood on
+more than five thousand method declarations alone. They are gone from converted code.
+
+Nothing they said is lost. Each fact now sits where a Go reader already looks:
+
+- **In the signature.** A pointer receiver is `this ref T`. A Go type is a `partial struct` or
+  `partial interface` declared in its package. A function with a string-view twin takes an `sstring`.
+- **In a short comment written the way Go writes it.** A defined type states its underlying type after
+  its name, `partial struct Duration /*num:int64*/;`. An embedded field says `/*embed*/`. A struct tag
+  follows its field in Go's backquoted spelling. An array's length is Go's own prefix, `/*[32]*/`.
+
+The go2cs source generators read the signature or the comment at build time and write the attribute form
+into generated code, where the runtime and `reflect` find it. So the converted file is left with the
+code, and what it compiles to is unchanged.
+[Converted code, before and after the face lift](BeforeAndAfterTheFaceLift.md) shows eight real lines of
+the converted standard library on both sides of the change, each beside the Go line it came from, and
+[the reference](ConversionStrategies-Reference/source-generators.md#marker-comments-what-converted-code-carries-instead-of-an-attribute)
+lists every marker and the few attributes that stay, with the reason for each.
+
+The whole standard library was converted again for this release, and every validated package holds its
+count: the roster's packages pass Go's own tests at the same verdict counts on Windows and on Linux as
+before the change. Hand-written C# is untouched by it. A file written by hand keeps its attributes, and
+the generators and the runtime read either spelling. The `go.*` packages are built and versioned
+together, so use one version of them in a project.
+
+**A C# project that references the `go.*` packages now runs under Native AOT on Windows.** With the
+1.24.13.4 packages such a program, published with `PublishAot`, stopped on Windows at its first call to
+`runtime.Caller`, which Go's `log` and `testing` packages reach. It now runs. The Native AOT check that
+gates the release publishes a C# consumer of the packages and runs it on `linux-x64`, `win-x64` and
+`osx-x64`, and it passes on all three. `osx-arm64` is not measured. A project that sets no trim mode of
+its own gets the packages' default, a partial trim, so the startup failure the 1.24.13.4 packages showed
+without that setting is gone too. The publish is still slow: over an hour on a hosted CI machine for Linux and for Windows, and several
+hours for an Intel Mac.
+
+**A fully trimmed Native AOT build runs for the first time.** With `TrimMode` set to `full`, a consumer
+of the packages used to stop at startup, because a full trim removed members the runtime library reaches
+by reflection. Each package now registers the Go types it defines, and the consumer runs. The cost is
+size: a fully trimmed executable keeps every Go type the program can reach, so it is about twice as large
+as before (12.4 MB to 24.5 MB for the measured consumer), where it used to keep less and fail. The
+default partial trim is unchanged, in size and in behavior. The runtime library's own trim warnings fall
+from 76 to 32 in the same change. This is measured on `win-x64`, on one development machine; the hosted
+check measures the default trim.
+
+**Fixes since 1.24.13.4 that a user of the packages or the converter sees:**
+
+- **Stack traces keep their file and line numbers.** The packages now carry their symbol files, so a
+  program that references them gets Go file names and line numbers in a panic's traceback and from
+  `runtime.Caller`. Publishing a converted program a second time no longer loses them (Windows, Linux and
+  macOS). No assembly or symbol file in the packages names a path of the machine that built it.
+- **A caller's line is the line of its call.** A call inside a statement that spans several lines reports
+  its own line, as Go does, where it used to report the statement's first.
+- **The converter accepts more Go.** An explicitly instantiated generic function passed as an argument,
+  an exported alias of an unexported type, a parenthesized type in a type assertion, a function-local
+  pointer type used as a conversion, a defined type over another package's type used as a conversion, a
+  promoted method with a parameter named `target`, and a method on a named map or channel type that
+  shares a name with the library type's own member each convert and compile now.
+
 ## October 1, 2026 — Every implementable standard-library package validates
 
 **Every implementable package in Go 1.24.13's standard library now validates its own test suite in
