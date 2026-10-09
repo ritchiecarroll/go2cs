@@ -1774,6 +1774,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckRecvMapElementDeref() => CheckTarget("RecvMapElementDeref");
 
     [TestMethod]
+    public void CheckReexecArgv0Token() => CheckTarget("ReexecArgv0Token");
+
+    [TestMethod]
     public void CheckRefLoweredDeferChain() => CheckTarget("RefLoweredDeferChain");
 
     [TestMethod]

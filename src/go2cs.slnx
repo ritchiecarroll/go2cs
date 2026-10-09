@@ -883,6 +883,7 @@
     <Project Path="tests/Behavioral/ReceiverFieldMethodCall/ReceiverFieldMethodCall.csproj" />
     <Project Path="tests/Behavioral/ReceiverNestedFieldAddress/ReceiverNestedFieldAddress.csproj" />
     <Project Path="tests/Behavioral/ReceiverPointerValue/ReceiverPointerValue.csproj" />
+    <Project Path="tests/Behavioral/ReexecArgv0Token/ReexecArgv0Token.csproj" />
     <Project Path="tests/Behavioral/RefLoweredDeferChain/RefLoweredDeferChain.csproj" />
     <Project Path="tests/Behavioral/RefPrimaryFieldReceiver/RefPrimaryFieldReceiver.csproj" />
     <Project Path="tests/Behavioral/ReflectNamedFuncAssign/ReflectNamedFuncAssign.csproj" />
