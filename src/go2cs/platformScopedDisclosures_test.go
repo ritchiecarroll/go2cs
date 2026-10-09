@@ -388,29 +388,37 @@ func TestCleanRecordCarriesNoOutOfScopeKey(t *testing.T) {
 // assertion became the rule those scopes must obey rather than their absence.
 //
 // CACHE CAVEAT, the same one fleetIdentifierCensus_test.go carries: the files read here live under
-// src/core, OUTSIDE this module, and cmd/go drops out-of-module files from the test input hash — so
+// src/core and src/tests, OUTSIDE this module, and cmd/go drops out-of-module files from the test input hash — so
 // a cached PASS would survive a manifest gaining a scope. Run the converter suite with -count=1,
 // which every gate in this repo already does.
 func TestEveryCommittedManifestLoadsUnchanged(t *testing.T) {
 	root := repoRootFromPackageDir(t)
 
-	out, err := exec.Command("git", "-C", root, "ls-files", "-z", "src/core/**/go2cs_test_disclosures.json").Output()
-	if err != nil {
-		t.Fatalf("git ls-files: %v", err)
-	}
-
+	// Both committed homes: the standard library's manifests beside each package in src/core, and the
+	// third-party module rows' manifests in src/tests/ModuleDisclosures (-module-disclosures). Until
+	// 2026-10-09 only the first was read here, so a malformed module manifest surfaced only when a
+	// -tests run happened to read it.
 	manifests := []string{}
-	for _, path := range strings.Split(string(out), "\x00") {
-		if strings.TrimSpace(path) != "" {
-			manifests = append(manifests, path)
+	for _, pathspec := range []string{"src/core/**/go2cs_test_disclosures.json", "src/tests/ModuleDisclosures/**/go2cs_test_disclosures.json"} {
+		out, err := exec.Command("git", "-C", root, "ls-files", "-z", pathspec).Output()
+		if err != nil {
+			t.Fatalf("git ls-files %s: %v", pathspec, err)
 		}
-	}
 
-	// Vacuity guard: a wrong pathspec would make every assertion below pass over nothing, which is
-	// the shape this whole increment exists to refuse one level up.
-	if len(manifests) == 0 {
-		t.Fatal("no committed disclosure manifest was found: the pathspec is wrong and this arm is " +
-			"asserting nothing")
+		found := 0
+		for _, path := range strings.Split(string(out), "\x00") {
+			if strings.TrimSpace(path) != "" {
+				manifests = append(manifests, path)
+				found++
+			}
+		}
+
+		// Vacuity guard, per home: a wrong pathspec would make every assertion below pass over
+		// nothing for that home, which is the shape this whole increment exists to refuse one level up.
+		if found == 0 {
+			t.Fatalf("no committed disclosure manifest was found for %s: the pathspec is wrong and this "+
+				"arm is asserting nothing there", pathspec)
+		}
 	}
 
 	totalEntries := 0
