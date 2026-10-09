@@ -1,10 +1,12 @@
-# hashset v1.0.0: runbook section 3 for the owner (int.nugettest.org rehearsal)
+# hashset v1.0.0: the owner sheet (runbook sections 3 and 4)
 
-Written by C2 on 2026-10-09 for the owner to paste on the i7. It covers `docs/NugetgoPublish.md` section 3 for
-`github.com/ritchiecarroll/hashset` v1.0.0. Section 4 (sign and push to nuget.org) is not here: COORD brings it on the
-consolidated owner sheet.
+Written by C2 on 2026-10-09 for the owner to paste on the i7. It is the one owner sheet for publishing
+`github.com/ritchiecarroll/hashset` v1.0.0: `docs/NugetgoPublish.md` section 3 (the int.nugettest.org rehearsal) and
+section 4 (the conversion repository, signing, and the nuget.org push). The registry row and the section 6 demo
+follow on COORD's side after the owner reports.
 
-COORD may instead WAIVE this rehearsal. Both paths are below: **PATH A** runs it, **PATH B** records the waiver.
+Section 3 has two paths: **PATH A** runs the rehearsal, **PATH B** records COORD's waiver of it. Section 4 runs only
+after COORD has ruled sections 1-3 green, by either path.
 
 ## What this branch holds
 
@@ -16,14 +18,18 @@ COORD may instead WAIVE this rehearsal. Both paths are below: **PATH A** runs it
 | `app/` | the sample program (`main.go`, `go.mod`, `go.sum`) and `go-run.out`, its `go run` output |
 | `rehearsal/mappings.txt` | the one registry row, as a local mappings file (the registry has no row yet) |
 | `rehearsal/nuget.config` | `nugetgo.*` from int.nugettest.org, everything else from nuget.org |
-| `conversion/github.com/ritchiecarroll/hashset/` | the conversion source for the `hashset-cs` repository (runbook 4.5) |
+| `conversion/github.com/ritchiecarroll/hashset/` | the first commit of the `hashset-cs` repository (section 4.0) |
 
 Both packages were packed at `T` = `claude/c2-nugetgo-tools` @ `7888e4e72f`, against the published go.* 1.24.13.5,
 with `-platforms linux/amd64`. Section 1: 37 matched, 0 disclosed, 5 Example declarations excluded; input digest
 `sha256-7fb2058d54e18d61eaa288b0e79c847c953bdadf87cdd00fdb0d832750903114`, the same in the proof and the packed project.
 
-For hashset the pack wrote no module `Directory.Build.targets`, because hashset's LICENSE already names The go2cs
-Authors, so the csproj template's copyright applies. `conversion/` is therefore the whole of `PR/src/<module>`.
+`conversion/` holds the whole of `PR/src/<module>` (for hashset the pack wrote no module `Directory.Build.targets`,
+because hashset's LICENSE already names The go2cs Authors), plus five files: `PR`'s root `Directory.Build.props` and
+`Directory.Build.targets`, without which the project does not restore (`GoStdLibVersion` is set there; NU1015 without
+it), hashset's LICENSE verbatim, a README, and a `.gitignore` for the build output. Measured on 2026-10-09: a fresh copy
+of `conversion/` builds with `dotnet build -c Release -p:GoStdLibVersion=1.24.13.5`, and the dll it builds carries the
+same version and copyright attributes as the packed one.
 
 ## PATH A: run the rehearsal
 
@@ -192,3 +198,184 @@ What the waiver gives up, stated so that it is a decision and not an omission:
 - The run did not see the bytes a gallery serves, which can carry a repository signature the packed bytes do not.
 - The first run of both is then section 6's demo, against nuget.org, after the package is published and cannot be
   deleted. Section 6 already reruns this same program, so a defect would be found there, but only after publication.
+
+## Section 4: publish to nuget.org (PERMANENT)
+
+Run this only after COORD has ruled sections 1-3 green, by PATH A or PATH B. **A version pushed to nuget.org is
+permanent.** It can be unlisted, but it can never be deleted or replaced, and `nugetgo.github.com.ritchiecarroll.hashset`
+1.0.0 can never be pushed again with other bytes. Every block below stops with a `throw` before the push if a gate
+fails.
+
+Paste the blocks in order into one pwsh 7 window, started at the root of your go2cs clone. Section 4 does not need
+PATH A's folder. You need: the signing card inserted, `NuGetCertFingerprint` set as it is for `release-nuget.ps1`, and
+a nuget.org API key whose glob covers this ID. A key scoped to `go.*` does not cover `nugetgo.*`; a 403 at 4.2 means
+the key's scope, and nuget.org's API keys page sets it.
+
+### 4.0a Environment and the two trees
+
+```powershell
+$Repo   = (git rev-parse --show-toplevel)
+$Pub    = Join-Path ([IO.Path]::GetTempPath()) 'nugetgo-hashset-publish'
+$Kit    = 'claude/c2-nugetgo-hashset-1.0.0'
+$Master = '18f9c58186'
+$Id     = 'nugetgo.github.com.ritchiecarroll.hashset'
+$PV     = '1.0.0'
+$Org    = 'https://api.nuget.org/v3/index.json'
+$CsRepo = 'ritchiecarroll/hashset-cs'
+if (Test-Path $Pub) { throw "$Pub already exists: remove it or choose another folder" }
+New-Item -ItemType Directory $Pub | Out-Null
+
+git -C $Repo fetch origin master $Kit
+if ($LASTEXITCODE) { throw "git fetch exited $LASTEXITCODE" }
+git -C $Repo worktree add --detach "$Pub\kit" "origin/$Kit"
+if ($LASTEXITCODE) { throw "worktree kit exited $LASTEXITCODE" }
+git -C $Repo worktree add --detach "$Pub\signer" $Master
+if ($LASTEXITCODE) { throw "worktree signer exited $LASTEXITCODE" }
+```
+
+### 4.0 Create the conversion repository and push its first commit
+
+First create `github.com/ritchiecarroll/hashset-cs` as an EMPTY public repository: in the GitHub UI (owner
+ritchiecarroll, name hashset-cs, Public, and no README, license or .gitignore, because the first commit brings them),
+or with `gh repo create ritchiecarroll/hashset-cs --public`. The package's `RepositoryUrl` already names it.
+
+The block checks that the files build on their own, commits them, pushes, and reads the repository back anonymously
+to confirm it is public. git signs the commit if your configuration sets `commit.gpgsign`; add `-S` to the commit
+line to sign it regardless.
+
+```powershell
+$Cs = "$Pub\hashset-cs"
+Copy-Item -Recurse "$Pub\kit\conversion\github.com\ritchiecarroll\hashset" $Cs
+if (-not (Test-Path "$Cs\.gitignore")) { throw '.gitignore was not copied' }
+Push-Location $Cs
+dotnet build -c Release -p:GoStdLibVersion=1.24.13.5
+$rc = $LASTEXITCODE
+Pop-Location
+if ($rc) { throw "the conversion source does not build (dotnet build exited $rc)" }
+
+git -C $Cs init -b main
+git -C $Cs add .
+git -C $Cs status --short
+git -C $Cs commit -m 'hashset v1.0.0, converted by go2cs against go.* 1.24.13.5'
+if ($LASTEXITCODE) { throw "git commit exited $LASTEXITCODE" }
+git -C $Cs remote add origin "https://github.com/$CsRepo.git"
+git -C $Cs push -u origin main
+if ($LASTEXITCODE) { throw "git push exited $LASTEXITCODE" }
+try { $visible = Invoke-RestMethod "https://api.github.com/repos/$CsRepo" }
+catch { throw "$CsRepo cannot be read anonymously: make it public (runbook 0.6)" }
+if ($visible.private) { throw "$CsRepo is private: make it public (runbook 0.6)" }
+"public: $($visible.html_url) @ $(git -C $Cs rev-parse --short=10 HEAD)"
+```
+
+`git status --short` lists 11 files: the two generated `.cs` files, the csproj and slnx, the two icons, the two
+`Directory.Build` files, LICENSE, README.md and .gitignore. The build output is under `.artifacts\`, which `.gitignore`
+excludes.
+
+### 4.1 The checksum gate, then sign and verify
+
+`sign-nupkgs.ps1` signs every `.nupkg` in the folder it is given, so the release candidate is copied into a folder of
+its own. The rehearsal package is never signed and never goes to nuget.org.
+
+The two signer calls are `release-nuget.ps1`'s own, read from `src/release-nuget.ps1` and `src/sign-nupkgs.ps1` at
+master `18f9c58186`. Its Phase 0 runs the signer without `-Apply` to prove the certificate is reachable, and its Phase 2
+runs it with `-Apply`. Both run under Windows PowerShell exactly as `release-nuget.ps1` launches them. The PIN prompt
+comes once, at `-Apply`. The verify is the step `sign-nupkgs.ps1` recommends after signing, with two of the SDK's own
+options: `--all`, and `--certificate-fingerprint`, which fails unless the signer is the certificate
+`NuGetCertFingerprint` names.
+
+```powershell
+$file = "$Id.$PV.nupkg"
+$sums = (Get-Content "$Pub\kit\nupkg\SHA256SUMS") -match "\s$([regex]::Escape($file))$"
+$want = if ($sums) { ($sums[0] -split '\s+')[0] } else { $null }
+if (-not $want) { throw "SHA256SUMS has no line for $file" }
+$SignDir = "$Pub\sign"
+New-Item -ItemType Directory $SignDir | Out-Null
+Copy-Item "$Pub\kit\nupkg\$file" $SignDir
+$got = (Get-FileHash -Algorithm SHA256 "$SignDir\$file").Hash.ToLowerInvariant()
+if ($got -ne $want) { throw "checksum mismatch: $file is not the package C2 packed" }
+if (@(Get-ChildItem "$SignDir\*.nupkg").Count -ne 1) { throw "$SignDir must hold the release candidate alone" }
+"checksum OK  $file (unsigned, as packed)"
+
+if (-not $env:NuGetCertFingerprint) { throw 'NuGetCertFingerprint is not set: it is the variable release-nuget.ps1 and sign-nupkgs.ps1 read' }
+$fingerprint = $env:NuGetCertFingerprint.Trim().Replace(' ', '').ToUpperInvariant()
+$signer = "$Pub\signer\src\sign-nupkgs.ps1"
+& powershell -NoProfile -ExecutionPolicy Bypass -File $signer -PackageDir $SignDir
+if ($LASTEXITCODE) { throw "the signer's certificate check exited ${LASTEXITCODE}: is the card inserted?" }
+& powershell -NoProfile -ExecutionPolicy Bypass -File $signer -PackageDir $SignDir -Apply
+if ($LASTEXITCODE) { throw "signing exited $LASTEXITCODE; nothing was pushed" }
+dotnet nuget verify --all "$SignDir\$file" --certificate-fingerprint $fingerprint
+if ($LASTEXITCODE) { throw "dotnet nuget verify exited $LASTEXITCODE; do not push" }
+$signedHash = (Get-FileHash -Algorithm SHA256 "$SignDir\$file").Hash.ToLowerInvariant()
+"signed and verified  $file  sha256 $signedHash"
+```
+
+### 4.2 Push to nuget.org (the permanent step)
+
+The block first checks that nuget.org holds no package with this ID (runbook 0.5), then asks you to type `publish`,
+then reads the key from a prompt. The key handling is the same as 3.1: the key is never typed on a command line and
+does not enter PSReadLine history; while `dotnet nuget push` runs, it is in that process's argument list, as with
+`release-nuget.ps1`; the variable is removed when the push ends.
+
+`release-nuget.ps1` adds `--skip-duplicate` because a re-run of a 300-package release has to pass over the packages
+already sent. It is left out here on purpose: the ID was just shown to be free, so a duplicate would mean something is
+wrong, and the push should fail on it rather than skip it.
+
+```powershell
+$probe = Invoke-WebRequest "https://api.nuget.org/v3-flatcontainer/$($Id.ToLowerInvariant())/index.json" -SkipHttpErrorCheck
+if ($probe.StatusCode -ne 404) { throw "$Id is not free on nuget.org (HTTP $($probe.StatusCode)): stop and tell COORD" }
+Write-Host "About to push $file (sha256 $signedHash) to nuget.org." -ForegroundColor Yellow
+Write-Host 'This is PERMANENT: a pushed version can be unlisted, never deleted or replaced.' -ForegroundColor Yellow
+if ((Read-Host "Type 'publish' to push") -cne 'publish') { throw 'Not published. Nothing was sent.' }
+
+$secure = Read-Host -AsSecureString 'nuget.org API key'
+$env:NUGETGO_ORG_KEY = [Net.NetworkCredential]::new('', $secure).Password
+try {
+    dotnet nuget push "$SignDir\$file" --source $Org --api-key $env:NUGETGO_ORG_KEY
+    $rc = $LASTEXITCODE
+}
+finally {
+    Remove-Item Env:NUGETGO_ORG_KEY -ErrorAction SilentlyContinue
+    $secure.Dispose()
+}
+if ($rc) { throw "dotnet nuget push exited $rc. Do not re-sign or re-pack; tell COORD." }
+"pushed: $Id $PV"
+```
+
+### 4.3 Wait until nuget.org lists the version
+
+nuget.org validates a package before listing it. The block checks the flat container and the registration (runbook
+4.4) once a minute for up to 90 minutes.
+
+```powershell
+$index = Invoke-RestMethod $Org
+$flat = ($index.resources | Where-Object { $_.'@type' -eq 'PackageBaseAddress/3.0.0' } | Select-Object -First 1).'@id'.TrimEnd('/')
+$reg  = ($index.resources | Where-Object { $_.'@type' -eq 'RegistrationsBaseUrl/3.6.0' } | Select-Object -First 1).'@id'.TrimEnd('/')
+$lower = $Id.ToLowerInvariant()
+$listed = $false
+foreach ($i in 1..90) {
+    try { $inFlat = @((Invoke-RestMethod "$flat/$lower/index.json").versions) -contains $PV } catch { $inFlat = $false }
+    $inReg = $false
+    try {
+        foreach ($page in @((Invoke-RestMethod "$reg/$lower/index.json").items)) {
+            $leaves = if ($page.items) { $page.items } else { (Invoke-RestMethod $page.'@id').items }
+            if (@($leaves.catalogEntry.version) -contains $PV) { $inReg = $true }
+        }
+    }
+    catch { $inReg = $false }
+    if ($inFlat -and $inReg) { $listed = $true; break }
+    Start-Sleep -Seconds 60
+}
+if (-not $listed) { throw "$Id $PV is not listed after 90 minutes (flat container $inFlat, registration $inReg): tell COORD; do not push again" }
+"listed on nuget.org: $Id $PV (flat container and registration)"
+```
+
+### 4.4 Stop and report to COORD
+
+Send COORD one reply with: the `public:` line from 4.0; the `checksum OK` line and the `signed and verified` line from
+4.1; the `pushed:` line from 4.2; and the `listed on nuget.org` line from 4.3. Do not send the build or signer output
+itself: it contains local paths.
+
+Then stop. The registry row #1 pull request on the nugetgo repository and the section 6 demo are COORD's.
+
+Keep `$Pub\sign` (the signed package as pushed) until COORD confirms the row. To clean up after that:
+`git -C $Repo worktree remove "$Pub\kit"`, the same for `"$Pub\signer"`, then delete `$Pub`.
