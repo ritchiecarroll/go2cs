@@ -28,7 +28,7 @@ Nothing they said is lost. Each fact now sits where a Go reader already looks:
 The go2cs source generators read the signature or the comment at build time and write the attribute form
 into generated code, where the runtime and `reflect` find it. So the converted file is left with the
 code, and what it compiles to is unchanged.
-[Converted code, before and after the face lift](BeforeAndAfterTheFaceLift.md) shows eight real lines of
+[Converted code, before and after the face lift](BeforeAndAfterTheFaceLift.md) shows nine real examples from
 the converted standard library on both sides of the change, each beside the Go line it came from, and
 [the reference](ConversionStrategies-Reference/source-generators.md#marker-comments-what-converted-code-carries-instead-of-an-attribute)
 lists every marker and the few attributes that stay, with the reason for each.

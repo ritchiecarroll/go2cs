@@ -14,7 +14,7 @@ Browse all: [Go Standard Library NuGet packages](https://www.nuget.org/packages?
 **Converted C# no longer carries the attributes that said what Go's own syntax already says.** A pointer
 receiver is `this ref`, a Go type is a bare `partial struct`, and an embedded field, a struct tag and an
 array's length are short comments in Go's own spelling. The source generators read them at build time.
-[Before and after](BeforeAndAfterTheFaceLift.md) shows eight real lines of the converted standard library
+[Before and after](BeforeAndAfterTheFaceLift.md) shows nine real examples from the converted standard library
 on both sides of the change. **A C# project that references the `go.*` packages now runs under Native AOT
 on Windows**, as it does on Linux and on Intel Macs, and a fully trimmed Native AOT build runs for the
 first time. The converted library ships as **NuGet 1.24.13.5**, targeting .NET 10, with every validated
