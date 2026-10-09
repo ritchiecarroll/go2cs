@@ -464,6 +464,18 @@ output compared with Go's; and the IL3050 census, predicted per sub-stage and re
 - **OQ-5.** Answer 2 adds one static member to every Go type's generated part (generated output only, nothing in the
   committed corpus). Is that acceptable in principle, with its size cost measured in 3c before it seats?
 
+**AMENDED 2026-10-08 (G): section 9 ACCEPTED and OQ-4 and OQ-5 RULED** (COORD, ledger 19:43, `7f6b0f8243`):
+- **Order:** as proposed, 3a, 3b, 3c, 3d, 3e. Method sets and frames stay with stage 5. Stage 3 seats in the train after
+  the face-lift release. 3a starts on its own branch off the FL fixup tip `9b7dfdb2ec` (golib only), and this plan
+  branch lands with 3a's seat.
+- **OQ-4:** the property is `GoAotFailOnDynamicCode`, scoped to IL3050 only. IL2026 joins only if, after stage 3, a
+  reachable `RequiresUnreferencedCode` boundary is measured still standing in golib. The consumer documentation must
+  say the property turns EVERY reachable IL3050 into an error, the program's own and other packages' included, not
+  only golib's.
+- **OQ-5:** one generated static member per Go type is accepted in principle (generator output only; converted code
+  reads and runs the same). 3c seats only with its size measured on BOTH the full-trim and the partial-trim consumer and
+  stated in the seat; if the partial-trim executable grows by more than 5%, it goes back to COORD before it seats.
+
 ### 9.10 What this section does not claim
 
 - It does not size stage 3. The sub-stage order is by risk, not by measured cost.
