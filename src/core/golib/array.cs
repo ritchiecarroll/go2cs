@@ -112,12 +112,8 @@ public interface IGoReflectSequence
 [Serializable]
 [System.Diagnostics.DebuggerDisplay("len = {Length}")]
 [System.Diagnostics.DebuggerTypeProxy(typeof(array<>.DebugView))]
-public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquatable<IArray>, IGoZeroShaped, IGoTypeOpsSource
+public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquatable<IArray>, IGoZeroShaped
 {
-    // reflect's operations for this container type (trim stage 3c-2b; see IGoTypeOpsSource): it names only array<T>
-    // itself, never a container of it, so the ops add no generic level.
-    IGoTypeOps IGoTypeOpsSource.TypeOps => GoTypeOps<array<T>>.Instance;
-
     // The debugger's view (DebuggerTypeProxy): the array's elements. Built only when a debugger expands one.
     internal sealed class DebugView(array<T> value)
     {

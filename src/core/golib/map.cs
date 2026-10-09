@@ -187,12 +187,8 @@ public interface IGoReflectMap
 
 [System.Diagnostics.DebuggerDisplay("len = {Count}")]
 [System.Diagnostics.DebuggerTypeProxy(typeof(map<,>.DebugView))]
-public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<TKey, TValue>>, IGoTypeOpsSource where TKey : notnull
+public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<TKey, TValue>> where TKey : notnull
 {
-    // reflect's operations for this container type (trim stage 3c-2b; see IGoTypeOpsSource): it names only map<TKey, TValue>
-    // itself, never a container of it, so the ops add no generic level.
-    IGoTypeOps IGoTypeOpsSource.TypeOps => GoTypeOps<map<TKey, TValue>>.Instance;
-
     // The debugger's view (DebuggerTypeProxy): the map's key/value pairs, the nil-key entry first. It
     // reads the store DIRECTLY rather than through Go's range contract (enumerateStore), so expanding a
     // huge map costs SHOWN entries, not the whole map; More counts the rest. A Go map takes no lock, so

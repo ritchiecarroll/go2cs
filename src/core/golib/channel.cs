@@ -1208,12 +1208,8 @@ internal static class SelectRuntime
 /// <typeparam name="T">Target type for channel.</typeparam>
 [System.Diagnostics.DebuggerDisplay("len = {Length}, cap = {Capacity}, closed = {IsClosed}")]
 [System.Diagnostics.DebuggerTypeProxy(typeof(channel<>.DebugView))]
-public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>, ISelectableChannel, IGoReflectChannel, IGoTypeOpsSource
+public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>, ISelectableChannel, IGoReflectChannel
 {
-    // reflect's operations for this container type (trim stage 3c-2b; see IGoTypeOpsSource): it names only channel<T>
-    // itself, never a container of it, so the ops add no generic level.
-    IGoTypeOps IGoTypeOpsSource.TypeOps => GoTypeOps<channel<T>>.Instance;
-
     // The debugger's view (DebuggerTypeProxy): Go's len and cap of the buffer, and whether it is closed.
     // Read without the channel's lock: a debugger's read must never wait on a goroutine it has stopped.
     internal sealed class DebugView(channel<T> value)
