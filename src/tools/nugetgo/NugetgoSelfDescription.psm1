@@ -108,4 +108,11 @@ function Get-NugetgoThirdPartyRequires {
     }
 }
 
-Export-ModuleMember -Function Get-NugetgoPackedPackages, Get-NugetgoThirdPartyRequires
+# RED (COORD ruling 2026-10-09, jwt/v5's test helper package): not yet implemented.
+function Select-NugetgoPackedLibraries {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$RecurseRoot, [Parameter(Mandatory)][object[]]$Libraries, [string[]]$ExcludePackage = @())
+    return $Libraries
+}
+
+Export-ModuleMember -Function Get-NugetgoPackedPackages, Get-NugetgoThirdPartyRequires, Select-NugetgoPackedLibraries
