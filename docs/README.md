@@ -9,17 +9,17 @@ Browse all: [Go Standard Library NuGet packages](https://www.nuget.org/packages?
 
 ---
 
-## 📰 NEWS — Every implementable standard-library package validates
+## 📰 NEWS — Converted code reads like Go, and Native AOT runs on Windows
 
-**All 225 implementable packages of Go 1.24.13's standard library pass their own test suites in
-C#**: 225 of the 230 testable (97.8%), at 69,777 matching verdicts against `go test -json`, with 373
-divergences disclosed by exact failure signature. They include `runtime` itself, `reflect`,
-`net/http` and `crypto/tls`, and on Linux 223 of the 223 applicable rows validate. Each row of the
-[validated roster](ValidatedTestPackages.md) links a proof page that lists Go's verdict beside
-go2cs's, test by test, and the five packages outside the 225 are
-[listed with their reasons](ValidatedTestPackages.md#excluded-packages). The converted library
-ships as **NuGet 1.24.13.3**, targeting .NET 10. The
-[full announcement](NEWS.md#october-1-2026--every-implementable-standard-library-package-validates)
+**Converted C# no longer carries the attributes that said what Go's own syntax already says.** A pointer
+receiver is `this ref`, a Go type is a bare `partial struct`, and an embedded field, a struct tag and an
+array's length are short comments in Go's own spelling. The source generators read them at build time.
+[Before and after](BeforeAndAfterTheFaceLift.md) shows eight real lines of the converted standard library
+on both sides of the change. **A C# project that references the `go.*` packages now runs under Native AOT
+on Windows**, as it does on Linux and on Intel Macs, and a fully trimmed Native AOT build runs for the
+first time. The converted library ships as **NuGet 1.24.13.5**, targeting .NET 10, with every validated
+package at its count on Windows and on Linux. The
+[full announcement](NEWS.md#october-10-2026--converted-code-reads-like-go-and-native-aot-runs-on-windows)
 has the details.
 
 **➡ All announcements can be found in the [go2cs News Archive](NEWS.md).**
@@ -40,6 +40,7 @@ easily, and a .NET developer can use Go code directly within the .NET ecosystem.
 * Track which stdlib test suites pass in C#: [Validated Test Packages](ValidatedTestPackages.md)
 * Find converted Go modules as NuGet packages: [nugetgo.net](https://nugetgo.net)
 * Call converted Go from your C# code: [Consuming converted Go from C#](ConsumingGoFromCSharp.md)
+* See what the converted code looks like now: [Converted code, before and after the face lift](BeforeAndAfterTheFaceLift.md)
 * View example converted test: [`utf8_test.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/unicode/utf8/utf8_test.cs)
 * See current project [status](#status), [milestones](#milestones), and [known issues](KnownIssues.md)
 
