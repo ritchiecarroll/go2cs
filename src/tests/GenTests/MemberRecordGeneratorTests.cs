@@ -298,4 +298,31 @@ public class MemberRecordGeneratorTests
         foreach (string refused in new[] { "/*[]*/", "/* [4]*/", "/*[4] */", "/*[a]*/", "/*[4]x*/", "/*[-1]*/", "/*[4][]*/", "/*embed*/" })
             Assert.IsNull(MemberMarkers.ParseDims(refused), refused);
     }
+
+    // Trim stage 3b (docs/PLAN-golib-full-trim.md, 9.6): golib finds a [GoParamDims] record's method by GetMethods on its
+    // declaring type (GoReflect.ParamDimsRecords) and suppresses the trim warning there on the strength of this: every
+    // recorded method, and only those, is kept by a DynamicDependency on an empty module initializer of its package
+    // class. A recorded method with no dependency is exactly the miss that suppression must not survive.
+    [TestMethod]
+    public void EveryParamDimsRecordedMethodIsKeptForTrimming()
+    {
+        CSharpCompilation compilation = Compile(MarkerCommentsFixture());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new MemberRecordGenerator()).RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out _);
+        string[] generated = driver.GetRunResult().GeneratedTrees.Select(tree => tree.ToString()).ToArray();
+
+        string[] recorded = Recorded(generated, "GoParamDims").Select(record => record.Split(' ')[0]).Distinct().OrderBy(name => name, StringComparer.Ordinal).ToArray();
+        SyntaxTree? keepTree = output.SyntaxTrees.SingleOrDefault(tree => tree.ToString().Contains("KeepParamDimsMethods"));
+
+        Assert.IsNotNull(keepTree, "no generated keep-alive for the recorded methods: " + string.Join(", ", recorded));
+
+        string keep = keepTree!.ToString();
+        string[] kept = Regex.Matches(keep, @"DynamicDependency\(""([^""(`]+)").Select(match => match.Groups[1].Value).Distinct().OrderBy(name => name, StringComparer.Ordinal).ToArray();
+
+        CollectionAssert.AreEqual(recorded, kept, $"every recorded method, and only those, is kept:\n{keep}");
+        StringAssert.Contains(keep, "[global::System.Runtime.CompilerServices.ModuleInitializer]", "a module initializer is always kept, so its dependencies are");
+        StringAssert.Contains(keep, "\"first``1(go.array{``0})\"", "a generic func is named by its documentation signature");
+
+        Diagnostic[] errors = output.GetSemanticModel(keepTree).GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray();
+        Assert.AreEqual(0, errors.Length, "the keep-alive binds: " + string.Join("; ", errors.Take(3)));
+    }
 }

@@ -21,14 +21,14 @@ namespace GolibTests;
 /// </summary>
 /// <remarks>
 /// go2cs-gen registers a factory for every NON-generic struct whose <c>default</c> is not its Go zero value.
-/// A GENERIC one has no closed type a module initializer could register, so it keeps <c>default</c>. That is
-/// the residual the ruling states, with no reflection fallback. At go1.24.13 the converted std has one such
-/// type, <c>unique.uniqueMap[T]</c>, and it is needy only through the generator's conservative
-/// promoted-embed rule. Its embeds are inline value slots, so its <c>default</c> is a usable Go zero value.
-/// No std path zeroes it by value: it is only ever reached through a pointer (the GoZero census3 reading).
-/// The residual arm pins the golib half with a local generic needy struct, and the generator half with
-/// the real <c>uniqueMap</c>. If either arm starts failing, the residual has changed and the ruling
-/// needs re-reading.
+/// A GENERIC one has no closed type a module initializer could register; until trim stage 3b it kept
+/// <c>default</c>, the residual the ruling stated. Its generated part now carries
+/// <see cref="IGoZeroConstructed"/>, which names its own closed instantiation, and GoZero builds a type no
+/// factory registers through that. At go1.24.13 the converted std has one generic needy struct,
+/// <c>unique.uniqueMap[T]</c> (needy only through the generator's conservative promoted-embed rule; no std
+/// path zeroes it by value, the GoZero census3 reading). The arms pin the golib half with local generic
+/// structs, hooked and not, and the generator half with the real <c>uniqueMap</c>. golib asks nothing of a
+/// struct carrying neither: there is no reflection fallback.
 /// </remarks>
 [TestClass]
 public class GoZeroResidualTests
@@ -42,6 +42,16 @@ public class GoZeroResidualTests
         public array<T> vals = new(4);
 
         public GenericNeedy() { }
+    }
+
+    // The same shape carrying the construction hook exactly as go2cs-gen writes it on a generic needy struct.
+    private struct HookedGenericNeedy<T> : IGoZeroConstructed
+    {
+        public array<T> vals = new(4);
+
+        public HookedGenericNeedy() { }
+
+        object IGoZeroConstructed.GoZeroNew() => new HookedGenericNeedy<T>();
     }
 
     // The registration a type's module initializer made, read through the same reflection for every arm
@@ -77,13 +87,30 @@ public class GoZeroResidualTests
     }
 
     [TestMethod]
-    public void AnUnregisteredGenericNeedyStructKeepsDefault()
+    public void AGenericNeedyStructWithNeitherKeepsDefault()
     {
         Assert.IsNull(GoZeroFactory<GenericNeedy<int>>.Create, "nothing registers a generic struct");
-        Assert.AreEqual((nint)0, GoZero<GenericNeedy<int>>().vals.Length, "the stated residual: GoZero is default(T)");
+        Assert.AreEqual((nint)0, GoZero<GenericNeedy<int>>().vals.Length, "no registration and no hook: GoZero is default(T)");
 
         // Control: the same read sees a constructed zero, so the 0 above is default and not the instrument.
         Assert.AreEqual((nint)4, new GenericNeedy<int>().vals.Length, "the constructor gives the array its length");
+    }
+
+    [TestMethod]
+    public void AHookedGenericNeedyStructIsConstructed()
+    {
+        Assert.IsNull(GoZeroFactory<HookedGenericNeedy<int>>.Create, "nothing registers a generic struct");
+        Assert.AreEqual((nint)4, GoZero<HookedGenericNeedy<int>>().vals.Length, "GoZero builds it through its hook");
+        Assert.AreEqual((nint)4, GoZero(default(HookedGenericNeedy<int>)).vals.Length, "so does the template overload");
+
+        // The array<T> fill: a zeroed fixed array of them (clear, a container's zeroed window) rebuilds each element.
+        array<HookedGenericNeedy<int>> zero = GoZero(new array<HookedGenericNeedy<int>>(3));
+
+        for (int i = 0; i < 3; i++)
+            Assert.AreEqual((nint)4, zero[i].vals.Length, $"element {i} is a constructed zero");
+
+        // Control: the read sees a broken zero when there is one.
+        Assert.AreEqual((nint)0, default(HookedGenericNeedy<int>).vals.Length, "default leaves the array at length 0");
     }
 
     [TestMethod]
@@ -93,6 +120,7 @@ public class GoZeroResidualTests
 
         RunPackageInit(uniqueMap);
 
-        Assert.IsNull(RegisteredFactory(uniqueMap.MakeGenericType(typeof(nint))), "unique.uniqueMap[T] keeps default");
+        Assert.IsNull(RegisteredFactory(uniqueMap.MakeGenericType(typeof(nint))), "unique.uniqueMap[T] has no factory");
+        Assert.IsTrue(typeof(IGoZeroConstructed).IsAssignableFrom(uniqueMap), "its generated part carries the construction hook instead");
     }
 }

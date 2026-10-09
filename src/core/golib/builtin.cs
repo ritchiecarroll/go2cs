@@ -1289,7 +1289,7 @@ public static partial class builtin
     /// (<c>S ~[]E</c> boxed to its <see cref="ISlice{T}"/> constraint) — the boxed view
     /// aliases the caller's backing array.
     /// </summary>
-    public static void clear<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(ISlice<T> slice)
+    public static void clear<T>(ISlice<T> slice)
     {
         // A zero-size element has one value and it IS the zero value, so clearing is complete before
         // it starts — and asking for the span would be asking for storage the slice does not own.
@@ -1460,7 +1460,7 @@ public static partial class builtin
         return S.Wrap(result);
     }
 
-    public static void clear<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(slice<T> slice)
+    public static void clear<T>(slice<T> slice)
     {
         // See the ISlice overload: zero-size elements are already their own zero value.
         if (GoZeroSizeFacts<T>.IsZeroSize)
@@ -1474,7 +1474,7 @@ public static partial class builtin
     /// span (e.g. a <c>(*[N]T)(ptr)[:n]</c> unsafe array view).
     /// </summary>
     /// <param name="span">Target span.</param>
-    public static void clear<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(Span<T> span)
+    public static void clear<T>(Span<T> span)
     {
         // An element whose Go zero value must be BUILT cannot be zeroed by Span.Clear (which fills
         // `default`) — see GoZero. The check is a per-T constant, so every ordinary element type
@@ -1516,13 +1516,15 @@ public static partial class builtin
     /// is what keeps each NEW consumer from re-opening the zero-value-construction defect class.
     /// </para>
     /// </remarks>
-    public static T GoZero<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(T template)
+    public static T GoZero<T>(T template)
     {
         // Hoisted per closed T, so the overwhelmingly common case folds to a constant `default`.
         if (ZeroFacts<T>.IsDefault)
             return default!;
 
-        return template is IGoZeroShaped shaped ? (T)shaped.GoZeroLike() : (T)Activator.CreateInstance(typeof(T))!;
+        // Not default, so T is a shaped golib value or a converted struct carrying its generated construction hook
+        // (trim stage 3b: no Activator, so nothing asks a type parameter for its constructor).
+        return template is IGoZeroShaped shaped ? (T)shaped.GoZeroLike() : (T)((IGoZeroConstructed)template!).GoZeroNew();
     }
 
     /// <summary>
@@ -1542,9 +1544,10 @@ public static partial class builtin
     /// reaches here (the GoZero ruling of 2026-09-28, measured).
     /// </para>
     /// <para>
-    /// STATED RESIDUAL: a GENERIC needy struct cannot be registered (a module initializer cannot name an open
-    /// generic), so its zero stays <c>default</c> here, as it was before this method existed. A census found no
-    /// std path that reaches one; GolibTests' GoZeroResidualTests pins the behaviour.
+    /// A GENERIC needy struct cannot be registered (a module initializer cannot name an open generic). Until trim
+    /// stage 3b its zero stayed <c>default</c> here (the residual the ruling stated); its generated part now
+    /// carries <see cref="IGoZeroConstructed"/>, which names its own closed instantiation, and a type no factory
+    /// registers is built through that. GolibTests' GoZeroResidualTests pins both halves.
     /// </para>
     /// <para>
     /// STATED RESIDUAL, the bare fixed array: when <typeparamref name="T"/> is itself an <see cref="array{T}"/>
@@ -1553,7 +1556,10 @@ public static partial class builtin
     /// template overload above has no such gap, because the array it is handed carries its length.
     /// </para>
     /// </remarks>
-    public static T GoZero<T>() => GoZeroFactory<T>.Create is { } create ? create() : default!;
+    public static T GoZero<T>() =>
+        GoZeroFactory<T>.Create is { } create ? create() :
+        ZeroFacts<T>.IsConstructed ? (T)((IGoZeroConstructed)(object)default(T)!).GoZeroNew() :
+        default!;
 
     /// <summary>
     /// Determines whether <c>default(T)</c> is already the Go zero value for <typeparamref name="T"/>
@@ -1570,6 +1576,9 @@ public static partial class builtin
     // it as a static field lets the JIT fold the test to a constant for the closed instantiation.
     private static class ZeroFacts<T>
     {
+        // A converted struct whose constructor builds what `default` skips carries go2cs-gen's construction hook.
+        internal static readonly bool IsConstructed = typeof(T).IsValueType && typeof(IGoZeroConstructed).IsAssignableFrom(typeof(T));
+
         internal static readonly bool IsDefault = Classify();
 
         private static bool Classify()
@@ -1584,10 +1593,13 @@ public static partial class builtin
             if (typeof(IGoZeroShaped).IsAssignableFrom(type))
                 return false;
 
-            // A converted Go struct is zeroed by calling its generated parameterless constructor;
-            // anything else golib carries (@string, slice<T>, map<K,V>, the numeric primitives) is
-            // already correctly zeroed by `default`.
-            return !type.IsDefined(typeof(GoTypeAttribute), false) || type.GetConstructor(Type.EmptyTypes) is null;
+            // A converted Go struct whose constructor builds something (a fixed-array field, an embed box, a needy
+            // value field, a directional channel's stamp) carries the hook; every other struct golib meets, converted
+            // or not (@string, slice<T>, map<K,V>, a struct with no initializers), is zeroed by `default`. Until trim
+            // stage 3b this asked the type for its parameterless constructor and ran it through Activator, which a
+            // trimmer cannot follow from T; GolibTests' GoZeroConstructionGuardTests checks the two answers agree for
+            // every converted struct the host loads.
+            return !IsConstructed;
         }
     }
 
