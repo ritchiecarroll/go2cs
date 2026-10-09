@@ -15,15 +15,25 @@ namespace go;
 
 /// <summary>
 /// The object-form operations reflect needs for a Go type it knows only at run time and holds no value of: a new heap
-/// box (<c>reflect.New</c>), the canonical typed nil pointer (<c>reflect.Zero</c> of a pointer type, with or without an
-/// array's dims), and a field-alias box over a parent box's field of this type (<c>reflect.Value.Field</c>).
+/// box (<c>reflect.New</c>) and the canonical typed nil pointer (<c>reflect.Zero</c> of a pointer type, with or without
+/// an array's dims).
 /// </summary>
 /// <remarks>
+/// <para>
 /// Trim stage 3c-2b (docs/PLAN-golib-full-trim.md, section 9): the bridge closed a generic helper over the type with
-/// MakeGenericMethod, which Native AOT cannot do for an instantiation it never compiled. <see cref="GoTypeOps{T}"/> is
-/// compiled for every type whose ops some compiled code names: go2cs-gen names a struct's and its pointer's on the
-/// struct's generated part (<see cref="IGoTypeOpsSource"/>), golib's containers name their own, and the builtins are
-/// named here. <see cref="GoTypeOps.Of"/> finds them.
+/// MakeGenericMethod, which Native AOT cannot do for a VALUE-type instantiation it never compiled. <see cref="GoTypeOps{T}"/>
+/// is compiled for every value type whose ops some compiled code names: go2cs-gen names a struct's on its generated part
+/// (<see cref="IGoTypeOpsSource"/>), golib's containers name their own, and the builtins are named here.
+/// <see cref="GoTypeOps.Of"/> finds them.
+/// </para>
+/// <para>
+/// MEASURED SHAPE (2026-10-09, package consumer, Native AOT full trim, win-x64): the first prototype also named a
+/// pointer's ops (<c>GoTypeOps&lt;ж&lt;S&gt;&gt;</c>) and a field-alias box per type, and grew the executable +87.8% over trim
+/// stage 3c-2a; this shape grows it +1.9%. A pointer's ops are a REFERENCE-type instantiation, which the fallback loads
+/// under Native AOT (measured: <c>reflect.New</c> of <c>**T</c> and of an interface equal Go's output), so naming them per
+/// type bought nothing; and a field-alias box cannot be reached under Native AOT until family E (the DynamicMethod field
+/// accessors) is answered, so <c>GoReflect.FieldAliasBox</c> keeps its own dynamic site until then.
+/// </para>
 /// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public interface IGoTypeOps
@@ -39,9 +49,6 @@ public interface IGoTypeOps
 
     /// <summary>The canonical typed nil pointer to this ARRAY type carrying its dims (<c>ж&lt;T&gt;.NilBoxOfDims</c>).</summary>
     object NilBoxOfDims(long[] dims);
-
-    /// <summary>A field-alias box over <paramref name="parentBox"/>'s field of this type, through <paramref name="accessor"/>.</summary>
-    object FieldBox(object parentBox, Delegate accessor);
 }
 
 /// <summary>The operations of <typeparamref name="T"/>: each names its own instantiation, so a compiled reference compiles them.</summary>
@@ -70,27 +77,22 @@ public sealed class GoTypeOps<T> : IGoTypeOps
 
     /// <inheritdoc/>
     public object NilBoxOfDims(long[] dims) => ж<T>.NilBoxOfDims(dims);
-
-    /// <inheritdoc/>
-    public object FieldBox(object parentBox, Delegate accessor) => new FieldRefBox<T>(parentBox, (FieldRefFunc<T>)accessor, accessor);
 }
 
 /// <summary>
-/// Names a Go type's operations and its pointer's, at FIXED depth: implemented on every struct and named type's generated
-/// part by go2cs-gen, and by golib's containers (trim stage 3c-2b).
+/// Names a Go VALUE type's operations: implemented on every struct and struct-kind named type's generated part by
+/// go2cs-gen, and by golib's containers (trim stage 3c-2b).
 /// </summary>
 /// <remarks>
-/// <see cref="ж{T}"/> does not implement it: a box's own source would name <c>GoTypeOps&lt;ж&lt;ж&lt;T&gt;&gt;&gt;</c>, and
-/// that level's the next, without bound. A pointer to a pointer is the fallback's (<see cref="GoTypeOps.Of"/>).
+/// Only a value type carries it: its zero value is how golib reaches the member, and a reference type's operations are an
+/// instantiation the fallback loads under Native AOT. <see cref="ж{T}"/> in particular does not: a box's own source would
+/// name <c>GoTypeOps&lt;ж&lt;ж&lt;T&gt;&gt;&gt;</c>, and that level's the next, without bound.
 /// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public interface IGoTypeOpsSource
 {
     /// <summary>This type's operations.</summary>
     IGoTypeOps TypeOps { get; }
-
-    /// <summary>The operations of a pointer to this type (<c>ж&lt;T&gt;</c> as a pointee or a field's type).</summary>
-    IGoTypeOps BoxTypeOps { get; }
 }
 
 /// <summary>Finds the <see cref="IGoTypeOps"/> of a type known only at run time (trim stage 3c-2b).</summary>
@@ -100,7 +102,8 @@ public static class GoTypeOps
 
     static GoTypeOps()
     {
-        // The builtins have no generated part to name their ops; these name them, and a pointer to each.
+        // The builtins have no generated part to name their ops; these name them, and a pointer to each (a pointer to a
+        // builtin is common enough under reflect.New to be worth the table's few entries).
         register<bool>();
         register<sbyte>();
         register<short>();
@@ -131,30 +134,21 @@ public static class GoTypeOps
     /// <summary>The operations of <paramref name="type"/>.</summary>
     /// <remarks>
     /// In order: a builtin's (and a pointer to one); a value type's own source, reached through a zero value of it (its
-    /// members read nothing of the value); a pointer's, through its pointee's source; and otherwise the fallback, which
-    /// closes the operations over the type at run time: an interface, a func type, a pointer to a pointer. That is the
-    /// one dynamic-code site left on these paths, the boundary trim stage 3d annotates.
+    /// members read nothing of the value); and otherwise the fallback, which closes the operations over the type at run
+    /// time: a pointer, an interface, a func type -- reference types, whose instantiation Native AOT loads (measured). That
+    /// is the one dynamic-code site left on these paths, the boundary trim stage 3d annotates.
     /// </remarks>
     public static IGoTypeOps Of(Type type) => s_ops.GetOrAdd(type, static t => FromSource(t) ?? dynamicOps(t));
 
     // The operations compiled code names for this type, or null when only the fallback can answer (GolibTests pins which
     // types answer here: under the JIT the fallback answers the same instance, so the route is invisible without this).
-    internal static IGoTypeOps? FromSource(Type type)
-    {
-        if (isSourceCandidate(type) && uninitialized(type) is IGoTypeOpsSource source && source.TypeOps.Type == type)
-            return source.TypeOps;
-
-        if (GoReflect.TryBoxPointee(type, out Type? pointee) && type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ж<>) &&
-            isSourceCandidate(pointee) && uninitialized(pointee) is IGoTypeOpsSource pointeeSource && pointeeSource.BoxTypeOps.Type == type)
-            return pointeeSource.BoxTypeOps;
-
-        return null;
-    }
+    internal static IGoTypeOps? FromSource(Type type) =>
+        isSourceCandidate(type) && uninitialized(type) is IGoTypeOpsSource source && source.TypeOps.Type == type ? source.TypeOps : null;
 
     private static bool isSourceCandidate(Type type) => type.IsValueType && !type.IsPrimitive && !type.IsEnum && !type.ContainsGenericParameters;
 
     [UnconditionalSuppressMessage("Trimming", "IL2067", Justification =
-        "No constructor runs: the zero value only carries its type's IGoTypeOpsSource members, which read nothing of it. " +
+        "No constructor runs: the zero value only carries its type's IGoTypeOpsSource member, which reads nothing of it. " +
         "The types are the program's generated Go types and golib's containers, which Native AOT has constructed " +
         "(measured on the package consumer and the 3c-2a reflect probe).")]
     private static object uninitialized(Type type) => RuntimeHelpers.GetUninitializedObject(type);

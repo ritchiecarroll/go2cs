@@ -199,11 +199,9 @@ public interface IGoReflectSlice
 [System.Diagnostics.DebuggerTypeProxy(typeof(slice<>.DebugView))]
 public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquatable<ISlice>, IEquatable<IArray>, ISupportMake<slice<T>>, ISliceWrap<slice<T>, T>, IByteSeq<slice<T>, T>, ISliceBacking, IGoTypeOpsSource
 {
-    // reflect's operations for this container type and a pointer to it (trim stage 3c-2b; see IGoTypeOpsSource): each
-    // names only slice<T> itself, never a container of it, so the ops add no generic level.
+    // reflect's operations for this container type (trim stage 3c-2b; see IGoTypeOpsSource): it names only slice<T>
+    // itself, never a container of it, so the ops add no generic level.
     IGoTypeOps IGoTypeOpsSource.TypeOps => GoTypeOps<slice<T>>.Instance;
-
-    IGoTypeOps IGoTypeOpsSource.BoxTypeOps => GoTypeOps<ж<slice<T>>>.Instance;
 
     // The debugger's view (DebuggerTypeProxy): Go's len and cap, and the elements of the len window --
     // never the backing array around it. Built only when a debugger expands a slice.

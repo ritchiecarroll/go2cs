@@ -26,21 +26,22 @@ public class TrimStage3c2bTests
     public void AGeneratedStructsOpsComeFromItsOwnFace()
     {
         Assert.AreSame(GoTypeOps<time.Time>.Instance, GoTypeOps.FromSource(typeof(time.Time)), "a converted struct names its own ops");
-        Assert.AreSame(GoTypeOps<ж<time.Time>>.Instance, GoTypeOps.FromSource(typeof(ж<time.Time>)), "and a pointer to it, through the pointee's face");
+        Assert.IsNull(GoTypeOps.FromSource(typeof(ж<time.Time>)), "a pointer to it is a reference type: the fallback's, not a face's");
+        Assert.AreSame(GoTypeOps<ж<time.Time>>.Instance, GoTypeOps.Of(typeof(ж<time.Time>)));
     }
 
     [TestMethod]
     public void ANamedSliceTypesOpsComeFromItsOwnFace()
     {
         Assert.AreSame(GoTypeOps<sort.IntSlice>.Instance, GoTypeOps.FromSource(typeof(sort.IntSlice)));
-        Assert.AreSame(GoTypeOps<ж<sort.IntSlice>>.Instance, GoTypeOps.FromSource(typeof(ж<sort.IntSlice>)));
+        Assert.IsNull(GoTypeOps.FromSource(typeof(ж<sort.IntSlice>)));
     }
 
     [TestMethod]
     public void GolibsContainersNameTheirOwnOps()
     {
         Assert.AreSame(GoTypeOps<slice<int>>.Instance, GoTypeOps.FromSource(typeof(slice<int>)));
-        Assert.AreSame(GoTypeOps<ж<slice<int>>>.Instance, GoTypeOps.FromSource(typeof(ж<slice<int>>)));
+        Assert.IsNull(GoTypeOps.FromSource(typeof(ж<slice<int>>)), "a pointer to a container is the fallback's too");
         Assert.AreSame(GoTypeOps<array<byte>>.Instance, GoTypeOps.FromSource(typeof(array<byte>)));
         Assert.AreSame(GoTypeOps<map<@string, int>>.Instance, GoTypeOps.FromSource(typeof(map<@string, int>)));
         Assert.AreSame(GoTypeOps<channel<int>>.Instance, GoTypeOps.FromSource(typeof(channel<int>)));
@@ -61,7 +62,8 @@ public class TrimStage3c2bTests
     [TestMethod]
     public void OnlyWhatNothingNamesFallsBack()
     {
-        // An interface, and a pointer to a pointer (ж<T> carries no face: its own would name ж<ж<T>>, without bound).
+        // An interface, and a pointer (ж<T> carries no face: a reference type's operations are the fallback's, which Native AOT
+        // loads -- measured -- and a box's own face would name ж<ж<T>>, without bound).
         Assert.IsNull(GoTypeOps.FromSource(typeof(ISomeInterface)));
         Assert.IsNull(GoTypeOps.FromSource(typeof(ж<ж<time.Time>>)));
 

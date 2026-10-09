@@ -542,6 +542,7 @@ public static partial class GoReflect
     // -------- addressable alias boxes (Field(i)/Index(i) write-through; the ref-accessor contract) --------
 
     private static readonly ConcurrentDictionary<(Type boxType, string fieldKey), Delegate> s_fieldAccessors = new();
+    private static readonly ConcurrentDictionary<Type, Func<object, Delegate, object>> s_fieldBoxMakers = new();
 
     /// <summary>
     /// A field-alias <c>ж&lt;F&gt;</c> over a parent box's Go field: reads/writes route through the
@@ -555,8 +556,15 @@ public static partial class GoReflect
         Type boxType = parentBox.GetType();
         Delegate accessor = s_fieldAccessors.GetOrAdd((boxType, fieldPathKey(field)), _ => buildFieldAccessor(boxType, field));
 
-        // The field type's operations (trim stage 3c-2b: GoTypeOps, named by compiled code) build the FieldRefBox<F>.
-        return GoTypeOps.Of(field.Type).FieldBox(parentBox, accessor);
+        return s_fieldBoxMakers.GetOrAdd(field.Type, static ft =>
+            typeof(GoReflect).GetMethod(nameof(makeFieldBox), BindingFlags.NonPublic | BindingFlags.Static)!
+                .MakeGenericMethod(ft).CreateDelegate<Func<object, Delegate, object>>())(parentBox, accessor);
+    }
+
+    private static object makeFieldBox<F>(object parentBox, Delegate accessor)
+    {
+        FieldRefFunc<F> fieldRef = (FieldRefFunc<F>)accessor;
+        return new FieldRefBox<F>(parentBox, fieldRef, accessor);
     }
 
     private static string fieldPathKey(GoFieldInfo field)

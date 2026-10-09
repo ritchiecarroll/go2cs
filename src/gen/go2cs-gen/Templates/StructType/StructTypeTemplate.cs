@@ -211,13 +211,13 @@ internal class StructTypeTemplate : TemplateBase
         }
     }
 
-    // reflect's operations for this struct and a pointer to it (golib's IGoTypeOpsSource; trim stage 3c-2b): every struct
-    // names exactly GoTypeOps<itself> and GoTypeOps<ж<itself>>, at FIXED depth, so golib reaches a type it knows only at
-    // run time (reflect.New, a canonical nil pointer, a field alias) without closing a generic method over it. Never a
-    // deeper level: GenTests' GoTypeOpsSourceTests fails on a member that names its own type inside its own type.
+    // reflect's operations for this struct (golib's IGoTypeOpsSource; trim stage 3c-2b): every struct names exactly
+    // GoTypeOps<itself>, so golib reaches a value type it knows only at run time (reflect.New, a canonical nil pointer)
+    // without closing a generic method over it. Never a deeper level: GenTests' GoTypeOpsSourceTests fails on a member that
+    // names anything but the struct itself. A pointer to it is a reference type, whose operations golib's fallback loads
+    // under Native AOT; naming them here per struct grew the package consumer's full-trim executable ~50% (measured).
     private string TypeOpsSourceMembers =>
-        $"\r\n{TypeElemIndent}global::go.IGoTypeOps global::go.IGoTypeOpsSource.TypeOps => global::go.GoTypeOps<{StructName}>.Instance;\r\n" +
-        $"\r\n{TypeElemIndent}global::go.IGoTypeOps global::go.IGoTypeOpsSource.BoxTypeOps => global::go.GoTypeOps<global::go.ж<{StructName}>>.Instance;\r\n";
+        $"\r\n{TypeElemIndent}global::go.IGoTypeOps global::go.IGoTypeOpsSource.TypeOps => global::go.GoTypeOps<{StructName}>.Instance;\r\n";
 
     // golib's construction hook (IGoZeroConstructed; trim stage 3b, docs/PLAN-golib-full-trim.md section 9.6): a struct
     // whose constructor builds what `default` skips -- a needy member (IsNeedy) or a directional channel's stamp

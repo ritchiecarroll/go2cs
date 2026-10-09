@@ -18,12 +18,13 @@ namespace go2cs.Tests;
 /// <summary>
 /// Guards the generated operations face (golib's IGoTypeOpsSource; trim stage 3c-2b, docs/PLAN-golib-full-trim.md
 /// section 9): every struct and struct-kind named type names exactly <c>GoTypeOps&lt;itself&gt;</c> and
-/// <c>GoTypeOps&lt;ж&lt;itself&gt;&gt;</c>; a class wrapper (a named pointer type) names none.
+/// nothing more (a pointer is a reference type, whose operations golib's fallback loads under Native AOT); a class wrapper
+/// (a named pointer type) names none.
 /// </summary>
 /// <remarks>
 /// THE HAZARD GUARD (COORD's ruling on section 9's hazard rule): a face member that named its own type inside its own
 /// type -- <c>GoTypeOps&lt;ж&lt;ж&lt;S&gt;&gt;&gt;</c>, <c>GoTypeOps&lt;S&lt;S&lt;T&gt;&gt;&gt;</c> -- would make ILC expand one more
-/// generic level per level, without bound (a 70-line probe ground 30+ CPU-minutes on one). <see cref="EveryFaceMemberNamesOnlyItselfOrAPointerToItself"/>
+/// generic level per level, without bound (a 70-line probe ground 30+ CPU-minutes on one). <see cref="EveryFaceMemberNamesOnlyItself"/>
 /// reads every GoTypeOps instantiation the generated parts name and fails on any other argument.
 /// </remarks>
 [TestClass]
@@ -89,11 +90,11 @@ public class GoTypeOpsSourceTests
     {
         StringAssert.Contains(part, "global::go.IGoTypeOpsSource", $"{self} implements the operations face");
         StringAssert.Contains(part, $"global::go.IGoTypeOps global::go.IGoTypeOpsSource.TypeOps => global::go.GoTypeOps<{self}>.Instance;", $"{self} names its own operations");
-        StringAssert.Contains(part, $"global::go.IGoTypeOps global::go.IGoTypeOpsSource.BoxTypeOps => global::go.GoTypeOps<global::go.ж<{self}>>.Instance;", $"{self} names its pointer's");
+        Assert.IsFalse(part.Contains("GoTypeOps<global::go.ж<"), $"{self} names no pointer's ops: a reference type's are the fallback's (the measured shape)");
     }
 
     [TestMethod]
-    public void AStructNamesItsOwnOpsAndItsPointers() => AssertFace(PartFor(" partial struct Plain"), "Plain");
+    public void AStructNamesItsOwnOps() => AssertFace(PartFor(" partial struct Plain"), "Plain");
 
     [TestMethod]
     public void AGenericStructNamesItsOwnClosedOps() => AssertFace(PartFor(" partial struct Generic<T>"), "Generic<T>");
@@ -121,7 +122,7 @@ public class GoTypeOpsSourceTests
     }
 
     [TestMethod]
-    public void EveryFaceMemberNamesOnlyItselfOrAPointerToItself()
+    public void EveryFaceMemberNamesOnlyItself()
     {
         int checkedFaces = 0;
 
@@ -133,7 +134,7 @@ public class GoTypeOpsSourceTests
                     continue;
 
                 foreach (string argument in GoTypeOpsArguments(part))
-                    Assert.IsTrue(argument == declaration || argument == $"global::go.ж<{declaration}>", $"{declaration}'s face names GoTypeOps<{argument}>: only itself or a pointer to itself, never a deeper level");
+                    Assert.AreEqual(declaration, argument, $"{declaration}'s face names GoTypeOps<{argument}>: only itself, never a level over it");
 
                 checkedFaces++;
             }
@@ -146,12 +147,12 @@ public class GoTypeOpsSourceTests
     public void TheHazardGuardNamesASelfNestingMember()
     {
         // The guard's own control: a face that named a pointer to a pointer to itself is refused by name.
-        string planted = "global::go.IGoTypeOps global::go.IGoTypeOpsSource.BoxTypeOps => global::go.GoTypeOps<global::go.ж<global::go.ж<Plain>>>.Instance;";
+        string planted = "global::go.IGoTypeOps global::go.IGoTypeOpsSource.TypeOps => global::go.GoTypeOps<global::go.ж<global::go.ж<Plain>>>.Instance;";
 
         string[] arguments = [.. GoTypeOpsArguments(planted)];
 
         CollectionAssert.AreEqual(new[] { "global::go.ж<global::go.ж<Plain>>" }, arguments);
-        Assert.IsFalse(arguments[0] == "Plain" || arguments[0] == "global::go.ж<Plain>", "the planted level is not one the guard admits");
+        Assert.AreNotEqual("Plain", arguments[0], "the planted level is not one the guard admits");
     }
 
     // Every type argument a part gives GoTypeOps<...>, balanced across nested angle brackets.

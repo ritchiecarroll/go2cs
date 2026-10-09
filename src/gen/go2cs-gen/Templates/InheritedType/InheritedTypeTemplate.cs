@@ -660,18 +660,17 @@ internal class InheritedTypeTemplate : TemplateBase
     private string ZeroConstructionInterface => !ZeroConstructed ? "" :
         string.IsNullOrEmpty(ImplementedInterface) && !EmitsValueClone ? " : global::go.IGoZeroConstructed" : ", global::go.IGoZeroConstructed";
 
-    // reflect's operations for this named type and a pointer to it (golib's IGoTypeOpsSource; trim stage 3c-2b), on every
-    // STRUCT wrapper (a named slice, map, array, channel, numeric or struct type): exactly GoTypeOps<itself> and
-    // GoTypeOps<ж<itself>>, at fixed depth. A class wrapper (a named pointer type) carries none: a pointer's own source
-    // would name a pointer to a pointer, and that level's the next, without bound.
+    // reflect's operations for this named type (golib's IGoTypeOpsSource; trim stage 3c-2b), on every STRUCT wrapper (a
+    // named slice, map, array, channel, numeric or struct type): exactly GoTypeOps<itself>. A class wrapper (a named pointer
+    // type) carries none: it is a reference type, whose operations golib's fallback loads under Native AOT, and a pointer's
+    // own source would name a pointer to a pointer, and that level's the next, without bound.
     private bool TypeOpsSource => ObjectKind == "struct";
 
     private string TypeOpsSourceInterface => !TypeOpsSource ? "" :
         string.IsNullOrEmpty(ImplementedInterface) && !EmitsValueClone && !ZeroConstructed ? " : global::go.IGoTypeOpsSource" : ", global::go.IGoTypeOpsSource";
 
     private string TypeOpsSourceMembers => !TypeOpsSource ? "" :
-        $"\r\n\r\n        global::go.IGoTypeOps global::go.IGoTypeOpsSource.TypeOps => global::go.GoTypeOps<{ObjectName}>.Instance;" +
-        $"\r\n\r\n        global::go.IGoTypeOps global::go.IGoTypeOpsSource.BoxTypeOps => global::go.GoTypeOps<global::go.ж<{ObjectName}>>.Instance;";
+        $"\r\n\r\n        global::go.IGoTypeOps global::go.IGoTypeOpsSource.TypeOps => global::go.GoTypeOps<{ObjectName}>.Instance;";
 
     // A C# constructor name must not carry the type's generic parameters (e.g. the constructor for
     // a generic named array type `vec<T>` is `vec(...)`, not `vec<T>(...)`). Non-generic types have
