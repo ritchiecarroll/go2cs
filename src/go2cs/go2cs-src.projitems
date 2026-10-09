@@ -300,6 +300,8 @@
     <None Include="$(MSBuildThisFileDirectory)nestedArgScaling_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nestedMapPointerValue_test.go" />
     <None Include="$(MSBuildThisFileDirectory)noinlineDirective_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetFeed.go" />
+    <None Include="$(MSBuildThisFileDirectory)nugetFeed_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetLock.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetLock_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetMap.go" />

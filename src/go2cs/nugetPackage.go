@@ -164,7 +164,7 @@ func selectNuGetPackage(nugetID string, mod thirdPartyModule, locked nugetLockEn
 		return nugetPackageChoice{}, []string{fmt.Sprintf("%s: %v", nugetID, err)}, nil
 	}
 
-	candidates, err := nugetPackageCandidates(mod.version, published)
+	candidates, err := nugetSelectionCandidates(mod.version, published)
 
 	if err != nil {
 		return nugetPackageChoice{}, []string{fmt.Sprintf("%s: %v", nugetID, err)}, nil
@@ -259,7 +259,17 @@ func nugetContentHash(data []byte) string {
 
 // fetchNuGetVersions lists a package's published versions from the flat container.
 func fetchNuGetVersions(nugetID string) ([]string, error) {
-	data, err := nugetHTTPGet(fmt.Sprintf("%s/%s/index.json", nugetFlatContainerURL, strings.ToLower(nugetID)), 4<<20)
+	if nugetFeedIsFolder() {
+		return nugetFolderFeedVersions(nugetID)
+	}
+
+	base, err := nugetFeedFlatContainer()
+
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := nugetHTTPGet(fmt.Sprintf("%s/%s/index.json", base, strings.ToLower(nugetID)), 4<<20)
 
 	if err != nil {
 		return nil, err
@@ -276,8 +286,8 @@ func fetchNuGetVersions(nugetID string) ([]string, error) {
 	return index.Versions, nil
 }
 
-// readNuGetPackage returns a nupkg's bytes from the cache, then NuGet's global packages folder, then the flat
-// container (caching what it downloads).
+// readNuGetPackage returns a nupkg's bytes from the cache, then NuGet's global packages folder, then the feed
+// selection reads -- nuget.org's flat container, or the -nuget-map-feed -- caching what it downloads.
 func readNuGetPackage(nugetID, version string) ([]byte, error) {
 	lowerID, lowerVersion := strings.ToLower(nugetID), strings.ToLower(version)
 	fileName := lowerID + "." + lowerVersion + ".nupkg"
@@ -297,7 +307,18 @@ func readNuGetPackage(nugetID, version string) ([]byte, error) {
 		}
 	}
 
-	data, err := nugetHTTPGet(fmt.Sprintf("%s/%s/%s/%s", nugetFlatContainerURL, lowerID, lowerVersion, fileName), nugetPackageMaxBytes)
+	var data []byte
+	var err error
+
+	if nugetFeedIsFolder() {
+		data, err = nugetFolderFeedRead(nugetID, version)
+	} else {
+		var base string
+
+		if base, err = nugetFeedFlatContainer(); err == nil {
+			data, err = nugetHTTPGet(fmt.Sprintf("%s/%s/%s/%s", base, lowerID, lowerVersion, fileName), nugetPackageMaxBytes)
+		}
+	}
 
 	if err != nil {
 		return nil, err

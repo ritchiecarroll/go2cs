@@ -212,6 +212,7 @@ go2cs -tests -recurse -test-action all module_dir out_root      # validate a who
 | `-nuget-map-exclude <module-path>` | With `-recurse=nuget`: never map this module, whatever a source says. Repeatable. |
 | `-nuget-map-refresh` | With `-recurse=nuget`: fetch every URL source unconditionally (bypassing the local cache) and re-resolve, adopting what the sources say now instead of what `go2cs.nuget.lock` pinned. |
 | `-nuget-map-canonical-only` | With `-recurse=nuget`: apply only **canonical** mappings (the module owner's own conversion); a community mapping is treated as unmapped. |
+| `-nuget-map-feed <feed>` | With `-recurse=nuget`: read mapped packages' versions from this feed **instead of** nuget.org: an `https://` NuGet v3 service index (a rehearsal gallery such as int.nugettest.org) or a local folder of `.nupkg` files. A rehearsal version (`nugetgo-pack.ps1 -RehearsalSuffix`) is admitted only from it. The restore reads your own package sources, so add the feed there too. |
 | `-tests` | Also convert the package's `_test.go` suite and emit a runnable C# test-host project (default off). Forces `-comments` on and works from a bare clone with no flags or environment setup. With plain `-recurse` it validates a whole module against its own tests: `go2cs -tests -recurse module_dir out_root`, with the output root outside the module's source tree; a module that needs a newer Go than the converted standard library is refused. See [Try it yourself](#try-it-yourself--validate-a-converted-test-suite). |
 | `-test-action <action>` | With `-tests`: one of `convert` (default), `build`, `run`, `compare`, or `all`. `convert` and `all` convert the package and its tests; `build` / `run` / `compare` act on the **existing** converted artifacts — validated against the test manifest's recorded input digest — without reconverting. `compare` (and `all`) runs both `go test -json -count=1` and the converted C# test host and diffs the terminal results by test name. |
 | `-test-timeout <duration>` | Package deadline for a converted-test action, in Go duration syntax (default `2m`); `run` and `compare` give it to both `go test` and the converted host. The host's `dotnet publish` always gets at least `30m`, because the first publish on a fresh tree builds the whole standard-library closure. A suite that runs long in C# needs a larger value: `hash/maphash` is validated with `-test-timeout 30m`. |
@@ -492,7 +493,7 @@ the pin offline, warns if a source now disagrees, and refuses a package whose by
   It is repeatable, and the first source that names a module answers for it. nugetgo.net answers every module your
   sources do not name, so a short override file is enough.
 - `-nuget-map off` turns mapping off and makes no request.
-- `-nuget-map-only`, `-nuget-map-exclude`, `-nuget-map-refresh` and `-nuget-map-canonical-only` are listed under
+- `-nuget-map-only`, `-nuget-map-exclude`, `-nuget-map-refresh`, `-nuget-map-canonical-only` and `-nuget-map-feed` are listed under
   [Common options](#common-options). Every `-nuget-map*` flag needs `-recurse=nuget`.
 
 ## Project layout
