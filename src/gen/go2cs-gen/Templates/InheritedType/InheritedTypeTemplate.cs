@@ -664,7 +664,7 @@ internal class InheritedTypeTemplate : TemplateBase
     // named slice, map, array, channel, numeric or struct type): exactly GoTypeOps<itself>. A class wrapper (a named pointer
     // type) carries none: it is a reference type, whose operations golib's fallback loads under Native AOT, and a pointer's
     // own source would name a pointer to a pointer, and that level's the next, without bound.
-    private bool TypeOpsSource => ObjectKind == "struct";
+    private bool TypeOpsSource => ObjectKind == "struct" && TypeOpsScope.Wants(ObjectName);
 
     private string TypeOpsSourceInterface => !TypeOpsSource ? "" :
         string.IsNullOrEmpty(ImplementedInterface) && !EmitsValueClone && !ZeroConstructed ? " : global::go.IGoTypeOpsSource" : ", global::go.IGoTypeOpsSource";

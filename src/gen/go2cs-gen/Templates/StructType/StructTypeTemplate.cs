@@ -205,7 +205,8 @@ internal class StructTypeTemplate : TemplateBase
             if (NeedsZeroConstruction)
                 bases.Add("global::go.IGoZeroConstructed");
 
-            bases.Add("global::go.IGoTypeOpsSource");
+            if (TypeOpsScope.Wants(StructName))
+                bases.Add("global::go.IGoTypeOpsSource");
 
             return $" : {string.Join(", ", bases)}";
         }
@@ -216,7 +217,7 @@ internal class StructTypeTemplate : TemplateBase
     // without closing a generic method over it. Never a deeper level: GenTests' GoTypeOpsSourceTests fails on a member that
     // names anything but the struct itself. A pointer to it is a reference type, whose operations golib's fallback loads
     // under Native AOT; naming them here per struct grew the package consumer's full-trim executable ~50% (measured).
-    private string TypeOpsSourceMembers =>
+    private string TypeOpsSourceMembers => !TypeOpsScope.Wants(StructName) ? "" :
         $"\r\n{TypeElemIndent}global::go.IGoTypeOps global::go.IGoTypeOpsSource.TypeOps => global::go.GoTypeOps<{StructName}>.Instance;\r\n";
 
     // golib's construction hook (IGoZeroConstructed; trim stage 3b, docs/PLAN-golib-full-trim.md section 9.6): a struct
