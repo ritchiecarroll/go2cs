@@ -1520,7 +1520,7 @@ public static partial class GoReflect
     /// <para>
     /// So the call is made in TYPED code — one small generic trampoline per family arity, closed
     /// over the delegate's own parameter types by <c>MakeGenericMethod</c> and cached as an ordinary
-    /// delegate (the <c>elementBoxViaAt</c> idiom in GoReflect.FieldAccess.cs). Inside a trampoline
+    /// delegate (the idiom FieldAliasBox's makeFieldBox uses in GoReflect.FieldAccess.cs). Inside a trampoline
     /// the tail is a <c>TArg[]</c> and its conversion to <c>Span&lt;TArg&gt;</c> is an ordinary
     /// one, so nothing is ever boxed.
     /// </para>

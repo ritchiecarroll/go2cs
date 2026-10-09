@@ -55,7 +55,7 @@ namespace go;
 /// <para>
 /// WHAT READS WHAT. Element access (<c>chunkOf</c>'s <c>&amp;p.chunks[l1][l2]</c>) goes through
 /// <see cref="Value"/>, the managed array, whose element boxes are ordinary managed ones.
-/// <see cref="TryGetNativeArrayView{Telem}"/> answers null, so the element door never builds a native
+/// <see cref="TryGetNativeArrayView(Type)"/> answers null, so the element door never builds a native
 /// window over the block. The address (<see cref="NativeAddress"/>, <see cref="PointerOrderToken"/>)
 /// is the block's. <c>NativeAddress</c>-gated byte arithmetic (<c>unsafe.Add</c>'s byte stepping,
 /// <c>ReadPointerWord</c>) would therefore address the UNUSED block; no corpus site does arithmetic on
@@ -103,7 +103,7 @@ internal sealed class ShadowArrayBox<T> : ж<array<T>>
 
     /// <inheritdoc/>
     // The elements are managed, so no native window is ever built over the block.
-    internal override IArray<Telem>? TryGetNativeArrayView<Telem>() => null;
+    internal override IArray? TryGetNativeArrayView(Type elementType) => null;
 
     /// <inheritdoc/>
     // No MANAGED storage to pin or name by address: the address is native, answered first by the
