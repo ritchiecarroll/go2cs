@@ -42,6 +42,7 @@ type nugetMapOptions struct {
 	exclude       []string // -nuget-map-exclude <module-path>: modules that are never mapped
 	refresh       bool     // -nuget-map-refresh: bypass the cache and re-resolve deliberately instead of keeping the lock
 	canonicalOnly bool     // -nuget-map-canonical-only: a community mapping is treated as unmapped
+	feed          string   // -nuget-map-feed <https service index|folder>: package selection reads this feed instead of nuget.org
 }
 
 // active reports whether this run resolves mappings at all: always, unless -nuget-map off.
