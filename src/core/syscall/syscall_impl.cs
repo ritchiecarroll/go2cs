@@ -33,11 +33,13 @@ partial class syscall_package
         Environment.Exit((int)code);
     }
 
-    // Windows' page size is 4096 on every architecture Go supports; runtime.getpagesize reports
-    // the value the OS gave it at startup, which is this constant in practice.
+    // Go's runtime provides this (runtime.syscall_Getpagesize): it returns physPageSize, the page size
+    // the OS reported at startup. A constant 4096 stood here, which is wrong on Apple silicon (16384)
+    // and on any 64 KiB-page arm64 linux; the call now crosses into the runtime through its public
+    // shim (managed_impl.cs, the runtimeSetenv pattern below), so os.Getpagesize answers what Go does.
     public static partial nint Getpagesize()
     {
-        return 4096;
+        return runtime_package.syscallGetpagesize();
     }
 
     // Go's runtime provides these (runtime.syscall_runtimeSetenv/Unsetenv): they mirror the change

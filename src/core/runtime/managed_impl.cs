@@ -422,6 +422,13 @@ partial class runtime_package
 
     public static void syscallRuntimeUnsetenv(@string key) => syscall_runtimeUnsetenv(key);
 
+    // syscallGetpagesize is syscall.Getpagesize, the same crossing: Go provides it from the runtime
+    // (runtime.go's `//go:linkname syscall_Getpagesize syscall.Getpagesize`, which returns
+    // physPageSize, the page size osinit read). syscall_impl.cs answered a constant 4096 instead,
+    // which is wrong on Apple silicon (16384) and would hide a flavour whose physPageSize was never
+    // set; each flavour's os_<goos>_impl.cs now sets it, so the runtime's value is the answer.
+    public static nint syscallGetpagesize() => syscall_Getpagesize();
+
     // TEST SEAM (A15): Go's export_test.go `var ForceGCPeriod = &forcegcperiod`, which
     // runtime's TestPeriodicGC writes. GolibTests is outside runtime's InternalsVisibleTo grant.
     public static ref int64 GoForceGCPeriod => ref forcegcperiod;
