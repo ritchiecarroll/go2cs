@@ -323,6 +323,8 @@
     <None Include="$(MSBuildThisFileDirectory)packageImportPathStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageInfoWriter.go" />
     <None Include="$(MSBuildThisFileDirectory)packageInitFacts.go" />
+    <None Include="$(MSBuildThisFileDirectory)packageInputDigest.go" />
+    <None Include="$(MSBuildThisFileDirectory)packageInputDigest_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageStateOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)parenFuncLitGoDeferCallee_test.go" />
     <None Include="$(MSBuildThisFileDirectory)perUnitAliasRenames_test.go" />
