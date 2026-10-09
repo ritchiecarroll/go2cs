@@ -1786,6 +1786,14 @@ if ($newsStart -ge 0 -and $newsEnd -gt $newsStart) {
 # The price is stated rather than hidden: a figure whose PHRASING drifts reads as absent, not stale.
 # The phrasings below are the block's own; a re-worded figure needs its pattern re-worded with it,
 # and the unconditional printout below is where a reader sees an expected figure reading absent.
+#
+# NO FIGURE REQUIRED (COORD ruling 2026-10-09). The face-lift release text (1ae1026a56) took the counts
+# out of the block on purpose: durable prose carries no exact counts unless a process re-measures them,
+# and the roster header carries the current figures. The headline therefore joins the others as
+# checked-IF-QUOTED: quoted, it must still equal the roster header, whole and by name, so a stale count
+# still fails; unquoted, it reads absent and passes. A block that quotes NO figure at all passes by
+# name below, on a block the vacuity control above has already located, so an unread README cannot
+# pass this way.
 function Get-NewsFigurePart {
     param([string] $Text, [string] $Pattern, [int] $Group = 1)
 
@@ -1810,7 +1818,7 @@ $linuxPattern = '(\d+)\s+of\s+the\s+(\d+)\s+applicable\s+rows'
 $bankedPctPattern = '(\d+)\s+of\s+the\s+(\d+)\s+testable[A-Za-z\s*-]{0,60}?\(\s*([\d.]+)\s*%\s*\)'
 
 $newsFigures = @(
-    @{ Name = 'banked / testable packages'; Required = $true
+    @{ Name = 'banked / testable packages'; Required = $false
        Parts = @(@{ Pattern = $bankedPattern; Group = 1; Roster = "$($rows.Count)" }
                  @{ Pattern = $bankedPattern; Group = 2; Roster = "$testable" }) }
     @{ Name = 'headline testable percentage'; Required = $false
@@ -1831,12 +1839,14 @@ $newsFigures = @(
 # inputs are never shown is one nobody can tell apart from a comparison that did not happen.
 Write-Host ''
 Write-Host 'README featured NEWS block vs the roster header:' -ForegroundColor Cyan
+$newsFiguresQuoted = 0
 foreach ($figure in $newsFigures) {
     # A List, not a pipeline: a pipeline drops the $null that marks an absent part and shifts the rest.
     $readings = New-Object System.Collections.Generic.List[object]
     foreach ($part in $figure.Parts) { $readings.Add((Get-NewsFigurePart $newsText $part.Pattern $part.Group)) }
     $rosterShown = (@($figure.Parts | ForEach-Object { $_.Roster }) -join '/')
     $stated = @($readings | Where-Object { $null -ne $_ }).Count
+    if ($stated -gt 0) { $newsFiguresQuoted++ }
 
     if ($stated -eq 0 -and -not $figure.Required) {
         Write-Host ('  {0,-32} README {1,-14} roster {2}' -f $figure.Name, '(absent -- not stated in the block)', $rosterShown)
@@ -1856,6 +1866,14 @@ foreach ($figure in $newsFigures) {
         $actual += $(if ($null -ne $readings[$p]) { $readings[$p] } else { '(not found)' })
     }
     Assert-Equal "README featured NEWS block: $($figure.Name) matches the roster header" ($expected -join '/') ($actual -join '/')
+}
+
+# The no-count form passes BY NAME, so the report says why nothing above was compared. It binds on the
+# located block's text being non-empty: a block the vacuity control could not find has failed there,
+# and this line cannot turn that into a pass.
+if ($newsFiguresQuoted -eq 0) {
+    if ($newsText.Length -gt 0) { Write-Host '  (the block quotes no roster figure: durable prose carries no counts, so none can be stale)' }
+    Assert-Equal 'README featured NEWS block: quotes no roster figure, so none is stale (ruled 2026-10-09)' $true ($newsText.Length -gt 0)
 }
 
 # ---- 2f. a row's cells agree with its OWN page at the pin (ruled 2026-09-22) ----------------------
