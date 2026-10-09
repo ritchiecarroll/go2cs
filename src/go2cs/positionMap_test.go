@@ -19,6 +19,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 
 	"go2cs/internal/stdlibmeta"
 )
@@ -228,6 +229,49 @@ func TestGoSourceIdentityIsBuildShapeFaithful(t *testing.T) {
 
 			if got := visitor.goSourceIdentity(test.output); got != test.want {
 				t.Errorf("goSourceIdentity = %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestGoSourceIdentityOfAModuleCacheSourceIsTheTrimpathForm(t *testing.T) {
+	// A -recurse module read from the module cache is recorded the way cmd/go spells it under
+	// -trimpath, <module>@<version>/<file> with the cache's case escaping undone, never the absolute
+	// cache path: a packed assembly carries this string, and on Windows the cache sits under the
+	// user's profile (the nugetgo rehearsal, 2026-10-09, gap 3). The runtime roots it against the
+	// link-time module cache when a host hands it one (GO2CS_DEFAULT_GOMODCACHE).
+	cache := filepath.Join(t.TempDir(), "pkg", "mod")
+	previous := goModCache
+	goModCache = cache
+	t.Cleanup(func() { goModCache = previous })
+	out := filepath.Join(t.TempDir(), "out", "pkg")
+
+	tests := []struct {
+		name   string
+		source string
+		want   string
+	}{
+		{"module root file", filepath.Join(cache, "github.com", "ritchiecarroll", "hashset@v1.0.0", "hashset.go"),
+			"github.com/ritchiecarroll/hashset@v1.0.0/hashset.go"},
+		{"package below the module root", filepath.Join(cache, "github.com", "golang-jwt", "jwt", "v5@v5.3.1", "request", "request.go"),
+			"github.com/golang-jwt/jwt/v5@v5.3.1/request/request.go"},
+		{"escaped upper case is undone", filepath.Join(cache, "github.com", "!burnt!sushi", "toml@v1.3.2", "decode.go"),
+			"github.com/BurntSushi/toml@v1.3.2/decode.go"},
+		{"pseudo-version", filepath.Join(cache, "golang.org", "x", "exp@v0.0.0-20240613232115-7f521ea00fb8", "maps", "maps.go"),
+			"golang.org/x/exp@v0.0.0-20240613232115-7f521ea00fb8/maps/maps.go"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			visitor := &Visitor{sourceFilePath: test.source, options: Options{goRoot: filepath.Join(t.TempDir(), "go")}}
+			got := visitor.goSourceIdentity(filepath.Join(out, "x.cs"))
+
+			if got != test.want {
+				t.Errorf("goSourceIdentity = %q, want %q", got, test.want)
+			}
+
+			if strings.Contains(got, filepath.ToSlash(cache)) {
+				t.Errorf("goSourceIdentity %q carries the module cache root", got)
 			}
 		})
 	}
@@ -501,5 +545,31 @@ func TestEncodeFuncLitNamesOrdersEnclosingFirst(t *testing.T) {
 
 	if encoded, want := encodeFuncLitNames(entries), "10-18:1;10-12:1.1;20-20:2"; encoded != want {
 		t.Errorf("got %q, want %q", encoded, want)
+	}
+}
+
+func TestTestHostEnvironmentCarriesTheLinkTimeModuleCache(t *testing.T) {
+	// A module-cache source is recorded in its -trimpath form, so the converted host answers the
+	// absolute path `go test` prints only when the launcher hands its runtime the module cache, as it
+	// hands the link-time GOROOT. Both sides of a comparison launch through this one helper.
+	cache := filepath.Join(t.TempDir(), "pkg", "mod")
+	previous := goModCache
+	goModCache = cache
+	t.Cleanup(func() { goModCache = previous })
+
+	name, args := "sh", []string{"-c", `printf '%s' "$GO2CS_DEFAULT_GOMODCACHE"`}
+
+	if runtime.GOOS == "windows" {
+		name, args = "cmd", []string{"/c", "echo %GO2CS_DEFAULT_GOMODCACHE%"}
+	}
+
+	output, err := runCommandWithTimeout(time.Minute, t.TempDir(), Options{goRoot: filepath.Join(t.TempDir(), "go")}, name, args...)
+
+	if err != nil {
+		t.Fatalf("%s: %v (%s)", name, err, output)
+	}
+
+	if got := strings.TrimSpace(output); got != cache {
+		t.Errorf("the child's GO2CS_DEFAULT_GOMODCACHE = %q, want %q", got, cache)
 	}
 }

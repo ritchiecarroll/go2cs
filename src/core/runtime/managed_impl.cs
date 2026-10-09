@@ -2734,6 +2734,12 @@ partial class runtime_package
     public static string GoResolveRecordedFileProbe(string goFile, string csPath, string linkRoot) =>
         resolveRecordedGoFile(goFile, csPath, linkRoot);
 
+    /// <summary>
+    /// GolibTests' probe: as above, with the link-time module cache <paramref name="linkModuleCache"/> a module record roots against.
+    /// </summary>
+    public static string GoResolveRecordedFileProbe(string goFile, string csPath, string linkRoot, string linkModuleCache) =>
+        resolveRecordedGoFile(goFile, csPath, linkRoot);
+
     // THE MODULE UNDER TEST'S STAGED COPY. A -recurse module's records name the absolute Go source the
     // converter read, the module-cache file. `go test` runs the package IN that directory, so a Go test's
     // working directory and its Caller's directory agree. The test host runs it in a staged COPY of the
