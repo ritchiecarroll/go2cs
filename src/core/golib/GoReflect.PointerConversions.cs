@@ -25,7 +25,9 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using go.golib;
 
 namespace go;
@@ -164,47 +166,123 @@ public static partial class GoReflect
         return true;
     }
 
-    private static readonly ConcurrentDictionary<(Type, Type), Func<object, object>?> s_valueReinterpreters = new();
-
     /// <summary>
     /// A COPY of <paramref name="src"/> re-typed as <paramref name="dstType"/> when the two value types have
-    /// ONE representation (the same gate the pointer reinterpret uses: value types, the destination no
-    /// larger, layout-compatible) -- Go's value conversion between struct types identical up to their
-    /// tags (`struct{ x int "a" }` to `struct{ x int "b" }`, two lifted C# structs of one shape).
-    /// False for anything else; the caller refuses rather than guessing.
+    /// ONE representation -- Go's value conversion between struct types identical up to their tags
+    /// (`struct{ x int "a" }` to `struct{ x int "b" }`, two lifted C# structs of one shape). False for
+    /// anything else; the caller refuses rather than guessing.
     /// </summary>
+    /// <remarks>
+    /// Trim stage 3c-2a: the copy is FIELD-WISE over the field metadata the type registry keeps, not a byte
+    /// reinterpret closed over the pair with MakeGenericMethod (which Native AOT cannot). Never a raw byte copy:
+    /// these structs carry managed references (a string, a slice's backing, a pointer), and a raw copy would bypass
+    /// the GC's write barriers. Go's conversion IS a copy (classified 2026-10-09: a write through either value is
+    /// not seen through the other, in Go and here), so a field-wise one is the same value. The shapes it admits are
+    /// PointerExtensions' LayoutCompatible relation, in its own order: one side a (possibly nested) single-field
+    /// wrapper over the other, or the same fields in the same order, each the same type or itself compatible. The
+    /// old gate also admitted two reference-free structs of any shape by size alone, a byte pun reflect never needs:
+    /// it calls this only for Go structs of identical underlying type, whose lifted fields correspond one to one.
+    /// </remarks>
     public static bool TryReinterpretValue(object src, Type dstType, out object? result)
     {
-        result = null;
         Type srcType = src.GetType();
+
         if (srcType == dstType)
         {
             result = src;
             return true;
         }
-        Func<object, object>? reinterpreter = s_valueReinterpreters.GetOrAdd((srcType, dstType), static key =>
+
+        return tryCopyFieldWise(src, srcType, dstType, out result);
+    }
+
+    private static bool tryCopyFieldWise(object src, Type from, Type to, out object? result)
+    {
+        result = null;
+
+        if (from == to)
         {
-            (Type from, Type to) = key;
-            if (!from.IsValueType || !to.IsValueType)
-                return null;
-            bool representable = (bool)typeof(PointerExtensions.ReinterpretAliasesStorage<,>)
-                .MakeGenericType(from, to).GetField("Value", BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null)!;
-            if (!representable)
-                return null;
-            MethodInfo copy = typeof(GoReflect).GetMethod(nameof(reinterpretCopy), BindingFlags.NonPublic | BindingFlags.Static)!.MakeGenericMethod(from, to);
-            return b => copy.Invoke(null, [b])!;
-        });
-        if (reinterpreter is null)
+            result = src;
+            return true;
+        }
+
+        if (!from.IsValueType || !to.IsValueType || from.IsPrimitive || to.IsPrimitive || from.IsEnum || to.IsEnum)
             return false;
-        result = reinterpreter(src);
+
+        // One side a single-field wrapper over the other (the generated defined-type-over-struct wrapper, the
+        // embedding idiom): unwrap the source down to the destination, or wrap the source up to it.
+        if (singleFieldUnwrapped(from) == to)
+        {
+            object inner = src;
+
+            for (Type type = from; type != to; type = GoFieldMetadata.InstanceFields(type)[0].FieldType)
+                inner = GoFieldMetadata.InstanceFields(type)[0].GetValue(inner)!;
+
+            result = inner;
+            return true;
+        }
+
+        if (singleFieldUnwrapped(to) == from)
+        {
+            result = wrapFieldWise(src, from, to);
+            return true;
+        }
+
+        // The same fields in the same order, all the way down.
+        FieldInfo[] fromFields = GoFieldMetadata.InstanceFields(from), toFields = GoFieldMetadata.InstanceFields(to);
+
+        if (fromFields.Length == 0 || fromFields.Length != toFields.Length)
+            return false;
+
+        object destination = uninitializedValue(to);
+
+        for (int i = 0; i < fromFields.Length; i++)
+        {
+            object? value = fromFields[i].GetValue(src);
+
+            if (fromFields[i].FieldType != toFields[i].FieldType)
+            {
+                // A differing field must be a compatible value type; a reference field of another type never is.
+                if (value is null || !tryCopyFieldWise(value, fromFields[i].FieldType, toFields[i].FieldType, out value))
+                    return false;
+            }
+
+            toFields[i].SetValue(destination, value);
+        }
+
+        result = destination;
         return true;
     }
 
-    private static object reinterpretCopy<T, TDst>(object boxed)
+    // `to` holding `src` at the bottom of its single-field chain.
+    private static object wrapFieldWise(object src, Type from, Type to)
     {
-        T copy = (T)boxed;
-        return System.Runtime.CompilerServices.Unsafe.As<T, TDst>(ref copy)!;
+        if (to == from)
+            return src;
+
+        FieldInfo field = GoFieldMetadata.InstanceFields(to)[0];
+        object wrapper = uninitializedValue(to);
+
+        field.SetValue(wrapper, wrapFieldWise(src, from, field.FieldType));
+
+        return wrapper;
     }
+
+    // The type a chain of single-field value types bottoms out at (PointerExtensions' UnwrapSingleField).
+    private static Type singleFieldUnwrapped(Type type)
+    {
+        // Bounded: each hop strictly descends into a field's type, and a struct cannot contain itself.
+        while (type.IsValueType && !type.IsPrimitive && !type.IsEnum && GoFieldMetadata.InstanceFields(type) is [var only])
+            type = only.FieldType;
+
+        return type;
+    }
+
+    // A value type's zero, its fields then stored one by one (trim stage 3c-2a).
+    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification =
+        "No constructor runs: the zero value's fields are all stored by the field-wise copy. The types are Go structs " +
+        "the program converts between, which it has constructed, and whose fields the type registry keeps.")]
+    private static object uninitializedValue(Type type) => RuntimeHelpers.GetUninitializedObject(type);
 
     /// <summary>
     /// The same channel (same core -- the queue, its lock, its waiters) re-stamped with

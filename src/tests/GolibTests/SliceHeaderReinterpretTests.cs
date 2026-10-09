@@ -184,19 +184,25 @@ public class SliceHeaderReinterpretTests
     [TestMethod]
     public void ThePointerTypesFactoryContractTheAdapterResolvesByReflection()
     {
-        // golib cannot name the unsafe assembly, so the adapter resolves `FromBox<X>(ж<X>)` on the
-        // header's pointer field type by name. This arm is what pins that contract.
+        // golib cannot name the unsafe assembly, so the adapter resolves `FromBoxObject(object)` on the
+        // header's pointer field type by name (trim stage 3c-2a: the untyped twin of FromBox<X>, so the adapter closes no
+        // generic method over the element). This arm is what pins that contract.
+        MethodInfo? fromBoxObject = typeof(@unsafe.Pointer).GetMethod("FromBoxObject", BindingFlags.Public | BindingFlags.Static, [typeof(object)]);
+
+        Assert.IsNotNull(fromBoxObject, "unsafe.Pointer.FromBoxObject(object) must exist, public and static");
+        Assert.AreEqual(typeof(@unsafe.Pointer), fromBoxObject!.ReturnType, "…returning the pointer type");
+        Assert.IsTrue(typeof(IUnsafePointer).IsAssignableFrom(typeof(@unsafe.Pointer)), "…on a type the adapter's detector admits");
+
+        // The typed FromBox<X> stays the converter's mint, and the name the adapter looks up stays unambiguous.
         MethodInfo? fromBox = typeof(@unsafe.Pointer).GetMethod("FromBox", BindingFlags.Public | BindingFlags.Static);
 
         Assert.IsNotNull(fromBox, "unsafe.Pointer.FromBox must exist, public and static");
         Assert.IsTrue(fromBox!.IsGenericMethodDefinition && fromBox.GetGenericArguments().Length == 1, "…generic in the pointee");
-        Assert.AreEqual(typeof(@unsafe.Pointer), fromBox.MakeGenericMethod(typeof(byte)).ReturnType, "…returning the pointer type");
-        Assert.IsTrue(typeof(IUnsafePointer).IsAssignableFrom(typeof(@unsafe.Pointer)), "…on a type the adapter's detector admits");
 
         // And the factory retains without pinning: a transient address with the box behind it.
         byte value = 7;
         ref byte v = ref heap(value, out ж<byte> Ꮡv);
-        @unsafe.Pointer p = @unsafe.Pointer.FromBox(Ꮡv);
+        @unsafe.Pointer p = @unsafe.Pointer.FromBoxObject(Ꮡv);
         Assert.AreSame(Ꮡv, p.RetainedSource);
     }
 

@@ -96,7 +96,7 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
     // ---- the shape, resolved once per (T, TDst) ----
 
     private static readonly FieldInfo[]? s_fields;      // [0] pointer, [1] len, [2] cap — declaration order
-    private static readonly MethodInfo? s_fromBox;      // <pointer type>.FromBox<X>(ж<X>) → pointer object
+    private static readonly MethodInfo? s_fromBox;      // <pointer type>.FromBoxObject(object box) → pointer object
     private static readonly Func<IArray, (object? backing, nint low, nint len, nint cap)>? s_describe;
     private static readonly Func<IArray, object>? s_elementZero;
 
@@ -111,7 +111,6 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
         if (!source.IsGenericType || source.GetGenericTypeDefinition() != typeof(slice<>) || !header.IsValueType || header.IsPrimitive || header.IsEnum)
             return;
 
-        Type element = source.GetGenericArguments()[0];
         // Declaration order is GoFieldMetadata's order (no metadata token under Native AOT; see there).
         FieldInfo[] fields = GoFieldMetadata.InstanceFields(header);
 
@@ -126,51 +125,36 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
         if (fields[1].FieldType != typeof(nint) || fields[2].FieldType != typeof(nint))
             return;
 
-        // The pointer type's own retaining factory: `public static <Pointer> FromBox<X>(ж<X> box)`.
-        // Resolved by name because the marker interface is empty and golib cannot reference the
-        // assembly that defines the class; the contract is pinned by SliceHeaderReinterpretTests.
-        MethodInfo? fromBox = pointerType.GetMethod("FromBox", BindingFlags.Public | BindingFlags.Static);
+        // The pointer type's own retaining factory for a box known only as an object:
+        // `public static <Pointer> FromBoxObject(object box)` (unsafe.Pointer's untyped twin of FromBox<X>; trim stage
+        // 3c-2a, so nothing here closes a generic method over the element). Resolved by name because the marker interface
+        // is empty and golib cannot reference the assembly that defines the class; the contract is pinned by
+        // SliceHeaderReinterpretTests.
+        MethodInfo? fromBox = pointerType.GetMethod("FromBoxObject", BindingFlags.Public | BindingFlags.Static, [typeof(object)]);
 
-        if (fromBox is null || !fromBox.IsGenericMethodDefinition || fromBox.GetGenericArguments().Length != 1)
+        if (fromBox is null || !pointerType.IsAssignableFrom(fromBox.ReturnType))
             return;
-
-        MethodInfo closed = fromBox.MakeGenericMethod(element);
-
-        if (!pointerType.IsAssignableFrom(closed.ReturnType))
-            return;
-
-        MethodInfo describe = typeof(SliceHeaderBox<T, TDst>).GetMethod(nameof(Describe), BindingFlags.NonPublic | BindingFlags.Static)!.MakeGenericMethod(element);
-        MethodInfo elementZero = typeof(SliceHeaderBox<T, TDst>).GetMethod(nameof(ElementZero), BindingFlags.NonPublic | BindingFlags.Static)!.MakeGenericMethod(element);
 
         s_fields = fields;
-        s_fromBox = closed;
-        s_describe = (Func<IArray, (object?, nint, nint, nint)>)Delegate.CreateDelegate(typeof(Func<IArray, (object?, nint, nint, nint)>), describe);
-        s_elementZero = (Func<IArray, object>)Delegate.CreateDelegate(typeof(Func<IArray, object>), elementZero);
+        s_fromBox = fromBox;
+
+        // The slice's identity words, without allocating: backing array (null for a nil slice), low, len, cap.
+        s_describe = static array => ((IGoReflectSlice)array).ReflectDescribe();
+
+        // The element-0 box at the slice's low index — Go's `s.array`. Constructed only when the words moved.
+        //
+        // A ZERO-CAPACITY slice names no element, and Go never gives it a pointer past the end: the
+        // compiler keeps an in-bounds base when a reslice leaves cap 0, and mallocgc(0) answers the
+        // runtime's zerobase. Element 0 at such a slice's low index is one past the end of its backing
+        // (mem[len:len], or any make([]T, 0)), and minting the pointer read it: IndexOutOfRangeException,
+        // which took runtime's TestMemclr down at MemclrBytes(mem[size:size]). So a cap-0 slice's array
+        // word is a per-element-type zerobase element: non-nil, as Go's is, and never dereferenced by a
+        // correct program, since there is no element to reach through it.
+        //
+        // Both through the slice's own face (ISlice<T>'s default members, trim stage 3c-2a): T IS the slice type here, so
+        // the face is compiled for it; the box no longer closes a generic method over its element.
+        s_elementZero = static array => ((IGoReflectSlice)array).ReflectElementZero();
         Applies = true;
-    }
-
-    // The slice's identity words, without allocating: backing array (null for a nil slice), low, len, cap.
-    private static (object? backing, nint low, nint len, nint cap) Describe<X>(IArray array)
-    {
-        slice<X> source = (slice<X>)array;
-        return (source.m_array, source.Low, source.Length, source.Capacity);
-    }
-
-    // The element-0 box at the slice's low index — Go's `s.array`. Constructed only when the words moved.
-    //
-    // A ZERO-CAPACITY slice names no element, and Go never gives it a pointer past the end: the
-    // compiler keeps an in-bounds base when a reslice leaves cap 0, and mallocgc(0) answers the
-    // runtime's zerobase. Element 0 at such a slice's low index is one past the end of its backing
-    // (mem[len:len], or any make([]T, 0)), and minting the pointer read it: IndexOutOfRangeException,
-    // which took runtime's TestMemclr down at MemclrBytes(mem[size:size]). So a cap-0 slice's array
-    // word is a per-element-type zerobase element: non-nil, as Go's is, and never dereferenced by a
-    // correct program, since there is no element to reach through it.
-    private static object ElementZero<X>(IArray array)
-    {
-        if (((slice<X>)array).Capacity == 0)
-            return GoZeroCapacityElement<X>.Element;
-
-        return new ElemRefBox<X>(array, 0);
     }
 
     internal static ж<TDst> Mint(ж<T> source)

@@ -91,7 +91,6 @@ internal sealed class HeaderSliceBox<T, TDst> : ж<TDst>
         if (!target.IsGenericType || target.GetGenericTypeDefinition() != typeof(slice<>) || !header.IsValueType || header.IsPrimitive || header.IsEnum)
             return;
 
-        Type element = target.GetGenericArguments()[0];
         // Declaration order is GoFieldMetadata's order (no metadata token under Native AOT; see there).
         FieldInfo[] fields = GoFieldMetadata.InstanceFields(header);
 
@@ -108,27 +107,21 @@ internal sealed class HeaderSliceBox<T, TDst> : ж<TDst>
         if (fields[1].FieldType != typeof(nint) || fields[2].FieldType != typeof(nint))
             return;
 
-        Type pointee = pointerType.GetGenericArguments()[0];
-        MethodInfo words = typeof(HeaderSliceBox<T, TDst>).GetMethod(nameof(Words), BindingFlags.NonPublic | BindingFlags.Static)!.MakeGenericMethod(pointee);
-        MethodInfo rebase = typeof(HeaderSliceBox<T, TDst>).GetMethod(nameof(Rebase), BindingFlags.NonPublic | BindingFlags.Static)!.MakeGenericMethod(element);
-
         s_fields = fields;
-        s_words = (Func<object, (bool, bool, nuint)>)Delegate.CreateDelegate(typeof(Func<object, (bool, bool, nuint)>), words);
-        s_rebase = (Func<nuint, nint, nint, object>)Delegate.CreateDelegate(typeof(Func<nuint, nint, nint, object>), rebase);
+
+        // The array box's identity: nil, native, and the native address (0 for a managed element box). Through the box's
+        // untyped face (trim stage 3c-2a), so nothing closes a generic method over the pointee.
+        s_words = static pointer =>
+        {
+            IGoReflectBox box = (IGoReflectBox)pointer;
+            return (box.IsNilPointer, box.NativeAddress != 0, box.NativeAddress);
+        };
+
+        // The single creation door, through the target slice type's own face (ISlice<T>'s default member, trim stage
+        // 3c-2a): TDst IS that slice type, so a zero value of it carries the member, compiled for it.
+        IGoReflectSlice target0 = (IGoReflectSlice)(object)default(TDst)!;
+        s_rebase = (address, len, cap) => target0.ReflectOverNativeMemory(address, len, cap);
         Applies = true;
-    }
-
-    // The array box's identity: nil, native, and the native address (0 for a managed element box).
-    private static (bool nil, bool native, nuint address) Words<Y>(object pointer)
-    {
-        ж<Y> box = (ж<Y>)pointer;
-        return (box.IsNilPointer, box.IsNative, box.NativeAddress);
-    }
-
-    // The single creation door, closed over the element type.
-    private static object Rebase<X>(nuint address, nint len, nint cap)
-    {
-        return slice<X>.OverNativeMemory(address, len, cap);
     }
 
     internal static ж<TDst> Mint(ж<T> source)

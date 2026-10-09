@@ -509,6 +509,30 @@ public class Pointer : StandardBox<uintptr>, IUnsafePointer {
             return new Pointer((uintptr)ptr, box);
     }
 
+    // FromBox for a box known only as an object (trim stage 3c-2a): golib's slice-header box mints the pointer of a header
+    // over a slice whose element type it knows only at run time, and closing FromBox<T> over it needed MakeGenericMethod,
+    // which Native AOT cannot. The same four answers through the box's untyped face; the typed FromBox above keeps its own
+    // body because converted code calls it on hot paths. GolibTests' SliceHeaderReinterpretTests holds the two equal for a
+    // nil, a zerobase, a native and a managed box.
+    public static Pointer FromBoxObject(object? box)
+    {
+        if (box is null)
+            return new Pointer(nil);
+
+        IGoReflectBox face = box as IGoReflectBox ?? throw new global::System.ArgumentException($"unsafe.Pointer.FromBoxObject: {box.GetType()} is not a pointer box", nameof(box));
+
+        if (face.IsNilPointer)
+            return new Pointer(nil);
+
+        if (face.NamesZeroBase)
+            return new Pointer(GoZeroBase.Address, box);
+
+        if (face.NativeAddress != 0)
+            return new Pointer((uintptr)face.NativeAddress, box);
+
+        return new Pointer((uintptr)face.TransientSlotAddress(), box);
+    }
+
     // The converter's mint for `unsafe.Pointer(&x)` — an address TAKEN, as opposed to FromBox's
     // pointer VALUE carried across. The difference is the pin, and it is the whole reason this door
     // exists beside FromBox: `fixed` holds storage still for its own statement, while an address
