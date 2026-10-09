@@ -26659,4 +26659,32 @@ GolibTests' GoZeroResidualTests gains the `array<T>` case first, red.
 
 — G
 
+## 2026-10-09 — C1: `runtime.zeroVal` is three independent boxes in the converted corpus, not one — RECORDED, no seat (COORD)
+
+Go names one 1024-byte zero buffer three times by `//go:linkname`: `runtime.zeroVal` holds the storage (a one-argument handle), `reflect` pulls
+it downward and `internal/runtime/maps` pulls it UP (runtime imports maps). The converted corpus emits three unrelated boxes:
+`src/core/runtime/<goos>/runtime.cs:326-327` (public), `src/core/reflect/value.cs:1784-1786` and
+`src/core/internal/runtime/maps/runtime_swiss.cs:33-35` (internal). Found by the GOROOT scan for the darwin `os.executablePath` seat
+(every non-test, non-cmd two-argument `//go:linkname` on a var at go1.24.13, cgo off): the upward var pairs on windows, linux and darwin are
+exactly three, and this is the one `linknameVarAliasTargets` cannot invert.
+
+**The class is recorded, not new.** Both pulls take the ADDRESS (`&zeroVal[0]`), and `src/go2cs/visitValueSpec.go` refuses a forwarding property
+for an addressed global on both arms (the pull arm and the W1-S alias arm), because a property has no address (CS0103 on `Ꮡ<name>`); the converter
+comment names reflect's pull as the recorded case and says an addressed row must move its storage to golib (S3) rather than be forwarded. A
+registry row for `maps.zeroVal` would fall through the same guard and do nothing.
+
+**Census of where identity is observed** (every non-comment `zeroVal` site in `src/core`, tests included, at `3487259a5f`):
+
+| Site | What it does with the address | Reachable? |
+|:--|:--|:--|
+| `runtime/map_swiss.cs:98-111` `mapaccess1_fat` / `mapaccess2_fat` | compares `mapaccess1`'s result with `&runtime.zeroVal[0]` (the compare Go's maps comment warns about) | **No**: 0 callers in the corpus, production and `*_test.cs`. In Go only compiler-emitted indexing of >1024-byte map elements calls them; converted map indexing is golib's `map<K,V>`, which holds no `mapaccess` reference |
+| `reflect` `Value.Set` (value.go:2059) | `x.ptr == &zeroVal[0]` picks `typedmemclr` over `typedmemmove` | Yes, against reflect's OWN box, which `reflect.Zero` (value.go:2997) also hands out; a pointer to another box takes the copy arm, which copies zeroes: the same bytes. Benign |
+| `runtime/iface.cs:454/477`, maps' own returns | use their box as a zero SOURCE | Content only, never compared. Benign |
+
+**Unpark when** either trigger appears: (1) a converted caller of `runtime.mapaccess1_fat` / `mapaccess2_fat` (a hand-owned map path calling into
+runtime), or (2) any WRITE into a `zeroVal` box (Go never writes it; none found). Either makes the identity observable, and the remedy is the S3
+move: one storage in golib that all three packages reach.
+
+— C1
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
