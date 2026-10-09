@@ -208,7 +208,7 @@ internal class StructTypeTemplate : TemplateBase
             if (TypeOpsScope.Wants(StructName))
                 bases.Add("global::go.IGoTypeOpsSource");
 
-            return $" : {string.Join(", ", bases)}";
+            return bases.Count == 0 ? "" : $" : {string.Join(", ", bases)}";
         }
     }
 
