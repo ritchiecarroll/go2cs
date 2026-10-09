@@ -6,6 +6,11 @@
 > even if a full trim stays out of reach, the build should be quiet, with every warning answered at the right place
 > and never by a blanket suppression. Every number here is measured at master `541766413e` on lane G's windows machine unless the
 > text says otherwise. The scripts and raw logs are named in section 8.
+>
+> **AMENDED 2026-10-08 (G).** The owner ruled the three open questions (section 6). Stages 1 and 2 are cut and seated
+> in TRAIN FL as rows 17 (`claude/g-trim-golib-sites`) and 18 (`claude/g-trim-registry`): with stage 2 the
+> package consumer RUNS under Native AOT and a full trim. Section 9 proposes stage 3, the dynamic-code class; it is a
+> plan only, for the next train, and nothing in it is ruled.
 
 ---
 
@@ -278,6 +283,12 @@ stated limits, and they keep a regression in golib's reflection from arriving si
 - **OQ-3.** Under Native AOT, should `reflect.FuncOf` and `reflect.StructOf` fail at compile time (the analyzer's
   answer once `RequiresDynamicCode` is on them), or at run time with a Go panic naming the limit?
 
+**RULED, the owner, 2026-10-08 (ledger 11:4x):** OQ-1 yes, the quiet build first and stage 5 separately. OQ-2 "why
+not add now": stage 2 in TRAIN FL. It was built as go2cs-gen output, not on the record line, because an attribute on
+a declaration does not keep metadata under Native AOT (measured; section 9.1). OQ-3: a RUN-TIME Go panic naming the
+limit by default, PLUS an opt-in consumer build switch (an MSBuild property) that makes those paths fail the AOT build
+for a consumer who wants it caught at compile time. Section 9.5 is the design.
+
 ---
 
 ## 7. What this plan does not claim
@@ -312,3 +323,157 @@ stated limits, and they keep a regression in golib's reflection from arriving si
 
 The scripts live in the lane's scratch area, not in the repository; the comment above says what each one did, so any
 reading can be repeated against master `541766413e`.
+
+---
+
+## 9. Stage 3, the dynamic-code class (PROPOSED, 2026-10-08)
+
+> **STATUS: PROPOSED (G), a plan only, no cut; for the train after TRAIN FL.** Every site and line here is read at
+> the TRAIN FL fixup tip `9b7dfdb2ec`, the base stages 1 and 2 were cut on.
+
+### 9.1 Where stages 1 and 2 left things (measured)
+
+- Stage 2's registry works: on the package consumer, Native AOT with a full trim RUNS (exit 0), and no type loses its
+  field metadata (3 before). The executable grows from 12.4 to 24.5 MB, because every Go type of the closure is kept;
+  COORD accepted that price (ledger 19:36).
+- An attribute on a type does NOT keep its metadata under Native AOT; a `[DynamicDependency]` on a kept method does.
+  Measured on the FL union, three local probes: type-level `DynamicallyAccessedMembers` left all 3 types stripped; a
+  `typeof(T)` into an annotated parameter, and an empty module initializer carrying `[DynamicDependency]`, both left 0.
+- Generic structs keep their fields too: a probe that formats `Pair[string, int]` and `Box[Plain]` through `fmt` prints
+  exactly Go's output under a full trim with stage 2, where the base printed `{}` for both.
+- **The next stop is dynamic code, not trimming.** The same probe then asks `reflect.TypeOf(p).Field(1).Type`, and the
+  program stops with `GoReflect.readSlot[reflect_package+rtype] is missing native code. MethodInfo.MakeGenericMethod()
+  is not compatible with AOT compilation`. That is `ReadPointerSlot` (`GoReflect.FieldAccess.cs:98`), one of the 57
+  IL3050 sites this section is about.
+
+### 9.2 The 57 sites, in four families
+
+The AOT analyzer reports 57 IL3050 rows in golib at the FL union, the same count as at master. By what they build:
+`MakeGenericMethod` 32, `MakeGenericType` 20, `DynamicMethod` 2, `Expression` delegate types 2, a dynamic assembly 1.
+By what they are FOR, which is what decides the answer:
+
+| Family | Sites | Where |
+|---|---|---|
+| **V. A value operation over a run-time type** (`reflect.Value`'s slots, fields, elements, slices, maps; nil pointers; new boxes; pointer reinterprets; header boxes; a type assertion to a run-time type) | 33 | `GoReflect.FieldAccess.cs` `ReadPointerSlot` :98, `WritePointerSlot` :110, `FieldAliasBox` :607, `isReadonlyZeroSizeField` :651, `ElementAliasBoxOfBox` :701, `ElementAliasBoxOfValue` :719, `SliceWindow` :739 :771, `GrowSlice` :806, `SetMapEntry` :850, `DeleteMapEntry` :874, `TryGetMapEntry` :900; `GoReflect.ValueMarshalling.cs` `CanonicalNilPointer` :91 :114, the default and container factories :648 :697 :714, `MakeSizedArray` :672, `TryByteSliceView` :786, `TryByteSliceAs` :828; `GoReflect.PointerConversions.cs` `AliasSliceAsArrayPointer` :66, `TryConvertPointer` :131 :137, `TryReinterpretValue` :198 :202, `WithChanCargo` :232; `GoReflect.TypeLayout.cs` `firstArrayElement` :861; `ж.SliceHeaderBox.cs` :137 :142 :143; `ж.HeaderSliceBox.cs` :112 :113; `builtin.cs` `TryTypeAssert` :3456 |
+| **F. A function type built at run time** (Go's multiple results as a `ValueTuple`, a variadic tail, the variadic delegate families and their trampolines) | 12 | `GoReflect.TypeLayout.cs` `TryFuncShape` :1322, `MakeGoFuncType` :1374, `makeGoResultType` :1391 to :1396 and :1400, `buildVariadicInvoker` :1602 :1604; `GoReflect.MakeVariadicDelegate.cs` :58 |
+| **M. Method sets and interface shells** (a generic Go method's closed extension, a box target, a delegate type for an extension, a generic adapter shell, a generic conversion operator) | 7 | `runtime/TypeExtensions.ExtensionMethodRegistry.cs` `CreateStaticDelegate` :415 :416 :440 :444, `GetExtensionMethods` :323; `runtime/TypeExtensions.cs` :143; `AdapterBinder.cs` :260 |
+| **E. Code emitted at run time** (`reflect.StructOf`'s dynamic assembly; the `DynamicMethod` field accessors) | 5 | `GoStructSynthesis.cs` :192; `GoReflect.FieldAccess.cs` `buildFieldAccessor` :646 :671 :685; `ж.Contracts.cs` :143 |
+
+Outside golib the same class had two more in master's Native AOT publish of the consumer (section 2, not re-read at
+the FL union): `internal/abi/type_impl.cs:873` (`synthesizeArrayType`, `MakeGenericType`) and one in
+`runtime/managed_impl.cs`, both hand-owned companion files.
+
+### 9.3 The principle
+
+Native AOT compiles a generic instantiation only when compiled code names it. golib reaches its generic helpers from a
+`Type` it learned at run time (`MakeGenericMethod(t)`), which names nothing. Three answers, in order of preference:
+
+1. **Instance dispatch on a value golib already holds.** If the operation's input is a value, its generic type already
+   exists, because the value does: `ж<T>`, `slice<T>`, `map<K,V>`, `array<T>`, `channel<T>` and the generated wrappers
+   were constructed by compiled code. A non-generic interface those types implement (a slot read and write, a window, a
+   grow, a map get, set and delete, an element alias) is compiled for every instantiation the program has, so golib
+   calls it instead of making a generic method. No generator change; golib only. This answers the measured stop:
+   `ReadPointerSlot` holds the box, and `ж<T>` reading its own slot as `object` needs no `MakeGenericMethod`.
+2. **A creation hook generated per Go type.** An operation that starts from a `Type` alone (a new box, a default value,
+   a sized array, a canonical nil pointer, a container of a given type) has no value to dispatch on. go2cs-gen writes, on
+   each Go type's generated part, a static member that names the instantiation (for example a `GoTypeOps<T>` object
+   reached through a static field). The field is initialized on first use, so a program pays nothing for types it never
+   creates by reflection, and ILC compiles `GoTypeOps<T>` because the generated code names it. golib finds the member
+   through stage 2's registry, which already keeps the type's fields.
+3. **The boundary.** What is left builds a type the program never had: `reflect.StructOf`, `reflect.FuncOf` with a
+   signature no compiled code uses, `reflect.SliceOf`, `MapOf`, `ChanOf` or `ArrayOf` over a combination no compiled
+   code mentions, a composite deeper than the generated hooks reach. These carry `RequiresDynamicCode` and the owner's
+   OQ-3 behaviour (9.5).
+
+### 9.4 Family by family
+
+- **V (33).** Most take a value: the slot pair, the field and element aliases, the slice window and grow, the three map
+  operations, the byte-slice views, the pointer reinterprets, the channel cargo, the header boxes (`SliceHeaderBox` and
+  `HeaderSliceBox` close `Describe`, `ElementZero` and `Words` over the slice's element, which the slice value already
+  knows). These move to answer 1. `isReadonlyZeroSizeField` asks a per-type FACT through `GoZeroSizeFacts<T>`; the fact
+  can be computed from the field metadata stage 2 keeps, with no instantiation. Answer 2 takes the few that create from a
+  type alone: `CanonicalNilPointer`, the default and container factories, `MakeSizedArray`. `TryTypeAssert` (a type
+  assertion to a type known only at run time) is the one to size first: it may need answer 2 for the asserted type.
+- **F (12).** A Go func type is a delegate. Every delegate type a converted program USES exists, so a func type built
+  from Go parts can first look for the existing delegate with that signature (registered, as stage 2 registers types)
+  and build a new one only when none exists. The variadic families are golib's own, so their instantiations over
+  registered element types can be generated the same way. A signature no compiled code uses is answer 3.
+- **M (7).** These belong to the method-set scan, which stage 5 replaces with a method-set registry generated by
+  go2cs-gen. Until then they are answer 3, and a program that needs them fails with the OQ-3 panic, not silently.
+- **E (5).** `reflect.StructOf` and `reflect.FuncOf` are the capability boundary C2 recorded on the BOARD (2026-10-06):
+  answer 3. The `DynamicMethod` field accessors serve an ordinary `reflect.Value.Field(i)`, so they matter more:
+  go2cs-gen already generates a field accessor for converted types (the "A17" accessor the IL path imitates), and golib
+  should take it whenever it exists, keeping the `DynamicMethod` only for a synthesized type.
+
+### 9.5 The owner's OQ-3, as a design
+
+- **By default, a Go panic at run time.** Every remaining dynamic path checks `RuntimeFeature.IsDynamicCodeSupported`
+  first and, where it is false, panics with a Go error that names the operation and the limit (for example `reflect:
+  StructOf needs code generated at run time, which a Native AOT program does not have`). A JIT program never sees it.
+- **Opt-in, a build failure.** A consumer property in go.lib's packed targets, proposed name
+  `GoAotFailOnDynamicCode` (default off), sets `TrimmerSingleWarn=false` and adds IL3050 to `WarningsAsErrors`. The
+  remaining dynamic paths carry `RequiresDynamicCode` rather than a suppression, so ILC reports each one the PROGRAM
+  REACHES (it analyzes reachable code only) as an error at publish. A program that never reaches one publishes as
+  before. The property is what makes "caught at compile time" possible without making every consumer pay for it.
+- **Why the annotation does not spread into the corpus.** Converted projects do not run the AOT analyzer, so a
+  `RequiresDynamicCode` on a golib entry point raises nothing in a converted project's build. Only ILC sees it, at a
+  consumer's publish, and only on the paths that program reaches.
+- **The gate.** A planted `reflect.StructOf` in a probe program: with the property, the publish fails naming it; without
+  it, the publish succeeds and the program panics with the message above.
+
+### 9.6 Two items owed by earlier stages
+
+- **`GoReflect.MemberRecords.cs:200`** (IL2070, open since stage 2). `ParamDimsRecords` calls `GetMethods` on a type
+  that carries a `[GoParamDims]` record, to find the method the record names. Rooting every method of a package class
+  would undo the trim. The generator writes each record, so it knows the method's signature, and stage 2's registration
+  can carry one `[DynamicDependency("<documentation signature>", typeof(<pkg>_package))]` per recorded method: the
+  method's metadata is then kept exactly where a record needs it. GenTests' registration guard grows an arm: every
+  `[GoParamDims]` record's method is registered.
+- **`builtin.cs:1590` and `array.cs:477`** (the BOARD row of 2026-10-08). A generic struct that needs construction has
+  no GoZero factory, because a module initializer cannot name an open generic. Answer 2 fits: the creation hook on the
+  generated part of a generic needy struct can name its own closed instantiation's zero, so both sites read the hook
+  and stop asking for a constructor. GoZeroResidualTests gains the `array<T>` case first, red.
+
+### 9.7 Frames (class F of section 3)
+
+The three `StackFrame.GetMethod()` sites stay as they are in stage 3 and get `RequiresUnreferencedCode` on a narrow
+internal boundary in stage 4, for the quiet build. Under Native AOT the package consumer's frame line reads `none`
+where the trimmed JIT reads `zsortfunc.go:73`: Go file and line for a frame needs a position route that does not go
+through `MethodBase`. That is stage 5.
+
+### 9.8 Order, risk and gates
+
+| Sub-stage | What | Risk |
+|---|---|---|
+| **3a** | Answer 1 for family V's value-taking sites, including the measured stop; `isReadonlyZeroSizeField` from metadata. golib only. | low: golib only, no generated change |
+| **3b** | `MemberRecords:200` through the registration; the deferred zero-value pair through a creation hook. | low to medium |
+| **3c** | Answer 2: the generated creation hooks, for family V's create-from-type sites and family F's variadic families. | medium: one generated member per Go type; generator output changes corpus-wide |
+| **3d** | Answer 3: `RequiresDynamicCode` on what remains, the OQ-3 panic, and the `GoAotFailOnDynamicCode` property. | medium: touches go.lib's packed targets |
+| **3e** | Family F's func types through existing delegates. | medium to high |
+| (5) | Family M with the method-set registry; frames. | high, as section 5 says |
+
+Gates for each sub-stage, beyond those stages 1 and 2 ran: a Native AOT probe battery under a full trim, one program per
+family (`reflect.Value` `Field`, `Set`, `Index`, `Slice`, `Append`, `MapIndex`, `SetMapIndex`, `New`, `Zero`; func
+types through `reflect.TypeOf(f)` and `Call`; `MakeFunc`; a type assertion to a run-time type; `fmt` of each), its
+output compared with Go's; and the IL3050 census, predicted per sub-stage and read file by file, as stages 1 and 2 did.
+
+### 9.9 Questions for the owner
+
+- **OQ-4.** The opt-in property's name (`GoAotFailOnDynamicCode` is proposed) and its scope: IL3050 only, or the
+  trimming analyzer's IL2026 at the same boundaries as well?
+- **OQ-5.** Answer 2 adds one static member to every Go type's generated part (generated output only, nothing in the
+  committed corpus). Is that acceptable in principle, with its size cost measured in 3c before it seats?
+
+### 9.10 What this section does not claim
+
+- It does not size stage 3. The sub-stage order is by risk, not by measured cost.
+- It does not know yet how many of family V's create-from-type sites a real program reaches; the probe battery of 3a
+  measures it.
+- Whether the generated creation hooks reach deep enough composites (a `slice` of a `map` of a generic struct) without
+  the generic-cycle cut-offs ILC already reports under a partial trim is a measurement owed in 3c.
+
+<!-- G, 2026-10-08, at the FL fixup tip 9b7dfdb2ec. IL3050 census: scratch efR2a (arm B minus arm A, 57 rows); the
+     families by enclosing member (il3050-rows.pl, enclosing.pl). The measured stop: efR2d G4 probe-seat (Native AOT,
+     full trim, stage 2 seat ca1a2cf81d): output lines 1 and 2 equal Go's, then NotSupportedException at
+     GoReflect.readSlot[reflect_package+rtype]. The attribute-on-type falsification: scratch efZ1 (arms C, D), the
+     registration that works: efZ2 (arm E), efZ3 (arm G). -->
