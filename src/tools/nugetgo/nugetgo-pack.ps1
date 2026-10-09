@@ -5,8 +5,9 @@
 
 .DESCRIPTION
     Input is a `go2cs -recurse=nuget` output root. Every main-module LIBRARY package under <RecurseRoot>/src/<module>
-    (one assembly per Go package; a main package is excluded) is built through its own project, whose go.* references
-    are PackageReferences at $(GoStdLibVersion). A generated module pack project then carries each package's assembly
+    (one assembly per Go package; a main package is excluded, and so is each package -ExcludePackage names) is built
+    through its own project, whose go.* references are PackageReferences at $(GoStdLibVersion). A generated module
+    pack project then carries each package's assembly
     under lib/<tfm>/, and declares the UNION of the packages' public go.* PackageReferences at the same
     $(GoStdLibVersion). The pack passes GoStdLibVersion as B4's range, [<ClosureVersion>, <next Go minor>), so NuGet
     writes the range from the PackageReference route itself, with no rewrite of any edge. The lower bound is the
@@ -65,6 +66,8 @@ param(
     [switch]$Release,
     [string[]]$ExistingIds = @(),
     [string[]]$ThirdPartyPackage = @(),
+    # Library packages of the module left out of the pack, by import path (a package holding the module's own test fixtures).
+    [string[]]$ExcludePackage = @(),
     [string[]]$VList,
     [string]$Authors = 'go2cs conversion',
     [string]$Gpf = $(if ($env:NUGET_PACKAGES) { $env:NUGET_PACKAGES } else { Join-Path ([Environment]::GetFolderPath('UserProfile')) '.nuget/packages' })
@@ -100,13 +103,21 @@ $stdlibRange = "[$ClosureVersion, $goMajor.$($goMinor + 1))"
 $moduleSrc = Join-Path (Join-Path $RecurseRoot 'src') $ModulePath
 if (-not (Test-Path $moduleSrc)) { Refuse "no converted module at $moduleSrc (a -recurse=nuget output root is expected)" }
 $projects = @(Get-ChildItem -Path $moduleSrc -Recurse -Filter '*.csproj' | Where-Object { $_.Name -notlike '*.tests.csproj' } | Sort-Object FullName)
-$libraries = New-Object System.Collections.Generic.List[object]
-$goRefs = New-Object 'System.Collections.Generic.SortedSet[string]' ([StringComparer]::OrdinalIgnoreCase)
+$candidates = New-Object System.Collections.Generic.List[object]
 foreach ($p in $projects) {
     [xml]$x = Get-Content -Raw -LiteralPath $p.FullName
     $outputType = @($x.Project.PropertyGroup | ForEach-Object { $_.OutputType } | Where-Object { $_ })[0]
     if ($outputType -ne 'Library') { Write-Host "  excluded (OutputType $outputType, a Go main): $($p.FullName.Substring($moduleSrc.Length))"; continue }
+    $candidates.Add($p)
+}
+# -ExcludePackage leaves a library out (Select-NugetgoPackedLibraries refuses an exclusion a packed package references).
+$selected = @(Select-NugetgoPackedLibraries -RecurseRoot $RecurseRoot -Libraries $candidates.ToArray() -ExcludePackage $ExcludePackage)
+$libraries = New-Object System.Collections.Generic.List[object]
+$goRefs = New-Object 'System.Collections.Generic.SortedSet[string]' ([StringComparer]::OrdinalIgnoreCase)
+foreach ($p in $candidates) {
+    if ($selected -notcontains $p) { Write-Host "  excluded (-ExcludePackage): $($p.FullName.Substring($moduleSrc.Length))"; continue }
     $libraries.Add($p)
+    [xml]$x = Get-Content -Raw -LiteralPath $p.FullName
     foreach ($ref in @($x.Project.ItemGroup | ForEach-Object { $_.PackageReference } | Where-Object { $_ })) {
         if ($ref.Include -like 'go.*' -and $ref.Version -eq '$(GoStdLibVersion)' -and $ref.PrivateAssets -ne 'all') { [void]$goRefs.Add($ref.Include) }
     }
