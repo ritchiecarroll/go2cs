@@ -797,6 +797,7 @@
     <Project Path="tests/Behavioral/NoInlinePartial/NoInlinePartial.csproj" />
     <Project Path="tests/Behavioral/InitOrderNoInline/InitOrderNoInline.csproj" />
     <Project Path="tests/Behavioral/OptionalInterfaceStructuralAssertion/OptionalInterfaceStructuralAssertion.csproj" />
+    <Project Path="tests/Behavioral/OsExecutablePath/OsExecutablePath.csproj" />
     <Project Path="tests/Behavioral/PackageAliasRootedTypeArgs/PackageAliasRootedTypeArgs.csproj" />
     <Project Path="tests/Behavioral/PackageNameShadowing/PackageNameShadowing.csproj" />
     <Project Path="tests/Behavioral/PackageShadowParam/PackageShadowParam.csproj" />
