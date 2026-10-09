@@ -46,19 +46,16 @@ public interface IArray<T> : IArray, IEnumerable<(nint, T)>, IGoReflectSequence
     // closed over T with MakeGenericMethod, compiled here for every array, slice and named wrapper the program has.
     Type IGoReflectSequence.ReflectElementType => typeof(T);
 
-    object IGoReflectSequence.ReflectWindow(nint low, nint high) => this switch
+    // One member for both window forms: two overloads were two bodies per array and slice type, and partial trim compiles
+    // every one (measured 2026-10-09: +2.94 MB for the pair on the package consumer).
+    object IGoReflectSequence.ReflectWindow(nint low, nint high, nint max, bool hasMax) => (this, hasMax) switch
     {
-        slice<T> s => s.slice(low, high),
-        array<T> a => new slice<T>(a, low, high),
-        ISlice<T> view => new slice<T>(view).slice(low, high),
-        _ => throw new InvalidOperationException($"SliceWindow: unsupported container {GetType()}")
-    };
-
-    object IGoReflectSequence.ReflectWindow(nint low, nint high, nint max) => this switch
-    {
-        slice<T> s => s.Reslice(low, high, max),
-        array<T> a => new slice<T>((T[])a, low, high, max),
-        ISlice<T> view => new slice<T>(view).Reslice(low, high, max),
+        (slice<T> s, false) => s.slice(low, high),
+        (slice<T> s, true) => s.Reslice(low, high, max),
+        (array<T> a, false) => new slice<T>(a, low, high),
+        (array<T> a, true) => new slice<T>((T[])a, low, high, max),
+        (ISlice<T> view, false) => new slice<T>(view).slice(low, high),
+        (ISlice<T> view, true) => new slice<T>(view).Reslice(low, high, max),
         _ => throw new InvalidOperationException($"SliceWindow: unsupported container {GetType()}")
     };
 
@@ -84,11 +81,8 @@ public interface IGoReflectSequence
     /// <summary>The element type.</summary>
     Type ReflectElementType { get; }
 
-    /// <summary>A <c>slice</c> window <c>[low:high]</c> sharing this sequence's backing store.</summary>
-    object ReflectWindow(nint low, nint high);
-
-    /// <summary>The full slice expression's window <c>[low:high:max]</c>, sharing this sequence's backing store.</summary>
-    object ReflectWindow(nint low, nint high, nint max);
+    /// <summary>A <c>slice</c> window <c>[low:high]</c>, or with <paramref name="hasMax"/> the full slice expression's <c>[low:high:max]</c>, sharing this sequence's backing store.</summary>
+    object ReflectWindow(nint low, nint high, nint max, bool hasMax);
 
     /// <summary>An element-alias box over element <paramref name="index"/> of this (detached) sequence value.</summary>
     object ReflectElementAlias(int index);

@@ -691,7 +691,7 @@ public static partial class GoReflect
     /// </summary>
     public static object SliceWindow(object container, Type elemType, nint low, nint high)
     {
-        return sequenceOf(container, elemType, nameof(SliceWindow)).ReflectWindow(low, high);
+        return sequenceOf(container, elemType, nameof(SliceWindow)).ReflectWindow(low, high, 0, hasMax: false);
     }
 
     /// <summary>
@@ -708,7 +708,7 @@ public static partial class GoReflect
     /// </remarks>
     public static object SliceWindow(object container, Type elemType, nint low, nint high, nint max)
     {
-        return sequenceOf(container, elemType, nameof(SliceWindow)).ReflectWindow(low, high, max);
+        return sequenceOf(container, elemType, nameof(SliceWindow)).ReflectWindow(low, high, max, hasMax: true);
     }
 
 
