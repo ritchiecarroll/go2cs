@@ -405,6 +405,8 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				// would record against empty global state rather than record nothing. Whether any
 				// of the four packages loses a [GoImplement] record it previously carried is a
 				// question for the two-seeded diff to answer, not for this comment to assume.
+				options.inputDigest = moduleInputDigest(projectFileName, files, packageOutputPath, options)
+
 				if err = writeProjectFile(projectFileName, projectFileContents, packageOutputPath, packageTypes, options); err != nil {
 					log.Fatalf("Error while writing project file \"%s\": %s\n", projectFileName, err)
 				}
@@ -604,6 +606,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		resolveDynamicTypeMarkers(outputFileNames)
 
 		// Write project file with correct output type and unsafe code settings
+		options.inputDigest = moduleInputDigest(projectFileName, files, packageOutputPath, options)
 		err = writeProjectFile(projectFileName, projectFileContents, packageOutputPath, packageTypes, options)
 
 		if err != nil {

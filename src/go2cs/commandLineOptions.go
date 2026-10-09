@@ -102,6 +102,10 @@ type Options struct {
 	// -nuget-map*: the -recurse=nuget mapping sources (nugetMap.go); resolved, locked and reported, not yet
 	// applied (stage S3b).
 	nugetMap nugetMapOptions
+
+	// inputDigest is the GoInputDigest the package being converted records in its project (packageInputDigest.go): set
+	// per package before its project file is written, and "" for every project that records none.
+	inputDigest string
 }
 
 // packageUnderTestPath returns the import path of the package under test, whichever field the
