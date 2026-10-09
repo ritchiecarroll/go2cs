@@ -54,12 +54,31 @@ from the flat container on 2026-10-09.
 | Third-party dependencies | none | none (`go.mod` has no `require`) | none (`go.mod` has no `require`) |
 | Description form (B6) | the author's (`-UpstreamPublishes`) | third-party | third-party |
 | Upstream LICENSE holders | The go2cs Authors | Google Inc. | Dave Grijalva; golang-jwt maintainers |
-| Conversion repository (`RepositoryUrl`) | `https://github.com/ritchiecarroll/hashset-cs` | OWNER to name | OWNER to name |
+| Conversion repository (`RepositoryUrl`) | `https://github.com/ritchiecarroll/hashset-cs` | `https://github.com/ritchiecarroll/uuid-cs` (COORD ruling 2026-10-09: the existing repository) | `https://github.com/ritchiecarroll/jwt-cs` (the same ruling) |
 | Registry status | `canonical` (the repository is under the module's org) | `community` | `community` |
 | Conversion repository layout (runbook 4.5, COORD ruling) | flat: the pack writes no module `Directory.Build.targets` (the holder is The go2cs Authors) | nested: the pack writes a module `Directory.Build.targets` (holder Google Inc.), so the root build files sit one directory above the module's files | nested, for the same reason (holders Dave Grijalva and the golang-jwt maintainers) |
 | Validation reading | 37 matched, 0 disclosed, 5 Example declarations excluded (the 2026-10-09 rehearsal at `56f0f1f254`) | 54 matched, 0 disclosed, 1 package, `windows/amd64` and `linux/amd64` (`ValidatedModules.md`, banked at `05d40930aa`) | 189 matched, 0 disclosed, 2 packages (root, `request`), `windows/amd64` and `linux/amd64` (`ValidatedModules.md`, banked at `05d40930aa`); `test` and `cmd/jwt` have no tests |
 
 Every reading above is re-read at `T` in runbook section 1; none is carried forward.
+
+**The conversion repositories for uuid and jwt/v5 already exist** (COORD ruling, 2026-10-09). COORD created
+`uuid-cs` and `jwt-cs` on 2026-09-30, on the owner's authorization, as the conversion-source repositories, each with a
+README, the upstream LICENSE verbatim and a `.gitattributes` (`uuid-cs`'s reads `* text=auto eol=lf`). The conversion lands on top of the
+existing `main` as one new commit in the nested layout: the README is replaced by the runbook's README, which keeps
+its "unofficial" and "not affiliated" sentences, and the LICENSE stays as it is. COORD pushes that commit, so the
+owner's section 4 for these two modules is sign, push and poll. The generated files are CRLF and the repositories
+normalize to LF; for uuid (2026-10-09) the LF tree built with a dll of the packed dll's size and strings.
+
+**uuid at `T` (2026-10-09, linux/amd64): 54 matched, 0 disclosed, the banked reading.** The first `-tests` run read
+`TestVersion6` Go=pass C#=fail ("time reversed"). The cause is an upstream test race, and the converted code is not
+at fault: in google/uuid v1.6.0, `NewV6` writes the version nibble over bits 12-15 of the timestamp and `Time()` reads
+those bits back unmasked, so the test fails whenever the timestamp crosses a multiple of 0x1000 (409.6 microseconds)
+between its two `NewV6` calls. A Go probe that encodes two timestamps the way `NewV6` does shows it deterministically,
+and native Go fails the test 3 times in 20,000 runs (`go test -run 'TestVersion6$' -count=20000`). COORD ruled it
+CITED, NOT DISCLOSED: a disclosure states a stable Go-versus-C# divergence, and this is neither stable nor a
+divergence. The proof is a green run; the same note is on the package's proof page, from a notes-only module
+disclosure manifest (`github.com/google/uuid@v1.6.0/go2cs_test_disclosures.json`, on the uuid kit ref until it is
+seated under `src/tests/ModuleDisclosures`), and in the row's pull request.
 
 ## 3. Sample programs
 
@@ -129,7 +148,7 @@ go2cs <nil>
 | When | Step | Runbook |
 |:--|:--|:--|
 | before hashset's section 4 | Make `hashset-cs` public. On 2026-10-09 an anonymous `git ls-remote` of it asked for credentials, so it is private or does not exist yet. | 0.6 |
-| before uuid's and jwt/v5's section 2 | Name and create their conversion repositories. Each name is the package's `RepositoryUrl`. | 0.6 |
+| before uuid's and jwt/v5's section 4 | None: `uuid-cs` and `jwt-cs` exist, and COORD pushes each conversion commit. | 0.6, 4.5 |
 | before the first section 3 | An int.nugettest.org account and API key for B1's publisher. | 3.1 |
 | per module | Push the rehearsal to int.nugettest.org; sign and push the release candidate to nuget.org; push the conversion source. | 3.1, 4 |
 | before hashset's row | COORD, on release day: the nugetgo pull request adding 1.24.13.5 to `cmd/sitegen/go2cs-releases.txt`, which lists `1.24.13.3` and `1.24.13.4` at `bd121c760e`. | 5.1 |
