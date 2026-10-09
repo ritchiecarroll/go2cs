@@ -1,0 +1,2 @@
+# module-path	nuget-id	status	source-repo	registered	contact
+github.com/golang-jwt/jwt/v5	nugetgo.github.com.golang-jwt.jwt.v5	community	https://github.com/ritchiecarroll/jwt-cs	2026-10-09	owner
