@@ -129,9 +129,21 @@ COORD rules sections 1-3 green before this step.
 3. **Push:** `dotnet nuget push <ID>.<PV>.nupkg --source https://api.nuget.org/v3/index.json`. A published version
    can be unlisted but never deleted.
 4. **Lane:** wait until the flat container and the registration list `PV`. The registry's checks read both.
-5. **Owner:** push the conversion source to the conversion repository: the contents of `PR/src/M`, including the
-   `Directory.Build.targets` the pack wrote there, so that a rebuild from the repository produces the same assembly
-   attributes.
+5. **Owner:** push the conversion source to the conversion repository. It holds:
+   - the contents of `PR/src/M`, including the `Directory.Build.targets` the pack writes there when the upstream
+     holder is not The go2cs Authors;
+   - `PR`'s root `Directory.Build.props` and `Directory.Build.targets`. Without the root `Directory.Build.props` the
+     project does not restore (NU1015), because `GoStdLibVersion` is set there;
+   - the module's LICENSE verbatim (B6), a README, and a `.gitignore` for the build output (`.artifacts/`).
+
+   When the pack wrote no module `Directory.Build.targets`, all of these can sit at the repository root (hashset,
+   2026-10-09). When it wrote one, the root build files must sit in a directory above the module's files, because that
+   file imports the nearest `Directory.Build.targets` above its own directory. This second layout follows from the
+   file and has not been built yet.
+
+   Before pushing, build a fresh copy with `dotnet build -c Release -p:GoStdLibVersion=R`. For hashset (2026-10-09)
+   the dll it built carried the same version and copyright attributes as the packed one, which is what lets a rebuild
+   from the repository reproduce the package's assembly attributes.
 
 ## 5. The registry row (owner, through the nugetgo repository's CI)
 
