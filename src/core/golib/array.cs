@@ -65,6 +65,15 @@ public interface IArray<T> : IArray, IEnumerable<(nint, T)>, IGoReflectSequence
     object IGoReflectSequence.ReflectElementAlias(int index) => new ElemRefBox<T>((IArray)this, index);
 
     object? IGoReflectSequence.ReflectFirstElement() => this[0];
+
+    // A nested sized array's fill (GoReflect.MakeSizedArray; trim stage 3c-2a): every element built by `element`, in index
+    // order, into this sequence's own backing store. The outer array's member, so it names nothing but its own element
+    // type: a member that built a container of its declaring type would be an unbounded generic expansion.
+    void IGoReflectSequence.ReflectFill(Func<object> element)
+    {
+        for (nint i = 0; i < Length; i++)
+            this[i] = (T)element();
+    }
 }
 
 /// <summary>
@@ -95,6 +104,9 @@ public interface IGoReflectSequence
 
     /// <summary>Element 0, as <see cref="object"/>.</summary>
     object? ReflectFirstElement();
+
+    /// <summary>Stores <paramref name="element"/>'s result into every element, in index order.</summary>
+    void ReflectFill(Func<object> element);
 }
 
 [Serializable]

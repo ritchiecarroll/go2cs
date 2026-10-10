@@ -643,21 +643,22 @@ public static partial class GoReflect
         });
     }
 
-    // Cached boxed default(T) — the nil form of the golib container STRUCTS (a null reference is
-    // NOT the nil map/chan/slice; the zero struct is).
-    private static readonly ConcurrentDictionary<Type, Func<object?>> s_defaultFactories = new();
-
-    /// <summary>The boxed <c>default(T)</c> for a managed type (cached factory).</summary>
+    /// <summary>
+    /// The boxed <c>default(T)</c> for a managed type — the nil form of the golib container STRUCTS (a null reference is
+    /// NOT the nil map/chan/slice; the zero struct is).
+    /// </summary>
+    /// <remarks>
+    /// Trim stage 3c-2a: a value type's boxed zero is its uninitialized instance (all fields zero, no constructor run),
+    /// exactly what boxing <c>default(T)</c> gives, with no generic method closed over a run-time type. A reference type's
+    /// default is null, and so is a <see cref="Nullable{T}"/>'s, which boxes to null.
+    /// </remarks>
+    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification =
+        "A value type's zero needs no constructor: GetUninitializedObject runs none. The value types reflect asks a zero " +
+        "of are the program's own Go types and golib's containers, which Native AOT has constructed (measured on the " +
+        "package consumer, trim stage 3c-2a).")]
     public static object? DefaultValueOf(Type t)
     {
-        return s_defaultFactories.GetOrAdd(t, static ct =>
-            typeof(GoReflect).GetMethod(nameof(defaultOf), BindingFlags.NonPublic | BindingFlags.Static)!
-                .MakeGenericMethod(ct).CreateDelegate<Func<object?>>())();
-    }
-
-    private static object? defaultOf<T>()
-    {
-        return default(T);
+        return t.IsValueType && Nullable.GetUnderlyingType(t) is null ? RuntimeHelpers.GetUninitializedObject(t) : null;
     }
 
     /// <summary>
@@ -673,25 +674,20 @@ public static partial class GoReflect
         if (elem is null)
             throw new InvalidOperationException($"MakeSizedArray: {arrayType} has no element type.");
 
-        if (level >= dims.Length - 1 || KindOf(elem) != Array)
-            return Activator.CreateInstance(arrayType, dims[level])!;
+        object array = Activator.CreateInstance(arrayType, dims[level])!;
 
-        MethodInfo factoryMaker = typeof(GoReflect).GetMethod(nameof(sizedArrayElementFactory), BindingFlags.NonPublic | BindingFlags.Static)!
-            .MakeGenericMethod(elem);
+        // A nested level builds each element as its own sized array, through the OUTER array's own fill (trim stage 3c-2a:
+        // IArray<T>'s default member, compiled for every array type the program has), in index order -- what the
+        // factory constructor the converter emits does, with the same one backing allocation.
+        if (level < dims.Length - 1 && KindOf(elem) == Array)
+            ((IGoReflectSequence)array).ReflectFill(() => MakeSizedArray(elem, dims, level + 1));
 
-        object elementFactory = factoryMaker.Invoke(null, [elem, dims, level + 1])!;
-
-        return Activator.CreateInstance(arrayType, dims[level], elementFactory)!;
-    }
-
-    private static Func<E> sizedArrayElementFactory<E>(Type elemType, nint[] dims, int level)
-    {
-        return () => (E)MakeSizedArray(elemType, dims, level)!;
+        return array;
     }
 
     // -------- container construction (reflect.MakeSlice / MakeMap; named wrappers included) --------
 
-    private static readonly ConcurrentDictionary<Type, Func<nint, nint, object>> s_containerMakers = new();
+    private static readonly ConcurrentDictionary<Type, IGoReflectMake> s_containerMakers = new();
 
     /// <summary>
     /// Constructs a golib container (or a generated NAMED container wrapper) through its
@@ -700,14 +696,22 @@ public static partial class GoReflect
     /// </summary>
     public static object MakeContainer(Type containerType, nint p1 = 0, nint p2 = -1)
     {
+        // The container type's own static Make, through ISupportMake<T>'s default member (trim stage 3c-2a), asked of a zero
+        // value of the type: the member reads nothing of it.
         return s_containerMakers.GetOrAdd(containerType, static ct =>
-            typeof(GoReflect).GetMethod(nameof(makeSupported), BindingFlags.NonPublic | BindingFlags.Static)!
-                .MakeGenericMethod(ct).CreateDelegate<Func<nint, nint, object>>())(p1, p2);
+            uninitializedFace<IGoReflectMake>(ct, nameof(MakeContainer))).ReflectMake(p1, p2);
     }
 
-    private static object makeSupported<T>(nint p1, nint p2) where T : ISupportMake<T>
+    // A zero value of a type known only at run time, as the face its members are reached through (trim stage 3c-2a). Only a
+    // face whose members read nothing of the value asks this: the value is uninitialized, not constructed.
+    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification =
+        "No constructor runs: the zero value only carries the type's own face members (ISupportMake's Make, a slice's " +
+        "re-spelling). The types are golib's containers and the program's generated container wrappers, which Native AOT " +
+        "has constructed (measured on the package consumer, trim stage 3c-2a).")]
+    private static TFace uninitializedFace<TFace>(Type type, string operation) where TFace : class
     {
-        return T.Make(p1, p2)!;
+        return RuntimeHelpers.GetUninitializedObject(type) as TFace ??
+            throw new InvalidOperationException($"{operation}: {type} does not implement {typeof(TFace).Name}");
     }
 
     // -------- pointer-box construction (reflect.New) --------
@@ -803,7 +807,7 @@ public static partial class GoReflect
         return true;
     }
 
-    private static readonly ConcurrentDictionary<Type, Func<slice<byte>, object?>?> s_byteSliceStores = new();
+    private static readonly ConcurrentDictionary<Type, IGoReflectSlice?> s_byteSliceStores = new();
 
     /// <summary>
     /// <paramref name="bytes"/> re-spelled as a value of the Uint8-element slice type
@@ -816,34 +820,30 @@ public static partial class GoReflect
     {
         stored = null;
 
-        Func<slice<byte>, object?>? storer = s_byteSliceStores.GetOrAdd(sliceType, static st =>
+        // The slice type's own face (trim stage 3c-2a: ISlice<T>'s default member), reached through a zero value of the type,
+        // for exactly the types the generic helper served: Slice-kinded, over the element the type's kind reports.
+        IGoReflectSlice? storer = s_byteSliceStores.GetOrAdd(sliceType, static st =>
         {
             Type? elem = KindOf(st) == Slice ? ElementType(st) : null;
 
-            return elem is null
-                ? null
-                : typeof(GoReflect).GetMethod(nameof(byteSliceAsOf), BindingFlags.NonPublic | BindingFlags.Static)!
-                    .MakeGenericMethod(elem).CreateDelegate<Func<slice<byte>, object?>>();
+            if (elem is null)
+                return null;
+
+            IGoReflectSlice face = uninitializedFace<IGoReflectSlice>(st, nameof(TryByteSliceAs));
+
+            if (((IGoReflectSequence)face).ReflectElementType != elem)
+                throw new InvalidOperationException($"TryByteSliceAs: {st}'s face names {((IGoReflectSequence)face).ReflectElementType}, its kind {elem}");
+
+            return face;
         });
 
-        if (storer?.Invoke(bytes) is not { } aliased)
+        if (storer?.ReflectByteSliceAs(bytes) is not { } aliased)
             return false;
 
         // The ELEMENT is now spelled right; a DEFINED slice type still needs its wrapper, and that
         // is the one assignability relation Value.Set already routes through — so a named []byte
         // and a named []DefinedByte are reached by one rule rather than two.
         return TryMarshalAssignable(aliased, sliceType, out stored);
-    }
-
-    private static object? byteSliceAsOf<E>(slice<byte> bytes)
-    {
-        if (typeof(E) == typeof(byte))
-            return bytes;
-
-        if (!ByteAliasableElement<E>.Value)
-            return null;
-
-        return slice<E>.AliasOfElement(in bytes);
     }
 
     // -------- Go convertibility (Set{Int,Uint,Float,Complex,String,Bool} + future Convert) --------

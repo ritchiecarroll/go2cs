@@ -750,6 +750,16 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
     object? IGoReflectBox.ReadBoxSlot() => ValueSlot;
 
+    bool IGoReflectBox.NamesZeroBase => NamesZeroBase;
+
+    // unsafe.Pointer.FromBox's managed-box number (trim stage 3c-2a): the address of ValueSlot, pinned only for this call,
+    // exactly the `fixed` FromBox took over its typed box. Transient by the same caveat as every unsafe.Pointer number.
+    unsafe nuint IGoReflectBox.TransientSlotAddress()
+    {
+        fixed (T* slot = &ValueSlot)
+            return (nuint)slot;
+    }
+
     void IGoReflectBox.WriteBoxSlot(object? value)
     {
         if (IsNilPointer)
