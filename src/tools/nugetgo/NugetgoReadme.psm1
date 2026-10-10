@@ -7,8 +7,11 @@
     hashset 1.0.0 shipped VALIDATION.md as its package README. nuget.org showed an inline-code heading that wrapped
     badly, a five-column table whose 64-character digest column scrolled, and every inline code span as a red block
     (its dark theme's style for code), and the package had no icon. The pack now generates a README in the style of
-    the go.* standard library packages: the package ID as the title, the PROOF text as a blockquote, a badge row, the
+    the go.* standard library packages: the package ID as the title, the description as a blockquote, a badge row, the
     Go package's own synopsis, and a license line. VALIDATION.md is still packed, as a file the README links.
+    The owner's review of the hashset revision-1 preview (2026-10-10): the description carries no "PROOF:" prefix (unexplained to
+    a nuget.org reader; the registry tier and the Tests badge carry the proof), and the blockquote's module path, and
+    the license line's, link the Go module's source at its version, so the README's first link is back to the Go.
     The icon is the go2cs icon the conversion carries, unless -Icon names another.
 #>
 #Requires -Version 5.1
@@ -61,12 +64,30 @@ function Test-NugetgoSpdx([string]$Expression) {
     $Expression -cmatch '^[A-Za-z0-9][A-Za-z0-9.+-]*( (AND|OR|WITH) [A-Za-z0-9][A-Za-z0-9.+-]*)*$'
 }
 
+# The Go module's source at its version, the link a README's module path carries (owner review, 2026-10-10). A module
+# at the root of a github.com repository -- its path github.com/<org>/<repo>, or that plus a /vN major-version suffix,
+# whose tag Go reads at the repository root -- links GitHub's tree at its tag: the version itself, or a pseudo-version's
+# commit, and never "+incompatible", which is not part of the tag. Every other module (another host, or a module in a
+# repository subdirectory, whose tag is prefixed by that directory) links pkg.go.dev at its version, which names its
+# source.
+function Get-NugetgoModuleSourceUrl([string]$ModulePath, [string]$GoVersion) {
+    $tag = if ($GoVersion.StartsWith('v')) { $GoVersion } else { "v$GoVersion" }
+    $parts = @($ModulePath.Trim('/') -split '/')
+    $atRoot = $parts.Count -eq 3 -or ($parts.Count -eq 4 -and $parts[3] -cmatch '^v[2-9][0-9]*$')
+    if ($parts[0] -ceq 'github.com' -and $atRoot) {
+        $ref = $tag -replace '\+incompatible$', ''
+        if ($ref -cmatch '\d{14}-(?<commit>[0-9a-f]{12})$') { $ref = $Matches['commit'] }
+        return "https://github.com/$($parts[1])/$($parts[2])/tree/$ref"
+    }
+    "https://pkg.go.dev/$ModulePath@$tag"
+}
+
 function New-NugetgoBadge([string]$Alt, [string]$Label, [string]$Message, [string]$Color, [string]$Logo, [string]$Target) {
     "[![$Alt]($script:ShieldsHost/badge/$(ConvertTo-NugetgoShieldsText $Label)-$(ConvertTo-NugetgoShieldsText $Message)-$Color`?logo=$Logo)]($Target)"
 }
 
-# The package README, in the go.* standard library packages' style: the package ID as the title, the PROOF text as a
-# blockquote, two lines of badges, the Go package's synopsis, then the license line. Every link is absolute, because
+# The package README, in the go.* standard library packages' style: the package ID as the title, the description as a
+# blockquote (its module path a link to the module's source), two lines of badges, the Go package's synopsis, then the license line. Every link is absolute, because
 # nuget.org resolves no relative link. VALIDATION.md and the license file are linked in the conversion repository,
 # which carries both at its root (docs/NugetgoPublish.md, 4.5), at -RepositoryTag: the tag nuget-<package version>
 # COORD mints on the conversion commit before the package is signed (COORD ruling 2026-10-10), so an older
@@ -92,6 +113,11 @@ function New-NugetgoPackageReadme {
     )
     $repo = $RepositoryUrl.TrimEnd('/')
     $goTag = if ($GoVersion.StartsWith('v')) { $GoVersion } else { "v$GoVersion" }
+    $moduleSource = Get-NugetgoModuleSourceUrl $ModulePath $GoVersion
+    $moduleLink = "[$ModulePath]($moduleSource)"
+    $at = $Description.IndexOf($ModulePath, [StringComparison]::Ordinal)
+    if ($at -lt 0) { throw "the description does not name the module path $ModulePath, so its blockquote cannot link the module's source" }
+    $callout = $Description.Substring(0, $at) + $moduleLink + $Description.Substring($at + $ModulePath.Length)
     $tests = if ($Unvalidated) { New-NugetgoBadge 'Tests' 'Tests' 'not validated' 'orange' 'go' "$repo/blob/$RepositoryTag/VALIDATION.md" }
              else { New-NugetgoBadge 'Tests' 'Tests' "$Matched matched / $Disclosed disclosed" 'brightgreen' 'go' "$repo/blob/$RepositoryTag/VALIDATION.md" }
     $source = New-NugetgoBadge 'C# Source' 'C# Source' "@$PackageVersion" $script:DotnetPurple 'dotnet' "$repo/tree/$RepositoryTag"
@@ -100,11 +126,11 @@ function New-NugetgoPackageReadme {
 
     $blocks = New-Object System.Collections.Generic.List[string]
     $blocks.Add("# $Id")
-    $blocks.Add("> $Description")
+    $blocks.Add("> $callout")
     $blocks.Add("$tests $source\`n$module $release")
     if ($Synopsis -and $Synopsis.Trim()) { $blocks.Add((ConvertTo-NugetgoMarkdownText $Synopsis.Trim())) }
     $blocks.Add('---')
-    $blocks.Add("Converted from $ModulePath source; licensed under $LicenseSpdx — see [$LicenseName]($repo/blob/$RepositoryTag/$LicenseName).")
+    $blocks.Add("Converted from $moduleLink source; licensed under $LicenseSpdx — see [$LicenseName]($repo/blob/$RepositoryTag/$LicenseName).")
     if ($DefaultIcon) { $blocks.Add($script:ArtworkLine) }
     ($blocks -join "`n`n") + "`n"
 }
@@ -112,9 +138,18 @@ function New-NugetgoPackageReadme {
 # The reasons a README is refused as a nuget.org package README (owner, 2026-10-10): inline code in any heading (ATX or
 # setext), any table wider than three columns (its width is the cell count of its delimiter row, as GitHub-flavored
 # Markdown defines a table), and any link naming blob/HEAD or tree/HEAD (COORD ruling 2026-10-10: a package's links name
-# its conversion tag). Lines inside a fenced code block are none of these. No reason means accepted.
-function Test-NugetgoReadme([string]$Text) {
+# its conversion tag). Lines inside a fenced code block are none of these. The owner's review (2026-10-10) adds two: a
+# "PROOF:" anywhere, and, given -ModuleSourceUrl, a first link that is not that URL (the README's first link is back to
+# the Go module's source). No reason means accepted.
+function Test-NugetgoReadme([string]$Text, [string]$ModuleSourceUrl) {
     $reasons = New-Object System.Collections.Generic.List[string]
+    if ($Text.Contains('PROOF:')) { $reasons.Add('"PROOF:" appears in the README (owner review 2026-10-10: the registry tier and the Tests badge carry the proof)') }
+    if ($ModuleSourceUrl) {
+        # A link's text is plain text or a badge's image ([![alt](img)](target)): the target is the link, the image is not.
+        $first = [regex]::Match($Text, '(?<!!)\[(?:[^\[\]]*|!\[[^\[\]]*\]\([^)\s]*\))\]\((?<url>[^)\s]+)\)')
+        if (-not $first.Success) { $reasons.Add("the first link is missing: it must name the module source $ModuleSourceUrl") }
+        elseif ($first.Groups['url'].Value -cne $ModuleSourceUrl) { $reasons.Add("the first link names $($first.Groups['url'].Value), not the module source $ModuleSourceUrl") }
+    }
     $lines = @($Text -split "`r?`n")
     $fence = $null
     for ($i = 0; $i -lt $lines.Count; $i++) {
@@ -164,4 +199,4 @@ function Resolve-NugetgoPackageIcon {
 }
 
 Export-ModuleMember -Function ConvertTo-NugetgoShieldsText, ConvertTo-NugetgoMarkdownText, Get-NugetgoProofTotals, Test-NugetgoSpdx,
-    New-NugetgoPackageReadme, Test-NugetgoReadme, Resolve-NugetgoPackageIcon
+    Get-NugetgoModuleSourceUrl, New-NugetgoPackageReadme, Test-NugetgoReadme, Resolve-NugetgoPackageIcon
