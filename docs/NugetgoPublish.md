@@ -116,7 +116,8 @@ mismatch of identity, description, copyright, ranges or self-description.
    `AR`. No directory for `M` exists under `AR/src` or `AR/pkg`: the module was not converted locally.
 5. **Gate: the program.** Restore and run with a private `NUGET_PACKAGES` and a nuget.config that maps `nugetgo.*`
    to the test gallery and everything else to nuget.org (`packageSourceMapping`). `dotnet run` prints exactly what
-   `go run` prints, byte for byte.
+   `go run` prints, byte for byte. A script that waits on `dotnet run` or `dotnet build` as a process passes
+   `-p:UseSharedCompilation=false` (trap 9).
 6. Record the readings (date, host nickname, `T`, both digests, the two outputs) in the instance's record.
 
 ## 4. Publish to nuget.org (owner; irreversible)
@@ -217,3 +218,15 @@ PLAN section 6, step 5: the launch demo and the standing integration test.
    prints that form under the GOROOT's `src` directory instead.
 8. **A cloud host may not reach the test gallery or nugetgo.net.** On 2026-10-09 the cloud container's proxy refused
    both, so sections 3 and 6 run on a lane box.
+9. **A build leaves the Roslyn compiler server running, and a Windows wait counts it.** On Windows,
+   `Start-Process -Wait` waits for every process the command starts, and the compiler server a build starts stays
+   alive for minutes: the owner's hashset run of 3.5 on the i7 (2026-10-09) waited about 10 minutes.
+   `-p:UseSharedCompilation=false` keeps the build from starting it. Measured on linux: without the flag one
+   server is left running after `dotnet run`, with it none, and the output is the same. Linux does not reproduce
+   the wait itself, because there `Start-Process -Wait` waits for the process alone.
+10. **The owner's sheets start PowerShell 7 first.** The i7's default shell is Windows PowerShell 5.1, and
+    PowerShell 7 is installed there as a .NET global tool, which no longer starts once a sheet's environment block
+    has put .NET 10 first on `PATH`. So a sheet opens with `& "$env:USERPROFILE\.dotnet\tools\pwsh.exe"`, a check
+    that `$PSVersionTable.PSVersion` reads 7.x, and `Set-Location` to the go2cs clone, before its environment
+    block. It also says to stop at the first red line: a `throw` stops only its own statement, and pasted lines
+    after it keep running.
