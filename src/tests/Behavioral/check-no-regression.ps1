@@ -465,6 +465,13 @@ $documentedAliasDriftPackages = @(
     # diff on a linux host, measured 2026-10-10 by C1 while gating claude/c1-darwin-exepath. The package runs
     # on every platform (a darwin-only arm inside it), so no F8 marker.
     'SyscallKeystonePulls'
+    # OsGetpagesize (COORD ruling 2026-10-10, found by the i9's windows rehearsal of the next train): its golden was captured
+    # on Linux, and a windows transpile adds two syscall alias declarations to package_info.cs (syscall Handle and
+    # Sockaddr, each aliased to its Delta-prefixed type), a +2 diff and nothing else. CONTROL, so it is not a converter
+    # change: the exepath seat's converter (claude/c1-darwin-exepath cd95f1e595) with -platforms windows/amd64 on a linux
+    # host emits exactly those two lines, and with linux/amd64 emits the golden byte for byte; OsExecutablePath and
+    # ReexecArgv0Token emit their goldens under both targets. The package runs on every platform, so no F8 marker.
+    'OsGetpagesize'
 ) | Where-Object { $OmitAliasDriftMembers -notcontains $_ }
 
 function Test-IsPlatformAliasDrift {
