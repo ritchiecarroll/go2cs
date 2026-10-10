@@ -2,8 +2,10 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-55%2F66_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/strconv.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/strconv@go1.24.13)\
+[![Tests](https://img.shields.io/badge/Tests-55_matched_%2F_11_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/strconv.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/strconv@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/strconv) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/strconv)
+
+From C#, call this package through the static class go.strconv_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
 Package strconv implements conversions to and from string representations of basic data types.
 

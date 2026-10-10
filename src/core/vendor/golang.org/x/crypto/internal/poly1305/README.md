@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@v0.30.0-00ADD8?logo=go)](https://pkg.go.dev/golang.org/x/crypto@v0.30.0/internal/poly1305)\
 [![Source](https://img.shields.io/badge/Source-@v0.30.0-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/vendor/golang.org/x/crypto/internal/poly1305) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/vendor/golang.org/x/crypto/internal/poly1305)
 
+From C#, call this package through the static class go.vendor.golang.org.x.crypto.@internal.poly1305_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package poly1305 implements Poly1305 one-time message authentication code as specified in [https://cr.yp.to/mac/poly1305-20050329.pdf](https://cr.yp.to/mac/poly1305-20050329.pdf).
 
 Poly1305 is a fast, one-time authentication function. It is infeasible for an attacker to generate an authenticator for a message without the key. However, a key must only be used for a single message. Authenticating two different messages with the same key allows an attacker to forge authenticators for other messages with the same key.

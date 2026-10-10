@@ -2,8 +2,10 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-10819%2F10890_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/runtime.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/runtime@go1.24.13)\
+[![Tests](https://img.shields.io/badge/Tests-10819_matched_%2F_71_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/runtime.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/runtime@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/runtime) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/runtime)
+
+From C#, call this package through the static class go.runtime_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
 Package runtime contains operations that interact with Go's runtime system, such as functions to control goroutines. It also includes the low-level type information used by the reflect package; see [reflect](https://pkg.go.dev/reflect@go1.24.13)'s documentation for the programmable interface to the run-time type system.
 

@@ -209,10 +209,11 @@ function Get-GoGreenBadgeVerification {
 
     foreach ($readme in Get-ChildItem $CoreDir -Filter 'README.md' -Recurse -File) {
         $text = [System.IO.File]::ReadAllText($readme.FullName)
-        if ($text -notmatch 'badge/Tests-(\d+)%2F(\d+)_validated-brightgreen') { continue }
+        # "M matched / D disclosed" (the nugetgo wording since 2026-10-10; the total is their sum).
+        if ($text -notmatch 'badge/Tests-(\d+)_matched_%2F_(\d+)_disclosed-brightgreen') { continue }
 
         $badgeMatched = [int]$Matches[1]
-        $badgeTotal = [int]$Matches[2]
+        $badgeTotal = [int]$Matches[1] + [int]$Matches[2]
 
         # The dot-id itself contains dots (path.filepath), so its capture excludes only "/" and ")".
         if ($text -notmatch 'https://go2cs\.net/validation/([^/]+)/([^)/]+)\.html') {
@@ -356,7 +357,7 @@ function Get-GoReleaseCensus {
         $readmeId = $readme.Directory.FullName.Substring($CoreDir.Length).TrimStart('\', '/') -replace '[\\/]', '.'
         $readmeIds.Add($readmeId)
         $text = [System.IO.File]::ReadAllText($readme.FullName)
-        if ($text -notmatch 'badge/Tests-\d+%2F\d+_validated-brightgreen') { continue }
+        if ($text -notmatch 'badge/Tests-\d+_matched_%2F_\d+_disclosed-brightgreen') { continue }
         $greenIds.Add($readmeId)
     }
 

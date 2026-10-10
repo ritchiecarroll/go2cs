@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/internal/runtime/exithook@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/internal/runtime/exithook) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/internal/runtime/exithook)
 
+From C#, call this package through the static class go.@internal.runtime.exithook_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package exithook provides limited support for on-exit cleanup.
 
 CAREFUL! The expectation is that Add should only be called from a safe context (e.g. not an error/panic path or signal handler, preemption enabled, allocation allowed, write barriers allowed, etc), and that the exit function F will be invoked under similar circumstances. That is the say, we are expecting that F uses normal / high-level Go code as opposed to one of the more restricted dialects used for the trickier parts of the runtime.

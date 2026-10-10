@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/internal/goexperiment@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/internal/goexperiment) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/internal/goexperiment)
 
+From C#, call this package through the static class go.@internal.goexperiment_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package goexperiment implements support for toolchain experiments.
 
 Toolchain experiments are controlled by the GOEXPERIMENT environment variable. GOEXPERIMENT is a comma-separated list of experiment names. GOEXPERIMENT can be set at make.bash time, which sets the default experiments for binaries built with the tool chain; or it can be set at build time. GOEXPERIMENT can also be set to "none", which disables any experiments that were enabled at make.bash time.

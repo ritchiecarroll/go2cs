@@ -720,14 +720,16 @@ function Get-TestProjectIdentityViolations {
 
 <#
 .SYNOPSIS
-    Whether a README's Tests badge CLAIMS validation (`N/N_validated`), in any colour.
+    Whether a README's Tests badge CLAIMS validation (`M matched / D disclosed`), in any colour.
 .DESCRIPTION
     Moved here unchanged from check-roster-format.ps1 section 2b3. `not_yet_validated` (orange) and
-    `none_to_validate` (lightgrey) are the badge's other two forms and claim nothing.
+    `none_to_validate` (lightgrey) are the badge's other two forms and claim nothing. Re-worded 2026-10-10
+    (owner-approved): the retired `N/T_validated` form is no longer a claim, and check-roster-format.ps1
+    asserts that no tracked README still carries it.
 #>
 function Test-ReadmeAdvertisesValidated {
     param([string] $Text)
-    return [regex]::IsMatch($Text, 'img\.shields\.io/badge/Tests-\d+%2F\d+_validated-')
+    return [regex]::IsMatch($Text, 'img\.shields\.io/badge/Tests-\d+_matched_%2F_\d+_disclosed-')
 }
 
 <#

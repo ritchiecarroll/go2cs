@@ -186,6 +186,7 @@
     <None Include="$(MSBuildThisFileDirectory)handOwnAddress_test.go" />
     <None Include="$(MSBuildThisFileDirectory)handOwnReferences_test.go" />
     <None Include="$(MSBuildThisFileDirectory)handOwnTypeAccessibility_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)handPackageReadme_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hostFatalClass_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hostLaunchLoadTime_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hoistedLiteralOperations.go" />
@@ -371,6 +372,7 @@
     <None Include="$(MSBuildThisFileDirectory)readme.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeDocLinks.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeDocLinks_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)readmeFromCSharp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeValidationBadge.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeValidationBadge_test.go" />
     <None Include="$(MSBuildThisFileDirectory)reconvertDeletionsSkipList_test.go" />

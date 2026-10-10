@@ -26,16 +26,19 @@
 // That reading order is also WHERE the break goes (user ruling 2026-08-15, from the live NuGet page).
 // All four on one line wrapped raggedly in nuget.org's narrow README pane — it broke wherever the
 // pane's width fell rather than where the meaning does. Splitting at the seam the order already names
-// gives the one variable-width badge (Tests, whose message is `<m>/<t> validated`) the room, and
+// gives the one variable-width badge (Tests, whose message is `<m> matched / <d> disclosed`) the room, and
 // leaves the fixed-width Source pair together on a line that cannot outgrow the pane. It stays ONE
 // paragraph of two lines rather than two paragraphs: the four badges are a single statement.
 //
 // The Tests badge is the package's honesty contract:
 //
-//	green   <m>/<t> validated   Go's own test suite for this package was converted, run under the
-//	                            Go-semantics test host and compared verdict for verdict against
+//	green   <m> matched /       Go's own test suite for this package was converted, run under the
+//	        <d> disclosed       Go-semantics test host and compared verdict for verdict against
 //	                            `go test -json`. The badge LINKS its proof: the versioned page under
 //	                            docs/validation/<version>/, which is the per-test differential.
+//	                            (Worded as the nugetgo packages' badge since 2026-10-10, owner-approved:
+//	                            the earlier `<m>/<m+d> validated` read as d FAILING tests, where a
+//	                            disclosed test is a documented, explained difference.)
 //	orange  not yet validated   The package's Go sources DO define Test functions; they have not
 //	                            been put through the pipeline yet. Never shown on a test-less
 //	                            package — that would invent a debt that does not exist.
@@ -440,7 +443,7 @@ func readmeValidationBadgeLine(projectPath string, projectName string, sourceDir
 	if hasCommittedTestProject(projectPath, projectName) {
 		if matched, disclosed, ok := validatedPackageTotals(currentPath, projectName); ok {
 			return validationBadge(
-				fmt.Sprintf("%d%%2F%d_validated", matched, matched+disclosed),
+				shieldsBadgeMessage(fmt.Sprintf("%d matched / %d disclosed", matched, disclosed)),
 				"brightgreen",
 				fmt.Sprintf("%s/%s/%s/%s.html", validationSiteURL, validationDocsDirName, version, projectName))
 		}

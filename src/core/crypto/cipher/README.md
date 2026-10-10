@@ -2,8 +2,10 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-27272%2F27272_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/crypto.cipher.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/crypto/cipher@go1.24.13)\
+[![Tests](https://img.shields.io/badge/Tests-27272_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/crypto.cipher.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/crypto/cipher@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/crypto/cipher) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/crypto/cipher)
+
+From C#, call this package through the static class go.crypto.cipher_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
 Package cipher implements standard block cipher modes that can be wrapped around low-level block cipher implementations. See [https://csrc.nist.gov/groups/ST/toolkit/BCM/current\_modes.html](https://csrc.nist.gov/groups/ST/toolkit/BCM/current_modes.html) and NIST Special Publication 800-38A.
 

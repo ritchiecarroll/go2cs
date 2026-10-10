@@ -1091,6 +1091,9 @@ Assert-Equal 'test-project identity: the named sides add up' $testProjects.Count
 #     snapshot that same day).
 # The badge vocabulary measured over every README that day: `N/N_validated` (brightgreen),
 # `not_yet_validated` (orange), `none_to_validate` (lightgrey) -- only the first claims validation.
+# RE-WORDED 2026-10-10 (owner-approved, COORD): the green badge reads `M matched / D disclosed`, the nugetgo
+# badge's wording, because `69/73 validated` read as four FAILING tests. The retired `N/T_validated` form
+# claims nothing any more, and no tracked README may still carry it (asserted below the census).
 #
 # OUTSIDE THE CHECK BY CONSTRUCTION, named rather than failed: a banked row with no README at all has
 # no badge to disagree with. At the stamp those were four test-only packages:
@@ -1102,6 +1105,10 @@ Assert-Equal 'test-project identity: the named sides add up' $testProjects.Count
 # shared with push-nuget.ps1's release census; the fixtures below still drive them.
 
 Assert-Equal 'badge: a validated Tests badge is recognised' $true `
+    (Test-ReadmeAdvertisesValidated '[![Tests](https://img.shields.io/badge/Tests-1_matched_%2F_0_disclosed-brightgreen?logo=go)](x)')
+Assert-Equal 'badge: a validated Tests badge with disclosures is recognised' $true `
+    (Test-ReadmeAdvertisesValidated '[![Tests](https://img.shields.io/badge/Tests-69_matched_%2F_4_disclosed-brightgreen?logo=go)](x)')
+Assert-Equal 'badge: the retired N/T_validated form is not a claim (a README still carrying it reds the census below)' $false `
     (Test-ReadmeAdvertisesValidated '[![Tests](https://img.shields.io/badge/Tests-1%2F1_validated-brightgreen?logo=go)](x)')
 Assert-Equal 'badge: not_yet_validated is not a validation claim' $false `
     (Test-ReadmeAdvertisesValidated '[![Tests](https://img.shields.io/badge/Tests-not_yet_validated-orange?logo=go)](x)')
@@ -1136,6 +1143,9 @@ Write-Host ('  banked rows with NO README (outside the check): {0}' -f ($rowsWit
 
 Assert-Equal 'badge vs roster: the vacuity guard (a zero means the README walk read nothing)' $true ($readmePackages.Count -gt 0)
 Assert-Equal 'badge vs roster: every README Tests badge agrees with the roster' '' ($badgeViolations -join '; ')
+$retiredBadge = @($readmePackages | Where-Object {
+        [regex]::IsMatch([System.IO.File]::ReadAllText((Join-Path (Join-Path $PSScriptRoot 'core') ($_ + '/README.md'))), 'img\.shields\.io/badge/Tests-\d+%2F\d+_validated-') })
+Assert-Equal 'badge: no tracked README carries the retired N/T_validated Tests badge (2026-10-10)' '' ($retiredBadge -join ', ')
 
 # ---- 2b4. the PROOF-PAGE identity's contract, against fixtures (2026-09-23, COORD ruling RN-6) ----
 # current proof pages = rows by name + relocation anchors by link + exclusion rows by exclusion (the
