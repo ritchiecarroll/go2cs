@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-53_matched_%2F_15_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/testing.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/testing@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/testing) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/testing)
 
+From C#, call this package through the static class go.testing_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package testing provides support for automated testing of Go packages. This is the go2cs Phase-4 test host: a hand-maintained implementation of the `testing` API — `T`, `B`, `F`, `TB`, subtests, parallelism, `TempDir` with Go-faithful `os.RemoveAll` cleanup semantics, `Setenv`, package deadlines — that runs converted `_test.go` suites and compares their verdicts one-for-one against a clean `go test -json` baseline. Every validated package's proof page on [go2cs.net/validation](https://go2cs.net/validation/index.html) was produced under this host.
 
 ---

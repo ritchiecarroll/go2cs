@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-1106_matched_%2F_2_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/os.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/os@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/os) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/os)
 
+From C#, call this package through the static class go.os_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package os provides a platform-independent interface to operating system functionality. The design is Unix-like, although the error handling is Go-like; failing calls return values of type error rather than error numbers. Often, more information is available within the error. For example, if a call that takes a file name fails, such as \[Open] or \[Stat], the error will include the failing file name when printed and will be of type \[\*PathError], which may be unpacked for more information.
 
 The os interface is intended to be uniform across all operating systems. Features not generally available appear in the system-specific package syscall.

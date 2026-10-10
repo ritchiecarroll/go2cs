@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-40_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/encoding.asn1.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/encoding/asn1@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/encoding/asn1) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/encoding/asn1)
 
+From C#, call this package through the static class go.encoding.asn1_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package asn1 implements parsing of DER-encoded ASN.1 data structures, as defined in ITU-T Rec X.690.
 
 See also “A Layman's Guide to a Subset of ASN.1, BER, and DER,” [http://luca.ntop.org/Teaching/Appunti/asn1.html](http://luca.ntop.org/Teaching/Appunti/asn1.html).

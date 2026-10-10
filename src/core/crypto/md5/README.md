@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-11_matched_%2F_1_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/crypto.md5.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/crypto/md5@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/crypto/md5) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/crypto/md5)
 
+From C#, call this package through the static class go.crypto.md5_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package md5 implements the MD5 hash algorithm as defined in RFC 1321.
 
 MD5 is cryptographically broken and should not be used for secure applications.

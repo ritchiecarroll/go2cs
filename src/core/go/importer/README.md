@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-3_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/go.importer.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/go/importer@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/go/importer) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/go/importer)
 
+From C#, call this package through the static class go.go.importer_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package importer provides access to export data importers.
 
 These functions, which are mostly deprecated, date from before the introduction of modules in release Go 1.11. They should no longer be relied on except for use in test cases using small programs that depend only on the standard library. For reliable module-aware loading of type information, use the packages.Load function from golang.org/x/tools/go/packages.

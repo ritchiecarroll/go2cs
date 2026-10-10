@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-199_matched_%2F_17_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/log.slog.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/log/slog@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/log/slog) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/log/slog)
 
+From C#, call this package through the static class go.log.slog_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package slog provides structured logging, in which log records include a message, a severity level, and various other attributes expressed as key-value pairs.
 
 It defines a type, \[Logger], which provides several methods (such as \[Logger.Info] and \[Logger.Error]) for reporting events of interest.

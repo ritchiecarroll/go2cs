@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-9_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/image.draw.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/image/draw@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/image/draw) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/image/draw)
 
+From C#, call this package through the static class go.image.draw_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package draw provides image composition functions.
 
 See "The Go image/draw package" for an introduction to this package: [https://golang.org/doc/articles/image\_draw.html](https://golang.org/doc/articles/image_draw.html)

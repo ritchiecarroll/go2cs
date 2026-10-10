@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-18_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/io.fs.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/io/fs@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/io/fs) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/io/fs)
 
+From C#, call this package through the static class go.io.fs_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package fs defines basic interfaces to a file system. A file system can be provided by the host operating system but also by other packages.
 
 See the [testing/fstest](https://pkg.go.dev/testing/fstest@go1.24.13) package for support with testing implementations of file systems.

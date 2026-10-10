@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-46_matched_%2F_6_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/sync.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/sync@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/sync) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/sync)
 
+From C#, call this package through the static class go.sync_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package sync provides basic synchronization primitives such as mutual exclusion locks. Other than the \[Once] and \[WaitGroup] types, most are intended for use by low-level library routines. Higher-level synchronization is better done via channels and communication.
 
 Values containing the types defined in this package should not be copied.

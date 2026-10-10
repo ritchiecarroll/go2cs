@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-574_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/go.types.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/go/types@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/go/types) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/go/types)
 
+From C#, call this package through the static class go.go.types_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package types declares the data types and implements the algorithms for type-checking of Go packages. Use \[Config.Check] to invoke the type checker for a package. Alternatively, create a new type checker with \[NewChecker] and invoke it incrementally by calling \[Checker.Files].
 
 Type-checking consists of several interdependent phases:

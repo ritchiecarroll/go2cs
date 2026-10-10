@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-57_matched_%2F_1_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/context.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/context@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/context) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/context)
 
+From C#, call this package through the static class go.context_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package context defines the Context type, which carries deadlines, cancellation signals, and other request-scoped values across API boundaries and between processes.
 
 Incoming requests to a server should create a \[Context], and outgoing calls to servers should accept a Context. The chain of function calls between them must propagate the Context, optionally replacing it with a derived Context created using \[WithCancel], \[WithDeadline], \[WithTimeout], or \[WithValue].

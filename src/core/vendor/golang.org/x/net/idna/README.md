@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@v0.32.1--0.20250304185419--76f9bf3279ef-00ADD8?logo=go)](https://pkg.go.dev/golang.org/x/net@v0.32.1-0.20250304185419-76f9bf3279ef/idna)\
 [![Source](https://img.shields.io/badge/Source-@v0.32.1--0.20250304185419--76f9bf3279ef-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/vendor/golang.org/x/net/idna) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/vendor/golang.org/x/net/idna)
 
+From C#, call this package through the static class go.vendor.golang.org.x.net.idna_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package idna implements IDNA2008 using the compatibility processing defined by UTS (Unicode Technical Standard) #46, which defines a standard to deal with the transition from IDNA2003.
 
 IDNA2008 (Internationalized Domain Names for Applications), is defined in RFC 5890, RFC 5891, RFC 5892, RFC 5893 and RFC 5894. UTS #46 is defined in [https://www.unicode.org/reports/tr46](https://www.unicode.org/reports/tr46). See [https://unicode.org/cldr/utility/idna.jsp](https://unicode.org/cldr/utility/idna.jsp) for a visualization of the differences between these two standards.

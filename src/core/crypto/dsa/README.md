@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-4_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/crypto.dsa.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/crypto/dsa@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/crypto/dsa) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/crypto/dsa)
 
+From C#, call this package through the static class go.crypto.dsa_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package dsa implements the Digital Signature Algorithm, as defined in FIPS 186-3.
 
 The DSA operations in this package are not implemented using constant-time algorithms.

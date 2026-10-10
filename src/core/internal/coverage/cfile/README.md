@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-15_matched_%2F_1_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/internal.coverage.cfile.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/internal/coverage/cfile@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/internal/coverage/cfile) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/internal/coverage/cfile)
 
+From C#, call this package through the static class go.@internal.coverage.cfile_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package cfile implements management of coverage files. It provides functionality exported in runtime/coverage as well as additional functionality used directly by package testing through testing/internal/testdeps.
 
 ---

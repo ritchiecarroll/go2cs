@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-518_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/crypto.x509.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/crypto/x509@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/crypto/x509) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/crypto/x509)
 
+From C#, call this package through the static class go.crypto.x509_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package x509 implements a subset of the X.509 standard.
 
 It allows parsing and generating certificates, certificate signing requests, certificate revocation lists, and encoded public and private keys. It provides a certificate verifier, complete with a chain builder.

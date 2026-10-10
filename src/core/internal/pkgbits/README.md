@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-2_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/internal.pkgbits.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/internal/pkgbits@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/internal/pkgbits) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/internal/pkgbits)
 
+From C#, call this package through the static class go.@internal.pkgbits_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package pkgbits implements low-level coding abstractions for Unified IR's export data format.
 
 At a low-level, a package is a collection of bitstream elements. Each element has a "kind" and a dense, non-negative index. Elements can be randomly accessed given their kind and index.

@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-4_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/internal.buildcfg.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/internal/buildcfg@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/internal/buildcfg) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/internal/buildcfg)
 
+From C#, call this package through the static class go.@internal.buildcfg_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package buildcfg provides access to the build configuration described by the current environment. It is for use by build tools such as cmd/go or cmd/compile and for setting up go/build's Default context.
 
 Note that it does NOT provide access to the build configuration used to build the currently-running binary. For that, use runtime.GOOS etc as well as internal/goexperiment.

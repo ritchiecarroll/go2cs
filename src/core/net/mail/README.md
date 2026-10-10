@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-11_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/net.mail.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/net/mail@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/net/mail) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/net/mail)
 
+From C#, call this package through the static class go.net.mail_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package mail implements parsing of mail messages.
 
 For the most part, this package follows the syntax as specified by RFC 5322 and extended by RFC 6532. Notable divergences:

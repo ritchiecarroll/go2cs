@@ -941,11 +941,11 @@ func TestPackageReadmeRefreshFollowsInProcessConversionNotRunMode(t *testing.T) 
 
 	// ---- the state a FRESH bank is in: converted, no proof page yet ----
 
-	if err := writeReadmeFile(projectPath, dotID, doc, sourceDir, options); err != nil {
+	if err := writeReadmeFile(projectPath, dotID, doc, sourceDir, "", options); err != nil {
 		t.Fatalf("conversion-time README: %v", err)
 	}
 
-	recordPackageReadmeEmission(projectPath, dotID, doc, sourceDir)
+	recordPackageReadmeEmission(projectPath, dotID, doc, sourceDir, "")
 
 	if !strings.Contains(readme(), "Tests-not_yet_validated-orange") {
 		t.Fatalf("a package with tests and no proof page must read not_yet_validated:\n%s", readme())
@@ -1005,7 +1005,7 @@ func TestPackageReadmeRefreshFollowsInProcessConversionNotRunMode(t *testing.T) 
 
 	// ---- and a record belongs to the package that left it, not to whatever run reaches the page ----
 
-	recordPackageReadmeEmission(filepath.Join(filepath.Dir(projectPath), "des"), "crypto.des", doc, sourceDir)
+	recordPackageReadmeEmission(filepath.Join(filepath.Dir(projectPath), "des"), "crypto.des", doc, sourceDir, "")
 
 	if err := refreshPackageReadmeAfterProof(projectPath, options); err != nil {
 		t.Fatalf("refresh with a foreign record: %v", err)

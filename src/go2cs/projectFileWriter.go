@@ -629,14 +629,16 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 		if emitsPackageReadme(projectFileName, options) {
 			projectName := strings.TrimSuffix(filepath.Base(projectFileName), ".csproj")
 
-			if err := writeReadmeFile(outputFilePath, projectName, packageDoc, packageSourceDir, options); err != nil {
+			csClass := packageReadmeCSharpClass()
+
+			if err := writeReadmeFile(outputFilePath, projectName, packageDoc, packageSourceDir, csClass, options); err != nil {
 				return fmt.Errorf("failed to write README file for project \"%s\": %s", outputFilePath, err)
 			}
 
 			// Capture what this README was composed from, so the -tests pipeline can re-emit it after
 			// the compare writes the proof page its Tests badge reads (refreshPackageReadmeAfterProof).
 			// Inside the gate on purpose: a package that gets no README here can get none there either.
-			recordPackageReadmeEmission(outputFilePath, projectName, packageDoc, packageSourceDir)
+			recordPackageReadmeEmission(outputFilePath, projectName, packageDoc, packageSourceDir, csClass)
 		}
 	}
 

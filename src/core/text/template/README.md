@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-52_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/text.template.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/text/template@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/text/template) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/text/template)
 
+From C#, call this package through the static class go.text.template_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package template implements data-driven templates for generating textual output.
 
 To generate HTML output, see [html/template](https://pkg.go.dev/html/template@go1.24.13), which has the same interface as this package but automatically secures HTML output against certain attacks.

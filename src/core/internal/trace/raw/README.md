@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/internal/trace/raw@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/internal/trace/raw) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/internal/trace/raw)
 
+From C#, call this package through the static class go.@internal.trace.raw_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package raw provides an interface to interpret and emit Go execution traces. It can interpret and emit execution traces in its wire format as well as a bespoke but simple text format.
 
 The readers and writers in this package perform no validation on or ordering of the input, and so are generally unsuitable for analysis. However, they're very useful for testing and debugging the tracer in the runtime and more sophisticated trace parsers.

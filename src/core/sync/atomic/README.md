@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-108_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/sync.atomic.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/sync/atomic@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/sync/atomic) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/sync/atomic)
 
+From C#, call this package through the static class go.sync.atomic_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package atomic provides low-level atomic memory primitives useful for implementing synchronization algorithms.
 
 These functions require great care to be used correctly. Except for special, low-level applications, synchronization is better done with channels or the facilities of the [sync](https://pkg.go.dev/sync@go1.24.13) package. Share memory by communicating; don't communicate by sharing memory.
