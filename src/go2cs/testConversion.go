@@ -10299,6 +10299,13 @@ func eligibleTerminalTestResults(results map[string]string, manifest testManifes
 	return filtered
 }
 
+// linkTimeModuleCacheEnv is the module cache a converted host roots recorded module sources against:
+// GO2CS_DEFAULT_GOMODCACHE, read once by the host's runtime at start-up (goenvs_impl.cs), as the
+// link-time GOROOT is.
+func linkTimeModuleCacheEnv() string {
+	return "GO2CS_DEFAULT_GOMODCACHE=" + goModCacheDir()
+}
+
 func runCommandWithTimeout(timeout time.Duration, workingDir string, options Options, name string, args ...string) (string, error) {
 	return runCommandWithTimeoutEnv(timeout, workingDir, options, nil, name, args...)
 }
@@ -10332,6 +10339,12 @@ func runCommandWithTimeoutEnv(timeout time.Duration, workingDir string, options 
 		// from runtime.GOROOT() as Go's does, and standard-library frames root against it rather
 		// than against whatever GOROOT the environment names.
 		cmd.Env = append(cmd.Env, "GO2CS_DEFAULT_GOROOT="+options.goRoot)
+
+		// And the module cache through the same kind of channel: a module-cache source is recorded in
+		// its -trimpath form, <module>@<version>/<file> (goSourceIdentity), and the host's runtime roots
+		// it here, answering the absolute path `go test` prints for an untrimmed build. A converted
+		// program run without it answers the -trimpath form, and no packed assembly names a cache path.
+		cmd.Env = append(cmd.Env, linkTimeModuleCacheEnv())
 
 		// `go test` PREPENDS $GOROOT/bin to the test binary's PATH, so a test that shells out to
 		// `go` gets the toolchain matching the GOROOT it was built against. Measured against Go

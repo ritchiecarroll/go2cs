@@ -74,6 +74,7 @@ $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'NugetgoIdentity.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoSelfDescription.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoLicense.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'NugetgoHostPaths.psm1') -Force
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 
 function Refuse([string]$why) { throw "REFUSED: $why" }
@@ -266,7 +267,14 @@ $isolated = Join-Path $Scratch 'nuget-packages'
 New-Item -ItemType Directory -Force $isolated, $OutDir | Out-Null
 $savedNp = $env:NUGET_PACKAGES
 $savedStd = $env:GoStdLibVersion
+$savedCi = $env:ContinuousIntegrationBuild
+$savedPathMap = $env:PathMap
 $env:NUGET_PACKAGES = $isolated
+# No host path in a packed assembly (the nugetgo rehearsal's gap 3): a deterministic CI build, with the recurse root
+# and the scratch mapped, so the pdb path an assembly's debug directory names and every source path in its pdb read
+# /_/... . Through the environment, as the range below, so a path holding ',' or ';' is not split as a -p: global.
+$env:ContinuousIntegrationBuild = 'true'
+$env:PathMap = "$([System.IO.Path]::GetFullPath($RecurseRoot).TrimEnd('\', '/'))=/_/,$([System.IO.Path]::GetFullPath($Scratch).TrimEnd('\', '/'))=/_scratch/"
 # The range reaches every project through the ENVIRONMENT, which MSBuild reads as properties: a -p: global would
 # split it at its comma. The recurse root's generated props defaults GoStdLibVersion only when it is empty.
 $env:GoStdLibVersion = $stdlibRange
@@ -275,7 +283,7 @@ try {
     & dotnet pack $packProject -c Release -o $OutDir --configfile $nugetConfig --nologo -v m
     if ($LASTEXITCODE -ne 0) { throw "dotnet pack failed ($LASTEXITCODE)" }
 }
-finally { $env:NUGET_PACKAGES = $savedNp; $env:GoStdLibVersion = $savedStd }
+finally { $env:NUGET_PACKAGES = $savedNp; $env:GoStdLibVersion = $savedStd; $env:ContinuousIntegrationBuild = $savedCi; $env:PathMap = $savedPathMap }
 $gpfAfter = @(Get-GpfPairs)
 $grown = @($gpfAfter | Where-Object { $gpfBefore -notcontains $_ })
 if ($grown.Count) { throw "the global packages folder GREW: $($grown -join ', ')" }
@@ -283,9 +291,18 @@ if ($grown.Count) { throw "the global packages folder GREW: $($grown -join ', ')
 # ---- read the package back ---------------------------------------------------------------------------------------------
 $nupkg = Join-Path $OutDir "$($id.Id).$packageVersion.nupkg"
 if (-not (Test-Path $nupkg)) { $nupkg = @(Get-ChildItem $OutDir -Filter "$($id.Id).*.nupkg" | Sort-Object LastWriteTime -Descending)[0].FullName }
+# The roots no packed byte may name: the build root, the pack's scratch and output, the module cache, the user profile.
+$hostRoots = @($RecurseRoot, $Scratch, $OutDir, (& go env GOMODCACHE).Trim(), [Environment]::GetFolderPath('UserProfile')) |
+    Where-Object { $_ } | ForEach-Object { [System.IO.Path]::GetFullPath($_) } | Select-Object -Unique
+$hostPathHits = New-Object System.Collections.Generic.List[string]
 $zip = [System.IO.Compression.ZipFile]::OpenRead($nupkg)
 try {
     $entries = @($zip.Entries | ForEach-Object { $_.FullName })
+    foreach ($entry in $zip.Entries) {
+        $stream = $entry.Open(); $buffer = New-Object System.IO.MemoryStream
+        try { $stream.CopyTo($buffer) } finally { $stream.Dispose() }
+        foreach ($root in @(Find-NugetgoHostPaths -Bytes $buffer.ToArray() -Roots $hostRoots)) { $hostPathHits.Add("$($entry.FullName) names $root") }
+    }
     $nuspecEntry = $zip.Entries | Where-Object { $_.FullName -like '*.nuspec' } | Select-Object -First 1
     $reader = New-Object System.IO.StreamReader($nuspecEntry.Open())
     [xml]$nuspec = $reader.ReadToEnd(); $reader.Dispose()
@@ -335,6 +352,19 @@ foreach ($dll in $libFiles) {
     elseif ($info.LegalCopyright -cne $assemblyCopyright.Copyright -or $info.CompanyName -cne $Authors) {
         throw "$(Split-Path -Leaf $dll) carries copyright '$($info.LegalCopyright)' and company '$($info.CompanyName)', not '$($assemblyCopyright.Copyright)' and '$Authors'"
     }
+}
+# No host path: every packed entry (scanned above), and the pdb each packed assembly was built with, which a symbols
+# package would carry.
+foreach ($dll in $libFiles) {
+    $pdbName = [System.IO.Path]::ChangeExtension((Split-Path -Leaf $dll), '.pdb')
+    $pdb = @(Get-ChildItem -LiteralPath $RecurseRoot -Recurse -Force -Filter $pdbName -File | Sort-Object LastWriteTime -Descending)[0]
+    if (-not $pdb) { throw "no $pdbName under $RecurseRoot for the packed $(Split-Path -Leaf $dll)" }
+    foreach ($root in @(Find-NugetgoHostPaths -Bytes ([System.IO.File]::ReadAllBytes($pdb.FullName)) -Roots $hostRoots)) { $hostPathHits.Add("$pdbName names $root") }
+}
+Write-Host "    host paths: $($hostPathHits.Count) in $($entries.Count) packed entries and $($libFiles.Count) pdb(s)"
+if ($hostPathHits.Count) {
+    Remove-Item -LiteralPath $nupkg   # a refused package is never left where a push could pick it up
+    throw "REFUSED: the package would publish a host path -- $($hostPathHits -join '; ')"
 }
 # S2: the self-description is in the package, byte for byte what was written, and the CONVERTER'S OWN parser reads it.
 if (-not $selfEntry) { throw 'the package carries no go2cs/source-metadata.txt' }
