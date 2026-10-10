@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace go;
@@ -189,6 +190,11 @@ public static partial class GoReflect
     /// not an array or a pointer to one: the comment the generator read and the signature the compiler built
     /// have drifted apart, and a dims-less answer would be silent.
     /// </remarks>
+    [UnconditionalSuppressMessage("Trimming", "IL2070",
+        Justification = "Every method a [GoParamDims] record names is kept by go2cs-gen's MemberRecordGenerator: an empty module " +
+                        "initializer in the same package class carries a DynamicDependency for each recorded method (trim stage 3b, " +
+                        "docs/PLAN-golib-full-trim.md section 9.6), and GenTests' MemberRecordGeneratorTests.EveryParamDimsRecordedMethodIsKeptForTrimming checks every record has one. " +
+                        "A method no record names is never looked up here.")]
     internal static Dictionary<MethodInfo, long[]?[]> ParamDimsRecords(Type type) =>
         s_paramDimsRecords.GetOrAdd(type, static declaring =>
         {

@@ -119,7 +119,7 @@ internal class StructTypeTemplate : TemplateBase
 
                 // Constructors
                 {{Constructors}}
-                {{ValueCloneImplementation}}{{GoZeroRegistration}}
+                {{ValueCloneImplementation}}{{GoZeroRegistration}}{{GoZeroConstructionHook}}
                 // Handle comparisons between struct '{{NonGenericStructName}}' instances
                 {{EqualsMember}}
                 public override bool Equals(object? obj) => obj is {{StructName}} other && Equals(other);
@@ -151,8 +151,8 @@ internal class StructTypeTemplate : TemplateBase
     // GoZeroFactory<T>. Generic code reads that registration through builtin.GoZero<T>() wherever
     // Go produces a zero of a type parameter (`var z T`, a named result, a map miss, a closed-channel
     // receive, a failed comma-ok assertion), where `default` is wrong only for a needy T. A GENERIC
-    // struct cannot host a module initializer and has no closed type to register, so it keeps
-    // `default`: the residual option B states (pinned by GolibTests' GoZeroResidualTests).
+    // struct cannot host a module initializer and has no closed type to register; the residual option B
+    // stated is closed by its construction hook instead (GoZeroConstructionHook; GolibTests' GoZeroResidualTests).
     // The memberwise `Equals(T)` and `GetHashCode`, omitted when a hand-owned partial declares the
     // struct's own equality (HandWrittenEquality). Each carries the blank line that follows it in the
     // template, so the generated form is byte-identical to the unconditional one it replaced.
@@ -193,7 +193,31 @@ internal class StructTypeTemplate : TemplateBase
     // listed only when the embedded TYPE itself carries a fixed array, and then the ordinary
     // `copy.<member> = <member>.ΔClone()` line is correct: the assignment lands in the copy's own
     // inline storage, never in the source's.
-    private string ValueCloneBaseList => ValueCloneFields.Length > 0 ? " : IGoValueClone" : "";
+    private string ValueCloneBaseList =>
+        (ValueCloneFields.Length > 0, NeedsZeroConstruction) switch
+        {
+            (true, true) => " : IGoValueClone, global::go.IGoZeroConstructed",
+            (true, false) => " : IGoValueClone",
+            (false, true) => " : global::go.IGoZeroConstructed",
+            _ => ""
+        };
+
+    // golib's construction hook (IGoZeroConstructed; trim stage 3b, docs/PLAN-golib-full-trim.md section 9.6): a struct
+    // whose constructor builds what `default` skips -- a needy member (IsNeedy) or a directional channel's stamp
+    // (ChanDirInitializerMembers) -- names its own zero here, generic or not, so golib never asks a type parameter for its
+    // constructor. A generic struct gains what the GoZero factory registration cannot give it (see GoZeroRegistration).
+    // The rule is what the constructor BUILDS, so it also counts a blank `_` fixed array, whose `= new(N)` initializer
+    // the constructor runs although IsNeedy (the factory's rule) leaves an unobservable blank field out: golib built
+    // every such struct through Activator before, and GolibTests' GoZeroConstructionGuardTests holds the two equal.
+    private bool NeedsZeroConstruction => IsNeedy || HasBlankArrayMember || ChanDirInitializerMembers.Count > 0;
+
+    private bool HasBlankArrayMember => StructMembers.Any(member =>
+        GetSimpleName(member.memberName) == "_" && !member.isReferenceType && member.typeName.Contains("go.array<"));
+
+    private string GoZeroConstructionHook =>
+        NeedsZeroConstruction
+            ? $"\r\n{TypeElemIndent}object global::go.IGoZeroConstructed.GoZeroNew() => new {StructName}();\r\n"
+            : string.Empty;
 
     private string ValueCloneImplementation
     {
