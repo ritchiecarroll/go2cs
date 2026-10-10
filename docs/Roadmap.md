@@ -46,7 +46,10 @@
      published; the module table drops jwt (validated) and keeps gojq; cgo's loud failure is stated as
      done; the Go 1.25 hop is a decision with no month; the timeline is rewritten to match. No count
      is quoted for macOS: the roster's rows carry it. The trim plan is not linked because
-     docs/PLAN-golib-full-trim.md is not on master at this commit. -->
+     docs/PLAN-golib-full-trim.md is not on master at this commit.
+     Amended the same day at master 2ddabcc67a: the Phase 5 section links the stub inventory
+     (docs/phase4/CENSUS-phase5-stub-inventory.md, landed that day) in place of its placeholder, in words,
+     with no count. -->
 
 This page is the plan for what comes next in go2cs: the Go and .NET releases the converted standard
 library moves to, the platforms it runs on, the real-world Go code it converts beyond the standard
@@ -267,9 +270,11 @@ closing the gaps it finds now: `os.Executable`, the system page size, and an arm
 `hash/crc32`. A declaration no validated test reaches can still be a throwing stub, and a program that
 calls one stops with a `NotImplementedException` that names it.
 
-**A measured inventory is being produced**: every remaining stub, its Go declaration, its package and
-target, and whether any test reaches it. This page links it when it is published; until then no count
-is quoted here.
+**The remaining stubs are measured.** The
+[Phase 5 stub inventory](phase4/CENSUS-phase5-stub-inventory.md) is a measured inventory of the
+declarations that still compile against throwing stubs, per package and per operating system. None of
+them is reached by a validated package's tests. The record carries the counts, so this page quotes
+none.
 
 **How a declaration gets its implementation.**
 
@@ -290,8 +295,8 @@ is quoted here.
 
 **What closing Phase 5 means:** for every supported target, no unexplained throwing stub remains; each
 implemented member has a real companion or a documented target exclusion; and every applicable package
-is validated. Closing it systematically, rather than as tests demand, is unscheduled and waits on the
-inventory.
+is validated. Closing it systematically, rather than as tests demand, is unscheduled; the inventory
+is what it starts from.
 
 Phase 5 is not the "stage 5" of the trimming work under
 [Native AOT and trimming](#native-aot-and-trimming); the two numberings are unrelated.
@@ -373,7 +378,7 @@ the rest are tracked in `src/go2cs/ToDo.md`:
 | When the project owner closes the Go 1.24 line, no earlier than November 2026 | The Go 1.25 hop. |
 | After the Go 1.25 hop | The .NET 11 measurement stage (.NET 11 ships in November 2026). The Go 1.26 hop, as a separate hop. `timefmt-go` and `gojq`, as their prerequisites land. The generic-methods design for Go 1.27. The decision on how often later hops run. |
 | Q1 2027 | Go 1.27 hop, by about February. The cgo bridge's first phases (C library only; Linux, then Windows, then macOS). The Phase 4D design kickoff. The allocation work's design kickoff. |
-| Unscheduled | Closing Phase 5 systematically, once its inventory is published. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
+| Unscheduled | Closing Phase 5 systematically, from its inventory. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
 
 ## How progress is tracked
 
