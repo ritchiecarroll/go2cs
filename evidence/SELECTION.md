@@ -3,6 +3,9 @@
 Measured by C2 on 2026-10-10 on the linux lane box, with go2cs built at `T` = `claude/c2-nugetgo-tools` @ `c8ef680e14`.
 Re-measured the same day on the package re-packed at `ac8775c806` (its README links the conversion tag): the same
 selection, `[1.0.0.1]`, and the lock pins it. The converter is unchanged between the two tools commits.
+Not re-measured on the package re-packed at `03485eed68` (the owner's review: no "PROOF:", the module source linked):
+between `ac8775c806` and `03485eed68` no converter Go source changed, and the two packages' nuspecs differ only in
+`<description>` and `<releaseNotes>`. Selection reads the ID, the version and the dependencies, which are equal.
 The sample program is the hashset kit's `app/` (`example.com/hashsetdemo`), and the mapping is the registry row, unchanged:
 
 ```

@@ -35,12 +35,23 @@ key whose glob covers `nugetgo.*` (in `$env:NUGETGO_API_KEY`, or typed at the pr
 | `conversion-add/VALIDATION.md`, `conversion-add/index.md` | the two files the `hashset-cs` repository adds at its root (COORD's commit) |
 | `evidence/SELECTION.md` | the measurement that a consumer selects 1.0.0.1 over 1.0.0 |
 
-Packed at `T` = `claude/c2-nugetgo-tools` @ `ac8775c806` (the 1.0.0 tools plus the README and icon cut), from the same
+Packed at `T` = `claude/c2-nugetgo-tools` @ `03485eed68` (the 1.0.0 tools, the README and icon cut, and your review
+of the first preview), from the same
 two roots as 1.0.0, against the published go.* 1.24.13.5, with `-Revision 1 -Release -LicenseSpdx MIT`. The proof is
 unchanged: 37 matched, 0 disclosed, input digest
 `sha256-7fb2058d54e18d61eaa288b0e79c847c953bdadf87cdd00fdb0d832750903114`, bound to the packed project. The read-back
 was clean: README.md generated, the go2cs icon packed byte for byte, no host path, and the self-description still
 reads module version `v1.0.0` (B3: the rebuild changes the package version only).
+
+**Your review of the first preview (2026-10-10).** The description and the README no longer say "PROOF:", and the
+README's first link is the Go source: the module path in the top callout, and in the "Converted from ..." line, links
+`github.com/ritchiecarroll/hashset` at its tag `v1.0.0` on GitHub. The pack refuses a "PROOF:" in either, and a README
+whose first link is anything else. Nothing else in the package changed: the assembly, the pdb, the icon, LICENSE,
+`index.md` and the self-description are byte for byte the earlier repack's, and so are the ID, the version and the
+dependencies. One packed file did change: VALIDATION.md opens with the description, so its first line lost "PROOF: "
+too. `conversion-add/VALIDATION.md` is that new file. Block 1b compares the tag's VALIDATION.md with it, so the tag
+must name a `hashset-cs` commit that carries the new file. COORD rules how (C2's post, 2026-10-10); until then block 1b
+stops with "VALIDATION.md at nuget-1.0.0.1 is not the one the package carries", as it should.
 
 The preview badges are local stand-ins: this lane box cannot reach img.shields.io, so each badge is drawn from its
 own URL (label, message, color). nuget.org loads the real images from shields.io.
