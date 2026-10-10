@@ -64,7 +64,7 @@ $repo = 'https://github.com/example/mod-cs'
 $proofText = 'PROOF: unofficial go2cs C# conversion of example.com/mod v1.2.3, built on the Go 1.24.13 standard library.'
 $readmeArgs = @{
     Id = 'nugetgo.example.com.mod'; Description = $proofText; ModulePath = 'example.com/mod'; GoVersion = 'v1.2.3'
-    PackageVersion = '1.2.3'; ClosureVersion = '1.24.13.5'; RepositoryUrl = $repo; LicenseName = 'LICENSE'
+    PackageVersion = '1.2.3'; ClosureVersion = '1.24.13.5'; RepositoryUrl = $repo; RepositoryTag = 'nuget-1.2.3'; LicenseName = 'LICENSE'
     LicenseSpdx = 'MIT'; Synopsis = 'Package mod does *one* thing.'; Matched = 40; Disclosed = 1; DefaultIcon = $true
 }
 $readme = New-NugetgoPackageReadme @readmeArgs
@@ -73,18 +73,19 @@ $lines = @($readme -split "`n")
 Write-Host 'the generated README'
 Check 'the title is the package ID, as plain text' ($lines[0] -ceq '# nugetgo.example.com.mod') "line 1 '$($lines[0])'"
 Check 'the PROOF text is a blockquote' ($lines -ccontains "> $proofText") 'no blockquote line'
-Check 'the Tests badge reads matched / disclosed and links VALIDATION.md in the source repository' (
-    $readme.Contains("[![Tests](https://img.shields.io/badge/Tests-40_matched_%2F_1_disclosed-brightgreen?logo=go)]($repo/blob/HEAD/VALIDATION.md)")) 'no such badge'
-Check 'the C# Source badge links the conversion repository' (
-    $readme.Contains("[![C# Source](https://img.shields.io/badge/C%23_Source-@1.2.3-512BD4?logo=dotnet)]($repo)")) 'no such badge'
+Check 'the Tests badge reads matched / disclosed and links VALIDATION.md at the conversion tag' (
+    $readme.Contains("[![Tests](https://img.shields.io/badge/Tests-40_matched_%2F_1_disclosed-brightgreen?logo=go)]($repo/blob/nuget-1.2.3/VALIDATION.md)")) 'no such badge'
+Check 'the C# Source badge links the conversion repository at its tag' (
+    $readme.Contains("[![C# Source](https://img.shields.io/badge/C%23_Source-@1.2.3-512BD4?logo=dotnet)]($repo/tree/nuget-1.2.3)")) 'no such badge'
 Check 'the Go module badge links pkg.go.dev at the module version' (
     $readme.Contains('[![Go module](https://img.shields.io/badge/Go_module-@v1.2.3-00ADD8?logo=go)](https://pkg.go.dev/example.com/mod@v1.2.3)')) 'no such badge'
 Check 'the go2cs badge links the release it was built on' (
     $readme.Contains('[![go2cs](https://img.shields.io/badge/go2cs-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5)')) 'no such badge'
 Check 'the synopsis is its own paragraph, escaped' ($lines -ccontains 'Package mod does \*one\* thing.') 'no synopsis line'
-Check 'the license line' ($lines -ccontains "Converted from example.com/mod source; licensed under MIT — see [LICENSE]($repo/blob/HEAD/LICENSE).") 'no license line'
+Check 'the license line' ($lines -ccontains "Converted from example.com/mod source; licensed under MIT — see [LICENSE]($repo/blob/nuget-1.2.3/LICENSE).") 'no license line'
 Check 'the go2cs icon brings its artwork line' ($readme.Contains('Artwork licensed under Creative Commons Attribution 3.0')) 'no artwork line'
 Check 'no inline code anywhere' (-not $readme.Contains('`')) 'a backtick'
+Check 'no link names HEAD (COORD ruling 2026-10-10: links name the conversion tag)' ($readme -notmatch '/(blob|tree)/HEAD\b') 'a HEAD link'
 Check 'the README passes its own guard' (@(Test-NugetgoReadme $readme).Count -eq 0) "refused: $(@(Test-NugetgoReadme $readme) -join '; ')"
 $readmeArgs.DefaultIcon = $false
 Check 'an author''s own icon brings no artwork line' (-not (New-NugetgoPackageReadme @readmeArgs).Contains('Artwork')) 'an artwork line'
@@ -112,7 +113,11 @@ $cases = @(
     @('a thematic break after a blank line is not a heading', "Some ``x`` prose.`n`n---`n", @()),
     @('a four-column table', "| a | b | c | d |`n|--|--|--|--|`n| 1 | 2 | 3 | 4 |`n", @('a table 4 columns wide')),
     @('a three-column table', "| a | b | c |`n|--|--|--|`n| 1 | 2 | 3 |`n", @()),
-    @('an escaped pipe is not a column', "| a \| b | c |`n|--|--|`n", @())
+    @('an escaped pipe is not a column', "| a \| b | c |`n|--|--|`n", @()),
+    @('a badge linking blob/HEAD', "[![Tests](https://img.shields.io/badge/Tests-1-green)](https://github.com/o/r-cs/blob/HEAD/VALIDATION.md)`n", @('names HEAD')),
+    @('a link to tree/HEAD', "See [the source](https://github.com/o/r-cs/tree/HEAD).`n", @('names HEAD')),
+    @('a link naming the conversion tag', "See [LICENSE](https://github.com/o/r-cs/blob/nuget-1.2.3/LICENSE).`n", @()),
+    @('the go.* artwork line, which names go2cs master', "Artwork; see [artwork attribution](https://github.com/ritchiecarroll/go2cs/blob/master/docs/images/README).`n", @())
 )
 foreach ($case in $cases) {
     $reasons = @(Test-NugetgoReadme $case[1])

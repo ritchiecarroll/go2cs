@@ -68,7 +68,9 @@ function New-NugetgoBadge([string]$Alt, [string]$Label, [string]$Message, [strin
 # The package README, in the go.* standard library packages' style: the package ID as the title, the PROOF text as a
 # blockquote, two lines of badges, the Go package's synopsis, then the license line. Every link is absolute, because
 # nuget.org resolves no relative link. VALIDATION.md and the license file are linked in the conversion repository,
-# which carries both at its root (docs/NugetgoPublish.md, 4.5).
+# which carries both at its root (docs/NugetgoPublish.md, 4.5), at -RepositoryTag: the tag nuget-<package version>
+# COORD mints on the conversion commit before the package is signed (COORD ruling 2026-10-10), so an older
+# version's page keeps its own proof. HEAD would follow the repository to a later version's files.
 function New-NugetgoPackageReadme {
     [CmdletBinding()]
     param(
@@ -79,6 +81,7 @@ function New-NugetgoPackageReadme {
         [Parameter(Mandatory)][string]$PackageVersion,
         [Parameter(Mandatory)][string]$ClosureVersion,
         [Parameter(Mandatory)][string]$RepositoryUrl,
+        [Parameter(Mandatory)][string]$RepositoryTag,
         [Parameter(Mandatory)][string]$LicenseName,
         [Parameter(Mandatory)][string]$LicenseSpdx,
         [string]$Synopsis,
@@ -89,9 +92,9 @@ function New-NugetgoPackageReadme {
     )
     $repo = $RepositoryUrl.TrimEnd('/')
     $goTag = if ($GoVersion.StartsWith('v')) { $GoVersion } else { "v$GoVersion" }
-    $tests = if ($Unvalidated) { New-NugetgoBadge 'Tests' 'Tests' 'not validated' 'orange' 'go' "$repo/blob/HEAD/VALIDATION.md" }
-             else { New-NugetgoBadge 'Tests' 'Tests' "$Matched matched / $Disclosed disclosed" 'brightgreen' 'go' "$repo/blob/HEAD/VALIDATION.md" }
-    $source = New-NugetgoBadge 'C# Source' 'C# Source' "@$PackageVersion" $script:DotnetPurple 'dotnet' $repo
+    $tests = if ($Unvalidated) { New-NugetgoBadge 'Tests' 'Tests' 'not validated' 'orange' 'go' "$repo/blob/$RepositoryTag/VALIDATION.md" }
+             else { New-NugetgoBadge 'Tests' 'Tests' "$Matched matched / $Disclosed disclosed" 'brightgreen' 'go' "$repo/blob/$RepositoryTag/VALIDATION.md" }
+    $source = New-NugetgoBadge 'C# Source' 'C# Source' "@$PackageVersion" $script:DotnetPurple 'dotnet' "$repo/tree/$RepositoryTag"
     $module = New-NugetgoBadge 'Go module' 'Go module' "@$goTag" $script:GoBlue 'go' "https://pkg.go.dev/$ModulePath@$goTag"
     $release = New-NugetgoBadge 'go2cs' 'go2cs' "@$ClosureVersion" $script:DotnetPurple 'dotnet' "$script:Go2csRepository/tree/nuget-$ClosureVersion"
 
@@ -101,14 +104,15 @@ function New-NugetgoPackageReadme {
     $blocks.Add("$tests $source\`n$module $release")
     if ($Synopsis -and $Synopsis.Trim()) { $blocks.Add((ConvertTo-NugetgoMarkdownText $Synopsis.Trim())) }
     $blocks.Add('---')
-    $blocks.Add("Converted from $ModulePath source; licensed under $LicenseSpdx — see [$LicenseName]($repo/blob/HEAD/$LicenseName).")
+    $blocks.Add("Converted from $ModulePath source; licensed under $LicenseSpdx — see [$LicenseName]($repo/blob/$RepositoryTag/$LicenseName).")
     if ($DefaultIcon) { $blocks.Add($script:ArtworkLine) }
     ($blocks -join "`n`n") + "`n"
 }
 
 # The reasons a README is refused as a nuget.org package README (owner, 2026-10-10): inline code in any heading (ATX or
-# setext), and any table wider than three columns (its width is the cell count of its delimiter row, as GitHub-flavored
-# Markdown defines a table). Lines inside a fenced code block are neither. No reason means accepted.
+# setext), any table wider than three columns (its width is the cell count of its delimiter row, as GitHub-flavored
+# Markdown defines a table), and any link naming blob/HEAD or tree/HEAD (COORD ruling 2026-10-10: a package's links name
+# its conversion tag). Lines inside a fenced code block are none of these. No reason means accepted.
 function Test-NugetgoReadme([string]$Text) {
     $reasons = New-Object System.Collections.Generic.List[string]
     $lines = @($Text -split "`r?`n")
@@ -126,6 +130,9 @@ function Test-NugetgoReadme([string]$Text) {
         if ($line -match '^\s{0,3}#{1,6}(\s|$)' -and $line.Contains('`')) { $reasons.Add("line ${n}: inline code in the heading '$($line.Trim())'") }
         if ($i -gt 0 -and $line -match '^\s{0,3}(=+|-+)\s*$' -and $lines[$i - 1].Trim() -and $lines[$i - 1].Contains('`') -and $lines[$i - 1] -notmatch '\|') {
             $reasons.Add("line $($i): inline code in the heading '$($lines[$i - 1].Trim())'")
+        }
+        foreach ($link in [regex]::Matches($line, '\]\((?<url>[^)\s]+)\)')) {
+            if ($link.Groups['url'].Value -match '/(blob|tree)/HEAD(/|$)') { $reasons.Add("line ${n}: a link names HEAD, not the conversion tag: $($link.Groups['url'].Value)") }
         }
         if ($line.Contains('|') -and $line.Contains('-') -and ($line -replace '[\s|:-]', '') -eq '') {
             $columns = @($line.Trim().Trim('|') -split '\|').Count
