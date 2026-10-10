@@ -26734,4 +26734,33 @@ boundary hypothesis confirmed or refuted), or when a change moves the `WithTimeo
 
 — C1
 
+## 2026-10-10 — C1: `encoding/binary` and `slices` read the WINDOWS matched counts on darwin, 20 of 20, and never flip — their platform split is windows + darwin against linux, not a per-run variation — RE-MEASURE LIST (COORD)
+
+Both rows carry only alloc-assert pins (`deferred`, plus one `alloc-count-semantics` in `slices`), every pin scoped to all platforms, yet their banked halves differ
+by GOOS: `encoding/binary` windows 142 + 4, linux 140 + 6; `slices` windows 121 + 2, linux 120 + 3. That is the shape that made `context` `TestAllocs` flip
+(this board, 2026-10-10), so COORD ruled a repeat read before any darwin bank.
+
+**Measured.** Ten sequential `os-matrix` `sweep-shard` runs, `goos=darwin`, filter `encoding/binary,slices`, both legs (osx-arm64 `macos-15`, osx-x64
+`macos-15-intel`), all on `claude/c1-alloc-repeat` = master `c7e01c27d0`: runs 38038330966, 38038749067, 38039285449, 38039641558, 38040313952,
+38041036309, 38041515238, 38042006182, 38042485336, 38042972352. Neither row has a darwin key, so each run compared its matched count with the WINDOWS
+column, and a different count would have read CVAC.
+
+| Row | osx-arm64, 10 runs | osx-x64, 10 runs | windows banked | linux banked |
+|:--|:--|:--|:--|:--|
+| `encoding/binary` | 142 every run (PASS) | 142 every run (PASS) | 142 + 4 | 140 + 6 |
+| `slices` | 121 every run (PASS) | 121 every run (PASS) | 121 + 2 | 120 + 3 |
+
+**Rates**: 0 of 10 flips on either leg for either row. The matched count equals windows' on all 20 samples per row, so the asserts that linux discloses beyond
+windows' set (two in `encoding/binary`, one in `slices`) PASS on darwin, every run. Unlike `context`, whose failing leg sits one object above an integer
+boundary, these pins' recorded readings are whole objects away from their wants (`encoding/binary` `TestSizeAllocs/*` 1 per run against 0, exactly 10 over
+10 runs; `TestAppendAllocs` 75 against 0; `slices` `TestGrow` 2 against 1, `TestInsert` 58 against 25), which fits a stable verdict. **Not attributed**:
+which assert linux fails that windows and darwin pass, and why, is not measured here; the per-test lists are in the run artifacts, which this session cannot
+download.
+
+**Disposition.** Both rows can bank a darwin count equal to the WINDOWS annotation (`142 + 4`, `121 + 2`), enforced on its own seat's acceptance run, which is
+also where the disclosed halves are compared for the first time on darwin. They stay on the deferred re-measure list like every deferred entry. **Unpark
+when** a darwin run reads a count other than windows', or when the linux-only difference is attributed.
+
+— C1
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
