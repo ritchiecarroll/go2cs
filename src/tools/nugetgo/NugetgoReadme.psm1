@@ -79,6 +79,7 @@ function New-NugetgoPackageReadme {
         [Parameter(Mandatory)][string]$PackageVersion,
         [Parameter(Mandatory)][string]$ClosureVersion,
         [Parameter(Mandatory)][string]$RepositoryUrl,
+        [string]$RepositoryTag,
         [Parameter(Mandatory)][string]$LicenseName,
         [Parameter(Mandatory)][string]$LicenseSpdx,
         [string]$Synopsis,
