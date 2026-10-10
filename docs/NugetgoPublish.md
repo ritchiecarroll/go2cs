@@ -98,12 +98,14 @@ The package README is generated in the style of the `go.*` packages (owner, 2026
 text, a badge row, the root package's synopsis and a license line. VALIDATION.md is packed beside it as a file the
 README links. `-LicenseSpdx` names the upstream license for that line (for example `MIT` or `BSD-3-Clause`): the
 caller states it, and the pack never infers it. The icon defaults to the go2cs icon the conversion carries. **A module
-author publishing their own module sets their own icon with `-Icon` before publishing.**
+author publishing their own module sets their own icon with `-Icon` before publishing.** The README's links into the
+conversion repository name the tag `nuget-<PV>` (COORD ruling, 2026-10-10; section 4, step 5); a rehearsal package
+names its release's tag, because a rehearsal version is never tagged.
 
 **Gate: both packs exit 0.** The pack itself refuses, by name: a host path in any packed file, a restored `go.*`
 closure that is not the published `R`, a proof whose input digest is not the packed project's, any read-back
-mismatch of identity, description, copyright, ranges or self-description, a README with inline code in a heading or
-a table wider than three columns, and a package with no icon.
+mismatch of identity, description, copyright, ranges or self-description, a README with inline code in a heading, a
+table wider than three columns or a link naming `HEAD`, and a package with no icon.
 
 ## 3. Rehearse on int.nugettest.org (B7)
 
@@ -138,7 +140,9 @@ COORD rules sections 1-3 green before this step.
 3. **Push:** `dotnet nuget push <ID>.<PV>.nupkg --source https://api.nuget.org/v3/index.json`. A published version
    can be unlisted but never deleted.
 4. **Lane:** wait until the flat container and the registration list `PV`. The registry's checks read both.
-5. **Owner:** push the conversion source to the conversion repository. It holds:
+5. **COORD, BEFORE step 1:** push the conversion source to the conversion repository, and mint the signed tag
+   `nuget-<PV>` on that commit (the stdlib release's order: the tag exists before the package is signed). The owner
+   sheet's first gate checks that the tag exists and resolves anonymously. The commit holds:
    - the contents of `PR/src/M`, including the `Directory.Build.targets` the pack writes there when the upstream
      holder is not The go2cs Authors;
    - `PR`'s root `Directory.Build.props` and `Directory.Build.targets`. Without the root `Directory.Build.props` the
@@ -146,8 +150,11 @@ COORD rules sections 1-3 green before this step.
    - the module's LICENSE verbatim (B6), a README, and a `.gitignore` for the build output (`.artifacts/`);
    - the packed VALIDATION.md and its per-package proof pages, byte for byte as the package carries them.
 
-   The license file and VALIDATION.md sit at the repository ROOT in either layout below: the package README links
-   `<RepositoryUrl>/blob/HEAD/VALIDATION.md` and `<RepositoryUrl>/blob/HEAD/<license file>`.
+   The license file and VALIDATION.md sit at the repository ROOT in either layout below. The package README links
+   `<RepositoryUrl>/tree/nuget-<PV>`, `<RepositoryUrl>/blob/nuget-<PV>/VALIDATION.md` and
+   `<RepositoryUrl>/blob/nuget-<PV>/<license file>`: a tag, never `HEAD`, so an older version's page keeps its own proof
+   after a rebuild's commit replaces those files (COORD ruling, 2026-10-10). A rebuild whose C# source is unchanged still
+   gets a commit and its own tag when a file the README links changes, and a tag on the unchanged commit otherwise.
 
    **The layout (COORD ruling, 2026-10-09).** When the pack wrote no module `Directory.Build.targets` (the upstream
    holder is The go2cs Authors), the repository is FLAT: everything above sits at its root (hashset). When the pack
