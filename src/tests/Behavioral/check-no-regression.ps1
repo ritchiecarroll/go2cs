@@ -458,6 +458,13 @@ $changed = & git -C $repoRoot status --short -- "src/tests/Behavioral/*.cs" "src
 # exactly why a list nobody checks would go stale silently.
 $documentedAliasDriftPackages = @(
     'EnvironBlockWalk'   # golden captured on Windows; runs on both platforms, so no F8 marker
+    # SyscallKeystonePulls (COORD ruling 2026-10-10, the EnvironBlockWalk precedent): its golden was captured
+    # on Windows and a linux transpile names its runtime import alias with the Delta prefix (`runtime` becomes
+    # Delta-runtime, in the using and its one use), a 2/2 diff and nothing else. CONTROL, so it is not a
+    # converter change: master's converter (src/go2cs unchanged 3487259a5f..9dba51e03e) emits the identical
+    # diff on a linux host, measured 2026-10-10 by C1 while gating claude/c1-darwin-exepath. The package runs
+    # on every platform (a darwin-only arm inside it), so no F8 marker.
+    'SyscallKeystonePulls'
 ) | Where-Object { $OmitAliasDriftMembers -notcontains $_ }
 
 function Test-IsPlatformAliasDrift {
