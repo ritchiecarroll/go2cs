@@ -71,6 +71,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+Import-Module (Join-Path $PSScriptRoot 'NugetgoClosure.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoIdentity.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoSelfDescription.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoLicense.psm1') -Force
@@ -280,7 +281,16 @@ $env:PathMap = "$([System.IO.Path]::GetFullPath($RecurseRoot).TrimEnd('\', '/'))
 $env:GoStdLibVersion = $stdlibRange
 try {
     Write-Host "==> $($id.Id) $packageVersion  ($($libraries.Count) package assemblies; stdlib range $stdlibRange)"
-    & dotnet pack $packProject -c Release -o $OutDir --configfile $nugetConfig --nologo -v m
+    # Restore first, and pack only against a PUBLISHED release (COORD, 2026-10-09): every go.* package restored is exactly
+    # -ClosureVersion, and nuget.org lists it. A package built against anything else names a go.lib it was not compiled
+    # against, or one nobody can restore.
+    & dotnet restore $packProject --configfile $nugetConfig --nologo -v m
+    if ($LASTEXITCODE -ne 0) { throw "dotnet restore failed ($LASTEXITCODE)" }
+    $closureReasons = @(Test-NugetgoPublishedClosure -Restored (Get-NugetgoRestoredClosure -PackagesFolder $isolated) -ClosureVersion $ClosureVersion `
+        -PublishedVersions { param($packageId) Get-NugetgoPublishedVersions -Id $packageId })
+    if ($closureReasons.Count) { Refuse "the pack's go.* closure is not the published release ${ClosureVersion}: $($closureReasons -join '; ')" }
+    Write-Host "    closure: every go.* package restored is the published $ClosureVersion"
+    & dotnet pack $packProject -c Release -o $OutDir --no-restore --nologo -v m
     if ($LASTEXITCODE -ne 0) { throw "dotnet pack failed ($LASTEXITCODE)" }
 }
 finally { $env:NUGET_PACKAGES = $savedNp; $env:GoStdLibVersion = $savedStd; $env:ContinuousIntegrationBuild = $savedCi; $env:PathMap = $savedPathMap }
