@@ -234,6 +234,29 @@ namespace GolibTests
         }
 
         [TestMethod]
+        public void AModuleRecordRootsAgainstTheLinkTimeModuleCache()
+        {
+            // A module-cache source is recorded in its -trimpath form, <module>@<version>/<file>, so a packed
+            // assembly never names the publisher's cache (the nugetgo rehearsal's gap 3). The host roots it against
+            // the module cache the pipeline hands it, re-applying the cache's case escaping, which is the absolute
+            // path `go test` prints; with none it answers the recorded form, as a -trimpath Go binary does.
+            const string cache = "/srv/gomodcache";
+            Assert.AreEqual("/srv/gomodcache/github.com/ritchiecarroll/hashset@v1.0.0/hashset.go",
+                go.runtime_package.GoResolveRecordedFileProbe("github.com/ritchiecarroll/hashset@v1.0.0/hashset.go", "/out/hashset.cs", "/go/root", cache));
+            Assert.AreEqual("/srv/gomodcache/github.com/!burnt!sushi/toml@v1.3.2/internal/tz.go",
+                go.runtime_package.GoResolveRecordedFileProbe("github.com/BurntSushi/toml@v1.3.2/internal/tz.go", "/out/tz.cs", "/go/root", cache), "the cache's case escaping is re-applied");
+            Assert.AreEqual("/srv/gomodcache/example.com/m@v1.0.0-!r!c1/m.go",
+                go.runtime_package.GoResolveRecordedFileProbe("example.com/m@v1.0.0-RC1/m.go", "/out/m.cs", "/go/root", cache), "and to the version");
+            Assert.AreEqual("D:/gomodcache/example.com/m@v1.2.3/m.go",
+                go.runtime_package.GoResolveRecordedFileProbe("example.com/m@v1.2.3/m.go", "/out/m.cs", "", @"D:\gomodcache\"), "a Windows cache is forward-slashed");
+            Assert.AreEqual("github.com/ritchiecarroll/hashset@v1.0.0/hashset.go",
+                go.runtime_package.GoResolveRecordedFileProbe("github.com/ritchiecarroll/hashset@v1.0.0/hashset.go", "/out/hashset.cs", "/go/root", ""),
+                "no module cache: the recorded (-trimpath) form, never rooted under GOROOT/src");
+            Assert.AreEqual("/go/root/src/runtime/debug/stack.go",
+                go.runtime_package.GoResolveRecordedFileProbe("runtime/debug/stack.go", "/out/stack.cs", "/go/root", cache), "a standard-library record is unchanged");
+        }
+
+        [TestMethod]
         public void SyntheticPCOfAnUnrecordedFunctionReportsItsConvertedPosition()
         {
             var frame = SyntheticFrame(typeof(go.slcguard.probe_package).GetMethod(nameof(go.slcguard.probe_package.productionShapedFrame))!);
