@@ -49,7 +49,10 @@
      docs/PLAN-golib-full-trim.md is not on master at this commit.
      Amended the same day at master 2ddabcc67a: the Phase 5 section links the stub inventory
      (docs/phase4/CENSUS-phase5-stub-inventory.md, landed that day) in place of its placeholder, in words,
-     with no count. -->
+     with no count.
+     Owner review 1, the same day: every ## section opens with an "In short" paragraph (what it is, why it
+     matters to a user, where it stands), and Phase 5's says it is about completeness, not speed, with
+     a placeholder for the measurement of which exported functions can reach a stub. -->
 
 This page is the plan for what comes next in go2cs: the Go and .NET releases the converted standard
 library moves to, the platforms it runs on, the real-world Go code it converts beyond the standard
@@ -66,6 +69,10 @@ of the standard library, and [Validated Modules](ValidatedModules.md) that of th
 
 ## Phase 4: validation against Go's own tests
 
+**In short.** Phase 4 checks the converted standard library against Go's own tests, package by package,
+so that "it works" is measured and not claimed. It is done on Windows and Linux, under way on macOS, and
+has one planned extension.
+
 Phase 4 converts each package's `_test.go` suite and compares it, verdict for verdict, with `go test`.
 It is not finished, and it stands in three parts:
 
@@ -80,6 +87,9 @@ It is not finished, and it stands in three parts:
 
 ## How the project moves: release hops
 
+**In short.** go2cs follows Go and .NET one release at a time, and every move proves every package
+again. For a user that means each go2cs release names exactly one Go release and one .NET release.
+
 The project advances by release migrations, called [hops](Glossary.md#hop): moving the converted
 standard library (the *corpus*) to a new Go release or to a new .NET runtime, one variable at a time
 and never both in one hop. Each Go hop re-validates every package against that release's own tests.
@@ -91,6 +101,10 @@ frames how hops are run, and the two standing runbooks that lead on procedure,
 one wins when two disagree, is in [`Glossary.md`](Glossary.md#document-types).
 
 ## Go releases
+
+**In short.** The converted standard library is on Go 1.24.13, a release Go no longer patches, so it
+lacks the security fixes Go has issued since. Three planned moves bring it to a supported Go release
+and keep it there; the first starts when the project owner closes the Go 1.24 line.
 
 Go 1.24 left upstream support in February 2026, and the 1.25 series left it in August 2026, so
 packages built from either carry none of the Go security fixes issued since. The next three hops
@@ -107,6 +121,9 @@ owner decides that line is done, in November 2026 at the earliest:
 How often later hops run is decided ahead of the Go 1.27 hop.
 
 ## .NET
+
+**In short.** Converted code targets .NET 10, a long-term-support release, and stays there until
+.NET 12. You need the .NET 10 SDK, and a newer SDK on your machine does not change what you get.
 
 **The published target stays `net10.0`.** .NET 10 is a long-term-support release, supported until
 November 2028, and converted packages stay on it until `net12.0`, the next long-term-support release.
@@ -144,6 +161,10 @@ the run inside the runner's deadline, which is what the TLS work under [Performa
 
 ## Native AOT and trimming
 
+**In short.** You can publish converted Go as a native executable today, and it runs, but the publish
+can take hours and the file is large. This work makes that publish smaller, quicker and free of
+warnings, in stages.
+
 A converted program, and a C# program that references the `go.*` packages, can be published with Native
 AOT. Making that publish smaller, faster and free of trim warnings is staged work on the runtime
 library and the source generators:
@@ -163,6 +184,9 @@ on a six-core `win-x64` machine and produced an executable of about 370 MB, whic
 has the measurements. A build, `dotnet run` and a publish without Native AOT are not affected.
 
 ## Platforms
+
+**In short.** go2cs is validated on x64 Windows and x64 Linux. macOS, on Intel and on Apple silicon,
+has packages and is being validated package by package now. Other platforms are not supported yet.
 
 **Windows and Linux.** The converter runs on both, and the standard library is multi-target on disk:
 platform-shared files sit flat, and a package whose Go source varies by platform keeps one folder per
@@ -185,6 +209,9 @@ zones, sockets, the `syscall` surface) follows Windows semantics or fails.
 
 ## Real-world Go modules
 
+**In short.** Beyond the standard library, go2cs converts third-party Go modules and holds each to the
+same bar: its own tests must match Go's. Three modules pass today, and a larger one is next.
+
 Third-party modules are the proving ground after the standard library. Each module is converted,
 validated against its own Go test suite exactly as a standard-library package is, and given a proof
 page beside the conversion rather than on the standard-library roster. `go2cs -tests -recurse` runs a
@@ -206,6 +233,10 @@ own dependencies convert. Further modules follow; the
 [go2cs Target Atlas](https://go2cs.net/TargetAtlas.html) is one input to their selection.
 
 ## NuGet packages of converted modules
+
+**In short.** A Go module that someone has already converted can arrive as a NuGet package, so your
+conversion restores it and does not convert it again. The first such package is published, and the
+registry that maps Go modules to their packages is live.
 
 With `-recurse=nuget`, a converted program references the standard library, the runtime and the
 source generators as published NuGet packages, and the same substitution reaches third-party modules:
@@ -230,6 +261,9 @@ instead of a local transpile. The converter side is built and on by default (see
 
 ## cgo
 
+**In short.** Go code that calls C through cgo cannot be converted yet. The converter says so and
+stops, naming the file, and a bridge to native code is planned from 2027.
+
 A Go file that imports `"C"` is not converted, and the standard library is converted with
 `CGO_ENABLED=0`. The plan is [`PLAN-cgo-interop.md`](PLAN-cgo-interop.md):
 
@@ -242,6 +276,9 @@ A Go file that imports `"C"` is not converted, and the standard library is conve
   macOS. Each target needs a C toolchain on the converting machine.
 
 ## Phase 4D: examples, fuzz seed corpora and benchmarks
+
+**In short.** Validation counts Go's `Test` functions today. Phase 4D adds the other kinds of test a
+Go package carries: examples, fuzz seeds and benchmarks. It is planned and not yet started.
 
 Validation counts a package's `Test` functions. Phase 4D, the next validation slice, widens what
 "validated" covers:
@@ -258,10 +295,20 @@ Phase 5. Detail:
 
 ## Phase 5 — Implement assembly-backed declarations in C#
 
+**In short.** Phase 5 is about completeness, not speed. A small set of standard-library declarations
+has no portable Go body, because Go implements them in assembly, in cgo or inside its runtime. Today
+each of those compiles to a stub that throws a `NotImplementedException`, naming the declaration, if
+it is ever called. Phase 5 gives each one a real C# body. Making portable code that already works
+run faster is a different subject, under [Performance](#performance).
+
+**What it means for you.** No validated package's tests reach a stub, and a call that does reach one
+fails loudly and by name, never silently. Which exported functions can reach a stub is being
+measured, and this page links that result when it is published.
+
 The converted library reproduces Go built with `-tags purego`, so most assembly-backed code takes its
-portable Go path. Some declarations have no Go body to convert: they are backed by assembler, cgo,
-runtime or compiler intrinsics, or platform services. Each compiles against a throwing stub from the
-`PartialStubGenerator` until a C# implementation exists. Phase 5 is writing those implementations.
+portable Go path and needs nothing from Phase 5. The declarations it is about are the ones with no Go
+body at all: they are backed by assembler, cgo, runtime or compiler intrinsics, or platform services.
+The `PartialStubGenerator` writes the throwing stub for each until a C# implementation exists.
 
 **It proceeds package by package, as validation demands, not as one campaign.** When a package's own
 tests need a declaration, it gets a hand-written C# body and the package validates with it. That is how
@@ -302,6 +349,10 @@ Phase 5 is not the "stage 5" of the trimming work under
 [Native AOT and trimming](#native-aot-and-trimming); the two numberings are unrelated.
 
 ## Performance
+
+**In short.** Converted code is usually slower than Go and uses more memory, and the published
+comparison says by how much. This section lists the work planned to narrow the gap. None of it holds
+up anything else on this page.
 
 The published [performance comparison](Performance.md) measures converted C# against Go on the JIT
 and under Native AOT. The follow-ups run off the critical path:
@@ -355,6 +406,9 @@ keys, where a zero-allocation lookup would need a custom comparer that slows eve
 
 ## Open converter items
 
+**In short.** Known, smaller gaps in the converter, none of them scheduled. The validated standard
+library and modules convert despite them; one matters to you only if your code uses that construct.
+
 Smaller converter items, unscheduled. The first is recorded in the
 [struct-types reference](ConversionStrategies-Reference/struct-types.md#a-global-addressed-only-by-the-packages-own-_testgo-is-still-heap-boxed);
 the rest are tracked in `src/go2cs/ToDo.md`:
@@ -371,6 +425,9 @@ the rest are tracked in `src/go2cs/ToDo.md`:
 
 ## Timeline
 
+**In short.** The order the work on this page is planned in. Few rows carry a date; most wait on
+something else finishing first.
+
 | When | Planned |
 |:--|:--|
 | Now | macOS validation of the standard library, package by package. The trimming work for Native AOT. Further converted modules as NuGet packages: `uuid` and `jwt` after `hashset`. |
@@ -381,6 +438,8 @@ the rest are tracked in `src/go2cs/ToDo.md`:
 | Unscheduled | Closing Phase 5 systematically, from its inventory. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
 
 ## How progress is tracked
+
+**In short.** Where to check each claim on this page for yourself.
 
 | What | Where |
 |:--|:--|
