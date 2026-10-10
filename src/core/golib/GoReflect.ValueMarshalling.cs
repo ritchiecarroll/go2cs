@@ -87,8 +87,9 @@ public static partial class GoReflect
             // reading off t itself today, when every box type sits at depth 0). @unsafe.Pointer is
             // exempt and keeps its NilInstance-probe fall-through: its canonical nil is its own,
             // never the raw ж<uintptr> box's.
+            // The pointee's operations (trim stage 3c-2b: GoTypeOps, named by compiled code) answer ж<pointee>.NilBox.
             if (!typeof(IUnsafePointer).IsAssignableFrom(t) && TryBoxPointee(t, out Type? pointee))
-                return typeof(ж<>).MakeGenericType(pointee).GetProperty(nameof(ж<int>.NilBox), BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
+                return GoTypeOps.Of(pointee).NilBox();
 
             // A generated NAMED pointer wrapper exposes its canonical typed nil as NilInstance
             // (declared internal by the template — probe both visibilities).
@@ -111,8 +112,7 @@ public static partial class GoReflect
         long[] dims = new long[arrayDims.Length];
         for (int i = 0; i < dims.Length; i++)
             dims[i] = arrayDims[i];
-        MethodInfo? mint = typeof(ж<>).MakeGenericType(pointee).GetMethod(nameof(ж<int>.NilBoxOfDims), BindingFlags.Public | BindingFlags.Static);
-        return mint is null ? CanonicalNilPointer(pointerType) : mint.Invoke(null, [dims]);
+        return GoTypeOps.Of(pointee).NilBoxOfDims(dims);
     }
 
     /// <summary>
@@ -709,19 +709,11 @@ public static partial class GoReflect
 
     // -------- pointer-box construction (reflect.New) --------
 
-    private static readonly ConcurrentDictionary<Type, Func<object?, object>> s_boxMakers = new();
-
     /// <summary>A fresh heap box <c>ж&lt;T&gt;</c> holding <paramref name="value"/> — <c>reflect.New</c>'s allocation.</summary>
+    /// <remarks>Through the pointee's operations (trim stage 3c-2b: GoTypeOps, named by compiled code).</remarks>
     public static object NewPointerBox(Type pointeeType, object? value)
     {
-        return s_boxMakers.GetOrAdd(pointeeType, static pt =>
-            typeof(GoReflect).GetMethod(nameof(newBox), BindingFlags.NonPublic | BindingFlags.Static)!
-                .MakeGenericMethod(pt).CreateDelegate<Func<object?, object>>())(value);
-    }
-
-    private static object newBox<T>(object? value)
-    {
-        return value is null ? new StandardBox<T>(default(T)!) : new StandardBox<T>((T)value);
+        return GoTypeOps.Of(pointeeType).NewBox(value);
     }
 
     // -------- the []byte VIEW of any Uint8-element slice (reflect.Value.Bytes / SetBytes) --------

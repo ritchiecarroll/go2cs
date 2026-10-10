@@ -54,6 +54,10 @@ public class TypeGenerator : ISourceGenerator
         // is a Go type only by its [GoType] attribute.
         bool handOwned = IsHandOwnedAssembly(context.Compilation);
 
+        // Trim stage 3c-2b: which types this compilation spells a pointer to, the ones that carry the operations face
+        // (see TypeOpsScope).
+        TypeOpsScope.Begin(context.Compilation);
+
         HashSet<string> emittedHintNames = new(StringComparer.OrdinalIgnoreCase);
 
         // Shared by every named fixed-array wrapper this Execute emits (see the Array arm's element
