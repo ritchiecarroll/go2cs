@@ -364,6 +364,7 @@
     <None Include="$(MSBuildThisFileDirectory)readme.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeDocLinks.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeDocLinks_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)readmeFromCSharp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeValidationBadge.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeValidationBadge_test.go" />
     <None Include="$(MSBuildThisFileDirectory)reconvertDeletionsSkipList_test.go" />
