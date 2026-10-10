@@ -80,6 +80,42 @@ func readNuGetLock(outRoot string) (map[string]nugetLockEntry, error) {
 	return entries, nil
 }
 
+// nugetLockLayer spells the source that answered a mapping the way the lock records it: a URL as it is, a local file
+// relative to the output root, never as an absolute host path (the nugetgo rehearsal, 2026-10-09, gap 6), since a
+// conversion repository commits its lock. A layer read back from the lock is already relative to the root and is kept;
+// one the user named (fromLock false) is relative to the working directory, so it is resolved first. An absolute
+// layer a lock written before this rule holds is rewritten the same way. A file on another volume than the root, with
+// no relative spelling, is recorded by its base name.
+func nugetLockLayer(layer string, outRoot string, fromLock bool) string {
+	if layer == "" || strings.Contains(layer, "://") {
+		return layer
+	}
+
+	path := layer
+
+	if !filepath.IsAbs(path) {
+		if fromLock {
+			return filepath.ToSlash(layer)
+		}
+
+		absolute, err := filepath.Abs(path)
+
+		if err != nil {
+			return filepath.Base(path)
+		}
+
+		path = absolute
+	}
+
+	if root, err := filepath.Abs(outRoot); err == nil {
+		if relative, err := filepath.Rel(root, path); err == nil {
+			return filepath.ToSlash(relative)
+		}
+	}
+
+	return filepath.Base(path)
+}
+
 // writeNuGetLock writes the output root's mapping lock, sorted by module.
 func writeNuGetLock(outRoot string, entries map[string]nugetLockEntry) error {
 	modules := make([]string, 0, len(entries))
