@@ -82,5 +82,19 @@ one development machine; the hosted check measures the default.
 full, not only the parts the program uses. For a small program that references about thirty of them, the
 publish took a little over an hour on a CI runner for Linux and for Windows, several hours for an Intel Mac,
 and more than two hours on a four-core machine, and the
-executable was about 250 MB. A converted project pays the same cost, because it uses the same setting. A
-build, `dotnet run` and a publish without Native AOT are not affected.
+executable was about 250 MB. A program that uses `fmt` and `reflect` references about twice as many: on a
+six-core Windows machine (`win-x64`, 31 GB of memory) its publish took about five and a half hours, the
+Native AOT compiler held about 9.5 GB of memory throughout, and the executable was about 370 MB. It ran
+correctly. A converted project pays the same cost, because it uses the same setting. A build, `dotnet run`
+and a publish without Native AOT are not affected.
+
+<!-- Measured 2026-10-10 by G (ledger: COORD's stage-3 table, row A): "genprobe", a short fmt + reflect program
+     (generic struct printing, reflect.TypeOf / Field / DeepEqual), converted, 58 Go packages in its closure,
+     published with Native AOT and TrimMode=partial against master 56f0f1f254 (the release tree), .NET SDK
+     10.0.400, win-x64, Windows 11, AMD 6 cores / 12 threads, 31 GB. Run ALONE: rc 0, wall 19,579 s (5 h 26 min),
+     executable 386,929,664 bytes, output identical to Go's. ILC worked on one core after its first hour, private
+     memory 8.7 to 9.4 GB; light concurrent work in its first two hours makes the wall an upper bound by minutes, not
+     hours. Two such publishes run side by side on the same machine (ILC 8.7 and 10.3 GB, 1.3 GB left free) were
+     both still compiling at the four-hour ceiling. The ~250 MB consumer above measured 243,136,000 bytes on the same
+     machine and tree. -->
+
