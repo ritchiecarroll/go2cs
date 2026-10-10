@@ -212,6 +212,8 @@
     <None Include="$(MSBuildThisFileDirectory)internal\gensourcemeta\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\genstdlibmeta\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gensymbols\main.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\gensynopsis\main.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\gensynopsis\main_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\releasestamp\stamp.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\releasestamp\stamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\contextBudget_test.go" />
