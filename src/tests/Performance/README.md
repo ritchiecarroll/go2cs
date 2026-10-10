@@ -1,5 +1,13 @@
 # Go vs transpiled C# — runtime performance comparison
 
+> **Measured on:** the results below were measured on Windows x64 (`win-x64`), with go2cs converting
+> Go 1.23.1 (the builds that followed the NuGet 1.23.1.7 release) and the C# running on
+> .NET 10 (SDK 10.0.400); the Go column is the same programs built by Go 1.23.1 for
+> `windows/amd64`. The .NET 9 table under History was measured on Windows x64 (`win-x64`) too, with
+> .NET SDK 9.0.316. go2cs now converts Go 1.24.13, and none of these numbers has been re-measured on
+> it yet: a re-baseline at the last Go 1.24 package release is planned (see the
+> [Roadmap](https://github.com/ritchiecarroll/go2cs/blob/master/docs/Roadmap.md#performance)).
+
 A small, targeted benchmark suite answering the question people ask first: **how fast is transpiled
 C# compared to the original Go?** — startup time and memory, on both the normal JIT runtime and
 **Native AOT** (self-contained, the closest deployment analog to a Go binary).

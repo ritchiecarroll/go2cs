@@ -8,8 +8,13 @@ name: Docs site
 #   liquid  -- TestDocsSurviveJekyllLiquid: no page carries a Liquid token that would break the build
 #              or render as empty text (.claude/rules/docs-records.md).
 #   build   -- the Pages build itself fails on a Liquid or Markdown error.
-#   rewrite -- .github/site-outside-links.py points links that climb out of docs/ (../src/..., ../CLAUDE.md)
-#              at the repository on GitHub at the commit being built; the Markdown keeps its relative links.
+#   rewrite -- .github/site-outside-links.py points links that climb out of docs/ (../src/..., ../CLAUDE.md),
+#              and links into the docs/ paths that docs/_config.yml excludes from the build (the internal
+#              records: phase3/, phase4/, doctrine/), at the repository on GitHub at the commit being
+#              built; the Markdown keeps its relative links. It fails the run if an excluded path was built.
+#   strip   -- .github/site-strip-comments.py removes HTML comments from the built pages. The Markdown
+#              keeps them (provenance lives there by project rule); <script>/<style> contents and IE
+#              conditional comments are left alone.
 #   links   -- .github/site-check.py over the BUILT site: broken internal links, broken #fragments and
 #              shared page titles, against .github/site-check-baseline.json (the findings the site
 #              already had when this check landed). A finding not in the baseline fails the run.
@@ -25,6 +30,7 @@ on:
       - '.github/site-check.py'
       - '.github/site-check-baseline.json'
       - '.github/site-outside-links.py'
+      - '.github/site-strip-comments.py'
       - 'src/go2cs/internal/repoguard/docsJekyllLiquid_test.go'
   pull_request:
     paths:
@@ -33,6 +39,7 @@ on:
       - '.github/site-check.py'
       - '.github/site-check-baseline.json'
       - '.github/site-outside-links.py'
+      - '.github/site-strip-comments.py'
       - 'src/go2cs/internal/repoguard/docsJekyllLiquid_test.go'
   workflow_dispatch:
 permissions:
@@ -64,11 +71,13 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
-      - name: Point links that climb out of docs/ at the repository on GitHub
+      - name: Point links that climb out of docs/, or into an excluded path, at the repository on GitHub
         # The Pages build runs in a container and leaves _site owned by root; take it back first.
         run: |
           sudo chown -R "$(id -u):$(id -g)" _site
           python .github/site-outside-links.py _site . "${{ github.sha }}" "${{ github.repository }}"
+      - name: Remove HTML comments from the built pages
+        run: python .github/site-strip-comments.py _site
       - name: Check links, fragments and titles against the baseline
         run: python .github/site-check.py _site site-check.json --baseline .github/site-check-baseline.json
       - name: Keep the check's report

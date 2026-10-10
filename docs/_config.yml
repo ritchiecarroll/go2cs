@@ -9,3 +9,11 @@ github:
   owner_name: J. Ritchie Carroll
 plugins:
   - jemoji
+# Internal records stay in the repository and on GitHub but are not published on the site.
+# Jekyll excludes every source path that STARTS WITH an entry, so name no file at the docs/ root
+# with one of these prefixes. After the build, .github/site-outside-links.py reads this list,
+# points links into it at GitHub, and fails the run if any of it was built.
+exclude:
+  - phase3
+  - phase4
+  - doctrine
