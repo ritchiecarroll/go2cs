@@ -37,6 +37,7 @@ key whose glob covers `nugetgo.*` (in `$env:NUGETGO_API_KEY`, or typed at the pr
 | `preview/VALIDATION-as-1.0.0-readme.png` | 1.0.0's README (VALIDATION.md), rendered the same way, for comparison |
 | `conversion-add/VALIDATION.md`, `conversion-add/index.md` | the two files the `hashset-cs` repository adds at its root (COORD's commit) |
 | `evidence/SELECTION.md` | the measurement that a consumer selects 1.0.0.2 over 1.0.0 |
+| `evidence/Test-ChecksumGate.ps1` | a parse-and-run test of block 2's checksum gate as this sheet writes it, against this kit's packages and a one-line SHA256SUMS (COORD found the one-line false red live, 2026-10-10) |
 
 Packed at `T` = `claude/c2-nugetgo-tools` @ `3d0d70ba53` (the 1.0.0 tools, the README and icon cut, and your review
 of the revision-1 preview), from the same
@@ -132,7 +133,7 @@ PIN prompt comes once, at `-Apply`. The verify fails unless the signer is the ce
 
 ```powershell
 $file = "$Id.$PV.nupkg"
-$sums = (Get-Content "$Pub\kit\nupkg\SHA256SUMS") -match "\s$([regex]::Escape($file))$"
+$sums = @(Get-Content "$Pub\kit\nupkg\SHA256SUMS") -match "\s$([regex]::Escape($file))$"
 $want = if ($sums) { ($sums[0] -split '\s+')[0] } else { $null }
 if (-not $want) { throw "SHA256SUMS has no line for $file" }
 $SignDir = "$Pub\sign"
