@@ -94,6 +94,24 @@ func TestNuGetMapDefaultConsultsTheRegistry(t *testing.T) {
 	}
 }
 
+// The nugetgo rehearsal (2026-10-09, gap 8): a module with no third-party module has nothing to map, so the
+// registry is not read, nothing is warned and no lock is written.
+func TestNuGetMapWithNoThirdPartyModuleFetchesNothing(t *testing.T) {
+	f := newNuGetMapFixture(t)
+	f.set("/registry", mapRow(modA.path, "reg.a", "canonical"))
+	outRoot := t.TempDir()
+
+	decisions, warnings, err := runNuGetMapResolution(nil, nugetMapOptions{}, outRoot)
+
+	if err != nil || len(decisions) != 0 || len(warnings) != 0 || f.count("/registry") != 0 {
+		t.Errorf("no third-party module: decisions %+v, warnings %q, registry requests %d, err %v", decisions, warnings, f.count("/registry"), err)
+	}
+
+	if _, err := os.Stat(nugetLockPath(outRoot)); !os.IsNotExist(err) {
+		t.Errorf("a module with nothing to map wrote %s", nugetLockFileName)
+	}
+}
+
 func TestNuGetMapOffFetchesNothing(t *testing.T) {
 	f := newNuGetMapFixture(t)
 	f.set("/registry", mapRow(modA.path, "reg.a", "canonical"))
