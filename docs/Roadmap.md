@@ -52,7 +52,11 @@
      with no count.
      Owner review 1, the same day: every ## section opens with an "In short" paragraph (what it is, why it
      matters to a user, where it stands), and Phase 5's says it is about completeness, not speed, with
-     a placeholder for the measurement of which exported functions can reach a stub. -->
+     a placeholder for the measurement of which exported functions can reach a stub.
+     Amended the same day at master ea47fdd770: the placeholder becomes the link to
+     docs/phase4/CENSUS-phase5-exported-reach.md with its findings in words, and the Phase 5 detail and
+     the Timeline's Unscheduled row follow the owner's priority ruling (ledger 2026-10-10 10:15 and
+     11:33): easily reached stubs first, the unreached ones when a real use needs one. -->
 
 This page is the plan for what comes next in go2cs: the Go and .NET releases the converted standard
 library moves to, the platforms it runs on, the real-world Go code it converts beyond the standard
@@ -302,8 +306,13 @@ it is ever called. Phase 5 gives each one a real C# body. Making portable code t
 run faster is a different subject, under [Performance](#performance).
 
 **What it means for you.** No validated package's tests reach a stub, and a call that does reach one
-fails loudly and by name, never silently. Which exported functions can reach a stub is being
-measured, and this page links that result when it is published.
+fails loudly and by name, never silently. Which exported functions can reach one is measured, in the
+[exported-reach record](phase4/CENSUS-phase5-exported-reach.md). On Windows and Linux the only exported
+calls that do are ones Go itself refuses to carry out in an ordinary program: clearing coverage
+counters in a program built without coverage, and `runtime.Breakpoint`. They are being changed to
+answer exactly as Go does. On macOS, verifying a certificate against the system's root certificates
+and CPU profiling also reach a stub. Those are part of the macOS work
+([Platforms](#platforms)).
 
 The converted library reproduces Go built with `-tags purego`, so most assembly-backed code takes its
 portable Go path and needs nothing from Phase 5. The declarations it is about are the ones with no Go
@@ -342,8 +351,12 @@ none.
 
 **What closing Phase 5 means:** for every supported target, no unexplained throwing stub remains; each
 implemented member has a real companion or a documented target exclusion; and every applicable package
-is validated. Closing it systematically, rather than as tests demand, is unscheduled; the inventory
-is what it starts from.
+is validated.
+
+**What is closed first.** Priority follows the
+[exported-reach record](phase4/CENSUS-phase5-exported-reach.md): a stub that an ordinary program can
+easily reach is closed ahead of everything else. The stubs no exported call reaches stay as they
+are, by name, until a real use needs one; closing those has no date.
 
 Phase 5 is not the "stage 5" of the trimming work under
 [Native AOT and trimming](#native-aot-and-trimming); the two numberings are unrelated.
@@ -435,7 +448,7 @@ something else finishing first.
 | When the project owner closes the Go 1.24 line, no earlier than November 2026 | The Go 1.25 hop. |
 | After the Go 1.25 hop | The .NET 11 measurement stage (.NET 11 ships in November 2026). The Go 1.26 hop, as a separate hop. `timefmt-go` and `gojq`, as their prerequisites land. The generic-methods design for Go 1.27. The decision on how often later hops run. |
 | Q1 2027 | Go 1.27 hop, by about February. The cgo bridge's first phases (C library only; Linux, then Windows, then macOS). The Phase 4D design kickoff. The allocation work's design kickoff. |
-| Unscheduled | Closing Phase 5 systematically, from its inventory. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
+| Unscheduled | The Phase 5 stubs that no exported call reaches, each closed when a real use needs it. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
 
 ## How progress is tracked
 
