@@ -32,7 +32,7 @@ namespace go;
 /// <para>
 /// So <see cref="Value"/> REFUSES rather than fabricating an <c>array&lt;T&gt;</c> that cannot
 /// exist. Consumers reach the elements through the element door — <c>at&lt;T&gt;(i)</c>, which
-/// consults <see cref="TryGetNativeArrayView{Telem}"/> before it touches <c>Value</c> — and that
+/// consults <see cref="TryGetNativeArrayView(Type)"/> before it touches <c>Value</c> — and that
 /// door keeps `at`'s single implementation, single bounds check and single element-box
 /// construction. An index past the minted length is refused by that same existing check, which is
 /// what makes the length handed in at construction load-bearing rather than advisory.
@@ -84,18 +84,18 @@ internal sealed class NativeArrayBox<T> : ж<array<T>>
     /// door golib already has for native-backed windows, refusals included (a managed-reference
     /// element type is refused there, by name).
     /// </summary>
-    internal override IArray<Telem>? TryGetNativeArrayView<Telem>()
+    internal override IArray? TryGetNativeArrayView(Type elementType)
     {
         // The block holds T. A request for any other element type is not this box's to answer, and
         // falling through is right: the caller then meets the ordinary not-an-array-or-slice error
         // rather than a window over bytes that mean something else.
-        if (typeof(Telem) != typeof(T))
+        if (elementType != typeof(T))
             return null;
 
         if (IsNilPointer)
             return null;
 
-        return (IArray<Telem>)(object)slice<T>.OverNativeMemory(m_nativeAddr, m_length);
+        return slice<T>.OverNativeMemory(m_nativeAddr, m_length);
     }
 
     /// <inheritdoc/>

@@ -100,17 +100,41 @@ public interface ISlice<T> : IArray<T>, ISlice, IGoReflectSlice
 
         return new slice<T>(backing, 0, length);
     }
+
+    // The []byte aliasing this slice's storage (GoReflect.TryByteSliceView; trim stage 3c-1), or null when the element is
+    // not one byte under another Go name: GoReflect.ByteAliasableElement is the whole safety argument for the alias.
+    slice<byte>? IGoReflectSlice.ReflectByteView()
+    {
+        if (!GoReflect.ByteAliasableElement<T>.Value)
+            return null;
+
+        // A defined SLICE type over a defined byte element reaches its window through the shared-backing view ctor.
+        slice<T> source = this is slice<T> raw ? raw : new slice<T>(this);
+
+        return slice<byte>.AliasOfElement(in source);
+    }
+
+    // Go's (*[N]T)(s) (GoReflect.AliasSliceAsArrayPointer; trim stage 3c-1): an array<T> of length N over this slice's
+    // backing store.
+    object IGoReflectSlice.ReflectAliasAsArray(nint length) => array<T>.Alias(this is slice<T> raw ? raw : new slice<T>(this), length);
 }
 
 /// <summary>
-/// reflect.Value.Grow on a slice value (<c>GoReflect.GrowSlice</c>), implemented once, generically, by
-/// <see cref="ISlice{T}"/>'s default member (trim stage 3a; see <see cref="IGoReflectSequence"/>).
+/// reflect's object-form operations on a slice value (<c>GoReflect.GrowSlice</c>, <c>TryByteSliceView</c>,
+/// <c>AliasSliceAsArrayPointer</c>), implemented once, generically, by <see cref="ISlice{T}"/>'s default members (trim
+/// stages 3a and 3c-1; see <see cref="IGoReflectSequence"/>).
 /// </summary>
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 public interface IGoReflectSlice
 {
     /// <summary>A slice with room for <paramref name="extra"/> more elements past its length; this value when it has it.</summary>
     object ReflectGrow(nint extra);
+
+    /// <summary>The <c>[]byte</c> aliasing this slice's storage, or null when its element is not a one-byte Go type.</summary>
+    slice<byte>? ReflectByteView();
+
+    /// <summary>An array of length <paramref name="length"/> aliasing this slice's backing store.</summary>
+    object ReflectAliasAsArray(nint length);
 }
 
 // A ref struct option exists for slices that would be restricted to stack-only usage, however, this prevents

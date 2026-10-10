@@ -40,7 +40,6 @@ namespace go;
 // answering wrong.
 public static partial class GoReflect
 {
-    private static readonly ConcurrentDictionary<Type, Func<object, nint, object>> s_sliceArrayAliasers = new();
     private static readonly ConcurrentDictionary<(Type, Type), Func<object, object>?> s_pointerReinterpreters = new();
 
     /// <summary>
@@ -62,9 +61,12 @@ public static partial class GoReflect
         // underlying slice<E> it wraps, so the wrapper's backing is exactly what the array shares.
         object source = TryUnwrapWrapperValue(slice, out object? unwrapped) ? unwrapped : slice;
 
-        object aliased = s_sliceArrayAliasers.GetOrAdd(elem, static et =>
-            typeof(GoReflect).GetMethod(nameof(aliasSliceAsArray), BindingFlags.NonPublic | BindingFlags.Static)!
-                .MakeGenericMethod(et).CreateDelegate<Func<object, nint, object>>())(source, length);
+        // The slice's own face (trim stage 3c-1: ISlice<T>'s default member, compiled for every slice type the program
+        // has), for exactly the values the generic helper took: a slice of the pointee's element type.
+        if (source is not IGoReflectSlice sourceSlice || ((IGoReflectSequence)source).ReflectElementType != elem)
+            throw new InvalidOperationException($"AliasSliceAsArrayPointer: unsupported slice {source.GetType()}");
+
+        object aliased = sourceSlice.ReflectAliasAsArray(length);
 
         // A defined array pointee (`type MyBytesArray0 [0]byte`) takes the aliased HEADER through its
         // generated single-argument constructor: the header's backing reference is the alias.
@@ -74,16 +76,6 @@ public static partial class GoReflect
             throw new InvalidOperationException($"AliasSliceAsArrayPointer: cannot wrap {arrayType} as {pointee}");
 
         return wrapPointerBox(NewPointerBox(pointee, pointeeValue), pointerType);
-    }
-
-    private static object aliasSliceAsArray<E>(object source, nint length)
-    {
-        return source switch
-        {
-            slice<E> s => array<E>.Alias(s, length),
-            ISlice<E> view => array<E>.Alias(new slice<E>(view), length),
-            _ => throw new InvalidOperationException($"AliasSliceAsArrayPointer: unsupported slice {source.GetType()}")
-        };
     }
 
     /// <summary>
@@ -214,8 +206,6 @@ public static partial class GoReflect
         return System.Runtime.CompilerServices.Unsafe.As<T, TDst>(ref copy)!;
     }
 
-    private static readonly ConcurrentDictionary<Type, Func<object, ChanCargo?, object>> s_channelRestampers = new();
-
     /// <summary>
     /// The same channel (same core -- the queue, its lock, its waiters) re-stamped with
     /// <paramref name="cargo"/>: <c>reflect.Value.Convert</c> between channel types hands out a value
@@ -225,17 +215,8 @@ public static partial class GoReflect
     /// </summary>
     public static object WithChanCargo(object channel, ChanCargo? cargo)
     {
-        Type ct = channel.GetType();
-        if (!ct.IsGenericType || ct.GetGenericTypeDefinition() != typeof(channel<>))
-            return channel;
-        return s_channelRestampers.GetOrAdd(ct.GetGenericArguments()[0], static et =>
-            typeof(GoReflect).GetMethod(nameof(restampChannel), BindingFlags.NonPublic | BindingFlags.Static)!
-                .MakeGenericMethod(et).CreateDelegate<Func<object, ChanCargo?, object>>())(channel, cargo);
-    }
-
-    private static object restampChannel<T>(object channel, ChanCargo? cargo)
-    {
-        return ((channel<T>)channel).WithCargo(cargo);
+        // channel<T>'s own face (trim stage 3c-1), which only channel<T> implements: the values the generic helper took.
+        return channel is IGoReflectChannel restampable ? restampable.ReflectWithCargo(cargo) : channel;
     }
 
     // The ж<X> a defined pointer type wraps (its generated single-argument constructor's parameter),

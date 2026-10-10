@@ -546,7 +546,6 @@ public static partial class GoReflect
 
     private static readonly ConcurrentDictionary<(Type boxType, string fieldKey), Delegate> s_fieldAccessors = new();
     private static readonly ConcurrentDictionary<Type, Func<object, Delegate, object>> s_fieldBoxMakers = new();
-    private static readonly ConcurrentDictionary<(Type boxType, Type elemType), Func<object, nint, object>> s_elementBoxMakers = new();
 
     /// <summary>
     /// A field-alias <c>ж&lt;F&gt;</c> over a parent box's Go field: reads/writes route through the
@@ -671,19 +670,12 @@ public static partial class GoReflect
     /// </summary>
     public static object ElementAliasBoxOfBox(object containerBox, Type elemType, nint index)
     {
-        Type boxType = containerBox.GetType();
+        // The box's own element door (trim stage 3c-1): at<E>'s view, publish, bounds panic and element box, for an
+        // element type known only at run time, compiled for every ж<T> the program has.
+        if (containerBox is not IGoReflectBox box)
+            throw new InvalidOperationException($"ElementAliasBoxOfBox: {containerBox.GetType()} is not a pointer box");
 
-        return s_elementBoxMakers.GetOrAdd((boxType, elemType), static key =>
-        {
-            Type containerType = key.boxType.GetGenericArguments()[0];
-            return typeof(GoReflect).GetMethod(nameof(elementBoxViaAt), BindingFlags.NonPublic | BindingFlags.Static)!
-                .MakeGenericMethod(containerType, key.elemType).CreateDelegate<Func<object, nint, object>>();
-        })(containerBox, index);
-    }
-
-    private static object elementBoxViaAt<C, E>(object box, nint index)
-    {
-        return ((ж<C>)box).at<E>(index);
+        return box.ReflectElementAt(index, elemType);
     }
 
     /// <summary>

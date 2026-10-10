@@ -349,6 +349,45 @@ internal interface IGoReflectBox
 
     /// <summary>Stores <paramref name="value"/> through the kind's own <c>ValueSlot</c>; a nil box panics as Go's nil store does.</summary>
     void WriteBoxSlot(object? value);
+
+    /// <summary>
+    /// <c>at&lt;E&gt;(index)</c> for an element type <paramref name="elementType"/> known only at run time
+    /// (<c>GoReflect.ElementAliasBoxOfBox</c>; trim stage 3c-1): an element alias over the array or slice this box names.
+    /// </summary>
+    object ReflectElementAt(nint index, Type elementType);
+}
+
+/// <summary>
+/// The element test <c>ж&lt;T&gt;</c>'s array view applies to the array or slice it names (trim stage 3c-1): a struct, so
+/// the view is specialized per check and <see cref="TypedArrayViewCheck{Telem}"/> costs <c>at&lt;Telem&gt;</c> exactly
+/// the <c>is IArray&lt;Telem&gt;</c> test it always made.
+/// </summary>
+internal interface IArrayViewCheck
+{
+    /// <summary>The requested element type (a native array box answers only its own).</summary>
+    Type ElementType { get; }
+
+    /// <summary>Whether <paramref name="view"/> is a view of the requested element type.</summary>
+    bool Accepts(IArray view);
+}
+
+/// <summary>The element test of <c>at&lt;Telem&gt;</c>: the view is an <see cref="IArray{T}"/> of <typeparamref name="Telem"/>.</summary>
+internal readonly struct TypedArrayViewCheck<Telem> : IArrayViewCheck
+{
+    public Type ElementType => typeof(Telem);
+
+    public bool Accepts(IArray view) => view is IArray<Telem>;
+}
+
+/// <summary>
+/// The same test for an element type known only at run time: every <see cref="IArray{T}"/> names its element through its
+/// sequence face (a type cannot implement two <c>IArray&lt;&gt;</c> without its face's element type being ambiguous).
+/// </summary>
+internal readonly struct RuntimeArrayViewCheck(Type elementType) : IArrayViewCheck
+{
+    public Type ElementType => elementType;
+
+    public bool Accepts(IArray view) => view is IGoReflectSequence sequence && sequence.ReflectElementType == elementType;
 }
 
 /// <summary>

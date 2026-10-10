@@ -107,6 +107,17 @@ public interface IChannel : IEnumerable
     }
 }
 
+/// <summary>
+/// reflect's re-stamp of a <see cref="channel{T}"/> value with another channel type's cargo (<c>GoReflect.WithChanCargo</c>;
+/// trim stage 3c-1). Implemented by <see cref="channel{T}"/> alone, exactly the values the generic helper accepted: a
+/// generated named channel wrapper is returned as it is.
+/// </summary>
+internal interface IGoReflectChannel
+{
+    /// <summary>The same channel (same core) carrying <paramref name="cargo"/>.</summary>
+    object ReflectWithCargo(ChanCargo? cargo);
+}
+
 public interface IChannel<T> : IChannel
 {
     void Send(in T value);
@@ -1197,7 +1208,7 @@ internal static class SelectRuntime
 /// <typeparam name="T">Target type for channel.</typeparam>
 [System.Diagnostics.DebuggerDisplay("len = {Length}, cap = {Capacity}, closed = {IsClosed}")]
 [System.Diagnostics.DebuggerTypeProxy(typeof(channel<>.DebugView))]
-public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>, ISelectableChannel
+public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>, ISelectableChannel, IGoReflectChannel
 {
     // The debugger's view (DebuggerTypeProxy): Go's len and cap of the buffer, and whether it is closed.
     // Read without the channel's lock: a debugger's read must never wait on a goroutine it has stopped.
@@ -1369,6 +1380,10 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
 
     /// <summary>The same core with a different cargo, the live-copy narrowing carrier, cargo-wide.</summary>
     public channel<T> WithCargo(ChanCargo? cargo) => new(m_core, cargo);
+
+    // reflect.Value.Convert's re-stamp between channel types (GoReflect.WithChanCargo; trim stage 3c-1), compiled for every
+    // channel type the program has.
+    object IGoReflectChannel.ReflectWithCargo(ChanCargo? cargo) => WithCargo(cargo);
 
     /// <summary>
     /// Gets the capacity of the channel (0 for an unbuffered or nil channel) — Go's <c>cap()</c>.
