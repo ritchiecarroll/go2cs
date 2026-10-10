@@ -749,7 +749,7 @@ public static partial class GoReflect
     // types directly — value type, no managed references, exactly one byte wide — and never
     // inferred from the [GoType] token, so a wrapper that ever stopped being a bare byte would fall
     // out of the alias rather than pun something wider.
-    private static class ByteAliasableElement<E>
+    internal static class ByteAliasableElement<E>
     {
         internal static readonly bool Value =
             typeof(E).IsValueType &&
@@ -758,7 +758,7 @@ public static partial class GoReflect
             KindOf(typeof(E)) == Uint8;
     }
 
-    private static readonly ConcurrentDictionary<Type, Func<object, slice<byte>?>?> s_byteSliceViews = new();
+    private static readonly ConcurrentDictionary<Type, Type?> s_byteSliceViews = new();
 
     /// <summary>
     /// The <c>[]byte</c> ALIASING <paramref name="container"/>'s storage, when
@@ -784,33 +784,23 @@ public static partial class GoReflect
                 return true;
         }
 
-        Func<object, slice<byte>?>? viewer = s_byteSliceViews.GetOrAdd(container.GetType(), static ct =>
-        {
-            Type? elem = KindOf(ct) == Slice ? ElementType(ct) : null;
+        // The element of a Slice-kinded container type, or null for any other kind (cached: the answer is per type).
+        Type? elem = s_byteSliceViews.GetOrAdd(container.GetType(), static ct => KindOf(ct) == Slice ? ElementType(ct) : null);
 
-            return elem is null
-                ? null
-                : typeof(GoReflect).GetMethod(nameof(byteSliceViewOf), BindingFlags.NonPublic | BindingFlags.Static)!
-                    .MakeGenericMethod(elem).CreateDelegate<Func<object, slice<byte>?>>();
-        });
+        if (elem is null)
+            return false;
 
-        if (viewer?.Invoke(container) is not { } aliased)
+        // The slice's own face (trim stage 3c-1: ISlice<T>'s default member, compiled for every slice type the program
+        // has) aliases the bytes; the element it names must be the one the type's kind reports, as the generic helper's
+        // cast required.
+        if (container is not IGoReflectSlice slice || ((IGoReflectSequence)container).ReflectElementType != elem)
+            throw new InvalidOperationException($"TryByteSliceView: unsupported container {container.GetType()} for element type {elem}");
+
+        if (slice.ReflectByteView() is not { } aliased)
             return false;
 
         view = aliased;
         return true;
-    }
-
-    private static slice<byte>? byteSliceViewOf<E>(object container)
-    {
-        if (!ByteAliasableElement<E>.Value)
-            return null;
-
-        // A defined SLICE type over a defined byte element reaches its window through the same
-        // shared-backing view ctor the plain-byte case above uses; a raw slice<E> unboxes.
-        slice<E> source = container is slice<E> raw ? raw : new slice<E>((ISlice<E>)container);
-
-        return slice<byte>.AliasOfElement(in source);
     }
 
     private static readonly ConcurrentDictionary<Type, Func<slice<byte>, object?>?> s_byteSliceStores = new();

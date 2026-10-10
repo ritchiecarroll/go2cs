@@ -211,7 +211,11 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // A METHOD returning null, never a field: this base is per-BOX, so instance state added here
     // is a corpus-wide byte cost on every pointer in the corpus. The address and the length live
     // on the one kind that has them.
-    internal virtual IArray<Telem>? TryGetNativeArrayView<Telem>() => null;
+    //
+    // NON-GENERIC (trim stage 3c-1): the requested element type is an argument, so a native box refuses a mismatch
+    // before it builds anything, exactly as the generic form did, and reflect's door (IGoReflectBox.ReflectElementAt)
+    // reaches it without closing a generic method over a run-time type.
+    internal virtual IArray? TryGetNativeArrayView(Type elementType) => null;
 
     // ---- minting (the of()/at() surface — unchanged signatures, kind ctors behind them) ----
 
@@ -349,13 +353,19 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     /// already-published box pays no lock, and the slow path runs at most once per box (twice
     /// only if the pointed-to value is REASSIGNED to a different array).
     /// </para>
+    /// <para>
+    /// The element type is a CHECK, not a type parameter (trim stage 3c-1): <see cref="at{Telem}(nint)"/> passes
+    /// <see cref="TypedArrayViewCheck{Telem}"/>, the same <c>is IArray&lt;Telem&gt;</c> test as before, specialized per
+    /// <c>Telem</c> because the check is a struct; reflect's element door passes <see cref="RuntimeArrayViewCheck"/> for an
+    /// element type it knows only at run time. One publish, two callers.
+    /// </para>
     /// </remarks>
-    private IArray<Telem> arrayView<Telem>()
+    private IArray arrayView<TCheck>(TCheck check) where TCheck : struct, IArrayViewCheck
     {
         // A pointer-to-array over NATIVE memory supplies its own view, and must be asked FIRST:
         // every path below reads Value, which for such a box would read element bytes as an
         // array<T> header. Null for every other kind, so nothing else changes shape here.
-        if (TryGetNativeArrayView<Telem>() is { } nativeView)
+        if (TryGetNativeArrayView(check.ElementType) is { } nativeView)
             return nativeView;
 
         if (!s_publishArrayBacking)
@@ -363,7 +373,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
             // Nothing behind this T is lazy (see computePublishArrayBacking), so the view IS the
             // storage's view and no publish — and no Source probe — is owed. A non-IArray T is
             // simply the wrong receiver, and reports the same error it always did.
-            return Value as IArray<Telem> ?? throw notAnArrayOrSlice();
+            return Value is IArray storageView && check.Accepts(storageView) ? storageView : throw notAnArrayOrSlice();
         }
 
         // FAST PATH — a backing has already been published, and the view just boxed shares it, so
@@ -374,15 +384,17 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // backing also means observing the copy-back that installed it.
         object? published = Volatile.Read(ref m_publishedArrayBacking);
 
-        if (published is not null && Value is IArray<Telem> view && ReferenceEquals(view.Source, published))
+        // IArray.Source is the same backing reference IArray<Telem>.Source returns (array<T> hands back m_array to both;
+        // every generated wrapper's non-generic Source forwards to its underlying's), so the identity token is unchanged.
+        if (published is not null && Value is IArray view && check.Accepts(view) && ReferenceEquals(view.Source, published))
             return view;
 
-        return publishArrayBacking<Telem>();
+        return publishArrayBacking(check);
     }
 
     // The at-most-once publish. Kept out of line so arrayView stays small enough to inline.
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private IArray<Telem> publishArrayBacking<Telem>()
+    private IArray publishArrayBacking<TCheck>(TCheck check) where TCheck : struct, IArrayViewCheck
     {
         // Resolve the storage reference BEFORE taking the lock: for a field or element reference
         // that walk runs through the parent box, and the lock guards the publish, not the walk.
@@ -390,7 +402,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
         lock (this)
         {
-            if (value is not IArray<Telem> view)
+            if (value is not IArray view || !check.Accepts(view))
                 throw notAnArrayOrSlice();
 
             // Materializes the lazy backing on the boxed copy, and hands back the RAW backing
@@ -425,7 +437,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     /// </summary>
     public ж<Telem> at<Telem>(nint index)
     {
-        IArray<Telem> array = arrayView<Telem>();
+        IArray<Telem> array = (IArray<Telem>)arrayView(new TypedArrayViewCheck<Telem>());
 
         // Go's &p[i] through a pointer-to-array panics with runtime.boundsError, which recover() sees;
         // a raw IndexOutOfRangeException escaped it.
@@ -446,7 +458,7 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
     public ж<Telem> at<Telem>(ulong index)
     {
-        IArray<Telem> array = arrayView<Telem>();
+        IArray<Telem> array = (IArray<Telem>)arrayView(new TypedArrayViewCheck<Telem>());
 
         if (index >= (ulong)array.Length)
             throw RuntimeErrorPanic.IndexOutOfRange(index, array.Length);
@@ -744,6 +756,19 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
             throw RuntimeErrorPanic.NilPointerDereference();
 
         ValueSlot = (T)value!;
+    }
+
+    // reflect's element door (GoReflect.ElementAliasBoxOfBox; trim stage 3c-1): at<Telem>'s body for an element type
+    // known only at run time. The same view and publish (arrayView), the same bounds panic, and the same ElemRefBox over
+    // the published view, built by the view's own sequence face, which is compiled for every array and slice type.
+    object IGoReflectBox.ReflectElementAt(nint index, Type elementType)
+    {
+        IArray array = arrayView(new RuntimeArrayViewCheck(elementType));
+
+        if (!array.IndexIsValid(index))
+            throw RuntimeErrorPanic.IndexOutOfRange(index, array.Length);
+
+        return ((IGoReflectSequence)array).ReflectElementAlias((int)index);
     }
 
     // ---- the dereference operator and equality operators ----
