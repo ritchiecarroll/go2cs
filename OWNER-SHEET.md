@@ -40,7 +40,7 @@ after COORD has ruled sections 1-3 green, by either path.
 | `evidence/v6probe/` | the Go probe that shows the upstream `TestVersion6` race deterministically |
 | `ROW-PR.md` | draft text for the registry row's pull request |
 
-Both packages were packed at `T` = `claude/c2-nugetgo-tools` @ `ac8775c806`, against the published go.* 1.24.13.5,
+Both packages were packed at `T` = `claude/c2-nugetgo-tools` @ `3d0d70ba53`, against the published go.* 1.24.13.5,
 with `-platforms linux/amd64`. Section 1: 54 matched, 0 disclosed, 18 Benchmark and Fuzz declarations excluded; input
 digest `sha256-1d40aaa871f4e430ac651e70e05593f11e9ed13539146378156e81f13af51b28`, the same in the proof and the packed
 project. The first `-tests` run read one red, `TestVersion6`, an upstream test race that native Go reproduces; COORD
@@ -49,8 +49,17 @@ ruled it cited, not disclosed (`ROW-PR.md` and the first-wave plan give the evid
 `T` is the tools that packed the first packages here plus the README and icon cut (owner, 2026-10-10), and the packs
 add `-LicenseSpdx BSD-3-Clause`. Each package now carries a generated README.md as its nuget.org README, the go2cs icon,
 and VALIDATION.md as a file the README links. The README links the conversion repository at the tag `nuget-<release
-version>`, never `HEAD` (COORD ruling 2026-10-10). Everything else is unchanged and was measured so: the packed assemblies
-are byte-identical to the ones packed at `7888e4e72f`, and so are the description and VALIDATION.md.
+version>`, never `HEAD` (COORD ruling 2026-10-10). The packed assemblies are byte-identical to the ones packed at
+`7888e4e72f`, measured.
+
+The owner's review of the hashset preview (2026-10-10) reaches these packages too, from `T` = `3d0d70ba53`. The
+description, the release notes and the README's top callout no longer start with "PROOF:", and read "...
+standard library; not affiliated ...". The callout's module path, and the "Converted from ..." line's, link the Go
+module's source at its version tag on GitHub. The package tags are `go2cs golang go`, with PROOF dropped (COORD ruling
+C). Against the previous kit's packages, only README.md, VALIDATION.md (its first line, which is the description) and
+the nuspec's description, release notes and tags differ; every assembly, the pdbs, the icon, LICENSE, `index.md` and the
+self-description are byte-identical. `conversion/VALIDATION.md` is the new file, byte for byte as packed, and
+`conversion/README.md` quotes the new description.
 
 ## PATH A: run the rehearsal
 
@@ -74,7 +83,7 @@ if ((go version) -notmatch 'go1\.24\.13 ') { throw 'go is not go1.24.13: check t
 
 $Repo = (git rev-parse --show-toplevel)
 $Work = Join-Path ([IO.Path]::GetTempPath()) 'nugetgo-uuid-int1'
-$T    = 'ac8775c806'
+$T    = '3d0d70ba53'
 $Kit  = 'claude/c2-nugetgo-uuid-1.6.0'
 $Id   = 'nugetgo.github.com.google.uuid'
 $PV   = '1.6.0-int.1'
