@@ -153,6 +153,15 @@ public static class GoTypeOps
     /// </remarks>
     public static IGoTypeOps Of(Type type) => s_ops.GetOrAdd(type, static t => FromSource(t) ?? dynamicOps(t));
 
+    /// <summary>
+    /// Registers operations a converted package's generated escape registry names: a closed container (array, slice,
+    /// map, chan) the package converts to an interface, or reaches through such a value's fields (trim stage 3c-2b(iii),
+    /// go2cs-gen's EscapeRegistryGenerator). Only an interface value reaches reflect, and the registering package's module
+    /// initializer runs before any of its code, so the operations are here before the value is.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static void Register(IGoTypeOps ops) => s_ops.TryAdd(ops.Type, ops);
+
     // The operations compiled code names for this type, or null when only the fallback can answer (GolibTests pins which
     // types answer here: under the JIT the fallback answers the same instance, so the route is invisible without this).
     internal static IGoTypeOps? FromSource(Type type) =>
