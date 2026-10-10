@@ -94,18 +94,46 @@ own test fixtures rather than API a consumer imports; the instance plan names an
 exclusion that names no library of the module, and one that a packed package references. The rehearsal label
 `int.1` is ruled (COORD, 2026-10-09).
 
-The package README is generated in the style of the `go.*` packages (owner, 2026-10-10): the package ID, the PROOF
-text, a badge row, the root package's synopsis and a license line. VALIDATION.md is packed beside it as a file the
-README links. `-LicenseSpdx` names the upstream license for that line (for example `MIT` or `BSD-3-Clause`): the
-caller states it, and the pack never infers it. The icon defaults to the go2cs icon the conversion carries. **A module
-author publishing their own module sets their own icon with `-Icon` before publishing.** The README's links into the
+The package README is `PR/src/M/nuget/README.md`, in the style of the `go.*` packages (owner, 2026-10-10). The pack
+writes it on the first pack (see *Customizing the package page* below). Its generated block holds the description,
+whose module path links the Go source at its version, a badge row, and the license line. There is no "PROOF:" in it
+or in the description (owner review, 2026-10-10). VALIDATION.md is packed beside it as a file the README links.
+`-LicenseSpdx` names the upstream license for that line (for example `MIT` or `BSD-3-Clause`): the caller states it,
+and the pack never infers it. The icon defaults to the go2cs icon the conversion carries. The README's links into the
 conversion repository name the tag `nuget-<PV>` (COORD ruling, 2026-10-10; section 4, step 5); a rehearsal package
 names its release's tag, because a rehearsal version is never tagged.
+
+### Customizing the package page
+
+The package page belongs to the module's author; the pack keeps its facts true (COORD ruling, 2026-10-10).
+
+- **The README** is `nuget/README.md` in the converted module's directory (`PR/src/M/nuget/README.md`; in a flat
+  conversion repository that is `nuget/README.md` at its root). When it is absent, the pack SEEDS it: the package ID
+  as the title, the generated block, then the root package's Go synopsis. It prints `SEEDED <path>` and says to commit
+  it. From then on the file is the author's: retitle it, rewrite the synopsis, add sections.
+- **The generated block** lies between `[//]: # (nugetgo:generated:begin)` and `[//]: # (nugetgo:generated:end)`.
+  Every pack rewrites it from what it measured: the callout with the Go-source link and the security caveat, the
+  Tests, C# Source, Go module and go2cs badges, the license line, and the artwork line when the icon is go2cs's.
+  When the file's block is stale, the pack rewrites it in the file and in the packed copy, and prints `REWRITTEN
+  with package version <PV>, tag nuget-<PV>`. A rehearsal pack writes its rehearsal version there, so commit the
+  file after the RELEASE pack. Nothing outside the block is ever touched.
+- **The pack refuses the file, by name,** when there is no fence; when a marker appears twice, an end has no begin,
+  a begin has no end, or the end comes first; when a marker is not on its own line between blank lines; and when a
+  line names `nugetgo:generated` without being the marker (an HTML comment shows as text on a page that disables
+  HTML). It also refuses a link above the block (the first link is the Go source), and today's README arms: no
+  "PROOF:", no inline code in a heading, no table over three columns, no link naming `HEAD`. The packed README must
+  equal the file byte for byte.
+- **The icon** is `nuget/icon.png` beside the README when present: PNG or JPEG, at most 1 MB, nuget.org's limits.
+  Otherwise it is the go2cs icon. `-Icon` still names one for a single pack, but it is refused when `nuget/icon.png`
+  exists, because there are then two sources.
+- Packages published before this (hashset 1.0.0 and revision 2, uuid and jwt in their first wave) keep their
+  generated READMEs. A conversion repository gets the file at its next rebuild.
 
 **Gate: both packs exit 0.** The pack itself refuses, by name: a host path in any packed file, a restored `go.*`
 closure that is not the published `R`, a proof whose input digest is not the packed project's, any read-back
 mismatch of identity, description, copyright, ranges or self-description, a README with inline code in a heading, a
-table wider than three columns or a link naming `HEAD`, and a package with no icon.
+table wider than three columns or a link naming `HEAD`, a README whose generated block is missing or malformed or has
+a link above it, a package with no icon, and `-Icon` given beside a `nuget/icon.png`.
 
 ## 3. Rehearse on int.nugettest.org (B7)
 
@@ -144,7 +172,8 @@ COORD rules sections 1-3 green before this step.
    `nuget-<PV>` on that commit (the stdlib release's order: the tag exists before the package is signed). The owner
    sheet's first gate checks that the tag exists and resolves anonymously. The commit holds:
    - the contents of `PR/src/M`, including the `Directory.Build.targets` the pack writes there when the upstream
-     holder is not The go2cs Authors;
+     holder is not The go2cs Authors, and `nuget/README.md` (and `nuget/icon.png`, when present) as the release pack
+     left them;
    - `PR`'s root `Directory.Build.props` and `Directory.Build.targets`. Without the root `Directory.Build.props` the
      project does not restore (NU1015), because `GoStdLibVersion` is set there;
    - the module's LICENSE verbatim (B6), a README, and a `.gitignore` for the build output (`.artifacts/`);
