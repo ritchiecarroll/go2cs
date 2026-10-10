@@ -83,7 +83,8 @@ and neither is pushed by this step.
 pwsh -NoProfile -File <T>/src/tools/nugetgo/nugetgo-pack.ps1 -ModulePath M -GoVersion V -Revision 0 `
   -RecurseRoot PR -ValidationDir VR/validation/M -ClosureVersion R -Feed https://api.nuget.org/v3/index.json `
   -OutDir <out-rehearsal> -Scratch <scratch-rehearsal> -RepositoryUrl <conversion repo> -Upstream <holder> `
-  [-UpstreamPublishes] [-ExcludePackage <import path>] -RehearsalSuffix int.1
+  -LicenseSpdx <SPDX expression> [-Icon <PNG or JPEG>] [-UpstreamPublishes] [-ExcludePackage <import path>] `
+  -RehearsalSuffix int.1
 ```
 
 The release candidate is the same command with `-Release` in place of `-RehearsalSuffix int.1`, and its own `-OutDir`
@@ -93,9 +94,16 @@ own test fixtures rather than API a consumer imports; the instance plan names an
 exclusion that names no library of the module, and one that a packed package references. The rehearsal label
 `int.1` is ruled (COORD, 2026-10-09).
 
+The package README is generated in the style of the `go.*` packages (owner, 2026-10-10): the package ID, the PROOF
+text, a badge row, the root package's synopsis and a license line. VALIDATION.md is packed beside it as a file the
+README links. `-LicenseSpdx` names the upstream license for that line (for example `MIT` or `BSD-3-Clause`): the
+caller states it, and the pack never infers it. The icon defaults to the go2cs icon the conversion carries. **A module
+author publishing their own module sets their own icon with `-Icon` before publishing.**
+
 **Gate: both packs exit 0.** The pack itself refuses, by name: a host path in any packed file, a restored `go.*`
-closure that is not the published `R`, a proof whose input digest is not the packed project's, and any read-back
-mismatch of identity, description, copyright, ranges or self-description.
+closure that is not the published `R`, a proof whose input digest is not the packed project's, any read-back
+mismatch of identity, description, copyright, ranges or self-description, a README with inline code in a heading or
+a table wider than three columns, and a package with no icon.
 
 ## 3. Rehearse on int.nugettest.org (B7)
 
@@ -135,7 +143,11 @@ COORD rules sections 1-3 green before this step.
      holder is not The go2cs Authors;
    - `PR`'s root `Directory.Build.props` and `Directory.Build.targets`. Without the root `Directory.Build.props` the
      project does not restore (NU1015), because `GoStdLibVersion` is set there;
-   - the module's LICENSE verbatim (B6), a README, and a `.gitignore` for the build output (`.artifacts/`).
+   - the module's LICENSE verbatim (B6), a README, and a `.gitignore` for the build output (`.artifacts/`);
+   - the packed VALIDATION.md and its per-package proof pages, byte for byte as the package carries them.
+
+   The license file and VALIDATION.md sit at the repository ROOT in either layout below: the package README links
+   `<RepositoryUrl>/blob/HEAD/VALIDATION.md` and `<RepositoryUrl>/blob/HEAD/<license file>`.
 
    **The layout (COORD ruling, 2026-10-09).** When the pack wrote no module `Directory.Build.targets` (the upstream
    holder is The go2cs Authors), the repository is FLAT: everything above sits at its root (hashset). When the pack
