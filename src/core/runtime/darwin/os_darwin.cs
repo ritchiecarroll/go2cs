@@ -475,7 +475,7 @@ internal static bool validSIGPROF(ref m mp, ref sigctxt c) {
 }
 
 //go:linkname executablePath os.executablePath
-internal static @string executablePath;
+public static @string executablePath;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string executablePathˢ = "executable_path="u8;

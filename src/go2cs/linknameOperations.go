@@ -789,9 +789,19 @@ type linknameVarAlias struct {
 // TestLinknameVarAliasRegistryMatchesGoSource re-derives both halves from GOROOT so the judgment
 // cannot rot.
 //
-// One row today, because the corpus exposes exactly one upward pair. The three DOWNWARD pulls
-// (math/bits's overflowError and divideError, time/sleep_test's haveHighResSleep) need no row: their
-// forwarding property already points the safe way and varLinknamePull emits it.
+// Two rows today, one per upward pair the windows, linux and darwin corpus exposes through a
+// `//go:linkname` VAR push out of runtime. The first comment here said "exactly one", counted on the
+// windows flavor; darwin's os.executablePath is the second, found 2026-10-09 when math/rand's
+// TestDefaultRace failed on both mac legs of a darwin sweep with os.Executable's "cannot find
+// executable path". Measured over GOROOT at go1.24.13 (every non-test, non-cmd two-argument
+// directive on a var): with cgo off, the only other upward var pair on these three targets is
+// internal/runtime/maps.zeroVal -> runtime.zeroVal, and a row could not invert it: maps takes its
+// address (&zeroVal[0]), and visitValueSpec refuses a forwarding property for an addressed global on
+// both arms, so it stays its own box as reflect's downward pull of the same var does. Its identity
+// compare (runtime.mapaccess1_fat/mapaccess2_fat) has no caller in the corpus (census 2026-10-09).
+// The three DOWNWARD pulls (math/bits's overflowError and divideError, time/sleep_test's
+// haveHighResSleep) need no row: their forwarding property already points the safe way and
+// varLinknamePull emits it.
 var linknameVarAliasTargets = map[string]linknameVarAlias{
 	// Windows long-path awareness. runtime/os_windows.go carries the two-argument directive
 	// (`//go:linkname canUseLongPaths internal/syscall/windows.CanUseLongPaths`) and isw's
@@ -815,6 +825,22 @@ var linknameVarAliasTargets = map[string]linknameVarAlias{
 	// produces paths that silently fail — a plausible-looking wrong answer, the failure mode this
 	// project rules against. See docs/phase4/DESIGN-linkname-push-cycles.md.
 	"internal/syscall/windows.CanUseLongPaths": {storage: "runtime.canUseLongPaths"},
+
+	// The darwin executable path. runtime/os_darwin.go carries the two-argument directive
+	// (`//go:linkname executablePath os.executablePath`) and os's executable_darwin.go the one-argument
+	// handle, so Go's write lives in runtime.sysargs and the alias points UP, out of runtime into os,
+	// which imports runtime. Emitted the default way, runtime's pull is refused as a cycle and each side
+	// keeps a field of its own, so os.executable() read an empty string on every darwin run and
+	// answered "cannot find executable path" -- every darwin re-exec through os.Executable failed
+	// (testenv.Executable's callers, math/rand's TestDefaultRace).
+	//
+	// Storage in runtime, for the reasons the row above gives: that is where Go writes it, and os
+	// already references runtime, so the inversion adds no reference. FORWARDING ALONE WOULD AGAIN BE A
+	// NO-OP -- the managed model never runs sysargs -- so the populate half is
+	// runtime/darwin/os_darwin_impl.cs, which sets executablePath at module initialization from the
+	// path the process was started from (Environment.ProcessPath, the apphost, as /proc/self/exe reads
+	// on linux). Solaris carries the same directive and is not a go2cs target.
+	"os.executablePath": {storage: "runtime.executablePath"},
 }
 
 // linknameVarAliasStorage is the reverse index of linknameVarAliasTargets: the set of STORAGE members
