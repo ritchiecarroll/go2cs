@@ -596,6 +596,9 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 		newContents = []byte(insertProjectItemGroup(string(newContents), embedItems))
 	}
 
+	// A module package's production inputs, which its validation proof must name (packageInputDigest.go).
+	newContents = []byte(insertInputDigestProperty(string(newContents), options.inputDigest))
+
 	newContents = preserveHandOwnReferences(projectFileName, newContents)
 
 	// Check if project file needs to be written
