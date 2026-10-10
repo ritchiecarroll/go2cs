@@ -501,7 +501,9 @@ above (§1, §3, §4.3, OQ-3) point back to this block, and the earlier text sta
   at the version tag for a module at a github.com repository root (or with a /vN major suffix), pkg.go.dev at that
   version for any other host or a subdirectory module (`Get-NugetgoModuleSourceUrl`). The pack refuses a
   description or README that carries "PROOF:" and a README whose first link is not that source, both before packing
-  and in the read-back. The nuspec tag `PROOF` (`<PackageTags>`) is unchanged; whether it goes too is open.
+  and in the read-back. The nuspec tag `PROOF` went too (COORD ruling C, the same day): `<PackageTags>` reads
+  `go2cs;golang;go`, because nuget.org shows a tag as a chip with no meaning to a reader, and the read-back refuses
+  a PROOF tag.
 - **B7 — rehearsal.** Each new package shape is rehearsed on int.nugettest.org first.
 - **B8 — first wave.** uuid and jwt. gojq's scope is ruled before it is packed.
 
