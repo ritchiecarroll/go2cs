@@ -32,6 +32,7 @@ after COORD has ruled sections 1-3 green, by either path.
 | `nupkg/SHA256SUMS` | both packages' SHA-256, as packed |
 | `preview/README.md` | the package README both packages carry (their README on nuget.org), as text |
 | `preview/README.png` | that README rendered on a dark page (the badges drawn locally: this box cannot reach img.shields.io) |
+| `evidence/Test-ChecksumGate.ps1` | a parse-and-run test of block 2's checksum gate as this sheet writes it, against this kit's packages and a one-line SHA256SUMS (COORD found the one-line false red live, 2026-10-10) |
 
 Each package file is named `<ID>.nupkg` inside a folder named for its role, not `<ID>.<version>.nupkg`: this ID ends
 in `v5`, so the usual name contains a four-part number the identifier census refuses. NuGet reads a package's ID
@@ -335,7 +336,7 @@ options: `--all`, and `--certificate-fingerprint`, which fails unless the signer
 
 ```powershell
 $file = "$Id.nupkg"
-$sums = (Get-Content "$Pub\kit\nupkg\SHA256SUMS") -match "\srelease/$([regex]::Escape($file))$"
+$sums = @(Get-Content "$Pub\kit\nupkg\SHA256SUMS") -match "\srelease/$([regex]::Escape($file))$"
 $want = if ($sums) { ($sums[0] -split '\s+')[0] } else { $null }
 if (-not $want) { throw "SHA256SUMS has no line for $file" }
 $SignDir = "$Pub\sign"
