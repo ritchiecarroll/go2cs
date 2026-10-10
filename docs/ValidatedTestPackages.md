@@ -254,6 +254,10 @@ the denominator honest.
   inapplicable, in neither the numerator nor the applicable denominator, never pending, and skipped
   by name when the sweep runs under that OS. The Linux line above sums the annotations exactly as
   the verdict line sums the columns.
+- A row validated on macOS carries a `darwin: N + D` annotation in the same place. One annotation
+  covers both chips: a row gains it only when Apple silicon (arm64) and Intel (x64) agree with each
+  other verdict for verdict. macOS validation is in progress, so a row with no `darwin:` annotation
+  has not been validated there yet.
 - Every count on every platform is measured with `CGO_ENABLED=0`, the state the corpus is emitted
   in, pinned for the whole run by the sweep since 2026-09-03, so cgo-gated tests (`testenv.HasCGO()`
   variants, cgo-only subtests) are absent on Linux exactly as on Windows. Linux annotations banked

@@ -80,7 +80,7 @@ signature. On Linux, all 223 applicable rows validate at their own Linux counts,
 verdicts with 392 disclosed. The other two, `internal/syscall/windows` and
 `internal/syscall/windows/registry`, are Windows-exclusive and have nothing to compile there.
 
-The last two rows banked today. **`runtime` validates at 10,819 matching verdicts, with 71
+The last two packages validated today. **`runtime` validates at 10,819 matching verdicts, with 71
 disclosed** (10,810 and 73 on Linux). This is the Go runtime's own suite, run against the managed
 runtime that replaces Go's. It covers the scheduler and preemption, channels and `select`, finalizers
 and cleanups, and `defer`, `panic` and `recover` in every ordering, with Go-spelled tracebacks and
@@ -101,11 +101,11 @@ those six are withdrawn from both sides by name.
 
 The September 24 announcement stood at 218 of 230. Since then, every one of the six implementable
 packages it named as not yet validated has validated. `net/http` validated again on September 25, at
-all 1,387 verdicts, once Go 1.24's `internal/synctest` was supported. `internal/synctest` itself banked
+all 1,387 verdicts, once Go 1.24's `internal/synctest` was supported. `internal/synctest` itself validated
 at 28 of 28 on September 27, the same day as `reflect`, now at 396 matching with 22 disclosed.
-`net/http/pprof` banked at 15 of 15 on September 28, and `runtime` and `runtime/pprof` complete the six
-today. A seventh row joined by arithmetic rather than by ruling. On September 28, `runtime/trace` left
-the exclusion ledger: go2cs's managed execution tracer writes a trace that Go's own parser accepts,
+`net/http/pprof` validated at 15 of 15 on September 28, and `runtime` and `runtime/pprof` complete the six
+today. A seventh package joined because the implementable set itself grew. On September 28,
+`runtime/trace` stopped being an exclusion: go2cs's managed execution tracer writes a trace that Go's own parser accepts,
 both of its verdicts matched, and the implementable set grew from 224 to 225. The same day
 `runtime/debug` left the roster, when its disclosure for `TestStack` was found to match by substring
 and absorb assertion lines it should not have. It returned on September 30, at 8 matching with 1
@@ -125,13 +125,13 @@ one of the 225 rows links a proof page that lists Go's verdict beside go2cs's, t
 Five testable packages sit outside the implementable set. Every one of them is an internal package
 that no Go program outside the standard library can import, and each is listed with its class,
 mechanism and evidence. `runtime/internal/wasitest` is a WASI test package that runs no test on
-`windows/amd64`, because its only selecting test skips unless the target is `wasip1/wasm` (E1).
+`windows/amd64`, because its only selecting test skips unless the target is `wasip1/wasm`.
 `internal/unsafeheader` builds live slices and strings by writing raw header fields, a memory model
-a managed runtime deliberately does not have, so a pass would be fabrication rather than implementation
-(E3). The other three run cleanly but validate nothing about the port (E4). `net/internal/cgotest`'s
+a managed runtime deliberately does not have, so a pass would be fabrication rather than implementation.
+The other three run cleanly but validate nothing about the port. `net/internal/cgotest`'s
 only test has an empty body, `internal/copyright` scans the GOROOT both sides share for copyright
 notices, and `crypto/internal/fips140deps` shells out to `go list` to check the Go tree's import
-policy. An exclusion rejoins the denominator the day its evidence changes, as `runtime/trace`'s did.
+policy. An excluded package rejoins the count the day its evidence changes, as `runtime/trace`'s did.
 
 Go's own tests first passed in C# on [July 17](#july-17-2026--gos-own-tests-now-pass-in-c), with
 `unicode/utf8`'s fourteen verdicts. Seventy-six days later, the last implementable package validated.

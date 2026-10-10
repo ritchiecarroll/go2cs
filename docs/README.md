@@ -17,7 +17,8 @@ array's length are short comments in Go's own spelling. The source generators re
 [Before and after](BeforeAndAfterTheFaceLift.md) shows nine real examples from the converted standard library
 on both sides of the change. **A C# project that references the `go.*` packages now runs under Native AOT
 on Windows**, as it does on Linux and on Intel Macs, and a fully trimmed Native AOT build runs for the
-first time. The converted library ships as **NuGet 1.24.13.5**, targeting .NET 10, with every validated
+first time; a Native AOT publish is still slow and large
+([Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)). The converted library ships as **NuGet 1.24.13.5**, targeting .NET 10, with every validated
 package at its count on Windows and on Linux. The
 [full announcement](NEWS.md#october-9-2026--converted-code-reads-like-go-and-native-aot-runs-on-windows)
 has the details.
@@ -380,8 +381,9 @@ internal static void Main() {
 > packages, with a converter built from a checkout at or after the commit that published them. The output
 > matches `go run`, including `fatih/color`'s colors in an interactive terminal, on both platforms.
 > macOS (Intel and Apple silicon): packages ship for both chips, the behavioral suite passes on both, and the README
-> walkthrough runs. The standard library is not yet validated package by package on macOS, so don't expect it to be
-> fully operational there yet. Other platforms and architectures are tracked in the Roadmap's
+> walkthrough runs. The standard library is being validated package by package on macOS; a
+> [roster](ValidatedTestPackages.md) row shows a macOS count once its package validates there, so don't expect a
+> package without one to be fully operational on macOS yet. Other platforms and architectures are tracked in the Roadmap's
 > [Platforms section](Roadmap.md#platforms)._
 
 **3 — C#: build the generated solution.** The app's per-project `.slnx` builds the app and its whole

@@ -17,8 +17,8 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   libraries ship a pure-Go fallback behind a build tag, and you have to pass that tag yourself.
 * **Goroutines are real threads.** Thousands are fine. Hundreds of thousands are not.
 * **It's usually slower than Go**, starts slower and uses more memory.
-* **One conversion targets one operating system**, and the standard library is validated on x64
-  Windows and Linux only.
+* **One conversion targets one operating system.** The standard library is validated on x64
+  Windows and Linux, and its macOS validation is in progress.
 * **Most failures are loud. A few differences are silent**: see the last bullet under
   [what behaves differently](#what-converts-but-doesnt-behave-exactly-like-go).
 
@@ -94,7 +94,8 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   correct, validated, and slower than Go's assembly. A TLS handshake is where you will notice.
 * **Native AOT** starts much faster and holds less memory, but once running it is slower than the JIT
   on most rows of the comparison, and a publish compiles every converted package your program
-  references: hours, and more memory than most laptops have
+  references: hours, and from about 9.5 GB to 18 GB of memory, depending on how much of the library
+  the program uses
   ([the cost](Performance.md#what-the-aot-column-costs-to-produce--the-honesty-footnote)).
 
 ## Third-party modules: where they trip today
@@ -146,8 +147,9 @@ verdict, by full test name. That's a real bar, and narrower than the word sounds
   Converted projects and the `go.*` packages target `net10.0`.
 * **Where it runs.** The standard library is validated on x64 Windows and x64 Linux (glibc, on
   Microsoft's build of .NET: Ubuntu's own package has an entry in [Known issues](KnownIssues.md)).
-  macOS, Intel and Apple silicon, has packages and runs the README walkthrough, but isn't validated
-  package by package yet. Anywhere else the Windows flavor of the library loads, warns that it is
+  macOS, Intel and Apple silicon, has packages and runs the README walkthrough, and is being validated
+  package by package: a [roster](ValidatedTestPackages.md) row shows a macOS count once its package
+  validates on both chips. Anywhere else the Windows flavor of the library loads, warns that it is
   `running the "windows" build`, and follows Windows rules or fails wherever it touches the OS.
 * **One conversion, one operating system.** Go picks build-tagged files at conversion time, so convert
   once per OS (`-platforms linux/amd64`), into separate output folders.

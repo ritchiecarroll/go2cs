@@ -85,7 +85,8 @@ and more than two hours on a four-core machine, and the
 executable was about 250 MB. A program that uses `fmt` and `reflect` references about twice as many: on a
 six-core Windows machine (`win-x64`, 31 GB of memory) its publish took about five and a half hours, the
 Native AOT compiler held about 9.5 GB of memory throughout, and the executable was about 370 MB. It ran
-correctly. A converted project pays the same cost, because it uses the same setting. A build, `dotnet run`
+correctly. The performance suite's programs, which compile the whole converted standard library, peak at
+15 to 18 GB while they publish ([Performance](Performance.md)). A converted project pays the same cost, because it uses the same setting. A build, `dotnet run`
 and a publish without Native AOT are not affected.
 
 <!-- Measured 2026-10-10 by G (ledger: COORD's stage-3 table, row A): "genprobe", a short fmt + reflect program
