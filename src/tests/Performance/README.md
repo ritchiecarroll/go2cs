@@ -64,7 +64,8 @@ separately by the Startup row.
 - **The AOT column's numbers are runtime numbers; producing them is expensive, and we say so.**
   Each Native AOT publish compiles the entire converted-stdlib closure whole-program — hours per
   publish, largely single-threaded, at a **15–18 GB** build-time working-set peak (re-measured at
-  each Go or .NET release move) — which is also exactly what buys the column's lean images and runtime memory wins. The
+  each Go or .NET release move; a smaller program that uses only `fmt` and `reflect` held about 9.5 GB,
+  [Known issues](https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)) — which is also exactly what buys the column's lean images and runtime memory wins. The
   full disclosure, the reasoning, and the compile-farm mitigation live in the suite README's
   ["What the AOT column costs to produce"](https://github.com/ritchiecarroll/go2cs/blob/master/src/tests/Performance/README.md#what-the-aot-column-costs-to-produce--the-honesty-footnote)
   section.
