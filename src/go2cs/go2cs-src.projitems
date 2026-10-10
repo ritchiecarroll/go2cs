@@ -363,6 +363,7 @@
     <None Include="$(MSBuildThisFileDirectory)publicizeSiblingTestSeed_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeOverFuncBinding_test.go" />
     <None Include="$(MSBuildThisFileDirectory)readme.go" />
+    <None Include="$(MSBuildThisFileDirectory)readmeBadgeExclusion_test.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeDocLinks.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeDocLinks_test.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeFromCSharp_test.go" />

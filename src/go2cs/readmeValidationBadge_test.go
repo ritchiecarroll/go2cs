@@ -51,9 +51,29 @@ func badgeTree(t *testing.T, dotID string, version string) (string, string) {
 		// every composed-target test reads the unpublished-line fallback instead, which is what nine
 		// of them did when the resolution changed and this helper had not caught up.
 		mustMkdirAll(t, filepath.Join(tree, "docs", validationDocsDirName, version))
+
+		// And the roster, whose exclusion ledger the Tests badge honors: a repository has one. This
+		// one excludes nothing; writeBadgeRoster rewrites it for a test that needs an exclusion.
+		writeBadgeRoster(t, root)
 	}
 
 	return root, projectPath
+}
+
+// writeBadgeRoster writes docs/ValidatedTestPackages.md beside the go2cs root with an exclusion ledger
+// naming the given import paths, in the committed roster's ledger shape (an "Excluded packages"
+// heading, then one plain-code-span row per package).
+func writeBadgeRoster(t *testing.T, root string, excluded ...string) {
+	t.Helper()
+
+	roster := "# Validated Test Packages\n\n## Excluded packages\n\n" +
+		"| Package | Verdicts | Class | Mechanism | Rooting |\n|:--|:--:|:--:|:--|:--:|\n"
+
+	for _, importPath := range excluded {
+		roster += fmt.Sprintf("| `%s` | 1 | E4 | The comparison validates nothing about the port. | [ruling][exclusion-ruling] |\n", importPath)
+	}
+
+	mustWriteFile(t, filepath.Join(filepath.Dir(root), "docs", validationRosterFileName), strings.ReplaceAll(roster, "\n", "\r\n"))
 }
 
 // addProofPage writes a proof page for dotID rendered by the production renderer, so the counts the
