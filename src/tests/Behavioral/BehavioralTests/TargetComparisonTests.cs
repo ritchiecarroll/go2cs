@@ -1579,6 +1579,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPartialRedeclaration() => CheckTarget("PartialRedeclaration");
 
     [TestMethod]
+    public void CheckPhase5Breakpoint() => CheckTarget("Phase5Breakpoint");
+
+    [TestMethod]
+    public void CheckPhase5CoverageAPIs() => CheckTarget("Phase5CoverageAPIs");
+
+    [TestMethod]
     public void CheckPipeCloseUnblocksRead() => CheckTarget("PipeCloseUnblocksRead");
 
     [TestMethod]

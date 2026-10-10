@@ -818,6 +818,8 @@
     <Project Path="tests/Behavioral/ParenthesizedTypeAssertion/ParenthesizedTypeAssertion.csproj" />
     <Project Path="tests/Behavioral/ParenTypeConversionCall/ParenTypeConversionCall.csproj" />
     <Project Path="tests/Behavioral/PartialRedeclaration/PartialRedeclaration.csproj" />
+    <Project Path="tests/Behavioral/Phase5Breakpoint/Phase5Breakpoint.csproj" />
+    <Project Path="tests/Behavioral/Phase5CoverageAPIs/Phase5CoverageAPIs.csproj" />
     <Project Path="tests/Behavioral/PkgLevelFuncLitLocals/PkgLevelFuncLitLocals.csproj" />
     <Project Path="tests/Behavioral/PipeCloseUnblocksRead/PipeCloseUnblocksRead.csproj" />
     <Project Path="tests/Behavioral/PlainSendOperandOrder/PlainSendOperandOrder.csproj" />
