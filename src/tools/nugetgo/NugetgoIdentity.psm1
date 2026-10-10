@@ -11,7 +11,7 @@
                            without +incompatible; a rebuild is X.Y.Z.N for a release and L.0.N for a prerelease or
                            pseudo-version; the refusals (an uppercase prerelease label, an Int32 overflow, more than
                            64 characters) and the @v/list guard before any L.0.N rebuild.
-    Get-NugetgoDescription the package description: the third-party PROOF sentence (B6) or the author's form, decided
+    Get-NugetgoDescription the package description: the third-party sentence (B6) or the author's form, decided
                            by -UpstreamPublishes cross-checked against the module's and -RepositoryUrl's host/org.
 
     All three return an object, never a bare string, so a refusal carries its reason instead of an empty value a caller
@@ -159,8 +159,9 @@ function Get-NugetgoHostOrg([string]$Path) {
 function Get-NugetgoDescription {
     <#
     .SYNOPSIS
-        The package description: the third-party PROOF sentence (B6), or the AUTHOR's form when the module's own
-        author publishes (owner ruling, 2026-10-02). The fact that decides it is -UpstreamPublishes, CROSS-CHECKED against
+        The package description: the third-party sentence (B6), or the AUTHOR's form when the module's own
+        author publishes (owner ruling, 2026-10-02). Neither carries a "PROOF:" prefix (owner review of the hashset revision-1
+        preview, 2026-10-10: unexplained to a nuget.org reader; the registry tier and the Tests badge carry the proof). The fact that decides it is -UpstreamPublishes, CROSS-CHECKED against
         the module path's host/org and -RepositoryUrl's, the URL the registry's canonical rule reads: the switch with the
         same org gives the author's form; neither gives the third-party form; the switch with another org, the same org
         without the switch, or the switch on a path whose host/org the pack cannot compare, is REFUSED by name.
@@ -187,14 +188,14 @@ function Get-NugetgoDescription {
             return & $refuse "-UpstreamPublishes: -RepositoryUrl $RepositoryUrl is not under $moduleOrg, the module's own org; the author's conversion-source repository lives there (the registry's canonical rule reads the same URL)"
         }
         return [pscustomobject]@{ Author = $true; Refused = $false; Reason = $null
-            Description = "PROOF: go2cs C# conversion of $ModulePath $GoVersion, published by its author, built on the Go $GoRelease standard library, " +
+            Description = "go2cs C# conversion of $ModulePath $GoVersion, published by its author, built on the Go $GoRelease standard library; " +
                 "not affiliated with or endorsed by the Go project. $security" }
     }
     if ($moduleOrg -and $repositoryOrg -eq $moduleOrg) {
         return & $refuse "-RepositoryUrl $RepositoryUrl is under $moduleOrg, the module's own org, which is the author's form: pass -UpstreamPublishes, or publish from a repository outside that org"
     }
     return [pscustomobject]@{ Author = $false; Refused = $false; Reason = $null
-        Description = "PROOF: unofficial go2cs C# conversion of $ModulePath $GoVersion, built on the Go $GoRelease standard library, " +
+        Description = "unofficial go2cs C# conversion of $ModulePath $GoVersion, built on the Go $GoRelease standard library; " +
             "not affiliated with or endorsed by $Upstream or the Go project. $security" }
 }
 

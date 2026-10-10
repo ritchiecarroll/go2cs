@@ -491,6 +491,19 @@ above (§1, §3, §4.3, OQ-3) point back to this block, and the earlier text sta
   **A named gap:** a module path with no comparable host/org (gopkg.in, a vanity domain) takes only the third-party
   form; with the switch it is REFUSED, because the pack cannot corroborate authorship for that path shape. Resolving
   the path's `go-import` record would close it, and is not built. Section 2's canonical rule has the same gap.
+  **AMENDED 2026-10-10 (owner review of the hashset revision-1 preview, COORD session) -- PROOF dropped from the visible
+  text.** The registry tier and the Tests badge carry the proof. To a nuget.org reader "PROOF:" was unexplained
+  jargon, so neither form carries it: the description, the release notes and the README's blockquote read "unofficial
+  go2cs C# conversion of ..." (third-party) or "go2cs C# conversion of ..., published by its author, ..." (author),
+  and "standard library" is now followed by "; not affiliated" rather than ", not affiliated", as the owner's
+  proposed callout reads. This supersedes "Stable versions carry PROOF in the text" above. The README's blockquote
+  and its "Converted from ..." line also LINK the module path to the Go module's source at its version: GitHub's tree
+  at the version tag for a module at a github.com repository root (or with a /vN major suffix), pkg.go.dev at that
+  version for any other host or a subdirectory module (`Get-NugetgoModuleSourceUrl`). The pack refuses a
+  description or README that carries "PROOF:" and a README whose first link is not that source, both before packing
+  and in the read-back. The nuspec tag `PROOF` went too (COORD ruling C, the same day): `<PackageTags>` reads
+  `go2cs;golang;go`, because nuget.org shows a tag as a chip with no meaning to a reader, and the read-back refuses
+  a PROOF tag.
 - **B7 — rehearsal.** Each new package shape is rehearsed on int.nugettest.org first.
 - **B8 — first wave.** uuid and jwt. gojq's scope is ruled before it is packed.
 
