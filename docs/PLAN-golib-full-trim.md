@@ -11,6 +11,10 @@
 > in TRAIN FL as rows 17 (`claude/g-trim-golib-sites`) and 18 (`claude/g-trim-registry`): with stage 2 the
 > package consumer RUNS under Native AOT and a full trim. Section 9 proposes stage 3, the dynamic-code class; it is a
 > plan only, for the next train, and nothing in it is ruled.
+>
+> **AMENDED 2026-10-10 (G).** Stage 3 is measured and RULED: the owner chose the shape measured as row G+(iii) and
+> retired the size bars as gates (Go behavioural parity first; size and build time reported with every seat). The
+> stack, the table and what stays at stage 3d are in section 9.11.
 
 ---
 
@@ -489,3 +493,68 @@ output compared with Go's; and the IL3050 census, predicted per sub-stage and re
      full trim, stage 2 seat ca1a2cf81d): output lines 1 and 2 equal Go's, then NotSupportedException at
      GoReflect.readSlot[reflect_package+rtype]. The attribute-on-type falsification: scratch efZ1 (arms C, D), the
      registration that works: efZ2 (arm E), efZ3 (arm G). -->
+
+### 9.11 Stage 3 measured, and the owner's ruling (2026-10-10)
+
+**AMENDED 2026-10-10 (G). The owner RULED (relayed by COORD): stage 3 seats in the shape measured as row G+(iii)
+below.** His reasoning, verbatim: "build limits, and file size increases are fine (things to optimize in the future) --
+most important is Go behavioral parity, without that, you lose from the first attempt (user's perspective)." So
+OQ-5's 5% partial-trim gate and the 25% full-trim bar are **retired as gates** for this work. Size and build time are
+still measured and reported with every seat; they never block parity.
+
+**The stack, in train order** (each on the one before it; the ILLink fix is its own row, a sibling of 3c-1 on 3b):
+
+| Row | Branch | What |
+|---|---|---|
+| 3a | `claude/g-trim-3a-dispatch` | reflect's value operations dispatch through non-generic faces (answer 1) |
+| 3b | `claude/g-trim-3b-records-zero` @ `64804ed9b5` | the zero value through a generated construction hook; each param-dims record's method kept |
+| 3b fix | same branch @ `07411b26f7` | a keep names its method without a parameter list: ILLink crashed (IL1012) on a full signature naming a nested type of another assembly (`go.unsafe_package.Pointer`); upstream repro `claude/g-illink-repro` |
+| 3c-1 | `claude/g-trim-3c1-held-value` | the four held-value reflect sites through the faces |
+| 3c-2a | `claude/g-trim-3c2a-golib-faces` | the type-only sites ask a zero value's face |
+| 3c-2b | `claude/g-trim-3c2b-pointer-ops` | reflect.New / Zero(*T) through generated type operations; the face only on a type whose pointer its compilation spells; **never on golib's containers** |
+| 3c-2b(iii) | `claude/g-trim-3c2b-escape-registry` | a generated registry names the operations of every closed container that can reach reflect |
+
+**The stage-3 table** (Native AOT, win-x64, deltas against master `56f0f1f254`; P = the default partial trim,
+F = a full trim; DP = the template-default `dotnet publish`, ILLink, no AOT, of four programs: rc and output equal to
+Go's; "fails" = what differs from Go under Native AOT with a full trim, AOT only, the JIT unaffected):
+
+| Row | consumer P | consumer F | genprobe F | c32a F | DP | fails under AOT (F) |
+|---|---|---|---|---|---|---|
+| A master | 243,136,000 B | 24,480,768 B | 36,830,720 B | 37,134,848 B | pass | c32a, c32b; c32c by construction (not run) |
+| B 3a | +5.85% | +0.90% | +2.27% | +2.28% | pass | c32a, c32b; c32c by construction (not run) |
+| C 3a, the window overloads merged | +5.44% | +0.90% | +2.41% | +2.43% | pass | as B |
+| D 3c-2b, a face on every value type and container | **ILC crash** | +3.41% | +45.22% | +45.04% | 3b fix: pass | none probed |
+| E D, the face only where a pointer is spelled | **ILC crash** | +3.20% | +21.56% | +21.62% | 3b fix: pass | never-pointed-to types |
+| F 3c-2a (3c-2b dropped) | +7.82% | +2.85% | +3.45% | +3.58% | 3b fix: pass | c32b, c32c |
+| G E without the container faces | +8.03% | +3.03% | +10.75% | +10.82% | 3b fix: pass | c32c |
+| **G+(iii)** G with the escape registry | **+9.58%** | +3.93% | +12.25% | +12.46% | pass | none probed |
+
+The probes: genprobe (fmt + reflect over generic structs; it stops at family E's `buildFieldAccessor` in every row,
+by design), c32a (Zero, nested sized arrays, Make*, SetBytes, the tagged conversion after a GC), c32b (reflect.New and
+Zero of pointer types through the operations, the builtins table and the fallback), c32c (reflect.New and Zero(*C) for
+an array, slice, map and chan). Rows D and E crashed ILC under partial trim (System.OverflowException in its
+type-system hashtable after about 100 minutes): a face on a generic container names the container's operations, those
+make its box live, and the box builds a container of the container, whose face names the next level. Row G removed
+only the container faces and compiles; the escape registry gives containers their operations back without a face.
+
+**Build time of the escape registry** (Roslyn's per-generator timing, a full stdlib build): 41-45 CPU-seconds per OS
+over 342 projects, the largest single project about 3 s, against about 300 s for the other go2cs generators. Wall-clock
+A/B runs of the full stdlib build (two per arm and OS) stayed within their own noise.
+
+**What stays at stage 3d** (golib's dynamic fallback: AOT only, the JIT answers the same): a conversion inside generic
+code (T to an interface, open at the site); a container reachable only through a field another assembly does not
+export; a struct whose own compilation never spells a pointer to it (the face's syntactic rule: Go `*T` receivers are
+written `ref`, and a pointer reached only through `var` inference is missed; the converter could make the rule exact).
+
+**Also measured:** a fmt + reflect program's default (partial-trim) Native AOT publish on master takes about 5.5 hours
+and 9.5 GB of the AOT compiler's memory on a 6-core / 12-thread, 31 GB machine and yields about 370 MB; it runs
+correctly (docs/KnownIssues.md, `claude/g-known-issue-aot-reflect`).
+
+9.10's open measurement is answered: generic-cycle expansion is real for faces on golib's containers (rows D, E) and
+absent without them (rows G, G+(iii)).
+
+<!-- G, 2026-10-10. Table: scratch ef3tab (cells.tsv, bat.txt; rows A-G), row G+(iii) ef3tabH and chainH; the
+     container probe c32c-probe (Go output via go1.24.13); default publish dpub (cells.tsv; the createdump.exe trap is
+     fixed in its runner); generator timing esctime (ReportAnalyzer logs), wall A/B escwall; registry counts from
+     escwall's prototype builds (134-137 packages, 651-662 registrations per OS); escape census escount (std: 346
+     container-escape sites in 59 packages). Master genprobe P: ef3tab4, 19,579 s alone, 386,929,664 B. -->
