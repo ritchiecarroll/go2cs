@@ -99,8 +99,8 @@ type Options struct {
 	testInlineTypeAccess bool // internal bridge types carry accessibility on their source declaration
 	testFriendAssembly   bool // production internals may be consumed by the separate test assembly
 
-	// -nuget-map*: the -recurse=nuget mapping sources (nugetMap.go); resolved, locked and reported, not yet
-	// applied (stage S3b).
+	// -nuget-map*: the -recurse=nuget mapping sources (nugetMap.go): resolved, locked and reported, and each mapped
+	// module whose published package qualifies is substituted by it (nugetSubstitution.go, stage S3b).
 	nugetMap nugetMapOptions
 
 	// inputDigest is the GoInputDigest the package being converted records in its project (packageInputDigest.go): set
