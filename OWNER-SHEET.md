@@ -8,6 +8,17 @@ follow on COORD's side after the owner reports.
 Section 3 has two paths: **PATH A** runs the rehearsal, **PATH B** records COORD's waiver of it. Section 4 runs only
 after COORD has ruled sections 1-3 green, by either path.
 
+## Before the first block, in every new window
+
+1. The i7's default shell is Windows PowerShell 5.1. This sheet needs PowerShell 7, which is installed as a .NET
+   global tool. Start it FIRST, from the 5.1 window and before the environment block:
+   `& "$env:USERPROFILE\.dotnet\tools\pwsh.exe"`. Once the environment block has put .NET 10 first on `PATH`, that
+   pwsh no longer starts.
+2. Confirm that `$PSVersionTable.PSVersion` reads 7.x.
+3. `Set-Location` to the root of your go2cs clone.
+4. **Stop at the first red line.** A `throw` stops only the statement it is in: the lines pasted after it keep
+   running. Read each block's output before you paste the next, and send COORD the first red line instead.
+
 ## What this branch holds
 
 | Path | What it is |
@@ -156,11 +167,15 @@ if ($gates.Values -contains $false) { throw 'a 3.4 gate failed' }
 `Start-Process` hands each program a file as its standard output, so both outputs are compared as the bytes each
 program wrote.
 
+`-p:UseSharedCompilation=false` keeps the build from starting the Roslyn compiler server. On Windows,
+`Start-Process -Wait` waits for every process the command starts, and that server stays alive for minutes after a
+build: the hashset run on the i7 waited about 10 minutes without it.
+
 ```powershell
 $appProject = "$Work\AR\src\example.com\hashsetdemo"
 Copy-Item "$Work\kit\rehearsal\nuget.config" "$appProject\nuget.config"
 $env:NUGET_PACKAGES = "$Work\packages"
-$p = Start-Process dotnet -ArgumentList 'run', '-c', 'Release' -WorkingDirectory $appProject -NoNewWindow -Wait -PassThru `
+$p = Start-Process dotnet -ArgumentList 'run', '-c', 'Release', '-p:UseSharedCompilation=false' -WorkingDirectory $appProject -NoNewWindow -Wait -PassThru `
     -RedirectStandardOutput "$Work\dotnet-run.out" -RedirectStandardError "$Work\dotnet-run.err"
 if ($p.ExitCode) { throw "dotnet run exited $($p.ExitCode) (see $Work\dotnet-run.err)" }
 $p = Start-Process go -ArgumentList 'run', '.' -WorkingDirectory "$Work\app" -NoNewWindow -Wait -PassThru `
