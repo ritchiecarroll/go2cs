@@ -20,6 +20,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"go/build"
 	"io"
 	"os"
 )
@@ -53,7 +54,15 @@ func run(args []string, stdout io.Writer) error {
 	return err
 }
 
-// packageSynopsis returns the synopsis of the Go package in dir.
+// packageSynopsis returns the synopsis of the Go package in dir. go/build reads only the files the default build
+// context selects (a test file or one a build constraint excludes is not the package's) and takes the synopsis from
+// the doc comment attached to their package clause, so a license header above it is not read.
 func packageSynopsis(dir string) (string, error) {
-	return "", nil
+	pkg, err := build.ImportDir(dir, 0)
+
+	if err != nil {
+		return "", fmt.Errorf("no Go package in %s: %w", dir, err)
+	}
+
+	return pkg.Doc, nil
 }
