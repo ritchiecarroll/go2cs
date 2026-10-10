@@ -9,7 +9,7 @@ using errors = errors_package;
 partial class os_package {
 
 //go:linkname executablePath
-public static @string executablePath; // set by ../runtime/os_darwin.go
+public static @string executablePath { get => go.runtime_package.executablePath; set => go.runtime_package.executablePath = value; }
 
 internal static @string initCwd;
 internal static error initCwdErr;

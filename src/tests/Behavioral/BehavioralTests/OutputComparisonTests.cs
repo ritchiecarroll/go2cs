@@ -1463,6 +1463,12 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckOptionalInterfaceStructuralAssertion() => CheckTarget("OptionalInterfaceStructuralAssertion");
 
     [TestMethod]
+    public void CheckOsExecutablePath() => CheckTarget("OsExecutablePath");
+
+    [TestMethod]
+    public void CheckOsGetpagesize() => CheckTarget("OsGetpagesize");
+
+    [TestMethod]
     public void CheckPackageAliasRootedTypeArgs() => CheckTarget("PackageAliasRootedTypeArgs");
 
     [TestMethod]
