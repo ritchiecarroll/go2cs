@@ -344,6 +344,22 @@ public interface IGoReflectPointer
 /// </summary>
 internal interface IGoReflectBox
 {
+    /// <summary>Whether this is a nil pointer.</summary>
+    bool IsNilPointer { get; }
+
+    /// <summary>The native address this box aliases, or 0 for a managed box.</summary>
+    nuint NativeAddress { get; }
+
+    /// <summary>Whether this box names the zerobase (<see cref="ж{T}.NamesZeroBase"/>).</summary>
+    bool NamesZeroBase { get; }
+
+    /// <summary>
+    /// The transient address of the box's <c>ValueSlot</c>, pinned only for the duration of the call: what
+    /// <c>unsafe.Pointer.FromBox</c> numbers a managed box by (trim stage 3c-2a, so a header box can mint the pointer
+    /// without closing <c>FromBox&lt;X&gt;</c> over a run-time element type).
+    /// </summary>
+    nuint TransientSlotAddress();
+
     /// <summary>The pointee through the kind's own <c>ValueSlot</c>.</summary>
     object? ReadBoxSlot();
 

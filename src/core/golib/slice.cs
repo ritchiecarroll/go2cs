@@ -117,6 +117,42 @@ public interface ISlice<T> : IArray<T>, ISlice, IGoReflectSlice
     // Go's (*[N]T)(s) (GoReflect.AliasSliceAsArrayPointer; trim stage 3c-1): an array<T> of length N over this slice's
     // backing store.
     object IGoReflectSlice.ReflectAliasAsArray(nint length) => array<T>.Alias(this is slice<T> raw ? raw : new slice<T>(this), length);
+
+    // reflect.Value.SetBytes's re-spelling (GoReflect.TryByteSliceAs; trim stage 3c-2a): `bytes` as a slice of this slice
+    // type's element, ALIASING the same storage, or null when the element is not one byte under another Go name. Reached
+    // through a zero value of the destination slice type, so it reads nothing of this value.
+    object? IGoReflectSlice.ReflectByteSliceAs(slice<byte> bytes)
+    {
+        if (typeof(T) == typeof(byte))
+            return bytes;
+
+        if (!GoReflect.ByteAliasableElement<T>.Value)
+            return null;
+
+        return slice<T>.AliasOfElement(in bytes);
+    }
+
+    // The slice-header box's identity words for this slice (SliceHeaderBox.Describe; trim stage 3c-2a): backing array
+    // (null for a nil slice), low, len, cap, without allocating.
+    (object? backing, nint low, nint len, nint cap) IGoReflectSlice.ReflectDescribe()
+    {
+        slice<T> source = (slice<T>)this;
+        return (source.m_array, source.Low, source.Length, source.Capacity);
+    }
+
+    // The slice-header box's array word (SliceHeaderBox.ElementZero; trim stage 3c-2a): the element-0 box at the low index,
+    // or, for a zero-capacity slice that names no element, the per-element-type zerobase element (see there).
+    object IGoReflectSlice.ReflectElementZero()
+    {
+        if (((slice<T>)this).Capacity == 0)
+            return GoZeroCapacityElement<T>.Element;
+
+        return new ElemRefBox<T>((IArray)this, 0);
+    }
+
+    // The header-slice box's rebuild (HeaderSliceBox.Rebase; trim stage 3c-2a): a slice of this slice type's element over
+    // native memory, through golib's single creation door. Reached through a zero value of the slice type.
+    object IGoReflectSlice.ReflectOverNativeMemory(nuint address, nint len, nint cap) => slice<T>.OverNativeMemory(address, len, cap);
 }
 
 /// <summary>
@@ -135,6 +171,18 @@ public interface IGoReflectSlice
 
     /// <summary>An array of length <paramref name="length"/> aliasing this slice's backing store.</summary>
     object ReflectAliasAsArray(nint length);
+
+    /// <summary><paramref name="bytes"/> as a slice of this slice type's element, aliasing them; null when the element is not one byte.</summary>
+    object? ReflectByteSliceAs(slice<byte> bytes);
+
+    /// <summary>This slice's identity words: backing array (null for nil), low, len, cap.</summary>
+    (object? backing, nint low, nint len, nint cap) ReflectDescribe();
+
+    /// <summary>The element-0 box at this slice's low index, or the zerobase element for a zero-capacity slice.</summary>
+    object ReflectElementZero();
+
+    /// <summary>A slice of this slice type's element over <paramref name="len"/>/<paramref name="cap"/> elements of native memory.</summary>
+    object ReflectOverNativeMemory(nuint address, nint len, nint cap);
 }
 
 // A ref struct option exists for slices that would be restricted to stack-only usage, however, this prevents
