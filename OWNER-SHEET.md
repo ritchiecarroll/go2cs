@@ -30,19 +30,26 @@ after COORD has ruled sections 1-3 green, by either path.
 | `nupkg/nugetgo.github.com.google.uuid.1.6.0-int.1.nupkg` | the rehearsal package, unsigned, for int.nugettest.org only |
 | `nupkg/nugetgo.github.com.google.uuid.1.6.0.nupkg` | the release candidate, unsigned, for section 4 only; it never goes to int |
 | `nupkg/SHA256SUMS` | both packages' SHA-256, as packed |
+| `preview/README.md` | the package README both packages carry (their README on nuget.org), as text |
+| `preview/README.png` | that README rendered on a dark page (the badges drawn locally: this box cannot reach img.shields.io) |
 | `app/` | the sample program (`main.go`, `go.mod`, `go.sum`) and `go-run.out`, its `go run` output |
 | `rehearsal/mappings.txt` | the one registry row (`community`), as a local mappings file |
 | `rehearsal/nuget.config` | `nugetgo.*` from int.nugettest.org, everything else from nuget.org |
-| `conversion/` | for COORD: the files of the conversion commit on `uuid-cs`, in the nested layout |
+| `conversion/` | for COORD: the files of the conversion commit on `uuid-cs`, in the nested layout; the upstream LICENSE, VALIDATION.md and the proof page(s) sit at its root |
 | `disclosures/` | the notes-only module disclosure manifest that put the `TestVersion6` note on the proof page |
 | `evidence/v6probe/` | the Go probe that shows the upstream `TestVersion6` race deterministically |
 | `ROW-PR.md` | draft text for the registry row's pull request |
 
-Both packages were packed at `T` = `claude/c2-nugetgo-tools` @ `7888e4e72f`, against the published go.* 1.24.13.5,
+Both packages were packed at `T` = `claude/c2-nugetgo-tools` @ `c8ef680e14`, against the published go.* 1.24.13.5,
 with `-platforms linux/amd64`. Section 1: 54 matched, 0 disclosed, 18 Benchmark and Fuzz declarations excluded; input
 digest `sha256-1d40aaa871f4e430ac651e70e05593f11e9ed13539146378156e81f13af51b28`, the same in the proof and the packed
 project. The first `-tests` run read one red, `TestVersion6`, an upstream test race that native Go reproduces; COORD
 ruled it cited, not disclosed (`ROW-PR.md` and the first-wave plan give the evidence).
+
+`T` is the tools that packed the first packages here plus the README and icon cut (owner, 2026-10-10), and the packs
+add `-LicenseSpdx BSD-3-Clause`. Each package now carries a generated README.md as its nuget.org README, the go2cs icon,
+and VALIDATION.md as a file the README links. Everything else is unchanged and was measured so: the packed assemblies
+are byte-identical to the ones packed at `7888e4e72f`, and so are the description and VALIDATION.md.
 
 ## PATH A: run the rehearsal
 
@@ -66,7 +73,7 @@ if ((go version) -notmatch 'go1\.24\.13 ') { throw 'go is not go1.24.13: check t
 
 $Repo = (git rev-parse --show-toplevel)
 $Work = Join-Path ([IO.Path]::GetTempPath()) 'nugetgo-uuid-int1'
-$T    = '7888e4e72f'
+$T    = 'c8ef680e14'
 $Kit  = 'claude/c2-nugetgo-uuid-1.6.0'
 $Id   = 'nugetgo.github.com.google.uuid'
 $PV   = '1.6.0-int.1'
@@ -275,6 +282,10 @@ if ($LASTEXITCODE) { throw "worktree signer exited $LASTEXITCODE" }
 COORD pushes the conversion commit to `github.com/ritchiecarroll/uuid-cs` (the existing repository; runbook 4.5,
 nested layout). The package's `RepositoryUrl` names it. Nothing in this section touches it.
 
+The commit carries the upstream LICENSE, VALIDATION.md and the proof page(s) at the repository root (`conversion/` has
+them there), because the package README links `VALIDATION.md` and `LICENSE` at that root. It should land before
+4.2, so those links never fail.
+
 ### 4.1 The checksum gate, then sign and verify
 
 `sign-nupkgs.ps1` signs every `.nupkg` in the folder it is given, so the release candidate is copied into a folder of
@@ -315,10 +326,11 @@ $signedHash = (Get-FileHash -Algorithm SHA256 "$SignDir\$file").Hash.ToLowerInva
 
 ### 4.2 Push to nuget.org (the permanent step)
 
-The block first checks that nuget.org holds no package with this ID (runbook 0.5), then asks you to type `publish`,
-then reads the key from a prompt. The key handling is the same as 3.1: the key is never typed on a command line and
-does not enter PSReadLine history; while `dotnet nuget push` runs, it is in that process's argument list, as with
-`release-nuget.ps1`; the variable is removed when the push ends.
+The block first checks that nuget.org holds no package with this ID (runbook 0.5), then asks you to type `publish`.
+The key comes from `$env:NUGETGO_API_KEY` when that is set, and from a prompt when it is empty. Either way it is never
+printed, never typed on a command line and never in PSReadLine history; while `dotnet nuget push` runs, it is in that
+process's argument list, as with `release-nuget.ps1`; the block's copy is removed when the push ends. Your
+`$env:NUGETGO_API_KEY` is read, not changed. The key's glob must cover `nugetgo.*`.
 
 `release-nuget.ps1` adds `--skip-duplicate` because a re-run of a 300-package release has to pass over the packages
 already sent. It is left out here on purpose: the ID was just shown to be free, so a duplicate would mean something is
@@ -331,17 +343,14 @@ Write-Host "About to push $file (sha256 $signedHash) to nuget.org." -ForegroundC
 Write-Host 'This is PERMANENT: a pushed version can be unlisted, never deleted or replaced.' -ForegroundColor Yellow
 if ((Read-Host "Type 'publish' to push") -cne 'publish') { throw 'Not published. Nothing was sent.' }
 
-$secure = Read-Host -AsSecureString 'nuget.org API key'
-$env:NUGETGO_ORG_KEY = [Net.NetworkCredential]::new('', $secure).Password
+if ($env:NUGETGO_API_KEY) { $key = $env:NUGETGO_API_KEY; 'key: from $env:NUGETGO_API_KEY' }
+else { $secure = Read-Host -AsSecureString 'nuget.org API key (nugetgo.*)'; $key = [Net.NetworkCredential]::new('', $secure).Password; $secure.Dispose(); 'key: from the prompt' }
 try {
-    dotnet nuget push "$SignDir\$file" --source $Org --api-key $env:NUGETGO_ORG_KEY
+    dotnet nuget push "$SignDir\$file" --source $Org --api-key $key
     $rc = $LASTEXITCODE
 }
-finally {
-    Remove-Item Env:NUGETGO_ORG_KEY -ErrorAction SilentlyContinue
-    $secure.Dispose()
-}
-if ($rc) { throw "dotnet nuget push exited $rc. Do not re-sign or re-pack; tell COORD." }
+finally { Remove-Variable key -ErrorAction SilentlyContinue }
+if ($rc) { throw "dotnet nuget push exited $rc (a 403 in its output means the key's glob does not cover nugetgo.*). Do not re-sign or re-pack; tell COORD." }
 "pushed: $Id $PV"
 ```
 

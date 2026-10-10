@@ -30,6 +30,7 @@ fixes issued after Go 1.24.13; review before any production use.
 | `uuid/Directory.Build.targets` | written by the nugetgo pack: the assembly's copyright names the upstream holder |
 | `Directory.Build.props`, `Directory.Build.targets` | the build settings go2cs generated; `GoStdLibVersion` is set here |
 | `LICENSE` | the upstream license, verbatim (BSD 3-Clause) |
+| `VALIDATION.md`, `index.md` | the validation summary the NuGet package ships, and its proof page(s), byte for byte as packed |
 
 The project sits one directory below the root build files on purpose: `uuid/Directory.Build.targets` imports the
 nearest `Directory.Build.targets` above its own directory, which is the root one.
