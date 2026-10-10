@@ -45,6 +45,20 @@ try {
     Check 'the root package by import path and assembly' (@($packed | Where-Object { $_.ImportPath -ceq 'example.com/mod' -and $_.Assembly -ceq 'example.com.mod' }).Count -eq 1) ($packed | Out-String)
     Check 'a nested package by import path and assembly' (@($packed | Where-Object { $_.ImportPath -ceq 'example.com/mod/sub' -and $_.Assembly -ceq 'example.com.mod.sub' }).Count -eq 1) ($packed | Out-String)
 
+    # -ExcludePackage (COORD ruling 2026-10-09): a module's library package that holds its own test fixtures, not API a
+    # consumer imports (jwt/v5's test helper), is left out of the pack. Refused by name: an exclusion that names no
+    # library of the module, and an excluded package a packed package still references.
+    Write-Host 'excluded packages'
+    $all = @($rootLib, $subLib, $plainLib)
+    $kept = @(Select-NugetgoPackedLibraries -RecurseRoot $root -Libraries $all -ExcludePackage @('example.com/mod/plain'))
+    Check 'an excluded package is not packed' ($kept.Count -eq 2 -and @($kept | Where-Object { $_.FullName -eq $plainLib.FullName }).Count -eq 0) "kept $(@($kept | ForEach-Object { $_.Name }) -join ', ')"
+    $kept = @(Select-NugetgoPackedLibraries -RecurseRoot $root -Libraries $all)
+    Check 'with no exclusion every library is packed' ($kept.Count -eq 3) "kept $($kept.Count)"
+    $why = Refusal { Select-NugetgoPackedLibraries -RecurseRoot $root -Libraries $all -ExcludePackage @('example.com/mod/typo') }
+    Check 'an exclusion that names no library package is refused by name' ("$why" -like '*-ExcludePackage example.com/mod/typo names no library package*') "got '$why'"
+    $why = Refusal { Select-NugetgoPackedLibraries -RecurseRoot $root -Libraries $all -ExcludePackage @('example.com/mod') }
+    Check 'an excluded package a packed package references is refused, naming both' ("$why" -like '*example.com/mod is excluded*example.com/mod/sub references it*') "got '$why'"
+
     Write-Host 'third-party requires'
     $reqs = @(Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($rootLib, $subLib) -ThirdPartyPackage @($depPackage))
     Check 'one require per referenced MODULE (two packages of one dependency module)' ($reqs.Count -eq 1) "got $($reqs.Count): $($reqs | Out-String)"
@@ -75,6 +89,11 @@ try {
 finally {
     Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue
 }
+
+Write-Host 'the pack uses it'
+$pack = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'nugetgo-pack.ps1'))
+Check 'nugetgo-pack.ps1 takes -ExcludePackage and selects its libraries through Select-NugetgoPackedLibraries' (
+    $pack.Contains('[string[]]$ExcludePackage') -and $pack.Contains('Select-NugetgoPackedLibraries')) 'the pack does not select its libraries'
 
 Write-Host "ran $ran, failed $failed"
 exit $failed
