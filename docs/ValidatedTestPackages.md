@@ -187,7 +187,7 @@ the denominator honest.
      Those counts are MATCHED counts only; the + 0 halves are verified by the sweep run ON THIS REF, where Source=darwin enforces them. No
      count in the table or the header changes. -->
 
-<!-- Provenance, darwin wave 8 2026-10-10 (C1; the owner's rule as for waves 3-7): sixteen more rows carry their first `darwin:` annotation.
+<!-- Provenance, darwin wave 8 2026-10-10 (C1; the owner's rule as for waves 3-7): fifteen more rows carry their first `darwin:` annotation.
      These are the rows that carry DISCLOSURES: windows and linux share both halves, and each row's go2cs_test_disclosures.json scopes every
      pin to all platforms, darwin included. Each annotation is the row's banked `N + D`. Measured on both hosted mac legs (osx-arm64 macos-15,
      osx-x64 macos-15-intel) by os-matrix sweep-shard in ONE run, 38020195545, on master 4d3e557ffb, exact names, -TestTimeout 45m, with the
@@ -198,7 +198,12 @@ the denominator honest.
      the matched half. Each leg's tracked diff (540 bytes) is one named class, not a darwin verdict input: unique/clone.cs.auto 1/1, the
      review sibling of a whole-file hand-own, re-emitted by that row's -tests pass. That run compared MATCHED counts only (no darwin key yet,
      so Source=columns); the disclosed halves (+1 each, except crypto/sha3 +5, database/sql +2, internal/runtime/maps +108, log/slog +17) are
-     verified by the sweep run ON THIS REF, where Source=darwin enforces N + D. No count in the table or the header changes. -->
+     verified by the sweep run ON THIS REF, where Source=darwin enforces N + D. No count in the table or the header changes.
+     context was read with the other sixteen and is NOT banked: the acceptance run on this seat, 38022494087, PASSED the fifteen rows above at
+     N + D on both legs, but on osx-arm64 context read DISC "58, disclosed 0 vs the darwin expectation 1" -- its one disclosure, TestAllocs
+     (exact AllocsPerRun counts; WithTimeout(bg, 5ms) reads 9 against a want of 8 at most), passed there, while the read run had it disclosed
+     on the same leg and osx-x64 kept it disclosed in both runs. A disclosed test that passes on some runs is not a stable darwin count, so the
+     row keeps no darwin annotation until that is understood. -->
 
 ## Reading the table
 
@@ -283,7 +288,7 @@ the denominator honest.
 | [`container/heap`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/container/heap) | 7 | | Heap interface over a slice. · linux: 7 · darwin: 7 · [proof](validation/current/container.heap.md) |
 | [`container/list`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/container/list) | 10 | | Doubly-linked list — pointers and receiver methods. · linux: 10 · darwin: 10 · [proof](validation/current/container.list.md) |
 | [`container/ring`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/container/ring) | 8 | | Circular linked list — a pointer graph. · linux: 8 · darwin: 8 · [proof](validation/current/container.ring.md) |
-| [`context`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/context) | 57 | 1 | Cancellation trees over real channel rendezvous — parent/child propagation, `Done` broadcast, `AfterFunc` registration races, `t.Deadline`-driven tree cancellation, value chains named through the reflectlite bridge; deferred alloc-count disclosure. · linux: 57 + 1 · darwin: 57 + 1 · [proof](validation/current/context.md) |
+| [`context`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/context) | 57 | 1 | Cancellation trees over real channel rendezvous — parent/child propagation, `Done` broadcast, `AfterFunc` registration races, `t.Deadline`-driven tree cancellation, value chains named through the reflectlite bridge; deferred alloc-count disclosure. · linux: 57 + 1 · [proof](validation/current/context.md) |
 | [`crypto`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto) | 6 | | The root `crypto` package's cross-cipher invariants — every stream mode's out-of-bounds-write guard (CFB/CTR/OFB/RC4) and the `purego` build-tag assertion the converted corpus is built under. · linux: 6 · darwin: 6 · · [proof](validation/current/crypto.md) |
 | [`crypto/aes`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/aes) | 57 | | AES over the `purego` generic implementation — key expansion, the S-box and Te/Td round tables, GF(2⁸) `mul`/`powx`, known-answer encrypt/decrypt vectors, and the CBC/CTR/GCM interface-upgrade probes. · linux: 57 · [proof](validation/current/crypto.aes.md) |
 | [`crypto/cipher`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/cipher) | 27272 | | Go's block-cipher MODES over the converted AES — CBC/CFB/CTR/OFB encrypt and decrypt against the NIST SP 800-38A vectors; GCM authenticated encryption, including the counter-wrap edge, invalid tag sizes, empty plaintext, and the tag-failure path that must overwrite its output buffer. `TestGCMAsm` is the founding `platform-skip` row: Go passes on a build with a distinct assembly GCM; the converted corpus, having no assembly codepaths at all, takes gcm_test.go's own skip. ⚠ **SCOPED OFF WINDOWS AT go1.24.13 (2026-09-22, H10 manifest re-sign):** the windows record now reads `TestGCMAsm` pass on BOTH sides, so its pin absorbs nothing there and is scoped to linux and darwin; the 1.23.12-era `linux: 13 + 1` annotation still claims it until the linux axis re-runs at 1.24.13. ⚠ **RE-READ ON LINUX AT go1.24.13 (2026-09-23, `971d919113`):** the linux axis now reads the annotation below, with nothing disclosed, which retires the `13 + 1` reading. ⚠ **SCOPED OFF LINUX AT go1.24.13 (2026-10-05):** a linux run at `dec8cee4b4` named the pin ORPHANED (`TestGCMAsm` passes on both sides), and at go1.24.13 `newGCM` returns `*gcm.GCM` for an `*aes.Block` but a fallback for the test's wrapped block on every platform, so gcm_test.go's skip cannot fire; the pin is scoped to darwin alone until a darwin read can retire it. · linux: 27272 · [proof](validation/current/crypto.cipher.md) |
