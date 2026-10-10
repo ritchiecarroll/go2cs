@@ -26687,4 +26687,51 @@ move: one storage in golib that all three packages reach.
 
 — C1
 
+## 2026-10-10 — C1: `context` `TestAllocs` (deferred) FLIPS between runs on BOTH mac legs — arm64 4 of 12, x64 2 of 12 — RE-MEASURE LIST (COORD)
+
+The row's one disclosure is `TestAllocs`, class `deferred` (exact `AllocsPerRun` counts; the failing leg is
+`WithTimeout(bg, 5*time.Millisecond)`, `reading` 9 against `want` 8 at most). On darwin that test PASSES on some runs and stays
+disclosed on others, at ONE SHA, on both hosted mac legs. Found by darwin wave 8's acceptance run, which compared the disclosed half on
+darwin for the first time; the row was held out of the wave-8 bank for it (master `d5ef3d9be0`).
+
+**Measured.** One row per run, `os-matrix` `sweep-shard`, `goos=darwin`, filter `context`, both legs (osx-arm64 `macos-15-arm64`,
+osx-x64 `macos-15`). "57" = 57 matched, `TestAllocs` disclosed; "58" = 58 matched, `TestAllocs` PASSED (the row has exactly one
+disclosure, so 58 - 57 = 1 names it; the log prints no per-test list).
+
+| Run | Ref | osx-arm64 | osx-x64 |
+|:--|:--|:--|:--|
+| 38020195545 (wave-8 read) | master `4d3e557ffb` | 57 | 57 |
+| 38022494087 (wave-8 acceptance) | `claude/c1-darwin-wave8-bank` `5cdbf70259` | **58** | 57 |
+| 38025792244 | `claude/c1-context-repeat` = `4d3e557ffb` | **58** | 57 |
+| 38026331471 | same | 57 | 57 |
+| 38026973612 | same | 57 | **58** |
+| 38027378161 | same | 57 | 57 |
+| 38027785247 | same | **58** | 57 |
+| 38028307550 | same | **58** | **58** |
+| 38028944480 | same | 57 | 57 |
+| 38029399509 | same | 57 | 57 |
+| 38029998779 | same | 57 | 57 |
+| 38030416851 | same | 57 | 57 |
+
+**Rates**: osx-arm64 4 of 12 (3 of 10 on the pinned repeat ref), osx-x64 2 of 12 (2 of 10). No other `context` verdict moved in any
+run (matched was always 57 or 58 against 57 + 1). The two wave-8 refs differ from `4d3e557ffb` only in `docs/ValidatedTestPackages.md`.
+linux and windows were NOT measured here: their banked `57 + 1` says the test was disclosed on the runs that banked them, not that it
+never passes there.
+
+**Candidate mechanism, not an attribution.** `testing.AllocsPerRun` (`src/core/testing/testing.cs:694`) returns the golib object count
+over 100 runs by INTEGER division, as Go does, so the recorded 9 means 900-999 counted objects. A run that counts fewer than 900 reads 8
+and passes. A count sitting just above the boundary would flip on any small per-run variation. What varies between runs on this leg is
+not measured; the counter is per-thread (`AllocationCounter.CurrentThreadCount`), so a timer or runtime callback landing on the test
+thread inside the window is one candidate. Reading the exact count per run would decide it; the sweep log does not print it (only the
+first `AllocsPerRun` call of a test writes the unit note).
+
+**Disposition.** A `deferred` entry is re-measured every sweep (2026-09-05 ruling), and until REC-F (v)'s comparator lands COORD
+compares each deferred entry's `reading` by hand at each sweep read (this board, 2026-09-23 B5 §7). This entry's `reading` is not a
+single value on darwin: it is 9 on some runs and at most 8 on others. `context` banks no darwin count while that holds; a darwin count of
+`57 + 1` would fail one run in three on arm64, and `58 + 0` would fail two in three. **Unpark when** the per-run count is read (the
+boundary hypothesis confirmed or refuted), or when a change moves the `WithTimeout(5ms)` count by enough that it no longer straddles 900
+(either the B′ field-ref boxes named in the entry's `plan`, which would make it pass every run, or a change that adds objects).
+
+— C1
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
