@@ -862,16 +862,11 @@ public static partial class GoReflect
         return box;
     }
 
+    // Element 0 of an IArray<elemType>, or null for anything else: IArray<T>'s default member (trim stage 3a), compiled
+    // for every sequence the program has, where the bridge closed a generic reader over the element type.
     private static object? firstArrayElement(object arrayValue, Type elemType)
     {
-        MethodInfo reader = typeof(GoReflect).GetMethod(nameof(readFirstElement), BindingFlags.NonPublic | BindingFlags.Static)!
-            .MakeGenericMethod(elemType);
-        return reader.Invoke(null, [arrayValue]);
-    }
-
-    private static object? readFirstElement<E>(object arrayValue)
-    {
-        return arrayValue is IArray<E> typed ? typed[0] : null;
+        return arrayValue is IGoReflectSequence sequence && sequence.ReflectElementType == elemType ? sequence.ReflectFirstElement() : null;
     }
 
     /// <summary>

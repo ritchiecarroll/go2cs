@@ -32,15 +32,69 @@ public interface IArray : IEnumerable, ICloneable
     }
 }
 
-public interface IArray<T> : IArray, IEnumerable<(nint, T)>
+public interface IArray<T> : IArray, IEnumerable<(nint, T)>, IGoReflectSequence
 {
     new T[] Source { get; }
-    
+
     new ref T this[nint index] { get; }
 
     Span<T> ꓸꓸꓸ { get; }
 
     Span<T> ToSpan();
+
+    // Reflect's object-form sequence operations (trim stage 3a; see IGoReflectSequence): the bodies the reflect bridge
+    // closed over T with MakeGenericMethod, compiled here for every array, slice and named wrapper the program has.
+    Type IGoReflectSequence.ReflectElementType => typeof(T);
+
+    object IGoReflectSequence.ReflectWindow(nint low, nint high) => this switch
+    {
+        slice<T> s => s.slice(low, high),
+        array<T> a => new slice<T>(a, low, high),
+        ISlice<T> view => new slice<T>(view).slice(low, high),
+        _ => throw new InvalidOperationException($"SliceWindow: unsupported container {GetType()}")
+    };
+
+    object IGoReflectSequence.ReflectWindow(nint low, nint high, nint max) => this switch
+    {
+        slice<T> s => s.Reslice(low, high, max),
+        array<T> a => new slice<T>((T[])a, low, high, max),
+        ISlice<T> view => new slice<T>(view).Reslice(low, high, max),
+        _ => throw new InvalidOperationException($"SliceWindow: unsupported container {GetType()}")
+    };
+
+    object IGoReflectSequence.ReflectElementAlias(int index) => new ElemRefBox<T>((IArray)this, index);
+
+    object? IGoReflectSequence.ReflectFirstElement() => this[0];
+}
+
+/// <summary>
+/// Reflect's object-form operations on a sequence value (<c>GoReflect.SliceWindow</c>, <c>ElementAliasBoxOfValue</c>,
+/// the first-element read behind an array's dims), implemented once, generically, by <see cref="IArray{T}"/>'s default
+/// members.
+/// </summary>
+/// <remarks>
+/// Trim stage 3a (docs/PLAN-golib-full-trim.md, section 9): the bridge closed a generic helper over the element type
+/// with <c>MakeGenericMethod</c>, which Native AOT cannot do for a value-type element it never compiled. A default
+/// member of a generic interface is compiled for every implementing type the program has, and a generated named
+/// wrapper inherits it. PUBLIC only because <see cref="IArray{T}"/> is.
+/// </remarks>
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+public interface IGoReflectSequence
+{
+    /// <summary>The element type.</summary>
+    Type ReflectElementType { get; }
+
+    /// <summary>A <c>slice</c> window <c>[low:high]</c> sharing this sequence's backing store.</summary>
+    object ReflectWindow(nint low, nint high);
+
+    /// <summary>The full slice expression's window <c>[low:high:max]</c>, sharing this sequence's backing store.</summary>
+    object ReflectWindow(nint low, nint high, nint max);
+
+    /// <summary>An element-alias box over element <paramref name="index"/> of this (detached) sequence value.</summary>
+    object ReflectElementAlias(int index);
+
+    /// <summary>Element 0, as <see cref="object"/>.</summary>
+    object? ReflectFirstElement();
 }
 
 [Serializable]

@@ -85,7 +85,7 @@ public enum PointerStorage
 
 [System.Diagnostics.DebuggerDisplay("{ToString(),nq}")]
 [System.Diagnostics.DebuggerTypeProxy(typeof(ж<>.DebugView))]
-public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess, IAllocationIdentity
+public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess, IGoReflectBox, IAllocationIdentity
 {
     // The debugger's view (DebuggerTypeProxy): the pointee, or null for the nil pointer -- reading a nil
     // box's Value would be Go's nil dereference, which a debugger must never trigger.
@@ -729,6 +729,21 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
         value = ValueSlot;
         return true;
+    }
+
+    // ---- reflect's object-form slot pair (GoReflect.ReadPointerSlot / WritePointerSlot; trim stage 3a) ----
+    //
+    // The same bodies the reflect bridge closed over T with MakeGenericMethod; as members of the box they are compiled
+    // for every ж<T> the program has, which Native AOT requires.
+
+    object? IGoReflectBox.ReadBoxSlot() => ValueSlot;
+
+    void IGoReflectBox.WriteBoxSlot(object? value)
+    {
+        if (IsNilPointer)
+            throw RuntimeErrorPanic.NilPointerDereference();
+
+        ValueSlot = (T)value!;
     }
 
     // ---- the dereference operator and equality operators ----
