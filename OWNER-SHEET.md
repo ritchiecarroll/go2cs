@@ -40,6 +40,7 @@ after COORD has ruled sections 1-3 green, by either path.
 | `evidence/v6probe/` | the Go probe that shows the upstream `TestVersion6` race deterministically |
 | `ROW-PR.md` | draft text for the registry row's pull request |
 | `evidence/Test-ChecksumGate.ps1` | a parse-and-run test of block 2's checksum gate as this sheet writes it, against this kit's packages and a one-line SHA256SUMS (COORD found the one-line false red live, 2026-10-10) |
+| `evidence/Test-SheetPaste.ps1` | feeds every block of this sheet line by line, as an interactive pwsh paste runs it, and refuses a statement that would run on its own (an `else` or `catch` on its own line) |
 
 Both packages were packed at `T` = `claude/c2-nugetgo-tools` @ `3d0d70ba53`, against the published go.* 1.24.13.5,
 with `-platforms linux/amd64`. Section 1: 54 matched, 0 disclosed, 18 Benchmark and Fuzz declarations excluded; input
@@ -122,8 +123,7 @@ $env:NUGETGO_INT_KEY = [Net.NetworkCredential]::new('', $secure).Password
 try {
     dotnet nuget push "$Work\kit\nupkg\$Id.$PV.nupkg" --source $Int --api-key $env:NUGETGO_INT_KEY
     $rc = $LASTEXITCODE
-}
-finally {
+} finally {
     Remove-Item Env:NUGETGO_INT_KEY -ErrorAction SilentlyContinue
     $secure.Dispose()
 }
@@ -313,8 +313,7 @@ if ($LASTEXITCODE) { throw "git ls-remote exited ${LASTEXITCODE}: $CsRepo cannot
 if (-not $refs) { throw "$CsRepo has no tag ${Tag}: COORD pushes it before this sheet; stop and tell COORD" }
 $commit = (@($refs | Where-Object { $_ -like '*^{}' }) + $refs)[0].Split("`t")[0]
 foreach ($f in 'VALIDATION.md', 'LICENSE') {
-    try { Invoke-WebRequest "https://raw.githubusercontent.com/$CsRepo/$Tag/$f" -OutFile "$Pub\tag-$f" }
-    catch { throw "$f does not resolve anonymously at $CsRepo ${Tag}: stop and tell COORD" }
+    try { Invoke-WebRequest "https://raw.githubusercontent.com/$CsRepo/$Tag/$f" -OutFile "$Pub\tag-$f" } catch { throw "$f does not resolve anonymously at $CsRepo ${Tag}: stop and tell COORD" }
 }
 if ((Get-FileHash "$Pub\tag-VALIDATION.md").Hash -ne (Get-FileHash "$Pub\kit\conversion\VALIDATION.md").Hash) { throw "VALIDATION.md at $Tag is not the one the package carries: stop and tell COORD" }
 "tag OK  $CsRepo $Tag -> commit $($commit.Substring(0, 10)); VALIDATION.md and LICENSE resolve anonymously"
@@ -377,13 +376,11 @@ Write-Host "About to push $file (sha256 $signedHash) to nuget.org." -ForegroundC
 Write-Host 'This is PERMANENT: a pushed version can be unlisted, never deleted or replaced.' -ForegroundColor Yellow
 if ((Read-Host "Type 'publish' to push") -cne 'publish') { throw 'Not published. Nothing was sent.' }
 
-if ($env:NUGETGO_API_KEY) { $key = $env:NUGETGO_API_KEY; 'key: from $env:NUGETGO_API_KEY' }
-else { $secure = Read-Host -AsSecureString 'nuget.org API key (nugetgo.*)'; $key = [Net.NetworkCredential]::new('', $secure).Password; $secure.Dispose(); 'key: from the prompt' }
+if ($env:NUGETGO_API_KEY) { $key = $env:NUGETGO_API_KEY; 'key: from $env:NUGETGO_API_KEY' } else { $secure = Read-Host -AsSecureString 'nuget.org API key (nugetgo.*)'; $key = [Net.NetworkCredential]::new('', $secure).Password; $secure.Dispose(); 'key: from the prompt' }
 try {
     dotnet nuget push "$SignDir\$file" --source $Org --api-key $key
     $rc = $LASTEXITCODE
-}
-finally { Remove-Variable key -ErrorAction SilentlyContinue }
+} finally { Remove-Variable key -ErrorAction SilentlyContinue }
 if ($rc) { throw "dotnet nuget push exited $rc (a 403 in its output means the key's glob does not cover nugetgo.*). Do not re-sign or re-pack; tell COORD." }
 "pushed: $Id $PV"
 ```
@@ -407,8 +404,7 @@ foreach ($i in 1..90) {
             $leaves = if ($page.items) { $page.items } else { (Invoke-RestMethod $page.'@id').items }
             if (@($leaves.catalogEntry.version) -contains $PV) { $inReg = $true }
         }
-    }
-    catch { $inReg = $false }
+    } catch { $inReg = $false }
     if ($inFlat -and $inReg) { $listed = $true; break }
     Start-Sleep -Seconds 60
 }
