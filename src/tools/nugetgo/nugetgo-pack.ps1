@@ -51,6 +51,13 @@
     the conversion carries, or -Icon. The read-back refuses a README with inline code in a heading or a table wider
     than three columns or a link naming HEAD, and a package with no icon.
 
+    The author's package page (COORD ruling 2026-10-10): the README lives in the conversion, at nuget/README.md in the
+    converted module's directory. The first pack SEEDS it (the title, the fenced generated block, the synopsis) and
+    says to commit it; from then on it is the author's, and every pack rewrites only the block between
+    [//]: # (nugetgo:generated:begin) and [//]: # (nugetgo:generated:end), says so with the version and tag it wrote,
+    and packs the file byte for byte. A missing, duplicated, misordered or malformed fence is refused by name, and so is
+    a link before it. nuget/icon.png beside it replaces the go2cs icon; -Icon with that file present is refused.
+
     The restore is isolated: a nuget.config with <clear/> and only -Feed as a source, and a private NUGET_PACKAGES.
     The user's global packages folder is censused for nugetgo.* and go.* before and after, and the run fails if it
     grew. Nothing is pushed anywhere, and nothing is signed: signing is the release's last step.
@@ -228,33 +235,63 @@ else {
 }
 
 # ---- the package README and icon ---------------------------------------------------------------------------------------
-$packageIcon = Resolve-NugetgoPackageIcon -Icon $Icon -ConvertedDirectories @($libraries | ForEach-Object { $_.DirectoryName })
+# The author's package page (COORD ruling 2026-10-10) lives in the converted module's own directory, the one tree the
+# pack owns and every conversion repository carries: nuget/README.md and nuget/icon.png. In a flat conversion repository
+# that is nuget/ at its root; in a nested one, <project dir>/nuget/.
+$pageDir = Join-Path $moduleSrc 'nuget'
+$authorReadme = Join-Path $pageDir 'README.md'
+$authorIconFile = Join-Path $pageDir 'icon.png'
+$iconSource = Select-NugetgoIconSource -Icon $Icon -AuthorIcon $(if (Test-Path -LiteralPath $authorIconFile -PathType Leaf) { $authorIconFile } else { '' })
+if ($iconSource.Reason) { Refuse $iconSource.Reason }
+$packageIcon = Resolve-NugetgoPackageIcon -Icon $iconSource.Path -ConvertedDirectories @($libraries | ForEach-Object { $_.DirectoryName })
 if ($packageIcon.Reason) { Refuse $packageIcon.Reason }
-# The synopsis of the module's root package, from its Go source. A module whose root package is not packed has no one
-# package to speak for it, and its README has no synopsis.
-$synopsis = ''
-if (@($packed | Where-Object { $_.ImportPath -ceq $ModulePath }).Count) {
-    if (-not (Test-Path -LiteralPath $moduleCacheDir -PathType Container)) { Refuse "no module source at $moduleCacheDir for the README's synopsis (go mod download $ModulePath@$GoVersion)" }
-    Push-Location (Join-Path (Split-Path (Split-Path $PSScriptRoot)) 'go2cs')
-    try { $synopsis = (& go run ./internal/gensynopsis -dir $moduleCacheDir | Out-String).Trim(); if ($LASTEXITCODE -ne 0) { Refuse "gensynopsis could not read $moduleCacheDir ($LASTEXITCODE)" } }
-    finally { Pop-Location }
-}
 # The conversion repository's tag the README links: the RELEASE version's, a rehearsal included (its own version is
 # never tagged).
 $repositoryTag = "nuget-$($ver.Version)"
-$readmeArgs = @{
-    Id = $id.Id; Description = $description; ModulePath = $ModulePath; GoVersion = $GoVersion; PackageVersion = $packageVersion
+$blockArgs = @{
+    Description = $description; ModulePath = $ModulePath; GoVersion = $GoVersion; PackageVersion = $packageVersion
     ClosureVersion = $ClosureVersion; RepositoryUrl = $RepositoryUrl; RepositoryTag = $repositoryTag; LicenseName = $licenseName; LicenseSpdx = $LicenseSpdx
-    Synopsis = $synopsis; DefaultIcon = $packageIcon.Default
+    DefaultIcon = $packageIcon.Default
 }
-if ($UnvalidatedReason) { $readmeArgs.Unvalidated = $true } else { $readmeArgs.Matched = $totals.Matched; $readmeArgs.Disclosed = $totals.Disclosed }
-$readme = New-NugetgoPackageReadme @readmeArgs
-# The README's first link is the Go module's source at its version (owner review 2026-10-10).
+if ($UnvalidatedReason) { $blockArgs.Unvalidated = $true } else { $blockArgs.Matched = $totals.Matched; $blockArgs.Disclosed = $totals.Disclosed }
+# The facts the block states that change from pack to pack, printed on every write so that a rehearsal's rewrite is
+# never taken for the release's.
+$facts = "package version $packageVersion, tag $repositoryTag"
+$utf8 = New-Object System.Text.UTF8Encoding($false)
+if (-not (Test-Path -LiteralPath $authorReadme -PathType Leaf)) {
+    # SEED: the synopsis of the module's root package, from its Go source. A module whose root package is not packed
+    # has no one package to speak for it, and its README has no synopsis.
+    $synopsis = ''
+    if (@($packed | Where-Object { $_.ImportPath -ceq $ModulePath }).Count) {
+        if (-not (Test-Path -LiteralPath $moduleCacheDir -PathType Container)) { Refuse "no module source at $moduleCacheDir for the README's synopsis (go mod download $ModulePath@$GoVersion)" }
+        Push-Location (Join-Path (Split-Path (Split-Path $PSScriptRoot)) 'go2cs')
+        try { $synopsis = (& go run ./internal/gensynopsis -dir $moduleCacheDir | Out-String).Trim(); if ($LASTEXITCODE -ne 0) { Refuse "gensynopsis could not read $moduleCacheDir ($LASTEXITCODE)" } }
+        finally { Pop-Location }
+    }
+    $readme = New-NugetgoPackageReadme -Id $id.Id -Synopsis $synopsis @blockArgs
+    New-Item -ItemType Directory -Force $pageDir | Out-Null
+    [System.IO.File]::WriteAllText($authorReadme, $readme, $utf8)
+    Write-Host "  readme: SEEDED $authorReadme ($facts). Commit it: from now on it is yours, and every pack rewrites only the block between the nugetgo:generated markers."
+}
+else {
+    $raw = [System.IO.File]::ReadAllBytes($authorReadme)
+    $bom = $raw.Length -ge 3 -and $raw[0] -eq 0xEF -and $raw[1] -eq 0xBB -and $raw[2] -eq 0xBF
+    $merged = Merge-NugetgoReadme ([System.IO.File]::ReadAllText($authorReadme)) (New-NugetgoGeneratedBlock @blockArgs)
+    if ($merged.Reasons.Count) { Refuse "the package README $authorReadme -- $($merged.Reasons -join '; ')" }
+    $readme = $merged.Text
+    if ($merged.Rewritten) {
+        [System.IO.File]::WriteAllText($authorReadme, $readme, (New-Object System.Text.UTF8Encoding($bom)))
+        Write-Host "  readme: the generated block in $authorReadme was stale: REWRITTEN with $facts. Commit it."
+    }
+    else { Write-Host "  readme: $authorReadme, its generated block current ($facts)" }
+}
+# The README's first link is the Go module's source at its version (owner review 2026-10-10), so no link may come
+# before the fence.
 $moduleSource = Get-NugetgoModuleSourceUrl $ModulePath $GoVersion
-$readmeReasons = @(Test-NugetgoReadme $readme $moduleSource)
-if ($readmeReasons.Count) { Refuse "the generated README is not a nuget.org README -- $($readmeReasons -join '; ')" }
-Write-Host "  readme: generated ($(@($readme -split "`n").Count) lines; links the conversion tag $repositoryTag; synopsis: $(if ($synopsis) { $synopsis } else { 'none' }))"
-Write-Host "  icon: $($packageIcon.Name) $(if ($packageIcon.Default) { '(the go2cs icon the conversion carries)' } else { "(-Icon $($packageIcon.Path))" })"
+$readmeReasons = @(Test-NugetgoReadme $readme $moduleSource) + @(Test-NugetgoReadmeFence $readme)
+if ($readmeReasons.Count) { Refuse "the package README $authorReadme is not a nuget.org README -- $($readmeReasons -join '; ')" }
+Write-Host "  readme: $(@($readme -split "`n").Count) lines; links the conversion tag $repositoryTag"
+Write-Host "  icon: $($packageIcon.Name) $(if ($packageIcon.Default) { '(the go2cs icon the conversion carries)' } elseif ($iconSource.Path -eq $authorIconFile) { "(the author's $authorIconFile)" } else { "(-Icon $($packageIcon.Path))" })"
 foreach ($page in $pages) {
     $rel = $page.FullName.Substring($ValidationDir.TrimEnd('\', '/').Length + 1).Replace('\', '/')
     if ($rel -ieq 'README.md' -or $rel -ieq $packageIcon.Name) { Refuse "the validation page $rel would be packed over the package's $rel" }
@@ -452,8 +489,8 @@ if (-not $validationHead.StartsWith("> $description", [StringComparison]::Ordina
 $presentation = New-Object System.Collections.Generic.List[string]
 if ($md.readme -cne 'README.md') { $presentation.Add("the package README is '$($md.readme)', not the generated README.md") }
 if ($null -eq $packedReadme) { $presentation.Add('the package carries no README.md') }
-elseif ($packedReadme -cne $readme) { $presentation.Add('the packed README.md differs from the one generated') }
-else { foreach ($why in @(Test-NugetgoReadme $packedReadme $moduleSource)) { $presentation.Add("README.md $why") } }
+elseif ($packedReadme -cne $readme) { $presentation.Add("the packed README.md differs from $authorReadme as composed") }
+else { foreach ($why in @(Test-NugetgoReadme $packedReadme $moduleSource) + @(Test-NugetgoReadmeFence $packedReadme)) { $presentation.Add("README.md $why") } }
 if ($md.description.Contains('PROOF:')) { $presentation.Add('the description carries "PROOF:"') }
 # nuget.org shows each tag as a chip; PROOF means nothing to a reader there (COORD ruling C, 2026-10-10).
 if ($md.tags -match '\bPROOF\b') { $presentation.Add("the tags '$($md.tags)' carry PROOF") }
