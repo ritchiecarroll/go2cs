@@ -27,6 +27,12 @@ $script:DotnetPurple = '512BD4'
 $script:IconMaxBytes = 1024 * 1024
 $script:IconExtensions = @('.png', '.jpg', '.jpeg')
 $script:MaxTableColumns = 3
+# The fence around the block the pack owns in an author's package README (COORD ruling 2026-10-10). A CommonMark link
+# reference definition renders nothing whether a renderer allows HTML or not; an HTML comment shows as text where HTML
+# is disabled (measured with Markdig 0.37, the engine nuget.org's gallery uses). Each must stand alone between blank
+# lines: without the blank line before it, it continues the paragraph above as visible text (measured).
+$script:FenceBegin = '[//]: # (nugetgo:generated:begin)'
+$script:FenceEnd = '[//]: # (nugetgo:generated:end)'
 
 # A value as shields.io's path form spells it, the converter's own rule (shieldsBadgeMessage in
 # src/go2cs/readmeValidationBadge.go): '_' and '-' doubled, a space as '_', and '%', '/' and '#' percent-encoded so
@@ -86,16 +92,15 @@ function New-NugetgoBadge([string]$Alt, [string]$Label, [string]$Message, [strin
     "[![$Alt]($script:ShieldsHost/badge/$(ConvertTo-NugetgoShieldsText $Label)-$(ConvertTo-NugetgoShieldsText $Message)-$Color`?logo=$Logo)]($Target)"
 }
 
-# The package README, in the go.* standard library packages' style: the package ID as the title, the description as a
-# blockquote (its module path a link to the module's source), two lines of badges, the Go package's synopsis, then the license line. Every link is absolute, because
-# nuget.org resolves no relative link. VALIDATION.md and the license file are linked in the conversion repository,
-# which carries both at its root (docs/NugetgoPublish.md, 4.5), at -RepositoryTag: the tag nuget-<package version>
-# COORD mints on the conversion commit before the package is signed (COORD ruling 2026-10-10), so an older
-# version's page keeps its own proof. HEAD would follow the repository to a later version's files.
-function New-NugetgoPackageReadme {
+# The block the pack owns in a package README (COORD ruling 2026-10-10): the description as a blockquote (its module path
+# a link to the module's source), two lines of badges, the license line and, with the go2cs icon, its artwork line.
+# Every link is absolute, because nuget.org resolves no relative link. VALIDATION.md and the license file are linked in
+# the conversion repository, which carries both at its root (docs/NugetgoPublish.md, 4.5), at -RepositoryTag: the tag
+# nuget-<package version> COORD mints on the conversion commit before the package is signed (COORD ruling 2026-10-10),
+# so an older version's page keeps its own proof. HEAD would follow the repository to a later version's files.
+function New-NugetgoGeneratedBlock {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory)][string]$Id,
         [Parameter(Mandatory)][string]$Description,
         [Parameter(Mandatory)][string]$ModulePath,
         [Parameter(Mandatory)][string]$GoVersion,
@@ -105,7 +110,6 @@ function New-NugetgoPackageReadme {
         [Parameter(Mandatory)][string]$RepositoryTag,
         [Parameter(Mandatory)][string]$LicenseName,
         [Parameter(Mandatory)][string]$LicenseSpdx,
-        [string]$Synopsis,
         [int]$Matched,
         [int]$Disclosed,
         [switch]$Unvalidated,
@@ -125,14 +129,103 @@ function New-NugetgoPackageReadme {
     $release = New-NugetgoBadge 'go2cs' 'go2cs' "@$ClosureVersion" $script:DotnetPurple 'dotnet' "$script:Go2csRepository/tree/nuget-$ClosureVersion"
 
     $blocks = New-Object System.Collections.Generic.List[string]
-    $blocks.Add("# $Id")
     $blocks.Add("> $callout")
     $blocks.Add("$tests $source\`n$module $release")
-    if ($Synopsis -and $Synopsis.Trim()) { $blocks.Add((ConvertTo-NugetgoMarkdownText $Synopsis.Trim())) }
-    $blocks.Add('---')
     $blocks.Add("Converted from $moduleLink source; licensed under $LicenseSpdx — see [$LicenseName]($repo/blob/$RepositoryTag/$LicenseName).")
     if ($DefaultIcon) { $blocks.Add($script:ArtworkLine) }
-    ($blocks -join "`n`n") + "`n"
+    $blocks -join "`n`n"
+}
+
+# The package README the pack SEEDS when the conversion has none (COORD ruling 2026-10-10): the package ID as the
+# title, then the fenced generated block, then the Go package's synopsis. From then on the file is the author's: the
+# title, the synopsis and anything added outside the fence are never touched, and every pack rewrites the fence.
+function New-NugetgoPackageReadme {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$Id,
+        [Parameter(Mandatory)][string]$Description,
+        [Parameter(Mandatory)][string]$ModulePath,
+        [Parameter(Mandatory)][string]$GoVersion,
+        [Parameter(Mandatory)][string]$PackageVersion,
+        [Parameter(Mandatory)][string]$ClosureVersion,
+        [Parameter(Mandatory)][string]$RepositoryUrl,
+        [Parameter(Mandatory)][string]$RepositoryTag,
+        [Parameter(Mandatory)][string]$LicenseName,
+        [Parameter(Mandatory)][string]$LicenseSpdx,
+        [string]$Synopsis,
+        [int]$Matched,
+        [int]$Disclosed,
+        [switch]$Unvalidated,
+        [switch]$DefaultIcon
+    )
+    $blockArgs = @{} + $PSBoundParameters
+    [void]$blockArgs.Remove('Id'); [void]$blockArgs.Remove('Synopsis')
+    $parts = New-Object System.Collections.Generic.List[string]
+    $parts.Add("# $Id")
+    $parts.Add($script:FenceBegin)
+    $parts.Add((New-NugetgoGeneratedBlock @blockArgs))
+    $parts.Add($script:FenceEnd)
+    if ($Synopsis -and $Synopsis.Trim()) { $parts.Add((ConvertTo-NugetgoMarkdownText $Synopsis.Trim())) }
+    ($parts -join "`n`n") + "`n"
+}
+
+# The reasons a README's fence is refused (COORD ruling 2026-10-10): no fence; a marker given twice; an end without a
+# begin, a begin without an end, or the end first; a marker not on its own line between blank lines; and a line that
+# names nugetgo:generated without being the marker (the HTML comment form, which nuget.org would show as text). Lines
+# inside a fenced code block are none of these. No reason means one well-formed fence.
+function Test-NugetgoReadmeFence([string]$Text) {
+    $reasons = New-Object System.Collections.Generic.List[string]
+    $lines = @($Text -split "`r?`n")
+    $begins = New-Object System.Collections.Generic.List[int]
+    $ends = New-Object System.Collections.Generic.List[int]
+    $code = $null
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        $line = $lines[$i]
+        if ($line -match '^\s{0,3}(?<f>`{3,}|~{3,})') {
+            if (-not $code) { $code = $Matches['f'] } elseif ($line.Trim() -eq $code) { $code = $null }
+            continue
+        }
+        if ($code) { continue }
+        if ($line -ceq $script:FenceBegin) { $begins.Add($i) }
+        elseif ($line -ceq $script:FenceEnd) { $ends.Add($i) }
+        elseif ($line.Contains('nugetgo:generated')) { $reasons.Add("line $($i + 1) names nugetgo:generated but is not the marker: the fence is exactly '$($script:FenceBegin)' and '$($script:FenceEnd)', each on its own line") }
+    }
+    if ($begins.Count -eq 0 -and $ends.Count -eq 0) { $reasons.Add("no generated block: the README has no '$($script:FenceBegin)' line; the pack fills the block between it and '$($script:FenceEnd)'") }
+    if ($begins.Count -gt 1) { $reasons.Add("the begin marker appears more than once (lines $(($begins | ForEach-Object { $_ + 1 }) -join ', ')): one fence only") }
+    if ($ends.Count -gt 1) { $reasons.Add("the end marker appears more than once (lines $(($ends | ForEach-Object { $_ + 1 }) -join ', ')): one fence only") }
+    if ($begins.Count -ge 1 -and $ends.Count -eq 0) { $reasons.Add("the begin marker (line $($begins[0] + 1)) has no end marker after it") }
+    if ($ends.Count -ge 1 -and $begins.Count -eq 0) { $reasons.Add("the end marker (line $($ends[0] + 1)) has no begin marker before it") }
+    if ($begins.Count -eq 1 -and $ends.Count -eq 1 -and $ends[0] -lt $begins[0]) { $reasons.Add("the end marker (line $($ends[0] + 1)) comes before the begin marker (line $($begins[0] + 1))") }
+    foreach ($i in @($begins) + @($ends)) {
+        if ($i -gt 0 -and $lines[$i - 1].Trim()) { $reasons.Add("line $($i + 1): the marker needs a blank line before it, or it shows as text in the paragraph above") }
+        if ($i -lt $lines.Count - 1 -and $lines[$i + 1].Trim()) { $reasons.Add("line $($i + 1): the marker needs a blank line after it") }
+    }
+    $reasons.ToArray()
+}
+
+# An author's README with its fenced block replaced by -Block. Returns @{ Text; Rewritten; Reasons }: Reasons from
+# Test-NugetgoReadmeFence and Text $null when the fence is refused; otherwise Text is the file with only the lines
+# between the markers replaced (a blank line, the block, a blank line), in the file's own line endings, and Rewritten
+# says whether that changed anything. Nothing outside the fence is touched.
+function Merge-NugetgoReadme([string]$Text, [string]$Block) {
+    $reasons = @(Test-NugetgoReadmeFence $Text)
+    if ($reasons.Count) { return [pscustomobject]@{ Text = $null; Rewritten = $false; Reasons = $reasons } }
+    $nl = if ($Text.Contains("`r`n")) { "`r`n" } else { "`n" }
+    $lines = @($Text -split "`r?`n")
+    $b = [Array]::IndexOf([string[]]$lines, $script:FenceBegin)
+    $e = [Array]::IndexOf([string[]]$lines, $script:FenceEnd)
+    $merged = @($lines[0..$b]) + @('') + @($Block -split "`r?`n") + @('') + @($lines[$e..($lines.Count - 1)])
+    $out = $merged -join $nl
+    [pscustomobject]@{ Text = $out; Rewritten = ($out -cne $Text); Reasons = @() }
+}
+
+# The icon a pack takes (COORD ruling 2026-10-10): -Icon, or the author's nuget/icon.png in the conversion, or neither
+# (Path $null: the go2cs icon the conversion carries). Both is refused by name: two sources would let one silently win.
+function Select-NugetgoIconSource([string]$Icon, [string]$AuthorIcon) {
+    if ($Icon -and $AuthorIcon) {
+        return [pscustomobject]@{ Path = $null; Reason = "two icons: -Icon $Icon and $AuthorIcon in the conversion; the file is the author's choice, so drop -Icon, or delete the file" }
+    }
+    [pscustomobject]@{ Path = $(if ($Icon) { $Icon } elseif ($AuthorIcon) { $AuthorIcon } else { $null }); Reason = $null }
 }
 
 # The reasons a README is refused as a nuget.org package README (owner, 2026-10-10): inline code in any heading (ATX or
@@ -199,4 +292,5 @@ function Resolve-NugetgoPackageIcon {
 }
 
 Export-ModuleMember -Function ConvertTo-NugetgoShieldsText, ConvertTo-NugetgoMarkdownText, Get-NugetgoProofTotals, Test-NugetgoSpdx,
-    Get-NugetgoModuleSourceUrl, New-NugetgoPackageReadme, Test-NugetgoReadme, Resolve-NugetgoPackageIcon
+    Get-NugetgoModuleSourceUrl, New-NugetgoGeneratedBlock, New-NugetgoPackageReadme, Test-NugetgoReadmeFence, Merge-NugetgoReadme,
+    Select-NugetgoIconSource, Test-NugetgoReadme, Resolve-NugetgoPackageIcon

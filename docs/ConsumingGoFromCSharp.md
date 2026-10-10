@@ -22,6 +22,22 @@ There are two ways to get one:
 
 The C# you write is the same either way.
 
+## Customizing the package page
+
+If you convert and publish your own module, its nuget.org page is the file `nuget/README.md` in the converted
+module's directory (the conversion repository's root when the module sits there). The first pack writes it, and from
+then on it is yours: change the title, rewrite the description under it, add usage sections. Commit it with the
+conversion.
+
+The pack still owns one block in it, between the lines `[//]: # (nugetgo:generated:begin)` and
+`[//]: # (nugetgo:generated:end)`. That block states the facts: where the C# came from and a link back to the Go
+source, the security caveat, the test badge, the versions, and the license. Every pack rewrites the block from what it
+measured, says so, and leaves everything outside it alone. Keep both marker lines, each on its own line with a blank
+line before and after, and put no link above the block. The pack refuses the file, by name, otherwise.
+
+`nuget/icon.png` beside it replaces the go2cs icon (PNG, at most 1 MB). The publishing runbook, `NugetgoPublish.md`,
+has the same rules in its "Customizing the package page" section.
+
 ## Names: packages, classes and namespaces
 
 A Go package becomes a static class named `<package>_package`, in a namespace built from the rest of its import path.
