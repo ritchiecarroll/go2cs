@@ -11,6 +11,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
 	"slices"
 	"sort"
 	"strings"
@@ -42,6 +43,7 @@ type nugetMapOptions struct {
 	exclude       []string // -nuget-map-exclude <module-path>: modules that are never mapped
 	refresh       bool     // -nuget-map-refresh: bypass the cache and re-resolve deliberately instead of keeping the lock
 	canonicalOnly bool     // -nuget-map-canonical-only: a community mapping is treated as unmapped
+	feed          string   // -nuget-map-feed <https service index|folder>: package selection reads this feed instead of nuget.org
 }
 
 // active reports whether this run resolves mappings at all: always, unless -nuget-map off.
@@ -89,6 +91,20 @@ func validateNuGetMapFlags(given []string, o nugetMapOptions, recurseNuGet bool)
 
 	if o.only && len(o.sources) == 0 {
 		return errors.New("-nuget-map-only drops the nugetgo.net fallback, so it needs at least one -nuget-map <file|https-url> source to answer instead")
+	}
+
+	if o.feed != "" {
+		if o.off {
+			return errors.New("-nuget-map-feed chooses where mapped packages are read from, and -nuget-map off maps nothing")
+		}
+
+		if scheme, _, isURL := strings.Cut(o.feed, "://"); isURL && scheme != "https" {
+			return fmt.Errorf("-nuget-map-feed %s: only https:// service indexes are read (a plain http:// feed can be rewritten in transit); a local feed is named by its folder", o.feed)
+		} else if !isURL {
+			if info, err := os.Stat(o.feed); err != nil || !info.IsDir() {
+				return fmt.Errorf("-nuget-map-feed %s is not a folder; a local feed is a folder of nupkgs, a remote one an https:// v3 service index", o.feed)
+			}
+		}
 	}
 
 	for _, src := range o.sources {
