@@ -132,7 +132,13 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 			return err
 		}
 
+		// -nuget-map-feed: selection reads that feed instead of nuget.org.
+		nugetPackageFeed = m.options.nugetMap.feed
 		substitutions, substitutionWarnings, err := substituteNuGetMappings(decisions, m.thirdPartyModules, m.recurseRoot(), m.options.nugetMap.refresh)
+
+		if err == nil && nugetPackageFeed != "" && len(substitutions) > 0 {
+			substitutionWarnings = append(substitutionWarnings, fmt.Sprintf("-nuget-map-feed %s: package versions were selected from this feed, not nuget.org; the restore needs it as a package source (nuget.config)", nugetPackageFeed))
+		}
 
 		if err != nil {
 			return err
