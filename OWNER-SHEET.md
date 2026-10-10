@@ -42,7 +42,7 @@ and version from its contents, so the file name changes nothing for signing or p
 | `conversion/` | for COORD: the files of the conversion commit on `jwt-cs`, in the nested layout; the upstream LICENSE, VALIDATION.md and the proof page(s) sit at its root |
 | `ROW-PR.md` | draft text for the registry row's pull request |
 
-Both packages were packed at `T` = `claude/c2-nugetgo-tools` @ `c8ef680e14`, against the published go.* 1.24.13.5,
+Both packages were packed at `T` = `claude/c2-nugetgo-tools` @ `ac8775c806`, against the published go.* 1.24.13.5,
 with `-platforms linux/amd64` and `-ExcludePackage github.com/golang-jwt/jwt/v5/test` (COORD ruling: jwt's own test
 fixtures, not API a consumer imports). Each holds two assemblies, the root package and `request`. Section 1: 189
 matched, 0 disclosed (root 186, `request` 3); input digests `sha256-9647af36…eb78` (root) and `sha256-4a1b7eb5…f8cb`
@@ -50,7 +50,8 @@ matched, 0 disclosed (root 186, `request` 3); input digests `sha256-9647af36…e
 
 `T` is the tools that packed the first packages here plus the README and icon cut (owner, 2026-10-10), and the packs
 add `-LicenseSpdx MIT`. Each package now carries a generated README.md as its nuget.org README, the go2cs icon,
-and VALIDATION.md as a file the README links. Everything else is unchanged and was measured so: the packed assemblies
+and VALIDATION.md as a file the README links. The README links the conversion repository at the tag `nuget-<release
+version>`, never `HEAD` (COORD ruling 2026-10-10). Everything else is unchanged and was measured so: the packed assemblies
 are byte-identical to the ones packed at `7888e4e72f`, and so are the description and VALIDATION.md.
 
 ## PATH A: run the rehearsal
@@ -75,7 +76,7 @@ if ((go version) -notmatch 'go1\.24\.13 ') { throw 'go is not go1.24.13: check t
 
 $Repo = (git rev-parse --show-toplevel)
 $Work = Join-Path ([IO.Path]::GetTempPath()) 'nugetgo-jwt-int1'
-$T    = 'c8ef680e14'
+$T    = 'ac8775c806'
 $Kit  = 'claude/c2-nugetgo-jwt-5.3.1'
 $Id   = 'nugetgo.github.com.golang-jwt.jwt.v5'
 $PV   = '5.3.1-int.1'
@@ -285,8 +286,31 @@ COORD pushes the conversion commit to `github.com/ritchiecarroll/jwt-cs` (the ex
 nested layout). The package's `RepositoryUrl` names it. Nothing in this section touches it.
 
 The commit carries the upstream LICENSE, VALIDATION.md and the proof page(s) at the repository root (`conversion/` has
-them there), because the package README links `VALIDATION.md` and `LICENSE` at that root. It should land before
-4.2, so those links never fail.
+them there), because the package README links `VALIDATION.md` and `LICENSE` at that root, at the tag `nuget-$PV`.
+COORD pushes the commit and mints the signed tag on it before you start section 4; 4.0b checks both.
+
+### 4.0b Gate: the conversion repository's tag
+
+The tag `nuget-$PV` on `ritchiecarroll/jwt-cs` names the conversion commit the package README links (COORD ruling 2026-10-10:
+a tag, never `HEAD`). COORD pushes that commit and mints the signed tag before you start; this block checks, as an
+anonymous reader (no credentials), that the tag exists, that VALIDATION.md and the license file resolve at it, and
+that VALIDATION.md is byte for byte the one the package carries. It changes nothing.
+
+```powershell
+$CsRepo = 'ritchiecarroll/jwt-cs'
+$Tag = "nuget-$PV"
+$env:GIT_TERMINAL_PROMPT = '0'
+$refs = @(git -c credential.helper= ls-remote "https://github.com/$CsRepo.git" "refs/tags/$Tag" "refs/tags/$Tag^{}")
+if ($LASTEXITCODE) { throw "git ls-remote exited ${LASTEXITCODE}: $CsRepo cannot be read anonymously" }
+if (-not $refs) { throw "$CsRepo has no tag ${Tag}: COORD pushes it before this sheet; stop and tell COORD" }
+$commit = (@($refs | Where-Object { $_ -like '*^{}' }) + $refs)[0].Split("`t")[0]
+foreach ($f in 'VALIDATION.md', 'LICENSE') {
+    try { Invoke-WebRequest "https://raw.githubusercontent.com/$CsRepo/$Tag/$f" -OutFile "$Pub\tag-$f" }
+    catch { throw "$f does not resolve anonymously at $CsRepo ${Tag}: stop and tell COORD" }
+}
+if ((Get-FileHash "$Pub\tag-VALIDATION.md").Hash -ne (Get-FileHash "$Pub\kit\conversion\VALIDATION.md").Hash) { throw "VALIDATION.md at $Tag is not the one the package carries: stop and tell COORD" }
+"tag OK  $CsRepo $Tag -> commit $($commit.Substring(0, 10)); VALIDATION.md and LICENSE resolve anonymously"
+```
 
 ### 4.1 The checksum gate, then sign and verify
 
@@ -386,7 +410,7 @@ if (-not $listed) { throw "$Id $PV is not listed after 90 minutes (flat containe
 
 ### 4.4 Stop and report to COORD
 
-Send COORD one reply with: the `checksum OK` line and the `signed and verified` line from
+Send COORD one reply with: the `tag OK` line from 4.0b; the `checksum OK` line and the `signed and verified` line from
 4.1; the `pushed:` line from 4.2; and the `listed on nuget.org` line from 4.3. Do not send the build or signer output
 itself: it contains local paths.
 
