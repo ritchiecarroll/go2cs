@@ -39,6 +39,7 @@ after COORD has ruled sections 1-3 green, by either path.
 | `disclosures/` | the notes-only module disclosure manifest that put the `TestVersion6` note on the proof page |
 | `evidence/v6probe/` | the Go probe that shows the upstream `TestVersion6` race deterministically |
 | `ROW-PR.md` | draft text for the registry row's pull request |
+| `evidence/Test-ChecksumGate.ps1` | a parse-and-run test of block 2's checksum gate as this sheet writes it, against this kit's packages and a one-line SHA256SUMS (COORD found the one-line false red live, 2026-10-10) |
 
 Both packages were packed at `T` = `claude/c2-nugetgo-tools` @ `3d0d70ba53`, against the published go.* 1.24.13.5,
 with `-platforms linux/amd64`. Section 1: 54 matched, 0 disclosed, 18 Benchmark and Fuzz declarations excluded; input
@@ -333,7 +334,7 @@ options: `--all`, and `--certificate-fingerprint`, which fails unless the signer
 
 ```powershell
 $file = "$Id.$PV.nupkg"
-$sums = (Get-Content "$Pub\kit\nupkg\SHA256SUMS") -match "\s$([regex]::Escape($file))$"
+$sums = @(Get-Content "$Pub\kit\nupkg\SHA256SUMS") -match "\s$([regex]::Escape($file))$"
 $want = if ($sums) { ($sums[0] -split '\s+')[0] } else { $null }
 if (-not $want) { throw "SHA256SUMS has no line for $file" }
 $SignDir = "$Pub\sign"
