@@ -271,6 +271,7 @@ func main() {
 	commandLine.Var(&nugetMapExcludeVals, "nuget-map-exclude", "With -recurse=nuget: a module path that is never mapped, whatever a source says; repeatable")
 	nugetMapRefreshCmd := commandLine.Bool("nuget-map-refresh", false, "With -recurse=nuget: fetch every URL source unconditionally (bypassing the cache) and re-resolve every module, adopting what the sources now say instead of what go2cs.nuget.lock pinned")
 	nugetMapCanonicalOnlyCmd := commandLine.Bool("nuget-map-canonical-only", false, "With -recurse=nuget: apply canonical mappings only (the module owner's own conversion); a community mapping is treated as unmapped")
+	nugetMapFeedCmd := commandLine.String("nuget-map-feed", "", "With -recurse=nuget: read mapped packages' versions from this feed INSTEAD of nuget.org -- an https:// NuGet v3 service index (a rehearsal gallery such as int.nugettest.org) or a local folder of nupkgs; a rehearsal version (nugetgo-pack.ps1 -RehearsalSuffix) is admitted only from it. The restore of the emitted projects reads your own package sources, so name the feed there too")
 	targetPlatformCmd := commandLine.String("platforms", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH), "Target platform(s) for conversion, format: os/arch; comma-separated for a list (windows/amd64,linux/amd64,darwin/amd64), which with -stdlib emits the multi-platform (layout L3) corpus — one GOOS per target")
 	platformCensusCmd := commandLine.String("platform-census", "", "With -stdlib and two or more -platforms targets: convert once per target into an isolated seeded staging root under this directory, classify the emissions (shared/variant/partial/exclusive) and write platform-manifest.json there. Emits NO corpus output")
 	refCensusCmd := commandLine.String("ref-census", "", "With -stdlib: run the ж-box A1 ref-lowering classification census (analysis only, never emits) over the standard library — once per -platforms target — and write the JSON report to this path. See docs/phase4/DESIGN-zh-box-reduction.md §9 stage A1")
@@ -485,6 +486,8 @@ Examples:
 	if err != nil {
 		log.Fatalf("%v\n", err)
 	}
+
+	nugetMapOpts.feed = *nugetMapFeedCmd
 
 	var nugetMapGiven []string
 	commandLine.Visit(func(f *flag.Flag) {
