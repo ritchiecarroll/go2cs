@@ -9,18 +9,18 @@ Browse all: [Go Standard Library NuGet packages](https://www.nuget.org/packages?
 
 ---
 
+**go2cs converts Go source code into C# that reads like the Go it came from and behaves the same.**
+It tracks Go 1.24.13 and targets .NET 10. The converted Go standard library passes Go's own tests,
+package by package, on Windows and Linux, and the same validation is in progress on macOS.
+**Try it:** [convert a real Go module](#converting-a-real-world-module), start to finish.
+
 ## 📰 NEWS — Converted code reads like Go, and Native AOT runs on Windows
 
-**Converted C# no longer carries the attributes that said what Go's own syntax already says.** A pointer
-receiver is `this ref`, a Go type is a bare `partial struct`, and an embedded field, a struct tag and an
-array's length are short comments in Go's own spelling. The source generators read them at build time.
-[Before and after](BeforeAndAfterTheFaceLift.md) shows nine real examples from the converted standard library
-on both sides of the change. **A C# project that references the `go.*` packages now runs under Native AOT
-on Windows**, as it does on Linux and on Intel Macs, and a fully trimmed Native AOT build runs for the
-first time. The converted library ships as **NuGet 1.24.13.5**, targeting .NET 10, with every validated
-package at its count on Windows and on Linux. The
-[full announcement](NEWS.md#october-9-2026--converted-code-reads-like-go-and-native-aot-runs-on-windows)
-has the details.
+**October 9, 2026, NuGet 1.24.13.5.** Converted C# drops the attributes that repeated Go's own syntax
+([before and after](BeforeAndAfterTheFaceLift.md)), and a C# project that references the `go.*`
+packages runs under Native AOT on Windows; a Native AOT publish is still slow and large
+([Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)).
+[Full announcement](NEWS.md#october-9-2026--converted-code-reads-like-go-and-native-aot-runs-on-windows).
 
 **➡ All announcements can be found in the [go2cs News Archive](NEWS.md).**
 
@@ -161,6 +161,11 @@ maps to C# (with [`ConversionStrategies-Reference/`](ConversionStrategies-Refere
 - **[Go 1.24.13](https://go.dev/dl/)** — the converter is a Go program, and it uses the Go toolchain to load
   and type-check the source being converted. Make sure your Go environment is set up (`GOROOT`/`GOPATH`)
   and the source you want to convert already builds with `go build`.
+  Go 1.24 is out of upstream support, so the converted standard library carries none of the Go security
+  fixes issued since; the [Roadmap](Roadmap.md#go-releases) says which Go releases come next.
+- **Supported platforms** — Windows and Linux on x64, where the converted standard library is validated
+  against Go's own tests. macOS, Intel and Apple silicon, has packages and is being validated package by
+  package ([Platforms](Roadmap.md#platforms)).
 
 ## Installing the converter
 
@@ -380,8 +385,9 @@ internal static void Main() {
 > packages, with a converter built from a checkout at or after the commit that published them. The output
 > matches `go run`, including `fatih/color`'s colors in an interactive terminal, on both platforms.
 > macOS (Intel and Apple silicon): packages ship for both chips, the behavioral suite passes on both, and the README
-> walkthrough runs. The standard library is not yet validated package by package on macOS, so don't expect it to be
-> fully operational there yet. Other platforms and architectures are tracked in the Roadmap's
+> walkthrough runs. The standard library is being validated package by package on macOS; a
+> [roster](ValidatedTestPackages.md) row shows a macOS count once its package validates there, so don't expect a
+> package without one to be fully operational on macOS yet. Other platforms and architectures are tracked in the Roadmap's
 > [Platforms section](Roadmap.md#platforms)._
 
 **3 — C#: build the generated solution.** The app's per-project `.slnx` builds the app and its whole

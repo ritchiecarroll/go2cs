@@ -1,11 +1,12 @@
 # Validated Test Packages
 <!-- {% raw %} — Jekyll/Liquid guard: this doc contains {{ sequences (Go template/composite syntax) that Liquid would otherwise parse or silently eat. Keep the matching endraw as the final line. -->
 
-Each package below has its own Go 1.24.13 `_test.go` suite converted to C#, built against the
-converted standard library, run under the Go-semantics test host, and differentially compared —
-verdict for verdict — against a clean `go test -json` baseline. A row appears only when *every*
-`Test` function's result matches `go test`; a package that almost passes never appears, which keeps
-the denominator honest.
+**What a row means.** Each package in the table below has had its own Go 1.24.13 test suite
+converted to C#, built against the converted standard library, run, and compared with `go test`,
+verdict for verdict. A package appears only when every `Test` function's result either matches Go's
+or is disclosed, by its exact failure, as something the converted code does not do; a package that
+almost passes never appears. [What "validated" means, and what it doesn't](Limitations.md#what-validated-means-and-what-it-doesnt)
+says what that proves and what it does not.
 
 ## Where Phase 4 stands
 
@@ -18,34 +19,9 @@ the denominator honest.
 > measures against only those a faithful managed conversion can honestly validate at all.
 >
 > **Every implementable package validates.** No candidate remains; the five packages outside the
-> 225 are the exclusions below (see
-> [The 230 at the H10 close](#the-230-at-the-h10-close-go12413-2026-09-23)).
+> 225 are listed, each with its reason, under [Excluded packages](#excluded-packages).
 >
 > **Linux: 223 of 223 applicable rows validated at their Linux counts** — 69,617 matching verdicts · 392 disclosed · 2 rows platform-exclusive (`linux: n/a`). (They are `internal/syscall/windows` and its child `internal/syscall/windows/registry`; the parent is Windows-exclusive by its own name, every source file is `*_windows.go`, and its layout-L3 csproj compiles nothing under `GoTargetOS=linux`.)
->
-> **Denominator:** the 230 of the 346 packages `go list std` reports at go1.24.13 whose test files
-> surviving the corpus axis (windows/amd64, `-tags purego,math_big_pure_go`) declare a `Test`
-> function, listed in
-> [`docs/phase4/hopA-inputs/recon-lists/population-go1.24.13.txt`](phase4/hopA-inputs/recon-lists/population-go1.24.13.txt).
->
-> **Exclusions:** five, the whole ledger, each with its class, mechanism and evidence in
-> [Excluded packages](#excluded-packages). An exclusion is subtractable only from a set that
-> contains it. The four rows Go's own windows/amd64 constraints leave with no test at all are
-> **not members of the 230**, so they were struck from the ledger on 2026-09-22 on the
-> `internal/runtime/syscall` precedent. [The 230, derived](#the-230-derived-go12413-2026-09-22)
-> derives the 230 and that strike.
->
-> [`src/check-roster-format.ps1`](../src/check-roster-format.ps1) recomputes every figure here from
-> the table and fails on any disagreement. It checks the one figure the table cannot know, the
-> denominator, against the population file instead, along with every banked and excluded row's
-> membership in it.
->
-> **Ten rows moved with Go 1.24's import paths.** Ten packages validated at Go 1.23.12 have no
-> package at their old path at go1.24.13. Their tests validate under the packages that now hold
-> them, and each row carries its own go1.24.13 counts;
-> [The H10 relocation map](#the-h10-relocation-map) has the per-row arithmetic. The Go 1.23.12
-> anchor's own denominators, 215 and the 209/210 its implementable line carried, are recorded in
-> [The 215, derived](#the-215-derived--and-the-thirteen-rows-that-are-not-yet-banked).
 
 <!-- Superseded 2026-09-24 (H12 C5; the 1.24.13.1 announcement's Piece 5(a), owner-accepted r3 at
      claude/coord-handover 77f85249fe). From 2026-09-22 until the H10 close re-banked every row at its
@@ -276,6 +252,10 @@ the denominator honest.
   inapplicable, in neither the numerator nor the applicable denominator, never pending, and skipped
   by name when the sweep runs under that OS. The Linux line above sums the annotations exactly as
   the verdict line sums the columns.
+- A row validated on macOS carries a `darwin: N + D` annotation in the same place. One annotation
+  covers both chips: a row gains it only when Apple silicon (arm64) and Intel (x64) agree with each
+  other verdict for verdict. macOS validation is in progress, so a row with no `darwin:` annotation
+  has not been validated there yet.
 - Every count on every platform is measured with `CGO_ENABLED=0`, the state the corpus is emitted
   in, pinned for the whole run by the sweep since 2026-09-03, so cgo-gated tests (`testenv.HasCGO()`
   variants, cgo-only subtests) are absent on Linux exactly as on Windows. Linux annotations banked
@@ -569,6 +549,32 @@ the denominator honest.
      with caller-side `LocalFree`), `TestDirectoryJunction` and `TestDirectorySymbolicLink` (raw-metal
      struct overlay on managed bytes), `TestRemoveAllWithExecutedProcess` (relocatable single-file test
      executable)." and ended at the 2026-09-23 RE-BANKED sentence. -->
+
+## How the header's figures are derived
+
+**Denominator:** the 230 of the 346 packages `go list std` reports at go1.24.13 whose test files
+surviving the corpus axis (windows/amd64, `-tags purego,math_big_pure_go`) declare a `Test`
+function, listed in
+[`docs/phase4/hopA-inputs/recon-lists/population-go1.24.13.txt`](phase4/hopA-inputs/recon-lists/population-go1.24.13.txt).
+
+**Exclusions:** five, the whole ledger, each with its class, mechanism and evidence in
+[Excluded packages](#excluded-packages). An exclusion is subtractable only from a set that
+contains it. The four rows Go's own windows/amd64 constraints leave with no test at all are
+**not members of the 230**, so they were struck from the ledger on 2026-09-22 on the
+`internal/runtime/syscall` precedent. [The 230, derived](#the-230-derived-go12413-2026-09-22)
+derives the 230 and that strike.
+
+[`src/check-roster-format.ps1`](../src/check-roster-format.ps1) recomputes every figure in the header
+from the table and fails on any disagreement. It checks the one figure the table cannot know, the
+denominator, against the population file instead, along with every banked and excluded row's
+membership in it.
+
+**Ten rows moved with Go 1.24's import paths.** Ten packages validated at Go 1.23.12 have no
+package at their old path at go1.24.13. Their tests validate under the packages that now hold
+them, and each row carries its own go1.24.13 counts;
+[The H10 relocation map](#the-h10-relocation-map) has the per-row arithmetic. The Go 1.23.12
+anchor's own denominators, 215 and the 209/210 its implementable line carried, are recorded in
+[The 215, derived](#the-215-derived--and-the-thirteen-rows-that-are-not-yet-banked).
 
 ## Disclosures
 
