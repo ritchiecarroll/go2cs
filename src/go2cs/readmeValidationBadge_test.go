@@ -119,9 +119,9 @@ func mustWriteFile(t *testing.T, path string, contents string) {
 	}
 }
 
-// A validated package's badge is green, states matched/total (total = matched + disclosed, so the
-// denominator counts every test the suite ran), and links the VERSIONED proof page — the badge IS
-// the proof link, so this string is pinned verbatim.
+// A validated package's badge is green, states "<matched> matched / <disclosed> disclosed" (the
+// nugetgo packages' wording since 2026-10-10: a bare total read the disclosed tests as failures), and
+// links the VERSIONED proof page — the badge IS the proof link, so this string is pinned verbatim.
 func TestValidationBadgeGreenPinsCountsAndVersionedProofLink(t *testing.T) {
 	root, projectPath := badgeTree(t, "io", "1.23.1.2")
 
