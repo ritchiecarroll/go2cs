@@ -1025,7 +1025,7 @@ function Write-Handoff {
     Write-Host '     staging root FIRST -- an unseeded root gives the hand-own marker nothing to detect,'
     Write-Host '     emits every whole-file hand-own as a plain .cs, and breaks per-GOOS layout adoption:'
     Write-Host ''
-    Write-Host '        # seed: src/core, src/version.props and docs/validation, mirroring the src/ layout' -ForegroundColor DarkGray
+    Write-Host '        # seed: src/core, src/version.props, docs/validation and docs/ValidatedTestPackages.md, mirroring the src/ layout' -ForegroundColor DarkGray
     Write-Host '        # then, single-target (the default windows corpus):' -ForegroundColor DarkGray
     Write-Host '        go2cs -stdlib -comments -go2cspath <staging>/src' -ForegroundColor White
     Write-Host ''

@@ -2,8 +2,10 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-80%2F81_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/bufio.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/bufio@go1.24.13)\
+[![Tests](https://img.shields.io/badge/Tests-80_matched_%2F_1_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/bufio.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/bufio@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/bufio) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/bufio)
+
+From C#, call this package through the static class go.bufio_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
 Package bufio implements buffered I/O. It wraps an io.Reader or io.Writer object, creating another object (Reader or Writer) that also implements the interface but provides buffering and some help for textual I/O.
 

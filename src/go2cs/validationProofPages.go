@@ -720,6 +720,63 @@ func readValidationRoster(docsPath string) ([]string, bool, error) {
 	return packages, true, nil
 }
 
+// exclusionLedgerRowPattern and exclusionLedgerHeadingPattern read the roster's EXCLUSION LEDGER, the
+// "Excluded packages" table: the packages a ruling took out of the validated population, each with its
+// class and why. They are verbatim ports of $ExclusionLedgerRowPattern and $ExclusionLedgerHeadingPattern
+// in src/_roster.ps1, and TestExclusionLedgerPatternsAgree holds them together. A ledger row's first cell
+// is a PLAIN code span, never the banked table's linked [`pkg`](url) shape.
+var (
+	exclusionLedgerRowPattern     = regexp.MustCompile("^\\|\\s*`([^`]+)`\\s*\\|\\s*([^|]*?)\\s*\\|\\s*([^|]*?)\\s*\\|")
+	exclusionLedgerHeadingPattern = regexp.MustCompile("^(#{1,6})\\s+Excluded packages\\s*$")
+)
+
+// readRosterExclusions returns the import paths the roster's exclusion ledger names, read the way
+// Get-ExclusionLedgerRows reads them in src/_roster.ps1: only within the ledger's own section, from its
+// heading to the next heading of equal or higher level. Other tables in the roster have the same row
+// shape, so the heading is what identifies the ledger. Like that function it refuses rather than guesses:
+// a missing roster, a missing heading or a duplicated heading is an error, never an empty ledger.
+func readRosterExclusions(docsPath string) (map[string]bool, error) {
+	rosterPath := filepath.Join(docsPath, validationRosterFileName)
+	data, err := os.ReadFile(rosterPath)
+
+	if err != nil {
+		return nil, err
+	}
+
+	lines := strings.Split(strings.ReplaceAll(string(data), "\r", ""), "\n")
+	start := -1
+
+	for i, line := range lines {
+		if exclusionLedgerHeadingPattern.MatchString(line) {
+			if start >= 0 {
+				return nil, fmt.Errorf("the roster \"%s\" has more than one 'Excluded packages' heading", rosterPath)
+			}
+
+			start = i
+		}
+	}
+
+	if start < 0 {
+		return nil, fmt.Errorf("the roster \"%s\" has no 'Excluded packages' heading", rosterPath)
+	}
+
+	level := len(exclusionLedgerHeadingPattern.FindStringSubmatch(lines[start])[1])
+	sectionEnd := regexp.MustCompile(fmt.Sprintf("^#{1,%d}\\s", level))
+	excluded := make(map[string]bool)
+
+	for _, line := range lines[start+1:] {
+		if sectionEnd.MatchString(line) {
+			break
+		}
+
+		if match := exclusionLedgerRowPattern.FindStringSubmatch(line); match != nil {
+			excluded[match[1]] = true
+		}
+	}
+
+	return excluded, nil
+}
+
 // composeValidationIndex puts freshly rendered rows into the committed page: the text up to and
 // including the CURRENT table's header and separator is kept byte for byte (the Frozen snapshots
 // section lives there), the old rows are dropped, and whatever follows them is kept. It reports false

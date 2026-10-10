@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-not_yet_validated-orange?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/net/internal/socktest@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/net/internal/socktest) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/net/internal/socktest)
 
+From C#, call this package through the static class go.net.@internal.socktest_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package socktest provides utilities for socket testing.
 
 ---

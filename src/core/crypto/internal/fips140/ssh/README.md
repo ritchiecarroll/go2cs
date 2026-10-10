@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/crypto/internal/fips140/ssh@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/crypto/internal/fips140/ssh) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/crypto/internal/fips140/ssh)
 
+From C#, call this package through the static class go.crypto.@internal.fips140.ssh_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package ssh implements the SSH KDF as specified in RFC 4253, Section 7.2 and allowed by SP 800-135 Revision 1.
 
 ---

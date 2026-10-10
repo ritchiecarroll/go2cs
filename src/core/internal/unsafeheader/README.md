@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-not_yet_validated-orange?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/internal/unsafeheader@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/internal/unsafeheader) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/internal/unsafeheader)
 
+From C#, call this package through the static class go.@internal.unsafeheader_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package unsafeheader contains header declarations for the Go runtime's slice and string implementations.
 
 This package allows packages that cannot import "reflect" to use types that are tested to be equivalent to reflect.SliceHeader and reflect.StringHeader.

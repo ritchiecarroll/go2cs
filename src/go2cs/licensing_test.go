@@ -153,7 +153,7 @@ func TestLicensingPackageAndReadme(t *testing.T) {
 	if string(contents) != "Custom local terms" {
 		t.Fatal("local license was overwritten")
 	}
-	if err := writeReadmeFile(output, "sync", "", "", options); err != nil {
+	if err := writeReadmeFile(output, "sync", "", "", "", options); err != nil {
 		t.Fatal(err)
 	}
 	readme, err := os.ReadFile(filepath.Join(output, "README.md"))

@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@v0.32.1--0.20250304185419--76f9bf3279ef-00ADD8?logo=go)](https://pkg.go.dev/golang.org/x/net@v0.32.1-0.20250304185419-76f9bf3279ef/nettest)\
 [![Source](https://img.shields.io/badge/Source-@v0.32.1--0.20250304185419--76f9bf3279ef-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/vendor/golang.org/x/net/nettest) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/vendor/golang.org/x/net/nettest)
 
+From C#, call this package through the static class go.vendor.golang.org.x.net.nettest_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package nettest provides utilities for network testing.
 
 ---

@@ -22,7 +22,7 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageId>go.lib</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageDescription>$(Description)</PackageDescription>
+    <PackageDescription>Go core library functions in .NET for use with go2cs.</PackageDescription>
     <PackageProjectUrl>https://github.com/ritchiecarroll/go2cs</PackageProjectUrl>
     <PackageIcon>go2cs.png</PackageIcon>
     <PackageTags>go2cs;Golang;go</PackageTags>

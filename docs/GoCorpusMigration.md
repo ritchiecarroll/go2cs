@@ -622,8 +622,8 @@ until it is.
 **CLAUDE.md's reconvert ritual, unchanged and unabridged.** A migration is the *most* likely moment to
 skip a step of it, so the non-negotiables are restated rather than referenced:
 
-- **Seed first.** Copy `src/core`, `src/version.props` and `docs/validation` into the staging root,
-  mirroring the `src/` layout, and convert with `-go2cspath <staging>/src`. An unseeded root gives the
+- **Seed first.** Copy `src/core`, `src/version.props`, `docs/validation` and `docs/ValidatedTestPackages.md` into
+  the staging root, mirroring the `src/` layout, and convert with `-go2cspath <staging>/src`. An unseeded root gives the
   hand-own marker nothing to detect, so every whole-file hand-own is emitted as a plain `.cs` and the
   overlay rule protects **nothing** — the auto conversions compile and are operationally broken. Since
   the per-GOOS corpus layout landed, an unseeded root also breaks layout adoption: there is no
@@ -860,6 +860,7 @@ inert.
 | `src/core` minus `bin`/`obj`/`Generated` | floor 2: the marker detector and layout L3's per-GOOS routing need it |
 | `src/version.props` | the corpus pin guard reads it beside `core`; H5's root takes `<H2>`'s file — the pin AND the reset build number the emitted badges read — never a sed of the pin line; H4a's takes `<landing>`'s |
 | `docs/validation` | the README Tests and Source·C# badges read it with `version.props`; without either, both badges vanish corpus-wide |
+| `docs/ValidatedTestPackages.md` | the Tests badge reads the roster's exclusion ledger, so an excluded row never goes green; without it the Tests badge vanishes corpus-wide (TRAIN T3 fixup, 2026-10-10) |
 | `src/Directory.Build.props`, `src/gen` minus build dirs | to BUILD the root: `core/Directory.Build.props` imports the file above it (the TFM) and resolves the analyzer at `$(go2csPath)gen/go2cs-gen`, which the generated solution also lists |
 
 <!-- Lane R's seeding, 2026-09-07/08 and 2026-09-13: r-h5b-setup.sh:36-51, setup-convert.sh:38-51 (archived, sha256 in the rehearsal's

@@ -2,8 +2,10 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-19%2F19_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/hash.fnv.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/hash/fnv@go1.24.13)\
+[![Tests](https://img.shields.io/badge/Tests-19_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/hash.fnv.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/hash/fnv@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/hash/fnv) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/hash/fnv)
+
+From C#, call this package through the static class go.hash.fnv_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
 Package fnv implements FNV-1 and FNV-1a, non-cryptographic hash functions created by Glenn Fowler, Landon Curt Noll, and Phong Vo. See [https://en.wikipedia.org/wiki/Fowler-Noll-Vo\_hash\_function](https://en.wikipedia.org/wiki/Fowler-Noll-Vo_hash_function).
 

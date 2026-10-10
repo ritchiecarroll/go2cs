@@ -137,6 +137,7 @@ type packageReadmeEmission struct {
 	projectName string
 	packageDoc  string
 	sourceDir   string
+	csClass     string
 }
 
 // convertedPackageReadme is the last README emission this process made from a conversion. A single
@@ -148,13 +149,31 @@ var convertedPackageReadme *packageReadmeEmission
 // README, capturing what it wrote it from. Recorded only when the README was actually emitted, so
 // the gate that decides whether a package gets a README at all (emitsPackageReadme) is the same gate
 // that decides whether one can be refreshed.
-func recordPackageReadmeEmission(projectPath string, projectName string, packageDoc string, sourceDir string) {
+func recordPackageReadmeEmission(projectPath string, projectName string, packageDoc string, sourceDir string, csClass string) {
 	convertedPackageReadme = &packageReadmeEmission{
 		projectPath: projectPath,
 		projectName: projectName,
 		packageDoc:  packageDoc,
 		sourceDir:   sourceDir,
+		csClass:     csClass,
 	}
+}
+
+// packageReadmeCSharpClass is the static class a C# caller reaches this package through, for the README's "From C#"
+// line: the class package_info.cs declares, the conversion's namespace and the sanitized <name>_package (so a keyword
+// segment keeps its `@`, as a caller must type it). Empty when no package is being converted.
+func packageReadmeCSharpClass() string {
+	if packageName == "" {
+		return ""
+	}
+
+	class := getSanitizedImport(packageName + PackageSuffix)
+
+	if packageNamespace == "" {
+		return class
+	}
+
+	return packageNamespace + "." + class
 }
 
 // refreshPackageReadmeAfterProof re-emits a converted package's README once the compare has written
@@ -178,7 +197,7 @@ func refreshPackageReadmeAfterProof(outputPath string, options Options) error {
 		return nil
 	}
 
-	return writeReadmeFile(emission.projectPath, emission.projectName, emission.packageDoc, emission.sourceDir, options)
+	return writeReadmeFile(emission.projectPath, emission.projectName, emission.packageDoc, emission.sourceDir, emission.csClass, options)
 }
 
 // writeReadmeFile emits a README.md into a converted library package directory, wrapping the
@@ -194,7 +213,7 @@ func refreshPackageReadmeAfterProof(outputPath string, options Options) error {
 //
 // The CRLF pass at the bottom is what carries the badge paragraph's internal hard break to disk, so
 // readmeBadgeLine composes that break with a bare \n and lets this one conversion cover it.
-func writeReadmeFile(projectPath string, projectName string, packageDoc string, sourceDir string, options Options) error {
+func writeReadmeFile(projectPath string, projectName string, packageDoc string, sourceDir string, csClass string, options Options) error {
 	projectPath = strings.TrimRight(projectPath, string(filepath.Separator)) + string(filepath.Separator)
 	readmeFileName := projectPath + "README.md"
 
@@ -206,6 +225,12 @@ func writeReadmeFile(projectPath string, projectName string, packageDoc string, 
 	if badges := readmeBadgeLine(projectPath, projectName, sourceDir, options); badges != "" {
 		builder.WriteString(badges)
 		builder.WriteString("\n\n")
+	}
+
+	// The "From C#" line (first-impression audit, COORD 2026-10-10): the class a C# caller uses and the guide that
+	// shows how. Plain text, no inline code: nuget.org's dark theme draws an inline-code span as a red block.
+	if csClass != "" {
+		builder.WriteString(fmt.Sprintf("From C#, call this package through the static class %s; see [Consuming converted Go from C#](%s/ConsumingGoFromCSharp.html).\n\n", csClass, validationSiteURL))
 	}
 
 	if rendered := renderPackageDoc(packageDoc, sourceDir, options); rendered != "" {

@@ -2,8 +2,10 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-82%2F82_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/crypto.elliptic.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/crypto/elliptic@go1.24.13)\
+[![Tests](https://img.shields.io/badge/Tests-82_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.5/crypto.elliptic.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/crypto/elliptic@go1.24.13)\
 [![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/crypto/elliptic) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/crypto/elliptic)
+
+From C#, call this package through the static class go.crypto.elliptic_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
 Package elliptic implements the standard NIST P-224, P-256, P-384, and P-521 elliptic curves over prime fields.
 

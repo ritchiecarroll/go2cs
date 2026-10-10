@@ -27,8 +27,8 @@
 //     differing Go source and identical Windows↔Linux emission. A census over `go list` output would
 //     be wrong in both directions, so this one hashes what the converter actually wrote.
 //
-//  2. **Each staging root is SEEDED** — `core` + `version.props` + `docs/validation`, mirroring the
-//     repository's `src/` layout — exactly as CLAUDE.md's reconvert ritual requires. An unseeded root
+//  2. **Each staging root is SEEDED** — `core` + `version.props` + `docs/validation` + the roster,
+//     mirroring the repository's `src/` layout — exactly as CLAUDE.md's reconvert ritual requires. An unseeded root
 //     gives the `[module: GoManualConversion]` detector nothing to detect, so all 41 hand-owned files
 //     emit as plain `.cs` (16 of them displacing a `.cs.auto` sibling) and a fully hand-owned package
 //     additionally emits a `.csproj`/`package_info.cs`/`README.md` it must not. That is a different
@@ -463,10 +463,11 @@ func compareEmissionToSeed(artifacts map[string]artifactState, seed map[string]a
 }
 
 // seedCensusRoot reproduces CLAUDE.md's reconvert seeding ritual into a staging root, MIRRORING the
-// repository's own layout — `<stage>/src/core`, `<stage>/src/version.props`, `<stage>/docs/validation`
-// — because that is the shape the converter's two upward walks expect (the project-reference root is
-// the directory holding `core/golib`; the README validation badge reads `version.props` from that
-// root and `docs/validation` from its SIBLING `docs`). Returns the number of files copied.
+// repository's own layout — `<stage>/src/core`, `<stage>/src/version.props`, `<stage>/docs/validation`,
+// `<stage>/docs/ValidatedTestPackages.md` — because that is the shape the converter's two upward walks
+// expect (the project-reference root is the directory holding `core/golib`; the README validation
+// badge reads `version.props` from that root, and `docs/validation` and the roster from its SIBLING
+// `docs`). Returns the number of files copied.
 func seedCensusRoot(seedRoot, stageRoot string) (int, error) {
 	outputRoot := filepath.Join(stageRoot, "src")
 	copied := 0
@@ -500,6 +501,19 @@ func seedCensusRoot(seedRoot, stageRoot string) (int, error) {
 
 	if err != nil {
 		return copied, fmt.Errorf("failed to seed the validation record: %w", err)
+	}
+
+	copied += n
+
+	// And the roster, whose exclusion ledger the Tests badge honors (readRosterExclusions): without it
+	// the badge cannot tell an excluded package's proof page from a validated one's, so it is omitted
+	// from every staged README. Before the badge read the ledger, an unseeded roster made no difference,
+	// and an excluded row's README was rewritten green (crypto/internal/fips140deps, TRAIN T3 fixup).
+	n, err = copyFileIfPresent(filepath.Join(filepath.Dir(seedRoot), "docs", validationRosterFileName),
+		filepath.Join(stageRoot, "docs", validationRosterFileName))
+
+	if err != nil {
+		return copied, fmt.Errorf("failed to seed %s: %w", validationRosterFileName, err)
 	}
 
 	copied += n

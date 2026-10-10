@@ -5,6 +5,8 @@
 [![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@v0.21.0-00ADD8?logo=go)](https://pkg.go.dev/golang.org/x/text@v0.21.0/secure/bidirule)\
 [![Source](https://img.shields.io/badge/Source-@v0.21.0-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/vendor/golang.org/x/text/secure/bidirule) [![Source](https://img.shields.io/badge/Source-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5/src/core/vendor/golang.org/x/text/secure/bidirule)
 
+From C#, call this package through the static class go.vendor.golang.org.x.text.secure.bidirule_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
+
 Package bidirule implements the Bidi Rule defined by RFC 5893.
 
 This package is under development. The API may change without notice and without preserving backward compatibility.
