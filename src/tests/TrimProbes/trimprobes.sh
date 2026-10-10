@@ -40,7 +40,9 @@ for p in consumer genprobe c32a c32b c32c; do
     (cd "$OUT/$p" && "$exe" > "$OUT/run-$p.out" 2> "$OUT/run-$p.err"); x=$?
     if [ $p = consumer ]; then
       tr -d '\r' < "$OUT/run-$p.out" | grep -qE '^PACKAGE-SYMBOLS: ' && [ ! -s "$OUT/run-$p.err" ] && verdict=RUNS-CLEAN || verdict=DIFFERS
-    elif tr -d '\r' < "$OUT/run-$p.out" | diff -q - "$dir/expected.txt" > /dev/null; then verdict=GO-EQUAL
+    # CR stripped on BOTH sides: a core.autocrlf=true checkout writes expected.txt with CRLF (.gitattributes pins it to
+    # LF as well), and a Windows program writes CRLF.
+    elif diff -q <(tr -d '\r' < "$OUT/run-$p.out") <(tr -d '\r' < "$dir/expected.txt") > /dev/null; then verdict=GO-EQUAL
     else verdict="DIFFERS($(grep -m1 -oE '[A-Za-z]+Exception' "$OUT/run-$p.err"))"; fi
   fi
   printf '%s\t%s\t%s\t%s\t%s\t%s\n' $p $ARM $rc "$x" "$verdict" "$size"

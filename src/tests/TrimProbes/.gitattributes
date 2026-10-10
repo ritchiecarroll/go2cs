@@ -1,0 +1,2 @@
+# Go's expected output is compared byte for byte (CR stripped both sides by trimprobes.sh); keep it LF on every checkout.
+*.txt text eol=lf
