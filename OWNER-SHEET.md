@@ -1,9 +1,12 @@
-# hashset v1.0.0, rebuild 1.0.0.1: the owner sheet (sign, push, poll)
+# hashset v1.0.0, rebuild 1.0.0.2: the owner sheet (sign, push, poll)
 
 Written by C2 on 2026-10-10 for the owner to paste on the i7. It publishes `nugetgo.github.com.ritchiecarroll.hashset`
-**1.0.0.1**: the same Go module, `github.com/ritchiecarroll/hashset` v1.0.0, rebuilt (B3: a release's rebuild adds a
+**1.0.0.2**: the same Go module, `github.com/ritchiecarroll/hashset` v1.0.0, rebuilt (B3: a release's rebuild adds a
 fourth part, `X.Y.Z.N`). The rebuild exists to fix the package page on nuget.org: 1.0.0 showed VALIDATION.md as its
-README and had no icon. 1.0.0.1 carries a generated README in the style of the `go.*` packages and the go2cs icon.
+README and had no icon. 1.0.0.2 carries a generated README in the style of the `go.*` packages and the go2cs icon.
+**Revision 1 (1.0.0.1) is skipped forever** (COORD ruling C, 2026-10-10): it was packed, and its tag `nuget-1.0.0.1` was
+pushed to `hashset-cs`, but it was never pushed to nuget.org. The tag stays where it is, unconsumed, because a posted
+ref is never replaced. Your review of its preview changed the package's text, so the change ships as revision 2.
 
 This is `docs/NugetgoPublish.md` section 4, steps 1 to 4 only: sign, verify, push, wait. There is no int rehearsal,
 no registry change (the row maps the module to the ID, not to a version) and no new conversion: the C# source is the
@@ -27,36 +30,37 @@ key whose glob covers `nugetgo.*` (in `$env:NUGETGO_API_KEY`, or typed at the pr
 
 | Path | What it is |
 |:--|:--|
-| `nupkg/nugetgo.github.com.ritchiecarroll.hashset.1.0.0.1.nupkg` | the rebuild, unsigned, as packed |
+| `nupkg/nugetgo.github.com.ritchiecarroll.hashset.1.0.0.2.nupkg` | the rebuild, unsigned, as packed |
 | `nupkg/SHA256SUMS` | its SHA-256, as packed |
 | `preview/README.md` | the package README it carries, as text |
 | `preview/README.png` | that README rendered on a dark page (the badges drawn locally; see below) |
 | `preview/VALIDATION-as-1.0.0-readme.png` | 1.0.0's README (VALIDATION.md), rendered the same way, for comparison |
 | `conversion-add/VALIDATION.md`, `conversion-add/index.md` | the two files the `hashset-cs` repository adds at its root (COORD's commit) |
-| `evidence/SELECTION.md` | the measurement that a consumer selects 1.0.0.1 over 1.0.0 |
+| `evidence/SELECTION.md` | the measurement that a consumer selects 1.0.0.2 over 1.0.0 |
 
-Packed at `T` = `claude/c2-nugetgo-tools` @ `03485eed68` (the 1.0.0 tools, the README and icon cut, and your review
-of the first preview), from the same
-two roots as 1.0.0, against the published go.* 1.24.13.5, with `-Revision 1 -Release -LicenseSpdx MIT`. The proof is
+Packed at `T` = `claude/c2-nugetgo-tools` @ `3d0d70ba53` (the 1.0.0 tools, the README and icon cut, and your review
+of the revision-1 preview), from the same
+two roots as 1.0.0, against the published go.* 1.24.13.5, with `-Revision 2 -Release -LicenseSpdx MIT`. The proof is
 unchanged: 37 matched, 0 disclosed, input digest
 `sha256-7fb2058d54e18d61eaa288b0e79c847c953bdadf87cdd00fdb0d832750903114`, bound to the packed project. The read-back
 was clean: README.md generated, the go2cs icon packed byte for byte, no host path, and the self-description still
 reads module version `v1.0.0` (B3: the rebuild changes the package version only).
 
-**Your review of the first preview (2026-10-10).** The description and the README no longer say "PROOF:", and the
-README's first link is the Go source: the module path in the top callout, and in the "Converted from ..." line, links
-`github.com/ritchiecarroll/hashset` at its tag `v1.0.0` on GitHub. The pack refuses a "PROOF:" in either, and a README
-whose first link is anything else. Nothing else in the package changed: the assembly, the pdb, the icon, LICENSE,
-`index.md` and the self-description are byte for byte the earlier repack's, and so are the ID, the version and the
-dependencies. One packed file did change: VALIDATION.md opens with the description, so its first line lost "PROOF: "
-too. `conversion-add/VALIDATION.md` is that new file. Block 1b compares the tag's VALIDATION.md with it, so the tag
-must name a `hashset-cs` commit that carries the new file. COORD rules how (C2's post, 2026-10-10); until then block 1b
-stops with "VALIDATION.md at nuget-1.0.0.1 is not the one the package carries", as it should.
+**Your review of the revision-1 preview (2026-10-10).** The description and the README no longer say "PROOF:", and
+the README's first link is the Go source: the module path in the top callout, and in the "Converted from ..." line,
+links `github.com/ritchiecarroll/hashset` at its tag `v1.0.0` on GitHub. The package tags are `go2cs golang go`, with
+PROOF dropped (COORD ruling C). The pack refuses a "PROOF:" in the description or README, a PROOF tag, and a README
+whose first link is anything else. Against revision 1's package, the assembly, the pdb, the icon, LICENSE, `index.md`,
+VALIDATION.md and the self-description are byte for byte the same; the version, the tags and the README's tag links
+differ. Against 1.0.0's text, VALIDATION.md's first line lost "PROOF: " too, because it is the description.
+`conversion-add/VALIDATION.md` is that file, byte for byte as packed (mixed line endings: the header line LF, the page
+CRLF; git blob `501e16c9d9`). COORD commits it to `hashset-cs` and mints the signed tag `nuget-1.0.0.2` on that commit
+before you start; block 1b checks it.
 
 The preview badges are local stand-ins: this lane box cannot reach img.shields.io, so each badge is drawn from its
 own URL (label, message, color). nuget.org loads the real images from shields.io.
 
-**The README links `hashset-cs` at the tag `nuget-1.0.0.1`:** the C# Source badge links the tree, the Tests badge
+**The README links `hashset-cs` at the tag `nuget-1.0.0.2`:** the C# Source badge links the tree, the Tests badge
 `VALIDATION.md` and the license line `LICENSE`, both at the repository root (COORD ruling 2026-10-10: a tag, never
 `HEAD`, so 1.0.0's page and this one each keep their own). LICENSE is already there. VALIDATION.md is not, so COORD's
 commit adds `conversion-add/VALIDATION.md` and `conversion-add/index.md` at the root, and COORD mints the signed tag
@@ -83,7 +87,7 @@ $Pub    = Join-Path ([IO.Path]::GetTempPath()) 'nugetgo-hashset-rebuild-1'
 $Kit    = 'claude/c2-nugetgo-hashset-rebuild-1'
 $Master = '18f9c58186'
 $Id     = 'nugetgo.github.com.ritchiecarroll.hashset'
-$PV     = '1.0.0.1'
+$PV     = '1.0.0.2'
 $Org    = 'https://api.nuget.org/v3/index.json'
 if (Test-Path $Pub) { throw "$Pub already exists: remove it or choose another folder" }
 New-Item -ItemType Directory $Pub | Out-Null
@@ -154,21 +158,21 @@ $signedHash = (Get-FileHash -Algorithm SHA256 "$SignDir\$file").Hash.ToLowerInva
 
 ### 3. Push to nuget.org (the permanent step)
 
-The block first reads nuget.org: the ID must already list 1.0.0 (it is yours, from the first publish) and must not
-list 1.0.0.1. It then asks you to type `publish`. **A pushed version is permanent:** it can be unlisted, never deleted
+The block first reads nuget.org: the ID must already list 1.0.0 (it is yours, from the first publish) and must list
+neither 1.0.0.1 (revision 1, skipped: it must never appear) nor 1.0.0.2. It then asks you to type `publish`. **A pushed version is permanent:** it can be unlisted, never deleted
 or replaced.
 
 The key comes from `$env:NUGETGO_API_KEY` when that is set, and from a prompt when it is empty. Either way it is
 never printed, it never appears on a command line you type or in PSReadLine history, and the block's copy of it is
 removed when the push ends. Your `$env:NUGETGO_API_KEY` is read, not changed. While `dotnet nuget push` runs, the key
 is in that process's argument list, as with `release-nuget.ps1`. `--skip-duplicate` is left out on purpose: the block
-has just shown that 1.0.0.1 is not on nuget.org, so a duplicate means something is wrong.
+has just shown that 1.0.0.2 is not on nuget.org, so a duplicate means something is wrong.
 
 ```powershell
 $lower = $Id.ToLowerInvariant()
 $listedNow = @((Invoke-RestMethod "https://api.nuget.org/v3-flatcontainer/$lower/index.json").versions)
 if ($listedNow -notcontains '1.0.0') { throw "nuget.org does not list $Id 1.0.0: stop and tell COORD" }
-if ($listedNow -contains $PV) { throw "nuget.org already lists $Id ${PV}: stop and tell COORD; do not push" }
+foreach ($v in '1.0.0.1', $PV) { if ($listedNow -contains $v) { throw "nuget.org already lists $Id ${v}: stop and tell COORD; do not push" } }
 "nuget.org lists $Id $($listedNow -join ', '); $PV is not there yet"
 Write-Host "About to push $file (sha256 $signedHash) to nuget.org." -ForegroundColor Yellow
 Write-Host 'This is PERMANENT: a pushed version can be unlisted, never deleted or replaced.' -ForegroundColor Yellow
@@ -218,6 +222,6 @@ Send COORD one reply with: the `tag OK` line from block 1b, the `checksum OK` an
 `pushed:` lines from block 3, and the `listed on nuget.org` line from block 4. Do not send the signer output itself:
 it contains local paths.
 
-Then stop. Look at the package page on nuget.org once it shows 1.0.0.1, and tell COORD whether it reads as you want.
+Then stop. Look at the package page on nuget.org once it shows 1.0.0.2, and tell COORD whether it reads as you want.
 Keep `$Pub\sign` (the signed package as pushed) until COORD confirms. To clean up after that:
 `git -C $Repo worktree remove "$Pub\kit"`, the same for `"$Pub\signer"`, then delete `$Pub`.

@@ -6,6 +6,13 @@ selection, `[1.0.0.1]`, and the lock pins it. The converter is unchanged between
 Not re-measured on the package re-packed at `03485eed68` (the owner's review: no "PROOF:", the module source linked):
 between `ac8775c806` and `03485eed68` no converter Go source changed, and the two packages' nuspecs differ only in
 `<description>` and `<releaseNotes>`. Selection reads the ID, the version and the dependencies, which are equal.
+
+**Revision 2 (COORD ruling C, 2026-10-10), re-measured** with the same go2cs build and the same command over a folder
+holding 1.0.0 and `nugetgo.github.com.ritchiecarroll.hashset.1.0.0.2.nupkg` (packed at `3d0d70ba53`), the pair nuget.org
+will list: exit 0, `1 third-party module(s), 1 mapped, 1 referenced as packages`, `PackageReference
+nugetgo.github.com.ritchiecarroll.hashset [1.0.0.2]`, and `go2cs.nuget.lock` pins `1.0.0.2` (mapping source
+`../mappings.txt`). No local conversion of the module (`AR/src` holds only `example.com`, no `AR/pkg`). The program
+was not re-run: its assembly is byte-identical to revision 1's, which ran equal to `go run`.
 The sample program is the hashset kit's `app/` (`example.com/hashsetdemo`), and the mapping is the registry row, unchanged:
 
 ```
