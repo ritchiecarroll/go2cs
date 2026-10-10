@@ -1,0 +1,8 @@
+new struct: {1 2}
+new named slice: [3 4]
+new int: 5
+zero *Point is nil: true
+new *Point (box pointee, fixed depth) elem nil: true
+new error (builtins table) elem nil: true
+new **Point (fallback) elem nil: true
+new fmt.Stringer (fallback) elem nil: true

@@ -1,0 +1,10 @@
+zero struct: {0 0 }
+zero slice nil: true
+zero map nil: true
+zero [2][3]int: [[0 0 0] [0 0 0]] 3
+make named slice: [0 9] 2 4 main.Named
+make map: map[k:3]
+make chan: 7 true
+setbytes named: [9 8]
+setbytes named elem: [5 6 7]
+convert after GC: 1 s [1 2] 42

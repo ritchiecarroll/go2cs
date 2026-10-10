@@ -1,0 +1,7 @@
+new [4]int: [0 0 7 0]
+new []int elem nil: true
+new map elem nil: true
+new chan elem nil: true
+new []Point len: 1
+zero *[4]int is nil: true
+zero *[]int is nil: true
