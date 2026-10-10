@@ -123,6 +123,79 @@ Check 'no synopsis, no empty paragraph' (-not (New-NugetgoPackageReadme @readmeA
 $readmeArgs.Remove('Matched'); $readmeArgs.Remove('Disclosed'); $readmeArgs.Unvalidated = $true
 Check 'an unvalidated pack says so in its Tests badge' ((New-NugetgoPackageReadme @readmeArgs).Contains('/badge/Tests-not_validated-orange?logo=go')) 'no not_validated badge'
 
+Write-Host 'the seeded README: one fence at the top, the title and synopsis outside it (COORD ruling 2026-10-10)'
+$B = '[//]: # (nugetgo:generated:begin)'
+$E = '[//]: # (nugetgo:generated:end)'
+$seedArgs = @{} + $readmeArgs
+$seedArgs.Synopsis = 'Package mod does *one* thing.'; $seedArgs.DefaultIcon = $true
+$seedArgs.Remove('Unvalidated'); $seedArgs.Matched = 40; $seedArgs.Disclosed = 1
+$seed = New-NugetgoPackageReadme @seedArgs
+$sl = @($seed -split "`n")
+$bi = [Array]::IndexOf([string[]]$sl, $B); $ei = [Array]::IndexOf([string[]]$sl, $E)
+Check 'the title is the first line, outside the fence' ($sl[0] -ceq '# nugetgo.example.com.mod' -and $bi -gt 0) "begin at $bi"
+Check 'the begin marker is line 3, a blank line on each side' ($bi -eq 2 -and $sl[1] -ceq '' -and $sl[3] -ceq '') "begin at $bi"
+Check 'the end marker follows, a blank line on each side' ($ei -gt $bi -and $sl[$ei - 1] -ceq '' -and $sl[$ei + 1] -ceq '') "end at $ei"
+$inside = @($sl[($bi + 1)..($ei - 1)])
+Check 'the callout is the first line inside the fence' (@($inside | Where-Object { $_ })[0] -clike '> unofficial go2cs C# conversion of *') 'no callout first'
+Check 'the badges, the license line and the artwork line are inside the fence' (
+    ($inside -join "`n").Contains('[![Tests]') -and ($inside -join "`n").Contains('[![go2cs]') -and
+    @($inside | Where-Object { $_ -clike 'Converted from *' }).Count -eq 1 -and @($inside | Where-Object { $_ -clike 'Artwork licensed *' }).Count -eq 1) 'a generated line outside the fence'
+Check 'the synopsis is after the fence, the author''s' ([Array]::IndexOf([string[]]$sl, 'Package mod does \*one\* thing.') -gt $ei) 'no synopsis after the fence'
+Check 'the seed passes the fence guard and the README guard' (@(Test-NugetgoReadmeFence $seed).Count -eq 0 -and @(Test-NugetgoReadme $seed $modSource).Count -eq 0) "refused: $(@(Test-NugetgoReadmeFence $seed) + @(Test-NugetgoReadme $seed $modSource) -join '; ')"
+$blockArgs = @{} + $seedArgs; $blockArgs.Remove('Id'); $blockArgs.Remove('Synopsis')
+$block = New-NugetgoGeneratedBlock @blockArgs
+Check 'the generated block is exactly what the fence holds' (($inside -join "`n").Trim() -ceq $block.Trim()) 'block and fence differ'
+
+Write-Host 'the author''s file: the pack rewrites only the fence'
+$authored = $seed.Replace('# nugetgo.example.com.mod', '# My widget, in C#') + "`n## Usage`n`nCall ``Do``.`n"
+$m = Merge-NugetgoReadme $authored $block
+Check 'a current block is left as it is' ($m.Reasons.Count -eq 0 -and -not $m.Rewritten -and $m.Text -ceq $authored) "reasons [$($m.Reasons -join '; ')] rewritten $($m.Rewritten)"
+$stale = $authored.Replace('40_matched_%2F_1_disclosed', '39_matched_%2F_1_disclosed')
+$m = Merge-NugetgoReadme $stale $block
+Check 'a stale block is rewritten, and the text outside it is untouched' ($m.Reasons.Count -eq 0 -and $m.Rewritten -and $m.Text -ceq $authored) "reasons [$($m.Reasons -join '; ')] rewritten $($m.Rewritten)"
+$emptied = $authored.Substring(0, $authored.IndexOf($B) + $B.Length) + "`n`n" + $authored.Substring($authored.IndexOf($E))
+$m = Merge-NugetgoReadme $emptied $block
+Check 'an emptied fence is refilled' ($m.Rewritten -and $m.Text -ceq $authored) "rewritten $($m.Rewritten)"
+$crlf = $stale.Replace("`n", "`r`n")
+$m = Merge-NugetgoReadme $crlf $block
+Check 'a CRLF file stays CRLF' ($m.Rewritten -and $m.Text -ceq $authored.Replace("`n", "`r`n")) 'line endings changed'
+$noCaveat = $authored.Replace('## Usage', '## Usage (the author deleted nothing generated)')
+Check 'the author may write anything outside the fence' (@(Test-NugetgoReadmeFence $noCaveat).Count -eq 0) 'refused'
+
+Write-Host 'the fence guard'
+$body = "`n> callout`n`n"
+foreach ($case in @(
+        @('no fence at all', "# t`n`nprose`n", 'no generated block'),
+        @('a second begin marker', "# t`n`n$B`n$body$E`n`n$B`n`n$E`n", 'more than once'),
+        @('begin without end', "# t`n`n$B`n$body", 'no end marker'),
+        @('end before begin', "# t`n`n$E`n`n$B`n$body", 'before'),
+        @('a marker with no blank line before it', "# t`n$B`n$body$E`n", 'blank line before'),
+        @('a marker with no blank line after it', "# t`n`n$B`n$body$E`nprose`n", 'blank line after'),
+        @('the HTML comment form, which nuget.org shows as text', "# t`n`n<!-- nugetgo:generated:begin -->`n$body<!-- nugetgo:generated:end -->`n", 'not the marker'))) {
+    $reasons = @(Test-NugetgoReadmeFence $case[1])
+    Check $case[0] (@($reasons | Where-Object { $_.Contains($case[2]) }).Count -gt 0) "reasons [$($reasons -join '; ')]"
+    $m = Merge-NugetgoReadme $case[1] $block
+    Check "$($case[0]): the merge refuses too" ($m.Reasons.Count -gt 0 -and $null -eq $m.Text) "merge text $($null -ne $m.Text)"
+}
+$linkFirst = "# t`n`nSee [my site](https://example.com).`n`n" + $seed.Substring($seed.IndexOf($B))
+Check 'a link before the fence fails the first-link arm' (@(Test-NugetgoReadme $linkFirst $modSource | Where-Object { $_.Contains('the first link') }).Count -gt 0) 'accepted'
+
+Write-Host 'the icon source (COORD ruling 2026-10-10)'
+$src = Select-NugetgoIconSource -Icon '' -AuthorIcon ''
+Check 'neither: the default' ($null -eq $src.Path -and -not $src.Reason) "read $($src | ConvertTo-Json -Compress)"
+$src = Select-NugetgoIconSource -Icon '' -AuthorIcon 'conv/nuget/icon.png'
+Check 'nuget/icon.png alone wins over the default' ($src.Path -ceq 'conv/nuget/icon.png' -and -not $src.Reason) "read $($src | ConvertTo-Json -Compress)"
+$src = Select-NugetgoIconSource -Icon 'logo.png' -AuthorIcon ''
+Check '-Icon alone is used' ($src.Path -ceq 'logo.png' -and -not $src.Reason) "read $($src | ConvertTo-Json -Compress)"
+$src = Select-NugetgoIconSource -Icon 'logo.png' -AuthorIcon 'conv/nuget/icon.png'
+Check '-Icon with nuget/icon.png present is refused: two sources' ($null -eq $src.Path -and $src.Reason -and $src.Reason.Contains('two icons')) "read $($src | ConvertTo-Json -Compress)"
+
+Write-Host 'the pack wires it'
+$packText = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'nugetgo-pack.ps1'))
+foreach ($needle in @('Merge-NugetgoReadme', 'Select-NugetgoIconSource', 'Test-NugetgoReadmeFence $packedReadme', "Join-Path `$moduleSrc 'nuget'")) {
+    Check "nugetgo-pack.ps1 calls $needle" ($packText.Contains($needle)) 'not wired'
+}
+
 Write-Host 'the README guard'
 $hashsetPage = @"
 > PROOF: unofficial go2cs C# conversion of github.com/ritchiecarroll/hashset v1.0.0.
