@@ -51,6 +51,22 @@ the [Roadmap](Roadmap.md).
 *Phase 2's 57-package `fmt` closure, considered and rejected as a bootstrap in 2026-06, is now simply
 what the behavioral suite builds: cold ~48 s, warm ~4 s.*
 
+## Milestones
+
+High level timeline of the project's major turning points; the tags carry the details.
+
+| Date | Milestone | Commit / Tag | Notes |
+|:--|:--|:--|:--|
+| 2018-05-21 | Project inception | `929d1457f` | A C#/.NET converter built on an ANTLR4 Go grammar. |
+| 2022-03-13 | [`v0.1.2` release](NEWS.md#march-13-2022--v012-release) | [`v0.1.2`](https://github.com/ritchiecarroll/go2cs/releases/tag/v0.1.2) | The mature ANTLR4-era converter, tagged. |
+| 2025-01-12 | [The converter is rewritten in Go](NEWS.md#january-12-2025--the-converter-is-rewritten-in-go-go2cs-version-2) | `87465f5f5` | Rebuilt on `go/ast` + `go/types`, with the `golib` runtime library and Roslyn source generators supplying Go's semantics. |
+| 2025-05-05 | [First full standard-library auto-conversion](NEWS.md#may-5-2025--first-full-standard-library-auto-conversion) | `6ca1c45b7` · [`full-conversion-2025-05`](https://github.com/ritchiecarroll/go2cs/releases/tag/full-conversion-2025-05) (`cc14584c7`) | Every Go file gets a C# file; compiling comes later. |
+| 2026-07-10 | [**First clean full-standard-library compile**](NEWS.md#july-10-2026--the-entire-go-standard-library-compiles-in-net) | `51ba5d9cf` · [`stdlib-green-2026-07-10`](https://github.com/ritchiecarroll/go2cs/releases/tag/stdlib-green-2026-07-10) | Every package compiles with zero errors, `runtime`, `reflect` and `net/http` included ([details](StdLibCompileMilestone.md)). |
+| 2026-07-14 | [Standard library on NuGet](NEWS.md#july-14-2026--the-converted-go-standard-library-is-on-nuget) | `2363af0e6` · `dd821a556` · [`nuget-stdlib-2026-07-14`](https://github.com/ritchiecarroll/go2cs/releases/tag/nuget-stdlib-2026-07-14) | A converted app references the standard library from nuget.org, with no local go2cs checkout. |
+| 2026-07-17 | [**First Go test suite passing in C#**](NEWS.md#july-17-2026--gos-own-tests-now-pass-in-c) | `337a928df` · [`utf8-tests-green-2026-07-17`](https://github.com/ritchiecarroll/go2cs/releases/tag/utf8-tests-green-2026-07-17) | `unicode/utf8` matches `go test`, test for test. |
+| 2026-08-08 | [**Go programs run on Linux**](NEWS.md#august-8-2026--go-programs-run-on-linux) | [`linux-first-run-2026-08-08`](https://github.com/ritchiecarroll/go2cs/releases/tag/linux-first-run-2026-08-08) | Converted programs, the `fatih/color` walkthrough included, match `go run` on Linux. |
+| 2026-10-01 | [**Every implementable standard-library package validates**](NEWS.md#october-1-2026--every-implementable-standard-library-package-validates) | `133ca704e` · `nuget-1.24.13.3` | Every implementable package passes its own Go tests in C#, `runtime` included, on Windows and Linux. |
+
 ## Phase 0 — Documentation ✅ done
 
 Orientation docs so any task starts informed: [`/CLAUDE.md`](../CLAUDE.md),

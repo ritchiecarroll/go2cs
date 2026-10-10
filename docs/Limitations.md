@@ -30,7 +30,7 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 * **Go newer than the library tracks.** A newer `go` line in your `go.mod`, or any dependency's, gets
   `package requires newer Go version` or a refusal naming both releases. Set `GOTOOLCHAIN=local` and pin
   older versions until `go build ./...` passes, as the
-  [README walkthrough](README.md#converting-a-real-world-module) does.
+  [module walkthrough](ConvertingAModule.md#step-by-step) does.
 * **Hand-written assembly.** A function whose body lives in a `.s` file usually becomes a stub. The
   project builds clean, and the first call throws a `NotImplementedException` saying
   `no implementation reached this compilation`. Convert with the library's pure-Go build tag
@@ -120,7 +120,7 @@ The [validated modules](ValidatedModules.md) page is still short.
   skipped, the run still exits 0, and every project that imports it fails to build. Read the summary
   line, `Recursive conversion complete in ...: N/M packages converted (K failed: ...)`, not the exit
   code. `-recurse=module`
-  [converts only your packages](README.md#optional-convert-the-module-only-and-deal-with-its-dependencies-later).
+  [converts only your packages](ConvertingAModule.md#optional-convert-the-module-only-and-deal-with-its-dependencies-later).
 
 ## What "validated" means, and what it doesn't
 
