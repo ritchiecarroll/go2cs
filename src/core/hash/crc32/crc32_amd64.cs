@@ -28,9 +28,18 @@
 //     code") and leaves internal/cpu untouched. This is the general recipe for realizing an
 //     asm-backed arch layer in managed code; see docs/ConversionStrategies-Reference.md.
 //
-// Where no intrinsic is available (a non-x64 process, or a CPU without SSE4.2 / PCLMULQDQ+SSE4.1),
-// archAvailable* returns false and crc32.go falls back to slicing-by-8 — exactly how Go degrades on
-// an architecture with no arch implementation.
+//  3. The corpus is converted at GOARCH=amd64, so this file is the arch layer an arm64 process runs
+//     too. Go on arm64 compiles crc32_arm64.go instead, whose layer is the ARMv8 CRC32 instructions
+//     (crc32_arm64.s: CRC32X/W/H/B for IEEE, CRC32CX/CW/CH/CB for Castagnoli) gated on
+//     cpu.ARM64.HasCRC32. Without an arm64 arm here, an arm64 process reported no arch layer while
+//     Go on the same machine had one, and TestArchIEEE / TestArchCastagnoli skipped in C# where Go
+//     ran them (osx-arm64, os-matrix run 38036662620). The arm64 arm transcribes crc32_arm64.go and
+//     .s against System.Runtime.Intrinsics.Arm.Crc32, probed locally for the reason in (2). The x86
+//     path keeps precedence, so an x64 process is unchanged.
+//
+// Where no intrinsic is available (a CPU with neither the x86 instructions above nor the ARMv8 CRC32
+// instructions), archAvailable* returns false and crc32.go falls back to slicing-by-8 — exactly how
+// Go degrades on an architecture with no arch implementation.
 [module: go.GoManualConversion]
 
 namespace go.hash;
@@ -39,6 +48,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
+using ArmCrc32 = System.Runtime.Intrinsics.Arm.Crc32;
 
 partial class crc32_package {
 
@@ -53,6 +63,64 @@ internal static bool hasSSE42 => Sse42.X64.IsSupported;
 // hasCLMUL replaces cpu.X86.HasPCLMULQDQ && cpu.X86.HasSSE41 — ieeeCLMUL needs PCLMULQDQ for the
 // folding steps and SSE4.1 for the final PEXTRD.
 internal static bool hasCLMUL => Pclmulqdq.IsSupported && Sse41.IsSupported;
+
+// hasArmCRC32 replaces cpu.ARM64.HasCRC32 for the arm64 arm (header, point 3). The Arm64 form is
+// required because both arm64 ports consume 8-byte words (CRC32X / CRC32CX), as crc32_arm64.s does.
+internal static bool hasArmCRC32 => ArmCrc32.Arm64.IsSupported;
+
+// castagnoliUpdate updates the non-inverted crc with the given data, using the ARMv8 CRC32C
+// instructions. Transcribes crc32_arm64.s ·castagnoliUpdate: the .s loop's LDP pairs are two 8-byte
+// words in sequence, so an 8-byte loop followed by the 4/2/1-byte tail consumes the same bytes in the
+// same order.
+internal static uint32 castagnoliUpdate(uint32 crc, slice<byte> p) {
+    nint length = len(p);
+    if (length == 0) {
+        return crc;
+    }
+    ref byte data = ref MemoryMarshal.GetReference(p.ToSpan());
+    nint i = 0;
+    for (; length - i >= 8; i += 8) {
+        crc = ArmCrc32.Arm64.ComputeCrc32C(crc, Unsafe.ReadUnaligned<uint64>(ref Unsafe.Add(ref data, i)));
+    }
+    if (length - i >= 4) {
+        crc = ArmCrc32.ComputeCrc32C(crc, Unsafe.ReadUnaligned<uint32>(ref Unsafe.Add(ref data, i)));
+        i += 4;
+    }
+    if (length - i >= 2) {
+        crc = ArmCrc32.ComputeCrc32C(crc, Unsafe.ReadUnaligned<uint16>(ref Unsafe.Add(ref data, i)));
+        i += 2;
+    }
+    if (length - i >= 1) {
+        crc = ArmCrc32.ComputeCrc32C(crc, Unsafe.Add(ref data, i));
+    }
+    return crc;
+}
+
+// ieeeUpdate updates the non-inverted crc with the given data, using the ARMv8 CRC32 instructions.
+// Transcribes crc32_arm64.s ·ieeeUpdate, in the same shape as castagnoliUpdate above.
+internal static uint32 ieeeUpdate(uint32 crc, slice<byte> p) {
+    nint length = len(p);
+    if (length == 0) {
+        return crc;
+    }
+    ref byte data = ref MemoryMarshal.GetReference(p.ToSpan());
+    nint i = 0;
+    for (; length - i >= 8; i += 8) {
+        crc = ArmCrc32.Arm64.ComputeCrc32(crc, Unsafe.ReadUnaligned<uint64>(ref Unsafe.Add(ref data, i)));
+    }
+    if (length - i >= 4) {
+        crc = ArmCrc32.ComputeCrc32(crc, Unsafe.ReadUnaligned<uint32>(ref Unsafe.Add(ref data, i)));
+        i += 4;
+    }
+    if (length - i >= 2) {
+        crc = ArmCrc32.ComputeCrc32(crc, Unsafe.ReadUnaligned<uint16>(ref Unsafe.Add(ref data, i)));
+        i += 2;
+    }
+    if (length - i >= 1) {
+        crc = ArmCrc32.ComputeCrc32(crc, Unsafe.Add(ref data, i));
+    }
+    return crc;
+}
 
 // castagnoliSSE42 updates the (non-inverted) crc with the given buffer, using the SSE 4.2 CRC32
 // instruction. Transcribes crc32_amd64.s ·castagnoliSSE42.
@@ -210,11 +278,15 @@ internal static ж<sse42Table> castagnoliSSE42TableK1;
 internal static ж<sse42Table> castagnoliSSE42TableK2;
 
 internal static bool archAvailableCastagnoli() {
-    return hasSSE42;
+    return hasSSE42 || hasArmCRC32;
 }
 
 internal static void archInitCastagnoli() {
     if (!hasSSE42) {
+        // crc32_arm64.go archInitCastagnoli: the arm64 layer needs no tables.
+        if (hasArmCRC32) {
+            return;
+        }
         throw panic("arch-specific Castagnoli not available");
     }
     castagnoliSSE42TableK1 = @new<sse42Table>();
@@ -246,6 +318,10 @@ internal static uint32 castagnoliShift(ж<sse42Table> Ꮡtable, uint32 crc) {
 
 internal static uint32 archUpdateCastagnoli(uint32 crc, slice<byte> p) {
     if (!hasSSE42) {
+        // crc32_arm64.go archUpdateCastagnoli.
+        if (hasArmCRC32) {
+            return ~castagnoliUpdate(~crc, p);
+        }
         throw panic("not available");
     }
     // This method is inspired from the algorithm in Intel's white paper:
@@ -342,13 +418,17 @@ internal static uint32 archUpdateCastagnoli(uint32 crc, slice<byte> p) {
 }
 
 internal static bool archAvailableIEEE() {
-    return hasCLMUL;
+    return hasCLMUL || hasArmCRC32;
 }
 
 internal static ж<slicing8Table> archIeeeTable8;
 
 internal static void archInitIEEE() {
     if (!hasCLMUL) {
+        // crc32_arm64.go archInitIEEE: the arm64 layer needs no tables.
+        if (hasArmCRC32) {
+            return;
+        }
         throw panic("not available");
     }
     // We still use slicing-by-8 for small buffers.
@@ -357,6 +437,10 @@ internal static void archInitIEEE() {
 
 internal static uint32 archUpdateIEEE(uint32 crc, slice<byte> p) {
     if (!hasCLMUL) {
+        // crc32_arm64.go archUpdateIEEE.
+        if (hasArmCRC32) {
+            return ~ieeeUpdate(~crc, p);
+        }
         throw panic("not available");
     }
     if (len(p) >= 64) {
