@@ -44,6 +44,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 [module: go.GoManualConversion]
 
@@ -87,9 +88,82 @@ partial class runtime_package
             string processName = System.IO.Path.GetFileNameWithoutExtension(processPath);
 
             if (!string.Equals(processName, "dotnet", StringComparison.OrdinalIgnoreCase))
-                snapshot[0] = processPath;
+            {
+                // ProcessPath is the executable, which is NOT always argv[0]: exec(2) takes the path
+                // and the argv vector separately, and a caller may set argv[0] to anything. Go's
+                // self-re-exec idiom for a child that must know it is the child does exactly that --
+                // logrus's alt_exit_test sets cmd.Path = os.Executable() and cmd.Args[0] to a token,
+                // and the child recognizes itself ONLY by os.Args[0] == token. Answering ProcessPath
+                // there made every child a parent: each re-executed again, without bound (measured
+                // 2026-10-09 on linux: the logrus run was OOM-killed). So the kernel's own argv[0]
+                // is read where the platform exposes it, and ProcessPath stays the fallback.
+                snapshot[0] = KernelArgv0(args.Length) ?? processPath;
+            }
         }
 
         argslice = snapshot;
     }
+
+    // The kernel's argv[0] for this process, or null when it cannot be read with confidence.
+    // argc is the managed vector's length: in apphost mode the kernel vector has the same length
+    // (only element zero differs), so a vector of any other length is not the one we expect and
+    // is not trusted.
+    private static string? KernelArgv0(int argc)
+    {
+        try
+        {
+            if (GOOS == "linux"u8)
+            {
+                // /proc/self/cmdline is argv as exec(2) received it, each element NUL-terminated.
+                byte[] cmdline = System.IO.File.ReadAllBytes("/proc/self/cmdline");
+                int fields = 0;
+
+                foreach (byte b in cmdline)
+                {
+                    if (b == 0)
+                        fields++;
+                }
+
+                if (fields != argc)
+                    return null;
+
+                int end = Array.IndexOf(cmdline, (byte)0);
+                return System.Text.Encoding.UTF8.GetString(cmdline, 0, end);
+            }
+
+            if (GOOS == "darwin"u8)
+            {
+                // There is no /proc; libSystem keeps the C runtime's argc/argv, which are the
+                // vector exec(2) received.
+                IntPtr pargc = DarwinNSGetArgc();
+
+                if (pargc == IntPtr.Zero || Marshal.ReadInt32(pargc) != argc)
+                    return null;
+
+                IntPtr pargv = DarwinNSGetArgv();
+
+                if (pargv == IntPtr.Zero)
+                    return null;
+
+                IntPtr argv = Marshal.ReadIntPtr(pargv);
+
+                if (argv == IntPtr.Zero)
+                    return null;
+
+                return Marshal.PtrToStringUTF8(Marshal.ReadIntPtr(argv));
+            }
+        }
+        catch (Exception)
+        {
+            // Any failure to read the kernel vector falls back to ProcessPath, the previous answer.
+        }
+
+        return null;
+    }
+
+    [DllImport("libc", EntryPoint = "_NSGetArgc")]
+    private static extern IntPtr DarwinNSGetArgc();
+
+    [DllImport("libc", EntryPoint = "_NSGetArgv")]
+    private static extern IntPtr DarwinNSGetArgv();
 }

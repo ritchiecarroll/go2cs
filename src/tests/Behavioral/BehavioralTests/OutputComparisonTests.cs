@@ -1718,6 +1718,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckRecvMapElementDeref() => CheckTarget("RecvMapElementDeref");
 
     [TestMethod]
+    public void CheckReexecArgv0Token() => CheckTarget("ReexecArgv0Token");
+
+    [TestMethod]
     public void CheckRefLoweredDeferChain() => CheckTarget("RefLoweredDeferChain");
 
     [TestMethod]
