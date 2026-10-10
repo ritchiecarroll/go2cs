@@ -10,6 +10,7 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -134,7 +135,14 @@ func TestNuGetMapWritesTheSevenFieldLock(t *testing.T) {
 		}
 	}
 
-	want := strings.Join([]string{modA.path, "v1.0.0", "mine.a", "community", mine, "-", "-"}, "\t")
+	// The layer is the user's file relative to the output root, never its absolute path (gap 6 of the nugetgo rehearsal).
+	layer, err := filepath.Rel(outRoot, mine)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := strings.Join([]string{modA.path, "v1.0.0", "mine.a", "community", filepath.ToSlash(layer), "-", "-"}, "\t")
 
 	if len(rows) != 1 || rows[0] != want {
 		t.Errorf("lock rows %q; want exactly %q", rows, want)
@@ -208,5 +216,69 @@ func TestNuGetMapKeepsLockEntriesOutsideThisRun(t *testing.T) {
 
 	if err != nil || lock[other.module] != other || lock[modA.path].nugetID != "mine.a" {
 		t.Errorf("lock %+v (err %v); want the other module kept beside the new entry", lock, err)
+	}
+}
+
+// THE LOCK NAMES NO HOST PATH (the nugetgo rehearsal, 2026-10-09, gap 6). A conversion repository commits its
+// go2cs.nuget.lock, so the layer that answered a mapping is recorded by URL, or relative to the output root, never as
+// the absolute path the user typed; a lock written before the rule is rewritten the same way at its next write, and a
+// layer read back from the lock (already relative to the root) is kept as it is.
+func TestNuGetLockRecordsTheMappingSourceRelativeOrByURL(t *testing.T) {
+	f := newNuGetMapFixture(t)
+	f.set("/registry", mapRow(modB.path, "reg.b", "canonical"))
+	work := t.TempDir()
+	outRoot := filepath.Join(work, "out")
+	mapsDir := filepath.Join(work, "maps")
+
+	if err := os.MkdirAll(mapsDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	mine := filepath.Join(mapsDir, "mine.txt")
+
+	if err := os.WriteFile(mine, []byte(mapRow(modA.path, "mine.a", "community")), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// A legacy entry for a module outside this run, pinned with the absolute path an older converter wrote.
+	legacy := nugetLockEntry{module: "github.com/o/o", version: "v1.0.0", nugetID: "o", status: "canonical", layer: mine, packageVersion: "-", contentHash: "-"}
+
+	if err := writeNuGetLock(outRoot, map[string]nugetLockEntry{legacy.module: legacy}); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, _, err := runNuGetMapResolution([]thirdPartyModule{modA, modB}, nugetMapOptions{sources: []string{mine}}, outRoot); err != nil {
+		t.Fatal(err)
+	}
+
+	lock, err := readNuGetLock(outRoot)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := map[string]string{modA.path: "../maps/mine.txt", modB.path: nugetMapRegistryURL, legacy.module: "../maps/mine.txt"}
+
+	for module, layer := range want {
+		if got := lock[module].layer; got != layer {
+			t.Errorf("%s: the lock records layer %q, want %q", module, got, layer)
+		}
+	}
+
+	data, _ := os.ReadFile(nugetLockPath(outRoot))
+
+	if strings.Contains(string(data), filepath.ToSlash(work)) || strings.Contains(string(data), work) {
+		t.Errorf("the lock names the host path %s:\n%s", work, data)
+	}
+
+	// A second run reads the relative layers back and keeps them, unchanged.
+	if _, _, err := runNuGetMapResolution([]thirdPartyModule{modA, modB}, nugetMapOptions{sources: []string{mine}}, outRoot); err != nil {
+		t.Fatal(err)
+	}
+
+	again, _ := os.ReadFile(nugetLockPath(outRoot))
+
+	if string(again) != string(data) {
+		t.Errorf("a second run rewrote the lock:\n%s\nwant\n%s", again, data)
 	}
 }

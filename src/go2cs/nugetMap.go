@@ -350,13 +350,20 @@ func runNuGetMapResolution(modules []thirdPartyModule, o nugetMapOptions, outRoo
 			continue
 		}
 
-		entry := nugetLockEntry{module: decision.module, version: decision.version, nugetID: decision.nugetID, status: decision.status, layer: decision.layer, packageVersion: "-", contentHash: "-"}
+		entry := nugetLockEntry{module: decision.module, version: decision.version, nugetID: decision.nugetID, status: decision.status, layer: nugetLockLayer(decision.layer, outRoot, decision.fromLock), packageVersion: "-", contentHash: "-"}
 
 		if previous, kept := lock[decision.module]; kept && decision.fromLock {
 			entry.packageVersion, entry.contentHash = previous.packageVersion, previous.contentHash
 		}
 
 		lock[decision.module] = entry
+	}
+
+	// An entry this run did not decide (another module of the root) keeps its layer, rewritten if a lock written before
+	// the rule pinned it as an absolute host path.
+	for modulePath, entry := range lock {
+		entry.layer = nugetLockLayer(entry.layer, outRoot, true)
+		lock[modulePath] = entry
 	}
 
 	if err := writeNuGetLock(outRoot, lock); err != nil {
