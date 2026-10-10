@@ -695,7 +695,7 @@ func TestSeedCensusRootCarriesThePublishedStampTheBadgesRead(t *testing.T) {
 	mustWriteFile(t, filepath.Join(projectPath, dotID+testProjectFileSuffix), "<Project />")
 	addProofPage(t, root, dotID, 98, 0)
 
-	wantTests := validationBadge("98%2F98_validated", "brightgreen",
+	wantTests := validationBadge("98_matched_%2F_0_disclosed", "brightgreen",
 		fmt.Sprintf("%s/%s/1.23.12.3/%s.html", validationSiteURL, validationDocsDirName, dotID))
 
 	if got := readmeValidationBadgeLine(projectPath, dotID, ""); got != wantTests {

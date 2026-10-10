@@ -128,7 +128,7 @@ func TestValidationBadgeGreenPinsCountsAndVersionedProofLink(t *testing.T) {
 	addProofPage(t, root, "io", 59, 2)
 	mustWriteFile(t, filepath.Join(projectPath, "io"+testProjectFileSuffix), "<Project />")
 
-	const expected = "[![Tests](https://img.shields.io/badge/Tests-59%2F61_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.23.1.2/io.html)"
+	const expected = "[![Tests](https://img.shields.io/badge/Tests-59_matched_%2F_2_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.23.1.2/io.html)"
 
 	if badge := readmeValidationBadgeLine(projectPath, "io", ""); badge != expected {
 		t.Fatalf("green badge mismatch\n got: %s\nwant: %s", badge, expected)
@@ -142,7 +142,7 @@ func TestValidationBadgeGreenUsesDotIDForNestedPackages(t *testing.T) {
 	addProofPage(t, root, "path.filepath", 40, 0)
 	mustWriteFile(t, filepath.Join(projectPath, "path.filepath"+testProjectFileSuffix), "<Project />")
 
-	const expected = "[![Tests](https://img.shields.io/badge/Tests-40%2F40_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.23.1.2/path.filepath.html)"
+	const expected = "[![Tests](https://img.shields.io/badge/Tests-40_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.23.1.2/path.filepath.html)"
 
 	if badge := readmeValidationBadgeLine(projectPath, "path.filepath", ""); badge != expected {
 		t.Fatalf("green badge mismatch\n got: %s\nwant: %s", badge, expected)
@@ -617,7 +617,7 @@ func TestReadmeBadgeParagraphSplitsTestsDocsFromBothSources(t *testing.T) {
 		t.Skip("the Go toolchain version is not resolvable")
 	}
 
-	expected := "[![Tests](https://img.shields.io/badge/Tests-59%2F61_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.23.1.2/io.html)" +
+	expected := "[![Tests](https://img.shields.io/badge/Tests-59_matched_%2F_2_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.23.1.2/io.html)" +
 		" " + fmt.Sprintf("[![Docs](https://img.shields.io/badge/Docs-@%s-00ADD8?logo=go)](https://pkg.go.dev/io@go%s)", goVersion(), goVersion()) +
 		"\\\n" + fmt.Sprintf("[![Source](https://img.shields.io/badge/Source-@%s-00ADD8?logo=go)](https://github.com/golang/go/tree/go%s/src/io)", goVersion(), goVersion()) +
 		" " + "[![Source](https://img.shields.io/badge/Source-@1.23.1.2-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.23.1.2/src/core/io)"
@@ -690,7 +690,7 @@ func TestReadmeBadgeParagraphDegradesToOneLineWithoutAStrayBreak(t *testing.T) {
 		addProofPage(t, root, "io", 59, 2)
 		mustWriteFile(t, filepath.Join(outside, "io"+testProjectFileSuffix), "<Project />")
 
-		const expected = "[![Tests](https://img.shields.io/badge/Tests-59%2F61_validated-brightgreen?logo=go)](https://go2cs.net/validation/1.23.1.2/io.html)"
+		const expected = "[![Tests](https://img.shields.io/badge/Tests-59_matched_%2F_2_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.23.1.2/io.html)"
 
 		if line := readmeBadgeLine(outside, "io", "", Options{}); line != expected {
 			t.Fatalf("first-line-only paragraph mismatch\n got: %q\nwant: %q", line, expected)
@@ -965,7 +965,7 @@ func TestPackageReadmeRefreshFollowsInProcessConversionNotRunMode(t *testing.T) 
 
 	refreshed := readme()
 
-	if !strings.Contains(refreshed, "Tests-2%2F2_validated-brightgreen") {
+	if !strings.Contains(refreshed, "Tests-2_matched_%2F_0_disclosed-brightgreen") {
 		t.Errorf("the refresh did not level the badge in the same run:\n%s", refreshed)
 	}
 
