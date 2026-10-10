@@ -106,6 +106,9 @@ Check 'neither form carries "PROOF:" (owner review of the hashset revision-1 pre
 $pack = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'nugetgo-pack.ps1'))
 Check 'nugetgo-pack.ps1 refuses a description carrying "PROOF:", before the pack and in the read-back' (
     $pack.Contains('if ($description.Contains(''PROOF:''))') -and $pack.Contains('if ($md.description.Contains(''PROOF:''))')) 'no such refusal'
+Check 'the packed tags are go2cs;golang;go, without PROOF (COORD ruling C, 2026-10-10: a chip a nuget.org reader cannot read)' (
+    $pack.Contains('<PackageTags>go2cs;golang;go</PackageTags>') -and -not ($pack -match '<PackageTags>[^<]*PROOF')) 'PackageTags still carries PROOF'
+Check 'nugetgo-pack.ps1 refuses PROOF in the read-back tags' ($pack.Contains('if ($md.tags -match ''\bPROOF\b'')')) 'no read-back refusal of the tag'
 Check 'nugetgo-pack.ps1 takes its description from Get-NugetgoDescription, under -UpstreamPublishes' ($pack.Contains('Get-NugetgoDescription -ModulePath') -and
     $pack.Contains('-UpstreamPublishes:$UpstreamPublishes') -and $pack.Contains('[switch]$UpstreamPublishes') -and -not $pack.Contains('$description = "PROOF')) 'the pack script still spells the description itself'
 

@@ -311,7 +311,7 @@ $csproj = @"
     <RepositoryUrl>$(ConvertTo-NugetgoMSBuildLiteral $RepositoryUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>$(ConvertTo-NugetgoMSBuildLiteral $RepositoryUrl)</PackageProjectUrl>
-    <PackageTags>go2cs;golang;go;PROOF</PackageTags>
+    <PackageTags>go2cs;golang;go</PackageTags>
   </PropertyGroup>
   <ItemGroup>
 $projRefs
@@ -455,6 +455,8 @@ if ($null -eq $packedReadme) { $presentation.Add('the package carries no README.
 elseif ($packedReadme -cne $readme) { $presentation.Add('the packed README.md differs from the one generated') }
 else { foreach ($why in @(Test-NugetgoReadme $packedReadme $moduleSource)) { $presentation.Add("README.md $why") } }
 if ($md.description.Contains('PROOF:')) { $presentation.Add('the description carries "PROOF:"') }
+# nuget.org shows each tag as a chip; PROOF means nothing to a reader there (COORD ruling C, 2026-10-10).
+if ($md.tags -match '\bPROOF\b') { $presentation.Add("the tags '$($md.tags)' carry PROOF") }
 if (-not $md.icon) { $presentation.Add('the package has no icon') }
 elseif ($md.icon -cne $packageIcon.Name -or $null -eq $packedIcon -or -not [System.Linq.Enumerable]::SequenceEqual($packedIcon, [System.IO.File]::ReadAllBytes($packageIcon.Path))) { $presentation.Add("the package icon '$($md.icon)' is not $($packageIcon.Path), byte for byte") }
 if (@($entries | Where-Object { $_ -ceq 'VALIDATION.md' }).Count -ne 1) { $presentation.Add('VALIDATION.md is not packed as a file') }
