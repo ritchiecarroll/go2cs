@@ -61,7 +61,7 @@ public interface IMap
     void Clear();
 }
 
-public interface IMap<TKey, TValue> : IMap, IDictionary<TKey, TValue> where TKey : notnull
+public interface IMap<TKey, TValue> : IMap, IDictionary<TKey, TValue>, IGoReflectMap where TKey : notnull
 {
     (TValue, bool) this[TKey key, bool _] { get; }
 
@@ -134,6 +134,55 @@ public interface IMap<TKey, TValue> : IMap, IDictionary<TKey, TValue> where TKey
             return (present, value);
         }
     }
+
+    // Reflect's object-form map operations (trim stage 3a; see IGoReflectMap): the bodies the reflect bridge closed
+    // over (TKey, TValue) with MakeGenericMethod, compiled here for every map type the program has.
+    Type IGoReflectMap.ReflectKeyType => typeof(TKey);
+
+    Type IGoReflectMap.ReflectElemType => typeof(TValue);
+
+    void IGoReflectMap.ReflectSet(object? key, object? value) => ((IDictionary<TKey, TValue>)this)[(TKey)key!] = (TValue)value!;
+
+    // The same Remove the bridge called through IMap<TKey, TValue>, so golib's dedicated NIL-key slot is reached: the
+    // backing Dictionary cannot hold a null key and the non-generic surface cannot see that entry.
+    void IGoReflectMap.ReflectDelete(object? key) => ((IMap<TKey, TValue>)this).Remove((TKey)key!);
+
+    // Through the comma-ok indexer, so the NIL key is found like any other.
+    bool IGoReflectMap.ReflectTryGet(object? key, out object? value)
+    {
+        (TValue found, bool present) = this[(TKey)key!, true];
+        value = present ? found : null;
+        return present;
+    }
+}
+
+/// <summary>
+/// Reflect's object-form operations on a live map (<c>GoReflect.SetMapEntry</c>, <c>DeleteMapEntry</c>,
+/// <c>TryGetMapEntry</c>), implemented once, generically, by <see cref="IMap{TKey, TValue}"/>'s default members.
+/// </summary>
+/// <remarks>
+/// Trim stage 3a (docs/PLAN-golib-full-trim.md, section 9): the bridge closed a generic helper over the key and element
+/// types with <c>MakeGenericMethod</c>, which Native AOT cannot do for a value-type instantiation it never compiled. A
+/// default member of a generic interface is compiled for every implementing type the program has, and a generated
+/// named-map wrapper inherits it. PUBLIC only because <see cref="IMap{TKey, TValue}"/> is.
+/// </remarks>
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+public interface IGoReflectMap
+{
+    /// <summary>The map's key type.</summary>
+    Type ReflectKeyType { get; }
+
+    /// <summary>The map's element type.</summary>
+    Type ReflectElemType { get; }
+
+    /// <summary>Stores <paramref name="value"/> under <paramref name="key"/> (<c>reflect.Value.SetMapIndex</c>).</summary>
+    void ReflectSet(object? key, object? value);
+
+    /// <summary>Deletes the entry under <paramref name="key"/>; an absent key is a no-op, as Go's <c>delete</c> is.</summary>
+    void ReflectDelete(object? key);
+
+    /// <summary>Reads the entry under <paramref name="key"/>, with Go's comma-ok presence.</summary>
+    bool ReflectTryGet(object? key, out object? value);
 }
 
 [System.Diagnostics.DebuggerDisplay("len = {Count}")]

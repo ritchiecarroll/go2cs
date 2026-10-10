@@ -65,7 +65,7 @@ public interface ISlice : IArray
     ISlice? Append(object[] elems);
 }
 
-public interface ISlice<T> : IArray<T>, ISlice
+public interface ISlice<T> : IArray<T>, ISlice, IGoReflectSlice
 {
     ISlice<T> Append(params T[] elems);
 
@@ -74,6 +74,43 @@ public interface ISlice<T> : IArray<T>, ISlice
     ISlice<T> Slice(int start, int length);
 
     ISlice<T> Slice(nint start, nint length);
+
+    // reflect.Value.Grow's body (trim stage 3a; see IGoReflectSlice), compiled for every slice type the program has.
+    // Returns this same value when its spare capacity already suffices: Go reallocates only past the capacity, and an
+    // early reallocation would detach a caller still holding the old backing store.
+    object IGoReflectSlice.ReflectGrow(nint extra)
+    {
+        slice<T> s = this is slice<T> raw ? raw : new slice<T>(this);
+        nint length = s.Length;
+
+        if (length + extra <= s.Capacity)
+            return this;
+
+        nint capacity = s.Capacity == 0 ? length + extra : s.Capacity;
+
+        while (capacity < length + extra)
+            capacity *= 2;
+
+        // Go's Value.Grow reaches growslice here, which mallocs the new backing; so is this one charged.
+        T[] backing = AllocationCounter.NewArray<T>(capacity);
+
+        // Block copy, not an element loop: encoding/gob's decUint8Slice grows buffers past internal/saferio's 10 MiB
+        // chunk, where a per-element ref indexer walk is orders of magnitude slower than the memmove a Span copy is.
+        s.ToSpan().CopyTo(backing);
+
+        return new slice<T>(backing, 0, length);
+    }
+}
+
+/// <summary>
+/// reflect.Value.Grow on a slice value (<c>GoReflect.GrowSlice</c>), implemented once, generically, by
+/// <see cref="ISlice{T}"/>'s default member (trim stage 3a; see <see cref="IGoReflectSequence"/>).
+/// </summary>
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+public interface IGoReflectSlice
+{
+    /// <summary>A slice with room for <paramref name="extra"/> more elements past its length; this value when it has it.</summary>
+    object ReflectGrow(nint extra);
 }
 
 // A ref struct option exists for slices that would be restricted to stack-only usage, however, this prevents
