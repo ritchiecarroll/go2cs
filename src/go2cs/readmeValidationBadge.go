@@ -49,13 +49,14 @@
 // over the emitted READMEs must reproduce the roster's own denominator (the packages whose Go
 // sources define Test functions) with no package left unclassified.
 //
-// FALLBACK (load-bearing for reproducibility): the Tests badge is composed from two things that live
+// FALLBACK (load-bearing for reproducibility): the Tests badge is composed from three things that live
 // in the REPOSITORY, not in the conversion — src/version.props (the published version, which pins the
-// proof URL) and docs/validation/current/ (the counts). A conversion rooted anywhere else — a bare
-// temp -go2cspath root, a deployed GOPATH runtime root — can locate neither and emits NO Tests badge
-// at all rather than a half-composed URL. This is why a reconvert that must reproduce the committed
-// READMEs byte-identically has to seed version.props and docs/validation alongside src/core; see
-// CLAUDE.md's corpus-mechanics seed step. The Docs badge reads the TOOLCHAIN instead (go env
+// proof URL), docs/validation/current/ (the counts) and docs/ValidatedTestPackages.md (the roster,
+// whose exclusion ledger keeps an excluded package from going green). A conversion rooted anywhere
+// else — a bare temp -go2cspath root, a deployed GOPATH runtime root — can locate none of them and
+// emits NO Tests badge at all rather than a half-composed URL. This is why a reconvert that must
+// reproduce the committed READMEs byte-identically has to seed version.props, docs/validation and the
+// roster alongside src/core; see the corpus-reconvert skill's seed step. The Docs badge reads the TOOLCHAIN instead (go env
 // GOVERSION, and GOROOT's own src/vendor/modules.txt for the vendored packages), so it survives an
 // unseeded root — which is why an unseeded reconvert's READMEs now carry a Docs-only badge line
 // rather than none at all. Seed anyway; only the symptom moved.
@@ -435,12 +436,36 @@ func readmeValidationBadgeLine(projectPath string, projectName string, sourceDir
 		return ""
 	}
 
+	// The roster's exclusion ledger is the third repository input. Without it the badge cannot know
+	// whether a ruling excluded this package, so it takes the same fallback as the other two and says
+	// nothing: a green fallback is exactly how a roster-less seed rewrote an excluded row's README.
+	exclusions, err := readRosterExclusions(filepath.Join(filepath.Dir(root), "docs"))
+
+	if err != nil {
+		return ""
+	}
+
+	// Compared as dot-ids, the form projectName already has: mapping a dot-id back to an import path
+	// is lossy wherever a path element holds a dot (a vendored golang.org/x/... package).
+	excluded := false
+
+	for importPath := range exclusions {
+		if validationProofDotID(importPath) == projectName {
+			excluded = true
+		}
+	}
+
 	// GREEN requires BOTH signals to agree: the package's converted test project is committed beside
 	// it (the pipeline ran and its results were banked) AND its proof page states the totals the
-	// badge is about to claim. They are 1:1 across the corpus; requiring both means a badge can
-	// never claim a number no committed evidence backs, and any disagreement shows up as a census
-	// miscount rather than as a wrong badge.
-	if hasCommittedTestProject(projectPath, projectName) {
+	// badge is about to claim. Requiring both means a badge can never claim a number no committed
+	// evidence backs, and any disagreement shows up as a census miscount rather than as a wrong badge.
+	//
+	// And the roster must not EXCLUDE the package. An exclusion row keeps both signals on purpose (the
+	// proof page is the evidence for the exclusion), so the signals alone said "validated" where the
+	// roster rules otherwise: crypto/internal/fips140deps, an E4 row, emitted green on every target
+	// while its committed README read "not yet validated" (TRAIN T3 fixup, 2026-10-10). An excluded
+	// package falls through to the has-tests classification below.
+	if !excluded && hasCommittedTestProject(projectPath, projectName) {
 		if matched, disclosed, ok := validatedPackageTotals(currentPath, projectName); ok {
 			return validationBadge(
 				shieldsBadgeMessage(fmt.Sprintf("%d matched / %d disclosed", matched, disclosed)),
