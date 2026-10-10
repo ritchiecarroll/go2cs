@@ -645,7 +645,20 @@ internal class InheritedTypeTemplate : TemplateBase
     // underlying struct through its own parameterless constructor runs those initializers. Every other
     // inherited kind emits nothing here: its default is already its zero value.
     private string ParameterlessConstructor => ForwardedStructMembers is null || ForwardedStructMembers.Count == 0 ?
-        "" : $"\r\n\r\n        public {ConstructorName}() => m_value = new {TypeName}();";
+        "" : $"\r\n\r\n        public {ConstructorName}() => m_value = new {TypeName}();{ZeroConstructionHook}";
+
+    // golib's construction hook (IGoZeroConstructed; trim stage 3b), on exactly the struct wrappers that have the
+    // constructor above: their zero is the underlying struct's constructed zero, which golib built through Activator
+    // before. Whether that differs from `default` is the underlying's own question (StructTypeTemplate's
+    // NeedsZeroConstruction), so the wrapper does not repeat it; GolibTests' GoZeroConstructionGuardTests holds the hook
+    // to what construction builds.
+    private bool ZeroConstructed => ObjectKind == "struct" && ForwardedStructMembers is { Count: > 0 };
+
+    private string ZeroConstructionHook => ZeroConstructed ?
+        $"\r\n\r\n        object global::go.IGoZeroConstructed.GoZeroNew() => new {ObjectName}();" : "";
+
+    private string ZeroConstructionInterface => !ZeroConstructed ? "" :
+        string.IsNullOrEmpty(ImplementedInterface) && !EmitsValueClone ? " : global::go.IGoZeroConstructed" : ", global::go.IGoZeroConstructed";
 
     // A C# constructor name must not carry the type's generic parameters (e.g. the constructor for
     // a generic named array type `vec<T>` is `vec(...)`, not `vec<T>(...)`). Non-generic types have
@@ -662,7 +675,7 @@ internal class InheritedTypeTemplate : TemplateBase
     public override string TemplateBody =>
         $$"""
             {{GoTypeAttributePrefix}}[{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
-            {{Scope}} partial {{ObjectKind}} {{ObjectName}}{{ImplementedInterface}}{{ValueCloneInterface}}
+            {{Scope}} partial {{ObjectKind}} {{ObjectName}}{{ImplementedInterface}}{{ValueCloneInterface}}{{ZeroConstructionInterface}}
             {
                 // Value of the {{ObjectKind}} '{{ObjectName}}'
                 private {{ReadOnly}}{{ValueFieldType}}{{Nullable}} m_value;

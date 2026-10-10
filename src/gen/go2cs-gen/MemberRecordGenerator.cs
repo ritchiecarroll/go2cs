@@ -12,6 +12,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static go2cs.Symbols;
 
 namespace go2cs;
 
@@ -340,6 +341,48 @@ public class MemberRecordGenerator : ISourceGenerator
 
         Dictionary<INamedTypeSymbol, (string ns, List<string> records)> byType = new(SymbolEqualityComparer.Default);
 
+        // The methods a [GoParamDims] record names, by the outermost (package) class they live under: golib finds each
+        // one by GetMethods on its declaring type (GoReflect.ParamDimsRecords), so a trimmed publish must keep exactly
+        // those methods' metadata (trim stage 3b; EmitParamDimsDependencies).
+        Dictionary<INamedTypeSymbol, (string ns, List<string> dependencies)> recordedMethods = new(SymbolEqualityComparer.Default);
+
+        void keepRecordedMethod(SyntaxNode declaration, IMethodSymbol method)
+        {
+            INamedTypeSymbol? declaring = method.ContainingType;
+            INamedTypeSymbol? outermost = declaring;
+
+            while (outermost?.ContainingType is not null)
+                outermost = outermost.ContainingType;
+
+            string? methodId = method.GetDocumentationCommentId();
+            string? typeId = declaring?.GetDocumentationCommentId();
+
+            if (declaring is null || outermost is null || outermost.IsGenericType || methodId is null || typeId is null ||
+                !methodId.StartsWith($"M:{typeId.Substring(2)}.", StringComparison.Ordinal))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, declaration.GetLocation(), $"The trimming dependency for {method.ToDisplayString()}", "its documentation signature cannot be named from a non-generic package class"));
+                return;
+            }
+
+            string ns = declaration.GetNamespaceName();
+
+            // The method's name (with a generic arity, ``n), never its parameter list: ILLink, the template-default
+            // publish, dies with IL1012 matching a full signature against a method whose parameter is a nested type of
+            // another assembly (go.unsafe_package.Pointer; measured 2026-10-09 against runtime's addCovMeta), and a
+            // name never visits a parameter. Go has no overloading, so the name alone is near-exact: it can also keep
+            // another receiver's same-named method in the package class, metadata only.
+            string signature = methodId.Substring(typeId.Length + 1);
+            int parameters = signature.IndexOf('(');
+
+            if (parameters >= 0)
+                signature = signature.Substring(0, parameters);
+
+            if (!recordedMethods.TryGetValue(outermost, out (string ns, List<string> dependencies) slot))
+                recordedMethods[outermost] = slot = (ns, []);
+
+            slot.dependencies.Add($"[global::System.Diagnostics.CodeAnalysis.DynamicDependency({SymbolDisplay.FormatLiteral(signature, true)}, {GeneratedPartials.TypeOf(declaring)})]");
+        }
+
         void record(SyntaxNode declaration, ISymbol? symbol, string fact, string? value = null) =>
             add(declaration, symbol?.ContainingType, $"[global::go.GoMemberRecord({SymbolDisplay.FormatLiteral(symbol?.Name ?? "", true)}, global::go.GoMemberFact.{fact}{(value is null ? "" : ", " + value)})]");
 
@@ -424,14 +467,20 @@ public class MemberRecordGenerator : ISourceGenerator
 
                     string parameterTypes = string.Join(", ", methodSymbol.Parameters.Select(parameter => GeneratedPartials.TypeOf(parameter.Type)));
 
+                    bool recordedAny = false;
+
                     for (int position = 0; position < method.ParameterList.Parameters.Count; position++)
                     {
                         if (MemberMarkers.DimsOf(method.ParameterList.Parameters[position]) is { } parameterDims)
                         {
                             add(method, methodSymbol.ContainingType, $"[global::go.GoParamDims({SymbolDisplay.FormatLiteral(methodSymbol.Name, true)}, " +
                                 $"new global::System.Type[] {{ {parameterTypes} }}, {position}, {MemberMarkers.DimsArguments(parameterDims)})]");
+                            recordedAny = true;
                         }
                     }
+
+                    if (recordedAny)
+                        keepRecordedMethod(method, methodSymbol);
 
                     break;
 
@@ -447,5 +496,29 @@ public class MemberRecordGenerator : ISourceGenerator
 
         foreach (KeyValuePair<INamedTypeSymbol, (string ns, List<string> records)> pair in byType)
             context.AddSource(GeneratedPartials.HintName(hintNames, pair.Value.ns, pair.Key, "members"), GeneratedPartials.Source(pair.Value.ns, pair.Key, pair.Value.records));
+
+        foreach (KeyValuePair<INamedTypeSymbol, (string ns, List<string> dependencies)> pair in recordedMethods)
+            context.AddSource(GeneratedPartials.HintName(hintNames, pair.Value.ns, pair.Key, "paramdims-keep"), ParamDimsDependencies(pair.Value.ns, pair.Key, pair.Value.dependencies));
+    }
+
+    // One EMPTY module initializer per package class carrying a [DynamicDependency] for every method a [GoParamDims]
+    // record names (trim stage 3b, docs/PLAN-golib-full-trim.md section 9.6). A module initializer is always kept, and
+    // both trimmers keep a kept method's dynamic dependencies, so a trimmed publish keeps exactly the recorded methods'
+    // metadata, where golib's GoReflect.ParamDimsRecords reads it. Nothing executes. It sits in the package class so
+    // typeof reaches a private nested declaring type.
+    private static string ParamDimsDependencies(string ns, INamedTypeSymbol packageClass, IEnumerable<string> dependencies)
+    {
+        StringBuilder source = new();
+        source.Append("// <auto-generated/>\r\n#nullable enable\r\n\r\n");
+        source.Append($"namespace {ns};\r\n\r\n");
+        source.Append($"partial class {packageClass.Name}\r\n{{\r\n");
+        source.Append("    [global::System.Runtime.CompilerServices.ModuleInitializer]\r\n");
+
+        foreach (string dependency in dependencies.Distinct())
+            source.Append("    ").Append(dependency).Append("\r\n");
+
+        source.Append($"    internal static void {TempVarMarker}KeepParamDimsMethods() {{ }}\r\n}}\r\n");
+
+        return source.ToString();
     }
 }
