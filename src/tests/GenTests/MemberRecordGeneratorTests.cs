@@ -320,7 +320,13 @@ public class MemberRecordGeneratorTests
 
         CollectionAssert.AreEqual(recorded, kept, $"every recorded method, and only those, is kept:\n{keep}");
         StringAssert.Contains(keep, "[global::System.Runtime.CompilerServices.ModuleInitializer]", "a module initializer is always kept, so its dependencies are");
-        StringAssert.Contains(keep, "\"first``1(go.array{``0})\"", "a generic func is named by its documentation signature");
+        StringAssert.Contains(keep, "\"first``1\"", "a generic func is named with its arity");
+
+        // ILLink (the template-default publish) dies with IL1012 matching a full signature against a method whose
+        // parameter is a nested type of another assembly (go.unsafe_package.Pointer; measured 2026-10-09), so every
+        // dependency names its method without a parameter list. Go has no overloading: the name alone is near-exact.
+        string[] withParameters = Regex.Matches(keep, @"DynamicDependency\(""([^""]*\([^""]*)""").Select(match => match.Groups[1].Value).ToArray();
+        Assert.AreEqual(0, withParameters.Length, "a dependency names a parameter list: " + string.Join(", ", withParameters));
 
         Diagnostic[] errors = output.GetSemanticModel(keepTree).GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray();
         Assert.AreEqual(0, errors.Length, "the keep-alive binds: " + string.Join("; ", errors.Take(3)));

@@ -365,7 +365,17 @@ public class MemberRecordGenerator : ISourceGenerator
             }
 
             string ns = declaration.GetNamespaceName();
+
+            // The method's name (with a generic arity, ``n), never its parameter list: ILLink, the template-default
+            // publish, dies with IL1012 matching a full signature against a method whose parameter is a nested type of
+            // another assembly (go.unsafe_package.Pointer; measured 2026-10-09 against runtime's addCovMeta), and a
+            // name never visits a parameter. Go has no overloading, so the name alone is near-exact: it can also keep
+            // another receiver's same-named method in the package class, metadata only.
             string signature = methodId.Substring(typeId.Length + 1);
+            int parameters = signature.IndexOf('(');
+
+            if (parameters >= 0)
+                signature = signature.Substring(0, parameters);
 
             if (!recordedMethods.TryGetValue(outermost, out (string ns, List<string> dependencies) slot))
                 recordedMethods[outermost] = slot = (ns, []);
