@@ -9,10 +9,15 @@
      path, the two remaining sstring increments, the macOS flavor gap, the open converter items) are
      carried forward on docs/Roadmap.md, restated in present tense. -->
 
+<!-- Amended 2026-10-10 (the Roadmap refresh at master 4c42cc7d3a): the intro says which parts of Phase 4
+     this page records. No moved section is changed. -->
+
 This page holds the completed phases of the go2cs roadmap and the git commits and tags that anchor
 them. Each section keeps the heading and text it was recorded with while the work happened, so its
-dates, figures and "next" items describe that moment. Phase 4's validation objective is tracked on
-the [roster](ValidatedTestPackages.md), which carries its current state. What is planned next is in
+dates, figures and "next" items describe that moment. Of Phase 4, the sub-phases recorded here, 4A to
+4C, are complete; its macOS validation and Phase 4D are still ahead and are on the
+[Roadmap](Roadmap.md#phase-4-validation-against-gos-own-tests). Phase 4's validation objective is tracked
+on the [roster](ValidatedTestPackages.md), which carries its current state. What is planned next is in
 the [Roadmap](Roadmap.md).
 
 > **Status (2026-07-10): Phases 0–3 done — the full standard library compiles.** All **302** packages of
