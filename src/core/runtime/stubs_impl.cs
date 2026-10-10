@@ -111,6 +111,33 @@ partial class runtime_package
 
     public static void GoTestSPWrite() => testSPWrite();
 
+    // breakpoint executes the architecture's trap instruction (INT3 on amd64, BRK on arm64); it is
+    // runtime.Breakpoint's whole body. With a debugger attached, the debugger takes the trap and the
+    // program continues when it resumes, which Debugger.Break is the CLR's form of. With none, Go's
+    // trap is fatal: the runtime writes its report to stderr and exits 2. The report's first line is
+    // fixed text, measured with go1.24.13 (the Phase5Breakpoint behavioral test compares it):
+    //   linux, darwin   "SIGTRAP: trace trap"   (signal_unix.go sighandler: the signal's name and text)
+    //   windows         "fatal error: fault"    (signal_windows.go: the trap is a Go exception, so
+    //                                            exceptionhandler pushes sigpanic, which has no
+    //                                            breakpoint case and throws "fault"; "[signal
+    //                                            0x80000003 ...]" follows)
+    // The lines after it (PC, registers, the goroutine traceback) are machine addresses the managed host
+    // has no counterpart for, so only the report line and Go's exit status are reproduced. Before this
+    // the PartialStubGenerator's NotImplementedException answered, which recover() cannot catch either.
+    internal static partial void breakpoint()
+    {
+        if (System.Diagnostics.Debugger.IsAttached)
+        {
+            System.Diagnostics.Debugger.Break();
+            return;
+        }
+
+        Console.Out.Flush();
+        Console.Error.Write(GOOS == "windows"u8 ? "fatal error: fault\n" : "SIGTRAP: trace trap\n");
+        Console.Error.Flush();
+        Environment.Exit(2);
+    }
+
     // The ready-seam guards' view (GoroutineReadyTests): ANOTHER goroutine's g status, read through the
     // descriptor golib's record carries, so a test can wait for a parker to reach _Gwaiting and see a
     // waker move it to _Grunnable. uint.MaxValue while that goroutine has minted no g.

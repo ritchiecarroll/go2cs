@@ -80,7 +80,11 @@ func TestDeclaredNotImplementedCensus(t *testing.T) {
 	// //go:linkname push exists in this corpus), so an assembly stub cannot serve here, however many
 	// hosts it has killed. Today the controls are two pushes that do not arrive and have callers in
 	// their own package: internal/runtime/maps.mapKeyError (pushed from runtime/map_swiss.cs) and
-	// internal/coverage/cfile.getCovCounterList (pushed from runtime/covercounter.cs).
+	// runtime/pprof.mach_vm_region (pushed from runtime/darwin/sys_darwin.cs), which the Phase 5
+	// exported-reach census confirmed a user API reaches (pprof.StartCPUProfile on darwin, arm64 and
+	// x64; docs/phase4/CENSUS-phase5-exported-reach.md). It replaced
+	// internal/coverage/cfile.getCovCounterList in the commit that bodied that one (emit_impl.cs,
+	// 2026-10-10), which moved to the negative controls below.
 	//
 	// It named RED 7's three (fips140's getIndicator, setIndicator and fatal) until RED 7 (a) gave
 	// them bodies; they left the population and their rows left this list IN THAT SAME COMMIT, which
@@ -91,8 +95,8 @@ func TestDeclaredNotImplementedCensus(t *testing.T) {
 	// checking nothing, which is the vacuity the arm exists to refuse. So when a control gains a
 	// body, a member that is still stubbed replaces it in the same commit.
 	controls := []string{
-		"internal/coverage/cfile/emit.cs:getCovCounterList",
 		"internal/runtime/maps/runtime_swiss.cs:mapKeyError",
+		"runtime/pprof/darwin/vminfo_darwin.cs:mach_vm_region",
 	}
 
 	if len(controls) == 0 {
@@ -129,6 +133,12 @@ func TestDeclaredNotImplementedCensus(t *testing.T) {
 		"internal/sync/runtime.cs:runtime_Semrelease",
 		"internal/sync/runtime.cs:runtime_canSpin",
 		"internal/sync/runtime.cs:runtime_doSpin",
+
+		// Moved here from the controls above in the commit that bodied it (internal/coverage/cfile/
+		// emit_impl.cs, 2026-10-10): the empty counter list Go's runtime walk returns for a binary built
+		// without -cover. Its implementing part sits in a companion beside a converted file that keeps
+		// the declaration, the same split runtimeNano checks.
+		"internal/coverage/cfile/emit.cs:getCovCounterList",
 	}
 
 	found := map[string]bool{}
@@ -378,10 +388,13 @@ const (
 // tracer): no-ops, which is Go's behaviour with tracing off and a named model limit with it on. Before
 // that, a converted program calling trace.NewTask died on the first call.
 //
+// internal/coverage/cfile.getCovCounterList left with its body in internal/coverage/cfile/emit_impl.cs
+// (2026-10-10, the Phase 5 windows/linux seat): the empty list, Go's own answer for a binary built
+// without -cover. Before that, runtime/coverage.ClearCounters died on its first call on every OS.
+//
 // ⚠ EDIT THIS TABLE IN THE COMMIT THAT MOVES THE TREE, never afterwards. That is the whole mechanism.
 var declaredPushStubs = map[string]string{
 	"crypto/x509/internal/macos.syscall":                 dispositionLatent,
-	"internal/coverage/cfile.getCovCounterList":          dispositionLatent,
 	"internal/runtime/maps.mapKeyError":                  dispositionLatent,
 	"internal/syscall/windows.QueryPerformanceCounter":   dispositionLatent,
 	"internal/syscall/windows.QueryPerformanceFrequency": dispositionLatent,

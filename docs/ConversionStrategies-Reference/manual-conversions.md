@@ -2956,6 +2956,24 @@ to switch to, so that is the only branch. `procyield(n)` is `Thread.SpinWait((in
 else in `runtime/stubs.go` deliberately keeps throwing, `getg`/`mcall` included: a loud, locatable
 failure beats quietly operating on a fabricated goroutine descriptor.
 
+**`runtime.breakpoint` traps the way Go's does** (`runtime/stubs_impl.cs`). Go's body is one trap
+instruction. With a debugger attached the debugger takes it and the program resumes, so the managed
+body is `Debugger.Break()` in that case. With none, Go's trap is fatal: the runtime writes a report and
+exits 2. The managed body writes the report's first line, measured with go1.24.13 (`SIGTRAP: trace
+trap` on linux and darwin; `fatal error: fault` on windows, where the trap is a Go exception that `sigpanic` has no case for), and exits 2. The PC, register and
+traceback lines that follow in Go's report are machine addresses with no managed counterpart, so they are
+not reproduced. Guarded by the `Phase5Breakpoint` behavioral test, which compares exit status, stdout and
+the first stderr line against `go run` on each OS.
+
+**`internal/coverage/cfile.getCovCounterList` returns Go's coverage-off value** (`emit_impl.cs`).
+runtime pushes it (`runtime/covercounter.go`) with a body that walks every module's linker-placed counter
+section, starting from an empty, non-nil slice. A converted program is never built with `-cover`, so
+Go's walk returns that empty slice, and the companion returns the same. The push stays out of
+`linknamePushTargets`, which already records that the section walk is not something the managed model
+runs. `runtime/coverage.ClearCounters` therefore returns Go's `program not built with -cover`, and the
+other four `runtime/coverage` functions keep returning their own errors before they would reach it.
+Guarded by the `Phase5CoverageAPIs` behavioral test (all five functions, output-compared).
+
 **`internal/runtime/atomic` is the NATIVE half of the S1 fork and gets a real conversion, not a
 stub** (`atomic_impl.cs`). Its ~40 declarations are all `.s` files, but they are plain memory atomics
 over native scalars, and the CLR has an exact equivalent: `Xadd*`→`Interlocked.Add` (both return the
