@@ -41,6 +41,13 @@
     module the packed packages reference becomes a NuGet dependency on the package -ThirdPartyPackage names (owner
     ruling B4: the first revision built for the same corpus); one the caller does not name is refused by name.
 
+    README and icon (owner feedback on the hashset 1.0.0 nuget.org page, 2026-10-10): the package README is
+    generated in the go.* standard library packages' style (NugetgoReadme.psm1) -- the package ID, the PROOF text, a
+    badge row, the Go package's synopsis (internal/gensynopsis, read from the module's own source) and a license line
+    naming -LicenseSpdx -- and VALIDATION.md is packed beside it as a file the README links. The icon is the go2cs.png
+    the conversion carries, or -Icon. The read-back refuses a README with inline code in a heading or a table wider
+    than three columns, and a package with no icon.
+
     The restore is isolated: a nuget.config with <clear/> and only -Feed as a source, and a private NUGET_PACKAGES.
     The user's global packages folder is censused for nugetgo.* and go.* before and after, and the run fails if it
     grew. Nothing is pushed anywhere, and nothing is signed: signing is the release's last step.
@@ -64,6 +71,12 @@ param(
     # module path's own host/org (Get-NugetgoDescription, owner ruling 2026-10-02).
     [switch]$UpstreamPublishes,
     [string]$LicenseFile,
+    # The upstream license as an SPDX expression, for the README's license line. It is stated, never inferred from the
+    # license file (NugetgoLicense.psm1).
+    [string]$LicenseSpdx,
+    # The package icon, PNG or JPEG up to 1 MB; the go2cs icon the conversion carries when not given. A module author
+    # publishing their own module sets their own.
+    [string]$Icon,
     [string]$RehearsalSuffix,
     [switch]$Release,
     [string[]]$ExistingIds = @(),
@@ -82,6 +95,7 @@ Import-Module (Join-Path $PSScriptRoot 'NugetgoSelfDescription.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoValidationBinding.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoLicense.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoHostPaths.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'NugetgoReadme.psm1') -Force
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 
 function Refuse([string]$why) { throw "REFUSED: $why" }
@@ -134,14 +148,19 @@ $packed = @(Get-NugetgoPackedPackages -RecurseRoot $RecurseRoot -Libraries $libr
 $requires = @(Get-NugetgoThirdPartyRequires -RecurseRoot $RecurseRoot -Libraries $libraries.ToArray() -ThirdPartyPackage $ThirdPartyPackage)
 
 # ---- B6 metadata -----------------------------------------------------------------------------------------------------
+# The module's own source in the module cache, where the license file and the package synopsis are read. The cache
+# spells each uppercase letter of the path as '!' and its lowercase (golang.org/x/mod/module.EscapePath).
+$moduleCacheDir = Join-Path (& go env GOMODCACHE).Trim() ([regex]::Replace("$ModulePath@$GoVersion", '[A-Z]', { '!' + $args[0].Value.ToLowerInvariant() }))
 # The upstream license file under its own name: the converter's moduleLicenseNames, in its order (NugetgoLicense.psm1).
 if (-not $LicenseFile) {
-    $found = Find-NugetgoModuleLicense -ModuleDir (Join-Path (& go env GOMODCACHE).Trim() "$ModulePath@$GoVersion")
+    $found = Find-NugetgoModuleLicense -ModuleDir $moduleCacheDir
     if (-not $found.Name) { Refuse "no upstream license file: $($found.Reason)" }
     $LicenseFile = $found.Path
 }
 if (-not (Test-Path -LiteralPath $LicenseFile -PathType Leaf)) { Refuse "no upstream license file at $LicenseFile" }
 $licenseName = Split-Path -Leaf $LicenseFile
+if (-not $LicenseSpdx) { Refuse '-LicenseSpdx is required: the README names the upstream license as an SPDX expression (for example MIT or BSD-3-Clause), stated by the caller, never inferred' }
+if (-not (Test-NugetgoSpdx $LicenseSpdx)) { Refuse "-LicenseSpdx '$LicenseSpdx' is not an SPDX expression (identifiers joined by AND, OR or WITH)" }
 $copyright = (@(Get-NugetgoCopyrightLines -LicenseFile $LicenseFile) -join '; ')
 if (-not $copyright) { Refuse "the upstream license file carries no Copyright line: $LicenseFile" }
 # Each packed assembly's own copyright attribute names the UPSTREAM holder too (owner ruling 2026-10-04): the same
@@ -190,6 +209,8 @@ else {
     $validationPage = Join-Path $ValidationDir 'MODULE.md'
     if (-not (Test-Path -LiteralPath $validationPage)) { Refuse "no MODULE.md in $ValidationDir (a validated module is required; D7)" }
     $pages = @(Get-ChildItem -LiteralPath $ValidationDir -Filter '*.md' -Recurse | Where-Object { $_.Name -ne 'MODULE.md' })
+    $totals = Get-NugetgoProofTotals -ModuleSummary ([System.IO.File]::ReadAllText($validationPage))
+    if ($totals.Packages -eq 0) { Refuse "$validationPage has no package row: the README's Tests badge has no totals to state" }
     # The proof must be OF the packed bytes (the nugetgo rehearsal, 2026-10-09, gap 4): every MODULE.md row's input
     # digest is the GoInputDigest its packed project records. $packed lists the libraries in $libraries' order.
     $packedDigests = @{}
@@ -202,11 +223,41 @@ else {
     }
 }
 
+# ---- the package README and icon ---------------------------------------------------------------------------------------
+$packageIcon = Resolve-NugetgoPackageIcon -Icon $Icon -ConvertedDirectories @($libraries | ForEach-Object { $_.DirectoryName })
+if ($packageIcon.Reason) { Refuse $packageIcon.Reason }
+# The synopsis of the module's root package, from its Go source. A module whose root package is not packed has no one
+# package to speak for it, and its README has no synopsis.
+$synopsis = ''
+if (@($packed | Where-Object { $_.ImportPath -ceq $ModulePath }).Count) {
+    if (-not (Test-Path -LiteralPath $moduleCacheDir -PathType Container)) { Refuse "no module source at $moduleCacheDir for the README's synopsis (go mod download $ModulePath@$GoVersion)" }
+    Push-Location (Join-Path (Split-Path (Split-Path $PSScriptRoot)) 'go2cs')
+    try { $synopsis = (& go run ./internal/gensynopsis -dir $moduleCacheDir | Out-String).Trim(); if ($LASTEXITCODE -ne 0) { Refuse "gensynopsis could not read $moduleCacheDir ($LASTEXITCODE)" } }
+    finally { Pop-Location }
+}
+$readmeArgs = @{
+    Id = $id.Id; Description = $description; ModulePath = $ModulePath; GoVersion = $GoVersion; PackageVersion = $packageVersion
+    ClosureVersion = $ClosureVersion; RepositoryUrl = $RepositoryUrl; LicenseName = $licenseName; LicenseSpdx = $LicenseSpdx
+    Synopsis = $synopsis; DefaultIcon = $packageIcon.Default
+}
+if ($UnvalidatedReason) { $readmeArgs.Unvalidated = $true } else { $readmeArgs.Matched = $totals.Matched; $readmeArgs.Disclosed = $totals.Disclosed }
+$readme = New-NugetgoPackageReadme @readmeArgs
+$readmeReasons = @(Test-NugetgoReadme $readme)
+if ($readmeReasons.Count) { Refuse "the generated README is not a nuget.org README -- $($readmeReasons -join '; ')" }
+Write-Host "  readme: generated ($(@($readme -split "`n").Count) lines; synopsis: $(if ($synopsis) { $synopsis } else { 'none' }))"
+Write-Host "  icon: $($packageIcon.Name) $(if ($packageIcon.Default) { '(the go2cs icon the conversion carries)' } else { "(-Icon $($packageIcon.Path))" })"
+foreach ($page in $pages) {
+    $rel = $page.FullName.Substring($ValidationDir.TrimEnd('\', '/').Length + 1).Replace('\', '/')
+    if ($rel -ieq 'README.md' -or $rel -ieq $packageIcon.Name) { Refuse "the validation page $rel would be packed over the package's $rel" }
+}
+
 # ---- the generated module pack project --------------------------------------------------------------------------------
 $packDir = Join-Path (Join-Path $Scratch 'pack') $id.Id
 if (Test-Path $packDir) { Remove-Item -Recurse -Force $packDir }
 New-Item -ItemType Directory -Force $packDir | Out-Null
 Copy-Item -LiteralPath $LicenseFile (Join-Path $packDir $licenseName)
+Copy-Item -LiteralPath $packageIcon.Path (Join-Path $packDir $packageIcon.Name)
+[System.IO.File]::WriteAllText((Join-Path $packDir 'README.md'), $readme, (New-Object System.Text.UTF8Encoding($false)))
 # VALIDATION.md = the ruled two sentences as its header, then the proof page itself, unchanged below them.
 [System.IO.File]::WriteAllText((Join-Path $packDir 'VALIDATION.md'),
     ("> $description`n`n" + [System.IO.File]::ReadAllText($validationPage)), (New-Object System.Text.UTF8Encoding($false)))
@@ -246,7 +297,8 @@ $csproj = @"
     <PackageReleaseNotes>$(ConvertTo-NugetgoMSBuildLiteral $description)</PackageReleaseNotes>
     <Copyright>$(ConvertTo-NugetgoMSBuildLiteral $copyright)</Copyright>
     <PackageLicenseFile>$(& $esc $licenseName)</PackageLicenseFile>
-    <PackageReadmeFile>VALIDATION.md</PackageReadmeFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>$(& $esc $packageIcon.Name)</PackageIcon>
     <RepositoryUrl>$(ConvertTo-NugetgoMSBuildLiteral $RepositoryUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>$(ConvertTo-NugetgoMSBuildLiteral $RepositoryUrl)</PackageProjectUrl>
@@ -260,6 +312,8 @@ $pkgRefs
   </ItemGroup>
   <ItemGroup>
     <None Include="$(& $esc $licenseName)" Pack="true" PackagePath="" />
+    <None Include="README.md" Pack="true" PackagePath="" />
+    <None Include="$(& $esc $packageIcon.Name)" Pack="true" PackagePath="" />
     <None Include="VALIDATION.md" Pack="true" PackagePath="" />
     <None Include="go2cs/source-metadata.txt" Pack="true" PackagePath="go2cs" />
 $pageItems
@@ -340,6 +394,16 @@ try {
     $nuspecEntry = $zip.Entries | Where-Object { $_.FullName -like '*.nuspec' } | Select-Object -First 1
     $reader = New-Object System.IO.StreamReader($nuspecEntry.Open())
     [xml]$nuspec = $reader.ReadToEnd(); $reader.Dispose()
+    $readmeEntry = $zip.Entries | Where-Object { $_.FullName -eq 'README.md' } | Select-Object -First 1
+    $packedReadme = $null
+    if ($readmeEntry) { $reader = New-Object System.IO.StreamReader($readmeEntry.Open()); $packedReadme = $reader.ReadToEnd(); $reader.Dispose() }
+    $iconEntry = $zip.Entries | Where-Object { $_.FullName -ceq $packageIcon.Name } | Select-Object -First 1
+    $packedIcon = $null
+    if ($iconEntry) {
+        $stream = $iconEntry.Open(); $buffer = New-Object System.IO.MemoryStream
+        try { $stream.CopyTo($buffer) } finally { $stream.Dispose() }
+        $packedIcon = $buffer.ToArray()
+    }
     $validationEntry = $zip.Entries | Where-Object { $_.FullName -eq 'VALIDATION.md' } | Select-Object -First 1
     $reader = New-Object System.IO.StreamReader($validationEntry.Open())
     $validationHead = $reader.ReadToEnd(); $reader.Dispose()
@@ -363,6 +427,7 @@ Write-Host "    license file: $($md.license.'#text') ($($md.license.type)); read
 Write-Host "    copyright: $($md.copyright)"
 Write-Host "    description: $($md.description)"
 Write-Host "    pages: $((@($entries | Where-Object { $_ -like '*.md' })) -join ', ')"
+Write-Host "    icon: $($md.icon)"
 if ($md.id -ne $id.Id -or $md.version -ne $packageVersion) { throw "read-back identity $($md.id) $($md.version) is not $($id.Id) $packageVersion" }
 if ($md.description -cne $description -or $md.releaseNotes -cne $description) { throw 'the read-back description or release notes are not the ruled text' }
 if ($md.copyright -cne $copyright) { throw "the read-back copyright '$($md.copyright)' is not the upstream license file's Copyright lines '$copyright'" }
@@ -373,6 +438,21 @@ if ($md.authors -cne $Authors) { throw "the read-back authors '$($md.authors)' a
 # compared as a URI, the repository url (written as given) as text.
 if ($md.repository.url -cne $RepositoryUrl -or ([Uri]$md.projectUrl).AbsoluteUri -cne ([Uri]$RepositoryUrl).AbsoluteUri) { throw "the read-back repository url '$($md.repository.url)' or project url '$($md.projectUrl)' is not -RepositoryUrl '$RepositoryUrl'" }
 if (-not $validationHead.StartsWith("> $description", [StringComparison]::Ordinal)) { throw 'the packed VALIDATION.md does not open with the ruled text' }
+# The README and the icon, as nuget.org will show them (owner, 2026-10-10). A refused package is removed, as a host
+# path's is, so no push can pick it up.
+$presentation = New-Object System.Collections.Generic.List[string]
+if ($md.readme -cne 'README.md') { $presentation.Add("the package README is '$($md.readme)', not the generated README.md") }
+if ($null -eq $packedReadme) { $presentation.Add('the package carries no README.md') }
+elseif ($packedReadme -cne $readme) { $presentation.Add('the packed README.md differs from the one generated') }
+else { foreach ($why in @(Test-NugetgoReadme $packedReadme)) { $presentation.Add("README.md $why") } }
+if (-not $md.icon) { $presentation.Add('the package has no icon') }
+elseif ($md.icon -cne $packageIcon.Name -or $null -eq $packedIcon -or -not [System.Linq.Enumerable]::SequenceEqual($packedIcon, [System.IO.File]::ReadAllBytes($packageIcon.Path))) { $presentation.Add("the package icon '$($md.icon)' is not $($packageIcon.Path), byte for byte") }
+if (@($entries | Where-Object { $_ -ceq 'VALIDATION.md' }).Count -ne 1) { $presentation.Add('VALIDATION.md is not packed as a file') }
+Write-Host "    readme and icon: $(if ($presentation.Count) { "$($presentation.Count) refusal(s)" } else { 'README.md generated and clean; icon packed' })"
+if ($presentation.Count) {
+    Remove-Item -LiteralPath $nupkg
+    throw "REFUSED: the package's nuget.org page -- $($presentation -join '; ')"
+}
 if ($badDeps.Count) { throw "go.* dependencies not at the B4 range: $(($badDeps | ForEach-Object { "$($_.id) $($_.version)" }) -join ', ')" }
 if (@($entries | Where-Object { $_ -like 'lib/*.dll' }).Count -ne $libraries.Count) { throw "lib/ carries $(@($entries | Where-Object { $_ -like 'lib/*.dll' }).Count) assemblies for $($libraries.Count) packages" }
 # Each assembly's copyright and company, read from the dll taken back OUT of the nupkg: its version resource, the
