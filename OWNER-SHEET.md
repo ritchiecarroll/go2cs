@@ -35,7 +35,7 @@ key whose glob covers `nugetgo.*` (in `$env:NUGETGO_API_KEY`, or typed at the pr
 | `conversion-add/VALIDATION.md`, `conversion-add/index.md` | the two files the `hashset-cs` repository adds at its root (COORD's commit) |
 | `evidence/SELECTION.md` | the measurement that a consumer selects 1.0.0.1 over 1.0.0 |
 
-Packed at `T` = `claude/c2-nugetgo-tools` @ `c8ef680e14` (the 1.0.0 tools plus the README and icon cut), from the same
+Packed at `T` = `claude/c2-nugetgo-tools` @ `ac8775c806` (the 1.0.0 tools plus the README and icon cut), from the same
 two roots as 1.0.0, against the published go.* 1.24.13.5, with `-Revision 1 -Release -LicenseSpdx MIT`. The proof is
 unchanged: 37 matched, 0 disclosed, input digest
 `sha256-7fb2058d54e18d61eaa288b0e79c847c953bdadf87cdd00fdb0d832750903114`, bound to the packed project. The read-back
@@ -45,9 +45,11 @@ reads module version `v1.0.0` (B3: the rebuild changes the package version only)
 The preview badges are local stand-ins: this lane box cannot reach img.shields.io, so each badge is drawn from its
 own URL (label, message, color). nuget.org loads the real images from shields.io.
 
-**The README links two files in `hashset-cs`:** `VALIDATION.md` (the Tests badge) and `LICENSE` (the license line),
-both at the repository root. LICENSE is already there. VALIDATION.md is not, so COORD's commit adds
-`conversion-add/VALIDATION.md` and `conversion-add/index.md` at the root before you push the package. The C# source
+**The README links `hashset-cs` at the tag `nuget-1.0.0.1`:** the C# Source badge links the tree, the Tests badge
+`VALIDATION.md` and the license line `LICENSE`, both at the repository root (COORD ruling 2026-10-10: a tag, never
+`HEAD`, so 1.0.0's page and this one each keep their own). LICENSE is already there. VALIDATION.md is not, so COORD's
+commit adds `conversion-add/VALIDATION.md` and `conversion-add/index.md` at the root, and COORD mints the signed tag
+on that commit, before you start. Block 1b checks both. The C# source
 does not change: measured against `hashset-cs` @ `e886982b0b`, every source file differs from the kit's only in line
 endings (git stored LF), and LICENSE, README.md, .gitignore and both icons are byte-identical.
 
@@ -81,6 +83,29 @@ git -C $Repo worktree add --detach "$Pub\kit" "origin/$Kit"
 if ($LASTEXITCODE) { throw "worktree kit exited $LASTEXITCODE" }
 git -C $Repo worktree add --detach "$Pub\signer" $Master
 if ($LASTEXITCODE) { throw "worktree signer exited $LASTEXITCODE" }
+```
+
+### 1b. Gate: the conversion repository's tag
+
+The tag `nuget-$PV` on `ritchiecarroll/hashset-cs` names the conversion commit the package README links (COORD ruling 2026-10-10:
+a tag, never `HEAD`). COORD pushes that commit and mints the signed tag before you start; this block checks, as an
+anonymous reader (no credentials), that the tag exists, that VALIDATION.md and the license file resolve at it, and
+that VALIDATION.md is byte for byte the one the package carries. It changes nothing.
+
+```powershell
+$CsRepo = 'ritchiecarroll/hashset-cs'
+$Tag = "nuget-$PV"
+$env:GIT_TERMINAL_PROMPT = '0'
+$refs = @(git -c credential.helper= ls-remote "https://github.com/$CsRepo.git" "refs/tags/$Tag" "refs/tags/$Tag^{}")
+if ($LASTEXITCODE) { throw "git ls-remote exited ${LASTEXITCODE}: $CsRepo cannot be read anonymously" }
+if (-not $refs) { throw "$CsRepo has no tag ${Tag}: COORD pushes it before this sheet; stop and tell COORD" }
+$commit = (@($refs | Where-Object { $_ -like '*^{}' }) + $refs)[0].Split("`t")[0]
+foreach ($f in 'VALIDATION.md', 'LICENSE') {
+    try { Invoke-WebRequest "https://raw.githubusercontent.com/$CsRepo/$Tag/$f" -OutFile "$Pub\tag-$f" }
+    catch { throw "$f does not resolve anonymously at $CsRepo ${Tag}: stop and tell COORD" }
+}
+if ((Get-FileHash "$Pub\tag-VALIDATION.md").Hash -ne (Get-FileHash "$Pub\kit\conversion-add\VALIDATION.md").Hash) { throw "VALIDATION.md at $Tag is not the one the package carries: stop and tell COORD" }
+"tag OK  $CsRepo $Tag -> commit $($commit.Substring(0, 10)); VALIDATION.md and LICENSE resolve anonymously"
 ```
 
 ### 2. The checksum gate, then sign and verify
@@ -178,7 +203,7 @@ if (-not $listed) { throw "$Id $PV is not listed after 90 minutes (flat containe
 
 ### 5. Stop and report to COORD
 
-Send COORD one reply with: the `checksum OK` and `signed and verified` lines from block 2, the `nuget.org lists` and
+Send COORD one reply with: the `tag OK` line from block 1b, the `checksum OK` and `signed and verified` lines from block 2, the `nuget.org lists` and
 `pushed:` lines from block 3, and the `listed on nuget.org` line from block 4. Do not send the signer output itself:
 it contains local paths.
 
