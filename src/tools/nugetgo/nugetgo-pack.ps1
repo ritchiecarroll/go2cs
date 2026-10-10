@@ -44,9 +44,12 @@
     README and icon (owner feedback on the hashset 1.0.0 nuget.org page, 2026-10-10): the package README is
     generated in the go.* standard library packages' style (NugetgoReadme.psm1) -- the package ID, the PROOF text, a
     badge row, the Go package's synopsis (internal/gensynopsis, read from the module's own source) and a license line
-    naming -LicenseSpdx -- and VALIDATION.md is packed beside it as a file the README links. The icon is the go2cs.png
+    naming -LicenseSpdx -- and VALIDATION.md is packed beside it as a file the README links. Its links into the
+    conversion repository name the tag nuget-<release version> (COORD ruling 2026-10-10), which COORD mints on the
+    conversion commit before the package is signed; a rehearsal names its release's tag, since a rehearsal version
+    gets none. The icon is the go2cs.png
     the conversion carries, or -Icon. The read-back refuses a README with inline code in a heading or a table wider
-    than three columns, and a package with no icon.
+    than three columns or a link naming HEAD, and a package with no icon.
 
     The restore is isolated: a nuget.config with <clear/> and only -Feed as a source, and a private NUGET_PACKAGES.
     The user's global packages folder is censused for nugetgo.* and go.* before and after, and the run fails if it
@@ -235,16 +238,19 @@ if (@($packed | Where-Object { $_.ImportPath -ceq $ModulePath }).Count) {
     try { $synopsis = (& go run ./internal/gensynopsis -dir $moduleCacheDir | Out-String).Trim(); if ($LASTEXITCODE -ne 0) { Refuse "gensynopsis could not read $moduleCacheDir ($LASTEXITCODE)" } }
     finally { Pop-Location }
 }
+# The conversion repository's tag the README links: the RELEASE version's, a rehearsal included (its own version is
+# never tagged).
+$repositoryTag = "nuget-$($ver.Version)"
 $readmeArgs = @{
     Id = $id.Id; Description = $description; ModulePath = $ModulePath; GoVersion = $GoVersion; PackageVersion = $packageVersion
-    ClosureVersion = $ClosureVersion; RepositoryUrl = $RepositoryUrl; LicenseName = $licenseName; LicenseSpdx = $LicenseSpdx
+    ClosureVersion = $ClosureVersion; RepositoryUrl = $RepositoryUrl; RepositoryTag = $repositoryTag; LicenseName = $licenseName; LicenseSpdx = $LicenseSpdx
     Synopsis = $synopsis; DefaultIcon = $packageIcon.Default
 }
 if ($UnvalidatedReason) { $readmeArgs.Unvalidated = $true } else { $readmeArgs.Matched = $totals.Matched; $readmeArgs.Disclosed = $totals.Disclosed }
 $readme = New-NugetgoPackageReadme @readmeArgs
 $readmeReasons = @(Test-NugetgoReadme $readme)
 if ($readmeReasons.Count) { Refuse "the generated README is not a nuget.org README -- $($readmeReasons -join '; ')" }
-Write-Host "  readme: generated ($(@($readme -split "`n").Count) lines; synopsis: $(if ($synopsis) { $synopsis } else { 'none' }))"
+Write-Host "  readme: generated ($(@($readme -split "`n").Count) lines; links the conversion tag $repositoryTag; synopsis: $(if ($synopsis) { $synopsis } else { 'none' }))"
 Write-Host "  icon: $($packageIcon.Name) $(if ($packageIcon.Default) { '(the go2cs icon the conversion carries)' } else { "(-Icon $($packageIcon.Path))" })"
 foreach ($page in $pages) {
     $rel = $page.FullName.Substring($ValidationDir.TrimEnd('\', '/').Length + 1).Replace('\', '/')
