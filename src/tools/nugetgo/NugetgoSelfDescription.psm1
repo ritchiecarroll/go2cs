@@ -108,4 +108,39 @@ function Get-NugetgoThirdPartyRequires {
     }
 }
 
-Export-ModuleMember -Function Get-NugetgoPackedPackages, Get-NugetgoThirdPartyRequires
+<#
+.SYNOPSIS
+    The libraries a module pack carries: every library of the module except the packages -ExcludePackage names (COORD
+    ruling 2026-10-09: jwt/v5's `test` package holds jwt's own test fixtures, not API a consumer imports). An exclusion
+    that names no library package of the module is refused, so a misspelt one cannot pack the package it meant to
+    leave out; so is an excluded package that a packed package references, whose assembly the package would then lack.
+#>
+function Select-NugetgoPackedLibraries {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$RecurseRoot, [Parameter(Mandatory)][object[]]$Libraries, [string[]]$ExcludePackage = @())
+
+    $srcRoot = Join-Path $RecurseRoot 'src'
+    $byPath = @{}
+    foreach ($library in $Libraries) { $byPath[(Get-RelativeImportPath $srcRoot $library.DirectoryName)] = $library }
+
+    $excluded = @{}
+    foreach ($importPath in @($ExcludePackage | Where-Object { $_ })) {
+        if (-not $byPath.ContainsKey($importPath)) { throw "REFUSED: -ExcludePackage $importPath names no library package of the module under $srcRoot" }
+        $excluded[[System.IO.Path]::GetFullPath($byPath[$importPath].FullName)] = $importPath
+    }
+
+    $kept = @($Libraries | Where-Object { -not $excluded.ContainsKey([System.IO.Path]::GetFullPath($_.FullName)) })
+    foreach ($library in $kept) {
+        [xml]$project = Get-Content -Raw -LiteralPath $library.FullName
+        foreach ($reference in @($project.Project.ItemGroup | ForEach-Object { $_.ProjectReference } | Where-Object { $_ })) {
+            $include = ([string]$reference.Include).Replace('\', [System.IO.Path]::DirectorySeparatorChar).Replace('/', [System.IO.Path]::DirectorySeparatorChar)
+            $target = [System.IO.Path]::GetFullPath((Join-Path $library.DirectoryName $include))
+            if ($excluded.ContainsKey($target)) {
+                throw "REFUSED: -ExcludePackage $($excluded[$target]) is excluded, and the packed package $(Get-RelativeImportPath $srcRoot $library.DirectoryName) references it"
+            }
+        }
+    }
+    return $kept
+}
+
+Export-ModuleMember -Function Get-NugetgoPackedPackages, Get-NugetgoThirdPartyRequires, Select-NugetgoPackedLibraries
