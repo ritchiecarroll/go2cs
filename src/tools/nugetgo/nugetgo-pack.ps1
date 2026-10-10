@@ -20,7 +20,7 @@
     packed only under -Release.
 
     Metadata (B6): upstream's Copyright lines and license file verbatim, under its own name (NugetgoLicense.psm1),
-    the PROOF description, RepositoryUrl = the per-module conversion-source repo. D7: the module's MODULE.md ships as
+    the ruled description (no "PROOF:" prefix: owner review 2026-10-10), RepositoryUrl = the per-module conversion-source repo. D7: the module's MODULE.md ships as
     VALIDATION.md, with every per-package proof page beside it. The proof must be OF the packed bytes: each MODULE.md
     row's input digest must be the GoInputDigest its packed project records (NugetgoValidationBinding.psm1), so a proof
     from other sources, other options, another target or another converter is refused by name.
@@ -42,8 +42,8 @@
     ruling B4: the first revision built for the same corpus); one the caller does not name is refused by name.
 
     README and icon (owner feedback on the hashset 1.0.0 nuget.org page, 2026-10-10): the package README is
-    generated in the go.* standard library packages' style (NugetgoReadme.psm1) -- the package ID, the PROOF text, a
-    badge row, the Go package's synopsis (internal/gensynopsis, read from the module's own source) and a license line
+    generated in the go.* standard library packages' style (NugetgoReadme.psm1) -- the package ID, the description
+    with its module path linked to the Go module's source at its version (owner review 2026-10-10), a badge row, the Go package's synopsis (internal/gensynopsis, read from the module's own source) and a license line
     naming -LicenseSpdx -- and VALIDATION.md is packed beside it as a file the README links. Its links into the
     conversion repository name the tag nuget-<release version> (COORD ruling 2026-10-10), which COORD mints on the
     conversion commit before the package is signed; a rehearsal names its release's tag, since a rehearsal version
@@ -192,6 +192,7 @@ $described = Get-NugetgoDescription -ModulePath $ModulePath -GoVersion $GoVersio
     -RepositoryUrl $RepositoryUrl -UpstreamPublishes:$UpstreamPublishes
 if ($described.Refused) { Refuse "package description: $($described.Reason)" }
 $description = $described.Description
+if ($description.Contains('PROOF:')) { Refuse 'package description: it carries "PROOF:" (owner review 2026-10-10: the registry tier and the Tests badge carry the proof)' }
 
 # D7: a validated module ships its MODULE.md as VALIDATION.md, the per-package pages beside it. A module that cannot
 # validate yet packs ONLY as a rehearsal of its shape (-UnvalidatedReason), whose VALIDATION.md says so; such a
@@ -248,7 +249,9 @@ $readmeArgs = @{
 }
 if ($UnvalidatedReason) { $readmeArgs.Unvalidated = $true } else { $readmeArgs.Matched = $totals.Matched; $readmeArgs.Disclosed = $totals.Disclosed }
 $readme = New-NugetgoPackageReadme @readmeArgs
-$readmeReasons = @(Test-NugetgoReadme $readme)
+# The README's first link is the Go module's source at its version (owner review 2026-10-10).
+$moduleSource = Get-NugetgoModuleSourceUrl $ModulePath $GoVersion
+$readmeReasons = @(Test-NugetgoReadme $readme $moduleSource)
 if ($readmeReasons.Count) { Refuse "the generated README is not a nuget.org README -- $($readmeReasons -join '; ')" }
 Write-Host "  readme: generated ($(@($readme -split "`n").Count) lines; links the conversion tag $repositoryTag; synopsis: $(if ($synopsis) { $synopsis } else { 'none' }))"
 Write-Host "  icon: $($packageIcon.Name) $(if ($packageIcon.Default) { '(the go2cs icon the conversion carries)' } else { "(-Icon $($packageIcon.Path))" })"
@@ -450,7 +453,8 @@ $presentation = New-Object System.Collections.Generic.List[string]
 if ($md.readme -cne 'README.md') { $presentation.Add("the package README is '$($md.readme)', not the generated README.md") }
 if ($null -eq $packedReadme) { $presentation.Add('the package carries no README.md') }
 elseif ($packedReadme -cne $readme) { $presentation.Add('the packed README.md differs from the one generated') }
-else { foreach ($why in @(Test-NugetgoReadme $packedReadme)) { $presentation.Add("README.md $why") } }
+else { foreach ($why in @(Test-NugetgoReadme $packedReadme $moduleSource)) { $presentation.Add("README.md $why") } }
+if ($md.description.Contains('PROOF:')) { $presentation.Add('the description carries "PROOF:"') }
 if (-not $md.icon) { $presentation.Add('the package has no icon') }
 elseif ($md.icon -cne $packageIcon.Name -or $null -eq $packedIcon -or -not [System.Linq.Enumerable]::SequenceEqual($packedIcon, [System.IO.File]::ReadAllBytes($packageIcon.Path))) { $presentation.Add("the package icon '$($md.icon)' is not $($packageIcon.Path), byte for byte") }
 if (@($entries | Where-Object { $_ -ceq 'VALIDATION.md' }).Count -ne 1) { $presentation.Add('VALIDATION.md is not packed as a file') }

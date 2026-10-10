@@ -4,7 +4,9 @@
     the hashset 1.0.0 nuget.org page, 2026-10-10). hashset 1.0.0 shipped VALIDATION.md as its README, so nuget.org
     showed an inline-code heading, a five-column table and red code blocks, and the package had no icon. The pack now
     generates a README in the go.* standard library packages' style and refuses one with inline code in a heading or a
-    table wider than three columns, and refuses a pack with no icon. Exit code = the number of failed cases.
+    table wider than three columns, and refuses a pack with no icon. The owner's review of the hashset revision-1 preview
+    (2026-10-10): no "PROOF:" in the README or the description, and the README's first link names the Go module's
+    source at its version. Exit code = the number of failed cases.
 #>
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'NugetgoReadme.psm1') -Force
@@ -60,10 +62,25 @@ foreach ($bad in @('', 'BSD 3-Clause', 'see LICENSE', 'MIT;rm')) {
     Check "'$bad' is refused" (-not (Test-NugetgoSpdx $bad)) 'accepted'
 }
 
+Write-Host 'the Go module source a README links'
+foreach ($case in @(
+        @('github.com/ritchiecarroll/hashset', 'v1.0.0', 'https://github.com/ritchiecarroll/hashset/tree/v1.0.0'),
+        @('github.com/google/uuid', '1.6.0', 'https://github.com/google/uuid/tree/v1.6.0'),
+        @('github.com/golang-jwt/jwt/v5', 'v5.3.1', 'https://github.com/golang-jwt/jwt/tree/v5.3.1'),
+        @('github.com/o/r', 'v0.0.0-20240102030405-0123456789ab', 'https://github.com/o/r/tree/0123456789ab'),
+        @('github.com/o/r', 'v2.1.0+incompatible', 'https://github.com/o/r/tree/v2.1.0'),
+        @('github.com/o/r/sub', 'v1.0.0', 'https://pkg.go.dev/github.com/o/r/sub@v1.0.0'),
+        @('gopkg.in/yaml.v3', 'v3.0.1', 'https://pkg.go.dev/gopkg.in/yaml.v3@v3.0.1'),
+        @('example.com/mod', 'v1.2.3', 'https://pkg.go.dev/example.com/mod@v1.2.3'))) {
+    $got = Get-NugetgoModuleSourceUrl -ModulePath $case[0] -GoVersion $case[1]
+    Check "$($case[0]) $($case[1])" ($got -ceq $case[2]) "got '$got', want '$($case[2])'"
+}
+
 $repo = 'https://github.com/example/mod-cs'
-$proofText = 'PROOF: unofficial go2cs C# conversion of example.com/mod v1.2.3, built on the Go 1.24.13 standard library.'
+$descText = 'unofficial go2cs C# conversion of example.com/mod v1.2.3, built on the Go 1.24.13 standard library.'
+$modSource = 'https://pkg.go.dev/example.com/mod@v1.2.3'
 $readmeArgs = @{
-    Id = 'nugetgo.example.com.mod'; Description = $proofText; ModulePath = 'example.com/mod'; GoVersion = 'v1.2.3'
+    Id = 'nugetgo.example.com.mod'; Description = $descText; ModulePath = 'example.com/mod'; GoVersion = 'v1.2.3'
     PackageVersion = '1.2.3'; ClosureVersion = '1.24.13.5'; RepositoryUrl = $repo; RepositoryTag = 'nuget-1.2.3'; LicenseName = 'LICENSE'
     LicenseSpdx = 'MIT'; Synopsis = 'Package mod does *one* thing.'; Matched = 40; Disclosed = 1; DefaultIcon = $true
 }
@@ -72,7 +89,9 @@ $lines = @($readme -split "`n")
 
 Write-Host 'the generated README'
 Check 'the title is the package ID, as plain text' ($lines[0] -ceq '# nugetgo.example.com.mod') "line 1 '$($lines[0])'"
-Check 'the PROOF text is a blockquote' ($lines -ccontains "> $proofText") 'no blockquote line'
+Check 'the description is a blockquote, its module path linked to the module source' (
+    $lines -ccontains "> unofficial go2cs C# conversion of [example.com/mod]($modSource) v1.2.3, built on the Go 1.24.13 standard library.") 'no such blockquote line'
+Check 'no PROOF: anywhere (owner review 2026-10-10)' (-not $readme.Contains('PROOF')) 'PROOF in the README'
 Check 'the Tests badge reads matched / disclosed and links VALIDATION.md at the conversion tag' (
     $readme.Contains("[![Tests](https://img.shields.io/badge/Tests-40_matched_%2F_1_disclosed-brightgreen?logo=go)]($repo/blob/nuget-1.2.3/VALIDATION.md)")) 'no such badge'
 Check 'the C# Source badge links the conversion repository at its tag' (
@@ -82,11 +101,21 @@ Check 'the Go module badge links pkg.go.dev at the module version' (
 Check 'the go2cs badge links the release it was built on' (
     $readme.Contains('[![go2cs](https://img.shields.io/badge/go2cs-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5)')) 'no such badge'
 Check 'the synopsis is its own paragraph, escaped' ($lines -ccontains 'Package mod does \*one\* thing.') 'no synopsis line'
-Check 'the license line' ($lines -ccontains "Converted from example.com/mod source; licensed under MIT — see [LICENSE]($repo/blob/nuget-1.2.3/LICENSE).") 'no license line'
+Check 'the license line links the module source too' ($lines -ccontains "Converted from [example.com/mod]($modSource) source; licensed under MIT — see [LICENSE]($repo/blob/nuget-1.2.3/LICENSE).") 'no license line'
 Check 'the go2cs icon brings its artwork line' ($readme.Contains('Artwork licensed under Creative Commons Attribution 3.0')) 'no artwork line'
 Check 'no inline code anywhere' (-not $readme.Contains('`')) 'a backtick'
 Check 'no link names HEAD (COORD ruling 2026-10-10: links name the conversion tag)' ($readme -notmatch '/(blob|tree)/HEAD\b') 'a HEAD link'
-Check 'the README passes its own guard' (@(Test-NugetgoReadme $readme).Count -eq 0) "refused: $(@(Test-NugetgoReadme $readme) -join '; ')"
+Check 'the README passes its own guard' (@(Test-NugetgoReadme $readme $modSource).Count -eq 0) "refused: $(@(Test-NugetgoReadme $readme $modSource) -join '; ')"
+$author = @{} + $readmeArgs
+$author.ModulePath = 'github.com/ritchiecarroll/hashset'; $author.GoVersion = 'v1.0.0'
+$author.Description = 'go2cs C# conversion of github.com/ritchiecarroll/hashset v1.0.0, published by its author, built on the Go 1.24.13 standard library; not affiliated with or endorsed by the Go project.'
+$authorReadme = New-NugetgoPackageReadme @author
+Check 'the author form links the module at its version tag on GitHub (the owner''s callout)' (
+    @($authorReadme -split "`n") -ccontains '> go2cs C# conversion of [github.com/ritchiecarroll/hashset](https://github.com/ritchiecarroll/hashset/tree/v1.0.0) v1.0.0, published by its author, built on the Go 1.24.13 standard library; not affiliated with or endorsed by the Go project.') 'no such callout'
+$noPath = @{} + $readmeArgs
+$noPath.Description = 'a description that never names its module'
+$threw = $false; try { New-NugetgoPackageReadme @noPath | Out-Null } catch { $threw = $_.Exception.Message.Contains('does not name the module path') }
+Check 'a description that does not name the module path is refused' $threw 'not refused by name'
 $readmeArgs.DefaultIcon = $false
 Check 'an author''s own icon brings no artwork line' (-not (New-NugetgoPackageReadme @readmeArgs).Contains('Artwork')) 'an artwork line'
 $readmeArgs.Synopsis = ''
@@ -106,7 +135,8 @@ $hashsetPage = @"
 "@
 $cases = @(
     # name, text, expected reason fragments (none = accepted)
-    @('the hashset 1.0.0 README as published', $hashsetPage, @('inline code in the heading', 'a table 5 columns wide')),
+    @('the hashset 1.0.0 README as published', $hashsetPage, @('inline code in the heading', 'a table 5 columns wide', 'PROOF:')),
+    @('PROOF: in a description callout', "> PROOF: go2cs C# conversion of example.com/mod v1.2.3.`n", @('PROOF:')),
     @('inline code in an ATX heading', "## The ``Set`` type`n", @('inline code in the heading')),
     @('inline code in a setext heading', "The ``Set`` type`n---------------`n", @('inline code in the heading')),
     @('a heading-shaped line inside a code fence', (('```text', '# `x`', '```', '') -join "`n"), @()),
@@ -129,6 +159,19 @@ foreach ($case in $cases) {
         $missing = @($want | Where-Object { $f = $_; -not @($reasons | Where-Object { $_.Contains($f) }).Count })
         Check $case[0] ($missing.Count -eq 0) "reasons [$($reasons -join '; ')] lack [$($missing -join '; ')]"
     }
+}
+
+Write-Host 'the first link names the module source'
+$src = 'https://github.com/o/r/tree/v1.0.0'
+foreach ($case in @(
+        @('the callout links the module source first', "> go2cs C# conversion of [github.com/o/r]($src) v1.0.0.`n`n[![Tests](https://img.shields.io/badge/x-y-green)](https://github.com/o/r-cs/blob/nuget-1.0.0/VALIDATION.md)`n", @()),
+        @('a badge before the callout link', "[![Tests](https://img.shields.io/badge/x-y-green)](https://github.com/o/r-cs/blob/nuget-1.0.0/VALIDATION.md)`n`n> conversion of [github.com/o/r]($src).`n", @('the first link')),
+        @('the callout links another version', "> conversion of [github.com/o/r](https://github.com/o/r/tree/v0.9.0).`n", @('the first link')),
+        @('no link at all', "> conversion of github.com/o/r v1.0.0.`n", @('the first link')))) {
+    $reasons = @(Test-NugetgoReadme $case[1] $src)
+    $want = @($case[2])
+    if ($want.Count -eq 0) { Check $case[0] ($reasons.Count -eq 0) "refused: $($reasons -join '; ')" }
+    else { Check $case[0] (@($reasons | Where-Object { $_.Contains($want[0]) }).Count -gt 0) "reasons [$($reasons -join '; ')]" }
 }
 
 Write-Host 'the icon'
