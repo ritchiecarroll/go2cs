@@ -1,4 +1,4 @@
-> PROOF: unofficial go2cs C# conversion of github.com/golang-jwt/jwt/v5 v5.3.1, built on the Go 1.24.13 standard library, not affiliated with or endorsed by the golang-jwt maintainers or the Go project. Security: that standard library carries no Go security fixes issued after Go 1.24.13; review before any production use.
+> unofficial go2cs C# conversion of github.com/golang-jwt/jwt/v5 v5.3.1, built on the Go 1.24.13 standard library; not affiliated with or endorsed by the golang-jwt maintainers or the Go project. Security: that standard library carries no Go security fixes issued after Go 1.24.13; review before any production use.
 
 # `github.com/golang-jwt/jwt/v5` — module validation summary
 

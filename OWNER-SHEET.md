@@ -42,7 +42,7 @@ and version from its contents, so the file name changes nothing for signing or p
 | `conversion/` | for COORD: the files of the conversion commit on `jwt-cs`, in the nested layout; the upstream LICENSE, VALIDATION.md and the proof page(s) sit at its root |
 | `ROW-PR.md` | draft text for the registry row's pull request |
 
-Both packages were packed at `T` = `claude/c2-nugetgo-tools` @ `ac8775c806`, against the published go.* 1.24.13.5,
+Both packages were packed at `T` = `claude/c2-nugetgo-tools` @ `3d0d70ba53`, against the published go.* 1.24.13.5,
 with `-platforms linux/amd64` and `-ExcludePackage github.com/golang-jwt/jwt/v5/test` (COORD ruling: jwt's own test
 fixtures, not API a consumer imports). Each holds two assemblies, the root package and `request`. Section 1: 189
 matched, 0 disclosed (root 186, `request` 3); input digests `sha256-9647af36…eb78` (root) and `sha256-4a1b7eb5…f8cb`
@@ -51,8 +51,17 @@ matched, 0 disclosed (root 186, `request` 3); input digests `sha256-9647af36…e
 `T` is the tools that packed the first packages here plus the README and icon cut (owner, 2026-10-10), and the packs
 add `-LicenseSpdx MIT`. Each package now carries a generated README.md as its nuget.org README, the go2cs icon,
 and VALIDATION.md as a file the README links. The README links the conversion repository at the tag `nuget-<release
-version>`, never `HEAD` (COORD ruling 2026-10-10). Everything else is unchanged and was measured so: the packed assemblies
-are byte-identical to the ones packed at `7888e4e72f`, and so are the description and VALIDATION.md.
+version>`, never `HEAD` (COORD ruling 2026-10-10). The packed assemblies are byte-identical to the ones packed at
+`7888e4e72f`, measured.
+
+The owner's review of the hashset preview (2026-10-10) reaches these packages too, from `T` = `3d0d70ba53`. The
+description, the release notes and the README's top callout no longer start with "PROOF:", and read "...
+standard library; not affiliated ...". The callout's module path, and the "Converted from ..." line's, link the Go
+module's source at its version tag on GitHub. The package tags are `go2cs golang go`, with PROOF dropped (COORD ruling
+C). Against the previous kit's packages, only README.md, VALIDATION.md (its first line, which is the description) and
+the nuspec's description, release notes and tags differ; every assembly, the pdbs, the icon, LICENSE, `index.md` and the
+self-description are byte-identical. `conversion/VALIDATION.md` is the new file, byte for byte as packed, and
+`conversion/README.md` quotes the new description.
 
 ## PATH A: run the rehearsal
 
@@ -76,7 +85,7 @@ if ((go version) -notmatch 'go1\.24\.13 ') { throw 'go is not go1.24.13: check t
 
 $Repo = (git rev-parse --show-toplevel)
 $Work = Join-Path ([IO.Path]::GetTempPath()) 'nugetgo-jwt-int1'
-$T    = 'ac8775c806'
+$T    = '3d0d70ba53'
 $Kit  = 'claude/c2-nugetgo-jwt-5.3.1'
 $Id   = 'nugetgo.github.com.golang-jwt.jwt.v5'
 $PV   = '5.3.1-int.1'
