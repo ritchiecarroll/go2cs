@@ -343,7 +343,9 @@ func TestLicensingMainModuleLicenseWarning(t *testing.T) {
 		t.Fatalf("the application module's metadata moved:\n%s", got)
 	}
 	if !strings.Contains(stderr, "Package license is unspecified for ") ||
-		!strings.Contains(stderr, "the module root's License.md is not packed for the application's own module") ||
+		!strings.Contains(stderr, "the module root's License.md is not referenced by the project") ||
+		!strings.Contains(stderr, "nugetgo-pack.ps1 packs it as the package's license file when it packs this module") ||
+		!strings.Contains(stderr, "for a plain dotnet pack, place it beside the project or pass -license") ||
 		strings.Count(stderr, "WARNING:") != 1 {
 		t.Fatalf("warning does not name the module root's license file:\n%s", stderr)
 	}

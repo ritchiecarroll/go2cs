@@ -998,6 +998,11 @@ func writeThirdPartyModuleSummary(moduleDir string, modulePath string) error {
 
 	var rows []pageRow
 
+	// The declarations each page excluded from both sides of its comparison, by import path: MODULE.md is what a
+	// module pack ships as VALIDATION.md, so it names them rather than leaving them to the pages (the nugetgo
+	// rehearsal, 2026-10-09, gap 7).
+	excludedByPackage := map[string][]string{}
+
 	// The build-tags sentence of every page: one value when the module was read in one run (the usual
 	// case), more when packages were re-read under different tags, none for pages written before pages
 	// stated their tags.
@@ -1021,6 +1026,10 @@ func writeThirdPartyModuleSummary(moduleDir string, modulePath string) error {
 		importPath := ""
 		if match := proofTitlePattern.FindStringSubmatch(strings.ReplaceAll(string(data), "\r", "")); match != nil {
 			importPath = match[1]
+		}
+
+		if excluded := proofExcludedDeclarations(string(data)); len(excluded) > 0 {
+			excludedByPackage[importPath] = excluded
 		}
 
 		if match := proofBuildTagsPattern.FindStringSubmatch(strings.ReplaceAll(string(data), "\r", "")); match != nil {
@@ -1077,9 +1086,49 @@ func writeThirdPartyModuleSummary(moduleDir string, modulePath string) error {
 
 	fmt.Fprintf(&page, "\n**Total: %d matched · %d disclosed** across %d package(s).\n", totalMatched, totalDisclosed, len(rows))
 
+	if len(excludedByPackage) > 0 {
+		count := 0
+		for _, excluded := range excludedByPackage {
+			count += len(excluded)
+		}
+
+		page.WriteString("\n## Excluded declarations\n\n")
+		fmt.Fprintf(&page, "%d declaration(s) were excluded from both sides of the comparison and are not counted above;\n", count)
+		page.WriteString("each package's proof page gives the reason for its own.\n\n")
+
+		for _, row := range rows {
+			for _, entry := range excludedByPackage[row.importPath] {
+				fmt.Fprintf(&page, "- `%s`: %s\n", row.importPath, entry)
+			}
+		}
+	}
+
 	_, err = writeStableDocFile(filepath.Join(moduleDir, thirdPartyModuleSummaryName), page.String())
 
 	return err
+}
+
+// proofExcludedDeclarations reads a proof page's "Excluded declarations" list back: each entry as the page names it,
+// in the page's (sorted) order.
+func proofExcludedDeclarations(page string) []string {
+	_, section, found := strings.Cut(strings.ReplaceAll(page, "\r", ""), "\n## Excluded declarations\n")
+	if !found {
+		return nil
+	}
+
+	var excluded []string
+
+	for _, line := range strings.Split(section, "\n") {
+		if strings.HasPrefix(line, "## ") {
+			break
+		}
+
+		if entry, ok := strings.CutPrefix(line, "- "); ok {
+			excluded = append(excluded, entry)
+		}
+	}
+
+	return excluded
 }
 
 // proofTitlePattern reads a proof page's import path back from its title line.

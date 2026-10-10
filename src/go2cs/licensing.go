@@ -386,7 +386,7 @@ func warnUnspecifiedLicense(projectFile string, sourceDir string, options Option
 	// (thirdPartyModuleLicense); when its root has one, the warning names it instead of implying none.
 	if root != "" && options.mainModuleDir != "" && licenseSamePath(root, options.mainModuleDir) {
 		if name := licenseModuleFile(root); name != "" {
-			showWarning("Package license is unspecified for %s (reported once per module); the module root's %s is not packed for the application's own module unless it is placed beside the project, or pass -license with an SPDX expression before packing.", projectFile, name)
+			showWarning("Package license is unspecified for %s (reported once per module); the module root's %s is not referenced by the project. nugetgo-pack.ps1 packs it as the package's license file when it packs this module; for a plain dotnet pack, place it beside the project or pass -license with an SPDX expression.", projectFile, name)
 			return
 		}
 	}
