@@ -119,7 +119,7 @@ internal class StructTypeTemplate : TemplateBase
 
                 // Constructors
                 {{Constructors}}
-                {{ValueCloneImplementation}}{{GoZeroRegistration}}{{GoZeroConstructionHook}}
+                {{ValueCloneImplementation}}{{GoZeroRegistration}}{{GoZeroConstructionHook}}{{TypeOpsSourceMembers}}
                 // Handle comparisons between struct '{{NonGenericStructName}}' instances
                 {{EqualsMember}}
                 public override bool Equals(object? obj) => obj is {{StructName}} other && Equals(other);
@@ -193,14 +193,33 @@ internal class StructTypeTemplate : TemplateBase
     // listed only when the embedded TYPE itself carries a fixed array, and then the ordinary
     // `copy.<member> = <member>.ΔClone()` line is correct: the assignment lands in the copy's own
     // inline storage, never in the source's.
-    private string ValueCloneBaseList =>
-        (ValueCloneFields.Length > 0, NeedsZeroConstruction) switch
+    private string ValueCloneBaseList
+    {
+        get
         {
-            (true, true) => " : IGoValueClone, global::go.IGoZeroConstructed",
-            (true, false) => " : IGoValueClone",
-            (false, true) => " : global::go.IGoZeroConstructed",
-            _ => ""
-        };
+            List<string> bases = [];
+
+            if (ValueCloneFields.Length > 0)
+                bases.Add("IGoValueClone");
+
+            if (NeedsZeroConstruction)
+                bases.Add("global::go.IGoZeroConstructed");
+
+            if (TypeOpsScope.Wants(StructName))
+                bases.Add("global::go.IGoTypeOpsSource");
+
+            return bases.Count == 0 ? "" : $" : {string.Join(", ", bases)}";
+        }
+    }
+
+    // reflect's operations for this struct (golib's IGoTypeOpsSource; trim stage 3c-2b): a struct whose pointer the
+    // compilation spells (TypeOpsScope) names exactly GoTypeOps<itself>, so golib reaches a value type it knows only at run
+    // time (reflect.New, a canonical nil pointer)
+    // without closing a generic method over it. Never a deeper level: GenTests' GoTypeOpsSourceTests fails on a member that
+    // names anything but the struct itself. A pointer to it is a reference type, whose operations golib's fallback loads
+    // under Native AOT; naming them here per struct grew the package consumer's full-trim executable ~50% (measured).
+    private string TypeOpsSourceMembers => !TypeOpsScope.Wants(StructName) ? "" :
+        $"\r\n{TypeElemIndent}global::go.IGoTypeOps global::go.IGoTypeOpsSource.TypeOps => global::go.GoTypeOps<{StructName}>.Instance;\r\n";
 
     // golib's construction hook (IGoZeroConstructed; trim stage 3b, docs/PLAN-golib-full-trim.md section 9.6): a struct
     // whose constructor builds what `default` skips -- a needy member (IsNeedy) or a directional channel's stamp

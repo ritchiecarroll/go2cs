@@ -660,6 +660,19 @@ internal class InheritedTypeTemplate : TemplateBase
     private string ZeroConstructionInterface => !ZeroConstructed ? "" :
         string.IsNullOrEmpty(ImplementedInterface) && !EmitsValueClone ? " : global::go.IGoZeroConstructed" : ", global::go.IGoZeroConstructed";
 
+    // reflect's operations for this named type (golib's IGoTypeOpsSource; trim stage 3c-2b), on a STRUCT wrapper (a named
+    // slice, map, array, channel, numeric or struct type) whose pointer the compilation spells (TypeOpsScope): exactly
+    // GoTypeOps<itself>. A class wrapper (a named pointer
+    // type) carries none: it is a reference type, whose operations golib's fallback loads under Native AOT, and a pointer's
+    // own source would name a pointer to a pointer, and that level's the next, without bound.
+    private bool TypeOpsSource => ObjectKind == "struct" && TypeOpsScope.Wants(ObjectName);
+
+    private string TypeOpsSourceInterface => !TypeOpsSource ? "" :
+        string.IsNullOrEmpty(ImplementedInterface) && !EmitsValueClone && !ZeroConstructed ? " : global::go.IGoTypeOpsSource" : ", global::go.IGoTypeOpsSource";
+
+    private string TypeOpsSourceMembers => !TypeOpsSource ? "" :
+        $"\r\n\r\n        global::go.IGoTypeOps global::go.IGoTypeOpsSource.TypeOps => global::go.GoTypeOps<{ObjectName}>.Instance;";
+
     // A C# constructor name must not carry the type's generic parameters (e.g. the constructor for
     // a generic named array type `vec<T>` is `vec(...)`, not `vec<T>(...)`). Non-generic types have
     // no '<' so ConstructorName equals ObjectName — emitting byte-identical output.
@@ -675,7 +688,7 @@ internal class InheritedTypeTemplate : TemplateBase
     public override string TemplateBody =>
         $$"""
             {{GoTypeAttributePrefix}}[{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
-            {{Scope}} partial {{ObjectKind}} {{ObjectName}}{{ImplementedInterface}}{{ValueCloneInterface}}{{ZeroConstructionInterface}}
+            {{Scope}} partial {{ObjectKind}} {{ObjectName}}{{ImplementedInterface}}{{ValueCloneInterface}}{{ZeroConstructionInterface}}{{TypeOpsSourceInterface}}
             {
                 // Value of the {{ObjectKind}} '{{ObjectName}}'
                 private {{ReadOnly}}{{ValueFieldType}}{{Nullable}} m_value;
@@ -683,7 +696,7 @@ internal class InheritedTypeTemplate : TemplateBase
 
                 {{MemberScope}} {{ConstructorName}}({{TypeName}} value) => m_value = {{ValueConstructorArgument}};
 
-                public {{ConstructorName}}(NilType _) => m_value = {{NilValueExpression}};{{ParameterlessConstructor}}
+                public {{ConstructorName}}(NilType _) => m_value = {{NilValueExpression}};{{ParameterlessConstructor}}{{TypeOpsSourceMembers}}
 
         {{ValueProperty}}
                 public override string ToString() => {{ToStringImplementation}};
