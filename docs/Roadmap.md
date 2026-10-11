@@ -254,25 +254,24 @@ own dependencies convert. Further modules follow; the
 ## NuGet packages of converted modules
 
 **In short.** A Go module that someone has already converted can arrive as a NuGet package, so your
-conversion restores it and does not convert it again. The first such package is published, and the
-registry that maps Go modules to their packages is live.
+conversion restores it and does not convert it again. Converted modules are published this way today,
+and [nugetgo.net](https://nugetgo.net), the registry that maps Go modules to their packages, lists them.
 
 With `-recurse=nuget`, a converted program references the standard library, the runtime and the
 source generators as published NuGet packages, and the same substitution reaches third-party modules:
 the [nugetgo.net](https://nugetgo.net) community registry maps Go module paths to published NuGet
 packages of their conversions, so a dependency someone has already converted becomes a package restore
-instead of a local transpile. The converter side is built and on by default (see the README's
+instead of a local transpile. The converter side is built and on by default (see
 [Mapping modules to NuGet packages](ConvertingAModule.md#mapping-modules-to-nuget-packages)). The design is
 [`PLAN-nugetgo.md`](PLAN-nugetgo.md).
 
 - **Package IDs:** a converted module publishes as `nugetgo.<dotted module path>`; the `go.` prefix is
   the converted standard library's alone.
-- **Proof packages rehearse first**, to a local feed and NuGet's test gallery, before anything reaches
-  nuget.org.
-- **The first package is published.** [`hashset`](https://github.com/ritchiecarroll/hashset) is on
-  nuget.org as `nugetgo.github.com.ritchiecarroll.hashset`, the registry lists it, and a program that
-  imports it converts with `-recurse=nuget` to a project that restores the package instead of
-  converting the module again. `google/uuid` and `golang-jwt/jwt` follow.
+- **A package rehearses first**, on a local feed, before it reaches nuget.org.
+- **Converted modules are published.** The [nugetgo.net](https://nugetgo.net) registry lists each
+  one, with the Go module and version it was converted from. A program that imports a listed module
+  converts with `-recurse=nuget` to a project that restores the package instead of converting the
+  module again.
 - **The package-ID prefixes are not reserved yet.** The reservation requests are with NuGet, which has
   not decided them.
 - **Packages built from an unsupported Go release are labelled as proofs**, and are rebuilt once the
@@ -464,7 +463,7 @@ something else finishing first.
 
 | When | Planned |
 |:--|:--|
-| Now | macOS validation of the standard library, package by package. The trimming work for Native AOT. Further converted modules as NuGet packages: `uuid` and `jwt` after `hashset`. |
+| Now | macOS validation of the standard library, package by package. The trimming work for Native AOT. Further converted modules as NuGet packages. |
 | Next | At least one more Go 1.24 package release, carrying that work. The performance re-baseline at the last one. |
 | When the project owner closes the Go 1.24 line, no earlier than November 2026 | The Go 1.25 hop. |
 | After the Go 1.25 hop | The .NET 11 measurement stage (.NET 11 ships in November 2026). The Go 1.26 hop, as a separate hop. `timefmt-go` and `gojq`, as their prerequisites land. The generic-methods design for Go 1.27. The decision on how often later hops run. |
