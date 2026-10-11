@@ -1,0 +1,132 @@
+name: Release binaries (prototype)
+
+# PROTOTYPE, launch readiness (the launch plan's decision D3). It builds the converter for six platforms and
+# proves each binary runs on its own platform's runner. It PUBLISHES NOTHING: it has no release step and no
+# write permission, and it runs only when someone starts it by hand. The archives are workflow artifacts,
+# which expire.
+#
+# The converter is pure Go (CGO_ENABLED=0), so one Linux runner cross-compiles all six. The smoke jobs then
+# download each archive on a runner of that platform and run `go2cs -version`, which must exit 0 and name a
+# release.
+#
+# What a real release workflow would add, none of it here: a `push: tags: ['nuget-*']` trigger, a build
+# provenance attestation, a check that go2cs.release equals the tag's version, and a DRAFT GitHub Release
+# holding the archives and SHA256SUMS for the owner to publish.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['claude/r-install-scope']
+    paths: ['.github/workflows/release-binaries.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-binaries-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Cross-compile six platforms
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: src/go2cs/go.mod
+          cache-dependency-path: src/go2cs/go.sum
+
+      - name: Build and archive
+        working-directory: src/go2cs
+        env:
+          CGO_ENABLED: '0'
+          GOTOOLCHAIN: local
+        run: |
+          set -euo pipefail
+          out="$GITHUB_WORKSPACE/dist"
+          mkdir -p "$out"
+          {
+            echo '## Release binaries (prototype)'
+            echo
+            echo "Built by $(go version) at \`${GITHUB_SHA}\`."
+            echo
+            echo '| RID | binary bytes | archive | archive bytes |'
+            echo '|:--|--:|:--|--:|'
+          } >> "$GITHUB_STEP_SUMMARY"
+          while read -r goos goarch rid; do
+            stage="$RUNNER_TEMP/$rid"
+            mkdir -p "$stage"
+            exe=go2cs
+            if [ "$goos" = windows ]; then exe=go2cs.exe; fi
+            GOOS="$goos" GOARCH="$goarch" go build -trimpath -o "$stage/$exe" .
+            cp "$GITHUB_WORKSPACE/src/go2cs/LICENSE" "$GITHUB_WORKSPACE/src/go2cs/LICENSE-EXCEPTION" "$stage/"
+            # Asset names carry no version, so releases/latest/download/<name> stays a stable URL.
+            if [ "$goos" = windows ]; then
+              archive="go2cs-$rid.zip"
+              (cd "$stage" && zip -q -9 "$out/$archive" "$exe" LICENSE LICENSE-EXCEPTION)
+            else
+              archive="go2cs-$rid.tar.gz"
+              tar -C "$stage" -czf "$out/$archive" "$exe" LICENSE LICENSE-EXCEPTION
+            fi
+            echo "| \`$rid\` | $(stat -c %s "$stage/$exe") | \`$archive\` | $(stat -c %s "$out/$archive") |" >> "$GITHUB_STEP_SUMMARY"
+          done <<'TARGETS'
+          windows amd64 win-x64
+          windows arm64 win-arm64
+          linux amd64 linux-x64
+          linux arm64 linux-arm64
+          darwin amd64 osx-x64
+          darwin arm64 osx-arm64
+          TARGETS
+          (cd "$out" && sha256sum go2cs-* > SHA256SUMS && cat SHA256SUMS)
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: release-binaries
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  smoke:
+    name: go2cs -version on ${{ matrix.rid }}
+    needs: build
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { rid: win-x64,     runner: windows-latest }
+          - { rid: win-arm64,   runner: windows-11-arm }
+          - { rid: linux-x64,   runner: ubuntu-latest }
+          - { rid: linux-arm64, runner: ubuntu-24.04-arm }
+          - { rid: osx-x64,     runner: macos-15-intel }
+          - { rid: osx-arm64,   runner: macos-15 }
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          name: release-binaries
+          path: dist
+
+      - name: Verify the checksum, unpack, and run go2cs -version
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $rid = '${{ matrix.rid }}'
+          $archive = Get-ChildItem dist -Filter "go2cs-$rid.*" | Select-Object -First 1
+          if (-not $archive) { throw "no archive for $rid in the artifact" }
+          $want = (Get-Content dist/SHA256SUMS | Where-Object { $_ -match [regex]::Escape($archive.Name) }) -split '\s+' | Select-Object -First 1
+          $got = (Get-FileHash $archive.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($want -ne $got) { throw "checksum mismatch for $($archive.Name): want $want, got $got" }
+          New-Item -ItemType Directory -Force unpacked | Out-Null
+          if ($archive.Extension -eq '.zip') { Expand-Archive $archive.FullName -DestinationPath unpacked }
+          else { tar -xzf $archive.FullName -C unpacked; if ($LASTEXITCODE -ne 0) { throw "tar exited $LASTEXITCODE" } }
+          $exe = Join-Path unpacked ($IsWindows ? 'go2cs.exe' : 'go2cs')
+          $report = & $exe -version
+          $code = $LASTEXITCODE
+          $report | ForEach-Object { Write-Host $_ }
+          if ($code -ne 0) { throw "go2cs -version exited $code on $rid" }
+          $release = ($report | Where-Object { $_ -like 'go2cs.release=*' }) -replace '^go2cs\.release=', ''
+          if (-not $release -or $release -eq 'unknown') { throw "go2cs -version named no release on $rid" }
+          $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture
+          Add-Content $env:GITHUB_STEP_SUMMARY "``$rid`` on ``${{ matrix.runner }}`` ($arch): ``go2cs -version`` exit 0, release ``$release``, archive $($archive.Length) bytes, checksum verified."
