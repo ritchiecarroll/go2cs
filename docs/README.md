@@ -74,16 +74,16 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
 
 ## Explore
 
-* See Go and its generated C# side by side: [Tour of go2cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/tour/README.md)
-* Browse real converted code: [the converted Go standard library](https://github.com/ritchiecarroll/go2cs/tree/master/src/core)
-* Learn how each Go construct maps to C#: [Conversion Strategies](ConversionStrategies.md)
-* See what the converter does and how much of Go it covers: [Features](Features.md)
-* Call converted Go from your own C#: [Consuming converted Go from C#](ConsumingGoFromCSharp.md)
-* Find Go modules already converted and published as NuGet packages: [nugetgo.net](https://nugetgo.net)
-* Check which standard-library packages pass Go's own tests: [Validated Test Packages](ValidatedTestPackages.md)
-* Know where it will fail or fight you before you start: [Limitations](Limitations.md) and [Known issues](KnownIssues.md)
-* See where the project stands and what comes next: [Status](#status) and the [Roadmap](Roadmap.md)
-* Build the converter yourself, or work on it: [Building go2cs from source](BuildingGo2cs.md)
+* Go and C# side by side: [Tour of go2cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/tour/README.md)
+* Real converted code: [the Go standard library](https://github.com/ritchiecarroll/go2cs/tree/master/src/core)
+* How each Go construct maps to C#: [Conversion Strategies](ConversionStrategies.md)
+* What the converter does: [Features](Features.md)
+* Call converted Go from C#: [Consuming converted Go](ConsumingGoFromCSharp.md)
+* Go modules on NuGet: [nugetgo.net](https://nugetgo.net)
+* Packages passing Go's own tests: [Validated Test Packages](ValidatedTestPackages.md)
+* Before you start: [Limitations](Limitations.md) and [Known issues](KnownIssues.md)
+* Where it stands: [Status](#status) and the [Roadmap](Roadmap.md)
+* Build it yourself: [Building go2cs from source](BuildingGo2cs.md)
 
 [![Tour of go2cs showing Go and generated C# side by side](images/tour-of-go2cs.png)](images/tour-of-go2cs.png)
 
@@ -165,22 +165,18 @@ NuGet packages. Wondering which Go modules make good conversions? The
 
 ## Frequently asked questions
 
-* **Why convert Go to C#?** [To use Go code from inside .NET](FAQ.md#why-convert-go-to-c), without a
-  second process, a native wrapper or a hand rewrite.
-* **Is converted code slower than Go?** [Usually, and sometimes not](FAQ.md#is-converted-code-slower-than-go).
-  The measurements are published.
-* **Does it really behave like Go?** [It is measured against Go's own tests](FAQ.md#does-converted-code-really-behave-like-go),
-  and every difference is disclosed by name.
-* **What does not convert?** [cgo, hand-written assembly, and code that needs a newer Go](FAQ.md#what-does-not-convert).
-* **What does the generated C# look like?** [Like the Go it came from](FAQ.md#what-does-the-generated-c-look-like).
-  [See real examples](#real-standard-library-conversions-side-by-side).
-* **How do I call a converted Go package from C#?** [Reference it like any other library](FAQ.md#how-do-i-call-a-converted-go-package-from-c).
-* **Why not call Go through a native library instead?** [You can, and here is the trade](FAQ.md#why-not-call-go-through-a-native-library-instead).
-* **Can it convert a module with third-party dependencies?** [Yes, though not every module converts cleanly yet](FAQ.md#can-it-convert-a-module-with-third-party-dependencies).
-* **Does it work with Native AOT?** [It runs, at a cost in publish time and size](FAQ.md#does-it-work-with-native-aot).
-* **What license covers the code go2cs generates?** [Not the converter's](FAQ.md#what-license-covers-the-code-go2cs-generates).
+* **Why convert Go to C#?** [To use Go code inside .NET](FAQ.md#why-convert-go-to-c).
+* **Is it slower than Go?** [Usually, and sometimes not](FAQ.md#is-converted-code-slower-than-go).
+* **Does it behave like Go?** [Measured against Go's own tests](FAQ.md#does-converted-code-really-behave-like-go).
+* **What does not convert?** [cgo, assembly, newer Go](FAQ.md#what-does-not-convert).
+* **What does the C# look like?** [Like the Go](FAQ.md#what-does-the-generated-c-look-like). [See examples](#real-standard-library-conversions-side-by-side).
+* **How do I call it from C#?** [Like any other library](FAQ.md#how-do-i-call-a-converted-go-package-from-c).
+* **Why not a native library?** [You can; here is the trade](FAQ.md#why-not-call-go-through-a-native-library-instead).
+* **Third-party dependencies?** [Yes, not all convert cleanly yet](FAQ.md#can-it-convert-a-module-with-third-party-dependencies).
+* **Does it work with Native AOT?** [Yes, at a cost in time and size](FAQ.md#does-it-work-with-native-aot).
+* **What license covers the output?** [Not the converter's](FAQ.md#what-license-covers-the-code-go2cs-generates).
 
-[More questions](FAQ.md): versions, platforms, run-time dependencies, and C# to Go.
+[More questions](FAQ.md): versions, platforms, dependencies, C# to Go.
 
 ![GopherDotNetBotFrisbee](images/GopherDotNetBotFrisbee.png)
 
