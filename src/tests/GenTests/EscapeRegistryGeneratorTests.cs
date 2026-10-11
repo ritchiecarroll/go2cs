@@ -123,42 +123,71 @@ public class EscapeRegistryGeneratorTests
     [TestMethod]
     public void AContainerTheCompilationCannotNameIsNotRegistered()
     {
-        CSharpParseOptions options = new(LanguageVersion.Preview);
-        MetadataReference[] platform = [.. References()];
-
-        MetadataReference Emit(string name, string source, params MetadataReference[] references)
-        {
-            CSharpCompilation library = CSharpCompilation.Create(name,
-                [CSharpSyntaxTree.ParseText(source, options), CSharpSyntaxTree.ParseText(TemplateUsings, options)],
-                [.. platform, .. references], new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
-
-            using System.IO.MemoryStream image = new();
-            Microsoft.CodeAnalysis.Emit.EmitResult emitted = library.Emit(image);
-            Assert.IsTrue(emitted.Success, $"{name} compiles: " + string.Join("; ", emitted.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).Take(3)));
-
-            return MetadataReference.CreateFromImage(image.ToArray());
-        }
-
         MetadataReference c = Emit("cpkg", "namespace go; [GoPackage(\"cpkg\")] public static partial class cpkg_package { public partial struct Deep { public nint x; } }");
         MetadataReference b = Emit("bpkg", "namespace go; [GoPackage(\"bpkg\")] public static partial class bpkg_package { public partial struct Holder { public slice<cpkg_package.Deep> deep; public slice<nint> nums; } }", c);
 
         // A references B only, as a tests project with DisableTransitiveProjectReferences does.
-        CSharpCompilation a = CSharpCompilation.Create("apkg",
-            [CSharpSyntaxTree.ParseText("namespace go; [GoPackage(\"apkg\")] public static partial class apkg_package { internal static object Use() => default(bpkg_package.Holder); }", options, path: @"C:\go2cs\src\core\apkg\apkg.cs"),
+        (string[] registered, Diagnostic[] errors) = RunOn("apkg", "internal static object Use() => default(bpkg_package.Holder);", b);
+
+        Assert.AreEqual(0, errors.Length, "the registry compiles: " + string.Join("; ", errors.Take(3)));
+        Assert.IsFalse(registered.Any(name => name.Contains("cpkg_package")), "a container over C's type, which A cannot name, is not: " + string.Join(", ", registered));
+        Assert.IsFalse(registered.Contains("global::go.slice<nint>"), "and B's fields are not walked at all (see AForeignStructsFieldsAreNotWalked)");
+    }
+
+    // RELEASE BLOCKER for 1.24.13.6 (2026-10-11): walking a REFERENCED assembly's struct fields made a platform-neutral
+    // package's registry depend on the OS flavor of what it references -- go.runtime.debug and
+    // go.internal.coverage.decodemeta registered go.slice<go.syscall_package.WSABuf>, a type only syscall's WINDOWS flavor
+    // has -- so the neutral assembly differed per OS (and one shipped windows-only metadata to every platform). The walk
+    // descends into a struct's fields only when the compilation defines the struct: a package's own sources compile on
+    // every OS it ships for, so every type its registry spells exists in every flavor. P stands in for a per-OS package
+    // (syscall): its Holder's field is a container over a type only P has. A container A spells through its OWN field
+    // (slice<P.Holder>) stays registered; one reachable only inside P's struct does not (golib's fallback answers it:
+    // trim stage 3d's boundary under Native AOT, never a wrong answer).
+    [TestMethod]
+    public void AForeignStructsFieldsAreNotWalked()
+    {
+        MetadataReference p = Emit("ppkg", "namespace go; [GoPackage(\"ppkg\")] public static partial class ppkg_package { public partial struct OnlyHere { public nint x; } public partial struct Holder { public slice<ppkg_package.OnlyHere> only; } }");
+
+        (string[] registered, Diagnostic[] errors) = RunOn("apkg",
+            "partial struct Mine { internal slice<ppkg_package.Holder> holders; } internal static object Use() => default(ppkg_package.Holder); internal static object UseMine() => default(Mine);", p);
+
+        Assert.AreEqual(0, errors.Length, "the registry compiles: " + string.Join("; ", errors.Take(3)));
+        CollectionAssert.Contains(registered, "global::go.slice<global::go.ppkg_package.Holder>", "a container A reaches through its own struct's field is registered");
+        Assert.IsFalse(registered.Any(name => name.Contains("OnlyHere")), "a container reachable only inside the foreign struct is not: " + string.Join(", ", registered));
+    }
+
+    private static MetadataReference Emit(string name, string source, params MetadataReference[] references)
+    {
+        CSharpParseOptions options = new(LanguageVersion.Preview);
+
+        CSharpCompilation library = CSharpCompilation.Create(name,
+            [CSharpSyntaxTree.ParseText(source, options), CSharpSyntaxTree.ParseText(TemplateUsings, options)],
+            [.. References(), .. references], new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+
+        using System.IO.MemoryStream image = new();
+        Microsoft.CodeAnalysis.Emit.EmitResult emitted = library.Emit(image);
+        Assert.IsTrue(emitted.Success, $"{name} compiles: " + string.Join("; ", emitted.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).Take(3)));
+
+        return MetadataReference.CreateFromImage(image.ToArray());
+    }
+
+    // Runs the generator over a package class named <name>_package holding `members`, referencing `references` only.
+    private static (string[] registered, Diagnostic[] errors) RunOn(string name, string members, params MetadataReference[] references)
+    {
+        CSharpParseOptions options = new(LanguageVersion.Preview);
+
+        CSharpCompilation compilation = CSharpCompilation.Create(name,
+            [CSharpSyntaxTree.ParseText($"namespace go; [GoPackage(\"{name}\")] public static partial class {name}_package {{ {members} }}", options, path: $@"C:\go2cs\src\core\{name}\{name}.cs"),
              CSharpSyntaxTree.ParseText(TemplateUsings, options)],
-            [.. platform, b], new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+            [.. References(), .. references], new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
 
         CSharpGeneratorDriver.Create(new EscapeRegistryGenerator()).WithUpdatedParseOptions(options)
-            .RunGeneratorsAndUpdateCompilation(a, out Compilation output, out _);
+            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out _);
 
         string[] registered = output.SyntaxTrees.Select(tree => tree.ToString())
             .SelectMany(source => Regex.Matches(source, @"global::go\.GoTypeOps\.Register\(global::go\.GoTypeOps<(.+)>\.Instance\);").Select(match => match.Groups[1].Value))
             .ToArray();
 
-        Diagnostic[] errors = output.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray();
-        Assert.AreEqual(0, errors.Length, "the registry compiles: " + string.Join("; ", errors.Take(3)));
-
-        CollectionAssert.Contains(registered, "global::go.slice<nint>", "what A can name through B's field is registered");
-        Assert.IsFalse(registered.Any(name => name.Contains("cpkg_package")), "a container over C's type, which A cannot name, is not: " + string.Join(", ", registered));
+        return (registered, output.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray());
     }
 }

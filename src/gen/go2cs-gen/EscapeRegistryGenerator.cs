@@ -157,8 +157,18 @@ public class EscapeRegistryGenerator : ISourceGenerator
             Fields(compilation, package, named, registered, visited, depth);
     }
 
+    // The walk descends into a struct's fields only when THIS compilation defines the struct. A package's own sources
+    // compile on every OS it ships for, so every type its registry spells then exists in every flavor and the registry is
+    // OS-invariant by construction. Walking a REFERENCED assembly's fields made a platform-neutral package depend on the
+    // flavor of what it references (1.24.13.6's release rehearsal, 2026-10-11: go.runtime.debug and
+    // go.internal.coverage.decodemeta registered go.slice<go.syscall_package.WSABuf>, a type only syscall's windows flavor
+    // has), and was also the only route to a type the compilation cannot name (TRAIN T3). A container reachable only
+    // inside a foreign struct falls to golib's fallback: trim stage 3d's boundary under Native AOT, never a wrong answer.
     private static void Fields(Compilation compilation, INamedTypeSymbol package, INamedTypeSymbol type, HashSet<ITypeSymbol> registered, HashSet<ITypeSymbol> visited, int depth)
     {
+        if (!SymbolEqualityComparer.Default.Equals(type.ContainingAssembly, compilation.Assembly))
+            return;
+
         foreach (IFieldSymbol field in type.GetMembers().OfType<IFieldSymbol>().Where(field => !field.IsStatic && !field.IsConst))
             Reach(compilation, package, field.Type, registered, visited, depth + 1);
     }
