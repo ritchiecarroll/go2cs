@@ -62,7 +62,7 @@ Two more that the brief did not list, found while drafting:
 | E | **The Go 1.26 hop**, H0 to release, by the runbook | the final 1.24.13.N shipped (the hop plan's O1) | seven lanes and COORD, as the [hop plan](https://github.com/ritchiecarroll/go2cs/blob/claude/i9-plan-hop-go126/docs/PLAN-hop-go126.md) section 7 proposes | 85 to 145 lane-days; 3.5 to 5 calendar weeks from H1 |
 | F | **Wide-launch readiness** (section 3, the items that gate the wide launch) | D's findings; parts need E | C1 (macOS), R, COORD | 8 to 16 lane-days |
 | G | **The wide launch** | E published, F done, a week of soak | the owner posts; COORD drafts replies | 1 week of presence |
-| H | **The Go 1.27 hop** (generic methods, a design-sized feature) | E; its design drafted during E's H10 | to be planned | not sized here |
+| H | **The Go 1.27 hop** (generic methods, a design-sized feature) | E; its design drafted during E's H10 | to be planned | 60 to 100 lane-days, 11 to 21 of them language work; landing about December 2026 to January 2027 if it follows E's close directly ([measured 2026-10-11](https://github.com/ritchiecarroll/go2cs/blob/claude/i9-go125-recon/docs/phase4/RECON-go125-hop.md), section X.7; an estimate) |
 
 **What runs in parallel, and what collides:**
 
@@ -163,6 +163,14 @@ launch in late January is a launch on a release with weeks of support left, and 
 back. So the wide launch has a real last date on 1.26, about the end of January. If the hop's publish
 slips past mid-December, the choice is January on 1.26 or waiting for the 1.27 hop (decision D7).
 
+**The 1.27 hop changes that choice.** It is measured at 60 to 100 lane-days and could land between
+December 2026 and January 2027 if it starts as the 1.26 hop closes (an estimate). By the 1.26 hop's own
+ratio of lane-days to calendar time, that is roughly two and a half to three and a half weeks. So there are two honest shapes for the wide launch:
+**on 1.26 in December**, the earliest date, with the 1.27 release following as the launch's first piece
+of news; or **on 1.27 in late January or February**, later, but on the newest Go release with a full
+support window ahead and generic methods converted. A launch on 1.26 in late January is the weakest
+of the three and is the one to avoid.
+
 **Assumptions.** Seven lanes and COORD stay available. The owner is available for the cold test in the
 week of Oct 12 and for the PIN on release days. No converter defect from the soft launch needs its own
 release. The Go 1.26 target does not move mid-hop.
@@ -245,8 +253,9 @@ minutes, and names the edges. Figures in square brackets are read from the roste
 - **D5. Size the ASCII glyph spellings now**, and decide after the soft launch from what readers raise.
 - **D6. How to say how the project is built.** The wording is yours. The plan recommends saying it first,
   in the FAQ and in each post's first comment, in two sentences.
-- **D7. The wide launch if the hop publishes after about Dec 10.** December 15 to 17, January 12 to 28, or
-  after the 1.27 hop. January is the last window in which 1.26 is comfortably supported.
+- **D7. Which Go release the wide launch stands on.** On 1.26 in December (Dec 1 to 17), if the hop
+  publishes by about Dec 4; otherwise on 1.27, in late January or February, once that hop lands. The
+  plan recommends against a wide launch on 1.26 in late January, weeks before 1.26 leaves support.
 - **D8. Accounts.** Hacker News and Reddit favor accounts with history, and Lobsters needs an invitation.
   Which of your accounts post, and is a Lobsters invitation in hand?
 - **D9. The expectation text.** How quick a reply do you want to promise? The draft says best-effort,
