@@ -131,7 +131,7 @@ function New-NugetgoGeneratedBlock {
     $blocks = New-Object System.Collections.Generic.List[string]
     $blocks.Add("> $callout")
     $blocks.Add("$tests $source\`n$module $release")
-    $blocks.Add("Converted from $moduleLink source; licensed under $LicenseSpdx — see [$LicenseName]($repo/blob/$RepositoryTag/$LicenseName).")
+    $blocks.Add("Converted from $moduleLink source; licensed under $LicenseSpdx $([char]0x2014) see [$LicenseName]($repo/blob/$RepositoryTag/$LicenseName).")
     if ($DefaultIcon) { $blocks.Add($script:ArtworkLine) }
     $blocks -join "`n`n"
 }

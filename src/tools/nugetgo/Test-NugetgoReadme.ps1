@@ -41,14 +41,14 @@ Write-Host 'the proof totals'
 $a = 'sha256-' + ('a' * 64)
 $b = 'sha256-' + ('b' * 64)
 $summary = @"
-# ``example.com/mod`` — module validation summary
+# ``example.com/mod`` $([char]0x2014) module validation summary
 
 | Package | Matched | Disclosed | Input digest | Proof |
 |:--|--:|--:|:--|:--|
 | ``example.com/mod`` | 37 | 0 | ``$a`` | [index.md](index.md) |
 | ``example.com/mod/sub`` | 3 | 1 | ``$b`` | [sub.md](sub.md) |
 
-**Total: 40 matched · 1 disclosed** across 2 package(s).
+**Total: 40 matched $([char]0x00B7) 1 disclosed** across 2 package(s).
 "@
 $t = Get-NugetgoProofTotals -ModuleSummary $summary
 Check 'two rows sum' ($t.Matched -eq 40 -and $t.Disclosed -eq 1 -and $t.Packages -eq 2) "read $($t.Matched)/$($t.Disclosed)/$($t.Packages)"
@@ -102,7 +102,7 @@ Check 'the Go module badge links pkg.go.dev at the module version' (
 Check 'the go2cs badge links the release it was built on' (
     $readme.Contains('[![go2cs](https://img.shields.io/badge/go2cs-@1.24.13.5-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.5)')) 'no such badge'
 Check 'the synopsis is its own paragraph, escaped' ($lines -ccontains 'Package mod does \*one\* thing.') 'no synopsis line'
-Check 'the license line links the module source too' ($lines -ccontains "Converted from [example.com/mod]($modSource) source; licensed under MIT — see [LICENSE]($repo/blob/nuget-1.2.3/LICENSE).") 'no license line'
+Check 'the license line links the module source too' ($lines -ccontains "Converted from [example.com/mod]($modSource) source; licensed under MIT $([char]0x2014) see [LICENSE]($repo/blob/nuget-1.2.3/LICENSE).") 'no license line'
 Check 'the go2cs icon brings its artwork line' ($readme.Contains('Artwork licensed under Creative Commons Attribution 3.0')) 'no artwork line'
 Check 'no inline code anywhere' (-not $readme.Contains('`')) 'a backtick'
 Check 'no link names HEAD (COORD ruling 2026-10-10: links name the conversion tag)' ($readme -notmatch '/(blob|tree)/HEAD\b') 'a HEAD link'
@@ -201,7 +201,7 @@ Write-Host 'the README guard'
 $hashsetPage = @"
 > PROOF: unofficial go2cs C# conversion of github.com/ritchiecarroll/hashset v1.0.0.
 
-# ``github.com/ritchiecarroll/hashset`` — module validation summary
+# ``github.com/ritchiecarroll/hashset`` $([char]0x2014) module validation summary
 
 | Package | Matched | Disclosed | Input digest | Proof |
 |:--|--:|--:|:--|:--|
@@ -310,5 +310,5 @@ foreach ($case in @(
     else { Check "$($case[0]) is refused" (@($reasons | Where-Object { $_.Contains($case[4]) }).Count -gt 0) "reasons [$($reasons -join '; ')]" }
 }
 
-Write-Host "$($ran - $failed)/$ran passed"
+Write-Host "ran $ran, failed $failed"
 exit $failed
