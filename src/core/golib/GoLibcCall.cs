@@ -125,6 +125,42 @@ public static unsafe class GoLibcCall
         return r;
     }
 
+    /// <summary>
+    /// One C call taking five pointer-sized integer arguments and one <see cref="double"/>, returning one
+    /// pointer-sized value and testing nothing: Go's <c>runtime·syscall_x509</c>, the entry
+    /// <c>crypto/x509/internal/macos</c> calls CoreFoundation and Security.framework through.
+    /// </summary>
+    /// <remarks>
+    /// The double travels in the first floating-point argument register and the integers in the first five
+    /// integer registers, which is where both C ABIs put them for a non-variadic callee and where Go's entry
+    /// puts them (runtime/sys_darwin_arm64.s: <c>FMOVD 48(R0), F0</c> beside <c>R0</c>-<c>R4</c>;
+    /// sys_darwin_amd64.s: <c>X0</c> beside <c>DI</c>-<c>R8</c>). Every function crypto/x509 calls this way
+    /// is non-variadic, so Apple silicon's variadic stack rule (<see cref="VariadicStackSlot"/>) does not
+    /// apply, and like Go's entry it reads no errno: the callers test the result themselves.
+    /// <para>
+    /// The macos wrappers pass out-parameters as <c>unsafe.Pointer(&amp;local)</c>, which reaches here as a
+    /// managed-pointer token; those take the same marshal the libc funnel does (<see cref="Call"/>), so the
+    /// callee writes a Go-layout native copy that is decoded back into the box after the call.
+    /// </para>
+    /// </remarks>
+    public static nuint CallFiveAndDouble(nint fn, nuint a1, nuint a2, nuint a3, nuint a4, nuint a5, double f1)
+    {
+        ReadOnlySpan<nuint> args = [a1, a2, a3, a4, a5];
+
+        return NativeStructMarshal.AnyToken(args) ?
+            NativeStructMarshal.CallLibcWithDouble(fn, args, f1) :
+            CallFiveAndDoubleUnmarshalled(fn, args, f1);
+    }
+
+    /// <summary><see cref="CallFiveAndDouble"/> without the token marshal: the arguments reach the callee as given.</summary>
+    internal static nuint CallFiveAndDoubleUnmarshalled(nint fn, ReadOnlySpan<nuint> args, double f1)
+    {
+        if (fn == 0)
+            throw new ArgumentException("go2cs: native call through a null function pointer — the address was never resolved", nameof(fn));
+
+        return ((delegate* unmanaged[Cdecl]<nuint, nuint, nuint, nuint, nuint, double, nuint>)fn)(args[0], args[1], args[2], args[3], args[4], f1);
+    }
+
     // Apple silicon only: x86-64 passes a variadic callee's arguments in registers, so nothing moves there,
     // and linux is untouched.
     private static readonly bool s_darwinArm64 = OperatingSystem.IsMacOS() && RuntimeInformation.ProcessArchitecture == Architecture.Arm64;

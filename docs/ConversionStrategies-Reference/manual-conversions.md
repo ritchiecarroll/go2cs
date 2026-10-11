@@ -1457,6 +1457,23 @@ and because the section is rewritten from what the current run bound, a driver t
 not merely skip the records — it would EMPTY a section the `-stdlib` emission had populated.
 `TestBothDriversCollectCgoDynamicImports` pins that.
 
+**The caller that `crypto/x509/internal/macos` was missing.** A resolved address only matters once
+something calls it. `syscall` and `internal/syscall/unix` call theirs through the libc funnel. The 28
+`x509_<sym>` records are called through `macOS.syscall`, which is Go's `runtime·syscall_x509`. Go
+pushes that function into the package by `//go:linkname` and writes its body in
+`runtime/sys_darwin_{amd64,arm64}.s`: one call to `fn` with five pointer-sized integers and one
+`float64` (only `CFDateCreate` uses the float), returning one word and reading no errno. The push
+never reached the converted package, so until 2026-10-11 the declaration kept the
+`PartialStubGenerator`'s throwing body, and `Certificate.Verify` with system roots threw
+`NotImplementedException` on both mac chips. `macos/darwin/corefoundation_impl.cs` now supplies the
+body as a forward to golib's `GoLibcCall.CallFiveAndDouble`. That method puts the double in the first
+floating-point register, where Go's entry puts it, and sends the wrappers' `unsafe.Pointer(&local)`
+out-parameters through `NativeStructMarshal`, the same path the libc funnel's arguments take
+(`CallLibcWithDouble` beside `CallLibc`). The framework binaries need no special handling, because
+`GoCgoDynamicImports` loads whatever absolute path a record names. The `X509SystemVerify` behavioral
+test guards the result on every OS: a self-signed leaf must fail with `UnknownAuthorityError`, and Go's
+own `verify_test.go` public chain must verify against the system store at that fixture's fixed time.
+
 ## `internal/concurrent.HashTrieMap` — a managed map where Go seeds itself from `MapType().Hasher`
 
 > **At Go 1.24.13 (dated amendment; the section below is the Go 1.23 surface it was written against).**
