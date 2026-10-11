@@ -71,6 +71,21 @@ same way, and the first converted module is published as a NuGet package.
 [Validated Test Packages](ValidatedTestPackages.md), the validation roster, carries the current state
 of the standard library, and [Validated Modules](ValidatedModules.md) that of third-party modules.
 
+**What that rests on.** The converter is guarded by hundreds of Go-versus-C# behavioral test projects.
+Each one is transpiled, compiled and compared against a committed expected output, and each runnable
+one is executed with its output compared against Go's. The whole Go standard library compiles cleanly
+as .NET assemblies. It reproduces Go built with `-tags purego`: a managed runtime cannot execute Go's
+hand-written assembly, so the portable pure-Go variants of the assembly-backed crypto and hash
+functions are the faithful target
+([Conversion Strategies](ConversionStrategies.md#the-standard-library-reproduces-go--tags-purego)).
+Compiling is not the same as running correctly, which is what Phase 4 below is for.
+<!-- "hundreds" (697 at the 2026-09-26 count) counted at master db1bd885a2: 697 directories under src/tests/Behavioral
+     carry a committed .cs.target golden; the two harness directories (BehavioralRunner, BehavioralTests)
+     carry none and are not counted. -->
+<!-- Moved here from the README's Status section. The prose quotes no counts. They were 225 of 225 and 225 of 230 on 2026-10-01 at master
+     c2591d5b95, read from the Phase 4 progress header of docs/ValidatedTestPackages.md, which carries
+     the current figures. -->
+
 ## Phase 4: validation against Go's own tests
 
 **In short.** Phase 4 checks the converted standard library against Go's own tests, package by package,
@@ -239,25 +254,24 @@ own dependencies convert. Further modules follow; the
 ## NuGet packages of converted modules
 
 **In short.** A Go module that someone has already converted can arrive as a NuGet package, so your
-conversion restores it and does not convert it again. The first such package is published, and the
-registry that maps Go modules to their packages is live.
+conversion restores it and does not convert it again. Converted modules are published this way today,
+and [nugetgo.net](https://nugetgo.net), the registry that maps Go modules to their packages, lists them.
 
 With `-recurse=nuget`, a converted program references the standard library, the runtime and the
 source generators as published NuGet packages, and the same substitution reaches third-party modules:
 the [nugetgo.net](https://nugetgo.net) community registry maps Go module paths to published NuGet
 packages of their conversions, so a dependency someone has already converted becomes a package restore
-instead of a local transpile. The converter side is built and on by default (see the README's
-[Mapping modules to NuGet packages](README.md#mapping-modules-to-nuget-packages)). The design is
+instead of a local transpile. The converter side is built and on by default (see
+[Mapping modules to NuGet packages](ConvertingAModule.md#mapping-modules-to-nuget-packages)). The design is
 [`PLAN-nugetgo.md`](PLAN-nugetgo.md).
 
 - **Package IDs:** a converted module publishes as `nugetgo.<dotted module path>`; the `go.` prefix is
   the converted standard library's alone.
-- **Proof packages rehearse first**, to a local feed and NuGet's test gallery, before anything reaches
-  nuget.org.
-- **The first package is published.** [`hashset`](https://github.com/ritchiecarroll/hashset) is on
-  nuget.org as `nugetgo.github.com.ritchiecarroll.hashset`, the registry lists it, and a program that
-  imports it converts with `-recurse=nuget` to a project that restores the package instead of
-  converting the module again. `google/uuid` and `golang-jwt/jwt` follow.
+- **A package rehearses first**, on a local feed, before it reaches nuget.org.
+- **Converted modules are published.** The [nugetgo.net](https://nugetgo.net) registry lists each
+  one, with the Go module and version it was converted from. A program that imports a listed module
+  converts with `-recurse=nuget` to a project that restores the package instead of converting the
+  module again.
 - **The package-ID prefixes are not reserved yet.** The reservation requests are with NuGet, which has
   not decided them.
 - **Packages built from an unsupported Go release are labelled as proofs**, and are rebuilt once the
@@ -417,6 +431,12 @@ standard-library reconvert, and re-runs the performance suite.
 **Not pursued:** `for range string(x)`, which has no standard-library sites; and `m[string(x)]` map
 keys, where a zero-allocation lookup would need a custom comparer that slows every `@string`-keyed map.
 
+## IDE mode (an experiment)
+
+A gated experiment in writing Go in an editor and running and debugging it as .NET, with the debugger
+showing Go values the way a Go developer expects. Its feasibility is tested first, and nothing in it is
+a commitment yet. The plan: [IDE mode](PLAN-ide-mode.md).
+
 ## Open converter items
 
 **In short.** Known, smaller gaps in the converter, none of them scheduled. The validated standard
@@ -443,7 +463,7 @@ something else finishing first.
 
 | When | Planned |
 |:--|:--|
-| Now | macOS validation of the standard library, package by package. The trimming work for Native AOT. Further converted modules as NuGet packages: `uuid` and `jwt` after `hashset`. |
+| Now | macOS validation of the standard library, package by package. The trimming work for Native AOT. Further converted modules as NuGet packages. |
 | Next | At least one more Go 1.24 package release, carrying that work. The performance re-baseline at the last one. |
 | When the project owner closes the Go 1.24 line, no earlier than November 2026 | The Go 1.25 hop. |
 | After the Go 1.25 hop | The .NET 11 measurement stage (.NET 11 ships in November 2026). The Go 1.26 hop, as a separate hop. `timefmt-go` and `gojq`, as their prerequisites land. The generic-methods design for Go 1.27. The decision on how often later hops run. |

@@ -2,7 +2,7 @@
 
 ![go2cs](images/go2cs-small.png)
 
-> The story behind the [2026-07-10 milestone](README.md#milestones) row — the day the entire Go
+> The story behind the [2026-07-10 milestone](RoadmapHistory.md#milestones) row — the day the entire Go
 > standard library first compiled clean in C#.
 
 ---
