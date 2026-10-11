@@ -291,6 +291,19 @@ function Resolve-NugetgoPackageIcon {
     & $none 'no icon: the conversion carries no go2cs.png beside its projects, and no -Icon was given'
 }
 
+# The closing section of a THIRD-PARTY conversion repository's root README (owner item, COORD ruling 2026-10-11).
+function New-NugetgoMaintainersSection {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$ModulePath, [string]$Maintainer, [switch]$Author)
+    ''
+}
+
+# The reasons a conversion repository's root README is refused (COORD ruling 2026-10-11).
+function Test-NugetgoConversionReadme([string]$Text, [string]$ModulePath, [switch]$Author) {
+    @()
+}
+
 Export-ModuleMember -Function ConvertTo-NugetgoShieldsText, ConvertTo-NugetgoMarkdownText, Get-NugetgoProofTotals, Test-NugetgoSpdx,
     Get-NugetgoModuleSourceUrl, New-NugetgoGeneratedBlock, New-NugetgoPackageReadme, Test-NugetgoReadmeFence, Merge-NugetgoReadme,
-    Select-NugetgoIconSource, Test-NugetgoReadme, Resolve-NugetgoPackageIcon
+    Select-NugetgoIconSource, Test-NugetgoReadme, Resolve-NugetgoPackageIcon, New-NugetgoMaintainersSection,
+    Test-NugetgoConversionReadme
