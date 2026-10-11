@@ -4,9 +4,38 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
+	"regexp"
 	"strings"
 	"testing"
 )
+
+// The Tour install is pinned in three places; they move together with the corpus's Go release.
+func TestTourInstallPinsAgree(t *testing.T) {
+	pin := tourModule[strings.Index(tourModule, "@")+1:]
+	if pin == "latest" {
+		t.Fatalf("tourModule is %q: @latest follows x/website onto a newer Go than the converter's", tourModule)
+	}
+	for file, pattern := range map[string]string{
+		"scripts/start.ps1": `(?m)^\$TourVersion = "([^"]+)"`,
+		"scripts/start.sh":  `(?m)^tour_version=(\S+)`,
+	} {
+		text, err := os.ReadFile(file)
+		if err != nil {
+			t.Fatal(err)
+		}
+		match := regexp.MustCompile(pattern).FindSubmatch(text)
+		if match == nil {
+			t.Fatalf("%s: no tour version variable found", file)
+		}
+		if got := string(match[1]); got != pin {
+			t.Errorf("%s pins %q, tourModule pins %q", file, got, pin)
+		}
+		if strings.Contains(string(text), "tour@latest") {
+			t.Errorf("%s still installs tour@latest", file)
+		}
+	}
+}
 
 func TestModifyResponseDefaultsTourToDarkWithSyntax(t *testing.T) {
 	body := `<!doctype html><html data-theme="auto"><head></head><body>Tour</body></html>`
