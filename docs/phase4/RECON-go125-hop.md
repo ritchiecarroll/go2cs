@@ -11,6 +11,10 @@
 >
 > The shape follows [`RECON-go1.24-hop.md`](RECON-go1.24-hop.md): headline, method, the bills, what this
 > record does not establish, then the recommendation.
+>
+> **EXTENDED the same day:** the EXTENSION block at the foot takes up the target question: 1.25 against
+> 1.26 (measured) and 1.27 (release notes only). Its recommendation, two hops (1.26, then 1.27),
+> supersedes §3.3's for the choice of target. §3.3 stands for the shape of a 1.25 hop if one is run.
 
 ---
 
@@ -484,3 +488,210 @@ The scripts are kept on the i9 lane's logs share; each is read-only.
      "The 230 at the H10 close" (218 banked + 6 candidates + 6 exclusion rows = 230) and the 2026-10-01 header.
      Lessons: GoCorpusMigration.md §7 (3, 2/43, 13, 19/60, 30/64, 34, 36, 40, 47, 48, 51, 52, 77). PLAN-corpus-upgrade.md
      §6 sizing table; §8 OQ-10 and the P1-P5 parity gates. -->
+
+---
+
+## EXTENSION — 2026-10-11, the same day: which target? 1.25, 1.26 or 1.27
+
+> **Asked by COORD after §0's support finding.** 1.25 is already outside upstream support; 1.26.9 and
+> 1.27.2 are current (both 2026-10-08). The owner picks the **target** before the **shape**. This block
+> repeats §1–§2's measurements against go1.26 and states what it can for go1.27. §0–§4 above stand as
+> written for the 1.25 target.
+
+### X.1 What was measured, and what was not
+
+- **go1.26: MEASURED.** The module cache holds `golang.org/toolchain@v0.0.1-go1.26.4.windows-amd64`
+  (VERSION `go1.26.4`). The same instruments ran on the same axes as §1. The newest 1.26 is .9; .5–.9
+  are security and bug fixes in `crypto/tls`, `net/http`, `os`, `net/url` and the tools (go.dev release
+  history).
+- **go1.27: NOT MEASURED FROM SOURCE.** No 1.27 toolchain or source is on this box. A source download
+  needs the owner's own OK. It is asked for, not taken. **Every 1.27 figure below comes from the release
+  notes (https://go.dev/doc/go1.27, read 2026-10-11) and is marked as such.**
+
+### X.2 go1.24.13 → go1.26.4, measured
+
+**Standard-library packages** (`go list std`, the §1 axes):
+
+| OS | go1.24.13 | go1.26.4 | added | removed |
+|:--|--:|--:|--:|--:|
+| windows | 346 | 362 | 26 | 10 |
+| linux | 344 | 360 | 27 | 11 |
+| darwin | 345 | 360 | 26 | 11 |
+
+- **Added beyond 1.25's set (windows):**
+  - `crypto/hpke` (public);
+  - `crypto/internal/{constanttime,entropy/v1.0.0,fips140/mldsa,fips140deps/time,rand}`;
+  - `crypto/mlkem/mlkemtest`;
+  - `go/internal/scannerhooks`;
+  - `internal/runtime/gc/{internal/gen,scan}`;
+  - `internal/runtime/pprof/label`;
+  - `internal/runtime/syscall/windows`;
+  - `internal/strconv`;
+  - `testing/cryptotest` (public).
+- **Removed beyond 1.25's:** `crypto/internal/hpke` (→ `crypto/hpke` by name) and `internal/itoa`
+  (→ `internal/strconv` by name).
+- **GOEXPERIMENT baseline:** `Dwarf5`, `RandomizedHeapBase64` and **`GreenTeaGC`** are on by default.
+  `SwissMap`, `AliasTypeParams` and `SyncHashTrieMap` are no longer baseline flags; they are retired as
+  experiments.
+- **Language: `new(expr)` and a generic type's self-reference in its own type-parameter list.**
+  - A parse census of each GOROOT's `src` (excluding `cmd` and `testdata`) counts calls to `new` whose
+    argument is certainly an expression. Identifier, selector, index and star arguments are ambiguous
+    without types, so the count is a floor.
+  - Result: 1.24.13 has 0; 1.25.12 has 0; **1.26.4 has 1, in a test of `runtime/secret`**, an
+    experiment-gated package outside the default set.
+  - So 1.26's standard library barely uses `new(expr)`. The converter still owes both features for any
+    third-party module that declares `go 1.26`, which is the nugetgo axis.
+  - Self-reference was not counted; it needs type information.
+- **Converter:** `src/go2cs` **builds (rc 0) and vets clean under go1.26.4.**
+  - **go/types:** +`Var.Kind`/`VarKind`, +`LookupSelection`. `Named.Underlying` and
+    `Named.SetUnderlying` changed only parameter names.
+  - **go/ast:** +`ParseDirective`, `Directive`, `DirectiveArg`, `PreorderStack`, and the
+    `BasicLit.ValueEnd` field. `BasicLit.End` is now correct for multi-line raw strings in
+    Windows-line-ended files. That can move position-map spans, a converter H4 check.
+  - **go/token:** +`File.End`, +`FileSet.AddExistingFiles`.
+- **Runtime:**
+  - **`runtime`'s selected production files: +23,386 / −5,130 lines, about five times 1.25's
+    +4,470 / −2,222.** The causes are Green Tea GC as default, `internal/runtime/gc/scan`, and the heap
+    base randomization.
+  - The heap randomization **changes printed pointer values between runs**. That is the address-shaped
+    output class that the roster's `addressPairs` (`oneToOne` and `nToN`) reading exists for.
+  - `runtime` +65 / −7 test functions.
+  - `testing` adds `ArtifactDir` to `T`, `B` and `F`, on top of `Attr` and `Output`. The old
+    `synctest.Run` API is removed in 1.26 per the 1.25 notes.
+- **H6:** 185 marked: **79 touched-substantive**, 6 trivial, 36 untouched, 64 with no counterpart.
+  - Against 1.25's 58 that is +36%, and against hop B's 46 it is +72%.
+  - By package: `runtime` 27, `syscall` 9, `sync` 5, 3 each for `os`, `net` and
+    `internal/syscall/windows`, and 1–2 each for 23 more, among them `time`, `math/bits`, `hash/crc32`,
+    `crypto/rand`, `internal/cpu`, `internal/sync`, `internal/runtime/maps` and `runtime/pprof`.
+  - **26 rows** (13,917 verdicts) carry a substantive hand-own in their own package; 1.25 had 17.
+- **The roster census** (225 rows, constrained selections):
+
+  | Class | 1.25.12 rows | 1.25.12 verdicts | 1.26.4 rows | 1.26.4 verdicts |
+  |:--|--:|--:|--:|--:|
+  | R — package gone | 2 | 6 | **4** | 28 |
+  | U — untouched | 77 | 11,756 | **38** | 372 |
+  | T — tests only | 14 | 425 | 14 | 10,425 |
+  | P — production only | 32 | 1,371 | 44 | 1,046 |
+  | B — both, same test set | 37 | 2,430 | 50 | 3,434 |
+  | F — test-function set moved | 63 | 53,789 | **75** | 54,472 |
+
+  - Test functions: **+420 / −45** at 1.26 against +279 / −22 at 1.25.
+  - The four relocated rows: `crypto/internal/hpke`, `go/ast/internal/tests`, `internal/itoa` and
+    `internal/trace/internal/oldtrace`.
+  - The largest movers: `os` +70, `runtime` +65 / −7, `net/http` +33 / −1, `internal/synctest`
+    +23 / −1, `testing` +21, `math/big` +15 / −5, `crypto/internal/fips140test` +14 / −2.
+- **The new-package closure:** every one of the 221 surviving rows now reaches **10** new packages
+  through `runtime` and the crypto floor. 1.25 had 3. They are:
+  - `internal/runtime/{gc,gc/scan,syscall/windows,pprof/label}`;
+  - `internal/strconv`;
+  - `internal/trace/tracev2`;
+  - `go/internal/scannerhooks`;
+  - `crypto/internal/{constanttime,entropy/v1.0.0,fips140deps/time}`.
+
+### X.3 go1.24.13 → go1.27, from the release notes only (NOT MEASURED)
+
+- **Language, three changes:**
+  - **Generic methods** (a method declares its own type parameters).
+  - Struct-literal keys may be **field selectors**.
+  - Function type inference on **assignment and conversion** to a function type.
+- **Generic methods are not optional for the corpus.** The notes show the standard library using them:
+  `math/rand/v2`'s `(*Rand) N[Int intType](Int) Int`. So the corpus compile (H7) cannot pass until the
+  converter emits them. That is a converter feature on the corpus's critical path, the same shape as
+  hop B's generic type aliases, which the plan gave its own DESIGN.
+- **Library changes that hit banked rows:**
+  - **`encoding/json` is now backed by v2** (532 verdicts; error text may differ);
+  - `encoding/json/v2` and `encoding/json/jsontext` become ordinary packages, so new rows;
+  - **`compress/flate`'s encoder** changes its output bytes, which reaches `compress/*`, `archive/zip`
+    and `image/png` goldens;
+  - **Unicode 17** for the strict `unicode` row;
+  - new packages `uuid` and `crypto/mldsa`;
+  - ML-DSA through `crypto/tls` and `crypto/x509`.
+- **Runtime and compiler:**
+  - closure names change, and `reflect.Value.Pointer` equality for closures may differ, which reaches
+    golib's frame and traceback emulation;
+  - tracebacks carry pprof labels for `go 1.27` modules;
+  - `asynctimerchan` is removed: golib's `channel.cs` and `SyncTestBubble.cs` and the converter's
+    `convCallExpr.go:5084` and `manualTypeOperations.go:2656` carry that branch, so it simplifies;
+  - size-specialized small-object allocation.
+- **Tooling:**
+  - `gotypesalias` is removed: Alias nodes are always produced, and the converter already handles
+    them (`foreignTypeAliases.go:149`);
+  - `go test -json` adds an `OutputType` field (a verdict-parser check);
+  - `gofmt` alignment changes.
+- **Support window:** 1.27 is supported until 1.29 ships, about 2027-08.
+
+### X.4 The comparison
+
+Effort is shape C, in lane-days, as **estimates**. The basis is §3.2's: hop B's calendar and lanes,
+and PLAN's gate-cycle table (hop C 3–5 cycles, hop D 4–6), scaled by the measured H6 and roster bills.
+The 1.27 estimates are wider because nothing in them is measured.
+
+| Target | Language and converter work | Runtime and testing-host bill | Rows touched (of 225) | H6 substantive | Shape C, ESTIMATE | Upstream support at landing |
+|:--|:--|:--|:--|--:|:--|:--|
+| **1.25.14** | none; converter builds and vets clean | runtime +4.5k / −2.2k; host: `Attr`/`Output`, `AllocsPerRun` panic, synctest hook | 146 (77 untouched) | 58 | **65–105** | **none**: out of support since 1.27.0 |
+| **1.26.9** | `new(expr)`, generic self-reference (std use about 0); `BasicLit.ValueEnd`; converter builds and vets clean | runtime **+23.4k / −5.1k**; Green Tea GC default; randomized heap base; host adds `ArtifactDir` | 183 (38 untouched) | 79 | **85–140** (as one fold from 1.24) | about 3 months: until 1.28, about 2027-02 |
+| **1.27.2** | **generic methods** (the std uses them: H7-critical), selector keys, assignment inference: **a DESIGN-sized H4** | everything in 1.26, plus closure naming, traceback labels, `asynctimerchan` gone; json v2 swap, flate bytes, Unicode 17 | not measured | not measured | **130–220** (as one fold from 1.24) | about 9 months: until 1.29, about 2027-08 |
+
+**Sequences, end to end (estimates):**
+
+| Sequence | Estimate |
+|:--|:--|
+| 1.25, then 1.26, then 1.27 (three hops) | 215–355 lane-days |
+| **1.26, then 1.27** (two hops) | **175–290** |
+| 1.27 direct (one hop) | 130–220 |
+
+The 1.27-direct figure is the lowest total and has the widest uncertainty.
+
+### X.5 Recommendation: two hops — 1.26 now, then 1.27 — with 1.25 kept as an internal checkpoint and not a release
+
+1. **Not 1.25 as a released stepping stone.** It would spend a full H11/H12 ritual (one release, its
+   proof pages and its deprecations) to land on a series upstream no longer supports. Its one real
+   value, attribution, can be bought without a release (point 3).
+2. **Not 1.27 direct.** It is cheapest on paper and the worst bet:
+   - **It folds three releases.** OQ-18's own rationale is that a combined hop's differential shows the
+     union of the releases' upstream changes, and that R11's both-directions problem doubles. Three
+     releases make that worse again.
+   - **It puts a DESIGN-sized converter feature on the corpus's critical path.** Generic methods are
+     used by the standard library itself, so H7 cannot pass without them. The runbook's lessons are
+     about exactly that compounding:
+     - lesson 57: a per-class census at both pins, never one total;
+     - lesson 24: size a red by a whole-corpus census;
+     - lesson 34: a repair that runs from two days to three weeks.
+
+     A fold makes every red ambiguous between three releases.
+   - **Its bill is unmeasured.** The owner would be choosing it on release notes alone.
+3. **1.26 now, as a fold of 1.25 and 1.26, with an attribution checkpoint at 1.25.**
+   - Run H5's seeded reconvert and H7's compile ladder at **go1.25.14 first, in scratch, with no
+     release**, then at go1.26. Every red is then attributed to 1.25 or to 1.26 before it is triaged.
+   - That buys back what OQ-18 protects, at the cost of one extra scratch conversion and compile,
+     instead of a release ritual.
+   - 1.26's language delta is nearly unused by its own standard library (X.2), so H4 stays small.
+   - It lands with about three months of support left.
+4. **Then 1.27 as its own hop.** It starts with a generic-methods DESIGN, which can be drafted during
+   the 1.26 hop's H10, off the critical path. It lands inside 1.27's support window and leaves the
+   corpus one release behind current, which is where OQ-19's cadence question starts.
+
+**What this needs ruled:**
+- **OQ-18 is ratified as "fold only if hop B classified clean with zero (c) rewrites owed".** NOTES §4
+  records that hop B owed class (c) rewrites. So a 1.24 → 1.26 hop contradicts a standing ruling, and
+  the runbook's preamble requires a new ruling first.
+- The 1.25 checkpoint in point 3 is the mitigation offered for that ruling, not a substitute for it.
+- If the owner keeps OQ-18 as it stands, the sequence becomes 1.25 → 1.26 → 1.27 (the 215–355 row),
+  and 1.25 should go out as shape C at the smallest ritual H12 allows.
+
+### X.6 What this extension does NOT establish
+
+- **No 1.27 measurement.** Every 1.27 cell is from the release notes. The source download that would
+  measure it is the owner's call.
+- **1.26 was measured at .4, not .9.** That is the same caveat as §1's .12 against .14.
+- **No corpus conversion at any target.** The bills are upstream-delta readings, as in §5.
+- **The fold estimate assumes the 1.25 checkpoint costs one scratch conversion and compile.** If the
+  checkpoint's reds need triage of their own, that is extra.
+
+<!-- Extension measured 2026-10-11 on the i9 at master 20279db5f6: TO go1.26.4 (module cache, read-only), the same
+     instruments (std census, constrained row census, go doc declarations, handown-census.ps1, the new-package closure,
+     converter build and vet), plus a parse-only new(expr) census over each GOROOT's src. Release notes
+     https://go.dev/doc/go1.26 and https://go.dev/doc/go1.27 and https://go.dev/doc/devel/release, read 2026-10-11.
+     PLAN-corpus-upgrade.md §6 (sizing table, the fold rule) and §8 (OQ-18 ratified, OQ-19 deferred); NOTES-next-hop.md
+     §4 (OQ-18's fold rule failed: hop B owed class (c) rewrites); GoCorpusMigration.md preamble (a change contradicting
+     a ruling requires a new ruling first) and §7 lessons 24, 34, 57. -->
