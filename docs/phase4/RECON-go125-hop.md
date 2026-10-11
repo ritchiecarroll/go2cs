@@ -504,9 +504,10 @@ The scripts are kept on the i9 lane's logs share; each is read-only.
   (VERSION `go1.26.4`). The same instruments ran on the same axes as §1. The newest 1.26 is .9; .5–.9
   are security and bug fixes in `crypto/tls`, `net/http`, `os`, `net/url` and the tools (go.dev release
   history).
-- **go1.27: NOT MEASURED FROM SOURCE.** No 1.27 toolchain or source is on this box. A source download
-  needs the owner's own OK. It is asked for, not taken. **Every 1.27 figure below comes from the release
-  notes (https://go.dev/doc/go1.27, read 2026-10-11) and is marked as such.**
+- **go1.27: MEASURED LATER THE SAME DAY (X.7).** When this block was first written, no 1.27 toolchain
+  was on the box, and X.3 is from the release notes. The owner then authorized the download in chat. X.7
+  carries the measured go1.27.2 figures, and also go1.26.9 (the hop's actual target) in place of .4.
+  X.4's table carries the measured cells.
 
 ### X.2 go1.24.13 → go1.26.4, measured
 
@@ -624,23 +625,29 @@ The scripts are kept on the i9 lane's logs share; each is read-only.
 
 Effort is shape C, in lane-days, as **estimates**. The basis is §3.2's: hop B's calendar and lanes,
 and PLAN's gate-cycle table (hop C 3–5 cycles, hop D 4–6), scaled by the measured H6 and roster bills.
-The 1.27 estimates are wider because nothing in them is measured.
+**Every cell is now measured** (X.7). The first version of this table had 1.27 from the release notes,
+with 1.26 at .4.
 
-| Target | Language and converter work | Runtime and testing-host bill | Rows touched (of 225) | H6 substantive | Shape C, ESTIMATE | Upstream support at landing |
+| Target (from 1.24.13 unless stated) | Language and converter work | Runtime and testing-host bill | Rows touched (of 225) | H6 substantive | Shape C, ESTIMATE | Upstream support at landing |
 |:--|:--|:--|:--|--:|:--|:--|
-| **1.25.14** | none; converter builds and vets clean | runtime +4.5k / −2.2k; host: `Attr`/`Output`, `AllocsPerRun` panic, synctest hook | 146 (77 untouched) | 58 | **65–105** | **none**: out of support since 1.27.0 |
-| **1.26.9** | `new(expr)`, generic self-reference (std use about 0); `BasicLit.ValueEnd`; converter builds and vets clean | runtime **+23.4k / −5.1k**; Green Tea GC default; randomized heap base; host adds `ArtifactDir` | 183 (38 untouched) | 79 | **85–140** (as one fold from 1.24) | about 3 months: until 1.28, about 2027-02 |
-| **1.27.2** | **generic methods** (the std uses them: H7-critical), selector keys, assignment inference: **a DESIGN-sized H4** | everything in 1.26, plus closure naming, traceback labels, `asynctimerchan` gone; json v2 swap, flate bytes, Unicode 17 | not measured | not measured | **130–220** (as one fold from 1.24) | about 9 months: until 1.29, about 2027-08 |
+| **1.25.14** (measured at .12) | none; converter builds and vets clean | runtime +4.5k / −2.2k; host: `Attr`/`Output`, `AllocsPerRun` panic, synctest hook | 146 (77 untouched) | 58 | **65–105** | **none**: out of support since 1.27.0 |
+| **1.26.9** (measured at .9) | `new(expr)`, generic self-reference (std use: 1 test site); `BasicLit.ValueEnd`; converter builds and vets clean | runtime **+23.5k / −5.1k**; Green Tea GC default; randomized heap base; host adds `ArtifactDir` | 183 (38 untouched; 78 with a moved test set, +462 / −45) | 79 | **85–145** (one fold; [`PLAN-hop-go126.md`](https://github.com/ritchiecarroll/go2cs/blob/claude/i9-plan-hop-go126/docs/PLAN-hop-go126.md)) | about 3 months: until 1.28, about 2027-02 |
+| **1.27.2** (measured at .2; one fold of three releases) | **generic methods** (std: 1 production declaration, `math/rand/v2` `Rand.N`, and 2 in `runtime` tests); `new(expr)` (std: 2 production, 47 test); selector keys; assignment inference; converter builds and vets clean | runtime +15.6k / −5.6k; everything in 1.26, plus `encoding/json` on v2 (−4.3k), `net/http` −13.1k (HTTP/2 moves to `internal/http2`), flate +3.3k / −1.1k, Unicode 17 | 191 (30 untouched; 99 with a moved test set, +651 / −58) | 83 | **120–190** | about 9 months: until 1.29, about 2027-08 |
+| **1.27.2 from 1.26.9** (the follow-on hop) | the 1.27 language set (generic methods, `new(expr)` now used, selector keys); converter builds and vets clean | runtime +2.4k / −10.7k; json v2, flate, `net/http`, Unicode 17 | 132 (89 untouched; 61 with a moved test set, +195 / −19) | 32 | **60–100** | about 7–8 months, landing about 2026-12 to 2027-01 |
 
 **Sequences, end to end (estimates):**
 
 | Sequence | Estimate |
 |:--|:--|
-| 1.25, then 1.26, then 1.27 (three hops) | 215–355 lane-days |
-| **1.26, then 1.27** (two hops) | **175–290** |
-| 1.27 direct (one hop) | 130–220 |
+| 1.25, then 1.26, then 1.27 (three hops; the middle hop, 1.25 → 1.26, is unmeasured and taken at about 60–100) | 185–305 lane-days |
+| **1.26, then 1.27** (two hops, the ruled path) | **145–245** |
+| 1.27 direct (one hop) | 120–190 |
 
-The 1.27-direct figure is the lowest total and has the widest uncertainty.
+Measurement narrows the gap between the two paths but does not close it. 1.27-direct is still the
+lowest total. It is still a three-release fold, now **measured** at 83 hand-owns and 99 moved rows. Its
+language work is still on the H7 critical path: `math/rand/v2` depends on generic methods. The ruled path
+pays about 25–55 lane-days more. In return it gets two attributable hops, and a supported (1.26)
+corpus published at the first hop's close rather than at the end of the larger fold.
 
 ### X.5 Recommendation: two hops — 1.26 now, then 1.27 — with 1.25 kept as an internal checkpoint and not a release
 
@@ -681,12 +688,89 @@ The 1.27-direct figure is the lowest total and has the widest uncertainty.
 
 ### X.6 What this extension does NOT establish
 
-- **No 1.27 measurement.** Every 1.27 cell is from the release notes. The source download that would
-  measure it is the owner's call.
-- **1.26 was measured at .4, not .9.** That is the same caveat as §1's .12 against .14.
+- ~~No 1.27 measurement.~~ ~~1.26 was measured at .4, not .9.~~ Both were closed later the same day
+  (X.7): go1.27.2 and go1.26.9 were fetched with the owner's OK and checked against go.dev's SHA-256.
+- **No compile at 1.27.** The generic-methods estimate in X.7 is a design estimate. No converter code was
+  written or run against a 1.27 corpus.
 - **No corpus conversion at any target.** The bills are upstream-delta readings, as in §5.
 - **The fold estimate assumes the 1.25 checkpoint costs one scratch conversion and compile.** If the
   checkpoint's reds need triage of their own, that is extra.
+
+### X.7 MEASURED — go1.27.2 and go1.26.9 (later 2026-10-11, after the owner's download OK)
+
+> The owner ruled the target first (Go 1.26; fold; 1.25.14 checkpoint; 1.27 as its own hop). He then
+> authorized the downloads in chat. This sub-section **sizes the 1.27 hop that follows** and refreshes
+> 1.26 at its real target. It changes no ruling.
+
+**Provenance.**
+- `go1.27.2.windows-amd64.zip` (79,008,081 bytes) and `go1.26.9.windows-amd64.zip` (75,002,909 bytes)
+  were fetched from go.dev.
+- Each was checked against the SHA-256 in go.dev's own release JSON (`/dl/?mode=json&include=all`, read
+  directly, not through a summary): both **MATCH**. A red control (a wrong expected value) reads
+  MISMATCH.
+- Both were extracted into a scratch directory, never a GOROOT the fleet uses. VERSION reads `go1.27.2`
+  and `go1.26.9`.
+- The same instruments as X.2 ran: per-target runs for `go1.24.13 → T`, plus a parameterized FROM for
+  `go1.26.9 → go1.27.2`.
+- The worktree read `git status` 0 after every run.
+
+**go1.26.9, the hop's target.**
+- It agrees with .4 everywhere that matters: std +26 / −10; 79 substantive hand-owns; 38 rows untouched;
+  4 relocated.
+- It differs only in **78** rows with a moved test set (+462 / −45), against .4's 75 (+420 / −45). P and
+  B shift by 1 and 2.
+- The converter builds and vets clean.
+- [`PLAN-hop-go126.md`](https://github.com/ritchiecarroll/go2cs/blob/claude/i9-plan-hop-go126/docs/PLAN-hop-go126.md)
+  §3 was written from .4. Its ⟲ stages re-measure at .9 regardless.
+
+**go1.24.13 → go1.27.2 (the direct fold, for comparison).**
+
+| Measure | Value |
+|:--|:--|
+| std windows | 346 → 383 (+47 / −10); linux 344 → 381; darwin 345 → 381 |
+| GOEXPERIMENT baseline | adds `JSONv2` and `SizeSpecializedMalloc` to 1.26's set |
+| H6 | 185 marked: **83 substantive**, 8 trivial, 30 untouched, 64 with no counterpart |
+| Rows | R 4 · U **30** · T 12 · P 39 · B 41 · F **99** (+651 / −58 test functions; 80.3% of verdicts) |
+| New-package closure | every one of the 221 surviving rows reaches the `encoding/json/{v2,jsontext,internal/*}` family as well as 1.26's runtime set |
+| Converter | **builds (rc 0) and vets clean** under go1.27.2 |
+
+- **Front-end API, all additive:**
+  - `go/types`: `Hasher` and `HasherIgnoreTags`, `String` on `Instance`, `TypeList` and `TypeParamList`;
+  - `go/token`: `File.String`;
+  - `go/constant`: `StringLen`;
+  - `go/scanner`: `Scanner.End`.
+
+**go1.26.9 → go1.27.2 (THE FOLLOW-ON HOP).**
+
+| Measure | Value |
+|:--|:--|
+| std | +22 / −1. Added: `uuid`, `crypto/mldsa`, `encoding/json/{v2,jsontext}` and their internals, `net/http/internal/{http2,httpsfv}`, `internal/{gate,nettest}`, `database/sql/internal`, `crypto/internal/cryptotest/{wycheproof,x509limbo}`, and six `vendor/golang.org/x/{crypto,net}` packages (QUIC and HTTP/3). Removed: `go/internal/scannerhooks` |
+| H6 | **32 substantive** (`runtime` 10, `syscall` 3, `internal/poll` 3, `reflect` 2, `internal/syscall/windows` 2, and 1 each for 12 more, including `math/rand/v2`), 5 trivial, 81 untouched, 67 with no counterpart |
+| Rows | U **89** · T 5 · P 42 · B 24 · F **61** (+195 / −19). 17 rows carry a substantive hand-own in their own package |
+| Largest production deltas | `net/http` +1.4k / −13.0k; `runtime` +2.4k / −10.7k; `encoding/json` +1.8k / −4.3k; `compress/flate` +3.3k / −1.1k; `unicode` +0.9k / −0.4k |
+
+**The language forms, counted** (a parse-only census of each GOROOT's `src`, excluding `cmd` and
+`testdata`, under go1.27.2's parser):
+
+| | go1.24.13 | go1.26.9 | go1.27.2 |
+|:--|--:|--:|--:|
+| Generic-method declarations (production / test) | 0 / 0 | 0 / 0 | **1 / 2**: `math/rand/v2/rand.go:213` `(*Rand) N`; two in `runtime` tests |
+| `new(expr)` with a definite-expression argument (a floor; production / test) | 0 / 0 | 0 / 1 | **2 / 47**: `net/http/internal/http2` 2; `encoding/json/v2` 45 tests; `go/types` 1; `runtime/secret` 1 |
+
+**The generic-methods converter work — a DESIGN ESTIMATE.** No code was written or run.
+
+| Item | What it is | Lane-days |
+|:--|:--|--:|
+| DESIGN | How a method with its own type parameters maps to C#. A generic method on the receiver's emitted type or extension class, with the method's own type parameters after the receiver's. The constraint mapping is reused from generic functions (it exists today). Go's rule that interface methods cannot be generic means **no interface-dispatch or `ImplementGenerator` change**: such methods are outside every method set used for satisfaction. Their reflection metadata must exclude them, and the DESIGN states that by test | 2–3 |
+| Emission | Declarations; call sites from `types.Info.Instances` on the method selector (explicit and inferred type arguments); method values and expressions of an instantiated generic method (`r.N[int]` as a func value → a lambda); the generator's method registration skips them | 4–7 |
+| Proof | Behavioral fixtures (declare, call, infer, method value, pointer and value receivers, generic receiver plus generic method); GenTests; the `math/rand/v2` row as the in-corpus subject | 2–3 |
+| **Generic methods total** | | **8–13** |
+| `new(expr)` | Emission as the existing heap-box form of a value. Owed already at the 1.26 hop for modules; 1.27's std uses it at 2 production sites | 1–3 |
+| Selector keys in struct literals | Composite-literal keys that are field selectors through embedded fields. Emission walks the selector path into nested initializers | 2–4 |
+| Assignment inference | `go/types` delivers the instantiation, so expected near-zero; a probe confirms it | 0–1 |
+
+**The 1.27 hop's H4 language work is about 11–21 lane-days.** It sits inside X.4's 60–100 for the
+follow-on hop. The DESIGN is drafted during the 1.26 hop's H10, as the owner ruled.
 
 <!-- Extension measured 2026-10-11 on the i9 at master 20279db5f6: TO go1.26.4 (module cache, read-only), the same
      instruments (std census, constrained row census, go doc declarations, handown-census.ps1, the new-package closure,
