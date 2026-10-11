@@ -113,4 +113,52 @@ public class EscapeRegistryGeneratorTests
         Diagnostic[] errors = output.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray();
         Assert.AreEqual(0, errors.Length, "the registry binds: " + string.Join("; ", errors.Take(3)));
     }
+
+    // TRAIN T3 (2026-10-10): a *.tests.csproj sets DisableTransitiveProjectReferences, so a type the compilation reaches
+    // only through a referenced assembly's field signature can live in an assembly it does not reference -- and a
+    // registry line naming it fails to compile (CS0234: go/internal/srcimporter naming go.ast_package, internal/testenv
+    // and testing naming go.io_package). Two hops: A references B, B references C, and A sees C's type only through B's
+    // field. The registry keeps what A can name and skips the rest (that container falls to golib's fallback: trim
+    // stage 3d's boundary under Native AOT, never a wrong answer).
+    [TestMethod]
+    public void AContainerTheCompilationCannotNameIsNotRegistered()
+    {
+        CSharpParseOptions options = new(LanguageVersion.Preview);
+        MetadataReference[] platform = [.. References()];
+
+        MetadataReference Emit(string name, string source, params MetadataReference[] references)
+        {
+            CSharpCompilation library = CSharpCompilation.Create(name,
+                [CSharpSyntaxTree.ParseText(source, options), CSharpSyntaxTree.ParseText(TemplateUsings, options)],
+                [.. platform, .. references], new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+
+            using System.IO.MemoryStream image = new();
+            Microsoft.CodeAnalysis.Emit.EmitResult emitted = library.Emit(image);
+            Assert.IsTrue(emitted.Success, $"{name} compiles: " + string.Join("; ", emitted.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).Take(3)));
+
+            return MetadataReference.CreateFromImage(image.ToArray());
+        }
+
+        MetadataReference c = Emit("cpkg", "namespace go; [GoPackage(\"cpkg\")] public static partial class cpkg_package { public partial struct Deep { public nint x; } }");
+        MetadataReference b = Emit("bpkg", "namespace go; [GoPackage(\"bpkg\")] public static partial class bpkg_package { public partial struct Holder { public slice<cpkg_package.Deep> deep; public slice<nint> nums; } }", c);
+
+        // A references B only, as a tests project with DisableTransitiveProjectReferences does.
+        CSharpCompilation a = CSharpCompilation.Create("apkg",
+            [CSharpSyntaxTree.ParseText("namespace go; [GoPackage(\"apkg\")] public static partial class apkg_package { internal static object Use() => default(bpkg_package.Holder); }", options, path: @"C:\go2cs\src\core\apkg\apkg.cs"),
+             CSharpSyntaxTree.ParseText(TemplateUsings, options)],
+            [.. platform, b], new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+
+        CSharpGeneratorDriver.Create(new EscapeRegistryGenerator()).WithUpdatedParseOptions(options)
+            .RunGeneratorsAndUpdateCompilation(a, out Compilation output, out _);
+
+        string[] registered = output.SyntaxTrees.Select(tree => tree.ToString())
+            .SelectMany(source => Regex.Matches(source, @"global::go\.GoTypeOps\.Register\(global::go\.GoTypeOps<(.+)>\.Instance\);").Select(match => match.Groups[1].Value))
+            .ToArray();
+
+        Diagnostic[] errors = output.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray();
+        Assert.AreEqual(0, errors.Length, "the registry compiles: " + string.Join("; ", errors.Take(3)));
+
+        CollectionAssert.Contains(registered, "global::go.slice<nint>", "what A can name through B's field is registered");
+        Assert.IsFalse(registered.Any(name => name.Contains("cpkg_package")), "a container over C's type, which A cannot name, is not: " + string.Join(", ", registered));
+    }
 }
