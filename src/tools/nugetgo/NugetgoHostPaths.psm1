@@ -11,7 +11,16 @@
     as well.
 #>
 
-$script:latin1 = [System.Text.Encoding]::Latin1
+# ISO-8859-1 by code page: the Encoding.Latin1 property is .NET 5 and later, $null on the .NET Framework that Windows
+# PowerShell 5.1 runs on (the T3 battery's 5.1 leg, 2026-10-11).
+$script:latin1 = [System.Text.Encoding]::GetEncoding(28591)
+
+# A portable pdb's Document table is read with System.Reflection.Metadata. PowerShell 7 carries it; .NET Framework does
+# not, so Windows PowerShell 5.1 has it only where the GAC does. Without it a pdb is REFUSED by name, never passed unread.
+if (-not ('System.Reflection.Metadata.MetadataReaderProvider' -as [type])) {
+    try { Add-Type -AssemblyName System.Reflection.Metadata -ErrorAction Stop } catch { }
+}
+$script:PdbReaderMissing = -not ('System.Reflection.Metadata.MetadataReaderProvider' -as [type])
 
 function Get-NugetgoRootSpellings([string]$root) {
     $trimmed = $root.Trim().TrimEnd('/', '\')
@@ -37,6 +46,9 @@ function Test-NugetgoContainsRoot([string]$text, [string]$spelling) {
 # The document names of a portable pdb (metadata signature BSJB at offset 0), joined by newlines; empty for anything else.
 function Get-NugetgoPdbDocumentNames([byte[]]$bytes) {
     if ($bytes.Length -lt 4 -or $bytes[0] -ne 0x42 -or $bytes[1] -ne 0x53 -or $bytes[2] -ne 0x4A -or $bytes[3] -ne 0x42) { return '' }
+    if ($script:PdbReaderMissing) {
+        throw "a portable pdb's document names are read with System.Reflection.Metadata, which this PowerShell ($($PSVersionTable.PSVersion)) cannot load: run the pack under PowerShell 7"
+    }
     try {
         $provider = [System.Reflection.Metadata.MetadataReaderProvider]::FromPortablePdbStream([System.IO.MemoryStream]::new($bytes))
         try {
