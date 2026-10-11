@@ -58,6 +58,11 @@
     and packs the file byte for byte. A missing, duplicated, misordered or malformed fence is refused by name, and so is
     a link before it. nuget/icon.png beside it replaces the go2cs icon; -Icon with that file present is refused.
 
+    The conversion repository's root README (COORD ruling 2026-10-11): -ConversionReadme names it, and the pack refuses
+    one that does not fit the description's form. A third-party conversion's README must END with the offer to the
+    module's maintainers (New-NugetgoMaintainersSection); an author's must not carry it. The parameter is OPTIONAL for
+    now. It becomes mandatory for release packs, never rehearsal packs, when the next sheet is cut.
+
     The restore is isolated: a nuget.config with <clear/> and only -Feed as a source, and a private NUGET_PACKAGES.
     The user's global packages folder is censused for nugetgo.* and go.* before and after, and the run fails if it
     grew. Nothing is pushed anywhere, and nothing is signed: signing is the release's last step.
@@ -87,6 +92,8 @@ param(
     # The package icon, PNG or JPEG up to 1 MB; the go2cs icon the conversion carries when not given. A module author
     # publishing their own module sets their own.
     [string]$Icon,
+    # The conversion repository's root README.md, checked against the description's form (Test-NugetgoConversionReadme).
+    [string]$ConversionReadme,
     [string]$RehearsalSuffix,
     [switch]$Release,
     [string[]]$ExistingIds = @(),
@@ -200,6 +207,14 @@ $described = Get-NugetgoDescription -ModulePath $ModulePath -GoVersion $GoVersio
 if ($described.Refused) { Refuse "package description: $($described.Reason)" }
 $description = $described.Description
 if ($description.Contains('PROOF:')) { Refuse 'package description: it carries "PROOF:" (owner review 2026-10-10: the registry tier and the Tests badge carry the proof)' }
+# The conversion repository's root README (COORD ruling 2026-10-11): a third-party conversion's ends with the offer to
+# the module's maintainers, and an author's carries none.
+if ($ConversionReadme) {
+    if (-not (Test-Path -LiteralPath $ConversionReadme -PathType Leaf)) { Refuse "-ConversionReadme: no file at $ConversionReadme" }
+    $conversionReasons = @(Test-NugetgoConversionReadme -Text ([System.IO.File]::ReadAllText($ConversionReadme)) -ModulePath $ModulePath -Author:$described.Author)
+    if ($conversionReasons.Count) { Refuse "the conversion repository's README ${ConversionReadme}: $($conversionReasons -join '; ')" }
+    Write-Host "conversion README: $(if ($described.Author) { 'the author form, with no maintainers section' } else { 'ends with the offer to the module''s maintainers' })"
+}
 
 # D7: a validated module ships its MODULE.md as VALIDATION.md, the per-package pages beside it. A module that cannot
 # validate yet packs ONLY as a rehearsal of its shape (-UnvalidatedReason), whose VALIDATION.md says so; such a
