@@ -9,6 +9,7 @@
 package repoguard
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -49,22 +50,33 @@ func TestNugetgoSuitesPass(t *testing.T) {
 		name := filepath.Base(suite)
 
 		t.Run(strings.TrimSuffix(name, ".ps1"), func(t *testing.T) {
-			command := exec.Command(pwsh, "-NoProfile", "-NonInteractive", "-File", suite)
-			command.Env = append(os.Environ(), "NO_COLOR=1") // plain text: the failure message quotes the output
-			output, err := command.CombinedOutput()
+			output, err := nugetgoSuiteCommand(pwsh, suite).CombinedOutput()
 
 			if err != nil {
-				fails := failLine.FindAllString(string(output), -1)
-				detail := strings.Join(fails, "\n")
-
-				if detail == "" {
-					detail = lastLines(string(output), 20)
-				}
-
-				t.Errorf("%s failed (%v):\n%s", name, err, detail)
+				t.Error(nugetgoSuiteFailure(name, pwsh, err, string(output), failLine))
 			}
 		})
 	}
+}
+
+// nugetgoSuiteCommand is the pwsh launch for one suite.
+func nugetgoSuiteCommand(pwsh string, suite string) *exec.Cmd {
+	command := exec.Command(pwsh, "-NoProfile", "-NonInteractive", "-File", suite)
+	command.Env = append(os.Environ(), "NO_COLOR=1") // plain text: the failure message quotes the output
+
+	return command
+}
+
+// nugetgoSuiteFailure is the message for a suite that exited non-zero: its FAIL lines, or the output tail when the
+// script threw.
+func nugetgoSuiteFailure(name string, pwsh string, err error, output string, failLine *regexp.Regexp) string {
+	detail := strings.Join(failLine.FindAllString(output, -1), "\n")
+
+	if detail == "" {
+		detail = lastLines(output, 20)
+	}
+
+	return fmt.Sprintf("%s failed (%v):\n%s", name, err, detail)
 }
 
 // lastLines is the tail of a suite's output, for a failure that printed no FAIL line (a script that threw).
@@ -76,4 +88,40 @@ func lastLines(text string, n int) string {
 	}
 
 	return strings.Join(lines, "\n")
+}
+
+// THE LAUNCH ENVIRONMENT (TRAIN T3 battery, COORD 2026-10-11). On the battery box, `pwsh` resolved to the .NET
+// global-tool shim (~/.dotnet/tools/pwsh, PowerShell 7.4 on .NET 8) while DOTNET_ROOT named a .NET 10-only install.
+// The host refused to start it ("framework missing ... framework_version=8.0.0", 0x80008096), and all six subtests
+// failed although every suite passes. A pwsh launched for a suite therefore runs with DOTNET_ROLL_FORWARD=Major: a
+// framework-dependent pwsh starts on any newer installed runtime. Where the runtime it asks for is installed, Major
+// changes nothing. Running is preferred to skipping, which would hide the gate on exactly the box that runs the
+// battery.
+func TestNugetgoSuiteCommandRollsForwardToANewerRuntime(t *testing.T) {
+	t.Setenv("DOTNET_ROLL_FORWARD", "Disable") // a parent setting must not decide it
+
+	command := nugetgoSuiteCommand("pwsh", "Test-Example.ps1")
+	value := ""
+
+	for _, entry := range command.Env {
+		if name, v, ok := strings.Cut(entry, "="); ok && name == "DOTNET_ROLL_FORWARD" {
+			value = v // the last one is what the child sees
+		}
+	}
+
+	if value != "Major" {
+		t.Fatalf("the suite's pwsh runs with DOTNET_ROLL_FORWARD=%q; want Major", value)
+	}
+}
+
+// A launch failure has to read as an environment problem at a glance, so the message names the pwsh it ran.
+func TestNugetgoSuiteFailureNamesThePwshItRan(t *testing.T) {
+	const pwsh = "/opt/dotnet-tools/pwsh"
+
+	message := nugetgoSuiteFailure("Test-Example.ps1", pwsh, fmt.Errorf("exit status 150"),
+		"You must install or update .NET to run this application.\n", regexp.MustCompile(`(?m)^\s*FAIL\s.*$`))
+
+	if !strings.Contains(message, pwsh) {
+		t.Fatalf("the failure message does not name the pwsh it ran (%s):\n%s", pwsh, message)
+	}
 }
