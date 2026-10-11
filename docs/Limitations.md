@@ -30,7 +30,7 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 * **Go newer than the library tracks.** A newer `go` line in your `go.mod`, or any dependency's, gets
   `package requires newer Go version` or a refusal naming both releases. Set `GOTOOLCHAIN=local` and pin
   older versions until `go build ./...` passes, as the
-  [README walkthrough](README.md#converting-a-real-world-module) does.
+  [module walkthrough](ConvertingAModule.md#step-by-step) does.
 * **Hand-written assembly.** A function whose body lives in a `.s` file usually becomes a stub. The
   project builds clean, and the first call throws a `NotImplementedException` saying
   `no implementation reached this compilation`. Convert with the library's pure-Go build tag
@@ -102,14 +102,17 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 
 The [validated modules](ValidatedModules.md) page is still short.
 
-* **A plain `-recurse` (your module plus its dependencies) applies no build tags for you**, while the
-  standard library is converted with Go's portable tags, `purego` and `math_big_pure_go`. So a
-  dependency with an assembly or `unsafe` fast path converts the fast path: pass its portable tag
-  (`purego` is the common one). Under `-tests` an explicit `-tags` replaces the default, so include
-  `purego,math_big_pure_go` with yours.
-* **A test suite that imports testify isn't there yet.** Its bundled go-spew does pointer arithmetic
-  into `reflect.Value` at load, which the runtime library refuses by design, so the converted test
-  program dies at startup. go-spew's `safe` tag selects its fallback, and nothing passes it for you.
+* **A plain `-recurse` (your module plus its dependencies) applies one build tag for you, `safe`**,
+  while the standard library is converted with Go's portable tags, `purego` and `math_big_pure_go`.
+  So a dependency with an assembly fast path converts the fast path unless its fallback is behind
+  `safe`: pass its portable tag (`purego` is the common one). An explicit `-tags` replaces every
+  default, so include `safe` with yours, and under `-tests` include `purego,math_big_pure_go` too.
+* **A test suite that imports testify depends on the `safe` tag.** Its bundled go-spew does pointer
+  arithmetic into `reflect.Value` at load, which the runtime library refuses by design, and go-spew's
+  `safe` tag selects its fallback. `-recurse` passes that tag for you
+  ([Build tags for a module](ConvertingAModule.md#build-tags-for-a-module)). Drop it, with
+  `-module-safe-tag=false` or an explicit `-tags` that leaves it out, and the converted test program
+  dies at startup.
 * **Tests that read `os.Args`** see the flags of the C# program that runs them. `flag.Parse()` is fine;
   a CLI framework that walks `os.Args[1:]` itself, as cobra and pflag do, diverges from `go test`.
 * **Converter bugs that surface as C# compile errors**, usually in corners of the type system. In your
@@ -120,7 +123,7 @@ The [validated modules](ValidatedModules.md) page is still short.
   skipped, the run still exits 0, and every project that imports it fails to build. Read the summary
   line, `Recursive conversion complete in ...: N/M packages converted (K failed: ...)`, not the exit
   code. `-recurse=module`
-  [converts only your packages](README.md#optional-convert-the-module-only-and-deal-with-its-dependencies-later).
+  [converts only your packages](ConvertingAModule.md#optional-convert-the-module-only-and-deal-with-its-dependencies-later).
 
 ## What "validated" means, and what it doesn't
 

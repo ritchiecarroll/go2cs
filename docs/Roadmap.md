@@ -71,6 +71,21 @@ same way, and the first converted module is published as a NuGet package.
 [Validated Test Packages](ValidatedTestPackages.md), the validation roster, carries the current state
 of the standard library, and [Validated Modules](ValidatedModules.md) that of third-party modules.
 
+**What that rests on.** The converter is guarded by hundreds of Go-versus-C# behavioral test projects.
+Each one is transpiled, compiled and compared against a committed expected output, and each runnable
+one is executed with its output compared against Go's. The whole Go standard library compiles cleanly
+as .NET assemblies. It reproduces Go built with `-tags purego`: a managed runtime cannot execute Go's
+hand-written assembly, so the portable pure-Go variants of the assembly-backed crypto and hash
+functions are the faithful target
+([Conversion Strategies](ConversionStrategies.md#the-standard-library-reproduces-go--tags-purego)).
+Compiling is not the same as running correctly, which is what Phase 4 below is for.
+<!-- "hundreds" (697 at the 2026-09-26 count) counted at master db1bd885a2: 697 directories under src/tests/Behavioral
+     carry a committed .cs.target golden; the two harness directories (BehavioralRunner, BehavioralTests)
+     carry none and are not counted. -->
+<!-- Moved here from the README's Status section. The prose quotes no counts. They were 225 of 225 and 225 of 230 on 2026-10-01 at master
+     c2591d5b95, read from the Phase 4 progress header of docs/ValidatedTestPackages.md, which carries
+     the current figures. -->
+
 ## Phase 4: validation against Go's own tests
 
 **In short.** Phase 4 checks the converted standard library against Go's own tests, package by package,
@@ -247,7 +262,7 @@ source generators as published NuGet packages, and the same substitution reaches
 the [nugetgo.net](https://nugetgo.net) community registry maps Go module paths to published NuGet
 packages of their conversions, so a dependency someone has already converted becomes a package restore
 instead of a local transpile. The converter side is built and on by default (see the README's
-[Mapping modules to NuGet packages](README.md#mapping-modules-to-nuget-packages)). The design is
+[Mapping modules to NuGet packages](ConvertingAModule.md#mapping-modules-to-nuget-packages)). The design is
 [`PLAN-nugetgo.md`](PLAN-nugetgo.md).
 
 - **Package IDs:** a converted module publishes as `nugetgo.<dotted module path>`; the `go.` prefix is
