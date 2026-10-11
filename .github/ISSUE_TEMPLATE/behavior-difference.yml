@@ -1,0 +1,63 @@
+name: Behavior difference against Go
+description: The converted program builds and runs, and does something different from the Go program.
+labels: ["triage", "behavior-difference"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Converted code is meant to behave as the Go does, so a difference is a defect unless it is a disclosed one.
+        Some differences are known and documented:
+        [what converts, but doesn't behave exactly like Go](https://go2cs.net/Limitations.html#what-converts-but-doesnt-behave-exactly-like-go).
+        A standard-library package's disclosed differences are on its row of the
+        [roster](https://go2cs.net/ValidatedTestPackages.html).
+  - type: textarea
+    id: go-source
+    attributes:
+      label: Go source
+      description: The smallest Go program that shows the difference.
+      render: go
+    validations:
+      required: true
+  - type: textarea
+    id: go-output
+    attributes:
+      label: What Go does
+      description: The output of `go run`, with `go version`.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: cs-output
+    attributes:
+      label: What the converted program does
+      description: The output of `dotnet run` on the converted program, including any exception and its stack trace.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: version
+    attributes:
+      label: go2cs -version
+      description: Paste the whole output of `go2cs -version`.
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system and architecture
+      options:
+        - Windows x64 (win-x64)
+        - Windows Arm64 (win-arm64)
+        - Linux x64 (linux-x64)
+        - Linux Arm64 (linux-arm64)
+        - macOS Intel (osx-x64)
+        - macOS Apple silicon (osx-arm64)
+        - Other (say which below)
+    validations:
+      required: true
+  - type: textarea
+    id: more
+    attributes:
+      label: Anything else
+      description: Whether it happens every run, the build configuration (Debug or Release), and the command you converted with.

@@ -1,0 +1,53 @@
+name: Problem with a published package
+description: A go.* or nugetgo.* NuGet package does not restore, build or behave as expected.
+labels: ["triage", "nugetgo"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form is for a package you referenced from NuGet: the converted Go standard library (`go.*`), the
+        runtime (`go.lib`), the source generators (`go.gen`), or a converted module (`nugetgo.*`, listed at
+        [nugetgo.net](https://nugetgo.net)). For code you converted yourself, use the conversion bug form.
+  - type: input
+    id: package
+    attributes:
+      label: Package and version
+      description: The package ID and the exact version, as your project file or `dotnet list package` shows them.
+      placeholder: nugetgo.github.com.google.uuid 1.6.0
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: The restore or build error, or what the package did and what you expected. Include the C# that calls it.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: project
+    attributes:
+      label: Your project
+      description: The target framework, the other go.* or nugetgo.* packages you reference with their versions, and `dotnet --version`.
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system and architecture
+      options:
+        - Windows x64 (win-x64)
+        - Windows Arm64 (win-arm64)
+        - Linux x64 (linux-x64)
+        - Linux Arm64 (linux-arm64)
+        - macOS Intel (osx-x64)
+        - macOS Apple silicon (osx-arm64)
+        - Other (say which below)
+    validations:
+      required: true
+  - type: textarea
+    id: more
+    attributes:
+      label: Anything else
+      description: Whether you publish with trimming or Native AOT, and whether an earlier version of the package worked.

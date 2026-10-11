@@ -1,0 +1,63 @@
+name: Conversion bug
+description: go2cs failed to convert Go code, or the C# it produced does not compile.
+labels: ["triage", "conversion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for trying go2cs. Before you file, please check
+        [Limitations](https://go2cs.net/Limitations.html) and [Known issues](https://go2cs.net/KnownIssues.html):
+        cgo, hand-written assembly and code that needs a newer Go than go2cs tracks are known not to convert.
+  - type: textarea
+    id: go-source
+    attributes:
+      label: Go source
+      description: The smallest Go that shows the problem, or a link to the module and version you converted.
+      render: go
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command line
+      description: The exact go2cs command you ran, and the directory you ran it from.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Output or error
+      description: >-
+        What go2cs printed, or the C# compiler's errors from `dotnet build`. Include the conversion's summary
+        line: a run can exit 0 and still report a package that failed.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: version
+    attributes:
+      label: go2cs -version
+      description: Paste the whole output of `go2cs -version`. It names the release, the converter and the Go toolchain.
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system and architecture
+      options:
+        - Windows x64 (win-x64)
+        - Windows Arm64 (win-arm64)
+        - Linux x64 (linux-x64)
+        - Linux Arm64 (linux-arm64)
+        - macOS Intel (osx-x64)
+        - macOS Apple silicon (osx-arm64)
+        - Other (say which below)
+    validations:
+      required: true
+  - type: textarea
+    id: more
+    attributes:
+      label: Anything else
+      description: Build tags you passed, the `dotnet --version` you build with, or what you already tried.
