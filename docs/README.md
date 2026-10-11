@@ -172,8 +172,8 @@ NuGet packages. Wondering which Go modules make good conversions? The
 * **Does it really behave like Go?** [It is measured against Go's own tests](FAQ.md#does-converted-code-really-behave-like-go),
   and every difference is disclosed by name.
 * **What does not convert?** [cgo, hand-written assembly, and code that needs a newer Go](FAQ.md#what-does-not-convert).
-* **What does the generated C# look like?** [Like the Go it came from](FAQ.md#what-does-the-generated-c-look-like):
-  readable, and still generated code. [Judge it on real code](#real-standard-library-conversions-side-by-side).
+* **What does the generated C# look like?** [Like the Go it came from](FAQ.md#what-does-the-generated-c-look-like).
+  [See real examples](#real-standard-library-conversions-side-by-side).
 * **How do I call a converted Go package from C#?** [Reference it like any other library](FAQ.md#how-do-i-call-a-converted-go-package-from-c).
 * **Why not call Go through a native library instead?** [You can, and here is the trade](FAQ.md#why-not-call-go-through-a-native-library-instead).
 * **Can it convert a module with third-party dependencies?** [Yes, though not every module converts cleanly yet](FAQ.md#can-it-convert-a-module-with-third-party-dependencies).
