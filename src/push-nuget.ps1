@@ -1922,18 +1922,22 @@ foreach ($rid in $otherRids) {
 # comparison between two SAME-flavor packs reports every assembly byte-identical, so the build is
 # reproducible and the cascade is the whole explanation.
 #
-# So the discriminator is the entry set plus the assembly LENGTH. Identity fields are fixed-size, so a
-# pure identity difference can never move it: this test has no false positives, which is what a
-# release gate needs. It is a smoke alarm, not a semantic digest -- section 13.1's digest remains the
-# instrument that answers the IL question in full, and it is a per-increment measurement rather than a
-# per-release one.
+# So the discriminator is the entry set plus each entry's MEANING: Get-GoLibEntryKey
+# (tools/pushnuget/GoAssemblyMaterial.psm1) hashes an assembly with exactly those identity fields zeroed, so a
+# pure identity difference cannot move the key and every other byte -- a type or member reference, a
+# signature, a string literal, IL -- does. Until 1.24.13.6 the discriminator was the assembly LENGTH,
+# which also had no false positives but could not see a difference that keeps the length. The 1.24.13.6
+# release rehearsal (master 4c9c68a32f) found one: the escape-registry generator puts per-OS type
+# references (go.slice<go.syscall_package.WSABuf>) into go.internal.coverage.decodemeta, whose three
+# flavors are all 345,600 bytes because PE sections pad to 512, so it shipped its Windows assembly to
+# every RID. A promoted package's warning now names, per flavor, what differs.
 $promoted = @()
 $variesOnThisPair = 0
 $identityOnly = 0
 $l3Count = $ridSplitIds.Count   # captured before any promotion below can inflate it
 
 foreach ($id in @($refFacts.Keys | Sort-Object)) {
-    $material = $false      # entry set or assembly length differs: a real difference
+    $material = $false      # entry set or an entry's meaning differs: a real difference
     $anyByte = $false       # any byte differs at all: includes the identity cascade above
 
     foreach ($rid in $otherRids) {
@@ -1965,8 +1969,8 @@ Write-Step ("  of {0} platform-neutral package(s): {1} differ materially, {2} di
             ($refFacts.Count - $l3Count), $promoted.Count, $identityOnly)
 
 if ($promoted.Count) {
-    Write-Warning ("These packages carry NO per-GOOS sources yet their assemblies differ in LENGTH between flavors, " +
-                   "which the identity cascade cannot explain, so they are being shipped with RID-specific assets: " +
+    Write-Warning ("These packages carry NO per-GOOS sources yet their assemblies differ in MEANING between flavors " +
+                   "(beyond the identity cascade), so they are being shipped with RID-specific assets: " +
                    "$($promoted -join ', '). Investigate before publishing -- the corpus has most likely gained a " +
                    "platform axis this script's L3 derivation cannot see " +
                    "(see docs\phase4\DESIGN-multiplatform-corpus.md section 13.1).")
