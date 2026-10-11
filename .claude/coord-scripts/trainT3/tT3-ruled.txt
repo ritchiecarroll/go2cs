@@ -1,0 +1,16 @@
+# TRAIN T3 -- the RULED resolutions the map and the assembly may make (tT3-resolve.py reads this file; nothing else does).
+# One line per (row, file):  ref|sha10|path|kind|hunks=N|ruling
+#   ref    the row's ref as the seat table writes it (no claude/ prefix)
+#   sha10  the first ten characters of the row's SEATED sha: a re-cut under the same name does NOT inherit the ruling
+#   path   the one file the ruling covers
+#   kind   append-both        = an insert against an insert at one point (EMPTY base in the diff3 form), both sides kept
+#                               whole, the union's lines first, the row's below them (merge order)
+#          append-both-sorted = the same shape, both sides' lines of each hunk written in sorted order (stripped,
+#                               case-insensitive): an alphabetical registration list (FL7). No other kind exists.
+#   hunks  how many such hunks the file holds in that merge
+# ANY conflict that no line here names ABORTS the map row and the assembly, with the row and every hunk named.
+# A line that no merge uses is printed as UNUSED by both scripts (the order moved, or the row merges clean now).
+# The file's content hash is stamped by the map and compared by the assembly: edit it BEFORE the map, never between.
+#
+# TRAIN T3 (2026-10-10): NO ACTIVE LINE. The i9's rehearsal-4b merged the 24 rows over 4e6322d770 with 0 conflicts
+# (claude/i9-union-t3-ref 71e5f69dda); this derive's own map (tT3-conflict-map.sh) is the reading of record for the order.
