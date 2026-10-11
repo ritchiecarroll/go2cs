@@ -48,10 +48,15 @@ function New-PortablePdb([string]$document) {
     [void][System.Reflection.Metadata.Ecma335.PortablePdbBuilder]::new($mb, $counts, [System.Reflection.Metadata.MethodDefinitionHandle]::new(), $null).Serialize($builder)
     , $builder.ToArray()
 }
-$hits = @(Find-NugetgoHostPaths -Bytes (New-PortablePdb "$cache/github.com/x/y@v1.0.0/y.cs") -Roots $roots)
-Check 'a portable pdb document under a root' ($hits.Count -eq 1 -and $hits[0] -eq $cache) "found [$($hits -join ', ')], want $cache"
-$hits = @(Find-NugetgoHostPaths -Bytes (New-PortablePdb '/_/src/github.com/x/y/y.cs') -Roots $roots)
-Check 'a portable pdb with path-mapped documents' ($hits.Count -eq 0) "found [$($hits -join ', ')], want none"
+# Building a pdb needs System.Reflection.Metadata in THIS host too. Where it is missing (Windows PowerShell 5.1 without
+# it in the GAC) the two arms cannot run, and say so; the refusal arm below covers what the scan does there.
+if ('System.Reflection.Metadata.Ecma335.MetadataBuilder' -as [type]) {
+    $hits = @(Find-NugetgoHostPaths -Bytes (New-PortablePdb "$cache/github.com/x/y@v1.0.0/y.cs") -Roots $roots)
+    Check 'a portable pdb document under a root' ($hits.Count -eq 1 -and $hits[0] -eq $cache) "found [$($hits -join ', ')], want $cache"
+    $hits = @(Find-NugetgoHostPaths -Bytes (New-PortablePdb '/_/src/github.com/x/y/y.cs') -Roots $roots)
+    Check 'a portable pdb with path-mapped documents' ($hits.Count -eq 0) "found [$($hits -join ', ')], want none"
+}
+else { Write-Host "  skip  the two portable-pdb arms: this PowerShell ($($PSVersionTable.PSVersion)) cannot load System.Reflection.Metadata to build one" }
 Write-Host 'Windows PowerShell 5.1'
 # The T3 battery's 5.1 leg (COORD, 2026-10-11): [System.Text.Encoding]::Latin1 is a .NET 5 property, so on .NET
 # Framework it is $null and every scan threw "You cannot call a method on a null-valued expression".
