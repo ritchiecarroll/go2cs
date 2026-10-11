@@ -52,6 +52,20 @@ $hits = @(Find-NugetgoHostPaths -Bytes (New-PortablePdb "$cache/github.com/x/y@v
 Check 'a portable pdb document under a root' ($hits.Count -eq 1 -and $hits[0] -eq $cache) "found [$($hits -join ', ')], want $cache"
 $hits = @(Find-NugetgoHostPaths -Bytes (New-PortablePdb '/_/src/github.com/x/y/y.cs') -Roots $roots)
 Check 'a portable pdb with path-mapped documents' ($hits.Count -eq 0) "found [$($hits -join ', ')], want none"
+Write-Host 'Windows PowerShell 5.1'
+# The T3 battery's 5.1 leg (COORD, 2026-10-11): [System.Text.Encoding]::Latin1 is a .NET 5 property, so on .NET
+# Framework it is $null and every scan threw "You cannot call a method on a null-valued expression".
+$module = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'NugetgoHostPaths.psm1'))
+Check 'the module names no .NET API that Windows PowerShell 5.1 lacks (Encoding.Latin1)' (-not $module.Contains('[System.Text.Encoding]::Latin1')) 'it reads [System.Text.Encoding]::Latin1'
+# A portable pdb's document names are read with System.Reflection.Metadata, which .NET Framework does not ship. Where it
+# cannot be loaded, the scan must REFUSE the pdb by name: returning no document names would pass a pdb it never read.
+$pdbSignature = [byte[]](0x42, 0x53, 0x4A, 0x42) + [byte[]]::new(60)
+& (Get-Module NugetgoHostPaths) { $script:PdbReaderMissing = $true }
+$threw = $null
+try { [void](Find-NugetgoHostPaths -Bytes $pdbSignature -Roots $roots) } catch { $threw = $_.Exception.Message }
+& (Get-Module NugetgoHostPaths) { $script:PdbReaderMissing = $false }
+Check 'a portable pdb it cannot read is refused, naming System.Reflection.Metadata' ($threw -and $threw.Contains('System.Reflection.Metadata')) "threw [$threw]"
+
 Check 'an empty or blank root is ignored' (@(Find-NugetgoHostPaths -Bytes (Utf8 'anything') -Roots @('', '  ')).Count -eq 0) 'a blank root matched'
 
 Write-Host 'the pack uses it'
