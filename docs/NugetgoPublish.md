@@ -129,11 +129,30 @@ The package page belongs to the module's author; the pack keeps its facts true (
 - Packages published before this (hashset 1.0.0 and revision 2, uuid and jwt in their first wave) keep their
   generated READMEs. A conversion repository gets the file at its next rebuild.
 
+### The conversion repository's README
+
+The conversion repository's root `README.md` is written by hand for each conversion; no tool generates it. A
+THIRD-PARTY conversion, one published by the go2cs project and not by the module's maintainers, ENDS it with an offer
+to them (owner item, COORD ruling 2026-10-11). The author form (hashset-cs) carries no such section.
+
+```powershell
+Import-Module ./src/tools/nugetgo/NugetgoReadme.psm1
+New-NugetgoMaintainersSection -ModulePath github.com/golang-jwt/jwt/v5 -Maintainer golang-jwt
+```
+
+`-Maintainer` names who maintains the module and defaults to the module path: uuid-cs names
+`github.com/google/uuid`, jwt-cs names the org, `golang-jwt`. Paste the section at the end of the README.
+`nugetgo-pack.ps1 -ConversionReadme <path to the root README.md>` checks it (`Test-NugetgoConversionReadme`): a
+third-party README that does not end with the section for the module is refused by name, and so is an author README
+that carries one. `-ConversionReadme` is OPTIONAL today. It becomes MANDATORY for release packs, never rehearsal packs,
+in the same train as the author-owned package README, when the next sheet is cut.
+
 **Gate: both packs exit 0.** The pack itself refuses, by name: a host path in any packed file, a restored `go.*`
 closure that is not the published `R`, a proof whose input digest is not the packed project's, any read-back
 mismatch of identity, description, copyright, ranges or self-description, a README with inline code in a heading, a
 table wider than three columns or a link naming `HEAD`, a README whose generated block is missing or malformed or has
-a link above it, a package with no icon, and `-Icon` given beside a `nuget/icon.png`.
+a link above it, a package with no icon, `-Icon` given beside a `nuget/icon.png`, and, when `-ConversionReadme` is
+given, a conversion README that does not fit the description's form.
 
 ## 3. Rehearse on int.nugettest.org (B7)
 
@@ -176,7 +195,8 @@ COORD rules sections 1-3 green before this step.
      left them;
    - `PR`'s root `Directory.Build.props` and `Directory.Build.targets`. Without the root `Directory.Build.props` the
      project does not restore (NU1015), because `GoStdLibVersion` is set there;
-   - the module's LICENSE verbatim (B6), a README, and a `.gitignore` for the build output (`.artifacts/`);
+   - the module's LICENSE verbatim (B6), a README (for a third-party conversion, ending with the maintainers section:
+     section 2, "The conversion repository's README"), and a `.gitignore` for the build output (`.artifacts/`);
    - the packed VALIDATION.md and its per-package proof pages, byte for byte as the package carries them.
 
    The license file and VALIDATION.md sit at the repository ROOT in either layout below. The package README links
