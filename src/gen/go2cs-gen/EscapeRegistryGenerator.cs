@@ -31,6 +31,8 @@ namespace go2cs;
 /// <item>a conversion inside generic code (T to an interface), whose container is open at the site;</item>
 /// <item>a container reachable only through a field another assembly does not export (Roslyn imports only public members
 /// from metadata);</item>
+/// <item>a container over a type the compilation cannot name: one in an assembly it does not reference directly (a
+/// tests project's DisableTransitiveProjectReferences), or an inaccessible one (see <see cref="Nameable"/>);</item>
 /// <item>a struct that carries no face of its own (its compilation never spells a pointer to it; TypeOpsScope).</item>
 /// </list>
 /// <para>
@@ -135,7 +137,7 @@ public class EscapeRegistryGenerator : ISourceGenerator
 
         if (IsContainer(named))
         {
-            if (!ContainsTypeParameter(named) && compilation.IsSymbolAccessibleWithin(named, package))
+            if (!ContainsTypeParameter(named) && Nameable(compilation, package, named))
                 registered.Add(named);
 
             foreach (ITypeSymbol argument in named.TypeArguments)
@@ -160,6 +162,28 @@ public class EscapeRegistryGenerator : ISourceGenerator
         foreach (IFieldSymbol field in type.GetMembers().OfType<IFieldSymbol>().Where(field => !field.IsStatic && !field.IsConst))
             Reach(compilation, package, field.Type, registered, visited, depth + 1);
     }
+
+    // A registry line must compile, so every type it spells must be one this compilation can NAME: not an error type,
+    // defined in this compilation or an assembly it references DIRECTLY, and accessible from the package class. A tests
+    // project sets DisableTransitiveProjectReferences, so a type reached through a referenced assembly's field signature
+    // can live in an assembly it does not reference (TRAIN T3, 2026-10-10: CS0234 naming go.ast_package and go.io_package).
+    // Such a container is skipped: it falls to golib's fallback, trim stage 3d's boundary under Native AOT (an exception,
+    // never a wrong answer); the JIT is unaffected.
+    internal static bool Nameable(Compilation compilation, INamedTypeSymbol package, ITypeSymbol type) => type switch
+    {
+        IArrayTypeSymbol array => Nameable(compilation, package, array.ElementType),
+        IPointerTypeSymbol pointer => Nameable(compilation, package, pointer.PointedAtType),
+        INamedTypeSymbol named => named.TypeKind != TypeKind.Error &&
+            (named.SpecialType != SpecialType.None || ReferencesDirectly(compilation, named.ContainingAssembly)) &&
+            compilation.IsSymbolAccessibleWithin(named, package) &&
+            named.TypeArguments.All(argument => Nameable(compilation, package, argument)),
+        _ => false
+    };
+
+    private static bool ReferencesDirectly(Compilation compilation, IAssemblySymbol? assembly) =>
+        assembly is not null &&
+        (SymbolEqualityComparer.Default.Equals(assembly, compilation.Assembly) ||
+         compilation.SourceModule.ReferencedAssemblySymbols.Contains(assembly, SymbolEqualityComparer.Default));
 
     internal static bool IsContainer(INamedTypeSymbol type) =>
         type.ContainingAssembly?.Name == "golib" && type.ContainingType is null && s_containers.Contains(type.Name) && type.IsGenericType;
