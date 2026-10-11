@@ -59,10 +59,14 @@ func TestNugetgoSuitesPass(t *testing.T) {
 	}
 }
 
-// nugetgoSuiteCommand is the pwsh launch for one suite.
+// nugetgoSuiteCommand is the pwsh launch for one suite. DOTNET_ROLL_FORWARD=Major lets a framework-dependent pwsh
+// (the .NET global-tool shim) start on a newer runtime than the one it was built for when that one is not installed;
+// see TestNugetgoSuiteCommandRollsForwardToANewerRuntime. It is appended last, so it wins over a parent's setting.
 func nugetgoSuiteCommand(pwsh string, suite string) *exec.Cmd {
 	command := exec.Command(pwsh, "-NoProfile", "-NonInteractive", "-File", suite)
-	command.Env = append(os.Environ(), "NO_COLOR=1") // plain text: the failure message quotes the output
+	command.Env = append(os.Environ(),
+		"NO_COLOR=1", // plain text: the failure message quotes the output
+		"DOTNET_ROLL_FORWARD=Major")
 
 	return command
 }
@@ -76,7 +80,9 @@ func nugetgoSuiteFailure(name string, pwsh string, err error, output string, fai
 		detail = lastLines(output, 20)
 	}
 
-	return fmt.Sprintf("%s failed (%v):\n%s", name, err, detail)
+	// The pwsh path is named so that a launch failure (a .NET host error such as 0x8000809x) reads as the
+	// environment's problem at a glance, not the suite's.
+	return fmt.Sprintf("%s failed (%v) under %s:\n%s", name, err, pwsh, detail)
 }
 
 // lastLines is the tail of a suite's output, for a failure that printed no FAIL line (a script that threw).
