@@ -38,6 +38,15 @@ and compared against a committed expected output, and each runnable one is execu
 compared against Go's. [`CONTRIBUTING.md`](https://github.com/ritchiecarroll/go2cs/blob/master/CONTRIBUTING.md)
 says how to run them before you send a change.
 
+Three focused checks run by hand when you change what they guard:
+
+- `src/check-warning-entries.sh`: the per-file warning entries the converter writes match the compiler's
+  warnings, in both directions.
+- `src/tests/pack-paths-selftest.ps1`: the pack's path guard (`src/check-pack-paths.ps1`) names exactly
+  the paths planted in fabricated packages.
+- `src/tools/nugetgo/Test-NugetgoSelfDescription.ps1`: the module pack's self-description, on a
+  fabricated conversion output.
+
 ## Validate a converted test suite
 
 Every validated package ships its **converted C# test sources** next to the production code under

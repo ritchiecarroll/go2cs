@@ -432,6 +432,12 @@ standard-library reconvert, and re-runs the performance suite.
 **Not pursued:** `for range string(x)`, which has no standard-library sites; and `m[string(x)]` map
 keys, where a zero-allocation lookup would need a custom comparer that slows every `@string`-keyed map.
 
+## IDE mode (an experiment)
+
+A gated experiment in writing Go in an editor and running and debugging it as .NET, with the debugger
+showing Go values the way a Go developer expects. Its feasibility is tested first, and nothing in it is
+a commitment yet. The plan: [IDE mode](PLAN-ide-mode.md).
+
 ## Open converter items
 
 **In short.** Known, smaller gaps in the converter, none of them scheduled. The validated standard

@@ -17,3 +17,5 @@ exclude:
   - phase3
   - phase4
   - doctrine
+  - PLAN-context-diet.md
+  - PLAN-rebank-wave.md
