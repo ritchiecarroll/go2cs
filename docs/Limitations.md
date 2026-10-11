@@ -12,7 +12,7 @@ spots real code hits today.
 standard library, and runs on x64 Windows or Linux. **A longer evening:** lots of third-party modules,
 `unsafe`, assembly fast paths, or tests that pull in testify or read `os.Args`.
 
-* **You need Go 1.24 itself on your PATH**, the release go2cs tracks, and **cgo is refused**.
+* **You need Go 1.24.13 itself on your PATH**, the release go2cs tracks, and **cgo is refused**.
 * **Assembly, `//go:linkname` and deep `unsafe` tricks compile clean, then fail at run time.** Many
   libraries ship a pure-Go fallback behind a build tag, and you have to pass that tag yourself.
 * **Goroutines are real threads.** Thousands are fine. Hundreds of thousands are not.

@@ -541,7 +541,7 @@ to the official source.
 
 ## January 5, 2021 — Go as a scripting language for Unity and Godot
 
-Example usages of go2cs allow [Go](https://golang.org/ref/spec) to serve as the **scripting language
+Example usages of go2cs allow [Go](https://go.dev/ref/spec) to serve as the **scripting language
 for the [Unity](https://unity.com/) and [Godot](https://godotengine.org/) game-engine platforms** —
 see the [GoUnity](https://github.com/ritchiecarroll/GoUnity) and
 [GodotGo](https://github.com/ritchiecarroll/GodotGo) projects. The project has also been updated to
