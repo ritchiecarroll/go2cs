@@ -291,16 +291,43 @@ function Resolve-NugetgoPackageIcon {
     & $none 'no icon: the conversion carries no go2cs.png beside its projects, and no -Icon was given'
 }
 
-# The closing section of a THIRD-PARTY conversion repository's root README (owner item, COORD ruling 2026-10-11).
+# The closing section of a THIRD-PARTY conversion repository's root README (owner item, COORD ruling 2026-10-11): the
+# conversion is the go2cs project's, not the module maintainers', and the repository and its NuGet package ID are
+# theirs for the asking. COORD wrote it by hand into uuid-cs (491e0a1b2f) and jwt-cs (dffc7d6aa3); these lines are that
+# text, line breaks included. {0} is the module path, in code; {1} is who maintains it. That is a judgement, so it is
+# an input: uuid-cs names the module path (the default), jwt-cs the org, golang-jwt. The author form (hashset-cs)
+# carries no closing section.
+$script:MaintainersHeading = "## For the module's maintainers"
+$script:MaintainersLines = @(
+    'This conversion is published by the go2cs project, not by the maintainers of `{0}`. If you',
+    'maintain {1} and would like to own it, open an issue here and we will gladly transfer this',
+    'repository, and the NuGet package ID with it, to you.')
+
 function New-NugetgoMaintainersSection {
     [CmdletBinding()]
     param([Parameter(Mandatory)][string]$ModulePath, [string]$Maintainer, [switch]$Author)
-    ''
+    if ($Author) { throw "an author conversion carries no maintainers section: $ModulePath is published by its author" }
+    if (-not $Maintainer) { $Maintainer = $ModulePath }
+    $script:MaintainersHeading + "`n`n" + ((@($script:MaintainersLines) -join "`n") -f $ModulePath, $Maintainer) + "`n"
 }
 
-# The reasons a conversion repository's root README is refused (COORD ruling 2026-10-11).
+# The reasons a conversion repository's root README is refused (COORD ruling 2026-10-11). A third-party README must END
+# with the maintainers section for -ModulePath, with any maintainer named. An author README (-Author) must not carry the
+# heading at all. Line endings are not compared. No reason means accepted.
 function Test-NugetgoConversionReadme([string]$Text, [string]$ModulePath, [switch]$Author) {
-    @()
+    $text = $Text -replace "`r`n", "`n"
+    $headings = [regex]::Matches($text, '(?m)^' + [regex]::Escape($script:MaintainersHeading) + '\s*$').Count
+    if ($Author) {
+        if ($headings) { return @("an author conversion carries no maintainers section, and this README has '$($script:MaintainersHeading)'") }
+        return @()
+    }
+    $slot = 'NUGETGO-MAINTAINER-SLOT'
+    $lines = @($script:MaintainersLines | ForEach-Object { [regex]::Escape(($_ -f $ModulePath, $slot)) })
+    $lines[1] = $lines[1].Replace($slot, '(?<maintainer>[^\n]+)')
+    $section = '(?:^|\n)' + [regex]::Escape($script:MaintainersHeading) + '\n\n' + ($lines -join '\n') + '\s*$'
+    if ([regex]::IsMatch($text, $section)) { return @() }
+    if (-not $headings) { return @("the README does not end with '$($script:MaintainersHeading)', the offer to the maintainers of $ModulePath") }
+    @("the README's '$($script:MaintainersHeading)' is not the section for $ModulePath as the template words it, or it is not the README's last section")
 }
 
 Export-ModuleMember -Function ConvertTo-NugetgoShieldsText, ConvertTo-NugetgoMarkdownText, Get-NugetgoProofTotals, Test-NugetgoSpdx,
