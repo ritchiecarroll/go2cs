@@ -74,7 +74,9 @@ Like the Go, on purpose. A Go method is a C# extension method, multiple results 
 embedded struct's fields are promoted. Names keep Go's spelling, so they do not follow .NET naming
 conventions, and a few Go ideas with no C# spelling use letters you will not find on your keyboard, such
 as `ж<T>` for a pointer. The [glyph table](ConversionStrategies.md#reading-converted-code-names-and-glyphs)
-explains each one.
+explains each one. To judge it on real code, see
+[Real standard-library conversions, side by side](README.md#real-standard-library-conversions-side-by-side):
+converted files beside their Go source, from simple to complex.
 
 It is readable, and it is still generated code. Do not edit a converted file by hand, because the next
 conversion rewrites it: change the Go, or mark a file as manually converted so the converter leaves it
