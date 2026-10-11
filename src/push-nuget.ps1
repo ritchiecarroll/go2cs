@@ -1547,6 +1547,8 @@ Write-Step "Verified $sourceVerified C# Source badge(s) pin $fullVersion and its
 # flavors' dependencies, and the merge below computes that union. Both sets restore everywhere; only
 # the RID-matched assemblies ever load.
 Add-Type -AssemblyName System.IO.Compression.FileSystem
+# The platform-neutral check's per-entry key and its reason by name (the verification below).
+Import-Module (Join-Path $PSScriptRoot 'tools/pushnuget/GoAssemblyMaterial.psm1') -Force
 
 # --- nupkg surgery helpers ------------------------------------------------------------------------
 # A .nupkg is an ordinary zip, so the merge below is entry-level: no repack, no re-sign, no NuGet
@@ -1803,6 +1805,41 @@ foreach ($rid in $buildOrder) {
 }
 
 # --- Asset merge ----------------------------------------------------------------------------------
+function Read-GoZipEntryBytes([System.IO.Compression.ZipArchiveEntry]$Entry) {
+    $ms = New-Object System.IO.MemoryStream
+    $s = $Entry.Open()
+    try { $s.CopyTo($ms) } finally { $s.Dispose() }
+    return , $ms.ToArray()
+}
+
+# Why a platform-neutral package was promoted, by name: each lib/ entry whose key differs between the reference
+# flavor and another, with GoAssemblyMaterial's reason for it.
+function Get-GoPromotionReason([string]$Id) {
+    $reasons = @()
+    foreach ($rid in $otherRids) {
+        $a = $refFacts[$Id]
+        $b = $facts[$rid][$Id]
+        $onlyA = @($a.Key.Keys | Where-Object { -not $b.Key.ContainsKey($_) })
+        $onlyB = @($b.Key.Keys | Where-Object { -not $a.Key.ContainsKey($_) })
+        if ($onlyA.Count -or $onlyB.Count) {
+            $reasons += "[$rid] lib/ entry set differs (only in ${referenceRid}: $($onlyA -join ', '); only in ${rid}: $($onlyB -join ', '))"
+            continue
+        }
+
+        $za = [System.IO.Compression.ZipFile]::OpenRead($a.Path)
+        $zb = [System.IO.Compression.ZipFile]::OpenRead($b.Path)
+        try {
+            foreach ($k in @($a.Key.Keys | Sort-Object)) {
+                if ($a.Key[$k] -eq $b.Key[$k]) { continue }
+                $why = Get-GoLibEntryDifference -Name $k -A (Read-GoZipEntryBytes $za.GetEntry($k)) -B (Read-GoZipEntryBytes $zb.GetEntry($k))
+                $reasons += "[$rid] $why"
+            }
+        }
+        finally { $za.Dispose(); $zb.Dispose() }
+    }
+    return ($reasons -join '; ')
+}
+
 function Read-GoPackageFacts([string]$Path) {
     $zip = [System.IO.Compression.ZipFile]::OpenRead($Path)
     try {
@@ -1824,17 +1861,17 @@ function Read-GoPackageFacts([string]$Path) {
         # A .pdb still travels with its DLL wherever the merge below copies lib/.
         $sha = [System.Security.Cryptography.SHA256]::Create()
         $lib = @{}
-        $size = @{}
+        $key = @{}
         try {
             foreach ($e in $zip.Entries) {
                 if ($e.FullName -notlike 'lib/*' -or $e.FullName -like '*.pdb') { continue }
-                $size[$e.FullName] = $e.Length
-                $s = $e.Open()
-                try { $lib[$e.FullName] = [BitConverter]::ToString($sha.ComputeHash($s)) } finally { $s.Dispose() }
+                $bytes = Read-GoZipEntryBytes $e
+                $lib[$e.FullName] = [BitConverter]::ToString($sha.ComputeHash($bytes))
+                $key[$e.FullName] = Get-GoLibEntryKey -Name $e.FullName -Bytes $bytes
             }
         } finally { $sha.Dispose() }
 
-        return [pscustomobject]@{ Id = $id; Path = $Path; Lib = $lib; Size = $size }
+        return [pscustomobject]@{ Id = $id; Path = $Path; Lib = $lib; Key = $key }
     }
     finally { $zip.Dispose() }
 }
@@ -1906,7 +1943,7 @@ foreach ($id in @($refFacts.Keys | Sort-Object)) {
 
         foreach ($k in $a.Lib.Keys) {
             if (-not $b.Lib.ContainsKey($k)) { $material = $true; $anyByte = $true; break }
-            if ($a.Size[$k] -ne $b.Size[$k]) { $material = $true }
+            if ($a.Key[$k] -ne $b.Key[$k]) { $material = $true }
             if ($a.Lib[$k] -ne $b.Lib[$k]) { $anyByte = $true }
         }
         if ($material) { break }
@@ -1933,6 +1970,7 @@ if ($promoted.Count) {
                    "$($promoted -join ', '). Investigate before publishing -- the corpus has most likely gained a " +
                    "platform axis this script's L3 derivation cannot see " +
                    "(see docs\phase4\DESIGN-multiplatform-corpus.md section 13.1).")
+    foreach ($id in $promoted) { Write-Warning "  $id -- $(Get-GoPromotionReason $id)" }
 }
 
 # The merge itself. A neutral package is copied VERBATIM from the reference flavor -- byte for byte the

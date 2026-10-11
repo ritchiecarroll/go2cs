@@ -26,22 +26,35 @@ import (
 // already runs. Each suite's exit code is its number of failed arms, so a non-zero exit fails the guard, which names
 // the suite and quotes its FAIL lines.
 //
+// src/tools/pushnuget carries push-nuget.ps1's platform-neutral check and its suite (the 1.24.13.6 release rehearsal),
+// held to the same rules.
+//
 // The suites are found by glob, so a new Test-*.ps1 is covered the day it lands. They need pwsh (PowerShell 7: the
 // host-path suite reads portable pdbs through System.Reflection.Metadata, which Windows PowerShell 5.1 does not ship).
 // A host with no pwsh on PATH skips, and says so by name.
+// toolSuiteDirs are the directories under src/tools whose Test-*.ps1 suites, scripts and modules the guards in this
+// file and nugetgoScripts_test.go cover.
+var toolSuiteDirs = []string{"nugetgo", "pushnuget"}
+
 func TestNugetgoSuitesPass(t *testing.T) {
 	pwsh, err := exec.LookPath("pwsh")
 	if err != nil {
 		t.Skip("pwsh is not on PATH: the nugetgo Test-*.ps1 suites did NOT run on this host")
 	}
 
-	suites, err := filepath.Glob(filepath.Join(repoRootFromPackageDir(t), "src", "tools", "nugetgo", "Test-*.ps1"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	var suites []string
 
-	if len(suites) == 0 {
-		t.Fatal("no src/tools/nugetgo/Test-*.ps1 suite found: the glob or the tree moved")
+	for _, dir := range toolSuiteDirs {
+		matches, err := filepath.Glob(filepath.Join(repoRootFromPackageDir(t), "src", "tools", dir, "Test-*.ps1"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(matches) == 0 {
+			t.Fatalf("no src/tools/%s/Test-*.ps1 suite found: the glob or the tree moved", dir)
+		}
+
+		suites = append(suites, matches...)
 	}
 
 	failLine := regexp.MustCompile(`(?m)^\s*FAIL\s.*$`)

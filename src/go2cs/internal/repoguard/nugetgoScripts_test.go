@@ -71,29 +71,34 @@ func TestNugetgoSuitesPrintTheStandardSummaryLine(t *testing.T) {
 	}
 
 	if suites == 0 {
-		t.Fatal("no src/tools/nugetgo/Test-*.ps1 suite found: the glob or the tree moved")
+		t.Fatal("no Test-*.ps1 suite found under src/tools: the glob or the tree moved")
 	}
 }
 
-// nugetgoScripts lists the PowerShell scripts and modules under src/tools/nugetgo.
+// nugetgoScripts lists the PowerShell scripts and modules under each of toolSuiteDirs (src/tools/nugetgo and
+// src/tools/pushnuget).
 func nugetgoScripts(t *testing.T) []string {
 	t.Helper()
 
-	dir := filepath.Join(repoRootFromPackageDir(t), "src", "tools", "nugetgo")
-
 	var scripts []string
 
-	for _, pattern := range []string{"*.ps1", "*.psm1"} {
-		matches, err := filepath.Glob(filepath.Join(dir, pattern))
-		if err != nil {
-			t.Fatal(err)
+	for _, name := range toolSuiteDirs {
+		dir := filepath.Join(repoRootFromPackageDir(t), "src", "tools", name)
+		found := 0
+
+		for _, pattern := range []string{"*.ps1", "*.psm1", "testdata/*.ps1"} {
+			matches, err := filepath.Glob(filepath.Join(dir, pattern))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			found += len(matches)
+			scripts = append(scripts, matches...)
 		}
 
-		scripts = append(scripts, matches...)
-	}
-
-	if len(scripts) == 0 {
-		t.Fatal("no script under src/tools/nugetgo: the tree moved")
+		if found == 0 {
+			t.Fatalf("no script under src/tools/%s: the tree moved", name)
+		}
 	}
 
 	return scripts
