@@ -15,9 +15,6 @@ name: Release binaries (prototype)
 
 on:
   workflow_dispatch:
-  push:
-    branches: ['claude/r-install-scope']
-    paths: ['.github/workflows/release-binaries.yml']
 
 permissions:
   contents: read
