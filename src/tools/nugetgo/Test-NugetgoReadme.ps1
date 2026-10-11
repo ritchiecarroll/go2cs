@@ -6,7 +6,8 @@
     generates a README in the go.* standard library packages' style and refuses one with inline code in a heading or a
     table wider than three columns, and refuses a pack with no icon. The owner's review of the hashset revision-1 preview
     (2026-10-10): no "PROOF:" in the README or the description, and the README's first link names the Go module's
-    source at its version. Exit code = the number of failed cases.
+    source at its version. COORD ruling 2026-10-11: a third-party conversion repository's root README ends with an
+    offer to the module's maintainers, and the author form never carries one. Exit code = the number of failed cases.
 #>
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'NugetgoReadme.psm1') -Force
@@ -269,6 +270,45 @@ try {
     }
 }
 finally { Remove-Item -Recurse -Force $dir }
+
+Write-Host "the maintainers section (a third-party conversion repository's root README)"
+# COORD ruling 2026-10-11: a third-party conversion repository's root README ends with an offer to the module's
+# maintainers; the author form (hashset) never carries it. The fixtures are the three repositories' READMEs byte for
+# byte (testdata/conversion-readme/README.txt names the commits).
+$fixtures = Join-Path $PSScriptRoot 'testdata/conversion-readme'
+$readmeOf = { param($name) [System.IO.File]::ReadAllText((Join-Path $fixtures "$name.md")) }
+$uuidReadme = & $readmeOf 'uuid-cs'
+$jwtReadme = & $readmeOf 'jwt-cs'
+$hashsetReadme = & $readmeOf 'hashset-cs'
+$heading = "## For the module's maintainers"
+$sectionOf = { param($text) $text.Substring($text.IndexOf($heading, [StringComparison]::Ordinal)) }
+$withoutSection = { param($text) $text.Substring(0, $text.IndexOf($heading, [StringComparison]::Ordinal)).TrimEnd() + "`n" }
+$uuidModule = 'github.com/google/uuid'
+$jwtModule = 'github.com/golang-jwt/jwt/v5'
+$hashsetModule = 'github.com/ritchiecarroll/hashset'
+
+$got = New-NugetgoMaintainersSection -ModulePath $uuidModule
+Check 'the section for uuid is uuid-cs''s, byte for byte (the maintainer defaults to the module path)' ($got -ceq (& $sectionOf $uuidReadme)) "got [$got]"
+$got = New-NugetgoMaintainersSection -ModulePath $jwtModule -Maintainer 'golang-jwt'
+Check 'the section for jwt with -Maintainer golang-jwt is jwt-cs''s, byte for byte' ($got -ceq (& $sectionOf $jwtReadme)) "got [$got]"
+$threw = $null
+try { [void](New-NugetgoMaintainersSection -ModulePath $hashsetModule -Author) } catch { $threw = $_.Exception.Message }
+Check 'no section is made for an author conversion' ($threw -and $threw.Contains('author')) "threw [$threw]"
+
+foreach ($case in @(
+        @('uuid-cs as committed', $uuidReadme, $uuidModule, $false, $null),
+        @('jwt-cs as committed', $jwtReadme, $jwtModule, $false, $null),
+        @('hashset-cs as committed (author form, no section)', $hashsetReadme, $hashsetModule, $true, $null),
+        @('uuid-cs with the section stripped', (& $withoutSection $uuidReadme), $uuidModule, $false, 'does not end with'),
+        @('jwt-cs with the section stripped', (& $withoutSection $jwtReadme), $jwtModule, $false, 'does not end with'),
+        @('hashset-cs with the section added', ($hashsetReadme.TrimEnd() + "`n`n" + (New-NugetgoMaintainersSection -ModulePath $hashsetModule)), $hashsetModule, $true, 'author'),
+        @('uuid-cs checked as another module', $uuidReadme, 'github.com/google/other', $false, 'not the section for'),
+        @('uuid-cs with text after the section', ($uuidReadme + "`n## Later`n"), $uuidModule, $false, 'not the section for'),
+        @('uuid-cs with CRLF line endings', ($uuidReadme -replace "`n", "`r`n"), $uuidModule, $false, $null))) {
+    $reasons = @(Test-NugetgoConversionReadme -Text $case[1] -ModulePath $case[2] -Author:$case[3])
+    if (-not $case[4]) { Check $case[0] ($reasons.Count -eq 0) "refused: $($reasons -join '; ')" }
+    else { Check "$($case[0]) is refused" (@($reasons | Where-Object { $_.Contains($case[4]) }).Count -gt 0) "reasons [$($reasons -join '; ')]" }
+}
 
 Write-Host "$($ran - $failed)/$ran passed"
 exit $failed
