@@ -30,10 +30,13 @@ jobs:
   build:
     name: Cross-compile six platforms
     runs-on: ubuntu-latest
+    outputs:
+      go-version: ${{ steps.go.outputs.go-version }}
     steps:
       - uses: actions/checkout@v5
 
       - uses: actions/setup-go@v6
+        id: go
         with:
           go-version-file: src/go2cs/go.mod
           cache-dependency-path: src/go2cs/go.sum
@@ -103,6 +106,15 @@ jobs:
           - { rid: osx-x64,     runner: macos-15-intel }
           - { rid: osx-arm64,   runner: macos-15 }
     steps:
+      # go2cs needs Go even to print its version today: main.go resolves GOROOT before it reads any flag, and a
+      # -trimpath binary carries no GOROOT of its own. The first run of this prototype (38168160233) failed on
+      # both macOS runners for that reason: their images do not put Go on PATH. Installing Go here is what a
+      # user must do anyway before converting.
+      - uses: actions/setup-go@v6
+        with:
+          go-version: ${{ needs.build.outputs.go-version }}
+          cache: false
+
       - uses: actions/download-artifact@v5
         with:
           name: release-binaries
