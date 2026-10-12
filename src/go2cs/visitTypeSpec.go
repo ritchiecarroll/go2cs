@@ -179,15 +179,20 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		// The `global using` line is the only place C# declares the alias, so its doc goes directly above it
 		// (docs/PLAN-comment-and-spacing-parity.md, the owner's decision 6), at the file's top level, after the
 		// blank line Go has above the declaration: the block sits directly under the file's leading comments
-		// (visitFile drops the blank line when nothing is above it).
+		// (visitFile drops the blank line when nothing is above it). An alias of an anonymous struct or interface
+		// lifted that type above, and its doc with it: then there is nothing left to write here.
 		if v.options.includeComments && doc != nil {
-			v.typeAliasDeclarations.WriteString(v.newline)
-
+			aliasDoc := &strings.Builder{}
 			savedIndent := v.indentLevel
 			v.indentLevel = 0
-			v.writeCommentString(v.typeAliasDeclarations, doc, token.NoPos)
+			v.writeCommentString(aliasDoc, doc, token.NoPos)
 			v.indentLevel = savedIndent
-			v.typeAliasDeclarations.WriteString(v.newline)
+
+			if aliasDoc.Len() > 0 {
+				v.typeAliasDeclarations.WriteString(v.newline)
+				v.typeAliasDeclarations.WriteString(aliasDoc.String())
+				v.typeAliasDeclarations.WriteString(v.newline)
+			}
 		}
 
 		v.typeAliasDeclarations.WriteString(fmt.Sprintf("global using %s = %s;%s", aliasName, typeName, v.newline))
