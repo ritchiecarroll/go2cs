@@ -53,10 +53,14 @@
     GOROOT of the outgoing release, passed through to handown-census.ps1 (mandatory there too).
 
 .PARAMETER ToGoRoot
-    GOROOT of the incoming release, passed through to handown-census.ps1.
+    GOROOT of the incoming release, passed through to handown-census.ps1. Its VERSION must name the
+    release src/version.props pins (bumped at H2, so at H6 it is the incoming one), or the gate refuses.
 
 .PARAMETER AuditFile
-    The migration's audit file. Default: docs/phase4/AUDIT-h6-handown-go124.md in this tree.
+    The migration's audit file. Default: docs/phase4/AUDIT-h6-handown-go<GoStdLibVersion>.md in this
+    tree, the release read from src/version.props, never a literal (NOTES-next-hop A8). A default that
+    names no file REFUSES by name rather than reading an earlier hop's audit; an earlier hop's audit
+    (hop B's is AUDIT-h6-handown-go124.md) is passed explicitly.
 
 .NOTES
     Requires PowerShell 5.1 (Windows) or PowerShell 7+. Exit 0 clean, 1 on any violation, 2 when the
@@ -73,7 +77,6 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-if (-not $AuditFile) { $AuditFile = Join-Path $repo 'docs/phase4/AUDIT-h6-handown-go124.md' }
 $censusScript = Join-Path $PSScriptRoot 'handown-census.ps1'
 
 $emDash = [string][char]0x2014
@@ -121,7 +124,28 @@ function Get-CensusPopulation([string] $Census, [string] $From, [string] $To) {
 }
 
 if (-not (Test-Path $censusScript)) { Stop-Refused "the census instrument is absent: src/handown-census.ps1" }
-if (-not (Test-Path $AuditFile)) { Stop-Refused "the audit file is absent: $AuditFile" }
+
+# --- 0. The release: src/version.props <GoStdLibVersion>, the runbook's one source of record -------
+# A literal default here read the PREVIOUS hop's audit when run without -AuditFile, and passed or
+# failed on rows nobody wrote for this hop (NOTES-next-hop A8).
+$propsPath = Join-Path $repo 'src/version.props'
+$pinMatch = if (Test-Path -LiteralPath $propsPath) {
+    [regex]::Match([System.IO.File]::ReadAllText($propsPath), '<GoStdLibVersion>\s*([^<\s]+)\s*</GoStdLibVersion>')
+}
+if (-not $pinMatch -or -not $pinMatch.Success) { Stop-Refused "src/version.props carries no <GoStdLibVersion>, so the release under audit has no source of record" }
+$goPin = $pinMatch.Groups[1].Value
+if (-not $AuditFile) { $AuditFile = Join-Path $repo "docs/phase4/AUDIT-h6-handown-go$goPin.md" }
+if (-not (Test-Path $AuditFile)) { Stop-Refused "the audit file is absent: $AuditFile (the release pinned in src/version.props is go$goPin)" }
+
+# The census classifies against -ToGoRoot while src/core is the pinned release's, so the two must name
+# one release. Matched whole: go1.24.13 is not met by go1.24.130.
+$toVersionPath = Join-Path $ToGoRoot 'VERSION'
+if (-not (Test-Path -LiteralPath $toVersionPath)) { Stop-Refused "-ToGoRoot has no VERSION file, so its release cannot be checked against the pin go$goPin" }
+$toVersion = (Get-Content -LiteralPath $toVersionPath -TotalCount 1)
+if (-not [regex]::IsMatch($toVersion, '(?<![0-9A-Za-z.])go' + [regex]::Escape($goPin) + '(?![0-9.])')) {
+    Stop-Refused "-ToGoRoot's VERSION is '$toVersion', not the release src/version.props pins (go$goPin)"
+}
+Write-Host "h6-completeness: release go$goPin (src/version.props); audit $AuditFile"
 
 Write-Host "h6-completeness: population by src/handown-census.ps1 over src/core"
 try {
