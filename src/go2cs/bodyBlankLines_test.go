@@ -112,6 +112,19 @@ func caseBody(v int) {
 	}
 }
 
+func defaultFirst(v, w int) int {
+	n := 0
+	switch v {
+	default:
+		// default body first
+		n = 22
+	case w:
+		// case one first
+		n = 11
+	}
+	return n
+}
+
 func typeSwitchBody(v any) {
 	switch t := v.(type) {
 	case string:
@@ -134,6 +147,7 @@ func selectBody(ch chan int) {
 func main() {
 	fmt.Println(steps(), commentLed(), commentGroups(), commentThenGap(), threeLineComment(), afterSwitch(2), deferredReturn(), localType())
 	caseBody(1)
+	fmt.Println(defaultFirst(1, 1))
 	typeSwitchBody(1)
 	selectBody(make(chan int))
 }
@@ -206,6 +220,14 @@ func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
 
 	if next := lineContaining(t, lines, "// opens the case body") + 1; !strings.Contains(lines[next], "caseOneˢ);") {
 		t.Errorf("the comment leading a case body is not directly above its first statement: next line %q", strings.TrimSpace(lines[next]))
+	}
+
+	// A switch on a non-constant case is lowered to if/else, which emits a leading `default:` clause
+	// last; its leading comment must stay in its own body, not be flushed into the clause emitted first.
+	for _, pair := range [][2]string{{"// default body first", "n = 22;"}, {"// case one first", "n = 11;"}} {
+		if next := lineContaining(t, lines, pair[0]) + 1; !strings.Contains(lines[next], pair[1]) {
+			t.Errorf("%q is not directly above %q: next line %q", pair[0], pair[1], strings.TrimSpace(lines[next]))
+		}
 	}
 
 	// gofmt never leaves two blank lines in a row, a blank line right after `{` or one right before `}`,
