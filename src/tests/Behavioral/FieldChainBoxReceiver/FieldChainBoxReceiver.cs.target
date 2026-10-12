@@ -8,13 +8,8 @@ partial struct counter {
     internal int64 n;
 }
 
-internal static ж<counter> ptr(this ж<counter> Ꮡc) {
-    return Ꮡc;
-}
-
-internal static void inc(this ж<counter> Ꮡc) {
-    Ꮡc.ptr().Value.n++;
-}
+internal static ж<counter> ptr(this ж<counter> Ꮡc) => Ꮡc;
+internal static void inc(this ж<counter> Ꮡc) => Ꮡc.ptr().Value.n++;
 
 partial struct holder {
     internal counter c;

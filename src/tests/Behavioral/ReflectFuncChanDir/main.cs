@@ -32,22 +32,11 @@ public static bool Equal(this AssignD x, /*<-*/channel<bool> y) {
     return true;
 }
 
-internal static void recvLocal(/*<-*/channel<nint> c) {
-}
-
-internal static void bidiLocal(channel<nint> c) {
-}
-
-internal static void sendOnly(channel/*<-*/<@string> c) {
-}
-
-internal static (/*<-*/channel<nint>, error) two() {
-    return (default!, default!);
-}
-
-internal static /*<-*/channel<bool> mixed(nint a, channel/*<-*/<nint> c) {
-    return default!;
-}
+internal static void recvLocal(/*<-*/channel<nint> c) { }
+internal static void bidiLocal(channel<nint> c) { }
+internal static void sendOnly(channel/*<-*/<@string> c) { }
+internal static (/*<-*/channel<nint>, error) two() => (default!, default!);
+internal static /*<-*/channel<bool> mixed(nint a, channel/*<-*/<nint> c) => default!;
 
 internal static void nestedDir(channel/*<-*/</*<-*/channel<nint>> c) {
 }

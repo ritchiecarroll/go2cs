@@ -30,29 +30,12 @@ public static partial void Info(this ref E e, params ꓸꓸꓸany argsʗp) {
     got = viaCallers();
 }
 
-public static partial void Take(this ref E e, P p) {
-    got = viaCallers();
-}
-
-public static partial void One(this ref E e, any a) {
-    got = viaCallers();
-}
-
-public static partial void Bare(this ref E e) {
-    got = viaCallers();
-}
-
-public static partial nint Value(this ref E e, any a) {
-    return viaCallers();
-}
-
-internal static partial void takeP(P p) {
-    got = viaCallers();
-}
-
-internal static partial void plain(any a) {
-    got = viaCallers();
-}
+public static partial void Take(this ref E e, P p) => got = viaCallers();
+public static partial void One(this ref E e, any a) => got = viaCallers();
+public static partial void Bare(this ref E e) => got = viaCallers();
+public static partial nint Value(this ref E e, any a) => viaCallers();
+internal static partial void takeP(P p) => got = viaCallers();
+internal static partial void plain(any a) => got = viaCallers();
 
 internal static partial void plainV(params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();

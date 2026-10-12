@@ -19,13 +19,8 @@ internal static @string onlyNilCheck(ж<node> Ꮡp) {
     return setˢ;
 }
 
-internal static bool inner(ж<node> Ꮡp) {
-    return Ꮡp == nil;
-}
-
-internal static bool passThrough(ж<node> Ꮡp) {
-    return inner(Ꮡp);
-}
+internal static bool inner(ж<node> Ꮡp) => Ꮡp == nil;
+internal static bool passThrough(ж<node> Ꮡp) => inner(Ꮡp);
 
 internal static nint usesValue(ref node p) {
     return p.val;

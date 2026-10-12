@@ -4,17 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static uint8 takeU8(uint8 x) {
-    return x;
-}
-
-internal static int8 takeI8(int8 x) {
-    return x;
-}
-
-internal static uint16 takeU16(uint16 x) {
-    return x;
-}
+internal static uint8 takeU8(uint8 x) => x;
+internal static int8 takeI8(int8 x) => x;
+internal static uint16 takeU16(uint16 x) => x;
 
 partial struct box {
     internal uint8 b;

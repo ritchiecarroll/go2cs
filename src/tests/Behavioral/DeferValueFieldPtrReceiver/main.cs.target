@@ -8,13 +8,8 @@ partial struct counter {
     internal nint n;
 }
 
-internal static void reset(this ref counter c) {
-    c.n = 0;
-}
-
-internal static void inc(this ref counter c) {
-    c.n++;
-}
+internal static void reset(this ref counter c) => c.n = 0;
+internal static void inc(this ref counter c) => c.n++;
 
 partial struct builder {
     internal counter c;

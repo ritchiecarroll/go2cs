@@ -20,17 +20,9 @@ partial struct circle {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string circleˢ = "circle"u8;
 
-internal static @string name(this ref circle c) {
-    return circleˢ;
-}
-
-internal static void grow(this ref circle c, nint n) {
-    c.r += n;
-}
-
-internal static nint size(this ref circle c) {
-    return c.r;
-}
+internal static @string name(this ref circle c) => circleˢ;
+internal static void grow(this ref circle c, nint n) => c.r += n;
+internal static nint size(this ref circle c) => c.r;
 
 partial struct dot {
     internal nint tag;
@@ -39,13 +31,8 @@ partial struct dot {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string dotˢ = "dot"u8;
 
-internal static @string name(this dot d) {
-    return dotˢ;
-}
-
-internal static void grow(this dot d, nint n) {
-    d.tag += n;
-}
+internal static @string name(this dot d) => dotˢ;
+internal static void grow(this dot d, nint n) => d.tag += n;
 
 partial struct errMark {
     internal nint code;

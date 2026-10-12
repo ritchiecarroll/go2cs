@@ -17,13 +17,8 @@ partial struct widget {
     internal @string name;
 }
 
-internal static @string Describe(this widget w) {
-    return "describe:"u8 + w.name;
-}
-
-internal static @string Tag(this widget w) {
-    return "tag:"u8 + w.name;
-}
+internal static @string Describe(this widget w) => "describe:"u8 + w.name;
+internal static @string Tag(this widget w) => "tag:"u8 + w.name;
 
 partial struct plain {
 }

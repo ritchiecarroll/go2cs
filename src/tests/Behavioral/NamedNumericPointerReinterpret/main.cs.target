@@ -21,13 +21,8 @@ partial struct lfstack /*num:uint64*/;
 
 partial struct sweepClass /*num:uint32*/;
 
-internal static uint64 peek(this ж<lfstack> Ꮡhead) {
-    return load64(Ꮡhead.Reinterpret<lfstack, uint64>());
-}
-
-internal static uint32 peek(this ж<sweepClass> Ꮡsc) {
-    return load32(Ꮡsc.Reinterpret<sweepClass, uint32>());
-}
+internal static uint64 peek(this ж<lfstack> Ꮡhead) => load64(Ꮡhead.Reinterpret<lfstack, uint64>());
+internal static uint32 peek(this ж<sweepClass> Ꮡsc) => load32(Ꮡsc.Reinterpret<sweepClass, uint32>());
 
 internal static uint64 peekVia(ж<lfstack> Ꮡp) {
     return load64(Ꮡp.Reinterpret<lfstack, uint64>());

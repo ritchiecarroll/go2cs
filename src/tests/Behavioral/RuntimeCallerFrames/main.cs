@@ -34,13 +34,8 @@ internal static partial (nint, nint) sameSite() {
     return (callerLine(), wrapGrand());
 }
 
-internal static partial nint siteA() {
-    return callerLine();
-}
-
-internal static partial nint siteB() {
-    return callerLine();
-}
+internal static partial nint siteA() => callerLine();
+internal static partial nint siteB() => callerLine();
 
 internal static partial bool okAt(nint skip) {
     var (_, _, _, ok) = runtime.Caller(skip);

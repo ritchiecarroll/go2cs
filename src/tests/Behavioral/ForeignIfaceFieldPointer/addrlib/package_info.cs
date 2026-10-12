@@ -50,7 +50,7 @@ using static go.ForeignIfaceFieldPointer.addrlib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("addr.go", "addr.cs", "AA4+gKKA")]
+[assembly: go.GoPositionMap("addr.go", "addr.cs", "AA4+gII=")]
 // </GoSourcePositionMaps>
 
 namespace go.ForeignIfaceFieldPointer;

@@ -31,21 +31,10 @@ internal static bool paramEq(any a, any b) {
     return AreEqual(a, b);
 }
 
-internal static any retLit() {
-    return (nint)(0);
-}
-
-internal static any retNamed() {
-    return (nint)(namedInt);
-}
-
-internal static any retRuneL() {
-    return (rune)'A';
-}
-
-internal static any retFloatL() {
-    return 2.5D;
-}
+internal static any retLit() => (nint)(0);
+internal static any retNamed() => (nint)(namedInt);
+internal static any retRuneL() => (rune)'A';
+internal static any retFloatL() => 2.5D;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string intˢ = "int"u8;

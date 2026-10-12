@@ -17,9 +17,7 @@ public static nint Bump(this ref Inner i) {
     return i.n;
 }
 
-public static nint Get(this Inner i) {
-    return i.n;
-}
+public static nint Get(this Inner i) => i.n;
 
 partial struct SameP {
     public partial ref ж<Inner> Inner { get; }

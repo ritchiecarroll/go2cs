@@ -16,13 +16,8 @@ partial struct UnixAddr {
     public @string Net;
 }
 
-public static @string Network(this ref UnixAddr a) {
-    return a.Net;
-}
-
-public static @string String(this ref UnixAddr a) {
-    return a.Name;
-}
+public static @string Network(this ref UnixAddr a) => a.Net;
+public static @string String(this ref UnixAddr a) => a.Name;
 
 internal partial struct main_type /*dyn*/ {
     internal Addr got, want;

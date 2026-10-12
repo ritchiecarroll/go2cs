@@ -67,13 +67,8 @@ partial struct emblem {
     internal nint rank;
 }
 
-internal static @string Label(this emblem e) {
-    return e.name;
-}
-
-internal static nint Rank(this emblem e) {
-    return e.rank;
-}
+internal static @string Label(this emblem e) => e.name;
+internal static nint Rank(this emblem e) => e.rank;
 
 partial interface stamped :
     CrossPkgLib.Labeled
@@ -89,13 +84,8 @@ partial struct seal {
     internal @string name;
 }
 
-internal static @string Label(this seal s) {
-    return s.name;
-}
-
-internal static @string Stamp(this seal s) {
-    return "ok:"u8 + s.name;
-}
+internal static @string Label(this seal s) => s.name;
+internal static @string Stamp(this seal s) => "ok:"u8 + s.name;
 
 partial struct dial {
     internal @string n;
@@ -120,24 +110,14 @@ partial struct cert {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string certˢ = "cert"u8;
 
-internal static @string Label(this cert c) {
-    return certˢ;
-}
+internal static @string Label(this cert c) => certˢ;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string waxˢ = "wax"u8;
 
-internal static @string Seal(this cert c) {
-    return waxˢ;
-}
-
-internal static nint Rating(this cert c) {
-    return 9;
-}
-
-internal static nint Serial(this cert c) {
-    return c.id;
-}
+internal static @string Seal(this cert c) => waxˢ;
+internal static nint Rating(this cert c) => 9;
+internal static nint Serial(this cert c) => c.id;
 
 partial struct holder<T> {
     public partial ref ж<CrossPkgLib_package.Cache<T>> Cache { get; }

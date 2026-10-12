@@ -6,13 +6,8 @@ partial class main_package {
 
 partial struct stack /*[]nint*/;
 
-internal static void growTo(ref stack s, nint v) {
-    s = append(s, v);
-}
-
-internal static void shrink(ref stack s) {
-    s = (s).slice(0, len(s) - 1);
-}
+internal static void growTo(ref stack s, nint v) => s = append(s, v);
+internal static void shrink(ref stack s) => s = (s).slice(0, len(s) - 1);
 
 internal static void push(this ж<stack> Ꮡs, nint v) {
     growTo(ref (Ꮡs).DerefOrNull(), v);

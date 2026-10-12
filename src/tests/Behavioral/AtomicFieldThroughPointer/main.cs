@@ -8,13 +8,8 @@ partial struct atom {
     internal int64 v;
 }
 
-internal static void add(this ref atom a, int64 d) {
-    a.v += d;
-}
-
-internal static int64 get(this ref atom a) {
-    return a.v;
-}
+internal static void add(this ref atom a, int64 d) => a.v += d;
+internal static int64 get(this ref atom a) => a.v;
 
 partial struct profile {
     internal atom wait;

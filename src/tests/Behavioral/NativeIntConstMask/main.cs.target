@@ -8,13 +8,8 @@ internal static uintptr shift => 3;
 
 internal static uintptr blockSize => 16;
 
-internal static uintptr low(uintptr i) {
-    return (uintptr)(i & (uintptr)(((1 << (int)(shift))) - 1));
-}
-
-internal static uintptr align(uintptr i) {
-    return (uintptr)(i & ~(uintptr)(blockSize - 1));
-}
+internal static uintptr low(uintptr i) => (uintptr)(i & (uintptr)(((1 << (int)(shift))) - 1));
+internal static uintptr align(uintptr i) => (uintptr)(i & ~(uintptr)(blockSize - 1));
 
 internal static uintptr maskAddr(uintptr i) {
     return (uintptr)(i & (uintptr)(nuint)0x00ffffffffffUL);

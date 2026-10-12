@@ -27,17 +27,9 @@ partial struct Impl {
     internal nint s;
 }
 
-public static @string Name(this ref Impl p) {
-    return p.n;
-}
-
-public static nint Size(this ref Impl p) {
-    return p.s;
-}
-
-public static ж<Impl> Clone(this ref Impl p) {
-    return Ꮡ(new Impl(p.n, p.s + 1));
-}
+public static @string Name(this ref Impl p) => p.n;
+public static nint Size(this ref Impl p) => p.s;
+public static ж<Impl> Clone(this ref Impl p) => Ꮡ(new Impl(p.n, p.s + 1));
 
 public static bool Each(this ref Impl p, @string label, Action<ж<Impl>> f) {
     f(Ꮡ(new Impl(p.n + "/"u8 + label, p.s)));

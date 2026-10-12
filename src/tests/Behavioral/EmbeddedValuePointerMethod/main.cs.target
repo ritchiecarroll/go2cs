@@ -9,17 +9,9 @@ partial struct inner {
     internal nint n;
 }
 
-internal static void bump(this ref inner i, nint d) {
-    i.n += d;
-}
-
-internal static void reset0(this ref inner i) {
-    i.n = 0;
-}
-
-internal static nint total(this ref inner i) {
-    return i.n;
-}
+internal static void bump(this ref inner i, nint d) => i.n += d;
+internal static void reset0(this ref inner i) => i.n = 0;
+internal static nint total(this ref inner i) => i.n;
 
 partial struct outer {
     internal nint tag;
@@ -32,13 +24,8 @@ internal static partial void viaParam(ж<outer> Ꮡo) {
 
 partial struct flags /*num:uint8*/;
 
-internal static void set(this ref flags f, flags bit) {
-    f |= (flags)(bit);
-}
-
-internal static void clear(this ref flags f, flags bit) {
-    f &= unchecked((flags)~(flags)(bit));
-}
+internal static void set(this ref flags f, flags bit) => f |= (flags)(bit);
+internal static void clear(this ref flags f, flags bit) => f &= unchecked((flags)~(flags)(bit));
 
 partial struct chunk {
     internal uint16 inUse;

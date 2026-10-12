@@ -13,9 +13,7 @@ internal static nint add(this ref counter c, nint d) {
     return c.n;
 }
 
-internal static nint get(this counter c) {
-    return c.n;
-}
+internal static nint get(this counter c) => c.n;
 
 internal static void Main() {
     var f = ((Func<ж<counter>, nint, nint>)(add));

@@ -11,23 +11,17 @@ partial struct path {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object popˢ = (@string)"pop"u8;
 
-internal static void Pop(this path p, nint k) {
-    fmt.Println(popˢ, p.name, k);
-}
+internal static void Pop(this path p, nint k) => fmt.Println(popˢ, p.name, k);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object doneˢ = (@string)"done"u8;
 
-internal static void Done(this path p) {
-    fmt.Println(doneˢ, p.name);
-}
+internal static void Done(this path p) => fmt.Println(doneˢ, p.name);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object pairˢ = (@string)"pair"u8;
 
-internal static void Pair(this path p, nint a, @string b) {
-    fmt.Println(pairˢ, p.name, a, b);
-}
+internal static void Pair(this path p, nint a, @string b) => fmt.Println(pairˢ, p.name, a, b);
 
 partial struct state {
     internal path cur;

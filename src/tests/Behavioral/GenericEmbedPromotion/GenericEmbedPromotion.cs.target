@@ -17,9 +17,7 @@ partial struct p224 {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string p224ˢ = "p224"u8;
 
-internal static @string label(this ref p224 p) {
-    return p224ˢ;
-}
+internal static @string label(this ref p224 p) => p224ˢ;
 
 internal static ж<p224> combine(this ref p224 p, ж<p224> Ꮡo) {
     ref var o = ref Ꮡo.DerefOrNull();
@@ -27,9 +25,7 @@ internal static ж<p224> combine(this ref p224 p, ж<p224> Ꮡo) {
     return Ꮡ(new p224(v: p.v + o.v));
 }
 
-internal static (ж<p224>, error) restore(this ref p224 p, slice<byte> b) {
-    return (Ꮡ(new p224(v: (nint)b[0])), default!);
-}
+internal static (ж<p224>, error) restore(this ref p224 p, slice<byte> b) => (Ꮡ(new p224(v: (nint)b[0])), default!);
 
 internal static ж<p224> newP224() {
     return Ꮡ(new p224(v: 1));

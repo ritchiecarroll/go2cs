@@ -8,13 +8,8 @@ partial struct Box<T> {
     internal T v;
 }
 
-internal static void setT<T>(ref T p, T val) {
-    p = val;
-}
-
-internal static T getT<T>(ref T p) {
-    return p;
-}
+internal static void setT<T>(ref T p, T val) => p = val;
+internal static T getT<T>(ref T p) => p;
 
 public static void Set<T>(this ж<Box<T>> Ꮡb, T val) {
     ref var b = ref Ꮡb.DerefOrNull();

@@ -97,13 +97,8 @@ partial interface InlineEmbed :
 partial struct embeddedImpl {
 }
 
-internal static error Close(this embeddedImpl _) {
-    return default!;
-}
-
-internal static error Flush(this embeddedImpl _) {
-    return default!;
-}
+internal static error Close(this embeddedImpl _) => default!;
+internal static error Flush(this embeddedImpl _) => default!;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object interfaceEmbedCloseAndˢ = (@string)"InterfaceEmbed: Close and Flush OK"u8;
@@ -128,17 +123,9 @@ partial struct fakeError {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string fakeErrorˢ = "fake error"u8;
 
-internal static @string Error(this fakeError _) {
-    return fakeErrorˢ;
-}
-
-internal static error Unwrap(this fakeError _) {
-    return Δio.EOF;
-}
-
-internal static bool Is(this fakeError _, error err) {
-    return AreEqual(err, Δio.EOF);
-}
+internal static @string Error(this fakeError _) => fakeErrorˢ;
+internal static error Unwrap(this fakeError _) => Δio.EOF;
+internal static bool Is(this fakeError _, error err) => AreEqual(err, Δio.EOF);
 
 partial struct tally {
     internal nint total;

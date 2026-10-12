@@ -16,13 +16,8 @@ internal static nint Add(this ref counter c, nint d) {
     return c.n;
 }
 
-internal static void Reset(this ref counter c) {
-    c.n = 0;
-}
-
-internal static nint Value(this counter c) {
-    return c.n;
-}
+internal static void Reset(this ref counter c) => c.n = 0;
+internal static nint Value(this counter c) => c.n;
 
 internal static @string Label(this counter c, @string p) {
     return fmt.Sprintf("%s=%d"u8, p, c.n);
@@ -49,16 +44,12 @@ partial struct outer {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string betaˢ = "beta"u8;
 
-internal static @string Beta(this outer _) {
-    return betaˢ;
-}
+internal static @string Beta(this outer _) => betaˢ;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string alphaˢ = "alpha"u8;
 
-internal static @string Alpha(this outer _) {
-    return alphaˢ;
-}
+internal static @string Alpha(this outer _) => alphaˢ;
 
 internal static slice<@string> names(reflectꓸType t) {
     var @out = new slice<@string>(0, t.NumMethod());

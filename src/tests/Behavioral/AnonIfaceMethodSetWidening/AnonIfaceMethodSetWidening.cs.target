@@ -8,16 +8,12 @@ partial struct gadget {
     internal nint n;
 }
 
-internal static @string Foo(this gadget g) {
-    return fmt.Sprintf("foo %d"u8, g.n);
-}
+internal static @string Foo(this gadget g) => fmt.Sprintf("foo %d"u8, g.n);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string barˢ = "bar"u8;
 
-internal static @string Bar(this ref gadget g) {
-    return barˢ;
-}
+internal static @string Bar(this ref gadget g) => barˢ;
 
 partial interface fooer {
     @string Foo();

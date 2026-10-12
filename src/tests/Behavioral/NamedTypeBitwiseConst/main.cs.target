@@ -10,13 +10,8 @@ internal static UntypedInt classConstructed => 0x20;
 
 internal static UntypedInt classContext => 0x80;
 
-public static Tag Constructed(this Tag t) {
-    return (Tag)(t | (uint8)classConstructed);
-}
-
-public static Tag Context(this Tag t) {
-    return (Tag)(t | (uint8)classContext);
-}
+public static Tag Constructed(this Tag t) => (Tag)(t | (uint8)classConstructed);
+public static Tag Context(this Tag t) => (Tag)(t | (uint8)classContext);
 
 partial struct word /*num:uint64*/;
 

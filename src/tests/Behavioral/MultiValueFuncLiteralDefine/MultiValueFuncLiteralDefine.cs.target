@@ -8,25 +8,13 @@ partial struct box {
     internal nint n;
 }
 
-internal static nint get(this box b) {
-    return b.n;
-}
+internal static nint get(this box b) => b.n;
+internal static void bump(this ref box b, nint d) => b.n += d;
 
-internal static void bump(this ref box b, nint d) {
-    b.n += d;
-}
+internal static nint @double(nint v) => v * 2;
+internal static nint triple(nint v) => v * 3;
 
-internal static nint @double(nint v) {
-    return v * 2;
-}
-
-internal static nint triple(nint v) {
-    return v * 3;
-}
-
-internal static T identity<T>(T v) {
-    return v;
-}
+internal static T identity<T>(T v) => v;
 
 internal static T square<T>(T v)
     where T : /* ~int | ~float64 */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()

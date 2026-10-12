@@ -7,17 +7,9 @@ partial class main_package {
 
 partial struct words /*[]@string*/;
 
-internal static nint Len(this words w) {
-    return len(w);
-}
-
-internal static bool Less(this words w, nint i, nint j) {
-    return w[i] < w[j];
-}
-
-internal static void Swap(this words w, nint i, nint j) {
-    (w[i], w[j]) = (w[j], w[i]);
-}
+internal static nint Len(this words w) => len(w);
+internal static bool Less(this words w, nint i, nint j) => w[i] < w[j];
+internal static void Swap(this words w, nint i, nint j) => (w[i], w[j]) = (w[j], w[i]);
 
 public static void Sort(sort.Interface data) {
     sort.Sort(data);

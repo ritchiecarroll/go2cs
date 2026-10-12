@@ -69,13 +69,8 @@ internal static void deferred() {
     finally { ᒐ.Run(); }
 }
 
-internal static C128 takeC128(C128 c) {
-    return c;
-}
-
-internal static C64 takeC64(C64 c) {
-    return c;
-}
+internal static C128 takeC128(C128 c) => c;
+internal static C64 takeC64(C64 c) => c;
 
 internal static C128 takeMany(params ꓸꓸꓸC128 csʗp) {
     var cs = csʗp.sslice();
@@ -87,17 +82,9 @@ internal static C128 takeMany(params ꓸꓸꓸC128 csʗp) {
     return sum;
 }
 
-internal static C128 retC128() {
-    return 3D;
-}
-
-internal static C64 retC64() {
-    return 2.5F;
-}
-
-internal static (C128, C64) retMulti() {
-    return (1D, 2F);
-}
+internal static C128 retC128() => 3D;
+internal static C64 retC64() => 2.5F;
+internal static (C128, C64) retMulti() => (1D, 2F);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object assignˢ = (@string)"assign:"u8;

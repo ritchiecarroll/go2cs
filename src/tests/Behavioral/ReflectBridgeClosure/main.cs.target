@@ -45,26 +45,12 @@ internal static error call(this handler h, nint n) {
     return h(n);
 }
 
-internal static void noArgs() {
-}
-
-internal static void oneIn(nint _) {
-}
-
-internal static error oneOut() {
-    return default!;
-}
-
-internal static (nint, error) twoOut() {
-    return (0, default!);
-}
-
-internal static void variadic(@string _Δp0, params ꓸꓸꓸnint ʗp) {
-}
-
-internal static (bool, error) mixed(nint a, @string b) {
-    return (false, default!);
-}
+internal static void noArgs() { }
+internal static void oneIn(nint _) { }
+internal static error oneOut() => default!;
+internal static (nint, error) twoOut() => (0, default!);
+internal static void variadic(@string _Δp0, params ꓸꓸꓸnint ʗp) { }
+internal static (bool, error) mixed(nint a, @string b) => (false, default!);
 
 partial struct definedByte /*num:byte*/;
 

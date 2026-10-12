@@ -27,9 +27,7 @@ internal static void loopArg(this ref tracker t, nint k) {
     t.done.ᐸꟷ(k);
 }
 
-internal static void bump(this ref tracker t) {
-    t.n++;
-}
+internal static void bump(this ref tracker t) => t.n++;
 
 internal static partial void start(this ж<tracker> Ꮡt) {
     goǃ(Ꮡt.loop);

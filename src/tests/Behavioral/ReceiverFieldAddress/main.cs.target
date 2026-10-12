@@ -19,13 +19,8 @@ public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
     return bump(ref nonnil(ref c).n, delta);
 }
 
-public static void Set(this ж<Counter> Ꮡc, int32 v) {
-    (Ꮡc.of(Counter.Ꮡn)).Value = v;
-}
-
-public static int32 Get(this ref Counter c) {
-    return c.n;
-}
+public static void Set(this ж<Counter> Ꮡc, int32 v) => (Ꮡc.of(Counter.Ꮡn)).Value = v;
+public static int32 Get(this ref Counter c) => c.n;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object afterSetˢ = (@string)"after Set:"u8;

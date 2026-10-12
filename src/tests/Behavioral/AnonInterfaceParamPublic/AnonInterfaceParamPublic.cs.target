@@ -8,13 +8,8 @@ partial struct named {
     internal @string n;
 }
 
-internal static @string Name(this named v) {
-    return "name:"u8 + v.n;
-}
-
-internal static @string Label(this named v) {
-    return "label:"u8 + v.n;
-}
+internal static @string Name(this named v) => "name:"u8 + v.n;
+internal static @string Label(this named v) => "label:"u8 + v.n;
 
 public partial interface Report_r /*dyn*/ {
     @string Name();

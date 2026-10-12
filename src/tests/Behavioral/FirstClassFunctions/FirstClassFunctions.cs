@@ -210,9 +210,7 @@ internal static nint fillFast(this ж<worker> Ꮡw, slice<byte> b) {
     return len(b) + w.n;
 }
 
-internal static void bump(this ref worker w) {
-    w.n++;
-}
+internal static void bump(this ref worker w) => w.n++;
 
 internal static error /*err*/ initWorker(this ref worker w, nint level) {
     switch (ᐧ) {

@@ -20,13 +20,8 @@ partial struct plain {
     internal @string tag;
 }
 
-internal static @string Read(this plain p) {
-    return "read:"u8 + p.tag;
-}
-
-internal static @string Write(this plain p, @string s) {
-    return "p:"u8 + s;
-}
+internal static @string Read(this plain p) => "read:"u8 + p.tag;
+internal static @string Write(this plain p, @string s) => "p:"u8 + s;
 
 partial struct holder {
     public iolike.Reader Reader;

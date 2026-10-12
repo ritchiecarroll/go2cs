@@ -9,17 +9,9 @@ partial struct slot {
     internal nint n;
 }
 
-internal static void inc(this ref slot s) {
-    s.n++;
-}
-
-internal static void add(this ref slot s, nint d) {
-    s.n += d;
-}
-
-internal static nint get(this ref slot s) {
-    return s.n;
-}
+internal static void inc(this ref slot s) => s.n++;
+internal static void add(this ref slot s, nint d) => s.n += d;
+internal static nint get(this ref slot s) => s.n;
 
 partial struct holder {
     internal slot s;

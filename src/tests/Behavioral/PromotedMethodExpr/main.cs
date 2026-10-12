@@ -19,9 +19,7 @@ internal static nint Add(this ref inner i, nint d) {
     return i.n;
 }
 
-internal static nint Get(this inner i) {
-    return i.n;
-}
+internal static nint Get(this inner i) => i.n;
 
 partial struct outer {
     internal partial ref inner inner { get; }

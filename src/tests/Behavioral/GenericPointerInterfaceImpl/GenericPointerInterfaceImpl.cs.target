@@ -17,9 +17,7 @@ partial struct p224 {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string p224ˢ = "p224"u8;
 
-internal static @string label(this ref p224 p) {
-    return p224ˢ;
-}
+internal static @string label(this ref p224 p) => p224ˢ;
 
 internal static ж<p224> combine(this ref p224 p, ж<p224> Ꮡo) {
     ref var o = ref Ꮡo.DerefOrNull();
@@ -27,9 +25,7 @@ internal static ж<p224> combine(this ref p224 p, ж<p224> Ꮡo) {
     return Ꮡ(new p224(v: p.v + o.v));
 }
 
-internal static (ж<p224>, error) restore(this ref p224 p, slice<byte> b) {
-    return (Ꮡ(new p224(v: (nint)b[0])), default!);
-}
+internal static (ж<p224>, error) restore(this ref p224 p, slice<byte> b) => (Ꮡ(new p224(v: (nint)b[0])), default!);
 
 internal static ж<p224> newP224() {
     return Ꮡ(new p224(v: 1));
@@ -42,9 +38,7 @@ partial struct p384 {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string p384ˢ = "p384"u8;
 
-internal static @string label(this ref p384 p) {
-    return p384ˢ;
-}
+internal static @string label(this ref p384 p) => p384ˢ;
 
 internal static ж<p384> combine(this ref p384 p, ж<p384> Ꮡo) {
     ref var o = ref Ꮡo.DerefOrNull();
@@ -52,9 +46,7 @@ internal static ж<p384> combine(this ref p384 p, ж<p384> Ꮡo) {
     return Ꮡ(new p384(v: p.v * o.v));
 }
 
-internal static (ж<p384>, error) restore(this ref p384 p, slice<byte> b) {
-    return (Ꮡ(new p384(v: (nint)b[0])), default!);
-}
+internal static (ж<p384>, error) restore(this ref p384 p, slice<byte> b) => (Ꮡ(new p384(v: (nint)b[0])), default!);
 
 internal static ж<p384> newP384() {
     return Ꮡ(new p384(v: 2));

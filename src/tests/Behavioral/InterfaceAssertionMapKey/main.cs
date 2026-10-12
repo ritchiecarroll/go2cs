@@ -18,23 +18,15 @@ partial struct myVar {
     internal @string n;
 }
 
-internal static @string Name(this ref myVar o) {
-    return o.n;
-}
-
-internal static void isDependency(this ref myVar o) {
-}
+internal static @string Name(this ref myVar o) => o.n;
+internal static void isDependency(this ref myVar o) { }
 
 partial struct myConst {
     internal @string n;
 }
 
-internal static @string Name(this myConst o) {
-    return o.n;
-}
-
-internal static void isDependency(this myConst o) {
-}
+internal static @string Name(this myConst o) => o.n;
+internal static void isDependency(this myConst o) { }
 
 partial struct myFunc {
     internal @string n;

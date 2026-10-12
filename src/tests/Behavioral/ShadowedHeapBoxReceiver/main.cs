@@ -8,13 +8,8 @@ partial struct Builder {
     internal nint n;
 }
 
-public static void With(this ж<Builder> Ꮡb, Action<ж<Builder>> f) {
-    f(Ꮡb);
-}
-
-public static nint Sum(this ref Builder b) {
-    return b.n;
-}
+public static void With(this ж<Builder> Ꮡb, Action<ж<Builder>> f) => f(Ꮡb);
+public static nint Sum(this ref Builder b) => b.n;
 
 internal static nint compute() {
     nint inner() {

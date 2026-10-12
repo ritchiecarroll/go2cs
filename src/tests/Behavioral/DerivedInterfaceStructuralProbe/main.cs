@@ -8,13 +8,8 @@ partial struct tempErr {
     internal @string msg;
 }
 
-internal static @string Error(this ref tempErr e) {
-    return e.msg;
-}
-
-internal static bool Temporary(this ref tempErr e) {
-    return true;
-}
+internal static @string Error(this ref tempErr e) => e.msg;
+internal static bool Temporary(this ref tempErr e) => true;
 
 partial struct plainErr {
     internal @string msg;
@@ -57,29 +52,16 @@ partial struct node {
     internal @string id;
 }
 
-internal static @string String(this ref node n) {
-    return "node:"u8 + n.id;
-}
-
-internal static @string Name(this ref node n) {
-    return n.id;
-}
-
-internal static nint Depth(this ref node n) {
-    return 3;
-}
+internal static @string String(this ref node n) => "node:"u8 + n.id;
+internal static @string Name(this ref node n) => n.id;
+internal static nint Depth(this ref node n) => 3;
 
 partial struct shallow {
     internal @string id;
 }
 
-internal static @string String(this ref shallow s) {
-    return "shallow:"u8 + s.id;
-}
-
-internal static @string Name(this ref shallow s) {
-    return s.id;
-}
+internal static @string String(this ref shallow s) => "shallow:"u8 + s.id;
+internal static @string Name(this ref shallow s) => s.id;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string notDeepˢ = "not deep"u8;

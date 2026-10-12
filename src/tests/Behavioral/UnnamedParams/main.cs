@@ -13,21 +13,11 @@ partial struct note {
 
 internal static nint count;
 
-internal static void setup(ж<note> _) {
-    count += 1;
-}
+internal static void setup(ж<note> _) => count += 1;
+internal static void discard(nint _) => count += 10;
 
-internal static void discard(nint _) {
-    count += 10;
-}
-
-internal static void unnamedVariadic(params ꓸꓸꓸstring ʗp) {
-    count += 100;
-}
-
-internal static void blankVariadic(params ꓸꓸꓸnint _ʗp) {
-    count += 1000;
-}
+internal static void unnamedVariadic(params ꓸꓸꓸstring ʗp) => count += 100;
+internal static void blankVariadic(params ꓸꓸꓸnint _ʗp) => count += 1000;
 
 internal static void bothUnnamed(nint _Δp0, params ꓸꓸꓸstring ʗp) {
     count += 10000;

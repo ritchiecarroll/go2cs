@@ -6,13 +6,8 @@ partial class main_package {
 
 partial struct version /*@string*/;
 
-internal static bool isValid(this version v) {
-    return v != ""u8;
-}
-
-internal static @string tag(this version v) {
-    return ((@string)v) + "!"u8;
-}
+internal static bool isValid(this version v) => v != ""u8;
+internal static @string tag(this version v) => ((@string)v) + "!"u8;
 
 internal static version asVersion(@string s) {
     return ((version)s);

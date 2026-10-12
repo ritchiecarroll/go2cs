@@ -9,13 +9,8 @@ partial struct Box<T> {
     public T V;
 }
 
-public static T Get<T>(this Box<T> b) {
-    return b.V;
-}
-
-public static void Set<T>(this ref Box<T> b, T v) {
-    b.V = v;
-}
+public static T Get<T>(this Box<T> b) => b.V;
+public static void Set<T>(this ref Box<T> b, T v) => b.V = v;
 
 public static Box<T> NewBox<T>(T v) {
     return new Box<T>(V: v);

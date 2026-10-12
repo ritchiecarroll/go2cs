@@ -22,17 +22,9 @@ partial struct baseHandler {
     internal nint level;
 }
 
-internal static bool Enabled(this baseHandler b, nint level) {
-    return level >= b.level;
-}
-
-internal static @string Handle(this baseHandler b, @string msg) {
-    return "base:"u8 + msg;
-}
-
-internal static @string WithName(this baseHandler b, @string name) {
-    return "base-name:"u8 + name;
-}
+internal static bool Enabled(this baseHandler b, nint level) => level >= b.level;
+internal static @string Handle(this baseHandler b, @string msg) => "base:"u8 + msg;
+internal static @string WithName(this baseHandler b, @string name) => "base-name:"u8 + name;
 
 partial struct wrapper {
     /*embed*/ public ΔHandler Handler;

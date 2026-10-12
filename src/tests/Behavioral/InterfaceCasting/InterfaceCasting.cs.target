@@ -246,13 +246,8 @@ partial struct badge {
     internal nint num;
 }
 
-internal static @string @string(this ref badge b) {
-    return b.text;
-}
-
-internal static nint @int(this ref badge b) {
-    return b.num;
-}
+internal static @string @string(this ref badge b) => b.text;
+internal static nint @int(this ref badge b) => b.num;
 
 internal static void replaceAnimal(ref Animal a) {
     a = new CatжAnimal(Ꮡ(new Cat(nil)));
@@ -302,13 +297,8 @@ partial struct fileRdr {
     internal @string name;
 }
 
-internal static @string read(this fileRdr f) {
-    return "read:"u8 + f.name;
-}
-
-internal static @string close(this fileRdr f) {
-    return "close:"u8 + f.name;
-}
+internal static @string read(this fileRdr f) => "read:"u8 + f.name;
+internal static @string close(this fileRdr f) => "close:"u8 + f.name;
 
 internal static rdCloser open(@string name) {
     return new fileRdr(name);

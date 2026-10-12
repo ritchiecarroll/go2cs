@@ -22,23 +22,17 @@ partial struct dot {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string circleˢ = "circle"u8;
 
-internal static @string name(this circle c) {
-    return circleˢ;
-}
+internal static @string name(this circle c) => circleˢ;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string squareˢ = "square"u8;
 
-internal static @string name(this square s) {
-    return squareˢ;
-}
+internal static @string name(this square s) => squareˢ;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string dotˢ = "dot"u8;
 
-internal static @string name(this dot d) {
-    return dotˢ;
-}
+internal static @string name(this dot d) => dotˢ;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string noneˢ = "none"u8;

@@ -17,25 +17,15 @@ partial struct conn {
     internal @string data;
 }
 
-internal static @string Read(this ref conn c) {
-    return "read:"u8 + c.data;
-}
-
-internal static @string Close(this ref conn c) {
-    return "closed:"u8 + c.data;
-}
+internal static @string Read(this ref conn c) => "read:"u8 + c.data;
+internal static @string Close(this ref conn c) => "closed:"u8 + c.data;
 
 partial struct valConn {
     internal @string tag;
 }
 
-internal static @string Read(this valConn v) {
-    return "vread:"u8 + v.tag;
-}
-
-internal static @string Close(this valConn v) {
-    return "vclosed:"u8 + v.tag;
-}
+internal static @string Read(this valConn v) => "vread:"u8 + v.tag;
+internal static @string Close(this valConn v) => "vclosed:"u8 + v.tag;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string mutatedˢ = "mutated"u8;

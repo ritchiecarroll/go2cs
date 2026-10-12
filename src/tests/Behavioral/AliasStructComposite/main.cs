@@ -12,17 +12,9 @@ partial struct Inner {
     public nint W;
 }
 
-internal static alias keyed() {
-    return new alias(V: 7, W: 3);
-}
-
-internal static alias empty() {
-    return new alias();
-}
-
-internal static alias positional() {
-    return new alias(1, 2);
-}
+internal static alias keyed() => new alias(V: 7, W: 3);
+internal static alias empty() => new alias();
+internal static alias positional() => new alias(1, 2);
 
 internal static uint64 sum(/*[4]*/ words w) {
     w = w.Clone();

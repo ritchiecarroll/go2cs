@@ -29,17 +29,9 @@ partial struct conn {
     internal @string data;
 }
 
-internal static @string Read(this ref conn c) {
-    return c.data;
-}
-
-internal static void Write(this ref conn c, @string s) {
-    c.data = s;
-}
-
-internal static @string Close(this ref conn c) {
-    return "closed:"u8 + c.data;
-}
+internal static @string Read(this ref conn c) => c.data;
+internal static void Write(this ref conn c, @string s) => c.data = s;
+internal static @string Close(this ref conn c) => "closed:"u8 + c.data;
 
 internal static @string readFrom(Reader r) {
     return r.Read();

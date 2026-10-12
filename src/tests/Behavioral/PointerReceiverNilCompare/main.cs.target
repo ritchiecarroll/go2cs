@@ -8,13 +8,8 @@ partial struct box {
     internal nint val;
 }
 
-internal static bool isNil(this ж<box> Ꮡb) {
-    return Ꮡb == nil;
-}
-
-internal static bool notNil(this ж<box> Ꮡb) {
-    return Ꮡb != nil;
-}
+internal static bool isNil(this ж<box> Ꮡb) => Ꮡb == nil;
+internal static bool notNil(this ж<box> Ꮡb) => Ꮡb != nil;
 
 internal static bool same(this ж<box> Ꮡb, ж<box> Ꮡother) {
     return Ꮡb == Ꮡother;

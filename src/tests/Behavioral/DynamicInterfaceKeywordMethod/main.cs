@@ -14,16 +14,9 @@ partial struct harness {
     internal nint deadline;
 }
 
-internal static @string Name(this harness h) {
-    return h.name;
-}
-
-internal static void @private(this harness h) {
-}
-
-internal static (nint, bool) Deadline(this harness h) {
-    return (h.deadline, true);
-}
+internal static @string Name(this harness h) => h.name;
+internal static void @private(this harness h) { }
+internal static (nint, bool) Deadline(this harness h) => (h.deadline, true);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object nameˢ = (@string)"Name:"u8;
@@ -54,13 +47,8 @@ partial struct gate {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object sealedˢ = (@string)"sealed:"u8;
 
-internal static void @private(this gate g) {
-    fmt.Println(sealedˢ, g.name);
-}
-
-internal static @string Kind(this gate g) {
-    return "gate:"u8 + g.name;
-}
+internal static void @private(this gate g) => fmt.Println(sealedˢ, g.name);
+internal static @string Kind(this gate g) => "gate:"u8 + g.name;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object directˢ = (@string)"direct:"u8;

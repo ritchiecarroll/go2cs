@@ -25,38 +25,19 @@ internal static int32 add(this ж<Counter> Ꮡc, int32 delta) {
     return bump(ref nonnil(ref c).n, delta);
 }
 
-public static void Set(this ж<Counter> Ꮡc, int32 v) {
-    (Ꮡc.of(Counter.Ꮡn)).Value = v;
-}
-
-public static int32 Get(this ref Counter c) {
-    return c.n;
-}
+public static void Set(this ж<Counter> Ꮡc, int32 v) => (Ꮡc.of(Counter.Ꮡn)).Value = v;
+public static int32 Get(this ref Counter c) => c.n;
 
 partial struct Flag {
     internal Counter c;
     internal @string label;
 }
 
-public static int32 Incr(this ж<Flag> Ꮡf) {
-    return Ꮡf.of(Flag.Ꮡc).Add(1);
-}
-
-public static int32 AddN(this ж<Flag> Ꮡf, int32 d) {
-    return Ꮡf.of(Flag.Ꮡc).Add(d);
-}
-
-public static void Reset(this ж<Flag> Ꮡf, int32 v) {
-    Ꮡf.of(Flag.Ꮡc).Set(v);
-}
-
-public static int32 Value(this ref Flag f) {
-    return f.c.Get();
-}
-
-public static @string Label(this ref Flag f) {
-    return f.label;
-}
+public static int32 Incr(this ж<Flag> Ꮡf) => Ꮡf.of(Flag.Ꮡc).Add(1);
+public static int32 AddN(this ж<Flag> Ꮡf, int32 d) => Ꮡf.of(Flag.Ꮡc).Add(d);
+public static void Reset(this ж<Flag> Ꮡf, int32 v) => Ꮡf.of(Flag.Ꮡc).Set(v);
+public static int32 Value(this ref Flag f) => f.c.Get();
+public static @string Label(this ref Flag f) => f.label;
 
 internal static int32 applyTwice(Func<int32, int32> f, int32 d) {
     f(d);
@@ -67,17 +48,9 @@ internal static int32 readVia(Func<int32> get) {
     return get();
 }
 
-public static int32 AddTwice(this ж<Counter> Ꮡc, int32 d) {
-    return applyTwice(Ꮡc.Add, d);
-}
-
-public static int32 AddViaValue(this ж<Flag> Ꮡf, int32 d) {
-    return applyTwice(Ꮡf.of(Flag.Ꮡc).Add, d);
-}
-
-public static int32 ReadViaValue(this ж<Flag> Ꮡf) {
-    return readVia(Ꮡf.of(Flag.Ꮡc).Get);
-}
+public static int32 AddTwice(this ж<Counter> Ꮡc, int32 d) => applyTwice(Ꮡc.Add, d);
+public static int32 AddViaValue(this ж<Flag> Ꮡf, int32 d) => applyTwice(Ꮡf.of(Flag.Ꮡc).Add, d);
+public static int32 ReadViaValue(this ж<Flag> Ꮡf) => readVia(Ꮡf.of(Flag.Ꮡc).Get);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string hitsˢ = "hits"u8;

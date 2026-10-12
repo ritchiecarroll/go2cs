@@ -19,9 +19,7 @@ internal static void bump(this ж<buf> Ꮡb) {
     add(ref nonnil(ref b).n, 1);
 }
 
-internal static nint get(this ref buf b) {
-    return b.n;
-}
+internal static nint get(this ref buf b) => b.n;
 
 partial struct tracer {
     internal slice<buf> tabs;

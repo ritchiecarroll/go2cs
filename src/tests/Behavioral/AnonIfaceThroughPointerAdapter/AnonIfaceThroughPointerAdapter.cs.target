@@ -8,16 +8,12 @@ partial struct thing {
     internal nint n;
 }
 
-internal static @string Ping(this ref thing t) {
-    return fmt.Sprintf("ping %d"u8, t.n);
-}
+internal static @string Ping(this ref thing t) => fmt.Sprintf("ping %d"u8, t.n);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string pongˢ = "pong"u8;
 
-internal static @string Pong(this thing t) {
-    return pongˢ;
-}
+internal static @string Pong(this thing t) => pongˢ;
 
 partial interface speaker {
     @string Pong();

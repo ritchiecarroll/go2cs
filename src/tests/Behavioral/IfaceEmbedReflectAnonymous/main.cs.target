@@ -12,13 +12,8 @@ partial struct E {
     public nint Code;
 }
 
-public static @string Error(this E _) {
-    return "e"u8;
-}
-
-public static @string GoString(this E _) {
-    return "E!"u8;
-}
+public static @string Error(this E _) => "e"u8;
+public static @string GoString(this E _) => "E!"u8;
 
 partial struct S {
     public nint N;

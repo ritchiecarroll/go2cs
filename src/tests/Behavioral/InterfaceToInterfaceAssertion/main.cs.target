@@ -16,13 +16,8 @@ partial struct widget {
     internal nint n;
 }
 
-internal static @string Str(this ref widget w) {
-    return fmt.Sprintf("widget(%d)"u8, w.n);
-}
-
-internal static @string Marshal(this ref widget w) {
-    return fmt.Sprintf("<%d>"u8, w.n);
-}
+internal static @string Str(this ref widget w) => fmt.Sprintf("widget(%d)"u8, w.n);
+internal static @string Marshal(this ref widget w) => fmt.Sprintf("<%d>"u8, w.n);
 
 partial struct other {
 }
