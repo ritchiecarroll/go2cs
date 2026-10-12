@@ -711,6 +711,7 @@ func analyze(p pair, r *results, verbose bool) {
 					r.ex("body:go-blank-cs-none", fmt.Sprintf("%s.go:%d -> .cs:%d", where, L, st), strings.TrimSpace(g.src[L-1]))
 				}
 			}
+			separator := preludeSeparator(cs, g, cOpen, cEnd, lb, rb)
 			for c := cOpen + 1; c < cEnd; c++ {
 				if !isBlankCS(cs, c) || isBlankCS(cs, c-1) {
 					continue
@@ -720,6 +721,10 @@ func analyze(p pair, r *results, verbose bool) {
 					nx++
 				}
 				if matchedStarts[nx] {
+					continue
+				}
+				if c == separator {
+					r.body.add("prelude-separator", 1)
 					continue
 				}
 				prev := strings.TrimSpace(cs.codeText[c-2])
@@ -746,6 +751,61 @@ func analyze(p pair, r *results, verbose bool) {
 	if verbose {
 		fmt.Fprintf(os.Stderr, "%s: %d groups\n", where, len(g.groups))
 	}
+}
+
+// preludeLineRe matches a line of the converter's prelude, the lines it writes after a function's opening brace
+// and ahead of the Go body: named-result locals and variadic slices (`T n = default!;`, `var xs = xsʗp.slice();`),
+// array clones (`a = a.Clone();`), pointer derefs, heap boxes and named-result aliases (`ref var t = ref Ꮡt.val;`,
+// `ref var x = ref heap(xʗp, out var Ꮡx);`, `heap<T>(out var Ꮡn);`), and a deferring function's frame head
+// (`GoFrame ᒐ = default;`, `try {`).
+var preludeLineRe = regexp.MustCompile(`^([^=(]+ [\pL\pN_@]+ = [^;]+;|[\pL\pN_@]+ = [\pL\pN_@]+\.\w+\(\);|ref (var|\S+) [\pL\pN_@]+ = ref .+;|heap<.*>\(out var \S+\);|try \{)$`)
+
+// preludeSeparator returns the C# line of the one blank line that sets the converter's prelude apart from the Go
+// body (the owner's decision 2, docs/PLAN-comment-and-spacing-parity.md class E2), or 0 when the body has none.
+// The prelude runs without a blank line from the line after the opening brace, every line one preludeLineRe
+// matches; one blank line follows it; and the line after that opens the translation of the Go body's first line:
+// its comment, or the first line holding its identifiers, with only scaffolding (scaffoldRe), a bare `{` or
+// comments between. A blank line inside the prelude, or a second one after it, is not the separator.
+func preludeSeparator(cs *csFile, g *goFile, cOpen, cEnd, lb, rb int) int {
+	c := cOpen + 1
+	for c < cEnd && !isBlankCS(cs, c) {
+		if !preludeLineRe.MatchString(strings.TrimSpace(cs.codeText[c-1])) {
+			return 0
+		}
+		c++
+	}
+	if c == cOpen+1 || c+1 >= cEnd || isBlankCS(cs, c+1) || lb+1 >= rb {
+		return 0
+	}
+	goFirst := strings.TrimSpace(g.src[lb])
+	if strings.HasPrefix(goFirst, "//") || strings.HasPrefix(goFirst, "/*") {
+		if commentOnly(cs, c+1) {
+			return c
+		}
+		return 0
+	}
+	ids := goIdents(g.idents[lb+1])
+	for l := c + 1; l < cEnd && !isBlankCS(cs, l); l++ {
+		if !cs.codeOnLine[l-1] {
+			continue
+		}
+		ci := csIdents(cs.codeText[l-1])
+		all := true
+		for k := range ids {
+			if !ci[k] {
+				all = false
+				break
+			}
+		}
+		if all {
+			return c
+		}
+		code := strings.TrimSpace(cs.codeText[l-1])
+		if code != "{" && !scaffoldRe.MatchString(code) && !attrRe.MatchString(cs.codeText[l-1]) {
+			return 0
+		}
+	}
+	return 0
 }
 
 var preludeRe = regexp.MustCompile(`(DerefOrNull\(\);|heap<.*>\(out var \S+\);|= \S+\.Clone\(\);|\.sslice\(\);|= GoZero<.*>\(\);|= nonnil\(ref .*;|= default!;)$`)

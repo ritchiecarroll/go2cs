@@ -32,8 +32,6 @@ import (
 )
 
 var wantUtf8Census = map[string]int{
-	// E2: the converter's blank line after named-result locals (the owner's decision 2)
-	"body:extra:after-named-result-locals": 3,
 	// J: end-of-line alignment (the RuneError run, no longer split by blank lines since B, is ragged; the
 	// `first` table's row comments, end-of-line again since F, follow rows `@as` widens)
 	"eol:misaligned":    3,
