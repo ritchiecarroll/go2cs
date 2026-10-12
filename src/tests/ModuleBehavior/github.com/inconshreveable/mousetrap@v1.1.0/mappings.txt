@@ -1,0 +1,2 @@
+# module-path	nuget-id	status	source-repo	registered	contact
+github.com/inconshreveable/mousetrap	nugetgo.github.com.inconshreveable.mousetrap	community	https://github.com/ritchiecarroll/mousetrap-cs	2026-10-12	owner

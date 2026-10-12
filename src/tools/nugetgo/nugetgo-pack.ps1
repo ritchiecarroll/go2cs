@@ -74,6 +74,14 @@
     line, the flavors whose package metadata the self-description does not describe. The decision is a measurement,
     never a list and never the module author's word.
 
+    Behavioral proof (COORD ruling 2026-10-12): a module with no Go tests has no comparison for `go2cs -recurse -tests`
+    to make, so it ships -BehaviorProofDir instead of -ValidationDir: one row per shipped RID (<rid>.md), each written
+    on a host of that RID by Invoke-NugetgoBehaviorRow.ps1, usually the os-matrix workflow's nugetgo-behavior stage
+    (NugetgoBehaviorProof.psm1). VALIDATION.md is then the behavioral page, which says it is not a test comparison, and
+    the Tests badge says there are no Go tests and how many RIDs ran. After the pack, each row's assembly must be the
+    bytes the package carries for its RID, and each row must have been recorded on its file's RID and GOOS; anything
+    else is refused by name and the package removed. A module with Go tests never takes this proof.
+
     The restore is isolated: a nuget.config with <clear/> and only -Feed as a source, and a private NUGET_PACKAGES.
     The user's global packages folder is censused for nugetgo.* and go.* before and after, and the run fails if it
     grew. Nothing is pushed anywhere, and nothing is signed: signing is the release's last step.
@@ -87,6 +95,8 @@ param(
     [Parameter(Mandatory)][string]$RecurseRoot,
     [string]$ValidationDir,
     [string]$UnvalidatedReason,
+    # A module with no Go tests: the directory of its behavioral proof rows, <rid>.md for every shipped RID.
+    [string]$BehaviorProofDir,
     [Parameter(Mandatory)][string]$ClosureVersion,
     [Parameter(Mandatory)][string]$Feed,
     [Parameter(Mandatory)][string]$OutDir,
@@ -128,6 +138,7 @@ Import-Module (Join-Path $PSScriptRoot 'NugetgoLicense.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoHostPaths.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoReadme.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoFlavors.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'NugetgoBehaviorProof.psm1') -Force
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 
 function Refuse([string]$why) { throw "REFUSED: $why" }
@@ -232,13 +243,15 @@ if ($ConversionReadme) {
     Write-Host "conversion README: $(if ($described.Author) { 'the author form, with no maintainers section' } else { 'ends with the offer to the module''s maintainers' })"
 }
 
-# D7: a validated module ships its MODULE.md as VALIDATION.md, the per-package pages beside it. A module that cannot
-# validate yet packs ONLY as a rehearsal of its shape (-UnvalidatedReason), whose VALIDATION.md says so; such a
-# package is never a release.
+# D7: a validated module ships its MODULE.md as VALIDATION.md, the per-package pages beside it. A module with no Go
+# tests ships its behavioral proof instead (COORD ruling 2026-10-12). A module that cannot validate yet packs ONLY as a
+# rehearsal of its shape (-UnvalidatedReason), whose VALIDATION.md says so; such a package is never a release.
 $pages = @()
-if ($UnvalidatedReason) {
-    if ($Release) { Refuse 'an unvalidated module is never packed as a release (-UnvalidatedReason with -Release)' }
-    if ($ValidationDir) { Refuse '-UnvalidatedReason and -ValidationDir are exclusive' }
+if (-not (Test-Path -LiteralPath $moduleCacheDir -PathType Container)) { Refuse "no module source at $moduleCacheDir, where the pack reads whether the module has Go tests (go mod download $ModulePath@$GoVersion)" }
+$proofMode = Get-NugetgoProofMode -ValidationDir $ValidationDir -UnvalidatedReason $UnvalidatedReason -BehaviorProofDir $BehaviorProofDir -Release:$Release `
+    -ModuleHasGoTests (Test-NugetgoModuleHasGoTests -ModuleDir $moduleCacheDir)
+if ($proofMode.Reason) { Refuse $proofMode.Reason }
+if ($proofMode.Mode -ceq 'unvalidated') {
     $validationPage = Join-Path $Scratch 'UNVALIDATED.md'
     New-Item -ItemType Directory -Force $Scratch | Out-Null
     [System.IO.File]::WriteAllText($validationPage, ("# ``$ModulePath`` -- NOT VALIDATED`n`n" +
@@ -246,8 +259,17 @@ if ($UnvalidatedReason) {
         "not been converted and compared, so it carries no validation proof, and it is not published.`n`n$UnvalidatedReason`n"),
         (New-Object System.Text.UTF8Encoding($false)))
 }
+elseif ($proofMode.Mode -ceq 'behavioral') {
+    # The rows are read now and bound after the pack, against the bytes the package carries for each RID.
+    if (-not (Test-Path -LiteralPath $BehaviorProofDir -PathType Container)) { Refuse "-BehaviorProofDir: no directory at $BehaviorProofDir" }
+    $behaviorRows = @{}
+    foreach ($f in @(Get-ChildItem -LiteralPath $BehaviorProofDir -Filter '*.md' -File)) { $behaviorRows[$f.BaseName] = Read-NugetgoBehaviorRow -Path $f.FullName }
+    $validationPage = Join-Path $Scratch 'BEHAVIOR.md'
+    New-Item -ItemType Directory -Force $Scratch | Out-Null
+    [System.IO.File]::WriteAllText($validationPage, (New-NugetgoBehaviorPage -ModulePath $ModulePath -GoVersion $GoVersion -Rows $behaviorRows), (New-Object System.Text.UTF8Encoding($false)))
+    Write-Host "  proof: behavioral, $($behaviorRows.Count) row(s) from $BehaviorProofDir ($(@($behaviorRows.Keys | Sort-Object) -join ', '))"
+}
 else {
-    if (-not $ValidationDir) { Refuse 'a validated module needs -ValidationDir (D7), or -UnvalidatedReason for a pack-shape rehearsal' }
     $validationPage = Join-Path $ValidationDir 'MODULE.md'
     if (-not (Test-Path -LiteralPath $validationPage)) { Refuse "no MODULE.md in $ValidationDir (a validated module is required; D7)" }
     $pages = @(Get-ChildItem -LiteralPath $ValidationDir -Filter '*.md' -Recurse | Where-Object { $_.Name -ne 'MODULE.md' })
@@ -284,7 +306,9 @@ $blockArgs = @{
     ClosureVersion = $ClosureVersion; RepositoryUrl = $RepositoryUrl; RepositoryTag = $repositoryTag; LicenseName = $licenseName; LicenseSpdx = $LicenseSpdx
     DefaultIcon = $packageIcon.Default
 }
-if ($UnvalidatedReason) { $blockArgs.Unvalidated = $true } else { $blockArgs.Matched = $totals.Matched; $blockArgs.Disclosed = $totals.Disclosed }
+if ($proofMode.Mode -ceq 'unvalidated') { $blockArgs.Unvalidated = $true }
+elseif ($proofMode.Mode -ceq 'behavioral') { $blockArgs.BehaviorRids = $behaviorRows.Count }
+else { $blockArgs.Matched = $totals.Matched; $blockArgs.Disclosed = $totals.Disclosed }
 # The facts the block states that change from pack to pack, printed on every write so that a rehearsal's rewrite is
 # never taken for the release's.
 $facts = "package version $packageVersion, tag $repositoryTag"
@@ -570,6 +594,13 @@ if ($grown.Count) { throw "the global packages folder GREW: $($grown -join ', ')
 $nupkg = Join-Path $OutDir "$($id.Id).$packageVersion.nupkg"
 if (-not (Test-Path $nupkg)) { $nupkg = @(Get-ChildItem $OutDir -Filter "$($id.Id).*.nupkg" | Sort-Object LastWriteTime -Descending)[0].FullName }
 if ($flavorDecision.RidSpecific) { Set-NugetgoRidAssets -Package $nupkg -Assemblies $flavorAssemblies -TargetFramework 'net10.0' }
+# The behavioral proof must be OF the packed bytes: each RID's row ran the assembly this package carries for that RID,
+# on that RID and its GOOS, and printed what go run printed.
+if ($proofMode.Mode -ceq 'behavioral') {
+    $unproven = @(Test-NugetgoBehaviorRows -Rows $behaviorRows -Assemblies (Get-NugetgoPackedRidAssemblies -Package $nupkg -TargetFramework 'net10.0') -ModulePath $ModulePath -GoVersion $GoVersion)
+    if ($unproven.Count) { Remove-Item -LiteralPath $nupkg; Refuse "the behavioral proof is not a proof of the packed bytes -- $($unproven -join '; ')" }
+    foreach ($rid in @($behaviorRows.Keys | Sort-Object)) { Write-Host "  proof: $rid ran $($behaviorRows[$rid].assembly) on $($behaviorRows[$rid].host): bound" }
+}
 # The roots no packed byte may name: the build root, the pack's scratch and output, the module cache, the user profile.
 $hostRoots = @($RecurseRoot, $Scratch, $OutDir, (& go env GOMODCACHE).Trim(), [Environment]::GetFolderPath('UserProfile')) |
     Where-Object { $_ } | ForEach-Object { [System.IO.Path]::GetFullPath($_) } | Select-Object -Unique

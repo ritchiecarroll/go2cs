@@ -123,7 +123,10 @@ function New-NugetgoGeneratedBlock {
     $at = $Description.IndexOf($ModulePath, [StringComparison]::Ordinal)
     if ($at -lt 0) { throw "the description does not name the module path $ModulePath, so its blockquote cannot link the module's source" }
     $callout = $Description.Substring(0, $at) + $moduleLink + $Description.Substring($at + $ModulePath.Length)
+    # A module with no Go tests is proven by behavior, one row per RID (COORD ruling 2026-10-12): the badge says there
+    # are no Go tests to count and how many RIDs ran, never a test count.
     $tests = if ($Unvalidated) { New-NugetgoBadge 'Tests' 'Tests' 'not validated' 'orange' 'go' "$repo/blob/$RepositoryTag/VALIDATION.md" }
+             elseif ($BehaviorRids -gt 0) { New-NugetgoBadge 'Tests' 'Tests' "no Go tests, behavior on $BehaviorRids RIDs" 'blue' 'go' "$repo/blob/$RepositoryTag/VALIDATION.md" }
              else { New-NugetgoBadge 'Tests' 'Tests' "$Matched matched / $Disclosed disclosed" 'brightgreen' 'go' "$repo/blob/$RepositoryTag/VALIDATION.md" }
     $source = New-NugetgoBadge 'C# Source' 'C# Source' "@$PackageVersion" $script:DotnetPurple 'dotnet' "$repo/tree/$RepositoryTag"
     $module = New-NugetgoBadge 'Go module' 'Go module' "@$goTag" $script:GoBlue 'go' "https://pkg.go.dev/$ModulePath@$goTag"

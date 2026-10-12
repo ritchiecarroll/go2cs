@@ -69,9 +69,12 @@ gh workflow run os-matrix.yml -f goos=linux  -f stage=sweep-shard -f filter=comp
 | Input | Values | Meaning |
 |:--|:--|:--|
 | `goos` | `windows` · `linux` · `darwin` | The corpus flavor to bind. Each maps to a runner + RID pair; **`darwin` fans out to BOTH mac runners** (arm64 and x64) in one dispatch. |
-| `stage` | `census` · `behavioral-smoke` · `sweep-shard` · `release-smoke` · `aot-smoke` | What to run. One stage per dispatch. |
+| `stage` | `census` · `behavioral-smoke` · `sweep-shard` · `release-smoke` · `aot-smoke` · `nugetgo-behavior` | What to run. One stage per dispatch. |
 | `filter` | free text, optional | The shard. A package substring for `sweep-shard`, a project-name substring for `behavioral-smoke`. Blank takes the stage's documented default. |
 | `published_version` | a four-part go.* version, optional | `release-smoke` only. Blank packs this tree and consumes that pack (the pre-publish gate). Set, the pack is skipped and every leg restores that version from nuget.org (the post-publish smoke). |
+| `nugetgo_module` | `MODULE@VERSION` | `nugetgo-behavior` only, and required there. Its sample program and mappings row must exist at `src/tests/ModuleBehavior/MODULE@VERSION/` on the dispatched ref. |
+| `nugetgo_package` | a NuGet package version | `nugetgo-behavior` only, and required there: the rehearsal package every row runs (e.g. `1.1.0-int.1`). |
+| `nugetgo_feed` | a NuGet v3 feed URL, optional | `nugetgo-behavior` only. Blank takes int.nugettest.org, where the runbook rehearses. |
 
 There is no `all` value: one dispatch per flavor keeps each leg's artifacts, budget and verdict
 separate, which is what makes a wall readable. Dispatching all three is three cheap clicks.
@@ -183,6 +186,28 @@ finish inside the 6 hours a hosted job may run (37523439849, cancelled at 6h00m)
 budget reaches it. osx-x64, the same darwin build, read 293 min; linux-x64 56 min; win-x64 71 min (and an open defect: the
 executable fails at startup with "no metadata token available"). A larger or self-hosted Apple-silicon runner is the owner's call.
 
+### `nugetgo-behavior` — one behavioral proof row per shipped RID
+
+A third-party module with no Go tests cannot be validated by `go2cs -recurse -tests`, so its nugetgo package ships a
+behavioral proof (COORD ruling 2026-10-12): one row per shipped RID, each written ON a host of that RID. No row is
+inferred from another, so the stage runs the same four legs as `release-smoke`, whatever `goos` says, with no pack.
+Each leg builds the converter and runs `src/tools/nugetgo/Invoke-NugetgoBehaviorRow.ps1`: the sample program under
+`src/tests/ModuleBehavior/MODULE@VERSION/` is run with `go run`, converted against `nugetgo_package` on
+`nugetgo_feed`, built with `-r <rid>` and run with dotnet. The row records both outputs' hashes, the module assembly
+that loaded, the RID the host's dotnet reports, the GOOS go reports, and the host as the runner label, `ImageOS` and
+`ImageVersion`. The leg exits non-zero when the outputs differ; the row is still written, as the evidence.
+
+The row is annotated in its OWN step as one base64 notice titled `nugetgo-row <rid>`, and kept in the artifact.
+`src/tools/nugetgo/Get-NugetgoBehaviorRows.ps1 -RunId <id> -OutDir <dir>` reads the four rows back through the
+annotations API, and `nugetgo-pack.ps1 -BehaviorProofDir <dir>` binds each to the bytes the release packs for its RID.
+The plan refuses the three `nugetgo_*` inputs on any other stage, a malformed value, and a module with no sample at the
+dispatched ref.
+
+```
+gh workflow run os-matrix.yml -f stage=nugetgo-behavior \
+  -f nugetgo_module=github.com/inconshreveable/mousetrap@v1.1.0 -f nugetgo_package=1.1.0-int.1
+```
+
 ## Results flow
 
 Nothing is automatic and nothing is written back. Every leg uploads an `artifacts/` bundle
@@ -251,6 +276,7 @@ disclosure count is half of what makes a row honest.
 | `behavioral-smoke` | 90 min | 135 min | Converter `go build` plus a filtered four-phase run whose shared core closure is built from nothing. |
 | `sweep-shard` | 210 min | 315 min | One convert/build/run/compare cycle per matched row; the sweep's own per-package floors are the reason this is the largest. |
 | `release-smoke` | 90 min | 135 min | The leg only: converter `go build` plus four small restore/build/run arms. The `pack` job (windows, 240 min) is separate. Provisional. |
+| `nugetgo-behavior` | 90 min | 135 min | The leg: converter `go build`, one `go run`, one conversion against the feed, and one cold restore, build and run of the sample. `release-smoke`'s leg is the closest shape. Provisional. |
 | `aot-smoke` | 240 min | 360 min | The leg only, three RIDs: one Native AOT publish of a 31-package consumer under `TrimMode=partial` -- linux 56, windows 71, osx-x64 293 min (37523439849). osx-arm64 is not run: it did not finish in 360, GitHub's ceiling. |
 
 The macOS multiplier is 1.5x because `macos-15` (arm64) is a 3-core runner and every phase here is

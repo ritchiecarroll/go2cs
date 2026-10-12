@@ -16,8 +16,17 @@
 #
 # A row is a small text file, <rid>.md: a title line, then one "key: value" per line.
 
-$script:RowKeys = @('module', 'version', 'package', 'rid', 'runtime-rid', 'host', 'os', 'go', 'dotnet', 'go-output', 'dotnet-output', 'outputs-equal', 'assembly', 'date')
-$script:ShippedRids = @('win-x64', 'linux-x64', 'osx-x64', 'osx-arm64')
+# Without -Force: nugetgo-pack.ps1 has already imported NugetgoFlavors.psm1, and a forced re-import from inside this
+# module would unload the pack's copy (its functions then read "not recognized"). The map is read once, at import.
+Import-Module (Join-Path $PSScriptRoot 'NugetgoFlavors.psm1')
+
+$script:RowKeys = @('module', 'version', 'package', 'rid', 'runtime-rid', 'goos', 'host', 'os', 'go', 'dotnet', 'go-output', 'dotnet-output', 'outputs-equal', 'assembly', 'date')
+# The release's RID map (NugetgoFlavors.psm1): the RIDs a row is owed for, and the GOOS each one's row is recorded on.
+$script:RidGoos = Get-NugetgoRidFlavors
+$script:ShippedRids = @($script:RidGoos.Keys)
+# The title of a row's annotation. The fetch script selects by it, so it never collides with a leg's summary chunks or
+# a runner warning in the same step (C1, 2026-10-12).
+$script:RowTitle = 'nugetgo-row'
 
 function Get-NugetgoBehaviorRowKeys { $script:RowKeys }
 
@@ -53,6 +62,7 @@ function Test-NugetgoBehaviorRows {
         }
         if ($row.rid -cne $rid) { $reasons.Add("[$rid] the row's rid is '$($row.rid)', not its file's") }
         if ($row.'runtime-rid' -cne $rid) { $reasons.Add("[$rid] the row was recorded on $($row.'runtime-rid'), not on ${rid}: a row never stands for another RID") }
+        if ($row.goos -and $row.goos -cne $script:RidGoos[$rid]) { $reasons.Add("[$rid] the row was recorded on GOOS $($row.goos), not ${rid}'s $($script:RidGoos[$rid]): a row never stands for another OS") }
         if ($row.module -cne $ModulePath -or $row.version -cne $GoVersion) { $reasons.Add("[$rid] the row is for $($row.module) $($row.version), not $ModulePath $GoVersion") }
         if ($row.'outputs-equal' -cne 'true' -or $row.'go-output' -cne $row.'dotnet-output') { $reasons.Add("[$rid] dotnet run did not print what go run printed (go $($row.'go-output'), dotnet $($row.'dotnet-output'))") }
         $packed = $Assemblies[$rid]
@@ -75,9 +85,9 @@ function New-NugetgoBehaviorPage {
     $lines.Add("# ``$ModulePath`` -- behavioral proof (upstream has no Go tests)")
     $lines.Add('')
     $lines.Add("``$ModulePath`` $GoVersion ships no Go tests, so this page is not a test comparison. Each row below is a sample")
-    $lines.Add('program run on that RID''s own host: the program converted by go2cs against this package and run with `dotnet run`,')
-    $lines.Add('and the Go program run with `go run`, printed the same bytes. Each row names the assembly that loaded, which is the')
-    $lines.Add('package''s own for that RID, and the host it ran on. No row stands for another RID.')
+    $lines.Add('program run on that RID''s own host: the program converted by go2cs against this package, built for that RID and run')
+    $lines.Add('with dotnet, and the Go program run with `go run`, printed the same bytes. Each row names the assembly that loaded,')
+    $lines.Add('which is the package''s own for that RID, and the host it ran on. No row stands for another RID.')
     $lines.Add('')
     $lines.Add('| RID | Host | Assembly | Outputs equal |')
     $lines.Add('|:--|:--|:--|:--|')
@@ -102,12 +112,109 @@ function Test-NugetgoModuleHasGoTests {
     $false
 }
 
-# RED STUBS (the cobra increment, part 3): every function below is unmet.
-function Get-NugetgoPackedRidAssemblies { param([string]$Package, [string]$TargetFramework) @{} }
-function Get-NugetgoProofMode { param([string]$ValidationDir, [string]$UnvalidatedReason, [string]$BehaviorProofDir, [switch]$Release, [bool]$ModuleHasGoTests) [pscustomobject]@{ Mode = $null; Reason = $null } }
-function ConvertTo-NugetgoRowAnnotationText { param([string]$Text) '' }
-function ConvertFrom-NugetgoRowAnnotations { param($Annotations) @{} }
-function Get-NugetgoRowHost { param([hashtable]$Environment, [string]$HostLabel) '' }
-function New-NugetgoBehaviorRowText { param($Fields) '' }
+# Each shipped RID's assemblies, file name -> bytes, as NuGet selects them for a framework-dependent build with that
+# RID: runtimes/<rid>/lib/<tfm>/ when the package has that folder, otherwise lib/<tfm>/. A neutral package therefore
+# gives every RID its lib/ bytes, and a RID-specific one each RID its own.
+function Get-NugetgoPackedRidAssemblies {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Package, [Parameter(Mandatory)][string]$TargetFramework)
+
+    Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
+    $entries = @{}
+    $zip = [System.IO.Compression.ZipFile]::OpenRead($Package)
+    try {
+        foreach ($e in $zip.Entries) {
+            if ($e.FullName -notlike '*.dll') { continue }
+            $ms = New-Object System.IO.MemoryStream
+            $st = $e.Open()
+            try { $st.CopyTo($ms) } finally { $st.Dispose() }
+            $entries[$e.FullName] = $ms.ToArray()
+        }
+    }
+    finally { $zip.Dispose() }
+    $byRid = @{}
+    foreach ($rid in $script:ShippedRids) {
+        $folder = "runtimes/$rid/lib/$TargetFramework/"
+        if (-not @($entries.Keys | Where-Object { $_.StartsWith($folder, [StringComparison]::Ordinal) }).Count) { $folder = "lib/$TargetFramework/" }
+        $set = @{}
+        foreach ($name in $entries.Keys) {
+            if ($name.StartsWith($folder, [StringComparison]::Ordinal) -and $name.Substring($folder.Length) -notmatch '/') { $set[$name.Substring($folder.Length)] = $entries[$name] }
+        }
+        $byRid[$rid] = $set
+    }
+    $byRid
+}
+
+# Which proof a pack carries (D7). A module with Go tests ships its test comparison (-ValidationDir); a module with no
+# Go tests ships the behavioral proof (-BehaviorProofDir), because `go2cs -recurse -tests` has nothing to compare; and a
+# pack-shape rehearsal ships neither (-UnvalidatedReason). The three are exclusive. Reason is a refusal, or $null.
+function Get-NugetgoProofMode {
+    [CmdletBinding()]
+    param([string]$ValidationDir, [string]$UnvalidatedReason, [string]$BehaviorProofDir, [switch]$Release, [Parameter(Mandatory)][bool]$ModuleHasGoTests)
+
+    $refuse = { param($why) [pscustomobject]@{ Mode = $null; Reason = $why } }
+    $given = @(@{ '-ValidationDir' = $ValidationDir; '-UnvalidatedReason' = $UnvalidatedReason; '-BehaviorProofDir' = $BehaviorProofDir }.GetEnumerator() | Where-Object { $_.Value } | ForEach-Object { $_.Key } | Sort-Object)
+    if ($given.Count -gt 1) { return & $refuse "$($given -join ' and ') are exclusive: a package carries one proof" }
+    if ($UnvalidatedReason) {
+        if ($Release) { return & $refuse 'an unvalidated module is never packed as a release (-UnvalidatedReason with -Release)' }
+        return [pscustomobject]@{ Mode = 'unvalidated'; Reason = $null }
+    }
+    if ($BehaviorProofDir) {
+        if ($ModuleHasGoTests) { return & $refuse 'the module has Go tests: its proof is the test comparison (-ValidationDir), never a behavioral one' }
+        return [pscustomobject]@{ Mode = 'behavioral'; Reason = $null }
+    }
+    if ($ValidationDir) { return [pscustomobject]@{ Mode = 'validated'; Reason = $null } }
+    if ($ModuleHasGoTests) { return & $refuse 'a validated module needs -ValidationDir (D7), or -UnvalidatedReason for a pack-shape rehearsal' }
+    & $refuse 'a module with no Go tests needs -BehaviorProofDir (one row per shipped RID, each run on its own OS), or -UnvalidatedReason for a pack-shape rehearsal'
+}
+
+# A row as ONE annotation message: its UTF-8 bytes in base64, which needs no workflow-command escaping and fits one
+# annotation chunk (a row is ~15 lines). The step passes it to .github/annotate-summary.ps1 with the title
+# "nugetgo-row <rid>".
+function ConvertTo-NugetgoRowAnnotationText {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Text)
+    [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($Text))
+}
+
+# The rows a run's annotations carry, RID -> row text. -Annotations are the objects GET .../check-runs/{id}/annotations
+# returns (title, message). An annotation whose title is not "nugetgo-row <rid>" is someone else's and is ignored; one
+# that is, but does not decode to a row for that RID, is refused by name, never skipped.
+function ConvertFrom-NugetgoRowAnnotations {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][AllowEmptyCollection()]$Annotations)
+
+    $rows = @{}
+    foreach ($a in @($Annotations)) {
+        if ([string]$a.title -notmatch "^$([regex]::Escape($script:RowTitle)) (?<rid>\S+)$") { continue }
+        $rid = $Matches['rid']
+        try { $text = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String(([string]$a.message).Trim())) }
+        catch { throw "the annotation '$($a.title)' is not a base64 row: $($_.Exception.Message)" }
+        $ridLine = @($text -split "`n" | Where-Object { $_ -match '^rid: ' })
+        if ($ridLine.Count -ne 1 -or $ridLine[0] -cne "rid: $rid") { throw "the annotation '$($a.title)' carries a row for '$(($ridLine -join ', ') -replace '^rid: ', '')', not $rid" }
+        if ($rows.ContainsKey($rid)) { throw "two annotations carry a row for $rid" }
+        $rows[$rid] = $text
+    }
+    $rows
+}
+
+# The host a row names. A hosted runner sets ImageOS and ImageVersion, and the workflow passes the matrix label as
+# NUGETGO_RUNNER; a label such as macos-15-intel can move to a new image, so the image version is what makes a row
+# reproducible (C1, 2026-10-12). Any other host is named by the caller, never guessed.
+function Get-NugetgoRowHost {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][hashtable]$Environment, [string]$HostLabel)
+
+    if ($HostLabel) { return $HostLabel }
+    if ($Environment.ImageOS -and $Environment.ImageVersion -and $Environment.NUGETGO_RUNNER) { return "$($Environment.NUGETGO_RUNNER) (image $($Environment.ImageOS) $($Environment.ImageVersion))" }
+    throw 'not a hosted runner (no ImageOS, ImageVersion and NUGETGO_RUNNER): name the host with -HostLabel'
+}
+
+# A row's text: the title line, then one "key: value" per line, in the order given.
+function New-NugetgoBehaviorRowText {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][System.Collections.Specialized.OrderedDictionary]$Fields)
+    "# nugetgo behavioral proof row`n" + ((@($Fields.Keys) | ForEach-Object { "${_}: $($Fields[$_])" }) -join "`n") + "`n"
+}
 
 Export-ModuleMember -Function Get-NugetgoBehaviorRowKeys, Read-NugetgoBehaviorRow, Test-NugetgoBehaviorRows, New-NugetgoBehaviorPage, Test-NugetgoModuleHasGoTests, Get-NugetgoPackedRidAssemblies, Get-NugetgoProofMode, ConvertTo-NugetgoRowAnnotationText, ConvertFrom-NugetgoRowAnnotations, Get-NugetgoRowHost, New-NugetgoBehaviorRowText
