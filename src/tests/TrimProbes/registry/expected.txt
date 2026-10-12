@@ -1,0 +1,7 @@
+BySize is an array: true
+BySize entries: 61
+entry fields: 3 true true true
+NumGC present: true
+BySize field found: true array 61
+reflect.New: ptr array 61 struct
+Addr: ptr 61

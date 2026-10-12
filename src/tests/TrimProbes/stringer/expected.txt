@@ -1,0 +1,8 @@
+1 reflect.Kind: array
+2 time.Duration: 1.5s
+3 main named int: kay
+4 main struct: ess
+5 main pointer receiver: pee
+6 %v of a Kind: slice, %s: map, %d: 2
+7 assert Kind to fmt.Stringer: true true
+8 direct call: chan

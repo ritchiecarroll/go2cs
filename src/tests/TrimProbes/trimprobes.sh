@@ -10,9 +10,10 @@
 #
 # Prints one tab-separated row per program (program, arm, publish rc, run exit, verdict, executable bytes) and exits 1
 # if any program fails its expectation for the arm. Expectations: under the default arm every program publishes
-# (rc 0) and runs: consumer prints its PACKAGE-SYMBOLS line with empty stderr, the other four equal expected.txt (Go's
-# own output). Under F, genprobe stops by design at family E (GoReflect.buildFieldAccessor, exit 2), so its verdict is
-# reported, not judged; c32a, c32b and c32c are judged against expected.txt.
+# (rc 0) and runs: consumer prints its PACKAGE-SYMBOLS line with empty stderr, the other seven equal expected.txt (Go's
+# own output). Under F, genprobe's verdict is reported, not judged (it stopped at family E's buildFieldAccessor on every
+# tree before the method-set keep, ec6df12120, and equals Go's output from it on); every other program is judged against
+# expected.txt, so registry, stringer and fieldbox read red on a tree older than the seats they pin (README).
 set -u
 SRC=${1:?usage: trimprobes.sh <go2cs src dir> [arm] [rid]}; ARM=${2:-default}; RID=${3:-}
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -24,7 +25,7 @@ esac
 [ -d "$SRC/core/golib" ] || { echo "not a go2cs src dir: $SRC" >&2; exit 2; }
 OUT=$HERE/out-$ARM-$RID; rm -rf "${OUT:?}"; mkdir -p "$OUT"
 fail=0
-for p in consumer genprobe c32a c32b c32c; do
+for p in consumer genprobe c32a c32b c32c registry stringer fieldbox; do
   dir=$HERE/$p; proj=$(ls "$dir"/*.csproj | head -1); name=$(sed -n 's#.*<AssemblyName>\(.*\)</AssemblyName>.*#\1#p' "$proj" | head -1)
   [ -n "$name" ] || name=$(basename "$proj" .csproj)
   case $ARM in

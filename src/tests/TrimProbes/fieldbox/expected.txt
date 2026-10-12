@@ -1,0 +1,6 @@
+1 Addr write-through: 41
+2 fmt &struct: &{2 y}
+3 SetInt read back: 42
+4 identity: true true
+5 promoted: 7 7 true
+6 defined over struct: 9
