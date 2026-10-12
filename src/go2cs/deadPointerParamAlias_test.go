@@ -8,7 +8,10 @@
 
 package main
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 // A pointer parameter's deref VALUE alias is dropped when the converted body never names the value
 // (bodyReferencesIdentAsValue). The scan is a whole-word text match and deliberately errs toward
@@ -93,5 +96,32 @@ func TestBodyReferencesIdentAsValueIgnoresNamedArgumentLabels(t *testing.T) {
 				t.Fatalf("bodyReferencesIdentAsValue(%q, \"parent\") = %v, want %v", test.body, got, test.want)
 			}
 		})
+	}
+}
+
+// A comment never decides emitted code. The alias scan read the body's comments as code, so under
+// -comments a comment that names the parameter (runtime's casGToPreemptScan: "We never notify
+// gp.syncGroup …") added a dereferencing alias the conversion without -comments does not have.
+func TestPointerParamAliasIgnoresComments(t *testing.T) {
+	lines := convertWithComments(t, `package main
+
+import "fmt"
+
+func touch(p *int) bool {
+	ok := p != nil
+	// p.field is never read here
+	return ok /* nor p.other */
+}
+
+func main() {
+	x := 1
+	fmt.Println(touch(&x))
+}
+`)
+
+	for i, line := range lines {
+		if strings.Contains(line, "static bool touch(") && i+1 < len(lines) && strings.Contains(lines[i+1], "ref var p") {
+			t.Errorf("touch's p gets a dereferencing alias that only its comments name: %q", strings.TrimSpace(lines[i+1]))
+		}
 	}
 }
