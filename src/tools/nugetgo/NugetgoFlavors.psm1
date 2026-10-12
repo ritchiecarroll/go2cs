@@ -151,4 +151,23 @@ function Test-NugetgoRidLayout {
     $reasons.ToArray()
 }
 
-Export-ModuleMember -Function Get-NugetgoRidFlavors, Get-NugetgoReferenceGoos, Get-NugetgoFlavorGoos, Get-NugetgoFlavorDecision, Set-NugetgoRidAssets, Test-NugetgoRidLayout
+# RED STUBS (the cobra increment): today a third-party require that differs by GOOS is refused, and no flavor is
+# disclosed.
+function Merge-NugetgoFlavorRequires {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)]$Requires, [string[]]$ThirdPartyPackage = @())
+    $first = $null
+    foreach ($goos in Get-NugetgoFlavorGoos) {
+        $set = @($Requires[$goos] | ForEach-Object { "$($_.Module)@$($_.Version)" } | Sort-Object) -join ', '
+        if ($null -eq $first) { $first = $set } elseif ($set -cne $first) { throw "the $goos flavor requires [$set] where another requires [$first]" }
+    }
+    @($Requires[(Get-NugetgoFlavorGoos)[0]])
+}
+
+function Get-NugetgoFlavorDisclosure {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$ProofGoos, [switch]$RidSpecific)
+    $null
+}
+
+Export-ModuleMember -Function Get-NugetgoRidFlavors, Get-NugetgoReferenceGoos, Get-NugetgoFlavorGoos, Get-NugetgoFlavorDecision, Set-NugetgoRidAssets, Test-NugetgoRidLayout, Merge-NugetgoFlavorRequires, Get-NugetgoFlavorDisclosure

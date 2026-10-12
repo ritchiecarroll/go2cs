@@ -111,5 +111,28 @@ catch { $wrongSet = $_.Exception.Message }
 Check 'a package whose lib/ is not the flavors'' assembly set is refused' ($wrongSet -like '*Other.dll*') "got: $wrongSet"
 Remove-Item -Recurse -Force $scratch
 
+Write-Host 'requires are the union of the flavors'' (COORD ruling 2026-10-12, for cobra)'
+function Req($module, $version, $id, $pv) { [pscustomobject]@{ Module = $module; Version = $version; NuGetId = $id; PackageVersion = $pv } }
+$trap = Req 'github.com/inconshreveable/mousetrap' 'v1.1.0' 'nugetgo.github.com.inconshreveable.mousetrap' '1.1.0'
+$pflag = Req 'github.com/spf13/pflag' 'v1.0.9' 'nugetgo.github.com.spf13.pflag' '1.0.9'
+$named = @('github.com/inconshreveable/mousetrap=nugetgo.github.com.inconshreveable.mousetrap@1.1.0', 'github.com/spf13/pflag=nugetgo.github.com.spf13.pflag@1.0.9')
+$union = @(try { Merge-NugetgoFlavorRequires -Requires (Flavors @($pflag, $trap) @($pflag) @($pflag)) -ThirdPartyPackage $named } catch { "threw: $($_.Exception.Message)" })
+Check 'a require only windows has is in the union, once each, sorted by module' (
+    (@($union | ForEach-Object { $_.Module }) -join ',') -ceq 'github.com/inconshreveable/mousetrap,github.com/spf13/pflag') "got $(@($union | ForEach-Object { if ($_.Module) { $_.Module } else { $_ } }) -join ', ')"
+$same = @(Merge-NugetgoFlavorRequires -Requires (Flavors @($pflag) @($pflag) @($pflag)) -ThirdPartyPackage @($named[1]))
+Check 'flavors that agree give their own requires' ((@($same | ForEach-Object { $_.Module }) -join ',') -ceq 'github.com/spf13/pflag') "got $(@($same | ForEach-Object { $_.Module }) -join ', ')"
+$why = $null
+try { Merge-NugetgoFlavorRequires -Requires (Flavors @($trap) @((Req 'github.com/inconshreveable/mousetrap' 'v1.0.0' 'nugetgo.github.com.inconshreveable.mousetrap' '1.0.0')) @($trap)) -ThirdPartyPackage @($named[0]) | Out-Null } catch { $why = $_.Exception.Message }
+Check 'one module at two versions across flavors is refused' ($why -like '*mousetrap*v1.0.0*v1.1.0*' -or $why -like '*mousetrap*v1.1.0*v1.0.0*') "got: $why"
+$why = $null
+try { Merge-NugetgoFlavorRequires -Requires (Flavors @($pflag) @($pflag) @($pflag)) -ThirdPartyPackage $named | Out-Null } catch { $why = $_.Exception.Message }
+Check 'a -ThirdPartyPackage no flavor references is refused' ($why -like '*mousetrap*no flavor*') "got: $why"
+
+Write-Host 'a RID-specific package discloses the flavors its self-description does not describe (COORD ruling 2026-10-12)'
+$line = Get-NugetgoFlavorDisclosure -ProofGoos linux -RidSpecific
+Check 'it names the described flavor and both others' ("$line" -like '*linux*' -and "$line" -like '*windows*' -and "$line" -like '*darwin*' -and "$line" -like '*source-metadata.txt*') "got '$line'"
+Check 'it is one line' ("$line" -notmatch "`n") "got '$line'"
+Check 'a neutral package carries no such line' ($null -eq (Get-NugetgoFlavorDisclosure -ProofGoos linux)) 'a neutral package got a line'
+
 Write-Host "ran $ran, failed $failed"
 exit $failed
