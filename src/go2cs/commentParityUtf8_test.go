@@ -32,11 +32,8 @@ import (
 )
 
 var wantUtf8Census = map[string]int{
-	// B: doc comments of specs inside a group
-	"missed:spec-doc-in-group": 2,
 	// D: blank lines between the specs of a group
 	"group:go-blank-cs-none": 4,
-	"group:go-none-cs-blank": 4,
 	// E: the converter's own blank lines inside bodies
 	"body:extra:after-lowered-switch":      2,
 	"body:extra:after-named-result-locals": 3,
@@ -46,11 +43,10 @@ var wantUtf8Census = map[string]int{
 	"misplaced:in-composite-literal/anchor-differs":       1,
 	// H: a trailing comment after `{`
 	"misplaced:after-open-brace/trailing-to-own-line": 2,
-	// J: end-of-line alignment
-	"eol:misaligned":        1,
-	"eol:split":             1,
+	// J: end-of-line alignment (the RuneError run, no longer split by blank lines since B, is ragged)
+	"eol:misaligned":        2,
 	"eol:moved-to-own-line": 2,
-	"eol:cs-ragged-run":     1,
+	"eol:cs-ragged-run":     2,
 }
 
 func TestCommentParityUtf8(t *testing.T) {

@@ -16,15 +16,15 @@ import (
 func (v *Visitor) visitGenDecl(genDecl *ast.GenDecl) {
 	var hasValueSpec bool
 
-	for _, spec := range genDecl.Specs {
+	for index, spec := range genDecl.Specs {
 		switch specType := spec.(type) {
 		case *ast.ImportSpec:
 			v.visitImportSpec(specType, genDecl.Doc)
 		case *ast.ValueSpec:
-			v.visitValueSpec(specType, genDecl.Doc, genDecl.Tok)
+			v.visitValueSpec(specType, specDoc(genDecl, index, specType.Doc), genDecl.Tok)
 			hasValueSpec = true
 		case *ast.TypeSpec:
-			v.visitTypeSpec(specType, genDecl.Doc)
+			v.visitTypeSpec(specType, specDoc(genDecl, index, specType.Doc))
 		default:
 			panic(fmt.Sprintf("@visitGenDecl - unexpected GenDecl Spec: %#v", v.getPrintedNode(specType)))
 		}
@@ -33,4 +33,25 @@ func (v *Visitor) visitGenDecl(genDecl *ast.GenDecl) {
 	if !v.inFunction && hasValueSpec {
 		v.outputBuilder.WriteString(v.newline)
 	}
+}
+
+// specDoc answers the doc comment the spec at index of genDecl is emitted with. go/parser attaches a
+// doc to the GenDecl when it precedes the declaration, and to the SPEC when it precedes a spec inside
+// a grouped `( … )`, so an ungrouped declaration's doc is the GenDecl's and a grouped spec's doc is
+// its own. A grouped declaration's doc documents the group: it is written once, above the first spec,
+// together with that spec's own doc when it has one.
+func specDoc(genDecl *ast.GenDecl, index int, doc *ast.CommentGroup) *ast.CommentGroup {
+	if !genDecl.Lparen.IsValid() {
+		return genDecl.Doc
+	}
+
+	if index > 0 || genDecl.Doc == nil {
+		return doc
+	}
+
+	if doc == nil {
+		return genDecl.Doc
+	}
+
+	return &ast.CommentGroup{List: append(append([]*ast.Comment{}, genDecl.Doc.List...), doc.List...)}
 }

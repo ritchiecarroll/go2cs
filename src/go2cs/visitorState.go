@@ -404,6 +404,13 @@ type Visitor struct {
 	// must be publicized (used as an exported struct field; see packagePublicizedTypes), and
 	// consumed (read and cleared) by the type-kind emitter (visitArrayType/visitStructType/…).
 	pendingTypeAccess string
+
+	// pendingTypeDoc carries the doc comment of the type spec being declared to the forward-declaration
+	// type-kind emitters (named ident, array/slice, map, chan, func, pointer and cross-package types),
+	// which write it after their leading line break; see writePendingTypeDoc. The struct and interface
+	// emitters take the doc as an argument instead.
+	pendingTypeDoc    *ast.CommentGroup
+	pendingTypeDocPos token.Pos
 	// manualConversion mirrors the file entry's flag: this file's destination `.cs` is a hand-owned
 	// manual conversion, so the visit still feeds package-wide state but the emitted text lands in
 	// the non-compiled `.cs.auto` review sibling. Consulted by recordTypeAccessibility, which must

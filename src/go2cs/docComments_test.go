@@ -130,12 +130,20 @@ func TestDocCommentsOfSpecsAndTypes(t *testing.T) {
 		{"// List doc.", " List"},
 		{"// Table doc.", " Table"},
 		{"// Pipe doc.", " Pipe"},
-		{"// Handler doc.", " Handler"},
+		// a methodless func type is rendered inline as its base delegate, so its doc documents the marker
+		// comment the converter writes in place of a declaration; that line is checked below
+		{"// Handler doc.", " Ptr"},
 		{"// Ptr doc.", " Ptr"},
 		{"// Dur doc.", " Dur"},
 	} {
 		if got := docAbove(t, lines, c.doc); got != "" && !strings.Contains(got, c.declares) {
 			t.Errorf("%q documents %q, want the declaration containing %q", c.doc, got, c.declares)
+		}
+	}
+
+	for i, line := range lines {
+		if strings.TrimSpace(line) == "// Handler doc." && (i+1 >= len(lines) || !strings.Contains(lines[i+1], "type Handler is a methodless func type")) {
+			t.Errorf("\"// Handler doc.\" is not directly above the converter's line for type Handler")
 		}
 	}
 

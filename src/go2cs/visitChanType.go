@@ -48,6 +48,7 @@ func (v *Visitor) visitChanType(chanType *ast.ChanType, identType types.Type, na
 	if !v.inFunction {
 		target.WriteString(v.newline)
 	}
+	v.writePendingTypeDoc(target)
 
 	// A generic defined channel (`type Pipe[T any] chan T`) declares its type parameters and their
 	// constraints, as the map, array and slice shells do. A non-generic channel renders "" for both.
