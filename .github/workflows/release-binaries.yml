@@ -177,7 +177,7 @@ jobs:
           $release = ($report | Where-Object { $_ -like 'go2cs.release=*' }) -replace '^go2cs\.release=', ''
           if (-not $release -or $release -eq 'unknown') { throw "go2cs -version named no release on $rid" }
           $want = '${{ needs.build.outputs.release-version }}'
-          if ($want -and $release -ne $want) { throw "go2cs.release is $release on $rid, and the tag says $want: the tag is not on the release commit" }
+          if ($want -and $release -ne $want) { throw "go2cs.release is $release on $rid, and the tag says ${want}: the tag is not on the release commit" }
           $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture
           Add-Content $env:GITHUB_STEP_SUMMARY "``$rid`` on ``${{ matrix.runner }}`` ($arch): ``go2cs -version`` exit 0, release ``$release``, archive $($archive.Length) bytes, checksum verified."
 
