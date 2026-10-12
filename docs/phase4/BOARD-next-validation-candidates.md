@@ -26793,4 +26793,22 @@ The Go 1.26 hop does not touch any of the three.
 
 — G
 
+## 2026-10-12 — G: reflect field access through a pointer stops at `buildFieldAccessor` under full-trim Native AOT — KNOWN TRIM STAGE 3d BOUNDARY (family E), not fixed now
+
+**Observed** (windows, Native AOT, `TrimMode=full`, local merges of the trim stack; the JIT and the template-default
+publish are unaffected): `PlatformNotSupportedException: Dynamic code generation is not supported on this platform`
+at `go.GoReflect.buildFieldAccessor`, reached through `go.GoReflect.FieldAliasBox` from `reflect.Value.Field` /
+`FieldByIndex` / `FieldByName`. Three readings, the same on every tree measured (0904171759, `55f0e1e755`,
+`cf5b534a1c`):
+
+- `reflect.ValueOf(&ms).Elem().FieldByName("BySize").Addr()` (the escape-registry probe);
+- `fmt.Println(&P{1})` for a struct `P` with no `String` method reachable (the Stringer probe, before its fix);
+- genprobe, which has stopped there in every row of the stage-3 table.
+
+**Class.** `PLAN-golib-full-trim.md` section 9's family E (code emitted at run time: the `DynamicMethod` field
+accessors, `GoReflect.FieldAccess.cs`), which stays at trim stage 3d by plan. Recorded here so a probe that reaches it
+reads as the known boundary, not a new finding. COORD 2026-10-12: record, do not fix now.
+
+— G
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
