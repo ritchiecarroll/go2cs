@@ -9,18 +9,18 @@ internal static readonly @string pemBlock = """
 QUJDREVGR0g=
 -----END TEST-----
 
-"""u8;
+"""u8.Raw();
 
 internal static slice<byte> rawBytes = slice<byte>("""
 first
 second
-"""u8);
+"""u8.Raw());
 
 internal static @string describe(@string name) {
     return fmt.Sprintf("""
 name: %s
 done
-"""u8, name);
+"""u8.Raw(), name);
 }
 
 internal static readonly @string quote = "`"u8;
@@ -29,11 +29,11 @@ internal static readonly @string quote = "`"u8;
 private static readonly @string lineOneLineTwoˢ = """
 line one
 line two
-"""u8;
+"""u8.Raw();
 private static readonly @string endsWithANewlineˢ = """
 ends with a newline
 
-"""u8;
+"""u8.Raw();
 private static readonly @string cNoNewlineHereˢ = @"C:\no\newline\here"u8;
 private static readonly @string keepsItsCrˢ = "keeps\r\nits CR"u8;
 
@@ -43,10 +43,10 @@ internal static void Main() {
     @string chain = """
 head
 
-""" + quote + @"x" + quote + """
+""".Raw() + quote + @"x" + quote + """
 
 tail
-""";
+""".Raw();
     @string oneLine = cNoNewlineHereˢ;
     @string interpreted = keepsItsCrˢ;
     foreach (var (_, s) in new @string[]{plain, trailing, pemBlock, describe("p"u8), chain, oneLine, interpreted}.slice()) {

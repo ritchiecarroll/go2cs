@@ -93,23 +93,23 @@ public static void Print(this ref table t, ж<abi.SwissMapType> Ꮡtyp, ж<ΔMap
     print((@string)"""
 table{
 	index: 
-"""u8, t.index, (@string)"""
+"""u8.Raw(), t.index, (@string)"""
 
 	localDepth: 
-"""u8, t.localDepth, (@string)"""
+"""u8.Raw(), t.localDepth, (@string)"""
 
 	capacity: 
-"""u8, t.capacity, (@string)"""
+"""u8.Raw(), t.capacity, (@string)"""
 
 	used: 
-"""u8, t.used, (@string)"""
+"""u8.Raw(), t.used, (@string)"""
 
 	growthLeft: 
-"""u8, t.growthLeft, (@string)"""
+"""u8.Raw(), t.growthLeft, (@string)"""
 
 	groups:
 
-"""u8);
+"""u8.Raw());
     for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
         print((@string)"\t\tgroup "u8, i, (@string)"\n"u8);
         var g = t.groups.group(Ꮡtyp, i);

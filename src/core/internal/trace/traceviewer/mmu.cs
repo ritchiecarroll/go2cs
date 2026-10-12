@@ -382,7 +382,7 @@ internal static @string templMMU = """
   </body>
 </html>
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string windowˢ = "window"u8;
