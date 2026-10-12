@@ -51,6 +51,19 @@ var spaced = []int{
 
 type pair struct{ a, b int }
 
+func norm(a, b []int) int {
+	n := 0
+	switch {
+	case len(a) == 0:
+		// a is empty
+		n = 1
+		fallthrough
+	case len(b) == 0:
+		n += 2
+	}
+	return n
+}
+
 func main() {
 	local := []int{
 		10, // ten
@@ -63,7 +76,7 @@ func main() {
 		a: 1, // field a
 		b: 2, // field b
 	}
-	fmt.Println(table, spaced, local, p, steps[0](1),
+	fmt.Println(table, spaced, local, p, steps[0](1), norm(nil, nil),
 		len(local), // the length
 		cap(local))
 }
@@ -129,6 +142,12 @@ func TestCompositeLitCommentsKeepGoPlacement(t *testing.T) {
 		if got := blankAbove(t, lines, c.line); got != c.blank {
 			t.Errorf("blank line above %q = %v, want %v", c.line, got, c.blank)
 		}
+	}
+
+	// A list takes only the comments inside its own brackets: the condition of a lowered switch's next
+	// case, rendered before the case body above it is written, must not take that body's comment.
+	if next := strings.TrimSpace(lines[lineContaining(t, lines, "// a is empty")+1]); next != "n = 1;" {
+		t.Errorf("the comment leading a case body is not above its first statement: the next line reads %q", next)
 	}
 
 	// The package-level literal's comments are inside it, below its doc comment.
