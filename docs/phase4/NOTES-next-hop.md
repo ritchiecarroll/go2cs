@@ -568,3 +568,9 @@ item, and the lane plan (F2) budgets for it. H10 stays the hop's largest step (r
 ## Amendments
 
 *(Append-only. Each block is dated and states what changed and why. Earlier text stays as written.)*
+
+**2026-10-12 — §2 A14: FOUND → BUILT.** P2 built the allocation-unit extractor on
+`claude/p2-hop-a14-alloc-unit` `0af043ecac`. It is tooling only, with footprint 0, and runbook H10 step
+3(a) names it. It lands with a train. The hop's own plan, `docs/PLAN-hop-go126.md` §1, carries the same
+state. (The hop target has since moved to Go 1.26 by owner ruling; this note's A-items carry over where the
+plan does not supersede them.)

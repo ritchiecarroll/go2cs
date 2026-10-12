@@ -82,7 +82,7 @@ needs it (lessons 2, 43):
 | A9 | `docs/phase4/hopA-inputs/shardmap.py` takes the population by release | **OPEN**: `:94` names `population-go1.24.13.txt` | H10 |
 | A12 | x/tools and x/mod at H1 step 3 | the converter pins x/tools v0.42.0 and x/mod v0.33.0 (both `go 1.24.0`); the newest cached here are v0.48.0 and v0.38.0, both `go 1.25.0`. **Choosing a 1.26-era version needs a module fetch (§2 O6)** | H1 |
 | A13 | `src/check-roster-format.ps1` derives the population path | **DONE** (`:906`) | — |
-| A14 | the allocation-unit extractor (lesson 31's reading run) | OPEN (NOTES A14) | H10 |
+| A14 | the allocation-unit extractor (lesson 31's reading run) | **BUILT** (P2, `claude/p2-hop-a14-alloc-unit` `0af043ecac`, tooling only, footprint 0; runbook H10 step 3(a) names it). Lands with a train | H10 |
 | — | the repoguard retired-marker guard, "owed before the next hop's H6" (runbook H6) | OPEN | H6 |
 
 **Hosts**, Readiness "Host":
@@ -266,7 +266,7 @@ GOROOTs' source by name.
 
 | Stage | What this hop does beyond the runbook text | Lanes (proposal, §7) | Lane-days (ESTIMATE) |
 |:--|:--|:--|:--|
-| **Readiness** | A3, A7, A8, A9 and A14 landed and red-proved; the retired-marker guard; host records; O2–O4 asked now | **P2 (A3, A7, A8, A9: dispatched 2026-10-12, `claude/p2-hop-readiness-a3-a9`)**, i9 (guard), C1 (A14); each lane its host | 8–14 |
+| **Readiness** | A3, A7, A8, A9 and A14 landed and red-proved; the retired-marker guard; host records; O2–O4 asked now | **P2 (A3, A7, A8, A9: dispatched 2026-10-12, `claude/p2-hop-readiness-a3-a9`; A14: BUILT, `0af043ecac`)**, i9 (guard); each lane its host | 8–14 |
 | **H0** ⟲ | Seeded old-release `.cs.auto` baseline; package census; roster snapshot; the outgoing three-target manifest; the behavioral failing set by name; each box's bare `go version`. Commit every unbanked reading (lesson 48) | COORD/i7 (behavioral, manifests), i9 (census, `.auto`) | 3–5 |
 | **H1 + H2** (one pair) | go1.26.9 installed (O2); the `go` directive; x/tools and x/mod in their own commit (O6, A12), **gated by CNR byte-identical after the bump**, a full seeded corpus reconvert with hours of wall; the converter `go test` suite (about 40 min a run on G-LAPTOP); `go vet` under the new directive (clean today at 1.26.9, RECON X.7); GODEBUG defaults read against the test host (1.26 adds the heap-randomization, Green Tea and crypto-randomness classes; 1.25's `containermaxprocs`, `updatemaxprocs`, `decoratemappings`, `tlssha1` and `x509sha256skid`) | G (the converter half, 1.5–3), COORD (the pin pair) | 3–5 |
 | **H3** ⟲ | `population-go1.26.9.txt` by two routes; relocations by body; new IDs → O5; `//go:embed`, linker-synthesized linknames and new syntax, each with a probe (lesson 54) | C2 (genpopulation), i9 (independent route) | 2–3 |
@@ -327,7 +327,7 @@ COORD's to rule.
 | **i9** (lead) | windows | This plan; H0 census and `.auto`; H3's second route; H4a; **the §4 checkpoint**; H5 emission; the H7 windows flavour; H10 windows shards (non-TLS) | Owner hardware order: one heavy task at a time, `-m:4` / `-p 4`, WHEA counted; **no `crypto/tls` or TLS-using net rows** |
 | **G** | windows + linux arm | H1 converter; H4 language and front end; the H6 runtime share; the H7 linux flavour; H10 windows shards | — |
 | **R** | windows + WSL | Readiness instruments A3, A7, A9; **the H4 testing host**; the H6 sync and synctest share; H12 docs and badges | Also writes the launch plan |
-| **C1** | cloud linux | A14; the H6 runtime share (its runtime hand-own history); the H10 linux reading and bank | No pwsh; CNR and the roster guard are COORD's |
+| **C1** | cloud linux | The H6 runtime share (its runtime hand-own history); the H10 linux reading and bank | No pwsh; CNR and the roster guard are COORD's |
 | **C2** | cloud linux | H3 genpopulation and relocations | Disk-limited; **also carries the owner's nugetgo modules (priority 1)**, so its hop load is kept small |
 | **P1** | cloud linux (Sonnet, pilot) | H10 disclosure re-signs and alloc relabels: bounded and mechanically checked | — |
 | **P2** | cloud linux | H4 linkname bodies; the H6 syscall, poll, os, net and reflect share; H8 comparands | — |
@@ -407,3 +407,10 @@ measurements; RECON X.7 on `claude/i9-go125-recon` `dc0e159ccf`):
 - **go1.25.14** (the §4 checkpoint) is outside the ruling's words and stays an ask.
 - **Readiness instruments A3, A7, A8 and A9 moved to P2** (dispatched 2026-10-12).
 - **Status:** PROPOSED, with O1 and O2 RULED.
+
+**2026-10-12 (evening) — A14 BUILT; go1.25.14 installed on the i9:**
+- **A14**, the allocation-unit extractor, is BUILT by P2 on `claude/p2-hop-a14-alloc-unit` `0af043ecac`.
+  It is tooling only, with footprint 0, and runbook H10 step 3(a) names it. It is no longer C1's.
+- **go1.25.14 for the §4 checkpoint** is installed side by side on the i9 with the user's OK in chat,
+  SHA-256-matched against go.dev, so the checkpoint box's half of O2 is closed. go1.26.9 is installed
+  there too.
