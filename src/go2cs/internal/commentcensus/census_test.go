@@ -154,3 +154,52 @@ func TestAnchorReadsPastConverterScaffolding(t *testing.T) {
 		t.Errorf("bad: %v, want %v", got, want)
 	}
 }
+
+// preludeBlanks reads testdata/prelude's rendering: its body blank-line classes, and the separators read.
+func preludeBlanks(t *testing.T, rendering string) (map[string]int, int) {
+	t.Helper()
+
+	pairs := FindPairs("testdata/prelude/"+rendering, "testdata/prelude/goroot")
+
+	if len(pairs) != 1 {
+		t.Fatalf("%s: %d pairs found, want 1 (prelude/prelude.cs against prelude/prelude.go)", rendering, len(pairs))
+	}
+
+	r := NewResults()
+
+	if err := r.Analyze(pairs[0]); err != nil {
+		t.Fatalf("%s: %v", rendering, err)
+	}
+
+	// Vacuity: the four functions are read, or no class could move.
+	if n := r.r.body["functions"]; n != 4 {
+		t.Fatalf("%s: %d function bodies read, want 4", rendering, n)
+	}
+
+	got := map[string]int{}
+
+	for k, n := range r.Counts() {
+		if strings.HasPrefix(k, "body:") {
+			got[k] = n
+		}
+	}
+
+	return got, r.r.body["prelude-separator"]
+}
+
+// The converter sets its prelude (named-result locals, variadic slices, array clones, heap boxes) apart from the
+// Go body by exactly one blank line: the owner's decision 2, so that blank line is not a defect. `good` is the
+// converter's emission; `bad` puts the blank line inside the prelude in three functions, as the converter did
+// before, and two blank lines after the prelude in the fourth. `first` opens with a Go statement that reads like
+// a prelude line (`var z int`), followed by Go's own blank line: only the blank line above it is the separator.
+func TestPreludeSeparatorIsNotADefect(t *testing.T) {
+	if got, separators := preludeBlanks(t, "good"); len(got) != 0 || separators != 4 {
+		t.Errorf("good: %v and %d separators, want no body class and 4 separators", got, separators)
+	}
+
+	want := map[string]int{"body:extra:after-named-result-locals": 3, "body:extra:after-param-prelude": 1}
+
+	if got, separators := preludeBlanks(t, "bad"); !maps.Equal(got, want) || separators != 0 {
+		t.Errorf("bad: %v and %d separators, want %v and 0 separators", got, separators, want)
+	}
+}

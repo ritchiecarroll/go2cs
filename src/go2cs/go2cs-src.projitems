@@ -225,6 +225,9 @@
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\planted\bad2\plant\plant.cs" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\planted\good\plant\plant.cs" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\planted\goroot\src\plant\plant.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\prelude\bad\prelude\prelude.cs" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\prelude\good\prelude\prelude.cs" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\prelude\goroot\src\prelude\prelude.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gencorpusrelease\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\genpopulation\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gensourcemeta\main.go" />
