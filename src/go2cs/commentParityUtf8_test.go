@@ -37,8 +37,6 @@ var wantUtf8Census = map[string]int{
 	// F: comments inside composite literals (the `first` table)
 	"misplaced:in-composite-literal/trailing-to-own-line": 16,
 	"misplaced:in-composite-literal/anchor-differs":       1,
-	// H: a trailing comment after `{`
-	"misplaced:after-open-brace/trailing-to-own-line": 2,
 	// J: end-of-line alignment (the RuneError run, no longer split by blank lines since B, is ragged)
 	"eol:misaligned":        2,
 	"eol:moved-to-own-line": 2,

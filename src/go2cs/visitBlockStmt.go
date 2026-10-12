@@ -43,8 +43,18 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtCont
 	var lastStmt ast.Stmt
 	prefix := v.newline + v.indent(v.indentLevel)
 
-	if len(blockStmt.List) > 0 && v.options.includeComments {
-		v.writeStandAloneCommentString(v.outputBuilder, blockStmt.List[0].Pos(), nil, prefix)
+	if v.options.includeComments {
+		limit := blockStmt.Rbrace
+
+		if len(blockStmt.List) > 0 {
+			limit = blockStmt.List[0].Pos()
+		}
+
+		v.writeLineTrailingComments(blockStmt.Lbrace, limit)
+
+		if len(blockStmt.List) > 0 {
+			v.writeStandAloneCommentString(v.outputBuilder, blockStmt.List[0].Pos(), nil, prefix)
+		}
 	}
 
 	for _, stmt := range blockStmt.List {
@@ -66,6 +76,10 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtCont
 		v.dropEmptyGap(gap)
 
 		lastStmt = stmt
+	}
+
+	if lastStmt != nil {
+		v.writeClosingComments(lastStmt, blockStmt.Rbrace)
 	}
 
 	if context.format.useIndent {
@@ -252,12 +266,104 @@ func (v *Visitor) writeLeadingBodyComments(colon token.Pos, first ast.Stmt) {
 		}
 	}
 
+	colonLine := v.file.Line(colon)
+
 	for _, pos := range leading {
-		v.outputBuilder.WriteString(prefix)
-		v.outputBuilder.WriteString(strings.ReplaceAll(v.standAloneComments[pos], "\n", v.newline))
+		comment := v.standAloneComments[pos]
+
+		// A comment on the `:` line trails the clause's opening line, as it trails `case X:` in Go.
+		if v.file.Line(pos) == colonLine && pos > colon && !strings.Contains(comment, "\n") && v.currentLine() != "" {
+			v.outputBuilder.WriteString(" ")
+			v.outputBuilder.WriteString(comment)
+		} else {
+			v.outputBuilder.WriteString(prefix)
+			v.outputBuilder.WriteString(strings.ReplaceAll(comment, "\n", v.newline))
+		}
 
 		delete(v.standAloneComments, pos)
 		v.sortedCommentPos = removeCommentPos(v.sortedCommentPos, pos)
+	}
+}
+
+// writeLineTrailingComments writes a one-line comment Go has after a block's `{`, on the same line and
+// before limit, at the end of the `{` line, as Go has it (class H). It does nothing unless the output's
+// current line ends with that `{`: a block whose opening line is followed by converter text (a
+// function body's prelude placeholder) keeps the comment on its own line below, as before.
+func (v *Visitor) writeLineTrailingComments(lbrace, limit token.Pos) {
+	if !v.options.includeComments || !lbrace.IsValid() {
+		return
+	}
+
+	if v.file == nil {
+		v.file = v.fset.File(lbrace)
+	}
+
+	output := v.outputBuilder.String()
+	raw := strings.TrimRight(stripPositionSentinels(output[strings.LastIndex(output, "\n")+1:]), " \t\r")
+
+	if !strings.HasSuffix(raw, "{") {
+		return
+	}
+
+	braceLine := v.file.Line(lbrace)
+
+	var trailing []token.Pos
+
+	for _, pos := range v.sortedCommentPos {
+		if pos >= limit || v.file.Line(pos) > braceLine {
+			break
+		}
+
+		if comment, found := v.standAloneComments[pos]; found && pos > lbrace && !strings.Contains(comment, "\n") {
+			trailing = append(trailing, pos)
+		}
+	}
+
+	for _, pos := range trailing {
+		v.outputBuilder.WriteString(" ")
+		v.outputBuilder.WriteString(v.standAloneComments[pos])
+
+		delete(v.standAloneComments, pos)
+		v.sortedCommentPos = removeCommentPos(v.sortedCommentPos, pos)
+	}
+}
+
+// writeClosingComments writes the comments still pending between a block's last statement and its `}`
+// above that brace, with Go's blank line before a comment where it has one (class H). Left pending, the
+// next flush wrote them after the block, in the statement that follows it.
+func (v *Visitor) writeClosingComments(last ast.Stmt, rbrace token.Pos) {
+	if !v.options.includeComments || !rbrace.IsValid() {
+		return
+	}
+
+	if v.file == nil {
+		v.file = v.fset.File(rbrace)
+	}
+
+	prefix := v.newline + v.indent(v.indentLevel)
+	lastLine := v.file.Line(last.End())
+
+	var pending []token.Pos
+
+	for _, pos := range v.sortedCommentPos {
+		if pos >= rbrace {
+			break
+		}
+
+		if _, found := v.standAloneComments[pos]; found {
+			pending = append(pending, pos)
+		}
+	}
+
+	for _, pos := range pending {
+		line := v.file.Line(pos)
+
+		if line-lastLine > 1 {
+			v.writeGapLine()
+		}
+
+		v.writeStandAloneCommentString(v.outputBuilder, pos, nil, prefix)
+		lastLine = max(lastLine, line+strings.Count(v.standAloneComments[pos], "\n"))
 	}
 }
 
