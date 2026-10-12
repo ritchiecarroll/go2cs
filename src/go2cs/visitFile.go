@@ -154,6 +154,9 @@ func (v *Visitor) visitFile(file *ast.File) {
 
 	v.collectMethodNamespaceUsings(file)
 
+	v.oneLineRuns = adjacentOneLineFuncs(v.fset, file)
+	v.lastCollapsedFunc = nil
+
 	for _, decl := range file.Decls {
 		v.visitDecl(decl)
 	}

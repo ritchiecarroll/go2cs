@@ -141,6 +141,9 @@ type Visitor struct {
 	sortedCommentPos   []token.Pos
 	commentGroups      []*ast.CommentGroup // the file's, with or without -comments (goBlankLineBetween)
 	callParens         [][3]token.Pos      // the `(`, `)` and first argument of each call being converted, innermost last (convExprList)
+	oneLineRuns        oneLineRunMap       // the file's adjacent one-line functions, each to the one above it (oneLineMembers.go)
+	lastCollapsedFunc  *ast.FuncDecl       // the last function written as a one-line member
+	lastCollapsedEnd   int                 // and the output offset where it ends
 	processedComments  hashset.HashSet[token.Pos]
 	newline            string
 	indentLevel        int

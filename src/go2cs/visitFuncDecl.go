@@ -646,6 +646,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	functionExecContextMarker := fmt.Sprintf(FunctionExecContextMarker, goFunctionName)
 	functionBlockPrefixMarker := fmt.Sprintf(FunctionBlockPrefixMarker, goFunctionName)
 
+	memberStart := v.outputBuilder.Len()
 	v.outputBuilder.WriteString(v.newline)
 	v.outputBuilder.WriteString(functionPrefixMarker)
 	v.writePositionSentinel(funcDecl.Pos())
@@ -1452,7 +1453,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	v.replaceMarker(functionBlockPrefixMarker, blockPrefix)
 
-	if v.currentFuncPrefix.Len() > 0 {
+	separable := v.currentFuncPrefix.Len() == 0
+
+	if !separable {
 		v.currentFuncPrefix.WriteString(v.newline)
 	}
 
@@ -1518,6 +1521,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		}
 	} else {
 		v.outputBuilder.WriteString(v.newline)
+		v.collapseOneLineMember(funcDecl, memberStart, separable)
 	}
 
 	v.inFunction = false

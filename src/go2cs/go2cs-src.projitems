@@ -342,6 +342,7 @@
     <None Include="$(MSBuildThisFileDirectory)nugetMapRefusedRows_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetMapResolve_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetMapRun_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)oneLineMembers.go" />
     <None Include="$(MSBuildThisFileDirectory)oracleBuildFailure_test.go" />
     <None Include="$(MSBuildThisFileDirectory)oracleTestArgs_test.go" />
     <None Include="$(MSBuildThisFileDirectory)orphanDisclosureCheck_test.go" />
