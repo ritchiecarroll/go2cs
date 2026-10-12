@@ -22,7 +22,7 @@ internal static slice<rune> board = slice<rune>(
 ...........
 ...........
 
-""");
+""".Raw());
 
 internal static nint center;
 
