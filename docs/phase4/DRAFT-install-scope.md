@@ -3,7 +3,8 @@
 > **State: DRAFT, 2026-10-11, for the owner.** It scopes the launch plan's decision D3
 > (`launch/PLAN-launch.md` on `claude/launch`). Measured where it says measured; everything else is an
 > estimate or a statement of how an outside service documents itself, and is labelled so. Nothing here
-> publishes anything. The prototype is `.github/workflows/release-binaries.yml` on this branch.
+> publishes anything: the workflow, `.github/workflows/release-binaries.yml` on this branch, makes a draft
+> Release at most, and a person publishes it.
 
 ## The short answer
 
@@ -164,7 +165,23 @@ the first impression, and neither is made on this branch, which changes no conve
    option's own description already promises.
 2. Replace the six-word fatal line with one that says Go is required and names the release.
 
+**The tag-triggered form (2026-10-11).** The owner approved a GitHub Release for each NuGet release, so
+the workflow now also runs on a `nuget-N.N.N.N` tag. On a tag it attests the archives, fails unless every
+platform's binary names the tag's version, and creates a **draft** Release with the six archives,
+`SHA256SUMS` and the attestation bundle. It never publishes, refuses any other `nuget-*` tag, and refuses a
+tag that already has a Release. Only its last job can write, and only on a tag.
+
+- **Run 38194727956, at `1f1b7bb797`: green.** The non-tag path after the rewrite: six platforms built and
+  smoked, the draft-release job skipped, no Release created.
+- **Run 38194439091, at `74d095532a`: failed, a defect in the rewrite.** All six smoke jobs stopped on a
+  PowerShell parse error in a new message. Fixed in the next commit.
+- **The version check is shown to fail when it should.** Run locally against a real `win-x64` archive, the
+  smoke script exits 0 with the matching version, 0 with no tag version, and 1 with a wrong one.
+- **Not run: the tag path itself**, which is the attestation step and the draft Release. It cannot run
+  without a release tag being pushed. It is parsed, and each shell step passes a syntax check. Its first
+  real run is the first release tag, so read that run before trusting it.
+
 **A note on how the runs were started.** A workflow that is not yet on the default branch cannot be
 started by hand. For these two runs only, the file carried a push trigger limited to this branch and to
-the workflow file itself. The branch's last commit removes it, so the file as proposed runs on
-`workflow_dispatch` alone.
+the workflow file itself, and later to this branch alone. The branch's last commit removes it, so the
+file as proposed runs on `workflow_dispatch` and on a `nuget-*` tag, and on nothing else.

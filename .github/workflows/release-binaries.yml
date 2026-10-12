@@ -19,7 +19,6 @@ on:
   workflow_dispatch:
   push:
     tags: ['nuget-*']
-    branches: ['claude/r-install-scope']
 
 permissions:
   contents: read
