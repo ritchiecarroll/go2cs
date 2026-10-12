@@ -26763,4 +26763,34 @@ when** a darwin run reads a count other than windows', or when the linux-only di
 
 — C1
 
+## 2026-10-12 — G: go-cmp's cyclic transformer subtests are ~20x slower than Go — KNOWN PERFORMANCE ITEM (F2)
+
+**For go-cmp's proof notes.** go-cmp v0.7.0 has no proof pages yet; when it banks, its paragraph in
+[`ValidatedModules.md`](../ValidatedModules.md) carries this item. It is a speed difference only: both subtests
+match Go's verdict (PASS) before and after the fix below.
+
+**The rows.** `cmp`'s `TestDiff/Transformer/CyclicComplex` and `TestDiff/Transformer/CyclicString`. cmp's
+recursion checker (`recChecker`) lets a cyclic transformer recurse 1<<16 path steps before it panics, so each
+subtest drives a 65,536-frame-deep recursion, launches goroutines inside it, and unwinds the panic through it.
+
+**Measured** (windows, Release, tiered JIT off, the test host published against each tree, both subtests in one
+`--run 'TestDiff/Transformer/Cyclic'`): master `450311ca6a` **396 s**; with F2 fix A (`claude/g-golib-creator-o1`
+`1a00003c9b`, seated for the next train) **20 s**. Fix A resolves a goroutine's creator once per `go` site
+instead of by a full stack walk per `go` statement, which at 65,536 frames deep was the dominant cost.
+
+**The residual floor** (the 20 s, still about 20x Go):
+
+1. **A panic is re-raised at every deferring frame.** A Go function with a `defer` converts to a frame whose
+   `catch (when IsPanic) { Capture } finally { Run }` re-throws the panic at each level that defers: about
+   4.3 µs per level (measured with a deep-panic probe), and 65,536 levels here. **Fix B** (converter): emit the
+   catch only when a deferred call can `recover()`, else the `finally` alone. QUEUED (COORD 2026-10-12): its
+   corpus footprint (every function body that defers) is sized first, before any cut.
+2. **One OS thread per goroutine.** Each `go` statement starts a thread; the per-start cost is not yet measured
+   in isolation. A golib scheduler change, estimated in weeks. OUT OF SCOPE until a ruling.
+3. Minor: `reflect.Call` boxing, struct copies, GC.
+
+The Go 1.26 hop does not touch any of the three.
+
+— G
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
