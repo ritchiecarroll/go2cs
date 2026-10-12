@@ -1107,58 +1107,29 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			namedReturnDeclsStr = namedReturnDecls.String()
 		}
 
-		if resultParameters.Len() > 0 {
-			resultParameters.WriteString(v.newline)
-			blockPrefix += resultParameters.String()
-		}
-
-		if arrayClones.Len() > 0 {
-			if blockPrefix == "" {
-				arrayClones.WriteString(v.newline)
-			}
-
-			blockPrefix += arrayClones.String()
-		}
-
-		if implicitPointers.Len() > 0 {
-			if blockPrefix == "" {
-				implicitPointers.WriteString(v.newline)
-			}
-
-			blockPrefix += implicitPointers.String()
-		}
+		// The prelude's parts are written line after line, and one blank line sets the whole prelude
+		// apart from the Go body (the owner's decision 2, docs/PLAN-comment-and-spacing-parity.md E2).
+		blockPrefix += resultParameters.String()
+		blockPrefix += arrayClones.String()
+		blockPrefix += implicitPointers.String()
 
 		// Entry-time heap boxes for capture-mode value params follow the pointer derefs; the
 		// signature rebuild below renames each boxed param to its incoming `ʗp` form.
-		if paramHeapBoxes.Len() > 0 {
-			if blockPrefix == "" {
-				paramHeapBoxes.WriteString(v.newline)
-			}
-
-			blockPrefix += paramHeapBoxes.String()
-		}
+		blockPrefix += paramHeapBoxes.String()
 
 		// The //go:cgo_unsafe_args block: constructed at entry from the parameters, after the boxes and
 		// aliases it reads through, and pinned for the libcCall the body makes (cgoUnsafeArgsLift.go).
 		if v.currentCgoLift != nil {
-			liftBlock := v.newline + v.indent(v.indentLevel+1) + v.cgoUnsafeArgsBlockPrologue(v.currentCgoLift)
-
-			if blockPrefix == "" {
-				liftBlock += v.newline
-			}
-
-			blockPrefix += liftBlock
+			blockPrefix += v.newline + v.indent(v.indentLevel+1) + v.cgoUnsafeArgsBlockPrologue(v.currentCgoLift)
 		}
 
 		// In-wrapper value aliases for heap-box-backed named results (namedReturnDeferMode):
 		// the box was created outside the wrapper; body statements keep referencing the plain
 		// name through this ref alias, exactly like a deref'd pointer parameter.
-		if namedResultAliases.Len() > 0 {
-			if blockPrefix == "" {
-				namedResultAliases.WriteString(v.newline)
-			}
+		blockPrefix += namedResultAliases.String()
 
-			blockPrefix += namedResultAliases.String()
+		if blockPrefix != "" {
+			blockPrefix += v.newline
 		}
 
 		if implicitPointers.Len() > 0 || paramHeapBoxes.Len() > 0 || skippedDeadPointerAlias || hasRefLoweredParams {
