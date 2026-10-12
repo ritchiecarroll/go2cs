@@ -765,6 +765,41 @@ rather than the target is what keeps a **removed** package a candidate — `inte
      whose stem maps to no .go name", which the new KEEP-METADATA row contradicted
      (src/reconvert-deletions.ps1:128-135). -->
 
+> **AMENDED 2026-10-12, §7 lesson 87: a package whose own source is gone while a GOOS-named child package
+> remains.**
+>
+> **The case.** At go1.24.13, `internal/runtime/syscall` is a linux-only package in the per-OS layout: its
+> project file sits at `core/internal/runtime/syscall/`, and its `.cs` files sit in a `linux/` folder. At
+> go1.26.9 that package is gone. Go has two packages on its paths instead: `internal/runtime/syscall/linux`
+> and a new `internal/runtime/syscall/windows`.
+>
+> **What the pass did.** It keyed whole-package removal on each deleted FILE's directory, so the only
+> absent "package" it saw was the `linux/` folder. The parent's project file, README and icons were never
+> residue. The stale project survived H5c and stayed in `go2cs-stdlib.slnx`, and its `$(GoTargetOS)/*.cs`
+> glob compiled the new `windows` package's files into the wrong assembly (CS0234 ×12 at 1.26.9 rung 1).
+> `-Apply` then refused on the solution post-condition, after deleting.
+>
+> **Arm 1: the parent is residue.** A staged project directory qualifies when all three hold:
+> - its own non-test Go source existed at the SOURCE release;
+> - it is gone at the TARGET;
+> - a child named for a GOOS holds Go source at the target.
+>
+> The directory's own files (project, README, icons) are then residue, and its solution entry is removed.
+> The child directories are never touched. This is decided from the two GOROOTs' files, never from the
+> rows, so all three flavours agree. Under `-Goos linux`, the old `linux/` files resolve to the NEW
+> package and are not delete rows at all. Solution entries are matched to the project file DIRECTLY in
+> the package directory, because a prefix match would drop the children's entries. A per-OS folder key is
+> never counted as a package that lost its project.
+>
+> **Arm 2: the hazard is refused.** A project directory that survives the pass, beside a child directory
+> named for a GOOS that carries a project of its own, is REFUSED by name (exit 3, nothing deleted). Its
+> per-OS glob would compile the child package. No release from 1.24 to 1.27 has that shape: the only
+> parents with GOOS-named child packages, `internal/syscall` and `internal/runtime/syscall`, have no Go
+> source of their own.
+>
+> **The check.** [`src/check-h5c-goos-child.ps1`](../src/check-h5c-goos-child.ps1) builds a fixture shaped
+> like `internal/runtime/syscall` at go1.26.9 and asserts both arms against real GOROOTs. It was red first.
+
 **`UNRESOLVED` stops the step for a human.** Those rows are always listed, and the class is not
 hypothetical and not automatable from a file name: the rehearsal's 25 contains exactly one,
 `crypto/ecdh/package_init.cs`, a genuinely stale generated file whose staleness only a reader can
@@ -4555,6 +4590,15 @@ healthy run look hung — and, in the other direction, what lets a hung one look
      template-currency checks, launch-check tables, isolation re-runs, complement-shard bisection and frozen unions),
      and the skill does not hold them at e2008427b1. The draft's placement note lands 86 with or after the seat that
      adds them (draft lessons 97 and 102-110, routed as §7's intro routes instrument discipline). -->
+
+87. **(2026-10-12, the Go 1.26 hop's recon.) A package's directory is where its PROJECT lives, not where its
+    `.cs` files live.** Key a whole-package removal on the package directory, and decide it from the
+    releases' own files rather than from a flavour's rows. A per-OS-layout package can vanish while Go
+    reuses its `linux/` and `windows/` paths as new packages. Why: the file-directory key missed
+    `internal/runtime/syscall`'s project at go1.26.9; the stale project then compiled the new `windows`
+    package's files, and `-Apply` refused after deleting. **Step text:** H5c, AMENDED 2026-10-12.
+    <!-- docs/phase4/RECON-go1.26-hop.md §4-§5 (F1) on claude/i9-recon-go126 bd69190547; COORD ruling 2026-10-12;
+         src/check-h5c-goos-child.ps1 red at 94306766a9, green at 58952d5e85. -->
 
 <!-- SEED COVERAGE (owner order 2026-09-23; ledger 2026-09-23 14:52 · OWNER ORDER · c9e15c73a0), each verified against the cited source:
   1 hosts before the hop: DNS (relay NXDOMAIN->SERVFAIL, per-box public IPv4, IPv6 unbound) .......... 42 (+ the Readiness Host bullet)
