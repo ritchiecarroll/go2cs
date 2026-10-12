@@ -774,7 +774,7 @@ internal static @string depsRules = """
 
 
 
-"""u8;
+"""u8.Raw();
 
 // listStdPkgs returns the same list of packages as "go list std".
 internal static (slice<@string>, error) listStdPkgs(@string goroot) {

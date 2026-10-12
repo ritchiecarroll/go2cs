@@ -576,7 +576,7 @@ internal static readonly @string map1A1Z2Map2001122334455ˢ = """
 "map2": {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8}
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestHandler(ж<testing.T> Ꮡt) {
     RemoveAll();

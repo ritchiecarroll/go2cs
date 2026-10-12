@@ -133,7 +133,7 @@ func Greet(who string) {
 	fmt.Printf("Hello, %s!\n", who)
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string testᶜ = """
@@ -145,7 +145,7 @@ func ExampleGreet_world() {
 	Greet("world")
 }
 
-"""u8;
+"""u8.Raw();
 
 // This example illustrates how to use NewFromFiles
 // to compute package documentation with examples.
@@ -214,7 +214,7 @@ type GType[T any] int
 
 func (GType[T]) M() {}
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string testᶜ1 = """
@@ -283,7 +283,7 @@ func ExampleGFunc_suffix() {}
 func ExampleGType_M() {}
 func ExampleGType_M_suffix() {}
 
-"""u8;
+"""u8.Raw();
 
 // Output:
 // package p - This is the package comment.

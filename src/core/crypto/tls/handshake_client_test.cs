@@ -2753,7 +2753,7 @@ bZ3Uq5eLfsn8oPgfC57gpO6yiN+UURRTlK3bgYvLh4VWB3XXk9UaQZ7Mq1tpXjoD
 HYFybkWzibkZp4WRo+Fa28rirH+/wHt0vfeN7UCceURZEx4JaxIIfe4ku7uDRhJi
 RwBA9Xk1KBNF
 -----END CERTIFICATE-----
-"""u8));
+"""u8.Raw()));
     if (b == nil) {
         Ꮡt.Fatal(failedToDecodeˢ);
     }
@@ -3163,7 +3163,7 @@ o2SBdbs3Y6MBPBtTu977Z/0RO63J3M5i2tjUiDfrFy7+VRLKr7qQ7JibohyB8QaR
 9lwJoZk/B2i+ZMRNSP34ztAwtxmasPt6RAWGQpWCn9qmttAHAnMfDqe7F7jVR6rS
 u58=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tlsServerSentCertificateˢ = "tls: server sent certificate containing RSA key larger than 8192 bits"u8;

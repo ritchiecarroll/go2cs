@@ -677,7 +677,7 @@ internal static readonly @string defaultOutput = """
 panic calling String method on zero flag_test.zeroPanicker for flag ZP0: panic!
 panic calling String method on zero flag_test.zeroPanicker for flag ZP1: panic!
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string printDefaultsTestˢ = "print defaults test"u8;

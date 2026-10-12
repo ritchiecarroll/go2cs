@@ -16,12 +16,12 @@ internal static readonly @string goTestFuzzV1Int1Uintˢ = """
 go test fuzz v1
 int(-1)
 uint(4294967295)
-"""u8;
+"""u8.Raw();
 internal static readonly @string goTestFuzzV1Intˢ = """
 go test fuzz v1
 int(9223372036854775807)
 uint(18446744073709551615)
-"""u8;
+"""u8.Raw();
 internal static readonly object didnTWriteFinalNewlineToˢ = (@string)"didn't write final newline to corpus file"u8;
 
 internal partial struct TestUnmarshalMarshal_type /*dyn*/ {
@@ -53,7 +53,7 @@ public static void TestUnmarshalMarshal(ж<testing.T> Ꮡt) {
             @in: """
 go test fuzz v1
 string("a"bcad")
-"""u8,
+"""u8.Raw(),
             reject: true
         ),
         new(
@@ -61,7 +61,7 @@ string("a"bcad")
             @in: """
 go test fuzz v1
 int()
-"""u8,
+"""u8.Raw(),
             reject: true
         ),
         new(
@@ -69,7 +69,7 @@ int()
             @in: """
 go test fuzz v1
 uint(-32)
-"""u8,
+"""u8.Raw(),
             reject: true
         ),
         new(
@@ -77,7 +77,7 @@ uint(-32)
             @in: """
 go test fuzz v1
 int8(1234456)
-"""u8,
+"""u8.Raw(),
             reject: true
         ),
         new(
@@ -85,7 +85,7 @@ int8(1234456)
             @in: """
 go test fuzz v1
 int(20*5)
-"""u8,
+"""u8.Raw(),
             reject: true
         ),
         new(
@@ -93,7 +93,7 @@ int(20*5)
             @in: """
 go test fuzz v1
 int(--5)
-"""u8,
+"""u8.Raw(),
             reject: true
         ),
         new(
@@ -101,7 +101,7 @@ int(--5)
             @in: """
 go test fuzz v1
 bool(0)
-"""u8,
+"""u8.Raw(),
             reject: true
         ),
         new(
@@ -109,7 +109,7 @@ bool(0)
             @in: """
 go test fuzz v1
 byte('aa)
-"""u8,
+"""u8.Raw(),
             reject: true
         ),
         new(
@@ -117,7 +117,7 @@ byte('aa)
             @in: """
 go test fuzz v1
 byte('☃')
-"""u8,
+"""u8.Raw(),
             reject: true
         ),
         new(
@@ -126,11 +126,11 @@ byte('☃')
 go test fuzz v1
 string("has extra newline")
 
-"""u8,
+"""u8.Raw(),
             want: """
 go test fuzz v1
 string("has extra newline")
-"""u8
+"""u8.Raw()
         ),
         new(
             desc: "trailing spaces"u8,
@@ -139,12 +139,12 @@ go test fuzz v1
 string("extra")
 []byte("spacing")  
     
-"""u8,
+"""u8.Raw(),
             want: """
 go test fuzz v1
 string("extra")
 []byte("spacing")
-"""u8
+"""u8.Raw()
         ),
         new(
             desc: "float types"u8,
@@ -152,7 +152,7 @@ string("extra")
 go test fuzz v1
 float64(0)
 float32(0)
-"""u8
+"""u8.Raw()
         ),
         new(
             desc: "various types"u8,
@@ -174,7 +174,7 @@ bool(true)
 string("hello\\xbd\\xb2=\\xbc ⌘")
 float64(-12.5)
 float32(2.5)
-"""u8
+"""u8.Raw()
         ),
         new(
             desc: "float edge cases"u8,
@@ -190,7 +190,7 @@ float64(-Inf)
 float64(NaN)
 math.Float64frombits(0x7ff8000000000002)
 math.Float32frombits(0x7fc00001)
-"""u8
+"""u8.Raw()
         ),
         new(
             desc: "int variations"u8,
@@ -208,7 +208,7 @@ byte('\u0000')
 byte('\'')
 math.Float64frombits(9221120237041090562)
 math.Float32frombits(2143289345)
-"""u8,
+"""u8.Raw(),
             want: """
 go test fuzz v1
 int(0)
@@ -223,7 +223,7 @@ byte('\x00')
 byte('\'')
 math.Float64frombits(0x7ff8000000000002)
 math.Float32frombits(0x7fc00001)
-"""u8
+"""u8.Raw()
         ),
         new(
             desc: "rune validation"u8,
@@ -237,7 +237,7 @@ rune(0xd800)
 rune(0x10ffff)
 rune(0x110000)
 
-"""u8,
+"""u8.Raw(),
             want: """
 go test fuzz v1
 rune('\x00')
@@ -247,7 +247,7 @@ rune('�')
 int32(55296)
 rune('\U0010ffff')
 int32(1114112)
-"""u8
+"""u8.Raw()
         ),
         new(
             desc: "int overflow"u8,
@@ -255,7 +255,7 @@ int32(1114112)
 go test fuzz v1
 int(0x7fffffffffffffff)
 uint(0xffffffffffffffff)
-"""u8,
+"""u8.Raw(),
             want: ((Func<@string>)(() => {
                 var exprᴛ1 = strconv.IntSize;
                 if (exprᴛ1 == 32) {

@@ -324,7 +324,7 @@ Content-Type: application/x-www-form-urlencoded
 Content-Length: 15
 
 postfoo=postbar
-"""u8;
+"""u8.Raw();
 
 public static void TestCGIBasicPost(ж<testing.T> Ꮡt) {
     testenv.MustHaveExec(new cgi_internal_test_package.testing_TжTB(Ꮡt));
@@ -361,7 +361,7 @@ Content-Type: application/x-www-form-urlencoded
 Transfer-Encoding: chunked
 
 
-"""u8 + chunk(postfooˢ) + chunk("="u8) + chunk(postbarˢ) + chunk(""u8);
+"""u8.Raw() + chunk(postfooˢ) + chunk("="u8) + chunk(postbarˢ) + chunk(""u8);
     var h = Ꮡ(new Handler(
         Path: os.Args[0],
         Root: "/test.cgi"u8

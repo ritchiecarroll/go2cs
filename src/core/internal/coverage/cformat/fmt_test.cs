@@ -29,34 +29,34 @@ q.go:20.0,25.0 3 0
 q.go:30.0,31.0 2 1
 q.go:33.0,40.0 7 2
 lit.go:99.0,100.0 1 0
-"""u8;
+"""u8.Raw();
 private static readonly @string modeAtomicLitGo990100010ˢ = """
 
 mode: atomic
 lit.go:99.0,100.0 1 0
-"""u8;
+"""u8.Raw();
 private static readonly @string myPack1Coverage667Ofˢ = """
 
        	my/pack1		coverage: 66.7% of statements
         my/pack2		coverage: 0.0% of statements
 
-"""u8;
+"""u8.Raw();
 private static readonly @string coverage625OfStatementsˢ = """
 
 		coverage: 62.5% of statements in ./...
 
-"""u8;
+"""u8.Raw();
 private static readonly @string pGo10F1333QGo20F2750ˢ = """
 
 p.go:10:	f1		33.3%
 q.go:20:	f2		75.0%
 total		(statements)	62.5%
-"""u8;
+"""u8.Raw();
 private static readonly @string myPack1Coverage667Ofˢ2 = """
 
        	my/pack1		coverage: 66.7% of statements
 
-"""u8;
+"""u8.Raw();
 
 public static void TestBasics(ж<testing.T> Ꮡt) {
     var fm = cformat.NewFormatter(coverage.CtrModeAtomic);
@@ -181,12 +181,12 @@ private static readonly @string myPack1CoverageNoˢ = """
        	my/pack1 coverage:	[no statements]
         my/pack2 coverage:	[no statements]
 
-"""u8;
+"""u8.Raw();
 private static readonly @string coverageNoStatementsˢ = """
 
        	coverage:	[no statements]
 
-"""u8;
+"""u8.Raw();
 
 public static void TestEmptyPackages(ж<testing.T> Ꮡt) {
     var fm = cformat.NewFormatter(coverage.CtrModeAtomic);

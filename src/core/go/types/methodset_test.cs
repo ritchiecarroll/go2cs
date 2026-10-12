@@ -143,7 +143,7 @@ type Node[T any] struct {
 
 type Instance = *Tree[int]
 
-"""u8;
+"""u8.Raw();
 
 // Test for go.dev/issue/52715
 public static void TestNewMethodSet_RecursiveGeneric(ж<testing.T> Ꮡt) {
@@ -174,7 +174,7 @@ package p
 type T *int
 func (T) m() {} // expected error: invalid receiver type
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue60634(ж<testing.T> Ꮡt) {
     @string src = srcᶜ31;

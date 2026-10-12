@@ -200,10 +200,10 @@ var smallmapvar map[string]string
 func main() {
 	smallmapvar = make(map[string]string)
 	mapvar := make(map[string]string, 
-"""u8 + strconv.FormatInt(abi.OldMapBucketCount + 9, 10) + """
+"""u8.Raw() + strconv.FormatInt(abi.OldMapBucketCount + 9, 10) + """
 )
 	slicemap := make(map[string][]string,
-"""u8 + strconv.FormatInt(abi.OldMapBucketCount + 3, 10) + """
+"""u8.Raw() + strconv.FormatInt(abi.OldMapBucketCount + 3, 10) + """
 )
     chanint := make(chan int, 10)
     chanstr := make(chan string, 10)
@@ -229,7 +229,7 @@ func main() {
 	runtime.KeepAlive(mapvar)
 }  // END_OF_PROGRAM
 
-"""u8;
+"""u8.Raw();
 
 internal static nint lastLine(slice<byte> src) {
     var eop = slice<byte>("END_OF_PROGRAM"u8);
@@ -526,7 +526,7 @@ func main() {
 	_ = aaa()
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testParallelˢ = "test.parallel"u8;
@@ -665,7 +665,7 @@ func main() {
 	println(iface, iface2)
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object testGdbAutotmpTypesIsTooˢ = (@string)"TestGdbAutotmpTypes is too slow on aix/ppc64"u8;
@@ -753,7 +753,7 @@ func main() {
 	println("hello world")
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestGdbConst(ж<testing.T> Ꮡt) {
     checkGdbEnvironment(Ꮡt);
@@ -813,7 +813,7 @@ func crash() {
 	panic("panic!")
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object noSignalsOnWindowsˢ = (@string)"no signals on windows"u8;
@@ -888,7 +888,7 @@ func main() {
         time.Sleep(time.Second * 1)
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInfiniteˢ = (@string)"skipping infinite callstack test on non-arm64 arches"u8;

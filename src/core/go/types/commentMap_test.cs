@@ -86,7 +86,7 @@ x /* ERROR "3:1" */                // ignore automatically inserted semicolon he
 	package /* ERROR "7:2" */  // indented with tab
         import  /* ERROR "8:9" */  // indented with blanks
 
-"""u8;
+"""u8.Raw();
 
 public static void TestCommentMap(ж<testing.T> Ꮡt) {
     @string src = srcᶜ14;

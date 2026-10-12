@@ -45,7 +45,7 @@ func main() {
 	t.Used()
 }
 
-"""u8;
+"""u8.Raw();
 
 // Issue 36021: verify that text/template doesn't prevent the linker from removing
 // unused methods.

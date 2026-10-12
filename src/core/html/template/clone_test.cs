@@ -210,7 +210,7 @@ internal static readonly @string tmplᶜ1 = """
 		{{define "a"}}{{template "lhs"}}{{.}}{{template "rhs"}}{{end}}
 		{{define "lhs"}} <a href=" {{end}}
 		{{define "rhs"}} "></a> {{end}}
-"""u8;
+"""u8.Raw();
 
 public static void TestTemplates(ж<testing.T> Ꮡt) {
     var names = new @string[]{"t0"u8, "a"u8, "lhs"u8, "rhs"u8}.slice();
@@ -385,7 +385,7 @@ internal static readonly @string @baseᶜ = """
 {{ define "a" -}}<title>{{ template "b" . -}}</title>{{ end -}}
 {{ define "b" }}{{ end -}}
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string pageᶜ = @"{{ template ""a"" . }}"u8;

@@ -644,7 +644,7 @@ AJ2xDx8hcFH1mt0G/FX0Kw4zd8NLQsLxdxP8c4CU6x+7Nz/OAipmsHMdMqUybDKw
 juDEI/9bfU1lcKwrmz3O2+BtjjKAvpafkmO8l7tdufThcV4q5O8DIrGKZTqPwJNl
 1IXNDw9bg1kWRxYtnCQ6yICmJhSFm/Y3m6xv+cXDBlHz4n/FsRC6UfTd
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string gtsRoot = """
 -----BEGIN CERTIFICATE-----
@@ -678,7 +678,7 @@ Z6tGn6D/Qqc6f1zLXbBwHSs09dR2CQzreExZBfMzQsNhFRAbd03OIozUhfJFfbdT
 2tIMPNuzjsmhDYAPexZ3FL//2wmUspO8IFgV6dtxQ/PeEMMA3KgqlbbC1j+Qa3bb
 bP6MvPJwNQzcmRk13NfIRmPVNnGuV/u3gm3c
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string googleLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -712,7 +712,7 @@ zWfTn1IcKhA3IC7A1n/5bkkWD1Xi1mdWFQ6DQDMp//667zz7pKOgFMlB93aPDjvI
 c78zEqNswn6xGKXpWF5xVwdFcsx9HKhJ6UAi2bQ/KQ1yb7LPUOR6wXXWrG1cLnNP
 i8eNLnKL9PXQ+5SwJFCzfEhcIZuhzg==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 // googleLeafWithInvalidHash is the same as googleLeaf, but the signature
 // algorithm in the certificate contains a nonsense OID.
@@ -748,7 +748,7 @@ zWfTn1IcKhA3IC7A1n/5bkkWD1Xi1mdWFQ6DQDMp//667zz7pKOgFMlB93aPDjvI
 c78zEqNswn6xGKXpWF5xVwdFcsx9HKhJ6UAi2bQ/KQ1yb7LPUOR6wXXWrG1cLnNP
 i8eNLnKL9PXQ+5SwJFCzfEhcIZuhzg==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string smimeLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -797,7 +797,7 @@ d0cnKTfA6IpjGo8EeHcxnIXT8NPImWaRj0qqonvYady7ci6U4m3lkNSdXNn1afgw
 mYust+gxVtOZs1gk2MUCgJ1V1X+g7r/Cg7viIn6TLkLrpS1kS1hvMqkl9M+7XqPo
 Qd95nJKOkusQpy99X4dF/lfbYAQnnjnqh3DLD2gvYObXFaAYFaiBKTiMTV2X72F+
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string smimeIntermediate = """
 -----BEGIN CERTIFICATE-----
@@ -841,7 +841,7 @@ FlKAn0OvYp4niKhAJwaBVN3kowmJuOU5Rid+TUnfyxbJ9cttSgzaF3hP/N4zgMEM
 5tikXUskeckt8LUK96EH0QyssavAMECUEb/xrupyRdYWwjQGvNLq6T5+fViDGyOw
 k+lzD44wofy8paAy9uC9Owae0zMEzhcsyRm7
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string smimeRoot = """
 -----BEGIN CERTIFICATE-----
@@ -878,7 +878,7 @@ QnMFlEPVjjxOAToZpR9GTnfQXeWBIiGH/pR9hNiTrdZoQ0iy2+tzJOeRf1SktoA+
 naM8THLCV8Sg1Mw4J87VBp6iSNnpn86CcDaTmjvfliHjWbcM2pE38P1ZWrOZyGls
 QyYBNWNgVYkDOnXYukrZVP/u3oDYLdE41V4tC5h9Pmzb/CaIxw==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static @string nameConstraintsLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -921,7 +921,7 @@ OSWK3CLz8qAEBe72XGoBjBzuk9VQxg6k52qjxCyYf7CBSQpTZhsNMf0gzu+JNATc
 b+XaOqJT6uI/RfqAJVe16ZeXZIFZgQlzIwRS9vobq9fqTIpH/QxqgXROGqAlbBVp
 /ByH6FEe6+oH1UCklhg=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static @string nameConstraintsIntermediate1 = """
 -----BEGIN CERTIFICATE-----
@@ -966,7 +966,7 @@ RtyTqKsuh/rRvKMmgUdEPZbVI23yzUKhi/mTbyml/35x/f6f5p7OYIKcQ/34sts8
 xoW9dfkWBQKAXCstXat3WJVilGXBFub6GoVZdnxTDipyMZhUT/vzXq2bPphjcdR5
 YGbmwyYmChfa
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static @string nameConstraintsIntermediate2 = """
 -----BEGIN CERTIFICATE-----
@@ -995,7 +995,7 @@ qCPorxi0xoRogj8kqkS2xyzYLElhx9X7jIzfZ8dC4mgOeoCtVvwM9xvmef3n6Vyb
 rc2yJS70DvfkPiEnBJ2x2AHZV3yKTALUqurkV705JledqUT9I5frAwYNXZ8pNzde
 n+DIcSIo7yKy6MX9czbFWQ==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static @string globalSignRoot = """
 -----BEGIN CERTIFICATE-----
@@ -1019,7 +1019,7 @@ mcIfeg7jLQitChws/zyrVQ4PkX4268NXSb7hLi18YIvDQVETI53O9zJrlAGomecs
 Mx86OyXShkDOOyyGeMlhLxS67ttVb9+E7gUJTb0o2HLO02JQZR7rkpeDMdmztcpH
 WD9f
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string digicertRoot = """
 -----BEGIN CERTIFICATE-----
@@ -1044,7 +1044,7 @@ PnlUkiaY4IBIqDfv8NZ5YBberOgOzW6sRBc4L0na4UU+Krk2U886UAb3LujEV0ls
 YSEY1QSteDwsOoBrp+uvFRTp2InBuThs4pFsiv9kuXclVzDAGySj4dzp30d8tbQk
 CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string trustAsiaSHA384Intermediate = """
 -----BEGIN CERTIFICATE-----
@@ -1071,7 +1071,7 @@ SlUpboB5vyT7jFePZ2v95CKjcr0EhiQ0gwxpdgoipZdfYTiMFGxCLsk6v8pUv7Tq
 PT/qadOGyC+PfLuZh1PtLp20mF06K+MzheCiv+w1NT5ofhmcObvukc68wvbvRFL6
 rRzZxAYN36q1SX8=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string trustAsiaLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -1102,7 +1102,7 @@ CgYIKoZIzj0EAwMDaAAwZQIwHg8JmjRtcq+OgV0vVmdVBPqehi1sQJ9PZ+51CG+Z
 0GOu+2HwS/fyLRViwSc/MZoVAjEA7NgbgpPN4OIsZn2XjMGxemtVxGFS6ZR+1364
 EEeHB9vhZAEjQSePAfjR9aAGhXRa
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string selfSigned = """
 -----BEGIN CERTIFICATE-----
@@ -1123,7 +1123,7 @@ pl01FCBGTcncVqr6RK1r4fTpeCCfRIERD+YRJz8TtPH6ydesfLL8jIV40H8NiDfG
 vRAvOtNiKtPzFeQVdbRPOskC4rcHyPeiDAMAMixeLi63+CFty4da3r5lRezeedCE
 cw3ESZzThBwWqvPOtJdpXdm+r57pDW8qD+/0lY8wfImMNkQAyCUCLg/1Lxt/hrBj
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string issuerSubjectMatchRoot = """
 -----BEGIN CERTIFICATE-----
@@ -1140,7 +1140,7 @@ VsvqWmsOAGrRWm4fBiMH/8vRGnTkJEMLqiqgc3Ulgry/P6n4SIis7TqUOw3TiMhn
 RGEz33Fsxa/tFoy/gvlJu+MqB1M2NyV33pGkdwl/b7KRWMQFieqO+uE7Ge/49pS3
 eyfm5ITdK/WT9TzYhsU4AVZcn20=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string issuerSubjectMatchLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -1157,7 +1157,7 @@ hvcNAQELBQADgYEAjYYF2on1HcUWFEG5NIcrXDiZ49laW3pb3gtcCEUJbxydMV8I
 ynqjmdqDCyK+TwI1kU5dXDe/iSJYfTB20i/QoO53nnfA1hnr7KBjNWqAm4AagN5k
 vEA4PCJprUYmoj3q9MKSSRYDlq5kIbl87mSRR4GqtAwJKxIasvOvULOxziQ=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string x509v1TestRoot = """
 -----BEGIN CERTIFICATE-----
@@ -1174,7 +1174,7 @@ YjpGpYkQ6b248xijCK7zI+lOeWN89zfSXn1AvfsC9pSdTMeDklWktbF/Ad0IN8Md
 h2NtN34ard0hEfHc8qW8mkXdsysVmq6cPvFYaHz+dBtkHuHDoy8YQnC0zdN/WyYB
 /1JmacUUofl+HusHuLkDxmadogI=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string x509v1TestIntermediate = """
 -----BEGIN CERTIFICATE-----
@@ -1189,7 +1189,7 @@ DRG6FbF9kL9jb/TDHkbVBk+sl/Pxi4/XjuFyIALlARgAkeZcPmL5tNW1ImHkwsHR
 zWE77kJDibzd141u21ZbLsKvEdUJXjla43bdyMmEqf5VGpC3D4sFt3QVH7lGeRur
 x5Wlq1u3YDL/j6s1nU2dQ3ySB/oP7J+vQ9V4QeM+
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string x509v1TestLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -1206,7 +1206,7 @@ CwUAA4GBADYzYUvaToO/ucBskPdqXV16AaakIhhSENswYVSl97/sODaxsjishKq9
 5R7siu+JnIFotA7IbBe633p75xEnLN88X626N/XRFG9iScLzpj0o0PWXBUiB+fxL
 /jt8qszOXCv2vYdUTPNuPqufXLWMoirpuXrr1liJDmedCcAHepY/
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string ignoreCNWithSANRoot = """
 -----BEGIN CERTIFICATE-----
@@ -1229,7 +1229,7 @@ nJHMB1q07YHpbwIkcV/lfCE9pig2nPXTLwYZz9cl46Ul5RCpPUi+IKURo3x8y0FU
 aSLjI/Ya0zwUARMmyZ3RRGCyhIarPb20mKSaMf1/Nb23pS3k1QgmZhk5pAnXYsWu
 BJ6bvwEAasFiLGP6Zbdmxb2hIA==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string ignoreCNWithSANLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -1253,7 +1253,7 @@ sZKEHSs3RUJvm7qqpA9Yfzm9jg+i9j32zh1xFacghAOmFRFXa9eCVeigZ/KK2mEY
 j2kBQyvnyKsXHLAKUoUOpd6t/1PHrfXnGj+HmzZNloJ/BZ1kiWb4eLvMljoLGkZn
 xZbqP3Krgjj4XNaXjg==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string excludedNamesLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -1279,7 +1279,7 @@ qKlWE+0S16+pzsWvKn831uylqwIb8ANBPsCX4aM4muFBHavSWAHgRO+P+yXVw8Q+
 VQDnMHUe5PbZd1/+1KKVs1K/CkBCtoHNHp1d/JT+2zUQJphwja9CcgfFdVhSnHL4
 oEEOFtqVMIuQfR2isi08qW/JGOHc4sFoLYB8hvdaxKWSE19A
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string excludedNamesIntermediate = """
 -----BEGIN CERTIFICATE-----
@@ -1305,7 +1305,7 @@ A264BwLo6v1Mos1o1JUvFFcp4GANlw0XFiWh7JXYRl8WmS5DoouUC+aNJ3lmyF6z
 LbIjZCSfgZnk/LK1KU1j91FI2bc2ULYZvAC1PAg8/zvIgxn6YM2Q7ZsdEgWw0FpS
 zMBX1/lk4wkFckeUIlkD55Y=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string excludedNamesRoot = """
 -----BEGIN CERTIFICATE-----
@@ -1332,7 +1332,7 @@ yU1yRHUqUYpN0DWFpsPbBqgM6uUAVO2ayBFhPgWUaqkmSbZ/Nq7isGvknaTmcIwT
 6mOAFN0qFb4RGzfGJW7x6z7KCULS7qVDp6fU3tRoScHFEgRubks6jzQ1W5ooSm4o
 +NQCZDd5eFeU8PpNX7rgaYE4GPq+EEmLVCBYmdctr8QVdqJ//8Xu3+1phjDy
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string invalidCNRoot = """
 -----BEGIN CERTIFICATE-----
@@ -1343,7 +1343,7 @@ QXaPXYCc2cIyCdqp0ROUksRz0pOLTc5iY2nraUheRUD1vRRneq7GeXOVNn7uXONg
 oCGMjNwwCgYIKoZIzj0EAwIDRwAwRAIgDSiwgIn8g1lpruYH0QD1GYeoWVunfmrI
 XzZZl0eW/ugCICgOfXeZ2GGy3wIC0352BaC3a8r5AAb2XSGNe+e9wNN6
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string validCNWithoutSAN = """
 -----BEGIN CERTIFICATE-----
@@ -1355,7 +1355,7 @@ p4ULTPdFToFAeqnGHbu62bkms8pQkDAKBggqhkjOPQQDAgNHADBEAiBTbNe3WWFR
 cqUYo0sNUuoV+tCTMDJUS+0PWIW4qBqCOwIgFHdLDn5PCk9kJpfc0O2qZx03hdq0
 h7olHCpY9yMRiz0=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string rootWithoutSKID = """
 -----BEGIN CERTIFICATE-----
@@ -1368,7 +1368,7 @@ BgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MBIGA1UdEQQLMAmCB2V4YW1wbGUwCgYI
 KoZIzj0EAwIDSQAwRgIhAMaBYWFCjTfn0MNyQ0QXvYT/iIFompkIqzw6wB7qjLrA
 AiEA3sn65V7G4tsjZEOpN0Jykn9uiTjqniqn/S/qmv8gIec=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string leafWithAKID = """
 -----BEGIN CERTIFICATE-----
@@ -1382,7 +1382,7 @@ ssWvTAveakIwEgYDVR0RBAswCYIHZXhhbXBsZTAKBggqhkjOPQQDAgNHADBEAiBk
 4LpWiWPOIl5PIhX9PDVkmjpre5oyoH/3aYwG8ABYuAIgCeSfbYueOOG2AdXuMqSU
 ZZMqeJS7JldLx91sPUArY5A=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string rootMatchingSKIDMismatchingSubject = """
 -----BEGIN CERTIFICATE-----
@@ -1394,7 +1394,7 @@ MA8GA1UdJQQIMAYGBFUdJQAwDwYDVR0TAQH/BAUwAwEB/zAMBgNVHQ4EBQQDAQID
 MAoGCCqGSM49BAMCA0gAMEUCIQDgtAp7iVHxMnKxZPaLQPC+Tv2r7+DJc88k2SKH
 MPs/wQIgFjjNvBoQEl7vSHTcRGCCcFMdlN4l0Dqc9YwGa9fyrQs=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string rootMismatchingSKIDMatchingSubject = """
 -----BEGIN CERTIFICATE-----
@@ -1406,7 +1406,7 @@ MA8GA1UdJQQIMAYGBFUdJQAwDwYDVR0TAQH/BAUwAwEB/zAKBggqhkjOPQQDAgNI
 ADBFAiEAukWOiuellx8bugRiwCS5XQ6IOJ1SZcjuZxj76WojwxkCIHqa71qNw8FM
 DtA5yoL9M2pDFF6ovFWnaCe+KlzSwAW/
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string leafMatchingAKIDMatchingIssuer = """
 -----BEGIN CERTIFICATE-----
@@ -1418,7 +1418,7 @@ BgNVHSMEBzAFgAMBAgMwEgYDVR0RBAswCYIHZXhhbXBsZTAKBggqhkjOPQQDAgNJ
 ADBGAiEAnV9XV7a4h0nfJB8pWv+pBUXRlRFA2uZz3mXEpee8NYACIQCWa+wL70GL
 ePBQCV1F9sE2q4ZrnsT9TZoNrSe/bMDjzA==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 
 partial struct unknownAuthorityErrorTestsᴛ1 /*dyn*/ {
@@ -1521,7 +1521,7 @@ jP5cBaVl50t4qoCuVIE9cOucnxYXnI7X5HpXWvu8Pfxo4SwVjb1az8Fk5s8ZnxGe
 fPB6Q3L/pKBe0SEe5GywpwtokPLB3lAygcuHbxp/1FlQ1NQZqq+vgXRIla26bNJf
 IuYkJwt6w+LH/9HZgf8=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string selfSignedNoCommonNameWithOrgName = """
 -----BEGIN CERTIFICATE-----
@@ -1542,7 +1542,7 @@ rD8cNkHf74v98KvBhcwBlDifVzmkWzMG6TL1EkRXUyLKiWgoTUFSkCDV927oXXMR
 DKnszq+AVw+K8hbeV2A7GqT7YfeqOAvSbatTDnDtKOPmlCnQui8A149VgZzXv7eU
 29ssJSqjUPyp58dlV6ZuynxPho1QVZUOQgnJToXIQ3/5vIvJRXy52GJCs4/Gh/w=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string selfSignedNoCommonNameNoOrgName = """
 -----BEGIN CERTIFICATE-----
@@ -1563,7 +1563,7 @@ w67CoNRb81dy+4Q1lGpA8ORoLWh5fIq2t2eNGc4qB8vlTIKiESzAwu7u3sRfuWQi
 4R+gnfLd37FWflMHwztFbVTuNtPOljCX0LN7KcuoXYlr05RhQrmoN7fQHsrZMNLs
 8FVjHdKKu+uPstwd04Uy4BR/H2y1yerN9j/L6ZkMl98iiA==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string criticalExtRoot = """
 -----BEGIN CERTIFICATE-----
@@ -1577,7 +1577,7 @@ BDAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDwYDVR0TAQH/BAUwAwEB
 uBx+VAQnjFkBMAoGCCqGSM49BAMCA0gAMEUCIFeSV00fABFceWR52K+CfIgOHotY
 FizzGiLB47hGwjMuAiEA8e0um2Kr8FPQ4wmFKaTRKHMaZizCGl3m+RG5QsE1KWo=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string criticalExtIntermediate = """
 -----BEGIN CERTIFICATE-----
@@ -1592,7 +1592,7 @@ EEA31wH7QC+4HH5UBCeMWQEwCgYIKoZIzj0EAwIDSAAwRQIhAOhhNRb6KV7h3wbE
 cdap8bojzvUcPD78fbsQPCNw1jPxAiBOeAJhlTwpKn9KHpeJphYSzydj9NqcS26Y
 xXbdbm27KQ==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string criticalExtLeafWithExt = """
 -----BEGIN CERTIFICATE-----
@@ -1607,7 +1607,7 @@ IwQUMBKAEIwaaKi1dttdV3sfjRSyBqMwCgYDUQMEAQH/BAAwCgYIKoZIzj0EAwID
 SAAwRQIgVjy8GBgZFiagexEuDLqtGjIRJQtBcf7lYgf6XFPH1h4CIQCT6nHhGo6E
 I+crEm4P5q72AnA/Iy0m24l7OvLuXObAmg==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string criticalExtIntermediateWithExt = """
 -----BEGIN CERTIFICATE-----
@@ -1622,7 +1622,7 @@ UuQZ6sO3XvBsxgNZ3zAbBgNVHSMEFDASgBBAN9cB+0AvuBx+VAQnjFkBMAoGA1ED
 BAEB/wQAMAoGCCqGSM49BAMCA0kAMEYCIQCQzTPd6XKex+OAPsKT/1DsoMsg8vcG
 c2qZ4Q0apT/kvgIhAKu2TnNQMIUdcO0BYQIl+Uhxc78dc9h4lO+YJB47pHGx
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string criticalExtLeaf = """
 -----BEGIN CERTIFICATE-----
@@ -1637,7 +1637,7 @@ UNhY4JhezH9gQYqvDMWrWDAbBgNVHSMEFDASgBArF29S5Bnqw7de8GzGA1nfMAoG
 CCqGSM49BAMCA0gAMEUCIQClA3d4tdrDu9Eb5ZBpgyC+fU1xTZB0dKQHz6M5fPZA
 2AIgN96lM+CPGicwhN24uQI6flOsO3H0TJ5lNzBYLtnQtlc=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal partial struct TestValidHostname_tests /*dyn*/ {
     internal @string host;

@@ -508,7 +508,7 @@ main(void)
 	return 0;
 }
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string aObjˢ = "a.obj"u8;
 internal static readonly object couldNotFindBssSectionˢ = (@string)"could not find .bss section"u8;
 internal static readonly object bssDataSucceededExpectedˢ = (@string)"bss.Data succeeded, expected error"u8;
@@ -621,7 +621,7 @@ func main() {
 	fmt.Printf("offset=0x%x\n", offset)
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string buildˢ = "build"u8;

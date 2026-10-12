@@ -57,7 +57,7 @@ public static partial void TestVendorPackages(ж<testing.T> Ꮡt) {
 		Package %q should not be vendored into this repo.
 		After getting approval from the Go team, add it to allowedPackagePrefixes
 		in %s.
-"""u8,
+"""u8.Raw(),
                 pkg, thisFile);
         }
     }

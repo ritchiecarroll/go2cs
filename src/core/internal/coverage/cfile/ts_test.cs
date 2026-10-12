@@ -116,7 +116,7 @@ func main() {
   println("hello")
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string helloGoˢ = "hello.go"u8;

@@ -430,7 +430,7 @@ vxrWemxlTZCvMe4BTg/nSRKHVsjGfpSe90C1VmTsG2H2x3rF1J1eVxgcHr+FVQWtyK7srFGAgOrHqDnp
 7VPGNzO/O3kkCut7pnGno0idCCNyt6Crca5ZiDjpgVzXsnc6X71rDyBgcbtucn8KhjBMpOfrz7VlTdtT
 Sqm7JH//2Q==
 
-"""u8;
+"""u8.Raw();
 
 public static void TestPaddedRSTMarker(ж<testing.T> Ꮡt) {
     // This test image comes from golang.org/issue/28717

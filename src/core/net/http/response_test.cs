@@ -319,7 +319,7 @@ Connection: close
 Content-Type: multipart/byteranges; boundary=18a75608c8f47cef
 
 some body
-"""u8,
+"""u8.Raw(),
         "HTTP/1.1 206 Partial Content\r\n"u8 + "Connection: close\r\n"u8 + "Content-Type: multipart/byteranges; boundary=18a75608c8f47cef\r\n"u8 + "\r\n"u8 + "some body"u8,
         new Response(
             Status: "206 Partial Content"u8,

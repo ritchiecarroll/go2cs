@@ -674,7 +674,7 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
 			"Z": 17,
 			"Q": 18
 		}
-"""u8,
+"""u8.Raw(),
         ptr: @new<Top>(),
         @out: new Top(
             Level0: 1,
@@ -970,7 +970,7 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
 			"Q": 18,
 			"extra": true
 		}
-"""u8,
+"""u8.Raw(),
         ptr: @new<Top>(),
         @out: new Top(
             Level0: 1,
@@ -1022,7 +1022,7 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
 			"Z": 17,
 			"Q": 18
 		}
-"""u8,
+"""u8.Raw(),
         ptr: @new<Top>(),
         @out: new Top(
             Level0: 1,
@@ -1801,7 +1801,7 @@ internal static @string allValueIndent = """
 	"Interface": 5.2,
 	"PInterface": null
 }
-"""u8;
+"""u8.Raw();
 
 internal static @string allValueCompact = stripWhitespace(allValueIndent);
 
@@ -1892,7 +1892,7 @@ internal static @string pallValueIndent = """
 	"Interface": null,
 	"PInterface": 5.2
 }
-"""u8;
+"""u8.Raw();
 
 internal static @string pallValueCompact = stripWhitespace(pallValueIndent);
 
@@ -2148,7 +2148,7 @@ public static void TestUnmarshalNulls(ж<testing.T> Ꮡt) {
 				"Buffer": null,
 				"Struct": null
 			}
-"""u8);
+"""u8.Raw());
     ref var nulls = ref heap<NullTest>(out var Ꮡnulls);
     nulls = new NullTest(
         Bool: true,

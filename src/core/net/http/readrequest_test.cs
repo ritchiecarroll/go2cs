@@ -407,7 +407,7 @@ Content-Length: 3
 Content-Length: 4
 
 abc
-"""u8)),
+"""u8.Raw())),
     new("smuggle_two_content_len_head"u8, reqBytes("""
 HEAD / HTTP/1.1
 Host: foo
@@ -415,15 +415,15 @@ Content-Length: 4
 Content-Length: 5
 
 1234
-"""u8)),
+"""u8.Raw())),
     new("leading_space_in_header"u8, reqBytes("""
 GET / HTTP/1.1
  Host: foo
-"""u8)),
+"""u8.Raw())),
     new("leading_tab_in_header"u8, reqBytes("""
 GET / HTTP/1.1
 
-"""u8 + "\t"u8 + @"Host: foo"u8))
+"""u8.Raw() + "\t"u8 + @"Host: foo"u8))
 }.slice();
 
 public static void TestReadRequest_Bad(ж<testing.T> Ꮡt) {

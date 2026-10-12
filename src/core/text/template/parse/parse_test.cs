@@ -811,7 +811,7 @@ internal static readonly @string printfField1Field2Field3ˢ = """
 	{{printf "%v" (contains $z.Field1.Field2 $y)}}
 {{end}}
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkListString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();

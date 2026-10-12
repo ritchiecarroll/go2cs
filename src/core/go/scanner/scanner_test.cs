@@ -97,7 +97,7 @@ internal static slice<elt> tokens = new elt[]{
     new(token.STRING, "`"u8 + """
 foo
 	                        bar
-"""u8 + "`"u8,
+"""u8.Raw() + "`"u8,
         literal
     ),
     new(token.STRING, "`\r`"u8, literal),
@@ -859,7 +859,7 @@ internal static readonly @string srcᶜ1 = """
 		// foo
 		}
 	
-"""u8;
+"""u8.Raw();
 
 // Verify that no comments show up as literal values when skipping comments.
 public static void TestIssue10213(ж<testing.T> Ꮡt) {

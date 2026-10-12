@@ -887,7 +887,7 @@ Cookies("http://secondhost.fake/secondpath")
 SetCookie("http://secondhost.fake/secondpath", [namesecondpath=valsecondpath])
 Cookies("http://firsthost.fake/nosetcookie")
 
-"""u8;
+"""u8.Raw();
 
 internal static void testJarCalls(ж<testing.T> Ꮡt, testMode mode) {
     ref var t = ref Ꮡt.DerefOrNull();

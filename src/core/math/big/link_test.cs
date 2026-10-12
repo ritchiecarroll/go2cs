@@ -42,7 +42,7 @@ package main
 import _ "math/big"
 func main() {}
 
-"""u8);
+"""u8.Raw());
     {
         var errΔ1 = os.WriteFile(goFile, @file, 420); if (errΔ1 != default!) {
             Ꮡt.Fatal(errΔ1);

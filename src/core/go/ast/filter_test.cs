@@ -34,7 +34,7 @@ func (t2) f1() {}
 func (t2) f2() {}
 func (x *t2) f2() {}
 
-"""u8;
+"""u8.Raw();
 
 // Calling ast.MergePackageFiles with ast.FilterFuncDuplicates
 // keeps a duplicate entry with attached documentation in favor
@@ -57,7 +57,7 @@ func (t2) f1() {}
 
 func (x *t2) f2() {}
 
-"""u8;
+"""u8.Raw();
 
 public static void TestFilterDuplicates(ж<testing.T> Ꮡt) {
     // parse input

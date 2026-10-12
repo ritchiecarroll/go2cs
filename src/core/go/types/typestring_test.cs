@@ -51,13 +51,13 @@ struct {
 		x, y int
 		z float32 "foo"
 	}
-"""u8, @"struct{x int; y int; z float32 ""foo""}"u8),
+"""u8.Raw(), @"struct{x int; y int; z float32 ""foo""}"u8),
     new("""
 struct {
 		string
 		elems []complex128
 	}
-"""u8, @"struct{string; elems []complex128}"u8),
+"""u8.Raw(), @"struct{string; elems []complex128}"u8),
     dup("*int"u8),
     dup("***struct{}"u8),
     dup("*struct{a int; b float32}"u8),

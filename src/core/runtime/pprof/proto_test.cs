@@ -285,7 +285,7 @@ c000000000-c000036000 rw-p 00000000 00:00 0
 ->
 07000000 07093000 06c00000 /path/to/gobench_server_main
 
-"""u8;
+"""u8.Raw();
 
 internal static @string profSelfMapsTestsWithDeleted = """
 
@@ -341,7 +341,7 @@ ffffffffff600000-ffffffffff601000 r-xp 00000090 00:00 0                  [vsysca
 7ffc34343000 7ffc34345000 00000000 [vdso]
 ffffffffff600000 ffffffffff601000 00000090 [vsyscall]
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object malformedTestCaseˢ = (@string)"malformed test case"u8;

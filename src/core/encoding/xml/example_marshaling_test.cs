@@ -75,7 +75,7 @@ internal static readonly @string animalsAnimalGopherˢ = """
 		<animal>gopher</animal>
 		<animal>zebra</animal>
 	</animals>
-"""u8;
+"""u8.Raw();
 
 internal partial struct Example_customMarshalXML_zoo /*dyn*/ {
     public slice<Animal> Animals; /*`xml:"animal"`*/

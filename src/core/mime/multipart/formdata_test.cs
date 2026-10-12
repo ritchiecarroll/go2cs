@@ -221,7 +221,7 @@ Content-Disposition: form-data; name="version"
 
 171
 -----------------------------8d345eef0d38dc9--
-"""u8;
+"""u8.Raw();
 
 public static void TestReadForm_NoReadAfterEOF(ж<testing.T> Ꮡt) {
     var maxMemory = ((int64)32 << (int)(20));
@@ -272,11 +272,11 @@ public static void TestReadForm_NonFileMaxMemory(ж<testing.T> Ꮡt) {
 Content-Disposition: form-data; name="largetext"
 
 
-"""u8 + largeTextValue + """
+"""u8.Raw() + largeTextValue + """
 
 --MyBoundary--
 
-"""u8;
+"""u8.Raw();
     @string testBody = strings.ReplaceAll(message, "\n"u8, "\r\n"u8);
     // Try parsing the form with increasing maxMemory values.
     // Changes in how we account for non-file form data may cause the exact point

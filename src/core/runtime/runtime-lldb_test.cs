@@ -81,7 +81,7 @@ func main() {
 	_ = ptrvar
 }
 
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string lldbScriptSource = """
 
@@ -140,7 +140,7 @@ else:
 lldb.SBDebugger.Destroy(debugger)
 sys.exit()
 
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string expectedLldbOutput = """
 Created target
@@ -151,7 +151,7 @@ Stopped at main.go:10
 Stopped in main.main
 intvar = 42
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string goModˢ = "go.mod"u8;

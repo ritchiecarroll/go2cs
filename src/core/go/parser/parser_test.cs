@@ -255,7 +255,7 @@ type T struct{}
 var x int
 func f() { L: }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestObjects(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -327,7 +327,7 @@ type s1b struct { *int }
 type s2b struct { byte; int; *float }
 type s3b struct { a, b *s3b; c []float }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestUnresolved(ж<testing.T> Ꮡt) {
     var (f, err) = ParseFile(token.NewFileSet(), ""u8, packagePFuncF1aIntFuncˢ, 0);
@@ -385,7 +385,7 @@ func ExampleCount() {
 	// 5
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestCommentGroups(ж<testing.T> Ꮡt) {
     var (f, err) = ParseFile(token.NewFileSet(), ""u8, packageP1a1b1c1d2a2bˢ, ParseComments);
@@ -498,7 +498,7 @@ type T struct {
 	f7 int ; /*f7a*/ /*f7b*/ //f7c
 }
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string tF1ˢ = "T.F1"u8;
 internal static readonly @string f1LeadCommentˢ = "/* F1 lead comment *///"u8;
 internal static readonly @string f1LineCommentˢ = "/* F1 */// line comment"u8;
@@ -614,7 +614,7 @@ var lastDecl int
 
 /* end of file */
 
-"""u8;
+"""u8.Raw();
 
 public static void TestFileStartEndPos(ж<testing.T> Ꮡt) {
     @string src = srcᶜ1;
@@ -697,7 +697,7 @@ internal static readonly @string srcᶜ2 = """
 package main
 type x int // comment
 
-"""u8;
+"""u8.Raw();
 
 public static void TestLastLineComment(ж<testing.T> Ꮡt) {
     @string src = srcᶜ2;

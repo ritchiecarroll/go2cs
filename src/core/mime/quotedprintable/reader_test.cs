@@ -128,13 +128,13 @@ OK: 28934
 invalid bytes after =: 3949
 quotedprintable: invalid hex byte 0x0d: 2048
 unexpected EOF: 194
-"""u8;
+"""u8.Raw();
 internal static readonly @string ok896InvalidBytesAfterˢ = """
 OK: 896
 invalid bytes after =: 100
 quotedprintable: invalid hex byte 0x0d: 26
 unexpected EOF: 3
-"""u8;
+"""u8.Raw();
 
 public static void TestExhaustive(ж<testing.T> Ꮡt) {
     if (useQprint.Value) {

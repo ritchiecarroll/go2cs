@@ -601,7 +601,7 @@ single
 cell
 lines
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkCode(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();

@@ -59,7 +59,7 @@ MAMBAf8wDQYJKoZIhvcNAQEFBQADQQBJlffJHybjDGxRMqaRmDhX0+6v02TUKZsW
 r5QuVbpQhH6u+0UgcW0jp9QwpxoPTLTWGXEWBBBurxFwiCBhkQ+V
 -----END CERTIFICATE-----
 
-"""u8;
+"""u8.Raw();
 
 internal static @string rsaKeyPEM = testingKey("""
 -----BEGIN RSA TESTING KEY-----
@@ -72,7 +72,7 @@ xVLHwDXh/6NJAiEAl2oHGGLz64BuAfjKrqwz7qMYr9HCLIe/YsoWq/olzScCIQDi
 D2lWusoe2/nEqfDVVWGWlyJ7yOmqaVm/iNUN9B2N2g==
 -----END RSA TESTING KEY-----
 
-"""u8);
+"""u8.Raw());
 
 // keyPEM is the same as rsaKeyPEM, but declares itself as just
 // "PRIVATE KEY", not "RSA PRIVATE KEY".  https://golang.org/issue/4477
@@ -87,7 +87,7 @@ xVLHwDXh/6NJAiEAl2oHGGLz64BuAfjKrqwz7qMYr9HCLIe/YsoWq/olzScCIQDi
 D2lWusoe2/nEqfDVVWGWlyJ7yOmqaVm/iNUN9B2N2g==
 -----END TESTING KEY-----
 
-"""u8);
+"""u8.Raw());
 
 internal static @string ecdsaCertPEM = """
 -----BEGIN CERTIFICATE-----
@@ -104,7 +104,7 @@ H5jBImIxPL4WxQNiBTexAkF8D1EtpYuWdlVQ80/h/f4pBcGiXPqX5h2PQSQY7hP1
 +jwM1FGS4fREIOvlBYr/SzzQRtwrvrzGYxDEDbsC0ZGRnA==
 -----END CERTIFICATE-----
 
-"""u8;
+"""u8.Raw();
 
 internal static @string ecdsaKeyPEM = testingKey("""
 -----BEGIN EC PARAMETERS-----
@@ -118,7 +118,7 @@ VQldyCXTXGgu7OC0AQCC/Y/+ODK3NFKlRi+AsG3VQDSV4tgHLqZBBus0S6pPcg1q
 kohxS/xfFg/TEwRSSws+roJr4JFKpO2t3/be5OdqmQ==
 -----END EC TESTING KEY-----
 
-"""u8);
+"""u8.Raw());
 
 // golang.org/issue/4477
 
@@ -164,7 +164,7 @@ internal static readonly @string nonsensePEMᶜ = """
 Zm9vZm9vZm9v
 -----END NONSENSE-----
 
-"""u8;
+"""u8.Raw();
 
 public static void TestX509KeyPairErrors(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();

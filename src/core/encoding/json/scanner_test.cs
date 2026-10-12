@@ -85,7 +85,7 @@ public static void TestCompactAndIndent(ж<testing.T> Ꮡt) {
 	0,
 	-5e+2
 ]
-"""u8),
+"""u8.Raw()),
         new(Name(""u8), "{\"\":\"<>&\u2028\u2029\"}"u8, "{\n\t\"\": \"<>&\u2028\u2029\"\n}"u8)
     }.slice();
     // See golang.org/issue/34070
