@@ -199,8 +199,11 @@ Start with [`CONTRIBUTING.md`](https://github.com/ritchiecarroll/go2cs/blob/mast
 [Building go2cs from source](BuildingGo2cs.md) and [`Architecture.md`](Architecture.md). There is plenty
 of low-hanging fruit here; jump in if you'd like to help.
 
-<!-- EXPECTATION LINE: the owner's wording goes here (launch plan decision D9). What it needs to say: this is
-     one person's project, replies are best-effort, and where to ask. Not written by the docs lane. -->
+go2cs is a personal project, worked on in spare time. Issues, ideas and pull requests are welcome and are read,
+but replies are best-effort and can take a while. Questions belong in
+[Discussions](https://github.com/ritchiecarroll/go2cs/discussions), and defects in
+[Issues](https://github.com/ritchiecarroll/go2cs/issues/new/choose).
+<!-- Launch plan decision D9: COORD's wording, OK'd by the owner 2026-10-12 for his later edit. -->
 
 ## License
 
