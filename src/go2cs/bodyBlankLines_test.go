@@ -213,6 +213,9 @@ func braceComments(v int) int {
 	switch v {
 	case 1: // on the case label
 		n = 2
+	// above case two
+	case 2: // on case two
+		n = 3
 	}
 	for i := 0; i < v; i++ {
 		n += i
@@ -363,6 +366,7 @@ func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
 	for _, c := range []struct{ comment, header string }{
 		{"// after the if brace", "if (v > 0) {"},
 		{"// on the case label", "case 1:"},
+		{"// on case two", "case 2:"},
 	} {
 		if line := lines[lineContaining(t, lines, c.comment)]; !strings.Contains(line, c.header) {
 			t.Errorf("%q does not trail %q: %q", c.comment, c.header, strings.TrimSpace(line))
