@@ -152,3 +152,48 @@ func TestLiteralInCallKeepsItsComments(t *testing.T) {
 		t.Errorf("the loop body's comment is at line %d, want %d (the first line of the body):\n%s", at+1, loop+2, strings.Join(lines[loop:min(len(lines), loop+5)], "\n"))
 	}
 }
+
+// Own-line comments between the operands of a multi-line chain keep their own lines, one comment line per C#
+// line, the next operand after them; and a comment on an argument that a call's conversion renders more than
+// once is never lost.
+const ownLineOperandCommentsSource = `package main
+
+import "fmt"
+
+func printable(b byte, star bool) bool {
+	return 'a' <= b && b <= 'z' ||
+		b == '?' ||
+		// This is technically not allowed.
+		// However, certificates use it.
+		(star && b == '*')
+}
+
+type ext struct{ v int }
+
+func build() (ret []ext) {
+	ret = make([]ext, 10 /* maximum number of elements. */)
+	return
+}
+
+func main() {
+	fmt.Println(printable('a', true), len(build()))
+}
+`
+
+func TestOwnLineOperandCommentsKeepTheirLines(t *testing.T) {
+	lines := convertWithComments(t, ownLineOperandCommentsSource)
+
+	first := lineContaining(t, lines, "// This is technically not allowed.")
+	second := lineContaining(t, lines, "// However, certificates use it.")
+
+	if strings.TrimSpace(lines[first]) != "// This is technically not allowed." || second != first+1 || strings.TrimSpace(lines[second]) != "// However, certificates use it." {
+		t.Errorf("the own-line comments are not on lines of their own:\n%s", strings.Join(lines[max(0, first-1):min(len(lines), first+3)], "\n"))
+	}
+
+	if next := strings.TrimSpace(lines[second+1]); !strings.HasPrefix(next, "(star && b == (rune)'*')") {
+		t.Errorf("the operand after the comments is %q, want it on the next line", next)
+	}
+
+	// make's size argument: rendered, then rebuilt; its comment is written somewhere, never dropped
+	lineContaining(t, lines, "maximum number of elements.")
+}
