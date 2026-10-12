@@ -203,3 +203,43 @@ func TestPreludeSeparatorIsNotADefect(t *testing.T) {
 		t.Errorf("bad: %v and %d separators, want %v and 0 separators", got, separators, want)
 	}
 }
+
+// onelineCounts reads testdata/oneline's rendering: its census classes, the one-line members read and the function
+// bodies read.
+func onelineCounts(t *testing.T, rendering string) (map[string]int, int, int) {
+	t.Helper()
+
+	pairs := FindPairs("testdata/oneline/"+rendering, "testdata/oneline/goroot")
+
+	if len(pairs) != 1 {
+		t.Fatalf("%s: %d pairs found, want 1 (oneline/oneline.cs against oneline/oneline.go)", rendering, len(pairs))
+	}
+
+	r := NewResults()
+
+	if err := r.Analyze(pairs[0]); err != nil {
+		t.Fatalf("%s: %v", rendering, err)
+	}
+
+	return r.Counts(), r.r.body["one-line-member"], r.r.body["functions"]
+}
+
+// Adjacent one-line functions are written as one-line members (the owner's decision 5): `sig => E;` or `sig { }`,
+// one after another. A member written `=> E;` has no body to compare and a Go one-line body no blank line, so it is
+// read as a one-line member, not as a body not found. Its expression is not its declaration: `Is`'s reads
+// `context_package.DeadlineExceeded`, which must not hide the line from the declarations, nor may a name in an
+// expression stand in for a declaration's. `good` is the converter's emission; `bad` writes a blank line between two
+// members Go writes adjacently.
+func TestOneLineMembersAreRead(t *testing.T) {
+	got, oneLine, functions := onelineCounts(t, "good")
+
+	if len(got) != 0 || oneLine != 3 || functions != 2 {
+		t.Errorf("good: %v, %d one-line members and %d bodies, want no class, 3 and 2", got, oneLine, functions)
+	}
+
+	want := map[string]int{"top:go-none-cs-blank": 1}
+
+	if got, oneLine, _ := onelineCounts(t, "bad"); !maps.Equal(got, want) || oneLine != 3 {
+		t.Errorf("bad: %v and %d one-line members, want %v and 3", got, oneLine, want)
+	}
+}

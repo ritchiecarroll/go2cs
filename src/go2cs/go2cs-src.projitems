@@ -223,6 +223,9 @@
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\anchor\good\anchor\anchor.cs" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\anchor\goroot\src\anchor\anchor.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\corpus_baseline.txt" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\oneline\bad\oneline\oneline.cs" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\oneline\good\oneline\oneline.cs" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\oneline\goroot\src\oneline\oneline.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\planted\bad\plant\plant.cs" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\planted\bad2\plant\plant.cs" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\planted\good\plant\plant.cs" />
