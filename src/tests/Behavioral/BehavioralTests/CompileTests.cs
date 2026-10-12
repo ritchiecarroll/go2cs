@@ -2440,6 +2440,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckVariadicNamedEmptyIface() => CheckTarget("VariadicNamedEmptyIface");
 
     [TestMethod]
+    public void CheckVariadicPackAlias() => CheckTarget("VariadicPackAlias");
+
+    [TestMethod]
     public void CheckVariadicPackPassThrough() => CheckTarget("VariadicPackPassThrough");
 
     [TestMethod]

@@ -2443,6 +2443,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckVariadicNamedEmptyIface() => CheckTarget("VariadicNamedEmptyIface");
 
     [TestMethod]
+    public void CheckVariadicPackAlias() => CheckTarget("VariadicPackAlias");
+
+    [TestMethod]
     public void CheckVariadicPackPassThrough() => CheckTarget("VariadicPackPassThrough");
 
     [TestMethod]

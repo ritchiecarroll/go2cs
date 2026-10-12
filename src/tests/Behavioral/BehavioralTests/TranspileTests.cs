@@ -2440,6 +2440,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckVariadicNamedEmptyIface() => CheckTarget("VariadicNamedEmptyIface");
 
     [TestMethod]
+    public void CheckVariadicPackAlias() => CheckTarget("VariadicPackAlias");
+
+    [TestMethod]
     public void CheckVariadicPackPassThrough() => CheckTarget("VariadicPackPassThrough");
 
     [TestMethod]
