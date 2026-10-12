@@ -11,6 +11,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"regexp"
 	"strings"
@@ -173,6 +174,21 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 			if liftedTypeDeclaredBy(identType, v.info.Defs[typeSpec.Name]) {
 				v.liftedTypeMap[identType] = aliasName
 			}
+		}
+
+		// The `global using` line is the only place C# declares the alias, so its doc goes directly above it
+		// (docs/PLAN-comment-and-spacing-parity.md, the owner's decision 6), at the file's top level, after a
+		// blank line when another using precedes it, as Go separates the declarations.
+		if v.options.includeComments && doc != nil {
+			if v.typeAliasDeclarations.Len() > 0 {
+				v.typeAliasDeclarations.WriteString(v.newline)
+			}
+
+			savedIndent := v.indentLevel
+			v.indentLevel = 0
+			v.writeCommentString(v.typeAliasDeclarations, doc, token.NoPos)
+			v.indentLevel = savedIndent
+			v.typeAliasDeclarations.WriteString(v.newline)
 		}
 
 		v.typeAliasDeclarations.WriteString(fmt.Sprintf("global using %s = %s;%s", aliasName, typeName, v.newline))
