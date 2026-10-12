@@ -117,9 +117,11 @@ func (v *Visitor) visitStatementList(stmts []ast.Stmt, colon token.Pos) {
 }
 
 // clauseSpan is a clause's source: after the previous clause (or the body's `{`) and before the next
-// clause (or the body's `}`).
+// clause (or the body's `}`). end is the end of the clause's last statement (or its colon), and
+// caseColumn the column of its `case` or `default` keyword.
 type clauseSpan struct {
-	after, before token.Pos
+	after, before, end token.Pos
+	caseColumn         int
 }
 
 // noteClauseSpans records the clauseSpan of each clause of a switch, type switch or select body, in
@@ -145,9 +147,9 @@ func (v *Visitor) noteClauseSpans(body *ast.BlockStmt) {
 
 		switch clause := stmt.(type) {
 		case *ast.CaseClause:
-			v.clauseSpans[clause.Colon] = clauseSpan{after, before}
+			v.clauseSpans[clause.Colon] = clauseSpan{after, before, clause.End(), v.fset.Position(clause.Case).Column}
 		case *ast.CommClause:
-			v.clauseSpans[clause.Colon] = clauseSpan{after, before}
+			v.clauseSpans[clause.Colon] = clauseSpan{after, before, clause.End(), v.fset.Position(clause.Case).Column}
 		}
 
 		after = stmt.End()
@@ -169,8 +171,10 @@ func (v *Visitor) holdClauseComments(colon token.Pos) {
 
 	var held, kept []token.Pos
 
+	// After the clause's last statement, a comment at the next label's column or left of it documents
+	// the next clause (gofmt indents a body's comments deeper), so it is not held.
 	for _, pos := range v.sortedCommentPos {
-		if pos > span.after && pos < span.before {
+		if pos > span.after && pos < span.before && (pos < span.end || v.fset.Position(pos).Column > span.caseColumn) {
 			held = append(held, pos)
 		} else {
 			kept = append(kept, pos)
