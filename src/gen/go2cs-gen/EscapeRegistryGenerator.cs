@@ -33,8 +33,9 @@ namespace go2cs;
 /// from metadata);</item>
 /// <item>a container over a type the compilation cannot name: one in an assembly it does not reference directly (a
 /// tests project's DisableTransitiveProjectReferences), or an inaccessible one (see <see cref="Nameable"/>);</item>
-/// <item>in a platform-NEUTRAL package, a container reachable only inside a PER-OS assembly's struct (see Fields and
-/// <see cref="IsPerOS"/>: the neutral registry must be the same in every OS flavor);</item>
+/// <item>a container reachable only through a PER-OS assembly's non-exported surface from a platform-NEUTRAL package (see
+/// Fields and <see cref="IsPerOS"/>: the neutral registry must be the same in every OS flavor; what a neutral package
+/// reaches through a per-OS assembly's EXPORTED structs, that assembly registers itself);</item>
 /// <item>a struct that carries no face of its own (its compilation never spells a pointer to it; TypeOpsScope).</item>
 /// </list>
 /// <para>
@@ -109,8 +110,33 @@ public class EscapeRegistryGenerator : ISourceGenerator
                         byPackage[package] = registered = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
 
                     visited.Clear();
-                    Reach(compilation, package, source, registered, visited, 0, perOS);
+                    Reach(compilation, package, source, registered, visited, 0, perOS, exportedOnly: false);
                 }
+            }
+        }
+
+        // A per-OS package also registers what a neutral package would have reached through its EXPORTED structs, since a
+        // neutral walk stops at a per-OS assembly (Fields). Without this, a container reached only that way was registered
+        // nowhere: expvar's runtime.MemStats lost array<runtime.MemStats_BySize> to the per-OS marker (2026-10-11, the one
+        // distinct type the six-build count lost). The view mirrors what a referencing compilation imports from metadata:
+        // exported structs, their public fields, and the public fields of any of this package's structs reached through them.
+        if (perOS)
+        {
+            foreach (INamedTypeSymbol exported in ExportedStructs(compilation.Assembly.GlobalNamespace))
+            {
+                INamedTypeSymbol package = exported;
+
+                while (package.ContainingType is not null)
+                    package = package.ContainingType;
+
+                if (SymbolEqualityComparer.Default.Equals(package, exported) || package.IsGenericType || !GeneratedPartials.CanReopen(package))
+                    continue;
+
+                if (!byPackage.TryGetValue(package, out HashSet<ITypeSymbol>? registered))
+                    byPackage[package] = registered = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+
+                visited.Clear();
+                Fields(compilation, package, exported, registered, visited, 0, walkPerOS: true, exportedOnly: true);
             }
         }
 
@@ -125,21 +151,21 @@ public class EscapeRegistryGenerator : ISourceGenerator
 
     // A closed container reachable from a value of type: the type itself, a container's elements, a pointer's target and
     // a converted struct's fields. An interface ends the walk: what it holds is converted, and registered, where it was.
-    internal static void Reach(Compilation compilation, INamedTypeSymbol package, ITypeSymbol type, HashSet<ITypeSymbol> registered, HashSet<ITypeSymbol> visited, int depth, bool walkPerOS)
+    internal static void Reach(Compilation compilation, INamedTypeSymbol package, ITypeSymbol type, HashSet<ITypeSymbol> registered, HashSet<ITypeSymbol> visited, int depth, bool walkPerOS, bool exportedOnly)
     {
         if (depth > 16 || !visited.Add(type) || type.TypeKind is TypeKind.Interface or TypeKind.TypeParameter or TypeKind.Delegate)
             return;
 
         if (type is IArrayTypeSymbol array)
         {
-            Reach(compilation, package, array.ElementType, registered, visited, depth + 1, walkPerOS);
+            Reach(compilation, package, array.ElementType, registered, visited, depth + 1, walkPerOS, exportedOnly);
             return;
         }
 
         if (type is not INamedTypeSymbol named || named.ContainingNamespace?.ToDisplayString() != "go")
         {
             if (type is INamedTypeSymbol { TypeKind: TypeKind.Struct, ContainingNamespace: { } ns } other && ns.ToDisplayString().StartsWith("go.", System.StringComparison.Ordinal))
-                Fields(compilation, package, other, registered, visited, depth, walkPerOS);
+                Fields(compilation, package, other, registered, visited, depth, walkPerOS, exportedOnly);
 
             return;
         }
@@ -150,7 +176,7 @@ public class EscapeRegistryGenerator : ISourceGenerator
                 registered.Add(named);
 
             foreach (ITypeSymbol argument in named.TypeArguments)
-                Reach(compilation, package, argument, registered, visited, depth + 1, walkPerOS);
+                Reach(compilation, package, argument, registered, visited, depth + 1, walkPerOS, exportedOnly);
 
             return;
         }
@@ -158,12 +184,12 @@ public class EscapeRegistryGenerator : ISourceGenerator
         // ж<T>, Go's pointer: its target is reachable through Elem.
         if (named.Name == "ж" && named.TypeArguments.Length == 1)
         {
-            Reach(compilation, package, named.TypeArguments[0], registered, visited, depth + 1, walkPerOS);
+            Reach(compilation, package, named.TypeArguments[0], registered, visited, depth + 1, walkPerOS, exportedOnly);
             return;
         }
 
         if (named.TypeKind == TypeKind.Struct && named.ContainingAssembly?.Name != "golib")
-            Fields(compilation, package, named, registered, visited, depth, walkPerOS);
+            Fields(compilation, package, named, registered, visited, depth, walkPerOS, exportedOnly);
     }
 
     // A platform-NEUTRAL package never descends into a PER-OS assembly's struct fields: only those vary by OS (syscall's
@@ -171,14 +197,49 @@ public class EscapeRegistryGenerator : ISourceGenerator
     // -- the 1.24.13 r6 release rehearsal, 2026-10-11), so the neutral registry is OS-invariant by construction. A neutral
     // foreign struct's fields, and every struct of the compilation's own, are still walked. A per-OS package walks freely:
     // its own output is per-OS anyway. A container it thereby skips falls to golib's fallback: trim stage 3d's boundary
-    // under Native AOT, never a wrong answer.
-    private static void Fields(Compilation compilation, INamedTypeSymbol package, INamedTypeSymbol type, HashSet<ITypeSymbol> registered, HashSet<ITypeSymbol> visited, int depth, bool walkPerOS)
+    // under Native AOT, never a wrong answer. (A per-OS package registers those for its own exported structs: Execute.)
+    // exportedOnly walks this compilation's structs as a referencing compilation sees them: public fields only.
+    private static void Fields(Compilation compilation, INamedTypeSymbol package, INamedTypeSymbol type, HashSet<ITypeSymbol> registered, HashSet<ITypeSymbol> visited, int depth, bool walkPerOS, bool exportedOnly)
     {
-        if (!walkPerOS && !SymbolEqualityComparer.Default.Equals(type.ContainingAssembly, compilation.Assembly) && IsPlatformVariant(type.ContainingAssembly))
+        bool own = SymbolEqualityComparer.Default.Equals(type.ContainingAssembly, compilation.Assembly);
+
+        if (!walkPerOS && !own && IsPlatformVariant(type.ContainingAssembly))
             return;
 
-        foreach (IFieldSymbol field in type.GetMembers().OfType<IFieldSymbol>().Where(field => !field.IsStatic && !field.IsConst))
-            Reach(compilation, package, field.Type, registered, visited, depth + 1, walkPerOS);
+        foreach (IFieldSymbol field in type.GetMembers().OfType<IFieldSymbol>().Where(field => !field.IsStatic && !field.IsConst && (!exportedOnly || !own || field.DeclaredAccessibility == Accessibility.Public)))
+            Reach(compilation, package, field.Type, registered, visited, depth + 1, walkPerOS, exportedOnly);
+    }
+
+    // Every non-generic struct this compilation exports (public, inside public types) under a go.* namespace.
+    private static IEnumerable<INamedTypeSymbol> ExportedStructs(INamespaceSymbol ns)
+    {
+        foreach (INamespaceSymbol child in ns.GetNamespaceMembers())
+        {
+            foreach (INamedTypeSymbol type in ExportedStructs(child))
+                yield return type;
+        }
+
+        string name = ns.ToDisplayString();
+
+        if (name != "go" && !name.StartsWith("go.", System.StringComparison.Ordinal))
+            yield break;
+
+        Stack<INamedTypeSymbol> pending = new(ns.GetTypeMembers().Where(type => type.DeclaredAccessibility == Accessibility.Public));
+
+        while (pending.Count > 0)
+        {
+            INamedTypeSymbol type = pending.Pop();
+
+            // A generic type, and anything nested in one, is open: no closed container to register.
+            if (type.IsGenericType)
+                continue;
+
+            foreach (INamedTypeSymbol nested in type.GetTypeMembers().Where(nested => nested.DeclaredAccessibility == Accessibility.Public))
+                pending.Push(nested);
+
+            if (type.TypeKind == TypeKind.Struct)
+                yield return type;
+        }
     }
 
     // A registry line must compile, so every type it spells must be one this compilation can NAME: not an error type,

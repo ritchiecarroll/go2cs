@@ -204,6 +204,36 @@ public class EscapeRegistryGeneratorTests
         Assert.IsFalse(neutral.Any(source => source.Contains("go2cs.PlatformVariant")), "the same package with its sources at the project root is neutral");
     }
 
+    // The per-OS marker's one lost type (2026-10-11, the six-build count against 0904171759): expvar boxes runtime.MemStats,
+    // whose BySize field is array<runtime.MemStats_BySize>; once expvar (neutral) stopped at runtime (per-OS), no registry
+    // named it. A per-OS package therefore registers what a referencing compilation reaches through its EXPORTED structs:
+    // their public fields, and the public fields of its own structs reached through them -- the metadata view a neutral
+    // walk had. Not a non-exported struct, not a non-public field, not a generic struct; and a neutral package, which every
+    // walk still reaches, adds nothing.
+    [TestMethod]
+    public void APerOSPackageRegistersWhatItsExportedStructsReach()
+    {
+        const string Members =
+            "public partial struct Sz { public uint Size; public slice<nint> sizes; } " +
+            "public partial struct Stats { public array<Sz> BySize; public Inner inner; internal slice<Sz> hidden; } " +
+            "public partial struct Inner { public map<nint, Sz> byKey; internal channel<Sz> notThis; } " +
+            "internal partial struct Unexported { public slice<bool> no; } " +
+            "public partial struct Gen<T> { public slice<T> open; public slice<byte> closedButGeneric; }";
+
+        (string[] registered, _, Diagnostic[] errors) = RunOn("opkg", Members, goTargetOS: "linux", perOSSource: true);
+
+        Assert.AreEqual(0, errors.Length, "the registry compiles: " + string.Join("; ", errors.Take(3)));
+        CollectionAssert.Contains(registered, "global::go.array<global::go.opkg_package.Sz>", "an exported struct's public field");
+        CollectionAssert.Contains(registered, "global::go.slice<nint>", "through a container's element type, the element struct's public field");
+        CollectionAssert.Contains(registered, "global::go.map<nint, global::go.opkg_package.Sz>", "through a public field of its own struct type");
+        Assert.IsFalse(registered.Any(name => name.Contains("slice<global::go.opkg_package.Sz>") || name.Contains("channel<")), "a non-public field is not walked: " + string.Join(", ", registered));
+        Assert.IsFalse(registered.Any(name => name.Contains("slice<bool>")), "a non-exported struct is not a root: " + string.Join(", ", registered));
+        Assert.IsFalse(registered.Any(name => name.Contains("slice<byte>")), "a generic struct is not a root: " + string.Join(", ", registered));
+
+        (string[] neutral, _, _) = RunOn("opkg", Members, goTargetOS: "linux", perOSSource: false);
+        Assert.AreEqual(0, neutral.Length, "a neutral package registers only what it converts: " + string.Join(", ", neutral));
+    }
+
     private const string ProjectDirectory = @"C:\go2cs\src\core\opkg";
 
     private static MetadataReference EmitLibrary(string name, string source, params MetadataReference[] references)
