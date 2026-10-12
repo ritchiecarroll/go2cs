@@ -145,6 +145,23 @@ func emptyClause(v, w string) int {
 	return n
 }
 
+func defaultInner(v, w int) int {
+	n := 0
+	switch v {
+	default:
+		if v > 100 {
+			// inside the default body
+			n = 1
+		}
+	case w:
+		n = add(fmt.Sprint(w), 66)
+	case w + 1: // on the label
+		// below the label
+		n = add(fmt.Sprint(w), 77)
+	}
+	return n
+}
+
 func typeSwitchBody(v any) {
 	switch t := v.(type) {
 	case string:
@@ -169,6 +186,7 @@ func main() {
 	caseBody(1)
 	fmt.Println(defaultFirst(1, 1))
 	fmt.Println(emptyClause("x", "w"))
+	fmt.Println(defaultInner(1, 1))
 	typeSwitchBody(1)
 	selectBody(make(chan int))
 }
@@ -261,6 +279,19 @@ func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
 	for _, pair := range [][2]string{{"// above case z", "add(w, 55)"}} {
 		if next := lineContaining(t, lines, pair[0]) + 1; !strings.Contains(lines[next], pair[1]) {
 			t.Errorf("%q is not directly above %q: next line %q", pair[0], pair[1], strings.TrimSpace(lines[next]))
+		}
+	}
+
+	// A comment inside a `default:` clause the lowering moves to the end waits for that clause, and a
+	// comment trailing a case label is written with its clause: a flush in a clause emitted earlier
+	// must not write either inside an argument list.
+	if next := lineContaining(t, lines, "// inside the default body") + 1; !strings.Contains(lines[next], "n = 1;") {
+		t.Errorf("the comment inside the moved default body is not above its statement: next line %q", strings.TrimSpace(lines[next]))
+	}
+
+	for _, call := range []string{"fmt.Sprint(w), 66);", "fmt.Sprint(w), 77);"} {
+		if line := lines[lineContaining(t, lines, call)]; strings.Contains(line, "//") {
+			t.Errorf("a comment was written inside %q: %q", call, strings.TrimSpace(line))
 		}
 	}
 
