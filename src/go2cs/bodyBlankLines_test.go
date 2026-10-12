@@ -16,8 +16,9 @@
 // a body with no blank line in Go has none in C#, and a three-line comment is three lines, not a
 // comment with blank lines around it.
 //
-// The blank lines are kept only under `-comments` (the plan's decision 1): without it the emission is
-// unchanged, which keeps every behavioral golden (captured without `-comments`) where it is.
+// The blank lines are kept in every conversion (the owner's decision 1). Without `-comments` the
+// comments are not written, so a blank line is kept when any line between two statements is blank in Go;
+// a line a comment covers is not blank.
 
 package main
 
@@ -445,7 +446,7 @@ func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
 	}
 }
 
-func TestBodyBlankLinesNotAddedWithoutComments(t *testing.T) {
+func TestBodyBlankLinesKeptWithoutComments(t *testing.T) {
 	root := t.TempDir()
 	pkgDir := filepath.Join(root, "app")
 
@@ -479,9 +480,37 @@ func TestBodyBlankLinesNotAddedWithoutComments(t *testing.T) {
 
 	lines := strings.Split(strings.ReplaceAll(readGenerated(t, filepath.Join(outDir, "main.cs")), "\r", ""), "\n")
 
-	for _, text := range []string{"nint b = a + 1;", "nint n = m;", "afterTheCaseGapˢ);", "afterTheTypeSwitchGapˢ);", "afterTheSelectGapˢ);"} {
-		if blankAbove(t, lines, text) {
-			t.Errorf("without -comments, a blank line was added above %q; the emission (and every behavioral golden) must not move", text)
+	for _, c := range []struct {
+		line  string
+		blank bool
+		why   string
+	}{
+		{"nint b = a + 1;", true, "a blank line between two statements"},
+		{"return b;", false, "no blank line in Go"},
+		{"nint y = x;", true, "a blank line, then a comment not written"},
+		{"nint q = p;", true, "a blank line between two comment groups not written"},
+		{"nint n = m;", true, "a comment not written, then a blank line"},
+		{"nint d = c;", false, "a three-line comment not written is no blank line"},
+		// A lowered switch keeps its trailing line break without -comments (class E1 trims it under
+		// -comments only), so the statement after it has a blank line above whether Go has one or not; the
+		// gap adds no second one.
+		{"nint w = v * 2;", true, "a blank line after a lowered switch"},
+		{"afterTheCaseGapˢ);", true, "a blank line inside a case body"},
+		{"afterTheTypeSwitchGapˢ);", true, "a blank line inside a type-switch case body"},
+		{"afterTheSelectGapˢ);", true, "a blank line inside a select case body"},
+	} {
+		if got := blankAbove(t, lines, c.line); got != c.blank {
+			t.Errorf("without -comments, blank line above %q = %v, want %v (%s)", c.line, got, c.blank, c.why)
+		}
+	}
+
+	for i, line := range lines {
+		if i > 0 && strings.TrimSpace(line) == "" && strings.TrimSpace(lines[i-1]) == "" {
+			t.Errorf("without -comments, lines %d-%d are two blank lines in a row", i, i+1)
+		}
+
+		if strings.Contains(line, "// why y follows") || strings.Contains(line, "// first group") || strings.Contains(line, "// one") {
+			t.Errorf("without -comments, line %d writes a Go comment: %q", i+1, line)
 		}
 	}
 }
