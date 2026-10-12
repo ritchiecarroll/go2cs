@@ -290,7 +290,15 @@ func (v *Visitor) visitFile(file *ast.File) {
 
 	if v.typeAliasDeclarations.Len() > 0 {
 		v.typeAliasDeclarations.WriteString(v.newline)
-		fileText = strings.ReplaceAll(fileText, TypeAliasMarker, v.typeAliasDeclarations.String())
+		aliases := v.typeAliasDeclarations.String()
+
+		// A documented alias opens with a blank line that sets its doc apart from the file's leading comments; with
+		// nothing above the block, the file does not open with one.
+		if strings.HasPrefix(fileText, TypeAliasMarker) {
+			aliases = strings.TrimLeft(aliases, "\r\n")
+		}
+
+		fileText = strings.ReplaceAll(fileText, TypeAliasMarker, aliases)
 	} else {
 		fileText = strings.ReplaceAll(fileText, TypeAliasMarker, "")
 	}
