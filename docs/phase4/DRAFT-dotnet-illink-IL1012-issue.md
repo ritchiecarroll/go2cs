@@ -8,6 +8,20 @@
 > control variants again on a second Windows 11 machine with the same SDK, 2026-10-10: the same error text
 > and the same five outcomes. The Native AOT line is G's reading alone.
 >
+> **Amended 2026-10-12: a second way to reach it.** G met the same crash at a second site: a
+> `[DynamicDependency("String(<a nested type>)", typeof(<the package class>))]` on a struct's `ToString`
+> override, where the signature it asked for looked harmless. R reduced it the same day on the same SDK
+> (three variants, below): the trimmer crashes on **any overload of that name** whose parameter is a
+> nested type from another assembly, even when the signature asked for names a different overload. That
+> is in the issue text now, as "A sibling overload is enough". It widens who can hit the bug, so it is
+> worth keeping in the report. The second repro is two small edits to the first one's projects.
+>
+> **Not verified:** that G's site is this exact shape. G's attribute named a nested type of the target's
+> own package, which alone does not crash (the first row of the new table), so a sibling `String`
+> overload with a nested parameter from another package is the likely cause there. That is R's inference
+> from the reduction, not a reading of G's generated code. The issue text claims only what the reduction
+> shows.
+>
 > **Repository:** `dotnet/runtime`. **Suggested label:** `area-Tools-ILLink`. **Template:** Bug report.
 
 ---
@@ -29,6 +43,10 @@ signature with the candidate method's parameters.
 
 It needs all three conditions. A nested type from the same assembly as the method works, a non-nested
 type from another assembly works, and the same method named without a parameter list works.
+
+The parameter does not have to belong to the method the signature names. It is enough that the target
+type has **another overload of the same name** with such a parameter: see "A sibling overload is
+enough" below.
 
 We met it in a source generator that emits one `[DynamicDependency]` per method it has to keep. The
 repro below is three small projects with no other dependency.
@@ -125,7 +143,8 @@ succeeds, at the cost of keeping every overload of `M`.
 - .NET SDK 10.0.400
 - `Microsoft.NET.ILLink.Tasks` 10.0.11 (implicit through `PublishTrimmed`, read from `obj/project.assets.json`)
 - Windows 11 x64, RID `win-x64`
-- Reproduced on two machines with these versions. No other OS or architecture was tried.
+- The first repro was reproduced on two machines with these versions; the sibling-overload variants on
+  one. No other OS or architecture was tried.
 
 ### Other information
 
@@ -140,6 +159,42 @@ Changing only the signature string in `App/Program.cs`, or only `TrimMode` in `A
 | `"L(B.Local.Nested)"` (a nested type in the method's own assembly) | `partial` | succeeds |
 
 Native AOT's compiler (`PublishAot`) accepts the failing attribute.
+
+#### A sibling overload is enough
+
+The signature in the attribute does not have to name the method with the nested parameter. If the
+target type has two overloads of one name, and only one of them takes a nested type from another
+assembly, a `[DynamicDependency]` that names the **other** overload fails in the same way. The trimmer
+appears to build a signature for every candidate of that name before it compares them.
+
+With `LibA` as above, give `LibB` two overloads:
+
+```csharp
+namespace B;
+
+public static class Q
+{
+    public struct Kind { public int v; }
+
+    public static string String(Kind k) => k.v.ToString();
+    public static string String(A.Outer.Nested n) => "n";
+}
+```
+
+and ask for the first one, whose parameter is a nested type in `Q`'s own assembly:
+
+```csharp
+[DynamicDependency("String(B.Q.Kind)", typeof(B.Q))]
+static int Main() => 0;
+```
+
+| `B.Q` declares | Result |
+|---|---|
+| `String(Kind)` only | succeeds |
+| `String(A.Outer.Nested)`, then `String(Kind)` | IL1012, the same exception and stack |
+| `String(Kind)`, then `String(A.Outer.Nested)` | IL1012, the same exception and stack |
+
+So a library author can hit this without writing a signature that mentions the other assembly at all.
 
 A guess from the stack, not checked against the source: the two `VisitTypeReference` frames look like the
 nested-type branch visiting the declaring type of the parameter's type reference, and getting null for a
