@@ -588,9 +588,12 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 
 	// A call's comments after its last argument, before its `)`: on that argument's line they trail it
 	// (`cipher(k, false /* not for reading */)`); a line comment puts the `)` on a line of its own. Only
-	// for the argument list of the innermost call being converted, the one that opens at its `(`: a
-	// composite literal's elements come through here too, inside some enclosing call.
-	if callContext != nil && !forceMultiLine && len(v.callParens) > 0 && v.callParens[len(v.callParens)-1][0] == prevEndPos {
+	// for the whole argument list of the innermost call being converted, the one that opens at its `(`
+	// with its first argument: a composite literal's elements come through here too, inside some
+	// enclosing call, and make's size arguments (Args[1:]) are rendered here and then rebuilt. A deferred
+	// call's capture render (callArgs) is not the one written either.
+	if callContext != nil && callContext.callArgs == nil && !forceMultiLine && len(v.callParens) > 0 &&
+		v.callParens[len(v.callParens)-1][0] == prevEndPos && v.callParens[len(v.callParens)-1][2] == exprs[0].Pos() {
 		if rparen := v.callParens[len(v.callParens)-1][1]; rparen > exprs[len(exprs)-1].End() {
 			if v.writeListComments(result, prevEndPos, exprs[len(exprs)-1].End(), rparen, v.indentLevel+1) {
 				result.WriteString(v.newline)

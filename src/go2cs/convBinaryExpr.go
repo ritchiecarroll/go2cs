@@ -2411,9 +2411,20 @@ func (v *Visitor) joinWithOperandComments(binaryExpr *ast.BinaryExpr, left, op, 
 
 	builder.WriteString(strings.TrimRight(op, " "))
 
+	// A comment on the line where the operator (or the comment before it) ends trails it; one on a later
+	// line takes a line of its own, as in Go.
+	prevLine := v.file.Line(binaryExpr.OpPos)
+
 	for _, pos := range leading {
-		builder.WriteString(" ")
+		if v.file.Line(pos) == prevLine {
+			builder.WriteString(" ")
+		} else {
+			builder.WriteString(v.newline)
+			builder.WriteString(v.indent(v.indentLevel + 1))
+		}
+
 		builder.WriteString(v.standAloneComments[pos])
+		prevLine = v.file.Line(pos)
 	}
 
 	if breaks {
