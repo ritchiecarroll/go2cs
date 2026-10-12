@@ -6,6 +6,16 @@ concurrency behavior than the Go it came from is treated as a security issue, no
 Reports against the converter, the `golib` runtime, the `go2cs-gen` source generators, and the converted
 standard library under `src/core` are all in scope.
 
+## Supported Versions
+
+Security fixes go into the **latest published release** only: the newest `go.*` packages on NuGet and the
+converter at the matching tag. Earlier releases are not patched; the fix is to move to the latest one.
+
+The converted standard library is Go's own code at one Go release, the one the README's
+[Requirements](README.md#requirements) name. It carries the Go security fixes that release carries and none
+issued after it, so when that Go release is out of upstream support the converted library is behind Go's
+current fixes. The [Roadmap](Roadmap.md#go-releases) says which Go releases come next.
+
 ## Reporting Security Issues
 
 > **_Please report security vulnerabilities privately as described below, not through public GitHub issues._**

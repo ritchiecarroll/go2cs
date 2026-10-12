@@ -199,6 +199,9 @@ Start with [`CONTRIBUTING.md`](https://github.com/ritchiecarroll/go2cs/blob/mast
 [Building go2cs from source](BuildingGo2cs.md) and [`Architecture.md`](Architecture.md). There is plenty
 of low-hanging fruit here; jump in if you'd like to help.
 
+<!-- EXPECTATION LINE: the owner's wording goes here (launch plan decision D9). What it needs to say: this is
+     one person's project, replies are best-effort, and where to ask. Not written by the docs lane. -->
+
 ## License
 
 go2cs contains components under several licenses. The converter (`src/go2cs`) is

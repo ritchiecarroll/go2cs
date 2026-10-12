@@ -1,0 +1,17 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Question, idea or feature request
+    url: https://github.com/ritchiecarroll/go2cs/discussions
+    about: Ask a question or propose a feature in Discussions. Issues are for defects.
+  - name: Frequently asked questions
+    url: https://go2cs.net/FAQ.html
+    about: Why convert Go to C#, how fast it is, what does not convert, and what license covers the output.
+  - name: Limitations
+    url: https://go2cs.net/Limitations.html
+    about: Where a conversion will fail, fight you, or behave differently from Go. Check here before you file.
+  - name: Known issues
+    url: https://go2cs.net/KnownIssues.html
+    about: Specific bugs that are already written up, with their workarounds.
+  - name: Report a security vulnerability
+    url: https://github.com/ritchiecarroll/go2cs/security/policy
+    about: Please report vulnerabilities privately, as the security policy describes, and not in a public issue.
