@@ -588,3 +588,34 @@ outranks size.
      stage diagnosis strdiag (D1-D9); mechanism test ddtest (standalone, boxed kept / unboxed not, name-only under ILC
      and ILLink); consumer F mskpre 30,568,960 B, mskx 27,254,272 B; seat battery seat-msk (2eb9be7ccc, record amended
      to ec6df12120), its first run seat-msk-3d5a (full signatures, DP IL1012 x4); DP sizes dpub cells.tsv base-cf5b, msk. -->
+
+### 9.13 Family E and the post-hop size backlog (AMENDED 2026-10-12, G)
+
+**Family E seated for T4** as `claude/g-trim-fieldbox` (`864bf27871`): every converted struct carries a generated
+field-box table (golib's `IGoFieldBoxSource`), and reflect's addressable `Value.Field(i)` builds the field's view through
+it, the same view converted code builds for `&s.f`. The DynamicMethod (`buildFieldAccessor`) remains only as the JIT's
+fallback. Stacked on it, `claude/g-promoted-field-identity` (`0726750708`) makes a promoted field one Go pointer
+however it is spelled. reflect.StructOf's minted types stay at stage 3d.
+
+**Full-trim sizes accepted for parity** (the owner's rule: size is an optimization target, never a gate on parity):
+
+| Seat | Full-trim consumer | Against its base |
+|---|---|---|
+| method-set keep (`ec6df12120`) | 30,568,960 B | +20.15% |
+| field-box table, every struct (`864bf27871`) | 38,228,480 B | +25.1% |
+| promoted-field identity (`0726750708`) | 38,436,352 B | +0.54% |
+
+**The post-hop size backlog** (measurement items; none is a T4 item):
+
+1. Keep Go-EXPORTED methods only in the method-set keep: measured +7.1% instead of +20.1%; gated on the census in 9.12.
+2. Move the identity arm's members (`SameGoAddress`, `OrderTokenIsExact`, the `IExactOrderToken` implementation) off the
+   generic `FieldRefBox<T>` onto a non-generic base. They are compiled once per field type today, which is the likely
+   mechanism of the identity seat's +0.54% (its prediction was "within a few KB"; COORD 2026-10-12).
+3. The field-box table on every struct (+25.1%): measure which part is the switch and which the per-field-type
+   `of<F>` instantiations, and whether a struct reached by no reflect call can drop its table.
+
+<!-- G, 2026-10-12. Field-box arms: fbxsize (arm a, face only, 35,598,848 B and the probe still red; arm b 38,228,480 B);
+     seat batteries seat-fbx and seat-pid; the six-shape probe scratch/fbx-probe; the promoted-identity census
+     scratch/promcensus (70 flat value-embed sites in std with tests, 0 explicit nested). -->
+
+
