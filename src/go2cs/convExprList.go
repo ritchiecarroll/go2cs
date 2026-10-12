@@ -13,6 +13,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"sort"
 	"strings"
 	"unicode"
 )
@@ -40,10 +41,12 @@ func isSimpleIdentifierName(s string) bool {
 // writeListComments writes the free comments ahead of one item of a list that spans lines — a composite
 // literal's elements or a call's arguments — where Go has them. A comment on the line where the previous
 // item (or the opening brace) ends trails that line; any other takes a line of its own, at indentLevel,
-// after the blank line Go has above it. prevEnd is where the previous item ends and limit where the next
-// one starts. It reports whether what it wrote ends in a line comment, after which the next item must
-// start a new line.
-func (v *Visitor) writeListComments(builder *strings.Builder, prevEnd, limit token.Pos, indentLevel int) bool {
+// after the blank line Go has above it. open is the list's opening bracket, prevEnd where the previous
+// item ends and limit where the next one starts. Only comments after open are the list's: a list can be
+// rendered before the code ahead of it is written (a lowered switch renders its next case's condition
+// before the body above it), and a comment there belongs to that code. It reports whether what it wrote
+// ends in a line comment, after which the next item must start a new line.
+func (v *Visitor) writeListComments(builder *strings.Builder, open, prevEnd, limit token.Pos, indentLevel int) bool {
 	if !v.options.includeComments || !prevEnd.IsValid() || !limit.IsValid() {
 		return false
 	}
@@ -53,7 +56,9 @@ func (v *Visitor) writeListComments(builder *strings.Builder, prevEnd, limit tok
 	handledPos := []token.Pos{}
 	endsInLineComment := false
 
-	for _, pos := range v.sortedCommentPos {
+	first := sort.Search(len(v.sortedCommentPos), func(i int) bool { return v.sortedCommentPos[i] > open })
+
+	for _, pos := range v.sortedCommentPos[first:] {
 		if pos >= limit {
 			break
 		}
@@ -129,14 +134,14 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			if i == 0 && prevEndPos.IsValid() {
 				exprOnNewLine = v.isLineFeedBetween(prevEndPos, expr.Pos())
 
-				if v.writeListComments(result, prevEndPos, expr.Pos(), v.indentLevel+1) {
+				if v.writeListComments(result, prevEndPos, prevEndPos, expr.Pos(), v.indentLevel+1) {
 					exprOnNewLine = true
 				}
 			} else {
 				result.WriteRune(',')
 				exprOnNewLine = v.isLineFeedBetween(exprs[i-1].End(), expr.Pos())
 
-				if v.writeListComments(result, exprs[i-1].End(), expr.Pos(), v.indentLevel+1) {
+				if v.writeListComments(result, prevEndPos, exprs[i-1].End(), expr.Pos(), v.indentLevel+1) {
 					exprOnNewLine = true
 				}
 			}
