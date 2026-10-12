@@ -285,6 +285,7 @@
     <None Include="$(MSBuildThisFileDirectory)moduleDisclosureRoot.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleDisclosureRoot_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleNamespaceAgreement_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)moduleProofDisclosureLink_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleProofPages_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleTestsDriver.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleTestsDriver_integration_test.go" />
