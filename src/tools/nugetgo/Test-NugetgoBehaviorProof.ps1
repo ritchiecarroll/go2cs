@@ -141,6 +141,25 @@ Check 'the sample section is a level-2 heading under the test comparison' ("$sec
 Check 'it says the rows are in addition to the test comparison, and never that there are no tests' ("$section" -like '*in addition to the test comparison*' -and "$section" -notlike '*not a test comparison*' -and "$section" -notlike '*no Go tests*') "got:`n$section"
 Check 'one table row per RID' (@(("$section" -split "`n") | Where-Object { $_ -match '^\| (win-x64|linux-x64|osx-x64|osx-arm64) \|' }).Count -eq 4) "got:`n$section"
 
+Write-Host 'a module of several packages: the row lists every assembly the package carries for its RID'
+$second = 'github.com.example.mod.sub.dll'
+$secondBytes = [System.Text.Encoding]::ASCII.GetBytes('the second package')
+$packedTwo = @{}
+foreach ($rid in $packed.Keys) { $packedTwo[$rid] = @{ $assembly = $packed[$rid][$assembly]; $second = $secondBytes } }
+function RowsTwo([hashtable]$drop = @{}) {
+    $o = @{}
+    foreach ($rid in 'win-x64', 'linux-x64', 'osx-x64', 'osx-arm64') {
+        $list = @("$assembly $(Sha $packed[$rid][$assembly])")
+        if (-not $drop.ContainsKey($rid)) { $list += "$second $(Sha $secondBytes)" }
+        $o[$rid] = @{ 'assembly' = ($list | Sort-Object) -join '; ' }
+    }
+    Rows $o
+}
+$why = @(Test-NugetgoBehaviorRows -Rows (RowsTwo) -Assemblies $packedTwo -ModulePath $module -GoVersion 'v1.1.0')
+Check 'a row listing both packed assemblies, each at its packed bytes, is accepted' ($why.Count -eq 0) "$($why -join ' | ')"
+$why = @(Test-NugetgoBehaviorRows -Rows (RowsTwo @{ 'linux-x64' = 1 }) -Assemblies $packedTwo -ModulePath $module -GoVersion 'v1.1.0')
+Check 'a row that leaves out one of the packed assemblies is refused, naming it' (@($why | Where-Object { $_ -like "*linux-x64*$second*" }).Count -ge 1) "$($why -join ' | ')"
+
 Write-Host 'a row travels as an annotation (C1: annotations come through the API; artifacts and summaries are blob-served)'
 $rowText = [System.IO.File]::ReadAllText((Write-Row 'osx-arm64'))
 $helper = Join-Path $PSScriptRoot '../../../.github/annotate-summary.ps1'
