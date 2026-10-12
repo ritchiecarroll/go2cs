@@ -343,6 +343,28 @@ func (v *Visitor) writeGapLine() bool {
 	return true
 }
 
+// trimTrailingLineBreak removes the line break a converted switch ends with. Every statement opens with
+// its own line break, as does the enclosing block's `}`, so the switch's own made a blank line Go never
+// has: after a switch Go writes adjacently to the next statement, and before the `}` of a block that ends
+// with one. Where Go has a blank line after the switch, writeStatementGap writes it.
+//
+// Under `-comments` only (docs/PLAN-comment-and-spacing-parity.md, class E1), as writeStatementGap is:
+// the behavioral goldens, captured without it, keep the line break.
+func (v *Visitor) trimTrailingLineBreak() {
+	if !v.options.includeComments {
+		return
+	}
+
+	output := v.outputBuilder.String()
+
+	if !strings.HasSuffix(output, v.newline) {
+		return
+	}
+
+	v.outputBuilder.Reset()
+	v.outputBuilder.WriteString(strings.TrimSuffix(output, v.newline))
+}
+
 // stripEmissionMarkers removes the `>>MARKER:…<<` placeholders the converter resolves after emission.
 func stripEmissionMarkers(text string) string {
 	const prefix, suffix = ">>MARKER:", "<<"

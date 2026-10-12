@@ -32,10 +32,8 @@ import (
 )
 
 var wantUtf8Census = map[string]int{
-	// E: the converter's own blank lines inside bodies
-	"body:extra:after-lowered-switch":      2,
+	// E2: the converter's blank line after named-result locals (the owner's decision 2)
 	"body:extra:after-named-result-locals": 3,
-	"body:extra:before-close-brace":        2,
 	// F: comments inside composite literals (the `first` table)
 	"misplaced:in-composite-literal/trailing-to-own-line": 16,
 	"misplaced:in-composite-literal/anchor-differs":       1,

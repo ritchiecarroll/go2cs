@@ -29,6 +29,7 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt, target
 
 func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 	v.noteClauseSpans(typeSwitchStmt.Body)
+	defer v.trimTrailingLineBreak()
 
 	var caseClauses []*ast.CaseClause
 
