@@ -34,13 +34,10 @@ import (
 var wantUtf8Census = map[string]int{
 	// E2: the converter's blank line after named-result locals (the owner's decision 2)
 	"body:extra:after-named-result-locals": 3,
-	// F: comments inside composite literals (the `first` table)
-	"misplaced:in-composite-literal/trailing-to-own-line": 16,
-	"misplaced:in-composite-literal/anchor-differs":       1,
-	// J: end-of-line alignment (the RuneError run, no longer split by blank lines since B, is ragged)
-	"eol:misaligned":        2,
-	"eol:moved-to-own-line": 2,
-	"eol:cs-ragged-run":     2,
+	// J: end-of-line alignment (the RuneError run, no longer split by blank lines since B, is ragged; the
+	// `first` table's row comments, end-of-line again since F, follow rows `@as` widens)
+	"eol:misaligned":    3,
+	"eol:cs-ragged-run": 3,
 }
 
 func TestCommentParityUtf8(t *testing.T) {

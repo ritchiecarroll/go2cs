@@ -31,7 +31,21 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 	v.inValueSpec = true
 
 	v.outputBuilder.WriteString(v.newline)
-	v.writeDoc(doc, valueSpec.End())
+
+	// The comments before the spec go above its doc; those inside it are written where the spec's own
+	// emission reaches them (a composite literal's, writeListComments). Any it does not reach are put
+	// above the doc once the spec is written, where every comment inside a spec used to go.
+	if v.options.includeComments {
+		v.writeStandAloneCommentString(v.outputBuilder, valueSpec.Pos(), doc, "")
+
+		defer func(docOffset int) {
+			unreached := &strings.Builder{}
+			v.writeStandAloneCommentString(unreached, valueSpec.End(), nil, "")
+			v.spliceOutput(docOffset, unreached.String())
+		}(v.outputBuilder.Len())
+	}
+
+	v.writeDoc(doc, token.NoPos)
 
 	// A var displaced by manualConversionVars: its hand-owned member replaces the declaration. Only a
 	// spec that declares that one name can be displaced; a registered name sharing a spec is refused
