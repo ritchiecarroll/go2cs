@@ -17,6 +17,7 @@ package commentcensus
 import (
 	"maps"
 	"slices"
+	"strings"
 	"testing"
 )
 
@@ -97,4 +98,59 @@ func TestPlantedBad2NamesEachSite(t *testing.T) {
 		"body:extra:before-close-brace": 1, // a blank line before a closing brace
 		"body:extra:unexplained":        1, // an extra blank line inside a body
 	})
+}
+
+// anchorFindings returns the misplaced and missed findings for testdata/anchor/<rendering>.
+func anchorFindings(t *testing.T, rendering string) map[string]int {
+	t.Helper()
+
+	pairs := FindPairs("testdata/anchor/"+rendering, "testdata/anchor/goroot")
+
+	if len(pairs) != 1 {
+		t.Fatalf("%s: %d pairs found, want 1 (anchor/anchor.cs against anchor/anchor.go)", rendering, len(pairs))
+	}
+
+	r := NewResults()
+
+	if err := r.Analyze(pairs[0]); err != nil {
+		t.Fatalf("%s: %v", rendering, err)
+	}
+
+	// Vacuity: the Go file has four comment groups past its header; fewer would mean they were not read.
+	if r.Groups() < 4 {
+		t.Fatalf("%s: %d Go comment groups read, want at least 4", rendering, r.Groups())
+	}
+
+	got := map[string]int{}
+
+	for k, n := range r.Counts() {
+		if strings.HasPrefix(k, "misplaced:") || strings.HasPrefix(k, "missed:") {
+			got[k] = n
+		}
+	}
+
+	if t.Failed() || len(got) > 0 {
+		for _, f := range r.Findings("") {
+			t.Logf("%s: %s at %s: %s", rendering, f.Class, f.Where, f.Detail)
+		}
+	}
+
+	return got
+}
+
+// The anchor of an own-line comment is the first C# line that translates the Go code after it. The converter
+// writes scaffolding ahead of a statement's own translation (a func literal's capture copy, a heap box for an
+// escaping local), renames a labeled continue or break to a goto, and closes a struct literal with `)`: none of
+// them moves the comment. `good` places each comment where Go has it, behind one of those shapes; `bad` puts one
+// above a capture copy that the wrong statement follows, which must still read as misplaced.
+func TestAnchorReadsPastConverterScaffolding(t *testing.T) {
+	if got := anchorFindings(t, "good"); len(got) != 0 {
+		t.Errorf("good: %v, want no misplaced or missed comment", got)
+	}
+
+	want := map[string]int{"misplaced:free-stmt/anchor-differs": 1}
+
+	if got := anchorFindings(t, "bad"); !maps.Equal(got, want) {
+		t.Errorf("bad: %v, want %v", got, want)
+	}
 }
