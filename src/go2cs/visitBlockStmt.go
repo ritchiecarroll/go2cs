@@ -79,7 +79,9 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtCont
 	}
 
 	if lastStmt != nil {
-		v.writeClosingComments(lastStmt, blockStmt.Rbrace)
+		v.writeClosingComments(lastStmt.End(), blockStmt.Rbrace, 0)
+	} else {
+		v.writeClosingComments(blockStmt.Lbrace, blockStmt.Rbrace, 0)
 	}
 
 	if context.format.useIndent {
@@ -128,14 +130,62 @@ func (v *Visitor) visitStatementList(stmts []ast.Stmt, colon token.Pos) {
 		v.visitListStmt(stmt)
 		v.dropEmptyGap(gap)
 	}
+
+	if span, spanned := v.clauseSpans[colon]; spanned {
+		v.writeClosingComments(stmts[len(stmts)-1].End(), span.before, span.caseColumn)
+	}
+}
+
+// writeAboveLabelComments writes the comments Go has on their own lines above a clause's `case` or
+// `default` label, above the clause's header in C# (class H), at the header's indentation. A clause's
+// held comments (holdClauseComments) are released first. Left to writeLeadingBodyComments, they were
+// written below the header, at the top of the body.
+func (v *Visitor) writeAboveLabelComments(colon token.Pos) {
+	if !v.options.includeComments {
+		return
+	}
+
+	v.releaseClauseComments(colon)
+
+	span, spanned := v.clauseSpans[colon]
+
+	if !spanned {
+		return
+	}
+
+	if v.file == nil {
+		v.file = v.fset.File(colon)
+	}
+
+	afterLine := v.file.Line(span.after)
+
+	var above []token.Pos
+
+	for _, pos := range v.sortedCommentPos {
+		if pos >= span.caseStart {
+			break
+		}
+
+		if _, found := v.standAloneComments[pos]; found && pos > span.after && v.file.Line(pos) > afterLine {
+			above = append(above, pos)
+		}
+	}
+
+	for _, pos := range above {
+		v.writeOutput("%s", strings.ReplaceAll(v.standAloneComments[pos], "\n", v.newline))
+		v.outputBuilder.WriteString(v.newline)
+
+		delete(v.standAloneComments, pos)
+		v.sortedCommentPos = removeCommentPos(v.sortedCommentPos, pos)
+	}
 }
 
 // clauseSpan is a clause's source: after the previous clause (or the body's `{`) and before the next
-// clause (or the body's `}`). end is the end of the clause's last statement (or its colon), and
-// caseColumn the column of its `case` or `default` keyword.
+// clause (or the body's `}`). caseStart is its `case` or `default` keyword, end the end of its last
+// statement (or its colon), and caseColumn the keyword's column.
 type clauseSpan struct {
-	after, before, end token.Pos
-	caseColumn         int
+	after, caseStart, before, end token.Pos
+	caseColumn                    int
 }
 
 // noteClauseSpans records the clauseSpan of each clause of a switch, type switch or select body, in
@@ -161,9 +211,9 @@ func (v *Visitor) noteClauseSpans(body *ast.BlockStmt) {
 
 		switch clause := stmt.(type) {
 		case *ast.CaseClause:
-			v.clauseSpans[clause.Colon] = clauseSpan{after, before, clause.End(), v.fset.Position(clause.Case).Column}
+			v.clauseSpans[clause.Colon] = clauseSpan{after, clause.Case, before, clause.End(), v.fset.Position(clause.Case).Column}
 		case *ast.CommClause:
-			v.clauseSpans[clause.Colon] = clauseSpan{after, before, clause.End(), v.fset.Position(clause.Case).Column}
+			v.clauseSpans[clause.Colon] = clauseSpan{after, clause.Case, before, clause.End(), v.fset.Position(clause.Case).Column}
 		}
 
 		after = stmt.End()
@@ -343,29 +393,31 @@ func (v *Visitor) writeLineTrailingComments(lbrace, limit token.Pos) {
 	}
 }
 
-// writeClosingComments writes the comments still pending between a block's last statement and its `}`
-// above that brace, with Go's blank line before a comment where it has one (class H). Left pending, the
-// next flush wrote them after the block, in the statement that follows it.
-func (v *Visitor) writeClosingComments(last ast.Stmt, rbrace token.Pos) {
-	if !v.options.includeComments || !rbrace.IsValid() {
+// writeClosingComments writes the comments still pending before limit (a block's `}`, or the end of a
+// case body) on their own lines at the end of the body, with Go's blank line before a comment where it
+// has one (class H). after is the body's last statement end, or its `{` when the body is empty; with
+// minColumn above 0, only comments indented deeper than that column are taken (a case body's, not the
+// next label's). Left pending, the next flush wrote them after the block, in what follows it.
+func (v *Visitor) writeClosingComments(after, limit token.Pos, minColumn int) {
+	if !v.options.includeComments || !limit.IsValid() || !after.IsValid() {
 		return
 	}
 
 	if v.file == nil {
-		v.file = v.fset.File(rbrace)
+		v.file = v.fset.File(limit)
 	}
 
 	prefix := v.newline + v.indent(v.indentLevel)
-	lastLine := v.file.Line(last.End())
+	lastLine := v.file.Line(after)
 
 	var pending []token.Pos
 
 	for _, pos := range v.sortedCommentPos {
-		if pos >= rbrace {
+		if pos >= limit {
 			break
 		}
 
-		if _, found := v.standAloneComments[pos]; found {
+		if _, found := v.standAloneComments[pos]; found && (minColumn == 0 || pos > after && v.fset.Position(pos).Column > minColumn) {
 			pending = append(pending, pos)
 		}
 	}

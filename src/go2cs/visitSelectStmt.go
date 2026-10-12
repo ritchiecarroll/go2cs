@@ -283,6 +283,8 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 			v.outputBuilder.WriteString(v.newline)
 		}
 
+		v.writeAboveLabelComments(comClause.Colon)
+
 		// visitStmt resets this per statement, but an EMPTY clause body (a bare `default:` — io
 		// pipe.go read's poll select) never calls visitStmt, so the flag would carry the PREVIOUS
 		// clause's terminal `return` and suppress the mandatory `break;` (C# requires every switch

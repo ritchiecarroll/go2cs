@@ -152,6 +152,8 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 			v.outputBuilder.WriteString(v.newline)
 		}
 
+		v.writeAboveLabelComments(caseClause.Colon)
+
 		if caseClause.List == nil {
 			// Emit `default: {` WITHOUT a trailing newline (mirroring the `case …: {` path below):
 			// each visited body statement supplies its own LEADING newline, so a trailing newline here

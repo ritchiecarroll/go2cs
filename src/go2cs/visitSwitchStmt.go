@@ -586,6 +586,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 
 		// Write "if" statements for each case clause
 		for i, caseClause := range caseClauses {
+			v.writeAboveLabelComments(caseClause.Colon)
 			v.writeOutput("")
 
 			caseFallsThrough := false
@@ -801,6 +802,8 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 				v.outputBuilder.WriteString(v.newline)
 			}
 
+			v.writeAboveLabelComments(caseClause.Colon)
+
 			if caseClause.List == nil {
 				v.writeOutput("default: {")
 			} else {
@@ -849,6 +852,8 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			if clauseIndex > 0 {
 				v.outputBuilder.WriteString(v.newline)
 			}
+
+			v.writeAboveLabelComments(caseClause.Colon)
 
 			if caseClause.List == nil {
 				v.writeOutput("default: {")

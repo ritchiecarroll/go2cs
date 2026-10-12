@@ -354,13 +354,13 @@ func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
 	}
 
 	// A comment that is an empty clause's whole body stays in that clause's block, and a comment above
-	// a case label is written above its clause's first statement; neither may wait for the next flush,
-	// which writes it inside that statement's argument list.
+	// a case label is written above that clause's header; neither may wait for the next flush, which
+	// writes it inside a statement's argument list.
 	if at := lineContaining(t, lines, "// empty clause body"); !strings.HasSuffix(strings.TrimSpace(lines[at-1]), "{") || !strings.HasPrefix(strings.TrimSpace(lines[at+1]), "}") {
 		t.Errorf("the comment that is an empty clause's body is not inside its block: %q / %q / %q", strings.TrimSpace(lines[at-1]), strings.TrimSpace(lines[at]), strings.TrimSpace(lines[at+1]))
 	}
 
-	for _, pair := range [][2]string{{"// above case z", "add(w, 55)"}} {
+	for _, pair := range [][2]string{{"// above case z", "== \"z\"u8)"}} {
 		if next := lineContaining(t, lines, pair[0]) + 1; !strings.Contains(lines[next], pair[1]) {
 			t.Errorf("%q is not directly above %q: next line %q", pair[0], pair[1], strings.TrimSpace(lines[next]))
 		}
