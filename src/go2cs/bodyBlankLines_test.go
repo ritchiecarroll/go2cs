@@ -86,6 +86,36 @@ func afterSwitch(v int) int {
 	return w
 }
 
+func switchNoGap(v, w int) int {
+	switch v {
+	case w:
+		v--
+	}
+	u := v * 3
+	switch {
+	case u > 1:
+		u--
+	}
+	t := u * 5
+	return t
+}
+
+func switchLast(v int) (n int) {
+	if v > 0 {
+		switch m := v * 2; m {
+		case 2:
+			n = m
+		}
+	}
+	for i := 0; i < v; i++ {
+		switch {
+		case i > 1:
+			n++
+		}
+	}
+	return n
+}
+
 func deferredReturn() (n int) {
 	defer func() { n++ }()
 	n = 1
@@ -182,7 +212,7 @@ func selectBody(ch chan int) {
 }
 
 func main() {
-	fmt.Println(steps(), commentLed(), commentGroups(), commentThenGap(), threeLineComment(), afterSwitch(2), deferredReturn(), localType())
+	fmt.Println(steps(), commentLed(), commentGroups(), commentThenGap(), threeLineComment(), afterSwitch(2), deferredReturn(), localType(), switchNoGap(1, 1), switchLast(2))
 	caseBody(1)
 	fmt.Println(defaultFirst(1, 1))
 	fmt.Println(emptyClause("x", "w"))
@@ -247,6 +277,8 @@ func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
 		{"// three", false, "a three-line comment gains no blank line"},
 		{"nint d = c;", false, "a three-line comment gains no blank line"},
 		{"nint w = v * 2;", true, "a blank line after a lowered switch"},
+		{"nint u = v * 3;", false, "no blank line after a lowered switch Go writes adjacently"},
+		{"nint t = u * 5;", false, "no blank line after a lowered switch Go writes adjacently"},
 		{"afterTheCaseGapˢ);", true, "a blank line inside a case body"},
 		{"// opens the case body", false, "a comment leading a case body stays above its first statement"},
 		{"afterTheTypeSwitchGapˢ);", true, "a blank line inside a type-switch case body"},
