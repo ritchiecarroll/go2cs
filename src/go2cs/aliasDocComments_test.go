@@ -60,7 +60,39 @@ func TestAliasDocAboveItsGlobalUsing(t *testing.T) {
 		}
 	}
 
+	// With nothing above the using block, the file does not open with a blank line.
+	if strings.TrimSpace(lines[0]) == "" {
+		t.Errorf("the file opens with a blank line")
+	}
+
 	if t.Failed() {
+		t.Logf("emitted:\n%s", strings.Join(lines, "\n"))
+	}
+}
+
+const aliasDocUnderHeaderSource = `// Copyright 2026 The Example Authors.
+// The header's last line.
+
+package main
+
+import "fmt"
+
+// Celsius is an alias for a float.
+type Celsius = float64
+
+func main() {
+	var c Celsius = 21.5
+	fmt.Println(c)
+}
+`
+
+// The using block sits directly under the file's leading comments; an alias's doc is set apart from them by the
+// blank line Go has above the declaration, so it does not read as the end of the file's header.
+func TestAliasDocSetApartFromTheFileHeader(t *testing.T) {
+	lines := convertWithComments(t, aliasDocUnderHeaderSource)
+
+	if !blankAbove(t, lines, "// Celsius is an alias for a float.") {
+		t.Errorf("no blank line between the file's header and the alias's doc")
 		t.Logf("emitted:\n%s", strings.Join(lines, "\n"))
 	}
 }
