@@ -266,19 +266,34 @@ func (v *Visitor) writeLeadingBodyComments(colon token.Pos, first ast.Stmt) {
 		}
 	}
 
+	// A one-line comment on the `:` line trails the clause's opening line, as it trails `case X:` in Go.
+	// It is written first, while the output's current line is still that header; the clause's other
+	// leading comments follow on their own lines.
 	colonLine := v.file.Line(colon)
+	header := v.currentLine()
+	trailHeader := header != "" && !strings.HasPrefix(header, "//") && !strings.HasPrefix(header, "/*")
+
+	var onLabel, ownLine []token.Pos
 
 	for _, pos := range leading {
-		comment := v.standAloneComments[pos]
-
-		// A comment on the `:` line trails the clause's opening line, as it trails `case X:` in Go.
-		if v.file.Line(pos) == colonLine && pos > colon && !strings.Contains(comment, "\n") && v.currentLine() != "" {
-			v.outputBuilder.WriteString(" ")
-			v.outputBuilder.WriteString(comment)
+		if trailHeader && pos > colon && v.file.Line(pos) == colonLine && !strings.Contains(v.standAloneComments[pos], "\n") {
+			onLabel = append(onLabel, pos)
 		} else {
-			v.outputBuilder.WriteString(prefix)
-			v.outputBuilder.WriteString(strings.ReplaceAll(comment, "\n", v.newline))
+			ownLine = append(ownLine, pos)
 		}
+	}
+
+	for _, pos := range onLabel {
+		v.outputBuilder.WriteString(" ")
+		v.outputBuilder.WriteString(v.standAloneComments[pos])
+
+		delete(v.standAloneComments, pos)
+		v.sortedCommentPos = removeCommentPos(v.sortedCommentPos, pos)
+	}
+
+	for _, pos := range ownLine {
+		v.outputBuilder.WriteString(prefix)
+		v.outputBuilder.WriteString(strings.ReplaceAll(v.standAloneComments[pos], "\n", v.newline))
 
 		delete(v.standAloneComments, pos)
 		v.sortedCommentPos = removeCommentPos(v.sortedCommentPos, pos)
