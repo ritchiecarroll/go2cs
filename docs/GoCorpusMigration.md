@@ -799,6 +799,8 @@ rather than the target is what keeps a **removed** package a candidate — `inte
 >
 > **The check.** [`src/check-h5c-goos-child.ps1`](../src/check-h5c-goos-child.ps1) builds a fixture shaped
 > like `internal/runtime/syscall` at go1.26.9 and asserts both arms against real GOROOTs. It was red first.
+> **It runs at H5c, on the hop host, BEFORE `-Apply`, with the hop's source and target GOROOTs
+> (`-SourceGoRoot`, `-GoRoot`). It is not a CI test:** like the instrument, it needs both releases installed.
 
 **`UNRESOLVED` stops the step for a human.** Those rows are always listed, and the class is not
 hypothetical and not automatable from a file name: the rehearsal's 25 contains exactly one,
