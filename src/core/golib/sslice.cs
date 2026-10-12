@@ -49,7 +49,16 @@ public ref struct sslice<T>
     // section A) hands the callee's params Span<T> the SAME storage, as Go passes the pack's header.
     // Spelled with escapes: this file is not UTF-8 (its header's copyright sign is one Latin-1 byte),
     // so a raw glyph here would be read through whatever fallback code page the compiler picks.
-    public Span<T> \uA4F8\uA4F8\uA4F8 => ToSpan();
+    // It clears golib's spread record (SpreadRecord.cs): a view's window carries no capacity the record
+    // could vouch for, so an escaping callee copies it rather than take a stale slice of the same storage.
+    public Span<T> \uA4F8\uA4F8\uA4F8
+    {
+        get
+        {
+            SpreadRecord<T>.Clear();
+            return ToSpan();
+        }
+    }
 
     public Span<T> ToCapacitySpan()
     {
@@ -202,6 +211,8 @@ public ref struct sslice<T>
 
     public static implicit operator Span<T>(sslice<T> source)
     {
+        // The same window the spread getter hands out, so the same clear (SpreadRecord.cs).
+        SpreadRecord<T>.Clear();
         return source.ToSpan();
     }
 
@@ -246,6 +257,11 @@ public static class SSliceExtensions
     /// </summary>
     public static sslice<T> sslice<T>(this Span<T> source, nint low = -1, nint high = -1, nint max = -1)
     {
+        // The viewing prologue consumes the spread record (SpreadRecord.cs). A view hands its window on only
+        // through its spread getter or its Span<T> conversion, which clear the record themselves; this clear
+        // ends the record's hold on the spread array, and leaves no record for a span made by other means.
+        SpreadRecord<T>.Clear();
+
         if (low == -1 && high == -1 && max == -1)
             return new sslice<T>(source);
 

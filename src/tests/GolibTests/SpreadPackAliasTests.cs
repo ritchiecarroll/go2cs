@@ -46,14 +46,34 @@ public class SpreadPackAliasTests
         return keep(window[..2]);
     }
 
-    // func sum(xs ...int) int, a viewing callee.
+    // A hand-written consumer with no prologue (as a hand-owned function's or builtin's can be): it leaves the record.
+    private static int count(params Span<nint> xs) => xs.Length;
+
+    // func passThrough(other []int, xs ...int) []int { count(other...); return keep(xs...) }, a viewing callee.
+    private static slice<nint> passThrough(slice<nint> other, params Span<nint> xsʗp)
+    {
+        var xs = xsʗp.sslice();
+        _ = count(other.ꓸꓸꓸ);
+        return keep(xs.ꓸꓸꓸ);
+    }
+
+    // The same pass-through, the view handed on by its implicit conversion to Span<T> rather than its spread getter.
+    private static slice<nint> passThroughByConversion(slice<nint> other, params Span<nint> xsʗp)
+    {
+        var xs = xsʗp.sslice();
+        _ = count(other.ꓸꓸꓸ);
+        Span<nint> window = xs;
+        return keep(window);
+    }
+
+    // func sum(xs ...int) int, a viewing callee. It indexes the view, so nothing but its prologue touches the record.
     private static nint sum(params Span<nint> xsʗp)
     {
         var xs = xsʗp.sslice();
         nint total = 0;
 
-        foreach (nint x in (Span<nint>)xs)
-            total += x;
+        for (int i = 0; i < xs.Length; i++)
+            total += xs[i];
 
         return total;
     }
@@ -123,18 +143,97 @@ public class SpreadPackAliasTests
     }
 
     [TestMethod]
+    public void AViewPassThroughNeverTakesARecordLeftByAnotherSpread()
+    {
+        // A consumer without a prologue leaves `other`'s record standing; the view then spreads its own pack, the
+        // same first element and length as `other` but capacity 2. Go: keep's pack is xs[0:2:2], so its append
+        // reallocates. The view's spread clears the record, so keep copies rather than take `other` (capacity 3).
+        var backing = new nint[] { 1, 2, 3 };
+        var xs = backing.slice(0, 2, 2);
+        var other = backing.slice(0, 2, 3);
+        var r = passThrough(other, xs.ꓸꓸꓸ);
+        _ = append(r, (nint)99);
+
+        Assert.AreEqual((nint)2, cap(r));
+        Assert.AreEqual((nint)3, backing[2], "the append in keep must not write past xs's capacity");
+    }
+
+    [TestMethod]
+    public void AViewHandedOnByConversionNeverTakesARecordLeftByAnotherSpread()
+    {
+        // As above, through sslice -> Span<T>: the conversion clears the record as the spread getter does.
+        var backing = new nint[] { 1, 2, 3 };
+        var xs = backing.slice(0, 2, 2);
+        var other = backing.slice(0, 2, 3);
+        var r = passThroughByConversion(other, xs.ꓸꓸꓸ);
+        _ = append(r, (nint)99);
+
+        Assert.AreEqual((nint)2, cap(r));
+        Assert.AreEqual((nint)3, backing[2]);
+    }
+
+    [TestMethod]
+    public void AnArrayPointerSpreadNeverTakesARecordLeftByAnotherSpread()
+    {
+        // Go: p := (*[2]int)(xs); keep(p[:]...) has cap 2. An array<T> can alias a slice's storage (Alias), so its
+        // spread clears a record left over the same first element by a consumer without a prologue.
+        var backing = new nint[] { 1, 2, 3 };
+        var other = backing.slice(0, 2, 3);
+        var p = array<nint>.Alias(backing.slice(0, 2, 2), 2);
+        _ = count(other.ꓸꓸꓸ);
+        var r = keep(p.ꓸꓸꓸ);
+        _ = append(r, (nint)99);
+
+        Assert.AreEqual((nint)2, cap(r));
+        Assert.AreEqual((nint)3, backing[2]);
+    }
+
+    [TestMethod]
+    public void AViewingPrologueEndsTheRecord()
+    {
+        // The viewing prologue consumes the record, so a span made later by a producer golib does not see (here the
+        // public slice<T>.ToSpan, which no converted call site emits) can never meet it.
+        var backing = new nint[] { 1, 2, 3 };
+        var xs = backing.slice(0, 2, 3);
+        Assert.AreEqual((nint)3, sum(xs.ꓸꓸꓸ));
+
+        var r = keep(backing.slice(0, 2, 2).ToSpan());
+        _ = append(r, (nint)99);
+
+        Assert.AreEqual((nint)2, cap(r));
+        Assert.AreEqual((nint)3, backing[2]);
+    }
+
+    [TestMethod]
     public void SameArraySameLengthOtherOffsetIsRejected()
     {
         var backing = new nint[] { 1, 2, 3, 4 };
         var left = backing.slice(0, 2, 4);
         var right = backing.slice(2, 4, 4);
 
-        Span<nint> recorded = left.ꓸꓸꓸ;   // a record for `left` ...
-        var r = keep(right.ToSpan());       // ... and a span of `right` reaching the escaping prologue
+        // The record sits at offset 2, so a match that ignored the offset would take it for the window at 0.
+        Span<nint> recorded = right.ꓸꓸꓸ;  // a record for `right` ...
+        var r = keep(left.ToSpan());        // ... and a span of `left` reaching the escaping prologue
+        Assert.AreEqual((nint)1, r[0], "the pack holds left's elements, not right's");
         r[0] = 50;
 
         Assert.AreEqual(2, recorded.Length);
-        Assert.AreEqual((nint)3, backing[2], "a window at another offset is not the recorded slice");
+        Assert.AreEqual((nint)1, backing[0], "a window at another offset is not the recorded slice");
+        Assert.AreEqual((nint)3, backing[2]);
+    }
+
+    [TestMethod]
+    public void AShorterWindowOverTheSameFirstElementIsRejected()
+    {
+        var backing = new nint[] { 1, 2, 3 };
+        var xs = backing.slice(0, 2, 3);
+
+        _ = count(xs.ꓸꓸꓸ);                         // a record for `xs` (length 2) ...
+        var r = keep(xs.ToSpan()[..1]);             // ... and a length-1 span at its first element
+        r[0] = 60;
+
+        Assert.AreEqual((nint)1, len(r));
+        Assert.AreEqual((nint)1, backing[0], "a window of another length is not the recorded slice");
     }
 
     [TestMethod]

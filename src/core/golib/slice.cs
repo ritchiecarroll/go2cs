@@ -638,7 +638,8 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public T[] Source => AllocationCounter.CopyOf<T>(ToSpan());
 
-    public Span<T> ꓸꓸꓸ => ToSpan(); // Spread operator
+    // Spread operator. Records this slice so an escaping prologue can keep it as Go does (SpreadRecord.cs).
+    public Span<T> ꓸꓸꓸ => SpreadRecord<T>.Record(this);
 
     // Pinning is a MANAGED-storage concept: native memory does not move, so a native-backed slice
     // has nothing to pin and no PinnedBuffer to offer. Callers that want its address use the
@@ -1852,10 +1853,17 @@ public static class SliceExtensions
     // slice of a zero-size type reads as nil across a spread. Nothing in the corpus observes it.
     public static slice<T> slice<T>(this Span<T> source)
     {
+        // The escaping prologue consumes the spread record whatever it decides (SpreadRecord.cs). A pack
+        // that IS the last spread slice's window is that slice, as Go passes it: same array, same capacity.
+        bool spread = SpreadRecord<T>.TryTake(source, out slice<T> spreadSlice);
+
         // Route the nil case through slice<T>'s own re-slicer rather than the copy: it already
         // answers Go's `nil[0:0] == nil` and panics on any bound that leaves the nil header.
         if (IsNilSpan(source))
             return default(slice<T>).slice();
+
+        if (spread)
+            return spreadSlice;
 
         return AllocationCounter.CopyOf<T>(source).slice();
     }

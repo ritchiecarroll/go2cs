@@ -69,6 +69,8 @@ public class ThreadStateCensusTests
         ("golib/PanicException.cs|t_lastAdopted", Disposition.GolibReset, "internal static void ResetThread() => t_lastAdopted = null;", "the panic this thread's catches adopted last, which a range-over-func early stop marks (GoFuncRoot.ResetThread calls PanicException.ResetThread)"),
         ("golib/GoFrame.cs|t_threadToken", Disposition.KeptThreadResource, "[ThreadStatic] private static object? t_threadToken;", "this thread's identity for a panic's SiteOwnerThread: a thread property, not goroutine state"),
         ("golib/GoexitException.cs|t_started", Disposition.GolibReset, "internal static void ResetThread() => t_started = false;", "whether a Goexit has been raised on this goroutine (GoFuncRoot.ResetThread calls GoexitException.ResetThread)"),
+        ("golib/SpreadRecord.cs|t_last", Disposition.Registered, "GoroutineThreadState.Register(static () => Clear())", "the slice behind this thread's last spread, which an escaping variadic prologue may take"),
+        ("golib/SpreadRecord.cs|t_valid", Disposition.Registered, "GoroutineThreadState.Register(static () => Clear())", "whether that spread record is live"),
         ("golib/runtime/GoschedBackoff.cs|t_consecutiveInertYields", Disposition.GolibReset, "internal static void ResetThread() => t_consecutiveInertYields = 0;", "a Gosched backoff streak"),
         ("golib/runtime/Goroutine.cs|t_current", Disposition.RetiredByRun, "t_current = null;", "the goroutine identity; Goroutine.Run's scope retires it"),
         ("golib/runtime/Goroutine.cs|s_profileLabels", Disposition.FlowsWithContext, "AsyncLocal<object?> s_profileLabels", "pprof labels, inherited at goroutine creation"),
@@ -319,6 +321,7 @@ public class ThreadStateCensusTests
         yield return ("GoexitException.t_started", () => Field(typeof(GoexitException), "t_started").GetValue(null), false);
         yield return ("GoFrame.t_splicesRefused", () => Field(typeof(GoFrame), "t_splicesRefused").GetValue(null), false);
         yield return ("PanicException.t_lastAdopted", () => Field(typeof(PanicException), "t_lastAdopted").GetValue(null), null);
+        yield return ("SpreadRecord<nint>.t_valid", () => Field(SpreadRecordOfNint, "t_valid").GetValue(null), false);
         yield return ("registered probe", () => t_registeredProbe, 0);
     }
 
@@ -350,8 +353,13 @@ public class ThreadStateCensusTests
         Field(typeof(GoFrame), "t_splicesRefused").SetValue(null, true);
         Field(typeof(PanicException), "t_lastAdopted").SetValue(null, stale);
 
+        _ = new slice<nint>(2).ꓸꓸꓸ;    // a spread whose pack no prologue consumed: a live record
+        Assert.IsTrue((bool)Field(SpreadRecordOfNint, "t_valid").GetValue(null)!, "the planted spread left no record");
+
         t_registeredProbe = 7;
     }
+
+    private static Type SpreadRecordOfNint => typeof(Coro).Assembly.GetType("go.SpreadRecord`1")!.MakeGenericType(typeof(nint));
 
     // True when this thread holds no live panic-sequence entry (the array is absent, or every entry is clear).
     private static bool SequencesClear()

@@ -347,7 +347,16 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     // `default` can have, and any index into it panics Go-style rather than crashing the host.)
     private T[] Backing => m_array ?? [];
 
-    public Span<T> ꓸꓸꓸ => ToSpan(); // Spread operator
+    // Spread operator. An array may be a window over shared storage (m_low), so its spread clears golib's
+    // spread record as a view's does (SpreadRecord.cs).
+    public Span<T> ꓸꓸꓸ
+    {
+        get
+        {
+            SpreadRecord<T>.Clear();
+            return ToSpan();
+        }
+    }
 
     public nint Length => m_length;
 
