@@ -120,3 +120,35 @@ func TestOperandCommentsAtTheirGoPosition(t *testing.T) {
 		}
 	}
 }
+
+// A composite literal's elements inside a call's func-literal argument are not that call's argument list: the
+// comments after the literal (in the loop body below it) stay where Go has them, and the literal stays on its line.
+const literalInCallSource = `package main
+
+import "fmt"
+
+func run(name string, f func()) { f() }
+
+func main() {
+	run("x", func() {
+		for _, n := range []int{1, 2} {
+			// in the loop body
+			fmt.Println(n)
+		}
+	})
+}
+`
+
+func TestLiteralInCallKeepsItsComments(t *testing.T) {
+	lines := convertWithComments(t, literalInCallSource)
+
+	loop := lineContaining(t, lines, "foreach (var (_, n) in")
+
+	if !strings.Contains(lines[loop], "{1, 2}.slice()) {") {
+		t.Errorf("the literal left its line: %q", lines[loop])
+	}
+
+	if at := lineContaining(t, lines, "// in the loop body"); at != loop+1 {
+		t.Errorf("the loop body's comment is at line %d, want %d (the first line of the body):\n%s", at+1, loop+2, strings.Join(lines[loop:min(len(lines), loop+5)], "\n"))
+	}
+}
