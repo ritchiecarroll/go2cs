@@ -205,6 +205,24 @@ func commentOnly(cs *csFile, ln int) bool {
 
 var attrRe = regexp.MustCompile(`^\s*\[[A-Za-z]`)
 
+// scaffoldRe matches the lines the converter writes ahead of a statement's own translation: a func literal's
+// capture copy (`var xʗ1 = x;`) and a heap box for an escaping local (`ref var x = ref heap<T>(out var Ꮡx);`).
+var scaffoldRe = regexp.MustCompile(`^(var [\pL\pN_@]+ʗ\d+ = [\pL\pN_@Ꮡ.]+;|ref var [\pL\pN_@]+ = ref heap(<.*>)?\(.*out var Ꮡ[\pL\pN_@]+\);)$`)
+
+// gotoLabelRe matches the goto a labeled continue or break becomes; its label is Go's.
+var gotoLabelRe = regexp.MustCompile(`\bgoto (?:continue|break)_([\pL_][\pL\pN_]*);`)
+
+// anchorIdents is csIdents for a comment's anchor line, plus the Go label of a labeled continue or break.
+func anchorIdents(code string) map[string]bool {
+	m := csIdents(code)
+
+	for _, match := range gotoLabelRe.FindAllStringSubmatch(code, -1) {
+		m[match[1]] = true
+	}
+
+	return m
+}
+
 func nextCodeLineCS(cs *csFile, ln int) int {
 	for l := ln + 1; l <= len(cs.lines); l++ {
 		if cs.codeOnLine[l-1] && !attrRe.MatchString(cs.codeText[l-1]) {
@@ -332,12 +350,16 @@ func analyze(p pair, r *results, verbose bool) {
 		var csAnchor map[string]bool
 		csNext := ""
 		if c.trailing {
-			csAnchor = csIdents(cs.codeText[c.line-1])
+			csAnchor = anchorIdents(cs.codeText[c.line-1])
 		} else {
-			// skip the rest of this comment block, then the next code line
+			// skip the rest of this comment block, then the next code line; past the converter's scaffolding
+			// while it does not carry Go's anchor
 			nl := nextCodeLineCS(cs, c.line)
+			for nl > 0 && goFirst != "" && !anchorIdents(cs.codeText[nl-1])[goFirst] && scaffoldRe.MatchString(strings.TrimSpace(cs.codeText[nl-1])) {
+				nl = nextCodeLineCS(cs, nl)
+			}
 			if nl > 0 {
-				csAnchor = csIdents(cs.codeText[nl-1])
+				csAnchor = anchorIdents(cs.codeText[nl-1])
 				csNext = strings.TrimSpace(cs.codeText[nl-1])
 			}
 		}
@@ -349,7 +371,8 @@ func analyze(p pair, r *results, verbose bool) {
 			kind = "own-line-to-trailing"
 		case len(goAnchor) > 0 && len(csAnchor) > 0 && !csAnchor[goFirst]:
 			kind = "anchor-differs"
-		case len(goAnchor) == 0 && goNextTok == token.RBRACE && !strings.HasPrefix(csNext, "}"):
+		// a closing brace: C# closes a struct literal's constructor call with `)`
+		case len(goAnchor) == 0 && goNextTok == token.RBRACE && !strings.HasPrefix(csNext, "}") && !strings.HasPrefix(csNext, ")"):
 			kind = "anchor-differs"
 		}
 		if kind != "" {
