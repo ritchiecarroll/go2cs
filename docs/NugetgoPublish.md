@@ -203,7 +203,15 @@ assembly is not the bytes the package carries for its RID.
    `-p:UseSharedCompilation=false` (trap 9).
 6. Record the readings (date, host nickname, `T`, both digests, the two outputs) in the instance's record.
 
-### A module with no Go tests: the behavioral rows
+### The hosted rows
+
+For a module with no Go tests these rows are its proof. For a module WITH Go tests (COORD ruling 2026-10-12; tools
+at `claude/c2-nugetgo-sample-rows` or later) they are an additional row set beside the test proof, never in its
+place: they replace steps 3 to 5 above, which then need no owner's machine, and the release candidate takes
+`-BehaviorProofDir <rows>` beside `-ValidationDir`. Its VALIDATION.md gains a "Sample behavior" section under the test
+comparison, and its README a Sample behavior badge after the Tests badge. A tested module packed without rows is
+published exactly as before. The module's sample program and mappings row are committed at `T` under
+`src/tests/ModuleBehavior/M@V/`.
 
 After step 2, every shipped RID's row is written on a hosted runner of its own OS. No row is inferred from another.
 
@@ -218,7 +226,8 @@ After step 2, every shipped RID's row is written on a hosted runner of its own O
 2. **Lane:** fetch the rows through the annotations API, which a restricted-egress lane can reach:
    `pwsh -File <T>/src/tools/nugetgo/Get-NugetgoBehaviorRows.ps1 -RunId <run> -OutDir <rows>`.
 3. **Gate: four rows.** Each reads `outputs-equal: true`, its `runtime-rid` is its file's RID, its `goos` is that
-   RID's GOOS, and its `host` names the runner label and image version. The release candidate's pack (section 2)
+   RID's GOOS, its `host` names the runner label and image version, and its `assembly` lists every assembly the
+   package carries for that RID, one `<file> sha256-<hex>` per Go package. The release candidate's pack (section 2)
    binds each row's `assembly` to the bytes it packs for that RID, so a release whose bytes differ from the rehearsal's
    is refused there.
 
