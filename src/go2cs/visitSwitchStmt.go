@@ -323,6 +323,8 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			reorderedClauses = append(reorderedClauses, caseClause)
 			reorderedFlags = append(reorderedFlags, caseHasFallthroughStmt[i])
 			caseClauses = reorderedClauses
+			v.holdClauseComments(caseClause.Colon)
+			defer v.releaseClauseComments(caseClause.Colon)
 			caseHasFallthroughStmt = reorderedFlags
 			break
 		}

@@ -11,6 +11,7 @@ package main
 import (
 	"go/ast"
 	"go/token"
+	"slices"
 	"strings"
 )
 
@@ -115,16 +116,15 @@ func (v *Visitor) visitStatementList(stmts []ast.Stmt, colon token.Pos) {
 	}
 }
 
-// clauseSpan is the source a clause's leading comments are taken from: after the previous clause (or
-// the body's `{`) and before the next clause (or the body's `}`). caseStart is the clause's `case` or
-// `default` keyword.
+// clauseSpan is a clause's source: after the previous clause (or the body's `{`) and before the next
+// clause (or the body's `}`).
 type clauseSpan struct {
-	after, caseStart, before token.Pos
+	after, before token.Pos
 }
 
 // noteClauseSpans records the clauseSpan of each clause of a switch, type switch or select body, in
-// source order, so writeLeadingBodyComments takes a clause's comments from its own span whatever order
-// the lowering emits the clauses in.
+// source order: holdClauseComments holds a moved clause's comments by it, and writeLeadingBodyComments
+// writes an empty clause's comments up to its end.
 func (v *Visitor) noteClauseSpans(body *ast.BlockStmt) {
 	if !v.options.includeComments || body == nil {
 		return
@@ -145,30 +145,78 @@ func (v *Visitor) noteClauseSpans(body *ast.BlockStmt) {
 
 		switch clause := stmt.(type) {
 		case *ast.CaseClause:
-			v.clauseSpans[clause.Colon] = clauseSpan{after, clause.Case, before}
+			v.clauseSpans[clause.Colon] = clauseSpan{after, before}
 		case *ast.CommClause:
-			v.clauseSpans[clause.Colon] = clauseSpan{after, clause.Case, before}
+			v.clauseSpans[clause.Colon] = clauseSpan{after, before}
 		}
 
 		after = stmt.End()
 	}
 }
 
-// writeLeadingBodyComments writes a clause's leading comments above its first statement, as
-// visitBlockStmt does for a block's first statement: those between its `:` line and the first
-// statement, and those on their own lines above its `case` label. With no first statement (first is
-// nil) it writes the comments of the empty body, up to the next clause. Left pending, they were written
-// by the next flush, after the first statement or inside an argument list. A comment on the `:` line
-// itself (trailing the case label) is left where it was: that placement is class H's.
+// holdClauseComments takes the pending comments of the clause at colon out of the flush index, so a
+// flush while clauses emitted ahead of it are converted cannot write them there: the if/else lowering
+// and select move a leading `default:` clause to the end, and every flush writes all pending comments
+// ahead of its target, in an argument list as readily as above a statement. releaseClauseComments puts
+// them back when the clause's body starts, and the switch or select releases them again when it ends,
+// so none is lost when the body is not converted through visitStatementList.
+func (v *Visitor) holdClauseComments(colon token.Pos) {
+	span, spanned := v.clauseSpans[colon]
+
+	if !spanned {
+		return
+	}
+
+	var held, kept []token.Pos
+
+	for _, pos := range v.sortedCommentPos {
+		if pos > span.after && pos < span.before {
+			held = append(held, pos)
+		} else {
+			kept = append(kept, pos)
+		}
+	}
+
+	if len(held) == 0 {
+		return
+	}
+
+	if v.heldComments == nil {
+		v.heldComments = map[token.Pos][]token.Pos{}
+	}
+
+	v.heldComments[colon] = held
+	v.sortedCommentPos = kept
+}
+
+// releaseClauseComments returns the comments holdClauseComments held for the clause at colon; a second
+// release finds nothing.
+func (v *Visitor) releaseClauseComments(colon token.Pos) {
+	held, found := v.heldComments[colon]
+
+	if !found {
+		return
+	}
+
+	delete(v.heldComments, colon)
+	v.sortedCommentPos = append(v.sortedCommentPos, held...)
+	slices.Sort(v.sortedCommentPos)
+}
+
+// writeLeadingBodyComments writes, above a clause's first statement, the comments still pending ahead
+// of it, as visitBlockStmt does for a block's first statement: those between the `:` line and the first
+// statement, those above the `case` label, and one trailing the label. With no first statement (first
+// is nil) it writes those of the empty body, up to the next clause. Left pending, they were written by
+// the next flush, after the first statement or inside an argument list. A clause whose comments were
+// held (holdClauseComments) gets them back first.
 //
-// Only the clause's own span is read (noteClauseSpans), and each comment is written on its own rather
-// than through writeStandAloneCommentString, which flushes every pending comment ahead of its target:
-// a switch lowered to if/else emits a leading `default:` clause last, and its comments, still pending,
-// would land in the clause emitted first.
+// Each comment is written on its own, with the prefix this body's statements take.
 func (v *Visitor) writeLeadingBodyComments(colon token.Pos, first ast.Stmt) {
 	if !v.options.includeComments || !colon.IsValid() {
 		return
 	}
+
+	v.releaseClauseComments(colon)
 
 	span, spanned := v.clauseSpans[colon]
 
@@ -187,7 +235,6 @@ func (v *Visitor) writeLeadingBodyComments(colon token.Pos, first ast.Stmt) {
 	}
 
 	prefix := v.newline + v.indent(v.indentLevel)
-	colonLine := v.file.Line(colon)
 
 	var leading []token.Pos
 
@@ -196,15 +243,7 @@ func (v *Visitor) writeLeadingBodyComments(colon token.Pos, first ast.Stmt) {
 			break
 		}
 
-		if _, found := v.standAloneComments[pos]; !found {
-			continue
-		}
-
-		line := v.file.Line(pos)
-		inBody := pos > colon && line > colonLine
-		aboveLabel := spanned && pos > span.after && pos < span.caseStart && line > v.file.Line(span.after)
-
-		if inBody || aboveLabel {
+		if _, found := v.standAloneComments[pos]; found {
 			leading = append(leading, pos)
 		}
 	}

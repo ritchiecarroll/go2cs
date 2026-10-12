@@ -57,6 +57,8 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 	// Ensure default clause is the last clause
 	if hasDefault {
 		comClauses = append(comClauses, defaultClause)
+		v.holdClauseComments(defaultClause.Colon)
+		defer v.releaseClauseComments(defaultClause.Colon)
 	}
 
 	// Go evaluates EVERY case's operands — a receive case's channel operand, and a send case's

@@ -414,6 +414,9 @@ type Visitor struct {
 	// clauseSpans maps the colon of each case and select clause to the source span its leading comments
 	// are taken from; noteClauseSpans fills it per switch and select, writeLeadingBodyComments reads it.
 	clauseSpans map[token.Pos]clauseSpan
+	// heldComments holds, by colon, the pending comments of a clause the lowering emits after clauses
+	// that follow it in the source; holdClauseComments fills it, releaseClauseComments empties it.
+	heldComments map[token.Pos][]token.Pos
 	// manualConversion mirrors the file entry's flag: this file's destination `.cs` is a hand-owned
 	// manual conversion, so the visit still feeds package-wide state but the emitted text lands in
 	// the non-compiled `.cs.auto` review sibling. Consulted by recordTypeAccessibility, which must
