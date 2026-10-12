@@ -514,3 +514,94 @@ func TestBodyBlankLinesKeptWithoutComments(t *testing.T) {
 		}
 	}
 }
+
+// Without `-comments`, some statements open with a line of their own that is blank or holds only
+// indentation: one Go leads with a comment that is not written, a variable initialized by a func
+// literal. Where Go has a blank line above such a statement, that line already is the blank line, and
+// the gap must not add a second one (gofmt never writes two in a row).
+const doubledGapSource = `package main
+
+import "fmt"
+
+type inner struct{ n int }
+
+func (i *inner) Add(d int) int { i.n += d; return i.n }
+
+type outer struct{ inner }
+
+func check(name string, f func()) {
+	defer func() { fmt.Println(name, recover() != nil) }()
+	f()
+}
+
+func main() {
+	lv := 1
+	fmt.Println("lv", lv)
+
+	// Method expression of a promoted method.
+	add := (*outer).Add
+	var o outer
+	fmt.Println(add(&o, 2))
+
+	var s any = []int{1, 2}
+	check("slice", func() { _ = s == s })
+
+	var fn any = func() {}
+	check("func", func() { _ = fn == fn })
+}
+`
+
+func TestBodyBlankLinesNotDoubledWithoutComments(t *testing.T) {
+	lines := convertWithoutComments(t, doubledGapSource)
+
+	for i := 1; i < len(lines); i++ {
+		if strings.TrimSpace(lines[i]) == "" && strings.TrimSpace(lines[i-1]) == "" {
+			t.Errorf("lines %d-%d are two blank lines in a row:\n%s", i, i+1, strings.Join(lines[max(0, i-4):min(len(lines), i+3)], "\n"))
+		}
+	}
+
+	for _, text := range []string{"var add = ", "any fn = "} {
+		if !blankAbove(t, lines, text) {
+			t.Errorf("no blank line above %q, where Go has one", text)
+		}
+	}
+}
+
+// convertWithoutComments converts a single-file package with `-comments` off and returns the emitted
+// C# split into lines.
+func convertWithoutComments(t *testing.T, source string) []string {
+	t.Helper()
+
+	root := t.TempDir()
+	pkgDir := filepath.Join(root, "app")
+
+	writeModuleFile(t, filepath.Join(pkgDir, "go.mod"), "module example.com/app\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(pkgDir, "main.go"), source)
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{
+		goRoot:              goRoot,
+		goPath:              build.Default.GOPATH,
+		go2csPath:           filepath.Join(root, "runtime"),
+		targetPlatform:      runtime.GOOS + "/" + runtime.GOARCH,
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+	}
+
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	outDir := filepath.Join(root, "out")
+
+	if err := processConversion(pkgDir, true, outDir, options); err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
+
+	return strings.Split(strings.ReplaceAll(readGenerated(t, filepath.Join(outDir, "main.cs")), "\r", ""), "\n")
+}
