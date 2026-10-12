@@ -22,8 +22,12 @@
                             the caller passes on the platforms the README says it works on; elsewhere it is
                             a MEASUREMENT that never moves the exit code, because this arm is what measures
                             a platform before the README may name it.
+      G  PER-OS ASSETS      a consumer of runtime/coverage and runtime/debug, converted and compared the same
+                            way, then the RID's own restored assembly of go.internal.coverage.decodemeta and
+                            go.runtime.debug read for this OS's syscall buffer type: Iovec and not WSABuf off
+                            Windows, WSABuf and not Iovec on it (the 1.24.13.6 release blocker).
 
-    Exit 0 when A, B and C pass (and D, with -GateWalkthrough); 1 otherwise. Every arm's evidence lands
+    Exit 0 when A, B, C and G pass (and D, with -GateWalkthrough); 1 otherwise. Every arm's evidence lands
     under -WorkRoot.
 
 .PARAMETER Feed
@@ -280,6 +284,60 @@ $behavioral = Join-Path $WorkRoot 'C-behavioral-src'
 New-Item -ItemType Directory -Force $behavioral | Out-Null
 Copy-Item (Join-Path $repoSrc 'tests/Behavioral/StatLayoutTruth/go.mod'), (Join-Path $repoSrc 'tests/Behavioral/StatLayoutTruth/main.go') $behavioral
 $verdicts += Invoke-ConvertArm 'C-StatLayoutTruth' $behavioral
+
+# ---- G: the per-OS assets of go.internal.coverage.decodemeta and go.runtime.debug ------------------
+# An assembly whose metadata names a per-OS type ships one twin per RID. The 1.24.13.6 rehearsal shipped
+# go.internal.coverage.decodemeta with its Windows build in lib/ only: its escape registry names
+# go.syscall_package.WSABuf, which no unix go.syscall defines, so a consumer died at startup on Linux and macOS
+# (TypeLoadException: Could not load type 'WSABuf' from assembly 'syscall', from the module initializer).
+# runtime/coverage's cfile imports decodemeta, so this consumer loads it at init; the run is the behavior, and the
+# restored assembly of each package for this leg's compile RID is the cause, read by name.
+$cov = Join-Path $WorkRoot 'G-coverage-debug-src'
+New-Item -ItemType Directory -Force $cov | Out-Null
+"module example.com/relsmokecov`n`ngo 1.24`n" | Set-Content -LiteralPath (Join-Path $cov 'go.mod') -Encoding utf8 -NoNewline
+@'
+package main
+
+import (
+	"bytes"
+	"fmt"
+	"runtime/coverage"
+	"runtime/debug"
+)
+
+func main() {
+	// runtime/coverage's cfile imports internal/coverage/decodemeta, so this program loads that package at init.
+	var meta bytes.Buffer
+	fmt.Println("WriteMeta fails without -cover:", coverage.WriteMeta(&meta) != nil)
+	fmt.Println("ClearCounters fails without -cover:", coverage.ClearCounters() != nil)
+
+	old := debug.SetGCPercent(150)
+	fmt.Println("SetGCPercent round trip:", debug.SetGCPercent(old))
+}
+'@ | Set-Content -LiteralPath (Join-Path $cov 'main.go') -Encoding utf8
+$gVerdict = Invoke-ConvertArm 'G-coverage-debug' $cov
+if ($gVerdict -like 'PASS*') {
+    $props = [System.IO.File]::ReadAllText((Join-Path $cov 'csharp/Directory.Build.props'))
+    $null = $props -match '<GoCompileRuntimeIdentifier>([^<]+)</GoCompileRuntimeIdentifier>'
+    $assetRid = $Matches[1]
+    $want, $refuse = if ($assetRid -like 'win-*') { 'WSABuf', 'Iovec' } else { 'Iovec', 'WSABuf' }
+    $cache = Join-Path $WorkRoot 'G-coverage-debug/nuget-cache'
+    $notes = @()
+    foreach ($pkg in @(@{ Id = 'go.internal.coverage.decodemeta'; Dll = 'internal.coverage.decodemeta.dll' }, @{ Id = 'go.runtime.debug'; Dll = 'runtime.debug.dll' })) {
+        $assetDir = Join-Path $cache "$($pkg.Id)/$($Version.ToLowerInvariant())/runtimes/$assetRid/lib"
+        $dll = @(Get-ChildItem -LiteralPath $assetDir -Recurse -Filter $pkg.Dll -File -ErrorAction SilentlyContinue)
+        if ($dll.Count -ne 1) { $gVerdict = "FAIL (G-coverage-debug): restored $($pkg.Id) $Version carries $($dll.Count) runtimes/$assetRid/ assembly, want 1 ($assetDir)"; break }
+        $text = [System.Text.Encoding]::Latin1.GetString([System.IO.File]::ReadAllBytes($dll[0].FullName))
+        if ($text.Contains($refuse) -or -not $text.Contains($want)) {
+            $found = if ($text.Contains($refuse)) { "names $refuse" } else { "does not name $want" }
+            $gVerdict = "FAIL (G-coverage-debug): $($pkg.Id) $Version's runtimes/$assetRid/ assembly $found (this OS's syscall buffer type is $want)"
+            break
+        }
+        $notes += "$($pkg.Id) runtimes/$assetRid/ names $want, not $refuse"
+    }
+    if ($gVerdict -like 'PASS*') { $gVerdict += "; " + ($notes -join '; ') }
+}
+$verdicts += $gVerdict
 
 # ---- D: the README walkthrough, measured, never gating -------------------------------------------
 $walk = Join-Path $WorkRoot 'D-walkthrough-src'

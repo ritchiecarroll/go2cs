@@ -156,14 +156,19 @@ every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
   `dotnet run`, on a first and a second unchanged single-file publish and on a framework-dependent publish, the off
   switch prints `none`. **Measured, never gating** on E's terms; every release before the one that ships symbols fails
   RUN, PUBLISH and FDD. Its Native AOT run is the `aot-smoke` stage below, not an arm here.
+- **G** a consumer of `runtime/coverage` and `runtime/debug`, converted and compared the same way, then the RID's
+  own restored assembly of `go.internal.coverage.decodemeta` and `go.runtime.debug` read for the OS's syscall buffer
+  type: `Iovec` and not `WSABuf` off Windows, the reverse on it. The 1.24.13.6 rehearsal shipped decodemeta's Windows
+  build in `lib/` only, and a consumer died at startup on Linux and macOS (`TypeLoadException` for `WSABuf`); the
+  consumer loads decodemeta at init, so the run reads the behavior and the assembly names the cause. It gates.
 
-A leg is green when arms A-D pass. Dispatch it at the tree that ships, before every release:
+A leg is green when arms A-D and G pass. Dispatch it at the tree that ships, before every release:
 it is what proves the packages carry what that tree's converter emits on every OS (C2's 2026-10-03 finding: N's
 converter emits `unsafe.ArrayPointer`, which the published 1.24.13.3 lacks). The pack job's budget is its own
 (240 min; measured 38-53 min).
 
 **After the publish**, the same stage with `published_version` set to the version just pushed (say
-`-f published_version=1.24.13.4`) skips the pack and runs the same four arms on the same four RIDs against
+`-f published_version=1.24.13.4`) skips the pack and runs the same arms on the same four RIDs against
 nuget.org itself, `go.*` and everything else restored from there: the release as a user receives it. It is
 dispatchable once every id in the walkthrough's restore closure is listed (a partial index fails restore loudly,
 NU1102). The input is refused on any other stage and must be four numeric parts.
@@ -250,7 +255,7 @@ disclosure count is half of what makes a row honest.
 | `census` | 150 min | 225 min | The full stdlib solution build `--no-incremental` on the fleet's slowest anchored box, plus a **cold** NuGet restore of every project. |
 | `behavioral-smoke` | 90 min | 135 min | Converter `go build` plus a filtered four-phase run whose shared core closure is built from nothing. |
 | `sweep-shard` | 210 min | 315 min | One convert/build/run/compare cycle per matched row; the sweep's own per-package floors are the reason this is the largest. |
-| `release-smoke` | 90 min | 135 min | The leg only: converter `go build` plus four small restore/build/run arms. The `pack` job (windows, 240 min) is separate. Provisional. |
+| `release-smoke` | 90 min | 135 min | The leg only: converter `go build` plus five small restore/build/run arms. The `pack` job (windows, 240 min) is separate. Provisional. |
 | `aot-smoke` | 240 min | 360 min | The leg only, three RIDs: one Native AOT publish of a 31-package consumer under `TrimMode=partial` -- linux 56, windows 71, osx-x64 293 min (37523439849). osx-arm64 is not run: it did not finish in 360, GitHub's ceiling. |
 
 The macOS multiplier is 1.5x because `macos-15` (arm64) is a 3-core runner and every phase here is

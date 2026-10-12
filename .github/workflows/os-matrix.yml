@@ -1344,7 +1344,7 @@ jobs:
           $summary = @(
               "## Release smoke -- GOOS=$goos ($rid)"
               ''
-              "exit ``$smokeExit`` (A, B and C gate; D $(if ($gateWalkthrough) { 'gates here' } else { 'is measured only here' }))"
+              "exit ``$smokeExit`` (A, B, C and G gate; D $(if ($gateWalkthrough) { 'gates here' } else { 'is measured only here' }))"
               ''
               '```'
           ) + @(Get-Content -LiteralPath $log | Where-Object { $_ -match '^(release smoke:|PASS|FAIL|MEASURED)' }) + @('```')
