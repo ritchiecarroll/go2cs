@@ -102,4 +102,12 @@ function Test-NugetgoModuleHasGoTests {
     $false
 }
 
-Export-ModuleMember -Function Get-NugetgoBehaviorRowKeys, Read-NugetgoBehaviorRow, Test-NugetgoBehaviorRows, New-NugetgoBehaviorPage, Test-NugetgoModuleHasGoTests
+# RED STUBS (the cobra increment, part 3): every function below is unmet.
+function Get-NugetgoPackedRidAssemblies { param([string]$Package, [string]$TargetFramework) @{} }
+function Get-NugetgoProofMode { param([string]$ValidationDir, [string]$UnvalidatedReason, [string]$BehaviorProofDir, [switch]$Release, [bool]$ModuleHasGoTests) [pscustomobject]@{ Mode = $null; Reason = $null } }
+function ConvertTo-NugetgoRowAnnotationText { param([string]$Text) '' }
+function ConvertFrom-NugetgoRowAnnotations { param($Annotations) @{} }
+function Get-NugetgoRowHost { param([hashtable]$Environment, [string]$HostLabel) '' }
+function New-NugetgoBehaviorRowText { param($Fields) '' }
+
+Export-ModuleMember -Function Get-NugetgoBehaviorRowKeys, Read-NugetgoBehaviorRow, Test-NugetgoBehaviorRows, New-NugetgoBehaviorPage, Test-NugetgoModuleHasGoTests, Get-NugetgoPackedRidAssemblies, Get-NugetgoProofMode, ConvertTo-NugetgoRowAnnotationText, ConvertFrom-NugetgoRowAnnotations, Get-NugetgoRowHost, New-NugetgoBehaviorRowText

@@ -123,6 +123,11 @@ $readmeArgs.Synopsis = ''
 Check 'no synopsis, no empty paragraph' (-not (New-NugetgoPackageReadme @readmeArgs).Contains("`n`n`n")) 'a blank run'
 $readmeArgs.Remove('Matched'); $readmeArgs.Remove('Disclosed'); $readmeArgs.Unvalidated = $true
 Check 'an unvalidated pack says so in its Tests badge' ((New-NugetgoPackageReadme @readmeArgs).Contains('/badge/Tests-not_validated-orange?logo=go')) 'no not_validated badge'
+$behaviorArgs = @{} + $readmeArgs; $behaviorArgs.Remove('Unvalidated'); $behaviorArgs.BehaviorRids = 4
+$behaviorReadme = New-NugetgoPackageReadme @behaviorArgs
+Check 'a behavioral proof says so in its Tests badge, with its RID count (COORD ruling 2026-10-12)' (
+    $behaviorReadme.Contains('[![Tests](https://img.shields.io/badge/Tests-no_Go_tests,_behavior_on_4_RIDs-blue?logo=go)](https://github.com/example/mod-cs/blob/nuget-1.2.3/VALIDATION.md)')) "got: $(@($behaviorReadme -split "`n" | Where-Object { $_ -like '*Tests*' }) -join ' | ')"
+Check 'a behavioral proof states no test counts' (-not $behaviorReadme.Contains('matched')) 'a matched count'
 
 Write-Host 'the seeded README: one fence at the top, the title and synopsis outside it (COORD ruling 2026-10-10)'
 $B = '[//]: # (nugetgo:generated:begin)'

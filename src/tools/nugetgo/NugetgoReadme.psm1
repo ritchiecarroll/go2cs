@@ -113,6 +113,7 @@ function New-NugetgoGeneratedBlock {
         [int]$Matched,
         [int]$Disclosed,
         [switch]$Unvalidated,
+        [int]$BehaviorRids,
         [switch]$DefaultIcon
     )
     $repo = $RepositoryUrl.TrimEnd('/')
@@ -156,6 +157,7 @@ function New-NugetgoPackageReadme {
         [int]$Matched,
         [int]$Disclosed,
         [switch]$Unvalidated,
+        [int]$BehaviorRids,
         [switch]$DefaultIcon
     )
     $blockArgs = @{} + $PSBoundParameters
