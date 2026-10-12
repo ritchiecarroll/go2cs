@@ -96,6 +96,11 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtCont
 // visitStatementList converts the statements of a case, type-switch case or select case body, keeping
 // Go's blank lines between them as a block body does (writeStatementGap). colon is the clause's `:`.
 func (v *Visitor) visitStatementList(stmts []ast.Stmt, colon token.Pos) {
+	if len(stmts) == 0 {
+		v.writeLeadingBodyComments(colon, nil)
+		return
+	}
+
 	for i, stmt := range stmts {
 		gap := -1
 
@@ -110,21 +115,75 @@ func (v *Visitor) visitStatementList(stmts []ast.Stmt, colon token.Pos) {
 	}
 }
 
-// writeLeadingBodyComments writes the standalone comments between a clause's `:` line and its first
-// statement above that statement, as visitBlockStmt does for a block's first statement. Without it they
-// stayed pending and writeStatementGap wrote them after the first statement. A comment on the `:` line
+// clauseSpan is the source a clause's leading comments are taken from: after the previous clause (or
+// the body's `{`) and before the next clause (or the body's `}`). caseStart is the clause's `case` or
+// `default` keyword.
+type clauseSpan struct {
+	after, caseStart, before token.Pos
+}
+
+// noteClauseSpans records the clauseSpan of each clause of a switch, type switch or select body, in
+// source order, so writeLeadingBodyComments takes a clause's comments from its own span whatever order
+// the lowering emits the clauses in.
+func (v *Visitor) noteClauseSpans(body *ast.BlockStmt) {
+	if !v.options.includeComments || body == nil {
+		return
+	}
+
+	if v.clauseSpans == nil {
+		v.clauseSpans = map[token.Pos]clauseSpan{}
+	}
+
+	after := body.Lbrace
+
+	for i, stmt := range body.List {
+		before := body.Rbrace
+
+		if i+1 < len(body.List) {
+			before = body.List[i+1].Pos()
+		}
+
+		switch clause := stmt.(type) {
+		case *ast.CaseClause:
+			v.clauseSpans[clause.Colon] = clauseSpan{after, clause.Case, before}
+		case *ast.CommClause:
+			v.clauseSpans[clause.Colon] = clauseSpan{after, clause.Case, before}
+		}
+
+		after = stmt.End()
+	}
+}
+
+// writeLeadingBodyComments writes a clause's leading comments above its first statement, as
+// visitBlockStmt does for a block's first statement: those between its `:` line and the first
+// statement, and those on their own lines above its `case` label. With no first statement (first is
+// nil) it writes the comments of the empty body, up to the next clause. Left pending, they were written
+// by the next flush, after the first statement or inside an argument list. A comment on the `:` line
 // itself (trailing the case label) is left where it was: that placement is class H's.
 //
-// Each comment is written on its own rather than through writeStandAloneCommentString, which flushes
-// every pending comment ahead of its target: a switch lowered to if/else emits a leading `default:`
-// clause last, and its comments, still pending, would land in the clause emitted first.
+// Only the clause's own span is read (noteClauseSpans), and each comment is written on its own rather
+// than through writeStandAloneCommentString, which flushes every pending comment ahead of its target:
+// a switch lowered to if/else emits a leading `default:` clause last, and its comments, still pending,
+// would land in the clause emitted first.
 func (v *Visitor) writeLeadingBodyComments(colon token.Pos, first ast.Stmt) {
 	if !v.options.includeComments || !colon.IsValid() {
 		return
 	}
 
+	span, spanned := v.clauseSpans[colon]
+
+	if first == nil && !spanned {
+		return
+	}
+
 	if v.file == nil {
-		v.file = v.fset.File(first.Pos())
+		v.file = v.fset.File(colon)
+	}
+
+	before := span.before
+
+	if first != nil {
+		before = first.Pos()
 	}
 
 	prefix := v.newline + v.indent(v.indentLevel)
@@ -133,11 +192,19 @@ func (v *Visitor) writeLeadingBodyComments(colon token.Pos, first ast.Stmt) {
 	var leading []token.Pos
 
 	for _, pos := range v.sortedCommentPos {
-		if pos >= first.Pos() {
+		if pos >= before {
 			break
 		}
 
-		if _, found := v.standAloneComments[pos]; found && pos > colon && v.file.Line(pos) > colonLine {
+		if _, found := v.standAloneComments[pos]; !found {
+			continue
+		}
+
+		line := v.file.Line(pos)
+		inBody := pos > colon && line > colonLine
+		aboveLabel := spanned && pos > span.after && pos < span.caseStart && line > v.file.Line(span.after)
+
+		if inBody || aboveLabel {
 			leading = append(leading, pos)
 		}
 	}

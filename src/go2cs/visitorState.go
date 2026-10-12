@@ -411,6 +411,9 @@ type Visitor struct {
 	// emitters take the doc as an argument instead.
 	pendingTypeDoc    *ast.CommentGroup
 	pendingTypeDocPos token.Pos
+	// clauseSpans maps the colon of each case and select clause to the source span its leading comments
+	// are taken from; noteClauseSpans fills it per switch and select, writeLeadingBodyComments reads it.
+	clauseSpans map[token.Pos]clauseSpan
 	// manualConversion mirrors the file entry's flag: this file's destination `.cs` is a hand-owned
 	// manual conversion, so the visit still feeds package-wide state but the emitted text lands in
 	// the non-compiled `.cs.auto` review sibling. Consulted by recordTypeAccessibility, which must

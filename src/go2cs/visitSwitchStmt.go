@@ -113,6 +113,8 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, target LabeledStmt
 }
 
 func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
+	v.noteClauseSpans(switchStmt.Body)
+
 	// A tagged switch whose tag is the CONSTANT `true` (`switch c := s[i]; true { case cond: … }`
 	// — strconv readFloat) is Go's idiom for an expressionless switch with an init statement:
 	// each boolean case CONDITION matches when it holds. Normalize to the expressionless form

@@ -28,6 +28,8 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt, target
 }
 
 func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
+	v.noteClauseSpans(typeSwitchStmt.Body)
+
 	var caseClauses []*ast.CaseClause
 
 	for _, stmt := range typeSwitchStmt.Body.List {

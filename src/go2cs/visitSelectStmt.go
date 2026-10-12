@@ -17,6 +17,8 @@ import (
 )
 
 func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
+	v.noteClauseSpans(selectStmt.Body)
+
 	var comClauses []*ast.CommClause
 	var defaultClause *ast.CommClause
 	hasDefault := false
