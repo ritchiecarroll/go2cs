@@ -21,7 +21,14 @@ func (v *Visitor) visitGenDecl(genDecl *ast.GenDecl) {
 		case *ast.ImportSpec:
 			v.visitImportSpec(specType, genDecl.Doc)
 		case *ast.ValueSpec:
+			gap := -1
+
+			if index > 0 {
+				gap = v.writeSpecGap(genDecl.Specs[index-1], specType)
+			}
+
 			v.visitValueSpec(specType, specDoc(genDecl, index, specType.Doc), genDecl.Doc, genDecl.Tok)
+			v.dropEmptyGap(gap)
 			hasValueSpec = true
 		case *ast.TypeSpec:
 			v.visitTypeSpec(specType, specDoc(genDecl, index, specType.Doc))
@@ -54,4 +61,30 @@ func specDoc(genDecl *ast.GenDecl, index int, doc *ast.CommentGroup) *ast.Commen
 	}
 
 	return &ast.CommentGroup{List: append(append([]*ast.Comment{}, genDecl.Doc.List...), doc.List...)}
+}
+
+// writeSpecGap writes the blank line gofmt keeps between two specs of a `const ( … )` or `var ( … )`
+// group, when Go has one above spec or above its doc. It returns the output length before the blank
+// line, or -1 when it wrote none, for dropEmptyGap: a spec that emits nothing leaves no blank line.
+//
+// Under `-comments` only (docs/PLAN-comment-and-spacing-parity.md, class D), as writeStatementGap is.
+func (v *Visitor) writeSpecGap(prev ast.Spec, spec *ast.ValueSpec) int {
+	if !v.options.includeComments {
+		return -1
+	}
+
+	start := spec.Pos()
+
+	if spec.Doc != nil {
+		start = spec.Doc.Pos()
+	}
+
+	if v.fset.Position(start).Line-v.fset.Position(prev.End()).Line <= 1 {
+		return -1
+	}
+
+	mark := v.outputBuilder.Len()
+	v.outputBuilder.WriteString(v.newline)
+
+	return mark
 }

@@ -32,8 +32,6 @@ import (
 )
 
 var wantUtf8Census = map[string]int{
-	// D: blank lines between the specs of a group
-	"group:go-blank-cs-none": 4,
 	// E: the converter's own blank lines inside bodies
 	"body:extra:after-lowered-switch":      2,
 	"body:extra:after-named-result-locals": 3,
