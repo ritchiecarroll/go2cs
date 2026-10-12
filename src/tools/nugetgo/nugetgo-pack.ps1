@@ -69,8 +69,10 @@
     packed project's GoInputDigest, builds every flavor, and compares the flavors' assemblies with the release's material
     check (GoAssemblyMaterial.psm1). Equal in meaning: one neutral assembly set in lib/<tfm>/, packed from -RecurseRoot as
     before. Different: the release's RID-specific layout (NugetgoFlavors.psm1), lib/<tfm>/ the windows flavor and
-    runtimes/<rid>/lib/<tfm>/ each RID's, with every flavor's go.* dependencies. The decision is a measurement, never a
-    list and never the module author's word.
+    runtimes/<rid>/lib/<tfm>/ each RID's, with every flavor's go.* dependencies. Third-party requires are the union of
+    every flavor's, in the nuspec and the self-description, and a RID-specific package's VALIDATION.md names, in one
+    line, the flavors whose package metadata the self-description does not describe. The decision is a measurement,
+    never a list and never the module author's word.
 
     The restore is isolated: a nuget.config with <clear/> and only -Feed as a source, and a private NUGET_PACKAGES.
     The user's global packages folder is censused for nugetgo.* and go.* before and after, and the run fails if it
@@ -175,7 +177,8 @@ if ($libraries.Count -eq 0) { Refuse "no library package under $moduleSrc" }
 
 # ---- S2: what the self-description lists ------------------------------------------------------------------------------
 $packed = @(Get-NugetgoPackedPackages -RecurseRoot $RecurseRoot -Libraries $libraries.ToArray())
-$requires = @(Get-NugetgoThirdPartyRequires -RecurseRoot $RecurseRoot -Libraries $libraries.ToArray() -ThirdPartyPackage $ThirdPartyPackage)
+# This flavor's requires; the package's are the union of every flavor's, taken after the flavors are converted.
+$requires = @(Get-NugetgoThirdPartyRequires -RecurseRoot $RecurseRoot -Libraries $libraries.ToArray() -ThirdPartyPackage $ThirdPartyPackage -AllowUnreferenced)
 
 # ---- B6 metadata -----------------------------------------------------------------------------------------------------
 # The module's own source in the module cache, where the license file and the package synopsis are read. The cache
@@ -412,6 +415,15 @@ try {
 }
 finally { foreach ($k in $saved.Keys) { Set-Item "env:$k" $saved[$k] -ErrorAction SilentlyContinue; if ($null -eq $saved[$k]) { Remove-Item "env:$k" -ErrorAction SilentlyContinue } } }
 $flavorDecision = Get-NugetgoFlavorDecision -Assemblies $flavorAssemblies -ProofGoos $proofGoos
+# Third-party requires, per TFM: the union of every flavor's (COORD ruling 2026-10-12). A neutral package's flavors agree,
+# so for one the union is -RecurseRoot's own list.
+$flavorRequires = @{}
+foreach ($goos in Get-NugetgoFlavorGoos) {
+    $root = if ($goos -ceq $proofGoos) { $RecurseRoot } else { Join-Path $flavorDir $goos }
+    $flavorRequires[$goos] = @(Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries $flavorProjects[$goos] -ThirdPartyPackage $ThirdPartyPackage -AllowUnreferenced)
+}
+try { $requires = @(Merge-NugetgoFlavorRequires -Requires $flavorRequires -ThirdPartyPackage $ThirdPartyPackage) }
+catch { Refuse ($_.Exception.Message -replace '^REFUSED: ', '') }
 if ($flavorDecision.RidSpecific) {
     Write-Host "  flavors: $((Get-NugetgoFlavorGoos) -join ', ') differ in meaning: RID-specific assets ($(@($ridFlavors.Keys) -join ', ')), lib/ the $(Get-NugetgoReferenceGoos) flavor, as the go.* release packs them"
     foreach ($why in $flavorDecision.Reasons) { Write-Host "    $why" }
@@ -422,12 +434,6 @@ if ($flavorDecision.RidSpecific) {
             foreach ($ref in @($x.Project.ItemGroup | ForEach-Object { $_.PackageReference } | Where-Object { $_ })) {
                 if ($ref.Include -like 'go.*' -and $ref.Version -eq '$(GoStdLibVersion)' -and $ref.PrivateAssets -ne 'all') { [void]$goRefs.Add($ref.Include) }
             }
-        }
-        if ($goos -cne $proofGoos) {
-            $flavorRequires = @(Get-NugetgoThirdPartyRequires -RecurseRoot (Join-Path $flavorDir $goos) -Libraries $flavorProjects[$goos] -ThirdPartyPackage $ThirdPartyPackage)
-            $a = @($requires | ForEach-Object { "$($_.Module)@$($_.Version)" } | Sort-Object) -join ', '
-            $b = @($flavorRequires | ForEach-Object { "$($_.Module)@$($_.Version)" } | Sort-Object) -join ', '
-            if ($a -cne $b) { Refuse "the $goos flavor requires [$b] where $proofGoos requires [$a]: a third-party dependency that differs by GOOS is not packed yet" }
         }
     }
 }
@@ -441,8 +447,10 @@ Copy-Item -LiteralPath $LicenseFile (Join-Path $packDir $licenseName)
 Copy-Item -LiteralPath $packageIcon.Path (Join-Path $packDir $packageIcon.Name)
 [System.IO.File]::WriteAllText((Join-Path $packDir 'README.md'), $readme, (New-Object System.Text.UTF8Encoding($false)))
 # VALIDATION.md = the ruled two sentences as its header, then the proof page itself, unchanged below them.
+# A RID-specific package's page discloses, in one line, the flavors its self-description does not describe.
+$flavorDisclosure = Get-NugetgoFlavorDisclosure -ProofGoos $proofGoos -RidSpecific:$flavorDecision.RidSpecific
 [System.IO.File]::WriteAllText((Join-Path $packDir 'VALIDATION.md'),
-    ("> $description`n`n" + [System.IO.File]::ReadAllText($validationPage)), (New-Object System.Text.UTF8Encoding($false)))
+    ("> $description`n`n" + $(if ($flavorDisclosure) { "> $flavorDisclosure`n`n" } else { '' }) + [System.IO.File]::ReadAllText($validationPage)), (New-Object System.Text.UTF8Encoding($false)))
 $esc = { param($s) [System.Security.SecurityElement]::Escape($s) }
 
 # S2: go2cs/source-metadata.txt, written by the converter's own Go package so its consumer is known to read it.

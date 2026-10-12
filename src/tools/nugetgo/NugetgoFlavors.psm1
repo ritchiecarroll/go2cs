@@ -151,23 +151,44 @@ function Test-NugetgoRidLayout {
     $reasons.ToArray()
 }
 
-# RED STUBS (the cobra increment): today a third-party require that differs by GOOS is refused, and no flavor is
-# disclosed.
+# The package's third-party requires: the UNION of its flavors' (COORD ruling 2026-10-12, for cobra, whose command_win.go
+# imports mousetrap on windows only). NuGet declares dependencies per target framework, never per RID, so -- as the
+# go.* release does for its own dependencies -- every flavor's require is declared, and only the RID-matched assemblies
+# load. The self-description's require lines take the same union. One module at two versions is refused: one go.mod
+# resolves one version, so a disagreement means the flavors were not converted from the same module graph. And each
+# -ThirdPartyPackage must name a module SOME flavor references (each flavor was asked with -AllowUnreferenced).
 function Merge-NugetgoFlavorRequires {
     [CmdletBinding()]
     param([Parameter(Mandatory)]$Requires, [string[]]$ThirdPartyPackage = @())
-    $first = $null
+
+    $byModule = [ordered]@{}
     foreach ($goos in Get-NugetgoFlavorGoos) {
-        $set = @($Requires[$goos] | ForEach-Object { "$($_.Module)@$($_.Version)" } | Sort-Object) -join ', '
-        if ($null -eq $first) { $first = $set } elseif ($set -cne $first) { throw "the $goos flavor requires [$set] where another requires [$first]" }
+        foreach ($r in @($Requires[$goos])) {
+            if ($null -eq $r) { continue }
+            if (-not $byModule.Contains($r.Module)) { $byModule[$r.Module] = $r; continue }
+            $seen = $byModule[$r.Module]
+            if ($seen.Version -cne $r.Version -or $seen.NuGetId -cne $r.NuGetId -or $seen.PackageVersion -cne $r.PackageVersion) {
+                throw "REFUSED: the flavors require $($r.Module) at $($seen.Version) ($($seen.NuGetId) $($seen.PackageVersion)) and at $($r.Version) ($($r.NuGetId) $($r.PackageVersion))"
+            }
+        }
     }
-    @($Requires[(Get-NugetgoFlavorGoos)[0]])
+    foreach ($entry in $ThirdPartyPackage) {
+        $module = ($entry -split '=', 2)[0]
+        if (-not $byModule.Contains($module)) { throw "REFUSED: -ThirdPartyPackage names $module, which no flavor's packed package references" }
+    }
+    @($byModule.Keys | Sort-Object | ForEach-Object { $byModule[$_] })
 }
 
+# The one line a RID-specific package's proof page carries (COORD ruling 2026-10-12, item 4): its self-description
+# describes the proof flavor's package_info metadata, and the other flavors' are not described. Nothing for a neutral
+# package, whose flavors agree.
 function Get-NugetgoFlavorDisclosure {
     [CmdletBinding()]
     param([Parameter(Mandatory)][string]$ProofGoos, [switch]$RidSpecific)
-    $null
+
+    if (-not $RidSpecific) { return $null }
+    $others = @(Get-NugetgoFlavorGoos | Where-Object { $_ -cne $ProofGoos })
+    "Flavors: this package carries RID-specific assemblies; its go2cs/source-metadata.txt describes the $ProofGoos flavor's package metadata, and the $($others -join ' and ') flavors' metadata is not described."
 }
 
 Export-ModuleMember -Function Get-NugetgoRidFlavors, Get-NugetgoReferenceGoos, Get-NugetgoFlavorGoos, Get-NugetgoFlavorDecision, Set-NugetgoRidAssets, Test-NugetgoRidLayout, Merge-NugetgoFlavorRequires, Get-NugetgoFlavorDisclosure

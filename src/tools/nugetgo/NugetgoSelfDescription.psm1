@@ -44,7 +44,8 @@ function Get-NugetgoPackedPackages {
 
 function Get-NugetgoThirdPartyRequires {
     [CmdletBinding()]
-    param([Parameter(Mandatory)][string]$RecurseRoot, [Parameter(Mandatory)][object[]]$Libraries, [string[]]$ThirdPartyPackage = @())
+    # -AllowUnreferenced: one flavor of a module whose requires differ by GOOS (nugetgo-pack.ps1 checks the union instead).
+    param([Parameter(Mandatory)][string]$RecurseRoot, [Parameter(Mandatory)][object[]]$Libraries, [string[]]$ThirdPartyPackage = @(), [switch]$AllowUnreferenced)
 
     # -ThirdPartyPackage '<module>=<nuget-id>@<package-version>', one per dependency module.
     $named = @{}
@@ -100,7 +101,7 @@ function Get-NugetgoThirdPartyRequires {
     }
 
     foreach ($module in $named.Keys) {
-        if (-not $modules.Contains($module)) { throw "REFUSED: -ThirdPartyPackage names $module, which no packed package references" }
+        if (-not $modules.Contains($module) -and -not $AllowUnreferenced) { throw "REFUSED: -ThirdPartyPackage names $module, which no packed package references" }
     }
 
     foreach ($module in $modules) {
