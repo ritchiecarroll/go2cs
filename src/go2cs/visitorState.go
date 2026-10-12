@@ -140,7 +140,7 @@ type Visitor struct {
 	standAloneComments map[token.Pos]string
 	sortedCommentPos   []token.Pos
 	commentGroups      []*ast.CommentGroup // the file's, with or without -comments (goBlankLineBetween)
-	callRparens        []token.Pos         // the `)` of each call being converted, innermost last (convExprList)
+	callParens         [][2]token.Pos      // the `(` and `)` of each call being converted, innermost last (convExprList)
 	processedComments  hashset.HashSet[token.Pos]
 	newline            string
 	indentLevel        int

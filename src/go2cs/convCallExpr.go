@@ -261,8 +261,8 @@ func identIsUntypedConst(info *types.Info, ident *ast.Ident) bool {
 
 func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) string {
 	// The call's `)` bounds the comments its argument list writes after its last argument (convExprList).
-	v.callRparens = append(v.callRparens, callExpr.Rparen)
-	defer func() { v.callRparens = v.callRparens[:len(v.callRparens)-1] }()
+	v.callParens = append(v.callParens, [2]token.Pos{callExpr.Lparen, callExpr.Rparen})
+	defer func() { v.callParens = v.callParens[:len(v.callParens)-1] }()
 
 	// The //go:cgo_unsafe_args block lift (cgoUnsafeArgsLift.go): the ONE `unsafe.Pointer(&first)` the
 	// current declaration's lift consumes renders as the synthesized block's pinned box. Intercepted
