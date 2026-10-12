@@ -1765,6 +1765,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckRangeVarReassign() => CheckTarget("RangeVarReassign");
 
     [TestMethod]
+    public void CheckRawStringLineEndings() => CheckTarget("RawStringLineEndings");
+
+    [TestMethod]
     public void CheckReceiverCapturedInClosure() => CheckTarget("ReceiverCapturedInClosure");
 
     [TestMethod]
