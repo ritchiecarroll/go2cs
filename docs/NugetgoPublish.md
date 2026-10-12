@@ -74,6 +74,12 @@ Stop at the first one that fails.
 5. **Gate: the binding.** Each library project under `PR/src/M` records a `GoInputDigest` equal to its MODULE.md row.
    The pack checks this again; reading it here catches a wrong binary before a pack runs.
 
+**A module with no Go tests** (COORD ruling 2026-10-12; tools at `claude/c2-nugetgo-cobra-increment` or later). Step 2
+refuses it ("has no package with Go test files"), so there is no `VR` and no MODULE.md: skip steps 2, 3 and 5. Its
+proof is behavioral, one row per shipped RID, each run on a host of that RID (section 3, *A module with no Go tests*).
+Its sample program is committed at `T` under `src/tests/ModuleBehavior/M@V/`: `main.go`, `go.mod`, `go.sum`, and
+`mappings.txt` with the module's row.
+
 ## 2. Pack (lane, at `T`)
 
 Two packs from the same two roots: the rehearsal for int.nugettest.org, and the release candidate. Neither is signed
@@ -88,7 +94,10 @@ pwsh -NoProfile -File <T>/src/tools/nugetgo/nugetgo-pack.ps1 -ModulePath M -GoVe
 ```
 
 The release candidate is the same command with `-Release` in place of `-RehearsalSuffix int.1`, and its own `-OutDir`
-and `-Scratch`. `-UpstreamPublishes` is given only when the module's author publishes (B6); the pack refuses the switch
+and `-Scratch`. For a module with no Go tests, the rehearsal takes `-UnvalidatedReason <text>` in place of
+`-ValidationDir`, because its rows are run on the rehearsal package; the release candidate takes `-BehaviorProofDir
+<rows>` in place of `-ValidationDir`, after section 3 has written the rows. Its VALIDATION.md is then the behavioral
+page, and its Tests badge says there are no Go tests and how many RIDs ran. `-UpstreamPublishes` is given only when the module's author publishes (B6); the pack refuses the switch
 for any other org. `-ExcludePackage` names, by import path, a library package of the module that holds the module's
 own test fixtures rather than API a consumer imports; the instance plan names any such package. The pack refuses an
 exclusion that names no library of the module, and one that a packed package references. The rehearsal label
@@ -166,7 +175,10 @@ a link above it, a package with no icon, `-Icon` given beside a `nuget/icon.png`
 given, a conversion README that does not fit the description's form, and (flavors) a flavor conversion that does
 not reproduce `PR`'s digests, a flavor that does not build, a third-party require that differs by GOOS (the cobra
 increment unions them; COORD ruling 2026-10-12), a neutral package carrying `runtimes/`, and a RID-specific package
-whose `lib/` or `runtimes/<rid>/` is not the measured flavor, or whose two Mac folders differ.
+whose `lib/` or `runtimes/<rid>/` is not the measured flavor, or whose two Mac folders differ. (Behavioral proof)
+`-BehaviorProofDir` beside `-ValidationDir` or `-UnvalidatedReason`, or for a module with Go tests; and a missing row
+for a shipped RID, a row whose outputs differ, a row recorded on another RID or GOOS than its file's, and a row whose
+assembly is not the bytes the package carries for its RID.
 
 ## 3. Rehearse on int.nugettest.org (B7)
 
@@ -190,6 +202,25 @@ whose `lib/` or `runtimes/<rid>/` is not the measured flavor, or whose two Mac f
    `go run` prints, byte for byte. A script that waits on `dotnet run` or `dotnet build` as a process passes
    `-p:UseSharedCompilation=false` (trap 9).
 6. Record the readings (date, host nickname, `T`, both digests, the two outputs) in the instance's record.
+
+### A module with no Go tests: the behavioral rows
+
+After step 2, every shipped RID's row is written on a hosted runner of its own OS. No row is inferred from another.
+
+1. **Lane:** dispatch the OS matrix's `nugetgo-behavior` stage on `T`'s branch, from the Actions page or as:
+   ```
+   gh workflow run os-matrix.yml --ref <T's branch> -f stage=nugetgo-behavior \
+     -f nugetgo_module=M@V -f nugetgo_package=PV-int.1
+   ```
+   The feed defaults to int.nugettest.org. Each of the four legs (windows-latest, ubuntu-latest, macos-15,
+   macos-15-intel) runs the sample with `go run`, converts it against `PV-int.1`, builds it with `-r <rid>` and runs
+   it with dotnet (`Invoke-NugetgoBehaviorRow.ps1`), which is steps 3 to 5 above on that OS.
+2. **Lane:** fetch the rows through the annotations API, which a restricted-egress lane can reach:
+   `pwsh -File <T>/src/tools/nugetgo/Get-NugetgoBehaviorRows.ps1 -RunId <run> -OutDir <rows>`.
+3. **Gate: four rows.** Each reads `outputs-equal: true`, its `runtime-rid` is its file's RID, its `goos` is that
+   RID's GOOS, and its `host` names the runner label and image version. The release candidate's pack (section 2)
+   binds each row's `assembly` to the bytes it packs for that RID, so a release whose bytes differ from the rehearsal's
+   is refused there.
 
 ## 4. Publish to nuget.org (owner; irreversible)
 
