@@ -71,24 +71,32 @@ internal static void Main() {
     localArr[0] = 1;
     localArr[globalLen - 1] = 2;
     fmt.Println(localˢ, len(localArr), localArr[0], localArr[99]);
+
     array<byte> big = new(1000000); /* overflow */
     big[overflow - 1] = 3;
     fmt.Println(bigˢ, len(big), big[999999]);
+
     array<byte> localExpr = new(100); /* exprLen */
     fmt.Println(localExprˢ, len(localExpr));
+
     array<byte> localLit = new(50); /* 1e2D / 2 */
     fmt.Println(localLiteralˢ, len(localLit));
+
     array<nint> localCplx = new(10); /* cplxLen */
     localCplx[9] = 4;
     fmt.Println(localComplexˢ, len(localCplx), localCplx[9]);
+
     array<array<byte>> multi = new(10, () => new(10)); /* namedLen */
     multi[9][9] = 5;
     fmt.Println(multiˢ, len(multi), len(multi[0]), multi[9][9]);
+
     array<byte> localInt = new(100); /* intLen */
     fmt.Println(localIntˢ, len(localInt));
+
     pkgArr[0] = 6;
     pkgCplxArr[9] = 7;
     fmt.Println(pkgˢ, len(pkgArr), pkgArr[0], len(pkgCplxArr), pkgCplxArr[9], len(pkgExprArr), len(pkgIntArr));
+
     floatLenArr fl = default!;
     fl[9] = 8;
     cplxLenArr cl = default!;
@@ -96,25 +104,33 @@ internal static void Main() {
     exprLenArr el = default!;
     intLenArr il = default!;
     fmt.Println(namedˢ, len(fl), fl[9], len(cl), cl[9], len(el), len(il));
+
     holder h = new();
     h.buf[99] = 10;
     h.nest[9][9] = 11;
     fmt.Println(fieldˢ, len(h.buf), h.buf[99], len(h.nest), len(h.nest[0]), h.nest[9][9]);
+
     aliasArr al = new(10);
     al[9] = 12;
     fmt.Println(aliasˢ, len(al), al[9]);
+
     array<byte> arg = new(10); /* namedLen */
     var got = roundTrip(arg);
     fmt.Println(paramˢ, len(got), got[0]);
+
     ref var lit = ref heap<array<byte>>(out var Ꮡlit);
     lit = new byte[]{1, 2}.array(10);
     fmt.Println(compositeˢ, len(lit), lit[0], lit[9]);
+
     ж<array<byte>> ptr = Ꮡlit;
     fmt.Println(pointerˢ, 10, ptr.Value[1]);
+
     var m = new map<@string, array<byte>>{["k"u8] = lit.Clone()};
     fmt.Println(mapValueˢ, len(m["k"u8, () => new array<byte>(10)]), m["k"u8, () => new array<byte>(10)][1]);
+
     var sl = GoReflect.WithElemDims(new array<byte>[]{lit.Clone()}.slice(), 10);
     fmt.Println(sliceElemˢ, len(sl), len(sl[0]), sl[0][1]);
+
     uintptr u = 1;
     nuint n = 1;
     int64 i64 = 1;

@@ -12,6 +12,7 @@ partial struct root {
 
 internal static void release(this ref root r) {
     r.fd = -r.fd;
+
     if (r.done != default!) {
         r.done.ᐸꟷ(r.fd);
     }
@@ -72,12 +73,16 @@ internal static nint localChain() {
 internal static void Main() {
     var a = Ꮡ(new Root(root: Ꮡ(new root(fd: 3))));
     fmt.Println(deferChain<nint>(ref (a).DerefOrNull(), 0), (~(~a).root).fd);
+
     var b = Ꮡ(new Root(root: Ꮡ(new root(fd: 5, done: new channel<nint>(0)))));
     fmt.Println(goChain(ref (b).DerefOrNull()), (~(~b).root).fd);
+
     var c = Ꮡ(new Root(root: Ꮡ(new root(fd: 11))));
     fmt.Println(immediateChain(ref (c).DerefOrNull()));
+
     var d = Ꮡ(new root(fd: 13));
     fmt.Println(directReceiver(d), (~d).fd);
+
     fmt.Println(localChain());
 }
 

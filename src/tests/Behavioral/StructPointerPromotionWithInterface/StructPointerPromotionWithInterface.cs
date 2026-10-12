@@ -160,31 +160,41 @@ internal static void Main() {
     ref var e = ref heap<MyError>(out var Ꮡe);
     e = new MyError(time.Now(), "Hello"u8);
     var a = new MyCustomError("New One"u8, default!, Ꮡe);
+
     a.Message = newˢ;
     a.What = worldˢ;
+
     fmt.Println(myErrorWhatˢ, e.What);
     fmt.Println(myCustomErrorWhatˢ, a.What);
     fmt.Println(myCustomErrorMethodˢ, a.Time());
+
     ref var inner = ref heap<ж<Inner>>(out var Ꮡinner);
     inner = Ꮡ(new Inner(Value: "hello"u8));
     var innerPtr = Ꮡinner;
+
     var middle = new Middle(Inner: inner);
     fmt.Println(middle.Value);
+
     var outer = new Outer(ptr: innerPtr);
     fmt.Println((~(outer.ptr.ValueSlot)).Value);
+
     var dev = Ꮡ(new Device(name: "sensor"u8, hits: 3));
     Describer dsc = new deviceHandle(Device: dev);
     fmt.Println(dsc.Describe());
     var p = dsc.Tag();
     p.Value = 7;
     fmt.Println((~dev).hits);
+
     var pw = new pair(new leftSide(tag: "a"u8), new rightSide(tag: "b"u8));
     fmt.Println(pw.leftSide.tag, pw.rightSide.Ping());
+
     fmt.Println(probeRig(new rig(dev: new Device(name: "r"u8, hits: 42))));
+
     var ck = Ꮡ(new counterKind(nil));
     ck.Value.label = "k9"u8;
     stamper st = new counterKindжstamper(ck);
     fmt.Println(st.Stamp(), st.Stamp(), st.Hits());
+
     var stn = Ꮡ(new Station(id: "s1"u8));
     Pinger pg = new link(Station: stn);
     fmt.Println(pg.Ping(), pg.Ping(), (~stn).pings);

@@ -51,16 +51,19 @@ internal static void Main() {
     fmt.Println(sameˢ, a(), varˢ, b());
     fmt.Println(sameAnyˢ, show((Func<@string>)(Run)));
     _ = (Func<@string>)(Run);
+
     Func<time.Duration, /*<-*/channel<time.Time>> c = time.After;
     Func<time.Duration, /*<-*/channel<time.Time>> d = time.After;
     fmt.Println(importedˢ, show((c).OrTypedNilFunc()), varˢ, show((d).OrTypedNilFunc()));
     fmt.Println(importedAnyˢ, show((Func<time.Duration, /*<-*/channel<time.Time>>)(time.After)));
     _ = (Func<time.Duration, /*<-*/channel<time.Time>>)(time.After);
+
     any f = (Func<@string>)(Run);
     any h = default!;
     h = (Func<time.Duration, /*<-*/channel<time.Time>>)(time.After);
     var g = new any[]{(Func<time.Duration, /*<-*/channel<time.Time>>)(time.After), (Func<@string>)(Run)}.slice();
     fmt.Println(slotsˢ, show(f), (@string)"|"u8, show(h), (@string)"|"u8, show(g[0]), (@string)"|"u8, show(g[1]), (@string)"|"u8, show(retAny()));
+
     Func<@string> e = Run;
     fmt.Println(controlˢ, e(), use(Run), new T(nil).Run());
 }

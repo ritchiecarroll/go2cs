@@ -57,13 +57,16 @@ internal static void Main() {
     var b = Ꮡ(new box(nil));
     fmt.Println(b.isNil(), b.notNil());
     fmt.Println(b.same(b), b.same(Ꮡ(new box(nil))));
+
     var e = Ꮡ(new embedder(nil));
     e.Value.val = 7;
     e.Value.tag = 9;
     fmt.Println(e.isNil(), e.checkGuard());
+
     ж<box> np = default!;
     fmt.Println(np.isNil(), np.notNil(), np.describe());
     fmt.Println(b.describe());
+
     ж<embedder> ne = default!;
     fmt.Println(ne.isNil(), ne.checkGuard());
 }

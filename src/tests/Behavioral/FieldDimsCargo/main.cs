@@ -47,41 +47,56 @@ private static readonly object sliceElemKindˢ = (@string)"slice elem kind    "u
 
 internal static void Main() {
     var t = reflect.TypeOf(new Target(nil));
+
     fmt.Println(fieldTypesˢ);
+
     for (nint i = 0; i < t.NumField(); i++) {
         var f = t.Field(i);
         fmt.Printf("%-8s %s\n"u8, f.Name, f.Type);
     }
+
     var marr = t.Field(0).Type;
+
     fmt.Println(mapAccessorsˢ);
     fmt.Println(keyˢ, marr.Key(), marr.Key().Len());
     fmt.Println(elemˢ, marr.Elem(), marr.Elem().Len());
+
     fmt.Println(decodeMapAllocationˢ);
     fmt.Println(newKeyLenˢ, reflect.New(marr.Key()).Elem().Len());
     fmt.Println(newElemLenˢ, reflect.New(marr.Elem()).Elem().Len());
+
     var deep = t.Field(2).Type;
+
     fmt.Println(pointerChainˢ);
     fmt.Println(deepˢ, deep);
     fmt.Println(deepElem3ˢ, deep.Elem().Elem().Elem(), deep.Elem().Elem().Elem().Len());
     fmt.Println(ptrElemˢ, t.Field(1).Type.Elem(), t.Field(1).Type.Elem().Len());
+
     ref var target = ref heap(new Target(), out var Ꮡtarget);
+
     var walk = reflect.ValueOf(Ꮡtarget).Elem().Field(2);
+
     while (walk.Kind() == reflect.ΔPointer) {
         if (walk.IsNil()) {
             walk.Set(reflect.New(walk.Type().Elem()));
         }
+
         walk = walk.Elem();
     }
+
     fmt.Println(decIndirectWalkˢ);
     fmt.Println(landedOnˢ, walk.Type(), walk.Len(), walk.CanAddr());
+
     fmt.Println(oneAccessorAtATimeˢ);
     fmt.Println(elemOnlyKeyˢ, t.Field(3).Type.Key());
     fmt.Println(elemOnlyElemˢ, t.Field(3).Type.Elem(), t.Field(3).Type.Elem().Len());
     fmt.Println(keyOnlyKeyˢ, t.Field(4).Type.Key(), t.Field(4).Type.Key().Len());
     fmt.Println(keyOnlyElemˢ, t.Field(4).Type.Elem());
+
     fmt.Println(initializerRouteˢ);
     fmt.Println(plainˢ, t.Field(5).Type, t.Field(5).Type.Len());
     fmt.Println(nestedˢ, t.Field(6).Type, t.Field(6).Type.Len(), t.Field(6).Type.Elem().Len());
+
     fmt.Println(boundariesˢ);
     fmt.Println(namedPtrElemKindˢ, t.Field(7).Type.Elem().Kind());
     fmt.Println(sliceElemKindˢ, t.Field(8).Type.Elem().Kind());

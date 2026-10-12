@@ -41,13 +41,16 @@ internal static void Main() {
             fmt.Println(stringToSidReturnedANilˢ, s);
             continue;
         }
+
         (var back, err) = sid.String();
         if (err != default!) {
             fmt.Println(sidStringErrorˢ, err);
             continue;
         }
+
         fmt.Println(s, (@string)"->"u8, back, roundtripˢ, back == s, len0ˢ, sid.Len() > 0);
     }
+
     {
         var (_, err) = syscall.StringToSid(notASidˢ); if (err == default!){
             fmt.Println(malformedSidRejectedˢ);
@@ -55,11 +58,13 @@ internal static void Main() {
             fmt.Println(malformedSidRejectedTrueˢ);
         }
     }
+
     var (a, _) = syscall.StringToSid(s1532545ˢ);
     var (b, _) = syscall.StringToSid(s1532545ˢ);
     var (@as, _) = a.String();
     var (bs, _) = b.String();
     fmt.Println(stableˢ, @as == bs, @as == "S-1-5-32-545"u8);
+
     ref var name = ref heap<ж<uint16>>(out var Ꮡname);
     ref var bufType = ref heap(new uint32(), out var ᏑbufType);
     {

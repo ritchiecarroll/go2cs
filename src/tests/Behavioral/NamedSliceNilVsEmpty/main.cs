@@ -29,22 +29,31 @@ private static readonly @string chanMadeˢ = "chanMade"u8;
 internal static void Main() {
     IntSlice zeroSlice = default!;
     probe(sliceZeroˢ, zeroSlice == default!);
+
     var emptySlice = new IntSlice(new nint[]{}.slice());
     probe(sliceEmptyLiteralˢ, emptySlice == default!);
+
     var madeSlice = new IntSlice(0);
     probe(sliceMakeZeroˢ, madeSlice == default!);
+
     var filledSlice = new IntSlice(new nint[]{1, 2}.slice());
     probe(sliceFilledˢ, filledSlice == default!);
+
     var tail = filledSlice[2..2];
     probe(sliceResliceTailCapZeroˢ, tail == default!);
+
     var nilReslice = zeroSlice[0..0];
     probe(sliceNilResliceˢ, nilReslice == default!);
+
     StrIntMap zeroMap = default!;
     probe(mapZeroˢ, zeroMap == default!);
+
     var emptyMap = new StrIntMap(new map<@string, nint>{});
     probe(mapEmptyLiteralˢ, emptyMap == default!);
+
     IntChan zeroChan = default!;
     probe(chanZeroˢ, zeroChan == default!);
+
     var madeChan = new IntChan(0);
     probe(chanMadeˢ, madeChan == default!);
 }

@@ -28,6 +28,7 @@ internal static void Main() {
     ref var h = ref heap<view>(out var Ꮡh);
     h = new view(tag: 7, n: 5);
     fmt.Println(readN(Ꮡh));
+
     ref var g = ref heap<header>(out var Ꮡg);
     g = new header(tag: 9, n: 3);
     nint v = ((Ꮡg.Reinterpret<header, view>())).Value.n;

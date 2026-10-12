@@ -55,18 +55,24 @@ internal static void Main() {
     buf[0] = 0x99;
     writeThrough(buf[1..]);
     fmt.Println(aliasedWriteˢ, buf);
+
     var p = Ꮡ(array<byte>.Alias(buf[1..], 4));
     buf[2] = 0xab;
     fmt.Println(readBackThroughPointerˢ, p.Value[0], p.Value[1], p.Value[2], p.Value[3]);
+
     var got = valueCopy(buf[1..]);
     fmt.Println(valueConversionˢ, got, sliceUnchangedˢ, buf[1..5]);
+
     var deref = p.Value.Clone();
     deref[1] = 0x00;
     fmt.Println(derefCopyˢ, deref, stillThroughPointerˢ, p.Value[1]);
+
     var view = (~p)[..];
     view[3] = 0x7f;
     fmt.Println(sliceOfArrayPointerˢ, buf[4], lenCapˢ, len(view), cap(view));
+
     fmt.Println(elementIdentityˢ, p.at<byte>(0) == Ꮡ(buf, 1), windowedIdentityˢ, p.at<byte>(2) == Ꮡ(buf, 3));
+
     var src = new byte[]{
         0x10, 0x20, 0x30, 0x00,
         0x40, 0x50, 0x60, 0xff,
@@ -75,6 +81,7 @@ internal static void Main() {
     var dst = new slice<byte>(len(src));
     premultiplyLike(dst, src);
     fmt.Println(windowedLoopˢ, dst);
+
     fmt.Println(arrayLengthˢ, 4, len(p.Value));
 }
 

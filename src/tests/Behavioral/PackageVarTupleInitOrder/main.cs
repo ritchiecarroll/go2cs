@@ -16,6 +16,7 @@ internal static (Sum, error) build(/*[4]*/ array<byte> src) {
     if (src[0] == 0) {
         return (new Sum(new byte[4].array()), errors.New(bWasReadBeforeItWasˢ));
     }
+
     return (((Sum)src), default!);
 }
 
@@ -25,6 +26,7 @@ internal static Sum must(Sum s, error err) {
     if (err != default!) {
         throw panic(err);
     }
+
     return s.Clone();
 }
 

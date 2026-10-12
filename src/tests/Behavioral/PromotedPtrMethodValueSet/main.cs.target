@@ -55,12 +55,15 @@ partial interface bumper {
 
 internal static @string names(reflectꓸType t) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
+
     for (nint i = 0; i < t.NumMethod(); i++) {
         if (i > 0) {
             Ꮡsb.WriteString(","u8);
         }
+
         Ꮡsb.WriteString(t.Method(i).Name);
     }
+
     return sb.String();
 }
 
@@ -70,21 +73,26 @@ private static readonly @string bumpˢ = "Bump"u8;
 internal static void describe(@string label, any v) {
     var t = reflect.TypeOf(v);
     fmt.Printf("%s: NumMethod=%d [%s]\n"u8, label, t.NumMethod(), names(t));
+
     var rv = reflect.ValueOf(v);
     var m = rv.MethodByName(bumpˢ);
     fmt.Printf("%s: MethodByName(Bump) valid=%v\n"u8, label, m.IsValid());
+
     if (m.IsValid()) {
         var @out = m.Call(default!);
         fmt.Printf("%s: Bump via MethodByName = %d\n"u8, label, @out[0].Int());
     }
+
     for (nint i = 0; i < t.NumMethod(); i++) {
         if (t.Method(i).Name == "Bump"u8) {
             var @out = rv.Method(i).Call(default!);
             fmt.Printf("%s: Bump via Method(%d).Call = %d\n"u8, label, i, @out[0].Int());
         }
     }
+
     var (b, ok) = v._<bumper>(ᐧ);
     fmt.Printf("%s: assert bumper ok=%v\n"u8, label, ok);
+
     if (ok) {
         fmt.Printf("%s: Bump via interface = %d\n"u8, label, b.Bump());
     }
@@ -117,35 +125,43 @@ internal static void Main() {
     describe(samePˢ, p);
     describe(samePˢ2, Ꮡp);
     fmt.Println(samePInnerAfterˢ, p.n);
+
     ref var v = ref heap<SameV>(out var Ꮡv);
     v = new SameV(new Inner(20));
     describe(sameVˢ, v);
     describe(sameVˢ2, Ꮡv);
     fmt.Println(sameVInnerAfterˢ, v.n);
+
     ref var vp = ref heap<OuterVP>(out var Ꮡvp);
     vp = new OuterVP(new MidP(Ꮡ(new Inner(30))));
     describe(outerVPˢ, vp);
     describe(outerVPˢ2, Ꮡvp);
     fmt.Println(outerVPInnerAfterˢ, vp.n);
+
     ref var pv = ref heap<OuterPV>(out var Ꮡpv);
     pv = new OuterPV(Ꮡ(new MidV(new Inner(40))));
     describe(outerPVˢ, pv);
     describe(outerPVˢ2, Ꮡpv);
     fmt.Println(outerPVInnerAfterˢ, pv.n);
+
     ref var vv = ref heap<OuterVV>(out var Ꮡvv);
     vv = new OuterVV(new MidV(new Inner(50)));
     describe(outerVVˢ, vv);
     describe(outerVVˢ2, Ꮡvv);
     fmt.Println(outerVVInnerAfterˢ, vv.n);
+
     var rw = new bufio.ReadWriter(Reader: bufio.NewReader(new strings_ReaderжReader(strings.NewReader(firstSecondˢ))));
     var rt = reflect.TypeOf(rw);
     var (_, hasReadString) = rt.MethodByName(readStringˢ);
     fmt.Println(bufioReadWriterValueHasˢ, hasReadString);
+
     var @out = reflect.ValueOf(rw).MethodByName(readStringˢ).Call(new reflectꓸValue[]{reflect.ValueOf((byte)(rune)'\n')}.slice());
     fmt.Printf("ReadString via reflect = %q\n"u8, @out[0].String());
+
     any x = rw;
     var (r, ok) = x._<Δio.Reader>(ᐧ);
     fmt.Println(bufioReadWriterValueˢ, ok);
+
     if (ok) {
         var buf = new slice<byte>(6);
         var (n, _) = r.Read(buf);

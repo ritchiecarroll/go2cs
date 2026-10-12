@@ -31,22 +31,31 @@ internal static void Main() {
     ref var zoo = ref heap<array<Animal>>(out var Ꮡzoo);
     zoo = new Animal[]{new FrogжAnimal(f), new DogжAnimal(d)}.array();
     Test t = default!;
+
     fmt.Printf("Iface cmp result = %v\n"u8, AreEqual(zoo[0], f));
     fmt.Printf("Iface cmp result = %v\n"u8, AreEqual(zoo[0], zoo[0]));
     fmt.Printf("Iface cmp result = %v\n"u8, !AreEqual(zoo[0], t));
+
     any stored = gobˢ;
     fmt.Printf("any cmp = %v %v\n"u8, !AreEqual(stored, (@string)("gob")), !AreEqual(stored, (@string)("xml")));
+
     checkErr(1);
     checkErr(0);
     useAndRelease();
+
     Animal a = default!;
     fmt.Printf("%T\n"u8, a);
+
     foreach (var (_, aΔ1) in zoo.ΔRangeSnapshot()) {
         fmt.Println(aΔ1.Type(), canˢ, aΔ1.Swim());
     }
+
     fmt.Printf("%T\n"u8, a);
+
     ShowZoo(Ꮡzoo);
+
     fmt.Printf("%T\n"u8, a);
+
     var vowels = new array<bool>(128){[(rune)'a'] = true, [(rune)'e'] = true, [(rune)'i'] = true, [(rune)'o'] = true, [(rune)'u'] = true, [(rune)'y'] = true};
     fmt.Println(vowels);
 }
@@ -122,6 +131,7 @@ public static void ShowZoo(/*[2]*/ ж<array<Animal>> Ꮡzoo) {
     ref var zoo = ref Ꮡzoo.DerefOrNull();
 
     Animal a = default!;
+
     foreach (var (_, vᴛ1) in zoo.ΔRangeSnapshot()) {
         a = vᴛ1;
 

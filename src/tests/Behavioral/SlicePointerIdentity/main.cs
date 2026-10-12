@@ -37,27 +37,35 @@ internal static void Main() {
     foreach (var (i, _) in s) {
         s[i] = i * 10;
     }
+
     fmt.Println(selfˢ, Ꮡ(s, 0) == Ꮡ(s, 0));
     fmt.Println(selfMidˢ, Ꮡ(s, 2) == Ꮡ(s, 2));
     fmt.Println(distinctˢ, Ꮡ(s, 0) == Ꮡ(s, 1));
+
     var t = s[1..];
     fmt.Println(resliceˢ, Ꮡ(t, 0) == Ꮡ(s, 1));
     fmt.Println(resliceXˢ, Ꮡ(t, 0) == Ꮡ(s, 0));
     fmt.Println(reslice2ˢ, Ꮡ(t, 2) == Ꮡ(s, 3));
+
     var u = t[1..];
     fmt.Println(reslice2ˢ2, Ꮡ(u, 0) == Ꮡ(s, 2));
+
     var w = append(s.slice(0, 0, 1), (nint)(99));
     fmt.Println(appendSameˢ, Ꮡ(w, 0) == Ꮡ(s, 0));
+
     ref var a = ref heap(new array<nint>(4), out var Ꮡa);
     var v = a[..];
     fmt.Println(arrSelfˢ, Ꮡa.at<nint>(1) == Ꮡa.at<nint>(1));
     fmt.Println(arrVsSlcˢ, Ꮡ(v, 2) == Ꮡa.at<nint>(2));
     fmt.Println(arrVsSlc2ˢ, Ꮡ(v, 0) == Ꮡa.at<nint>(1));
+
     var ns = new slice<node>(3);
     fmt.Println(structElemˢ, Ꮡ(ns, 1) == Ꮡ(ns, 1), Ꮡ(ns, 1) == Ꮡ(ns, 2));
+
     var p = Ꮡ(s, 1);
     p.Value = 42;
     fmt.Println(writeThruˢ, s[1], t[0]);
+
     var m = new map<ж<nint>, @string>{};
     m[Ꮡ(s, 2)] = twoˢ;
     m[Ꮡ(s, 3)] = threeˢ;
@@ -68,6 +76,7 @@ internal static void Main() {
     fmt.Println(mapResliceˢ, m[Ꮡ(t, 1)], m[Ꮡ(t, 2)]);
     var (_, miss) = m[Ꮡ(s, 0), ꟷ];
     fmt.Println(mapMissˢ, miss);
+
     var z = new slice<nint>(4);
     fmt.Println(otherBackˢ, Ꮡ(z, 0) == Ꮡ(s, 0));
 }

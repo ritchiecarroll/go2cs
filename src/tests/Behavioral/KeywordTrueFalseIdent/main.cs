@@ -16,6 +16,7 @@ internal static @string setFlag(bool @true) {
 
 internal static void Main() {
     fmt.Println(setFlag(true), setFlag(false));
+
     nint @false = 7;
     fmt.Println(@false + 1);
 }

@@ -23,6 +23,7 @@ internal static void Main() {
     ref var x = ref heap(new counters(), out var Ꮡx);
     touch(ref x.c[0]);
     touch(ref x.c[2]);
+
     slice<ж<atomic.Int32>> ptrs = default!;
     foreach (var (i, _) in x.c) {
         ptrs = append(ptrs, Ꮡx.at(counters.Ꮡc, i));

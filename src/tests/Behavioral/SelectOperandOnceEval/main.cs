@@ -51,12 +51,14 @@ internal static void Main() {
         fmt.Println(s1Gotˢ, v, madeˢ, made);
         break;
     }}
+
     var selᴛ2 = after();
     switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
     case 0 when selᴛ2.ꟷᐳ(out var v): {
         fmt.Println(s2Gotˢ, v, afterCallsˢ, afterCalls);
         break;
     }}
+
     ref var ch = ref heap<channel<nint>>(out var Ꮡch);
     ch = new channel<nint>(1);
     ch.ᐸꟷ(7);
@@ -68,6 +70,7 @@ internal static void Main() {
         fmt.Println(s3Sink0ˢ, sink[0], lenChˢ, len(ch), lenReplˢ, len(repl));
         break;
     }}
+
     var selᴛ4 = fresh();
     switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
     case 0 when selᴛ4.ꟷᐳ(out var v): {

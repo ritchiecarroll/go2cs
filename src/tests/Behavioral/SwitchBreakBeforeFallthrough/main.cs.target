@@ -15,6 +15,7 @@ private static readonly @string anonymousˢ = "anonymous"u8;
 
 internal static @string zone(nint kind, @string s) {
     @string @out = unsetˢ;
+
     var exprᴛ1 = kind;
     var matchᴛ1 = false;
     if (exprᴛ1 == isoZone) { matchᴛ1 = true;
@@ -70,6 +71,7 @@ internal static void Main() {
         new(nameZone, "MST"u8),
         new(9, "?"u8)
     }.slice();
+
     foreach (var (_, c) in cases) {
         fmt.Printf("%d %q -> %s\n"u8, c.kind, c.s, zone(c.kind, c.s));
     }

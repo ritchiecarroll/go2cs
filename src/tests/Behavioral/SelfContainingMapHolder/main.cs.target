@@ -60,11 +60,14 @@ private static readonly object directSelfˢ = (@string)"direct self:"u8;
 internal static void direct() {
     Direct nilD = default!;
     fmt.Println(directNilˢ, nilD == default!, len(nilD));
+
     var d = new Direct(new map<nint, Direct>{[1] = new Direct(new map<nint, Direct>{[2] = default!}), [3] = new map<nint, Direct>{}});
     d[4] = new Direct(new map<nint, Direct>{[5] = new Direct(new map<nint, Direct>{[6] = default!})});
     fmt.Println(directLenˢ, len(d), len(d[1]), len(d[4][5]), d[1][2] == default!, d[3] == default!);
+
     var (v, ok) = d[7, ꟷ];
     fmt.Println(directMissingˢ, v == default!, ok);
+
     delete(d, 3);
     var keys = new nint[]{}.slice();
     foreach (var (k, _) in d) {
@@ -72,6 +75,7 @@ internal static void direct() {
     }
     sort.Ints(keys);
     fmt.Println(directKeysˢ, keys);
+
     var m = new Direct(4);
     m[0] = m;
     fmt.Println(directSelfˢ, len(m[0][0][0]));
@@ -167,27 +171,36 @@ private static readonly object finalizerˢ = (@string)"finalizer:"u8;
 internal static void reflection() {
     ref var d = ref heap<Direct>(out var Ꮡd);
     d = new Direct(new map<nint, Direct>{[1] = new Direct(new map<nint, Direct>{[2] = default!})});
+
     var t = reflect.TypeOf(d);
     fmt.Println(reflectTypeˢ, t.Kind(), AreEqual(t.Elem(), t), t.Key().Kind(), t.Size());
     fmt.Printf("reflect %%T: %T\n"u8, d);
+
     var v = reflect.ValueOf(d);
     fmt.Println(reflectLenˢ, v.Len(), v.MapIndex(reflect.ValueOf((nint)(1))).Len());
+
     v.SetMapIndex(reflect.ValueOf((nint)(3)), reflect.ValueOf(new Direct(new map<nint, Direct>{})));
     fmt.Println(reflectSetˢ, len(d), d[3] != default!);
+
     nint n = 0;
     for (var iter = v.MapRange(); iter.Next(); ) {
         n++;
     }
     fmt.Println(reflectRangeˢ, n);
+
     fmt.Println(reflectDeepequalˢ, reflect.DeepEqual(new Direct(new map<nint, Direct>{[1] = new Direct(new map<nint, Direct>{[2] = default!})}), new Direct(new map<nint, Direct>{[1] = new Direct(new map<nint, Direct>{[2] = default!})})), reflect.DeepEqual(new Direct(new map<nint, Direct>{[1] = default!}), new Direct(new map<nint, Direct>{[2] = default!})));
+
     var s = new DirectStr(new map<@string, DirectStr>{["a"u8] = new DirectStr(new map<@string, DirectStr>{["b"u8] = default!})});
     fmt.Printf("fmt: %v %d\n"u8, s, len(s));
+
     var ds = new DefinedOverStruct(new viaStructV(n: 7, m: new ViaStruct(new map<nint, viaStructV>{[1] = new()})));
     var fv = reflect.ValueOf(ds);
     fmt.Println(reflectFieldsˢ, fv.NumField(), fv.Field(0).Int(), fv.Field(1).Len());
+
     fmt.Stringer st = d;
     var (back, ok) = st._<Direct>(ᐧ);
     fmt.Println(adapterˢ, st.String(), ok, len(back));
+
     var p = new PDirect(Ꮡd);
     runtime.SetFinalizer(p, (PDirect _) => {
     });

@@ -35,7 +35,9 @@ private static readonly @string otherˢ = "other"u8;
 
 internal static void Main() {
     var s = New(debugˢ);
+
     fmt.Println((~s).setting == nil);
+
     var sʗ1 = s;
     ((Action)(() => {
         GoFrame ᒐ = default;
@@ -48,12 +50,15 @@ internal static void Main() {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }))();
+
     ж<setting> p = default!;
     s.Value.setting = p;
     fmt.Println((~s).setting == nil);
+
     s.Value.setting = lookup(gcpacertraceˢ);
     fmt.Println((~s).setting == nil);
     fmt.Println((~s).name, s.bump(), s.bump());
+
     var direct = lookup(otherˢ);
     s.Value.setting = direct;
     s.Value.count = 10;

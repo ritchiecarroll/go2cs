@@ -18,27 +18,35 @@ internal static void Main() {
     ref var ptr = ref heap<ж<nint>>(out var Ꮡptr);
     ref var pptr = ref heap<ж<ж<nint>>>(out var Ꮡpptr);
     ж<ж<ж<nint>>> ppptr = default!;
+
     a = 3000;
+
     ptr = Ꮡa;
+
     pptr = Ꮡptr;
     ppptr = Ꮡpptr;
+
     fmt.Printf("Value of a = %d\n"u8, a);
     PrintValPtr(ptr);
     fmt.Printf("Main-function return value available at *ptr = %d\n"u8, EscapePrintValPtr(ptr).Value);
     fmt.Printf("Main-function updated value available at *ptr = %d\n"u8, ptr.Value);
     PrintValPtr2Ptr(pptr);
     PrintValPtr2Ptr2Ptr(ppptr);
+
     a = 1900;
+
     fmt.Printf("Value of a = %d\n"u8, a);
     PrintValPtr(ptr);
     fmt.Printf("Main-function return value available at *ptr = %d\n"u8, EscapePrintValPtr(ptr).Value);
     fmt.Printf("Main-function updated value available at *ptr = %d\n"u8, ptr.Value);
     PrintValPtr2Ptr(pptr);
     PrintValPtr2Ptr2Ptr(ppptr);
+
     ref var b = ref heap<Buffer>(out var Ꮡb);
     b = new Buffer(nil);
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
+
     derefElements();
 }
 
@@ -50,7 +58,9 @@ public static (nint n, error err) Read(this ref Buffer b, slice<byte> p) {
     if (n > 0) {
         b.lastRead = opRead;
     }
+
     (Ꮡ(new Buffer(buf: p))).Read(p);
+
     return (n, default!);
 }
 

@@ -40,6 +40,7 @@ internal static void Main() {
     recovered(liveThenTypedNilSameTypeˢ, () => {
         Ꮡv1.Store(((Action<nint>)(default!)).OrTypedNilFunc());
     });
+
     ref var v2 = ref heap(new atomic.Value(), out var Ꮡv2);
     Ꮡv2.Store(((Action<nint>)(default!)).OrTypedNilFunc());
     recovered(typedNilThenLiveSameTypeˢ, () => {
@@ -47,11 +48,13 @@ internal static void Main() {
             _ = fd;
         });
     });
+
     ref var v3 = ref heap(new atomic.Value(), out var Ꮡv3);
     Ꮡv3.Store(((Action<nint>)(default!)).OrTypedNilFunc());
     recovered(typedNilThenTypedNilˢ, () => {
         Ꮡv3.Store(((Action<@string>)(default!)).OrTypedNilFunc());
     });
+
     ref var v4 = ref heap(new atomic.Value(), out var Ꮡv4);
     Ꮡv4.Store((nint fd) => {
         _ = fd;
@@ -61,11 +64,13 @@ internal static void Main() {
             _ = fd;
         });
     });
+
     ref var v5 = ref heap(new atomic.Value(), out var Ꮡv5);
     Ꮡv5.Store((nint)(1));
     recovered(intThenStringDifferentˢ, () => {
         Ꮡv5.Store((@string)"x"u8);
     });
+
     ref var v6 = ref heap(new atomic.Value(), out var Ꮡv6);
     Ꮡv6.Store(nint (nint fd) => fd * 2);
     {

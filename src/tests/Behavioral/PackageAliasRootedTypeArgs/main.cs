@@ -113,15 +113,19 @@ internal static void Main() {
     anon r = new anon(A: 9);
     iface s = new Stringish[]{new Header(Name: "if"u8, Size: 6)}.slice();
     anonI t = new zed(v: 11);
+
     var sendCh = new channel<Header>(1);
     sends send = sendCh.WithDirection(GoChanDir.Send);
     var recvCh = new channel<Header>(1);
     recvCh.ᐸꟷ(new Header(Name: "recv"u8, Size: 12));
     recvs recv = recvCh.WithDirection(GoChanDir.Recv);
+
     f.ᐸꟷ("ch"u8);
     send.ᐸꟷ(new Header(Name: "send"u8, Size: 13));
+
     k0();
     var (name, err) = k2(new Header(Name: "k2"u8, Size: 14));
+
     fmt.Println(namesˢ, a, sizesˢ, b, gridˢ, c, errsˢ, d);
     fmt.Println(cplxˢ, e, cplx2ˢ, e2, chansˢ, ᐸꟷ(f), arrˢ, g);
     fmt.Println(hdrsˢ, h, rdrsˢ, i, ptrsˢ, j, (@string)"fn:"u8, k(abcdˢ));

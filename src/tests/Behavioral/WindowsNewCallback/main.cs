@@ -47,18 +47,24 @@ private static readonly object callbackPanicUnwindsˢ = (@string)"callback-panic
 internal static void Main() {
     var kernel32 = syscall.NewLazyDLL(kernel32Dllˢ);
     var enumSystemLocalesW = kernel32.NewProc(enumSystemLocalesWˢ);
+
     var cb1 = syscall.NewCallback(onLocale);
     var cb2 = syscall.NewCallback(onLocale);
     fmt.Println(sameFuncSamePointerˢ, cb1 == cb2);
+
     var cbOther = syscall.NewCallback(onLocaleOther);
     fmt.Println(differentFuncDifferentˢ, cbOther != cb1);
+
     enumSystemLocalesW.Call(cb1, (uintptr)0x1);
     fmt.Println(callbackInvokedˢ, invoked);
+
     var enumTimeFormatsEx = kernel32.NewProc(enumTimeFormatsExˢ);
     uintptr localeNameUserDefault = 0;
     enumTimeFormatsEx.Call(syscall.NewCallback(onTimeFormat), localeNameUserDefault, 0, wantLParam);
     fmt.Printf("lparam-round-trip: %#x (want %#x)\n"u8, seenLParam, wantLParam);
+
     fmt.Println(nonconformingRefusalˢ, refusalText());
+
     fmt.Println(callbackPanicUnwindsˢ, panicUnwindText(enumTimeFormatsEx));
 }
 

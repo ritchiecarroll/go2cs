@@ -54,6 +54,7 @@ internal static @string viaLocal(Reader r) {
 internal static void Main() {
     fmt.Println(viaLocal(new srcжReader(Ꮡ(new src(data: slice<byte>("abcd"u8))))));
     fmt.Println(viaForeign(new srcжio_Reader(Ꮡ(new src(data: slice<byte>("wxyz"u8))))));
+
     var s = Ꮡ(new src(data: slice<byte>("0123456789"u8)));
     fmt.Println(viaLocal(new srcжReader(s)));
     fmt.Println(viaForeign(new srcжio_Reader(s)));

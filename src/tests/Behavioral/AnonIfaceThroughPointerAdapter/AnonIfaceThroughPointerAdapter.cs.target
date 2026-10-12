@@ -46,6 +46,7 @@ internal partial interface main_typeᴛ2 /*dyn*/ {
 
 internal static void Main() {
     speaker s = new thingжspeaker(Ꮡ(new thing(7)));
+
     {
         var (p, ok) = s._<main_type>(ᐧ); if (ok){
             fmt.Println(pingOkˢ, p.Ping());
@@ -53,6 +54,7 @@ internal static void Main() {
             fmt.Println(pingMissedˢ);
         }
     }
+
     {
         var (b, ok) = s._<main_typeᴛ1>(ᐧ); if (ok){
             fmt.Println(bothOkˢ, b.Ping(), b.Pong());
@@ -60,6 +62,7 @@ internal static void Main() {
             fmt.Println(bothMissedˢ);
         }
     }
+
     {
         var (_, ok) = s._<main_typeᴛ2>(ᐧ); if (ok){
             fmt.Println(quitMatchedWrongˢ);

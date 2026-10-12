@@ -105,12 +105,16 @@ internal static void Main() {
     var a = new nint[]{1, 2, 3}.slice();
     forward(a.ꓸꓸꓸ);
     fmt.Println(forwardWroteThroughˢ, a);
+
     fmt.Println(sumˢ, sum(a.ꓸꓸꓸ), sum(), sum(5));
     fmt.Println(gatherˢ, gather(new nint[]{0}.slice(), 1, 2), gather(default!, a.ꓸꓸꓸ));
+
     var d = new slice<nint>(2);
     nint n = fill(d, 8, 9, 10);
     fmt.Println(fillˢ, n, d);
+
     fmt.Println(describeˢ, describe(dSVˢ, (nint)(1), twoˢ, 3.5D));
+
     fmt.Println(intoˢ, into(1, 2));
     fmt.Println(copyIntoˢ, copyInto(1, 2, 3));
     var k = keep(5, 6);

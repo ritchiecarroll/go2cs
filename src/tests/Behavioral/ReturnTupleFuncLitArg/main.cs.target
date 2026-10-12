@@ -51,8 +51,10 @@ internal static void Main() {
     var (h, label, err) = makeHandlers("go"u8);
     fmt.Println(label, err);
     h.invoke(pingˢ);
+
     var s = makeSingle(fourˢ);
     s(pongˢ);
+
     var p = makePlain(3);
     p(plainˢ);
 }

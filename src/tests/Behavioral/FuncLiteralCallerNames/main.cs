@@ -8,11 +8,14 @@ partial class main_package {
 
 internal static partial @string who() {
     var pc = new slice<uintptr>(1);
+
     if (runtime.Callers(2, pc) == 0) {
         return ""u8;
     }
+
     var frames = runtime.CallersFrames(pc);
     var (frame, _) = frames.Next();
+
     return frame.Function;
 }
 
@@ -120,6 +123,7 @@ internal static partial void deferred() {
     GoFrame ᒐ = default;
     try {
         fmt.Println(namedControlˢ, who());
+
         defer(() => {
             fmt.Println(deferredˢ, who());
         }, ref ᒐ);

@@ -35,6 +35,7 @@ internal static void Main() {
     fmt.Println(table[new OSArch("linux"u8, "amd64"u8)].supported);
     fmt.Println(table[new OSArch("windows"u8, "386"u8)].supported);
     fmt.Println(len(table));
+
     foreach (var (_, d) in allDesc) {
         fmt.Println(d.Name, d.ΔDescription);
     }

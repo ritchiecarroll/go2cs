@@ -67,6 +67,7 @@ internal static void Main() {
     fmt.Println(label(tagˢ, 7, 8));
     fmt.Println(new note(9).tally(1, 2));
     fmt.Println(total(1, 2, 3, 4));
+
     @string litUnnamed(params ꓸꓸꓸnint _ʗp) => litUnnamedˢ;
     @string litBlank(params ꓸꓸꓸstring _ʗp) => litBlankˢ;
     nint litNamed(params ꓸꓸꓸstring partsʗp) {

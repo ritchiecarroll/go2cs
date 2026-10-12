@@ -39,6 +39,7 @@ internal static @string classify(error err) {
             return fmt.Sprintf("temporary=%v msg=%v"u8, te.Temporary(), te.Error());
         }
     }
+
     return notTemporaryˢ;
 }
 
@@ -95,6 +96,7 @@ internal static @string describe(any v) {
             return fmt.Sprintf("%v %v %v"u8, d.String(), d.Name(), d.Depth());
         }
     }
+
     return notDeepˢ;
 }
 

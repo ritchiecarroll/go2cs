@@ -72,10 +72,12 @@ internal static void early(this ж<box> Ꮡx, bool skip) {
         ref var x = ref Ꮡx.DerefOrNull();
 
         x.a.touch();
+
         if (skip) {
             fmt.Println(earlyOutˢ);
             return;
         }
+
         ᒐd1 = true;
         fmt.Println(bodyEarlyˢ);
     }
@@ -96,9 +98,11 @@ internal static void mixed(this ж<box> Ꮡx, bool f) {
         x.a.touch();
         x.b.touch();
         ᒐd1 = true;
+
         if (f) {
             ᒐd2 = true;
         }
+
         fmt.Println(bodyMixedˢ);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -133,6 +137,7 @@ internal static void withLit(this ж<box> Ꮡx) {
 
         x.a.touch();
         ᒐd1 = true;
+
         void f() {
             GoFrame ᒐ = default;
             try {
@@ -145,6 +150,7 @@ internal static void withLit(this ж<box> Ꮡx) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }
+
         f();
         fmt.Println(bodyWithLitˢ);
     }
@@ -161,9 +167,11 @@ internal static void condPrefix(this ж<box> Ꮡx, bool f) {
         ref var x = ref Ꮡx.DerefOrNull();
 
         x.a.touch();
+
         if (f) {
             x.b.touch();
         }
+
         defer(Ꮡx.of(box.Ꮡb).done, ref ᒐ);
         fmt.Println(bodyCondPrefixˢ);
     }
@@ -210,11 +218,14 @@ internal static void writeShape(this ж<box> Ꮡx, bool isFile) {
                 return;
             }
         }
+
         ᒐd1 = true;
+
         if (isFile) {
             x.b.touch();
             ᒐd2 = true;
         }
+
         fmt.Println(bodyWriteShapeˢ, isFile);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -243,7 +254,9 @@ private static readonly object recoveredˢ = (@string)"recovered"u8;
 
 internal static void Main() {
     var x = Ꮡ(new box(a: new tracer(id: "a"u8), b: new tracer(id: "b"u8)));
+
     x.two();
+
     var xʗ1 = x;
     ((Action)(() => {
         GoFrame ᒐ = default;
@@ -255,11 +268,13 @@ internal static void Main() {
                     }
                 }
             }, ref ᒐ);
+
             xʗ1.boom();
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }))();
+
     x.early(true);
     x.early(false);
     x.mixed(true);
@@ -269,6 +284,7 @@ internal static void Main() {
     x.writeShape(true);
     x.writeShape(false);
     x.withLit();
+
     var other = Ꮡ(new box(a: new tracer(id: "other-a"u8), b: new tracer(id: "other-b"u8)));
     x.rebound(other);
 }

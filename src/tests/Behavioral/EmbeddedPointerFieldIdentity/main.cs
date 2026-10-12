@@ -39,18 +39,22 @@ internal static void Main() {
     var o = Ꮡ(new outer(nil));
     fmt.Println(depth1ˢ, o.of(outer.Ꮡin) == o.of(outer.Ꮡin));
     fmt.Println(depth2ˢ, o.of(outer.Ꮡin).of(inner.Ꮡv) == o.of(outer.Ꮡin).of(inner.Ꮡv));
+
     var m = new map<ж<uint32>, @string>{};
     m[o.of(outer.Ꮡin).of(inner.Ꮡv)] = firstˢ;
     m[o.of(outer.Ꮡin).of(inner.Ꮡv)] = secondˢ;
     fmt.Println(mapEntriesˢ, len(m), m[o.of(outer.Ꮡin).of(inner.Ꮡv)]);
+
     var h = Ꮡ(new holder(nil));
     var w = Ꮡ(new wrapper(holder: h));
     fmt.Println(promotedStructˢ, w.of(wrapper.Ꮡc) == h.of(holder.Ꮡc));
     fmt.Println(promotedFieldˢ, w.of(wrapper.Ꮡc).of(core.Ꮡsema) == h.of(holder.Ꮡc).of(core.Ꮡsema));
+
     var pm = new map<ж<uint32>, nint>{};
     pm[w.of(wrapper.Ꮡc).of(core.Ꮡsema)] = 1;
     pm[h.of(holder.Ꮡc).of(core.Ꮡsema)] = 2;
     fmt.Println(promotedMapˢ, len(pm), pm[w.of(wrapper.Ꮡc).of(core.Ꮡsema)]);
+
     (w.of(wrapper.Ꮡc).of(core.Ꮡsema)).Value = 7;
     fmt.Println(sharedStorageˢ, (~h).c.sema, (~w).c.sema);
 }

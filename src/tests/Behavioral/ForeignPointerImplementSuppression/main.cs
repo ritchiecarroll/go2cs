@@ -29,15 +29,20 @@ private static readonly object crossˢ = (@string)"cross:"u8;
 internal static void Main() {
     var t = Ꮡ(new toneꓸTone(D: 3));
     tone.Level l = new tone.ΔToneжLevel(t);
+
     fmt.Println(toneˢ, l.Tone(), l.Name());
+
     l.Set(7);
     fmt.Println(aliasˢ, (~t).D, l.Tone());
+
     tone.Level l2 = new tone.ΔToneжLevel(t);
     fmt.Println((@string)"eq:"u8, AreEqual(l, l2), AreEqual(l, ((tone.Level)new tone.ΔToneжLevel(Ꮡ(new toneꓸTone(D: 7))))));
+
     var (back, ok) = l._<ж<toneꓸTone>>(ᐧ);
     fmt.Println(assertˢ, ok, back == t);
     var (_, badOK) = l._<ж<tone.Plain>>(ᐧ);
     fmt.Println(assertMissˢ, badOK);
+
     switch (l.type()) {
     case ж<tone.Plain> v: {
         fmt.Println(switchˢ, plainˢ, (~v).D);
@@ -52,22 +57,29 @@ internal static void Main() {
         fmt.Println(switchˢ, defaultˢ);
         break;
     }}
+
     var seen = new map<tone.Level, @string>{};
     seen[l] = firstˢ;
     seen[l2] = secondˢ;
     fmt.Println(mapˢ, seen[l], len(seen));
+
     var p = Ꮡ(new tone.Plain(D: 4));
     tone.Level pl = new tone.PlainжLevel(p);
     pl.Set(6);
     fmt.Println(plainˢ2, pl.Tone(), pl.Name(), (~p).D);
+
     fmt.Println(libˢ, tone.Default.Tone(), tone.DefaultPlain.Tone());
+
     fmt.Println(describeˢ, AreEqual(tone.Describe(t), l));
+
     tone.Level ln = new tone.LoneжLevel(Ꮡ(new tone.Lone(D: 5)));
     ln.Set(2);
     fmt.Println(loneˢ, ln.Tone(), ln.Name());
+
     shade.Level sl = new tone_ΔToneжLevel(t);
     sl.Set(9);
     fmt.Println(shadeˢ, sl.Tone(), sl.Name(), (~t).D);
+
     fmt.Println(crossˢ, l.Tone(), sl.Tone(), (~back).D);
 }
 

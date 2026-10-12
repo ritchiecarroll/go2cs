@@ -38,32 +38,42 @@ internal static void Main() {
     try {
         ref var receiverAddr = ref heap<array<byte>>(out var ᏑreceiverAddr);
         receiverAddr = new byte[]{127, 0, 0, 2}.array();
+
         var (receiver, err) = syscall.Socket(syscall.AF_INET, syscall.SOCK_DGRAM, 0);
         fatal(socketReceiverˢ, err);
         defer(syscall.Close, receiver, ref ᒐ);
+
         fatal(bindˢ, syscall.Bind(receiver, new syscall.SockaddrInet4жSockaddr(Ꮡ(new syscall.SockaddrInet4(Addr: receiverAddr.Clone(), Port: 0)))));
+
         (var bound, err) = syscall.Getsockname(receiver);
         fatal(getsocknameˢ, err);
         var dst = bound._<ж<syscall.SockaddrInet4>>();
         fmt.Println(boundToTheDiscriminatingˢ, (~dst).Addr == receiverAddr);
         fmt.Println(aPortWasAssignedˢ, (~dst).Port != 0);
+
         (var sender, err) = syscall.Socket(syscall.AF_INET, syscall.SOCK_DGRAM, 0);
         fatal(socketSenderˢ, err);
         defer(syscall.Close, sender, ref ᒐ);
+
         var to = Ꮡ(new syscall.SockaddrInet4(Addr: (~dst).Addr.Clone(), Port: (~dst).Port));
         fatal(sendtoAddressedˢ, syscall.Sendto(sender, slice<byte>("addressed"u8), 0, new syscall.SockaddrInet4жSockaddr(to)));
+
         var buf = new slice<byte>(64);
         (var n, var from, err) = syscall.Recvfrom(receiver, buf, 0);
         fatal(recvfromAddressedˢ, err);
         fmt.Println(addressedPayloadˢ, ((@string)(buf.slice(0, n))));
+
         var first = from._<ж<syscall.SockaddrInet4>>();
         fmt.Println(addressedSenderIsIn1278ˢ, (~first).Addr[0] == 127);
         fmt.Println(addressedSenderHasAPortˢ, (~first).Port != 0);
+
         fatal(connectˢ, syscall.Connect(sender, new syscall.SockaddrInet4жSockaddr(to)));
         fatal(sendtoNilToˢ, syscall.Sendto(sender, slice<byte>("connected"u8), 0, default!));
+
         (n, from, err) = syscall.Recvfrom(receiver, buf, 0);
         fatal(recvfromNilToˢ, err);
         fmt.Println(nilToPayloadˢ, ((@string)(buf.slice(0, n))));
+
         var second = from._<ж<syscall.SockaddrInet4>>();
         fmt.Println(nilToSenderEqualsˢ,
             (~second).Addr == (~first).Addr && (~second).Port == (~first).Port);

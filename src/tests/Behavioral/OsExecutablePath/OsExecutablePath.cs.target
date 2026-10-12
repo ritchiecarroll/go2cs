@@ -25,11 +25,13 @@ internal static void Main() {
         return;
     }
     fmt.Println(pathIsAbsoluteˢ, filepath.IsAbs(path));
+
     var (info, statErr) = os.Stat(path);
     fmt.Println(pathExistsˢ, statErr == default!);
     if (statErr == default!) {
         fmt.Println(pathIsARegularFileˢ, info.Mode().IsRegular());
     }
+
     var (again, err2) = os.Executable();
     fmt.Println(secondCallAgreesˢ, err2 == default! && again == path);
 }

@@ -35,6 +35,7 @@ internal static void Main() {
     }
     fmt.Println();
     fmt.Println(lenˢ, len(@out));
+
     var pts = new point[]{new(1, 2), new(3, 4)}.slice();
     nint total = 0;
     foreach (var (_, vᴛ1) in pts) {
@@ -44,6 +45,7 @@ internal static void Main() {
     }
     fmt.Println(totalˢ, total);
     fmt.Println(origˢ, pts[0].x, pts[1].x);
+
     var tags = new point[]{new(10, 1), new(20, 2)}.slice();
     nint sum = 0;
     foreach (var (_, vᴛ2) in tags) {
@@ -53,6 +55,7 @@ internal static void Main() {
         sum += t.x + t.y;
     }
     fmt.Println(fieldwriteˢ, sum, tags[0].x, tags[1].y);
+
     var rows = new row[]{new(new point(1, 2), Ꮡ(new point(10, 0))), new(new point(3, 4), Ꮡ(new point(20, 0)))}.slice();
     foreach (var (_, vᴛ3) in rows) {
         var r = vᴛ3;
@@ -60,12 +63,14 @@ internal static void Main() {
         fmt.Println(fieldMethodˢ, r.v.bump());
     }
     fmt.Println(fieldMethodOrigˢ, rows[0].v.x, rows[1].v.x);
+
     foreach (var (_, vᴛ4) in rows) {
         var r = vᴛ4;
 
         r.v.x = 99;
     }
     fmt.Println(nestedWriteOrigˢ, rows[0].v.x, rows[1].v.x);
+
     foreach (var (_, vᴛ5) in rows) {
         ref var r = ref heap(new row(), out var Ꮡr);
         r = vᴛ5;
@@ -74,6 +79,7 @@ internal static void Main() {
         p.Value.x += 5;
         fmt.Println(addrˢ, (~p).x);
     }
+
     foreach (var (_, r) in rows) {
         r.ptr.bump();
     }

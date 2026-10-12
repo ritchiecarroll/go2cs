@@ -21,6 +21,7 @@ internal static partial (Δnet.Conn client, Δnet.Conn server, Action cleanup, b
         return (default!, default!, () => {
         }, false);
     }
+
     var accepts = new channel<Δnet.Conn>(1);
     var acceptsʗ1 = accepts;
     var listenerʗ1 = listener;
@@ -32,12 +33,14 @@ internal static partial (Δnet.Conn client, Δnet.Conn server, Action cleanup, b
         }
         acceptsʗ1.ᐸꟷ(conn);
     });
+
     (client, err) = Δnet.Dial(tcpˢ, listener.Addr().String());
     if (err != default!) {
         listener.Close();
         return (default!, default!, () => {
         }, false);
     }
+
     server = ᐸꟷ(accepts);
     if (server == default!) {
         client.Close();
@@ -45,6 +48,7 @@ internal static partial (Δnet.Conn client, Δnet.Conn server, Action cleanup, b
         return (default!, default!, () => {
         }, false);
     }
+
     var listenerʗ2 = listener;
     return (client, server, () => {
         server.Close();
@@ -70,16 +74,20 @@ internal static partial void deadlineLifecycle() {
         }
         var cleanupʗ1 = cleanup;
         defer(cleanupʗ1, ref ᒐ);
+
         var buf = new slice<byte>(16);
+
         client.SetReadDeadline(time.Now().Add(300 * time.Millisecond));
         var start = time.Now();
         var (_, err) = client.Read(buf);
         var blockedFor = time.Since(start);
         fmt.Printf("lifecycle: blockedReadTimesOut=%v parked=%v\n"u8, isTimeout(err), blockedFor >= 200 * time.Millisecond);
+
         start = time.Now();
         var (_, err2) = client.Read(buf);
         var stickyFor = time.Since(start);
         fmt.Printf("lifecycle: timeoutIsSticky=%v immediate=%v\n"u8, isTimeout(err2), stickyFor < 150 * time.Millisecond);
+
         client.SetReadDeadline(new time.Time(nil));
         var serverʗ1 = server;
         goǃ(() => {
@@ -106,6 +114,7 @@ internal static void pastDeadline() {
         }
         var cleanupʗ1 = cleanup;
         defer(cleanupʗ1, ref ᒐ);
+
         client.SetReadDeadline(time.Now().Add(-time.ΔSecond));
         var buf = new slice<byte>(16);
         var start = time.Now();
@@ -130,7 +139,9 @@ internal static partial void replacedWhileBlocked() {
         }
         var cleanupʗ1 = cleanup;
         defer(cleanupʗ1, ref ᒐ);
+
         client.SetReadDeadline(time.Now().Add(300 * time.Millisecond));
+
         var clientʗ1 = client;
         var serverʗ1 = server;
         goǃ(() => {
@@ -139,6 +150,7 @@ internal static partial void replacedWhileBlocked() {
             time.Sleep(400 * time.Millisecond);
             serverʗ1.Write(slice<byte>("late"u8));
         });
+
         var buf = new slice<byte>(16);
         var (n, err) = client.Read(buf);
         fmt.Printf("replace: releasedByData=%v bytes=%v notTimeout=%v\n"u8, err == default!, n == 4, !isTimeout(err));
@@ -160,6 +172,7 @@ internal static partial void modeIndependence() {
         }
         var cleanupʗ1 = cleanup;
         defer(cleanupʗ1, ref ᒐ);
+
         var serverʗ1 = server;
         goǃ(() => {
             var drain = new slice<byte>(64);
@@ -171,11 +184,13 @@ internal static partial void modeIndependence() {
                 }
             }
         });
+
         client.SetReadDeadline(time.Now().Add(-time.ΔSecond));
         var buf = new slice<byte>(16);
         var (_, readErr) = client.Read(buf);
         var (_, writeErr) = client.Write(slice<byte>("still writable"u8));
         fmt.Printf("modes: readExpired=%v writeModeIndependent=%v\n"u8, isTimeout(readErr), writeErr == default!);
+
         client.SetDeadline(time.Now().Add(-time.ΔSecond));
         var (_, readErr2) = client.Read(buf);
         var (_, writeErr2) = client.Write(slice<byte>("now neither"u8));
@@ -198,10 +213,12 @@ internal static void closeBeatsTimeout() {
         }
         var cleanupʗ1 = cleanup;
         defer(cleanupʗ1, ref ᒐ);
+
         client.SetReadDeadline(time.Now().Add(-time.ΔSecond));
         var buf = new slice<byte>(16);
         client.Read(buf);
         client.Close();
+
         var (_, err) = client.Read(buf);
         fmt.Printf("order: closeBeatsTimeout=%v notTimeout=%v\n"u8,
             err != default! && errors.Is(err, Δnet.ErrClosed), !isTimeout(err));
@@ -223,15 +240,19 @@ internal static partial void deadlineVersusData() {
         }
         var cleanupʗ1 = cleanup;
         defer(cleanupʗ1, ref ᒐ);
+
         var buf = new slice<byte>(16);
+
         server.Write(slice<byte>("ready"u8));
         time.Sleep(200 * time.Millisecond);
         client.SetReadDeadline(time.Now().Add(-time.ΔSecond));
         var (n, err) = client.Read(buf);
         fmt.Printf("race: expiredBeatsBufferedData=%v noBytes=%v\n"u8, isTimeout(err), n == 0);
+
         client.SetReadDeadline(time.Now().Add(2 * time.ΔSecond));
         var (n2, err2) = client.Read(buf);
         fmt.Printf("race: dataInsideDeadline=%v bytes=%v\n"u8, err2 == default!, n2 == 5);
+
         client.SetReadDeadline(new time.Time(nil));
         var serverʗ1 = server;
         goǃ(() => {

@@ -18,6 +18,7 @@ internal static slice<pair> build(slice<nint> lengths) {
         pairs[i].value = i;
         pairs[i].length = lengthΔ1;
     }
+
     nint length = 0;
     foreach (var (_, p) in pairs) {
         length += p.length;

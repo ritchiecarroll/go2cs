@@ -92,14 +92,19 @@ private static readonly object callerCopyUntouchedˢ = (@string)"caller copy unt
 
 internal static void Main() {
     var t = new Tally(total: 5, log: "start"u8);
+
     var (before, after, log) = closureRead(t, 3);
     fmt.Println(closureReadˢ, before, after, log);
+
     (var total, log) = closureWrite(t, 3);
     fmt.Println(closureWriteˢ, total, log);
+
     (total, log) = deferClosure(t, 3);
     fmt.Println(deferClosureˢ, total, log);
+
     (total, log) = deferMethodValue(t, 3);
     fmt.Println(deferMethodValueˢ, total, log);
+
     fmt.Println(callerCopyUntouchedˢ, t.total, t.log);
 }
 

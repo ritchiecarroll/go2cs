@@ -52,8 +52,10 @@ internal static void Main() {
     bv = 20;
     Ꮡc.Put(Ꮡa, Ꮡav);
     Ꮡc.Put(Ꮡb, Ꮡbv);
+
     fmt.Println(getAˢ, Ꮡc.Get(Ꮡa).Value);
     fmt.Println(getBˢ, Ꮡc.Get(Ꮡb).Value);
+
     ref var newAv = ref heap<nint>(out var ᏑnewAv);
     newAv = 99;
     Ꮡc.Put(Ꮡa, ᏑnewAv);

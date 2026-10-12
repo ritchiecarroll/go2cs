@@ -16,6 +16,7 @@ internal static void Main() {
     var vals = new nint[]{3, 1, 4, 1, 5}.slice();
     var counts = new map<@string, nint>{["a"u8] = 2, ["b"u8] = 7};
     nint total = 0;
+
         var valsʗ1 = vals;
 
         var valsʗ2 = vals;
@@ -36,7 +37,9 @@ internal static void Main() {
         total += n;
         fmt.Println(p.name, n);
     }
+
     fmt.Println(totalˢ, total);
+
     for (nint round = 0; round < 2; round++) {
         ref var seen = ref heap<slice<@string>>(out var Ꮡseen);
         seen = new @string[]{}.slice();

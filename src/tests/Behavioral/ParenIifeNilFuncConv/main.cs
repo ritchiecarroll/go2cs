@@ -10,6 +10,7 @@ internal static nint call(this handlerFunc h, @string s) {
     if (h == default!) {
         return -1;
     }
+
     return h(s);
 }
 
@@ -22,21 +23,27 @@ internal static void Main() {
     ((Action)(() => {
         fmt.Println(parenIifeˢ);
     }))();
+
     nint sum = ((Func<nint, nint, nint>)((a, b) => {
         return a + b;
     }))(3, 4);
     fmt.Println(sum);
+
     ((Action)(() => {
         fmt.Println(bareIifeˢ);
     }))();
+
     nint product = ((Func<nint, nint, nint>)((a, b) => {
         return a * b;
     }))(3, 4);
     fmt.Println(product);
+
     var h = default(handlerFunc)!;
     fmt.Println(h == default!, h.call("x"u8));
+
     h = new handlerFunc((@string s) => len(s));
     fmt.Println(h == default!, h.call(abcdˢ));
+
     var table = new handlerFunc[]{default(handlerFunc)!, h}.slice();
     foreach (var (_, entry) in table) {
         fmt.Println(entry.call("zz"u8));

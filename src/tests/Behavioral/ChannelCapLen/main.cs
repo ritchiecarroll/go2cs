@@ -17,10 +17,13 @@ internal static void Main() {
     fmt.Println(len(ch), cap(ch));
     fmt.Println(ᐸꟷ(ch), ᐸꟷ(ch), ᐸꟷ(ch));
     fmt.Println(len(ch), cap(ch));
+
     var u = new channel<@string>(0);
     fmt.Println(len(u), cap(u));
+
     channel<nint> n = default!;
     fmt.Println(len(n), cap(n));
+
     var d = new channel<nint>(2);
     d.ᐸꟷ(7);
     d.ᐸꟷ(8);

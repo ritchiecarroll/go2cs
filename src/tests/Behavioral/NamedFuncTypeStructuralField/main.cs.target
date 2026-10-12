@@ -45,10 +45,13 @@ partial struct comparer {
 
 internal static void Main() {
     var items = new item[]{new("delta"u8, 4), new("alpha"u8, 1), new("charlie"u8, 3), new("bravo"u8, 2)}.slice();
+
     new By((ж<item> a, ж<item> b) => (~a).rank < (~b).rank).Sort(items);
+
     foreach (var (_, it) in items) {
         fmt.Println(it.name, it.rank);
     }
+
     var c = new comparer(cmp: byName);
     fmt.Println(c.cmp(Ꮡ(items, 0), Ꮡ(items, 1)));
 }

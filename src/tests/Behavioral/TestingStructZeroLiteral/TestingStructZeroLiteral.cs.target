@@ -14,6 +14,7 @@ internal static void Main() {
     var f = Ꮡ(new testing.F(nil));
     var b = new testing.B(nil);
     var pb = new testing.PB(nil);
+
     fmt.Println((@string)"T:"u8, t != nil);
     fmt.Println((@string)"M:"u8, m != nil);
     fmt.Println((@string)"F:"u8, f != nil);

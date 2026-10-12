@@ -35,6 +35,7 @@ internal static void Main() {
     h.bump();
     h.bump();
     fmt.Println(h.get(), h.n, h.tag);
+
     var t = new top(mid: new mid(leaf: Ꮡ(new leaf(n: 10))), label: "t"u8);
     t.bump();
     fmt.Println(t.get(), t.n, t.label);

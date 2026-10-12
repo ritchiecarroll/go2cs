@@ -128,21 +128,27 @@ public static (nint E2, @string p) Testing() {
     @string p = default!;
 
     fmt.Println(E2);
+
     E2 = 1;
     nint B2 = 2;
     fmt.Println(E2, B2);
+
     p = helloˢ;
+
     {
         nint E2Δ1 = 99;
         nint B2Δ1 = 199;
         fmt.Println(E2Δ1, B2Δ1);
     }
+
     {
         E2 = 100;
         nint B2Δ2 = 200;
         fmt.Println(E2, B2Δ2);
     }
+
     fmt.Println(E2, B2);
+
     return (E2, p);
 }
 
@@ -154,14 +160,19 @@ internal static void Main() {
     var agesDemo = new PeopleByAge(new Person[]{new("Zed"u8, 30, 11.5F), new("Amy"u8, 25, 7.0F)}.slice());
     agesDemo.sort();
     fmt.Println(agesDemo[0].Name);
+
     var lt = ((levelToken)markerConst);
     fmt.Println((uint32)lt + 1);
+
     fmt.Println(MultiLine);
     fmt.Println(MultiLine2);
     fmt.Println(MultiLine3);
+
     Testing();
+
     @string x = helloSj3ˢ;
     fmt.Println(x);
+
     var people = new Person[]{
         new(
             Name: "Person1"u8,
@@ -189,22 +200,30 @@ internal static void Main() {
             ShoeSize: 8.5F
         )
     }.slice();
+
     fmt.Println(people);
+
     sort_package.Sort(((PeopleByShoeSize)people));
     fmt.Println(people);
+
     sort_package.Sort(((PeopleByAge)people));
     fmt.Println(people);
+
     var byAge = ((PeopleByAge)people);
     fmt.Println(byAge[0..3].Len(), byAge[2..].Len());
+
     var pb = @new<PeopleByAge>();
     pb.ValueSlot = byAge[1..4];
     fmt.Println((~pb).Len());
+
     var ros = ((Roster)(slice<Person>)(byAge[0..2]));
     fmt.Println(ros.headcount(), len(ros));
+
     ref var crew = ref heap<Roster>(out var Ꮡcrew);
     crew = new Roster(new Person[]{new(Name: "Ann"u8, Age: 30), new(Name: "Bob"u8, Age: 40)}.slice());
     consumeOne(ref (Ꮡcrew.of(Roster.Ꮡm_value)).DerefOrNull());
     fmt.Println(consumedˢ, len(crew), crew[0].Name);
+
     x = """
 
         SELECT *

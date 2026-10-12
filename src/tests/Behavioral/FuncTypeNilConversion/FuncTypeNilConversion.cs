@@ -30,20 +30,28 @@ private static readonly object c6Sumˢ = (@string)"C6 sum:"u8;
 internal static void Main() {
     var a = (Actionꓸꓸꓸ<nint>)(default!);
     fmt.Println(a1Variadic1ParamActionˢ, a == default!);
+
     var b = (Funcꓸꓸꓸ<Point, nint>)(default!);
     fmt.Println(a2Variadic1ParamFuncNilˢ, b == default!);
+
     var c = (Funcꓸꓸꓸ<@string, (nint, bool)>)(default!);
     fmt.Println(a3Variadic1ParamMultiˢ, c == default!);
+
     var d = (Funcꓸꓸꓸ<Point, Point, nint>)(default!);
     fmt.Println(b1Variadic2ParamNilˢ, d == default!);
+
     var e = (Func<Point, nint>)(default!);
     fmt.Println(b2NonVariadicNilˢ, e == default!);
+
     var f = (Func<nint, bool>)(default!);
     fmt.Println(b3NonVariadicBoolNilˢ, f == default!);
+
     var g = (Action)(default!);
     fmt.Println(b4NoParamNilˢ, g == default!);
+
     var h = (Funcꓸꓸꓸ<nint, nint>)(sum);
     fmt.Println(b5ConversionOfARealFuncˢ, h(1, 2, 3));
+
     fmt.Println(c1OneNilArgˢ, countArgs("x"u8, (any)(default!)));
     fmt.Println(c2NilAmongOthersˢ, countArgs("x"u8, (nint)(1), (any)(default!), (@string)"y"u8));
     fmt.Println(c3NoVariadicArgsˢ, countArgs("x"u8));

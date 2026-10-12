@@ -36,9 +36,11 @@ internal static partial void Main() {
         defer(ᴛ1 => fmt.Println(ᴛ1), firstˢ, ref ᒐ);
         defer(ᴛ1 => fmt.Println(ᴛ1), secondˢ, ref ᒐ);
         defer(ᴛ1 => fmt.Println(ᴛ1), thirdˢ, ref ᒐ);
+
         Funcꓸꓸꓸ<any, (nint, error)> f1 = fmt.Println;
         var f1ʗ1 = f1;
         defer(ᴛ1 => f1ʗ1(ᴛ1), fourthˢ, ref ᒐ);
+
         var msgs = new channel<@string>(2);
         var cancel = makeStop(stoppedˢ, msgs.WithDirection(GoChanDir.Send));
         var cancelʗ1 = cancel;
@@ -46,6 +48,7 @@ internal static partial void Main() {
         var msgsʗ1 = msgs;
         goǃ(() => makeStop(goStoppedˢ, msgsʗ1.WithDirection(GoChanDir.Send))());
         fmt.Println(ᐸꟷ(msgs));
+
         var drained = new channel<nint>(1);
         var drainedʗ1 = drained;
         defer(() => {
@@ -53,18 +56,24 @@ internal static partial void Main() {
             fmt.Println(afterCloseˢ, v, open);
         }, ref ᒐ);
         defer(ᴛ1 => close(ᴛ1), drained, ref ᒐ);
+
         defer(GetPrintLn(), fifthˢ, ref ᒐ);
+
         var c = Ꮡ(new acc(nil));
         var (s1, e1) = c.add(5);
         fmt.Println(s1, e1);
         var (s2, e2) = c.add(-1);
         fmt.Println(s2, e2, (~c).total);
+
         var sm = Ꮡ(new sema(nil));
         acquireAndWork(sm);
         fmt.Println(afterˢ, (~sm).held);
+
         watchAndSend(sm);
         fmt.Println(sentˢ, ᐸꟷ((~sm).@out), heldˢ, (~sm).held);
+
         fmt.Println(notifyˢ, notifyAll(1, 2, 3));
+
         fmt.Println(mainFunctionˢ);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

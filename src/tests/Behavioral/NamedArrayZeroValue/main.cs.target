@@ -60,6 +60,7 @@ internal static void Main() {
     fmt.Println(varNSˢ, len(sv), len(sv[0].a), sv);
     fmt.Println(varNBˢ, len(b), b);
     fmt.Println(varNOˢ, len(o), len(o[0]), o);
+
     var pd = @new<nn>();
     var ps = @new<ns>();
     var pb = @new<nb>();
@@ -68,19 +69,24 @@ internal static void Main() {
     fmt.Println(newNSˢ, len(ps.Value), len((ps.Value)[0].a), ps.Value);
     fmt.Println(newNBˢ, len(pb.Value), pb.Value);
     fmt.Println(newNOˢ, len(po.Value), len((po.Value)[0]), po.Value);
+
     holder h = new();
     fmt.Println(fieldNNˢ, len(h.f), len(h.f[0]), h.f);
     fmt.Println(fieldNSˢ, len(h.g), len(h.g[0].a), h.g);
+
     var (rr, ss) = namedResult();
     fmt.Println(resNNˢ, len(rr), len(rr[0]), rr);
     fmt.Println(resNSˢ, len(ss), len(ss[0].a), ss);
+
     array<nn> aa = new(2);
     fmt.Println(arrNNˢ, len(aa), len(aa[0]), len(aa[0][0]), aa);
+
     var sl = GoReflect.WithElemDims(new slice<nn>(2), 2, 3);
     fmt.Println(sliceNNˢ, len(sl), len(sl[0]), len(sl[0][0]), sl);
     var mp = new map<nint, nn>();
     var mv = mp[7].Clone();
     fmt.Println(mapNNˢ, len(mv), len(mv[0]), mv);
+
     d[1][2] = 9;
     sv[1].a[2] = 8;
     (pd.Value)[0][1] = 5;

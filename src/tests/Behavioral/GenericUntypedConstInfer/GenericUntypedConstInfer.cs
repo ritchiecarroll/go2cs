@@ -90,30 +90,43 @@ private static readonly object chanˢ = (@string)"chan"u8;
 
 internal static void Main() {
     nint i = 7;
+
     wantValue((nint)(0))(i, false);
     wantValue((nint)(7))(i, true);
+
     wantPresent(15)(true);
     takeOnly(15);
+
     wantValue<nint>(0)(i, false);
+
     wantValue(i)(i, true);
+
     fmt.Println(bareˢ, bareResult(42));
+
     float64 f = 2.5D;
     wantValue(0.0D)(f, false);
     wantValue(2.5D)(f, true);
+
     rune r = (rune)'q';
     wantValue((rune)'a')(r, false);
     wantValue((rune)'q')(r, true);
+
     @string s = "hi"u8;
     wantValue((@string)"")(s, false);
     wantValue((@string)"hi")(s, true);
+
     bool b = true;
     wantValue(true)(b, true);
+
     pairValue((@string)"k", (nint)(0))(i, false);
+
     wantValue((nint)(3 + 4))(i, true);
     wantValue((nint)((1 << (int)(10))))((1 << (int)(10)), true);
+
     fmt.Println(sliceˢ, sliceOf((nint)(9)));
     fmt.Println(mapˢ, mapTo(oneˢ, (nint)(1))[oneˢ]);
     fmt.Println(chanˢ, ᐸꟷ(chanOf((nint)(11))));
+
     wantLike((byte)0, (byte)(3))(3, true);
     wantInt64((int64)(1234567890123L))(1234567890123L, true);
 }

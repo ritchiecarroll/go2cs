@@ -14,13 +14,17 @@ private static readonly @string gammaˢ = "gamma"u8;
 internal static void Main() {
     ref var v = ref heap(new atomic.Value(), out var Ꮡv);
     fmt.Println(Ꮡv.Load() == default!);
+
     @string a = alphaˢ;
     @string b = betaˢ;
     @string c = gammaˢ;
+
     Ꮡv.Store(a);
     fmt.Println(AreEqual(Ꮡv.Load(), a));
+
     var old = Ꮡv.Swap(b);
     fmt.Println(AreEqual(old, a), AreEqual(Ꮡv.Load(), b));
+
     fmt.Println(Ꮡv.CompareAndSwap(b, c), AreEqual(Ꮡv.Load(), c));
     fmt.Println(Ꮡv.CompareAndSwap(b, a), AreEqual(Ꮡv.Load(), c));
 }

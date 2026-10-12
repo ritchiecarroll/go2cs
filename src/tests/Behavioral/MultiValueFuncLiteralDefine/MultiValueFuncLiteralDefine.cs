@@ -43,12 +43,15 @@ private static readonly object genericInstantiationsˢ = (@string)"generic insta
 
 internal static void Main() {
     nint n = 3;
+
     var small = (nint v) => v < n;
     var even = (nint v) => v % 2 == 0;
     fmt.Println(funcLiteralsˢ, small(2), even(2), small(5), even(5));
+
     var d = @double;
     var t = triple;
     fmt.Println(methodGroupsˢ, d(2), t(2));
+
     var b = Ꮡ(new box(n: 2));
     var recvʗ1 = ~b;
     
@@ -59,9 +62,11 @@ internal static void Main() {
     var bump = (nint p1) => bʗ2.bump(p1);
     bump(3);
     fmt.Println(methodValuesˢ, get(), (~b).n);
+
     var show = nint () => 1;
     var p = b;
     fmt.Println(funcLiteralBesideAˢ, show(), (~p).n);
+
     var id = identity<@string>;
     var sq = square<float64>;
     fmt.Println(genericInstantiationsˢ, id("go"u8), sq(1.5D));

@@ -60,8 +60,10 @@ private static readonly @string helloˢ = "hello"u8;
 internal static void Main() {
     nint minValue = Min<nint>(42, 17);
     fmt.Printf("Min value: %d\n"u8, minValue);
+
     nint strLength = Convert<@string, nint>(helloˢ, (@string s) => len(s));
     fmt.Printf("String length: %d\n"u8, strLength);
+
     ref var n = ref heap<nint>(out var Ꮡn);
     n = 5;
     fmt.Println(renew(Ꮡn).Value);

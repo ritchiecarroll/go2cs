@@ -51,6 +51,7 @@ internal static void Main() {
     Ꮡb.write(", "u8);
     Ꮡb.write(worldˢ);
     fmt.Println(b.String());
+
     ((Action)(() => {
         GoFrame ᒐ = default;
         try {

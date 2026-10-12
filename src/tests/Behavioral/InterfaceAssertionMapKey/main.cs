@@ -60,6 +60,7 @@ internal static void Main() {
     objMap[new myConst("const-c"u8)] = 4;
     objMap[new myConst("const-d"u8)] = 8;
     objMap[new myFuncжObject(Ꮡ(new myFunc("func-e"u8)))] = 16;
+
     var M = new map<dependency, bool>();
     foreach (var (obj, _) in objMap) {
         {
@@ -69,6 +70,7 @@ internal static void Main() {
         }
     }
     fmt.Println(objMapˢ, len(objMap), (@string)"M:"u8, len(M));
+
     nint hits = 0;
     nint sum = 0;
     foreach (var (d, _) in M) {
@@ -81,6 +83,7 @@ internal static void Main() {
         sum += v;
     }
     fmt.Println(hitsˢ, hits, sumˢ, sum);
+
     foreach (var (d, _) in M) {
         Object o = d;
         {
@@ -89,6 +92,7 @@ internal static void Main() {
             }
         }
     }
+
     foreach (var (obj, _) in objMap) {
         var (d, ok) = obj._<dependency>(ᐧ);
         if (!ok) {

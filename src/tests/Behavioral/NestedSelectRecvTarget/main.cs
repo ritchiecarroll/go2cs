@@ -57,6 +57,7 @@ private static readonly object outerDefaultWrongˢ = (@string)"outer default (wr
 
 internal static void Main() {
     var ch = new channel<nint>(2);
+
     ch.ᐸꟷ(42);
     var selᴛ3 = ch;
     switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
@@ -64,6 +65,7 @@ internal static void Main() {
         fmt.Println(outerFiredA0ˢ, a[0], lenChˢ, len(ch));
         break;
     }}
+
     ch.ᐸꟷ(43);
     innerCh.ᐸꟷ(7);
     var selᴛ4 = ch;
@@ -72,6 +74,7 @@ internal static void Main() {
         fmt.Println(outerFiredA1ˢ, a[1], lenChˢ, len(ch));
         break;
     }}
+
     ch.ᐸꟷ(44);
     ch.ᐸꟷ(45);
     var selᴛ5 = ch;
@@ -80,6 +83,7 @@ internal static void Main() {
         fmt.Println(outerFiredA2ˢ, a[2], lenChˢ, len(ch), nextˢ, ᐸꟷ(ch));
         break;
     }}
+
     ch.ᐸꟷ(46);
     var selᴛ6 = ch;
     switch (select(ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
@@ -87,6 +91,7 @@ internal static void Main() {
         fmt.Println(outerFiredA3ˢ, a[3], lenChˢ, len(ch));
         break;
     }}
+
     ch.ᐸꟷ(47);
     var selᴛ7 = ch;
     switch (trySelect(ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {

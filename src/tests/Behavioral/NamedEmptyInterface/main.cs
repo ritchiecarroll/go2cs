@@ -49,6 +49,7 @@ internal static void Main() {
     I d = new point(3, 4);
     I e = default!;
     fmt.Printf("%T %v | %T %v | %T %v | %T %v | %T %v\n"u8, a, a, b, b, c, c, d, d, e, e);
+
     show((int8)7);
     show((nint)(9));
     show((@string)"s"u8);
@@ -59,10 +60,12 @@ internal static void Main() {
     anon((@string)"s"u8);
     anon(new point(5, 6));
     anon(default!);
+
     fmt.Printf("%T %v\n"u8, back((int8)(-1)), back((int8)(-1)));
     for (nint i = 0; i < 4; i++) {
         show(pick(i));
     }
+
     e = a;
     fmt.Println(AreEqual(e, a), AreEqual(e, b), e == default!);
     {
@@ -80,6 +83,7 @@ internal static void Main() {
         fmt.Println(otherˢ);
         break;
     }}
+
     var list = new I[]{(int8)1, (nint)(2), (@string)"three"u8, new point(4, 4), default!}.slice();
     fmt.Println(len(list), list);
     var m = new map<@string, I>{["n"u8] = (nint)(1), ["s"u8] = (@string)"one"u8};

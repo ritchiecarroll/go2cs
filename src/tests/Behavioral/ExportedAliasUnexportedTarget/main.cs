@@ -19,6 +19,7 @@ public static void Log(this ж<Logger> Ꮡl, @string line) {
 
         Ꮡl.of(Logger.Ꮡmu).Lock();
         ᒐd1 = true;
+
         l.lines = append(l.lines, line);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -36,10 +37,12 @@ internal static void Main() {
     l.mu.Disable();
     Ꮡl.Log(secondˢ);
     fmt.Println(len(l.lines), l.lines[0], l.lines[1]);
+
     ref var w = ref heap(new aliaslibꓸMutexWrap(), out var Ꮡw);
     Ꮡw.Lock();
     Ꮡw.Unlock();
     fmt.Println(lockRoundTripOkˢ);
+
     fmt.Println(aliaslib.Compare(1, 2), aliaslib.Compare(2, 2), aliaslib.Compare(3, 2));
 }
 

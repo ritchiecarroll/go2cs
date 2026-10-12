@@ -26,20 +26,25 @@ internal static void Main() {
     foreach (var (_, r) in rows) {
         fmt.Printf(r.format + "\n"u8, r.val.ꓸꓸꓸ);
     }
+
     SE s = default!;
     s = append(s, (any)(1), (any)((@string)"two"u8), (any)(3.5D));
     fmt.Println(len(s), cap(s) >= 3, s);
     fmt.Println(s[0], s[1], s[2]);
     fmt.Println(s[1..], s.describe());
+
     foreach (var (i, v) in s) {
         fmt.Print(i, (@string)"="u8, v, (@string)";"u8);
     }
     fmt.Println();
+
     var t = new SE(new any[]{}.slice());
     t = appendꓸꓸꓸ(t, s);
     fmt.Println(len(t), t);
+
     var ops = new fileOps(new any[]{(@string)"ab"u8, (int64)3, (@string)"cde"u8}.slice());
     fmt.Println(len(ops), ops, ops[1..2]);
+
     SE zero = default!;
     fmt.Println(zero == default!, len(zero), zero, new SE(new any[]{}.slice()) == default!);
 }

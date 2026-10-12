@@ -31,11 +31,15 @@ internal static void Main() {
     var a = Ꮡ(new nint[]{1, 2, 3}.array());
     a = ж<array<nint>>.NilBoxOfDims(3L);
     fmt.Println(assignLocalLenˢ, reflect.ValueOf(a.OrTypedNil()).Len(), capˢ, reflect.ValueOf(a.OrTypedNil()).Cap());
+
     holder h = default!;
     h.versym = ж<array<uint16>>.NilBoxOfDims(3L);
     fmt.Println(assignFieldElemLenˢ, reflect.ValueOf(h.versym.OrTypedNil()).Type().Elem().Len());
+
     fmt.Println(argumentElemLenˢ, takeArg(ж<Sigset>.NilBoxOfDims(2L)));
+
     fmt.Println(resultElemLenˢ, reflect.ValueOf(ret().OrTypedNil()).Type().Elem().Len());
+
     fmt.Println(conversionLenˢ, reflect.ValueOf(ж<array<nint>>.NilBoxOfDims(7L)).Len());
 }
 

@@ -22,13 +22,16 @@ internal static void Main() {
     p.a = 5;
     p.b = "hi"u8;
     fmt.Println(p.a, p.b);
+
     Box<@string> b = default!;
     b.v = boxedˢ;
     fmt.Println(b.v);
+
     Pair<@string, @string> sp = default!;
     sp.a = "x"u8;
     sp.b = "y"u8;
     fmt.Println(sp.a, sp.b);
+
     Pair<nint, Box<@string>> nested = default!;
     nested.a = 9;
     nested.b.v = deepˢ;

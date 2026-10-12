@@ -57,6 +57,7 @@ internal static void Main() {
         break;
     }}
     fmt.Printf("| S1 got:%d\n"u8, got);
+
     var fullBytes = new channel<byte>(1);
     fullBytes.ᐸꟷ(7);
     var noPeer = new channel<nint>(0);
@@ -84,6 +85,7 @@ internal static void Main() {
         break;
     }}
     fmt.Printf("| S2 hit:%d\n"u8, hit);
+
     var room = new channel<nint>(1);
     var blocked = new channel<nint>(0);
     nint which = 0;
@@ -100,6 +102,7 @@ internal static void Main() {
     }}
     nint delivered = ᐸꟷ(room);
     fmt.Printf("| S3 which:%d delivered:%d\n"u8, which, delivered);
+
     var src = new channel<nint>(1);
     src.ᐸꟷ(5);
     var sink = new channel<nint>(1);

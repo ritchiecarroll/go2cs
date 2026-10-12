@@ -24,9 +24,11 @@ internal static sizer std = new flat(n: 100);
 
 internal static Func<@string, nint> pickSizer(this ref config c) {
     var f = std.size;
+
     if (c.s != default!) {
         f = c.s.size;
     }
+
     c.s = new flat(n: 1000);
     return f;
 }
@@ -40,6 +42,7 @@ internal static void Main() {
     var f = c.pickSizer();
     fmt.Println(f(abcˢ));
     fmt.Println((~c).s.size(abcˢ));
+
     var c2 = Ꮡ(new config(nil));
     var g = c2.pickSizer();
     fmt.Println(g(abcdˢ));

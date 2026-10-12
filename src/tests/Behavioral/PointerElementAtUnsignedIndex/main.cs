@@ -39,11 +39,13 @@ internal static void Main() {
     ref var arr = ref heap(new array<nint>(3), out var Ꮡarr);
     var p = Ꮡarr;
     var ps = Ꮡ(new S(nil));
+
     uint64 u64 = 18446744073709551615UL;
     nuint u = unchecked((nuint)(9223372036854775810UL));
     uintptr up = unchecked((nuint)(9223372036854775811UL));
     uint32 u32 = unchecked((uint32)(4294967295UL));
     uint64 ok = 2;
+
     var pʗ1 = p;
     @try(pointerToArrayUint64Maxˢ, () => pʗ1.at<nint>((ulong)(u64)));
     var pʗ2 = p;
@@ -60,6 +62,7 @@ internal static void Main() {
     @try(fieldArrayUintPast263ˢ, () => psʗ2.at(S.Ꮡa, (ulong)(u)));
     var psʗ3 = ps;
     @try(fieldArrayInRangeˢ, () => psʗ3.at(S.Ꮡa, (ulong)(ok)));
+
     fmt.Println(arr, (~ps).a);
 }
 

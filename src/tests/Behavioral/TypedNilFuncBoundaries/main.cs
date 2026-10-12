@@ -40,25 +40,36 @@ private static readonly object fieldsetˢ = (@string)"fieldset"u8;
 
 internal static void Main() {
     Func<nint, nint> zero = default!;
+
     var argSlot = take((zero).OrTypedNilFunc());
+
     var elemSlot = new any[]{(zero).OrTypedNilFunc()}.slice();
+
     var fieldSlot = new row[]{new((zero).OrTypedNilFunc(), true)}.slice();
+
     var keyedSlot = new map<@string, any>{["k"u8] = (zero).OrTypedNilFunc()};
+
     var appendSlot = append(new any[]{}.slice(), (any)((zero).OrTypedNilFunc()));
+
     fmt.Println(argˢ, argSlot == default!);
     fmt.Println(elemˢ, elemSlot[0] == default!);
     fmt.Println(fieldˢ, fieldSlot[0].v == default!);
     fmt.Println(keyedˢ, keyedSlot["k"u8] == default!);
     fmt.Println(appendˢ, appendSlot[0] == default!);
+
     fmt.Println(convˢ, take(((Action)(default!)).OrTypedNilFunc()) == default!);
+
     holder h = default!;
+
     fmt.Println(declaredˢ, take(declared) != default!);
     fmt.Println(qualifiedˢ, take(fmt.Sprint) != default!);
     var hʗ1 = h;
     fmt.Println(methodvalˢ, take(() => hʗ1.method()) != default!);
     fmt.Println(literalˢ, take(() => {
     }) != default!);
+
     fmt.Println(fieldfnˢ, take((h.fn).OrTypedNilFunc()) == default!);
+
     h.fn = declared;
     fmt.Println(fieldsetˢ, take((h.fn).OrTypedNilFunc()) == default!);
 }

@@ -66,16 +66,19 @@ internal static void Main() {
 
     i = new GreeterᴠGreetable(g);
     fmt.Println(interfaceNilˢ, i == default!);
+
     ref var v = ref heap<reflectꓸValue>(out var Ꮡv);
     v = reflect.ValueOf(Ꮡi).Elem();
     fmt.Println(kindˢ, v.Kind(), elemTypeˢ, v.Elem().Type(), elemNilˢ, v.Elem().IsNil());
     fmt.Println(numMethodˢ, v.NumMethod());
+
     ref var m = ref heap<reflectꓸValue>(out var Ꮡm);
     m = v.Method(0);
     fmt.Println(methodKindˢ, m.Kind(), typeˢ, m.Type());
     var mʗ1 = m;
     call(method0Callˢ, () => mʗ1.Call(default!)[0].String());
     call(methodByNameShoutCallˢ, () => Ꮡv.Value.MethodByName(shoutˢ).Call(default!)[0].String());
+
     var h = new Greeter(() => helloˢ);
     i = new GreeterᴠGreetable(h);
     v = reflect.ValueOf(Ꮡi).Elem();

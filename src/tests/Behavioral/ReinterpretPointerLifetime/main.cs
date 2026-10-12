@@ -38,6 +38,7 @@ internal static void Main() {
     var v = asView(h);
     v.Value.kind = 25;
     fmt.Println(aliasˢ, (~h).kind == 25, (~v).size == 16, (~v).name == "string"u8);
+
     var retained = asView(Ꮡ(new header(kind: 24, size: 16, name: "retained"u8)));
     churn();
     fmt.Println(lifetimeˢ, (~retained).kind == 24, (~retained).size == 16, (~retained).name == "retained"u8);

@@ -28,25 +28,34 @@ internal partial struct main_point /*dyn*/ {
 internal static void Main() {
     ref var a = ref heap(new array<any>(1), out var Ꮡa);
     fmt.Println(iface1ˢ, unmarshal("[42]"u8, Ꮡa), a);
+
     ref var b = ref heap(new array<nint>(2), out var Ꮡb);
     fmt.Println(int2ˢ, unmarshal("[7,8]"u8, Ꮡb), b);
+
     ref var c = ref heap(new array<nint>(2), out var Ꮡc);
     fmt.Println(truncˢ, unmarshal("[1,2,3,4]"u8, Ꮡc), c);
+
     ref var d = ref heap(new array<@string>(3), out var Ꮡd);
     fmt.Println(zerofillˢ, unmarshal(@"[""x""]"u8, Ꮡd), d);
+
     ref var e = ref heap(new array<nint>(2), out var Ꮡe);
     e = new nint[]{9, 9}.array();
     fmt.Println(emptyˢ, unmarshal("[]"u8, Ꮡe), e);
+
     ref var f = ref heap(new array<array<nint>>(2, () => new(2)), out var Ꮡf);
     fmt.Println(nestedˢ, unmarshal("[[1,2],[3,4]]"u8, Ꮡf), f);
     ref var g = ref heap(new array<main_point>(2), out var Ꮡg);
     fmt.Println(structsˢ, unmarshal(x1Y2X3Y4ˢ, Ꮡg), g);
+
     ref var h = ref heap<slice<nint>>(out var Ꮡh);
     fmt.Println(sliceˢ, unmarshal("[3,4,5]"u8, Ꮡh), h);
+
     ref var i = ref heap<any>(out var Ꮡi);
     fmt.Println(anyifaceˢ, unmarshal("[1,2]"u8, Ꮡi), i);
+
     ref var j = ref heap(new nint(), out var Ꮡj);
     fmt.Println(badtargetˢ, unmarshal("[1,2]"u8, Ꮡj), j);
+
     ref var k = ref heap(new array<nint>(2), out var Ꮡk);
     fmt.Println(badmapˢ, unmarshal(@"{""a"":1}"u8, Ꮡk), k);
 }

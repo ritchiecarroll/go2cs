@@ -48,8 +48,10 @@ internal static void Main() {
     var c = Ꮡ(new counter(n: 0));
     c.bumpTwice();
     fmt.Println((~c).n);
+
     fmt.Println(addInClosure(c, 5));
     fmt.Println((~c).n);
+
     Δp pv = default!;
     pv.id = 7;
     tagger t = default!;

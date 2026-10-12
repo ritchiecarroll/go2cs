@@ -31,12 +31,15 @@ internal partial struct run_rep /*dyn*/ {
 internal static (@string, nint) run() {
     run_rep rep = new(nil);
     rep.label = startˢ;
+
     nint build() {
         rep.counter.bump();
         rep.label = builtˢ;
         return rep.n;
     }
+
     fmt.Println(innerˢ, build(), rep.label);
+
     nint got = apply(() => {
         void touch() {
             rep.counter.bump();
@@ -46,6 +49,7 @@ internal static (@string, nint) run() {
         return rep.n;
     });
     fmt.Println(appliedˢ2, got);
+
     return (rep.label, rep.n);
 }
 

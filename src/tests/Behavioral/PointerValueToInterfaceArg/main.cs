@@ -48,10 +48,12 @@ internal static void Main() {
     a.Value.buf = append((~a).buf, (byte)((rune)'a'));
     fmt.Println(((@string)(~a).buf), (~a).id);
     a.free();
+
     var b = newPrinter();
     b.Value.buf = append((~b).buf, (byte)((rune)'b'));
     fmt.Println(((@string)(~b).buf), (~b).id);
     b.free();
+
     var c = Ꮡ(new pp(id: 100));
     keep(c);
     var got = poolGet()._<ж<pp>>();

@@ -130,18 +130,25 @@ private static readonly object okEmptyˢ = (@string)"ok-empty :"u8;
 internal static void Main() {
     fmt.Println(join3ˢ, callString(join, (@string)"go"u8, (nint)(1), (nint)(2), (nint)(3)));
     fmt.Println(join0ˢ, callString(join, (@string)"go"u8));
+
     fmt.Println(sumˢ, callString(sum, (nint)(4), (nint)(5), (nint)(6)));
     fmt.Println(sum0ˢ, callString(sum));
+
     fmt.Println(describeˢ, callString(describe, tagˢ, (nint)(1), twoˢ, true));
+
     fmt.Println(firstAˢ, callString(firstNonZero, (nint)(0), (nint)(0), (nint)(9)));
     fmt.Println(firstBˢ, callString(firstNonZero));
+
     fmt.Println(recordNˢ, len(reflect.ValueOf(record).Call(new reflectꓸValue[]{
         reflect.ValueOf((@string)"a"u8), reflect.ValueOf((@string)"x"u8), reflect.ValueOf((@string)"y"u8)
     }.slice())));
     fmt.Println(recordedˢ, recorded);
+
     fmt.Println(betweenˢ, callString(between, (nint)(2), (nint)(4), (nint)(1), (nint)(2), (nint)(3), (nint)(4), (nint)(5)));
+
     var m = reflect.ValueOf(new counter(@base: 100)).MethodByName(totalˢ);
     fmt.Println(methodˢ, callString(m.Interface(), (nint)(1), (nint)(2)));
+
     var funcs = new map<@string, any>{
         ["cat"u8] = ((Funcꓸꓸꓸ<@string, @string, @string>)(@string (@string sep, params ꓸꓸꓸstring partsʗp) => {
             var parts = partsʗp.sslice();
@@ -180,6 +187,7 @@ internal static void Main() {
     fmt.Println(catˢ, callString(funcs[catˢ2], (@string)"-"u8, (@string)"a"u8, (@string)"b"u8, (@string)"c"u8));
     fmt.Println(countˢ, callString(funcs[countˢ2], (nint)(1), (nint)(2), (nint)(3), (nint)(4)));
     fmt.Println(pairˢ, callString(funcs[pairˢ2], (nint)(7), (nint)(1), (nint)(2)));
+
     fmt.Println(toofewˢ, recoverText(() => {
         reflect.ValueOf(join).Call(default!);
     }));

@@ -36,8 +36,10 @@ internal static void Main() {
     foreach (var (_, e) in ptrElems) {
         fmt.Println((~e).@in, (~e).str, (~e).error == default!);
     }
+
     fmt.Println((~mapPtrValues["a"u8]).n + (~mapPtrValues["b"u8]).n);
     fmt.Println(nested[0][0].tag, nested[0][1].tag);
+
     ptrElems[0].Value.@in = 42;
     fmt.Println((~ptrElems[0]).@in);
 }

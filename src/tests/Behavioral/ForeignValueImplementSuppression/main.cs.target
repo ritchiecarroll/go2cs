@@ -33,15 +33,20 @@ internal static void Main() {
     var p = Ꮡ(new Img(new hueꓸShade(L: 0x99, A: 0xff)));
     var got = p.At();
     var want = new hueꓸShade(L: 0x99, A: 0xff);
+
     fmt.Printf("shade: %v %T\n"u8, got, got);
+
     fmt.Println((@string)"eq:"u8, AreEqual(got, want), AreEqual(want, got));
+
     hue.Tint w = want;
     fmt.Println(ifaceEqˢ, AreEqual(got, w));
     fmt.Println((@string)"ne:"u8, AreEqual(got, new hueꓸShade(L: 1, A: 2)));
+
     var (v, ok) = got._<hueꓸShade>(ᐧ);
     fmt.Println(assertˢ, ok, v.L, v.A);
     var (_, badOK) = got._<hue.Gray>(ᐧ);
     fmt.Println(assertMissˢ, badOK);
+
     switch (got.type()) {
     case hue.Gray t: {
         fmt.Println(switchˢ, grayˢ, t.Y);
@@ -56,19 +61,26 @@ internal static void Main() {
         fmt.Println(switchˢ, defaultˢ);
         break;
     }}
+
     var seen = new map<hue.Tint, @string>{};
     seen[got] = fromIfaceˢ;
     fmt.Println(mapˢ, seen[want], len(seen));
+
     var (l, a) = got.Shade();
     fmt.Println(callˢ, l, a);
+
     fmt.Printf("lib: %v %T %v\n"u8, hue.Default, hue.Default, AreEqual(hue.Default, new hueꓸShade(L: 1, A: 2)));
     fmt.Printf("lib-gray: %v %T\n"u8, hue.DefaultGray, hue.DefaultGray);
+
     hue.Tint g = new hue.Gray(Y: 5);
     fmt.Printf("gray: %v %T %v\n"u8, g, g, AreEqual(g, new hue.Gray(Y: 5)));
+
     fmt.Println(describeˢ, AreEqual(hue.Describe(want), got));
+
     hue.Tint f = new hue_TinterᴠTint(new hue.Tinter(() => ((uint32)(11), (uint32)(22))));
     var (fl, fa) = f.Shade();
     fmt.Println(funcˢ, fl, fa);
+
     var (dl, da) = hue.DefaultFunc.Shade();
     fmt.Println(funcLibˢ, dl, da);
 }

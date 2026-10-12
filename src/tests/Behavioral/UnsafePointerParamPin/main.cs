@@ -51,14 +51,17 @@ internal static void Main() {
     ref var x = ref heap(new uintptr(), out var Ꮡx);
     x = 42;
     fmt.Println(readViaParam(Ꮡx));
+
     ref var t = ref heap(new utp(), out var Ꮡt);
     t = 77;
     fmt.Println(Ꮡt.read());
     fmt.Println(Ꮡt.tricky());
+
     ref var h = ref heap<holder>(out var Ꮡh);
     h = new holder(v: 9);
     var q = Ꮡh.of(holder.Ꮡv);
     fmt.Println(q.Value);
+
     ref var a = ref heap(new uintptr(), out var Ꮡa);
     a = 11;
     ref var z = ref heap(new uintptr(), out var Ꮡz);

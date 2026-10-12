@@ -39,10 +39,13 @@ internal static @string describe(Token t) {
 internal static void Main() {
     any t = (nint)(42);
     fmt.Println(describe(t));
+
     @string msg = "hi"u8;
     Token ts = msg;
     fmt.Println(describe(ts));
+
     fmt.Println(describe(new point(1, 2)));
+
     Named n = new point(3, 4);
     fmt.Println(n.String());
 }

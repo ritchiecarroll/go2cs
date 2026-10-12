@@ -39,13 +39,18 @@ partial interface stamper {
 internal static void Main() {
     greeter g = new loudжgreeter(Ꮡ(new loud(n: 1)));
     fmt.Printf("%T\n"u8, g);
+
     greeter h = new soft(n: 2);
     fmt.Printf("%T\n"u8, h);
+
     any raw = Ꮡ(new loud(n: 3));
     fmt.Printf("%T\n"u8, raw);
+
     fmt.Printf("%T\n"u8, new soft(n: 4));
+
     stamper m = new typelib_Markᴠstamper(typelib.NewMark("x"u8));
     fmt.Printf("%T\n"u8, m);
+
     fmt.Println(g.greet(), h.greet(), m.Stamp());
 }
 

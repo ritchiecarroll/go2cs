@@ -41,8 +41,10 @@ internal static void Main() {
     var (ᴛ3, ᴛ4) = parts();
     nint s = combine(ᴛ3, ᴛ4);
     fmt.Println((~n).a, (~n).b, s);
+
     var (ᴛ5, ᴛ6) = parts();
     record(ᴛ5, ᴛ6);
+
     fmt.Println(g);
 }
 

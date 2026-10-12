@@ -26,9 +26,12 @@ internal static void Main() {
     ref var b = ref heap<nint>(out var Ꮡb);
     b = 2;
     var r = Ꮡ(new registry(handles: new map<@string, ж<nint>>{["a"u8] = Ꮡa, ["b"u8] = Ꮡb}));
+
     fmt.Println(r.at("a"u8), r.at("b"u8));
+
     r.set("a"u8, 10);
     fmt.Println(r.at("a"u8), a);
+
     var c = r.clone();
     fmt.Println(len(c.handles));
 }

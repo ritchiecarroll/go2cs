@@ -81,8 +81,10 @@ partial struct p224Curve {
 
 internal static void Main() {
     var pc = Ꮡ(new p224Curve(new curve<p224жpoint>(name: "p224c"u8, newPoint: () => newP224(), seed: Ꮡ(new p224(v: 3)))));
+
     fmt.Println((~pc).name);
     fmt.Println(pc.of(p224Curve.Ꮡcurve).LabelOf((~pc).seed));
+
     Named n = new p224CurveжNamed(pc);
     fmt.Println(n.Tag());
     fmt.Println(n.SeedLabel());

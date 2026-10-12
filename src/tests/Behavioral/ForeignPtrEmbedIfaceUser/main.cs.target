@@ -32,9 +32,11 @@ internal static void Main() {
     a.Add(5);
     a.Add(7);
     fmt.Println(valueˢ, a.Total(), box.Meter.Total());
+
     accumulator p = new meterBoxжaccumulator(Ꮡbox);
     p.Add(10);
     fmt.Println(pointerˢ, p.Total(), box.Meter.Total());
+
     var pair = ForeignPtrEmbedIfaceLib.NewPair();
     combo c = new ForeignPtrEmbedIfaceLib_Pairжcombo(pair);
     c.Add(3);

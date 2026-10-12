@@ -26,19 +26,24 @@ internal static void Main() {
         fmt.Println(childMarkerˢ, Δos.Getenv(spawnBasicsMarkerˢ));
         Δos.Exit(3);
     }
+
     var cmd = exec.Command(Δos.Args[0]);
     cmd.Value.Env = append(Δos.Environ(), "SPAWN_BASICS_CHILD=1"u8, "SPAWN_BASICS_MARKER=xyzzy");
+
     var (@out, err) = cmd.CombinedOutput();
+
     fmt.Print(((@string)@out));
     if (err == default!) {
         fmt.Println(parentUnexpectedNilErrorˢ);
         return;
     }
+
     var (exitErr, ok) = err._<ж<exec.ExitError>>(ᐧ);
     if (!ok) {
         fmt.Println(parentSpawnFailedˢ, strings.ReplaceAll(err.Error(), Δos.Args[0], selfˢ));
         return;
     }
+
     fmt.Println(parentChildExitCodeˢ, exitErr.Value.ProcessState.ExitCode());
     fmt.Println(parentCapturedˢ, len(strings.Split(strings.TrimSpace(((@string)@out)), "\n"u8)), linesˢ);
 }

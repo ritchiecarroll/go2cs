@@ -29,10 +29,13 @@ internal static @string walkRangeShape(reflectꓸValue v) {
     if (v.Kind() != reflect.Chan) {
         return notAChannelˢ;
     }
+
     if (v.Type().ChanDir() == reflect.SendDir) {
         return rangeOverSendOnlyChannelˢ;
     }
+
     slice<@string> @out = default!;
+
     while (ᐧ) {
         var (elem, ok) = v.Recv();
         if (!ok) {
@@ -40,6 +43,7 @@ internal static @string walkRangeShape(reflectꓸValue v) {
         }
         @out = append(@out, fmt.Sprint(elem));
     }
+
     return "["u8 + strings.Join(@out, " "u8) + "]"u8;
 }
 
@@ -105,31 +109,40 @@ internal static partial void Main() {
     var send = new channel/*<-*/<nint>(0, GoChanDir.Send);
     var recv = new /*<-*/channel<nint>(2, GoChanDir.Recv);
     var both = new channel<nint>(0);
+
     describe(makeChanˢ, reflect.TypeOf(send));
     describe(makeChanˢ2, reflect.TypeOf(recv));
     describe(makeChanˢ3, reflect.TypeOf(both));
+
     var ps = Ꮡ(channel/*<-*/<@string>.SendOnly);
     var pr = Ꮡ(/*<-*/channel<nint>.RecvOnly);
+
     fmt.Printf("new chan<-: %v -> %v | dir=%v\n"u8, reflect.TypeOf(ps.OrTypedNil()), reflect.TypeOf(ps.OrTypedNil()).Elem(), reflect.TypeOf(ps.OrTypedNil()).Elem().ChanDir());
     fmt.Printf("new <-chan: %v -> %v | dir=%v\n"u8, reflect.TypeOf(pr.OrTypedNil()), reflect.TypeOf(pr.OrTypedNil()).Elem(), reflect.TypeOf(pr.OrTypedNil()).Elem().ChanDir());
     fmt.Printf("elem of new: %v | %v\n"u8, reflect.ValueOf(ps.OrTypedNil()).Elem().Type(), reflect.ValueOf(pr.OrTypedNil()).Elem().Type());
+
     var ht = reflect.TypeOf(new holder(nil));
     for (nint i = 0; i < ht.NumField(); i++) {
         var f = ht.Field(i);
         fmt.Printf("field %s: %v | dir=%v\n"u8, f.Name, f.Type, f.Type.ChanDir());
     }
+
     var st = reflect.TypeOf(send);
     var rt = reflect.TypeOf(recv);
     fmt.Printf("zero: %T | %T\n"u8, reflect.Zero(st).Interface(), reflect.Zero(rt).Interface());
     fmt.Printf("new elem: %T | %v\n"u8, reflect.New(st).Elem().Interface(), reflect.New(rt).Type());
+
     var ci = reflect.TypeOf(@new<channel<nint>>()).Elem();
     var ri = reflect.TypeOf(Ꮡ(/*<-*/channel<nint>.RecvOnly)).Elem();
     var si = reflect.TypeOf(Ꮡ(channel/*<-*/<nint>.SendOnly)).Elem();
     fmt.Println(chanRecvˢ, ci.AssignableTo(ri), recvChanˢ, ri.AssignableTo(ci), chanSendˢ, ci.AssignableTo(si), sendRecvˢ, si.AssignableTo(ri));
     fmt.Println(identicalˢ, AreEqual(ci, reflect.TypeOf(both)), distinctˢ, !AreEqual(ci, ri), !AreEqual(ri, si));
+
     sink sk = new sink(0);
     describe(definedChanˢ, reflect.TypeOf(sk));
+
     fmt.Println(rangeCount5ˢ, walkRangeShape(reflect.ValueOf(count(5))));
+
     var done = new channel<@string>(1);
     var doneʗ1 = done;
     goǃ(() => {
@@ -146,16 +159,19 @@ internal static partial void Main() {
         fmt.Println(rangeSendOnlyHungTheˢ);
         break;
     }}
+
     var buffered = new channel<nint>(2);
     var bv = reflect.ValueOf(buffered);
     bv.Send(reflect.ValueOf((nint)(41)));
     bv.Send(reflect.ValueOf((nint)(42)));
     var (first, ok1) = bv.Recv();
     fmt.Println(sendRecvˢ2, first.Int(), ok1, lenˢ, bv.Len(), capˢ, bv.Cap());
+
     var (drained, ok2) = bv.TryRecv();
     var (empty, ok3) = bv.TryRecv();
     fmt.Println(tryrecvˢ, drained.Int(), ok2, emptyValidˢ, empty.IsValid(), ok3);
     fmt.Println(trysendˢ, bv.TrySend(reflect.ValueOf((nint)(7))));
+
     var closing = new channel<@string>(1);
     closing.ᐸꟷ(lastˢ);
     close(closing);
@@ -163,6 +179,7 @@ internal static partial void Main() {
     var (drainedVal, okDrain) = cv.Recv();
     var (zeroVal, okZero) = cv.Recv();
     fmt.Printf("closed: %q %v then %q %v\n"u8, drainedVal.String(), okDrain, zeroVal.String(), okZero);
+
     var sendʗ1 = send;
     fmt.Println(recvOnSendOnlyˢ, recovered(() => {
         reflect.ValueOf(sendʗ1).Recv();

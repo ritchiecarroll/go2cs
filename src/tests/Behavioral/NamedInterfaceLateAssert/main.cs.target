@@ -61,22 +61,31 @@ private static readonly @string quietPartialˢ = "quiet-partial  "u8;
 internal static void Main() {
     ref var d = ref heap(new dirLike(), out var Ꮡd);
     d = rootˢ;
+
     var (s, ok) = latelib.TryTop(d);
     report(topDirLikeˢ, s, ok);
+
     (s, ok) = latelib.TryMid(d);
     report(midDirLikeˢ, s, ok);
+
     (s, ok) = latelib.TryBase(d);
     report(baseDirLikeˢ, s, ok);
+
     (s, ok) = latelib.TryQuiet(d);
     report(quietDirLikeˢ, s, ok);
+
     (s, ok) = latelib.TryTop(Ꮡd);
     report(topPtrDirLikeˢ, s, ok);
+
     (s, ok) = latelib.TryQuiet(Ꮡd);
     report(quietPtrDirˢ, s, ok);
+
     (s, ok) = latelib.TryTop(new partial(n: "p"u8));
     report(topPartialˢ, s, ok);
+
     (s, ok) = latelib.TryMid(new partial(n: "p"u8));
     report(midPartialˢ, s, ok);
+
     (s, ok) = latelib.TryQuiet(new partial(n: "p"u8));
     report(quietPartialˢ, s, ok);
 }

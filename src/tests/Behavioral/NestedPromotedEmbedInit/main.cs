@@ -24,6 +24,7 @@ internal static void Main() {
     p.Value.f.name = "hi"u8;
     p.Value.f.pad[0] = 65;
     fmt.Println((~p).f.width, (~p).f.name, (~p).f.pad[0]);
+
     var r = Ꮡ(new printer(nil));
     r.Value.f.width = 9;
     r.Value.f.pad[2] = 90;

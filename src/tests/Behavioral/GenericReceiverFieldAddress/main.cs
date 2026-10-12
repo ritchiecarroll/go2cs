@@ -38,6 +38,7 @@ internal static void Main() {
     Ꮡbi.Set(42);
     Ꮡbi.Set(Ꮡbi.Get() + 1);
     fmt.Println(intˢ, Ꮡbi.Get());
+
     ref var bs = ref heap(new Box<@string>(), out var Ꮡbs);
     Ꮡbs.Set(helloˢ);
     fmt.Println(stringˢ, Ꮡbs.Get());

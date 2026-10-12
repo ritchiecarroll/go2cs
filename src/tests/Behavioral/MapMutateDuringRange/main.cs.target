@@ -42,16 +42,19 @@ internal static void Main() {
     }
     fmt.Println(insertVisitedˢ, visited);
     fmt.Println(insertFinalˢ, dump(insert, new @string[]{"a"u8, "a!"u8, "b"u8, "b!"u8, "c"u8, "c!"u8}.slice()));
+
     var update = new map<@string, nint>{["x"u8] = 1, ["y"u8] = 2};
     foreach (var (k, v) in update) {
         update[k] = v + 100;
     }
     fmt.Println(updateFinalˢ, dump(update, new @string[]{"x"u8, "y"u8}.slice()));
+
     var del = new map<@string, nint>{["p"u8] = 1, ["q"u8] = 2, ["r"u8] = 3};
     foreach (var (k, _) in del) {
         delete(del, k);
     }
     fmt.Println(deleteFinalˢ, dump(del, new @string[]{"p"u8, "q"u8, "r"u8}.slice()));
+
     var mix = new map<@string, nint>{["m"u8] = 1, ["n"u8] = 2};
     foreach (var (k, v) in mix) {
         if (len(k) == 1) {
@@ -60,16 +63,19 @@ internal static void Main() {
         }
     }
     fmt.Println(mixFinalˢ, dump(mix, new @string[]{"m"u8, "mm"u8, "n"u8, "nn"u8}.slice()));
+
     var src = new map<@string, nint>{["s"u8] = 5};
     var dst = new map<@string, nint>{};
     foreach (var (k, v) in src) {
         dst[k + "-copy"u8] = v;
     }
     fmt.Println(controlFinalˢ, dump(dst, new @string[]{"s-copy"u8}.slice()));
+
     var zero = 0.0D;
     var nan = new map<float64, nint>{};
     nan[zero / zero] = 1;
     nan[zero / zero] = 1;
+
     nint seen = 0;
     nint sum = 0;
     foreach (var (_, v) in nan) {
@@ -77,10 +83,13 @@ internal static void Main() {
         sum += v;
     }
     fmt.Println(nanLenˢ, len(nan), visitedˢ, seen, sumˢ, sum);
+
     var (_, nanFound) = nan[zero / zero, ꟷ];
     fmt.Println(nanLookupFoundˢ, nanFound);
+
     delete(nan, zero / zero);
     fmt.Println(nanLenAfterDeleteˢ, len(nan));
+
     var mixed = new map<float64, nint>{[1.5D] = 10};
     mixed[zero / zero] = 1;
     mixed[zero / zero] = 1;

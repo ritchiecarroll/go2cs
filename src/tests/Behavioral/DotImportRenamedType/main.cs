@@ -35,29 +35,39 @@ private static readonly object localAssertˢ = (@string)"local-assert:"u8;
 internal static void Main() {
     var m = new renamedlibꓸMarker(Name: "alpha"u8, Size: 3);
     fmt.Println(literalˢ, m.Marker());
+
     var p = Ꮡ(new renamedlibꓸMarker(Name: "beta"u8, Size: 5));
     fmt.Println(ptrLiteralˢ, (~p).Marker());
+
     var d = new renamedlibꓸDetail(Label: "gamma"u8, Rank: 7);
     fmt.Println(detailLiteralˢ, d.Show());
+
     fmt.Println(detailOfˢ, m.Detail().Show());
+
     {
         var (got, ok) = Describe(deltaˢ, 9)._<renamedlibꓸMarker>(ᐧ); if (ok) {
             fmt.Println(assertOkˢ, got.Marker());
         }
     }
+
     var one = Wrap(epsilonˢ, 11)._<renamedlibꓸDetail>();
     fmt.Println(assertOneˢ, one.Show());
+
     var (_, notMarker) = Wrap(zetaˢ, 13)._<renamedlibꓸMarker>(ᐧ);
     fmt.Println(assertMissˢ, notMarker);
+
     var pl = new Plain(Note: "eta"u8);
     fmt.Println(plainˢ, pl.Note);
+
     {
         var (got, ok) = Boxed(thetaˢ)._<Plain>(ᐧ); if (ok) {
             fmt.Println(plainAssertˢ, got.Note);
         }
     }
+
     var l = new ΔLocal(Tag: "iota"u8);
     fmt.Println(localˢ, l.Local());
+
     {
         var (got, ok) = ((any)l)._<ΔLocal>(ᐧ); if (ok) {
             fmt.Println(localAssertˢ, got.Local());

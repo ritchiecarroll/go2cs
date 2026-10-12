@@ -127,9 +127,11 @@ internal static void Main() {
     any declaredConst = int64 () => 6;
     var byName = new map<@string, any>{["seven"u8] = int64 () => 7};
     any named = (scaled(12)).OrTypedNilFunc();
+
     var all = new any[]{retMulti(), retNamed(), retConst(), declared, assigned, argument, keyed.h,
         elements[0], elements[1], converted, namedConverted, sent, positional.h, first, second,
         declaredConst, byName[sevenˢ], named}.slice();
+
     foreach (var (i, f) in all) {
         fmt.Printf("%2d: %s\n"u8, i, call(f));
     }

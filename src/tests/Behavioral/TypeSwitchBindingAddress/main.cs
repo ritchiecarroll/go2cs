@@ -68,9 +68,11 @@ internal static any process(any tok, ж<resolver> Ꮡr) {
 
 internal static void Main() {
     var r = Ꮡ(new resolver(ns: new map<@string, @string>{["a"u8] = "urn:a"u8}));
+
     var s = process(new start(n: new name(space: "a"u8, local: "x"u8), attr: new name[]{new(space: "a"u8, local: "y"u8)}.slice()), r)._<start>();
     fmt.Println(s.n.space, s.n.local);
     fmt.Println(s.attr[0].space, s.attr[0].local);
+
     var e = process(new end(n: new name(space: "z"u8, local: "w"u8)), r)._<end>();
     fmt.Println(e.n.space, e.n.local);
 }

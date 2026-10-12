@@ -38,19 +38,25 @@ private static readonly object litmultiˢ = (@string)"litmulti:"u8;
 
 internal static partial void Main() {
     var @out = new channel<nint>(0);
+
     goǃ((ᴛ1, ᴛ2, ᴛ3) => sum(ᴛ1, ᴛ2, ᴛ3), @out, 3, 4);
     fmt.Println(sumˢ, ᐸꟷ(@out));
+
     goǃ((ᴛ1, ᴛ2) => pair(ᴛ1, ᴛ2), @out, 6);
     fmt.Println(pairˢ, ᐸꟷ(@out));
+
     goǃ(() => nib());
     fmt.Println(nibˢ, ᐸꟷ(gch));
+
     var outʗ1 = @out;
     goǃ(() => {
         outʗ1.ᐸꟷ(1);
     });
     fmt.Println(litˢ, ᐸꟷ(@out));
+
     goǃ(emit, @out);
     fmt.Println(emitˢ, ᐸꟷ(@out));
+
     goǃ((channel<nint> o) => {
         error retErr = default!;
         GoFrame ᒐ = default;
@@ -66,6 +72,7 @@ internal static partial void Main() {
         ᒐdone: return retErr;
     }, @out);
     fmt.Println(litvalˢ, ᐸꟷ(@out));
+
     goǃ(error (channel<nint> o, nint n) => {
         o.ᐸꟷ(n * 2);
         if (n < 0) {

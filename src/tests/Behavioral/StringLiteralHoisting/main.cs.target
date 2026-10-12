@@ -13,6 +13,7 @@ internal static @string kind(nint n) {
     if (n == 0) {
         return zeroValueReturnˢ;
     }
+
     return otherValueReturnˢ;
 }
 
@@ -24,9 +25,11 @@ internal static @string joinAll(params ꓸꓸꓸstring partsʗp) {
     var parts = partsʗp.sslice();
 
     @string @out = ""u8;
+
     foreach (var (_, p) in parts) {
         @out = @out + p + "|"u8;
     }
+
     return @out;
 }
 
@@ -41,6 +44,7 @@ internal static @string withSuffix(@string suffix) {
 internal static nint mutableBytes() {
     var b = slice<byte>("byte slice source literal"u8);
     b[0] = (rune)'B';
+
     return len(b);
 }
 
@@ -68,36 +72,53 @@ private static readonly @string theQuickBrownFoxJumpsˢ2 = "the quick brown fox 
 
 internal static void Main() {
     fmt.Println(kind(0), kind(1));
+
     fmt.Println(echo(sharedAcrossFilesˢ));
+
     fmt.Println(joinAll(variadicElementOneˢ, variadicElementTwoˢ));
+
     box b = default!;
     b.name = structFieldAssignmentˢ;
     b.tag = structFieldSecondˢ;
     fmt.Println(b.name, b.tag);
+
     fmt.Println(((@string)((label)(@string)namedStringConversionˢ)));
+
     var counts = new map<@string, nint>{};
     counts[standaloneMapKeyˢ]++;
     counts[standaloneMapKeyˢ] += 2;
     fmt.Println(counts[standaloneMapKeyˢ]);
+
     fmt.Println(preBoxedAnyTargetˢ);
+
     fmt.Println(echo(mixedUseLiteralˢ), mixedUseLiteralˢ);
+
     fmt.Println(isSentinel(comparisonOperandLiteralˢ), isSentinel(nopeˢ));
     fmt.Println(withSuffix(tailˢ));
     fmt.Println(mutableBytes());
+
     fmt.Printf("format position literal %s\n"u8, formatTrailingArgumentˢ);
+
     fmt.Println(echo("OK"u8), echo(yesˢ), echo(trueˢ));
+
     fmt.Println(echo(blake2s256ˢ), echo(httpServerReadyˢ));
+
     fmt.Println(echo(""u8) == ""u8);
+
     var parts = new @string[]{"composite element one"u8, "composite element two"u8}.slice();
     var boxed = new box("struct composite element"u8, "struct composite tag"u8);
     var table = new map<@string, @string>{["composite key"u8] = "composite value"u8};
     fmt.Println(parts[0], parts[1], boxed.name, boxed.tag, table[compositeKeyˢ]);
+
     var anys = new any[]{(@string)"any composite element"u8, (nint)(7)}.slice();
     fmt.Println(anys[0], anys[1]);
+
     fmt.Println(pkgLevelLiteral);
     fmt.Println(derivedAtInit, len(derivedAtInit) > 0);
+
     fmt.Println(echo(theQuickBrownFoxJumpsˢ));
     fmt.Println(echo(theQuickBrownFoxJumpsˢ2));
+
     fmt.Println(echo("世界世界"u8));
 }
 

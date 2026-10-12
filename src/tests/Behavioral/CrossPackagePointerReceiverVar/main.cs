@@ -17,17 +17,21 @@ internal static void Main() {
     lib.ᏑBoxed.RLock();
     lib.ᏑBoxed.RUnlock();
     fmt.Println(boxedRlockRunlockOkˢ);
+
     lib.ᏑPlain.RLock();
     lib.ᏑPlain.RUnlock();
     fmt.Println(plainRlockRunlockOkˢ);
+
     lib.ᏑBoxed.Lock();
     lib.ᏑBoxed.Unlock();
     lib.ᏑPlain.Lock();
     lib.ᏑPlain.Unlock();
     fmt.Println(lockUnlockOkˢ);
+
     lib.Cnt.Inc();
     lib.Cnt.Inc();
     fmt.Println(counterˢ, lib.Cnt.Value());
+
     lib.Touch();
     lib.ᏑBoxed.RLock();
     lib.ᏑBoxed.RUnlock();

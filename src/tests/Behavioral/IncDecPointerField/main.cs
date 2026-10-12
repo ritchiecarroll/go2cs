@@ -22,9 +22,11 @@ internal static void Main() {
     var @base = Ꮡ(new counter(n: 5));
     @base.Value.sub.k = 3;
     var c = get(@base);
+
     c.Value.n++;
     c.Value.n++;
     c.Value.sub.k--;
+
     fmt.Println((~@base).n, (~@base).sub.k);
 }
 

@@ -27,6 +27,7 @@ internal static partial void Main() {
         }
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         var done = new channel<slice<byte>>(1);
         var doneʗ1 = done;
         var lnʗ2 = ln;
@@ -46,22 +47,27 @@ internal static partial void Main() {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
+
         (var c, err) = Δnet.Dial(tcpˢ, ln.Addr().String());
         if (err != default!) {
             fmt.Println(dialˢ, err);
             return;
         }
+
         ref var bufs = ref heap<Δnet.Buffers>(out var Ꮡbufs);
         bufs = new Δnet.Buffers(new slice<byte>[]{}.slice());
         for (nint i = 0; i < 10; i++) {
             bufs = append(bufs, new byte[]{(byte)i}.slice());
         }
+
         (var n, err) = Ꮡbufs.WriteTo(new net_ConnᴠWriter(c));
         c._<ж<Δnet.TCPConn>>().CloseWrite();
         fmt.Println(wroteˢ, n, errˢ, err);
+
         var got = ᐸꟷ(done);
         fmt.Println(lenˢ, len(got));
         fmt.Println(bytesˢ, got);
+
         var ordered = len(got) == 10;
         for (nint i = 0; ordered && i < 10; i++) {
             ordered = got[i] == (byte)i;

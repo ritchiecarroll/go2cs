@@ -60,38 +60,46 @@ internal static void Main() {
     @catch(methodCallˢ, () => {
         fmt.Println(pʗ1.label());
     });
+
     var pʗ2 = p;
     @catch(fieldReadˢ, () => {
         fmt.Println((~pʗ2).name);
     });
+
     var pʗ3 = p;
     @catch(fieldWriteˢ, () => {
         pʗ3.Value.name = "x"u8;
     });
+
     var pʗ4 = p;
     @catch(explicitDerefˢ, () => {
         fmt.Println(pʗ4.Value);
     });
+
     ref var b = ref heap(new box(), out var Ꮡb);
     var bʗ1 = b;
     @catch(nestedFieldˢ, () => {
         fmt.Println((~bʗ1.p).name);
     });
+
     var nodes = new slice<ж<node>>(2);
     var nodesʗ1 = nodes;
     @catch(sliceElementˢ, () => {
         fmt.Println((~nodesʗ1[0]).name);
     });
+
     var m = new map<@string, ж<node>>{};
     var mʗ1 = m;
     @catch(mapValueˢ, () => {
         fmt.Println((~mʗ1[absentˢ]).name);
     });
+
     var real = Ꮡ(new node(name: "head"u8));
     var realʗ1 = real;
     @catch(chainWalkˢ, () => {
         fmt.Println((~(~realʗ1).next).name);
     });
+
     var pʗ5 = p;
     @catch(nilSafeMethodˢ, () => {
         fmt.Println(pʗ5.isNil());
@@ -106,6 +114,7 @@ internal static void Main() {
     @catch(nilCompareˢ, () => {
         fmt.Println(pʗ6 == nil, bʗ2.p == nil, nodesʗ2[0] == nil);
     });
+
     fmt.Println(stillRunningˢ, real.label());
 }
 

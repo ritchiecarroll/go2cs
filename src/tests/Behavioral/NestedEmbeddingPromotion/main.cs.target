@@ -29,9 +29,11 @@ internal static void Main() {
     x.p = 9;
     x.m = 2;
     x.t = 3;
+
     fmt.Println(x.n, x.p, x.m, x.t);
     fmt.Println(x.inner.n, x.mid.m);
     fmt.Println(x.describe());
+
     x.n = 42;
     fmt.Println(x.n, x.inner.n);
 }

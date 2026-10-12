@@ -58,21 +58,25 @@ internal static void Main() {
     p.swap(1, 2);
     p.set(0, 99);
     show(ref (p).DerefOrNull());
+
     var q = Ꮡ(new ints(new nint[]{1, 2, 3, 4, 5}.slice()));
     for ((nint i, nint j) = (0, len(q.ValueSlot) - 1); i < j; (i, j) = (i + 1, j - 1)) {
         q.swap(i, j);
     }
     show(ref (q).DerefOrNull());
+
     var c = Ꮡ(new cells(new cell[]{new(10), new(20), new(30), new(40)}.slice()));
     c.swapAt(0, 3);
     c.swapAt(1, 2);
     c.setAt(0, 99);
     showCells(ref (c).DerefOrNull());
+
     var d = Ꮡ(new cells(new cell[]{new(1), new(2), new(3), new(4), new(5)}.slice()));
     for ((nint i, nint j) = (0, len(d.ValueSlot) - 1); i < j; (i, j) = (i + 1, j - 1)) {
         d.swapAt(i, j);
     }
     showCells(ref (d).DerefOrNull());
+
     var e = Ꮡ(new cells(new cell[]{new(5), new(3), new(9), new(1), new(7), new(2), new(8)}.slice()));
     for (nint i = 0; i < len(e.ValueSlot); i++) {
         nint min = i;

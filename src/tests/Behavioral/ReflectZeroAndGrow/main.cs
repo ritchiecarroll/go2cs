@@ -85,12 +85,14 @@ internal static void Main() {
     z(nsEmptyˢ, ((NS)(@string)""u8));
     z(niNonZeroˢ, ((NI)3));
     z(niZeroˢ, ((NI)0));
+
     z(uint812ˢ, new uint8[]{1, 2}.array());
     z(uint8ˢ, new uint8[]{}.array(2));
     z(na12ˢ, new NA(new uint8[]{1, 2}.array()));
     z("NA{}"u8, new NA(new uint8[2].array()));
     z(stringˢ, new @string[]{}.array(3));
     z(nsAˢ, new NS[]{((NS)(@string)"a"u8), ((NS)(@string)""u8)}.array());
+
     z(nbNilˢ, ((NB)default!));
     z("NB{}"u8, new NB(new byte[]{}.slice()));
     z(byteNilˢ, slice<byte>(default!));
@@ -99,6 +101,7 @@ internal static void Main() {
     z(mapNilˢ, nilMap);
     z(mapEmptyˢ, new map<@string, nint>{});
     z(intNilˢ, ((ж<nint>)nil));
+
     z(innerˢ, new inner(nil));
     z(innerSValˢ, new inner(S: ((NS)(@string)valˢ)));
     z(innerN1ˢ, new inner(N: 1));
@@ -109,23 +112,28 @@ internal static void Main() {
     n = 0;
     z(outerPNˢ, new outer(P: Ꮡn));
     z(outerSlˢ, new outer(Sl: new nint[]{}.slice()));
+
     fmt.Println(anyNsIsZeroˢ, reflect.ValueOf(((any)((NS)(@string)""u8))).IsZero());
     fmt.Println(anyNsVIsZeroˢ, reflect.ValueOf(((any)((NS)(@string)"v"u8))).IsZero());
+
     z(outerENilˢ, new outer(nil));
     z(outerEErrˢ, new outer(E: errors.New("x"u8)));
     var ev = reflect.ValueOf(Ꮡ(new outer(nil))).Elem().FieldByName("E"u8);
     fmt.Println(fieldEKindˢ, ev.Kind(), isZeroˢ, ev.IsZero());
     var ev2 = reflect.ValueOf(Ꮡ(new outer(E: errors.New("x"u8)))).Elem().FieldByName("E"u8);
     fmt.Println(fieldESetKindˢ, ev2.Kind(), isZeroˢ, ev2.IsZero());
+
     ref var s = ref heap<slice<byte>>(out var Ꮡs);
     s = new byte[]{1, 2, 3, 4}.slice();
     var rv = reflect.ValueOf(Ꮡs).Elem();
     rv.Grow(1);
     fmt.Println(grow1LenCapˢ, rv.Len(), rv.Cap() >= 5, len(s), cap(s) >= 5);
+
     ref var empty = ref heap<slice<byte>>(out var Ꮡempty);
     var re = reflect.ValueOf(Ꮡempty).Elem();
     re.Grow(3);
     fmt.Println(grow3FromNilˢ, re.Len(), re.Cap() >= 3, empty == default!);
+
     ref var big = ref heap<slice<nint>>(out var Ꮡbig);
     big = new slice<nint>(2, 2);
     var rb = reflect.ValueOf(Ꮡbig).Elem();
@@ -133,6 +141,7 @@ internal static void Main() {
     rb.SetLen(3);
     rb.Index(2).SetInt(99);
     fmt.Println(growSetLenˢ, len(big), big[2], cap(big) >= 10);
+
     ref var keep = ref heap<slice<nint>>(out var Ꮡkeep);
     keep = new nint[]{7, 8}.slice();
     var rk = reflect.ValueOf(Ꮡkeep).Elem();

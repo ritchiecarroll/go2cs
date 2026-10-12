@@ -43,13 +43,18 @@ internal static void Main() {
     }
     fmt.Println();
     fmt.Println(get4(data, 0));
+
     dump(octalDataˢ, octalData);
     dump(asciiOctalˢ, asciiOctal);
+
     @string local = ((@string)(new byte[]{0xfe, 0xfd}));
     dump(localˢ, local);
+
     dump(escapedOctalˢ, escapedOctal);
+
     @string localEscaped = ((@string)(new byte[]{0x5c, 0x33, 0x37, 0x37, 0x7c, 0xff}));
     dump(localEscapedˢ, localEscaped);
+
     fmt.Println(((@string)(rune)backslashRune), ((@string)(rune)octalRune), (nint)backslashRune, (nint)octalRune);
 }
 

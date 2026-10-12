@@ -71,21 +71,29 @@ internal static partial nint boxRefCapturedValueNamedAfterType() {
 internal static void Main() {
     var p = Ꮡh.of(holder.Ꮡmark);
     p.Value = 42;
+
     var q = Ꮡh.of(holder.Ꮡextra);
     q.Value = 7;
+
     fmt.Println(h.mark, h.extra);
+
     Δmark m = default!;
     m.id = 3;
     tagger t = default!;
     t.mark();
     fmt.Println(m.id);
+
     var pid = Ꮡgm.of(main_package.Δmark.Ꮡid);
     pid.Value = 99;
     fmt.Println(gm.id);
+
     var h2 = new holder(mark: 5, extra: 6);
     fmt.Println(h2.mark, h2.extra);
+
     fmt.Println(localShadowsCollisionType());
+
     fmt.Println(capturedLocalNamedAfterType());
+
     fmt.Println(boxRefCapturedValueNamedAfterType());
 }
 

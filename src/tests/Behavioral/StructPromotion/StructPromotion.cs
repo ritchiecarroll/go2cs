@@ -64,10 +64,12 @@ internal static void Main() {
     var person = new Person(name: "Dr. Michał"u8, age: 29);
     fmt.Println(person);
     fmt.Println(person.IsDr());
+
     var record = new Record(nil);
     record.name = drMichaˢ;
     record.age = 18;
     record.position = softwareEngineerˢ;
+
     fmt.Println(record);
     fmt.Println(record.name);
     fmt.Println(record.age);
@@ -75,6 +77,7 @@ internal static void Main() {
     fmt.Println(record.IsAdult());
     fmt.Println(record.IsManager());
     fmt.Println(record.IsDr());
+
     var l = Ꮡ(new ledger(nil));
     l.Value.tag = "x"u8;
     fmt.Println(l.describe(), l.describe(), (~l).seq);

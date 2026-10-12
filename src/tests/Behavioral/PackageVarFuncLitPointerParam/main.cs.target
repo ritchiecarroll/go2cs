@@ -25,6 +25,7 @@ internal static @string label(this ref request r) {
 
 internal static @string inside() {
     @string f(ж<request> r) => (~r).path + "!"u8;
+
     return f(Ꮡ(new request(path: "/ctl"u8)));
 }
 
@@ -34,8 +35,11 @@ private static readonly @string secondˢ = "second"u8;
 
 internal static void Main() {
     var r = Ꮡ(new request(path: "/a"u8, closed: true, depth: 1));
+
     fmt.Println(describe(r, firstˢ));
+
     deepen(r);
+
     fmt.Println(describe(r, secondˢ));
     fmt.Println(pathOf(r), inside());
 }

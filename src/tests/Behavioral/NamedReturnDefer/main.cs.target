@@ -152,17 +152,23 @@ private static readonly object parseLimited99ˢ = (@string)"parseLimited(99):"u8
 internal static void Main() {
     fmt.Println(incr());
     fmt.Println(incrBare());
+
     var (a, b) = swapAndBump();
     fmt.Println(a, b);
+
     var (o1, l1) = compute(3);
     fmt.Println(o1, l1);
     var (o2, l2) = compute(-5);
     fmt.Println(o2, l2);
+
     fmt.Println(closures(5));
+
     var (c1, m1) = guarded(false);
     fmt.Println(c1, m1);
+
     var (c2, m2) = guarded(true);
     fmt.Println(c2, m2);
+
     {
         var (bΔ1, err) = parseLimited(4); if (err == default!) {
             fmt.Println(parseLimited4ˢ, (~bΔ1).v, err);

@@ -69,17 +69,20 @@ internal static void Main() {
     o.of(outer.Ꮡinner).bump(5);
     o.of(outer.Ꮡinner).bump(3);
     viaParam(o);
+
     fmt.Println(o.of(outer.Ꮡinner).total());
     fmt.Println((~o).n);
     fmt.Println((~o).inner.n);
     fmt.Println((~o).tag);
     o.of(outer.Ꮡinner).reset0();
     fmt.Println((~o).n);
+
     var c = new chunk(nil);
     c.alloc(5);
     fmt.Println(c.inUse, (uint8)c.flags);
     c.free(2);
     fmt.Println(c.inUse, (uint8)c.flags);
+
     var d = new chunk(nil);
     ref var e = ref heap<chunk>(out var Ꮡe);
     e = new chunk(nil);

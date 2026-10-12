@@ -22,25 +22,34 @@ internal static partial void Main() {
     goǃ(ᴛ1 => fmt.Println(ᴛ1), firstˢ);
     goǃ(ᴛ1 => fmt.Println(ᴛ1), secondˢ);
     goǃ(ᴛ1 => fmt.Println(ᴛ1), thirdˢ);
+
     Funcꓸꓸꓸ<any, (nint, error)> f1 = fmt.Println;
     var f1ʗ1 = f1;
     goǃ(ᴛ1 => f1ʗ1(ᴛ1), fourthˢ);
+
     goǃ(GetPrintLn(), fifthˢ);
+
     goǃ((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), functionResultˢ, add(3, 4));
+
     printSquare(5);
+
     nint count = 1;
     goǃ(() => {
         fmt.Println(goCountClosureˢ, count);
     });
     count = 10;
     fmt.Println(countBeforeGoˢ, count);
+
     time.Sleep(200);
+
     var done = new channel<EmptyStruct>(0);
     runPair(done);
     ᐸꟷ(done);
+
     var acc = Ꮡ(new accum(nil));
     bindAdd(acc);
     fmt.Println(accumTotalˢ, (~acc).total);
+
     fmt.Println(mainFunctionˢ);
 }
 

@@ -39,18 +39,21 @@ internal static void keyUpdate() {
     foreach (var (k, _) in m) {
         fmt.Println(float64KeyAfter0Then0ˢ, sign(k), lenˢ, len(m));
     }
+
     var m2 = new map<float64, bool>{};
     m2[negZero] = true;
     m2[0D] = true;
     foreach (var (k, _) in m2) {
         fmt.Println(float64KeyAfter0Then0ˢ2, sign(k), lenˢ, len(m2));
     }
+
     var mi = new map<any, nint>{};
     mi[0.0D] = 1;
     mi[negZero] = 2;
     foreach (var (k, v) in mi) {
         fmt.Println(interfaceKeyAfter0Then0ˢ, sign(k._<float64>()), valueˢ, v, lenˢ, len(mi));
     }
+
     var mc = new map<complex128, nint>{};
     mc[complex(0D, 0D)] = 1;
     mc[complex(negZero, negZero)] = 2;
@@ -63,9 +66,11 @@ internal static void keyUpdate() {
     foreach (var (k, v) in ms) {
         fmt.Println(structFloat64KeyAfterˢ, sign(k.x), valueˢ, v);
     }
+
     var mn = new map<nint, nint>{[7] = 1};
     mn[7] = 2;
     fmt.Println(intKeyOverwriteˢ, mn[7], len(mn));
+
     var mf = new map<F64, bool>{};
     mf[0D] = true;
     mf[((F64)negZero)] = true;
@@ -105,10 +110,12 @@ internal static void nanKeys() {
     m[0D] = 3;
     m[negZero] = 4;
     fmt.Println(float64NaNTwiceThen0ˢ, len(m));
+
     var mi = new map<any, nint>{};
     mi[nan] = 1;
     mi[nan] = 2;
     fmt.Println(interfaceNaNTwiceˢ, len(mi));
+
     var mf = new map<F64, nint>{};
     mf[((F64)nan)] = 1;
     mf[((F64)nan)] = 2;
@@ -156,6 +163,7 @@ internal static void rangeUnderOverwrite() {
         }
     }
     fmt.Println(rangeUnderOverwriteˢ, bad, bothOrdersSeenˢ, after > 0 && before > 0);
+
     (bad, after, before) = (0, 0, 0);
     for (nint trial = 0; trial < 400; trial++) {
         var m = new map<any, nint>{};
@@ -227,6 +235,7 @@ internal static void hashPanic() {
     var empty = new map<any, bool>{};
     var full = new map<any, bool>{[(nint)(1)] = true, [(@string)"a"u8] = true};
     map<any, bool> nilMap = default!;
+
     var emptyʗ1 = empty;
     var sliceʗ1 = Δslice;
     @try(emptyMapLookupIntˢ, () => {
@@ -305,6 +314,7 @@ internal static void reflectSide() {
     @try(reflectDeleteIntOnNilMapˢ, () => {
         nilmʗ2.SetMapIndex(reflect.ValueOf(sliceʗ4), new reflectꓸValue(nil));
     });
+
     var fm = reflect.MakeMap(reflect.MapOf(reflect.TypeFor<float64>(), reflect.TypeFor<bool>()));
     fm.SetMapIndex(reflect.ValueOf(0.0D), reflect.ValueOf(true));
     fm.SetMapIndex(reflect.ValueOf(negZero), reflect.ValueOf(true));

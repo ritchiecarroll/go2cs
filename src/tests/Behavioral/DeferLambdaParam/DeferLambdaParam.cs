@@ -27,6 +27,7 @@ internal static void Main() {
         defer((nint cnt) => {
             fmt.Println(deferredCountClosureˢ, cnt);
         }, count, ref ᒐ);
+
         @string a = oneˢ;
         @string b = twoˢ;
         defer((ᴛ1, ᴛ2) => ((Actionꓸꓸꓸ<@string>)((params ꓸꓸꓸstring partsʗp) => {
@@ -34,6 +35,7 @@ internal static void Main() {
             fmt.Println(deferredVariadicˢ, len(parts), parts);
         }))(ᴛ1, ᴛ2), a, b, ref ᒐ);
         (a, b) = (changedˢ, alsoChangedˢ);
+
         defer(ᴛ1 => ((Actionꓸꓸꓸ<nint>)((params ꓸꓸꓸnint partsʗp) => {
             var parts = partsʗp.slice();
             fmt.Println(deferredVariadic1Argˢ, parts);
@@ -46,11 +48,13 @@ internal static void Main() {
             var parts = partsʗp.sslice();
             fmt.Println(deferredVariadicNoArgsˢ, len(parts));
         }))(), ref ᒐ);
+
         defer((ᴛ1, ᴛ2) => ((Funcꓸꓸꓸ<@string, nint>)((params ꓸꓸꓸstring partsʗp) => {
             var parts = partsʗp.slice();
             fmt.Println(deferredVariadicWithˢ, parts);
             return len(parts);
         }))(ᴛ1, ᴛ2), (@string)"r1", "r2", ref ᒐ);
+
         fmt.Println(iifeVariadicˢ, ((Funcꓸꓸꓸ<nint, nint>)((params ꓸꓸꓸnint partsʗp) => {
             var parts = partsʗp.sslice();
             nint total = 0;
@@ -59,6 +63,7 @@ internal static void Main() {
             }
             return total;
         }))(1, 2, 3));
+
         count = 10;
         fmt.Println(countBeforeDeferˢ, count);
     }

@@ -106,6 +106,7 @@ internal static void Main() {
     fmt.Println(canSetViaEmbeddedˢ, reflect.ValueOf(new embeds(new sElem(new sElemᴛ1[]{new()}.slice()))).Field(0).Index(0).Field(0).CanSet());
     fmt.Println(canSetViaUnexportedˢ, reflect.ValueOf(new holds(new sElem(new sElemᴛ1[]{new()}.slice()))).Field(0).Index(0).Field(0).CanSet());
     fmt.Println(canSetViaSliceˢ, reflect.ValueOf(new embeds(new sElem(new sElemᴛ1[]{new()}.slice()))).Field(0).Slice(0, 1).Index(0).Field(0).CanSet());
+
     var (_, foundTwice) = reflect.TypeOf(new twice(nil)).FieldByName("B"u8);
     var (fOnce, foundOnce) = reflect.TypeOf(new once(nil)).FieldByName("B"u8);
     var (fD, foundD) = reflect.TypeOf(new twice(nil)).FieldByName("D"u8);
@@ -117,10 +118,12 @@ internal static void Main() {
     var (fDeeperD, foundDeeperD) = reflect.TypeOf(new deeper(nil)).FieldByName("D"u8);
     fmt.Println(deeperBFoundˢ, foundDeeperB, valueValidˢ, reflect.ValueOf(new deeper(nil)).FieldByName("B"u8).IsValid());
     fmt.Println(deeperDFoundˢ, foundDeeperD, indexˢ, fDeeperD.Index, valueˢ, reflect.ValueOf(new deeper(nil)).FieldByName("D"u8).IsValid());
+
     var (_, mTwice) = reflect.TypeOf(new twice(nil)).MethodByName("M"u8);
     var (_, mDeeper) = reflect.TypeOf(new deeper(nil)).MethodByName("M"u8);
     var (_, mOnce) = reflect.TypeOf(new once(nil)).MethodByName("M"u8);
     fmt.Println(mPromotedTwiceˢ, mTwice, deeperˢ, mDeeper, onceˢ, mOnce);
+
     var lt = reflect.TypeOf(new local(new fieldlib.Outer(nil)));
     var ot = reflect.TypeOf(new fieldlib.Outer(nil));
     @string mine = reflect.TypeOf(new main_i()).Field(0).PkgPath;
@@ -129,6 +132,7 @@ internal static void Main() {
     fmt.Println(localField1PkgPathOuterˢ, lt.Field(1).PkgPath == ot.Field(1).PkgPath);
     fmt.Println(localField1PkgPathIsˢ, lt.Field(1).PkgPath != mine, lt.Field(1).PkgPath != ""u8);
     fmt.Println(anonUnexportedPkgPathIsˢ, mine == "main"u8);
+
     void anon(@string label, reflectꓸType t) {
         var f = t.Field(0);
         fmt.Printf("%-14s name=%-5s anonymous=%-5v type=%-6v pkgPath=%q\n"u8, label, f.Name, f.Anonymous, f.Type, f.PkgPath);

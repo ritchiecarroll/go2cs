@@ -18,6 +18,7 @@ internal static @string String(this main_MyBool b) {
     if (b) {
         return trueIshˢ;
     }
+
     return falseIshˢ;
 }
 
@@ -30,10 +31,12 @@ internal static void Main() {
     bool b3 = x == y;
     bool b4 = x == y;
     main_MyBoolᴛ1 b5 = x == y;
+
     fmt.Println(c);
     fmt.Println(b3);
     fmt.Println(b4);
     fmt.Println(b5);
+
     main_MyBool other = default!;
     ShowValue(other);
 }

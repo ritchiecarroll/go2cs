@@ -54,11 +54,13 @@ internal static void Main() {
         var (a, b) = (wrap(default!), wrap(default!));
         fmt.Println((@string)"a == b:"u8, AreEqual(a, b));
     });
+
     @try(mapHashˢ, () => {
         var m = new map<Greetable, nint>{};
         m[wrap(default!)] = 1;
         fmt.Println(storedOkˢ);
     });
+
     @try(reflectSetˢ, () => {
         ref var dest = ref heap<Greetable>(out var Ꮡdest);
         var rv = reflect.ValueOf(Ꮡdest).Elem();
@@ -67,6 +69,7 @@ internal static void Main() {
         rv.Set(reflect.ValueOf(Ꮡsrc).Elem());
         fmt.Println(setOkDestNilˢ, Ꮡdest.ValueSlot == default!);
     });
+
     @try(methodValueCallˢ, () => {
         var g = wrap(default!);
         var v = reflect.ValueOf(g);

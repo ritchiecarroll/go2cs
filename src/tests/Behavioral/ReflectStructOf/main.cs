@@ -84,13 +84,16 @@ internal static void Main() {
     var intT = reflect.TypeOf((int64)0);
     var byteT = reflect.TypeOf((uint8)0);
     var strT = reflect.TypeOf((@string)""u8);
+
     var shape = new reflect.StructField[]{field("A"u8, intT), field("B"u8, strT)}.slice();
     var first = reflect.StructOf(shape);
     var second = reflect.StructOf(new reflect.StructField[]{field("A"u8, intT), field("B"u8, strT)}.slice());
     fmt.Println(internedˢ, AreEqual(first, second), usableAsAMapKeyˢ,
         new map<reflectꓸType, nint>{[first] = 1}[second] == 1);
+
     fmt.Printf("type: %v | kind=%v | name=%q | pkgpath=%q | numfield=%d | size=%d | align=%d\n"u8,
         first, first.Kind(), first.Name(), first.PkgPath(), first.NumField(), first.Size(), first.Align());
+
     var one = reflect.StructOf(new reflect.StructField[]{field("F"u8, reflect.ArrayOf(1, intT))}.slice());
     var two = reflect.StructOf(new reflect.StructField[]{field("F"u8, reflect.ArrayOf(2, intT))}.slice());
     var tagged = reflect.StructOf(new reflect.StructField[]{new(Name: "A"u8, Type: intT, Tag: @"json:""a"""u8)}.slice());
@@ -99,6 +102,7 @@ internal static void Main() {
         byFieldNameˢ, !AreEqual(renamed, first), byFieldCountˢ, !AreEqual(first, reflect.StructOf(shape[..1])));
     fmt.Println(lengthsˢ, one.Field(0).Type.Len(), two.Field(0).Type.Len(),
         sizesˢ, one.Size(), two.Size());
+
     var dims = reflect.StructOf(new reflect.StructField[]{
         field("N"u8, intT),
         field(arrˢ, reflect.ArrayOf(3, byteT)),
@@ -112,6 +116,7 @@ internal static void Main() {
     }
     fmt.Println(elemLensˢ, dims.Field(1).Type.Len(), dims.Field(2).Type.Len(),
         dims.Field(2).Type.Elem().Len());
+
     var v = reflect.New(dims).Elem();
     v.Field(0).SetInt(42);
     for (nint i = 0; i < 3; i++) {
@@ -123,6 +128,7 @@ internal static void Main() {
         v.Field(2).Index(1).Index(2).Uint());
     fmt.Println(zeroˢ, reflect.Zero(dims).Interface(), deepequalToFreshˢ,
         reflect.DeepEqual(reflect.Zero(dims).Interface(), reflect.New(dims).Elem().Interface()));
+
     var tags = reflect.StructOf(new reflect.StructField[]{
         new(Name: "A"u8, Type: intT, Tag: @"json:""a,omitempty"""u8),
         new(Name: "B"u8, Type: strT, Tag: @"xml:""b"""u8),
@@ -132,6 +138,7 @@ internal static void Main() {
     fmt.Printf("tags: %q %q %q | json key=%q xml key=%q\n"u8,
         tags.Field(0).Tag, tags.Field(1).Tag, tags.Field(2).Tag,
         tags.Field(0).Tag.Get(jsonˢ), tags.Field(1).Tag.Get(xmlˢ));
+
     var embedType = reflect.TypeOf(new main_i());
     var embedded = reflect.StructOf(new reflect.StructField[]{
         new(Name: "Celsius"u8, Type: reflect.TypeOf(((Celsius)0D)), Anonymous: true),
@@ -141,6 +148,7 @@ internal static void Main() {
     fmt.Println(embeddedFlagsˢ, embedded.Field(0).Anonymous, embedded.Field(1).Anonymous,
         namesˢ, embedded.Field(0).Name, embedded.Field(1).Name,
         embedTypeˢ, embedded.Field(0).Type, numfieldˢ, embedType.NumField());
+
     var unexported = reflect.StructOf(new reflect.StructField[]{
         new(Name: "Shown"u8, Type: intT),
         new(Name: "hidden"u8, Type: intT, PkgPath: "main"u8)
@@ -148,16 +156,19 @@ internal static void Main() {
     fmt.Printf("unexported: %v | field pkgpaths=%q,%q | exported=%v,%v\n"u8, unexported,
         unexported.Field(0).PkgPath, unexported.Field(1).PkgPath,
         unexported.Field(0).IsExported(), unexported.Field(1).IsExported());
+
     var stringerT = reflect.TypeOf(((ж<fmt.Stringer>)nil)).Elem();
     fmt.Println(implementsStringerˢ, first.Implements(stringerT),
         implementsAnyˢ, first.Implements(reflect.TypeOf(((ж<any>)nil)).Elem()),
         comparableˢ, first.Comparable(),
         declaredStringerDoesˢ, reflect.TypeOf(new stringer(nil)).Implements(stringerT));
+
     var deep = byteT;
     for (nint i = 0; i < 5; i++) {
         deep = reflect.StructOf(new reflect.StructField[]{field("N"u8, deep)}.slice());
     }
     fmt.Println(nestedStructsˢ, deep, sizeˢ, deep.Size());
+
     var intTʗ1 = intT;
     fmt.Println(noNameˢ, recovered(() => {
         reflect.StructOf(new reflect.StructField[]{field(""u8, intTʗ1)}.slice());

@@ -17,38 +17,49 @@ private static readonly object xAfterThreadˢ = (@string)"x after thread"u8;
 
 internal static partial void Main() {
     nint i = 0;
+
     while (i < 10) {
         f(ref i);
         i++;
     }
+
     fmt.Println();
     fmt.Println((@string)"i ="u8, i);
+
     for (i = 0; i < 10; i++) {
         f(ref i);
+
         for (nint j = 0; j < 3; j++) {
             fmt.Println(i + j);
         }
         fmt.Println();
     }
+
     fmt.Println((@string)"i ="u8, i);
     fmt.Println();
+
 @out:
     for (nint iΔ1 = 0; iΔ1 < 5; iΔ1++) {
         f(ref iΔ1);
+
         for (nint iΔ2 = 12; iΔ2 < 15; iΔ2++) {
             f(ref iΔ2);
             goto break_out;
         }
+
         if (iΔ1 > 13) {
             goto continue_out;
         }
+
         fmt.Println();
 continue_out:;
     }
 break_out:;
+
     fmt.Println();
     fmt.Println((@string)"i ="u8, i);
     fmt.Println();
+
     var nums = new nint[]{1, 2, 3, 4}.slice();
 scan:
     foreach (var (_, n) in nums) {
@@ -64,22 +75,29 @@ scan:
 continue_scan:;
     }
 break_scan:;
+
     fmt.Println();
+
     nint x = 99;
     fmt.Println(iBeforeThreadAndˢ, i, xBeforeThreadˢ, x);
     goǃ((ᴛ1, ᴛ2, ᴛ3, ᴛ4) => fmt.Println(ᴛ1, ᴛ2, ᴛ3, ᴛ4), iFromThreadAndˢ, i, xFromThreadˢ, x);
+
     while (ᐧ) {
         i++;
         x++;
         f(ref i);
+
         if (i > 12) {
             break;
         }
     }
+
     fmt.Println();
     fmt.Println((@string)"i ="u8, i);
     fmt.Println((@string)"x = "u8, x);
+
     time.Sleep(1);
+
     fmt.Println(iAfterThreadAndˢ, i, xAfterThreadˢ, x);
 }
 

@@ -27,14 +27,18 @@ internal static void Main() {
     nint @base = default!;
     nint @as = default!;
     nint @event = default!;
+
     set(ref @base);
     set(ref @as);
     set(ref @event);
+
     @base += 1;
     fmt.Println(@base, @as, @event);
+
     @decimal dec = default!;
     dec.Assign(7);
     fmt.Println(dec.String());
+
     var p = Ꮡnull;
     p.ValueSlot = append(p.ValueSlot, (byte)((rune)'!'));
     fmt.Println(((@string)@null), ((@string)(p.ValueSlot)));

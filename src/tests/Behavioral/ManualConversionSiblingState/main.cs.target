@@ -17,10 +17,13 @@ private static readonly object labelˢ = (@string)"label:"u8;
 
 internal static void Main() {
     newprocs = 4;
+
     sched.disable.user = true;
     var np = Ꮡsched.of(schedlike.Ꮡdisable).of(schedlike_disable.Ꮡn);
     np.Value = 7;
+
     sched.label = "ok"u8;
+
     reportProcs();
     fmt.Println(disableˢ, sched.disable.user, sched.disable.n);
     fmt.Println(labelˢ, sched.label);

@@ -51,11 +51,15 @@ internal static void Main() {
     var c = Ꮡ(new node(val: 3));
     var b = Ꮡ(new node(val: 2, next: c));
     var a = Ꮡ(new node(val: 1, next: b));
+
     fmt.Println(a.sum());
+
     fmt.Println(a.advance(0), a.advance(1), a.advance(2), a.advance(99));
+
     a.scale(10);
     fmt.Println((~a).val, (~b).val, (~c).val);
     fmt.Println(a.sum());
+
     fmt.Println((~a).val, (~(~a).next).val, (~(~(~a).next).next).val);
 }
 

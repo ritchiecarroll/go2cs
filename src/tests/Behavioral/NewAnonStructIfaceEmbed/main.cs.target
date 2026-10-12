@@ -30,10 +30,13 @@ private static readonly object localˢ = (@string)"local:"u8;
 internal static void Main() {
     badge b = new reservedᴛ1жbadge(reserved);
     fmt.Println(b != default!);
+
     reserved.Value.badge = new gold(nil);
     fmt.Println(b.label());
+
     var local = @new<reservedᴛ1>();
     local.Value.badge = new gold(nil);
+
     badge b2 = new reservedᴛ1жbadge(local);
     fmt.Println(localˢ, b2.label());
 }

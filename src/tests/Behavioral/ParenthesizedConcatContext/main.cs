@@ -33,6 +33,7 @@ private static readonly object litˢ = (@string)"lit"u8;
 
 internal static void Main() {
     @string a = "v"u8;
+
     @catch(() => {
         throw panic("pn1" + "pn2");
     });
@@ -45,22 +46,28 @@ internal static void Main() {
     @catch(() => {
         throw panic((a + "-pn"));
     });
+
     fmt.Println((@string)("p1" + "p2"));
     fmt.Println((@string)(("p3" + "p4")));
     fmt.Println((@string)((("p5" + "p6"))));
     fmt.Println(a + "-x");
     fmt.Println((a + "-y"));
+
     fmt.Println(litˢ);
     fmt.Println((@string)(("lit")));
+
     any c1 = (@string)("q1" + "q2");
     any c2 = (@string)(("q3" + "q4"));
     any v1 = a + "-q";
     any v2 = (a + "-q");
     fmt.Println(c1, c2, v1, v2);
+
     fmt.Println(retConst(), retConstParen(), retVar(a), retVarParen(a));
+
     var (x, n) = pairConst();
     var (y, m) = pairConstParen();
     fmt.Println(x, n, y, m);
+
     var elems = new @string[]{a + "-g"u8, (a + "-h"u8)}.slice();
     fmt.Println(elems);
 }

@@ -31,6 +31,7 @@ internal static void Main() {
     var (g, ok) = identlib.TryGreet(v);
     fmt.Println(valueˢ, ok);
     fmt.Println(identlib.Describe(g, v));
+
     var p = Ꮡ(new loud(n: 2));
     var (g2, ok2) = identlib.TryGreet(p.OrTypedNil());
     fmt.Println(pointerˢ, ok2);

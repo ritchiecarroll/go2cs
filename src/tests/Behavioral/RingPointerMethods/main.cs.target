@@ -88,6 +88,7 @@ internal static void Main() {
     fmt.Println((~a.Next()).Value);
     fmt.Println(a.Len());
     fmt.Println((~a.Move(5)).Value);
+
     var r = makeRing(4);
     fmt.Println(r.Len());
     fmt.Println((~r.Next()).Value);

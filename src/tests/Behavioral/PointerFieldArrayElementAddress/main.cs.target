@@ -37,6 +37,7 @@ internal static void Main() {
     viaParam(Ꮡr, 0);
     viaParam(Ꮡr, 0);
     fmt.Println(r.future[0].n);
+
     var h = Ꮡ(new holder(r: Ꮡr));
     viaLocal(ref (h).DerefOrNull(), 1);
     fmt.Println(r.future[1].n);

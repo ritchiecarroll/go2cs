@@ -34,6 +34,7 @@ private static readonly object otherSNameˢ = (@string)"other's name:"u8;
 internal static void Main() {
     var (first, second) = twoSites();
     var third = other();
+
     fmt.Println(functionˢ, first.Function);
     fmt.Println(funcNonNilˢ, first.Func != nil);
     fmt.Println(funcNameMatchesˢ, first.Func != nil && first.Func.Name() == first.Function);

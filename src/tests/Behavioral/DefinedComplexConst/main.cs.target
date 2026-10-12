@@ -120,22 +120,27 @@ internal static void Main() {
     b = 0.5F;
     C128b ab = 6D;
     fmt.Println(assignˢ, a, b, ab);
+
     var m = new map<C128, @string>{[0D] = "zero"u8, [1.5D] = "one-half"u8};
     m[2D] = twoˢ;
     fmt.Println(mapˢ, m[0D], m[1.5D], m[2D], len(m));
+
     var (x, y) = retMulti();
     fmt.Println(callˢ, takeC128(3D), takeC64(5F), takeMany(1D, 2D, 3D), retC128(), retC64(), x, y);
+
     var s = new C128[]{1D, 2D, 3D.i()}.slice();
     var arr = new C64[]{1F, 2F}.array();
     var p = new pair(a: 4D, b: 5F);
     var mv = new map<@string, C64>{["k"u8] = 9F};
     fmt.Println(compositeˢ, s, arr, p, mv["k"u8]);
+
     var c = ((C128)2D);
     c = c * 2D;
     c = 1D + c;
     c += 2D;
     c -= 0.5D;
     fmt.Println(binaryˢ, c, c == 6.5D, c == 0D, c != 0D, b * 2F, 1F - b);
+
     C128 ni = intConst;
     C64 nf = floatConst;
     C128 nc = cplxConst;
@@ -143,7 +148,9 @@ internal static void Main() {
     C128 neg = -1D;
     C64 expr = 7F + 0F.i();
     fmt.Println(namedˢ, ni, nf, nc, ci, neg, expr, takeC128(intConst), takeC64(floatConst));
+
     fmt.Println(conversionˢ, ((C64)2F), ((C128)(-3D)), ((C128b)1.25D), ((C128)complex(0D, 0D)));
+
     C64 localC64 = /* 1.5 */ 1.5F + 0F.i();
     C128b localC128b = /* -2 */ -2D + 0D.i();
     F32 localF32 = -2.5f;
@@ -151,9 +158,11 @@ internal static void Main() {
     F64 localF64 = 2.5;
     fmt.Println(typedˢ, typedC128, typedC128r, typedC64, typedC64n, typedC64c, typedC128b, localC64, localC128b, 0.5F + 0F.i(), 2D + 0D.i(), classify(0D), classify(2.5D), classify(3D));
     deferred();
+
     var ch = new channel<C64>(1);
     ch.ᐸꟷ(8F);
     fmt.Println(channelˢ, ᐸꟷ(ch));
+
     complex128 pc = 3D;
     complex64 pc64 = 4F;
     F64 df = 5D;

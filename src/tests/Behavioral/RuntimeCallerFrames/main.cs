@@ -104,36 +104,48 @@ private static readonly object tracebackParenthesizesˢ = (@string)"traceback pa
 internal static partial void Main() {
     var (x, y) = sameSite();
     fmt.Println(sameLineAgreementˢ, x == y);
+
     fmt.Println(selfLineConstantˢ, selfLine() == selfLine());
     fmt.Println(selfLineDiffersFromCallˢ, selfLine() != callerLine());
+
     fmt.Println(distinctCallSitesˢ, siteA() != siteB());
+
     var (_, here, _, _) = runtime.Caller(0);
     fmt.Println(sameFileˢ, here == callerFile());
     fmt.Println(fileReportedˢ, len(here) > 0);
+
     fmt.Println(callerFileTailˢ, callerFileTail());
     fmt.Println(callerFileRootedˢ, callerFileRooted());
     fmt.Println(callerLineˢ, selfLine());
     fmt.Println(callerLineTwoFramesUpˢ, wrapGrand());
     fmt.Println(tracebackNamesAGoFileˢ, hasSub(stackText(), mainGoˢ));
+
     fmt.Println(okAt0ˢ, okAt(0));
     fmt.Println(okAt1ˢ, okAt(1));
     fmt.Println(okTwoLevelsUpˢ, deepOK());
     fmt.Println(okPastTheStackˢ, okAt(1000));
+
     fmt.Println(callersDepthDeltaˢ, depthPlus2() - depth());
+
     var (callerFwd, callerBack) = callerSeparators();
     fmt.Println(callerFileUsesForwardˢ, callerFwd);
     fmt.Println(callerFileUsesHostˢ, callerBack);
+
     var (framesFwd, framesBack) = framesSeparators();
     fmt.Println(framesFilesUseForwardˢ, framesFwd);
     fmt.Println(framesFilesUseHostˢ, framesBack);
+
     fmt.Println(tracebackUsesHostˢ, stackHasBackslash());
+
     @string methodTrace = ((recvT)0).valueFrame();
     fmt.Println(tracebackNamesPointerˢ, hasSub(methodTrace, mainRecvTPtrFrameˢ));
     fmt.Println(tracebackNamesValueˢ, hasSub(methodTrace, mainRecvTValueFrameˢ));
     fmt.Println(tracebackDropsPointerˢ, hasSub(methodTrace, mainPtrFrameˢ));
     fmt.Println(tracebackDropsValueˢ, hasSub(methodTrace, mainValueFrameˢ));
+
     @string genTrace = new genRecv<nint>(nil).genFrame();
     fmt.Println(tracebackNamesGenericˢ, hasSub(genTrace, mainGenRecvGenFrameˢ));
+
     @string plainTrace = plainFrame();
     fmt.Println(tracebackNamesPlainFuncˢ, hasSub(plainTrace, mainPlainFrameˢ));
     fmt.Println(tracebackParenthesizesˢ, hasSub(plainTrace, "(*"u8));

@@ -42,6 +42,7 @@ internal static partial void Main() {
     for (nint i = 0; i < 3; i++) {
         fmt.Println(ᐸꟷ(res));
     }
+
     var ch2 = new channel<nint>(0);
     var res2 = new channel<@string>(1);
     var ch2ʗ1 = ch2;
@@ -65,6 +66,7 @@ internal static partial void Main() {
     });
     close(ch2);
     fmt.Println(ᐸꟷ(res2));
+
     var ch3 = new channel<nint>(0);
     var other = new channel<nint>(0);
     var res3 = new channel<@string>(1);
@@ -86,6 +88,7 @@ internal static partial void Main() {
     });
     close(ch3);
     fmt.Println(ᐸꟷ(res3));
+
     var ch4 = new channel<nint>(0);
     var other2 = new channel<nint>(0);
     var res4 = new channel<@string>(1);
@@ -120,6 +123,7 @@ internal static partial void Main() {
     });
     close(ch4);
     fmt.Println(ᐸꟷ(res4));
+
     expectPanic(closeOfClosedˢ, () => {
         var cc = new channel<nint>(0);
         close(cc);

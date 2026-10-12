@@ -73,18 +73,23 @@ private static readonly object nameIntactˢ = (@string)"name intact:"u8;
 
 internal static void Main() {
     var o = Ꮡ(new outer(name: "x"u8, ptr: Ꮡ(new inner(nil))));
+
     o.bumpA();
     o.bumpA();
     fmt.Println(oneHopˢ, (~o).@in.a);
+
     o.bumpSelected(0);
     o.bumpSelected(1);
     fmt.Println(selectedˢ, (~o).@in.a, (~o).@in.b);
+
     o.bumpViaPtr();
     fmt.Println(throughPointerHopˢ, (~(~o).ptr).b, valueFieldUntouchedˢ, (~o).@in.b);
+
     var d = Ꮡ(new deep(nil));
     d.bumpLeaf();
     d.bumpLeaf();
     fmt.Println(twoHopsˢ, (~d).md.lf.n);
+
     fmt.Println(readBackˢ, o.readA());
     fmt.Println(nameIntactˢ, (~o).name);
 }

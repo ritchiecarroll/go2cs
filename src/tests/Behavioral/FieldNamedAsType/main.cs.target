@@ -33,15 +33,18 @@ internal static void Main() {
     a = new Node(value: 2);
     ref var b = ref heap<Node>(out var Ꮡb);
     b = new Node(value: 3);
+
     root.ΔNode = Ꮡa;
     root.Nodes = new Node[]{a, b}.slice();
     a.ΔNode = Ꮡb;
+
     fmt.Println(root.value);
     fmt.Println((~root.ΔNode).value);
     fmt.Println((~(~root.ΔNode).ΔNode).value);
     fmt.Println(len(root.Nodes));
     fmt.Println(root.Nodes[1].value);
     fmt.Println(localCollision());
+
     var list = buildList();
     fmt.Println(len(list), (~list[0]).value, (~list[1]).value);
 }

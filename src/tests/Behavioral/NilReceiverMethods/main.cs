@@ -111,6 +111,7 @@ private static readonly @string renamedTxtˢ = "renamed.txt"u8;
 
 internal static void Main() {
     ж<File> nilFile = default!;
+
     fmt.Println(nilReceiverDelegatedˢ);
     var nilFileʗ1 = nilFile;
     @try(nilFileCheckValidˢ, () => {
@@ -121,6 +122,7 @@ internal static void Main() {
         var err = nilFileʗ2.Chdir();
         fmt.Printf("  Chdir -> %v (is errInvalid: %v)\n"u8, err, AreEqual(err, errInvalid));
     });
+
     fmt.Println();
     fmt.Println(nilReceiverUnconditionalˢ);
     var nilFileʗ3 = nilFile;
@@ -131,6 +133,7 @@ internal static void Main() {
     @try(nilFileValNameˢ, () => {
         _ = nilFileʗ4.ValName();
     });
+
     fmt.Println();
     fmt.Println(nilReceiverSideEffectˢ);
     var nilFileʗ5 = nilFile;
@@ -141,6 +144,7 @@ internal static void Main() {
     @try(nilFileValAnnounceˢ, () => {
         _ = nilFileʗ6.ValAnnounce();
     });
+
     fmt.Println();
     fmt.Println(nonNilReceiverBothShapesˢ);
     var real = Ꮡ(new File(name: "real.txt"u8, fd: 41));
@@ -169,6 +173,7 @@ internal static void Main() {
         fmt.Printf("  BoxAnnounce -> %s\n"u8, realʗ6.BoxAnnounce());
     });
     fmt.Printf("  box/ref shapes agree on the name: %v\n"u8, real.BoxName() == real.ValName());
+
     fmt.Println();
     fmt.Println(theReceiverSurvivesAˢ);
     real.Value.name = renamedTxtˢ;

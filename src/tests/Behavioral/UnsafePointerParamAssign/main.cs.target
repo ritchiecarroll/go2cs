@@ -47,15 +47,19 @@ internal static void Main() {
     b = 2;
     @unsafe.Pointer pa = @unsafe.Pointer.FromPinnedBox(Ꮡa);
     @unsafe.Pointer pb = @unsafe.Pointer.FromPinnedBox(Ꮡb);
+
     @unsafe.Pointer r = (uintptr)rebind(pa, pb);
     fmt.Println(rebindˢ, ~(ж<nint>)(uintptr)(r), callerSPaStillReadsˢ, ~(ж<nint>)(uintptr)(pa));
+
     ref var arr = ref heap<array<int32>>(out var Ꮡarr);
     arr = new int32[]{10, 20, 30, 40}.array();
     @unsafe.Pointer p0 = @unsafe.Pointer.FromPinnedBox(Ꮡarr.at<int32>(0));
     @unsafe.Pointer s = (uintptr)advance(p0, /* unsafe.Sizeof(arr[0]) */ (uintptr)4);
     fmt.Println(advanceˢ, ~(ж<int32>)(uintptr)(s), callerSP0StillReadsˢ, ~(ж<int32>)(uintptr)(p0));
+
     @unsafe.Pointer t = (uintptr)step(p0, 2 * (nint)/* unsafe.Sizeof(arr[0]) */ (uintptr)4);
     fmt.Println(stepˢ, ~(ж<int32>)(uintptr)(t), callerSP0StillReadsˢ, ~(ж<int32>)(uintptr)(p0));
+
     fmt.Println(clearˢ, clear(pa), callerSPaStillReadsˢ, ~(ж<nint>)(uintptr)(pa));
     fmt.Println(localˢ, ~(ж<nint>)(uintptr)(local(pb)), a, b);
 }

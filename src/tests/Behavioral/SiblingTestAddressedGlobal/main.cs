@@ -24,13 +24,17 @@ internal static readonly @string firstˢ = "first"u8;
 
 internal static void Main() {
     fmt.Println(lookup("a"u8));
+
     lookup = @string (@string key) => "swapped:"u8 + key;
     fmt.Println(lookup("b"u8));
+
     counter += 3;
     counter++;
     fmt.Println(counter);
+
     head.name = firstˢ;
     fmt.Println(head.name);
+
     fmt.Println(untouched);
 }
 
