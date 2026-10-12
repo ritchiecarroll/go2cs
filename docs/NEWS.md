@@ -28,6 +28,10 @@ fully trimmed. A Native AOT publish is still slow and large to begin with
 interface inside generic code, a container reachable only through a field another package does not
 export, and a struct whose own package never takes a pointer to it.
 
+One defect is known in a fully trimmed publish: `fmt` prints some named types in their raw form
+([Known issues](KnownIssues.md#under-a-fully-trimmed-native-aot-publish-fmt-prints-some-named-types-raw)).
+The default publish is not affected, and the fix is in the next release.
+
 **Converted modules as NuGet packages.** Three Go modules are published at
 [nugetgo.net](https://nugetgo.net): `hashset`, `google/uuid` and `golang-jwt/jwt` v5. The tooling that
 packs them now refuses a package whose standard-library references are not a published release, records
