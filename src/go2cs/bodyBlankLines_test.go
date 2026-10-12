@@ -192,6 +192,19 @@ func defaultInner(v, w int) int {
 	return n
 }
 
+func defaultThenLabel(v, w int) int {
+	n := 0
+	switch v {
+	default:
+		n = 3
+
+	// above case w
+	case w:
+		n = add(fmt.Sprint(w), 88)
+	}
+	return n
+}
+
 func typeSwitchBody(v any) {
 	switch t := v.(type) {
 	case string:
@@ -217,6 +230,7 @@ func main() {
 	fmt.Println(defaultFirst(1, 1))
 	fmt.Println(emptyClause("x", "w"))
 	fmt.Println(defaultInner(1, 1))
+	fmt.Println(defaultThenLabel(1, 1))
 	typeSwitchBody(1)
 	selectBody(make(chan int))
 }
@@ -319,6 +333,12 @@ func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
 	// must not write either inside an argument list.
 	if next := lineContaining(t, lines, "// inside the default body") + 1; !strings.Contains(lines[next], "n = 1;") {
 		t.Errorf("the comment inside the moved default body is not above its statement: next line %q", strings.TrimSpace(lines[next]))
+	}
+
+	// A comment above the case label that follows a moved `default:` belongs to that case, not to the
+	// default: holding it with the default wrote it after the whole switch.
+	if next := lineContaining(t, lines, "// above case w") + 1; !strings.Contains(lines[next], "fmt.Sprint(w), 88);") {
+		t.Errorf("the comment above a case after a moved default is not above that case's statement: next line %q", strings.TrimSpace(lines[next]))
 	}
 
 	for _, call := range []string{"fmt.Sprint(w), 66);", "fmt.Sprint(w), 77);"} {
