@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace go;
@@ -56,7 +57,16 @@ internal interface IInteriorPointer
     nuint PointerOrderToken { get; }
 }
 
-public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer
+/// <summary>
+/// A field view whose order token is base plus Go offsets all the way down, asked of a view's SOURCE (held as
+/// <c>object</c>) by the promoted-field identity arm, which compares order tokens only when both are exact.
+/// </summary>
+internal interface IExactOrderToken
+{
+    bool OrderTokenIsExact { get; }
+}
+
+public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IExactOrderToken
 {
     private readonly object m_source;
     private readonly FieldRefFunc<T> m_accessor;
@@ -185,8 +195,14 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer
         // Pointer into a struct field: same source object and field accessor. The comparison uses
         // the field IDENTITY token — the original accessor delegate — never the stored ref
         // function (comparing per-call wrappers made every distinct `&x.field` box unequal).
-        if (other is not FieldRefBox<T> fr || !SameSource(m_source, fr.m_source))
+        if (other is not FieldRefBox<T> fr)
             return false;
+
+        // The same Go address reached through DIFFERENT sources: converted code's flat promoted `&o.X` is one view over
+        // `o`, the nested `&o.Inner.X` (and reflect's FieldByName("X").Addr(), which builds the nested chain) a view over
+        // `o`'s view of Inner. Go says they are one pointer.
+        if (!SameSource(m_source, fr.m_source))
+            return SameGoAddress(fr);
 
         if (m_token.Equals(fr.m_token))
             return true;
@@ -197,10 +213,14 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer
         // PointerOrderToken already resolves both spellings by, which is why their uintptrs always agreed
         // while == answered false and a map keyed by one missed the other (box-equality census, 2026-09-29).
         // "Same declaring type" holds by construction: both tokens are resolved against the one source's pointee.
-        // RESIDUAL: a PROMOTED field is not covered. Converted code nests a box per hop
-        // (`Ꮡs.of(ᏑEmbedded).of(ᏑF)`) while reflect builds one box over a two-hop path, so their SOURCES
-        // differ and this arm is never reached. That needs its own arm.
-        return FieldNameOf(m_token) is { } name && name == FieldNameOf(fr.m_token);
+        // (A PROMOTED field reached two ways has two SOURCES, a flat view over the outer box and a nested chain;
+        // the different-sources arm above, SameGoAddress, answers it.)
+        if (FieldNameOf(m_token) is { } name && name == FieldNameOf(fr.m_token))
+            return true;
+
+        // Two DIFFERENT fields of one source sit at one Go offset only when one is zero-size; Go's comparison then may
+        // answer either way, and the address it compares answers equal (SameGoAddress).
+        return SameGoAddress(fr);
     }
 
     /// <inheritdoc/>
@@ -283,6 +303,29 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer
     public override object ReferentObject =>
         m_source is INilPointer parent ? parent.ReferentObject : m_source;
 
+    // ---- the promoted-field identity arm (COORD 2026-10-12) ----
+
+    // Two managed-rooted field views of ONE root allocation at ONE Go offset are one Go pointer: the same allocation
+    // (AllocationId resolves an of() chain to its root) and the same order token (allocation base plus the Go offset,
+    // composed down the chain). T is the same by construction (Equals(ж<T>)), and a pointer of another type at that
+    // offset is another Go type, never compared equal. Both tokens must be EXACT -- every hop's offset resolved from the
+    // Go layout -- since an unresolved hop falls to a hash displacement that could agree by accident. A native-rooted view
+    // keeps its address comparison above. Two zero-size fields at one offset compare equal here, which Go allows: "Pointers
+    // to distinct zero-size variables may or may not be equal" (The Go Programming Language Specification, Comparison
+    // operators).
+    private bool SameGoAddress(FieldRefBox<T> other) =>
+        NativeSlotAddress == 0 && other.NativeSlotAddress == 0 &&
+        OrderTokenIsExact && other.OrderTokenIsExact &&
+        AllocationId == other.AllocationId &&
+        PointerOrderToken == other.PointerOrderToken;
+
+    // Whether this view's order token is base plus Go offsets all the way down: its own field's offset resolved, and its
+    // source's token exact in turn (a root box's base is; an element view's index times the Go stride is).
+    bool IExactOrderToken.OrderTokenIsExact => OrderTokenIsExact;
+
+    private bool OrderTokenIsExact =>
+        GoFieldOffsetOf(m_source, m_token) >= 0 && (m_source is not IExactOrderToken source || source.OrderTokenIsExact);
+
     // ---- identity helpers (unchanged bodies, relocated with their sole consumer) ----
 
     private static bool SameSource(object source1, object source2)
@@ -336,17 +379,46 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer
 
     private static readonly ConcurrentDictionary<(Type, string), nint> s_goFieldDisplacements = new();
 
+    // The field's Go offset in structType: a field of its own, else a field PROMOTED through VALUE embeds, by Go's rule --
+    // the shallowest depth that has the name wins, and it must hold exactly one (an ambiguous name selects nothing). A
+    // promotion through an embedded POINTER is not followed: it names storage in another allocation, and the converter
+    // roots those views at the pointer. Without the promoted arm, converted code's flat `&o.X` (`Ꮡo.of(Outer.ᏑX)`) had no
+    // offset and fell to a hash displacement, so its order token could not agree with the nested `&o.Inner.X`'s.
     private static nint ResolveGoFieldOffset(Type structType, string fieldName)
     {
-        if (GoReflect.GoFieldOffsets(structType) is not { } offsets)
-            return -1;
+        List<(Type type, nint baseOffset)> level = [(structType, 0)];
 
-        GoReflect.GoFieldInfo[] fields = GoReflect.GoFields(structType);
-
-        for (int i = 0; i < fields.Length && i < offsets.Length; i++)
+        for (int depth = 0; depth < 16 && level.Count > 0; depth++)
         {
-            if (fields[i].Name == fieldName)
-                return offsets[i];
+            List<(Type type, nint baseOffset)> next = [];
+            nint found = -1;
+            int matches = 0;
+
+            foreach ((Type type, nint baseOffset) in level)
+            {
+                if (GoReflect.GoFieldOffsets(type) is not { } offsets)
+                    continue;
+
+                GoReflect.GoFieldInfo[] fields = GoReflect.GoFields(type);
+
+                for (int i = 0; i < fields.Length && i < offsets.Length; i++)
+                {
+                    if (fields[i].Name == fieldName)
+                    {
+                        found = baseOffset + offsets[i];
+                        matches++;
+                    }
+                    else if (fields[i].Embedded && fields[i].Type.IsValueType)
+                    {
+                        next.Add((fields[i].Type, baseOffset + offsets[i]));
+                    }
+                }
+            }
+
+            if (matches > 0)
+                return matches == 1 ? found : -1;
+
+            level = next;
         }
 
         return -1;
