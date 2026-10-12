@@ -16,6 +16,9 @@ import (
 )
 
 func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtContext) {
+	defer func(saved token.Pos) { v.blockRbrace = saved }(v.blockRbrace)
+	v.blockRbrace = blockStmt.Rbrace
+
 	v.pushBlock()
 
 	if len(context.outerPrefix) > 0 {

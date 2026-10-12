@@ -242,6 +242,12 @@ func (v *Visitor) writeTrailingComment(stmtEnd token.Pos) bool {
 			break
 		}
 
+		// A comment past the enclosing block's closing brace (`func(x int) int { return x + 1 }, // c`)
+		// trails what holds the block, which writes it there.
+		if v.blockRbrace.IsValid() && pos > v.blockRbrace {
+			break
+		}
+
 		comment, found := v.standAloneComments[pos]
 
 		if !found {
