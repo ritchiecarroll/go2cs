@@ -64,8 +64,9 @@ func specDoc(genDecl *ast.GenDecl, index int, doc *ast.CommentGroup) *ast.Commen
 }
 
 // writeSpecGap writes the blank line gofmt keeps between two specs of a `const ( … )` or `var ( … )`
-// group, when Go has one above spec or above its doc. It returns the output length before the blank
-// line, or -1 when it wrote none, for dropEmptyGap: a spec that emits nothing leaves no blank line.
+// group, when Go has one above spec or above its doc. The gap is measured from the end of the previous
+// spec's trailing comment, which can span lines (`/* … */`). It returns the output length before the
+// blank line, or -1 when it wrote none, for dropEmptyGap: a spec that emits nothing leaves no blank line.
 //
 // Under `-comments` only (docs/PLAN-comment-and-spacing-parity.md, class D), as writeStatementGap is.
 func (v *Visitor) writeSpecGap(prev ast.Spec, spec *ast.ValueSpec) int {
@@ -79,7 +80,13 @@ func (v *Visitor) writeSpecGap(prev ast.Spec, spec *ast.ValueSpec) int {
 		start = spec.Doc.Pos()
 	}
 
-	if v.fset.Position(start).Line-v.fset.Position(prev.End()).Line <= 1 {
+	prevEnd := prev.End()
+
+	if prevSpec, ok := prev.(*ast.ValueSpec); ok && prevSpec.Comment != nil && prevSpec.Comment.End() > prevEnd {
+		prevEnd = prevSpec.Comment.End()
+	}
+
+	if v.fset.Position(start).Line-v.fset.Position(prevEnd).Line <= 1 {
 		return -1
 	}
 
