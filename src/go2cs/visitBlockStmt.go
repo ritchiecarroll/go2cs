@@ -114,6 +114,10 @@ func (v *Visitor) visitStatementList(stmts []ast.Stmt, colon token.Pos) {
 // statement above that statement, as visitBlockStmt does for a block's first statement. Without it they
 // stayed pending and writeStatementGap wrote them after the first statement. A comment on the `:` line
 // itself (trailing the case label) is left where it was: that placement is class H's.
+//
+// Each comment is written on its own rather than through writeStandAloneCommentString, which flushes
+// every pending comment ahead of its target: a switch lowered to if/else emits a leading `default:`
+// clause last, and its comments, still pending, would land in the clause emitted first.
 func (v *Visitor) writeLeadingBodyComments(colon token.Pos, first ast.Stmt) {
 	if !v.options.includeComments || !colon.IsValid() {
 		return
@@ -139,11 +143,11 @@ func (v *Visitor) writeLeadingBodyComments(colon token.Pos, first ast.Stmt) {
 	}
 
 	for _, pos := range leading {
-		if _, found := v.standAloneComments[pos]; !found {
-			continue
-		}
+		v.outputBuilder.WriteString(prefix)
+		v.outputBuilder.WriteString(strings.ReplaceAll(v.standAloneComments[pos], "\n", v.newline))
 
-		v.writeStandAloneCommentString(v.outputBuilder, pos, nil, prefix)
+		delete(v.standAloneComments, pos)
+		v.sortedCommentPos = removeCommentPos(v.sortedCommentPos, pos)
 	}
 }
 
