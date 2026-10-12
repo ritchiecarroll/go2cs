@@ -83,7 +83,7 @@ and neither is pushed by this step.
 pwsh -NoProfile -File <T>/src/tools/nugetgo/nugetgo-pack.ps1 -ModulePath M -GoVersion V -Revision 0 `
   -RecurseRoot PR -ValidationDir VR/validation/M -ClosureVersion R -Feed https://api.nuget.org/v3/index.json `
   -OutDir <out-rehearsal> -Scratch <scratch-rehearsal> -RepositoryUrl <conversion repo> -Upstream <holder> `
-  -LicenseSpdx <SPDX expression> [-Icon <PNG or JPEG>] [-UpstreamPublishes] [-ExcludePackage <import path>] `
+  -LicenseSpdx <SPDX expression> -Converter G [-Icon <PNG or JPEG>] [-UpstreamPublishes] [-ExcludePackage <import path>] `
   -RehearsalSuffix int.1
 ```
 
@@ -93,6 +93,17 @@ for any other org. `-ExcludePackage` names, by import path, a library package of
 own test fixtures rather than API a consumer imports; the instance plan names any such package. The pack refuses an
 exclusion that names no library of the module, and one that a packed package references. The rehearsal label
 `int.1` is ruled (COORD, 2026-10-09).
+
+**Flavors** (COORD ruling 2026-10-12; tools at `claude/c2-nugetgo-rid-packs` or later). The pack adopts the `go.*`
+release's per-OS promotion. A `-recurse` conversion emits one GOOS, so the pack converts `M`'s own source once per GOOS
+of the release's RID map (windows, linux, darwin) with `-Converter`, which is `G` from section 1. It refuses unless its
+conversion of `P`'s GOOS reproduces every packed project's `GoInputDigest`, because the digest records the converter
+(trap 3). It builds every flavor and compares the assemblies with the release's material check. If they are equal in
+meaning, the package is one neutral assembly set packed from `PR`, exactly as before. If they differ, it takes the
+release's RID-specific layout: `lib/<tfm>/` carries the windows flavor and `runtimes/<rid>/lib/<tfm>/` carries each
+RID's flavor, with every flavor's `go.*` dependencies. The pack prints which it chose and why. Without `-Converter`,
+the pack builds a converter from its own tree. That matches `G` only when `G` was built from the same directory with
+the same toolchain.
 
 The package README is `PR/src/M/nuget/README.md`, in the style of the `go.*` packages (owner, 2026-10-10). The pack
 writes it on the first pack (see *Customizing the package page* below). Its generated block holds the description,
@@ -152,7 +163,10 @@ closure that is not the published `R`, a proof whose input digest is not the pac
 mismatch of identity, description, copyright, ranges or self-description, a README with inline code in a heading, a
 table wider than three columns or a link naming `HEAD`, a README whose generated block is missing or malformed or has
 a link above it, a package with no icon, `-Icon` given beside a `nuget/icon.png`, and, when `-ConversionReadme` is
-given, a conversion README that does not fit the description's form.
+given, a conversion README that does not fit the description's form, and (flavors) a flavor conversion that does
+not reproduce `PR`'s digests, a flavor that does not build, a third-party require that differs by GOOS (the cobra
+increment unions them; COORD ruling 2026-10-12), a neutral package carrying `runtimes/`, and a RID-specific package
+whose `lib/` or `runtimes/<rid>/` is not the measured flavor, or whose two Mac folders differ.
 
 ## 3. Rehearse on int.nugettest.org (B7)
 
