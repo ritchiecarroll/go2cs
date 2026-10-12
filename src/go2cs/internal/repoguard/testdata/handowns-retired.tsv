@@ -1,0 +1,9 @@
+# Retired hand-owns: one row per path in handowns-baseline.txt that is no longer marked at HEAD
+# (GoCorpusMigration.md H6, "Durable form"). Written by hand: each row is a closed H6 record.
+# Columns, tab-separated: the retired path, then "moved <path marked at HEAD>" or "deleted", then the record.
+src/core/crypto/internal/alias/alias_impl.cs	moved src/core/crypto/internal/fips140/alias/alias_impl.cs	docs/phase4/AUDIT-h6-handown-go124.md, 2026-09-14 amendment (the population moved 147 -> 145 at the H5 relocation): principal md5-identical
+src/core/crypto/subtle/xor_generic.cs	moved src/core/crypto/internal/fips140/subtle/xor_generic.cs	docs/phase4/AUDIT-h6-handown-go124.md, 2026-09-14 amendment (row 3 follows the fourth fips140 relocation), C1 f0f8826894
+src/core/internal/concurrent/hashtriemap.cs	moved src/core/internal/sync/hashtriemap.cs	docs/phase4/AUDIT-h6-handown-go124.md, 2026-09-14 amendment (the H5 relocation): principal changed, row 20
+src/core/internal/concurrent/hashtriemap_whitebox.cs	deleted	docs/phase4/AUDIT-h6-handown-go124.md, 2026-09-14 amendment (the H5 relocation): the 1.24.13 test has no dumpMap/dumpNode, so the file's reason went with it; ruled COORD 46198c1b9 section 1
+src/core/internal/weak/pointer.cs	moved src/core/weak/pointer.cs	docs/phase4/AUDIT-h6-handown-go124.md, 2026-09-14 amendment (the H5 relocation): principal changed, row 145
+src/core/vendor/golang.org/x/crypto/sha3/xor.cs	deleted	docs/phase4/AUDIT-h6-handown-go124.md, 2026-09-14 amendment (the H5 relocation): no xor.go in either 1.24 sha3 package; the cured class is carried by crypto/internal/fips140/sha3/keccakf_impl.cs (row 149, q97); ruled COORD 46198c1b9 section 1
