@@ -8,6 +8,57 @@ their full text.
 
 ---
 
+## October 12, 2026 — Reflection works under Native AOT, and macOS validation passes three quarters
+
+**NuGet 1.24.13.6.** This release is about converted Go behaving the same in more places: under Native
+AOT, on macOS, and at the edges where a call used to reach an unimplemented stub.
+
+**Reflection under Native AOT.** Go's `reflect` creates values of types it learns about at run time.
+Until now the runtime library did that by generating code at run time, which Native AOT cannot do, so a
+program that reflected over its own types could fail once published that way. The source generators now
+write those operations at build time, for every type a package defines and every container type that can
+reach `reflect`. `reflect.New`, `reflect.Zero`, the `Make` functions and conversions between struct types
+behave under Native AOT as they do under the JIT, in a default publish and in a fully trimmed one.
+
+This costs size, and the choice is deliberate: behaving like Go comes before being small. Measured on
+`win-x64`, a C# program that references the packages publishes about 10% larger with the default trim
+and about 4% larger fully trimmed, and programs that lean on reflection over generic types grow about 12%
+fully trimmed. A Native AOT publish is still slow and large to begin with
+([Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)). Three cases still take the old path under Native AOT only: a conversion to an
+interface inside generic code, a container reachable only through a field another package does not
+export, and a struct whose own package never takes a pointer to it.
+
+**Converted modules as NuGet packages.** Three Go modules are published at
+[nugetgo.net](https://nugetgo.net): `hashset`, `google/uuid` and `golang-jwt/jwt` v5. The tooling that
+packs them now refuses a package whose standard-library references are not a published release, records
+no path from the machine that built it, and binds the package's validation record to the exact files
+packed. A package's README on nuget.org is the author's own: the pack keeps one fenced block in it up to
+date, with the badges and the provenance, and leaves the rest alone. For a conversion, `-nuget-map-feed`
+reads mapped packages from a feed you name, such as a local folder, instead of nuget.org
+([Command-line options](CommandLine.md#options)).
+
+**Every `go.*` package says how it was checked, and how to call it.** The Tests badge on each package's
+README now reads the two numbers that matter, tests matched and tests disclosed, and links the package's
+proof page. Below it, one line names the C# class that holds the package's functions, so a C# developer
+who lands on `go.strings` knows to call `go.strings_package`.
+
+**Two calls that reached a stub now answer as Go does.** A measurement of which exported functions can
+reach an unimplemented stub found two on Windows and Linux
+([the record](phase4/CENSUS-phase5-exported-reach.md)). `runtime/coverage.ClearCounters` now returns Go's
+own error for a program built without coverage, and `runtime.Breakpoint` breaks into an attached
+debugger, or without one stops the program with Go's report line.
+
+**macOS.** Validation of the standard library on macOS passes three quarters of the roster: 171 of 225
+packages now carry a macOS count, each agreed between Apple silicon and Intel
+([the roster](ValidatedTestPackages.md)). Four fixes came out of that work. `os.Executable` returns the
+program's path. The memory page size is the machine's real one, 16 KB on Apple silicon, where it was
+fixed at 4 KB. `hash/crc32` uses the processor's CRC instructions on Arm64. And on Linux and macOS
+`os.Args[0]` is the name the program was started with, as it is in Go, so a program that starts itself
+again under another name recognizes itself. Verifying a certificate against the system's roots still reaches a stub on macOS; that
+fix is promoted ahead of the rest of the macOS work.
+
+The `go.*` packages are built and versioned together, so use one version of them in a project.
+
 ## October 9, 2026 — Converted code reads like Go, and Native AOT runs on Windows
 
 <!-- attribute-shown: the announcement names the attributes that left converted code -->
