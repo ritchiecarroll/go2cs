@@ -43,25 +43,32 @@
 - **The shape is C, the hop B shape.** Run every row, then publish at the H10 close. A short list of rows,
   named in advance from §3.3's reserved pool and capped (§2 O7), may be demoted, each with a costed
   recon-basis row.
-- **Effort** is an estimate: **85–145 lane-days, 3.5–5 calendar weeks at 7 lanes** (§6). The H6 review
-  (79 files) and the H10 re-derivation dominate it.
-- **The critical path:** H1/H2 → H4 (the testing host first) → H4a → **the §4 checkpoint** → H5 → H6 ∥ H7
-  → H7a → H8 → H9 → H10 → H11/H12.
+- **Effort** is an estimate: **100–165 lane-days, 4–5.5 calendar weeks at 7 lanes** (§6; amended
+  2026-10-12, see the foot). The H6 review dominates it: 79 files, 9,600 upstream lines changed,
+  measured at 1.26.9. The H10 re-derivation is next.
+- **The critical path:** H1/H2 → H4 (the testing host, then the language cuts on the H1-built converter)
+  → H4a → **the §4 checkpoint** → H5 → H6 ∥ H7 → H7a → H8 → H9 → H10 → H11/H12.
 
 ---
 
 ## 1. Preconditions: Readiness and the fourth ordering
 
 **The outgoing final release must ship before H1.** The runbook's fourth ordering requires it, because
-`migrate-gorelease.ps1` resets `<GoBuildNumber>` at the pin stage. 1.24.13.6 shipped on 2026-10-11.
-The owner's 11:44 priorities say a further 1.24 release may follow if the three harder nugetgo modules
-need converter fixes. **The owner names which 1.24.13.N is the final one (§2 O1). H1 does not start
-before it ships.**
+`migrate-gorelease.ps1` resets `<GoBuildNumber>` at the pin stage. 1.24.13.6 was published on
+2026-10-12. The owner's 2026-10-11 priorities say a further 1.24 release may follow if the three harder
+nugetgo modules need converter fixes. **The owner names which 1.24.13.N is the final one (§2 O1). H1
+does not start before it ships.**
+
+**The comment and spacing parity work lands BEFORE the hop** (owner, 2026-10-11 evening; decisions
+ruled 2026-10-12). Its seats re-baseline the behavioral goldens, whitespace only. So **H0's comparands
+(the `.cs.auto` baseline, the behavioral failing set, the manifests) are captured AFTER the last
+comment-parity train lands**, never before. Otherwise H5's differential mixes the hop with the
+re-baseline.
 
 **Instruments**, Readiness "Instruments". Each lands on master and is red-proved before the stage that
 needs it (lessons 2, 43):
 
-| # | Instrument | State at master `20279db5f6` | Needed by |
+| # | Instrument | State at master `20279db5f6` (re-read at `7092f7126e` on 2026-10-12: unchanged) | Needed by |
 |:--|:--|:--|:--|
 | A3 | `-Hop` applies roster execution pins | **OPEN**: `src/_roster.ps1:475` and `:587` still set `Execution = $null` | H10 |
 | A7 | `src/run-h10-recon.ps1` reads the pin from `version.props` | **OPEN**: `:841–843` deny anything but `go1\.24\.13` | H10 recon leg |
@@ -88,8 +95,11 @@ needs it (lessons 2, 43):
 - **O1 — Name the final 1.24.13.N** (§1). H1 waits for it to ship.
 - **O2 — Toolchains, side by side under `~/sdk`, verified by `go version` output, never auto-fetched as an
   install:**
-  - **go1.26.9 on the i7** and on every box that converts or builds: the i9; G-LAPTOP and its linux arm;
-    R-LAPTOP and its WSL arm; each cloud lane's container, where the container recipe fetches it;
+  - **go1.26.9 on the i7** and on every box that converts or builds: the i9; G-LAPTOP and **its linux
+    arm**; R-LAPTOP and its WSL arm; each cloud lane's container, where the container recipe fetches it.
+    G-LAPTOP's linux arm had no 1.24 root until it was provisioned earlier this year (G), and it carries
+    H7's linux flavour, so **ask for it now**. The i9 already holds a checksum-verified go1.26.9 in
+    scratch (RECON X.7). It is a reading copy and not the O2 install;
   - **go1.25.14 on the box that runs the §4 checkpoint** (the i9 is proposed). This box has only go1.25.12
     cached, and the ruling names .14.
 - **O3 — The BoGo host.**
@@ -246,26 +256,26 @@ GOROOTs' source by name.
 |:--|:--|:--|:--|
 | **Readiness** | A3, A7, A8, A9 and A14 landed and red-proved; the retired-marker guard; host records; O2–O4 asked now | R (A3, A7, A9), i9 (A8, guard), C1 (A14); each lane its host | 8–14 |
 | **H0** ⟲ | Seeded old-release `.cs.auto` baseline; package census; roster snapshot; the outgoing three-target manifest; the behavioral failing set by name; each box's bare `go version`. Commit every unbanked reading (lesson 48) | COORD/i7 (behavioral, manifests), i9 (census, `.auto`) | 3–5 |
-| **H1 + H2** (one pair) | go1.26.9 installed (O2); the `go` directive; x/tools and x/mod in their own commit and CNR (O6, A12); `go vet` under the new directive; GODEBUG defaults read against the test host (1.26 adds the heap-randomization, Green Tea and crypto-randomness classes; 1.25's `containermaxprocs`, `updatemaxprocs`, `decoratemappings`, `tlssha1` and `x509sha256skid`) | G (converter), COORD (the pin pair) | 3–5 |
+| **H1 + H2** (one pair) | go1.26.9 installed (O2); the `go` directive; x/tools and x/mod in their own commit (O6, A12), **gated by CNR byte-identical after the bump**, a full seeded corpus reconvert with hours of wall; the converter `go test` suite (about 40 min a run on G-LAPTOP); `go vet` under the new directive (clean today at 1.26.9, RECON X.7); GODEBUG defaults read against the test host (1.26 adds the heap-randomization, Green Tea and crypto-randomness classes; 1.25's `containermaxprocs`, `updatemaxprocs`, `decoratemappings`, `tlssha1` and `x509sha256skid`) | G (the converter half, 1.5–3), COORD (the pin pair) | 3–5 |
 | **H3** ⟲ | `population-go1.26.9.txt` by two routes; relocations by body; new IDs → O5; `//go:embed`, linker-synthesized linknames and new syntax, each with a probe (lesson 54) | C2 (genpopulation), i9 (independent route) | 2–3 |
-| **H4** | **The testing host FIRST:** `Attr`, `Output`, `ArtifactDir`; `AllocsPerRun`'s parallel panic with Go's exact `parallelStart`/`parallelStop` accounting; the `testingSynctestTest` hook; `synctest.Run` removed. Then `new(expr)`, self-reference, the `ValueEnd` position-map check, the `go.mod` readers, and the linkname bodies. CNR byte-identical on the outgoing corpus | R (testing host), G (language and front end), P2 (linkname bodies) | 8–14 |
+| **H4** | **The testing host FIRST** (hand-owned C#, so it can be written against the outgoing corpus, lesson 13): `Attr`, `Output`, `ArtifactDir`; `AllocsPerRun`'s parallel panic with Go's exact `parallelStart`/`parallelStop` accounting; the `testingSynctestTest` hook; `synctest.Run` removed. **The language cuts start only AFTER H1**, because `new(expr)` and self-reference typecheck only in a converter built with go1.26's `go/types` (G). They are: **`new(expr)`**, 1.5–2.5: the one emission site `convCallExpr.go:2846` (today `@new<T>()`) boxes the evaluated value, with untyped-constant default typing and the array and struct clone rule. Two sites would break SILENTLY: `convCallExpr.go:1244` (the named-array wrapper over a zero value) and `visitValueSpec.go:579` (the struct-type lift that assumes a type argument). Three are safe: `callerInliningAnalysis.go:453`, `refLoweringAnalysisOperations.go:881`, `typedNilInterfaceBoxing.go:256`. **Generic self-reference**, 1–3: C# accepts the F-bounded constraint; the risk is the converter's own walkers recursing (20 `.Constraint()` reads in 5 files, `constraintOperations.go` first) and go2cs-gen's constraint emission; probe first. **`BasicLit.ValueEnd`**, 0.25–0.5: only CRLF sources move; GOROOT is LF, so CNR should read identical; one probe for CRLF module checkouts. **The `go.mod` `ignore` directive**, 0.25, rides the x/mod bump. Then the linkname bodies. CNR byte-identical | R (testing host), G (language, 3–6.5), P2 (linkname bodies) | 8–14 |
 | **H4a** | The outgoing-record-frozen shape: one seeded three-target old-release regen into staging, nothing committed | i9 | 2–3 |
 | **§4 checkpoint** | S25 and S26; RED25 against RED26; the two-leg H6 census | i9 | 4–7 |
 | **H5** | The 1.26.9 three-target reconvert (S26 is its run); H5c with `-ExpectSourceGo go1.24.13`; overlay; marker gate | i9 (emission), COORD (H5c review) | 5–8 |
-| **H6** ⟲ | **79 files, attributed (§4 step 6).** Every one gets a classified delta record. The completeness gate runs at H6 AND before the release. Split, exhaustive at the 1.26.4 census: **C1 + G, 32:** `runtime` 27, `runtime/pprof`, `internal/runtime/{syscall,maps}`, `internal/abi`, `internal/cpu`. **P2, 24:** `syscall` 9, `internal/syscall/windows` 3 + `registry` 2, `internal/poll` 2, `os` 3, `net` 3, darwin `vendor/…/route` 2. **R, 13:** `sync` 5, `internal/sync`, `unique`, `time`, `iter`, `internal/synctest`, `testing`, `internal/testenv`, `internal/godebug`. **G, 10:** `reflect` 2, `math/bits`, `hash/crc32`, `crypto/rand`, four `crypto/internal/fips140/*`, `internal/chacha8rand`. Re-split at the go1.26.9 census | C1, G, R, P2 | 15–25 |
+| **H6** ⟲ | **79 files, attributed (§4 step 6).** Every one gets a classified delta record. The completeness gate runs at H6 AND before the release. Split, exhaustive at the 1.26.4 census: **C1 + G, 32:** `runtime` 27, `runtime/pprof`, `internal/runtime/{syscall,maps}`, `internal/abi`, `internal/cpu`. **P2, 24:** `syscall` 9, `internal/syscall/windows` 3 + `registry` 2, `internal/poll` 2, `os` 3, `net` 3, darwin `vendor/…/route` 2. **R, 13:** `sync` 5, `internal/sync`, `unique`, `time`, `iter`, `internal/synctest`, `testing`, `internal/testenv`, `internal/godebug`. **G, 10:** `reflect` 2, `math/bits`, `hash/crc32`, `crypto/rand`, four `crypto/internal/fips140/*`, `internal/chacha8rand`. Re-split at the go1.26.9 census. **Sizing (amended 2026-10-12, measured at go1.26.9):** the 79 hand-owns map to 76 upstream files with 9,600 changed lines. **20 files are large** (≥150 changed lines; 10 of them `runtime`): `internal/poll/fd_windows.go` +658/−438, `runtime/malloc.go` +654/−244, `runtime/mcleanup.go` +660/−15, `testing/testing.go` +483/−165, `runtime/mgc.go` +464/−116, `runtime/runtime2.go` +336/−128, and so on. 56 are small. At G's rates (about 1–1.5 lane-days per large file, 0.3 per small one), H6 is **30–45**; `runtime` (25 files, 5,060 lines) is 14–20 of that | C1, G, R, P2 | **30–45** |
 | **H7** | 100% compile on the windows, linux and darwin flavours, serially per flavour; RED26 drives it | i9 (windows), G (linux), COORD or C1 (darwin) | 8–14 |
 | **H7a** | One master fold, never a rebase, after the last compile-side seat; plan the second fold at the campaign tip (lesson 25) | COORD | 1–2 |
 | **H8** ⟲ | Platform manifest; marker gate zero per target; the default-flavour build reproduces the single-target build | P2 | 2–4 |
 | **H9** | Golden rebank on **windows** (the banking platform); predict first; Output's failing set equal by name to H0's, with APPEARED empty | COORD/i7 | 3–5 |
 | **H10** ⟲ | Census and pre-stage (the reserved pool first), then the recon leg in a throwaway worktree, then seat, plan and driver. The linux READING runs alongside; the linux BANK is its own leg. Alloc relabel (lesson 31). Every relocated row's `Receives` provenance. Address-shaped output under heap randomization is read through `addressPairs` | i9 and G (windows shards, i9 non-TLS only), C1 and P1 (linux reading and bank), COORD (dispatch and the `crypto/tls` host), P1 (disclosure re-signs) | 18–30 |
 | **H11 + H12 + release** | Existence-plus-monotonicity before the first publish; badges and docs (R); the ritual rehearsed; release-smoke on four RIDs; the PIN (O10); deprecations after the publish (O9) | COORD, R, the owner | 3–5 |
-| **Total** | | | **85–145** |
+| **Total** | | | **100–165** |
 
 **What can overlap:**
 - Readiness instruments and host records can run alongside O1's wait.
 - H3's derivation can run as soon as go1.26.9 is installed. It does not need H2.
-- The testing-host and language cuts (H4) are written against the outgoing corpus first, per
-  lesson 13.
+- The testing host (H4's hand-owned half) is written against the outgoing corpus first, per lesson 13.
+  The language cuts cannot be: they wait on the H1-built converter.
 - H6 review runs alongside the H7 ladder once H5 lands.
 - H10's pre-staging of the reserved pool can begin at H7a.
 
@@ -286,8 +296,10 @@ H7a before any run rung; H9 before H10; H10 before H11).
   - the language delta is small (hop B carried generic type aliases);
   - one checkpoint is added;
   - one more lane.
-- **ESTIMATE: 3.5–5 calendar weeks from H1** to the publish at the H10 close. The serial spine is about
-  H1 → H5 at 1.5–2 weeks and H6/H7 → H9 at about 1 week; H10 is 1–1.5 weeks.
+- **ESTIMATE: 4–5.5 calendar weeks from H1** to the publish at the H10 close. The serial spine is about:
+  - H1 → H5: 1.5–2 weeks;
+  - H6/H7 → H9: 1.5–2 weeks (the H6 sizing: four lanes in parallel);
+  - H10: 1–1.5 weeks.
 - The demoted rows (if any, O7) bank after it, as in hop B.
 - **The 1.27 generic-methods DESIGN** is drafted during H10, off this hop's critical path (the ruling).
 
@@ -347,3 +359,31 @@ COORD's to rule.
      Instrument states read at master 20279db5f6 on 2026-10-11: src/_roster.ps1:475 and :587, run-h10-recon.ps1:841-843,
      check-h6-completeness.ps1:76, shardmap.py:94, check-roster-format.ps1:906; src/go2cs/go.mod; module-cache x/tools and
      x/mod .mod files. -->
+
+---
+
+## Amendments
+
+*(Dated. Each block states what changed and why.)*
+
+**2026-10-12 — G's corrections for its stages, checked and applied** (G's message via COORD; the i9's
+measurements; RECON X.7 on `claude/i9-go125-recon` `dc0e159ccf`):
+
+- **H4.** The language cuts start after H1: `new(expr)` and self-reference typecheck only under
+  go1.26's `go/types`. G's site list and estimates went into the H4 row (3–6.5 for G's share).
+  - Every cited site was spot-checked at master: `convCallExpr.go:2846` and `:1244`,
+    `visitValueSpec.go:579`, `callerInliningAnalysis.go:453`, `refLoweringAnalysisOperations.go:881`,
+    `typedNilInterfaceBoxing.go:256`.
+  - The 20 `.Constraint()` reads are 11 + 3 + 4 + 1 + 1 over 5 files.
+  - The H4 total stays 8–14.
+- **H1.** The gate is named: CNR byte-identical after the x/tools and x/mod bump. The converter suite
+  takes about 40 min a run.
+- **H6.** 15–25 → **30–45**. G proposed 25–38 from the 1.24.13 → 1.25.12 runtime half (18 of 71 runtime
+  hand-own files changed, +1,312 / −654). The i9 measured the full 1.24.13 → 1.26.9 range: 76 upstream
+  files, 9,600 changed lines, 20 of them large. At G's per-file rates that gives 30–45.
+- **Totals.** **100–165 lane-days; 4–5.5 calendar weeks.**
+- **O2.** G-LAPTOP's linux arm is named, with an ask-now note.
+- **§1.** The publication date of 1.24.13.6 is corrected. The comment-parity precondition (H0 after its
+  last train) is added. The instrument states were re-read at master `7092f7126e`, unchanged.
+- **§4 note.** The two-leg H6 census (step 6) will show `runtime`'s 1.25 leg as already heavy, as G
+  measured, before Green Tea's 1.26 leg.
