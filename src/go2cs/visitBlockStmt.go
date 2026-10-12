@@ -10,6 +10,7 @@ package main
 
 import (
 	"go/ast"
+	"go/token"
 	"strings"
 )
 
@@ -46,30 +47,10 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtCont
 	}
 
 	for _, stmt := range blockStmt.List {
-		if v.options.includeComments {
-			if lastStmt != nil {
-				if v.file == nil {
-					v.file = v.fset.File(stmt.Pos())
-				}
+		gap := -1
 
-				currentLine := v.file.Line(stmt.Pos())
-				lastLine := v.file.Line(lastStmt.End())
-
-				comments := &strings.Builder{}
-				var wrote bool
-
-				if wrote, lines := v.writeStandAloneCommentString(comments, stmt.Pos(), nil, prefix); wrote {
-					lastLine -= lines - 1
-				}
-
-				if wrote && currentLine-lastLine > 1 {
-					v.outputBuilder.WriteString(strings.Repeat(v.newline, currentLine-lastLine-1))
-				}
-
-				if comments.Len() > 0 {
-					v.outputBuilder.WriteString(comments.String())
-				}
-			}
+		if lastStmt != nil {
+			gap = v.writeStatementGap(lastStmt, stmt)
 		}
 
 		// Inject any hoisted stack-string temp declarations whose anchor is this statement, so a
@@ -81,6 +62,7 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtCont
 		}
 
 		v.visitListStmt(stmt)
+		v.dropEmptyGap(gap)
 
 		lastStmt = stmt
 	}
@@ -109,6 +91,150 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtCont
 	}
 
 	v.popBlock()
+}
+
+// visitStatementList converts the statements of a case, type-switch case or select case body, keeping
+// Go's blank lines between them as a block body does (writeStatementGap).
+func (v *Visitor) visitStatementList(stmts []ast.Stmt) {
+	for i, stmt := range stmts {
+		gap := -1
+
+		if i > 0 {
+			gap = v.writeStatementGap(stmts[i-1], stmt)
+		}
+
+		v.visitListStmt(stmt)
+		v.dropEmptyGap(gap)
+	}
+}
+
+// writeStatementGap writes what lies between two statements of one list in the Go source: the
+// standalone comments still pending before next, and a blank line wherever Go has one, before a
+// comment group, between two groups, and before next itself. gofmt keeps at most one blank line in a
+// row, so a gap of any size writes one. Comments before prev's last line (inside prev, or trailing it
+// and not yet claimed) are flushed in order with no blank line, as before.
+//
+// Under `-comments` only (docs/PLAN-comment-and-spacing-parity.md, class A and its decision 1): without
+// it nothing is written, so the emission, and every behavioral golden, is unchanged.
+//
+// It returns the output length before the blank line it wrote ahead of next, or -1 when it wrote none,
+// for dropEmptyGap.
+func (v *Visitor) writeStatementGap(prev, next ast.Stmt) int {
+	if !v.options.includeComments {
+		return -1
+	}
+
+	if v.file == nil {
+		v.file = v.fset.File(next.Pos())
+	}
+
+	prefix := v.newline + v.indent(v.indentLevel)
+	lastLine := v.file.Line(prev.End())
+	nextPos := next.Pos()
+
+	// Take the pending positions first: writing a comment removes it from sortedCommentPos.
+	var pending []token.Pos
+
+	for _, pos := range v.sortedCommentPos {
+		if pos >= nextPos {
+			break
+		}
+
+		if _, found := v.standAloneComments[pos]; found {
+			pending = append(pending, pos)
+		}
+	}
+
+	for _, pos := range pending {
+		line := v.file.Line(pos)
+		endLine := line + strings.Count(v.standAloneComments[pos], "\n")
+
+		if line-lastLine > 1 {
+			v.writeGapLine()
+		}
+
+		v.writeStandAloneCommentString(v.outputBuilder, pos, nil, prefix)
+
+		lastLine = max(lastLine, endLine)
+	}
+
+	if v.file.Line(nextPos)-lastLine > 1 {
+		mark := v.outputBuilder.Len()
+
+		if v.writeGapLine() {
+			return mark
+		}
+	}
+
+	return -1
+}
+
+// writeGapLine writes the line break that makes Go's blank line, and reports whether it did. It writes
+// none when the output already ends with a line break (a lowered switch ends with its own, and the next
+// line's leading break then makes the blank line by itself; a second would leave two blank lines in a
+// row, which gofmt never does), or directly after an opening brace (the statements before the gap
+// emitted nothing here, such as a local type declaration lifted out of the body).
+//
+// Both tests read the current line as it will be emitted: without position sentinels (every statement
+// writes one, so a statement that emits no C# still leaves one behind; positionMapOperations.go) and
+// without `>>MARKER:…<<` placeholders (a function body opens with its block-prefix marker).
+func (v *Visitor) writeGapLine() bool {
+	output := v.outputBuilder.String()
+	lineStart := strings.LastIndex(output, "\n") + 1
+	line := strings.TrimRight(stripEmissionMarkers(stripPositionSentinels(output[lineStart:])), " \t\r")
+
+	// An empty current line is a break already written, or nothing emitted yet in this block's own
+	// builder (a function body's brace can sit in the enclosing builder).
+	if line == "" || strings.HasSuffix(line, "{") {
+		return false
+	}
+
+	v.outputBuilder.WriteString(v.newline)
+
+	return true
+}
+
+// stripEmissionMarkers removes the `>>MARKER:…<<` placeholders the converter resolves after emission.
+func stripEmissionMarkers(text string) string {
+	const prefix, suffix = ">>MARKER:", "<<"
+
+	for {
+		start := strings.Index(text, prefix)
+
+		if start < 0 {
+			return text
+		}
+
+		end := strings.Index(text[start+len(prefix):], suffix)
+
+		if end < 0 {
+			return text
+		}
+
+		text = text[:start] + text[start+len(prefix)+end+len(suffix):]
+	}
+}
+
+// dropEmptyGap removes the blank line writeStatementGap wrote ahead of a statement that then emitted
+// nothing but whitespace and its position sentinel (a bare `return` the deferred-call lowering carries
+// past its `finally`, for one), so the blank line does not end up alone before a closing brace. Only the
+// line break at mark is removed; the statement's sentinel stays, so its position-map entry does too.
+// mark is writeStatementGap's result.
+func (v *Visitor) dropEmptyGap(mark int) {
+	if mark < 0 {
+		return
+	}
+
+	output := v.outputBuilder.String()
+	end := mark + len(v.newline)
+
+	if end > len(output) || output[mark:end] != v.newline || strings.TrimSpace(stripPositionSentinels(output[end:])) != "" {
+		return
+	}
+
+	v.outputBuilder.Reset()
+	v.outputBuilder.WriteString(output[:mark])
+	v.outputBuilder.WriteString(output[end:])
 }
 
 // pushBlock redirects emission into a FRESH output builder, so whatever is written next accumulates

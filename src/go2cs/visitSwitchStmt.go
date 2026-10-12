@@ -720,9 +720,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 				v.continueTargetStack = append(v.continueTargetStack, &continueTargetEntry{isWrapper: true})
 			}
 
-			for _, stmt := range caseClause.Body {
-				v.visitListStmt(stmt)
-			}
+			v.visitStatementList(caseClause.Body)
 
 			if switchBreakWrap {
 				v.continueTargetStack = v.continueTargetStack[:len(v.continueTargetStack)-1]
@@ -824,9 +822,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			// and suppress the mandatory `break;` (CS8070 on a final case, CS0163 otherwise).
 			v.lastStatementWasReturn = false
 
-			for _, stmt := range caseClause.Body {
-				v.visitListStmt(stmt)
-			}
+			v.visitStatementList(caseClause.Body)
 
 			v.outputBuilder.WriteString(v.newline)
 
@@ -916,9 +912,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			// and suppress the mandatory `break;` (CS8070 on a final case, CS0163 otherwise).
 			v.lastStatementWasReturn = false
 
-			for _, stmt := range caseClause.Body {
-				v.visitListStmt(stmt)
-			}
+			v.visitStatementList(caseClause.Body)
 
 			v.outputBuilder.WriteString(v.newline)
 

@@ -74,6 +74,32 @@ func threeLineComment() int {
 	return d
 }
 
+func afterSwitch(v int) int {
+	switch {
+	case v > 1:
+		v--
+	case v < 0:
+		v++
+	}
+
+	w := v * 2
+	return w
+}
+
+func deferredReturn() (n int) {
+	defer func() { n++ }()
+	n = 1
+
+	return
+}
+
+func localType() int {
+	type pair struct{ a, b int }
+
+	p := pair{1, 2}
+	return p.a + p.b
+}
+
 func caseBody(v int) {
 	switch v {
 	case 1:
@@ -105,7 +131,7 @@ func selectBody(ch chan int) {
 }
 
 func main() {
-	fmt.Println(steps(), commentLed(), commentGroups(), commentThenGap(), threeLineComment())
+	fmt.Println(steps(), commentLed(), commentGroups(), commentThenGap(), threeLineComment(), afterSwitch(2), deferredReturn(), localType())
 	caseBody(1)
 	typeSwitchBody(1)
 	selectBody(make(chan int))
@@ -166,12 +192,35 @@ func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
 		{"// two", false, "a three-line comment gains no blank line"},
 		{"// three", false, "a three-line comment gains no blank line"},
 		{"nint d = c;", false, "a three-line comment gains no blank line"},
+		{"nint w = v * 2;", true, "a blank line after a lowered switch"},
 		{"afterTheCaseGapˢ);", true, "a blank line inside a case body"},
 		{"afterTheTypeSwitchGapˢ);", true, "a blank line inside a type-switch case body"},
 		{"afterTheSelectGapˢ);", true, "a blank line inside a select case body"},
 	} {
 		if got := blankAbove(t, lines, c.line); got != c.blank {
 			t.Errorf("%s: blank line above %q = %v, want %v", c.why, c.line, got, c.blank)
+		}
+	}
+
+	// gofmt never leaves two blank lines in a row, a blank line right after `{` or one right before `}`,
+	// and neither may a body here. A statement that ends with its own trailing line break (a lowered
+	// switch) must not gain a second blank line; a gap ahead of a statement that emits nothing (a bare
+	// `return` carried by the deferred-call lowering) must not be left before the closing brace; and a gap
+	// after statements that emit nothing (a local type declaration, lifted out) must not open the body.
+	for i := 1; i+1 < len(lines); i++ {
+		if strings.TrimSpace(lines[i]) != "" {
+			continue
+		}
+
+		prev, next := strings.TrimSpace(lines[i-1]), strings.TrimSpace(lines[i+1])
+
+		switch {
+		case prev == "" && strings.HasPrefix(lines[i+1], "    "):
+			t.Errorf("two blank lines in a row above line %d (%q)", i+2, next)
+		case strings.HasSuffix(prev, "{") && strings.HasPrefix(lines[i+1], "    "):
+			t.Errorf("a blank line right after %q (line %d)", prev, i)
+		case strings.HasPrefix(lines[i+1], "    ") && strings.HasPrefix(next, "}"):
+			t.Errorf("a blank line right before %q (line %d), after %q", next, i+2, prev)
 		}
 	}
 }

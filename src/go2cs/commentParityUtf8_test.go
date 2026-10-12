@@ -32,8 +32,6 @@ import (
 )
 
 var wantUtf8Census = map[string]int{
-	// A: blank lines inside function bodies
-	"body:go-blank-cs-none": 1, // Valid: the blank line after `p = p[:len(p):len(p)]`
 	// B: doc comments of specs inside a group
 	"missed:spec-doc-in-group": 2,
 	// D: blank lines between the specs of a group
