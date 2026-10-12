@@ -246,9 +246,33 @@ public static class AdapterBinder
         // Value-typed: the reflective tier first — it needs no generic instantiation, which is the
         // only form guaranteed available under Native AOT — belting to the delegate tier when the
         // interface has a member the invoker cannot forward and no object shell was emitted.
-        return isValueType
-            ? BuildObjectShellFactory(valueType, spec) ?? BuildGenericShellFactory(valueType, spec)
-            : BuildGenericShellFactory(valueType, spec) ?? BuildObjectShellFactory(valueType, spec);
+        if (isValueType)
+        {
+            // P3 eligibility (DESIGN-iface-shell-caching 6.4): the object shell holds the boxed value
+            // by reference, so it is cached; the generic shell over a value type COPIES the struct in
+            // its constructor, so it is never cached.
+            Func<object, object>? objectShell = BuildObjectShellFactory(valueType, spec);
+
+            return objectShell is not null ?
+                CacheShellInstances(objectShell) :
+                BuildGenericShellFactory(valueType, spec);
+        }
+
+        // A reference-typed dynamic value: either tier holds the same reference.
+        Func<object, object>? factory = BuildGenericShellFactory(valueType, spec) ?? BuildObjectShellFactory(valueType, spec);
+
+        return factory is null ? null : CacheShellInstances(factory);
+    }
+
+    // P3 EXPERIMENT: one shell instance per Go dynamic value, held weakly on that value, so a re-assert
+    // of the same value returns the same shell instead of constructing a new one. A null value (a typed
+    // nil func) has no identity to key on and is built fresh every time.
+    private static Func<object, object> CacheShellInstances(Func<object, object> factory)
+    {
+        ConditionalWeakTable<object, object> instances = new();
+        ConditionalWeakTable<object, object>.CreateValueCallback create = value => factory(value);
+
+        return value => value is null ? factory(value!) : instances.GetValue(value, create);
     }
 
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2059", Justification = GoTypeRegistry.RegisteredGenericJustification)]
