@@ -205,6 +205,22 @@ func defaultThenLabel(v, w int) int {
 	return n
 }
 
+func braceComments(v int) int {
+	n := 0
+	if v > 0 { // after the if brace
+		n = 1
+	}
+	switch v {
+	case 1: // on the case label
+		n = 2
+	}
+	for i := 0; i < v; i++ {
+		n += i
+		// before the loop's closing brace
+	}
+	return n
+}
+
 func typeSwitchBody(v any) {
 	switch t := v.(type) {
 	case string:
@@ -231,6 +247,7 @@ func main() {
 	fmt.Println(emptyClause("x", "w"))
 	fmt.Println(defaultInner(1, 1))
 	fmt.Println(defaultThenLabel(1, 1))
+	fmt.Println(braceComments(2))
 	typeSwitchBody(1)
 	selectBody(make(chan int))
 }
@@ -339,6 +356,21 @@ func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
 	// default: holding it with the default wrote it after the whole switch.
 	if next := lineContaining(t, lines, "// above case w") + 1; !strings.Contains(lines[next], "fmt.Sprint(w), 88);") {
 		t.Errorf("the comment above a case after a moved default is not above that case's statement: next line %q", strings.TrimSpace(lines[next]))
+	}
+
+	// Class H: a comment after `{` or after `case X:` on the same line trails that line, and a comment
+	// after a block's last statement stays above its closing brace.
+	for _, c := range []struct{ comment, header string }{
+		{"// after the if brace", "if (v > 0) {"},
+		{"// on the case label", "case 1:"},
+	} {
+		if line := lines[lineContaining(t, lines, c.comment)]; !strings.Contains(line, c.header) {
+			t.Errorf("%q does not trail %q: %q", c.comment, c.header, strings.TrimSpace(line))
+		}
+	}
+
+	if at := lineContaining(t, lines, "// before the loop's closing brace"); !strings.Contains(lines[at-1], "n += i;") || strings.TrimSpace(lines[at+1]) != "}" {
+		t.Errorf("the comment before a closing brace is not between the last statement and the brace: %q / %q / %q", strings.TrimSpace(lines[at-1]), strings.TrimSpace(lines[at]), strings.TrimSpace(lines[at+1]))
 	}
 
 	for _, call := range []string{"fmt.Sprint(w), 66);", "fmt.Sprint(w), 77);"} {
