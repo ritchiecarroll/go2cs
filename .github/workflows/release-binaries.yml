@@ -1,0 +1,221 @@
+name: Release binaries
+
+# Builds the converter for six platforms and proves each binary runs on its own platform's runner.
+#
+# ON A nuget-<version> TAG (the tag the release ritual pushes last, after the packages are public) it also:
+#   - refuses a tag that is not nuget-N.N.N.N;
+#   - attests the archives' build provenance (verify one with `gh attestation verify <file> --repo <owner>/<repo>`);
+#   - fails unless `go2cs -version` on every platform names the tag's version as go2cs.release;
+#   - creates a DRAFT GitHub Release holding the six archives, SHA256SUMS and the attestation bundle.
+# A DRAFT IS NOT PUBLISHED. A person reads it, replaces its placeholder notes with the release notes, and
+# publishes it. This workflow never publishes, and it refuses to touch a Release that already exists for the tag.
+#
+# STARTED BY HAND (workflow_dispatch) it builds and smokes only: no attestation, no Release, read-only token.
+#
+# The converter is pure Go (CGO_ENABLED=0), so one Linux runner cross-compiles all six. Archive names carry no
+# version, so releases/latest/download/<name> is a stable URL once a Release is published.
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['nuget-*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-binaries-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Cross-compile six platforms
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write       # the attestation's signing identity; used only on a tag
+      attestations: write   # to store the attestation; used only on a tag
+    outputs:
+      go-version: ${{ steps.go.outputs.go-version }}
+      release-version: ${{ steps.tag.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Read the release version from the tag
+        id: tag
+        if: github.ref_type == 'tag'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if ! printf '%s' "$TAG" | grep -Eq '^nuget-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::tag '$TAG' is not nuget-N.N.N.N; this workflow releases nothing for it"
+            exit 1
+          fi
+          echo "version=${TAG#nuget-}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-go@v6
+        id: go
+        with:
+          go-version-file: src/go2cs/go.mod
+          cache-dependency-path: src/go2cs/go.sum
+
+      - name: Build and archive
+        working-directory: src/go2cs
+        env:
+          CGO_ENABLED: '0'
+          GOTOOLCHAIN: local
+        run: |
+          set -euo pipefail
+          out="$GITHUB_WORKSPACE/dist"
+          mkdir -p "$out"
+          {
+            echo '## Release binaries (prototype)'
+            echo
+            echo "Built by $(go version) at \`${GITHUB_SHA}\`."
+            echo
+            echo '| RID | binary bytes | archive | archive bytes |'
+            echo '|:--|--:|:--|--:|'
+          } >> "$GITHUB_STEP_SUMMARY"
+          while read -r goos goarch rid; do
+            stage="$RUNNER_TEMP/$rid"
+            mkdir -p "$stage"
+            exe=go2cs
+            if [ "$goos" = windows ]; then exe=go2cs.exe; fi
+            GOOS="$goos" GOARCH="$goarch" go build -trimpath -o "$stage/$exe" .
+            cp "$GITHUB_WORKSPACE/src/go2cs/LICENSE" "$GITHUB_WORKSPACE/src/go2cs/LICENSE-EXCEPTION" "$stage/"
+            # Asset names carry no version, so releases/latest/download/<name> stays a stable URL.
+            if [ "$goos" = windows ]; then
+              archive="go2cs-$rid.zip"
+              (cd "$stage" && zip -q -9 "$out/$archive" "$exe" LICENSE LICENSE-EXCEPTION)
+            else
+              archive="go2cs-$rid.tar.gz"
+              tar -C "$stage" -czf "$out/$archive" "$exe" LICENSE LICENSE-EXCEPTION
+            fi
+            echo "| \`$rid\` | $(stat -c %s "$stage/$exe") | \`$archive\` | $(stat -c %s "$out/$archive") |" >> "$GITHUB_STEP_SUMMARY"
+          done <<'TARGETS'
+          windows amd64 win-x64
+          windows arm64 win-arm64
+          linux amd64 linux-x64
+          linux arm64 linux-arm64
+          darwin amd64 osx-x64
+          darwin arm64 osx-arm64
+          TARGETS
+          (cd "$out" && sha256sum go2cs-* > SHA256SUMS && cat SHA256SUMS)
+
+      - name: Attest the archives' build provenance
+        id: attest
+        if: github.ref_type == 'tag'
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/go2cs-*
+
+      - name: Keep the attestation bundle beside the archives
+        if: github.ref_type == 'tag'
+        env:
+          BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+        run: |
+          set -euo pipefail
+          test -s "$BUNDLE"
+          cp "$BUNDLE" dist/go2cs-attestation.sigstore.jsonl
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: release-binaries
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  smoke:
+    name: go2cs -version on ${{ matrix.rid }}
+    needs: build
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { rid: win-x64,     runner: windows-latest }
+          - { rid: win-arm64,   runner: windows-11-arm }
+          - { rid: linux-x64,   runner: ubuntu-latest }
+          - { rid: linux-arm64, runner: ubuntu-24.04-arm }
+          - { rid: osx-x64,     runner: macos-15-intel }
+          - { rid: osx-arm64,   runner: macos-15 }
+    steps:
+      # go2cs needs Go even to print its version today: main.go resolves GOROOT before it reads any flag, and a
+      # -trimpath binary carries no GOROOT of its own. The first run of this prototype (38168160233) failed on
+      # both macOS runners for that reason: their images do not put Go on PATH. Installing Go here is what a
+      # user must do anyway before converting.
+      - uses: actions/setup-go@v6
+        with:
+          go-version: ${{ needs.build.outputs.go-version }}
+          cache: false
+
+      - uses: actions/download-artifact@v5
+        with:
+          name: release-binaries
+          path: dist
+
+      - name: Verify the checksum, unpack, and run go2cs -version
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $rid = '${{ matrix.rid }}'
+          $archive = Get-ChildItem dist -Filter "go2cs-$rid.*" | Select-Object -First 1
+          if (-not $archive) { throw "no archive for $rid in the artifact" }
+          $sum = (Get-Content dist/SHA256SUMS | Where-Object { $_ -match [regex]::Escape($archive.Name) }) -split '\s+' | Select-Object -First 1
+          $got = (Get-FileHash $archive.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($sum -ne $got) { throw "checksum mismatch for $($archive.Name): want $sum, got $got" }
+          New-Item -ItemType Directory -Force unpacked | Out-Null
+          if ($archive.Extension -eq '.zip') { Expand-Archive $archive.FullName -DestinationPath unpacked }
+          else { tar -xzf $archive.FullName -C unpacked; if ($LASTEXITCODE -ne 0) { throw "tar exited $LASTEXITCODE" } }
+          $exe = Join-Path unpacked ($IsWindows ? 'go2cs.exe' : 'go2cs')
+          $report = & $exe -version
+          $code = $LASTEXITCODE
+          $report | ForEach-Object { Write-Host $_ }
+          if ($code -ne 0) { throw "go2cs -version exited $code on $rid" }
+          $release = ($report | Where-Object { $_ -like 'go2cs.release=*' }) -replace '^go2cs\.release=', ''
+          if (-not $release -or $release -eq 'unknown') { throw "go2cs -version named no release on $rid" }
+          $want = '${{ needs.build.outputs.release-version }}'
+          if ($want -and $release -ne $want) { throw "go2cs.release is $release on $rid, and the tag says ${want}: the tag is not on the release commit" }
+          $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture
+          Add-Content $env:GITHUB_STEP_SUMMARY "``$rid`` on ``${{ matrix.runner }}`` ($arch): ``go2cs -version`` exit 0, release ``$release``, archive $($archive.Length) bytes, checksum verified."
+
+  draft-release:
+    name: Create the DRAFT GitHub Release
+    needs: [build, smoke]
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # to create the draft Release; nothing else in this workflow can write
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          name: release-binaries
+          path: dist
+
+      - name: Create the draft (never published here)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.build.outputs.release-version }}
+        run: |
+          set -euo pipefail
+          test -n "$VERSION"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::a Release already exists for $TAG; this workflow does not overwrite one"
+            exit 1
+          fi
+          ls -l dist
+          test "$(ls dist/go2cs-*.zip dist/go2cs-*.tar.gz | wc -l)" -eq 6
+          test -s dist/SHA256SUMS
+          test -s dist/go2cs-attestation.sigstore.jsonl
+          notes="DRAFT, created by the release-binaries workflow from tag $TAG. Replace this text with the release notes before publishing."
+          gh release create "$TAG" --draft --verify-tag --title "go2cs $VERSION" --notes "$notes" \
+            dist/go2cs-*.zip dist/go2cs-*.tar.gz dist/SHA256SUMS dist/go2cs-attestation.sigstore.jsonl
+          draft="$(gh release view "$TAG" --json isDraft --jq .isDraft)"
+          if [ "$draft" != "true" ]; then
+            echo "::error::the Release for $TAG is not a draft"
+            exit 1
+          fi
+          echo "Draft Release created for \`$TAG\`. It is NOT published: read it, set its notes, then publish it by hand." >> "$GITHUB_STEP_SUMMARY"
