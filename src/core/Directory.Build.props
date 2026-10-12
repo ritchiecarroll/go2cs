@@ -32,6 +32,15 @@
     <go2csPath>$([MSBuild]::EnsureTrailingSlash($([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..'))))</go2csPath>
   </PropertyGroup>
 
+  <!-- go2cs-gen's escape registry (trim stage 3c-2b(iii)) tells a PER-OS package (an L3 csproj compiling
+       $(GoTargetOS)/*.cs) from a platform-neutral one by whether a source file sits in <project>/<GoTargetOS>/. It stamps
+       the per-OS assemblies (go2cs.PlatformVariant), and a neutral package never walks their struct fields, so its registry
+       is the same in every OS flavor (the 1.24.13 r6 release rehearsal found two neutral packages that were not). -->
+  <ItemGroup>
+    <CompilerVisibleProperty Include="GoTargetOS" />
+    <CompilerVisibleProperty Include="MSBuildProjectDirectory" />
+  </ItemGroup>
+
   <!-- Shared NuGet version for every converted stdlib package (single source: src/version.props) -->
   <Import Project="$(MSBuildThisFileDirectory)../version.props" />
 
