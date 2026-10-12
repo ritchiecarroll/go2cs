@@ -172,6 +172,9 @@ const (
 	// c1 doc.
 	c1 = 4
 	c2 = 5
+	d1 = 6 /* a trailing block comment
+	   that spans two lines */
+	d2 = 7
 )
 
 func main() {
@@ -181,7 +184,7 @@ func main() {
 		x2 = 7
 	)
 
-	fmt.Println(a1, a2, b1, c1, c2, x1, x2)
+	fmt.Println(a1, a2, b1, c1, c2, d1, d2, x1, x2)
 }
 `
 
@@ -197,6 +200,7 @@ func TestGroupBlankLines(t *testing.T) {
 		{"// c1 doc.", true},
 		{" c1 => 4", false},
 		{" c2 => 5", false},
+		{" d2 => 7", false}, // the gap is measured from the end of d1's trailing comment
 		{"x2 = 7", true},
 	} {
 		found := false
