@@ -51,6 +51,10 @@ var spaced = []int{
 
 type pair struct{ a, b int }
 
+func eight() int { return 8 } // a one-line declaration's label
+
+func after() int { return 9 }
+
 func norm(a, b []int) int {
 	n := 0
 	switch {
@@ -76,7 +80,7 @@ func main() {
 		a: 1, // field a
 		b: 2, // field b
 	}
-	fmt.Println(table, spaced, local, p, steps[0](1), norm(nil, nil),
+	fmt.Println(table, spaced, local, p, steps[0](1), norm(nil, nil), eight(), after(),
 		len(local), // the length
 		cap(local))
 }
@@ -142,6 +146,12 @@ func TestCompositeLitCommentsKeepGoPlacement(t *testing.T) {
 		if got := blankAbove(t, lines, c.line); got != c.blank {
 			t.Errorf("blank line above %q = %v, want %v", c.line, got, c.blank)
 		}
+	}
+
+	// A one-line func declaration's label stays in its function, on the return it follows, and does not
+	// move to the declaration after it.
+	if line := strings.TrimSpace(lines[lineContaining(t, lines, "// a one-line declaration's label")]); line != "return 8; // a one-line declaration's label" {
+		t.Errorf("a one-line func declaration's label left its return: the line reads %q", line)
 	}
 
 	// A list takes only the comments inside its own brackets: the condition of a lowered switch's next
