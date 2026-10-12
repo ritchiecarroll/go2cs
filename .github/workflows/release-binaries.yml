@@ -1,20 +1,25 @@
-name: Release binaries (prototype)
+name: Release binaries
 
-# PROTOTYPE, launch readiness (the launch plan's decision D3). It builds the converter for six platforms and
-# proves each binary runs on its own platform's runner. It PUBLISHES NOTHING: it has no release step and no
-# write permission, and it runs only when someone starts it by hand. The archives are workflow artifacts,
-# which expire.
+# Builds the converter for six platforms and proves each binary runs on its own platform's runner.
 #
-# The converter is pure Go (CGO_ENABLED=0), so one Linux runner cross-compiles all six. The smoke jobs then
-# download each archive on a runner of that platform and run `go2cs -version`, which must exit 0 and name a
-# release.
+# ON A nuget-<version> TAG (the tag the release ritual pushes last, after the packages are public) it also:
+#   - refuses a tag that is not nuget-N.N.N.N;
+#   - attests the archives' build provenance (verify one with `gh attestation verify <file> --repo <owner>/<repo>`);
+#   - fails unless `go2cs -version` on every platform names the tag's version as go2cs.release;
+#   - creates a DRAFT GitHub Release holding the six archives, SHA256SUMS and the attestation bundle.
+# A DRAFT IS NOT PUBLISHED. A person reads it, replaces its placeholder notes with the release notes, and
+# publishes it. This workflow never publishes, and it refuses to touch a Release that already exists for the tag.
 #
-# What a real release workflow would add, none of it here: a `push: tags: ['nuget-*']` trigger, a build
-# provenance attestation, a check that go2cs.release equals the tag's version, and a DRAFT GitHub Release
-# holding the archives and SHA256SUMS for the owner to publish.
+# STARTED BY HAND (workflow_dispatch) it builds and smokes only: no attestation, no Release, read-only token.
+#
+# The converter is pure Go (CGO_ENABLED=0), so one Linux runner cross-compiles all six. Archive names carry no
+# version, so releases/latest/download/<name> is a stable URL once a Release is published.
 
 on:
   workflow_dispatch:
+  push:
+    tags: ['nuget-*']
+    branches: ['claude/r-install-scope']
 
 permissions:
   contents: read
@@ -27,10 +32,28 @@ jobs:
   build:
     name: Cross-compile six platforms
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write       # the attestation's signing identity; used only on a tag
+      attestations: write   # to store the attestation; used only on a tag
     outputs:
       go-version: ${{ steps.go.outputs.go-version }}
+      release-version: ${{ steps.tag.outputs.version }}
     steps:
       - uses: actions/checkout@v5
+
+      - name: Read the release version from the tag
+        id: tag
+        if: github.ref_type == 'tag'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if ! printf '%s' "$TAG" | grep -Eq '^nuget-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::tag '$TAG' is not nuget-N.N.N.N; this workflow releases nothing for it"
+            exit 1
+          fi
+          echo "version=${TAG#nuget-}" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-go@v6
         id: go
@@ -81,6 +104,22 @@ jobs:
           TARGETS
           (cd "$out" && sha256sum go2cs-* > SHA256SUMS && cat SHA256SUMS)
 
+      - name: Attest the archives' build provenance
+        id: attest
+        if: github.ref_type == 'tag'
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/go2cs-*
+
+      - name: Keep the attestation bundle beside the archives
+        if: github.ref_type == 'tag'
+        env:
+          BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+        run: |
+          set -euo pipefail
+          test -s "$BUNDLE"
+          cp "$BUNDLE" dist/go2cs-attestation.sigstore.jsonl
+
       - uses: actions/upload-artifact@v6
         with:
           name: release-binaries
@@ -124,9 +163,9 @@ jobs:
           $rid = '${{ matrix.rid }}'
           $archive = Get-ChildItem dist -Filter "go2cs-$rid.*" | Select-Object -First 1
           if (-not $archive) { throw "no archive for $rid in the artifact" }
-          $want = (Get-Content dist/SHA256SUMS | Where-Object { $_ -match [regex]::Escape($archive.Name) }) -split '\s+' | Select-Object -First 1
+          $sum = (Get-Content dist/SHA256SUMS | Where-Object { $_ -match [regex]::Escape($archive.Name) }) -split '\s+' | Select-Object -First 1
           $got = (Get-FileHash $archive.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-          if ($want -ne $got) { throw "checksum mismatch for $($archive.Name): want $want, got $got" }
+          if ($sum -ne $got) { throw "checksum mismatch for $($archive.Name): want $sum, got $got" }
           New-Item -ItemType Directory -Force unpacked | Out-Null
           if ($archive.Extension -eq '.zip') { Expand-Archive $archive.FullName -DestinationPath unpacked }
           else { tar -xzf $archive.FullName -C unpacked; if ($LASTEXITCODE -ne 0) { throw "tar exited $LASTEXITCODE" } }
@@ -137,5 +176,47 @@ jobs:
           if ($code -ne 0) { throw "go2cs -version exited $code on $rid" }
           $release = ($report | Where-Object { $_ -like 'go2cs.release=*' }) -replace '^go2cs\.release=', ''
           if (-not $release -or $release -eq 'unknown') { throw "go2cs -version named no release on $rid" }
+          $want = '${{ needs.build.outputs.release-version }}'
+          if ($want -and $release -ne $want) { throw "go2cs.release is $release on $rid, and the tag says $want: the tag is not on the release commit" }
           $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture
           Add-Content $env:GITHUB_STEP_SUMMARY "``$rid`` on ``${{ matrix.runner }}`` ($arch): ``go2cs -version`` exit 0, release ``$release``, archive $($archive.Length) bytes, checksum verified."
+
+  draft-release:
+    name: Create the DRAFT GitHub Release
+    needs: [build, smoke]
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # to create the draft Release; nothing else in this workflow can write
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          name: release-binaries
+          path: dist
+
+      - name: Create the draft (never published here)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.build.outputs.release-version }}
+        run: |
+          set -euo pipefail
+          test -n "$VERSION"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::a Release already exists for $TAG; this workflow does not overwrite one"
+            exit 1
+          fi
+          ls -l dist
+          test "$(ls dist/go2cs-*.zip dist/go2cs-*.tar.gz | wc -l)" -eq 6
+          test -s dist/SHA256SUMS
+          test -s dist/go2cs-attestation.sigstore.jsonl
+          notes="DRAFT, created by the release-binaries workflow from tag $TAG. Replace this text with the release notes before publishing."
+          gh release create "$TAG" --draft --verify-tag --title "go2cs $VERSION" --notes "$notes" \
+            dist/go2cs-*.zip dist/go2cs-*.tar.gz dist/SHA256SUMS dist/go2cs-attestation.sigstore.jsonl
+          draft="$(gh release view "$TAG" --json isDraft --jq .isDraft)"
+          if [ "$draft" != "true" ]; then
+            echo "::error::the Release for $TAG is not a draft"
+            exit 1
+          fi
+          echo "Draft Release created for \`$TAG\`. It is NOT published: read it, set its notes, then publish it by hand." >> "$GITHUB_STEP_SUMMARY"
