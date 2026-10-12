@@ -328,9 +328,7 @@ func (v *Visitor) writeStatementGap(prev, next ast.Stmt) int {
 // writes one, so a statement that emits no C# still leaves one behind; positionMapOperations.go) and
 // without `>>MARKER:…<<` placeholders (a function body opens with its block-prefix marker).
 func (v *Visitor) writeGapLine() bool {
-	output := v.outputBuilder.String()
-	lineStart := strings.LastIndex(output, "\n") + 1
-	line := strings.TrimRight(stripEmissionMarkers(stripPositionSentinels(output[lineStart:])), " \t\r")
+	line := v.currentLine()
 
 	// An empty current line is a break already written, or nothing emitted yet in this block's own
 	// builder (a function body's brace can sit in the enclosing builder).
@@ -363,6 +361,15 @@ func (v *Visitor) trimTrailingLineBreak() {
 
 	v.outputBuilder.Reset()
 	v.outputBuilder.WriteString(strings.TrimSuffix(output, v.newline))
+}
+
+// currentLine returns the line the output builder ends with, as it will be emitted: without position
+// sentinels, `>>MARKER:…<<` placeholders and trailing whitespace. It is empty after a line break.
+func (v *Visitor) currentLine() string {
+	output := v.outputBuilder.String()
+	lineStart := strings.LastIndex(output, "\n") + 1
+
+	return strings.TrimRight(stripEmissionMarkers(stripPositionSentinels(output[lineStart:])), " \t\r")
 }
 
 // stripEmissionMarkers removes the `>>MARKER:…<<` placeholders the converter resolves after emission.

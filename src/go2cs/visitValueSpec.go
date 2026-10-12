@@ -27,6 +27,9 @@ const varPlaceholderFormat = "// go2cs generated this placeholder — var %s is 
 // spec (visitGenDecl's specDoc); declDoc is the declaration's own doc, which the //go:linkname and
 // //go:embed reads take together with valueSpec.Doc.
 func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.CommentGroup, tok token.Token) {
+	defer func(saved bool) { v.inValueSpec = saved }(v.inValueSpec)
+	v.inValueSpec = true
+
 	v.outputBuilder.WriteString(v.newline)
 	v.writeDoc(doc, valueSpec.End())
 

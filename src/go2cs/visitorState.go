@@ -417,6 +417,9 @@ type Visitor struct {
 	// heldComments holds, by colon, the pending comments of a clause the lowering emits after clauses
 	// that follow it in the source; holdClauseComments fills it, releaseClauseComments empties it.
 	heldComments map[token.Pos][]token.Pos
+	// inValueSpec is set while visitValueSpec converts a spec, so a struct it lifts ahead of the var does
+	// not open a second line after the spec's own (visitStructType, class L).
+	inValueSpec bool
 	// manualConversion mirrors the file entry's flag: this file's destination `.cs` is a hand-owned
 	// manual conversion, so the visit still feeds package-wide state but the emitted text lands in
 	// the non-compiled `.cs.auto` review sibling. Consulted by recordTypeAccessibility, which must
