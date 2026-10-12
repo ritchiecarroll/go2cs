@@ -959,6 +959,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 			var srcVal string
 			var constVal string
 
+			// Whether a broken byte-array constant (brokenByteArrayConst) already wrote the spec's
+			// trailing comment after its last operand.
+			specCommentTaken := false
+
 			// Whether a COMPLEX-kind constant's value fits the declaration's complex width (and so
 			// rendered as a real complex value rather than falling to the GoBigConst arm below).
 			complexRepresentable := false
@@ -984,6 +988,11 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 					// that the value round-trips, and TestGetValues then compared the response against
 					// its own silently-wrong constant.
 					constVal = byteArrayStringLiteral(s)
+
+					if broken, tookSpecComment := v.brokenByteArrayConst(valueSpec, valueSpec.Values[i], s); broken != "" {
+						constVal = broken
+						specCommentTaken = tookSpecComment
+					}
 				} else {
 					var isRawStr bool
 					constVal, isRawStr = v.getStringLiteral(c.Val().ExactString())
@@ -1188,7 +1197,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 					v.writeOutput("%s static readonly %s %s = %s;", access, strTypeName, csIDName, constVal)
 				}
 
-				v.writeComment(valueSpec.Comment, tokEnd+typeLenDeviation-1)
+				if !specCommentTaken {
+					v.writeComment(valueSpec.Comment, tokEnd+typeLenDeviation-1)
+				}
+
 				constHandled = true
 			}
 
