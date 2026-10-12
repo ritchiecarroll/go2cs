@@ -239,6 +239,7 @@ minutes, and names the edges. Figures in square brackets are read from the roste
 | [`drafts/reddit-golang.md`](drafts/reddit-golang.md) | r/golang |
 | [`drafts/reddit-dotnet.md`](drafts/reddit-dotnet.md) | r/dotnet, with the r/csharp variant |
 | [`drafts/replies.md`](drafts/replies.md) | the reply bank |
+| [`drafts/release-1.24.13.6.md`](drafts/release-1.24.13.6.md) | the GitHub Release body for 1.24.13.6 |
 
 ## 8. Open decisions for the owner
 
