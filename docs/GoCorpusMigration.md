@@ -2394,7 +2394,10 @@ Per banked package:
    retires — full definitions in
    [`ConversionStrategies-Reference.md`](ConversionStrategies-Reference.md).
    - (a) A reading-run TSV from the landed, red-proved unit extractor (NOTES A14), then the relabel, then rulings,
-     then page banking; labels are classed against the plan bar at the first classing.
+     then page banking; labels are classed against the plan bar at the first classing. The extractor is
+     [`src/tools/alloc-units`](../src/tools/alloc-units/README.md): give it the reading-owed entries with `-entries`
+     and every row's package directory, and it writes one TSV row per entry. It refuses rather than guess, so a
+     refusal stops the reading until it is understood.
    - (b) Every structural label is read against its design records.
    - (c) Unit-claiming classes are checked against measured units, and reading-vs-run MOVE rows are listed.
    - (d) Every failure line each signature matches is listed on both OSes; over-absorbing pins are narrowed and
