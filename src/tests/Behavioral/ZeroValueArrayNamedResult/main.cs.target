@@ -32,8 +32,8 @@ internal static void putUint64(slice<byte> b, uint64 v) {
 
 internal static partial ticket /*key*/ ticketFromBytes(/*[32]*/ array<byte> b) {
     ticket key = new();
-
     b = b.Clone();
+
     copy(key.aesKey[..], b[..16]);
     copy(key.hmacKey[..], b[16..]);
     key.seq = 7;

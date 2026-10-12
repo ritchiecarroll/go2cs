@@ -22,8 +22,8 @@ internal static ж<loc> get(this ж<loc> Ꮡl) {
 internal static (@string name, nint offset) lookup(this ж<loc> Ꮡl, nint sec) {
     @string name = default!;
     nint offset = default!;
-
     ref var l = ref Ꮡl.DerefOrNull();
+
     Ꮡl = Ꮡl.get(); l = ref Ꮡl.DerefOrNull();
     name = l.name;
     offset = l.offset + sec;
