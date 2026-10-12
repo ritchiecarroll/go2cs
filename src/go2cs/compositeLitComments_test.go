@@ -42,6 +42,13 @@ var steps = []func(int) int{
 	func(x int) int { return x * 2 }, // double
 }
 
+var spaced = []int{
+	1,
+
+	// after a blank line
+	2,
+}
+
 type pair struct{ a, b int }
 
 func main() {
@@ -56,7 +63,7 @@ func main() {
 		a: 1, // field a
 		b: 2, // field b
 	}
-	fmt.Println(table, local, p, steps[0](1),
+	fmt.Println(table, spaced, local, p, steps[0](1),
 		len(local), // the length
 		cap(local))
 }
@@ -111,6 +118,16 @@ func TestCompositeLitCommentsKeepGoPlacement(t *testing.T) {
 
 		if next := strings.TrimSpace(lines[at+1]); !strings.HasPrefix(next, c[1]) {
 			t.Errorf("%q is not directly above %q: the next line reads %q", c[0], c[1], next)
+		}
+	}
+
+	// An own-line comment keeps the blank line Go has above it, and gains none where Go has none.
+	for _, c := range []struct {
+		line  string
+		blank bool
+	}{{"// after a blank line", true}, {"// heading", false}, {"// before thirty", false}, {"// before the last row", false}} {
+		if got := blankAbove(t, lines, c.line); got != c.blank {
+			t.Errorf("blank line above %q = %v, want %v", c.line, got, c.blank)
 		}
 	}
 
