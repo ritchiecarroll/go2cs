@@ -1403,10 +1403,19 @@ behavioral divergence, an added branch shows up as nothing.
 > marker list and asserting that every absent entry has a closed row. Banked, not cut during a
 > migration — the list's baseline moves at every hop and a guard whose baseline moves needs the hop to
 > be over before it can be written honestly.
-> The 1.24.13 hop is over, so the guard is owed before the next hop's H6. It is absent at 172d437e66, and its
-> baseline is that hop's `logs/handowns-outgoing.txt`.
+> **The guard is [`retiredHandOwns_test.go`](../src/go2cs/internal/repoguard/retiredHandOwns_test.go).** Its
+> baseline is the union of the marker census at the previous hop's OUTGOING commit and at the commit it is
+> generated at. [`src/handown-baseline.ps1`](../src/handown-baseline.ps1) writes it, and the guard re-derives it
+> from the SHAs in its header. No `logs/handowns-outgoing.txt` was ever committed. That is no loss, because the
+> list is H6's own `git grep` at the outgoing commit, and any clone can re-run it. A census of the
+> generation commit alone reads zero absent entries and proves nothing about the hop that just closed. Each
+> retirement is a row in `testdata/handowns-retired.tsv`, either `moved <path marked at HEAD>` or `deleted`, with
+> its record. **When a hop closes, regenerate the baseline, naming that hop's outgoing commit, and add a row
+> for each of its retirements.** The population is the marked set only: AUDIT-h6 OQ-1 was ruled out 2026-10-12,
+> because a deleted `*_impl.cs` companion already breaks the build.
 > *(Edited in place 2026-10-01, §7 lesson 60: missing the comm step let sha3's fabricated `array<T>` class return
-> while H6 passed.)*
+> while H6 passed. Edited in place 2026-10-12: the guard landed. Its first run named
+> `runtime/pprof/pprof_impl.cs`, which `b415d4d9d9` had deleted after the hop with no record.)*
 
 **The instrument** is `.cs.auto` — the converter's answer to *"what would the automatic conversion of
 this file be, today, from this Go tree?"*
@@ -4370,9 +4379,10 @@ healthy run look hung — and, in the other direction, what lets a hung one look
     "does this package exist" from `git ls-files`/`git ls-tree` at the ref, never from `os.Stat`.** Why: a newer GOROOT
     reported a false linkname regression, and removed directories read as absent, empty or populated depending on the box.
     <!-- BOARD:25674-25692. -->
-60. **Cut the retired-hand-own guard (H6's durable form) after each hop closes and before the next hop's H6, baselined
-    on that hop's `logs/handowns-outgoing.txt`.** Why: missing the comm step let sha3's fabricated `array<T>` class return
-    while H6 passed, and repoguard has no such guard at 172d437e66. **Step text:** H6.
+60. **After each hop closes and before the next hop's H6, re-baseline the retired-hand-own guard (H6's durable form) on
+    that hop's outgoing commit with `src/handown-baseline.ps1`, and add a row for each retirement.** Why: missing the
+    comm step let sha3's fabricated `array<T>` class return while H6 passed. Repoguard had no such guard until 2026-10-12,
+    and its first run found a hand-own that had been deleted after the hop with no record. **Step text:** H6.
     <!-- 172d437e66:docs/GoCorpusMigration.md:1256-1262, :1288, :1318-1321; NOTES-next-hop.md A15 (owed: the
     entry itself is not in NOTES yet; a separate seat adds it). -->
 
