@@ -607,6 +607,11 @@ func stripEmissionMarkers(text string) string {
 // past its `finally`, for one), so the blank line does not end up alone before a closing brace. Only the
 // line break at mark is removed; the statement's sentinel stays, so its position-map entry does too.
 // mark is writeStatementGap's result.
+//
+// Without `-comments` it also removes the blank line ahead of a statement whose own first line is blank
+// or holds only indentation (one Go leads with a comment that is not written, a variable initialized by
+// a func literal): that line already sits where Go's blank line is, and a second would make two in a
+// row, which gofmt never writes.
 func (v *Visitor) dropEmptyGap(mark int) {
 	if mark < 0 {
 		return
@@ -615,13 +620,31 @@ func (v *Visitor) dropEmptyGap(mark int) {
 	output := v.outputBuilder.String()
 	end := mark + len(v.newline)
 
-	if end > len(output) || output[mark:end] != v.newline || strings.TrimSpace(stripPositionSentinels(output[end:])) != "" {
+	if end > len(output) || output[mark:end] != v.newline {
+		return
+	}
+
+	if after := stripPositionSentinels(output[end:]); strings.TrimSpace(after) != "" && (v.options.includeComments || !opensWithBlankLine(after, v.newline)) {
 		return
 	}
 
 	v.outputBuilder.Reset()
 	v.outputBuilder.WriteString(output[:mark])
 	v.outputBuilder.WriteString(output[end:])
+}
+
+// opensWithBlankLine reports whether text, a statement's emission, begins with a line break and then a
+// line that is empty or holds only indentation.
+func opensWithBlankLine(text, newline string) bool {
+	rest, found := strings.CutPrefix(text, newline)
+
+	if !found {
+		return false
+	}
+
+	line, _, complete := strings.Cut(rest, newline)
+
+	return complete && strings.TrimSpace(line) == ""
 }
 
 // pushBlock redirects emission into a FRESH output builder, so whatever is written next accumulates
