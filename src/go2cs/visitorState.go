@@ -420,9 +420,9 @@ type Visitor struct {
 	// inValueSpec is set while visitValueSpec converts a spec, so a struct it lifts ahead of the var does
 	// not open a second line after the spec's own (visitStructType, class L).
 	inValueSpec bool
-	// blockRbrace is the closing brace of the block whose statements are being visited; a comment past it
-	// on a statement's line trails what encloses the block, not the statement (writeTrailingComment).
-	blockRbrace token.Pos
+	// funcLitRbrace is the closing brace of the func literal whose body is being visited; a comment past it
+	// on a statement's line labels the literal, not the statement (writeTrailingComment).
+	funcLitRbrace token.Pos
 	// manualConversion mirrors the file entry's flag: this file's destination `.cs` is a hand-owned
 	// manual conversion, so the visit still feeds package-wide state but the emitted text lands in
 	// the non-compiled `.cs.auto` review sibling. Consulted by recordTypeAccessibility, which must
