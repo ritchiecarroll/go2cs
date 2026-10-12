@@ -14,6 +14,10 @@
 package main
 
 import (
+	"go/build"
+	"path/filepath"
+	"regexp"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -107,5 +111,88 @@ func TestAdjacentOneLineMembersWithoutComments(t *testing.T) {
 
 	if blankAbove(t, lines, " Add(") {
 		t.Errorf("a blank line above Add() without -comments")
+	}
+}
+
+const oneLineMembersPositionSource = `package main
+
+import "runtime"
+
+func callerLine() int {
+	_, _, line, _ := runtime.Caller(1)
+	return line
+}
+
+func siteA() int { return callerLine() }
+func siteB() int { return callerLine() }
+func siteC()     {}
+func siteD() int { return siteB() }
+
+func main() {
+	println(siteA(), siteB(), siteD())
+	siteC()
+}
+`
+
+// A one-line member keeps its Go line in the position map: runtime.Caller from inside siteA answers siteA's Go line
+// and from inside siteB answers siteB's (Behavioral/RuntimeCallerFrames, `distinct call sites`). The statement's
+// sentinel is written after the header's `{`, where it marks the NEXT line, the body's; once the body is on the
+// member's line, the next line is the next member, and a trailing sentinel there gave it the line above.
+func TestOneLineMembersKeepTheirGoLines(t *testing.T) {
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module example.com/onelinepos\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(appDir, "main.go"), oneLineMembersPositionSource)
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{
+		goRoot:              goRoot,
+		goPath:              build.Default.GOPATH,
+		go2csPath:           filepath.Join(root, "out"),
+		recurse:             true,
+		targetPlatform:      runtime.GOOS + "/" + runtime.GOARCH,
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+	}
+
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	if err := NewModuleConverter(options).ConvertModule(appDir); err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	outDir := filepath.Join(options.go2csPath, "src", "example.com", "onelinepos")
+	mainCs := readGenerated(t, filepath.Join(outDir, "main.cs"))
+	info := readGenerated(t, filepath.Join(outDir, "package_info.cs"))
+
+	record := regexp.MustCompile(`GoPositionMap\("[^"]*", "main\.cs", "([A-Za-z0-9+/=]*)"\)`).FindStringSubmatch(info)
+
+	if record == nil {
+		t.Fatalf("package_info.cs carries no GoPositionMap record for main.cs:\n%s", info)
+	}
+
+	table := decodePositionTable(t, record[1])
+
+	for _, c := range []struct {
+		fragment string
+		goLine   int
+	}{
+		{" siteA() =>", 10},
+		{" siteB() =>", 11},
+		{" siteC() { }", 12},
+		{" siteD() =>", 13},
+		{"println(siteA(), siteB(), siteD());", 16},
+	} {
+		if got := answeringGoLine(table, csLineContaining(t, mainCs, c.fragment)); got != c.goLine {
+			t.Errorf("%q answers Go line %d, want %d", c.fragment, got, c.goLine)
+		}
 	}
 }
