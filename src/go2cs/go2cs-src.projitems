@@ -76,6 +76,7 @@
     <None Include="$(MSBuildThisFileDirectory)compilerPropertyClass_test.go" />
     <None Include="$(MSBuildThisFileDirectory)compoundShiftGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)commandLineOptions.go" />
+    <None Include="$(MSBuildThisFileDirectory)commentParityUtf8_test.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyAliasDot_test.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyGenericCall_test.go" />
@@ -207,6 +208,16 @@
     <None Include="$(MSBuildThisFileDirectory)initOrderTupleSpec_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internalTestLocalInterfaceStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)interfaceConversion.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\census.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\census_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\corpus_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\cslex.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\golex.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\corpus_baseline.txt" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\planted\bad\plant\plant.cs" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\planted\bad2\plant\plant.cs" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\planted\good\plant\plant.cs" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\planted\goroot\src\plant\plant.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gencorpusrelease\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\genpopulation\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gensourcemeta\main.go" />
