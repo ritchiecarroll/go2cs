@@ -156,3 +156,65 @@ func TestDocCommentsOfSpecsAndTypes(t *testing.T) {
 		}
 	}
 }
+
+// D: Go's blank lines between the specs of a group are kept, before a spec or its doc, and no other
+// blank line is added between them.
+const groupBlankLinesSource = `package main
+
+import "fmt"
+
+const (
+	a1 = 1
+	a2 = 2
+
+	b1 = 3
+
+	// c1 doc.
+	c1 = 4
+	c2 = 5
+)
+
+func main() {
+	var (
+		x1 = 6
+
+		x2 = 7
+	)
+
+	fmt.Println(a1, a2, b1, c1, c2, x1, x2)
+}
+`
+
+func TestGroupBlankLines(t *testing.T) {
+	lines := convertWithComments(t, groupBlankLinesSource)
+
+	for _, c := range []struct {
+		text  string
+		blank bool
+	}{
+		{" a2 => 2", false},
+		{" b1 => 3", true},
+		{"// c1 doc.", true},
+		{" c1 => 4", false},
+		{" c2 => 5", false},
+		{"x2 = 7", true},
+	} {
+		found := false
+
+		for i, line := range lines {
+			if !strings.Contains(line, c.text) {
+				continue
+			}
+
+			found = true
+
+			if got := i > 0 && strings.TrimSpace(lines[i-1]) == ""; got != c.blank {
+				t.Errorf("blank line above %q = %v, want %v", strings.TrimSpace(line), got, c.blank)
+			}
+		}
+
+		if !found {
+			t.Errorf("%q not emitted", c.text)
+		}
+	}
+}
