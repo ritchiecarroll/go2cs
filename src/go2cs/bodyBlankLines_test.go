@@ -224,6 +224,23 @@ func braceComments(v int) int {
 	return n
 }
 
+func emptyAndEnds(v int) int {
+	n := 0
+	if v > 5 {
+		// nothing to do
+	} else {
+		n = 9
+	}
+	switch v {
+	case 1:
+		n = 2
+		// end of case one
+	case 2:
+		n = 3
+	}
+	return n
+}
+
 func typeSwitchBody(v any) {
 	switch t := v.(type) {
 	case string:
@@ -251,6 +268,7 @@ func main() {
 	fmt.Println(defaultInner(1, 1))
 	fmt.Println(defaultThenLabel(1, 1))
 	fmt.Println(braceComments(2))
+	fmt.Println(emptyAndEnds(1))
 	typeSwitchBody(1)
 	selectBody(make(chan int))
 }
@@ -357,8 +375,8 @@ func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
 
 	// A comment above the case label that follows a moved `default:` belongs to that case, not to the
 	// default: holding it with the default wrote it after the whole switch.
-	if next := lineContaining(t, lines, "// above case w") + 1; !strings.Contains(lines[next], "fmt.Sprint(w), 88);") {
-		t.Errorf("the comment above a case after a moved default is not above that case's statement: next line %q", strings.TrimSpace(lines[next]))
+	if next := lineContaining(t, lines, "// above case w") + 1; !strings.Contains(lines[next], "== w)") {
+		t.Errorf("the comment above a case after a moved default is not above that case's header: next line %q", strings.TrimSpace(lines[next]))
 	}
 
 	// Class H: a comment after `{` or after `case X:` on the same line trails that line, and a comment
@@ -371,6 +389,21 @@ func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
 		if line := lines[lineContaining(t, lines, c.comment)]; !strings.Contains(line, c.header) {
 			t.Errorf("%q does not trail %q: %q", c.comment, c.header, strings.TrimSpace(line))
 		}
+	}
+
+	// The rest of class H: a comment above a case label stays above that label's header; a comment
+	// alone in an empty block stays in that block; a comment after a case body's last statement stays
+	// at the end of that body.
+	if next := lineContaining(t, lines, "// above case two") + 1; !strings.Contains(lines[next], "case 2:") {
+		t.Errorf("the comment above a case label is not above its header: next line %q", strings.TrimSpace(lines[next]))
+	}
+
+	if at := lineContaining(t, lines, "// nothing to do"); !strings.Contains(lines[at-1], "if (v > 5)") || !strings.HasPrefix(strings.TrimSpace(lines[at+1]), "}") {
+		t.Errorf("the comment alone in an empty block is not inside it: %q / %q / %q", strings.TrimSpace(lines[at-1]), strings.TrimSpace(lines[at]), strings.TrimSpace(lines[at+1]))
+	}
+
+	if at := lineContaining(t, lines, "// end of case one"); !strings.Contains(lines[at-1], "n = 2;") {
+		t.Errorf("the comment at the end of a case body does not follow its last statement: %q above it", strings.TrimSpace(lines[at-1]))
 	}
 
 	if at := lineContaining(t, lines, "// before the loop's closing brace"); !strings.Contains(lines[at-1], "n += i;") || strings.TrimSpace(lines[at+1]) != "}" {
