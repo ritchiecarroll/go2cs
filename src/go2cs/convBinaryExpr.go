@@ -2066,7 +2066,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 				}
 			}
 
-			return fmt.Sprintf("(%s)(%s%s%s)", binaryTypeName, leftOperand, binaryOp, rightOperand)
+			return fmt.Sprintf("(%s)(%s)", binaryTypeName, v.joinWithOperandComments(binaryExpr, leftOperand, binaryOp, rightOperand))
 		}
 
 		// ARITHMETIC only. When one operand references a *named* untyped numeric constant and the
@@ -2194,7 +2194,7 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 			}
 		}
 
-		return fmt.Sprintf("%s%s%s", leftOperand, binaryOp, rightOperand)
+		return v.joinWithOperandComments(binaryExpr, leftOperand, binaryOp, rightOperand)
 	}
 
 	// Handle start of pattern match expression with "is" keyword. Go's `!=` has no C# pattern
@@ -2322,4 +2322,109 @@ func (v *Visitor) isUntypedConstShift(expr ast.Expr) bool {
 
 	basic, ok := tv.Type.(*types.Basic)
 	return ok && basic.Info()&types.IsUntyped != 0 && basic.Info()&types.IsInteger != 0
+}
+
+// joinWithOperandComments joins a binary expression's operands around its operator, with the comments Go has on
+// the operands (class G, the owner's decision 3) when `-comments` is on: one between the left operand and the
+// operator trails that operand; one between the operator and the right operand leads it on its line; and where Go
+// breaks the line after the operator (always after a line comment) the C# breaks there too, the comment trailing
+// the operator and the right operand on the next line, one level in. A comment is taken only when written here, so
+// an arm that does not join this way leaves it pending, where it was written before.
+func (v *Visitor) joinWithOperandComments(binaryExpr *ast.BinaryExpr, left, op, right string) string {
+	if !v.options.includeComments {
+		return left + op + right
+	}
+
+	if v.file == nil {
+		v.file = v.fset.File(binaryExpr.Pos())
+	}
+
+	pending := func(from, to token.Pos) []token.Pos {
+		var found []token.Pos
+
+		for _, pos := range v.sortedCommentPos {
+			if pos >= to {
+				break
+			}
+
+			if _, ok := v.standAloneComments[pos]; ok && pos > from {
+				found = append(found, pos)
+			}
+		}
+
+		return found
+	}
+
+	take := func(positions []token.Pos) {
+		for _, pos := range positions {
+			delete(v.standAloneComments, pos)
+			v.sortedCommentPos = removeCommentPos(v.sortedCommentPos, pos)
+		}
+	}
+
+	builder := &strings.Builder{}
+	builder.WriteString(left)
+
+	// Between the left operand and the operator only a block comment on the operand's line can stay inline.
+	if trailing := pending(binaryExpr.X.End(), binaryExpr.OpPos); len(trailing) > 0 {
+		inline := true
+
+		for _, pos := range trailing {
+			comment := v.standAloneComments[pos]
+
+			if !strings.HasPrefix(comment, "/*") || strings.Contains(comment, "\n") || v.file.Line(pos) != v.file.Line(binaryExpr.X.End()) {
+				inline = false
+			}
+		}
+
+		if inline {
+			for _, pos := range trailing {
+				builder.WriteString(" ")
+				builder.WriteString(v.standAloneComments[pos])
+			}
+
+			take(trailing)
+		}
+	}
+
+	leading := pending(binaryExpr.OpPos, binaryExpr.Y.Pos())
+
+	if len(leading) == 0 {
+		builder.WriteString(op)
+		builder.WriteString(right)
+
+		return builder.String()
+	}
+
+	for _, pos := range leading {
+		if strings.Contains(v.standAloneComments[pos], "\n") {
+			// a multi-line comment here keeps today's placement
+			builder.WriteString(op)
+			builder.WriteString(right)
+
+			return builder.String()
+		}
+	}
+
+	last := leading[len(leading)-1]
+	breaks := strings.HasPrefix(v.standAloneComments[last], "//") || v.file.Line(binaryExpr.Y.Pos()) > v.file.Line(last)
+
+	builder.WriteString(strings.TrimRight(op, " "))
+
+	for _, pos := range leading {
+		builder.WriteString(" ")
+		builder.WriteString(v.standAloneComments[pos])
+	}
+
+	if breaks {
+		builder.WriteString(v.newline)
+		builder.WriteString(v.indent(v.indentLevel + 1))
+	} else {
+		builder.WriteString(" ")
+	}
+
+	builder.WriteString(right)
+	take(leading)
+
+	return builder.String()
 }
