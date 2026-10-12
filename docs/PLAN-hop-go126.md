@@ -1,7 +1,8 @@
 # PLAN — the Go 1.26 hop (hop C′): go1.24.13 → go1.26.9, one fold, with an attribution checkpoint at 1.25.14
 
-> **STATUS: PROPOSED (the i9, the hop's lead, 2026-10-11).** It awaits COORD's acceptance and the owner
-> hands in §2. It is a campaign plan, so it supplies *this* hop's target, sequencing, census, lane
+> **STATUS: PROPOSED (the i9, the hop's lead, 2026-10-11); O1 and O2 RULED (owner, 2026-10-12).** The
+> rest awaits COORD's acceptance and the remaining owner hands in §2. **H0's trigger: the 1.24.13.7 release
+> record lands** (§1). It is a campaign plan, so it supplies *this* hop's target, sequencing, census, lane
 > proposal and estimates. It supplies **no procedure**. The procedure is
 > [`GoCorpusMigration.md`](GoCorpusMigration.md) (the runbook), referenced by stage and never restated.
 > Where this plan and the runbook disagree, the runbook wins, and the disagreement becomes an in-stage
@@ -55,9 +56,14 @@
 
 **The outgoing final release must ship before H1.** The runbook's fourth ordering requires it, because
 `migrate-gorelease.ps1` resets `<GoBuildNumber>` at the pin stage. 1.24.13.6 was published on
-2026-10-12. The owner's 2026-10-11 priorities say a further 1.24 release may follow if the three harder
-nugetgo modules need converter fixes. **The owner names which 1.24.13.N is the final one (§2 O1). H1
-does not start before it ships.**
+2026-10-12.
+
+**RULED (owner, 2026-10-12; O1): 1.24.13.7 is the FINAL 1.24 release.** It is the next train: comment
+parity, the macOS x509 fix, G's trim fixes and the go-cmp speedup. H1 starts from it.
+
+**H0's trigger: the 1.24.13.7 release record lands.** That covers the publish, the write-once proof
+snapshot and the post-publish smoke. H0's comparands are then captured at that tree, which already
+carries the comment-parity re-baseline below.
 
 **The comment and spacing parity work lands BEFORE the hop** (owner, 2026-10-11 evening; decisions
 ruled 2026-10-12). Its seats re-baseline the behavioral goldens, whitespace only. So **H0's comparands
@@ -92,9 +98,15 @@ needs it (lessons 2, 43):
 ## 2. What the owner's hands are needed for
 
 **For H0 and H1:**
-- **O1 — Name the final 1.24.13.N** (§1). H1 waits for it to ship.
+- **O1 — Name the final 1.24.13.N** (§1). H1 waits for it to ship. **RULED 2026-10-12: 1.24.13.7.**
 - **O2 — Toolchains, side by side under `~/sdk`, verified by `go version` output, never auto-fetched as an
-  install:**
+  install.**
+  - **RULED 2026-10-12 for go1.26.9:** "OK to install 1.26.9 on you and all lanes" (owner to COORD).
+  - **State:** the i7 is DONE (SHA-256 matched against go.dev's release JSON; go1.24.13 untouched). Each
+    other lane installs on its own box, confirms by owner, and records its `go version` output.
+  - **go1.25.14 for the checkpoint is NOT in the ruling's words.** It is still an ask (below).
+
+  The boxes:
   - **go1.26.9 on the i7** and on every box that converts or builds: the i9; G-LAPTOP and **its linux
     arm**; R-LAPTOP and its WSL arm; each cloud lane's container, where the container recipe fetches it.
     G-LAPTOP's linux arm had no 1.24 root until it was provisioned earlier this year (G), and it carries
@@ -254,7 +266,7 @@ GOROOTs' source by name.
 
 | Stage | What this hop does beyond the runbook text | Lanes (proposal, §7) | Lane-days (ESTIMATE) |
 |:--|:--|:--|:--|
-| **Readiness** | A3, A7, A8, A9 and A14 landed and red-proved; the retired-marker guard; host records; O2–O4 asked now | R (A3, A7, A9), i9 (A8, guard), C1 (A14); each lane its host | 8–14 |
+| **Readiness** | A3, A7, A8, A9 and A14 landed and red-proved; the retired-marker guard; host records; O2–O4 asked now | **P2 (A3, A7, A8, A9: dispatched 2026-10-12, `claude/p2-hop-readiness-a3-a9`)**, i9 (guard), C1 (A14); each lane its host | 8–14 |
 | **H0** ⟲ | Seeded old-release `.cs.auto` baseline; package census; roster snapshot; the outgoing three-target manifest; the behavioral failing set by name; each box's bare `go version`. Commit every unbanked reading (lesson 48) | COORD/i7 (behavioral, manifests), i9 (census, `.auto`) | 3–5 |
 | **H1 + H2** (one pair) | go1.26.9 installed (O2); the `go` directive; x/tools and x/mod in their own commit (O6, A12), **gated by CNR byte-identical after the bump**, a full seeded corpus reconvert with hours of wall; the converter `go test` suite (about 40 min a run on G-LAPTOP); `go vet` under the new directive (clean today at 1.26.9, RECON X.7); GODEBUG defaults read against the test host (1.26 adds the heap-randomization, Green Tea and crypto-randomness classes; 1.25's `containermaxprocs`, `updatemaxprocs`, `decoratemappings`, `tlssha1` and `x509sha256skid`) | G (the converter half, 1.5–3), COORD (the pin pair) | 3–5 |
 | **H3** ⟲ | `population-go1.26.9.txt` by two routes; relocations by body; new IDs → O5; `//go:embed`, linker-synthesized linknames and new syntax, each with a probe (lesson 54) | C2 (genpopulation), i9 (independent route) | 2–3 |
@@ -387,3 +399,11 @@ measurements; RECON X.7 on `claude/i9-go125-recon` `dc0e159ccf`):
   last train) is added. The instrument states were re-read at master `7092f7126e`, unchanged.
 - **§4 note.** The two-leg H6 census (step 6) will show `runtime`'s 1.25 leg as already heavy, as G
   measured, before Green Tea's 1.26 leg.
+
+**2026-10-12 (later) — O1 and O2 RULED** (owner, relayed by COORD, ledger 11:59):
+- **O1:** 1.24.13.7 is the final 1.24 release, and H1 starts from it.
+- **O2:** go1.26.9 may be installed on every lane's box; the i7 is done.
+- **The H0 trigger is named:** the 1.24.13.7 release record lands.
+- **go1.25.14** (the §4 checkpoint) is outside the ruling's words and stays an ask.
+- **Readiness instruments A3, A7, A8 and A9 moved to P2** (dispatched 2026-10-12).
+- **Status:** PROPOSED, with O1 and O2 RULED.
