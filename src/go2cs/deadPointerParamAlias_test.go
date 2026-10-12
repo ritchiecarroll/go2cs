@@ -125,3 +125,24 @@ func main() {
 		}
 	}
 }
+
+// csharpCodeWithoutComments removes comments and nothing else: a `//` or `/*` inside each literal form
+// the converter emits is code, so a value use after it is still found.
+func TestCSharpCodeWithoutComments(t *testing.T) {
+	for _, test := range []struct{ text, want string }{
+		{"a(p); // p.x\nb();", "a(p);  \nb();"},
+		{"x = /* p */ y;", "x =   y;"},
+		{`s = "http://h/" + p; // q`, `s = "http://h/" + p;  `},
+		{`s = "a\"//" + p;`, `s = "a\"//" + p;`},
+		{`s = @"a\" + p; // q`, `s = @"a\" + p;  `},
+		{`s = @"x""//""y" + p;`, `s = @"x""//""y" + p;`},
+		{`s = $@"{p}//" + q;`, `s = $@"{p}//" + q;`},
+		{"s = \"\"\"\n// raw\n\"\"\" + p;", "s = \"\"\"\n// raw\n\"\"\" + p;"},
+		{`c = '/'; // q`, `c = '/';  `},
+		{`c = '\''; d = p;`, `c = '\''; d = p;`},
+	} {
+		if got := csharpCodeWithoutComments(test.text); got != test.want {
+			t.Errorf("csharpCodeWithoutComments(%q) = %q, want %q", test.text, got, test.want)
+		}
+	}
+}

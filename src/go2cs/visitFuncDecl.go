@@ -715,6 +715,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	// actually referenced — a param used only through its box gets no alias; see below). Captured
 	// from the output builder across the body visit; the signature written above is excluded.
 	bodyText := ""
+	bodyCode := "" // bodyText without its comments, for the dead-alias scan
 
 	if funcDecl.Body != nil {
 		blockContext.format.useNewLine = len(constraints) > 0
@@ -979,9 +980,14 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 				// though Go never touches the pointee (syscall's `writeFile(…, overlapped *Overlapped)`
 				// called with a nil overlapped, used only as `unsafe.Pointer(overlapped)`). Skipping an
 				// unreferenced alias is behavior-preserving and removes the spurious nil deref. The
-				// scan errs toward KEEPING the alias — a coincidental match in a field selector,
-				// string, or comment — so a genuinely live value alias is never dropped (no CS0103).
-				if !bodyReferencesIdentAsValue(bodyText, getSanitizedIdentifier(analyzedName)) {
+				// scan errs toward KEEPING the alias — a coincidental match in a field selector or
+				// string — so a genuinely live value alias is never dropped (no CS0103). Comments are
+				// not code: the scan reads the body without them, so `-comments` never changes it.
+				if bodyCode == "" {
+					bodyCode = csharpCodeWithoutComments(bodyText)
+				}
+
+				if !bodyReferencesIdentAsValue(bodyCode, getSanitizedIdentifier(analyzedName)) {
 					// The param still needs the box rename (`Ꮡ<name>`) the body's uses reference —
 					// force the signature rebuild even if this leaves implicitPointers empty.
 					skippedDeadPointerAlias = true
@@ -1610,6 +1616,81 @@ func (v *Visitor) isDerefdPointerParamIdent(ident *ast.Ident) bool {
 // and namable is excluded: a C# NAMED-ARGUMENT LABEL (see isNamedArgumentLabel). The alias
 // dereferences the box, so a dead one turns a legitimately nil argument into an entry-time
 // NilPointerDereference the Go never performs.
+// csharpCodeWithoutComments returns text with each C# comment replaced by one space. It lexes the
+// literals the converter emits, so a `//` or `/*` inside one is code: regular and interpolated strings
+// ("…", backslash escapes), verbatim strings (@"…", $@"…", @$"…", doubled-quote escapes), raw strings
+// ("""…""", closed by as many quotes as opened them) and character literals.
+func csharpCodeWithoutComments(text string) string {
+	var code strings.Builder
+
+	for index := 0; index < len(text); {
+		remaining := text[index:]
+		end := index + 1
+
+		switch {
+		case strings.HasPrefix(remaining, "//"):
+			if newline := strings.IndexByte(remaining, '\n'); newline >= 0 {
+				index += newline
+			} else {
+				index = len(text)
+			}
+
+			code.WriteByte(' ')
+			continue
+		case strings.HasPrefix(remaining, "/*"):
+			if close := strings.Index(remaining[2:], "*/"); close >= 0 {
+				index += 2 + close + 2
+			} else {
+				index = len(text)
+			}
+
+			code.WriteByte(' ')
+			continue
+		case strings.HasPrefix(remaining, `"""`):
+			quotes := len(remaining) - len(strings.TrimLeft(remaining, `"`))
+
+			if close := strings.Index(remaining[quotes:], strings.Repeat(`"`, quotes)); close >= 0 {
+				end = index + quotes + close + quotes
+			} else {
+				end = len(text)
+			}
+		case strings.HasPrefix(remaining, `@"`), strings.HasPrefix(remaining, `$@"`), strings.HasPrefix(remaining, `@$"`):
+			end = index + strings.IndexByte(remaining, '"') + 1
+
+			for end < len(text) {
+				if text[end] == '"' {
+					if end+1 < len(text) && text[end+1] == '"' {
+						end += 2
+						continue
+					}
+
+					end++
+					break
+				}
+
+				end++
+			}
+		case remaining[0] == '"' || remaining[0] == '\'':
+			quote := remaining[0]
+
+			for end < len(text) && text[end] != quote && text[end] != '\n' {
+				if text[end] == '\\' {
+					end++
+				}
+
+				end++
+			}
+
+			end = min(end+1, len(text))
+		}
+
+		code.WriteString(text[index:end])
+		index = end
+	}
+
+	return code.String()
+}
+
 func bodyReferencesIdentAsValue(bodyText, name string) bool {
 	if name == "" {
 		return false
