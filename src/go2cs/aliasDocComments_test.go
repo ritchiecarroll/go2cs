@@ -96,3 +96,36 @@ func TestAliasDocSetApartFromTheFileHeader(t *testing.T) {
 		t.Logf("emitted:\n%s", strings.Join(lines, "\n"))
 	}
 }
+
+const aliasOfStructDocSource = `// Copyright 2026 The Example Authors.
+
+// Package main is a sample.
+package main
+
+import "fmt"
+
+// Point is an alias of an anonymous struct, whose doc the lifted struct takes.
+type Point = struct{ X, Y int }
+
+func main() {
+	fmt.Println(Point{1, 2})
+}
+`
+
+// An alias of an anonymous struct lifts the struct, which takes the doc; the using line then has no doc of its own
+// to write and must not leave a bare blank line where it would have gone.
+func TestAliasOfStructLeavesNoBareBlankLine(t *testing.T) {
+	lines := convertWithComments(t, aliasOfStructDocSource)
+
+	for i := 1; i < len(lines); i++ {
+		if strings.TrimSpace(lines[i]) == "" && strings.TrimSpace(lines[i-1]) == "" {
+			t.Errorf("two blank lines in a row at line %d", i+1)
+			t.Logf("emitted:\n%s", strings.Join(lines, "\n"))
+			break
+		}
+	}
+
+	if got := strings.Count(strings.Join(lines, "\n"), "Point is an alias of an anonymous struct"); got != 1 {
+		t.Errorf("the alias's doc is written %d times, want 1", got)
+	}
+}
