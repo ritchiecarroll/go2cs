@@ -394,7 +394,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 			v.writeOutput("%s", boxDecl)
 		}
 
-		v.visitStatementList(comClause.Body)
+		v.visitStatementList(comClause.Body, comClause.Colon)
 
 		v.outputBuilder.WriteString(v.newline)
 

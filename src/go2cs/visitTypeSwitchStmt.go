@@ -174,7 +174,7 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 				v.outputBuilder.WriteString(fmt.Sprintf(" %s = %s;", targetIdent, boundExpr))
 			}
 
-			v.visitStatementList(caseClause.Body)
+			v.visitStatementList(caseClause.Body, caseClause.Colon)
 
 			v.outputBuilder.WriteString(v.newline)
 
@@ -371,7 +371,7 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 					// inherit a STALE lastStatementWasReturn from the prior case (CS0163).
 					v.lastStatementWasReturn = false
 
-					v.visitStatementList(caseClause.Body)
+					v.visitStatementList(caseClause.Body, caseClause.Colon)
 
 					v.outputBuilder.WriteString(v.newline)
 
@@ -433,7 +433,7 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 					// below — the empty C# case then falls through (CS0163).
 					v.lastStatementWasReturn = false
 
-					v.visitStatementList(caseClause.Body)
+					v.visitStatementList(caseClause.Body, caseClause.Colon)
 
 					v.outputBuilder.WriteString(v.newline)
 

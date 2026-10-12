@@ -103,6 +103,7 @@ func localType() int {
 func caseBody(v int) {
 	switch v {
 	case 1:
+		// opens the case body
 		fmt.Println("case one")
 
 		fmt.Println("after the case gap")
@@ -194,12 +195,17 @@ func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
 		{"nint d = c;", false, "a three-line comment gains no blank line"},
 		{"nint w = v * 2;", true, "a blank line after a lowered switch"},
 		{"afterTheCaseGapˢ);", true, "a blank line inside a case body"},
+		{"// opens the case body", false, "a comment leading a case body stays above its first statement"},
 		{"afterTheTypeSwitchGapˢ);", true, "a blank line inside a type-switch case body"},
 		{"afterTheSelectGapˢ);", true, "a blank line inside a select case body"},
 	} {
 		if got := blankAbove(t, lines, c.line); got != c.blank {
 			t.Errorf("%s: blank line above %q = %v, want %v", c.why, c.line, got, c.blank)
 		}
+	}
+
+	if next := lineContaining(t, lines, "// opens the case body") + 1; !strings.Contains(lines[next], "caseOneˢ);") {
+		t.Errorf("the comment leading a case body is not directly above its first statement: next line %q", strings.TrimSpace(lines[next]))
 	}
 
 	// gofmt never leaves two blank lines in a row, a blank line right after `{` or one right before `}`,

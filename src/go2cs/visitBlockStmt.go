@@ -94,17 +94,56 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtCont
 }
 
 // visitStatementList converts the statements of a case, type-switch case or select case body, keeping
-// Go's blank lines between them as a block body does (writeStatementGap).
-func (v *Visitor) visitStatementList(stmts []ast.Stmt) {
+// Go's blank lines between them as a block body does (writeStatementGap). colon is the clause's `:`.
+func (v *Visitor) visitStatementList(stmts []ast.Stmt, colon token.Pos) {
 	for i, stmt := range stmts {
 		gap := -1
 
-		if i > 0 {
+		if i == 0 {
+			v.writeLeadingBodyComments(colon, stmt)
+		} else {
 			gap = v.writeStatementGap(stmts[i-1], stmt)
 		}
 
 		v.visitListStmt(stmt)
 		v.dropEmptyGap(gap)
+	}
+}
+
+// writeLeadingBodyComments writes the standalone comments between a clause's `:` line and its first
+// statement above that statement, as visitBlockStmt does for a block's first statement. Without it they
+// stayed pending and writeStatementGap wrote them after the first statement. A comment on the `:` line
+// itself (trailing the case label) is left where it was: that placement is class H's.
+func (v *Visitor) writeLeadingBodyComments(colon token.Pos, first ast.Stmt) {
+	if !v.options.includeComments || !colon.IsValid() {
+		return
+	}
+
+	if v.file == nil {
+		v.file = v.fset.File(first.Pos())
+	}
+
+	prefix := v.newline + v.indent(v.indentLevel)
+	colonLine := v.file.Line(colon)
+
+	var leading []token.Pos
+
+	for _, pos := range v.sortedCommentPos {
+		if pos >= first.Pos() {
+			break
+		}
+
+		if _, found := v.standAloneComments[pos]; found && pos > colon && v.file.Line(pos) > colonLine {
+			leading = append(leading, pos)
+		}
+	}
+
+	for _, pos := range leading {
+		if _, found := v.standAloneComments[pos]; !found {
+			continue
+		}
+
+		v.writeStandAloneCommentString(v.outputBuilder, pos, nil, prefix)
 	}
 }
 
