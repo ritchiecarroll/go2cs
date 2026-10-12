@@ -527,7 +527,11 @@ func analyze(p pair, r *results, verbose bool) {
 			re = regexp.MustCompile(q + `\s*(=>|=|;|,)`)
 		}
 		for k := cursor; k < len(declLines); k++ {
-			if re.MatchString(cs.codeText[declLines[k]-1]) {
+			code := cs.codeText[declLines[k]-1]
+			if kind == "func" {
+				code = declHead(code)
+			}
+			if re.MatchString(code) {
 				cursor = k + 1
 				return declLines[k]
 			}
@@ -658,6 +662,11 @@ func analyze(p pair, r *results, verbose bool) {
 		if fd, ok := d.(*ast.FuncDecl); ok && fd.Body != nil {
 			lb := g.fset.Position(fd.Body.Lbrace).Line
 			rb := g.fset.Position(fd.Body.Rbrace).Line
+			// A one-line Go function written as a one-line member (decision 5) has no body lines on either side.
+			if lb == rb && strings.Contains(cs.codeText[cl-1], "=>") {
+				r.body.add("one-line-member", 1)
+				continue
+			}
 			cOpen, cEnd, okb := csBodyRange(cs, cl)
 			if !okb {
 				r.body.add("cs-body-not-found", 1)
@@ -813,7 +822,18 @@ var preludeRe = regexp.MustCompile(`(DerefOrNull\(\);|heap<.*>\(out var \S+\);|=
 var csDeclRe = regexp.MustCompile(`^(\[[^\]]*\]\s*)*(public|internal|private|protected|partial|static|readonly|unsafe|const|ref|file|new)\b`)
 
 func isCSDecl(cs *csFile, ln int) bool {
-	return csDeclRe.MatchString(cs.codeText[ln-1]) && !strings.HasPrefix(cs.codeText[ln-1], "partial class ") && !strings.Contains(cs.codeText[ln-1], "_package")
+	head := declHead(cs.codeText[ln-1])
+	return csDeclRe.MatchString(head) && !strings.HasPrefix(head, "partial class ") && !strings.Contains(head, "_package")
+}
+
+// declHead is a declaration line's text ahead of its expression body: a one-line member's expression
+// (`Is(...) => AreEqual(err, context_package.DeadlineExceeded);`) names other packages and functions, and none of
+// them is the declaration.
+func declHead(code string) string {
+	if i := strings.Index(code, "=>"); i >= 0 {
+		return code[:i]
+	}
+	return code
 }
 
 // csBodyRange returns the lines of the brace body that opens on or after line ln: its opening and closing lines.

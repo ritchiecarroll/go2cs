@@ -64,4 +64,4 @@ top:unmapped:func	39
 top:unmapped:type-alias	41
 top:unmapped:type-other	69
 top:unmapped:type-struct	1
-top:unmapped:var	6
+top:unmapped:var	3
