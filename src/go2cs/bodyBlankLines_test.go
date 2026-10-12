@@ -125,6 +125,26 @@ func defaultFirst(v, w int) int {
 	return n
 }
 
+func add(s string, k int) int {
+	return len(s) + k
+}
+
+func emptyClause(v, w string) int {
+	n := 0
+	switch v {
+	case w:
+		// empty clause body
+	case "x":
+		n = add(w, 33)
+	case "y":
+		n = 44
+	// above case z
+	case "z":
+		n = add(w, 55)
+	}
+	return n
+}
+
 func typeSwitchBody(v any) {
 	switch t := v.(type) {
 	case string:
@@ -148,6 +168,7 @@ func main() {
 	fmt.Println(steps(), commentLed(), commentGroups(), commentThenGap(), threeLineComment(), afterSwitch(2), deferredReturn(), localType())
 	caseBody(1)
 	fmt.Println(defaultFirst(1, 1))
+	fmt.Println(emptyClause("x", "w"))
 	typeSwitchBody(1)
 	selectBody(make(chan int))
 }
@@ -227,6 +248,25 @@ func TestBodyBlankLinesKeptUnderComments(t *testing.T) {
 	for _, pair := range [][2]string{{"// default body first", "n = 22;"}, {"// case one first", "n = 11;"}} {
 		if next := lineContaining(t, lines, pair[0]) + 1; !strings.Contains(lines[next], pair[1]) {
 			t.Errorf("%q is not directly above %q: next line %q", pair[0], pair[1], strings.TrimSpace(lines[next]))
+		}
+	}
+
+	// A comment that is an empty clause's whole body stays in that clause's block, and a comment above
+	// a case label is written above its clause's first statement; neither may wait for the next flush,
+	// which writes it inside that statement's argument list.
+	if at := lineContaining(t, lines, "// empty clause body"); !strings.HasSuffix(strings.TrimSpace(lines[at-1]), "{") || !strings.HasPrefix(strings.TrimSpace(lines[at+1]), "}") {
+		t.Errorf("the comment that is an empty clause's body is not inside its block: %q / %q / %q", strings.TrimSpace(lines[at-1]), strings.TrimSpace(lines[at]), strings.TrimSpace(lines[at+1]))
+	}
+
+	for _, pair := range [][2]string{{"// above case z", "add(w, 55)"}} {
+		if next := lineContaining(t, lines, pair[0]) + 1; !strings.Contains(lines[next], pair[1]) {
+			t.Errorf("%q is not directly above %q: next line %q", pair[0], pair[1], strings.TrimSpace(lines[next]))
+		}
+	}
+
+	for _, call := range []string{"add(w, 33)", "add(w, 55)"} {
+		if line := lines[lineContaining(t, lines, call)]; strings.Contains(line, "//") {
+			t.Errorf("a comment was written inside %q: %q", call, strings.TrimSpace(line))
 		}
 	}
 
