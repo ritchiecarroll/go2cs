@@ -75,6 +75,7 @@
     <None Include="$(MSBuildThisFileDirectory)compilerIntrinsic.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerIntrinsic_test.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerPropertyClass_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)compositeLitComments_test.go" />
     <None Include="$(MSBuildThisFileDirectory)compoundShiftGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)commandLineOptions.go" />
     <None Include="$(MSBuildThisFileDirectory)commentParityUtf8_test.go" />
