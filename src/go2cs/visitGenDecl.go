@@ -21,7 +21,7 @@ func (v *Visitor) visitGenDecl(genDecl *ast.GenDecl) {
 		case *ast.ImportSpec:
 			v.visitImportSpec(specType, genDecl.Doc)
 		case *ast.ValueSpec:
-			v.visitValueSpec(specType, specDoc(genDecl, index, specType.Doc), genDecl.Tok)
+			v.visitValueSpec(specType, specDoc(genDecl, index, specType.Doc), genDecl.Doc, genDecl.Tok)
 			hasValueSpec = true
 		case *ast.TypeSpec:
 			v.visitTypeSpec(specType, specDoc(genDecl, index, specType.Doc))
