@@ -546,6 +546,9 @@ public class TypeGenerator : ISourceGenerator
                         continue;
                 }
 
+                // Trim: the type's Go methods stay visible to golib's method-set scan while it can be boxed (MethodSetKeep).
+                generatedSource = MethodSetKeep.OnToString(generatedSource, semanticModel.GetDeclaredSymbol(targetSyntax) as INamedTypeSymbol);
+
                 // Add the source code to the compilation
                 context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.g.cs")), generatedSource);
             }
