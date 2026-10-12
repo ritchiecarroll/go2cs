@@ -36,6 +36,12 @@ var table = [...]int{
 	5, 6, // last row
 }
 
+// steps is a package-level table of one-line funcs, each labeled after its closing brace.
+var steps = []func(int) int{
+	func(x int) int { return x + 1 }, // add one
+	func(x int) int { return x * 2 }, // double
+}
+
 type pair struct{ a, b int }
 
 func main() {
@@ -50,7 +56,7 @@ func main() {
 		a: 1, // field a
 		b: 2, // field b
 	}
-	fmt.Println(table, local, p,
+	fmt.Println(table, local, p, steps[0](1),
 		len(local), // the length
 		cap(local))
 }
@@ -78,6 +84,16 @@ func TestCompositeLitCommentsKeepGoPlacement(t *testing.T) {
 
 		if blankBelow(lines, c[0]) {
 			t.Errorf("a blank line follows %q; Go has none", c[0])
+		}
+	}
+
+	// A label after a one-line func's closing brace trails the element, not the func's own statement:
+	// the func keeps its expression body.
+	for _, c := range [][2]string{{"// add one", "x + 1,"}, {"// double", "x * 2 //"}} {
+		line := strings.TrimSpace(lines[lineContaining(t, lines, c[0])])
+
+		if !strings.Contains(line, "=> "+c[1]) {
+			t.Errorf("%q does not trail its func element `=> %s`: the line reads %q", c[0], c[1], line)
 		}
 	}
 
