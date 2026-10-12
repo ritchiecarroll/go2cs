@@ -27,7 +27,8 @@ import (
 // one-line function Go writes on its own is unchanged.
 //
 // The collapse rewrites the member's finished text, so it keeps every position sentinel the text carries: the
-// statement's sentinel moves onto the member's line, which is the Go line both were written for.
+// statement's sentinel moves ahead of the member's body, onto the member's line, which is the Go line both were
+// written for.
 
 // oneLineRunMap maps each function of a file that Go writes on one line, directly next to another such function, to
 // the one-line function directly above it (nil for the first of a run).
@@ -153,18 +154,20 @@ func (v *Visitor) collapseOneLineMember(funcDecl *ast.FuncDecl, memberStart int,
 		return
 	}
 
-	// The body's statement sentinel is written after the header's `{`; it stays at the end of the line.
+	// The body's statement sentinel is written after the header's `{`, where a sentinel with nothing after it marks
+	// the NEXT line. Collapsed, that line is the next member's, so the sentinel moves ahead of the member's body and
+	// marks the member's own line, the Go line it was written for.
 	brace := strings.LastIndex(lines[header], " {")
-	signature, trailing := lines[header][:brace], lines[header][brace+len(" {"):]
+	signature, sentinels := lines[header][:brace], lines[header][brace+len(" {"):]
 
-	if stripPositionSentinels(trailing) != "" {
+	if stripPositionSentinels(sentinels) != "" {
 		return
 	}
 
-	member := signature + " { }" + trailing
+	member := signature + " " + sentinels + "{ }"
 
 	if kind != "empty" {
-		sentinels, statement := splitLeadingSentinels(lines[closing-1])
+		bodySentinels, statement := splitLeadingSentinels(lines[closing-1])
 
 		if kind == "return" {
 			if !strings.HasPrefix(statement, "return ") {
@@ -184,7 +187,7 @@ func (v *Visitor) collapseOneLineMember(funcDecl *ast.FuncDecl, memberStart int,
 			return
 		}
 
-		member = signature + " => " + sentinels + statement + trailing
+		member = signature + " => " + sentinels + bodySentinels + statement
 	}
 
 	collapsed := append(append(lines[:header:header], member), lines[closing+1:]...)
