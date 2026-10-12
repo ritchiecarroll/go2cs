@@ -130,6 +130,17 @@ Check '-BehaviorProofDir and -UnvalidatedReason are exclusive' ((Mode @{ Behavio
 Check 'an unvalidated module is never a release' ((Mode @{ UnvalidatedReason = 'r'; Release = $true; ModuleHasGoTests = $false }).Reason -like '*never packed as a release*') 'not refused'
 Check 'a release with no proof is refused, and names the behavioral proof for a module with no Go tests' ((Mode @{ Release = $true; ModuleHasGoTests = $false }).Reason -like '*-BehaviorProofDir*') 'not refused by name'
 
+Write-Host 'a module WITH Go tests: hosted sample rows BESIDE the test proof, never in its place (COORD ruling 2026-10-12)'
+$both = Mode @{ ValidationDir = 'v'; BehaviorProofDir = 'b'; ModuleHasGoTests = $true; Release = $true }
+Check 'rows beside -ValidationDir: the test proof stays the validation, the rows are additional' ($both.Mode -ceq 'validated' -and $both.SampleRows -and -not $both.Reason) "got: $($both | Out-String)"
+$alone = Mode @{ ValidationDir = 'v'; ModuleHasGoTests = $true; Release = $true }
+Check '-ValidationDir alone is exactly today''s pack: no sample rows owed' ($alone.Mode -ceq 'validated' -and -not $alone.SampleRows -and -not $alone.Reason) "got: $($alone | Out-String)"
+Check 'rows alone, for a module with Go tests, are refused and name -ValidationDir' ((Mode @{ BehaviorProofDir = 'b'; ModuleHasGoTests = $true; Release = $true }).Reason -like '*has Go tests*-ValidationDir*') 'not refused by name'
+$section = New-NugetgoSampleBehaviorSection -ModulePath $module -GoVersion 'v1.1.0' -Rows (Rows)
+Check 'the sample section is a level-2 heading under the test comparison' ("$section" -match '(?m)^## Sample behavior on 4 RIDs$') "got: $(("$section" -split "`n")[0])"
+Check 'it says the rows are in addition to the test comparison, and never that there are no tests' ("$section" -like '*in addition to the test comparison*' -and "$section" -notlike '*not a test comparison*' -and "$section" -notlike '*no Go tests*') "got:`n$section"
+Check 'one table row per RID' (@(("$section" -split "`n") | Where-Object { $_ -match '^\| (win-x64|linux-x64|osx-x64|osx-arm64) \|' }).Count -eq 4) "got:`n$section"
+
 Write-Host 'a row travels as an annotation (C1: annotations come through the API; artifacts and summaries are blob-served)'
 $rowText = [System.IO.File]::ReadAllText((Write-Row 'osx-arm64'))
 $helper = Join-Path $PSScriptRoot '../../../.github/annotate-summary.ps1'

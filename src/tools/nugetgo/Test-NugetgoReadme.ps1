@@ -128,6 +128,14 @@ $behaviorReadme = New-NugetgoPackageReadme @behaviorArgs
 Check 'a behavioral proof says so in its Tests badge, with its RID count (COORD ruling 2026-10-12)' (
     $behaviorReadme.Contains('[![Tests](https://img.shields.io/badge/Tests-no_Go_tests,_behavior_on_4_RIDs-blue?logo=go)](https://github.com/example/mod-cs/blob/nuget-1.2.3/VALIDATION.md)')) "got: $(@($behaviorReadme -split "`n" | Where-Object { $_ -like '*Tests*' }) -join ' | ')"
 Check 'a behavioral proof states no test counts' (-not $behaviorReadme.Contains('matched')) 'a matched count'
+$sampleArgs = @{} + $behaviorArgs; $sampleArgs.Remove('BehaviorRids'); $sampleArgs.Matched = 40; $sampleArgs.Disclosed = 1; $sampleArgs.SampleRids = 4
+$sampleReadme = New-NugetgoPackageReadme @sampleArgs
+$testsBadge = '[![Tests](https://img.shields.io/badge/Tests-40_matched_%2F_1_disclosed-brightgreen?logo=go)](https://github.com/example/mod-cs/blob/nuget-1.2.3/VALIDATION.md)'
+$sampleBadge = '[![Sample behavior](https://img.shields.io/badge/Sample_behavior-4_RIDs-blue?logo=go)](https://github.com/example/mod-cs/blob/nuget-1.2.3/VALIDATION.md)'
+Check 'a tested module with hosted rows keeps its Tests badge and gains a Sample behavior badge right after it (COORD ruling 2026-10-12)' (
+    $sampleReadme.Contains("$testsBadge $sampleBadge")) "got: $(@($sampleReadme -split "`n" | Where-Object { $_ -like '*Tests*' }) -join ' | ')"
+$noSampleArgs = @{} + $sampleArgs; $noSampleArgs.Remove('SampleRids')
+Check 'without rows there is no Sample behavior badge' (-not (New-NugetgoPackageReadme @noSampleArgs).Contains('Sample_behavior')) 'a sample badge'
 
 Write-Host 'the seeded README: one fence at the top, the title and synopsis outside it (COORD ruling 2026-10-10)'
 $B = '[//]: # (nugetgo:generated:begin)'

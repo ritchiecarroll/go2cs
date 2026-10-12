@@ -217,4 +217,7 @@ function New-NugetgoBehaviorRowText {
     "# nugetgo behavioral proof row`n" + ((@($Fields.Keys) | ForEach-Object { "${_}: $($Fields[$_])" }) -join "`n") + "`n"
 }
 
-Export-ModuleMember -Function Get-NugetgoBehaviorRowKeys, Read-NugetgoBehaviorRow, Test-NugetgoBehaviorRows, New-NugetgoBehaviorPage, Test-NugetgoModuleHasGoTests, Get-NugetgoPackedRidAssemblies, Get-NugetgoProofMode, ConvertTo-NugetgoRowAnnotationText, ConvertFrom-NugetgoRowAnnotations, Get-NugetgoRowHost, New-NugetgoBehaviorRowText
+# RED STUB (sample rows beside the test proof): unmet.
+function New-NugetgoSampleBehaviorSection { param([string]$ModulePath, [string]$GoVersion, $Rows) '' }
+
+Export-ModuleMember -Function Get-NugetgoBehaviorRowKeys, Read-NugetgoBehaviorRow, Test-NugetgoBehaviorRows, New-NugetgoBehaviorPage, Test-NugetgoModuleHasGoTests, Get-NugetgoPackedRidAssemblies, Get-NugetgoProofMode, ConvertTo-NugetgoRowAnnotationText, ConvertFrom-NugetgoRowAnnotations, Get-NugetgoRowHost, New-NugetgoBehaviorRowText, New-NugetgoSampleBehaviorSection
