@@ -129,13 +129,16 @@ function New-NugetgoGeneratedBlock {
     $tests = if ($Unvalidated) { New-NugetgoBadge 'Tests' 'Tests' 'not validated' 'orange' 'go' "$repo/blob/$RepositoryTag/VALIDATION.md" }
              elseif ($BehaviorRids -gt 0) { New-NugetgoBadge 'Tests' 'Tests' "no Go tests, behavior on $BehaviorRids RIDs" 'blue' 'go' "$repo/blob/$RepositoryTag/VALIDATION.md" }
              else { New-NugetgoBadge 'Tests' 'Tests' "$Matched matched / $Disclosed disclosed" 'brightgreen' 'go' "$repo/blob/$RepositoryTag/VALIDATION.md" }
+    # A module with Go tests may also carry hosted sample rows (COORD ruling 2026-10-12): a second badge right after the
+    # Tests badge, never in its place.
+    $sample = if ($SampleRids -gt 0) { New-NugetgoBadge 'Sample behavior' 'Sample behavior' "$SampleRids RIDs" 'blue' 'go' "$repo/blob/$RepositoryTag/VALIDATION.md" } else { '' }
     $source = New-NugetgoBadge 'C# Source' 'C# Source' "@$PackageVersion" $script:DotnetPurple 'dotnet' "$repo/tree/$RepositoryTag"
     $module = New-NugetgoBadge 'Go module' 'Go module' "@$goTag" $script:GoBlue 'go' "https://pkg.go.dev/$ModulePath@$goTag"
     $release = New-NugetgoBadge 'go2cs' 'go2cs' "@$ClosureVersion" $script:DotnetPurple 'dotnet' "$script:Go2csRepository/tree/nuget-$ClosureVersion"
 
     $blocks = New-Object System.Collections.Generic.List[string]
     $blocks.Add("> $callout")
-    $blocks.Add("$tests $source\`n$module $release")
+    $blocks.Add("$tests $(if ($sample) { "$sample " })$source\`n$module $release")
     $blocks.Add("Converted from $moduleLink source; licensed under $LicenseSpdx $([char]0x2014) see [$LicenseName]($repo/blob/$RepositoryTag/$LicenseName).")
     if ($DefaultIcon) { $blocks.Add($script:ArtworkLine) }
     $blocks -join "`n`n"

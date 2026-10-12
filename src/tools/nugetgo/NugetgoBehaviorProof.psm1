@@ -67,10 +67,18 @@ function Test-NugetgoBehaviorRows {
         if ($row.'outputs-equal' -cne 'true' -or $row.'go-output' -cne $row.'dotnet-output') { $reasons.Add("[$rid] dotnet run did not print what go run printed (go $($row.'go-output'), dotnet $($row.'dotnet-output'))") }
         $packed = $Assemblies[$rid]
         if ($null -eq $packed) { $reasons.Add("[$rid] the package carries no assembly for $rid"); continue }
-        if ([string]$row.assembly -notmatch '^(?<name>\S+) (?<sha>sha256-[0-9a-f]{64})$') { $reasons.Add("[$rid] the row's assembly '$($row.assembly)' is not '<file> sha256-<hex>'"); continue }
-        $name = $Matches['name']; $sha = $Matches['sha']
-        if (-not $packed.ContainsKey($name)) { $reasons.Add("[$rid] the row ran $name, which the package does not carry for $rid") }
-        elseif ((Get-NugetgoSha256 $packed[$name]) -cne $sha) { $reasons.Add("[$rid] the row ran $name at $sha, which is not the packed bytes for $rid ($(Get-NugetgoSha256 $packed[$name]))") }
+        # One "<file> sha256-<hex>" entry per assembly, joined by "; ": a module of several packages binds them all.
+        $ran = @{}
+        $malformed = @([string]$row.assembly -split '; ' | Where-Object { $_ -notmatch '^\S+ sha256-[0-9a-f]{64}$' })
+        if ($malformed.Count) { $reasons.Add("[$rid] the row's assembly '$($row.assembly)' is not '<file> sha256-<hex>' entries joined by '; '"); continue }
+        foreach ($entry in [string]$row.assembly -split '; ') { $name, $sha = $entry -split ' ', 2; $ran[$name] = $sha }
+        foreach ($name in @($ran.Keys | Sort-Object)) {
+            if (-not $packed.ContainsKey($name)) { $reasons.Add("[$rid] the row ran $name, which the package does not carry for $rid") }
+            elseif ((Get-NugetgoSha256 $packed[$name]) -cne $ran[$name]) { $reasons.Add("[$rid] the row ran $name at $($ran[$name]), which is not the packed bytes for $rid ($(Get-NugetgoSha256 $packed[$name]))") }
+        }
+        foreach ($name in @($packed.Keys | Sort-Object)) {
+            if (-not $ran.ContainsKey($name)) { $reasons.Add("[$rid] the row does not list $name, which the package carries for ${rid}: a row binds every packed assembly") }
+        }
     }
     foreach ($rid in $Rows.Keys) { if ($script:ShippedRids -notcontains $rid) { $reasons.Add("a row for $rid, a RID the package does not ship") } }
     $reasons.ToArray()
@@ -89,13 +97,36 @@ function New-NugetgoBehaviorPage {
     $lines.Add('with dotnet, and the Go program run with `go run`, printed the same bytes. Each row names the assembly that loaded,')
     $lines.Add('which is the package''s own for that RID, and the host it ran on. No row stands for another RID.')
     $lines.Add('')
-    $lines.Add('| RID | Host | Assembly | Outputs equal |')
-    $lines.Add('|:--|:--|:--|:--|')
+    foreach ($line in Get-NugetgoRowTable -Rows $Rows) { $lines.Add($line) }
+    ($lines -join "`n") + "`n"
+}
+
+# The rows as a table, one line per shipped RID that has a row, in the release's RID order.
+function Get-NugetgoRowTable {
+    param([Parameter(Mandatory)]$Rows)
+    '| RID | Host | Assembly | Outputs equal |'
+    '|:--|:--|:--|:--|'
     foreach ($rid in $script:ShippedRids) {
         $row = $Rows[$rid]
         if ($null -eq $row) { continue }
-        $lines.Add("| $rid | $($row.host) ($($row.os)) | ``$($row.assembly)`` | $($row.'outputs-equal') (go $($row.go), dotnet $($row.dotnet)) |")
+        "| $rid | $($row.host) ($($row.os)) | ``$($row.assembly)`` | $($row.'outputs-equal') (go $($row.go), dotnet $($row.dotnet)) |"
     }
+}
+
+# The hosted sample rows of a module WITH Go tests, as a section under its test comparison (COORD ruling 2026-10-12):
+# additional evidence, never the validation.
+function New-NugetgoSampleBehaviorSection {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$ModulePath, [Parameter(Mandatory)][string]$GoVersion, [Parameter(Mandatory)]$Rows)
+
+    $lines = New-Object System.Collections.Generic.List[string]
+    $lines.Add("## Sample behavior on $(@($Rows.Keys).Count) RIDs")
+    $lines.Add('')
+    $lines.Add("In addition to the test comparison above, a sample program using ``$ModulePath`` $GoVersion was run on each RID's own")
+    $lines.Add('host: converted by go2cs against this package, built for that RID and run with dotnet, it printed the same bytes as')
+    $lines.Add('`go run`. Each row names the assembly that loaded, which is the package''s own for that RID, and the host it ran on.')
+    $lines.Add('')
+    foreach ($line in Get-NugetgoRowTable -Rows $Rows) { $lines.Add($line) }
     ($lines -join "`n") + "`n"
 }
 
@@ -147,25 +178,31 @@ function Get-NugetgoPackedRidAssemblies {
 
 # Which proof a pack carries (D7). A module with Go tests ships its test comparison (-ValidationDir); a module with no
 # Go tests ships the behavioral proof (-BehaviorProofDir), because `go2cs -recurse -tests` has nothing to compare; and a
-# pack-shape rehearsal ships neither (-UnvalidatedReason). The three are exclusive. Reason is a refusal, or $null.
+# pack-shape rehearsal ships neither (-UnvalidatedReason). A module WITH Go tests may also carry hosted sample rows
+# (-BehaviorProofDir beside -ValidationDir, COORD ruling 2026-10-12): an ADDITIONAL row set, never the validation.
+# Reason is a refusal, or $null; SampleRows says the validated mode carries those rows.
 function Get-NugetgoProofMode {
     [CmdletBinding()]
     param([string]$ValidationDir, [string]$UnvalidatedReason, [string]$BehaviorProofDir, [switch]$Release, [Parameter(Mandatory)][bool]$ModuleHasGoTests)
 
-    $refuse = { param($why) [pscustomobject]@{ Mode = $null; Reason = $why } }
+    $result = { param($mode, $why, $sample) [pscustomobject]@{ Mode = $mode; Reason = $why; SampleRows = [bool]$sample } }
+    if ($ValidationDir -and $BehaviorProofDir -and -not $UnvalidatedReason) {
+        if (-not $ModuleHasGoTests) { return & $result $null '-BehaviorProofDir and -ValidationDir are exclusive for a module with no Go tests: its proof is the behavioral one alone' $false }
+        return & $result 'validated' $null $true
+    }
     $given = @(@{ '-ValidationDir' = $ValidationDir; '-UnvalidatedReason' = $UnvalidatedReason; '-BehaviorProofDir' = $BehaviorProofDir }.GetEnumerator() | Where-Object { $_.Value } | ForEach-Object { $_.Key } | Sort-Object)
-    if ($given.Count -gt 1) { return & $refuse "$($given -join ' and ') are exclusive: a package carries one proof" }
+    if ($given.Count -gt 1) { return & $result $null "$($given -join ' and ') are exclusive: a package carries one proof" $false }
     if ($UnvalidatedReason) {
-        if ($Release) { return & $refuse 'an unvalidated module is never packed as a release (-UnvalidatedReason with -Release)' }
-        return [pscustomobject]@{ Mode = 'unvalidated'; Reason = $null }
+        if ($Release) { return & $result $null 'an unvalidated module is never packed as a release (-UnvalidatedReason with -Release)' $false }
+        return & $result 'unvalidated' $null $false
     }
     if ($BehaviorProofDir) {
-        if ($ModuleHasGoTests) { return & $refuse 'the module has Go tests: its proof is the test comparison (-ValidationDir), never a behavioral one' }
-        return [pscustomobject]@{ Mode = 'behavioral'; Reason = $null }
+        if ($ModuleHasGoTests) { return & $result $null 'the module has Go tests: its proof is the test comparison (-ValidationDir), and hosted sample rows go beside it, never in its place' $false }
+        return & $result 'behavioral' $null $false
     }
-    if ($ValidationDir) { return [pscustomobject]@{ Mode = 'validated'; Reason = $null } }
-    if ($ModuleHasGoTests) { return & $refuse 'a validated module needs -ValidationDir (D7), or -UnvalidatedReason for a pack-shape rehearsal' }
-    & $refuse 'a module with no Go tests needs -BehaviorProofDir (one row per shipped RID, each run on its own OS), or -UnvalidatedReason for a pack-shape rehearsal'
+    if ($ValidationDir) { return & $result 'validated' $null $false }
+    if ($ModuleHasGoTests) { return & $result $null 'a validated module needs -ValidationDir (D7), or -UnvalidatedReason for a pack-shape rehearsal' $false }
+    & $result $null 'a module with no Go tests needs -BehaviorProofDir (one row per shipped RID, each run on its own OS), or -UnvalidatedReason for a pack-shape rehearsal' $false
 }
 
 # A row as ONE annotation message: its UTF-8 bytes in base64, which needs no workflow-command escaping and fits one
@@ -216,8 +253,5 @@ function New-NugetgoBehaviorRowText {
     param([Parameter(Mandatory)][System.Collections.Specialized.OrderedDictionary]$Fields)
     "# nugetgo behavioral proof row`n" + ((@($Fields.Keys) | ForEach-Object { "${_}: $($Fields[$_])" }) -join "`n") + "`n"
 }
-
-# RED STUB (sample rows beside the test proof): unmet.
-function New-NugetgoSampleBehaviorSection { param([string]$ModulePath, [string]$GoVersion, $Rows) '' }
 
 Export-ModuleMember -Function Get-NugetgoBehaviorRowKeys, Read-NugetgoBehaviorRow, Test-NugetgoBehaviorRows, New-NugetgoBehaviorPage, Test-NugetgoModuleHasGoTests, Get-NugetgoPackedRidAssemblies, Get-NugetgoProofMode, ConvertTo-NugetgoRowAnnotationText, ConvertFrom-NugetgoRowAnnotations, Get-NugetgoRowHost, New-NugetgoBehaviorRowText, New-NugetgoSampleBehaviorSection

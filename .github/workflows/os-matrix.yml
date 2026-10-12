@@ -46,7 +46,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one behavioral proof row per shipped RID for a nugetgo package of a module with no Go tests, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet; goos is ignored)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored)'
         type: choice
         required: true
         default: census
@@ -1456,8 +1456,9 @@ jobs:
           exit $aotExit
 
       # -------------------------------------------------------------------------------------
-      # nugetgo-behavior — ONE behavioral proof row, on this leg's own OS, for a nugetgo package of a module with no
-      # Go tests (COORD ruling 2026-10-12): the sample under src/tests/ModuleBehavior/ run with `go run`, converted
+      # nugetgo-behavior — ONE sample row, on this leg's own OS, for a nugetgo package (COORD rulings 2026-10-12): the
+      # proof of a module with no Go tests, or an additional row set beside a tested module's test proof. The sample
+      # under src/tests/ModuleBehavior/ run with `go run`, converted
       # against the package on the feed, built for this RID and run with dotnet (src/tools/nugetgo/
       # Invoke-NugetgoBehaviorRow.ps1). The row is annotated in its own step below and kept in the artifact;
       # Get-NugetgoBehaviorRows.ps1 fetches the rows through the API, and nugetgo-pack.ps1 -BehaviorProofDir binds

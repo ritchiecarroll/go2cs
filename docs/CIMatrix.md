@@ -186,10 +186,13 @@ finish inside the 6 hours a hosted job may run (37523439849, cancelled at 6h00m)
 budget reaches it. osx-x64, the same darwin build, read 293 min; linux-x64 56 min; win-x64 71 min (and an open defect: the
 executable fails at startup with "no metadata token available"). A larger or self-hosted Apple-silicon runner is the owner's call.
 
-### `nugetgo-behavior` — one behavioral proof row per shipped RID
+### `nugetgo-behavior` — one sample row per shipped RID
 
 A third-party module with no Go tests cannot be validated by `go2cs -recurse -tests`, so its nugetgo package ships a
-behavioral proof (COORD ruling 2026-10-12): one row per shipped RID, each written ON a host of that RID. No row is
+behavioral proof (COORD ruling 2026-10-12): one row per shipped RID, each written ON a host of that RID. A module WITH
+Go tests may carry the same four rows beside its test proof, never in its place (COORD ruling 2026-10-12): its page
+gains a "Sample behavior" section and its README a Sample behavior badge, and the rows replace the owner's local-feed
+sample run in the runbook's section 3. No row is
 inferred from another, so the stage runs the same four legs as `release-smoke`, whatever `goos` says, with no pack.
 Each leg builds the converter and runs `src/tools/nugetgo/Invoke-NugetgoBehaviorRow.ps1`: the sample program under
 `src/tests/ModuleBehavior/MODULE@VERSION/` is run with `go run`, converted against `nugetgo_package` on

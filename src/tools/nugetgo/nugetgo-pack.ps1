@@ -80,7 +80,10 @@
     (NugetgoBehaviorProof.psm1). VALIDATION.md is then the behavioral page, which says it is not a test comparison, and
     the Tests badge says there are no Go tests and how many RIDs ran. After the pack, each row's assembly must be the
     bytes the package carries for its RID, and each row must have been recorded on its file's RID and GOOS; anything
-    else is refused by name and the package removed. A module with Go tests never takes this proof.
+    else is refused by name and the package removed. A module with Go tests never takes this proof in place of its test
+    comparison; it may carry the same rows BESIDE it (-BehaviorProofDir with -ValidationDir, COORD ruling 2026-10-12),
+    as an additional row set: VALIDATION.md gains a "Sample behavior" section under the comparison, the README a
+    Sample behavior badge after the Tests badge, and the rows are bound to the packed bytes by the same check.
 
     The restore is isolated: a nuget.config with <clear/> and only -Feed as a source, and a private NUGET_PACKAGES.
     The user's global packages folder is censused for nugetgo.* and go.* before and after, and the run fails if it
@@ -247,10 +250,18 @@ if ($ConversionReadme) {
 # tests ships its behavioral proof instead (COORD ruling 2026-10-12). A module that cannot validate yet packs ONLY as a
 # rehearsal of its shape (-UnvalidatedReason), whose VALIDATION.md says so; such a package is never a release.
 $pages = @()
+$behaviorRows = @{}
 if (-not (Test-Path -LiteralPath $moduleCacheDir -PathType Container)) { Refuse "no module source at $moduleCacheDir, where the pack reads whether the module has Go tests (go mod download $ModulePath@$GoVersion)" }
 $proofMode = Get-NugetgoProofMode -ValidationDir $ValidationDir -UnvalidatedReason $UnvalidatedReason -BehaviorProofDir $BehaviorProofDir -Release:$Release `
     -ModuleHasGoTests (Test-NugetgoModuleHasGoTests -ModuleDir $moduleCacheDir)
 if ($proofMode.Reason) { Refuse $proofMode.Reason }
+# The rows, the behavioral proof's or a tested module's additional sample rows: read now, bound after the pack against
+# the bytes the package carries for each RID.
+if ($BehaviorProofDir) {
+    if (-not (Test-Path -LiteralPath $BehaviorProofDir -PathType Container)) { Refuse "-BehaviorProofDir: no directory at $BehaviorProofDir" }
+    foreach ($f in @(Get-ChildItem -LiteralPath $BehaviorProofDir -Filter '*.md' -File)) { $behaviorRows[$f.BaseName] = Read-NugetgoBehaviorRow -Path $f.FullName }
+    if ($proofMode.SampleRows) { Write-Host "  proof: sample rows beside the test comparison, $($behaviorRows.Count) row(s) from $BehaviorProofDir ($(@($behaviorRows.Keys | Sort-Object) -join ', '))" }
+}
 if ($proofMode.Mode -ceq 'unvalidated') {
     $validationPage = Join-Path $Scratch 'UNVALIDATED.md'
     New-Item -ItemType Directory -Force $Scratch | Out-Null
@@ -260,10 +271,6 @@ if ($proofMode.Mode -ceq 'unvalidated') {
         (New-Object System.Text.UTF8Encoding($false)))
 }
 elseif ($proofMode.Mode -ceq 'behavioral') {
-    # The rows are read now and bound after the pack, against the bytes the package carries for each RID.
-    if (-not (Test-Path -LiteralPath $BehaviorProofDir -PathType Container)) { Refuse "-BehaviorProofDir: no directory at $BehaviorProofDir" }
-    $behaviorRows = @{}
-    foreach ($f in @(Get-ChildItem -LiteralPath $BehaviorProofDir -Filter '*.md' -File)) { $behaviorRows[$f.BaseName] = Read-NugetgoBehaviorRow -Path $f.FullName }
     $validationPage = Join-Path $Scratch 'BEHAVIOR.md'
     New-Item -ItemType Directory -Force $Scratch | Out-Null
     [System.IO.File]::WriteAllText($validationPage, (New-NugetgoBehaviorPage -ModulePath $ModulePath -GoVersion $GoVersion -Rows $behaviorRows), (New-Object System.Text.UTF8Encoding($false)))
@@ -308,7 +315,10 @@ $blockArgs = @{
 }
 if ($proofMode.Mode -ceq 'unvalidated') { $blockArgs.Unvalidated = $true }
 elseif ($proofMode.Mode -ceq 'behavioral') { $blockArgs.BehaviorRids = $behaviorRows.Count }
-else { $blockArgs.Matched = $totals.Matched; $blockArgs.Disclosed = $totals.Disclosed }
+else {
+    $blockArgs.Matched = $totals.Matched; $blockArgs.Disclosed = $totals.Disclosed
+    if ($proofMode.SampleRows) { $blockArgs.SampleRids = $behaviorRows.Count }
+}
 # The facts the block states that change from pack to pack, printed on every write so that a rehearsal's rewrite is
 # never taken for the release's.
 $facts = "package version $packageVersion, tag $repositoryTag"
@@ -474,7 +484,8 @@ Copy-Item -LiteralPath $packageIcon.Path (Join-Path $packDir $packageIcon.Name)
 # A RID-specific package's page discloses, in one line, the flavors its self-description does not describe.
 $flavorDisclosure = Get-NugetgoFlavorDisclosure -ProofGoos $proofGoos -RidSpecific:$flavorDecision.RidSpecific
 [System.IO.File]::WriteAllText((Join-Path $packDir 'VALIDATION.md'),
-    ("> $description`n`n" + $(if ($flavorDisclosure) { "> $flavorDisclosure`n`n" } else { '' }) + [System.IO.File]::ReadAllText($validationPage)), (New-Object System.Text.UTF8Encoding($false)))
+    ("> $description`n`n" + $(if ($flavorDisclosure) { "> $flavorDisclosure`n`n" } else { '' }) + [System.IO.File]::ReadAllText($validationPage) +
+        $(if ($proofMode.SampleRows) { "`n" + (New-NugetgoSampleBehaviorSection -ModulePath $ModulePath -GoVersion $GoVersion -Rows $behaviorRows) } else { '' })), (New-Object System.Text.UTF8Encoding($false)))
 $esc = { param($s) [System.Security.SecurityElement]::Escape($s) }
 
 # S2: go2cs/source-metadata.txt, written by the converter's own Go package so its consumer is known to read it.
@@ -596,9 +607,9 @@ if (-not (Test-Path $nupkg)) { $nupkg = @(Get-ChildItem $OutDir -Filter "$($id.I
 if ($flavorDecision.RidSpecific) { Set-NugetgoRidAssets -Package $nupkg -Assemblies $flavorAssemblies -TargetFramework 'net10.0' }
 # The behavioral proof must be OF the packed bytes: each RID's row ran the assembly this package carries for that RID,
 # on that RID and its GOOS, and printed what go run printed.
-if ($proofMode.Mode -ceq 'behavioral') {
+if ($proofMode.Mode -ceq 'behavioral' -or $proofMode.SampleRows) {
     $unproven = @(Test-NugetgoBehaviorRows -Rows $behaviorRows -Assemblies (Get-NugetgoPackedRidAssemblies -Package $nupkg -TargetFramework 'net10.0') -ModulePath $ModulePath -GoVersion $GoVersion)
-    if ($unproven.Count) { Remove-Item -LiteralPath $nupkg; Refuse "the behavioral proof is not a proof of the packed bytes -- $($unproven -join '; ')" }
+    if ($unproven.Count) { Remove-Item -LiteralPath $nupkg; Refuse "the $(if ($proofMode.SampleRows) { 'sample rows are' } else { 'behavioral proof is' }) not a proof of the packed bytes -- $($unproven -join '; ')" }
     foreach ($rid in @($behaviorRows.Keys | Sort-Object)) { Write-Host "  proof: $rid ran $($behaviorRows[$rid].assembly) on $($behaviorRows[$rid].host): bound" }
 }
 # The roots no packed byte may name: the build root, the pack's scratch and output, the module cache, the user profile.

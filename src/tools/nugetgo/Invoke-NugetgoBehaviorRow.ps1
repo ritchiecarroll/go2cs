@@ -14,12 +14,12 @@
       2. It is converted with -Converter against the package on -Feed (`-recurse=nuget -nuget-map-only
          -nuget-map-feed`, the mappings row beside the sample), and the consumer half is checked: the app references
          the package at exactly -PackageVersion, and the module was not converted locally.
-      3. It is built for this RID (`dotnet build -r <rid>`) with a private NUGET_PACKAGES, so the module assembly in
+      3. It is built for this RID (`dotnet build -r <rid>`) with a private NUGET_PACKAGES, so each module assembly in
          the output folder is the one the host loads: the package's runtimes/<rid>/ asset when it has one, else lib/.
-         The script refuses a build whose copy is not that asset.
-      4. The built program is run with dotnet, and the row records both outputs' hashes, whether they are equal, the
-         module assembly's file name and hash, this host's RID (as its dotnet reports it) and GOOS (as go reports it),
-         the host and the toolchains.
+         The script refuses a build whose copy of any of them is not that asset.
+      4. The built program is run with dotnet, and the row records both outputs' hashes, whether they are equal, every
+         module assembly's file name and hash (one per Go package the package carries), this host's RID (as its
+         dotnet reports it) and GOOS (as go reports it), the host and the toolchains.
 
     The row is written even when the outputs differ, as evidence; the script then exits 1. NugetgoBehaviorProof.psm1
     reads the rows, and nugetgo-pack.ps1 -BehaviorProofDir binds each one to the bytes it packs for that RID.
@@ -142,16 +142,20 @@ try {
 finally { foreach ($k in $saved.Keys) { if ($null -eq $saved[$k]) { Remove-Item "env:$k" -ErrorAction SilentlyContinue } else { Set-Item "env:$k" $saved[$k] } } }
 Write-Host "dotnet: $((Get-Item -LiteralPath $dotnetOut).Length) bytes, $(Sha256File $dotnetOut)"
 
-# ---- the module assembly that loaded ------------------------------------------------------------------------------------
+# ---- the module assemblies that loaded ---------------------------------------------------------------------------------
+# Every assembly the package carries (one per Go package), each as the program's folder holds it, which must be the
+# package's asset for this RID: runtimes/<rid>/ when the package has one, else lib/.
 $restored = Join-Path (Join-Path $packages $id.ToLowerInvariant()) $PackageVersion.ToLowerInvariant()
-$libNames = @(Get-ChildItem -LiteralPath (Join-Path $restored 'lib/net10.0') -Filter '*.dll' -File -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })
-if ($libNames.Count -ne 1) { Refuse "$id $PackageVersion carries $($libNames.Count) assemblies in lib/net10.0; a row records one" }
-$name = $libNames[0]
-$asset = Join-Path $restored "runtimes/$Rid/lib/net10.0/$name"
-if (-not (Test-Path -LiteralPath $asset -PathType Leaf)) { $asset = Join-Path $restored "lib/net10.0/$name" }
-$loaded = Join-Path (Split-Path $targetPath) $name
-if (-not (Test-Path -LiteralPath $loaded -PathType Leaf)) { Refuse "the program's folder holds no $name" }
-if ((Sha256File $loaded) -cne (Sha256File $asset)) { Refuse "the program's $name is not the package's $Rid asset ($asset)" }
+$libNames = @(Get-ChildItem -LiteralPath (Join-Path $restored 'lib/net10.0') -Filter '*.dll' -File -ErrorAction SilentlyContinue | ForEach-Object { $_.Name } | Sort-Object)
+if ($libNames.Count -eq 0) { Refuse "$id $PackageVersion carries no assembly in lib/net10.0 (restored at $restored)" }
+$assemblies = foreach ($name in $libNames) {
+    $asset = Join-Path $restored "runtimes/$Rid/lib/net10.0/$name"
+    if (-not (Test-Path -LiteralPath $asset -PathType Leaf)) { $asset = Join-Path $restored "lib/net10.0/$name" }
+    $loaded = Join-Path (Split-Path $targetPath) $name
+    if (-not (Test-Path -LiteralPath $loaded -PathType Leaf)) { Refuse "the program's folder holds no $name" }
+    if ((Sha256File $loaded) -cne (Sha256File $asset)) { Refuse "the program's $name is not the package's $Rid asset ($asset)" }
+    "$name $(Sha256File $loaded)"
+}
 
 # ---- the row ------------------------------------------------------------------------------------------------------------
 $goHash = Sha256File $goOut
@@ -170,7 +174,7 @@ $fields = [ordered]@{
     'go-output'     = $goHash
     'dotnet-output' = $dotnetHash
     'outputs-equal' = $(if ($goHash -ceq $dotnetHash) { 'true' } else { 'false' })
-    'assembly'      = "$name $(Sha256File $loaded)"
+    'assembly'      = (@($assemblies) -join '; ')
     'date'          = [DateTime]::UtcNow.ToString('yyyy-MM-dd')
 }
 $row = New-NugetgoBehaviorRowText -Fields $fields
