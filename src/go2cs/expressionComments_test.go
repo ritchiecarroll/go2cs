@@ -66,3 +66,57 @@ func TestPackedConstUnchangedWithoutComments(t *testing.T) {
 		t.Errorf("without -comments the folded constant changed: %q", lines[at])
 	}
 }
+
+// Comments on call arguments and binary operands, inline and across lines.
+const operandCommentsSource = `package main
+
+import "fmt"
+
+func cipher(k []byte, read bool) int { return len(k) }
+
+func main() {
+	a := cipher(nil, false /* not for reading */)
+	wantLen := 1 + /*sec*/ 8 + /*nsec*/ 4
+	var s []int
+	if len(s) > 4 || // header
+		len(s) > 2 || // session
+		len(s) > 1 {
+		fmt.Println(a, wantLen)
+	}
+	x := 1<<2 | // two
+		1<<3
+	fmt.Println(x)
+}
+`
+
+func TestOperandCommentsAtTheirGoPosition(t *testing.T) {
+	lines := convertWithComments(t, operandCommentsSource)
+
+	// inline, where Go has them
+	for _, text := range []string{
+		"cipher(default!, false /* not for reading */)",
+		"1 + /*sec*/ 8 + /*nsec*/ 4",
+	} {
+		lineContaining(t, lines, text)
+	}
+
+	// across lines: each operand's line comment trails its operator, the next operand starts the next line
+	for _, c := range []struct{ trailing, next string }{
+		{"len(s) > 4 || // header", "len(s) > 2 ||"},
+		{"len(s) > 2 || // session", "len(s) > 1)"},
+		{"| // two", "(1 << (int)(3))"},
+	} {
+		at := lineContaining(t, lines, c.trailing)
+
+		if at+1 >= len(lines) || !strings.Contains(lines[at+1], c.next) {
+			t.Errorf("the line after %q does not continue with %q:\n%s", c.trailing, c.next, strings.Join(lines[at:min(len(lines), at+2)], "\n"))
+		}
+	}
+
+	// nothing hoisted out of the expressions
+	for i, line := range lines {
+		if trimmed := strings.TrimSpace(line); trimmed == "// header" || trimmed == "// session" || trimmed == "// two" || trimmed == "/* not for reading */" || trimmed == "/*sec*/" {
+			t.Errorf("line %d: a comment hoisted out of its expression: %q", i+1, line)
+		}
+	}
+}
