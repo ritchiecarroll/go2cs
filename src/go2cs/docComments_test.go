@@ -218,3 +218,49 @@ func TestGroupBlankLines(t *testing.T) {
 		}
 	}
 }
+
+// L: a package-level var of an anonymous struct type lifts the struct ahead of the var. The lift wrote
+// its own line break after the spec's, so a run of two blank lines stood before the struct, or a blank
+// line between a doc and the struct it is written above.
+const liftedVarSource = `package main
+
+import "fmt"
+
+var before = 0
+
+// Meta doc.
+var Meta struct {
+	A int
+}
+
+var other = 1
+
+var (
+	g1 struct{ B int }
+	g2 = 2
+)
+
+func main() {
+	fmt.Println(before, Meta.A, other, g1.B, g2)
+}
+`
+
+func TestNoBlankLineRunsAroundLiftedVars(t *testing.T) {
+	lines := convertWithComments(t, liftedVarSource)
+
+	for i := 1; i < len(lines); i++ {
+		if strings.TrimSpace(lines[i]) == "" && strings.TrimSpace(lines[i-1]) == "" {
+			t.Errorf("two blank lines in a row above line %d (%q)", i+2, strings.TrimSpace(lines[min(i+1, len(lines)-1)]))
+		}
+	}
+
+	if got := docAbove(t, lines, "// Meta doc."); !strings.Contains(got, "Meta") {
+		t.Errorf("\"// Meta doc.\" documents %q", got)
+	}
+
+	for i, line := range lines {
+		if strings.TrimSpace(line) == "// Meta doc." && (i+1 >= len(lines) || strings.TrimSpace(lines[i+1]) == "") {
+			t.Errorf("a blank line between \"// Meta doc.\" and the declaration it documents")
+		}
+	}
+}
