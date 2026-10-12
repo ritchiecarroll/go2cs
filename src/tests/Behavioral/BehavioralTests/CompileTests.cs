@@ -403,6 +403,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckDeferFrameScopes() => CheckTarget("DeferFrameScopes");
 
     [TestMethod]
+    public void CheckDeferGoSpreadArg() => CheckTarget("DeferGoSpreadArg");
+
+    [TestMethod]
     public void CheckDeferHeapFieldPtrMethod() => CheckTarget("DeferHeapFieldPtrMethod");
 
     [TestMethod]

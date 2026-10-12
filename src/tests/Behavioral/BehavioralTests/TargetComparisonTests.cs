@@ -406,6 +406,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDeferFrameScopes() => CheckTarget("DeferFrameScopes");
 
     [TestMethod]
+    public void CheckDeferGoSpreadArg() => CheckTarget("DeferGoSpreadArg");
+
+    [TestMethod]
     public void CheckDeferHeapFieldPtrMethod() => CheckTarget("DeferHeapFieldPtrMethod");
 
     [TestMethod]

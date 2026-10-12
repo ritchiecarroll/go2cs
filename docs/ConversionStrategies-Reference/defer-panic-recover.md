@@ -378,6 +378,46 @@ CONTROLS that must keep their existing emission, plain matching-arity arguments 
 SINGLE-value call as the sole argument, both of which stay bare method groups. `go` mirrors every
 arm and is covered by two of its own.)
 
+## `defer f(xs...)` spreads a SLICE: the slice is the eager argument, the thunk spreads it
+
+A spread argument passes the slice ITSELF: in Go the callee's variadic parameter is the caller's
+slice, sharing its backing array. Under `defer`/`go`, the argument is evaluated at the statement, so
+the slice header is fixed then. A later write through `xs` is seen by the call, while re-assigning
+`xs` to another slice is not.
+
+The argument-list renderer appended the spread view (`.ꓸꓸꓸ`, a `Span<T>`) and then handed that
+whole expression to the registration as the eager argument. No generic thunk parameter can hold a
+`Span<T>`:
+
+```csharp
+defer((ᴛ1, ᴛ2) => show(ᴛ1, ᴛ2), (@string)"defer", xs.ꓸꓸꓸ, ref ᒐ);   // BEFORE: CS9244
+goǃ(ᴛ1 => only(ᴛ1), xs.ꓸꓸꓸ);                                       // BEFORE: CS1503
+```
+
+The eager argument is now the slice, and the thunk spreads its own parameter when the call runs:
+
+```go
+defer show("defer", xs...)   //  Go: xs is evaluated here; show runs at unwind
+xs[0] = 9                    //      show sees this write
+xs = []int{7, 7, 7}          //      and not this re-assignment
+```
+
+```csharp
+defer((ᴛ1, ᴛ2) => show(ᴛ1, ᴛ2.ꓸꓸꓸ), (@string)"defer", xs, ref ᒐ);
+goǃ(ᴛ1 => only(ᴛ1.ꓸꓸꓸ), xs);
+```
+
+A spread call always takes the temp-parameter form (`visitDeferStmt`/`visitGoStmt`): a method-group
+form would hand the slice to the `params` parameter. The finally-lowered defer never meets this
+shape, because it lowers only calls with no arguments.
+
+**Reach.** Zero sites in the standard library (production and tests) and in the module cache; the
+two-seeded `-stdlib` diff reads zero changed files on windows, linux and darwin. The shape is a
+user-code one, found as a CS9244 in a converted program. (Guarded by `DeferGoSpreadArg`: a deferred
+function, a deferred pointer-receiver method and a goroutine, each writing through `xs` after the
+statement and then re-assigning it; and by `TestADeferredOrSpawnedSpreadCallPassesTheSliceAndSpreadsItInTheThunk`,
+which also covers the one-argument goroutine.)
+
 ## `defer panic(v)` captures its value at the defer, and the sequence survives it
 
 `panic` is the one built-in emitted as a `throw` **statement** rather than as a call, and that made it

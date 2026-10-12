@@ -159,6 +159,12 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 		renderLambdaParams = true
 	}
 
+	// A SPREAD call (`f(xs...)`) always takes the temp-parameter form: the eager argument is the slice and the
+	// thunk spreads it (see convExprList). A method-group form would hand the slice to the params parameter.
+	if paramCount > 0 && goStmt.Call.Ellipsis.IsValid() {
+		renderLambdaParams = true
+	}
+
 	if paramCount > 0 {
 		lambdaContext.callArgs = make([]string, paramCount)
 		lambdaContext.renderParams = renderLambdaParams

@@ -403,6 +403,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDeferFrameScopes() => CheckTarget("DeferFrameScopes");
 
     [TestMethod]
+    public void CheckDeferGoSpreadArg() => CheckTarget("DeferGoSpreadArg");
+
+    [TestMethod]
     public void CheckDeferHeapFieldPtrMethod() => CheckTarget("DeferHeapFieldPtrMethod");
 
     [TestMethod]

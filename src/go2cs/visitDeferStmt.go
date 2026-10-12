@@ -174,6 +174,12 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 	// costs a closure allocation per defer. Measured and withdrawn 2026-09-02; the overload table
 	// is one grep and settles it, so check it before re-deriving this.
 
+	// A SPREAD call (`f(xs...)`) always takes the temp-parameter form: the eager argument is the slice and the
+	// thunk spreads it (see convExprList). A method-group form would hand the slice to the params parameter.
+	if paramCount > 0 && deferStmt.Call.Ellipsis.IsValid() {
+		renderLambdaParams = true
+	}
+
 	if paramCount > 0 {
 		lambdaContext.callArgs = make([]string, paramCount)
 		lambdaContext.renderParams = renderLambdaParams

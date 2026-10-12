@@ -436,6 +436,13 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			arg.WriteString("." + EllipsisOperator)
 		}
 
+		// A deferred or spawned call's SPREAD argument (`defer f(xs...)`, `go f(xs...)`): Go evaluates the
+		// argument at the statement, and a spread argument is the slice itself, so the eager argument is the
+		// SLICE and the thunk spreads its own parameter (`defer((ᴛ1, ᴛ2) => f(ᴛ1, ᴛ2.ꓸꓸꓸ), a, xs, ref ᒐ)`). The
+		// spread view is a Span, which no generic thunk parameter can hold (CS9244, and CS1503 for the
+		// one-argument goǃ), and the slice also keeps the callee's pack on the caller's backing array, as in Go.
+		spreadThunkArg := callArgs != nil && hasSpreadOperator && i == len(exprs)-1 && !spreadAsSlice
+
 		if callArgs == nil {
 			result.WriteString(arg.String())
 		} else {
@@ -503,11 +510,17 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 				result.WriteString(strings.Join(components, ", "))
 			} else if callContext != nil && callContext.refLoweredTempArgs != nil && callContext.refLoweredTempArgs[i] {
 				result.WriteString(fmt.Sprintf("ref %s%d.DerefOrNull()", TempVarMarker, i+1))
+			} else if spreadThunkArg {
+				result.WriteString(fmt.Sprintf("%s%d.%s", TempVarMarker, i+1, EllipsisOperator))
 			} else {
 				result.WriteString(fmt.Sprintf("%s%d", TempVarMarker, i+1))
 			}
 
-			callArgs[i] = arg.String()
+			if spreadThunkArg {
+				callArgs[i] = strings.TrimSuffix(arg.String(), "."+EllipsisOperator)
+			} else {
+				callArgs[i] = arg.String()
+			}
 		}
 
 		if exprOnNewLine {
