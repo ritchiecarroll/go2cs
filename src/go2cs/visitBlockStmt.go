@@ -12,6 +12,7 @@ import (
 	"go/ast"
 	"go/token"
 	"slices"
+	"sort"
 	"strings"
 )
 
@@ -440,18 +441,27 @@ func (v *Visitor) writeClosingComments(after, limit token.Pos, minColumn int) {
 // row, so a gap of any size writes one. Comments before prev's last line (inside prev, or trailing it
 // and not yet claimed) are flushed in order with no blank line, as before.
 //
-// Under `-comments` only (docs/PLAN-comment-and-spacing-parity.md, class A and its decision 1): without
-// it nothing is written, so the emission, and every behavioral golden, is unchanged.
+// In every conversion (docs/PLAN-comment-and-spacing-parity.md, class A; the owner's decision 1).
+// Without `-comments` no comment is written, so the gap is one blank line when Go has any blank line in
+// it (goBlankLineBetween).
 //
 // It returns the output length before the blank line it wrote ahead of next, or -1 when it wrote none,
 // for dropEmptyGap.
 func (v *Visitor) writeStatementGap(prev, next ast.Stmt) int {
-	if !v.options.includeComments {
-		return -1
-	}
-
 	if v.file == nil {
 		v.file = v.fset.File(next.Pos())
+	}
+
+	if !v.options.includeComments {
+		if v.goBlankLineBetween(prev.End(), next.Pos()) {
+			mark := v.outputBuilder.Len()
+
+			if v.writeGapLine() {
+				return mark
+			}
+		}
+
+		return -1
 	}
 
 	prefix := v.newline + v.indent(v.indentLevel)
@@ -495,6 +505,27 @@ func (v *Visitor) writeStatementGap(prev, next ast.Stmt) int {
 	return -1
 }
 
+// goBlankLineBetween reports whether a line between from's line and to's line is blank in the Go source:
+// not on either end's line, and covered by no comment group.
+func (v *Visitor) goBlankLineBetween(from, to token.Pos) bool {
+	last := v.file.Line(from)
+	first := sort.Search(len(v.commentGroups), func(i int) bool { return v.commentGroups[i].Pos() > from })
+
+	for _, group := range v.commentGroups[first:] {
+		if group.Pos() >= to {
+			break
+		}
+
+		if v.file.Line(group.Pos())-last > 1 {
+			return true
+		}
+
+		last = max(last, v.file.Line(group.End()))
+	}
+
+	return v.file.Line(to)-last > 1
+}
+
 // writeGapLine writes the line break that makes Go's blank line, and reports whether it did. It writes
 // none when the output already ends with a line break (a lowered switch ends with its own, and the next
 // line's leading break then makes the blank line by itself; a second would leave two blank lines in a
@@ -523,8 +554,9 @@ func (v *Visitor) writeGapLine() bool {
 // has: after a switch Go writes adjacently to the next statement, and before the `}` of a block that ends
 // with one. Where Go has a blank line after the switch, writeStatementGap writes it.
 //
-// Under `-comments` only (docs/PLAN-comment-and-spacing-parity.md, class E1), as writeStatementGap is:
-// the behavioral goldens, captured without it, keep the line break.
+// Under `-comments` only (docs/PLAN-comment-and-spacing-parity.md, class E1; the owner's decision 1 took
+// only class A into every conversion): the behavioral goldens, captured without it, keep the line break,
+// and writeGapLine then writes no second one.
 func (v *Visitor) trimTrailingLineBreak() {
 	if !v.options.includeComments {
 		return

@@ -139,6 +139,7 @@ type Visitor struct {
 	outputBuilder      *strings.Builder
 	standAloneComments map[token.Pos]string
 	sortedCommentPos   []token.Pos
+	commentGroups      []*ast.CommentGroup // the file's, with or without -comments (goBlankLineBetween)
 	processedComments  hashset.HashSet[token.Pos]
 	newline            string
 	indentLevel        int

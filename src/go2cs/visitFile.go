@@ -80,6 +80,8 @@ func (v *Visitor) visitFile(file *ast.File) {
 	// markEmptyInterfaceFuncLits)
 	v.markEmptyInterfaceFuncLits(file)
 
+	v.commentGroups = file.Comments
+
 	if v.options.includeComments {
 		// Create standalone comments map
 		for _, commentGroup := range file.Comments {

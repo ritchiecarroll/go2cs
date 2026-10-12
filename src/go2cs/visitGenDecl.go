@@ -68,7 +68,8 @@ func specDoc(genDecl *ast.GenDecl, index int, doc *ast.CommentGroup) *ast.Commen
 // spec's trailing comment, which can span lines (`/* … */`). It returns the output length before the
 // blank line, or -1 when it wrote none, for dropEmptyGap: a spec that emits nothing leaves no blank line.
 //
-// Under `-comments` only (docs/PLAN-comment-and-spacing-parity.md, class D), as writeStatementGap is.
+// Under `-comments` only (docs/PLAN-comment-and-spacing-parity.md, class D; the owner's decision 1 took
+// only class A, writeStatementGap, into every conversion).
 func (v *Visitor) writeSpecGap(prev ast.Spec, spec *ast.ValueSpec) int {
 	if !v.options.includeComments {
 		return -1
