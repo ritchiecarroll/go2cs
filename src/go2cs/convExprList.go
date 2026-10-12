@@ -39,15 +39,17 @@ func isSimpleIdentifierName(s string) bool {
 
 // writeListComments writes the free comments ahead of one item of a list that spans lines — a composite
 // literal's elements or a call's arguments — where Go has them. A comment on the line where the previous
-// item (or the opening brace) ends trails that line; any other takes a line of its own, at indentLevel.
-// prevEnd is where the previous item ends and limit where the next one starts. It reports whether what
-// it wrote ends in a line comment, after which the next item must start a new line.
+// item (or the opening brace) ends trails that line; any other takes a line of its own, at indentLevel,
+// after the blank line Go has above it. prevEnd is where the previous item ends and limit where the next
+// one starts. It reports whether what it wrote ends in a line comment, after which the next item must
+// start a new line.
 func (v *Visitor) writeListComments(builder *strings.Builder, prevEnd, limit token.Pos, indentLevel int) bool {
 	if !v.options.includeComments || !prevEnd.IsValid() || !limit.IsValid() {
 		return false
 	}
 
 	prevLine := v.fset.Position(prevEnd).Line
+	lastLine := prevLine
 	handledPos := []token.Pos{}
 	endsInLineComment := false
 
@@ -62,14 +64,21 @@ func (v *Visitor) writeListComments(builder *strings.Builder, prevEnd, limit tok
 			continue
 		}
 
-		if pos > prevEnd && v.fset.Position(pos).Line == prevLine {
+		line := v.fset.Position(pos).Line
+
+		if pos > prevEnd && line == prevLine {
 			builder.WriteString(" ")
 		} else {
+			if pos > prevEnd && line > lastLine+1 {
+				builder.WriteString(v.newline)
+			}
+
 			builder.WriteString(v.newline)
 			builder.WriteString(v.indent(indentLevel))
 		}
 
 		builder.WriteString(strings.ReplaceAll(comment, "\n", v.newline))
+		lastLine = line + strings.Count(comment, "\n")
 		endsInLineComment = strings.HasPrefix(comment, "//")
 
 		delete(v.standAloneComments, pos)
