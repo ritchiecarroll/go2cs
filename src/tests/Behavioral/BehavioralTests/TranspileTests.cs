@@ -370,6 +370,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckCtorFieldInitializerOmitted() => CheckTarget("CtorFieldInitializerOmitted");
 
     [TestMethod]
+    public void CheckDarwinLookupProbe() => CheckTarget("DarwinLookupProbe");
+
+    [TestMethod]
     public void CheckDeadPointerParamAlias() => CheckTarget("DeadPointerParamAlias");
 
     [TestMethod]

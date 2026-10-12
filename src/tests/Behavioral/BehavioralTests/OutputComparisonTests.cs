@@ -347,6 +347,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckCtorFieldInitializerOmitted() => CheckTarget("CtorFieldInitializerOmitted");
 
     [TestMethod]
+    public void CheckDarwinLookupProbe() => CheckTarget("DarwinLookupProbe");
+
+    [TestMethod]
     public void CheckDeadPointerParamAlias() => CheckTarget("DeadPointerParamAlias");
 
     [TestMethod]

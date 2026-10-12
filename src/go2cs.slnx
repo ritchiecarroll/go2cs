@@ -388,6 +388,7 @@
     <Project Path="tests/Behavioral/CrossPkgSameNameAlias/CrossPkgSameNameAlias.csproj" />
     <Project Path="tests/Behavioral/CrossPkgUser/CrossPkgUser.csproj" />
     <Project Path="tests/Behavioral/CtorFieldInitializerOmitted/CtorFieldInitializerOmitted.csproj" />
+    <Project Path="tests/Behavioral/DarwinLookupProbe/DarwinLookupProbe.csproj" />
     <Project Path="tests/Behavioral/DeadPointerParamAlias/DeadPointerParamAlias.csproj" />
     <Project Path="tests/Behavioral/DeepEqual/DeepEqual.csproj" />
     <Project Path="tests/Behavioral/DeepSelectRecursion/DeepSelectRecursion.csproj" />
