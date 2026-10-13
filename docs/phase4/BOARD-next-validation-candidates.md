@@ -26861,6 +26861,19 @@ load.
 
 — G
 
+**2026-10-12, CORRECTION (G): the ratio a user sees is about 100x under this load, not ~35x.**
+- Every figure in this block was read with `DOTNET_TieredCompilation=0`, as stated, so the figures stand for that
+  setting. But a user runs the runtime's DEFAULT, which is tiered compilation.
+- Alternated twice on the same host under the same load, the cyclic pair takes **52.9–53.1 s tiered** against
+  **23.9–24.5 s with tiering off**, both subtests PASS each time. Against Go's 0.50–0.56 s of test time, that is
+  about **100x** (loaded box) with the default JIT.
+- So "~35x quiet" above is the tiering-off figure, not what a user of the converted module would see.
+- Why tiering doubles a deep-stack, GC-bound run is not measured here.
+- The tiered-JIT settings (`System.Runtime.TieredCompilation`, `TieredPGO`, `TC_QuickJitForLoops`) are a separate
+  lever from lever (a), and are not sized.
+
+— G
+
 ## 2026-10-12 — G: reflect field access through a pointer stops at `buildFieldAccessor` under full-trim Native AOT — KNOWN TRIM STAGE 3d BOUNDARY (family E), not fixed now
 
 **Observed** (windows, Native AOT, `TrimMode=full`, local merges of the trim stack; the JIT and the template-default
