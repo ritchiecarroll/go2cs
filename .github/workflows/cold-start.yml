@@ -18,9 +18,6 @@ name: Cold start (a newcomer's first hour, on a clean Linux)
 
 on:
   workflow_dispatch:
-  push:
-    branches: ['claude/r-cold-start']
-    paths: ['.github/workflows/cold-start.yml']
 
 permissions:
   contents: read
