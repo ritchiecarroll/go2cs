@@ -58,7 +58,7 @@ an input of the landing refresh. **Readings only**: nothing to cut, commit or pu
 | Union SHA | `58f17868feec5e8e317ca8293ab662ef530a0839` (`fixup-2: TRAIN T4`, on the fixup `94ca118a20d1504b4bbc2092e1bbd1543ac209fb`) |
 | Base | `226afb810a21408ebda2412dd74d526345c46f65` = TRAIN Q's landed master line and COORD's docs commits after it (`541766413e` at the derive) |
 | Shard list | `.claude/coord-scripts/trainT4/tT4-i9-shard.txt` on `claude/coord-handover`: **132 rows**, byte-identical to Q's (and P's); sha256 `057c78c1...` in full in the GO |
-| Driver, seat list, helper, drift reader | `tT4-i9-shard.sh`, `tT4-seats-draft.txt`, `tT4-helpers.py`, and (RUN2) `tT4-i9-drift.sh`, `tT4-drift-tokens.py`, `tT4-drift-classify.py`, same folder, same commit (`<HND>`). All SEVEN files (with the list) from ONE fetch, as blob bytes |
+| Driver, seat list, helper, drift reader | `tT4-i9-shard.sh`, `tT4-seats-draft.txt`, `tT4-helpers.py`, and (RUN2) `tT4-i9-drift.sh`, `tT4-drift-tokens.py`, `tT4-drift-classify.py`, same folder, same commit (`6f01af421ec7819a216f27354748eef1f28dd79b` (the kit commit; the branch tip one commit above it fills this line, every script and list byte-identical)). All SEVEN files (with the list) from ONE fetch, as blob bytes |
 | Second-run row | `TWOPASS_ROW`, default `unicode/utf16` (your own control row at P); the GO may name another row of the list |
 
 ## What changed since Q's shard (FL), then what Q's brief said (Q's items stand)

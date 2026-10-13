@@ -64,7 +64,7 @@ that becomes that base. **Readings only**: nothing to cut, commit or push. Start
 |---|---|
 | Union ref / SHA | `claude/coord-trainT4-union-r2` / `58f17868feec5e8e317ca8293ab662ef530a0839` (RUN2: `fixup-2: TRAIN T4`, on the fixup `94ca118a20d1504b4bbc2092e1bbd1543ac209fb`; run1's `claude/coord-trainT4-union` is HISTORY) |
 | Base | `226afb810a21408ebda2412dd74d526345c46f65` = TRAIN P's landed master line (the driver refuses a commit of the union's line that is not a Q seat merge or a Q fixup above it) |
-| Driver, helper, seat list | `tT4-linux-legs.sh`, `tT4-helpers.py`, `tT4-seats-draft.txt` from `.claude/coord-scripts/trainT4/` on `claude/coord-handover` at `<HND>`, all from ONE fetch, in one folder outside the clone |
+| Driver, helper, seat list | `tT4-linux-legs.sh`, `tT4-helpers.py`, `tT4-seats-draft.txt` from `.claude/coord-scripts/trainT4/` on `claude/coord-handover` at `6f01af421ec7819a216f27354748eef1f28dd79b` (the kit commit; the branch tip one commit above it fills this line, every script and list byte-identical), all from ONE fetch, in one folder outside the clone |
 | Second-run row | `TWOPASS_ROW`, default `runtime/debug` (P2's control row at P) |
 
 ## Launch (P's form)
