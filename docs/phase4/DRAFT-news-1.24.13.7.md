@@ -73,9 +73,9 @@ to `full` are fixed. `fmt` finds a named type's `String`, `Error`, `Format` and 
 so a `time.Duration` prints as `1.5s` and not as a count of nanoseconds; that was the defect 1.24.13.6
 shipped with. Reading a struct's fields by reflection through a pointer works. And a field promoted from
 an embedded struct is the same field whichever way it is reached **[CONFIRM the second and third
-against the landed rows: this draft read them from the rows' one-line descriptions]**. The price is size again, on the same
-principle as before: behaving like Go comes first. **[CONFIRM the measured figure and its platform from
-the trim plan before publishing; do not print one from this draft.]** The default publish was not
+against the landed rows: this draft read them from the rows' one-line descriptions]**. The price is size again, and the choice is the same as before: behaving like Go comes first.
+Measured on `win-x64`, a fully trimmed C# program that references the packages is about 26% larger than
+it was in 1.24.13.6. The default publish was not
 affected by any of the three.
 
 **Starting a goroutine is cheaper.** The runtime library recorded where each goroutine was started by
@@ -122,8 +122,12 @@ comment: delete it when a release carries the fix. 1.24.13.7 does.
      macOS: row claude/c1-darwin-x509-roots (behavioral X509SystemVerify, red first on darwin).
      Full trim: row claude/g-promoted-field-identity, the chain ec6df12120 (method-set keep, the Stringer fix),
        864bf27871 (field-box tables), 0726750708 (promoted-field identity). The size cost is in the ledger as
-       +20.1% and +25.1% for the full-trim consumer at two points of that chain; which baseline each is against
-       is not something this draft read from the plan, hence the CONFIRM.
+       Size, from COORD 2026-10-13 (win-x64, full trim, the consumer program): the field-box tables took it
+       from 30,568,960 to 38,228,480 bytes (+25.1%); promoted-field identity adds 207,872 bytes (+0.54%);
+       about +26% combined over the pre-train base. Stated once in the entry, with its platform.
+       Raw strings stay in the entry (COORD, the same message). Still marked CONFIRM: the roster counts at
+       the landed record, and the two full-trim fixes beyond the Stringer one, whose user-visible effect G is
+       to state.
      Goroutines: row claude/g-golib-creator-o1.
      Modules: row claude/c2-nugetgo-rid-packs.
      Tour pin and README line: on master already (3e918939fc merge; 226afb810a).
