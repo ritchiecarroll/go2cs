@@ -29,8 +29,8 @@ cd colordemo
 go mod init example.com/colordemo
 ```
 
-Create `main.go` (`go mod tidy` needs a real source file — with none present it reports
-`warning: "all" matched no packages`):
+Create `main.go` with this content (`go mod tidy` needs a real source file — with none present it
+reports `warning: "all" matched no packages`):
 
 ```go
 package main
@@ -41,6 +41,42 @@ func main() {
 	color.New(color.FgGreen, color.Bold).Println("hello from fatih/color")
 }
 ```
+
+To create the file from the command line, paste one of these. Each writes exactly the program above:
+
+```powershell
+@'
+package main
+
+import "github.com/fatih/color"
+
+func main() {
+    color.New(color.FgGreen, color.Bold).Println("hello from fatih/color")
+}
+'@ | Set-Content -Encoding utf8 main.go   # PowerShell
+```
+
+```bash
+cat > main.go <<'EOF'   # bash / zsh
+package main
+
+import "github.com/fatih/color"
+
+func main() {
+    color.New(color.FgGreen, color.Bold).Println("hello from fatih/color")
+}
+EOF
+```
+
+> **NOTE — a Go source file must be UTF-8.** In Windows PowerShell 5.1, `>` and `Out-File` write UTF-16,
+> and an editor that opens such a file usually keeps that encoding. Go then stops with
+> `unexpected NUL in input`. If you made `main.go` with `echo ... > main.go` and pasted the code in
+> afterwards, this is why. The PowerShell block above writes UTF-8, and this line re-saves a file that is
+> already UTF-16:
+>
+> ```powershell
+> $t = Get-Content main.go -Raw; [IO.File]::WriteAllText("$PWD\main.go", $t, (New-Object Text.UTF8Encoding $false))
+> ```
 
 Next, pin the app's dependencies to releases that go2cs's Go version can read, and confirm it builds as Go.
 
