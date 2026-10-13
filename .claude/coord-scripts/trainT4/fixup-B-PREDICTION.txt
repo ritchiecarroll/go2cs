@@ -1,0 +1,28 @@
+TRAIN T4 run2, fixup launch B (FIXUP_N=1, EXPECT_HEAD=b258fe81db) -- PREDICTION, written BEFORE the launch (03:0x 2026-10-13).
+Launch A's measurement (02:12-02:59) read exactly its prediction: fresh emission plants=OK emit=OK union-attributable 1241 / 1271 /
+1260 = 3,772 pairs, 1,548 distinct, handown-written=0, csproj=OK; refusal control FIRED; ABORT at 4-regen, nothing written; the
+projitems edit restored; logs kept in go/tT4-fixup-logs.measure.
+The proof on run2's emission: DRIFT-PLANTS OK (6 plants, each NAMED, each restored byte-identical); DRIFT-TOKENS 3,772 pairs,
+3,549 token-identical, 223 code-class (the same FAIL pair set as run1, line for line); DRIFT-CLASSES DEREF-ALIAS-DROPPED=410
+LAMBDA-EXPR-BODY=6 OTHER=0 (the same class lines as run1). The new path file run2/tT4-regen-allow-row2.txt = the union of the three
+attr lists: 1,548 paths, sha256 268702927ca7, BYTE-IDENTICAL to run1's (306 package_info.cs; all src/core/*.cs).
+The emission vs run1's COMMITTED fixup blobs (tT4-r2-fixdiff.py emit, plants 7 of 7 ok): windows 68 files / 89 blank lines removed +
+40 package_info map-only; linux 64 / 83 + 38; darwin 65 / 84 + 39; OTHER 0. Distinct: 77 .cs (blank deletions only) + 53
+package_info.cs (GoPositionMap lines only) = 130 src/core paths. (C1 quoted 90 / 84 / 85 blank lines: this reads one fewer per target.)
+
+B1 PRE: LIVE gate none; head b258fe81db; seats 11; REGEN_ALLOW stamped as the file (1548 exact path(s), sha256 268702927ca7) with the
+   note ending '(run2: includes the var/const doc-gap fix 07cacea829)'.
+B2 PRERES as launch A: precheck 0 hard failures; roster guard 2115 under both editions, 0 execution configs; stdlib-metadata PASS; sort 0/3.
+B3 PRERES-reg: exactly ONE projitems line; CONTROL FIRED before; 5 TestProjitems* PASS after.
+B4 Step 4: 'RE-USING the kept emission evidence in /h/go2cs-tmp-coord/tT4emitr2'; 1241 / 1271 / 1260; control rc=1 listed=1548
+   refused=1548 FIRED; regen applied = 1,548 file(s); regen-applied == regen-changed; HANDOWN 0, csproj OK (launch A's reading).
+B5 4-regen stdlib-metadata PASS; 4t encoding/json, encoding/binary, net/rpc NOT READ (as run1).
+B6 Step 5: CNR moves exactly GOLDEN_RULED [RawStringLineEndings X509SystemVerify] (moved-not-predicted=[] predicted-not-moved=[]),
+   6 files, each project's four phases green; the six golden blobs BYTE-IDENTICAL to run1's fixup.
+B7 Step 6: precheck 0 hard failures; purge leaves 0. Step 7: ONE signed commit 'fixup: TRAIN T4', 1,555 files (1 projitems + 6
+   goldens + 1,548 corpus); signature G by the one key 941694536F21BAFF (U at %G? as the union merges read); ' D' empty.
+B8 Tree vs run1's fixup tree 4fb604339d: EXACTLY 133 paths = the 3 of a0e2099e9a..fbf2a5ebc5 (each at fbf2a5ebc5's blob) + the 130
+   src/core paths above (77 BLANK-DEL, 53 MAP-ONLY), OTHER 0; projitems and the six goldens identical to run1's.
+B9 tT4-treecheck.sh (run2): the fixup tree with the 1,548 paths put back to the run2 union blobs differs from the i9's 0145a977f0 by
+   exactly the 3 T4-13 paths (SAME); git diff RT FT = 1,548, EXTRA 0, MISSING 0; union->fixup 1,555.
+B10 Step C (module rehearsal at the fixup head, a copy folder): rc 0 (7 = an owed re-read, named).

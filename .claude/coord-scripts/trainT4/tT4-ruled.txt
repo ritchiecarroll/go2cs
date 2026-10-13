@@ -1,0 +1,24 @@
+# TRAIN T4 -- the RULED resolutions the map and the assembly may make (tT4-resolve.py reads this file; nothing else does).
+# One line per (row, file):  ref|sha10|path|kind|hunks=N|ruling
+#   ref    the row's ref as the seat table writes it (no claude/ prefix)
+#   sha10  the first ten characters of the row's SEATED sha: a re-cut under the same name does NOT inherit the ruling
+#   path   the one file the ruling covers
+#   kind   append-both        = an insert against an insert at one point (EMPTY base in the diff3 form), both sides kept
+#                               whole, the union's lines first, the row's below them (merge order)
+#          append-both-sorted = the same shape, both sides' lines of each hunk written in sorted order (FL7)
+#          theirs             = T4 (T4-3): the ROW's blob WHOLE (index stage 3, byte for byte), never a per-hunk pick: the
+#                               union side's changes to that file since the merge-base are REPLACED by the seat's own
+#   hunks  how many conflict hunks the file holds in that merge (the diff3 form), asserted for every kind
+# ANY conflict that no line here names ABORTS the map row and the assembly, with the row and every hunk named.
+# A line that no merge uses is printed as UNUSED by both scripts (the order moved, or the row merges clean now).
+# The file's content hash is stamped by the map and compared by the assembly: edit it BEFORE the map, never between.
+#
+# TRAIN T4 (COORD 2026-10-12): row 3 only, the SEAT's side for exactly these two files. Measured by the derive's probe
+# map (run1/probe0, at the union of rows 1-2 over 226afb810a): each file holds ONE hunk, ours 2 / theirs 5 lines and
+# ours 48 / theirs 181 lines, base empty. WHY WHOLE-FILE: a per-hunk 'theirs' (git merge-file --theirs) of
+# EscapeRegistryGenerator.cs keeps master's Nameable and ReferencesDirectly (T3's fixup-2, merged clean outside the
+# hunk) BESIDE the seat's own copies: two definitions of each (read 2026-10-12, the silent duplication of merge-hazards).
+# The seat carries its own Nameable (0904171759); the whole blob holds each once. For the tests file the two forms are
+# byte-identical.
+g-promoted-field-identity|0726750708|src/gen/go2cs-gen/EscapeRegistryGenerator.cs|theirs|hunks=1|COORD 2026-10-12: the seat's side (its 0904171759 carries the Nameable fix master took from T3's fixup-2)
+g-promoted-field-identity|0726750708|src/tests/GenTests/EscapeRegistryGeneratorTests.cs|theirs|hunks=1|COORD 2026-10-12: the seat's side (its 181 lines hold master's 48: AContainerTheCompilationCannotNameIsNotRegistered)

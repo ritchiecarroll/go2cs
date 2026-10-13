@@ -1,0 +1,11 @@
+TRAIN T4 run2, fixup launch A (FIXUP_N=1, EXPECT_HEAD=b258fe81db, no REGEN_ALLOW_FILE) -- PREDICTION, written BEFORE the launch.
+A1 PRE: LIVE gate none (the stale run1 battery lock coord-scratch/tT4/.battery.lock removed after the census read no T4
+   process and run1's battery console last written 01:16); head b258fe81db, seats 11, REGEN_ALLOW composes to nothing ('^$').
+A2 PRERES: precheck hard-failures=0 (COUNT projitems 551 -> 576, c1-comment-parity-gap-fix:+23 c2-nugetgo-rid-packs:+2);
+   roster guard 2115 under both editions, 0 execution configs; stdlib-metadata PASS; sort fix 0 / 3.
+A3 PRERES-reg: ONE projitems line (retiredHandOwns_test.go after publishedCounterReset_test.go), CONTROL FIRED, 5 TestProjitems* PASS.
+A4 Steps 0b-3 as run1 (no prose, S1 COUNT=0, optin CHECK PASS 1236 / 229).
+A5 Step 4: a FRESH emission check (no REGEN-U.txt in /h/go2cs-tmp-coord/tT4emitr2): plants=OK emit=OK handown-written=0
+   csproj=OK, union-attributable about 1241 / 1271 / 1260 (run1's 3,772 pairs, 1,548 distinct paths); refusal control FIRED;
+   then ABORT at step 4-regen, 'regen check rc=1 (nothing written)', every listed path refused (REGEN_ALLOW '^$'), the
+   emission scratch KEPT. Worktree edit = the projitems line alone (restored by hand before launch B). About 55 minutes.

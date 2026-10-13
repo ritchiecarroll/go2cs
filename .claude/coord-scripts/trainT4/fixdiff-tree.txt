@@ -1,0 +1,135 @@
+# tree: run1 fixup tree 4fb604339decfd10d9234c4e2b597a0edcb2ca92 vs run2 fixup 94ca118a20, delta a0e2099e9a..fbf2a5ebc5
+DELTA A docs/PLAN-comment-and-spacing-parity.md
+MAP-ONLY M src/core/archive/zip/package_info.cs
+BLANK-DEL M src/core/archive/zip/writer.cs :: -1 blank
+BLANK-DEL M src/core/bufio/bufio.cs :: -1 blank
+MAP-ONLY M src/core/bufio/package_info.cs
+BLANK-DEL M src/core/compress/flate/huffman_bit_writer.cs :: -1 blank
+BLANK-DEL M src/core/compress/flate/huffman_code.cs :: -1 blank
+BLANK-DEL M src/core/compress/flate/inflate.cs :: -1 blank
+MAP-ONLY M src/core/compress/flate/package_info.cs
+MAP-ONLY M src/core/crypto/internal/fips140/sha256/package_info.cs
+BLANK-DEL M src/core/crypto/internal/fips140/sha256/sha256.cs :: -1 blank
+MAP-ONLY M src/core/crypto/sha1/package_info.cs
+BLANK-DEL M src/core/crypto/sha1/sha1.cs :: -1 blank
+BLANK-DEL M src/core/crypto/tls/common.cs :: -1 blank
+BLANK-DEL M src/core/crypto/tls/handshake_messages.cs :: -1 blank
+MAP-ONLY M src/core/crypto/tls/package_info.cs
+MAP-ONLY M src/core/crypto/x509/darwin/package_info.cs
+MAP-ONLY M src/core/crypto/x509/linux/package_info.cs
+BLANK-DEL M src/core/crypto/x509/parser.cs :: -2 blank
+MAP-ONLY M src/core/crypto/x509/windows/package_info.cs
+BLANK-DEL M src/core/debug/buildinfo/buildinfo.cs :: -1 blank
+MAP-ONLY M src/core/debug/buildinfo/package_info.cs
+BLANK-DEL M src/core/debug/elf/file.cs :: -1 blank
+MAP-ONLY M src/core/debug/elf/package_info.cs
+BLANK-DEL M src/core/debug/elf/reader.cs :: -1 blank
+BLANK-DEL M src/core/debug/macho/fat.cs :: -1 blank
+MAP-ONLY M src/core/debug/macho/package_info.cs
+BLANK-DEL M src/core/debug/plan9obj/file.cs :: -1 blank
+MAP-ONLY M src/core/debug/plan9obj/package_info.cs
+BLANK-DEL M src/core/encoding/gob/decode.cs :: -1 blank
+BLANK-DEL M src/core/encoding/gob/decoder.cs :: -1 blank
+MAP-ONLY M src/core/encoding/gob/package_info.cs
+BLANK-DEL M src/core/encoding/xml/marshal.cs :: -1 blank
+MAP-ONLY M src/core/encoding/xml/package_info.cs
+BLANK-DEL M src/core/go/ast/ast.cs :: -1 blank
+BLANK-DEL M src/core/go/ast/commentmap.cs :: -2 blank
+MAP-ONLY M src/core/go/ast/package_info.cs
+BLANK-DEL M src/core/go/doc/example.cs :: -2 blank
+MAP-ONLY M src/core/go/doc/package_info.cs
+MAP-ONLY M src/core/go/parser/package_info.cs
+BLANK-DEL M src/core/go/parser/parser.cs :: -3 blank
+BLANK-DEL M src/core/go/printer/nodes.cs :: -2 blank
+MAP-ONLY M src/core/go/printer/package_info.cs
+BLANK-DEL M src/core/go/types/call.cs :: -3 blank
+BLANK-DEL M src/core/go/types/expr.cs :: -2 blank
+BLANK-DEL M src/core/go/types/gcsizes.cs :: -1 blank
+BLANK-DEL M src/core/go/types/index.cs :: -1 blank
+BLANK-DEL M src/core/go/types/infer.cs :: -1 blank
+BLANK-DEL M src/core/go/types/literals.cs :: -1 blank
+MAP-ONLY M src/core/go/types/package_info.cs
+BLANK-DEL M src/core/go/types/resolver.cs :: -1 blank
+BLANK-DEL M src/core/go/types/sizes.cs :: -1 blank
+MAP-ONLY M src/core/html/template/package_info.cs
+BLANK-DEL M src/core/html/template/template.cs :: -1 blank
+MAP-ONLY M src/core/image/jpeg/package_info.cs
+BLANK-DEL M src/core/image/jpeg/writer.cs :: -1 blank
+MAP-ONLY M src/core/image/png/package_info.cs
+BLANK-DEL M src/core/image/png/reader.cs :: -1 blank
+BLANK-DEL M src/core/internal/poll/windows/fd_windows.cs :: -1 blank
+MAP-ONLY M src/core/internal/poll/windows/package_info.cs
+BLANK-DEL M src/core/internal/trace/gc.cs :: -2 blank
+BLANK-DEL M src/core/internal/trace/generation.cs :: -1 blank
+MAP-ONLY M src/core/internal/trace/internal/oldtrace/package_info.cs
+BLANK-DEL M src/core/internal/trace/internal/oldtrace/parser.cs :: -1 blank
+MAP-ONLY M src/core/internal/trace/package_info.cs
+BLANK-DEL M src/core/internal/trace/reader.cs :: -1 blank
+BLANK-DEL M src/core/internal/xcoff/file.cs :: -2 blank
+MAP-ONLY M src/core/internal/xcoff/package_info.cs
+BLANK-DEL M src/core/math/big/float.cs :: -1 blank
+BLANK-DEL M src/core/math/big/int.cs :: -1 blank
+BLANK-DEL M src/core/math/big/nat.cs :: -4 blank
+MAP-ONLY M src/core/math/big/package_info.cs
+MAP-ONLY M src/core/math/cmplx/package_info.cs
+BLANK-DEL M src/core/math/cmplx/tan.cs :: -1 blank
+MAP-ONLY M src/core/mime/darwin/package_info.cs
+BLANK-DEL M src/core/mime/encodedword.cs :: -1 blank
+MAP-ONLY M src/core/mime/linux/package_info.cs
+MAP-ONLY M src/core/mime/windows/package_info.cs
+BLANK-DEL M src/core/net/darwin/dial.cs :: -1 blank
+MAP-ONLY M src/core/net/darwin/package_info.cs
+BLANK-DEL M src/core/net/http/cookie.cs :: -1 blank
+BLANK-DEL M src/core/net/http/h2_bundle.cs :: -5 blank
+MAP-ONLY M src/core/net/http/package_info.cs
+BLANK-DEL M src/core/net/http/routing_index.cs :: -1 blank
+BLANK-DEL M src/core/net/linux/dial.cs :: -1 blank
+MAP-ONLY M src/core/net/linux/package_info.cs
+BLANK-DEL M src/core/net/mail/message.cs :: -2 blank
+MAP-ONLY M src/core/net/mail/package_info.cs
+BLANK-DEL M src/core/net/netip/netip.cs :: -1 blank
+MAP-ONLY M src/core/net/netip/package_info.cs
+MAP-ONLY M src/core/net/rpc/jsonrpc/package_info.cs
+BLANK-DEL M src/core/net/rpc/jsonrpc/server.cs :: -1 blank
+BLANK-DEL M src/core/net/windows/dial.cs :: -1 blank
+MAP-ONLY M src/core/net/windows/package_info.cs
+MAP-ONLY M src/core/os/darwin/package_info.cs
+BLANK-DEL M src/core/os/env.cs :: -1 blank
+MAP-ONLY M src/core/os/linux/package_info.cs
+MAP-ONLY M src/core/os/windows/package_info.cs
+BLANK-DEL M src/core/runtime/darwin/malloc.cs :: -1 blank
+BLANK-DEL M src/core/runtime/darwin/mheap.cs :: -1 blank
+MAP-ONLY M src/core/runtime/darwin/package_info.cs
+BLANK-DEL M src/core/runtime/darwin/stack.cs :: -1 blank
+BLANK-DEL M src/core/runtime/histogram.cs :: -1 blank
+BLANK-DEL M src/core/runtime/linux/malloc.cs :: -1 blank
+BLANK-DEL M src/core/runtime/linux/mheap.cs :: -1 blank
+MAP-ONLY M src/core/runtime/linux/package_info.cs
+BLANK-DEL M src/core/runtime/linux/stack.cs :: -1 blank
+BLANK-DEL M src/core/runtime/mbitmap.cs :: -1 blank
+BLANK-DEL M src/core/runtime/mgc.cs :: -1 blank
+BLANK-DEL M src/core/runtime/symtab.cs :: -1 blank
+BLANK-DEL M src/core/runtime/tracecpu.cs :: -1 blank
+BLANK-DEL M src/core/runtime/windows/malloc.cs :: -1 blank
+BLANK-DEL M src/core/runtime/windows/mheap.cs :: -1 blank
+BLANK-DEL M src/core/runtime/windows/netpoll_windows.cs :: -1 blank
+BLANK-DEL M src/core/runtime/windows/os_windows.cs :: -2 blank
+MAP-ONLY M src/core/runtime/windows/package_info.cs
+BLANK-DEL M src/core/runtime/windows/stack.cs :: -1 blank
+MAP-ONLY M src/core/syscall/windows/package_info.cs
+BLANK-DEL M src/core/syscall/windows/syscall_windows.cs :: -2 blank
+BLANK-DEL M src/core/text/template/helper.cs :: -1 blank
+MAP-ONLY M src/core/text/template/package_info.cs
+MAP-ONLY M src/core/time/darwin/package_info.cs
+BLANK-DEL M src/core/time/format.cs :: -1 blank
+MAP-ONLY M src/core/time/linux/package_info.cs
+MAP-ONLY M src/core/time/windows/package_info.cs
+BLANK-DEL M src/core/vendor/golang.org/x/net/idna/idna10.0.0.cs :: -1 blank
+MAP-ONLY M src/core/vendor/golang.org/x/net/idna/package_info.cs
+BLANK-DEL M src/core/vendor/golang.org/x/net/route/darwin/address.cs :: -1 blank
+MAP-ONLY M src/core/vendor/golang.org/x/net/route/darwin/package_info.cs
+BLANK-DEL M src/core/vendor/golang.org/x/text/unicode/norm/normalize.cs :: -1 blank
+MAP-ONLY M src/core/vendor/golang.org/x/text/unicode/norm/package_info.cs
+DELTA M src/go2cs/bodyBlankLines_test.go
+DELTA M src/go2cs/visitBlockStmt.go
+FIXDIFF-TREE 4fb604339d -> 94ca118a20: paths=133 DELTA=3 (of 3 in a0e2099e9a..fbf2a5ebc5; tip blob 3; missing []) BLANK-DEL=77 (blank lines removed 98) MAP-ONLY=53 SAME=0 OTHER=0 VERDICT=OK
