@@ -185,6 +185,29 @@ func TestLinknamePushRoutesOsSigpipe(t *testing.T) {
 		"runtime carries the real body (systemstack(sigpipe): sigsend, signal_ignored, dieFromSignal) and it runs")
 }
 
+// TestLinknamePushRoutesPprofMachVMRegion pins darwin's runtime/pprof pair: runtime's `mach_vm_region`,
+// pushed into runtime/pprof's bodyless `mach_vm_region` (vminfo_darwin.go). pprof's readMapping walks the
+// process's memory regions with it whenever a profile is built, so a missing row is a dead host on every
+// darwin program that writes a CPU or heap profile: net/http/pprof's /debug/pprof/profile handler died in
+// the stub on both hosted mac legs (darwin wave 12, run 38349654137), and /debug/pprof/heap read
+// infrastructure-error on the same exception. Like os's sigpipe pair it is invisible off darwin, where Go
+// declares neither half.
+func TestLinknamePushRoutesPprofMachVMRegion(t *testing.T) {
+	assertBarePushRouted(t, "runtime/pprof", "mach_vm_region", "runtime", "mach_vm_region",
+		"building any profile on darwin dies in the stub (net/http/pprof's profile and heap handlers)",
+		"runtime carries the real body (libcCall over the mach_vm_region trampoline) and it runs")
+}
+
+// TestLinknamePushRoutesPprofProcRegionfilename pins the second half of the same walk: runtime's
+// `proc_regionfilename`, pushed into runtime/pprof's bodyless `proc_regionfilename`, which names the file
+// behind each executable region machVMInfo finds. Reached only after mach_vm_region returns a region, so
+// it is the next stub a darwin profile would die in once the pair above is routed.
+func TestLinknamePushRoutesPprofProcRegionfilename(t *testing.T) {
+	assertBarePushRouted(t, "runtime/pprof", "proc_regionfilename", "runtime", "proc_regionfilename",
+		"the region walk dies in the stub at the first executable region it names",
+		"runtime carries the real body (libcCall over the proc_regionfilename trampoline) and it runs")
+}
+
 // assertBarePushRouted is the shared body of the pinned-pair guards above. Both halves of the pair are
 // re-derived from GOROOT, so Go's source is the input and the converter's routing is the thing under
 // test; and the last assertion exercises packageFuncAccess itself rather than the reverse index it
