@@ -421,7 +421,7 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 				// A parent whose Go=pass/C#=fail divergence is purely the roll-up of disclosed
 				// subtests carries no manifest entry of its own (matchTerminalStatuses' aggregation
 				// rule), so say what it actually is rather than rendering two empty cells.
-				fmt.Fprintf(&page, "| `%s` | `%s` | %s |\n", escapeProofCell(name), "aggregate",
+				fmt.Fprintf(&page, "| `%s` | `%s` | %s |\n", escapeProofCell(name), disclosureClassAggregate,
 					escapeProofCell("no failure text of its own — the roll-up of this test's disclosed subtests"))
 				continue
 			}
@@ -1083,9 +1083,20 @@ func productionProjectInputDigest(outputPath string, manifest testManifest) stri
 	return projectInputDigest(string(data))
 }
 
+// disclosureClassAggregate is the class a proof page and the console summary give a disclosed parent that is purely
+// the roll-up of its disclosed subtests: it has no manifest entry, so no class of its own.
+const disclosureClassAggregate = "aggregate"
+
 // writeThirdPartyModuleSummary regenerates <moduleDir>/MODULE.md from the package pages beneath it: one
 // row per page (its import path, matched and disclosed counts, a link) and the module's totals.
 func writeThirdPartyModuleSummary(moduleDir string, modulePath string) error {
+	return writeThirdPartyModuleSummaryWith(moduleDir, modulePath, nil)
+}
+
+// writeThirdPartyModuleSummaryWith is writeThirdPartyModuleSummary for a -tests -recurse run that knows which of the
+// module's tested packages did not validate (import path -> the run's reason). MODULE.md names each of them, and a
+// page of one of them on disk (an earlier run's, into this root) is not summed: it is not this run's proof.
+func writeThirdPartyModuleSummaryWith(moduleDir string, modulePath string, unvalidated map[string]string) error {
 	type pageRow struct {
 		importPath  string
 		link        string
@@ -1124,6 +1135,10 @@ func writeThirdPartyModuleSummary(moduleDir string, modulePath string) error {
 		importPath := ""
 		if match := proofTitlePattern.FindStringSubmatch(strings.ReplaceAll(string(data), "\r", "")); match != nil {
 			importPath = match[1]
+		}
+
+		if _, failed := unvalidated[importPath]; failed {
+			return nil
 		}
 
 		if excluded := proofExcludedDeclarations(string(data)); len(excluded) > 0 {
@@ -1184,6 +1199,25 @@ func writeThirdPartyModuleSummary(moduleDir string, modulePath string) error {
 
 	fmt.Fprintf(&page, "\n**Total: %d matched · %d disclosed** across %d package(s).\n", totalMatched, totalDisclosed, len(rows))
 
+	// A tested package that did not validate has no row above, so the summary says so outright rather than leaving
+	// the row absent (COORD ruling 2026-10-13, the go-cmp dry run). nugetgo-pack.ps1 refuses to pack one.
+	if len(unvalidated) > 0 {
+		failed := make([]string, 0, len(unvalidated))
+		for importPath := range unvalidated {
+			failed = append(failed, importPath)
+		}
+
+		sort.Strings(failed)
+
+		page.WriteString("\n## Packages that did not validate\n\n")
+		fmt.Fprintf(&page, "%d package(s) of this module have Go tests that this run did not validate. Nothing above proves them,\n", len(failed))
+		page.WriteString("and a module pack refuses to ship them.\n\n")
+
+		for _, importPath := range failed {
+			fmt.Fprintf(&page, "- `%s`: %s\n", importPath, unvalidatedReasonLine(unvalidated[importPath]))
+		}
+	}
+
 	if len(excludedByPackage) > 0 {
 		count := 0
 		for _, excluded := range excludedByPackage {
@@ -1209,14 +1243,29 @@ func writeThirdPartyModuleSummary(moduleDir string, modulePath string) error {
 // unvalidatedReasonLimit is the longest reason, in runes, MODULE.md gives for a package that did not validate.
 const unvalidatedReasonLimit = 200
 
-// unvalidatedReasonLine is the reason MODULE.md gives for a package that did not validate. RED STUB.
+// unvalidatedReasonLine is the reason MODULE.md gives for a package that did not validate: the first line of the
+// run's error (later lines carry the test host's raw output), clipped to unvalidatedReasonLimit runes.
 func unvalidatedReasonLine(reason string) string {
-	return reason
+	line, _, _ := strings.Cut(strings.TrimSpace(strings.ReplaceAll(reason, "\r", "")), "\n")
+	line = strings.TrimSpace(line)
+
+	if runes := []rune(line); len(runes) > unvalidatedReasonLimit {
+		line = strings.TrimSpace(string(runes[:unvalidatedReasonLimit])) + "…"
+	}
+
+	return line
 }
 
-// recordUnvalidatedModulePackages rewrites MODULE.md naming the tested packages that did not validate. RED STUB.
+// recordUnvalidatedModulePackages rewrites <outRoot>/validation/<modulePath>/MODULE.md naming the tested packages that
+// did not validate in a -tests -recurse run (import path -> the run's reason).
 func recordUnvalidatedModulePackages(outRoot string, modulePath string, unvalidated map[string]string) error {
-	return nil
+	moduleDir := filepath.Join(outRoot, "validation", filepath.FromSlash(modulePath))
+
+	if err := os.MkdirAll(moduleDir, 0o755); err != nil {
+		return err
+	}
+
+	return writeThirdPartyModuleSummaryWith(moduleDir, modulePath, unvalidated)
 }
 
 // proofExcludedDeclarations reads a proof page's "Excluded declarations" list back: each entry as the page names it,

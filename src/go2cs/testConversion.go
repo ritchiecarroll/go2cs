@@ -10508,14 +10508,14 @@ func escapeCSharp(value string) string {
 func disclosedClassList(disclosed []string, disclosures map[string]testDisclosure) []string {
 	classes := hashset.HashSet[string]{}
 	for _, name := range disclosed {
-		// A disclosed ancestor rolled up from its children has no entry, and adds its empty class as
-		// it always has; a two-half entry adds each half's.
+		// A disclosed ancestor rolled up from its children has no entry: it is the aggregate the proof
+		// page names it (COORD ruling 2026-10-13); a two-half entry adds each half's.
 		if disclosure, own := disclosures[name]; own {
 			for _, part := range disclosure.parts() {
 				classes.Add(part.Class)
 			}
 		} else {
-			classes.Add("")
+			classes.Add(disclosureClassAggregate)
 		}
 	}
 	classList := classes.Keys()

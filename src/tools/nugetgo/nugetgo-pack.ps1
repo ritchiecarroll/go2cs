@@ -287,7 +287,9 @@ else {
     $packedDigests = @{}
     for ($i = 0; $i -lt $libraries.Count; $i++) { $packedDigests[$packed[$i].ImportPath] = Get-NugetgoProjectInputDigest -ProjectFile $libraries[$i].FullName }
     $proofDigests = Get-NugetgoProofInputDigests -ModuleSummary ([System.IO.File]::ReadAllText($validationPage))
-    $unbound = @(Test-NugetgoValidationBinding -Proof $proofDigests -Packed $packedDigests)
+    # A packed package with Go tests must have a row: one without is a package the -tests run did not validate.
+    $testedPaths = @(Get-NugetgoTestedImportPaths -ModuleDir $moduleCacheDir -ModulePath $ModulePath -ImportPaths @($packedDigests.Keys))
+    $unbound = @(Test-NugetgoValidationBinding -Proof $proofDigests -Packed $packedDigests -Tested $testedPaths)
     if ($unbound.Count) { Refuse "the validation proof is not a proof of the packed tree -- $($unbound -join '; ')" }
     foreach ($path in @($packedDigests.Keys | Sort-Object)) {
         Write-Host "  proof: $path $(if ($proofDigests.ContainsKey($path)) { "bound at $($packedDigests[$path])" } else { 'has no proof row (no Go tests)' })"
