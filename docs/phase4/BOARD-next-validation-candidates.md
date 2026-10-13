@@ -26793,6 +26793,74 @@ The Go 1.26 hop does not touch any of the three.
 
 — G
 
+## 2026-10-12 — G: go-cmp's cyclic floor is GARBAGE COLLECTION times the live stack depth, and the ratio to Go is ~35x, not ~20x — READING (COORD accepted), amends the note above
+
+**Correction to the note above.**
+- The ratio is about **35x on a quiet box**, not "about 20x". Go's own `go test -count=1` (the pin) runs the pair
+  in **0.50–0.56 s** of test time.
+- The converted host takes 20 s quiet. Under a load, alternated three times with Go, it takes 25.4–26.7 s, less a
+  measured 1.55 s fixed startup (an empty `--run`).
+- G's prediction of ~20x was **scored a MISS**.
+- Item 1 of the note (the panic re-raise) is bounded at about 10% of the wall: the filter-capture route that
+  removes it moved the pair 20 s → 17–19 s (`DESIGN-filter-capture-route.md`, PARKED). Item 3 of the note
+  ("minor: … GC") is in fact the floor.
+
+**Measured.** Windows, JIT, Release, tiered JIT off; today's emission against master plus F2 fix A. Absolute walls
+read 20–25% high, because an `ilc` compile loaded the box; every comparison below was alternated under the same
+load.
+
+1. **GC owns the wall.** The trace is the runtime's own EventPipe with the GC keyword only, no sampler.
+   - 59 GCs; collections take **24.0 s of a 30.4 s traced span (79%)**. gen0: 34, mean 466 ms; gen1: 21, mean
+     387 ms.
+   - Reaching the suspension costs about 1 ms in total.
+   - The mark phases, timed from consecutive `GCMarkWithType` events: **stack roots take 12.0 s**. Handles,
+     dependent handles and the finalization queues take under 0.1 s together.
+   - The rest of the collection time comes after marking. That a compacting GC rescans the stacks to relocate
+     them is inferred, not timed.
+2. **The mechanism, standalone** (a C# probe: recurse N frames, time `GC.Collect(0)` at the bottom on a tiny heap).
+   - A gen0 collection costs **0.27 µs per live frame**, linearly: 17.7 ms at 65,536 frames, 70 ms at 262,144.
+   - `recChecker` lets the cyclic transformer recurse 1<<16 path steps, each several CLR frames deep. That stack
+     is live through every GC of the subtest.
+3. **The A/B** (untraced walls, alternated).
+   - Default GC: 24.2–24.5 s. `DOTNET_GCgen0size` 512 MB: **12.1–12.9 s**. Both subtests PASS.
+   - A gen0 sweep at 32 MB / 128 MB / 1 GB reads 12.6 / 12.0 / 12.7 s, so the curve is flat past 32 MB.
+   - What remains is gen1: 13 GCs at a mean of 660 ms under the 512 MB budget.
+4. **Self time.** The sampler was EventPipe's 1 ms SampleProfiler. It inflated this run about 10x (261 s against
+   24 s) at this depth, so read proportions only. Over the 6,520 busy samples (wait leaves and idle thread-pool IO
+   waits excluded):
+
+   | Frame | Share | What it is |
+   |---|---|---|
+   | `Thread.PollGC` | 43% | a thread parked while the runtime is suspended, inside go-cmp's struct copies |
+   | `EH.DispatchEx` | 13% | the panic unwind, all of it under `GoFrame.Run` in `compareAny` |
+   | `Goroutine.StartWithCreator` | 10% | `callTRFunc`'s `go` statement |
+   | `InitClassSlow` | 4% | |
+   | `RuntimeMethodHandle.GetStubIfNeeded` | 3% | `reflect.Call` |
+
+5. **Allocation leaders** (AllocationTick, 459 MB sampled):
+
+   | Type | Share | Where |
+   |---|---|---|
+   | `StandardBox<cmp.transform>` | 16.3% | `apply` heap-boxes a `transform` |
+   | `SByte[]` | 11.5% | |
+   | `StandardBox<cmp.sliceIndex>` | 6.7% | |
+   | `Type[]` | 5.3% | |
+   | `Action` | 4.9% | |
+   | `ΔValue[]` | 4.8% | |
+
+**Levers.**
+- **(a) A larger gen0 budget** halves this wall. It changes how every converted program runs, so it goes to the
+  owner with evidence across programs. COORD has ordered it sized: the knob's supported form under the JIT and
+  Native AOT, the Performance suite's wall and peak working set against 2–3 budgets, the GC-sensitive behaviours,
+  and the concurrent and DATAS alternatives.
+- **Post-hop candidates, recorded here with no sizing yet** (both change emitted code, so both go to the owner):
+  - **(b)** Fewer heap allocations per Go level: the `transform` and `sliceIndex` boxes, a converter escape
+    decision.
+  - **(c)** Fewer CLR frames per Go level on the `compareAny` → `apply` → `callTRFunc` → `reflect.Call` path.
+    This needs emitted changes, plus golib's call path.
+
+— G
+
 ## 2026-10-12 — G: reflect field access through a pointer stops at `buildFieldAccessor` under full-trim Native AOT — KNOWN TRIM STAGE 3d BOUNDARY (family E), not fixed now
 
 **Observed** (windows, Native AOT, `TrimMode=full`, local merges of the trim stack; the JIT and the template-default
