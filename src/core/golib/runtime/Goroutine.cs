@@ -957,12 +957,19 @@ public sealed class Goroutine
     /// it did through <c>QueueUserWorkItem</c> — <c>Thread.Start</c> captures it the same way — which
     /// is what keeps a failure inside a goroutine attributable to the test that spawned it.
     /// </remarks>
-    public static void Start(Action body)
+    public static void Start(Action body) => Start(body, "", 0);
+
+    /// <summary>
+    /// Starts <paramref name="body"/> as a goroutine launched from the <c>go</c> site at
+    /// <paramref name="callerFile"/>:<paramref name="callerLine"/>, whose creator is resolved once per site (see
+    /// <see cref="CreatorOfSite"/>); <c>builtin.goǃ</c> passes its own caller's site.
+    /// </summary>
+    public static void Start(Action body, string callerFile, int callerLine)
     {
         // Captured HERE, on the thread executing the `go` statement -- the new thread's first frame
         // is Run, which knows nothing about who asked for it. `body` IS the goroutine's start
         // function on this overload: nothing wrapped it, so its Method names the Go function.
-        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorFrame();
+        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorOfSite(callerFile, callerLine, body.Method);
         StartWithCreator(body, creator, ilOffset, body.Method);
     }
 
@@ -977,10 +984,50 @@ public sealed class Goroutine
     /// profile groups by. Two delegates over one method answer one function, so a method group and a
     /// closure are interchangeable here.
     /// </remarks>
-    public static void Start(Action body, Delegate entry)
+    public static void Start(Action body, Delegate entry) => Start(body, entry, "", 0);
+
+    /// <summary>
+    /// Starts <paramref name="body"/> as a goroutine whose START FUNCTION is <paramref name="entry"/>, launched from the
+    /// <c>go</c> site at <paramref name="callerFile"/>:<paramref name="callerLine"/> (see <see cref="Start(Action, string, int)"/>).
+    /// </summary>
+    public static void Start(Action body, Delegate entry, string callerFile, int callerLine)
     {
-        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorFrame();
+        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorOfSite(callerFile, callerLine, entry.Method);
         StartWithCreator(body, creator, ilOffset, entry.Method);
+    }
+
+    // The creator of a `go` statement, ONCE per site. CreatorFrame resolves a frame for every frame on the stack, so
+    // calling it at every `go` made a goroutine's creation cost grow with the creator's stack depth: go-cmp's cyclic
+    // Transformer test, which recurses 65,536 levels and launches a goroutine from that depth, spent 95% of its time
+    // there (386 s; 20 s with the capture stubbed; Go 0.3 s -- measured 2026-10-11). A `go` site's creator never
+    // changes, so it is resolved by the walk the first time the site runs and read from this cache after. The site is
+    // the launcher's caller (CallerFilePath/CallerLineNumber, which the C# compiler fills in at the `goǃ` call, so
+    // converted code needs no change) plus the entry delegate's method, which keeps two `go` statements on one C#
+    // line apart. A caller with no site (an empty file or a line of 0) walks every time, as before.
+    private static readonly ConcurrentDictionary<(string file, int line, System.Reflection.MethodBase? entry), (System.Reflection.MethodBase? method, int ilOffset)> s_creatorBySite = new();
+
+    // Counts the walks CreatorOfSite performs (GolibTests reads it: one per site, never one per `go`).
+    internal static long CreatorWalks;
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static (System.Reflection.MethodBase? method, int ilOffset) CreatorOfSite(string callerFile, int callerLine, System.Reflection.MethodBase? entry)
+    {
+        if (callerLine <= 0 || string.IsNullOrEmpty(callerFile))
+        {
+            Interlocked.Increment(ref CreatorWalks);
+            return CreatorFrame();
+        }
+
+        (string, int, System.Reflection.MethodBase?) site = (callerFile, callerLine, entry);
+
+        if (s_creatorBySite.TryGetValue(site, out (System.Reflection.MethodBase? method, int ilOffset) cached))
+            return cached;
+
+        Interlocked.Increment(ref CreatorWalks);
+        (System.Reflection.MethodBase? method, int ilOffset) found = CreatorFrame();
+        s_creatorBySite.TryAdd(site, found);
+
+        return found;
     }
 
     /// <summary>
