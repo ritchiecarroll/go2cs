@@ -68,15 +68,24 @@ the same bytes as in Go however the file's line endings were checked out.
 macOS, so an ordinary `https` request from a converted program failed there, on Intel and on Apple
 silicon. It now calls the system's own verification, as Go does.
 
-**Native AOT, fully trimmed.** Three defects that showed only in a Native AOT publish with `TrimMode` set
-to `full` are fixed. `fmt` finds a named type's `String`, `Error`, `Format` and `GoString` methods again,
-so a `time.Duration` prints as `1.5s` and not as a count of nanoseconds; that was the defect 1.24.13.6
-shipped with. Reading a struct's fields by reflection through a pointer works. And a field promoted from
-an embedded struct is the same field whichever way it is reached **[CONFIRM the second and third
-against the landed rows: this draft read them from the rows' one-line descriptions]**. The price is size again, and the choice is the same as before: behaving like Go comes first.
-Measured on `win-x64`, a fully trimmed C# program that references the packages is about 26% larger than
-it was in 1.24.13.6. The default publish was not
-affected by any of the three.
+**Native AOT, fully trimmed.** Two defects that showed only in a Native AOT publish with `TrimMode` set
+to `full` are fixed. The default publish and programs running under the JIT never had them.
+
+- **`fmt` calls a value's own methods again.** A type's Go methods are no longer trimmed away when they
+  are reached only at run time, so `fmt` calls `String()` or `Error()` and no longer prints the raw
+  value. A `time.Duration` prints as `1.5s`, not as a count of nanoseconds. This is the defect 1.24.13.6
+  shipped with and listed under Known issues.
+- **Reflection reaches a struct's fields through a pointer.** Reading or setting a field by reflection on
+  a struct reached through a pointer, with `reflect.ValueOf(&v).Elem().Field(i)` or `FieldByName`, and
+  taking that field's address, now works. In 1.24.13.6 it stopped with a `PlatformNotSupportedException`.
+
+The price is size again, and the choice is the same as before: behaving like Go comes first. Measured on
+`win-x64`, a fully trimmed C# program that references the packages is about 26% larger than it was in
+1.24.13.6.
+
+**Two pointers to one field are equal, however the field was reached.** A field promoted from an embedded
+struct can be named two ways, `&s.X` and `&s.Inner.X`. The two pointers now compare equal, as they do in
+Go. Before, they could compare unequal. This one applied to every program, under the JIT as well.
 
 **Starting a goroutine is cheaper.** The runtime library recorded where each goroutine was started by
 walking the whole call stack. It now resolves that once for each `go` statement. Code that starts
@@ -101,7 +110,7 @@ The `go.*` packages are built and versioned together, so use one version of them
 
 **[RELEASE DAY], 2026, NuGet 1.24.13.7.** Converted C# now carries Go's doc comments, in-function
 comments and blank lines where Go put them. An `https` request from a converted program works on macOS.
-Three defects in fully trimmed Native AOT publishes are fixed, including the one that printed named
+Two defects in fully trimmed Native AOT publishes are fixed, including the one that printed named
 types raw. This is the last release built from Go 1.24; the next moves to Go 1.26.
 [Full announcement](NEWS.md#[the anchor of the dated heading]).
 ```
@@ -126,8 +135,11 @@ comment: delete it when a release carries the fix. 1.24.13.7 does.
        from 30,568,960 to 38,228,480 bytes (+25.1%); promoted-field identity adds 207,872 bytes (+0.54%);
        about +26% combined over the pre-train base. Stated once in the entry, with its platform.
        Raw strings stay in the entry (COORD, the same message). Still marked CONFIRM: the roster counts at
-       the landed record, and the two full-trim fixes beyond the Stringer one, whose user-visible effect G is
-       to state.
+       the landed record.
+       The three fixes' user-visible effects are G's own sentences, relayed by COORD 2026-10-13, restated here
+       and not widened. Field-box tables and the Stringer fix are full-trim Native AOT only; promoted-field
+       identity is every publish, JIT and AOT, so it has its own paragraph. G's remark that encoding/json
+       decoding into a struct takes the field path is INFERRED, not measured, and is left out.
      Goroutines: row claude/g-golib-creator-o1.
      Modules: row claude/c2-nugetgo-rid-packs.
      Tour pin and README line: on master already (3e918939fc merge; 226afb810a).
