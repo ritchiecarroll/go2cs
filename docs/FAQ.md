@@ -145,3 +145,11 @@ No. A source conversion from C# to Go would need so many restrictions on the C# 
 practical. To call compiled .NET code from Go instead, see
 [go-dotnet](https://github.com/matiasinsaurralde/go-dotnet), which hosts the .NET runtime, or
 [embedding Mono through cgo](https://www.mono-project.com/docs/advanced/embedding/).
+
+## Why does Go stop with "unexpected NUL in input"?
+
+The Go file is not UTF-8. It is almost always a file made in Windows PowerShell 5.1 with `>` or
+`Out-File`, which write UTF-16, and then edited in place. Go source must be UTF-8, so `go build` fails
+before go2cs is involved at all.
+[The walkthrough's note](ConvertingAModule.md#step-by-step) shows how to create the file as UTF-8 and a
+one-line command that re-saves a file that is already UTF-16.
