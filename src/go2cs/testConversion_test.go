@@ -5331,6 +5331,44 @@ func TestTestVariantBridgeFollowsRenamedPackageVar(t *testing.T) {
 	}
 }
 
+// TestTestHostRunEnvTurnsBackgroundGCOff guards the runner half of the runtime-settings ruling (owner,
+// 2026-10-12): every converted host run gets DOTNET_gcConcurrent=0, in every configuration, beside the
+// tiering decision rather than coupled to it, so a -test-tiered A/B moves ONE axis. The test-host template
+// sets the same thing (TestConcurrentGCOffInTheTestHostTemplateOnlyAndQuickJitOnInBoth); the env also
+// covers a host built before the template change. It is a constant of the pipeline, not an
+// options-dependent axis, so testEnvironmentRecord does not carry it.
+func TestTestHostRunEnvTurnsBackgroundGCOff(t *testing.T) {
+	cases := []struct {
+		testConfig string
+		testTiered bool
+		wantTC0    bool
+	}{
+		{"Debug", false, false},
+		{"Debug", true, false},
+		{"Release", false, true},
+		{"Release", true, false},
+	}
+
+	for _, c := range cases {
+		options := Options{testConfig: c.testConfig, testTiered: c.testTiered}
+		env := testHostRunEnv(options)
+
+		if count := slices.Index(env, "DOTNET_gcConcurrent=0"); count < 0 {
+			t.Errorf("testHostRunEnv(%s, tiered=%v) = %v; want DOTNET_gcConcurrent=0 in every configuration", c.testConfig, c.testTiered, env)
+		}
+
+		if got := slices.Contains(env, "DOTNET_TieredCompilation=0"); got != c.wantTC0 {
+			t.Errorf("testHostRunEnv(%s, tiered=%v) = %v; DOTNET_TieredCompilation=0 present %v, want %v (the GC entry must not move the tiering decision)", c.testConfig, c.testTiered, env, got, c.wantTC0)
+		}
+
+		for _, entry := range env {
+			if strings.Count(strings.Join(env, "\n"), entry) != 1 {
+				t.Errorf("testHostRunEnv(%s, tiered=%v) = %v repeats %q", c.testConfig, c.testTiered, env, entry)
+			}
+		}
+	}
+}
+
 // TestTestEnvironmentRecordRoundTrips exercises the three meaningful -test-config/-test-tiered
 // combinations end to end: testEnvironmentFromOptions derives the record testHostRunEnv's own
 // decision must agree with (so proof pages and the actual run environment can never silently
@@ -5367,7 +5405,7 @@ func TestTestEnvironmentRecordRoundTrips(t *testing.T) {
 			// SAME decision — that is the whole reason testEnvironmentFromOptions reads the same
 			// two options testHostRunEnv does, rather than being handed a value to trust.
 			env := testHostRunEnv(options)
-			gotRunEnvTC0 := len(env) == 1 && env[0] == "DOTNET_TieredCompilation=0"
+			gotRunEnvTC0 := slices.Contains(env, "DOTNET_TieredCompilation=0")
 
 			if gotRunEnvTC0 != c.wantRunEnvTC0 {
 				t.Errorf("testHostRunEnv(%+v) = %v, want DOTNET_TieredCompilation=0 present: %v", options, env, c.wantRunEnvTC0)

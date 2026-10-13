@@ -547,3 +547,39 @@ func TestQuickJitForLoopsOptInShipsCommentedInTheExecutableGroupOnly(t *testing.
 		t.Errorf("test-csproj-template.xml mentions TieredCompilationQuickJitForLoops; the test hosts are the fleet's instrument and carry no opt-in")
 	}
 }
+
+// The runtime settings (owner ruling 2026-10-12, BOARD "runtime settings for converted programs"): the TEST HOST
+// turns background GC off, because a deep recursion such as go-cmp's cyclic transformer pays a stack walk per GC and
+// background GC caps the gen0 budget (measured: the pair 24.5 s -> 9.5 s under the runner's tiering-off). The APP
+// template is unchanged; both settings are documented opt-ins there. Quick JIT stays ON in both templates: turning
+// it off is inert under the runner (which already disables tiering) and costs up to 2.2x on interface dispatch for
+// an IL-only host run directly, so the owner dropped it. Read from the rendered documents, as MSBuild loads them.
+func TestConcurrentGCOffInTheTestHostTemplateOnlyAndQuickJitOnInBoth(t *testing.T) {
+	testHost := propertyGroupsOf(t, "test-csproj-template.xml", renderTestCsprojTemplate())
+
+	if value := testHost.value("ConcurrentGarbageCollection"); value != "false" {
+		t.Errorf("test-csproj-template.xml sets ConcurrentGarbageCollection=%q; the ruling is false for every test host", value)
+	}
+
+	if condition, _ := testHost.conditionOf("ConcurrentGarbageCollection"); condition != "" {
+		t.Errorf("test-csproj-template.xml sets ConcurrentGarbageCollection under Condition %q; it must be unconditional, so a built host and a published one run alike", condition)
+	}
+
+	rendered := map[string]propertyGroups{"test-csproj-template.xml": testHost}
+
+	for _, outputType := range []string{"Exe", "Library"} {
+		name := "csproj-template.xml (" + outputType + ")"
+		app := propertyGroupsOf(t, name, renderCsprojTemplate(outputType, "", ""))
+		rendered[name] = app
+
+		if value := app.value("ConcurrentGarbageCollection"); value != "" {
+			t.Errorf("%s SETS ConcurrentGarbageCollection=%q; the app template is unchanged, background GC off is a documented opt-in", name, value)
+		}
+	}
+
+	for name, groups := range rendered {
+		if value := groups.value("TieredCompilationQuickJit"); value != "" {
+			t.Errorf("%s SETS TieredCompilationQuickJit=%q; the owner dropped quick-JIT-off from both templates", name, value)
+		}
+	}
+}
