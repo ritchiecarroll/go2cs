@@ -968,6 +968,9 @@
     <Project Path="tests/Behavioral/SharedEmbeddedInterfaceMember/SharedEmbeddedInterfaceMember.csproj" />
     <Project Path="tests/Behavioral/ShiftNegativeWideConst/ShiftNegativeWideConst.csproj" />
     <Project Path="tests/Behavioral/ShiftPrecedenceUnsigned/ShiftPrecedenceUnsigned.csproj" />
+    <Project Path="tests/Behavioral/ShellCacheMutation/ShellCacheMutation.csproj" />
+    <Project Path="tests/Behavioral/ShellCacheNilFunc/ShellCacheNilFunc.csproj" />
+    <Project Path="tests/Behavioral/ShellCacheReassertEquality/ShellCacheReassertEquality.csproj" />
     <Project Path="tests/Behavioral/ShellForwardArity/ShellForwardArity.csproj" />
     <Project Path="tests/Behavioral/SiblingPackageNames/SiblingPackageNames.csproj" />
     <Project Path="tests/Behavioral/SiblingPackageNames/teststructs/foo1/SiblingPackageNames.teststructs.foo1.csproj" />
