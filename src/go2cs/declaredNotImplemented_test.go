@@ -392,9 +392,13 @@ const (
 // (2026-10-10, the Phase 5 windows/linux seat): the empty list, Go's own answer for a binary built
 // without -cover. Before that, runtime/coverage.ClearCounters died on its first call on every OS.
 //
+// crypto/x509/internal/macos.syscall left with its body in crypto/x509/internal/macos/darwin/corefoundation_impl.cs
+// (2026-10-11, the D4 macOS system-root seat): Go's runtime·syscall_x509 as one native call with five integer
+// arguments and a float64 (golib GoLibcCall.CallFiveAndDouble). Before that, Certificate.Verify with system
+// roots threw on both mac chips.
+//
 // ⚠ EDIT THIS TABLE IN THE COMMIT THAT MOVES THE TREE, never afterwards. That is the whole mechanism.
 var declaredPushStubs = map[string]string{
-	"crypto/x509/internal/macos.syscall":                 dispositionLatent,
 	"internal/runtime/maps.mapKeyError":                  dispositionLatent,
 	"internal/syscall/windows.QueryPerformanceCounter":   dispositionLatent,
 	"internal/syscall/windows.QueryPerformanceFrequency": dispositionLatent,

@@ -2467,6 +2467,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckWsaSendtoRoundTrip() => CheckTarget("WsaSendtoRoundTrip");
 
     [TestMethod]
+    public void CheckX509SystemVerify() => CheckTarget("X509SystemVerify");
+
+    [TestMethod]
     public void CheckXpkgPromotedInnerLib() => CheckTarget("XpkgPromotedInnerLib");
 
     [TestMethod]
