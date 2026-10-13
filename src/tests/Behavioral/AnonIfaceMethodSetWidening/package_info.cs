@@ -52,7 +52,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("AnonIfaceMethodSetWidening.go", "AnonIfaceMethodSetWidening.cs", "AAoYgLKAAA8IhIKAiJS4goCIlA==")]
+[assembly: go.GoPositionMap("AnonIfaceMethodSetWidening.go", "AnonIfaceMethodSetWidening.cs", "AAoYwgAQCISCgIiUuIKAiJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go;
