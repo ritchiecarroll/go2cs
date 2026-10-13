@@ -26874,6 +26874,108 @@ load.
 
 — G
 
+## 2026-10-12 — G: runtime settings for converted programs — the GC and tiering knobs, SIZED (COORD accepted; to the owner, no code cut)
+
+**What was asked.** COORD asked two things after the floor reading above. First, size lever (a), the gen0 budget, across
+programs. Then, when the correction showed tiering doubles go-cmp, size the TIERING settings the same way. Measure only.
+The recommendation goes to the owner as one decision. No code is cut until the owner rules.
+
+**Instruments.**
+- **Effective config:** a C# probe that reads the runtime's own effective GC configuration
+  (`GC.GetConfigurationVariables`), GC counts, pause time and peak working set. Its workload allocates at the bottom of
+  a deep stack. It ran under the JIT and Native AOT.
+- **Arm harness:** runs every program under every arm, ROUND-ROBIN, so box load hits all arms alike. One warm-up round
+  is discarded, then the median of 5 (go-cmp and the behaviours: 3). Per run it records:
+  - the process wall;
+  - the program's own `elapsed_ns`;
+  - the peak working set (`GetProcessMemoryInfo` on the exited process's open handle, controlled against the probe's
+    own reading);
+  - a hash of the output.
+- **Programs:**
+  - the 15 Performance benchmarks in two shapes: as BUILT (IL-only, the suite's JIT column) and as PUBLISHED by the
+    template (self-contained, partial trim, ReadyToRun; golib and the converted packages carry R2R code);
+  - go-cmp's cyclic pair, from the template's single-file R2R test-host publish, plus its startup (an empty `--run`);
+  - `SetFinalizerBridge` (a finalizer and `runtime.GC()`) and `GoroutineParkStorm` (1,000 goroutines parked at once).
+- **Conditions:** windows, Release. One unrelated `ilc` held a core throughout, so absolute walls read high and
+  only ratios are used.
+- **Outputs:** IDENTICAL to the default in every arm of both sizings, every exit 0. The two behaviour tests match Go.
+
+### The knobs: which exist, and which are honored
+
+| Knob | Documented for .NET 10 | JIT | Native AOT |
+|---|---|---|---|
+| `GCgen0size` (gen0 budget) | **no** | env `DOTNET_GCgen0size` only; the runtimeconfig spellings `System.GC.Gen0Size` and `GCgen0size` are IGNORED | **ignored**, even the env var |
+| `System.GC.Concurrent` / `ConcurrentGarbageCollection` | yes | honored | honored: the MSBuild property is embedded at publish; env `DOTNET_gcConcurrent=0` also works |
+| `System.GC.Server` / `ServerGarbageCollection`, DATAS (`GarbageCollectionAdaptationMode`) | yes | honored | MSBuild property honored; env `DOTNET_gcServer=1` NOT honored (chosen at publish) |
+| `TieredCompilation`, `TC_QuickJit`, `TC_QuickJitForLoops`, `TieredPGO` | yes | honored, each read as a measured effect | **no meaning** (no JIT) |
+| `ReadyToRun` (env use/ignore) | yes | honored | no meaning |
+| OSR | **not on the page** | not an arm | — |
+
+**Two facts behind the table.**
+- **Concurrent-off works by lifting a cap.** Background GC caps the gen0 budget; the probe reads an effective
+  `GCGen0MaxBudget` of 8 MB. Turning background GC off lifts the cap, and the probe's gen0 GCs fall 575 → 113.
+- **The docs and the runtime disagree on QuickJitForLoops.** The page says an omitted `QuickJitForLoops` means
+  false, but the QJFL-off arm differs from the default everywhere, so the runtime's default is on. Turning it off
+  also removes OSR. That is the template's existing commented opt-in for the packaged-Ubuntu OSR issue.
+
+### The GC arms (default tiered JIT)
+
+| Arm | go-cmp pair wall / peak | Suite (built) work vs default | Suite peak vs default |
+|---|---|---|---|
+| default | 54.9 s / 799 MB | 1.00x | 1.00x |
+| concurrent-off | **17.3 s / 879 MB** | 0.95–1.10x | unchanged, except IfaceShell 1.18x and TlsHandshake 1.23x |
+| server + DATAS | 12.5 s / 1,038 MB | 0.93–1.15x (String, StringMatch, IfaceShell slower) | up to 1.18x |
+| server, no DATAS | 6.0 s / 1,085 MB | 0.95–1.06x | **2.0–3.1x** on the allocating benchmarks |
+| gen0 64 / 256 / 512 MB (undocumented, reference only) | 28.9–30.0 s / 919–922 MB | 0.91–1.10x | up to 2.2x |
+
+On the Native AOT probe: default 12.2 s / 66 MB, concurrent-off 3.1 s / 150 MB, server + DATAS 2.7 s / 154 MB, server
+without DATAS 0.9 s / 379 MB. That is the JIT's shape.
+
+### The tiering arms (9 arms; each combined with nothing else unless named)
+
+| Arm | go-cmp pair wall / peak | go-cmp startup | Suite PUBLISHED: work geo-mean (worst) | Published Startup row | Suite BUILT: work geo-mean (worst) | Built Startup row |
+|---|---|---|---|---|---|---|
+| default | 54.9 s / 793 MB | 0.99 s | 1.00x | 331 ms | 1.00x | 1.00x |
+| TieredCompilation off | 24.5 s / 522 MB | 1.46 s | **1.19x (RefLower 3.63x, TlsHandshake 2.55x)** | 1.27x | 1.09x (IfaceCall 2.16x) | 1.51x |
+| QuickJit off | 24.8 s / 522 MB | 1.46 s | **0.94x** (RefLower 1.22x) | 1.27x | 1.10x (IfaceCall 2.20x) | 1.50x |
+| QuickJitForLoops off | 31.9 s / 588 MB | 1.08 s | 0.96x (Sort 1.16x) | 1.13x | 1.19x (IfaceCall 2.15x) | 1.14x |
+| TieredPGO off | 35.5 s / 596 MB | 0.98 s | 1.06x (Sort 1.32x) | 1.00x | 1.30x (IfaceCall 2.17x) | 0.99x |
+| ReadyToRun use off | 49.9 s / 752 MB | 1.34 s | 0.55x (short runs JIT up), but startup **2.42x** and peak 2.0x | 2.42x | 1.03x | 1.38x |
+| concurrent-off | 12.9 s / 893 MB | 1.00 s | 1.02x (peak up to 1.83x, TlsHandshake) | 1.01x | 1.00x (peak up to 1.51x) | 1.00x |
+| TieredCompilation off + concurrent-off | 9.5 s / 551 MB | 1.47 s | 1.18x (RefLower 3.63x) | 1.25x | 1.11x | 1.53x |
+| **QuickJit off + concurrent-off** | **9.6 s / 552 MB** | 1.45 s | **0.94x** (RefLower 1.22x; peak up to 1.82x) | 1.28x | 1.10x (IfaceCall 2.21x) | 1.55x |
+
+**The traps the table exposes.**
+- **TieredCompilation=false on a PUBLISHED build.** With tiering off, the ReadyToRun code is never re-optimized, so
+  the published suite runs 1.19x slower on the geo-mean and RefLower 3.6x slower. QuickJit=false gives the same
+  go-cmp gain and keeps that re-optimization.
+- **QuickJit=false on an UNPUBLISHED run** (`dotnet build` or run). A method without R2R code loses the tier-0
+  instrumentation that dynamic PGO needs, and interface dispatch slows up to 2.2x (IfaceCall). TieredPGO=false alone
+  produces the same 2.17x.
+- **Why the deep stack gets cheaper.** Quick-JIT frames are larger, which matches the 30% lower peak with tiering or
+  QuickJit off. Their cost per GC stack walk was not measured.
+
+### The recommendation (COORD accepted, to the owner)
+
+| Template | Settings | Expected gain | Known trade-off |
+|---|---|---|---|
+| **Test host** (`*.tests.csproj`) | `TieredCompilationQuickJit=false` + `ConcurrentGarbageCollection=false` | go-cmp 54.9 → 9.6 s (0.17x) at 0.70x peak; published suite 0.94x | +90 ms to +470 ms startup per process; up to +84 MB peak on allocation-heavy programs; full GCs block; an unpublished host loses PGO on interface dispatch (up to 2.2x) |
+| **The `-tests` runner** | concurrent-off added to the env it already sets (`DOTNET_TieredCompilation=0`, the Release default, for reproducible verdicts) | go-cmp 24.5 → 9.5 s under the runner's own tiering-off | blocking full GCs; the env list lives in the converter's runner, so it is the owner's call too |
+| **App** | **no change**; document both as opt-ins for deep-recursion or batch programs | — | QuickJit-off costs every app about +27% startup, and up to 2.2x on unpublished runs; concurrent-off makes full GCs blocking for long-running servers with large heaps (not measured) |
+
+**Rejected:**
+- the undocumented gen0 budget: unsupported, and ignored by Native AOT;
+- `TieredCompilation=false`: the R2R trap above;
+- `TieredPGO=false`: slower in every shape;
+- ReadyToRun use off: 2.4x startup;
+- server GC: a heap and a GC thread per core, up to 15% slower on three benchmarks, and 2–3x memory without DATAS.
+
+**Native AOT.** The tiering knobs have no meaning there; concurrent-off is honored. Two Performance benchmarks are
+being published under AOT (TlsHandshake, StringMatch), to be measured under the default against concurrent-off. They
+land as their own block.
+
+— G
+
 ## 2026-10-12 — G: reflect field access through a pointer stops at `buildFieldAccessor` under full-trim Native AOT — KNOWN TRIM STAGE 3d BOUNDARY (family E), not fixed now
 
 **Observed** (windows, Native AOT, `TrimMode=full`, local merges of the trim stack; the JIT and the template-default
