@@ -1333,6 +1333,11 @@ if ($unexpectedDeletable.Count -gt 0) {
 # is reported by name and the directory stays. Never `Remove-Item -Recurse` here.
 $absentPackageDirs = @{}
 
+# A key here that is a layout-L3 per-GOOS FOLDER (core\<pkg>\<goos>\) rather than a package directory: its
+# rows resolved, through Resolve-Principal's L3 arm, to the PARENT's import path. A per-GOOS folder never
+# holds a project, so it is never a "package with no project file" in the solution post-condition below.
+$absentL3Folders = @{}
+
 foreach ($row in @($deleteRows | Where-Object { $_.Class -eq 'DELETE-ABSENT' -and $_.Reason -eq 'package not in std at target' })) {
     $segments = $row.Path -split '/'
 
@@ -1340,6 +1345,85 @@ foreach ($row in @($deleteRows | Where-Object { $_.Class -eq 'DELETE-ABSENT' -an
 
     $dir = ($segments[0..($segments.Count - 2)] -join '/')
     $absentPackageDirs[$dir] = $true
+
+    $importPath = $row.Principal.Substring(0, [Math]::Max(0, $row.Principal.LastIndexOf('/')))
+    if ($importPath -ne $dir -and ($KnownGoos -contains $segments[-2])) { $absentL3Folders[$dir] = $true }
+}
+
+# ---------------------------------------------------------------------------------------------
+# A PACKAGE WHOSE OWN SOURCE IS GONE WHILE A GOOS-NAMED CHILD PACKAGE REMAINS (coordinator ruling
+# 2026-10-12, on the i9's Go 1.26 recon, RECON-go1.26-hop.md F1).
+#
+# At go1.24.13 internal/runtime/syscall is a linux-only package in the per-OS layout: its project file at
+# core\internal\runtime\syscall\ and its .cs in the linux\ folder. At go1.26.9 that package is GONE and Go
+# has two packages on its paths instead, internal/runtime/syscall/linux and internal/runtime/syscall/windows.
+# The rows above key the removal on each FILE's directory, so the only absent "package directory" was the
+# linux\ FOLDER: the parent's project, README and icons were never enumerated, the stale project survived
+# H5c and stayed in the solution, and its $(GoTargetOS)/*.cs glob compiled the NEW windows package's files
+# into the wrong assembly (CS0234 x12 at the 1.26.9 rung 1).
+#
+# ⚠ WHY THIS IS DECIDED FROM THE GOROOTS' FILES AND NOT FROM THE ROWS. A row-derived answer depends on the
+# flavour: under -Goos linux the old linux\ files resolve to the NEW package internal/runtime/syscall/linux
+# and are never DELETE rows at all, so the windows run would remove the parent and the linux run would not,
+# and the three flavours' delete sets would disagree. Whether a directory's OWN Go source exists is the same
+# question in every flavour. A directory qualifies when it holds a staged project, it held non-test Go source
+# at the SOURCE release (so it was a converted package), it holds none at the TARGET, and a child named for a
+# GOOS holds non-test Go source at the target. Its own files then become residue below, and its solution entry
+# is removed like any DELETE-ABSENT package's; its child directories are never touched.
+function Test-OwnGoSource {
+    param([Parameter(Mandatory = $true)][string] $Root, [Parameter(Mandatory = $true)][string] $ImportPath)
+
+    $dir = Join-Path (Join-Path $Root 'src') ($ImportPath -replace '/', [System.IO.Path]::DirectorySeparatorChar)
+    if (-not (Test-Path -LiteralPath $dir -PathType Container)) { return $false }
+    return (@(Get-ChildItem -LiteralPath $dir -File -Filter '*.go' -ErrorAction SilentlyContinue | Where-Object { $_.Name -notlike '*_test.go' }).Count -gt 0)
+}
+
+$stagedProjectDirs = @(Get-ChildItem -LiteralPath $CoreDir -Recurse -File -Filter '*.csproj' -ErrorAction SilentlyContinue |
+    ForEach-Object { Get-RelativeDisplayPath -Path $_.DirectoryName -Root $CoreDir } |
+    Where-Object { $_ -and @($_ -split '/' | Where-Object { $_ -in @('bin', 'obj') }).Count -eq 0 } |
+    Sort-Object -Unique)
+
+$goosChildParents = @{}
+
+foreach ($dir in $stagedProjectDirs) {
+    if (-not (Test-OwnGoSource -Root $SourceGoRoot -ImportPath $dir)) { continue }
+    if (Test-OwnGoSource -Root $GoRoot -ImportPath $dir) { continue }
+
+    $children = @($KnownGoos | Where-Object { Test-OwnGoSource -Root $GoRoot -ImportPath "$dir/$_" })
+    if ($children.Count -eq 0) { continue }
+
+    $absentPackageDirs[$dir] = $true
+    $goosChildParents[$dir] = $children
+}
+
+# ---------------------------------------------------------------------------------------------
+# THE HAZARD ITSELF, REFUSED: a project directory that SURVIVES this pass beside a child directory named for
+# a GOOS that is a package of its own (it carries its own project). The per-OS layout compiles
+# $(GoTargetOS)/*.cs, so that parent's project would compile the CHILD package's files. No Go release from
+# 1.24 to 1.27 has that shape (internal/syscall and internal/runtime/syscall, the only parents with
+# GOOS-named children, have no Go source of their own), so a hit is a new upstream shape the converter's
+# layout cannot hold, and it is refused by name rather than built wrong.
+$goosChildCollisions = @()
+
+foreach ($dir in $stagedProjectDirs) {
+    if ($absentPackageDirs.ContainsKey($dir)) { continue }
+
+    foreach ($g in $KnownGoos) {
+        $child = Join-Path $CoreDir (("$dir/$g") -replace '/', [System.IO.Path]::DirectorySeparatorChar)
+
+        if ((Test-Path -LiteralPath $child -PathType Container) -and
+            @(Get-ChildItem -LiteralPath $child -File -Filter '*.csproj' -ErrorAction SilentlyContinue).Count -gt 0) {
+            $goosChildCollisions += "$dir/$g"
+        }
+    }
+}
+
+if ($goosChildCollisions.Count -gt 0) {
+    Write-Host ''
+    Write-Host ("REFUSED: {0} per-OS-layout package director(y/ies) hold a child package named for a GOOS: {1}." -f $goosChildCollisions.Count, ($goosChildCollisions -join ', ')) -ForegroundColor Red
+    Write-Host 'The parent''s $(GoTargetOS)/*.cs glob would compile the child package''s files into the wrong assembly.' -ForegroundColor Red
+    Write-Host 'This is a layout the converter cannot hold. NOTHING WAS DELETED.' -ForegroundColor Red
+    exit 3
 }
 
 $residueRows = @()
@@ -1779,12 +1863,21 @@ else {
         Write-Host ("  orphaned hand-owns: {0} deleted, of {1}  (relocate is REFUSED; a move lives in git)" -f $orphansDeleted, $orphanRows.Count)
     }
 
-    foreach ($dir in @($absentPackageDirs.Keys | Sort-Object)) {
+    # Deepest first, so a per-GOOS folder emptied by its rows is gone before its parent is tested.
+    foreach ($dir in @($absentPackageDirs.Keys | Sort-Object -Descending)) {
         $onDisk = Join-Path $CoreDir ($dir -replace '/', [System.IO.Path]::DirectorySeparatorChar)
 
         if (-not (Test-Path -LiteralPath $onDisk -PathType Container)) { continue }
 
         $left = @(Get-ChildItem -LiteralPath $onDisk -Force -ErrorAction SilentlyContinue)
+
+        if ($goosChildParents.ContainsKey($dir) -and $left.Count -gt 0 -and
+            @($left | Where-Object { -not ($_.PSIsContainer -and ($goosChildParents[$dir] -contains $_.Name)) }).Count -eq 0) {
+            # Expected, not a leftover: the directory now holds only its GOOS-named child packages.
+            $dirsKept += $dir
+            Write-Host ("    KEPT     {0}/  -- holds only its GOOS-named child package(s): {1}" -f $dir, ($goosChildParents[$dir] -join ', '))
+            continue
+        }
 
         if ($left.Count -eq 0) {
             Remove-Item -LiteralPath $onDisk -Force
@@ -1837,6 +1930,10 @@ else {
     $slnxDirs = @()
 
     foreach ($dir in @($absentPackageDirs.Keys | Sort-Object)) {
+        # A per-GOOS folder is never a project, so it is never a package that lost its project file
+        # (see $absentL3Folders). Counting it is what refused the internal/runtime/syscall case at go1.26.9.
+        if ($absentL3Folders.ContainsKey($dir)) { continue }
+
         $onDisk = Join-Path $CoreDir ($dir -replace '/', [System.IO.Path]::DirectorySeparatorChar)
 
         # No directory at all, or a directory with no surviving .csproj: either way nothing can build it
@@ -1875,7 +1972,10 @@ else {
                 # (solutionGenerator.go's own reason -- a pre-F5 binary or a deployed tree can emit
                 # backslashes), one spelling of the path, and no escaped backslash in the pattern.
                 $normalized = $line.Replace([char]92, [char]47)
-                $pattern    = 'Path="core/' + (($dir -split '/' | ForEach-Object { [regex]::Escape($_) }) -join '/') + '/'
+                # The project file DIRECTLY in the package directory, never one below it: a parent whose
+                # own source is gone keeps its GOOS-named child packages, and a prefix match would drop
+                # their entries too (core/internal/runtime/syscall/ is a prefix of .../syscall/windows/).
+                $pattern    = 'Path="core/' + (($dir -split '/' | ForEach-Object { [regex]::Escape($_) }) -join '/') + '/[^/"]+\.csproj"'
 
                 if ($normalized -match $pattern) { $drop = $true; break }
             }
