@@ -487,6 +487,10 @@ func hasBreakList(list []ast.Stmt, label string, implicit bool) bool {
 // shape is unchanged, so the file/line pair stays INDIVISIBLE as a property of the record rather
 // than of its declaring file, and an assembly attribute answers the same wherever it is declared.
 func (v *Visitor) finalizePositionMap(outputFileName string) {
+	// The trailing-comment alignment pass runs on the same finished text, once the sentinels are gone, on every path
+	// that writes a file (trailingCommentAlignment.go).
+	defer v.finalizeCommentAlignment(outputFileName)
+
 	text := v.outputBuilder.String()
 
 	if !strings.Contains(text, PositionSentinel) {

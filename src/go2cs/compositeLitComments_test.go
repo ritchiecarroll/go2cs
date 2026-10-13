@@ -112,8 +112,8 @@ func TestCompositeLitCommentsKeepGoPlacement(t *testing.T) {
 	}
 
 	// A label after a one-line func's closing brace trails the element, not the func's own statement:
-	// the func keeps its expression body.
-	for _, c := range [][2]string{{"// add one", "x + 1,"}, {"// double", "x * 2 //"}} {
+	// the func keeps its expression body. Go aligned the two labels, so they share a column (decision 4).
+	for _, c := range [][2]string{{"// add one", "x + 1, //"}, {"// double", "x * 2  //"}} {
 		line := strings.TrimSpace(lines[lineContaining(t, lines, c[0])])
 
 		if !strings.Contains(line, "=> "+c[1]) {

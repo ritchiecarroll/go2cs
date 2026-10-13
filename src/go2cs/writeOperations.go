@@ -327,17 +327,14 @@ func (v *Visitor) writeCommentString(builder *strings.Builder, comment *ast.Comm
 			v.writeString(builder, "") // Write indent
 		}
 
+		// A trailing comment is written one space after its code; one gofmt aligned with its neighbours is padded to
+		// their column once the file's text is final (trailingCommentAlignment.go).
 		if targetPos > token.NoPos {
-			padding := int(comment.Slash - targetPos)
-
-			if padding < 1 {
-				padding = 1
-			}
-
-			builder.WriteString(strings.Repeat(" ", padding))
+			builder.WriteString(" ")
 		}
 
 		builder.WriteString(carriedComment(comment.Text))
+		builder.WriteString(v.alignMarkerFor(comment, targetPos > token.NoPos))
 	}
 }
 

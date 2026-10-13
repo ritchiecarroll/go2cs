@@ -31,12 +31,9 @@ import (
 	"go2cs/internal/commentcensus"
 )
 
-var wantUtf8Census = map[string]int{
-	// J: end-of-line alignment (the RuneError run, no longer split by blank lines since B, is ragged; the
-	// `first` table's row comments, end-of-line again since F, follow rows `@as` widens)
-	"eol:misaligned":    3,
-	"eol:cs-ragged-run": 3,
-}
+// Empty since J: the three runs it aligned were the last findings (the RuneError, RuneSelf, MaxRune, UTFMax
+// constants; the xx, as, s1-s7 constants; the `first` table's rows, whose last row C# writes without a comma).
+var wantUtf8Census = map[string]int{}
 
 func TestCommentParityUtf8(t *testing.T) {
 	goRoot := build.Default.GOROOT

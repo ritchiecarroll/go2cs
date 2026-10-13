@@ -90,6 +90,10 @@ func rewriteDeferredMarkers(outputFileNames []string, description, prefix, suffi
 			}
 		}
 
+		// The replaced names change code widths, so the trailing-comment blocks aligned when the file was written are
+		// aligned again (trailingCommentAlignment.go).
+		content = realignTrailingComments(fileName, content)
+
 		// This pass runs AFTER the file was written, so it is the one rewrite the position map
 		// cannot see. Its replacements are type NAMES and cannot span lines, and the map's C#
 		// line numbers are only valid while that stays true — so say so loudly rather than let a
