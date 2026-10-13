@@ -36,11 +36,17 @@ type pair struct {
 
 var lone = 4 // only
 
+const (
+	short    = 1   /* block one */
+	longName = 222 /* block two,
+	   continued */
+)
+
 func main() {
 	x := 1   // set x
 	x += 2   // add
 	y := "s" // a string
-	fmt.Println(x, y, small, medium, big, lone, pair{})
+	fmt.Println(x, y, small, medium, big, lone, pair{}, short, longName)
 }
 `
 
@@ -49,7 +55,7 @@ func commentColumn(t *testing.T, lines []string, text string) (int, int) {
 	t.Helper()
 
 	line := lines[lineContaining(t, lines, text)]
-	at := strings.Index(line, "//")
+	at := strings.Index(line, text[:2])
 
 	return utf8.RuneCountInString(line[:at]), utf8.RuneCountInString(strings.TrimRight(line[:at], " "))
 }
@@ -61,6 +67,7 @@ func TestGoAlignedTrailingCommentsAlign(t *testing.T) {
 		{"// one", "// two", "// three"},
 		{"// first", "// second", "// third"},
 		{"// set x", "// add", "// a string"},
+		{"/* block one */", "/* block two,"},
 	} {
 		longest, columns := 0, map[int]bool{}
 
