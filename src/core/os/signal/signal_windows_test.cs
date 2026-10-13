@@ -69,7 +69,7 @@ func main() {
 	}
 }
 
-"""u8;
+"""u8.Raw();
 
 public static partial void TestCtrlBreak(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;

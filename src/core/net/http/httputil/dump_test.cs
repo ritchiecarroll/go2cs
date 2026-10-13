@@ -353,7 +353,7 @@ internal static slice<dumpResTestsᴛ1> dumpResTests = new dumpResTestsᴛ1[]{
 HTTP/1.1 200 OK
 Content-Length: 50
 Foo: Bar
-"""u8
+"""u8.Raw()
     ),
     new(
         res: Ꮡ(new http.Response(
@@ -371,7 +371,7 @@ HTTP/1.1 200 OK
 Content-Length: 3
 
 foo
-"""u8
+"""u8.Raw()
     ),
     new(
         res: Ꮡ(new http.Response(
@@ -392,7 +392,7 @@ Transfer-Encoding: chunked
 3
 foo
 0
-"""u8
+"""u8.Raw()
     ),
     new(
         res: Ꮡ(new http.Response(
@@ -414,7 +414,7 @@ HTTP/1.1 200 OK
 Foo1: Bar1
 Foo2: Bar2
 Content-Length: 0
-"""u8
+"""u8.Raw()
     )
 }.slice();
 

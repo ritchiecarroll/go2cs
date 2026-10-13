@@ -163,7 +163,7 @@ traceback_system_test.go:56: runtime_test.child1: 	child2()
 traceback_system_test.go:35: runtime_test.crashViaPanic.func1: 		child1()
 redacted.go:0: runtime.goexit
 
-"""u8
+"""u8.Raw()
         ),
         new(
             name: "trap"u8, // Test panic via trap. x/telemetry is aware that trap
@@ -181,7 +181,7 @@ traceback_system_test.go:104: runtime_test.trap1: 	trap2()
 traceback_system_test.go:50: runtime_test.crashViaTrap.func1: 		trap1()
 redacted.go:0: runtime.goexit
 
-"""u8
+"""u8.Raw()
         )
     }.slice();
     foreach (var (_, vᴛ1) in tests) {

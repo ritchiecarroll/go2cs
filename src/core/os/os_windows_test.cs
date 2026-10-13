@@ -909,7 +909,7 @@ func main() {
 	fmt.Printf("%q", os.Args)
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestCmdArgs(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();

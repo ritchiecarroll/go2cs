@@ -127,6 +127,6 @@ var distInfo = map[OSArch]osArchInfo {
 {{end}}
 }
 
-"""u8;
+"""u8.Raw();
 
 } // end platform_test_package

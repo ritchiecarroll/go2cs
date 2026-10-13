@@ -3342,7 +3342,7 @@ dial: blocking
 canceling
 Get error = true
 
-"""u8;
+"""u8.Raw();
 
 internal static partial void testTransportCancelRequestInDial(ж<testing.T> Ꮡt, cancelTest test) {
     GoFrame ᒐ = default;
@@ -3876,7 +3876,7 @@ Echo-Request-Id: %s
 Content-Length: %d
 
 %s
-"""u8, resCode, id, len(body), body), "\n"u8, "\r\n"u8, -1));
+"""u8.Raw(), resCode, id, len(body), body), "\n"u8, "\r\n"u8, -1));
                     w.Write(v);
                     if (id == reqIDʗ1(numReqs)) {
                         return;
@@ -4793,7 +4793,7 @@ Handler
 Write("%s")
 Handler
 
-"""u8, tcʗ1.reqString, tcʗ1.reqString, tcʗ1.reqString);
+"""u8.Raw(), tcʗ1.reqString, tcʗ1.reqString, tcʗ1.reqString);
                 if (got != want) {
                     tΔ1.Errorf("Log of events differs. Got:\n%s\nWant:\n%s"u8, got, want);
                 }

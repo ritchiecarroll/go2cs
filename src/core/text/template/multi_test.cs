@@ -115,14 +115,14 @@ internal static readonly @string multiText1 = """
 	{{define "x"}}TEXT{{end}}
 	{{define "dotV"}}{{.V}}{{end}}
 
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string multiText2 = """
 
 	{{define "dot"}}{{.}}{{end}}
 	{{define "nested"}}{{template "dot" .}}{{end}}
 
-"""u8;
+"""u8.Raw();
 
 public static void TestMultiExecute(ж<testing.T> Ꮡt) {
     // Declare a couple of templates first.

@@ -173,7 +173,7 @@ type T[P any] struct{}
 var X T[int]
 
 
-"""u8;
+"""u8.Raw();
 
 internal partial struct TestMethodInstantiation_tests /*dyn*/ {
     internal @string decl;
@@ -221,7 +221,7 @@ func (T[P]) m() {}
 
 var _ T[int]
 
-"""u8;
+"""u8.Raw();
 
 public static void TestImmutableSignatures(ж<testing.T> Ꮡt) {
     @string src = srcᶜ18;

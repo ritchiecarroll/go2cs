@@ -955,7 +955,7 @@ line 3
 {{define "one"}}{{template "two" .}}{{end}}
 {{define "two"}}{{template "three" .}}{{end}}
 {{define "three"}}{{index "hi" $}}{{end}}
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string topˢ = "top"u8;
@@ -1027,7 +1027,7 @@ internal static readonly @string treeTemplate = """
 	]
 	(- end -)
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string treeˢ = "tree"u8;
@@ -1917,7 +1917,7 @@ var v = "v";
 {{ template "jstempl" $ }}
 </script>
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string templHtmlˢ = "templ.html"u8;

@@ -564,7 +564,7 @@ func F[P any](P) {}
 
 type T[P any] []P
 
-"""u8;
+"""u8.Raw();
 
 internal partial struct TestInstanceInfo_testInst /*dyn*/ {
     internal @string name;
@@ -967,7 +967,7 @@ func (r N[B]) m() { r.m(); r.n() }
 
 func (r *N[C]) n() {  }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestGenericMethodInfo(ж<testing.T> Ꮡt) {
     @string src = packagePTypeNAAnyIntFuncˢ;
@@ -1152,7 +1152,7 @@ var (
 	_ = snort.Ints
 )
 
-"""u8;
+"""u8.Raw();
 
 internal partial struct TestPkgNameOf_type /*dyn*/ {
     internal @string path; // path string enclosed in "'s
@@ -1552,7 +1552,7 @@ package p12
 			d++
 			return d
 		}
-"""u8, new @string[]{
+"""u8.Raw(), new @string[]{
             "d = 3"u8, "b = f()"u8, "c = f()"u8, "a = c + b"u8
         }.slice()),
         new("""
@@ -1568,7 +1568,7 @@ package main
 		var b, c    = next(), next()
 		var d, e, f = next(), next(), next()
 		
-"""u8, new @string[]{
+"""u8.Raw(), new @string[]{
             "a = next()"u8, "b = next()"u8, "c = next()"u8, "d = next()"u8, "e = next()"u8, "f = next()"u8, "_ = makeOrder()"u8
         }.slice()),
         new("""
@@ -1589,7 +1589,7 @@ package p13
 		    }
 		    return T{}
 		}
-"""u8, new @string[]{
+"""u8.Raw(), new @string[]{
             "t = makeT(0)"u8, "v = t.m()"u8
         }.slice()),
         new("""
@@ -1610,7 +1610,7 @@ package p14
 		    }
 		    return T{}
 		}
-"""u8, new @string[]{
+"""u8.Raw(), new @string[]{
             "t = makeT(0)"u8, "v = t.m()"u8
         }.slice()),
         new("""
@@ -1629,7 +1629,7 @@ package p15
 		func g2() int { return x2 }
 
 		var x2 = 0
-"""u8, new @string[]{
+"""u8.Raw(), new @string[]{
             "x1 = 0"u8, "y1 = f1()"u8, "x2 = 0"u8, "y2 = f2()"u8
         }.slice())
     }.slice();
@@ -1746,7 +1746,7 @@ var V T
 func F() {}
 func (T) M() {}
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string mainSrcᶜ = """
@@ -1826,7 +1826,7 @@ func main() {
 	_ = (*B).f
 	_ = G[string].m
 }
-"""u8;
+"""u8.Raw();
 
 public static void TestSelection(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -1930,7 +1930,7 @@ import "missing"
 const C1 = foo
 const C2 = missing.C
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string mainSrcᶜ1 = """
@@ -1940,7 +1940,7 @@ import "a"
 var _ = a.C1
 var _ = a.C2
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue8518(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -1971,7 +1971,7 @@ internal static readonly @string libSrcᶜ2 = """
 package a
 const C = foo
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string mainSrcᶜ2 = """
@@ -1980,7 +1980,7 @@ package main
 import "a"
 const _ = a.C
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue59603(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -2125,7 +2125,7 @@ type Node[T any] struct {
 
 type Instance = *Tree[int]
 
-"""u8;
+"""u8.Raw();
 
 // Test for go.dev/issue/52715
 public static void TestLookupFieldOrMethod_RecursiveGeneric(ж<testing.T> Ꮡt) {
@@ -2469,7 +2469,7 @@ func (*T1) m2() {}
 
 func f(x int) { y := x; print(y) }
 
-"""u8;
+"""u8.Raw();
 
 // TestObjectParents verifies that objects have parent scopes or not
 // as specified by the Object interface.
@@ -2540,7 +2540,7 @@ type T = foo.T
 var v T = c
 func f(x T) T { return foo.F(x) }
 
-"""u8;
+"""u8.Raw();
 
 // TestFailedImport tests that we don't get follow-on errors
 // elsewhere in a package due to failing to import a package.
@@ -2642,7 +2642,7 @@ type Nested[P any] *interface{b(P)}
 
 type K = Nested[string]
 
-"""u8;
+"""u8.Raw();
 
 public static partial void TestInstantiateConcurrent(ж<testing.T> Ꮡt) {
     @string src = srcᶜ6;
@@ -2802,7 +2802,7 @@ func fn() {
 	_ = r
 }
 
-"""u8;
+"""u8.Raw();
 
 internal partial struct TestInstantiatedObjects_tests /*dyn*/ {
     internal @string name;
@@ -2958,7 +2958,7 @@ func (N4) m()
 
 type Bad Bad // invalid type
 
-"""u8;
+"""u8.Raw();
 
 internal partial struct TestImplements_tests /*dyn*/ {
     public typesꓸType V;
@@ -3065,7 +3065,7 @@ func (*V3) m()
 type V4 struct{}
 func (V4) M()
 
-"""u8;
+"""u8.Raw();
 
 public static void TestMissingMethodAlternative(ж<testing.T> Ꮡt) {
     @string src = srcᶜ9;
@@ -3108,7 +3108,7 @@ internal static readonly @string src1ᶜ = """
 package p
 var _ T
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string src2ᶜ = """
@@ -3117,7 +3117,7 @@ package p
 func f() int { return 0 }
 var _ = f(1, 2)
 
-"""u8;
+"""u8.Raw();
 
 public static void TestErrorURL(ж<testing.T> Ꮡt) {
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
@@ -3342,7 +3342,7 @@ type T[_ any] struct{}
 type A T[B]
 type B = T[A]
 
-"""u8;
+"""u8.Raw();
 
 // This is a regression test for #66704.
 public static void TestUnaliasTooSoonInCycle(ж<testing.T> Ꮡt) {
@@ -3365,7 +3365,7 @@ type A = B
 type B = C
 type C = int
 
-"""u8;
+"""u8.Raw();
 
 public static void TestAlias_Rhs(ж<testing.T> Ꮡt) {
     setGotypesalias(Ꮡt, true);

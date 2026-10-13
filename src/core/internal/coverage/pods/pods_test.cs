@@ -127,14 +127,14 @@ o1/covcounters.0880952782ab1be95aa0733055a4d06b.41.2 o:0
 o1/covcounters.0880952782ab1be95aa0733055a4d06b.42.1 o:0
 o2/covcounters.0880952782ab1be95aa0733055a4d06b.35.11 o:1
 ]
-"""u8,
+"""u8.Raw(),
         """
 o2/covmeta.0880952783ab1be95aa0733055a4d1a6 [
 o2/covcounters.0880952783ab1be95aa0733055a4d1a6.36.3 o:1
 o2/covcounters.0880952783ab1be95aa0733055a4d1a6.37.2 o:1
 o2/covcounters.0880952783ab1be95aa0733055a4d1a6.38.1 o:1
 ]
-"""u8
+"""u8.Raw()
     }.slice();
     foreach (var (k, exp) in expected) {
         @string got = podToString(podlist[k]);

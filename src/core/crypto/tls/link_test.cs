@@ -46,7 +46,7 @@ package main
 import _ "crypto/tls"
 func main() {}
 
-"""u8,
+"""u8.Raw(),
             bad: new @string[]{
                 "tls.(*Conn)"u8,
                 "type:crypto/tls.clientHandshakeState"u8,
@@ -63,7 +63,7 @@ func main() {
   tls.Server(nil, nil)
 }
 
-"""u8,
+"""u8.Raw(),
             want: new @string[]{
                 "crypto/tls.(*Conn).clientHandshake"u8,
                 "crypto/tls.(*Conn).serverHandshake"u8
@@ -76,7 +76,7 @@ package main
 import "crypto/tls"
 func main() { tls.Dial("", "", nil) }
 
-"""u8,
+"""u8.Raw(),
             want: new @string[]{
                 "crypto/tls.(*Conn).clientHandshake"u8
             }.slice(),

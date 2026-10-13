@@ -309,7 +309,7 @@ foobar
 //line bar:3
 done
 
-"""u8);
+"""u8.Raw());
     @string filename = filenameᶜ;
     var fset = NewFileSet();
     var f = fset.AddFile(filename, fset.Base(), len(src));

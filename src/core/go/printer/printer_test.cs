@@ -223,7 +223,7 @@ internal static readonly @string srcᶜ = """
 	// comment 3
 	package main
 	
-"""u8;
+"""u8.Raw();
 
 // TODO(gri) check that golden is idempotent
 //check(t, golden, golden, e.mode)
@@ -345,7 +345,7 @@ func fibo(n int) {
 	return fibo(n-1) + fibo(n-2)
 }
 
-"""u8;
+"""u8.Raw();
 
 // Verify that the printer produces a correct program
 // even if the position information of comments introducing newlines
@@ -419,7 +419,7 @@ func (t *t) foo(a, b, c int) int {
 		c*t.z
 }
 
-"""u8;
+"""u8.Raw();
 
 // Verify that the SourcePos mode emits correct //line directives
 // by testing that position information for matching identifiers
@@ -488,7 +488,7 @@ var x, y, z int
 func g() { // line 8
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string wantᶜ = """
@@ -504,7 +504,7 @@ var x, y, z int
 func g() {
 }
 
-"""u8;
+"""u8.Raw();
 
 // Verify that the SourcePos mode doesn't emit unnecessary //line directives
 // before empty lines.
@@ -633,7 +633,7 @@ package p
 
 func f()
 
-"""u8;
+"""u8.Raw();
 
 // TestFuncType tests that an ast.FuncType with a nil Params field
 // can be printed (per go/ast specification). Test case for issue 3870.
@@ -750,7 +750,7 @@ internal static readonly @string srcᶜ4 = """
 package p
 func _() {}
 
-"""u8;
+"""u8.Raw();
 
 // TestX is a skeleton test that can be filled in for debugging one-off cases.
 // Do not remove.
@@ -777,21 +777,21 @@ func foo() {
 type bar int // comment2
 
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string fooᶜ = """
 func foo() {
 	// comment inside func
 }
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string barᶜ = """
 // leading comment
 type bar int	// comment2
 
-"""u8;
+"""u8.Raw();
 
 public static void TestCommentedNode(ж<testing.T> Ꮡt) {
     @string input = inputᶜ;
@@ -891,7 +891,7 @@ func f() {
                 call(),
         }
 }
-"""u8;
+"""u8.Raw();
 internal static readonly @string returnCallˢ = "return call()"u8;
 
 // Verify that we don't print a newline between "return" and its results, as

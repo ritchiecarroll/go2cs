@@ -549,7 +549,7 @@ j+mSARB/17pKVXYWHXjsj7yIex0PadzXMO1zT5KHoNA3HT8ietoGhgjsfA+CSnvvqh/jJtqsrwOv
 2b6NGNzXfTYexzJ+nU7/ALkf4P8Awv6P9KvTQQ4AgyDqCF85Pho3CTB7eHwXoH+LT65uZbX9X+o2
 bqbPb06551Y4
 
-"""u8;
+"""u8.Raw();
 internal static readonly object decodedResultsNotEqualˢ = (@string)"Decoded results not equal"u8;
 
 public static void TestDecoderIssue4779(ж<testing.T> Ꮡt) {

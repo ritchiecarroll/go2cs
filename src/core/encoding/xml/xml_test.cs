@@ -151,7 +151,7 @@ internal static slice<ΔToken> rawTokens = new ΔToken[]{
     ((global::go.encoding.xml_package.Directive)slice<byte>((@string)"""
 DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
-"""u8)),
+"""u8.Raw())),
     ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
     new StartElement(new Name(""u8, "body"u8), new global::go.encoding.xml_package.Attr[]{new(new Name("xmlns"u8, "foo"u8), "ns1"u8), new(new Name(""u8, "xmlns"u8), "ns2"u8), new(new Name("xmlns"u8, "tag"u8), "ns3"u8)}.slice()),
     ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8)),
@@ -190,7 +190,7 @@ internal static slice<ΔToken> cookedTokens = new ΔToken[]{
     ((global::go.encoding.xml_package.Directive)slice<byte>((@string)"""
 DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
-"""u8)),
+"""u8.Raw())),
     ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
     new StartElement(new Name("ns2"u8, "body"u8), new global::go.encoding.xml_package.Attr[]{new(new Name("xmlns"u8, "foo"u8), "ns1"u8), new(new Name(""u8, "xmlns"u8), "ns2"u8), new(new Name("xmlns"u8, "tag"u8), "ns3"u8)}.slice()),
     ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8)),
@@ -226,7 +226,7 @@ internal static readonly @string testInputAltEncoding = """
 
 <?xml version="1.0" encoding="x-testing-uppercase"?>
 <TAG>VALUE</TAG>
-"""u8;
+"""u8.Raw();
 
 internal static slice<ΔToken> rawTokensAltEncoding = new ΔToken[]{
     ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
@@ -300,7 +300,7 @@ internal static readonly @string nonStrictInput = """
 <tag>&;</tag>
 <tag>&0a;</tag>
 
-"""u8;
+"""u8.Raw();
 
 internal static slice<ΔToken> nonStrictTokens = new ΔToken[]{
     ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
@@ -475,7 +475,7 @@ internal static @string nestedDirectivesInput = """
 <!DOCTYPE [<!ENTITY xlt '">'>]>
 <!DOCTYPE [<!ENTITY xlt "'<">]>
 
-"""u8;
+"""u8.Raw();
 
 internal static slice<ΔToken> nestedDirectivesTokens = new ΔToken[]{
     ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
@@ -549,7 +549,7 @@ att
 
 --></elt>
 </root>
-"""u8;
+"""u8.Raw();
 
 public static void TestInputLinePos(ж<testing.T> Ꮡt) {
     @string testInput = rootPiEltAttValCdataEltˢ;
@@ -652,7 +652,7 @@ internal static readonly @string testScalarsInput = """
 	<String>15</String>
 	<PtrString>16</PtrString>
 </allscalars>
-"""u8;
+"""u8.Raw();
 
 public static void TestAllScalars(ж<testing.T> Ꮡt) {
     ref var a = ref heap(new allScalars(), out var Ꮡa);
@@ -983,7 +983,7 @@ internal static @string directivesWithCommentsInput = """
 <!DOCTYPE [<!ENTITY go "Golang"><!-- a comment-->]>
 <!DOCTYPE <!-> <!> <!----> <!-->--> <!--->--> [<!ENTITY go "Golang"><!-- a comment-->]>
 
-"""u8;
+"""u8.Raw();
 
 internal static slice<ΔToken> directivesWithCommentsTokens = new ΔToken[]{
     ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
@@ -1062,7 +1062,7 @@ internal static readonly @string exampleTitleExampleTitleˢ = """
 			<link>http://example.com/home</link> <!-- not assigned -->
 			<ns:link xmlns:ns="http://www.w3.org/2005/Atom">http://example.com/ns</ns:link>
 		</example>
-"""u8;
+"""u8.Raw();
 
 internal partial struct TestIssue8535_ExampleConflict /*dyn*/ {
     public global::go.encoding.xml_package.Name XMLName; /*`xml:"example"`*/
@@ -1581,7 +1581,7 @@ internal static readonly @string testInputHTMLAutoClose = """
 <BR/><BR/>
 <Br></Br>
 <BR><span id="test">abc</span><br/><br/>
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkHTMLAutoClose(ж<testing.B> Ꮡb) {
     Ꮡb.RunParallel((ж<testing.PB> p) => {

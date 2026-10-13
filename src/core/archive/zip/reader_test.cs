@@ -900,7 +900,7 @@ internal static slice<byte> rZipBytes() {
 0000190 00 00 00 00 00 00 00 00 00 00 00 72 2f 72 2e 7a
 00001a0 69 70 50 4b 05 06 00 00 00 00 01 00 01 00 35 00
 00001b0 00 00 6d 01 00 00 00 00
-"""u8;
+"""u8.Raw();
     s = regexp.MustCompile(@"[0-9a-f]{7}"u8).ReplaceAllString(s, ""u8);
     s = regexp.MustCompile(@"\s+"u8).ReplaceAllString(s, ""u8);
     var (b, err) = hex.DecodeString(s);
@@ -1061,7 +1061,7 @@ internal static slice<byte> biggestZipBytes() {
 00004c0 00 00 00 00 62 69 67 67 65 72 2e 7a 69 70 50 4b
 00004d0 05 06 00 00 00 00 01 00 01 00 38 00 00 00 96 04
 00004e0 00 00 00 00
-"""u8;
+"""u8.Raw();
     s = regexp.MustCompile(@"[0-9a-f]{7}"u8).ReplaceAllString(s, ""u8);
     s = regexp.MustCompile(@"\s+"u8).ReplaceAllString(s, ""u8);
     var (b, err) = hex.DecodeString(s);

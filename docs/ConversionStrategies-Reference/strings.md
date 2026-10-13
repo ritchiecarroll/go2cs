@@ -10,6 +10,7 @@ Go's `string` becomes golib [`@string`](https://github.com/ritchiecarroll/go2cs/
 | `"text"` | `"text"u8` (a `ReadOnlySpan<byte>`) | converts to `@string` where a value is needed |
 | a literal used as a value | `static readonly @string textˢ` | [hoisted literals](#a-value-materializing-string-literal-is-hoisted-to-a-static-readonly-field-beside-its-first-use) |
 | `const name = "text"` inside a function | `static readonly @string nameᶜ` | [local string constants](#a-function-local-string-const-hoists-to-a-static-readonly-field-under-its-own-name) |
+| a raw string that spans lines | `"""…"""u8.Raw()` | [multi-line raw strings](#a-multi-line-raw-string-ends-in-raw) |
 | a literal with raw non-UTF-8 bytes | `((@string)(new byte[]{…}))` | [raw-byte literals](#a-string-literal-with-raw-byte-escapes-emits-a-byte-array-string) |
 | `type Token string` | `partial struct Token /*@string*/` | [named string types](#named-string-types) |
 | `string(b)` read and discarded | `(sstring)b` | [conversion views](#a-non-escaping-stringbyte-local-emits-the-stack-string-sstring) |
@@ -59,6 +60,31 @@ Some slots cannot take a span, and the literal changes form there:
 | `[]rune("…")`, or `[]byte` of a constant concatenation | `slice<rune>((@string)"héllo")` | the rune conversion goes through `@string` |
 
 Parentheses are transparent: `(x)` renders exactly as `x` would in the same slot. The behavioral tests `StringLiteralSliceConversion`, `NamedStringConversion`, `NamedStringZeroValue`, `CompositeElementStringConcat`, `AnyStringLitComposite` and `ParenthesizedConcatContext` cover these forms.
+
+## A multi-line raw string ends in `.Raw()`
+
+A Go raw string that spans lines emits as a C# raw string literal, and the literal ends in `.Raw()`. Every line of the Go text stays as it was:
+
+```go
+return fmt.Sprintf(`%[1]s and %[2]s both match some paths, like %[3]q.
+But neither is more specific than the other.
+%[1]s matches %[4]q, but %[2]s doesn't.
+%[2]s matches %[5]q, but %[1]s doesn't.`,
+	p1, p2, commonPath(p1, p2), differencePath(p1, p2), differencePath(p2, p1))
+```
+```csharp
+return fmt.Sprintf("""
+%[1]s and %[2]s both match some paths, like %[3]q.
+But neither is more specific than the other.
+%[1]s matches %[4]q, but %[2]s doesn't.
+%[2]s matches %[5]q, but %[1]s doesn't.
+"""u8.Raw(),
+            Ꮡp1.OrTypedNil(), Ꮡp2.OrTypedNil(), commonPath(ref (Ꮡp1).DerefOrNull(), ref (Ꮡp2).DerefOrNull()), differencePath(ref (Ꮡp1).DerefOrNull(), ref (Ꮡp2).DerefOrNull()), differencePath(ref (Ꮡp2).DerefOrNull(), ref (Ꮡp1).DerefOrNull()));
+```
+
+`Raw()` exists because of line endings. A Go raw string never holds a carriage return: the Go compiler drops every CR between the backquotes. C# instead takes a raw literal's line breaks from the source file, and `.gitattributes` pins every `*.cs` to `eol=crlf`, so every checkout gives the literal CRLF. Without `Raw()`, a build of the checked-out file holds `\r\n` where Go holds `\n`, and its length, bytes, comparisons and hashes all differ. A published package and a plain `dotnet build` both compile that checked-out form. `Raw()` (golib `string.cs`) removes every CR, which is exactly Go's rule, so the value is the same on any checkout.
+
+`Raw()` adds no allocation. The implicit span-to-`@string` conversion already copies the literal's bytes once, and `Raw()` makes that same copy while skipping CRs. A raw string inside a `+` chain of constant pieces emits as a C# `string`, and takes the `string` overload of `Raw()`. The strip applies to raw literals only. An interpreted `"\r\n"` holds a real CR and keeps it, and a one-line raw string emits as a verbatim `@"…"` literal with no line break. The behavioral test `RawStringLineEndings` guards this. Its golden is checked by compiling and running the committed CRLF `main.cs`, without a fresh transpile.
 
 ## A string literal with raw-byte escapes emits a byte-array `@string`
 

@@ -63,7 +63,7 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
 		}
 		var Println = fmt.Println
 		
-"""u8,
+"""u8.Raw(),
         """
 
 		package p
@@ -75,7 +75,7 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
 		}
 		func g() (x int) { return }
 		
-"""u8,
+"""u8.Raw(),
         """
 
 		package p
@@ -100,7 +100,7 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
 			switch {} // implicit 'true' tag
 		}
 		
-"""u8,
+"""u8.Raw(),
         """
 
 		package p
@@ -108,7 +108,7 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
 		func (T) _() {}
 		func (T) _() {}
 		
-"""u8,
+"""u8.Raw(),
         """
 
 		package p
@@ -125,7 +125,7 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
 		L2:
 		}
 		
-"""u8
+"""u8.Raw()
     }.slice();
     var pkgnames = new @string[]{
         "fmt"u8,

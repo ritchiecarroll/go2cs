@@ -167,7 +167,7 @@ func HelloWorld() {
 
 func main() {}
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string exetextᶜ = """
@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestStdioAreInheritable(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new syscall_test_package.testing_TжTB(Ꮡt));

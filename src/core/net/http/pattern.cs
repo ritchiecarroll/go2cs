@@ -460,7 +460,7 @@ internal static @string describeConflict(ж<pattern> Ꮡp1, ж<pattern> Ꮡp2) {
 But neither is more specific than the other.
 %[1]s matches %[4]q, but %[2]s doesn't.
 %[2]s matches %[5]q, but %[1]s doesn't.
-"""u8,
+"""u8.Raw(),
             Ꮡp1.OrTypedNil(), Ꮡp2.OrTypedNil(), commonPath(ref (Ꮡp1).DerefOrNull(), ref (Ꮡp2).DerefOrNull()), differencePath(ref (Ꮡp1).DerefOrNull(), ref (Ꮡp2).DerefOrNull()), differencePath(ref (Ꮡp2).DerefOrNull(), ref (Ꮡp1).DerefOrNull()));
     }
     if (mrel == moreGeneral && prel == moreSpecific) {

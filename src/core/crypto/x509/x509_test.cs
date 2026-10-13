@@ -182,7 +182,7 @@ FF53oIpvxe/SCOymfWq/LW849Ytv3Xwod0+wzAP8STXG4HSELS4UedPYeHJJJYcZ
 +QIDAQAB
 -----END PUBLIC KEY-----
 
-"""u8;
+"""u8.Raw();
 
 internal static @string pemPrivateKey = testingKey("""
 
@@ -202,7 +202,7 @@ AAA7eoZ9AEHflUeuLn9QJI/r0hyQQLEtrpwv6rDT1GCWaLII5HJ6NUFVf4TTcqxo
 wg/HcAJWY60xZTJDFN+Qfx8ZQvBEin6c2/h+zZi5IVY=
 -----END RSA TESTING KEY-----
 
-"""u8);
+"""u8.Raw());
 
 // pemEd25519Key is the example from RFC 8410, Section 4.
 internal static @string pemEd25519Key = """
@@ -211,7 +211,7 @@ internal static @string pemEd25519Key = """
 MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE=
 -----END PUBLIC KEY-----
 
-"""u8;
+"""u8.Raw();
 
 // pemX25519Key was generated from pemX25519Key with "openssl pkey -pubout".
 internal static @string pemX25519Key = """
@@ -220,7 +220,7 @@ internal static @string pemX25519Key = """
 MCowBQYDK2VuAyEA5yGXrH/6OzxuWEhEWS01/f4OP+Of3Yrddy6/J1kDTVM=
 -----END PUBLIC KEY-----
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string pkcs1PublicKeyᶜ = "308201080282010100817cfed98bcaa2e2a57087451c7674e0c675686dc33ff1268b0c2a6ee0202dec710858ee1c31bdf5e7783582e8ca800be45f3275c6576adc35d98e26e95bb88ca5beb186f853b8745d88bc9102c5f38753bcda519fb05948d5c77ac429255ff8aaf27d9f45d1586e95e2e9ba8a7cb771b8a09dd8c8fed3f933fd9b439bc9f30c475953418ef25f71a2b6496f53d94d39ce850aa0cc75d445b5f5b4f4ee4db78ab197a9a8d8a852f44529a007ac0ac23d895928d60ba538b16b0b087a7f903ed29770e215019b77eaecc360f35f7ab11b6d735978795b2c4a74e5bdea4dc6594cd67ed752a108e666729a753ab36d6c4f606f8760f507e1765be8cd744007e629020103"u8;
@@ -337,7 +337,7 @@ UjmopwKBgAqB2KYYMUqAOvYcBnEfLDmyZv9BTVNHbR2lKkMYqv5LlvDaBxVfilE0
 2riO4p6BaAdvzXjKeRrGNEKoHNBpOSfYCOM16NjL8hIZB1CaV3WbT5oY+jp7Mzd5
 7d56RZOE+ERK2uz/7JX9VSsM/LbH9pJibd4e8mikDS9ntciqOH/3
 -----END RSA TESTING KEY-----
-"""u8;
+"""u8.Raw();
 internal static readonly @string testingKeyˢ = "TESTING KEY"u8;
 internal static readonly @string privateKeyˢ = "PRIVATE KEY"u8;
 internal static readonly @string x509rsacrt0ˢ = "x509rsacrt=0"u8;
@@ -931,7 +931,7 @@ DKxL46r/FLgJYnzBEH99AiEA3fBouObsvV1R3oVkb4BQYnD4/4LeId6lAT43YvyV
 a/A=
 -----END CERTIFICATE-----
 
-"""u8;
+"""u8.Raw();
 
 // Self-signed certificate using ECDSA with SHA256 & secp256r1
 internal static @string ecdsaSHA256p256CertPem = """
@@ -951,7 +951,7 @@ YNtqjcAGFKpweoN//kQwCgYIKoZIzj0EAwIDRwAwRAIgIYSaUA/IB81gjbIw/hUV
 h5wi
 -----END CERTIFICATE-----
 
-"""u8;
+"""u8.Raw();
 
 // Self-signed certificate using ECDSA with SHA256 & secp384r1
 internal static @string ecdsaSHA256p384CertPem = """
@@ -972,7 +972,7 @@ PU9A3CHMdEcdw/MEAjBBO1lId8KOCh9UZunsSMfqXiVurpzmhWd6VYZ/32G+M+Mh
 3yILeYQzllt/g0rKVRk=
 -----END CERTIFICATE-----
 
-"""u8;
+"""u8.Raw();
 
 // Self-signed certificate using ECDSA with SHA384 & secp521r1
 internal static @string ecdsaSHA384p521CertPem = """
@@ -994,7 +994,7 @@ BF9KLolo01wMt8DjoYP5Fb3j5MH7xwJCAbWZzTOp4l4DPkIvAh4LeC4VWbwPPyqh
 kBg71w/iEcSY3wUKgHGcJJrObZw7wys91I5kENljqw/Samdr3ka+jBJa
 -----END CERTIFICATE-----
 
-"""u8;
+"""u8.Raw();
 
 
 partial struct ecdsaTestsᴛ1 /*dyn*/ {
@@ -1065,7 +1065,7 @@ z4IWqMXg4TAMBgNVHRMEBTADAQH/MAkGByqGSM44BAMDLwAwLAIUPtn/5j8Q1jJI
 7ggOIsgrhgUdjGQCFCsmDq1H11q9+9Wp9IMeGrTSKHIM
 -----END CERTIFICATE-----
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object parsedKeyDiffersFromˢ = (@string)"Parsed key differs from expected key"u8;
@@ -1157,7 +1157,7 @@ FioUxb6UKdHcPLR1VZtAdTdTMjSJxUqD/35Cdfqs7oDJXz8f6TXO2Tdy6G++YUs9
 qsGZWxzFvvkXUkQSl0dQQ5jO/FtUJcAVXVVp20LxPemfatAHpW31WdJYeWSQWky2
 +f9b5TXKXVyjlUL7uHxowWrT2AtTchDH22wTEtqLEF9Z3Q==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 // openssl req -newkey rsa:2048 -keyout test.key -sha256 -sigopt \
 // rsa_padding_mode:pss -sigopt rsa_pss_saltlen:32 -sigopt rsa_mgf1_md:sha256 \
@@ -1187,7 +1187,7 @@ wxX8nS1ISYd8jXPUMgsBKVbWufvLoIymMJW8CZbpprVZel5zFn0bmPrON8IHS30w
 Gs+ITJjKEnZgXmAQ25SLKVzkZkBcGANs2GsdHNJ370Puisy0FIPD2NXR5uASAf7J
 +w9fjQ==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 public static void TestRSAPSSSelfSigned(ж<testing.T> Ꮡt) {
     foreach (var (i, pemBlock) in new @string[]{rsaPSSSelfSignedPEM, rsaPSSSelfSignedOpenSSL110PEM}.slice()) {
@@ -1253,7 +1253,7 @@ CTs6nUop2JX/aL57Q1Ry4K2i464wDwYDVR0TAQH/BAUwAwEB/zAFBgMrZXADQQBT
 pVgcLDsqnqydTqUdX11tprUI3hKC85cgrvrYmPQagzJrkfUkHcQgfyziTdoTO21U
 GtKoKNxgudT0eEs8HJEA
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 public static void TestEd25519SelfSigned(ж<testing.T> Ꮡt) {
     var (der, _) = pem.Decode(slice<byte>(ed25519Certificate));
@@ -1301,7 +1301,7 @@ fnnktsblSUV4lRCit0ymC7Ojhe+gzCCwkgs5kDzVVag+tnl/0e2DloIjASwOhpbH
 KVcg7fBd484ht/sS+l0dsB4KDOSpd8JzVDMF8OZqlaydizoJO0yWr9GbCN1+OKq5
 EhLrEqU=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string ed25519CRLCertificate = """
 
@@ -1351,13 +1351,13 @@ gZNgMB8GA1UdIwQYMBaAFLcX2hbqxe0fGElE09LjoDUKgZNgMAUGAytlcANBAPw+
 FOq7cMJvODRwvMin9HwNHijXKp8iikXoAnaEHi1kLR4JtSlxH5WKTnmHUWCa54ZA
 9mDH0e5odhcdkMySkwc=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static @string ed25519CRLKey = testingKey("""
 -----BEGIN TEST KEY-----
 MC4CAQAwBQYDK2VwBCIEINdKh2096vUBYu4EIFpjShsUSh3vimKya1sQ1YTT4RZG
 -----END TEST KEY-----
-"""u8);
+"""u8.Raw());
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string ozAtlantisˢ = "Oz/Atlantis"u8;
@@ -1993,7 +1993,7 @@ GNnI3Zk0cwNKA49hZntKKiy22DhRk7JAHF01d6Bu3KkHkmENrtJ+zj/+159WAnUa
 qViorq4=
 -----END CERTIFICATE-----
 
-"""u8;
+"""u8.Raw();
 
 public static void TestMD5(ж<testing.T> Ꮡt) {
     var (pemBlock, _) = pem.Decode(slice<byte>(md5cert));
@@ -2058,7 +2058,7 @@ p0vMRpqBWHyFeSnIyMZn3TJWRSt1tukkqVCavh9a+hoV2cxVlXIWg7nCto/9iIw4
 hB2rXZIxE0/9gzvGnfERYraL7KtnvshksBFQRlgXa5kc0x38BvEO5ZaoDPl4ILdE
 GFGNEH5PlGffo05wc46QkYU=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object unexpectedSuccessWhenˢ = (@string)"unexpected success when parsing certificate with missing RSA NULL parameter"u8;
@@ -2090,7 +2090,7 @@ J4TBiKC62hCdZv18rBleP6ETfhbPg7pTs8p4ebQbpmtNxRS9Lw3MzQ8Ya5Ybwzj2
 NwBSyCtCQl7mrEg4nJqJl4A2EUhnET/oVxU0oTV/SZ3ziGXcY1oG1s6vidV7TZTu
 MCRtdSdaM7g3
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 public static void TestISOOIDInCertificate(ж<testing.T> Ꮡt) {
     var (block, _) = pem.Decode(slice<byte>(certISOOID));
@@ -2140,7 +2140,7 @@ uH6/skk4OEKcfOtN0hCnISOVuKYyS4ANARWRG5VGHIH06z3lGUVARFRJ61gtAprd
 La+fgSS+LVZ+kU2TkeoWAKvGq8MAgDq4D4Xqwekg7WKFeuyusi/NI5rm40XgjBMF
 DF72IUofoVt7wo0=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string eportalMssEdusSiˢ = "eportal.mss.edus.si"u8;
@@ -2207,7 +2207,7 @@ N9IEPnWuihC09cyx/WMQIUlWnaQLHdfpPS04Iez3yy2PdfXJzwfPrja7rNE+skK6
 pa/O1nF0AfWOpw==
 -----END CERTIFICATE-----
 	
-"""u8)); if (!ok) {
+"""u8.Raw())); if (!ok) {
             Ꮡt.Fatal(appendCertsFromPEMFailedˢ);
         }
     }
@@ -2236,7 +2236,7 @@ LYPmRhTioROA/drghicRkiu9hxdPyxkYS16M5g3Zj30jdm+k/6C6PeNtN9YmOOga
 nCOSyFYfGhqOANYzpmuV+oIedAsPpIbfIzN8njYUs1zio+1IoI4o8ddM9sCbtPU8
 o+WoY6IsCKXV/g==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string expectedᶜ = "empty name constraints"u8;
@@ -2404,7 +2404,7 @@ eYJk/axQOOTcy4Es53dvnZsjXH0EA/QHnn7UV+JmlE3rtVxcYp6MLYPmRhTioROA
 ANYzpmuV+oIedAsPpIbfIzN8njYUs1zio+1IoI4o8ddM9sCbtPU8o+WoY6IsCKXV
 /g==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 public static void TestCriticalNameConstraintWithUnknownType(ж<testing.T> Ꮡt) {
     var (block, _) = pem.Decode(slice<byte>(criticalNameConstraintWithUnknownTypePEM));
@@ -2439,7 +2439,7 @@ E4D92uCGJxGSK72HF0/LGRhLXozmDdmPfSN2b6T/oLo942031iY46BqcI5LIVh8a
 Go4A1jOma5X6gh50Cw+kht8jM3yeNhSzXOKj7Uigjijx10z2wJu09Tyj5ahjoiwI
 pdX+
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string expectedᶜ1 = "contained invalid mask"u8;
@@ -2497,7 +2497,7 @@ QejEoHHUvYV8TThHZr6Z6Ib8CECgTehU4QvepkgDXNoNrKRZBG0JhLjkwxh2whZq
 nvWBfALC2VuNOM6C0rDY+HmhMlVt0XeqnybD9MuQALMit7Z00Cw2CIjNsBI9xBqD
 xKK9CjUb7gzRUWSpB9jGHsvpEMHOzIFhufvH2Bz1XJw+Cl7khw==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 public static void TestAdditionFieldsInGeneralSubtree(ж<testing.T> Ꮡt) {
     // Very rarely, certificates can include additional fields in the
@@ -2611,7 +2611,7 @@ oPJTlZu1Gg1ZDJueTWWsLlO+P+Wzm3MRRIbcgdRzm4mdO7ubu26SzX/aQXDhuih+
 eVxXDTCfs7GUlxnjOp5j559X/N0A
 -----END CERTIFICATE-----
 
-"""u8;
+"""u8.Raw();
 
 public static void TestMultipleURLsInCRLDP(ж<testing.T> Ꮡt) {
     var (block, _) = pem.Decode(slice<byte>(multipleURLsInCRLDPPEM));
@@ -3543,7 +3543,7 @@ GtqYfMHsvrRHW8J2IPHW0/MUHmJ/NDu/vNchxke2OEfCPLtseo3hJt8l8HbH+yE8
 DFrt8YVRi1CLomEyuPJDF4og3O3ZsoXuxcPd9UPxULOCxycdolRw8Iv/Xgr082j3
 svXC3HUd3apM2Yy3xJAlk/mUkzVXfdJZ+Zy1huNsUoJ+gM8rmpyGhYyx
 -----END CERTIFICATE-----
-"""u8
+"""u8.Raw()
         ),
         new(
             name: "rsa leaf"u8,
@@ -3601,7 +3601,7 @@ U5xAFAe/Xrrq3sxTuDJPQA8alk6h/ql5Klkw6dL53csiPka/MevDqdifWkzuT/6n
 YK/ePeJzPD17FA9V+N1rcuF3Wk29AZvCOSasdIkIuE82vGr3dfNrsrn9E9lWIbCr
 Qc4=
 -----END CERTIFICATE-----
-"""u8
+"""u8.Raw()
         )
     }.slice();
     foreach (var (_, vᴛ1) in cases) {
@@ -3646,7 +3646,7 @@ EDuVXxwZgIU3+dOwv1SsMu0xuV48hf7xmK8n7sAMYgllB+96DnPqBeboJj4snYnx
 AwNIADBFAiBi1jz/T2HT5nAfrD7zsgR+68qh7Erc6Q4qlxYBOgKG4QIhAOtjIn+Q
 tA+bq+55P3ntxTOVRq0nv1mwnkjwt9cQR9Fn
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 // mismatchingSigAlgParamPEM contains a certificate where the Certificate
 // signatureAlgorithm and the TBSCertificate signature contain
@@ -3660,7 +3660,7 @@ EDuVXxwZgIU3+dOwv1SsMu0xuV48hf7xmK8n7sAMYgllB+96DnPqBeboJj4snYnx
 AgUAA0gAMEUCIGLWPP9PYdPmcB+sPvOyBH7ryqHsStzpDiqXFgE6AobhAiEA62Mi
 f5C0D5ur7nk/ee3FM5VGrSe/WbCeSPC31xBH0Wc=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 public static void TestSigAlgMismatch(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -3712,7 +3712,7 @@ mADkhWBKIMuh8D1195TaQ39oXCUIuNJ9MxB73HZn8bjhU3zhxoNbKXuNSm8uf0So
 GkVrMgfHeMpkksK0hAzc3S1fTbvdiuo43NlmouxBulVtWmQ9twPMHOKRUJ7jCUSV
 FxdzPcwl
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 public static void TestAuthKeyIdOptional(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -3810,7 +3810,7 @@ WAz9QnPcSdrit64V7ubMqu+RQZoYRo1KOWWihTx/DEH4C5zoHzU2YI2M4I4YsQZX
 CehBpYA/aRsR0WsTNS751lAV2ZE4QkPpF69n2Zak0WpPzLSnjkgfAHJp3k3xc6RH
 Emfp+Qc+eXWQQrjUtf3RfjUE9wAEz/E2vg8ngR+muohs
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 public static void TestLargeOID(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -3860,7 +3860,7 @@ WGnh+ojZ5clKvS5yXh3Wkj78M6sb32KfcBk0Hx6NkCYPt60ODYmWtvqwtw6r73u5
 TnTYWRNvo2svX69TriL+CkHY9O1Hkwf2It5zHl3gNiKTJVaak8AuEz/CKWZneovt
 yYLwhUhg3PX5Co1VKYE+9TxloiE=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 public static void TestParseUniqueID(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -4109,7 +4109,7 @@ hkjOPQIBBggqhkjOPQMBBwNCAAQ9ezsIsj+q17K87z/PXE/rfGRN72P/Wyn5d6oo
 A0cAMEQCIBzfBU5eMPT6m5lsR6cXaJILpAaiD9YxOl4v6dT3rzEjAiBHmjnHmAss
 RqUAyJKFzqZxOlK2q4j2IYnuj5+LrLGbQA==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object parsedCertificateWithˢ = (@string)"parsed certificate with negative serial"u8;
@@ -4155,7 +4155,7 @@ d9rmm4DjydH0t7/sMCB56lQrfhJNplguzsbjFW4l245KbNKHfLiqwEGUgZjBNKur
 ot6qX/skahLtt0CNOaFIge75HVKe/69OrWQGdp18dkay/KS4Glu8YMKIjOhfrUi1
 NZA=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object parseCertificateShouldˢ = (@string)"ParseCertificate should fail when parsing certificate with duplicate extensions"u8;
@@ -4184,7 +4184,7 @@ CwUAA4GBAHROEsE7URk1knXmBnQtIHwoq663vlMcX3Hes58pUy020rWP8QkocA+X
 VF18/phg3p5ILlS4fcbbP2bEeV0pePo2k00FDPsJEKCBAX2LKxbU7Vp2OuV2HM2+
 VLOVx0i+/Q7fikp3hbN1JwuMTU0v2KL/IKoUcZc02+5xiYrnOIt5
 -----END CERTIFICATE REQUEST-----
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object parseCertificateRequestˢ = (@string)"ParseCertificateRequest should fail when parsing CSR with duplicate extensions"u8;
@@ -4213,7 +4213,7 @@ UJ8hsHxtnIeqb2ufHnQFJO+wEJhx2Uxm/BTuzHOeffuQkwATez4skZ7SlX9exgb7
 6jRMRilqb4F7f8w+uDoqxRrA9zc8mwY16zPsyBhRet+ZGbj/ilgvGmtZ21qZZ/FU
 0pJFJIVLM3l49Onr5uIt5+hCWKwHlgE0nGpjKLR3cMg=
 -----END CERTIFICATE REQUEST-----
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object parseCertificateRequestˢ2 = (@string)"ParseCertificateRequest should succeed when parsing CSR with duplicate attributes"u8;

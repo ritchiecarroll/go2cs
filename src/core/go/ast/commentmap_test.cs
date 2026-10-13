@@ -72,7 +72,7 @@ func f3() {
 
 // the very last comment
 
-"""u8;
+"""u8.Raw();
 
 // res maps a key of the form "line number: node type"
 // to the associated comments' text.

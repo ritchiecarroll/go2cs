@@ -5877,7 +5877,7 @@ Content-Length: 10
 HelloWorld
 
 
-"""u8;
+"""u8.Raw();
 internal static readonly object expectHeaderShouldNotBeˢ = (@string)"Expect header should not be filtered out"u8;
 
 public static partial void TestIssue13893_Expect100(ж<testing.T> Ꮡt) {
@@ -5922,7 +5922,7 @@ GET /should-be-ignored HTTP/1.1
 Host: foo
 
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string helloWorldˢ4 = "Hello world!"u8;
 
 public static partial void TestIssue11549_Expect100(ж<testing.T> Ꮡt) {
@@ -6670,7 +6670,7 @@ Accept-Encoding: gzip,deflate,sdch
 Accept-Language: en-US,en;q=0.8
 Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkServerFakeConnNoKeepAlive(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -6728,7 +6728,7 @@ Accept-Encoding: gzip,deflate,sdch
 Accept-Language: en-US,en;q=0.8
 Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3
 
-"""u8;
+"""u8.Raw();
 
 public static partial void BenchmarkServerFakeConnWithKeepAlive(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -6761,7 +6761,7 @@ internal static readonly @string getHttp11HostGolangOrgˢ3 = """
 GET / HTTP/1.1
 Host: golang.org
 
-"""u8;
+"""u8.Raw();
 
 // same as above, but representing the most simple possible request
 // and handler. Notably: the handler does not call rw.Header().

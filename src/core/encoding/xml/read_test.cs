@@ -84,7 +84,7 @@ not being used from outside intra_region_diff.py.
 
 
 </summary></entry></feed> 	   
-"""u8;
+"""u8.Raw();
 
 public partial struct Feed {
     public global::go.encoding.xml_package.Name XMLName; /*`xml:"http://www.w3.org/2005/Atom feed"`*/
@@ -182,7 +182,7 @@ the top of feeds.py marked NOTE(rsc).
 
 
 
-"""u8
+"""u8.Raw()
             )
         ),
         new(
@@ -218,7 +218,7 @@ not being used from outside intra_region_diff.py.
 
 
 
-"""u8
+"""u8.Raw()
             )
         )
     }.slice()
@@ -246,7 +246,7 @@ internal static readonly @string pathTestString = """
     <After>2</After>
 </Result>
 
-"""u8;
+"""u8.Raw();
 
 public partial struct PathTestItem {
     public @string Value;
@@ -362,7 +362,7 @@ internal static readonly @string withoutNameTypeData = """
 
 <?xml version="1.0" charset="utf-8"?>
 <Test3 Attr="OK" />
-"""u8;
+"""u8.Raw();
 
 public partial struct TestThree {
     public global::go.encoding.xml_package.Name XMLName; /*`xml:"Test3"`*/
@@ -685,7 +685,7 @@ internal static readonly @string xmlVersion10EncodingUtf8ˢ2 = """
 		<Data2>howdy <!-- comment -->world</Data2>
 		</MyStruct>
 	
-"""u8;
+"""u8.Raw();
 
 public static void TestUnmarshaler(ж<testing.T> Ꮡt) {
     @string xml = xmlVersion10EncodingUtf8ˢ2;
@@ -842,7 +842,7 @@ internal static readonly @string emptyXML = """
     <X></X>
 </Parent>
 
-"""u8;
+"""u8.Raw();
 
 // golang.org/issues/13417
 public static void TestUnmarshalEmptyValues(ж<testing.T> Ꮡt) {
@@ -1020,7 +1020,7 @@ internal static readonly @string whitespaceValuesXML = """
     <F64Neg>  -266.703  </F64Neg>
 </WhitespaceValuesParent>
 
-"""u8;
+"""u8.Raw();
 
 // golang.org/issues/22146
 public static void TestUnmarshalWhitespaceValues(ж<testing.T> Ꮡt) {
@@ -1110,7 +1110,7 @@ internal static readonly @string whitespaceAttrsXML = """
 >
 </WhitespaceAttrsParent>
 
-"""u8;
+"""u8.Raw();
 
 // golang.org/issues/22146
 public static void TestUnmarshalWhitespaceAttrs(ж<testing.T> Ꮡt) {

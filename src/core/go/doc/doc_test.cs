@@ -266,7 +266,7 @@ func (*G2[A, B]) MG4() {}
 
 
 
-"""u8;
+"""u8.Raw();
 
 // TODO: synthesize a param for G1?
 internal static ж<global::go.go.doc_package.Package> funcsPackage = Ꮡ(new Package(

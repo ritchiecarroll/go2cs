@@ -120,7 +120,7 @@ never read data
 
 useless trailer
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string longlineˢ = "[longline]"u8;
 
 internal static @string testMultipartBody(@string sep) {
@@ -352,7 +352,7 @@ foo-bar: baz
 
 Oh no, premature EOF!
 
-"""u8,
+"""u8.Raw(),
         """
 
 This is a multi-part message.  This line is ignored.
@@ -361,7 +361,7 @@ foo-bar: baz
 
 Oh no, premature EOF!
 --MyBoundary-
-"""u8
+"""u8.Raw()
     }.slice()) {
         var body = vᴛ1;
 
@@ -413,14 +413,14 @@ foo-bar: baz
 Body
 --MyBoundary
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string fooBarBopBody2MyBoundaryˢ = """
 foo-bar: bop
 
 Body 2
 --MyBoundary--
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string bodyˢ = "Body"u8;
 internal static readonly @string body2ˢ = "Body 2"u8;
 
@@ -546,7 +546,7 @@ Content-Transfer-Encoding: quoted-printable
 
 <div dir=3D"ltr">Hello World.</div>
 --0016e68ee29c5d515f04cedf6733--
-"""u8;
+"""u8.Raw();
 internal static readonly @string divDir3dLtrHelloWorldDivˢ = @"<div dir=3D""ltr"">Hello World.</div>"u8;
 internal static readonly @string divDirLtrHelloWorldDivˢ = @"<div dir=""ltr"">Hello World.</div>"u8;
 
@@ -805,7 +805,7 @@ foo: bar
 
 
 --MyBoundary--
-"""u8, "\n"u8, "\r\n"u8, -1),
+"""u8.Raw(), "\n"u8, "\r\n"u8, -1),
         want: new headerBody[]{
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"u8] = new @string[]{"bar"u8}.slice()}), ""u8)
         }.slice()
@@ -838,7 +838,7 @@ Content-Transfer-Encoding: 8bit
 html things
 ------=_NextPart_4c2fbafd7ec4c8bf08034fe724b608d9_alt--
 ------=_NextPart_4c2fbafd7ec4c8bf08034fe724b608d9--
-"""u8, "\n"u8, "\r\n"u8, -1),
+"""u8.Raw(), "\n"u8, "\r\n"u8, -1),
         want: new headerBody[]{
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"u8] = new @string[]{@"multipart/alternative; boundary=""----=_NextPart_4c2fbafd7ec4c8bf08034fe724b608d9_alt"""u8}.slice()}),
                 strings.Replace("""
@@ -854,7 +854,7 @@ Content-Transfer-Encoding: 8bit
 
 html things
 ------=_NextPart_4c2fbafd7ec4c8bf08034fe724b608d9_alt--
-"""u8, "\n"u8, "\r\n"u8, -1)
+"""u8.Raw(), "\n"u8, "\r\n"u8, -1)
             )
         }.slice()
     ),
@@ -867,7 +867,7 @@ Content-Disposition: form-data; name="block"; filename="block"
 Content-Type: application/octet-stream
 
 
-"""u8 + strings.Repeat("A"u8, peekBufferSize - 65) + "\n--00ffded004d4dd0fdf945fbdef9d9050cfd6a13a821846299b27fc71b9db--"u8, "\n"u8, "\r\n"u8, -1),
+"""u8.Raw() + strings.Repeat("A"u8, peekBufferSize - 65) + "\n--00ffded004d4dd0fdf945fbdef9d9050cfd6a13a821846299b27fc71b9db--"u8, "\n"u8, "\r\n"u8, -1),
         want: new headerBody[]{
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"u8] = new @string[]{@"application/octet-stream"u8}.slice(), ["Content-Disposition"u8] = new @string[]{@"form-data; name=""block""; filename=""block"""u8}.slice()}),
                 strings.Repeat("A"u8, peekBufferSize - 65)
@@ -883,7 +883,7 @@ Content-Disposition: form-data; name="block"; filename="block"
 Content-Type: application/octet-stream
 
 
-"""u8 + strings.Repeat("A"u8, peekBufferSize - 65) + "\n--00ffded004d4dd0fdf945fbdef9d9050cfd6a13a821846299b27fc71b9db--\n"u8, "\n"u8, "\r\n"u8, -1),
+"""u8.Raw() + strings.Repeat("A"u8, peekBufferSize - 65) + "\n--00ffded004d4dd0fdf945fbdef9d9050cfd6a13a821846299b27fc71b9db--\n"u8, "\n"u8, "\r\n"u8, -1),
         want: new headerBody[]{
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"u8] = new @string[]{@"application/octet-stream"u8}.slice(), ["Content-Disposition"u8] = new @string[]{@"form-data; name=""block""; filename=""block"""u8}.slice()}),
                 strings.Repeat("A"u8, peekBufferSize - 65)
@@ -899,7 +899,7 @@ Content-Disposition: form-data; name="block"; filename="block"
 Content-Type: application/octet-stream
 
 
-"""u8 + strings.Repeat("A"u8, peekBufferSize) + "\n--aaaaaaaaaa00ffded004d4dd0fdf945fbdef9d9050cfd6a13a821846299b27fc71b9db--"u8, "\n"u8, "\r\n"u8, -1),
+"""u8.Raw() + strings.Repeat("A"u8, peekBufferSize) + "\n--aaaaaaaaaa00ffded004d4dd0fdf945fbdef9d9050cfd6a13a821846299b27fc71b9db--"u8, "\n"u8, "\r\n"u8, -1),
         want: new headerBody[]{
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"u8] = new @string[]{@"application/octet-stream"u8}.slice(), ["Content-Disposition"u8] = new @string[]{@"form-data; name=""block""; filename=""block"""u8}.slice()}),
                 strings.Repeat("A"u8, peekBufferSize)
@@ -915,7 +915,7 @@ Content-Disposition: form-data; name="myfile"; filename="my-file.txt"
 Content-Type: application/octet-stream
 
 
-"""u8, "\n"u8, "\r\n"u8, -1) + strings.Repeat("A"u8, (nint)peekBufferSize - (len("\n--") + len("08b84578eabc563dcba967a945cdf0d9f613864a8f4a716f0e81caa71a74") + len("\r") + 1)) + strings.Replace("""
+"""u8.Raw(), "\n"u8, "\r\n"u8, -1) + strings.Repeat("A"u8, (nint)peekBufferSize - (len("\n--") + len("08b84578eabc563dcba967a945cdf0d9f613864a8f4a716f0e81caa71a74") + len("\r") + 1)) + strings.Replace("""
 
 --08b84578eabc563dcba967a945cdf0d9f613864a8f4a716f0e81caa71a74
 Content-Disposition: form-data; name="key"
@@ -923,7 +923,7 @@ Content-Disposition: form-data; name="key"
 val
 --08b84578eabc563dcba967a945cdf0d9f613864a8f4a716f0e81caa71a74--
 
-"""u8, "\n"u8, "\r\n"u8, -1),
+"""u8.Raw(), "\n"u8, "\r\n"u8, -1),
         want: new headerBody[]{
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"u8] = new @string[]{@"application/octet-stream"u8}.slice(), ["Content-Disposition"u8] = new @string[]{@"form-data; name=""myfile""; filename=""my-file.txt"""u8}.slice()}),
                 strings.Repeat("A"u8, (nint)peekBufferSize - (len("\n--") + len("08b84578eabc563dcba967a945cdf0d9f613864a8f4a716f0e81caa71a74") + len("\r") + 1))
@@ -948,7 +948,7 @@ Body
 Body2
 --foo-bar--
 --foo--
-"""u8, "\n"u8, "\r\n"u8, -1),
+"""u8.Raw(), "\n"u8, "\r\n"u8, -1),
         want: new headerBody[]{
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"u8] = new @string[]{@"multipart/alternative; boundary=""foo-bar"""u8}.slice()}),
                 strings.Replace("""
@@ -959,7 +959,7 @@ Body
 
 Body2
 --foo-bar--
-"""u8, "\n"u8, "\r\n"u8, -1)
+"""u8.Raw(), "\n"u8, "\r\n"u8, -1)
             )
         }.slice()
     ),
@@ -975,7 +975,7 @@ Content-Type: multipart/alternative; boundary="foo--"
 Body
 
 --foo--
-"""u8, "\n"u8, "\r\n"u8, -1),
+"""u8.Raw(), "\n"u8, "\r\n"u8, -1),
         want: new headerBody[]{
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"u8] = new @string[]{@"multipart/alternative; boundary=""foo--"""u8}.slice()}), ""u8)
         }.slice()

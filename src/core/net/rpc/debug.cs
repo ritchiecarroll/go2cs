@@ -38,7 +38,7 @@ internal static readonly @string debugText = """
 	{{end}}
 	</body>
 	</html>
-"""u8;
+"""u8.Raw();
 
 internal static (ж<template.Template>, error) tupleᴛ1ʗ = template.New("RPC debug"u8).Parse(debugText);
 internal static ж<template.Template> debug = template.Must(tupleᴛ1ʗ.Item1, tupleᴛ1ʗ.Item2);

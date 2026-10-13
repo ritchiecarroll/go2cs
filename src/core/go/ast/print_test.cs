@@ -49,7 +49,7 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
 0  map[string]int (len = 1) {
 		1  .  "a": 1
 		2  }
-"""u8),
+"""u8.Raw()),
     new(@new<nint>(), "0  *0"u8),
     new(new nint[]{}.array(), @"0  [0]int {}"u8),
     new(new nint[]{1, 2, 3}.array(),
@@ -59,13 +59,13 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
 		2  .  1: 2
 		3  .  2: 3
 		4  }
-"""u8),
+"""u8.Raw()),
     new(new nint[]{42}.array(),
         """
 0  [1]int {
 		1  .  0: 42
 		2  }
-"""u8),
+"""u8.Raw()),
     new(new nint[]{}.slice(), @"0  []int (len = 0) {}"u8),
     new(new nint[]{1, 2, 3}.slice(),
         """
@@ -74,7 +74,7 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
 		2  .  1: 2
 		3  .  2: 3
 		4  }
-"""u8),
+"""u8.Raw()),
     new(new EmptyStruct(), @"0  struct {} {}"u8),
     new(new Δtype(7), @"0  struct { x int } {}"u8),
     new(new Δtypeᴛ1(42, 991),
@@ -82,14 +82,14 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
 0  struct { X int; y int } {
 		1  .  X: 42
 		2  }
-"""u8),
+"""u8.Raw()),
     new(new Δtypeᴛ2(42, 991),
         """
 0  struct { X int; Y int } {
 		1  .  X: 42
 		2  .  Y: 991
 		3  }
-"""u8)
+"""u8.Raw())
 }.slice();
 
 // Split s into lines, trim whitespace from all lines, and return

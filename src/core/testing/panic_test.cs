@@ -44,7 +44,7 @@ public static void TestPanic(ж<testing.T> Ꮡt) {
 --- FAIL: TestPanicHelper (N.NNs)
     panic_test.go:NNN: TestPanicHelper
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "subtest panics"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8}.slice(),
@@ -55,7 +55,7 @@ public static void TestPanic(ж<testing.T> Ꮡt) {
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "subtest panics with cleanup"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8}.slice(),
@@ -69,7 +69,7 @@ ran outer cleanup
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "subtest panics with outer cleanup panic"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=outer"u8}.slice(),
@@ -81,7 +81,7 @@ ran outer cleanup
 --- FAIL: TestPanicHelper (N.NNs)
     panic_test.go:NNN: TestPanicHelper
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "subtest panics with middle cleanup panic"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=middle"u8}.slice(),
@@ -95,7 +95,7 @@ ran outer cleanup
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "subtest panics with inner cleanup panic"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=inner"u8}.slice(),
@@ -109,7 +109,7 @@ ran outer cleanup
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "parallel subtest panics with cleanup"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_parallel"u8}.slice(),
@@ -123,7 +123,7 @@ ran outer cleanup
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "parallel subtest panics with outer cleanup panic"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=outer"u8, "-test_panic_parallel"u8}.slice(),
@@ -135,7 +135,7 @@ ran outer cleanup
 --- FAIL: TestPanicHelper (N.NNs)
     panic_test.go:NNN: TestPanicHelper
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "parallel subtest panics with middle cleanup panic"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=middle"u8, "-test_panic_parallel"u8}.slice(),
@@ -149,7 +149,7 @@ ran outer cleanup
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "parallel subtest panics with inner cleanup panic"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=inner"u8, "-test_panic_parallel"u8}.slice(),
@@ -163,7 +163,7 @@ ran outer cleanup
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
 
-"""u8
+"""u8.Raw()
     )
     }.slice();
     foreach (var (_, vᴛ1) in testCases) {
@@ -272,7 +272,7 @@ public static void TestMorePanic(ж<testing.T> Ꮡt) {
             want: """
 panic: die
 	panic: test executed panic(nil) or runtime.Goexit
-"""u8
+"""u8.Raw()
         ),
         new(
             desc: "Issue 48515: call t.Run in t.Cleanup should trigger panic"u8,

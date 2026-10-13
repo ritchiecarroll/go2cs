@@ -490,7 +490,7 @@ Types of profiles available:
 <table>
 <thead><td>Count</td><td>Profile</td></thead>
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string tableAHrefGoroutineDebugˢ = """
 </table>
 <a href="goroutine?debug=2">full goroutine stack dump</a>
@@ -499,13 +499,13 @@ internal static readonly @string tableAHrefGoroutineDebugˢ = """
 Profile Descriptions:
 <ul>
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string ulPBodyHtmlˢ = """
 </ul>
 </p>
 </body>
 </html>
-"""u8;
+"""u8.Raw();
 
 internal static error indexTmplExecute(io.Writer w, slice<profileEntry> profiles) {
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);

@@ -147,7 +147,7 @@ MGECAQACEQDar8EuoZuSosYtE9SeXSyPAgMBAAECEBf7XDET8e6jjTcfO7y/sykC
 CQDozXjCjkBzLQIJAPB6MqNbZaQrAghbZTdQoko5LQIIUp9ZiKDdYjMCCCCpqzmX
 d8Y7
 -----END RSA TESTING KEY-----
-"""u8;
+"""u8.Raw();
 
 public static void TestGnuTLSKey(ж<testing.T> Ꮡt) {
     Ꮡt.Setenv(godebugˢ, rsa1024min0ˢ);
@@ -509,7 +509,7 @@ EO+ZJ79TJKN5yiGBRsv5yvx5UiHxajEXAiAhAol5N4EUyq6I9w1rYdhPMGpLfk7A
 IU2snfRJ6Nq2CQIgFrPsWRCkV+gOYcajD17rEqmuLrdIRexpg8N1DOSXoJ8CIGlS
 tAboUGBxTDq3ZroNism3DaMIbKPyYrAqhKov1h5V
 -----END RSA TESTING KEY-----
-"""u8)));
+"""u8.Raw())));
 internal static ref ж<rsa.PrivateKey> test512Key => ref Ꮡtest512Key.ValueSlot;
 
 internal static ж<rsa.PrivateKey> test512KeyTwo = parseKey(testingKey("""
@@ -523,7 +523,7 @@ MQIhAMp5i2WCNeNpD6n/WkqBU6kJMXPSaPZy82mm5feYHgt5AiEAkg/QnhB9fjma
 1BzRqD4Uv0pDMXIkhooe+Rrn0OwtI3ECIQDP6nxML3JOjbAS7ydFBv176uVsMJib
 r4PZozCXKuuGNg==
 -----END PRIVATE KEY-----
-"""u8));
+"""u8.Raw()));
 
 internal static ж<rsa.PrivateKey> test1024Key = parseKey(testingKey("""
 -----BEGIN RSA TESTING KEY-----
@@ -541,7 +541,7 @@ eRYWciE+Cre5dzfZkomeXE0xBrhecV0bOq6EKWLSVE+yr6mAl05ThRK9DCfPSOpy
 F6rgN3QiyCA9J/1FluUCQQC5nX+PTU1FXx+6Ri2ZCi6EjEKMHr7gHcABhMinZYOt
 N59pra9UdVQw9jxCU9G7eMyb0jJkNACAuEwakX3gi27b
 -----END RSA TESTING KEY-----
-"""u8));
+"""u8.Raw()));
 
 internal static @string test2048KeyPEM = testingKey("""
 -----BEGIN TESTING KEY-----
@@ -572,7 +572,7 @@ ZWPxPAyQUEA7EkuUhAX1bVNG6UJTYA8kmGcUCG4jPTgWzi00IyUUr8jK7efyU/zs
 qiJuVs1bia+flYIQpysMl1VzZh8gW1nkB4SVPm5l2wBvVJDIr9Mc6rueC/oVNkh2
 fLVGuFoTVIu2bF0cWAjNNMg=
 -----END TESTING KEY-----
-"""u8);
+"""u8.Raw());
 
 internal static ж<ж<rsa.PrivateKey>> Ꮡtest2048Key = new StandardBox<ж<rsa.PrivateKey>>(parseKey(test2048KeyPEM));
 internal static ref ж<rsa.PrivateKey> test2048Key => ref Ꮡtest2048Key.ValueSlot;
@@ -618,7 +618,7 @@ Fh4jJb+4zwSML9R6iJu/LH5B7Fre2Te8QrYP+k/jIHPYJtGesVt/WlAtpDCNsC3j
 17IGHe9jZX/EVnSshCkXOBHG31buV10k5GSkeKcoDrkpp25wQ6FjW9L3Q68y6Y8r
 8h02sdAMB9Yc2A4EgzOySWoD
 -----END TESTING KEY-----
-"""u8));
+"""u8.Raw()));
 
 internal static ж<rsa.PrivateKey> test4096Key = parseKey(testingKey("""
 -----BEGIN TESTING KEY-----
@@ -673,7 +673,7 @@ T10qfQol54KjGld/HVDhzbsZJxzLDqvPlroWgwLdOLDMXhwJYfTnqMEQkaG4Aawr
 Nx2YZ03g6Kt6B6c43LJx1a/zEPYSZcPERgWOSHlcjmwRfTs6uoN9xt1qs4zEUaKv
 Axreud3rJ0rekUp6rI1joG717Wls
 -----END TESTING KEY-----
-"""u8));
+"""u8.Raw()));
 
 public static void BenchmarkDecryptPKCS1v15(ж<testing.B> Ꮡb) {
     Ꮡb.Run("2048"u8, (ж<testing.B> bΔ1) => {
@@ -1131,7 +1131,7 @@ TQIhAKMSvzIBnni7ot/OSie2TmJLY4SwTQAevXysE2RbFDYdAiEBCUEaRQnMnbp7
 v/Ow5T0q5gIJAiEAyS4RaI9YG8EWx/2w0T67ZUVAw8eOMB6BIUg0Xcu+3okCIBOs
 /5OiPgoTdSy7bcF9IGpSE8ZgGKzgYQVZeN97YE00
 -----END RSA TESTING KEY-----
-"""u8;
+"""u8.Raw();
 internal static readonly object boringCryptoModeReturnsˢ = (@string)"BoringCrypto mode returns the wrong error from SignPSS"u8;
 
 public static void TestPSmallerThanQ(ж<testing.T> Ꮡt) {

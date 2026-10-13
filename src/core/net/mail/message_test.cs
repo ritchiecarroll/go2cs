@@ -39,7 +39,7 @@ Message-ID: <1234@local.machine.example>
 This is a message just to say hello.
 So, "Hello".
 
-"""u8,
+"""u8.Raw(),
         header: new Header(new map<@string, slice<@string>>{
             ["From"u8] = new @string[]{"John Doe <jdoe@machine.example>"u8}.slice(),
             ["To"u8] = new @string[]{"Mary Smith <mary@example.net>"u8}.slice(),
@@ -55,7 +55,7 @@ Feedback-Type: abuse
 User-Agent: SomeGenerator/1.0
 Version: 1
 
-"""u8,
+"""u8.Raw(),
         header: new Header(new map<@string, slice<@string>>{
             ["Feedback-Type"u8] = new @string[]{"abuse"u8}.slice(),
             ["User-Agent"u8] = new @string[]{"SomeGenerator/1.0"u8}.slice(),
@@ -70,7 +70,7 @@ Custom/Header: v
 
 Body
 
-"""u8,
+"""u8.Raw(),
         header: new Header(new map<@string, slice<@string>>{
             ["From"u8] = new @string[]{"iant@golang.org"u8}.slice(),
             ["Custom/Header"u8] = new @string[]{"v"u8}.slice()
@@ -84,7 +84,7 @@ From: iant@golang.org
 
 Hello, gophers!
 
-"""u8,
+"""u8.Raw(),
         header: new Header(new map<@string, slice<@string>>{
             ["From"u8] = new @string[]{"iant@golang.org"u8}.slice(),
             ["From iant@golang.org Mon Jun 19 00"u8] = new @string[]{"00:00 2023"u8}.slice()

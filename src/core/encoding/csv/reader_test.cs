@@ -65,7 +65,7 @@ b",§"ccc"
 ¶§"a,a",§"b""bb",§"ccc"
 ¶§zzz,§yyy,§xxx
 
-"""u8,
+"""u8.Raw(),
     Output: new slice<@string>[]{
         new @string[]{"#field1"u8, "field2"u8, "field3"u8}.slice(),
         new @string[]{"aaa"u8, "bb\nb"u8, "ccc"u8}.slice(),
@@ -90,7 +90,7 @@ b",§"ccc"
 line",§"one line",§"three
 line
 field"
-"""u8,
+"""u8.Raw(),
     Output: new slice<@string>[]{new @string[]{"two\nline"u8, "one line"u8, "three\nline\nfield"u8}.slice()}.slice()
 ), new(
     Name: "BlankLine"u8,
@@ -228,7 +228,7 @@ field"
 ¶§"x",§"",§"",§""
 ¶§"",§"",§"",§""
 
-"""u8,
+"""u8.Raw(),
     Output: new slice<@string>[]{
         new @string[]{"x"u8, "y"u8, "z"u8, "w"u8}.slice(),
         new @string[]{"x"u8, "y"u8, "z"u8, ""u8}.slice(),
@@ -651,7 +651,7 @@ x,,,
 "x","","",""
 "","","",""
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkRead(ж<testing.B> Ꮡb) {
     benchmarkRead(Ꮡb, default!, benchmarkCSVData);
@@ -676,7 +676,7 @@ xxxxxxxxxxxxxxxxxxxxxxxx,yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy,zzzzzzzzzzzzzzzzzzzzzz
 ,,zzzz,wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww,vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy,zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz,wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww,vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkReadLargeFields(ж<testing.B> Ꮡb) {
     benchmarkRead(Ꮡb, default!, strings.Repeat(xxxxxxxxxxxxxxxxˢ, 3));

@@ -2365,7 +2365,7 @@ internal static readonly @string xmlVersion10EncodingUtf8ˢ = """
 <root>
 </root>
 
-"""u8;
+"""u8.Raw();
 
 public static void TestDecodeEncode(ж<testing.T> Ꮡt) {
     ref var @in = ref heap(new bytes.Buffer(), out var Ꮡin);

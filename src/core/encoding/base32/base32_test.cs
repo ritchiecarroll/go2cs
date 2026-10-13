@@ -545,7 +545,7 @@ IZJAOZSWY2LUEBSXG43FEBRWS3DMOVWSAZDPNRXXEZJAMV2SAZTVM5UWC5BANZ2WY3DBBJYGC4TJMF
 NZ2CYIDTOVXHIIDJNYFGG5LMOBQSA4LVNEQG6ZTGNFRWSYJAMRSXGZLSOVXHIIDNN5WGY2LUEBQW42
 LNEBUWIIDFON2CA3DBMJXXE5LNFY==
 ====
-"""u8;
+"""u8.Raw();
     @string encodedShort = strings.ReplaceAll(encoded, "\n"u8, ""u8);
     var dec = NewDecoder(StdEncoding, new base32_test_package.strings_ReaderжReader(strings.NewReader(encoded)));
     var (res1, err) = io.ReadAll(dec);

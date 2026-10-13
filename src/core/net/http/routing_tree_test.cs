@@ -97,7 +97,7 @@ internal static readonly @string aAAXBABABYABMultiABXGJGXˢ = """
                 "i":
                     "/g/h/i"
 
-"""u8;
+"""u8.Raw();
 
 public static void TestRoutingAddPattern(ж<testing.T> Ꮡt) {
     @string want = aAAXBABABYABMultiABXGJGXˢ;

@@ -719,7 +719,7 @@ DwYDVR0RBAgwBocEfwAAATANBgkqhkiG9w0BAQsFAAOBgQBGq0Si+yhU+Fpn+GKU
 o0RIvFkTgxYEiKSBXCUNmAysEbEoVr4dzWFihAm/1oDGRY2CLLTYg5vbySK3KhIR
 e/oCO8HJ/+rJnahJ05XX1Q7lNQ==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static @string clientKeyPEM = testingKey("""
 
@@ -738,7 +738,7 @@ rWiFla26IVXV0xcD98VWJsTBZMlgPnSOqoMdM1kSEd4fUmlAYI/dFzV1XYSkOmVr
 FhdZnklmpVDeu27P4c0CQQCuCOup0FlJSBpWY1TTfun/KMBkBatMz0VMA3d7FKIU
 csPezl677Yjo8u1r/KzeI6zLg87Z8E6r6ZWNc9wBSZK6
 -----END RSA TESTING KEY-----
-"""u8);
+"""u8.Raw());
 
 internal static readonly @string clientECDSACertificatePEM = """
 
@@ -755,7 +755,7 @@ C3JosDJdYUoCdFzCgbkWqD8pyDbHgf9stlvZcPE4O1BIKJTLCRpS8V3ujfK58PDa
 2RU6+b0DeoeiIzXsAkIBo9SKeDUcSpoj0gq+KxAxnZxfvuiRs9oa9V2jI/Umi0Vw
 jWVim34BmT0Y9hCaOGGbLlfk+syxis7iI6CH8OFnUes=
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static @string clientECDSAKeyPEM = testingKey("""
 
@@ -769,7 +769,7 @@ FMBexFe01MNvja5oHt1vzobhfm6ySD6B5U7ixohLZNz1MLvT/2XMW/TdtWo+PtAd
 3kfDdq0Z9kUsjLzYHQFMH3CQRnZIi4+DzEpcj0B22uCJ7B0rxE4wdihBsmKo+1vx
 +U56jb0JuK7qixgnTy5w/hOWusPTQBbNZU6sER7m8Q==
 -----END EC TESTING KEY-----
-"""u8);
+"""u8.Raw());
 
 internal static readonly @string clientEd25519CertificatePEM = """
 
@@ -782,14 +782,14 @@ AwIwDAYDVR0TAQH/BAIwADAWBgNVHREEDzANggtleGFtcGxlLmNvbTAFBgMrZXAD
 QQD8GRcqlKUx+inILn9boF2KTjRAOdazENwZ/qAicbP1j6FYDc308YUkv+Y9FN/f
 7Q7hF9gRomDQijcjKsJGqjoI
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static @string clientEd25519KeyPEM = testingKey("""
 
 -----BEGIN TESTING KEY-----
 MC4CAQAwBQYDK2VwBCIEINifzf07d9qx3d44e0FSbV4mC/xQxT644RRbpgNpin7I
 -----END TESTING KEY-----
-"""u8);
+"""u8.Raw());
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedErrorFromˢ2 = (@string)"expected error from incomplete handshake, got nil"u8;

@@ -360,7 +360,7 @@ public static void TestGenericTrieBuilding(ж<testing.T> Ꮡt) {
 			.y+
 			z+
 			
-"""u8),
+"""u8.Raw()),
         new("abracadabra;abracadabrakazam;abraham;abrasion"u8, """
 -
 			a-
@@ -373,7 +373,7 @@ public static void TestGenericTrieBuilding(ж<testing.T> Ꮡt) {
 			....s-
 			.....ion+
 			
-"""u8),
+"""u8.Raw()),
         new("aaa;aa;a;i;longerst;longer;long;xx;x;X;Y"u8, """
 -
 			X+
@@ -389,14 +389,14 @@ public static void TestGenericTrieBuilding(ж<testing.T> Ꮡt) {
 			x+
 			.x+
 			
-"""u8),
+"""u8.Raw()),
         new("foo;;foo;foo1"u8, """
 +
 			f-
 			.oo+
 			...1+
 			
-"""u8)
+"""u8.Raw())
     }.slice();
     foreach (var (_, tc) in testCases) {
         var keys = Split(tc.@in, ";"u8);

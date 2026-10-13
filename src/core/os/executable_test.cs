@@ -160,6 +160,6 @@ func main() {
 	}
 }
 
-"""u8;
+"""u8.Raw();
 
 } // end os_test_package

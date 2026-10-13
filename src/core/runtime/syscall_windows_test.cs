@@ -422,7 +422,7 @@ uintptr_t %s(%s f) {
 	return f(%s);
 }
 	
-"""u8, attr, typename, strings.Join(cTypes, ","u8), funcname, typename, strings.Join(cArgs, ","u8));
+"""u8.Raw(), attr, typename, strings.Join(cTypes, ","u8), funcname, typename, strings.Join(cArgs, ","u8));
 }
 
 internal static void testOne(this cbFunc f, ж<testing.T> Ꮡt, ж<syscall.DLL> Ꮡdll, bool cdecl, uintptr cb) {
@@ -583,7 +583,7 @@ internal static readonly object includeStdintHTypedefˢ = (@string)"""
 #include <stdint.h>
 typedef struct { uint8_t x, y; } uint8Pair_t;
 
-"""u8;
+"""u8.Raw();
 
 internal static void makeSrc(this ref cbDLL d, ж<testing.T> Ꮡt, @string path) {
     GoFrame ᒐ = default;
@@ -859,7 +859,7 @@ uintptr_t cfunc(callback f, uintptr_t n) {
    return r;
 }
 
-"""u8;
+"""u8.Raw();
 
 // Use a new goroutine so that we get a small stack.
 internal partial struct TestReturnAfterStackGrowInCallback_result /*dyn*/ {
@@ -951,7 +951,7 @@ public static void TestSyscallN(ж<testing.T> Ꮡt) {
 		#include <stdint.h>
 		#include <windows.h>
 		int cfunc(%s) { return %s; }
-"""u8, strings.Join(args, ", "u8), strings.Join(rets, " && "u8));
+"""u8.Raw(), strings.Join(args, ", "u8), strings.Join(rets, " && "u8));
                 @string tmpdir = tΔ1.TempDir();
                 @string srcname = mydllCˢ;
                 var err = Δos.WriteFile(filepath.Join(tmpdir, srcname), slice<byte>(src), 0);
@@ -995,7 +995,7 @@ uintptr_t cfunc(uintptr_t a, double b, float c, double d) {
 	return 0;
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestFloatArgs(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
@@ -1064,7 +1064,7 @@ double cfuncDouble(uintptr_t a, double b, float c, double d) {
 	return 0;
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestFloatReturn(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
@@ -1313,7 +1313,7 @@ uintptr_t cfunc(void) {
    return 0;
 }
 
-"""u8;
+"""u8.Raw();
 
 // See Issue 14959
 public static void TestDLLPreloadMitigation(ж<testing.T> Ꮡt) {
@@ -1571,6 +1571,6 @@ import _ "os" // average Go program will use "os" package, do the same here
 func main() {
 }
 
-"""u8;
+"""u8.Raw();
 
 } // end runtime_test_package

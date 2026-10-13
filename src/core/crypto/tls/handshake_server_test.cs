@@ -1887,7 +1887,7 @@ nKpbtU22+PbIMSJ+e80fmY9LIPx5N4HTAiAthGSimMR9bloz0EY3GyuUEyqoDgMd
 hXxjuno2WesoJQIgemilbcALXpxsLmZLgcQ2KSmaVr7jb5ECx9R+hYKTw1sCIG4s
 T+E0J8wlH24pgwQHzy7Ko2qLwn1b5PW8ecrlvP1g
 -----END RSA TESTING KEY-----
-"""u8;
+"""u8.Raw();
 internal static readonly @string keySizeTooSmallˢ = "key size too small"u8;
 internal static readonly @string handshakeFailureˢ = "handshake failure"u8;
 
@@ -1904,7 +1904,7 @@ DDAKBggrBgEFBQcDATAMBgNVHRMBAf8EAjAAMBYGA1UdEQQPMA2CC2V4YW1wbGUu
 Y29tMA0GCSqGSIb3DQEBCwUAA0EAxDuUS+BrrS3c+h+k+fQPOmOScy6yTX9mHw0Q
 KbucGamXYEy0URIwOdO0tQ3LHPc1YGvYSPwkDjkjqECs2Vm/AA==
 -----END CERTIFICATE-----
-"""u8), slice<byte>(testingKey(beginRsaTestingKeyˢ)));
+"""u8.Raw()), slice<byte>(testingKey(beginRsaTestingKeyˢ)));
     if (err != default!) {
         Ꮡt.Fatal(err);
     }

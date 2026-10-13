@@ -46,7 +46,7 @@ type S struct {
     n int
 }
 
-"""u8;
+"""u8.Raw();
 
 // go.dev/issue/16316
 public static void TestMultipleSizeUse(ж<testing.T> Ꮡt) {
@@ -77,7 +77,7 @@ var s struct {
 	y []byte
 }
 
-"""u8;
+"""u8.Raw();
 
 // go.dev/issue/16464
 public static void TestAlignofNaclSlice(ж<testing.T> Ꮡt) {
@@ -104,7 +104,7 @@ import "unsafe"
 
 const _ = unsafe.Offsetof(struct{ x int64 }{}.x)
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue16902(ж<testing.T> Ꮡt) {
     @string src = srcᶜ38;
@@ -136,7 +136,7 @@ var s struct {
 	z int64
 }
 
-"""u8;
+"""u8.Raw();
 
 // go.dev/issue/53884.
 public static void TestAtomicAlign(ж<testing.T> Ꮡt) {
@@ -189,7 +189,7 @@ type foo struct {
 func main() {
 	assert(unsafe.Sizeof(foo{}) == 16)
 }
-"""u8
+"""u8.Raw()
     ),
     new(
         "issue60734"u8,
@@ -213,7 +213,7 @@ func main() {
 	assert(unsafe.Sizeof(Data{}) == 16)
 }
 
-"""u8
+"""u8.Raw()
     )
 }.slice();
 

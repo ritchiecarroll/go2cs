@@ -26,7 +26,7 @@ private static readonly @string pathRscIoFortuneModRscIoˢ = """
 		path	rsc.io/fortune
 		mod	rsc.io/fortune	v1.0.0
 		
-"""u8;
+"""u8.Raw();
 private static readonly object pathCmdTest2jsonˢ = (@string)@"path	cmd/test2json"u8;
 private static readonly @string go118PathExampleComMModˢ = """
 
@@ -35,21 +35,21 @@ private static readonly @string go118PathExampleComMModˢ = """
 		mod	example.com/m	(devel)	
 		build	-compiler=gc
 		
-"""u8;
+"""u8.Raw();
 private static readonly @string go118PathExampleComMˢ = """
 
 		go	1.18
 		path	example.com/m
 		build	-compiler=gc
 		
-"""u8;
+"""u8.Raw();
 private static readonly @string go118PathExampleComMˢ2 = """
 
 		go 1.18
 		path example.com/m
 		build CRAZY_ENV="requires\nescaping"
 		
-"""u8;
+"""u8.Raw();
 
 public static void FuzzParseBuildInfoRoundTrip(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();

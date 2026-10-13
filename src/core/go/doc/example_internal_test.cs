@@ -37,7 +37,7 @@ import (
 	"d"
 )
 
-"""u8,
+"""u8.Raw(),
             want: new @string[]{"a"u8}.slice()
         ),
         new(
@@ -53,7 +53,7 @@ import (
 	"d"
 )
 
-"""u8,
+"""u8.Raw(),
             want: new @string[]{"a"u8, "b"u8, "d"u8}.slice()
         ),
         new(
@@ -71,7 +71,7 @@ import (
 	"d"
 )
 
-"""u8,
+"""u8.Raw(),
             want: new @string[]{"a"u8, "b"u8, "d"u8}.slice()
         ),
         new(
@@ -84,7 +84,7 @@ import (
 
 	"c"
 )
-"""u8,
+"""u8.Raw(),
             want: new @string[]{"a"u8, "c"u8}.slice()
         ),
         new(
@@ -98,7 +98,7 @@ import (
 	m "c"
 	"d"
 )
-"""u8,
+"""u8.Raw(),
             want: new @string[]{"a"u8, "c"u8}.slice()
         ),
         new(
@@ -113,7 +113,7 @@ import (
 	_ "c"
 	"d"
 )
-"""u8,
+"""u8.Raw(),
             want: new @string[]{"a"u8, "b"u8, "c"u8}.slice()
         )
     }.slice()) {

@@ -529,7 +529,7 @@ COOKIE: __utma=000000000.0000000000.0000000000.0000000000.0000000000.00; __utmb=
 Non-Interned: test
 
 
-"""u8, "\n"u8, "\r\n"u8, -1);
+"""u8.Raw(), "\n"u8, "\r\n"u8, -1);
 
 internal static @string serverHeaders = strings.Replace("""
 Content-Type: text/html; charset=utf-8
@@ -543,7 +543,7 @@ Connection: Close
 Non-Interned: test
 
 
-"""u8, "\n"u8, "\r\n"u8, -1);
+"""u8.Raw(), "\n"u8, "\r\n"u8, -1);
 
 internal partial struct BenchmarkReadMIMEHeader_type /*dyn*/ {
     internal @string name;
