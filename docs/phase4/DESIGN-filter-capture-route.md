@@ -198,6 +198,12 @@ and that wall clock is the comparison.
   deeppanic arms published under Native AOT (the default trim, not full) were still compiling when this record
   was posted, after more than 37 minutes of `ilc`. Their numbers land as a dated block here, as a commit on top.
 
+  **2026-10-13 (G), the Native AOT arms.** The base arm (today's emitted shape, against the same golib) published and
+  ran: 65,536-level wall unwind **115–227 ms**, against the JIT's 287–303 ms; 8,192 levels 9.6–11.2 ms; 1,024 levels
+  1.1–1.4 ms (three runs each). The F-run arm was NOT measured under AOT. Its publish had spent about seven hours in
+  `ilc` when it was stopped, to give TRAIN T4's linux legs a quiet box. The route is PARKED, so no re-run is owed.
+  If it is ever unparked, its AOT arm is the first reading to take.
+
 **go-cmp's cyclic subtests** (`TestDiff/Transformer/Cyclic`, both in one run, the published test host):
 
 | Arm | Cyclic pair, wall | Whole `cmp` package, alternated runs | Verdicts |
