@@ -861,8 +861,14 @@ public static class TestHost
     }
 
     // Path containment, asked the way the rest of this file asks it: case-insensitively, over fully
-    // resolved paths, with the root's own directory counting as inside itself.
-    internal static bool IsWithin(string candidate, string root)
+    // resolved paths, with the root's own directory counting as inside itself. "Resolved" includes
+    // symbolic links: a working directory read back through getcwd(3) is PHYSICAL, while a root
+    // this host recorded may have been named through a link, so the physical spellings are
+    // compared as well as the literal ones (see PhysicalPath).
+    internal static bool IsWithin(string candidate, string root) =>
+        IsLiterallyWithin(candidate, root) || IsLiterallyWithin(PhysicalPath(candidate), PhysicalPath(root));
+
+    private static bool IsLiterallyWithin(string candidate, string root)
     {
         try
         {
@@ -875,6 +881,69 @@ public static class TestHost
         catch (Exception ex) when (ex is ArgumentException or IOException or NotSupportedException)
         {
             return false;
+        }
+    }
+
+    /// <summary>
+    /// The PHYSICAL spelling of a path on Unix: every symbolic-link component resolved, which is how
+    /// getcwd(3) reports a working directory. Windows answers the path unchanged.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A process learns its working directory from getcwd, so it sees the physical path even when
+    /// its parent spawned it in a directory named through a link. On macOS that is the normal case:
+    /// the temp directory is under /var, and /var is a link to /private/var. The parent keeps the
+    /// logical spelling in PWD, and Go's os.Getwd prefers PWD when it names the current directory.
+    /// A child spawned with a filtered environment has no PWD, so it answers the physical one.
+    /// net/http/cgi's TestDir and TestEnvOverride are the measured witnesses (darwin, both legs;
+    /// reproduced on linux with TMPDIR set to a link, 2026-10-13). The parent said /var/..., the
+    /// CGI child /private/var/..., the containment check called the child a stranger, and the
+    /// child sandboxed again and reported that directory instead.
+    /// </para>
+    /// <para>
+    /// Windows has no such split: a child's current directory is the string its parent passed,
+    /// never resolved. Anything that cannot be resolved answers the path as given, which is what
+    /// every caller did before this existed.
+    /// </para>
+    /// </remarks>
+    internal static string PhysicalPath(string path)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            return path;
+
+        try
+        {
+            List<string> pending = [.. Path.GetFullPath(path).Split('/', StringSplitOptions.RemoveEmptyEntries)];
+            string resolved = "/";
+            int links = 0;
+
+            for (int i = 0; i < pending.Count; i++)
+            {
+                string next = Path.Combine(resolved, pending[i]);
+                string? target = new FileInfo(next).LinkTarget;
+
+                if (target is null)
+                {
+                    resolved = next;
+                    continue;
+                }
+
+                // The kernel's own bound on a link chain (ELOOP): a cycle answers the path as given.
+                if (++links > 40)
+                    return path;
+
+                // A link's target is relative to the directory holding the link, which is already
+                // physical here; the target and the rest of the path are then walked from the root.
+                pending = [.. Path.GetFullPath(target, resolved).Split('/', StringSplitOptions.RemoveEmptyEntries), .. pending.Skip(i + 1)];
+                resolved = "/";
+                i = -1;
+            }
+
+            return resolved;
+        }
+        catch (Exception ex) when (ex is ArgumentException or IOException or UnauthorizedAccessException or NotSupportedException)
+        {
+            return path;
         }
     }
 
@@ -1068,15 +1137,18 @@ public static class TestHost
     // first choice; it is omitted entirely when it is the Windows directory, for the reason
     // CreateRunDirectory states at length. Dropping it rather than ranking it lower is deliberate:
     // there is no condition under which writing a test sandbox into the Windows directory is the
-    // answer, and the executable's own directory is always available.
+    // answer, and the executable's own directory is always available. Each base is taken by its
+    // PHYSICAL path: the sandbox becomes the run's working directory, and a helper that reads it back
+    // through getcwd must get the same spelling the parent's PWD and os.Getwd give (PhysicalPath has
+    // the measured case). `go test` itself runs a package in a real directory.
     private static IEnumerable<string> CandidateRunRoots()
     {
         string temp = Path.GetTempPath();
 
         if (!IsWindowsDirectory(temp))
-            yield return temp;
+            yield return PhysicalPath(temp);
 
-        yield return AppContext.BaseDirectory;
+        yield return PhysicalPath(AppContext.BaseDirectory);
     }
 
     // True only when this is Windows AND the path is the Windows directory or inside it. Every

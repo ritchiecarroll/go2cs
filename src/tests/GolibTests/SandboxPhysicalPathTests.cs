@@ -78,4 +78,39 @@ public class SandboxPhysicalPathTests
             Directory.Delete(real, recursive: true);
         }
     }
+
+    [TestMethod]
+    public void APhysicalPathResolvesEveryLinkComponent()
+    {
+        SkipOnWindows();
+
+        string real = NewDirectory("chain");
+        string inner = Path.Combine(real, "inner");
+        string outerLink = real + "-outer";
+        string innerLink = Path.Combine(real, "inner-link");
+
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(inner, "leaf"));
+            Directory.CreateSymbolicLink(outerLink, real);
+
+            // A RELATIVE target, resolved against the directory that holds the link.
+            Directory.CreateSymbolicLink(innerLink, "inner");
+
+            Assert.AreEqual(Path.Combine(TestHost.PhysicalPath(real), "inner", "leaf"),
+                TestHost.PhysicalPath(Path.Combine(outerLink, "inner-link", "leaf")),
+                "a link in an outer component and a relative link in an inner one must both resolve");
+
+            // A path with no links answers itself, and a path that does not exist answers as given.
+            string missing = Path.Combine(TestHost.PhysicalPath(real), "no-such-directory");
+
+            Assert.AreEqual(missing, TestHost.PhysicalPath(missing));
+        }
+        finally
+        {
+            File.Delete(innerLink);
+            File.Delete(outerLink);
+            Directory.Delete(real, recursive: true);
+        }
+    }
 }
