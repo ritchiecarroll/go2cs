@@ -472,6 +472,8 @@ function Get-HopSkeletonRows {
             Conditional = @()
             ConditionalDisclosures = @()
             OS          = @{}
+            # $null by design: this parses a dated CENSUS record and builds no sweep rows (-Hop reads
+            # Get-HopPopulationRows, which carries each row's pin -- NOTES A3; no caller at 7092f7126e).
             Execution   = $null
             Index       = $rowIndex
             Receives    = $rowReceives
@@ -521,13 +523,20 @@ function Get-HopSkeletonRows {
         EXPECTATION: each target lists its sources, with the outgoing roster's banked count where it has
         a row. A target outside the population is refused by name -- a relocation into nothing is a
         stale table.
+      * EXECUTION PINS (NOTES A3): a row's `execution:` annotation is an EXECUTION property of its tests,
+        not a count, so it crosses the hop where Expected does not. A banked row keeps its own pin; a
+        relocation target takes the pin of each banked source it receives. Every contributor must agree,
+        an unpinned one included, and a disagreement is refused by name -- choosing one would run the
+        row under a config nobody measured. Before this, every hop row was built with Execution = $null
+        and a pinned row ran at the default (the class d095fe8108 fixed in the recon wrapper). An
+        exclusion-ledger row produces no hop row, so a pin named in its prose re-enters with its row.
     Measured at go1.24.13 against the census's 227-row appendix: the census's own inputs (no corpus tags,
     its two 09-08 exclusions) reproduce it exactly; the ruled inputs give 225, the roster's implementable
     denominator.
 .OUTPUTS
     The row shape Get-HopSkeletonRows returns, so the sweep's row pipeline needs no second shape:
     Package, Expected ($null), Disclosed ($null), Conditional, ConditionalDisclosures, OS, Execution
-    ($null), Index (1..N in population order) and Receives.
+    (the roster pin as above, else $null), Index (1..N in population order) and Receives.
 #>
 function Get-HopPopulationRows {
     param(
@@ -538,12 +547,17 @@ function Get-HopPopulationRows {
     $population = @(Get-PopulationRows -Path $PopulationPath)
     $excluded = @(Get-ExclusionLedgerRows -Path $RosterPath | ForEach-Object { $_.Package })
     $banked = @{}
+    $pins = @{}
 
     foreach ($row in (Get-ValidatedRosterRows -Path $RosterPath)) {
         $banked[$row.Package] = $row.Expected
+        $pins[$row.Package] = $row.Execution
     }
 
     $receives = @{}
+    # Per target, each banked contributor and its pin ('' when unpinned): the row itself, then every
+    # banked source it receives. Only banked rows contribute -- an unbanked source has no annotation.
+    $pinSources = @{}
 
     if ($RelocationsPath) {
         if (-not (Test-Path $RelocationsPath)) { throw "Cannot find the relocation table at $RelocationsPath" }
@@ -571,12 +585,27 @@ function Get-HopPopulationRows {
 
             if (-not $receives.ContainsKey($fields[1])) { $receives[$fields[1]] = New-Object System.Collections.Generic.List[string] }
             [void]$receives[$fields[1]].Add($source)
+
+            if ($banked.ContainsKey($fields[0])) {
+                if (-not $pinSources.ContainsKey($fields[1])) { $pinSources[$fields[1]] = New-Object System.Collections.Generic.List[object] }
+                [void]$pinSources[$fields[1]].Add(@($fields[0], [string]$pins[$fields[0]]))
+            }
         }
     }
 
     $rows = New-Object System.Collections.Generic.List[object]
 
     foreach ($package in ($population | Where-Object { $_ -notin $excluded })) {
+        $contributors = New-Object System.Collections.Generic.List[object]
+        if ($banked.ContainsKey($package)) { [void]$contributors.Add(@($package, [string]$pins[$package])) }
+        if ($pinSources.ContainsKey($package)) { foreach ($c in $pinSources[$package]) { [void]$contributors.Add($c) } }
+
+        $distinct = @($contributors | ForEach-Object { $_[1] } | Sort-Object -Unique)
+        if ($distinct.Count -gt 1) {
+            $named = ($contributors | ForEach-Object { "$($_[0]) ($(if ($_[1]) { $_[1] } else { 'unpinned' }))" }) -join ', '
+            throw "Hop row '$package' inherits disagreeing execution pins: $named -- re-measure it and annotate one, rather than run it under a config nobody chose"
+        }
+
         [void]$rows.Add([PSCustomObject]@{
             Package     = $package
             Expected    = $null
@@ -584,7 +613,7 @@ function Get-HopPopulationRows {
             Conditional = @()
             ConditionalDisclosures = @()
             OS          = @{}
-            Execution   = $null
+            Execution   = if ($distinct.Count -eq 1 -and $distinct[0]) { $distinct[0] } else { $null }
             Index       = $rows.Count + 1
             Receives    = if ($receives.ContainsKey($package)) { $receives[$package] -join ', ' } else { '' }
         })
