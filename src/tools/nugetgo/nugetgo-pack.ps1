@@ -175,12 +175,28 @@ foreach ($p in $projects) {
     if ($outputType -ne 'Library') { Write-Host "  excluded (OutputType $outputType, a Go main): $($p.FullName.Substring($moduleSrc.Length))"; continue }
     $candidates.Add($p)
 }
+# The module's own source in the module cache, where the test-only packages, the license file and the package synopsis
+# are read. The cache spells each uppercase letter of the path as '!' and its lowercase (golang.org/x/mod/module.EscapePath).
+$moduleCacheDir = Join-Path (& go env GOMODCACHE).Trim() ([regex]::Replace("$ModulePath@$GoVersion", '[A-Z]', { '!' + $args[0].Value.ToLowerInvariant() }))
+if (-not (Test-Path -LiteralPath $moduleCacheDir -PathType Container)) { Refuse "no module source at $moduleCacheDir, where the pack reads which packages are test-only (go mod download $ModulePath@$GoVersion)" }
+# A test-only internal package -- imported only from _test.go files, or by nothing -- is left out on every platform the
+# go.* release ships; one with Go tests of its own is packed, its proof row kept (COORD ruling 2026-10-13).
+$testOnly = Get-NugetgoTestOnlyPackages -ModuleDir $moduleCacheDir -ModulePath $ModulePath -Platforms (Get-NugetgoFlavorPlatforms)
+foreach ($path in @($testOnly.Kept)) { Write-Host "  kept: validated (test-only, with Go tests of its own): $path" }
 # -ExcludePackage leaves a library out (Select-NugetgoPackedLibraries refuses an exclusion a packed package references).
-$selected = @(Select-NugetgoPackedLibraries -RecurseRoot $RecurseRoot -Libraries $candidates.ToArray() -ExcludePackage $ExcludePackage)
+$selected = @(Select-NugetgoPackedLibraries -RecurseRoot $RecurseRoot -Libraries $candidates.ToArray() -ExcludePackage $ExcludePackage -TestOnlyPackage @($testOnly.Excluded))
+$candidatePaths = @(Get-NugetgoPackedPackages -RecurseRoot $RecurseRoot -Libraries $candidates.ToArray() | ForEach-Object { $_.ImportPath })
 $libraries = New-Object System.Collections.Generic.List[object]
 $goRefs = New-Object 'System.Collections.Generic.SortedSet[string]' ([StringComparer]::OrdinalIgnoreCase)
-foreach ($p in $candidates) {
-    if ($selected -notcontains $p) { Write-Host "  excluded (-ExcludePackage): $($p.FullName.Substring($moduleSrc.Length))"; continue }
+for ($ci = 0; $ci -lt $candidates.Count; $ci++) {
+    $p = $candidates[$ci]
+    if ($selected -notcontains $p) {
+        if ($ExcludePackage -notcontains $candidatePaths[$ci] -and @($testOnly.Excluded) -contains $candidatePaths[$ci]) {
+            Write-Host "  excluded (test-only: imported only from _test.go or by nothing): $($p.FullName.Substring($moduleSrc.Length))"
+        }
+        else { Write-Host "  excluded (-ExcludePackage): $($p.FullName.Substring($moduleSrc.Length))" }
+        continue
+    }
     $libraries.Add($p)
     [xml]$x = Get-Content -Raw -LiteralPath $p.FullName
     foreach ($ref in @($x.Project.ItemGroup | ForEach-Object { $_.PackageReference } | Where-Object { $_ })) {
@@ -195,9 +211,7 @@ $packed = @(Get-NugetgoPackedPackages -RecurseRoot $RecurseRoot -Libraries $libr
 $requires = @(Get-NugetgoThirdPartyRequires -RecurseRoot $RecurseRoot -Libraries $libraries.ToArray() -ThirdPartyPackage $ThirdPartyPackage -AllowUnreferenced)
 
 # ---- B6 metadata -----------------------------------------------------------------------------------------------------
-# The module's own source in the module cache, where the license file and the package synopsis are read. The cache
-# spells each uppercase letter of the path as '!' and its lowercase (golang.org/x/mod/module.EscapePath).
-$moduleCacheDir = Join-Path (& go env GOMODCACHE).Trim() ([regex]::Replace("$ModulePath@$GoVersion", '[A-Z]', { '!' + $args[0].Value.ToLowerInvariant() }))
+# $moduleCacheDir (above, before the selection) is where the license file and the package synopsis are read.
 # The upstream license file under its own name: the converter's moduleLicenseNames, in its order (NugetgoLicense.psm1).
 if (-not $LicenseFile) {
     $found = Find-NugetgoModuleLicense -ModuleDir $moduleCacheDir

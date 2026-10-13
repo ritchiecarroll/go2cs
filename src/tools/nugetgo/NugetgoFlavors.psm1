@@ -40,6 +40,11 @@ function Get-NugetgoReferenceGoos { @((Get-NugetgoRidFlavors).Values)[0] }
 # The distinct GOOS values, in map order: one conversion and one build each.
 function Get-NugetgoFlavorGoos { @((Get-NugetgoRidFlavors).Values | Select-Object -Unique) }
 
+# The distinct 'goos/goarch' pairs the RID map ships, in map order (x64 is amd64): where a package's imports are read.
+function Get-NugetgoFlavorPlatforms {
+    @((Get-NugetgoRidFlavors).GetEnumerator() | ForEach-Object { "$($_.Value)/$(if ($_.Key -like '*-arm64') { 'arm64' } else { 'amd64' })" } | Select-Object -Unique)
+}
+
 # Does any flavor's assembly set differ in meaning from the proof's flavor? -Assemblies maps each GOOS of
 # Get-NugetgoFlavorGoos to a hashtable of assembly file name -> bytes. A flavor that is missing is refused rather than
 # read as neutral: the decision is only a measurement when every flavor was measured.
@@ -191,4 +196,4 @@ function Get-NugetgoFlavorDisclosure {
     "Flavors: this package carries RID-specific assemblies; its go2cs/source-metadata.txt describes the $ProofGoos flavor's package metadata, and the $($others -join ' and ') flavors' metadata is not described."
 }
 
-Export-ModuleMember -Function Get-NugetgoRidFlavors, Get-NugetgoReferenceGoos, Get-NugetgoFlavorGoos, Get-NugetgoFlavorDecision, Set-NugetgoRidAssets, Test-NugetgoRidLayout, Merge-NugetgoFlavorRequires, Get-NugetgoFlavorDisclosure
+Export-ModuleMember -Function Get-NugetgoRidFlavors, Get-NugetgoReferenceGoos, Get-NugetgoFlavorGoos, Get-NugetgoFlavorPlatforms, Get-NugetgoFlavorDecision, Set-NugetgoRidAssets, Test-NugetgoRidLayout, Merge-NugetgoFlavorRequires, Get-NugetgoFlavorDisclosure

@@ -13,6 +13,7 @@
 #>
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'NugetgoSelfDescription.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'NugetgoFlavors.psm1') -Force
 $failed = 0
 $ran = 0
 function Check([string]$name, [bool]$ok, [string]$detail) {
@@ -49,7 +50,9 @@ try {
     Write-Go 'cmd/tool/main.go' "package main`n`nimport _ `"example.com/tmod/internal/cmdonly`"`n`nfunc main() {}`n"
     Write-Go 'internal/cmdonly/cmdonly.go' "package cmdonly`n"
 
-    $result = Get-NugetgoTestOnlyPackages -ModuleDir $mod -ModulePath 'example.com/tmod'
+    $platforms = @(Get-NugetgoFlavorPlatforms)
+    Check 'the platforms read are the RID map''s goos/goarch pairs' (($platforms -join ',') -ceq 'windows/amd64,linux/amd64,darwin/amd64,darwin/arm64') "read [$($platforms -join ', ')]"
+    $result = Get-NugetgoTestOnlyPackages -ModuleDir $mod -ModulePath 'example.com/tmod' -Platforms $platforms
     $excluded = @($result.Excluded | Sort-Object) -join ','
     $kept = @($result.Kept | Sort-Object) -join ','
     Check 'test-only internal packages are excluded: the helper, what only it reaches, and an orphan' (
