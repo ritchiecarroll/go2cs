@@ -862,7 +862,7 @@ public static class TestHost
 
     // Path containment, asked the way the rest of this file asks it: case-insensitively, over fully
     // resolved paths, with the root's own directory counting as inside itself.
-    private static bool IsWithin(string candidate, string root)
+    internal static bool IsWithin(string candidate, string root)
     {
         try
         {
