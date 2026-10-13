@@ -1270,7 +1270,19 @@ jobs:
           # The failing tests' text, in the step log as well: a host that can read this log but not the
           # artifact's blob storage can still root-cause a red. Every C# 'fail' event of each row whose
           # sweep exited non-zero, disclosed failures included, capped at 40 lines a test and 30 tests a row.
+          # Then the last 80 lines of the row's preserved console output: a host that CRASHES writes no
+          # failing event, and its exception and stack sit there (net/http/pprof on darwin, wave 12, whose
+          # log carried the stack's last three frames and not the exception above them).
           foreach ($name in $failedRows) {
+              $rowOutput = Get-ChildItem -Path $failEvidence -Recurse -File -Filter 'row-output.txt' -ErrorAction SilentlyContinue |
+                  Where-Object { $_.Directory.Name -eq 'runfinal' -and $_.Directory.Parent.Name -eq ($name -replace '/', '.') } |
+                  Sort-Object LastWriteTime | Select-Object -Last 1
+
+              if ($rowOutput) {
+                  Write-Host "==> row output: $name -- last 80 lines of $($rowOutput.FullName.Substring($PWD.Path.Length).TrimStart('\', '/'))"
+                  Get-Content -LiteralPath $rowOutput.FullName -Tail 80 | ForEach-Object { Write-Host "      $_" }
+              }
+
               $resultsFile = Join-Path $PWD "src/core/$name/go2cs_test_results.json"
 
               if (-not (Test-Path -LiteralPath $resultsFile)) {
