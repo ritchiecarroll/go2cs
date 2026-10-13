@@ -45,7 +45,7 @@ function Get-NugetgoProjectInputDigest([string]$ProjectFile) {
     path -> its project's digest); empty when it is. A packed package with no proof row is not a reason: a package with
     no Go tests has no proof page.
 #>
-function Test-NugetgoValidationBinding([hashtable]$Proof, [hashtable]$Packed) {
+function Test-NugetgoValidationBinding([hashtable]$Proof, [hashtable]$Packed, [string[]]$Tested = @()) {
     $reasons = New-Object System.Collections.Generic.List[string]
     if ($Proof.Count -eq 0) { $reasons.Add('the proof lists no package'); return $reasons.ToArray() }
     foreach ($path in @($Proof.Keys | Sort-Object)) {
@@ -65,4 +65,12 @@ function Test-NugetgoValidationBinding([hashtable]$Proof, [hashtable]$Packed) {
     return $reasons.ToArray()
 }
 
-Export-ModuleMember -Function Get-NugetgoProofInputDigests, Get-NugetgoProjectInputDigest, Test-NugetgoValidationBinding
+<#
+.SYNOPSIS
+    The import paths among -ImportPaths whose package directory in the module source holds Go test files. RED STUB.
+#>
+function Get-NugetgoTestedImportPaths([string]$ModuleDir, [string]$ModulePath, [string[]]$ImportPaths) {
+    return @()
+}
+
+Export-ModuleMember -Function Get-NugetgoProofInputDigests, Get-NugetgoProjectInputDigest, Test-NugetgoValidationBinding, Get-NugetgoTestedImportPaths

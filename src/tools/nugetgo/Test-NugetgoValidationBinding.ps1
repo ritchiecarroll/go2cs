@@ -66,10 +66,49 @@ foreach ($case in $cases) {
     else { Check $case[0] ($reasons.Count -eq 0) "reasons [$($reasons -join ' | ')], want none" }
 }
 
+Write-Host 'a packed package with Go tests and no proof row is refused (COORD ruling 2026-10-13, the go-cmp dry run)'
+# The two real MODULE.md files of go-cmp v0.7.0 at r6 39b58d0d8d: at the default -test-timeout 2m the root package cmp
+# lost its comparison to the package deadline and the summary simply has no row for it; at 6m every tested package has
+# one. The packed digests are that run's -recurse=nuget root's, for the same G.
+$gcmpPacked = @{
+    'github.com/google/go-cmp/cmp' = 'sha256-11c6f392ca735ab58a82483770d01ef027887075817f6a1f380456c1d7975200'
+    'github.com/google/go-cmp/cmp/cmpopts' = 'sha256-a9c1290c92729b05c3b750d02d38dd48b66b25a45062c30590ad68108823e0d9'
+    'github.com/google/go-cmp/cmp/internal/diff' = 'sha256-5ac44f8574c52f432d82d26c8cf023f05ab9095e557026b3bd0e2f930460f08f'
+    'github.com/google/go-cmp/cmp/internal/function' = 'sha256-6688f052f93b9c56451ab0044f607fdae7cf24c774a4a598f80385ecc9ffd2f0'
+    'github.com/google/go-cmp/cmp/internal/value' = 'sha256-29abf7c2a9cbae38c7c47cbcb82329e269a27796989571858339142757d28a7c'
+    'github.com/google/go-cmp/cmp/internal/flags' = 'sha256-c0ab592d010ce33d9707946ddb58fc615d21219209c9b98269aa918ad5faa44d'
+}
+$gcmpTested = @('github.com/google/go-cmp/cmp', 'github.com/google/go-cmp/cmp/cmpopts', 'github.com/google/go-cmp/cmp/internal/diff',
+    'github.com/google/go-cmp/cmp/internal/function', 'github.com/google/go-cmp/cmp/internal/value')
+$fixtures = Join-Path $PSScriptRoot 'testdata/binding'
+$at2m = Get-NugetgoProofInputDigests -ModuleSummary ([System.IO.File]::ReadAllText((Join-Path $fixtures 'go-cmp-v0.7.0-timeout-2m.MODULE.md')))
+$at6m = Get-NugetgoProofInputDigests -ModuleSummary ([System.IO.File]::ReadAllText((Join-Path $fixtures 'go-cmp-v0.7.0-timeout-6m.MODULE.md')))
+Check 'the 2m fixture has no row for cmp; the 6m fixture has all five' (-not $at2m.ContainsKey('github.com/google/go-cmp/cmp') -and $at2m.Count -eq 4 -and $at6m.Count -eq 5) "2m rows [$(@($at2m.Keys | Sort-Object) -join ', ')], 6m rows [$(@($at6m.Keys | Sort-Object) -join ', ')]"
+$reasons = @(Test-NugetgoValidationBinding -Proof $at2m -Packed $gcmpPacked -Tested $gcmpTested)
+Check 'the 2m proof does not bind a packed cmp, which has Go tests' (@($reasons | Where-Object { $_.Contains('github.com/google/go-cmp/cmp has Go tests and no proof row') -and $_.Contains('step 1.2') }).Count -eq 1 -and $reasons.Count -eq 1) "reasons [$($reasons -join ' | ')], want exactly one naming cmp and step 1.2"
+$reasons = @(Test-NugetgoValidationBinding -Proof $at6m -Packed $gcmpPacked -Tested $gcmpTested)
+Check 'the 6m proof binds the same packed tree (flags has no tests and no row)' ($reasons.Count -eq 0) "reasons [$($reasons -join ' | ')], want none"
+$reasons = @(Test-NugetgoValidationBinding -Proof $at2m -Packed @{ 'github.com/google/go-cmp/cmp/cmpopts' = $gcmpPacked['github.com/google/go-cmp/cmp/cmpopts']; 'github.com/google/go-cmp/cmp/internal/diff' = $gcmpPacked['github.com/google/go-cmp/cmp/internal/diff']; 'github.com/google/go-cmp/cmp/internal/function' = $gcmpPacked['github.com/google/go-cmp/cmp/internal/function']; 'github.com/google/go-cmp/cmp/internal/value' = $gcmpPacked['github.com/google/go-cmp/cmp/internal/value'] } -Tested $gcmpTested)
+Check 'a tested package left out of the pack is not a reason' ($reasons.Count -eq 0) "reasons [$($reasons -join ' | ')], want none"
+
+Write-Host 'which packed packages have Go tests is read from the module source'
+$mod = Join-Path ([System.IO.Path]::GetTempPath()) ("nugetgo-tested-$PID-" + [DateTime]::UtcNow.Ticks)
+try {
+    foreach ($f in @('root.go', 'root_test.go', 'sub/sub.go', 'sub/sub_test.go', 'notests/n.go', 'deep/d.go', 'deep/inner/i_test.go', 'testdata/x_test.go')) {
+        $path = Join-Path $mod $f
+        New-Item -ItemType Directory -Force (Split-Path $path) | Out-Null
+        [System.IO.File]::WriteAllText($path, "package x`n")
+    }
+    $tested = @(Get-NugetgoTestedImportPaths -ModuleDir $mod -ModulePath 'example.com/mod' -ImportPaths @('example.com/mod', 'example.com/mod/sub', 'example.com/mod/notests', 'example.com/mod/deep') | Sort-Object)
+    Check 'a package whose own directory holds *_test.go files, and only those' (($tested -join ',') -ceq 'example.com/mod,example.com/mod/sub') "read [$($tested -join ', ')], want example.com/mod and example.com/mod/sub (deep's tests are in a subdirectory)"
+}
+finally { if (Test-Path $mod) { Remove-Item -Recurse -Force $mod } }
+
 Write-Host 'the pack uses it'
 $pack = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot 'nugetgo-pack.ps1'))
 Check 'nugetgo-pack.ps1 reads each packed project''s digest and the proof''s' (
     $pack.Contains('Get-NugetgoProjectInputDigest') -and $pack.Contains('Get-NugetgoProofInputDigests')) 'the pack does not read both digests'
+Check 'nugetgo-pack.ps1 tells the binding which packed packages have Go tests' ($pack -match 'Get-NugetgoTestedImportPaths' -and $pack -match 'Test-NugetgoValidationBinding [^\r\n]*-Tested') 'the pack does not pass -Tested'
 $bound = $pack.IndexOf('Test-NugetgoValidationBinding')
 Check 'nugetgo-pack.ps1 checks the binding before it packs' ($bound -ge 0 -and $bound -lt $pack.IndexOf('& dotnet pack')) 'no binding check ahead of dotnet pack'
 

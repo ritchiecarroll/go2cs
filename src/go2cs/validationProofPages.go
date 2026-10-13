@@ -1206,6 +1206,19 @@ func writeThirdPartyModuleSummary(moduleDir string, modulePath string) error {
 	return err
 }
 
+// unvalidatedReasonLimit is the longest reason, in runes, MODULE.md gives for a package that did not validate.
+const unvalidatedReasonLimit = 200
+
+// unvalidatedReasonLine is the reason MODULE.md gives for a package that did not validate. RED STUB.
+func unvalidatedReasonLine(reason string) string {
+	return reason
+}
+
+// recordUnvalidatedModulePackages rewrites MODULE.md naming the tested packages that did not validate. RED STUB.
+func recordUnvalidatedModulePackages(outRoot string, modulePath string, unvalidated map[string]string) error {
+	return nil
+}
+
 // proofExcludedDeclarations reads a proof page's "Excluded declarations" list back: each entry as the page names it,
 // in the page's (sorted) order.
 func proofExcludedDeclarations(page string) []string {

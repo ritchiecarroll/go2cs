@@ -249,6 +249,11 @@ func runModuleTests(moduleDir string, outRoot string, options Options, corpusRel
 	return nil
 }
 
+// recordsUnvalidatedPackages reports whether a run's failed packages are named in MODULE.md. RED STUB.
+func recordsUnvalidatedPackages(options Options) bool {
+	return false
+}
+
 // convertAndActOnPackageTests is the single-package -tests flow of main() for one package: convert
 // (production recompiled with the test closure's usings, then the tests), then the requested action.
 func convertAndActOnPackageTests(inputDir string, outputDir string, options Options) error {
