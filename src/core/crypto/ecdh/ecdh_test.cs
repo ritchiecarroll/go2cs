@@ -491,7 +491,7 @@ func main() {
 	println("OK")
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object testRequiresRunningGoˢ = (@string)"test requires running 'go build'"u8;

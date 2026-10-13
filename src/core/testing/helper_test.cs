@@ -37,7 +37,7 @@ private static readonly @string failTestTBHelperˢ = """
     helperfuncs_test.go:73: 9
     helperfuncs_test.go:69: 10
 
-"""u8;
+"""u8.Raw();
 
 public static void TestTBHelper(ж<testing.T> Ꮡt) {
     if (Δos.Getenv(goWantHelperProcessˢ) == "1"u8) {

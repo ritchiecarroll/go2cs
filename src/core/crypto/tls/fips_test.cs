@@ -701,7 +701,7 @@ aEjosRZNJv1nDEl5qG9XN3FC9zb5FrGSFmTTUvR4f4tUHr7wifNSS2dtgQ6+jU6f
 m9o6fukaP7t5VyOXuV7FIO/Hdg2lqW+xU1LowZpVd6ANZ5rAZXtMhWe3+mjfFtju
 TAnR
 -----RAQ PREGVSVPNGR-----
-"""u8)));
+"""u8.Raw())));
     testRSAPSS2048Certificate = block.Value.Bytes;
     (block, _) = pem.Decode(obscuretestdata.Rot13(slice<byte>("""
 
@@ -732,7 +732,7 @@ HvbaCd0PtLOPLKidvbWuCrjxBd/L5jeQOrMJ1SDX5DQ9J5Z8/5mkq4eqiWgwuoWc
 bBegiZqey6hcl9Um4OWQ3SKjISvCSR7wdrAdv0S21ivYkOCZZQ3HBQS6YY5RlYvE
 9I4kIZF8XKkit7ekfhdmZCfpIvnJHY6JAIOufQ2+92qUkFKmm5RWXD==
 -----RAQ EFN CEVINGR XRL-----
-"""u8)));
+"""u8.Raw())));
     error err = default!;
     (testRSAPSS2048PrivateKey, err) = Δx509.ParsePKCS1PrivateKey((~block).Bytes);
     if (err != default!) {

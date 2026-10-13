@@ -63,7 +63,7 @@ func F[T *U, U any](param1, param2 int) /*param1=undef*/ (res1 /*res1=undef*/, r
 }
 /*main=undef*/
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string undefˢ = "undef"u8;
 internal static readonly @string typesˢ2 = "*types."u8;
 

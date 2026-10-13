@@ -265,7 +265,7 @@ Content-Transfer-Encoding: binary
 binary data
 --xxx--
 
-"""u8;
+"""u8.Raw();
 
 // Issue 9305: ParseMultipartForm should populate PostForm too
 public static void TestParseMultipartFormPopulatesPostForm(ж<testing.T> Ꮡt) {
@@ -337,7 +337,7 @@ Content-Type: text/plain
 
 --xxx--
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string fileˢ = "file"u8;
 
 // Issue 45789: multipart form should not include directory path in filename
@@ -1669,7 +1669,7 @@ Accept-Language: en-US,en;q=0.8
 Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3
 Cookie: __utma=1.1978842379.1323102373.1323102373.1323102373.1; EPi:NumberOfVisits=1,2012-02-28T13:42:18; CrmSession=5b707226b9563e1bc69084d07a107c98; plushContainerWidth=100%25; plushNoTopMenu=0; hudson_auto_refresh=false
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkReadRequestChrome(ж<testing.B> Ꮡb) {
     // https://github.com/felixge/node-http-perf/blob/master/fixtures/get.http
@@ -1683,7 +1683,7 @@ User-Agent: curl/7.27.0
 Host: localhost:8080
 Accept: */*
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkReadRequestCurl(ж<testing.B> Ꮡb) {
     // curl http://localhost:8080/
@@ -1697,7 +1697,7 @@ Host: localhost:8080
 User-Agent: ApacheBench/2.3
 Accept: */*
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkReadRequestApachebench(ж<testing.B> Ꮡb) {
     // ab -n 1 -c 1 http://localhost:8080/
@@ -1713,7 +1713,7 @@ Accept-Encoding: gzip
 User-Agent: JoeDog/1.00 [en] (X11; I; Siege 2.70)
 Connection: keep-alive
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkReadRequestSiege(ж<testing.B> Ꮡb) {
     // siege -r 1 -c 1 http://localhost:8080/
@@ -1725,7 +1725,7 @@ internal static readonly @string getHttp11HostLocalhostˢ3 = """
 GET / HTTP/1.1
 Host: localhost:8080
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkReadRequestWrk(ж<testing.B> Ꮡb) {
     // wrk -t 1 -r 1 -c 1 http://localhost:8080/

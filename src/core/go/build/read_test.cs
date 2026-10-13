@@ -55,13 +55,13 @@ package p
 			_ "x"
 			a "x" // comment
 			
-""" + quote + @"x" + quote + """
+""".Raw() + quote + @"x" + quote + """
 
 			_ /*comment*/ 
-""" + quote + @"x" + quote + """
+""".Raw() + quote + @"x" + quote + """
 
 			a 
-""" + quote + @"x" + quote + """
+""".Raw() + quote + @"x" + quote + """
 
 		)
 		import (
@@ -72,7 +72,7 @@ package p
 
 		ℙvar x = 1
 		
-""",
+""".Raw(),
         ""u8
     ),
     new(
@@ -110,7 +110,7 @@ internal static slice<readTest> readCommentsTests = new readTest[]{
 
 		// asdf
 		ℙHello, world
-"""u8,
+"""u8.Raw(),
         ""u8
     ),
     new(
@@ -125,7 +125,7 @@ internal static slice<readTest> readCommentsTests = new readTest[]{
 
 		// asdf
 		ℙHello, world
-"""u8,
+"""u8.Raw(),
         ""u8
     )
 }.slice();
@@ -282,7 +282,7 @@ internal static slice<readEmbedTestsᴛ1> readEmbedTests = new readEmbedTestsᴛ
 test:4:12:x
 		 test:4:14:y
 		 test:4:16:z
-"""u8
+"""u8.Raw()
     ),
     new(
         "package p\nimport \"embed\"\nvar i int\n//go:embed x \"\\x79\" `z`\nvar files embed.FS"u8,
@@ -290,7 +290,7 @@ test:4:12:x
 test:4:12:x
 		 test:4:14:y
 		 test:4:21:z
-"""u8
+"""u8.Raw()
     ),
     new(
         "package p\nimport \"embed\"\nvar i int\n//go:embed x y\n//go:embed z\nvar files embed.FS"u8,
@@ -298,7 +298,7 @@ test:4:12:x
 test:4:12:x
 		 test:4:14:y
 		 test:5:12:z
-"""u8
+"""u8.Raw()
     ),
     new(
         "package p\nimport \"embed\"\nvar i int\n\t //go:embed x y\n\t //go:embed z\n\t var files embed.FS"u8,
@@ -306,7 +306,7 @@ test:4:12:x
 test:4:14:x
 		 test:4:16:y
 		 test:5:14:z
-"""u8
+"""u8.Raw()
     ),
     new(
         "package p\nimport \"embed\"\n//go:embed x y z\nvar files embed.FS"u8,
@@ -314,7 +314,7 @@ test:4:14:x
 test:3:12:x
 		 test:3:14:y
 		 test:3:16:z
-"""u8
+"""u8.Raw()
     ),
     new(
         "\ufeffpackage p\nimport \"embed\"\n//go:embed x y z\nvar files embed.FS"u8,
@@ -322,7 +322,7 @@ test:3:12:x
 test:3:12:x
 		 test:3:14:y
 		 test:3:16:z
-"""u8
+"""u8.Raw()
     ),
     new(
         "package p\nimport \"embed\"\nvar s = \"/*\"\n//go:embed x\nvar files embed.FS"u8,
@@ -335,7 +335,7 @@ package p
 		 var s = "\"\\\\"
 		 //go:embed x
 		 var files embed.FS
-"""u8,
+"""u8.Raw(),
         @"test:4:15:x"u8
     ),
     new(

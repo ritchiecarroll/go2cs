@@ -40,7 +40,7 @@ func (G[P]) N() (p P) { return }
 
 type Inst = G[int]
 	
-"""u8;
+"""u8.Raw();
 
 internal partial struct BenchmarkNamed_tests /*dyn*/ {
     internal @string name;
@@ -125,7 +125,7 @@ func (Node[Q]) M(Q) {}
 
 type Inst = *Tree[int]
 
-"""u8;
+"""u8.Raw();
 
 // Test that types do not expand infinitely, as in go.dev/issue/52715.
 public static void TestFiniteTypeExpansion(ж<testing.T> Ꮡt) {
@@ -161,7 +161,7 @@ func (T) a() {}
 func (T) c() {}
 func (T) b() {}
 
-"""u8;
+"""u8.Raw();
 
 // TestMethodOrdering is a simple test verifying that the indices of methods of
 // a named type remain the same as long as the same source and AddMethod calls

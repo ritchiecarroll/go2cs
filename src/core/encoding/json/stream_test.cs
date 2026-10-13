@@ -79,7 +79,7 @@ false
 {"ß":"long s","K":"Kelvin"}
 3.14
 
-"""u8;
+"""u8.Raw();
 
 public static void TestEncoder(ж<testing.T> Ꮡt) {
     for (nint i = 0; i <= len(streamTest); i++) {
@@ -170,7 +170,7 @@ false
 >}
 3.14
 
-"""u8;
+"""u8.Raw();
 
 public static void TestEncoderIndent(ж<testing.T> Ꮡt) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);

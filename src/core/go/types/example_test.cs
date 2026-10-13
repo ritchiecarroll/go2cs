@@ -47,7 +47,7 @@ func main() {
 	freezing := FToC(-18)
 	fmt.Println(freezing, Boiling) }
 
-"""u8,
+"""u8.Raw(),
         """
 package main
 import "fmt"
@@ -57,7 +57,7 @@ func FToC(f float64) Celsius { return Celsius(f - 32 / 9 * 5) }
 const Boiling Celsius = 100
 func Unused() { {}; {{ var x int; _ = x }} } // make sure empty block scopes get printed
 
-"""u8
+"""u8.Raw()
     }.slice()) {
         files = append(files, mustParse(fset, src));
     }
@@ -94,7 +94,7 @@ func (c *Celsius) SetF(f float64) { *c = Celsius(f - 32 / 9 * 5) }
 type S struct { I; m int }
 type I interface { m() byte }
 
-"""u8;
+"""u8.Raw();
 
 // Output:
 // package "temperature" scope {
@@ -182,7 +182,7 @@ func fib(x int) int {
 	}
 	return fib(x-1) - fib(x-2)
 }
-"""u8;
+"""u8.Raw();
 
 // Output:
 // Method set of temperature.Celsius:

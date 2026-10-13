@@ -126,7 +126,7 @@ from
 	join uid on uid.id = ur.user
 ;
 	
-"""u8;
+"""u8.Raw();
 
 public static void ExampleDB_Query_multipleResultSets() {
     GoFrame ᒐ = default;

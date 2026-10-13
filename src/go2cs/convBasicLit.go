@@ -812,6 +812,14 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 		if context.u8StringOK {
 			result.WriteString("u8")
 		}
+
+		// A Go raw string never holds a CR, but C# takes a multi-line raw literal's line breaks from
+		// the .cs file, and every checkout gives that file CRLF (.gitattributes pins *.cs eol=crlf).
+		// golib's Raw() (string.cs) removes them, so the value is Go's on any checkout. A one-line
+		// raw string is a verbatim literal with no line break, and an interpreted string is unchanged.
+		if isRawStr && strings.Contains(strVal, "\n") {
+			result.WriteString(".Raw()")
+		}
 	}
 
 	return result.String()

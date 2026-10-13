@@ -14,7 +14,7 @@ internal static readonly @string diamond = """
 
 NONE < a < b, c < d;
 
-"""u8;
+"""u8.Raw();
 
 internal static ж<global::go.@internal.dag_package.Graph> mustParse(ж<testing.T> Ꮡt, @string dag) {
     Ꮡt.Helper();

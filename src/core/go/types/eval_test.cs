@@ -128,7 +128,7 @@ public static void TestEvalPos(ж<testing.T> Ꮡt) {
 			/* m.Pi < m.E => false, untyped bool */
 		}
 		
-"""u8,
+"""u8.Raw(),
         """
 
 		package p
@@ -153,13 +153,13 @@ public static void TestEvalPos(ж<testing.T> Ꮡt) {
 			type FT /* FT => , p.FT */ interface{}
 		}
 		
-"""u8,
+"""u8.Raw(),
         """
 
 		package p
 		/* T => , p.T */
 		
-"""u8,
+"""u8.Raw(),
         """
 
 		package p
@@ -174,7 +174,7 @@ public static void TestEvalPos(ж<testing.T> Ꮡt) {
 			type R interface {} // must not shadow R in first line of this function body
 		}
 		
-"""u8
+"""u8.Raw()
     }.slice();
     var fset = token.NewFileSet();
     slice<ж<ast.File>> files = default!;
@@ -255,7 +255,7 @@ func f(a int, s string) S {
 
 	return S{}
 }
-"""u8;
+"""u8.Raw();
 
 public static void TestCheckExpr(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
@@ -344,7 +344,7 @@ internal static readonly @string srcᶜ16 = """
 package p
 func _[A any](A) {}
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue65898(ж<testing.T> Ꮡt) {
     @string src = srcᶜ16;

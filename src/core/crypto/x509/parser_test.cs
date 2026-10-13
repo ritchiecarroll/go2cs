@@ -157,7 +157,7 @@ gc5PYnVF0ot7qAmNFENIpbKg3BdusBkF9rGxLaDSUBvSc7+s9iQz9d/iRuAebrYu
 +eqUlJ2lsjS1U8qyPmlH+spfPNbAEQEsuP32Aw==
 -----END CERTIFICATE-----
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedˢ = (@string)"expected RequireExplicitPolicyZero to be set"u8;

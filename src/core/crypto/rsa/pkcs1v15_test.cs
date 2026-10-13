@@ -304,7 +304,7 @@ internal static readonly @string beginRsaPublicKeyˢ = """
 MEgCQQCd9BVzo775lkohasxjnefF1nCMcNoibqIWEVDe/K7M2GSoO4zlSQB+gkix
 O3AnTcdHB51iaZpWfxPSnew8yfulAgMBAAE=
 -----END RSA PUBLIC KEY-----
-"""u8;
+"""u8.Raw();
 internal static readonly object verifyPKCS1v15AcceptedAˢ = (@string)"VerifyPKCS1v15 accepted a truncated signature"u8;
 
 public static void TestShortPKCS1v15Signature(ж<testing.T> Ꮡt) {

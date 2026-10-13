@@ -57,7 +57,7 @@ internal static readonly @string wantᶜ1 = """
  "str": {},
  "sto": {}
 }
-"""u8;
+"""u8.Raw();
 
 public static void TestOmitEmpty(ж<testing.T> Ꮡt) {
     @string want = wantᶜ1;
@@ -143,7 +143,7 @@ internal static readonly @string wantᶜ2 = """
  "nps3": {},
  "nps4": {}
 }
-"""u8;
+"""u8.Raw();
 
 public static void TestOmitZero(ж<testing.T> Ꮡt) {
     @string want = wantᶜ2;
@@ -186,7 +186,7 @@ internal static readonly @string wantᶜ3 = """
   "nps4": {}
  }
 }
-"""u8;
+"""u8.Raw();
 
 public static void TestOmitZeroMap(ж<testing.T> Ꮡt) {
     @string want = wantᶜ3;
@@ -237,7 +237,7 @@ internal static readonly @string wantᶜ4 = """
  "str": {},
  "nzs": {}
 }
-"""u8;
+"""u8.Raw();
 
 public static void TestOmitEmptyZero(ж<testing.T> Ꮡt) {
     @string want = wantᶜ4;
@@ -295,7 +295,7 @@ public static void TestRoundtripStringTag(ж<testing.T> Ꮡt) {
 	"StrStr": "\"xzbit\"",
 	"NumberStr": "46"
 }
-"""u8
+"""u8.Raw()
     ), new(
         CaseName: Name(stringDoubleEscapesˢ), // See golang.org/issues/38173.
 
@@ -312,7 +312,7 @@ public static void TestRoundtripStringTag(ж<testing.T> Ꮡt) {
 	"StrStr": "\"\\b\\f\\n\\r\\t\\\"\\\\\"",
 	"NumberStr": "0"
 }
-"""u8
+"""u8.Raw()
     )
     }.slice();
     foreach (var (_, vᴛ1) in tests) {

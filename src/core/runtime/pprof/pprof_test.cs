@@ -901,7 +901,7 @@ public static void TestBlockProfile(ж<testing.T> Ꮡt) {
 #	0x[0-9a-f]+	runtime/pprof\.blockChanRecv\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 #	0x[0-9a-f]+	runtime/pprof\.TestBlockProfile\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 
-"""u8),
+"""u8.Raw()),
             new(
                 name: "chan send"u8,
                 f: blockChanSend,
@@ -917,7 +917,7 @@ public static void TestBlockProfile(ж<testing.T> Ꮡt) {
 #	0x[0-9a-f]+	runtime/pprof\.blockChanSend\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 #	0x[0-9a-f]+	runtime/pprof\.TestBlockProfile\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 
-"""u8),
+"""u8.Raw()),
             new(
                 name: "chan close"u8,
                 f: blockChanClose,
@@ -933,7 +933,7 @@ public static void TestBlockProfile(ж<testing.T> Ꮡt) {
 #	0x[0-9a-f]+	runtime/pprof\.blockChanClose\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 #	0x[0-9a-f]+	runtime/pprof\.TestBlockProfile\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 
-"""u8),
+"""u8.Raw()),
             new(
                 name: "select recv async"u8,
                 f: blockSelectRecvAsync,
@@ -949,7 +949,7 @@ public static void TestBlockProfile(ж<testing.T> Ꮡt) {
 #	0x[0-9a-f]+	runtime/pprof\.blockSelectRecvAsync\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 #	0x[0-9a-f]+	runtime/pprof\.TestBlockProfile\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 
-"""u8),
+"""u8.Raw()),
             new(
                 name: "select send sync"u8,
                 f: blockSelectSendSync,
@@ -965,7 +965,7 @@ public static void TestBlockProfile(ж<testing.T> Ꮡt) {
 #	0x[0-9a-f]+	runtime/pprof\.blockSelectSendSync\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 #	0x[0-9a-f]+	runtime/pprof\.TestBlockProfile\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 
-"""u8),
+"""u8.Raw()),
             new(
                 name: "mutex"u8,
                 f: blockMutex,
@@ -981,7 +981,7 @@ public static void TestBlockProfile(ж<testing.T> Ꮡt) {
 #	0x[0-9a-f]+	runtime/pprof\.blockMutex\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 #	0x[0-9a-f]+	runtime/pprof\.TestBlockProfile\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 
-"""u8),
+"""u8.Raw()),
             new(
                 name: "cond"u8,
                 f: blockCond,
@@ -997,7 +997,7 @@ public static void TestBlockProfile(ж<testing.T> Ꮡt) {
 #	0x[0-9a-f]+	runtime/pprof\.blockCond\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 #	0x[0-9a-f]+	runtime/pprof\.TestBlockProfile\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 
-"""u8)
+"""u8.Raw())
         }.array();
         // Generate block profile
         runtime.SetBlockProfileRate(1);
@@ -3222,7 +3222,7 @@ sync.(*Mutex).Unlock
 runtime/pprof.inlineF
 runtime/pprof.inlineE
 runtime/pprof.inlineD
-"""u8
+"""u8.Raw()
             ),
             new(
                 Name: "block"u8,
@@ -3232,7 +3232,7 @@ sync.(*Mutex).Lock
 runtime/pprof.inlineC
 runtime/pprof.inlineB
 runtime/pprof.inlineA
-"""u8
+"""u8.Raw()
             )
         }.slice();
         foreach (var (_, vᴛ1) in tcs) {

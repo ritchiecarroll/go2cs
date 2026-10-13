@@ -27,7 +27,7 @@ import (
 	"test" // test comment
 )
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string srcᶜ1 = """
@@ -45,7 +45,7 @@ import (
 	"test"
 )
 
-"""u8;
+"""u8.Raw();
 
 public static void TestSortImportsUpdatesFileImportsField(ж<testing.T> Ꮡt) {
     Ꮡt.Run(oneImportStatementˢ, (ж<testing.T> tΔ1) => {

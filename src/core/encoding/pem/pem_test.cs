@@ -82,41 +82,41 @@ internal static readonly @string pemTooFewEndingDashes = """
 -----BEGIN FOO-----
 dGVzdA==
 -----END FOO----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string pemTooManyEndingDashes = """
 
 -----BEGIN FOO-----
 dGVzdA==
 -----END FOO------
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string pemTrailingNonWhitespace = """
 
 -----BEGIN FOO-----
 dGVzdA==
 -----END FOO----- .
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string pemWrongEndingType = """
 
 -----BEGIN FOO-----
 dGVzdA==
 -----END BAR-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string pemMissingEndingSpace = """
 
 -----BEGIN FOO-----
 dGVzdA==
 -----ENDBAR-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string pemMissingEndLine = """
 
 -----BEGIN FOO-----
 Header: 1
-"""u8;
+"""u8.Raw();
 
 internal static @string pemRepeatingBegin = strings.Repeat("-----BEGIN \n"u8, 10);
 
@@ -407,7 +407,7 @@ Header: 1
 Header: 1
 
 -----END VALID HEADERS-----
-"""u8);
+"""u8.Raw());
 
 internal static ж<global::go.encoding.pem_package.Block> certificate = Ꮡ(new Block(Type: "CERTIFICATE"u8,
     Headers: new map<@string, @string>{},
@@ -641,7 +641,7 @@ N4XPksobn/NO2IDvPM7N9ZCe+aeyDEkE8QmP6mPScLuGvzSrsgOxWTMWF7Dbdzj0
 tJQLJRZ+ItT5Irl4owSEBNLahC1j3fhQavbj9WVAfKk=
 -----END RSA TESTING KEY-----
 
-"""u8);
+"""u8.Raw());
 
 public static void TestBadEncode(ж<testing.T> Ꮡt) {
     var b = Ꮡ(new Block(Type: "BAD"u8, Headers: new map<@string, @string>{["X:Y"u8] = "Z"u8}));
@@ -687,7 +687,7 @@ foo foo foo
 -----BEGIN TEST BLOCK-----
 aGVsbG8=
 -----END TEST BLOCK-----
-"""u8
+"""u8.Raw()
         ),
         new(
             name: "leading garbage on block"u8,
@@ -698,7 +698,7 @@ MCowBQYDK2VwAyEApVjJeLW5MoP6uR3+OeITokM+rBDng6dgl1vvhcy+wws=
 -----BEGIN TEST BLOCK-----
 aGVsbG8=
 -----END TEST BLOCK-----
-"""u8
+"""u8.Raw()
         ),
         new(
             name: "leading garbage"u8,
@@ -707,7 +707,7 @@ foo foo foo
 -----BEGIN TEST BLOCK-----
 aGVsbG8=
 -----END TEST BLOCK-----
-"""u8
+"""u8.Raw()
         ),
         new(
             name: "leading partial block"u8,
@@ -717,7 +717,7 @@ foo foo foo
 -----BEGIN TEST BLOCK-----
 aGVsbG8=
 -----END TEST BLOCK-----
-"""u8
+"""u8.Raw()
         ),
         new(
             name: "multiple BEGIN"u8,
@@ -727,7 +727,7 @@ aGVsbG8=
 -----BEGIN TEST BLOCK-----
 aGVsbG8=
 -----END TEST BLOCK-----
-"""u8
+"""u8.Raw()
         ),
         new(
             name: "multiple END"u8,
@@ -737,7 +737,7 @@ aGVsbG8=
 -----END TEST BLOCK-----
 -----END TEST BLOCK-----
 -----END TEST BLOCK-----
-"""u8
+"""u8.Raw()
         ),
         new(
             name: "leading malformed BEGIN"u8,
@@ -748,7 +748,7 @@ aGVsbG8=
 -----BEGIN TEST BLOCK-----
 aGVsbG8=
 -----END TEST BLOCK-----
-"""u8
+"""u8.Raw()
         )
     }.slice()) {
         ref var tc = ref heap(new TestDecodeStrangeCases_type(), out var Ꮡtc);
@@ -775,7 +775,7 @@ aGVsbG8=
 internal static readonly @string endPublicKeyˢ = """
 
 -----END PUBLIC KEY-----
-"""u8;
+"""u8.Raw();
 internal static readonly object unexpectedBlockˢ = (@string)"unexpected block"u8;
 
 public static void TestJustEnd(ж<testing.T> Ꮡt) {

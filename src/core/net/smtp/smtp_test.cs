@@ -225,7 +225,7 @@ Subject: Hooray for Go
 Line 1
 .Leading dot line .
 Goodbye.
-"""u8;
+"""u8.Raw();
 
 public static void TestBasic(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -355,7 +355,7 @@ internal static @string basicServer = """
 250 Data OK
 221 OK
 
-"""u8;
+"""u8.Raw();
 
 internal static @string basicClient = """
 HELO localhost
@@ -378,7 +378,7 @@ Goodbye.
 .
 QUIT
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string eh502Eh221Okˢ = """
@@ -386,13 +386,13 @@ internal static readonly @string eh502Eh221Okˢ = """
 502 EH?
 221 OK
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string ehloLocalhostHeloˢ = """
 EHLO localhost
 HELO localhost
 QUIT
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string localhostˢ = "localhost"u8;
 internal static readonly object expectedEhloToFailˢ = (@string)"expected EHLO to fail"u8;
 
@@ -437,7 +437,7 @@ internal static readonly @string basicServerᶜ = """
 250 Sender OK
 221 Goodbye
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string basicClientᶜ = """
@@ -445,7 +445,7 @@ HELO localhost
 MAIL FROM:<user@gmail.com>
 QUIT
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string basicServerᶜ1 = """
@@ -454,7 +454,7 @@ internal static readonly @string basicServerᶜ1 = """
 250 Sender OK
 221 Goodbye
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string basicClientᶜ1 = """
@@ -462,7 +462,7 @@ EHLO localhost
 MAIL FROM:<user@gmail.com>
 QUIT
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string basicServerᶜ2 = """
@@ -472,7 +472,7 @@ internal static readonly @string basicServerᶜ2 = """
 250 Sender OK
 221 Goodbye
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string basicClientᶜ2 = """
@@ -480,7 +480,7 @@ EHLO localhost
 MAIL FROM:<user@gmail.com> BODY=8BITMIME
 QUIT
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string basicServerᶜ3 = """
@@ -490,7 +490,7 @@ internal static readonly @string basicServerᶜ3 = """
 250 Sender OK
 221 Goodbye
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string basicClientᶜ3 = """
@@ -498,7 +498,7 @@ EHLO localhost
 MAIL FROM:<user+📧@gmail.com> SMTPUTF8
 QUIT
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string basicServerᶜ4 = """
@@ -509,7 +509,7 @@ internal static readonly @string basicServerᶜ4 = """
 250 Sender OK
 221 Goodbye
 	
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string basicClientᶜ4 = """
@@ -517,7 +517,7 @@ EHLO localhost
 MAIL FROM:<user+📧@gmail.com> BODY=8BITMIME SMTPUTF8
 QUIT
 
-"""u8;
+"""u8.Raw();
 
 public static void TestExtensions(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -767,13 +767,13 @@ internal static @string newClientServer = """
 250 8BITMIME
 221 OK
 
-"""u8;
+"""u8.Raw();
 
 internal static @string newClientClient = """
 EHLO localhost
 QUIT
 
-"""u8;
+"""u8.Raw();
 
 public static void TestNewClient2(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
@@ -821,14 +821,14 @@ internal static @string newClient2Server = """
 250 8BITMIME
 221 OK
 
-"""u8;
+"""u8.Raw();
 
 internal static @string newClient2Client = """
 EHLO localhost
 HELO localhost
 QUIT
 
-"""u8;
+"""u8.Raw();
 
 public static partial void TestNewClientWithTLS(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
@@ -998,7 +998,7 @@ internal static @string baseHelloServer = """
 250-mx.google.com at your service
 250 FEATURE
 
-"""u8;
+"""u8.Raw();
 
 internal static slice<@string> helloServer = new @string[]{
     ""u8,
@@ -1017,7 +1017,7 @@ internal static @string baseHelloClient = """
 EHLO customhost
 HELO customhost
 
-"""u8;
+"""u8.Raw();
 
 internal static slice<@string> helloClient = new @string[]{
     ""u8,
@@ -1040,7 +1040,7 @@ Subject: SendMail test
 
 SendMail is working for me.
 
-"""u8;
+"""u8.Raw();
 
 public static partial void TestSendMail(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
@@ -1128,7 +1128,7 @@ internal static @string sendMailServer = """
 250 Data ok
 221 Goodbye
 
-"""u8;
+"""u8.Raw();
 
 internal static @string sendMailClient = """
 EHLO localhost
@@ -1144,7 +1144,7 @@ SendMail is working for me.
 .
 QUIT
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string helloWorldˢ = "220 hello world"u8;
@@ -1262,7 +1262,7 @@ internal static @string authFailedServer = """
 535 please see www.example.com
 221 Goodbye
 
-"""u8;
+"""u8.Raw();
 
 internal static @string authFailedClient = """
 EHLO localhost
@@ -1270,7 +1270,7 @@ AUTH PLAIN AHVzZXIAcGFzcw==
 *
 QUIT
 
-"""u8;
+"""u8.Raw();
 
 public static partial void TestTLSClient(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
@@ -1525,7 +1525,7 @@ NmvQQPOMgM3m+oQSCPRTNGSg25e1Qbo7bgQDv8ZTnq8FgOJ/rbkyERw2JckkHpD4
 n4qcK27WkEDBtQFlPihIM8hLIuzWoi/9wygiElTy/tVL3y7fGCvY2/k1KBthtZGF
 tN8URjVmyEo=
 -----END CERTIFICATE-----
-"""u8);
+"""u8.Raw());
 
 // localhostKey is the private key for localhostCert.
 internal static slice<byte> localhostKey = slice<byte>(testingKey("""
@@ -1545,7 +1545,7 @@ QXLEiJoClkR2orAmqjPLVhR3t2oB3INcnEjLNSq8LHyQEfXyaFfu4U9l5+fRPL2i
 jiC0k/9L5dHUsF0XZothAkEA23ddgRs+Id/HxtojqqUT27B8MT/IGNrYsp4DvS/c
 qgkeluku4GjxRlDMBuXk94xOBEinUs+p/hwP1Alll80Tpg==
 -----END RSA TESTING KEY-----
-"""u8));
+"""u8.Raw()));
 
 internal static @string testingKey(@string s) {
     return strings.ReplaceAll(s, "TESTING KEY"u8, "PRIVATE KEY"u8);

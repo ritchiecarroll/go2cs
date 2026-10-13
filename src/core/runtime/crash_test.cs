@@ -367,7 +367,7 @@ wrap: bad
 panic: again
 
 
-"""u8;
+"""u8.Raw();
 
 public static void TestRecursivePanic(ж<testing.T> Ꮡt) {
     @string output = runTestProg(Ꮡt, testprogˢ, recursivePanicˢ);
@@ -385,7 +385,7 @@ second panic
 panic: third panic
 
 
-"""u8;
+"""u8.Raw();
 
 public static void TestRecursivePanic2(ж<testing.T> Ꮡt) {
     @string output = runTestProg(Ꮡt, testprogˢ, recursivePanic2ˢ);
@@ -401,7 +401,7 @@ internal static readonly @string panicFirstPanicˢ = """
 panic: first panic
 
 
-"""u8;
+"""u8.Raw();
 
 public static void TestRecursivePanic3(ж<testing.T> Ꮡt) {
     @string output = runTestProg(Ꮡt, testprogˢ, recursivePanic3ˢ);
@@ -417,7 +417,7 @@ internal static readonly @string panicFirstPanicRecoveredˢ = """
 panic: first panic [recovered]
 	panic: second panic
 
-"""u8;
+"""u8.Raw();
 
 public static void TestRecursivePanic4(ж<testing.T> Ꮡt) {
     @string output = runTestProg(Ꮡt, testprogˢ, recursivePanic4ˢ);
@@ -434,7 +434,7 @@ first panic
 second panic
 panic: third panic
 
-"""u8;
+"""u8.Raw();
 
 public static void TestRecursivePanic5(ж<testing.T> Ꮡt) {
     @string output = runTestProg(Ꮡt, testprogˢ, recursivePanic5ˢ);

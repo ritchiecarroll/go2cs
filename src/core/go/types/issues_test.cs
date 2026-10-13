@@ -50,7 +50,7 @@ var (
 	_ = (interface{})("foo")
 	_ = (interface{})(nil)
 )
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue5849(ж<testing.T> Ꮡt) {
     @string src = packagePVarSUintUint88ˢ;
@@ -101,7 +101,7 @@ func f() int {
 	return 0
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue6413(ж<testing.T> Ꮡt) {
     @string src = packagePFuncFIntDeferFGoˢ;
@@ -131,7 +131,7 @@ package p
 func (T) m() (res bool) { return }
 type T struct{} // receiver type after method declaration
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue7245(ж<testing.T> Ꮡt) {
     @string src = packagePFuncTMResBoolˢ;
@@ -164,7 +164,7 @@ func _() {
         _, _, _ = x, y, z  // uses x, y, z
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string wantᶜ2 = """
@@ -178,7 +178,7 @@ L6 uses var x int
 L7 uses var x int
 L7 uses var y int
 L7 uses var z int
-"""u8;
+"""u8.Raw();
 
 // This tests that uses of existing vars on the LHS of an assignment
 // are Uses, not Defs; and also that the (illegal) use of a non-var on
@@ -242,7 +242,7 @@ func main() {
 	}
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string src1ᶜ1 = """
@@ -261,7 +261,7 @@ func main() {
 	}
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string src2ᶜ1 = """
@@ -280,7 +280,7 @@ func main() {
 	}
 }
 
-"""u8;
+"""u8.Raw();
 
 // This tests that the package associated with the types.Object.Pkg method
 // is the type's package independent of the order in which the imports are
@@ -656,7 +656,7 @@ func _() {
 	a.F(template /* ERRORx "cannot use.*html/template.* as .*text/template" */ .Template{})
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string csrcᶜ = """
@@ -677,7 +677,7 @@ var _ fmt.Stringer = 1 // ERRORx "cannot use 1.*as fmt\\.Stringer"
 // text/template.
 func _() { a.G(template /* ERRORx "cannot use .*html/template.*Template" */ .Template{}) }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string tsrcᶜ = """
@@ -691,7 +691,7 @@ type T int
 // Verify that the current package name also causes disambiguation.
 var _ T = template /* ERRORx "cannot use.*text/template.* as T value" */.Template{}
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue43124(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -863,19 +863,19 @@ type I0 interface {
 }
 var _ I0 = b.S{}
 
-"""u8, //---------------------------------------------------------------
+"""u8.Raw(), //---------------------------------------------------------------
 
             """
 package b
 type S struct{}
 func (S) M0(struct{ f string }) {}
 
-"""u8,
+"""u8.Raw(),
             """
 6:12: cannot use b[.]S{} [(]value of struct type b[.]S[)] as I0 value in variable declaration: b[.]S does not implement I0 [(]wrong type for method M0[)]
 .*have M0[(]struct{f string /[*] package b [*]/ }[)]
 .*want M0[(]struct{f string /[*] package main [*]/ }[)]
-"""u8),
+"""u8.Raw()),
         new(
             """
 package main
@@ -885,19 +885,19 @@ type I1 interface {
 }
 var _ I1 = b.S{}
 
-"""u8, //---------------------------------------------------------------
+"""u8.Raw(), //---------------------------------------------------------------
 
             """
 package b
 type S struct{}
 func (S) M1(struct{ string }) {}
 
-"""u8,
+"""u8.Raw(),
             """
 6:12: cannot use b[.]S{} [(]value of struct type b[.]S[)] as I1 value in variable declaration: b[.]S does not implement I1 [(]wrong type for method M1[)]
 .*have M1[(]struct{string /[*] package b [*]/ }[)]
 .*want M1[(]struct{string /[*] package main [*]/ }[)]
-"""u8),
+"""u8.Raw()),
         new(
             """
 package main
@@ -907,19 +907,19 @@ type I2 interface {
 }
 var _ I2 = b.S{}
 
-"""u8, //---------------------------------------------------------------
+"""u8.Raw(), //---------------------------------------------------------------
 
             """
 package b
 type S struct{}
 func (S) M2(struct{ f struct{ f string } }) {}
 
-"""u8,
+"""u8.Raw(),
             """
 6:12: cannot use b[.]S{} [(]value of struct type b[.]S[)] as I2 value in variable declaration: b[.]S does not implement I2 [(]wrong type for method M2[)]
 .*have M2[(]struct{f struct{f string} /[*] package b [*]/ }[)]
 .*want M2[(]struct{f struct{f string} /[*] package main [*]/ }[)]
-"""u8),
+"""u8.Raw()),
         new(
             """
 package main
@@ -929,19 +929,19 @@ type I3 interface {
 }
 var _ I3 = b.S{}
 
-"""u8, //---------------------------------------------------------------
+"""u8.Raw(), //---------------------------------------------------------------
 
             """
 package b
 type S struct{}
 func (S) M3(struct{ F struct{ f string } }) {}
 
-"""u8,
+"""u8.Raw(),
             """
 6:12: cannot use b[.]S{} [(]value of struct type b[.]S[)] as I3 value in variable declaration: b[.]S does not implement I3 [(]wrong type for method M3[)]
 .*have M3[(]struct{F struct{f string /[*] package b [*]/ }}[)]
 .*want M3[(]struct{F struct{f string /[*] package main [*]/ }}[)]
-"""u8),
+"""u8.Raw()),
         new(
             """
 package main
@@ -951,19 +951,19 @@ type I4 interface {
 }
 var _ I4 = b.S{}
 
-"""u8, //---------------------------------------------------------------
+"""u8.Raw(), //---------------------------------------------------------------
 
             """
 package b
 type S struct{}
 func (S) M4(struct { *string }) {}
 
-"""u8,
+"""u8.Raw(),
             """
 6:12: cannot use b[.]S{} [(]value of struct type b[.]S[)] as I4 value in variable declaration: b[.]S does not implement I4 [(]wrong type for method M4[)]
 .*have M4[(]struct{[*]string /[*] package b [*]/ }[)]
 .*want M4[(]struct{[*]string /[*] package main [*]/ }[)]
-"""u8),
+"""u8.Raw()),
         new(
             """
 package main
@@ -974,7 +974,7 @@ type I5 interface {
 }
 var _ I5 = b.S{}
 
-"""u8, //---------------------------------------------------------------
+"""u8.Raw(), //---------------------------------------------------------------
 
             """
 package b
@@ -982,12 +982,12 @@ type S struct{}
 type t struct{ A int }
 func (S) M5(struct {S;t}) {}
 
-"""u8,
+"""u8.Raw(),
             """
 7:12: cannot use b[.]S{} [(]value of struct type b[.]S[)] as I5 value in variable declaration: b[.]S does not implement I5 [(]wrong type for method M5[)]
 .*have M5[(]struct{b[.]S; b[.]t}[)]
 .*want M5[(]struct{b[.]S; t}[)]
-"""u8)
+"""u8.Raw())
     }.slice();
     var fset = token.NewFileSet();
     var fsetʗ1 = fset;
@@ -1033,7 +1033,7 @@ type Layout = C.struct_layout
 
 func (*Layout /* ERROR "cannot define new methods on non-local type Layout" */) Binding() {}
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string cgoTypesᶜ = """
@@ -1077,7 +1077,7 @@ func _cgoCheckPointer(interface{}, interface{})
 //go:noescape
 func _cgoCheckResult(interface{})
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue59944(ж<testing.T> Ꮡt) {
     testenv.MustHaveCGO(new types_test_package.testing_TжTB(Ꮡt));
@@ -1105,7 +1105,7 @@ func _() {
 	A(B, nil // syntax error: missing ',' before newline in argument list
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue61931(ж<testing.T> Ꮡt) {
     @string src = srcᶜ22;
@@ -1126,7 +1126,7 @@ package p
 func f[T any]() {}
 func _()        { f() }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue61938(ж<testing.T> Ꮡt) {
     @string src = srcᶜ23;
@@ -1157,7 +1157,7 @@ func f[I *T, T any]() {
         var v T
         _ = v
 }
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue63260(ж<testing.T> Ꮡt) {
     @string src = srcᶜ24;
@@ -1199,7 +1199,7 @@ package p
 type A = []int
 type S struct{ A }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string wantᶜ3 = "type p.S struct{p.A}"u8;
@@ -1305,7 +1305,7 @@ func _() {
 	f([]string{})
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue64759(ж<testing.T> Ꮡt) {
     @string src = srcᶜ26;
@@ -1331,7 +1331,7 @@ func f(x int) {
 	}
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue68334(ж<testing.T> Ꮡt) {
     @string src = srcᶜ27;
@@ -1361,7 +1361,7 @@ type (
 	A = S
 	T A
 )
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string wantᶜ4 = "type p.T struct{}"u8;
@@ -1388,7 +1388,7 @@ package p
 
 var _ = T{{x}}
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue69092(ж<testing.T> Ꮡt) {
     @string src = srcᶜ29;

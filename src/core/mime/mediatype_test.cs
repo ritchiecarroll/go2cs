@@ -447,7 +447,7 @@ public static void TestParseMediaType(ж<testing.T> Ꮡt) {
 message/external-body; access-type=URL;
 		URL*0="ftp://";
 		URL*1="cs.utk.edu/pub/moore/bulk-mailer/bulk-mailer.tar";
-"""u8, // example from rfc2231-p.3 (https://datatracker.ietf.org/doc/html/rfc2231)
+"""u8.Raw(), // example from rfc2231-p.3 (https://datatracker.ietf.org/doc/html/rfc2231)
  // <-- trailing semicolon
 
             @"message/external-body"u8,

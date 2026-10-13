@@ -33,19 +33,19 @@ public static readonly @string MultiLine = """
         Line2 ""Yo""
         Line3
         
-"""u8;
+"""u8.Raw();
 public static readonly @string MultiLine2 = """"
 
         Line1 /123
         Line2 """Yo"""
         Line3
-""""u8;
+""""u8.Raw();
 public static readonly @string MultiLine3 = """
 Line1
         Line2
         "Yo"
         Line3
-"""u8;
+"""u8.Raw();
 
 public static nint A2 = 1;
 public static @string B2 = "42"u8;
@@ -228,7 +228,7 @@ internal static void Main() {
 
         SELECT *
         FROM 
-"""u8 + "`Role`"u8;
+"""u8.Raw() + "`Role`"u8;
 }
 
 } // end main_package

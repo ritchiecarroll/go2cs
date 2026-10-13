@@ -52,7 +52,7 @@ public static void TestMapFSChmodDot(ж<testing.T> Ꮡt) {
 a: dr-xr-xr-x
 a/b.txt: -rw-rw-rw-
 
-"""u8[1..];
+"""u8.Raw()[1..];
     @string got = buf.String();
     if (want != got) {
         Ꮡt.Errorf("MapFS modes want:\n%s\ngot:\n%s\n"u8, want, got);

@@ -67,7 +67,7 @@ internal static readonly @string sizesSizeSmallSizeSizeˢ = """
 		<size>small</size>
 		<size>large</size>
 	</sizes>
-"""u8;
+"""u8.Raw();
 
 internal partial struct Example_textMarshalXML_inventory /*dyn*/ {
     public slice<Size> Sizes; /*`xml:"size"`*/

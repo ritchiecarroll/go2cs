@@ -870,7 +870,7 @@ type S struct {
 	f T
 }
 
-"""u8;
+"""u8.Raw();
 
 public static partial void TestIssue69912(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
