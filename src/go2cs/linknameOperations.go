@@ -410,6 +410,18 @@ var linknamePushTargets = map[string]linknamePush{
 	// end the host through golib's unhandled-goroutine door. The forwarder is on the consumer side, across
 	// the runtime/pprof -> runtime edge that already exists (the same zero graph cost as the row above).
 	"runtime/pprof.readProfile": {source: "runtime.runtime_pprof_readProfile", bareDecl: true},
+	// darwin's runtime/pprof region walk, pushed by runtime/sys_darwin.go
+	// (`//go:linkname mach_vm_region runtime/pprof.mach_vm_region` and the proc_regionfilename twin). BARE
+	// consumer shape: vminfo_darwin.go declares both bodyless with no directive of its own. readMapping walks
+	// the process's memory regions with mach_vm_region whenever a profile is built and names each executable
+	// region's file with proc_regionfilename, so without these rows every darwin program that writes a CPU or
+	// heap profile dies in the stub: net/http/pprof's /debug/pprof/profile handler took the host down on both
+	// hosted mac legs (darwin wave 12, run 38349654137) and /debug/pprof/heap read infrastructure-error on the
+	// same exception. The pushed bodies are ORDINARY CONVERTED Go over libcCall and the two trampolines'
+	// cgo_import_dynamic records (runtime/darwin/sys_darwin.cs). The forwarders are on the consumer side, across
+	// the runtime/pprof -> runtime edge that already exists, the same zero graph cost as the rows above.
+	"runtime/pprof.mach_vm_region":      {source: "runtime.mach_vm_region", bareDecl: true},
+	"runtime/pprof.proc_regionfilename": {source: "runtime.proc_regionfilename", bareDecl: true},
 	// crypto/internal/fips140's service indicator, pushed by runtime/runtime1.go
 	// (`//go:linkname fips_getIndicator crypto/internal/fips140.getIndicator`, and the setter beside it).
 	// SELF-SYMBOL consumer shape, the second and third members of that arm: indicator.go declares
