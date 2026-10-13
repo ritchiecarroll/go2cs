@@ -107,8 +107,20 @@ notarization unless browser downloads on macOS turn out to be how people actuall
 Today `release-nuget.ps1` packs, signs and pushes the packages, and the ritual ends with
 `git push origin nuget-<version>`.
 
-- **The tag push is the trigger.** A real version of the workflow runs on `push: tags: ['nuget-*']`, so
-  the binaries are built from exactly the tagged commit, after the packages are public.
+- **The tag push is the trigger, and the record commit is what is built.** The ritual mints the
+  `nuget-<version>` tag on the last commit *before* the version is committed. The commit that follows,
+  `release: go2cs converted stdlib <version>`, is the **record commit**: the one that sets
+  `src/go2cs/corpus-release.txt`, the string a converter reports as `go2cs.release`. A converter built
+  at the tag itself therefore names the previous release. So the workflow finds the record commit on
+  master (the first commit after the tag whose `corpus-release.txt` reads the tag's version), requires
+  the tag's commit to be its ancestor and `src/go2cs` to be byte-identical between the two apart from
+  that one file, and builds the record commit. The source built is the tagged converter, and the
+  binary names the right release.
+- **The record lands minutes after the tag**, so on a tag push the workflow waits for it, looking every
+  two minutes for up to two hours, then fails with a message that says how to re-run it.
+- **A tag can be given by hand.** Starting the workflow with an existing tag in its `tag` input takes
+  the same release path. That is how a release whose tag run failed, or predates the workflow, gets
+  its binaries.
 - **It checks itself against the tag:** `go2cs -version` on each platform must print the tag's version
   as `go2cs.release`, or the run fails.
 - **It creates a DRAFT GitHub Release** holding the six archives, `SHA256SUMS` and the attestation, with
@@ -177,9 +189,16 @@ tag that already has a Release. Only its last job can write, and only on a tag.
   PowerShell parse error in a new message. Fixed in the next commit.
 - **The version check is shown to fail when it should.** Run locally against a real `win-x64` archive, the
   smoke script exits 0 with the matching version, 0 with no tag version, and 1 with a wrong one.
-- **Not run: the tag path itself**, which is the attestation step and the draft Release. It cannot run
-  without a release tag being pushed. It is parsed, and each shell step passes a syntax check. Its first
-  real run is the first release tag, so read that run before trusting it.
+- **The first tag run, 38268359067 on `nuget-1.24.13.6`: failed, correctly.** The build was green and all
+  six smokes stopped on the version check: `go2cs.release is 1.24.13.5 …, and the tag says 1.24.13.6`.
+  The draft step was skipped and nothing was published. The cause was the ritual fact above, which the
+  workflow did not know: it built the tag's commit. The fix builds the record commit. Its step was run
+  locally against the real tags: 1.24.13.6, 1.24.13.5 and 1.24.13.4 each resolve to their own record
+  commit; a malformed tag, a tag that does not exist, and a tag whose record is not on master each fail
+  with their own message; and with no tag it builds where it stands.
+- **Still not run: the attestation step and the draft Release.** The first tag run stopped at the
+  version check, before either. They are parsed, and each shell step passes a syntax check. Their first
+  real run is the next release run, so read that run before publishing its draft.
 
 **A note on how the runs were started.** A workflow that is not yet on the default branch cannot be
 started by hand. For these two runs only, the file carried a push trigger limited to this branch and to

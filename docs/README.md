@@ -98,6 +98,9 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
 - **Windows or Linux on x64**, where the converted standard library is validated against Go's own
   tests. macOS, on Intel and Apple silicon, has packages and is being validated package by package
   ([Platforms](Roadmap.md#platforms)).
+  A minimal Linux, such as a container or a fresh server, also needs `git` and `curl`, and .NET's
+  native dependencies ICU and OpenSSL
+  ([Microsoft's list](https://learn.microsoft.com/dotnet/core/install/linux-scripted-manual#dependencies)).
 
 ## Installing the converter
 

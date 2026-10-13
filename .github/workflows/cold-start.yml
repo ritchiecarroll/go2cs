@@ -1,0 +1,191 @@
+name: Cold start (a newcomer's first hour, on a clean Linux)
+
+# A LAUNCH-READINESS CHECK. It does what a first-time user does, on a machine with nothing installed, and
+# follows the README and the module walkthrough literally: install Go and the .NET SDK, clone, `go install`
+# the converter, then convert, build and run the walkthrough's program and compare its output with `go run`.
+#
+# Each job runs in a clean container image (`container:`), not on the runner's own preinstalled image, so
+# nothing is there that the documentation did not tell the user to install. The one exception is stated in
+# the first step: the handful of packages a bare container lacks and a real desktop has (certificates, curl,
+# git, tar), plus the two native libraries .NET needs, which a first-time user gets from Microsoft's own
+# install instructions.
+#
+# It PUBLISHES NOTHING, has a read-only token, and runs only when someone starts it by hand. Every step is
+# timed into the run's summary. Network steps retry. A stumble a newcomer would hit is written to the summary
+# as a FRICTION line; the job fails only when the walkthrough itself fails.
+#
+# It clones the repository's default branch, as a user would, not the commit the workflow was started from.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cold-start-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GO_VERSION: '1.24.13'
+  DOTNET_CHANNEL: '10.0'
+  REPO_URL: https://github.com/${{ github.repository }}.git
+
+jobs:
+  cold-start:
+    name: ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ['ubuntu:24.04', 'debian:12']
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: 0. What a bare container lacks and a desktop has
+        run: |
+          set -euo pipefail
+          t0=$(date +%s)
+          export DEBIAN_FRONTEND=noninteractive
+          for try in 1 2 3; do apt-get update -qq && break; sleep 10; done
+          # certificates, curl, git and tar: on any developer's machine, absent from a bare image.
+          # jq: this check's own tool, to read go.dev's release listing. Not something a user needs.
+          # libicu and libssl: .NET's native dependencies, which dotnet-install.sh does not install.
+          icu=$(apt-cache --names-only search '^libicu[0-9]+$' | awk '{print $1}' | sort -V | tail -1)
+          for try in 1 2 3; do
+            apt-get install -y -qq --no-install-recommends ca-certificates curl git tar gzip jq "$icu" libssl3 zlib1g libstdc++6 && break
+            sleep 10
+          done
+          {
+            echo "## Cold start on \`${{ matrix.image }}\`"
+            echo
+            echo "$(. /etc/os-release && echo "$PRETTY_NAME"), $(uname -m), $(nproc) cores. Nothing else was installed before the steps below."
+            echo
+            echo "| Step | Seconds | Result |"
+            echo "|:--|--:|:--|"
+            echo "| 0. certificates, curl, git, tar; .NET's native libraries ($icu, libssl3) | $(( $(date +%s) - t0 )) | ok |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "FRICTION: the README names the .NET SDK and Go, and does not say that a minimal Linux also needs git, curl and .NET's native libraries (ICU, OpenSSL). A desktop has them; a container or a fresh server does not." >> "$RUNNER_TEMP/friction.txt"
+
+      - name: 1. Install Go, the release the README names, checksum verified
+        run: |
+          set -euo pipefail
+          t0=$(date +%s)
+          name="go${GO_VERSION}.linux-amd64.tar.gz"
+          cd "$RUNNER_TEMP"
+          want=$(curl -sSfL --retry 5 --retry-all-errors 'https://go.dev/dl/?mode=json&include=all' \
+            | jq -r --arg n "$name" '.[].files[] | select(.filename == $n) | .sha256')
+          test -n "$want"
+          curl -sSfL --retry 5 --retry-all-errors -o "$name" "https://go.dev/dl/$name"
+          got=$(sha256sum "$name" | cut -d' ' -f1)
+          if [ "$got" != "$want" ]; then echo "::error::Go archive checksum mismatch: got $got, want $want"; exit 1; fi
+          tar -C /usr/local -xzf "$name"
+          echo "/usr/local/go/bin" >> "$GITHUB_PATH"
+          echo "$HOME/go/bin" >> "$GITHUB_PATH"
+          /usr/local/go/bin/go version
+          echo "| 1. Go $GO_VERSION from go.dev, SHA-256 matched ($(stat -c %s "$name") bytes) | $(( $(date +%s) - t0 )) | $(/usr/local/go/bin/go version) |" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 2. Install the .NET SDK with Microsoft's install script
+        run: |
+          set -euo pipefail
+          t0=$(date +%s)
+          cd "$RUNNER_TEMP"
+          curl -sSfL --retry 5 --retry-all-errors -o dotnet-install.sh https://dot.net/v1/dotnet-install.sh
+          for try in 1 2 3; do bash dotnet-install.sh --channel "$DOTNET_CHANNEL" --install-dir "$HOME/.dotnet" && break; sleep 15; done
+          echo "$HOME/.dotnet" >> "$GITHUB_PATH"
+          echo "DOTNET_ROOT=$HOME/.dotnet" >> "$GITHUB_ENV"
+          echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" >> "$GITHUB_ENV"
+          echo "DOTNET_NOLOGO=1" >> "$GITHUB_ENV"
+          v=$("$HOME/.dotnet/dotnet" --version)
+          echo "| 2. .NET SDK, channel $DOTNET_CHANNEL, by dotnet-install.sh | $(( $(date +%s) - t0 )) | $v |" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 3. Clone the repository and go install the converter (README, Installing the converter)
+        run: |
+          set -euo pipefail
+          t0=$(date +%s)
+          cd "$HOME"
+          for try in 1 2 3; do rm -rf go2cs; git clone --quiet "$REPO_URL" go2cs && break; sleep 15; done
+          clone=$(( $(date +%s) - t0 ))
+          echo "| 3a. git clone ($(du -sh go2cs | cut -f1), commit \`$(git -C go2cs rev-parse --short=10 HEAD)\`) | $clone | ok |" >> "$GITHUB_STEP_SUMMARY"
+          t1=$(date +%s)
+          cd go2cs/src/go2cs
+          for try in 1 2 3; do go install . && break; sleep 15; done
+          echo "| 3b. go install . | $(( $(date +%s) - t1 )) | ok |" >> "$GITHUB_STEP_SUMMARY"
+          t2=$(date +%s)
+          go2cs -version | tee "$RUNNER_TEMP/version.txt"
+          rel=$(sed -n 's/^go2cs\.release=//p' "$RUNNER_TEMP/version.txt")
+          echo "| 3c. go2cs -version | $(( $(date +%s) - t2 )) | release $rel |" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 4. The module walkthrough, step 1 (Go builds and runs)
+        run: |
+          set -euo pipefail
+          t0=$(date +%s)
+          page="$HOME/go2cs/docs/ConvertingAModule.md"
+          mkdir -p "$HOME/colordemo" && cd "$HOME/colordemo"
+          go mod init example.com/colordemo
+          # main.go is created by the page's OWN bash block, cut out of the page, not retyped here.
+          awk '/^cat > main\.go <</{f=1} f{print} f&&/^EOF$/{exit}' "$page" > "$RUNNER_TEMP/make-main.sh"
+          test -s "$RUNNER_TEMP/make-main.sh"
+          bash "$RUNNER_TEMP/make-main.sh"
+          test -s main.go
+          export GOTOOLCHAIN=local
+          echo "GOTOOLCHAIN=local" >> "$GITHUB_ENV"
+          for try in 1 2 3; do go get github.com/fatih/color@v1.18.0 && break; sleep 15; done
+          go mod tidy
+          go build ./...
+          go run . > "$RUNNER_TEMP/go.out"
+          cat "$RUNNER_TEMP/go.out"
+          echo "| 4. walkthrough step 1: go mod init, main.go from the page, go get, tidy, build, run | $(( $(date +%s) - t0 )) | go run printed $(wc -l < "$RUNNER_TEMP/go.out") line(s) |" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 5. The module walkthrough, step 2 (go2cs converts it)
+        run: |
+          set -euo pipefail
+          t0=$(date +%s)
+          cd "$HOME/colordemo"
+          go2cs -recurse=nuget . csharp 2>&1 | tee "$RUNNER_TEMP/convert.log"
+          summary=$(grep -E 'Recursive conversion complete' "$RUNNER_TEMP/convert.log" | tail -1 || true)
+          test -f csharp/src/example.com/colordemo/example.com.colordemo.slnx
+          echo "| 5. walkthrough step 2: go2cs -recurse=nuget . csharp | $(( $(date +%s) - t0 )) | ${summary:-converted} |" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 6. The module walkthrough, step 3 (dotnet build, the first NuGet restore)
+        run: |
+          set -euo pipefail
+          t0=$(date +%s)
+          cd "$HOME/colordemo/csharp/src/example.com/colordemo"
+          ok=0
+          for try in 1 2 3; do
+            if dotnet build example.com.colordemo.slnx -c Debug 2>&1 | tee "$RUNNER_TEMP/build.log"; then ok=1; break; fi
+            sleep 20
+          done
+          test "$ok" = 1
+          line=$(grep -E '[0-9]+ Warning\(s\)|Build succeeded' "$RUNNER_TEMP/build.log" | tr '\n' ' ' | tr -s ' ')
+          echo "| 6. walkthrough step 3: dotnet build, with the first restore of the go.* packages | $(( $(date +%s) - t0 )) | ${line:-built} |" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 7. The module walkthrough, step 4 (dotnet run equals go run)
+        run: |
+          set -euo pipefail
+          t0=$(date +%s)
+          cd "$HOME/colordemo/csharp/src/example.com/colordemo"
+          dotnet run -c Debug > "$RUNNER_TEMP/cs.out"   # the walkthrough's own command
+          cat "$RUNNER_TEMP/cs.out"
+          if cmp -s "$RUNNER_TEMP/go.out" "$RUNNER_TEMP/cs.out"; then
+            echo "| 7. walkthrough step 4: dotnet run | $(( $(date +%s) - t0 )) | **output identical to go run** |" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "| 7. walkthrough step 4: dotnet run | $(( $(date +%s) - t0 )) | **DIFFERS from go run** |" >> "$GITHUB_STEP_SUMMARY"
+            diff "$RUNNER_TEMP/go.out" "$RUNNER_TEMP/cs.out" || true
+            echo "::error::dotnet run and go run printed different output"
+            exit 1
+          fi
+
+      - name: Friction a newcomer would meet
+        if: always()
+        run: |
+          {
+            echo
+            echo "### Friction"
+            echo
+            if [ -s "$RUNNER_TEMP/friction.txt" ]; then sed 's/^/- /' "$RUNNER_TEMP/friction.txt"; else echo "- none recorded"; fi
+          } >> "$GITHUB_STEP_SUMMARY"
