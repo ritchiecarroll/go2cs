@@ -605,3 +605,71 @@ func convertWithoutComments(t *testing.T, source string) []string {
 
 	return strings.Split(strings.ReplaceAll(readGenerated(t, filepath.Join(outDir, "main.cs")), "\r", ""), "\n")
 }
+
+// A comment that documents a var or const statement inside a body is that statement's doc, written with it rather
+// than flushed as a standalone comment ahead of it, so the gap test must not count its lines as blank ones.
+// math/big's nat.expNN (`w := _W - int(shift)` / `// zz and r are used ...` / `var zz, r nat`) gained a blank line
+// Go does not have before such a comment, at 82 corpus sites under -comments (TRAIN T4's census re-baseline).
+const declDocGapSource = `package main
+
+import "fmt"
+
+func adjacent(shift int) int {
+	w := 64 - shift
+	// zz and r are used to avoid allocating
+	// otherwise the arguments would alias.
+	var zz, r int
+	const k = 2
+	// the padding length
+	const pad = 16
+	return w + zz + r + k + pad
+}
+
+func spaced(shift int) int {
+	w := 64 - shift
+
+	// keep the blank line Go has
+	var v int
+	return w + v
+}
+
+func afterBlock(x bool) int {
+	if x {
+		fmt.Println("x")
+	}
+	// Read the data
+	n := 2
+	return n
+}
+
+func afterStatement(n int) []byte {
+	m := n + 1
+	// Allocate new buffer.
+	buf := make([]byte, m)
+	return buf
+}
+
+func main() {
+	fmt.Println(adjacent(1), spaced(1), afterBlock(true), len(afterStatement(1)))
+}
+`
+
+func TestNoBlankLineBeforeDeclStatementDoc(t *testing.T) {
+	lines := convertWithComments(t, declDocGapSource)
+
+	for _, c := range []struct {
+		line  string
+		blank bool
+		why   string
+	}{
+		{"// zz and r are used to avoid allocating", false, "Go writes the var statement's doc directly after the statement before it"},
+		{"// the padding length", false, "Go writes the const statement's doc directly after the statement before it"},
+		{"// keep the blank line Go has", true, "a blank line Go has before a var statement's doc stays"},
+		{"// Read the data", false, "control: a comment leading `n := 2` after a block gains no blank line"},
+		{"// Allocate new buffer.", false, "control: a comment leading `buf := make(...)` gains no blank line"},
+	} {
+		if got := blankAbove(t, lines, c.line); got != c.blank {
+			t.Errorf("%q: blank line above = %v, want %v (%s)", c.line, got, c.blank, c.why)
+		}
+	}
+}
