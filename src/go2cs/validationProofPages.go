@@ -115,6 +115,11 @@ type proofPageProvenance struct {
 	// (packageInputDigest.go): what the proven conversion was made from, which nugetgo-pack.ps1 compares with the
 	// packed project's. "" renders nothing, so a stdlib page is unchanged.
 	inputDigest string
+
+	// disclosureURL is a THIRD-PARTY page's link to the disclosure manifest its run read, when that manifest is in
+	// the go2cs checkout's committed -module-disclosures tree (thirdPartyDisclosureURL); "" names the manifest beside
+	// the converted package instead. A stdlib page keeps its src/core link and never reads this.
+	disclosureURL string
 }
 
 // proofInputDigestPattern reads a third-party proof page's input digest back, for its MODULE.md row.
@@ -390,8 +395,15 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 			fmt.Fprintf(&page, "A disclosed divergence is a specific Go assertion %s — not\n", claim)
 			page.WriteString("a skipped test and not a tolerance. Each one is pinned by exact failure signature in the package's\n")
 		}
-		fmt.Fprintf(&page, "hand-owned [`go2cs_test_disclosures.json`](%s/blob/master/src/core/%s/go2cs_test_disclosures.json);\n",
-			go2csRepositoryURL, provenance.importPath)
+		switch {
+		case provenance.convertedPath == "":
+			fmt.Fprintf(&page, "hand-owned [`go2cs_test_disclosures.json`](%s/blob/master/src/core/%s/go2cs_test_disclosures.json);\n",
+				go2csRepositoryURL, provenance.importPath)
+		case provenance.disclosureURL != "":
+			fmt.Fprintf(&page, "hand-owned [`go2cs_test_disclosures.json`](%s);\n", provenance.disclosureURL)
+		default:
+			fmt.Fprintf(&page, "hand-owned `go2cs_test_disclosures.json` beside the converted package (`%s`);\n", provenance.convertedPath)
+		}
 		page.WriteString("a disclosed test that fails any *other* way is still a hard mismatch.\n\n")
 
 		if hasDeferred {
@@ -1011,6 +1023,7 @@ func writeThirdPartyProofPage(outputPath string, pagePath string, comparison tes
 		convertedPath: filepath.ToSlash(converted),
 		buildTags:     options.buildTags,
 		inputDigest:   productionProjectInputDigest(outputPath, manifest),
+		disclosureURL: thirdPartyDisclosureURL(outputPath, manifest, options),
 	}
 
 	if err := os.MkdirAll(filepath.Dir(pagePath), 0o755); err != nil {
@@ -1024,6 +1037,34 @@ func writeThirdPartyProofPage(outputPath string, pagePath string, comparison tes
 	moduleDir := filepath.Join(outRoot, "validation", filepath.FromSlash(manifest.ModulePath))
 
 	return writeThirdPartyModuleSummary(moduleDir, manifest.ModulePath)
+}
+
+// thirdPartyDisclosureURL is the go2cs repository URL of the disclosure manifest a third-party -tests run read, when
+// the run read it from the committed -module-disclosures tree inside the checkout it converted against, or "". The
+// manifest is resolved by resolveDisclosureManifestDir with the inputs testConversion gave it, so the page links the
+// file that was applied. A manifest in the package's output directory, or a tree outside the checkout, has no go2cs
+// URL. The golang.org/x/sync kit (2026-10-12) found the page linking src/core/<importPath>, the standard library's
+// home, which no module manifest lives in.
+func thirdPartyDisclosureURL(outputPath string, manifest testManifest, options Options) string {
+	if options.go2csPath == "" || options.mainModuleDir == "" {
+		return ""
+	}
+
+	rel := strings.TrimPrefix(strings.TrimPrefix(manifest.PackageImportPath, manifest.ModulePath), "/")
+	pkgDir := filepath.Join(options.mainModuleDir, filepath.FromSlash(rel))
+	manifestDir, _ := resolveDisclosureManifestDir(outputPath, options.testModuleDisclosures, options.mainModulePath, options.mainModuleDir, pkgDir)
+
+	if filepath.Clean(manifestDir) == filepath.Clean(outputPath) {
+		return ""
+	}
+
+	inRepo, err := filepath.Rel(filepath.Dir(filepath.Clean(options.go2csPath)), manifestDir)
+
+	if err != nil || inRepo == ".." || strings.HasPrefix(inRepo, ".."+string(filepath.Separator)) || filepath.IsAbs(inRepo) {
+		return ""
+	}
+
+	return go2csRepositoryURL + "/blob/master/" + filepath.ToSlash(filepath.Join(inRepo, testDisclosureFileName))
 }
 
 // productionProjectInputDigest is the GoInputDigest the package's production project in outputPath records: the value

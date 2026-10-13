@@ -1,0 +1,4 @@
+Copyright (c) 2026 The go2cs Authors. All rights reserved.
+
+This fixture module exists only to test how nugetgo-pack.ps1 packs a module whose exported API differs by GOOS. It
+is licensed under the same terms as go2cs.

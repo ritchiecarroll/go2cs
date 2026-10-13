@@ -58,6 +58,20 @@
     and packs the file byte for byte. A missing, duplicated, misordered or malformed fence is refused by name, and so is
     a link before it. nuget/icon.png beside it replaces the go2cs icon; -Icon with that file present is refused.
 
+    The conversion repository's root README (COORD ruling 2026-10-11): -ConversionReadme names it, and the pack refuses
+    one that does not fit the description's form. A third-party conversion's README must END with the offer to the
+    module's maintainers (New-NugetgoMaintainersSection); an author's must not carry it. The parameter is OPTIONAL for
+    now. It becomes mandatory for release packs, never rehearsal packs, when the next sheet is cut.
+
+    Flavors (COORD ruling 2026-10-12): the pack adopts the go.* release's per-OS promotion (push-nuget.ps1). A -recurse
+    conversion emits one GOOS, so the pack converts the module's own source once per GOOS of the release's RID map
+    (windows, linux, darwin) with this tree's converter, requires its conversion of -RecurseRoot's GOOS to reproduce every
+    packed project's GoInputDigest, builds every flavor, and compares the flavors' assemblies with the release's material
+    check (GoAssemblyMaterial.psm1). Equal in meaning: one neutral assembly set in lib/<tfm>/, packed from -RecurseRoot as
+    before. Different: the release's RID-specific layout (NugetgoFlavors.psm1), lib/<tfm>/ the windows flavor and
+    runtimes/<rid>/lib/<tfm>/ each RID's, with every flavor's go.* dependencies. The decision is a measurement, never a
+    list and never the module author's word.
+
     The restore is isolated: a nuget.config with <clear/> and only -Feed as a source, and a private NUGET_PACKAGES.
     The user's global packages folder is censused for nugetgo.* and go.* before and after, and the run fails if it
     grew. Nothing is pushed anywhere, and nothing is signed: signing is the release's last step.
@@ -87,6 +101,11 @@ param(
     # The package icon, PNG or JPEG up to 1 MB; the go2cs icon the conversion carries when not given. A module author
     # publishing their own module sets their own.
     [string]$Icon,
+    # The conversion repository's root README.md, checked against the description's form (Test-NugetgoConversionReadme).
+    [string]$ConversionReadme,
+    # The go2cs that converted -RecurseRoot (the runbook's G). Each flavor is converted with it, so the flavors share its
+    # GoInputDigest revision; when it is not given, the pack builds one from this tree.
+    [string]$Converter,
     [string]$RehearsalSuffix,
     [switch]$Release,
     [string[]]$ExistingIds = @(),
@@ -106,6 +125,7 @@ Import-Module (Join-Path $PSScriptRoot 'NugetgoValidationBinding.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoLicense.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoHostPaths.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'NugetgoReadme.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'NugetgoFlavors.psm1') -Force
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 
 function Refuse([string]$why) { throw "REFUSED: $why" }
@@ -200,6 +220,14 @@ $described = Get-NugetgoDescription -ModulePath $ModulePath -GoVersion $GoVersio
 if ($described.Refused) { Refuse "package description: $($described.Reason)" }
 $description = $described.Description
 if ($description.Contains('PROOF:')) { Refuse 'package description: it carries "PROOF:" (owner review 2026-10-10: the registry tier and the Tests badge carry the proof)' }
+# The conversion repository's root README (COORD ruling 2026-10-11): a third-party conversion's ends with the offer to
+# the module's maintainers, and an author's carries none.
+if ($ConversionReadme) {
+    if (-not (Test-Path -LiteralPath $ConversionReadme -PathType Leaf)) { Refuse "-ConversionReadme: no file at $ConversionReadme" }
+    $conversionReasons = @(Test-NugetgoConversionReadme -Text ([System.IO.File]::ReadAllText($ConversionReadme)) -ModulePath $ModulePath -Author:$described.Author)
+    if ($conversionReasons.Count) { Refuse "the conversion repository's README ${ConversionReadme}: $($conversionReasons -join '; ')" }
+    Write-Host "conversion README: $(if ($described.Author) { 'the author form, with no maintainers section' } else { 'ends with the offer to the module''s maintainers' })"
+}
 
 # D7: a validated module ships its MODULE.md as VALIDATION.md, the per-package pages beside it. A module that cannot
 # validate yet packs ONLY as a rehearsal of its shape (-UnvalidatedReason), whose VALIDATION.md says so; such a
@@ -296,6 +324,114 @@ foreach ($page in $pages) {
     $rel = $page.FullName.Substring($ValidationDir.TrimEnd('\', '/').Length + 1).Replace('\', '/')
     if ($rel -ieq 'README.md' -or $rel -ieq $packageIcon.Name) { Refuse "the validation page $rel would be packed over the package's $rel" }
 }
+
+# ---- flavors: the go.* release's per-OS promotion (COORD ruling 2026-10-12) ---------------------------------------------
+# A -recurse conversion emits ONE GOOS, and a module can differ by GOOS (mousetrap's StartedByExplorer, cobra's
+# command_win.go). So the module is converted and built once per GOOS of the release's RID map, with this tree's
+# converter and the module's own source, and the flavors' assemblies are compared with the release's material check
+# (NugetgoFlavors.psm1). Equal in meaning: one neutral assembly set, packed from -RecurseRoot as always. Different: the
+# release's RID-specific layout, after the pack. The proof's flavor is -RecurseRoot itself; the pack's own conversion of
+# that GOOS must reproduce every packed project's GoInputDigest, so the other flavors are known to be the same input,
+# options and converter.
+$flavorDir = Join-Path $Scratch 'flavors'
+if (Test-Path $flavorDir) { Remove-Item -Recurse -Force $flavorDir }
+New-Item -ItemType Directory -Force $flavorDir | Out-Null
+$rootProps = [System.IO.File]::ReadAllText((Join-Path $RecurseRoot 'Directory.Build.props'))
+if ($rootProps -notmatch '<GoCompileRuntimeIdentifier>(?<rid>[^<]+)</GoCompileRuntimeIdentifier>') { Refuse "$RecurseRoot/Directory.Build.props names no GoCompileRuntimeIdentifier: the GOOS -RecurseRoot was converted for cannot be read" }
+$proofRid = $Matches['rid']
+$ridFlavors = Get-NugetgoRidFlavors
+if (-not $ridFlavors.Contains($proofRid)) { Refuse "-RecurseRoot was converted for $proofRid, a RID the go.* release does not ship ($(@($ridFlavors.Keys) -join ', '))" }
+$proofGoos = $ridFlavors[$proofRid]
+$flavorArch = if ($proofRid -like '*-arm64') { 'arm64' } else { 'amd64' }
+if (-not (Test-Path -LiteralPath $moduleCacheDir -PathType Container)) { Refuse "no module source at $moduleCacheDir to convert each flavor from (go mod download $ModulePath@$GoVersion)" }
+$flavorConverterDir = Join-Path (Split-Path (Split-Path $PSScriptRoot)) 'go2cs'
+if ($Converter) {
+    if (-not (Test-Path -LiteralPath $Converter -PathType Leaf)) { Refuse "-Converter: no file at $Converter" }
+    $converter = [System.IO.Path]::GetFullPath($Converter)
+}
+else {
+    $converter = Join-Path $flavorDir $(if ($env:OS -eq 'Windows_NT') { 'go2cs.exe' } else { 'go2cs' })
+    Push-Location $flavorConverterDir
+    try { & go build -o $converter .; if ($LASTEXITCODE -ne 0) { Refuse "the converter at $flavorConverterDir did not build ($LASTEXITCODE)" } }
+    finally { Pop-Location }
+}
+$flavorProjects = @{}
+foreach ($goos in Get-NugetgoFlavorGoos) {
+    $root = Join-Path $flavorDir $goos
+    $log = Join-Path $flavorDir "$goos.log"
+    & $converter -recurse=nuget -platforms "$goos/$flavorArch" -go2cspath (Split-Path $flavorConverterDir) $moduleCacheDir $root *> $log
+    if ($LASTEXITCODE -ne 0) { Refuse "the $goos flavor of $ModulePath did not convert ($LASTEXITCODE): $log" }
+    $flavorSrc = Join-Path (Join-Path $root 'src') $ModulePath
+    $flavorProjects[$goos] = @(foreach ($p in $libraries) {
+        $rel = $p.FullName.Substring($moduleSrc.Length).TrimStart('\', '/')
+        $fp = Join-Path $flavorSrc $rel
+        if (-not (Test-Path -LiteralPath $fp -PathType Leaf)) { Refuse "the $goos flavor has no ${rel}: a package missing on one GOOS is not packed" }
+        Get-Item -LiteralPath $fp
+    })
+    # The assemblies' copyright targets the pack wrote beside -RecurseRoot's module, so every flavor's assemblies carry it.
+    if (Test-Path -LiteralPath $moduleTargets) { Copy-Item -LiteralPath $moduleTargets (Join-Path $flavorSrc 'Directory.Build.targets') -Force }
+}
+for ($i = 0; $i -lt $libraries.Count; $i++) {
+    $packedDigest = Get-NugetgoProjectInputDigest -ProjectFile $libraries[$i].FullName
+    $flavorDigest = Get-NugetgoProjectInputDigest -ProjectFile $flavorProjects[$proofGoos][$i].FullName
+    if ($packedDigest -cne $flavorDigest) { Refuse "the pack's $proofGoos conversion does not reproduce -RecurseRoot: $($libraries[$i].Name) records $packedDigest there and $flavorDigest here. -RecurseRoot was converted from other sources, options or converter than $moduleCacheDir and $converter (pass the go2cs that converted it as -Converter)" }
+}
+$flavorProjects[$proofGoos] = $libraries.ToArray()
+$flavorConfig = Join-Path $flavorDir 'nuget.config'
+[System.IO.File]::WriteAllText($flavorConfig, @"
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <clear />
+    <add key="nugetgo-closure" value="$([System.Security.SecurityElement]::Escape($Feed))" />
+  </packageSources>
+</configuration>
+"@, (New-Object System.Text.UTF8Encoding($false)))
+$flavorAssemblies = @{}
+$flavorPdbs = New-Object System.Collections.Generic.List[string]
+$isolated = Join-Path $Scratch 'nuget-packages'
+New-Item -ItemType Directory -Force $isolated | Out-Null
+$saved = @{ NUGET_PACKAGES = $env:NUGET_PACKAGES; GoStdLibVersion = $env:GoStdLibVersion; ContinuousIntegrationBuild = $env:ContinuousIntegrationBuild; PathMap = $env:PathMap }
+try {
+    # The pack's own build environment (below), each flavor's root mapped to /_/ as -RecurseRoot is, so the flavors
+    # differ only where their sources do.
+    $env:NUGET_PACKAGES = $isolated; $env:GoStdLibVersion = $stdlibRange; $env:ContinuousIntegrationBuild = 'true'
+    foreach ($goos in Get-NugetgoFlavorGoos) {
+        $root = if ($goos -ceq $proofGoos) { $RecurseRoot } else { Join-Path $flavorDir $goos }
+        $env:PathMap = "$([System.IO.Path]::GetFullPath($root).TrimEnd('\', '/'))=/_/,$([System.IO.Path]::GetFullPath($Scratch).TrimEnd('\', '/'))=/_scratch/"
+        $flavorAssemblies[$goos] = @{}
+        foreach ($p in $flavorProjects[$goos]) {
+            & dotnet build $p.FullName -c Release "-p:RestoreConfigFile=$flavorConfig" --nologo -v q
+            if ($LASTEXITCODE -ne 0) { throw "the $goos flavor of $($p.Name) did not build ($LASTEXITCODE)" }
+            $targetPath = (& dotnet msbuild $p.FullName -getProperty:TargetPath -p:Configuration=Release | Out-String).Trim()
+            if (-not (Test-Path -LiteralPath $targetPath -PathType Leaf)) { throw "the $goos flavor of $($p.Name) built no assembly at '$targetPath'" }
+            $flavorAssemblies[$goos][(Split-Path -Leaf $targetPath)] = [System.IO.File]::ReadAllBytes($targetPath)
+            $flavorPdbs.Add([System.IO.Path]::ChangeExtension($targetPath, '.pdb'))
+        }
+    }
+}
+finally { foreach ($k in $saved.Keys) { Set-Item "env:$k" $saved[$k] -ErrorAction SilentlyContinue; if ($null -eq $saved[$k]) { Remove-Item "env:$k" -ErrorAction SilentlyContinue } } }
+$flavorDecision = Get-NugetgoFlavorDecision -Assemblies $flavorAssemblies -ProofGoos $proofGoos
+if ($flavorDecision.RidSpecific) {
+    Write-Host "  flavors: $((Get-NugetgoFlavorGoos) -join ', ') differ in meaning: RID-specific assets ($(@($ridFlavors.Keys) -join ', ')), lib/ the $(Get-NugetgoReferenceGoos) flavor, as the go.* release packs them"
+    foreach ($why in $flavorDecision.Reasons) { Write-Host "    $why" }
+    # Dependencies are per target framework, never per RID (push-nuget.ps1): the package declares every flavor's.
+    foreach ($goos in Get-NugetgoFlavorGoos) {
+        foreach ($p in $flavorProjects[$goos]) {
+            [xml]$x = Get-Content -Raw -LiteralPath $p.FullName
+            foreach ($ref in @($x.Project.ItemGroup | ForEach-Object { $_.PackageReference } | Where-Object { $_ })) {
+                if ($ref.Include -like 'go.*' -and $ref.Version -eq '$(GoStdLibVersion)' -and $ref.PrivateAssets -ne 'all') { [void]$goRefs.Add($ref.Include) }
+            }
+        }
+        if ($goos -cne $proofGoos) {
+            $flavorRequires = @(Get-NugetgoThirdPartyRequires -RecurseRoot (Join-Path $flavorDir $goos) -Libraries $flavorProjects[$goos] -ThirdPartyPackage $ThirdPartyPackage)
+            $a = @($requires | ForEach-Object { "$($_.Module)@$($_.Version)" } | Sort-Object) -join ', '
+            $b = @($flavorRequires | ForEach-Object { "$($_.Module)@$($_.Version)" } | Sort-Object) -join ', '
+            if ($a -cne $b) { Refuse "the $goos flavor requires [$b] where $proofGoos requires [$a]: a third-party dependency that differs by GOOS is not packed yet" }
+        }
+    }
+}
+else { Write-Host "  flavors: $((Get-NugetgoFlavorGoos) -join ', ') agree in meaning: one neutral assembly set, packed from -RecurseRoot ($proofGoos)" }
 
 # ---- the generated module pack project --------------------------------------------------------------------------------
 $packDir = Join-Path (Join-Path $Scratch 'pack') $id.Id
@@ -425,6 +561,7 @@ if ($grown.Count) { throw "the global packages folder GREW: $($grown -join ', ')
 # ---- read the package back ---------------------------------------------------------------------------------------------
 $nupkg = Join-Path $OutDir "$($id.Id).$packageVersion.nupkg"
 if (-not (Test-Path $nupkg)) { $nupkg = @(Get-ChildItem $OutDir -Filter "$($id.Id).*.nupkg" | Sort-Object LastWriteTime -Descending)[0].FullName }
+if ($flavorDecision.RidSpecific) { Set-NugetgoRidAssets -Package $nupkg -Assemblies $flavorAssemblies -TargetFramework 'net10.0' }
 # The roots no packed byte may name: the build root, the pack's scratch and output, the module cache, the user profile.
 $hostRoots = @($RecurseRoot, $Scratch, $OutDir, (& go env GOMODCACHE).Trim(), [Environment]::GetFolderPath('UserProfile')) |
     Where-Object { $_ } | ForEach-Object { [System.IO.Path]::GetFullPath($_) } | Select-Object -Unique
@@ -461,6 +598,8 @@ try {
     New-Item -ItemType Directory -Force $libDir | Out-Null
     $libFiles = @($zip.Entries | Where-Object { $_.FullName -like 'lib/*.dll' } | ForEach-Object {
         $out = Join-Path $libDir $_.Name; [System.IO.Compression.ZipFileExtensions]::ExtractToFile($_, $out, $true); $out })
+    $runtimeFiles = @($zip.Entries | Where-Object { $_.FullName -like 'runtimes/*.dll' } | ForEach-Object {
+        $out = Join-Path $libDir ($_.FullName -replace '[\\/]', '_'); [System.IO.Compression.ZipFileExtensions]::ExtractToFile($_, $out, $true); $out })
 }
 finally { $zip.Dispose() }
 $md = $nuspec.package.metadata
@@ -468,6 +607,7 @@ $deps = @($md.dependencies.group | ForEach-Object { $_.dependency } | Where-Obje
 $badDeps = @($deps | Where-Object { $_.id -like 'go.*' -and -not ([string]$_.version).StartsWith("[$ClosureVersion, ", [StringComparison]::Ordinal) })
 Write-Host "==> read back: $($md.id) $($md.version)"
 Write-Host "    lib: $((@($entries | Where-Object { $_ -like 'lib/*' })) -join ', ')"
+Write-Host "    runtimes: $(if ($flavorDecision.RidSpecific) { (@($entries | Where-Object { $_ -like 'runtimes/*' })) -join ', ' } else { 'none (one neutral assembly set)' })"
 Write-Host "    dependencies: $($deps.Count), each go.* at $(@($deps | ForEach-Object { $_.version } | Sort-Object -Unique) -join ' | ')"
 Write-Host "    license file: $($md.license.'#text') ($($md.license.type)); readme: $($md.readme); repository: $($md.repository.url)"
 Write-Host "    copyright: $($md.copyright)"
@@ -503,10 +643,15 @@ if ($presentation.Count) {
     throw "REFUSED: the package's nuget.org page -- $($presentation -join '; ')"
 }
 if ($badDeps.Count) { throw "go.* dependencies not at the B4 range: $(($badDeps | ForEach-Object { "$($_.id) $($_.version)" }) -join ', ')" }
+if ($flavorDecision.RidSpecific) {
+    $layout = @(Test-NugetgoRidLayout -Package $nupkg -Assemblies $flavorAssemblies -TargetFramework 'net10.0')
+    if ($layout.Count) { Remove-Item -LiteralPath $nupkg; throw "REFUSED: the RID-specific layout -- $($layout -join '; ')" }
+}
+elseif (@($entries | Where-Object { $_ -like 'runtimes/*' }).Count) { Remove-Item -LiteralPath $nupkg; throw 'REFUSED: a neutral package carries runtimes/ entries' }
 if (@($entries | Where-Object { $_ -like 'lib/*.dll' }).Count -ne $libraries.Count) { throw "lib/ carries $(@($entries | Where-Object { $_ -like 'lib/*.dll' }).Count) assemblies for $($libraries.Count) packages" }
 # Each assembly's copyright and company, read from the dll taken back OUT of the nupkg: its version resource, the
 # values a file's properties show.
-foreach ($dll in $libFiles) {
+foreach ($dll in @($libFiles) + @($runtimeFiles)) {
     $info = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($dll)
     Write-Host "    assembly $(Split-Path -Leaf $dll): copyright '$($info.LegalCopyright)', company '$($info.CompanyName)'"
     if ($assemblyCopyright.Skip) {
@@ -524,7 +669,11 @@ foreach ($dll in $libFiles) {
     if (-not $pdb) { throw "no $pdbName under $RecurseRoot for the packed $(Split-Path -Leaf $dll)" }
     foreach ($root in @(Find-NugetgoHostPaths -Bytes ([System.IO.File]::ReadAllBytes($pdb.FullName)) -Roots $hostRoots)) { $hostPathHits.Add("$pdbName names $root") }
 }
-Write-Host "    host paths: $($hostPathHits.Count) in $($entries.Count) packed entries and $($libFiles.Count) pdb(s)"
+foreach ($pdb in $flavorPdbs) {
+    if (-not (Test-Path -LiteralPath $pdb -PathType Leaf)) { throw "no $pdb beside a flavor's assembly" }
+    foreach ($root in @(Find-NugetgoHostPaths -Bytes ([System.IO.File]::ReadAllBytes($pdb)) -Roots $hostRoots)) { $hostPathHits.Add("$(Split-Path -Leaf $pdb) ($pdb) names $root") }
+}
+Write-Host "    host paths: $($hostPathHits.Count) in $($entries.Count) packed entries, $($libFiles.Count) pdb(s) and the $($flavorPdbs.Count) flavor pdb(s)"
 if ($hostPathHits.Count) {
     Remove-Item -LiteralPath $nupkg   # a refused package is never left where a push could pick it up
     throw "REFUSED: the package would publish a host path -- $($hostPathHits -join '; ')"

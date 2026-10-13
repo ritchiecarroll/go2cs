@@ -267,6 +267,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nativeRootFieldViewCensus_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nugetgoScripts_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nugetgoSuites_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nugetgoTestdataEol_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\psQuestionMarkVariable_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\publishedCounterReset_test.go" />
     <None Include="$(MSBuildThisFileDirectory)liftedTypeNames.go" />
@@ -307,6 +308,7 @@
     <None Include="$(MSBuildThisFileDirectory)moduleDisclosureRoot.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleDisclosureRoot_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleNamespaceAgreement_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)moduleProofDisclosureLink_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleProofPages_test.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleTestsDriver.go" />
     <None Include="$(MSBuildThisFileDirectory)moduleTestsDriver_integration_test.go" />
