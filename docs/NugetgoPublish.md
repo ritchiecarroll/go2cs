@@ -66,10 +66,15 @@ Stop at the first one that fails.
 1. Build `G` once: `go build -o <bin>/go2cs .` in `T`'s `src/go2cs`. Every conversion of this module uses this one
    binary, because the input digest records the converter (trap 3).
 2. Convert with the module's tests, into a fresh output root `VR` (the output directory is the SECOND positional):
-   `G -recurse -tests -test-action all -platforms P -go2cspath <T>/src <SRC> <VR>`.
-3. **Gate: the proof.** `VR/validation/M/MODULE.md` exists, every package row carries an `Input digest`, and its
-   disclosed and excluded declarations are read. COORD reads MODULE.md: it is what the package ships as
-   VALIDATION.md.
+   `G -recurse -tests -test-action all -platforms P -go2cspath <T>/src -module-disclosures <T>/src/tests/ModuleDisclosures <SRC> <VR>`.
+   `-module-disclosures` applies the disclosures committed for `M@V` (COORD ruling 2026-10-13); without it a module
+   whose divergences are disclosed there cannot validate. A slow module may need `-test-timeout` above its 2m default:
+   state the value used beside the proof.
+3. **Gate: the proof.** Step 2 exits 0. A tested package that did not validate makes it exit non-zero, and MODULE.md
+   names it under *Packages that did not validate* instead of giving it a row; the pack refuses to ship it (tools at
+   `claude/c2-nugetgo-binding-tested` or later). Then `VR/validation/M/MODULE.md` exists, every package row carries an
+   `Input digest`, and its disclosed and excluded declarations are read. COORD reads MODULE.md: it is what the
+   package ships as VALIDATION.md.
 4. Convert the pack's input into another fresh root `PR`: `G -recurse=nuget -platforms P -go2cspath <T>/src <SRC> <PR>`.
 5. **Gate: the binding.** Each library project under `PR/src/M` records a `GoInputDigest` equal to its MODULE.md row.
    The pack checks this again; reading it here catches a wrong binary before a pack runs.
@@ -95,8 +100,8 @@ pwsh -NoProfile -File <T>/src/tools/nugetgo/nugetgo-pack.ps1 -ModulePath M -GoVe
 
 The release candidate is the same command with `-Release` in place of `-RehearsalSuffix int.1`, and its own `-OutDir`
 and `-Scratch`. For a module with no Go tests, the rehearsal takes `-UnvalidatedReason <text>` in place of
-`-ValidationDir`, because its rows are run on the rehearsal package; the release candidate takes `-BehaviorProofDir
-<rows>` in place of `-ValidationDir`, after section 3 has written the rows. Its VALIDATION.md is then the behavioral
+`-ValidationDir`, because its rows are run on the rehearsal package; the release candidate takes
+`-BehaviorProofDir <rows>` in place of `-ValidationDir`, after section 3 has written the rows. Its VALIDATION.md is then the behavioral
 page, and its Tests badge says there are no Go tests and how many RIDs ran. `-UpstreamPublishes` is given only when the module's author publishes (B6); the pack refuses the switch
 for any other org. `-ExcludePackage` names, by import path, a library package of the module that holds the module's
 own test fixtures rather than API a consumer imports; the instance plan names any such package. The pack refuses an
