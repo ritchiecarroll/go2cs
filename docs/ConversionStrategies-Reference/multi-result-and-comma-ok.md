@@ -97,6 +97,56 @@ Stdlib footprint at `fa18863b94`: 161 prologues on windows and 158 on linux and 
 by the converter's `TestVariadicPackViewAdmitsOnlyNonRetainingUses`, controlled both ways; and by
 GolibTests' `SSliceSpreadTests`.)
 
+**An ESCAPING pack that a spread hands over IS the caller's slice (2026-10-12, route (a)).** Go's
+`f(xs...)` passes the slice itself, so a callee that KEEPS its pack — `return xs`, a store, a capture —
+holds the caller's backing array and capacity. The escaping prologue, `var xs = xsʗp.slice();`, receives
+only a `Span<T>`, which has no capacity and cannot be kept, so it copied: `keep(xs...)` followed by a write
+through the result printed `[7 2]` where Go prints `[7 8]`. That also replaces the sentence above that a
+callee which keeps its pack copies it. golib now records, per thread and per element type, the slice
+behind the last spread (`slice<T>.ꓸꓸꓸ`, in `SpreadRecord.cs`). The escaping prologue returns that slice
+when the pack IS its window: the same first element and the same length. Anything else is copied, as
+before. The emission does not change; this is a golib change only.
+
+The record lives from one spread to one prologue. Both prologues consume it: the escaping one takes it on
+a match, the viewing one (`sslice()`) clears it. The match can be wrong only for a DIFFERENT span over the
+same first element with the same length and another capacity, which a stale record meets when a window
+reaches the prologue by some route other than the spread getter. Every route by which converted code makes
+such a window clears the record: `sslice<T>.ꓸꓸꓸ` (a view's pass-through), the `sslice<T>` → `Span<T>`
+conversion, and `array<T>.ꓸꓸꓸ` (an array can alias a slice's storage through `Alias`). A pooled thread
+resets the record between goroutines (`GoroutineThreadState.Register`). A native-backed slice and a slice
+of a zero-size type are never recorded.
+
+The census that rules out a residual route, taken at `226afb810a`:
+- golib's 42 `ToSpan`/`AsSpan` producers (38 lines). Every one is internal and feeds `CopyTo`, `CopyOf`,
+  `Append`, `clear`, a string constructor, the print sink, `PinnedBuffer`'s implicit `Span`, or the
+  sslice conversion above. golib cannot call converted code except through a delegate or an interface.
+  Reflect's variadic trampolines (`GoReflect.TypeLayout.cs`) pass `new Span<TArg>((TArg[])t)`, and
+  `reflect`'s `Call` and `CallSlice` build that array fresh (`Array.CreateInstance`, `value_impl.cs`), so
+  it is never a slice's storage.
+- The 36 whole-file hand-owns and the 29 `_impl.cs` sites (37 producer lines in all). Every producer feeds
+  a sink: `MemoryMarshal`, `IndexOf`, `SequenceEqual`, `CopyTo`, a `Write`, an `@string` constructor, or
+  `GetReference`. Where a hand-owned call spreads into a variadic (`export_test`'s
+  `gcTestIsReachable(ptrs.ꓸꓸꓸ)`, `slices`' `Insert(s, i, v.ꓸꓸꓸ)`, `exec_windows`' `append(b, s.ꓸꓸꓸ)`),
+  it does so through the slice getter.
+- `PinnedBuffer.ꓸꓸꓸ` has no caller in the tree and is left as it is.
+
+No residual route stays open. Three cases keep the copy and are DISCLOSED, all as at `226afb810a`:
+- A viewing callee's pass-through `keep(xs...)` into an escaping callee. Go aliases the original
+  caller's slice, but the view holds no slice header to hand over.
+- `reflect.Value.CallSlice` into an escaping callee, which marshals the tail into a fresh array.
+- A native-backed slice, and a slice of a zero-size type.
+
+COST: in the prototype, a spread into a VIEWING callee went from 1.23 to 4.27 ns per call (+3 ns, the
+record and the clear). A spread into an ESCAPING callee went from 14.20 ns (the copy) to 13.94 ns (the
+hit), and its allocation is gone. The view cost is accepted under the parity-over-size rule. An escaping
+spread call's allocation count may drop by one, which moves it toward Go's.
+
+(Guarded by GolibTests' `SpreadPackAliasTests`: 17 cases, among them nested and re-spread packs, an
+interleaved spread, another thread, concurrent goroutines, a zero-length window with capacity, nil, the
+stale window through a view, and one isolating test for each clear and each half of the match, each made
+to fail by removing what it guards. Also by the reuse arm of `ThreadStateCensusTests` and by the
+`VariadicPackAlias` behavioral test, which fails at `226afb810a`.)
+
 **The `ꓸꓸꓸT` alias identifier mirrors the GO name; its referent must be using-independent.** The readable `params ꓸꓸꓸT` form is a namespace-scope C# using alias (`using ꓸꓸꓸstring = Span<@string>;`), so it applies only where a legal alias identifier exists — everything else falls back to the inline `params Span<T>`. Two separate constraints decide that, and only the first is about the *name*. **(1) The identifier** cannot contain `<`, `>` or `.`, so it transliterates the element's **Go** name, joining any package qualifier with `TypeAliasDot` — Go's `ps ...unsafe.Pointer` becomes `params ꓸꓸꓸunsafeꓸPointer psʗp`, the same `pkgꓸType` convention `package_info.cs` already uses for its global usings. Go names are preferred over the emitted C# ones: they need no `@` keyword-escape stripping (`@` is legal only at identifier start — `ꓸꓸꓸ@string` is a lex error, CS1002/CS0116 — while the `Span<>` referent keeps the escape), carry no `_package` class suffix, and undo a Δ collision-rename, so go/types' `...Type` reads `ꓸꓸꓸType` rather than `ꓸꓸꓸΔType`. Any Go identifier is a legal C# one and the ellipsis prefix defuses keywords (`...event` → `ꓸꓸꓸevent`); types with no Go name — a basic type, a universe type (`error`), a lifted anonymous struct (internal/fuzz's `CorpusEntry`) — transliterate the emitted C# name instead. Because only the *name* is constrained, a qualified referent still reads like Go: a **same-package** element is qualified with the package class (a bare nested name like `statDep` does not resolve at namespace scope, CS0246) yet still emits `params ꓸꓸꓸShape shapesʗp` over `using ꓸꓸꓸShape = Span<main_package.Shape>;`. **(2) The referent** is resolved by C# with the compilation unit's own using directives *not* in effect, so it may not name another file-local alias. A cross-package element renders in the short alias form (`@unsafe.Pointer`, `ast.Expr`), which is exactly that — left as-is it fails CS0246, and `go2cs-gen` (which copies these usings into its generated files) cannot resolve the symbol either and falls back to unescaped text, `Span<unsafe.Pointer>`, whose bare keyword cascades to CS8956. Such a referent is therefore rewritten to the alias's own target — `Span<unsafe_package.Pointer>`, `Span<global::go.go.ast_package.Expr>` — which is using-independent by construction, being what the `using <alias> = <target>;` line itself resolves. The mapping is recorded where the import using is *emitted* rather than re-derived, so the `-tests` package-under-test rebinding is honored automatically; an alias not yet bound when the declaration is visited (visitFile synthesizes canonical aliases for inference-only foreign references *after* the walk) degrades to the inline form. A **pointer** element is the one constructed form that does transliterate: go2cs already writes `*T` as `ж<T>`, so `bs ...*box` reads `params ꓸꓸꓸжbox bsʗp`. Its pointee resolves through the same routine and so takes the same namespace-scope qualification — the alias referent says `Span<ж<main_package.box>>` where the inline form could say bare `ж<box>`, since only the inline form sits inside the package class — and the two rules compose, giving go/doc's `...*ast.File` a `ꓸꓸꓸжastꓸFile = Span<ж<global::go.go.ast_package.File>>`. A pointee with no alias form of its own (a type parameter, a constructed pointee such as `*[]byte`) takes the whole element inline with it. Genuinely inline-only, then: a **type parameter** (never in scope inside a referent — `First<T>(params Span<T> valsʗp)`) and every **other constructed** element, for which no established transliteration exists (`map<@string, any>`, `slice<byte>`, `Action<ж<options>>`). Two element types transliterating to one identifier in a single file would bind it twice (CS1537), so the first claim wins and the loser stays inline. Deriving from Go names is also what keeps os/signal's long-standing `using ꓸꓸꓸosꓸSignal = Span<osꓸSignal>;` and text/template's `ꓸꓸꓸreflectꓸValue` **byte-identical** through this path — they already followed the convention, because their bare C# names come from **global** usings in `package_info.cs`, which *do* carry over into a using-alias referent. (Guarded by the `VariadicSlotInterfaces` behavioral test — a same-package interface element — and by `VariadicPointerParam`, which pins all three outcomes in one file: an aliased pointer (`ꓸꓸꓸжbox`), an aliased cross-package element (`ꓸꓸꓸunsafeꓸPointer`), and an inline constructed one (`Span<slice<byte>>`); the type-parameter arm of that fallback is held by `GenericVariadicFunc`. All output-compared vs Go. Stdlib footprint: every previously-inline site becomes an alias except the type-parameter and non-pointer-constructed ones — same-package elements read bare (`ꓸꓸꓸAttr`, `ꓸꓸꓸtraceArg`, `ꓸꓸꓸWriter`, `ꓸꓸꓸType`), cross-package ones carry their qualifier (`ꓸꓸꓸunsafeꓸPointer` in runtime, `ꓸꓸꓸastꓸExpr` in go/types), and pointers take the `ж` form — `unicode.In(r, ranges ...*RangeTable)` becomes `params ꓸꓸꓸжRangeTable rangesʗp`.)
 
 **A named result is DECLARED only when something reads it (2026-08-08).** Go's named results are ordinary addressable locals, so the converter declared every one of them at function entry. But Go names results for *documentation* far more often than it uses them — `func EncodeRune(r rune) (r1, r2 rune)` never mentions `r1`/`r2` again — and the emitted `rune r1 = default!;` is then dead on arrival. That one shape was **1,218 of the corpus's 1,219 `CS0219`** ("assigned but its value is never used") warnings. Nothing is lost by omitting it, because the names survive exactly where a reader reads them — on the C# tuple return type — so the emission moves closer to the Go source, not further from it:
