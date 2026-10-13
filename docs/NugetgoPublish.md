@@ -105,7 +105,10 @@ and `-Scratch`. For a module with no Go tests, the rehearsal takes `-Unvalidated
 page, and its Tests badge says there are no Go tests and how many RIDs ran. `-UpstreamPublishes` is given only when the module's author publishes (B6); the pack refuses the switch
 for any other org. `-ExcludePackage` names, by import path, a library package of the module that holds the module's
 own test fixtures rather than API a consumer imports; the instance plan names any such package. The pack refuses an
-exclusion that names no library of the module, and one that a packed package references. The rehearsal label
+exclusion that names no library of the module, and one that a packed package references. An INTERNAL package that
+no production code reaches (imported only from `_test.go` files, or by nothing) is left out without being named, and
+the pack log lists each one; one with Go tests of its own is packed and logged `kept: validated` (tools at
+`claude/c2-nugetgo-testonly-exclude` or later). `-ExcludePackage` stays the tool for a public helper. The rehearsal label
 `int.1` is ruled (COORD, 2026-10-09).
 
 **Flavors** (COORD ruling 2026-10-12; tools at `claude/c2-nugetgo-rid-packs` or later). The pack adopts the `go.*`
