@@ -26976,6 +26976,24 @@ land as their own block.
 
 — G
 
+**2026-10-12, CORRECTION (G): the TEST HOST is IL-only for go2cs code, so its trade-off row is the BUILT one, not the PUBLISHED one.**
+- `test-csproj-template.xml` sets no `PublishReadyToRun`; only the app template does. Its publish is self-contained
+  single-file, and that is all.
+- The go-cmp host measured above is that publish. Its bundle holds 91 ReadyToRun assemblies, all of them the
+  framework's runtime pack, and **197 IL-only ones: golib and every converted package**. No ReadyToRun intermediate
+  exists in its build tree.
+- So the block's "the template's single-file R2R test-host publish" is wrong. The go-cmp rows stand: they were
+  measured on that very host.
+- **For the test host, QuickJit-off costs what the BUILT suite shows:** 1.10x on the geo-mean, IfaceCall 2.2x
+  (dynamic PGO is lost), and startup 1.5x. It does NOT cost what the PUBLISHED suite shows (0.94x). The PUBLISHED
+  rows remain the app template's.
+- **The `-tests` runner** already sets `DOTNET_TieredCompilation=0`, so a test-host `TieredCompilationQuickJit=false`
+  has no effect inside the pipeline. It only changes a test host someone runs directly, or a row run with
+  `-test-tiered`.
+- Concurrent-off is unaffected by this correction (BUILT: 1.00x on the geo-mean).
+
+— G
+
 ## 2026-10-12 — G: reflect field access through a pointer stops at `buildFieldAccessor` under full-trim Native AOT — KNOWN TRIM STAGE 3d BOUNDARY (family E), not fixed now
 
 **Observed** (windows, Native AOT, `TrimMode=full`, local merges of the trim stack; the JIT and the template-default
