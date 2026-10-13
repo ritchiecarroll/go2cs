@@ -9,7 +9,7 @@ namespace GolibTests;
 [TestClass]
 public class ShellInstanceCacheTests
 {
-    // The P3 experiment (docs/phase4/DESIGN-iface-shell-caching.md, section 6.4) has AdapterBinder keep
+    // P3 (docs/phase4/DESIGN-iface-shell-caching.md, sections 6.4 and 12) has AdapterBinder keep
     // ONE runtime shell per Go dynamic value, so a re-assert of the same value returns the shell an
     // earlier assert built. The cache must hold the value WEAKLY: a shell holds its value strongly, so a
     // cache that held either strongly would keep every value ever asserted alive for the life of the

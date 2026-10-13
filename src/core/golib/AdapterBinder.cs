@@ -85,8 +85,6 @@ public static class AdapterBinder
 {
     private static readonly ConcurrentDictionary<Type, GoInterfaceShellAttribute?> s_shellSpecs = [];
 
-    private static readonly bool s_cacheShellInstances = Environment.GetEnvironmentVariable("GO2CS_P3_SHELL_CACHE") != "0";
-
     private const BindingFlags CtorFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
     private const BindingFlags ShellStateFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
@@ -266,17 +264,11 @@ public static class AdapterBinder
         return factory is null ? null : CacheShellInstances(factory);
     }
 
-    // P3 EXPERIMENT: one shell instance per Go dynamic value, held weakly on that value, so a re-assert
-    // of the same value returns the same shell instead of constructing a new one. A null value (a typed
-    // nil func) has no identity to key on and is built fresh every time.
+    // One shell instance per Go dynamic value (DESIGN-iface-shell-caching 6.4), held weakly on that
+    // value, so a re-assert of the same value returns the same shell instead of constructing a new one.
+    // A null value (a typed nil func) has no identity to key on and is built fresh every time.
     private static Func<object, object> CacheShellInstances(Func<object, object> factory)
     {
-        // MEASUREMENT SWITCH, decided once per factory build and never on the hot path: setting
-        // GO2CS_P3_SHELL_CACHE=0 returns the uncached factory, so ONE Native AOT image measures both
-        // arms (each publish costs hours).
-        if (!s_cacheShellInstances)
-            return factory;
-
         ConditionalWeakTable<object, object> instances = new();
         ConditionalWeakTable<object, object>.CreateValueCallback create = value => factory(value);
 

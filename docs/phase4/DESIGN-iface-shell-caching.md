@@ -456,6 +456,8 @@ instantiation, which is exactly what the object tier exists to avoid.
 
 ### 6.4 P3 — `ConditionalWeakTable` per-referent shell cache — **experiment only**
 
+> **⚠ 2026-10-13: ADOPTED.** The experiment met its bar on the JIT and Native AOT legs; see §12.
+
 **Mechanism.** `ShellInstance<TInterface>` = a `ConditionalWeakTable<object, object>` keyed on the
 Go dynamic value (the `ж<T>` box, or the boxed value). On assert: probe the table, return the
 existing shell, else construct via the itab factory and add. GC-safe by construction: an entry dies
@@ -977,3 +979,79 @@ allocation — an attribute read allocates and a dictionary hit does not — so 
 to do their job (building a name string, boxing a scalar) assert a per-call ceiling set below what
 the uncached read cost. Gated on the full behavioral suite plus an operational re-validation of every
 banked package (charter §5, golib change class).
+
+---
+
+## 12. P3 — adopted 2026-10-13 (measured on both legs)
+
+§6.4 called P3 *experiment only* and set the bar: adopt only if an A/B after P0 shows a real win. The
+experiment ran on `claude/p2-iface-shell-cwt` and met that bar on the JIT leg and on the Native AOT
+leg. The coordinator adopted it (a golib-only change with no emitted change) for the first train after
+the Go 1.26 hop. §6.4 is left as written; this section is its result.
+
+**What landed.** `AdapterBinder.BuildFactory` wraps the shell factory in `CacheShellInstances`: one
+`ConditionalWeakTable<object, object>` per (dynamic type, interface) factory, keyed on the Go dynamic
+value, so a re-assert of the same value returns the shell an earlier assert built. Eligibility is the
+§6.4 rule, decided once at factory-build time:
+- the object shell is always cached (it holds the boxed value by reference);
+- a shell over a reference-typed value is cached, whichever tier built it;
+- the generic shell over a **value** type is never cached, because its constructor copies the struct;
+- a null value (a typed nil func) has no identity to key on, so it is built fresh on every assert.
+
+The experiment carried a measurement switch, `GO2CS_P3_SHELL_CACHE=0`, so that one Native AOT image
+could measure both arms. It is **removed** in the seated change: the cache is the behavior, and no
+environment variable turns it off.
+
+**JIT leg** (measured 2026-10-12, linux, 4 vCPU VM, Microsoft .NET 10.0.12, `--no-aot`):
+
+| reading | base | cache | delta |
+|---|---:|---:|---:|
+| allocation, `PerfIfaceShell`, B/iter (in-process probe, 1 M iterations, 3 identical windows) | 96 | 24 | **−72** (prediction −72, met exactly: both shells, 32 + 40 B; the 24 B boxed return remains) |
+| benchmark elapsed, median of 20 rounds (order alternated, round 0 dropped), ms | 1201.5 | 1175.7 | −25.8 (−2.1%); cache faster in 14 of 20 paired rounds |
+| steady state, ns/iter, best of 15 × 1 M windows after warmup, 16 processes per arm | 144.1 | 137.2 | **−6.9** (prediction −8 to +1, met at its favourable end) |
+| the same, on the one switch image (switch off vs on) | 147.1 | 139.3 | −7.8 |
+| controls `PerfIface` / `PerfIfaceCall`, ms | 582.3 / 477.3 | 578.2 / 484.5 | −0.7% / +1.5% (no shell on either row) |
+
+An 8-round first try on the switch image read +1.6 ns, the wrong sign. The effect is smaller than this
+VM's cross-process spread, and fewer than about 16 rounds could not resolve it.
+
+**Native AOT leg** (measured 2026-10-13 on the i9, one publish of `PerfIfaceShell` at `fe24c9a045`,
+both arms from that image by the switch; 22 rounds, order alternated, round 0 dropped): the cache won
+**21 of 21** paired rounds, median ratio cache/base **0.773** (**156.3 → 121.9 ns/iter**, −22.7%), with
+no overlap between the two arms' ranges. The benchmark's checksum was asserted equal to Go's in every
+run. The 15 GB linux box could not read this leg: its publish died in ILC's final phase after 7 h 54 min
+("Insufficient memory to continue the execution of the program"); see `DATA-hopN-perf.md`, the
+2026-10-13 row.
+
+**Size** (JIT publish, read from the PE section table): `golib.dll`'s `.text` grows by **448 bytes**
+with the cache alone (+576 with the switch, which is now removed); the file grows by one 512-byte
+block. Nothing else in the publish changes size, and no assembly or dependency is added
+(`ConditionalWeakTable` is in CoreLib).
+
+**Guards** (the §6.4 list, cut red-first):
+- `src/tests/Behavioral/ShellCacheMutation` (G1): a write through a pointer after its shell exists is
+  seen by the old shell and by every re-assert; a second pointer of the same type is never answered by
+  the first one's shell; value sources answer with their own contents.
+- `src/tests/Behavioral/ShellCacheReassertEquality` (G2): interface equality across re-asserts, for
+  pointer and value sources, and against the dynamic value in a plain `any`.
+- `src/tests/Behavioral/ShellCacheNilFunc` (G3): a typed nil func asserts ok, beside two non-nil funcs
+  of the same type.
+- `src/tests/GolibTests/ShellInstanceCacheTests`: a control that the cache is engaged and keyed on the
+  value, and a liveness arm that a cached shell does not keep its value alive.
+
+Each guard was made to fail on a fault planted in `CacheShellInstances`, then pass on the real cache:
+
+| planted fault | G1 | G2 | G3 | control | liveness |
+|---|:-:|:-:|:-:|:-:|:-:|
+| cache keyed on the type only (one shell for every value) | RED | RED | RED | RED | RED |
+| no null guard (a nil func reaches the weak table) | pass | pass | RED | pass | pass |
+| a strong `ConcurrentDictionary` in place of the weak table | pass | pass | pass | pass | RED |
+| the real cache | pass | pass | pass | pass | pass |
+
+Under the type-keyed fault, G1 printed `other box: true 2` against Go's `10` and a sum of 11000
+against 20500; G2 printed `true` for two boxes with equal contents; G3 printed 7 for the value Go
+prints as 8. G1 and G2 both catch only that fault, but on different observables (a stale value and a
+wrong equality), so both are kept.
+
+**Gates on the seated change**: the full GolibTests, the full behavioral corpus, and `go test ./...`
+in `src/go2cs`. The results are in the seat post, not here, because they are read at the seat's tip.
