@@ -786,6 +786,61 @@ Assert-Throws 'ledger scope: a DUPLICATED heading REFUSES rather than picking on
         -Trailing @('', '## Excluded packages', '')
 } 'appears 2 times'
 
+# ---- 1d. the -Hop rows carry their roster execution pins (NOTES-next-hop A3) -----------------------
+# A sweep under -Hop runs the rows Get-HopPopulationRows builds, so a pin that row construction drops
+# runs the package under the default config with nothing to say so. Each arm fails if the pin carry
+# is removed: a banked row keeps its own pin, a relocated row takes its predecessor's, and two sources
+# that disagree refuse rather than run under a config nobody chose.
+function Read-FixtureHop {
+    param([string[]] $RosterRows, [string[]] $Population, [string[]] $Relocations)
+
+    $dir = Join-Path ([System.IO.Path]::GetTempPath()) ('go2cs-hop-fixture-' + [guid]::NewGuid().ToString('n'))
+    New-Item -ItemType Directory -Path $dir | Out-Null
+
+    try {
+        $roster = @(
+            '| Package | Tests | Disclosed | What it exercises |'
+            '|:--|:--:|:--:|:--|'
+        ) + $RosterRows + @(
+            ''
+            '## Excluded packages'
+            ''
+            '| Package | Verdicts | Class | Mechanism | Rooting |'
+            '|:--|:--:|:--:|:--|:--:|'
+        )
+        $utf8 = New-Object System.Text.UTF8Encoding($false)
+        [System.IO.File]::WriteAllText((Join-Path $dir 'roster.md'), ($roster -join "`r`n"), $utf8)
+        [System.IO.File]::WriteAllText((Join-Path $dir 'population.txt'), (($Population -join "`n") + "`n"), $utf8)
+        [System.IO.File]::WriteAllText((Join-Path $dir 'relocations.tsv'), ((@("source`ttarget") + $Relocations) -join "`n") + "`n", $utf8)
+        return @(Get-HopPopulationRows -PopulationPath (Join-Path $dir 'population.txt') `
+            -RosterPath (Join-Path $dir 'roster.md') -RelocationsPath (Join-Path $dir 'relocations.tsv'))
+    }
+    finally {
+        if (Test-Path $dir) { Remove-Item $dir -Recurse -Force }
+    }
+}
+
+$hopRosterRows = @(
+    "| [``hop/pinned``](https://x/a) | 5 |  | Pinned. $dot execution: release-tiered $dot [proof](p.md) |"
+    "| [``hop/plain``](https://x/b) | 3 |  | Unpinned. $dot [proof](p.md) |"
+    "| [``hop/old``](https://x/c) | 4 |  | Relocated away, pinned. $dot execution: release-tc0 $dot [proof](p.md) |"
+)
+$hopFixture = Read-FixtureHop -RosterRows $hopRosterRows -Population @('hop/pinned', 'hop/plain', 'hop/new') `
+    -Relocations @("hop/old`thop/new")
+$hopByName = @{}
+foreach ($row in $hopFixture) { $hopByName[$row.Package] = $row }
+
+Assert-Equal 'hop pins: a banked row keeps its own execution pin' 'release-tiered' $hopByName['hop/pinned'].Execution
+Assert-Equal 'hop pins: the pin reaches the dotnet test arguments' '-test-config Release -test-tiered' `
+    ((Get-RosterExecutionArgs $hopByName['hop/pinned'].Execution) -join ' ')
+Assert-Equal 'hop pins: an unpinned banked row stays unpinned' $true ($null -eq $hopByName['hop/plain'].Execution)
+Assert-Equal "hop pins: a relocated row takes its predecessor's pin" 'release-tc0' $hopByName['hop/new'].Execution
+
+Assert-Throws 'hop pins: relocation sources with DISAGREEING pins REFUSE rather than picking one' {
+    Read-FixtureHop -RosterRows $hopRosterRows -Population @('hop/pinned', 'hop/new') `
+        -Relocations @("hop/old`thop/new", "hop/plain`thop/new")
+} "Hop row 'hop/new' inherits disagreeing execution pins"
+
 # ---- 2. the roster's own arithmetic --------------------------------------------------------------
 $rows = @(Get-ValidatedRosterRows -Path $table)
 $lines = [System.IO.File]::ReadAllLines($table)

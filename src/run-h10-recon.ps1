@@ -709,6 +709,39 @@ function Get-RowConverterArgs([string] $Deadline, [string[]] $ExecArgs, [string]
            @('-test-timeout', $Deadline, '-go2cspath', $Go2csPath) + @($Extra) + @($GoDir, $OutDir)
 }
 
+# THE CORPUS PIN, from the tree's src/version.props (the runbook's source of record); $null if absent.
+function Get-TreeGoPin([string] $Root) {
+    $props = Join-Path $Root 'src/version.props'
+    if (-not (Test-Path -LiteralPath $props)) { return $null }
+    $m = [regex]::Match([System.IO.File]::ReadAllText($props), '<GoStdLibVersion>\s*([^<\s]+)\s*</GoStdLibVersion>')
+    if ($m.Success) { return $m.Groups[1].Value } else { return $null }
+}
+
+# A release matches only WHOLE: `go1.24.13` is not met by go1.24.130, which the literal this replaced
+# ('go1\.24\.13', unanchored) accepted.
+function Test-GoPinMatch([string] $Text, [string] $Pin) {
+    return [regex]::IsMatch($Text, '(?<![0-9A-Za-z.])go' + [regex]::Escape($Pin) + '(?![0-9.])')
+}
+
+function Test-GoPinContract {
+    Write-Host '  go pin contract (the release comes from version.props, matched whole):'
+    $ok = $true
+    $cases = @(
+        @('go version go1.24.13 linux/amd64',  '1.24.13', $true,  'the pinned SDK'),
+        @('go1.24.13',                         '1.24.13', $true,  'a GOROOT/VERSION first line'),
+        @('go version go1.26.9 linux/amd64',   '1.24.13', $false, 'another release refuses'),
+        @('go version go1.24.130 linux/amd64', '1.24.13', $false, 'a longer patch number refuses'),
+        @('go version go1.26.9 linux/amd64',   '1.26.9',  $true,  'the pin moves with version.props')
+    )
+    foreach ($c in $cases) {
+        $got  = Test-GoPinMatch $c[0] $c[1]
+        $pass = ($got -eq $c[2])
+        if (-not $pass) { $ok = $false }
+        Write-Host ("    {0,-36} pin {1,-8} -> {2,-5} {3,-6} {4}" -f $c[0], $c[1], $got, $(if ($pass) { 'ok' } else { 'FAILED' }), $c[3])
+    }
+    return $ok
+}
+
 # ⚠⚠ THE ARM, AND ITS FIRST CASE OF EACH HALF IS THE ONE THAT WAS RED. Measured against the base's
 # behaviour (the blob this commit replaces, 158ce37f6c): the floor-replaces-ask rule returns 30m for
 # the first deadline case and 60m for the second, and the empty-extra call returns `-test-config
@@ -803,10 +836,12 @@ if ($SelfTest) {
     $okX = Test-VerdictCrossCheckContract
     # The deadline and the pin, captured before the canary for the same order reason.
     $okR = Test-RowInvocationContract
+    $okP = Test-GoPinContract
     Assert-OrdinalJsonReader
-    if ($ok -and $okX -and $okR) { Write-Host '  SELF-TEST PASSED -- the summary-line contract, the verdict cross-check contract, the row invocation contract AND the ordinal-reader canary'; exit 0 }
+    if ($ok -and $okX -and $okR -and $okP) { Write-Host '  SELF-TEST PASSED -- the summary-line contract, the verdict cross-check contract, the row invocation contract, the go pin contract AND the ordinal-reader canary'; exit 0 }
     if (-not $ok)  { Deny 'the summary-line contract FAILED its self-test -- the parse and its controls disagree' }
     if (-not $okX) { Deny 'the verdict cross-check contract FAILED its self-test -- see the case list above' }
+    if (-not $okP) { Deny 'the go pin contract FAILED its self-test -- a release matched other than whole; see the case list above' }
     Deny 'the row invocation contract FAILED its self-test -- a deadline that is not the LONGER of the floor and the ask, or a row run without its roster execution pin; see the case list above'
 }
 
@@ -833,14 +868,20 @@ $pathGo    = (Get-Command go -ErrorAction SilentlyContinue)
 if (-not $pathGo) { Deny "no 'go' resolvable on PATH after prepending '$GoRoot\bin'" }
 $pathGoVer = NativeFirstLine { & go version }
 $verFile   = (Get-Content -LiteralPath $goVer -TotalCount 1)
+# The pin is the TREE's src/version.props <GoStdLibVersion>, the runbook's one source of record, never
+# a literal: the H1 bump moves it, and a literal would refuse the incoming release's SDK while still
+# accepting the outgoing one (NOTES-next-hop A7).
+$goPin = Get-TreeGoPin $Tree
+if (-not $goPin) { Deny "'$(Join-Path $Tree 'src/version.props')' carries no <GoStdLibVersion> -- the corpus pin has no source of record" }
+Write-Host "  corpus pin        : go$goPin   (src/version.props GoStdLibVersion)"
 Write-Host "  go version OUTPUT : $goVersion   (the SDK at -GoRoot, by absolute path)"
 Write-Host "  go ON PATH        : $pathGoVer   (what the converter will SPAWN)"
 Write-Host "  go resolved from  : $($pathGo.Source)"
 Write-Host "  GOROOT VERSION    : $verFile   (the second derivation)"
 # A refusal that does not NAME the value it refused on sends the reader back to reproduce it.
-if ($goVersion  -notmatch 'go1\.24\.13') { Deny "the pin did not take -- 'go version' OUTPUT is '$goVersion', not the corpus pin go1.24.13" }
-if ($pathGoVer  -notmatch 'go1\.24\.13') { Deny "PATH's go is '$pathGoVer' -- the converter spawns THIS one, not the SDK at -GoRoot" }
-if ($verFile    -notmatch 'go1\.24\.13') { Deny "GOROOT/VERSION is '$verFile', not the corpus pin go1.24.13" }
+if (-not (Test-GoPinMatch $goVersion $goPin)) { Deny "the pin did not take -- 'go version' OUTPUT is '$goVersion', not the corpus pin go$goPin" }
+if (-not (Test-GoPinMatch $pathGoVer $goPin)) { Deny "PATH's go is '$pathGoVer' -- the converter spawns THIS one, not the SDK at -GoRoot" }
+if (-not (Test-GoPinMatch $verFile   $goPin)) { Deny "GOROOT/VERSION is '$verFile', not the corpus pin go$goPin" }
 # THREE derivations of one pin, and they must agree: the binary, the binary PATH resolves, and the file.
 if ($pathGo.Source -notlike (Join-Path $GoRoot '*')) { Deny "PATH's go resolves to '$($pathGo.Source)', which is not under the pinned GOROOT '$GoRoot'" }
 
