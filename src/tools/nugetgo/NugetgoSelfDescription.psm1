@@ -118,7 +118,7 @@ function Get-NugetgoThirdPartyRequires {
 #>
 function Select-NugetgoPackedLibraries {
     [CmdletBinding()]
-    param([Parameter(Mandatory)][string]$RecurseRoot, [Parameter(Mandatory)][object[]]$Libraries, [string[]]$ExcludePackage = @())
+    param([Parameter(Mandatory)][string]$RecurseRoot, [Parameter(Mandatory)][object[]]$Libraries, [string[]]$ExcludePackage = @(), [string[]]$TestOnlyPackage = @())
 
     $srcRoot = Join-Path $RecurseRoot 'src'
     $byPath = @{}
@@ -144,4 +144,14 @@ function Select-NugetgoPackedLibraries {
     return $kept
 }
 
-Export-ModuleMember -Function Get-NugetgoPackedPackages, Get-NugetgoThirdPartyRequires, Select-NugetgoPackedLibraries
+<#
+.SYNOPSIS
+    The module's test-only internal packages. RED STUB.
+#>
+function Get-NugetgoTestOnlyPackages {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$ModuleDir, [Parameter(Mandatory)][string]$ModulePath)
+    return [pscustomobject]@{ Excluded = @(); Kept = @() }
+}
+
+Export-ModuleMember -Function Get-NugetgoPackedPackages, Get-NugetgoThirdPartyRequires, Select-NugetgoPackedLibraries, Get-NugetgoTestOnlyPackages
