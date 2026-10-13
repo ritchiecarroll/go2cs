@@ -36,9 +36,8 @@ public static void TestOver65kFiles(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < nFiles; i++) {
         var (_, errΔ1) = w.CreateHeader(Ꮡ(new FileHeader(
             Name: fmt.Sprintf("%d.dat"u8, i),
-            Method: Store
+            Method: Store // Deflate is too slow when it is compiled with -race flag
         )));
-        // Deflate is too slow when it is compiled with -race flag
         if (errΔ1 != default!) {
             Ꮡt.Fatalf("creating file %d: %v"u8, i, errΔ1);
         }
@@ -113,6 +112,7 @@ internal static void testHeaderRoundTrip(ж<global::go.archive.zip_package.FileH
             Ꮡt.Errorf("ModifiedDate: got %d, want %d\n"u8, got, want);
         }
     }
+
     {
         var (sysfh, ok) = fi.Sys()._<ж<global::go.archive.zip_package.FileHeader>>(ᐧ); if (!ok && sysfh != Ꮡfh) {
             Ꮡt.Errorf("Sys didn't return original *FileHeader"u8);
@@ -224,6 +224,7 @@ internal static (nint n, error err) Write(this ref rleBuffer r, slice<byte> p) {
             }
         }
     }
+
     foreach (var (_, b) in p) {
         if (rp == nil || (~rp).b != b){
             r.buf = append(r.buf, new repeatedByte(r.Size(), b, 1));
@@ -286,6 +287,7 @@ public static void TestRLEBuffer(ж<testing.T> Ꮡt) {
     if (len((~b).buf) != 10) {
         Ꮡt.Fatalf("len(b.buf) = %d; want 10"u8, len((~b).buf));
     }
+
     for (nint i = 0; i < len(all); i++) {
         for (nint j = 0; j < len(all) - i; j++) {
             var buf = new slice<byte>(j);
@@ -406,8 +408,6 @@ internal static readonly @string uint16maxZip64ˢ = "uint16max_Zip64"u8;
 
 // At 16k records, we need to generate a zip64 file.
 public static void TestZip64ManyRecords(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
@@ -536,11 +536,13 @@ internal static bool suffixIsZip64(ж<testing.T> Ꮡt, sizedReaderAt zip) {
             Ꮡt.Fatalf("ReadAt: %v"u8, errΔ1);
         }
     }
+
     nint sigOff = findSignatureInBlock(d);
     if (sigOff == -1) {
         Ꮡt.Errorf("failed to find signature in block"u8);
         return false;
     }
+
     var (dirOff, err) = findDirectory64End(zip, zip.Size() - (int64)len(d) + (int64)sigOff);
     if (err != default!) {
         Ꮡt.Fatalf("findDirectory64End: %v"u8, err);
@@ -548,18 +550,21 @@ internal static bool suffixIsZip64(ж<testing.T> Ꮡt, sizedReaderAt zip) {
     if (dirOff == -1) {
         return false;
     }
+
     d = new slice<byte>(directory64EndLen);
     {
         var (_, errΔ2) = zip.ReadAt(d, dirOff); if (errΔ2 != default!) {
             Ꮡt.Fatalf("ReadAt(off=%d): %v"u8, dirOff, errΔ2);
         }
     }
+
     var b = ((global::go.archive.zip_package.readBuf)d);
     {
         var sig = b.uint32(); if (sig != directory64EndSignature) {
             return false;
         }
     }
+
     var size = b.uint64();
     if (size != (uint64)(directory64EndLen - 12)) {
         Ꮡt.Errorf("expected length of %d, got %d"u8, (nint)(directory64EndLen - 12), size);
@@ -589,6 +594,7 @@ public static void TestZip64LargeDirectory(ж<testing.T> Ꮡt) {
                     Ꮡt.Errorf("Close central directory size = %d; want %d"u8, size, wantLen);
                 }
             };
+
             ref var uint16string = ref heap<@string>(out var Ꮡuint16string);
             uint16string = strings.Repeat("."u8, uint16max);
             var remain = wantLen;
@@ -683,6 +689,7 @@ internal static ж<rleBuffer> testZip64(testing.TB t, int64 size) {
             t.Fatal(errΔ3);
         }
     }
+
     // read back zip file and check that we get to the end of it
     (var r, err) = NewReader(new zip_internal_test_package.rleBufferжReaderAt(buf), buf.Size());
     if (err != default!) {
@@ -726,11 +733,13 @@ internal static ж<rleBuffer> testZip64(testing.TB t, int64 size) {
             }
         }
     }
+
     {
         var (got, want) = (f0.Value.UncompressedSize64, (uint64)size + (uint64)len(end)); if (got != want) {
             t.Errorf("UncompressedSize64 %#x, want %#x"u8, got, want);
         }
     }
+
     return buf;
 }
 
@@ -749,6 +758,7 @@ internal static void testValidHeader(ж<global::go.archive.zip_package.FileHeade
 
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var z = NewWriter(new zip_test_package.bytes_BufferжWriter(Ꮡbuf));
+
     var (f, err) = z.CreateHeader(Ꮡh);
     if (err != default!) {
         Ꮡt.Fatalf("error creating header: %v"u8, err);
@@ -763,6 +773,7 @@ internal static void testValidHeader(ж<global::go.archive.zip_package.FileHeade
             Ꮡt.Fatalf("error closing zip writer: %v"u8, errΔ2);
         }
     }
+
     var b = buf.Bytes();
     (var zf, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(b)), (int64)len(b));
     if (err != default!) {
@@ -780,16 +791,18 @@ internal static readonly @string timeFormatᶜ = "20060102T150405.000.txt"u8;
 // Issue 4302.
 public static void TestHeaderInvalidTagAndSize(ж<testing.T> Ꮡt) {
     @string timeFormat = timeFormatᶜ;
+
     var ts = time.Now();
     @string filename = ts.Format(timeFormat);
+
     ref var h = ref heap<global::go.archive.zip_package.FileHeader>(out var Ꮡh);
     h = new FileHeader(
         Name: filename,
         Method: Deflate,
-        Extra: slice<byte>(ts.Format(time.RFC3339Nano))
+        Extra: slice<byte>(ts.Format(time.RFC3339Nano)) // missing tag and len, but Extra is best-effort parsing
     );
-    // missing tag and len, but Extra is best-effort parsing
     h.SetModTime(ts);
+
     testValidHeader(Ꮡh, Ꮡt);
 }
 
@@ -798,9 +811,8 @@ public static void TestHeaderTooShort(ж<testing.T> Ꮡt) {
     h = new FileHeader(
         Name: "foo.txt"u8,
         Method: Deflate,
-        Extra: new byte[]{zip64ExtraID}.slice()
+        Extra: new byte[]{zip64ExtraID}.slice() // missing size and second half of tag, but Extra is best-effort parsing
     );
-    // missing size and second half of tag, but Extra is best-effort parsing
     testValidHeader(Ꮡh, Ꮡt);
 }
 
@@ -823,9 +835,11 @@ public static void TestHeaderTooLongErr(ж<testing.T> Ꮡt) {
             wanterr: errLongExtra
         )
     }.slice();
+
     // write a zip file
     var buf = @new<bytes.Buffer>();
     var w = NewWriter(new zip_test_package.bytes_BufferжWriter(buf));
+
     foreach (var (_, test) in headerTests) {
         var h = Ꮡ(new FileHeader(
             Name: test.name,
@@ -836,6 +850,7 @@ public static void TestHeaderTooLongErr(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("error=%v, want %v"u8, err, test.wanterr);
         }
     }
+
     {
         var err = w.Close(); if (err != default!) {
             Ꮡt.Fatal(err);
@@ -844,15 +859,12 @@ public static void TestHeaderTooLongErr(ж<testing.T> Ꮡt) {
 }
 
 public static void TestHeaderIgnoredSize(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     ref var h = ref heap<global::go.archive.zip_package.FileHeader>(out var Ꮡh);
     h = new FileHeader(
         Name: "foo.txt"u8,
         Method: Deflate,
-        Extra: new byte[]{(byte)((byte)zip64ExtraID & 0xFF), (byte)(((byte)zip64ExtraID).Rsh((uint64)(8))), 24, 0, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8}.slice()
+        Extra: new byte[]{(byte)((byte)zip64ExtraID & 0xFF), (byte)(((byte)zip64ExtraID).Rsh((uint64)(8))), 24, 0, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8}.slice() // bad size but shouldn't be consulted
     );
-    // bad size but shouldn't be consulted
     testValidHeader(Ꮡh, Ꮡt);
 }
 
@@ -865,11 +877,9 @@ public static void TestZeroLengthHeader(ж<testing.T> Ꮡt) {
         Method: Deflate,
         Extra: new byte[]{
             85, 84, 5, 0, 3, 154, 144, 195, 77, // tag 21589 size 5
-
-            85, 120, 0, 0
+            85, 120, 0, 0 // tag 30805 size 0
         }.slice()
     );
-    // tag 30805 size 0
     testValidHeader(Ꮡh, Ꮡt);
 }
 

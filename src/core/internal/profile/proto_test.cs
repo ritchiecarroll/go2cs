@@ -39,6 +39,7 @@ public static void TestPackedEncoding(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("failed encode %d, got %v, want %v"u8, i, got, want);
             }
         }
+
         var dest = @new<packedInts>();
         {
             var err = unmarshal(tc.encoded, new profile_internal_test_package.packedIntsжmessage(dest)); if (err != default!) {

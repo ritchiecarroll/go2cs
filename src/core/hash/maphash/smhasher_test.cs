@@ -104,6 +104,7 @@ internal static void check(this ref hashSet s, ж<testing.T> Ꮡt) {
     Ꮡt.Helper();
     var list = s.list;
     slices.Sort<slice<uint64>, uint64>(list);
+
     nint collisions = 0;
     for (nint i = 1; i < len(list); i++) {
         if (list[i] == list[i - 1]) {
@@ -111,6 +112,7 @@ internal static void check(this ref hashSet s, ж<testing.T> Ꮡt) {
         }
     }
     nint n = len(list);
+
     const float64 SLOP = 10.0;
     var pairs = (int64)n * (int64)(n - 1) / 2;
     var expected = (float64)pairs / math.Pow(2.0D, (float64)hashSize);
@@ -194,8 +196,10 @@ internal static void twoNonZero(ж<hashSet> Ꮡh, nint n) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     var b = new slice<byte>(n);
+
     // all zero
     h.addB(b);
+
     // one non-zero byte
     for (nint i = 0; i < n; i++) {
         for (nint x = 1; x < 256; x++) {
@@ -204,6 +208,7 @@ internal static void twoNonZero(ж<hashSet> Ꮡh, nint n) {
             b[i] = 0;
         }
     }
+
     // two non-zero bytes
     for (nint i = 0; i < n; i++) {
         for (nint x = 1; x < 256; x++) {
@@ -389,24 +394,26 @@ public static void TestSmhasherAvalanche(ж<testing.T> Ꮡt) {
 }
 
 internal static void avalancheTest1(ж<testing.T> Ꮡt, key k) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     Ꮡt.Helper();
     UntypedInt REP = 100000;
     var r = rand.New(rand.NewSource(1234));
     nint n = k.bits();
+
     // grid[i][j] is a count of whether flipping
     // input bit i affects output bit j.
     var grid = GoReflect.WithElemDims(new slice<array<nint>>(n, () => new(64)), 64);
+
     for (nint z = 0; z < REP; z++) {
         // pick a random key, hash it
         k.random(r);
         var h = k.hash();
+
         // flip each bit, hash & compare the results
         for (nint i = 0; i < n; i++) {
             k.flipBit(i);
             var d = (uint64)(h ^ k.hash());
             k.flipBit(i);
+
             // record the effects of that bit flip
             var g = Ꮡ(grid, i);
             for (nint j = 0; j < hashSize; j++) {
@@ -415,6 +422,7 @@ internal static void avalancheTest1(ж<testing.T> Ꮡt, key k) {
             }
         }
     }
+
     // Each entry in the grid should be about REP/2.
     // More precisely, we did N = k.bits() * hashSize experiments where
     // each is the sum of REP coin flips. We want to find bounds on the
@@ -454,6 +462,7 @@ internal static void windowed(ж<testing.T> Ꮡt, key k) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
     UntypedInt BITS = 16;
+
     var h = newHashSet();
     for (nint r = 0; r < k.bits(); r++) {
         for (nint i = 0; i < (nint)((1 << (int)(BITS))); i++) {

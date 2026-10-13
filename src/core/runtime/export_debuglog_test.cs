@@ -62,6 +62,7 @@ public static @string DumpDebugLog() {
     printDebugLogImpl();
     var buf = gp.Value.writebuf;
     gp.Value.writebuf = default!;
+
     return ((@string)buf);
 }
 

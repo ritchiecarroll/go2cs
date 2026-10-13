@@ -24,8 +24,8 @@ public static void TestReadLine(ж<testing.T> Ꮡt) {
         if (exprᴛ1 == "android"u8 || exprᴛ1 == "plan9"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "wasip1"u8) {
             Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
         }
-
         @string filename = etcServicesˢ; // a nice big file
+
         var (fd, err) = Δos.Open(filename);
         if (err != default!) {
             // The file is missing even on some Unix systems.
@@ -34,12 +34,14 @@ public static void TestReadLine(ж<testing.T> Ꮡt) {
         var fdʗ1 = fd;
         defer(() => fdʗ1.Close(), ref ᒐ);
         var br = bufio.NewReader(new net_test_package.os_FileжReader(fd));
+
         (var Δfile, err) = open(filename);
         if (Δfile == nil) {
             Ꮡt.Fatal(err);
         }
         var fileʗ1 = Δfile;
         defer(fileʗ1.close, ref ᒐ);
+
         nint lineno = 1;
         nint byteno = 0;
         while (ᐧ) {

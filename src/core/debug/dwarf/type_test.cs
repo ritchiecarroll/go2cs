@@ -51,6 +51,7 @@ internal static ж<dwarf.Data> elfData(ж<testing.T> Ꮡt, @string name) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (var d, err) = f.DWARF();
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -63,6 +64,7 @@ internal static ж<dwarf.Data> machoData(ж<testing.T> Ꮡt, @string name) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (var d, err) = f.DWARF();
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -75,6 +77,7 @@ internal static ж<dwarf.Data> peData(ж<testing.T> Ꮡt, @string name) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (var d, err) = f.DWARF();
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -134,6 +137,7 @@ internal static void testTypedefs(ж<testing.T> Ꮡt, ж<dwarf.Data> Ꮡd, @stri
                     typstr = (~t1).Type.String();
                 }
             }
+
             {
                 var (want, ok) = testcases[(~t1).Name, ꟷ]; if (ok) {
                     if (seen[(~t1).Name]) {
@@ -150,6 +154,7 @@ internal static void testTypedefs(ж<testing.T> Ꮡt, ж<dwarf.Data> Ꮡd, @stri
             r.SkipChildren();
         }
     }
+
     foreach (var (k, _) in testcases) {
         if (!seen[k]) {
             Ꮡt.Errorf("missing %s"u8, k);
@@ -182,8 +187,8 @@ public static void TestTypedefCycle(ж<testing.T> Ꮡt) {
         if (exprᴛ1 == TagBaseType || exprᴛ1 == TagTypedef || exprᴛ1 == TagPointerType || exprᴛ1 == TagStructType) {
             offsets = append(offsets, (~e).Offset);
         }
-
     }
+
     // Parse each type with a fresh type cache.
     foreach (var (_, offset) in offsets) {
         var dΔ1 = elfData(Ꮡt, testdataCycleElfˢ);
@@ -194,8 +199,8 @@ public static void TestTypedefCycle(ж<testing.T> Ꮡt) {
     }
 }
 
-// varname:typename:string:size
 internal static slice<@string> unsupportedTypeTests = new @string[]{
+    // varname:typename:string:size
     "culprit::(unsupported type ReferenceType):8"u8,
     "pdm::(unsupported type PtrToMemberType):-1"u8
 }.slice();
@@ -307,12 +312,15 @@ internal static void testBitOffsets(ж<testing.T> Ꮡt, ж<dwarf.Data> Ꮡd, @st
         if (e == nil) {
             break;
         }
+
         if ((~e).Tag == TagStructType) {
             var (typ, errΔ1) = Ꮡd.Type((~e).Offset);
             if (errΔ1 != default!) {
                 Ꮡt.Fatal(dTypeˢ, errΔ1);
             }
+
             var t1 = typ._<ж<dwarf.StructType>>();
+
             @string bitInfoDump(ж<dwarf.StructField> f) {
                 @string res = fmt.Sprintf("S:%d"u8, (~f).BitSize);
                 if ((~f).BitOffset != 0) {
@@ -323,6 +331,7 @@ internal static void testBitOffsets(ж<testing.T> Ꮡt, ж<dwarf.Data> Ꮡd, @st
                 }
                 return res;
             }
+
             foreach (var (_, field) in (~t1).Field) {
                 // We're only testing for bitfields
                 if ((~field).BitSize == 0) {

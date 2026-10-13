@@ -24,18 +24,35 @@ partial class net_internal_test_package {
 
 internal static ж<socktest.Switch> Ꮡsw = new StandardBox<socktest.Switch>(default(socktest.Switch));
 internal static ref socktest.Switch sw => ref Ꮡsw.Value;
+
+// uninstallTestHooks runs just before a run of benchmarks.
 internal static ж<Δsync.Once> ᏑtestHookUninstaller = new StandardBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once testHookUninstaller => ref ᏑtestHookUninstaller.Value;
 
 internal static ж<bool> testTCPBig = flag.Bool("tcpbig"u8, false, "whether to test massive size of data per read or write call on TCP connection"u8);
+
 internal static ж<bool> testDNSFlood = flag.Bool("dnsflood"u8, false, "whether to test DNS query flooding"u8);
+
+// If external IPv4 connectivity exists, we can try dialing
+// non-node/interface local scope IPv4 addresses.
+// On Windows, Lookup APIs may not return IPv4-related
+// resource records when a node has no external IPv4
+// connectivity.
 internal static ж<bool> testIPv4 = flag.Bool("ipv4"u8, true, "assume external IPv4 connectivity exists"u8);
+
+// If external IPv6 connectivity exists, we can try dialing
+// non-node/interface local scope IPv6 addresses.
+// On Windows, Lookup APIs may not return IPv6-related
+// resource records when a node has no external IPv6
+// connectivity.
 internal static ж<bool> testIPv6 = flag.Bool("ipv6"u8, false, "assume external IPv6 connectivity exists"u8);
 
 public static void TestMain(ж<testing.M> Ꮡm) {
     setupTestData();
     installTestHooks();
+
     nint st = Ꮡm.Run();
+
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
     if (testing.Verbose()) {
         printRunningGoroutines();
@@ -83,16 +100,19 @@ internal static void setupTestData() {
             new("ip4"u8, "localhost"u8, Ꮡ(new IPAddr(IP: IPv4(127, 0, 0, 1))), default!)
         }.slice());
     }
+
     if (supportsIPv6()) {
         resolveTCPAddrTests = append(resolveTCPAddrTests, new resolveTCPAddrTest("tcp6"u8, "localhost:3"u8, Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 3)), default!));
         resolveUDPAddrTests = append(resolveUDPAddrTests, new resolveUDPAddrTest("udp6"u8, "localhost:3"u8, Ꮡ(new UDPAddr(IP: IPv6loopback, Port: 3)), default!));
         resolveIPAddrTests = append(resolveIPAddrTests, new resolveIPAddrTest("ip6"u8, "localhost"u8, Ꮡ(new IPAddr(IP: IPv6loopback)), default!));
+
         // Issue 20911: don't return IPv4 addresses for
         // Resolve*Addr calls of the IPv6 unspecified address.
         resolveTCPAddrTests = append(resolveTCPAddrTests, new resolveTCPAddrTest("tcp"u8, "[::]:4"u8, Ꮡ(new TCPAddr(IP: IPv6unspecified, Port: 4)), default!));
         resolveUDPAddrTests = append(resolveUDPAddrTests, new resolveUDPAddrTest("udp"u8, "[::]:4"u8, Ꮡ(new UDPAddr(IP: IPv6unspecified, Port: 4)), default!));
         resolveIPAddrTests = append(resolveIPAddrTests, new resolveIPAddrTest("ip"u8, "::"u8, Ꮡ(new IPAddr(IP: IPv6unspecified)), default!));
     }
+
     var ifi = loopbackInterface();
     if (ifi != nil) {
         ref var index = ref heap<@string>(out var Ꮡindex);
@@ -110,6 +130,7 @@ internal static void setupTestData() {
             new("ip6"u8, "fe80::1%"u8 + index, Ꮡ(new IPAddr(IP: ParseIP(fe801ˢ), Zone: index)), default!)
         }.slice());
     }
+
     @string addr = ipv6LinkLocalUnicastAddr(ifi);
     if (addr != ""u8) {
         if (Δruntime.GOOS != "dragonfly"u8) {
@@ -147,7 +168,6 @@ internal static void setupTestData() {
                 new("udp6"u8, "[ip6-localhost%"u8 + (~ifi).Name + "]:0"u8, true)
             }.slice());
         }
-
     }
 }
 

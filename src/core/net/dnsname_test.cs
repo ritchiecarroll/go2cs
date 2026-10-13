@@ -16,8 +16,8 @@ internal partial struct dnsNameTest {
     internal bool result;
 }
 
-// RFC 2181, section 11.
 internal static slice<dnsNameTest> dnsNameTests = new dnsNameTest[]{
+    // RFC 2181, section 11.
     new("_xmpp-server._tcp.google.com"u8, true),
     new("foo.com"u8, true),
     new("1foo.com"u8, true),
@@ -43,11 +43,14 @@ internal static void emitDNSNameTest(channel/*<-*/<dnsNameTest> ch) {
         }
         @string char64 = char63 + "a"u8;
         @string longDomain = strings.Repeat(char63 + "."u8, 5) + "example"u8;
+
         foreach (var (_, tc) in dnsNameTests) {
             ch.ᐸꟷ(tc);
         }
+
         ch.ᐸꟷ(new dnsNameTest(char63 + ".com"u8, true));
         ch.ᐸꟷ(new dnsNameTest(char64 + ".com"u8, false));
+
         // Remember: wire format is two octets longer than presentation
         // (length octets for the first and [root] last labels).
         // 253 is fine:
@@ -75,6 +78,7 @@ public static void BenchmarkDNSName(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
+
     var benchmarks = appendꓸꓸꓸ(dnsNameTests, new dnsNameTest[]{
         new(strings.Repeat("a"u8, 63), true),
         new(strings.Repeat("a"u8, 64), false)

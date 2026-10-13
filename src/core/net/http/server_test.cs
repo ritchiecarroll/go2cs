@@ -101,6 +101,7 @@ public static void TestFindHandler(ж<testing.T> Ꮡt) {
     }.slice()) {
         mux.Handle(ph.pat, ph.h);
     }
+
     foreach (var (_, test) in new TestFindHandler_typeᴛ1[]{
         new("GET"u8, "/"u8, "&http.handler{i:1}"u8),
         new("GET"u8, "//"u8, @"&http.redirectHandler{url:""/"", code:301}"u8),
@@ -131,8 +132,6 @@ public static void TestFindHandler(ж<testing.T> Ꮡt) {
 }
 
 public static void TestEmptyServeMux(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Verify that a ServeMux with nothing registered
     // doesn't panic.
     var mux = NewServeMux();
@@ -159,6 +158,7 @@ public static void TestRegisterErr(ж<testing.T> Ꮡt) {
     var mux = NewServeMux();
     var h = Ꮡ(new Δhandler(nil));
     mux.Handle("/a"u8, new http_internal_test_package.ΔhandlerжΔHandler(h));
+
     foreach (var (_, vᴛ1) in new TestRegisterErr_type[]{
         new(""u8, new http_internal_test_package.ΔhandlerжΔHandler(h), "invalid pattern"u8),
         new("/"u8, default!, "nil handler"u8),
@@ -230,31 +230,28 @@ public static void TestEscapedPathsAndPatterns(ж<testing.T> Ꮡt) {
     var matches = new TestEscapedPathsAndPatterns_matches[]{
         new(
             "/a"u8, // this pattern matches a path that unescapes to "/a"
-
             new @string[]{"/a"u8, "/%61"u8}.slice(),
             new @string[]{"/a"u8, "/%61"u8}.slice()
         ),
         new(
             "/%62"u8, // patterns are unescaped by segment; matches paths that unescape to "/b"
-
             new @string[]{"/b"u8, "/%62"u8}.slice(),
             new @string[]{"/%2562"u8}.slice() // In 1.21, patterns were not unescaped but paths were.
 
         ),
         new(
             "/%7B/%7D"u8, // the only way to write a pattern that matches '{' or '}'
-
             new @string[]{"/{/}"u8, "/%7b/}"u8, "/{/%7d"u8, "/%7B/%7D"u8}.slice(),
             new @string[]{"/%257B/%257D"u8}.slice() // In 1.21, patterns were not unescaped.
 
         ),
         new(
             "/%x"u8, // patterns that do not unescape are left unchanged
-
             new @string[]{"/%25x"u8}.slice(),
             new @string[]{"/%25x"u8}.slice()
         )
     }.slice();
+
     var matchesʗ1 = matches;
     void run(ж<testing.T> tΔ1, bool test121) {
         GoFrame ᒐ = default;
@@ -263,11 +260,13 @@ public static void TestEscapedPathsAndPatterns(ж<testing.T> Ꮡt) {
                 use121 = u;
             }, use121, ref ᒐ);
             use121 = test121;
+
             var mux = NewServeMux();
             foreach (var (_, m) in matchesʗ1) {
                 mux.HandleFunc(m.pattern, (global::go.net.http_package.ResponseWriter w, ж<global::go.net.http_package.Request> r) => {
                 });
             }
+
             foreach (var (_, m) in matchesʗ1) {
                 var paths = m.paths;
                 if (use121) {
@@ -294,6 +293,7 @@ public static void TestEscapedPathsAndPatterns(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }
+
     var runʗ1 = run;
     Ꮡt.Run(latestˢ, (ж<testing.T> tΔ2) => {
         runʗ1(tΔ2, false);
@@ -365,6 +365,7 @@ public static void BenchmarkServerMatch(ж<testing.B> Ꮡb) {
     mux.HandleFunc(adminProductsCreateˢ, fn);
     mux.HandleFunc(adminProductsUpdateˢ, fn);
     mux.HandleFunc(adminProductsDeleteˢ, fn);
+
     var paths = new @string[]{"/"u8, "/notfound"u8, "/admin/"u8, "/admin/foo"u8, "/contact"u8, "/products"u8,
         "/products/"u8, "/products/3/image.jpg"u8}.slice();
     b.StartTimer();

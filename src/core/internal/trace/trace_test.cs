@@ -45,8 +45,8 @@ public static void TestTraceAnnotations(ж<testing.T> Ꮡt) {
             new(Δtrace.EventLog, ((Δtrace.TaskID)1), new @string[]{"key0"u8, "0123456789abcdef"u8}.slice()),
             new(Δtrace.EventRegionEnd, ((Δtrace.TaskID)1), new @string[]{"region1"u8}.slice()),
             new(Δtrace.EventRegionEnd, ((Δtrace.TaskID)1), new @string[]{"region0"u8}.slice()),
-            new(Δtrace.EventTaskEnd, ((Δtrace.TaskID)1), new @string[]{"task0"u8}.slice()), //  Currently, pre-existing region is not recorded to avoid allocations.
-
+            new(Δtrace.EventTaskEnd, ((Δtrace.TaskID)1), new @string[]{"task0"u8}.slice()),
+            //  Currently, pre-existing region is not recorded to avoid allocations.
             new(Δtrace.EventRegionBegin, Δtrace.BackgroundTask, new @string[]{"post-existing region"u8}.slice())
         }.slice();
         var (r, err) = Δtrace.NewReader(new trace_test_package.bytes_ReaderжReader(bytes.NewReader(tb)));
@@ -79,7 +79,6 @@ public static void TestTraceAnnotations(ж<testing.T> Ꮡt) {
                     var log = ev.Log();
                     match = log.Task == wantEv.task && log.Category == wantEv.args[0] && log.Message == wantEv.args[1];
                 }
-
                 if (match) {
                     want[i] = want[len(want) - 1];
                     want = want.slice(0, len(want) - 1);
@@ -107,11 +106,11 @@ internal static readonly @string cgoCallbackGoˢ = "cgo-callback.go"u8;
 
 public static void TestTraceCgoCallback(ж<testing.T> Ꮡt) {
     testenv.MustHaveCGO(new trace_test_package.testing_TжTB(Ꮡt));
+
     var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "plan9"u8 || exprᴛ1 == "windows"u8) {
         Ꮡt.Skipf("cgo callback test requires pthreads and is not supported on %s"u8, Δruntime.GOOS);
     }
-
     testTraceProg(Ꮡt, cgoCallbackGoˢ, default!);
 }
 
@@ -146,6 +145,7 @@ public static void TestTraceCPUProfile(ж<testing.T> Ꮡt) {
         if (pprofSamples == 0) {
             tΔ1.Skip(cpuProfileDidNotIncludeˢ);
         }
+
         // Examine the execution tracer's view of the CPU profile samples. Filter it
         // to only include samples from the single test goroutine. Use the goroutine
         // ID that was recorded in the events: that should reflect getg().m.curg,
@@ -195,6 +195,7 @@ public static void TestTraceCPUProfile(ж<testing.T> Ꮡt) {
         if (!hogRegionClosed) {
             tΔ1.Fatalf("execution trace did not close cpuHogger region"u8);
         }
+
         // The execution trace may drop CPU profile samples if the profiling buffer
         // overflows. Based on the size of profBufWordCount, that takes a bit over
         // 1900 CPU samples or 19 thread-seconds at a 100 Hz sample rate. If we've
@@ -207,6 +208,7 @@ public static void TestTraceCPUProfile(ж<testing.T> Ꮡt) {
                 tΔ1.Fail();
             }
         }
+
         foreach (var (stack, traceSamplesΔ1) in traceStacks) {
             nint pprofSamplesΔ1 = pprofStacks[stack];
             delete(pprofStacks, stack);
@@ -224,6 +226,7 @@ public static void TestTraceCPUProfile(ж<testing.T> Ꮡt) {
                 tΔ1.Fail();
             }
         }
+
         if (tΔ1.Failed()) {
             tΔ1.Logf("execution trace CPU samples:"u8);
             foreach (var (stack, samples) in traceStacks) {
@@ -239,8 +242,6 @@ internal static readonly @string futileWakeupGoˢ = "futile-wakeup.go"u8;
 internal static readonly object didNotSeeAGoroutineInAˢ = (@string)"did not see a goroutine in a the region 'special'"u8;
 
 public static void TestTraceFutileWakeup(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testTraceProg(Ꮡt, futileWakeupGoˢ, (ж<testing.T> tΔ1, slice<byte> tb, slice<byte> _Δp2, bool _Δp3) => {
         // Check to make sure that no goroutine in the "special" trace region
         // ends up blocking, unblocking, then immediately blocking again.
@@ -249,11 +250,8 @@ public static void TestTraceFutileWakeup(ж<testing.T> Ꮡt) {
         // so there should never be a clean block/unblock on the goroutine unless
         // the runtime was generating extraneous events.
         const nint entered = iota;
-        
         const nint blocked = 1;
-        
         const nint runnable = 2;
-        
         const nint running = 3;
         var gs = new map<Δtrace.GoID, nint>();
         var seenSpecialGoroutines = false;
@@ -329,7 +327,6 @@ public static void TestTraceFutileWakeup(ж<testing.T> Ꮡt) {
                     state = entered;
                 }
             }
-
             gs[id] = state;
         }
         if (!seenSpecialGoroutines) {
@@ -367,8 +364,6 @@ internal partial struct TestTraceStacks_evDesc /*dyn*/ {
 }
 
 public static void TestTraceStacks(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testTraceProg(Ꮡt, stacksGoˢ, (ж<testing.T> tΔ1, slice<byte> tb, slice<byte> _, bool stress) => {
         // mainLine is the line number of `func main()` in testprog/stacks.go.
         UntypedInt mainLine = 21;
@@ -446,7 +441,6 @@ public static void TestTraceStacks(ж<testing.T> Ꮡt) {
             }.slice()),
             new(Δtrace.EventMetric, "/sched/gomaxprocs:threads"u8, new TestTraceStacks_frame[]{
                 new("runtime.startTheWorld"u8, 0), // this is when the current gomaxprocs is logged.
-
                 new("runtime.startTheWorldGC"u8, 0),
                 new("runtime.GOMAXPROCS"u8, 0),
                 new("main.main"u8, 0)
@@ -525,7 +519,6 @@ public static void TestTraceStacks(ж<testing.T> Ꮡt) {
                         var (old, @new) = st.Goroutine();
                         str = fmt.Sprintf("%s %s->%s"u8, st.Resource.Kind, old, @new);
                     }
-
                     match = str == wantEv.match;
                 }
                 else if (exprᴛ1 == Δtrace.EventRangeBegin) {
@@ -536,7 +529,6 @@ public static void TestTraceStacks(ж<testing.T> Ꮡt) {
                     var metric = ev.Metric();
                     match = metric.Name == wantEv.match;
                 }
-
                 match = match && stackMatches(ev.Stack(), wantEv.frames);
                 if (match) {
                     want[i] = want[len(want) - 1];
@@ -561,7 +553,6 @@ public static void TestTraceStress(ж<testing.T> Ꮡt) {
     if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
         Ꮡt.Skip("no os.Pipe on " + Δruntime.GOOS);
     }
-
     testTraceProg(Ꮡt, stressGoˢ, checkReaderDeterminism);
 }
 
@@ -573,7 +564,6 @@ public static void TestTraceStressStartStop(ж<testing.T> Ꮡt) {
     if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
         Ꮡt.Skip("no os.Pipe on " + Δruntime.GOOS);
     }
-
     testTraceProg(Ꮡt, stressStartStopGoˢ, default!);
 }
 
@@ -593,7 +583,6 @@ public static void TestTraceWaitOnPipe(ж<testing.T> Ꮡt) {
         testTraceProg(Ꮡt, waitOnPipeGoˢ, default!);
         return;
     }
-
     Ꮡt.Skip("no applicable syscall.Pipe on " + Δruntime.GOOS);
 }
 
@@ -608,6 +597,7 @@ internal static void checkReaderDeterminism(ж<testing.T> Ꮡt, slice<byte> tb, 
     var tbʗ1 = tb;
     slice<traceꓸEvent> events() {
         slice<traceꓸEvent> evs = default!;
+
         var (r, err) = Δtrace.NewReader(new trace_test_package.bytes_ReaderжReader(bytes.NewReader(tbʗ1)));
         if (err != default!) {
             Ꮡt.Error(err);
@@ -622,10 +612,13 @@ internal static void checkReaderDeterminism(ж<testing.T> Ꮡt, slice<byte> tb, 
             }
             evs = append(evs, ev.ΔClone());
         }
+
         return evs;
     }
+
     var evs1 = events();
     var evs2 = events();
+
     {
         nint l1 = len(evs1);
         nint l2 = len(evs2); if (l1 != l2) {
@@ -662,9 +655,11 @@ internal static readonly @string traceallocfree1ˢ = "traceallocfree=1"u8;
 
 internal static void testTraceProg(ж<testing.T> Ꮡt, @string progName, Action<ж<testing.T>, slice<byte>, slice<byte>, bool> extra) {
     testenv.MustHaveGoRun(new trace_test_package.testing_TжTB(Ꮡt));
+
     // Check if we're on a builder.
     var onBuilder = testenv.Builder() != ""u8;
     var onOldBuilder = !strings.Contains(testenv.Builder(), gotipˢ) && !strings.Contains(testenv.Builder(), go1ˢ);
+
     @string testPath = filepath.Join(testdataTestprogˢ, progName);
     @string testName = progName;
     void runTest(ж<testing.T> tΔ1, bool stress, @string extraGODEBUG) {
@@ -686,6 +681,7 @@ internal static void testTraceProg(ж<testing.T> Ꮡt, @string progName, Action<
             godebug += ","u8 + extraGODEBUG;
         }
         cmd.Value.Env = append((~cmd).Env, "GODEBUG="u8 + godebug);
+
         // Capture stdout and stderr.
         //
         // The protocol for these programs is that stdout contains the trace data
@@ -704,12 +700,15 @@ internal static void testTraceProg(ж<testing.T> Ꮡt, @string progName, Action<
             }
         }
         var tb = traceBuf.Bytes();
+
         // Test the trace and the parser.
         testReader(tΔ1, new trace_test_package.bytes_ReaderжReader(bytes.NewReader(tb)), testtrace.ExpectSuccess());
+
         // Run some extra validation.
         if (!tΔ1.Failed() && extra != default!) {
             extra(tΔ1, tb, errBuf.Bytes(), stress);
         }
+
         // Dump some more information on failure.
         if (tΔ1.Failed() && onBuilder){
             // Dump directly to the test log on the builder, since this

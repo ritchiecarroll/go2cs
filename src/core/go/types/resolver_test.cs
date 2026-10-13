@@ -48,9 +48,8 @@ internal static readonly @string testResolveIdentsˢ = "testResolveIdents"u8;
 internal static readonly @string mutexStringerErrorˢ = "[Mutex Stringer error]"u8;
 
 public static void TestResolveIdents(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+
     var sources = new @string[]{
         """
 
@@ -127,16 +126,19 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
 		
 """u8.Raw()
     }.slice();
+
     var pkgnames = new @string[]{
         "fmt"u8,
         "math"u8
     }.slice();
+
     // parse package files
     var fset = token.NewFileSet();
     slice<ж<ast.File>> files = default!;
     foreach (var (_, src) in sources) {
         files = append(files, mustParse(fset, src));
     }
+
     // resolve and type-check package AST
     var importer = Ꮡ(new resolveTestImporter(fset: fset));
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
@@ -147,12 +149,14 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // check that all packages were imported
     foreach (var (_, name) in pkgnames) {
         if (!(~importer).imported[name]) {
             Ꮡt.Errorf("package %s not imported"u8, name);
         }
     }
+
     // check that qualified identifiers are resolved
     foreach (var (_, f) in files) {
         var fsetʗ1 = fset;
@@ -182,11 +186,13 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
             return true;
         });
     }
+
     foreach (var (id, obj) in uses) {
         if (obj == default!) {
             Ꮡt.Errorf("%s: Uses[%s] == nil"u8, fset.Position(id.Pos()), (~id).Name);
         }
     }
+
     // check that each identifier in the source is found in uses or defs or both
     ref var both = ref heap<slice<@string>>(out var Ꮡboth);
     foreach (var (_, f) in files) {
@@ -221,6 +227,7 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
             return true;
         });
     }
+
     // check the expected set of idents that are simultaneously uses and defs
     slices.Sort<slice<@string>, @string>(both);
     {
@@ -229,6 +236,7 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("simultaneous uses/defs = %s, want %s"u8, got, want);
         }
     }
+
     // any left-over identifiers didn't exist in the source
     foreach (var (x, _) in uses) {
         Ꮡt.Errorf("%s: identifier %s not present in source"u8, fset.Position(x.Pos()), (~x).Name);
@@ -236,8 +244,8 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
     foreach (var (x, _) in defs) {
         Ꮡt.Errorf("%s: identifier %s not present in source"u8, fset.Position(x.Pos()), (~x).Name);
     }
-}
 
-// TODO(gri) add tests to check ImplicitObj callbacks
+    // TODO(gri) add tests to check ImplicitObj callbacks
+}
 
 } // end types_test_package

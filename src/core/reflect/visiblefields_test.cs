@@ -16,19 +16,16 @@ partial struct structField {
     internal slice<nint> index;
 }
 
-
 partial struct fieldsTestsᴛ1 /*dyn*/ {
     internal @string testName;
     internal any val;
     internal slice<structField> expect;
 }
-
     partial struct Δtypeᴛ37 /*dyn*/ {
         public nint A;
         public @string B;
         public bool C;
     }
-
     partial struct typeᴛ38_A /*dyn*/ {
         public nint X;
     }
@@ -36,20 +33,16 @@ partial struct fieldsTestsᴛ1 /*dyn*/ {
     partial struct Δtypeᴛ38 /*dyn*/ {
         public typeᴛ38_A A;
     }
-
     partial struct Δtypeᴛ39 /*dyn*/ {
         public partial ref SFG SFG { get; }
     }
-
     partial struct Δtypeᴛ40 /*dyn*/ {
         internal partial ref sFG sFG { get; }
     }
-
     partial struct Δtypeᴛ41 /*dyn*/ {
         public partial ref SFG SFG { get; }
         public partial ref SF SF { get; }
     }
-
     partial struct Δtypeᴛ42 /*dyn*/ {
         public partial ref SFGH3 SFGH3 { get; }
         public partial ref SG1 SG1 { get; }
@@ -57,11 +50,9 @@ partial struct fieldsTestsᴛ1 /*dyn*/ {
         public partial ref SF2 SF2 { get; }
         public nint L;
     }
-
     partial struct Δtypeᴛ43 /*dyn*/ {
         public partial ref ж<SF> SF { get; }
     }
-
     partial struct Δtypeᴛ44 /*dyn*/ {
         public partial ref ΔM M { get; }
     }
@@ -337,6 +328,7 @@ public static void TestFields(ж<Δtesting.T> Ꮡt) {
                     tΔ1.Fatalf("unexpected field count; got %d want %d"u8, got, want);
                 }
             }
+
             foreach (var (j, field) in fields) {
                 var expect = testʗ1.expect[j];
                 tΔ1.Logf("field %d: %s"u8, j, expect.name);
@@ -352,6 +344,7 @@ public static void TestFields(ж<Δtesting.T> Ꮡt) {
                 if (!DeepEqual(gotField, expectField)) {
                     tΔ1.Fatalf("unexpected field result\ngot %#v\nwant %#v"u8, gotField, expectField);
                 }
+
                 // Sanity check that we can actually access the field by the
                 // expected name.
                 var (gotField1, ok) = typ.FieldByName(expect.name);

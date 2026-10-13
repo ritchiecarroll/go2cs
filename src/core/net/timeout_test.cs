@@ -33,23 +33,20 @@ partial class net_internal_test_package {
     };
 }
 
-// Tests that dial timeouts, deadlines in the past work.
-// timeout over deadline
-// timeout over deadline
-
 partial struct dialTimeoutTestsᴛ1 /*dyn*/ {
     internal time.Duration initialTimeout;
     internal time.Duration initialDelta; // for deadline
 }
 internal static slice<dialTimeoutTestsᴛ1> dialTimeoutTests = new dialTimeoutTestsᴛ1[]{
+    // Tests that dial timeouts, deadlines in the past work.
     new((time.Duration)(-5000000000L), 0),
     new(0, (time.Duration)(-5000000000L)),
-    new((time.Duration)(-5000000000L), (time.Duration)(5000000000L)),
+    new((time.Duration)(-5000000000L), (time.Duration)(5000000000L)), // timeout over deadline
     new((time.Duration)(-9223372036854775808L), 0),
     new(0, (time.Duration)(-9223372036854775808L)),
     new(1 * time.Millisecond, 0),
     new(0, 1 * time.Millisecond),
-    new(1 * time.Millisecond, (time.Duration)(5000000000L))
+    new(1 * time.Millisecond, (time.Duration)(5000000000L)) // timeout over deadline
 }.slice();
 
 public static void TestDialTimeout(ж<testing.T> Ꮡt) {
@@ -63,6 +60,7 @@ public static void TestDialTimeout(ж<testing.T> Ꮡt) {
         }
 
         Ꮡt.Parallel();
+
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
         var lnʗ1 = ln;
         defer(() => {
@@ -72,6 +70,7 @@ public static void TestDialTimeout(ж<testing.T> Ꮡt) {
                 }
             }
         }, ref ᒐ);
+
         foreach (var (_, vᴛ1) in dialTimeoutTests) {
             ref var tt = ref heap(new dialTimeoutTestsᴛ1(), out var Ꮡtt);
             tt = vᴛ1;
@@ -86,6 +85,7 @@ public static void TestDialTimeout(ж<testing.T> Ꮡt) {
                 ref var d = ref heap<global::go.net_package.Dialer>(out var Ꮡd);
                 d = new Dialer(Timeout: ttʗ1.initialTimeout);
                 var delta = ttʗ1.initialDelta;
+
                 time.Time beforeDial = default!;
                 time.Time afterDial = default!;
                 error err = default!;
@@ -93,13 +93,17 @@ public static void TestDialTimeout(ж<testing.T> Ꮡt) {
                     if (delta != 0) {
                         d.Deadline = time.Now().Add(delta);
                     }
+
                     beforeDial = time.Now();
+
                     global::go.net_package.Conn c = default!;
                     (c, err) = Ꮡd.Dial(lnʗ2.Addr().Network(), lnʗ2.Addr().String());
                     afterDial = time.Now();
+
                     if (err != default!) {
                         break;
                     }
+
                     // Even though we're not calling Accept on the Listener, the kernel may
                     // spuriously accept connections on its behalf. If that happens, we will
                     // close the connection (to try to get it out of the kernel's accept
@@ -112,6 +116,7 @@ public static void TestDialTimeout(ж<testing.T> Ꮡt) {
                     // another error immediately.
                     tΔ1.Logf("closing spurious connection from Dial"u8);
                     c.Close();
+
                     if (delta <= 1 && d.Timeout <= 1) {
                         tΔ1.Fatalf("can't reduce Timeout or Deadline"u8);
                     }
@@ -124,12 +129,14 @@ public static void TestDialTimeout(ж<testing.T> Ꮡt) {
                         tΔ1.Logf("reducing Timeout to %v"u8, d.Timeout);
                     }
                 }
+
                 if (d.Deadline.IsZero() || afterDial.Before(d.Deadline)) {
                     var delay = afterDial.Sub(beforeDial);
                     if (delay < d.Timeout) {
                         tΔ1.Errorf("Dial returned after %v; want ≥%v"u8, delay, d.Timeout);
                     }
                 }
+
                 {
                     var perr = parseDialError(err); if (perr != default!) {
                         tΔ1.Errorf("unexpected error from Dial: %v"u8, perr);
@@ -164,8 +171,9 @@ public static void TestDialTimeoutMaxDuration(ж<testing.T> Ꮡt) {
                 }
             }
         }, ref ᒐ);
-        foreach (var (_, vᴛ1) in new TestDialTimeoutMaxDuration_type[]{ // Large timeouts that will overflow an int64 unix nanos.
 
+        foreach (var (_, vᴛ1) in new TestDialTimeoutMaxDuration_type[]{
+            // Large timeouts that will overflow an int64 unix nanos.
             new((time.Duration)(9223372036854775807L), 0),
             new(0, (time.Duration)(9223372036854775807L))
         }.slice()) {
@@ -200,9 +208,8 @@ public static void TestDialTimeoutMaxDuration(ж<testing.T> Ꮡt) {
 internal static readonly object wantedDeadlineExceededˢ = (@string)"wanted deadline exceeded"u8;
 
 public static void TestAcceptTimeout(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     Ꮡt.Parallel();
+
     var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "plan9"u8) {
         Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
@@ -212,24 +219,28 @@ public static void TestAcceptTimeout(ж<testing.T> Ꮡt) {
         (time.Duration)(-5000000000L),
         10 * time.Millisecond
     }.slice();
+
     foreach (var (_, timeout) in timeouts) {
         var timeoutΔ1 = timeout;
         Ꮡt.Run(fmt.Sprintf("%v"u8, timeoutΔ1), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 tΔ1.Parallel();
+
                 var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), tcpˢ);
                 var lnʗ1 = ln;
                 defer(() => lnʗ1.Close(), ref ᒐ);
+
                 if (timeoutΔ1 >= 0){
-                } else {
                     // Don't dial the listener at all, so that Accept will hang.
+                } else {
                     // A deadline in the past should cause Accept to fail even if there are
                     // incoming connections available. Try to make one available before the
                     // call to Accept happens. (It's ok if the timing doesn't always work
                     // out that way, though: the test should pass regardless.)
                     var (ctx, cancel) = context.WithCancel(context.Background());
                     var dialDone = new channel<EmptyStruct>(0);
+
                     // Ensure that our background Dial returns before we close the listener.
                     // Otherwise, the listener's port could be reused immediately and we
                     // might spuriously Dial some completely unrelated socket, causing some
@@ -240,6 +251,7 @@ public static void TestAcceptTimeout(ж<testing.T> Ꮡt) {
                         cancelʗ1();
                         ᐸꟷ(dialDoneʗ1);
                     }, ref ᒐ);
+
                     var ctxʗ1 = ctx;
                     var dialDoneʗ2 = dialDone;
                     var lnʗ2 = ln;
@@ -267,19 +279,23 @@ public static void TestAcceptTimeout(ж<testing.T> Ꮡt) {
                         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                         finally { ᒐ.Run(); }
                     });
+
                     time.Sleep(10 * time.Millisecond);
                 }
+
                 {
                     var errΔ2 = ln._<ж<global::go.net_package.TCPListener>>().SetDeadline(time.Now().Add(timeoutΔ1)); if (errΔ2 != default!) {
                         tΔ1.Fatal(errΔ2);
                     }
                 }
                 tΔ1.Logf("ln.SetDeadline(time.Now().Add(%v))"u8, timeoutΔ1);
+
                 var (c, err) = ln.Accept();
                 if (err == default!) {
                     c.Close();
                 }
                 tΔ1.Logf("ln.Accept: %v"u8, err);
+
                 {
                     var perr = parseAcceptError(err); if (perr != default!) {
                         tΔ1.Error(perr);
@@ -299,6 +315,7 @@ public static void TestAcceptTimeoutMustReturn(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
+
         var exprᴛ1 = Δruntime.GOOS;
         if (exprᴛ1 == "plan9"u8) {
             Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
@@ -307,6 +324,7 @@ public static void TestAcceptTimeoutMustReturn(ж<testing.T> Ꮡt) {
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         {
             var errΔ1 = ln._<ж<global::go.net_package.TCPListener>>().SetDeadline(noDeadline); if (errΔ1 != default!) {
                 Ꮡt.Error(errΔ1);
@@ -321,6 +339,7 @@ public static void TestAcceptTimeoutMustReturn(ж<testing.T> Ꮡt) {
         if (err == default!) {
             c.Close();
         }
+
         {
             var perr = parseAcceptError(err); if (perr != default!) {
                 Ꮡt.Error(perr);
@@ -338,6 +357,7 @@ public static partial void TestAcceptTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
+
         var exprᴛ1 = Δruntime.GOOS;
         if (exprᴛ1 == "plan9"u8) {
             Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
@@ -346,6 +366,7 @@ public static partial void TestAcceptTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         var maxch = new channel<ж<time.Timer>>(0);
         var ch = new channel<error>(0);
         var chʗ1 = ch;
@@ -366,9 +387,11 @@ public static partial void TestAcceptTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
             var (_, err) = lnʗ2.Accept();
             chʗ1.ᐸꟷ(err);
         });
+
         var max = ᐸꟷ(maxch);
         var maxʗ1 = max;
         defer(() => maxʗ1.Stop(), ref ᒐ);
+
         var selᴛ15 = ch;
         var selᴛ16 = (~max).C;
         switch (select(ᐸꟷ(selᴛ15, ꓸꓸꓸ), ᐸꟷ(selᴛ16, ꓸꓸꓸ))) {
@@ -391,14 +414,13 @@ public static partial void TestAcceptTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-// Tests that read deadlines work, even if there's data ready
-// to be read.
-
 partial struct readTimeoutTestsᴛ1 /*dyn*/ {
     internal time.Duration timeout;
     internal array<error> xerrs = new(2); // expected errors in transition
 }
 internal static slice<readTimeoutTestsᴛ1> readTimeoutTests = new readTimeoutTestsᴛ1[]{
+    // Tests that read deadlines work, even if there's data ready
+    // to be read.
     new((time.Duration)(-5000000000L), new error[]{Δos.ErrDeadlineExceeded, Δos.ErrDeadlineExceeded}.array()),
     new(50 * time.Millisecond, new error[]{default!, Δos.ErrDeadlineExceeded}.array())
 }.slice();
@@ -430,12 +452,14 @@ public static void TestReadTimeout(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ2);
             }
         }
+
         var (c, err) = Dial((~ls).Listener.Addr().Network(), (~ls).Listener.Addr().String());
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var cʗ2 = c;
         defer(() => cʗ2.Close(), ref ᒐ);
+
         foreach (var (i, vᴛ1) in readTimeoutTests) {
             var tt = vᴛ1.ΔClone();
 
@@ -479,6 +503,7 @@ public static partial void TestReadTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
+
         var exprᴛ1 = Δruntime.GOOS;
         if (exprᴛ1 == "plan9"u8) {
             Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
@@ -487,12 +512,14 @@ public static partial void TestReadTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         var (c, err) = Dial(ln.Addr().Network(), ln.Addr().String());
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
+
         var maxch = new channel<ж<time.Timer>>(0);
         var ch = new channel<error>(0);
         var cʗ2 = c;
@@ -519,9 +546,11 @@ public static partial void TestReadTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
             var (_, errΔ4) = cʗ2.Read(b[..]);
             chʗ1.ᐸꟷ(errΔ4);
         });
+
         var max = ᐸꟷ(maxch);
         var maxʗ1 = max;
         defer(() => maxʗ1.Stop(), ref ᒐ);
+
         var selᴛ17 = ch;
         var selᴛ18 = (~max).C;
         switch (select(ᐸꟷ(selᴛ17, ꓸꓸꓸ), ᐸꟷ(selᴛ18, ꓸꓸꓸ))) {
@@ -554,9 +583,9 @@ public static partial void TestReadTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-// Tests that read deadlines work, even if there's data ready
-// to be read.
 internal static slice<readTimeoutTestsᴛ1> readFromTimeoutTests = new readTimeoutTestsᴛ1[]{
+    // Tests that read deadlines work, even if there's data ready
+    // to be read.
     new((time.Duration)(-5000000000L), new error[]{Δos.ErrDeadlineExceeded, Δos.ErrDeadlineExceeded}.array()),
     new(50 * time.Millisecond, new error[]{default!, Δos.ErrDeadlineExceeded}.array())
 }.slice();
@@ -582,6 +611,7 @@ public static void TestReadFromTimeout(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ1);
             }
         }
+
         var (host, _, err) = SplitHostPort((~ls).PacketConn.LocalAddr().String());
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -593,6 +623,7 @@ public static void TestReadFromTimeout(ж<testing.T> Ꮡt) {
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
         ch.ᐸꟷ(c.LocalAddr());
+
         foreach (var (i, vᴛ1) in readFromTimeoutTests) {
             var tt = vᴛ1.ΔClone();
 
@@ -633,9 +664,9 @@ public static void TestReadFromTimeout(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-// Tests that write deadlines work, even if there's buffer
-// space available to write.
 internal static slice<readTimeoutTestsᴛ1> writeTimeoutTests = new readTimeoutTestsᴛ1[]{
+    // Tests that write deadlines work, even if there's buffer
+    // space available to write.
     new((time.Duration)(-5000000000L), new error[]{Δos.ErrDeadlineExceeded, Δos.ErrDeadlineExceeded}.array()),
     new(10 * time.Millisecond, new error[]{default!, Δos.ErrDeadlineExceeded}.array())
 }.slice();
@@ -645,9 +676,11 @@ public static void TestWriteTimeout(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
+
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         foreach (var (i, vᴛ1) in writeTimeoutTests) {
             var tt = vᴛ1.ΔClone();
 
@@ -657,6 +690,7 @@ public static void TestWriteTimeout(ж<testing.T> Ꮡt) {
             }
             var cʗ1 = c;
             defer(() => cʗ1.Close(), ref ᒐ);
+
             {
                 var errΔ1 = c.SetWriteDeadline(time.Now().Add(tt.timeout)); if (errΔ1 != default!) {
                     Ꮡt.Fatalf("#%d: %v"u8, i, errΔ1);
@@ -696,6 +730,7 @@ public static partial void TestWriteTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
+
         var exprᴛ1 = Δruntime.GOOS;
         if (exprᴛ1 == "plan9"u8) {
             Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
@@ -704,12 +739,14 @@ public static partial void TestWriteTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         var (c, err) = Dial(ln.Addr().Network(), ln.Addr().String());
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
+
         var maxch = new channel<ж<time.Timer>>(0);
         var ch = new channel<error>(0);
         var cʗ2 = c;
@@ -742,9 +779,11 @@ public static partial void TestWriteTimeoutMustNotReturn(ж<testing.T> Ꮡt) {
                 }
             }
         });
+
         var max = ᐸꟷ(maxch);
         var maxʗ1 = max;
         defer(() => maxʗ1.Stop(), ref ᒐ);
+
         var selᴛ19 = ch;
         var selᴛ20 = (~max).C;
         switch (select(ᐸꟷ(selᴛ19, ꓸꓸꓸ), ᐸꟷ(selᴛ20, ꓸꓸꓸ))) {
@@ -781,17 +820,21 @@ public static void TestWriteToTimeout(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
+
         var c1 = newLocalPacketListener(new net_test_package.testing_TжTB(Ꮡt), udpˢ);
         var c1ʗ1 = c1;
         defer(() => c1ʗ1.Close(), ref ᒐ);
+
         var (host, _, err) = SplitHostPort(c1.LocalAddr().String());
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var timeouts = new time.Duration[]{
             (time.Duration)(-5000000000L),
             10 * time.Millisecond
         }.slice();
+
         foreach (var (_, timeout) in timeouts) {
             var c1ʗ2 = c1;
             Ꮡt.Run(fmt.Sprint(timeout), (ж<testing.T> tΔ1) => {
@@ -803,6 +846,7 @@ public static void TestWriteToTimeout(ж<testing.T> Ꮡt) {
                     }
                     var c2ʗ1 = c2;
                     defer(() => c2ʗ1.Close(), ref ᒐ);
+
                     {
                         var errΔ2 = c2.SetWriteDeadline(time.Now().Add(timeout)); if (errΔ2 != default!) {
                             tΔ1.Fatalf("SetWriteDeadline: %v"u8, errΔ2);
@@ -855,7 +899,20 @@ public static void TestWriteToTimeout(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
+// minDynamicTimeout is the minimum timeout to attempt for
+// tests that automatically increase timeouts until success.
+//
+// Lower values may allow tests to succeed more quickly if the value is close
+// to the true minimum, but may require more iterations (and waste more time
+// and CPU power on failed attempts) if the timeout is too low.
 internal static time.Duration minDynamicTimeout => /* 1 * time.Millisecond */ 1000000;
+
+// maxDynamicTimeout is the maximum timeout to attempt for
+// tests that automatically increase timeouts until success.
+//
+// This should be a strict upper bound on the latency required to hit a
+// timeout accurately, even on a slow or heavily-loaded machine. If a test
+// would increase the timeout beyond this value, the test fails.
 internal static time.Duration maxDynamicTimeout => /* 4 * time.Second */ 4000000000;
 
 // timeoutUpperBound returns the maximum time that we expect a timeout of
@@ -863,16 +920,15 @@ internal static time.Duration maxDynamicTimeout => /* 4 * time.Second */ 4000000
 internal static time.Duration timeoutUpperBound(time.Duration d) {
     var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "openbsd"u8 || exprᴛ1 == "netbsd"u8) {
+        // NetBSD and OpenBSD seem to be unable to reliably hit deadlines even when
+        // the absolute durations are long.
+        // In https://build.golang.org/log/c34f8685d020b98377dd4988cd38f0c5bd72267e,
+        // we observed that an openbsd-amd64-68 builder took 4.090948779s for a
+        // 2.983020682s timeout (37.1% overhead).
+        // (See https://go.dev/issue/50189 for further detail.)
+        // Give them lots of slop to compensate.
         return d * 3 / 2;
     }
-
-    // NetBSD and OpenBSD seem to be unable to reliably hit deadlines even when
-    // the absolute durations are long.
-    // In https://build.golang.org/log/c34f8685d020b98377dd4988cd38f0c5bd72267e,
-    // we observed that an openbsd-amd64-68 builder took 4.090948779s for a
-    // 2.983020682s timeout (37.1% overhead).
-    // (See https://go.dev/issue/50189 for further detail.)
-    // Give them lots of slop to compensate.
     // Other platforms seem to hit their deadlines more reliably,
     // at least when they are long enough to cover scheduling jitter.
     return d * 11 / 10;
@@ -903,12 +959,14 @@ public static void TestReadTimeoutFluctuation(ж<testing.T> Ꮡt) {
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         var (c, err) = Dial(ln.Addr().Network(), ln.Addr().String());
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
+
         var d = minDynamicTimeout;
         var b = new slice<byte>(256);
         while (ᐧ) {
@@ -923,6 +981,7 @@ public static void TestReadTimeoutFluctuation(ж<testing.T> Ꮡt) {
             nint n = default!;
             (n, err) = c.Read(b);
             var t1 = time.Now();
+
             if (n != 0 || err == default! || !err._<ΔError>().Timeout()) {
                 Ꮡt.Errorf("Read did not return (0, timeout): (%d, %v)"u8, n, err);
             }
@@ -934,6 +993,7 @@ public static void TestReadTimeoutFluctuation(ж<testing.T> Ꮡt) {
             if (!isDeadlineExceeded(err)) {
                 Ꮡt.Errorf("Read error is not DeadlineExceeded: %v"u8, err);
             }
+
             var actual = t1.Sub(t0);
             if (t1.Before(deadline)) {
                 Ꮡt.Errorf("Read took %s; expected at least %s"u8, actual, d);
@@ -954,6 +1014,7 @@ public static void TestReadTimeoutFluctuation(ж<testing.T> Ꮡt) {
                     continue;
                 }
             }
+
             break;
         }
     }
@@ -968,12 +1029,14 @@ public static void TestReadFromTimeoutFluctuation(ж<testing.T> Ꮡt) {
         var c1 = newLocalPacketListener(new net_test_package.testing_TжTB(Ꮡt), udpˢ);
         var c1ʗ1 = c1;
         defer(() => c1ʗ1.Close(), ref ᒐ);
+
         var (c2, err) = Dial(c1.LocalAddr().Network(), c1.LocalAddr().String());
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var c2ʗ1 = c2;
         defer(() => c2ʗ1.Close(), ref ᒐ);
+
         var d = minDynamicTimeout;
         var b = new slice<byte>(256);
         while (ᐧ) {
@@ -988,6 +1051,7 @@ public static void TestReadFromTimeoutFluctuation(ж<testing.T> Ꮡt) {
             nint n = default!;
             (n, _, err) = c2._<PacketConn>().ReadFrom(b);
             var t1 = time.Now();
+
             if (n != 0 || err == default! || !err._<ΔError>().Timeout()) {
                 Ꮡt.Errorf("ReadFrom did not return (0, timeout): (%d, %v)"u8, n, err);
             }
@@ -999,6 +1063,7 @@ public static void TestReadFromTimeoutFluctuation(ж<testing.T> Ꮡt) {
             if (!isDeadlineExceeded(err)) {
                 Ꮡt.Errorf("ReadFrom error is not DeadlineExceeded: %v"u8, err);
             }
+
             var actual = t1.Sub(t0);
             if (t1.Before(deadline)) {
                 Ꮡt.Errorf("ReadFrom took %s; expected at least %s"u8, actual, d);
@@ -1019,6 +1084,7 @@ public static void TestReadFromTimeoutFluctuation(ж<testing.T> Ꮡt) {
                     continue;
                 }
             }
+
             break;
         }
     }
@@ -1029,8 +1095,6 @@ public static void TestReadFromTimeoutFluctuation(ж<testing.T> Ꮡt) {
 public static void TestWriteTimeoutFluctuation(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         var exprᴛ1 = Δruntime.GOOS;
         if (exprᴛ1 == "plan9"u8) {
             Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
@@ -1039,12 +1103,14 @@ public static void TestWriteTimeoutFluctuation(ж<testing.T> Ꮡt) {
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         var (c, err) = Dial(ln.Addr().Network(), ln.Addr().String());
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
+
         var d = minDynamicTimeout;
         while (ᐧ) {
             Ꮡt.Logf("SetWriteDeadline(+%v)"u8, d);
@@ -1078,6 +1144,7 @@ public static void TestWriteTimeoutFluctuation(ж<testing.T> Ꮡt) {
             if (!isDeadlineExceeded(errΔ2)) {
                 Ꮡt.Errorf("Write error is not DeadlineExceeded: %v"u8, errΔ2);
             }
+
             var actual = t1.Sub(t0);
             if (t1.Before(deadline)) {
                 Ꮡt.Errorf("Write took %s; expected at least %s"u8, actual, d);
@@ -1113,6 +1180,7 @@ public static void TestWriteTimeoutFluctuation(ж<testing.T> Ꮡt) {
                     continue;
                 }
             }
+
             break;
         }
     }
@@ -1133,8 +1201,6 @@ internal static readonly object skippingInShortModeˢ = (@string)"skipping in sh
 public static void TestVariousDeadlines1Proc(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         // Cannot use t.Parallel - modifies global GOMAXPROCS.
         if (testing.Short()) {
             Ꮡt.Skip(skippingInShortModeˢ);
@@ -1150,8 +1216,6 @@ public static void TestVariousDeadlines1Proc(ж<testing.T> Ꮡt) {
 public static void TestVariousDeadlines4Proc(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         // Cannot use t.Parallel - modifies global GOMAXPROCS.
         if (testing.Short()) {
             Ꮡt.Skip(skippingInShortModeˢ);
@@ -1184,6 +1248,7 @@ internal static void testVariousDeadlines(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(err);
             }
         }
+
         foreach (var (_, timeout) in new time.Duration[]{
             1 * time.ΔNanosecond,
             2 * time.ΔNanosecond,
@@ -1215,10 +1280,12 @@ internal static void testVariousDeadlines(ж<testing.T> Ꮡt) {
             for (nint run = 0; run < numRuns; run++) {
                 @string name = fmt.Sprintf("%v %d/%d"u8, timeout, run, numRuns);
                 Ꮡt.Log(name);
+
                 var (c, err) = Dial((~ls).Listener.Addr().Network(), (~ls).Listener.Addr().String());
                 if (err != default!) {
                     Ꮡt.Fatal(err);
                 }
+
                 var t0 = time.Now();
                 {
                     var errΔ1 = c.SetDeadline(t0.Add(timeout)); if (errΔ1 != default!) {
@@ -1228,6 +1295,7 @@ internal static void testVariousDeadlines(ж<testing.T> Ꮡt) {
                 (var n, err) = Δio.Copy(Δio.Discard, new net_test_package.net_ConnᴠReader(c));
                 var dt = time.Since(t0);
                 c.Close();
+
                 {
                     var (nerr, ok) = err._<ΔError>(ᐧ); if (ok && nerr.Timeout()){
                         Ꮡt.Logf("%v: good timeout after %v; %d bytes"u8, name, dt, n);
@@ -1248,6 +1316,7 @@ public static void TestReadWriteProlongedTimeout(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
+
         var exprᴛ1 = Δruntime.GOOS;
         if (exprᴛ1 == "plan9"u8) {
             Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
@@ -1263,6 +1332,7 @@ public static void TestReadWriteProlongedTimeout(ж<testing.T> Ꮡt) {
                 }
                 var cʗ1 = cΔ1;
                 defer(() => cʗ1.Close(), ref ᒐ);
+
                 ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
                 Ꮡwg.Add(2);
                 var cʗ2 = cΔ1;
@@ -1344,12 +1414,14 @@ public static void TestReadWriteProlongedTimeout(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ6);
             }
         }
+
         var (c, err) = Dial((~ls).Listener.Addr().Network(), (~ls).Listener.Addr().String());
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var cʗ4 = c;
         defer(() => cʗ4.Close(), ref ᒐ);
+
         array<byte> b = new(1);
         for (nint i = 0; i < 1000; i++) {
             c.Write(b[..]);
@@ -1365,19 +1437,23 @@ public static partial void TestReadWriteDeadlineRace(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
+
         nint N = 1000;
         if (testing.Short()) {
             N = 50;
         }
+
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         var (c, err) = Dial(ln.Addr().Network(), ln.Addr().String());
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
+
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(3);
         var cʗ2 = c;
@@ -1454,9 +1530,11 @@ public static partial void TestConcurrentSetDeadline(ж<testing.T> Ꮡt) {
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         const nint goroutines = 8;
         UntypedInt conns = 10;
         const nint tries = 100;
+
         ref var c = ref heap(new array<global::go.net_package.Conn>(10), out var Ꮡc);
         for (nint iᴛ1 = 0; iᴛ1 < conns; iᴛ1++) {
             var i = iᴛ1;
@@ -1468,6 +1546,7 @@ public static partial void TestConcurrentSetDeadline(ж<testing.T> Ꮡt) {
             var cʗ1 = c;
             defer(() => cʗ1[i].Close(), ref ᒐ);
         }
+
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(goroutines);
         ref var now = ref heap<time.Time>(out var Ꮡnow);

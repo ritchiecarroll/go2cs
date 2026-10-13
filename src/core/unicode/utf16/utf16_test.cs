@@ -133,6 +133,7 @@ internal static slice<decodeTest> decodeTests = new decodeTest[]{
 
 public static void TestAllocationsDecode(ж<testing.T> Ꮡt) {
     testenv.SkipIfOptimizationOff(new utf16_test_package.testing_TжTB(Ꮡt));
+
     foreach (var (_, vᴛ1) in decodeTests) {
         ref var tt = ref heap(new decodeTest(), out var Ꮡtt);
         tt = vᴛ1;
@@ -159,8 +160,6 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
     }
 }
 
-// illegal, replacement rune substituted
-
 partial struct decodeRuneTestsᴛ1 /*dyn*/ {
     internal rune r1, r2;
     internal rune want;
@@ -170,7 +169,7 @@ internal static slice<decodeRuneTestsᴛ1> decodeRuneTests = new decodeRuneTests
     new(0xd800, 0xdc01, 0x10001),
     new(0xd808, 0xdf45, 0x12345),
     new(0xdbff, 0xdfff, 0x10ffff),
-    new(0xd800, (rune)'a', 0xfffd)
+    new(0xd800, (rune)'a', 0xfffd) // illegal, replacement rune substituted
 }.slice();
 
 public static void TestDecodeRune(ж<testing.T> Ꮡt) {
@@ -182,35 +181,23 @@ public static void TestDecodeRune(ж<testing.T> Ꮡt) {
     }
 }
 
-// from https://en.wikipedia.org/wiki/UTF-16
-// LATIN SMALL LETTER Z
-// CJK UNIFIED IDEOGRAPH-6C34 (water)
-// Byte Order Mark
-// LINEAR B SYLLABLE B008 A (first non-BMP code point)
-// MUSICAL SYMBOL G CLEF
-// PRIVATE USE CHARACTER-10FFFD (last Unicode code point)
-// surr1-1
-// surr1
-// surr2
-// surr3
-// surr3-1
-
 partial struct surrogateTestsᴛ1 /*dyn*/ {
     internal rune r;
     internal bool want;
 }
 internal static slice<surrogateTestsᴛ1> surrogateTests = new surrogateTestsᴛ1[]{
-    new((rune)'\u007A', false),
-    new((rune)'\u6C34', false),
-    new((rune)'\uFEFF', false),
-    new((rune)0x10000, false),
-    new((rune)0x1D11E, false),
-    new((rune)0x10FFFD, false),
-    new((rune)0xd7ff, false),
-    new((rune)0xd800, true),
-    new((rune)0xdc00, true),
-    new((rune)0xe000, false),
-    new((rune)0xdfff, true)
+    // from https://en.wikipedia.org/wiki/UTF-16
+    new((rune)'\u007A', false), // LATIN SMALL LETTER Z
+    new((rune)'\u6C34', false), // CJK UNIFIED IDEOGRAPH-6C34 (water)
+    new((rune)'\uFEFF', false), // Byte Order Mark
+    new((rune)0x10000, false), // LINEAR B SYLLABLE B008 A (first non-BMP code point)
+    new((rune)0x1D11E, false), // MUSICAL SYMBOL G CLEF
+    new((rune)0x10FFFD, false), // PRIVATE USE CHARACTER-10FFFD (last Unicode code point)
+    new((rune)0xd7ff, false), // surr1-1
+    new((rune)0xd800, true), // surr1
+    new((rune)0xdc00, true), // surr2
+    new((rune)0xe000, false), // surr3
+    new((rune)0xdfff, true) // surr3-1
 }.slice();
 
 public static void TestIsSurrogate(ж<testing.T> Ꮡt) {
@@ -250,6 +237,7 @@ public static void BenchmarkDecodeRune(ж<testing.B> Ꮡb) {
     foreach (var (i, u) in new rune[]{(rune)0x1D4D0, (rune)0x1D4D1, (rune)0x1D4D2, (rune)0x1D4D3, (rune)0x1D4D4}.slice()) {
         (rs[2 * i], rs[2 * i + 1]) = EncodeRune(u);
     }
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         for (nint j = 0; j < 5; j++) {

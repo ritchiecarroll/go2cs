@@ -15,6 +15,7 @@ public static void FuzzEscapeUnescape(ж<testing.F> Ꮡf) {
         if (u != v) {
             t.Errorf("EscapeString(%q) = %q, UnescapeString(%q) = %q, want %q"u8, v, e, e, u, v);
         }
+
         // As per the documentation, this isn't always equal to v, so it makes
         // no sense to check for equality. It can still be interesting to find
         // panics in it though.

@@ -27,6 +27,7 @@ public static void TestRectangle(ж<testing.T> Ꮡt) {
         }
         return default!;
     }
+
     var rects = new global::go.image_package.Rectangle[]{
         Rect(0, 0, 10, 10),
         Rect(10, 0, 20, 10),
@@ -40,6 +41,7 @@ public static void TestRectangle(ж<testing.T> Ꮡt) {
         Rect(88, 88, 88, 88),
         Rect(6, 5, 4, 3)
     }.slice();
+
     // r.Eq(s) should be equivalent to every point in r being in s, and every
     // point in s being in r.
     foreach (var (_, r) in rects) {
@@ -51,6 +53,7 @@ public static void TestRectangle(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // The intersection should be the largest rectangle a such that every point
     // in a is both in r and in s.
     foreach (var (_, r) in rects) {
@@ -89,6 +92,7 @@ public static void TestRectangle(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // The union should be the smallest rectangle a such that every point in r
     // is in a and every point in s is in a.
     foreach (var (_, r) in rects) {

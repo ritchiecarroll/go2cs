@@ -19,23 +19,24 @@ partial class debug_test_package {
 // invoked in a special mode indicated by an environment variable.
 public static void ExampleSetCrashOutput_monitor() {
     appmain();
-}
 
-// This Example doesn't actually run as a test because its
-// purpose is to crash, so it has no "Output:" comment
-// within the function body.
-//
-// To observe the monitor in action, replace the entire text
-// of this comment with "Output:" and run this command:
-//
-//    $ go test -run=ExampleSetCrashOutput_monitor runtime/debug
-//    panic: oops
-//    ...stack...
-//    monitor: saved crash report at /tmp/10804884239807998216.crash
+    // This Example doesn't actually run as a test because its
+    // purpose is to crash, so it has no "Output:" comment
+    // within the function body.
+    //
+    // To observe the monitor in action, replace the entire text
+    // of this comment with "Output:" and run this command:
+    //
+    //    $ go test -run=ExampleSetCrashOutput_monitor runtime/debug
+    //    panic: oops
+    //    ...stack...
+    //    monitor: saved crash report at /tmp/10804884239807998216.crash
+}
 
 // appmain represents the 'main' function of your application.
 internal static void appmain() {
     monitor();
+
     // Run the application.
     println((@string)"hello"u8);
     throw panic("oops");
@@ -61,6 +62,7 @@ internal static void monitor() {
         // This is the monitor (child) process.
         log.SetFlags(0);
         log.SetPrefix(monitorˢ);
+
         var (crash, errΔ1) = io.ReadAll(new os_FileжReader(os.Stdin));
         if (errΔ1 != default!) {
             log.Fatalf("failed to read from input pipe: %v"u8, errΔ1);
@@ -69,6 +71,7 @@ internal static void monitor() {
             // Parent process terminated without reporting a crash.
             os.Exit(0);
         }
+
         // Save the crash report securely in the file system.
         (var f, errΔ1) = os.CreateTemp(""u8, crashˢ);
         if (errΔ1 != default!) {
@@ -86,6 +89,7 @@ internal static void monitor() {
         }
         log.Fatalf("saved crash report at %s"u8, f.Name());
     }
+
     // This is the application process.
     // Fork+exec the same executable in monitor mode.
     var (exe, err) = os.Executable();
@@ -106,8 +110,7 @@ internal static void monitor() {
             log.Fatalf("can't start monitor: %v"u8, errΔ4);
         }
     }
+    // Now return and start the application proper...
 }
-
-// Now return and start the application proper...
 
 } // end debug_test_package

@@ -20,6 +20,8 @@ using weak = weak_package;
 
 partial class unique_internal_test_package {
 
+// Set up special types. Because the internal maps are sharded by type,
+// this will ensure that we're not overlapping with other tests.
 internal partial struct testString /*@string*/;
 
 internal partial struct testIntArray /*[4]nint*/;
@@ -70,8 +72,10 @@ internal static void testHandle<T, Tᴺ>(ж<testing.T> Ꮡt, T value) {
     @string name = reflect.TypeFor<Tᴺ>().Name();
     Ꮡt.Run(fmt.Sprintf("%s/%#v"u8, name, value), (ж<testing.T> tΔ1) => {
         tΔ1.Parallel();
+
         var v0 = Make<T>(value);
         var v1 = Make<T>(value);
+
         if (!AreEqual(v0.Value(), v1.Value())) {
             tΔ1.Error(v0ValueV1Valueˢ);
         }
@@ -81,6 +85,7 @@ internal static void testHandle<T, Tᴺ>(ж<testing.T> Ꮡt, T value) {
         if (v0 != v1) {
             tΔ1.Error(v0V1ˢ);
         }
+
         drainMaps<T>(tΔ1);
         checkMapsFor(tΔ1, value);
     });
@@ -89,10 +94,13 @@ internal static void testHandle<T, Tᴺ>(ж<testing.T> Ꮡt, T value) {
 // drainMaps ensures that the internal maps are drained.
 internal static void drainMaps<T>(ж<testing.T> Ꮡt) {
     Ꮡt.Helper();
+
     if (@unsafe.Sizeof((@new<T>()).ValueSlot) == 0) {
         return; // zero-size types are not inserted.
     }
+
     var wait = new channel<EmptyStruct>(1);
+
     // Set up a one-time notification for the next time the cleanup runs.
     // Note: this will only run if there's no other active cleanup, so
     // we can be sure that the next time cleanup runs, it'll see the new
@@ -109,8 +117,10 @@ internal static void drainMaps<T>(ж<testing.T> Ꮡt) {
             break;
         }}
     });
+
     Δruntime.GC();
     ᏑcleanupMu.Unlock();
+
     // Wait until cleanup runs.
     ᐸꟷ(wait);
 }
@@ -145,8 +155,10 @@ public static void TestMakeClonesStrings(ж<testing.T> Ꮡt) {
         ranʗ1.ᐸꟷ(true);
     });
     var h = Make<@string>(s);
+
     // Clean up s (hopefully) and run the finalizer.
     Δruntime.GC();
+
     var selᴛ2 = time.After(1 * time.ΔSecond);
     var selᴛ3 = ran;
     switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {

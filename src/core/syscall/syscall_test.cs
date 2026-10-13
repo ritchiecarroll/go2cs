@@ -41,6 +41,7 @@ public static void TestEnv(ж<testing.T> Ꮡt) {
 // reporting of fork/exec status. See Issue 14979.
 public static void TestExecErrPermutedFds(ж<testing.T> Ꮡt) {
     testenv.MustHaveExec(new syscall_test_package.testing_TжTB(Ꮡt));
+
     var attr = Ꮡ(new Δos.ProcAttr(Files: new ж<Δos.File>[]{Δos.Stdin, Δos.Stderr, Δos.Stdout}.slice()));
     var (_, err) = Δos.StartProcess("/"u8, new @string[]{"/"u8}.slice(), attr);
     if (err == default!) {

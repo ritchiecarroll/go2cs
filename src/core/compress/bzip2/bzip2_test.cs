@@ -110,9 +110,11 @@ public static void TestReader(ж<testing.T> Ꮡt) {
         fail: true
     )
     }.slice();
+
     foreach (var (i, v) in vectors) {
         var rd = NewReader(new bzip2_internal_test_package.bytes_ReaderжReader(bytes.NewReader(v.input)));
         var (buf, err) = io.ReadAll(rd);
+
         {
             var fail = (bool)(err != default!); if (fail != v.fail) {
                 if (fail){
@@ -146,6 +148,7 @@ public static void TestBitReader(ж<testing.T> Ꮡt) {
         new(nbits: 6, value: 13),
         new(nbits: 1, fail: true)
     }.slice();
+
     var rd = bytes.NewReader(new byte[]{0xab, 0x12, 0x34, 0x56, 0x78, 0x71, 0x3f, 0x8d}.slice());
     var br = newBitReader(new bzip2_internal_test_package.bytes_ReaderжReader(rd));
     foreach (var (i, v) in vectors) {
@@ -171,18 +174,14 @@ internal partial struct TestMTF_type /*dyn*/ {
 }
 
 public static void TestMTF(ж<testing.T> Ꮡt) {
-// [1 0 2 3 4]
-// [1 0 2 3 4]
-// [0 1 2 3 4]
-// [4 0 1 2 3]
-// [0 4 1 2 3]
     slice<TestMTF_type> vectors = new TestMTF_type[]{
-        new(idx: 1, sym: 1),
-        new(idx: 0, sym: 1),
-        new(idx: 1, sym: 0),
-        new(idx: 4, sym: 4),
-        new(idx: 1, sym: 0)
+        new(idx: 1, sym: 1), // [1 0 2 3 4]
+        new(idx: 0, sym: 1), // [1 0 2 3 4]
+        new(idx: 1, sym: 0), // [0 1 2 3 4]
+        new(idx: 4, sym: 4), // [4 0 1 2 3]
+        new(idx: 1, sym: 0) // [0 4 1 2 3]
     }.slice();
+
     var mtf = newMTFDecoderWithRange(5);
     foreach (var (i, v) in vectors) {
         var sym = mtf.Decode(v.idx);
@@ -215,9 +214,11 @@ internal static void benchmarkDecode(ж<testing.B> Ꮡb, slice<byte> compressed)
     if (err != default!) {
         Ꮡb.Fatal(err);
     }
+
     b.SetBytes(uncompressedSize);
     b.ReportAllocs();
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         var r = bytes.NewReader(compressed);
         io.Copy(io.Discard, NewReader(new bzip2_internal_test_package.bytes_ReaderжReader(r)));

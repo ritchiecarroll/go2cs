@@ -97,10 +97,11 @@ public static void TestIssue29551(ж<testing.T> Ꮡt) {
         new(new Sym(goVersion: ver118, Name: "type..hash.debug/elf.ProgHeader"u8), ""u8),
         new(new Sym(goVersion: ver118, Name: "type..eq.runtime._panic"u8), ""u8),
         new(new Sym(goVersion: ver118, Name: "type..hash.struct { runtime.gList; runtime.n int32 }"u8), ""u8),
-        new(new Sym(goVersion: ver118, Name: "go.(*struct { sync.Mutex; math/big.table [64]math/big"u8), ""u8), // unfortunate
-
+        new(new Sym(goVersion: ver118, Name: "go.(*struct { sync.Mutex; math/big.table [64]math/big"u8), ""u8),
+        // unfortunate
         new(new Sym(goVersion: ver118, Name: "go.uber.org/zap/buffer.(*Buffer).AppendString"u8), ""u8)
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         var tc = vᴛ1;
 

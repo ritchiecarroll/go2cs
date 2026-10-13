@@ -30,6 +30,7 @@ internal static readonly @string bothWraparoundˢ = "BothWraparound"u8;
 
 public static void TestProfBuf(ж<testing.T> Ꮡt) {
     UntypedInt hdrSize = 2;
+
     void write(ж<testing.T> tΔ1, ж<global::go.runtime_internal_test_package.ProfBuf> b, @unsafe.Pointer tagʗp, int64 now, slice<uint64> hdr, slice<uintptr> stk) {
         ref var tag = ref heap(tagʗp, out var Ꮡtag);
         b.Write(Ꮡtag, now, hdr, stk);
@@ -73,8 +74,10 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
             tΔ4.Errorf("unexpected profile read (non-blocking): %#x, %#x, eof=%v; want nil, nil, eof=true"u8, rdata, rtags, eof);
         }
     }
+
     var myTags = new slice<byte>(100);
     Ꮡt.Logf("myTags is %p"u8, Ꮡ(myTags, 0));
+
     var myTagsʗ1 = myTags;
     var readʗ1 = read;
     var writeʗ1 = write;
@@ -86,6 +89,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
         writeʗ1(tΔ5, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ1, 2)), 99, new uint64[]{101, 102}.slice(), new uintptr[]{201, 202, 203, 204}.slice());
         readʗ1(tΔ5, b, new uint64[]{8, 99, 101, 102, 201, 202, 203, 204}.slice(), new @unsafe.Pointer[]{@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ1, 2))}.slice());
     });
+
     var myTagsʗ2 = myTags;
     var readʗ2 = read;
     var writeʗ2 = write;
@@ -96,6 +100,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
         writeʗ2(tΔ6, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 1)), 500, new uint64[]{502, 504}.slice(), new uintptr[]{506}.slice());
         readʗ2(tΔ6, b, new uint64[]{10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 99, 101, 102, 201, 202, 203, 204, 5, 500, 502, 504, 506}.slice(), new @unsafe.Pointer[]{@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 0)), @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 2)), @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 1))}.slice());
     });
+
     var myTagsʗ3 = myTags;
     var readʗ3 = read;
     var writeʗ3 = write;
@@ -105,6 +110,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
         writeʗ3(tΔ7, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ3, 2)), 99, new uint64[]{101, 102}.slice(), new uintptr[]{201, 202, 203, 204}.slice());
         readʗ3(tΔ7, b, new uint64[]{10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 99, 101, 102, 201, 202, 203, 204}.slice(), new @unsafe.Pointer[]{@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ3, 0)), @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ3, 2))}.slice());
     });
+
     var myTagsʗ4 = myTags;
     var readʗ4 = read;
     var writeʗ4 = write;
@@ -114,6 +120,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
         writeʗ4(tΔ8, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ4, 2)), 99, new uint64[]{101, 102}.slice(), new uintptr[]{201, 202, 203, 204}.slice());
         readʗ4(tΔ8, b, new uint64[]{10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 99, 101, 102, 201, 202, 203, 204}.slice(), new @unsafe.Pointer[]{@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ4, 0)), @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ4, 2))}.slice());
     });
+
     var myTagsʗ5 = myTags;
     var readʗ5 = read;
     var writeʗ5 = write;
@@ -132,6 +139,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
         writeʗ5(tΔ9, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 1)), 500, new uint64[]{502, 504}.slice(), new uintptr[]{506}.slice()); // room for overflow+this record
         readʗ5(tΔ9, b, new uint64[]{5, 99, 0, 0, 300, 5, 500, 502, 504, 506}.slice(), new @unsafe.Pointer[]{default!, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 1))}.slice());
     });
+
     var myTagsʗ6 = myTags;
     var readʗ6 = read;
     var writeʗ6 = write;
@@ -149,6 +157,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
         writeʗ6(tΔ10, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 1)), 500, new uint64[]{502, 505}.slice(), new uintptr[]{506}.slice()); // written
         readʗ6(tΔ10, b, new uint64[]{5, 500, 502, 505, 506}.slice(), new @unsafe.Pointer[]{@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 1))}.slice());
     });
+
     var myTagsʗ7 = myTags;
     var readʗ7 = read;
     var writeʗ7 = write;
@@ -164,6 +173,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
         writeʗ7(tΔ11, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ7, 1)), 500, new uint64[]{502, 504}.slice(), new uintptr[]{506}.slice());
         readʗ7(tΔ11, b, new uint64[]{5, 500, 502, 504, 506}.slice(), new @unsafe.Pointer[]{@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ7, 1))}.slice());
     });
+
     var myTagsʗ8 = myTags;
     var readBlockʗ1 = readBlock;
     var readEOFʗ1 = readEOF;
@@ -184,6 +194,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
         wait();
         readEOFʗ1(tΔ12, b);
     });
+
     var myTagsʗ9 = myTags;
     var readʗ8 = read;
     var writeʗ9 = write;
@@ -195,6 +206,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
             readʗ8(tΔ13, b, default!, default!); // release data returned by previous read
         }
     });
+
     var myTagsʗ10 = myTags;
     var readʗ9 = read;
     var writeʗ10 = write;
@@ -206,6 +218,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
             readʗ9(tΔ14, b, default!, default!); // release data returned by previous read
         }
     });
+
     var myTagsʗ11 = myTags;
     var readʗ10 = read;
     var writeʗ11 = write;

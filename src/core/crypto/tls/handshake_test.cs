@@ -57,16 +57,16 @@ internal static ж<@string> bogoFilter = flag.String("bogo-filter"u8, ""u8, "BoG
 internal static ж<@string> bogoLocalDir = flag.String("bogo-local-dir"u8, ""u8, "Local BoGo to use, instead of fetching from source"u8);
 
 internal static void runTestAndUpdateIfNeeded(ж<testing.T> Ꮡt, @string name, Action<ж<testing.T>, bool> run, bool wait) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // FIPS mode is non-deterministic and so isn't suited for testing against static test transcripts.
     skipFIPS(Ꮡt);
+
     var success = Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
         if (!update.Value && !wait) {
             tΔ1.Parallel();
         }
         run(tΔ1, false);
     });
+
     if (!success && update.Value) {
         Ꮡt.Run(name + "#update"u8, (ж<testing.T> tΔ2) => {
             run(tΔ2, true);
@@ -86,15 +86,18 @@ internal static error checkOpenSSLVersion() {
     if (!update.Value) {
         return default!;
     }
+
     var openssl = exec.Command(opensslˢ, versionˢ);
     var (output, err) = openssl.CombinedOutput();
     if (err != default!) {
         return err;
     }
+
     @string version = ((@string)output);
     if (strings.HasPrefix(version, openSSL111ˢ)) {
         return default!;
     }
+
     println((@string)"***********************************************"u8);
     println((@string)""u8);
     println((@string)"You need to build OpenSSL 1.1.1 from source in order"u8);
@@ -104,6 +107,7 @@ internal static error checkOpenSSLVersion() {
     println((@string)"./Configure enable-weak-ssl-ciphers no-shared"u8);
     println((@string)"and then add the apps/ directory at the front of your PATH."u8);
     println((@string)"***********************************************"u8);
+
     return errors.New(versionOfOpenSSLDoesNotˢ);
 }
 
@@ -154,8 +158,10 @@ internal static (nint n, error err) Read(this ж<recordingConn> Ꮡr, slice<byte
             }
         }
         b = b.slice(0, n);
+
         Ꮡr.of(recordingConn.ᏑMutex).Lock();
         defer(Ꮡr.of(recordingConn.ᏑMutex).Unlock, ref ᒐ);
+
         {
             nint l = len(r.flows); if (l == 0 || !r.reading){
                 var buf = new slice<byte>(len(b));
@@ -185,8 +191,10 @@ internal static (nint n, error err) Write(this ж<recordingConn> Ꮡr, slice<byt
             }
         }
         b = b.slice(0, n);
+
         Ꮡr.of(recordingConn.ᏑMutex).Lock();
         defer(Ꮡr.of(recordingConn.ᏑMutex).Unlock, ref ᒐ);
+
         {
             nint l = len(r.flows); if (l == 0 || r.reading){
                 var buf = new slice<byte>(len(b));
@@ -241,6 +249,7 @@ internal static (slice<slice<byte>> flows, error err) parseTestData(io.Reader r)
     slice<slice<byte>> flows = default!;
 
     slice<byte> currentFlow = default!;
+
     var scanner = bufio.NewScanner(r);
     while (scanner.Scan()) {
         @string line = scanner.Text();
@@ -253,6 +262,7 @@ internal static (slice<slice<byte>> flows, error err) parseTestData(io.Reader r)
             }
             continue;
         }
+
         // Otherwise the line is a line of hex dump that looks like:
         // 00000170  fc f5 06 bf (...)  |.....X{&?......!|
         // (Some bytes have been omitted from the middle section.)
@@ -261,11 +271,13 @@ internal static (slice<slice<byte>> flows, error err) parseTestData(io.Reader r)
             return (default!, errors.New(invalidTestDataˢ));
         }
         line = after;
+
         (var before, _, ok) = strings.Cut(line, "|"u8);
         if (!ok) {
             return (default!, errors.New(invalidTestDataˢ));
         }
         line = before;
+
         var hexBytes = strings.Fields(line);
         foreach (var (_, hexByte) in hexBytes) {
             var (val, errΔ1) = strconv.ParseUint(hexByte, 16, 8);
@@ -275,9 +287,11 @@ internal static (slice<slice<byte>> flows, error err) parseTestData(io.Reader r)
             currentFlow = append(currentFlow, (byte)val);
         }
     }
+
     if (len(currentFlow) > 0) {
         flows = append(flows, currentFlow);
     }
+
     return (flows, default!);
 }
 
@@ -300,10 +314,12 @@ internal static (nint n, error err) Read(this ж<replayingConn> Ꮡr, slice<byte
 
         Ꮡr.of(replayingConn.ᏑMutex).Lock();
         defer(Ꮡr.of(replayingConn.ᏑMutex).Unlock, ref ᒐ);
+
         if (!r.reading) {
             r.t.Errorf("expected write, got read"u8);
             (n, err) = (0, fmt.Errorf("recording expected write, got read"u8)); goto ᒐdone;
         }
+
         n = copy(b, r.flows[0]);
         r.flows[0] = r.flows[0].slice(n);
         if (len(r.flows[0]) == 0) {
@@ -330,10 +346,12 @@ internal static (nint n, error err) Write(this ж<replayingConn> Ꮡr, slice<byt
 
         Ꮡr.of(replayingConn.ᏑMutex).Lock();
         defer(Ꮡr.of(replayingConn.ᏑMutex).Unlock, ref ᒐ);
+
         if (r.reading) {
             r.t.Errorf("expected read, got write"u8);
             (n, err) = (0, fmt.Errorf("recording expected read, got write"u8)); goto ᒐdone;
         }
+
         if (!bytes.HasPrefix(r.flows[0], b)) {
             r.t.Errorf("write mismatch: expected %x, got %x"u8, r.flows[0], b);
             (n, err) = (0, fmt.Errorf("write mismatch"u8)); goto ᒐdone;
@@ -358,6 +376,7 @@ internal static error Close(this ж<replayingConn> Ꮡr) {
 
         Ꮡr.of(replayingConn.ᏑMutex).Lock();
         ᒐd1 = true;
+
         if (len(r.flows) > 0) {
             r.t.Errorf("closed with unfinished flows"u8);
             return fmt.Errorf("unexpected close"u8);
@@ -405,7 +424,6 @@ internal static @string tempFile(@string contents) {
 
 // localListener is set up by TestMain and used by localPipe to create Conn
 // pairs like net.Pipe, but connected by an actual buffered TCP connection.
-
 partial struct localListenerᴛ1 /*dyn*/ {
     internal sync.Mutex mu;
     internal netꓸAddr addr;
@@ -437,7 +455,9 @@ internal static (net.Conn, net.Conn) localPipe(testing.TB t) {
     try {
         ᏑlocalListener.of(localListenerᴛ1.Ꮡmu).Lock();
         defer(ᏑlocalListener.of(localListenerᴛ1.Ꮡmu).Unlock, ref ᒐ);
+
         var addr = localListener.addr;
+
         error err = default!;
 Dialing:
         for (nint i = 0; i < 5; i++) {
@@ -489,6 +509,7 @@ Dialing:
 continue_Dialing:;
         }
 break_Dialing:;
+
         t.Fatalf("localPipe: failed to connect: %v"u8, err);
         throw panic("unreachable");
     }
@@ -510,6 +531,7 @@ internal static slice<uint16> allCipherSuites() {
     foreach (var (i, suite) in ΔcipherSuites) {
         ids[i] = suite.Value.id;
     }
+
     return ids;
 }
 
@@ -523,11 +545,14 @@ public static void TestMain(ж<testing.M> Ꮡm) {
             os.Exit(89);
         }
     };
+
     flag.Parse();
+
     if (bogoMode.Value) {
         bogoShim();
         os.Exit(0);
     }
+
     os.Exit(runMain(Ꮡm));
 }
 
@@ -540,6 +565,7 @@ internal static partial nint runMain(ж<testing.M> Ꮡm) {
         // Cipher suites preferences change based on the architecture. Force them to
         // the version without AES acceleration for test consistency.
         hasAESGCMHardwareSupport = false;
+
         // Set up localPipe.
         var (l, err) = net.Listen(tcpˢ, "127.0.0.1:0"u8);
         if (err != default!) {
@@ -554,12 +580,14 @@ internal static partial nint runMain(ж<testing.M> Ꮡm) {
         var lʗ1 = l;
         defer(() => lʗ1.Close(), ref ᒐ);
         goǃ(localServer, l);
+
         {
             var errΔ1 = checkOpenSSLVersion(); if (errΔ1 != default!) {
                 fmt.Fprintf(new os.FileжWriter(os.Stderr), "Error: %v"u8, errΔ1);
                 os.Exit(1);
             }
         }
+
         testConfig = Ꮡ(new Config(
             Time: () => time_package.Unix(0, 0),
             Rand: new zeroSource(nil),
@@ -584,6 +612,7 @@ internal static partial nint runMain(ж<testing.M> Ꮡm) {
             var fʗ1 = f;
             defer(() => fʗ1.Close(), ref ᒐ);
         }
+
         return Ꮡm.Run();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -809,6 +838,7 @@ public static partial void TestServerHelloTrailingMessage(ж<testing.T> Ꮡt) {
         if (err != default!) {
             testFatal(Ꮡt, err);
         }
+
         ref var hs = ref heap<global::go.crypto.tls_package.serverHandshakeStateTLS13>(out var Ꮡhs);
         hs = new serverHandshakeStateTLS13(
             c: srv,
@@ -825,10 +855,12 @@ public static partial void TestServerHelloTrailingMessage(ж<testing.T> Ꮡt) {
                 testFatal(Ꮡt, errΔ2);
             }
         }
+
         (var record, err) = concatHandshakeMessages(new global::go.crypto.tls_package.serverHelloMsgжhandshakeMessage(hs.hello), new global::go.crypto.tls_package.encryptedExtensionsMsgжhandshakeMessage(Ꮡ(new encryptedExtensionsMsg(alpnProtocol: "h2"u8))));
         if (err != default!) {
             testFatal(Ꮡt, err);
         }
+
         {
             var (_, errΔ3) = sʗ1.Write(record); if (errΔ3 != default!) {
                 testFatal(Ꮡt, errΔ3);
@@ -836,6 +868,7 @@ public static partial void TestServerHelloTrailingMessage(ж<testing.T> Ꮡt) {
         }
         srv.Close();
     });
+
     var cli = Client(c, testConfig);
     @string expectedErr = tlsHandshakeBufferNotˢ;
     {
@@ -854,14 +887,17 @@ public static partial void TestClientHelloTrailingMessage(ж<testing.T> Ꮡt) {
     var cʗ1 = c;
     goǃ(() => {
         var cli = Client(cʗ1, testConfig);
+
         var (hello, _, _, err) = cli.makeClientHello();
         if (err != default!) {
             testFatal(Ꮡt, err);
         }
+
         (var record, err) = concatHandshakeMessages(new global::go.crypto.tls_package.clientHelloMsgжhandshakeMessage(hello), new global::go.crypto.tls_package.certificateMsgTLS13жhandshakeMessage(Ꮡ(new certificateMsgTLS13(nil))));
         if (err != default!) {
             testFatal(Ꮡt, err);
         }
+
         {
             var (_, errΔ1) = cʗ1.Write(record); if (errΔ1 != default!) {
                 testFatal(Ꮡt, errΔ1);
@@ -869,6 +905,7 @@ public static partial void TestClientHelloTrailingMessage(ж<testing.T> Ꮡt) {
         }
         cli.Close();
     });
+
     var srv = Server(s, testConfig);
     @string expectedErr = tlsHandshakeBufferNotˢ;
     {
@@ -886,18 +923,22 @@ public static partial void TestDoubleClientHelloHRR(ж<testing.T> Ꮡt) {
     // server sends a HRR after reading the first ClientHello, the server must
     // either fail or ignore the trailing ClientHello.
     var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
+
     var cʗ1 = c;
     goǃ(() => {
         var cli = Client(cʗ1, testConfig);
+
         var (hello, _, _, err) = cli.makeClientHello();
         if (err != default!) {
             testFatal(Ꮡt, err);
         }
         hello.Value.keyShares = default!;
+
         (var record, err) = concatHandshakeMessages(new global::go.crypto.tls_package.clientHelloMsgжhandshakeMessage(hello), new global::go.crypto.tls_package.clientHelloMsgжhandshakeMessage(hello));
         if (err != default!) {
             testFatal(Ꮡt, err);
         }
+
         {
             var (_, errΔ1) = cʗ1.Write(record); if (errΔ1 != default!) {
                 testFatal(Ꮡt, errΔ1);
@@ -905,6 +946,7 @@ public static partial void TestDoubleClientHelloHRR(ж<testing.T> Ꮡt) {
         }
         cli.Close();
     });
+
     var srv = Server(s, testConfig);
     @string expectedErr = tlsHandshakeBufferNotˢ2;
     {

@@ -36,9 +36,8 @@ internal static slice<byte> mustMarshal(ж<testing.T> Ꮡt, global::go.crypto.tl
 }
 
 public static void TestMarshalUnmarshal(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var randΔ1 = go.math.rand_package.New(go.math.rand_package.NewSource(time_package.Now().UnixNano()));
+
     foreach (var (i, m) in tests) {
         var ty = reflect.ValueOf(m).Type();
         var mʗ1 = m;
@@ -55,17 +54,20 @@ public static void TestMarshalUnmarshal(ж<testing.T> Ꮡt) {
                     tΔ1.Errorf("#%d: failed to create value"u8, i);
                     break;
                 }
+
                 var m1 = v.Interface()._<handshakeMessage>();
                 var marshaled = mustMarshal(tΔ1, m1);
                 if (!mʗ1.unmarshal(marshaled)) {
                     tΔ1.Errorf("#%d failed to unmarshal %#v %x"u8, i, m1, marshaled);
                     break;
                 }
+
                 {
                     var (mΔ1, okΔ1) = mʗ1._<ж<global::go.crypto.tls_package.SessionState>>(ᐧ); if (okΔ1) {
                         mΔ1.Value.activeCertHandles = default!;
                     }
                 }
+
                 {
                     var (ch, okΔ2) = mʗ1._<ж<global::go.crypto.tls_package.clientHelloMsg>>(ᐧ); if (okΔ2) {
                         // extensions is special cased, as it is only populated by the
@@ -79,6 +81,7 @@ public static void TestMarshalUnmarshal(ж<testing.T> Ꮡt) {
                         ch.Value.extensions = default!;
                     }
                 }
+
                 // clientHelloMsg and serverHelloMsg, when unmarshalled, store
                 // their original representation, for later use in the handshake
                 // transcript. In order to prevent DeepEqual from failing since
@@ -93,10 +96,12 @@ public static void TestMarshalUnmarshal(ж<testing.T> Ꮡt) {
                     tΔ2.Value.original = default!;
                     break;
                 }}
+
                 if (!reflect.DeepEqual(m1, mʗ1)) {
                     tΔ1.Errorf("#%d got:%#v want:%#v %x"u8, i, mʗ1, m1, marshaled);
                     break;
                 }
+
                 if (i >= 3) {
                     // The first three message types (ClientHello,
                     // ServerHello and Finished) are allowed to
@@ -218,7 +223,6 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
         m.Value.pskModes = new uint8[]{pskModeDHE, pskModePlain}.slice();
         break;
     }}
-
     for (nint i = 0; i < randΔ1.Intn(5); i++) {
         global::go.crypto.tls_package.pskIdentity psk = default!;
         psk.obfuscatedTicketAge = (uint32)randΔ1.Intn(500000);
@@ -235,6 +239,7 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     if (randΔ1.Intn(10) > 5) {
         m.Value.encryptedClientHello = randomBytes(randΔ1.Intn(50) + 1, Ꮡrand);
     }
+
     return reflect.ValueOf(m.OrTypedNil());
 }
 
@@ -248,6 +253,7 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     m.Value.cipherSuite = (uint16)randΔ1.Int31();
     m.Value.compressionMethod = (uint8)randΔ1.Intn(256);
     m.Value.supportedPoints = randomBytes(randΔ1.Intn(5) + 1, Ꮡrand);
+
     if (randΔ1.Intn(10) > 5) {
         m.Value.ocspStapling = true;
     }
@@ -257,9 +263,11 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     if (randΔ1.Intn(10) > 5) {
         m.Value.alpnProtocol = randomString(randΔ1.Intn(32) + 1, Ꮡrand);
     }
+
     for (nint i = 0; i < randΔ1.Intn(4); i++) {
         m.Value.scts = append((~m).scts, randomBytes(randΔ1.Intn(500) + 1, Ꮡrand));
     }
+
     if (randΔ1.Intn(10) > 5) {
         m.Value.secureRenegotiationSupported = true;
         m.Value.secureRenegotiation = randomBytes(randΔ1.Intn(50) + 1, Ꮡrand);
@@ -292,6 +300,7 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     if (randΔ1.Intn(10) > 5) {
         m.Value.serverNameAck = randΔ1.Intn(2) == 1;
     }
+
     return reflect.ValueOf(m.OrTypedNil());
 }
 
@@ -299,12 +308,14 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     var m = Ꮡ(new encryptedExtensionsMsg(nil));
+
     if (randΔ1.Intn(10) > 5) {
         m.Value.alpnProtocol = randomString(randΔ1.Intn(32) + 1, Ꮡrand);
     }
     if (randΔ1.Intn(10) > 5) {
         m.Value.earlyData = true;
     }
+
     return reflect.ValueOf(m.OrTypedNil());
 }
 
@@ -547,27 +558,33 @@ public static void TestRejectEmptySCTList(ж<testing.T> Ꮡt) {
         scts: new slice<byte>[]{sct}.slice()
     ));
     var serverHelloBytes = mustMarshal(Ꮡt, new global::go.crypto.tls_package.serverHelloMsgжhandshakeMessage(serverHello));
+
     ref var serverHelloCopy = ref heap(new global::go.crypto.tls_package.serverHelloMsg(), out var ᏑserverHelloCopy);
     if (!ᏑserverHelloCopy.unmarshal(serverHelloBytes)) {
         Ꮡt.Fatal(failedToUnmarshalInitialˢ);
     }
+
     // Change serverHelloBytes so that the SCT list is empty
     nint i = bytes.Index(serverHelloBytes, sct);
     if (i < 0) {
         Ꮡt.Fatal(cannotFindSctInˢ);
     }
+
     slice<byte> serverHelloEmptySCT = default!;
     serverHelloEmptySCT = appendꓸꓸꓸ(serverHelloEmptySCT, serverHelloBytes.slice(0, i - 6));
     // Append the extension length and SCT list length for an empty list.
     serverHelloEmptySCT = appendꓸꓸꓸ(serverHelloEmptySCT, new byte[]{0, 2, 0, 0}.slice());
     serverHelloEmptySCT = appendꓸꓸꓸ(serverHelloEmptySCT, serverHelloBytes.slice(i + 4));
+
     // Update the handshake message length.
     serverHelloEmptySCT[1] = (byte)(((len(serverHelloEmptySCT) - 4) >> (int)(16)));
     serverHelloEmptySCT[2] = (byte)(((len(serverHelloEmptySCT) - 4) >> (int)(8)));
     serverHelloEmptySCT[3] = (byte)(len(serverHelloEmptySCT) - 4);
+
     // Update the extensions length
     serverHelloEmptySCT[42] = (byte)(((len(serverHelloEmptySCT) - 44) >> (int)(8)));
     serverHelloEmptySCT[43] = (byte)(len(serverHelloEmptySCT) - 44);
+
     if (ᏑserverHelloCopy.unmarshal(serverHelloEmptySCT)) {
         Ꮡt.Fatal(unmarshaledServerHelloˢ);
     }
@@ -586,6 +603,7 @@ public static void TestRejectEmptySCT(ж<testing.T> Ꮡt) {
         scts: new slice<byte>[]{default!}.slice()
     ));
     var serverHelloBytes = mustMarshal(Ꮡt, new global::go.crypto.tls_package.serverHelloMsgжhandshakeMessage(serverHello));
+
     ref var serverHelloCopy = ref heap(new global::go.crypto.tls_package.serverHelloMsg(), out var ᏑserverHelloCopy);
     if (ᏑserverHelloCopy.unmarshal(serverHelloBytes)) {
         Ꮡt.Fatal(unmarshaledServerHelloˢ2);
@@ -605,6 +623,7 @@ public static void TestRejectDuplicateExtensions(ж<testing.T> Ꮡt) {
     if (ᏑclientHelloCopy.unmarshal(clientHelloBytes)) {
         Ꮡt.Error(unmarshaledClientHelloˢ);
     }
+
     (var serverHelloBytes, err) = hex.DecodeString("02000030030300000000000000000000000000000000000000000000000000000000000000000000000000080005000000050000"u8);
     if (err != default!) {
         Ꮡt.Fatalf("failed to decode test ServerHello: %s"u8, err);

@@ -14,6 +14,7 @@ partial class trace_internal_test_package {
 
 public static void TestHeap(ж<testing.T> Ꮡt) {
     slice<ж<global::go.@internal.trace_package.batchCursor>> heap = default!;
+
     // Insert a bunch of values into the heap.
     checkHeap(Ꮡt, heap);
     heap = heapInsert(heap, makeBatchCursor(5));
@@ -22,6 +23,7 @@ public static void TestHeap(ж<testing.T> Ꮡt) {
         heap = heapInsert(heap, makeBatchCursor(i));
         checkHeap(Ꮡt, heap);
     }
+
     // Update an element in the middle to be the new minimum.
     foreach (var (i, _) in heap) {
         if ((~heap[i]).ev.time == 5) {
@@ -34,6 +36,7 @@ public static void TestHeap(ж<testing.T> Ꮡt) {
     if ((~heap[0]).ev.time != -21) {
         Ꮡt.Fatalf("heap update failed, expected %d as heap min: %s"u8, (nint)(-21), heapDebugString(heap));
     }
+
     // Update the minimum element to be smaller. There should be no change.
     heap[0].Value.ev.time = -22;
     heapUpdate(heap, 0);
@@ -41,6 +44,7 @@ public static void TestHeap(ж<testing.T> Ꮡt) {
     if ((~heap[0]).ev.time != -22) {
         Ꮡt.Fatalf("heap update failed, expected %d as heap min: %s"u8, (nint)(-22), heapDebugString(heap));
     }
+
     // Update the last element to be larger. There should be no change.
     heap[len(heap) - 1].Value.ev.time = 21;
     heapUpdate(heap, len(heap) - 1);
@@ -48,6 +52,7 @@ public static void TestHeap(ж<testing.T> Ꮡt) {
     if ((~heap[len(heap) - 1]).ev.time != 21) {
         Ꮡt.Fatalf("heap update failed, expected %d as heap min: %s"u8, (nint)(21), heapDebugString(heap));
     }
+
     // Update the last element to be smaller.
     heap[len(heap) - 1].Value.ev.time = 7;
     heapUpdate(heap, len(heap) - 1);
@@ -55,6 +60,7 @@ public static void TestHeap(ж<testing.T> Ꮡt) {
     if ((~heap[len(heap) - 1]).ev.time == 21) {
         Ꮡt.Fatalf("heap update failed, unexpected %d as heap min: %s"u8, (nint)(21), heapDebugString(heap));
     }
+
     // Remove an element in the middle.
     foreach (var (i, _) in heap) {
         if ((~heap[i]).ev.time == 5) {
@@ -68,9 +74,11 @@ public static void TestHeap(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("failed to remove heap elem with time %d: %s"u8, (nint)(5), heapDebugString(heap));
         }
     }
+
     // Remove tail.
     heap = heapRemove(heap, len(heap) - 1);
     checkHeap(Ꮡt, heap);
+
     // Remove from the head, and make sure the result is sorted.
     nint l = len(heap);
     slice<ж<global::go.@internal.trace_package.batchCursor>> removed = default!;
@@ -103,6 +111,7 @@ internal static @string heapDebugString(slice<ж<global::go.@internal.trace_pack
 
 internal static void checkHeap(ж<testing.T> Ꮡt, slice<ж<global::go.@internal.trace_package.batchCursor>> heap) {
     Ꮡt.Helper();
+
     foreach (var (i, _) in heap) {
         if (i == 0) {
             continue;

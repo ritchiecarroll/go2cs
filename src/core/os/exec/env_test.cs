@@ -19,6 +19,7 @@ internal partial struct TestDedupEnv_tests /*dyn*/ {
 
 public static void TestDedupEnv(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
+
     var tests = new TestDedupEnv_tests[]{
         new(
             noCase: true,
@@ -35,26 +36,26 @@ public static void TestDedupEnv(ж<testing.T> Ꮡt) {
             want: new @string[]{"=b"u8, "foo"u8, "bar"u8}.slice()
         ),
         new(
-            noCase: true, // #49886: preserve weird Windows keys with leading "=" signs.
-
+            // #49886: preserve weird Windows keys with leading "=" signs.
+            noCase: true,
             @in: new @string[]{@"=C:=C:\golang"u8, @"=D:=D:\tmp"u8, @"=D:=D:\"u8}.slice(),
             want: new @string[]{@"=C:=C:\golang"u8, @"=D:=D:\"u8}.slice()
         ),
         new(
-            @in: new @string[]{ // #52436: preserve invalid key-value entries (for now).
- // (Maybe filter them out or error out on them at some point.)
-"dodgy"u8, "entries"u8}.slice(),
+            // #52436: preserve invalid key-value entries (for now).
+            // (Maybe filter them out or error out on them at some point.)
+            @in: new @string[]{"dodgy"u8, "entries"u8}.slice(),
             want: new @string[]{"dodgy"u8, "entries"u8}.slice()
         ),
         new(
-            @in: new @string[]{ // Filter out entries containing NULs.
-((@string)(new byte[]{0x41, 0x3d, 0x61, 0x00, 0x62})), "B=b"u8, ((@string)(new byte[]{0x43, 0x00, 0x43, 0x3d, 0x63}))}.slice(),
+            // Filter out entries containing NULs.
+            @in: new @string[]{((@string)(new byte[]{0x41, 0x3d, 0x61, 0x00, 0x62})), "B=b"u8, ((@string)(new byte[]{0x43, 0x00, 0x43, 0x3d, 0x63}))}.slice(),
             want: new @string[]{"B=b"u8}.slice(),
             wantErr: true
         ),
         new(
-            nulOK: true, // Plan 9 needs to preserve environment variables with NUL (#56544).
-
+            // Plan 9 needs to preserve environment variables with NUL (#56544).
+            nulOK: true,
             @in: new @string[]{"path=one\x00two"u8}.slice(),
             want: new @string[]{"path=one\x00two"u8}.slice()
         )

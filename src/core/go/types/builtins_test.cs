@@ -15,29 +15,6 @@ using types = global::go.go.types_package;
 
 partial class types_test_package {
 
-// constant
-// constant
-// constant
-// constant
-// constant
-// constant
-// constant
-// constant
-// go.dev/issue/37349
-// go.dev/issue/37393
-// go.dev/issue/45667
-// constant
-// constant
-// constant
-// constant
-// constant
-// constant
-// constant
-// constant
-// constant
-// constant
-// no tests for trace since it produces output as a side-effect
-
 partial struct builtinCallsᴛ1 /*dyn*/ {
     internal @string name, src, sig;
 }
@@ -49,16 +26,16 @@ internal static slice<builtinCallsᴛ1> builtinCalls = new builtinCallsᴛ1[]{
     new("append"u8, @"var s []byte; _ = append(s, ""foo""...)"u8, @"func([]byte, string...) []byte"u8),
     new("append"u8, @"type T []byte; var s T; var str string; _ = append(s, str...)"u8, @"func(p.T, string...) p.T"u8),
     new("append"u8, @"type T []byte; type U string; var s T; var str U; _ = append(s, str...)"u8, @"func(p.T, p.U...) p.T"u8),
-    new("cap"u8, @"var s [10]int; _ = cap(s)"u8, @"invalid type"u8),
-    new("cap"u8, @"var s [10]int; _ = cap(&s)"u8, @"invalid type"u8),
+    new("cap"u8, @"var s [10]int; _ = cap(s)"u8, @"invalid type"u8), // constant
+    new("cap"u8, @"var s [10]int; _ = cap(&s)"u8, @"invalid type"u8), // constant
     new("cap"u8, @"var s []int64; _ = cap(s)"u8, @"func([]int64) int"u8),
     new("cap"u8, @"var c chan<-bool; _ = cap(c)"u8, @"func(chan<- bool) int"u8),
     new("cap"u8, @"type S []byte; var s S; _ = cap(s)"u8, @"func(p.S) int"u8),
     new("cap"u8, @"var s P; _ = cap(s)"u8, @"func(P) int"u8),
-    new("len"u8, @"_ = len(""foo"")"u8, @"invalid type"u8),
+    new("len"u8, @"_ = len(""foo"")"u8, @"invalid type"u8), // constant
     new("len"u8, @"var s string; _ = len(s)"u8, @"func(string) int"u8),
-    new("len"u8, @"var s [10]int; _ = len(s)"u8, @"invalid type"u8),
-    new("len"u8, @"var s [10]int; _ = len(&s)"u8, @"invalid type"u8),
+    new("len"u8, @"var s [10]int; _ = len(s)"u8, @"invalid type"u8), // constant
+    new("len"u8, @"var s [10]int; _ = len(&s)"u8, @"invalid type"u8), // constant
     new("len"u8, @"var s []int64; _ = len(s)"u8, @"func([]int64) int"u8),
     new("len"u8, @"var c chan<-bool; _ = len(c)"u8, @"func(chan<- bool) int"u8),
     new("len"u8, @"var m map[string]float32; _ = len(m)"u8, @"func(map[string]float32) int"u8),
@@ -68,7 +45,7 @@ internal static slice<builtinCallsᴛ1> builtinCalls = new builtinCallsᴛ1[]{
     new("clear"u8, @"var s []byte; clear(s)"u8, @"func([]byte)"u8),
     new("close"u8, @"var c chan int; close(c)"u8, @"func(chan int)"u8),
     new("close"u8, @"var c chan<- chan string; close(c)"u8, @"func(chan<- chan string)"u8),
-    new("complex"u8, @"_ = complex(1, 0)"u8, @"invalid type"u8),
+    new("complex"u8, @"_ = complex(1, 0)"u8, @"invalid type"u8), // constant
     new("complex"u8, @"var re float32; _ = complex(re, 1.0)"u8, @"func(float32, float32) complex64"u8),
     new("complex"u8, @"var im float64; _ = complex(1, im)"u8, @"func(float64, float64) complex128"u8),
     new("complex"u8, @"type F32 float32; var re, im F32; _ = complex(re, im)"u8, @"func(p.F32, p.F32) complex64"u8),
@@ -80,37 +57,43 @@ internal static slice<builtinCallsᴛ1> builtinCalls = new builtinCallsᴛ1[]{
     new("copy"u8, @"var dst []byte; copy(dst, ""hello"")"u8, @"func([]byte, string) int"u8),
     new("delete"u8, @"var m map[string]bool; delete(m, ""foo"")"u8, @"func(map[string]bool, string)"u8),
     new("delete"u8, @"type (K string; V int); var m map[K]V; delete(m, ""foo"")"u8, @"func(map[p.K]p.V, p.K)"u8),
-    new("imag"u8, @"_ = imag(1i)"u8, @"invalid type"u8),
+    new("imag"u8, @"_ = imag(1i)"u8, @"invalid type"u8), // constant
     new("imag"u8, @"var c complex64; _ = imag(c)"u8, @"func(complex64) float32"u8),
     new("imag"u8, @"var c complex128; _ = imag(c)"u8, @"func(complex128) float64"u8),
     new("imag"u8, @"type C64 complex64; var c C64; _ = imag(c)"u8, @"func(p.C64) float32"u8),
     new("imag"u8, @"type C128 complex128; var c C128; _ = imag(c)"u8, @"func(p.C128) float64"u8),
-    new("real"u8, @"_ = real(1i)"u8, @"invalid type"u8),
+    new("real"u8, @"_ = real(1i)"u8, @"invalid type"u8), // constant
     new("real"u8, @"var c complex64; _ = real(c)"u8, @"func(complex64) float32"u8),
     new("real"u8, @"var c complex128; _ = real(c)"u8, @"func(complex128) float64"u8),
     new("real"u8, @"type C64 complex64; var c C64; _ = real(c)"u8, @"func(p.C64) float32"u8),
     new("real"u8, @"type C128 complex128; var c C128; _ = real(c)"u8, @"func(p.C128) float64"u8),
     new("make"u8, @"_ = make([]int, 10)"u8, @"func([]int, int) []int"u8),
     new("make"u8, @"type T []byte; _ = make(T, 10, 20)"u8, @"func(p.T, int, int) p.T"u8),
+
+    // go.dev/issue/37349
     new("make"u8, @"              _ = make([]int, 0   )"u8, @"func([]int, int) []int"u8),
     new("make"u8, @"var l    int; _ = make([]int, l   )"u8, @"func([]int, int) []int"u8),
     new("make"u8, @"              _ = make([]int, 0, 0)"u8, @"func([]int, int, int) []int"u8),
     new("make"u8, @"var l    int; _ = make([]int, l, 0)"u8, @"func([]int, int, int) []int"u8),
     new("make"u8, @"var    c int; _ = make([]int, 0, c)"u8, @"func([]int, int, int) []int"u8),
     new("make"u8, @"var l, c int; _ = make([]int, l, c)"u8, @"func([]int, int, int) []int"u8),
+
+    // go.dev/issue/37393
     new("make"u8, @"                _ = make([]int       , 0   )"u8, @"func([]int, int) []int"u8),
     new("make"u8, @"var l    byte ; _ = make([]int8      , l   )"u8, @"func([]int8, byte) []int8"u8),
     new("make"u8, @"                _ = make([]int16     , 0, 0)"u8, @"func([]int16, int, int) []int16"u8),
     new("make"u8, @"var l    int16; _ = make([]string    , l, 0)"u8, @"func([]string, int16, int) []string"u8),
     new("make"u8, @"var    c int32; _ = make([]float64   , 0, c)"u8, @"func([]float64, int, int32) []float64"u8),
     new("make"u8, @"var l, c uint ; _ = make([]complex128, l, c)"u8, @"func([]complex128, uint, uint) []complex128"u8),
+
+    // go.dev/issue/45667
     new("make"u8, @"const l uint = 1; _ = make([]int, l)"u8, @"func([]int, uint) []int"u8),
-    new("max"u8, @"               _ = max(0        )"u8, @"invalid type"u8),
+    new("max"u8, @"               _ = max(0        )"u8, @"invalid type"u8), // constant
     new("max"u8, @"var x int    ; _ = max(x        )"u8, @"func(int) int"u8),
     new("max"u8, @"var x int    ; _ = max(0, x     )"u8, @"func(int, int) int"u8),
     new("max"u8, @"var x string ; _ = max(""a"", x   )"u8, @"func(string, string) string"u8),
     new("max"u8, @"var x float32; _ = max(0, 1.0, x)"u8, @"func(float32, float32, float32) float32"u8),
-    new("min"u8, @"               _ = min(0        )"u8, @"invalid type"u8),
+    new("min"u8, @"               _ = min(0        )"u8, @"invalid type"u8), // constant
     new("min"u8, @"var x int    ; _ = min(x        )"u8, @"func(int) int"u8),
     new("min"u8, @"var x int    ; _ = min(0, x     )"u8, @"func(int, int) int"u8),
     new("min"u8, @"var x string ; _ = min(""a"", x   )"u8, @"func(string, string) string"u8),
@@ -130,14 +113,14 @@ internal static slice<builtinCallsᴛ1> builtinCalls = new builtinCallsᴛ1[]{
     new("Add"u8, @"var p unsafe.Pointer; _ = unsafe.Add(p, -1.0)"u8, @"func(unsafe.Pointer, int) unsafe.Pointer"u8),
     new("Add"u8, @"var p unsafe.Pointer; var n uintptr; _ = unsafe.Add(p, n)"u8, @"func(unsafe.Pointer, uintptr) unsafe.Pointer"u8),
     new("Add"u8, @"_ = unsafe.Add(nil, 0)"u8, @"func(unsafe.Pointer, int) unsafe.Pointer"u8),
-    new("Alignof"u8, @"_ = unsafe.Alignof(0)"u8, @"invalid type"u8),
-    new("Alignof"u8, @"var x struct{}; _ = unsafe.Alignof(x)"u8, @"invalid type"u8),
+    new("Alignof"u8, @"_ = unsafe.Alignof(0)"u8, @"invalid type"u8), // constant
+    new("Alignof"u8, @"var x struct{}; _ = unsafe.Alignof(x)"u8, @"invalid type"u8), // constant
     new("Alignof"u8, @"var x P; _ = unsafe.Alignof(x)"u8, @"func(P) uintptr"u8),
-    new("Offsetof"u8, @"var x struct{f bool}; _ = unsafe.Offsetof(x.f)"u8, @"invalid type"u8),
-    new("Offsetof"u8, @"var x struct{_ int; f bool}; _ = unsafe.Offsetof((&x).f)"u8, @"invalid type"u8),
+    new("Offsetof"u8, @"var x struct{f bool}; _ = unsafe.Offsetof(x.f)"u8, @"invalid type"u8), // constant
+    new("Offsetof"u8, @"var x struct{_ int; f bool}; _ = unsafe.Offsetof((&x).f)"u8, @"invalid type"u8), // constant
     new("Offsetof"u8, @"var x struct{_ int; f P}; _ = unsafe.Offsetof((&x).f)"u8, @"func(P) uintptr"u8),
-    new("Sizeof"u8, @"_ = unsafe.Sizeof(0)"u8, @"invalid type"u8),
-    new("Sizeof"u8, @"var x struct{}; _ = unsafe.Sizeof(x)"u8, @"invalid type"u8),
+    new("Sizeof"u8, @"_ = unsafe.Sizeof(0)"u8, @"invalid type"u8), // constant
+    new("Sizeof"u8, @"var x struct{}; _ = unsafe.Sizeof(x)"u8, @"invalid type"u8), // constant
     new("Sizeof"u8, @"var x P; _ = unsafe.Sizeof(x)"u8, @"func(P) uintptr"u8),
     new("Slice"u8, @"var p *int; _ = unsafe.Slice(p, 1)"u8, @"func(*int, int) []int"u8),
     new("Slice"u8, @"var p *byte; var n uintptr; _ = unsafe.Slice(p, n)"u8, @"func(*byte, uintptr) []byte"u8),
@@ -148,19 +131,21 @@ internal static slice<builtinCallsᴛ1> builtinCalls = new builtinCallsᴛ1[]{
     new("String"u8, @"type B *byte; var b B; _ = unsafe.String(b, 0)"u8, @"func(*byte, int) string"u8),
     new("StringData"u8, @"var s string; _ = unsafe.StringData(s)"u8, @"func(string) *byte"u8),
     new("StringData"u8, @"_ = unsafe.StringData(""foo"")"u8, @"func(string) *byte"u8),
-    new("assert"u8, @"assert(true)"u8, @"invalid type"u8),
-    new("assert"u8, @"type B bool; const pred B = 1 < 2; assert(pred)"u8, @"invalid type"u8)
+    new("assert"u8, @"assert(true)"u8, @"invalid type"u8), // constant
+    new("assert"u8, @"type B bool; const pred B = 1 < 2; assert(pred)"u8, @"invalid type"u8) // constant
+
+    // no tests for trace since it produces output as a side-effect
 }.slice();
 
 public static void TestBuiltinSignatures(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     DefPredeclaredTestFuncs();
+
     var seen = new map<@string, bool>{["trace"u8] = true}; // no test for trace built-in; add it manually
     foreach (var (_, call) in builtinCalls) {
         testBuiltinSignature(Ꮡt, call.name, call.src, call.sig);
         seen[call.name] = true;
     }
+
     // make sure we didn't miss one
     foreach (var (_, name) in Universe.Names()) {
         {
@@ -180,9 +165,11 @@ public static void TestBuiltinSignatures(ж<testing.T> Ꮡt) {
 
 internal static void testBuiltinSignature(ж<testing.T> Ꮡt, @string name, @string src0, @string want) {
     @string src = fmt.Sprintf(@"package p; import ""unsafe""; type _ unsafe.Pointer /* use unsafe */; func _[P ~[]byte]() { %s }"u8, src0);
+
     var uses = new map<ж<ast.Ident>, types.Object>();
     var types = new map<ast.Expr, types.TypeAndValue>();
     mustTypecheck(src, nil, Ꮡ(new typesꓸInfo(Uses: uses, Types: types)));
+
     // find called function
     nint n = 0;
     ast.Expr fun = default!;
@@ -198,6 +185,7 @@ internal static void testBuiltinSignature(ж<testing.T> Ꮡt, @string name, @str
         Ꮡt.Errorf("%s: got %d CallExprs; want 1"u8, src0, n);
         return;
     }
+
     // check recorded types for fun and descendents (may be parenthesized)
     while (ᐧ) {
         // the recorded type for the built-in must match the wanted signature
@@ -212,6 +200,7 @@ internal static void testBuiltinSignature(ж<testing.T> Ꮡt, @string name, @str
                 return;
             }
         }
+
         // called function must be a (possibly parenthesized, qualified)
         // identifier denoting the expected built-in
         switch (fun.type()) {
@@ -237,12 +226,12 @@ internal static void testBuiltinSignature(ж<testing.T> Ꮡt, @string name, @str
             break;
         }
         case ж<ast.SelectorExpr> p: {
+            // built-in from package unsafe - ignore details
             return; // we're done
         }
         default: {
             var p = fun;
-            Ꮡt.Errorf("%s: invalid function call"u8, // built-in from package unsafe - ignore details
- src0);
+            Ꮡt.Errorf("%s: invalid function call"u8, src0);
             return;
         }}
     }

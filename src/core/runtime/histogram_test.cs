@@ -20,6 +20,7 @@ public static void TestTimeHistogram(ж<testing.T> Ꮡt) {
     // The result of this bad alignment is a segfault on
     // 32-bit platforms when calling Record.
     var h = ᏑdummyTimeHistogram;
+
     // Record exactly one sample in each bucket.
     for (nint j = 0; j < runtime_internal_test_package.TimeHistNumSubBuckets; j++) {
         var v = ((int64)j << (int)((runtime_internal_test_package.TimeHistMinBucketBits - 1 - runtime_internal_test_package.TimeHistSubBucketBits)));
@@ -42,6 +43,7 @@ public static void TestTimeHistogram(ж<testing.T> Ꮡt) {
     h.Record((int64)(-1));
     h.Record(Δmath.MaxInt64);
     h.Record(Δmath.MaxInt64);
+
     // Check to make sure there's exactly one count in each
     // bucket.
     for (nint i = 0; i < runtime_internal_test_package.TimeHistNumBuckets; i++) {
@@ -64,6 +66,7 @@ public static void TestTimeHistogram(ж<testing.T> Ꮡt) {
     if (c != 1) {
         Ꮡt.Errorf("overflow bucket has count that is not 1: %d"u8, c);
     }
+
     (c, ok) = h.Count(runtime_internal_test_package.TimeHistNumBuckets + 1, 0);
     if (ok) {
         Ꮡt.Errorf("expected to hit overflow bucket: (%d, %d)"u8, (nint)(runtime_internal_test_package.TimeHistNumBuckets + 1), (nint)(0));
@@ -71,11 +74,13 @@ public static void TestTimeHistogram(ж<testing.T> Ꮡt) {
     if (c != 2) {
         Ꮡt.Errorf("overflow bucket has count that is not 2: %d"u8, c);
     }
+
     dummyTimeHistogram = new runtime_internal_test_package.TimeHistogram(nil);
 }
 
 public static void TestTimeHistogramMetricsBuckets(ж<testing.T> Ꮡt) {
     var buckets = runtime_internal_test_package.TimeHistogramMetricsBuckets();
+
     nint nonInfBucketsLen = runtime_internal_test_package.TimeHistNumSubBuckets * runtime_internal_test_package.TimeHistNumBuckets;
     nint expBucketsLen = nonInfBucketsLen + 3; // Count -Inf, the edge for the overflow bucket, and +Inf.
     if (len(buckets) != expBucketsLen) {

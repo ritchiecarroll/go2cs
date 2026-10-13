@@ -23,6 +23,7 @@ public static void Example() {
     if (err != default!) {
         log.Fatal(err);
     }
+
     // Set the sender and recipient first
     {
         var errΔ1 = c.Mail(senderExampleOrgˢ); if (errΔ1 != default!) {
@@ -34,6 +35,7 @@ public static void Example() {
             log.Fatal(errΔ2);
         }
     }
+
     // Send the email body.
     (var wc, err) = c.Data();
     if (err != default!) {
@@ -47,6 +49,7 @@ public static void Example() {
     if (err != default!) {
         log.Fatal(err);
     }
+
     // Send the QUIT command and close the connection.
     err = c.Quit();
     if (err != default!) {
@@ -57,9 +60,7 @@ public static void Example() {
 // variables to make ExamplePlainAuth compile, without adding
 // unnecessary noise there.
 internal static @string from = "gopher@example.net"u8;
-
 internal static slice<byte> msg = slice<byte>("dummy message"u8);
-
 internal static slice<@string> recipients = new @string[]{"foo@example.com"u8}.slice();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -71,6 +72,7 @@ public static void ExamplePlainAuth() {
     // hostname is used by PlainAuth to validate the TLS certificate.
     @string hostname = mailExampleComˢ;
     var auth = smtp.PlainAuth(""u8, userExampleComˢ, passwordˢ, hostname);
+
     var err = smtp.SendMail(hostname + ":25"u8, auth, from, recipients, msg);
     if (err != default!) {
         log.Fatal(err);
@@ -80,6 +82,7 @@ public static void ExamplePlainAuth() {
 public static void ExampleSendMail() {
     // Set up authentication information.
     var auth = smtp.PlainAuth(""u8, userExampleComˢ, passwordˢ, mailExampleComˢ);
+
     // Connect to the server, authenticate, set the sender and recipient,
     // and send the email all in one step.
     var to = new @string[]{"recipient@example.net"u8}.slice();

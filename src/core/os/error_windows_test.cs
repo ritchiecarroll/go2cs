@@ -14,6 +14,7 @@ partial class os_test_package {
 
 [GoInit] internal static void init() {
     syscall.Errno _ERROR_BAD_NETPATH = /* syscall.Errno(53) */ 53;
+
     isExistTests = append(isExistTests,
         new isExistTest(err: new fs.PathErrorжerror(Ꮡ(new fs.PathError(Err: syscall.ERROR_FILE_NOT_FOUND))), @is: false, isnot: true),
         new isExistTest(err: new Δos.LinkErrorжerror(Ꮡ(new Δos.LinkError(Err: syscall.ERROR_FILE_NOT_FOUND))), @is: false, isnot: true),

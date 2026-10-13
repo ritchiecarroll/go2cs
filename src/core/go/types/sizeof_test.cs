@@ -18,10 +18,9 @@ internal partial struct TestSizeof_type /*dyn*/ {
 // Signal size changes of important structures.
 public static void TestSizeof(ж<testing.T> Ꮡt) {
     const bool _64bit = /* ^uint(0)>>32 != 0 */ true;
-// Types
-// Objects
-// Misc
+
     slice<TestSizeof_type> tests = new TestSizeof_type[]{
+        // Types
         new(new Basic(nil), 16, 32),
         new(new Array(nil), 16, 24),
         new(new Slice(nil), 8, 16),
@@ -36,6 +35,8 @@ public static void TestSizeof(ж<testing.T> Ꮡt) {
         new(new Named(nil), 60, 112),
         new(new TypeParam(nil), 28, 48),
         new(new Δterm(nil), 12, 24),
+
+        // Objects
         new(new PkgName(nil), 44, 80),
         new(new Const(nil), 48, 88),
         new(new TypeName(nil), 40, 72),
@@ -44,6 +45,8 @@ public static void TestSizeof(ж<testing.T> Ꮡt) {
         new(new Label(nil), 44, 80),
         new(new Builtin(nil), 44, 80),
         new(new Nil(nil), 40, 72),
+
+        // Misc
         new(new ΔScope(nil), 44, 88),
         new(new Package(nil), 44, 88),
         new(new _TypeSet(nil), 28, 56)

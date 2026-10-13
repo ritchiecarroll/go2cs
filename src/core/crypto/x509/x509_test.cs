@@ -64,6 +64,7 @@ public static void TestParsePKCS1PrivateKey(ж<testing.T> Ꮡt) {
     if ((~priv).PublicKey.N.Cmp((~rsaPrivateKey).PublicKey.N) != 0 || (~priv).PublicKey.E != (~rsaPrivateKey).PublicKey.E || (~priv).D.Cmp((~rsaPrivateKey).D) != 0 || (~priv).Primes[0].Cmp((~rsaPrivateKey).Primes[0]) != 0 || (~priv).Primes[1].Cmp((~rsaPrivateKey).Primes[1]) != 0) {
         Ꮡt.Errorf("got:%+v want:%+v"u8, priv.OrTypedNil(), rsaPrivateKey.OrTypedNil());
     }
+
     // This private key includes an invalid prime that
     // rsa.PrivateKey.Validate should reject.
     var data = slice<byte>(((@string)(new byte[]{0x30, 0x16, 0x02, 0x00, 0x02, 0x02, 0x7f, 0x00, 0x02, 0x02, 0x30, 0x30, 0x02, 0x02, 0x30, 0x30, 0x02, 0x02, 0x00, 0x01, 0x02, 0x02, 0x7f, 0x00})));
@@ -72,6 +73,7 @@ public static void TestParsePKCS1PrivateKey(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("parsing invalid private key did not result in an error"u8);
         }
     }
+
     // A partial key without CRT values should still parse.
     var (b, _) = asn1.Marshal(new TestParsePKCS1PrivateKey_val(
         N: (~priv).N,
@@ -124,13 +126,14 @@ public static void TestMarshalInvalidPublicKey(ж<testing.T> Ꮡt) {
 
 internal static any /*pub*/ testParsePKIXPublicKey(ж<testing.T> Ꮡt, @string pemBytes) {
     any pub = default!;
-
     ref var t = ref Ꮡt.DerefOrNull();
+
     var (block, _) = pem.Decode(slice<byte>(pemBytes));
     (pub, var err) = ParsePKIXPublicKey((~block).Bytes);
     if (err != default!) {
         Ꮡt.Fatalf("Failed to parse public key: %s"u8, err);
     }
+
     (var pubBytes2, err) = MarshalPKIXPublicKey(pub);
     if (err != default!) {
         Ꮡt.Errorf("Failed to marshal public key for the second time: %s"u8, err);
@@ -243,6 +246,7 @@ internal static ref ж<rsa.PrivateKey> testPrivateKey => ref ᏑtestPrivateKey.V
 
 [GoInit] internal static void init() {
     var (block, _) = pem.Decode(slice<byte>(pemPrivateKey));
+
     error err = default!;
     {
         (x509_internal_test_package.testPrivateKey, err) = ParsePKCS1PrivateKey((~block).Bytes); if (err != default!) {
@@ -294,7 +298,9 @@ public static void TestMarshalRSAPrivateKey(ж<testing.T> Ꮡt) {
             fromBase10("4597024781409332673052708605078359346966325141767460991205742124888960305710298765592730135879076084498363772408626791576005136245060321874472727132746643162385746062759369754202494417496879741537284589047"u8)
         }.slice()
     ));
+
     var derBytes = MarshalPKCS1PrivateKey(priv);
+
     var (priv2, err) = ParsePKCS1PrivateKey(derBytes);
     if (err != default!) {
         Ꮡt.Errorf("error parsing serialized key: %s"u8, err);
@@ -303,6 +309,7 @@ public static void TestMarshalRSAPrivateKey(ж<testing.T> Ꮡt) {
     if ((~priv).PublicKey.N.Cmp((~priv2).PublicKey.N) != 0 || (~priv).PublicKey.E != (~priv2).PublicKey.E || (~priv).D.Cmp((~priv2).D) != 0 || builtin.len((~priv2).Primes) != 3 || (~priv).Primes[0].Cmp((~priv2).Primes[0]) != 0 || (~priv).Primes[1].Cmp((~priv2).Primes[1]) != 0 || (~priv).Primes[2].Cmp((~priv2).Primes[2]) != 0) {
         Ꮡt.Errorf("wrong priv:\ngot  %+v\nwant %+v"u8, priv2.OrTypedNil(), priv.OrTypedNil());
     }
+
     if ((~priv).Precomputed.Dp == nil) {
         Ꮡt.Fatalf("Precomputed.Dp is nil"u8);
     }
@@ -346,14 +353,18 @@ public static void TestMarshalRSAPrivateKeyInvalid(ж<testing.T> Ꮡt) {
     var (block, _) = pem.Decode(slice<byte>(strings.ReplaceAll(
         beginRsaTestingKeyˢ, testingKeyˢ, privateKeyˢ)));
     var (testRSA2048, _) = ParsePKCS1PrivateKey((~block).Bytes);
+
     ref var broken = ref heap<rsa.PrivateKey>(out var Ꮡbroken);
     broken = testRSA2048.Value;
     broken.Precomputed.Dp = @new<bigꓸInt>().SetUint64(42);
+
     var (parsed, err) = ParsePKCS1PrivateKey(MarshalPKCS1PrivateKey(Ꮡbroken));
     if (err == default!) {
         Ꮡt.Errorf("expected error, got success"u8);
     }
+
     Ꮡt.Setenv(godebugˢ, x509rsacrt0ˢ);
+
     (parsed, err) = ParsePKCS1PrivateKey(MarshalPKCS1PrivateKey(Ꮡbroken));
     if (err != default!) {
         Ꮡt.Fatalf("expected success, got error: %v"u8, err);
@@ -382,6 +393,7 @@ public static void TestMarshalRSAPublicKey(ж<testing.T> Ꮡt) {
     if ((~pub).N.Cmp((~pub2).N) != 0 || (~pub).E != (~pub2).E) {
         Ꮡt.Errorf("ParsePKCS1PublicKey = %+v, want %+v"u8, pub.OrTypedNil(), pub2.OrTypedNil());
     }
+
     // It's never been documented that asn1.Marshal/Unmarshal on rsa.PublicKey works,
     // but it does, and we know of code that depends on it.
     // Lock that in, even though we'd prefer that people use MarshalPKCS1PublicKey and ParsePKCS1PublicKey.
@@ -400,54 +412,40 @@ public static void TestMarshalRSAPublicKey(ж<testing.T> Ꮡt) {
     if (builtin.len(rest) != 0 || (~pub).N.Cmp((~pub3).N) != 0 || (~pub).E != (~pub3).E) {
         Ꮡt.Errorf("Unmarshal(rsa.PublicKey) = %+v, %q want %+v, %q"u8, pub.OrTypedNil(), rest, pub2.OrTypedNil(), slice<byte>(default!));
     }
+
     var publicKeys = new TestMarshalRSAPublicKey_publicKeys[]{
         new(
             derBytes: new byte[]{
                 0x30, 6, // SEQUENCE, 6 bytes
-
                 0x02, 1, // INTEGER, 1 byte
-
                 17,
                 0x02, 1, // INTEGER, 1 byte
-
-                3
-            }.slice() // 3
-
+                3 // 3
+            }.slice()
         ), new(
         derBytes: new byte[]{
             0x30, 6, // SEQUENCE
-
             0x02, 1, // INTEGER, 1 byte
-
             0xff, // -1
-
             0x02, 1, // INTEGER, 1 byte
-
             3
         }.slice(),
         expectedErrSubstr: "zero or negative"u8
     ), new(
         derBytes: new byte[]{
             0x30, 6, // SEQUENCE
-
             0x02, 1, // INTEGER, 1 byte
-
             17,
             0x02, 1, // INTEGER, 1 byte
-
-            0xff
-        }.slice(), // -1
-
+            0xff // -1
+        }.slice(),
         expectedErrSubstr: "zero or negative"u8
     ), new(
         derBytes: new byte[]{
             0x30, 6, // SEQUENCE
-
             0x02, 1, // INTEGER, 1 byte
-
             17,
             0x02, 1, // INTEGER, 1 byte
-
             3,
             1
         }.slice(),
@@ -455,33 +453,28 @@ public static void TestMarshalRSAPublicKey(ж<testing.T> Ꮡt) {
     ), new(
         derBytes: new byte[]{
             0x30, 9, // SEQUENCE
-
             0x02, 1, // INTEGER, 1 byte
-
             17,
             0x02, 4, // INTEGER, 4 bytes
-
             0x7f, 0xff, 0xff, 0xff
         }.slice()
     ), new(
         derBytes: new byte[]{
             0x30, 10, // SEQUENCE
-
             0x02, 1, // INTEGER, 1 byte
-
             17,
             0x02, 5, // INTEGER, 5 bytes
-
             0x00, 0x80, 0x00, 0x00, 0x00
-        }.slice(), // On 64-bit systems, encoding/asn1 will accept the
- // public exponent, but ParsePKCS1PublicKey will return
- // an error. On 32-bit systems, encoding/asn1 will
- // return the error. The common substring of both error
- // is the word “large”.
-
+        }.slice(),
+        // On 64-bit systems, encoding/asn1 will accept the
+        // public exponent, but ParsePKCS1PublicKey will return
+        // an error. On 32-bit systems, encoding/asn1 will
+        // return the error. The common substring of both error
+        // is the word “large”.
         expectedErrSubstr: "large"u8
     )
     }.slice();
+
     foreach (var (i, test) in publicKeys) {
         var shouldFail = builtin.len(test.expectedErrSubstr) > 0;
         var (pubΔ1, errΔ1) = ParsePKCS1PublicKey(test.derBytes);
@@ -510,8 +503,6 @@ internal partial struct matchHostnamesTest {
     internal bool ok;
 }
 
-// Issue 27591
-// perfect matches allow trailing dots in patterns
 internal static slice<matchHostnamesTest> matchHostnamesTests = new matchHostnamesTest[]{
     new("a.b.c"u8, "a.b.c"u8, true),
     new("a.b.c"u8, "b.b.c"u8, false),
@@ -523,7 +514,7 @@ internal static slice<matchHostnamesTest> matchHostnamesTests = new matchHostnam
     new("*.example.com"u8, "www.example.com"u8, true),
     new("*.example.com"u8, "www.example.com."u8, true),
     new("*.example.com"u8, "xyz.www.example.com"u8, false),
-    new("*.example.com"u8, "https://www.example.com"u8, false),
+    new("*.example.com"u8, "https://www.example.com"u8, false), // Issue 27591
     new("*.example..com"u8, "www.example..com"u8, false),
     new("www.example..com"u8, "www.example..com"u8, true),
     new("*.*.example.com"u8, "xyz.www.example.com"u8, false),
@@ -536,7 +527,7 @@ internal static slice<matchHostnamesTest> matchHostnamesTests = new matchHostnam
     new("."u8, "."u8, false),
     new("example.com"u8, "example.com."u8, true),
     new("example.com."u8, "example.com"u8, false),
-    new("example.com."u8, "example.com."u8, true),
+    new("example.com."u8, "example.com."u8, true), // perfect matches allow trailing dots in patterns
     new("*.com."u8, "example.com."u8, false),
     new("*.com."u8, "example.com"u8, false),
     new("*.com"u8, "example.com"u8, true),
@@ -580,6 +571,7 @@ public static void TestMatchIP(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("VerifyHostname(quux.foo.bar.baz): %v"u8, err);
     }
+
     // But check that if we change it to be matching against an IP address,
     // it is rejected.
     c = Ꮡ(new Certificate(
@@ -592,6 +584,7 @@ public static void TestMatchIP(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Fatalf("VerifyHostname(1.2.3.4) should have failed, did not"u8);
     }
+
     c = Ꮡ(new Certificate(
         IPAddresses: new net.IP[]{net.ParseIP("127.0.0.1"u8), net.ParseIP("::1"u8)}.slice()
     ));
@@ -622,15 +615,18 @@ public static void TestCertificateParse(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("Wrong number of certs: got %d want 2"u8, builtin.len(certs));
         return;
     }
+
     err = certs[0].CheckSignatureFrom(certs[1]);
     if (err != default!) {
         Ꮡt.Error(err);
     }
+
     {
         var errΔ1 = certs[0].VerifyHostname(mailGoogleComˢ); if (errΔ1 != default!) {
             Ꮡt.Error(errΔ1);
         }
     }
+
     const nint expectedExtensions = 10;
     {
         nint n = builtin.len((~certs[0]).Extensions); if (n != expectedExtensions) {
@@ -675,15 +671,18 @@ public static void TestMismatchedSignatureAlgorithm(ж<testing.T> Ꮡt) {
     if (der == nil) {
         Ꮡt.Fatal(failedToFindPemBlockˢ);
     }
+
     var (cert, err) = ParseCertificate((~der).Bytes);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     {
         err = cert.CheckSignature(ECDSAWithSHA256, default!, default!); if (err == default!) {
             Ꮡt.Fatal(checkSignatureˢ);
         }
     }
+
     @string expectedSubstring = expectedSubstringᶜ;
     if (!strings.Contains(err.Error(), expectedSubstring)) {
         Ꮡt.Errorf("Expected error containing %q, but got %q"u8, expectedSubstring, err);
@@ -725,14 +724,17 @@ public static void TestCreateSelfSignedCertificate(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var random = rand.Reader;
+
     var (ecdsaPriv, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
     if (err != default!) {
         Ꮡt.Fatalf("Failed to generate ECDSA key: %s"u8, err);
     }
+
     (var ed25519Pub, var ed25519Priv, err) = ed25519.GenerateKey(random);
     if (err != default!) {
         Ꮡt.Fatalf("Failed to generate Ed25519 key: %s"u8, err);
     }
+
     var tests = new TestCreateSelfSignedCertificate_tests[]{
         new("RSA/RSA"u8, testPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), testPrivateKey.OrTypedNil(), true, SHA384WithRSA),
         new("RSA/ECDSA"u8, testPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), ecdsaPriv.OrTypedNil(), false, ECDSAWithSHA384),
@@ -743,9 +745,11 @@ public static void TestCreateSelfSignedCertificate(ж<testing.T> Ꮡt) {
         new("RSAPSS/ECDSA"u8, testPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), ecdsaPriv.OrTypedNil(), false, ECDSAWithSHA384),
         new("Ed25519"u8, ed25519Pub, ed25519Priv, true, PureEd25519)
     }.slice();
+
     var testExtKeyUsage = new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageClientAuth, ExtKeyUsageServerAuth}.slice();
     var testUnknownExtKeyUsage = new asn1.ObjectIdentifier[]{new nint[]{1, 2, 3}.slice(), new nint[]{2, 59, 1}.slice()}.slice();
     var extraExtensionData = slice<byte>("extra extension"u8);
+
     foreach (var (_, test) in tests) {
         @string commonName = testExampleComˢ;
         ref var template = ref heap<global::go.crypto.x509_package.Certificate>(out var Ꮡtemplate);
@@ -759,8 +763,8 @@ public static void TestCreateSelfSignedCertificate(ж<testing.T> Ꮡt) {
                     new(
                         Type: new nint[]{2, 5, 4, 42}.slice(),
                         Value: (@string)"Gopher"u8
-                    ), // This should override the Country, above.
-
+                    ),
+                    // This should override the Country, above.
                     new(
                         Type: new nint[]{2, 5, 4, 6}.slice(),
                         Value: (@string)"NL"u8
@@ -796,8 +800,8 @@ public static void TestCreateSelfSignedCertificate(ж<testing.T> Ꮡt) {
                 new(
                     Id: new nint[]{1, 2, 3, 4}.slice(),
                     Value: extraExtensionData
-                ), // This extension should override the SubjectKeyId, above.
-
+                ),
+                // This extension should override the SubjectKeyId, above.
                 new(
                     Id: oidExtensionSubjectKeyId,
                     Critical: false,
@@ -805,49 +809,63 @@ public static void TestCreateSelfSignedCertificate(ж<testing.T> Ꮡt) {
                 )
             }.slice()
         );
+
         var (derBytes, errΔ1) = CreateCertificate(random, Ꮡtemplate, Ꮡtemplate, test.pub, test.priv);
         if (errΔ1 != default!) {
             Ꮡt.Errorf("%s: failed to create certificate: %s"u8, test.name, errΔ1);
             continue;
         }
+
         (var cert, errΔ1) = ParseCertificate(derBytes);
         if (errΔ1 != default!) {
             Ꮡt.Errorf("%s: failed to parse certificate: %s"u8, test.name, errΔ1);
             continue;
         }
+
         if (builtin.len((~cert).Policies) != 1 || !(~cert).Policies[0].Equal(template.Policies[0])) {
             Ꮡt.Errorf("%s: failed to parse policy identifiers: got:%#v want:%#v"u8, test.name, (~cert).PolicyIdentifiers, template.Policies);
         }
+
         if (builtin.len((~cert).PermittedDNSDomains) != 2 || (~cert).PermittedDNSDomains[0] != ".example.com" || (~cert).PermittedDNSDomains[1] != "example.com") {
             Ꮡt.Errorf("%s: failed to parse name constraints: %#v"u8, test.name, (~cert).PermittedDNSDomains);
         }
+
         if (builtin.len((~cert).ExcludedDNSDomains) != 1 || (~cert).ExcludedDNSDomains[0] != "bar.example.com") {
             Ꮡt.Errorf("%s: failed to parse name constraint exclusions: %#v"u8, test.name, (~cert).ExcludedDNSDomains);
         }
+
         if (builtin.len((~cert).PermittedIPRanges) != 2 || (~cert).PermittedIPRanges[0].String() != "192.168.0.0/16"u8 || (~cert).PermittedIPRanges[1].String() != "1.0.0.0/8"u8) {
             Ꮡt.Errorf("%s: failed to parse IP constraints: %#v"u8, test.name, (~cert).PermittedIPRanges);
         }
+
         if (builtin.len((~cert).ExcludedIPRanges) != 1 || (~cert).ExcludedIPRanges[0].String() != "2001:db8::/48"u8) {
             Ꮡt.Errorf("%s: failed to parse IP constraint exclusions: %#v"u8, test.name, (~cert).ExcludedIPRanges);
         }
+
         if (builtin.len((~cert).PermittedEmailAddresses) != 1 || (~cert).PermittedEmailAddresses[0] != "foo@example.com") {
             Ꮡt.Errorf("%s: failed to parse permitted email addresses: %#v"u8, test.name, (~cert).PermittedEmailAddresses);
         }
+
         if (builtin.len((~cert).ExcludedEmailAddresses) != 2 || (~cert).ExcludedEmailAddresses[0] != ".example.com" || (~cert).ExcludedEmailAddresses[1] != "example.com") {
             Ꮡt.Errorf("%s: failed to parse excluded email addresses: %#v"u8, test.name, (~cert).ExcludedEmailAddresses);
         }
+
         if (builtin.len((~cert).PermittedURIDomains) != 2 || (~cert).PermittedURIDomains[0] != ".bar.com" || (~cert).PermittedURIDomains[1] != "bar.com") {
             Ꮡt.Errorf("%s: failed to parse permitted URIs: %#v"u8, test.name, (~cert).PermittedURIDomains);
         }
+
         if (builtin.len((~cert).ExcludedURIDomains) != 2 || (~cert).ExcludedURIDomains[0] != ".bar2.com" || (~cert).ExcludedURIDomains[1] != "bar2.com") {
             Ꮡt.Errorf("%s: failed to parse excluded URIs: %#v"u8, test.name, (~cert).ExcludedURIDomains);
         }
+
         if ((~cert).Subject.CommonName != commonName) {
             Ꮡt.Errorf("%s: subject wasn't correctly copied from the template. Got %s, want %s"u8, test.name, (~cert).Subject.CommonName, commonName);
         }
+
         if (builtin.len((~cert).Subject.Country) != 1 || (~cert).Subject.Country[0] != "NL") {
             Ꮡt.Errorf("%s: ExtraNames didn't override Country"u8, test.name);
         }
+
         foreach (var (_, ext) in (~cert).Extensions) {
             if (ext.Id.Equal(oidExtensionSubjectAltName)) {
                 if (ext.Critical) {
@@ -855,6 +873,7 @@ public static void TestCreateSelfSignedCertificate(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         var found = false;
         foreach (var (_, atv) in (~cert).Subject.Names) {
             if (atv.Type.Equal(new nint[]{2, 5, 4, 42}.slice())) {
@@ -865,45 +884,59 @@ public static void TestCreateSelfSignedCertificate(ж<testing.T> Ꮡt) {
         if (!found) {
             Ꮡt.Errorf("%s: Names didn't contain oid 2.5.4.42 from ExtraNames"u8, test.name);
         }
+
         if ((~cert).Issuer.CommonName != commonName) {
             Ꮡt.Errorf("%s: issuer wasn't correctly copied from the template. Got %s, want %s"u8, test.name, (~cert).Issuer.CommonName, commonName);
         }
+
         if ((~cert).SignatureAlgorithm != test.sigAlgo) {
             Ꮡt.Errorf("%s: SignatureAlgorithm wasn't copied from template. Got %v, want %v"u8, test.name, (~cert).SignatureAlgorithm, test.sigAlgo);
         }
+
         if (!slices.Equal<slice<global::go.crypto.x509_package.ExtKeyUsage>, global::go.crypto.x509_package.ExtKeyUsage>((~cert).ExtKeyUsage, testExtKeyUsage)) {
             Ꮡt.Errorf("%s: extkeyusage wasn't correctly copied from the template. Got %v, want %v"u8, test.name, (~cert).ExtKeyUsage, testExtKeyUsage);
         }
+
         if (!slices.EqualFunc<slice<asn1.ObjectIdentifier>, slice<asn1.ObjectIdentifier>, asn1.ObjectIdentifier, asn1.ObjectIdentifier>((~cert).UnknownExtKeyUsage, testUnknownExtKeyUsage, ((Func<asn1.ObjectIdentifier, asn1.ObjectIdentifier, bool>)(asn1.Equal)))) {
             Ꮡt.Errorf("%s: unknown extkeyusage wasn't correctly copied from the template. Got %v, want %v"u8, test.name, (~cert).UnknownExtKeyUsage, testUnknownExtKeyUsage);
         }
+
         if (!slices.Equal<slice<@string>, @string>((~cert).OCSPServer, template.OCSPServer)) {
             Ꮡt.Errorf("%s: OCSP servers differ from template. Got %v, want %v"u8, test.name, (~cert).OCSPServer, template.OCSPServer);
         }
+
         if (!slices.Equal<slice<@string>, @string>((~cert).IssuingCertificateURL, template.IssuingCertificateURL)) {
             Ꮡt.Errorf("%s: Issuing certificate URLs differ from template. Got %v, want %v"u8, test.name, (~cert).IssuingCertificateURL, template.IssuingCertificateURL);
         }
+
         if (!slices.Equal<slice<@string>, @string>((~cert).DNSNames, template.DNSNames)) {
             Ꮡt.Errorf("%s: SAN DNS names differ from template. Got %v, want %v"u8, test.name, (~cert).DNSNames, template.DNSNames);
         }
+
         if (!slices.Equal<slice<@string>, @string>((~cert).EmailAddresses, template.EmailAddresses)) {
             Ꮡt.Errorf("%s: SAN emails differ from template. Got %v, want %v"u8, test.name, (~cert).EmailAddresses, template.EmailAddresses);
         }
+
         if (builtin.len((~cert).URIs) != 1 || (~cert).URIs[0].String() != "https://foo.com/wibble#foo"u8) {
             Ꮡt.Errorf("%s: URIs differ from template. Got %v, want %v"u8, test.name, (~cert).URIs, template.URIs);
         }
+
         if (!slices.EqualFunc<slice<net.IP>, slice<net.IP>, net.IP, net.IP>((~cert).IPAddresses, template.IPAddresses, ((Func<net.IP, net.IP, bool>)(net.Equal)))) {
             Ꮡt.Errorf("%s: SAN IPs differ from template. Got %v, want %v"u8, test.name, (~cert).IPAddresses, template.IPAddresses);
         }
+
         if (!slices.Equal<slice<@string>, @string>((~cert).CRLDistributionPoints, template.CRLDistributionPoints)) {
             Ꮡt.Errorf("%s: CRL distribution points differ from template. Got %v, want %v"u8, test.name, (~cert).CRLDistributionPoints, template.CRLDistributionPoints);
         }
+
         if (!bytes.Equal((~cert).SubjectKeyId, new byte[]{4, 3, 2, 1}.slice())) {
             Ꮡt.Errorf("%s: ExtraExtensions didn't override SubjectKeyId"u8, test.name);
         }
+
         if (!bytes.Contains(derBytes, extraExtensionData)) {
             Ꮡt.Errorf("%s: didn't find extra extension in DER output"u8, test.name);
         }
+
         if (test.checkSig) {
             errΔ1 = cert.CheckSignatureFrom(cert);
             if (errΔ1 != default!) {
@@ -995,7 +1028,6 @@ kBg71w/iEcSY3wUKgHGcJJrObZw7wys91I5kENljqw/Samdr3ka+jBJa
 -----END CERTIFICATE-----
 
 """u8.Raw();
-
 
 partial struct ecdsaTestsᴛ1 /*dyn*/ {
     internal global::go.crypto.x509_package.SignatureAlgorithm sigAlgo;
@@ -1196,11 +1228,13 @@ public static void TestRSAPSSSelfSigned(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("#%d: failed to find PEM block"u8, i);
             continue;
         }
+
         var (cert, err) = ParseCertificate((~der).Bytes);
         if (err != default!) {
             Ꮡt.Errorf("#%d: failed to parse: %s"u8, i, err);
             continue;
         }
+
         {
             err = cert.CheckSignatureFrom(cert); if (err != default!) {
                 Ꮡt.Errorf("#%d: signature check failed: %s"u8, i, err);
@@ -1260,10 +1294,12 @@ public static void TestEd25519SelfSigned(ж<testing.T> Ꮡt) {
     if (der == nil) {
         Ꮡt.Fatalf("Failed to find PEM block"u8);
     }
+
     var (cert, err) = ParseCertificate((~der).Bytes);
     if (err != default!) {
         Ꮡt.Fatalf("Failed to parse: %s"u8, err);
     }
+
     if ((~cert).PublicKeyAlgorithm != Ed25519) {
         Ꮡt.Fatalf("Parsed key algorithm was not Ed25519"u8);
     }
@@ -1274,6 +1310,7 @@ public static void TestEd25519SelfSigned(ж<testing.T> Ꮡt) {
     if (builtin.len(parsedKey) != ed25519.PublicKeySize) {
         Ꮡt.Fatalf("Invalid Ed25519 key"u8);
     }
+
     {
         err = cert.CheckSignatureFrom(cert); if (err != default!) {
             Ꮡt.Fatalf("Signature check failed: %s"u8, err);
@@ -1373,26 +1410,31 @@ public static void TestCRLCreation(ж<testing.T> Ꮡt) {
     var (privRSA, _) = ParsePKCS1PrivateKey((~block).Bytes);
     (block, _) = pem.Decode(slice<byte>(pemCertificate));
     var (certRSA, _) = ParseCertificate((~block).Bytes);
+
     (block, _) = pem.Decode(slice<byte>(ed25519CRLKey));
     var (privEd25519, _) = ParsePKCS8PrivateKey((~block).Bytes);
     (block, _) = pem.Decode(slice<byte>(ed25519CRLCertificate));
     var (certEd25519, _) = ParseCertificate((~block).Bytes);
+
     var tests = new TestCRLCreation_tests[]{
         new("RSA CA"u8, privRSA.OrTypedNil(), certRSA),
         new("Ed25519 CA"u8, privEd25519, certEd25519)
     }.slice();
+
     var loc = time.FixedZone(ozAtlantisˢ, (nint)((time.Duration)(7200000000000L)).Seconds());
+
     var now = time.Unix(1000, 0).In(loc);
     var nowUTC = now.UTC();
     var expiry = time.Unix(10000, 0);
+
     var revokedCerts = new pkix.RevokedCertificate[]{
         new(
             SerialNumber: big.NewInt(1),
             RevocationTime: nowUTC
         ),
         new(
-            SerialNumber: big.NewInt(42), // RevocationTime should be converted to UTC before marshaling.
-
+            SerialNumber: big.NewInt(42),
+            // RevocationTime should be converted to UTC before marshaling.
             RevocationTime: now
         )
     }.slice();
@@ -1406,12 +1448,14 @@ public static void TestCRLCreation(ж<testing.T> Ꮡt) {
             RevocationTime: nowUTC
         )
     }.slice();
+
     foreach (var (_, test) in tests) {
         var (crlBytes, err) = test.cert.CreateCRL(rand.Reader, test.priv, revokedCerts, now, expiry);
         if (err != default!) {
             Ꮡt.Errorf("%s: error creating CRL: %s"u8, test.name, err);
             continue;
         }
+
         (var parsedCRL, err) = ParseDERCRL(crlBytes);
         if (err != default!) {
             Ꮡt.Errorf("%s: error reparsing CRL: %s"u8, test.name, err);
@@ -1447,12 +1491,14 @@ public static void TestParseDERCRL(ж<testing.T> Ꮡt) {
     if (numCerts != expected) {
         Ꮡt.Errorf("bad number of revoked certificates. got: %d want: %d"u8, numCerts, expected);
     }
+
     if (certList.HasExpired(time.Unix(1302517272, 0))) {
         Ꮡt.Errorf("CRL has expired (but shouldn't have)"u8);
     }
+
+    // Can't check the signature here without a package cycle.
 }
 
-// Can't check the signature here without a package cycle.
 public static void TestCRLWithoutExpiry(ж<testing.T> Ꮡt) {
     var derBytes = fromBase64("MIHYMIGZMAkGByqGSM44BAMwEjEQMA4GA1UEAxMHQ2FybERTUxcNOTkwODI3MDcwMDAwWjBpMBMCAgDIFw05OTA4MjIwNzAwMDBaMBMCAgDJFw05OTA4MjIwNzAwMDBaMBMCAgDTFw05OTA4MjIwNzAwMDBaMBMCAgDSFw05OTA4MjIwNzAwMDBaMBMCAgDUFw05OTA4MjQwNzAwMDBaMAkGByqGSM44BAMDLwAwLAIUfmVSdjP+NHMX0feW+aDU2G1cfT0CFAJ6W7fVWxjBz4fvftok8yqDnDWh"u8);
     var (certList, err) = ParseDERCRL(derBytes);
@@ -1478,9 +1524,12 @@ public static void TestParsePEMCRL(ж<testing.T> Ꮡt) {
     if (numCerts != expected) {
         Ꮡt.Errorf("bad number of revoked certificates. got: %d want: %d"u8, numCerts, expected);
     }
+
     if (certList.HasExpired(time.Unix(1302517272, 0))) {
         Ꮡt.Errorf("CRL has expired (but shouldn't have)"u8);
     }
+
+    // Can't check the signature here without a package cycle.
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1488,12 +1537,12 @@ internal static readonly object skippingInShortModeˢ = (@string)"skipping in -s
 internal static readonly @string runˢ = "run"u8;
 internal static readonly @string x509TestImportGoˢ = "x509_test_import.go"u8;
 
-// Can't check the signature here without a package cycle.
 public static void TestImports(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
     testenv.MustHaveGoRun(new x509_test_package.testing_TжTB(Ꮡt));
+
     {
         var (@out, err) = exec.Command(testenv.GoToolPath(new x509_test_package.testing_TжTB(Ꮡt)), runˢ, x509TestImportGoˢ).CombinedOutput(); if (err != default!) {
             Ꮡt.Errorf("failed to run x509_test_import.go: %s\n%s"u8, err, @out);
@@ -1515,22 +1564,27 @@ public static void TestCreateCertificateRequest(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var random = rand.Reader;
+
     var (ecdsa256Priv, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
     if (err != default!) {
         Ꮡt.Fatalf("Failed to generate ECDSA key: %s"u8, err);
     }
+
     (var ecdsa384Priv, err) = ecdsa.GenerateKey(elliptic.P384(), rand.Reader);
     if (err != default!) {
         Ꮡt.Fatalf("Failed to generate ECDSA key: %s"u8, err);
     }
+
     (var ecdsa521Priv, err) = ecdsa.GenerateKey(elliptic.P521(), rand.Reader);
     if (err != default!) {
         Ꮡt.Fatalf("Failed to generate ECDSA key: %s"u8, err);
     }
+
     (_, var ed25519Priv, err) = ed25519.GenerateKey(random);
     if (err != default!) {
         Ꮡt.Fatalf("Failed to generate Ed25519 key: %s"u8, err);
     }
+
     var tests = new TestCreateCertificateRequest_tests[]{
         new("RSA"u8, testPrivateKey.OrTypedNil(), SHA256WithRSA),
         new("RSA-PSS-SHA256"u8, testPrivateKey.OrTypedNil(), SHA256WithRSAPSS),
@@ -1539,6 +1593,7 @@ public static void TestCreateCertificateRequest(ж<testing.T> Ꮡt) {
         new("ECDSA-521"u8, ecdsa521Priv.OrTypedNil(), ECDSAWithSHA256),
         new("Ed25519"u8, ed25519Priv, PureEd25519)
     }.slice();
+
     foreach (var (_, test) in tests) {
         ref var template = ref heap<global::go.crypto.x509_package.CertificateRequest>(out var Ꮡtemplate);
         template = new CertificateRequest(
@@ -1551,21 +1606,25 @@ public static void TestCreateCertificateRequest(ж<testing.T> Ꮡt) {
             EmailAddresses: new @string[]{"gopher@golang.org"u8}.slice(),
             IPAddresses: new net.IP[]{net.IPv4(127, 0, 0, 1).To4(), net.ParseIP("2001:4860:0:2001::68"u8)}.slice()
         );
+
         var (derBytes, errΔ1) = CreateCertificateRequest(random, Ꮡtemplate, test.priv);
         if (errΔ1 != default!) {
             Ꮡt.Errorf("%s: failed to create certificate request: %s"u8, test.name, errΔ1);
             continue;
         }
+
         (var @out, errΔ1) = ParseCertificateRequest(derBytes);
         if (errΔ1 != default!) {
             Ꮡt.Errorf("%s: failed to create certificate request: %s"u8, test.name, errΔ1);
             continue;
         }
+
         errΔ1 = @out.CheckSignature();
         if (errΔ1 != default!) {
             Ꮡt.Errorf("%s: failed to check certificate request signature: %s"u8, test.name, errΔ1);
             continue;
         }
+
         if ((~@out).Subject.CommonName != template.Subject.CommonName){
             Ꮡt.Errorf("%s: output subject common name and template subject common name don't match"u8, test.name);
         } else 
@@ -1590,10 +1649,12 @@ internal static ж<global::go.crypto.x509_package.CertificateRequest> marshalAnd
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (var csr, err) = ParseCertificateRequest(derBytes);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     return csr;
 }
 
@@ -1602,15 +1663,17 @@ public static void TestCertificateRequestOverrides(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     ref var template = ref heap<global::go.crypto.x509_package.CertificateRequest>(out var Ꮡtemplate);
     template = new CertificateRequest(
         Subject: new pkix.Name(
             CommonName: "test.example.com"u8,
             Organization: new @string[]{"Σ Acme Co"u8}.slice()
         ),
-        DNSNames: new @string[]{"test.example.com"u8}.slice(), // An explicit extension should override the DNSNames from the
- // template.
+        DNSNames: new @string[]{"test.example.com"u8}.slice(),
 
+        // An explicit extension should override the DNSNames from the
+        // template.
         ExtraExtensions: new pkix.Extension[]{
             new(
                 Id: oidExtensionSubjectAltName,
@@ -1619,16 +1682,21 @@ public static void TestCertificateRequestOverrides(ж<testing.T> Ꮡt) {
             )
         }.slice()
     );
+
     var csr = marshalAndParseCSR(Ꮡt, Ꮡtemplate);
+
     if (builtin.len((~csr).DNSNames) != 1 || (~csr).DNSNames[0] != "foo.example.com") {
         Ꮡt.Errorf("Extension did not override template. Got %v\n"u8, (~csr).DNSNames);
     }
+
     if (builtin.len((~csr).Extensions) != 1 || !(~csr).Extensions[0].Id.Equal(oidExtensionSubjectAltName) || !(~csr).Extensions[0].Critical) {
         Ꮡt.Errorf("SAN extension was not faithfully copied, got %#v"u8, (~csr).Extensions);
     }
+
     // If there is already an attribute with X.509 extensions then the
     // extra extensions should be added to it rather than creating a CSR
     // with two extension attributes.
+
     template.Attributes = new pkix.AttributeTypeAndValueSET[]{
         new(
             Type: oidExtensionRequest,
@@ -1641,25 +1709,31 @@ public static void TestCertificateRequestOverrides(ж<testing.T> Ꮡt) {
             }.slice()
         )
     }.slice();
+
     csr = marshalAndParseCSR(Ꮡt, Ꮡtemplate);
     {
         nint l = builtin.len((~csr).Attributes); if (l != 1) {
             Ꮡt.Errorf("incorrect number of attributes: %d\n"u8, l);
         }
     }
+
     if (!(~csr).Attributes[0].Type.Equal(oidExtensionRequest) || builtin.len((~csr).Attributes[0].Value) != 1 || builtin.len((~csr).Attributes[0].Value[0]) != 2) {
         Ꮡt.Errorf("bad attributes: %#v\n"u8, (~csr).Attributes);
     }
+
     (var sanContents2, err) = marshalSANs(new @string[]{"foo2.example.com"u8}.slice(), default!, default!, default!);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // Extensions in Attributes should override those in ExtraExtensions.
     template.Attributes[0].Value[0] = append(template.Attributes[0].Value[0], new pkix.AttributeTypeAndValue(
         Type: oidExtensionSubjectAltName,
         Value: sanContents2
     ));
+
     csr = marshalAndParseCSR(Ꮡt, Ꮡtemplate);
+
     if (builtin.len((~csr).DNSNames) != 1 || (~csr).DNSNames[0] != "foo2.example.com") {
         Ꮡt.Errorf("Attributes did not override ExtraExtensions. Got %v\n"u8, (~csr).DNSNames);
     }
@@ -1672,15 +1746,19 @@ public static void TestParseCertificateRequest(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("failed to parse CSR: %s"u8, err);
         }
+
         if (builtin.len((~csr).EmailAddresses) != 1 || (~csr).EmailAddresses[0] != "gopher@golang.org") {
             Ꮡt.Errorf("incorrect email addresses found: %v"u8, (~csr).EmailAddresses);
         }
+
         if (builtin.len((~csr).DNSNames) != 1 || (~csr).DNSNames[0] != "test.example.com") {
             Ꮡt.Errorf("incorrect DNS names found: %v"u8, (~csr).DNSNames);
         }
+
         if (builtin.len((~csr).Subject.Country) != 1 || (~csr).Subject.Country[0] != "AU") {
             Ꮡt.Errorf("incorrect Subject name: %v"u8, (~csr).Subject);
         }
+
         var found = false;
         foreach (var (_, e) in (~csr).Extensions) {
             if (e.Id.Equal(oidExtensionBasicConstraints)) {
@@ -1710,24 +1788,29 @@ public static void TestCriticalFlagInCSRRequestedExtensions(ж<testing.T> Ꮡt) 
     // This CSR contains an extension request where the extensions have a
     // critical flag in them. In the past we failed to handle this.
     @string csrBase64 = csrBase64ᶜ;
+
     var csrBytes = fromBase64(csrBase64);
     var (csr, err) = ParseCertificateRequest(csrBytes);
     if (err != default!) {
         Ꮡt.Fatalf("failed to parse CSR: %s"u8, err);
     }
+
     var expected = new TestCriticalFlagInCSRRequestedExtensions_expected[]{
         new(oidExtensionBasicConstraints, fromBase64(maybAf8CAQAˢ)),
         new(oidExtensionKeyUsage, fromBase64(awIChAˢ))
     }.slice();
+
     {
         nint n = builtin.len((~csr).Extensions); if (n != builtin.len(expected)) {
             Ꮡt.Fatalf("expected to find %d extensions but found %d"u8, builtin.len(expected), n);
         }
     }
+
     foreach (var (i, extension) in (~csr).Extensions) {
         if (!extension.Id.Equal(expected[i].Id)) {
             Ꮡt.Fatalf("extension #%d has unexpected type %v (expected %v)"u8, i, extension.Id, expected[i].Id);
         }
+
         if (!bytes.Equal(extension.Value, expected[i].Value)) {
             Ꮡt.Fatalf("extension #%d has unexpected contents %x (expected %x)"u8, i, extension.Value, expected[i].Value);
         }
@@ -1743,11 +1826,13 @@ internal static ж<global::go.crypto.x509_package.Certificate> serialiseAndParse
         Ꮡt.Fatalf("failed to create certificate: %s"u8, err);
         return default!;
     }
+
     (var cert, err) = ParseCertificate(derBytes);
     if (err != default!) {
         Ꮡt.Fatalf("failed to parse certificate: %s"u8, err);
         return default!;
     }
+
     return cert;
 }
 
@@ -1771,18 +1856,21 @@ public static void TestMaxPathLenNotCA(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("MaxPathLen should be -1 when IsCa is false, got %d"u8, m);
         }
     }
+
     template.Value.MaxPathLen = -1;
     {
         nint m = serialiseAndParse(Ꮡt, template).Value.MaxPathLen; if (m != -1) {
             Ꮡt.Errorf("MaxPathLen should be -1 when IsCa is false and MaxPathLen set to -1, got %d"u8, m);
         }
     }
+
     template.Value.MaxPathLen = 5;
     {
         var (_, err) = CreateCertificate(rand.Reader, template, template, testPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), testPrivateKey.OrTypedNil()); if (err == default!) {
             Ꮡt.Error(specifyingAMaxPathLenˢ);
         }
     }
+
     template.Value.MaxPathLen = 0;
     template.Value.MaxPathLenZero = true;
     {
@@ -1790,6 +1878,7 @@ public static void TestMaxPathLenNotCA(ж<testing.T> Ꮡt) {
             Ꮡt.Error(settingMaxPathLenZeroˢ);
         }
     }
+
     template.Value.BasicConstraintsValid = false;
     {
         nint m = serialiseAndParse(Ꮡt, template).Value.MaxPathLen; if (m != 0) {
@@ -1811,6 +1900,7 @@ public static void TestMaxPathLen(ж<testing.T> Ꮡt) {
         BasicConstraintsValid: true,
         IsCA: true
     ));
+
     var cert1 = serialiseAndParse(Ꮡt, template);
     {
         nint m = cert1.Value.MaxPathLen; if (m != -1) {
@@ -1820,6 +1910,7 @@ public static void TestMaxPathLen(ж<testing.T> Ꮡt) {
     if ((~cert1).MaxPathLenZero) {
         Ꮡt.Errorf("Omitting MaxPathLen resulted in MaxPathLenZero"u8);
     }
+
     template.Value.MaxPathLen = 1;
     var cert2 = serialiseAndParse(Ꮡt, template);
     {
@@ -1830,6 +1921,7 @@ public static void TestMaxPathLen(ж<testing.T> Ꮡt) {
     if ((~cert2).MaxPathLenZero) {
         Ꮡt.Errorf("Setting MaxPathLen resulted in MaxPathLenZero"u8);
     }
+
     template.Value.MaxPathLen = 0;
     template.Value.MaxPathLenZero = true;
     var cert3 = serialiseAndParse(Ꮡt, template);
@@ -1855,11 +1947,13 @@ public static void TestNoAuthorityKeyIdInSelfSignedCert(ж<testing.T> Ꮡt) {
         IsCA: true,
         SubjectKeyId: new byte[]{1, 2, 3, 4}.slice()
     ));
+
     {
         var cert = serialiseAndParse(Ꮡt, template); if (builtin.len((~cert).AuthorityKeyId) != 0) {
             Ꮡt.Fatalf("self-signed certificate contained default authority key id"u8);
         }
     }
+
     template.Value.AuthorityKeyId = new byte[]{1, 2, 3, 4}.slice();
     {
         var cert = serialiseAndParse(Ꮡt, template); if (builtin.len((~cert).AuthorityKeyId) == 0) {
@@ -1886,12 +1980,14 @@ public static void TestNoSubjectKeyIdInCert(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("self-signed certificate did not generate subject key id using the public key"u8);
         }
     }
+
     template.Value.IsCA = false;
     {
         var cert = serialiseAndParse(Ꮡt, template); if (builtin.len((~cert).SubjectKeyId) != 0) {
             Ꮡt.Fatalf("self-signed certificate generated subject key id when it isn't a CA"u8);
         }
     }
+
     template.Value.SubjectKeyId = new byte[]{1, 2, 3, 4}.slice();
     {
         var cert = serialiseAndParse(Ꮡt, template); if (builtin.len((~cert).SubjectKeyId) == 0) {
@@ -1916,6 +2012,7 @@ public static void TestASN1BitLength(ж<testing.T> Ꮡt) {
         new(new byte[]{0xff, 0x80}.slice(), 9),
         new(new byte[]{0xff, 0x81}.slice(), 16)
     }.slice();
+
     foreach (var (i, test) in tests) {
         {
             nint got = asn1BitLength(test.bytes); if (got != test.bitLen) {
@@ -1957,8 +2054,6 @@ public static void TestInsecureAlgorithmErrorString(ж<testing.T> Ꮡt) {
     }
 }
 
-// Just [ v3_req ]
-// Both [ v3_req ] and [ req_attributes ]
 // These CSR was generated with OpenSSL:
 //
 //	openssl req -out CSR.csr -new -sha256 -nodes -keyout privateKey.key -config openssl.cnf
@@ -1973,7 +2068,9 @@ public static void TestInsecureAlgorithmErrorString(ж<testing.T> Ꮡt) {
 //	challengePassword = ignored challenge
 //	unstructuredName  = ignored unstructured name
 internal static array<@string> csrBase64Array = new @string[]{
+    // Just [ v3_req ]
     "MIIDHDCCAgQCAQAwfjELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDEUMBIGA1UEAwwLQ29tbW9uIE5hbWUxITAfBgkqhkiG9w0BCQEWEnRlc3RAZW1haWwuYWRkcmVzczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK1GY4YFx2ujlZEOJxQVYmsjUnLsd5nFVnNpLE4cV+77sgv9NPNlB8uhn3MXt5leD34rm/2BisCHOifPucYlSrszo2beuKhvwn4+2FxDmWtBEMu/QA16L5IvoOfYZm/gJTsPwKDqvaR0tTU67a9OtxwNTBMI56YKtmwd/o8d3hYv9cg+9ZGAZ/gKONcg/OWYx/XRh6bd0g8DMbCikpWgXKDsvvK1Nk+VtkDO1JxuBaj4Lz/p/MifTfnHoqHxWOWl4EaTs4Ychxsv34/rSj1KD1tJqorIv5Xv2aqv4sjxfbrYzX4kvS5SC1goIovLnhj5UjmQ3Qy8u65eow/LLWw+YFcCAwEAAaBZMFcGCSqGSIb3DQEJDjFKMEgwCQYDVR0TBAIwADALBgNVHQ8EBAMCBeAwLgYDVR0RBCcwJYERZ29waGVyQGdvbGFuZy5vcmeCEHRlc3QuZXhhbXBsZS5jb20wDQYJKoZIhvcNAQELBQADggEBAB6VPMRrchvNW61Tokyq3ZvO6/NoGIbuwUn54q6l5VZW0Ep5Nq8juhegSSnaJ0jrovmUgKDN9vEo2KxuAtwG6udS6Ami3zP+hRd4k9Q8djJPb78nrjzWiindLK5Fps9U5mMoi1ER8ViveyAOTfnZt/jsKUaRsscY2FzE9t9/o5moE6LTcHUS4Ap1eheR+J72WOnQYn3cifYaemsA9MJuLko+kQ6xseqttbh9zjqd9fiCSh/LNkzos9c+mg2yMADitaZinAh+HZi50ooEbjaT3erNq9O6RqwJlgD00g6MQdoz9bTAryCUhCQfkIaepmQ7BxS0pqWNW3MMwfDwx/Snz6g="u8,
+    // Both [ v3_req ] and [ req_attributes ]
     "MIIDaTCCAlECAQAwfjELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDEUMBIGA1UEAwwLQ29tbW9uIE5hbWUxITAfBgkqhkiG9w0BCQEWEnRlc3RAZW1haWwuYWRkcmVzczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK1GY4YFx2ujlZEOJxQVYmsjUnLsd5nFVnNpLE4cV+77sgv9NPNlB8uhn3MXt5leD34rm/2BisCHOifPucYlSrszo2beuKhvwn4+2FxDmWtBEMu/QA16L5IvoOfYZm/gJTsPwKDqvaR0tTU67a9OtxwNTBMI56YKtmwd/o8d3hYv9cg+9ZGAZ/gKONcg/OWYx/XRh6bd0g8DMbCikpWgXKDsvvK1Nk+VtkDO1JxuBaj4Lz/p/MifTfnHoqHxWOWl4EaTs4Ychxsv34/rSj1KD1tJqorIv5Xv2aqv4sjxfbrYzX4kvS5SC1goIovLnhj5UjmQ3Qy8u65eow/LLWw+YFcCAwEAAaCBpTAgBgkqhkiG9w0BCQcxEwwRaWdub3JlZCBjaGFsbGVuZ2UwKAYJKoZIhvcNAQkCMRsMGWlnbm9yZWQgdW5zdHJ1Y3R1cmVkIG5hbWUwVwYJKoZIhvcNAQkOMUowSDAJBgNVHRMEAjAAMAsGA1UdDwQEAwIF4DAuBgNVHREEJzAlgRFnb3BoZXJAZ29sYW5nLm9yZ4IQdGVzdC5leGFtcGxlLmNvbTANBgkqhkiG9w0BAQsFAAOCAQEAgxe2N5O48EMsYE7o0rZBB0wi3Ov5/yYfnmmVI22Y3sP6VXbLDW0+UWIeSccOhzUCcZ/G4qcrfhhx6gTZTeA01nP7TdTJURvWAH5iFqj9sQ0qnLq6nEcVHij3sG6M5+BxAIVClQBk6lTCzgphc835Fjj6qSLuJ20XHdL5UfUbiJxx299CHgyBRL+hBUIPfz8p+ZgamyAuDLfnj54zzcRVyLlrmMLNPZNll1Q70RxoU6uWvLH8wB8vQe3Q/guSGubLyLRTUQVPh+dw1L4t8MKFWfX/48jwRM4gIRHFHPeAAE9D9YAoqdIvj/iFm/eQ++7DP8MDwOZWsXeB6jjwHuLmkQ=="u8
 }.array();
 
@@ -2151,11 +2248,13 @@ public static void TestMultipleRDN(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("certificate with two elements in an RDN failed to parse: %v"u8, err);
     }
+
     {
         @string want = eportalMssEdusSiˢ; if ((~cert).Subject.CommonName != want) {
             Ꮡt.Errorf("got common name of %q, but want %q"u8, (~cert).Subject.CommonName, want);
         }
     }
+
     {
         @string want = "1236484010010"u8; if ((~cert).Subject.SerialNumber != want) {
             Ꮡt.Errorf("got serial number of %q, but want %q"u8, (~cert).Subject.SerialNumber, want);
@@ -2247,6 +2346,7 @@ public static void TestEmptyNameConstraints(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Fatal(unexpectedSuccessˢ);
     }
+
     @string expected = expectedᶜ;
     {
         @string str = err.Error(); if (!strings.Contains(str, expected)) {
@@ -2269,6 +2369,7 @@ public static void TestPKIXNameString(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // Check that parsed non-standard attributes are printed.
     ref var rdns = ref heap<pkix.RDNSequence>(out var Ꮡrdns);
     rdns = new pkix.Name(
@@ -2278,6 +2379,7 @@ public static void TestPKIXNameString(ж<testing.T> Ꮡt) {
     ).ToRDNSequence();
     var nn = new pkix.Name(nil);
     nn.FillFromRDNSequence(Ꮡrdns);
+
     // Check that zero-length non-nil ExtraNames hide Names.
     var extra = new pkix.AttributeTypeAndValue[]{
         new(Type: ((asn1.ObjectIdentifier)new nint[]{1, 2, 3, 4, 5}.slice()), Value: (@string)"backing array"u8)}.slice();
@@ -2287,6 +2389,7 @@ public static void TestPKIXNameString(ж<testing.T> Ꮡt) {
         Names: new pkix.AttributeTypeAndValue[]{
             new(Type: ((asn1.ObjectIdentifier)new nint[]{1, 2, 3, 4, 5}.slice()), Value: (@string)"golang.org"u8)}.slice()
     );
+
     var tests = new TestPKIXNameString_tests[]{
         new(nn, "L=Gophertown,1.2.3.4.5=#130a676f6c616e672e6f7267"u8),
         new(extraNotNil, "L=Gophertown"u8),
@@ -2317,14 +2420,14 @@ public static void TestPKIXNameString(ж<testing.T> Ꮡt) {
             Locality: new @string[]{"Gophertown"u8}.slice(),
             ExtraNames: new pkix.AttributeTypeAndValue[]{
                 new(Type: ((asn1.ObjectIdentifier)new nint[]{1, 2, 3, 4, 5}.slice()), Value: (@string)"golang.org"u8)}.slice()
-        ), "1.2.3.4.5=#130a676f6c616e672e6f7267,L=Gophertown"u8), // If there are no ExtraNames, the Names are printed instead.
-
+        ), "1.2.3.4.5=#130a676f6c616e672e6f7267,L=Gophertown"u8),
+        // If there are no ExtraNames, the Names are printed instead.
         new(new pkix.Name(
             Locality: new @string[]{"Gophertown"u8}.slice(),
             Names: new pkix.AttributeTypeAndValue[]{
                 new(Type: ((asn1.ObjectIdentifier)new nint[]{1, 2, 3, 4, 5}.slice()), Value: (@string)"golang.org"u8)}.slice()
-        ), "L=Gophertown,1.2.3.4.5=#130a676f6c616e672e6f7267"u8), // If there are both, print only the ExtraNames.
-
+        ), "L=Gophertown,1.2.3.4.5=#130a676f6c616e672e6f7267"u8),
+        // If there are both, print only the ExtraNames.
         new(new pkix.Name(
             Locality: new @string[]{"Gophertown"u8}.slice(),
             ExtraNames: new pkix.AttributeTypeAndValue[]{
@@ -2333,6 +2436,7 @@ public static void TestPKIXNameString(ж<testing.T> Ꮡt) {
                 new(Type: ((asn1.ObjectIdentifier)new nint[]{1, 2, 3, 4, 6}.slice()), Value: (@string)"example.com"u8)}.slice()
         ), "1.2.3.4.5=#130a676f6c616e672e6f7267,L=Gophertown"u8)
     }.slice();
+
     foreach (var (i, test) in tests) {
         {
             @string got = test.dn.String(); if (got != test.want) {
@@ -2340,6 +2444,7 @@ public static void TestPKIXNameString(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     if (!AreEqual(extra[0].Value, (@string)("backing array"))) {
         Ꮡt.Errorf("the backing array of an empty ExtraNames got modified by String"u8);
     }
@@ -2357,6 +2462,7 @@ public static void TestRDNSequenceString(ж<testing.T> Ꮡt) {
     slice<nint> oidOrganization = new nint[]{2, 5, 4, 10}.slice();
     slice<nint> oidOrganizationalUnit = new nint[]{2, 5, 4, 11}.slice();
     slice<nint> oidCommonName = new nint[]{2, 5, 4, 3}.slice();
+
     var tests = new TestRDNSequenceString_tests[]{
         new(
             seq: new pkix.RDNSequence(new pkix.RelativeDistinguishedNameSET[]{
@@ -2374,6 +2480,7 @@ public static void TestRDNSequenceString(ж<testing.T> Ꮡt) {
             want: "OU=Sales+CN=J. Smith,O=Widget Inc.,C=US"u8
         )
     }.slice();
+
     foreach (var (i, test) in tests) {
         {
             @string got = test.seq.String(); if (got != test.want) {
@@ -2412,6 +2519,7 @@ public static void TestCriticalNameConstraintWithUnknownType(ж<testing.T> Ꮡt)
     if (err != default!) {
         Ꮡt.Fatalf("unexpected parsing failure: %s"u8, err);
     }
+
     {
         nint l = builtin.len((~cert).UnhandledCriticalExtensions); if (l != 1) {
             Ꮡt.Fatalf("expected one unhandled critical extension, but found %d"u8, l);
@@ -2450,6 +2558,7 @@ public static void TestBadIPMask(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Fatalf("unexpected success"u8);
     }
+
     @string expected = expectedᶜ1;
     if (!strings.Contains(err.Error(), expected)) {
         Ꮡt.Fatalf("expected %q in error but got: %s"u8, expected, err);
@@ -2516,20 +2625,24 @@ public static void TestEmptySerialNumber(ж<testing.T> Ꮡt) {
     template = new Certificate(
         DNSNames: new @string[]{"example.com"u8}.slice()
     );
+
     foreach (var _ᴛ1 in range(100)) {
         var (derBytes, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, testPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), testPrivateKey.OrTypedNil());
         if (err != default!) {
             Ꮡt.Fatalf("failed to create certificate: %s"u8, err);
         }
+
         (var cert, err) = ParseCertificate(derBytes);
         if (err != default!) {
             Ꮡt.Fatalf("failed to parse certificate: %s"u8, err);
         }
+
         {
             nint sign = (~cert).SerialNumber.Sign(); if (sign != 1) {
                 Ꮡt.Fatalf("generated a non positive serial, sign: %d"u8, sign);
             }
         }
+
         (var b, err) = asn1.Marshal((~cert).SerialNumber.OrTypedNil());
         if (err != default!) {
             Ꮡt.Fatalf("failed to marshal generated serial number: %s"u8, err);
@@ -2553,14 +2666,17 @@ public static void TestEmptySubject(ж<testing.T> Ꮡt) {
         SerialNumber: big.NewInt(1),
         DNSNames: new @string[]{"example.com"u8}.slice()
     );
+
     var (derBytes, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, testPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), testPrivateKey.OrTypedNil());
     if (err != default!) {
         Ꮡt.Fatalf("failed to create certificate: %s"u8, err);
     }
+
     (var cert, err) = ParseCertificate(derBytes);
     if (err != default!) {
         Ꮡt.Fatalf("failed to parse certificate: %s"u8, err);
     }
+
     foreach (var (_, ext) in (~cert).Extensions) {
         if (ext.Id.Equal(oidExtensionSubjectAltName)) {
             if (!ext.Critical) {
@@ -2569,6 +2685,7 @@ public static void TestEmptySubject(ж<testing.T> Ꮡt) {
             return;
         }
     }
+
     Ꮡt.Fatal(sanExtensionIsMissingˢ);
 }
 
@@ -2619,6 +2736,7 @@ public static void TestMultipleURLsInCRLDP(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to parse certificate: %s"u8, err);
     }
+
     var want = new @string[]{
         "http://epscd.catcert.net/crl/ec-acc.crl"u8,
         "http://epscd2.catcert.net/crl/ec-acc.crl"u8
@@ -2668,15 +2786,18 @@ public static void TestCreateRevocationList(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("Failed to generate Ed25519 key: %s"u8, err);
     }
+
     // Generation command:
     // openssl req -x509 -newkey rsa -keyout key.pem -out cert.pem -days 365 -nodes -subj '/C=US/ST=California/L=San Francisco/O=Internet Widgets, Inc./OU=WWW/CN=Root/emailAddress=admin@example.com' -sha256 -addext basicConstraints=CA:TRUE -addext "keyUsage = digitalSignature, keyEncipherment, dataEncipherment, cRLSign, keyCertSign" -utf8
     @string utf8CAStr = "MIIEITCCAwmgAwIBAgIUXHXy7NdtDv+ClaHvIvlwCYiI4a4wDQYJKoZIhvcNAQELBQAwgZoxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMR8wHQYDVQQKDBZJbnRlcm5ldCBXaWRnZXRzLCBJbmMuMQwwCgYDVQQLDANXV1cxDTALBgNVBAMMBFJvb3QxIDAeBgkqhkiG9w0BCQEWEWFkbWluQGV4YW1wbGUuY29tMB4XDTIyMDcwODE1MzgyMFoXDTIzMDcwODE1MzgyMFowgZoxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMR8wHQYDVQQKDBZJbnRlcm5ldCBXaWRnZXRzLCBJbmMuMQwwCgYDVQQLDANXV1cxDTALBgNVBAMMBFJvb3QxIDAeBgkqhkiG9w0BCQEWEWFkbWluQGV4YW1wbGUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmXvp0WNjsZzySWT7Ce5zewQNKq8ujeZGphJ44Vdrwut/b6TcC4iYENds5+7/3PYwBllp3K5TRpCcafSxdhJsvA7/zWlHHNRcJhJLNt9qsKWP6ukI2Iw6OmFMg6kJQ8f67RXkT8HR3v0UqE+lWrA0g+oRuj4erLtfOtSpnl4nsE/Rs2qxbELFWAf7F5qMqH4dUyveWKrNT8eI6YQN+wBg0MAjoKRvDJnBhuo+IvvXX8Aq1QWUcBGPK3or/Ehxy5f/gEmSUXyEU1Ht/vATt2op+eRaEEpBdGRvO+DrKjlcQV2XMN18A9LAX6hCzH43sGye87dj7RZ9yj+waOYNaM7kFQIDAQABo10wWzAdBgNVHQ4EFgQUtbSlrW4hGL2kNjviM6wcCRwvOEEwHwYDVR0jBBgwFoAUtbSlrW4hGL2kNjviM6wcCRwvOEEwDAYDVR0TBAUwAwEB/zALBgNVHQ8EBAMCAbYwDQYJKoZIhvcNAQELBQADggEBAAko82YNNI2n/45L3ya21vufP6nZihIOIxgcRPUMX+IDJZk16qsFdcLgH3KAP8uiVLn8sULuCj35HpViR4IcAk2d+DqfG11l8kY+e5P7nYsViRfy0AatF59/sYlWf+3RdmPXfL70x4mE9OqlMdDm0kR2obps8rng83VLDNvj3R5sBnQwdw6LKLGzaE+RiCTmkH0+P6vnbOJ33su9+9al1+HvJUg3UM1Xq5Bw7TE8DQTetMV3c2Q35RQaJB9pQ4blJOnW9hfnt8yQzU6TU1bU4mRctTm1o1f8btPqUpi+/blhi5MUJK0/myj1XD00pmyfp8QAFl1EfqmTMIBMLg633A0="u8;
     var (utf8CABytes, _) = base64.StdEncoding.DecodeString(utf8CAStr);
     var (utf8CA, _) = ParseCertificate(utf8CABytes);
+
     @string utf8KeyStr = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCZe+nRY2OxnPJJZPsJ7nN7BA0qry6N5kamEnjhV2vC639vpNwLiJgQ12zn7v/c9jAGWWncrlNGkJxp9LF2Emy8Dv/NaUcc1FwmEks232qwpY/q6QjYjDo6YUyDqQlDx/rtFeRPwdHe/RSoT6VasDSD6hG6Ph6su1861KmeXiewT9GzarFsQsVYB/sXmoyofh1TK95Yqs1Px4jphA37AGDQwCOgpG8MmcGG6j4i+9dfwCrVBZRwEY8reiv8SHHLl/+ASZJRfIRTUe3+8BO3ain55FoQSkF0ZG874OsqOVxBXZcw3XwD0sBfqELMfjewbJ7zt2PtFn3KP7Bo5g1ozuQVAgMBAAECggEAIscjKiD9PAe2Fs9c2tk/LYazfRKI1/pv072nylfGwToffCq8+ZgP7PEDamKLc4QNScME685MbFbkOlYJyBlQriQv7lmGlY/A+Zd3l410XWaGf9IiAP91Sjk13zd0M/micApf23qtlXt/LMwvSadXnvRw4+SjirxCTdBWRt5K2/ZAN550v7bHFk1EZc3UBF6sOoNsjQWh9Ek79UmQYJBPiZDBHO7O2fh2GSIbUutTma+Tb2i1QUZzg+AG3cseF3p1i3uhNrCh+p+01bJSzGTQsRod2xpD1tpWwR3kIftCOmD1XnhpaBQi7PXjEuNbfucaftnoYj2ShDdmgD5RkkbTAQKBgQC8Ghu5MQ/yIeqXg9IpcSxuWtUEAEfK33/cC/IvuntgbNEnWQm5Lif4D6a9zjkxiCS+9HhrUu5U2EV8NxOyaqmtub3Np1Z5mPuI9oiZ119bjUJd4X+jKOTaePWvOv/rL/pTHYqzXohVMrXy+DaTIq4lOcv3n72SuhuTcKU95rhKtQKBgQDQ4t+HsRZd5fJzoCgRQhlNK3EbXQDv2zXqMW3GfpF7GaDP18I530inRURSJa++rvi7/MCFg/TXVS3QC4HXtbzTYTqhE+VHzSr+/OcsqpLE8b0jKBDv/SBkz811PUJDs3LsX31DT3K0zUpMpNSd/5SYTyJKef9L6mxmwlC1S2Yv4QKBgQC57SiYDdnQIRwrtZ2nXvlm/xttAAX2jqJoU9qIuNA4yHaYaRcGVowlUvsiw9OelQ6VPTpGA0wWy0src5lhkrKzSFRHEe+U89U1VVJCljLoYKFIAJvUH5jOJh/am/vYca0COMIfeAJUDHLyfcwb9XyiyRVGZzvP62tUelSq8gIZvQKBgCAHeaDzzWsudCO4ngwvZ3PGwnwgoaElqrmzRJLYG3SVtGvKOJTpINnNLDGwZ6dEaw1gLyEJ38QY4oJxEULDMiXzVasXQuPkmMAqhUP7D7A1JPw8C4TQ+mOa3XUppHx/CpMl/S4SA5OnmsnvyE5Fv0IveCGVXUkFtAN5rihuXEfhAoGANUkuGU3A0Upk2mzv0JTGP4H95JFG93cqnyPNrYs30M6RkZNgTW27yyr+Nhs4/cMdrg1AYTB0+6ItQWSDmYLs7JEbBE/8L8fdD1irIcygjIHE9nJh96TgZCt61kVGLE8758lOdmoB2rZOpGwi16QIhdQb+IyozYqfX+lQUojL/W0="u8;
     var (utf8KeyBytes, _) = base64.StdEncoding.DecodeString(utf8KeyStr);
     var (utf8KeyRaw, _) = ParsePKCS8PrivateKey(utf8KeyBytes);
     var utf8Key = utf8KeyRaw._<crypto.Signer>();
+
     var tests = new TestCreateRevocationList_tests[]{
         new(
             name: "nil template"u8,
@@ -3001,6 +3122,7 @@ public static void TestCreateRevocationList(ж<testing.T> Ꮡt) {
             ))
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tc = ref heap(new TestCreateRevocationList_tests(), out var Ꮡtc);
         tc = vᴛ1;
@@ -3020,14 +3142,17 @@ public static void TestCreateRevocationList(ж<testing.T> Ꮡt) {
             if (tcʗ1.expectedError != ""u8) {
                 return;
             }
+
             (var parsedCRL, errΔ1) = ParseRevocationList(crl);
             if (errΔ1 != default!) {
                 tΔ1.Fatalf("Failed to parse generated CRL: %s"u8, errΔ1);
             }
+
             if ((~tcʗ1.template).SignatureAlgorithm != UnknownSignatureAlgorithm && (~parsedCRL).SignatureAlgorithm != (~tcʗ1.template).SignatureAlgorithm) {
                 tΔ1.Fatalf("SignatureAlgorithm mismatch: got %v; want %v."u8, (~parsedCRL).SignatureAlgorithm,
                     (~tcʗ1.template).SignatureAlgorithm);
             }
+
             if (builtin.len((~tcʗ1.template).RevokedCertificates) > 0){
                 if (!reflect.DeepEqual((~parsedCRL).RevokedCertificates, (~tcʗ1.template).RevokedCertificates)) {
                     tΔ1.Fatalf("RevokedCertificates mismatch: got %v; want %v."u8,
@@ -3055,6 +3180,7 @@ public static void TestCreateRevocationList(ж<testing.T> Ꮡt) {
                     }
                 }
             }
+
             if (builtin.len((~parsedCRL).Extensions) != 2 + builtin.len((~tcʗ1.template).ExtraExtensions)) {
                 tΔ1.Fatalf("Generated CRL has wrong number of extensions, wanted: %d, got: %d"u8, 2 + builtin.len((~tcʗ1.template).ExtraExtensions), builtin.len((~parsedCRL).Extensions));
             }
@@ -3082,6 +3208,7 @@ public static void TestCreateRevocationList(ж<testing.T> Ꮡt) {
                 tΔ1.Fatalf("Unexpected second extension: got %v, want %v"u8,
                     (~parsedCRL).Extensions[1], crlExt);
             }
+
             // With Go 1.19's updated RevocationList, we can now directly compare
             // the RawSubject of the certificate to RawIssuer on the parsed CRL.
             // However, this doesn't work with our hacked issuers above (that
@@ -3108,6 +3235,7 @@ public static void TestCreateRevocationList(ж<testing.T> Ꮡt) {
                     tΔ1.Fatalf("Expected issuer.Subject, parsedCRL.Issuer to be the same; wanted: %#v, got: %#v"u8, caIssuer, (~parsedCRL).Issuer);
                 }
             }
+
             if (builtin.len((~parsedCRL).Extensions[2..]) == 0 && builtin.len((~tcʗ1.template).ExtraExtensions) == 0) {
                 // If we don't have anything to check return early so we don't
                 // hit a [] != nil false positive below.
@@ -3117,6 +3245,7 @@ public static void TestCreateRevocationList(ж<testing.T> Ꮡt) {
                 tΔ1.Fatalf("Extensions mismatch: got %v; want %v."u8,
                     (~parsedCRL).Extensions[2..], (~tcʗ1.template).ExtraExtensions);
             }
+
             if ((~tcʗ1.template).Number != nil && (~parsedCRL).Number == nil) {
                 tΔ1.Fatalf("Generated CRL missing Number: got nil, want %s"u8,
                     (~tcʗ1.template).Number.String());
@@ -3138,6 +3267,7 @@ public static void TestRSAPSAParameters(ж<testing.T> Ꮡt) {
 
     slice<byte> generateParams(crypto.Hash hashFunc) {
         asn1.ObjectIdentifier hashOID = default!;
+
         var exprᴛ1 = hashFunc;
         if (exprᴛ1 == crypto.SHA256) {
             hashOID = oidSHA256;
@@ -3160,21 +3290,26 @@ public static void TestRSAPSAParameters(ж<testing.T> Ꮡt) {
             SaltLength: hashFunc.Size(),
             TrailerField: 1
         );
+
         var mgf1Params = new pkix.AlgorithmIdentifier(
             Algorithm: hashOID,
             Parameters: asn1.NullRawValue
         );
+
         error err = default!;
         (@params.MGF.Parameters.FullBytes, err) = asn1.Marshal(mgf1Params);
         if (err != default!) {
             Ꮡt.Fatalf("failed to marshal MGF parameters: %s"u8, err);
         }
+
         (var serialized, err) = asn1.Marshal(@params);
         if (err != default!) {
             Ꮡt.Fatalf("failed to marshal parameters: %s"u8, err);
         }
+
         return serialized;
     }
+
     foreach (var (_, detail) in signatureAlgorithmDetails) {
         if (!detail.isRSAPSS) {
             continue;
@@ -3191,11 +3326,13 @@ internal static readonly @string errorContainsᶜ2 = "unknown extended key usage
 
 public static void TestUnknownExtKey(ж<testing.T> Ꮡt) {
     @string errorContains = errorContainsᶜ2;
+
     var template = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(10),
         DNSNames: new @string[]{"foo"u8}.slice(),
         ExtKeyUsage: new global::go.crypto.x509_package.ExtKeyUsage[]{((global::go.crypto.x509_package.ExtKeyUsage)(-1))}.slice()
     ));
+
     var (_, err) = CreateCertificate(rand.Reader, template, template, testPrivateKey.Public(), testPrivateKey.OrTypedNil());
     if (!strings.Contains(err.Error(), errorContains)) {
         Ꮡt.Errorf("expected error containing %q, got %s"u8, errorContains, err);
@@ -3223,11 +3360,13 @@ public static void TestIA5SANEnforcement(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("ecdsa.GenerateKey failed: %s"u8, err);
     }
+
     (var testURL, err) = url.Parse(httpsExampleComˢ);
     if (err != default!) {
         Ꮡt.Fatalf("url.Parse failed: %s"u8, err);
     }
     testURL.Value.RawQuery = "∞"u8;
+
     var marshalTests = new TestIA5SANEnforcement_marshalTests[]{
         new(
             name: "marshal: unicode dNSName"u8,
@@ -3254,6 +3393,7 @@ public static void TestIA5SANEnforcement(ж<testing.T> Ꮡt) {
             expectedError: "x509: \"https://example.com/?∞\" cannot be encoded as an IA5String"u8
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in marshalTests) {
         ref var tc = ref heap(new TestIA5SANEnforcement_marshalTests(), out var Ꮡtc);
         tc = vᴛ1;
@@ -3270,6 +3410,7 @@ public static void TestIA5SANEnforcement(ж<testing.T> Ꮡt) {
             }
         });
     }
+
     var unmarshalTests = new TestIA5SANEnforcement_unmarshalTests[]{
         new(
             name: "unmarshal: unicode dNSName"u8,
@@ -3287,6 +3428,7 @@ public static void TestIA5SANEnforcement(ж<testing.T> Ꮡt) {
             expectedError: "x509: SAN uniformResourceIdentifier is malformed"u8
         )
     }.slice();
+
     foreach (var (_, tc) in unmarshalTests) {
         var (der, errΔ2) = hex.DecodeString(tc.cert);
         if (errΔ2 != default!) {
@@ -3336,6 +3478,7 @@ public static void BenchmarkCreateCertificate(ж<testing.B> Ꮡb) {
             }
         )
     }.slice();
+
     foreach (var (_, tc) in tests) {
         var k = tc.gen();
         b.ResetTimer();
@@ -3450,6 +3593,7 @@ internal static bool certPoolEqual(ж<global::go.crypto.x509_package.CertPool> �
             return false;
         }
     }
+
     return true;
 }
 
@@ -3473,6 +3617,7 @@ public static void TestCertificateRequestRoundtripFields(ж<testing.T> Ꮡt) {
         URIs: new ж<url.URL>[]{urlA, urlB}.slice()
     ));
     var @out = marshalAndParseCSR(Ꮡt, @in);
+
     if (!slices.Equal<slice<@string>, @string>((~@in).DNSNames, (~@out).DNSNames)) {
         Ꮡt.Fatalf("Unexpected DNSNames: got %v, want %v"u8, (~@out).DNSNames, (~@in).DNSNames);
     }
@@ -3882,9 +4027,8 @@ public static void TestParseUniqueID(ж<testing.T> Ꮡt) {
 internal static readonly object expectedˢ6 = (@string)"expected CheckSignatureFrom to fail"u8;
 
 public static void TestDisableSHA1ForCertOnly(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     Ꮡt.Setenv(godebugˢ, ""u8);
+
     var tmpl = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(1),
         NotBefore: time.Now().Add(-time.ΔHour),
@@ -3902,6 +4046,7 @@ public static void TestDisableSHA1ForCertOnly(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to parse test cert: %s"u8, err);
     }
+
     err = cert.CheckSignatureFrom(cert);
     if (err == default!){
         Ꮡt.Error(expectedˢ6);
@@ -3911,6 +4056,7 @@ public static void TestDisableSHA1ForCertOnly(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("expected InsecureAlgorithmError error, got %T"u8, err);
         }
     }
+
     (var crlDER, err) = CreateRevocationList(rand.Reader, Ꮡ(new RevocationList(
         SignatureAlgorithm: SHA1WithRSA,
         Number: big.NewInt(1),
@@ -3924,11 +4070,13 @@ public static void TestDisableSHA1ForCertOnly(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to parse test CRL: %s"u8, err);
     }
+
     {
         err = crl.CheckSignatureFrom(cert); if (err != default!) {
             Ꮡt.Errorf("unexpected error: %s"u8, err);
         }
     }
+
     // This is an unrelated OCSP response, which will fail signature verification
     // but shouldn't return an InsecureAlgorithmError, since SHA1 should be allowed
     // for OCSP.
@@ -3937,6 +4085,7 @@ public static void TestDisableSHA1ForCertOnly(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to decode OCSP response TBS hex: %s"u8, err);
     }
+
     err = cert.CheckSignature(SHA1WithRSA, ocspTBS, default!);
     if (!AreEqual(err, rsa.ErrVerification)) {
         Ꮡt.Errorf("unexpected error: %s"u8, err);
@@ -4039,6 +4188,7 @@ public static void TestRevocationListCheckSignatureFrom(ж<testing.T> Ꮡt) {
             err: "x509: ECDSA verification failure"u8
         )
     }.slice();
+
     var crlIssuer = Ꮡ(new Certificate(
         BasicConstraintsValid: true,
         IsCA: true,
@@ -4094,6 +4244,7 @@ public static void TestOmitEmptyExtensions(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var emptyExtSeq = new byte[]{0xA3, 0x02, 0x30, 0x00}.slice();
     if (bytes.Contains(der, emptyExtSeq)) {
         Ꮡt.Error(derEncodingContainsTheAnˢ);
@@ -4236,6 +4387,7 @@ internal static readonly @string x509usepolicies0ˢ = "x509usepolicies=0"u8;
 
 public static void TestCertificateOIDPoliciesGODEBUG(ж<testing.T> Ꮡt) {
     Ꮡt.Setenv(godebugˢ, x509usepolicies0ˢ);
+
     ref var template = ref heap<global::go.crypto.x509_package.Certificate>(out var Ꮡtemplate);
     template = new Certificate(
         SerialNumber: big.NewInt(1),
@@ -4244,23 +4396,29 @@ public static void TestCertificateOIDPoliciesGODEBUG(ж<testing.T> Ꮡt) {
         NotAfter: time.Unix(100000, 0),
         PolicyIdentifiers: new asn1.ObjectIdentifier[]{new nint[]{1, 2, 3}.slice()}.slice()
     );
+
     slice<asn1.ObjectIdentifier> expectPolicyIdentifiers = new asn1.ObjectIdentifier[]{
         new nint[]{1, 2, 3}.slice()
     }.slice();
+
     slice<global::go.crypto.x509_package.OID> expectPolicies = new global::go.crypto.x509_package.OID[]{
         mustNewOIDFromInts(new uint64[]{1, 2, 3}.slice())
     }.slice();
+
     var (certDER, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
     if (err != default!) {
         Ꮡt.Fatalf("CreateCertificate() unexpected error: %v"u8, err);
     }
+
     (var cert, err) = ParseCertificate(certDER);
     if (err != default!) {
         Ꮡt.Fatalf("ParseCertificate() unexpected error: %v"u8, err);
     }
+
     if (!slices.EqualFunc<slice<asn1.ObjectIdentifier>, slice<asn1.ObjectIdentifier>, asn1.ObjectIdentifier, asn1.ObjectIdentifier>((~cert).PolicyIdentifiers, expectPolicyIdentifiers, slices.Equal<asn1.ObjectIdentifier, nint>)) {
         Ꮡt.Errorf("cert.PolicyIdentifiers = %v, want: %v"u8, (~cert).PolicyIdentifiers, expectPolicyIdentifiers);
     }
+
     if (!slices.EqualFunc<slice<global::go.crypto.x509_package.OID>, slice<global::go.crypto.x509_package.OID>, global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID>((~cert).Policies, expectPolicies, ((Func<global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID, bool>)(global::go.crypto.x509_package.Equal)))) {
         Ꮡt.Errorf("cert.Policies = %v, want: %v"u8, (~cert).Policies, expectPolicies);
     }
@@ -4274,6 +4432,7 @@ public static void TestCertificatePolicies(ж<testing.T> Ꮡt) {
     if (x509usepolicies.Value() == "0"u8) {
         Ꮡt.Skip(testReliesOnDefaultˢ);
     }
+
     ref var template = ref heap<global::go.crypto.x509_package.Certificate>(out var Ꮡtemplate);
     template = new Certificate(
         SerialNumber: big.NewInt(1),
@@ -4283,28 +4442,35 @@ public static void TestCertificatePolicies(ж<testing.T> Ꮡt) {
         PolicyIdentifiers: new asn1.ObjectIdentifier[]{new nint[]{1, 2, 3}.slice()}.slice(),
         Policies: new global::go.crypto.x509_package.OID[]{mustNewOIDFromInts(new uint64[]{1, 2, math.MaxUint32 + 1}.slice())}.slice()
     );
+
     var expectPolicies = new global::go.crypto.x509_package.OID[]{mustNewOIDFromInts(new uint64[]{1, 2, math.MaxUint32 + 1}.slice())}.slice();
     var (certDER, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
     if (err != default!) {
         Ꮡt.Fatalf("CreateCertificate() unexpected error: %v"u8, err);
     }
+
     (var cert, err) = ParseCertificate(certDER);
     if (err != default!) {
         Ꮡt.Fatalf("ParseCertificate() unexpected error: %v"u8, err);
     }
+
     if (!slices.EqualFunc<slice<global::go.crypto.x509_package.OID>, slice<global::go.crypto.x509_package.OID>, global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID>((~cert).Policies, expectPolicies, ((Func<global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID, bool>)(global::go.crypto.x509_package.Equal)))) {
         Ꮡt.Errorf("cert.Policies = %v, want: %v"u8, (~cert).Policies, expectPolicies);
     }
+
     Ꮡt.Setenv(godebugˢ, x509usepolicies1ˢ);
     expectPolicies = new global::go.crypto.x509_package.OID[]{mustNewOIDFromInts(new uint64[]{1, 2, math.MaxUint32 + 1}.slice())}.slice();
+
     (certDER, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
     if (err != default!) {
         Ꮡt.Fatalf("CreateCertificate() unexpected error: %v"u8, err);
     }
+
     (cert, err) = ParseCertificate(certDER);
     if (err != default!) {
         Ꮡt.Fatalf("ParseCertificate() unexpected error: %v"u8, err);
     }
+
     if (!slices.EqualFunc<slice<global::go.crypto.x509_package.OID>, slice<global::go.crypto.x509_package.OID>, global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID>((~cert).Policies, expectPolicies, ((Func<global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID, bool>)(global::go.crypto.x509_package.Equal)))) {
         Ꮡt.Errorf("cert.Policies = %v, want: %v"u8, (~cert).Policies, expectPolicies);
     }

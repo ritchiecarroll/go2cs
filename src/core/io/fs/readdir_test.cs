@@ -37,12 +37,15 @@ public static void TestReadDir(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("ReadDir(%s) = %v, %v, want %v, nil"u8, desc, names, errΔ1, new @string[]{"hello.txt"u8, "sub"u8}.slice());
         }
     }
+
     // Test that ReadDir uses the method when present.
     var (dirs, err) = ReadDir(new readDirOnly(new fstest_MapFSᴠReadDirFS(testFsys)), "."u8);
     check(readDirOnlyˢ, dirs, err);
+
     // Test that ReadDir uses Open when the method is not present.
     (dirs, err) = ReadDir(new openOnly(testFsys), "."u8);
     check(openOnlyˢ, dirs, err);
+
     // Test that ReadDir on Sub of . works (sub_test checks non-trivial subs).
     (var sub, err) = Sub(testFsys, "."u8);
     if (err != default!) {
@@ -71,10 +74,12 @@ public static void TestFileInfoToDirEntry(ж<testing.T> Ꮡt) {
             ModTime: time.Now(),
             Sys: ᏑsysValue))
     });
+
     var tests = new TestFileInfoToDirEntry_tests[]{
         new(path: "notadir.txt"u8, wantMode: 0, wantDir: false),
         new(path: "adir"u8, wantMode: os.ModeDir, wantDir: true)
     }.slice();
+
     foreach (var (_, test) in tests) {
         ref var testΔ1 = ref heap<TestFileInfoToDirEntry_tests>(out var ᏑtestΔ1);
         testΔ1 = test;
@@ -85,6 +90,7 @@ public static void TestFileInfoToDirEntry(ж<testing.T> Ꮡt) {
             if (err != default!) {
                 tΔ1.Fatal(err);
             }
+
             var dirEntry = FileInfoToDirEntry(fi);
             {
                 var (g, w) = (dirEntry.Type(), testʗ1.wantMode); if (g != w) {

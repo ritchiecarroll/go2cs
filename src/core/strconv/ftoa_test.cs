@@ -28,17 +28,6 @@ internal static readonly GoBigConst below1e23 = /* 99999999999999974834176 */
 internal static readonly GoBigConst above1e23 = /* 100000000000000008388608 */
     GoBigConst.Parse("100000000000000008388608");
 
-// g conversion and zero suppression
-// Round to even
-// avoid constant arithmetic
-// avoid constant arithmetic
-// fixed bugs
-// https://www.exploringbinary.com/java-hangs-when-converting-2-2250738585072012e-308/
-// https://www.exploringbinary.com/php-hangs-on-numeric-value-2-2250738585072011e-308/
-// Issue 2625.
-// Issue 29491.
-// Issue 52187
-// rounding
 internal static ж<slice<ftoaTest>> Ꮡftoatests = new StandardBox<slice<ftoaTest>>(new ftoaTest[]{
     new(1D, (rune)'e', 5, "1.00000e+00"u8),
     new(1D, (rune)'f', 5, "1.00000"u8),
@@ -55,6 +44,8 @@ internal static ж<slice<ftoaTest>> Ꮡftoatests = new StandardBox<slice<ftoaTes
     new(200000D, (rune)'X', -1, "0X1.86AP+17"u8),
     new(2000000D, (rune)'g', -1, "2e+06"u8),
     new(1e10D, (rune)'g', -1, "1e+10"u8),
+
+    // g conversion and zero suppression
     new(400D, (rune)'g', 2, "4e+02"u8),
     new(40D, (rune)'g', 2, "40"u8),
     new(4D, (rune)'g', 2, "4"u8),
@@ -84,6 +75,8 @@ internal static ж<slice<ftoaTest>> Ꮡftoatests = new StandardBox<slice<ftoaTes
     new(1.2345e6D, (rune)'e', 5, "1.23450e+06"u8),
     new(1.2345e6D, (rune)'f', 5, "1234500.00000"u8),
     new(1.2345e6D, (rune)'g', 5, "1.2345e+06"u8),
+
+    // Round to even
     new(1.2345e6D, (rune)'e', 3, "1.234e+06"u8),
     new(1.2355e6D, (rune)'e', 3, "1.236e+06"u8),
     new(1.2345D, (rune)'f', 3, "1.234"u8),
@@ -109,8 +102,8 @@ internal static ж<slice<ftoaTest>> Ꮡftoatests = new StandardBox<slice<ftoaTes
     new((float64)above1e23, (rune)'e', -1, "1.0000000000000001e+23"u8),
     new((float64)above1e23, (rune)'f', -1, "100000000000000010000000"u8),
     new((float64)above1e23, (rune)'g', -1, "1.0000000000000001e+23"u8),
-    new(fdiv(5e-304D, 1e20D), (rune)'g', -1, "5e-324"u8),
-    new(fdiv(-5e-304D, 1e20D), (rune)'g', -1, "-5e-324"u8),
+    new(fdiv(5e-304D, 1e20D), (rune)'g', -1, "5e-324"u8), // avoid constant arithmetic
+    new(fdiv(-5e-304D, 1e20D), (rune)'g', -1, "-5e-324"u8), // avoid constant arithmetic
     new(32D, (rune)'g', -1, "32"u8),
     new(32D, (rune)'g', 0, "3e+01"u8),
     new(100D, (rune)'x', -1, "0x1.9p+06"u8),
@@ -121,6 +114,8 @@ internal static ж<slice<ftoaTest>> Ꮡftoatests = new StandardBox<slice<ftoaTes
     new(Δmath.Inf(-1), (rune)'g', -1, "-Inf"u8),
     new(-Δmath.Inf(0), (rune)'g', -1, "-Inf"u8),
     new(-1D, (rune)'b', -1, "-4503599627370496p-52"u8),
+
+    // fixed bugs
     new(0.9D, (rune)'f', 1, "0.9"u8),
     new(0.09D, (rune)'f', 1, "0.1"u8),
     new(0.0999D, (rune)'f', 1, "0.1"u8),
@@ -129,15 +124,26 @@ internal static ж<slice<ftoaTest>> Ꮡftoatests = new StandardBox<slice<ftoaTes
     new(0.5D, (rune)'f', 1, "0.5"u8),
     new(0.5D, (rune)'f', 0, "0"u8),
     new(1.5D, (rune)'f', 0, "2"u8),
+
+    // https://www.exploringbinary.com/java-hangs-when-converting-2-2250738585072012e-308/
     new(2.2250738585072012e-308D, (rune)'g', -1, "2.2250738585072014e-308"u8),
+    // https://www.exploringbinary.com/php-hangs-on-numeric-value-2-2250738585072011e-308/
     new(2.2250738585072011e-308D, (rune)'g', -1, "2.225073858507201e-308"u8),
+
+    // Issue 2625.
     new(383260575764816448D, (rune)'f', 0, "383260575764816448"u8),
     new(383260575764816448D, (rune)'g', -1, "3.8326057576481645e+17"u8),
+
+    // Issue 29491.
     new(498484681984085570D, (rune)'f', -1, "498484681984085570"u8),
     new(-5.8339553793802237e+23D, (rune)'g', -1, "-5.8339553793802237e+23"u8),
+
+    // Issue 52187
     new(123.45D, (rune)'?', 0, "%?"u8),
     new(123.45D, (rune)'?', 1, "%?"u8),
     new(123.45D, (rune)'?', -1, "%?"u8),
+
+    // rounding
     new(2.275555555555555D, (rune)'x', -1, "0x1.23456789abcdep+01"u8),
     new(2.275555555555555D, (rune)'x', 0, "0x1p+01"u8),
     new(2.275555555555555D, (rune)'x', 2, "0x1.23p+01"u8),
@@ -220,6 +226,7 @@ public static void TestFtoaRandom(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < N; i++) {
         var bits = (uint64)(((uint64)rand.Uint32() << (int)(32)) | (uint64)rand.Uint32());
         var x = Δmath.Float64frombits(bits);
+
         @string shortFast = FormatFloat(x, (rune)'g', -1, 64);
         strconv_internal_test_package.SetOptimize(false);
         @string shortSlow = FormatFloat(x, (rune)'g', -1, 64);
@@ -227,6 +234,7 @@ public static void TestFtoaRandom(ж<testing.T> Ꮡt) {
         if (shortSlow != shortFast) {
             Ꮡt.Errorf("%b printed as %s, want %s"u8, x, shortFast, shortSlow);
         }
+
         nint prec = rand.Intn(12) + 5;
         shortFast = FormatFloat(x, (rune)'e', prec, 64);
         strconv_internal_test_package.SetOptimize(false);
@@ -253,15 +261,6 @@ public static void TestFormatFloatInvalidBitSize(ж<testing.T> Ꮡt) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// From testdata/testfp.txt
-// Trigger slow path (see issue #15672).
-// The shortest is: 8.034137530808823e+43
-// This denormal is pathological because the lower/upper
-// halfways to neighboring floats are:
-// 622666234635.321003e-320 ~= 622666234635.321e-320
-// 622666234635.321497e-320 ~= 622666234635.3215e-320
-// making it hard to find the 3rd digit
 
 partial struct ftoaBenchesᴛ1 /*dyn*/ {
     internal @string name;
@@ -292,10 +291,19 @@ internal static slice<ftoaBenchesᴛ1> ftoaBenches = new ftoaBenchesᴛ1[]{
     new("64Fixed4"u8, 1.23456e-78D, (rune)'e', 3, 64),
     new("64Fixed12"u8, 1.23456e-78D, (rune)'e', 12, 64),
     new("64Fixed16"u8, 1.23456e-78D, (rune)'e', 16, 64),
+    // From testdata/testfp.txt
     new("64Fixed12Hard"u8, Δmath.Ldexp(6965949469487146D, -249), (rune)'e', 12, 64),
     new("64Fixed17Hard"u8, Δmath.Ldexp(8887055249355788D, 665), (rune)'e', 17, 64),
     new("64Fixed18Hard"u8, Δmath.Ldexp(6994187472632449D, 690), (rune)'e', 18, 64),
+
+    // Trigger slow path (see issue #15672).
+    // The shortest is: 8.034137530808823e+43
     new("Slowpath64"u8, 8.03413753080882349e+43D, (rune)'e', -1, 64),
+    // This denormal is pathological because the lower/upper
+    // halfways to neighboring floats are:
+    // 622666234635.321003e-320 ~= 622666234635.321e-320
+    // 622666234635.321497e-320 ~= 622666234635.3215e-320
+    // making it hard to find the 3rd digit
     new("SlowpathDenormal64"u8, 622666234635.3213e-320D, (rune)'e', -1, 64)
 }.slice();
 

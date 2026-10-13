@@ -50,8 +50,8 @@ using static global::go.text.template_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("text/template/examplefiles_test.go", "examplefiles_test.cs", "ABkqooKClIKCgpSSgoKmAAgI6AAIEpa6lIKCuAAKCgALCO6WqKSCgqaCgriCgpSCgroADAgACwjulqjMgoKmgoK6goKmgoK6goKUgoK8")]
-[assembly: go.GoPositionMap("text/template/link_test.go", "link_test.cs", "ADEkooKUggAAJoSAgqSCgoCCpIKClII=")]
+[assembly: go.GoPositionMap("text/template/examplefiles_test.go", "examplefiles_test.cs", "ABkqooKClIKCgpSSgoKmAAgI6AAIEqbKpIKC2AAKCgAICO6muKSCgqaCgriCgpSCguoADAj47qa47IKCpoKCyoKCpoKCyoKClIKC/A==")]
+[assembly: go.GoPositionMap("text/template/link_test.go", "link_test.cs", "ADEkooKUggAAJpSAgqSCgoCCpIKClII=")]
 // </GoSourcePositionMaps>
 
 namespace go.text;

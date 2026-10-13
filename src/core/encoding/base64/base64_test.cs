@@ -26,13 +26,13 @@ internal partial struct testpair {
     internal @string decoded, encoded;
 }
 
-// RFC 3548 examples
-// RFC 4648 examples
-// Wikipedia examples
 internal static slice<testpair> pairs = new testpair[]{
+    // RFC 3548 examples
     new(((@string)(new byte[]{0x14, 0xfb, 0x9c, 0x03, 0xd9, 0x7e})), "FPucA9l+"u8),
     new(((@string)(new byte[]{0x14, 0xfb, 0x9c, 0x03, 0xd9})), "FPucA9k="u8),
     new(((@string)(new byte[]{0x14, 0xfb, 0x9c, 0x03})), "FPucAw=="u8),
+
+    // RFC 4648 examples
     new(""u8, ""u8),
     new("f"u8, "Zg=="u8),
     new("fo"u8, "Zm8="u8),
@@ -40,6 +40,8 @@ internal static slice<testpair> pairs = new testpair[]{
     new("foob"u8, "Zm9vYg=="u8),
     new("fooba"u8, "Zm9vYmE="u8),
     new("foobar"u8, "Zm9vYmFy"u8),
+
+    // Wikipedia examples
     new("sure."u8, "c3VyZS4="u8),
     new("sure"u8, "c3VyZQ=="u8),
     new("sur"u8, "c3Vy"u8),
@@ -187,12 +189,15 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
             testEqual(Ꮡt, decodeQErrorVWantVˢ, encoded, err, ((error)default!));
             testEqual(Ꮡt, decodeQLengthVWantVˢ, encoded, count, len(p.decoded));
             testEqual(Ꮡt, decodeQQWantQˢ, encoded, ((@string)(dbuf.slice(0, count))), p.decoded);
+
             (dbuf, err) = tt.enc.DecodeString(encoded);
             testEqual(Ꮡt, decodeStringQErrorVWantVˢ, encoded, err, ((error)default!));
             testEqual(Ꮡt, decodeStringQQWantQˢ, encoded, ((@string)dbuf), p.decoded);
+
             (var dst, err) = tt.enc.AppendDecode(slice<byte>("lead"u8), slice<byte>(encoded));
             testEqual(Ꮡt, appendDecodeQErrorVWantVˢ, p.encoded, err, ((error)default!));
             testEqual(Ꮡt, appendDecodeLeadQQWantQˢ, p.encoded, ((@string)dst), "lead" + p.decoded);
+
             (var dst2, err) = tt.enc.AppendDecode(dst.slice(0, 0, len(p.decoded)), slice<byte>(encoded));
             testEqual(Ꮡt, appendDecodeQErrorVWantVˢ, p.encoded, err, ((error)default!));
             testEqual(Ꮡt, appendDecodeQQWantQˢ, p.encoded, ((@string)dst2), p.decoded);
@@ -357,7 +362,6 @@ public static void TestEncodedLen(ж<testing.T> Ꮡt) {
         tests = append(tests, new TestEncodedLen_test(RawStdEncoding, unchecked((nint)(1152921504606846976L)), 1537228672809129302L));
         tests = append(tests, new TestEncodedLen_test(RawStdEncoding, unchecked((nint)(6917529027641081855L)), math.MaxInt));
     }
-
     foreach (var (_, tt) in tests) {
         {
             nint got = tt.enc.EncodedLen(tt.n); if ((int64)got != tt.want) {
@@ -394,7 +398,6 @@ public static void TestDecodedLen(ж<testing.T> Ꮡt) {
         tests = append(tests, new TestDecodedLen_test(RawStdEncoding, unchecked((nint)(1537228672809129302L)), 1152921504606846976L));
         tests = append(tests, new TestDecodedLen_test(RawStdEncoding, math.MaxInt, 6917529027641081855L));
     }
-
     foreach (var (_, tt) in tests) {
         {
             nint got = tt.enc.DecodedLen(tt.n); if ((int64)got != tt.want) {
@@ -428,6 +431,7 @@ public static void TestBig(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("io.ReadAll(NewDecoder(...)): %v"u8, err);
     }
+
     if (!bytes.Equal(raw, decoded)) {
         nint i = default!;
         for (i = 0; i < len(decoded) && i < len(raw); i++) {
@@ -506,7 +510,6 @@ public static partial void TestDecoderIssue3577(ж<testing.T> Ꮡt) {
     next.ᐸꟷ(new nextRead(0, wantErr));
     var d = NewDecoder(StdEncoding, new base64_internal_test_package.faultInjectReaderжReader(Ꮡ(new faultInjectReader(
         source: "VHdhcyBicmlsbGlnLCBhbmQgdGhlIHNsaXRoeSB0b3Zlcw=="u8, // twas brillig...
-
         nextc: next
     ))));
     var errc = new channel<error>(1);
@@ -555,17 +558,20 @@ internal static readonly object decodedResultsNotEqualˢ = (@string)"Decoded res
 public static void TestDecoderIssue4779(ж<testing.T> Ꮡt) {
     @string encoded = cpEat8aaaefˢ;
     @string encodedShort = strings.ReplaceAll(encoded, "\n"u8, ""u8);
+
     var dec = NewDecoder(StdEncoding, new base64_test_package.strings_ReaderжReader(strings.NewReader(encoded)));
     var (res1, err) = io.ReadAll(dec);
     if (err != default!) {
         Ꮡt.Errorf("ReadAll failed: %v"u8, err);
     }
+
     dec = NewDecoder(StdEncoding, new base64_test_package.strings_ReaderжReader(strings.NewReader(encodedShort)));
     slice<byte> res2 = default!;
     (res2, err) = io.ReadAll(dec);
     if (err != default!) {
         Ꮡt.Errorf("ReadAll failed: %v"u8, err);
     }
+
     if (!bytes.Equal(res1, res2)) {
         Ꮡt.Error(decodedResultsNotEqualˢ);
     }
@@ -651,17 +657,20 @@ internal static readonly @string aaaaaaˢ = "AAAAAA"u8;
 public static void TestDecoderRaw(ж<testing.T> Ꮡt) {
     @string source = aaaaaaˢ;
     var want = new byte[]{0, 0, 0, 0}.slice();
+
     // Direct.
     var (dec1, err) = RawURLEncoding.DecodeString(source);
     if (err != default! || !bytes.Equal(dec1, want)) {
         Ꮡt.Errorf("RawURLEncoding.DecodeString(%q) = %x, %v, want %x, nil"u8, source, dec1, err, want);
     }
+
     // Through reader. Used to fail.
     var r = NewDecoder(RawURLEncoding, new base64_test_package.bytes_ReaderжReader(bytes.NewReader(slice<byte>(source))));
     (var dec2, err) = io.ReadAll(io.LimitReader(r, 100));
     if (err != default! || !bytes.Equal(dec2, want)) {
         Ꮡt.Errorf("reading NewDecoder(RawURLEncoding, %q) = %x, %v, want %x, nil"u8, source, dec2, err, want);
     }
+
     // Should work with padding.
     r = NewDecoder(URLEncoding, new base64_test_package.bytes_ReaderжReader(bytes.NewReader(slice<byte>(source + "=="))));
     (var dec3, err) = io.ReadAll(r);

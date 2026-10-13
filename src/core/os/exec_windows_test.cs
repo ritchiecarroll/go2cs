@@ -29,13 +29,12 @@ internal static readonly @string testRunˢ = "-test.run=^$"u8;
 public static partial void TestRemoveAllWithExecutedProcess(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         // Regression test for golang.org/issue/25965.
         if (Δtesting.Short()) {
             Ꮡt.Skip(slowTestSkippingˢ);
         }
         testenv.MustHaveExec(new os_test_package.testing_TжTB(Ꮡt));
+
         ref var err = ref heap<error>(out var Ꮡerr);
         (var name, err) = Executable();
         if (err != default!) {

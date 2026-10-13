@@ -77,6 +77,7 @@ public static partial void TestCtrlBreak(ж<testing.T> Ꮡt) {
         // create source file
         @string source = sourceᶜ;
         @string tmp = Ꮡt.TempDir();
+
         // write ctrlbreak.go
         @string name = filepath.Join(tmp, ctlbreakˢ);
         @string src = name + ".go"u8;
@@ -87,6 +88,7 @@ public static partial void TestCtrlBreak(ж<testing.T> Ꮡt) {
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
         f.Write(slice<byte>(source));
+
         // compile it
         @string exe = name + ".exe"u8;
         defer(os.Remove, exe, ref ᒐ);
@@ -94,6 +96,7 @@ public static partial void TestCtrlBreak(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("Failed to compile: %v\n%v"u8, err, ((@string)o));
         }
+
         // run it
         var cmd = testenv.Command(new signal_test_package.testing_TжTB(Ꮡt), exe);
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);

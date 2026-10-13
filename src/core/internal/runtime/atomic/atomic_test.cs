@@ -96,6 +96,7 @@ internal static void shouldPanic(ж<testing.T> Ꮡt, @string name, Action f) {
         defer(() => {
             // Check that all GC maps are sane.
             runtime.GC();
+
             var err = recover();
             @string want = unaligned64BitAtomicˢ;
             if (err == default!){
@@ -130,10 +131,13 @@ public static void TestUnaligned64(ж<testing.T> Ꮡt) {
     if (/* unsafe.Sizeof(int(0)) */ (uintptr)8 != 4) {
         Ꮡt.Skip(testOnlyRunsOn32Bitˢ);
     }
+
     var x = new slice<uint32>(4);
     @unsafe.Pointer u = (@unsafe.Pointer)((uintptr)((uintptr)Ꮡ(x, 0) | 4)); // force alignment to 4
+
     var up64 = (ж<uint64>)(uintptr)(u); // misaligned
     var p64 = (ж<int64>)(uintptr)(u); // misaligned
+
     var up64ʗ1 = up64;
     shouldPanic(Ꮡt, load64ˢ, () => {
         atomic.Load64(up64ʗ1);
@@ -172,11 +176,13 @@ public static partial void TestAnd8(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // Set every bit in array to 1.
     var a = new slice<uint8>((1 << (int)(12)));
     foreach (var (i, _) in a) {
         a[i] = 0xff;
     }
+
     // Clear array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 8; i++) {
@@ -193,6 +199,7 @@ public static partial void TestAnd8(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 8; i++) {
         ᐸꟷ(done);
     }
+
     // Check that the array has been totally cleared.
     foreach (var (i, v) in a) {
         if (v != 0) {
@@ -213,11 +220,13 @@ public static partial void TestAnd(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // Set every bit in array to 1.
     var a = new slice<uint32>((1 << (int)(12)));
     foreach (var (i, _) in a) {
         a[i] = 0xffffffffU;
     }
+
     // Clear array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 32; i++) {
@@ -234,6 +243,7 @@ public static partial void TestAnd(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 32; i++) {
         ᐸꟷ(done);
     }
+
     // Check that the array has been totally cleared.
     foreach (var (i, v) in a) {
         if (v != 0) {
@@ -254,8 +264,10 @@ public static partial void TestOr8(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // Start with every bit in array set to 0.
     var a = new slice<uint8>((1 << (int)(12)));
+
     // Set every bit in array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 8; i++) {
@@ -272,6 +284,7 @@ public static partial void TestOr8(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 8; i++) {
         ᐸꟷ(done);
     }
+
     // Check that the array has been totally set.
     foreach (var (i, v) in a) {
         if (v != 0xff) {
@@ -292,8 +305,10 @@ public static partial void TestOr(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // Start with every bit in array set to 0.
     var a = new slice<uint32>((1 << (int)(12)));
+
     // Set every bit in array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 32; i++) {
@@ -310,6 +325,7 @@ public static partial void TestOr(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 32; i++) {
         ᐸꟷ(done);
     }
+
     // Check that the array has been totally set.
     foreach (var (i, v) in a) {
         if (v != 0xffffffffU) {
@@ -321,11 +337,13 @@ public static partial void TestOr(ж<testing.T> Ꮡt) {
 public static partial void TestBitwiseContended8(ж<testing.T> Ꮡt) {
     // Start with every bit in array set to 0.
     var a = new slice<uint8>(16);
+
     // Iterations to try.
     nint N = (1 << (int)(16));
     if (testing.Short()) {
         N = (1 << (int)(10));
     }
+
     // Set and then clear every bit in the array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 8; i++) {
@@ -351,6 +369,7 @@ public static partial void TestBitwiseContended8(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 8; i++) {
         ᐸꟷ(done);
     }
+
     // Check that the array has been totally cleared.
     foreach (var (i, v) in a) {
         if (v != 0) {
@@ -362,11 +381,13 @@ public static partial void TestBitwiseContended8(ж<testing.T> Ꮡt) {
 public static partial void TestBitwiseContended(ж<testing.T> Ꮡt) {
     // Start with every bit in array set to 0.
     var a = new slice<uint32>(16);
+
     // Iterations to try.
     nint N = (1 << (int)(16));
     if (testing.Short()) {
         N = (1 << (int)(10));
     }
+
     // Set and then clear every bit in the array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 32; i++) {
@@ -392,6 +413,7 @@ public static partial void TestBitwiseContended(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 32; i++) {
         ᐸꟷ(done);
     }
+
     // Check that the array has been totally cleared.
     foreach (var (i, v) in a) {
         if (v != 0) {
@@ -411,6 +433,7 @@ internal partial struct TestCasRel_x /*dyn*/ {
 public static void TestCasRel(ж<testing.T> Ꮡt) {
     UntypedInt _magic = 0x5a5aa5a5;
     ref var x = ref heap(new TestCasRel_x(), out var Ꮡx);
+
     x.before = _magic;
     x.after = _magic;
     for (nint j = 0; j < 32; j += 1) {
@@ -420,9 +443,11 @@ public static void TestCasRel(ж<testing.T> Ꮡt) {
         if (!atomic.CasRel(Ꮡx.of(TestCasRel_x.Ꮡi), x.o, x.n)) {
             Ꮡt.Fatalf("should have swapped %#x %#x"u8, x.o, x.n);
         }
+
         if (x.i != x.n) {
             Ꮡt.Fatalf("wrong x.i after swap: x.i=%#x x.n=%#x"u8, x.i, x.n);
         }
+
         if (x.before != _magic || x.after != _magic) {
             Ꮡt.Fatalf("wrong magic: %#x _ %#x != %#x _ %#x"u8, x.before, x.after, (nint)(_magic), (nint)(_magic));
         }

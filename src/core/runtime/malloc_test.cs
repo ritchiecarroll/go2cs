@@ -33,11 +33,14 @@ public static void TestMemStats(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     testMemStatsCount++;
+
     // Make sure there's at least one forced GC.
     GC();
+
     // Test that MemStats has sane values.
     var st = @new<Δruntime.MemStats>();
     ReadMemStats(st);
+
     var nz = error (any x) => {
         if (!AreEqual(x, reflect.Zero(reflect.TypeOf(x)).Interface())) {
             return default!;
@@ -51,6 +54,7 @@ public static void TestMemStats(ж<testing.T> Ꮡt) {
             if (testMemStatsCount > 1) {
                 return default!;
             }
+
             if (reflect.ValueOf(x).Convert(reflect.TypeOf(thresh)).Float() < thresh) {
                 return default!;
             }
@@ -79,6 +83,7 @@ public static void TestMemStats(ж<testing.T> Ꮡt) {
         ["GCCPUFraction"u8] = new Func<any, error>[]{le(0.99D)}.slice(), ["EnableGC"u8] = new Func<any, error>[]{eq(true)}.slice(), ["DebugGC"u8] = new Func<any, error>[]{eq(false)}.slice(),
         ["BySize"u8] = default!
     };
+
     var rst = reflect.ValueOf(st.OrTypedNil()).Elem();
     for (nint i = 0; i < rst.Type().NumField(); i++) {
         @string name = rst.Type().Field(i).Name;
@@ -96,17 +101,21 @@ public static void TestMemStats(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     if ((~st).Sys != (~st).HeapSys + (~st).StackSys + (~st).MSpanSys + (~st).MCacheSys + (~st).BuckHashSys + (~st).GCSys + (~st).OtherSys) {
         Ꮡt.Fatalf("Bad sys value: %+v"u8, st.Value);
     }
+
     if ((~st).HeapIdle + (~st).HeapInuse != (~st).HeapSys) {
         Ꮡt.Fatalf("HeapIdle(%d) + HeapInuse(%d) should be equal to HeapSys(%d), but isn't."u8, (~st).HeapIdle, (~st).HeapInuse, (~st).HeapSys);
     }
+
     {
         var lpe = (~st).PauseEnd[(nint)((~st).NumGC + 255) % len((~st).PauseEnd)]; if ((~st).LastGC != lpe) {
             Ꮡt.Fatalf("LastGC(%d) != last PauseEnd(%d)"u8, (~st).LastGC, lpe);
         }
     }
+
     uint64 pauseTotal = default!;
     foreach (var (_, pause) in (~st).PauseNs.ΔRangeSnapshot()) {
         pauseTotal += pause;
@@ -129,6 +138,7 @@ public static void TestMemStats(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("PauseTotalNs(%d) < sum PauseNs(%d)"u8, (~st).PauseTotalNs, pauseTotal);
         }
     }
+
     if ((~st).NumForcedGC > (~st).NumGC) {
         Ꮡt.Fatalf("NumForcedGC(%d) > NumGC(%d)"u8, (~st).NumForcedGC, (~st).NumGC);
     }
@@ -173,10 +183,12 @@ public static void TestTinyAlloc(ж<testing.T> Ꮡt) {
     foreach (var (i, _) in v) {
         v[i] = @unsafe.Pointer.FromPinnedBox(@new<byte>());
     }
+
     var chunks = new map<uintptr, bool>(N);
     foreach (var (_, p) in v.ΔRangeSnapshot()) {
         chunks[(uintptr)((uintptr)p & ~(uintptr)7)] = true;
     }
+
     if (len(chunks) == N) {
         Ꮡt.Fatal(noBytesAllocatedWithinˢ);
     }
@@ -191,8 +203,6 @@ partial struct obj12 {
 internal static readonly object unableToGetAFreshTinyˢ = (@string)"unable to get a fresh tiny slot"u8;
 
 public static void TestTinyAllocIssue37262(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (runtime_internal_test_package.Raceenabled) {
         Ꮡt.Skip(tinyallocSuppressedWhenˢ);
     }
@@ -203,13 +213,16 @@ public static void TestTinyAllocIssue37262(ж<testing.T> Ꮡt) {
     // by atomically accessing the first 64-bit
     // value of a tiny-allocated object.
     // See issue 37262 for details.
+
     // GC twice, once to reach a stable heap state
     // and again to make sure we finish the sweep phase.
     Δruntime.GC();
     Δruntime.GC();
+
     // Disable preemption so we stay on one P's tiny allocator and
     // nothing else allocates from it.
     runtime_internal_test_package.Acquirem();
+
     // Make 1-byte allocations until we get a fresh tiny slot.
     var aligned = false;
     for (nint i = 0; i < 16; i++) {
@@ -223,17 +236,21 @@ public static void TestTinyAllocIssue37262(ж<testing.T> Ꮡt) {
         runtime_internal_test_package.Releasem();
         Ꮡt.Fatal(unableToGetAFreshTinyˢ);
     }
+
     // Create a 4-byte object so that the current
     // tiny slot is partially filled.
     runtime_internal_test_package.Escape(@new<uint32>());
+
     // Create a 12-byte object, which fits into the
     // tiny slot. If it actually gets place there,
     // then the field "a" will be improperly aligned
     // for atomic access on 32-bit architectures.
     // This won't be true if issue 36606 gets resolved.
     var tinyObj12 = runtime_internal_test_package.Escape(@new<obj12>());
+
     // Try to atomically access "x.a".
     atomic.StoreUint64(tinyObj12.of(obj12.Ꮡa), 10);
+
     runtime_internal_test_package.Releasem();
 }
 
@@ -290,9 +307,8 @@ internal static readonly @string testRunˢ5 = "-test.run=^TestArenaCollision$"u8
 internal static readonly @string tooManyAddressSpaceˢ = "too many address space collisions"u8;
 
 public static void TestArenaCollision(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveExec(new runtime_test_package.testing_TжTB(Ꮡt));
+
     // Test that mheap.sysAlloc handles collisions with other
     // memory mappings.
     if (Δos.Getenv(testArenaCollisionˢ) != "1"u8) {
@@ -464,6 +480,7 @@ internal static partial void benchHelper(ж<testing.B> Ꮡb, nint n, Action<chan
     b.StopTimer();
     b.ResetTimer();
     GC();
+
     for (nint i = 0; i < b.N; i++) {
         foreach (var (_, ch) in m) {
             if (ch != default!) {
@@ -475,6 +492,7 @@ internal static partial void benchHelper(ж<testing.B> Ꮡb, nint n, Action<chan
         GC();
         b.StopTimer();
     }
+
     foreach (var (_, ch) in m) {
         close(ch);
     }
@@ -493,11 +511,14 @@ public static partial void BenchmarkGoroutineIdle(ж<testing.B> Ꮡb) {
         var fnʗ1 = fn;
         goǃ(fnʗ1);
     }
+
     GC();
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         GC();
     }
+
     b.StopTimer();
     close(quit);
     time.Sleep(10 * time.Millisecond);

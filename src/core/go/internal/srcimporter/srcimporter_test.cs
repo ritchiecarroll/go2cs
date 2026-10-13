@@ -34,8 +34,6 @@ internal static time.Duration maxTime => /* 2 * time.Second */ 2000000000;
 internal static ж<global::go.go.@internal.srcimporter_package.Importer> importer = New(build.ᏑDefault, token.NewFileSet(), new map<@string, ж<types.Package>>());
 
 internal static void doImport(ж<testing.T> Ꮡt, @string path, @string srcDir) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var t0 = time.Now();
     {
         var (_, err) = importer.ImportFrom(path, srcDir, 0); if (err != default!) {
@@ -65,14 +63,17 @@ internal static (nint, bool) walkDir(ж<testing.T> Ꮡt, @string path, time.Time
         Ꮡt.Log(testingTimeUsedUpˢ);
         return (0, true);
     }
+
     // ignore fake packages and testdata directories
     if (path == "builtin"u8 || path == "unsafe"u8 || strings.HasSuffix(path, testdataˢ)) {
         return (0, false);
     }
+
     var (list, err) = os.ReadDir(filepath.Join(testenv.GOROOT(new srcimporter_internal_test_package.testing_TжTB(Ꮡt)), srcˢ, path));
     if (err != default!) {
         Ꮡt.Fatalf("walkDir %s failed (%v)"u8, path, err);
     }
+
     nint nimports = 0;
     var hasGoFiles = false;
     foreach (var (_, f) in list) {
@@ -87,10 +88,12 @@ internal static (nint, bool) walkDir(ж<testing.T> Ꮡt, @string path, time.Time
             hasGoFiles = true;
         }
     }
+
     if (hasGoFiles) {
         doImport(Ꮡt, path, ""u8);
         nimports++;
     }
+
     return (nimports, false);
 }
 
@@ -99,6 +102,7 @@ internal static readonly object skippingInShortModeˢ = (@string)"skipping in -s
 
 public static void TestImportStdLib(ж<testing.T> Ꮡt) {
     testenv.MustHaveSource(new srcimporter_internal_test_package.testing_TжTB(Ꮡt));
+
     if (testing.Short() && testenv.Builder() == ""u8) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
@@ -107,8 +111,6 @@ public static void TestImportStdLib(ж<testing.T> Ꮡt) {
     Ꮡt.Logf("tested %d imports"u8, nimports);
 }
 
-// go/types.gcCompatibilityMode is off => interface not flattened
-
 partial struct importedObjectTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal @string want;
@@ -116,7 +118,7 @@ partial struct importedObjectTestsᴛ1 /*dyn*/ {
 internal static slice<importedObjectTestsᴛ1> importedObjectTests = new importedObjectTestsᴛ1[]{
     new("flag.Bool"u8, "func Bool(name string, value bool, usage string) *bool"u8),
     new("io.Reader"u8, "type Reader interface{Read(p []byte) (n int, err error)}"u8),
-    new("io.ReadWriter"u8, "type ReadWriter interface{Reader; Writer}"u8),
+    new("io.ReadWriter"u8, "type ReadWriter interface{Reader; Writer}"u8), // go/types.gcCompatibilityMode is off => interface not flattened
     new("math.Pi"u8, "const Pi untyped float"u8),
     new("math.Sin"u8, "func Sin(x float64) float64"u8),
     new("math/big.Int"u8, "type Int struct{neg bool; abs nat}"u8),
@@ -128,6 +130,7 @@ internal static readonly object invalidTestDataFormatˢ = (@string)"invalid test
 
 public static void TestImportedTypes(ж<testing.T> Ꮡt) {
     testenv.MustHaveSource(new srcimporter_internal_test_package.testing_TжTB(Ꮡt));
+
     foreach (var (_, test) in importedObjectTests) {
         nint i = strings.LastIndex(test.name, "."u8);
         if (i < 0) {
@@ -135,20 +138,24 @@ public static void TestImportedTypes(ж<testing.T> Ꮡt) {
         }
         @string importPath = test.name.slice(0, i);
         @string objName = test.name.slice(i + 1);
+
         var (pkg, err) = importer.ImportFrom(importPath, "."u8, 0);
         if (err != default!) {
             Ꮡt.Error(err);
             continue;
         }
+
         var obj = pkg.Scope().Lookup(objName);
         if (obj == default!) {
             Ꮡt.Errorf("%s: object not found"u8, test.name);
             continue;
         }
+
         @string got = types.ObjectString(obj, types.RelativeTo(pkg));
         if (got != test.want) {
             Ꮡt.Errorf("%s: got %q; want %q"u8, test.name, got, test.want);
         }
+
         {
             var (named, _) = obj.Type()._<ж<types.Named>>(ᐧ); if (named != nil) {
                 verifyInterfaceMethodRecvs(Ꮡt, named, 0);
@@ -160,17 +167,17 @@ public static void TestImportedTypes(ж<testing.T> Ꮡt) {
 // verifyInterfaceMethodRecvs verifies that method receiver types
 // are named if the methods belong to a named interface type.
 internal static void verifyInterfaceMethodRecvs(ж<testing.T> Ꮡt, ж<types.Named> Ꮡnamed, nint level) {
-    ref var named = ref Ꮡnamed.DerefOrNull();
-
     // avoid endless recursion in case of an embedding bug that lead to a cycle
     if (level > 10) {
         Ꮡt.Errorf("%s: embeds itself"u8, Ꮡnamed.OrTypedNil());
         return;
     }
+
     var (iface, _) = Ꮡnamed.Underlying()._<ж<types.Interface>>(ᐧ);
     if (iface == nil) {
         return; // not an interface
     }
+
     // check explicitly declared methods
     for (nint i = 0; i < iface.NumExplicitMethods(); i++) {
         var m = iface.ExplicitMethod(i);
@@ -183,6 +190,7 @@ internal static void verifyInterfaceMethodRecvs(ж<testing.T> Ꮡt, ж<types.Nam
             Ꮡt.Errorf("%s: got recv type %s; want %s"u8, m.OrTypedNil(), recv.Type(), Ꮡnamed.OrTypedNil());
         }
     }
+
     // check embedded interfaces (they are named, too)
     for (nint i = 0; i < iface.NumEmbeddeds(); i++) {
         // embedding of interfaces cannot have cycles; recursion will terminate
@@ -196,8 +204,10 @@ internal static readonly @string reimportˢ = "reimport"u8;
 
 public static void TestReimport(ж<testing.T> Ꮡt) {
     testenv.MustHaveSource(new srcimporter_internal_test_package.testing_TжTB(Ꮡt));
+
     // Reimporting a partially imported (incomplete) package is not supported (see issue #19337).
     // Make sure we recognize the situation and report an error.
+
     var mathPkg = types.NewPackage(mathˢ, mathˢ); // incomplete package
     var importer = New(build.ᏑDefault, token.NewFileSet(), new map<@string, ж<types.Package>>{[mathPkg.Path()] = mathPkg});
     var (_, err) = importer.ImportFrom(mathˢ, "."u8, 0);
@@ -213,6 +223,7 @@ internal static readonly object gotNoPackageDespiteNoˢ = (@string)"got no packa
 
 public static void TestIssue20855(ж<testing.T> Ꮡt) {
     testenv.MustHaveSource(new srcimporter_internal_test_package.testing_TжTB(Ꮡt));
+
     var (pkg, err) = importer.ImportFrom(goInternalSrcimporterˢ, "."u8, 0);
     if (err == default! || !strings.Contains(err.Error(), missingFunctionBodyˢ)) {
         Ꮡt.Fatalf("got unexpected or no error: %v"u8, err);
@@ -224,14 +235,18 @@ public static void TestIssue20855(ж<testing.T> Ꮡt) {
 
 internal static void testImportPath(ж<testing.T> Ꮡt, @string pkgPath) {
     testenv.MustHaveSource(new srcimporter_internal_test_package.testing_TжTB(Ꮡt));
+
     @string pkgName = path.Base(pkgPath);
+
     var (pkg, err) = importer.Import(pkgPath);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     if (pkg.Name() != pkgName) {
         Ꮡt.Errorf("got %q; want %q"u8, pkg.Name(), pkgName);
     }
+
     if (pkg.Path() != pkgPath) {
         Ꮡt.Errorf("got %q; want %q"u8, pkg.Path(), pkgPath);
     }
@@ -259,6 +274,7 @@ internal static readonly @string cmdCgoInternalTestˢ = "cmd/cgo/internal/test"u
 public static void TestCgo(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new srcimporter_internal_test_package.testing_TжTB(Ꮡt));
     testenv.MustHaveCGO(new srcimporter_internal_test_package.testing_TжTB(Ꮡt));
+
     ref var buildCtx = ref heap<build.Context>(out var ᏑbuildCtx);
     buildCtx = build.Default;
     var importer = New(ᏑbuildCtx, token.NewFileSet(), new map<@string, ж<types.Package>>());

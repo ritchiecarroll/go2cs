@@ -17,6 +17,7 @@ public static void TestExists(ж<testing.T> Ꮡt) {
     if (runtime.GOOS == "windows"u8) {
         Ꮡt.Skip(existsNotImplementedForˢ);
     }
+
     if (!Exists(os.Stdout.Fd())) {
         Ꮡt.Errorf("Exists(%d) got false want true"u8, os.Stdout.Fd());
     }

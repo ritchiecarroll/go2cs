@@ -17,6 +17,7 @@ public static void TestText(ж<testing.T> Ꮡt) {
     foreach (var (i, _) in indexSet) {
         indexSet[i] = new map<rune, nint>();
     }
+
     // not getting a char in a position: (31/32)¹⁰⁰⁰ = 1.6e-14
     // test completion within 1000 rounds: (1-(31/32)¹⁰⁰⁰)²⁶ = 0.9999999999996
     // empirically, this should complete within 400 rounds = 0.999921
@@ -38,6 +39,7 @@ public static void TestText(ж<testing.T> Ꮡt) {
             }
         }
         set[s] = new EmptyStruct();
+
         done = true;
         foreach (var (i, r) in s) {
             indexSet[i][r]++;

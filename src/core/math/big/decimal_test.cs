@@ -18,7 +18,6 @@ public static void TestDecimalString(ж<testing.T> Ꮡt) {
     foreach (var (_, vᴛ1) in new TestDecimalString_type[]{
         new(want: "0"u8),
         new(new @decimal(default!, 1000), "0"u8), // exponent of 0 is ignored
-
         new(new @decimal(slice<byte>("12345"u8), 0), "0.12345"u8),
         new(new @decimal(slice<byte>("12345"u8), -3), "0.00012345"u8),
         new(new @decimal(slice<byte>("12345"u8), +3), "123.45"u8),
@@ -94,6 +93,7 @@ public static void TestDecimalRounding(ж<testing.T> Ꮡt) {
         new(12999999, 4, "12990000"u8, "13000000"u8, "13000000"u8)
     }.slice()) {
         var x = ((global::go.math.big_package.nat)default!).setUint64(test.x);
+
         ref var d = ref heap(new global::go.math.big_package.@decimal(), out var Ꮡd);
         Ꮡd.init(x, 0);
         Ꮡd.roundDown(test.n);
@@ -102,6 +102,7 @@ public static void TestDecimalRounding(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("roundDown(%d, %d) = %s; want %s"u8, test.x, test.n, got, test.down);
             }
         }
+
         Ꮡd.init(x, 0);
         Ꮡd.round(test.n);
         {
@@ -109,6 +110,7 @@ public static void TestDecimalRounding(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("round(%d, %d) = %s; want %s"u8, test.x, test.n, got, test.even);
             }
         }
+
         Ꮡd.init(x, 0);
         d.roundUp(test.n);
         {

@@ -21,47 +21,6 @@ internal partial struct fileTest {
     internal map<@string, slice<global::go.debug.macho_package.Reloc>> relocations;
 }
 
-// LC_SYMTAB
-// LC_DYSYMTAB
-// LC_LOAD_DYLINKER
-// LC_UUID
-// LC_UNIXTHREAD
-// LC_SYMTAB
-// LC_DYSYMTAB
-// LC_LOAD_DYLINKER
-// LC_UUID
-// LC_UNIXTHREAD
-// LC_UUID
-// LC_SEGMENT
-// LC_SEGMENT
-// LC_SEGMENT
-// LC_SEGMENT
-// LC_DYLD_INFO_ONLY
-// LC_SYMTAB
-// LC_DYSYMTAB
-// LC_LOAD_DYLINKER
-// LC_UUID
-// LC_VERSION_MIN_MACOSX
-// LC_SOURCE_VERSION
-// LC_MAIN
-// LC_LOAD_DYLIB
-// LC_FUNCTION_STARTS
-// LC_DATA_IN_CODE
-// LC_SEGMENT
-// LC_SEGMENT
-// LC_SEGMENT
-// LC_SEGMENT
-// LC_DYLD_INFO_ONLY
-// LC_SYMTAB
-// LC_DYSYMTAB
-// LC_LOAD_DYLINKER
-// LC_UUID
-// LC_VERSION_MIN_MACOSX
-// LC_SOURCE_VERSION
-// LC_MAIN
-// LC_LOAD_DYLIB
-// LC_FUNCTION_STARTS
-// LC_DATA_IN_CODE
 internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTest>>(new fileTest[]{
     new(
         "testdata/gcc-386-darwin-exec.base64"u8,
@@ -72,11 +31,11 @@ internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTes
             Ꮡ(new SegmentHeader(LoadCmdSegment, 0xc0, "__DATA"u8, 0x2000, 0x1000, 0x1000, 0x1000, 0x7, 0x3, 0x2, 0x0)),
             Ꮡ(new SegmentHeader(LoadCmdSegment, 0x7c, "__IMPORT"u8, 0x3000, 0x1000, 0x2000, 0x1000, 0x7, 0x7, 0x1, 0x0)),
             Ꮡ(new SegmentHeader(LoadCmdSegment, 0x38, "__LINKEDIT"u8, 0x4000, 0x1000, 0x3000, 0x12c, 0x7, 0x1, 0x0, 0x0)),
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
+            default!, // LC_SYMTAB
+            default!, // LC_DYSYMTAB
+            default!, // LC_LOAD_DYLINKER
+            default!, // LC_UUID
+            default!, // LC_UNIXTHREAD
             Ꮡ(new Dylib(default!, "/usr/lib/libgcc_s.1.dylib"u8, 0x2, 0x10000, 0x10000)),
             Ꮡ(new Dylib(default!, "/usr/lib/libSystem.B.dylib"u8, 0x2, 0x6f0104, 0x10000))
         }.slice(),
@@ -97,11 +56,11 @@ internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTes
             Ꮡ(new SegmentHeader(LoadCmdSegment64, 0x1d8, "__TEXT"u8, 0x100000000UL, 0x1000, 0x0, 0x1000, 0x7, 0x5, 0x5, 0x0)),
             Ꮡ(new SegmentHeader(LoadCmdSegment64, 0x138, "__DATA"u8, 0x100001000UL, 0x1000, 0x1000, 0x1000, 0x7, 0x3, 0x3, 0x0)),
             Ꮡ(new SegmentHeader(LoadCmdSegment64, 0x48, "__LINKEDIT"u8, 0x100002000UL, 0x1000, 0x2000, 0x140, 0x7, 0x1, 0x0, 0x0)),
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
+            default!, // LC_SYMTAB
+            default!, // LC_DYSYMTAB
+            default!, // LC_LOAD_DYLINKER
+            default!, // LC_UUID
+            default!, // LC_UNIXTHREAD
             Ꮡ(new Dylib(default!, "/usr/lib/libgcc_s.1.dylib"u8, 0x2, 0x10000, 0x10000)),
             Ꮡ(new Dylib(default!, "/usr/lib/libSystem.B.dylib"u8, 0x2, 0x6f0104, 0x10000))
         }.slice(),
@@ -121,7 +80,7 @@ internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTes
         "testdata/gcc-amd64-darwin-exec-debug.base64"u8,
         new FileHeader(0xfeedfacfU, CpuAmd64, 0x80000003U, 0xa, 0x4, 0x5a0, 0),
         new any[]{
-            default!,
+            default!, // LC_UUID
             Ꮡ(new SegmentHeader(LoadCmdSegment64, 0x1d8, "__TEXT"u8, 0x100000000UL, 0x1000, 0x0, 0x0, 0x7, 0x5, 0x5, 0x0)),
             Ꮡ(new SegmentHeader(LoadCmdSegment64, 0x138, "__DATA"u8, 0x100001000UL, 0x1000, 0x0, 0x0, 0x7, 0x3, 0x3, 0x0)),
             Ꮡ(new SegmentHeader(LoadCmdSegment64, 0x278, "__DWARF"u8, 0x100002000UL, 0x1000, 0x1000, 0x1bc, 0x7, 0x3, 0x7, 0x0))
@@ -149,22 +108,22 @@ internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTes
         "testdata/clang-386-darwin-exec-with-rpath.base64"u8,
         new FileHeader(0xfeedfaceU, Cpu386, 0x3, 0x2, 0x10, 0x42c, 0x1200085),
         new any[]{
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
+            default!, // LC_SEGMENT
+            default!, // LC_SEGMENT
+            default!, // LC_SEGMENT
+            default!, // LC_SEGMENT
+            default!, // LC_DYLD_INFO_ONLY
+            default!, // LC_SYMTAB
+            default!, // LC_DYSYMTAB
+            default!, // LC_LOAD_DYLINKER
+            default!, // LC_UUID
+            default!, // LC_VERSION_MIN_MACOSX
+            default!, // LC_SOURCE_VERSION
+            default!, // LC_MAIN
+            default!, // LC_LOAD_DYLIB
             Ꮡ(new Rpath(default!, "/my/rpath"u8)),
-            default!,
-            default!
+            default!, // LC_FUNCTION_STARTS
+            default! // LC_DATA_IN_CODE
         }.slice(),
         default!,
         default!
@@ -173,22 +132,22 @@ internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTes
         "testdata/clang-amd64-darwin-exec-with-rpath.base64"u8,
         new FileHeader(0xfeedfacfU, CpuAmd64, 0x80000003U, 0x2, 0x10, 0x4c8, 0x200085),
         new any[]{
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
-            default!,
+            default!, // LC_SEGMENT
+            default!, // LC_SEGMENT
+            default!, // LC_SEGMENT
+            default!, // LC_SEGMENT
+            default!, // LC_DYLD_INFO_ONLY
+            default!, // LC_SYMTAB
+            default!, // LC_DYSYMTAB
+            default!, // LC_LOAD_DYLINKER
+            default!, // LC_UUID
+            default!, // LC_VERSION_MIN_MACOSX
+            default!, // LC_SOURCE_VERSION
+            default!, // LC_MAIN
+            default!, // LC_LOAD_DYLIB
             Ꮡ(new Rpath(default!, "/my/rpath"u8)),
-            default!,
-            default!
+            default!, // LC_FUNCTION_STARTS
+            default! // LC_DATA_IN_CODE
         }.slice(),
         default!,
         default!
@@ -301,6 +260,7 @@ public static void TestOpen(ж<testing.T> Ꮡt) {
 
     foreach (var (i, _) in fileTests) {
         var tt = Ꮡ(fileTests, i);
+
         // Use obscured files to prevent Apple’s notarization service from
         // mistaking them as candidates for notarization and rejecting the entire
         // toolchain.
@@ -324,10 +284,12 @@ public static void TestOpen(ж<testing.T> Ꮡt) {
                 if (iΔ2 >= len((~tt).loads)) {
                     break;
                 }
+
                 var want = (~tt).loads[iΔ2];
                 if (want == default!) {
                     continue;
                 }
+
                 switch (l.type()) {
                 case ж<global::go.debug.macho_package.ΔSegment> lΔ1: {
                     var have = lΔ1.of(global::go.debug.macho_package.ΔSegment.ᏑSegmentHeader);
@@ -364,6 +326,7 @@ public static void TestOpen(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("open %s: len(Loads) = %d, want %d"u8, (~tt).@file, fn, tn);
             }
         }
+
         if ((~tt).sections != default!) {
             foreach (var (iΔ3, sh) in (~f).Sections) {
                 if (iΔ3 >= len((~tt).sections)) {
@@ -381,6 +344,7 @@ public static void TestOpen(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("open %s: len(Sections) = %d, want %d"u8, (~tt).@file, fn, tn);
             }
         }
+
         if ((~tt).relocations != default!) {
             foreach (var (iΔ4, sh) in (~f).Sections) {
                 var have = sh.Value.Relocs;
@@ -397,8 +361,6 @@ public static void TestOpen(ж<testing.T> Ꮡt) {
 internal static readonly @string fileGoˢ = "file.go"u8;
 
 public static void TestOpenFailure(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     @string filename = fileGoˢ; // not a Mach-O file
     var (_, err) = Open(filename); // don't crash
     if (err == default!) {
@@ -414,18 +376,22 @@ public static void TestOpenFat(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     if ((~ff).Magic != MagicFat) {
         Ꮡt.Errorf("OpenFat: got magic number %#x, want %#x"u8, (~ff).Magic, MagicFat);
     }
     if (len((~ff).Arches) != 2) {
         Ꮡt.Errorf("OpenFat: got %d architectures, want 2"u8, len((~ff).Arches));
     }
+
     foreach (var (i, _) in (~ff).Arches) {
         var arch = Ꮡ((~ff).Arches, i);
         var ftArch = Ꮡ(fileTests, i);
+
         if ((~arch).Cpu != (~ftArch).hdr.Cpu || (~arch).SubCpu != (~ftArch).hdr.SubCpu) {
             Ꮡt.Errorf("OpenFat: architecture #%d got cpu=%#x subtype=%#x, expected cpu=%#x, subtype=%#x"u8, i, (~arch).Cpu, (~arch).SubCpu, (~ftArch).hdr.Cpu, (~ftArch).hdr.SubCpu);
         }
+
         if (!reflect.DeepEqual((~arch).FileHeader, (~ftArch).hdr)) {
             Ꮡt.Errorf("OpenFat header:\n\tgot %#v\n\twant %#v\n"u8, (~arch).FileHeader, (~ftArch).hdr);
         }
@@ -442,6 +408,7 @@ public static void TestOpenFatFailure(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("OpenFat %s: succeeded unexpectedly"u8, filename);
         }
     }
+
     filename = testdataGcc386DarwinExecˢ; // not a fat Mach-O
     var (ff, err) = openFatObscured(filename);
     if (!AreEqual(err, ErrNotFat)) {

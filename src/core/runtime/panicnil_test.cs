@@ -43,6 +43,7 @@ internal static void checkPanicNil(ж<testing.T> Ꮡt, any want) {
         var s = new metrics.Sample[]{new(Name: name)}.slice();
         metrics.Read(s);
         var v1 = s[0].Value.Uint64();
+
         var sʗ1 = s;
         defer(() => {
             var e = recover();

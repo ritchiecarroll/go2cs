@@ -27,9 +27,11 @@ public static void TestFixedGOROOT(ж<testing.T> Ꮡt) {
         var envs = runtime_internal_test_package.Envs();
         var oldenvs = appendꓸꓸꓸ(new @string[]{}.slice(), envs);
         defer(runtime_internal_test_package.SetEnvs, oldenvs, ref ᒐ);
+
         // attempt to reuse existing envs backing array.
         @string want = Δruntime.GOROOT();
         runtime_internal_test_package.SetEnvs(append(envs[..0], "GOROOT="u8 + want));
+
         {
             @string got = Δruntime.GOROOT(); if (got != want) {
                 Ꮡt.Errorf(@"initial runtime.GOROOT()=%q, want %q"u8, got, want);

@@ -59,6 +59,7 @@ internal static slice<fuzzCommand> decode(slice<byte> b) {
     nint entries = len(b) / fuzzCommandSize;
     nint usefulSize = entries * fuzzCommandSize;
     b = b.slice(0, usefulSize);
+
     ref var fc = ref heap<slice<fuzzCommand>>(out var Ꮡfc);
     fc = new slice<fuzzCommand>(entries);
     var buf = bytes.NewReader(b);
@@ -67,6 +68,7 @@ internal static slice<fuzzCommand> decode(slice<byte> b) {
             throw panic(fmt.Sprintf("error reading %v: %v"u8, b, err));
         }
     }
+
     return fc;
 }
 
@@ -82,11 +84,13 @@ public static void TestEncodeDecode(ж<testing.T> Ꮡt) {
             Key: 123
         )
     }.slice();
+
     var b = encode(fc);
     var got = decode(b);
     if (!reflect.DeepEqual(fc, got)) {
         Ꮡt.Errorf("encode-decode roundtrip got %+v want %+v"u8, got, fc);
     }
+
     // Extra trailing bytes ignored.
     b = append(b, (byte)(42));
     got = decode(b);
@@ -114,6 +118,7 @@ public static void FuzzTable(ж<testing.F> Ꮡf) {
             Key: 123
         )
     }.slice()));
+
     // Add enough times to trigger grow.
     f.Add(encode(new fuzzCommand[]{
         new(
@@ -174,11 +179,13 @@ public static void FuzzTable(ж<testing.F> Ꮡf) {
             Key: 2
         )
     }.slice()));
+
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> @in) => {
         var fc = decode(@in);
         if (len(fc) == 0) {
             return;
         }
+
         var (m, typ) = maps_internal_test_package.NewTestMap<uint16, uint32>(8);
         var @ref = new map<uint16, uint32>();
         foreach (var (_, vᴛ1) in fc) {
@@ -189,6 +196,7 @@ public static void FuzzTable(ж<testing.F> Ꮡf) {
             if (exprᴛ1 == fuzzOpGet) {
                 var (elemPtr, ok) = m.Get(typ, @unsafe.Pointer.FromPinnedBox(Ꮡc.of(fuzzCommand.ᏑKey)));
                 var (refElem, refOK) = @ref[c.Key, ꟷ];
+
                 if (ok != refOK) {
                     t.Errorf("Get(%d) got ok %v want ok %v"u8, c.Key, ok, refOK);
                 }
@@ -209,14 +217,12 @@ public static void FuzzTable(ж<testing.F> Ꮡf) {
                 delete(@ref, c.Key);
             }
             else { /* default: */
+                // Just skip this command to keep the fuzzer
+                // less constrained.
                 continue;
             }
-
         }
     });
 }
-
-// Just skip this command to keep the fuzzer
-// less constrained.
 
 } // end maps_test_package

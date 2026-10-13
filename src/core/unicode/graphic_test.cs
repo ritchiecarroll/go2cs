@@ -26,7 +26,6 @@ public static void TestIsControlLatin1(ж<testing.T> Ꮡt) {
             want = true;
             break;
         }}
-
         if (got != want) {
             Ꮡt.Errorf("%U incorrect: got %t; want %t"u8, i, got, want);
         }

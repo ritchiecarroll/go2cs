@@ -12,7 +12,6 @@ using static go.encoding.csv_package;
 
 partial class csv_internal_test_package {
 
-
 partial struct writeTestsᴛ1 /*dyn*/ {
     public slice<slice<@string>> Input;
     public @string Output;
@@ -91,13 +90,16 @@ public static void TestError(ж<testing.T> Ꮡt) {
     f.Write(new @string[]{"abc"u8}.slice());
     f.Flush();
     var err = f.Error();
+
     if (err != default!) {
         Ꮡt.Errorf("Unexpected error: %s\n"u8, err);
     }
+
     f = NewWriter(new errorWriter(nil));
     f.Write(new @string[]{"abc"u8}.slice());
     f.Flush();
     err = f.Error();
+
     if (err == default!) {
         Ꮡt.Error(errorShouldNotBeNilˢ);
     }

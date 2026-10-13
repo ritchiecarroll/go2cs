@@ -168,6 +168,7 @@ internal static void testMultipart(ж<testing.T> Ꮡt, io.Reader r, bool onlyNew
     Ꮡt.Parallel();
     var reader = NewReader(r, myBoundaryˢ2);
     var buf = @new<strings.Builder>();
+
     // Part1
     var (part, err) = reader.NextPart();
     if (part == nil || err != default!) {
@@ -195,13 +196,16 @@ internal static void testMultipart(ж<testing.T> Ꮡt, io.Reader r, bool onlyNew
             Ꮡt.Errorf("part 1 copy: %v"u8, errΔ1);
         }
     }
+
     @string adjustNewlines(@string sΔ1) {
         if (onlyNewlines) {
             return strings.ReplaceAll(sΔ1, "\r\n"u8, "\n"u8);
         }
         return sΔ1;
     }
+
     expectEq(Ꮡt, adjustNewlines(myValueTheEndˢ), buf.String(), valueOfFirstPartˢ);
+
     // Part2
     (part, err) = reader.NextPart();
     if (err != default!) {
@@ -228,6 +232,7 @@ internal static void testMultipart(ж<testing.T> Ꮡt, io.Reader r, bool onlyNew
     if (s != longLine) {
         Ꮡt.Errorf("part2 long body didn't match"u8);
     }
+
     // Part3
     (part, err) = reader.NextPart();
     if (part == nil || err != default!) {
@@ -245,12 +250,14 @@ internal static void testMultipart(ж<testing.T> Ꮡt, io.Reader r, bool onlyNew
     }
     expectEq(Ꮡt, adjustNewlines(line1Line2Line3EndsInAˢ),
         buf.String(), bodyOfPart3ˢ);
+
     // Part4
     (part, err) = reader.NextPart();
     if (part == nil || err != default!) {
         Ꮡt.Error(expectedPart4Withoutˢ);
         return;
     }
+
     // Non-existent part5
     (part, err) = reader.NextPart();
     if (part != nil) {
@@ -274,9 +281,11 @@ public static void TestVariousTextLineEndings(ж<testing.T> Ꮡt) {
         "Foo\rBar\r"u8,
         "\x00\x01\x02\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10"u8
     }.array();
+
     foreach (var (testNum, expectedBody) in tests.ΔRangeSnapshot()) {
         @string body = "--BOUNDARY\r\n"u8 + "Content-Disposition: form-data; name=\"value\"\r\n"u8 + "\r\n"u8 + expectedBody + "\r\n--BOUNDARY--\r\n"u8;
         var bodyReader = strings.NewReader(body);
+
         var reader = NewReader(new multipart_test_package.strings_ReaderжReader(bodyReader), boundaryˢ2);
         var buf = @new<bytes.Buffer>();
         var (part, err) = reader.NextPart();
@@ -293,6 +302,7 @@ public static void TestVariousTextLineEndings(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Errorf("Error copying multipart; bytes=%v, error=%v"u8, written, err);
         }
+
         (part, err) = reader.NextPart();
         if (part != nil) {
             Ꮡt.Errorf("Unexpected part in test %d"u8, testNum);
@@ -368,6 +378,7 @@ Oh no, premature EOF!
         body = strings.ReplaceAll(body, "\n"u8, "\r\n"u8);
         var bodyReader = strings.NewReader(body);
         var r = NewReader(new multipart_test_package.strings_ReaderжReader(bodyReader), myBoundaryˢ2);
+
         var (part, err) = r.NextPart();
         if (err != default!) {
             Ꮡt.Fatalf("didn't get a part"u8);
@@ -437,6 +448,7 @@ public static void TestMultipartStreamReadahead(ж<testing.T> Ꮡt) {
             new multipart_internal_test_package.sentinelReaderжReader(Ꮡ(new sentinelReader(done1))),
             new multipart_test_package.strings_ReaderжReader(strings.NewReader(testBody2))),
         myBoundaryˢ2);
+
     nint i = default!;
     var readerʗ1 = reader;
     void readPart(textproto.MIMEHeader hdr, @string body) {
@@ -444,6 +456,7 @@ public static void TestMultipartStreamReadahead(ж<testing.T> Ꮡt) {
         if (part == nil || err != default!) {
             Ꮡt.Fatalf("Part %d: NextPart failed: %v"u8, i, err);
         }
+
         if (!reflect.DeepEqual((~part).Header, hdr)) {
             Ꮡt.Errorf("Part %d: part.Header = %v, want %v"u8, i, (~part).Header, hdr);
         }
@@ -454,7 +467,9 @@ public static void TestMultipartStreamReadahead(ж<testing.T> Ꮡt) {
         }
         i++;
     }
+
     readPart(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo-Bar"u8] = new @string[]{"baz"u8}.slice()}), bodyˢ);
+
     var selᴛ1 = done1;
     switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
     case 0 when selᴛ1.ꟷᐳ(out _): {
@@ -464,6 +479,7 @@ public static void TestMultipartStreamReadahead(ж<testing.T> Ꮡt) {
     default: {
         break;
     }}
+
     readPart(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo-Bar"u8] = new @string[]{"bop"u8}.slice()}), body2ˢ);
 }
 
@@ -479,7 +495,9 @@ public static void TestLineContinuation(ж<testing.T> Ꮡt) {
     // TODO: The original mail ended with a double-newline before the
     // final delimiter; this was manually edited to use a CRLF.
     @string testBody = appleMail2292336769ˢ;
+
     var r = NewReader(new multipart_test_package.strings_ReaderжReader(strings.NewReader(testBody)), appleMail2292336769ˢ2);
+
     for (nint i = 0; i < 2; i++) {
         var (part, err) = r.NextPart();
         if (err != default!) {
@@ -553,7 +571,9 @@ internal static readonly @string divDirLtrHelloWorldDivˢ = @"<div dir=""ltr"">H
 public static void TestRawPart(ж<testing.T> Ꮡt) {
     // https://github.com/golang/go/issues/29090
     @string body = strings.Replace(contentTypeTextPlainˢ, "\n"u8, "\r\n"u8, -1);
+
     var r = NewReader(new multipart_test_package.strings_ReaderжReader(strings.NewReader(body)), "0016e68ee29c5d515f04cedf6733"u8);
+
     // This part is expected to be raw, bypassing the automatic handling
     // of quoted-printable.
     var (part, err) = r.NextRawPart();
@@ -576,6 +596,7 @@ public static void TestRawPart(ж<testing.T> Ꮡt) {
     if (got != want) {
         Ꮡt.Errorf("wrong part value:\n got: %q\nwant: %q"u8, got, want);
     }
+
     // This part is expected to have automatic decoding of quoted-printable.
     (part, err) = r.NextPart();
     if (err != default!) {
@@ -586,6 +607,7 @@ public static void TestRawPart(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("unexpected Content-Transfer-Encoding of %q"u8, te);
         }
     }
+
     buf.Reset();
     (_, err) = io.Copy(new multipart_test_package.strings_BuilderжWriter(Ꮡbuf), new global::go.mime.multipart_package.PartжReader(part));
     if (err != default!) {
@@ -619,6 +641,7 @@ public static void TestNested(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("error reading first section (alternative): %v"u8, err);
         }
+
         // Read the inner text/plain and text/html sections of the multipart/alternative.
         var mr2 = NewReader(new global::go.mime.multipart_package.PartжReader(p), "e89a8ff1c1e83553e004be640610"u8);
         (p, err) = mr2.NextPart();
@@ -639,15 +662,18 @@ public static void TestNested(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("reading text/html part: got %q, %v"u8, b, errΔ2);
             }
         }
+
         (p, err) = mr2.NextPart();
         if (!AreEqual(err, io.EOF)) {
             Ꮡt.Fatalf("final inner NextPart = %v; want io.EOF"u8, err);
         }
+
         // Back to the outer multipart/mixed, reading the image attachment.
         (_, err) = mr.NextPart();
         if (err != default!) {
             Ꮡt.Fatalf("error reading the image attachment at the end: %v"u8, err);
         }
+
         (_, err) = mr.NextPart();
         if (!AreEqual(err, io.EOF)) {
             Ꮡt.Fatalf("final outer NextPart = %v; want io.EOF"u8, err);
@@ -678,40 +704,13 @@ internal partial struct parseTest {
     internal slice<headerBody> want;
 }
 
-// Actual body from App Engine on a blob upload. The final part (the
-// Content-Type: message/external-body) is what App Engine replaces
-// the uploaded file with. The other form fields (prefixed with
-// "other" in their form-data name) are unchanged. A bug was
-// reported with blob uploads failing when the other fields were
-// empty. This was the MIME POST body that previously failed.
-// Single empty part, ended with --boundary immediately after headers.
-// Single empty part, ended with \r\n--boundary immediately after headers.
-// Final part empty.
-// Final part empty with newlines after final separator.
-// Final part empty with lwsp-chars after final separator.
-// No parts (empty form as submitted by Chrome)
-// Part containing data starting with the boundary, but with additional suffix.
-// Part containing a boundary with whitespace following it.
-// With ignored leading line.
-// Issue 10616; minimal
-// Issue 10616; full example from bug.
-// Issue 12662: Check that we don't consume the leading \r if the peekBuffer
-// ends in '\r\n--separator-'
-// Issue 12662: Same test as above with \r\n at the end
-// Issue 12662v2: We want to make sure that for short buffers that end with
-// '\r\n--separator-' we always consume at least one (valid) symbol from the
-// peekBuffer
-// Context: https://github.com/camlistore/camlistore/issues/642
-// If the file contents in the form happens to have a size such as:
-// size = peekBufferSize - (len("\n--") + len(boundary) + len("\r") + 1), (modulo peekBufferSize)
-// then peekBufferSeparatorIndex was wrongly returning (-1, false), which was leading to an nCopy
-// cut such as:
-// "somedata\r| |\n--Boundary\r" (instead of "somedata| |\r\n--Boundary\r"), which was making the
-// subsequent Read miss the boundary.
-// Issue 46042; a nested multipart uses the outer separator followed by
-// a dash.
-// A nested boundary cannot be the outer separator followed by double dash.
 internal static slice<parseTest> parseTests = new parseTest[]{
+    // Actual body from App Engine on a blob upload. The final part (the
+    // Content-Type: message/external-body) is what App Engine replaces
+    // the uploaded file with. The other form fields (prefixed with
+    // "other" in their form-data name) are unchanged. A bug was
+    // reported with blob uploads failing when the other fields were
+    // empty. This was the MIME POST body that previously failed.
     new(
         name: "App Engine post"u8,
         sep: "00151757727e9583fd04bfbca4c6"u8,
@@ -732,6 +731,8 @@ internal static slice<parseTest> parseTests = new parseTest[]{
             }), "Content-Type: image/png\r\nContent-Length: 232303\r\nX-AppEngine-Upload-Creation: 2012-05-10 23:14:02.715173\r\nContent-MD5: MzRjODU1ZDZhZGU1NmRlOWEwZmMwMDdlODBmZTA0NzA=\r\nContent-Disposition: form-data; name=file; filename=\"fall.png\"\r\n\r\n"u8)
         }.slice()
     ),
+
+    // Single empty part, ended with --boundary immediately after headers.
     new(
         name: "single empty part, --boundary"u8,
         sep: "abc"u8,
@@ -740,6 +741,8 @@ internal static slice<parseTest> parseTests = new parseTest[]{
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"u8] = new @string[]{"bar"u8}.slice()}), ""u8)
         }.slice()
     ),
+
+    // Single empty part, ended with \r\n--boundary immediately after headers.
     new(
         name: "single empty part, \r\n--boundary"u8,
         sep: "abc"u8,
@@ -748,6 +751,8 @@ internal static slice<parseTest> parseTests = new parseTest[]{
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"u8] = new @string[]{"bar"u8}.slice()}), ""u8)
         }.slice()
     ),
+
+    // Final part empty.
     new(
         name: "final part empty"u8,
         sep: "abc"u8,
@@ -757,6 +762,8 @@ internal static slice<parseTest> parseTests = new parseTest[]{
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo2"u8] = new @string[]{"bar2"u8}.slice()}), ""u8)
         }.slice()
     ),
+
+    // Final part empty with newlines after final separator.
     new(
         name: "final part empty then crlf"u8,
         sep: "abc"u8,
@@ -765,6 +772,8 @@ internal static slice<parseTest> parseTests = new parseTest[]{
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"u8] = new @string[]{"bar"u8}.slice()}), ""u8)
         }.slice()
     ),
+
+    // Final part empty with lwsp-chars after final separator.
     new(
         name: "final part empty then lwsp"u8,
         sep: "abc"u8,
@@ -773,12 +782,16 @@ internal static slice<parseTest> parseTests = new parseTest[]{
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"u8] = new @string[]{"bar"u8}.slice()}), ""u8)
         }.slice()
     ),
+
+    // No parts (empty form as submitted by Chrome)
     new(
         name: "no parts"u8,
         sep: "----WebKitFormBoundaryQfEAfzFOiSemeHfA"u8,
         @in: "------WebKitFormBoundaryQfEAfzFOiSemeHfA--\r\n"u8,
         want: new headerBody[]{}.slice()
     ),
+
+    // Part containing data starting with the boundary, but with additional suffix.
     new(
         name: "fake separator as data"u8,
         sep: "sep"u8,
@@ -787,6 +800,8 @@ internal static slice<parseTest> parseTests = new parseTest[]{
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"u8] = new @string[]{"bar"u8}.slice()}), "--sepFAKE"u8)
         }.slice()
     ),
+
+    // Part containing a boundary with whitespace following it.
     new(
         name: "boundary with whitespace"u8,
         sep: "sep"u8,
@@ -795,6 +810,8 @@ internal static slice<parseTest> parseTests = new parseTest[]{
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"u8] = new @string[]{"bar"u8}.slice()}), "text"u8)
         }.slice()
     ),
+
+    // With ignored leading line.
     new(
         name: "leading line"u8,
         sep: "MyBoundary"u8,
@@ -810,6 +827,8 @@ foo: bar
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"u8] = new @string[]{"bar"u8}.slice()}), ""u8)
         }.slice()
     ),
+
+    // Issue 10616; minimal
     new(
         name: "issue 10616 minimal"u8,
         sep: "sep"u8,
@@ -818,6 +837,8 @@ foo: bar
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Foo"u8] = new @string[]{"bar"u8}.slice()}), "a\r\n--sep_alt\r\nb\r\n"u8)
         }.slice()
     ),
+
+    // Issue 10616; full example from bug.
     new(
         name: "nested separator prefix is outer separator"u8,
         sep: "----=_NextPart_4c2fbafd7ec4c8bf08034fe724b608d9"u8,
@@ -858,6 +879,9 @@ html things
             )
         }.slice()
     ),
+
+    // Issue 12662: Check that we don't consume the leading \r if the peekBuffer
+    // ends in '\r\n--separator-'
     new(
         name: "peek buffer boundary condition"u8,
         sep: "00ffded004d4dd0fdf945fbdef9d9050cfd6a13a821846299b27fc71b9db"u8,
@@ -874,6 +898,8 @@ Content-Type: application/octet-stream
             )
         }.slice()
     ),
+
+    // Issue 12662: Same test as above with \r\n at the end
     new(
         name: "peek buffer boundary condition"u8,
         sep: "00ffded004d4dd0fdf945fbdef9d9050cfd6a13a821846299b27fc71b9db"u8,
@@ -890,6 +916,10 @@ Content-Type: application/octet-stream
             )
         }.slice()
     ),
+
+    // Issue 12662v2: We want to make sure that for short buffers that end with
+    // '\r\n--separator-' we always consume at least one (valid) symbol from the
+    // peekBuffer
     new(
         name: "peek buffer boundary condition"u8,
         sep: "aaaaaaaaaa00ffded004d4dd0fdf945fbdef9d9050cfd6a13a821846299b27fc71b9db"u8,
@@ -906,6 +936,14 @@ Content-Type: application/octet-stream
             )
         }.slice()
     ),
+
+    // Context: https://github.com/camlistore/camlistore/issues/642
+    // If the file contents in the form happens to have a size such as:
+    // size = peekBufferSize - (len("\n--") + len(boundary) + len("\r") + 1), (modulo peekBufferSize)
+    // then peekBufferSeparatorIndex was wrongly returning (-1, false), which was leading to an nCopy
+    // cut such as:
+    // "somedata\r| |\n--Boundary\r" (instead of "somedata| |\r\n--Boundary\r"), which was making the
+    // subsequent Read miss the boundary.
     new(
         name: "safeCount off by one"u8,
         sep: "08b84578eabc563dcba967a945cdf0d9f613864a8f4a716f0e81caa71a74"u8,
@@ -933,6 +971,9 @@ val
             )
         }.slice()
     ),
+
+    // Issue 46042; a nested multipart uses the outer separator followed by
+    // a dash.
     new(
         name: "nested separator prefix is outer separator followed by a dash"u8,
         sep: "foo"u8,
@@ -963,6 +1004,8 @@ Body2
             )
         }.slice()
     ),
+
+    // A nested boundary cannot be the outer separator followed by double dash.
     new(
         name: "nested separator prefix is outer separator followed by double dash"u8,
         sep: "foo"u8,

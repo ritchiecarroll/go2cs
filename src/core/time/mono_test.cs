@@ -48,6 +48,7 @@ public static void TestHasMonotonicClock(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("%s: unexpected monotonic clock reading"u8, expr);
         }
     }
+
     yes(after1ˢ, ᐸꟷ(After(1)));
     var ticker = NewTicker(1);
     yes(tick1ˢ, ᐸꟷ((~ticker).C));
@@ -56,13 +57,16 @@ public static void TestHasMonotonicClock(ж<Δtesting.T> Ꮡt) {
     var (tp, _) = Parse(UnixDate, satMar7110639Pst2015ˢ2);
     no(parseUnixDateSatMar71106ˢ, tp);
     no(unix14860573710ˢ, Unix(1486057371, 0));
+
     yes(nowˢ, Now());
+
     var tu = Unix(1486057371, 0);
     ref var tm = ref heap<Δtime.Time>(out var Ꮡtm);
     tm = tu;
     time_internal_test_package.SetMono(Ꮡtm, 123456);
     no("tu"u8, tu);
     yes("tm"u8, tm);
+
     no(tuAdd1ˢ, tu.Add(1));
     no(tuInUtcˢ, tu.In(ΔUTC));
     no(tuAddDate111ˢ, tu.AddDate(1, 1, 1));
@@ -71,6 +75,7 @@ public static void TestHasMonotonicClock(ж<Δtesting.T> Ꮡt) {
     no(tuUtcˢ, tu.UTC());
     no(tuRound2ˢ, tu.Round(2));
     no(tuTruncate2ˢ, tu.Truncate(2));
+
     yes(tmAdd1ˢ, tm.Add(1));
     no(tmAddDate111ˢ, tm.AddDate(1, 1, 1));
     no(tmAddDate000ˢ, tm.AddDate(0, 0, 0));
@@ -85,6 +90,7 @@ public static void TestMonotonicAdd(ж<Δtesting.T> Ꮡt) {
     ref var tm = ref heap<Δtime.Time>(out var Ꮡtm);
     tm = Unix(1486057371, 123456);
     time_internal_test_package.SetMono(Ꮡtm, 123456789012345L);
+
     ref var t2 = ref heap<Δtime.Time>(out var Ꮡt2);
     t2 = tm.Add(100000000);
     if (t2.Nanosecond() != 100123456) {
@@ -93,6 +99,7 @@ public static void TestMonotonicAdd(ж<Δtesting.T> Ꮡt) {
     if (time_internal_test_package.GetMono(Ꮡt2) != 123456889012345L) {
         Ꮡt.Errorf("t2.mono = %d, want 123456889012345"u8, time_internal_test_package.GetMono(Ꮡt2));
     }
+
     ref var t3 = ref heap<Δtime.Time>(out var Ꮡt3);
     t3 = tm.Add(-9000000000000000000); // wall now out of range
     if (t3.Nanosecond() != 123456) {
@@ -101,6 +108,7 @@ public static void TestMonotonicAdd(ж<Δtesting.T> Ꮡt) {
     if (time_internal_test_package.GetMono(Ꮡt3) != 0) {
         Ꮡt.Errorf("t3.mono = %d, want 0 (wall time out of range for monotonic reading)"u8, time_internal_test_package.GetMono(Ꮡt3));
     }
+
     ref var t4 = ref heap<Δtime.Time>(out var Ꮡt4);
     t4 = tm.Add(+9000000000000000000); // wall now out of range
     if (t4.Nanosecond() != 123456) {
@@ -109,6 +117,7 @@ public static void TestMonotonicAdd(ж<Δtesting.T> Ꮡt) {
     if (time_internal_test_package.GetMono(Ꮡt4) != 0) {
         Ꮡt.Errorf("t4.mono = %d, want 0 (wall time out of range for monotonic reading)"u8, time_internal_test_package.GetMono(Ꮡt4));
     }
+
     var tn = Now();
     var tn1 = tn.Add((Δtime.Duration)(3600000000000L));
     Sleep(100 * Millisecond);
@@ -149,12 +158,15 @@ public static void TestMonotonicSub(ж<Δtesting.T> Ꮡt) {
     ref var t1 = ref heap<Δtime.Time>(out var Ꮡt1);
     t1 = Unix(1483228799, 995000000);
     time_internal_test_package.SetMono(Ꮡt1, 123456789012345L);
+
     ref var t2 = ref heap<Δtime.Time>(out var Ꮡt2);
     t2 = Unix(1483228799, 5000000);
     time_internal_test_package.SetMono(Ꮡt2, 123456799012345L);
+
     ref var t3 = ref heap<Δtime.Time>(out var Ꮡt3);
     t3 = Unix(1483228799, 995000000);
     time_internal_test_package.SetMono(Ꮡt3, 123457789012345L);
+
     ref var t1w = ref heap<Δtime.Time>(out var Ꮡt1w);
     t1w = t1.AddDate(0, 0, 0);
     if (time_internal_test_package.GetMono(Ꮡt1w) != 0) {
@@ -170,6 +182,7 @@ public static void TestMonotonicSub(ж<Δtesting.T> Ꮡt) {
     if (time_internal_test_package.GetMono(Ꮡt3w) != 0) {
         Ꮡt.Fatalf("AddDate didn't strip monotonic clock reading"u8);
     }
+
     void sub(@string txs, @string tys, Δtime.Time tx, Δtime.Time txw, Δtime.Time ty, Δtime.Time tyw, Δtime.Duration d, Δtime.Duration dw) {
         void check(@string expr, Δtime.Duration dΔ1, Δtime.Duration want) {
             if (dΔ1 != want) {
@@ -184,12 +197,15 @@ public static void TestMonotonicSub(ж<Δtesting.T> Ꮡt) {
     sub("t1"u8, "t1"u8, t1, t1w, t1, t1w, 0, 0);
     sub("t1"u8, "t2"u8, t1, t1w, t2, t2w, -10 * Millisecond, 990 * Millisecond);
     sub("t1"u8, "t3"u8, t1, t1w, t3, t3w, -1000 * Millisecond, 0);
+
     sub("t2"u8, "t1"u8, t2, t2w, t1, t1w, 10 * Millisecond, -990 * Millisecond);
     sub("t2"u8, "t2"u8, t2, t2w, t2, t2w, 0, 0);
     sub("t2"u8, "t3"u8, t2, t2w, t3, t3w, -990 * Millisecond, -990 * Millisecond);
+
     sub("t3"u8, "t1"u8, t3, t3w, t1, t1w, 1000 * Millisecond, 0);
     sub("t3"u8, "t2"u8, t3, t3w, t2, t2w, 990 * Millisecond, 990 * Millisecond);
     sub("t3"u8, "t3"u8, t3, t3w, t3, t3w, 0, 0);
+
     void cmp(@string txs, @string tys, Δtime.Time tx, Δtime.Time txw, Δtime.Time ty, Δtime.Time tyw, nint c, nint cw) {
         void check(@string expr, any b, any want) {
             if (!AreEqual(b, want)) {
@@ -200,25 +216,31 @@ public static void TestMonotonicSub(ж<Δtesting.T> Ꮡt) {
         check(txs + "w.After("u8 + tys + ")"u8, txw.After(ty), cw > 0);
         check(txs + ".After("u8 + tys + "w)"u8, tx.After(tyw), cw > 0);
         check(txs + "w.After("u8 + tys + "w)"u8, txw.After(tyw), cw > 0);
+
         check(txs + ".Before("u8 + tys + ")"u8, tx.Before(ty), c < 0);
         check(txs + "w.Before("u8 + tys + ")"u8, txw.Before(ty), cw < 0);
         check(txs + ".Before("u8 + tys + "w)"u8, tx.Before(tyw), cw < 0);
         check(txs + "w.Before("u8 + tys + "w)"u8, txw.Before(tyw), cw < 0);
+
         check(txs + ".Equal("u8 + tys + ")"u8, tx.Equal(ty), c == 0);
         check(txs + "w.Equal("u8 + tys + ")"u8, txw.Equal(ty), cw == 0);
         check(txs + ".Equal("u8 + tys + "w)"u8, tx.Equal(tyw), cw == 0);
         check(txs + "w.Equal("u8 + tys + "w)"u8, txw.Equal(tyw), cw == 0);
+
         check(txs + ".Compare("u8 + tys + ")"u8, tx.Compare(ty), c);
         check(txs + "w.Compare("u8 + tys + ")"u8, txw.Compare(ty), cw);
         check(txs + ".Compare("u8 + tys + "w)"u8, tx.Compare(tyw), cw);
         check(txs + "w.Compare("u8 + tys + "w)"u8, txw.Compare(tyw), cw);
     }
+
     cmp("t1"u8, "t1"u8, t1, t1w, t1, t1w, 0, 0);
     cmp("t1"u8, "t2"u8, t1, t1w, t2, t2w, -1, +1);
     cmp("t1"u8, "t3"u8, t1, t1w, t3, t3w, -1, 0);
+
     cmp("t2"u8, "t1"u8, t2, t2w, t1, t1w, +1, -1);
     cmp("t2"u8, "t2"u8, t2, t2w, t2, t2w, 0, 0);
     cmp("t2"u8, "t3"u8, t2, t2w, t3, t3w, -1, -1);
+
     cmp("t3"u8, "t1"u8, t3, t3w, t1, t1w, +1, 0);
     cmp("t3"u8, "t2"u8, t3, t3w, t2, t2w, +1, +1);
     cmp("t3"u8, "t3"u8, t3, t3w, t3, t3w, 0, 0);
@@ -231,11 +253,13 @@ public static void TestMonotonicOverflow(ж<Δtesting.T> Ꮡt) {
     if (d < (Δtime.Duration)(-35000000000L) || (Δtime.Duration)(-30000000000L) < d) {
         Ꮡt.Errorf("Until(Now().Add(-30s)) = %v, want roughly -30s (-35s to -30s)"u8, d);
     }
+
     t1 = Now().Add((Δtime.Duration)(30000000000L));
     d = Until(t1);
     if (d < (Δtime.Duration)(25000000000L) || (Δtime.Duration)(30000000000L) < d) {
         Ꮡt.Errorf("Until(Now().Add(-30s)) = %v, want roughly 30s (25s to 30s)"u8, d);
     }
+
     var t0 = Now();
     t1 = t0.Add((Δtime.Duration)(9223372036854775807L));
     if (time_internal_test_package.GetMono(Ꮡt1) != 0) {
@@ -246,6 +270,7 @@ public static void TestMonotonicOverflow(ж<Δtesting.T> Ꮡt) {
     if (d < (Δtime.Duration)(-10000000000L) || (Δtime.Duration)(10000000000L) < d) {
         Ꮡt.Errorf("Since(Now().Add(max).Add(-max)) = %v, want [-10s, 10s]"u8, d);
     }
+
     t0 = Now();
     t1 = t0.Add((Δtime.Duration)(3600000000000L));
     Sleep(100 * Millisecond);
@@ -276,7 +301,6 @@ public static void TestMonotonicOverflow(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-
 partial struct monotonicStringTestsᴛ1 /*dyn*/ {
     internal int64 mono;
     internal @string want;
@@ -295,6 +319,7 @@ internal static slice<monotonicStringTestsᴛ1> monotonicStringTests = new monot
 public static void TestMonotonicString(ж<Δtesting.T> Ꮡt) {
     var t1 = Now();
     Ꮡt.Logf("Now() = %v"u8, t1);
+
     foreach (var (_, tt) in monotonicStringTests) {
         ref var t1Δ1 = ref heap<Δtime.Time>(out var Ꮡt1Δ1);
         t1Δ1 = Now();

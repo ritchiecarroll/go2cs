@@ -19,7 +19,6 @@ partial struct parseUint64Test {
     internal error err;
 }
 
-// base=10 so no underscores allowed
 internal static ж<slice<parseUint64Test>> ᏑparseUint64Tests = new StandardBox<slice<parseUint64Test>>(new parseUint64Test[]{
     new(""u8, 0, ErrSyntax),
     new("0"u8, 0, default!),
@@ -31,7 +30,7 @@ internal static ж<slice<parseUint64Test>> ᏑparseUint64Tests = new StandardBox
     new("18446744073709551615"u8, 18446744073709551615UL, default!),
     new("18446744073709551616"u8, 18446744073709551615UL, ErrRange),
     new("18446744073709551620"u8, 18446744073709551615UL, ErrRange),
-    new("1_2_3_4_5"u8, 0, ErrSyntax),
+    new("1_2_3_4_5"u8, 0, ErrSyntax), // base=10 so no underscores allowed
     new("_12345"u8, 0, ErrSyntax),
     new("1__2345"u8, 0, ErrSyntax),
     new("12345_"u8, 0, ErrSyntax),
@@ -48,16 +47,6 @@ partial struct parseUint64BaseTest {
     internal error err;
 }
 
-// underscores allowed with base == 0 only
-// base 0 => 10
-// base 10
-// base 0 => 16
-// base 16
-// base 0 => 8 (0377)
-// base 0 => 8 (0o377)
-// base 8
-// base 0 => 2 (0b101)
-// base 2
 internal static ж<slice<parseUint64BaseTest>> ᏑparseUint64BaseTests = new StandardBox<slice<parseUint64BaseTest>>(new parseUint64BaseTest[]{
     new(""u8, 0, 0, ErrSyntax),
     new("0"u8, 0, 0, default!),
@@ -89,47 +78,49 @@ internal static ж<slice<parseUint64BaseTest>> ᏑparseUint64BaseTests = new Sta
     new("0O"u8, 0, 0, ErrSyntax),
     new("0o377"u8, 0, 255, default!),
     new("0O377"u8, 0, 255, default!),
-    new("1_2_3_4_5"u8, 0, 12345, default!),
+
+    // underscores allowed with base == 0 only
+    new("1_2_3_4_5"u8, 0, 12345, default!), // base 0 => 10
     new("_12345"u8, 0, 0, ErrSyntax),
     new("1__2345"u8, 0, 0, ErrSyntax),
     new("12345_"u8, 0, 0, ErrSyntax),
-    new("1_2_3_4_5"u8, 10, 0, ErrSyntax),
+    new("1_2_3_4_5"u8, 10, 0, ErrSyntax), // base 10
     new("_12345"u8, 10, 0, ErrSyntax),
     new("1__2345"u8, 10, 0, ErrSyntax),
     new("12345_"u8, 10, 0, ErrSyntax),
-    new("0x_1_2_3_4_5"u8, 0, 0x12345, default!),
+    new("0x_1_2_3_4_5"u8, 0, 0x12345, default!), // base 0 => 16
     new("_0x12345"u8, 0, 0, ErrSyntax),
     new("0x__12345"u8, 0, 0, ErrSyntax),
     new("0x1__2345"u8, 0, 0, ErrSyntax),
     new("0x1234__5"u8, 0, 0, ErrSyntax),
     new("0x12345_"u8, 0, 0, ErrSyntax),
-    new("1_2_3_4_5"u8, 16, 0, ErrSyntax),
+    new("1_2_3_4_5"u8, 16, 0, ErrSyntax), // base 16
     new("_12345"u8, 16, 0, ErrSyntax),
     new("1__2345"u8, 16, 0, ErrSyntax),
     new("1234__5"u8, 16, 0, ErrSyntax),
     new("12345_"u8, 16, 0, ErrSyntax),
-    new("0_1_2_3_4_5"u8, 0, 5349, default!),
+    new("0_1_2_3_4_5"u8, 0, 5349, default!), // base 0 => 8 (0377)
     new("_012345"u8, 0, 0, ErrSyntax),
     new("0__12345"u8, 0, 0, ErrSyntax),
     new("01234__5"u8, 0, 0, ErrSyntax),
     new("012345_"u8, 0, 0, ErrSyntax),
-    new("0o_1_2_3_4_5"u8, 0, 5349, default!),
+    new("0o_1_2_3_4_5"u8, 0, 5349, default!), // base 0 => 8 (0o377)
     new("_0o12345"u8, 0, 0, ErrSyntax),
     new("0o__12345"u8, 0, 0, ErrSyntax),
     new("0o1234__5"u8, 0, 0, ErrSyntax),
     new("0o12345_"u8, 0, 0, ErrSyntax),
-    new("0_1_2_3_4_5"u8, 8, 0, ErrSyntax),
+    new("0_1_2_3_4_5"u8, 8, 0, ErrSyntax), // base 8
     new("_012345"u8, 8, 0, ErrSyntax),
     new("0__12345"u8, 8, 0, ErrSyntax),
     new("01234__5"u8, 8, 0, ErrSyntax),
     new("012345_"u8, 8, 0, ErrSyntax),
-    new("0b_1_0_1"u8, 0, 5, default!),
+    new("0b_1_0_1"u8, 0, 5, default!), // base 0 => 2 (0b101)
     new("_0b101"u8, 0, 0, ErrSyntax),
     new("0b__101"u8, 0, 0, ErrSyntax),
     new("0b1__01"u8, 0, 0, ErrSyntax),
     new("0b10__1"u8, 0, 0, ErrSyntax),
     new("0b101_"u8, 0, 0, ErrSyntax),
-    new("1_0_1"u8, 2, 0, ErrSyntax),
+    new("1_0_1"u8, 2, 0, ErrSyntax), // base 2
     new("_101"u8, 2, 0, ErrSyntax),
     new("1_01"u8, 2, 0, ErrSyntax),
     new("10_1"u8, 2, 0, ErrSyntax),
@@ -143,7 +134,6 @@ partial struct parseInt64Test {
     internal error err;
 }
 
-// base=10 so no underscores allowed
 internal static ж<slice<parseInt64Test>> ᏑparseInt64Tests = new StandardBox<slice<parseInt64Test>>(new parseInt64Test[]{
     new(""u8, 0, ErrSyntax),
     new("0"u8, 0, default!),
@@ -164,7 +154,7 @@ internal static ж<slice<parseInt64Test>> ᏑparseInt64Tests = new StandardBox<s
     new("-9223372036854775808"u8, -9223372036854775808L, default!),
     new("9223372036854775809"u8, 9223372036854775807L, ErrRange),
     new("-9223372036854775809"u8, -9223372036854775808L, ErrRange),
-    new("-1_2_3_4_5"u8, 0, ErrSyntax),
+    new("-1_2_3_4_5"u8, 0, ErrSyntax), // base=10 so no underscores allowed
     new("-_12345"u8, 0, ErrSyntax),
     new("_12345"u8, 0, ErrSyntax),
     new("1__2345"u8, 0, ErrSyntax),
@@ -180,13 +170,6 @@ partial struct parseInt64BaseTest {
     internal error err;
 }
 
-// other bases
-// base 2
-// base 8
-// base 16
-// underscores
-// octal
-// octal
 internal static ж<slice<parseInt64BaseTest>> ᏑparseInt64BaseTests = new StandardBox<slice<parseInt64BaseTest>>(new parseInt64BaseTest[]{
     new(""u8, 0, 0, ErrSyntax),
     new("0"u8, 0, 0, default!),
@@ -209,10 +192,14 @@ internal static ж<slice<parseInt64BaseTest>> ᏑparseInt64BaseTests = new Stand
     new("-9223372036854775808"u8, 0, -9223372036854775808L, default!),
     new("9223372036854775809"u8, 0, 9223372036854775807L, ErrRange),
     new("-9223372036854775809"u8, 0, -9223372036854775808L, ErrRange),
+
+    // other bases
     new("g"u8, 17, 16, default!),
     new("10"u8, 25, 25, default!),
     new("holycow"u8, 35, 32544027072L, default!),
     new("holycow"u8, 36, 38493362624L, default!),
+
+    // base 2
     new("0"u8, 2, 0, default!),
     new("-1"u8, 2, -1, default!),
     new("1010"u8, 2, 10, default!),
@@ -221,12 +208,18 @@ internal static ж<slice<parseInt64BaseTest>> ᏑparseInt64BaseTests = new Stand
     new("1000000000000000000000000000000000000000000000000000000000000000"u8, 2, 9223372036854775807L, ErrRange),
     new("-1000000000000000000000000000000000000000000000000000000000000000"u8, 2, -9223372036854775808L, default!),
     new("-1000000000000000000000000000000000000000000000000000000000000001"u8, 2, -9223372036854775808L, ErrRange),
+
+    // base 8
     new("-10"u8, 8, -8, default!),
     new("57635436545"u8, 8, 6416645477L, default!),
     new("100000000"u8, 8, ((int64)1 << (int)(24)), default!),
+
+    // base 16
     new("10"u8, 16, 16, default!),
     new("-123456789abcdef"u8, 16, -0x123456789abcdefL, default!),
     new("7fffffffffffffff"u8, 16, 9223372036854775807L, default!),
+
+    // underscores
     new("-0x_1_2_3_4_5"u8, 0, -0x12345, default!),
     new("0x_1_2_3_4_5"u8, 0, 0x12345, default!),
     new("-_0x12345"u8, 0, 0, ErrSyntax),
@@ -236,8 +229,8 @@ internal static ж<slice<parseInt64BaseTest>> ᏑparseInt64BaseTests = new Stand
     new("0x1__2345"u8, 0, 0, ErrSyntax),
     new("0x1234__5"u8, 0, 0, ErrSyntax),
     new("0x12345_"u8, 0, 0, ErrSyntax),
-    new("-0_1_2_3_4_5"u8, 0, -5349, default!),
-    new("0_1_2_3_4_5"u8, 0, 5349, default!),
+    new("-0_1_2_3_4_5"u8, 0, -5349, default!), // octal
+    new("0_1_2_3_4_5"u8, 0, 5349, default!), // octal
     new("-_012345"u8, 0, 0, ErrSyntax),
     new("_-012345"u8, 0, 0, ErrSyntax),
     new("_012345"u8, 0, 0, ErrSyntax),
@@ -257,7 +250,6 @@ partial struct parseUint32Test {
     internal error err;
 }
 
-// base=10 so no underscores allowed
 internal static ж<slice<parseUint32Test>> ᏑparseUint32Tests = new StandardBox<slice<parseUint32Test>>(new parseUint32Test[]{
     new(""u8, 0, ErrSyntax),
     new("0"u8, 0, default!),
@@ -268,7 +260,7 @@ internal static ж<slice<parseUint32Test>> ᏑparseUint32Tests = new StandardBox
     new("987654321"u8, 987654321, default!),
     new("4294967295"u8, unchecked((uint32)(4294967295UL)), default!),
     new("4294967296"u8, unchecked((uint32)(4294967295UL)), ErrRange),
-    new("1_2_3_4_5"u8, 0, ErrSyntax),
+    new("1_2_3_4_5"u8, 0, ErrSyntax), // base=10 so no underscores allowed
     new("_12345"u8, 0, ErrSyntax),
     new("_12345"u8, 0, ErrSyntax),
     new("1__2345"u8, 0, ErrSyntax),
@@ -282,7 +274,6 @@ partial struct parseInt32Test {
     internal error err;
 }
 
-// base=10 so no underscores allowed
 internal static ж<slice<parseInt32Test>> ᏑparseInt32Tests = new StandardBox<slice<parseInt32Test>>(new parseInt32Test[]{
     new(""u8, 0, ErrSyntax),
     new("0"u8, 0, default!),
@@ -303,7 +294,7 @@ internal static ж<slice<parseInt32Test>> ᏑparseInt32Tests = new StandardBox<s
     new("-2147483648"u8, (int32)(-1 << (int)(31)), default!),
     new("2147483649"u8, (int32)(2147483648L - 1), ErrRange),
     new("-2147483649"u8, (int32)(-1 << (int)(31)), ErrRange),
-    new("-1_2_3_4_5"u8, 0, ErrSyntax),
+    new("-1_2_3_4_5"u8, 0, ErrSyntax), // base=10 so no underscores allowed
     new("-_12345"u8, 0, ErrSyntax),
     new("_12345"u8, 0, ErrSyntax),
     new("1__2345"u8, 0, ErrSyntax),
@@ -451,7 +442,6 @@ public static void TestParseUint(ж<testing.T> Ꮡt) {
             }
         }
     }
-
 }
 
 public static void TestParseInt(ж<testing.T> Ꮡt) {
@@ -476,7 +466,6 @@ public static void TestParseInt(ж<testing.T> Ꮡt) {
             }
         }
     }
-
 }
 
 public static void TestAtoi(ж<testing.T> Ꮡt) {
@@ -509,7 +498,6 @@ public static void TestAtoi(ж<testing.T> Ꮡt) {
             }
         }
     }
-
 }
 
 internal static error bitSizeErrStub(@string name, nint bitSize) {

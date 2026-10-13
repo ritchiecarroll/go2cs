@@ -39,11 +39,13 @@ public static void TestPCGMarshal(ж<testing.T> Ꮡt) {
     if (((sstring)data) != want || err != default!) {
         Ꮡt.Errorf("MarshalBinary() = %q, %v, want %q, nil"u8, data, err, want);
     }
+
     var dataAppend = new slice<byte>(4, 32);
     (dataAppend, err) = p.AppendBinary(dataAppend);
     if (((sstring)dataAppend) != wantAppend || err != default!) {
         Ꮡt.Errorf("AppendBinary() = %q, %v, want %q, nil"u8, dataAppend, err, wantAppend);
     }
+
     var q = new PCG(nil);
     {
         var errΔ1 = q.UnmarshalBinary(slice<byte>(want)); if (errΔ1 != default!) {
@@ -53,6 +55,7 @@ public static void TestPCGMarshal(ж<testing.T> Ꮡt) {
     if (q != p) {
         Ꮡt.Fatalf("after round trip, q = %#x, but p = %#x"u8, q, p);
     }
+
     var qu = q.Uint64();
     var pu = p.Uint64();
     if (qu != pu) {
@@ -84,6 +87,7 @@ public static void TestPCG(ж<testing.T> Ꮡt) {
         0x12be8f07ad14c539UL,
         0x54908a48e8e4736eUL
     }.slice();
+
     foreach (var (i, x) in want) {
         {
             var u = p.Uint64(); if (u != x) {

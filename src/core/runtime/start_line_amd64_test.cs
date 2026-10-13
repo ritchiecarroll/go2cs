@@ -15,6 +15,7 @@ partial class runtime_test_package {
 // copies of this function.
 public static void TestStartLineAsm(ж<testing.T> Ꮡt) {
     startlinetest.CallerStartLine = callerStartLine;
+
     const nint wantLine = 23;
     nint got = startlinetest.AsmFunc();
     if (got != wantLine) {

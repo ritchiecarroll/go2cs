@@ -81,7 +81,22 @@ internal partial struct command {
     internal Func<slice<slice<byte>>, (slice<slice<byte>>, error)> handler;
 }
 
+// SHA2 algorithm capabilities:
+//   https://pages.nist.gov/ACVP/draft-celi-acvp-sha.html#section-7.2
+// HMAC algorithm capabilities:
+//   https://pages.nist.gov/ACVP/draft-fussell-acvp-mac.html#section-7
+// PBKDF2 algorithm capabilities:
+//   https://pages.nist.gov/ACVP/draft-celi-acvp-pbkdf.html#section-7.3
+// ML-KEM algorithm capabilities:
+//   https://pages.nist.gov/ACVP/draft-celi-acvp-ml-kem.html#section-7.3
+// HMAC DRBG algorithm capabilities:
+//   https://pages.nist.gov/ACVP/draft-vassilev-acvp-drbg.html#section-7.2
+//go:embed acvp_capabilities.json
 internal static slice<byte> capabilitiesJson = go.embed_package.ΔEmbedBytes<byte>(typeof(fipstest_internal_test_package).Assembly, "go.embed/crypto/internal/fips140test_test/", "acvp_capabilities.json");
+
+// commands should reflect what config says we support. E.g. adding a command here will be a NOP
+// unless the configuration/acvp_capabilities.json indicates the command's associated algorithm
+// is supported.
 internal static map<@string, command> commands = new map<@string, command>{
     ["getConfig"u8] = cmdGetConfig(),
     ["SHA2-224"u8] = cmdHashAft(new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224())),
@@ -145,25 +160,30 @@ internal static error processingLoop(io.Reader reader, io.Writer writer) {
         if (err != default!) {
             return fmt.Errorf("reading request: %w"u8, err);
         }
+
         var (cmd, exists) = commands[(~req).name, ꟷ];
         if (!exists) {
             return fmt.Errorf("unknown command: %q"u8, (~req).name);
         }
+
         {
             nint gotArgs = len((~req).args); if (gotArgs != cmd.requiredArgs) {
                 return fmt.Errorf("command %q expected %d args, got %d"u8, (~req).name, cmd.requiredArgs, gotArgs);
             }
         }
+
         (var response, err) = cmd.handler((~req).args);
         if (err != default!) {
             return fmt.Errorf("command %q failed: %w"u8, (~req).name, err);
         }
+
         {
             err = writeResponse(writer, response); if (err != default!) {
                 return fmt.Errorf("command %q response failed: %w"u8, (~req).name, err);
             }
         }
     }
+
     return default!;
 }
 
@@ -186,10 +206,12 @@ internal static (ж<request>, error) readRequest(io.Reader reader) {
     if (numArgs == 0) {
         return (default!, errors.New(invalidRequestZeroArgsˢ));
     }
+
     var (args, err) = readArgs(reader, numArgs);
     if (err != default!) {
         return (default!, err);
     }
+
     return (Ꮡ(new request(
         name: ((@string)args[0]),
         args: args[1..]
@@ -199,6 +221,7 @@ internal static (ж<request>, error) readRequest(io.Reader reader) {
 internal static (slice<slice<byte>>, error) readArgs(io.Reader reader, uint32 requiredArgs) {
     var argLengths = new slice<uint32>((nint)(requiredArgs));
     var args = new slice<slice<byte>>((nint)(requiredArgs));
+
     foreach (var (i, _) in argLengths) {
         {
             var err = binary.Read(reader, binary.LittleEndian, Ꮡ(argLengths, i)); if (err != default!) {
@@ -206,6 +229,7 @@ internal static (slice<slice<byte>>, error) readArgs(io.Reader reader, uint32 re
             }
         }
     }
+
     foreach (var (i, length) in argLengths) {
         var buf = new slice<byte>((nint)(length));
         {
@@ -215,6 +239,7 @@ internal static (slice<slice<byte>>, error) readArgs(io.Reader reader, uint32 re
         }
         args[i] = buf;
     }
+
     return (args, default!);
 }
 
@@ -228,6 +253,7 @@ internal static error writeResponse(io.Writer writer, slice<slice<byte>> args) {
             return fmt.Errorf("writing arg count: %w"u8, err);
         }
     }
+
     foreach (var (i, arg) in args) {
         {
             var err = binary.Write(writer, binary.LittleEndian, (uint32)len(arg)); if (err != default!) {
@@ -235,6 +261,7 @@ internal static error writeResponse(io.Writer writer, slice<slice<byte>> args) {
             }
         }
     }
+
     foreach (var (i, b) in args) {
         {
             var (_, err) = writer.Write(b); if (err != default!) {
@@ -242,6 +269,7 @@ internal static error writeResponse(io.Writer writer, slice<slice<byte>> args) {
             }
         }
     }
+
     return default!;
 }
 
@@ -264,12 +292,12 @@ internal static command cmdGetConfig() {
 internal static command cmdHashAft(fips140.Hash h) {
     return new command(
         requiredArgs: 1, // Message to hash.
-
         handler: (slice<slice<byte>> args) => {
             h.Reset();
             h.Write(args[0]);
             var digest = new slice<byte>(0, h.Size());
             digest = h.Sum(digest);
+
             return (new slice<byte>[]{digest}.slice(), default!);
         }
     );
@@ -292,27 +320,31 @@ internal static command cmdHashAft(fips140.Hash h) {
 internal static command cmdHashMct(fips140.Hash h) {
     return new command(
         requiredArgs: 1, // Seed message.
-
         handler: (slice<slice<byte>> args) => {
             nint hSize = h.Size();
             var seed = args[0];
+
             {
                 nint seedLen = len(seed); if (seedLen != hSize) {
                     return (default!, fmt.Errorf("invalid seed size: expected %d got %d"u8, hSize, seedLen));
                 }
             }
+
             var digest = new slice<byte>(0, hSize);
             var buf = new slice<byte>(0, 3 * hSize);
             buf = appendꓸꓸꓸ(buf, seed);
             buf = appendꓸꓸꓸ(buf, seed);
             buf = appendꓸꓸꓸ(buf, seed);
+
             for (nint i = 0; i < 1000; i++) {
                 h.Reset();
                 h.Write(buf);
                 digest = h.Sum(digest[..0]);
+
                 copy(buf, buf.slice(hSize));
                 copy(buf.slice(2 * hSize), digest);
             }
+
             return (new slice<byte>[]{buf.slice(hSize * 2)}.slice(), default!);
         }
     );
@@ -334,16 +366,17 @@ internal static command cmdHashMct(fips140.Hash h) {
 internal static command cmdSha3Mct(fips140.Hash h) {
     return new command(
         requiredArgs: 1, // Seed message.
-
         handler: (slice<slice<byte>> args) => {
             var seed = args[0];
             var md = new slice<slice<byte>>(1001);
             md[0] = seed;
+
             for (nint i = 1; i <= 1000; i++) {
                 h.Reset();
                 h.Write(md[i - 1]);
                 md[i] = h.Sum(default!);
             }
+
             return (new slice<byte>[]{md[1000]}.slice(), default!);
         }
     );
@@ -352,7 +385,6 @@ internal static command cmdSha3Mct(fips140.Hash h) {
 internal static command cmdHmacAft(Func<fips140.Hash> h) {
     return new command(
         requiredArgs: 2, // Message and key
-
         handler: (slice<slice<byte>> args) => {
             var msg = args[0];
             var key = args[1];
@@ -364,22 +396,25 @@ internal static command cmdHmacAft(Func<fips140.Hash> h) {
 }
 
 internal static command cmdPbkdf() {
-    return new command( // Hash name, key length, salt, password, iteration count
-
+    return new command(
+        // Hash name, key length, salt, password, iteration count
         requiredArgs: 5,
         handler: (slice<slice<byte>> args) => {
             var (h, err) = lookupHash(((@string)args[0]));
             if (err != default!) {
                 return (default!, fmt.Errorf("PBKDF2 failed: %w"u8, err));
             }
+
             var keyLen = binary.LittleEndian.Uint32(args[1]) / 8;
             var salt = args[2];
             var password = args[3];
             var iterationCount = binary.LittleEndian.Uint32(args[4]);
+
             (var derivedKey, err) = pbkdf2.Key(h, ((@string)password), salt, (nint)iterationCount, (nint)keyLen);
             if (err != default!) {
                 return (default!, fmt.Errorf("PBKDF2 failed: %w"u8, err));
             }
+
             return (new slice<byte>[]{derivedKey}.slice(), default!);
         }
     );
@@ -387,6 +422,7 @@ internal static command cmdPbkdf() {
 
 internal static (Func<fips140.Hash>, error) lookupHash(@string name) {
     Func<fips140.Hash> h = default!;
+
     var exprᴛ1 = name;
     if (exprᴛ1 == "SHA2-224"u8) {
         h = () => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224());
@@ -428,13 +464,14 @@ internal static (Func<fips140.Hash>, error) lookupHash(@string name) {
 internal static command cmdMlKem768KeyGenAft() {
     return new command(
         requiredArgs: 1, // Seed
-
         handler: (slice<slice<byte>> args) => {
             var seed = args[0];
+
             var (dk, err) = mlkem.NewDecapsulationKey768(seed);
             if (err != default!) {
                 return (default!, fmt.Errorf("generating ML-KEM 768 decapsulation key: %w"u8, err));
             }
+
             // Important: we must return the full encoding of dk, not the seed.
             return (new slice<byte>[]{dk.EncapsulationKey().Bytes(), mlkem.TestingOnlyExpandedBytes768(dk)}.slice(), default!);
         }
@@ -444,18 +481,21 @@ internal static command cmdMlKem768KeyGenAft() {
 internal static command cmdMlKem768EncapAft() {
     return new command(
         requiredArgs: 2, // Public key, entropy
-
         handler: (slice<slice<byte>> args) => {
             var pk = args[0];
             var entropy = args[1];
+
             var (ek, err) = mlkem.NewEncapsulationKey768(pk);
             if (err != default!) {
                 return (default!, fmt.Errorf("generating ML-KEM 768 encapsulation key: %w"u8, err));
             }
+
             if (len(entropy) != 32) {
                 return (default!, fmt.Errorf("wrong entropy length: got %d, want 32"u8, len(entropy)));
             }
+
             var (sharedKey, ct) = ek.EncapsulateInternal(Ꮡ(array<byte>.Alias(entropy[..32], 32)));
+
             return (new slice<byte>[]{ct, sharedKey}.slice(), default!);
         }
     );
@@ -464,18 +504,20 @@ internal static command cmdMlKem768EncapAft() {
 internal static command cmdMlKem768DecapAft() {
     return new command(
         requiredArgs: 2, // Private key, ciphertext
-
         handler: (slice<slice<byte>> args) => {
             var pk = args[0];
             var ct = args[1];
+
             var (dk, err) = mlkem.TestingOnlyNewDecapsulationKey768(pk);
             if (err != default!) {
                 return (default!, fmt.Errorf("generating ML-KEM 768 decapsulation key: %w"u8, err));
             }
+
             (var sharedKey, err) = dk.Decapsulate(ct);
             if (err != default!) {
                 return (default!, fmt.Errorf("decapsulating ML-KEM 768 ciphertext: %w"u8, err));
             }
+
             return (new slice<byte>[]{sharedKey}.slice(), default!);
         }
     );
@@ -484,13 +526,14 @@ internal static command cmdMlKem768DecapAft() {
 internal static command cmdMlKem1024KeyGenAft() {
     return new command(
         requiredArgs: 1, // Seed
-
         handler: (slice<slice<byte>> args) => {
             var seed = args[0];
+
             var (dk, err) = mlkem.NewDecapsulationKey1024(seed);
             if (err != default!) {
                 return (default!, fmt.Errorf("generating ML-KEM 1024 decapsulation key: %w"u8, err));
             }
+
             // Important: we must return the full encoding of dk, not the seed.
             return (new slice<byte>[]{dk.EncapsulationKey().Bytes(), mlkem.TestingOnlyExpandedBytes1024(dk)}.slice(), default!);
         }
@@ -500,18 +543,21 @@ internal static command cmdMlKem1024KeyGenAft() {
 internal static command cmdMlKem1024EncapAft() {
     return new command(
         requiredArgs: 2, // Public key, entropy
-
         handler: (slice<slice<byte>> args) => {
             var pk = args[0];
             var entropy = args[1];
+
             var (ek, err) = mlkem.NewEncapsulationKey1024(pk);
             if (err != default!) {
                 return (default!, fmt.Errorf("generating ML-KEM 1024 encapsulation key: %w"u8, err));
             }
+
             if (len(entropy) != 32) {
                 return (default!, fmt.Errorf("wrong entropy length: got %d, want 32"u8, len(entropy)));
             }
+
             var (sharedKey, ct) = ek.EncapsulateInternal(Ꮡ(array<byte>.Alias(entropy[..32], 32)));
+
             return (new slice<byte>[]{ct, sharedKey}.slice(), default!);
         }
     );
@@ -520,18 +566,20 @@ internal static command cmdMlKem1024EncapAft() {
 internal static command cmdMlKem1024DecapAft() {
     return new command(
         requiredArgs: 2, // Private key, ciphertext
-
         handler: (slice<slice<byte>> args) => {
             var pk = args[0];
             var ct = args[1];
+
             var (dk, err) = mlkem.TestingOnlyNewDecapsulationKey1024(pk);
             if (err != default!) {
                 return (default!, fmt.Errorf("generating ML-KEM 1024 decapsulation key: %w"u8, err));
             }
+
             (var sharedKey, err) = dk.Decapsulate(ct);
             if (err != default!) {
                 return (default!, fmt.Errorf("decapsulating ML-KEM 1024 ciphertext: %w"u8, err));
             }
+
             return (new slice<byte>[]{sharedKey}.slice(), default!);
         }
     );
@@ -540,7 +588,6 @@ internal static command cmdMlKem1024DecapAft() {
 internal static command cmdHmacDrbgAft(Func<fips140.Hash> h) {
     return new command(
         requiredArgs: 6, // Output length, entropy, personalization, ad1, ad2, nonce
-
         handler: (slice<slice<byte>> args) => {
             var outLen = binary.LittleEndian.Uint32(args[0]);
             var entropy = args[1];
@@ -548,10 +595,12 @@ internal static command cmdHmacDrbgAft(Func<fips140.Hash> h) {
             var ad1 = args[3];
             var ad2 = args[4];
             var nonce = args[5];
+
             // Our capabilities describe no additional data support.
             if (len(ad1) != 0 || len(ad2) != 0) {
                 return (default!, errors.New("additional data not supported"u8));
             }
+
             // Our capabilities describe no prediction resistance (requires reseed) and no reseed.
             // So the test procedure is:
             //   * Instantiate DRBG
@@ -563,6 +612,7 @@ internal static command cmdHmacDrbgAft(Func<fips140.Hash> h) {
             var drbg = ecdsa.TestingOnlyNewDRBG(h, entropy, nonce, personalization);
             drbg.Generate(@out);
             drbg.Generate(@out);
+
             return (new slice<byte>[]{@out}.slice(), default!);
         }
     );
@@ -590,12 +640,15 @@ internal static readonly @string goAcvpVersionᶜ = "v0.0.0-20250102201911-6839f
 
 public static void TestACVP(ж<testing.T> Ꮡt) {
     testenv.SkipIfShortAndSlow(new fipstest_internal_test_package.testing_TжTB(Ꮡt));
+
     @string bsslModule = bsslModuleᶜ;
     @string bsslVersion = bsslVersionᶜ;
     @string goAcvpModule = goAcvpModuleᶜ;
     @string goAcvpVersion = goAcvpVersionᶜ;
+
     // In crypto/tls/bogo_shim_test.go the test is skipped if run on a builder with runtime.GOOS == "windows"
     // due to flaky networking. It may be necessary to do the same here.
+
     // Stat the acvp test config file so the test will be re-run if it changes, invalidating cached results
     // from the old config.
     {
@@ -603,9 +656,12 @@ public static void TestACVP(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("failed to stat config file: %s"u8, errΔ1);
         }
     }
+
     // Fetch the BSSL module and use the JSON output to find the absolute path to the dir.
     @string bsslDir = cryptotest.FetchModule(Ꮡt, bsslModule, bsslVersion);
+
     Ꮡt.Log(buildingAcvptoolˢ);
+
     // Build the acvptool binary.
     @string toolPath = filepath.Join(Ꮡt.TempDir(), acvptoolExeˢ);
     @string goTool = testenv.GoToolPath(new fipstest_internal_test_package.testing_TжTB(Ꮡt));
@@ -621,8 +677,10 @@ public static void TestACVP(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("failed to build acvptool: %s\n%s"u8, errΔ2, @out.String());
         }
     }
+
     // Similarly, fetch the ACVP data module that has vectors/expected answers.
     @string dataDir = cryptotest.FetchModule(Ꮡt, goAcvpModule, goAcvpVersion);
+
     var (cwd, err) = os.Getwd();
     if (err != default!) {
         Ꮡt.Fatalf("failed to fetch cwd: %s"u8, err);
@@ -630,6 +688,7 @@ public static void TestACVP(ж<testing.T> Ꮡt) {
     @string configPath = filepath.Join(cwd, acvpTestConfigJsonˢ);
     Ꮡt.Logf("running check_expected.go\ncwd: %q\ndata_dir: %q\nconfig: %q\ntool: %q\nmodule-wrapper: %q\n"u8,
         cwd, dataDir, configPath, toolPath, os.Args[0]);
+
     // Run the check_expected test driver using the acvptool we built, and this test binary as the
     // module wrapper. The file paths in the config file are specified relative to the dataDir root
     // so we run the command from that dir.
@@ -637,8 +696,8 @@ public static void TestACVP(ж<testing.T> Ꮡt) {
         "run"u8,
         filepath.Join(bsslDir, utilFipstoolsAcvpˢ2),
         "-tool"u8,
-        toolPath, // Note: module prefix must match Wrapper value in acvp_test.config.json.
-
+        toolPath,
+        // Note: module prefix must match Wrapper value in acvp_test.config.json.
         "-module-wrappers"u8, "go:" + os.Args[0],
         "-tests"u8, configPath
     }.slice();
@@ -668,6 +727,7 @@ public static void TestTooFewArgs(ж<testing.T> Ꮡt) {
             return (default!, default!);
         }
     );
+
     ref var output = ref heap(new bytes.Buffer(), out var Ꮡoutput);
     var err = processingLoop(mockRequest(Ꮡt, testˢ, default!), new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡoutput));
     if (err == default!) {
@@ -694,6 +754,7 @@ public static void TestTooManyArgs(ж<testing.T> Ꮡt) {
             return (default!, default!);
         }
     );
+
     ref var output = ref heap(new bytes.Buffer(), out var Ꮡoutput);
     var err = processingLoop(mockRequest(
         Ꮡt, testˢ, new slice<byte>[]{slice<byte>("one"u8), slice<byte>("two"u8)}.slice()), new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡoutput));
@@ -715,10 +776,12 @@ public static void TestGetConfig(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Errorf("unexpected error: %v"u8, err);
     }
+
     var respArgs = readResponse(Ꮡt, new fipstest_internal_test_package.bytes_BufferжReader(Ꮡoutput));
     if (len(respArgs) != 1) {
         Ꮡt.Fatalf("expected 1 response arg, got %d"u8, len(respArgs));
     }
+
     if (!bytes.Equal(respArgs[0], capabilitiesJson)) {
         Ꮡt.Errorf("expected config %q, got %q"u8, ((@string)capabilitiesJson), ((@string)respArgs[0]));
     }
@@ -733,15 +796,18 @@ public static void TestSha2256(ж<testing.T> Ꮡt) {
         188, 142, 10, 214, 48, 236, 72, 143, 70, 216, 223, 205, 219, 69, 53, 29,
         205, 207, 162, 6, 14, 70, 113, 60, 251, 170, 201, 236, 119, 39, 141, 172
     }.slice();
+
     ref var output = ref heap(new bytes.Buffer(), out var Ꮡoutput);
     var err = processingLoop(mockRequest(Ꮡt, sha2256ˢ, new slice<byte>[]{testMessage}.slice()), new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡoutput));
     if (err != default!) {
         Ꮡt.Errorf("unexpected error: %v"u8, err);
     }
+
     var respArgs = readResponse(Ꮡt, new fipstest_internal_test_package.bytes_BufferжReader(Ꮡoutput));
     if (len(respArgs) != 1) {
         Ꮡt.Fatalf("expected 1 response arg, got %d"u8, len(respArgs));
     }
+
     if (!bytes.Equal(respArgs[0], expectedDigest)) {
         Ꮡt.Errorf("expected digest %v, got %v"u8, expectedDigest, respArgs[0]);
     }
@@ -749,13 +815,16 @@ public static void TestSha2256(ж<testing.T> Ꮡt) {
 
 internal static io.Reader mockRequest(ж<testing.T> Ꮡt, @string cmd, slice<slice<byte>> args) {
     Ꮡt.Helper();
+
     var msgData = appendꓸꓸꓸ(new slice<byte>[]{slice<byte>(cmd)}.slice(), args);
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
         var err = writeResponse(new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡbuf), msgData); if (err != default!) {
             Ꮡt.Fatalf("writeResponse error: %v"u8, err);
         }
     }
+
     return new fipstest_internal_test_package.bytes_BufferжReader(Ꮡbuf);
 }
 
@@ -766,10 +835,12 @@ internal static slice<slice<byte>> readResponse(ж<testing.T> Ꮡt, io.Reader re
             Ꮡt.Fatalf("failed to read response args count: %v"u8, errΔ1);
         }
     }
+
     var (args, err) = readArgs(reader, numArgs);
     if (err != default!) {
         Ꮡt.Fatalf("failed to read %d response args: %v"u8, numArgs, err);
     }
+
     return args;
 }
 

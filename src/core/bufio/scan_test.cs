@@ -30,15 +30,13 @@ public static void TestSpace(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-// UTF-8 error
-// correctly encoded RuneError
 internal static slice<@string> scanTests = new @string[]{
     ""u8,
     "a"u8,
     "¼"u8,
     "☹"u8,
-    ((@string)(new byte[]{0x81})),
-    "\uFFFD"u8,
+    ((@string)(new byte[]{0x81})), // UTF-8 error
+    "\uFFFD"u8, // correctly encoded RuneError
     "abcdefgh"u8,
     "abc def\n\t\tgh    "u8,
     ((@string)(new byte[]{0x61, 0x62, 0x63, 0xc2, 0xbc, 0xe2, 0x98, 0xb9, 0x81, 0xef, 0xbf, 0xbd, 0xe6, 0x97, 0xa5, 0xe6, 0x9c, 0xac, 0xe8, 0xaa, 0x9e, 0x82, 0x61, 0x62, 0x63}))
@@ -170,11 +168,9 @@ internal static void genLine(ж<bytes.Buffer> Ꮡbuf, nint lineNum, nint n, bool
     if (doCR) {
         n--;
     }
-    for (nint i = 0; i < n - 1; i++) {
-        // Stop early for \n.
+    for (nint i = 0; i < n - 1; i++) { // Stop early for \n.
         var c = (byte)((rune)'a' + (byte)(lineNum + i));
-        if (c == (rune)'\n' || c == (rune)'\r') {
-            // Don't confuse us.
+        if (c == (rune)'\n' || c == (rune)'\r') { // Don't confuse us.
             c = (rune)'N';
         }
         buf.WriteByte(c);
@@ -604,6 +600,8 @@ public static void TestHugeBuffer(ж<Δtesting.T> Ꮡt) {
     }
 }
 
+// negativeEOFReader returns an invalid -1 at the end, as though it
+// were wrapping the read system call.
 partial struct negativeEOFReader /*num:nint*/;
 
 internal static (nint, error) Read(this ref negativeEOFReader r, slice<byte> p) {

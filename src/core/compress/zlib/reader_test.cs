@@ -163,6 +163,7 @@ public static void TestDecompressor(ж<testing.T> Ꮡt) {
             }
             var zrʗ1 = zr;
             defer(() => zrʗ1.Close(), ref ᒐ);
+
             // Read and verify correctness of data.
             b.Reset();
             (var n, err) = io.Copy(new zlib_test_package.bytes_BufferжWriter(b), zr);
@@ -176,6 +177,7 @@ public static void TestDecompressor(ж<testing.T> Ꮡt) {
             if (s != tt.raw) {
                 Ꮡt.Errorf("%s: got %d-byte %q want %d-byte %q"u8, tt.desc, n, s, len(tt.raw), tt.raw);
             }
+
             // Check for sticky errors.
             {
                 var (nΔ1, errΔ1) = zr.Read(new byte[]{0}.slice()); if (nΔ1 != 0 || !AreEqual(errΔ1, io.EOF)) {

@@ -88,16 +88,19 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
         if (asan.Enabled) {
             Ꮡt.Skip(extraAllocationsWithAsanˢ);
         }
+
         // Disable sampling, otherwise it's difficult to assert anything.
         nint oldRate = runtime.MemProfileRate;
         runtime.MemProfileRate = 1;
         defer(() => {
             runtime.MemProfileRate = oldRate;
         }, ref ᒐ);
+
         // Allocate a meg to ensure that mcache.nextSample is updated to 1.
         for (nint i = 0; i < 1024; i++) {
             memSink = new slice<byte>(1024);
         }
+
         // Do the interesting allocations.
         allocateTransient1M();
         allocateTransient2M();
@@ -105,8 +108,11 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
         allocatePersistent1K();
         allocateReflect();
         memSink = default!;
+
         runtime.GC(); // materialize stats
+
         memoryProfilerRun++;
+
         var tests = new TestMemoryProfiler_tests[]{new(
             stk: new @string[]{"runtime/pprof.allocatePersistent1K"u8, "runtime/pprof.TestMemoryProfiler"u8}.slice(),
             legacy: fmt.Sprintf("""
@@ -148,6 +154,7 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
 """u8.Raw(), memoryProfilerRun, ((2 << (int)(20))) * memoryProfilerRun)
         )
         }.slice();
+
         var testsʗ1 = tests;
         Ꮡt.Run(debug1ˢ, (ж<testing.T> tΔ1) => {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
@@ -156,12 +163,14 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
                     tΔ1.Fatalf("failed to write heap profile: %v"u8, err);
                 }
             }
+
             foreach (var (_, test) in testsʗ1) {
                 if (!regexp.MustCompile(test.legacy).Match(buf.Bytes())) {
                     tΔ1.Fatalf("The entry did not match:\n%v\n\nProfile:\n%v\n"u8, test.legacy, Ꮡbuf.String());
                 }
             }
         });
+
         var testsʗ2 = tests;
         Ꮡt.Run(protoˢ, (ж<testing.T> tΔ2) => {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
@@ -175,16 +184,19 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
                 tΔ2.Fatalf("failed to parse heap profile: %v"u8, err);
             }
             tΔ2.Logf("Profile = %v"u8, p.OrTypedNil());
+
             var stks = profileStacks(p);
             foreach (var (_, test) in testsʗ2) {
                 if (!containsStack(stks, test.stk)) {
                     tΔ2.Fatalf("No matching stack entry for %q\n\nProfile:\n%v\n"u8, test.stk, p.OrTypedNil());
                 }
             }
+
             if (!containsInlinedCall(TestMemoryProfiler, (4 << (int)(10)))) {
                 tΔ2.Logf("Can't determine whether allocateTransient2MInline was inlined into TestMemoryProfiler."u8);
                 return;
             }
+
             // Check the inlined function location is encoded correctly.
             foreach (var (_, loc) in (~p).Location) {
                 var (inlinedCaller, inlinedCallee) = (false, false);

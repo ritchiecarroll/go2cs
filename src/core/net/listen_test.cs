@@ -66,6 +66,7 @@ public static void TestTCPListener(ж<testing.T> Ꮡt) {
             Ꮡt.Logf("skipping %s test"u8, tt.network + " " + tt.address);
             continue;
         }
+
         var (ln1, err) = Listen(tt.network, JoinHostPort(tt.address, "0"u8));
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -122,6 +123,7 @@ public static void TestUDPListener(ж<testing.T> Ꮡt) {
             Ꮡt.Logf("skipping %s test"u8, tt.network + " " + tt.address);
             continue;
         }
+
         var (c1, err) = ListenPacket(tt.network, JoinHostPort(tt.address, "0"u8));
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -146,46 +148,45 @@ public static void TestUDPListener(ж<testing.T> Ꮡt) {
     }
 }
 
-// Test cases and expected results for the attempting 2nd listen on the same port
-// 1st listen                2nd listen                 darwin  freebsd  linux  openbsd
-// ------------------------------------------------------------------------------------
-// "tcp"  ""                 "tcp"  ""                    -        -       -       -
-// "tcp"  ""                 "tcp"  "0.0.0.0"             -        -       -       -
-// "tcp"  "0.0.0.0"          "tcp"  ""                    -        -       -       -
-// ------------------------------------------------------------------------------------
-// "tcp"  ""                 "tcp"  "[::]"                -        -       -       ok
-// "tcp"  "[::]"             "tcp"  ""                    -        -       -       ok
-// "tcp"  "0.0.0.0"          "tcp"  "[::]"                -        -       -       ok
-// "tcp"  "[::]"             "tcp"  "0.0.0.0"             -        -       -       ok
-// "tcp"  "[::ffff:0.0.0.0]" "tcp"  "[::]"                -        -       -       ok
-// "tcp"  "[::]"             "tcp"  "[::ffff:0.0.0.0]"    -        -       -       ok
-// ------------------------------------------------------------------------------------
-// "tcp4" ""                 "tcp6" ""                    ok       ok      ok      ok
-// "tcp6" ""                 "tcp4" ""                    ok       ok      ok      ok
-// "tcp4" "0.0.0.0"          "tcp6" "[::]"                ok       ok      ok      ok
-// "tcp6" "[::]"             "tcp4" "0.0.0.0"             ok       ok      ok      ok
-// ------------------------------------------------------------------------------------
-// "tcp"  "127.0.0.1"        "tcp"  "[::1]"               ok       ok      ok      ok
-// "tcp"  "[::1]"            "tcp"  "127.0.0.1"           ok       ok      ok      ok
-// "tcp4" "127.0.0.1"        "tcp6" "[::1]"               ok       ok      ok      ok
-// "tcp6" "[::1]"            "tcp4" "127.0.0.1"           ok       ok      ok      ok
-//
-// Platform default configurations:
-// darwin, kernel version 11.3.0
-//	net.inet6.ip6.v6only=0 (overridable by sysctl or IPV6_V6ONLY option)
-// freebsd, kernel version 8.2
-//	net.inet6.ip6.v6only=1 (overridable by sysctl or IPV6_V6ONLY option)
-// linux, kernel version 3.0.0
-//	net.ipv6.bindv6only=0 (overridable by sysctl or IPV6_V6ONLY option)
-// openbsd, kernel version 5.0
-//	net.inet6.ip6.v6only=1 (overriding is prohibited)
-
 partial struct dualStackTCPListenerTestsᴛ1 /*dyn*/ {
     internal @string network1, address1; // first listener
     internal @string network2, address2; // second listener
     internal error xerr;  // expected error value, nil or other
 }
 internal static slice<dualStackTCPListenerTestsᴛ1> dualStackTCPListenerTests = new dualStackTCPListenerTestsᴛ1[]{
+    // Test cases and expected results for the attempting 2nd listen on the same port
+    // 1st listen                2nd listen                 darwin  freebsd  linux  openbsd
+    // ------------------------------------------------------------------------------------
+    // "tcp"  ""                 "tcp"  ""                    -        -       -       -
+    // "tcp"  ""                 "tcp"  "0.0.0.0"             -        -       -       -
+    // "tcp"  "0.0.0.0"          "tcp"  ""                    -        -       -       -
+    // ------------------------------------------------------------------------------------
+    // "tcp"  ""                 "tcp"  "[::]"                -        -       -       ok
+    // "tcp"  "[::]"             "tcp"  ""                    -        -       -       ok
+    // "tcp"  "0.0.0.0"          "tcp"  "[::]"                -        -       -       ok
+    // "tcp"  "[::]"             "tcp"  "0.0.0.0"             -        -       -       ok
+    // "tcp"  "[::ffff:0.0.0.0]" "tcp"  "[::]"                -        -       -       ok
+    // "tcp"  "[::]"             "tcp"  "[::ffff:0.0.0.0]"    -        -       -       ok
+    // ------------------------------------------------------------------------------------
+    // "tcp4" ""                 "tcp6" ""                    ok       ok      ok      ok
+    // "tcp6" ""                 "tcp4" ""                    ok       ok      ok      ok
+    // "tcp4" "0.0.0.0"          "tcp6" "[::]"                ok       ok      ok      ok
+    // "tcp6" "[::]"             "tcp4" "0.0.0.0"             ok       ok      ok      ok
+    // ------------------------------------------------------------------------------------
+    // "tcp"  "127.0.0.1"        "tcp"  "[::1]"               ok       ok      ok      ok
+    // "tcp"  "[::1]"            "tcp"  "127.0.0.1"           ok       ok      ok      ok
+    // "tcp4" "127.0.0.1"        "tcp6" "[::1]"               ok       ok      ok      ok
+    // "tcp6" "[::1]"            "tcp4" "127.0.0.1"           ok       ok      ok      ok
+    //
+    // Platform default configurations:
+    // darwin, kernel version 11.3.0
+    //	net.inet6.ip6.v6only=0 (overridable by sysctl or IPV6_V6ONLY option)
+    // freebsd, kernel version 8.2
+    //	net.inet6.ip6.v6only=1 (overridable by sysctl or IPV6_V6ONLY option)
+    // linux, kernel version 3.0.0
+    //	net.ipv6.bindv6only=0 (overridable by sysctl or IPV6_V6ONLY option)
+    // openbsd, kernel version 5.0
+    //	net.inet6.ip6.v6only=1 (overriding is prohibited)
     new("tcp"u8, ""u8, "tcp"u8, ""u8, syscall.EADDRINUSE),
     new("tcp"u8, ""u8, "tcp"u8, "0.0.0.0"u8, syscall.EADDRINUSE),
     new("tcp"u8, "0.0.0.0"u8, "tcp"u8, ""u8, syscall.EADDRINUSE),
@@ -216,10 +217,10 @@ public static void TestDualStackTCPListener(ж<testing.T> Ꮡt) {
     if (exprᴛ1 == "plan9"u8) {
         Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
     }
-
     if (!supportsIPv4() || !supportsIPv6()) {
         Ꮡt.Skip(bothIPv4AndIPv6Areˢ);
     }
+
     foreach (var (_, vᴛ1) in dualStackTCPListenerTests) {
         var tt = vᴛ1;
 
@@ -227,6 +228,7 @@ public static void TestDualStackTCPListener(ж<testing.T> Ꮡt) {
             Ꮡt.Logf("skipping %s test"u8, tt.network1 + " " + tt.address1);
             continue;
         }
+
         if (!supportsIPv4map() && differentWildcardAddr(tt.address1, tt.address2)) {
             tt.xerr = default!;
         }
@@ -305,10 +307,10 @@ public static void TestDualStackUDPListener(ж<testing.T> Ꮡt) {
     if (exprᴛ1 == "plan9"u8) {
         Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
     }
-
     if (!supportsIPv4() || !supportsIPv6()) {
         Ꮡt.Skip(bothIPv4AndIPv6Areˢ);
     }
+
     foreach (var (_, vᴛ1) in dualStackUDPListenerTests) {
         var tt = vᴛ1;
 
@@ -316,6 +318,7 @@ public static void TestDualStackUDPListener(ж<testing.T> Ꮡt) {
             Ꮡt.Logf("skipping %s test"u8, tt.network1 + " " + tt.address1);
             continue;
         }
+
         if (!supportsIPv4map() && differentWildcardAddr(tt.address1, tt.address2)) {
             tt.xerr = default!;
         }
@@ -418,7 +421,6 @@ internal static error checkFirstListener(@string network, any ln) {
     else { /* default: */
         return new net_test_package.net_UnknownNetworkErrorᴠerror(((global::go.net_package.UnknownNetworkError)network));
     }
-
     return default!;
 }
 
@@ -437,7 +439,6 @@ internal static error checkSecondListener(@string network, @string address, erro
     else { /* default: */
         return new net_test_package.net_UnknownNetworkErrorᴠerror(((global::go.net_package.UnknownNetworkError)network));
     }
-
     return default!;
 }
 
@@ -456,7 +457,6 @@ internal static error checkDualStackSecondListener(@string network, @string addr
     else { /* default: */
         return new net_test_package.net_UnknownNetworkErrorᴠerror(((global::go.net_package.UnknownNetworkError)network));
     }
-
     return default!;
 }
 
@@ -465,11 +465,11 @@ internal static error checkDualStackAddrFamily(ж<global::go.net_package.netFD> 
 
     switch (fd.laddr.type()) {
     case ж<global::go.net_package.TCPAddr> a: {
+        // If a node under test supports both IPv6 capability
+        // and IPv6 IPv4-mapping capability, we can assume
+        // that the node listens on a wildcard address with an
+        // AF_INET6 socket.
         if (supportsIPv4map() && fd.laddr._<ж<global::go.net_package.TCPAddr>>().isWildcard()){
-            // If a node under test supports both IPv6 capability
-            // and IPv6 IPv4-mapping capability, we can assume
-            // that the node listens on a wildcard address with an
-            // AF_INET6 socket.
             if (fd.family != syscall.AF_INET6) {
                 return fmt.Errorf("Listen(%s, %v) returns %v; want %v"u8, fd.net, fd.laddr, fd.family, (nint)(syscall.AF_INET6));
             }
@@ -481,11 +481,11 @@ internal static error checkDualStackAddrFamily(ж<global::go.net_package.netFD> 
         break;
     }
     case ж<global::go.net_package.UDPAddr> a: {
+        // If a node under test supports both IPv6 capability
+        // and IPv6 IPv4-mapping capability, we can assume
+        // that the node listens on a wildcard address with an
+        // AF_INET6 socket.
         if (supportsIPv4map() && fd.laddr._<ж<global::go.net_package.UDPAddr>>().isWildcard()){
-            // If a node under test supports both IPv6 capability
-            // and IPv6 IPv4-mapping capability, we can assume
-            // that the node listens on a wildcard address with an
-            // AF_INET6 socket.
             if (fd.family != syscall.AF_INET6) {
                 return fmt.Errorf("ListenPacket(%s, %v) returns %v; want %v"u8, fd.net, fd.laddr, fd.family, (nint)(syscall.AF_INET6));
             }
@@ -510,6 +510,7 @@ public static void TestWildWildcardListener(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+
         var exprᴛ1 = Δruntime.GOOS;
         if (exprᴛ1 == "plan9"u8) {
             Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
@@ -522,6 +523,7 @@ public static void TestWildWildcardListener(ж<testing.T> Ꮡt) {
                 }
             }
         }, ref ᒐ);
+
         {
             var (ln, err) = Listen(tcpˢ, ""u8); if (err == default!) {
                 ln.Close();
@@ -552,7 +554,6 @@ public static void TestWildWildcardListener(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-
 partial struct ipv4MulticastListenerTestsᴛ1 /*dyn*/ {
     internal @string net;
     internal ж<global::go.net_package.UDPAddr> gaddr; // see RFC 4727
@@ -571,14 +572,15 @@ internal static readonly object iPv4IsNotSupportedˢ = (@string)"IPv4 is not sup
 // port.
 public static void TestIPv4MulticastListener(ж<testing.T> Ꮡt) {
     testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+
     var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "android"u8 || exprᴛ1 == "plan9"u8) {
         Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
     }
-
     if (!supportsIPv4()) {
         Ꮡt.Skip(iPv4IsNotSupportedˢ);
     }
+
     void closer(slice<ж<global::go.net_package.UDPConn>> cs) {
         foreach (var (_, c) in cs) {
             if (c != nil) {
@@ -586,6 +588,7 @@ public static void TestIPv4MulticastListener(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     foreach (var (_, ifi) in new ж<global::go.net_package.Interface>[]{loopbackInterface(), default!}.slice()) {
         // Note that multicast interface assignment by system
         // is not recommended because it usually relies on
@@ -650,17 +653,18 @@ internal static readonly object mustBeRootˢ = (@string)"must be root"u8;
 // port.
 public static void TestIPv6MulticastListener(ж<testing.T> Ꮡt) {
     testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+
     var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "plan9"u8) {
         Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
     }
-
     if (!supportsIPv6()) {
         Ꮡt.Skip(iPv6IsNotSupportedˢ);
     }
     if (Δos.Getuid() != 0) {
         Ꮡt.Skip(mustBeRootˢ);
     }
+
     void closer(slice<ж<global::go.net_package.UDPConn>> cs) {
         foreach (var (_, c) in cs) {
             if (c != nil) {
@@ -668,6 +672,7 @@ public static void TestIPv6MulticastListener(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     foreach (var (_, ifi) in new ж<global::go.net_package.Interface>[]{loopbackInterface(), default!}.slice()) {
         // Note that multicast interface assignment by system
         // is not recommended because it usually relies on
@@ -736,7 +741,6 @@ internal static (bool, error) multicastRIBContains(global::go.net_package.IP ip)
             return (true, default!); // not implemented yet
         }
     }
-
     var (ift, err) = Interfaces();
     if (err != default!) {
         return (false, err);
@@ -760,10 +764,9 @@ internal static (bool, error) multicastRIBContains(global::go.net_package.IP ip)
 
 // Issue 21856.
 public static partial void TestClosingListener(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
     var addr = ln.Addr();
+
     var lnʗ1 = ln;
     goǃ(() => {
         while (ᐧ) {
@@ -774,11 +777,14 @@ public static partial void TestClosingListener(ж<testing.T> Ꮡt) {
             c.Close();
         }
     });
+
     // Let the goroutine start. We don't sleep long: if the
     // goroutine doesn't start, the test will pass without really
     // testing anything, which is OK.
     time.Sleep(time.Millisecond);
+
     ln.Close();
+
     var (ln2, err) = Listen(tcpˢ, addr.String());
     if (err != default!) {
         Ꮡt.Fatal(err);

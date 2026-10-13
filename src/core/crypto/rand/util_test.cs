@@ -104,6 +104,7 @@ public static void TestIntReads(ж<testing.T> Ꮡt) {
         var max = (int64)(((int64)1).Lsh((uint64)i));
         Ꮡt.Run(fmt.Sprintf("max=%d"u8, max), (ж<testing.T> tΔ1) => {
             var reader = Ꮡ(new countingReader(r: rand.Reader));
+
             var (_, err) = rand.Int(new rand_test_package.countingReaderжReader(reader), big.NewInt(max));
             if (err != default!) {
                 tΔ1.Fatalf("Can't generate random value: %d, %v"u8, max, err);

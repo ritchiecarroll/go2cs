@@ -13,7 +13,6 @@ public static void TestIssue48807(ж<testing.T> Ꮡt) {
 
     foreach (var (_, i) in new uint64[]{
         0x8234508000000001UL, // from issue48807
-
         (uint64)(72057598332895232L + 1)
     }.slice()) {
         var got = (float32)i;

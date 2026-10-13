@@ -39,6 +39,7 @@ public static void TestPanicWithDirectlyPrintableCustomTypes(ж<testing.T> Ꮡt)
         new("panicCustomUint64"u8, @"panic: main.MyUint64(93)"u8),
         new("panicCustomUintptr"u8, @"panic: main.MyUintptr(93)"u8)
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestPanicWithDirectlyPrintableCustomTypes_tests(), out var Ꮡtt);
         tt = vᴛ1;

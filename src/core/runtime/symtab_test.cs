@@ -77,76 +77,53 @@ internal static nint lineVar2a = lineNumber();  // 3
 internal static nint lineVar2b = lineNumber();
 
 // 4
-// 5
-// 7
-// 8
-// 9
-// 10
-// 11
-// 12
-// 13
-// 14
-// 15
-// 16
-// 17
-// 18
-
 // 19
 partial struct compLitᴛ1 /*dyn*/ {
+// 5
     internal nint lineA, lineB; // 6
 }
-internal static slice<compLitᴛ1> compLit = new compLitᴛ1[]{
-    new(
-        lineNumber(), lineNumber()
-    ),
-    new(
-        lineNumber(),
-        lineNumber()
-    ),
-    new(
-        lineB: lineNumber(),
-        lineA: lineNumber()
-    )
+internal static slice<compLitᴛ1> compLit = new compLitᴛ1[]{ // 7
+    new( // 8
+        lineNumber(), lineNumber() // 9
+
+    ), // 10
+    new( // 11
+        lineNumber(), // 12
+        lineNumber() // 13
+
+    ), // 14
+    new( // 15
+        lineB: lineNumber(), // 16
+        lineA: lineNumber() // 17
+
+    ) // 18
 }.slice();
 
-// 20
-// 21
-// 22
-internal static array<nint> arrayLit = new nint[]{lineNumber(),
-    lineNumber(), lineNumber(),
-    lineNumber()
+internal static array<nint> arrayLit = new nint[]{lineNumber(), // 20
+    lineNumber(), lineNumber(), // 21
+    lineNumber() // 22
 }.array();                            // 23
 
-// 24
-// 25
-// 26
-internal static slice<nint> sliceLit = new nint[]{lineNumber(),
-    lineNumber(), lineNumber(),
-    lineNumber()
+internal static slice<nint> sliceLit = new nint[]{lineNumber(), // 24
+    lineNumber(), lineNumber(), // 25
+    lineNumber() // 26
 }.slice();                   // 27
 
-// 28
-// 29
-// 30
-// 31
-// 32
-internal static map<nint, nint> mapLit = new map<nint, nint>{
-    [29] = lineNumber(),
-    [30] = lineNumber(),
-    [lineNumber()] = 31,
-    [lineNumber()] = 32
+internal static map<nint, nint> mapLit = new map<nint, nint>{ // 28
+    [29] = lineNumber(), // 29
+    [30] = lineNumber(), // 30
+    [lineNumber()] = 31, // 31
+    [lineNumber()] = 32 // 32
 };                         // 33
 
-// 34
-// 35
-internal static nint intLit = lineNumber() + lineNumber() + lineNumber(); // 36
+internal static nint intLit = lineNumber() + // 34
+    lineNumber() + // 35
+    lineNumber(); // 36
 
 internal static void trythis() {
     // 37
     recordLines(lineNumber(), // 38
-
         lineNumber(), // 39
-
         lineNumber()); // 40
 }
 
@@ -191,9 +168,7 @@ public static void TestLineNumber(ж<testing.T> Ꮡt) {
         new("mapLit[29]"u8, mapLit[29], 29),
         new("mapLit[30]"u8, mapLit[30], 30),
         new("mapLit[31]"u8, mapLit[31 + firstLine] + firstLine, 31), // nb it's the key not the value
-
         new("mapLit[32]"u8, mapLit[32 + firstLine] + firstLine, 32), // nb it's the key not the value
-
         new("intLit"u8, intLit - 2 * firstLine, 34 + 35 + 36),
         new("l38"u8, l38, 38),
         new("l39"u8, l39, 39),
@@ -245,11 +220,13 @@ internal static partial uintptr tracebackFunc(ж<testing.T> Ꮡt) {
     // an inline tree.
     inlined();
     inlined();
+
     // Acquire a PC in this function.
     var (pc, _, _, ok) = Δruntime.Caller(0);
     if (!ok) {
         Ꮡt.Fatalf("Caller(0) got ok false, want true"u8);
     }
+
     return pc;
 }
 
@@ -279,30 +256,31 @@ internal static readonly @string tracebackFuncˢ = "tracebackFunc"u8;
 //
 // This is a regression test for issue 44971.
 public static void TestFunctionAlignmentTraceback(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var pc = tracebackFunc(Ꮡt);
+
     // Double-check we got the right PC.
     var f = Δruntime.FuncForPC(pc);
     if (!strings.HasSuffix(f.Name(), tracebackFuncˢ)) {
         Ꮡt.Fatalf("Caller(0) = %+v, want tracebackFunc"u8, f.OrTypedNil());
     }
+
     // Iterate forward until we find a different function. Back up one
     // instruction is (hopefully) an alignment instruction.
     while (Δruntime.FuncForPC(pc) == f) {
         pc++;
     }
     pc--;
+
     // Is this an alignment region filler instruction? We only check this
     // on amd64 for simplicity. If this function has no filler, then we may
     // get a false negative, but will never get a false positive.
     if (Δruntime.GOARCH == "amd64"u8) {
         var code = ~(ж<uint8>)(uintptr)((@unsafe.Pointer)pc);
-        if (code != 0xcc) {
-            // INT $3
+        if (code != 0xcc) { // INT $3
             Ꮡt.Errorf("PC %v code got %#x want 0xcc"u8, pc, code);
         }
     }
+
     // Finally ensure that Frames.Next doesn't crash when processing this
     // PC.
     var frames = Δruntime.CallersFrames(new uintptr[]{pc}.slice());

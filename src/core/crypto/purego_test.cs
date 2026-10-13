@@ -37,6 +37,7 @@ public static void TestPureGoTag(ж<testing.T> Ꮡt) {
         Δlog.Fatalf("loading package list: %v\n%s"u8, err, @out);
     }
     var pkgs = strings.Split(strings.TrimSpace(((@string)@out)), "\n"u8);
+
     cmd = exec.Command(testenv.GoToolPath(new testing_TжTB(Ꮡt)), toolˢ, distˢ, listˢ);
     cmd.Value.Stderr = new Δos.FileжWriter(Δos.Stderr);
     (@out, err) = cmd.Output();
@@ -48,20 +49,22 @@ public static void TestPureGoTag(ж<testing.T> Ꮡt) {
         @string GOARCH = strings.Split(pair, "/"u8)[1];
         allGOARCH[GOARCH] = true;
     }
+
     foreach (var (_, pkgName) in pkgs) {
         if (strings.Contains(pkgName, boringˢ)) {
             continue;
         }
+
         foreach (var (GOARCH, _) in allGOARCH) {
             ref var context = ref heap<build.Context>(out var Ꮡcontext);
             context = new build.Context(
                 GOOS: "linux"u8, // darwin has custom assembly
-
                 GOARCH: GOARCH,
                 GOROOT: testenv.GOROOT(new testing_TжTB(Ꮡt)),
                 Compiler: build.Default.Compiler,
                 BuildTags: new @string[]{"purego"u8, "math_big_pure_go"u8}.slice()
             );
+
             var (pkg, errΔ1) = Ꮡcontext.Import(pkgName, ""u8, 0);
             if (errΔ1 != default!) {
                 Ꮡt.Fatal(errΔ1);

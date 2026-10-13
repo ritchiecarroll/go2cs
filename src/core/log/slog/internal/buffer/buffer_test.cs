@@ -24,6 +24,7 @@ public static void Test(ж<testing.T> Ꮡt) {
         b.WriteString(helloˢ);
         b.WriteByte((rune)',');
         b.Write(slice<byte>(" world"u8));
+
         @string got = b.String();
         @string want = helloWorldˢ;
         if (got != want) {

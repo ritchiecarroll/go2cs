@@ -68,6 +68,7 @@ public static void XTestParentFinishesChild(testingT t) {
         });
         var afterStopʗ1 = afterStop;
         defer(() => afterStopʗ1(), ref ᒐ);
+
         var selᴛ1 = parent.Done();
         var selᴛ2 = cancelChild.Done();
         var selᴛ3 = timerChild.Done();
@@ -92,6 +93,7 @@ public static void XTestParentFinishesChild(testingT t) {
         default: {
             break;
         }}
+
         // The parent's children should contain the three cancelable children.
         var pc = parent._<ж<global::go.context_package.cancelCtx>>();
         var cc = cancelChild._<ж<global::go.context_package.cancelCtx>>();
@@ -111,6 +113,7 @@ public static void XTestParentFinishesChild(testingT t) {
                 (~pc).children, cc.OrTypedNil(), tc.OrTypedNil());
         }
         pc.of(global::go.context_package.cancelCtx.Ꮡmu).Unlock();
+
         {
             var (p, ok) = parentCancelCtx((~cc).Context); if (!ok || p != pc) {
                 t.Errorf("bad linkage: parentCancelCtx(cancelChild.Context) = %v, %v want %v, true"u8, p.OrTypedNil(), ok, pc.OrTypedNil());
@@ -126,12 +129,15 @@ public static void XTestParentFinishesChild(testingT t) {
                 t.Errorf("bad linkage: parentCancelCtx(afterChild.Context) = %v, %v want %v, true"u8, p.OrTypedNil(), ok, pc.OrTypedNil());
             }
         }
+
         cancel();
+
         pc.of(global::go.context_package.cancelCtx.Ꮡmu).Lock();
         if (len((~pc).children) != 0) {
             t.Errorf("pc.cancel didn't clear pc.children = %v"u8, (~pc).children);
         }
         pc.of(global::go.context_package.cancelCtx.Ꮡmu).Unlock();
+
         // parent and children should all be finished.
         void check(global::go.context_package.Context ctx, @string name) {
             var selᴛ5 = ctx.Done();
@@ -153,6 +159,7 @@ public static void XTestParentFinishesChild(testingT t) {
         check(cancelChild, cancelChildˢ);
         check(valueChild, valueChildˢ);
         check(timerChild, timerChildˢ);
+
         // WithCancel should return a canceled context on a canceled parent.
         var precanceledChild = WithValue(parent, keyˢ, valueˢ);
         var selᴛ6 = precanceledChild.Done();
@@ -182,6 +189,7 @@ public static void XTestChildFinishesFirst(testingT t) {
         defer(() => stopʗ1(), ref ᒐ);
         foreach (var (_, parent) in new global::go.context_package.Context[]{Background(), cancelable}.slice()) {
             var (child, cancel) = WithCancel(parent);
+
             var selᴛ7 = parent.Done();
             var selᴛ8 = child.Done();
             switch (trySelect(ᐸꟷ(selᴛ7, ꓸꓸꓸ), ᐸꟷ(selᴛ8, ꓸꓸꓸ))) {
@@ -196,6 +204,7 @@ public static void XTestChildFinishesFirst(testingT t) {
             default: {
                 break;
             }}
+
             var cc = child._<ж<global::go.context_package.cancelCtx>>();
             var (pc, pcok) = parent._<ж<global::go.context_package.cancelCtx>>(ᐧ); // pcok == false when parent == Background()
             {
@@ -203,6 +212,7 @@ public static void XTestChildFinishesFirst(testingT t) {
                     t.Errorf("bad linkage: parentCancelCtx(cc.Context) = %v, %v want %v, %v"u8, p.OrTypedNil(), ok, pc.OrTypedNil(), pcok);
                 }
             }
+
             if (pcok) {
                 pc.of(global::go.context_package.cancelCtx.Ꮡmu).Lock();
                 if (len((~pc).children) != 1 || !contains((~pc).children, new global::go.context_package.cancelCtxжcanceler(cc))) {
@@ -210,7 +220,9 @@ public static void XTestChildFinishesFirst(testingT t) {
                 }
                 pc.of(global::go.context_package.cancelCtx.Ꮡmu).Unlock();
             }
+
             cancel();
+
             if (pcok) {
                 pc.of(global::go.context_package.cancelCtx.Ꮡmu).Lock();
                 if (len((~pc).children) != 0) {
@@ -218,6 +230,7 @@ public static void XTestChildFinishesFirst(testingT t) {
                 }
                 pc.of(global::go.context_package.cancelCtx.Ꮡmu).Unlock();
             }
+
             // child should be finished.
             var selᴛ9 = child.Done();
             switch (trySelect(ᐸꟷ(selᴛ9, ꓸꓸꓸ))) {
@@ -233,6 +246,7 @@ public static void XTestChildFinishesFirst(testingT t) {
                     t.Errorf("child.Err() == %v want %v"u8, e, Canceled);
                 }
             }
+
             // parent should not be finished.
             var selᴛ10 = parent.Done();
             switch (trySelect(ᐸꟷ(selᴛ10, ꓸꓸꓸ))) {
@@ -271,18 +285,21 @@ public static void XTestCancelRemoves(testingT t) {
             }
         }
     }
+
     var (ctx, _) = WithCancel(Background());
     checkChildren(afterCreationˢ, ctx, 0);
     var (_, cancel) = WithCancel(ctx);
     checkChildren(withWithCancelChildˢ, ctx, 1);
     cancel();
     checkChildren(afterCancelingWithCancelˢ, ctx, 0);
+
     (ctx, _) = WithCancel(Background());
     checkChildren(afterCreationˢ, ctx, 0);
     (_, cancel) = WithTimeout(ctx, (time.Duration)(3600000000000L));
     checkChildren(withWithTimeoutChildˢ, ctx, 1);
     cancel();
     checkChildren(afterCancelingˢ, ctx, 0);
+
     (ctx, _) = WithCancel(Background());
     checkChildren(afterCreationˢ, ctx, 0);
     var stop = AfterFunc(ctx, () => {
@@ -336,42 +353,53 @@ public static void XTestCustomContextGoroutines(testingT t) {
             }
             g = now;
         }
+
         var (_, cancel0) = WithCancel(new context_internal_test_package.myDoneCtxжContext(Ꮡ(new myDoneCtx(Background()))));
         cancel0();
         checkCreatedGoroutine();
+
         (_, cancel0) = WithTimeout(new context_internal_test_package.myDoneCtxжContext(Ꮡ(new myDoneCtx(Background()))), veryLongDuration);
         cancel0();
         checkCreatedGoroutine();
+
         checkNoGoroutine();
         var checkNoGoroutineʗ1 = checkNoGoroutine;
         defer(checkNoGoroutineʗ1, ref ᒐ);
+
         var (ctx1, cancel1) = WithCancel(Background());
         var cancel1ʗ1 = cancel1;
         defer(() => cancel1ʗ1(), ref ᒐ);
         checkNoGoroutine();
+
         var ctx2 = Ꮡ(new myCtx(ctx1));
         var (ctx3, cancel3) = WithCancel(new context_internal_test_package.myCtxжContext(ctx2));
         var cancel3ʗ1 = cancel3;
         defer(() => cancel3ʗ1(), ref ᒐ);
         checkNoGoroutine();
+
         var (_, cancel3b) = WithCancel(new context_internal_test_package.myDoneCtxжContext(Ꮡ(new myDoneCtx(new context_internal_test_package.myCtxжContext(ctx2)))));
         var cancel3bʗ1 = cancel3b;
         defer(() => cancel3bʗ1(), ref ᒐ);
         checkCreatedGoroutine(); // ctx1 is not providing Done, must not be used
+
         var (ctx4, cancel4) = WithTimeout(ctx3, veryLongDuration);
         var cancel4ʗ1 = cancel4;
         defer(() => cancel4ʗ1(), ref ᒐ);
         checkNoGoroutine();
+
         var (ctx5, cancel5) = WithCancel(ctx4);
         var cancel5ʗ1 = cancel5;
         defer(() => cancel5ʗ1(), ref ᒐ);
         checkNoGoroutine();
+
         cancel5();
         checkNoGoroutine();
+
         var (_, cancel6) = WithTimeout(ctx5, veryLongDuration);
         var cancel6ʗ1 = cancel6;
         defer(() => cancel6ʗ1(), ref ᒐ);
         checkNoGoroutine();
+
         // Check applied to canceled context.
         cancel6();
         cancel1();

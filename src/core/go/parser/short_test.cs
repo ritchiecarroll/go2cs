@@ -9,8 +9,6 @@ using static global::go.go.parser_package;
 
 partial class parser_internal_test_package {
 
-// go.dev/issue/9639
-// generic code
 internal static slice<@string> valids = new @string[]{
     "package p\n"u8,
     @"package p;"u8,
@@ -46,7 +44,7 @@ internal static slice<@string> valids = new @string[]{
     @"package p; func _() { map[int]int{}[0]++; map[int]int{}[0] += 1 }"u8,
     @"package p; func _(x interface{f()}) { interface{f()}(x).f() }"u8,
     @"package p; func _(x chan int) { chan int(x) <- 0 }"u8,
-    @"package p; const (x = 0; y; z)"u8,
+    @"package p; const (x = 0; y; z)"u8, // go.dev/issue/9639
     @"package p; var _ = map[P]int{P{}:0, {}:1}"u8,
     @"package p; var _ = map[*P]int{&P{}:0, {}:1}"u8,
     @"package p; type T = int"u8,
@@ -64,6 +62,8 @@ internal static slice<@string> valids = new @string[]{
     @"package p; type _ struct{ f [n]E }"u8,
     @"package p; type _ struct{ f [a+b+c+d]E }"u8,
     @"package p; type I1 interface{}; type I2 interface{ I1 }"u8,
+
+    // generic code
     @"package p; type _ []T[int]"u8,
     @"package p; type T[P any] struct { P }"u8,
     @"package p; type T[P comparable] struct { P }"u8,
@@ -129,12 +129,6 @@ public static void TestSingle(ж<testing.T> Ꮡt) {
     checkErrors(Ꮡt, src, src, (global::go.go.parser_package.Mode)(DeclarationErrors | AllErrors), true);
 }
 
-// go.dev/issue/8656
-// go.dev/issue/9639
-// go.dev/issue/12437
-// go.dev/issue/11611
-// go.dev/issue/13475
-// generic code
 internal static slice<@string> invalids = new @string[]{
     @"foo /* ERROR ""expected 'package'"" */ !"u8,
     @"package p; func f() { if { /* ERROR ""missing condition"" */ } };"u8,
@@ -177,14 +171,26 @@ internal static slice<@string> invalids = new @string[]{
     @"package p; type _ struct{ ( /* ERROR ""cannot parenthesize embedded type"" */ []byte) }"u8,
     @"package p; type _ struct{ *( /* ERROR ""cannot parenthesize embedded type"" */ int) }"u8,
     @"package p; type _ struct{ *( /* ERROR ""cannot parenthesize embedded type"" */ []byte) }"u8,
+
+    // go.dev/issue/8656
     @"package p; func f() (a b string /* ERROR ""missing ','"" */ , ok bool)"u8,
+
+    // go.dev/issue/9639
     @"package p; var x, y, z; /* ERROR ""expected type"" */"u8,
+
+    // go.dev/issue/12437
     @"package p; var _ = struct { x int, /* ERROR ""expected ';', found ','"" */ }{};"u8,
     @"package p; var _ = struct { x int, /* ERROR ""expected ';', found ','"" */ y float }{};"u8,
+
+    // go.dev/issue/11611
     @"package p; type _ struct { int, } /* ERROR ""expected 'IDENT', found '}'"" */ ;"u8,
     @"package p; type _ struct { int, float } /* ERROR ""expected type, found '}'"" */ ;"u8,
+
+    // go.dev/issue/13475
     @"package p; func f() { if true {} else ; /* ERROR ""expected if statement or block"" */ }"u8,
     @"package p; func f() { if true {} else defer /* ERROR ""expected if statement or block"" */ f() }"u8,
+
+    // generic code
     @"package p; type _[_ any] int; var _ = T[] /* ERROR ""expected operand"" */ {}"u8,
     @"package p; var _ func[ /* ERROR ""must have no type parameters"" */ T any](T)"u8,
     @"package p; func _[]/* ERROR ""empty type parameter list"" */()"u8,

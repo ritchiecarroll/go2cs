@@ -81,8 +81,8 @@ public static void TestFillAligned(ж<testing.T> Ꮡt) {
             0x0000000000000002,
             0x0000000000000008,
             ((uint64)1).Lsh((m - 1)),
-            ((uint64)1).Lsh(m), // Try a few fixed arbitrary examples.
-
+            ((uint64)1).Lsh(m),
+            // Try a few fixed arbitrary examples.
             0xb02b9effcf137016UL,
             0x3975a076a9fbff18UL,
             0x0f8c88ec3b81506eUL,
@@ -94,6 +94,7 @@ public static void TestFillAligned(ж<testing.T> Ꮡt) {
         for (nint i = 0; i < 1000; i++) {
             // Try a pseudo-random numbers.
             check(rand.Uint64(), m);
+
             if (m > 1) {
                 // For m != 1, let's construct a slightly more interesting
                 // random test. Generate a bitmap which is either 0 or
@@ -254,7 +255,6 @@ public static void TestPallocDataFindScavengeCandidate(ж<testing.T> Ꮡt) {
                 alloc: new global::go.runtime_internal_test_package.BitRange[]{new(bits + 2, (nuint)runtime_internal_test_package.PallocChunkPages - (bits + 2))}.slice(),
                 min: 1,
                 max: 3, // Make it so that max would have us try to break the huge page.
-
                 want: new runtime_internal_test_package.BitRange(0, bits + 2)
             );
             if (3 * bits < runtime_internal_test_package.PallocChunkPages) {
@@ -263,7 +263,6 @@ public static void TestPallocDataFindScavengeCandidate(ж<testing.T> Ꮡt) {
                     alloc: new global::go.runtime_internal_test_package.BitRange[]{new(0, bits - 10), new(2 * bits + 10, (nuint)runtime_internal_test_package.PallocChunkPages - (2 * bits + 10))}.slice(),
                     min: 1,
                     max: 12, // Make it so that max would have us try to break the huge page.
-
                     want: new runtime_internal_test_package.BitRange(bits, bits + 10)
                 );
             }
@@ -271,7 +270,6 @@ public static void TestPallocDataFindScavengeCandidate(ж<testing.T> Ꮡt) {
                 alloc: new global::go.runtime_internal_test_package.BitRange[]{new(0, (nuint)runtime_internal_test_package.PallocChunkPages - bits)}.slice(),
                 min: 1,
                 max: 1, // Even one page would break a huge page in this case.
-
                 want: new runtime_internal_test_package.BitRange((nuint)runtime_internal_test_package.PallocChunkPages - bits, bits)
             );
         } else 
@@ -279,7 +277,6 @@ public static void TestPallocDataFindScavengeCandidate(ж<testing.T> Ꮡt) {
             tests[preserveHugePageAllˢ] = new TestPallocDataFindScavengeCandidate_test(
                 min: 1,
                 max: 1, // Even one page would break a huge page in this case.
-
                 want: new runtime_internal_test_package.BitRange(0, runtime_internal_test_package.PallocChunkPages)
             );
         } else {
@@ -472,6 +469,7 @@ public static void TestPageAllocScavenge(ж<testing.T> Ꮡt) {
             try {
                 var b = runtime_internal_test_package.NewPageAlloc(vʗ1.beforeAlloc, vʗ1.beforeScav);
                 defer(runtime_internal_test_package.FreePageAlloc, b, ref ᒐ);
+
                 foreach (var (iter, h) in vʗ1.expect) {
                     {
                         var got = b.Scavenge(h.request); if (got != h.expect) {
@@ -481,6 +479,7 @@ public static void TestPageAllocScavenge(ж<testing.T> Ꮡt) {
                 }
                 var want = runtime_internal_test_package.NewPageAlloc(vʗ1.beforeAlloc, vʗ1.afterScav);
                 defer(runtime_internal_test_package.FreePageAlloc, want, ref ᒐ);
+
                 checkPageAlloc(tΔ1, want, b);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -496,6 +495,7 @@ public static void TestScavenger(ж<testing.T> Ꮡt) {
     // workedTime is a standard conversion of bytes of scavenge
     // work to time elapsed.
     int64 workedTime(uintptr bytes) => (int64)((bytes + 4095) / 4096) * (int64)(10 * time.Microsecond);
+
     // Set up a bunch of state that we're going to track and verify
     // throughout the test.
     var totalWork = (uint64)(((uintptr)64 << (int)(20)) - 3 * runtime_internal_test_package.PhysPageSize);
@@ -503,6 +503,7 @@ public static void TestScavenger(ж<testing.T> Ꮡt) {
     ref var totalWorked = ref heap(new atomic.Int64(), out var ᏑtotalWorked);
     ref var availableWork = ref heap(new atomic.Uint64(), out var ᏑavailableWork);
     ref var stopAt = ref heap(new atomic.Uint64(), out var ᏑstopAt);                      // How much available work to stop at.
+
     // Set up the scavenger.
     ref var s = ref heap(new global::go.runtime_internal_test_package.Scavenger(), out var Ꮡs);
     s.Sleep = (int64 ns) => {
@@ -529,9 +530,11 @@ public static void TestScavenger(ж<testing.T> Ꮡt) {
         return false;
     };
     s.GoMaxProcs = () => 1;
+
     // Define a helper for verifying that various properties hold.
     void verifyScavengerState(ж<testing.T> tΔ2, uint64 expWork) {
         tΔ2.Helper();
+
         // Check to make sure it did the amount of work we expected.
         {
             var workDone = (uint64)Ꮡs.Released(); if (workDone != expWork) {
@@ -545,36 +548,38 @@ public static void TestScavenger(ж<testing.T> Ꮡt) {
             tΔ2.Errorf("want %f CPU fraction, got %f"u8, idealFraction, cpuFraction);
         }
     }
+
     // Start the scavenger.
     Ꮡs.Start();
+
     // Set up some work and let the scavenger run to completion.
     ᏑavailableWork.Store(totalWork);
     Ꮡs.Wake();
-    if (!Ꮡs.BlockUntilParked(2000000000)) {
-        /* 2 seconds */
+    if (!Ꮡs.BlockUntilParked(2000000000 /* 2 seconds */)) {
         Ꮡt.Fatal(timedOutWaitingForˢ);
     }
     // Run a check.
     verifyScavengerState(Ꮡt, totalWork);
+
     // Now let's do it again and see what happens when we have no work to do.
     // It should've gone right back to sleep.
     Ꮡs.Wake();
-    if (!Ꮡs.BlockUntilParked(2000000000)) {
-        /* 2 seconds */
+    if (!Ꮡs.BlockUntilParked(2000000000 /* 2 seconds */)) {
         Ꮡt.Fatal(timedOutWaitingForˢ);
     }
     // Run another check.
     verifyScavengerState(Ꮡt, totalWork);
+
     // One more time, this time doing the same amount of work as the first time.
     // Let's see if we can get the scavenger to continue.
     ᏑavailableWork.Store(totalWork);
     Ꮡs.Wake();
-    if (!Ꮡs.BlockUntilParked(2000000000)) {
-        /* 2 seconds */
+    if (!Ꮡs.BlockUntilParked(2000000000 /* 2 seconds */)) {
         Ꮡt.Fatal(timedOutWaitingForˢ);
     }
     // Run another check.
     verifyScavengerState(Ꮡt, 2 * totalWork);
+
     // This time, let's stop after a certain amount of work.
     //
     // Pick a stopping point such that when subtracted from totalWork
@@ -586,12 +591,12 @@ public static void TestScavenger(ж<testing.T> Ꮡt) {
     var stoppingPoint = (uint64)(((uintptr)1 << (int)(20)) - 3 * runtime_internal_test_package.PhysPageSize);
     ᏑstopAt.Store(stoppingPoint);
     Ꮡs.Wake();
-    if (!Ꮡs.BlockUntilParked(2000000000)) {
-        /* 2 seconds */
+    if (!Ꮡs.BlockUntilParked(2000000000 /* 2 seconds */)) {
         Ꮡt.Fatal(timedOutWaitingForˢ);
     }
     // Run another check.
     verifyScavengerState(Ꮡt, 2 * totalWork + (totalWork - stoppingPoint));
+
     // Clean up.
     Ꮡs.Stop();
 }
@@ -608,9 +613,12 @@ internal partial struct TestScavengeIndex_testCase /*dyn*/ {
 }
 
 public static void TestScavengeIndex(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    // This test suite tests the scavengeIndex data structure.    // type markFunc is a methodless func type — rendered inline as its base delegate
+    // This test suite tests the scavengeIndex data structure.    // markFunc is a function that makes the address range [base, limit)
+    // available for scavenging in a test index.
+    // type markFunc is a methodless func type — rendered inline as its base delegate
+    // findFunc is a function that searches for the next available page
+    // to scavenge in the index. It asserts that the page is found in
+    // chunk "ci" at page "offset."
     // type findFunc is a methodless func type — rendered inline as its base delegate
 
     // The structure of the tests below is as follows:
@@ -631,8 +639,10 @@ public static void TestScavengeIndex(ж<testing.T> Ꮡt) {
         Action<global::go.runtime_internal_test_package.ChunkIdx, nuint> find = default!;
         Action nextGen = default!;
         tΔ1.Helper();
+
         // Pick some reasonable bounds. We don't need a huge range just to test.
         var si = runtime_internal_test_package.NewScavengeIndex(runtime_internal_test_package.BaseChunkIdx, runtime_internal_test_package.BaseChunkIdx + 64);
+
         // Initialize all the chunks as dense and empty.
         //
         // Also, reset search addresses so that we can get page offsets.
@@ -643,16 +653,19 @@ public static void TestScavengeIndex(ж<testing.T> Ꮡt) {
             si.SetEmpty(ci);
         }
         si.ResetSearchAddrs();
+
         // Create and return test functions.
         var siʗ1 = si;
         mark = (uintptr @base, uintptr limit) => {
             tΔ1.Helper();
+
             siʗ1.AllocRange(@base, limit);
             siʗ1.FreeRange(@base, limit);
         };
         var siʗ2 = si;
         find = (global::go.runtime_internal_test_package.ChunkIdx want, nuint wantOffset) => {
             tΔ1.Helper();
+
             var (got, gotOffset) = siʗ2.Find(force);
             if (want != got) {
                 tΔ1.Errorf("find: wanted chunk index %d, got %d"u8, want, got);
@@ -668,6 +681,7 @@ public static void TestScavengeIndex(ж<testing.T> Ꮡt) {
         var siʗ3 = si;
         nextGen = () => {
             tΔ1.Helper();
+
             siʗ3.NextGen();
         };
         return (mark, find, nextGen);

@@ -111,8 +111,8 @@ public static void TestIssue16902(ж<testing.T> Ꮡt) {
     ref var info = ref heap<typesꓸInfo>(out var Ꮡinfo);
     info = new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>());
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
-    conf = new types.Config( // TODO(adonovan): use same FileSet as mustTypecheck.
-
+    conf = new types.Config(
+        // TODO(adonovan): use same FileSet as mustTypecheck.
         Importer: defaultImporter(token.NewFileSet()),
         Sizes: new types.StdSizesжSizes(Ꮡ(new types.StdSizes(WordSize: 8, MaxAlign: 8)))
     );
@@ -141,14 +141,16 @@ var s struct {
 // go.dev/issue/53884.
 public static void TestAtomicAlign(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt)); // The Go command is needed for the importer to determine the locations of stdlib .a files.
+
     @string src = srcᶜ39;
+
     var want = new int64[]{0, 8, 16}.slice();
     foreach (var (_, arch) in new @string[]{"386"u8, "amd64"u8}.slice()) {
         var wantʗ1 = want;
         Ꮡt.Run(arch, (ж<testing.T> tΔ1) => {
             ref var conf = ref heap<types.Config>(out var Ꮡconf);
-            conf = new types.Config( // TODO(adonovan): use same FileSet as findStructTypeConfig.
-
+            conf = new types.Config(
+                // TODO(adonovan): use same FileSet as findStructTypeConfig.
                 Importer: defaultImporter(token.NewFileSet()),
                 Sizes: types.SizesFor("gc"u8, arch)
             );
@@ -158,6 +160,7 @@ public static void TestAtomicAlign(ж<testing.T> Ꮡt) {
             for (nint i = 0; i < ts.NumFields(); i++) {
                 fields = append(fields, ts.Field(i));
             }
+
             var offsets = conf.Sizes.Offsetsof(fields);
             if (offsets[0] != wantʗ1[0] || offsets[1] != wantʗ1[1] || offsets[2] != wantʗ1[2]) {
                 tΔ1.Errorf("OffsetsOf(%v) = %v want %v"u8, ts.OrTypedNil(), offsets, wantʗ1);
@@ -229,8 +232,8 @@ public static void TestGCSizes(ж<testing.T> Ꮡt) {
         Ꮡt.Run(tcΔ1.name, (ж<testing.T> tΔ1) => {
             tΔ1.Parallel();
             ref var conf = ref heap<types.Config>(out var Ꮡconf);
-            conf = new types.Config( // TODO(adonovan): use same FileSet as mustTypecheck.
-
+            conf = new types.Config(
+                // TODO(adonovan): use same FileSet as mustTypecheck.
                 Importer: defaultImporter(token.NewFileSet()),
                 Sizes: types.SizesFor("gc"u8, amd64ˢ)
             );

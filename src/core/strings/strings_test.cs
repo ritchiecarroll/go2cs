@@ -68,12 +68,6 @@ partial struct IndexTest {
     internal nint @out;
 }
 
-// cases with one byte strings - test special case in Index()
-// test special cases in Index() for short strings
-// test fallback to Rabin-Karp.
-// test fallback to IndexRune
-// invalid UTF-8 byte sequence (must be longer than bytealg.MaxBruteForce to
-// test that we don't use IndexRune)
 internal static slice<IndexTest> indexTests = new IndexTest[]{
     new(""u8, ""u8, 0),
     new(""u8, "a"u8, -1),
@@ -91,6 +85,7 @@ internal static slice<IndexTest> indexTests = new IndexTest[]{
     new("999f2xmimunbuyew5vrkla9cpwhmxan8o98ec"u8, "98ec"u8, 33),
     new("9lpt9r98i04k8bz6c6dsrthb96bhi"u8, "96bhi"u8, 24),
     new("55u558eqfaod2r2gu42xxsu631xf0zobs5840vl"u8, "5840vl"u8, 33),
+    // cases with one byte strings - test special case in Index()
     new(""u8, "a"u8, -1),
     new("x"u8, "a"u8, -1),
     new("x"u8, "x"u8, 0),
@@ -98,6 +93,7 @@ internal static slice<IndexTest> indexTests = new IndexTest[]{
     new("abc"u8, "b"u8, 1),
     new("abc"u8, "c"u8, 2),
     new("abc"u8, "x"u8, -1),
+    // test special cases in Index() for short strings
     new(""u8, "ab"u8, -1),
     new("bc"u8, "ab"u8, -1),
     new("ab"u8, "ab"u8, 0),
@@ -162,9 +158,13 @@ internal static slice<IndexTest> indexTests = new IndexTest[]{
     new("xx012345678901234567890123456789012345678901234567890123456789012"u8[..41], "0123456789012345678901234567890123456789"u8, -1),
     new("xx012345678901234567890123456789012345678901234567890123456789012"u8, "0123456789012345678901234567890123456xxx"u8, -1),
     new("xx0123456789012345678901234567890123456789012345678901234567890120123456789012345678901234567890123456xxx"u8, "0123456789012345678901234567890123456xxx"u8, 65),
+    // test fallback to Rabin-Karp.
     new("oxoxoxoxoxoxoxoxoxoxoxoy"u8, "oy"u8, 22),
     new("oxoxoxoxoxoxoxoxoxoxoxox"u8, "oy"u8, -1),
+    // test fallback to IndexRune
     new("oxoxoxoxoxoxoxoxoxoxox☺"u8, "☺"u8, 22),
+    // invalid UTF-8 byte sequence (must be longer than bytealg.MaxBruteForce to
+    // test that we don't use IndexRune)
     new(((@string)(new byte[]{0x78, 0x78, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x78, 0x78, 0x78, 0xed, 0x9f, 0xc0})), ((@string)(new byte[]{0xed, 0x9f, 0xc0})), 105)
 }.slice();
 
@@ -280,14 +280,10 @@ public static void TestLastIndexByte(ж<testing.T> Ꮡt) {
         new(""u8, "q"u8, -1),
         new("abcdef"u8, "q"u8, -1),
         new("abcdefabcdef"u8, "a"u8, len("abcdef")), // something in the middle
-
         new("abcdefabcdef"u8, "f"u8, len("abcdefabcde")), // last byte
-
         new("zabcdefabcdef"u8, "z"u8, 0), // first byte
-
-        new("a☺b☻c☹d"u8, "b"u8, len("a☺"))
+        new("a☺b☻c☹d"u8, "b"u8, len("a☺")) // non-ascii
     }.slice();
-    // non-ascii
     foreach (var (_, test) in testCases) {
         nint actual = LastIndexByte(test.s, test.sep[0]);
         if (actual != test.@out) {
@@ -312,8 +308,7 @@ internal static readonly @string charsᶜ = "abcdefghijklmnopqrstuvwxyz012345678
 public static void TestIndexRandom(ж<testing.T> Ꮡt) {
     @string chars = charsᶜ;
     for (nint times = 0; times < 10; times++) {
-        for (nint strLen = 5 + rand.Intn(5); strLen < 140; strLen += 10) {
-            // Arbitrary
+        for (nint strLen = 5 + rand.Intn(5); strLen < 140; strLen += 10) { // Arbitrary
             var s1 = new slice<byte>(strLen);
             foreach (var (i, _) in s1) {
                 s1[i] = chars[rand.Intn(len(chars))];
@@ -354,52 +349,50 @@ public static void TestIndexRune(ж<testing.T> Ꮡt) {
         new("a A x"u8, (rune)'A', 2),
         new("some_text=some_value"u8, (rune)'=', 9),
         new("☺a"u8, (rune)'a', 3),
-        new("a☻☺b"u8, (rune)'☺', 4), // RuneError should match any invalid UTF-8 byte sequence.
+        new("a☻☺b"u8, (rune)'☺', 4),
 
+        // RuneError should match any invalid UTF-8 byte sequence.
         new("�"u8, (rune)'�', 0),
         new(((@string)(new byte[]{0xff})), (rune)'�', 0),
         new("☻x�"u8, (rune)'�', len("☻x")),
         new(((@string)(new byte[]{0xe2, 0x98, 0xbb, 0x78, 0xe2, 0x98})), (rune)'�', len("☻x")),
         new(((@string)(new byte[]{0xe2, 0x98, 0xbb, 0x78, 0xe2, 0x98, 0xef, 0xbf, 0xbd})), (rune)'�', len("☻x")),
-        new(((@string)(new byte[]{0xe2, 0x98, 0xbb, 0x78, 0xe2, 0x98, 0x78})), (rune)'�', len("☻x")), // Invalid rune values should never match.
+        new(((@string)(new byte[]{0xe2, 0x98, 0xbb, 0x78, 0xe2, 0x98, 0x78})), (rune)'�', len("☻x")),
 
+        // Invalid rune values should never match.
         new(((@string)(new byte[]{0x61, 0xe2, 0x98, 0xba, 0x62, 0xe2, 0x98, 0xbb, 0x63, 0xe2, 0x98, 0xb9, 0x64, 0xe2, 0x98, 0xef, 0xbf, 0xbd, 0xff, 0xef, 0xbf, 0xbd, 0xed, 0xa0, 0x80})), -1, -1),
         new(((@string)(new byte[]{0x61, 0xe2, 0x98, 0xba, 0x62, 0xe2, 0x98, 0xbb, 0x63, 0xe2, 0x98, 0xb9, 0x64, 0xe2, 0x98, 0xef, 0xbf, 0xbd, 0xff, 0xef, 0xbf, 0xbd, 0xed, 0xa0, 0x80})), 0xD800, -1), // Surrogate pair
+        new(((@string)(new byte[]{0x61, 0xe2, 0x98, 0xba, 0x62, 0xe2, 0x98, 0xbb, 0x63, 0xe2, 0x98, 0xb9, 0x64, 0xe2, 0x98, 0xef, 0xbf, 0xbd, 0xff, 0xef, 0xbf, 0xbd, 0xed, 0xa0, 0x80})), utf8.MaxRune + 1, -1),
 
-        new(((@string)(new byte[]{0x61, 0xe2, 0x98, 0xba, 0x62, 0xe2, 0x98, 0xbb, 0x63, 0xe2, 0x98, 0xb9, 0x64, 0xe2, 0x98, 0xef, 0xbf, 0xbd, 0xff, 0xef, 0xbf, 0xbd, 0xed, 0xa0, 0x80})), utf8.MaxRune + 1, -1), // 2 bytes
-
+        // 2 bytes
         new("ӆ"u8, (rune)'ӆ', 0),
         new("a"u8, (rune)'ӆ', -1),
         new("  ӆ"u8, (rune)'ӆ', 2),
         new("  a"u8, (rune)'ӆ', -1),
         new(Repeat("ц"u8, 64) + "ӆ"u8, (rune)'ӆ', 128), // test cutover
-
         new(Repeat("Ꙁ"u8, 64) + "Ꚁ"u8, (rune)'䚀', -1), // 'Ꚁ' and '䚀' share the same last two bytes
- // 3 bytes
 
+        // 3 bytes
         new("Ꚁ"u8, (rune)'Ꚁ', 0),
         new("a"u8, (rune)'Ꚁ', -1),
         new("  Ꚁ"u8, (rune)'Ꚁ', 2),
         new("  a"u8, (rune)'Ꚁ', -1),
         new(Repeat("Ꙁ"u8, 64) + "Ꚁ"u8, (rune)'Ꚁ', 192), // test cutover
-
         new(Repeat("𡋀"u8, 64) + "𡌀"u8, (rune)0x23300, -1), // '𡌀' and '𣌀' share the same last two bytes
- // 4 bytes
 
+        // 4 bytes
         new("𡌀"u8, (rune)0x21300, 0),
         new("a"u8, (rune)0x21300, -1),
         new("  𡌀"u8, (rune)0x21300, 2),
         new("  a"u8, (rune)0x21300, -1),
         new(Repeat("𡋀"u8, 64) + "𡌀"u8, (rune)0x21300, 256), // test cutover
+        new(Repeat("𡋀"u8, 64), (rune)0x21300, -1),
 
-        new(Repeat("𡋀"u8, 64), (rune)0x21300, -1), // Test the cutover to bytealg.IndexString when it is triggered in
- // the middle of rune that contains consecutive runs of equal bytes.
-
+        // Test the cutover to bytealg.IndexString when it is triggered in
+        // the middle of rune that contains consecutive runs of equal bytes.
         new("aaaaaKKKK\U000bc104"u8, (rune)0xBC104, 17), // cutover: (n + 16) / 8
-
         new("aaaaaKKKK鄄"u8, (rune)'鄄', 17),
         new("aaKKKKKa\U000bc104"u8, (rune)0xBC104, 18), // cutover: 4 + n>>4
-
         new("aaKKKKKa鄄"u8, (rune)'鄄', 18)
     }.slice();
     foreach (var (_, tt) in tests) {
@@ -409,6 +402,7 @@ public static void TestIndexRune(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // Make sure we trigger the cutover and string(rune) conversion.
     @string haystack = "test"u8 + Repeat("𡋀"u8, 32) + "𡌀"u8;
     var allocs = testing.AllocsPerRun(1000, () => {
@@ -692,8 +686,6 @@ internal static void runStringTests(ж<testing.T> Ꮡt, Func<@string, @string> f
     }
 }
 
-// grows one byte per char
-// test utf8.RuneSelf and utf8.MaxRune
 internal static slice<StringTest> upperTests = new StringTest[]{
     new(""u8, ""u8),
     new("ONLYUPPER"u8, "ONLYUPPER"u8),
@@ -703,12 +695,10 @@ internal static slice<StringTest> upperTests = new StringTest[]{
     new("longStrinGwitHmixofsmaLLandcAps"u8, "LONGSTRINGWITHMIXOFSMALLANDCAPS"u8),
     new("RENAN BASTOS 93 AOSDAJDJAIDJAIDAJIaidsjjaidijadsjiadjiOOKKO"u8, "RENAN BASTOS 93 AOSDAJDJAIDJAIDAJIAIDSJJAIDIJADSJIADJIOOKKO"u8),
     new("long\u0250string\u0250with\u0250nonascii\u2C6Fchars"u8, "LONG\u2C6FSTRING\u2C6FWITH\u2C6FNONASCII\u2C6FCHARS"u8),
-    new("\u0250\u0250\u0250\u0250\u0250"u8, "\u2C6F\u2C6F\u2C6F\u2C6F\u2C6F"u8),
-    new("a\u0080\U0010FFFF"u8, "A\u0080\U0010FFFF"u8)
+    new("\u0250\u0250\u0250\u0250\u0250"u8, "\u2C6F\u2C6F\u2C6F\u2C6F\u2C6F"u8), // grows one byte per char
+    new("a\u0080\U0010FFFF"u8, "A\u0080\U0010FFFF"u8) // test utf8.RuneSelf and utf8.MaxRune
 }.slice();
 
-// shrinks one byte per char
-// test utf8.RuneSelf and utf8.MaxRune
 internal static slice<StringTest> lowerTests = new StringTest[]{
     new(""u8, ""u8),
     new("abc"u8, "abc"u8),
@@ -717,8 +707,8 @@ internal static slice<StringTest> lowerTests = new StringTest[]{
     new("longStrinGwitHmixofsmaLLandcAps"u8, "longstringwithmixofsmallandcaps"u8),
     new("renan bastos 93 AOSDAJDJAIDJAIDAJIaidsjjaidijadsjiadjiOOKKO"u8, "renan bastos 93 aosdajdjaidjaidajiaidsjjaidijadsjiadjiookko"u8),
     new("LONG\u2C6FSTRING\u2C6FWITH\u2C6FNONASCII\u2C6FCHARS"u8, "long\u0250string\u0250with\u0250nonascii\u0250chars"u8),
-    new("\u2C6D\u2C6D\u2C6D\u2C6D\u2C6D"u8, "\u0251\u0251\u0251\u0251\u0251"u8),
-    new("A\u0080\U0010FFFF"u8, "a\u0080\U0010FFFF"u8)
+    new("\u2C6D\u2C6D\u2C6D\u2C6D\u2C6D"u8, "\u0251\u0251\u0251\u0251\u0251"u8), // shrinks one byte per char
+    new("A\u0080\U0010FFFF"u8, "a\u0080\U0010FFFF"u8) // test utf8.RuneSelf and utf8.MaxRune
 }.slice();
 
 internal static readonly @string space = "\t\v\r\f\n\u0085\u00a0\u2000\u3000"u8;
@@ -782,6 +772,7 @@ public static void TestMap(ж<testing.T> Ꮡt) {
     if (m != expect) {
         Ꮡt.Errorf("growing: expected %q got %q"u8, expect, m);
     }
+
     // 2. Shrink
     var minRune = (rune _) => (rune)'a';
     m = Map(minRune, tenRunes(Δunicode.MaxRune));
@@ -789,18 +780,21 @@ public static void TestMap(ж<testing.T> Ꮡt) {
     if (m != expect) {
         Ꮡt.Errorf("shrinking: expected %q got %q"u8, expect, m);
     }
+
     // 3. Rot13
     m = Map(rot13, aToZedˢ);
     expect = nGbMrqˢ;
     if (m != expect) {
         Ꮡt.Errorf("rot13: expected %q got %q"u8, expect, m);
     }
+
     // 4. Rot13^2
     m = Map(rot13, Map(rot13, aToZedˢ));
     expect = aToZedˢ;
     if (m != expect) {
         Ꮡt.Errorf("rot13: expected %q got %q"u8, expect, m);
     }
+
     // 5. Drop
     var dropNotLatin = (rune rΔ1) => {
         if (Δunicode.Is(Δunicode.Latin, rΔ1)) {
@@ -813,6 +807,7 @@ public static void TestMap(ж<testing.T> Ꮡt) {
     if (m != expect) {
         Ꮡt.Errorf("drop: expected %q got %q"u8, expect, m);
     }
+
     // 6. Identity
     var identity = (rune rΔ2) => rΔ2;
     @string orig = inputStringThatWeExpectˢ;
@@ -820,6 +815,7 @@ public static void TestMap(ж<testing.T> Ꮡt) {
     if (@unsafe.StringData(orig) != @unsafe.StringData(m)) {
         Ꮡt.Error(unexpectedCopyDuringˢ);
     }
+
     // 7. Handle invalid UTF-8 sequence
     var replaceNotLatin = rune (rune rΔ3) => {
         if (Δunicode.Is(Δunicode.Latin, rΔ3)) {
@@ -832,6 +828,7 @@ public static void TestMap(ж<testing.T> Ꮡt) {
     if (m != expect) {
         Ꮡt.Errorf("replace invalid sequence: expected %q got %q"u8, expect, m);
     }
+
     // 8. Check utf8.RuneSelf and utf8.MaxRune encoding
     var encode = rune (rune rΔ4) => {
         var exprᴛ1 = rΔ4;
@@ -841,7 +838,6 @@ public static void TestMap(ж<testing.T> Ꮡt) {
         if (exprᴛ1 == Δunicode.MaxRune) {
             return utf8.RuneSelf;
         }
-
         return rΔ4;
     };
     @string s = ((@string)(rune)utf8.RuneSelf) + ((@string)(rune)utf8.MaxRune);
@@ -854,6 +850,7 @@ public static void TestMap(ж<testing.T> Ꮡt) {
     if (m != s) {
         Ꮡt.Errorf("encoding not handled correctly: expected %q got %q"u8, s, m);
     }
+
     // 9. Check mapping occurs in the front, middle and back
     var trimSpaces = (rune rΔ5) => {
         if (Δunicode.IsSpace(rΔ5)) {
@@ -881,7 +878,6 @@ internal static readonly @string toLowerˢ = "ToLower"u8;
 public static void TestToLower(ж<testing.T> Ꮡt) {
     runStringTests(Ꮡt, ToLower, toLowerˢ, lowerTests);
 }
-
 
 partial struct toValidUTF8Testsᴛ1 /*dyn*/ {
     internal @string @in;
@@ -992,8 +988,6 @@ public static void TestTrimSpace(ж<testing.T> Ꮡt) {
     runStringTests(Ꮡt, TrimSpace, trimSpaceˢ, trimSpaceTests);
 }
 
-//empty string tests
-
 partial struct trimTestsᴛ1 /*dyn*/ {
     internal @string f;
     internal @string @in, arg, @out;
@@ -1014,6 +1008,7 @@ internal static slice<trimTestsᴛ1> trimTests = new trimTestsᴛ1[]{
     new("Trim"u8, ((@string)(new byte[]{0x80, 0x74, 0x65, 0x73, 0x74, 0xff})), ((@string)(new byte[]{0xff})), "test"u8),
     new("Trim"u8, " Ġ "u8, " "u8, "Ġ"u8),
     new("Trim"u8, " Ġİ0"u8, "0 "u8, "Ġİ"u8),
+    //empty string tests
     new("Trim"u8, "abba"u8, ""u8, "abba"u8),
     new("Trim"u8, ""u8, "123"u8, ""u8),
     new("Trim"u8, ""u8, ""u8, ""u8),
@@ -1053,7 +1048,6 @@ public static void TestTrim(ж<testing.T> Ꮡt) {
         else { /* default: */
             Ꮡt.Errorf("Undefined trim function %s"u8, name);
         }
-
         @string actual = f(tc.@in, tc.arg);
         if (actual != tc.@out) {
             Ꮡt.Errorf("%s(%q, %q) = %q; want %q"u8, name, tc.@in, tc.arg, actual, tc.@out);
@@ -1065,6 +1059,7 @@ public static void BenchmarkTrim(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
+
     for (nint i = 0; i < b.N; i++) {
         foreach (var (_, tc) in trimTests) {
             @string name = tc.f;
@@ -1088,7 +1083,6 @@ public static void BenchmarkTrim(ж<testing.B> Ꮡb) {
             else { /* default: */
                 Ꮡb.Errorf("Undefined trim function %s"u8, name);
             }
-
             @string actual = f(tc.@in, tc.arg);
             if (actual != tc.@out) {
                 Ꮡb.Errorf("%s(%q, %q) = %q; want %q"u8, name, tc.@in, tc.arg, actual, tc.@out);
@@ -1148,7 +1142,6 @@ internal static predicate not(predicate p) {
         "not "u8 + p.name
     );
 }
-
 
 partial struct trimFuncTestsᴛ1 /*dyn*/ {
     internal predicate f;
@@ -1218,9 +1211,6 @@ public static void TestTrimFunc(ж<testing.T> Ꮡt) {
     }
 }
 
-// last rune in space is 3 bytes
-// tests of invalid UTF-8
-
 partial struct indexFuncTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal predicate f;
@@ -1231,10 +1221,12 @@ internal static slice<indexFuncTestsᴛ1> indexFuncTests = new indexFuncTestsᴛ
     new("abc"u8, isDigit, -1, -1),
     new("0123"u8, isDigit, 0, 3),
     new("a1b"u8, isDigit, 1, 1),
-    new(space, isSpace, 0, len(space) - 3),
+    new(space, isSpace, 0, len(space) - 3), // last rune in space is 3 bytes
     new("\u0e50\u0e5212hello34\u0e50\u0e51"u8, isDigit, 0, 18),
     new("\u2C6F\u2C6F\u2C6F\u2C6FABCDhelloEF\u2C6F\u2C6FGH\u2C6F\u2C6F"u8, isUpper, 0, 34),
     new("12\u0e50\u0e52hello34\u0e50\u0e51"u8, not(isDigit), 8, 12),
+
+    // tests of invalid UTF-8
     new(((@string)(new byte[]{0x80, 0x31})), isDigit, 1, 1),
     new(((@string)(new byte[]{0x80, 0x61, 0x62, 0x63})), isDigit, -1, -1),
     new(((@string)(new byte[]{0xc0, 0x61, 0xc0})), isValidRune, 1, 1),
@@ -1300,6 +1292,7 @@ public static void TestCaseConsistency(ж<testing.T> Ꮡt) {
     // convert the cases.
     @string upper = ToUpper(s);
     @string lower = ToLower(s);
+
     // Consistency checks
     {
         nint n = utf8.RuneCountInString(upper); if (n != numRunes) {
@@ -1317,9 +1310,7 @@ public static void TestCaseConsistency(ж<testing.T> Ꮡt) {
     if (!equal(toLowerLowerˢ, ToLower(lower), lower, Ꮡt)) {
         Ꮡt.Error(toLowerLowerConsistencyˢ);
     }
-}
-
-/*
+    /*
 		  These fail because of non-one-to-oneness of the data, such as multiple
 		  upper case 'I' mapping to 'i'.  We comment them out but keep them for
 		  interest.
@@ -1333,6 +1324,8 @@ public static void TestCaseConsistency(ж<testing.T> Ꮡt) {
 			t.Error("ToLower(upper) consistency fail");
 		}
 	*/
+}
+
 internal static @string longString = "a"u8 + ((sstring)new slice<byte>((1 << (int)(16)))) + "z"u8;
 
 internal static @string longSpaces = ((Func<@string>)(() => {
@@ -1342,8 +1335,6 @@ internal static @string longSpaces = ((Func<@string>)(() => {
     }
     return ((@string)b);
 }))();
-
-// Tests for results over the chunkLimit
 
 partial struct RepeatTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
@@ -1363,6 +1354,7 @@ public static slice<RepeatTestsᴛ1> RepeatTests = new RepeatTestsᴛ1[]{
     new("000"u8, "000000000"u8, 3),
     new("\t\t\t\t"u8, "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"u8, 4),
     new(" "u8, longSpaces, len(longSpaces)),
+    // Tests for results over the chunkLimit
     new(((@string)(rune)0), ((@string)new slice<byte>((1 << (int)(16)))), (1 << (int)(16))),
     new(longString, longString + longString, 2)
 }.slice();
@@ -1400,6 +1392,7 @@ internal static error /*err*/ repeat(@string s, nint count) {
                 }
             }
         }, ref ᒐ);
+
         Repeat(s, count);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1427,12 +1420,15 @@ public static void TestRepeatCatchesOverflow(ж<testing.T> Ꮡt) {
                 }
                 continue;
             }
+
             if (err == default! || !Contains(err.Error(), tt.errStr)) {
                 Ꮡt.Errorf("%s#%d got %q want %q"u8, prefix, i, err, tt.errStr);
             }
         }
     }
+
     nint maxInt = /* int(^uint(0) >> 1) */ unchecked((nint)9223372036854775807);
+
     runTestCases(""u8, new slice<TestRepeatCatchesOverflow_testCase>(7){
         [0] = new("--"u8, -2147483647, "negative"u8),
         [1] = new(""u8, maxInt, ""u8),
@@ -1442,10 +1438,12 @@ public static void TestRepeatCatchesOverflow(ж<testing.T> Ꮡt) {
         [5] = new("--"u8, -102, "negative"u8),
         [6] = new(((@string)new slice<byte>(255)), (nint)((~(nuint)0) / 255 + 1), "overflow"u8)
     });
+
     const bool is64Bit = /* 1<<(^uintptr(0)>>63)/2 != 0 */ true;
     if (!is64Bit) {
         return;
     }
+
     runTestCases(bitˢ, new slice<TestRepeatCatchesOverflow_testCase>(1){
         [0] = new("-"u8, maxInt, "out of range"u8)
     });
@@ -1463,7 +1461,6 @@ internal static bool runesEqual(slice<rune> a, slice<rune> b) {
     return true;
 }
 
-
 partial struct RunesTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal slice<rune> @out;
@@ -1480,8 +1477,6 @@ public static slice<RunesTestsᴛ1> RunesTests = new RunesTestsᴛ1[]{
 }.slice();
 
 public static void TestRunes(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     foreach (var (_, tt) in RunesTests) {
         var a = slice<rune>(tt.@in);
         if (!runesEqual(a, tt.@out)) {
@@ -1586,7 +1581,6 @@ public static void TestReadRune(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct UnreadRuneErrorTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal Action<ж<strings.Reader>> f;
@@ -1625,7 +1619,6 @@ public static void TestUnreadRuneError(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct ReplaceTestsᴛ1 /*dyn*/ {
     internal @string @in;
@@ -1671,7 +1664,6 @@ public static void TestReplace(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct TitleTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
 }
@@ -1697,21 +1689,6 @@ public static void TestTitle(ж<testing.T> Ꮡt) {
     }
 }
 
-// cases to cover code in runtime/asm_amd64.s:indexShortStr
-// 2-byte needle
-// 3-byte needle
-// 4-byte needle
-// 5-7-byte needle
-// 8-byte needle
-// 9-15-byte needle
-// 16-byte needle
-// 17-31-byte needle
-// partial match cases
-// 3
-// 5-7
-// 9-15
-// 17-31, issue 15679
-
 partial struct ContainsTestsᴛ1 /*dyn*/ {
     internal @string str, substr;
     internal bool expected;
@@ -1721,58 +1698,70 @@ public static slice<ContainsTestsᴛ1> ContainsTests = new ContainsTestsᴛ1[]{
     new("abc"u8, "bcd"u8, false),
     new("abc"u8, ""u8, true),
     new(""u8, "a"u8, false),
+
+    // cases to cover code in runtime/asm_amd64.s:indexShortStr
+    // 2-byte needle
     new("xxxxxx"u8, "01"u8, false),
     new("01xxxx"u8, "01"u8, true),
     new("xx01xx"u8, "01"u8, true),
     new("xxxx01"u8, "01"u8, true),
     new("01xxxxx"u8[1..], "01"u8, false),
     new("xxxxx01"u8[..6], "01"u8, false),
+    // 3-byte needle
     new("xxxxxxx"u8, "012"u8, false),
     new("012xxxx"u8, "012"u8, true),
     new("xx012xx"u8, "012"u8, true),
     new("xxxx012"u8, "012"u8, true),
     new("012xxxxx"u8[1..], "012"u8, false),
     new("xxxxx012"u8[..7], "012"u8, false),
+    // 4-byte needle
     new("xxxxxxxx"u8, "0123"u8, false),
     new("0123xxxx"u8, "0123"u8, true),
     new("xx0123xx"u8, "0123"u8, true),
     new("xxxx0123"u8, "0123"u8, true),
     new("0123xxxxx"u8[1..], "0123"u8, false),
     new("xxxxx0123"u8[..8], "0123"u8, false),
+    // 5-7-byte needle
     new("xxxxxxxxx"u8, "01234"u8, false),
     new("01234xxxx"u8, "01234"u8, true),
     new("xx01234xx"u8, "01234"u8, true),
     new("xxxx01234"u8, "01234"u8, true),
     new("01234xxxxx"u8[1..], "01234"u8, false),
     new("xxxxx01234"u8[..9], "01234"u8, false),
+    // 8-byte needle
     new("xxxxxxxxxxxx"u8, "01234567"u8, false),
     new("01234567xxxx"u8, "01234567"u8, true),
     new("xx01234567xx"u8, "01234567"u8, true),
     new("xxxx01234567"u8, "01234567"u8, true),
     new("01234567xxxxx"u8[1..], "01234567"u8, false),
     new("xxxxx01234567"u8[..12], "01234567"u8, false),
+    // 9-15-byte needle
     new("xxxxxxxxxxxxx"u8, "012345678"u8, false),
     new("012345678xxxx"u8, "012345678"u8, true),
     new("xx012345678xx"u8, "012345678"u8, true),
     new("xxxx012345678"u8, "012345678"u8, true),
     new("012345678xxxxx"u8[1..], "012345678"u8, false),
     new("xxxxx012345678"u8[..13], "012345678"u8, false),
+    // 16-byte needle
     new("xxxxxxxxxxxxxxxxxxxx"u8, "0123456789ABCDEF"u8, false),
     new("0123456789ABCDEFxxxx"u8, "0123456789ABCDEF"u8, true),
     new("xx0123456789ABCDEFxx"u8, "0123456789ABCDEF"u8, true),
     new("xxxx0123456789ABCDEF"u8, "0123456789ABCDEF"u8, true),
     new("0123456789ABCDEFxxxxx"u8[1..], "0123456789ABCDEF"u8, false),
     new("xxxxx0123456789ABCDEF"u8[..20], "0123456789ABCDEF"u8, false),
+    // 17-31-byte needle
     new("xxxxxxxxxxxxxxxxxxxxx"u8, "0123456789ABCDEFG"u8, false),
     new("0123456789ABCDEFGxxxx"u8, "0123456789ABCDEFG"u8, true),
     new("xx0123456789ABCDEFGxx"u8, "0123456789ABCDEFG"u8, true),
     new("xxxx0123456789ABCDEFG"u8, "0123456789ABCDEFG"u8, true),
     new("0123456789ABCDEFGxxxxx"u8[1..], "0123456789ABCDEFG"u8, false),
     new("xxxxx0123456789ABCDEFG"u8[..21], "0123456789ABCDEFG"u8, false),
-    new("xx01x"u8, "012"u8, false),
-    new("xx0123x"u8, "01234"u8, false),
-    new("xx01234567x"u8, "012345678"u8, false),
-    new("xx0123456789ABCDEFx"u8, "0123456789ABCDEFG"u8, false)
+
+    // partial match cases
+    new("xx01x"u8, "012"u8, false), // 3
+    new("xx0123x"u8, "01234"u8, false), // 5-7
+    new("xx01234567x"u8, "012345678"u8, false), // 9-15
+    new("xx0123456789ABCDEFx"u8, "0123456789ABCDEFG"u8, false) // 17-31, issue 15679
 }.slice();
 
 public static void TestContains(ж<testing.T> Ꮡt) {
@@ -1806,7 +1795,6 @@ public static void TestContainsAny(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct ContainsRuneTestsᴛ1 /*dyn*/ {
     internal @string str;
@@ -1845,7 +1833,6 @@ public static void TestContainsFunc(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct EqualFoldTestsᴛ1 /*dyn*/ {
     internal @string s, t;
@@ -1909,25 +1896,28 @@ public static void BenchmarkEqualFold(ж<testing.B> Ꮡb) {
             }
         }
     });
+
     @string s1 = s1ᶜ;
     @string s2 = s2ᶜ;
+
     Ꮡb.Run(asciiˢ, (ж<testing.B> bΔ2) => {
         for (nint i = 0; i < (~bΔ2).N; i++) {
             EqualFold(s1, s2);
         }
     });
+
     Ꮡb.Run(unicodePrefixˢ, (ж<testing.B> bΔ3) => {
         for (nint i = 0; i < (~bΔ3).N; i++) {
             EqualFold("αβδ" + s1, "ΑΒΔ" + s2);
         }
     });
+
     Ꮡb.Run(unicodeSuffixˢ, (ж<testing.B> bΔ4) => {
         for (nint i = 0; i < (~bΔ4).N; i++) {
             EqualFold(s1 + "αβδ", s2 + "ΑΒΔ");
         }
     });
 }
-
 
 partial struct CountTestsᴛ1 /*dyn*/ {
     internal @string s, sep;
@@ -1956,7 +1946,6 @@ public static void TestCount(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct cutTestsᴛ1 /*dyn*/ {
     internal @string s, sep;
     internal @string before, after;
@@ -1983,7 +1972,6 @@ public static void TestCut(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct cutPrefixTestsᴛ1 /*dyn*/ {
     internal @string s, sep;
     internal @string after;
@@ -2007,7 +1995,6 @@ public static void TestCutPrefix(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct cutSuffixTestsᴛ1 /*dyn*/ {
     internal @string s, sep;
@@ -2176,9 +2163,9 @@ public static void BenchmarkCountByte(ж<testing.B> Ꮡb) {
     }
 }
 
-// Input is ~10% space, ~10% 2-byte UTF-8, rest ASCII non-space.
 internal static Func<@string> makeFieldsInput = () => {
     var x = new slice<byte>((1 << (int)(20)));
+    // Input is ~10% space, ~10% 2-byte UTF-8, rest ASCII non-space.
     foreach (var (i, _) in x) {
         var exprᴛ1 = rand.Intn(10);
         var matchᴛ1 = false;
@@ -2197,14 +2184,13 @@ internal static Func<@string> makeFieldsInput = () => {
         if (fallthrough || !matchᴛ1) { /* default: */
             x[i] = (rune)'x';
         }
-
     }
     return ((@string)x);
 };
 
-// Input is ~10% space, rest ASCII non-space.
 internal static Func<@string> makeFieldsInputASCII = () => {
     var x = new slice<byte>((1 << (int)(20)));
+    // Input is ~10% space, rest ASCII non-space.
     foreach (var (i, _) in x) {
         if (rand.Intn(10) == 0){
             x[i] = (rune)' ';

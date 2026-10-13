@@ -334,8 +334,8 @@ public static void TestCleanupPointerEqualsArg(ж<testing.T> Ꮡt) {
                     Ꮡt.Error(wantPanicTestDidNotPanicˢ);
                 } else 
                 if (AreEqual(r, want)){
-                } else {
                     // do nothing
+                } else {
                     Ꮡt.Errorf("wrong panic: want=%q, got=%q"u8, want, r);
                 }
             }

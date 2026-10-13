@@ -33,21 +33,19 @@ internal partial struct tester {
     internal @string pattern; // regexp that log output must match; we add ^ and expected_text$ always
 }
 
-// individual pieces:
-// microsec implies time
-// shortfile overrides longfile
-// everything at once:
 internal static slice<tester> tests = new tester[]{
+    // individual pieces:
     new(0, ""u8, ""u8),
     new(0, "XXX"u8, "XXX"u8),
     new(Ldate, ""u8, Rdate + " "),
     new(Ltime, ""u8, Rtime + " "),
     new((nint)((nint)Ltime | (nint)Lmsgprefix), "XXX"u8, Rtime + " XXX"),
     new((nint)((nint)Ltime | (nint)Lmicroseconds), ""u8, Rtime + Rmicroseconds + " "),
-    new(Lmicroseconds, ""u8, Rtime + Rmicroseconds + " "),
+    new(Lmicroseconds, ""u8, Rtime + Rmicroseconds + " "), // microsec implies time
     new(Llongfile, ""u8, Rlongfile + " "),
     new(Lshortfile, ""u8, Rshortfile + " "),
-    new((nint)((nint)Llongfile | (nint)Lshortfile), ""u8, Rshortfile + " "),
+    new((nint)((nint)Llongfile | (nint)Lshortfile), ""u8, Rshortfile + " "), // shortfile overrides longfile
+    // everything at once:
     new((nint)((nint)(UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | (nint)Llongfile), "XXX"u8, "XXX" + Rdate + " " + Rtime + Rmicroseconds + " " + Rlongfile + " "),
     new((nint)((nint)(UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | (nint)Lshortfile), "XXX"u8, "XXX" + Rdate + " " + Rtime + Rmicroseconds + " " + Rshortfile + " "),
     new((nint)((nint)(UntypedInt)((UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | Llongfile) | (nint)Lmsgprefix), "XXX"u8, Rdate + " " + Rtime + Rmicroseconds + " " + Rlongfile + " XXX"),
@@ -176,6 +174,7 @@ public static void TestFlagAndPrefixSetting(ж<testing.T> Ꮡt) {
     if (!matched) {
         Ꮡt.Error(messageDidNotMatchˢ);
     }
+
     // Ensure that a newline is added only if the buffer lacks a newline suffix.
     b.Reset();
     l.SetFlags(0);

@@ -46,6 +46,7 @@ public static void TestNISTPKITSPolicy(ж<testing.T> Ꮡt) {
     // _and_ validating the path, we take the path as given and run
     // policiesValid on it.
     @string certDir = testdataNistPkitsCertsˢ;
+
     ref var testcases = ref heap<slice<TestNISTPKITSPolicy_testcases>>(out var Ꮡtestcases);
     var (b, err) = os.ReadFile(testdataNistPkitsVectorsˢ);
     if (err != default!) {
@@ -56,6 +57,7 @@ public static void TestNISTPKITSPolicy(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(errΔ1);
         }
     }
+
     var policyTests = new map<@string, bool>{
         ["4.8.1 All Certificates Same Policy Test1 (Subpart 1)"u8] = true,
         ["4.8.1 All Certificates Same Policy Test1 (Subpart 2)"u8] = true,
@@ -146,6 +148,7 @@ public static void TestNISTPKITSPolicy(ж<testing.T> Ꮡt) {
         ["4.12.9 Valid Self-Issued inhibitAnyPolicy Test9"u8] = true,
         ["4.12.10 Invalid Self-Issued inhibitAnyPolicy Test10"u8] = true
     };
+
     foreach (var (_, vᴛ1) in testcases) {
         ref var tc = ref heap(new TestNISTPKITSPolicy_testcases(), out var Ꮡtc);
         tc = vᴛ1;
@@ -169,6 +172,7 @@ public static void TestNISTPKITSPolicy(ж<testing.T> Ꮡt) {
                 chain = append(chain, cert);
             }
             slices.Reverse<slice<ж<global::go.crypto.x509_package.Certificate>>, ж<global::go.crypto.x509_package.Certificate>>(chain);
+
             slice<global::go.crypto.x509_package.OID> initialPolicies = default!;
             foreach (var (_, pstr) in tcʗ1.InitialPolicySet) {
                 var (policy, ok) = nistTestPolicies[pstr, ꟷ];
@@ -177,6 +181,7 @@ public static void TestNISTPKITSPolicy(ж<testing.T> Ꮡt) {
                 }
                 initialPolicies = append(initialPolicies, policy);
             }
+
             var valid = policiesValid(chain, new VerifyOptions(
                 CertificatePolicies: initialPolicies,
                 inhibitPolicyMapping: tcʗ1.InitialPolicyMappingInhibit,

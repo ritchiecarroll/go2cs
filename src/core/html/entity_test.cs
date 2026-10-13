@@ -15,9 +15,11 @@ internal static readonly object mapsNotLoadedˢ = (@string)"maps not loaded"u8;
 
 public static void TestEntityLength(ж<testing.T> Ꮡt) {
     var (entity, entity2) = entityMaps();
+
     if (len(entity) == 0 || len(entity2) == 0) {
         Ꮡt.Fatal(mapsNotLoadedˢ);
     }
+
     // We verify that the length of UTF-8 encoding of each value is <= 1 + len(key).
     // The +1 comes from the leading "&". This property implies that the length of
     // unescaped text is <= the length of escaped text.

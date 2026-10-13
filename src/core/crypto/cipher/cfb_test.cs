@@ -22,7 +22,6 @@ partial class cipher_test_package {
 // cfbTests contains the test vectors from
 // https://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf, section
 // F.3.13.
-
 partial struct cfbTestsᴛ1 /*dyn*/ {
     internal @string key, iv, plaintext, ciphertext;
 }
@@ -71,19 +70,24 @@ public static void TestCFBVectors(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         (var block, err) = aes.NewCipher(key);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var ciphertext = new slice<byte>(len(plaintext));
         var cfb = cipher.NewCFBEncrypter(block, iv);
         cfb.XORKeyStream(ciphertext, plaintext);
+
         if (!bytes.Equal(ciphertext, expected)) {
             Ꮡt.Errorf("#%d: wrong output: got %x, expected %x"u8, i, ciphertext, expected);
         }
+
         var cfbdec = cipher.NewCFBDecrypter(block, iv);
         var plaintextCopy = new slice<byte>(len(ciphertext));
         cfbdec.XORKeyStream(plaintextCopy, ciphertext);
+
         if (!bytes.Equal(plaintextCopy, plaintext)) {
             Ꮡt.Errorf("#%d: wrong plaintext: got %x, expected %x"u8, i, plaintextCopy, plaintext);
         }
@@ -96,6 +100,7 @@ public static void TestCFBInverse(ж<testing.T> Ꮡt) {
         Ꮡt.Error(err);
         return;
     }
+
     var plaintext = slice<byte>("this is the plaintext. this is the plaintext."u8);
     var iv = new slice<byte>(block.BlockSize());
     rand.Reader.Read(iv);
@@ -103,10 +108,12 @@ public static void TestCFBInverse(ж<testing.T> Ꮡt) {
     var ciphertext = new slice<byte>(len(plaintext));
     copy(ciphertext, plaintext);
     cfb.XORKeyStream(ciphertext, ciphertext);
+
     var cfbdec = cipher.NewCFBDecrypter(block, iv);
     var plaintextCopy = new slice<byte>(len(plaintext));
     copy(plaintextCopy, ciphertext);
     cfbdec.XORKeyStream(plaintextCopy, plaintextCopy);
+
     if (!bytes.Equal(plaintextCopy, plaintext)) {
         Ꮡt.Errorf("got: %x, want: %x"u8, plaintextCopy, plaintext);
     }
@@ -120,12 +127,15 @@ public static void TestCFBStream(ж<testing.T> Ꮡt) {
     foreach (var (_, keylen) in new nint[]{128, 192, 256}.slice()) {
         Ꮡt.Run(fmt.Sprintf("AES-%d"u8, keylen), (ж<testing.T> tΔ1) => {
             var rng = newRandReader(tΔ1);
+
             var key = new slice<byte>(keylen / 8);
             rng.Read(key);
+
             var (block, err) = aes.NewCipher(key);
             if (err != default!) {
                 throw panic(err);
             }
+
             var blockʗ1 = block;
             tΔ1.Run(encrypterˢ, (ж<testing.T> tΔ2) => {
                 cryptotest.TestStreamFromBlock(tΔ2, blockʗ1, cipher.NewCFBEncrypter);
@@ -136,14 +146,18 @@ public static void TestCFBStream(ж<testing.T> Ꮡt) {
             });
         });
     }
+
     Ꮡt.Run(desˢ, (ж<testing.T> tΔ4) => {
         var rng = newRandReader(tΔ4);
+
         var key = new slice<byte>(8);
         rng.Read(key);
+
         var (block, err) = des.NewCipher(key);
         if (err != default!) {
             throw panic(err);
         }
+
         var blockʗ3 = block;
         tΔ4.Run(encrypterˢ, (ж<testing.T> tΔ5) => {
             cryptotest.TestStreamFromBlock(tΔ5, blockʗ3, cipher.NewCFBEncrypter);

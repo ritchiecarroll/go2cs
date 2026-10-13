@@ -47,10 +47,10 @@ using static global::go.image.jpeg_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/jpeg/dct_test.go", "dct_test.cs", "ABAeooKCgpSCgriCpoKmgoKWgoKCgoKUzLKygpSCgoKUgsyysoKClIKCurKygoKCAAQS8oKCgqaokoKUACIGACJeAAsCgoKCgoKCqriCAAMaAAsCgoKCgoKCqriCuIKCgoKCgpSUgrg=")]
-[assembly: go.GoPositionMap("image/jpeg/fuzz_test.go", "fuzz_test.cs", "ABggooKWgoKUgoKUgoKUloKCgpSClIKClKKCgoKCpIKCgqSCgoI=", "36-66:1")]
-[assembly: go.GoPositionMap("image/jpeg/reader_test.go", "reader_test.cs", "ABkysgALGIKCgoKUgoKClIKCpoKClpSCgIKCpICCgqSAgoLWgoCCguaC2qKCgpSSAAsSsoKClIKCgoKCuNaUgoKWgoKCgoKUgpTMkoKUgqaCgu6WgoKCgoIABxKmgoKCgoKUlOaCgoKUgoKClIKCgpSCAAkIzgAGRIKClJSCgrQAowEEhAABvAKCgpSAgsiUgoKCgIKkuIKUgJKkgILIgoKUlIKAgqbIloKCgoKUgoKClIKCgsqCgoKWhIKCAAgIgoKCkoKSgpSEAAscgoKEgoKCgoKEgsqigoKUgoKUgoKCgriC1oI=", "252-255:1", "", "194=pixString/1/2/1,pixString/2/2/2")]
-[assembly: go.GoPositionMap("image/jpeg/writer_test.go", "writer_test.cs", "ABguAAoWgoKClIIACA4AFDKCgoKCgoKCgriCgoKCgoKCgqaUAAkIAAgagoKClKaigoKUktaClIKCgpaSgoKCpoKCgpSCgqaCgs6igoKUgoCCpIKClIKUgIK2goCCzKKCkoKCgoKCgoKCgqamgoKUgpSCgtyCgoKCgoKqooKCgriigoKCgoIABxCCgoKCgriigoKCgoKCgoKCpoKCgoKC", "", "", "236=Intn/1/3/1,Intn/2/3/2,Intn/3/3/3;269=Intn/1/3/1,Intn/2/3/2,Intn/3/3/3")]
+[assembly: go.GoPositionMap("image/jpeg/dct_test.go", "dct_test.cs", "ABAeooKCgpSCgriCpoKmgoKmgoKCgoKU3LKygpSCgoKUgtyysoKClIKCyrKygoKCAAQS8oKCgqaokoKUpgAiXgALAoKCgoKCgqq4ggADGgALAoKCgoKCgqq4griCgoKCgoKUlIK4")]
+[assembly: go.GoPositionMap("image/jpeg/fuzz_test.go", "fuzz_test.cs", "ABggooKmgoKUgoKUgoKUpoKCgpSClIKClKKCgoKCpIKCgqSCgoI=", "36-66:1")]
+[assembly: go.GoPositionMap("image/jpeg/reader_test.go", "reader_test.cs", "ABkysgALGIKCgoKUgoKClIKCpoKCppSCgIKCpICCgqSAgoLWgoCCguaC2qKCgpSSAAsSsoKClIKCgoKCuNaUgoKmgoKCgoKUgpTMkoKUgqaCgu6mgoKCgoIABxKmgoKCgoKUlOaCgoKUgoKClIKCgpSCAAkIrgAHRIKClKSCgrQAowEEhAACvAKCgpSAgsiUgoKCgIKkuIKUgJKkgILIgoKUlIKAgqbIpoKCgoKUgoKClIKCgsqCgoKmlIKCAAgIgoKCkoKSgpSUAAwcgoKUgoKCgoKUgsqigoKUgoKUgoKCgriC1oI=", "252-255:1", "", "197=pixString/1/2/1,pixString/2/2/2")]
+[assembly: go.GoPositionMap("image/jpeg/writer_test.go", "writer_test.cs", "ABguAAoWgoKClILuABYygoKCgoKCgoK4goKCgoKCgoKmlAAICAAIGoKCgpSmooKClJLWgpSCgoKWkoKCgqaCgoKUgoKmgoLOooKClIKAgqSCgpSClICCtoKAgsyigpKCgoKCgoKCgoKmpoKClIKUgoLcgoKCgoKCuqKCgoK4ooKCgoKCAAcQgoKCgoK4ooKCgoKCgoKCgqaCgoKCgg==", "", "", "235=Intn/1/3/1,Intn/2/3/2,Intn/3/3/3;269=Intn/1/3/1,Intn/2/3/2,Intn/3/3/3")]
 // </GoSourcePositionMaps>
 
 namespace go.image;

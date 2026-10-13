@@ -50,7 +50,7 @@ using static global::go.image.png_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/png/example_test.go", "example_test.cs", "ABYskKSmgoKWhIKCgoKClJTogqaEgoIABxKCgpaAgoKmgII=")]
+[assembly: go.GoPositionMap("image/png/example_test.go", "example_test.cs", "ABYskKSmgoKmlIKCgoKClJTograUgoIACBKCgqaAgoK2gII=")]
 // </GoSourcePositionMaps>
 
 namespace go.image;

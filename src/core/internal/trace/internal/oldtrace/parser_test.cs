@@ -85,7 +85,6 @@ public static void TestParseCanned(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("unknown input file suffix: %v"u8, f.Name());
             break;
         }}
-
     }
 }
 
@@ -104,20 +103,24 @@ internal static void checkTrace(ж<testing.T> Ꮡt, nint ver, global::go.@intern
 
 public static void TestBuckets(ж<testing.T> Ꮡt) {
     ref var evs = ref heap(new global::go.@internal.trace.@internal.oldtrace_package.Events(), out var Ꮡevs);
+
     UntypedInt N = /* eventsBucketSize*3 + 123 */ 1572987;
     for (nint i = 0; i < N; i++) {
         evs.append(new Event(Ts: ((global::go.@internal.trace.@internal.oldtrace_package.Timestamp)(int64)i)));
     }
+
     {
         nint nΔ1 = len(evs.buckets); if (nΔ1 != 4) {
             Ꮡt.Fatalf("got %d buckets, want %d"u8, nΔ1, (nint)(4));
         }
     }
+
     {
         nint nΔ2 = evs.Len(); if (nΔ2 != N) {
             Ꮡt.Fatalf("got %d events, want %d"u8, nΔ2, (nint)(N));
         }
     }
+
     nint n = default!;
     Ꮡevs.All()((ж<global::go.@internal.trace.@internal.oldtrace_package.Event> evΔ1) => {
         n++;
@@ -126,6 +129,7 @@ public static void TestBuckets(ж<testing.T> Ꮡt) {
     if (n != N) {
         Ꮡt.Fatalf("iterated over %d events, expected %d"u8, n, (nint)(N));
     }
+
     UntypedInt consume = /* eventsBucketSize + 50 */ 524338;
     for (nint i = 0; i < consume; i++) {
         {
@@ -134,6 +138,7 @@ public static void TestBuckets(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     if (evs.buckets[0] != nil) {
         Ꮡt.Fatalf("expected first bucket to have been dropped"u8);
     }
@@ -142,21 +147,25 @@ public static void TestBuckets(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("expected bucket %d to be non-nil"u8, i + 1);
         }
     }
+
     {
         nint nΔ3 = evs.Len(); if (nΔ3 != (nint)(N - consume)) {
             Ꮡt.Fatalf("got %d remaining elements, expected %d"u8, nΔ3, (nint)(N - consume));
         }
     }
+
     var ev = evs.Ptr(0);
     if ((~ev).Ts != consume) {
         Ꮡt.Fatalf("got event %d, expected %d"u8, (nint)(int64)(~ev).Ts, (nint)(consume));
     }
+
     while (ᐧ) {
         var (_, ok) = evs.Pop();
         if (!ok) {
             break;
         }
     }
+
     foreach (var (i, b) in evs.buckets) {
         if (b != nil) {
             Ꮡt.Fatalf("expected bucket %d to be nil"u8, i);

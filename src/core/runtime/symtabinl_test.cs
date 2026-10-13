@@ -26,11 +26,13 @@ public static void XTestInlineUnwinder(TestingT t) {
     if (TestenvOptimizationOff()) {
         t.Skip(skippingTestWithInliningˢ);
     }
+
     var pc1 = abi.FuncPCABIInternal(tiuTest);
     var f = findfunc(pc1);
     if (!f.valid()) {
         t.Fatalf("failed to resolve tiuTest at PC %#x"u8, pc1);
     }
+
     var want = new map<@string, nint>{
         ["tiuInlined1:3 tiuTest:10"u8] = 0,
         ["tiuInlined1:3 tiuInlined2:6 tiuTest:11"u8] = 0,
@@ -42,6 +44,7 @@ public static void XTestInlineUnwinder(TestingT t) {
         ["tiuInlined2"u8] = 5,
         ["tiuTest"u8] = 9
     };
+
     // Iterate over the PCs in tiuTest and walk the inline stack for each.
     @string prevStack = "x"u8;
     for (var pc = pc1; pc < pc1 + 1024 && findfunc(pc) == f; pc += sys.PCQuantum) {
@@ -65,7 +68,9 @@ public static void XTestInlineUnwinder(TestingT t) {
             if (!stringslite.HasSuffix(@file, wantFile)) {
                 t.Errorf("tiuTest+%#x: want file ...%s, got %s"u8, pc - pc1, wantFile, @file);
             }
+
             var sf = u.srcFunc(uf);
+
             @string name = sf.name();
             @string namePrefix = namePrefixᶜ;
             if (stringslite.HasPrefix(name, namePrefix)) {
@@ -74,6 +79,7 @@ public static void XTestInlineUnwinder(TestingT t) {
             if (!stringslite.HasPrefix(name, tiuˢ)) {
                 t.Errorf("tiuTest+%#x: unexpected function %s"u8, pc - pc1, name);
             }
+
             nint start = (nint)sf.startLine - tiuStart;
             if (start != wantStart[name]) {
                 t.Errorf("tiuTest+%#x: want startLine %d, got %d"u8, pc - pc1, wantStart[name], start);
@@ -81,14 +87,18 @@ public static void XTestInlineUnwinder(TestingT t) {
             if (sf.funcID != abi.FuncIDNormal) {
                 t.Errorf("tiuTest+%#x: bad funcID %v"u8, pc - pc1, sf.funcID);
             }
+
             if (len(Δstack) > 0) {
                 Δstack += " "u8;
             }
             Δstack += FmtSprintf("%s:%d"u8, name, line - tiuStart);
         }
+
         if (Δstack != prevStack) {
             prevStack = Δstack;
+
             t.Logf("tiuTest+%#x: %s"u8, pc - pc1, Δstack);
+
             {
                 var (_, ok) = want[Δstack, ꟷ]; if (ok) {
                     want[Δstack]++;
@@ -96,6 +106,7 @@ public static void XTestInlineUnwinder(TestingT t) {
             }
         }
     }
+
     // Check that we got all the stacks we wanted.
     foreach (var (Δstack, count) in want) {
         if (count == 0) {

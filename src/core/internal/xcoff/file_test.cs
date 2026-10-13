@@ -58,6 +58,7 @@ internal static ref slice<fileTest> fileTests => ref ᏑfileTests.ValueSlot;
 public static void TestOpen(ж<testing.T> Ꮡt) {
     foreach (var (i, _) in fileTests) {
         var tt = Ꮡ(fileTests, i);
+
         var (f, err) = Open((~tt).@file);
         if (err != default!) {
             Ꮡt.Error(err);
@@ -67,6 +68,7 @@ public static void TestOpen(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("open %s:\n\thave %#v\n\twant %#v\n"u8, (~tt).@file, (~f).FileHeader, (~tt).hdr);
             continue;
         }
+
         foreach (var (iΔ1, sh) in (~f).Sections) {
             if (iΔ1 >= len((~tt).sections)) {
                 break;
@@ -97,8 +99,6 @@ public static void TestOpen(ж<testing.T> Ꮡt) {
 internal static readonly @string fileGoˢ = "file.go"u8;
 
 public static void TestOpenFailure(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     @string filename = fileGoˢ; // not an XCOFF object file
     var (_, err) = Open(filename); // don't crash
     if (err == default!) {

@@ -68,10 +68,12 @@ public static void TestExitHooks(ж<testing.T> Ꮡt) {
                 expected: ""u8
             )
         }.slice();
+
         var (exe, err) = buildTestProg(Ꮡt, testexithooksˢ, bmode);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         @string bt = ""u8;
         if (bmode != ""u8) {
             bt = " bmode: "u8 + bmode;

@@ -34,17 +34,21 @@ public static void TestFIPSCheckVerify(ж<testing.T> Ꮡt) {
         Ꮡt.Logf("verified"u8);
         return;
     }
+
     if (godebug.New(fips140ˢ).Value() == "on"u8) {
         Ꮡt.Fatalf("GODEBUG=fips140=on but verification did not run"u8);
     }
+
     if (!enableFIPSTest) {
         return;
     }
+
     {
         var errΔ1 = fips140.Supported(); if (errΔ1 != default!) {
             Ꮡt.Skipf("skipping: %v"u8, errΔ1);
         }
     }
+
     var cmd = testenv.Command(new fipstest_internal_test_package.testing_TжTB(Ꮡt), os.Args[0], testVˢ, testRunTestFIPSCheckˢ);
     cmd.Value.Env = append(cmd.Environ(), "GODEBUG=fips140=on"u8);
     var (@out, err) = cmd.CombinedOutput();
@@ -73,11 +77,13 @@ public static void TestFIPSCheckInfo(ж<testing.T> Ꮡt) {
     if (!enableFIPSTest) {
         return;
     }
+
     {
         var err = fips140.Supported(); if (err != default!) {
             Ꮡt.Skipf("skipping: %v"u8, err);
         }
     }
+
     // Check that the checktest symbols are initialized properly.
     if (checktest.NOPTRDATA != 1) {
         Ꮡt.Errorf("checktest.NOPTRDATA = %d, want 1"u8, checktest.NOPTRDATA);
@@ -102,6 +108,7 @@ public static void TestFIPSCheckInfo(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("*checktest.PtrStaticData() = %d, want 10"u8, p.Value);
         }
     }
+
     // Check that the checktest symbols are in the right go:fipsinfo sections.
     void sect(nint i, @string name, @unsafe.Pointer p) {
         var s = Linkinfo.Sects[i];
@@ -123,6 +130,7 @@ public static void TestFIPSCheckInfo(ж<testing.T> Ꮡt) {
         }
     }
     sect(3, dataˢ, @unsafe.Pointer.FromPinnedBox(Ꮡ(checktest.DATA)));
+
     // Check that some symbols are not in FIPS sections.
     void no(@string name, @unsafe.Pointer p, params ꓸꓸꓸnint ixʗp) {
         var ix = ixʗp.sslice();
@@ -133,15 +141,18 @@ public static void TestFIPSCheckInfo(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // Check that the symbols are not in unexpected sections (that is, no overlaps).
     no(checktestTextˢ, (@unsafe.Pointer)abi.FuncPCABIInternal(checktest.TEXT), 1, 2, 3);
     no(checktestRodataˢ, @unsafe.Pointer.FromPinnedBox(Ꮡ(checktest.RODATA)), 0, 2, 3);
     no(checktestNoptrdataˢ, @unsafe.Pointer.FromPinnedBox(checktest.ᏑNOPTRDATA), 0, 1, 3);
     no(checktestDataˢ, @unsafe.Pointer.FromPinnedBox(Ꮡ(checktest.DATA)), 0, 1, 2);
+
     // Check that non-FIPS symbols are not in any of the sections.
     no(fmtPrintfˢ, (@unsafe.Pointer)abi.FuncPCABIInternal(fmt.Printfᶠ), 0, 1, 2, 3); // TEXT
     no(unicodeCategoriesˢ, @unsafe.Pointer.FromPinnedBox(Ꮡ(unicode.Categories)), 0, 1, 2, 3); // BSS
     no(unicodeAsciiHexDigitˢ, @unsafe.Pointer.FromBox(Ꮡ(unicode.ASCII_Hex_Digit)), 0, 1, 2, 3); // DATA
+
     // Check that we have enough data in total.
     // On arm64 the fips sections in this test currently total 23 kB.
     var n = (uintptr)0;

@@ -21,6 +21,7 @@ public static void TestNewEqual(ж<testing.T> Ꮡt) {
     if (AreEqual(errors.New(abcˢ), errors.New(xyzˢ))) {
         Ꮡt.Errorf(@"New(""abc"") == New(""xyz"")"u8);
     }
+
     // Same allocation should be equal to itself (not crash).
     var err = errors.New(jklˢ);
     if (!AreEqual(err, err)) {

@@ -135,12 +135,14 @@ internal static void testRead(ж<testing.T> Ꮡt, slice<readTest> tests, Func<io
         var (beforeP, afterP, _) = strings.Cut(tt.@in, "ℙ"u8);
         @string @in = beforeP + afterP;
         @string testOut = beforeP;
+
         {
             var (beforeD, afterD, ok) = strings.Cut(beforeP, "𝔻"u8); if (ok) {
                 @in = beforeD + afterD + afterP;
                 testOut = afterD;
             }
         }
+
         var r = strings.NewReader(@in);
         var (buf, err) = read(new build_internal_test_package.strings_ReaderжReader(r));
         if (err != default!) {
@@ -156,6 +158,7 @@ internal static void testRead(ж<testing.T> Ꮡt, slice<readTest> tests, Func<io
             Ꮡt.Errorf("#%d: success, expected %q"u8, i, tt.err);
             continue;
         }
+
         @string @out = ((@string)buf);
         if (@out != testOut) {
             Ꮡt.Errorf("#%d: wrong output:\nhave %q\nwant %q\n"u8, i, @out, testOut);
@@ -264,10 +267,6 @@ public static void TestReadFailuresIgnored(ж<testing.T> Ꮡt) {
     });
 }
 
-// no import, no scan
-// no import, no scan
-// no import, no scan
-
 partial struct readEmbedTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
 }
@@ -347,15 +346,15 @@ package p
         "test:4:12:pointer"u8
     ),
     new(
-        "package p\n//go:embed x y z\n"u8,
+        "package p\n//go:embed x y z\n"u8, // no import, no scan
         ""u8
     ),
     new(
-        "package p\n//go:embed x y z\nvar files embed.FS"u8,
+        "package p\n//go:embed x y z\nvar files embed.FS"u8, // no import, no scan
         ""u8
     ),
     new(
-        "\ufeffpackage p\n//go:embed x y z\nvar files embed.FS"u8,
+        "\ufeffpackage p\n//go:embed x y z\nvar files embed.FS"u8, // no import, no scan
         ""u8
     )
 }.slice();

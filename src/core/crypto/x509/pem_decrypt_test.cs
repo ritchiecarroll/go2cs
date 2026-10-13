@@ -91,9 +91,6 @@ public static void TestEncrypt(ж<testing.T> Ꮡt) {
     }
 }
 
-// generated with:
-// openssl genrsa -aes128 -passout pass:asdf -out server.orig.key 128
-
 partial struct testDataᴛ1 /*dyn*/ {
     internal global::go.crypto.x509_package.PEMCipher kind;
     internal slice<byte> password;
@@ -247,6 +244,8 @@ PXHYtPqxQIbD2pScR5qum7iGUh11lEUPkmt+2uqS
 """u8.Raw()
     ),
     new(
+        // generated with:
+        // openssl genrsa -aes128 -passout pass:asdf -out server.orig.key 128
         kind: PEMCipherAES128,
         password: slice<byte>("asdf"u8),
         pemData: slice<byte>(testingKey("""

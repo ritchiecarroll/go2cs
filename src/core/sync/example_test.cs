@@ -69,15 +69,14 @@ public static partial void ExampleOnce() {
     for (nint i = 0; i < 10; i++) {
         ᐸꟷ(done);
     }
+    // Output:
+    // Only once
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object computedOnceˢ = (@string)"Computed once:"u8;
 internal static readonly object wantˢ = (@string)"want"u8;
 internal static readonly object gotˢ = (@string)"got"u8;
-
-// Output:
-// Only once
 
 // This example uses OnceValue to perform an "expensive" computation just once,
 // even when used concurrently.
@@ -106,15 +105,14 @@ public static partial void ExampleOnceValue() {
     for (nint i = 0; i < 10; i++) {
         ᐸꟷ(done);
     }
+    // Output:
+    // Computed once: 499500
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object readingFileOnceˢ = (@string)"Reading file once"u8;
 internal static readonly @string exampleTestGoˢ = "example_test.go"u8;
 internal static readonly object errorˢ = (@string)"error:"u8;
-
-// Output:
-// Computed once: 499500
 
 // This example uses OnceValues to read a file just once.
 public static partial void ExampleOnceValues() {
@@ -138,9 +136,8 @@ public static partial void ExampleOnceValues() {
     for (nint i = 0; i < 10; i++) {
         ᐸꟷ(done);
     }
+    // Output:
+    // Reading file once
 }
-
-// Output:
-// Reading file once
 
 } // end sync_test_package

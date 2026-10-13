@@ -36,6 +36,7 @@ public static void TestDefaultRace(ж<testing.T> Ꮡt) {
     if (testing.Short() && !race.Enabled) {
         Ꮡt.Skip(skippingStartingAnotherˢ);
     }
+
     @string env = envᶜ;
     {
         @string v = os.Getenv(env); if (v != ""u8) {
@@ -43,7 +44,9 @@ public static void TestDefaultRace(ж<testing.T> Ꮡt) {
             return;
         }
     }
+
     Ꮡt.Parallel();
+
     for (nint i = 0; i < 6; i++) {
         nint iΔ1 = i;
         Ꮡt.Run(strconv.Itoa(iΔ1), (ж<testing.T> tΔ1) => {
@@ -70,18 +73,19 @@ public static void TestDefaultRace(ж<testing.T> Ꮡt) {
 // calls to top-level functions and to Seed without any duplicate values.
 // This will also give the race detector a change to report any problems.
 internal static partial void doDefaultTest(ж<testing.T> Ꮡt, @string v) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var (code, err) = strconv.Atoi(v);
     if (err != default!) {
         Ꮡt.Fatalf("internal error: unrecognized code %q"u8, v);
     }
+
     nint goroutines = runtime.GOMAXPROCS(0);
     if (goroutines < 4) {
         goroutines = 4;
     }
+
     var ch = new channel<uint64>(goroutines * 3);
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
+
     // The various tests below should not cause race detector reports
     // and should not produce duplicate results.
     //
@@ -90,11 +94,12 @@ internal static partial void doDefaultTest(ж<testing.T> Ꮡt, @string v) {
     // number twice. That could happen something like 1 / 2**64 times,
     // which is rare enough that it may never happen. We don't worry
     // about that case.
+
     switch (code) {
     case 0: {
+        // Call Seed and Uint64 concurrently.
         Ꮡwg.Add(goroutines);
         for (nint i = 0; i < goroutines; i++) {
-            // Call Seed and Uint64 concurrently.
             goǃ((int64 s) => {
                 GoFrame ᒐ = default;
                 try {
@@ -121,9 +126,9 @@ internal static partial void doDefaultTest(ж<testing.T> Ꮡt, @string v) {
         break;
     }
     case 1: {
+        // Call Uint64 concurrently with no Seed.
         Ꮡwg.Add(goroutines);
         for (nint i = 0; i < goroutines; i++) {
-            // Call Uint64 concurrently with no Seed.
             var chʗ2 = ch;
             goǃ(() => {
                 GoFrame ᒐ = default;
@@ -138,11 +143,11 @@ internal static partial void doDefaultTest(ж<testing.T> Ꮡt, @string v) {
         break;
     }
     case 2: {
+        // Start with Uint64 to pick the fast source, then call
+        // Seed and Uint64 concurrently.
         ch.ᐸꟷ(Uint64());
         Ꮡwg.Add(goroutines);
         for (nint i = 0; i < goroutines; i++) {
-            // Start with Uint64 to pick the fast source, then call
-            // Seed and Uint64 concurrently.
             goǃ((int64 s) => {
                 GoFrame ᒐ = default;
                 try {
@@ -178,6 +183,7 @@ internal static partial void doDefaultTest(ж<testing.T> Ꮡt, @string v) {
         Ꮡwg.Wait();
         close(chʗ4);
     });
+
     var m = new map<uint64, bool>();
     foreach (var i in ch) {
         if (m[i]) {

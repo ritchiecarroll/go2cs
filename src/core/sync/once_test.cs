@@ -68,6 +68,7 @@ public static void TestOncePanic(ж<Δtesting.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }))();
+
     Ꮡonce.Do(() => {
         Ꮡt.Fatalf("Once.Do called twice"u8);
     });

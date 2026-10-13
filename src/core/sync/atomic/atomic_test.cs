@@ -300,6 +300,7 @@ public static void TestSwapPointer(ж<testing.T> Ꮡt) {
     x.before = magicptr;
     x.after = magicptr;
     @unsafe.Pointer j = default!;
+
     foreach (var (_, p) in testPointers()) {
         @unsafe.Pointer k = (uintptr)SwapPointer(Ꮡx.of(TestSwapPointer_x.Ꮡi), p);
         if (x.i != p || k != j) {
@@ -2307,6 +2308,7 @@ public static partial void TestHammer32(ж<testing.T> Ꮡt) {
             n = 1000;
         }
         defer(runtime.GOMAXPROCS, runtime.GOMAXPROCS(p), ref ᒐ);
+
         foreach (var (name, testf) in hammer32) {
             var c = new channel<nint>(0);
             ref var val = ref heap(new uint32(), out var Ꮡval);
@@ -2599,6 +2601,7 @@ public static partial void TestHammer64(ж<testing.T> Ꮡt) {
             n = 1000;
         }
         defer(runtime.GOMAXPROCS, runtime.GOMAXPROCS(p), ref ᒐ);
+
         foreach (var (name, testf) in hammer64) {
             var c = new channel<nint>(0);
             ref var val = ref heap(new uint64(), out var Ꮡval);
@@ -2859,8 +2862,6 @@ internal static void hammerStoreLoadPointerMethod(ж<testing.T> Ꮡt, @unsafe.Po
 public static partial void TestHammerStoreLoad(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         var tests = new Action<ж<testing.T>, @unsafe.Pointer>[]{
             hammerStoreLoadInt32, hammerStoreLoadUint32,
             hammerStoreLoadUintptr, hammerStoreLoadPointer,
@@ -3117,6 +3118,7 @@ internal static void shouldPanic(ж<testing.T> Ꮡt, @string name, Action f) {
         defer(() => {
             // Check that all GC maps are sane.
             runtime.GC();
+
             var err = recover();
             @string want = unaligned64BitAtomicˢ;
             if (err == default!){
@@ -3151,8 +3153,10 @@ public static void TestUnaligned64(ж<testing.T> Ꮡt) {
     if (!arch32) {
         Ꮡt.Skip(testOnlyRunsOn32Bitˢ);
     }
+
     var x = new slice<uint32>(4);
     var p = Ꮡ(x, 1).Reinterpret<uint32, uint64>(); // misaligned
+
     var pʗ1 = p;
     shouldPanic(Ꮡt, loadUint64ˢ, () => {
         LoadUint64(pʗ1);
@@ -3209,6 +3213,7 @@ public static void TestAutoAligned64(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("Int64 pointer = %#x, want 8-aligned"u8, p);
         }
     }
+
     ref var unsigned = ref heap(new TestAutoAligned64_unsigned(), out var Ꮡunsigned);
     {
         var o = reflect.TypeOf(Ꮡunsigned).Elem().Field(1).Offset; if (o != 8) {

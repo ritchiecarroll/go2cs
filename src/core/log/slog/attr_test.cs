@@ -18,27 +18,18 @@ internal static readonly @string keyˢ = "key"u8;
 internal static readonly @string fooˢ = "foo"u8;
 
 public static void TestAttrNoAlloc(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (asan.Enabled) {
         Ꮡt.Skip(testAllocatesWithAsanˢ);
     }
     testenv.SkipIfOptimizationOff(new slog_test_package.testing_TжTB(Ꮡt));
     // Assign values just to make sure the compiler doesn't optimize away the statements.
     ref var i = ref heap(new int64(), out var Ꮡi);
-    
     uint64 u = default!;
-    
     float64 f = default!;
-    
     bool b = default!;
-    
     @string s = default!;
-    
     ref var x = ref heap<any>(out var Ꮡx);
-    
     ж<int64> p = Ꮡi;
-    
     time.Duration d = default!;
     var pʗ1 = p;
     nint a = (nint)testing.AllocsPerRun(5, () => {

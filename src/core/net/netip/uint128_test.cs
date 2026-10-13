@@ -40,7 +40,6 @@ public static void TestUint128AddSub(ж<testing.T> Ꮡt) {
         else { /* default: */
             throw panic("bogus op");
         }
-
         if (got != tt.want) {
             Ꮡt.Errorf("%v add %d = %v; want %v"u8, tt.@in, tt.op, got, tt.want);
         }

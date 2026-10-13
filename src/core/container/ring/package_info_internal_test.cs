@@ -29,7 +29,7 @@ using static go.container.ring_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("container/ring/ring_test.go", "ring_test.cs", "AA4akoKClJKCgpSmtIKCqIKCgoKCpoKUgpaCqIKCgoKUlIK6gpSCqIKUgpSClIKCgoKUgsqCqoKUgoKUgoKUgqaCgoKClKaApIKCgpSCgriCgoKCgoKWgoKCloKCpoKCgoKEgoSChIKEgqaCgoKCgriCgoSEgoSChIKChIKCpoKCgoKCgoKCzJKEgg==", "36-41:1")]
+[assembly: go.GoPositionMap("container/ring/ring_test.go", "ring_test.cs", "AA4akoKClJKCgpSmtIKCuIKCgoKCpoKUgqaCuIKCgoKUlILKgpSCuIKUgpSClIKCgoKUgsqCqoKUgoKUgoKUgqaCgoKClKaApIKCgpSCgriCgoKCgoKmgoKCpoKCpoKCgoKUgpSClIKUgqaCgoKCgriCgpSUgpSClIKClIKCpoKCgoKCgoKCzJKUgg==", "36-41:1")]
 // </GoSourcePositionMaps>
 
 namespace go.container;

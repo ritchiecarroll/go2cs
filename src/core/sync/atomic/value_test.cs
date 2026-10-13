@@ -180,7 +180,6 @@ public static void BenchmarkValueRead(ж<testing.B> Ꮡb) {
     });
 }
 
-
 partial struct Value_SwapTestsᴛ1 /*dyn*/ {
     internal any init;
     internal any @new;
@@ -219,7 +218,6 @@ public static void TestValue_Swap(ж<testing.T> Ꮡt) {
                         tΔ1.Errorf("should panic %v, got <nil>"u8, ttʗ2.err);
                         break;
                     }}
-
                 }, ref ᒐ);
                 {
                     var got = Ꮡv.Swap(ttʗ1.@new); if (!AreEqual(got, ttʗ1.want)) {
@@ -272,13 +270,11 @@ public static partial void TestValueSwapConcurrent(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct heapAᴛ1 /*dyn*/ {
     /*embed*/ internal nuint @uint;
 }
 internal static heapAᴛ1 heapA = new heapAᴛ1(0);
 internal static heapAᴛ1 heapB = new heapAᴛ1(0);
-
 
 partial struct Value_CompareAndSwapTestsᴛ1 /*dyn*/ {
     internal any init;
@@ -323,7 +319,6 @@ public static void TestValue_CompareAndSwap(ж<testing.T> Ꮡt) {
                         tΔ1.Errorf("did not panic, want %v"u8, ttʗ2.err);
                         break;
                     }}
-
                 }, ref ᒐ);
                 {
                     var got = Ꮡv.CompareAndSwap(ttʗ1.old, ttʗ1.@new); if (got != ttʗ1.want) {

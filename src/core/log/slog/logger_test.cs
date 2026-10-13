@@ -47,7 +47,9 @@ internal static readonly @string levelInfoMsgInfoAI1ˢ = @"level=INFO msg=info a
 public static void TestLogTextHandler(ж<testing.T> Ꮡt) {
     var ctx = context.Background();
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+
     var l = New(new global::go.log.slog_package.TextHandlerжΔHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), nil)));
+
     void check(@string want) {
         Ꮡt.Helper();
         if (want != ""u8) {
@@ -56,21 +58,29 @@ public static void TestLogTextHandler(ж<testing.T> Ꮡt) {
         checkLogOutput(Ꮡt, Ꮡbuf.String(), want);
         Ꮡbuf.Value.Reset();
     }
+
     l.Info(msgˢ, (@string)"a"u8, (nint)(1), (@string)"b"u8, (nint)(2));
     check(levelInfoMsgMsgA1B2ˢ);
+
     // By default, debug messages are not printed.
     l.Debug("bg"u8, Int("a"u8, 1), (@string)"b"u8, (nint)(2));
     check(""u8);
+
     l.Warn("w"u8, go.log.slog_package.Duration(durˢ, (time.Duration)(3000000000L)));
     check(levelWarnMsgWDur3sˢ);
+
     l.Error(badˢ, (@string)"a"u8, (nint)(1));
     check(levelErrorMsgBadA1ˢ);
+
     l.Log(ctx, LevelWarn + 1, "w"u8, Int("a"u8, 1), go.log.slog_package.String("b"u8, twoˢ));
     check(levelWarn1MsgWA1BTwoˢ);
+
     l.LogAttrs(ctx, LevelInfo + 1, aBCˢ, Int("a"u8, 1), go.log.slog_package.String("b"u8, twoˢ));
     check(levelInfo1MsgABCA1BTwoˢ);
+
     l.Info(infoˢ2, (@string)"a"u8, new global::go.log.slog_package.Attr[]{Int("i"u8, 1)}.slice());
     check(levelInfoMsgInfoAI1ˢ);
+
     l.Info(infoˢ2, (@string)"a"u8, GroupValue(Int("i"u8, 1)));
     check(levelInfoMsgInfoAI1ˢ);
 }
@@ -92,6 +102,7 @@ internal static readonly @string loggerTestGoDMsg3ˢ = @"logger_test.go:\d+: msg
 public static void TestConnections(ж<testing.T> Ꮡt) {
     ref var logbuf = ref heap(new bytes.Buffer(), out var Ꮡlogbuf);
     ref var slogbuf = ref heap(new bytes.Buffer(), out var Ꮡslogbuf);
+
     // Revert any changes to the default logger. This is important because other
     // tests might change the default logger using SetDefault. Also ensure we
     // restore the default logger at the end of the test.
@@ -106,6 +117,7 @@ public static void TestConnections(ж<testing.T> Ꮡt) {
         log_package.SetOutput(currentLogWriterʗ1);
         log_package.SetFlags(currentLogFlags);
     });
+
     // The default slog.Logger's handler uses the log package's default output.
     log_package.SetOutput(new slog_test_package.bytes_BufferжWriter(Ꮡlogbuf));
     log_package.SetFlags((nint)((nint)log_package.Lshortfile & ~(nint)(nint)log_package.LstdFlags));
@@ -124,10 +136,12 @@ public static void TestConnections(ж<testing.T> Ꮡt) {
     logbuf.Reset();
     go.log.slog_package.Error(msgˢ, errˢ, io.EOF, (@string)"c"u8, (nint)(3));
     checkLogOutput(Ꮡt, Ꮡlogbuf.String(), loggerTestGoDErrorMsgErrˢ);
+
     // Levels below Info are not printed.
     logbuf.Reset();
     Debug(msgˢ, (@string)"c"u8, (nint)(3));
     checkLogOutput(Ꮡt, Ꮡlogbuf.String(), ""u8);
+
     Ꮡt.Run(wrapDefaultHandlerˢ, (ж<testing.T> tΔ1) => {
         // It should be possible to wrap the default handler and get the right output.
         // This works because the default handler uses the pc in the Record
@@ -136,11 +150,13 @@ public static void TestConnections(ж<testing.T> Ꮡt) {
         logger.Info(msgˢ, (@string)"d"u8, (nint)(4));
         checkLogOutput(tΔ1, Ꮡlogbuf.String(), loggerTestGoDInfoMsgD4ˢ);
     });
+
     // Once slog.SetDefault is called, the direction is reversed: the default
     // log.Logger's output goes through the handler.
     SetDefault(New(new global::go.log.slog_package.TextHandlerжΔHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡslogbuf), Ꮡ(new HandlerOptions(AddSource: true))))));
     log_package.Print(msg2ˢ);
     checkLogOutput(Ꮡt, Ꮡslogbuf.String(), "time=" + textTimeRE + @" level=INFO source=.*logger_test.go:\d{3}""? msg=msg2");
+
     // The default log.Logger always outputs at Info level.
     slogbuf.Reset();
     SetDefault(New(new global::go.log.slog_package.TextHandlerжΔHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡslogbuf), Ꮡ(new HandlerOptions(Level: LevelWarn))))));
@@ -150,6 +166,7 @@ public static void TestConnections(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("got %q, want empty"u8, got);
         }
     }
+
     // Setting log's output again breaks the connection.
     logbuf.Reset();
     slogbuf.Reset();
@@ -194,6 +211,7 @@ public static void TestAttrs(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("got %v, want %v"u8, got, want);
         }
     }
+
     var l1 = New(new slog_internal_test_package.captureHandlerжΔHandler(Ꮡ(new captureHandler(nil)))).With((@string)"a"u8, (nint)(1));
     var l2 = New(l1.Handler()).With((@string)"b"u8, (nint)(2));
     l2.Info("m"u8, (@string)"c"u8, (nint)(3));
@@ -214,6 +232,7 @@ public static void TestCallDepth(ж<testing.T> Ꮡt) {
         var ctx = context.Background();
         var h = Ꮡ(new captureHandler(nil));
         nint startLine = default!;
+
         var hʗ1 = h;
         void check(nint count) {
             Ꮡt.Helper();
@@ -227,14 +246,17 @@ public static void TestCallDepth(ж<testing.T> Ꮡt) {
                     (~got).Function, gotFile, (~got).Line, wantFunc, wantFile, wantLine);
             }
         }
+
         defer(SetDefault, Default(), ref ᒐ); // restore
         var logger = New(new slog_internal_test_package.captureHandlerжΔHandler(h));
         SetDefault(logger);
+
         // Calls to check must be one line apart.
         // Determine line where calls start.
         var (f, _) = runtime.CallersFrames(new uintptr[]{callerPC(2)}.slice()).Next();
         startLine = f.Line + 4;
         // Do not change the number of lines between here and the call to check(0).
+
         logger.Log(ctx, LevelInfo, ""u8);
         check(0);
         logger.LogAttrs(ctx, LevelInfo, ""u8);
@@ -290,6 +312,7 @@ public static void TestAlloc(ж<testing.T> Ꮡt) {
         var dl = New(new discardTestHandler(nil));
         defer(SetDefault, Default(), ref ᒐ); // restore
         SetDefault(dl);
+
         Ꮡt.Run(infoˢ3, (ж<testing.T> tΔ1) => {
             wantAllocs(tΔ1, 0, [MethodImpl(MethodImplOptions.NoInlining)] () => {
                 Info(helloˢ);
@@ -505,9 +528,11 @@ public static void TestLogLoggerLevelForDefaultHandler(ж<testing.T> Ꮡt) {
         log_package.SetOutput(currentLogWriterʗ1);
         log_package.SetFlags(currentLogFlags);
     });
+
     ref var logBuf = ref heap(new bytes.Buffer(), out var ᏑlogBuf);
     log_package.SetOutput(new slog_test_package.bytes_BufferжWriter(ᏑlogBuf));
     log_package.SetFlags(0);
+
     foreach (var (_, test) in new TestLogLoggerLevelForDefaultHandler_type[]{
         new(LevelDebug, Debug, "DEBUG a"u8),
         new(LevelDebug, Info, "INFO a"u8),
@@ -532,6 +557,7 @@ public static void TestLogLoggerLevelForHandlerWriter(ж<testing.T> Ꮡt) {
         }
         return a;
     };
+
     // Revert any changes to the default logger. This is important because other
     // tests might change the default logger using SetDefault. Also ensure we
     // restore the default logger at the end of the test.
@@ -547,6 +573,7 @@ public static void TestLogLoggerLevelForHandlerWriter(ж<testing.T> Ꮡt) {
         log_package.SetOutput(currentLogWriterʗ1);
         log_package.SetFlags(currentFlags);
     });
+
     ref var logBuf = ref heap(new bytes.Buffer(), out var ᏑlogBuf);
     log_package.SetOutput(new slog_test_package.bytes_BufferжWriter(ᏑlogBuf));
     log_package.SetFlags(0);
@@ -562,6 +589,7 @@ internal static readonly @string levelErrorMsgMsgErrEofˢ = @"level=ERROR msg=ms
 
 public static void TestLoggerError(ж<testing.T> Ꮡt) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+
     var removeTime = (slice<@string> _, global::go.log.slog_package.Attr a) => {
         if (a.Key == TimeKey) {
             return new Attr(nil);
@@ -616,6 +644,7 @@ public static void TestContext(ж<testing.T> Ꮡt) {
         var l = New(new slog_internal_test_package.captureHandlerжΔHandler(h));
         defer(SetDefault, Default(), ref ᒐ); // restore
         SetDefault(l);
+
         foreach (var (_, test) in new TestContext_type[]{
             new(l.DebugContext, LevelDebug),
             new(l.InfoContext, LevelInfo),
@@ -628,6 +657,7 @@ public static void TestContext(ж<testing.T> Ꮡt) {
         }.slice()) {
             h.clear();
             var ctx = context.WithValue(context.Background(), (@string)"L"u8, test.wantLevel);
+
             test.f(ctx, "msg"u8);
             {
                 var gv = (~h).ctx.Value((@string)"L"u8); if (!AreEqual(gv, test.wantLevel) || (~h).r.Level != test.wantLevel) {
@@ -674,8 +704,8 @@ internal static error Handle(this ж<captureHandler> Ꮡh, context.Context ctx, 
     bool ᒐd1 = false;
     try {
         r = r.ΔClone();
-
         ref var h = ref Ꮡh.DerefOrNull();
+
         h.mu.Lock();
         ᒐd1 = true;
         h.ctx = ctx;
@@ -897,9 +927,11 @@ public static void TestPanics(ж<testing.T> Ꮡt) {
         log_package.SetOutput(currentLogWriterʗ1);
         log_package.SetFlags(currentLogFlags);
     });
+
     ref var logBuf = ref heap(new bytes.Buffer(), out var ᏑlogBuf);
     log_package.SetOutput(new slog_test_package.bytes_BufferжWriter(ᏑlogBuf));
     log_package.SetFlags((nint)((nint)log_package.Lshortfile & ~(nint)(nint)log_package.LstdFlags));
+
     SetDefault(New(new global::go.log.slog_package.defaultHandlerжΔHandler(newDefaultHandler(loginternal.DefaultOutput))));
     foreach (var (_, pt) in new TestPanics_type[]{
         new(((ж<panicTextAndJsonMarshaler>)nil), @"logger_test.go:\d+: INFO msg p=<nil>"u8),
@@ -911,6 +943,7 @@ public static void TestPanics(ж<testing.T> Ꮡt) {
         checkLogOutput(Ꮡt, ᏑlogBuf.String(), pt.@out);
         logBuf.Reset();
     }
+
     SetDefault(New(new global::go.log.slog_package.JSONHandlerжΔHandler(NewJSONHandler(new slog_test_package.bytes_BufferжWriter(ᏑlogBuf), nil))));
     foreach (var (_, pt) in new TestPanics_type[]{
         new(((ж<panicTextAndJsonMarshaler>)nil), @"{""time"":""" + jsonTimeRE + @""",""level"":""INFO"",""msg"":""msg"",""p"":null}"),

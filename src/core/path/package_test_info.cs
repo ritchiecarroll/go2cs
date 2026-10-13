@@ -31,7 +31,7 @@ using static global::go.path_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("path/match_test.go", "match_test.cs", "ABAkADp2goKCgg==")]
-[assembly: go.GoPositionMap("path/path_test.go", "path_test.cs", "ABUiACZkgoKAgqSAggAJCoKClIKClrKQkoIACBIABxCCgoCCAA0UAA0mgoKAggAJEgAHEIKCgILqAA0egoKAgtoADyCCgoCCAAoUAAoWgoKAgg==", "88-88:1")]
+[assembly: go.GoPositionMap("path/path_test.go", "path_test.cs", "AA8iADFkgoKAgqSAggAJCoKClIKCprKQkoIACBIABxCCgoCCAAoUABImgoKAggAJEgAHEIKCgILaAA4egoKAgtoADyCCgoCCAAoUAAoWgoKAgg==", "88-88:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -78,6 +78,7 @@ internal static ж<regexp.Regexp> errRx = regexp.MustCompile(@"^/\* *ERROR *(HER
 // in files and returns them as a map of error positions to error messages.
 internal static map<tokenꓸPos, @string> expectedErrors(ж<token.FileSet> Ꮡfset, @string filename, slice<byte> src) {
     var errors = new map<tokenꓸPos, @string>();
+
     scanner.Scanner s = default!;
     // file was parsed already - do not add it again to the file
     // set otherwise the position information returned here will
@@ -85,6 +86,7 @@ internal static map<tokenꓸPos, @string> expectedErrors(ж<token.FileSet> Ꮡfs
     s.Init(getFile(Ꮡfset, filename), src, default!, scanner.ScanComments);
     tokenꓸPos prev = default!;                // position of last non-comment, non-semicolon token
     tokenꓸPos here = default!;                // position immediately after the token at position prev
+
     while (ᐧ) {
         var (pos, tok, lit) = s.Scan();
         var exprᴛ1 = tok;
@@ -108,8 +110,8 @@ internal static map<tokenꓸPos, @string> expectedErrors(ж<token.FileSet> Ꮡfs
         }
         else if (exprᴛ1 == token.SEMICOLON) { matchᴛ1 = true;
             do {
+                // don't use the position of auto-inserted (invisible) semicolons
                 if (lit != ";"u8) {
-                    // don't use the position of auto-inserted (invisible) semicolons
                     break;
                 }
                 fallthrough = true;
@@ -125,7 +127,6 @@ internal static map<tokenꓸPos, @string> expectedErrors(ж<token.FileSet> Ꮡfs
             }
             here = prev + ((tokenꓸPos)l);
         }
-
     }
 }
 
@@ -162,6 +163,7 @@ internal static void compareErrors(ж<testing.T> Ꮡt, ж<token.FileSet> Ꮡfset
             }
         }
     }
+
     // there should be no expected errors left
     if (len(expected) > 0) {
         Ꮡt.Errorf("%d errors not reported:"u8, len(expected));
@@ -178,6 +180,7 @@ internal static void checkErrors(ж<testing.T> Ꮡt, @string filename, any input
         Ꮡt.Error(err);
         return;
     }
+
     var fset = token.NewFileSet();
     (_, err) = ParseFile(fset, filename, src, mode);
     ref var found = ref heap<scanner.ErrorList>(out var Ꮡfound);
@@ -187,12 +190,14 @@ internal static void checkErrors(ж<testing.T> Ꮡt, @string filename, any input
         return;
     }
     Ꮡfound.RemoveMultiples();
+
     var expected = new map<tokenꓸPos, @string>{};
     if (expectErrors) {
         // we are expecting the following errors
         // (collect these after parsing a file so that it is found in the file set)
         expected = expectedErrors(fset, filename, src);
     }
+
     // verify errors returned by the parser
     compareErrors(Ꮡt, fset, expected, found);
 }

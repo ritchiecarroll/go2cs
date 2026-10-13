@@ -27,11 +27,13 @@ public static partial void TestAnd32(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // Set every bit in array to 1.
     var a = new slice<uint32>((1 << (int)(12)));
     foreach (var (i, _) in a) {
         a[i] = 0xffffffffU;
     }
+
     // Clear array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 32; i++) {
@@ -48,6 +50,7 @@ public static partial void TestAnd32(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 32; i++) {
         ᐸꟷ(done);
     }
+
     // Check that the array has been totally cleared.
     foreach (var (i, v) in a) {
         if (v != 0) {
@@ -70,11 +73,13 @@ public static partial void TestAnd64(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // Set every bit in array to 1.
     var a = new slice<uint64>((1 << (int)(12)));
     foreach (var (i, _) in a) {
         a[i] = 0xffffffffffffffffUL;
     }
+
     // Clear array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 64; i++) {
@@ -91,6 +96,7 @@ public static partial void TestAnd64(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 64; i++) {
         ᐸꟷ(done);
     }
+
     // Check that the array has been totally cleared.
     foreach (var (i, v) in a) {
         if (v != 0) {
@@ -112,8 +118,10 @@ public static partial void TestOr32(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // Start with every bit in array set to 0.
     var a = new slice<uint32>((1 << (int)(12)));
+
     // Set every bit in array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 32; i++) {
@@ -130,6 +138,7 @@ public static partial void TestOr32(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 32; i++) {
         ᐸꟷ(done);
     }
+
     // Check that the array has been totally set.
     foreach (var (i, v) in a) {
         if (v != 0xffffffffU) {
@@ -152,8 +161,10 @@ public static partial void TestOr64(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // Start with every bit in array set to 0.
     var a = new slice<uint64>((1 << (int)(12)));
+
     // Set every bit in array bit-by-bit in different goroutines.
     var done = new channel<bool>(0);
     for (nint i = 0; i < 64; i++) {
@@ -170,6 +181,7 @@ public static partial void TestOr64(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 64; i++) {
         ᐸꟷ(done);
     }
+
     // Check that the array has been totally set.
     foreach (var (i, v) in a) {
         if (v != 0xffffffffffffffffUL) {

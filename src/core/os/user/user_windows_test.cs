@@ -61,6 +61,7 @@ internal static (@string name, @string password) addUserAccount(ж<testing.T> �
         return -1;
     };
     pattern = strings.Map(mapper, pattern);
+
     // Generate a long random password.
     array<byte> pwd = new(33);
     rand.Read(pwd[..]);
@@ -70,6 +71,7 @@ internal static (@string name, @string password) addUserAccount(ж<testing.T> �
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     nint @try = 0;
     while (ᐧ) {
         // Calculate a random suffix to append to the user name.
@@ -126,8 +128,6 @@ internal static readonly object skippingNonHermeticTestˢ = (@string)"skipping n
 // If the user already exists, it will be deleted and recreated.
 // The caller is responsible for closing the token.
 internal static (syscall.Token, ж<global::go.os.user_package.User>) windowsTestAccount(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (testenv.Builder() == ""u8) {
         // Adding and deleting users requires special permissions.
         // Even if we have them, we don't want to create users on
@@ -172,15 +172,15 @@ internal static readonly object expectedErrorˢ = (@string)"expected error"u8;
 public static void TestImpersonatedSelf(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         runtime.LockOSThread();
         defer(runtime.UnlockOSThread, ref ᒐ);
+
         ref var err = ref heap<error>(out var Ꮡerr);
         (var want, err) = current();
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var levels = new uint32[]{
             windows.SecurityAnonymous,
             windows.SecurityIdentification,
@@ -198,6 +198,7 @@ public static void TestImpersonatedSelf(ж<testing.T> Ꮡt) {
                         }
                     }
                     defer(() => windows.RevertToSelf(), ref ᒐ);
+
                     var (got, errΔ1) = current();
                     if (level == windows.SecurityAnonymous) {
                         // We can't get the process token when using an anonymous token,
@@ -224,17 +225,18 @@ public static void TestImpersonatedSelf(ж<testing.T> Ꮡt) {
 public static void TestImpersonated(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         runtime.LockOSThread();
         defer(runtime.UnlockOSThread, ref ᒐ);
+
         ref var err = ref heap<error>(out var Ꮡerr);
         (var want, err) = current();
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         // Create a test user and log in as that user.
         var (token, _) = windowsTestAccount(Ꮡt);
+
         // Impersonate the test user.
         {
             err = windows.ImpersonateLoggedOnUser(token); if (err != default!) {
@@ -248,6 +250,7 @@ public static void TestImpersonated(ж<testing.T> Ꮡt) {
                 throw panic(Ꮡerr.ValueSlot);
             }
         }, ref ᒐ);
+
         (var got, err) = current();
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -268,6 +271,7 @@ public static void TestCurrentNetapi32(ж<testing.T> Ꮡt) {
         // Test that Current does not load netapi32.dll.
         // First call Current.
         Current();
+
         // Then check if netapi32.dll is loaded.
         var (netapi32, errΔ1) = syscall.UTF16PtrFromString(netapi32Dllˢ);
         if (errΔ1 != default!) {
@@ -296,10 +300,12 @@ public static void TestCurrentNetapi32(ж<testing.T> Ꮡt) {
 public static void TestGroupIdsTestUser(ж<testing.T> Ꮡt) {
     // Create a test user and log in as that user.
     var (_, user) = windowsTestAccount(Ꮡt);
+
     var (gids, err) = user.GroupIds();
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     if (err != default!) {
         Ꮡt.Fatalf("%+v.GroupIds(): %v"u8, user.OrTypedNil(), err);
     }
@@ -307,7 +313,6 @@ public static void TestGroupIdsTestUser(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("%+v.GroupIds() = %v; does not contain user GID %s"u8, user.OrTypedNil(), gids, (~user).Gid);
     }
 }
-
 
 partial struct serviceAccountsᴛ1 /*dyn*/ {
     internal @string sid;

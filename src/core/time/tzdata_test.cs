@@ -22,12 +22,14 @@ public static void TestEmbeddedTZData(ж<Δtesting.T> Ꮡt) {
         var undo = time_internal_test_package.DisablePlatformSources();
         var undoʗ1 = undo;
         defer(undoʗ1, ref ᒐ);
+
         foreach (var (_, zone) in zones) {
             var (@ref, err) = Δtime.LoadLocation(zone);
             if (err != default!) {
                 Ꮡt.Errorf("LoadLocation(%q): %v"u8, zone, err);
                 continue;
             }
+
             (var embedded, err) = time_internal_test_package.LoadFromEmbeddedTZData(zone);
             if (err != default!) {
                 Ꮡt.Errorf("LoadFromEmbeddedTZData(%q): %v"u8, zone, err);
@@ -38,6 +40,7 @@ public static void TestEmbeddedTZData(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Errorf("LoadLocationFromTZData failed for %q: %v"u8, zone, err);
                 continue;
             }
+
             // Compare the name and zone fields of ref and sample.
             // The tx field changes faster as tzdata is updated.
             // The cache fields are expected to differ.
@@ -105,7 +108,6 @@ internal static bool equal(ж<Δtesting.T> Ꮡt, reflectꓸValue f1, reflectꓸV
         Ꮡt.Errorf("test internal error: unsupported kind %v"u8, f1.Type().Kind());
         return true;
     }
-
 }
 
 } // end time_test_package

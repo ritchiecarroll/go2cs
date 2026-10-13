@@ -45,6 +45,7 @@ public static void TestSymbols(ж<testing.T> Ꮡt) {
             if (!reflect.DeepEqual(ts, fs)) {
                 Ꮡt.Errorf("%s: Symbols = %v, want %v"u8, @file, fs, ts);
             }
+
             foreach (var (i, s) in fs) {
                 if (s.HasVersion) {
                     // No hidden versions here.

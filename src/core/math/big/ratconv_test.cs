@@ -15,12 +15,6 @@ using static go.math.big_package;
 
 partial class big_internal_test_package {
 
-// valid, without separators
-// '_' is not part of the number anymore
-// valid, with separators
-// invalid: no digits
-// invalid: incorrect use of separator
-
 partial struct exponentTestsᴛ1 /*dyn*/ {
     internal @string s; // string to be scanned
     internal bool base2ok;   // true if 'p'/'P' exponents are accepted
@@ -32,6 +26,7 @@ partial struct exponentTestsᴛ1 /*dyn*/ {
 }
 internal static slice<exponentTestsᴛ1> exponentTests;
 internal static void initᴛexponentTests() { exponentTests = new exponentTestsᴛ1[]{
+    // valid, without separators
     new(""u8, false, false, 0, 10, default!, 0),
     new("1"u8, false, false, 0, 10, default!, (rune)'1'),
     new("e0"u8, false, false, 0, 10, default!, 0),
@@ -44,12 +39,16 @@ internal static void initᴛexponentTests() { exponentTests = new exponentTests�
     new("p0"u8, true, false, 0, 2, default!, 0),
     new("P-123"u8, true, false, -123, 2, default!, 0),
     new("p+0a"u8, true, false, 0, 2, default!, (rune)'a'),
-    new("p+123__"u8, true, false, 123, 2, default!, (rune)'_'),
+    new("p+123__"u8, true, false, 123, 2, default!, (rune)'_'), // '_' is not part of the number anymore
+
+    // valid, with separators
     new("e+1_0"u8, false, true, 10, 10, default!, 0),
     new("e-1_0"u8, false, true, -10, 10, default!, 0),
     new("e123_456_789a"u8, false, true, 123456789, 10, default!, (rune)'a'),
     new("P+1_00"u8, false, true, 0, 10, default!, (rune)'P'),
     new("p-1_2_3"u8, true, true, -123, 2, default!, 0),
+
+    // invalid: no digits
     new("e"u8, false, false, 0, 10, errNoDigits, 0),
     new("ef"u8, false, false, 0, 10, errNoDigits, (rune)'f'),
     new("e+"u8, false, false, 0, 10, errNoDigits, 0),
@@ -58,6 +57,8 @@ internal static void initᴛexponentTests() { exponentTests = new exponentTests�
     new("P-"u8, true, false, 0, 2, errNoDigits, 0),
     new("p+e"u8, true, false, 0, 2, errNoDigits, (rune)'e'),
     new("e+_x"u8, false, true, 0, 10, errNoDigits, (rune)'x'),
+
+    // invalid: incorrect use of separator
     new("e0_"u8, false, true, 0, 10, errInvalSep, 0),
     new("e_0"u8, false, true, 0, 10, errInvalSep, 0),
     new("e-1_2__3"u8, false, true, -123, 10, errInvalSep, 0)
@@ -92,12 +93,8 @@ public partial struct StringTest {
     internal bool ok;
 }
 
-// invalid
-// issue 17001
-// CVE-2022-23772
-// valid
-// issue #16176
 internal static slice<StringTest> setStringTests = new StringTest[]{
+    // invalid
     new(@in: "1e"u8),
     new(@in: "1.e"u8),
     new(@in: "1e+14e-5"u8),
@@ -106,11 +103,13 @@ internal static slice<StringTest> setStringTests = new StringTest[]{
     new(@in: "a/b"u8),
     new(@in: "a.b"u8),
     new(@in: "1/0"u8),
-    new(@in: "4/3/2"u8),
+    new(@in: "4/3/2"u8), // issue 17001
     new(@in: "4/3/"u8),
     new(@in: "4/3."u8),
     new(@in: "4/"u8),
-    new(@in: "13e-9223372036854775808"u8),
+    new(@in: "13e-9223372036854775808"u8), // CVE-2022-23772
+
+    // valid
     new("0"u8, "0"u8, true),
     new("-0"u8, "0"u8, true),
     new("1"u8, "1"u8, true),
@@ -133,42 +132,42 @@ internal static slice<StringTest> setStringTests = new StringTest[]{
     new("53/70893980658822810696"u8, "53/70893980658822810696"u8, true),
     new("106/141787961317645621392"u8, "53/70893980658822810696"u8, true),
     new("204211327800791583.81095"u8, "4084226556015831676219/20000"u8, true),
-    new("0e9999999999"u8, "0"u8, true)
+    new("0e9999999999"u8, "0"u8, true) // issue #16176
 }.slice();
 
-// invalid
-// invalid with separators
-// (smoke tests only - a comprehensive set of tests is in natconv_test.go)
-// valid
-// 0-prefix indicates octal in this case
-// 0-prefix is ignored in this case (not a fraction)
-// E is part of hex mantissa, not exponent
-// valid with separators
-// (smoke tests only - a comprehensive set of tests is in natconv_test.go)
 // These are not supported by fmt.Fscanf.
 internal static slice<StringTest> setStringTests2 = new StringTest[]{
+    // invalid
     new(@in: "4/3x"u8),
     new(@in: "0/-1"u8),
     new(@in: "-1/-1"u8),
+
+    // invalid with separators
+    // (smoke tests only - a comprehensive set of tests is in natconv_test.go)
     new(@in: "10_/1"u8),
     new(@in: "_10/1"u8),
     new(@in: "1/1__0"u8),
+
+    // valid
     new("0b1000/3"u8, "8/3"u8, true),
     new("0B1000/0x8"u8, "1"u8, true),
-    new("-010/1"u8, "-8"u8, true),
+    new("-010/1"u8, "-8"u8, true), // 0-prefix indicates octal in this case
     new("-010.0"u8, "-10"u8, true),
     new("-0o10/1"u8, "-8"u8, true),
     new("0x10/1"u8, "16"u8, true),
     new("0x10/0x20"u8, "1/2"u8, true),
-    new("0010"u8, "10"u8, true),
+    new("0010"u8, "10"u8, true), // 0-prefix is ignored in this case (not a fraction)
     new("0x10.0"u8, "16"u8, true),
     new("0x1.8"u8, "3/2"u8, true),
     new("0X1.8p4"u8, "24"u8, true),
-    new("0x1.1E2"u8, "2289/2048"u8, true),
+    new("0x1.1E2"u8, "2289/2048"u8, true), // E is part of hex mantissa, not exponent
     new("0b1.1E2"u8, "150"u8, true),
     new("0B1.1P3"u8, "12"u8, true),
     new("0o10e-2"u8, "2/25"u8, true),
     new("0O10p-3"u8, "1"u8, true),
+
+    // valid with separators
+    // (smoke tests only - a comprehensive set of tests is in natconv_test.go)
     new("0b_1000/3"u8, "8/3"u8, true),
     new("0B_10_00/0x8"u8, "1"u8, true),
     new("0xdead/0B1101_1110_1010_1101"u8, "1"u8, true),
@@ -187,8 +186,10 @@ public static void TestRatSetString(ж<testing.T> Ꮡt) {
     slice<StringTest> tests = default!;
     tests = appendꓸꓸꓸ(tests, setStringTests);
     tests = appendꓸꓸꓸ(tests, setStringTests2);
+
     foreach (var (i, test) in tests) {
         var (x, ok) = @new<global::go.math.big_package.ΔRat>().SetString(test.@in);
+
         if (ok){
             if (!test.ok){
                 Ꮡt.Errorf("#%d SetString(%q) expected failure"u8, i, test.@in);
@@ -221,6 +222,7 @@ public static void TestRatScan(ж<testing.T> Ꮡt) {
         var x = @new<global::go.math.big_package.ΔRat>();
         buf.Reset();
         buf.WriteString(test.@in);
+
         var (_, err) = fmt.Fscanf(new big_test_package.bytes_BufferжReader(Ꮡbuf), "%v"u8, x.OrTypedNil());
         if (err == default! != test.ok) {
             if (test.ok){
@@ -235,7 +237,6 @@ public static void TestRatScan(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct floatStringTestsᴛ1 /*dyn*/ {
     internal @string @in;
@@ -265,59 +266,19 @@ internal static slice<floatStringTestsᴛ1> floatStringTests = new floatStringTe
 public static void TestFloatString(ж<testing.T> Ꮡt) {
     foreach (var (i, test) in floatStringTests) {
         var (x, _) = @new<global::go.math.big_package.ΔRat>().SetString(test.@in);
+
         if (x.FloatString(test.prec) != test.@out) {
             Ꮡt.Errorf("#%d got %s want %s"u8, i, x.FloatString(test.prec), test.@out);
         }
     }
 }
 
-// Constants plundered from strconv/testfp.txt.
-// Table 1: Stress Inputs for Conversion to 53-bit Binary, < 1/2 ULP
-// Table 2: Stress Inputs for Conversion to 53-bit Binary, > 1/2 ULP
-// Table 14: Stress Inputs for Conversion to 24-bit Binary, <1/2 ULP
-// Table 15: Stress Inputs for Conversion to 24-bit Binary, >1/2 ULP
-// Constants plundered from strconv/atof_test.go.
-// NB: exception made for this input
-// largest float64
-// next float64 - too large
-// the border is ...158079
-// borderline - okay
-// borderline - too large
-// a little too large
-// way too large
-// denormalized
-// smallest denormal
-// too small
-// way too small
-// way too small, negative
-// try to overflow exponent
-// [Disabled: too slow and memory-hungry with rationals.]
-// "1e-4294967296",
-// "1e+4294967296",
-// "1e-18446744073709551616",
-// "1e+18446744073709551616",
-// https://www.exploringbinary.com/java-hangs-when-converting-2-2250738585072012e-308/
-// https://www.exploringbinary.com/php-hangs-on-numeric-value-2-2250738585072011e-308/
-// A very large number (initially wrongly parsed by the fast algorithm).
-// A different kind of very large number.
-// Exactly halfway between 1 and math.Nextafter(1, 2).
-// Round to even (down).
-// Slightly lower; still round down.
-// Slightly higher; round up.
-// Slightly higher, but you have to read all the way to the end.
-// Smallest denormal, 2^(-1022-52)
-// Half of smallest denormal, 2^(-1022-53)
-// A little more than the exact half of smallest denormal
-// 2^-1075 + 2^-1100.  (Rounds to 1p-1074.)
-// The exact halfway between smallest normal and largest denormal:
-// 2^-1022 - 2^-1075.  (Rounds to 2^-1022.)
-//   1<<60 - 1
-// -(1<<60 - 1)
-//   1<<60 + 1
-// -(1<<60 + 1)
 // Test inputs to Rat.SetString. The prefix "long:" causes the test
 // to be skipped except in -long mode.  (The threshold is about 500us.)
 internal static slice<@string> float64inputs = new @string[]{
+    // Constants plundered from strconv/testfp.txt.
+
+    // Table 1: Stress Inputs for Conversion to 53-bit Binary, < 1/2 ULP
     "5e+125"u8,
     "69e+267"u8,
     "999e-026"u8,
@@ -340,6 +301,8 @@ internal static slice<@string> float64inputs = new @string[]{
     "20505426358836677347e-221"u8,
     "836168422905420598437e-234"u8,
     "4891559871276714924261e+222"u8,
+
+    // Table 2: Stress Inputs for Conversion to 53-bit Binary, > 1/2 ULP
     "9e-265"u8,
     "85e-037"u8,
     "623e+100"u8,
@@ -362,6 +325,8 @@ internal static slice<@string> float64inputs = new @string[]{
     "25188282901709339043e-252"u8,
     "308984926168550152811e-052"u8,
     "6372891218502368041059e+064"u8,
+
+    // Table 14: Stress Inputs for Conversion to 24-bit Binary, <1/2 ULP
     "5e-20"u8,
     "67e+14"u8,
     "985e+15"u8,
@@ -374,6 +339,8 @@ internal static slice<@string> float64inputs = new @string[]{
     "6930161142e-48"u8,
     "25933168707e+13"u8,
     "596428896559e+20"u8,
+
+    // Table 15: Stress Inputs for Conversion to 24-bit Binary, >1/2 ULP
     "3e-23"u8,
     "57e+18"u8,
     "789e-35"u8,
@@ -386,6 +353,8 @@ internal static slice<@string> float64inputs = new @string[]{
     "3752432815e-39"u8,
     "75224575729e-45"u8,
     "459926601011e+15"u8,
+
+    // Constants plundered from strconv/atof_test.go.
     "0"u8,
     "1"u8,
     "+1"u8,
@@ -401,26 +370,38 @@ internal static slice<@string> float64inputs = new @string[]{
     "100000000000000016777216"u8,
     "-1"u8,
     "-0.1"u8,
-    "-0"u8,
+    "-0"u8, // NB: exception made for this input
     "1e-20"u8,
     "625e-3"u8,
+
+    // largest float64
     "1.7976931348623157e308"u8,
     "-1.7976931348623157e308"u8,
+    // next float64 - too large
     "1.7976931348623159e308"u8,
     "-1.7976931348623159e308"u8,
+    // the border is ...158079
+    // borderline - okay
     "1.7976931348623158e308"u8,
     "-1.7976931348623158e308"u8,
+    // borderline - too large
     "1.797693134862315808e308"u8,
     "-1.797693134862315808e308"u8,
+
+    // a little too large
     "1e308"u8,
     "2e308"u8,
     "1e309"u8,
+
+    // way too large
     "1e310"u8,
     "-1e310"u8,
     "1e400"u8,
     "-1e400"u8,
     "long:1e400000"u8,
     "long:-1e400000"u8,
+
+    // denormalized
     "1e-305"u8,
     "1e-306"u8,
     "1e-307"u8,
@@ -428,31 +409,62 @@ internal static slice<@string> float64inputs = new @string[]{
     "1e-309"u8,
     "1e-310"u8,
     "1e-322"u8,
+    // smallest denormal
     "5e-324"u8,
     "4e-324"u8,
     "3e-324"u8,
+    // too small
     "2e-324"u8,
+    // way too small
     "1e-350"u8,
     "long:1e-400000"u8,
+    // way too small, negative
     "-1e-350"u8,
     "long:-1e-400000"u8,
+
+    // try to overflow exponent
+    // [Disabled: too slow and memory-hungry with rationals.]
+    // "1e-4294967296",
+    // "1e+4294967296",
+    // "1e-18446744073709551616",
+    // "1e+18446744073709551616",
+
+    // https://www.exploringbinary.com/java-hangs-when-converting-2-2250738585072012e-308/
     "2.2250738585072012e-308"u8,
+    // https://www.exploringbinary.com/php-hangs-on-numeric-value-2-2250738585072011e-308/
     "2.2250738585072011e-308"u8,
+
+    // A very large number (initially wrongly parsed by the fast algorithm).
     "4.630813248087435e+307"u8,
+
+    // A different kind of very large number.
     "22.222222222222222"u8,
     "long:2."u8 + strings.Repeat("2"u8, 4000) + "e+1"u8,
+
+    // Exactly halfway between 1 and math.Nextafter(1, 2).
+    // Round to even (down).
     "1.00000000000000011102230246251565404236316680908203125"u8,
+    // Slightly lower; still round down.
     "1.00000000000000011102230246251565404236316680908203124"u8,
+    // Slightly higher; round up.
     "1.00000000000000011102230246251565404236316680908203126"u8,
+    // Slightly higher, but you have to read all the way to the end.
     "long:1.00000000000000011102230246251565404236316680908203125"u8 + strings.Repeat("0"u8, 10000) + "1"u8,
+
+    // Smallest denormal, 2^(-1022-52)
     "4.940656458412465441765687928682213723651e-324"u8,
+    // Half of smallest denormal, 2^(-1022-53)
     "2.470328229206232720882843964341106861825e-324"u8,
+    // A little more than the exact half of smallest denormal
+    // 2^-1075 + 2^-1100.  (Rounds to 1p-1074.)
     "2.470328302827751011111470718709768633275e-324"u8,
+    // The exact halfway between smallest normal and largest denormal:
+    // 2^-1022 - 2^-1075.  (Rounds to 2^-1022.)
     "2.225073858507201136057409796709131975935e-308"u8,
-    "1152921504606846975"u8,
-    "-1152921504606846975"u8,
-    "1152921504606846977"u8,
-    "-1152921504606846977"u8,
+    "1152921504606846975"u8, //   1<<60 - 1
+    "-1152921504606846975"u8, // -(1<<60 - 1)
+    "1152921504606846977"u8, //   1<<60 + 1
+    "-1152921504606846977"u8, // -(1<<60 + 1)
     "1/3"u8
 }.slice();
 
@@ -477,46 +489,52 @@ public static void TestFloat32SpecialCases(ж<testing.T> Ꮡt) {
             }
             input = input[(int)(len("long:"))..];
         }
+
         var (r, ok) = @new<global::go.math.big_package.ΔRat>().SetString(input);
         if (!ok) {
             Ꮡt.Errorf("Rat.SetString(%q) failed"u8, input);
             continue;
         }
         var (f, exact) = r.Float32();
+
         // 1. Check string -> Rat -> float32 conversions are
         // consistent with strconv.ParseFloat.
         // Skip this check if the input uses "a/b" rational syntax.
         if (!strings.Contains(input, "/"u8)) {
             var (e64, _) = strconv.ParseFloat(input, 32);
             var e = (float32)e64;
+
             // Careful: negative Rats too small for
             // float64 become -0, but Rat obviously cannot
             // preserve the sign from SetString("-0").
             switch (ᐧ) {
             case {} when math.Float32bits(e) == math.Float32bits(f): {
+                // Ok: bitwise equal.
                 break;
             }
             case {} when f == 0F && r.Num().BitLen() == 0: {
+                // Ok: Rat(0) is equivalent to both +/- float64(0).
                 break;
             }
             default: {
-                Ꮡt.Errorf("strconv.ParseFloat(%q) = %g (%b), want %g (%b); delta = %g"u8, // Ok: bitwise equal.
- // Ok: Rat(0) is equivalent to both +/- float64(0).
- input, e, e, f, f, f - e);
+                Ꮡt.Errorf("strconv.ParseFloat(%q) = %g (%b), want %g (%b); delta = %g"u8, input, e, e, f, f, f - e);
                 break;
             }}
-
         }
+
         if (!isFinite((float64)f)) {
             continue;
         }
+
         // 2. Check f is best approximation to r.
         if (!checkIsBestApprox32(Ꮡt, f, r)) {
             // Append context information.
             Ꮡt.Errorf("(input was %q)"u8, input);
         }
+
         // 3. Check f->R->f roundtrip is non-lossy.
         checkNonLossyRoundtrip32(Ꮡt, f);
+
         // 4. Check exactness using slow algorithm.
         {
             var wasExact = @new<global::go.math.big_package.ΔRat>().SetFloat64((float64)f).Cmp(r) == 0; if (wasExact != exact) {
@@ -538,45 +556,51 @@ public static void TestFloat64SpecialCases(ж<testing.T> Ꮡt) {
             }
             input = input[(int)(len("long:"))..];
         }
+
         var (r, ok) = @new<global::go.math.big_package.ΔRat>().SetString(input);
         if (!ok) {
             Ꮡt.Errorf("Rat.SetString(%q) failed"u8, input);
             continue;
         }
         var (f, exact) = r.Float64();
+
         // 1. Check string -> Rat -> float64 conversions are
         // consistent with strconv.ParseFloat.
         // Skip this check if the input uses "a/b" rational syntax.
         if (!strings.Contains(input, "/"u8)) {
             var (e, _) = strconv.ParseFloat(input, 64);
+
             // Careful: negative Rats too small for
             // float64 become -0, but Rat obviously cannot
             // preserve the sign from SetString("-0").
             switch (ᐧ) {
             case {} when math.Float64bits(e) == math.Float64bits(f): {
+                // Ok: bitwise equal.
                 break;
             }
             case {} when f == 0D && r.Num().BitLen() == 0: {
+                // Ok: Rat(0) is equivalent to both +/- float64(0).
                 break;
             }
             default: {
-                Ꮡt.Errorf("strconv.ParseFloat(%q) = %g (%b), want %g (%b); delta = %g"u8, // Ok: bitwise equal.
- // Ok: Rat(0) is equivalent to both +/- float64(0).
- input, e, e, f, f, f - e);
+                Ꮡt.Errorf("strconv.ParseFloat(%q) = %g (%b), want %g (%b); delta = %g"u8, input, e, e, f, f, f - e);
                 break;
             }}
-
         }
+
         if (!isFinite(f)) {
             continue;
         }
+
         // 2. Check f is best approximation to r.
         if (!checkIsBestApprox64(Ꮡt, f, r)) {
             // Append context information.
             Ꮡt.Errorf("(input was %q)"u8, input);
         }
+
         // 3. Check f->R->f roundtrip is non-lossy.
         checkNonLossyRoundtrip64(Ꮡt, f);
+
         // 4. Check exactness using slow algorithm.
         {
             var wasExact = @new<global::go.math.big_package.ΔRat>().SetFloat64(f).Cmp(r) == 0; if (wasExact != exact) {
@@ -618,9 +642,8 @@ public static void TestIssue45910(ж<testing.T> Ꮡt) {
         new("1p-10000000"u8, true),
         new("1p+10000000"u8, true),
         new("1p+10000001"u8, false),
-        new("1.770p02041010010011001001"u8, false)
+        new("1.770p02041010010011001001"u8, false) // test case from issue
     }.slice()) {
-        // test case from issue
         var (_, got) = Ꮡx.SetString(test.input);
         if (got != test.want) {
             Ꮡt.Errorf("SetString(%s) got ok = %v; want %v"u8, test.input, got, test.want);
@@ -636,69 +659,44 @@ internal partial struct TestFloatPrec_type /*dyn*/ {
 }
 
 public static void TestFloatPrec(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-// examples from the issue #50489
-// more examples
-// test uninitialized zero value for Rat
-// 0
-// 1
-// 0.5
-// 0.(3)
-// 0.25
-// 0.2
-// 0.1(6)
-// 0.(142857)
-// 0.125
-// 0.(1)
-// 0.1
-// 0.(09)
-// 0.08(3)
-// 0.(076923)
-// 0.0(714285)
-// 0.0(6)
-// 0.0625
-// 5
-// 3.(3)
-// 1.(6)
-// 0.0000001
-// "0.00032"
-// 0.0009765625
-// 0.0000032(894736842105263157)
-// 0.00000002048
     slice<TestFloatPrec_type> tests = new TestFloatPrec_type[]{
+        // examples from the issue #50489
         new("10/100"u8, 1, true, "0.1"u8),
         new("3/100"u8, 2, true, "0.03"u8),
         new("10"u8, 0, true, "10"u8),
-        new("zero"u8, 0, true, "0"u8),
-        new("0"u8, 0, true, "0"u8),
-        new("1"u8, 0, true, "1"u8),
-        new("1/2"u8, 1, true, "0.5"u8),
-        new("1/3"u8, 0, false, "0"u8),
-        new("1/4"u8, 2, true, "0.25"u8),
-        new("1/5"u8, 1, true, "0.2"u8),
-        new("1/6"u8, 1, false, "0.2"u8),
-        new("1/7"u8, 0, false, "0"u8),
-        new("1/8"u8, 3, true, "0.125"u8),
-        new("1/9"u8, 0, false, "0"u8),
-        new("1/10"u8, 1, true, "0.1"u8),
-        new("1/11"u8, 0, false, "0"u8),
-        new("1/12"u8, 2, false, "0.08"u8),
-        new("1/13"u8, 0, false, "0"u8),
-        new("1/14"u8, 1, false, "0.1"u8),
-        new("1/15"u8, 1, false, "0.1"u8),
-        new("1/16"u8, 4, true, "0.0625"u8),
-        new("10/2"u8, 0, true, "5"u8),
-        new("10/3"u8, 0, false, "3"u8),
-        new("10/6"u8, 0, false, "2"u8),
-        new("1/10000000"u8, 7, true, "0.0000001"u8),
-        new("1/3125"u8, 5, true, "0.00032"u8),
-        new("1/1024"u8, 10, true, "0.0009765625"u8),
-        new("1/304000"u8, 7, false, "0.0000033"u8),
-        new("1/48828125"u8, 11, true, "0.00000002048"u8)
+
+        // more examples
+        new("zero"u8, 0, true, "0"u8), // test uninitialized zero value for Rat
+        new("0"u8, 0, true, "0"u8), // 0
+        new("1"u8, 0, true, "1"u8), // 1
+        new("1/2"u8, 1, true, "0.5"u8), // 0.5
+        new("1/3"u8, 0, false, "0"u8), // 0.(3)
+        new("1/4"u8, 2, true, "0.25"u8), // 0.25
+        new("1/5"u8, 1, true, "0.2"u8), // 0.2
+        new("1/6"u8, 1, false, "0.2"u8), // 0.1(6)
+        new("1/7"u8, 0, false, "0"u8), // 0.(142857)
+        new("1/8"u8, 3, true, "0.125"u8), // 0.125
+        new("1/9"u8, 0, false, "0"u8), // 0.(1)
+        new("1/10"u8, 1, true, "0.1"u8), // 0.1
+        new("1/11"u8, 0, false, "0"u8), // 0.(09)
+        new("1/12"u8, 2, false, "0.08"u8), // 0.08(3)
+        new("1/13"u8, 0, false, "0"u8), // 0.(076923)
+        new("1/14"u8, 1, false, "0.1"u8), // 0.0(714285)
+        new("1/15"u8, 1, false, "0.1"u8), // 0.0(6)
+        new("1/16"u8, 4, true, "0.0625"u8), // 0.0625
+        new("10/2"u8, 0, true, "5"u8), // 5
+        new("10/3"u8, 0, false, "3"u8), // 3.(3)
+        new("10/6"u8, 0, false, "2"u8), // 1.(6)
+        new("1/10000000"u8, 7, true, "0.0000001"u8), // 0.0000001
+        new("1/3125"u8, 5, true, "0.00032"u8), // "0.00032"
+        new("1/1024"u8, 10, true, "0.0009765625"u8), // 0.0009765625
+        new("1/304000"u8, 7, false, "0.0000033"u8), // 0.0000032(894736842105263157)
+        new("1/48828125"u8, 11, true, "0.00000002048"u8) // 0.00000002048
     }.slice();
+
     foreach (var (_, test) in tests) {
         ref var f = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡf);
+
         // check uninitialized zero value
         if (test.f != "zero"u8) {
             var (_, ok) = Ꮡf.SetString(test.f);
@@ -706,6 +704,7 @@ public static void TestFloatPrec(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("invalid test case: f = %s"u8, test.f);
             }
         }
+
         // results for f and -f must be the same
         @string fdec = test.fdec;
         for (nint i = 0; i < 2; i++) {
@@ -732,9 +731,11 @@ public static void BenchmarkFloatPrecExact(ж<testing.B> Ꮡb) {
         var d = NewInt(5);
         var p = NewInt((int64)n);
         d.Exp(d, p, nil);
+
         // r := 1/d
         ref var r = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡr);
         Ꮡr.SetFrac(NewInt(1), d);
+
         Ꮡb.Run(fmt.Sprint(n), (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 var (prec, ok) = Ꮡr.FloatPrec();
@@ -752,9 +753,11 @@ public static void BenchmarkFloatPrecMixed(ж<testing.B> Ꮡb) {
         var d = NewInt(3 * 5 * 7 * 11);
         var p = NewInt((int64)n);
         d.Exp(d, p, nil);
+
         // r := 1/d
         ref var r = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡr);
         Ꮡr.SetFrac(NewInt(1), d);
+
         Ꮡb.Run(fmt.Sprint(n), (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 var (prec, ok) = Ꮡr.FloatPrec();
@@ -773,9 +776,11 @@ public static void BenchmarkFloatPrecInexact(ж<testing.B> Ꮡb) {
         var p = NewInt((int64)n);
         d.Exp(d, p, nil);
         d.Add(d, NewInt(1));
+
         // r := 1/d
         ref var r = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡr);
         Ꮡr.SetFrac(NewInt(1), d);
+
         Ꮡb.Run(fmt.Sprint(n), (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 var (_, ok) = Ꮡr.FloatPrec();

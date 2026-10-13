@@ -231,6 +231,7 @@ public static void TestPageCacheFlush(ж<testing.T> Ꮡt) {
             };
             var b = runtime_internal_test_package.NewPageAlloc(beforeAlloc, beforeScav);
             defer(runtime_internal_test_package.FreePageAlloc, b, ref ᒐ);
+
             // Create and flush the cache.
             ref var c = ref heap<global::go.runtime_internal_test_package.PageCache>(out var Ꮡc);
             c = runtime_internal_test_package.NewPageCache(runtime_internal_test_package.PageBase(runtime_internal_test_package.BaseChunkIdx, @base), cache, scav);
@@ -238,6 +239,7 @@ public static void TestPageCacheFlush(ж<testing.T> Ꮡt) {
             if (!Ꮡc.Empty()) {
                 tΔ1.Errorf("pageCache flush did not clear cache"u8);
             }
+
             // Set up the expected after state.
             var afterAlloc = new map<global::go.runtime_internal_test_package.ChunkIdx, slice<global::go.runtime_internal_test_package.BitRange>>{
                 [runtime_internal_test_package.BaseChunkIdx] = bits64ToBitRangesʗ1(~cache, @base)
@@ -247,23 +249,29 @@ public static void TestPageCacheFlush(ж<testing.T> Ꮡt) {
             };
             var want = runtime_internal_test_package.NewPageAlloc(afterAlloc, afterScav);
             defer(runtime_internal_test_package.FreePageAlloc, want, ref ᒐ);
+
             // Check to see if it worked.
             checkPageAlloc(tΔ1, want, b);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }
+
     // Empty.
     runTest(Ꮡt, 0, 0, 0);
+
     // Full.
     runTest(Ꮡt, 0, ~(uint64)0, ~(uint64)0);
+
     // Random.
     for (nint i = 0; i < 100; i++) {
         // Generate random valid base within a chunk.
         nuint @base = (nuint)rand.Intn(runtime_internal_test_package.PallocChunkPages / 64) * 64;
+
         // Generate random cache.
         var cache = rand.Uint64();
         var scav = (uint64)(rand.Uint64() & cache);
+
         // Run the test.
         runTest(Ꮡt, @base, cache, scav);
     }
@@ -390,6 +398,7 @@ public static void TestPageAllocAllocToCache(ж<testing.T> Ꮡt) {
     // See #46860.
     if (runtime_internal_test_package.PageAlloc64Bit != 0 && goos.IsIos == 0) {
         UntypedInt chunkIdxBigJump = 0x100000; // chunk index offset which translates to O(TiB)
+
         // This test is similar to the one with the same name for
         // pageAlloc.alloc and serves the same purpose.
         // See mpagealloc_test.go for details.
@@ -424,6 +433,7 @@ public static void TestPageAllocAllocToCache(ж<testing.T> Ꮡt) {
             try {
                 var b = runtime_internal_test_package.NewPageAlloc(vʗ1.beforeAlloc, vʗ1.beforeScav);
                 defer(runtime_internal_test_package.FreePageAlloc, b, ref ᒐ);
+
                 foreach (var (_, expect) in vʗ1.hits) {
                     checkPageCache(tΔ1, b.AllocToCache(), expect);
                     if (tΔ1.Failed()) {
@@ -432,6 +442,7 @@ public static void TestPageAllocAllocToCache(ж<testing.T> Ꮡt) {
                 }
                 var want = runtime_internal_test_package.NewPageAlloc(vʗ1.afterAlloc, vʗ1.afterScav);
                 defer(runtime_internal_test_package.FreePageAlloc, want, ref ᒐ);
+
                 checkPageAlloc(tΔ1, want, b);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

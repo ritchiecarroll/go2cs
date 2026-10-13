@@ -63,29 +63,32 @@ public static void Example_sortWrapper() {
         Ꮡ(new Organ("prostate"u8, 62)),
         Ꮡ(new Organ("spleen"u8, 162))
     }.slice();
+
     sort.Sort(new ByWeight(s));
     fmt.Println(organsByWeightˢ);
     printOrgans(s);
+
     sort.Sort(new ByName(s));
     fmt.Println(organsByNameˢ);
     printOrgans(s);
+
+    // Output:
+    // Organs by weight:
+    // prostate (62g)
+    // pancreas (131g)
+    // spleen   (162g)
+    // heart    (290g)
+    // brain    (1340g)
+    // liver    (1494g)
+    // Organs by name:
+    // brain    (1340g)
+    // heart    (290g)
+    // liver    (1494g)
+    // pancreas (131g)
+    // prostate (62g)
+    // spleen   (162g)
 }
 
-// Output:
-// Organs by weight:
-// prostate (62g)
-// pancreas (131g)
-// spleen   (162g)
-// heart    (290g)
-// brain    (1340g)
-// liver    (1494g)
-// Organs by name:
-// brain    (1340g)
-// heart    (290g)
-// liver    (1494g)
-// pancreas (131g)
-// prostate (62g)
-// spleen   (162g)
 internal static void printOrgans(slice<ж<Organ>> s) {
     foreach (var (_, o) in s) {
         fmt.Printf("%-8s (%v)\n"u8, (~o).Name, (~o).Weight);

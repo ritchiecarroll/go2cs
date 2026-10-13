@@ -13,7 +13,6 @@ using static go.@internal.poll_internal_test_package;
 
 partial class poll_test_package {
 
-
 partial struct eofErrorTestsᴛ1 /*dyn*/ {
     internal nint n;
     internal error err;

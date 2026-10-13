@@ -93,6 +93,7 @@ internal static error mark(fs.DirEntry entry, error err, ж<slice<error>> Ꮡerr
 
 public static void TestWalkDir(ж<testing.T> Ꮡt) {
     Ꮡt.Chdir(Ꮡt.TempDir());
+
     var fsys = makeTree();
     ref var errors = ref heap<slice<error>>(out var Ꮡerrors);
     errors = new slice<error>(0, 10);

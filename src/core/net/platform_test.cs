@@ -26,8 +26,7 @@ internal static bool unixEnabledOnAIX;
         // The information is retrieved only once in this init()
         // instead of everytime testableNetwork is called.
         var (@out, _) = exec.Command("oslevel"u8, "-s"u8).Output();
-        if (len(@out) >= len("7200-XX-ZZ-YYMM")) {
-            // AIX 7.2, Tech Level XX, Service Pack ZZ, date YYMM
+        if (len(@out) >= len("7200-XX-ZZ-YYMM")) { // AIX 7.2, Tech Level XX, Service Pack ZZ, date YYMM
             sstring aixVer = ((sstring)(@out[..4]));
             var (tl, _) = strconv.Atoi(((@string)(@out[5..7])));
             unixEnabledOnAIX = aixVer > "7200"u8 || (aixVer == "7200"u8 && tl >= 2);
@@ -52,7 +51,6 @@ internal static bool testableNetwork(@string network) {
                 return false;
             }
         }
-
     }
     else if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8) {
         var exprᴛ3 = Δruntime.GOOS;
@@ -62,16 +60,13 @@ internal static bool testableNetwork(@string network) {
         if (exprᴛ3 == "aix"u8) {
             return unixEnabledOnAIX;
         }
-
     }
     else if (exprᴛ1 == "unixpacket"u8) {
         var exprᴛ4 = Δruntime.GOOS;
         if (exprᴛ4 == "aix"u8 || exprᴛ4 == "android"u8 || exprᴛ4 == "darwin"u8 || exprᴛ4 == "ios"u8 || exprᴛ4 == "plan9"u8 || exprᴛ4 == "windows"u8) {
             return false;
         }
-
     }
-
     var exprᴛ5 = net;
     if (exprᴛ5 == "tcp4"u8 || exprᴛ5 == "udp4"u8 || exprᴛ5 == "ip4"u8) {
         if (!supportsIPv4()) {
@@ -83,7 +78,6 @@ internal static bool testableNetwork(@string network) {
             return false;
         }
     }
-
     return true;
 }
 
@@ -94,13 +88,12 @@ internal static bool testableAddress(@string network, @string address) {
         var (net, _, _) = strings.Cut(network, ":"u8);
         var exprᴛ1 = net;
         if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8) {
+            // Abstract unix domain sockets, a Linux-ism.
             if (address[0] == (rune)'@' && Δruntime.GOOS != "linux"u8) {
-                // Abstract unix domain sockets, a Linux-ism.
                 return false;
             }
         }
     }
-
     return true;
 }
 
@@ -110,6 +103,7 @@ internal static bool testableListenArgs(@string network, @string address, @strin
     if (!testableNetwork(network) || !testableAddress(network, address)) {
         return false;
     }
+
     error err = default!;
     global::go.net_package.ΔAddr addr = default!;
     {
@@ -131,7 +125,6 @@ internal static bool testableListenArgs(@string network, @string address, @strin
             return true;
         }
     }
-
     if (err != default!) {
         return false;
     }
@@ -153,10 +146,12 @@ internal static bool testableListenArgs(@string network, @string address, @strin
         wildcard = addrΔ1.isWildcard();
         break;
     }}
+
     // Test wildcard IP addresses.
     if (wildcard && !testenv.HasExternalNetwork()) {
         return false;
     }
+
     // Test functionality of IPv4 communication using AF_INET and
     // IPv6 communication using AF_INET6 sockets.
     if (!supportsIPv4() && ip.To4() != default!) {
@@ -174,20 +169,20 @@ internal static bool testableListenArgs(@string network, @string address, @strin
             return false;
         }
     }
+
     // Test functionality of IPv4 communication using AF_INET6
     // sockets.
     if (!supportsIPv4map() && supportsIPv4() && (network == "tcp"u8 || network == "udp"u8 || network == "ip"u8) && wildcard) {
         // At this point, we prefer IPv4 when ip is nil.
         // See favoriteAddrFamily for further information.
-        if (ip.To16() != default! && ip.To4() == default! && cip.To4() != default!) {
-            // a pair of IPv6 server and IPv4 client
+        if (ip.To16() != default! && ip.To4() == default! && cip.To4() != default!) { // a pair of IPv6 server and IPv4 client
             return false;
         }
-        if ((ip.To4() != default! || ip == default!) && cip.To16() != default! && cip.To4() == default!) {
-            // a pair of IPv4 server and IPv6 client
+        if ((ip.To4() != default! || ip == default!) && cip.To16() != default! && cip.To4() == default!) { // a pair of IPv4 server and IPv6 client
             return false;
         }
     }
+
     return true;
 }
 
@@ -208,7 +203,6 @@ internal static void condFatalf(ж<testing.T> Ꮡt, @string network, @string for
         Ꮡt.Logf(format, args.ꓸꓸꓸ);
         return;
     }
-
     Ꮡt.Fatalf(format, args.ꓸꓸꓸ);
 }
 

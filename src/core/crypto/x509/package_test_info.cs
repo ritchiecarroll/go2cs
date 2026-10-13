@@ -89,7 +89,7 @@ using static global::go.crypto.x509_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/x509/hybrid_pool_test.go", "hybrid_pool_test.cs", "AB8qgoKClIKUAAoYgoKCgoKClIKClMyCgpSEAAcQgoKUgoKUgoKWgoKUhIKCloSCgpbcgoKUgoKWgoI=", "", "", "73=NewInt/1/1/1,Now/1/2/5,Add/1/2/5,Now/2/2/6,Add/2/2/6;107=NewInt/1/1/1,Now/1/2/2,Add/1/2/2,Now/2/2/3,Add/2/2/3")]
+[assembly: go.GoPositionMap("crypto/x509/hybrid_pool_test.go", "hybrid_pool_test.cs", "AB8qgoKClIKUAAoYgoKCgoKClIKClNyCgpSUAAcQgoKUgoKUgoKmgoKUlIKCppSCgqbcgoKUgoKmgoI=", "", "", "75=NewInt/1/1/1,Now/1/2/5,Add/1/2/5,Now/2/2/6,Add/2/2/6;114=NewInt/1/1/1,Now/1/2/2,Add/1/2/2,Now/2/2/3,Add/2/2/3")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

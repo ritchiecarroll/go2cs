@@ -48,10 +48,12 @@ public static void BenchmarkWorkerFuzzOverhead(ж<testing.B> Ꮡb) {
             os.Setenv(godebugˢ, origEnv);
         }, ref ᒐ);
         os.Setenv(godebugˢ, fmt.Sprintf("%s,fuzzseed=123"u8, origEnv));
+
         var ws = Ꮡ(new workerServer(
             fuzzFn: (CorpusEntry _) => (time.ΔSecond, default!),
             workerComm: new workerComm(memMu: new channel<ж<global::go.@internal.fuzz_package.sharedMem>>(1))
         ));
+
         var (mem, err) = sharedMemTempFile(workerSharedMemSize);
         if (err != default!) {
             Ꮡb.Fatalf("failed to create temporary shared memory file: %s"u8, err);
@@ -64,15 +66,19 @@ public static void BenchmarkWorkerFuzzOverhead(ж<testing.B> Ꮡb) {
                 }
             }
         }, ref ᒐ);
+
         var initialVal = new any[]{new slice<byte>(32)}.slice();
         var encodedVals = marshalCorpusFile(initialVal.ꓸꓸꓸ);
         mem.setValue(encodedVals);
+
         (~ws).memMu.ᐸꟷ(mem);
+
         b.ResetTimer();
         for (nint i = 0; i < b.N; i++) {
             ws.Value.m = newMutator();
             mem.setValue(encodedVals);
             mem.header().Value.count = 0;
+
             ws.fuzz(context.Background(), new fuzzArgs(Limit: 1));
         }
     }
@@ -204,9 +210,11 @@ public static void BenchmarkWorkerMinimize(ж<testing.B> Ꮡb) {
         if (race.Enabled) {
             Ꮡb.Skip(todo48504FixAndReEnableˢ);
         }
+
         var ws = Ꮡ(new workerServer(
             workerComm: new workerComm(memMu: new channel<ж<global::go.@internal.fuzz_package.sharedMem>>(1))
         ));
+
         ref var mem = ref heap<ж<global::go.@internal.fuzz_package.sharedMem>>(out var Ꮡmem);
         (mem, var err) = sharedMemTempFile(workerSharedMemSize);
         if (err != default!) {
@@ -220,6 +228,7 @@ public static void BenchmarkWorkerMinimize(ж<testing.B> Ꮡb) {
             }
         }, ref ᒐ);
         (~ws).memMu.ᐸꟷ(mem);
+
         var bytes = new slice<byte>(1024);
         var ctx = context.Background();
         for (nint sz = 1; sz <= len(bytes); sz <<= (int)(1)) {

@@ -35,7 +35,7 @@ using static global::go.os.exec.@internal.fdtest_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("os/exec/internal/fdtest/exists_test.go", "exists_test.cs", "AA8agoKWgg==")]
+[assembly: go.GoPositionMap("os/exec/internal/fdtest/exists_test.go", "exists_test.cs", "AA8agoKmgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.os.exec.@internal;

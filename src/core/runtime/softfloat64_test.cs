@@ -50,13 +50,9 @@ public static void TestFloat64(ж<testing.T> Ꮡt) {
         0.1D,
         1.5D,
         1.9999999999999998D, // all 1s mantissa
-
         1.3333333333333333D, // 1.010101010101...
-
         1.1428571428571428D, // 1.001001001001...
-
         1.112536929253601e-308D, // first normal
-
         2D,
         4D,
         8D,
@@ -92,10 +88,10 @@ public static void TestFloat64(ж<testing.T> Ꮡt) {
     for (nint i = len(@base); i < len(all); i++) {
         all[i] = rand.NormFloat64();
     }
+
     test(Ꮡt, "+"u8, add, fop(runtime_internal_test_package.Fadd64), all);
     test(Ꮡt, "-"u8, sub, fop(runtime_internal_test_package.Fsub64), all);
-    if (GOARCH != "386"u8) {
-        // 386 is not precise!
+    if (GOARCH != "386"u8) { // 386 is not precise!
         test(Ꮡt, "*"u8, mul, fop(runtime_internal_test_package.Fmul64), all);
         test(Ꮡt, "/"u8, div, fop(runtime_internal_test_package.Fdiv64), all);
     }
@@ -151,6 +147,7 @@ internal static void err(ж<testing.T> Ꮡt, @string format, params ꓸꓸꓸany
     var args = argsʗp.sslice();
 
     Ꮡt.Errorf(format, args.ꓸꓸꓸ);
+
     // cut errors off after a while.
     // otherwise we spend all our time
     // allocating memory to hold the
@@ -211,7 +208,6 @@ internal static (nint cmp, bool isnan) hwcmp(float64 f, float64 g) {
     case {} when f == g: {
         return (0, false);
     }}
-
     return (0, true); // must be NaN
 }
 

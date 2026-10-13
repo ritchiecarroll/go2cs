@@ -47,6 +47,7 @@ public static void TestUnixConnLocalWindows(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatal(errΔ1);
                 }
             }
+
             (var la, err) = ResolveUnixAddr(unixˢ, laddrΔ1);
             if (err != default!) {
                 Ꮡt.Fatal(err);
@@ -73,6 +74,7 @@ public static void TestUnixConnLocalWindows(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatal(errΔ2);
                 }
             }
+
             if (laddrΔ1 == ""u8) {
                 laddrΔ1 = "@"u8;
             }
@@ -98,17 +100,21 @@ public static void TestModeSocket(ж<testing.T> Ꮡt) {
         if (!windows.SupportUnixSocket()) {
             Ꮡt.Skip(unixTestˢ);
         }
+
         @string addr = testUnixAddr(new net_test_package.testing_TжTB(Ꮡt));
+
         var (l, err) = Listen(unixˢ, addr);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var lʗ1 = l;
         defer(() => lʗ1.Close(), ref ᒐ);
+
         (var stat, err) = Δos.Stat(addr);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var mode = stat.Mode();
         if ((fs.FileMode)(mode & Δos.ModeSocket) == 0) {
             Ꮡt.Fatalf("%v should have ModeSocket"u8, mode);

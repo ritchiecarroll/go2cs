@@ -72,6 +72,7 @@ public static void TestItoa(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("AppendInt(%q, %v, %v) = %q want %v"u8,
                     abcˢ, test.@in, test.@base, x, test.@out);
             }
+
             if (test.@in >= 0) {
                 @string sΔ1 = FormatUint((uint64)test.@in, test.@base);
                 if (sΔ1 != test.@out) {
@@ -84,6 +85,7 @@ public static void TestItoa(ж<testing.T> Ꮡt) {
                         abcˢ, (uint64)test.@in, test.@base, xΔ1, test.@out);
                 }
             }
+
             if (test.@base == 10 && (int64)(nint)test.@in == test.@in) {
                 @string sΔ2 = Itoa((nint)test.@in);
                 if (sΔ2 != test.@out) {
@@ -92,6 +94,7 @@ public static void TestItoa(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         // Override when base is illegal
         defer(() => {
             {
@@ -135,7 +138,6 @@ public static void TestUitoa(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct varlenUintsᴛ1 /*dyn*/ {
     internal uint64 @in;

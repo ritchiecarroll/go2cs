@@ -55,6 +55,7 @@ public static void TestMappingEachPair(ж<testing.T> Ꮡt) {
         m.add(i, v);
         want = append(want, new entry<nint, @string>(i, v));
     }
+
     ref var got = ref heap<slice<global::go.net.http_package.entry<nint, @string>>>(out var Ꮡgot);
     Ꮡm.eachPair((nint k, @string v) => {
         Ꮡgot.ValueSlot = append(Ꮡgot.ValueSlot, new entry<nint, @string>(k, v));

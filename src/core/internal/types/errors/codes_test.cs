@@ -25,6 +25,7 @@ private static readonly @string exampleˢ = "Example:"u8;
 
 public static void TestErrorCodeExamples(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt)); // go command needed to resolve std .a files for importer.Default().
+
     walkCodes(Ꮡt, (@string name, nint value, ж<ast.ValueSpec> spec) => {
         Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
             @string doc = (~spec).Doc.Text();
@@ -131,10 +132,10 @@ internal static error checkExample(ж<testing.T> Ꮡt, @string example) {
 public static void TestErrorCodeStyle(ж<testing.T> Ꮡt) {
     // The set of error codes is large and intended to be self-documenting, so
     // this test enforces some style conventions.
-    var forbiddenInIdent = new @string[]{ // use invalid instead
-
-        "illegal"u8, // words with a common short-form
-
+    var forbiddenInIdent = new @string[]{
+        // use invalid instead
+        "illegal"u8,
+        // words with a common short-form
         "argument"u8,
         "assertion"u8,
         "assignment"u8,
@@ -145,11 +146,9 @@ public static void TestErrorCodeStyle(ж<testing.T> Ꮡt) {
         "expression"u8,
         "function"u8,
         "initial"u8, // use init for initializer, initialization, etc.
-
         "integer"u8,
         "interface"u8,
         "iterat"u8, // use iter for iterator, iteration, etc.
-
         "literal"u8,
         "operation"u8,
         "package"u8,
@@ -159,17 +158,18 @@ public static void TestErrorCodeStyle(ж<testing.T> Ꮡt) {
         "statement"u8,
         "variable"u8
     }.slice();
-    var forbiddenInComment = new @string[]{ // lhs and rhs should be spelled-out.
-
-        "lhs"u8, "rhs"u8, // builtin should be hyphenated.
-
-        "builtin"u8, // Use dot-dot-dot.
-
+    var forbiddenInComment = new @string[]{
+        // lhs and rhs should be spelled-out.
+        "lhs"u8, "rhs"u8,
+        // builtin should be hyphenated.
+        "builtin"u8,
+        // Use dot-dot-dot.
         "ellipsis"u8
     }.slice();
     var nameHist = new map<nint, nint>();
     @string longestName = ""u8;
     nint maxValue = 0;
+
     var forbiddenInCommentʗ1 = forbiddenInComment;
     var forbiddenInIdentʗ1 = forbiddenInIdent;
     var nameHistʗ1 = nameHist;
@@ -207,6 +207,7 @@ public static void TestErrorCodeStyle(ж<testing.T> Ꮡt) {
             }
         }
     });
+
     if (testing.Verbose()) {
         nint totChars = default!;
         nint totCount = default!;

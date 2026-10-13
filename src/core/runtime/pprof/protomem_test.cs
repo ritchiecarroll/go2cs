@@ -28,6 +28,7 @@ internal partial struct TestConvertMemProfile_type /*dyn*/ {
 
 public static void TestConvertMemProfile(ж<testing.T> Ꮡt) {
     var (addr1, addr2, map1, map2) = testPCs(Ꮡt);
+
     // MemProfileRecord stacks are return PCs, so add one to the
     // addresses recorded in the "profile". The proto profile
     // locations are call PCs, so conversion will subtract one
@@ -39,6 +40,7 @@ public static void TestConvertMemProfile(ж<testing.T> Ꮡt) {
         new(AllocBytes: 512 * 1024, FreeBytes: 0, AllocObjects: 1, FreeObjects: 0, Stack: new uintptr[]{a2 + 1, a2 + 2}.slice()),
         new(AllocBytes: 512 * 1024, FreeBytes: 512 * 1024, AllocObjects: 1, FreeObjects: 1, Stack: new uintptr[]{a1 + 1, a1 + 2, a2 + 3}.slice())
     }.slice();
+
     var periodType = Ꮡ(new profile.ValueType(Type: "space"u8, Unit: "bytes"u8));
     var sampleType = new ж<profile.ValueType>[]{
         Ꮡ(new profile.ValueType(Type: "alloc_objects"u8, Unit: "count"u8)),
@@ -89,10 +91,12 @@ public static void TestConvertMemProfile(ж<testing.T> Ꮡt) {
                     tΔ1.Fatalf("writing profile: %v"u8, errΔ1);
                 }
             }
+
             var (p, err) = profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(Ꮡbuf));
             if (err != default!) {
                 tΔ1.Fatalf("profile.Parse: %v"u8, err);
             }
+
             checkProfile(tΔ1, p, rate, periodTypeʗ1, sampleTypeʗ1, samplesʗ1, tcʗ1.defaultSampleType);
         });
     }
@@ -153,6 +157,7 @@ public static void TestGenericsHashKeyInPprofBuilder(ж<testing.T> Ꮡt) {
         foreach (var (_, sz) in new nint[]{32, 64}.slice()) {
             genericAllocFunc<uint64>(sz / 8);
         }
+
         runtime.GC();
         var buf = bytes.NewBuffer(default!);
         {
@@ -164,6 +169,7 @@ public static void TestGenericsHashKeyInPprofBuilder(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("profile.Parse: %v"u8, err);
         }
+
         var actual = profileToStrings(p);
         var expected = new @string[]{
             "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint32] [1 128 0 0]"u8,
@@ -171,6 +177,7 @@ public static void TestGenericsHashKeyInPprofBuilder(ж<testing.T> Ꮡt) {
             "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint64] [1 32 0 0]"u8,
             "testing.tRunner;runtime/pprof.TestGenericsHashKeyInPprofBuilder;runtime/pprof.genericAllocFunc[go.shape.uint64] [1 64 0 0]"u8
         }.slice();
+
         foreach (var (_, l) in expected) {
             if (!slices.Contains(actual, l)) {
                 Ꮡt.Errorf("profile = %v\nwant = %v"u8, strings_package.Join(actual, "\n"u8), l);
@@ -223,15 +230,19 @@ public static void TestGenericsInlineLocations(ж<testing.T> Ꮡt) {
         if (testenv.OptimizationOff()) {
             Ꮡt.Skip(skippingTestWithˢ);
         }
+
         nint previousRate = runtime.MemProfileRate;
         runtime.MemProfileRate = 1;
         defer(() => {
             runtime.MemProfileRate = previousRate;
             sink = default!;
         }, ref ᒐ);
+
         nonRecursiveGenericAllocFunction<opAlloc, opCall>(true);
         nonRecursiveGenericAllocFunction<opCall, opAlloc>(false);
+
         runtime.GC();
+
         var buf = bytes.NewBuffer(default!);
         {
             var errΔ1 = WriteHeapProfile(new pprof_internal_test_package.bytes_BufferжWriter(buf)); if (errΔ1 != default!) {
@@ -242,6 +253,7 @@ public static void TestGenericsInlineLocations(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("profile.Parse: %v"u8, err);
         }
+
         @string expectedSample = expectedSampleᶜ;
         @string expectedLocation = expectedLocationᶜ;
         @string expectedLocationNewInliner = expectedLocationNewInlinerᶜ;
@@ -287,7 +299,9 @@ public static void TestHeapRuntimeFrames(ж<testing.T> Ꮡt) {
         defer(() => {
             runtime.MemProfileRate = previousRate;
         }, ref ᒐ);
+
         growMap();
+
         runtime.GC();
         var buf = bytes.NewBuffer(default!);
         {
@@ -299,7 +313,9 @@ public static void TestHeapRuntimeFrames(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("profile.Parse: %v"u8, err);
         }
+
         var actual = profileToStrings(p);
+
         // We must see growMap at least once.
         var foundGrowMap = false;
         foreach (var (_, l) in actual) {
@@ -307,6 +323,7 @@ public static void TestHeapRuntimeFrames(ж<testing.T> Ꮡt) {
                 continue;
             }
             foundGrowMap = true;
+
             // Runtime frames like mapassign and map internals should be hidden.
             if (strings_package.Contains(l, runtimeˢ)) {
                 Ꮡt.Errorf("Sample got %s, want no runtime frames"u8, l);
@@ -317,11 +334,11 @@ public static void TestHeapRuntimeFrames(ж<testing.T> Ꮡt) {
             if (strings_package.Contains(l, runtimeInternalˢ)) {
                 Ꮡt.Errorf("Sample got %s, want no runtime frames"u8, l);
             }
-            if (strings_package.Contains(l, mapassignˢ)) {
-                // in case mapassign moves to a package not matching above paths.
+            if (strings_package.Contains(l, mapassignˢ)) { // in case mapassign moves to a package not matching above paths.
                 Ꮡt.Errorf("Sample got %s, want no mapassign frames"u8, l);
             }
         }
+
         if (!foundGrowMap) {
             Ꮡt.Errorf("Profile got:\n%s\nwant sample in runtime/pprof.growMap"u8, strings_package.Join(actual, "\n"u8));
         }

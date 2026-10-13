@@ -55,6 +55,7 @@ internal static void testRoundTrip<E, D>(ж<testing.T> Ꮡt, Func<(D, error)> ge
     if (!bytes.Equal(Ke, Kd)) {
         Ꮡt.Fail();
     }
+
     (var ek1, err) = newEncapsulationKey(ek.Bytes());
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -77,6 +78,7 @@ internal static void testRoundTrip<E, D>(ж<testing.T> Ꮡt, Func<(D, error)> ge
     if (!bytes.Equal(Ke1, Kd1)) {
         Ꮡt.Fail();
     }
+
     (var dk2, err) = generateKey();
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -87,6 +89,7 @@ internal static void testRoundTrip<E, D>(ж<testing.T> Ꮡt, Func<(D, error)> ge
     if (bytes.Equal(dk.Bytes(), dk2.Bytes())) {
         Ꮡt.Fail();
     }
+
     var (Ke2, c2) = dk.EncapsulationKey().Encapsulate();
     if (bytes.Equal(c, c2)) {
         Ꮡt.Fail();
@@ -117,6 +120,7 @@ internal static void testBadLengths<E, D>(ж<testing.T> Ꮡt, Func<(D, error)> g
     var ek = dk.EncapsulationKey();
     var ekBytes = dk.EncapsulationKey().Bytes();
     var (_, c) = ek.Encapsulate();
+
     for (nint i = 0; i < len(dkBytes) - 1; i++) {
         {
             var (_, errΔ1) = newDecapsulationKey(dkBytes.slice(0, i)); if (errΔ1 == default!) {
@@ -133,6 +137,7 @@ internal static void testBadLengths<E, D>(ж<testing.T> Ꮡt, Func<(D, error)> g
             }
         }
     }
+
     for (nint i = 0; i < len(ekBytes) - 1; i++) {
         {
             var (_, errΔ3) = newEncapsulationKey(ekBytes.slice(0, i)); if (errΔ3 == default!) {
@@ -149,6 +154,7 @@ internal static void testBadLengths<E, D>(ж<testing.T> Ꮡt, Func<(D, error)> g
             }
         }
     }
+
     for (nint i = 0; i < len(c) - 1; i++) {
         {
             var (_, errΔ5) = dk.Decapsulate(c.slice(0, i)); if (errΔ5 == default!) {
@@ -182,11 +188,13 @@ public static void TestAccumulated(ж<testing.T> Ꮡt) {
         n = 1000000;
         expected = "424bf8f0e8ae99b78d788a6e2e8e9cdaf9773fc0c08a6f433507cb559edfd0f0"u8;
     }
+
     var s = sha3.NewShake128();
     var o = sha3.NewShake128();
     var seed = new slice<byte>(SeedSize);
     ref var msg = ref heap(new array<byte>(32), out var Ꮡmsg);
     var ct1 = new slice<byte>(CiphertextSize768);
+
     for (nint i = 0; i < n; i++) {
         s.Read(seed);
         var (dk, err) = NewDecapsulationKey768(seed);
@@ -195,10 +203,12 @@ public static void TestAccumulated(ж<testing.T> Ꮡt) {
         }
         var ek = dk.EncapsulationKey();
         o.Write(ek.Bytes());
+
         s.Read(msg[..]);
         var (k, ct) = (~ek).key.EncapsulateInternal(Ꮡmsg);
         o.Write(ct);
         o.Write(k);
+
         (var kk, err) = dk.Decapsulate(ct);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -206,6 +216,7 @@ public static void TestAccumulated(ж<testing.T> Ꮡt) {
         if (!bytes.Equal(kk, k)) {
             Ꮡt.Errorf("k: got %x, expected %x"u8, kk, k);
         }
+
         s.Read(ct1);
         (var k1, err) = dk.Decapsulate(ct1);
         if (err != default!) {
@@ -213,6 +224,7 @@ public static void TestAccumulated(ж<testing.T> Ꮡt) {
         }
         o.Write(k1);
     }
+
     @string got = hex.EncodeToString(o.Sum(default!));
     if (got != expected) {
         Ꮡt.Errorf("got %s, expected %s"u8, got, expected);
@@ -299,6 +311,7 @@ public static void BenchmarkRoundTrip(ж<testing.B> Ꮡb) {
             }
             var ekS = dkS.EncapsulationKey().Bytes();
             sink ^= (byte)(ekS[0]);
+
             (var Ks, errΔ1) = dkʗ1.Decapsulate(cʗ1);
             if (errΔ1 != default!) {
                 bΔ1.Fatal(errΔ1);
@@ -327,18 +340,23 @@ public static void TestConstantSizes(ж<testing.T> Ꮡt) {
     if (SharedKeySize != mlkem.SharedKeySize) {
         Ꮡt.Errorf("SharedKeySize mismatch: got %d, want %d"u8, (nint)(SharedKeySize), (nint)(mlkem.SharedKeySize));
     }
+
     if (SeedSize != mlkem.SeedSize) {
         Ꮡt.Errorf("SeedSize mismatch: got %d, want %d"u8, (nint)(SeedSize), (nint)(mlkem.SeedSize));
     }
+
     if (CiphertextSize768 != mlkem.CiphertextSize768) {
         Ꮡt.Errorf("CiphertextSize768 mismatch: got %d, want %d"u8, (nint)(CiphertextSize768), (nint)(mlkem.CiphertextSize768));
     }
+
     if (EncapsulationKeySize768 != mlkem.EncapsulationKeySize768) {
         Ꮡt.Errorf("EncapsulationKeySize768 mismatch: got %d, want %d"u8, (nint)(EncapsulationKeySize768), (nint)(mlkem.EncapsulationKeySize768));
     }
+
     if (CiphertextSize1024 != mlkem.CiphertextSize1024) {
         Ꮡt.Errorf("CiphertextSize1024 mismatch: got %d, want %d"u8, (nint)(CiphertextSize1024), (nint)(mlkem.CiphertextSize1024));
     }
+
     if (EncapsulationKeySize1024 != mlkem.EncapsulationKeySize1024) {
         Ꮡt.Errorf("EncapsulationKeySize1024 mismatch: got %d, want %d"u8, (nint)(EncapsulationKeySize1024), (nint)(mlkem.EncapsulationKeySize1024));
     }

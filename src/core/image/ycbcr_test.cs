@@ -63,12 +63,14 @@ internal static void testYCbCr(ж<testing.T> Ꮡt, global::go.image_package.Rect
     // Create a YCbCr image m, whose bounds are r translated by (delta.X, delta.Y).
     var r1 = r.Add(delta);
     var m = NewYCbCr(r1, subsampleRatio);
+
     // Test that the image buffer is reasonably small even if (delta.X, delta.Y) is far from the origin.
     if (len((~m).Y) > 100 * 100) {
         Ꮡt.Errorf("r=%v, subsampleRatio=%v, delta=%v: image buffer is too large"u8,
             r, subsampleRatio, delta);
         return;
     }
+
     // Initialize m's pixels. For 422 and 420 subsampling, some of the Cb and Cr elements
     // will be set multiple times. That's OK. We just want to avoid a uniform image.
     for (nint y = r1.Min.Y; y < r1.Max.Y; y++) {
@@ -80,6 +82,7 @@ internal static void testYCbCr(ж<testing.T> Ꮡt, global::go.image_package.Rect
             m.Value.Cr[ci] = (uint8)(y + 16 * x);
         }
     }
+
     // Make various sub-images of m.
     for (nint y0 = delta.Y + 3; y0 < delta.Y + 7; y0++) {
         for (nint y1 = delta.Y + 8; y1 < delta.Y + 13; y1++) {
@@ -87,6 +90,7 @@ internal static void testYCbCr(ж<testing.T> Ꮡt, global::go.image_package.Rect
                 for (nint x1 = delta.X + 8; x1 < delta.X + 13; x1++) {
                     var subRect = Rect(x0, y0, x1, y1);
                     var sub = m.SubImage(subRect)._<ж<global::go.image_package.YCbCr>>();
+
                     // For each point in the sub-image's bounds, check that m.At(x, y) equals sub.At(x, y).
                     for (nint y = sub.Value.Rect.Min.Y; y < (~sub).Rect.Max.Y; y++) {
                         for (nint x = sub.Value.Rect.Min.X; x < (~sub).Rect.Max.X; x++) {

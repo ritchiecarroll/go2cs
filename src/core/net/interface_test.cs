@@ -77,7 +77,6 @@ public static void TestInterfaces(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("got %v; want %v"u8, ifxi.OrTypedNil(), ifi);
             }
         }
-
         (var ifxn, errΔ1) = InterfaceByName(ifi.Name);
         if (errΔ1 != default!) {
             Ꮡt.Fatal(errΔ1);
@@ -224,8 +223,7 @@ internal static (ж<routeStats>, error) validateInterfaceUnicastAddrs(slice<glob
                 if (0 >= prefixLen || prefixLen > (nint)(8 * IPv4len) || maxPrefixLen != (nint)(8 * IPv4len)) {
                     return (default!, fmt.Errorf("unexpected prefix length: %d/%d for %#v"u8, prefixLen, maxPrefixLen, ifaΔ1.OrTypedNil()));
                 }
-                if ((~ifaΔ1).IP.IsLoopback() && prefixLen < 8) {
-                    // see RFC 1122
+                if ((~ifaΔ1).IP.IsLoopback() && prefixLen < 8) { // see RFC 1122
                     return (default!, fmt.Errorf("unexpected prefix length: %d/%d for %#v"u8, prefixLen, maxPrefixLen, ifaΔ1.OrTypedNil()));
                 }
                 stats.Value.ipv4++;
@@ -234,8 +232,7 @@ internal static (ж<routeStats>, error) validateInterfaceUnicastAddrs(slice<glob
                 if (0 >= prefixLen || prefixLen > (nint)(8 * IPv6len) || maxPrefixLen != (nint)(8 * IPv6len)) {
                     return (default!, fmt.Errorf("unexpected prefix length: %d/%d for %#v"u8, prefixLen, maxPrefixLen, ifaΔ1.OrTypedNil()));
                 }
-                if ((~ifaΔ1).IP.IsLoopback() && prefixLen != (nint)(8 * IPv6len)) {
-                    // see RFC 4291
+                if ((~ifaΔ1).IP.IsLoopback() && prefixLen != (nint)(8 * IPv6len)) { // see RFC 4291
                     return (default!, fmt.Errorf("unexpected prefix length: %d/%d for %#v"u8, prefixLen, maxPrefixLen, ifaΔ1.OrTypedNil()));
                 }
                 stats.Value.ipv6++;
@@ -318,23 +315,22 @@ internal static error checkMulticastStats(ж<ifStats> ᏑifStats, ж<routeStats>
     if (exprᴛ1 == "aix"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "plan9"u8 || exprᴛ1 == "solaris"u8 || exprᴛ1 == "illumos"u8) {
     }
     else { /* default: */
+        // Test the existence of connected multicast route
+        // clones for IPv4. Unlike IPv6, IPv4 multicast
+        // capability is not a mandatory feature, and so IPv4
+        // multicast validation is ignored and we only check
+        // IPv6 below.
+        //
+        // Test the existence of connected multicast route
+        // clones for IPv6. Some platform never uses loopback
+        // interface as the nexthop for multicast routing.
+        // We can assume the existence of connected multicast
+        // route clones when at least two connected unicast
+        // routes, ::1/128 and other, are installed.
         if (supportsIPv6() && ifStats.loop > 0 && uniStats.ipv6 > 1 && multiStats.ipv6 == 0) {
-            // Test the existence of connected multicast route
-            // clones for IPv4. Unlike IPv6, IPv4 multicast
-            // capability is not a mandatory feature, and so IPv4
-            // multicast validation is ignored and we only check
-            // IPv6 below.
-            //
-            // Test the existence of connected multicast route
-            // clones for IPv6. Some platform never uses loopback
-            // interface as the nexthop for multicast routing.
-            // We can assume the existence of connected multicast
-            // route clones when at least two connected unicast
-            // routes, ::1/128 and other, are installed.
             return fmt.Errorf("num IPv6 multicast route clones = 0; want >0; summary: %+v, %+v, %+v"u8, ᏑifStats.OrTypedNil(), ᏑuniStats.OrTypedNil(), ᏑmultiStats.OrTypedNil());
         }
     }
-
     return default!;
 }
 
@@ -343,6 +339,7 @@ public static void BenchmarkInterfaces(ж<testing.B> Ꮡb) {
 
     b.ReportAllocs();
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
+
     for (nint i = 0; i < b.N; i++) {
         {
             var (_, err) = Interfaces(); if (err != default!) {
@@ -360,6 +357,7 @@ public static void BenchmarkInterfaceByIndex(ж<testing.B> Ꮡb) {
 
     b.ReportAllocs();
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
+
     var ifi = loopbackInterface();
     if (ifi == nil) {
         Ꮡb.Skip(loopbackInterfaceNotˢ);
@@ -378,6 +376,7 @@ public static void BenchmarkInterfaceByName(ж<testing.B> Ꮡb) {
 
     b.ReportAllocs();
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
+
     var ifi = loopbackInterface();
     if (ifi == nil) {
         Ꮡb.Skip(loopbackInterfaceNotˢ);
@@ -396,6 +395,7 @@ public static void BenchmarkInterfaceAddrs(ж<testing.B> Ꮡb) {
 
     b.ReportAllocs();
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
+
     for (nint i = 0; i < b.N; i++) {
         {
             var (_, err) = InterfaceAddrs(); if (err != default!) {
@@ -410,6 +410,7 @@ public static void BenchmarkInterfacesAndAddrs(ж<testing.B> Ꮡb) {
 
     b.ReportAllocs();
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
+
     var ifi = loopbackInterface();
     if (ifi == nil) {
         Ꮡb.Skip(loopbackInterfaceNotˢ);
@@ -428,6 +429,7 @@ public static void BenchmarkInterfacesAndMulticastAddrs(ж<testing.B> Ꮡb) {
 
     b.ReportAllocs();
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
+
     var ifi = loopbackInterface();
     if (ifi == nil) {
         Ꮡb.Skip(loopbackInterfaceNotˢ);

@@ -31,7 +31,7 @@ using static global::go.crypto.@internal.fips140.mlkem_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/mlkem/field_test.go", "field_test.cs", "ABEggoKCgoLKgoKCgoKC3IKCgoKCgtyCgoKCgoLcgoKCgoKUgoKogoKClIKCgoLugoKUgpaogoKopoKCgoKCgtyCgpSClqiCgqimgoKCgoKC3IKCgpSmgoKCloKCgpSCgoKUgoKCqIKCgpSCgoKUgoKCqIKCgoKCuoKCgpSCgoKUgoKCuIKClIKCgoKSgoKCpoKCgpSCgsqCgoKUgoI=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/mlkem/field_test.go", "field_test.cs", "ABEggoKCgoLKgoKCgoKC3IKCgoKCgtyCgoKCgoLcgoKCgoKUgoK4goKClIKCgoLugoKUgqa4goK4poKCgoKCgtyCgpSCpriCgrimgoKCgoKC3IKCgpSmgoKCpoKCgpSCgoKUgoKCuIKCgpSCgoKUgoKCuIKCgoKCyoKCgpSCgoKUgoKCuIKClIKCgoKCgoKCpoKCgpSCgsqCgoKUgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

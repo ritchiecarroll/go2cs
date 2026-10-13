@@ -51,6 +51,7 @@ public static void TestNames(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("allDesc not sorted: %s ≥ %s"u8, all[i - 1].Name, all[i].Name);
         }
     }
+
     var names = runtime_readMetricNames();
     slices.Sort<slice<@string>, @string>(names);
     var samples = new slice<metrics.Sample>(len(names));
@@ -58,6 +59,7 @@ public static void TestNames(ж<testing.T> Ꮡt) {
         samples[i].Name = name;
     }
     metrics.Read(samples);
+
     foreach (var (_, d) in all) {
         while (len(samples) > 0 && samples[0].Name < d.Name) {
             Ꮡt.Errorf("%s: reported by runtime but not listed in All"u8, samples[0].Name);
@@ -107,6 +109,7 @@ private static readonly @string wantˢ = "want"u8;
 
 public static void TestDocs(ж<testing.T> Ꮡt) {
     @string want = formatDesc(Ꮡt);
+
     var (src, err) = os.ReadFile(docGoˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -154,6 +157,7 @@ public static void TestDocs(ж<testing.T> Ꮡt) {
             break;
         }}
     }
+
     if (!foundCode) {
         Ꮡt.Fatalf("did not find Supported metrics list in doc.go"u8);
     }

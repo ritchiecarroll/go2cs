@@ -102,14 +102,15 @@ public static partial void TestDebugLogSym(ж<testing.T> Ꮡt) {
 }
 
 public static partial void TestDebugLogInterleaving(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     skipDebugLog(Ꮡt);
     runtime_internal_test_package.ResetDebugLog();
+
     nint n1 = runtime_internal_test_package.CountDebugLog();
     Ꮡt.Logf("number of log shards at start: %d"u8, n1);
+
     const nint limit = 1000;
     const nint concurrency = 10;
+
     // Start several goroutines writing to the log simultaneously.
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     nint i = 0;
@@ -148,20 +149,24 @@ public static partial void TestDebugLogInterleaving(ж<testing.T> Ꮡt) {
     }
     // Start the chain reaction.
     chans[0].ᐸꟷ(true);
+
     // Wait for them to finish and get the log.
     Ꮡwg.Wait();
     @string gotFull = runtime_internal_test_package.DumpDebugLog();
     @string got = dlogCanonicalize(gotFull);
+
     nint n2 = runtime_internal_test_package.CountDebugLog();
     Ꮡt.Logf("number of log shards at end: %d"u8, n2);
     if (n2 < concurrency) {
         Ꮡt.Errorf("created %d log shards, expected >= %d"u8, n2, (nint)(concurrency));
     }
+
     // Construct the desired output.
     ref var want = ref heap(new strings.Builder(), out var Ꮡwant);
     for (nint iΔ1 = 0; iΔ1 < limit; iΔ1++) {
         fmt.Fprintf(new runtime_test_package.strings_BuilderжWriter(Ꮡwant), "[] %d\n"u8, iΔ1);
     }
+
     if (got != want.String()) {
         // Since the timestamps are useful in understand
         // failures of this test, we print the uncanonicalized
@@ -176,12 +181,12 @@ internal static readonly @string beginLogDLostFirstDKbNˢ = @"^>> begin log \d+;
 public static void TestDebugLogWraparound(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         skipDebugLog(Ꮡt);
+
         // Make sure we don't switch logs so it's easier to fill one up.
         Δruntime.LockOSThread();
         defer(Δruntime.UnlockOSThread, ref ᒐ);
+
         runtime_internal_test_package.ResetDebugLog();
         @string longString = strings.Repeat("a"u8, 128);
         ref var want = ref heap(new strings.Builder(), out var Ꮡwant);
@@ -190,6 +195,7 @@ public static void TestDebugLogWraparound(ж<testing.T> Ꮡt) {
             fmt.Fprintf(new runtime_test_package.strings_BuilderжWriter(Ꮡwant), "[] %d %s\n"u8, i, longString);
         }
         @string log = runtime_internal_test_package.DumpDebugLog();
+
         // Check for "lost" message.
         var lost = Δregexp.MustCompile(beginLogDLostFirstDKbNˢ);
         if (!lost.MatchString(log)) {
@@ -198,6 +204,7 @@ public static void TestDebugLogWraparound(ж<testing.T> Ꮡt) {
         var idx = lost.FindStringIndex(log);
         // Strip lost message.
         log = dlogCanonicalize(log.slice(idx[1]));
+
         // Check log.
         if (!strings.HasSuffix(want.String(), log)) {
             Ꮡt.Fatalf("wrong suffix:\n%s"u8, log);
@@ -209,6 +216,7 @@ public static void TestDebugLogWraparound(ж<testing.T> Ꮡt) {
 
 public static void TestDebugLogLongString(ж<testing.T> Ꮡt) {
     skipDebugLog(Ꮡt);
+
     runtime_internal_test_package.ResetDebugLog();
     @string longString = strings.Repeat("a"u8, runtime_internal_test_package.DebugLogStringLimit + 1);
     runtime_internal_test_package.Dlog().S(longString).End();

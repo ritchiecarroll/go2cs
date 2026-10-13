@@ -9,7 +9,6 @@ using static global::go.go.build.constraint_package;
 
 partial class constraint_internal_test_package {
 
-
 partial struct testsᴛ1 /*dyn*/ {
     internal @string @in;
     internal nint @out;

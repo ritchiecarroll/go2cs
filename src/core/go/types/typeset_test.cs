@@ -55,12 +55,14 @@ public static void TestTypeSetString(ж<testing.T> Ꮡt) {
         if (@file == nil) {
             Ꮡt.Fatalf("%s: %v (invalid test case)"u8, body, err);
         }
+
         // type check
         ref var conf = ref heap(new global::go.go.types_package.Config(), out var Ꮡconf);
         (var pkg, err) = Ꮡconf.Check((~(~@file).Name).Name, fset, new ж<ast.File>[]{@file}.slice(), nil);
         if (err != default!) {
             Ꮡt.Fatalf("%s: %v (invalid test case)"u8, body, err);
         }
+
         // lookup T
         var obj = (~pkg).scope.Lookup("T"u8);
         if (obj == default!) {
@@ -70,6 +72,7 @@ public static void TestTypeSetString(ж<testing.T> Ꮡt) {
         if (!ok) {
             Ꮡt.Fatalf("%s: %v is not an interface (invalid test case)"u8, body, obj);
         }
+
         // verify test case
         @string got = T.typeSet().String();
         if (got != want) {

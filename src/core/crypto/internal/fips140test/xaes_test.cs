@@ -50,14 +50,17 @@ public static void TestXAES(ж<testing.T> Ꮡt) {
     var key = bytes.Repeat(new byte[]{0x01}.slice(), 32);
     var plaintext = slice<byte>("XAES-256-GCM"u8);
     var additionalData = slice<byte>("c2sp.org/XAES-256-GCM"u8);
+
     var nonce = new slice<byte>(24);
     var ciphertext = new slice<byte>(len(plaintext) + 16);
+
     drbg.Read(nonce[..12]);
     var (c, _) = aes.New(key);
     var k = gcm.NewCounterKDF(c).DeriveKey(0x58, new array<byte>(nonce, 12));
     var (a, _) = aes.New(k[..]);
     var (g, _) = gcm.New(a, 12, 16);
     gcm.SealWithRandomNonce(g, nonce[12..], ciphertext, plaintext, additionalData);
+
     var (got, err) = xaesOpen(default!, key, nonce, ciphertext, additionalData);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -110,6 +113,7 @@ public static void TestXAESVectors(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("plaintext and decrypted are not equal"u8);
         }
     }
+
     key = bytes.Repeat(new byte[]{0x03}.slice(), 32);
     var aad = slice<byte>("c2sp.org/XAES-256-GCM"u8);
     ciphertext = xaesSeal(default!, key, nonce, plaintext, aad);
@@ -132,6 +136,7 @@ public static void TestXAESVectors(ж<testing.T> Ꮡt) {
 public static void TestXAESAccumulated(ж<testing.T> Ꮡt) {
     nint iterations = 10_000;
     @string expected = "e6b9edf2df6cec60c8cbd864e2211b597fb69a529160cd040d56c0c210081939"u8;
+
     var (s, d) = (sha3.NewShake128(), sha3.NewShake128());
     for (nint i = 0; i < iterations; i++) {
         var key = new slice<byte>(32);
@@ -145,6 +150,7 @@ public static void TestXAESAccumulated(ж<testing.T> Ꮡt) {
         s.Read(lenByte);
         var aad = new slice<byte>((nint)lenByte[0]);
         s.Read(aad);
+
         var ciphertext = xaesSeal(default!, key, nonce, plaintext, aad);
         var (decrypted, err) = xaesOpen(default!, key, nonce, ciphertext, aad);
         if (err != default!) {
@@ -153,6 +159,7 @@ public static void TestXAESAccumulated(ж<testing.T> Ꮡt) {
         if (!bytes.Equal(plaintext, decrypted)) {
             Ꮡt.Errorf("plaintext and decrypted are not equal"u8);
         }
+
         d.Write(ciphertext);
     }
     {

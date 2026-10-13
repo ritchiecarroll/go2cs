@@ -30,7 +30,7 @@ using static global::go.@internal.coverage.cformat_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/cformat/fmt_test.go", "fmt_test.cs", "ADwegoTOuMqmgoKUgoKUgoKWwoCCpAAAEIKCloKAgqSGgoKogoCCpIiCgrqCgIKkhoKCqICCpIiCgpSCgoKCqIKCgoCCpIaCggASDoSCgpaCgoKAgqSIgoLMgoKCgIKkhoKC", "18-24:1", "", "68=Invoke/1/2/1,Invoke/2/2/2;72=Invoke/1/3/1,Invoke/2/3/2,Invoke/3/3/3;77=Invoke/1/1/1")]
+[assembly: go.GoPositionMap("internal/coverage/cformat/fmt_test.go", "fmt_test.cs", "ADwegpTOuMqmgoKUgoKUgoKmwoCCpAAAEIKCpoKAgqSGgoK4goCCpIiCgsqCgIKkhoKCuICCpIiCgpSCgoKCuIKCgoCCpIaCggASDoSCgqaCgoKAgqSIgoLcgoKCgIKkhoKC", "18-24:1", "", "69=Invoke/1/2/1,Invoke/2/2/2;73=Invoke/1/3/1,Invoke/2/3/2,Invoke/3/3/3;78=Invoke/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

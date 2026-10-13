@@ -41,6 +41,7 @@ public static void TestResolution(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     foreach (var (_, fi) in fis) {
         var fiʗ1 = fi;
         Ꮡt.Run(fi.Name(), (ж<testing.T> tΔ1) => {
@@ -52,11 +53,14 @@ public static void TestResolution(ж<testing.T> Ꮡt) {
             if (errΔ1 != default!) {
                 tΔ1.Fatal(errΔ1);
             }
+
             // Compare the positions of objects resolved during parsing (fromParser)
             // to those annotated in source comments (fromComments).
+
             var handle = fset.File((~@file).Package);
             var fromParser = declsFromParser(@file);
             var fromComments = declsFromComments(handle, src);
+
             var handleʗ1 = handle;
             tokenꓸPosition pos(tokenꓸPos posΔ1) {
                 var p = handleʗ1.Position(posΔ1);
@@ -103,6 +107,7 @@ internal static map<tokenꓸPos, tokenꓸPos> declsFromParser(ж<ast.File> Ꮡfi
 // description of these annotations in the documentation for TestResolution.
 internal static map<tokenꓸPos, tokenꓸPos> declsFromComments(ж<tokenꓸFile> Ꮡhandle, slice<byte> src) {
     var (decls, uses) = positionMarkers(Ꮡhandle, src);
+
     var objmap = new map<tokenꓸPos, tokenꓸPos>();
     // Join decls and uses on name, to build the map of use->decl.
     foreach (var (name, posns) in uses) {
@@ -130,6 +135,7 @@ internal static (map<@string, tokenꓸPos> decls, map<@string, slice<tokenꓸPos
     decls = new map<@string, tokenꓸPos>();
     uses = new map<@string, slice<tokenꓸPos>>();
     tokenꓸPos prev = default!;                // position of last non-comment, non-semicolon token
+
 scanFile:
     while (ᐧ) {
         var (pos, tok, lit) = s.Scan();
@@ -155,8 +161,8 @@ scanFile:
             }
         }
         else if (exprᴛ1 == token.SEMICOLON) { matchᴛ1 = true;
+            // ignore automatically inserted semicolon
             if (lit == "\n"u8) {
-                // ignore automatically inserted semicolon
                 goto continue_scanFile;
             }
             fallthrough = true;
@@ -164,7 +170,6 @@ scanFile:
         if (fallthrough || !matchᴛ1) { /* default: */
             prev = pos;
         }
-
 continue_scanFile:;
     }
 break_scanFile:;
@@ -180,6 +185,7 @@ internal static (@string name, bool decl, bool use) annotatedObj(@string lit) {
         lit = lit.slice(0, len(lit) - 2); // strip trailing */
     }
     lit = strings.TrimSpace(lit[2..]);
+
 scanLit:
     foreach (var (idx, r) in lit) {
         switch (r) {
@@ -196,7 +202,6 @@ scanLit:
             goto break_scanLit;
             break;
         }}
-
 continue_scanLit:;
     }
 break_scanLit:;

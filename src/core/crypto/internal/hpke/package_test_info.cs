@@ -41,7 +41,7 @@ using static global::go.crypto.@internal.hpke_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/hpke/hpke_test.go", "hpke_test.cs", "ABUqgoKCgpSmgoKCgpSmgoKCgoKClJQAGgaCgoKWioCCprKShIKClICCpIKClICCpIKClICCpoKCgoKWhJaAlN6CloKCloKCgpYABhCCloKCgpSCgpSCgpSCgqiCsoKClIKCgoKCloKCgpSCloKCgpSC", "68-193:1;102-104:1.1;105-105:1.2;161-191:1.3")]
+[assembly: go.GoPositionMap("crypto/internal/hpke/hpke_test.go", "hpke_test.cs", "ABUqgoKCgpSmgoKCgpSmgoKCgoKClJQAGgaCgoKmioCCtrKSlIKClICCpIKClICCpIKClICCtoKCgoKmlJaApN6CpoKCpoKCgqYABhCCpoKCgpSCgpSCgpSCgriCsoKClIKCgoKCpoKCgpSCpoKCgpSC", "68-193:1;102-104:1.1;105-105:1.2;161-191:1.3")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;

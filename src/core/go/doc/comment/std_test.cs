@@ -26,6 +26,7 @@ public static void TestStd(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("%v\n%s"u8, err, @out);
     }
+
     slice<@string> list = default!;
     foreach (var (_, pkg) in strings.Fields(((@string)@out))) {
         if (!strings.Contains(pkg, "/"u8)) {
@@ -33,6 +34,7 @@ public static void TestStd(ж<testing.T> Ꮡt) {
         }
     }
     slices.Sort<slice<@string>, @string>(list);
+
     @string have = strings.Join(stdPkgs, "\n"u8) + "\n"u8;
     @string want = strings.Join(list, "\n"u8) + "\n"u8;
     if (have != want) {

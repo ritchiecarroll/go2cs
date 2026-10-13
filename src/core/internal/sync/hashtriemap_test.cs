@@ -58,10 +58,9 @@ internal static readonly @string swapˢ = "Swap"u8;
 internal static readonly @string loadAndDeleteˢ = "LoadAndDelete"u8;
 
 internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieMap<@string, nint>>> newMap) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     Ꮡt.Run(loadEmptyˢ, (ж<testing.T> tΔ1) => {
         var m = newMap();
+
         foreach (var (_, s) in testData.ΔRangeSnapshot()) {
             var (ᴛ1, ᴛ2) = m.Load(s);
             expectMissing(tΔ1, s, (nint)(0))(ᴛ1, ᴛ2);
@@ -69,6 +68,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
     });
     Ꮡt.Run(loadOrStoreˢ, (ж<testing.T> tΔ2) => {
         var m = newMap();
+
         foreach (var (i, s) in testData.ΔRangeSnapshot()) {
             var (ᴛ3, ᴛ4) = m.Load(s);
             expectMissing(tΔ2, s, (nint)(0))(ᴛ3, ᴛ4);
@@ -88,11 +88,13 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
     });
     Ꮡt.Run(allˢ, (ж<testing.T> tΔ3) => {
         var m = newMap();
+
         testAll(tΔ3, m, testDataMap(testData[..]), (@string _Δp0, nint _Δp1) => true);
     });
     Ꮡt.Run(clearˢ, (ж<testing.T> tΔ4) => {
         tΔ4.Run(simpleˢ, (ж<testing.T> tΔ5) => {
             var m = newMap();
+
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                 var (ᴛ15, ᴛ16) = m.Load(s);
                 expectMissing(tΔ5, s, (nint)(0))(ᴛ15, ᴛ16);
@@ -111,6 +113,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ4.Run(concurrentˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ6) => {
             var m = newMap();
+
             // Load up the map.
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                 var (ᴛ25, ᴛ26) = m.Load(s);
@@ -127,6 +130,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                     GoFrame ᒐ = default;
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
+
                         foreach (var (_, s) in testData.ΔRangeSnapshot()) {
                             // Try a couple things to interfere with the clear.
                             expectNotDeleted(tΔ6, s, math.MaxInt)(mʗ1.CompareAndDelete(s, math.MaxInt));
@@ -137,11 +141,14 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                     finally { ᒐ.Run(); }
                 }, i);
             }
+
             // Concurrently clear the map.
             Δruntime.Gosched();
             m.Clear();
+
             // Wait for workers to finish.
             Ꮡwg.Wait();
+
             // It should all be empty now.
             foreach (var (_, s) in testData.ΔRangeSnapshot()) {
                 var (ᴛ29, ᴛ30) = m.Load(s);
@@ -152,6 +159,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
     Ꮡt.Run(compareAndDeleteˢ, (ж<testing.T> tΔ7) => {
         tΔ7.Run(allˢ, (ж<testing.T> tΔ8) => {
             var m = newMap();
+
             foreach (var _ᴛ1 in range(3)) {
                 foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                     var (ᴛ31, ᴛ32) = m.Load(s);
@@ -180,6 +188,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ7.Run(oneˢ, (ж<testing.T> tΔ9) => {
             var m = newMap();
+
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                 var (ᴛ45, ᴛ46) = m.Load(s);
                 expectMissing(tΔ9, s, (nint)(0))(ᴛ45, ᴛ46);
@@ -205,6 +214,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ7.Run(multipleˢ, (ж<testing.T> tΔ10) => {
             var m = newMap();
+
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                 var (ᴛ57, ᴛ58) = m.Load(s);
                 expectMissing(tΔ10, s, (nint)(0))(ᴛ57, ᴛ58);
@@ -232,6 +242,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ7.Run(iterateˢ, (ж<testing.T> tΔ11) => {
             var m = newMap();
+
             var mʗ2 = m;
             testAll(tΔ11, m, testDataMap(testData[..]), (@string s, nint i) => {
                 expectDeleted(tΔ11, s, i)(mʗ2.CompareAndDelete(s, i));
@@ -244,6 +255,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ7.Run(concurrentUnsharedKeysˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ12) => {
             var m = newMap();
+
             nint gmp = Δruntime.GOMAXPROCS(-1);
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
             foreach (var i in range(gmp)) {
@@ -253,6 +265,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                     GoFrame ᒐ = default;
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
+
                         @string makeKey(@string s) => s + "-"u8 + strconv.Itoa(id);
                         foreach (var (_, s) in testData.ΔRangeSnapshot()) {
                             @string key = makeKey(s);
@@ -287,6 +300,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ7.Run(concurrentSharedKeysˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ13) => {
             var m = newMap();
+
             // Load up the map.
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                 var (ᴛ85, ᴛ86) = m.Load(s);
@@ -303,6 +317,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                     GoFrame ᒐ = default;
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
+
                         foreach (var (iΔ1, s) in testData.ΔRangeSnapshot()) {
                             expectNotDeleted(tΔ13, s, math.MaxInt)(mʗ4.CompareAndDelete(s, math.MaxInt));
                             mʗ4.CompareAndDelete(s, iΔ1);
@@ -324,6 +339,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
     Ꮡt.Run(compareAndSwapˢ, (ж<testing.T> tΔ14) => {
         tΔ14.Run(allˢ, (ж<testing.T> tΔ15) => {
             var m = newMap();
+
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                 var (ᴛ93, ᴛ94) = m.Load(s);
                 expectMissing(tΔ15, s, (nint)(0))(ᴛ93, ᴛ94);
@@ -352,6 +368,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ14.Run(oneˢ, (ж<testing.T> tΔ16) => {
             var m = newMap();
+
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                 var (ᴛ107, ᴛ108) = m.Load(s);
                 expectMissing(tΔ16, s, (nint)(0))(ᴛ107, ᴛ108);
@@ -377,6 +394,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ14.Run(multipleˢ, (ж<testing.T> tΔ17) => {
             var m = newMap();
+
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                 var (ᴛ119, ᴛ120) = m.Load(s);
                 expectMissing(tΔ17, s, (nint)(0))(ᴛ119, ᴛ120);
@@ -402,8 +420,10 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                 }
             }
         });
+
         tΔ14.Run(concurrentUnsharedKeysˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ18) => {
             var m = newMap();
+
             nint gmp = Δruntime.GOMAXPROCS(-1);
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
             foreach (var i in range(gmp)) {
@@ -413,6 +433,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                     GoFrame ᒐ = default;
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
+
                         @string makeKey(@string s) => s + "-"u8 + strconv.Itoa(id);
                         foreach (var (_, s) in testData.ΔRangeSnapshot()) {
                             @string key = makeKey(s);
@@ -447,6 +468,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ14.Run("ConcurrentUnsharedKeysWithDelete"u8, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ19) => {
             var m = newMap();
+
             nint gmp = Δruntime.GOMAXPROCS(-1);
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
             foreach (var i in range(gmp)) {
@@ -456,6 +478,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                     GoFrame ᒐ = default;
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
+
                         @string makeKey(@string s) => s + "-"u8 + strconv.Itoa(id);
                         foreach (var (_, s) in testData.ΔRangeSnapshot()) {
                             @string key = makeKey(s);
@@ -495,6 +518,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ14.Run(concurrentSharedKeysˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ20) => {
             var m = newMap();
+
             // Load up the map.
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                 var (ᴛ161, ᴛ162) = m.Load(s);
@@ -511,6 +535,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                     GoFrame ᒐ = default;
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
+
                         foreach (var (iΔ1, s) in testData.ΔRangeSnapshot()) {
                             expectNotSwapped<@string, nint>(tΔ20, s, math.MaxInt, iΔ1 + 1)(mʗ7.CompareAndSwap(s, math.MaxInt, iΔ1 + 1));
                             mʗ7.CompareAndSwap(s, iΔ1, iΔ1 + 1);
@@ -532,6 +557,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
     Ꮡt.Run(swapˢ, (ж<testing.T> tΔ21) => {
         tΔ21.Run(allˢ, (ж<testing.T> tΔ22) => {
             var m = newMap();
+
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                 var (ᴛ169, ᴛ170) = m.Load(s);
                 expectMissing(tΔ22, s, (nint)(0))(ᴛ169, ᴛ170);
@@ -559,6 +585,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ21.Run(oneˢ, (ж<testing.T> tΔ23) => {
             var m = newMap();
+
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                 var (ᴛ185, ᴛ186) = m.Load(s);
                 expectMissing(tΔ23, s, (nint)(0))(ᴛ185, ᴛ186);
@@ -583,6 +610,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ21.Run(multipleˢ, (ж<testing.T> tΔ24) => {
             var m = newMap();
+
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                 var (ᴛ199, ᴛ200) = m.Load(s);
                 expectMissing(tΔ24, s, (nint)(0))(ᴛ199, ᴛ200);
@@ -609,6 +637,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ21.Run(concurrentUnsharedKeysˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ25) => {
             var m = newMap();
+
             nint gmp = Δruntime.GOMAXPROCS(-1);
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
             foreach (var i in range(gmp)) {
@@ -618,6 +647,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                     GoFrame ᒐ = default;
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
+
                         @string makeKey(@string s) => s + "-"u8 + strconv.Itoa(id);
                         foreach (var (_, s) in testData.ΔRangeSnapshot()) {
                             @string key = makeKey(s);
@@ -653,6 +683,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ21.Run("ConcurrentUnsharedKeysWithDelete"u8, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ26) => {
             var m = newMap();
+
             nint gmp = Δruntime.GOMAXPROCS(-1);
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
             foreach (var i in range(gmp)) {
@@ -662,6 +693,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                     GoFrame ᒐ = default;
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
+
                         @string makeKey(@string s) => s + "-"u8 + strconv.Itoa(id);
                         foreach (var (_, s) in testData.ΔRangeSnapshot()) {
                             @string key = makeKey(s);
@@ -702,6 +734,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ21.Run(concurrentSharedKeysˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ27) => {
             var m = newMap();
+
             // Load up the map.
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                 var (ᴛ249, ᴛ250) = m.Load(s);
@@ -718,6 +751,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                     GoFrame ᒐ = default;
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
+
                         foreach (var (iΔ1, s) in testData.ΔRangeSnapshot()) {
                             mʗ10.Swap(s, iΔ1 + 1);
                             var (ᴛ253, ᴛ254) = mʗ10.Load(s);
@@ -738,6 +772,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
     Ꮡt.Run(loadAndDeleteˢ, (ж<testing.T> tΔ28) => {
         tΔ28.Run(allˢ, (ж<testing.T> tΔ29) => {
             var m = newMap();
+
             foreach (var _ᴛ2 in range(3)) {
                 foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                     var (ᴛ257, ᴛ258) = m.Load(s);
@@ -767,6 +802,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ28.Run(oneˢ, (ж<testing.T> tΔ30) => {
             var m = newMap();
+
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                 var (ᴛ275, ᴛ276) = m.Load(s);
                 expectMissing(tΔ30, s, (nint)(0))(ᴛ275, ᴛ276);
@@ -797,6 +833,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ28.Run(multipleˢ, (ж<testing.T> tΔ31) => {
             var m = newMap();
+
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                 var (ᴛ295, ᴛ296) = m.Load(s);
                 expectMissing(tΔ31, s, (nint)(0))(ᴛ295, ᴛ296);
@@ -829,6 +866,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ28.Run(iterateˢ, (ж<testing.T> tΔ32) => {
             var m = newMap();
+
             var mʗ11 = m;
             testAll(tΔ32, m, testDataMap(testData[..]), (@string s, nint i) => {
                 var (ᴛ315, ᴛ316) = mʗ11.LoadAndDelete(s);
@@ -842,6 +880,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ28.Run(concurrentUnsharedKeysˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ33) => {
             var m = newMap();
+
             nint gmp = Δruntime.GOMAXPROCS(-1);
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
             foreach (var i in range(gmp)) {
@@ -851,6 +890,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                     GoFrame ᒐ = default;
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
+
                         @string makeKey(@string s) => s + "-"u8 + strconv.Itoa(id);
                         foreach (var (_, s) in testData.ΔRangeSnapshot()) {
                             @string key = makeKey(s);
@@ -886,6 +926,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
         });
         tΔ28.Run(concurrentSharedKeysˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ34) => {
             var m = newMap();
+
             // Load up the map.
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
                 var (ᴛ335, ᴛ336) = m.Load(s);
@@ -902,6 +943,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                     GoFrame ᒐ = default;
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
+
                         foreach (var (_, s) in testData.ΔRangeSnapshot()) {
                             mʗ13.LoadAndDelete(s);
                             var (ᴛ339, ᴛ340) = mʗ13.Load(s);
@@ -953,6 +995,7 @@ internal static Action<V, bool> expectPresent<K, V>(ж<testing.T> Ꮡt, K key, V
     Ꮡt.Helper();
     return (V got, bool ok) => {
         Ꮡt.Helper();
+
         if (!ok) {
             Ꮡt.Errorf("expected key %v to be present in map"u8, key);
         }
@@ -971,6 +1014,7 @@ internal static Action<V, bool> expectMissing<K, V>(ж<testing.T> Ꮡt, K key, V
     }
     return (V got, bool ok) => {
         Ꮡt.Helper();
+
         if (ok) {
             Ꮡt.Errorf("expected key %v to be missing from map, got value %v"u8, key, got);
         }
@@ -984,6 +1028,7 @@ internal static Action<V, bool> expectLoaded<K, V>(ж<testing.T> Ꮡt, K key, V 
     Ꮡt.Helper();
     return (V got, bool loaded) => {
         Ꮡt.Helper();
+
         if (!loaded) {
             Ꮡt.Errorf("expected key %v to have been loaded, not stored"u8, key);
         }
@@ -997,6 +1042,7 @@ internal static Action<V, bool> expectStored<K, V>(ж<testing.T> Ꮡt, K key, V 
     Ꮡt.Helper();
     return (V got, bool loaded) => {
         Ꮡt.Helper();
+
         if (loaded) {
             Ꮡt.Errorf("expected inserted key %v to have been stored, not loaded"u8, key);
         }
@@ -1010,6 +1056,7 @@ internal static Action<bool> expectDeleted<K, V>(ж<testing.T> Ꮡt, K key, V ol
     Ꮡt.Helper();
     return (bool deleted) => {
         Ꮡt.Helper();
+
         if (!deleted) {
             Ꮡt.Errorf("expected key %v with value %v to be in map and deleted"u8, key, old);
         }
@@ -1020,6 +1067,7 @@ internal static Action<bool> expectNotDeleted<K, V>(ж<testing.T> Ꮡt, K key, V
     Ꮡt.Helper();
     return (bool deleted) => {
         Ꮡt.Helper();
+
         if (deleted) {
             Ꮡt.Errorf("expected key %v with value %v to not be in map and thus not deleted"u8, key, old);
         }
@@ -1030,6 +1078,7 @@ internal static Action<bool> expectSwapped<K, V>(ж<testing.T> Ꮡt, K key, V ol
     Ꮡt.Helper();
     return (bool swapped) => {
         Ꮡt.Helper();
+
         if (!swapped) {
             Ꮡt.Errorf("expected key %v with value %v to be in map and swapped for %v"u8, key, old, @new);
         }
@@ -1040,6 +1089,7 @@ internal static Action<bool> expectNotSwapped<K, V>(ж<testing.T> Ꮡt, K key, V
     Ꮡt.Helper();
     return (bool swapped) => {
         Ꮡt.Helper();
+
         if (swapped) {
             Ꮡt.Errorf("expected key %v with value %v to not be in map or not swapped for %v"u8, key, old, @new);
         }
@@ -1050,6 +1100,7 @@ internal static Action<V, bool> expectLoadedFromSwap<K, V>(ж<testing.T> Ꮡt, K
     Ꮡt.Helper();
     return (V got, bool loaded) => {
         Ꮡt.Helper();
+
         if (!loaded){
             Ꮡt.Errorf("expected key %v to be in map and for %v to have been swapped for %v"u8, key, want, @new);
         } else 
@@ -1063,6 +1114,7 @@ internal static Action<V, bool> expectNotLoadedFromSwap<K, V>(ж<testing.T> Ꮡt
     Ꮡt.Helper();
     return (V old, bool loaded) => {
         Ꮡt.Helper();
+
         if (loaded) {
             Ꮡt.Errorf("expected key %v to not be in map, but found value %v for it"u8, key, old);
         }
@@ -1073,6 +1125,7 @@ internal static Action<V, bool> expectLoadedFromDelete<K, V>(ж<testing.T> Ꮡt,
     Ꮡt.Helper();
     return (V got, bool loaded) => {
         Ꮡt.Helper();
+
         if (!loaded){
             Ꮡt.Errorf("expected key %v to be in map to be deleted"u8, key);
         } else 
@@ -1086,6 +1139,7 @@ internal static Action<V, bool> expectNotLoadedFromDelete<K, V>(ж<testing.T> �
     Ꮡt.Helper();
     return (V old, bool loaded) => {
         Ꮡt.Helper();
+
         if (loaded) {
             Ꮡt.Errorf("expected key %v to not be in map, but found value %v for it"u8, key, old);
         }
@@ -1150,6 +1204,7 @@ public static partial void TestConcurrentCache(ж<testing.T> Ꮡt) {
                     return v;
                 }
             }
+
             // Weak pointer was reclaimed, try to replace it with nw.
             if (mΔ1.CompareAndSwap(key, w, nw)) {
                 Δruntime.AddCleanup(nv, cleanupʗ1, new TestConcurrentCache_cleanupArg(key, nw));
@@ -1157,8 +1212,10 @@ public static partial void TestConcurrentCache(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     const nint N = 100_000;
     const nint P = 5_000;
+
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(N);
     foreach (var i in range(N)) {

@@ -21,15 +21,15 @@ internal static testpair bigtest = new testpair(
     "9jqo^BlbD-BleB1DJ+*+F(f,q/0JhKF<GL>Cj@.4Gp$d7F!,L7@<6@)/0JDEF<G%<+EV:2F!,\n"u8 + "O<DJ+*.@<*K0@<6L(Df-\\0Ec5e;DffZ(EZee.Bl.9pF\"AGXBPCsi+DGm>@3BB/F*&OCAfu2/AKY\n"u8 + "i(DIb:@FD,*)+C]U=@3BN#EcYf8ATD3s@q?d$AftVqCh[NqF<G:8+EV:.+Cf>-FD5W8ARlolDIa\n"u8 + "l(DId<j@<?3r@:F%a+D58'ATD4$Bl@l3De:,-DJs`8ARoFb/0JMK@qB4^F!,R<AKZ&-DfTqBG%G\n"u8 + ">uD.RTpAKYo'+CT/5+Cei#DII?(E,9)oF*2M7/c\n"u8
 );
 
-// Encode returns 0 when len(src) is 0
-// Wikipedia example
-// Special case when shortening !!!!! to z.
 internal static slice<testpair> pairs = new testpair[]{
+    // Encode returns 0 when len(src) is 0
     new(
         ""u8,
         ""u8
     ),
+    // Wikipedia example
     bigtest,
+    // Special case when shortening !!!!! to z.
     new(
         "\u0000\u0000\u0000\u0000"u8,
         "z"u8
@@ -181,6 +181,7 @@ public static void TestDecodeCorrupt(ж<testing.T> Ꮡt) {
         new("v"u8, 0),
         new("!z!!!!!!!!!"u8, 1)
     }.slice();
+
     foreach (var (_, e) in examples) {
         var dbuf = new slice<byte>(4 * len(e.e));
         var (_, _, err) = Decode(dbuf, slice<byte>(e.e), true);
@@ -221,6 +222,7 @@ public static void TestBig(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("io.ReadAll(NewDecoder(...)): %v"u8, err);
     }
+
     if (!bytes.Equal(raw, decoded)) {
         nint i = default!;
         for (i = 0; i < len(decoded) && i < len(raw); i++) {

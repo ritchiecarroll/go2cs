@@ -45,21 +45,22 @@ internal static readonly @string newSignatureMarkerᶜ = "START NEW SIGNATURE"u8
 public static partial void TestPSSGolden(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         var (inFile, err) = os.Open(testdataPssVectTxtBz2ˢ);
         if (err != default!) {
             Ꮡt.Fatalf("Failed to open input file: %s"u8, err);
         }
         var inFileʗ1 = inFile;
         defer(() => inFileʗ1.Close(), ref ᒐ);
+
         // The pss-vect.txt file contains RSA keys and then a series of
         // signatures. A goroutine is used to preprocess the input by merging
         // lines, removing spaces in hex values and identifying the start of
         // new keys and signature blocks.
         @string newKeyMarker = newKeyMarkerᶜ;
         @string newSignatureMarker = newSignatureMarkerᶜ;
+
         var values = new channel<@string>(0);
+
         var inFileʗ2 = inFile;
         var valuesʗ1 = values;
         goǃ(() => {
@@ -69,6 +70,7 @@ public static partial void TestPSSGolden(ж<testing.T> Ꮡt) {
                 var scanner = bufio.NewScanner(bzip2.NewReader(new rsa_test_package.os_FileжReader(inFileʗ2)));
                 @string partialValue = default!;
                 var lastWasValue = true;
+
                 while (scanner.Scan()) {
                     @string line = scanner.Text();
                     switch (ᐧ) {
@@ -99,7 +101,6 @@ public static partial void TestPSSGolden(ж<testing.T> Ꮡt) {
                         partialValue += line;
                         break;
                     }}
-
                 }
                 {
                     var errΔ1 = scanner.Err(); if (errΔ1 != default!) {
@@ -110,6 +111,7 @@ public static partial void TestPSSGolden(ж<testing.T> Ꮡt) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
+
         ж<rsa.PublicKey> key = default!;
         slice<byte> hashed = default!;
         crypto.Hash hash = crypto.SHA1;
@@ -117,6 +119,7 @@ public static partial void TestPSSGolden(ж<testing.T> Ꮡt) {
         var opts = Ꮡ(new PSSOptions(
             SaltLength: PSSSaltLengthEqualsHash
         ));
+
         foreach (var marker in values) {
             var exprᴛ1 = marker;
             if (exprᴛ1 == newKeyMarker) {
@@ -127,8 +130,8 @@ public static partial void TestPSSGolden(ж<testing.T> Ꮡt) {
                 }
                 key.Value.N = bigFromHex(nHex);
                 key.Value.E = intFromHex(ᐸꟷ(values));
+                // We don't care for d, p, q, dP, dQ or qInv.
                 for (nint i = 0; i < 6; i++) {
-                    // We don't care for d, p, q, dP, dQ or qInv.
                     ᐸꟷ(values);
                 }
             }
@@ -136,9 +139,11 @@ public static partial void TestPSSGolden(ж<testing.T> Ꮡt) {
                 var msg = fromHex(ᐸꟷ(values));
                 ᐸꟷ(values); // skip salt
                 var sig = fromHex(ᐸꟷ(values));
+
                 h.Reset();
                 h.Write(msg);
                 hashed = h.Sum(hashed[..0]);
+
                 {
                     var errΔ3 = VerifyPSS(key, hash, hashed, sig, opts); if (errΔ3 != default!) {
                         Ꮡt.Error(errΔ3);
@@ -148,7 +153,6 @@ public static partial void TestPSSGolden(ж<testing.T> Ꮡt) {
             else { /* default: */
                 Ꮡt.Fatalf("unknown marker: %s"u8, marker);
             }
-
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -159,10 +163,12 @@ public static partial void TestPSSGolden(ж<testing.T> Ꮡt) {
 // the default options. OpenSSL sets the salt length to be maximal.
 public static void TestPSSOpenSSL(ж<testing.T> Ꮡt) {
     Ꮡt.Setenv(godebugˢ, rsa1024min0ˢ);
+
     crypto.Hash hash = crypto.SHA256;
     var h = hash.New();
     h.Write(slice<byte>("testing"u8));
     var hashed = h.Sum(default!);
+
     // Generated with `echo -n testing | openssl dgst -sign key.pem -sigopt rsa_padding_mode:pss -sha256 > sig`
     var sig = new byte[]{
         0x95, 0x59, 0x6f, 0xd3, 0x10, 0xa2, 0xe7, 0xa2, 0x92, 0x9d,
@@ -173,6 +179,7 @@ public static void TestPSSOpenSSL(ж<testing.T> Ꮡt) {
         0xc6, 0xe6, 0xc0, 0x44, 0xf3, 0xb4, 0xb4, 0x2e, 0x8c, 0x66,
         0x0a, 0x37, 0x9c, 0x69
     }.slice();
+
     {
         var err = VerifyPSS(test512Key.of(rsa.PrivateKey.ᏑPublicKey), hash, hashed, sig, nil); if (err != default!) {
             Ꮡt.Error(err);
@@ -185,6 +192,7 @@ public static void TestPSSNilOpts(ж<testing.T> Ꮡt) {
     var h = hash.New();
     h.Write(slice<byte>("testing"u8));
     var hashed = h.Sum(default!);
+
     SignPSS(rand.Reader, rsaPrivateKey, hash, hashed, nil);
 }
 
@@ -196,7 +204,6 @@ internal partial struct TestPSSSigning_type /*dyn*/ {
 public static void TestPSSSigning(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-// In FIPS mode, PSSSaltLengthAuto is capped at PSSSaltLengthEqualsHash.
     slice<TestPSSSigning_type> saltLengthCombinations = new TestPSSSigning_type[]{
         new(PSSSaltLengthAuto, PSSSaltLengthAuto, true, true),
         new(PSSSaltLengthEqualsHash, PSSSaltLengthAuto, true, true),
@@ -205,16 +212,19 @@ public static void TestPSSSigning(ж<testing.T> Ꮡt) {
         new(8, 8, true, true),
         new(8, PSSSaltLengthAuto, true, true),
         new(42, PSSSaltLengthAuto, true, true),
+        // In FIPS mode, PSSSaltLengthAuto is capped at PSSSaltLengthEqualsHash.
         new(PSSSaltLengthAuto, PSSSaltLengthEqualsHash, false, true),
         new(PSSSaltLengthAuto, 106, true, false),
         new(PSSSaltLengthAuto, 20, false, true),
         new(PSSSaltLengthAuto, -2, false, false)
     }.slice();
+
     crypto.Hash hash = crypto.SHA1;
     var h = hash.New();
     h.Write(slice<byte>("testing"u8));
     var hashed = h.Sum(default!);
     ref var opts = ref heap(new rsa.PSSOptions(), out var Ꮡopts);
+
     foreach (var (i, test) in saltLengthCombinations) {
         opts.SaltLength = test.signSaltLength;
         var (sig, err) = SignPSS(rand.Reader, rsaPrivateKey, hash, hashed, Ꮡopts);
@@ -222,6 +232,7 @@ public static void TestPSSSigning(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("#%d: error while signing: %s"u8, i, err);
             continue;
         }
+
         opts.SaltLength = test.verifySaltLength;
         err = VerifyPSS(rsaPrivateKey.of(rsa.PrivateKey.ᏑPublicKey), hash, hashed, sig, Ꮡopts);
         var good = test.good;
@@ -286,13 +297,12 @@ internal static readonly object cryptoRsaInvalidPssSaltˢ = (@string)"crypto/rsa
 internal static readonly object verifyPSSUnexpectedˢ = (@string)"VerifyPSS unexpected success"u8;
 
 public static void TestInvalidPSSSaltLength(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     Ꮡt.Setenv(godebugˢ, rsa1024min0ˢ);
     var (key, err) = GenerateKey(rand.Reader, 245);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var digest = sha256.Sum256(slice<byte>("message"u8));
     {
         var (_, errΔ1) = SignPSS(rand.Reader, key, crypto.SHA256, digest[..], Ꮡ(new PSSOptions(
@@ -302,6 +312,7 @@ public static void TestInvalidPSSSaltLength(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("SignPSS unexpected error: got %v, want %v"u8, errΔ1, cryptoRsaInvalidPssSaltˢ);
         }
     }
+
     // We don't check the specific error here, because crypto/rsa and crypto/internal/boring
     // return different errors, so we just check that _an error_ was returned.
     {
@@ -320,6 +331,7 @@ public static void TestHashOverride(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("SignPSS unexpected error: got %v, want nil"u8, err);
     }
+
     // VerifyPSS has the inverse behavior, opts.Hash is always ignored, check this is true.
     {
         var errΔ1 = VerifyPSS(test2048Key.of(rsa.PrivateKey.ᏑPublicKey), crypto.SHA512, digest[..], sig, Ꮡ(new PSSOptions(Hash: crypto.SHA256))); if (errΔ1 != default!) {

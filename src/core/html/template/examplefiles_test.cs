@@ -61,27 +61,32 @@ public static void ExampleTemplate_glob() {
         // Here we create a temporary directory and populate it with our sample
         // template definition files; usually the template files would already
         // exist in some location known to the program.
-        @string dir = createTestDir(new templateFile[]{ // T0.tmpl is a plain template file that just invokes T1.
-
-            new("T0.tmpl"u8, @"T0 invokes T1: ({{template ""T1""}})"u8), // T1.tmpl defines a template, T1 that invokes T2.
-
-            new("T1.tmpl"u8, @"{{define ""T1""}}T1 invokes T2: ({{template ""T2""}}){{end}}"u8), // T2.tmpl defines a template T2.
-
+        @string dir = createTestDir(new templateFile[]{
+            // T0.tmpl is a plain template file that just invokes T1.
+            new("T0.tmpl"u8, @"T0 invokes T1: ({{template ""T1""}})"u8),
+            // T1.tmpl defines a template, T1 that invokes T2.
+            new("T1.tmpl"u8, @"{{define ""T1""}}T1 invokes T2: ({{template ""T2""}}){{end}}"u8),
+            // T2.tmpl defines a template T2.
             new("T2.tmpl"u8, @"{{define ""T2""}}This is T2{{end}}"u8)
         }.slice());
         // Clean up after the test; another quirk of running as an example.
         defer(os.RemoveAll, dir, ref ᒐ);
+
         // pattern is the glob pattern used to find all the template files.
         @string pattern = filepath.Join(dir, tmplˢ);
+
         // Here starts the example proper.
         // T0.tmpl is the first name matched, so it becomes the starting template,
         // the value returned by ParseGlob.
         var (ᴛ1, ᴛ2) = template.ParseGlob(pattern);
         var tmpl = template.Must(ᴛ1, ᴛ2);
+
         var err = tmpl.Execute(new os.FileжWriter(os.Stdout), default!);
         if (err != default!) {
             log.Fatalf("template execution: %s"u8, err);
         }
+        // Output:
+        // T0 invokes T1: (T1 invokes T2: (This is T2))
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -91,9 +96,6 @@ public static void ExampleTemplate_glob() {
 internal static readonly @string t1Tmplˢ = "T1.tmpl"u8;
 internal static readonly @string t2Tmplˢ = "T2.tmpl"u8;
 
-// Output:
-// T0 invokes T1: (T1 invokes T2: (This is T2))
-
 // Here we demonstrate loading a set of templates from files in different directories
 public static void ExampleTemplate_parsefiles() {
     GoFrame ᒐ = default;
@@ -101,14 +103,16 @@ public static void ExampleTemplate_parsefiles() {
         // Here we create different temporary directories and populate them with our sample
         // template definition files; usually the template files would already
         // exist in some location known to the program.
-        @string dir1 = createTestDir(new templateFile[]{ // T1.tmpl is a plain template file that just invokes T2.
-
+        @string dir1 = createTestDir(new templateFile[]{
+            // T1.tmpl is a plain template file that just invokes T2.
             new("T1.tmpl"u8, @"T1 invokes T2: ({{template ""T2""}})"u8)
         }.slice());
-        @string dir2 = createTestDir(new templateFile[]{ // T2.tmpl defines a template T2.
 
+        @string dir2 = createTestDir(new templateFile[]{
+            // T2.tmpl defines a template T2.
             new("T2.tmpl"u8, @"{{define ""T2""}}This is T2{{end}}"u8)
         }.slice());
+
         // Clean up after the test; another quirk of running as an example.
         defer((ᴛ1, ᴛ2) => ((Actionꓸꓸꓸ<@string>)((params ꓸꓸꓸstring dirsʗp) => {
             var dirs = dirsʗp.sslice();
@@ -116,6 +120,7 @@ public static void ExampleTemplate_parsefiles() {
                 os.RemoveAll(dir);
             }
         }))(ᴛ1, ᴛ2), dir1, dir2, ref ᒐ);
+
         // Here starts the example proper.
         // Let's just parse only dir1/T0 and dir2/T2
         var paths = new @string[]{
@@ -124,10 +129,13 @@ public static void ExampleTemplate_parsefiles() {
         }.slice();
         var (ᴛ3, ᴛ4) = template.ParseFiles(paths.ꓸꓸꓸ);
         var tmpl = template.Must(ᴛ3, ᴛ4);
+
         var err = tmpl.Execute(new os.FileжWriter(os.Stdout), default!);
         if (err != default!) {
             log.Fatalf("template execution: %s"u8, err);
         }
+        // Output:
+        // T1 invokes T2: (This is T2)
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -141,8 +149,6 @@ internal static readonly object parsingDriver2ˢ = (@string)"parsing driver2: "u
 internal static readonly @string driver1ˢ = "driver1"u8;
 internal static readonly @string driver2ˢ = "driver2"u8;
 
-// Output:
-// T1 invokes T2: (This is T2)
 // The following example is duplicated in text/template; keep them in sync.
 
 // This example demonstrates one way to share some templates
@@ -154,16 +160,18 @@ public static void ExampleTemplate_helpers() {
         // Here we create a temporary directory and populate it with our sample
         // template definition files; usually the template files would already
         // exist in some location known to the program.
-        @string dir = createTestDir(new templateFile[]{ // T1.tmpl defines a template, T1 that invokes T2.
-
-            new("T1.tmpl"u8, @"{{define ""T1""}}T1 invokes T2: ({{template ""T2""}}){{end}}"u8), // T2.tmpl defines a template T2.
-
+        @string dir = createTestDir(new templateFile[]{
+            // T1.tmpl defines a template, T1 that invokes T2.
+            new("T1.tmpl"u8, @"{{define ""T1""}}T1 invokes T2: ({{template ""T2""}}){{end}}"u8),
+            // T2.tmpl defines a template T2.
             new("T2.tmpl"u8, @"{{define ""T2""}}This is T2{{end}}"u8)
         }.slice());
         // Clean up after the test; another quirk of running as an example.
         defer(os.RemoveAll, dir, ref ᒐ);
+
         // pattern is the glob pattern used to find all the template files.
         @string pattern = filepath.Join(dir, tmplˢ);
+
         // Here starts the example proper.
         // Load the helpers.
         var (ᴛ5, ᴛ6) = template.ParseGlob(pattern);
@@ -188,6 +196,9 @@ public static void ExampleTemplate_helpers() {
         if (err != default!) {
             log.Fatalf("driver2 execution: %s"u8, err);
         }
+        // Output:
+        // Driver 1 calls T1: (T1 invokes T2: (This is T2))
+        // Driver 2 calls T2: (This is T2)
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -203,9 +214,6 @@ internal static readonly @string t0Tmplˢ = "T0.tmpl"u8;
 internal static readonly object secondˢ = (@string)"second"u8;
 internal static readonly object firstˢ = (@string)"first"u8;
 
-// Output:
-// Driver 1 calls T1: (T1 invokes T2: (This is T2))
-// Driver 2 calls T2: (This is T2)
 // The following example is duplicated in text/template; keep them in sync.
 
 // This example demonstrates how to use one group of driver
@@ -216,22 +224,26 @@ public static void ExampleTemplate_share() {
         // Here we create a temporary directory and populate it with our sample
         // template definition files; usually the template files would already
         // exist in some location known to the program.
-        @string dir = createTestDir(new templateFile[]{ // T0.tmpl is a plain template file that just invokes T1.
-
-            new("T0.tmpl"u8, "T0 ({{.}} version) invokes T1: ({{template `T1`}})\n"u8), // T1.tmpl defines a template, T1 that invokes T2. Note T2 is not defined
-
+        @string dir = createTestDir(new templateFile[]{
+            // T0.tmpl is a plain template file that just invokes T1.
+            new("T0.tmpl"u8, "T0 ({{.}} version) invokes T1: ({{template `T1`}})\n"u8),
+            // T1.tmpl defines a template, T1 that invokes T2. Note T2 is not defined
             new("T1.tmpl"u8, @"{{define ""T1""}}T1 invokes T2: ({{template ""T2""}}){{end}}"u8)
         }.slice());
         // Clean up after the test; another quirk of running as an example.
         defer(os.RemoveAll, dir, ref ᒐ);
+
         // pattern is the glob pattern used to find all the template files.
         @string pattern = filepath.Join(dir, tmplˢ);
+
         // Here starts the example proper.
         // Load the drivers.
         var (ᴛ7, ᴛ8) = template.ParseGlob(pattern);
         var drivers = template.Must(ᴛ7, ᴛ8);
+
         // We must define an implementation of the T2 template. First we clone
         // the drivers, then add a definition of T2 to the template name space.
+
         // 1. Clone the helper set to create a new name space from which to run them.
         var (first, err) = drivers.Clone();
         if (err != default!) {
@@ -242,6 +254,7 @@ public static void ExampleTemplate_share() {
         if (err != default!) {
             log.Fatal(parsingT2ˢ, err);
         }
+
         // Now repeat the whole thing, using a different version of T2.
         // 1. Clone the drivers.
         (var second, err) = drivers.Clone();
@@ -253,6 +266,7 @@ public static void ExampleTemplate_share() {
         if (err != default!) {
             log.Fatal(parsingT2ˢ, err);
         }
+
         // Execute the templates in the reverse order to verify the
         // first is unaffected by the second.
         err = second.ExecuteTemplate(new os.FileжWriter(os.Stdout), t0Tmplˢ, secondˢ);
@@ -263,13 +277,13 @@ public static void ExampleTemplate_share() {
         if (err != default!) {
             log.Fatalf("first: execution: %s"u8, err);
         }
+
+        // Output:
+        // T0 (second version) invokes T1: (T1 invokes T2: (T2, version B))
+        // T0 (first version) invokes T1: (T1 invokes T2: (T2, version A))
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Output:
-// T0 (second version) invokes T1: (T1 invokes T2: (T2, version B))
-// T0 (first version) invokes T1: (T1 invokes T2: (T2, version A))
 
 } // end template_test_package

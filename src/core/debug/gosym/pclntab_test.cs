@@ -72,12 +72,11 @@ internal static void endtest() {
 internal static void skipIfNotELF(ж<testing.T> Ꮡt) {
     var exprᴛ1 = runtime.GOOS;
     if (exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "linux"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "solaris"u8 || exprᴛ1 == "illumos"u8) {
+        // OK.
     }
     else { /* default: */
-        Ꮡt.Skipf("skipping on non-ELF system %s"u8, // OK.
- runtime.GOOS);
+        Ꮡt.Skipf("skipping on non-ELF system %s"u8, runtime.GOOS);
     }
-
 }
 
 internal static ж<global::go.debug.gosym_package.Table> getTable(ж<testing.T> Ꮡt) {
@@ -118,12 +117,14 @@ internal static (ж<elf.File>, ж<global::go.debug.gosym_package.Table>) parse(@
         f.Close();
         Ꮡt.Fatalf("reading %s gopclntab: %v"u8, @file, err);
     }
+
     var pcln = NewLineTable(pclndat, (~f.Section(textˢ)).Addr);
     (var tab, err) = NewTable(symdat, pcln);
     if (err != default!) {
         f.Close();
         Ꮡt.Fatalf("parsing %s gosymtab: %v"u8, @file, err);
     }
+
     return (Ꮡf, tab);
 }
 
@@ -132,19 +133,20 @@ internal static readonly object notRelevantToGo12Symbolˢ = (@string)"not releva
 internal static readonly @string debugGosymˢ = "debug/gosym.TestLineFromAline"u8;
 
 public static void TestLineFromAline(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     skipIfNotELF(Ꮡt);
+
     var tab = getTable(Ꮡt);
     if ((~tab).go12line != nil) {
         // aline's don't exist in the Go 1.2 table.
         Ꮡt.Skip(notRelevantToGo12Symbolˢ);
     }
+
     // Find the sym package
     var pkg = tab.LookupFunc(debugGosymˢ).Value.Obj;
     if (pkg == nil) {
         Ꮡt.Fatalf("nil pkg"u8);
     }
+
     // Walk every absolute line and ensure that we hit every
     // source line monotonically
     var lastline = new map<@string, nint>();
@@ -182,14 +184,14 @@ public static void TestLineFromAline(ж<testing.T> Ꮡt) {
 }
 
 public static void TestLineAline(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     skipIfNotELF(Ꮡt);
+
     var tab = getTable(Ꮡt);
     if ((~tab).go12line != nil) {
         // aline's don't exist in the Go 1.2 table.
         Ꮡt.Skip(notRelevantToGo12Symbolˢ);
     }
+
     foreach (var (_, o) in (~tab).Files) {
         // A source file can appear multiple times in a
         // object.  alineFromLine will always return alines in
@@ -200,10 +202,12 @@ public static void TestLineAline(ж<testing.T> Ꮡt) {
             if (path == ""u8) {
                 break;
             }
+
             // cgo files are full of 'Z' symbols, which we don't handle
             if (len(path) > 4 && path.slice(len(path) - 4) == ".cgo") {
                 continue;
             }
+
             {
                 var (minline, ok) = found[path, ꟷ]; if (path != ""u8 && ok) {
                     if (minline >= line) {
@@ -213,6 +217,7 @@ public static void TestLineAline(ж<testing.T> Ꮡt) {
                 }
             }
             found[path] = line;
+
             var (a, err) = o.alineFromLine(path, line);
             if (err != default!){
                 Ꮡt.Errorf("absolute line %d in object %s maps to %s:%d, but mapping that back gives error %s"u8, i, (~o).Paths[0].Name, path, line, err);
@@ -234,6 +239,7 @@ public static void TestPCLine(ж<testing.T> Ꮡt) {
     try {
         dotest(Ꮡt);
         defer(endtest, ref ᒐ);
+
         var (f, tab) = crack(pclinetestBinary, Ꮡt);
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
@@ -242,6 +248,7 @@ public static void TestPCLine(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("reading .text: %v"u8, err);
         }
+
         // Test PCToLine
         var sym = tab.LookupFunc(mainLinefrompcˢ);
         nint wantLine = 0;
@@ -260,6 +267,7 @@ public static void TestPCLine(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("PCToLine(%#x) = %s:%d (%s), want %s:%d (%s)"u8, pc, @file, line, (~fn).Name, pclinetestSˢ, wantLine, (~sym).Name);
             }
         }
+
         // Test LineToPC
         sym = tab.LookupFunc(mainPcfromlineˢ);
         nint lookupline = -1;
@@ -307,6 +315,7 @@ internal static readonly object notRelevantToGo12Symbolˢ2 = (@string)"not relev
 
 public static void TestSymVersion(ж<testing.T> Ꮡt) {
     skipIfNotELF(Ꮡt);
+
     var table = getTable(Ꮡt);
     if ((~table).go12line == nil) {
         Ꮡt.Skip(notRelevantToGo12Symbolˢ2);
@@ -390,6 +399,7 @@ internal static readonly @string pcToLineˢ = "PCToLine"u8;
 public static void Benchmark115(ж<testing.B> Ꮡb) {
     var dat = read115Executable(new gosym_internal_test_package.testing_BжTB(Ꮡb));
     const uint64 textStart = 0x1001000;
+
     var datʗ1 = dat;
     Ꮡb.Run(newLineTableˢ, (ж<testing.B> bΔ1) => {
         bΔ1.ReportAllocs();
@@ -397,6 +407,7 @@ public static void Benchmark115(ж<testing.B> Ꮡb) {
             sinkLineTable = NewLineTable(datʗ1, textStart);
         }
     });
+
     var pcln = NewLineTable(dat, textStart);
     var pclnʗ1 = pcln;
     Ꮡb.Run(newTableˢ, (ж<testing.B> bΔ2) => {
@@ -409,11 +420,13 @@ public static void Benchmark115(ж<testing.B> Ꮡb) {
             }
         }
     });
+
     ref var err = ref heap<error>(out var Ꮡerr);
     (var tab, err) = NewTable(default!, pcln);
     if (err != default!) {
         Ꮡb.Fatal(err);
     }
+
     var pclnʗ2 = pcln;
     var tabʗ1 = tab;
     Ꮡb.Run(lineToPCˢ, (ж<testing.B> bΔ3) => {
@@ -436,6 +449,7 @@ public static void Benchmark115(ж<testing.B> Ꮡb) {
             }
         }
     });
+
     var tabʗ2 = tab;
     Ꮡb.Run(pcToLineˢ, (ж<testing.B> bΔ4) => {
         bΔ4.ReportAllocs();

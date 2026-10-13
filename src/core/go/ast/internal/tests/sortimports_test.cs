@@ -50,30 +50,38 @@ import (
 public static void TestSortImportsUpdatesFileImportsField(ж<testing.T> Ꮡt) {
     Ꮡt.Run(oneImportStatementˢ, (ж<testing.T> tΔ1) => {
         @string src = srcᶜ;
+
         var fset = token.NewFileSet();
         var (f, err) = parser.ParseFile(fset, testGoˢ, src, (parser.Mode)(parser.ParseComments | parser.SkipObjectResolution));
         if (err != default!) {
             tΔ1.Fatal(err);
         }
+
         ast.SortImports(fset, f);
+
         // Check that the duplicate import spec is eliminated.
         nint importDeclSpecCount = len((~(~f).Decls[0]._<ж<ast.GenDecl>>()).Specs);
         if (importDeclSpecCount != 1) {
             tΔ1.Fatalf("len(f.Decls[0].(*ast.GenDecl).Specs) = %v; want = 1"u8, importDeclSpecCount);
         }
+
         // Check that File.Imports is consistent.
         if (len((~f).Imports) != 1) {
             tΔ1.Fatalf("len(f.Imports) = %v; want = 1"u8, len((~f).Imports));
         }
     });
+
     Ꮡt.Run(multipleImportStatementsˢ, (ж<testing.T> tΔ2) => {
         @string src = srcᶜ1;
+
         var fset = token.NewFileSet();
         var (f, err) = parser.ParseFile(fset, testGoˢ, src, (parser.Mode)(parser.ParseComments | parser.SkipObjectResolution));
         if (err != default!) {
             tΔ2.Fatal(err);
         }
+
         ast.SortImports(fset, f);
+
         // Check that three single-spec import decls remain.
         foreach (var i in range(3)) {
             nint importDeclSpecCount = len((~(~f).Decls[i]._<ж<ast.GenDecl>>()).Specs);
@@ -81,6 +89,7 @@ public static void TestSortImportsUpdatesFileImportsField(ж<testing.T> Ꮡt) {
                 tΔ2.Fatalf("len(f.Decls[%v].(*ast.GenDecl).Specs) = %v; want = 1"u8, i, importDeclSpecCount);
             }
         }
+
         // Check that File.Imports is consistent.
         if (len((~f).Imports) != 3) {
             tΔ2.Fatalf("len(f.Imports) = %v; want = 3"u8, len((~f).Imports));

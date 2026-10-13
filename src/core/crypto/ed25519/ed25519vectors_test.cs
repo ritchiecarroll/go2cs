@@ -38,8 +38,6 @@ internal partial struct TestEd25519Vectors_vectors /*dyn*/ {
 //
 // See https://hdevalence.ca/blog/2020-10-04-its-25519am for more details.
 public static void TestEd25519Vectors(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var jsonVectors = downloadEd25519Vectors(Ꮡt);
     ref var vectors = ref heap<slice<TestEd25519Vectors_vectors>>(out var Ꮡvectors);
     {
@@ -51,25 +49,26 @@ public static void TestEd25519Vectors(ж<testing.T> Ꮡt) {
         var expectedToVerify = true;
         foreach (var (_, f) in v.Flags) {
             var exprᴛ1 = f;
+            // We use the simplified verification formula that doesn't multiply
+            // by the cofactor, so any low order residue will cause the
+            // signature not to verify.
+            //
+            // This is allowed, but not required, by RFC 8032.
             if (exprᴛ1 == "LowOrderResidue"u8) {
                 expectedToVerify = false;
             }
+            // Our point decoding allows non-canonical encodings (in violation
+            // of RFC 8032) but R is not decoded: instead, R is recomputed and
+            // compared bytewise against the canonical encoding.
             else if (exprᴛ1 == "NonCanonicalR"u8) {
                 expectedToVerify = false;
             }
-
         }
-        // We use the simplified verification formula that doesn't multiply
-        // by the cofactor, so any low order residue will cause the
-        // signature not to verify.
-        //
-        // This is allowed, but not required, by RFC 8032.
-        // Our point decoding allows non-canonical encodings (in violation
-        // of RFC 8032) but R is not decoded: instead, R is recomputed and
-        // compared bytewise against the canonical encoding.
+
         var publicKey = decodeHex(Ꮡt, v.A);
         var signature = appendꓸꓸꓸ(decodeHex(Ꮡt, v.R), decodeHex(Ꮡt, v.S));
         var message = slice<byte>(v.M);
+
         var didVerify = ed25519.Verify(publicKey, message, signature);
         if (didVerify && !expectedToVerify) {
             Ꮡt.Errorf("#%d: vector with flags %s unexpectedly verified"u8, i, v.Flags);
@@ -91,6 +90,7 @@ internal static slice<byte> downloadEd25519Vectors(ж<testing.T> Ꮡt) {
     @string path = filippoIoMostlyHarmlessˢ;
     @string version = v00020210322192420ˢ;
     @string dir = cryptotest.FetchModule(Ꮡt, path, version);
+
     var (jsonVectors, err) = os.ReadFile(filepath.Join(dir, ed25519vectorsJsonˢ));
     if (err != default!) {
         Ꮡt.Fatalf("failed to read ed25519vectors.json: %v"u8, err);

@@ -123,7 +123,7 @@ using static global::go.net_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/pipe_test.go", "pipe_test.cs", "AA8ggsKCgoKUuIKChICCpICCpICCpICCpICCpICC", "17-24:1;19-22:1.1")]
+[assembly: go.GoPositionMap("net/pipe_test.go", "pipe_test.cs", "AA8ggsKCgoKUuIKClICCpICCpICCpICCpICCpICC", "17-24:1;19-22:1.1")]
 // </GoSourcePositionMaps>
 
 namespace go;

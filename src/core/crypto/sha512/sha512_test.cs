@@ -663,6 +663,7 @@ internal static void testHash(ж<testing.T> Ꮡt, @string name, @string @in, @st
             return;
         }
     }
+
     for (nint pass = 0; pass < 3; pass++) {
         if (pass < 2){
             io.WriteString(new sha512_internal_test_package.hash_HashᴠWriter(digestFunc), @in);
@@ -671,6 +672,7 @@ internal static void testHash(ж<testing.T> Ꮡt, @string name, @string @in, @st
             digestFunc.Sum(default!);
             io.WriteString(new sha512_internal_test_package.hash_HashᴠWriter(digestFunc), @in.slice(len(@in) / 2));
         }
+
         {
             @string calculated = hex.EncodeToString(digestFunc.Sum(default!)); if (calculated != outHex) {
                 Ꮡt.Errorf("%s(%q) = %q (in pass #%d), but expected %q"u8, name, @in, calculated, pass, outHex);
@@ -762,6 +764,7 @@ internal static void testGoldenMarshal(ж<testing.T> Ꮡt) {
         new("384"u8, New384, golden384),
         new("512"u8, New, golden512)
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new testGoldenMarshal_tests(), out var Ꮡtt);
         tt = vᴛ1;
@@ -771,34 +774,42 @@ internal static void testGoldenMarshal(ж<testing.T> Ꮡt) {
             foreach (var (_, test) in ttʗ1.golden) {
                 var h = ttʗ1.newHash();
                 var h2 = ttʗ1.newHash();
+
                 io.WriteString(h, test.@in.slice(0, len(test.@in) / 2));
+
                 var (state, err) = h._<encoding.BinaryMarshaler>().MarshalBinary();
                 if (err != default!) {
                     tΔ1.Errorf("could not marshal: %v"u8, err);
                     return;
                 }
+
                 (var stateAppend, err) = h._<encoding.BinaryAppender>().AppendBinary(new slice<byte>(4, 32));
                 if (err != default!) {
                     tΔ1.Errorf("could not marshal: %v"u8, err);
                     return;
                 }
                 stateAppend = stateAppend[4..];
+
                 if (((sstring)state) != test.halfState) {
                     tΔ1.Errorf("New%s(%q) state = %q, want %q"u8, ttʗ1.name, test.@in, state, test.halfState);
                     continue;
                 }
+
                 if (((sstring)stateAppend) != test.halfState) {
                     tΔ1.Errorf("New%s(%q) stateAppend = %q, want %q"u8, ttʗ1.name, test.@in, stateAppend, test.halfState);
                     continue;
                 }
+
                 {
                     var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != default!) {
                         tΔ1.Errorf("could not unmarshal: %v"u8, errΔ1);
                         return;
                     }
                 }
+
                 io.WriteString(h, test.@in.slice(len(test.@in) / 2));
                 io.WriteString(h2, test.@in.slice(len(test.@in) / 2));
+
                 {
                     var (actual, actual2) = (h.Sum(default!), h2.Sum(default!)); if (!bytes.Equal(actual, actual2)) {
                         tΔ1.Errorf("New%s(%q) = 0x%x != marshaled 0x%x"u8, ttʗ1.name, test.@in, actual, actual2);
@@ -816,18 +827,22 @@ public static void TestMarshalMismatch(ж<testing.T> Ꮡt) {
         New512_224,
         New512_256
     }.slice();
+
     foreach (var (i, fn1) in h) {
         foreach (var (j, fn2) in h) {
             if (i == j) {
                 continue;
             }
+
             var h1 = fn1();
             var h2 = fn2();
+
             var (state, err) = h1._<encoding.BinaryMarshaler>().MarshalBinary();
             if (err != default!) {
                 Ꮡt.Errorf("i=%d: could not marshal: %v"u8, i, err);
                 continue;
             }
+
             {
                 var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 == default!) {
                     Ꮡt.Errorf("i=%d, j=%d: got no error, expected one: %v"u8, i, j, errΔ1);
@@ -886,8 +901,8 @@ internal partial struct unmarshalTest {
     internal @string sum;
 }
 
-// Data length: 6_565_544_823
 internal static slice<unmarshalTest> largeUnmarshalTests = new unmarshalTest[]{
+    // Data length: 6_565_544_823
     new(
         state: ((@string)(new byte[]{0x73, 0x68, 0x61, 0x07, 0xce, 0xb7, 0x65, 0x0f, 0x0f, 0xe1, 0x72, 0x5d, 0x23, 0x07, 0x6f, 0x4a, 0x21, 0x2e, 0x7b, 0x35, 0x42, 0xe4, 0x14, 0x30, 0x91, 0xdd, 0x00, 0x61, 0xe1, 0xb3, 0x45, 0x26, 0xb9, 0xbb, 0x07, 0x4a, 0x9f, 0x5e, 0x9f, 0x03, 0xcd, 0xba, 0x44, 0x96, 0x48, 0x80, 0xb0, 0x58, 0x9d, 0xde, 0xca, 0xb8, 0x0c, 0xf7, 0x3a, 0xd5, 0xe6, 0x27, 0xb9, 0x93, 0x66, 0xdd, 0x41, 0xf0, 0x7e, 0xe1, 0x02, 0x14, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5a, 0x5b, 0x5c, 0x5d, 0x5e, 0x5f, 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x87, 0x56, 0x43, 0x77})),
         sum: "12d612357a1dbc74a28883dff79b83e7d2b881ae40d7a67fd7305490bc8a641cd1ce9ece598192080d6e9ac7e75d5988567a58a9812991299eb99a04ecb69523"u8
@@ -910,6 +925,7 @@ internal static (slice<byte> sum, error err) safeSum(hash.Hash h) {
                 }
             }
         }, ref ᒐ);
+
         (sum, err) = (h.Sum(default!), default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -926,11 +942,13 @@ public static void TestLargeHashes(ж<testing.T> Ꮡt) {
                 continue;
             }
         }
+
         var (sum, err) = safeSum(h);
         if (err != default!) {
             Ꮡt.Errorf("test %d could not sum: %v"u8, i, err);
             continue;
         }
+
         if (fmt.Sprintf("%x"u8, sum) != test.sum) {
             Ꮡt.Errorf("test %d sum mismatch: expect %s got %x"u8, i, test.sum, sum);
         }
@@ -943,6 +961,7 @@ public static void TestAllocations(ж<testing.T> Ꮡt) {
         var n = testing.AllocsPerRun(10, () => {
             var @in = slice<byte>("hello, world!"u8);
             var @out = new slice<byte>(0, Size);
+
             {
                 var h = New();
                 h.Reset();
@@ -967,6 +986,7 @@ public static void TestAllocations(ж<testing.T> Ꮡt) {
                 h.Write(@in);
                 @out = h.Sum(@out[..0]);
             }
+
             Sum512(@in);
             Sum384(@in);
             Sum512_224(@in);

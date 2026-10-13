@@ -53,9 +53,9 @@ using static global::go.go.@internal.gccgoimporter_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/internal/gccgoimporter/gccgoinstallation_test.go", "gccgoinstallation_test.cs", "ABYiAIMBigK0goKWgoKClKiCgoKCqIKCgroAChA=")]
-[assembly: global::go.GoPositionMap("go/internal/gccgoimporter/importer_test.go", "importer_test.cs", "AB4wooKCgpaCgoKCloKCloKCgrqCgpSCgoKoggAMGgAZNIKCgoSy/rKCgpSAgqTmlIKCloKCgpSCgpSCgpSCgpSEgoKEgoKEspSCloKAgqSChIKCgoKWhIKClIKCgoKWhICCpICC")]
-[assembly: global::go.GoPositionMap("go/internal/gccgoimporter/parser_test.go", "parser_test.cs", "ABUeABQogoKCgoKCgoKEgqiAgqaCgpaCgoKogoKCgpSCgg==")]
+[assembly: global::go.GoPositionMap("go/internal/gccgoimporter/gccgoinstallation_test.go", "gccgoinstallation_test.cs", "ABIiAIcBigKUgoKmgoKClLiCgoKCuIKCgsoAChA=")]
+[assembly: global::go.GoPositionMap("go/internal/gccgoimporter/importer_test.go", "importer_test.cs", "AB4wooKCgqaCgoKCpoKCpoKCgsqCgpSCgoK4ggAMGgAZNIKCgpSy/rKCgpSAgqTmlIKCpoKCgpSCgpSCgpSCgpSUgoKUgoKUspSCpoKAgqSClIKCgoKmlIKClIKCgoKmlICCpICC")]
+[assembly: global::go.GoPositionMap("go/internal/gccgoimporter/parser_test.go", "parser_test.cs", "ABQeABQogoKCgoKCgoKUgriAgraCgqaCgoK4goKCgpSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;

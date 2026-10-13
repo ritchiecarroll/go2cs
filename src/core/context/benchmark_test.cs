@@ -30,6 +30,7 @@ public static void BenchmarkCommonParentCancel(ж<testing.B> Ꮡb) {
         var (shared, sharedcancel) = WithCancel(root);
         var sharedcancelʗ1 = sharedcancel;
         defer(() => sharedcancelʗ1(), ref ᒐ);
+
         b.ResetTimer();
         var sharedʗ1 = shared;
         Ꮡb.RunParallel((ж<testing.PB> pb) => {
@@ -69,6 +70,7 @@ internal static partial void benchmarkWithTimeout(ж<testing.B> Ꮡb, nint concu
     nint gomaxprocs = Δruntime.GOMAXPROCS(0);
     nint perPContexts = quo(concurrentContexts, gomaxprocs);
     var root = Background();
+
     // Generate concurrent contexts.
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     var ccf = new slice<slice<Action>>(gomaxprocs);
@@ -91,6 +93,7 @@ internal static partial void benchmarkWithTimeout(ж<testing.B> Ꮡb, nint concu
         }, i);
     }
     Ꮡwg.Wait();
+
     b.ResetTimer();
     var rootʗ2 = root;
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
@@ -105,6 +108,7 @@ internal static partial void benchmarkWithTimeout(ж<testing.B> Ꮡb, nint concu
         }
     });
     b.StopTimer();
+
     foreach (var (_, cf) in ccf) {
         foreach (var (_, f) in cf) {
             f();
@@ -184,6 +188,7 @@ public static void BenchmarkContextCancelDone(ж<testing.B> Ꮡb) {
         var (ctx, cancel) = WithCancel(Background());
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
+
         var ctxʗ1 = ctx;
         Ꮡb.RunParallel((ж<testing.PB> pb) => {
             while (pb.Next()) {
@@ -209,6 +214,7 @@ public static void BenchmarkDeepValueNewGoRoutine(ж<testing.B> Ꮡb) {
         for (nint i = 0; i < depth; i++) {
             ctx = WithValue(ctx, i, i);
         }
+
         Ꮡb.Run(fmt.Sprintf("depth=%d"u8, depth), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
@@ -235,6 +241,7 @@ public static void BenchmarkDeepValueSameGoRoutine(ж<testing.B> Ꮡb) {
         for (nint i = 0; i < depth; i++) {
             ctx = WithValue(ctx, i, i);
         }
+
         Ꮡb.Run(fmt.Sprintf("depth=%d"u8, depth), (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 Ꮡctx.ValueSlot.Value((nint)(-1));

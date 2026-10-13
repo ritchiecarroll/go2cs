@@ -54,6 +54,7 @@ public static void TestHashGrouping(ж<testing.T> Ꮡt) {
     }
     hh[0].Write(b);
     hh[1].WriteString(((@string)b));
+
     void writeByte(ж<global::go.hash.maphash_package.Hash> h, byte bΔ1) {
         var err = h.WriteByte(bΔ1);
         if (err != default!) {
@@ -72,6 +73,7 @@ public static void TestHashGrouping(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("WriteString single byte: %v"u8, err);
         }
     }
+
     foreach (var (i, x) in b) {
         writeByte(hh[2], x);
         writeSingleByte(hh[3], x);
@@ -87,17 +89,20 @@ public static void TestHashGrouping(ж<testing.T> Ꮡt) {
             writeStringSingleByte(hh[6], x);
         }
     }
+
     var sum = hh[0].Sum64();
     foreach (var (i, h) in hh) {
         if (sum != h.Sum64()) {
             Ꮡt.Errorf("hash %d not identical to a single Write"u8, i);
         }
     }
+
     {
         var sum1 = Bytes(hh[0].Seed(), b); if (sum1 != hh[0].Sum64()) {
             Ꮡt.Errorf("hash using Bytes not identical to a single Write"u8);
         }
     }
+
     {
         var sum1 = String(hh[0].Seed(), ((@string)b)); if (sum1 != hh[0].Sum64()) {
             Ꮡt.Errorf("hash using String not identical to a single Write"u8);
@@ -148,16 +153,20 @@ public static void TestRepeat(ж<testing.T> Ꮡt) {
     var h1 = @new<global::go.hash.maphash_package.Hash>();
     h1.WriteString(testingˢ);
     var sum1 = h1.Sum64();
+
     h1.Reset();
     h1.WriteString(testingˢ);
     var sum2 = h1.Sum64();
+
     if (sum1 != sum2) {
         Ꮡt.Errorf("different sum after resetting: %#x != %#x"u8, sum1, sum2);
     }
+
     var h2 = @new<global::go.hash.maphash_package.Hash>();
     h2.SetSeed(h1.Seed());
     h2.WriteString(testingˢ);
     var sum3 = h2.Sum64();
+
     if (sum1 != sum3) {
         Ꮡt.Errorf("different sum on the same seed: %#x != %#x"u8, sum1, sum3);
     }
@@ -469,10 +478,12 @@ public static void TestWriteComparableNoncommute(ж<testing.T> Ꮡt) {
     ref var h2 = ref heap(new global::go.hash.maphash_package.Hash(), out var Ꮡh2);
     h1.SetSeed(seed);
     h2.SetSeed(seed);
+
     h1.WriteString(abcˢ);
     WriteComparable(Ꮡh1, 123);
     WriteComparable(Ꮡh2, 123);
     h2.WriteString(abcˢ);
+
     if (h1.Sum64() == h2.Sum64()) {
         Ꮡt.Errorf("WriteComparable and WriteString unexpectedly commute"u8);
     }
@@ -529,6 +540,7 @@ internal static void benchmarkSize(ж<testing.B> Ꮡb, nint size) {
     var h = Ꮡ(new Hash(nil));
     var buf = new slice<byte>(size);
     @string s = ((@string)buf);
+
     var bufʗ1 = buf;
     var hʗ1 = h;
     Ꮡb.Run(writeˢ, (ж<testing.B> bΔ1) => {
@@ -539,6 +551,7 @@ internal static void benchmarkSize(ж<testing.B> Ꮡb, nint size) {
             hʗ1.Sum64();
         }
     });
+
     var bufʗ2 = buf;
     var hʗ2 = h;
     Ꮡb.Run(bytesˢ, (ж<testing.B> bΔ2) => {
@@ -548,6 +561,7 @@ internal static void benchmarkSize(ж<testing.B> Ꮡb, nint size) {
             Bytes(seed, bufʗ2);
         }
     });
+
     var hʗ3 = h;
     Ꮡb.Run(stringˢ, (ж<testing.B> bΔ3) => {
         bΔ3.SetBytes((int64)size);

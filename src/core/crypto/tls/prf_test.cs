@@ -54,6 +54,7 @@ public static void TestKeysFromPreMasterSecret(ж<testing.T> Ꮡt) {
         var (@in, _) = hex.DecodeString(test.preMasterSecret);
         var (clientRandom, _) = hex.DecodeString(test.clientRandom);
         var (serverRandom, _) = hex.DecodeString(test.serverRandom);
+
         var masterSecret = masterFromPreMasterSecret(test.version, ref (test.suite).DerefOrNull(), @in, clientRandom, serverRandom);
         {
             @string s = hex.EncodeToString(masterSecret); if (s != test.masterSecret) {
@@ -61,6 +62,7 @@ public static void TestKeysFromPreMasterSecret(ж<testing.T> Ꮡt) {
                 continue;
             }
         }
+
         var (clientMAC, serverMAC, clientKey, serverKey, _, _) = keysFromMasterSecret(test.version, ref (test.suite).DerefOrNull(), masterSecret, clientRandom, serverRandom, test.macLen, test.keyLen, 0);
         @string clientMACString = hex.EncodeToString(clientMAC);
         @string serverMACString = hex.EncodeToString(serverMAC);
@@ -69,15 +71,18 @@ public static void TestKeysFromPreMasterSecret(ж<testing.T> Ꮡt) {
         if (clientMACString != test.clientMAC || serverMACString != test.serverMAC || clientKeyString != test.clientKey || serverKeyString != test.serverKey) {
             Ꮡt.Errorf("#%d: got: (%s, %s, %s, %s) want: (%s, %s, %s, %s)"u8, i, clientMACString, serverMACString, clientKeyString, serverKeyString, test.clientMAC, test.serverMAC, test.clientKey, test.serverKey);
         }
+
         var ekm = ekmFromMasterSecret(test.version, test.suite, masterSecret, clientRandom, serverRandom);
         var (contextKeyingMaterial, err) = ekm(labelˢ, slice<byte>("context"u8), 32);
         if (err != default!) {
             Ꮡt.Fatalf("ekmFromMasterSecret failed: %v"u8, err);
         }
+
         (var noContextKeyingMaterial, err) = ekm(labelˢ, default!, 32);
         if (err != default!) {
             Ꮡt.Fatalf("ekmFromMasterSecret failed: %v"u8, err);
         }
+
         if (hex.EncodeToString(contextKeyingMaterial) != test.contextKeyingMaterial || hex.EncodeToString(noContextKeyingMaterial) != test.noContextKeyingMaterial) {
             Ꮡt.Errorf("#%d: got keying material: (%s, %s) want: (%s, %s)"u8, i, contextKeyingMaterial, noContextKeyingMaterial, test.contextKeyingMaterial, test.noContextKeyingMaterial);
         }

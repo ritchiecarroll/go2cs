@@ -10,9 +10,6 @@ using static go.bytes_internal_test_package;
 
 partial class bytes_test_package {
 
-// test runtime·memeq's chunked implementation
-// nil tests
-
 partial struct compareTestsᴛ1 /*dyn*/ {
     internal slice<byte> a, b;
     internal nint i;
@@ -30,10 +27,12 @@ internal static slice<compareTestsᴛ1> compareTests = new compareTestsᴛ1[]{
     new(slice<byte>("ab"u8), slice<byte>("x"u8), -1),
     new(slice<byte>("x"u8), slice<byte>("a"u8), 1),
     new(slice<byte>("b"u8), slice<byte>("x"u8), -1),
+    // test runtime·memeq's chunked implementation
     new(slice<byte>("abcdefgh"u8), slice<byte>("abcdefgh"u8), 0),
     new(slice<byte>("abcdefghi"u8), slice<byte>("abcdefghi"u8), 0),
     new(slice<byte>("abcdefghi"u8), slice<byte>("abcdefghj"u8), -1),
     new(slice<byte>("abcdefghj"u8), slice<byte>("abcdefghi"u8), 1),
+    // nil tests
     new(default!, default!, 0),
     new(slice<byte>(""u8), default!, 0),
     new(default!, slice<byte>(""u8), 0),
@@ -76,9 +75,11 @@ public static void TestCompareBytes(ж<testing.T> Ꮡt) {
         lengths = append(lengths, i);
     }
     lengths = append(lengths, (nint)(256), (nint)(512), (nint)(1024), (nint)(1333), (nint)(4095), (nint)(4096), (nint)(4097));
+
     if (!testing.Short()) {
         lengths = append(lengths, (nint)(65535), (nint)(65536), (nint)(65537), (nint)(99999));
     }
+
     nint n = lengths[len(lengths) - 1];
     var a = new slice<byte>(n + 1);
     var b = new slice<byte>(n + 1);

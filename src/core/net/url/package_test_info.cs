@@ -56,7 +56,7 @@ using static global::go.net.url_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/url/example_test.go", "example_test.cs", "ABMegoLcooKCgpSsooLcooKCgpQACgyigoKCgpSCggAIDsKCgoKCrKKCgoKChILusoKCgoLcooKCgoKCrrKCgoKCgq6ygoKCgoSCAAgOsoKClIKCgoKC2KSCgpSCgu7CgoKUgoKU2qKCgpQACAqigoKUgoIACA7CgoKUgoLuwoKClIKCgpTcsoKCgvyygoKW3KKCgoKU6qKCgpSCgpSCgoCC/KKCgpSCgoKU3LKCgpSCgoLuwgAHEIKCrLKCgoKU+qLcgoLcsoKClKiSgoKU", "", "", "406=UserPassword/1/1/2;439=UserPassword/1/1/2")]
+[assembly: go.GoPositionMap("net/url/example_test.go", "example_test.cs", "ABMegoIACAyCgoKClNyCggAIDIKCgoKUAA0MgoKCgoKUgoIADA6CgoKCgtyCgoKCgpSCAAoOgoKCgoIACAyCgoKCgoLugoKCgoKC7oKCgoKClIIADA6CgoKUgoKCgoLolIKClIKCAAoOgoKClIKClPqCgoKUAAoKgoKClIKCAAwOgoKClIKCAAoOgoKClIKCgpQACAyCgoKCAAoMgoKCpgAIDIKCgoKUAAgKgoKClIKClIKCgIIACQyCgoKUgoKClAAIDIKCgpSCgoIACg6CAAcQgoLcgoKCgpQACQqC3IKCAAgMgoKClLiCgoKU", "", "", "420=UserPassword/1/1/2;453=UserPassword/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

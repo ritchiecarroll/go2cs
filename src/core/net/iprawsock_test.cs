@@ -24,8 +24,6 @@ internal partial struct resolveIPAddrTest {
     internal error err;
 }
 
-// Go 1.0 behavior
-// Go 1.0 behavior
 internal static slice<resolveIPAddrTest> resolveIPAddrTests;
 internal static void initᴛresolveIPAddrTests() { resolveIPAddrTests = new resolveIPAddrTest[]{
     new("ip"u8, "127.0.0.1"u8, Ꮡ(new IPAddr(IP: IPv4(127, 0, 0, 1))), default!),
@@ -37,8 +35,8 @@ internal static void initᴛresolveIPAddrTests() { resolveIPAddrTests = new reso
     new("ip6:IPv6-ICMP"u8, "::1"u8, Ꮡ(new IPAddr(IP: ParseIP("::1"u8))), default!),
     new("ip"u8, "::1%en0"u8, Ꮡ(new IPAddr(IP: ParseIP("::1"u8), Zone: "en0"u8)), default!),
     new("ip6"u8, "::1%911"u8, Ꮡ(new IPAddr(IP: ParseIP("::1"u8), Zone: "911"u8)), default!),
-    new(""u8, "127.0.0.1"u8, Ꮡ(new IPAddr(IP: IPv4(127, 0, 0, 1))), default!),
-    new(""u8, "::1"u8, Ꮡ(new IPAddr(IP: ParseIP("::1"u8))), default!),
+    new(""u8, "127.0.0.1"u8, Ꮡ(new IPAddr(IP: IPv4(127, 0, 0, 1))), default!), // Go 1.0 behavior
+    new(""u8, "::1"u8, Ꮡ(new IPAddr(IP: ParseIP("::1"u8))), default!), // Go 1.0 behavior
     new("ip4:icmp"u8, ""u8, Ꮡ(new IPAddr(nil)), default!),
     new("l2tp"u8, "127.0.0.1"u8, nil, new net_test_package.net_UnknownNetworkErrorᴠerror(((global::go.net_package.UnknownNetworkError)(@string)"l2tp"u8))),
     new("l2tp:gre"u8, "127.0.0.1"u8, nil, new net_test_package.net_UnknownNetworkErrorᴠerror(((global::go.net_package.UnknownNetworkError)(@string)"l2tp:gre"u8))),
@@ -61,12 +59,14 @@ public static void TestResolveIPAddr(ж<testing.T> Ꮡt) {
         if (!testableNetwork(ipNoprivˢ)) {
             Ꮡt.Skip(ipNoprivTestˢ);
         }
+
         var origTestHookLookupIP = testHookLookupIP;
         var origTestHookLookupIPʗ1 = origTestHookLookupIP;
         defer(() => {
             testHookLookupIP = origTestHookLookupIPʗ1;
         }, ref ᒐ);
         testHookLookupIP = lookupLocalhost;
+
         foreach (var (_, tt) in resolveIPAddrTests) {
             var (addr, err) = ResolveIPAddr(tt.network, tt.litAddrOrName);
             if (!reflect.DeepEqual(addr.OrTypedNil(), tt.addr.OrTypedNil()) || !reflect.DeepEqual(err, tt.err)) {
@@ -84,7 +84,6 @@ public static void TestResolveIPAddr(ж<testing.T> Ꮡt) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
 
 partial struct ipConnLocalNameTestsᴛ1 /*dyn*/ {
     internal @string net;
@@ -140,6 +139,7 @@ public static void TestIPConnRemoteName(ж<testing.T> Ꮡt) {
         if (!testableNetwork(network)) {
             Ꮡt.Skipf("skipping %s test"u8, network);
         }
+
         var raddr = Ꮡ(new IPAddr(IP: IPv4(127, 0, 0, 1).To4()));
         var (c, err) = DialIP(network, Ꮡ(new IPAddr(IP: IPv4(127, 0, 0, 1))), raddr);
         if (testenv.SyscallIsNotSupported(err)){
@@ -210,6 +210,7 @@ public static void TestDialListenIPArgs(ж<testing.T> Ꮡt) {
             tests = append(tests, priv);
         }
     }
+
     foreach (var (_, tt) in tests) {
         foreach (var (_, vᴛ2) in tt.argLists) {
             var args = vᴛ2.Clone();

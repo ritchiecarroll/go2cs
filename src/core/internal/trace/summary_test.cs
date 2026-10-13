@@ -27,8 +27,10 @@ public static void TestSummarizeGoroutinesTrace(ж<testing.T> Ꮡt) {
     bool hasSchedWaitTime = default!;
     bool hasSyncBlockTime = default!;
     bool hasGCMarkAssistTime = default!;
+
     assertContainsGoroutine(Ꮡt, summaries, runtimeGcBgMarkWorkerˢ);
     assertContainsGoroutine(Ꮡt, summaries, mainMainFunc1ˢ);
+
     foreach (var (_, summary) in summaries) {
         basicGoroutineSummaryChecks(Ꮡt, summary);
         hasSchedWaitTime = hasSchedWaitTime || (~summary).SchedWaitTime > 0;
@@ -64,13 +66,12 @@ internal partial struct TestSummarizeGoroutinesRegionsTrace_region /*dyn*/ {
 
 public static void TestSummarizeGoroutinesRegionsTrace(ж<testing.T> Ꮡt) {
     var summaries = summarizeTraceTest(Ꮡt, testdataTestsGo122ˢ).Value.Goroutines;
-    var wantRegions = new map<@string, TestSummarizeGoroutinesRegionsTrace_region>{ // N.B. "pre-existing region" never even makes it into the trace.
- //
- // TODO(mknyszek): Add test case for end-without-a-start, which can happen at
- // a generation split only.
-
+    var wantRegions = new map<@string, TestSummarizeGoroutinesRegionsTrace_region>{
+        // N.B. "pre-existing region" never even makes it into the trace.
+        //
+        // TODO(mknyszek): Add test case for end-without-a-start, which can happen at
+        // a generation split only.
         [""u8] = new(Δtrace.EventStateTransition, Δtrace.EventStateTransition), // Task inheritance marker.
-
         ["task0 region"u8] = new(Δtrace.EventRegionBegin, Δtrace.EventBad),
         ["region0"u8] = new(Δtrace.EventRegionBegin, Δtrace.EventRegionEnd),
         ["region1"u8] = new(Δtrace.EventRegionBegin, Δtrace.EventRegionEnd),
@@ -113,17 +114,17 @@ public static void TestSummarizeTasksTrace(ж<testing.T> Ꮡt) {
     }
     var wantTasks = new map<Δtrace.TaskID, TestSummarizeTasksTrace_task>{
         [Δtrace.BackgroundTask] = new(
-            logs: new traceꓸLog[]{ // The background task (0) is never any task's parent.
-
+            // The background task (0) is never any task's parent.
+            logs: new traceꓸLog[]{
                 new(Task: Δtrace.BackgroundTask, Category: "log"u8, Message: "before do"u8),
                 new(Task: Δtrace.BackgroundTask, Category: "log"u8, Message: "before do"u8)
             }.slice(),
             goroutines: new Δtrace.GoID[]{1}.slice()
         ),
         [1] = new(
-            children: new Δtrace.TaskID[]{ // This started before tracing started and has no parents.
- // Task 2 is technically a child, but we lost that information.
-3, 7, 16}.slice(),
+            // This started before tracing started and has no parents.
+            // Task 2 is technically a child, but we lost that information.
+            children: new Δtrace.TaskID[]{3, 7, 16}.slice(),
             logs: new traceꓸLog[]{
                 new(Task: 1, Category: "log"u8, Message: "before do"u8),
                 new(Task: 1, Category: "log"u8, Message: "before do"u8)
@@ -131,8 +132,8 @@ public static void TestSummarizeTasksTrace(ж<testing.T> Ꮡt) {
             goroutines: new Δtrace.GoID[]{1}.slice()
         ),
         [2] = new(
-            children: new Δtrace.TaskID[]{ // This started before tracing started and its parent is technically (1), but that information was lost.
-8, 17}.slice(),
+            // This started before tracing started and its parent is technically (1), but that information was lost.
+            children: new Δtrace.TaskID[]{8, 17}.slice(),
             logs: new traceꓸLog[]{
                 new(Task: 2, Category: "log"u8, Message: "before do"u8),
                 new(Task: 2, Category: "log"u8, Message: "before do"u8)
@@ -149,8 +150,8 @@ public static void TestSummarizeTasksTrace(ж<testing.T> Ꮡt) {
             goroutines: new Δtrace.GoID[]{1}.slice()
         ),
         [4] = new(
-            children: new Δtrace.TaskID[]{ // Explicitly, no parent.
-12, 21}.slice(),
+            // Explicitly, no parent.
+            children: new Δtrace.TaskID[]{12, 21}.slice(),
             logs: new traceꓸLog[]{
                 new(Task: 4, Category: "log"u8, Message: "before do"u8),
                 new(Task: 4, Category: "log"u8, Message: "before do"u8)
@@ -160,10 +161,10 @@ public static void TestSummarizeTasksTrace(ж<testing.T> Ꮡt) {
         [12] = new(
             parent: parent(4),
             children: new Δtrace.TaskID[]{13}.slice(),
-            logs: new traceꓸLog[]{ // TODO(mknyszek): This is computed asynchronously in the trace,
- // which makes regenerating this test very annoying, since it will
- // likely break this test. Resolve this by making the order not matter.
-
+            logs: new traceꓸLog[]{
+                // TODO(mknyszek): This is computed asynchronously in the trace,
+                // which makes regenerating this test very annoying, since it will
+                // likely break this test. Resolve this by making the order not matter.
                 new(Task: 12, Category: "log2"u8, Message: "do"u8),
                 new(Task: 12, Category: "log"u8, Message: "fanout region4"u8),
                 new(Task: 12, Category: "log"u8, Message: "fanout region0"u8),
@@ -175,8 +176,8 @@ public static void TestSummarizeTasksTrace(ж<testing.T> Ꮡt) {
             goroutines: new Δtrace.GoID[]{1, 5, 6, 7, 8, 9}.slice()
         ),
         [13] = new(
-            parent: parent(12), // Explicitly, no children.
-
+            // Explicitly, no children.
+            parent: parent(12),
             logs: new traceꓸLog[]{
                 new(Task: 13, Category: "log2"u8, Message: "do"u8)
             }.slice(),
@@ -191,6 +192,7 @@ public static void TestSummarizeTasksTrace(ж<testing.T> Ꮡt) {
         if (id != (~summary).ID) {
             Ꮡt.Errorf("ambiguous task %d (or %d?): field likely set incorrectly"u8, id, (~summary).ID);
         }
+
         // Check parent.
         if (want.parent != nil){
             if ((~summary).Parent == nil){
@@ -203,6 +205,7 @@ public static void TestSummarizeTasksTrace(ж<testing.T> Ꮡt) {
         if ((~summary).Parent != nil) {
             Ꮡt.Errorf("unexpected parent %d for task %d"u8, (~(~summary).Parent).ID, id);
         }
+
         // Check children.
         var gotChildren = new map<Δtrace.TaskID, EmptyStruct>();
         foreach (var (_, child) in (~summary).Children) {
@@ -222,6 +225,7 @@ public static void TestSummarizeTasksTrace(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("unexpected child task %d for task %d"u8, child, id);
             }
         }
+
         // Check logs.
         if (len(want.logs) != len((~summary).Logs)){
             Ꮡt.Errorf("wanted %d logs for task %d, got %d logs instead"u8, len(want.logs), id, len((~summary).Logs));
@@ -232,6 +236,7 @@ public static void TestSummarizeTasksTrace(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         // Check goroutines.
         if (len(want.goroutines) != len((~summary).Goroutines)){
             Ꮡt.Errorf("wanted %d goroutines for task %d, got %d goroutines instead"u8, len(want.goroutines), id, len((~summary).Goroutines));
@@ -247,6 +252,7 @@ public static void TestSummarizeTasksTrace(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         // Marked as seen.
         delete(wantTasks, id);
     }
@@ -293,6 +299,7 @@ internal static ж<Δtrace.Summary> summarizeTraceTest(ж<testing.T> Ꮡt, @stri
     }
     // Create the analysis state.
     var s = Δtrace.NewSummarizer();
+
     // Create a reader.
     (var r, err) = Δtrace.NewReader(trc);
     if (err != default!) {
@@ -393,7 +400,6 @@ internal static void checkRegionEvents(ж<testing.T> Ꮡt, Δtrace.EventKind wan
     else { /* default: */
         Ꮡt.Errorf("unexpected want end event type: %s"u8, wantEnd);
     }
-
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -439,11 +445,13 @@ public static void TestRelatedGoroutinesV2Trace(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("malformed test %s: bad trace file: %v"u8, testPath, err);
     }
+
     // Create a reader.
     (var r, err) = Δtrace.NewReader(trc);
     if (err != default!) {
         Ꮡt.Fatalf("failed to create trace reader for %s: %v"u8, testPath, err);
     }
+
     // Collect all the events.
     slice<traceꓸEvent> events = default!;
     while (ᐧ) {
@@ -456,12 +464,12 @@ public static void TestRelatedGoroutinesV2Trace(ж<testing.T> Ꮡt) {
         }
         events = append(events, ev.ΔClone());
     }
+
     // Test the function.
     var targetg = ((Δtrace.GoID)86);
     var got = Δtrace.RelatedGoroutinesV2(events, targetg);
     var want = new map<Δtrace.GoID, EmptyStruct>{
         [((Δtrace.GoID)86)] = new EmptyStruct(), // N.B. Result includes target.
-
         [((Δtrace.GoID)71)] = new EmptyStruct(),
         [((Δtrace.GoID)25)] = new EmptyStruct(),
         [((Δtrace.GoID)122)] = new EmptyStruct()

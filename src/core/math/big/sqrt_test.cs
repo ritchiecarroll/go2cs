@@ -20,6 +20,7 @@ public static void TestFloatSqrt64(ж<testing.T> Ꮡt) {
             break;
         }
         var r = Δrand.Float64();
+
         var got = @new<global::go.math.big_package.Float>().SetPrec(53);
         got.Sqrt(NewFloat(r));
         var want = NewFloat(math.Sqrt(r));
@@ -35,10 +36,10 @@ internal partial struct TestFloatSqrt_type /*dyn*/ {
 }
 
 public static void TestFloatSqrt(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestFloatSqrt_type[]{ // Test values were generated on Wolfram Alpha using query
- //   'sqrt(N) to 350 digits'
- // 350 decimal digits give up to 1000 binary digits.
-
+    foreach (var (_, test) in new TestFloatSqrt_type[]{
+        // Test values were generated on Wolfram Alpha using query
+        //   'sqrt(N) to 350 digits'
+        // 350 decimal digits give up to 1000 binary digits.
         new("0.03125"u8, "0.17677669529663688110021109052621225982120898442211850914708496724884155980776337985629844179095519659187673077886403712811560450698134215158051518713749197892665283324093819909447499381264409775757143376369499645074628431682460775184106467733011114982619404115381053858929018135497032545349940642599871090667456829147610370507757690729404938184321879"u8),
         new("0.125"u8, "0.35355339059327376220042218105242451964241796884423701829416993449768311961552675971259688358191039318375346155772807425623120901396268430316103037427498395785330566648187639818894998762528819551514286752738999290149256863364921550368212935466022229965238808230762107717858036270994065090699881285199742181334913658295220741015515381458809876368643757"u8),
         new("0.5"u8, "0.70710678118654752440084436210484903928483593768847403658833986899536623923105351942519376716382078636750692311545614851246241802792536860632206074854996791570661133296375279637789997525057639103028573505477998580298513726729843100736425870932044459930477616461524215435716072541988130181399762570399484362669827316590441482031030762917619752737287514"u8),
@@ -55,6 +56,7 @@ public static void TestFloatSqrt(ж<testing.T> Ꮡt) {
         foreach (var (_, prec) in new nuint[]{24, 53, 64, 65, 100, 128, 129, 200, 256, 400, 600, 800, 1000}.slice()) {
             var x = @new<global::go.math.big_package.Float>().SetPrec(prec);
             x.Parse(test.x, 10);
+
             var got = @new<global::go.math.big_package.Float>().SetPrec(prec).Sqrt(x);
             var want = @new<global::go.math.big_package.Float>().SetPrec(prec);
             want.Parse(test.want, 10);
@@ -62,6 +64,7 @@ public static void TestFloatSqrt(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("prec = %d, Sqrt(%v) =\ngot  %g;\nwant %g"u8,
                     prec, test.x, got.OrTypedNil(), want.OrTypedNil());
             }
+
             // Square test.
             // If got holds the square root of x to precision p, then
             //   got = √x + k
@@ -70,15 +73,18 @@ public static void TestFloatSqrt(ж<testing.T> Ꮡt) {
             // and the error must satisfy
             //   err = |got² - x| ≈ | 2k√n | < 2**(-p+1)*√n
             // Ignoring the k² term for simplicity.
+
             // err = |got² - x|
             // (but do intermediate steps with 32 guard digits to
             // avoid introducing spurious rounding-related errors)
             var sq = @new<global::go.math.big_package.Float>().SetPrec(prec + 32).Mul(got, got);
             var diff = @new<global::go.math.big_package.Float>().Sub(sq, x);
             var err = diff.Abs(diff).SetPrec(prec);
+
             // maxErr = 2**(-p+1)*√x
             var one = @new<global::go.math.big_package.Float>().SetPrec(prec).SetInt64(1);
             var maxErr = @new<global::go.math.big_package.Float>().Mul(@new<global::go.math.big_package.Float>().SetMantExp(one, -(nint)prec + 1), got);
+
             if (err.Cmp(maxErr) >= 0) {
                 Ꮡt.Errorf("prec = %d, Sqrt(%v) =\ngot err  %g;\nwant maxErr %g"u8,
                     prec, test.x, err.OrTypedNil(), maxErr.OrTypedNil());

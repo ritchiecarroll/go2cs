@@ -70,11 +70,10 @@ internal partial struct TestStartLine_testCases /*dyn*/ {
 }
 
 public static void TestStartLine(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // We test inlined vs non-inlined variants. We can't do that if
     // optimizations are disabled.
     testenv.SkipIfOptimizationOff(new runtime_test_package.testing_TжTB(Ꮡt));
+
     var testCases = new TestStartLine_testCases[]{
         new(
             name: "normal"u8,
@@ -107,6 +106,7 @@ public static void TestStartLine(ж<testing.T> Ꮡt) {
             want: 64
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in testCases) {
         ref var tc = ref heap(new TestStartLine_testCases(), out var Ꮡtc);
         tc = vᴛ1;
@@ -128,13 +128,16 @@ internal static partial nint callerStartLine(bool wantInlined) {
     if (n != 1) {
         throw panic(fmt.Sprintf("no caller of callerStartLine? n = %d"u8, n));
     }
+
     var frames = Δruntime.CallersFrames(pcs[..]);
     ref var frame = ref heap<Δruntime.Frame>(out var Ꮡframe);
     (frame, _) = frames.Next();
+
     var inlined = frame.Func == nil; // Func always set to nil for inlined frames
     if (wantInlined != inlined) {
         throw panic(fmt.Sprintf("caller %s inlined got %v want %v"u8, frame.Function, inlined, wantInlined));
     }
+
     return runtime_internal_test_package.FrameStartLine(Ꮡframe);
 }
 

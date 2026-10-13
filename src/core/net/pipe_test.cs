@@ -31,6 +31,7 @@ public static void TestPipe(ж<testing.T> Ꮡt) {
 public static void TestPipeCloseError(ж<testing.T> Ꮡt) {
     var (c1, c2) = Δnet.Pipe();
     c1.Close();
+
     {
         var (_, err) = c1.Read(default!); if (!AreEqual(err, Δio.ErrClosedPipe)) {
             Ꮡt.Errorf("c1.Read() = %v, want io.ErrClosedPipe"u8, err);

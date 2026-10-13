@@ -54,6 +54,7 @@ public static void TestCoverageApis(ж<testing.T> Ꮡt) {
         os.RemoveAll(dir);
         mkdir(Ꮡt, dir);
     }
+
     // Build harness. We need two copies of the harness, one built
     // with -covermode=atomic and one built non-atomic.
     @string bdir1 = mkdir(Ꮡt, filepath.Join(dir, build1ˢ));
@@ -66,8 +67,10 @@ public static void TestCoverageApis(ж<testing.T> Ꮡt) {
     @string bdir2 = mkdir(Ꮡt, filepath.Join(dir, build2ˢ));
     var hargs2 = new @string[]{"-coverpkg=all"u8, "-covermode="u8 + nonAtomicMode}.slice();
     @string nonAtomicHarnessPath = buildHarness(Ꮡt, bdir2, hargs2);
+
     Ꮡt.Logf("atomic harness path is %s"u8, atomicHarnessPath);
     Ꮡt.Logf("non-atomic harness path is %s"u8, nonAtomicHarnessPath);
+
     // Sub-tests for each API we want to inspect, plus
     // extras for error testing.
     Ꮡt.Run(emitToDirˢ, (ж<testing.T> tΔ1) => {
@@ -142,8 +145,6 @@ internal static readonly @string harnessGoˢ = "harness.go"u8;
 
 // buildHarness builds the helper program "harness.exe".
 internal static @string buildHarness(ж<testing.T> Ꮡt, @string dir, slice<@string> opts) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     @string harnessPath = filepath.Join(dir, harnessExeˢ);
     @string harnessSrc = filepath.Join(testdataˢ, harnessGoˢ);
     var args = new @string[]{"build"u8, "-o"u8, harnessPath}.slice();
@@ -197,8 +198,6 @@ internal static slice<@string> updateGoCoverDir(slice<@string> env, @string gcd,
 }
 
 internal static (@string, error) runHarness(ж<testing.T> Ꮡt, @string harnessPath, @string tp, bool setGoCoverDir, @string rdir, @string edir) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     Ꮡt.Logf("running: %s -tp %s -o %s with rdir=%s and GOCOVERDIR=%v"u8, harnessPath, tp, edir, rdir, setGoCoverDir);
     var cmd = exec.Command(harnessPath, "-tp"u8, tp, "-o", edir);
     cmd.Value.Dir = rdir;
@@ -271,6 +270,7 @@ internal static void testEmitToDir(ж<testing.T> Ꮡt, @string harnessPath, @str
             Ꮡt.Logf("%s"u8, output);
             Ꮡt.Fatalf("running 'harness -tp emitDir': %v"u8, err);
         }
+
         // Just check to make sure meta-data file and counter data file were
         // written. Another alternative would be to run "go tool covdata"
         // or equivalent, but for now, this is what we've got.
@@ -348,6 +348,7 @@ internal static void testEmitToUnwritableDir(ж<testing.T> Ꮡt, @string harness
         try {
             @string tp = emitToUnwritableDirˢ;
             var (rdir, edir) = mktestdirs(Ꮡt, tag, tp, dir);
+
             // Make edir unwritable.
             {
                 var errΔ1 = os.Chmod(edir, 365); if (errΔ1 != default!) {
@@ -355,6 +356,7 @@ internal static void testEmitToUnwritableDir(ж<testing.T> Ꮡt, @string harness
                 }
             }
             defer(os.Chmod, edir, (fs.FileMode)(511), ref ᒐ);
+
             var (output, err) = runHarness(Ꮡt, harnessPath, tp, setGoCoverDir, rdir, edir);
             if (err != default!) {
                 Ꮡt.Logf("%s"u8, output);
@@ -429,11 +431,13 @@ internal static void testEmitToDirNonAtomic(ж<testing.T> Ꮡt, @string harnessP
     var (rdir, edir) = mktestdirs(Ꮡt, tag, tp, dir);
     var (output, err) = runHarness(Ꮡt, harnessPath, tp,
         true, rdir, edir);
+
     // We expect an error here.
     if (err == default!) {
         Ꮡt.Logf("%s"u8, output);
         Ꮡt.Fatalf("running 'harness -tp %s': did not get expected error"u8, tp);
     }
+
     @string got = strings.TrimSpace(((@string)output));
     @string want = writeCountersDirInvokedˢ;
     if (!strings.Contains(got, want)) {
@@ -454,17 +458,20 @@ internal static void testEmitToWriterNonAtomic(ж<testing.T> Ꮡt, @string harne
     var (rdir, edir) = mktestdirs(Ꮡt, tag, tp, dir);
     var (output, err) = runHarness(Ꮡt, harnessPath, tp,
         true, rdir, edir);
+
     // We expect an error here.
     if (err == default!) {
         Ꮡt.Logf("%s"u8, output);
         Ꮡt.Fatalf("running 'harness -tp %s': did not get expected error"u8, tp);
     }
+
     @string got = strings.TrimSpace(((@string)output));
     @string want = writeCountersInvokedForˢ;
     if (!strings.Contains(got, want)) {
         Ꮡt.Errorf("running 'harness -tp %s': got:\n%s\nwant: %s"u8,
             tp, got, want);
     }
+
     upmergeCoverData(Ꮡt, edir, naMode);
     upmergeCoverData(Ꮡt, rdir, naMode);
 }
@@ -479,17 +486,20 @@ internal static void testEmitWithCounterClearNonAtomic(ж<testing.T> Ꮡt, @stri
     var (rdir, edir) = mktestdirs(Ꮡt, tag, tp, dir);
     var (output, err) = runHarness(Ꮡt, harnessPath, tp,
         true, rdir, edir);
+
     // We expect an error here.
     if (err == default!) {
         Ꮡt.Logf("%s"u8, output);
         Ꮡt.Fatalf("running 'harness -tp %s' nonatomic: did not get expected error"u8, tp);
     }
+
     @string got = strings.TrimSpace(((@string)output));
     @string want = clearCountersInvokedForˢ;
     if (!strings.Contains(got, want)) {
         Ꮡt.Errorf("running 'harness -tp %s': got:\n%s\nwant: %s"u8,
             tp, got, want);
     }
+
     upmergeCoverData(Ꮡt, edir, naMode);
     upmergeCoverData(Ꮡt, rdir, naMode);
 }
@@ -507,6 +517,7 @@ public static void TestApisOnNocoverBinary(ж<testing.T> Ꮡt) {
     }
     testenv.MustHaveGoBuild(new cfile_internal_test_package.testing_TжTB(Ꮡt));
     @string dir = Ꮡt.TempDir();
+
     // Build harness with no -cover.
     @string bdir = mkdir(Ꮡt, filepath.Join(dir, nocoverˢ));
     @string edir = mkdir(Ꮡt, filepath.Join(dir, emitDirNoˢ));
@@ -529,20 +540,20 @@ internal static readonly @string raceˢ = "-race"u8;
 internal static readonly @string issue56006ˢ = "issue56006"u8;
 
 public static void TestIssue56006EmitDataRaceCoverRunningGoroutine(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (testing.Short()) {
         Ꮡt.Skipf("skipping test: too long for short mode"u8);
     }
     if (!goexperiment.CoverageRedesign) {
         Ꮡt.Skipf("skipping new coverage tests (experiment not enabled)"u8);
     }
+
     // This test requires "go test -race -cover", meaning that we need
     // go build, go run, and "-race" support.
     testenv.MustHaveGoRun(new cfile_internal_test_package.testing_TжTB(Ꮡt));
     if (!platform.RaceDetectorSupported(runtime.GOOS, runtime.GOARCH) || !testenv.HasCGO()) {
         Ꮡt.Skip(skippedDueToLackOfRaceˢ);
     }
+
     // This will run a program with -cover and -race where we have a
     // goroutine still running (and updating counters) at the point where
     // the test runtime is trying to write out counter data.
@@ -552,6 +563,7 @@ public static void TestIssue56006EmitDataRaceCoverRunningGoroutine(ж<testing.T>
     if (err != default!) {
         Ꮡt.Fatalf("go test -cover -race failed: %v\n%s"u8, err, b);
     }
+
     // Don't want to see any data races in output.
     var avoid = new @string[]{"DATA RACE"u8}.slice();
     foreach (var (_, no) in avoid) {
@@ -576,19 +588,23 @@ public static void TestIssue59563TruncatedCoverPkgAll(ж<testing.T> Ꮡt) {
         Ꮡt.Skipf("skipping test: too long for short mode"u8);
     }
     testenv.MustHaveGoRun(new cfile_internal_test_package.testing_TжTB(Ꮡt));
+
     @string tmpdir = Ꮡt.TempDir();
     @string ppath = filepath.Join(tmpdir, fooCovˢ);
+
     var cmd = exec.Command(testenv.GoToolPath(new cfile_internal_test_package.testing_TжTB(Ꮡt)), testˢ, coverpkgAllˢ, "-coverprofile=" + ppath);
     cmd.Value.Dir = filepath.Join(testdataˢ, issue59563ˢ);
     var (b, err) = cmd.CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatalf("go test -cover failed: %v\n%s"u8, err, b);
     }
+
     cmd = exec.Command(testenv.GoToolPath(new cfile_internal_test_package.testing_TжTB(Ꮡt)), toolˢ, coverˢ2, "-func=" + ppath);
     (b, err) = cmd.CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatalf("go tool cover -func failed: %v"u8, err);
     }
+
     var lines = strings.Split(((@string)b), "\n"u8);
     nint nfound = 0;
     var bad = false;

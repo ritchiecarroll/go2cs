@@ -38,14 +38,17 @@ internal static void checkLldbPython(ж<testing.T> Ꮡt) {
         Ꮡt.Skipf("skipping due to issue running lldb: %v\n%s"u8, err, @out);
     }
     lldbPath = strings.TrimSpace(((@string)@out));
+
     cmd = exec.Command(usrBinPython27ˢ, "-c"u8, importSysSysPathAppendˢ, lldbPath);
     (@out, err) = cmd.CombinedOutput();
+
     if (err != default!) {
         Ꮡt.Skipf("skipping due to issue running python: %v\n%s"u8, err, @out);
     }
     if (((sstring)@out) != "go lldb python support\n"u8) {
         Ꮡt.Skipf("skipping due to lack of python lldb support: %s"u8, @out);
     }
+
     if (Δruntime.GOOS == "darwin"u8) {
         // Try to see if we have debugging permissions.
         cmd = exec.Command(usrSbinDevToolsSecurityˢ, statusˢ);
@@ -160,22 +163,25 @@ internal static readonly @string scriptPyˢ = "script.py"u8;
 internal static readonly @string timeoutLaunchingˢ = "Timeout launching"u8;
 
 public static void TestLldbPython(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(Ꮡt));
     testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 31188);
+
     checkLldbPython(Ꮡt);
+
     @string dir = Ꮡt.TempDir();
+
     @string src = filepath.Join(dir, mainGoˢ);
     var err = Δos.WriteFile(src, slice<byte>(lldbHelloSource), 420);
     if (err != default!) {
         Ꮡt.Fatalf("failed to create src file: %v"u8, err);
     }
+
     @string mod = filepath.Join(dir, goModˢ);
     err = Δos.WriteFile(mod, slice<byte>("module lldbtest"u8), 420);
     if (err != default!) {
         Ꮡt.Fatalf("failed to create mod file: %v"u8, err);
     }
+
     // As of 2018-07-17, lldb doesn't support compressed DWARF, so
     // disable it for this test.
     var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), buildˢ, gcflagsAllNLˢ, ldflagsCompressdwarfˢ, "-o", aExeˢ);
@@ -185,14 +191,17 @@ public static void TestLldbPython(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("building source %v\n%s"u8, err, @out);
     }
+
     src = filepath.Join(dir, scriptPyˢ);
     err = Δos.WriteFile(src, slice<byte>(lldbScriptSource), 493);
     if (err != default!) {
         Ꮡt.Fatalf("failed to create script: %v"u8, err);
     }
+
     cmd = exec.Command(usrBinPython27ˢ, scriptPyˢ, lldbPath);
     cmd.Value.Dir = dir;
     var (got, _) = cmd.CombinedOutput();
+
     if (((sstring)got) != expectedLldbOutput) {
         if (strings.Contains(((@string)got), timeoutLaunchingˢ)) {
             Ꮡt.Skip(timeoutLaunchingˢ);

@@ -63,6 +63,7 @@ public static void TestHybridPool(ж<testing.T> Ꮡt) {
             time.Sleep(nextSleep);
         }
     }
+
     // Get the google.com chain, which should be valid on all platforms we
     // are testing
     var (c, err) = Δtls.Dial(tcpˢ, googleCom443ˢ, Ꮡ(new Δtls.Config(InsecureSkipVerify: true)));
@@ -70,6 +71,7 @@ public static void TestHybridPool(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("tls connection failed: %s"u8, err);
     }
     var googChain = c.ConnectionState().PeerCertificates;
+
     var rootTmpl = Ꮡ(new Δx509.Certificate(
         SerialNumber: big.NewInt(1),
         Subject: new pkix.Name(CommonName: "Go test root"u8),
@@ -90,20 +92,25 @@ public static void TestHybridPool(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to parse test cert: %s"u8, err);
     }
+
     (var pool, err) = Δx509.SystemCertPool();
     if (err != default!) {
         Ꮡt.Fatalf("SystemCertPool failed: %s"u8, err);
     }
     var opts = new Δx509.VerifyOptions(Roots: pool);
+
     (_, err) = googChain[0].Verify(opts);
     if (err != default!) {
         Ꮡt.Fatalf("verification failed for google.com chain (system only pool): %s"u8, err);
     }
+
     pool.AddCert(root);
+
     (_, err) = googChain[0].Verify(opts);
     if (err != default!) {
         Ꮡt.Fatalf("verification failed for google.com chain (hybrid pool): %s"u8, err);
     }
+
     var certTmpl = Ꮡ(new Δx509.Certificate(
         SerialNumber: big.NewInt(1),
         NotBefore: time.Now().Add(-time.ΔHour),
@@ -118,6 +125,7 @@ public static void TestHybridPool(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to parse test cert: %s"u8, err);
     }
+
     (_, err) = cert.Verify(opts);
     if (err != default!) {
         Ꮡt.Fatalf("verification failed for custom chain (hybrid pool): %s"u8, err);

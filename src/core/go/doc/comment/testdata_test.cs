@@ -47,6 +47,7 @@ public static void TestTestdata(ж<testing.T> Ꮡt) {
         }
         return false;
     };
+
     slice<byte> stripDollars(slice<byte> b) {
         // Remove trailing $ on lines.
         // They make it easier to see lines with trailing spaces,
@@ -97,7 +98,6 @@ public static void TestTestdata(ж<testing.T> Ꮡt) {
                 else { /* default: */
                     tΔ1.Fatalf("unknown output file %q"u8, f.Name);
                 }
-
                 if (((sstring)@out) != ((sstring)want)) {
                     tΔ1.Errorf("%s: %s"u8, @file, diff.Diff(f.Name, want, haveˢ, @out));
                 }

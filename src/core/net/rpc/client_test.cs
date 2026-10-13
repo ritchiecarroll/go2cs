@@ -88,22 +88,27 @@ public static partial void TestGobError(ж<testing.T> Ꮡt) {
             }
         }, ref ᒐ);
         Register(@new<S>());
+
         var (listen, err) = net.Listen(tcpˢ, "127.0.0.1:0"u8);
         if (err != default!) {
             throw panic(err);
         }
         goǃ(Accept, listen);
+
         (var client, err) = Dial(tcpˢ, listen.Addr().String());
         if (err != default!) {
             throw panic(err);
         }
+
         ref var reply = ref heap(new Reply(), out var Ꮡreply);
         err = client.Call(sRecvˢ, Ꮡ(new EmptyStruct()), Ꮡreply);
         if (err != default!) {
             throw panic(err);
         }
+
         fmt.Printf("%#v\n"u8, reply);
         client.Close();
+
         listen.Close();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

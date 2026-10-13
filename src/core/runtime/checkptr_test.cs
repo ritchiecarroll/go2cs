@@ -29,12 +29,15 @@ public static void TestCheckPtr(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingTestInShortModeˢ);
     }
+
     Ꮡt.Parallel();
     testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
+
     var (exe, err) = buildTestProg(Ꮡt, testprogˢ, gcflagsAllDCheckptr1ˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var testCases = new TestCheckPtr_testCases[]{
         new("CheckPtrAlignmentPtr"u8, "fatal error: checkptr: misaligned pointer conversion\n"u8),
         new("CheckPtrAlignmentNoPtr"u8, ""u8),
@@ -48,6 +51,7 @@ public static void TestCheckPtr(ж<testing.T> Ꮡt) {
         new("CheckPtrStringOK"u8, ""u8),
         new("CheckPtrStringFail"u8, "fatal error: checkptr: unsafe.String result straddles multiple allocations\n"u8)
     }.slice();
+
     foreach (var (_, tc) in testCases) {
         ref var tcΔ1 = ref heap<TestCheckPtr_testCases>(out var ᏑtcΔ1);
         tcΔ1 = tc;
@@ -85,15 +89,19 @@ public static void TestCheckPtr2(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingTestInShortModeˢ);
     }
+
     Ꮡt.Parallel();
     testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
+
     var (exe, err) = buildTestProg(Ꮡt, testprogˢ, gcflagsAllDCheckptr2ˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var testCases = new TestCheckPtr2_testCases[]{
         new("CheckPtrAlignmentNested"u8, "fatal error: checkptr: converted pointer straddles multiple allocations\n"u8)
     }.slice();
+
     foreach (var (_, tc) in testCases) {
         ref var tcΔ1 = ref heap<TestCheckPtr2_testCases>(out var ᏑtcΔ1);
         tcΔ1 = tc;

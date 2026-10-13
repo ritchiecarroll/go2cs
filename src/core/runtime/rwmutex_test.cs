@@ -56,8 +56,6 @@ internal static readonly object wasmHasNoThreadsYetˢ = (@string)"wasm has no th
 public static void TestParallelRWMutexReaders(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         if (GOARCH == "wasm"u8) {
             Ꮡt.Skip(wasmHasNoThreadsYetˢ);
         }
@@ -70,6 +68,7 @@ public static void TestParallelRWMutexReaders(ж<testing.T> Ꮡt) {
         // also preempts at the start of the sweep phase, so make sure that's
         // done too.
         GC();
+
         doTestParallelReaders(1);
         doTestParallelReaders(3);
         doTestParallelReaders(4);

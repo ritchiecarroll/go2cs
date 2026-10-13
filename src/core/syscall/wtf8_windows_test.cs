@@ -15,19 +15,6 @@ using unicode;
 
 partial class syscall_test_package {
 
-// 2-byte
-// 3-byte
-// unmatched surrogate halves
-// high surrogates: 0xD800 to 0xDBFF
-// "High surrogate followed by another high surrogate"
-// "High surrogate followed by a symbol that is not a surrogate"
-// "Unmatched high surrogate, followed by a surrogate pair, followed by an unmatched high surrogate"
-// low surrogates: 0xDC00 to 0xDFFF
-// "Low surrogate followed by another low surrogate"
-// "Low surrogate followed by a symbol that is not a surrogate"
-// "Unmatched low surrogate, followed by a surrogate pair, followed by an unmatched low surrogate"
-// 4-byte
-
 partial struct wtf8testsᴛ1 /*dyn*/ {
     internal @string str;
     internal slice<uint16> wstr;
@@ -45,6 +32,8 @@ internal static slice<wtf8testsᴛ1> wtf8tests = new wtf8testsᴛ1[]{
         str: "\x7F"u8,
         wstr: new uint16[]{0x7F}.slice()
     ),
+
+    // 2-byte
     new(
         str: ((@string)(new byte[]{0xc2, 0x80})),
         wstr: new uint16[]{0x80}.slice()
@@ -57,6 +46,8 @@ internal static slice<wtf8testsᴛ1> wtf8tests = new wtf8testsᴛ1[]{
         str: ((@string)(new byte[]{0xdf, 0xbf})),
         wstr: new uint16[]{0x07FF}.slice()
     ),
+
+    // 3-byte
     new(
         str: ((@string)(new byte[]{0xe0, 0xa0, 0x80})),
         wstr: new uint16[]{0x0800}.slice()
@@ -69,19 +60,24 @@ internal static slice<wtf8testsᴛ1> wtf8tests = new wtf8testsᴛ1[]{
         str: ((@string)(new byte[]{0xef, 0xbf, 0xbf})),
         wstr: new uint16[]{0xFFFF}.slice()
     ),
+    // unmatched surrogate halves
+    // high surrogates: 0xD800 to 0xDBFF
     new(
         str: ((@string)(new byte[]{0xed, 0xa0, 0x80})),
         wstr: new uint16[]{0xD800}.slice()
     ),
     new(
+        // "High surrogate followed by another high surrogate"
         str: ((@string)(new byte[]{0xed, 0xa0, 0x80, 0xed, 0xa0, 0x80})),
         wstr: new uint16[]{0xD800, 0xD800}.slice()
     ),
     new(
+        // "High surrogate followed by a symbol that is not a surrogate"
         str: ((@string)new byte[]{0xED, 0xA0, 0x80, 0xA}.slice()),
         wstr: new uint16[]{0xD800, 0xA}.slice()
     ),
     new(
+        // "Unmatched high surrogate, followed by a surrogate pair, followed by an unmatched high surrogate"
         str: ((@string)new byte[]{0xED, 0xA0, 0x80, 0xF0, 0x9D, 0x8C, 0x86, 0xED, 0xA0, 0x80}.slice()),
         wstr: new uint16[]{0xD800, 0xD834, 0xDF06, 0xD800}.slice()
     ),
@@ -93,19 +89,23 @@ internal static slice<wtf8testsᴛ1> wtf8tests = new wtf8testsᴛ1[]{
         str: ((@string)(new byte[]{0xed, 0xaf, 0xbf})),
         wstr: new uint16[]{0xDBFF}.slice()
     ),
+    // low surrogates: 0xDC00 to 0xDFFF
     new(
         str: ((@string)(new byte[]{0xed, 0xb0, 0x80})),
         wstr: new uint16[]{0xDC00}.slice()
     ),
     new(
+        // "Low surrogate followed by another low surrogate"
         str: ((@string)(new byte[]{0xed, 0xb0, 0x80, 0xed, 0xb0, 0x80})),
         wstr: new uint16[]{0xDC00, 0xDC00}.slice()
     ),
     new(
+        // "Low surrogate followed by a symbol that is not a surrogate"
         str: ((@string)new byte[]{0xED, 0xB0, 0x80, 0xA}.slice()),
         wstr: new uint16[]{0xDC00, 0xA}.slice()
     ),
     new(
+        // "Unmatched low surrogate, followed by a surrogate pair, followed by an unmatched low surrogate"
         str: ((@string)new byte[]{0xED, 0xB0, 0x80, 0xF0, 0x9D, 0x8C, 0x86, 0xED, 0xB0, 0x80}.slice()),
         wstr: new uint16[]{0xDC00, 0xD834, 0xDF06, 0xDC00}.slice()
     ),
@@ -117,6 +117,8 @@ internal static slice<wtf8testsᴛ1> wtf8tests = new wtf8testsᴛ1[]{
         str: ((@string)(new byte[]{0xed, 0xbf, 0xbf})),
         wstr: new uint16[]{0xDFFF}.slice()
     ),
+
+    // 4-byte
     new(
         str: ((@string)(new byte[]{0xf0, 0x90, 0x80, 0x80})),
         wstr: new uint16[]{0xD800, 0xDC00}.slice()

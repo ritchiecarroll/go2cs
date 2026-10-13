@@ -65,9 +65,8 @@ internal partial struct TestFinalizerRegisterABI_tests /*dyn*/ {
 public static void TestFinalizerRegisterABI(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         testenv.MustHaveExec(new runtime_test_package.testing_TжTB(Ꮡt));
+
         // Actually run the test in a subprocess because we don't want
         // finalizers from other tests interfering.
         if (Δos.Getenv(testFinalizerRegabiˢ) != "1"u8) {
@@ -79,6 +78,7 @@ public static void TestFinalizerRegisterABI(ж<testing.T> Ꮡt) {
             }
             return;
         }
+
         // Optimistically clear any latent finalizers from e.g. the testing
         // package before continuing.
         //
@@ -88,6 +88,7 @@ public static void TestFinalizerRegisterABI(ж<testing.T> Ꮡt) {
         // it's extremely unlikely.
         Δruntime.GC();
         Δruntime.GC();
+
         // fing will only pick the new IntRegArgs up if it's currently
         // sleeping and wakes up, so wait for it to go to sleep.
         var success = false;
@@ -101,8 +102,10 @@ public static void TestFinalizerRegisterABI(ж<testing.T> Ꮡt) {
         if (!success) {
             Ꮡt.Fatal(finalizerNotAsleepˢ);
         }
+
         nint argRegsBefore = runtime_internal_test_package.SetIntArgRegs(abi.IntArgRegs);
         defer(runtime_internal_test_package.SetIntArgRegs, argRegsBefore, ref ᒐ);
+
         var tests = new TestFinalizerRegisterABI_tests[]{
             new("Pointer"u8, regFinalizerPointer, -1),
             new("Interface"u8, regFinalizerIface, -2)
@@ -114,10 +117,13 @@ public static void TestFinalizerRegisterABI(ж<testing.T> Ꮡt) {
                 var x = Ꮡ(new TintPointer(p: @new<Tint>()));
                 (~x).p.Value = ((Tint)(~testʗ1).confirmValue);
                 Δruntime.SetFinalizer(x.OrTypedNil(), (~testʗ1).fin);
+
                 Δruntime.KeepAlive(x.OrTypedNil());
+
                 // Queue the finalizer.
                 Δruntime.GC();
                 Δruntime.GC();
+
                 if (!runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)time.ΔSecond)) {
                     tΔ1.Fatal(finalizerFailedToExecuteˢ);
                 }

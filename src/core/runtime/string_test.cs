@@ -138,7 +138,6 @@ public static void BenchmarkSliceByteToString(ж<testing.B> Ꮡb) {
     }
 }
 
-
 partial struct stringdataᴛ1 /*dyn*/ {
     internal @string name, data;
 }
@@ -275,6 +274,7 @@ public static void TestStringW(ж<testing.T> Ꮡt) {
         "hello"u8,
         "a\u5566\u7788b"u8
     }.slice();
+
     foreach (var (_, s) in strings) {
         slice<uint16> b = default!;
         foreach (var (_, c) in s) {
@@ -390,6 +390,7 @@ public static void TestStringOnStack(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 3; i++) {
         s = "a"u8 + s + "b"u8 + s + "c"u8;
     }
+
     {
         @string want = aaabcbabccbaabcbabcccˢ; if (s != want) {
             Ꮡt.Fatalf("want: '%v', got '%v'"u8, want, s);
@@ -408,6 +409,7 @@ public static void TestIntString(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("want '%v', got '%v'"u8, want, s);
         }
     }
+
     // Escaping result of intstring.
     array<@string> a = new(4);
     for (var i = (rune)0; i < 4; i++) {
@@ -471,8 +473,6 @@ internal static bool isZeroedR(slice<rune> r) {
 internal static readonly @string fooˢ3 = "foož"u8;
 
 public static void TestString2Slice(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Make sure we don't return slices that expose
     // an unzeroed section of stack-allocated temp buf
     // between len and cap. See issue 14232.
@@ -542,7 +542,6 @@ public static void TestAtoi(ж<testing.T> Ꮡt) {
             }
         }
     }
-
 }
 
 partial struct atoi32Test {
@@ -592,20 +591,22 @@ internal partial struct TestParseByteCount_type /*dyn*/ {
 }
 
 public static void TestParseByteCount(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestParseByteCount_type[]{ // Good numeric inputs.
-
+    foreach (var (_, test) in new TestParseByteCount_type[]{
+        // Good numeric inputs.
         new("1"u8, 1, true),
         new("12345"u8, 12345, true),
         new("012345"u8, 12345, true),
         new("98765432100"u8, 98765432100L, true),
-        new("9223372036854775807"u8, 9223372036854775807L, true), // Good trivial suffix inputs.
+        new("9223372036854775807"u8, 9223372036854775807L, true),
 
+        // Good trivial suffix inputs.
         new("1B"u8, 1, true),
         new("12345B"u8, 12345, true),
         new("012345B"u8, 12345, true),
         new("98765432100B"u8, 98765432100L, true),
-        new("9223372036854775807B"u8, 9223372036854775807L, true), // Good binary suffix inputs.
+        new("9223372036854775807B"u8, 9223372036854775807L, true),
 
+        // Good binary suffix inputs.
         new("1KiB"u8, ((int64)1 << (int)(10)), true),
         new("05KiB"u8, ((int64)5 << (int)(10)), true),
         new("1MiB"u8, ((int64)1 << (int)(20)), true),
@@ -613,41 +614,46 @@ public static void TestParseByteCount(ж<testing.T> Ꮡt) {
         new("1GiB"u8, ((int64)1 << (int)(30)), true),
         new("100GiB"u8, 107374182400L, true),
         new("1TiB"u8, 1099511627776L, true),
-        new("99TiB"u8, 108851651149824L, true), // Good zero inputs.
- //
- // -0 is an edge case, but no harm in supporting it.
+        new("99TiB"u8, 108851651149824L, true),
 
+        // Good zero inputs.
+        //
+        // -0 is an edge case, but no harm in supporting it.
         new("-0"u8, 0, true),
         new("0"u8, 0, true),
         new("0B"u8, 0, true),
         new("0KiB"u8, 0, true),
         new("0MiB"u8, 0, true),
         new("0GiB"u8, 0, true),
-        new("0TiB"u8, 0, true), // Bad inputs.
+        new("0TiB"u8, 0, true),
 
+        // Bad inputs.
         new(""u8, 0, false),
         new("-1"u8, 0, false),
         new("a12345"u8, 0, false),
         new("a12345B"u8, 0, false),
         new("12345x"u8, 0, false),
-        new("0x12345"u8, 0, false), // Bad numeric inputs.
+        new("0x12345"u8, 0, false),
 
+        // Bad numeric inputs.
         new("9223372036854775808"u8, 0, false),
         new("9223372036854775809"u8, 0, false),
         new("18446744073709551615"u8, 0, false),
         new("20496382327982653440"u8, 0, false),
         new("18446744073709551616"u8, 0, false),
         new("18446744073709551617"u8, 0, false),
-        new("9999999999999999999999"u8, 0, false), // Bad trivial suffix inputs.
+        new("9999999999999999999999"u8, 0, false),
 
+        // Bad trivial suffix inputs.
         new("9223372036854775808B"u8, 0, false),
         new("9223372036854775809B"u8, 0, false),
         new("18446744073709551615B"u8, 0, false),
         new("20496382327982653440B"u8, 0, false),
         new("18446744073709551616B"u8, 0, false),
         new("18446744073709551617B"u8, 0, false),
-        new("9999999999999999999999B"u8, 0, false), // Bad binary suffix inputs.
+        new("9999999999999999999999B"u8, 0, false),
 
+        // Bad binary suffix inputs.
         new("1Ki"u8, 0, false),
         new("05Ki"u8, 0, false),
         new("10Mi"u8, 0, false),
@@ -668,8 +674,9 @@ public static void TestParseByteCount(ж<testing.T> Ꮡt) {
         new("99999999999999999MiB"u8, 0, false),
         new("99999999999999GiB"u8, 0, false),
         new("99999999999TiB"u8, 0, false),
-        new("555EiB"u8, 0, false), // Mistaken SI suffix inputs.
+        new("555EiB"u8, 0, false),
 
+        // Mistaken SI suffix inputs.
         new("0KB"u8, 0, false),
         new("0MB"u8, 0, false),
         new("0GB"u8, 0, false),

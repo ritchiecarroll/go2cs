@@ -50,9 +50,11 @@ public static void TestStructOfEmbeddedIfaceMethodCall(ж<Δtesting.T> Ꮡt) {
             Type: Δreflect.TypeFor<TestStructOfEmbeddedIfaceMethodCall_Named>()
         )
     }.slice());
+
     var v = Δreflect.New(typ).Elem();
     v.Field(0).Set(
         Δreflect.ValueOf(Δreflect.TypeFor<@string>()));
+
     var x = v.Interface()._<TestStructOfEmbeddedIfaceMethodCall_Named>();
     var xʗ1 = x;
     shouldPanic(structOfDoesNotSupportˢ, () => {

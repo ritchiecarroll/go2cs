@@ -23,18 +23,22 @@ internal static readonly @string helloLinkˢ = "hello.link"u8;
 
 public static void TestSymlink(ж<testing.T> Ꮡt) {
     testenv.MustHaveSymlink(new fstest_internal_test_package.testing_TжTB(Ꮡt));
+
     @string tmp = Ꮡt.TempDir();
     var tmpfs = os.DirFS(tmp);
+
     {
         var err = os.WriteFile(filepath.Join(tmp, helloˢ), slice<byte>("hello, world\n"u8), 420); if (err != default!) {
             Ꮡt.Fatal(err);
         }
     }
+
     {
         var err = os.Symlink(filepath.Join(tmp, helloˢ), filepath.Join(tmp, helloLinkˢ)); if (err != default!) {
             Ꮡt.Fatal(err);
         }
     }
+
     {
         var err = TestFS(tmpfs, helloˢ, helloLinkˢ); if (err != default!) {
             Ꮡt.Fatal(err);
@@ -123,9 +127,11 @@ public static void TestTestFSWrappedErrors(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(errorExpectedˢ);
     }
     Ꮡt.Logf("Error (expecting wrapped fs.ErrPermission):\n%v"u8, err);
+
     if (!errors.Is(err, fs.ErrPermission)) {
         Ꮡt.Errorf("error should be a wrapped ErrPermission: %#v"u8, err);
     }
+
     // TestFS is expected to return a list of errors.
     // Enforce that the list can be extracted for browsing.
     ref var errs = ref heap<TestTestFSWrappedErrors_errs>(out var Ꮡerrs);

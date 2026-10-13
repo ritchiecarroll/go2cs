@@ -20,6 +20,7 @@ public static void TestCertPoolEqual(ж<testing.T> Ꮡt) {
 
     var tc = Ꮡ(new Certificate(Raw: new byte[]{1, 2, 3}.slice(), RawSubject: new byte[]{2}.slice()));
     var otherTC = Ꮡ(new Certificate(Raw: new byte[]{9, 8, 7}.slice(), RawSubject: new byte[]{8}.slice()));
+
     var emptyPool = NewCertPool();
     var nonSystemPopulated = NewCertPool();
     nonSystemPopulated.AddCert(tc);
@@ -101,6 +102,7 @@ public static void TestCertPoolEqual(ж<testing.T> Ꮡt) {
             equal: false
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tcΔ1 = ref heap(new TestCertPoolEqual_tests(), out var ᏑtcΔ1);
         tcΔ1 = vᴛ1;

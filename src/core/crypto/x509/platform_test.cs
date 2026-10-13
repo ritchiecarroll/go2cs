@@ -56,6 +56,7 @@ public static void TestPlatformVerifier(ж<testing.T> Ꮡt) {
     if (runtime.GOOS != "windows"u8 && runtime.GOOS != "darwin"u8) {
         Ꮡt.Skip(onlyTestedOnWindowsAndˢ);
     }
+
     var (der, err) = os.ReadFile(rootCertPath);
     if (err != default!) {
         Ꮡt.Fatalf("failed to read test root: %s"u8, err);
@@ -65,6 +66,7 @@ public static void TestPlatformVerifier(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to parse test root: %s"u8, err);
     }
+
     (der, err) = os.ReadFile(rootKeyPath);
     if (err != default!) {
         Ꮡt.Fatalf("failed to read test key: %s"u8, err);
@@ -74,12 +76,15 @@ public static void TestPlatformVerifier(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to parse test key: %s"u8, err);
     }
+
     {
         var (_, errΔ1) = testRoot.Verify(new VerifyOptions(nil)); if (errΔ1 != default!) {
             Ꮡt.Skipf("test root is not in trust store, skipping (err: %q)"u8, errΔ1);
         }
     }
+
     var now = time.Now();
+
     var tests = new TestPlatformVerifier_tests[]{
         new(
             name: "valid"u8,
@@ -198,10 +203,12 @@ public static void TestPlatformVerifier(ж<testing.T> Ꮡt) {
             windowsErr: "x509: certificate specifies an incompatible key usage"u8
         )
     }.slice();
+
     (var leafKey, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
     if (err != default!) {
         Ꮡt.Fatalf("ecdsa.GenerateKey failed: %s"u8, err);
     }
+
     foreach (var (_, tc) in tests) {
         ref var tcΔ1 = ref heap<TestPlatformVerifier_tests>(out var ᏑtcΔ1);
         tcΔ1 = tc;
@@ -223,6 +230,7 @@ public static void TestPlatformVerifier(ж<testing.T> Ꮡt) {
             if (errΔ2 != default!) {
                 tΔ1.Fatalf("ParseCertificate failed: %s"u8, errΔ2);
             }
+
             global::go.crypto.x509_package.VerifyOptions opts = default!;
             if (tcʗ1.dnsName != ""u8) {
                 opts.DNSName = tcʗ1.dnsName;
@@ -233,6 +241,7 @@ public static void TestPlatformVerifier(ж<testing.T> Ꮡt) {
             if (builtin.len(tcʗ1.eku) > 0) {
                 opts.KeyUsages = tcʗ1.eku;
             }
+
             @string expectedErr = tcʗ1.expectedErr;
             if (runtime.GOOS == "darwin"u8 && tcʗ1.macosErr != ""u8){
                 expectedErr = tcʗ1.macosErr;
@@ -240,6 +249,7 @@ public static void TestPlatformVerifier(ж<testing.T> Ꮡt) {
             if (runtime.GOOS == "windows"u8 && tcʗ1.windowsErr != ""u8) {
                 expectedErr = tcʗ1.windowsErr;
             }
+
             (_, errΔ2) = cert.Verify(opts);
             if (errΔ2 != default! && expectedErr == ""u8){
                 tΔ1.Errorf("unexpected verification error: %s"u8, errΔ2);

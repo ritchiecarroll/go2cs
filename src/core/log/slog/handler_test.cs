@@ -146,7 +146,6 @@ public static void TestConcurrentWrites(ж<testing.T> Ꮡt) {
             else { /* default: */
                 tΔ1.Fatalf("unexpected handlerType %q"u8, handlerType);
             }
-
             var sub1 = h.WithAttrs(new global::go.log.slog_package.Attr[]{go.log.slog_package.Bool(sub1ˢ, true)}.slice());
             var sub2 = h.WithAttrs(new global::go.log.slog_package.Attr[]{go.log.slog_package.Bool(sub2ˢ, true)}.slice());
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -223,8 +222,10 @@ public static void TestJSONAndTextHandlers(ж<testing.T> Ꮡt) {
 
     // remove all Attrs
     var removeAll = (slice<@string> _, global::go.log.slog_package.Attr a) => new Attr(nil);
+
     var attrs = new global::go.log.slog_package.Attr[]{go.log.slog_package.String("a"u8, oneˢ), Int("b"u8, 2), go.log.slog_package.Any(""u8, default!)}.slice();
     var preAttrs = new global::go.log.slog_package.Attr[]{Int(preˢ, 3), go.log.slog_package.String("x"u8, "y"u8)}.slice();
+
             var preAttrsʗ1 = preAttrs;
 
             var preAttrsʗ2 = preAttrs;
@@ -328,7 +329,6 @@ public static void TestJSONAndTextHandlers(ж<testing.T> Ꮡt) {
         new(
             name: "groups"u8,
             replace: removeKeys(TimeKey, LevelKey), // to simplify the result
-
             attrs: new global::go.log.slog_package.Attr[]{
                 Int("a"u8, 1),
                 Group("g"u8,
@@ -376,9 +376,8 @@ public static void TestJSONAndTextHandlers(ж<testing.T> Ꮡt) {
                 go.log.slog_package.String("a b"u8, "x\t\n\u0000y"u8),
                 Group(bCX2Eˢ,
                     go.log.slog_package.String("d=e"u8, "f.g\""u8),
-                    Int("m.d"u8, 1))
-            }.slice(), // dot is not escaped
-
+                    Int("m.d"u8, 1)) // dot is not escaped
+            }.slice(),
             wantText: @"msg=message ""a b""=""x\t\n\x00y"" "" b.c=\""\\x2E\t.d=e""=""f.g\"""" "" b.c=\""\\x2E\t.m.d""=1"u8,
             wantJSON: @"{""msg"":""message"",""a b"":""x\t\n\u0000y"","" b.c=\""\\x2E\t"":{""d=e"":""f.g\"""",""m.d"":1}}"u8
         ),
@@ -394,11 +393,10 @@ public static void TestJSONAndTextHandlers(ж<testing.T> Ꮡt) {
             wantJSON: @"{""msg"":""message"",""a"":1,""name"":{""first"":""Ren"",""last"":""Hoek""},""b"":2}"u8
         ),
         new(
-            name: "resolve"u8, // Test resolution when there is no ReplaceAttr function.
-
+            // Test resolution when there is no ReplaceAttr function.
+            name: "resolve"u8,
             attrs: new global::go.log.slog_package.Attr[]{
                 go.log.slog_package.Any(""u8, Ꮡ(new replace(new Value(nil)))), // should be elided
-
                 go.log.slog_package.Any(nameˢ, new logValueName("Ren"u8, "Hoek"u8))
             }.slice(),
             wantText: "time=2000-01-02T03:04:05.000Z level=INFO msg=message name.first=Ren name.last=Hoek"u8,
@@ -677,11 +675,11 @@ public static void TestHandlerEnabled(ж<testing.T> Ꮡt) {
         Ꮡal.Set(l);
         return Ꮡal;
     }
+
     foreach (var (_, test) in new TestHandlerEnabled_type[]{
         new(default!, true),
         new(LevelWarn, false),
         new(new global::go.log.slog_package.LevelVarжLeveler(Ꮡ(new LevelVar(nil))), true), // defaults to Info
-
         new(new global::go.log.slog_package.LevelVarжLeveler(levelVar(LevelWarn)), false),
         new(LevelDebug, true),
         new(new global::go.log.slog_package.LevelVarжLeveler(levelVar(LevelDebug)), true)
@@ -736,6 +734,7 @@ internal partial struct TestReplaceAttrGroups_ga /*dyn*/ {
 
 public static void TestReplaceAttrGroups(ж<testing.T> Ꮡt) {
     ref var got = ref heap<slice<TestReplaceAttrGroups_ga>>(out var Ꮡgot);
+
     var h = NewTextHandler(io.Discard, Ꮡ(new HandlerOptions(ReplaceAttr: (slice<@string> gs, global::go.log.slog_package.Attr a) => {
         @string v = a.Value.String();
         if (a.Key == TimeKey) {
@@ -752,6 +751,7 @@ public static void TestReplaceAttrGroups(ж<testing.T> Ꮡt) {
         Int("f"u8, 6),
         Group("g4"u8, Int("h"u8, 7)),
         Int("i"u8, 8));
+
     var want = new TestReplaceAttrGroups_ga[]{
         new(""u8, "a"u8, "1"u8),
         new("g1"u8, "b"u8, "2"u8),
@@ -813,6 +813,7 @@ public static void TestDiscardHandler(ж<testing.T> Ꮡt) {
     Ꮡt.Cleanup(() => {
         (os.Stdout, os.Stderr) = (stdoutʗ1, stderrʗ1);
     });
+
     // Just ensure nothing panics during normal usage
     var l = New(DiscardHandler);
     l.Info(msgˢ, (@string)"a"u8, (nint)(1), (@string)"b"u8, (nint)(2));

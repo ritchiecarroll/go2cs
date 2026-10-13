@@ -103,13 +103,17 @@ public static void Test64BitReturnStdCall(ж<testing.T> Ꮡt) {
     UntypedInt VER_SERVICEPACKMAJOR = 0x0000020;
     UntypedInt VER_SERVICEPACKMINOR = 0x0000010;
     UntypedInt VER_SUITENAME = 0x0000040;
+
     UntypedInt VER_EQUAL = 1;
     UntypedInt VER_GREATER = 2;
     uintptr VER_GREATER_EQUAL = 3;
     UntypedInt VER_LESS = 4;
     UntypedInt VER_LESS_EQUAL = 5;
+
     syscall.Errno ERROR_OLD_WIN_VERSION = 1150;
+
     var d = GetDLL(Ꮡt, kernel32Dllˢ);
+
     uintptr m1 = default!;
     uintptr m2 = default!;
     var VerSetConditionMask = d.Proc(verSetConditionMaskˢ);
@@ -117,6 +121,7 @@ public static void Test64BitReturnStdCall(ж<testing.T> Ꮡt) {
     (m1, m2, _) = VerSetConditionMask.Call(m1, m2, VER_MINORVERSION, VER_GREATER_EQUAL);
     (m1, m2, _) = VerSetConditionMask.Call(m1, m2, VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL);
     (m1, m2, _) = VerSetConditionMask.Call(m1, m2, VER_SERVICEPACKMINOR, VER_GREATER_EQUAL);
+
     ref var vi = ref heap<Test64BitReturnStdCall_OSVersionInfoEx>(out var Ꮡvi);
     vi = new Test64BitReturnStdCall_OSVersionInfoEx(
         MajorVersion: 5,
@@ -239,6 +244,7 @@ public static void TestCallbackPanicLocked(ж<testing.T> Ꮡt) {
     try {
         Δruntime.LockOSThread();
         defer(Δruntime.UnlockOSThread, ref ᒐ);
+
         if (!runtime_internal_test_package.LockedOSThread()) {
             Ꮡt.Fatal(runtimeLockOSThreadDidnTˢ);
         }
@@ -296,8 +302,6 @@ public static void TestCallbackPanic(ж<testing.T> Ꮡt) {
 }
 
 public static void TestCallbackPanicLoop(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Make sure we don't blow out m->g0 stack.
     for (nint i = 0; i < 100000; i++) {
         TestCallbackPanic(Ꮡt);
@@ -333,6 +337,7 @@ public static void TestCallbackInAnotherThread(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var d = GetDLL(Ꮡt, kernel32Dllˢ);
+
         var f = (uintptr p) => p;
         var (r, _, err) = d.Proc(createThreadˢ).Call(0, 0, syscall.NewCallback((f).OrTypedNilFunc()), 123, 0, 0);
         if (r == 0) {
@@ -340,6 +345,7 @@ public static void TestCallbackInAnotherThread(ж<testing.T> Ꮡt) {
         }
         var h = ((syscallꓸHandle)r);
         defer(syscall.CloseHandle, h, ref ᒐ);
+
         {
             var (s, errΔ1) = syscall.WaitForSingleObject(h, syscall.INFINITE);
             var exprᴛ1 = s;
@@ -427,6 +433,7 @@ uintptr_t %s(%s f) {
 
 internal static void testOne(this cbFunc f, ж<testing.T> Ꮡt, ж<syscall.DLL> Ꮡdll, bool cdecl, uintptr cb) {
     var (r1, _, _) = Ꮡdll.MustFindProc(f.cName(cdecl)).Call(cb);
+
     nint want = 0;
     for (nint i = 0; i < reflect.TypeOf(f.goFunc).NumIn(); i++) {
         want += i + 1;
@@ -440,7 +447,6 @@ partial struct uint8Pair {
     internal uint8 x, y;
 }
 
-// Non-uintptr parameters.
 internal static slice<cbFunc> cbFuncs = new cbFunc[]{
     new(uintptr (uintptr i1, uintptr i2) => i1 + i2),
     new(uintptr (uintptr i1, uintptr i2, uintptr i3) => i1 + i2 + i3),
@@ -450,6 +456,8 @@ internal static slice<cbFunc> cbFuncs = new cbFunc[]{
     new(uintptr (uintptr i1, uintptr i2, uintptr i3, uintptr i4, uintptr i5, uintptr i6, uintptr i7) => i1 + i2 + i3 + i4 + i5 + i6 + i7),
     new(uintptr (uintptr i1, uintptr i2, uintptr i3, uintptr i4, uintptr i5, uintptr i6, uintptr i7, uintptr i8) => i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8),
     new(uintptr (uintptr i1, uintptr i2, uintptr i3, uintptr i4, uintptr i5, uintptr i6, uintptr i7, uintptr i8, uintptr i9) => i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9),
+
+    // Non-uintptr parameters.
     new(uintptr (uint8 i1, uint8 i2, uint8 i3, uint8 i4, uint8 i5, uint8 i6, uint8 i7, uint8 i8, uint8 i9) => (uintptr)((uint8)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9))),
     new(uintptr (uint16 i1, uint16 i2, uint16 i3, uint16 i4, uint16 i5, uint16 i6, uint16 i7, uint16 i8, uint16 i9) => (uintptr)((uint16)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9))),
     new(uintptr (int8 i1, int8 i2, int8 i3, int8 i4, int8 i5, int8 i6, int8 i7, int8 i8, int8 i9) => (uintptr)((int8)(i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9))),
@@ -594,6 +602,7 @@ internal static void makeSrc(this ref cbDLL d, ж<testing.T> Ꮡt, @string path)
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         fmt.Fprint(new Δos.FileжWriter(f), includeStdintHTypedefˢ);
         foreach (var (_, cbf) in getCallbackTestFuncs()) {
             cbf.cSrc(new Δos.FileжWriter(f), false);
@@ -641,8 +650,10 @@ public static void TestStdcallAndCDeclCallbacks(ж<testing.T> Ꮡt) {
             }
         }
         @string tmp = Ꮡt.TempDir();
+
         nint oldRegs = runtime_internal_test_package.SetIntArgRegs(abi.IntArgRegs);
         defer(runtime_internal_test_package.SetIntArgRegs, oldRegs, ref ᒐ);
+
         foreach (var (_, vᴛ1) in cbDLLs) {
             ref var dll = ref heap(new cbDLL(), out var Ꮡdll);
             dll = vᴛ1;
@@ -774,8 +785,6 @@ internal static readonly @string testRunTestWERDialogueˢ = "-test.run=TestWERDi
 internal static readonly object testProgramSucceededˢ = (@string)"test program succeeded unexpectedly"u8;
 
 public static void TestWERDialogue(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (Δos.Getenv(testWerDialogueˢ) == "1"u8) {
         uintptr EXCEPTION_NONCONTINUABLE = 1;
         var mod = syscall.MustLoadDLL(kernel32Dllˢ);
@@ -875,8 +884,10 @@ public static partial void TestReturnAfterStackGrowInCallback(ж<testing.T> Ꮡt
                 Ꮡt.Skip(skippingTestGccIsMissingˢ);
             }
         }
+
         @string src = srcᶜ;
         @string tmpdir = Ꮡt.TempDir();
+
         @string srcname = mydllCˢ;
         var err = Δos.WriteFile(filepath.Join(tmpdir, srcname), slice<byte>(src), 0);
         if (err != default!) {
@@ -890,17 +901,20 @@ public static partial void TestReturnAfterStackGrowInCallback(ж<testing.T> Ꮡt
             Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, ((@string)@out));
         }
         @string dllpath = filepath.Join(tmpdir, outname);
+
         var dll = syscall.MustLoadDLL(dllpath);
         var dllʗ1 = dll;
         defer(() => dllʗ1.Release(), ref ᒐ);
+
         var proc = dll.MustFindProc(cfuncˢ);
+
         var cb = syscall.NewCallback(uintptr (uintptr n) => {
             forceStackCopy();
             return n;
         });
         ref var want = ref heap<TestReturnAfterStackGrowInCallback_result>(out var Ꮡwant);
-        want = new TestReturnAfterStackGrowInCallback_result( // Make it large enough to test issue #29331.
-
+        want = new TestReturnAfterStackGrowInCallback_result(
+            // Make it large enough to test issue #29331.
             r: ((~(uintptr)0) >> (int)(24)),
             err: 333
         );
@@ -931,6 +945,7 @@ public static void TestSyscallN(ж<testing.T> Ꮡt) {
     if (Δruntime.GOARCH != "amd64"u8) {
         Ꮡt.Skipf("skipping test: GOARCH=%s"u8, Δruntime.GOARCH);
     }
+
     for (nint arglen = 0; arglen <= runtime_internal_test_package.MaxArgs; arglen++) {
         nint arglenΔ1 = arglen;
         Ꮡt.Run(fmt.Sprintf("arg-%d"u8, arglenΔ1), (ж<testing.T> tΔ1) => {
@@ -946,13 +961,16 @@ public static void TestSyscallN(ж<testing.T> Ꮡt) {
                     @params[i] = (uintptr)i;
                 }
                 rets[arglenΔ1] = "1"u8; // for arglen == 0
+
                 @string src = fmt.Sprintf("""
 
 		#include <stdint.h>
 		#include <windows.h>
 		int cfunc(%s) { return %s; }
 """u8.Raw(), strings.Join(args, ", "u8), strings.Join(rets, " && "u8));
+
                 @string tmpdir = tΔ1.TempDir();
+
                 @string srcname = mydllCˢ;
                 var err = Δos.WriteFile(filepath.Join(tmpdir, srcname), slice<byte>(src), 0);
                 if (err != default!) {
@@ -966,10 +984,13 @@ public static void TestSyscallN(ж<testing.T> Ꮡt) {
                     tΔ1.Fatalf("failed to build dll: %v\n%s"u8, err, @out);
                 }
                 @string dllpath = filepath.Join(tmpdir, outname);
+
                 var dll = syscall.MustLoadDLL(dllpath);
                 var dllʗ1 = dll;
                 defer(() => dllʗ1.Release(), ref ᒐ);
+
                 var proc = dll.MustFindProc(cfuncˢ);
+
                 // proc.Call() will call SyscallN() internally.
                 (var r, _, err) = proc.Call(@params.ꓸꓸꓸ);
                 if (r != 1) {
@@ -1008,8 +1029,10 @@ public static void TestFloatArgs(ж<testing.T> Ꮡt) {
         if (Δruntime.GOARCH != "amd64"u8) {
             Ꮡt.Skipf("skipping test: GOARCH=%s"u8, Δruntime.GOARCH);
         }
+
         @string src = srcᶜ1;
         @string tmpdir = Ꮡt.TempDir();
+
         @string srcname = mydllCˢ;
         var err = Δos.WriteFile(filepath.Join(tmpdir, srcname), slice<byte>(src), 0);
         if (err != default!) {
@@ -1023,10 +1046,13 @@ public static void TestFloatArgs(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, ((@string)@out));
         }
         @string dllpath = filepath.Join(tmpdir, outname);
+
         var dll = syscall.MustLoadDLL(dllpath);
         var dllʗ1 = dll;
         defer(() => dllʗ1.Release(), ref ᒐ);
+
         var proc = dll.MustFindProc(cfuncˢ);
+
         (var r, _, err) = proc.Call(
             1,
             (uintptr)Δmath.Float64bits(2.2D),
@@ -1077,8 +1103,10 @@ public static void TestFloatReturn(ж<testing.T> Ꮡt) {
         if (Δruntime.GOARCH != "amd64"u8) {
             Ꮡt.Skipf("skipping test: GOARCH=%s"u8, Δruntime.GOARCH);
         }
+
         @string src = srcᶜ2;
         @string tmpdir = Ꮡt.TempDir();
+
         @string srcname = mydllCˢ;
         var err = Δos.WriteFile(filepath.Join(tmpdir, srcname), slice<byte>(src), 0);
         if (err != default!) {
@@ -1092,10 +1120,13 @@ public static void TestFloatReturn(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, ((@string)@out));
         }
         @string dllpath = filepath.Join(tmpdir, outname);
+
         var dll = syscall.MustLoadDLL(dllpath);
         var dllʗ1 = dll;
         defer(() => dllʗ1.Release(), ref ᒐ);
+
         var proc = dll.MustFindProc(cfuncFloatˢ);
+
         (_, var r, err) = proc.Call(
             1,
             (uintptr)Δmath.Float64bits(2.2D),
@@ -1105,7 +1136,9 @@ public static void TestFloatReturn(ж<testing.T> Ꮡt) {
         if (fr != 1.5F) {
             Ꮡt.Errorf("got %f want 1.5 (err=%v)"u8, fr, err);
         }
+
         proc = dll.MustFindProc(cfuncDoubleˢ);
+
         (_, r, err) = proc.Call(
             1,
             (uintptr)Δmath.Float64bits(2.2D),
@@ -1166,12 +1199,15 @@ internal static error resumeChildThread(ж<syscall.DLL> Ꮡkernel32, nint childp
         var _ResumeThread = Ꮡkernel32.MustFindProc(resumeThreadˢ);
         var _Thread32First = Ꮡkernel32.MustFindProc(thread32Firstˢ);
         var _Thread32Next = Ꮡkernel32.MustFindProc(thread32Nextˢ);
+
         var (snapshot, err) = syscall.CreateToolhelp32Snapshot(syscall.TH32CS_SNAPTHREAD, 0);
         if (err != default!) {
             return err;
         }
         defer(syscall.CloseHandle, snapshot, ref ᒐ);
+
         uintptr _THREAD_SUSPEND_RESUME = 0x0002;
+
         ref var te = ref heap(new resumeChildThread_ThreadEntry32(), out var Ꮡte);
         te.Size = (uint32)/* unsafe.Sizeof(te) */ (uintptr)28;
         (var ret, _, err) = _Thread32First.Call((uintptr)snapshot, (uintptr)Ꮡte);
@@ -1189,6 +1225,7 @@ internal static error resumeChildThread(ж<syscall.DLL> Ꮡkernel32, nint childp
             return err;
         }
         defer(syscall.Close, ((syscallꓸHandle)h), ref ᒐ);
+
         (ret, _, err) = _ResumeThread.Call(h);
         if (ret == 0xffffffffU) {
             return err;
@@ -1215,6 +1252,7 @@ public static void TestNumCPU(ж<testing.T> Ꮡt) {
             fmt.Fprintf(new Δos.FileжWriter(Δos.Stderr), "%d"u8, Δruntime.NumCPU());
             Δos.Exit(0);
         }
+
         {
             var n = runtime_internal_test_package.NumberOfProcessors();
             switch (ᐧ) {
@@ -1232,9 +1270,11 @@ public static void TestNumCPU(ж<testing.T> Ꮡt) {
 
         const uint32 _CREATE_SUSPENDED = 0x00000004;
         const uint32 _PROCESS_ALL_ACCESS = /* syscall.STANDARD_RIGHTS_REQUIRED | syscall.SYNCHRONIZE | 0xfff */ 2035711;
+
         var kernel32 = syscall.MustLoadDLL(kernel32Dllˢ);
         var _GetProcessAffinityMask = kernel32.MustFindProc(getProcessAffinityMaskˢ);
         var _SetProcessAffinityMask = kernel32.MustFindProc(setProcessAffinityMaskˢ);
+
         var cmd = exec.Command(Δos.Args[0], testRunTestNumCPUˢ);
         cmd.Value.Env = append(Δos.Environ(), "GO_WANT_HELPER_PROCESS=1"u8);
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
@@ -1259,6 +1299,7 @@ public static void TestNumCPU(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("child output: want %q, got %q"u8, want, childOutput);
             }
         }, ref ᒐ);
+
         var cmdʗ2 = cmd;
         var kernel32ʗ1 = kernel32;
         defer(() => {
@@ -1267,21 +1308,25 @@ public static void TestNumCPU(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(Ꮡerr.ValueSlot);
             }
         }, ref ᒐ);
+
         (var ph, err) = syscall.OpenProcess(_PROCESS_ALL_ACCESS, false, (uint32)(~(~cmd).Process).Pid);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         defer(syscall.CloseHandle, ph, ref ᒐ);
+
         ref var mask = ref heap(new uintptr(), out var Ꮡmask);
         ref var sysmask = ref heap(new uintptr(), out var Ꮡsysmask);
         (var ret, _, err) = _GetProcessAffinityMask.Call((uintptr)ph, (uintptr)@unsafe.Pointer.FromBox(Ꮡmask), (uintptr)@unsafe.Pointer.FromBox(Ꮡsysmask));
         if (ret == 0) {
             Ꮡt.Fatal(err);
         }
+
         (var newmask, err) = removeOneCPU(mask);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         (ret, _, err) = _SetProcessAffinityMask.Call((uintptr)ph, newmask);
         if (ret == 0) {
             Ꮡt.Fatal(err);
@@ -1322,7 +1367,9 @@ public static void TestDLLPreloadMitigation(ж<testing.T> Ꮡt) {
             Ꮡt.Skip(skippingTestGccIsMissingˢ);
         }
     }
+
     @string tmpdir = Ꮡt.TempDir();
+
     @string src = srcᶜ3;
     @string srcname = nojackCˢ;
     var err = Δos.WriteFile(filepath.Join(tmpdir, srcname), slice<byte>(src), 0);
@@ -1337,14 +1384,17 @@ public static void TestDLLPreloadMitigation(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, ((@string)@out));
     }
     @string dllpath = filepath.Join(tmpdir, name);
+
     var dll = syscall.MustLoadDLL(dllpath);
     dll.MustFindProc(cfuncˢ);
     dll.Release();
+
     // Get into the directory with the DLL we'll load by base name
     // ("nojack.dll") Think of this as the user double-clicking an
     // installer from their Downloads directory where a browser
     // silently downloaded some malicious DLLs.
     Ꮡt.Chdir(tmpdir);
+
     // First before we can load a DLL from the current directory,
     // loading it only as "nojack.dll", without an absolute path.
     delete(sysdll.IsSystemDLL, name); // in case test was run repeatedly
@@ -1353,6 +1403,7 @@ public static void TestDLLPreloadMitigation(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("failed to load %s by base name before sysdll registration: %v"u8, name, err);
     }
     dll.Release();
+
     // And now verify that if we register it as a system32-only
     // DLL, the implicit loading from the current directory no
     // longer works.
@@ -1381,11 +1432,14 @@ public static void TestBigStackCallbackSyscall(ж<testing.T> Ꮡt) {
                 Ꮡt.Skip(skippingTestGccIsMissingˢ);
             }
         }
+
         var (srcname, err) = filepath.Abs(testdataTestprogcgoˢ);
         if (err != default!) {
             Ꮡt.Fatal(absFailedˢ, err);
         }
+
         @string tmpdir = Ꮡt.TempDir();
+
         @string outname = mydllDllˢ;
         var cmd = exec.Command(gccˢ, sharedˢ, "-s", werrorˢ, "-o", outname, srcname);
         cmd.Value.Dir = tmpdir;
@@ -1394,9 +1448,11 @@ public static void TestBigStackCallbackSyscall(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("failed to build dll: %v - %v"u8, err, ((@string)@out));
         }
         @string dllpath = filepath.Join(tmpdir, outname);
+
         var dll = syscall.MustLoadDLL(dllpath);
         var dllʗ1 = dll;
         defer(() => dllʗ1.Release(), ref ᒐ);
+
         bool ok = default!;
         var proc = dll.MustFindProc(bigStackˢ);
         var cb = syscall.NewCallback(uintptr () => {
@@ -1415,8 +1471,6 @@ public static void TestBigStackCallbackSyscall(ж<testing.T> Ꮡt) {
 }
 
 public static void TestSyscallStackUsage(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Test that the stack usage of a syscall doesn't exceed the limit.
     // See https://go.dev/issue/69813.
     syscall.Syscall15(procSetEvent.Addr(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -1425,6 +1479,7 @@ public static void TestSyscallStackUsage(ж<testing.T> Ꮡt) {
 
 internal static ж<syscall.LazyDLL> modwinmm = syscall.NewLazyDLL("winmm.dll"u8);
 internal static ж<syscall.LazyDLL> modkernel32 = syscall.NewLazyDLL("kernel32.dll"u8);
+
 internal static ж<syscall.LazyProc> procCreateEvent = modkernel32.NewProc("CreateEventW"u8);
 internal static ж<syscall.LazyProc> procSetEvent = modkernel32.NewProc("SetEvent"u8);
 
@@ -1540,11 +1595,13 @@ public static void BenchmarkRunningGoProgram(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     @string tmpdir = Ꮡb.TempDir();
+
     @string src = filepath.Join(tmpdir, mainGoˢ);
     var err = Δos.WriteFile(src, slice<byte>(benchmarkRunningGoProgram), 438);
     if (err != default!) {
         Ꮡb.Fatal(err);
     }
+
     @string exe = filepath.Join(tmpdir, mainExeˢ);
     var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_BжTB(Ꮡb)), buildˢ, "-o", exe, src);
     cmd.Value.Dir = tmpdir;
@@ -1552,6 +1609,7 @@ public static void BenchmarkRunningGoProgram(ж<testing.B> Ꮡb) {
     if (err != default!) {
         Ꮡb.Fatalf("building main.exe failed: %v\n%s"u8, err, @out);
     }
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         var cmdΔ1 = exec.Command(exe);

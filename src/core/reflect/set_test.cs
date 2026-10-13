@@ -17,6 +17,7 @@ using Δreflect = reflect_package;
 
 partial class reflect_test_package {
 
+// convert identical underlying types
 internal partial struct TestImplicitMapConversion_MyBuffer /*global::go.bytes_package.Buffer*/;
 
 public static void TestImplicitMapConversion(ж<Δtesting.T> Ꮡt) {
@@ -180,7 +181,6 @@ public static void TestImplicitAppendConversion(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-
 partial struct implementsTestsᴛ1 /*dyn*/ {
     internal any x;
     internal any t;
@@ -232,7 +232,6 @@ public static void TestImplements(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-// test runs implementsTests too
 internal static slice<implementsTestsᴛ1> assignableTests = new implementsTestsᴛ1[]{
     new(@new<channel<nint>>(), Ꮡ(/*<-*/channel<nint>.RecvOnly), true),
     new(Ꮡ(/*<-*/channel<nint>.RecvOnly), @new<channel<nint>>(), false),
@@ -240,6 +239,7 @@ internal static slice<implementsTestsᴛ1> assignableTests = new implementsTests
     new(@new<IntPtr>(), @new<ж<nint>>(), true),
     new(@new<IntPtr>(), @new<IntPtr1>(), false),
     new(@new<Ch>(), Ꮡ(/*<-*/channel<any>.RecvOnly), true)
+    // test runs implementsTests too
 }.slice();
 
 partial class IntPtr /*ж<nint>*/;

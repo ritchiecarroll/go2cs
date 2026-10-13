@@ -55,6 +55,7 @@ func main() {}
             Ꮡt.Fatalf("compile: %v, %s"u8, errΔ2, @out);
         }
     }
+
     cmd = exec.Command(goBin, toolˢ, "nm", xExeˢ);
     cmd.Value.Dir = tmp;
     var (nm, err) = cmd.CombinedOutput();

@@ -52,8 +52,6 @@ internal static void array1(ж<bytes.Buffer> Ꮡbuf, nint n) {
     buf.WriteString("}\n"u8);
 }
 
-// add new test cases here as needed
-
 partial struct testsᴛ1 /*dyn*/ {
     internal @string name;
     internal Action<ж<bytes.Buffer>, nint> gen;
@@ -61,6 +59,7 @@ partial struct testsᴛ1 /*dyn*/ {
 }
 internal static slice<testsᴛ1> tests = new testsᴛ1[]{
     new("array1"u8, array1, 10000)
+    // add new test cases here as needed
 }.slice();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -73,6 +72,7 @@ public static void BenchmarkFormat(ж<testing.B> Ꮡb) {
         src.WriteString(packagePˢ);
         t.gen(Ꮡsrc, t.n);
         var data = src.Bytes();
+
         if (debug.Value) {
             @string filename = t.name + ".src"u8;
             var err = os.WriteFile(filename, data, 432);
@@ -80,6 +80,7 @@ public static void BenchmarkFormat(ж<testing.B> Ꮡb) {
                 Ꮡb.Fatalf("couldn't write %s: %v"u8, filename, err);
             }
         }
+
         var dataʗ1 = data;
         Ꮡb.Run(fmt.Sprintf("%s-%d"u8, t.name, t.n), (ж<testing.B> bΔ1) => {
             bΔ1.SetBytes((int64)len(dataʗ1));

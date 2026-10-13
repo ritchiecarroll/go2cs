@@ -16,6 +16,7 @@ partial class csv_internal_test_package {
 public static void FuzzRoundtrip(ж<testing.F> Ꮡf) {
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> @in) => {
         var buf = @new<bytes.Buffer>();
+
         t.Logf("input = %q"u8, @in);
         foreach (var (_, tt) in new global::go.encoding.csv_package.Reader[]{
             new(Comma: (rune)','),
@@ -36,11 +37,13 @@ public static void FuzzRoundtrip(ж<testing.F> Ꮡf) {
             r.Value.Comment = tt.Comment;
             r.Value.LazyQuotes = tt.LazyQuotes;
             r.Value.TrimLeadingSpace = tt.TrimLeadingSpace;
+
             var (records, err) = r.ReadAll();
             if (err != default!) {
                 continue;
             }
             t.Logf("first records = %#v"u8, records);
+
             buf.Reset();
             var w = NewWriter(new csv_test_package.bytes_BufferжWriter(buf));
             w.Value.Comma = tt.Comma;
@@ -56,6 +59,7 @@ public static void FuzzRoundtrip(ж<testing.F> Ꮡf) {
                 continue;
             }
             t.Logf("second input = %q"u8, buf.Bytes());
+
             r = NewReader(new csv_test_package.bytes_BufferжReader(buf));
             r.Value.Comma = tt.Comma;
             r.Value.Comment = tt.Comment;
@@ -67,6 +71,7 @@ public static void FuzzRoundtrip(ж<testing.F> Ꮡf) {
                 t.Logf("records = %v\n"u8, records);
                 t.Fatal(err);
             }
+
             // The reader turns \r\n into \n.
             foreach (var (_, record) in records) {
                 foreach (var (i, s) in record) {
@@ -81,6 +86,7 @@ public static void FuzzRoundtrip(ж<testing.F> Ꮡf) {
             if (len(records) == 0) {
                 records = default!;
             }
+
             if (!reflect.DeepEqual(records, result)) {
                 t.Fatalf("first read got %#v, second got %#v"u8, records, result);
             }

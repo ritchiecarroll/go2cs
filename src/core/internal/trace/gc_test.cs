@@ -34,6 +34,7 @@ internal partial struct TestMMU_type /*dyn*/ {
 
 public static void TestMMU(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
+
     // MU
     // 1.0  *****   *****   *****
     // 0.5      *   *   *   *
@@ -48,6 +49,7 @@ public static void TestMMU(ж<testing.T> Ꮡt) {
         new(5000000000, 0D)}.slice()
     }.slice();
     var mmuCurve = Δtrace.NewMMUCurve(util);
+
     foreach (var (_, test) in new TestMMU_type[]{
         new(0, 0D, new float64[]{}.slice()),
         new(time.Millisecond, 0D, new float64[]{0D, 0D}.slice()),
@@ -86,8 +88,6 @@ internal static readonly object skippingInShortModeˢ = (@string)"skipping in -s
 internal static readonly @string testdataTestsGo122Gcˢ = "testdata/tests/go122-gc-stress.test"u8;
 
 public static void TestMMUTrace(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Can't be t.Parallel() because it modifies the
     // testingOneBand package variable.
     if (testing.Short()) {
@@ -98,6 +98,7 @@ public static void TestMMUTrace(ж<testing.T> Ꮡt) {
         GoFrame ᒐ = default;
         try {
             var mmuCurve = Δtrace.NewMMUCurve(mu);
+
             // Test the optimized implementation against the "obviously
             // correct" implementation.
             for (var window = time.ΔNanosecond; window < (time.Duration)(10000000000L); window *= 10) {
@@ -107,6 +108,7 @@ public static void TestMMUTrace(ж<testing.T> Ꮡt) {
                     tΔ1.Errorf("want %f, got %f mutator utilization in window %s"u8, want, got, window);
                 }
             }
+
             // Test MUD with band optimization against MUD without band
             // optimization. We don't have a simple testing implementation
             // of MUDs (the simplest implementation is still quite
@@ -166,7 +168,9 @@ internal static float64 /*mmu*/ mmuSlow(slice<Δtrace.MutatorUtil> util, time.Du
             window = max;
         }
     }
+
     mmu = 1.0D;
+
     // muInWindow returns the mean mutator utilization between
     // util[0].Time and end.
     float64 muInWindow(slice<Δtrace.MutatorUtil> utilΔ1, int64 end) {
@@ -191,6 +195,7 @@ internal static float64 /*mmu*/ mmuSlow(slice<Δtrace.MutatorUtil> util, time.Du
             mmu = math.Min(mmu, muInWindowʗ1(util.slice(i), u.Time + (int64)window));
         }
     }
+
     // Consider all left-aligned windows.
     update();
     // Reverse the trace. Slightly subtle because each MutatorUtil

@@ -72,6 +72,7 @@ public static void BenchmarkBlock(ж<testing.B> Ꮡb) {
 
     ref var seed = ref heap(new array<uint64>(4), out var Ꮡseed);
     ref var blocks = ref heap(new array<uint64>(32), out var Ꮡblocks);
+
     for (nint i = 0; i < b.N; i++) {
         chacha8rand_internal_test_package.Block(Ꮡseed, Ꮡblocks, 0);
     }
@@ -94,6 +95,7 @@ public static void TestBlockGeneric(ж<testing.T> Ꮡt) {
         binary.LittleEndian.Uint64(s[(int)(2 * 8)..]),
         binary.LittleEndian.Uint64(s[(int)(3 * 8)..])
     }.array();
+
     chacha8rand_internal_test_package.Block(ᏑseedΔ1, Ꮡb1, 4);
     chacha8rand_internal_test_package.Block_generic(ᏑseedΔ1, Ꮡb2, 4);
     if (!slices.Equal<slice<uint64>, uint64>(b1[..], b2[..])) {

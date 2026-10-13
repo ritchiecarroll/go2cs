@@ -143,6 +143,7 @@ public static void BenchmarkSortStrings_Sorted(ж<testing.B> Ꮡb) {
 
     var ss = makeSortedStrings(N);
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         Sort((sort.Interface)(((sort.StringSlice)ss)));
     }
@@ -153,6 +154,7 @@ public static void BenchmarkSlicesSortStrings_Sorted(ж<testing.B> Ꮡb) {
 
     var ss = makeSortedStrings(N);
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         slices.Sort<slice<@string>, @string>(ss);
     }
@@ -194,8 +196,10 @@ public static void TestStructSorts(ж<testing.T> Ꮡt) {
     foreach (var (i, _) in ss) {
         ss2[i] = Ꮡ(new myStruct(n: (~ss[i]).n));
     }
+
     Sort(ss);
     slices.SortFunc(ss2, (ж<myStruct> a, ж<myStruct> b) => (~a).n - (~b).n);
+
     foreach (var (i, _) in ss) {
         if (ss[i].Value != ss2[i].Value) {
             Ꮡt.Fatalf("ints2 mismatch at %d; %v != %v"u8, i, ss[i].Value, ss2[i].Value);

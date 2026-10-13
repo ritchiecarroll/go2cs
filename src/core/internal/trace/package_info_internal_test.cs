@@ -28,10 +28,10 @@ using static go.@internal.trace_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/batchcursor_test.go", "batchcursor_test.cs", "AA4egpaCgoKCgqiCgoKCpoKCqIKCgoKogoKCgqiCgoKCqIKCgqaCgoK6gpaCgoKCgpSCuIKmgoKCgoKUlIKmgoSCgpSCpoI=")]
-[assembly: go.GoPositionMap("internal/trace/event_test.go", "event_test.cs", "AAoStJSSlJKUkpSSlJKUkpSS6KKCgIK2og==", "13-15:1;16-18:2;19-21:3;22-24:4;25-27:5;28-30:6;31-33:7;37-41:1")]
+[assembly: go.GoPositionMap("internal/trace/batchcursor_test.go", "batchcursor_test.cs", "AA4egqaCgoKCgriCgoKCpoKCuIKCgoK4goKCgriCgoKCuIKCgqaCgoLKgqaCgoKCgpSCuIKmgoKCgoKUlIKmgpSCgpSCpoI=")]
+[assembly: go.GoPositionMap("internal/trace/event_test.go", "event_test.cs", "AAoSlKSSlJKUkpSSlJKUkpSS6KKCgIK2og==", "13-15:1;16-18:2;19-21:3;22-24:4;25-27:5;28-30:6;31-33:7;37-41:1")]
 [assembly: go.GoPositionMap("internal/trace/export_test.go", "export_test.cs", "AAoO")]
-[assembly: go.GoPositionMap("internal/trace/mud_test.go", "mud_test.cs", "AA0apoKCgoKCgpSCgpaCgpSCqIKCgoKClILcpoKCgoKCgoKCgoKChIKClIKmgpSClIIABhSygpSCgg==")]
+[assembly: go.GoPositionMap("internal/trace/mud_test.go", "mud_test.cs", "AA0apoKCgoKCgpSCgqaCgpSCuIKCgoKClILcpoKCgoKCgoKCgoKClIKClIKmgpSClIIABhSygpSCgg==")]
 [assembly: go.GoPositionMap("internal/trace/order_test.go", "order_test.cs", "ABESgoKCgpSCgIKSgraAgqSAgraCgoKC", "11-28:1")]
 // </GoSourcePositionMaps>
 

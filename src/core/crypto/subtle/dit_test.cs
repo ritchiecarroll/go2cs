@@ -23,20 +23,25 @@ public static void TestWithDataIndependentTiming(ж<testing.T> Ꮡt) {
     if (!cpu.ARM64.HasDIT) {
         Ꮡt.Skip(cpuDoesNotSupportDitˢ);
     }
+
     var ditAlreadyEnabled = sys.DITEnabled();
+
     WithDataIndependentTiming(() => {
         if (!sys.DITEnabled()) {
             Ꮡt.Fatal(ditNotEnabledWithinˢ);
         }
+
         WithDataIndependentTiming(() => {
             if (!sys.DITEnabled()) {
                 Ꮡt.Fatal(ditNotEnabledWithinˢ2);
             }
         });
+
         if (!sys.DITEnabled()) {
             Ꮡt.Fatal(ditNotEnabledAfterReturnˢ);
         }
     });
+
     if (!ditAlreadyEnabled && sys.DITEnabled()) {
         Ꮡt.Fatal(ditNotUnsetAfterˢ);
     }
@@ -52,7 +57,9 @@ public static void TestDITPanic(ж<testing.T> Ꮡt) {
         if (!cpu.ARM64.HasDIT) {
             Ꮡt.Skip(cpuDoesNotSupportDitˢ);
         }
+
         var ditAlreadyEnabled = sys.DITEnabled();
+
         defer(() => {
             var e = recover();
             if (e == default!) {
@@ -62,10 +69,12 @@ public static void TestDITPanic(ж<testing.T> Ꮡt) {
                 Ꮡt.Error(ditStillEnabledAfterˢ);
             }
         }, ref ᒐ);
+
         WithDataIndependentTiming(() => {
             if (!sys.DITEnabled()) {
                 Ꮡt.Fatal(ditNotEnabledWithinˢ);
             }
+
             throw panic("bad");
         });
     }

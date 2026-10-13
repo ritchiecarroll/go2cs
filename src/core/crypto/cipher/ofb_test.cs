@@ -28,9 +28,9 @@ partial struct ofbTest {
     internal slice<byte> @out;
 }
 
-// NIST SP 800-38A pp 52-55
 internal static slice<ofbTest> ofbTests;
 internal static void initᴛofbTests() { ofbTests = new ofbTest[]{
+    // NIST SP 800-38A pp 52-55
     new(
         "OFB-AES128"u8,
         commonKey128,
@@ -72,11 +72,13 @@ internal static void initᴛofbTests() { ofbTests = new ofbTest[]{
 public static void TestOFB(ж<testing.T> Ꮡt) {
     foreach (var (_, tt) in ofbTests) {
         @string test = tt.name;
+
         var (c, err) = aes.NewCipher(tt.key);
         if (err != default!) {
             Ꮡt.Errorf("%s: NewCipher(%d bytes) = %s"u8, test, len(tt.key), err);
             continue;
         }
+
         for (nint j = 0; j <= 5; j += 5) {
             var plaintext = tt.@in.slice(0, len(tt.@in) - j);
             var ofb = cipher.NewOFB(c, tt.iv);
@@ -86,6 +88,7 @@ public static void TestOFB(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("%s/%d: encrypting\ninput % x\nhave % x\nwant % x"u8, test, len(plaintext), plaintext, ciphertext, tt.@out);
             }
         }
+
         for (nint j = 0; j <= 5; j += 5) {
             var ciphertext = tt.@out.slice(0, len(tt.@in) - j);
             var ofb = cipher.NewOFB(c, tt.iv);
@@ -95,6 +98,7 @@ public static void TestOFB(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("%s/%d: decrypting\nhave % x\nwant % x"u8, test, len(ciphertext), plaintext, tt.@in);
             }
         }
+
         if (Ꮡt.Failed()) {
             break;
         }
@@ -105,23 +109,30 @@ public static void TestOFBStream(ж<testing.T> Ꮡt) {
     foreach (var (_, keylen) in new nint[]{128, 192, 256}.slice()) {
         Ꮡt.Run(fmt.Sprintf("AES-%d"u8, keylen), (ж<testing.T> tΔ1) => {
             var rng = newRandReader(tΔ1);
+
             var key = new slice<byte>(keylen / 8);
             rng.Read(key);
+
             var (block, err) = aes.NewCipher(key);
             if (err != default!) {
                 throw panic(err);
             }
+
             cryptotest.TestStreamFromBlock(tΔ1, block, cipher.NewOFB);
         });
     }
+
     Ꮡt.Run(desˢ, (ж<testing.T> tΔ2) => {
         var rng = newRandReader(tΔ2);
+
         var key = new slice<byte>(8);
         rng.Read(key);
+
         var (block, err) = des.NewCipher(key);
         if (err != default!) {
             throw panic(err);
         }
+
         cryptotest.TestStreamFromBlock(tΔ2, block, cipher.NewOFB);
     });
 }

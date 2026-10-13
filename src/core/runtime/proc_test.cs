@@ -119,8 +119,8 @@ public static partial void TestYieldLocked(ж<testing.T> Ꮡt) {
             time.Sleep(time.Millisecond);
         }
         cʗ1.ᐸꟷ(true);
+        // runtime.UnlockOSThread() is deliberately omitted
     });
-    // runtime.UnlockOSThread() is deliberately omitted
     ᐸꟷ(c);
 }
 
@@ -130,8 +130,6 @@ internal static readonly object skippingOnUniprocessorˢ = (@string)"skipping on
 public static partial void TestGoroutineParallelism(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         if (Δruntime.NumCPU() == 1) {
             // Takes too long, too easy to deadlock, etc.
             Ꮡt.Skip(skippingOnUniprocessorˢ);
@@ -179,8 +177,6 @@ public static partial void TestGoroutineParallelism(ж<testing.T> Ꮡt) {
 
 // Test that all runnable goroutines are scheduled at the same time.
 public static void TestGoroutineParallelism2(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     //testGoroutineParallelism2(t, false, false)
     testGoroutineParallelism2(Ꮡt, true, false);
     testGoroutineParallelism2(Ꮡt, false, true);
@@ -194,8 +190,6 @@ internal static readonly @string tcpˢ = "tcp"u8;
 internal static partial void testGoroutineParallelism2(ж<testing.T> Ꮡt, bool load, bool netpoll) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         if (Δruntime.NumCPU() == 1) {
             // Takes too long, too easy to deadlock, etc.
             Ꮡt.Skip(skippingOnUniprocessorˢ);
@@ -300,6 +294,7 @@ public static partial void TestTimerFairness(ж<testing.T> Ꮡt) {
     if (Δruntime.GOARCH == "wasm"u8) {
         Ꮡt.Skip(noPreemptionOnWasmYetˢ);
     }
+
     var done = new channel<bool>(0);
     var c = new channel<bool>(0);
     for (nint i = 0; i < 2; i++) {
@@ -319,6 +314,7 @@ public static partial void TestTimerFairness(ж<testing.T> Ꮡt) {
             }
         });
     }
+
     var timer = time.After(20 * time.Millisecond);
     while (ᐧ) {
         var selᴛ84 = c;
@@ -338,6 +334,7 @@ public static partial void TestTimerFairness2(ж<testing.T> Ꮡt) {
     if (Δruntime.GOARCH == "wasm"u8) {
         Ꮡt.Skip(noPreemptionOnWasmYetˢ);
     }
+
     var done = new channel<bool>(0);
     var c = new channel<bool>(0);
     for (nint i = 0; i < 2; i++) {
@@ -384,6 +381,7 @@ public static partial void TestPreemption(ж<testing.T> Ꮡt) {
     if (Δruntime.GOARCH == "wasm"u8) {
         Ꮡt.Skip(noPreemptionOnWasmYetˢ);
     }
+
     // Test that goroutines are preempted at function calls.
     nint N = 5;
     if (testing.Short()) {
@@ -413,6 +411,7 @@ public static partial void TestPreemptionGC(ж<testing.T> Ꮡt) {
         if (Δruntime.GOARCH == "wasm"u8) {
             Ꮡt.Skip(noPreemptionOnWasmYetˢ);
         }
+
         // Test that pending GC preempts running goroutines.
         nint P = 5;
         nint N = 10;
@@ -487,7 +486,9 @@ public static partial void TestNumGoroutine(ж<testing.T> Ꮡt) {
     if (output != want) {
         Ꮡt.Fatalf("want %q, got %q"u8, want, output);
     }
+
     var buf = new slice<byte>((1 << (int)(20)));
+
     // Try up to 10 times for a match before giving up.
     // This is a fundamentally racy check but it's important
     // to notice if NumGoroutine and Stack are _always_ out of sync.
@@ -497,8 +498,10 @@ public static partial void TestNumGoroutine(ж<testing.T> Ꮡt) {
         // the same state of the world, so anything we can do
         // to keep it quiet is good.
         Δruntime.Gosched();
+
         nint n = Δruntime.NumGoroutine();
         buf = buf.slice(0, Δruntime.Stack(buf, true));
+
         // To avoid double-counting "goroutine" in "goroutine $m [running]:"
         // and "created by $func in goroutine $n", remove the latter
         @string outputΔ1 = strings.ReplaceAll(((@string)buf), inGoroutineˢ, ""u8);
@@ -519,8 +522,6 @@ internal static readonly object skippingInRaceModeˢ = (@string)"skipping in -ra
 public static partial void TestPingPongHog(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         if (Δruntime.GOARCH == "wasm"u8) {
             Ꮡt.Skip(noPreemptionOnWasmYetˢ);
         }
@@ -532,6 +533,7 @@ public static partial void TestPingPongHog(ж<testing.T> Ꮡt) {
             // which causes this test to fail (#38266).
             Ꮡt.Skip(skippingInRaceModeˢ);
         }
+
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(1), ref ᒐ);
         var done = new channel<bool>(0);
         var (hogChan, lightChan) = (new channel<bool>(0), new channel<bool>(0));
@@ -539,6 +541,7 @@ public static partial void TestPingPongHog(ж<testing.T> Ꮡt) {
         hogCount = 0;
         ref var lightCount = ref heap<nint>(out var ᏑlightCount);
         lightCount = 0;
+
         var doneʗ1 = done;
         void run(nint limit, ж<nint> counter, channel<bool> wake) {
             while (ᐧ) {
@@ -557,16 +560,19 @@ public static partial void TestPingPongHog(ж<testing.T> Ꮡt) {
                 }}
             }
         }
+
         // Start two co-scheduled hog goroutines.
         for (nint i = 0; i < 2; i++) {
             var runʗ1 = run;
             goǃ(runʗ1, (nint)(1000000), ᏑhogCount, hogChan);
         }
+
         // Start two co-scheduled light goroutines.
         for (nint i = 0; i < 2; i++) {
             var runʗ2 = run;
             goǃ(runʗ2, (nint)(1000), ᏑlightCount, lightChan);
         }
+
         // Start goroutine pairs and wait for a few preemption rounds.
         hogChan.ᐸꟷ(true);
         lightChan.ᐸꟷ(true);
@@ -574,6 +580,7 @@ public static partial void TestPingPongHog(ж<testing.T> Ꮡt) {
         close(done);
         ᐸꟷ(hogChan);
         ᐸꟷ(lightChan);
+
         // Check that hogCount and lightCount are within a factor of
         // 20, which indicates that both pairs of goroutines handed off
         // the P within a time-slice to their buddy. We can use a
@@ -598,6 +605,7 @@ public static partial void BenchmarkPingPongHog(ж<testing.B> Ꮡb) {
             return;
         }
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(1), ref ᒐ);
+
         // Create a CPU hog
         var (stop, done) = (new channel<bool>(0), new channel<bool>(0));
         var doneʗ1 = done;
@@ -615,6 +623,7 @@ public static partial void BenchmarkPingPongHog(ж<testing.B> Ꮡb) {
                 }}
             }
         });
+
         // Ping-pong b.N times
         var (ping, pong) = (new channel<bool>(0), new channel<bool>(0));
         var doneʗ2 = done;
@@ -691,8 +700,10 @@ internal static nint big(channel<nint> stop) {
         for (nint i = 0; i < 1000000000; i++) {
             n++;
         }
+
         // call bigframe, which used to miss the preemption in its prologue.
         bigframe(stop);
+
         // check if we've been asked to stop.
         var selᴛ92 = stop;
         switch (select(ᐸꟷ(selᴛ92, ꓸꓸꓸ))) {
@@ -721,9 +732,11 @@ internal static nint small(channel<nint> stop, /*[8192]*/ ж<array<byte>> Ꮡx) 
     foreach (var (i, _) in x) {
         sum += (nint)x[i];
     }
+
     // keep small from being a leaf function, which might
     // make it not do any stack check at all.
     nonleaf(stop);
+
     return sum;
 }
 
@@ -750,13 +763,12 @@ public static void TestSchedLocalQueueSteal(ж<testing.T> Ꮡt) {
 public static void TestSchedLocalQueueEmpty(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         if (Δruntime.NumCPU() == 1) {
             // Takes too long and does not trigger the race.
             Ꮡt.Skip(skippingOnUniprocessorˢ);
         }
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(4), ref ᒐ);
+
         // If runtime triggers a forced GC during this test then it will deadlock,
         // since the goroutines can't be stopped/preempted during spin wait.
         defer(Δdebug.SetGCPercent, Δdebug.SetGCPercent(-1), ref ᒐ);
@@ -764,6 +776,7 @@ public static void TestSchedLocalQueueEmpty(ж<testing.T> Ꮡt) {
         // also preempts at the start of the sweep phase, so make sure that's
         // done too. See #45867.
         Δruntime.GC();
+
         nint iters = (nint)100000;
         if (testing.Short()) {
             iters = 100;
@@ -850,8 +863,9 @@ internal static partial void warmupScheduler(nint targetThreadCount) {
         goǃ(() => {
             atomic.AddInt32(Ꮡcount, 1);
             while (atomic.LoadInt32(Ꮡcount) < (int32)targetThreadCount) {
+                // spin until all threads started
             }
-            // spin until all threads started
+
             // spin a bit more to ensure they are all running on separate CPUs.
             doWork(time.Millisecond);
             Ꮡwg.Done();
@@ -879,6 +893,7 @@ public static partial void BenchmarkCreateGoroutinesSingle(ж<testing.B> Ꮡb) {
     // get all the Ps running first.
     warmupScheduler(Δruntime.GOMAXPROCS(0));
     b.ResetTimer();
+
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(b.N);
     for (nint i = 0; i < b.N; i++) {
@@ -911,6 +926,7 @@ internal static void benchmarkWakeupParallel(ж<testing.B> Ꮡb, Action<time.Dur
     if (Δruntime.GOMAXPROCS(0) == 1) {
         Ꮡb.Skip(skippingGomaxprocs1ˢ);
     }
+
     var wakeDelay = 5 * time.Microsecond;
     foreach (var (_, delay) in new time.Duration[]{
         0,
@@ -1003,11 +1019,10 @@ public static void BenchmarkWakeupParallelSpinning(ж<testing.B> Ꮡb) {
     benchmarkWakeupParallel(Ꮡb, (time.Duration d) => {
         var end = time.Now().Add(d);
         while (time.Now().Before(end)) {
+            // do nothing
         }
     });
 }
-
-// do nothing
 
 // sysNanosleep is defined by OS-specific files (such as runtime_linux_test.go)
 // to sleep for the given duration. If nil, dependent tests are skipped.
@@ -1103,6 +1118,7 @@ public static partial void TestLockOSThreadNesting(ж<testing.T> Ꮡt) {
     if (Δruntime.GOARCH == "wasm"u8) {
         Ꮡt.Skip(noThreadsOnWasmYetˢ);
     }
+
     goǃ(() => {
         var (e, i) = runtime_internal_test_package.LockOSCounts();
         if (e != 0 || i != 0) {
@@ -1141,6 +1157,7 @@ internal static void testLockOSThreadExit(ж<testing.T> Ꮡt, @string prog) {
     if (output != want) {
         Ꮡt.Errorf("want %q, got %q"u8, want, output);
     }
+
     output = runTestProg(Ꮡt, prog, lockOSThreadAltˢ);
     if (output != want) {
         Ꮡt.Errorf("want %q, got %q"u8, want, output);
@@ -1165,10 +1182,12 @@ public static void TestLockOSThreadAvoidsStatePropagation(ж<testing.T> Ꮡt) {
 
 public static void TestLockOSThreadTemplateThreadRace(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
+
     var (exe, err) = buildTestProg(Ꮡt, testprogˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     nint iterations = 100;
     if (testing.Short()) {
         // Reduce run time to ~100ms, with much lower probability of
@@ -1201,17 +1220,21 @@ internal static partial void testPreemptionAfterSyscall(ж<testing.T> Ꮡt, time
         if (Δruntime.GOARCH == "wasm"u8) {
             Ꮡt.Skip(noPreemptionOnWasmYetˢ);
         }
+
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(2), ref ᒐ);
+
         nint iterations = 10;
         if (testing.Short()) {
             iterations = 1;
         }
         time.Duration maxDuration = /* 5 * time.Second */ 5000000000;
         const nint nroutines = 8;
+
         for (nint i = 0; i < iterations; i++) {
             var c = new channel<bool>(nroutines);
             ref var stop = ref heap<uint32>(out var Ꮡstop);
             stop = (uint32)0;
+
             var start = time.Now();
             for (nint g = 0; g < nroutines; g++) {
                 var cʗ1 = c;
@@ -1233,6 +1256,7 @@ internal static partial void testPreemptionAfterSyscall(ж<testing.T> Ꮡt, time
                 ᐸꟷ(c);
             }
             var duration = time.Since(start);
+
             if (duration > maxDuration) {
                 Ꮡt.Errorf("timeout exceeded: %v (%v)"u8, duration, maxDuration);
             }
@@ -1246,6 +1270,7 @@ public static void TestPreemptionAfterSyscall(ж<testing.T> Ꮡt) {
     if (Δruntime.GOOS == "plan9"u8) {
         testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 41015);
     }
+
     foreach (var (_, i) in new time.Duration[]{10, 100, 1000}.slice()) {
         var d = i * time.Microsecond;
         Ꮡt.Run(fmt.Sprint(d), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
@@ -1266,8 +1291,10 @@ public static partial void TestNetpollBreak(ж<testing.T> Ꮡt) {
     if (Δruntime.GOMAXPROCS(0) == 1) {
         Ꮡt.Skip(skippingGomaxprocs1ˢ);
     }
+
     // Make sure that netpoll is initialized.
     runtime_internal_test_package.NetpollGenericInit();
+
     var start = time.Now();
     var c = new channel<bool>(2);
     var cʗ1 = c;

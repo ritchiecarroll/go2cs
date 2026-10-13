@@ -13,7 +13,9 @@ internal static void checkDistribution(ж<testing.T> Ꮡt, slice<ж<global::go.n
     foreach (var (_, srv) in data) {
         sum += (nint)(~srv).Weight;
     }
+
     var results = new map<@string, nint>();
+
     nint count = 10000;
     for (nint j = 0; j < count; j++) {
         var d = new slice<ж<global::go.net_package.SRV>>(len(data));
@@ -22,6 +24,7 @@ internal static void checkDistribution(ж<testing.T> Ꮡt, slice<ж<global::go.n
         @string key = d[0].Value.Target;
         results[key] = results[key] + 1;
     }
+
     nint actual = results[(~data[0]).Target];
     var expected = (float64)count * (float64)(~data[0]).Weight / (float64)sum;
     var diff = (float64)actual - expected;

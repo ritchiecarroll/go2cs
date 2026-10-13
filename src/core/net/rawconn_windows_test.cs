@@ -59,27 +59,27 @@ internal static error controlRawConn(syscall.RawConn c, global::go.net_package.�
         }
         switch (addr.type()) {
         case ж<global::go.net_package.TCPAddr> addrΔ1: {
+            // There's no guarantee that IP-level socket
+            // options work well with dual stack sockets.
+            // A simple solution would be to take a look
+            // at the bound address to the raw connection
+            // and to classify the address family of the
+            // underlying socket by the bound address:
+            //
+            // - When IP.To16() != nil and IP.To4() == nil,
+            //   we can assume that the raw connection
+            //   consists of an IPv6 socket using only
+            //   IPv6 addresses.
+            //
+            // - When IP.To16() == nil and IP.To4() != nil,
+            //   the raw connection consists of an IPv4
+            //   socket using only IPv4 addresses.
+            //
+            // - Otherwise, the raw connection is a dual
+            //   stack socket, an IPv6 socket using IPv6
+            //   addresses including IPv4-mapped or
+            //   IPv4-embedded IPv6 addresses.
             if ((~addrΔ1).IP.To16() != default! && (~addrΔ1).IP.To4() == default!){
-                // There's no guarantee that IP-level socket
-                // options work well with dual stack sockets.
-                // A simple solution would be to take a look
-                // at the bound address to the raw connection
-                // and to classify the address family of the
-                // underlying socket by the bound address:
-                //
-                // - When IP.To16() != nil and IP.To4() == nil,
-                //   we can assume that the raw connection
-                //   consists of an IPv6 socket using only
-                //   IPv6 addresses.
-                //
-                // - When IP.To16() == nil and IP.To4() != nil,
-                //   the raw connection consists of an IPv4
-                //   socket using only IPv4 addresses.
-                //
-                // - Otherwise, the raw connection is a dual
-                //   stack socket, an IPv6 socket using IPv6
-                //   addresses including IPv4-mapped or
-                //   IPv4-embedded IPv6 addresses.
                 Ꮡoperr.ValueSlot = syscall.SetsockoptInt(((syscallꓸHandle)s), syscall.IPPROTO_IPV6, syscall.IPV6_UNICAST_HOPS, 1);
             } else 
             if ((~addrΔ1).IP.To16() == default! && (~addrΔ1).IP.To4() != default!) {
@@ -120,9 +120,7 @@ internal static error controlOnConnSetup(@string network, @string address, sysca
         default: {
             return errors.New("unknown network: "u8 + network);
         }}
-
     }
-
     {
         var err = c.Control(fn); if (err != default!) {
             return err;

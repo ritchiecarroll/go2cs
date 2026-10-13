@@ -41,6 +41,7 @@ public static void TestRawConnReadWrite(ж<testing.T> Ꮡt) {
                     }
                     var cʗ1 = cΔ1;
                     defer(() => cʗ1.Close(), ref ᒐ);
+
                     (var ccΔ1, errΔ1) = ln._<ж<global::go.net_package.TCPListener>>().SyscallConn();
                     if (errΔ1 != default!) {
                         tΔ1.Fatal(errΔ1);
@@ -65,6 +66,7 @@ public static void TestRawConnReadWrite(ж<testing.T> Ꮡt) {
                     if (called) {
                         tΔ1.Error(readShouldnTCallOpˢ);
                     }
+
                     array<byte> bΔ1 = new(32);
                     (var nΔ1, errΔ1) = cΔ1.Read(bΔ1[..]);
                     if (errΔ1 != default!) {
@@ -89,12 +91,14 @@ public static void TestRawConnReadWrite(ж<testing.T> Ꮡt) {
                     tΔ1.Fatal(errΔ3);
                 }
             }
+
             var (c, err) = Dial((~ls).Listener.Addr().Network(), (~ls).Listener.Addr().String());
             if (err != default!) {
                 tΔ1.Fatal(err);
             }
             var cʗ2 = c;
             defer(() => cʗ2.Close(), ref ᒐ);
+
             (var cc, err) = c._<ж<global::go.net_package.TCPConn>>().SyscallConn();
             if (err != default!) {
                 tΔ1.Fatal(err);
@@ -128,17 +132,20 @@ public static void TestRawConnReadWrite(ж<testing.T> Ꮡt) {
             var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ2), tcpˢ);
             var lnʗ1 = ln;
             defer(() => lnʗ1.Close(), ref ᒐ);
+
             var (c, err) = Dial(ln.Addr().Network(), ln.Addr().String());
             if (err != default!) {
                 tΔ2.Fatal(err);
             }
             var cʗ3 = c;
             defer(() => cʗ3.Close(), ref ᒐ);
+
             (var cc, err) = c._<ж<global::go.net_package.TCPConn>>().SyscallConn();
             if (err != default!) {
                 tΔ2.Fatal(err);
             }
             array<byte> b = new(1);
+
             c.SetDeadline(noDeadline);
             {
                 var errΔ1 = c.SetDeadline(time.Now().Add(-1)); if (errΔ1 != default!) {
@@ -171,6 +178,7 @@ public static void TestRawConnReadWrite(ж<testing.T> Ꮡt) {
             if (!isDeadlineExceeded(err)) {
                 tΔ2.Errorf("got %v; want timeout"u8, err);
             }
+
             c.SetReadDeadline(noDeadline);
             {
                 var errΔ2 = c.SetReadDeadline(time.Now().Add(-1)); if (errΔ2 != default!) {
@@ -190,6 +198,7 @@ public static void TestRawConnReadWrite(ж<testing.T> Ꮡt) {
             if (!isDeadlineExceeded(err)) {
                 tΔ2.Errorf("got %v; want timeout"u8, err);
             }
+
             c.SetWriteDeadline(noDeadline);
             {
                 var errΔ3 = c.SetWriteDeadline(time.Now().Add(-1)); if (errΔ3 != default!) {
@@ -230,6 +239,7 @@ public static void TestRawConnControl(ж<testing.T> Ꮡt) {
             var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), tcpˢ);
             var lnʗ1 = ln;
             defer(() => lnʗ1.Close(), ref ᒐ);
+
             var (cc1, err) = ln._<ж<global::go.net_package.TCPListener>>().SyscallConn();
             if (err != default!) {
                 tΔ1.Fatal(err);
@@ -239,12 +249,14 @@ public static void TestRawConnControl(ж<testing.T> Ꮡt) {
                     tΔ1.Fatal(errΔ1);
                 }
             }
+
             (var c, err) = Dial(ln.Addr().Network(), ln.Addr().String());
             if (err != default!) {
                 tΔ1.Fatal(err);
             }
             var cʗ1 = c;
             defer(() => cʗ1.Close(), ref ᒐ);
+
             (var cc2, err) = c._<ж<global::go.net_package.TCPConn>>().SyscallConn();
             if (err != default!) {
                 tΔ1.Fatal(err);
@@ -254,6 +266,7 @@ public static void TestRawConnControl(ж<testing.T> Ꮡt) {
                     tΔ1.Fatal(errΔ2);
                 }
             }
+
             ln.Close();
             {
                 var errΔ3 = controlRawConn(cc1, ln.Addr()); if (errΔ3 == default!) {

@@ -66,12 +66,15 @@ public static void TestFunVV(ж<testing.T> Ꮡt) {
         var arg = a;
         testFunVV(Ꮡt, addVVGˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word>(addVV_g), arg);
         testFunVV(Ꮡt, addVVˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word>(addVV), arg);
+
         arg = new argVV(a.z, a.y, a.x, a.c);
         testFunVV(Ꮡt, addVVGSymmetricˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word>(addVV_g), arg);
         testFunVV(Ꮡt, addVVSymmetricˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word>(addVV), arg);
+
         arg = new argVV(a.x, a.z, a.y, a.c);
         testFunVV(Ꮡt, subVVGˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word>(subVV_g), arg);
         testFunVV(Ꮡt, subVVˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word>(subVV), arg);
+
         arg = new argVV(a.y, a.z, a.x, a.c);
         testFunVV(Ꮡt, subVVGSymmetricˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word>(subVV_g), arg);
         testFunVV(Ꮡt, subVVSymmetricˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word>(subVV), arg);
@@ -199,6 +202,7 @@ internal static void testFunVWext(ж<testing.T> Ꮡt, @string msg, Func<slice<gl
     var z_g = new global::go.math.big_package.nat(len(a.z));
     global::go.math.big_package.Word c_g = f_g(z_g, a.x, a.y);
     global::go.math.big_package.Word c = f(a.z, a.x, a.y);
+
     foreach (var (i, zi) in a.z) {
         if (zi != z_g[i]) {
             Ꮡt.Errorf("%s\n\tgot z[%d] = %#x; want %#x"u8, msg, i, zi, z_g[i]);
@@ -231,10 +235,12 @@ public static void TestFunVW(ж<testing.T> Ꮡt) {
         var arg = a;
         testFunVW(Ꮡt, addVWGˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word>(addVW_g), arg);
         testFunVW(Ꮡt, addVWˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word>(addVW), arg);
+
         arg = new argVW(a.x, a.z, a.y, a.c);
         testFunVW(Ꮡt, subVWGˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word>(subVW_g), arg);
         testFunVW(Ꮡt, subVWˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word>(subVW), arg);
     }
+
     var shlVW_g = makeFunVW(shlVU_g);
     var shlVW = makeFunVW(shlVU);
     foreach (var (_, a) in lshVW) {
@@ -242,6 +248,7 @@ public static void TestFunVW(ж<testing.T> Ꮡt) {
         testFunVW(Ꮡt, shlVUGˢ, shlVW_g, arg);
         testFunVW(Ꮡt, shlVUˢ, shlVW, arg);
     }
+
     var shrVW_g = makeFunVW(shrVU_g);
     var shrVW = makeFunVW(shrVU);
     foreach (var (_, a) in rshVW) {
@@ -283,15 +290,18 @@ public static void TestFunVWExt(ж<testing.T> Ꮡt) {
         var arg = new argVW(z, x, y, 0);
         testFunVWext(Ꮡt, addVWRandomInputsˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word>(addVW), new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word>(addVW_g), arg);
         testFunVWext(Ꮡt, subVWRandomInputsˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word>(subVW), new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word>(subVW_g), arg);
+
         // vector of random numbers, but make 'x' and 'z' share storage
         arg = new argVW(x, x, y, 0);
         testFunVWext(Ꮡt, addVWRandomInputsSharingˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word>(addVW), new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word>(addVW_g), arg);
         testFunVWext(Ꮡt, subVWRandomInputsSharingˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word>(subVW), new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word>(subVW_g), arg);
+
         // vector of maximum uint, to force carry flag set in each 'add'
         y = ~((global::go.math.big_package.Word)((global::go.math.big_package.Word)0));
         x = makeWordVec(y, n);
         arg = new argVW(z, x, y, 0);
         testFunVWext(Ꮡt, addVWVectorOfMaxUintˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word>(addVW), new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word>(addVW_g), arg);
+
         // vector of '0', to force carry flag set in each 'sub'
         x = makeWordVec(0, n);
         arg = new argVW(z, x, 1, 0);
@@ -318,13 +328,13 @@ internal static slice<global::go.math.big_package.Word> argshlVUr1 = new global:
 
 internal static slice<global::go.math.big_package.Word> argshlVUrWm1 = new global::go.math.big_package.Word[]{(global::go.math.big_package.Word)((nuint)1 << (int)((_W - 1))), 0, 1, 2, 4, 8, 16}.slice();
 
-// test cases for shlVU
-// additional test cases with shift values of 0, 1 and (_W-1)
 internal static slice<argVU> argshlVU = new argVU[]{
+    // test cases for shlVU
     new(new global::go.math.big_package.Word[]{1, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)3 << (int)((_W - 2))), 0}.slice(), 7, 0, 0, 1, new global::go.math.big_package.Word[]{2, _M - 1, _M, _M, _M, _M, unchecked((nuint)(9223372036854775809UL))}.slice(), 1, "complete overlap of shlVU"u8),
     new(new global::go.math.big_package.Word[]{1, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)3 << (int)((_W - 2))), 0, 0, 0, 0}.slice(), 7, 0, 3, 1, new global::go.math.big_package.Word[]{2, _M - 1, _M, _M, _M, _M, unchecked((nuint)(9223372036854775809UL))}.slice(), 1, "partial overlap by half of shlVU"u8),
     new(new global::go.math.big_package.Word[]{1, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)3 << (int)((_W - 2))), 0, 0, 0, 0, 0, 0, 0}.slice(), 7, 0, 6, 1, new global::go.math.big_package.Word[]{2, _M - 1, _M, _M, _M, _M, unchecked((nuint)(9223372036854775809UL))}.slice(), 1, "partial overlap by 1 Word of shlVU"u8),
     new(new global::go.math.big_package.Word[]{1, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)3 << (int)((_W - 2))), 0, 0, 0, 0, 0, 0, 0, 0}.slice(), 7, 0, 7, 1, new global::go.math.big_package.Word[]{2, _M - 1, _M, _M, _M, _M, unchecked((nuint)(9223372036854775809UL))}.slice(), 1, "no overlap of shlVU"u8),
+    // additional test cases with shift values of 0, 1 and (_W-1)
     new(argshlVUIn, 7, 0, 0, 0, argshlVUr0, 0, "complete overlap of shlVU and shift of 0"u8),
     new(argshlVUIn, 7, 0, 0, 1, argshlVUr1, 0, "complete overlap of shlVU and shift of 1"u8),
     new(argshlVUIn, 7, 0, 0, _W - 1, argshlVUrWm1, 32, "complete overlap of shlVU and shift of _W - 1"u8),
@@ -347,13 +357,13 @@ internal static slice<global::go.math.big_package.Word> argshrVUr1 = new global:
 
 internal static slice<global::go.math.big_package.Word> argshrVUrWm1 = new global::go.math.big_package.Word[]{4, 8, 16, 32, 64, 128, 0}.slice();
 
-// test cases for shrVU
-// additional test cases with shift values of 0, 1 and (_W-1)
 internal static slice<argVU> argshrVU = new argVU[]{
+    // test cases for shrVU
     new(new global::go.math.big_package.Word[]{0, 3, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)1 << (int)((_W - 1)))}.slice(), 7, 1, 1, 1, new global::go.math.big_package.Word[]{unchecked((nuint)(9223372036854775809UL)), _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)_M >> (int)(1)), (global::go.math.big_package.Word)((nuint)1 << (int)((_W - 2)))}.slice(), (global::go.math.big_package.Word)((nuint)1 << (int)((_W - 1))), "complete overlap of shrVU"u8),
     new(new global::go.math.big_package.Word[]{0, 0, 0, 0, 3, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)1 << (int)((_W - 1)))}.slice(), 7, 4, 1, 1, new global::go.math.big_package.Word[]{unchecked((nuint)(9223372036854775809UL)), _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)_M >> (int)(1)), (global::go.math.big_package.Word)((nuint)1 << (int)((_W - 2)))}.slice(), (global::go.math.big_package.Word)((nuint)1 << (int)((_W - 1))), "partial overlap by half of shrVU"u8),
     new(new global::go.math.big_package.Word[]{0, 0, 0, 0, 0, 0, 0, 3, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)1 << (int)((_W - 1)))}.slice(), 7, 7, 1, 1, new global::go.math.big_package.Word[]{unchecked((nuint)(9223372036854775809UL)), _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)_M >> (int)(1)), (global::go.math.big_package.Word)((nuint)1 << (int)((_W - 2)))}.slice(), (global::go.math.big_package.Word)((nuint)1 << (int)((_W - 1))), "partial overlap by 1 Word of shrVU"u8),
     new(new global::go.math.big_package.Word[]{0, 0, 0, 0, 0, 0, 0, 0, 3, _M, _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)1 << (int)((_W - 1)))}.slice(), 7, 8, 1, 1, new global::go.math.big_package.Word[]{unchecked((nuint)(9223372036854775809UL)), _M, _M, _M, _M, (global::go.math.big_package.Word)((nuint)_M >> (int)(1)), (global::go.math.big_package.Word)((nuint)1 << (int)((_W - 2)))}.slice(), (global::go.math.big_package.Word)((nuint)1 << (int)((_W - 1))), "no overlap of shrVU"u8),
+    // additional test cases with shift values of 0, 1 and (_W-1)
     new(argshrVUIn, 7, 3, 3, 0, argshrVUr0, 0, "complete overlap of shrVU and shift of 0"u8),
     new(argshrVUIn, 7, 3, 3, 1, argshrVUr1, (global::go.math.big_package.Word)((nuint)1 << (int)((_W - 1))), "complete overlap of shrVU and shift of 1"u8),
     new(argshrVUIn, 7, 3, 3, _W - 1, argshrVUrWm1, 2, "complete overlap of shrVU and shift of _W - 1"u8),
@@ -391,6 +401,7 @@ public static void TestShiftOverlap(ж<testing.T> Ꮡt) {
         var arg = a;
         testShiftFunc(Ꮡt, shlVU, arg);
     }
+
     foreach (var (_, a) in argshrVU) {
         var arg = a;
         testShiftFunc(Ꮡt, shrVU, arg);
@@ -584,6 +595,7 @@ public static void TestFunVWW(ж<testing.T> Ꮡt) {
         var arg = a;
         testFunVWW(Ꮡt, mulAddVWWGˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word, global::go.math.big_package.Word>(mulAddVWW_g), arg);
         testFunVWW(Ꮡt, mulAddVWWˢ, new Func<slice<global::go.math.big_package.Word>, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word, global::go.math.big_package.Word>(mulAddVWW), arg);
+
         if (a.y != 0 && a.r < a.y) {
             var argΔ1 = new argWVW(a.x, a.c, a.z, a.y, a.r);
             testFunWVW(Ꮡt, divWVWˢ, new Func<slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, slice<global::go.math.big_package.Word>, global::go.math.big_package.Word, global::go.math.big_package.Word>(divWVW), argΔ1);
@@ -591,14 +603,13 @@ public static void TestFunVWW(ж<testing.T> Ꮡt) {
     }
 }
 
-// 32 bit only: {0xc47dfa8c, 50911, 0x98a4, 0x998587f4},
-
 partial struct mulWWTestsᴛ1 /*dyn*/ {
     internal global::go.math.big_package.Word x, y;
     internal global::go.math.big_package.Word q, r;
 }
 internal static slice<mulWWTestsᴛ1> mulWWTests = new mulWWTestsᴛ1[]{
     new(_M, _M, _M - 1, 1)
+    // 32 bit only: {0xc47dfa8c, 50911, 0x98a4, 0x998587f4},
 }.slice();
 
 public static void TestMulWW(ж<testing.T> Ꮡt) {
@@ -610,15 +621,14 @@ public static void TestMulWW(ж<testing.T> Ꮡt) {
     }
 }
 
-// TODO(agl): These will only work on 64-bit platforms.
-// {15064310297182388543, 0xe7df04d2d35d5d80, 13537600649892366549, 13644450054494335067, 10832252001440893781},
-// {15064310297182388543, 0xdab2f18048baa68d, 13644450054494335067, 12869334219691522700, 14233854684711418382},
-
 partial struct mulAddWWWTestsᴛ1 /*dyn*/ {
     internal global::go.math.big_package.Word x, y, c;
     internal global::go.math.big_package.Word q, r;
 }
 internal static slice<mulAddWWWTestsᴛ1> mulAddWWWTests = new mulAddWWWTestsᴛ1[]{
+    // TODO(agl): These will only work on 64-bit platforms.
+    // {15064310297182388543, 0xe7df04d2d35d5d80, 13537600649892366549, 13644450054494335067, 10832252001440893781},
+    // {15064310297182388543, 0xdab2f18048baa68d, 13644450054494335067, 12869334219691522700, 14233854684711418382},
     new(_M, _M, 0, _M - 1, 1),
     new(_M, _M, _M, _M, 0)
 }.slice();
@@ -631,7 +641,6 @@ public static void TestMulAddWWW(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct divWWTestsᴛ1 /*dyn*/ {
     internal global::go.math.big_package.Word x1, x0, y;

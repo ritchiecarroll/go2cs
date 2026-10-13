@@ -8,7 +8,6 @@ using static global::go.go.ast_package;
 
 partial class ast_internal_test_package {
 
-
 partial struct commentsᴛ1 /*dyn*/ {
     internal slice<@string> list;
     internal @string text;
@@ -47,13 +46,13 @@ public static void TestCommentText(ж<testing.T> Ꮡt) {
 
             list[iΔ1] = Ꮡ(new Comment(Text: s));
         }
+
         @string text = (Ꮡ(new CommentGroup(list))).Text();
         if (text != c.text) {
             Ꮡt.Errorf("case %d: got %q; expected %q"u8, i, text, c.text);
         }
     }
 }
-
 
 partial struct isDirectiveTestsᴛ1 /*dyn*/ {
     internal @string @in;

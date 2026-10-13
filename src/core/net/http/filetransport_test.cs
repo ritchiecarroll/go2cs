@@ -37,14 +37,17 @@ public static void TestFileTransport(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         var check = checker(Ꮡt);
+
         @string dname = Ꮡt.TempDir();
         @string fname = filepath.Join(dname, fooTxtˢ);
         var err = os.WriteFile(fname, slice<byte>("Bar"u8), 420);
         check(writeFileˢ, err);
         defer(os.Remove, fname, ref ᒐ);
+
         var tr = Ꮡ(new Transport(nil));
         tr.RegisterProtocol(fileˢ, NewFileTransport(((global::go.net.http_package.Dir)dname)));
         var c = Ꮡ(new Client(Transport: new global::go.net.http_package.TransportжRoundTripper(tr)));
+
         var fooURLs = new @string[]{"file:///foo.txt"u8, "file://../foo.txt"u8}.slice();
         foreach (var (_, urlstr) in fooURLs) {
             var (resΔ1, errΔ1) = c.Get(urlstr);
@@ -65,6 +68,7 @@ public static void TestFileTransport(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("for %s, got content %q, want %q"u8, urlstr, ((@string)slurp), barˢ);
             }
         }
+
         @string badURL = badURLᶜ;
         (var res, err) = c.Get(badURL);
         check("Get " + badURL, err);
@@ -82,12 +86,15 @@ internal static readonly @string badURLᶜ1 = "file://../no-exist.txt"u8;
 
 public static void TestFileTransportFS(ж<testing.T> Ꮡt) {
     var check = checker(Ꮡt);
+
     var fsys = new fstest.MapFS(new map<@string, ж<fstest.MapFile>>{
         ["index.html"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("index.html says hello"u8)))
     });
+
     var tr = Ꮡ(new Transport(nil));
     tr.RegisterProtocol(fileˢ, NewFileTransportFS(fsys));
     var c = Ꮡ(new Client(Transport: new global::go.net.http_package.TransportжRoundTripper(tr)));
+
     foreach (var (fname, mfile) in fsys) {
         @string urlstr = "file:///"u8 + fname;
         var (resΔ1, errΔ1) = c.Get(urlstr);
@@ -108,6 +115,7 @@ public static void TestFileTransportFS(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("for %s, got content %q, want %q"u8, urlstr, ((@string)slurp), barˢ);
         }
     }
+
     @string badURL = badURLᶜ1;
     var (res, err) = c.Get(badURL);
     check("Get " + badURL, err);

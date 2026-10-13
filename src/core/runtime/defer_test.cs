@@ -113,6 +113,7 @@ public static void TestConditionalDefers(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         list = new slice<nint>(0, 10);
+
         defer(() => {
             if (!AreEqual(recover(), (@string)("testConditional"))) {
                 Ꮡt.Fatal(expectedPanicˢ);
@@ -134,6 +135,7 @@ internal static void testConditionalDefers(nint n) {
         void doappend(nint i) {
             list = append(list, i);
         }
+
         var doappendʗ1 = doappend;
         defer(doappendʗ1, (nint)(1), ref ᒐ);
         if (n > 5) {
@@ -167,7 +169,6 @@ public static void TestDisappearingDefer(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(deferShouldnTRunˢ);
             }, ref ᒐ);
         }
-
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -216,8 +217,6 @@ internal static readonly object panic1ˢ = (@string)"panic1"u8;
 public static void TestRecoverMatching(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         defer(() => {
             var r = recover();
             if (!AreEqual(r, (@string)("panic1"))) {
@@ -287,6 +286,7 @@ public static void TestNonSSAableArgs(ж<testing.T> Ꮡt) {
         int64 save2 = default!;
         int64 save3 = default!;
         int64 save4 = default!;
+
         defer(() => {
             if (globint1 != 1) {
                 Ꮡt.Fatalf("globint1:  wanted: 1, got %v"u8, globint1);
@@ -310,6 +310,7 @@ public static void TestNonSSAableArgs(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("save1:  wanted: 4, got %v"u8, save4);
             }
         }, ref ᒐ);
+
         // Test function returning a non-SSAable arg
         defer((nonSSAable n) => {
             n = n.Clone();
@@ -319,6 +320,7 @@ public static void TestNonSSAableArgs(ж<testing.T> Ꮡt) {
         defer((bigStruct b) => {
             save2 = b.y;
         }, new bigStruct(1, 2, 3, 4, 5, sideeffect(6)), ref ᒐ);
+
         // Test struct field reference that is non-SSAable
         ref var foo = ref heap<containsBigStruct>(out var Ꮡfoo);
         foo = new containsBigStruct(nil);
@@ -361,6 +363,7 @@ public static void TestDeferForFuncWithNoExit(ж<testing.T> Ꮡt) {
         growStackIter(Ꮡx, 1000);
         cond = 2;
         doPanic();
+
         // This function has no exit/return, since it ends with an infinite loop
         while (ᐧ) {
         }
@@ -396,8 +399,8 @@ internal static void interpreter(nint level, nint maxlevel, nint rec) {
                 //fmt.Fprintln(os.Stderr, "re-panicing, level", level)
                 throw panic(e);
             }
+            //fmt.Fprintln(os.Stderr, "Recovered, level", level)
         }, ref ᒐ);
-        //fmt.Fprintln(os.Stderr, "Recovered, level", level)
         if (level + 1 < maxlevel){
             interpreter(level + 1, maxlevel, rec);
         } else {
@@ -485,7 +488,6 @@ internal static void g3() {
     g2();
 }
 
-
 partial struct globstructᴛ1 /*dyn*/ {
     internal nint a, b, c, d, e, f, g, h, i;
 }
@@ -495,6 +497,7 @@ internal static void ff1(ж<foo> Ꮡap, nint a, nint b, nint c, nint d, nint e, 
     GoFrame ᒐ = default;
     try {
         defer(Ꮡap.method1, ref ᒐ);
+
         // Make a defer that has a very large set of args, hence big size for the
         // defer record for the open-coded frame (which means it won't use the
         // defer pool)
@@ -539,6 +542,7 @@ public static void TestIssue43921(ж<testing.T> Ꮡt) {
                     }, ref ᒐ);
                     break;
                 }
+
                 defer(() => {
                     GoFrame ᒐ = default;
                     try {
@@ -570,6 +574,7 @@ public static void TestIssue43920(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var steps = ref heap(new nint(), out var Ꮡsteps);
+
         defer(() => {
             expect(Ꮡt, 1, recover());
         }, ref ᒐ);
@@ -624,8 +629,6 @@ internal static void step(ж<testing.T> Ꮡt, ж<nint> Ꮡsteps, nint want) {
 public static void TestIssue43941(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         ref var steps = ref heap(new nint(), out var Ꮡsteps);
         steps = 7;
         defer(() => {
@@ -683,6 +686,7 @@ public static void TestIssue43941(ж<testing.T> Ꮡt) {
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                     finally { ᒐ.Run(); }
                 }))();
+
                 // Code below isn't executed,
                 // but removing it breaks the test case.
                 defer(() => {

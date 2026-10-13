@@ -29,13 +29,16 @@ public static void TestParsePattern(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     global::go.net.http_package.segment lit(@string name) => new segment(s: name);
+
     global::go.net.http_package.segment wild(@string name) => new segment(s: name, wild: true);
+
     var wildʗ1 = wild;
     global::go.net.http_package.segment multi(@string name) {
         var s = wildʗ1(name);
         s.multi = true;
         return s;
     }
+
     foreach (var (_, vᴛ1) in new TestParsePattern_type[]{
         new("/"u8, new pattern(segments: new global::go.net.http_package.segment[]{multi(""u8)}.slice())),
         new("/a"u8, new pattern(segments: new global::go.net.http_package.segment[]{lit("a"u8)}.slice())),
@@ -106,8 +109,8 @@ public static void TestParsePattern(ж<testing.T> Ꮡt) {
         new(
             "/%61%62/%7b/%"u8,
             new pattern(segments: new global::go.net.http_package.segment[]{lit("ab"u8), lit("{"u8), lit("%"u8)}.slice())
-        ), // Allow multiple spaces matching regexp '[ \t]+' between method and path.
-
+        ),
+        // Allow multiple spaces matching regexp '[ \t]+' between method and path.
         new(
             "GET\t  /"u8,
             new pattern(method: "GET"u8, segments: new global::go.net.http_package.segment[]{multi(""u8)}.slice())
@@ -141,8 +144,6 @@ internal partial struct TestParsePatternError_type /*dyn*/ {
 }
 
 public static void TestParsePatternError(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     foreach (var (_, test) in new TestParsePatternError_type[]{
         new(""u8, "empty pattern"u8),
         new("A=B /"u8, "at offset 0: invalid method"u8),
@@ -152,7 +153,6 @@ public static void TestParsePatternError(ж<testing.T> Ꮡt) {
         new("/{wx"u8, "at offset 1: bad wildcard segment"u8),
         new("/a/{/}/c"u8, "at offset 3: bad wildcard segment"u8),
         new("/a/{%61}/c"u8, "at offset 3: bad wildcard name"u8), // wildcard names aren't unescaped
-
         new("/{a$}"u8, "at offset 1: bad wildcard name"u8),
         new("/{}"u8, "at offset 1: empty wildcard"u8),
         new("POST a.com/x/{}/y"u8, "at offset 13: empty wildcard"u8),
@@ -225,21 +225,21 @@ internal partial struct TestComparePaths_type /*dyn*/ {
 }
 
 public static void TestComparePaths(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
+    foreach (var (_, test) in new TestComparePaths_type[]{
+        // A non-final pattern segment can have one of two values: literal or
+        // single wildcard. A final pattern segment can have one of 5: empty
+        // (trailing slash), literal, dollar, single wildcard, or multi
+        // wildcard. Trailing slash and multi wildcard are the same.
 
-    foreach (var (_, test) in new TestComparePaths_type[]{ // A non-final pattern segment can have one of two values: literal or
- // single wildcard. A final pattern segment can have one of 5: empty
- // (trailing slash), literal, dollar, single wildcard, or multi
- // wildcard. Trailing slash and multi wildcard are the same.
- // A literal should be more specific than anything it overlaps, except itself.
-
+        // A literal should be more specific than anything it overlaps, except itself.
         new("/a"u8, "/a"u8, equivalent),
         new("/a"u8, "/b"u8, disjoint),
         new("/a"u8, "/"u8, moreSpecific),
         new("/a"u8, "/{$}"u8, disjoint),
         new("/a"u8, "/{x}"u8, moreSpecific),
-        new("/a"u8, "/{x...}"u8, moreSpecific), // Adding a segment doesn't change that.
+        new("/a"u8, "/{x...}"u8, moreSpecific),
 
+        // Adding a segment doesn't change that.
         new("/b/a"u8, "/b/a"u8, equivalent),
         new("/b/a"u8, "/b/b"u8, disjoint),
         new("/b/a"u8, "/b/"u8, moreSpecific),
@@ -251,8 +251,9 @@ public static void TestComparePaths(ж<testing.T> Ꮡt) {
         new("/{z}/a"u8, "/{z}/"u8, moreSpecific),
         new("/{z}/a"u8, "/{z}/{$}"u8, disjoint),
         new("/{z}/a"u8, "/{z}/{x}"u8, moreSpecific),
-        new("/{z}/a"u8, "/{z}/{x...}"u8, moreSpecific), // Single wildcard on left.
+        new("/{z}/a"u8, "/{z}/{x...}"u8, moreSpecific),
 
+        // Single wildcard on left.
         new("/{z}"u8, "/a"u8, moreGeneral),
         new("/{z}"u8, "/a/b"u8, disjoint),
         new("/{z}"u8, "/{$}"u8, disjoint),
@@ -264,8 +265,9 @@ public static void TestComparePaths(ж<testing.T> Ꮡt) {
         new("/b/{z}"u8, "/b/{$}"u8, disjoint),
         new("/b/{z}"u8, "/b/{x}"u8, equivalent),
         new("/b/{z}"u8, "/b/"u8, moreSpecific),
-        new("/b/{z}"u8, "/b/{x...}"u8, moreSpecific), // Trailing slash on left.
+        new("/b/{z}"u8, "/b/{x...}"u8, moreSpecific),
 
+        // Trailing slash on left.
         new("/"u8, "/a"u8, moreGeneral),
         new("/"u8, "/a/b"u8, moreGeneral),
         new("/"u8, "/{$}"u8, moreGeneral),
@@ -287,8 +289,9 @@ public static void TestComparePaths(ж<testing.T> Ꮡt) {
         new("/{z}/"u8, "/{z}/{x...}"u8, equivalent),
         new("/{z}/"u8, "/a/{x...}"u8, moreGeneral),
         new("/a/{z}/"u8, "/{z}/a/"u8, overlaps),
-        new("/a/{z}/b/"u8, "/{x}/c/{y...}"u8, overlaps), // Multi wildcard on left.
+        new("/a/{z}/b/"u8, "/{x}/c/{y...}"u8, overlaps),
 
+        // Multi wildcard on left.
         new("/{m...}"u8, "/a"u8, moreGeneral),
         new("/{m...}"u8, "/a/b"u8, moreGeneral),
         new("/{m...}"u8, "/{$}"u8, moreGeneral),
@@ -316,8 +319,9 @@ public static void TestComparePaths(ж<testing.T> Ꮡt) {
         new("/a/{z}/{m...}"u8, "/{z}/a/"u8, overlaps),
         new("/a/{z}/{m...}"u8, "/{z}/b/{y...}"u8, overlaps),
         new("/a/{z}/b/{m...}"u8, "/{x}/c/{y...}"u8, overlaps),
-        new("/a/{z}/a/{m...}"u8, "/{x}/b"u8, disjoint), // Dollar on left.
+        new("/a/{z}/a/{m...}"u8, "/{x}/b"u8, disjoint),
 
+        // Dollar on left.
         new("/{$}"u8, "/a"u8, disjoint),
         new("/{$}"u8, "/a/b"u8, disjoint),
         new("/{$}"u8, "/{$}"u8, equivalent),
@@ -387,17 +391,13 @@ public static void TestConflictsWith(ж<testing.T> Ꮡt) {
         new("/a/b/c"u8, "/a/c/c"u8, false),
         new("/{x}"u8, "/{y}"u8, true),
         new("/{x}"u8, "/a"u8, false), // more specific
-
         new("/{x}/{y}"u8, "/{x}/a"u8, false),
         new("/{x}/{y}"u8, "/{x}/a/b"u8, false),
         new("/{x}"u8, "/a/{y}"u8, false),
         new("/{x}/{y}"u8, "/{x}/a/"u8, false),
         new("/{x}"u8, "/a/{y...}"u8, false), // more specific
-
         new("/{x}/a/{y}"u8, "/{x}/a/{y...}"u8, false), // more specific
-
         new("/{x}/{y}"u8, "/{x}/a/{$}"u8, false), // more specific
-
         new("/{x}/{y}/{$}"u8, "/{x}/a/{$}"u8, false),
         new("/a/{x}"u8, "/{x}/b"u8, true),
         new("/"u8, "GET /"u8, false),

@@ -44,16 +44,20 @@ internal static any global;
 public static void TestLFStack(ж<testing.T> Ꮡt) {
     var stack = @new<uint64>();
     global = stack.OrTypedNil(); // force heap allocation
+
     // Check the stack is initially empty.
     if (runtime_internal_test_package.LFStackPop(stack) != nil) {
         Ꮡt.Fatalf("stack is not empty"u8);
     }
+
     // Push one element.
     var node = allocMyNode(42);
     runtime_internal_test_package.LFStackPush(stack, fromMyNode(node));
+
     // Push another.
     node = allocMyNode(43);
     runtime_internal_test_package.LFStackPush(stack, fromMyNode(node));
+
     // Pop one element.
     node = toMyNode(runtime_internal_test_package.LFStackPop(stack));
     if (node == nil) {
@@ -62,6 +66,7 @@ public static void TestLFStack(ж<testing.T> Ꮡt) {
     if ((~node).data != 43) {
         Ꮡt.Fatalf("no lifo"u8);
     }
+
     // Pop another.
     node = toMyNode(runtime_internal_test_package.LFStackPop(stack));
     if (node == nil) {
@@ -70,6 +75,7 @@ public static void TestLFStack(ж<testing.T> Ꮡt) {
     if ((~node).data != 42) {
         Ꮡt.Fatalf("no lifo"u8);
     }
+
     // Check the stack is empty again.
     if (runtime_internal_test_package.LFStackPop(stack) != nil) {
         Ꮡt.Fatalf("stack is not empty"u8);

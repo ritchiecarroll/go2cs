@@ -39,6 +39,7 @@ public static void TestReadCOFFSymbolAuxInfo(ж<testing.T> Ꮡt) {
                 err: "incorrect symbol storage class"u8
             )
         };
+
         // The testdata PE object file below was selected from a release
         // build from https://github.com/mstorsjo/llvm-mingw/releases; it
         // corresponds to the mingw "crt2.o" object. The object itself was

@@ -51,6 +51,7 @@ internal static partial void testWaitGroup(ж<Δtesting.T> Ꮡt, ж<Δsync.WaitG
 public static void TestWaitGroup(ж<Δtesting.T> Ꮡt) {
     var wg1 = Ꮡ(new WaitGroup(nil));
     var wg2 = Ꮡ(new WaitGroup(nil));
+
     // Run the same test a few times to ensure barrier is in a proper state.
     for (nint i = 0; i != 8; i++) {
         testWaitGroup(Ꮡt, wg1, wg2);

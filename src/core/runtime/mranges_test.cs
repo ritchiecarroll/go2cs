@@ -17,8 +17,8 @@ internal static readonly object detectedBadAddrRangesˢ = (@string)"detected bad
 
 internal static void validateAddrRanges(ж<testing.T> Ꮡt, ж<global::go.runtime_internal_test_package.AddrRanges> Ꮡa, params Span<global::go.runtime_internal_test_package.AddrRange> wantʗp) {
     var want = wantʗp.slice();
-
     ref var a = ref Ꮡa.DerefOrNull();
+
     var ranges = a.Ranges();
     if (len(ranges) != len(want)) {
         Ꮡt.Errorf("want %v, got %v"u8, want, ranges);
@@ -71,28 +71,34 @@ internal static void validateAddrRanges(ж<testing.T> Ꮡt, ж<global::go.runtim
 public static void TestAddrRangesAdd(ж<testing.T> Ꮡt) {
     ref var a = ref heap<global::go.runtime_internal_test_package.AddrRanges>(out var Ꮡa);
     a = runtime_internal_test_package.NewAddrRanges();
+
     // First range.
     Ꮡa.Add(runtime_internal_test_package.MakeAddrRange(512, 1024));
     validateAddrRanges(Ꮡt, Ꮡa,
         runtime_internal_test_package.MakeAddrRange(512, 1024));
+
     // Coalesce up.
     Ꮡa.Add(runtime_internal_test_package.MakeAddrRange(1024, 2048));
     validateAddrRanges(Ꮡt, Ꮡa,
         runtime_internal_test_package.MakeAddrRange(512, 2048));
+
     // Add new independent range.
     Ꮡa.Add(runtime_internal_test_package.MakeAddrRange(4096, 8192));
     validateAddrRanges(Ꮡt, Ꮡa,
         runtime_internal_test_package.MakeAddrRange(512, 2048),
         runtime_internal_test_package.MakeAddrRange(4096, 8192));
+
     // Coalesce down.
     Ꮡa.Add(runtime_internal_test_package.MakeAddrRange(3776, 4096));
     validateAddrRanges(Ꮡt, Ꮡa,
         runtime_internal_test_package.MakeAddrRange(512, 2048),
         runtime_internal_test_package.MakeAddrRange(3776, 8192));
+
     // Coalesce up and down.
     Ꮡa.Add(runtime_internal_test_package.MakeAddrRange(2048, 3776));
     validateAddrRanges(Ꮡt, Ꮡa,
         runtime_internal_test_package.MakeAddrRange(512, 8192));
+
     // Push a bunch of independent ranges to the end to try and force growth.
     var expectedRanges = new global::go.runtime_internal_test_package.AddrRange[]{runtime_internal_test_package.MakeAddrRange(512, 8192)}.slice();
     for (var i = (uintptr)0; i < 64; i++) {
@@ -101,6 +107,7 @@ public static void TestAddrRangesAdd(ж<testing.T> Ꮡt) {
         expectedRanges = append(expectedRanges, dRange);
         validateAddrRanges(Ꮡt, Ꮡa, expectedRanges.ꓸꓸꓸ);
     }
+
     // Push a bunch of independent ranges to the beginning to try and force growth.
     slice<global::go.runtime_internal_test_package.AddrRange> bottomRanges = default!;
     for (var i = (uintptr)0; i < 63; i++) {
@@ -261,6 +268,7 @@ public static void TestAddrRangesFindSucc(ж<testing.T> Ꮡt) {
             ranges: large
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new TestAddrRangesFindSucc_testt(), out var Ꮡtest);
         test = vᴛ1;

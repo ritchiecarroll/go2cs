@@ -163,8 +163,7 @@ public static void TestTextHandlerPreformatted(ж<testing.T> Ꮡt) {
     global::go.log.slog_package.ΔHandler h = new global::go.log.slog_package.TextHandlerжΔHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), nil));
     h = h.WithAttrs(new global::go.log.slog_package.Attr[]{go.log.slog_package.Duration(durˢ, time_package.ΔMinute), go.log.slog_package.Bool("b"u8, true)}.slice());
     // Also test omitting time.
-    var r = NewRecord(new time_package.Time(nil), 0, /* 0 Level is INFO */
- "m"u8, 0);
+    var r = NewRecord(new time_package.Time(nil), 0, /* 0 Level is INFO */ "m"u8, 0);
     r.AddAttrs(Int("a"u8, 1));
     {
         var err = h.Handle(context.Background(), r); if (err != default!) {
@@ -191,6 +190,7 @@ public static void TestTextHandlerAlloc(ж<testing.T> Ꮡt) {
     wantAllocs(Ꮡt, 0, () => {
         Ꮡh.ValueSlot.Handle(context.Background(), Ꮡr.Value);
     });
+
     h = h.WithGroup("s"u8);
     r.AddAttrs(Group("g"u8, Int("a"u8, 1)));
     wantAllocs(Ꮡt, 0, () => {

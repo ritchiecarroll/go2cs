@@ -36,6 +36,7 @@ public static partial void Example_openDBCLI() {
         var id = flag.Int64("id"u8, 0, personIdToFindˢ);
         var dsn = flag.String(dsnˢ, os.Getenv(dsnˢ2), connectionDataSourceNameˢ);
         flag.Parse();
+
         if (len(dsn.Value) == 0) {
             log.Fatal(missingDsnFlagˢ);
         }
@@ -43,6 +44,7 @@ public static partial void Example_openDBCLI() {
             log.Fatal(missingPersonIdˢ);
         }
         error err = default!;
+
         // Opening a driver typically will not attempt to connect to the database.
         (pool, err) = Δsql.Open(driverNameˢ, dsn.Value);
         if (err != default!) {
@@ -51,21 +53,27 @@ public static partial void Example_openDBCLI() {
             log.Fatal(unableToUseDataSourceˢ, err);
         }
         defer(() => pool.Close(), ref ᒐ);
+
         pool.SetConnMaxLifetime(0);
         pool.SetMaxIdleConns(3);
         pool.SetMaxOpenConns(3);
+
         var (ctx, stop) = context.WithCancel(context.Background());
         var stopʗ1 = stop;
         defer(() => stopʗ1(), ref ᒐ);
+
         var appSignal = new channel<osꓸSignal>(3);
         signal.Notify(appSignal.WithDirection(GoChanDir.Send), os.Interrupt);
+
         var appSignalʗ1 = appSignal;
         var stopʗ2 = stop;
         goǃ(() => {
             ᐸꟷ(appSignalʗ1);
             stopʗ2();
         });
+
         Ping(ctx);
+
         Query(ctx, id.Value);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -80,6 +88,7 @@ public static void Ping(context.Context ctx) {
         (ctx, var cancel) = context.WithTimeout(ctx, 1 * time.ΔSecond);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
+
         {
             var err = pool.PingContext(ctx); if (err != default!) {
                 log.Fatalf("unable to connect to database: %v"u8, err);
@@ -103,6 +112,7 @@ public static void Query(context.Context ctx, int64 id) {
         (ctx, var cancel) = context.WithTimeout(ctx, (time.Duration)(5000000000L));
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
+
         ref var name = ref heap(new @string(), out var Ꮡname);
         var err = pool.QueryRowContext(ctx, selectPNameFromPeopleAsPˢ, Δsql.Named("id"u8, id)).Scan(Ꮡname);
         if (err != default!) {

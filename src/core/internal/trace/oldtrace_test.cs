@@ -44,10 +44,12 @@ public static void TestOldtrace(ж<testing.T> Ꮡt) {
                 }
                 var fʗ1 = f;
                 defer(() => fʗ1.Close(), ref ᒐ);
+
                 (var tr, errΔ2) = Δtrace.NewReader(new trace_test_package.os_FileжReader(f));
                 if (errΔ2 != default!) {
                     tΔ1.Fatalf("failed to create reader: %s"u8, errΔ2);
                 }
+
                 var v = testtrace.NewValidator();
                 v.Value.Go121 = true;
                 while (ᐧ) {
@@ -63,6 +65,7 @@ public static void TestOldtrace(ж<testing.T> Ꮡt) {
                             tΔ1.Fatalf("converted event did not validate; event: \n%s\nerror: %s"u8, ev, errΔ4);
                         }
                     }
+
                     if (testName == "user_task_region_1_21_good"u8) {
                         testedUserRegions = true;
                         var validRegions = new map<@string, EmptyStruct>{
@@ -95,7 +98,6 @@ public static void TestOldtrace(ж<testing.T> Ꮡt) {
                                 tΔ1.Fatalf("converted event has unexpected user log:\n%s"u8, ev);
                             }
                         }
-
                     }
                 }
             }

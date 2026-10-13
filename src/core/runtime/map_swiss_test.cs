@@ -32,6 +32,7 @@ public static void TestGroupSizeZero(ж<testing.T> Ꮡt) {
     map<EmptyStruct, EmptyStruct> m = default!;
     var mTyp = abi.TypeOf(m);
     var mt = mTyp.Reinterpret<abi.Type, abi.SwissMapType>();
+
     // internal/runtime/maps when create pointers to slots, even if slots
     // are size 0. The compiler should have reserved an extra word to
     // ensure that pointers to the zero-size type at the end of group are

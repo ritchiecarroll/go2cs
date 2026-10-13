@@ -32,16 +32,6 @@ internal partial struct TestUnmarshalMarshal_type /*dyn*/ {
 }
 
 public static void TestUnmarshalMarshal(ж<testing.T> Ꮡt) {
-// The two IEEE 754 bit patterns used for the math.Float{64,32}frombits
-// encodings are non-math.NAN quiet-NaN values. Since they are not equal
-// to math.NaN(), they should be re-encoded to their bit patterns. They
-// are, respectively:
-//   * math.Float64bits(math.NaN())+1
-//   * math.Float32bits(float32(math.NaN()))+1
-// Although we arbitrarily choose default integer bases (0 or 16), we may
-// want to change those arbitrary choices in the future and should not
-// break the parser. Verify that integers in the opposite bases still
-// parse correctly.
     slice<TestUnmarshalMarshal_type> tests = new TestUnmarshalMarshal_type[]{
         new(
             desc: "missing version"u8,
@@ -178,6 +168,12 @@ float32(2.5)
         ),
         new(
             desc: "float edge cases"u8,
+            // The two IEEE 754 bit patterns used for the math.Float{64,32}frombits
+            // encodings are non-math.NAN quiet-NaN values. Since they are not equal
+            // to math.NaN(), they should be re-encoded to their bit patterns. They
+            // are, respectively:
+            //   * math.Float64bits(math.NaN())+1
+            //   * math.Float32bits(float32(math.NaN()))+1
             @in: """
 go test fuzz v1
 float32(-0)
@@ -194,6 +190,10 @@ math.Float32frombits(0x7fc00001)
         ),
         new(
             desc: "int variations"u8,
+            // Although we arbitrarily choose default integer bases (0 or 16), we may
+            // want to change those arbitrary choices in the future and should not
+            // break the parser. Verify that integers in the opposite bases still
+            // parse correctly.
             @in: """
 go test fuzz v1
 int(0x0)
@@ -267,7 +267,6 @@ uint(0xffffffffffffffff)
                 { /* default: */
                     throw panic("unreachable");
                 }
-
             }))()
         ),
         new(
@@ -296,6 +295,7 @@ uint(0xffffffffffffffff)
             if (newB[len(newB) - 1] != (rune)'\n') {
                 tΔ1.Error(didnTWriteFinalNewlineToˢ);
             }
+
             @string want = testʗ1.want;
             if (want == ""u8) {
                 want = testʗ1.@in;
@@ -317,6 +317,7 @@ public static void BenchmarkMarshalCorpusFile(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < len(buf); i++) {
         buf[i] = (byte)i;
     }
+
     for (nint sz = 1; sz <= len(buf); sz <<= (int)(1)) {
         nint szΔ1 = sz;
         var bufʗ1 = buf;
@@ -337,6 +338,7 @@ public static void BenchmarkUnmarshalCorpusFile(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < len(buf); i++) {
         buf[i] = (byte)i;
     }
+
     for (nint sz = 1; sz <= len(buf); sz <<= (int)(1)) {
         nint szΔ1 = sz;
         var data = marshalCorpusFile(buf.slice(0, szΔ1));
@@ -391,10 +393,13 @@ public static void FuzzFloat64RoundTrip(ж<testing.F> Ꮡf) {
     f.Add((uint64)0x7FF0000000000001UL); // signaling NaN
     f.Add(math.Float64bits(math.Inf(1)));
     f.Add(math.Float64bits(math.Inf(-1)));
+
     Ꮡf.Fuzz((ж<testing.T> t, uint64 u1) => {
         var x1 = math.Float64frombits(u1);
+
         var b = marshalCorpusFile(x1);
         t.Logf("marshaled math.Float64frombits(0x%x):\n%s"u8, u1, b);
+
         var (xs, err) = unmarshalCorpusFile(b);
         if (err != default!) {
             t.Fatal(err);
@@ -423,9 +428,11 @@ public static void FuzzRuneRoundTrip(ж<testing.F> Ꮡf) {
     f.Add((rune)(unicode.MaxRune + 1));
     f.Add((rune)(-2147483648));
     f.Add((rune)0x7fffffff);
+
     Ꮡf.Fuzz((ж<testing.T> t, rune r1) => {
         var b = marshalCorpusFile(r1);
         t.Logf("marshaled rune(0x%x):\n%s"u8, r1, b);
+
         var (rs, err) = unmarshalCorpusFile(b);
         if (err != default!) {
             t.Fatal(err);
@@ -446,9 +453,11 @@ public static void FuzzStringRoundTrip(ж<testing.F> Ꮡf) {
     f.Add((@string)""u8);
     f.Add((@string)"\x00"u8);
     f.Add(((@string)new rune[]{unicode.ReplacementChar}.slice()));
+
     Ꮡf.Fuzz((ж<testing.T> t, @string s1) => {
         var b = marshalCorpusFile(s1);
         t.Logf("marshaled %q:\n%s"u8, s1, b);
+
         var (rs, err) = unmarshalCorpusFile(b);
         if (err != default!) {
             t.Fatal(err);

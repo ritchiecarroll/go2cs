@@ -35,23 +35,22 @@ public static void Example() {
             fmt.Println(err);
         }
     }
+    // Output: 1989-03-15 22:30:00 +0000 UTC: the file system has gone away
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string emitMachoDwarfElfHeaderˢ = "emit macho dwarf: elf header corrupted"u8;
 
-// Output: 1989-03-15 22:30:00 +0000 UTC: the file system has gone away
 public static void ExampleNew() {
     var err = errors.New(emitMachoDwarfElfHeaderˢ);
     if (err != default!) {
         fmt.Print(err);
     }
+    // Output: emit macho dwarf: elf header corrupted
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 private static readonly @string nameᶜ = "bimmler"u8;
-
-// Output: emit macho dwarf: elf header corrupted
 
 // The fmt package's Errorf function lets us use the package's formatting
 // features to create descriptive error messages.
@@ -62,6 +61,7 @@ public static void ExampleNew_errorf() {
     if (err != default!) {
         fmt.Print(err);
     }
+    // Output: user "bimmler" (id 17) not found
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -70,7 +70,6 @@ private static readonly @string err2ˢ = "err2"u8;
 private static readonly object errIsErr1ˢ = (@string)"err is err1"u8;
 private static readonly object errIsErr2ˢ = (@string)"err is err2"u8;
 
-// Output: user "bimmler" (id 17) not found
 public static void ExampleJoin() {
     var err1 = errors.New(err1ˢ);
     var err2 = errors.New(err2ˢ);
@@ -82,17 +81,17 @@ public static void ExampleJoin() {
     if (errors.Is(err, err2)) {
         fmt.Println(errIsErr2ˢ);
     }
+    // Output:
+    // err1
+    // err2
+    // err is err1
+    // err is err2
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string nonExistingˢ = "non-existing"u8;
 private static readonly object fileDoesNotExistˢ = (@string)"file does not exist"u8;
 
-// Output:
-// err1
-// err2
-// err is err1
-// err is err2
 public static void ExampleIs() {
     {
         var (_, err) = os.Open(nonExistingˢ); if (err != default!) {
@@ -103,13 +102,14 @@ public static void ExampleIs() {
             }
         }
     }
+
+    // Output:
+    // file does not exist
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object failedAtPathˢ = (@string)"Failed at path:"u8;
 
-// Output:
-// file does not exist
 public static void ExampleAs() {
     {
         var (_, err) = os.Open(nonExistingˢ); if (err != default!) {
@@ -121,22 +121,22 @@ public static void ExampleAs() {
             }
         }
     }
+
+    // Output:
+    // Failed at path: non-existing
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string error1ˢ = "error1"u8;
 
-// Output:
-// Failed at path: non-existing
 public static void ExampleUnwrap() {
     var err1 = errors.New(error1ˢ);
     var err2 = fmt.Errorf("error2: [%w]"u8, err1);
     fmt.Println(err2);
     fmt.Println(errors.Unwrap(err2));
+    // Output:
+    // error2: [error1]
+    // error1
 }
-
-// Output:
-// error2: [error1]
-// error1
 
 } // end errors_test_package

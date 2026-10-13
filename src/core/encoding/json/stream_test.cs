@@ -55,7 +55,6 @@ public static @string String(this CasePos pos) {
     return fmt.Sprintf("%s:%d"u8, path.Base(frame.File), frame.Line);
 }
 
-// another value to make sure something can follow map
 // Test values for the stream test.
 // One of each JSON kind.
 internal static slice<any> streamTest = new any[]{
@@ -66,7 +65,7 @@ internal static slice<any> streamTest = new any[]{
     false,
     new any[]{(@string)"a"u8, (@string)"b"u8, (@string)"c"u8}.slice(),
     new map<@string, any>{["K"u8] = (@string)"Kelvin"u8, ["ß"u8] = (@string)"long s"u8},
-    3.14D
+    3.14D // another value to make sure something can follow map
 }.slice();
 
 internal static @string streamEncoded = """
@@ -126,6 +125,7 @@ public static void TestEncoderErrorAndReuseEncodeState(ж<testing.T> Ꮡt) {
         ref var dummy = ref heap<TestEncoderErrorAndReuseEncodeState_Dummy>(out var Ꮡdummy);
         dummy = new TestEncoderErrorAndReuseEncodeState_Dummy(Name: "Dummy"u8);
         dummy.Next = Ꮡdummy;
+
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         var enc = NewEncoder(new json_test_package.bytes_BufferжWriter(Ꮡbuf));
         {
@@ -139,6 +139,7 @@ public static void TestEncoderErrorAndReuseEncodeState(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("Marshal error: %v"u8, err);
             }
         }
+
         ref var got = ref heap(new TestEncoderErrorAndReuseEncodeState_Data(), out var Ꮡgot);
         {
             var err = Unmarshal(buf.Bytes(), Ꮡgot); if (err != default!) {
@@ -230,12 +231,15 @@ public static void TestEncoderSetEscapeHTML(ж<testing.T> Ꮡt) {
     C c = default!;
     CText ct = default!;
     TestEncoderSetEscapeHTML_tagStruct tagStruct = default!;
+
     // This case is particularly interesting, as we force the encoder to
     // take the address of the Ptr field to use its MarshalJSON method. This
     // is why the '&' is important.
     var marshalerStruct = Ꮡ(new TestEncoderSetEscapeHTML_marshalerStruct(@"""<str>"""u8, @"""<str>"""u8));
+
     // https://golang.org/issue/34154
     var stringOption = new TestEncoderSetEscapeHTML_stringOption(@"<html>foobar</html>"u8);
+
     var tests = new TestEncoderSetEscapeHTML_tests[]{
         new(Name("c"u8), c, @"""\u003c\u0026\u003e"""u8, @"""<&>"""u8),
         new(Name("ct"u8), ct, @"""\""\u003c\u0026\u003e\"""""u8, @"""\""<&>\"""""u8),
@@ -459,6 +463,7 @@ public static void TestBlocking(ж<testing.T> Ꮡt) {
             var wʗ1 = w;
             goǃ(ᴛ1 => wʗ1.Write(ᴛ1), slice<byte>(ttʗ1.@in));
             ref var val = ref heap<any>(out var Ꮡval);
+
             // If Decode reads beyond what w.Write writes above,
             // it will block, and the test will deadlock.
             {
@@ -483,8 +488,8 @@ internal partial struct TestDecodeInStream_tests /*dyn*/ {
 }
 
 public static void TestDecodeInStream(ж<testing.T> Ꮡt) {
-    var tests = new TestDecodeInStream_tests[]{ // streaming token cases
-
+    var tests = new TestDecodeInStream_tests[]{
+        // streaming token cases
         new(CaseName: Name(""u8), json: @"10"u8, expTokens: new any[]{(float64)10D}.slice()),
         new(CaseName: Name(""u8), json: @" [10] "u8, expTokens: new any[]{
             ((global::go.encoding.json_package.Delim)(rune)'['), (float64)10D, ((global::go.encoding.json_package.Delim)(rune)']')}.slice()),
@@ -505,8 +510,9 @@ public static void TestDecodeInStream(ж<testing.T> Ꮡt) {
         new(CaseName: Name(""u8), json: @"{""obj"": [{""a"": 1}]}"u8, expTokens: new any[]{
             ((global::go.encoding.json_package.Delim)(rune)'{'), (@string)"obj"u8, ((global::go.encoding.json_package.Delim)(rune)'['),
             ((global::go.encoding.json_package.Delim)(rune)'{'), (@string)"a"u8, (float64)1D, ((global::go.encoding.json_package.Delim)(rune)'}'),
-            ((global::go.encoding.json_package.Delim)(rune)']'), ((global::go.encoding.json_package.Delim)(rune)'}')}.slice()), // streaming tokens with intermittent Decode()
+            ((global::go.encoding.json_package.Delim)(rune)']'), ((global::go.encoding.json_package.Delim)(rune)'}')}.slice()),
 
+        // streaming tokens with intermittent Decode()
         new(CaseName: Name(""u8), json: @"{ ""a"": 1 }"u8, expTokens: new any[]{
             ((global::go.encoding.json_package.Delim)(rune)'{'), (@string)"a"u8,
             new decodeThis((float64)1D),
@@ -564,6 +570,7 @@ public static void TestDecodeInStream(ж<testing.T> Ꮡt) {
 
                 ref var got = ref heap<any>(out var Ꮡgot);
                 error err = default!;
+
                 {
                     var (dt, ok) = want._<decodeThis>(ᐧ); if (ok){
                         want = dt.v;
@@ -603,6 +610,7 @@ public static void TestHTTPDecoding(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         @string raw = rawᶜ1;
+
         var ts = httptest.NewServer(new json_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             w.Write(slice<byte>(raw));
         })));
@@ -614,8 +622,10 @@ public static void TestHTTPDecoding(ж<testing.T> Ꮡt) {
         }
         var resʗ1 = res;
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
+
         ref var foo = ref heap<TestHTTPDecoding_foo>(out var Ꮡfoo);
         foo = new TestHTTPDecoding_foo();
+
         var d = NewDecoder(new json_test_package.io_ReadCloserᴠReader((~res).Body));
         err = d.Decode(Ꮡfoo);
         if (err != default!) {
@@ -624,6 +634,7 @@ public static void TestHTTPDecoding(ж<testing.T> Ꮡt) {
         if (foo.Foo != "bar"u8) {
             Ꮡt.Errorf(@"Decode: got %q, want ""bar"""u8, foo.Foo);
         }
+
         // make sure we get the EOF the second time
         err = d.Decode(Ꮡfoo);
         if (!AreEqual(err, io.EOF)) {

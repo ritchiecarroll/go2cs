@@ -79,12 +79,14 @@ public static void TestRFC9180Vectors(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     ref var vectors = ref heap<slice<TestRFC9180Vectors_vectors>>(out var Ꮡvectors);
     {
         var errΔ1 = json.Unmarshal(vectorsJSON, Ꮡvectors); if (errΔ1 != default!) {
             Ꮡt.Fatal(errΔ1);
         }
     }
+
     foreach (var (_, vᴛ1) in vectors) {
         ref var vector = ref heap(new TestRFC9180Vectors_vectors(), out var Ꮡvector);
         vector = vᴛ1;
@@ -92,6 +94,7 @@ public static void TestRFC9180Vectors(ж<testing.T> Ꮡt) {
         var vectorʗ1 = vector;
         Ꮡt.Run(vector.Name, (ж<testing.T> tΔ1) => {
             var setup = parseVectorSetup(vectorʗ1.Setup);
+
             var (kemID, errΔ2) = strconv.Atoi(setup[kemIdˢ]);
             if (errΔ2 != default!) {
                 tΔ1.Fatal(errΔ2);
@@ -119,18 +122,22 @@ public static void TestRFC9180Vectors(ж<testing.T> Ꮡt) {
                     tΔ1.Skip(unsupportedAeadˢ);
                 }
             }
+
             var info = mustDecodeHex(tΔ1, setup[infoˢ]);
             var pubKeyBytes = mustDecodeHex(tΔ1, setup[pkRmˢ]);
             (var pub, errΔ2) = ParseHPKEPublicKey((uint16)kemID, pubKeyBytes);
             if (errΔ2 != default!) {
                 tΔ1.Fatal(errΔ2);
             }
+
             var ephemeralPrivKey = mustDecodeHex(tΔ1, setup[skEmˢ]);
+
             var ephemeralPrivKeyʗ1 = ephemeralPrivKey;
             testingOnlyGenerateKey = () => SupportedKEMs[(uint16)kemID].curve.NewPrivateKey(ephemeralPrivKeyʗ1);
             tΔ1.Cleanup(() => {
                 testingOnlyGenerateKey = default!;
             });
+
             (var encap, var sender, errΔ2) = SetupSender(
                 (uint16)kemID,
                 (uint16)kdfID,
@@ -140,15 +147,18 @@ public static void TestRFC9180Vectors(ж<testing.T> Ꮡt) {
             if (errΔ2 != default!) {
                 tΔ1.Fatal(errΔ2);
             }
+
             var expectedEncap = mustDecodeHex(tΔ1, setup[encˢ]);
             if (!bytes_package.Equal(encap, expectedEncap)) {
                 tΔ1.Errorf("unexpected encapsulated key, got: %x, want %x"u8, encap, expectedEncap);
             }
+
             var privKeyBytes = mustDecodeHex(tΔ1, setup[skRmˢ]);
             (var priv, errΔ2) = ParseHPKEPrivateKey((uint16)kemID, privKeyBytes);
             if (errΔ2 != default!) {
                 tΔ1.Fatal(errΔ2);
             }
+
             (var receipient, errΔ2) = SetupReceipient(
                 (uint16)kemID,
                 (uint16)kdfID,
@@ -159,6 +169,7 @@ public static void TestRFC9180Vectors(ж<testing.T> Ꮡt) {
             if (errΔ2 != default!) {
                 tΔ1.Fatal(errΔ2);
             }
+
             foreach (var (_, ctx) in new ж<global::go.crypto.@internal.hpke_package.context>[]{(~sender).context, (~receipient).context}.slice()) {
                 var expectedSharedSecret = mustDecodeHex(tΔ1, setup[sharedSecretˢ]);
                 if (!bytes_package.Equal((~ctx).sharedSecret, expectedSharedSecret)) {
@@ -177,6 +188,7 @@ public static void TestRFC9180Vectors(ж<testing.T> Ꮡt) {
                     tΔ1.Errorf("unexpected exporter secret, got: %x, want %x"u8, (~ctx).exporterSecret, expectedExporterSecret);
                 }
             }
+
             foreach (var (_, enc) in parseVectorEncryptions(vectorʗ1.Encryptions)) {
                 var encʗ1 = enc;
                 var receipientʗ1 = receipient;
@@ -193,6 +205,7 @@ public static void TestRFC9180Vectors(ж<testing.T> Ꮡt) {
                     if (!bytes_package.Equal(computedNonce, expectedNonce)) {
                         tΔ2.Errorf("unexpected nonce: got %x, want %x"u8, computedNonce, expectedNonce);
                     }
+
                     var expectedCiphertext = mustDecodeHex(tΔ2, encʗ1["ct"u8]);
                     (var ciphertext, errΔ3) = senderʗ1.Seal(mustDecodeHex(tΔ2, encʗ1[aadˢ]), mustDecodeHex(tΔ2, encʗ1["pt"u8]));
                     if (errΔ3 != default!) {
@@ -201,6 +214,7 @@ public static void TestRFC9180Vectors(ж<testing.T> Ꮡt) {
                     if (!bytes_package.Equal(ciphertext, expectedCiphertext)) {
                         tΔ2.Errorf("unexpected ciphertext: got %x want %x"u8, ciphertext, expectedCiphertext);
                     }
+
                     var expectedPlaintext = mustDecodeHex(tΔ2, encʗ1["pt"u8]);
                     (var plaintext, errΔ3) = receipientʗ1.Open(mustDecodeHex(tΔ2, encʗ1[aadˢ]), mustDecodeHex(tΔ2, encʗ1["ct"u8]));
                     if (errΔ3 != default!) {

@@ -56,14 +56,19 @@ public static void FuzzParseBuildInfoRoundTrip(ж<testing.F> Ꮡf) {
 
     // Package built from outside a module, missing some fields..
     f.Add(strip(pathRscIoFortuneModRscIoˢ));
+
     // Package built from the standard library, missing some fields..
     f.Add(pathCmdTest2jsonˢ);
+
     // Package built from inside a module.
     f.Add(strip(go118PathExampleComMModˢ));
+
     // Package built in GOPATH mode.
     f.Add(strip(go118PathExampleComMˢ));
+
     // Escaped build info.
     f.Add(strip(go118PathExampleComMˢ2));
+
     Ꮡf.Fuzz((ж<testing.T> t, @string s) => {
         var (bi, err) = debug.ParseBuildInfo(s);
         if (err != default!) {
@@ -71,6 +76,7 @@ public static void FuzzParseBuildInfoRoundTrip(ж<testing.F> Ꮡf) {
             t.Log(err);
             return;
         }
+
         // s2 could have different escaping from s.
         // However, it should parse to exactly the same contents.
         @string s2 = bi.String();
@@ -78,6 +84,7 @@ public static void FuzzParseBuildInfoRoundTrip(ж<testing.F> Ꮡf) {
         if (err != default!) {
             t.Fatalf("%v:\n%s"u8, err, s2);
         }
+
         if (!reflect.DeepEqual(bi2.OrTypedNil(), bi.OrTypedNil())) {
             t.Fatalf("Parsed representation differs.\ninput:\n%s\noutput:\n%s"u8, s, s2);
         }

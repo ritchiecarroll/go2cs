@@ -61,6 +61,7 @@ internal static void verifyKeepAliveSettings(ж<testing.T> Ꮡt, syscallꓸHandl
     if (cfg.Count == -1) {
         cfg.Count = oldCfg.Count;
     }
+
     var (tcpKeepAlive, err) = syscall.GetsockoptInt(fd, syscall.SOL_SOCKET, syscall.SO_KEEPALIVE);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -68,6 +69,7 @@ internal static void verifyKeepAliveSettings(ж<testing.T> Ꮡt, syscallꓸHandl
     if ((tcpKeepAlive != 0) != cfg.Enable) {
         Ꮡt.Fatalf("SO_KEEPALIVE: got %t; want %t"u8, tcpKeepAlive != 0, cfg.Enable);
     }
+
     (var tcpKeepAliveIdle, err) = syscall.GetsockoptInt(fd, syscall.IPPROTO_TCP, syscall_TCP_KEEPIDLE);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -75,6 +77,7 @@ internal static void verifyKeepAliveSettings(ж<testing.T> Ꮡt, syscallꓸHandl
     if (((time.Duration)(int64)tcpKeepAliveIdle) * time.ΔSecond != cfg.Idle) {
         Ꮡt.Fatalf("TCP_KEEPIDLE: got %ds; want %v"u8, tcpKeepAliveIdle, cfg.Idle);
     }
+
     (var tcpKeepAliveInterval, err) = syscall.GetsockoptInt(fd, syscall.IPPROTO_TCP, syscall_TCP_KEEPINTVL);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -82,6 +85,7 @@ internal static void verifyKeepAliveSettings(ж<testing.T> Ꮡt, syscallꓸHandl
     if (((time.Duration)(int64)tcpKeepAliveInterval) * time.ΔSecond != cfg.Interval) {
         Ꮡt.Fatalf("TCP_KEEPINTVL: got %ds; want %v"u8, tcpKeepAliveInterval, cfg.Interval);
     }
+
     (var tcpKeepAliveCount, err) = syscall.GetsockoptInt(fd, syscall.IPPROTO_TCP, syscall_TCP_KEEPCNT);
     if (err != default!) {
         Ꮡt.Fatal(err);

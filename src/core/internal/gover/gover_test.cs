@@ -89,22 +89,17 @@ public static void TestIsLang(ж<testing.T> Ꮡt) {
     test1<@string, bool>(Ꮡt, isLangTests, isLangˢ, IsLang);
 }
 
-// == 1.20.0
-// == 1.20.0
-// == 1.3.0
-// == 1.2.0
-// == 1.0.0
 internal static slice<testCase1<@string, bool>> isLangTests = new testCase1<@string, bool>[]{
     new("1.2rc3"u8, false),
     new("1.2.3"u8, false),
     new("1.999testmod"u8, false),
     new("1.22"u8, true),
     new("1.21"u8, true),
-    new("1.20"u8, false),
-    new("1.19"u8, false),
-    new("1.3"u8, false),
-    new("1.2"u8, false),
-    new("1"u8, false)
+    new("1.20"u8, false), // == 1.20.0
+    new("1.19"u8, false), // == 1.20.0
+    new("1.3"u8, false), // == 1.3.0
+    new("1.2"u8, false), // == 1.2.0
+    new("1"u8, false) // == 1.0.0
 }.slice();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

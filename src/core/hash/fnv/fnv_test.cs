@@ -128,34 +128,42 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
             foreach (var (_, g) in ttʗ1.gold) {
                 var h = ttʗ1.newHash();
                 var h2 = ttʗ1.newHash();
+
                 io.WriteString(h, g.@in.slice(0, len(g.@in) / 2));
+
                 var (state, err) = h._<encoding.BinaryMarshaler>().MarshalBinary();
                 if (err != default!) {
                     tΔ1.Errorf("could not marshal: %v"u8, err);
                     continue;
                 }
+
                 (var stateAppend, err) = h._<encoding.BinaryAppender>().AppendBinary(new slice<byte>(4, 32));
                 if (err != default!) {
                     tΔ1.Errorf("could not marshal: %v"u8, err);
                     continue;
                 }
                 stateAppend = stateAppend[4..];
+
                 if (((sstring)state) != g.halfState) {
                     tΔ1.Errorf("checksum(%q) state = %q, want %q"u8, g.@in, state, g.halfState);
                     continue;
                 }
+
                 if (((sstring)stateAppend) != g.halfState) {
                     tΔ1.Errorf("checksum(%q) state = %q, want %q"u8, g.@in, stateAppend, g.halfState);
                     continue;
                 }
+
                 {
                     var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != default!) {
                         tΔ1.Errorf("could not unmarshal: %v"u8, errΔ1);
                         continue;
                     }
                 }
+
                 io.WriteString(h, g.@in.slice(len(g.@in) / 2));
                 io.WriteString(h2, g.@in.slice(len(g.@in) / 2));
+
                 {
                     var (actual, actual2) = (h.Sum(default!), h2.Sum(default!)); if (!bytes.Equal(actual, actual2)) {
                         tΔ1.Errorf("hash(%q) = 0x%x != marshaled 0x%x"u8, g.@in, actual, actual2);
@@ -194,16 +202,19 @@ internal static void testIntegrity(ж<testing.T> Ꮡt, hash.Hash h) {
     var data = new byte[]{(rune)'1', (rune)'2', 3, 4, 5}.slice();
     h.Write(data);
     var sum = h.Sum(default!);
+
     {
         nint size = h.Size(); if (size != len(sum)) {
             Ꮡt.Fatalf("Size()=%d but len(Sum())=%d"u8, size, len(sum));
         }
     }
+
     {
         var a = h.Sum(default!); if (!bytes.Equal(sum, a)) {
             Ꮡt.Fatalf("first Sum()=0x%x, second Sum()=0x%x"u8, sum, a);
         }
     }
+
     h.Reset();
     h.Write(data);
     {
@@ -211,6 +222,7 @@ internal static void testIntegrity(ж<testing.T> Ꮡt, hash.Hash h) {
             Ꮡt.Fatalf("Sum()=0x%x, but after Reset() Sum()=0x%x"u8, sum, a);
         }
     }
+
     h.Reset();
     h.Write(data[..2]);
     h.Write(data[2..]);
@@ -219,6 +231,7 @@ internal static void testIntegrity(ж<testing.T> Ꮡt, hash.Hash h) {
             Ꮡt.Fatalf("Sum()=0x%x, but with partial writes, Sum()=0x%x"u8, sum, a);
         }
     }
+
     switch (h.Size()) {
     case 4: {
         var sum32 = h._<hash.Hash32>().Sum32();
@@ -235,12 +248,11 @@ internal static void testIntegrity(ж<testing.T> Ꮡt, hash.Hash h) {
         break;
     }
     case 16: {
+        // There's no Sum128 function, so we don't need to test anything here.
         break;
     }}
-
 }
 
-// There's no Sum128 function, so we don't need to test anything here.
 public static void BenchmarkFnv32KB(ж<testing.B> Ꮡb) {
     benchmarkKB(Ꮡb, new fnv_internal_test_package.hash_Hash32ᴠHash(New32()));
 }
@@ -274,6 +286,7 @@ internal static void benchmarkKB(ж<testing.B> Ꮡb, hash.Hash h) {
         data[i] = (byte)i;
     }
     var @in = new slice<byte>(0, h.Size());
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         h.Reset();

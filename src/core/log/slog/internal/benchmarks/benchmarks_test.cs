@@ -74,11 +74,11 @@ public static void BenchmarkAttrs(ж<testing.B> Ꮡb) {
                     var loggerʗ5 = loggerʗ1;
             foreach (var (_, vᴛ2) in new BenchmarkAttrs_typeᴛ1[]{
                 new(
-                    "5 args"u8, // The number should match nAttrsInline in slog/record.go.
- // This should exercise the code path where no allocations
- // happen in Record or Attr. If there are allocations, they
- // should only be from Duration.String and Time.String.
-
+                    // The number should match nAttrsInline in slog/record.go.
+                    // This should exercise the code path where no allocations
+                    // happen in Record or Attr. If there are allocations, they
+                    // should only be from Duration.String and Time.String.
+                    "5 args"u8,
                     () => {
                         loggerʗ2.LogAttrs(default!, slog.LevelInfo, testMessage,
                             slog.String(stringˢ, testString),
@@ -116,8 +116,8 @@ public static void BenchmarkAttrs(ж<testing.B> Ꮡb) {
                     }
                 ),
                 new(
-                    "40 args"u8, // Try an extreme value to see if the results are reasonable.
-
+                    // Try an extreme value to see if the results are reasonable.
+                    "40 args"u8,
                     () => {
                         loggerʗ5.LogAttrs(default!, slog.LevelInfo, testMessage,
                             slog.String(stringˢ, testString),

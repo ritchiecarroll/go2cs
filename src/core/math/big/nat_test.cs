@@ -13,7 +13,6 @@ using static go.math.big_package;
 
 partial class big_internal_test_package {
 
-
 partial struct cmpTestsᴛ1 /*dyn*/ {
     internal global::go.math.big_package.nat x, y;
     internal nint r;
@@ -59,13 +58,6 @@ internal static slice<argNN> sumNN = new argNN[]{
     new(new nat(new global::go.math.big_package.Word[]{0, 0, 0, 1}.slice()), new nat(new global::go.math.big_package.Word[]{0, 0, _M}.slice()), new nat(new global::go.math.big_package.Word[]{0, 0, 1}.slice()))
 }.slice();
 
-// 3^100 * 3^28 = 3^128
-// z = 111....1 (70000 digits)
-// x = 10^(99*700) + ... + 10^1400 + 10^700 + 1
-// y = 111....1 (700 digits, larger than Karatsuba threshold on 32-bit and 64-bit)
-// z = 111....1 (20000 digits)
-// x = 10^10000 + 1
-// y = 111....1 (10000 digits)
 internal static slice<argNN> prodNN;
 internal static void initᴛprodNN() { prodNN = new argNN[]{
     new(),
@@ -76,16 +68,23 @@ internal static void initᴛprodNN() { prodNN = new argNN[]{
     new(new nat(new global::go.math.big_package.Word[]{0, 0, 991 * 991}.slice()), new nat(new global::go.math.big_package.Word[]{0, 991}.slice()), new nat(new global::go.math.big_package.Word[]{0, 991}.slice())),
     new(new nat(new global::go.math.big_package.Word[]{1 * 991, 2 * 991, 3 * 991, 4 * 991}.slice()), new nat(new global::go.math.big_package.Word[]{1, 2, 3, 4}.slice()), new nat(new global::go.math.big_package.Word[]{991}.slice())),
     new(new nat(new global::go.math.big_package.Word[]{4, 11, 20, 30, 20, 11, 4}.slice()), new nat(new global::go.math.big_package.Word[]{1, 2, 3, 4}.slice()), new nat(new global::go.math.big_package.Word[]{4, 3, 2, 1}.slice())),
+    // 3^100 * 3^28 = 3^128
     new(
         natFromString("11790184577738583171520872861412518665678211592275841109096961"u8),
         natFromString("515377520732011331036461129765621272702107522001"u8),
         natFromString("22876792454961"u8)
     ),
+    // z = 111....1 (70000 digits)
+    // x = 10^(99*700) + ... + 10^1400 + 10^700 + 1
+    // y = 111....1 (700 digits, larger than Karatsuba threshold on 32-bit and 64-bit)
     new(
         natFromString(strings.Repeat("1"u8, 70000)),
         natFromString("1"u8 + strings.Repeat(strings.Repeat("0"u8, 699) + "1"u8, 99)),
         natFromString(strings.Repeat("1"u8, 700))
     ),
+    // z = 111....1 (20000 digits)
+    // x = 10^10000 + 1
+    // y = 111....1 (10000 digits)
     new(
         natFromString(strings.Repeat("1"u8, 20000)),
         natFromString("1"u8 + strings.Repeat("0"u8, 9999) + "1"u8),
@@ -129,26 +128,25 @@ public static void TestFunNN(ж<testing.T> Ꮡt) {
     foreach (var (_, a) in sumNN) {
         var arg = a;
         testFunNN(Ꮡt, addˢ, new Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>(((Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>)(global::go.math.big_package.add))), arg);
+
         arg = new argNN(a.z, a.y, a.x);
         testFunNN(Ꮡt, addSymmetricˢ, new Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>(((Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>)(global::go.math.big_package.add))), arg);
+
         arg = new argNN(a.x, a.z, a.y);
         testFunNN(Ꮡt, subˢ, new Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>(((Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>)(global::go.math.big_package.sub))), arg);
+
         arg = new argNN(a.y, a.z, a.x);
         testFunNN(Ꮡt, subSymmetricˢ, new Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>(((Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>)(global::go.math.big_package.sub))), arg);
     }
+
     foreach (var (_, a) in prodNN) {
         var arg = a;
         testFunNN(Ꮡt, mulˢ, new Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>(((Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>)(global::go.math.big_package.mul))), arg);
+
         arg = new argNN(a.z, a.y, a.x);
         testFunNN(Ꮡt, mulSymmetricˢ, new Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>(((Func<global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat, global::go.math.big_package.nat>)(global::go.math.big_package.mul))), arg);
     }
 }
-
-// empty range
-// empty range
-// 10!
-// 20!
-// 100!
 
 partial struct mulRangesNᴛ1 /*dyn*/ {
     internal uint64 a, b;
@@ -162,12 +160,13 @@ internal static slice<mulRangesNᴛ1> mulRangesN = new mulRangesNᴛ1[]{
     new(10, 10, "10"u8),
     new(0, 100, "0"u8),
     new(0, 1000000000, "0"u8),
-    new(1, 0, "1"u8),
-    new(100, 1, "1"u8),
-    new(1, 10, "3628800"u8),
-    new(1, 20, "2432902008176640000"u8),
+    new(1, 0, "1"u8), // empty range
+    new(100, 1, "1"u8), // empty range
+    new(1, 10, "3628800"u8), // 10!
+    new(1, 20, "2432902008176640000"u8), // 20!
     new(1, 100,
-        "933262154439441526816992388562667004907159682643816214685929"u8 + "638952175999932299156089414639761565182862536979208272237582"u8 + "51185210916864000000000000000000000000"u8
+        "933262154439441526816992388562667004907159682643816214685929"u8 + "638952175999932299156089414639761565182862536979208272237582"u8 + "51185210916864000000000000000000000000"u8 // 100!
+
     ),
     new(math.MaxUint64 - 0, math.MaxUint64, "18446744073709551615"u8),
     new(math.MaxUint64 - 1, math.MaxUint64, "340282366920938463408034375210639556610"u8),
@@ -343,6 +342,7 @@ internal static readonly @string shrSameˢ = "ShrSame"u8;
 
 public static void BenchmarkZeroShifts(ж<testing.B> Ꮡb) {
     var x = rndNat(800);
+
     var xʗ1 = x;
     Ꮡb.Run(shlˢ, (ж<testing.B> bΔ1) => {
         for (nint i = 0; i < (~bΔ1).N; i++) {
@@ -356,6 +356,7 @@ public static void BenchmarkZeroShifts(ж<testing.B> Ꮡb) {
             xʗ2.shl(xʗ2, 0);
         }
     });
+
     var xʗ3 = x;
     Ꮡb.Run(shrˢ, (ж<testing.B> bΔ3) => {
         for (nint i = 0; i < (~bΔ3).N; i++) {
@@ -390,6 +391,7 @@ internal static void runModWTests(ж<testing.T> Ꮡt, slice<modWTest> tests) {
         var (@in, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@in, 10);
         var (d, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.dividend, 10);
         var (@out, _) = @new<global::go.math.big_package.ΔInt>().SetString(test.@out, 10);
+
         global::go.math.big_package.Word r = (~@in).abs.modW((~d).abs[0]);
         if (r != (~@out).abs[0]) {
             Ꮡt.Errorf("#%d failed: got %d want %s"u8, i, r, @out.OrTypedNil());
@@ -405,7 +407,6 @@ public static void TestModW(ж<testing.T> Ꮡt) {
         runModWTests(Ꮡt, modWTests64);
     }
 }
-
 
 partial struct montgomeryTestsᴛ1 /*dyn*/ {
     internal @string x, y, m;
@@ -480,8 +481,6 @@ internal static slice<montgomeryTestsᴛ1> montgomeryTests = new montgomeryTests
 }.slice();
 
 public static void TestMontgomery(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var one = NewInt(1);
     var _B = @new<global::go.math.big_package.ΔInt>().Lsh(one, _W);
     foreach (var (i, test) in montgomeryTests) {
@@ -494,6 +493,7 @@ public static void TestMontgomery(ж<testing.T> Ꮡt) {
         while (len(y) < len(m)) {
             y = append(y, (global::go.math.big_package.Word)(0));
         }
+
         if (x.cmp(m) > 0) {
             var (_, r) = ((global::go.math.big_package.nat)default!).div(default!, x, m);
             Ꮡt.Errorf("#%d: x > m (0x%s > 0x%s; use 0x%s)"u8, i, x.utoa(16), m.utoa(16), r.utoa(16));
@@ -502,13 +502,16 @@ public static void TestMontgomery(ж<testing.T> Ꮡt) {
             var (_, r) = ((global::go.math.big_package.nat)default!).div(default!, x, m);
             Ꮡt.Errorf("#%d: y > m (0x%s > 0x%s; use 0x%s)"u8, i, y.utoa(16), m.utoa(16), r.utoa(16));
         }
+
         global::go.math.big_package.nat @out = default!;
         if (_W == 32){
             @out = natFromString(test.out32);
         } else {
             @out = natFromString(test.out64);
         }
+
         // t.Logf("#%d: len=%d\n", i, len(m))
+
         // check output in table
         var xi = Ꮡ(new ΔInt(abs: x));
         var yi = Ꮡ(new ΔInt(abs: y));
@@ -517,6 +520,7 @@ public static void TestMontgomery(ж<testing.T> Ꮡt) {
         if (@out.cmp((~p).abs.norm()) != 0) {
             Ꮡt.Errorf("#%d: out in table=0x%s, computed=0x%s"u8, i, @out.utoa(16), (~p).abs.norm().utoa(16));
         }
+
         // check k0 in table
         var k = @new<global::go.math.big_package.ΔInt>().Mod(Ꮡ(new ΔInt(abs: m)), _B);
         k = @new<global::go.math.big_package.ΔInt>().Sub(_B, k);
@@ -525,6 +529,7 @@ public static void TestMontgomery(ж<testing.T> Ꮡt) {
         if (k0 != ((global::go.math.big_package.Word)(nuint)test.k0)) {
             Ꮡt.Errorf("#%d: k0 in table=%#x, computed=%#x\n"u8, i, test.k0, k0);
         }
+
         // check montgomery with correct k0 produces correct output
         var z = ((global::go.math.big_package.nat)default!).montgomery(x, y, m, k0, len(m));
         z = z.norm();
@@ -571,10 +576,12 @@ public static void TestExpNN(ж<testing.T> Ꮡt) {
         var x = natFromString(test.x);
         var y = natFromString(test.y);
         var @out = natFromString(test.@out);
+
         global::go.math.big_package.nat m = default!;
         if (len(test.m) > 0) {
             m = natFromString(test.m);
         }
+
         var z = ((global::go.math.big_package.nat)default!).expNN(x, y, m, false);
         if (z.cmp(@out) != 0) {
             Ꮡt.Errorf("#%d got %s want %s"u8, i, z.utoa(10), @out.utoa(10));
@@ -620,7 +627,6 @@ internal static global::go.math.big_package.nat fibo(nint n) {
     case 1: {
         return new nat(new global::go.math.big_package.Word[]{1}.slice());
     }}
-
     var f0 = fibo(0);
     var f1 = fibo(1);
     global::go.math.big_package.nat f2 = default!;
@@ -667,7 +673,6 @@ public static void BenchmarkFibo(ж<testing.B> Ꮡb) {
         fibo(100000);
     }
 }
-
 
 partial struct bitTestsᴛ1 /*dyn*/ {
     internal @string x;
@@ -791,9 +796,6 @@ public static void BenchmarkNatSqr(ж<testing.B> Ꮡb) {
     }
 }
 
-// 2^65, 2^66-1, 2^65 - (2^66-1) + 2^67
-// 2^66-1, 2^65, 2^65-1
-
 partial struct subMod2NTestsᴛ1 /*dyn*/ {
     internal @string x;
     internal @string y;
@@ -806,7 +808,9 @@ internal static slice<subMod2NTestsᴛ1> subMod2NTests = new subMod2NTestsᴛ1[]
     new("0"u8, "1"u8, 1, "1"u8),
     new("3"u8, "5"u8, 3, "6"u8),
     new("5"u8, "3"u8, 3, "2"u8),
+    // 2^65, 2^66-1, 2^65 - (2^66-1) + 2^67
     new("36893488147419103232"u8, "73786976294838206463"u8, 67, "110680464442257309697"u8),
+    // 2^66-1, 2^65, 2^65-1
     new("73786976294838206463"u8, "36893488147419103232"u8, 67, "36893488147419103231"u8)
 }.slice();
 
@@ -827,7 +831,6 @@ public static void TestNatSubMod2N(ж<testing.T> Ꮡt) {
                 else if (exprᴛ1 == "aliasY"u8) {
                     z = y;
                 }
-
                 z = z.subMod2N(x, y, tt.n);
                 if (z.cmp(want) != 0) {
                     tΔ1.Fatalf("subMod2N(%d, %d, %d) = %d, want %d"u8, x0, y0, tt.n, z, want);
@@ -845,10 +848,10 @@ public static void TestNatSubMod2N(ж<testing.T> Ꮡt) {
 
 public static void BenchmarkNatSetBytes(ж<testing.B> Ꮡb) {
     UntypedInt maxLength = 128;
-    var lengths = new nint[]{ // No remainder:
-
-        8, 24, maxLength, // With remainder:
-
+    var lengths = new nint[]{
+        // No remainder:
+        8, 24, maxLength,
+        // With remainder:
         7, 23, maxLength - 1
     }.slice();
     var n = new global::go.math.big_package.nat(maxLength / _W); // ensure n doesn't need to grow during the test
@@ -886,6 +889,7 @@ public static void TestNatDiv(ж<testing.T> Ꮡt) {
             // compute x = a*b+c
             var x = ((global::go.math.big_package.nat)default!).mul(a, b);
             x = x.add(x, c);
+
             global::go.math.big_package.nat q = default!;
             global::go.math.big_package.nat r = default!;
             (q, r) = q.div(r, x, b);
@@ -908,6 +912,7 @@ public static void TestIssue37499(ж<testing.T> Ꮡt) {
     // of the quotient. This works in both 32-bit and 64-bit settings.
     var u = natFromString("0x2b6c385a05be027f5c22005b63c42a1165b79ff510e1706b39f8489c1d28e57bb5ba4ef9fd9387a3e344402c0a453381"u8);
     var v = natFromString("0x2b6c385a05be027f5c22005b63c42a1165b79ff510e1706c"u8);
+
     var q = ((global::go.math.big_package.nat)default!).make(8);
     q.divBasic(u, v);
     q = q.norm();

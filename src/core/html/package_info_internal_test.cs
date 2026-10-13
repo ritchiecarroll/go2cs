@@ -28,9 +28,9 @@ using static go.html_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("html/entity_test.go", "entity_test.cs", "AA8YgoSCzIKClIKmooI=")]
-[assembly: go.GoPositionMap("html/escape_test.go", "escape_test.cs", "AB8qADmKAYKCgoLKggAMGoKAgtyCgoKWooKCuKKCgriigoKCuKKCgoK4ooKCuKKCgg==")]
-[assembly: go.GoPositionMap("html/fuzz_test.go", "fuzz_test.cs", "AAoSgoKCgoLM", "10-21:1")]
+[assembly: go.GoPositionMap("html/entity_test.go", "entity_test.cs", "AA8YgpSC3IKClIKmooI=")]
+[assembly: go.GoPositionMap("html/escape_test.go", "escape_test.cs", "ABQqAESKAYKCgoLKggAMGoKAgtyCgoKWooKCuKKCgriigoKCuKKCgoK4ooKCuKKCgg==")]
+[assembly: go.GoPositionMap("html/fuzz_test.go", "fuzz_test.cs", "AAoSgoKCgoLc", "10-21:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -55,18 +55,20 @@ public static void TestMain(ж<testing.M> Ꮡm) {
             throw panic("unreachable");
         }
         else if (exprᴛ1 == ""u8) {
+            // fall through to normal behavior
         }
         else { /* default: */
             Δlog.Fatalf("invalid %s: %q"u8, entrypointVar, entrypoint);
         }
     }
 
-    // fall through to normal behavior
     var (_, coreErrBefore) = Δos.Stat(coreˢ);
+
     nint status = Ꮡm.Run();
     foreach (var (_, @file) in toRemove) {
         Δos.RemoveAll(@file);
     }
+
     var (_, coreErrAfter) = Δos.Stat(coreˢ);
     if (coreErrBefore != default! && coreErrAfter == default!) {
         fmt.Fprintln(new Δos.FileжWriter(Δos.Stderr), runtimeTestSomeTestLeftAˢ);
@@ -74,9 +76,9 @@ public static void TestMain(ж<testing.M> Ꮡm) {
             status = 1;
         }
     }
+
     Δos.Exit(status);
 }
-
 
 partial struct testprogᴛ1 /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; }
@@ -101,12 +103,15 @@ internal static @string runTestProg(ж<testing.T> Ꮡt, @string binary, @string 
     if (flagQuick.Value) {
         Ꮡt.Skip(quickˢ);
     }
+
     testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(Ꮡt));
     Ꮡt.Helper();
+
     var (exe, err) = buildTestProg(Ꮡt, binary);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     return runBuiltTestProg(Ꮡt, exe, name, env.ꓸꓸꓸ);
 }
 
@@ -114,10 +119,13 @@ internal static @string runBuiltTestProg(ж<testing.T> Ꮡt, @string exe, @strin
     var env = envʗp.sslice();
 
     Ꮡt.Helper();
+
     if (flagQuick.Value) {
         Ꮡt.Skip(quickˢ);
     }
+
     var start = time.Now();
+
     var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), exe, name));
     cmd.Value.Env = appendꓸꓸꓸ((~cmd).Env, env);
     if (testing.Short()) {
@@ -151,11 +159,11 @@ internal static readonly @string goexperimentˢ = "GOEXPERIMENT="u8;
 internal static (@string, error) buildTestProg(ж<testing.T> Ꮡt, @string binary, params ꓸꓸꓸstring flagsʗp) {
     var flags = flagsʗp.slice();
 
-    ref var t = ref Ꮡt.DerefOrNull();
     if (flagQuick.Value) {
         Ꮡt.Skip(quickˢ);
     }
     testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(Ꮡt));
+
     Ꮡtestprog.of(testprogᴛ1.ᏑMutex).Lock();
     if (testprog.dir == ""u8) {
         var (dirΔ1, err) = Δos.MkdirTemp(""u8, goBuildˢ);
@@ -165,6 +173,7 @@ internal static (@string, error) buildTestProg(ж<testing.T> Ꮡt, @string binar
         testprog.dir = dirΔ1;
         toRemove = append(toRemove, dirΔ1);
     }
+
     if (testprog.target == default!) {
         testprog.target = new map<@string, ж<buildexe>>();
     }
@@ -177,10 +186,13 @@ internal static (@string, error) buildTestProg(ж<testing.T> Ꮡt, @string binar
         target = Ꮡ(new buildexe(nil));
         testprog.target[name] = target;
     }
+
     @string dir = testprog.dir;
+
     // Unlock testprog while actually building, so that other
     // tests can look up executables that were already built.
     Ꮡtestprog.of(testprogᴛ1.ᏑMutex).Unlock();
+
     var flagsʗ1 = flags;
     var targetʗ1 = target;
     target.of(buildexe.Ꮡonce).Do(() => {
@@ -192,14 +204,18 @@ internal static (@string, error) buildTestProg(ж<testing.T> Ꮡt, @string binar
             defer(() => {
                 ᐸꟷ(serializeBuild);
             }, ref ᒐ);
+
             // Don't get confused if testenv.GoToolPath calls t.Skip.
             targetʗ1.Value.err = errors.New(buildingTestCalledTSkipˢ);
+
             @string exe = filepath.Join(dir, name + ".exe");
+
             var start = time.Now();
             var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), appendꓸꓸꓸ(new @string[]{"build"u8, "-o"u8, exe}.slice(), flagsʗ1).ꓸꓸꓸ);
             Ꮡt.Logf("running %v"u8, cmd.OrTypedNil());
             cmd.Value.Dir = "testdata/"u8 + binary;
             cmd = testenv.CleanCmdEnv(cmd);
+
             // Add the rangefunc GOEXPERIMENT unconditionally since some tests depend on it.
             // TODO(61405): Remove this once it's enabled by default.
             var edited = false;
@@ -215,6 +231,7 @@ internal static (@string, error) buildTestProg(ж<testing.T> Ꮡt, @string binar
             if (!edited) {
                 cmd.Value.Env = append((~cmd).Env, "GOEXPERIMENT=rangefunc"u8);
             }
+
             var (@out, err) = cmd.CombinedOutput();
             if (err != default!){
                 targetʗ1.Value.err = fmt.Errorf("building %s %v: %v\n%s"u8, binary, flagsʗ1, err, @out);
@@ -227,6 +244,7 @@ internal static (@string, error) buildTestProg(ж<testing.T> Ꮡt, @string binar
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     return ((~target).exe, (~target).err);
 }
 
@@ -274,6 +292,7 @@ internal static readonly @string fatalErrorAllGoroutinesˢ = "fatal error: all g
 internal static void testDeadlock(ж<testing.T> Ꮡt, @string name) {
     // External linking brings in cgo, causing deadlock detection not working.
     testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), false);
+
     @string output = runTestProg(Ꮡt, testprogˢ, name);
     @string want = fatalErrorAllGoroutinesˢ;
     if (!strings.HasPrefix(output, want)) {
@@ -316,6 +335,7 @@ internal static readonly @string noGoroutinesMainCalledˢ = "no goroutines (main
 public static void TestGoexitDeadlock(ж<testing.T> Ꮡt) {
     // External linking brings in cgo, causing deadlock detection not working.
     testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), false);
+
     @string output = runTestProg(Ꮡt, testprogˢ, goexitDeadlockˢ);
     @string want = noGoroutinesMainCalledˢ;
     if (!strings.Contains(output, want)) {
@@ -330,8 +350,8 @@ public static void TestStackOverflow(ж<testing.T> Ꮡt) {
     @string output = runTestProg(Ꮡt, testprogˢ, stackOverflowˢ);
     var want = new @string[]{
         "runtime: goroutine stack exceeds 1474560-byte limit\n"u8,
-        "fatal error: stack overflow"u8, // information about the current SP and stack bounds
-
+        "fatal error: stack overflow"u8,
+        // information about the current SP and stack bounds
         "runtime: sp="u8,
         "stack=["u8
     }.slice();
@@ -450,6 +470,7 @@ internal static readonly @string goexitExitˢ = "GoexitExit"u8;
 public static void TestGoexitCrash(ж<testing.T> Ꮡt) {
     // External linking brings in cgo, causing deadlock detection not working.
     testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), false);
+
     @string output = runTestProg(Ꮡt, testprogˢ, goexitExitˢ);
     @string want = noGoroutinesMainCalledˢ;
     if (!strings.Contains(output, want)) {
@@ -537,6 +558,7 @@ internal static readonly @string fatalErrorNoGoroutinesˢ = "fatal error: no gor
 public static void TestGoexitInPanic(ж<testing.T> Ꮡt) {
     // External linking brings in cgo, causing deadlock detection not working.
     testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), false);
+
     // see issue 8774: this code used to trigger an infinite recursion
     @string output = runTestProg(Ꮡt, testprogˢ, goexitInPanicˢ);
     @string want = fatalErrorNoGoroutinesˢ;
@@ -574,6 +596,7 @@ public static void TestRuntimePanicWithRuntimeError(ж<testing.T> Ꮡt) {
             close((channel<bool>)(default!));
         }
     };
+
     foreach (var (i, fn) in testCases.ΔRangeSnapshot()) {
         var got = panicValue(fn);
         {
@@ -614,6 +637,7 @@ public static void TestPanicAfterGoexit(ж<testing.T> Ꮡt) {
 public static void TestRecoveredPanicAfterGoexit(ж<testing.T> Ꮡt) {
     // External linking brings in cgo, causing deadlock detection not working.
     testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), false);
+
     @string output = runTestProg(Ꮡt, testprogˢ, "RecoveredPanicAfterGoexit"u8);
     @string want = fatalErrorNoGoroutinesˢ;
     if (!strings.HasPrefix(output, want)) {
@@ -624,6 +648,7 @@ public static void TestRecoveredPanicAfterGoexit(ж<testing.T> Ꮡt) {
 public static void TestRecoverBeforePanicAfterGoexit(ж<testing.T> Ꮡt) {
     // External linking brings in cgo, causing deadlock detection not working.
     testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), false);
+
     Ꮡt.Parallel();
     @string output = runTestProg(Ꮡt, testprogˢ, "RecoverBeforePanicAfterGoexit"u8);
     @string want = fatalErrorNoGoroutinesˢ;
@@ -635,6 +660,7 @@ public static void TestRecoverBeforePanicAfterGoexit(ж<testing.T> Ꮡt) {
 public static void TestRecoverBeforePanicAfterGoexit2(ж<testing.T> Ꮡt) {
     // External linking brings in cgo, causing deadlock detection not working.
     testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), false);
+
     Ꮡt.Parallel();
     @string output = runTestProg(Ꮡt, testprogˢ, "RecoverBeforePanicAfterGoexit2"u8);
     @string want = fatalErrorNoGoroutinesˢ;
@@ -668,6 +694,7 @@ public static void TestPanicTraceback(ж<testing.T> Ꮡt) {
     if (!strings.HasPrefix(output, want)) {
         Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
     }
+
     // Check functions in the traceback.
     var fns = new @string[]{"main.pt1.func1"u8, "panic"u8, "main.pt2.func1"u8, "panic"u8, "main.pt2"u8, "main.pt1"u8}.slice();
     foreach (var (_, fn) in fns) {
@@ -730,16 +757,19 @@ public static void TestMemPprof(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
+
         var (exe, err) = buildTestProg(Ꮡt, testprogˢ);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         (var got, err) = testenv.CleanCmdEnv(exec.Command(exe, memProfˢ)).CombinedOutput();
         if (err != default!) {
             Ꮡt.Fatalf("testprog failed: %s, output:\n%s"u8, err, got);
         }
         @string fn = strings.TrimSpace(((@string)got));
         defer(Δos.Remove, fn, ref ᒐ);
+
         for (nint @try = 0; @try < 2; @try++) {
             var cmd = testenv.CleanCmdEnv(exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), toolˢ, pprofˢ, allocSpaceˢ, topˢ));
             // Check that pprof works both with and without explicit executable on command line.
@@ -759,6 +789,7 @@ public static void TestMemPprof(ж<testing.T> Ꮡt) {
             if (!found) {
                 cmd.Value.Env = append((~cmd).Env, "PPROF_TMPDIR="u8 + Δos.TempDir());
             }
+
             var (top, errΔ1) = cmd.CombinedOutput();
             Ꮡt.Logf("%s:\n%s"u8, (~cmd).Args, top);
             if (errΔ1 != default!){
@@ -834,8 +865,6 @@ public static void TestConcurrentMapIterateWrite(ж<testing.T> Ꮡt) {
 }
 
 public static void TestConcurrentMapWritesIssue69447(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
     var (exe, err) = buildTestProg(Ꮡt, testprogˢ);
     if (err != default!) {
@@ -887,6 +916,7 @@ public static void TestPanicInlined(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("expecting stack trace to contain call to (*point).negate()"u8);
             }
         }, ref ᒐ);
+
         var pt = @new<point>();
         pt.negate();
     }
@@ -901,10 +931,12 @@ internal static readonly @string panicRaceˢ = "PanicRace"u8;
 // We want to delay exiting until a panic print is complete.
 public static void TestPanicRace(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
+
     var (exe, err) = buildTestProg(Ꮡt, testprogˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // The test is intentionally racy, and in my testing does not
     // produce the expected output about 0.05% of the time.
     // So run the program in a loop and only fail the test if we
@@ -917,10 +949,12 @@ retry:
             Ꮡt.Logf("try %d: program exited successfully, should have failed"u8, i + 1);
             continue;
         }
+
         if (i > 0) {
             Ꮡt.Logf("try %d:\n"u8, i + 1);
         }
         Ꮡt.Logf("%s\n"u8, got);
+
         var wants = new @string[]{
             "panic: crash"u8,
             "PanicRace"u8,
@@ -932,6 +966,7 @@ retry:
                 goto continue_retry;
             }
         }
+
         // Test generated expected output.
         return;
 continue_retry:;
@@ -949,10 +984,8 @@ public static void TestBadTraceback(ж<testing.T> Ꮡt) {
         "unexpected return pc"u8,
         "called from 0xbad"u8,
         "00000bad"u8, // Smashed LR in hex dump
-
-        "<main.badLR"u8
+        "<main.badLR"u8 // Symbolization in hex dump (badLR1 or badLR2)
     }.slice()) {
-        // Symbolization in hex dump (badLR1 or badLR2)
         if (!strings.Contains(output, want)) {
             Ꮡt.Errorf("output does not contain %q:\n%s"u8, want, output);
         }
@@ -980,6 +1013,7 @@ public static void TestTimePprof(ж<testing.T> Ꮡt) {
         @string fn = runTestProg(Ꮡt, testprogˢ, timeProfˢ, gotracebackCrashˢ);
         fn = strings.TrimSpace(fn);
         defer(Δos.Remove, fn, ref ᒐ);
+
         var cmd = testenv.CleanCmdEnv(exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), toolˢ, pprofˢ, topˢ, nodecount1ˢ, fn));
         cmd.Value.Env = append((~cmd).Env, "PPROF_TMPDIR="u8 + Δos.TempDir());
         var (top, err) = cmd.CombinedOutput();
@@ -1031,9 +1065,7 @@ public static void TestAbort(ж<testing.T> Ꮡt) {
         else { /* default: */
             want = sigtrapˢ;
         }
-
     }
-
     if (!strings.Contains(output, want)) {
         Ꮡt.Errorf("output does not contain %q:\n%s"u8, want, output);
     }
@@ -1141,12 +1173,12 @@ internal static readonly @string runtimeStackOverflowˢ = "runtime.stackOverflow
 
 // Test that g0 stack overflows are handled gracefully.
 public static void TestG0StackOverflow(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveExec(new runtime_test_package.testing_TжTB(Ꮡt));
+
     if (Δruntime.GOOS == "ios"u8) {
         testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 62671);
     }
+
     if (Δos.Getenv(testG0StackOverflowˢ) != "1"u8) {
         var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), Δos.Args[0], testRunˢ4, testVˢ));
         cmd.Value.Env = append((~cmd).Env, "TEST_G0_STACK_OVERFLOW=1"u8);
@@ -1178,6 +1210,7 @@ public static void TestG0StackOverflow(ж<testing.T> Ꮡt) {
         }
         return;
     }
+
     runtime_internal_test_package.G0StackOverflow();
 }
 
@@ -1197,11 +1230,13 @@ internal static readonly @string yzzyxˢ = "yzzyx\n"u8;
 
 public static void TestCrashWhileTracing(ж<testing.T> Ꮡt) {
     testenv.MustHaveExec(new runtime_test_package.testing_TжTB(Ꮡt));
+
     var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), Δos.Args[0]));
     cmd.Value.Env = append((~cmd).Env, "TEST_CRASH_WHILE_TRACING=1"u8);
     var (stdOut, err) = cmd.StdoutPipe();
     ref var errOut = ref heap(new bytes.Buffer(), out var ᏑerrOut);
     cmd.Value.Stderr = new runtime_test_package.bytes_BufferжWriter(ᏑerrOut);
+
     {
         var errΔ1 = cmd.Start(); if (errΔ1 != default!) {
             Ꮡt.Fatalf("could not start subprocess: %v"u8, errΔ1);
@@ -1238,7 +1273,6 @@ loop:
                 seen = true;
             }
         }
-
 continue_loop:;
     }
 break_loop:;

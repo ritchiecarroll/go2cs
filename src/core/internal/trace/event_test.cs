@@ -9,11 +9,10 @@ using static go.@internal.trace_package;
 partial class trace_internal_test_package {
 
 public static void TestPanicEvent(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Use a sync event for this because it doesn't have any extra metadata.
     ref var ev = ref heap<global::go.@internal.trace_package.ΔEvent>(out var Ꮡev);
     ev = syncEvent(nil, 0);
+
     var evʗ1 = ev;
     mustPanic(Ꮡt, () => {
         _ = evʗ1.Range();

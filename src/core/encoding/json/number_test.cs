@@ -12,6 +12,7 @@ partial class json_internal_test_package {
 public static void TestNumberIsValid(ж<testing.T> Ꮡt) {
     // From: https://stackoverflow.com/a/13340826
     ж<regexp.Regexp> jsonNumberRegexp = regexp.MustCompile(dDEEDˢ);
+
     var validTests = new @string[]{
         "0"u8,
         "-0"u8,
@@ -60,20 +61,24 @@ public static void TestNumberIsValid(ж<testing.T> Ꮡt) {
         "-0e+1"u8,
         "-0e-34"u8
     }.slice();
+
     foreach (var (_, test) in validTests) {
         if (!isValidNumber(test)) {
             Ꮡt.Errorf("%s should be valid"u8, test);
         }
+
         ref var f = ref heap(new float64(), out var Ꮡf);
         {
             var err = Unmarshal(slice<byte>(test), Ꮡf); if (err != default!) {
                 Ꮡt.Errorf("%s should be valid but Unmarshal failed: %v"u8, test, err);
             }
         }
+
         if (!jsonNumberRegexp.MatchString(test)) {
             Ꮡt.Errorf("%s should be valid but regexp does not match"u8, test);
         }
     }
+
     var invalidTests = new @string[]{
         ""u8,
         "invalid"u8,
@@ -97,16 +102,19 @@ public static void TestNumberIsValid(ж<testing.T> Ꮡt) {
         "01"u8,
         "1.e1"u8
     }.slice();
+
     foreach (var (_, test) in invalidTests) {
         if (isValidNumber(test)) {
             Ꮡt.Errorf("%s should be invalid"u8, test);
         }
+
         ref var f = ref heap(new float64(), out var Ꮡf);
         {
             var err = Unmarshal(slice<byte>(test), Ꮡf); if (err == default!) {
                 Ꮡt.Errorf("%s should be invalid but unmarshal wrote %v"u8, test, f);
             }
         }
+
         if (jsonNumberRegexp.MatchString(test)) {
             Ꮡt.Errorf("%s should be invalid but matches regexp"u8, test);
         }

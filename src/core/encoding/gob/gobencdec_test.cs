@@ -464,8 +464,10 @@ public static void TestGobEncoderValueThenPointer(ж<testing.T> Ꮡt) {
     TextValueGobber tv = ((TextValueGobber)(@string)"gravitationalacceleration"u8);
     ref var tw = ref heap<TextValueGobber>(out var Ꮡtw);
     tw = ((TextValueGobber)(@string)ftSˢ);
+
     // this was a bug: encoding a GobEncoder by value before a GobEncoder
     // pointer would cause duplicate type definitions to be sent.
+
     var b = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
     {
@@ -480,6 +482,7 @@ public static void TestGobEncoderValueThenPointer(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(decodeErrorˢ, err);
         }
     }
+
     {
         ValueGobber got = x.Value.V;
         ValueGobber want = v; if (got != want) {
@@ -495,6 +498,7 @@ public static void TestGobEncoderValueThenPointer(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("w = %q, want %q"u8, got.Value, want);
         }
     }
+
     {
         BinaryValueGobber got = x.Value.BV;
         BinaryValueGobber want = bv; if (got != want) {
@@ -510,6 +514,7 @@ public static void TestGobEncoderValueThenPointer(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("bw = %q, want %q"u8, got.Value, want);
         }
     }
+
     {
         TextValueGobber got = x.Value.TV;
         TextValueGobber want = tv; if (got != want) {
@@ -539,6 +544,7 @@ public static void TestGobEncoderPointerThenValue(ж<testing.T> Ꮡt) {
     ref var tv = ref heap<TextValueGobber>(out var Ꮡtv);
     tv = ((TextValueGobber)(@string)"gravitationalacceleration"u8);
     TextValueGobber tw = ((TextValueGobber)(@string)ftSˢ);
+
     var b = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
     {
@@ -553,6 +559,7 @@ public static void TestGobEncoderPointerThenValue(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(decodeErrorˢ, err);
         }
     }
+
     {
         var got = x.Value.V;
         ValueGobber want = v; if (got == nil){
@@ -568,6 +575,7 @@ public static void TestGobEncoderPointerThenValue(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("w = %q, want %q"u8, got, want);
         }
     }
+
     {
         var got = x.Value.BV;
         BinaryValueGobber want = bv; if (got == nil){
@@ -583,6 +591,7 @@ public static void TestGobEncoderPointerThenValue(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("bw = %q, want %q"u8, got, want);
         }
     }
+
     {
         var got = x.Value.TV;
         TextValueGobber want = tv; if (got == nil){
@@ -800,8 +809,8 @@ public partial struct isZeroBugArray /*[2]uint8*/;
 // Receiver is value, not pointer, to test isZero of array.
 public static (slice<byte> b, error e) GobEncode(this isZeroBugArray a) {
     slice<byte> b = default!;
-
     a = a.Clone();
+
     b = appendꓸꓸꓸ(b, a[..]);
     return (b, default!);
 }
@@ -871,6 +880,7 @@ public static void TestGobEncodePtrError(ж<testing.T> Ꮡt) {
 public static void TestNetIP(ж<testing.T> Ꮡt) {
     // Encoding of net.IP{1,2,3,4} in Go 1.1.
     var enc = new byte[]{0x07, 0x0a, 0x00, 0x04, 0x01, 0x02, 0x03, 0x04}.slice();
+
     ref var ip = ref heap<net.IP>(out var Ꮡip);
     var err = NewDecoder(new gob_test_package.bytes_ReaderжReader(bytes.NewReader(enc))).Decode(Ꮡip);
     if (err != default!) {
@@ -899,6 +909,7 @@ public static void TestIgnoreDepthLimit(ж<testing.T> Ꮡt) {
         }, ref ᒐ);
         var b = @new<bytes.Buffer>();
         var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
+
         // Nested slice
         var typ = reflect.TypeFor<nint>();
         var nested = reflect.ArrayOf(1, typ);
@@ -915,6 +926,7 @@ public static void TestIgnoreDepthLimit(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("Decode didn't fail with depth limit of 100: want %q, got %q"u8, expectedErr, err);
             }
         }
+
         // Nested struct
         nested = reflect.StructOf(new reflect.StructField[]{new(Name: "F"u8, Type: typ)}.slice());
         for (nint i = 0; i < 100; i++) {

@@ -36,7 +36,7 @@ using static global::go.@internal.testenv_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/testenv/testenv_test.go", "testenv_test.cs", "ABcigoSCggAFEIKCgpaCgpSEgoKUhIKClIIACgiigpaSpoKmAAcSlO6CtqaCuKaClpaEgoKCgpSCgpSClIKWgoKAgqSCgoK4ooKCgoKWlJS2gJTGgIIACwqUlKSCgoKEgoKCgpSm5tzmAAcQ", "114-117:1;118-121:2;143-147:1")]
+[assembly: go.GoPositionMap("internal/testenv/testenv_test.go", "testenv_test.cs", "ABcigpSCggAHEIKCgqaCgpSUgoKUlIKClIIACgiigqaCpoKmAAgSlO6CtqaCuKaCpqaUgoKCgpSCgpSClIKmgoKAgqSCgoK4goKCgoKmlJS2gJTGgIIACgqUlJSCgoKUgoKCgpSm5tzmAAcQ", "114-117:1;118-121:2;143-147:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

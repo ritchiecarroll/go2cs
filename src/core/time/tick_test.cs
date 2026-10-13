@@ -21,16 +21,17 @@ internal partial struct TestTicker_type /*dyn*/ {
 }
 
 public static void TestTicker(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     Ꮡt.Parallel();
+
     // We want to test that a ticker takes as much time as expected.
     // Since we don't want the test to run for too long, we don't
     // want to use lengthy times. This makes the test inherently flaky.
     // Start with a short time, but try again with a long one if the
     // first test fails.
+
     nint baseCount = 10;
     var baseDelta = 20 * Millisecond;
+
     // On Darwin ARM64 the tick frequency seems limited. Issue 35692.
     if ((Δruntime.GOOS == "darwin"u8 || Δruntime.GOOS == "ios"u8) && Δruntime.GOARCH == "arm64"u8) {
         // The following test will run ticker count/2 times then reset
@@ -41,12 +42,14 @@ public static void TestTicker(ж<Δtesting.T> Ꮡt) {
         baseCount = 6;
         baseDelta = 100 * Millisecond;
     }
+
     ref var errs = ref heap<slice<@string>>(out var Ꮡerrs);
     void logErrs() {
         foreach (var (_, e) in Ꮡerrs.ValueSlot) {
             Ꮡt.Log(e);
         }
     }
+
     foreach (var (_, test) in new TestTicker_type[]{new(
         count: baseCount,
         delta: baseDelta
@@ -90,16 +93,19 @@ public static void TestTicker(ж<Δtesting.T> Ꮡt) {
             break;
         }
         default: {
+            // ok
             break;
         }}
-        // ok
+
         // Test passed, so all done.
         if (len(errs) > 0) {
             Ꮡt.Logf("saw %d errors, ignoring to avoid flakiness"u8, len(errs));
             logErrs();
         }
+
         return;
     }
+
     Ꮡt.Errorf("saw %d errors"u8, len(errs));
     logErrs();
 }
@@ -114,6 +120,7 @@ public static void TestTickerStopWithDirectInitialization(ж<Δtesting.T> Ꮡt) 
 // Test that a bug tearing down a ticker has been fixed. This routine should not deadlock.
 public static void TestTeardown(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
+
     var Delta = 100 * Millisecond;
     if (Δtesting.Short()) {
         Delta = 20 * Millisecond;
@@ -183,6 +190,7 @@ public static partial void TestLongAdjustTimers(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Parallel();
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         defer(Ꮡwg.Wait, ref ᒐ);
+
         // Build up the timer heap.
         const nint count = 5000;
         Ꮡwg.Add(count);
@@ -200,6 +208,7 @@ public static partial void TestLongAdjustTimers(ж<Δtesting.T> Ꮡt) {
         foreach (var _ᴛ2 in range(count)) {
             Sleep(1 * Microsecond);
         }
+
         // Give ourselves 60 seconds to complete.
         // This used to reliably fail on a Mac M3 laptop,
         // which needed 77 seconds.
@@ -210,10 +219,13 @@ public static partial void TestLongAdjustTimers(ж<Δtesting.T> Ꮡt) {
         AfterFunc((Δtime.Duration)(60000000000L), () => {
             close(doneʗ1);
         });
+
         // Set up a queuing goroutine to ping pong through the scheduler.
         var inQ = new channel<Action>(0);
         var outQ = new channel<Action>(0);
+
         defer(ᴛ1 => close(ᴛ1), inQ, ref ᒐ);
+
         Ꮡwg.Add(1);
         var doneʗ2 = done;
         var inQʗ1 = inQ;
@@ -254,6 +266,7 @@ public static partial void TestLongAdjustTimers(ж<Δtesting.T> Ꮡt) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
+
         foreach (var i in range(50000)) {
             const nint @try = 20;
             foreach (var _ᴛ3 in range(@try)) {
@@ -337,18 +350,22 @@ public static void TestTimerGC(ж<Δtesting.T> Ꮡt) {
             Δruntime.GC();
             Δruntime.ReadMemStats(Ꮡstats);
             var before = (int64)(stats.Mallocs - stats.Frees);
+
             for (nint j = 0; j < (nint)N; j++) {
                 f();
             }
+
             Δruntime.GC();
             Δruntime.GC();
             Δruntime.GC();
             Δruntime.ReadMemStats(Ꮡstats);
             var after = (int64)(stats.Mallocs - stats.Frees);
+
             // Allow some slack, but inuse >= N means at least 1 allocation per iteration.
             var inuse = after - before;
             if (inuse >= (int64)N) {
                 tΔ2.Errorf("%s did not get GC'ed: %d allocations"u8, what, inuse);
+
                 Sleep(1 * ΔSecond);
                 Δruntime.ReadMemStats(Ꮡstats);
                 var afterΔ1 = (int64)(stats.Mallocs - stats.Frees);
@@ -357,6 +374,7 @@ public static void TestTimerGC(ж<Δtesting.T> Ꮡt) {
             }
         });
     }
+
     run(Ꮡt, afterˢ, () => {
         After(ΔHour);
     });
@@ -424,18 +442,16 @@ internal static bool Reset(this ref tickerTimer t, Δtime.Duration d) {
 }
 
 internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-*/channel<Δtime.Time> C, bool synctimerchan) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var (_, isTimer) = tim._<ж<Δtime.Timer>>(ᐧ);
     var isTicker = !isTimer;
+
     // Retry parameters. Enough to deflake even on slow machines.
     // Windows in particular has very coarse timers so we have to
     // wait 10ms just to make a timer go off.
     Δtime.Duration sched = /* 10 * Millisecond */ 10000000;
-    
     const nint tries = 100;
-    
     const nint drainTries = 5;
+
     // drain1 removes one potential stale time value
     // from the timer/ticker channel after Reset.
     // When using Go 1.23 sync timers/tickers, draining is never needed
@@ -454,6 +470,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
             Sleep(sched);
         }
     }
+
     // drainAsync removes potential stale time values after Stop/Reset.
     // When using Go 1 async timers, draining one or two values
     // may be needed after Reset or Stop (see comments in body for details).
@@ -464,6 +481,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
             // there are no stale values.
             return;
         }
+
         // async timers can send one stale value (then the timer is disabled).
         drain1ʗ1();
         if (isTicker) {
@@ -545,12 +563,15 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
         }
         Ꮡt.Errorf("len(C) = %d, want 1"u8, n);
     }
+
     // Test simple stop; timer never in heap.
     tim.Stop();
     noTick();
+
     // Test modify of timer not in heap.
     tim.Reset((Δtime.Duration)(10000000000000L));
     noTick();
+
     if (synctimerchan){
         // Test modify of timer in heap.
         tim.Reset(1);
@@ -558,9 +579,9 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
         {
             nint l = len(C);
             nint c = cap(C); if (l != 0 || c != 0) {
+                // t.Fatalf("len(C), cap(C) = %d, %d, want 0, 0", l, c)
             }
         }
-        // t.Fatalf("len(C), cap(C) = %d, %d, want 0, 0", l, c)
         assertTick();
     } else {
         // Test modify of timer in heap.
@@ -570,11 +591,13 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
         tim.Reset((Δtime.Duration)(10000000000000L));
         drainAsync();
         noTick();
+
         // Test that len sees an immediate tick arrive
         // for Reset of timer in heap.
         tim.Reset(1);
         assertLen();
         assertTick();
+
         // Test that len sees an immediate tick arrive
         // for Reset of timer NOT in heap.
         tim.Stop();
@@ -583,12 +606,14 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
         assertLen();
         assertTick();
     }
+
     // Sleep long enough that a second tick must happen if this is a ticker.
     // Test that Reset does not lose the tick that should have happened.
     Sleep(sched);
     tim.Reset((Δtime.Duration)(10000000000000L));
     drainAsync();
     noTick();
+
     void notDone(channel<bool> doneΔ1) {
         Ꮡt.Helper();
         var selᴛ31 = doneΔ1;
@@ -601,6 +626,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
             break;
         }}
     }
+
     void waitDone(channel<bool> doneΔ2) {
         Ꮡt.Helper();
         foreach (var _ᴛ4 in range(tries)) {
@@ -616,9 +642,11 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
         }
         Ꮡt.Fatalf("never got done"u8);
     }
+
     // Reset timer in heap (already reset above, but just in case).
     tim.Reset((Δtime.Duration)(10000000000000L));
     drainAsync();
+
     // Test stop while timer in heap (because goroutine is blocked on <-C).
     ref var done = ref heap<channel<bool>>(out var Ꮡdone);
     done = new channel<bool>(0);
@@ -630,13 +658,16 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
     });
     Sleep(sched);
     notDone(done);
+
     // Test reset far away while timer in heap.
     tim.Reset((Δtime.Duration)(20000000000000L));
     Sleep(sched);
     notDone(done);
+
     // Test imminent reset while in heap.
     tim.Reset(1);
     waitDone(done);
+
     // If this is a ticker, another tick should have come in already
     // (they are 1ns apart). If a timer, it should have stopped.
     if (isTicker){
@@ -644,9 +675,11 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
     } else {
         noTick();
     }
+
     tim.Stop();
     drainAsync();
     noTick();
+
     // Again using select and with two goroutines waiting.
     tim.Reset((Δtime.Duration)(10000000000000L));
     drainAsync();
@@ -716,6 +749,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
         }}
     }
     notDone(done);
+
     // Test enqueueTimerChan when timer is stopped.
     stop = new channel<bool>(0);
     done = new channel<bool>(2);
@@ -739,6 +773,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
     close(stop);
     waitDone(done);
     waitDone(done);
+
     // Test that Stop and Reset block old values from being received.
     // (Proposal go.dev/issue/37196.)
     if (synctimerchan) {
@@ -750,6 +785,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
             }
         }
         noTick();
+
         tim.Reset(ΔHour);
         noTick();
         {
@@ -775,8 +811,6 @@ internal static partial void testTimerChan(ж<Δtesting.T> Ꮡt, timer tim, /*<-
 }
 
 public static void TestManualTicker(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Code should not do this, but some old code dating to Go 1.9 does.
     // Make sure this doesn't crash.
     // See go.dev/issue/21874.

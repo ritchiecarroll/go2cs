@@ -55,8 +55,7 @@ internal static slice<reflectꓸValue> ct(reflectꓸType typ, params ꓸꓸꓸan
     var value = new slice<reflectꓸValue>(len(args), () => new(nil));
     foreach (var (i, v) in args) {
         var x = reflect.ValueOf(v);
-        if (!x.IsValid()){
-            // Make it a typed nil.
+        if (!x.IsValid()){ // Make it a typed nil.
             x = reflect.Zero(typ);
         } else {
             x = x.Convert(typ);
@@ -85,7 +84,6 @@ public static void TestCompare(ж<testing.T> Ꮡt) {
                     expect = 1;
                     break;
                 }}
-
                 if (c != expect) {
                     Ꮡt.Errorf("%s: compare(%v,%v)=%d; expect %d"u8, v0.Type(), v0, v1, c, expect);
                 }
@@ -211,7 +209,6 @@ internal static @string sprintKey(reflectꓸValue key) {
             return fmt.Sprint(key);
         }
     }
-
 }
 
 internal static ж<array<nint>> Ꮡints = new StandardBox<array<nint>>(new array<nint>(3));
@@ -298,18 +295,12 @@ public static void TestInterface(ж<testing.T> Ꮡt) {
     @string got = sprint(m);
     var typeGroups = new @string[]{
         "NaN: 1.1: 2.1: 3.1:"u8, // float64
-
         "false: true:"u8, // bool
-
         "1: 2: 3:"u8, // int
-
         "a: b: c:"u8, // string
-
         "[0 1]: [1 0]:"u8, // [2]int
-
-        "{0 1}: {1 0}:"u8
+        "{0 1}: {1 0}:"u8 // struct{ x int; y int }
     }.slice();
-    // struct{ x int; y int }
     foreach (var (_, g) in typeGroups) {
         if (!strings.Contains(got, g)) {
             Ꮡt.Errorf("sorted map should contain %q"u8, g);

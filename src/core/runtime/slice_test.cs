@@ -446,6 +446,7 @@ internal static readonly @string growˢ = "Grow"u8;
 public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
     Ꮡb.Run(noGrowˢ, (ж<testing.B> bΔ1) => {
         const nint C = 128;
+
         bΔ1.Run(byteˢ, (ж<testing.B> bΔ2) => {
             for (nint i = 0; i < (~bΔ2).N; i++) {
                 sByte = new slice<byte>(C);
@@ -454,6 +455,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
                 }
             }
         });
+
         bΔ1.Run("1Ptr"u8, (ж<testing.B> bΔ3) => {
             for (nint i = 0; i < (~bΔ3).N; i++) {
                 s1Ptr = new slice<uintptr>(C);
@@ -462,6 +464,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
                 }
             }
         });
+
         bΔ1.Run("2Ptr"u8, (ж<testing.B> bΔ4) => {
             for (nint i = 0; i < (~bΔ4).N; i++) {
                 s2Ptr = GoReflect.WithElemDims(new slice<array<uintptr>>(C, () => new(2)), 2);
@@ -470,6 +473,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
                 }
             }
         });
+
         bΔ1.Run("3Ptr"u8, (ж<testing.B> bΔ5) => {
             for (nint i = 0; i < (~bΔ5).N; i++) {
                 s3Ptr = GoReflect.WithElemDims(new slice<array<uintptr>>(C, () => new(3)), 3);
@@ -478,6 +482,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
                 }
             }
         });
+
         bΔ1.Run("4Ptr"u8, (ж<testing.B> bΔ6) => {
             for (nint i = 0; i < (~bΔ6).N; i++) {
                 s4Ptr = GoReflect.WithElemDims(new slice<array<uintptr>>(C, () => new(4)), 4);
@@ -487,8 +492,10 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
             }
         });
     });
+
     Ꮡb.Run(growˢ, (ж<testing.B> bΔ7) => {
         const nint C = 5;
+
         bΔ7.Run(byteˢ, (ж<testing.B> bΔ8) => {
             for (nint i = 0; i < (~bΔ8).N; i++) {
                 sByte = new slice<byte>(0);
@@ -498,6 +505,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
                 }
             }
         });
+
         bΔ7.Run("1Ptr"u8, (ж<testing.B> bΔ9) => {
             for (nint i = 0; i < (~bΔ9).N; i++) {
                 s1Ptr = new slice<uintptr>(0);
@@ -507,6 +515,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
                 }
             }
         });
+
         bΔ7.Run("2Ptr"u8, (ж<testing.B> bΔ10) => {
             for (nint i = 0; i < (~bΔ10).N; i++) {
                 s2Ptr = GoReflect.WithElemDims(new slice<array<uintptr>>(0, () => new(2)), 2);
@@ -516,6 +525,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
                 }
             }
         });
+
         bΔ7.Run("3Ptr"u8, (ж<testing.B> bΔ11) => {
             for (nint i = 0; i < (~bΔ11).N; i++) {
                 s3Ptr = GoReflect.WithElemDims(new slice<array<uintptr>>(0, () => new(3)), 3);
@@ -525,6 +535,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
                 }
             }
         });
+
         bΔ7.Run("4Ptr"u8, (ж<testing.B> bΔ12) => {
             for (nint i = 0; i < (~bΔ12).N; i++) {
                 s4Ptr = GoReflect.WithElemDims(new slice<array<uintptr>>(0, () => new(4)), 4);

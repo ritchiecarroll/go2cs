@@ -48,6 +48,7 @@ internal static readonly @string markerᶜ = "arrakis, dune, desert planet"u8;
 
 public static void TestPipePassing(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
+
     var (r, w, err) = os.Pipe();
     if (err != default!) {
         Ꮡt.Error(err);
@@ -80,6 +81,7 @@ internal static readonly @string cExit88ˢ = "/c exit 88"u8;
 
 public static void TestNoInheritHandles(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
+
     var cmd = testenv.Command(new exec_test_package.testing_TжTB(Ꮡt), cmdˢ, cExit88ˢ);
     cmd.Value.SysProcAttr = Ꮡ(new syscall.SysProcAttr(NoInheritHandles: true));
     var err = cmd.Run();
@@ -102,6 +104,7 @@ internal static readonly object noSystemrootFoundˢ = (@string)"no SYSTEMROOT fo
 public static void TestChildCriticalEnv(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     var cmd = helperCommand(Ꮡt, echoenvˢ, systemrootˢ);
+
     // Explicitly remove SYSTEMROOT from the command's environment.
     slice<@string> env = default!;
     foreach (var (_, kv) in cmd.Environ()) {
@@ -111,6 +114,7 @@ public static void TestChildCriticalEnv(ж<testing.T> Ꮡt) {
         }
     }
     cmd.Value.Env = env;
+
     var (@out, err) = cmd.CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatal(err);

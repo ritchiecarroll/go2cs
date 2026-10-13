@@ -44,6 +44,7 @@ internal static uint64 GroupCount(this ref global::go.@internal.runtime.maps_pac
         }
         return 1;
     }
+
     uint64 n = default!;
     ж<global::go.@internal.runtime.maps_package.table> lastTab = default!;
     foreach (var i in range(m.dirLen)) {
@@ -68,6 +69,7 @@ internal static @unsafe.Pointer KeyFromFullGroup(this ref global::go.@internal.r
     if (m.dirLen <= 0) {
         return default!;
     }
+
     ж<global::go.@internal.runtime.maps_package.table> lastTab = default!;
     foreach (var i in range(m.dirLen)) {
         var t = m.directoryAt((uintptr)i);
@@ -75,12 +77,14 @@ internal static @unsafe.Pointer KeyFromFullGroup(this ref global::go.@internal.r
             continue;
         }
         lastTab = t;
+
         for (var iΔ1 = (uint64)0; iΔ1 <= (~t).groups.lengthMask; iΔ1++) {
             var g = t.of(global::go.@internal.runtime.maps_package.table.Ꮡgroups).group(Ꮡtyp, iΔ1);
             var match = (~g.ctrls()).matchEmpty();
             if (match != 0) {
                 continue;
             }
+
             // All full or deleted slots.
             for (var j = (uintptr)0; j < abi.SwissMapGroupSlots; j++) {
                 if (g.ctrls().get(j) == ctrlDeleted) {
@@ -94,6 +98,7 @@ internal static @unsafe.Pointer KeyFromFullGroup(this ref global::go.@internal.r
             }
         }
     }
+
     return default!;
 }
 
@@ -104,6 +109,7 @@ internal static ж<global::go.@internal.runtime.maps_package.table> TableFor(thi
     if (m.dirLen <= 0) {
         return default!;
     }
+
     var hash = typ.Hasher(key, m.seed);
     var idx = m.directoryIndex(hash);
     return m.directoryAt(idx);

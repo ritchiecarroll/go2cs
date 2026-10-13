@@ -32,16 +32,15 @@ internal static map<@string, Func<ж<sha3.SHA3>>> testDigests = new map<@string,
     ["SHA3-512"u8] = New512
 };
 
-// NewCSHAKE without customization produces same result as SHAKE
 // testShakes contains functions that return *sha3.SHAKE instances for
 // with output-length equal to the KAT length.
-
 partial struct testShakesᴛ1 /*dyn*/ {
     internal Func<slice<byte>, slice<byte>, ж<sha3.SHAKE>> constructor;
     internal @string defAlgoName;
     internal @string defCustomStr;
 }
 internal static map<@string, testShakesᴛ1> testShakes = new map<@string, testShakesᴛ1>{
+    // NewCSHAKE without customization produces same result as SHAKE
     ["SHAKE128"u8] = new(NewCSHAKE128, ""u8, ""u8),
     ["SHAKE256"u8] = new(NewCSHAKE256, ""u8, ""u8),
     ["cSHAKE128"u8] = new(NewCSHAKE128, "CSHAKE128"u8, "CustomString"u8),
@@ -95,11 +94,13 @@ internal static void testUnalignedWrite(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Unaligned writes, alg=%s\ngot %q, want %q"u8, alg, got, want);
         }
     }
+
     // Same for SHAKE
     foreach (var (alg, df) in testShakes) {
         var want = new slice<byte>(16);
         var got = new slice<byte>(16);
         var d = df.constructor(slice<byte>(df.defAlgoName), slice<byte>(df.defCustomStr));
+
         d.Reset();
         d.Write(buf);
         d.Read(want);
@@ -134,6 +135,7 @@ public static void TestAppend(ж<testing.T> Ꮡt) {
 
 internal static void testAppend(ж<testing.T> Ꮡt) {
     var d = New224();
+
     for (nint capacity = 2; capacity <= 66; capacity += 64) {
         // The first time around the loop, Sum will have to reallocate.
         // The second time, it will not.
@@ -180,6 +182,7 @@ internal static void testSqueezing(ж<testing.T> Ꮡt) {
         d0.Write(slice<byte>(testString));
         var @ref = new slice<byte>(32);
         d0.Read(@ref);
+
         var d1 = v.constructor(slice<byte>(v.defAlgoName), slice<byte>(v.defCustomStr));
         d1.Write(slice<byte>(testString));
         slice<byte> multiple = default!;
@@ -221,15 +224,18 @@ private static readonly object gotˢ = (@string)"\ngot:\n"u8;
 internal static void testReset(ж<testing.T> Ꮡt) {
     var out1 = new slice<byte>(32);
     var out2 = new slice<byte>(32);
+
     foreach (var (_, v) in testShakes) {
         // Calculate hash for the first time
         var c = v.constructor(default!, new byte[]{0x99, 0x98}.slice());
         c.Write(sequentialBytes(0x100));
         c.Read(out1);
+
         // Calculate hash again
         c.Reset();
         c.Write(sequentialBytes(0x100));
         c.Read(out2);
+
         if (!bytes.Equal(out1, out2)) {
             Ꮡt.Error(expectedˢ, out1, gotˢ, out2);
         }
@@ -367,16 +373,17 @@ internal static void testCSHAKEAccumulated(ж<testing.T> Ꮡt, Func<slice<byte>,
         for (nint s = 0; s < 200; s++) {
             var S = new slice<byte>(s);
             rnd.Read(S);
+
             var c = newCSHAKE(N, S);
-            io.CopyN(new sha3.SHAKEжWriter(c), new sha3.SHAKEжReader(rnd), 100);
-            /* < rate */
+            io.CopyN(new sha3.SHAKEжWriter(c), new sha3.SHAKEжReader(rnd), 100 /* < rate */);
             io.CopyN(new sha3.SHAKEжWriter(acc), new sha3.SHAKEжReader(c), 200);
+
             c.Reset();
             io.CopyN(new sha3.SHAKEжWriter(c), new sha3.SHAKEжReader(rnd), rate);
             io.CopyN(new sha3.SHAKEжWriter(acc), new sha3.SHAKEжReader(c), 200);
+
             c.Reset();
-            io.CopyN(new sha3.SHAKEжWriter(c), new sha3.SHAKEжReader(rnd), 200);
-            /* > rate */
+            io.CopyN(new sha3.SHAKEжWriter(c), new sha3.SHAKEжReader(rnd), 200 /* > rate */);
             io.CopyN(new sha3.SHAKEжWriter(acc), new sha3.SHAKEжReader(c), 200);
         }
     }
@@ -400,6 +407,7 @@ internal static void testCSHAKELargeS(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingTestInShortModeˢ);
     }
+
     // See https://go.dev/issue/66232.
     const nint s = /* (1<<32)/8 + 1000 */ 536871912; // s * 8 > 2^32
     var S = new slice<byte>(s);
@@ -409,6 +417,7 @@ internal static void testCSHAKELargeS(ж<testing.T> Ꮡt) {
     io.CopyN(new sha3.SHAKEжWriter(c), new sha3.SHAKEжReader(rnd), 1000);
     var @out = new slice<byte>(32);
     c.Read(@out);
+
     // Generated with pycryptodome@3.20.0
     //
     //    from Crypto.Hash import cSHAKE128
@@ -530,6 +539,7 @@ internal static void benchmarkHash(ж<testing.B> Ꮡb, fips140.Hash h, nint size
     var data = sequentialBytes(size);
     b.SetBytes((int64)(size * num));
     b.StartTimer();
+
     slice<byte> state = default!;
     for (nint i = 0; i < b.N; i++) {
         for (nint j = 0; j < num; j++) {
@@ -550,8 +560,10 @@ internal static void benchmarkShake(ж<testing.B> Ꮡb, ж<sha3.SHAKE> Ꮡh, nin
     Ꮡh.Reset();
     var data = sequentialBytes(size);
     var d = new slice<byte>(32);
+
     b.SetBytes((int64)(size * num));
     b.StartTimer();
+
     for (nint i = 0; i < b.N; i++) {
         Ꮡh.Reset();
         for (nint j = 0; j < num; j++) {

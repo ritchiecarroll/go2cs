@@ -18,68 +18,68 @@ internal partial struct unescapeTest {
     internal @string unescaped;
 }
 
-// Handle no entities.
-// Handle simple named entities.
-// Handle hitting the end of the string.
-// Handle entities with two codepoints.
-// Handle decimal numeric entities.
-// Handle hexadecimal numeric entities.
-// Handle numeric early termination.
-// Handle numeric ISO-8859-1 entity replacements.
-// Handle single ampersand.
-// Handle ampersand followed by non-entity.
-// Handle "&#".
 internal static slice<unescapeTest> unescapeTests = new unescapeTest[]{
+    // Handle no entities.
     new(
         "copy"u8,
         "A\ttext\nstring"u8,
         "A\ttext\nstring"u8
     ),
+    // Handle simple named entities.
     new(
         "simple"u8,
         "&amp; &gt; &lt;"u8,
         "& > <"u8
     ),
+    // Handle hitting the end of the string.
     new(
         "stringEnd"u8,
         "&amp &amp"u8,
         "& &"u8
     ),
+    // Handle entities with two codepoints.
     new(
         "multiCodepoint"u8,
         "text &gesl; blah"u8,
         "text \u22db\ufe00 blah"u8
     ),
+    // Handle decimal numeric entities.
     new(
         "decimalEntity"u8,
         "Delta = &#916; "u8,
         "Delta = Δ "u8
     ),
+    // Handle hexadecimal numeric entities.
     new(
         "hexadecimalEntity"u8,
         "Lambda = &#x3bb; = &#X3Bb "u8,
         "Lambda = λ = λ "u8
     ),
+    // Handle numeric early termination.
     new(
         "numericEnds"u8,
         "&# &#x &#128;43 &copy = &#169f = &#xa9"u8,
         "&# &#x €43 © = ©f = ©"u8
     ),
+    // Handle numeric ISO-8859-1 entity replacements.
     new(
         "numericReplacements"u8,
         "Footnote&#x87;"u8,
         "Footnote‡"u8
     ),
+    // Handle single ampersand.
     new(
         "copySingleAmpersand"u8,
         "&"u8,
         "&"u8
     ),
+    // Handle ampersand followed by non-entity.
     new(
         "copyAmpersandNonEntity"u8,
         "text &test"u8,
         "text &test"u8
     ),
+    // Handle "&#".
     new(
         "copyAmpersandHash"u8,
         "text &#"u8,

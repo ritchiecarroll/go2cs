@@ -9,7 +9,6 @@ using static go.text.template.parse_package;
 
 partial class parse_internal_test_package {
 
-// keywords
 // Make the types prettyprint.
 internal static map<global::go.text.template.parse_package.itemType, @string> itemName = new map<global::go.text.template.parse_package.itemType, @string>{
     [itemError] = "error"u8,
@@ -32,6 +31,8 @@ internal static map<global::go.text.template.parse_package.itemType, @string> it
     [itemSpace] = "space"u8,
     [itemString] = "string"u8,
     [itemVariable] = "variable"u8,
+
+    // keywords
     [itemDot] = "."u8,
     [itemBlock] = "block"u8,
     [itemBreak] = "break"u8,
@@ -84,12 +85,6 @@ internal static @string rawNL = "`now is{{\n}}the time`"u8; // Contains newline 
 internal static global::go.text.template.parse_package.item tRawQuote = mkItem(itemRawString, raw);
 internal static global::go.text.template.parse_package.item tRawQuoteNL = mkItem(itemRawString, rawNL);
 
-// errors
-// Fixed bugs
-// Many elements in an action blew the lookahead until
-// we made lexInsideAction not loop.
-// This one is an error that we can't catch because it breaks templates with
-// minimized JavaScript. Should have fixed it before Go 1.1.
 internal static slice<lexTest> lexTests = new lexTest[]{
     new("empty"u8, ""u8, new global::go.text.template.parse_package.item[]{tEOF}.slice()),
     new("spaces"u8, " \t\n"u8, new global::go.text.template.parse_package.item[]{mkItem(itemText, " \t\n"u8), tEOF}.slice()),
@@ -322,6 +317,7 @@ internal static slice<lexTest> lexTests = new lexTest[]{
         mkItem(itemText, "-world"u8),
         tEOF
     }.slice()),
+    // errors
     new("badchar"u8, "#{{\x01}}"u8, new global::go.text.template.parse_package.item[]{
         mkItem(itemText, "#"u8),
         tLeft,
@@ -363,6 +359,10 @@ internal static slice<lexTest> lexTests = new lexTest[]{
         mkItem(itemNumber, "3"u8),
         mkItem(itemError, "unexpected right paren"u8)
     }.slice()),
+
+    // Fixed bugs
+    // Many elements in an action blew the lookahead until
+    // we made lexInsideAction not loop.
     new("long pipeline deadlock"u8, "{{|||||}}"u8, new global::go.text.template.parse_package.item[]{
         tLeft,
         tPipe,
@@ -381,6 +381,8 @@ internal static slice<lexTest> lexTests = new lexTest[]{
         mkItem(itemText, "hello-"u8),
         mkItem(itemError, @"comment ends before closing delimiter"u8)
     }.slice()),
+    // This one is an error that we can't catch because it breaks templates with
+    // minimized JavaScript. Should have fixed it before Go 1.1.
     new("unmatched right delimiter"u8, "hello-{.}}-world"u8, new global::go.text.template.parse_package.item[]{
         mkItem(itemText, "hello-{.}}-world"u8),
         tEOF
@@ -390,8 +392,8 @@ internal static slice<lexTest> lexTests = new lexTest[]{
 // collect gathers the emitted items into a slice.
 internal static slice<global::go.text.template.parse_package.item> /*items*/ collect(ж<lexTest> Ꮡt, @string left, @string right) {
     slice<global::go.text.template.parse_package.item> items = default!;
-
     ref var t = ref Ꮡt.DerefOrNull();
+
     var l = lex(t.name, t.input, left, right);
     l.Value.options = new lexOptions(
         emitComment: true,
@@ -502,6 +504,7 @@ public static void TestDelimsAlphaNumeric(ж<testing.T> Ꮡt) {
     }.slice()
     );
     var items = collect(Ꮡtest, hubˢ, hubˢ2);
+
     if (!equal(items, test.items, false)) {
         Ꮡt.Errorf("%s: got\n\t%v\nexpected\n\t%v"u8, test.name, items, test.items);
     }
@@ -522,6 +525,7 @@ public static void TestDelimsAndMarkers(ж<testing.T> Ꮡt) {
     }.slice()
     );
     var items = collect(Ꮡtest, "{{- "u8, " -}}"u8);
+
     if (!equal(items, test.items, false)) {
         Ꮡt.Errorf("%s: got\n\t%v\nexpected\n\t%v"u8, test.name, items, test.items);
     }
@@ -611,8 +615,8 @@ internal static (ж<global::go.text.template.parse_package.Tree> tree, error err
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
-
         ref var err = ref Ꮡerr.ValueSlot;
+
         defer(Ꮡt.recover, Ꮡerr, ref ᒐ);
         t.ParseName = t.Name;
         t.startParse(default!, Ꮡlex, new map<@string, ж<global::go.text.template.parse_package.Tree>>{});

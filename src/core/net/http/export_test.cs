@@ -52,6 +52,7 @@ internal static void initᴛMaxWriteWaitBeforeConnReuse() { MaxWriteWaitBeforeCo
     // When not under test, these values are always nil
     // and never assigned to.
     testHookMu = new sync.MutexжLocker(@new<sync.Mutex>());
+
     testHookClientDoResult = (ж<global::go.net.http_package.Response> res, error err) => {
         if (err != default!){
             {
@@ -119,10 +120,10 @@ public static global::go.net.http_package.ΔHandler NewTestTimeoutHandler(global
     return new global::go.net.http_package.timeoutHandlerжΔHandler(Ꮡ(new timeoutHandler(
         handler: Δhandler,
         testContext: ctx
+        // (no body)
     )));
 }
 
-// (no body)
 public static void ResetCachedEnvironment() {
     resetProxyConfig();
 }
@@ -203,9 +204,11 @@ internal static slice<@string> IdleConnStrsForTesting_h2(this ж<global::go.net.
         slice<@string> ret = default!;
         var noDialPool = (~t.h2transport._<ж<global::go.net.http_package.http2Transport>>()).ConnPool._<http2noDialClientConnPool>();
         var pool = noDialPool.http2clientConnPool;
+
         pool.of(global::go.net.http_package.http2clientConnPool.Ꮡmu).Lock();
         var poolʗ1 = pool;
         defer(poolʗ1.of(global::go.net.http_package.http2clientConnPool.Ꮡmu).Unlock, ref ᒐ);
+
         foreach (var (k, ccs) in (~pool).conns) {
             foreach (var (_, cc) in ccs) {
                 if (cc.idleState().canTakeNewRequest) {
@@ -213,6 +216,7 @@ internal static slice<@string> IdleConnStrsForTesting_h2(this ж<global::go.net.
                 }
             }
         }
+
         slices.Sort<slice<@string>, @string>(ret);
         return ret;
     }
@@ -281,6 +285,7 @@ internal static bool PutIdleTestConn(this ж<global::go.net.http_package.Transpo
     var (c, _) = net.Pipe();
     ref var key = ref heap<global::go.net.http_package.connectMethodKey>(out var Ꮡkey);
     key = new connectMethodKey(""u8, scheme, addr, false);
+
     if (t.MaxConnsPerHost > 0) {
         // Transport is tracking conns-per-host.
         // Increment connection count to account
@@ -292,12 +297,11 @@ internal static bool PutIdleTestConn(this ж<global::go.net.http_package.Transpo
         t.connsPerHost[key]++;
         t.connsPerHostMu.Unlock();
     }
+
     return Ꮡt.tryPutIdleConn(Ꮡ(new persistConn(
         t: Ꮡt,
         conn: c, // dummy
-
         closech: new channel<EmptyStruct>(0), // so it can be closed
-
         cacheKey: key
     ))) == default!;
 }
@@ -309,6 +313,7 @@ internal static bool PutIdleTestConnH2(this ж<global::go.net.http_package.Trans
 
     ref var key = ref heap<global::go.net.http_package.connectMethodKey>(out var Ꮡkey);
     key = new connectMethodKey(""u8, scheme, addr, false);
+
     if (t.MaxConnsPerHost > 0) {
         // Transport is tracking conns-per-host.
         // Increment connection count to account
@@ -320,6 +325,7 @@ internal static bool PutIdleTestConnH2(this ж<global::go.net.http_package.Trans
         t.connsPerHost[key]++;
         t.connsPerHostMu.Unlock();
     }
+
     return Ꮡt.tryPutIdleConn(Ꮡ(new persistConn(
         t: Ꮡt,
         alt: alt,

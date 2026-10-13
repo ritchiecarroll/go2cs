@@ -57,11 +57,7 @@ internal partial struct TestTableGroupCount_type /*dyn*/ {
 public static void TestTableGroupCount(ж<testing.T> Ꮡt) {
     // Test that maps of different sizes have the right number of
     // tables/groups.
-// 1.5 group max = 2 groups @ 75%
-// 2 groups at max
-// 2 groups at max + 1 -> grow to 4 groups
-// 3 * group max = 4 groups @75%
-// 4 groups at max + 1 -> grow to 8 groups
+
     slice<TestTableGroupCount_type> testCases = new TestTableGroupCount_type[]{
         new(
             n: -((1 << (int)(30))),
@@ -112,7 +108,7 @@ public static void TestTableGroupCount(ж<testing.T> Ꮡt) {
             )
         ),
         new(
-            n: belowMax,
+            n: belowMax, // 1.5 group max = 2 groups @ 75%
             escape: new TestTableGroupCount_mapCase(
                 initialLit: new TestTableGroupCount_mapCount(0, 0),
                 initialHint: new TestTableGroupCount_mapCount(1, 2),
@@ -120,7 +116,7 @@ public static void TestTableGroupCount(ж<testing.T> Ꮡt) {
             )
         ),
         new(
-            n: atMax,
+            n: atMax, // 2 groups at max
             escape: new TestTableGroupCount_mapCase(
                 initialLit: new TestTableGroupCount_mapCount(0, 0),
                 initialHint: new TestTableGroupCount_mapCount(1, 2),
@@ -128,7 +124,7 @@ public static void TestTableGroupCount(ж<testing.T> Ꮡt) {
             )
         ),
         new(
-            n: atMax + 1,
+            n: atMax + 1, // 2 groups at max + 1 -> grow to 4 groups
             escape: new TestTableGroupCount_mapCase(
                 initialLit: new TestTableGroupCount_mapCount(0, 0),
                 initialHint: new TestTableGroupCount_mapCount(1, 4),
@@ -136,7 +132,7 @@ public static void TestTableGroupCount(ж<testing.T> Ꮡt) {
             )
         ),
         new(
-            n: 2 * belowMax,
+            n: 2 * belowMax, // 3 * group max = 4 groups @75%
             escape: new TestTableGroupCount_mapCase(
                 initialLit: new TestTableGroupCount_mapCount(0, 0),
                 initialHint: new TestTableGroupCount_mapCount(1, 4),
@@ -144,7 +140,7 @@ public static void TestTableGroupCount(ж<testing.T> Ꮡt) {
             )
         ),
         new(
-            n: 2 * atMax + 1,
+            n: 2 * atMax + 1, // 4 groups at max + 1 -> grow to 8 groups
             escape: new TestTableGroupCount_mapCase(
                 initialLit: new TestTableGroupCount_mapCount(0, 0),
                 initialHint: new TestTableGroupCount_mapCount(1, 8),
@@ -152,29 +148,36 @@ public static void TestTableGroupCount(ж<testing.T> Ꮡt) {
             )
         )
     }.slice();
+
     void testMap(ж<testing.T> tΔ1, map<nint, nint> mʗp, nint n, TestTableGroupCount_mapCount initial, TestTableGroupCount_mapCount after) {
         ref var m = ref heap(mʗp, out var Ꮡm);
         var mm = ~Ꮡm.Reinterpret<map<nint, nint>, ж<mapsꓸMap>>();
+
         nint gotTab = mm.TableCount();
         if (gotTab != initial.tables) {
             tΔ1.Errorf("initial TableCount got %d want %d"u8, gotTab, initial.tables);
         }
+
         var gotGroup = mm.GroupCount();
         if (gotGroup != initial.groups) {
             tΔ1.Errorf("initial GroupCount got %d want %d"u8, gotGroup, initial.groups);
         }
+
         for (nint i = 0; i < n; i++) {
             m[i] = i;
         }
+
         gotTab = mm.TableCount();
         if (gotTab != after.tables) {
             tΔ1.Errorf("after TableCount got %d want %d"u8, gotTab, after.tables);
         }
+
         gotGroup = mm.GroupCount();
         if (gotGroup != after.groups) {
             tΔ1.Errorf("after GroupCount got %d want %d"u8, gotGroup, after.groups);
         }
     }
+
     var testCasesʗ1 = testCases;
     var testMapʗ1 = testMap;
     Ꮡt.Run(mapliteralˢ, (ж<testing.T> tΔ2) => {

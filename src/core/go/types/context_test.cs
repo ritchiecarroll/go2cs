@@ -16,8 +16,6 @@ internal static readonly object hashCollisionsAreˢ = (@string)"hash collisions 
 internal static readonly object badˢ = (@string)"bad"u8;
 
 public static void TestContextHashCollisions(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (debug) {
         Ꮡt.Skip(hashCollisionsAreˢ);
     }
@@ -29,6 +27,7 @@ public static void TestContextHashCollisions(ж<testing.T> Ꮡt) {
     // These lookups and updates use reasonable looking types in an attempt to
     // make them robust to internal type assertions, but could equally well use
     // arbitrary types.
+
     // Create some distinct origin types. nullaryP and nullaryQ have no
     // parameters and are identical (but have different type parameter names).
     // unaryP has a parameter.
@@ -51,7 +50,9 @@ public static void TestContextHashCollisions(ж<testing.T> Ꮡt) {
         var @params = NewTuple(NewVar(nopos, nil, "_"u8, new global::go.go.types_package.TypeParamжΔType(tparam)));
         unaryP = new types_test_package.types_ΔSignatureжΔType(NewSignatureType(nil, default!, new ж<global::go.go.types_package.TypeParam>[]{tparam}.slice(), @params, nil, false));
     }
+
     var ctxt = NewContext();
+
     // Update the context with an instantiation of nullaryP.
     var inst = NewSignatureType(nil, default!, default!, nil, nil, false);
     {
@@ -59,6 +60,7 @@ public static void TestContextHashCollisions(ж<testing.T> Ꮡt) {
             Ꮡt.Error(badˢ);
         }
     }
+
     // unaryP is not identical to nullaryP, so we should not get inst when
     // instantiated with identical type arguments.
     {
@@ -66,6 +68,7 @@ public static void TestContextHashCollisions(ж<testing.T> Ꮡt) {
             Ꮡt.Error(badˢ);
         }
     }
+
     // nullaryQ is identical to nullaryP, so we *should* get inst when
     // instantiated with identical type arguments.
     {
@@ -73,6 +76,7 @@ public static void TestContextHashCollisions(ж<testing.T> Ꮡt) {
             Ꮡt.Error(badˢ);
         }
     }
+
     // ...but verify we don't get inst with different type arguments.
     {
         var got = ctxt.lookup(""u8, nullaryQ, new global::go.go.types_package.ΔType[]{new global::go.go.types_package.BasicжΔType(Typ[ΔString])}.slice()); if (got != default!) {

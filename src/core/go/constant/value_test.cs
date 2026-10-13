@@ -15,19 +15,21 @@ using static global::go.go.constant_package;
 
 partial class constant_internal_test_package {
 
-// 0-octals
-// decimals
-// hexadecimals
-// octals
-// binaries
 internal static slice<@string> intTests = new @string[]{
+    // 0-octals
     @"0_123 = 0123"u8,
     @"0123_456 = 0123456"u8,
+
+    // decimals
     @"1_234 = 1234"u8,
     @"1_234_567 = 1234567"u8,
+
+    // hexadecimals
     @"0X_0 = 0"u8,
     @"0X_1234 = 0x1234"u8,
     @"0X_CAFE_f00d = 0xcafef00d"u8,
+
+    // octals
     @"0o0 = 0"u8,
     @"0o1234 = 01234"u8,
     @"0o01234567 = 01234567"u8,
@@ -40,6 +42,8 @@ internal static slice<@string> intTests = new @string[]{
     @"0O_0 = 0"u8,
     @"0O_1234 = 01234"u8,
     @"0O0123_4567 = 01234567"u8,
+
+    // binaries
     @"0b0 = 0"u8,
     @"0b1011 = 0xb"u8,
     @"0b00101101 = 0x2d"u8,
@@ -51,10 +55,9 @@ internal static slice<@string> intTests = new @string[]{
     @"0b_0010_1101 = 0x2d"u8
 }.slice();
 
-// decimal floats
-// hexadecimal floats
 // The RHS operand may be a floating-point quotient n/d of two integer values n and d.
 internal static slice<@string> floatTests = new @string[]{
+    // decimal floats
     @"1_2_3. = 123."u8,
     @"0_123. = 123."u8,
     @"0_0e0 = 0."u8,
@@ -75,6 +78,8 @@ internal static slice<@string> floatTests = new @string[]{
     @"1e+1000000000 = ?"u8,
     @"6e5518446744 = ?"u8,
     @"-6e5518446744 = ?"u8,
+
+    // hexadecimal floats
     @"0x0.p+0 = 0."u8,
     @"0Xdeadcafe.p-10 = 0xdeadcafe/1024"u8,
     @"0x1234.P84 = 0x1234000000000000000000000"u8,
@@ -115,6 +120,7 @@ internal static void testNumbers(ж<testing.T> Ꮡt, token.Token kind, slice<@st
             Ꮡt.Errorf("invalid test case: %s"u8, test);
             continue;
         }
+
         var x = MakeFromLiteral(a[0], kind, 0);
         global::go.go.constant_package.Value y = default!;
         if (a[1] == "?"){
@@ -133,15 +139,18 @@ internal static void testNumbers(ж<testing.T> Ꮡt, token.Token kind, slice<@st
                 throw panic(fmt.Sprintf("invalid test case: %s %d"u8, test, y.Kind()));
             }
         }
+
         global::go.go.constant_package.ΔKind xk = x.Kind();
         global::go.go.constant_package.ΔKind yk = y.Kind();
         if (xk != yk) {
             Ꮡt.Errorf("%s: got kind %d != %d"u8, test, xk, yk);
             continue;
         }
+
         if (yk == Unknown) {
             continue;
         }
+
         if (!Compare(x, token.EQL, y)) {
             Ꮡt.Errorf("%s: %s != %s"u8, test, x, y);
         }
@@ -156,16 +165,8 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
     testNumbers(Ꮡt, token.IMAG, imagTests);
 }
 
-// unary operations
-// etc.
-// binary operations
-// TODO(gri) should be the same as for /
-// etc.
-// shifts
-// etc.
-// comparisons
-// etc.
 internal static slice<@string> opTests = new @string[]{
+    // unary operations
     @"+ 0 = 0"u8,
     @"+ ? = ?"u8,
     @"- 1 = -1"u8,
@@ -175,6 +176,10 @@ internal static slice<@string> opTests = new @string[]{
     @"! true = false"u8,
     @"! false = true"u8,
     @"! ? = ?"u8,
+
+    // etc.
+
+    // binary operations
     @""""" + """" = """""u8,
     @"""foo"" + """" = ""foo"""u8,
     @""""" + ""bar"" = ""bar"""u8,
@@ -206,7 +211,7 @@ internal static slice<@string> opTests = new @string[]{
     @"? / 0 = ?"u8,
     @"0 / ? = ?"u8,
     @"0 * 1e+1000000000i = ?"u8,
-    @"0 % 0 = ""runtime_error:_integer_divide_by_zero"""u8,
+    @"0 % 0 = ""runtime_error:_integer_divide_by_zero"""u8, // TODO(gri) should be the same as for /
     @"10 % 3 = 1"u8,
     @"? % 0 = ?"u8,
     @"0 % ? = ?"u8,
@@ -227,12 +232,18 @@ internal static slice<@string> opTests = new @string[]{
     @"0 &^ 0 = 0"u8,
     @"0xf &^ 1 = 0xe"u8,
     @"1 &^ 0xf = 0"u8,
+    // etc.
+
+    // shifts
     @"0 << 0 = 0"u8,
     @"1 << 10 = 1024"u8,
     @"0 >> 0 = 0"u8,
     @"1024 >> 10 == 1"u8,
     @"? << 0 == ?"u8,
     @"? >> 10 == ?"u8,
+    // etc.
+
+    // comparisons
     @"false == false = true"u8,
     @"false == true = false"u8,
     @"true == false = false"u8,
@@ -271,27 +282,30 @@ internal static slice<@string> opTests = new @string[]{
     @"10 <= ? = false"u8,
     @"0 > ? = false"u8,
     @"10 >= ? = false"u8
+
+    // etc.
 }.slice();
 
 public static void TestOps(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in opTests) {
         var a = strings.Split(test, " "u8);
         nint i = 0; // operator index
+
         global::go.go.constant_package.Value x = default!;
         global::go.go.constant_package.Value x0 = default!;
         switch (len(a)) {
         case 4: {
+            // unary operation
             break;
         }
         case 5: {
+            // binary operation
             (x, x0) = (val(a[0]), val(a[0]));
             i = 1;
             break;
         }
         default: {
-            Ꮡt.Errorf("invalid test case: %s"u8, // unary operation
- // binary operation
- test);
+            Ꮡt.Errorf("invalid test case: %s"u8, test);
             continue;
             break;
         }}
@@ -300,17 +314,21 @@ public static void TestOps(ж<testing.T> Ꮡt) {
         if (!ok) {
             throw panic("missing optab entry for " + a[i]);
         }
+
         var (y, y0) = (val(a[i + 1]), val(a[i + 1]));
+
         var got = doOp(x, op, y);
         var want = val(a[i + 3]);
         if (!eql(got, want)) {
             Ꮡt.Errorf("%s: got %s; want %s"u8, test, got, want);
             continue;
         }
+
         if (x0 != default! && !eql(x, x0)) {
             Ꮡt.Errorf("%s: x changed to %s"u8, test, x);
             continue;
         }
+
         if (!eql(y, y0)) {
             Ꮡt.Errorf("%s: y changed to %s"u8, test, y);
             continue;
@@ -333,37 +351,37 @@ internal static @string xxx = strings.Repeat("x"u8, 68);
 
 internal static @string issue14262 = @"""بموجب الشروط التالية نسب المصنف — يجب عليك أن تنسب العمل بالطريقة التي تحددها المؤلف أو المرخص (ولكن ليس بأي حال من الأحوال أن توحي وتقترح بتحول أو استخدامك للعمل).  المشاركة على قدم المساواة — إذا كنت يعدل ، والتغيير ، أو الاستفادة من هذا العمل ، قد ينتج عن توزيع العمل إلا في ظل تشابه او تطابق فى واحد لهذا الترخيص."""u8;
 
-// Unknown
-// Bool
-// String
-// Int
-// Float
-// issue #16176
-// issue #20228
-// Complex
-
 partial struct stringTestsᴛ1 /*dyn*/ {
     internal @string input, @short, exact;
 }
 internal static slice<stringTestsᴛ1> stringTests = new stringTestsᴛ1[]{
+    // Unknown
     new(""u8, "unknown"u8, "unknown"u8),
     new("0x"u8, "unknown"u8, "unknown"u8),
     new("'"u8, "unknown"u8, "unknown"u8),
     new("1f0"u8, "unknown"u8, "unknown"u8),
     new("unknown"u8, "unknown"u8, "unknown"u8),
+
+    // Bool
     new("true"u8, "true"u8, "true"u8),
     new("false"u8, "false"u8, "false"u8),
+
+    // String
     new(@""""""u8, @""""""u8, @""""""u8),
     new(@"""foo"""u8, @"""foo"""u8, @"""foo"""u8),
     new(@""""u8 + xxx + @"xx"""u8, @""""u8 + xxx + @"xx"""u8, @""""u8 + xxx + @"xx"""u8),
     new(@""""u8 + xxx + @"xxx"""u8, @""""u8 + xxx + @"..."u8, @""""u8 + xxx + @"xxx"""u8),
     new(@""""u8 + xxx + xxx + @"xxx"""u8, @""""u8 + xxx + @"..."u8, @""""u8 + xxx + xxx + @"xxx"""u8),
     new(issue14262, @"""بموجب الشروط التالية نسب المصنف — يجب عليك أن تنسب العمل بالطريقة ال..."u8, issue14262),
+
+    // Int
     new("0"u8, "0"u8, "0"u8),
     new("-1"u8, "-1"u8, "-1"u8),
     new("12345"u8, "12345"u8, "12345"u8),
     new("-12345678901234567890"u8, "-12345678901234567890"u8, "-12345678901234567890"u8),
     new("12345678901234567890"u8, "12345678901234567890"u8, "12345678901234567890"u8),
+
+    // Float
     new("0."u8, "0"u8, "0"u8),
     new("-0.0"u8, "0"u8, "0"u8),
     new("10.0"u8, "10"u8, "10"u8),
@@ -372,8 +390,10 @@ internal static slice<stringTestsᴛ1> stringTests = new stringTestsᴛ1[]{
     new("1e9999"u8, "1e+9999"u8, "0x.f8d4a9da224650a8cb2959e10d985ad92adbd44c62917e608b1f24c0e1b76b6f61edffeb15c135a4b601637315f7662f325f82325422b244286a07663c9415d2p+33216"u8),
     new("1e-9999"u8, "1e-9999"u8, "0x.83b01ba6d8c0425eec1b21e96f7742d63c2653ed0a024cf8a2f9686df578d7b07d7a83d84df6a2ec70a921d1f6cd5574893a7eda4d28ee719e13a5dce2700759p-33215"u8),
     new("2.71828182845904523536028747135266249775724709369995957496696763"u8, "2.71828"u8, "271828182845904523536028747135266249775724709369995957496696763/100000000000000000000000000000000000000000000000000000000000000"u8),
-    new("0e9999999999"u8, "0"u8, "0"u8),
-    new("-6e-1886451601"u8, "0"u8, "0"u8),
+    new("0e9999999999"u8, "0"u8, "0"u8), // issue #16176
+    new("-6e-1886451601"u8, "0"u8, "0"u8), // issue #20228
+
+    // Complex
     new("0i"u8, "(0 + 0i)"u8, "(0 + 0i)"u8),
     new("-0i"u8, "(0 + 0i)"u8, "(0 + 0i)"u8),
     new("10i"u8, "(0 + 10i)"u8, "(0 + 10i)"u8),
@@ -403,6 +423,7 @@ internal static global::go.go.constant_package.Value val(@string lit) {
     if (len(lit) == 0) {
         return MakeUnknown();
     }
+
     var exprᴛ1 = lit;
     if (exprᴛ1 == "?"u8) {
         return MakeUnknown();
@@ -422,6 +443,7 @@ internal static global::go.go.constant_package.Value val(@string lit) {
             return BinaryOp(a, token.QUO, b);
         }
     }
+
     token.Token tok = token.INT;
     {
         var (first, last) = (lit[0], lit[len(lit) - 1]);
@@ -479,6 +501,7 @@ internal static void panicHandler(ж<global::go.go.constant_package.Value> Ꮡv)
         var switchᴛ1 = recover();
         switch (switchᴛ1.type()) {
         case null: {
+            // nothing to do
             break;
         }
         case @string p: {
@@ -499,7 +522,6 @@ internal static void panicHandler(ж<global::go.go.constant_package.Value> Ꮡv)
     finally { ᒐ.Run(); }
 }
 
-// nothing to do
 internal static global::go.go.constant_package.Value /*z*/ doOp(global::go.go.constant_package.Value x, token.Token op, global::go.go.constant_package.Value y) {
     heap<global::go.go.constant_package.Value>(out var Ꮡz);
     GoFrame ᒐ = default;
@@ -507,9 +529,11 @@ internal static global::go.go.constant_package.Value /*z*/ doOp(global::go.go.co
         ref var z = ref Ꮡz.ValueSlot;
 
         defer(panicHandler, Ꮡz, ref ᒐ);
+
         if (x == default!) {
             z = UnaryOp(op, y, 0); goto ᒐdone;
         }
+
         var exprᴛ1 = op;
         if (exprᴛ1 == token.EQL || exprᴛ1 == token.NEQ || exprᴛ1 == token.LSS || exprᴛ1 == token.LEQ || exprᴛ1 == token.GTR || exprᴛ1 == token.GEQ) {
             z = MakeBool(Compare(x, op, y)); goto ᒐdone;
@@ -521,7 +545,6 @@ internal static global::go.go.constant_package.Value /*z*/ doOp(global::go.go.co
         { /* default: */
             z = BinaryOp(x, op, y); goto ᒐdone;
         }
-
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -543,8 +566,6 @@ internal static slice<@string> fracTests = new @string[]{
 }.slice();
 
 public static void TestFractions(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     foreach (var (_, test) in fracTests) {
         var x = val(test);
         // We don't check the actual numerator and denominator because they
@@ -571,15 +592,18 @@ public static void TestBytes(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in bytesTests) {
         var x = val(test);
         var bytes = Bytes(x);
+
         // special case 0
         if (Sign(x) == 0 && len(bytes) != 0) {
             Ꮡt.Errorf("%s: got %v; want empty byte slice"u8, test, bytes);
         }
+
         {
             nint n = len(bytes); if (n > 0 && bytes[n - 1] == 0) {
                 Ꮡt.Errorf("%s: got %v; want no leading 0 byte"u8, test, bytes);
             }
         }
+
         {
             var got = MakeFromBytes(bytes); if (!eql(got, x)) {
                 Ꮡt.Errorf("%s: got %s; want %s (bytes = %v)"u8, test, got, x, bytes);
@@ -631,12 +655,14 @@ public static void TestMakeFloat64(ж<testing.T> Ꮡt) {
         if (val.Kind() != Float) {
             Ꮡt.Errorf("%v: got kind = %d; want %d"u8, arg, val.Kind(), Float);
         }
+
         // -0.0 is mapped to 0.0
         var (got, exact) = Float64Val(val);
         if (!exact || math.Float64bits(got) != math.Float64bits(arg + 0D)) {
             Ꮡt.Errorf("%v: got %v (exact = %v)"u8, arg, got, exact);
         }
     }
+
     // infinity
     foreach (var (sign, _) in new nint[]{-1, 1}.slice()) {
         var arg = math.Inf(sign);
@@ -697,7 +723,6 @@ public static void BenchmarkStringAdd(ж<testing.B> Ꮡb) {
         });
     }
 }
-
 
 partial struct bitLenTestsᴛ1 /*dyn*/ {
     internal int64 val;

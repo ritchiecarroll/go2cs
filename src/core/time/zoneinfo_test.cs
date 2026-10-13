@@ -33,15 +33,17 @@ internal static readonly @string envᶜ = "ZONEINFO"u8;
 public static void TestEnvVarUsage(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         time_internal_test_package.ResetZoneinfoForTesting();
+
         @string testZoneinfo = testZoneinfoᶜ;
         @string env = envᶜ;
+
         Ꮡt.Setenv(env, testZoneinfo);
+
         // Result isn't important, we're testing the side effect of this command
         Δtime.LoadLocation(asiaJerusalemˢ);
         defer(time_internal_test_package.ResetZoneinfoForTesting, ref ᒐ);
+
         {
             var zoneinfo = time_internal_test_package.ZoneinfoForTesting(); if (testZoneinfo != zoneinfo.Value) {
                 Ꮡt.Errorf("zoneinfo does not match env variable: got %q want %q"u8, zoneinfo.Value, testZoneinfo);
@@ -72,6 +74,7 @@ public static void TestLoadLocationValidatesNames(ж<Δtesting.T> Ꮡt) {
     time_internal_test_package.ResetZoneinfoForTesting();
     @string env = envᶜ1;
     Ꮡt.Setenv(env, ""u8);
+
     var bad = new @string[]{
         "/usr/foo/Foo"u8,
         "\\UNC\foo"u8,
@@ -120,6 +123,7 @@ public static void TestFirstZone(ж<Δtesting.T> Ꮡt) {
         var undo = time_internal_test_package.DisablePlatformSources();
         var undoʗ1 = undo;
         defer(undoʗ1, ref ᒐ);
+
         @string format = formatᶜ;
         slice<TestFirstZone_type> tests = new TestFirstZone_type[]{
             new(
@@ -135,6 +139,7 @@ public static void TestFirstZone(ж<Δtesting.T> Ꮡt) {
                 "Sat, 31 Dec 2011 00:00:00 +1300 (+13)"u8
             )
         }.slice();
+
         foreach (var (_, test) in tests) {
             var (z, err) = Δtime.LoadLocation(test.zone);
             if (err != default!) {
@@ -177,11 +182,13 @@ public static void TestLoadLocationFromTZData(ж<Δtesting.T> Ꮡt) {
         var undo = time_internal_test_package.DisablePlatformSources();
         var undoʗ1 = undo;
         defer(undoʗ1, ref ᒐ);
+
         @string locationName = locationNameᶜ;
         var (reference, err) = Δtime.LoadLocation(locationName);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var (gorootSource, ok) = time_internal_test_package.GorootZoneSource(testenv.GOROOT(new time_test_package.testing_TжTB(Ꮡt)));
         if (!ok) {
             Ꮡt.Fatal(failedToLocateTzinfoˢ);
@@ -194,6 +201,7 @@ public static void TestLoadLocationFromTZData(ж<Δtesting.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         if (!reflect.DeepEqual(reference.OrTypedNil(), sample.OrTypedNil())) {
             Ꮡt.Errorf("return values of LoadLocationFromTZData and LoadLocation don't match"u8);
         }
@@ -215,11 +223,13 @@ public static void TestEarlyLocation(ж<Δtesting.T> Ꮡt) {
         var undo = time_internal_test_package.DisablePlatformSources();
         var undoʗ1 = undo;
         defer(undoʗ1, ref ᒐ);
+
         @string locName = locNameᶜ;
         var (loc, err) = Δtime.LoadLocation(locName);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var d = Δtime.Date(1900, Δtime.January, 1, 0, 0, 0, 0, loc);
         var (tzName, tzOffset) = d.Zone();
         {
@@ -250,11 +260,6 @@ public static void TestMalformedTZData(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-// 2020b slim tzdata for Europe/Berlin.
-// 2021a slim tzdata for America/Nuuk.
-// 2021a slim tzdata for Asia/Gaza.
-// 2021a slim tzdata for Europe/Dublin.
-
 partial struct slimTestsᴛ1 /*dyn*/ {
     internal @string zoneName;
     internal @string fileName;
@@ -264,6 +269,7 @@ partial struct slimTestsᴛ1 /*dyn*/ {
 }
 internal static slice<slimTestsᴛ1> slimTests = new slimTestsᴛ1[]{
     new(
+        // 2020b slim tzdata for Europe/Berlin.
         zoneName: "Europe/Berlin"u8,
         fileName: "2020b_Europe_Berlin"u8,
         date: (ж<timeꓸLocation> loc) => Δtime.Date(2020, Δtime.October, 29, 15, 30, 0, 0, loc),
@@ -271,6 +277,7 @@ internal static slice<slimTestsᴛ1> slimTests = new slimTestsᴛ1[]{
         wantOffset: 3600
     ),
     new(
+        // 2021a slim tzdata for America/Nuuk.
         zoneName: "America/Nuuk"u8,
         fileName: "2021a_America_Nuuk"u8,
         date: (ж<timeꓸLocation> loc) => Δtime.Date(2020, Δtime.October, 29, 15, 30, 0, 0, loc),
@@ -278,6 +285,7 @@ internal static slice<slimTestsᴛ1> slimTests = new slimTestsᴛ1[]{
         wantOffset: -10800
     ),
     new(
+        // 2021a slim tzdata for Asia/Gaza.
         zoneName: "Asia/Gaza"u8,
         fileName: "2021a_Asia_Gaza"u8,
         date: (ж<timeꓸLocation> loc) => Δtime.Date(2020, Δtime.October, 29, 15, 30, 0, 0, loc),
@@ -285,6 +293,7 @@ internal static slice<slimTestsᴛ1> slimTests = new slimTestsᴛ1[]{
         wantOffset: 7200
     ),
     new(
+        // 2021a slim tzdata for Europe/Dublin.
         zoneName: "Europe/Dublin"u8,
         fileName: "2021a_Europe_Dublin"u8,
         date: (ж<timeꓸLocation> loc) => Δtime.Date(2021, Δtime.April, 2, 11, 12, 13, 0, loc),
@@ -305,6 +314,7 @@ public static void TestLoadLocationFromTZDataSlim(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Error(err);
             continue;
         }
+
         var d = test.date(reference);
         var (tzName, tzOffset) = d.Zone();
         if (tzName != test.wantName) {

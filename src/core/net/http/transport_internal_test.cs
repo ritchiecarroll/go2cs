@@ -29,11 +29,10 @@ internal static readonly @string testOverˢ = "test over"u8;
 public static partial void TestTransportPersistConnReadLoopEOF(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         var ln = newLocalListener(Ꮡt);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         var connc = new channel<net.Conn>(1);
         var conncʗ1 = connc;
         var lnʗ2 = ln;
@@ -51,6 +50,7 @@ public static partial void TestTransportPersistConnReadLoopEOF(ж<testing.T> Ꮡ
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
+
         var tr = @new<global::go.net.http_package.Transport>();
         var (req, _) = NewRequest(getˢ, "http://"u8 + ln.Addr().String(), default!);
         req = req.WithT(Ꮡt);
@@ -63,16 +63,19 @@ public static partial void TestTransportPersistConnReadLoopEOF(ж<testing.T> Ꮡ
         }
         var pcʗ1 = pc;
         defer(pcʗ1.close, errors.New(testOverˢ), ref ᒐ);
+
         var conn = ᐸꟷ(connc);
         if (conn == default!) {
             // Already called t.Error in the accept goroutine.
             return;
         }
         conn.Close(); // simulate the server hanging up on the client
+
         (_, err) = pc.roundTrip(treq);
         if (!isNothingWrittenError(err) && !isTransportReadFromServerError(err) && !AreEqual(err, errServerClosedIdle)) {
             Ꮡt.Errorf("roundTrip = %#v, %v; want errServerClosedIdle, transportReadFromServerError, or nothingWrittenError"u8, err, err);
         }
+
         ᐸꟷ((~pc).closech);
         err = pc.Value.closed;
         if (!isNothingWrittenError(err) && !isTransportReadFromServerError(err) && !AreEqual(err, errServerClosedIdle)) {
@@ -177,7 +180,6 @@ public static void TestTransportShouldRetryRequest(ж<testing.T> Ꮡt) {
             pc: nil,
             req: nil,
             err: new issue22091Error(nil), // like an external http2ErrNoCachedConn
-
             want: true
         ),
         [4] = new(
@@ -248,6 +250,7 @@ public static partial void TestTransportBodyAltRewind(ж<testing.T> Ꮡt) {
         var ln = newLocalListener(Ꮡt);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         var certʗ1 = cert;
         var lnʗ2 = ln;
         goǃ(() => {
@@ -270,6 +273,7 @@ public static partial void TestTransportBodyAltRewind(ж<testing.T> Ꮡt) {
                 sc.Close();
             }
         });
+
         @string addr = ln.Addr().String();
         var (req, _) = NewRequest(postˢ, httpsExampleOrgˢ, new http_test_package.bytes_BufferжReader(bytes.NewBufferString(requestˢ)));
         var roundTripped = false;

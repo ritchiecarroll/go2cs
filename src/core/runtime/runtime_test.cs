@@ -218,13 +218,13 @@ public static void TestStopCPUProfilingWithProfilerOff(ж<testing.T> Ꮡt) {
 // addresses that normally an OS would reserve for itself, or malformed
 // addresses. Even so, we might have to remove one or two on different
 // systems. We will see.
-// low addresses
-// high (kernel) addresses
-// or else malformed.
 internal static slice<uint64> faultAddrs = new uint64[]{
+    // low addresses
     0,
     1,
     0xfff,
+    // high (kernel) addresses
+    // or else malformed.
     0xffffffffffffffffUL,
     0xfffffffffffff001UL,
     0xffffffffffff0001UL,
@@ -247,6 +247,7 @@ public static void TestSetPanicOnFault(ж<testing.T> Ꮡt) {
     try {
         var old = Δdebug.SetPanicOnFault(true);
         defer(Δdebug.SetPanicOnFault, old, ref ᒐ);
+
         ref var nfault = ref heap<nint>(out var Ꮡnfault);
         nfault = 0;
         foreach (var (_, addr) in faultAddrs) {
@@ -271,6 +272,7 @@ internal static void testSetPanicOnFault(ж<testing.T> Ꮡt, uintptr addr, ж<ni
         if (GOOS == "js"u8 || GOOS == "wasip1"u8) {
             Ꮡt.Skip(GOOS + " does not support catching faults");
         }
+
         defer(() => {
             {
                 var err = recover(); if (err != default!) {
@@ -278,6 +280,7 @@ internal static void testSetPanicOnFault(ж<testing.T> Ꮡt, uintptr addr, ж<ni
                 }
             }
         }, ref ᒐ);
+
         // The read should fault, except that sometimes we hit
         // addresses that have had C or kernel pages mapped there
         // readable by user code. So just log the content.
@@ -316,7 +319,6 @@ public static void TestEqString(ж<testing.T> Ꮡt) {
         "aaa"u8,
         "ccc"u8,
         "cccc"u8[..3], // same contents, different string
-
         "1234567890"u8
     }.slice();
     foreach (var (_, s1) in s) {
@@ -383,6 +385,7 @@ public static void TestAppendGrowth(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("len=%d, cap=%d, want cap=%d"u8, len(Ꮡx.ValueSlot), cap(Ꮡx.ValueSlot), wantΔ1);
         }
     }
+
     check(0);
     nint want = 1;
     for (nint i = 1; i <= 100; i++) {
@@ -403,6 +406,7 @@ public static void TestAppendSliceGrowth(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("len=%d, cap=%d, want cap=%d"u8, len(Ꮡx.ValueSlot), cap(Ꮡx.ValueSlot), wantΔ1);
         }
     }
+
     check(0);
     nint want = 1;
     for (nint i = 1; i <= 100; i++) {
@@ -447,11 +451,10 @@ internal static readonly @string sparseNilˢ = "sparse-nil"u8;
 internal static readonly @string sparseˢ = "sparse"u8;
 
 public static partial void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
-    ref var b = ref Ꮡb.DerefOrNull();
-
     Action<ж<testing.B>> run(Func<bool> fn) {
         var runOne = (ж<testing.B> bΔ1) => {
             var latencies = new slice<time.Duration>(0, (~bΔ1).N);
+
             bΔ1.ResetTimer();
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 var start = time.Now();
@@ -462,6 +465,7 @@ public static partial void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
                 latencies = append(latencies, time.Since(start));
             }
             bΔ1.StopTimer();
+
             // Sort latencies then report percentiles.
             slices.Sort<slice<time.Duration>, time.Duration>(latencies);
             bΔ1.ReportMetric((float64)(int64)latencies[len(latencies) * 50 / 100], p50Nsˢ);
@@ -471,6 +475,7 @@ public static partial void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
         var runOneʗ1 = runOne;
         return (ж<testing.B> bΔ2) => {
             bΔ2.Run(idleˢ, runOneʗ1);
+
             var runOneʗ2 = runOneʗ1;
             bΔ2.Run(loadedˢ, (ж<testing.B> bΔ3) => {
                 var stop = applyGCLoad(bΔ3);
@@ -483,11 +488,13 @@ public static partial void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
             });
         };
     }
+
     // Measure the cost of counting goroutines
     Ꮡb.Run(smallNilˢ, run(() => {
         GoroutineProfile(default!);
         return true;
     }));
+
     // Measure the cost with a small set of goroutines
     nint n = NumGoroutine();
     ref var p = ref heap<slice<Δruntime.StackRecord>>(out var Ꮡp);
@@ -496,6 +503,7 @@ public static partial void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
         var (_, ok) = GoroutineProfile(Ꮡp.ValueSlot);
         return ok;
     }));
+
     // Measure the cost with a large set of goroutines
     var ch = new channel<nint>(0);
     ref var ready = ref heap(new Δsync.WaitGroup(), out var Ꮡready);
@@ -511,24 +519,29 @@ public static partial void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
         });
     }
     Ꮡready.Wait();
+
     // Count goroutines with a large allgs list
     Ꮡb.Run(largeNilˢ, run(() => {
         GoroutineProfile(default!);
         return true;
     }));
+
     n = NumGoroutine();
     p = new slice<Δruntime.StackRecord>(2 * n + 2 * GOMAXPROCS(0), () => new());
     Ꮡb.Run(largeˢ, run(() => {
         var (_, ok) = GoroutineProfile(Ꮡp.ValueSlot);
         return ok;
     }));
+
     close(ch);
     Ꮡdone.Wait();
+
     // Count goroutines with a large (but unused) allgs list
     Ꮡb.Run(sparseNilˢ, run(() => {
         GoroutineProfile(default!);
         return true;
     }));
+
     // Measure the cost of a large (but unused) allgs list
     n = NumGoroutine();
     p = new slice<Δruntime.StackRecord>(2 * n + 2 * GOMAXPROCS(0), () => new());
@@ -568,8 +581,8 @@ public static void TestTimediv(ж<testing.T> Ꮡt) {
             rem: 1
         ),
         new(
-            num: 12345000054321L, // Used by runtime.check.
-
+            // Used by runtime.check.
+            num: 12345000054321L,
             div: 1000000000,
             ret: 12345,
             rem: 54321
@@ -578,21 +591,18 @@ public static void TestTimediv(ж<testing.T> Ꮡt) {
             num: 4294967295L,
             div: 2,
             ret: (int32)(2147483648L - 1), // no overflow.
-
             rem: 1
         ),
         new(
             num: 4294967296L,
             div: 2,
             ret: (int32)(2147483648L - 1), // overflow.
-
             rem: 0
         ),
         new(
             num: 1099511627776L,
             div: 2,
             ret: (int32)(2147483648L - 1), // overflow.
-
             rem: 0
         ),
         new(
@@ -620,6 +630,7 @@ public static void TestTimediv(ж<testing.T> Ꮡt) {
             if (ret64 != (int64)tcʗ1.ret) {
                 tΔ1.Errorf("%d / %d got ret %d rem %d want ret %d rem %d"u8, tcʗ1.num, tcʗ1.div, ret64, rem64, tcʗ1.ret, tcʗ1.rem);
             }
+
             ref var rem = ref heap(new int32(), out var Ꮡrem);
             var ret = runtime_internal_test_package.Timediv(tcʗ1.num, tcʗ1.div, Ꮡrem);
             if (ret != tcʗ1.ret || rem != tcʗ1.rem) {
@@ -635,6 +646,7 @@ public static void BenchmarkProcYield(ж<testing.B> Ꮡb) {
                 runtime_internal_test_package.ProcYield(n);
             }
         };
+
     Ꮡb.Run("1"u8, benchN(1));
     Ꮡb.Run("10"u8, benchN(10));
     Ꮡb.Run("30"u8, benchN(30)); // active_spin_cnt in lock_sema.go and lock_futex.go
@@ -673,6 +685,7 @@ public static partial void BenchmarkMutexContention(ж<testing.B> Ꮡb) {
     // the benchmark clear. Most real uses of mutex will protect some number of
     // cache lines anyway.
     ref var state = ref heap(new BenchmarkMutexContention_state(), out var Ꮡstate);
+
     nint procs = GOMAXPROCS(0);
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     foreach (var _ᴛ1 in range(procs)) {
@@ -728,6 +741,7 @@ public static partial void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
     // advantage to lock/unlock implementations that take less time per
     // operation.
     ref var state = ref heap(new BenchmarkMutexCapture_state(), out var Ꮡstate);
+
     nint procs = GOMAXPROCS(0);
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     var histograms = new channel<array<array<nint>>>(0, ChanCargo.Of(null, new nint[] { 2, 65 }));
@@ -763,8 +777,10 @@ public static partial void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
             }
         });
     }
+
     Ꮡwg.Wait();
     b.StopTimer();
+
     array<array<nint>> histogram = new(2, () => new(65));
     foreach (var _ᴛ2 in range(procs)) {
         var h = ᐸꟷ(histograms);
@@ -774,6 +790,7 @@ public static partial void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
             }
         }
     }
+
     nint percentile([GoArrayDims(65)] array<nint> h, float64 p) {
         h = h.Clone();
         nint sum = 0;
@@ -781,6 +798,7 @@ public static partial void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
             var bound = ((uint64)(((uint64)1 << (int)(63)))).Rsh((int64)(i));
             sum += (nint)bound * v;
         }
+
         // Imagine that the longest streak / starvation events were instead half
         // as long but twice in number. (Note that we've pre-multiplied by the
         // [lower] "bound" value.) Continue those splits until we meet the
@@ -794,8 +812,10 @@ public static partial void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
                 return (nint)bound;
             }
         }
+
         return 0;
     }
+
     var perOp = (float64)b.Elapsed().Nanoseconds() / (float64)b.N;
     b.ReportMetric(perOp * (float64)percentile(histogram[0], 1.0D), nsStreakP100ˢ);
     b.ReportMetric(perOp * (float64)percentile(histogram[0], 0.9D), nsStreakP90ˢ);
@@ -823,6 +843,7 @@ public static void BenchmarkMutexHandoff(ж<testing.B> Ꮡb) {
                     bΔ1.Skipf("requires GOMAXPROCS >= %d"u8, workers);
                 }
             }
+
             // Measure latency of mutex handoff between threads.
             //
             // Hand off a runtime.mutex between two threads, one running a
@@ -840,9 +861,12 @@ public static void BenchmarkMutexHandoff(ж<testing.B> Ꮡb) {
             //
             // The two threads' goroutines communicate their current position to
             // each other in a non-blocking way via the "turn" state.
+
             ref var state = ref heap(new BenchmarkMutexHandoff_state(), out var Ꮡstate);
+
             ref var delta = ref heap(new atomic.Int64(), out var Ꮡdelta);
             ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
+
             // coordinator:
             //  - acquire the mutex
             //  - set the turn to 2 mod 4, instructing the worker to begin its Lock call
@@ -870,6 +894,7 @@ public static void BenchmarkMutexHandoff(ж<testing.B> Ꮡb) {
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                 finally { ᒐ.Run(); }
             });
+
             // worker:
             //  - wait until its our turn (2 mod 4)
             //  - acquire and release the mutex
@@ -896,15 +921,16 @@ public static void BenchmarkMutexHandoff(ж<testing.B> Ꮡb) {
                             Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡturn).Add(2);
                             break;
                         }}
-
                     }
                 }
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                 finally { ᒐ.Run(); }
             });
+
             Ꮡwg.Wait();
             bΔ1.ReportMetric((float64)Ꮡdelta.Load() / (float64)(~bΔ1).N, nsOpˢ);
         };
+
     Ꮡb.Run(soloˢ, (ж<testing.B> bΔ2) => {
         ref var @lock = ref heap(new Mutex(), out var Ꮡlock);
         foreach (var _ᴛ2 in range((~bΔ2).N)) {
@@ -912,6 +938,7 @@ public static void BenchmarkMutexHandoff(ж<testing.B> Ꮡb) {
             runtime_internal_test_package.ΔUnlock(Ꮡlock);
         }
     });
+
     Ꮡb.Run(fastPingPongˢ, testcase((ж<Mutex> l) => {
     }));
     Ꮡb.Run(slowPingPongˢ, testcase((ж<Mutex> l) => {

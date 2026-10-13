@@ -48,7 +48,7 @@ using static global::go.crypto.ecdsa_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/ecdsa/equal_test.go", "equal_test.cs", "ABIgooKEgpSClIKWgoKUgoKUgpSCloKClIK6goKClJSCAAkIgoCSgpSAkoCSgA==", "68-68:1;72-72:2;73-73:3;74-74:4")]
+[assembly: go.GoPositionMap("crypto/ecdsa/equal_test.go", "equal_test.cs", "ABIggoKUgpSClIKmgoKUgoKUgpSCpoKClILKgoKClJSCAAkIgoCSgpSAkoCSgA==", "68-68:1;72-72:2;73-73:3;74-74:4")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

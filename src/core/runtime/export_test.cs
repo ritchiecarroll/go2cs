@@ -340,13 +340,17 @@ public static (uintptr pagesInUse, uintptr counted) CountPagesInUse() {
     uintptr counted = default!;
 
     var stw = stopTheWorld(stwForTestCountPagesInUse);
+
     pagesInUse = Ꮡmheap_.of(global::go.runtime_package.mheap.ᏑpagesInUse).Load();
+
     foreach (var (_, s) in mheap_.allspans) {
         if (s.of(global::go.runtime_package.mspan.Ꮡstate).get() == mSpanInUse) {
             counted += s.Value.npages;
         }
     }
+
     startTheWorld(stw);
+
     return (pagesInUse, counted);
 }
 
@@ -389,33 +393,40 @@ internal static CPUStats ReadCPUStats() {
 
 public static void ReadMetricsSlow(ж<global::go.runtime_package.MemStats> ᏑmemStats, @unsafe.Pointer samplesp, nint len, nint cap) {
     var stw = stopTheWorld(stwForTestReadMetricsSlow);
+
     // Initialize the metrics beforehand because this could
     // allocate and skew the stats.
     metricsLock();
     initMetrics();
+
     systemstack(() => {
         // Donate the racectx to g0. readMetricsLocked calls into the race detector
         // via map access.
         getg().Value.racectx = getg().Value.m.Value.curg.Value.racectx;
+
         // Read the metrics once before in case it allocates and skews the metrics.
         // readMetricsLocked is designed to only allocate the first time it is called
         // with a given slice of samples. In effect, this extra read tests that this
         // remains true, since otherwise the second readMetricsLocked below could
         // allocate before it returns.
         readMetricsLocked(samplesp, len, cap);
+
         // Read memstats first. It's going to flush
         // the mcaches which readMetrics does not do, so
         // going the other way around may result in
         // inconsistent statistics.
         readmemstats_m(ref (ᏑmemStats).DerefOrNull());
+
         // Read metrics again. We need to be sure we're on the
         // system stack with readmemstats_m so that we don't call into
         // the stack allocator and adjust metrics between there and here.
         readMetricsLocked(samplesp, len, cap);
+
         // Undo the donation.
         getg().Value.racectx = 0;
     });
     metricsUnlock();
+
     startTheWorld(stw);
 }
 
@@ -433,11 +444,14 @@ public static (global::go.runtime_package.MemStats @base, global::go.runtime_pac
     global::go.runtime_package.MemStats slow = new();
 
     var stw = stopTheWorld(stwForTestReadMemStatsSlow);
+
     // Run on the system stack to avoid stack growth allocation.
     systemstack(() => {
         // Make sure stats don't change.
         getg().Value.m.Value.mallocing++;
+
         readmemstats_m(ref (Ꮡbase).DerefOrNull());
+
         // Initialize slow from base and zero the fields we're
         // recomputing.
         slow = Ꮡbase.Value.ΔClone();
@@ -447,6 +461,7 @@ public static (global::go.runtime_package.MemStats @base, global::go.runtime_pac
         slow.Frees = 0;
         slow.HeapReleased = 0;
         array<ReadMemStatsSlow_bySize> bySize = new(68); /* _NumSizeClasses */
+
         // Add up current allocations in spans.
         foreach (var (_, s) in mheap_.allspans) {
             if (s.of(global::go.runtime_package.mspan.Ꮡstate).get() != mSpanInUse) {
@@ -466,9 +481,11 @@ public static (global::go.runtime_package.MemStats @base, global::go.runtime_pac
                 }
             }
         }
+
         // Add in frees by just reading the stats for those directly.
         ref var m = ref heap(new global::go.runtime_package.heapStatsDelta(), out var Ꮡm);
         Ꮡmemstats.of(global::go.runtime_package.mstats.ᏑheapStats).unsafeRead(Ꮡm);
+
         // Collect per-sizeclass free stats.
         uint64 smallFree = default!;
         for (nint i = 0; i < _NumSizeClasses; i++) {
@@ -479,11 +496,14 @@ public static (global::go.runtime_package.MemStats @base, global::go.runtime_pac
         }
         slow.Frees += m.tinyAllocCount + m.largeFreeCount;
         slow.Mallocs += slow.Frees;
+
         slow.TotalAlloc = slow.Alloc + m.largeFree + smallFree;
+
         foreach (var (i, _) in slow.BySize) {
             slow.BySize[i].Mallocs = bySize[i].Mallocs;
             slow.BySize[i].Frees = bySize[i].Frees;
         }
+
         for (global::go.runtime_package.chunkIdx i = mheap_.pages.start; i < mheap_.pages.end; i++) {
             var chunk = Ꮡmheap_.of(global::go.runtime_package.mheap.Ꮡpages).tryChunkOf(i);
             if (chunk == nil) {
@@ -496,8 +516,10 @@ public static (global::go.runtime_package.MemStats @base, global::go.runtime_pac
             nint pg = sys.OnesCount64((~Δp).pcache.scav);
             slow.HeapReleased += (uint64)pg * (uint64)pageSize;
         }
+
         getg().Value.m.Value.mallocing--;
     });
+
     startTheWorld(stw);
     return (@base, slow);
 }
@@ -513,6 +535,7 @@ public static void ShrinkStackAndVerifyFramePointers() {
             stackPoisonCopy = before;
         }, ref ᒐ);
         stackPoisonCopy = 1;
+
         var gp = getg();
         var gpʗ1 = gp;
         systemstack(() => {
@@ -659,16 +682,20 @@ public static partial void RunGetgThreadSwitchTest() {
         chΔ1.ᐸꟷ(5);
         LockOSThread();
     }, ch);
+
     var g1 = getg();
+
     // Block on a receive. This is likely to get us a thread
     // switch. If we yield to the sender goroutine, it will
     // lock the thread, forcing us to resume on a different
     // thread.
     ᐸꟷ(ch);
+
     var g2 = getg();
     if (g1 != g2) {
         throw panic("g1 != g2");
     }
+
     // Also test getg after some control flow, as the
     // backend is sensitive to control flow.
     var g3 = getg();
@@ -682,6 +709,7 @@ public static UntypedInt PallocChunkPages => /* pallocChunkPages */ 512;
 public static UntypedInt PageAlloc64Bit => /* pageAlloc64Bit */ 1;
 public static uintptr PallocSumBytes => /* pallocSumBytes */ 8;
 
+// Expose pallocSum for testing.
 public partial struct PallocSum /*num:uint64*/;
 
 public static PallocSum PackPallocSum(nuint start, nuint max, nuint end) {
@@ -700,6 +728,7 @@ public static nuint End(this PallocSum m) {
     return ((global::go.runtime_package.pallocSum)(uint64)m).end();
 }
 
+// Expose pallocBits for testing.
 public partial struct ΔPallocBits /*global::go.runtime_package.pallocBits*/;
 
 public static (nuint, nuint) Find(this ж<ΔPallocBits> Ꮡb, uintptr npages, nuint searchIdx) {
@@ -725,11 +754,10 @@ public static nuint PopcntRange(this ж<ΔPallocBits> Ꮡb, nuint i, nuint n) {
 // SummarizeSlow is a slow but more obviously correct implementation
 // of (*pallocBits).summarize. Used for testing.
 public static PallocSum SummarizeSlow(ж<ΔPallocBits> Ꮡb) {
-    ref var b = ref Ꮡb.DerefOrNull();
-
     nuint start = default!;
     nuint most = default!;
     nuint end = default!;
+
     const nuint N = /* uint(len(b)) * 64 */ 512;
     while (start < N && (Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pageBits>()).get(start) == 0) {
         start++;
@@ -759,6 +787,7 @@ public static nuint FindBitRange64(uint64 c, nuint n) {
 public static slice<BitRange> DiffPallocBits(ж<ΔPallocBits> Ꮡa, ж<ΔPallocBits> Ꮡb) {
     var ba = Ꮡa.Reinterpret<ΔPallocBits, global::go.runtime_package.pageBits>();
     var bb = Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pageBits>();
+
     slice<BitRange> d = default!;
     nuint @base = (nuint)0;
     nuint size = (nuint)0;
@@ -796,6 +825,7 @@ public static @string StringifyPallocBits(ж<ΔPallocBits> Ꮡb, BitRange r) {
     return str;
 }
 
+// Expose pallocData for testing.
 public partial struct ΔPallocData /*global::go.runtime_package.pallocData*/;
 
 public static (nuint, nuint) FindScavengeCandidate(this ж<ΔPallocData> Ꮡd, nuint searchIdx, uintptr min, uintptr max) {
@@ -823,6 +853,7 @@ public static uint64 FillAligned(uint64 x, nuint m) {
     return fillAligned(x, m);
 }
 
+// Expose pageCache for testing.
 public partial struct PageCache /*global::go.runtime_package.pageCache*/;
 
 public static uintptr PageCachePages => /* pageCachePages */ 64;
@@ -854,6 +885,7 @@ public static (uintptr, uintptr) Alloc(this ж<PageCache> Ꮡc, uintptr npages) 
 public static void Flush(this ж<PageCache> Ꮡc, ж<PageAlloc> Ꮡs) {
     var cp = Ꮡc.Reinterpret<PageCache, global::go.runtime_package.pageCache>();
     var sp = Ꮡs.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>();
+
     var cpʗ1 = cp;
     var spʗ1 = sp;
     systemstack(() => {
@@ -865,12 +897,16 @@ public static void Flush(this ж<PageCache> Ꮡc, ж<PageAlloc> Ꮡs) {
     });
 }
 
+// Expose chunk index type.
 public partial struct ChunkIdx /*num:nuint*/;
 
+// Expose pageAlloc for testing. Note that because pageAlloc is
+// not in the heap, so is PageAlloc.
 public partial struct PageAlloc /*global::go.runtime_package.pageAlloc*/;
 
 public static (uintptr, uintptr) Alloc(this ж<PageAlloc> Ꮡp, uintptr npages) {
     var pp = Ꮡp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>();
+
     uintptr addr = default!;
     uintptr scav = default!;
     var ppʗ1 = pp;
@@ -886,6 +922,7 @@ public static (uintptr, uintptr) Alloc(this ж<PageAlloc> Ꮡp, uintptr npages) 
 
 public static PageCache AllocToCache(this ж<PageAlloc> Ꮡp) {
     var pp = Ꮡp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>();
+
     ref var c = ref heap(new PageCache(), out var Ꮡc);
     var ppʗ1 = pp;
     systemstack(() => {
@@ -900,6 +937,7 @@ public static PageCache AllocToCache(this ж<PageAlloc> Ꮡp) {
 
 public static void Free(this ж<PageAlloc> Ꮡp, uintptr @base, uintptr npages) {
     var pp = Ꮡp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>();
+
     var ppʗ1 = pp;
     systemstack(() => {
         // None of the tests need any higher-level locking, so we just
@@ -1082,11 +1120,13 @@ public partial struct BitRange {
 // ignored.
 public static ж<PageAlloc> NewPageAlloc(map<ChunkIdx, slice<BitRange>> chunks, map<ChunkIdx, slice<BitRange>> scav) {
     var Δp = @new<global::go.runtime_package.pageAlloc>();
+
     // We've got an entry, so initialize the pageAlloc.
     Δp.init(@new<global::go.runtime_package.mutex>(), testSysStat, true);
     lockInit((~Δp).mheapLock, lockRankMheap);
     foreach (var (i, init) in chunks) {
         var addr = chunkBase(((global::go.runtime_package.chunkIdx)(nuint)i));
+
         // Mark the chunk's existence in the pageAlloc.
         var pʗ1 = Δp;
         systemstack(() => {
@@ -1094,16 +1134,20 @@ public static ж<PageAlloc> NewPageAlloc(map<ChunkIdx, slice<BitRange>> chunks, 
             pʗ1.grow(addr, pallocChunkBytes);
             unlock((~pʗ1).mheapLock);
         });
+
         // Initialize the bitmap and update pageAlloc metadata.
         global::go.runtime_package.chunkIdx ci = chunkIndex(addr);
         var chunk = Δp.chunkOf(ci);
+
         // Clear all the scavenged bits which grow set.
         chunk.of(global::go.runtime_package.pallocData.Ꮡscavenged).clearRange(0, pallocChunkPages);
+
         // Simulate the allocation and subsequent free of all pages in
         // the chunk for the scavenge index. This sets the state equivalent
         // with all pages within the index being free.
         Δp.of(global::go.runtime_package.pageAlloc.Ꮡscav).of(pageAlloc_scav.Ꮡindex).alloc(ci, pallocChunkPages);
         Δp.of(global::go.runtime_package.pageAlloc.Ꮡscav).of(pageAlloc_scav.Ꮡindex).free(ci, 0, pallocChunkPages);
+
         // Apply scavenge state if applicable.
         if (scav != default!) {
             {
@@ -1118,16 +1162,19 @@ public static ж<PageAlloc> NewPageAlloc(map<ChunkIdx, slice<BitRange>> chunks, 
                 }
             }
         }
+
         // Apply alloc state.
         foreach (var (_, s) in init) {
             // Ignore the case of s.N == 0. allocRange doesn't handle
             // it and it's a no-op anyway.
             if (s.N != 0) {
                 chunk.allocRange(s.I, s.N);
+
                 // Make sure the scavenge index is updated.
                 Δp.of(global::go.runtime_package.pageAlloc.Ꮡscav).of(pageAlloc_scav.Ꮡindex).alloc(ci, s.N);
             }
         }
+
         // Update heap metadata for the allocRange calls above.
         var pʗ2 = Δp;
         systemstack(() => {
@@ -1136,6 +1183,7 @@ public static ж<PageAlloc> NewPageAlloc(map<ChunkIdx, slice<BitRange>> chunks, 
             unlock((~pʗ2).mheapLock);
         });
     }
+
     return Δp.Reinterpret<global::go.runtime_package.pageAlloc, PageAlloc>();
 }
 
@@ -1144,6 +1192,7 @@ public static ж<PageAlloc> NewPageAlloc(map<ChunkIdx, slice<BitRange>> chunks, 
 // collected by the garbage collector once it is no longer live.
 public static void FreePageAlloc(ж<PageAlloc> Ꮡpp) {
     var Δp = Ꮡpp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>();
+
     // Free all the mapped space for the summary levels.
     if (pageAlloc64Bit != 0){
         for (nint l = 0; l < summaryLevels; l++) {
@@ -1156,14 +1205,17 @@ public static void FreePageAlloc(ж<PageAlloc> Ꮡpp) {
         }
         sysFreeOS(@unsafe.Pointer.FromPinnedBox(Ꮡ((~Δp).summary[0], 0)), alignUp(resSize, physPageSize));
     }
+
     // Free extra data structures.
     sysFreeOS(@unsafe.Pointer.FromPinnedBox(Ꮡ((~Δp).scav.index.chunks, 0)), (uintptr)cap((~Δp).scav.index.chunks) * /* unsafe.Sizeof(atomicScavChunkData{}) */ (uintptr)8);
+
     // Subtract back out whatever we mapped for the summaries.
     // sysUsed adds to p.sysStat and memstats.mappedReady no matter what
     // (and in anger should actually be accounted for), and there's no other
     // way to figure out how much we actually mapped.
     ᏑgcController.of(global::go.runtime_package.gcControllerState.ᏑmappedReady).Add(-(int64)(~Δp).summaryMappedReady);
     testSysStat.add(-(int64)(~Δp).summaryMappedReady);
+
     // Free the mapped space for chunks.
     foreach (var (i, _) in (~Δp).chunks) {
         {
@@ -1212,10 +1264,12 @@ public static (nint n, bool ok) CheckScavengedBitsCleared(slice<BitsMismatch> mi
     bool ok = default!;
 
     ok = true;
+
     // Run on the system stack to avoid stack growth allocation.
     var mismatchesʗ1 = mismatches;
     systemstack(() => {
         getg().Value.m.Value.mallocing++;
+
         // Lock so that we can safely access the bitmap.
         @lock(Ꮡmheap_.of(global::go.runtime_package.mheap.Ꮡlock));
 chunkLoop:
@@ -1249,6 +1303,7 @@ continue_chunkLoop:;
         }
 break_chunkLoop:;
         unlock(Ꮡmheap_.of(global::go.runtime_package.mheap.Ꮡlock));
+
         getg().Value.m.Value.mallocing--;
     });
     return (n, ok);
@@ -1258,6 +1313,7 @@ public static uintptr /*leaked*/ PageCachePagesLeaked() {
     uintptr leaked = default!;
 
     var stw = stopTheWorld(stwForTestPageCachePagesLeaked);
+
     // Walk over destroyed Ps and look for unflushed caches.
     var deadp = allp.slice(len(allp), cap(allp));
     foreach (var (_, Δp) in deadp) {
@@ -1267,6 +1323,7 @@ public static uintptr /*leaked*/ PageCachePagesLeaked() {
             leaked += (uintptr)sys.OnesCount64((~Δp).pcache.cache);
         }
     }
+
     startTheWorld(stw);
     return leaked;
 }
@@ -1325,6 +1382,7 @@ public static bool Dequeue(this ref SemTable t, ж<uint32> Ꮡaddr) {
     return false;
 }
 
+// mspan wrapper for testing.
 public partial struct MSpan /*global::go.runtime_package.mspan*/;
 
 // Allocate an mspan for testing.
@@ -1638,11 +1696,13 @@ public static partial void Start(this ж<Scavenger> Ꮡs) {
     if (s.Sleep == default! || s.Scavenge == default! || s.ShouldStop == default! || s.GoMaxProcs == default!) {
         throw panic("must populate all stubs");
     }
+
     // Install hooks.
     s.scavenger.sleepStub = s.Sleep;
     s.scavenger.scavenge = s.Scavenge;
     s.scavenger.shouldStop = s.ShouldStop;
     s.scavenger.gomaxprocs = s.GoMaxProcs;
+
     // Start up scavenger goroutine, and wait for it to be ready.
     var stop = new channel<EmptyStruct>(0);
     s.stop = stop.WithDirection(GoChanDir.Send);
@@ -1673,8 +1733,7 @@ public static partial void Start(this ж<Scavenger> Ꮡs) {
             Ꮡs.of(Scavenger.Ꮡscavenger).sleep(workTime);
         }
     });
-    if (!Ꮡs.BlockUntilParked(1000000000)) {
-        /* 1 second */
+    if (!Ꮡs.BlockUntilParked(1000000000 /* 1 second */)) {
         throw panic("timed out waiting for scavenger to get ready");
     }
 }
@@ -1767,6 +1826,7 @@ public static void AllocRange(this ref ScavengeIndex s, uintptr @base, uintptr l
     global::go.runtime_package.chunkIdx ec = chunkIndex(limit - 1);
     nuint si = chunkPageIndex(@base);
     nuint ei = chunkPageIndex(limit - 1);
+
     if (sc == ec){
         // The range doesn't cross any chunk boundaries.
         s.i.alloc(sc, ei + 1 - si);
@@ -1785,6 +1845,7 @@ public static void FreeRange(this ж<ScavengeIndex> Ꮡs, uintptr @base, uintptr
     global::go.runtime_package.chunkIdx ec = chunkIndex(limit - 1);
     nuint si = chunkPageIndex(@base);
     nuint ei = chunkPageIndex(limit - 1);
+
     if (sc == ec){
         // The range doesn't cross any chunk boundaries.
         Ꮡs.of(ScavengeIndex.Ꮡi).free(sc, si, ei + 1 - si);
@@ -1930,15 +1991,14 @@ public static bool UnsafePoint(uintptr pc) {
         return false;
     }
     if (exprᴛ1 == abi.UnsafePointRestart1 || exprᴛ1 == abi.UnsafePointRestart2 || exprᴛ1 == abi.UnsafePointRestartAtEntry) {
+        // These are all interruptible, they just encode a nonstandard
+        // way of recovering when interrupted.
         return false;
     }
     { /* default: */
-// These are all interruptible, they just encode a nonstandard
-// way of recovering when interrupted.
         array<byte> buf = new(20);
         throw panic("invalid unsafe point code " + ((sstring)itoa(buf[..], (uint64)v)));
     }
-
 }
 
 public partial struct TraceMap {

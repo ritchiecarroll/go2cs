@@ -31,30 +31,33 @@ partial interface Pythagoras {
 // implements the interface.
 public static void Example_interface() {
     ref var network = ref heap(new bytes.Buffer(), out var Ꮡnetwork);                   // Stand-in for the network.
+
     // We must register the concrete type for the encoder and decoder (which would
     // normally be on a separate machine from the encoder). On each end, this tells the
     // engine which concrete type is being sent that implements the interface.
     gob.Register(new Point(nil));
+
     // Create an encoder and send some values.
     var enc = gob.NewEncoder(new gob_test_package.bytes_BufferжWriter(Ꮡnetwork));
     for (nint i = 1; i <= 3; i++) {
         interfaceEncode(enc, new Point(3 * i, 4 * i));
     }
+
     // Create a decoder and receive some values.
     var dec = gob.NewDecoder(new gob_test_package.bytes_BufferжReader(Ꮡnetwork));
     for (nint i = 1; i <= 3; i++) {
         var result = interfaceDecode(dec);
         fmt.Println(result.Hypotenuse());
     }
+
+    // Output:
+    // 5
+    // 10
+    // 15
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object encodeˢ = (@string)"encode:"u8;
-
-// Output:
-// 5
-// 10
-// 15
 
 // interfaceEncode encodes the interface value into the encoder.
 internal static void interfaceEncode(ж<gob.Encoder> Ꮡenc, Pythagoras pʗp) {

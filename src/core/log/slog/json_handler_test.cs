@@ -100,9 +100,9 @@ public static void TestAppendJSONValue(ж<testing.T> Ꮡt) {
     foreach (var (_, value) in new any[]{
         (@string)"hello\r\n\t\a"u8,
         (@string)@"""[{escape}]"""u8,
-        (@string)"<escapeHTML&>"u8, // \u2028\u2029 is an edge case in JavaScript vs JSON.
- // \xF6 is an incomplete encoding.
-
+        (@string)"<escapeHTML&>"u8,
+        // \u2028\u2029 is an edge case in JavaScript vs JSON.
+        // \xF6 is an incomplete encoding.
         ((@string)(new byte[]{0xce, 0xb8, 0xe2, 0x80, 0xa8, 0xe2, 0x80, 0xa9, 0xef, 0xbf, 0xbf, 0xf6})),
         (@string)@"-123"u8,
         (int64)(-9_200_123_456_789_123_456L),
@@ -275,6 +275,7 @@ public static void BenchmarkPreformatting(ж<testing.B> Ꮡb) {
                 Addr: "127.0.0.1:8080"u8
             )))
         }.slice();
+
         var (outFile, err) = os.Create(filepath.Join(Ꮡb.TempDir(), benchLogˢ));
         if (err != default!) {
             Ꮡb.Fatal(err);
@@ -287,6 +288,7 @@ public static void BenchmarkPreformatting(ж<testing.B> Ꮡb) {
                 }
             }
         }, ref ᒐ);
+
         foreach (var (_, vᴛ1) in new BenchmarkPreformatting_type[]{
             new("separate"u8, io.Discard, new any[]{
                 go.log.slog_package.String(programˢ, myTestProgramˢ),

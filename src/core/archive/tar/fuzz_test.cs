@@ -39,6 +39,7 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
         }
     }
     f.Add(b.Bytes());
+
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> bΔ1) => {
         var r = NewReader(new tar_test_package.bytes_ReaderжReader(bytes.NewReader(bΔ1)));
         var files = new FuzzReader_file[]{}.slice();
@@ -58,11 +59,13 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
             }
             files = append(files, new FuzzReader_file(header: hdr, content: buf.Bytes()));
         }
+
         // If we were unable to read anything out of the archive don't
         // bother trying to roundtrip it.
         if (len(files) == 0) {
             return;
         }
+
         var @out = bytes.NewBuffer(default!);
         var wΔ1 = NewWriter(new tar_test_package.bytes_BufferжWriter(@out));
         foreach (var (_, fΔ1) in files) {
@@ -82,11 +85,11 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
                 t.Fatalf("Unable to write archive: %s"u8, errΔ6);
             }
         }
+
+        // TODO: We may want to check if the archive roundtrips. This would require
+        // taking into account addition of the two zero trailer blocks that Writer.Close
+        // appends.
     });
 }
-
-// TODO: We may want to check if the archive roundtrips. This would require
-// taking into account addition of the two zero trailer blocks that Writer.Close
-// appends.
 
 } // end tar_internal_test_package

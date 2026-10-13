@@ -38,6 +38,7 @@ public static void TestLinkerGC(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     @string goBin = testenv.GoToolPath(new tls_test_package.testing_TжTB(Ꮡt));
     testenv.MustHaveGoBuild(new tls_test_package.testing_TжTB(Ꮡt));
+
     var tests = new TestLinkerGC_tests[]{
         new(
             name: "empty_import"u8,
@@ -84,9 +85,9 @@ func main() { tls.Dial("", "", nil) }
                 "crypto/tls.(*Conn).serverHandshake"u8
             }.slice()
         )
+        // TODO: add only_server like func main() { tls.Server(nil, nil) }
+        // That currently brings in the client via Conn.handleRenegotiation.
     }.slice();
-    // TODO: add only_server like func main() { tls.Server(nil, nil) }
-    // That currently brings in the client via Conn.handleRenegotiation.
     @string tmpDir = Ꮡt.TempDir();
     @string goFile = filepath.Join(tmpDir, xGoˢ);
     @string exeFile = filepath.Join(tmpDir, xExeˢ);
@@ -109,6 +110,7 @@ func main() { tls.Dial("", "", nil) }
                     tΔ1.Fatalf("compile: %v, %s"u8, errΔ2, @out);
                 }
             }
+
             cmd = exec.Command(goBin, toolˢ, "nm", xExeˢ);
             cmd.Value.Dir = tmpDir;
             var (nm, err) = cmd.CombinedOutput();

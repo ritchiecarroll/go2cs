@@ -21,13 +21,13 @@ internal static readonly @string flagTestEnv = "GO_WANT_FLAG_HELPER_PROCESS"u8;
 private static readonly @string testRunTestFlagˢ = "-test.run=^TestFlag$"u8;
 
 public static void TestFlag(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (Δos.Getenv(flagTestEnv) == "1"u8) {
         testFlagHelper(Ꮡt);
         return;
     }
+
     testenv.MustHaveExec(new testing_TжTB(Ꮡt));
+
     foreach (var (_, flag) in new @string[]{""u8, "-test.v"u8, "-test.v=test2json"u8}.slice()) {
         @string flagΔ1 = flag;
         Ꮡt.Run(flagΔ1, (ж<testing.T> tΔ1) => {
@@ -67,6 +67,7 @@ internal static void testFlagHelper(ж<testing.T> Ꮡt) {
     if (f == nil) {
         Ꮡt.Fatal(flagLookupTestVFailedˢ);
     }
+
     var (bf, ok) = (~f).Value._<testFlagHelper_type>(ᐧ);
     if (!ok){
         Ꮡt.Errorf("test.v flag (type %T) does not have IsBoolFlag method"u8, f.OrTypedNil());
@@ -74,11 +75,13 @@ internal static void testFlagHelper(ж<testing.T> Ꮡt) {
     if (!bf.IsBoolFlag()) {
         Ꮡt.Error(testVIsBoolFlagReturnedˢ);
     }
+
     (var gf, ok) = (~f).Value._<flag.Getter>(ᐧ);
     if (!ok) {
         Ꮡt.Fatalf("test.v flag (type %T) does not have Get method"u8, f.OrTypedNil());
     }
     var v = gf.Get();
+
     any want = default!;
     var exprᴛ1 = testFlagArg.Value;
     if (exprᴛ1 == ""u8) {

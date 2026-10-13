@@ -78,9 +78,9 @@ public static void ExampleHandler_levelHandler() {
     var logger = Δslog.New(new slog_test_package.LevelHandlerжΔHandler(NewLevelHandler(Δslog.LevelWarn, new Δslog.TextHandlerжΔHandler(th))));
     logger.Info(notPrintedˢ);
     logger.Warn(printedˢ);
-}
 
-// Output:
-// level=WARN msg=printed
+    // Output:
+    // level=WARN msg=printed
+}
 
 } // end slog_test_package

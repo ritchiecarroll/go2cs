@@ -18,9 +18,8 @@ internal partial struct clipTest {
     internal image.Point sp0, mp0;
 }
 
-// The following tests all have a nil mask.
-// The following tests all have a non-nil mask.
 internal static slice<clipTest> clipTests = new clipTest[]{
+    // The following tests all have a nil mask.
     new(
         "basic"u8,
         image.Rect(0, 0, 100, 100),
@@ -125,6 +124,8 @@ internal static slice<clipTest> clipTests = new clipTest[]{
         image.Pt(44, 33),
         new image.Point(nil)
     ),
+
+    // The following tests all have a non-nil mask.
     new(
         "basic mask"u8,
         image.Rect(0, 0, 80, 80),
@@ -171,6 +172,7 @@ public static void TestClip(ж<testing.T> Ꮡt) {
         } else {
             clip(new draw_test_package.image_ΔRGBAжImage(dst), Ꮡr, new image.ΔRGBAжImage(src), ref sp, mask0.SubImage(c.mr), Ꮡmp);
         }
+
         // Check that the actual results equal the expected results.
         if (!c.r0.Eq(r)) {
             Ꮡt.Errorf("%s: clip rectangle want %v got %v"u8, c.desc, c.r0, r);
@@ -186,6 +188,7 @@ public static void TestClip(ж<testing.T> Ꮡt) {
                 continue;
             }
         }
+
         // Check that the clipped rectangle is contained by the dst / src / mask
         // rectangles, in their respective coordinate spaces.
         if (!r.In(c.dr)) {

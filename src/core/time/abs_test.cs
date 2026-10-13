@@ -24,7 +24,6 @@ public partial interface testingT {
     void Skipf(@string format, params ꓸꓸꓸany argsʗp);
 }
 
-
 partial struct InternalTestsᴛ1 /*dyn*/ {
     public @string Name;
     public Action<testingT> Test;
@@ -117,6 +116,7 @@ internal static void testAbsDate(testingT t) {
                 }
             }
         }
+
         (year, var yday) = days.yearYday();
         year += (nint)absoluteYears;
         if (year != wantYear || yday != wantYday) {
@@ -129,6 +129,7 @@ internal static void testAbsDate(testingT t) {
                 }
             }
         }
+
         {
             wantMday++; if (wantMday == ends[wantMonth - 1] + 1 || wantMonth == February && wantMday == 29 && !isLeap(year)) {
                 wantMonth++;

@@ -77,7 +77,6 @@ internal static void setReadSecret(this ref testQUICConn q, global::go.crypto.tl
     else { /* default: */
         q.t.Errorf("SetReadSecret for unexpected level %v"u8, level);
     }
-
 }
 
 internal static void setWriteSecret(this ref testQUICConn q, global::go.crypto.tls_package.QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
@@ -96,7 +95,6 @@ internal static void setWriteSecret(this ref testQUICConn q, global::go.crypto.t
     else { /* default: */
         q.t.Errorf("SetWriteSecret for unexpected level %v"u8, level);
     }
-
 }
 
 internal static error errTransportParametersRequired = errors.New("transport parameters required"u8);
@@ -181,7 +179,6 @@ internal static error runTestQUICConnection(context.Context ctx, ж<testQUICConn
         else if (exprᴛ1 == QUICRejectedEarlyData) {
             a.Value.earlyDataRejected = true;
         }
-
         if (e.Kind != QUICNoEvent) {
             idleCount = 0;
         }
@@ -191,15 +188,19 @@ internal static error runTestQUICConnection(context.Context ctx, ж<testQUICConn
 public static void TestQUICConnection(ж<testing.T> Ꮡt) {
     var config = Ꮡ(new QUICConfig(TLSConfig: testConfig.Clone()));
     config.Value.TLSConfig.Value.MinVersion = VersionTLS13;
+
     var cli = newTestQUICClient(Ꮡt, config);
     (~cli).conn.SetTransportParameters(default!);
+
     var srv = newTestQUICServer(Ꮡt, config);
     (~srv).conn.SetTransportParameters(default!);
+
     {
         var err = runTestQUICConnection(context.Background(), cli, srv, default!); if (err != default!) {
             Ꮡt.Fatalf("error during connection handshake: %v"u8, err);
         }
     }
+
     {
         var (_, ok) = (~cli).readSecret[QUICEncryptionLevelHandshake, ꟷ]; if (!ok) {
             Ꮡt.Errorf("client has no Handshake secret"u8);
@@ -248,8 +249,10 @@ public static void TestQUICSessionResumption(ж<testing.T> Ꮡt) {
     clientConfig.Value.TLSConfig.Value.MinVersion = VersionTLS13;
     clientConfig.Value.TLSConfig.Value.ClientSessionCache = NewLRUClientSessionCache(1);
     clientConfig.Value.TLSConfig.Value.ServerName = exampleGoDevˢ;
+
     var serverConfig = Ꮡ(new QUICConfig(TLSConfig: testConfig.Clone()));
     serverConfig.Value.TLSConfig.Value.MinVersion = VersionTLS13;
+
     var cli = newTestQUICClient(Ꮡt, clientConfig);
     (~cli).conn.SetTransportParameters(default!);
     var srv = newTestQUICServer(Ꮡt, serverConfig);
@@ -262,6 +265,7 @@ public static void TestQUICSessionResumption(ж<testing.T> Ꮡt) {
     if ((~cli).conn.ConnectionState().DidResume) {
         Ꮡt.Errorf("first connection unexpectedly used session resumption"u8);
     }
+
     var cli2 = newTestQUICClient(Ꮡt, clientConfig);
     (~cli2).conn.SetTransportParameters(default!);
     var srv2 = newTestQUICServer(Ꮡt, serverConfig);
@@ -281,8 +285,10 @@ public static void TestQUICFragmentaryData(ж<testing.T> Ꮡt) {
     clientConfig.Value.TLSConfig.Value.MinVersion = VersionTLS13;
     clientConfig.Value.TLSConfig.Value.ClientSessionCache = NewLRUClientSessionCache(1);
     clientConfig.Value.TLSConfig.Value.ServerName = exampleGoDevˢ;
+
     var serverConfig = Ꮡ(new QUICConfig(TLSConfig: testConfig.Clone()));
     serverConfig.Value.TLSConfig.Value.MinVersion = VersionTLS13;
+
     var cli = newTestQUICClient(Ꮡt, clientConfig);
     (~cli).conn.SetTransportParameters(default!);
     var srv = newTestQUICServer(Ꮡt, serverConfig);
@@ -322,6 +328,7 @@ public static void TestQUICPostHandshakeClientAuthentication(ж<testing.T> Ꮡt)
             Ꮡt.Fatalf("error during connection handshake: %v"u8, errΔ1);
         }
     }
+
     var certReq = @new<global::go.crypto.tls_package.certificateRequestMsgTLS13>();
     certReq.Value.ocspStapling = true;
     certReq.Value.scts = true;
@@ -353,6 +360,7 @@ public static void TestQUICPostHandshakeKeyUpdate(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("error during connection handshake: %v"u8, errΔ1);
         }
     }
+
     var keyUpdate = @new<global::go.crypto.tls_package.keyUpdateMsg>();
     var (keyUpdateBytes, err) = keyUpdate.marshal();
     if (err != default!) {
@@ -380,6 +388,7 @@ public static void TestQUICPostHandshakeMessageTooLarge(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("error during connection handshake: %v"u8, err);
         }
     }
+
     nint size = maxHandshake + 1;
     {
         var err = (~cli).conn.HandleData(QUICEncryptionLevelApplication, new byte[]{
@@ -401,8 +410,10 @@ public static void TestQUICHandshakeError(ж<testing.T> Ꮡt) {
     clientConfig.Value.TLSConfig.Value.MinVersion = VersionTLS13;
     clientConfig.Value.TLSConfig.Value.InsecureSkipVerify = false;
     clientConfig.Value.TLSConfig.Value.ServerName = nameˢ;
+
     var serverConfig = Ꮡ(new QUICConfig(TLSConfig: testConfig.Clone()));
     serverConfig.Value.TLSConfig.Value.MinVersion = VersionTLS13;
+
     var cli = newTestQUICClient(Ꮡt, clientConfig);
     (~cli).conn.SetTransportParameters(default!);
     var srv = newTestQUICServer(Ꮡt, serverConfig);
@@ -506,10 +517,13 @@ public static void TestQUICDelayedTransportParameters(ж<testing.T> Ꮡt) {
     clientConfig.Value.TLSConfig.Value.MinVersion = VersionTLS13;
     clientConfig.Value.TLSConfig.Value.ClientSessionCache = NewLRUClientSessionCache(1);
     clientConfig.Value.TLSConfig.Value.ServerName = exampleGoDevˢ;
+
     var serverConfig = Ꮡ(new QUICConfig(TLSConfig: testConfig.Clone()));
     serverConfig.Value.TLSConfig.Value.MinVersion = VersionTLS13;
+
     @string cliParams = clientParamsˢ;
     @string srvParams = serverParamsˢ;
+
     var cli = newTestQUICClient(Ꮡt, clientConfig);
     var srv = newTestQUICServer(Ꮡt, serverConfig);
     {
@@ -529,6 +543,7 @@ public static void TestQUICDelayedTransportParameters(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("error during connection handshake: %v"u8, err);
         }
     }
+
     {
         @string got = ((@string)(~cli).gotParams);
         @string want = srvParams; if (got != want) {
@@ -546,6 +561,7 @@ public static void TestQUICDelayedTransportParameters(ж<testing.T> Ꮡt) {
 public static void TestQUICEmptyTransportParameters(ж<testing.T> Ꮡt) {
     var config = Ꮡ(new QUICConfig(TLSConfig: testConfig.Clone()));
     config.Value.TLSConfig.Value.MinVersion = VersionTLS13;
+
     var cli = newTestQUICClient(Ꮡt, config);
     (~cli).conn.SetTransportParameters(default!);
     var srv = newTestQUICServer(Ꮡt, config);
@@ -555,6 +571,7 @@ public static void TestQUICEmptyTransportParameters(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("error during connection handshake: %v"u8, err);
         }
     }
+
     if ((~cli).gotParams == default!) {
         Ꮡt.Errorf("client did not get transport params"u8);
     }
@@ -602,9 +619,11 @@ public static void TestQUICEarlyData(ж<testing.T> Ꮡt) {
     clientConfig.Value.TLSConfig.Value.ClientSessionCache = NewLRUClientSessionCache(1);
     clientConfig.Value.TLSConfig.Value.ServerName = exampleGoDevˢ;
     clientConfig.Value.TLSConfig.Value.NextProtos = new @string[]{"h3"u8}.slice();
+
     var serverConfig = Ꮡ(new QUICConfig(TLSConfig: testConfig.Clone()));
     serverConfig.Value.TLSConfig.Value.MinVersion = VersionTLS13;
     serverConfig.Value.TLSConfig.Value.NextProtos = new @string[]{"h3"u8}.slice();
+
     var cli = newTestQUICClient(Ꮡt, clientConfig);
     (~cli).conn.SetTransportParameters(default!);
     var srv = newTestQUICServer(Ꮡt, serverConfig);
@@ -618,6 +637,7 @@ public static void TestQUICEarlyData(ж<testing.T> Ꮡt) {
     if ((~cli).conn.ConnectionState().DidResume) {
         Ꮡt.Errorf("first connection unexpectedly used session resumption"u8);
     }
+
     var cli2 = newTestQUICClient(Ꮡt, clientConfig);
     (~cli2).conn.SetTransportParameters(default!);
     var srv2 = newTestQUICServer(Ꮡt, serverConfig);
@@ -627,7 +647,6 @@ public static void TestQUICEarlyData(ж<testing.T> Ꮡt) {
         if (exprᴛ1 == QUICStoreSession || exprᴛ1 == QUICResumeSession) {
             Ꮡt.Errorf("with EnableSessionEvents=false, got unexpected event %v"u8, e.Kind);
         }
-
         return false;
     };
     {
@@ -667,10 +686,12 @@ internal static void testQUICEarlyDataDeclined(ж<testing.T> Ꮡt, bool server) 
     clientConfig.Value.TLSConfig.Value.ClientSessionCache = NewLRUClientSessionCache(1);
     clientConfig.Value.TLSConfig.Value.ServerName = exampleGoDevˢ;
     clientConfig.Value.TLSConfig.Value.NextProtos = new @string[]{"h3"u8}.slice();
+
     var serverConfig = Ꮡ(new QUICConfig(TLSConfig: testConfig.Clone()));
     serverConfig.Value.EnableSessionEvents = true;
     serverConfig.Value.TLSConfig.Value.MinVersion = VersionTLS13;
     serverConfig.Value.TLSConfig.Value.NextProtos = new @string[]{"h3"u8}.slice();
+
     var cli = newTestQUICClient(Ꮡt, clientConfig);
     (~cli).conn.SetTransportParameters(default!);
     var srv = newTestQUICServer(Ꮡt, serverConfig);
@@ -684,6 +705,7 @@ internal static void testQUICEarlyDataDeclined(ж<testing.T> Ꮡt, bool server) 
     if ((~cli).conn.ConnectionState().DidResume) {
         Ꮡt.Errorf("first connection unexpectedly used session resumption"u8);
     }
+
     var cli2 = newTestQUICClient(Ꮡt, clientConfig);
     (~cli2).conn.SetTransportParameters(default!);
     var srv2 = newTestQUICServer(Ꮡt, serverConfig);

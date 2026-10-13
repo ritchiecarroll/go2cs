@@ -21,6 +21,7 @@ public static void TestSupportUnixSocket(ж<testing.T> Ꮡt) {
             }
         }
         defer(() => syscall.WSACleanup(), ref ᒐ);
+
         // Test that SupportUnixSocket returns true if WSASocket succeeds with AF_UNIX.
         var got = Δwindows.SupportUnixSocket();
         var (s, err) = Δwindows.WSASocket(syscall.AF_UNIX, syscall.SOCK_STREAM, 0, nil, 0, Δwindows.WSA_FLAG_NO_HANDLE_INHERIT);

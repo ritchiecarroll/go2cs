@@ -17,6 +17,7 @@ public static void TestXchg8(ж<testing.T> Ꮡt) {
         a[i] = next;
     }
     var b = a.Clone();
+
     // Compare behavior against non-atomic implementation. Expect the operation
     // to work at any byte offset and to not clobber neighboring values.
     foreach (var (i, _) in a) {

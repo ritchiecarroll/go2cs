@@ -11,15 +11,15 @@ using static global::go.reflect_internal_test_package;
 partial class reflect_test_package {
 
 internal static void testGCBitsMap(ж<Δtesting.T> Ꮡt) {
+    // Unlike old maps, we don't manually construct GC data for swiss maps,
+    // instead using the public reflect API in groupAndSlotOf.
 }
-
-// Unlike old maps, we don't manually construct GC data for swiss maps,
-// instead using the public reflect API in groupAndSlotOf.
 
 // See also runtime_test.TestGroupSizeZero.
 public static void TestGroupSizeZero(ж<Δtesting.T> Ꮡt) {
     var st = Δreflect.TypeFor<EmptyStruct>();
     var grp = reflect_internal_test_package.MapGroupOf(st, st);
+
     // internal/runtime/maps when create pointers to slots, even if slots
     // are size 0. We should have reserved an extra word to ensure that
     // pointers to the zero-size type at the end of group are valid.

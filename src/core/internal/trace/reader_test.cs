@@ -55,6 +55,7 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
     // getters can be made to panic. Turn this on once the parser is meant to
     // reject invalid traces.
     const bool testGetters = false;
+
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> b) => {
         var (r, err) = Δtrace.NewReader(new trace_test_package.bytes_ReaderжReader(bytes.NewReader(b)));
         if (err != default!) {
@@ -65,6 +66,7 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
             if (errΔ1 != default!) {
                 break;
             }
+
             if (!testGetters) {
                 continue;
             }
@@ -101,7 +103,6 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
             }
             else if (exprᴛ1 == Δtrace.EventBad) {
             }
-
         }
     });
 }
@@ -150,6 +151,7 @@ internal static void testReader(ж<testing.T> Ꮡt, io.Reader tr, ж<testtrace.E
 
 internal static @string dumpTraceToText(ж<testing.T> Ꮡt, slice<byte> b) {
     Ꮡt.Helper();
+
     var (br, err) = raw.NewReader(new trace_test_package.bytes_ReaderжReader(bytes.NewReader(b)));
     if (err != default!) {
         Ꮡt.Fatalf("dumping trace: %v"u8, err);
@@ -184,6 +186,7 @@ internal static @string dumpTraceToFile(ж<testing.T> Ꮡt, @string testName, bo
     GoFrame ᒐ = default;
     try {
         Ꮡt.Helper();
+
         @string desc = defaultˢ;
         if (stress) {
             desc = stressˢ;

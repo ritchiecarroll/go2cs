@@ -62,6 +62,7 @@ internal static readonly @string expectˢ = "expect: "u8;
 
 internal static void checkCoroTestProgOutput(ж<testing.T> Ꮡt, @string output) {
     Ꮡt.Helper();
+
     var c = strings.SplitN(output, "\n"u8, 2);
     if (len(c) == 1) {
         Ꮡt.Fatalf("expected at least one complete line in the output, got:\n%s"u8, output);

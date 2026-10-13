@@ -9,8 +9,7 @@ using static global::go.runtime_package;
 partial class runtime_internal_test_package {
 
 public static void MapTombstoneCheck(map<nint, nint> m) {
+    // TODO
 }
-
-// TODO
 
 } // end runtime_internal_test_package

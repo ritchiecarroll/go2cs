@@ -117,12 +117,14 @@ internal static bool checkAliasingOneArg(ж<testing.T> Ꮡt, Func<ж<bigꓸInt>,
     ref var x = ref Ꮡx.DerefOrNull();
 
     var (x1, v1) = (@new<bigꓸInt>().Set(Ꮡx), @new<bigꓸInt>().Set(Ꮡx));
+
     // Calculate a reference f(x) without aliasing.
     {
         var @out = f(Ꮡv, Ꮡx); if (@out != Ꮡv) {
             return false;
         }
     }
+
     // Test aliasing the argument and the receiver.
     {
         var @out = f(v1, v1); if (@out != v1 || !equal(v1, Ꮡv)) {
@@ -130,6 +132,7 @@ internal static bool checkAliasingOneArg(ж<testing.T> Ꮡt, Func<ж<bigꓸInt>,
             return false;
         }
     }
+
     // Ensure the arguments was not modified.
     return equal(Ꮡx, x1);
 }
@@ -151,6 +154,7 @@ internal static bool checkAliasingTwoArgs(ж<testing.T> Ꮡt, Func<ж<bigꓸInt>
     ref var y = ref Ꮡy.DerefOrNull();
 
     var (x1, y1, v1) = (@new<bigꓸInt>().Set(Ꮡx), @new<bigꓸInt>().Set(Ꮡy), @new<bigꓸInt>().Set(Ꮡv));
+
     // Calculate a reference f(x, y) without aliasing.
     {
         var @out = f(Ꮡv, Ꮡx, Ꮡy); if (@out == nil){
@@ -162,6 +166,7 @@ internal static bool checkAliasingTwoArgs(ж<testing.T> Ꮡt, Func<ж<bigꓸInt>
             return false;
         }
     }
+
     // Test aliasing the first argument and the receiver.
     v1.Set(Ꮡx);
     {
@@ -178,6 +183,7 @@ internal static bool checkAliasingTwoArgs(ж<testing.T> Ꮡt, Func<ж<bigꓸInt>
             return false;
         }
     }
+
     // Calculate a reference f(y, y) without aliasing.
     // We use y because it's the one that commonly has restrictions
     // like being prime or non-zero.
@@ -191,6 +197,7 @@ internal static bool checkAliasingTwoArgs(ж<testing.T> Ꮡt, Func<ж<bigꓸInt>
             return false;
         }
     }
+
     // Test aliasing the two arguments.
     {
         var @out = f(v1, Ꮡy, Ꮡy); if (@out != v1 || !equal(v1, Ꮡv)) {
@@ -206,6 +213,7 @@ internal static bool checkAliasingTwoArgs(ж<testing.T> Ꮡt, Func<ж<bigꓸInt>
             return false;
         }
     }
+
     // Ensure the arguments were not modified.
     return equal(Ꮡx, x1) && equal(Ꮡy, y1);
 }
@@ -317,7 +325,6 @@ public static void TestAliasing(ж<testing.T> Ꮡt) {
             else if (exprᴛ1 == "ModSqrt"u8) {
                 scale /= 500D;
             }
-
             {
                 var err = quick.Check(fʗ1, Ꮡ(new quick.Config(
                     MaxCountScale: scale

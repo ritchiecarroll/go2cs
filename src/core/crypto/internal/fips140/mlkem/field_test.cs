@@ -73,6 +73,7 @@ public static void TestDecompressCompress(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("compress(decompress(%d, %d), %d) = %d"u8, a, bits, bits, got);
             }
         }
+
         for (var a = ((global::go.crypto.@internal.fips140.mlkem_package.fieldElement)0); a < q; a++) {
             var c = compress(a, bits);
             if (c >= (uint16)(((uint16)1).Lsh((uint64)(bits)))) {
@@ -96,13 +97,16 @@ internal static uint16 CompressRat(global::go.crypto.@internal.fips140.mlkem_pac
     if (d <= 0 || d >= 12) {
         throw panic("d out of range");
     }
+
     var precise = big.NewRat((((int64)1).Lsh((uint64)(d))) * (int64)(uint16)x, q); // (2ᵈ / q) * x == (2ᵈ * x) / q
+
     // FloatString rounds halves away from 0, and our result should always be positive,
     // so it should work as we expect. (There's no direct way to round a Rat.)
     var (rounded, err) = strconv.ParseInt(precise.FloatString(0), 10, 64);
     if (err != default!) {
         throw panic(err);
     }
+
     // If we rounded up, `rounded` may be equal to 2ᵈ, so we perform a final reduction.
     return (uint16)(rem(rounded, (((int64)1).Lsh((uint64)(d)))));
 }
@@ -126,13 +130,16 @@ internal static global::go.crypto.@internal.fips140.mlkem_package.fieldElement D
     if (d <= 0 || d >= 12) {
         throw panic("d out of range");
     }
+
     var precise = big.NewRat((int64)q * (int64)y, ((int64)1).Lsh((uint64)(d))); // (q / 2ᵈ) * y  ==  (q * y) / 2ᵈ
+
     // FloatString rounds halves away from 0, and our result should always be positive,
     // so it should work as we expect. (There's no direct way to round a Rat.)
     var (rounded, err) = strconv.ParseInt(precise.FloatString(0), 10, 64);
     if (err != default!) {
         throw panic(err);
     }
+
     // If we rounded up, `rounded` may be equal to q, so we perform a final reduction.
     return ((global::go.crypto.@internal.fips140.mlkem_package.fieldElement)(uint16)(rounded % (int64)q));
 }
@@ -161,6 +168,7 @@ public static void TestEncodeDecode(ж<testing.T> Ꮡt) {
     var f = randomRingElement();
     var b = new slice<byte>(12 * n / 8);
     rand.Read(b);
+
     // Compare ringCompressAndEncode to ringCompressAndEncodeN.
     var e1 = ringCompressAndEncode(default!, f, 10);
     var e2 = ringCompressAndEncode10(default!, f);
@@ -177,6 +185,7 @@ public static void TestEncodeDecode(ж<testing.T> Ꮡt) {
     if (!bytes_package.Equal(e1, e2)) {
         Ꮡt.Errorf("ringCompressAndEncode = %x, ringCompressAndEncode1 = %x"u8, e1, e2);
     }
+
     // Compare ringDecodeAndDecompress to ringDecodeAndDecompressN.
     var g1 = ringDecodeAndDecompress(b[..(int)(encodingSize10)], 10);
     var g2 = ringDecodeAndDecompress10(Ꮡ(array<byte>.Alias(b, 320)));
@@ -193,6 +202,7 @@ public static void TestEncodeDecode(ж<testing.T> Ꮡt) {
     if (g1 != g2) {
         Ꮡt.Errorf("ringDecodeAndDecompress = %v, ringDecodeAndDecompress1 = %v"u8, g1, g2);
     }
+
     // Round-trip ringCompressAndEncode and ringDecodeAndDecompress.
     for (nint d = 1; d < 12; d++) {
         nint encodingSize = d * (nint)n / 8;
@@ -202,6 +212,7 @@ public static void TestEncodeDecode(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("roundtrip failed for d = %d"u8, d);
         }
     }
+
     // Round-trip ringCompressAndEncodeN and ringDecodeAndDecompressN.
     var g = ringDecodeAndDecompress10(Ꮡ(array<byte>.Alias(b, 320)));
     var @out = ringCompressAndEncode10(default!, g);
@@ -228,8 +239,7 @@ public static uint8 BitRev7(uint8 n) {
     r |= (uint8)((uint8)((n >> (int)(6)) & 0b0000_0001));
     r |= (uint8)((uint8)((n >> (int)(4)) & 0b0000_0010));
     r |= (uint8)((uint8)((n >> (int)(2)) & 0b0000_0100));
-    r |= (uint8)((uint8)(n & 0b0000_1000));
-    /**/
+    r |= (uint8)((uint8)(n /**/ & 0b0000_1000));
     r |= (uint8)((uint8)((uint8)(n << (int)(2)) & 0b0001_0000));
     r |= (uint8)((uint8)((uint8)(n << (int)(4)) & 0b0010_0000));
     r |= (uint8)((uint8)((uint8)(n << (int)(6)) & 0b0100_0000));

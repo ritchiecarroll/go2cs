@@ -28,14 +28,13 @@ internal static readonly object expectedEmptyˢ = (@string)"expected empty"u8;
 public static void TestPool(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         // disable GC so we can control when it happens.
         defer(debug.SetGCPercent, debug.SetGCPercent(-1), ref ᒐ);
         ref var p = ref heap(new Δsync.Pool(), out var Ꮡp);
         if (Ꮡp.Get() != default!) {
             Ꮡt.Fatal(expectedEmptyˢ);
         }
+
         // Make sure that the goroutine doesn't migrate to another P
         // between Put and Get calls.
         sync_internal_test_package.Runtime_procPin();
@@ -57,6 +56,7 @@ public static void TestPool(ж<Δtesting.T> Ꮡt) {
             }
         }
         sync_internal_test_package.Runtime_procUnpin();
+
         // Put in a large number of objects so they spill into
         // stealable space.
         for (nint i = 0; i < 100; i++) {
@@ -84,10 +84,9 @@ public static void TestPool(ж<Δtesting.T> Ꮡt) {
 public static void TestPoolNew(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         // disable GC so we can control when it happens.
         defer(debug.SetGCPercent, debug.SetGCPercent(-1), ref ᒐ);
+
         nint i = 0;
         ref var p = ref heap<Δsync.Pool>(out var Ꮡp);
         p = new Pool(
@@ -106,6 +105,7 @@ public static void TestPoolNew(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Fatalf("got %v; want 2"u8, v);
             }
         }
+
         // Make sure that the goroutine doesn't migrate to another P
         // between Put and Get calls.
         sync_internal_test_package.Runtime_procPin();
@@ -116,6 +116,7 @@ public static void TestPoolNew(ж<Δtesting.T> Ꮡt) {
             }
         }
         sync_internal_test_package.Runtime_procUnpin();
+
         {
             var v = Ꮡp.Get(); if (!AreEqual(v, (nint)(3))) {
                 Ꮡt.Fatalf("got %v; want 3"u8, v);
@@ -229,6 +230,7 @@ internal static partial void testPoolDequeue(ж<Δtesting.T> Ꮡt, global::go.sy
             atomic.StoreInt32(Ꮡstop, 1);
         }
     }
+
     // Start P-1 consumers.
     for (nint i = 1; i < P; i++) {
         Ꮡwg.Add(1);
@@ -253,6 +255,7 @@ internal static partial void testPoolDequeue(ж<Δtesting.T> Ꮡt, global::go.sy
             Ꮡwg.Done();
         });
     }
+
     // Start 1 producer.
     nint nPopHead = 0;
     Ꮡwg.Add(1);
@@ -274,6 +277,7 @@ internal static partial void testPoolDequeue(ж<Δtesting.T> Ꮡt, global::go.sy
         Ꮡwg.Done();
     });
     Ꮡwg.Wait();
+
     // Check results.
     foreach (var (i, count) in have) {
         if (count != 1) {
@@ -307,6 +311,7 @@ public static void TestNilPool(ж<Δtesting.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }
+
     ж<Δsync.Pool> p = default!;
     var catchʗ1 = @catch;
     var pʗ1 = p;
@@ -396,8 +401,10 @@ public static void BenchmarkPoolSTW(ж<Δtesting.B> Ꮡb) {
 
         // Take control of GC.
         defer(debug.SetGCPercent, debug.SetGCPercent(-1), ref ᒐ);
+
         ref var mstats = ref heap(new Δruntime.MemStats(), out var Ꮡmstats);
         slice<uint64> pauses = default!;
+
         ref var p = ref heap(new Δsync.Pool(), out var Ꮡp);
         for (nint i = 0; i < b.N; i++) {
             // Put a large number of items into a pool.
@@ -412,6 +419,7 @@ public static void BenchmarkPoolSTW(ж<Δtesting.B> Ꮡb) {
             Δruntime.ReadMemStats(Ꮡmstats);
             pauses = append(pauses, mstats.PauseNs[(mstats.NumGC + 255) % 256]);
         }
+
         // Get pause time stats.
         slices.Sort<slice<uint64>, uint64>(pauses);
         uint64 total = default!;
@@ -444,6 +452,7 @@ public static void BenchmarkPoolExpensiveNew(ж<Δtesting.B> Ꮡb) {
         defer(() => {
             globalSink = default!;
         }, ref ᒐ);
+
         // Create a pool that's "expensive" to fill.
         ref var p = ref heap(new Δsync.Pool(), out var Ꮡp);
         ref var nNew = ref heap(new uint64(), out var ᏑnNew);
@@ -476,6 +485,7 @@ public static void BenchmarkPoolExpensiveNew(ж<Δtesting.B> Ꮡb) {
             _ = sink;
         });
         Δruntime.ReadMemStats(Ꮡmstats2);
+
         b.ReportMetric((float64)(mstats2.NumGC - mstats1.NumGC) / (float64)b.N, gCsOpˢ);
         b.ReportMetric((float64)nNew / (float64)b.N, newOpˢ);
     }

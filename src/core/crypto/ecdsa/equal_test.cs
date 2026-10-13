@@ -17,10 +17,9 @@ using static go.crypto.ecdsa_internal_test_package;
 partial class ecdsa_test_package {
 
 internal static void testEqual(ж<testing.T> Ꮡt, elliptic.Curve c) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var (@private, _) = ecdsa.GenerateKey(c, rand.Reader);
     var @public = @private.of(ecdsa.PrivateKey.ᏑPublicKey);
+
     if (!@public.Equal(@public.OrTypedNil())) {
         Ꮡt.Errorf("public key is not equal to itself: %v"u8, @public.OrTypedNil());
     }
@@ -30,6 +29,7 @@ internal static void testEqual(ж<testing.T> Ꮡt, elliptic.Curve c) {
     if (!@private.Equal(@private.OrTypedNil())) {
         Ꮡt.Errorf("private key is not equal to itself: %v"u8, @private.OrTypedNil());
     }
+
     var (enc, err) = Δx509.MarshalPKCS8PrivateKey(@private.OrTypedNil());
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -44,6 +44,7 @@ internal static void testEqual(ж<testing.T> Ꮡt, elliptic.Curve c) {
     if (!@private.Equal(decoded)) {
         Ꮡt.Errorf("private key is not equal to itself after decoding: %v"u8, @private.OrTypedNil());
     }
+
     var (other, _) = ecdsa.GenerateKey(c, rand.Reader);
     if (@public.Equal(other.Public())) {
         Ꮡt.Errorf("different public keys are Equal"u8);
@@ -51,6 +52,7 @@ internal static void testEqual(ж<testing.T> Ꮡt, elliptic.Curve c) {
     if (@private.Equal(other.OrTypedNil())) {
         Ꮡt.Errorf("different private keys are Equal"u8);
     }
+
     // Ensure that keys with the same coordinates but on different curves
     // aren't considered Equal.
     var differentCurve = Ꮡ(new ecdsa.PublicKey(nil));

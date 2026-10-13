@@ -23,29 +23,35 @@ private static readonly @string exeˢ = ".exe"u8;
 
 public static void TestGoToolLocation(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
     @string exeSuffix = default!;
     if (Δruntime.GOOS == "windows"u8) {
         exeSuffix = exeˢ;
     }
+
     // Tests are defined to run within their package source directory,
     // and this package's source directory is $GOROOT/src/internal/testenv.
     // The 'go' command is installed at $GOROOT/bin/go, so if the environment
     // is correct then testenv.GoTool() should be identical to ../../../bin/go.
+
     @string relWant = "../../../bin/go"u8 + exeSuffix;
     var (absWant, err) = filepath.Abs(relWant);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     (var wantInfo, err) = os.Stat(absWant);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
     Ꮡt.Logf("found go tool at %q (%q)"u8, relWant, absWant);
+
     (var goTool, err) = testenv.GoTool();
     if (err != default!) {
         Ꮡt.Fatalf("testenv.GoTool(): %v"u8, err);
     }
     Ꮡt.Logf("testenv.GoTool() = %q"u8, goTool);
+
     (var gotInfo, err) = os.Stat(goTool);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -68,8 +74,8 @@ public static void TestHasGoBuild(ж<testing.T> Ꮡt) {
     if (!testenv.HasGoBuild()) {
         var exprᴛ1 = Δruntime.GOOS;
         if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
-            Ꮡt.Logf("HasGoBuild is false on %s"u8, // No exec syscall, so these shouldn't be able to 'go build'.
- Δruntime.GOOS);
+            // No exec syscall, so these shouldn't be able to 'go build'.
+            Ꮡt.Logf("HasGoBuild is false on %s"u8, Δruntime.GOOS);
             return;
         }
 
@@ -79,6 +85,7 @@ public static void TestHasGoBuild(ж<testing.T> Ꮡt) {
             // environment external Go users may be running in.
             Ꮡt.Skipf("skipping: 'go build' unavailable"u8);
         }
+
         // Since we control the Go builders, we know which ones ought
         // to be able to run 'go build'. Check that they can.
         //
@@ -88,9 +95,9 @@ public static void TestHasGoBuild(ж<testing.T> Ꮡt) {
         var exprᴛ2 = Δruntime.GOOS;
         if (exprᴛ2 == "ios"u8) {
             if (isCorelliumBuilder(b)){
-            } else {
                 // The corellium environment is self-hosting, so it should be able
                 // to build even though real "ios" devices can't exec.
+            } else {
                 // The usual iOS sandbox does not allow the app to start another
                 // process. If we add builders on stock iOS devices, they presumably
                 // will not be able to exec, so we may as well allow that now.
@@ -113,9 +120,12 @@ public static void TestHasGoBuild(ж<testing.T> Ꮡt) {
             Ꮡt.Logf("HasGoBuild is false on %s"u8, b);
             return;
         }
+
         Ꮡt.Fatalf("HasGoBuild unexpectedly false on %s"u8, b);
     }
+
     Ꮡt.Logf("HasGoBuild is true; checking consistency with other functions"u8);
+
     var hasExec = false;
     var hasExecGo = false;
     Ꮡt.Run(mustHaveExecˢ, (ж<testing.T> tΔ1) => {
@@ -132,6 +142,7 @@ public static void TestHasGoBuild(ж<testing.T> Ꮡt) {
     if (!hasExecGo) {
         Ꮡt.Errorf(@"MustHaveExecPath(t, ""go"") skipped unexpectedly"u8);
     }
+
     @string dir = Ꮡt.TempDir();
     @string mainGo = filepath.Join(dir, mainGoˢ);
     {
@@ -147,14 +158,13 @@ public static void TestHasGoBuild(ж<testing.T> Ꮡt) {
 }
 
 public static void TestMustHaveExec(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var hasExec = false;
     Ꮡt.Run(mustHaveExecˢ, (ж<testing.T> tΔ1) => {
         testenv.MustHaveExec(new testing_TжTB(tΔ1));
         tΔ1.Logf("MustHaveExec did not skip"u8);
         hasExec = true;
     });
+
     var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
         if (hasExec) {
@@ -177,7 +187,6 @@ public static void TestMustHaveExec(ж<testing.T> Ꮡt) {
             }
         }
     }
-
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -191,11 +200,11 @@ public static void TestCleanCmdEnvPWD(ж<testing.T> Ꮡt) {
     if (exprᴛ1 == "plan9"u8 || exprᴛ1 == "windows"u8) {
         Ꮡt.Skipf("PWD is not used on %s"u8, Δruntime.GOOS);
     }
-
     @string dir = Ꮡt.TempDir();
     var cmd = testenv.Command(new testing_TжTB(Ꮡt), testenv.GoToolPath(new testing_TжTB(Ꮡt)), helpˢ);
     cmd.Value.Dir = dir;
     cmd = testenv.CleanCmdEnv(cmd);
+
     foreach (var (_, env) in (~cmd).Env) {
         if (strings.HasPrefix(env, pwdˢ)) {
             @string pwd = strings.TrimPrefix(env, pwdˢ);

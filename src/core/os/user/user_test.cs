@@ -84,6 +84,7 @@ internal static void compare(ж<testing.T> Ꮡt, ж<global::go.os.user_package.U
 
 public static void TestLookup(ж<testing.T> Ꮡt) {
     checkUser(Ꮡt);
+
     var (want, err) = Current();
     if (err != default!) {
         if (hasCgo || (hasUSER && hasHOME)){
@@ -92,6 +93,7 @@ public static void TestLookup(ж<testing.T> Ꮡt) {
             Ꮡt.Skipf("skipping: %v"u8, err);
         }
     }
+
     // TODO: Lookup() has a fast path that calls Current() and returns if the
     // usernames match, so this test does not exercise very much. It would be
     // good to try and test finding a different user than the current user.
@@ -104,6 +106,7 @@ public static void TestLookup(ж<testing.T> Ꮡt) {
 
 public static void TestLookupId(ж<testing.T> Ꮡt) {
     checkUser(Ꮡt);
+
     var (want, err) = Current();
     if (err != default!) {
         if (hasCgo || (hasUSER && hasHOME)){
@@ -112,6 +115,7 @@ public static void TestLookupId(ж<testing.T> Ꮡt) {
             Ꮡt.Skipf("skipping: %v"u8, err);
         }
     }
+
     (var got, err) = LookupId((~want).Uid);
     if (err != default!) {
         Ꮡt.Fatalf("LookupId: %v"u8, err);
@@ -132,14 +136,13 @@ internal static void checkGroup(ж<testing.T> Ꮡt) {
 public static void TestLookupGroup(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         nint old = groupBuffer;
         defer(() => {
             groupBuffer = old;
         }, ref ᒐ);
         groupBuffer = 1; // force use of retry code
         checkGroup(Ꮡt);
+
         var (user, err) = Current();
         if (err != default!) {
             if (hasCgo || (hasUSER && hasHOME)){
@@ -148,6 +151,7 @@ public static void TestLookupGroup(ж<testing.T> Ꮡt) {
                 Ꮡt.Skipf("skipping: %v"u8, err);
             }
         }
+
         (var g1, err) = LookupGroupId((~user).Gid);
         if (err != default!) {
             // NOTE(rsc): Maybe the group isn't defined. That's fine.
@@ -159,6 +163,7 @@ public static void TestLookupGroup(ж<testing.T> Ꮡt) {
         if ((~g1).Gid != (~user).Gid) {
             Ꮡt.Errorf("LookupGroupId(%q).Gid = %s; want %s"u8, (~user).Gid, (~g1).Gid, (~user).Gid);
         }
+
         (var g2, err) = LookupGroup((~g1).Name);
         if (err != default!) {
             Ꮡt.Fatalf("LookupGroup(%q): %v"u8, (~g1).Name, err);
@@ -183,6 +188,7 @@ internal static void checkGroupList(ж<testing.T> Ꮡt) {
 
 public static void TestGroupIds(ж<testing.T> Ꮡt) {
     checkGroupList(Ꮡt);
+
     var (user, err) = Current();
     if (err != default!) {
         if (hasCgo || (hasUSER && hasHOME)){
@@ -191,6 +197,7 @@ public static void TestGroupIds(ж<testing.T> Ꮡt) {
             Ꮡt.Skipf("skipping: %v"u8, err);
         }
     }
+
     (var gids, err) = user.GroupIds();
     if (err != default!) {
         Ꮡt.Fatalf("%+v.GroupIds(): %v"u8, user.OrTypedNil(), err);

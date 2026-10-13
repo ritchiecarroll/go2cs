@@ -60,9 +60,11 @@ public static void TestInvalidEncoding(ж<testing.T> Ꮡt) {
     if (!h.init(new nint[]{1}.slice())) {
         Ꮡt.Fatal(failedToInitializeˢ);
     }
+
     // Initialize decompressor with invalid Huffman coding.
     global::go.compress.flate_package.decompressor f = new();
     f.r = new flate_test_package.bytes_Readerжflate_Reader(bytes.NewReader(new byte[]{0xff}.slice()));
+
     var (_, err) = f.huffSym(Ꮡh);
     if (err == default!) {
         Ꮡt.Fatal(shouldHaveRejectedˢ);
@@ -212,6 +214,7 @@ public static void TestStreams(ж<testing.T> Ꮡt) {
         "3130303634342068652e706870005d05355f7ed957ff084a90925d19e3ebc6d0"u8 + "c6d7"u8
     )
     }.slice();
+
     foreach (var (i, tc) in testCases) {
         var (data, err) = hex.DecodeString(tc.stream);
         if (err != default!) {
@@ -241,6 +244,7 @@ internal static readonly @string dataᶜ = ((@string)(new byte[]{0x00, 0x0c, 0x0
 
 public static void TestTruncatedStreams(ж<testing.T> Ꮡt) {
     @string data = dataᶜ;
+
     for (nint i = 0; i < len(data) - 1; i++) {
         var r = NewReader(new flate_test_package.strings_ReaderжReader(strings.NewReader(data.slice(0, i))));
         var (_, err) = io.Copy(io.Discard, r);
@@ -262,28 +266,33 @@ public static void TestReaderEarlyEOF(ж<testing.T> Ꮡt) {
     var testSizes = new nint[]{
         1, 2, 3, 4, 5, 6, 7, 8,
         100, 1000, 10000, 100000,
-        128, 1024, 16384, 131072, // Testing multiples of windowSize triggers the case
- // where Read will fail to return an early io.EOF.
+        128, 1024, 16384, 131072,
 
+        // Testing multiples of windowSize triggers the case
+        // where Read will fail to return an early io.EOF.
         windowSize * 1, windowSize * 2, windowSize * 3
     }.slice();
+
     nint maxSize = default!;
     foreach (var (_, n) in testSizes) {
         if (maxSize < n) {
             maxSize = n;
         }
     }
+
     var readBuf = new slice<byte>(40);
     var data = new slice<byte>(maxSize);
     foreach (var (i, _) in data) {
         data[i] = (byte)i;
     }
+
     foreach (var (_, sz) in testSizes) {
         if (testing.Short() && sz > windowSize) {
             continue;
         }
         foreach (var (_, flush) in new bool[]{true, false}.slice()) {
             var earlyEOF = true; // Do we expect early io.EOF?
+
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             var (w, _) = NewWriter(new flate_test_package.bytes_BufferжWriter(Ꮡbuf), 5);
             w.Write(data.slice(0, sz));
@@ -295,6 +304,7 @@ public static void TestReaderEarlyEOF(ж<testing.T> Ꮡt) {
                 earlyEOF = false;
             }
             w.Close();
+
             var r = NewReader(new flate_test_package.bytes_BufferжReader(Ꮡbuf));
             while (ᐧ) {
                 var (n, err) = r.Read(readBuf);
@@ -306,6 +316,7 @@ public static void TestReaderEarlyEOF(ж<testing.T> Ꮡt) {
                     if (r._<ж<global::go.compress.flate_package.decompressor>>().of(global::go.compress.flate_package.decompressor.Ꮡdict).availWrite() == windowSize) {
                         earlyEOF = false;
                     }
+
                     if (n == 0 && earlyEOF) {
                         Ꮡt.Errorf("On size:%d flush:%v, Read() = (0, io.EOF), want (n, io.EOF)"u8, sz, flush);
                     }

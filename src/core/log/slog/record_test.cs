@@ -27,6 +27,7 @@ public static void TestRecordAttrs(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("got %v, want %v"u8, got, @as);
         }
     }
+
     // Early return.
     // Hit both loops in Record.Attrs: front and back.
     foreach (var (_, stop) in new nint[]{2, 6}.slice()) {
@@ -57,7 +58,6 @@ public static void TestRecordSource(ж<testing.T> Ꮡt) {
         new(0, ""u8, ""u8, false),
         new(-16, ""u8, ""u8, false),
         new(1, "log/slog.TestRecordSource"u8, "record_test.go"u8, true), // 1: caller of NewRecord
-
         new(2, "testing.tRunner"u8, "testing.go"u8, true)
     }.slice()) {
         uintptr pc = default!;
@@ -88,6 +88,7 @@ public static void TestAliasingAndClone(ж<testing.T> Ꮡt) {
         }
         return @as;
     }
+
     void check(global::go.log.slog_package.Record r, slice<global::go.log.slog_package.Attr> want) {
         r = r.ΔClone();
         Ꮡt.Helper();
@@ -96,6 +97,7 @@ public static void TestAliasingAndClone(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("got %v, want %v"u8, got, want);
         }
     }
+
     // Create a record whose Attrs overflow the inline array,
     // creating a slice in r.back.
     var r1 = NewRecord(new time_package.Time(nil), 0, ""u8, 0);
@@ -114,6 +116,7 @@ public static void TestAliasingAndClone(ж<testing.T> Ꮡt) {
     var r1Attrs = attrsSlice(r1);
     check(r2, builtin.append(slices.Clip<slice<global::go.log.slog_package.Attr>, global::go.log.slog_package.Attr>(r1AttrsBefore),
         go.log.slog_package.String(bugˢ, addAttrsUnsafelyCalledOnˢ), Int("p"u8, 1)));
+
     // Adding to a clone is fine.
     r2 = r1.Clone();
     check(r2, r1Attrs);
@@ -165,6 +168,7 @@ public static void BenchmarkRecord(ж<testing.B> Ꮡb) {
 
     const nint nAttrs = /* nAttrsInline * 10 */ 50;
     ref var a = ref heap(new global::go.log.slog_package.Attr(), out var Ꮡa);
+
     for (nint i = 0; i < b.N; i++) {
         var r = NewRecord(new time_package.Time(nil), LevelInfo, ""u8, 0);
         for (nint j = 0; j < nAttrs; j++) {

@@ -27,7 +27,6 @@ internal partial struct multiParseTest {
     internal slice<@string> results;
 }
 
-// errors
 internal static slice<multiParseTest> multiParseTests = new multiParseTest[]{
     new("empty"u8, ""u8, noError,
         default!,
@@ -38,6 +37,7 @@ internal static slice<multiParseTest> multiParseTests = new multiParseTest[]{
     new("two"u8, @"{{define ""foo""}} FOO {{end}}{{define ""bar""}} BAR {{end}}"u8, noError,
         new @string[]{"foo"u8, "bar"u8}.slice(),
         new @string[]{" FOO "u8, " BAR "u8}.slice()),
+    // errors
     new("missing end"u8, @"{{define ""foo""}} FOO "u8, hasError,
         default!,
         default!),
@@ -63,19 +63,17 @@ public static void TestMultiParse(ж<testing.T> Ꮡt) {
             break;
         }
         case {} when err != default! && !test.ok: {
+            // expected error, got one
             if (debug.Value) {
-                // expected error, got one
                 fmt.Printf("%s: %s\n\t%s\n"u8, test.name, test.input, err);
             }
             continue;
             break;
         }}
-
         if (template == nil) {
             continue;
         }
-        if (len((~template).tmpl) != len(test.names) + 1) {
-            // +1 for root
+        if (len((~template).tmpl) != len(test.names) + 1) { // +1 for root
             Ꮡt.Errorf("%s: wrong number of templates; wanted %d got %d"u8, test.name, len(test.names), len((~template).tmpl));
             continue;
         }
@@ -93,7 +91,6 @@ public static void TestMultiParse(ж<testing.T> Ꮡt) {
     }
 }
 
-// User-defined function: test argument evaluator.
 internal static slice<execTest> multiExecTests;
 internal static void initᴛmultiExecTests() { multiExecTests = new execTest[]{
     new("empty"u8, ""u8, ""u8, default!, true),
@@ -105,6 +102,8 @@ internal static void initᴛmultiExecTests() { multiExecTests = new execTest[]{
     new("invoke dotV"u8, @"{{template ""dotV"" .U}}"u8, "v"u8, tVal.OrTypedNil(), true),
     new("invoke nested int"u8, @"{{template ""nested"" .I}}"u8, "17"u8, tVal.OrTypedNil(), true),
     new("variable declared by template"u8, @"{{template ""nested"" $x:=.SI}},{{index $x 1}}"u8, "[3 4 5],4"u8, tVal.OrTypedNil(), true),
+
+    // User-defined function: test argument evaluator.
     new("testFunc literal"u8, @"{{oneArg ""joe""}}"u8, "oneArg=joe"u8, tVal.OrTypedNil(), true),
     new("testFunc ."u8, @"{{oneArg .}}"u8, "oneArg=joe"u8, (@string)"joe"u8, true)
 }.slice(); }
@@ -185,12 +184,14 @@ internal static readonly @string fileTmplˢ = "file*.tmpl"u8;
 
 public static void TestParseFS(ж<testing.T> Ꮡt) {
     var fs = os.DirFS(testdataˢ);
+
     {
         var (_, err) = ParseFS(fs, doesNotExistˢ);
         if (err == default!) {
             Ꮡt.Error(expectedErrorForNonˢ);
         }
     }
+
     {
         var template = New(rootˢ);
         var (_, err) = template.ParseFS(fs, file1Tmplˢ, file2Tmplˢ);
@@ -199,6 +200,7 @@ public static void TestParseFS(ж<testing.T> Ꮡt) {
         }
         testExecute(multiExecTests, template, Ꮡt);
     }
+
     {
         var template = New(rootˢ);
         var (_, err) = template.ParseFS(fs, fileTmplˢ);
@@ -416,6 +418,7 @@ public static void TestNew(ж<testing.T> Ꮡt) {
     // template with same name already exists
     var (t1, _) = New(testˢ).Parse(defineTestFooEndˢ);
     var t2 = t1.New(testˢ);
+
     if ((~t1).common != (~t2).common) {
         Ꮡt.Errorf("t1 & t2 didn't share common struct; got %v != %v"u8, (~t1).common.OrTypedNil(), (~t2).common.OrTypedNil());
     }
@@ -425,6 +428,7 @@ public static void TestNew(ж<testing.T> Ꮡt) {
     if ((~t2).Tree != nil) {
         Ꮡt.Error(undefinedTemplateGotNonˢ);
     }
+
     var containsT1 = false;
     foreach (var (_, tmpl) in t1.Templates()) {
         if (tmpl == t2) {
@@ -479,8 +483,10 @@ public static void TestEmptyTemplate(ж<testing.T> Ꮡt) {
         new(new @string[]{"{{/* a comment */}}"u8, "{{/* a comment */}}"u8}.slice(), "comment"u8, ""u8),
         new(new @string[]{"{{.}}"u8, ""u8}.slice(), "twice"u8, ""u8)
     }.slice();
+
     foreach (var (i, c) in cases) {
         var root = New(rootˢ);
+
         ж<global::go.text.template_package.Template> m = default!;
         error err = default!;
         foreach (var (_, d) in c.defn) {
@@ -511,8 +517,6 @@ internal static readonly object stylesheetˢ = (@string)"stylesheet"u8;
 // templates added in that release, which got different answers depending
 // on the order templates appeared in the internal map.
 public static void TestIssue19294(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // The empty block in "xhtml" should be replaced during execution
     // by the contents of "stylesheet", but if the internal map associating
     // names with templates is built in the wrong order, the empty block

@@ -34,8 +34,6 @@ internal partial struct TestSehLookupFunctionEntry_tests /*dyn*/ {
 }
 
 public static void TestSehLookupFunctionEntry(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (Δruntime.GOARCH != "amd64"u8) {
         Ꮡt.Skip(skippingAmd64OnlyTestˢ);
     }
@@ -82,6 +80,7 @@ internal static slice<uintptr> sehCallers() {
     // RtlVirtualUnwind just needs a context with
     // valid a pc, sp and fp (aka bp).
     var ctx = runtime_internal_test_package.NewContextStub();
+
     var pcs = new slice<uintptr>(15);
     ref var @base = ref heap(new uintptr(), out var Ꮡbase);
     ref var frame = ref heap(new uintptr(), out var Ꮡframe);
@@ -126,11 +125,10 @@ internal static void testSehCallersEqual(ж<testing.T> Ꮡt, slice<uintptr> pcs,
         @string name = fn.Name();
         var exprᴛ1 = name;
         if (exprᴛ1 == "runtime.panicmem"u8) {
+            // These functions are skipped as they appear inconsistently depending
+            // whether inlining is on or off.
             continue;
         }
-
-        // These functions are skipped as they appear inconsistently depending
-        // whether inlining is on or off.
         got = append(got, name);
     }
     if (!slices.Equal<slice<@string>, @string>(want, got)) {

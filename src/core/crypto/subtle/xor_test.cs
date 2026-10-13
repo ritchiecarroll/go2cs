@@ -30,12 +30,15 @@ public static void TestXORBytes(ж<testing.T> Ꮡt) {
                     }
                     rand.Read(p);
                     rand.Read(q);
+
                     var d = new slice<byte>(alignD + n + 100);
                     rand.Read(d);
+
                     var want = bytes.Clone(d);
                     foreach (var i in range(n)) {
                         want[alignD + i] = (byte)(p[i] ^ q[i]);
                     }
+
                     {
                         nint nn = XORBytes(d.slice(alignD), p, q); if (!bytes.Equal(d, want)){
                             Ꮡt.Errorf("n=%d alignP=%d alignQ=%d alignD=%d:\n\tp = %x\n\tq = %x\n\td = %x\n\twant %x\n"u8, n, alignP, alignQ, alignD, p, q, d, want);
@@ -61,6 +64,7 @@ public static void TestXORBytes(ж<testing.T> Ꮡt) {
                             Ꮡt.Errorf("n=%d alignP=%d alignQ=%d alignD=%d: got %d, want %d"u8, n, alignP, alignQ, alignD, nn, n);
                         }
                     }
+
                     {
                         nint nn = XORBytes(p, p, p); if (!bytes.Equal(p, new slice<byte>(n))){
                             Ꮡt.Errorf("n=%d alignP=%d alignQ=%d alignD=%d: got %x, want %x"u8, n, alignP, alignQ, alignD, p, new slice<byte>(n));

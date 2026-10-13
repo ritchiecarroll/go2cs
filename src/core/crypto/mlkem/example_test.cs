@@ -17,14 +17,17 @@ public static void Example() {
         log.Fatal(err);
     }
     var encapsulationKey = dk.EncapsulationKey().Bytes();
+
     // Bob uses the encapsulation key to encapsulate a shared secret, and sends
     // back the ciphertext to Alice.
     var ciphertext = Bob(encapsulationKey);
+
     // Alice decapsulates the shared secret from the ciphertext.
     (var sharedSecret, err) = dk.Decapsulate(ciphertext);
     if (err != default!) {
         log.Fatal(err);
     }
+
     // Alice and Bob now share a secret.
     _ = sharedSecret;
 }
@@ -38,8 +41,10 @@ public static slice<byte> /*ciphertext*/ Bob(slice<byte> encapsulationKey) {
         log.Fatal(err);
     }
     (var sharedSecret, ciphertext) = ek.Encapsulate();
+
     // Alice and Bob now share a secret.
     _ = sharedSecret;
+
     // Bob sends the ciphertext to Alice.
     return ciphertext;
 }

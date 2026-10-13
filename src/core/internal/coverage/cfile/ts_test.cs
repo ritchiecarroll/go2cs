@@ -59,6 +59,7 @@ public static void TestTestSupport(ж<testing.T> Ꮡt) {
     @string tgcd = testGoCoverDir(Ꮡt);
     Ꮡt.Logf("testing.testGoCoverDir() returns %s mode=%s\n"u8,
         tgcd, testing.CoverMode());
+
     @string textfile = filepath.Join(Ꮡt.TempDir(), fileTxtˢ);
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     var err = ProcessCoverTestDir(tgcd, textfile,
@@ -66,6 +67,7 @@ public static void TestTestSupport(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("bad: %v"u8, err);
     }
+
     // Check for existence of text file.
     {
         var (inf, errΔ1) = os.Open(textfile); if (errΔ1 != default!){
@@ -74,6 +76,7 @@ public static void TestTestSupport(ж<testing.T> Ꮡt) {
             inf.Close();
         }
     }
+
     // Check for percent output with expected tokens.
     @string strout = sb.String();
     @string want = ofStatementsˢ;
@@ -142,6 +145,7 @@ internal static (@string, @string) genAuxMeta(ж<testing.T> Ꮡt, @string dstdir
             Ꮡt.Fatalf("go run failed (%v): %s"u8, errΔ2, b);
         }
     }
+
     // Pick out the generated meta-data file.
     var (files, err) = os.ReadDir(dstdir);
     if (err != default!) {
@@ -171,7 +175,9 @@ public static void TestAuxMetaDataFiles(ж<testing.T> Ꮡt) {
     @string tgcd = testGoCoverDir(Ꮡt);
     Ꮡt.Logf("testing.testGoCoverDir() returns %s mode=%s\n"u8,
         tgcd, testing.CoverMode());
+
     @string td = Ꮡt.TempDir();
+
     // Manufacture a new, separate meta-data file not related to this
     // test. Contents are not important, just so long as the
     // packages/paths are different.
@@ -182,6 +188,7 @@ public static void TestAuxMetaDataFiles(ж<testing.T> Ꮡt) {
         }
     }
     var (mfile, token) = genAuxMeta(Ꮡt, othermetadir);
+
     // Write a metafiles file.
     @string metafiles = filepath.Join(tgcd, coverage.MetaFilesFileName);
     var mfc = new coverage.MetaFileCollection(
@@ -197,6 +204,7 @@ public static void TestAuxMetaDataFiles(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("write failed: %v"u8, errΔ2);
         }
     }
+
     // Kick off guts of test.
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     @string textfile = filepath.Join(td, file2Txtˢ);
@@ -210,6 +218,7 @@ public static void TestAuxMetaDataFiles(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("removing metafiles file: %v"u8, err);
         }
     }
+
     // Look for the expected things in the coverage profile.
     (var contents, err) = os.ReadFile(textfile);
     @string strc = ((@string)contents);

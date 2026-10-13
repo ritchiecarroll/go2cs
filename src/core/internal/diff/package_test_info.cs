@@ -29,7 +29,7 @@ using static global::go.@internal.diff_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/diff/diff_test.go", "diff_test.cs", "AA8cgoKC9oKCgpaCgoKClIKUgoKC", "27-41:1", "", "44=Diff/1/1/1")]
+[assembly: go.GoPositionMap("internal/diff/diff_test.go", "diff_test.cs", "AA8cgoKC9oKCgqaCgoKClIKUgoKC", "27-41:1", "", "45=Diff/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

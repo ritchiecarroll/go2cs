@@ -71,18 +71,20 @@ public static void Example_customMarshalJSON() {
             log.Fatal(err);
         }
     }
+
     var census = new map<Animal, nint>();
     foreach (var (_, animal) in zoo) {
         census[animal] += 1;
     }
+
     fmt.Printf("Zoo Census:\n* Gophers: %d\n* Zebras:  %d\n* Unknown: %d\n"u8,
         census[Gopher], census[Zebra], census[Unknown]);
-}
 
-// Output:
-// Zoo Census:
-// * Gophers: 3
-// * Zebras:  2
-// * Unknown: 3
+    // Output:
+    // Zoo Census:
+    // * Gophers: 3
+    // * Zebras:  2
+    // * Unknown: 3
+}
 
 } // end json_test_package

@@ -54,6 +54,7 @@ public static void TestNextProtoUpgrade(ж<testing.T> Ꮡt) {
         ts.StartTLS();
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
+
         // Normal request, without NPN.
         {
             var c = ts.Client();
@@ -71,6 +72,7 @@ public static void TestNextProtoUpgrade(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         // Request to an advertised but unhandled NPN protocol.
         // Server will hang up.
         {
@@ -96,6 +98,7 @@ public static void TestNextProtoUpgrade(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("expected error on unhandled-proto request; got: %s"u8, buf.Bytes());
             }
         }
+
         // Request using the "tls-0.9" protocol, which we register here.
         // It is HTTP/0.9 over TLS.
         {

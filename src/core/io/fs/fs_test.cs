@@ -8,7 +8,6 @@ using testing = testing_package;
 
 partial class fs_test_package {
 
-
 partial struct isValidPathTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal bool ok;

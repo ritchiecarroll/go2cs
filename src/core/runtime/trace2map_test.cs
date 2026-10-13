@@ -16,6 +16,7 @@ partial class runtime_test_package {
 
 public static void TestTraceMap(ж<testing.T> Ꮡt) {
     ref var m = ref heap(new global::go.runtime_internal_test_package.TraceMap(), out var Ꮡm);
+
     // Try all these operations multiple times between resets, to make sure
     // we're resetting properly.
     foreach (var _ᴛ1 in range(3)) {
@@ -51,6 +52,7 @@ public static void TestTraceMap(ж<testing.T> Ꮡt) {
 
 public static partial void TestTraceMapConcurrent(ж<testing.T> Ꮡt) {
     ref var m = ref heap(new global::go.runtime_internal_test_package.TraceMap(), out var Ꮡm);
+
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     foreach (var i in range(3)) {
         Ꮡwg.Add(1);
@@ -58,6 +60,7 @@ public static partial void TestTraceMapConcurrent(ж<testing.T> Ꮡt) {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
+
                 @string si = strconv.Itoa(iΔ1);
                 ref var d = ref heap(new array<@string>(6), out var Ꮡd);
 

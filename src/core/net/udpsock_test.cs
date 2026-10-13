@@ -29,6 +29,7 @@ public static void BenchmarkUDP6LinkLocalUnicast(ж<testing.B> Ꮡb) {
         ref var b = ref Ꮡb.DerefOrNull();
 
         ᏑtestHookUninstaller.Do(uninstallTestHooks);
+
         if (!supportsIPv6()) {
             Ꮡb.Skip(iPv6IsNotSupportedˢ);
         }
@@ -40,6 +41,7 @@ public static void BenchmarkUDP6LinkLocalUnicast(ж<testing.B> Ꮡb) {
         if (lla == ""u8) {
             Ꮡb.Skip(iPv6LinkLocalUnicastˢ);
         }
+
         var (c1, err) = ListenPacket(udp6ˢ, JoinHostPort(lla + "%"u8 + (~ifi).Name, "0"u8));
         if (err != default!) {
             Ꮡb.Fatal(err);
@@ -52,6 +54,7 @@ public static void BenchmarkUDP6LinkLocalUnicast(ж<testing.B> Ꮡb) {
         }
         var c2ʗ1 = c2;
         defer(() => c2ʗ1.Close(), ref ᒐ);
+
         array<byte> buf = new(1);
         for (nint i = 0; i < b.N; i++) {
             {
@@ -77,8 +80,6 @@ internal partial struct resolveUDPAddrTest {
     internal error err;
 }
 
-// Go 1.0 behavior
-// Go 1.0 behavior
 internal static slice<resolveUDPAddrTest> resolveUDPAddrTests;
 internal static void initᴛresolveUDPAddrTests() { resolveUDPAddrTests = new resolveUDPAddrTest[]{
     new("udp"u8, "127.0.0.1:0"u8, Ꮡ(new UDPAddr(IP: IPv4(127, 0, 0, 1), Port: 0)), default!),
@@ -87,8 +88,8 @@ internal static void initᴛresolveUDPAddrTests() { resolveUDPAddrTests = new re
     new("udp6"u8, "[::1]:65535"u8, Ꮡ(new UDPAddr(IP: ParseIP("::1"u8), Port: 65535)), default!),
     new("udp"u8, "[::1%en0]:1"u8, Ꮡ(new UDPAddr(IP: ParseIP("::1"u8), Port: 1, Zone: "en0"u8)), default!),
     new("udp6"u8, "[::1%911]:2"u8, Ꮡ(new UDPAddr(IP: ParseIP("::1"u8), Port: 2, Zone: "911"u8)), default!),
-    new(""u8, "127.0.0.1:0"u8, Ꮡ(new UDPAddr(IP: IPv4(127, 0, 0, 1), Port: 0)), default!),
-    new(""u8, "[::1]:0"u8, Ꮡ(new UDPAddr(IP: ParseIP("::1"u8), Port: 0)), default!),
+    new(""u8, "127.0.0.1:0"u8, Ꮡ(new UDPAddr(IP: IPv4(127, 0, 0, 1), Port: 0)), default!), // Go 1.0 behavior
+    new(""u8, "[::1]:0"u8, Ꮡ(new UDPAddr(IP: ParseIP("::1"u8), Port: 0)), default!), // Go 1.0 behavior
     new("udp"u8, ":12345"u8, Ꮡ(new UDPAddr(Port: 12345)), default!),
     new("http"u8, "127.0.0.1:0"u8, nil, new net_test_package.net_UnknownNetworkErrorᴠerror(((global::go.net_package.UnknownNetworkError)(@string)"http"u8))),
     new("udp"u8, "127.0.0.1:domain"u8, Ꮡ(new UDPAddr(IP: ParseIP("127.0.0.1"u8), Port: 53)), default!),
@@ -111,6 +112,7 @@ public static void TestResolveUDPAddr(ж<testing.T> Ꮡt) {
             testHookLookupIP = origTestHookLookupIPʗ1;
         }, ref ᒐ);
         testHookLookupIP = lookupLocalhost;
+
         foreach (var (_, tt) in resolveUDPAddrTests) {
             var (addr, err) = ResolveUDPAddr(tt.network, tt.litAddrOrName);
             if (!reflect.DeepEqual(addr.OrTypedNil(), tt.addr.OrTypedNil()) || !reflect.DeepEqual(err, tt.err)) {
@@ -140,12 +142,14 @@ public static void TestWriteToUDP(ж<testing.T> Ꮡt) {
         if (!testableNetwork(udpˢ)) {
             Ꮡt.Skipf("skipping: udp not supported"u8);
         }
+
         var (c, err) = ListenPacket(udpˢ, "127.0.0.1:0"u8);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
+
         testWriteToConn(Ꮡt, c.LocalAddr().String());
         testWriteToPacketConn(Ꮡt, c.LocalAddr().String());
     }
@@ -162,10 +166,12 @@ internal static void testWriteToConn(ж<testing.T> Ꮡt, @string raddr) {
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
+
         (var ra, err) = ResolveUDPAddr(udpˢ, raddr);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var b = slice<byte>("CONNECTED-MODE SOCKET"u8);
         (_, err) = c._<ж<global::go.net_package.UDPConn>>().WriteToUDP(b, ra);
         if (err == default!) {
@@ -210,10 +216,12 @@ internal static void testWriteToPacketConn(ж<testing.T> Ꮡt, @string raddr) {
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
+
         (var ra, err) = ResolveUDPAddr(udpˢ, raddr);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var b = slice<byte>("UNCONNECTED-MODE SOCKET"u8);
         (_, err) = c._<ж<global::go.net_package.UDPConn>>().WriteToUDP(b, ra);
         if (err != default!) {
@@ -243,7 +251,6 @@ internal static void testWriteToPacketConn(ж<testing.T> Ꮡt, @string raddr) {
     finally { ᒐ.Run(); }
 }
 
-
 partial struct udpConnLocalNameTestsᴛ1 /*dyn*/ {
     internal @string net;
     internal ж<global::go.net_package.UDPAddr> laddr;
@@ -257,6 +264,7 @@ internal static void initᴛudpConnLocalNameTests() { udpConnLocalNameTests = ne
 
 public static void TestUDPConnLocalName(ж<testing.T> Ꮡt) {
     testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+
     foreach (var (_, vᴛ1) in udpConnLocalNameTests) {
         ref var tt = ref heap(new udpConnLocalNameTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
@@ -268,6 +276,7 @@ public static void TestUDPConnLocalName(ж<testing.T> Ꮡt) {
                 if (!testableNetwork(ttʗ1.net)) {
                     tΔ1.Skipf("skipping: %s not available"u8, ttʗ1.net);
                 }
+
                 var (c, err) = ListenUDP(ttʗ1.net, ttʗ1.laddr);
                 if (err != default!) {
                     tΔ1.Fatal(err);
@@ -298,6 +307,7 @@ public static void TestUDPConnLocalAndRemoteNames(ж<testing.T> Ꮡt) {
         if (!testableNetwork(udpˢ)) {
             Ꮡt.Skipf("skipping: udp not available"u8);
         }
+
         foreach (var (_, laddr) in new @string[]{""u8, "127.0.0.1:0"u8}.slice()) {
             var (c1, err) = ListenPacket(udpˢ, "127.0.0.1:0"u8);
             if (err != default!) {
@@ -305,6 +315,7 @@ public static void TestUDPConnLocalAndRemoteNames(ж<testing.T> Ꮡt) {
             }
             var c1ʗ1 = c1;
             defer(() => c1ʗ1.Close(), ref ᒐ);
+
             ж<global::go.net_package.UDPAddr> la = default!;
             if (laddr != ""u8) {
                 error errΔ1 = default!;
@@ -320,6 +331,7 @@ public static void TestUDPConnLocalAndRemoteNames(ж<testing.T> Ꮡt) {
             }
             var c2ʗ1 = c2;
             defer(() => c2ʗ1.of(global::go.net_package.UDPConn.Ꮡconn).Close(), ref ᒐ);
+
             array<TestUDPConnLocalAndRemoteNames_type> connAddrs = new TestUDPConnLocalAndRemoteNames_type[]{
                 new(c1.LocalAddr(), true),
                 new(c1._<ж<global::go.net_package.UDPConn>>().of(global::go.net_package.UDPConn.Ꮡconn).RemoteAddr(), false),
@@ -343,9 +355,11 @@ public static void TestIPv6LinkLocalUnicastUDP(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+
         if (!supportsIPv6()) {
             Ꮡt.Skip(iPv6IsNotSupportedˢ);
         }
+
         foreach (var (i, tt) in ipv6LinkLocalUnicastUDPTests) {
             var (c1, err) = ListenPacket(tt.network, tt.address);
             if (err != default!) {
@@ -372,6 +386,7 @@ public static void TestIPv6LinkLocalUnicastUDP(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatalf("got %v; expected a proper address with zone identifier"u8, la.OrTypedNil());
                 }
             }
+
             (var c2, err) = Dial(tt.network, (~ls).PacketConn.LocalAddr().String());
             if (err != default!) {
                 Ꮡt.Fatal(err);
@@ -388,6 +403,7 @@ public static void TestIPv6LinkLocalUnicastUDP(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatalf("got %v; expected a proper address with zone identifier"u8, ra.OrTypedNil());
                 }
             }
+
             {
                 var (_, errΔ2) = c2.Write(slice<byte>("UDP OVER IPV6 LINKLOCAL TEST"u8)); if (errΔ2 != default!) {
                     Ꮡt.Fatal(errΔ2);
@@ -399,6 +415,7 @@ public static void TestIPv6LinkLocalUnicastUDP(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatal(errΔ3);
                 }
             }
+
             foreach (var errΔ4 in ch) {
                 Ꮡt.Errorf("#%d: %v"u8, i, errΔ4);
             }
@@ -422,13 +439,14 @@ public static void TestUDPZeroBytePayload(ж<testing.T> Ꮡt) {
         else if (exprᴛ1 == "ios"u8) {
             testenv.SkipFlaky(new net_test_package.testing_TжTB(Ꮡt), 29225);
         }
-
         if (!testableNetwork(udpˢ)) {
             Ꮡt.Skipf("skipping: udp not available"u8);
         }
+
         var c = newLocalPacketListener(new net_test_package.testing_TжTB(Ꮡt), udpˢ);
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
+
         foreach (var (_, genericRead) in new bool[]{false, true}.slice()) {
             var (n, err) = c.WriteTo(default!, c.LocalAddr());
             if (err != default!) {
@@ -463,13 +481,14 @@ public static void TestUDPZeroByteBuffer(ж<testing.T> Ꮡt) {
         if (exprᴛ1 == "plan9"u8) {
             Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
         }
-
         if (!testableNetwork(udpˢ)) {
             Ꮡt.Skipf("skipping: udp not available"u8);
         }
+
         var c = newLocalPacketListener(new net_test_package.testing_TжTB(Ꮡt), udpˢ);
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
+
         var b = slice<byte>("UDP ZERO BYTE BUFFER TEST"u8);
         foreach (var (_, genericRead) in new bool[]{false, true}.slice()) {
             var (n, err) = c.WriteTo(b, c.LocalAddr());
@@ -486,19 +505,15 @@ public static void TestUDPZeroByteBuffer(ж<testing.T> Ꮡt) {
                 (_, _, err) = c.ReadFrom(default!);
             }
             var exprᴛ2 = err;
-            if (AreEqual(exprᴛ2, default!)) {
+            if (AreEqual(exprᴛ2, default!)) { // ReadFrom succeeds
             }
-            else { /* default: */
+            else { /* default: */ // Read may timeout, it depends on the platform
                 {
-                    var (nerr, ok) = err._<ΔError>(ᐧ); if ((!ok || !nerr.Timeout()) && Δruntime.GOOS != "windows"u8) {
-                        // ReadFrom succeeds
-                        // Read may timeout, it depends on the platform
-                        // Windows returns WSAEMSGSIZE
+                    var (nerr, ok) = err._<ΔError>(ᐧ); if ((!ok || !nerr.Timeout()) && Δruntime.GOOS != "windows"u8) { // Windows returns WSAEMSGSIZE
                         Ꮡt.Fatal(err);
                     }
                 }
             }
-
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -512,19 +527,21 @@ public static void TestUDPReadSizeError(ж<testing.T> Ꮡt) {
         if (exprᴛ1 == "plan9"u8) {
             Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
         }
-
         if (!testableNetwork(udpˢ)) {
             Ꮡt.Skipf("skipping: udp not available"u8);
         }
+
         var c1 = newLocalPacketListener(new net_test_package.testing_TжTB(Ꮡt), udpˢ);
         var c1ʗ1 = c1;
         defer(() => c1ʗ1.Close(), ref ᒐ);
+
         var (c2, err) = Dial(udpˢ, c1.LocalAddr().String());
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var c2ʗ1 = c2;
         defer(() => c2ʗ1.Close(), ref ᒐ);
+
         var b1 = slice<byte>("READ SIZE ERROR TEST"u8);
         foreach (var (_, genericRead) in new bool[]{false, true}.slice()) {
             var (n, errΔ1) = c2.Write(b1);
@@ -540,8 +557,7 @@ public static void TestUDPReadSizeError(ж<testing.T> Ꮡt) {
             } else {
                 (n, _, errΔ1) = c1.ReadFrom(b2);
             }
-            if (errΔ1 != default! && Δruntime.GOOS != "windows"u8) {
-                // Windows returns WSAEMSGSIZE
+            if (errΔ1 != default! && Δruntime.GOOS != "windows"u8) { // Windows returns WSAEMSGSIZE
                 Ꮡt.Fatal(errΔ1);
             }
             if (n != len(b1) - 1) {
@@ -561,6 +577,7 @@ public static void TestUDPReadTimeout(ж<testing.T> Ꮡt) {
         if (!testableNetwork(udp4ˢ)) {
             Ꮡt.Skipf("skipping: udp4 not available"u8);
         }
+
         var (la, err) = ResolveUDPAddr(udp4ˢ, "127.0.0.1:0"u8);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -571,6 +588,7 @@ public static void TestUDPReadTimeout(ж<testing.T> Ꮡt) {
         }
         var cʗ1 = c;
         defer(() => cʗ1.of(global::go.net_package.UDPConn.Ꮡconn).Close(), ref ᒐ);
+
         c.of(global::go.net_package.UDPConn.Ꮡconn).SetDeadline(time.Now());
         var b = new slice<byte>(1);
         (var n, var addr, err) = c.ReadFromUDP(b);
@@ -596,18 +614,19 @@ public static void TestAllocs(ж<testing.T> Ꮡt) {
     try {
         var exprᴛ1 = Δruntime.GOOS;
         if (exprᴛ1 == "plan9"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
-            Ꮡt.Skipf("skipping on %v"u8, // These implementations have not been optimized.
- Δruntime.GOOS);
+            // These implementations have not been optimized.
+            Ꮡt.Skipf("skipping on %v"u8, Δruntime.GOOS);
         }
-
         if (!testableNetwork(udp4ˢ)) {
             Ꮡt.Skipf("skipping: udp4 not available"u8);
         }
         if (asan.Enabled) {
             Ꮡt.Skip(testAllocatesMoreWithˢ);
         }
+
         // Optimizations are required to remove the allocs.
         testenv.SkipIfOptimizationOff(new net_test_package.testing_TжTB(Ꮡt));
+
         var (conn, err) = ListenUDP(udp4ˢ, Ꮡ(new UDPAddr(IP: IPv4(127, 0, 0, 1))));
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -618,6 +637,7 @@ public static void TestAllocs(ж<testing.T> Ꮡt) {
         ref var addrPort = ref heap<netip.AddrPort>(out var ᏑaddrPort);
         addrPort = addr._<ж<global::go.net_package.UDPAddr>>().AddrPort();
         var buf = new slice<byte>(8);
+
         var addrPortʗ1 = addrPort;
         var bufʗ1 = buf;
         var connʗ2 = conn;
@@ -636,6 +656,7 @@ public static void TestAllocs(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("WriteMsgUDPAddrPort/ReadMsgUDPAddrPort allocated %d objects"u8, got);
             }
         }
+
         var addrPortʗ2 = addrPort;
         var bufʗ2 = buf;
         var connʗ3 = conn;
@@ -654,6 +675,7 @@ public static void TestAllocs(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("WriteToUDPAddrPort/ReadFromUDPAddrPort allocated %d objects"u8, got);
             }
         }
+
         var addrʗ1 = addr;
         var bufʗ3 = buf;
         var connʗ4 = conn;
@@ -778,10 +800,10 @@ public static void TestUDPIPVersionReadMsg(ж<testing.T> Ꮡt) {
         if (exprᴛ1 == "plan9"u8) {
             Ꮡt.Skipf("skipping on %v"u8, Δruntime.GOOS);
         }
-
         if (!testableNetwork(udp4ˢ)) {
             Ꮡt.Skipf("skipping: udp4 not available"u8);
         }
+
         var (conn, err) = ListenUDP(udp4ˢ, Ꮡ(new UDPAddr(IP: IPv4(127, 0, 0, 1))));
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -832,13 +854,14 @@ public static void TestIPv6WriteMsgUDPAddrPortTargetAddrIPVersion(ж<testing.T> 
         if (!testableNetwork(udp6ˢ)) {
             Ꮡt.Skipf("skipping: udp6 not available"u8);
         }
+
         var exprᴛ1 = Δruntime.GOOS;
         if (exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "openbsd"u8) {
-            Ꮡt.Skipf("skipping on %v"u8, // DragonflyBSD's IPv6 sockets are always IPv6-only, according to the man page:
- // https://www.dragonflybsd.org/cgi/web-man?command=ip6 (search for IPV6_V6ONLY).
- // OpenBSD's IPv6 sockets are always IPv6-only, according to the man page:
- // https://man.openbsd.org/ip6#IPV6_V6ONLY
- Δruntime.GOOS);
+            // DragonflyBSD's IPv6 sockets are always IPv6-only, according to the man page:
+            // https://www.dragonflybsd.org/cgi/web-man?command=ip6 (search for IPV6_V6ONLY).
+            // OpenBSD's IPv6 sockets are always IPv6-only, according to the man page:
+            // https://man.openbsd.org/ip6#IPV6_V6ONLY
+            Ꮡt.Skipf("skipping on %v"u8, Δruntime.GOOS);
         }
 
         var (conn, err) = ListenUDP(udpˢ, nil);
@@ -847,18 +870,22 @@ public static void TestIPv6WriteMsgUDPAddrPortTargetAddrIPVersion(ж<testing.T> 
         }
         var connʗ1 = conn;
         defer(() => connʗ1.of(global::go.net_package.UDPConn.Ꮡconn).Close(), ref ᒐ);
+
         var daddr4 = netip.AddrPortFrom(netip.MustParseAddr("127.0.0.1"u8), 12345);
         var daddr4in6 = netip.AddrPortFrom(netip.MustParseAddr(ffff127001ˢ), 12345);
         var daddr6 = netip.AddrPortFrom(netip.MustParseAddr("::1"u8), 12345);
         var buf = new slice<byte>(8);
+
         (_, _, err) = conn.WriteMsgUDPAddrPort(buf, default!, daddr4);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         (_, _, err) = conn.WriteMsgUDPAddrPort(buf, default!, daddr4in6);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         (_, _, err) = conn.WriteMsgUDPAddrPort(buf, default!, daddr6);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -882,26 +909,31 @@ public static void TestIPv4WriteMsgUDPAddrPortTargetAddrIPVersion(ж<testing.T> 
         if (!testableNetwork(udp4ˢ)) {
             Ꮡt.Skipf("skipping: udp4 not available"u8);
         }
+
         var (conn, err) = ListenUDP(udp4ˢ, Ꮡ(new UDPAddr(IP: IPv4(127, 0, 0, 1))));
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var connʗ1 = conn;
         defer(() => connʗ1.of(global::go.net_package.UDPConn.Ꮡconn).Close(), ref ᒐ);
+
         var daddr4 = netip.AddrPortFrom(netip.MustParseAddr("127.0.0.1"u8), 12345);
         var daddr4in6 = netip.AddrPortFrom(netip.MustParseAddr(ffff127001ˢ), 12345);
         var daddr6 = netip.AddrPortFrom(netip.MustParseAddr("::1"u8), 12345);
         var buf = new slice<byte>(8);
+
         {
             (_, _, err) = conn.WriteMsgUDPAddrPort(buf, default!, daddr4); if (err != default!) {
                 Ꮡt.Errorf("conn.WriteMsgUDPAddrPort(buf, nil, daddr4) failed: %v"u8, err);
             }
         }
+
         {
             (_, _, err) = conn.WriteMsgUDPAddrPort(buf, default!, daddr4in6); if (err != default!) {
                 Ꮡt.Errorf("conn.WriteMsgUDPAddrPort(buf, nil, daddr4in6) failed: %v"u8, err);
             }
         }
+
         {
             (_, _, err) = conn.WriteMsgUDPAddrPort(buf, default!, daddr6); if (err == default!) {
                 Ꮡt.Errorf("conn.WriteMsgUDPAddrPort(buf, nil, daddr6) should have failed, but got no error"u8);

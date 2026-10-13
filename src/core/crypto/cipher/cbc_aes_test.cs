@@ -17,8 +17,6 @@ using go.crypto.@internal;
 
 partial class cipher_test_package {
 
-// NIST SP 800-38A pp 27-29
-
 partial struct cbcAESTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal slice<byte> key;
@@ -28,6 +26,7 @@ partial struct cbcAESTestsᴛ1 /*dyn*/ {
 }
 internal static slice<cbcAESTestsᴛ1> cbcAESTests;
 internal static void initᴛcbcAESTests() { cbcAESTests = new cbcAESTestsᴛ1[]{
+    // NIST SP 800-38A pp 27-29
     new(
         "CBC-AES128"u8,
         commonKey128,
@@ -80,9 +79,12 @@ internal static void testCBCEncrypterAES(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%s: NewCipher(%d bytes) = %s"u8, test.name, len(test.key), err);
             continue;
         }
+
         var encrypter = cipher.NewCBCEncrypter(c, test.iv);
+
         var data = new slice<byte>(len(test.@in));
         copy(data, test.@in);
+
         encrypter.CryptBlocks(data, data);
         if (!bytes.Equal(test.@out, data)) {
             Ꮡt.Errorf("%s: CBCEncrypter\nhave %x\nwant %x"u8, test.name, data, test.@out);
@@ -101,9 +103,12 @@ internal static void testCBCDecrypterAES(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%s: NewCipher(%d bytes) = %s"u8, test.name, len(test.key), err);
             continue;
         }
+
         var decrypter = cipher.NewCBCDecrypter(c, test.iv);
+
         var data = new slice<byte>(len(test.@out));
         copy(data, test.@out);
+
         decrypter.CryptBlocks(data, data);
         if (!bytes.Equal(test.@in, data)) {
             Ꮡt.Errorf("%s: CBCDecrypter\nhave %x\nwant %x"u8, test.name, data, test.@in);

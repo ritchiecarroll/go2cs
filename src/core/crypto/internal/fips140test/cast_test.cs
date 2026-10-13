@@ -75,6 +75,7 @@ internal static readonly @string fips140CastPctˢ = @"fips140\.(CAST|PCT)\(""([^
 
 public static void TestAllCASTs(ж<testing.T> Ꮡt) {
     testenv.MustHaveSource(new fipstest_internal_test_package.testing_TжTB(Ꮡt));
+
     // Ask "go list" for the location of the crypto/internal/fips140 tree, as it
     // might be the unpacked frozen tree selected with GOFIPS140.
     var cmd = testenv.Command(new fipstest_internal_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new fipstest_internal_test_package.testing_TжTB(Ꮡt)), listˢ, "-f", dirˢ, cryptoInternalFips140ˢ);
@@ -84,6 +85,7 @@ public static void TestAllCASTs(ж<testing.T> Ꮡt) {
     }
     @string fipsDir = strings.TrimSpace(((@string)@out));
     Ꮡt.Logf("FIPS module directory: %s"u8, fipsDir);
+
     // Find all invocations of fips140.CAST or fips140.PCT.
     ref var foundCASTs = ref heap<slice<@string>>(out var ᏑfoundCASTs);
     var castRe = regexp.MustCompile(fips140CastPctˢ);
@@ -108,6 +110,7 @@ public static void TestAllCASTs(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("WalkDir: %v"u8, errΔ1);
         }
     }
+
     slices.Sort<slice<@string>, @string>(foundCASTs);
     if (!slices.Equal<slice<@string>, @string>(foundCASTs, allCASTs)) {
         Ꮡt.Errorf("AllCASTs is out of date. Found CASTs: %#v"u8, foundCASTs);
@@ -158,6 +161,7 @@ public static void TestCASTPasses(ж<testing.T> Ꮡt) {
             Ꮡt.Skipf("FIPS140 not supported: %v"u8, errΔ1);
         }
     }
+
     var cmd = testenv.Command(new fipstest_internal_test_package.testing_TжTB(Ꮡt), testenv.Executable(new fipstest_internal_test_package.testing_TжTB(Ꮡt)), testRunTestConditionalsˢ, testVˢ);
     cmd.Value.Env = append((~cmd).Env, "GODEBUG=fips140=debug"u8);
     var (@out, err) = cmd.CombinedOutput();
@@ -165,6 +169,7 @@ public static void TestCASTPasses(ж<testing.T> Ꮡt) {
     if (err != default! || !strings.Contains(((@string)@out), completedSuccessfullyˢ)) {
         Ꮡt.Errorf("TestConditionals did not complete successfully"u8);
     }
+
     foreach (var (_, name) in allCASTs) {
         var outʗ1 = @out;
         Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
@@ -182,14 +187,13 @@ internal static readonly @string testRunTestConditionalsˢ2 = "-test.run=TestCon
 internal static readonly object testDidNotFailAsExpectedˢ = (@string)"Test did not fail as expected"u8;
 
 public static void TestCASTFailures(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveExec(new fipstest_internal_test_package.testing_TжTB(Ꮡt));
     {
         var err = fips140.Supported(); if (err != default!) {
             Ꮡt.Skipf("FIPS140 not supported: %v"u8, err);
         }
     }
+
     foreach (var (_, name) in allCASTs) {
         Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
             // Don't parallelize if running in verbose mode, to produce a less

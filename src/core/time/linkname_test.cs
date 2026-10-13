@@ -36,10 +36,12 @@ public static void TestLinkname(ж<Δtesting.T> Ꮡt) {
     if (abs != wantAbs) {
         Ꮡt.Fatalf("timeAbs(2006-01-02 15:04:05 UTC) = %d, want %d"u8, abs, (uint64)wantAbs);
     }
+
     var (year, month, day, yday) = absDate(abs, true);
     if (year != 2006 || month != Δtime.January || day != 2 || yday != 1) {
         Ꮡt.Errorf("absDate() = %v, %v, %v, %v, want 2006, January, 2, 1"u8, year, month, day, yday);
     }
+
     var (hour, min, sec) = absClock(abs);
     if (hour != 15 || min != 4 || sec != 5) {
         Ꮡt.Errorf("absClock() = %v, %v, %v, 15, 4, 5"u8, hour, min, sec);

@@ -16,12 +16,14 @@ internal static void benchmarkAESGCMSeal(ж<testing.B> Ꮡb, slice<byte> buf, ni
 
     b.ReportAllocs();
     b.SetBytes((int64)len(buf));
+
     slice<byte> key = new slice<byte>(keySize);
     array<byte> nonce = new(12);
     array<byte> ad = new(13);
     var (aesΔ1, _) = aes.NewCipher(key[..]);
     var (aesgcm, _) = cipher.NewGCM(aesΔ1);
     slice<byte> @out = default!;
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         @out = aesgcm.Seal(@out[..0], nonce[..], buf, ad[..]);
@@ -33,13 +35,16 @@ internal static void benchmarkAESGCMOpen(ж<testing.B> Ꮡb, slice<byte> buf, ni
 
     b.ReportAllocs();
     b.SetBytes((int64)len(buf));
+
     slice<byte> key = new slice<byte>(keySize);
     array<byte> nonce = new(12);
     array<byte> ad = new(13);
     var (aesΔ1, _) = aes.NewCipher(key[..]);
     var (aesgcm, _) = cipher.NewGCM(aesΔ1);
     slice<byte> @out = default!;
+
     var ct = aesgcm.Seal(default!, nonce[..], buf[..], ad[..]);
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         (@out, _) = aesgcm.Open(@out[..0], nonce[..], ct, ad[..]);
@@ -54,6 +59,7 @@ public static void BenchmarkAESGCM(ж<testing.B> Ꮡb) {
         Ꮡb.Run("Seal-128-"u8 + strconv.Itoa(length), (ж<testing.B> bΔ2) => {
             benchmarkAESGCMSeal(bΔ2, new slice<byte>(length), 128 / 8);
         });
+
         Ꮡb.Run("Open-256-"u8 + strconv.Itoa(length), (ж<testing.B> bΔ3) => {
             benchmarkAESGCMOpen(bΔ3, new slice<byte>(length), 256 / 8);
         });
@@ -67,10 +73,12 @@ internal static void benchmarkAESStream(ж<testing.B> Ꮡb, Func<cipher.Block, s
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.SetBytes((int64)len(buf));
+
     array<byte> key = new(16);
     array<byte> iv = new(16);
     var (aesΔ1, _) = aes.NewCipher(key[..]);
     var stream = mode(aesΔ1, iv[..]);
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         stream.XORKeyStream(buf, buf);
@@ -102,6 +110,7 @@ public static void BenchmarkAESCBCEncrypt1K(ж<testing.B> Ꮡb) {
 
     var buf = new slice<byte>(1024);
     b.SetBytes((int64)len(buf));
+
     array<byte> key = new(16);
     array<byte> iv = new(16);
     var (aesΔ1, _) = aes.NewCipher(key[..]);
@@ -116,6 +125,7 @@ public static void BenchmarkAESCBCDecrypt1K(ж<testing.B> Ꮡb) {
 
     var buf = new slice<byte>(1024);
     b.SetBytes((int64)len(buf));
+
     array<byte> key = new(16);
     array<byte> iv = new(16);
     var (aesΔ1, _) = aes.NewCipher(key[..]);

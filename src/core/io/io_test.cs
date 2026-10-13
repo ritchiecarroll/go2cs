@@ -52,6 +52,7 @@ public static void TestCopyNegative(ж<testing.T> Ꮡt) {
     if (wb.of(Buffer.ᏑΔBuffer).String() != ""u8) {
         Ꮡt.Errorf("Copy on LimitedReader with N<0 copied data"u8);
     }
+
     CopyN(new io_test_package.BufferжWriter(wb), new io_test_package.BufferжReader(rb), -1);
     if (wb.of(Buffer.ᏑΔBuffer).String() != ""u8) {
         Ꮡt.Errorf("CopyN with N<0 copied data"u8);
@@ -194,6 +195,7 @@ public static void BenchmarkCopyNSmall(ж<testing.B> Ꮡb) {
     var rd = bytes.NewReader(bs);
     var buf = @new<Buffer>();
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         CopyN(new io_test_package.BufferжWriter(buf), new io_test_package.bytes_ReaderжReader(rd), 512);
         rd.Reset(bs);
@@ -207,6 +209,7 @@ public static void BenchmarkCopyNLarge(ж<testing.B> Ꮡb) {
     var rd = bytes.NewReader(bs);
     var buf = @new<Buffer>();
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         CopyN(new io_test_package.BufferжWriter(buf), new io_test_package.bytes_ReaderжReader(rd), 32 * 1024);
         rd.Reset(bs);
@@ -238,26 +241,32 @@ public static void TestCopyNEOF(ж<testing.T> Ꮡt) {
     // Test that EOF behavior is the same regardless of whether
     // argument to CopyN has ReadFrom.
     var b = @new<bytes.Buffer>();
+
     var (n, err) = CopyN(new io_test_package.noReadFromжWriter(Ꮡ(new noReadFrom(new io_test_package.bytes_BufferжWriter(b)))), new io_test_package.strings_ReaderжReader(strings.NewReader(fooˢ)), 3);
     if (n != 3 || err != default!) {
         Ꮡt.Errorf("CopyN(noReadFrom, foo, 3) = %d, %v; want 3, nil"u8, n, err);
     }
+
     (n, err) = CopyN(new io_test_package.noReadFromжWriter(Ꮡ(new noReadFrom(new io_test_package.bytes_BufferжWriter(b)))), new io_test_package.strings_ReaderжReader(strings.NewReader(fooˢ)), 4);
     if (n != 3 || !AreEqual(err, EOF)) {
         Ꮡt.Errorf("CopyN(noReadFrom, foo, 4) = %d, %v; want 3, EOF"u8, n, err);
     }
+
     (n, err) = CopyN(new io_test_package.bytes_BufferжWriter(b), new io_test_package.strings_ReaderжReader(strings.NewReader(fooˢ)), 3); // b has read from
     if (n != 3 || err != default!) {
         Ꮡt.Errorf("CopyN(bytes.Buffer, foo, 3) = %d, %v; want 3, nil"u8, n, err);
     }
+
     (n, err) = CopyN(new io_test_package.bytes_BufferжWriter(b), new io_test_package.strings_ReaderжReader(strings.NewReader(fooˢ)), 4); // b has read from
     if (n != 3 || !AreEqual(err, EOF)) {
         Ꮡt.Errorf("CopyN(bytes.Buffer, foo, 4) = %d, %v; want 3, EOF"u8, n, err);
     }
+
     (n, err) = CopyN(new io_test_package.bytes_BufferжWriter(b), new wantedAndErrReader(nil), 5);
     if (n != 5 || err != default!) {
         Ꮡt.Errorf("CopyN(bytes.Buffer, wantedAndErrReader, 5) = %d, %v; want 5, nil"u8, n, err);
     }
+
     (n, err) = CopyN(new io_test_package.noReadFromжWriter(Ꮡ(new noReadFrom(new io_test_package.bytes_BufferжWriter(b)))), new wantedAndErrReader(nil), 5);
     if (n != 5 || err != default!) {
         Ꮡt.Errorf("CopyN(noReadFrom, wantedAndErrReader, 5) = %d, %v; want 5, nil"u8, n, err);
@@ -429,6 +438,7 @@ public static void TestSectionReader_Seek(ж<testing.T> Ꮡt) {
     // Verifies that NewSectionReader's Seeker behaves like bytes.NewReader (which is like strings.NewReader)
     var br = bytes.NewReader(slice<byte>("foo"u8));
     var sr = NewSectionReader(new io_test_package.bytes_ReaderжReaderAt(br), 0, (int64)len("foo"));
+
     foreach (var (_, whence) in new nint[]{SeekStart, SeekCurrent, SeekEnd}.slice()) {
         for (var offset = (int64)(-3); offset <= 4; offset++) {
             var (brOff, brErr) = br.Seek(offset, whence);
@@ -439,11 +449,13 @@ public static void TestSectionReader_Seek(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // And verify we can just seek past the end and get an EOF
     var (got, err) = sr.Seek(100, SeekStart);
     if (err != default! || got != 100) {
         Ꮡt.Errorf("Seek = %v, %v; want 100, nil"u8, got, err);
     }
+
     (var n, err) = sr.Read(new slice<byte>(10));
     if (n != 0 || !AreEqual(err, EOF)) {
         Ꮡt.Errorf("Read = %v, %v; want 0, EOF"u8, n, err);
@@ -460,6 +472,7 @@ public static void TestSectionReader_Size(ж<testing.T> Ꮡt) {
         new("a long sample data, 1234567890"u8, 30),
         new(""u8, 0)
     }.slice();
+
     foreach (var (_, tt) in tests) {
         var r = strings.NewReader(tt.data);
         var sr = NewSectionReader(new io_test_package.strings_ReaderжReaderAt(r), 0, (int64)len(tt.data));
@@ -516,6 +529,7 @@ public static void TestCopyLargeWriter(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Copy error: got %v, want %v"u8, err, want);
         }
     }
+
     want = errors.New(largeWriterErrorˢ);
     rb = @new<Buffer>();
     wb = new largeWriter(err: want);
@@ -545,6 +559,7 @@ public static void TestNopCloserWriterToForwarding(ж<testing.T> Ꮡt) {
         new("a WriterTo"u8, new TestNopCloserWriterToForwarding_typeᴛ1())
     }.array()) {
         var nc = NopCloser(tc.r);
+
         var (_, expected) = tc.r._<WriterTo>(ᐧ);
         var (_, got) = nc._<WriterTo>(ᐧ);
         if (expected != got) {
@@ -576,6 +591,7 @@ public static void TestOffsetWriter_Seek(ж<testing.T> Ꮡt) {
         var tmpfileʗ1 = tmpfile;
         defer(() => tmpfileʗ1.Close(), ref ᒐ);
         var w = NewOffsetWriter(new io_test_package.os_FileжWriterAt(tmpfile), 0);
+
         // Should throw error errWhence if whence is not valid
         var wʗ1 = w;
         Ꮡt.Run(errWhenceˢ, (ж<testing.T> tΔ1) => {
@@ -588,6 +604,7 @@ public static void TestOffsetWriter_Seek(ж<testing.T> Ꮡt) {
                 }
             }
         });
+
         // Should throw error errOffset if offset is negative
         var wʗ2 = w;
         Ꮡt.Run(errOffsetˢ, (ж<testing.T> tΔ2) => {
@@ -601,11 +618,12 @@ public static void TestOffsetWriter_Seek(ж<testing.T> Ꮡt) {
                 }
             }
         });
+
         // Normal tests
         var wʗ3 = w;
         Ꮡt.Run(normalˢ, (ж<testing.T> tΔ3) => {
-            var tests = new TestOffsetWriter_Seek_tests[]{ // keep in order
-
+            var tests = new TestOffsetWriter_Seek_tests[]{
+                // keep in order
                 new(whence: SeekStart, offset: 1, returnOff: 1),
                 new(whence: SeekStart, offset: 2, returnOff: 2),
                 new(whence: SeekStart, offset: 3, returnOff: 3),
@@ -633,6 +651,7 @@ public static void TestOffsetWriter_WriteAt(ж<testing.T> Ꮡt) {
     @string content = contentᶜ;
     var contentSize = (int64)len(content);
     @string tmpdir = Ꮡt.TempDir();
+
     [MethodImpl(MethodImplOptions.NoInlining)] void work(int64 off, int64 at) {
         GoFrame ᒐ = default;
         try {
@@ -643,6 +662,7 @@ public static void TestOffsetWriter_WriteAt(ж<testing.T> Ꮡt) {
             }
             var tmpfileʗ1 = tmpfile;
             defer(() => tmpfileʗ1.Close(), ref ᒐ);
+
             ref var writeN = ref heap(new int64(), out var ᏑwriteN);
             ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
             // Concurrent writes, one byte at a time
@@ -652,6 +672,7 @@ public static void TestOffsetWriter_WriteAt(ж<testing.T> Ꮡt) {
                     GoFrame ᒐ = default;
                     try {
                         defer(wgΔ1.Done, ref ᒐ);
+
                         var w = NewOffsetWriter(new io_test_package.os_FileжWriterAt(tmpfileΔ1), offΔ1);
                         var (n, e) = w.WriteAt(new byte[]{valueΔ1}.slice(), atΔ1 + (int64)stepΔ1);
                         if (e != default!) {
@@ -664,6 +685,7 @@ public static void TestOffsetWriter_WriteAt(ж<testing.T> Ꮡt) {
                 }, Ꮡwg, tmpfile, value, off, at, step);
             }
             Ꮡwg.Wait();
+
             // Read one more byte to reach EOF
             var buf = new slice<byte>((nint)(contentSize + 1));
             (var readN, err) = tmpfile.ReadAt(buf, off + at);
@@ -700,6 +722,7 @@ public static void TestWriteAt_PositionPriorToBase(ж<testing.T> Ꮡt) {
         }
         var tmpfileʗ1 = tmpfile;
         defer(() => tmpfileʗ1.Close(), ref ᒐ);
+
         // start writing position in OffsetWriter
         var offset = (int64)10;
         // position we want to write to the tmpfile
@@ -726,6 +749,7 @@ public static void TestOffsetWriter_Write(ж<testing.T> Ꮡt) {
     @string content = contentᶜ1;
     nint contentSize = len(content);
     @string tmpdir = Ꮡt.TempDir();
+
     (ж<Δio.OffsetWriter>, ж<os.File>) makeOffsetWriter(@string nameΔ1) {
         @string tmpfilename = "TestOffsetWriter_Write_"u8 + nameΔ1;
         var (tmpfile, err) = os.CreateTemp(tmpdir, tmpfilename);
@@ -747,6 +771,7 @@ public static void TestOffsetWriter_Write(ж<testing.T> Ꮡt) {
                 nameΔ2, readN, readContent, contentSize, content);
         }
     }
+
     @string name = default!;
     name = writeˢ;
     var checkContentʗ1 = checkContent;
@@ -766,6 +791,7 @@ public static void TestOffsetWriter_Write(ж<testing.T> Ꮡt) {
                 }
             }
             checkContentʗ1(name, f);
+
             // Copy -> Write
             // Copy file f to file f2
             name = copyˢ;
@@ -778,6 +804,7 @@ public static void TestOffsetWriter_Write(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     // Copy -> WriteTo -> Write
     // Note: strings.Reader implements the io.WriterTo interface.
     name = writeOfCopyWriteToˢ;

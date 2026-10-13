@@ -29,8 +29,6 @@ partial class runtime_test_package {
 public static partial void TestStackMem(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         UntypedInt BatchSize = 32;
         const nint BatchCount = 256;
         UntypedInt ArraySize = 1024;
@@ -62,6 +60,7 @@ public static partial void TestStackMem(ж<testing.T> Ꮡt) {
             for (nint i = 0; i < BatchSize; i++) {
                 ᐸꟷ(c);
             }
+
             // The goroutines have signaled via c that they are ready to exit.
             // Give them a chance to exit by sleeping. If we don't wait, we
             // might not reuse them on the next batch.
@@ -99,7 +98,9 @@ public static partial void TestStackGrowth(ж<testing.T> Ꮡt) {
         if (flagQuick.Value) {
             Ꮡt.Skip(quickˢ);
         }
+
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
+
         // in a normal goroutine
         time.Duration growDuration = default!;                // For debugging failures
         Ꮡwg.Add(1);
@@ -117,6 +118,7 @@ public static partial void TestStackGrowth(ж<testing.T> Ꮡt) {
         });
         Ꮡwg.Wait();
         Ꮡt.Log(firstGrowStackTookˢ, growDuration);
+
         // in locked goroutine
         Ꮡwg.Add(1);
         goǃ(() => {
@@ -131,6 +133,7 @@ public static partial void TestStackGrowth(ж<testing.T> Ꮡt) {
             finally { ᒐ.Run(); }
         });
         Ꮡwg.Wait();
+
         // in finalizer
         ref var finalizerStart = ref heap(new time.Time(), out var ᏑfinalizerStart);
         ref var started = ref heap(new atomic.Bool(), out var Ꮡstarted);
@@ -151,6 +154,7 @@ public static partial void TestStackGrowth(ж<testing.T> Ꮡt) {
         ref var setFinalizerTime = ref heap<time.Time>(out var ᏑsetFinalizerTime);
         setFinalizerTime = time.Now();
         s = default!;
+
         {
             var (d, ok) = t.Deadline(); if (ok) {
                 // Pad the timeout by an arbitrary 5% to give the AfterFunc time to run.
@@ -170,6 +174,7 @@ public static partial void TestStackGrowth(ж<testing.T> Ꮡt) {
                 defer(() => timerʗ1.Stop(), ref ᒐ);
             }
         }
+
         GC();
         Ꮡwg.Wait();
         Ꮡt.Logf("finalizer started after %s and ran %d iterations in %v"u8, finalizerStart.Sub(setFinalizerTime), Ꮡprogress.Load(), time.Since(finalizerStart));
@@ -223,6 +228,7 @@ internal static void growStackIter(ж<nint> Ꮡp, nint n) {
 public static partial void TestStackGrowthCallback(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
+
     // test stack growth at chan op
     Ꮡwg.Add(1);
     goǃ(() => {
@@ -239,6 +245,7 @@ public static partial void TestStackGrowthCallback(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     // test stack growth at map op
     Ꮡwg.Add(1);
     goǃ(() => {
@@ -255,6 +262,7 @@ public static partial void TestStackGrowthCallback(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     // test stack growth at goroutine creation
     Ꮡwg.Add(1);
     goǃ(() => {
@@ -302,6 +310,7 @@ public static void TestDeferPtrs(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var y = ref heap(new nint(), out var Ꮡy);
+
         defer(() => {
             if (Ꮡy.Value != 42) {
                 Ꮡt.Errorf("defer's stack references were not adjusted appropriately"u8);
@@ -352,8 +361,8 @@ internal static void testDeferPtrsGoexit(channel<nint> c, nint i) {
 
 internal static void setBig(ж<nint> Ꮡp, nint x, bigBuf b) {
     b = b.Clone();
-
     ref var p = ref Ꮡp.DerefOrNull();
+
     p = x;
 }
 
@@ -549,9 +558,7 @@ public static partial void TestStackCache(ж<testing.T> Ꮡt) {
     // Allocate a bunch of goroutines and grow their stacks.
     // Repeat a few times to test the stack cache.
     const nint R = 4;
-    
     UntypedInt G = 200;
-    
     const nint S = 5;
     for (nint i = 0; i < R; i++) {
         ref var reqchans = ref heap(new array<channel<nint>>(200), out var Ꮡreqchans);
@@ -816,6 +823,7 @@ public static partial void BenchmarkIssue18138(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < N; i++) {
         c.ᐸꟷ(new slice<byte>(1));
     }
+
     for (nint i = 0; i < b.N; i++) {
         ᐸꟷ(c); // get token
         var cʗ1 = c;
@@ -873,8 +881,6 @@ internal static void inlinablePanic(this structWithMethod s) {
 }
 
 public static void TestStackWrapperCaller(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     ref var d = ref heap(new structWithMethod(), out var Ꮡd);
     // Force the compiler to construct a wrapper method.
     var wrapper = ((Func<ж<structWithMethod>, @string>)([GoWrapper("(*structWithMethod).caller")] (p0) => caller(panicwrapRecv(p0, "value method runtime_test.structWithMethod.caller called using nil *structWithMethod pointer").Value)));
@@ -888,8 +894,6 @@ public static void TestStackWrapperCaller(ж<testing.T> Ꮡt) {
 }
 
 public static void TestStackWrapperCallers(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     ref var d = ref heap(new structWithMethod(), out var Ꮡd);
     var wrapper = ((Func<ж<structWithMethod>, slice<uintptr>>)([GoWrapper("(*structWithMethod).callers")] (p0) => callers(panicwrapRecv(p0, "value method runtime_test.structWithMethod.callers called using nil *structWithMethod pointer").Value)));
     // Check that <autogenerated> doesn't appear in the stack trace.
@@ -910,8 +914,6 @@ public static void TestStackWrapperCallers(ж<testing.T> Ꮡt) {
 internal static readonly @string autogeneratedˢ = "<autogenerated>"u8;
 
 public static void TestStackWrapperStack(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     ref var d = ref heap(new structWithMethod(), out var Ꮡd);
     var wrapper = ((Func<ж<structWithMethod>, @string>)([GoWrapper("(*structWithMethod).stack")] (p0) => stack(panicwrapRecv(p0, "value method runtime_test.structWithMethod.stack called using nil *structWithMethod pointer").Value)));
     // Check that <autogenerated> doesn't appear in the stack trace.
@@ -988,8 +990,6 @@ internal static readonly @string callersFramesˢ = "CallersFrames"u8;
 internal static readonly @string stackˢ2 = "Stack"u8;
 
 internal static void testStackWrapperPanic(ж<testing.T> Ꮡt, Action cb, @string expect) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Test that the stack trace from a panicking wrapper includes
     // the wrapper, even though elide these when they don't panic.
     Ꮡt.Run(callersFramesˢ, (ж<testing.T> tΔ1) => {
@@ -1066,6 +1066,7 @@ public static void TestTracebackSystemstack(ж<testing.T> Ꮡt) {
     if (GOARCH == "ppc64"u8 || GOARCH == "ppc64le"u8) {
         Ꮡt.Skip(systemstackTailCallNotˢ);
     }
+
     // Test that profiles correctly jump over systemstack,
     // including nested systemstack calls.
     var pcs = new slice<uintptr>(20);
@@ -1086,7 +1087,6 @@ public static void TestTracebackSystemstack(ж<testing.T> Ꮡt) {
         else if (exprᴛ1 == "runtime_test.TestTracebackSystemstack"u8) {
             countOut++;
         }
-
         if (!more) {
             break;
         }
@@ -1106,16 +1106,19 @@ public static void TestTracebackAncestors(ж<testing.T> Ꮡt) {
     var goroutineRegex = Δregexp.MustCompile(goroutine09ˢ);
     foreach (var (_, tracebackDepth) in new nint[]{0, 1, 5, 50}.slice()) {
         @string output = runTestProg(Ꮡt, testprogˢ, tracebackAncestorsˢ, fmt.Sprintf("GODEBUG=tracebackancestors=%d"u8, tracebackDepth));
+
         nint numGoroutines = 3;
         nint numFrames = 2;
         nint ancestorsExpected = numGoroutines;
         if (numGoroutines > tracebackDepth) {
             ancestorsExpected = tracebackDepth;
         }
+
         var matches = goroutineRegex.FindAllStringSubmatch(output, -1);
         if (len(matches) != 2) {
             Ꮡt.Fatalf("want 2 goroutines, got:\n%s"u8, output);
         }
+
         // Check functions in the traceback.
         var fns = new @string[]{"main.recurseThenCallGo"u8, "main.main"u8, "main.printStack"u8, "main.TracebackAncestors"u8}.slice();
         foreach (var (_, fn) in fns) {
@@ -1123,18 +1126,21 @@ public static void TestTracebackAncestors(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("expected %q function in traceback:\n%s"u8, fn, output);
             }
         }
+
         {
             @string want = originatingFromGoroutineˢ;
             nint count = ancestorsExpected; if (strings.Count(output, want) != count) {
                 Ꮡt.Errorf("output does not contain %d instances of %q:\n%s"u8, count, want, output);
             }
         }
+
         {
             @string want = mainRecurseThenCallGoˢ;
             nint count = ancestorsExpected * (numFrames + 1); if (strings.Count(output, want) != count) {
                 Ꮡt.Errorf("output does not contain %d instances of %q:\n%s"u8, count, want, output);
             }
         }
+
         {
             @string want = mainRecurseThenCallGo0xˢ;
             nint count = 1; if (strings.Count(output, want) != count) {
@@ -1159,6 +1165,7 @@ public static partial void TestDeferHeapAndStack(ж<testing.T> Ꮡt) {
     nint P = 4; // processors
     nint N = 10000; //iterations
     nint D = 200; // stack depth
+
     if (testing.Short()) {
         P /= 2;
         N /= 10;
@@ -1227,7 +1234,6 @@ public static void TestFramePointerAdjust(ж<testing.T> Ꮡt) {
     else { /* default: */
         Ꮡt.Skipf("frame pointer is not supported on %s"u8, GOARCH);
     }
-
     @string output = runTestProg(Ꮡt, testprogˢ, framePointerAdjustˢ);
     if (output != ""u8) {
         Ꮡt.Errorf("output:\n%s\n\nwant no output"u8, output);

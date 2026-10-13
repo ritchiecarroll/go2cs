@@ -21,6 +21,7 @@ internal partial struct TestOpen_tests /*dyn*/ {
 
 public static void TestOpen(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
+
     @string dir = Ꮡt.TempDir();
     @string @file = filepath.Join(dir, "a");
     var (f, err) = os.Create(@file);
@@ -28,6 +29,7 @@ public static void TestOpen(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     f.Close();
+
     var tests = new TestOpen_tests[]{
         new(dir, syscall.O_RDONLY, default!),
         new(dir, syscall.O_CREAT, default!),
@@ -36,7 +38,6 @@ public static void TestOpen(ж<testing.T> Ꮡt) {
         new(@file, (nint)((nint)(nint)((nint)(nint)((nint)syscall.O_APPEND | (nint)syscall.O_WRONLY) | os.O_CREATE) | os.O_TRUNC), default!),
         new(dir, (nint)((nint)syscall.O_RDONLY | (nint)syscall.O_TRUNC), syscall.ERROR_ACCESS_DENIED),
         new(dir, (nint)((nint)syscall.O_WRONLY | (nint)syscall.O_RDWR), default!), // TODO: syscall.Open returns EISDIR here, we should reconcile this
-
         new(dir, syscall.O_WRONLY, syscall.EISDIR),
         new(dir, syscall.O_RDWR, syscall.EISDIR)
     }.slice();

@@ -110,7 +110,6 @@ internal static @string valueToString(reflectꓸValue val) {
     { /* default: */
         throw panic("valueToString: can't print type " + typ.String());
     }
-
 }
 
 } // end reflect_test_package

@@ -25,6 +25,7 @@ public static void TestMUD(ж<testing.T> Ꮡt) {
         Ꮡt.Log(l, r, area);
         Ꮡmud.add(l, r, area);
         mass += area;
+
         // Check total histogram weight.
         var hmass = 0.0D;
         foreach (var (_, val) in mud.hist.ΔRangeSnapshot()) {
@@ -33,6 +34,7 @@ public static void TestMUD(ж<testing.T> Ꮡt) {
         if (!aeq(mass, hmass)) {
             Ꮡt.Fatalf("want mass %g, got %g"u8, mass, hmass);
         }
+
         // Check inverse cumulative sum approximations.
         for (var j = 0.0D; j < mass; j += mass * 0.099D) {
             mud.setTrackMass(j);
@@ -63,6 +65,7 @@ public static void TestMUDTracking(ж<testing.T> Ꮡt) {
             mass += area;
             (l, var u, var ok) = mud.approxInvCumulativeSum();
             var (inv, ok2) = mud.invCumulativeSum(trackMass);
+
             if (mass < trackMass){
                 if (ok) {
                     Ꮡt.Errorf("approx(%g) = [%g, %g), but mass = %g"u8, trackMass, l, u, mass);

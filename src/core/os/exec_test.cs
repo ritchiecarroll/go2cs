@@ -30,15 +30,18 @@ public static void TestProcessLiteral(ж<Δtesting.T> Ꮡt) {
         if (Δruntime.GOARCH == "wasm"u8) {
             Ꮡt.Skip(signalsSendNotifyNotˢ);
         }
+
         var c = new channel<osꓸSignal>(1);
         signal.Notify(c.WithDirection(GoChanDir.Send), Δos.Interrupt);
         defer(signal.Stop, c.WithDirection(GoChanDir.Send), ref ᒐ);
+
         var p = Ꮡ(new Δos.Process(Pid: Δos.Getpid()));
         {
             var err = p.Signal(Δos.Interrupt); if (err != default!) {
                 Ꮡt.Fatalf("Signal got err %v, want nil"u8, err);
             }
         }
+
         // Verify we actually received the signal.
         var selᴛ1 = time.After(1 * time.ΔSecond);
         var selᴛ2 = c;
@@ -48,6 +51,7 @@ public static void TestProcessLiteral(ж<Δtesting.T> Ꮡt) {
             break;
         }
         case 1 when selᴛ2.ꟷᐳ(out _): {
+            // Good
             break;
         }}
     }
@@ -55,12 +59,12 @@ public static void TestProcessLiteral(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-// Good
 public static void TestProcessReleaseTwice(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         testenv.MustHaveGoBuild(new os_test_package.testing_TжTB(Ꮡt));
         Ꮡt.Parallel();
+
         var (r, w, err) = Δos.Pipe();
         if (err != default!) {
             Ꮡt.Fatalf("Pipe() got err %v, want nil"u8, err);
@@ -69,9 +73,10 @@ public static void TestProcessReleaseTwice(ж<Δtesting.T> Ꮡt) {
         defer(() => rʗ1.Close(), ref ᒐ);
         var wʗ1 = w;
         defer(() => wʗ1.Close(), ref ᒐ);
-        (var p, err) = Δos.StartProcess(testenv.GoToolPath(new os_test_package.testing_TжTB(Ꮡt)), new @string[]{"go"u8}.slice(), Ꮡ(new Δos.ProcAttr( // N.B. On Windows, StartProcess requires exactly 3 Files. Pass
- // in a dummy pipe to avoid irrelevant output on the test stdout.
 
+        (var p, err) = Δos.StartProcess(testenv.GoToolPath(new os_test_package.testing_TжTB(Ꮡt)), new @string[]{"go"u8}.slice(), Ꮡ(new Δos.ProcAttr(
+            // N.B. On Windows, StartProcess requires exactly 3 Files. Pass
+            // in a dummy pipe to avoid irrelevant output on the test stdout.
             Files: new ж<Δos.File>[]{r, w, w}.slice()
         )));
         if (err != default!) {
@@ -82,12 +87,15 @@ public static void TestProcessReleaseTwice(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Fatalf("first Release: got err %v, want nil"u8, errΔ1);
             }
         }
+
         err = p.Release();
+
         // We want EINVAL from a second Release call only on Windows.
         error want = default!;
         if (Δruntime.GOOS == "windows"u8) {
             want = syscall.EINVAL;
         }
+
         if (!AreEqual(err, want)) {
             Ꮡt.Fatalf("second Release: got err %v, want %v"u8, err, want);
         }

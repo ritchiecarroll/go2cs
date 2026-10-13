@@ -46,18 +46,21 @@ internal static void testResponseControllerFlush(ж<testing.T> Ꮡt, testMode mo
             ᐸꟷ(continuecʗ1);
             w.Write(slice<byte>("two"u8));
         })));
+
         var (res, err) = (~cst).c.Get((~(~cst).ts).URL);
         if (err != default!) {
             Ꮡt.Fatalf("unexpected connection error: %v"u8, err);
         }
         var resʗ1 = res;
         defer(() => (~resʗ1).Body.Close(), ref ᒐ);
+
         var buf = new slice<byte>(16);
         (var n, err) = (~res).Body.Read(buf);
         builtin.close(continuec);
         if (err != default! || ((sstring)(buf.slice(0, n))) != "one"u8) {
             Ꮡt.Fatalf("Body.Read = %q, %v, want %q, nil"u8, ((@string)(buf.slice(0, n))), err, oneˢ);
         }
+
         (var got, err) = io.ReadAll((~res).Body);
         if (err != default! || ((sstring)got) != "two"u8) {
             Ꮡt.Fatalf("Body.Read = %q, %v, want %q, nil"u8, ((@string)got), err, twoˢ);
@@ -128,6 +131,7 @@ internal static void testResponseControllerSetPastWriteDeadline(ж<testing.T> �
                     Ꮡt.Errorf("ctl.SetWriteDeadline() = %v, want nil"u8, errΔ2);
                 }
             }
+
             w.Write(slice<byte>("two"u8));
             {
                 var errΔ3 = ctl.Flush(); if (errΔ3 == default!) {
@@ -150,6 +154,7 @@ internal static void testResponseControllerSetPastWriteDeadline(ж<testing.T> �
                 }
             }
         })));
+
         var (res, err) = (~cst).c.Get((~(~cst).ts).URL);
         if (err != default!) {
             Ꮡt.Fatalf("unexpected connection error: %v"u8, err);
@@ -172,8 +177,6 @@ public static void TestResponseControllerSetFutureWriteDeadline(ж<testing.T> �
 internal static void testResponseControllerSetFutureWriteDeadline(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         var errc = new channel<error>(1);
         var startwritec = new channel<EmptyStruct>(0);
         var errcʗ1 = errc;
@@ -195,6 +198,7 @@ internal static void testResponseControllerSetFutureWriteDeadline(ж<testing.T> 
             var (_, errΔ3) = io.Copy(new http_test_package.http_ResponseWriterᴠWriter(w), ((neverEnding)(rune)'a'));
             errcʗ1.ᐸꟷ(errΔ3);
         })));
+
         var (res, err) = (~cst).c.Get((~(~cst).ts).URL);
         builtin.close(startwritec);
         if (err != default!) {
@@ -269,6 +273,7 @@ internal static partial void testResponseControllerSetPastReadDeadline(ж<testin
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         })));
+
         var (pr, pw) = io.Pipe();
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(1);

@@ -334,7 +334,6 @@ public partial struct BadPathEmbeddedB {
     public @string Second; /*`xml:"First"`*/
 }
 
-
 partial struct badPathTestsᴛ1 /*dyn*/ {
     internal any v, e;
 }
@@ -395,6 +394,7 @@ internal partial struct TestUnmarshalAttr_ParamStringPtr /*dyn*/ {
 
 public static void TestUnmarshalAttr(ж<testing.T> Ꮡt) {
     var x = slice<byte>(@"<Param int=""1"" />"u8);
+
     var p1 = Ꮡ(new TestUnmarshalAttr_ParamPtr(nil));
     {
         var err = Unmarshal(x, p1.OrTypedNil()); if (err != default!) {
@@ -407,6 +407,7 @@ public static void TestUnmarshalAttr(ж<testing.T> Ꮡt) {
     if ((~p1).Int.Value != 1) {
         Ꮡt.Fatalf("Unmarshal with %s failed:\nhave %#v,\n want %#v"u8, x, (~p1).Int.OrTypedNil(), (nint)(1));
     }
+
     var p2 = Ꮡ(new TestUnmarshalAttr_ParamVal(nil));
     {
         var err = Unmarshal(x, p2.OrTypedNil()); if (err != default!) {
@@ -416,6 +417,7 @@ public static void TestUnmarshalAttr(ж<testing.T> Ꮡt) {
     if ((~p2).Int != 1) {
         Ꮡt.Fatalf("Unmarshal with %s failed:\nhave %#v,\n want %#v"u8, x, (~p2).Int, (nint)(1));
     }
+
     var p3 = Ꮡ(new TestUnmarshalAttr_ParamStringPtr(nil));
     {
         var err = Unmarshal(x, p3.OrTypedNil()); if (err != default!) {
@@ -434,7 +436,6 @@ public partial struct Tables {
     public @string HTable; /*`xml:"http://www.w3.org/TR/html4/ table"`*/
     public @string FTable; /*`xml:"http://www.w3schools.com/furniture table"`*/
 }
-
 
 partial struct tablesᴛ1 /*dyn*/ {
     internal @string xml;
@@ -528,11 +529,6 @@ public partial struct TAttr {
     public @string Other4; /*`xml:"http://golang.org/2/json/ other,attr,omitempty"`*/
 }
 
-// Default space does not apply to attribute names.
-// Default space does not apply to attribute names.
-// Default space does not apply to attribute names.
-// Default space does not apply to attribute names.
-
 partial struct tableAttrsᴛ1 /*dyn*/ {
     internal @string xml;
     internal TableAttrs tab;
@@ -552,10 +548,12 @@ internal static slice<tableAttrsᴛ1> tableAttrs = new tableAttrsᴛ1[]{
         tab: new TableAttrs(new TAttr(HTable: "hello"u8, FTable: "world"u8))
     ),
     new(
+        // Default space does not apply to attribute names.
         xml: @"<TableAttrs xmlns=""http://www.w3schools.com/furniture"" xmlns:h=""http://www.w3.org/TR/html4/""><TAttr "u8 + @"h:table=""hello"" table=""world"" "u8 + @"/></TableAttrs>"u8,
         tab: new TableAttrs(new TAttr(HTable: "hello"u8, FTable: ""u8))
     ),
     new(
+        // Default space does not apply to attribute names.
         xml: @"<TableAttrs xmlns:f=""http://www.w3schools.com/furniture""><TAttr xmlns=""http://www.w3.org/TR/html4/"" "u8 + @"table=""hello"" f:table=""world"" "u8 + @"/></TableAttrs>"u8,
         tab: new TableAttrs(new TAttr(HTable: ""u8, FTable: "world"u8))
     ),
@@ -564,11 +562,13 @@ internal static slice<tableAttrsᴛ1> tableAttrs = new tableAttrsᴛ1[]{
         tab: new TableAttrs(nil)
     ),
     new(
+        // Default space does not apply to attribute names.
         xml: @"<TableAttrs xmlns:h=""http://www.w3.org/TR/html4/""><TAttr "u8 + @"h:table=""hello"" table=""world"" "u8 + @"/></TableAttrs>"u8,
         tab: new TableAttrs(new TAttr(HTable: "hello"u8, FTable: ""u8)),
         ns: "http://www.w3schools.com/furniture"u8
     ),
     new(
+        // Default space does not apply to attribute names.
         xml: @"<TableAttrs xmlns:f=""http://www.w3schools.com/furniture""><TAttr "u8 + @"table=""hello"" f:table=""world"" "u8 + @"/></TableAttrs>"u8,
         tab: new TableAttrs(new TAttr(HTable: ""u8, FTable: "world"u8)),
         ns: "http://www.w3.org/TR/html4/"u8
@@ -617,12 +617,14 @@ public static void TestMarshalNSAttr(ж<testing.T> Ꮡt) {
     if (str != want) {
         Ꮡt.Errorf("Marshal:\nhave: %#q\nwant: %#q\n"u8, str, want);
     }
+
     ref var dst = ref heap(new TableAttrs(), out var Ꮡdst);
     {
         var errΔ1 = Unmarshal(data, Ꮡdst); if (errΔ1 != default!) {
             Ꮡt.Errorf("Unmarshal: %v"u8, errΔ1);
         }
     }
+
     if (dst != src) {
         Ꮡt.Errorf("Unmarshal = %q, want %q"u8, dst, src);
     }
@@ -637,8 +639,7 @@ public static error UnmarshalXML(this ref MyCharData m, ж<global::go.encoding.x
 
     while (ᐧ) {
         var (t, err) = d.Token();
-        if (AreEqual(err, io.EOF)) {
-            // found end of element
+        if (AreEqual(err, io.EOF)) { // found end of element
             break;
         }
         if (err != default!) {
@@ -689,12 +690,14 @@ internal static readonly @string xmlVersion10EncodingUtf8ˢ2 = """
 
 public static void TestUnmarshaler(ж<testing.T> Ꮡt) {
     @string xml = xmlVersion10EncodingUtf8ˢ2;
+
     ref var m = ref heap(new MyStruct(), out var Ꮡm);
     {
         var err = Unmarshal(slice<byte>(xml), Ꮡm); if (err != default!) {
             Ꮡt.Fatal(err);
         }
     }
+
     if (m.Data == nil || m.Attr == nil || (~m.Data).body != "hello world"u8 || (~m.Attr).attr != "attr1"u8 || m.Data2.body != "howdy world"u8 || m.Attr2.attr != "attr2"u8) {
         Ꮡt.Errorf("m=%#+v\n"u8, m);
     }
@@ -853,6 +856,7 @@ public static void TestUnmarshalEmptyValues(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("zero: Unmarshal failed: got %v"u8, err);
         }
     }
+
     ref var zBytes = ref heap<slice<byte>>(out var ᏑzBytes);
     zBytes = new byte[]{}.slice();
     ref var zInt = ref heap<nint>(out var ᏑzInt);
@@ -885,6 +889,7 @@ public static void TestUnmarshalEmptyValues(ж<testing.T> Ꮡt) {
     if (!reflect.DeepEqual(v.OrTypedNil(), want.OrTypedNil())) {
         Ꮡt.Fatalf("zero: Unmarshal:\nhave:  %#+v\nwant: %#+v"u8, v.OrTypedNil(), want.OrTypedNil());
     }
+
     // Test with a pre-populated dst.
     // Multiple addressable copies, as pointer-to fields will replace value during unmarshal.
     var vBytes0 = slice<byte>("x"u8);
@@ -944,6 +949,7 @@ public static void TestUnmarshalEmptyValues(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("populated: Unmarshal failed: got %v"u8, err);
         }
     }
+
     want = Ꮡ(new Parent(
         IPtr: ᏑzInt,
         Is: new nint[]{vInt0, zInt}.slice(),
@@ -960,11 +966,9 @@ public static void TestUnmarshalEmptyValues(ж<testing.T> Ꮡt) {
         Ss: new @string[]{vStr0, zStr}.slice(),
         SPtrs: new ж<@string>[]{ᏑvStr0, ᏑzStr}.slice(),
         Child: new Child(G: new Child_G(I: vInt0)), // I should == zInt0? (zero value)
-
         Children: new Child[]{new(G: new Child_G(I: vInt0)), new()}.slice(),
-        ChildPtr: Ꮡ(new Child(G: new Child_G(I: vInt0)))
+        ChildPtr: Ꮡ(new Child(G: new Child_G(I: vInt0))) // I should == zInt0? (zero value)
     ));
-    // I should == zInt0? (zero value)
     if (!reflect.DeepEqual(v.OrTypedNil(), want.OrTypedNil())) {
         Ꮡt.Fatalf("populated: Unmarshal:\nhave:  %#+v\nwant: %#+v"u8, v.OrTypedNil(), want.OrTypedNil());
     }
@@ -1031,6 +1035,7 @@ public static void TestUnmarshalWhitespaceValues(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("whitespace values: Unmarshal failed: got %v"u8, err);
         }
     }
+
     var want = new WhitespaceValuesParent(
         BFalse: false,
         BTrue: true,
@@ -1121,6 +1126,7 @@ public static void TestUnmarshalWhitespaceAttrs(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("whitespace attrs: Unmarshal failed: got %v"u8, err);
         }
     }
+
     var want = new WhitespaceAttrsParent(
         BFalse: false,
         BTrue: true,
@@ -1157,6 +1163,7 @@ internal partial struct TestUnmarshalIntoNil_T /*dyn*/ {
 public static void TestUnmarshalIntoNil(ж<testing.T> Ꮡt) {
     ж<TestUnmarshalIntoNil_T> nilPointer = default!;
     var err = Unmarshal(slice<byte>("<T><A>1</A></T>"u8), nilPointer.OrTypedNil());
+
     if (err == default!) {
         Ꮡt.Fatalf("no error in unmarshaling"u8);
     }

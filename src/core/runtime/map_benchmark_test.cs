@@ -327,6 +327,7 @@ internal static slice<nint> cyclicPermutation(nint n) {
     for (nint i = 0; i < n; i++) {
         res[i] = pInv[inc[p[i]]];
     }
+
     // Test result.
     nint j = 0;
     for (nint i = 0; i < n - 1; i++) {
@@ -577,9 +578,11 @@ public static void BenchmarkMapInterfaceString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var m = new map<any, bool>{};
+
     for (nint i = 0; i < 100; i++) {
         m[fmt.Sprintf("%d"u8, i)] = true;
     }
+
     var key = ((any)(@string)("A"u8));
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -591,11 +594,13 @@ public static void BenchmarkMapInterfacePtr(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var m = new map<any, bool>{};
+
     for (nint i = 0; i < 100; i++) {
         ref var iΔ1 = ref heap<nint>(out var ᏑiΔ1);
         iΔ1 = i;
         m[ᏑiΔ1] = true;
     }
+
     var key = @new<nint>();
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -648,6 +653,7 @@ internal static Action<ж<testing.B>> benchSizes(Action<ж<testing.B>, nint> f) 
         (1 << (int)(20)),
         (1 << (int)(22))
     }.slice();
+
     // Cases enabled by default. Set -mapbench for the remainder.
     //
     // With the other type combinations, there are literally thousands of
@@ -658,6 +664,7 @@ internal static Action<ж<testing.B>> benchSizes(Action<ж<testing.B>, nint> f) 
         [64] = true,
         [(1 << (int)(16))] = true
     };
+
     var byDefaultʗ1 = byDefault;
     var casesʗ1 = cases;
     return (ж<testing.B> b) => {
@@ -667,6 +674,7 @@ internal static Action<ж<testing.B>> benchSizes(Action<ж<testing.B>, nint> f) 
                 if (!mapbench.Value && !byDefaultʗ2[n]) {
                     bΔ1.Skip(skippedBecauseMapbenchˢ);
                 }
+
                 f(bΔ1, n);
             });
         }
@@ -684,11 +692,14 @@ internal static Action<ж<testing.B>> smallBenchSizes(Action<ж<testing.B>, nint
     };
 }
 
+// A 16 byte type.
 partial struct smallType /*[16]byte*/;
 
+// A 512 byte type.
 /* [(1 << (int)(9))]byte */
 partial struct mediumType /*[512]byte*/;
 
+// A 4KiB type.
 /* [(1 << (int)(12))]byte */
 partial struct bigType /*[4096]byte*/;
 
@@ -802,7 +813,6 @@ internal static slice<T> genValues<T>(nint start, nint end) {
         throw panic("unreachable");
         break;
     }}
-
 }
 
 // Avoid inlining to force a heap allocation.
@@ -840,6 +850,7 @@ internal static void checkAllocSize<K, E>(ж<testing.B> Ꮡb, nint n) {
     var size = (uint64)n * (uint64)@unsafe.Sizeof(k);
     E e = GoZero<E>();
     size += (uint64)n * (uint64)@unsafe.Sizeof(e);
+
     if (size >= ((uint64)1 << (int)(30))) {
         Ꮡb.Skipf("Total key+elem size %d exceeds 1GiB"u8, size);
     }
@@ -856,6 +867,7 @@ internal static partial void benchmarkMapIter<K, E>(ж<testing.B> Ꮡb, nint n) 
     var sinkK = newSink<K>();
     var sinkE = newSink<E>();
     b.ResetTimer();
+
     for (nint i = 0; i < iterations; i++) {
         foreach (var (kΔ1, eΔ1) in m) {
             sinkK.ValueSlot = kΔ1;
@@ -895,14 +907,17 @@ internal static partial void benchmarkMapIterLowLoad<K, E>(ж<testing.B> Ꮡb, n
     // Only insert one entry regardless of map size.
     var k = genValues<K>(0, 1);
     var e = genValues<E>(0, 1);
+
     var m = new map<K, E>(n);
     foreach (var (i, _) in k) {
         m[k[i]] = e[i];
     }
+
     nint iterations = iterCount(Ꮡb, n);
     var sinkK = newSink<K>();
     var sinkE = newSink<E>();
     b.ResetTimer();
+
     for (nint i = 0; i < iterations; i++) {
         foreach (var (kΔ1, eΔ1) in m) {
             sinkK.ValueSlot = kΔ1;
@@ -939,6 +954,7 @@ internal static partial void benchmarkMapAccessHit<K, E>(ж<testing.B> Ꮡb, nin
     var m = fillMap(k, e);
     var sink = newSink<E>();
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         sink.ValueSlot = m[k[rem(i, n)]];
     }
@@ -966,16 +982,17 @@ internal static void benchmarkMapAccessMiss<K, E>(ж<testing.B> Ꮡb, nint n) {
     var k = genValues<K>(0, n);
     var e = genValues<E>(0, n);
     var m = fillMap(k, e);
-    if (n == 0) {
-        // Create a lookup values for empty maps.
+    if (n == 0) { // Create a lookup values for empty maps.
         n = 1;
     }
     var w = genValues<K>(n, 2 * n);
     b.ResetTimer();
+
     bool ok = default!;
     for (nint i = 0; i < b.N; i++) {
         (_, ok) = m[w[rem(i, n)], ꟷ];
     }
+
     sinkOK = ok;
 }
 
@@ -1007,6 +1024,7 @@ internal static void benchmarkMapAssignExists<K, E>(ж<testing.B> Ꮡb, nint n) 
     var e = genValues<E>(0, n);
     var m = fillMap(k, e);
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m[k[rem(i, n)]] = e[rem(i, n)];
     }
@@ -1044,6 +1062,7 @@ internal static void benchmarkMapAssignFillNoHint<K, E>(ж<testing.B> Ꮡb, nint
     var k = genValues<K>(0, n);
     var e = genValues<E>(0, n);
     b.ResetTimer();
+
     map<K, E> m = default!;
     for (nint i = 0; i < b.N; i++) {
         if (rem(i, n) == 0) {
@@ -1084,11 +1103,14 @@ internal static void benchmarkMapAssignGrowLatency<K, E>(ж<testing.B> Ꮡb, nin
     checkAllocSize<K, E>(Ꮡb, n);
     var k = genValues<K>(0, n);
     var e = genValues<E>(0, n);
+
     // Store the run time of each mapassign. Keeping the full data rather
     // than a histogram provides higher precision. b.N tends to be <10M, so
     // the memory requirement isn't too bad.
     var sample = new slice<int64>(b.N);
+
     b.ResetTimer();
+
     map<K, E> m = default!;
     for (nint i = 0; i < b.N; i++) {
         if (rem(i, n) == 0) {
@@ -1099,7 +1121,9 @@ internal static void benchmarkMapAssignGrowLatency<K, E>(ж<testing.B> Ꮡb, nin
         var end = runtime_internal_test_package.Nanotime();
         sample[i] = end - start;
     }
+
     b.StopTimer();
+
     slices.Sort<slice<int64>, int64>(sample);
     // TODO(prattmic): Grow is so rare that even p99.99 often doesn't
     // display a grow case. Switch to a more direct measure of grow cases
@@ -1138,6 +1162,7 @@ internal static void benchmarkMapAssignFillHint<K, E>(ж<testing.B> Ꮡb, nint n
     var k = genValues<K>(0, n);
     var e = genValues<E>(0, n);
     b.ResetTimer();
+
     map<K, E> m = default!;
     for (nint i = 0; i < b.N; i++) {
         if (rem(i, n) == 0) {
@@ -1175,6 +1200,7 @@ internal static void benchmarkMapAssignFillClear<K, E>(ж<testing.B> Ꮡb, nint 
     var e = genValues<E>(0, n);
     var m = fillMap(k, e);
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         if (rem(i, n) == 0) {
             builtin.clear(m);
@@ -1213,6 +1239,7 @@ internal static void benchmarkMapAssignAddition<K, E>(ж<testing.B> Ꮡb, nint n
     var e = genValues<E>(0, n);
     var m = fillMap(k, e);
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m[k[rem(i, n)]] += e[rem(i, n)];
     }
@@ -1242,6 +1269,7 @@ internal static void benchmarkMapAssignAppend<K>(ж<testing.B> Ꮡb, nint n) {
     var e = genValues<slice<int32>>(0, n);
     var m = fillMap(k, e);
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m[k[rem(i, n)]] = append(m[k[rem(i, n)]], e[rem(i, n)][0]);
     }
@@ -1272,6 +1300,7 @@ internal static void benchmarkMapDelete<K, E>(ж<testing.B> Ꮡb, nint n) {
     var e = genValues<E>(0, n);
     var m = fillMap(k, e);
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         if (len(m) == 0) {
             // We'd like to StopTimer while refilling the map, but
@@ -1311,6 +1340,7 @@ internal static void benchmarkMapPop<K, E>(ж<testing.B> Ꮡb, nint n) {
     var e = genValues<E>(0, n);
     var m = fillMap(k, e);
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         if (len(m) == 0) {
             // We'd like to StopTimer while refilling the map, but

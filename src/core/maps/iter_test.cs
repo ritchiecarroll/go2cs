@@ -38,6 +38,7 @@ public static void TestKeys(ж<testing.T> Ꮡt) {
             m[i] = i;
             want = append(want, i);
         }
+
         slice<nint> got = default!;
         foreach (var k in range<nint>(Keys<map<nint, nint>, nint, nint>(m).Invoke)) {
             got = append(got, k);
@@ -57,6 +58,7 @@ public static void TestValues(ж<testing.T> Ꮡt) {
             m[i] = i;
             want = append(want, i);
         }
+
         slice<nint> got = default!;
         foreach (var v in range<nint>(Values<map<nint, nint>, nint, nint>(m).Invoke)) {
             got = append(got, v);
@@ -80,6 +82,7 @@ public static void TestInsert(ж<testing.T> Ꮡt) {
             }
         }
     });
+
     var want = new map<nint, nint>{
         [1] = 1,
         [2] = 1
@@ -93,6 +96,7 @@ public static void TestInsert(ж<testing.T> Ꮡt) {
     }) {
         want[i] = v;
     }
+
     if (!Equal<map<nint, nint>, map<nint, nint>, nint, nint>(got, want)) {
         Ꮡt.Errorf("Insert got: %v, want: %v"u8, got, want);
     }

@@ -17,7 +17,6 @@ internal static float64 inf = Δmath.Inf(+1);
 internal static float64 negInf = Δmath.Inf(-1);
 internal static float64 nan = Δmath.NaN();
 
-
 partial struct testsᴛ1 /*dyn*/ {
     internal float64 min, max;
 }
@@ -106,6 +105,7 @@ internal static void testMinMax<T>(ж<testing.T> Ꮡt, params Span<T> valsʗp)
             if (!(x < y)) {
                 Ꮡt.Fatalf("values out of order: !(%v < %v)"u8, x, y);
             }
+
             {
                 var z = builtin.min(x, y); if (!AreEqual(z, x)) {
                     Ꮡt.Errorf("min(%v, %v) = %v, want %v"u8, x, y, z, x);
@@ -116,6 +116,7 @@ internal static void testMinMax<T>(ж<testing.T> Ꮡt, params Span<T> valsʗp)
                     Ꮡt.Errorf("min(%v, %v) = %v, want %v"u8, y, x, z, x);
                 }
             }
+
             {
                 var z = builtin.max(x, y); if (!AreEqual(z, y)) {
                     Ꮡt.Errorf("max(%v, %v) = %v, want %v"u8, x, y, z, y);
@@ -149,6 +150,7 @@ internal static readonly @string xxxˢ = "xxx"u8;
 public static void TestMinMaxStringTies(ж<testing.T> Ꮡt) {
     @string s = xxxˢ;
     var x = strings.Split(s, ""u8);
+
     var xʗ1 = x;
     void test(nint i, nint j, nint k) {
         {
@@ -162,6 +164,7 @@ public static void TestMinMaxStringTies(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     test(0, 1, 2);
     test(0, 2, 1);
     test(1, 0, 2);

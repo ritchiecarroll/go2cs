@@ -46,7 +46,7 @@ using static global::go.@internal.abi_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/abi/abi_test.go", "abi_test.cs", "ABIelJaCgqiCggAPCJSogoKCgpaCloKCgqiCgoKogoKClIKCpoKUgg==")]
+[assembly: go.GoPositionMap("internal/abi/abi_test.go", "abi_test.cs", "ABIelKaCgriCggAPCJS4goKCgqaCpoKCgriCgoK4goKClIKCpoKUgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

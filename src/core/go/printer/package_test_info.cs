@@ -44,7 +44,7 @@ using static global::go.go.printer_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/printer/example_test.go", "example_test.cs", "ABIisoKAgoKAgoLY5riMwqiCgpamgg==")]
+[assembly: global::go.GoPositionMap("go/printer/example_test.go", "example_test.cs", "ABIisoKAgoKAgoLY5ricwriCgqamgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

@@ -18,18 +18,22 @@ public static void TestReadGCStats(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         defer(SetGCPercent, SetGCPercent(-1), ref ᒐ);
+
         ref var stats = ref heap(new debug.GCStats(), out var Ꮡstats);
         ref var mstats = ref heap(new runtime.MemStats(), out var Ꮡmstats);
         time.Duration min = default!;
         time.Duration max = default!;
+
         // First ReadGCStats will allocate, second should not,
         // especially if we follow up with an explicit garbage collection.
         stats.PauseQuantiles = new slice<time.Duration>(10);
         ReadGCStats(Ꮡstats);
         runtime.GC();
+
         // Assume these will return same data: no GC during ReadGCStats.
         ReadGCStats(Ꮡstats);
         runtime.ReadMemStats(Ꮡmstats);
+
         if (stats.NumGC != (int64)mstats.NumGC) {
             Ꮡt.Errorf("stats.NumGC = %d, but mstats.NumGC = %d"u8, stats.NumGC, mstats.NumGC);
         }
@@ -61,16 +65,19 @@ public static void TestReadGCStats(ж<testing.T> Ꮡt) {
                 offΔ1 = (offΔ1 + len(mstats.PauseNs) - 1) % len(mstats.PauseNs);
             }
         }
+
         var q = stats.PauseQuantiles;
         nint nq = len(q);
         if (q[0] != min || q[nq - 1] != max) {
             Ꮡt.Errorf("stats.PauseQuantiles = [%d, ..., %d], want [%d, ..., %d]"u8, q[0], q[nq - 1], min, max);
         }
+
         for (nint i = 0; i < nq - 1; i++) {
             if (q[i] > q[i + 1]) {
                 Ꮡt.Errorf("stats.PauseQuantiles[%d]=%d > stats.PauseQuantiles[%d]=%d"u8, i, q[i], i + 1, q[i + 1]);
             }
         }
+
         // compare memory stats with gc stats:
         if (len(stats.PauseEnd) != n) {
             Ꮡt.Fatalf("len(stats.PauseEnd) = %d, want %d"u8, len(stats.PauseEnd), n);
@@ -96,13 +103,17 @@ public static void TestFreeOSMemory(ж<testing.T> Ꮡt) {
     // the OS after.
     UntypedInt bigBytes = /* 32 << 20 */ 33554432;
     big = new slice<byte>(bigBytes);
+
     // Make sure any in-progress GCs are complete.
     runtime.GC();
+
     ref var before = ref heap(new runtime.MemStats(), out var Ꮡbefore);
     runtime.ReadMemStats(Ꮡbefore);
+
     // Clear the last reference to the big allocation, making it
     // susceptible to collection.
     big = default!;
+
     // FreeOSMemory runs a GC cycle before releasing memory,
     // so it's fine to skip a GC here.
     //
@@ -112,14 +123,17 @@ public static void TestFreeOSMemory(ж<testing.T> Ꮡt) {
     // often if FreeOSMemory does not work correctly, and a test
     // that passes every time if it does.
     FreeOSMemory();
+
     ref var after = ref heap(new runtime.MemStats(), out var Ꮡafter);
     runtime.ReadMemStats(Ꮡafter);
+
     // Check to make sure that the big allocation (now freed)
     // had its memory shift into HeapReleased as a result of that
     // FreeOSMemory.
     if (after.HeapReleased <= before.HeapReleased) {
         Ꮡt.Fatalf("no memory released: %d -> %d"u8, before.HeapReleased, after.HeapReleased);
     }
+
     // Check to make sure bigBytes was released, plus some slack. Pages may get
     // allocated in between the two measurements above for a variety for reasons,
     // most commonly for GC work bufs. Since this can get fairly high, depending
@@ -149,12 +163,14 @@ public static void TestSetGCPercent(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         testenv.SkipFlaky(new testing_TжTB(Ꮡt), 20076);
+
         // Test that the variable is being set and returned correctly.
         nint old = SetGCPercent(123);
         nint @new = SetGCPercent(old);
         if (@new != 123) {
             Ꮡt.Errorf("SetGCPercent(123); SetGCPercent(x) = %d, want 123"u8, @new);
         }
+
         // Test that the percentage is implemented correctly.
         defer(() => {
             SetGCPercent(old);
@@ -192,6 +208,7 @@ public static void TestSetGCPercent(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("NextGC = %d MB, want %d±%d MB"u8, (ms.NextGC >> (int)(20)), (want >> (int)(20)), (nint)((thresh >> (int)(20))));
             }
         }
+
         // Trigger a GC and get back to 100 MB live with GOGC=100.
         SetGCPercent(100);
         runtime.GC();

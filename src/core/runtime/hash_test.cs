@@ -123,6 +123,7 @@ internal static void addS_seed(this ref HashSet s, @string x, uintptr seed) {
 internal static void check(this ref HashSet s, ж<testing.T> Ꮡt) {
     var list = s.list;
     slices.Sort<slice<uintptr>, uintptr>(list);
+
     nint collisions = 0;
     for (nint i = 1; i < len(list); i++) {
         if (list[i] == list[i - 1]) {
@@ -130,6 +131,7 @@ internal static void check(this ref HashSet s, ж<testing.T> Ꮡt) {
         }
     }
     nint n = len(list);
+
     const float64 SLOP = 50.0;
     var pairs = (int64)n * (int64)(n - 1) / 2;
     var expected = (float64)pairs / Δmath.Pow(2.0D, (float64)hashSize);
@@ -220,8 +222,10 @@ internal static void twoNonZero(ж<HashSet> Ꮡh, nint n) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     var b = new slice<byte>(n);
+
     // all zero
     h.addB(b);
+
     // one non-zero byte
     for (nint i = 0; i < n; i++) {
         for (nint x = 1; x < 256; x++) {
@@ -230,6 +234,7 @@ internal static void twoNonZero(ж<HashSet> Ꮡh, nint n) {
             b[i] = 0;
         }
     }
+
     // two non-zero bytes
     for (nint i = 0; i < n; i++) {
         for (nint x = 1; x < 256; x++) {
@@ -570,23 +575,25 @@ public static void TestSmhasherAvalanche(ж<testing.T> Ꮡt) {
 }
 
 internal static void avalancheTest1(ж<testing.T> Ꮡt, Key k) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     UntypedInt REP = 100000;
     var r = rand.New(rand.NewSource(1234));
     nint n = k.bits();
+
     // grid[i][j] is a count of whether flipping
     // input bit i affects output bit j.
     var grid = GoReflect.WithElemDims(new slice<array<nint>>(n, () => new(64)), 64);
+
     for (nint z = 0; z < REP; z++) {
         // pick a random key, hash it
         k.random(r);
         var h = k.hash();
+
         // flip each bit, hash & compare the results
         for (nint i = 0; i < n; i++) {
             k.flipBit(i);
             var d = (uintptr)(h ^ k.hash());
             k.flipBit(i);
+
             // record the effects of that bit flip
             var g = Ꮡ(grid, i);
             for (nint j = 0; j < hashSize; j++) {
@@ -595,6 +602,7 @@ internal static void avalancheTest1(ж<testing.T> Ꮡt, Key k) {
             }
         }
     }
+
     // Each entry in the grid should be about REP/2.
     // More precisely, we did N = k.bits() * hashSize experiments where
     // each is the sum of REP coin flips. We want to find bounds on the
@@ -655,6 +663,7 @@ internal static void windowed(ж<testing.T> Ꮡt, ж<HashSet> Ꮡh, Key k) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
     UntypedInt BITS = 16;
+
     for (nint r = 0; r < k.bits(); r++) {
         for (nint i = 0; i < (nint)((1 << (int)(BITS))); i++) {
             k.clear();
@@ -744,8 +753,8 @@ public static void TestIssue66841(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Errorf("%s"u8, ((@string)@out));
         }
+        // Fall through. Might as well run this test when aeshash is on also.
     }
-    // Fall through. Might as well run this test when aeshash is on also.
     var h = newHashSet();
     array<byte> b = new(16);
     binary.LittleEndian.PutUint64(b[..8], 0xe7037ed1a0b428dbUL); // runtime.m2
@@ -771,6 +780,7 @@ internal static void benchmarkHash(ж<testing.B> Ꮡb, nint n) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     @string s = strings.Repeat("A"u8, n);
+
     for (nint i = 0; i < b.N; i++) {
         runtime_internal_test_package.StringHash(s, 0);
     }
@@ -800,11 +810,11 @@ public static void BenchmarkHash65536(ж<testing.B> Ꮡb) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string fooˢ2 = "foo"u8;
 
+// Make the key type at most 128 bytes. Otherwise,
+// we get an allocation per key.
 internal partial struct TestArrayHash_key /*[8]@string*/;
 
 public static void TestArrayHash(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Make sure that "" in arrays hash correctly. The hash
     // should at least scramble the input seed so that, e.g.,
     // {"","foo"} and {"foo",""} have different hashes.
@@ -817,6 +827,7 @@ public static void TestArrayHash(ж<testing.T> Ꮡt) {
     // header is allocated on the stack.)
     var f = () => {
         var m = new map<TestArrayHash_key, bool>(70);
+
         // fill m with keys that have 4 "foo"s and 4 ""s.
         for (nint i = 0; i < 256; i++) {
             TestArrayHash_key k = default!;
@@ -850,6 +861,7 @@ public static void TestStructHash(ж<testing.T> Ꮡt) {
     // See the comment in TestArrayHash.
     var f = () => {
         var m = new map<TestStructHash_key, bool>(70);
+
         // fill m with keys that have 4 "foo"s and 4 ""s.
         for (nint i = 0; i < 256; i++) {
             TestStructHash_key k = default!;

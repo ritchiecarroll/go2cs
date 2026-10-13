@@ -66,16 +66,15 @@ public static bool Less(this ref multiSorter ms, nint i, nint j) {
         var less = ms.less[k];
         switch (ᐧ) {
         case {} when less(p, q): {
+            // p < q, so we have a decision.
             return true;
         }
-        case {} when less(q, // p < q, so we have a decision.
- p): {
+        case {} when less(q, p): {
+            // p > q, so we have a decision.
             return false;
         }}
-
+        // p == q; try the next comparison.
     }
-    // p > q, so we have a decision.
-    // p == q; try the next comparison.
     // All comparisons to here said "equal", so just return whatever
     // the final comparison reports.
     return ms.less[k](p, q);
@@ -111,25 +110,30 @@ public static void Example_sortMultiKeys() {
     var decreasingLines = (ж<Change> c1, ж<Change> c2) => {
         return (~c1).lines > (~c2).lines; // Note: > orders downwards.
     };
+
     // Simple use: Sort by user.
     OrderedBy(new Func<ж<Change>, ж<Change>, bool>(user)).ΔSort(changes);
     fmt.Println(byUserˢ, changes);
+
     // More examples.
     OrderedBy(new Func<ж<Change>, ж<Change>, bool>(user), increasingLines).ΔSort(changes);
     fmt.Println(byUserLinesˢ, changes);
+
     OrderedBy(new Func<ж<Change>, ж<Change>, bool>(user), decreasingLines).ΔSort(changes);
     fmt.Println(byUserLinesˢ2, changes);
+
     OrderedBy(new Func<ж<Change>, ж<Change>, bool>(language), increasingLines).ΔSort(changes);
     fmt.Println(byLanguageLinesˢ, changes);
+
     OrderedBy(new Func<ж<Change>, ж<Change>, bool>(language), increasingLines, user).ΔSort(changes);
     fmt.Println(byLanguageLinesUserˢ, changes);
-}
 
-// Output:
-// By user: [{dmr C 100} {glenda Go 200} {gri Go 100} {gri Smalltalk 80} {ken C 150} {ken Go 200} {r Go 100} {r C 150} {rsc Go 200}]
-// By user,<lines: [{dmr C 100} {glenda Go 200} {gri Smalltalk 80} {gri Go 100} {ken C 150} {ken Go 200} {r Go 100} {r C 150} {rsc Go 200}]
-// By user,>lines: [{dmr C 100} {glenda Go 200} {gri Go 100} {gri Smalltalk 80} {ken Go 200} {ken C 150} {r C 150} {r Go 100} {rsc Go 200}]
-// By language,<lines: [{dmr C 100} {ken C 150} {r C 150} {gri Go 100} {r Go 100} {glenda Go 200} {ken Go 200} {rsc Go 200} {gri Smalltalk 80}]
-// By language,<lines,user: [{dmr C 100} {ken C 150} {r C 150} {gri Go 100} {r Go 100} {glenda Go 200} {ken Go 200} {rsc Go 200} {gri Smalltalk 80}]
+    // Output:
+    // By user: [{dmr C 100} {glenda Go 200} {gri Go 100} {gri Smalltalk 80} {ken C 150} {ken Go 200} {r Go 100} {r C 150} {rsc Go 200}]
+    // By user,<lines: [{dmr C 100} {glenda Go 200} {gri Smalltalk 80} {gri Go 100} {ken C 150} {ken Go 200} {r Go 100} {r C 150} {rsc Go 200}]
+    // By user,>lines: [{dmr C 100} {glenda Go 200} {gri Go 100} {gri Smalltalk 80} {ken Go 200} {ken C 150} {r C 150} {r Go 100} {rsc Go 200}]
+    // By language,<lines: [{dmr C 100} {ken C 150} {r C 150} {gri Go 100} {r Go 100} {glenda Go 200} {ken Go 200} {rsc Go 200} {gri Smalltalk 80}]
+    // By language,<lines,user: [{dmr C 100} {ken C 150} {r C 150} {gri Go 100} {r Go 100} {glenda Go 200} {ken Go 200} {rsc Go 200} {gri Smalltalk 80}]
+}
 
 } // end sort_test_package

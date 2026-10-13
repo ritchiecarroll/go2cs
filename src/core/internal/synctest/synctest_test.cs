@@ -158,12 +158,14 @@ public static void TestTimerReset(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("first sleep: <-tm.C = %v, want %v"u8, got, want);
             }
         }
+
         tm.Reset(2 * time.ΔSecond);
         {
             var (got, want) = (ᐸꟷ((~tm).C), start.Add((time.Duration)(3000000000L))); if (got != want) {
                 Ꮡt.Errorf("second sleep: <-tm.C = %v, want %v"u8, got, want);
             }
         }
+
         tm.Reset((time.Duration)(3000000000L));
         time.Sleep(1 * time.ΔSecond);
         tm.Reset((time.Duration)(3000000000L));
@@ -390,6 +392,7 @@ public static void TestCond(ж<testing.T> Ꮡt) {
         var cond = sync.NewCond(new sync.MutexжLocker(Ꮡmu));
         var start = time.Now();
         time.Duration waitTime = /* 1 * time.Millisecond */ 1000000;
+
         var condʗ1 = cond;
         goǃ(() => {
             // Signal the cond.
@@ -397,12 +400,14 @@ public static void TestCond(ж<testing.T> Ꮡt) {
             Ꮡmu.Lock();
             condʗ1.Signal();
             Ꮡmu.Unlock();
+
             // Broadcast to the cond.
             time.Sleep(waitTime);
             Ꮡmu.Lock();
             condʗ1.Broadcast();
             Ꮡmu.Unlock();
         });
+
         // Wait for cond.Signal.
         Ꮡmu.Lock();
         cond.Wait();
@@ -412,6 +417,7 @@ public static void TestCond(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("after cond.Signal: time elapsed = %v, want %v"u8, got, want);
             }
         }
+
         // Wait for cond.Broadcast in two goroutines.
         var waiterDone = false;
         var condʗ2 = cond;

@@ -37,6 +37,7 @@ internal static uint32 mul(uint32 b, uint32 c) {
             s ^= (uint32)(i);
             j ^= (uint32)(k); // turn off bit to end loop early
         }
+
         // i *= x in GF(2) modulo the polynomial
         i <<= (int)(1);
         if ((uint32)(i & 0x100) != 0) {

@@ -73,24 +73,31 @@ public static void TestCTRStream(ж<testing.T> Ꮡt) {
         foreach (var (_, keylen) in new nint[]{128, 192, 256}.slice()) {
             tΔ1.Run(fmt.Sprintf("AES-%d"u8, keylen), (ж<testing.T> tΔ2) => {
                 var rng = newRandReader(tΔ2);
+
                 var key = new slice<byte>(keylen / 8);
                 rng.Read(key);
+
                 var (block, err) = aes.NewCipher(key);
                 if (err != default!) {
                     throw panic(err);
                 }
+
                 cryptotest.TestStreamFromBlock(tΔ2, block, cipher.NewCTR);
             });
         }
     });
+
     Ꮡt.Run(desˢ, (ж<testing.T> tΔ3) => {
         var rng = newRandReader(tΔ3);
+
         var key = new slice<byte>(8);
         rng.Read(key);
+
         var (block, err) = des.NewCipher(key);
         if (err != default!) {
             throw panic(err);
         }
+
         cryptotest.TestStreamFromBlock(tΔ3, block, cipher.NewCTR);
     });
 }

@@ -28,6 +28,7 @@ public static void TestCertCache(ж<testing.T> Ꮡt) {
     if (p == nil) {
         Ꮡt.Fatal(failedToDecodeˢ);
     }
+
     var (certA, err) = Ꮡcc.newCert((~p).Bytes);
     if (err != default!) {
         Ꮡt.Fatalf("newCert failed: %s"u8, err);
@@ -39,6 +40,7 @@ public static void TestCertCache(ж<testing.T> Ꮡt) {
     if ((~certA).cert != (~certB).cert) {
         Ꮡt.Fatal(newCertReturnedAUniqueˢ);
     }
+
     {
         var (entry, ok) = Ꮡcc.of(global::go.crypto.tls_package.certCache.ᏑMap).Load(((@string)(~p).Bytes)); if (!ok){
             Ꮡt.Fatal(cacheDoesNotContainˢ);
@@ -50,6 +52,7 @@ public static void TestCertCache(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     void timeoutRefCheck(ж<testing.T> tΔ1, @string key, int64 count) {
         tΔ1.Helper();
         var c = time_package.After((time.Duration)(4000000000L));
@@ -68,6 +71,7 @@ public static void TestCertCache(ж<testing.T> Ꮡt) {
                 if (count == 0 && !ok) {
                     return;
                 }
+
                 if (e._<ж<global::go.crypto.tls_package.cacheEntry>>().of(global::go.crypto.tls_package.cacheEntry.Ꮡrefs).Load() == count) {
                     return;
                 }
@@ -75,19 +79,23 @@ public static void TestCertCache(ж<testing.T> Ꮡt) {
             }}
         }
     }
+
     // Keep certA alive until at least now, so that we can
     // purposefully nil it and force the finalizer to be
     // called.
     runtime.KeepAlive(certA.OrTypedNil());
     certA = default!;
     runtime.GC();
+
     timeoutRefCheck(Ꮡt, ((@string)(~p).Bytes), 1);
+
     // Keep certB alive until at least now, so that we can
     // purposefully nil it and force the finalizer to be
     // called.
     runtime.KeepAlive(certB.OrTypedNil());
     certB = default!;
     runtime.GC();
+
     timeoutRefCheck(Ꮡt, ((@string)(~p).Bytes), 0);
 }
 
@@ -98,6 +106,7 @@ public static void BenchmarkCertCache(ж<testing.B> Ꮡb) {
     if (p == nil) {
         Ꮡb.Fatal(failedToDecodeˢ);
     }
+
     ref var cc = ref heap<global::go.crypto.tls_package.certCache>(out var Ꮡcc);
     cc = new certCache(nil);
     b.ReportAllocs();

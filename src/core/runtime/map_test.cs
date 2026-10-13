@@ -37,22 +37,28 @@ internal static readonly object wrongSignˢ = (@string)"wrong sign"u8;
 // but it's what the current map implementation does.
 public static void TestNegativeZero(ж<testing.T> Ꮡt) {
     var m = new map<float64, bool>(0);
+
     m[+0.0D] = true;
     m[Δmath.Copysign(0.0D, -1.0D)] = true; // should overwrite +0 entry
+
     if (len(m) != 1) {
         Ꮡt.Error(lengthWrongˢ);
     }
+
     foreach (var (k, _) in m) {
         if (Δmath.Copysign(1.0D, k) > 0D) {
             Ꮡt.Error(wrongSignˢ);
         }
     }
+
     m = new map<float64, bool>(0);
     m[Δmath.Copysign(0.0D, -1.0D)] = true;
     m[+0.0D] = true; // should overwrite -0.0 entry
+
     if (len(m) != 1) {
         Ꮡt.Error(lengthWrongˢ);
     }
+
     foreach (var (k, _) in m) {
         if (Δmath.Copysign(1.0D, k) < 0D) {
             Ꮡt.Error(wrongSignˢ);
@@ -89,6 +95,7 @@ internal static void testMapNan(ж<testing.T> Ꮡt, map<float64, nint> m) {
 public static void TestMapAssignmentNan(ж<testing.T> Ꮡt) {
     var m = new map<float64, nint>(0);
     var nan = Δmath.NaN();
+
     // Test assignment.
     m[nan] = 1;
     m[nan] = 2;
@@ -101,6 +108,7 @@ public static void TestMapAssignmentNan(ж<testing.T> Ꮡt) {
 public static void TestMapOperatorAssignmentNan(ж<testing.T> Ꮡt) {
     var m = new map<float64, nint>(0);
     var nan = Δmath.NaN();
+
     // Test assignment operations.
     m[nan] += 1;
     m[nan] += 2;
@@ -109,9 +117,8 @@ public static void TestMapOperatorAssignmentNan(ж<testing.T> Ꮡt) {
 }
 
 public static void TestMapOperatorAssignment(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var m = new map<nint, nint>(0);
+
     // "m[k] op= x" is rewritten into "m[k] = m[k] op x"
     // differently when op is / or % than when it isn't.
     // Simple test to make sure they all work as expected.
@@ -119,6 +126,7 @@ public static void TestMapOperatorAssignment(ж<testing.T> Ꮡt) {
     m[0] += 67890;
     m[0] /= 123;
     m[0] %= 456;
+
     const nint want = /* (12345 + 67890) / 123 % 456 */ 196;
     {
         nint got = m[0]; if (got != want) {
@@ -131,12 +139,14 @@ internal static bool sinkAppend;
 
 public static void TestMapAppendAssignment(ж<testing.T> Ꮡt) {
     var m = new map<nint, slice<nint>>(0);
+
     m[0] = default!;
     m[0] = append(m[0], (nint)(12345));
     m[0] = append(m[0], (nint)(67890));
     (sinkAppend, m[0]) = (!sinkAppend, append(m[0], (nint)(123), (nint)(456)));
     var a = new nint[]{7, 8, 9, 0}.slice();
     m[0] = appendꓸꓸꓸ(m[0], a);
+
     var want = new nint[]{12345, 67890, 123, 456, 7, 8, 9, 0}.slice();
     {
         var got = m[0]; if (!slices.Equal<slice<nint>, nint>(got, want)) {
@@ -166,11 +176,13 @@ internal static readonly object naNValuesLostDuringGrowˢ = (@string)"NaN values
 public static void TestGrowWithNaN(ж<testing.T> Ꮡt) {
     var m = new map<float64, nint>(4);
     var nan = Δmath.NaN();
+
     // Use both assignment and assignment operations as they may
     // behave differently.
     m[nan] = 1;
     m[nan] = 2;
     m[nan] += 4;
+
     nint cnt = 0;
     nint s = 0;
     var growflag = true;
@@ -473,6 +485,7 @@ public static void TestEmptyKeyAndValue(ж<testing.T> Ꮡt) {
     b[new empty(nil)] = 0;
     b[new empty(nil)] = 1;
     c[new empty(nil)] = new empty(nil);
+
     if (len(a) != 1) {
         Ꮡt.Errorf("empty value insert problem"u8);
     }
@@ -495,7 +508,6 @@ public static void TestSingleBucketMapStringKeys_DupLen(ж<testing.T> Ꮡt) {
         ["xx"u8] = "x2val"u8,
         ["foo"u8] = "fooval"u8,
         ["bar"u8] = "barval"u8, // same key length as "foo"
-
         ["xxxx"u8] = "x4val"u8,
         [strings.Repeat("x"u8, 128)] = "longval1"u8,
         [strings.Repeat("y"u8, 128)] = "longval2"u8
@@ -531,6 +543,7 @@ public static void TestMapNanGrowIterator(ж<testing.T> Ꮡt) {
     UntypedInt nBuckets = 16;
     // To fill nBuckets buckets takes LOAD * nBuckets keys.
     nint nKeys = (nint)(/* nBuckets * runtime.HashLoad */ 14F);
+
     // Get map to full point with nan keys.
     for (nint i = 0; i < nKeys; i++) {
         m[nan] = i;
@@ -538,6 +551,7 @@ public static void TestMapNanGrowIterator(ж<testing.T> Ꮡt) {
     // Trigger grow
     m[1.0D] = 1;
     delete(m, 1.0D);
+
     // Run iterator
     var found = new map<nint, EmptyStruct>();
     foreach (var (_, v) in m) {
@@ -575,10 +589,12 @@ NextRound:
         for (nint i = 20; i < 1000; i++) {
             delete(m, i);
         }
+
         slice<nint> first = default!;
         foreach (var (i, _) in m) {
             first = append(first, i);
         }
+
         // 800 chances to get a different iteration order.
         // See bug 8736 for why we need so many tries.
         for (nint n = 0; n < 800; n++) {
@@ -610,15 +626,19 @@ public static void TestMapIterDuplicate(ж<testing.T> Ꮡt) {
         for (nint i = 20; i < 1000; i++) {
             delete(m, i);
         }
+
         slice<nint> want = default!;
         for (nint i = 0; i < 20; i++) {
             want = append(want, i);
         }
+
         slice<nint> got = default!;
         foreach (var (i, _) in m) {
             got = append(got, i);
         }
+
         slices.Sort<slice<nint>, nint>(got);
+
         if (!reflect.DeepEqual(got, want)) {
             Ꮡt.Errorf("iteration got %v want %v\n"u8, got, want);
         }
@@ -644,6 +664,7 @@ public static void TestMapStringBytesLookup(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf(@"m[string([]byte(""2""))] = %d, want 2"u8, xΔ2);
         }
     }
+
     nint x = default!;
     var bufʗ1 = buf;
     var mʗ1 = m;
@@ -653,6 +674,7 @@ public static void TestMapStringBytesLookup(ж<testing.T> Ꮡt) {
     if (n != 0D) {
         Ꮡt.Errorf("AllocsPerRun for m[string(buf)] = %v, want 0"u8, n);
     }
+
     x = 0;
     var bufʗ2 = buf;
     var mʗ2 = m;
@@ -766,6 +788,7 @@ public static void TestNonEscapingMap(ж<testing.T> Ꮡt) {
 
 public static void TestDeferDeleteSlow(ж<testing.T> Ꮡt) {
     var ks = new complex128[]{0D, 1D, 2D, 3D}.slice();
+
     var m = new map<any, nint>();
     foreach (var (i, k) in ks) {
         m[k] = i;
@@ -773,6 +796,7 @@ public static void TestDeferDeleteSlow(ж<testing.T> Ꮡt) {
     if (len(m) != len(ks)) {
         Ꮡt.Errorf("want %d elements, got %d"u8, len(ks), len(m));
     }
+
     var ksʗ1 = ks;
     var mʗ1 = m;
     ((Action)(() => {
@@ -796,6 +820,7 @@ public static void TestDeferDeleteSlow(ж<testing.T> Ꮡt) {
 public static void TestIncrementAfterDeleteValueInt(ж<testing.T> Ꮡt) {
     const nint key1 = 12;
     const nint key2 = 13;
+
     var m = new map<nint, nint>();
     m[key1] = 99;
     delete(m, key1);
@@ -810,6 +835,7 @@ public static void TestIncrementAfterDeleteValueInt(ж<testing.T> Ꮡt) {
 public static void TestIncrementAfterDeleteValueInt32(ж<testing.T> Ꮡt) {
     const nint key1 = 12;
     const nint key2 = 13;
+
     var m = new map<nint, int32>();
     m[key1] = 99;
     delete(m, key1);
@@ -824,6 +850,7 @@ public static void TestIncrementAfterDeleteValueInt32(ж<testing.T> Ꮡt) {
 public static void TestIncrementAfterDeleteValueInt64(ж<testing.T> Ꮡt) {
     const nint key1 = 12;
     const nint key2 = 13;
+
     var m = new map<nint, int64>();
     m[key1] = 99;
     delete(m, key1);
@@ -841,6 +868,7 @@ internal static readonly @string key2ᶜ = "x"u8;
 public static void TestIncrementAfterDeleteKeyStringValueInt(ж<testing.T> Ꮡt) {
     @string key1 = ""u8;
     @string key2 = key2ᶜ;
+
     var m = new map<@string, nint>();
     m[key1] = 99;
     delete(m, key1);
@@ -858,6 +886,7 @@ internal static readonly @string key2ᶜ1 = "x"u8;
 public static void TestIncrementAfterDeleteKeyValueString(ж<testing.T> Ꮡt) {
     @string key1 = ""u8;
     @string key2 = key2ᶜ1;
+
     var m = new map<@string, @string>();
     m[key1] = "99"u8;
     delete(m, key1);
@@ -878,6 +907,7 @@ internal static readonly @string key2ᶜ2 = "x"u8;
 public static void TestIncrementAfterBulkClearKeyStringValueInt(ж<testing.T> Ꮡt) {
     @string key1 = ""u8;
     @string key2 = key2ᶜ2;
+
     var m = new map<@string, nint>();
     m[key1] = 99;
     foreach (var (k, _) in m) {
@@ -1178,6 +1208,7 @@ public static void TestEmptyMapWithInterfaceKey(ж<testing.T> Ꮡt) {
     mustPanic(() => {
         _ = meʗ29[meʗ29];
     });
+
     var miʗ1 = mi;
     var structKeyʗ2 = structKey;
     mustNotPanic(() => {
@@ -1250,15 +1281,18 @@ internal static readonly @string testRunˢ6 = "-test.run=^TestMemHashGlobalSeed$
 
 internal static uintptr subprocessHash(ж<testing.T> Ꮡt, @string env) {
     Ꮡt.Helper();
+
     var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), Δos.Args[0], testRunˢ6));
     cmd.Value.Env = append((~cmd).Env, "GO_TEST_SUBPROCESS_HASH=1"u8);
     if (env != ""u8) {
         cmd.Value.Env = append((~cmd).Env, env);
     }
+
     var (@out, err) = cmd.Output();
     if (err != default!) {
         Ꮡt.Fatalf("cmd.Output got err %v want nil"u8, err);
     }
+
     @string s = strings.TrimSpace(((@string)@out));
     (var h, err) = strconv.ParseUint(s, 10, 64);
     if (err != default!) {
@@ -1284,34 +1318,41 @@ public static void TestMemHashGlobalSeed(ж<testing.T> Ꮡt) {
         Δos.Exit(0);
         return;
     }
+
     testenv.MustHaveExec(new runtime_test_package.testing_TжTB(Ꮡt));
+
     // aeshash and memhashFallback use separate per-process seeds, so test
     // both.
     Ꮡt.Run(aesˢ, (ж<testing.T> tΔ1) => {
         if (!runtime_internal_test_package.UseAeshash.Value) {
             tΔ1.Skip(noAesˢ);
         }
+
         var h1 = subprocessHash(tΔ1, ""u8);
         tΔ1.Logf("%d"u8, h1);
         var h2 = subprocessHash(tΔ1, ""u8);
         tΔ1.Logf("%d"u8, h2);
         var h3 = subprocessHash(tΔ1, ""u8);
         tΔ1.Logf("%d"u8, h3);
+
         if (h1 == h2 && h2 == h3) {
             tΔ1.Errorf("got duplicate hash %d want unique"u8, h1);
         }
     });
+
     Ꮡt.Run(noaesˢ, (ж<testing.T> tΔ2) => {
         @string env = ""u8;
         if (runtime_internal_test_package.UseAeshash.Value) {
             env = godebugCpuAesOffˢ;
         }
+
         var h1 = subprocessHash(tΔ2, env);
         tΔ2.Logf("%d"u8, h1);
         var h2 = subprocessHash(tΔ2, env);
         tΔ2.Logf("%d"u8, h2);
         var h3 = subprocessHash(tΔ2, env);
         tΔ2.Logf("%d"u8, h3);
+
         if (h1 == h2 && h2 == h3) {
             tΔ2.Errorf("got duplicate hash %d want unique"u8, h1);
         }
@@ -1330,11 +1371,13 @@ public static void TestMapIterDeleteReplace(ж<testing.T> Ꮡt) {
             foreach (var j in range(i)) {
                 m[j] = false;
             }
+
             // Delete and replace all entries.
             foreach (var (k, _) in m) {
                 delete(m, k);
                 m[k] = true;
             }
+
             foreach (var (k, v) in m) {
                 if (!v) {
                     tΔ1.Errorf("m[%d] got false want true"u8, k);

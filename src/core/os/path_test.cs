@@ -22,9 +22,8 @@ internal static Func<error, bool> isReadonlyError = (error _) => false;
 public static void TestMkdirAll(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         Ꮡt.Parallel();
+
         @string tmpDir = TempDir();
         @string path = tmpDir + "/_TestMkdirAll_/dir/./dir2"u8;
         var err = MkdirAll(path, 511);
@@ -32,11 +31,13 @@ public static void TestMkdirAll(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Fatalf("MkdirAll %q: %s"u8, path, err);
         }
         defer(RemoveAll, tmpDir + "/_TestMkdirAll_", ref ᒐ);
+
         // Already exists, should succeed.
         err = MkdirAll(path, 511);
         if (err != default!) {
             Ꮡt.Fatalf("MkdirAll %q (second time): %s"u8, path, err);
         }
+
         // Make file.
         @string fpath = path + "/file"u8;
         (var f, err) = Create(fpath);
@@ -45,6 +46,7 @@ public static void TestMkdirAll(ж<Δtesting.T> Ꮡt) {
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         // Can't make directory named after file.
         err = MkdirAll(fpath, 511);
         if (err == default!) {
@@ -57,6 +59,7 @@ public static void TestMkdirAll(ж<Δtesting.T> Ꮡt) {
         if (filepath.Clean((~perr).Path) != filepath.Clean(fpath)) {
             Ꮡt.Fatalf("MkdirAll %q returned wrong error path: %q not %q"u8, fpath, filepath.Clean((~perr).Path), filepath.Clean(fpath));
         }
+
         // Can't make subdirectory of file.
         @string ffpath = fpath + "/subdir"u8;
         err = MkdirAll(ffpath, 511);
@@ -70,6 +73,7 @@ public static void TestMkdirAll(ж<Δtesting.T> Ꮡt) {
         if (filepath.Clean((~perr).Path) != filepath.Clean(fpath)) {
             Ꮡt.Fatalf("MkdirAll %q returned wrong error path: %q not %q"u8, ffpath, filepath.Clean((~perr).Path), filepath.Clean(fpath));
         }
+
         if (Δruntime.GOOS == "windows"u8) {
             @string pathΔ1 = tmpDir + @"\_TestMkdirAll_\dir\.\dir2\"u8;
             var errΔ1 = MkdirAll(pathΔ1, 511);
@@ -85,6 +89,7 @@ public static void TestMkdirAll(ж<Δtesting.T> Ꮡt) {
 public static void TestMkdirAllWithSymlink(ж<Δtesting.T> Ꮡt) {
     testenv.MustHaveSymlink(new os_test_package.testing_TжTB(Ꮡt));
     Ꮡt.Parallel();
+
     @string tmpDir = Ꮡt.TempDir();
     @string dir = tmpDir + "/dir"u8;
     {
@@ -92,12 +97,14 @@ public static void TestMkdirAllWithSymlink(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Fatalf("Mkdir %s: %s"u8, dir, err);
         }
     }
+
     @string link = tmpDir + "/link"u8;
     {
         var err = Symlink(dirˢ, link); if (err != default!) {
             Ꮡt.Fatalf("Symlink %s: %s"u8, link, err);
         }
     }
+
     @string path = link + "/foo"u8;
     {
         var err = MkdirAll(path, 493); if (err != default!) {
@@ -117,10 +124,10 @@ public static void TestMkdirAllAtSlash(ж<Δtesting.T> Ꮡt) {
     if (exprᴛ1 == "android"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "plan9"u8 || exprᴛ1 == "windows"u8) {
         Ꮡt.Skipf("skipping on %s"u8, Δruntime.GOOS);
     }
-
     if (testenv.Builder() == ""u8) {
         Ꮡt.Skipf("skipping non-hermetic test outside of Go builders"u8);
     }
+
     RemoveAll(goOsTestˢ);
     @string dir = dirᶜ;
     var err = MkdirAll(dir, 511);
