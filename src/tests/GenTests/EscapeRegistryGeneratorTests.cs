@@ -161,4 +161,137 @@ public class EscapeRegistryGeneratorTests
         CollectionAssert.Contains(registered, "global::go.slice<nint>", "what A can name through B's field is registered");
         Assert.IsFalse(registered.Any(name => name.Contains("cpkg_package")), "a container over C's type, which A cannot name, is not: " + string.Join(", ", registered));
     }
+
+    // the 1.24.13 r6 release rehearsal (2026-10-11): a PLATFORM-NEUTRAL package's registry walked a PER-OS assembly's struct
+    // fields and registered go.slice<go.syscall_package.WSABuf>, a type only syscall's windows flavor has, so the neutral
+    // assembly differed per OS. A neutral compilation still walks a NEUTRAL foreign struct's fields (N below: coverage
+    // kept), but never a per-OS assembly's (P, marked go2cs.PlatformVariant): only a per-OS assembly's fields vary by OS,
+    // so the neutral registry is OS-invariant by construction. What it skips falls to golib's fallback: trim stage 3d's
+    // boundary under Native AOT, never a wrong answer.
+    [TestMethod]
+    public void ANeutralPackageDoesNotWalkAPerOSAssemblysFields()
+    {
+        MetadataReference p = EmitLibrary("ppkg", "[assembly: global::System.Reflection.AssemblyMetadata(\"go2cs.PlatformVariant\", \"true\")] namespace go; [GoPackage(\"ppkg\")] public static partial class ppkg_package { public partial struct OnlyHere { public nint x; } public partial struct Holder { public slice<ppkg_package.OnlyHere> only; } }");
+        MetadataReference n = EmitLibrary("npkg", "namespace go; [GoPackage(\"npkg\")] public static partial class npkg_package { public partial struct Inner { public nint x; } public partial struct Holder { public slice<npkg_package.Inner> inner; } }");
+
+        (string[] registered, string[] generated, Diagnostic[] errors) = RunOn("apkg",
+            "partial struct Mine { internal slice<ppkg_package.Holder> holders; } internal static object Use() => default(ppkg_package.Holder); internal static object UseN() => default(npkg_package.Holder); internal static object UseMine() => default(Mine);",
+            goTargetOS: null, perOSSource: false, p, n);
+
+        Assert.AreEqual(0, errors.Length, "the registry compiles: " + string.Join("; ", errors.Take(3)));
+        CollectionAssert.Contains(registered, "global::go.slice<global::go.ppkg_package.Holder>", "a container the package reaches through its OWN field is registered");
+        CollectionAssert.Contains(registered, "global::go.slice<global::go.npkg_package.Inner>", "a NEUTRAL foreign struct's fields are still walked");
+        Assert.IsFalse(registered.Any(name => name.Contains("OnlyHere")), "a PER-OS foreign struct's fields are not: " + string.Join(", ", registered));
+        Assert.IsFalse(generated.Any(source => source.Contains("go2cs.PlatformVariant")), "a neutral package carries no per-OS marker");
+    }
+
+    // The marker's source: a compilation is PER-OS exactly when one of its source files sits in <project>/<GoTargetOS>/,
+    // the folder the L3 csproj's `$(GoTargetOS)/*.cs` glob compiles (core/Directory.Build.props makes both properties
+    // visible to the generator). Such an assembly is stamped go2cs.PlatformVariant, and walks any assembly's fields: its
+    // own output is per-OS anyway.
+    [TestMethod]
+    public void APerOSPackageIsMarkedAndWalksFreely()
+    {
+        MetadataReference p = EmitLibrary("ppkg", "[assembly: global::System.Reflection.AssemblyMetadata(\"go2cs.PlatformVariant\", \"true\")] namespace go; [GoPackage(\"ppkg\")] public static partial class ppkg_package { public partial struct OnlyHere { public nint x; } public partial struct Holder { public slice<ppkg_package.OnlyHere> only; } }");
+
+        (string[] registered, string[] generated, Diagnostic[] errors) = RunOn("opkg", "internal static object Use() => default(ppkg_package.Holder);", goTargetOS: "linux", perOSSource: true, p);
+
+        Assert.AreEqual(0, errors.Length, "the marker and registry compile: " + string.Join("; ", errors.Take(3)));
+        Assert.IsTrue(generated.Any(source => source.Contains("[assembly: global::System.Reflection.AssemblyMetadata(\"go2cs.PlatformVariant\", \"true\")]")), "a per-OS package is stamped");
+        CollectionAssert.Contains(registered, "global::go.slice<global::go.ppkg_package.OnlyHere>", "and walks a per-OS assembly's fields");
+
+        (_, string[] neutral, _) = RunOn("opkg", "internal static object Use() => default(ppkg_package.Holder);", goTargetOS: "linux", perOSSource: false, p);
+        Assert.IsFalse(neutral.Any(source => source.Contains("go2cs.PlatformVariant")), "the same package with its sources at the project root is neutral");
+    }
+
+    // The per-OS marker's one lost type (2026-10-11, the six-build count against 0904171759): expvar boxes runtime.MemStats,
+    // whose BySize field is array<runtime.MemStats_BySize>; once expvar (neutral) stopped at runtime (per-OS), no registry
+    // named it. A per-OS package therefore registers what a referencing compilation reaches through its EXPORTED structs:
+    // their public fields, and the public fields of its own structs reached through them -- the metadata view a neutral
+    // walk had. Not a non-exported struct, not a non-public field, not a generic struct; and a neutral package, which every
+    // walk still reaches, adds nothing.
+    [TestMethod]
+    public void APerOSPackageRegistersWhatItsExportedStructsReach()
+    {
+        const string Members =
+            "public partial struct Sz { public uint Size; public slice<nint> sizes; } " +
+            "public partial struct Stats { public array<Sz> BySize; public Inner inner; internal slice<Sz> hidden; } " +
+            "public partial struct Inner { public map<nint, Sz> byKey; internal channel<Sz> notThis; } " +
+            "internal partial struct Unexported { public slice<bool> no; } " +
+            "public partial struct Gen<T> { public slice<T> open; public slice<byte> closedButGeneric; }";
+
+        (string[] registered, _, Diagnostic[] errors) = RunOn("opkg", Members, goTargetOS: "linux", perOSSource: true);
+
+        Assert.AreEqual(0, errors.Length, "the registry compiles: " + string.Join("; ", errors.Take(3)));
+        CollectionAssert.Contains(registered, "global::go.array<global::go.opkg_package.Sz>", "an exported struct's public field");
+        CollectionAssert.Contains(registered, "global::go.slice<nint>", "through a container's element type, the element struct's public field");
+        CollectionAssert.Contains(registered, "global::go.map<nint, global::go.opkg_package.Sz>", "through a public field of its own struct type");
+        Assert.IsFalse(registered.Any(name => name.Contains("slice<global::go.opkg_package.Sz>") || name.Contains("channel<")), "a non-public field is not walked: " + string.Join(", ", registered));
+        Assert.IsFalse(registered.Any(name => name.Contains("slice<bool>")), "a non-exported struct is not a root: " + string.Join(", ", registered));
+        Assert.IsFalse(registered.Any(name => name.Contains("slice<byte>")), "a generic struct is not a root: " + string.Join(", ", registered));
+
+        (string[] neutral, _, _) = RunOn("opkg", Members, goTargetOS: "linux", perOSSource: false);
+        Assert.AreEqual(0, neutral.Length, "a neutral package registers only what it converts: " + string.Join(", ", neutral));
+    }
+
+    private const string ProjectDirectory = @"C:\go2cs\src\core\opkg";
+
+    private static MetadataReference EmitLibrary(string name, string source, params MetadataReference[] references)
+    {
+        CSharpParseOptions options = new(LanguageVersion.Preview);
+
+        CSharpCompilation library = CSharpCompilation.Create(name,
+            [CSharpSyntaxTree.ParseText(source, options), CSharpSyntaxTree.ParseText(TemplateUsings, options)],
+            [.. References(), .. references], new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+
+        using System.IO.MemoryStream image = new();
+        Microsoft.CodeAnalysis.Emit.EmitResult emitted = library.Emit(image);
+        Assert.IsTrue(emitted.Success, $"{name} compiles: " + string.Join("; ", emitted.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).Take(3)));
+
+        return MetadataReference.CreateFromImage(image.ToArray());
+    }
+
+    // Runs the generator over <name>_package holding `members`. goTargetOS non-null sets the two build properties the
+    // generator reads (build_property.GoTargetOS, build_property.MSBuildProjectDirectory = ProjectDirectory); perOSSource
+    // places the package's source file in ProjectDirectory/<goTargetOS>/ instead of ProjectDirectory/.
+    private static (string[] registered, string[] generated, Diagnostic[] errors) RunOn(string name, string members, string? goTargetOS, bool perOSSource, params MetadataReference[] references)
+    {
+        CSharpParseOptions options = new(LanguageVersion.Preview);
+        string path = perOSSource && goTargetOS is not null ? $@"{ProjectDirectory}\{goTargetOS}\{name}.cs" : $@"{ProjectDirectory}\{name}.cs";
+
+        CSharpCompilation compilation = CSharpCompilation.Create(name,
+            [CSharpSyntaxTree.ParseText($"namespace go; [GoPackage(\"{name}\")] public static partial class {name}_package {{ {members} }}", options, path: path),
+             CSharpSyntaxTree.ParseText(TemplateUsings, options)],
+            [.. References(), .. references], new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+
+        Dictionary<string, string> properties = goTargetOS is null ? [] : new()
+        {
+            ["build_property.GoTargetOS"] = goTargetOS,
+            ["build_property.MSBuildProjectDirectory"] = ProjectDirectory
+        };
+
+        CSharpGeneratorDriver.Create([new EscapeRegistryGenerator()], parseOptions: options, optionsProvider: new BuildProperties(properties))
+            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out _);
+
+        string[] generated = [.. output.SyntaxTrees.Skip(compilation.SyntaxTrees.Length).Select(tree => tree.ToString())];
+        string[] registered = [.. generated.SelectMany(source => Regex.Matches(source, @"global::go\.GoTypeOps\.Register\(global::go\.GoTypeOps<(.+)>\.Instance\);").Select(match => match.Groups[1].Value))];
+
+        return (registered, generated, output.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray());
+    }
+
+    private sealed class BuildProperties(Dictionary<string, string> properties) : Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptionsProvider
+    {
+        private readonly Options m_global = new(properties);
+
+        public override Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions GlobalOptions => m_global;
+
+        public override Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions GetOptions(SyntaxTree tree) => m_global;
+
+        public override Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions GetOptions(AdditionalText textFile) => m_global;
+
+        private sealed class Options(Dictionary<string, string> values) : Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions
+        {
+            public override bool TryGetValue(string key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? value) => values.TryGetValue(key, out value);
+        }
+    }
 }
