@@ -494,7 +494,10 @@ func (v *Visitor) writeStatementGap(prev, next ast.Stmt) int {
 		lastLine = max(lastLine, endLine)
 	}
 
-	if v.file.Line(nextPos)-lastLine > 1 {
+	// Comment-aware, as goBlankLineBetween is, not a raw line difference: a comment group that is next's own
+	// doc (a var or const statement's) is written with next rather than flushed above, so its lines are not
+	// blank ones.
+	if v.goBlankLineBetween(v.file.LineStart(lastLine), nextPos) {
 		mark := v.outputBuilder.Len()
 
 		if v.writeGapLine() {
