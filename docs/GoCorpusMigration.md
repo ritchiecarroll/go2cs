@@ -179,18 +179,29 @@ Everything else may be reordered by the executing lane.
 >   once at the skipped release *N+1*, once at the target *N+2*. The *N+2* run **is** H5 proper, with
 >   H5's own gate. The *N+1* run pins the skipped release in the **seed only**: the repository's
 >   `version.props` never names *N+1*, nothing from that root is committed, and no golden, roster row or
->   package is produced from it.
+>   package is produced from it. **At *N+1*, H5c is applied in the scratch root only, never in the
+>   repository.**
+> - **The *N+1* ladder stops early, and the checkpoint says where.** No H6 work is done at *N+1*, so
+>   its ladder stops at the rung where the hand-owned files, still written for *N*, block the build.
+>   The checkpoint **states that stop**; it is not a red to triage. The reds at *N+1* are attribution
+>   evidence **up to that stop** and no further. A red at *N+2* beyond it has no *N+1* reading to be
+>   compared with, so it is read against **both** releases' source, by name, the rule the "does not do"
+>   paragraph below gives for H10.
 > - **One box runs both, serially.** Two conversions never overlap on one box, and each root takes
 >   exactly one conversion (CLAUDE.md's safety floor, items 1 and 11). Disk is H5's floor, twice.
-> - **What it yields:** every red at *N+2* is attributed before it is triaged. A site red at both
+> - **What it yields:** every red at *N+2* is attributed before it is triaged, by comparison up to the
+>   *N+1* stop and by source reading beyond it. A site red at both
 >   releases was born at *N+1*; a site red only at *N+2* was born there; a site red at *N+1* and green
 >   at *N+2* was closed upstream, and is recorded as such with its evidence. H6's
 >   [`handown-census.ps1`](../src/handown-census.ps1) runs once per leg (*N* → *N+1*, then *N+1* → *N+2*),
 >   so each substantive hand-owned file carries the leg or legs that moved it.
-> - **Its record** is a `docs/phase4/` CHECKPOINT file named for the skipped release. It lists the
->   per-class counts at both pins, every red by site with its attribution, and the binary's hash.
-> - **Its gate:** every red at *N+2* and every substantive H6 file carries an attribution. **A red is
->   never triaged without one.** It is not a parity gate, and it blocks H6 and H7, not H5.
+> - **Its record** is `docs/phase4/CHECKPOINT-go<N+1>-attribution.md`, named for the skipped release
+>   (`CHECKPOINT-go125-attribution.md` in the worked instance). It lists the per-class counts at both
+>   pins, the rung where the *N+1* ladder stopped, every red by site with its attribution, and the
+>   binary's hash.
+> - **Its gate:** every red at *N+2* and every substantive H6 file carries an attribution, and the
+>   record states the *N+1* stop. **A red is never triaged without one.** It is not a parity gate, and
+>   it blocks H6 and H7, not H5.
 >
 > **What the checkpoint does not do.** It does not run behavioral goldens or roster rows at the skipped
 > release: that is the cost of the second hop the fold exists to save. H9 and H10 attribute through the
@@ -211,7 +222,8 @@ Everything else may be reordered by the executing lane.
 >
 > **Worked instance — the 1.24 → 1.26 hop.** Admitted by the owner's ruling of 2026-10-11, which
 > re-rules OQ-18 for that hop; the instance plan is `PLAN-hop-go126.md` (proposed, and on its own branch
-> until it lands), whose §4 is this checkpoint with its boxes, releases and estimates named.
+> until it lands), whose §4 is this checkpoint with its boxes, releases and estimates named. That hop's
+> reconnaissance measured the *N+1* stop at the ladder's first rung.
 
 ### Readiness — before H0 **GATE**
 
@@ -4584,6 +4596,11 @@ healthy run look hung — and, in the other direction, what lets a hung one look
 79. **Every seat, docs seats included, runs plain `go test ./... -count=1` in `src/go2cs` at its own tip before
     admission, and the union rehearsal runs it again.** Why: union-only reds recurred at nearly every train, twice in a row
     from a docs seat failing repoguard's kramdown guard.
+    *(Extended 2026-10-13, TRAIN T4.)* The union rehearsal also reads the `-stdlib` emission check (leg E), at least its
+    union-attributable count per target (windows, linux, darwin), not only CNR. CNR re-converts the behavioral corpus
+    only, so a seat whose emission lands in `src/core` is invisible to it, to the suites and to a solution build. Why:
+    T4's four rehearsals read CNR green while one seat's uncommitted `src/core` footprint (1,548 paths, 3,772 drifted
+    files across the three targets) surfaced only at assembly.
     <!-- ledger 2026-09-22 08:18 ae2f25198; 2026-09-25 00:08 ff67c57420; 2026-09-29 12:43 d51a62eaad; 2026-09-30 14:02;
     coord-handover trainK/tK-seats-draft.txt:51. Extends §7 lesson 15. -->
 80. **At each status, read every lane's last post and unread count.** A lane is declared OFFLINE in one ledger line, with
