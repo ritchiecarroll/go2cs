@@ -14,6 +14,21 @@
 > not the expected one; plan for a wide launch on Go 1.27 in late January or February** (section 4, D7).
 > Sections 2, 4 and 8 are rewritten to that; sections 1, 3 and 5 to 7 stand, with section 3's finished
 > items listed at the top of section 8.
+>
+> **AMENDED 2026-10-13.** The owner ruled that **1.24.13.7 is the final 1.24 release**, which settles D2. It
+> is the next train: comment and spacing parity, the macOS certificate fix, the full-trim Native AOT
+> fixes and a speedup. It is also the soft-launch release. Its train is assembled and in its gates, and
+> has slipped about a day for one converter fix found by its own checks; the gate is not traded for
+> the date. **So the soft launch is tied to that release's record, not to a calendar date.** Also done:
+> the README's expectation line (D9), and Discussions (Announcements added, Polls removed, "Start here"
+> posted and pinned). The date ranges below still stand as estimates; where they named "the parity
+> release" they now mean 1.24.13.7.
+>
+> **What that does to the wide launch.** The release is arriving at the early end of yesterday's range,
+> so the hop can start earlier: H1 Oct 19 to 30, the 1.26 packages Nov 16 to Dec 8. December on Go 1.26
+> is no longer only the optimistic case; it is about even. It holds at any hop pace if H1 is by Oct 26.
+> The recommendation is unchanged: plan on Go 1.27 in January or February, and take December on 1.26 if
+> the hop publishes by Dec 4.
 
 The question this plan answers: when should go2cs be announced widely, what has to be true first, where,
 and how are the replies handled. The short answer is **two stages**. A **soft launch** to a few dozen
@@ -66,8 +81,8 @@ Two more that the brief did not list, found while drafting:
 | # | Stream | Depends on | Who | Estimate |
 |:--|:--|:--|:--|:--|
 | A | **The 1.24.13.6 release** | done | | published 2026-10-12 |
-| B | **Three harder modules** as NuGet packages, rising in complexity | A | C2; the owner (sign, push) | 1 to 3 weeks, unmeasured until C2's proposal names them |
-| P | **Comment and spacing parity**: converted code keeps Go's comments, blank lines and alignment | A | C1 leads, seat by seat; a train, then a release that carries it | the seats 3 to 6 more days at the pace so far, then a train and a release: about 1 to 2 weeks in all, an estimate with no plan figure behind it |
+| B | **Three harder modules** as NuGet packages, rising in complexity | A | C2; the owner (sign, push) | 1 to 3 weeks, an estimate. `x/sync` is packed and held, and a `cobra` increment (with `pflag`) is in progress; their conversion repositories, `sync-cs` and `pflag-cs`, exist. They publish after 1.24.13.7 |
+| P | **Comment and spacing parity**: converted code keeps Go's comments, blank lines and alignment | A | C1 leads, seat by seat; it rides the 1.24.13.7 train | the first classes are in the 1.24.13.7 train; two later classes (one-line functions, aligned trailing comments) are held for the first train after the hop |
 | C | **Soft-launch readiness** (section 3) | A | R, COORD, the owner | mostly done; what remains is in section 8 |
 | D | **The soft launch**, then a week of listening and fixing | C | the owner posts; COORD triages daily | 1 week |
 | E | **The Go 1.26 hop**, H0 to release, by the runbook | **P landed, then the final 1.24.13.N shipped** (the hop plan's O1). H0 is captured only after the last parity train | seven lanes and COORD, as the [hop plan](https://github.com/ritchiecarroll/go2cs/blob/claude/i9-plan-hop-go126/docs/PLAN-hop-go126.md) section 7 proposes | **100 to 165 lane-days; 4 to 5.5 calendar weeks from H1** (amended 2026-10-12) |
@@ -155,10 +170,10 @@ Re-derived 2026-10-12.
 ```
 2026   Oct 12     Oct 19     Oct 26     Nov 2      Nov 16     Nov 30     Dec 14  |  2027  Jan 11    Feb 1    Feb 15
 A  release  [done]
-P  parity   [== seats ==][train + release]            the release that carries parity: Oct 19 to Oct 30
+P  parity   [== seats ==][train + release]            1.24.13.7, the final 1.24 release: Oct 14 to Oct 23
 B  modules  [============ 1 to 3 weeks ====]
 D  soft launch          [ window: Oct 20 to Nov 5 ][ listen + fix ]
-E  1.26 hop                  [H0][========== 4 to 5.5 weeks from H1 ==========]   publish Nov 19 to Dec 11
+E  1.26 hop               [H0][========== 4 to 5.5 weeks from H1 ==========]      publish Nov 16 to Dec 8
 H  1.27 hop                                                    [===== 2.5 to 3.5 weeks, across the holidays =====]
 G  wide launch   on 1.26: [ Dec 1 to Dec 17, only if E publishes by Dec 4 ]   on 1.27: [ Jan 19 to Feb 18 ]
 ```
@@ -166,25 +181,25 @@ G  wide launch   on 1.26: [ Dec 1 to Dec 17, only if E publishes by Dec 4 ]   on
 | Milestone | Range | Derived from | What moves it |
 |:--|:--|:--|:--|
 | **1.24.13.6 on NuGet** | done, Oct 12 | | |
-| **The release that carries parity** (the earliest final 1.24.13.N) | **Oct 19 to Oct 30** | Six parity seats were posted in the first day and a half. The classes the owner ruled on Oct 12 are still to build, the largest being Go's blank lines in every conversion, which re-baselines about 650 expected outputs. Then one train (the last took about a day and a half from assembly to landing) and one release | how the remaining seats go; whether the modules' fixes ride it |
-| **Soft launch** | **Tue Oct 20 to Thu Nov 5** | Readiness is nearly done (section 8). Oct 20 to 22 on 1.24.13.6, or the first Tue to Thu after the parity release if it is worth the wait | decision D1; the owner's remaining hands (section 8) |
-| **Hop start (H1)** | **Oct 22 to Nov 3** | the parity release, plus H0 (3 to 5 lane-days, two to three days of calendar) | the parity release; the hop plan's O1 and O2 (the toolchain installs) |
-| **Go 1.26 packages published** | **Nov 19 to Dec 11** | H1 plus 4 to 5.5 weeks, the hop plan's section 6. The last hop took 16.4 days with six lanes and a hand-owned bill a little over half this one's | the hop plan's risks: the hand-owned review (re-sized upward on Oct 12 from a measurement), the runtime compile at 1.26, the TLS host. US Thanksgiving week falls inside this range, and release day needs the owner |
+| **1.24.13.7, the final 1.24 release** (ruled Oct 12) | **Oct 14 to Oct 23** | Its train was assembled on Oct 12 and is in its gates. It slipped about a day on Oct 13 for one converter fix its own census found, which means the train is re-assembled and its battery re-run. Then the release rehearsal and the owner's release sitting | the train's gates; the owner's sitting for the release |
+| **Soft launch** | **the first Tue to Thu after 1.24.13.7 is published and its post-publish check is green**; expected Oct 20 to Nov 5 | It follows the release's record, not a date. The release is what a newcomer will install, and it carries the change they notice most | the 1.24.13.7 record; decision D6 and D8, the owner's remaining hands |
+| **Hop start (H1)** | **Oct 19 to Oct 30** | 1.24.13.7 published, plus H0 (3 to 5 lane-days, two to three days of calendar). Go 1.26.9 is already installed on every lane | the 1.24.13.7 record; the hop plan's remaining owner hands |
+| **Go 1.26 packages published** | **Nov 16 to Dec 8** | H1 plus 4 to 5.5 weeks, the hop plan's section 6. The last hop took 16.4 days with six lanes and a hand-owned bill a little over half this one's | the hop plan's risks: the hand-owned review, the runtime compile at 1.26, the TLS host. US Thanksgiving week falls inside this range, and release day needs the owner |
 | **Go 1.27 packages published** | **mid-December to late January** | the 1.26 publish plus 2.5 to 3.5 weeks, stretched by the year-end holidays | the generic-methods design; the holidays; release day needs the owner |
 | **Wide launch** | **on 1.27: Tue Jan 19 to Thu Feb 18, 2027** (expected). **On 1.26: Dec 1 to Dec 17** (only if the hop publishes by Dec 4) | the publish, then a week of soak, then the first Tue to Thu clear of the dates below | see "Does December still hold?" |
 
 **Does December still hold?** At the optimistic end only. A December wide launch needs the 1.26 packages
 published by about **Dec 4**: a week of soak, then the next Tuesday to Thursday, the last being Dec 15 to
-17 before the holidays. The publish range is Nov 19 to Dec 11.
+17 before the holidays. The publish range is Nov 16 to Dec 8.
 
-- It holds at any pace in the hop's range if the hop starts by about **Oct 26**. That needs the parity
-  release by about Oct 23.
-- For a start between Oct 27 and Nov 3 it holds only if the hop beats its slow end: from Nov 3 it has to
-  finish in about four and a half weeks.
-- Before the amendment the publish range was Nov 12 to Dec 14. It now starts a week later, and the hop
+- It holds at any pace in the hop's range if the hop starts by about **Oct 26**, which needs
+  1.24.13.7 published by about Oct 23. On the Oct 13 reading that is likely but not certain.
+- For a start between Oct 27 and Oct 30 it holds only if the hop beats its slow end: from Oct 30 it
+  has to finish in about five weeks.
+- The first draft's publish range was Nov 12 to Dec 14. It now starts a few days later, and the hop
   itself is half a week longer at each end.
 
-So December is possible and should not be planned on. **The expected wide launch is on Go 1.27, between
+So December is possible, about even on the Oct 13 reading, and should not be planned on. **The expected wide launch is on Go 1.27, between
 Jan 19 and Feb 18, 2027.** That is later, and it is the stronger launch: the newest Go release, a full
 support window ahead, generic methods converted, and no "that Go is nearly out of support" reply to
 answer. If the 1.26 hop does publish by Dec 4, a December launch is a choice the owner still has (D7).
@@ -197,7 +212,7 @@ question becomes "when is 1.28", so earlier in the window is better.
 the second week of November; US Thanksgiving week, Nov 23 to 27; Dec 21 to Jan 8, when traffic is low and
 nobody is at a desk to try anything. Tuesday to Thursday, morning US Eastern, is the working default.
 
-**Assumptions.** Seven lanes and COORD stay available. The parity release needs no second train. The
+**Assumptions.** Seven lanes and COORD stay available. 1.24.13.7 needs no second train. The
 owner is available for release days and for the remaining soft-launch hands. No converter defect from
 the soft launch needs its own release. The Go 1.26 target does not move mid-hop. The parity stream's
 estimate is this plan's own, read from its pace so far; the parity plan states none.
@@ -282,25 +297,23 @@ minutes, and names the edges. Figures in square brackets are read from the roste
   supported-versions statement and private vulnerability reporting are all in place.
 - **License detection on GitHub** (the settings draft's item 7): COORD recommends leaving `LICENSE` as it
   is.
+- **D2:** 1.24.13.7 is the final 1.24 release (ruled 2026-10-12). The hop's H1 starts from it.
+- **D9:** the README's expectation line is written and on master.
+- **Discussions:** the Announcements category is added, Polls is removed, and the "Start here" post is
+  up and pinned.
+- **Go 1.26.9** is installed side by side on every lane (the hop plan's O2).
 
 **Still the owner's, for the soft launch:**
 
-- **D1. When is the soft launch?** Recommended: yes, on Go 1.24, to a few dozen people. Either Oct 20 to
-  22 on 1.24.13.6, or the first Tuesday to Thursday after the parity release (by about Nov 5). The second
-  shows better-looking converted code and costs a week or two of early feedback. The plan leans to the
-  second if the parity release is on track by Oct 23, and to the first if it is not.
+- **D1. The soft launch, confirmed or not.** It is now tied to 1.24.13.7: the first Tuesday to Thursday
+  after that release is published and its post-publish check is green, to a few dozen people. What is
+  left to decide is only whether to go, on the day.
 - **D6. How to say how the project is built.** The wording is yours. The plan recommends saying it first,
   in the FAQ and in each post's first comment, in two sentences.
-- **D9. The expectation text** for the README and the pinned post: one person's project, best-effort
-  replies, where to ask. A placeholder marks its place.
-- **Discussions:** add the Announcements category, remove Polls, and pin the "Start here" post. Only you
-  can; the text is ready in `docs/phase4/DRAFT-launch-github-settings.md`.
 - **D8. Accounts.** Which of your accounts post where, and whether a Lobsters invitation is in hand.
 
 **Still the owner's, for the hop and the wide launch:**
 
-- **D2. The final 1.24.13.N.** The release that carries comment parity is the earliest candidate. If the
-  three modules need converter fixes, they ride it or one more. This is the hop plan's O1 and it sets H1.
 - **D7. Which Go release the wide launch stands on.** Recommended: plan on **Go 1.27, Jan 19 to Feb 18**.
   Keep **Go 1.26, Dec 1 to 17** as an option to take only if the hop publishes by Dec 4. Not recommended:
   a wide launch on 1.26 in January, weeks before 1.26 leaves support.
