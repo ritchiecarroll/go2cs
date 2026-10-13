@@ -7164,13 +7164,21 @@ func settlePublishBinlog(binlog string, err error) error {
 // gave deterministic sub-millisecond verdicts with tiering off and flipped verdicts run-to-run with
 // it on (net/http's h2 write-deadline row), because a timing-bounded row's pass/fail can depend on
 // which run happens to hit the tier-0→tier-1 promotion boundary. -test-tiered opts back IN to the
-// CLR's default tiering when that A/B measurement itself is what's wanted. Meaningless under Debug,
-// which this function never touches.
+// CLR's default tiering when that A/B measurement itself is what's wanted. The tiering decision is
+// meaningless under Debug, which it never touches.
+//
+// Every configuration also runs with background GC off (DOTNET_gcConcurrent=0, owner ruling
+// 2026-10-12): a deep recursion pays one stack walk per GC, background GC caps the gen0 budget, and
+// go-cmp's cyclic transformer pair measured 24.5 s with it and 9.5 s without, outputs identical. The
+// test-host template sets the same thing; this covers a host built before that template change. It is
+// a constant of the pipeline, not an options-dependent axis, so testEnvironmentRecord does not carry it,
+// and it stays independent of -test-tiered so a tiering A/B moves one axis.
 func testHostRunEnv(options Options) []string {
+	var env []string
 	if options.testConfig == "Release" && !options.testTiered {
-		return []string{"DOTNET_TieredCompilation=0"}
+		env = append(env, "DOTNET_TieredCompilation=0")
 	}
-	return nil
+	return append(env, "DOTNET_gcConcurrent=0")
 }
 
 // testHostEnv is the converted host child's extra environment: the runtime settings (testHostRunEnv)
