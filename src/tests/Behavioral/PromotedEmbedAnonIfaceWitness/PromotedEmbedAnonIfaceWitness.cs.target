@@ -72,14 +72,18 @@ internal static void Main() {
     var u = Ꮡ(new Uint(nil));
     u.Value.Label = uintˢ;
     Node n = new UintжNode(u);
+
     var (basic, ok) = n._<main_type>(ᐧ);
     fmt.Println(uintAssertsToAnonBasicˢ, ok);
+
     if (ok) {
         var b = basic.Basic();
         b.Value.BitSize = 64;
         b.Value.Label = uint64ˢ;
     }
+
     fmt.Println(uintAfterWriteThroughˢ, (~u).BitSize, (~u).Label, n.String());
+
     var i = Ꮡ(new Int(nil));
     i.Value.Label = intˢ;
     Node ni = new IntжNode(i);
@@ -89,6 +93,7 @@ internal static void Main() {
         }
     }
     fmt.Println(intAfterWriteThroughˢ, (~i).BitSize, (~i).Label);
+
     switch (n.type()) {
     case {} Δt when Δt._<main_type>(out var t): {
         fmt.Println(typeSwitchMatchedAnonˢ, (~t.Basic()).BitSize);
@@ -99,25 +104,32 @@ internal static void Main() {
         fmt.Println(typeSwitchMatchedDefaultˢ);
         break;
     }}
+
     any anyValue = new Uint(nil);
     var (_, valueOK) = anyValue._<main_type>(ᐧ);
     fmt.Println(uintValueAssertsToAnonˢ, valueOK);
+
     var inner = Ꮡ(new Uint(nil));
     inner.Value.Label = innerˢ;
     inner.Value.ByteSize = 8;
+
     var p = Ꮡ(new Ptr(Node: new UintжNode(inner)));
     p.Value.Label = ptrˢ;
     p.Value.ByteSize = 4;
+
     Node np = new PtrжNode(p);
     fmt.Println(ptrCommonThroughEmbedˢ, (~np.Common()).Label, (~np.Common()).ByteSize);
     fmt.Println(ptrStringThroughEmbedˢ, np.String());
+
     var empty = Ꮡ(new Ptr(nil));
     empty.Value.Label = emptyˢ;
     empty.Value.ByteSize = 2;
     Node ne = new PtrжNode(empty);
     fmt.Println(ptrCommonWithNilFieldˢ, (~ne.Common()).Label, (~ne.Common()).ByteSize);
+
     ne.Common().Value.ByteSize = 16;
     fmt.Println(ptrAfterWriteThroughˢ, (~empty).ByteSize);
+
     fmt.Println(ptrFieldNodeˢ, (~(~p).Node.Common()).Label, (~p).Node.String());
 }
 

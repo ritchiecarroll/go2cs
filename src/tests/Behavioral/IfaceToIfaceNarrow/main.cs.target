@@ -59,11 +59,15 @@ private static readonly @string viaWriterˢ = "via-writer"u8;
 
 internal static void Main() {
     Conn c = new connжConn(Ꮡ(new conn(data: "init"u8)));
+
     ReadWriteCloser rwc = new ConnᴠReadWriteCloser(c);
+
     writeTo(new ConnᴠWriter(c), helloˢ);
     fmt.Println(readFrom(new ConnᴠReader(c)));
+
     var w = asWriter(c);
     w.Write(viaWriterˢ);
+
     fmt.Println(c.Read());
     fmt.Println(rwc.Close());
 }

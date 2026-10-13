@@ -35,6 +35,7 @@ internal static void Main() {
         fmt.Printf(format + "\n"u8, args.ꓸꓸꓸ);
     };
     any logf = (((Actionꓸꓸꓸ<@string, any>)(fn))).OrTypedNilFunc();
+
     {
         var (fnΔ1, ok) = logf._<Actionꓸꓸꓸ<@string, any>>(ᐧ); if (ok){
             fnΔ1(valueVFlagVˢ, (nint)(42), true);
@@ -42,6 +43,7 @@ internal static void Main() {
             fmt.Println(noMatchˢ);
         }
     }
+
     any notFn = plainˢ;
     {
         var (_, ok) = notFn._<Actionꓸꓸꓸ<@string, any>>(ᐧ); if (ok){
@@ -50,12 +52,14 @@ internal static void Main() {
             fmt.Println(noMatchForStringˢ);
         }
     }
+
     any plain = @string (@string s) => s + "!"u8;
     {
         var (fnΔ2, ok) = plain._<Func<@string, @string>>(ᐧ); if (ok) {
             fmt.Println(fnΔ2("ok"u8));
         }
     }
+
     any direct = ((Funcꓸꓸꓸ<any, @string>)(@string (params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp.sslice();
         return fmt.Sprint(args.ꓸꓸꓸ);
@@ -67,6 +71,7 @@ internal static void Main() {
             fmt.Println(directNoMatchˢ);
         }
     }
+
     var funcMap = new map<@string, any>{["esc"u8] = ((Funcꓸꓸꓸ<any, @string>)(escaper))};
     {
         var (f, ok) = funcMap[escˢ]._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok){
@@ -75,6 +80,7 @@ internal static void Main() {
             fmt.Println(mappedNoMatchˢ);
         }
     }
+
     any assigned = ((Funcꓸꓸꓸ<any, @string>)(escaper));
     {
         var (f, ok) = assigned._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok){
@@ -83,6 +89,7 @@ internal static void Main() {
             fmt.Println(assignedNoMatchˢ);
         }
     }
+
     var slots = new any[]{(Funcꓸꓸꓸ<any, @string>)(escaper)}.slice();
     {
         var (f, ok) = slots[0]._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok){
@@ -91,6 +98,7 @@ internal static void Main() {
             fmt.Println(elementNoMatchˢ);
         }
     }
+
     any directPlain = @string (@string s) => s + "?"u8;
     {
         var (f, ok) = directPlain._<Func<@string, @string>>(ᐧ); if (ok){

@@ -128,6 +128,7 @@ internal static void indexCopy() {
     var f = arr[0].ΔClone();
     f.bump();
     fmt.Println(indexˢ, arr[0].show(), (@string)"|"u8, f.show());
+
     var s = new digest[]{d.ΔClone()}.slice();
     var g = s[0].ΔClone();
     g.bump();
@@ -140,11 +141,13 @@ private static readonly object rangeˢ = (@string)"range:      "u8;
 internal static void rangeCopy() {
     var d = newDigest();
     var arr = new digest[]{d.ΔClone(), d.ΔClone()}.array();
+
     foreach (var (_, vᴛ1) in arr.ΔRangeSnapshot()) {
         var g = vᴛ1.ΔClone();
 
         g.bump();
     }
+
     fmt.Println(rangeˢ, arr[0].show(), arr[1].show());
 }
 

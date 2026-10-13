@@ -20,6 +20,7 @@ internal static bool isHost(byte c) {
 	1<<']' |
 	1<<':' */
             maskᶜ;
+
     return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (576284830442979328UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (576460746666278911UL)))) != 0;
 }
 
@@ -32,6 +33,7 @@ internal static bool validHeaderValueByte(byte c) {
 	1<<0x20 |
 	1<<0x09 */
             maskᶜ1;
+
     return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & ~(18446744069414584832UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & ~(9223372036854775807UL)))) == 0;
 }
 
@@ -41,6 +43,7 @@ private static readonly GoBigConst maskᶜ2 = GoBigConst.Parse("1180591620717411
 internal static uint64 smallHigh(byte c) {
     GoBigConst mask = /* 1<<70 | 1<<3 */
             maskᶜ2;
+
     return (uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (8UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (64UL)));
 }
 
@@ -50,6 +53,7 @@ private static readonly GoBigConst maskᶜ3 = GoBigConst.Parse("8507059173023461
 internal static uintptr nativeWidth(byte c) {
     GoBigConst mask = /* 1<<126 | 1<<65 | 1<<7 */
             maskᶜ3;
+
     return (uintptr)((uintptr)((((uintptr)1).Lsh((uint64)(c))) & (uintptr)((nuint)(128UL))) | (uintptr)((((uintptr)1).Lsh((uint64)((byte)(c - 64)))) & (uintptr)(unchecked((nuint)(4611686018427387906UL)))));
 }
 
@@ -73,8 +77,10 @@ internal static void Main() {
     }
     fmt.Println(isHostCountˢ, hosts);
     fmt.Println(validHeaderValueByteˢ, values);
+
     fmt.Println(isHostSamplesˢ, isHost((rune)'a'), isHost((rune)'Z'), isHost((rune)'9'), isHost((rune)':'), isHost((rune)' '), isHost(200));
     fmt.Println(valueSamplesˢ, validHeaderValueByte((rune)'a'), validHeaderValueByte(0x09), validHeaderValueByte(0x00), validHeaderValueByte(0x80));
+
     foreach (var (_, c) in new byte[]{3, 6, 70, 8, 64}.slice()) {
         fmt.Printf("smallHigh(%d) = %d\n"u8, c, smallHigh(c));
     }

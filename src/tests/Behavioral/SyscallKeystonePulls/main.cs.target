@@ -37,20 +37,25 @@ internal static void Main() {
     } else {
         fmt.Println(lookPathGoˢ, strings.TrimSuffix(filepath.Base(p), exeˢ), absoluteˢ, filepath.IsAbs(p));
     }
+
     (_, err) = exec.LookPath(noSuchExecutableGo2csˢ);
     fmt.Println(lookPathMissingErrorˢ, err != default!);
+
     if (runtime.GOOS != "darwin"u8) {
         fmt.Println(doneˢ);
         return;
     }
+
     (var u, err) = user.Current();
     fmt.Println(userCurrentErrorˢ, err != default!);
     if (err == default!) {
         fmt.Println(userCurrentUidSetˢ, (~u).Uid != ""u8, gidSetˢ, (~u).Gid != ""u8,
             usernameSetˢ, (~u).Username != ""u8);
+
         var (byName, e) = user.Lookup((~u).Username);
         fmt.Println(userLookupUsernameErrorˢ, e != default!,
             uidRoundTripsˢ, e == default! && (~byName).Uid == (~u).Uid);
+
         (var g, e) = user.LookupGroupId((~u).Gid);
         fmt.Println(userLookupGroupIdGidˢ, e != default!,
             nameSetˢ, e == default! && (~g).Name != ""u8);
@@ -60,6 +65,7 @@ internal static void Main() {
                 gidRoundTripsˢ, e2 == default! && (~byGroup).Gid == (~g).Gid);
         }
     }
+
     fmt.Println(doneˢ);
 }
 

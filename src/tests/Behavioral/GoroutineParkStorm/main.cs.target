@@ -18,10 +18,14 @@ private static readonly object matchˢ = (@string)"match:"u8;
 internal static partial void Main() {
     ref var start = ref heap(new Δsync.WaitGroup(), out var Ꮡstart);
     Ꮡstart.Add(1);
+
     ref var done = ref heap(new Δsync.WaitGroup(), out var Ꮡdone);
     Ꮡdone.Add(n);
+
     var arrived = new channel<nint>(n);
+
     var results = new channel<nint>(0);
+
     for (nint i = 0; i < n; i++) {
         var arrivedʗ1 = arrived;
         var resultsʗ1 = results;
@@ -37,17 +41,21 @@ internal static partial void Main() {
             finally { ᒐ.Run(); }
         }, i);
     }
+
     nint sum = 0;
     for (nint i = 0; i < n; i++) {
         sum += ᐸꟷ(arrived);
     }
     fmt.Println(arrivedˢ, (nint)(n), sumˢ, sum);
+
     Ꮡstart.Done();
+
     nint total = 0;
     for (nint i = 0; i < n; i++) {
         total += ᐸꟷ(results);
     }
     Ꮡdone.Wait();
+
     fmt.Println(rendezvousˢ, (nint)(n), totalˢ, total);
     fmt.Println(matchˢ, sum == total);
 }

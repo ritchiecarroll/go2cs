@@ -38,6 +38,7 @@ internal static void Main() {
         }
     }
     fmt.Println(whileCondˢ, count, n);
+
     n = 0;
     count = 0;
     for (nint i = 0; ᐧ ; i++) {
@@ -54,6 +55,7 @@ internal static void Main() {
         fmt.Println(condIˢ, i);
     }
     fmt.Println(forCondˢ, count, n);
+
     n = 0;
     var (ᴛ5, ᴛ6) = next();
     for (nint i = must(ᴛ5, ᴛ6); i < 6; ) {
@@ -65,6 +67,7 @@ continueᴛ3:;
         var (ᴛ7, ᴛ8) = next();
         i = must(ᴛ7, ᴛ8);
     }
+
     n = 0;
 outer:
     var (ᴛ9, ᴛ10) = next();
@@ -87,6 +90,7 @@ continueᴛ4:;
         i = must(ᴛ11, ᴛ12);
     }
 break_outer:;
+
     n = 0;
     slice<Func<nint>> funcs = default!;
     var (ᴛ13, ᴛ14) = next();

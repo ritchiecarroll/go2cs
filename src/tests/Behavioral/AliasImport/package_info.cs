@@ -61,7 +61,7 @@ using static go.main_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("aliased.go", "aliased.cs", "AAoWgoKCgg==", "14-14:1")]
-[assembly: go.GoPositionMap("main.go", "main.cs", "AA8YgoKCgoCSgpCSgJSCgoKCgoI=", "13-13:1;14-14:2;15-15:3;16-16:4;17-17:5;18-18:6;19-19:7")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "AA8YgoKCgoCSgpCSgKSCgoKCgoI=", "13-13:1;14-14:2;15-15:3;16-16:4;17-17:5;18-18:6;19-19:7")]
 // </GoSourcePositionMaps>
 
 namespace go;

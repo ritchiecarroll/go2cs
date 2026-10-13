@@ -31,6 +31,7 @@ private static readonly object orderˢ = (@string)"order:"u8;
 
 internal static void Main() {
     var ch = new channel<nint>(4);
+
     var selᴛ1 = ch;
     var (ᴛ1, ᴛ2) = pair();
     var selᴛ2 = selᴛ1.ᐸꟷ(must(ᴛ1, ᴛ2), ꓸꓸꓸ);
@@ -39,6 +40,7 @@ internal static void Main() {
         fmt.Println(sentAloneˢ);
         break;
     }}
+
     var never = new channel<nint>(0);
     var selᴛ3 = never;
     var selᴛ4 = ch;
@@ -53,6 +55,7 @@ internal static void Main() {
         fmt.Println(sentBesideAReceiveˢ);
         break;
     }}
+
     log = default!;
     var selᴛ6 = chanFor(ch);
     var (ᴛ5, ᴛ6) = pair();
@@ -62,8 +65,10 @@ internal static void Main() {
         fmt.Println(orderˢ, log);
         break;
     }}
+
     var (ᴛ7, ᴛ8) = pair();
     ch.ᐸꟷ(must(ᴛ7, ᴛ8));
+
     fmt.Println(ᐸꟷ(ch), ᐸꟷ(ch), ᐸꟷ(ch), ᐸꟷ(ch));
 }
 

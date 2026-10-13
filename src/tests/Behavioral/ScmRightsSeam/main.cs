@@ -53,62 +53,76 @@ internal static void Main() {
     GoFrame ᒐ = default;
     try {
         @string secret = secretᶜ;
+
         array<nint> pipeFds = new(2);
         fatal(pipe2ˢ, syscall.Pipe2(pipeFds[..], 0));
         nint pipeRead = pipeFds[0];
         nint pipeWrite = pipeFds[1];
         defer(syscall.Close, pipeRead, ref ᒐ);
+
         var (n, err) = syscall.Write(pipeWrite, slice<byte>(secret));
         fatal(writePipeˢ, err);
         fatal(closePipeWriteˢ, syscall.Close(pipeWrite));
         fmt.Println(bytesStagedInThePipeˢ, n == len(secret));
+
         (var pair, err) = syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0);
         fatal(socketpairˢ, err);
         nint sender = pair[0];
         nint receiver = pair[1];
         defer(syscall.Close, sender, ref ᒐ);
         defer(syscall.Close, receiver, ref ᒐ);
+
         var rights = syscall.UnixRights(pipeRead);
         fmt.Println(controlImageIsNonEmptyˢ, len(rights) > 0);
+
         (var sent, err) = syscall.SendmsgN(sender, new byte[]{(rune)'x'}.slice(), rights, default!, 0);
         fatal(sendmsgˢ, err);
         fmt.Println(payloadBytesSentˢ, sent == 1);
+
         var payload = new slice<byte>(8);
         var oob = new slice<byte>(syscall.CmsgSpace(4));
         (var rn, var oobn, _, _, err) = syscall.Recvmsg(receiver, payload, oob, 0);
         fatal(recvmsgˢ, err);
         fmt.Println(payloadByteReceivedˢ, rn == 1 && payload[0] == (rune)'x');
         fmt.Println(controlBytesReceivedˢ, oobn == len(oob));
+
         (var scms, err) = syscall.ParseSocketControlMessage(oob.slice(0, oobn));
         fatal(parseControlˢ, err);
         fmt.Println(controlMessagesˢ, len(scms));
+
         (var fds, err) = syscall.ParseUnixRights(Ꮡ(scms, 0));
         fatal(parseRightsˢ, err);
         fmt.Println(descriptorsReceivedˢ, len(fds));
+
         var got = new slice<byte>(len(secret));
         (rn, err) = syscall.Read(fds[0], got);
         fatal(readReceivedFdˢ, err);
         syscall.Close(fds[0]);
         fmt.Println(receivedDescriptorReadsˢ, rn == len(secret) && ((sstring)(got.slice(0, rn))) == secret);
+
         array<nint> pipe2Fds = new(2);
         fatal(pipe2Phase2ˢ, syscall.Pipe2(pipe2Fds[..], 0));
         nint pipe2Read = pipe2Fds[0];
         nint pipe2Write = pipe2Fds[1];
         defer(syscall.Close, pipe2Read, ref ᒐ);
+
         (var n2, err) = syscall.Write(pipe2Write, slice<byte>(secret));
         fatal(writePipe2ˢ, err);
         fatal(closePipe2Writeˢ, syscall.Close(pipe2Write));
         fmt.Println(bytesStagedInTheSecondˢ, n2 == len(secret));
+
         (var pair2, err) = syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0);
         fatal(socketpairPhase2ˢ, err);
         nint sender2 = pair2[0];
         nint receiver2 = pair2[1];
         defer(syscall.Close, sender2, ref ᒐ);
         defer(syscall.Close, receiver2, ref ᒐ);
+
         var rights2 = syscall.UnixRights(pipe2Read);
         (var sent2, err) = syscall.SendmsgN(sender2, default!, rights2, default!, 0);
         fatal(sendmsgControlOnlyˢ, err);
         fmt.Println(controlOnlySendReportsNoˢ, sent2 == 0);
+
         var payload2 = new slice<byte>(8);
         var oob2 = new slice<byte>(syscall.CmsgSpace(4));
         (_, var oobn2, _, _, err) = syscall.Recvmsg(receiver2, payload2, oob2, 0);
@@ -117,6 +131,7 @@ internal static void Main() {
         fatal(parseControlPhase2ˢ, err);
         (var fds2, err) = syscall.ParseUnixRights(Ꮡ(scms2, 0));
         fatal(parseRightsPhase2ˢ, err);
+
         var got2 = new slice<byte>(len(secret));
         (var rn2, err) = syscall.Read(fds2[0], got2);
         fatal(readReceivedFdPhase2ˢ, err);

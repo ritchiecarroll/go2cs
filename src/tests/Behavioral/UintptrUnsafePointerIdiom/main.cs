@@ -30,22 +30,29 @@ internal static void Main() {
     var g1 = (uintptr)Ꮡorigin;
     var g2 = (uintptr)Ꮡorigin;
     fmt.Println(globalˢ, g1 != 0, g1 == g2);
+
     ref var link = ref heap<ж<point>>(out var Ꮡlink);
     link = Ꮡorigin;
     fmt.Println(paramˢ, addrOf(link) == g1);
+
     ж<point> missing = default!;
     fmt.Println(nilParamˢ, addrOf(missing) == 0);
+
     ref var buf = ref heap(new array<int32>(4), out var Ꮡbuf);
     var (e0, e2) = (Ꮡbuf.at<int32>(0), Ꮡbuf.at<int32>(2));
     var a0 = (uintptr)e0;
     var a2 = (uintptr)e2;
     fmt.Println(strideˢ, a0 != 0, a2 - a0 == 2 * /* unsafe.Sizeof(buf[0]) */ (uintptr)4);
+
     @unsafe.Pointer up = @unsafe.Pointer.FromPinnedBox(e0);
     fmt.Println(roundTripˢ, (uintptr)up == a0);
+
     var shifted = (uintptr)(@unsafe.Pointer)((uintptr)e0 + 2 * /* unsafe.Sizeof(buf[0]) */ (uintptr)4);
     fmt.Println(arithmeticˢ, shifted == a2);
+
     var pp = Ꮡlink;
     fmt.Println(derefOperandˢ, (uintptr)(pp.ValueSlot) == g1);
+
     link.Value.y = 7;
     fmt.Println(writtenˢ, (~link).x, (~link).y, addrOf(link) == g1);
 }

@@ -16,12 +16,15 @@ internal static @string slashJoin(params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.sslice();
 
     @string joined = ""u8;
+
     foreach (var (i, e) in elem) {
         if (i > 0) {
             joined += "/"u8;
         }
+
         joined += e;
     }
+
     return joined;
 }
 
@@ -31,6 +34,7 @@ internal static @string join(this ref Context c, params ꓸꓸꓸstring elemʗp)
     if (c.JoinPath != default!) {
         return c.JoinPath(elem.ꓸꓸꓸ);
     }
+
     return slashJoin(elem.ꓸꓸꓸ);
 }
 
@@ -46,15 +50,20 @@ internal static void Main() {
             fmt.Printf(format + "\n"u8, args.ꓸꓸꓸ);
         }
     );
+
     fmt.Println(ctxt.JoinPath("a"u8, "b", "c"));
+
     fmt.Println(ctxt.JoinPath() == ""u8);
+
     var parts = new @string[]{"x"u8, "y"u8}.slice();
     fmt.Println(ctxt.join(parts.ꓸꓸꓸ));
+
     ctxt.JoinPath = @string (params ꓸꓸꓸstring elemʗp) => {
         var elem = elemʗp.sslice();
         return fmt.Sprint(len(elem));
     };
     fmt.Println(ctxt.JoinPath("p"u8, "q"));
+
     ctxt.Log("%s:%d"u8, ctxt.Name, (nint)(3));
     ctxt.Log(doneˢ);
 }

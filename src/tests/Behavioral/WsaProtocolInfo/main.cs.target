@@ -37,22 +37,29 @@ internal static void Main() {
             }
         }
         defer(() => syscall.WSACleanup(), ref ᒐ);
+
         fmt.Println(wsaStartupˢ);
         fmt.Println(versionNegotiatedˢ, data.Version == 0x202);
         fmt.Println(highVersionˢ, data.HighVersion == 0x202);
         fmt.Println(descriptionPrintableˢ, printableASCII(data.Description[..]));
+
         fmt.Println(wsaEnumProtocolsˢ);
+
         ref var protos = ref heap<array<int32>>(out var Ꮡprotos);
         protos = new int32[]{syscall.IPPROTO_TCP, 0}.array();
+
         ref var buf = ref heap(new array<syscall.WSAProtocolInfo>(32, () => new()), out var Ꮡbuf);
         ref var length = ref heap<uint32>(out var Ꮡlength);
         length = (uint32)/* unsafe.Sizeof(buf) */ (uintptr)20096;
+
         var (n, err) = syscall.WSAEnumProtocols(Ꮡprotos.at<int32>(0), Ꮡbuf.at<syscall.WSAProtocolInfo>(0), Ꮡlength);
         if (err != default!) {
             fmt.Println(fatalWSAEnumProtocolsˢ, err);
             return;
         }
+
         fmt.Println(entryCountInRangeˢ, n >= 1 && n <= (int32)len(buf));
+
         var (chainOK, familyOK, typeOK, protoOK, nameOK) = (true, true, true, true, true);
         for (var i = (int32)0; i < n; i++) {
             var p = buf[i].ΔClone();
@@ -72,11 +79,13 @@ internal static void Main() {
                 nameOK = false;
             }
         }
+
         fmt.Println(chainLengthInRangeˢ, chainOK);
         fmt.Println(addressFamilyIsInetˢ, familyOK);
         fmt.Println(socketTypeIsStreamˢ, typeOK);
         fmt.Println(protocolIsTcpˢ, protoOK);
         fmt.Println(protocolNamePrintableˢ, nameOK);
+
         var ifs = true;
         for (var i = (int32)0; i < n; i++) {
             if ((uint32)(buf[i].ServiceFlags1 & (uint32)syscall.XP1_IFS_HANDLES) == 0) {
@@ -84,10 +93,13 @@ internal static void Main() {
             }
         }
         fmt.Println(everyEntryCarriesXp1Ifsˢ, ifs);
+
         fmt.Println(requiredSizeˢ);
+
         var record = (uint32)/* unsafe.Sizeof(buf[0]) */ (uintptr)628;
         ref var @required = ref heap<uint32>(out var Ꮡrequired);
         @required = (uint32)0;
+
         (var m, err) = syscall.WSAEnumProtocols(Ꮡprotos.at<int32>(0), Ꮡbuf.at<syscall.WSAProtocolInfo>(0), Ꮡrequired);
         fmt.Println(undersizedBufferRefusedˢ, m == -1 && err != default!);
         fmt.Println(requiredSizeIsWholeˢ, @required >= record && @required % record == 0);

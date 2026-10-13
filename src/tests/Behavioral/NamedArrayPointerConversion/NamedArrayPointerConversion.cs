@@ -28,25 +28,32 @@ internal static void Main() {
     q.Value[0] = 7;
     q.Value[3] = 8;
     fmt.Println(b1Freshˢ, q.Value, lenˢ, len(q.Value));
+
     var z = Ꮡ(new MyEmptyArray(new array<byte>(0)));
     fmt.Println(b2ZeroLengthˢ, z.Value, lenˢ, len(z.Value));
+
     var n = Ꮡ(new MyInts(new array<nint>(3)));
     n.Value[1] = 5;
     fmt.Println(b3Intsˢ, n.Value, lenˢ, len(n.Value));
+
     var a = Ꮡ(new MyArray(new array<byte>(4)));
     var b = Ꮡ(new MyArray(new array<byte>(4)));
     a.Value[0] = 1;
     fmt.Println(b4Independentˢ, a.Value, b.Value);
+
     ж<MyEmptyArray> nilp = ж<MyEmptyArray>.NilBoxOfDims(0L);
     fmt.Println(c1Nilˢ, nilp == nil);
+
     var c = Ꮡ(new MyArray(new byte[]{1, 2, 3, 4}.array()));
     c.Value[1] = 9;
     fmt.Println(c2Compositeˢ, c.Value);
+
     ref var sraw = ref heap<slice<byte>>(out var Ꮡsraw);
     sraw = new byte[]{1, 2, 3}.slice();
     var sp = Ꮡsraw.Reinterpret<slice<byte>, MyBytes>();
     sp.ValueSlot = append(sp.ValueSlot, (byte)(4));
     fmt.Println(c3NamedSlicePtrAliasesˢ, sraw);
+
     ref var mb = ref heap<MyBytes>(out var Ꮡmb);
 
     mb = new MyBytes(new byte[]{9, 8}.slice());

@@ -18,7 +18,9 @@ internal partial struct secondWriteOps_readOp /*dyn*/ {
 internal static void secondWriteOps() {
     var tests = new secondWriteOps_testFnc[]{new secondWriteOps_readOp(1), new secondWriteOps_readOp(2)}.slice();
     var maker = ((secondWriteOps_fileMaker)new secondWriteOps_readOp(9));
+
     nint sum = 0;
+
     foreach (var (_, t) in tests) {
         {
             var (op, ok) = t._<secondWriteOps_readOp>(ᐧ); if (ok) {
@@ -26,11 +28,13 @@ internal static void secondWriteOps() {
             }
         }
     }
+
     {
         var (op, ok) = maker._<secondWriteOps_readOp>(ᐧ); if (ok) {
             sum += op.cnt;
         }
     }
+
     fmt.Println(secondWriteOpsˢ, len(tests), sum);
 }
 
@@ -39,6 +43,7 @@ private static readonly object secondAliasesˢ = (@string)"secondAliases:"u8;
 
 internal static void secondAliases() {
     var h = new secondAliases_hdr(Name: "link.txt"u8, Size: 0);
+
     fmt.Println(secondAliasesˢ, h, new Header(Name: "raw"u8, Size: 7));
 }
 

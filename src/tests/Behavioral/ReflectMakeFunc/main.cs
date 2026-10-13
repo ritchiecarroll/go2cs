@@ -37,10 +37,12 @@ internal static void Main() {
     makeSwap(ᏑintSwap);
     var (a, b) = intSwap(3, 7);
     fmt.Println(intSwapˢ, a, b);
+
     ref var stringSwap = ref heap<Func<@string, @string, (@string, @string)>>(out var ᏑstringSwap);
     makeSwap(ᏑstringSwap);
     var (s1, s2) = stringSwap(helloˢ, worldˢ);
     fmt.Println(stringSwapˢ, s1, s2);
+
     ref var events = ref heap<slice<@string>>(out var Ꮡevents);
     ref var t1 = ref heap<traceHooks>(out var Ꮡt1);
     t1 = new traceHooks(OnEvent: (@string s) => {
@@ -67,6 +69,7 @@ internal static void Main() {
     t1.OnEvent(dnsˢ);
     t1.OnEvent(connectˢ);
     fmt.Println(eventsˢ, events);
+
     ref var h = ref heap<traceHooks>(out var Ꮡh);
     h = new traceHooks(nil);
     var hv = reflect.ValueOf(Ꮡh).Elem();
@@ -78,9 +81,12 @@ internal static void Main() {
     sumField.Set(made);
     var (n, msg) = h.Sum(4, 5);
     fmt.Println(sumˢ, n, msg);
+
     fmt.Println(typeMatchˢ, AreEqual(made.Type(), sumField.Type()));
+
     var @out = made.Call(new reflectꓸValue[]{reflect.ValueOf((nint)(10)), reflect.ValueOf((nint)(20))}.slice());
     fmt.Println(callˢ, @out[0].Int(), @out[1].String());
+
     ref var describe = ref heap<Func<any, @string>>(out var Ꮡdescribe);
     var dv = reflect.ValueOf(Ꮡdescribe).Elem();
     dv.Set(reflect.MakeFunc(dv.Type(), (slice<reflectꓸValue> args) => {
@@ -88,12 +94,14 @@ internal static void Main() {
         return new reflectꓸValue[]{reflect.ValueOf(fmt.Sprintf("%v/%v"u8, arg.Kind(), arg.Elem().Kind()))}.slice();
     }));
     fmt.Println(describeˢ, describe((nint)(42)));
+
     ref var isNil = ref heap<Func<ж<nint>, bool>>(out var ᏑisNil);
     var nv = reflect.ValueOf(ᏑisNil).Elem();
     nv.Set(reflect.MakeFunc(nv.Type(), (slice<reflectꓸValue> args) => new reflectꓸValue[]{reflect.ValueOf(args[0].IsNil())}.slice()));
     ref var x = ref heap<nint>(out var Ꮡx);
     x = 5;
     fmt.Println(isNilˢ, isNil(nil), isNil(Ꮡx));
+
     ref var sum4 = ref heap<Func<array<byte>, nint>>(out var Ꮡsum4);
     var sv = reflect.ValueOf(Ꮡsum4).Elem();
     sv.Set(reflect.MakeFunc(sv.Type(), (slice<reflectꓸValue> args) => {

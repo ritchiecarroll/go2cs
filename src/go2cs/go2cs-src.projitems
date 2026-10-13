@@ -14,6 +14,7 @@
     <None Include="$(MSBuildThisFileDirectory)adapterPassSeparation_test.go" />
     <None Include="$(MSBuildThisFileDirectory)adapterStructLocality_test.go" />
     <None Include="$(MSBuildThisFileDirectory)addressTakenPredicates_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)aliasDocComments_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasPublicization_test.go" />
     <None Include="$(MSBuildThisFileDirectory)aliasReferenceImports_test.go" />
     <None Include="$(MSBuildThisFileDirectory)allocInliningFrames_test.go" />
@@ -38,6 +39,7 @@
     <None Include="$(MSBuildThisFileDirectory)behavioralPackageInfoAttributes_test.go" />
     <None Include="$(MSBuildThisFileDirectory)bestEffortTranspile_test.go" />
     <None Include="$(MSBuildThisFileDirectory)blockEventFrames_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)bodyBlankLines_test.go" />
     <None Include="$(MSBuildThisFileDirectory)buildConstraints_test.go" />
     <None Include="$(MSBuildThisFileDirectory)byRefReceiverGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)callerInliningAnalysis.go" />
@@ -74,8 +76,10 @@
     <None Include="$(MSBuildThisFileDirectory)compilerIntrinsic.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerIntrinsic_test.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerPropertyClass_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)compositeLitComments_test.go" />
     <None Include="$(MSBuildThisFileDirectory)compoundShiftGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)commandLineOptions.go" />
+    <None Include="$(MSBuildThisFileDirectory)commentParityUtf8_test.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyAliasDot_test.go" />
     <None Include="$(MSBuildThisFileDirectory)constraintProxyGenericCall_test.go" />
@@ -144,6 +148,7 @@
     <None Include="$(MSBuildThisFileDirectory)displacedCommentDrain_test.go" />
     <None Include="$(MSBuildThisFileDirectory)displacedPromotedCall_test.go" />
     <None Include="$(MSBuildThisFileDirectory)displacedRefReceiverCall_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)docComments_test.go" />
     <None Include="$(MSBuildThisFileDirectory)duplicatePartialMembers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)dynamicStructOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)dynamicTypeGate_test.go" />
@@ -158,6 +163,7 @@
     <None Include="$(MSBuildThisFileDirectory)escapingAnonStructPointerLift_test.go" />
     <None Include="$(MSBuildThisFileDirectory)escapedArrayElementAddress_test.go" />
     <None Include="$(MSBuildThisFileDirectory)eventFraming_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)expressionComments_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldDimsCargo_test.go" />
     <None Include="$(MSBuildThisFileDirectory)filterZeroMatch_test.go" />
@@ -207,6 +213,22 @@
     <None Include="$(MSBuildThisFileDirectory)initOrderTupleSpec_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internalTestLocalInterfaceStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)interfaceConversion.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\census.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\census_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\corpus_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\cslex.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\golex.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\anchor\bad\anchor\anchor.cs" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\anchor\good\anchor\anchor.cs" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\anchor\goroot\src\anchor\anchor.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\corpus_baseline.txt" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\planted\bad\plant\plant.cs" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\planted\bad2\plant\plant.cs" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\planted\good\plant\plant.cs" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\planted\goroot\src\plant\plant.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\prelude\bad\prelude\prelude.cs" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\prelude\good\prelude\prelude.cs" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\prelude\goroot\src\prelude\prelude.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gencorpusrelease\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\genpopulation\main.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\gensourcemeta\main.go" />
@@ -350,6 +372,7 @@
     <None Include="$(MSBuildThisFileDirectory)positionCalls_test.go" />
     <None Include="$(MSBuildThisFileDirectory)positionMapOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)positionMap_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)preludeSeparator_test.go" />
     <None Include="$(MSBuildThisFileDirectory)processGroupUnix.go" />
     <None Include="$(MSBuildThisFileDirectory)processGroup_test.go" />
     <None Include="$(MSBuildThisFileDirectory)processGroupWindows.go" />

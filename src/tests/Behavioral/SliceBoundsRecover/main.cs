@@ -58,9 +58,11 @@ internal static void Main() {
     uint64 u64 = (uint64)(1099511627776L + 3);
     uint32 u32 = 11;
     int64 i64 = 4294967301L;
+
     ref var a6 = ref heap(new array<nint>(6), out var Ꮡa6);
     nint two = 2;
     nint five = 5;
+
         var sʗ1 = s;
 
         var sʗ2 = s;
@@ -238,9 +240,11 @@ internal static void Main() {
             fmt.Println(lenˢ, len(t), capˢ, cap(t));
         })
     }.slice();
+
     foreach (var (_, c) in cases) {
         @try(c.name, c.f);
     }
+
     fmt.Println(doneˢ);
 }
 

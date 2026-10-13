@@ -24,6 +24,7 @@ internal static void Main() {
         count++;
     }
     fmt.Println(uintptrBlankKeyˢ, count);
+
     uintptr stride = 16;
     uintptr offset = default!;
     var offsets = new uintptr[]{}.slice();
@@ -32,35 +33,41 @@ internal static void Main() {
         offset += stride;
     }
     fmt.Println(uintptrOffsetsˢ, offsets);
+
     uint8 b = 5;
     nint sum8 = 0;
     foreach (var i in range<uint8>(b)) {
         sum8 += (nint)i;
     }
     fmt.Println(uint8Sumˢ, sum8);
+
     int64 big = 6;
     var sum64 = (int64)0;
     foreach (var i in range<int64>(big)) {
         sum64 += i;
     }
     fmt.Println(int64Sumˢ, sum64);
+
     uint64 u = 3;
     uint64 sumU = default!;
     foreach (var i in range<uint64>(u)) {
         sumU += i;
     }
     fmt.Println(uint64Sumˢ, sumU);
+
     rune r = 4;
     nint sumR = 0;
     foreach (var i in range<rune>(r)) {
         sumR += (nint)i;
     }
     fmt.Println(runeSumˢ, sumR);
+
     nint named = 0;
     foreach (var i in range<myLen>(((myLen)3))) {
         named += (nint)(uintptr)i;
     }
     fmt.Println(namedUintptrSumˢ, named);
+
     nint zero = 0;
     foreach (var _ᴛ3 in range<int64>((int64)0)) {
         zero++;
@@ -72,6 +79,7 @@ internal static void Main() {
         zero++;
     }
     fmt.Println(nonPositiveIterationsˢ, zero);
+
     nint plain = 0;
     foreach (var i in range(3)) {
         plain += i;

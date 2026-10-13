@@ -29,6 +29,7 @@ internal static partial void Main() {
             return;
         }
         defer(os.RemoveAll, dir, ref ᒐ);
+
         (var ta, err) = Δnet.ResolveUnixAddr(unixˢ, filepath.Join(dir, "s"));
         if (err != default!) {
             fmt.Println(fatalResolveˢ, err);
@@ -49,6 +50,7 @@ internal static partial void Main() {
                 }
             }
         });
+
         (var c, err) = Δnet.DialUnix(unixˢ, nil, ta);
         if (err != default!) {
             fmt.Println(fatalDialˢ, err);
@@ -56,6 +58,7 @@ internal static partial void Main() {
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
+
         var la = c.LocalAddr()._<ж<Δnet.UnixAddr>>();
         fmt.Println(netˢ, (~la).Net);
         fmt.Println(nameLenˢ, len((~la).Name));

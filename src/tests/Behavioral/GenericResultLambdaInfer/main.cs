@@ -65,8 +65,10 @@ private static readonly @string sevenˢ = "seven"u8;
 
 internal static void Main() {
     fmt.Println(fortyTwo(), fortyTwo());
+
     var nilOnce = Once(any () => default!);
     fmt.Println(describe(nilOnce()));
+
     var panicOnce = Once(any () => {
         throw panic("boom");
     });
@@ -82,14 +84,18 @@ internal static void Main() {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }))();
+
     var pairOnce = Once2((any, any) () => (default!, default!));
     var (p, q) = pairOnce();
     fmt.Println(describe(p), describe(q));
+
     var both = Once2((nint, @string) () => (7, sevenˢ));
     var (n, s) = both();
     fmt.Println(n, s);
+
     fmt.Println(reduce(new nint[]{1, 2, 3, 4}.slice(), nint (nint a, nint b) => a + b));
     fmt.Println(reduce(new @string[]{"a"u8, "b"u8, "c"u8}.slice(), @string (@string a, @string b) => a + b));
+
     fmt.Println(pick(new nint[]{3, 9, 4}.slice(), (nint a, nint b) => a > b));
     fmt.Println(pick(new @string[]{"pear"u8, "fig"u8, "plum"u8}.slice(), (@string a, @string b) => len(a) < len(b)));
 }

@@ -42,17 +42,20 @@ internal static void roundTrip() {
         }
         var serverʗ1 = server;
         defer(() => serverʗ1.Close(), ref ᒐ);
+
         var (dst, ok) = sockaddrOf(server.LocalAddr());
         if (!ok) {
             fmt.Println(roundtripServerAddressIsˢ);
             return;
         }
+
         (var sender, err) = newSender();
         if (err != default!) {
             fmt.Println(roundtripSenderSetupˢ);
             return;
         }
         defer(syscall.Closesocket, sender, ref ᒐ);
+
         (var local, err) = syscall.Getsockname(sender);
         if (err != default!) {
             fmt.Println(roundtripGetsocknameˢ);
@@ -63,10 +66,12 @@ internal static void roundTrip() {
             fmt.Println(roundtripSenderAddressIsˢ);
             return;
         }
+
         var payload = slice<byte>("wsasendto-payload"u8);
         (var sent, err) = send(sender, payload, new syscall.SockaddrInet4жΔSockaddr(dst));
         fmt.Println(roundtripSendReportedNoˢ, err == default!);
         fmt.Println(roundtripByteCountEqualsˢ, (nint)sent == len(payload));
+
         {
             var errΔ1 = server.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L))); if (errΔ1 != default!) {
                 fmt.Println(roundtripDeadlineFailedˢ);
@@ -80,6 +85,7 @@ internal static void roundTrip() {
             return;
         }
         fmt.Println(roundtripBytesArrivedˢ, ((sstring)(buf.slice(0, n))) == ((sstring)payload));
+
         (var peer, ok) = from._<ж<Δnet.UDPAddr>>(ᐧ);
         if (!ok) {
             fmt.Println(roundtripPeerAddressIsˢ);
@@ -112,17 +118,20 @@ internal static void zeroLengthDatagram() {
         }
         var serverʗ1 = server;
         defer(() => serverʗ1.Close(), ref ᒐ);
+
         var (dst, ok) = sockaddrOf(server.LocalAddr());
         if (!ok) {
             fmt.Println(zerolenServerAddressIsˢ);
             return;
         }
+
         (var sender, err) = newSender();
         if (err != default!) {
             fmt.Println(zerolenSenderSetupFailedˢ);
             return;
         }
         defer(syscall.Closesocket, sender, ref ᒐ);
+
         var one = new byte[]{0}.slice();
         ref var buf = ref heap<syscall.WSABuf>(out var Ꮡbuf);
         buf = new syscall.WSABuf(Len: 0, Buf: Ꮡ(one, 0));
@@ -130,6 +139,7 @@ internal static void zeroLengthDatagram() {
         err = syscall.WSASendto(sender, Ꮡbuf, 1, Ꮡsent, 0, new syscall.SockaddrInet4жΔSockaddr(dst), nil, nil);
         fmt.Println(zerolenSendReportedNoˢ, err == default!);
         fmt.Println(zerolenByteCountIsZeroˢ, sent == 0);
+
         {
             var errΔ1 = server.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L))); if (errΔ1 != default!) {
                 fmt.Println(zerolenDeadlineFailedˢ);

@@ -66,6 +66,7 @@ internal static void Main() {
     fmt.Println(namedFloatConversionˢ);
     var f = ((MyFloat)(/* -math.Sqrt2 */ -1.4142135623730951D));
     fmt.Println(f.Abs());
+
     fmt.Println(float64Constantˢ);
     bits64(maxFloat64ˢ, Δmath.Float64bits(MaxFloat64), 0x7fefffffffffffffUL);
     bits64(smallestNonzeroFloat64ˢ, Δmath.Float64bits(SmallestNonzeroFloat64), 0x1);
@@ -75,14 +76,17 @@ internal static void Main() {
     bits64(twoPiˢ, Δmath.Float64bits(twoPi), 0x401921fb54442d18UL);
     bits64(halfPiˢ, Δmath.Float64bits(halfPi), 0x3ff921fb54442d18UL);
     bits64(thirdˢ, Δmath.Float64bits(third), 0x3fd5555555555555UL);
+
     fmt.Println(float32Constantˢ);
     bits32(maxFloat32ˢ, Δmath.Float32bits(MaxFloat32), 0x7f7fffff);
     bits32(smallestNonzeroFloat32ˢ, Δmath.Float32bits(SmallestNonzeroFloat32), 0x1);
+
     fmt.Println(exactValueIdentitiesˢ);
     fmt.Println(maxFloat64Literalˢ, (float64)MaxFloat64 == 1.7976931348623157e+308D);
     fmt.Println(smallestNonzeroFloat64ˢ2, (float64)SmallestNonzeroFloat64 == 5e-324D);
     fmt.Println(maxFloat32Literalˢ, (float32)MaxFloat32 == 3.4028235e+38F);
     fmt.Println(log10ELiteralˢ, (float64)Log10E == 0.4342944819032518D);
+
     fmt.Println(isInfBoundaryˢ);
     fmt.Println(isInfMaxFloat64ˢ, isInf(1.7976931348623157e+308D, 1));
     fmt.Println(isInfMaxFloat64ˢ2, isInf(-1.7976931348623157e+308D, -1));

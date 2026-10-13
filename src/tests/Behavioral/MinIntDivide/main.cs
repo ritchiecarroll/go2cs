@@ -83,6 +83,7 @@ internal static @string localRem() {
             return fmt.Sprint(rem);
         }
     }
+
     return nonzeroˢ;
 }
 
@@ -114,6 +115,7 @@ internal static void arm(@string @class, Func<@string> f) {
         if (len(os.Args) > 1 && os.Args[1] != @class) {
             return;
         }
+
         defer(() => {
             {
                 var r = recover(); if (r != default!) {
@@ -121,6 +123,7 @@ internal static void arm(@string @class, Func<@string> f) {
                 }
             }
         }, ref ᒐ);
+
         fmt.Println(@class + ":", f());
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

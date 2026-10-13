@@ -147,6 +147,7 @@ private static readonly @string renamedˢ = "renamed"u8;
 
 internal static void Main() {
     ж<node> nilNode = default!;
+
     fmt.Println(nilArgumentDelegatedˢ);
     var nilNodeʗ1 = nilNode;
     @try(checkArgNilˢ, () => {
@@ -162,18 +163,21 @@ internal static void Main() {
     @try(guardedNilˢ, () => {
         fmt.Printf("  %s\n"u8, guarded(nilNodeʗ3));
     });
+
     fmt.Println();
     fmt.Println(nilArgumentUnconditionalˢ);
     var nilNodeʗ4 = nilNode;
     @try(readNameNilˢ, () => {
         _ = readName(nilNodeʗ4);
     });
+
     fmt.Println();
     fmt.Println(nilArgumentSideEffectˢ);
     var nilNodeʗ5 = nilNode;
     @try(announceNilˢ, () => {
         _ = announce(nilNodeʗ5);
     });
+
     fmt.Println();
     fmt.Println(nilTerminatedWalkˢ);
     var chain = Ꮡ(new node(name: "a"u8, n: 1, next: Ꮡ(new node(name: "b"u8, n: 2, next: Ꮡ(new node(name: "c"u8, n: 3))))));
@@ -185,6 +189,7 @@ internal static void Main() {
     @try(walkLenNilˢ, () => {
         fmt.Printf("  walkLen -> %d\n"u8, walkLen(nilNodeʗ6));
     });
+
     fmt.Println();
     fmt.Println(errorParameterHoldingNilˢ);
     ref var held = ref heap<error>(out var Ꮡheld);
@@ -194,6 +199,7 @@ internal static void Main() {
     @try(setErrNilˢ, () => {
         fmt.Printf("  %s\n"u8, setErr(nil, errNilArg));
     });
+
     fmt.Println();
     fmt.Println(normalizationRepointedˢ);
     var nilNodeʗ7 = nilNode;
@@ -204,6 +210,7 @@ internal static void Main() {
     @try(normalizeChainˢ, () => {
         fmt.Printf("  normalize -> %s\n"u8, normalize(chainʗ2));
     });
+
     fmt.Println();
     fmt.Println(nonNilArgumentsˢ);
     var chainʗ3 = chain;
@@ -227,6 +234,7 @@ internal static void Main() {
         var h = store(chainʗ7);
         fmt.Printf("  store -> %s, next: %s\n"u8, (~h).name, (~(~h).next).name);
     });
+
     fmt.Println();
     fmt.Println(aWriteThroughAPointerˢ);
     rename(ref (chain).DerefOrNull(), renamedˢ);

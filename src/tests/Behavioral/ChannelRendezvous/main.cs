@@ -20,6 +20,7 @@ private static readonly object pongˢ = (@string)"pong:"u8;
 internal static partial void Main() {
     var ch = new channel<nint>(0);
     fmt.Println(capˢ, cap(ch), lenˢ, len(ch));
+
     var selᴛ1 = ch.ᐸꟷ(1, ꓸꓸꓸ);
     switch (trySelect(selᴛ1)) {
     case 0: {
@@ -30,6 +31,7 @@ internal static partial void Main() {
         fmt.Println(sendNotReadyNoReceiverˢ);
         break;
     }}
+
     var selᴛ2 = ch;
     switch (trySelect(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
     case 0 when selᴛ2.ꟷᐳ(out var v): {
@@ -40,7 +42,9 @@ internal static partial void Main() {
         fmt.Println(recvNotReadyNoSenderˢ);
         break;
     }}
+
     fmt.Println(afterProbesLenˢ, len(ch), capˢ, cap(ch));
+
     var reply = new channel<nint>(0);
     var chʗ1 = ch;
     var replyʗ1 = reply;
@@ -51,6 +55,7 @@ internal static partial void Main() {
     ch.ᐸꟷ(21);
     fmt.Println(replyˢ, ᐸꟷ(reply));
     fmt.Println(afterRendezvousLenˢ, len(ch), capˢ, cap(ch));
+
     var ping = new channel<nint>(0);
     var pong = new channel<nint>(0);
     var pingʗ1 = ping;

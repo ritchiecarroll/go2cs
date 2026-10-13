@@ -9,10 +9,13 @@ private static readonly @string helloWorldˢ = "Hello World"u8;
 
 internal static void Main() {
     @string a = default!;
+
     a = helloWorldˢ;
+
     test(a);
     fmt.Println(a);
     fmt.Println();
+
     a = helloWorldˢ;
     test2(ref a);
     fmt.Println(a);

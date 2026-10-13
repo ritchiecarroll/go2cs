@@ -66,34 +66,42 @@ internal static void Main() {
     var mx = new mixed(Pub: 3);
     mx.sec = 4;
     fmt.Println(mx.Pub + mx.sec);
+
     ref var b = ref heap(new box(), out var Ꮡb);
     fill(Ꮡb);
     fmt.Println(b.w.a, b.w.b);
     fmt.Println(readBack(Ꮡb));
+
     var c = Ꮡb.of(box.Ꮡw);
     bump(ref (c.of(wrapper.Ꮡa)).DerefOrNull());
     fmt.Println(b.w.a, readBack(Ꮡb));
+
     var s = new shadowed(nil);
     s.fn = 5;
     s.ctxt.fn = 7;
     s.tag = 9;
     fmt.Println(s.fn, s.ctxt.fn, s.tag);
+
     var d = new derived(nil);
     d.id = 5;
     d.tag = 1;
     fmt.Println(d.id, d.tag, d.twice());
+
     ref var e = ref heap<derived>(out var Ꮡe);
     e = new derived(@base: new @base(id: 21), tag: 2);
     var p = Ꮡe;
     bump(ref (p.of(derived.Ꮡid)).DerefOrNull());
     fmt.Println(e.id, e.tag, e.twice());
+
     shadowed z = new(nil);
     z.ctxt.fn = 7;
     z.tag = 3;
     fmt.Println(z.ctxt.fn, z.tag);
+
     var np = @new<shadowed>();
     np.Value.tag = 11;
     fmt.Println((~np).tag, (~np).ctxt.tag);
+
     var fl = Ꮡ(new @file(fd: 5));
     fmt.Println(fl.bump(), (~fl).fd);
 }

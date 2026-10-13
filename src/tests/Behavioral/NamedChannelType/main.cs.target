@@ -30,17 +30,22 @@ internal static partial void Main() {
     cw.Close();
     cw.Wait();
     fmt.Println(waitedˢ);
+
     var q = new intQueue(3);
     q.ᐸꟷ(10);
     q.ᐸꟷ(20);
     fmt.Println(len(q), cap(q));
+
     nint v = ᐸꟷ<nint>(q);
     fmt.Println(v);
+
     (v, var ok) = ᐸꟷ<nint>(q, ꟷ);
     fmt.Println(v, ok);
+
     close<nint>(q);
     (v, ok) = ᐸꟷ<nint>(q, ꟷ);
     fmt.Println(v, ok);
+
     var drain = new intQueue(2);
     drain.ᐸꟷ(7);
     drain.ᐸꟷ(8);
@@ -50,6 +55,7 @@ internal static partial void Main() {
         sum += x;
     }
     fmt.Println(sum);
+
     var sel = new intQueue(1);
     sel.ᐸꟷ(42);
     var selᴛ1 = sel;
@@ -58,6 +64,7 @@ internal static partial void Main() {
         fmt.Println(y);
         break;
     }}
+
     var pipe = new intQueue(0);
     fmt.Println(len(pipe), cap(pipe));
     var pipeʗ1 = pipe;

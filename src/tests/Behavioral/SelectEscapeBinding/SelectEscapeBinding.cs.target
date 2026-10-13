@@ -17,7 +17,9 @@ private static readonly object afterˢ = (@string)"after:"u8;
 internal static void selectEscape() {
     var ch = new channel<boxedResult>(1);
     ch.ᐸꟷ(new boxedResult(value: 7, tag: "orig"u8));
+
     ж<boxedResult> saved = default!;
+
     var selᴛ1 = ch;
     switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
     case 0 when selᴛ1.ꟷᐳ(out var resᴛ1): {
@@ -28,6 +30,7 @@ internal static void selectEscape() {
         res.tag = mutatedˢ;
         break;
     }}
+
     fmt.Println(afterˢ, (~saved).value, (~saved).tag);
 }
 
@@ -38,8 +41,10 @@ private static readonly object fieldˢ = (@string)"field:"u8;
 internal static void selectEscapeCommaOk() {
     var ch = new channel<boxedResult>(1);
     ch.ᐸꟷ(new boxedResult(value: 3, tag: "ok-form"u8));
+
     ж<boxedResult> whole = default!;
     ж<nint> field = default!;
+
     var selᴛ2 = ch;
     switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
     case 0 when selᴛ2.ꟷᐳ(out var resᴛ2, out var ok): {
@@ -50,6 +55,7 @@ internal static void selectEscapeCommaOk() {
         fmt.Println(commaOkˢ, res.value, res.tag, ok);
         break;
     }}
+
     fmt.Println(fieldˢ, field.Value, (~whole).value);
 }
 
@@ -62,7 +68,9 @@ internal static void selectEscapeMixed() {
     var a = new channel<boxedResult>(1);
     var b = new channel<nint>(1);
     a.ᐸꟷ(new boxedResult(value: 1, tag: "x"u8));
+
     ж<boxedResult> keep = default!;
+
     var selᴛ3 = a;
     var selᴛ4 = b;
     switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {

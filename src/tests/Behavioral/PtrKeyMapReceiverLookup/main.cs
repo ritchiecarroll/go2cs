@@ -66,11 +66,15 @@ internal static void Main() {
     var a = Ꮡ(new conn(id: 1));
     var b = Ꮡ(new conn(id: 2));
     var t = Ꮡ(new tracker(m: new map<ж<conn>, @string>{[a] = "idle"u8}));
+
     fmt.Println(a.status(t), b.status(t));
+
     a.rename(t, busyˢ);
     fmt.Println(a.label(t), len((~t).m));
+
     b.rename(t, newˢ);
     fmt.Println(b.label(t), a.label(t), len((~t).m));
+
     a.close(t);
     fmt.Println(len((~t).m), a.status(t), b.status(t));
 }

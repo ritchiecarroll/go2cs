@@ -39,6 +39,7 @@ internal static void @catch(@string label, Action f) {
             }
             fmt.Printf("%s did not panic\n"u8, label);
         }, ref ᒐ);
+
         f();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -47,6 +48,7 @@ internal static void @catch(@string label, Action f) {
 
 internal static partial bool goexits(Action f) {
     var done = new channel<bool>(0);
+
     var doneʗ1 = done;
     goǃ(() => {
         GoFrame ᒐ = default;
@@ -62,6 +64,7 @@ internal static partial bool goexits(Action f) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     return ᐸꟷ(done);
 }
 
@@ -100,6 +103,7 @@ internal static iter.Seq<nint> doubleNext() {
                     }
                 }
             }, ref ᒐ);
+
             nextSlot();
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -125,65 +129,87 @@ private static readonly object pullAfterImmediateStopˢ = (@string)"pull after i
 
 internal static void Main() {
     var (next, stop) = iter.Pull(count(3));
+
     while (ᐧ) {
         var (vΔ1, okΔ1) = next();
         fmt.Println(pullˢ, vΔ1, okΔ1);
+
         if (!okΔ1) {
             break;
         }
     }
+
     var (v, ok) = next();
     fmt.Println(pullAfterExhaustionˢ, v, ok);
+
     stop();
     stop();
     fmt.Println(stopAfterExhaustionIsANoˢ);
+
     var (next2, stop2) = iter.Pull2(squares(3));
+
     while (ᐧ) {
         var (k, v2, ok2) = next2();
         fmt.Println(pull2ˢ, k, v2, ok2);
+
         if (!ok2) {
             break;
         }
     }
+
     stop2();
+
     var (next3, stop3) = iter.Pull(count(100));
     var (a, aok) = next3();
     var (b, bok) = next3();
     fmt.Println(earlyPullˢ, a, aok, b, bok);
+
     stop3();
+
     var (c, cok) = next3();
     fmt.Println(pullAfterEarlyStopˢ, c, cok);
+
     var (nextP, stopP) = iter.Pull(panicSeq());
     var nextPʗ1 = nextP;
     @catch(firstNextˢ, () => {
         nextPʗ1();
     });
+
     var (pv, pok) = nextP();
     fmt.Println(pullAfterPanicˢ, pv, pok);
+
     var stopPʗ1 = stopP;
     @catch(stopAfterPanicˢ, () => {
         stopPʗ1();
     });
+
     var (nextC, stopC) = iter.Pull(panicCleanupSeq());
     var (cv, cvok) = nextC();
     fmt.Println(cleanupPullˢ, cv, cvok);
+
     var stopCʗ1 = stopC;
     @catch(stopIntoCleanupˢ, () => {
         stopCʗ1();
     });
+
     var (nextD, _) = iter.Pull(doubleNext());
     nextSlot = nextD;
     nextD();
+
     ref var goexitNext = ref heap<Func<(nint, bool)>>(out var ᏑgoexitNext);
+
     fmt.Println(goexitCrossedˢ, goexits(() => {
         var (n, _) = iter.Pull(goexitSeq());
         ᏑgoexitNext.ValueSlot = n;
         n();
     }));
+
     var (gv, gok) = goexitNext();
     fmt.Println(pullAfterGoexitˢ, gv, gok);
+
     var (nextI, stopI) = iter.Pull(panicSeq());
     stopI();
+
     var (iv, iok) = nextI();
     fmt.Println(pullAfterImmediateStopˢ, iv, iok);
 }

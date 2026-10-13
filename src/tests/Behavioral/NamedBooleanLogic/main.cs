@@ -34,6 +34,7 @@ private static readonly @string andˢ = "and"u8;
 internal static void Main() {
     Value t = ((boolVal)true);
     Value f = ((boolVal)false);
+
     fmt.Println(unary(t).isSet());
     fmt.Println(unary(f).isSet());
     fmt.Println(binary(andˢ, t, f).isSet());

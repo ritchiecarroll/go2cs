@@ -139,6 +139,8 @@ type Visitor struct {
 	outputBuilder      *strings.Builder
 	standAloneComments map[token.Pos]string
 	sortedCommentPos   []token.Pos
+	commentGroups      []*ast.CommentGroup // the file's, with or without -comments (goBlankLineBetween)
+	callParens         [][3]token.Pos      // the `(`, `)` and first argument of each call being converted, innermost last (convExprList)
 	processedComments  hashset.HashSet[token.Pos]
 	newline            string
 	indentLevel        int
@@ -404,6 +406,25 @@ type Visitor struct {
 	// must be publicized (used as an exported struct field; see packagePublicizedTypes), and
 	// consumed (read and cleared) by the type-kind emitter (visitArrayType/visitStructType/…).
 	pendingTypeAccess string
+
+	// pendingTypeDoc carries the doc comment of the type spec being declared to the forward-declaration
+	// type-kind emitters (named ident, array/slice, map, chan, func, pointer and cross-package types),
+	// which write it after their leading line break; see writePendingTypeDoc. The struct and interface
+	// emitters take the doc as an argument instead.
+	pendingTypeDoc    *ast.CommentGroup
+	pendingTypeDocPos token.Pos
+	// clauseSpans maps the colon of each case and select clause to the source span its leading comments
+	// are taken from; noteClauseSpans fills it per switch and select, writeLeadingBodyComments reads it.
+	clauseSpans map[token.Pos]clauseSpan
+	// heldComments holds, by colon, the pending comments of a clause the lowering emits after clauses
+	// that follow it in the source; holdClauseComments fills it, releaseClauseComments empties it.
+	heldComments map[token.Pos][]token.Pos
+	// inValueSpec is set while visitValueSpec converts a spec, so a struct it lifts ahead of the var does
+	// not open a second line after the spec's own (visitStructType, class L).
+	inValueSpec bool
+	// funcLitRbrace is the closing brace of the func literal whose body is being visited; a comment past it
+	// on a statement's line labels the literal, not the statement (writeTrailingComment).
+	funcLitRbrace token.Pos
 	// manualConversion mirrors the file entry's flag: this file's destination `.cs` is a hand-owned
 	// manual conversion, so the visit still feeds package-wide state but the emitted text lands in
 	// the non-compiled `.cs.auto` review sibling. Consulted by recordTypeAccessibility, which must

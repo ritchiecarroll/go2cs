@@ -49,12 +49,15 @@ private static readonly @string msgˢ = "msg"u8;
 internal static void Main() {
     var l = new Logger(name: "test"u8);
     fmt.Println(l.Handler());
+
     ref var @base = ref heap<baseHandler>(out var Ꮡbase);
     @base = new baseHandler(level: 2);
+
     ΔHandler hv = new wrapper(Handler: @base, prefix: "wrap:"u8);
     fmt.Println(hv.Enabled(1), hv.Enabled(3));
     fmt.Println(hv.Handle(msgˢ));
     fmt.Println(hv.WithName("n"u8));
+
     var hp = Ꮡ(new wrapper(Handler: @base, prefix: "ptr:"u8));
     ΔHandler hpi = new wrapperжΔHandler(hp);
     fmt.Println(hpi.Enabled(2));

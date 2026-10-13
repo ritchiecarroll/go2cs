@@ -22,8 +22,10 @@ internal static nint triple(nint n) {
 internal static void Main() {
     var a = kinds[0x0001];
     fmt.Println(a.name, a.size, a.scale(a.size));
+
     var b = kinds[0x0002];
     fmt.Println(b.name, b.size, b.scale(b.size));
+
     fmt.Println(len(kinds));
 }
 

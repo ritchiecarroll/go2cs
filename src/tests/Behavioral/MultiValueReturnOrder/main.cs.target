@@ -141,31 +141,43 @@ private static readonly object assertThingˢ2 = (@string)"assert thing:"u8;
 internal static void Main() {
     var (o, err) = parseOID(abcˢ);
     fmt.Println(parseOIDˢ, ((@string)o.der), err);
+
     var (a, b) = readThenBump();
     fmt.Println(readThenBumpˢ, a, b);
+
     ref var log = ref heap<slice<@string>>(out var Ꮡlog);
     var (x, mid, y) = orderedCalls(ref log);
     fmt.Println(orderedCallsˢ, x, mid, y, log);
+
     var (p, q) = addressArgument();
     fmt.Println(addressArgumentˢ, p, q);
+
     var (r, s) = throughPointer();
     fmt.Println(throughPointerˢ, r, s);
+
     var (pc, pb) = pointerIdentity();
     fmt.Println(pointerIdentityˢ, (~pc).n, pb);
+
     var (ua, ub) = unrelatedOperand();
     fmt.Println(unrelatedOperandˢ, ua, ub);
+
     var (va, vb) = valueReceiverCall();
     fmt.Println(valueReceiverCallˢ, va, vb);
+
     var nd = Ꮡ(new node(pat: Ꮡ(new counter(nil))));
     var (fa, fb) = pointerFieldUnrelated(ref (nd).DerefOrNull());
     fmt.Println(pointerFieldUnrelatedˢ, fa, fb);
+
     var nd2 = Ꮡ(new node(pat: Ꮡ(new counter(nil))));
     var (ga, gb) = pointerFieldSame(ref (nd2).DerefOrNull());
     fmt.Println(pointerFieldSameˢ, ga, gb);
+
     var (v, ferr) = forwardPointer(oneˢ);
     fmt.Println(forwardPointerˢ, describe(v), ferr);
+
     var (tp, ok) = v._<ж<thing>>(ᐧ);
     fmt.Println(assertThingˢ, ok, (~tp).name);
+
     var (_, notValue) = v._<thing>(ᐧ);
     fmt.Println(assertThingˢ2, notValue);
 }

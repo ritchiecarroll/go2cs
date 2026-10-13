@@ -56,27 +56,36 @@ internal static void Main() {
     fmt.Println(x < (float64)Two129);
     float64 y = 1e30D;
     fmt.Println(y >= (float64)Two129);
+
     fmt.Println(ftoatests[0].f, ftoatests[1].f, ftoatests[2].f);
     fmt.Println(floats[0], floats[1], floats[2]);
     fmt.Println(floatArr[0], floatArr[1]);
     fmt.Println(byName[belowˢ], byName[aboveˢ], byName[smallˢ]);
     fmt.Println(keyed.f, nested[0][0], nested[1][0], asFloat32);
+
     fmt.Println(take((float64)below1e23), give());
+
     float64 v = (float64)above1e23;
     v = (float64)below1e23;
     fmt.Println(v);
+
     var local = new float64[]{(float64)below1e23, small}.slice();
     fmt.Println(local[0], local[1]);
+
     var ch = new channel<float64>(1);
     ch.ᐸꟷ((float64)below1e23);
     fmt.Println(ᐸꟷ(ch));
+
     fmt.Println(take(small), (nint)(small * 2), (float64)((float64)small / 4D));
+
     foreach (var (_, u) in new uint64[]{0, 999, 1000, 1001, ((uint64)1 << (int)(62)), ((uint64)1 << (int)(63)), 18446744073709551615UL}.slice()) {
         fmt.Println(u, u < small, u <= small, u > small, u >= small, u == small, u != small);
     }
+
     foreach (var (_, i) in new int64[]{-9223372036854775808L, -1, 0, 1000, 9223372036854775807L}.slice()) {
         fmt.Println(i, i < small, i > small, i == small);
     }
+
     fmt.Println(fastPath(0), fastPath(999), fastPath(1000), fastPath(((uint64)1 << (int)(63))), fastPath(18446744073709551615UL));
 }
 

@@ -15,10 +15,12 @@ internal static void Main() {
     ((Action)(() => {
         fmt.Println((@string)"a"u8);
     }))();
+
     nint x = ((Func<nint>)(() => {
         return 6 * 7;
     }))();
     fmt.Println(x);
+
     ((Action)(() => {
         GoFrame ᒐ = default;
         try {
@@ -35,6 +37,7 @@ internal static void Main() {
         finally { ᒐ.Run(); }
     }))();
     fmt.Println(afterRecoverˢ);
+
     nint total = 10 + ((Func<nint>)(() => {
         nint sum = 0;
         for (nint i = 1; i <= 4; i++) {
@@ -43,25 +46,30 @@ internal static void Main() {
         return sum;
     }))();
     fmt.Println(total);
+
     nint y = ((Func<nint>)(() => {
         return ((Func<nint>)(() => {
             return 5;
         }))() * 2;
     }))();
     fmt.Println(y);
+
     ((Action<nint>)(n => {
         fmt.Println((@string)"n ="u8, n);
     }))(7);
+
     nint tri = ((Func<nint, nint, nint, nint>)((a, b, c) => {
         return a + b + c;
     }))(1, 2, 3);
     fmt.Println(tri);
+
     for (nint k = 0; k < 3; k++) {
         ((Action<nint>)(xΔ1 => {
             fmt.Print(xΔ1, (@string)" "u8);
         }))(k);
     }
     fmt.Println();
+
     ((Action<@string>)(label => {
         GoFrame ᒐ = default;
         try {
@@ -78,6 +86,7 @@ internal static void Main() {
         finally { ᒐ.Run(); }
     }))(scopeˢ);
     fmt.Println(afterArgRecoverˢ);
+
     nint calls = 0;
     nint bump() {
         calls++;

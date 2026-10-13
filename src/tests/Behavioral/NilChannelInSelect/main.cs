@@ -17,7 +17,9 @@ private static readonly object outˢ = (@string)"out:"u8;
 
 internal static partial void Main() {
     channel<nint> nilCh = default!;
+
     fmt.Println(nilLenˢ, len(nilCh), capˢ, cap(nilCh));
+
     var live = new channel<nint>(1);
     live.ᐸꟷ(42);
     var selᴛ1 = nilCh;
@@ -36,6 +38,7 @@ internal static partial void Main() {
         fmt.Println(liveRecvˢ, v);
         break;
     }}
+
     var u = new channel<nint>(0);
     var uʗ1 = u;
     goǃ(() => {
@@ -52,6 +55,7 @@ internal static partial void Main() {
         fmt.Println(rendezvousRecvˢ, v);
         break;
     }}
+
     var @out = new channel<nint>(1);
     var selᴛ6 = nilCh.ᐸꟷ(9, ꓸꓸꓸ);
     var selᴛ7 = @out.ᐸꟷ(5, ꓸꓸꓸ);

@@ -80,21 +80,27 @@ internal static void Main() {
     var k = ((LocalKey)slice<byte>((@string)"abc"u8));
     var s = ((fmt.Stringer)k);
     fmt.Println(foreignSliceˢ, s.String());
+
     fmt.Printf("foreign-slice-type: %T\n"u8, s);
+
     var ls = ((fmt.Stringer)new Label(Text: "x"u8));
     fmt.Println(foreignStructˢ, ls.String());
     fmt.Printf("foreign-struct-type: %T %v\n"u8, ls, ls);
     var (lv, lok) = ls._<Label>(ᐧ);
     fmt.Println(foreignStructAssertˢ, lok, lv.Text, AreEqual(ls, ((fmt.Stringer)new Label(Text: "x"u8))));
+
     fmt.Println(unexportedIfaceˢ, pinUnexpMethI.f());
     var (_, uok) = pinUnexpMethI._<embedWithUnexpMeth>(ᐧ);
     fmt.Println(unexportedIfaceAssertˢ, uok);
+
     var li = ((LocalIface)new localImpl(N: 2));
     fmt.Println(localIfaceˢ, li.G());
     fmt.Println(localIfaceEqˢ, AreEqual(li, ((LocalIface)new localImpl(N: 2))), AreEqual(li, ((LocalIface)new localImpl(N: 3))));
+
     var mv = ((valued)new meterᴠvalued(new meter(() => 11)));
     var gv = ((valued)((gauge)4));
     fmt.Println(funcSourceˢ, mv.Value(), numericSourceˢ, gv.Value());
+
     switch (gv.type()) {
     case meter t: {
         fmt.Println(switchˢ, meterˢ, t());
@@ -109,6 +115,7 @@ internal static void Main() {
         fmt.Println(switchˢ, defaultˢ);
         break;
     }}
+
     var seen = new map<valued, @string>{};
     seen[gv] = callSyntaxˢ;
     valued byAssign = ((gauge)4);

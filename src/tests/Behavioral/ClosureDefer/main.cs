@@ -43,6 +43,7 @@ internal static void Main() {
         finally { ᒐ.Run(); }
     }
     f();
+
     void divPrint(nint a, nint b) {
         GoFrame ᒐ = default;
         try {
@@ -60,6 +61,7 @@ internal static void Main() {
     }
     divPrint(20, 4);
     divPrint(1, 0);
+
     nint /*result*/ safeDiv(nint a, nint b) {
         nint result = default!;
         GoFrame ᒐ = default;
@@ -79,6 +81,7 @@ internal static void Main() {
     }
     fmt.Println(safeDiv(20, 4));
     fmt.Println(safeDiv(1, 0));
+
     nint /*n*/ counted() {
         nint n = default!;
         GoFrame ᒐ = default;
@@ -94,8 +97,10 @@ internal static void Main() {
         ᒐdone: return n;
     }
     fmt.Println(counted());
+
     var greet = makeGreeter(go2csˢ);
     greet();
+
     void run(Action fn) {
         fn();
     }
@@ -108,6 +113,7 @@ internal static void Main() {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     ((Action)(() => {
         GoFrame ᒐ = default;
         try {
@@ -136,6 +142,7 @@ internal static void Main() {
     var tk = makeTask(5);
     fmt.Println(taskˢ, (~tk).fn(), (~tk).name);
     fmt.Println(fetchedˢ, v, err);
+
     fmt.Println(doneˢ);
 }
 

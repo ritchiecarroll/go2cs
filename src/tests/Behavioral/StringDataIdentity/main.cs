@@ -11,13 +11,17 @@ private static readonly @string identityProbeStringˢ = "identity probe string"u
 internal static void Main() {
     @string s = identityProbeStringˢ;
     @string t = s;
+
     fmt.Println(@unsafe.StringData(s) == @unsafe.StringData(t));
     fmt.Println(@unsafe.StringData(s) == @unsafe.StringData(s));
+
     @string u = ((@string)append(slice<byte>(default!), s.ꓸꓸꓸ));
     fmt.Println(@unsafe.StringData(s) == @unsafe.StringData(u));
     fmt.Println(s == u);
+
     @string v = s[1..];
     @string w = s[1..];
+
     fmt.Println(@unsafe.StringData(v) == @unsafe.StringData(v));
     fmt.Println(@unsafe.StringData(v) == @unsafe.StringData(w));
     fmt.Println(@unsafe.StringData(v) == @unsafe.StringData(s));

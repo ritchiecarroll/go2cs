@@ -41,6 +41,7 @@ internal static void Main() {
     nameOf<aliasIface, aliasIface>(aliasIfaceˢ);
     nameOf<inlineIface, inlineIface>(inlineIfaceˢ);
     nameOf<ordinary, ordinary>(ordinaryˢ);
+
     sizeOf(negOrdinaryˢ, ((ordinary)(@string)"x"u8));
     sizeOf<eface>(negEfaceˢ, default!);
 }

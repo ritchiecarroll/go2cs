@@ -52,9 +52,11 @@ partial struct counter {
 internal static nint sumHeap(slice<nint> heap) {
     ref var c = ref builtin.heap(new counter(), out var Ꮡc);
     var p = Ꮡc;
+
     foreach (var (_, v) in heap) {
         p.Value.n += v;
     }
+
     return c.n;
 }
 
@@ -63,6 +65,7 @@ internal static nint scaleHeap(nint heapʗp, nint factor) {
 
     var p = Ꮡheap;
     p.Value *= factor;
+
     return heap;
 }
 
@@ -77,6 +80,7 @@ private static readonly object shadowedˢ = (@string)"shadowed"u8;
 internal static void shadowedCalls() {
     ref var a = ref heap<arr>(out var Ꮡa);
     a = new arr(new nint[]{1, 2, 3}.array());
+
     nint make(nint n) => n * 2;
     nint @new(nint n) => n * 3;
     nint panic(nint n) => n * 4;
@@ -84,6 +88,7 @@ internal static void shadowedCalls() {
     nint println(nint n) => n * 6;
     nint len(ж<arr> p) => p.Value[0] + 100;
     nint cap(ж<arr> p) => p.Value[1] + 200;
+
     fmt.Println(shadowedˢ, make(21), @new(7), panic(5));
     fmt.Println(shadowedˢ, print(4), println(3), len(Ꮡa), cap(Ꮡa));
 }
@@ -98,8 +103,11 @@ internal static void Main() {
     fmt.Println(capPlusOne(new slice<nint>(2, 5)));
     fmt.Println(describeSignal(9));
     fmt.Println(describeSignal(1));
+
     shadowedCalls();
+
     fmt.Println(heapˢ, sumHeap(new nint[]{4, 5, 6}.slice()), scaleHeap(7, 6));
+
     var (l, c) = unshadowed();
     fmt.Println(builtinˢ, l, c);
 }

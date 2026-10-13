@@ -85,29 +85,38 @@ private static readonly @string s9MethodOneLiteralNotˢ = "S9 method, one litera
 internal static void Main() {
     var e = Ꮡ(new E(nil));
     nint l = default!;
+
     e.Info(looksDeliciousˢ);
     l = line();
     report(s1MethodVariadicOneˢ, got, l - 1);
+
     plain((@string)"x"u8);
     l = line();
     report(s2FuncOneConvertedˢ, got, l - 1);
+
     e.Bare();
     e.Value.n++;
     report(s3MethodNoArgsThenANonˢ, got, line() - 2);
+
     nint r = e.Value((@string)"y"u8);
     report(s4MethodResultUsedˢ, r, line() - 1);
+
     e.Info((@string)"a"u8, (nint)(1), 2.5D);
     l = line();
     report(s5MethodVariadicThreeˢ, got, l - 1);
+
     e.Take(new P(1, 2));
     l = line();
     report(s6MethodStructLiteralArgˢ, got, l - 1);
+
     takeP(new P(3, 4));
     l = line();
     report(s7FuncStructLiteralArgˢ, got, l - 1);
+
     plainV(litˢ);
     l = line();
     report(s8FuncVariadicOneLiteralˢ, got, l - 1);
+
     e.One(litˢ);
     l = line();
     report(s9MethodOneLiteralNotˢ, got, l - 1);

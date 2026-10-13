@@ -23,9 +23,29 @@ import (
 // displaces a package-level var declaration (funcPlaceholderFormat's twin for vars).
 const varPlaceholderFormat = "// go2cs generated this placeholder — var %s is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])"
 
-func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup, tok token.Token) {
+// visitValueSpec converts one spec of a const or var declaration. doc is the comment it writes above the
+// spec (visitGenDecl's specDoc); declDoc is the declaration's own doc, which the //go:linkname and
+// //go:embed reads take together with valueSpec.Doc.
+func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.CommentGroup, tok token.Token) {
+	defer func(saved bool) { v.inValueSpec = saved }(v.inValueSpec)
+	v.inValueSpec = true
+
 	v.outputBuilder.WriteString(v.newline)
-	v.writeDoc(doc, valueSpec.End())
+
+	// The comments before the spec go above its doc; those inside it are written where the spec's own
+	// emission reaches them (a composite literal's, writeListComments). Any it does not reach are put
+	// above the doc once the spec is written, where every comment inside a spec used to go.
+	if v.options.includeComments {
+		v.writeStandAloneCommentString(v.outputBuilder, valueSpec.Pos(), doc, "")
+
+		defer func(docOffset int) {
+			unreached := &strings.Builder{}
+			v.writeStandAloneCommentString(unreached, valueSpec.End(), nil, "")
+			v.spliceOutput(docOffset, unreached.String())
+		}(v.outputBuilder.Len())
+	}
+
+	v.writeDoc(doc, token.NoPos)
 
 	// A var displaced by manualConversionVars: its hand-owned member replaces the declaration. Only a
 	// spec that declares that one name can be displaced; a registered name sharing a spec is refused
@@ -268,7 +288,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					// address, so `&zeroVal[0]` (reflect, pulling runtime.zeroVal) would reference a
 					// nonexistent `ᏑzeroVal` box (CS0103). Such a pull falls through to the addressed-
 					// global emission — the pre-feature behavior, which compiles.
-					if ref, pkgPath, ok := varLinknamePull(goIDName, v.options, doc, valueSpec.Doc); ok && !v.inFunction && !v.isAddressedGlobal(ident) {
+					if ref, pkgPath, ok := varLinknamePull(goIDName, v.options, declDoc, valueSpec.Doc); ok && !v.inFunction && !v.isAddressedGlobal(ident) {
 						if i > 0 {
 							v.outputBuilder.WriteString(v.newline)
 						}
@@ -475,7 +495,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 						// The directive resolves to a resource-backed initializer instead. Nothing
 						// here fires for a variable without a directive, which is every other global
 						// in the corpus — see embedDirective.go for the rule and its scope.
-						if target, kind, elementType := v.embedTargetForSpec(valueSpec, doc, v.getIdentType(ident)); kind != embedKindNone {
+						if target, kind, elementType := v.embedTargetForSpec(valueSpec, declDoc, v.getIdentType(ident)); kind != embedKindNone {
 							initializer := embedInitializerExpr(kind, target, v.emittedClassName, elementType)
 
 							// The declared type may be a NAMED string or byte-slice type
@@ -939,6 +959,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 			var srcVal string
 			var constVal string
 
+			// Whether a broken byte-array constant (brokenByteArrayConst) already wrote the spec's
+			// trailing comment after its last operand.
+			specCommentTaken := false
+
 			// Whether a COMPLEX-kind constant's value fits the declaration's complex width (and so
 			// rendered as a real complex value rather than falling to the GoBigConst arm below).
 			complexRepresentable := false
@@ -964,6 +988,11 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					// that the value round-trips, and TestGetValues then compared the response against
 					// its own silently-wrong constant.
 					constVal = byteArrayStringLiteral(s)
+
+					if broken, tookSpecComment := v.brokenByteArrayConst(valueSpec, valueSpec.Values[i], s); broken != "" {
+						constVal = broken
+						specCommentTaken = tookSpecComment
+					}
 				} else {
 					var isRawStr bool
 					constVal, isRawStr = v.getStringLiteral(c.Val().ExactString())
@@ -1168,7 +1197,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					v.writeOutput("%s static readonly %s %s = %s;", access, strTypeName, csIDName, constVal)
 				}
 
-				v.writeComment(valueSpec.Comment, tokEnd+typeLenDeviation-1)
+				if !specCommentTaken {
+					v.writeComment(valueSpec.Comment, tokEnd+typeLenDeviation-1)
+				}
+
 				constHandled = true
 			}
 

@@ -30,21 +30,26 @@ internal static partial @string dump(slice<byte> buf) {
 
 internal static @string await(slice<byte> buf, slice<@string> want, bool sense) {
     @string d = default!;
+
     for (nint i = 0; i < pollLimit; i++) {
         d = dump(buf);
         var ok = true;
+
         foreach (var (_, state) in want) {
             if (present(d, state) != sense) {
                 ok = false;
                 break;
             }
         }
+
         if (ok) {
             return d;
         }
+
         runtime.Gosched();
         time.Sleep(time.Millisecond);
     }
+
     return d;
 }
 
@@ -58,26 +63,34 @@ private static readonly @string chanSendˢ = "chan send"u8;
 
 internal static partial void Main() {
     var buf = new slice<byte>(dumpSize);
+
     ref var mu = ref heap(new Δsync.Mutex(), out var Ꮡmu);
     Ꮡmu.Lock();
+
     var recv = new channel<nint>(0);
+
     var selA = new channel<nint>(0);
     var selB = new channel<nint>(0);
+
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(1);
+
     var done = new channel<@string>(len(parked));
+
     var doneʗ1 = done;
     goǃ(() => {
         Ꮡmu.Lock();
         Ꮡmu.Unlock();
         doneʗ1.ᐸꟷ(mutexˢ);
     });
+
     var doneʗ2 = done;
     var recvʗ1 = recv;
     goǃ(() => {
         ᐸꟷ(recvʗ1);
         doneʗ2.ᐸꟷ(recvˢ);
     });
+
     var doneʗ3 = done;
     var selAʗ1 = selA;
     var selBʗ1 = selB;
@@ -93,28 +106,38 @@ internal static partial void Main() {
         }}
         doneʗ3.ᐸꟷ(selectˢ);
     });
+
     var doneʗ4 = done;
     goǃ(() => {
         Ꮡwg.Wait();
         doneʗ4.ᐸꟷ(waitgroupˢ);
     });
+
     @string blocked = await(buf, parked, true);
+
     foreach (var (_, state) in parked) {
         fmt.Printf("parked %s: %v\n"u8, state, present(blocked, state));
     }
+
     fmt.Printf("parked running: %v\n"u8, present(blocked, runningˢ));
+
     fmt.Printf("parked chan send: %v\n"u8, present(blocked, chanSendˢ));
+
     Ꮡmu.Unlock();
     close(recv);
     close(selA);
     Ꮡwg.Done();
+
     foreach ((_, _) in parked) {
         ᐸꟷ(done);
     }
+
     @string released = await(buf, parked, false);
+
     foreach (var (_, state) in parked) {
         fmt.Printf("released %s: %v\n"u8, state, present(released, state));
     }
+
     fmt.Printf("released running: %v\n"u8, present(released, runningˢ));
 }
 

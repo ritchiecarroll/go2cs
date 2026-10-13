@@ -15,6 +15,7 @@ internal static void Main() {
     int32 i32 = Δmath.MinInt32;
     int64 i64 = Δmath.MinInt64;
     nint m1 = -1;
+
     fmt.Println(quo("a"u8, "b"u8), rem);
     fmt.Println(builtin.quo(i32, (int32)m1), builtin.rem(i32, (int32)m1));
     fmt.Println(builtin.quo(i64, (int64)m1), builtin.rem(i64, (int64)m1));

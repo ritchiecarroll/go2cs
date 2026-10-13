@@ -37,6 +37,7 @@ internal static void Main() {
     fmt.Println(casOkˢ, Ꮡn.CompareAndSwap(100, 7));
     fmt.Println(casNoˢ, Ꮡn.CompareAndSwap(100, 8));
     fmt.Println(finalˢ, Ꮡn.Load());
+
     ref var p = ref heap(new atomic.Pointer<nint>(), out var Ꮡp);
     fmt.Println(ptrNilˢ, Ꮡp.Load() == nil);
     ref var a = ref heap<nint>(out var Ꮡa);
@@ -50,6 +51,7 @@ internal static void Main() {
     fmt.Println(ptrFinalˢ, Ꮡp.Load().Value);
     var old = Ꮡp.Swap(Ꮡa);
     fmt.Println(ptrSwapˢ, old.Value, Ꮡp.Load().Value);
+
     ᏑgHolder.of(holder.Ꮡcount).Store(42);
     ᏑgHolder.of(holder.Ꮡcount).Add(8);
     fmt.Println(globalFieldˢ, ᏑgHolder.of(holder.Ꮡcount).Load());

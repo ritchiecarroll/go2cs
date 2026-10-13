@@ -34,11 +34,13 @@ internal static void Main() {
     A a = ((A)(@string)abcˢ);
     B b = ((B)(@string)a);
     fmt.Println(b, len(b), a.Len());
+
     otherString o = ((otherString)(@string)xyzˢ);
     pkgString p = ((pkgString)(@string)o);
     fmt.Println(p, ((otherString)(@string)p));
     main_myString m = ((main_myString)(@string)o);
     fmt.Println(m, ((otherString)(@string)m) == o);
+
     var t = ((T)true);
     var u = ((U)(bool)t);
     fmt.Println(u, !(bool)u);

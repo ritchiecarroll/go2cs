@@ -33,35 +33,48 @@ internal static void Main() {
     ref var p = ref heap(new main_p(), out var Ꮡp);
     p.X = 1;
     p.Y = 2;
+
     any i = p;
+
     p = i._<main_p>();
     fmt.Println(a1AssertIntoTheOriginalˢ, p.X, p.Y);
+
     var q = i._<main_p>();
     fmt.Println(a2AssertIntoANewVarˢ, q.X, q.Y);
+
     q = p;
     fmt.Println(a3OriginalAssignsIntoˢ, q.X, q.Y);
+
     p = q;
     fmt.Println(a4AssertedVarAssignsIntoˢ, p.X, p.Y);
+
     var (r, ok) = i._<main_p>(ᐧ);
     fmt.Println(a5CommaOkˢ, r.X, r.Y, ok);
+
     any third = new main_p(X: 8, Y: 9);
     var u = third._<main_p>();
     p = u;
     fmt.Println(a6ThirdOccurrenceˢ, p.X, p.Y);
+
     fmt.Println(a7EqualAcrossOccurrencesˢ, q == u);
+
     var pp = Ꮡp;
     any j = pp.OrTypedNil();
     var pq = j._<ж<main_p>>();
     fmt.Println(b1PointerAssertionˢ, (~pq).X, (~pq).Y);
+
     main_s s = default!;
     s.A = "hi"u8;
+
     any k = s;
     var t = k._<main_s>();
     s = t;
     fmt.Println(b2DifferentShapeˢ, s.A);
+
     any w = new main_type(X: "a"u8, Y: "b"u8);
     var x = w._<main_type>();
     fmt.Println(b3SameNamesDifferentˢ, x.X, x.Y);
+
     var (_, bad) = i._<main_s>(ᐧ);
     fmt.Println(b4MismatchedAssertionˢ, bad);
 }

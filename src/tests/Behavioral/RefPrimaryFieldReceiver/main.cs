@@ -91,6 +91,7 @@ private static readonly object nilReceiverEarlyReturnˢ = (@string)"nil receiver
 internal static partial void Main() {
     UntypedInt workers = 8;
     UntypedInt each = 2000;
+
     var c = Ꮡ(new counter(nil));
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < workers; i++) {
@@ -112,7 +113,9 @@ internal static partial void Main() {
     }
     Ꮡwg.Wait();
     fmt.Println(totalˢ, c.get(), wantˢ, (nint)(2 * workers * each));
+
     fmt.Println(trylockWhileHeldˢ, c.tryWhileHeld());
+
     c.of(counter.Ꮡmu).Lock();
     var released = new channel<bool>(0);
     var cʗ2 = c;
@@ -125,12 +128,14 @@ internal static partial void Main() {
     c.of(counter.Ꮡmu).Lock();
     c.of(counter.Ꮡmu).Unlock();
     fmt.Println(crossGoroutineUnlockOkˢ);
+
     var p = Ꮡ(new counter(nil));
     var q = p;
     q.of(counter.Ꮡmu).Lock();
     q.Value.n = 42;
     q.of(counter.Ꮡmu).Unlock();
     fmt.Println(viaLocalPointerˢ, (~p).n);
+
     ж<counter> nilc = default!;
     fmt.Println(nilReceiverEarlyReturnˢ, nilc.nBeforeTouch());
 }

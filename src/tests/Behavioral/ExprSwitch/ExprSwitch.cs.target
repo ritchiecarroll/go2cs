@@ -81,6 +81,7 @@ internal static void Main() {
     fmt.Println(getStr(testˢ));
     fmt.Println(getStr2(helloˢ, worldˢ));
     fmt.Println(getStr3(helloSˢ, worldˢ));
+
     nint i = 2;
     fmt.Print(writeˢ, i, (@string)" as "u8);
     switch (i) {
@@ -109,11 +110,14 @@ internal static void Main() {
 
     nint x = 5;
     fmt.Println(x);
+
     {
         nint xΔ1 = 6;
         fmt.Println(xΔ1);
     }
+
     fmt.Println(x);
+
     var exprᴛ1 = time.Now().Weekday();
     if (exprᴛ1 == time.Saturday || exprᴛ1 == time.Sunday) {
         fmt.Println(itSTheWeekendˢ);
@@ -138,6 +142,7 @@ internal static void Main() {
 
     nint hour = 1;
     nint hour1 = time.Now().Hour();
+
     {
         nint hourΔ1 = time.Now().Hour();
         switch (ᐧ) {
@@ -168,7 +173,9 @@ internal static void Main() {
     }
 
     fmt.Println(hour);
+
     var c = (rune)'\r';
+
     switch (c) {
     case (rune)' ' or (rune)'\t' or (rune)'\n' or (rune)'\f' or (rune)'\r': {
         fmt.Println(whitespaceˢ);
@@ -176,6 +183,7 @@ internal static void Main() {
     }}
 
     fmt.Printf("i before = %d\n"u8, i);
+
     {
         nint iΔ1 = 1;
         var exprᴛ2 = getNext();
@@ -201,11 +209,13 @@ internal static void Main() {
     }
 
     fmt.Printf("i after = %d\n"u8, i);
+
     {
         var next = getNext();
         var matchᴛ2 = false;
         if (next <= -1) { matchᴛ2 = true;
             fmt.Println(negativeˢ);
+
             var exprᴛ4 = getNext();
             var matchᴛ3 = false;
             if (exprᴛ4 is 1 or 2) { matchᴛ3 = true;
@@ -222,6 +232,7 @@ internal static void Main() {
         }
         else if (next is 0) { matchᴛ2 = true;
             fmt.Println(zeroˢ);
+
             {
                 var nextΔ2 = getNext();
                 var matchᴛ4 = false;
@@ -240,6 +251,7 @@ internal static void Main() {
         }
         else if (next is 1 or 2) { matchᴛ2 = true;
             fmt.Println(oneOrTwoˢ);
+
             switch (next) {
             case 1 or 2: {
                 fmt.Println(sub2OneOrTwoˢ);

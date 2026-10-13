@@ -24,7 +24,9 @@ internal static void Main() {
         fmt.Println(differsˢ);
         return;
     }
+
     fmt.Println(equalˢ);
+
     var g = ((Hash)sum(new byte[]{1, 2, 3, 4}.slice()));
     fmt.Println(g == ((Hash)(sum(new byte[]{1, 2, 3, 4}.slice()))), ((Hash)(sum(new byte[]{1, 2, 3, 4}.slice()))) == g);
     fmt.Println(g != ((Hash)(sum(default!))), ((Hash)(sum(default!))) != g, ((Hash)(sum(default!))) == h);

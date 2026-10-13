@@ -79,9 +79,11 @@ internal static partial void Main() {
         fmt.Println(s);
     }
     fmt.Println(counterˢ, (~c).n);
+
     goǃ(() => signalDone());
     ᐸꟷ(defaultDone);
     fmt.Println(goVariadicZeroArgDoneˢ);
+
     var ch = new channel<EmptyStruct>(0);
     goǃ(ᴛ1 => signalDone(ᴛ1), ch);
     ᐸꟷ(ch);

@@ -31,8 +31,10 @@ partial struct holder {
 internal static void Main() {
     var b = new box(((myErr)7));
     fmt.Println(b.err.Error());
+
     var b2 = new box(err: ((myErr)42));
     fmt.Println(b2.err.Error());
+
     var h = new holder(((tag)(@string)"x"u8));
     fmt.Println(h.n.Name());
 }

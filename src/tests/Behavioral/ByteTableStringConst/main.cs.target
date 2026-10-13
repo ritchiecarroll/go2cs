@@ -17,6 +17,7 @@ internal static void Main() {
     }
     fmt.Println();
     fmt.Println(lenˢ, len(revTab));
+
     for (nint i = 0; i < len(greedyHex); i++) {
         fmt.Printf("%d "u8, greedyHex[i]);
     }

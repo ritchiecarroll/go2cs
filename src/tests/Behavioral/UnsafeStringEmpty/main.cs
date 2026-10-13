@@ -25,15 +25,21 @@ private static readonly @string nilSliceˢ = "nil slice"u8;
 
 internal static void utf16() {
     fmt.Println(utf16ToStringˢ);
+
     array<uint16> alt = new(14);
     array<uint16> name = new(260);
+
     show(allNul14ˢ, syscall.UTF16ToString(alt[..]));
     show(allNul260ˢ, syscall.UTF16ToString(name[..]));
+
     copy(name[..], encode(readmeTxtˢ));
     show(terminatedˢ, syscall.UTF16ToString(name[..]));
+
     show(unterminatedˢ, syscall.UTF16ToString(encode(noTerminatorˢ)));
+
     var poisoned = new uint16[]{0, (rune)'x', (rune)'y', (rune)'z'}.array();
     show(leadingNulˢ, syscall.UTF16ToString(poisoned[..]));
+
     show(emptySliceˢ, syscall.UTF16ToString(new uint16[]{}.slice()));
     show(nilSliceˢ, syscall.UTF16ToString(default!));
 }
@@ -51,17 +57,23 @@ private static readonly object zeroLengthSliceLenˢ = (@string)"zero-length Slic
 
 internal static void unsafeStrings() {
     fmt.Println(unsafeStringˢ);
+
     var empty = new slice<byte>(0);
     show(makeLen0ˢ, @unsafe.String(@unsafe.SliceData(empty), 0));
     show(literalˢ, @unsafe.String(@unsafe.SliceData(new byte[]{}.slice()), 0));
+
     show(makeCap8ˢ, @unsafe.String(@unsafe.SliceData(new slice<byte>(0, 8)), 0));
+
     var body = slice<byte>("hello"u8);
     show(resliced0ˢ, @unsafe.String(@unsafe.SliceData(body[..0]), 0));
+
     slice<byte> nilSlice = default!;
     show(nilSliceˢ, @unsafe.String(@unsafe.SliceData(nilSlice), 0));
     show(emptyStringˢ, @unsafe.String(@unsafe.StringData(""u8), 0));
+
     show(fullˢ, @unsafe.String(@unsafe.SliceData(body), len(body)));
     show(prefixˢ, @unsafe.String(@unsafe.SliceData(body), 3));
+
     fmt.Println(zeroLengthSliceLenˢ, len(@unsafe.Slice(@unsafe.SliceData(empty), 0)));
 }
 

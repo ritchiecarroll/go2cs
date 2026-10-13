@@ -27,6 +27,7 @@ internal static void Main() {
     var l = e.Label();
     fmt.Println(l.ΔΔLabel, l.Resource);
     fmt.Println(l.describe());
+
     var m = new ΔLabel(ΔΔLabel: "mem"u8, Resource: 3);
     m.ΔΔLabel = m.ΔΔLabel + "!"u8;
     fmt.Println(m.ΔΔLabel, m.Resource);

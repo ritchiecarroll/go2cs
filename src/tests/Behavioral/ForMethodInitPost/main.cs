@@ -31,12 +31,14 @@ internal static void Main() {
         sum += u.i;
     }
     fmt.Println(sum);
+
     u.start(4);
     nint count = 0;
     for (; u.valid(); u.next()) {
         count++;
     }
     fmt.Println(count);
+
     @string @out = ""u8;
     for (@string p = abcˢ; p != ""u8; ) {
         @out += p[..1];

@@ -30,6 +30,7 @@ private static readonly object gGotˢ = (@string)"g: got"u8;
 
 internal static void Main() {
     var words = new @string[]{"skip"u8, "stop"u8, "keep"u8, "skip"u8, "keep"u8}.slice();
+
     for (nint i = 0; i < len(words); i++) {
         var exprᴛ1 = words[i];
         if (exprᴛ1 == "skip"u8) {
@@ -49,6 +50,7 @@ internal static void Main() {
         fmt.Println(aAfterSwitchˢ, i);
 continueᴛ1:;
     }
+
     for (nint i = 0; i < 4; i++) {
         var exprᴛ2 = words[i];
         if (exprᴛ2 == "skip"u8) {
@@ -58,6 +60,7 @@ continueᴛ1:;
 
         fmt.Println(bAfterSwitchˢ, i);
     }
+
     for (nint i = 0; i < 3; i++) {
         var exprᴛ3 = words[i];
         if (exprᴛ3 == "skip"u8 || exprᴛ3 == "stop"u8) {
@@ -72,6 +75,7 @@ continueᴛ1:;
 
         fmt.Println(cAfterSwitchˢ, i);
     }
+
     for (nint i = 0; i < 3; i++) {
         var exprᴛ4 = words[i];
         if (exprᴛ4 == "skip"u8 || exprᴛ4 == "keep"u8) {
@@ -94,6 +98,7 @@ continueᴛ1:;
         fmt.Println(dAfterSwitchˢ, i);
 continueᴛ4:;
     }
+
 outer:
     for (nint i = 0; i < 3; i++) {
         var exprᴛ5 = words[i];
@@ -112,6 +117,7 @@ outer:
 continue_outer:;
     }
 break_outer:;
+
     foreach (var (idx, w) in new @string[]{"go"u8, "brk"u8, "go"u8, "end"u8}.slice()) {
         var exprᴛ6 = w;
         if (exprᴛ6 == "go"u8 || exprᴛ6 == "brk"u8) {
@@ -128,6 +134,7 @@ break_outer:;
         fmt.Println(fAfterSwitchˢ, idx);
 continueᴛ7:;
     }
+
     slice<nint> got = default!;
     for (nint iᴛ1 = 0; iᴛ1 < 6; iᴛ1++) {
         var i = iᴛ1;

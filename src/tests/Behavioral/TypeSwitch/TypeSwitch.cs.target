@@ -48,6 +48,7 @@ internal static void Main() {
     whatAmI((uint64)2);
     whatAmI(heyˢ);
     whatAmI(default!);
+
     void classify(any i) {
         switch (i.type()) {
         case nint: {
@@ -80,6 +81,7 @@ internal static void Main() {
     classify(b);
     classify(c);
     classify(d);
+
     void kind(any i) {
         switch (i.type()) {
         case nuint: {
@@ -111,12 +113,15 @@ internal static void Main() {
     kind((@string)"x"u8);
     kind(3.14D);
     fmt.Println(sizeOf((int32)5), sizeOf((int64)7));
+
     ref var flag = ref heap(new bool(), out var Ꮡflag);
     ref var num = ref heap(new nint(), out var Ꮡnum);
     scanInto(Ꮡflag);
     scanInto(Ꮡnum);
     fmt.Println(flag, num);
+
     fmt.Println(probe(true), probe((nint)(7)), probe((@string)"ab"u8));
+
     marker mk = default!;
     fmt.Println(mk.tag(new byte[]{7, 8}.slice()));
 }

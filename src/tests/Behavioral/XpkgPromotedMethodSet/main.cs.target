@@ -136,10 +136,13 @@ partial struct HideC {
 
 internal static @string methods(reflectꓸType t) {
     slice<@string> names = default!;
+
     for (nint i = 0; i < t.NumMethod(); i++) {
         names = append(names, t.Method(i).Name);
     }
+
     sort.Strings(names);
+
     return fmt.Sprintf("%d [%s]"u8, t.NumMethod(), strings.Join(names, " "u8));
 }
 
@@ -159,6 +162,7 @@ internal static void probe(@string label, Func<@string> f) {
                 }
             }
         }, ref ᒐ);
+
         fmt.Printf("%s: %s\n"u8, label, f());
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -248,24 +252,31 @@ internal static void Main() {
     report(outerFDˢ, new OuterFD(nil));
     report(outerFSˢ, new OuterFS(nil));
     report("TT"u8, new TT(nil));
+
     probe(s5DispatchTokˢ, () => fmt.Sprint(((any)new OuterS5(nil))._<main_type>().Tok().N));
     probe(ttValueHasErrorˢ, () => {
         var (_, okΔ1) = ((any)new TT(nil))._<main_typeᴛ1>(ᐧ);
         return fmt.Sprint(okΔ1);
     });
+
     fmt.Println(new Direct(nil), new Outer(nil), new Mixed(nil));
+
     any f = new Five(nil);
+
     {
         var (t, okΔ2) = f._<main_type>(ᐧ); if (okΔ2) {
             fmt.Println(fiveTokNˢ, t.Tok().N);
         }
     }
+
     any s6 = new S6(nil);
+
     {
         var (t, okΔ3) = s6._<main_type>(ᐧ); if (okΔ3) {
             fmt.Println(s6TokNˢ, t.Tok().N);
         }
     }
+
     var (_, ok) = ((any)new Stamp(nil))._<json.Unmarshaler>(ᐧ);
     fmt.Println(stampValueIsJsonˢ, ok);
     (_, ok) = ((any)(Ꮡ(new Stamp(nil))))._<json.Unmarshaler>(ᐧ);
@@ -276,19 +287,24 @@ internal static void Main() {
     fmt.Println(directValueMethodByNameˢ, ok);
     (_, ok) = reflect.TypeOf(new PtrDirect(nil)).MethodByName(setˢ);
     fmt.Println(ptrDirectValueˢ, ok);
+
     any l = new Broken(nil);
     (_, ok) = l._<Δsync.Locker>(ᐧ);
     fmt.Println(brokenValueIsSyncLockerˢ, ok);
     fmt.Println(nameVarˢ, Name);
+
     probe(whereDirectCallˢ, () => fmt.Sprint(new Direct(nil).Inner.Where()));
     probe(whereViaAssertDirectˢ, () => fmt.Sprint(((any)new Direct(nil))._<main_typeᴛ2>().Where()));
     probe(whereViaAssertOuterˢ, () => fmt.Sprint(((any)new Outer(nil))._<main_typeᴛ2>().Where()));
+
     var d = Ꮡ(new Direct(nil));
     ((any)d.OrTypedNil())._<main_typeᴛ3>().Set(4);
     fmt.Println(directAfterSetThroughˢ, (~d).X);
+
     var pd = new PtrDirect(Ꮡ(new inner.Inner(nil)));
     ((any)pd)._<main_typeᴛ3>().Set(6);
     fmt.Println(ptrDirectAfterSetThroughˢ, pd.X);
+
     probe(samePValueMethodsˢ, () => methods(reflect.TypeOf(mid.NewSameP())));
     probe(samePPtrMethodsˢ, () => methods(reflect.TypeOf(Ꮡ(new mid.SameP(nil)))));
     probe(sameVValueMethodsˢ, () => methods(reflect.TypeOf(new mid.SameV(nil))));
@@ -296,20 +312,25 @@ internal static void Main() {
     probe(samePValueMethod0Callˢ, () => fmt.Sprint(reflect.ValueOf(mid.NewSameP()).Method(0).Call(default!)[0].Int()));
     probe(samePValueAssertCallPingˢ, () => {
         var (p, okΔ4) = ((any)mid.NewSameP())._<main_typeᴛ4>(ᐧ);
+
         if (!okΔ4) {
             return notSatisfiedˢ;
         }
+
         return fmt.Sprint(p.Ping());
     });
     probe(sameVValueAssertPingˢ, () => {
         var (_, okΔ5) = ((any)new mid.SameV(nil))._<main_typeᴛ4>(ᐧ);
+
         return fmt.Sprint(okΔ5);
     });
     probe(sameVAssertCallPingˢ, () => {
         var (p, okΔ6) = ((any)(Ꮡ(new mid.SameV(nil))))._<main_typeᴛ4>(ᐧ);
+
         if (!okΔ6) {
             return notSatisfiedˢ;
         }
+
         return fmt.Sprint(p.Ping());
     });
 }

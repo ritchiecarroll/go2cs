@@ -46,20 +46,26 @@ private static readonly object bytesTailˢ = (@string)"bytes tail:"u8;
 
 internal static void Main() {
     var items = new item[]{new("a"u8, 1), new("b"u8, 2), new("c"u8, 3)}.slice();
+
     var g = newGroup(items);
     show(roundTripˢ, g.items());
     fmt.Println(lenˢ, len(g.items()));
+
     g.items()[1].val = 20;
     show(afterWriteThroughˢ, items);
+
     fmt.Println(identityˢ, @unsafe.SliceData(items) == Ꮡ(items, 0));
     var tail = items[1..];
     fmt.Println(tailIdentityˢ, @unsafe.SliceData(tail) == Ꮡ(items, 1));
     fmt.Println(tailHeadˢ, (~@unsafe.SliceData(tail)).key);
+
     var nums = new int64[]{10, 20, 30}.slice();
     fmt.Println(int64Headˢ, @unsafe.SliceData(nums).Value);
     fmt.Println(int64TailHeadˢ, @unsafe.SliceData(nums[2..]).Value);
+
     var ptrs = new ж<item>[]{Ꮡ(items, 0), Ꮡ(items, 2)}.slice();
     fmt.Println(ptrElemˢ, (~@unsafe.Slice(@unsafe.SliceData(ptrs), len(ptrs))[1]).key);
+
     var b = slice<byte>("hello"u8);
     fmt.Println(bytesˢ, ((@string)@unsafe.Slice(@unsafe.SliceData(b), len(b))));
     fmt.Println(bytesTailˢ, ((@string)@unsafe.Slice(@unsafe.SliceData(b[2..]), 3)));

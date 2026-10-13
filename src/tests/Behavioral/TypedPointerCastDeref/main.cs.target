@@ -61,18 +61,25 @@ internal static void Main() {
     pt = new Pt(1, 2);
     ref var c = ref heap(new Count(), out var Ꮡc);
     c = 42;
+
     fmt.Println(structˢ, derefStruct(Ꮡpt));
     fmt.Println(namedNumˢ, derefNamedNum(Ꮡc));
+
     viaUnsafe(Ꮡpt).Value.Y = 20;
     fmt.Println(viaUnsafeWritesThroughˢ, pt);
+
     convIdentity(Ꮡpt).Value.X = 10;
     fmt.Println(convIdentityWritesˢ, pt);
+
     var got = derefStruct(Ꮡpt);
     got.X = 555;
     fmt.Println(copyˢ, got, originalˢ, pt);
+
     assignThrough(Ꮡpt);
     fmt.Println(assignedThroughˢ, pt);
+
     fmt.Println(localˢ, derefLocal());
+
     fmt.Println(callSurvivesˢ, advance(Ꮡpt).Value);
 }
 

@@ -23,6 +23,7 @@ public static (T, bool) Pop<T>(this ref Stack<T> s)
     if (len(s.elements) == 0) {
         return (zero, false);
     }
+
     nint index = len(s.elements) - 1;
     var element = s.elements[index];
     s.elements = s.elements.slice(0, index);
@@ -67,14 +68,18 @@ internal static void Main() {
     intStack.Push(20);
     var (val, _) = intStack.Pop();
     fmt.Printf("Popped from int stack: %d\n"u8, val);
+
     var stringStack = new Stack<@string>(nil);
     stringStack.Push(helloˢ);
     stringStack.Push(worldˢ);
     var (text, _) = stringStack.Pop();
     fmt.Printf("Popped from string stack: %s\n"u8, text);
+
     var pair = new Seq2Like<@string, nint>((@string k, nint v) => len(k) == v);
     fmt.Println(consume(pair, fourˢ, 4), pair(nopeˢ, 3));
+
     fmt.Println(describe<fmt.Stringer>(stringerˢ));
+
     fmt.Println(describe<ж<nint>>(ptrIntˢ));
 }
 

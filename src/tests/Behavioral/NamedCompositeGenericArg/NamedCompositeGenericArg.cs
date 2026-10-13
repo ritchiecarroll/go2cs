@@ -70,15 +70,20 @@ private static readonly object controlsˢ = (@string)"controls:"u8;
 internal static void Main() {
     var names = new Names(new map<nint, @string>{[2] = "b"u8, [1] = "a"u8});
     fmt.Println(namedMapˢ, keys<@string>(names));
+
     var scores = new Scores(new float64[]{1.5D, 2.5D}.slice());
     fmt.Println(namedSliceˢ, total<float64>(scores));
+
     var feed = new Feed(2);
     feed.ᐸꟷ(7);
     fmt.Println(namedChanˢ, drain<nint>(feed));
+
     Func<nint, bool> even = (nint v) => v % 2 == 0;
     fmt.Println(namedFuncˢ, count(new nint[]{1, 2, 4}.slice(), even));
+
     var grid = new Grid(new nint[]{4, 5}.array());
     fmt.Println(namedArrayˢ, first<nint>(grid));
+
     fmt.Println(controlsˢ, keys(new map<nint, @string>{[3] = "c"u8}), keys<@string>(names));
 }
 

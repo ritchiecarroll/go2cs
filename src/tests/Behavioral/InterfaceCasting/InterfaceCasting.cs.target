@@ -147,28 +147,37 @@ private static readonly object anyStringˢ = (@string)"any-string:"u8;
 
 internal static void Main() {
     error err = default!;
+
     err = new MyError("bar"u8);
+
     fmt.Printf("%v %v\n"u8, f(), err);
+
     var animals = new Animal[]{new DogжAnimal(@new<Dog>()), new CatжAnimal(@new<Cat>()), new Llama(nil), new JavaProgrammer(nil)}.slice();
     foreach (var (_, animal) in animals) {
         fmt.Println(animal.Speak());
     }
+
     var c = Ꮡ(new Counter(nil));
     Incrementer inc = new CounterжIncrementer(c);
     inc.Inc();
     inc.Inc();
     fmt.Println(viaPointerˢ, c.Total());
+
     c.Value.n = 10;
     fmt.Println(viaInterfaceˢ, inc.Total());
+
     var (back, ok) = inc._<ж<Counter>>(ᐧ);
     back.Inc();
     fmt.Println(assertBackˢ, ok, c.Total(), back == c);
+
     var r = Reversed(new Dog(nil));
     fmt.Println(promotedViaPointerˢ, r.Speak());
+
     for (nint k = 0; k < 3; k++) {
         var (a, name) = pick(k);
         fmt.Println(pickedˢ, name, a.Speak());
     }
+
     rdr rd = new strRdr(nil);
     fmt.Println(rd.read());
     var rc = open(dataˢ);
@@ -176,22 +185,26 @@ internal static void Main() {
     var readers = new rdr[]{new strRdr(nil)}.slice();
     readers[0] = new fileRdr(name: "x"u8);
     fmt.Println(readers[0].read());
+
     slice<Animal> pack = default!;
     pack = append(pack, (Animal)(new CatжAnimal(Ꮡ(new Cat(nil)))));
     pack = append(pack, (Animal)(new Dog(nil)));
     fmt.Println(len(pack), pack[0].Speak(), pack[1].Speak());
     var cp = Ꮡ(new Cat(nil));
     fmt.Println(cp.Self().Speak());
+
     ref var swapped = ref heap<Animal>(out var Ꮡswapped);
 
     swapped = new Dog(nil);
     replaceAnimal(ref swapped);
     fmt.Println(replacedˢ, swapped.Speak());
+
     Incrementer inc2 = default!;
     var (ᴛ1, ᴛ2) = makeCounter();
     (inc2, err) = (new CounterжIncrementer(ᴛ1), ᴛ2);
     inc2.Inc();
     fmt.Println(deconstructedIntoIfaceˢ, inc2.Total(), err == default!);
+
     Animal makeAnimal(bool feline) {
         if (feline) {
             return new CatжAnimal(Ꮡ(new Cat(nil)));
@@ -199,11 +212,15 @@ internal static void Main() {
         return new Dog(nil);
     }
     fmt.Println(madeˢ, makeAnimal(true).Speak(), makeAnimal(false).Speak());
+
     fmt.Println(plumbedˢ, runPlumbing());
+
     speakShutter ss = new wrapSinkжspeakShutter(Ꮡ(new wrapSink(Animal: new Dog(nil))));
     fmt.Println(ss.Speak(), ss.Shut());
+
     labeler lb = new badgeжlabeler(Ꮡ(new badge(text: "id"u8, num: 9)));
     fmt.Println(keywordMethodˢ, lb.@string(), lb.@int());
+
     var av = describe(true);
     var (@as, aok) = av._<@string>(ᐧ);
     fmt.Println(anyStringˢ, av, describe(false), @as, aok);

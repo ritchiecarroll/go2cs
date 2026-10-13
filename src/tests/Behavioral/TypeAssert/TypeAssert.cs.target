@@ -13,8 +13,11 @@ private static readonly object programCompletedAfterˢ = (@string)"Program compl
 
 internal static void Main() {
     safeAssertions();
+
     assertionsWithPanic();
+
     pointerAssertion();
+
     fmt.Println(programCompletedAfterˢ);
 }
 
@@ -24,11 +27,13 @@ private static readonly object pointerValueˢ = (@string)"Pointer value:"u8;
 
 internal static void pointerAssertion() {
     any i = Ꮡ(new box(n: 7));
+
     {
         var (bΔ1, ok) = i._<ж<box>>(ᐧ); if (ok) {
             fmt.Println(valueIsABoxˢ, (~bΔ1).n);
         }
     }
+
     var b = i._<ж<box>>();
     fmt.Println(pointerValueˢ, (~b).n);
 }
@@ -42,6 +47,7 @@ private static readonly object valueIsNotAnIntˢ = (@string)"Value is not an int
 
 internal static void safeAssertions() {
     any i = helloˢ;
+
     {
         var (s, ok) = i._<@string>(ᐧ); if (ok){
             fmt.Println(valueIsAStringˢ, s);
@@ -49,6 +55,7 @@ internal static void safeAssertions() {
             fmt.Println(valueIsNotAStringˢ);
         }
     }
+
     {
         var (n, ok) = i._<nint>(ᐧ); if (ok){
             fmt.Println(valueIsAnIntˢ, n);
@@ -73,10 +80,14 @@ internal static void assertionsWithPanic() {
                 }
             }
         }, ref ᒐ);
+
         any i = helloˢ;
+
         @string s = i._<@string>();
         fmt.Println(stringValueˢ, s);
+
         nint n = i._<nint>();
+
         fmt.Println(integerValueˢ, n);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

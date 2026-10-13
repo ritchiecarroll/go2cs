@@ -27,15 +27,19 @@ internal static void Main() {
     t.vals[1] = 5;
     t.n = 2;
     fmt.Println(zeroˢ, len(t.vals), t.vals, t.n);
+
     var p = @new<Tally>();
     p.Value.vals[3] = 7;
     fmt.Println(newˢ, len((~p).vals), (~p).vals);
+
     var l = new Tally(new counts(n: 1));
     l.vals[2] = 9;
     fmt.Println(literalˢ, len(l.vals), l.vals, l.n);
+
     var c = t.ΔClone();
     c.vals[0] = 11;
     fmt.Println(copyˢ, t.vals, c.vals);
+
     Score s = new();
     s.vals[0] = 3;
     s.n = 4;

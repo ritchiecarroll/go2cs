@@ -35,16 +35,21 @@ private static readonly object namedIntoOtherNamedˢ = (@string)"named into othe
 
 internal static void Main() {
     var a = new AssignA(() => 7);
+
     var (m, _) = reflect.TypeOf((a).OrTypedNilFunc()).MethodByName(equalˢ);
     fmt.Println(assignableˢ, m.Type.In(0).AssignableTo(m.Type.In(1)));
     fmt.Println(equalViaCallˢ, m.Func.Call(new reflectꓸValue[]{reflect.ValueOf((a).OrTypedNilFunc()), reflect.ValueOf((a).OrTypedNilFunc())}.slice())[0].Bool());
+
     fmt.Println(applyViaCallˢ, reflect.ValueOf(apply).Call(new reflectꓸValue[]{reflect.ValueOf((a).OrTypedNilFunc())}.slice())[0].Int());
+
     ref var f = ref heap<Func<nint>>(out var Ꮡf);
     reflect.ValueOf(Ꮡf).Elem().Set(reflect.ValueOf((a).OrTypedNilFunc()));
     fmt.Println(namedIntoUnnamedˢ, f());
+
     ref var b = ref heap<AssignA>(out var Ꮡb);
     reflect.ValueOf(Ꮡb).Elem().Set(reflect.ValueOf(nint () => 9));
     fmt.Println(unnamedIntoNamedˢ, b());
+
     var aʗ1 = a;
     ((Action)(() => {
         GoFrame ᒐ = default;

@@ -14,6 +14,7 @@ internal partial struct main_type /*dyn*/ {
 internal static void Main() {
     var b = ((st.AssignB)new main_type(3));
     fmt.Println(b.A, b.Sum());
+
     main_type s = default!;
     s.A = 4;
     fmt.Println(((st.AssignB)s).Sum());

@@ -105,13 +105,16 @@ internal static void Main() {
     var c = Ꮡ(new counter(nil));
     var pv = reflect.ValueOf(c.OrTypedNil());
     var pt = pv.Type();
+
     fmt.Println(ptrNumMethodˢ, pt.NumMethod(), valueNumMethodˢ, pv.NumMethod());
     fmt.Println(ptrMethodsˢ, strings.Join(names(pt), ","u8));
     var sorted = appendꓸꓸꓸ(slice<@string>(default!), names(pt));
     sort.Strings(sorted);
     fmt.Println(ptrOrderIsSortedˢ, reflect.DeepEqual(sorted, names(pt)));
+
     var vv = reflect.ValueOf(c.Value);
     fmt.Println(valNumMethodˢ, vv.Type().NumMethod(), methodsˢ, strings.Join(names(vv.Type()), ","u8));
+
     for (nint i = 0; i < pt.NumMethod(); i++) {
         var mΔ1 = pt.Method(i);
         var mv = pv.Method(i);
@@ -119,26 +122,33 @@ internal static void Main() {
         fmt.Printf("  [%d] %s index=%d pkgpath=%q numIn=%d numOut=%d\n"u8,
             i, mΔ1.Name, mΔ1.Index, mΔ1.PkgPath, mt.NumIn(), mt.NumOut());
     }
+
     var add = pv.Method(0);
     fmt.Println(addKindˢ, add.Kind(), in0ˢ, add.Type().In(0).Kind());
     fmt.Println(add5ˢ, add.Call(new reflectꓸValue[]{reflect.ValueOf((nint)(5))}.slice())[0].Interface());
     fmt.Println(add7ˢ, add.Call(new reflectꓸValue[]{reflect.ValueOf((nint)(7))}.slice())[0].Interface());
     fmt.Println(receiverObservedTheˢ, (~c).n);
+
     var label = pv.MethodByName(labelˢ);
     fmt.Println(labelˢ2, label.Call(new reflectꓸValue[]{reflect.ValueOf((@string)"n"u8)}.slice())[0].Interface());
     fmt.Println(valueˢ, pv.MethodByName(valueˢ2).Call(default!)[0].Interface());
+
     var reset = pv.MethodByName(resetˢ);
     fmt.Println(resetOutsˢ, len(reset.Call(default!)), (@string)"-> n ="u8, (~c).n);
+
     var (m, ok) = pt.MethodByName(valueˢ2);
     fmt.Println(methodByNameValueˢ, ok, m.Name, m.Index, pt.Method(m.Index).Name);
     var (_, missing) = pt.MethodByName(nopeˢ);
     fmt.Println(methodByNameAbsentˢ, missing, valueFormValidˢ, pv.MethodByName(nopeˢ).IsValid());
+
     var c2 = Ꮡ(new counter(n: 3));
     var (addM, _) = pt.MethodByName(addˢ);
     fmt.Println(unboundFuncNumInˢ, addM.Type.NumIn(),
         callˢ, addM.Func.Call(new reflectꓸValue[]{reflect.ValueOf(c2.OrTypedNil()), reflect.ValueOf((nint)(4))}.slice())[0].Interface());
+
     fmt.Println(outerMethodsˢ, strings.Join(names(reflect.TypeOf(new outer(nil))), ","u8));
     fmt.Println(outerZetaˢ, reflect.ValueOf(new outer(nil)).MethodByName(zetaˢ2).Call(default!)[0].Interface());
+
     ref var s = ref heap<fmt.Stringer>(out var Ꮡs);
     s = ((stringish)(@string)"hi"u8);
     var st = reflect.TypeOf(Ꮡs).Elem();

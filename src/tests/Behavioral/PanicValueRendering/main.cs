@@ -29,17 +29,21 @@ internal static void Main() {
     fmt.Println(recoveredˢ, recoverText(() => {
         throw panic(mustOpen(aTxtˢ));
     }));
+
     var wrapped = fmt.Errorf("load config: %w"u8, mustOpen(cfgYamlˢ));
     var wrappedʗ1 = wrapped;
     fmt.Println(recoveredˢ, recoverText(() => {
         throw panic(wrappedʗ1);
     }));
+
     fmt.Println(recoveredˢ, recoverText(() => {
         throw panic("plain string");
     }));
+
     fmt.Println(recoveredˢ, recoverText(() => {
         throw panic(errors.New(simpleˢ));
     }));
+
     throw panic(mustOpen(finalTxtˢ));
 }
 

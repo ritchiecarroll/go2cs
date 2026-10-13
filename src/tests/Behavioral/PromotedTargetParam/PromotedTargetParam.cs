@@ -46,14 +46,17 @@ internal static void Main() {
     fmt.Println(v.Pair(paramˢ));
     v.Base.Rename(valueRenamedˢ);
     fmt.Println(v.Pair(paramˢ));
+
     var p = new ByPointer(Ꮡ(new Base("pointer-recv"u8)));
     fmt.Println(p.Pair(paramˢ));
     p.Rename(pointerRenamedˢ);
     fmt.Println(p.Pair(paramˢ));
+
     var fv = new ForeignByValue(new targetlib.Finder(Name: "foreign-value"u8));
     fmt.Println(fv.Finder.Match(paramˢ));
     fv.Finder.Retarget(foreignValueRenamedˢ);
     fmt.Println(fv.Finder.Match(paramˢ));
+
     var fp = new ForeignByPointer(Ꮡ(new targetlib.Finder(Name: "foreign-pointer"u8)));
     fmt.Println(fp.Finder.Value.Match(paramˢ));
     fp.Finder.Value.Retarget(foreignPointerRenamedˢ);

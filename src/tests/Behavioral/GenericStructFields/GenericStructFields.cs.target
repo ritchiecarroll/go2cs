@@ -51,14 +51,17 @@ internal static void Main() {
             ["verified"u8] = new(Value: false, Error: fmt.Errorf("verification pending"u8))
         }
     );
+
     fmt.Printf("Int result: %d\n"u8, container.IntResult.Value);
     fmt.Printf("String result: %s\n"u8, container.StringResult.Value);
     fmt.Printf("First float value: %f\n"u8, container.FloatValues[0].Value);
     fmt.Printf("Completion status: %t\n"u8, container.Mappings[completedˢ].Value);
+
     Δpool<nint> pl = default!;
     pl.items = append(pl.items, (nint)(7), (nint)(8));
     var (v, ok) = pl.take();
     fmt.Println(v, ok, new keeper(nil).pool());
+
     var w = new wrapped<@string>(tag: new tag<@string>(label: "gen"u8), count: 2);
     fmt.Println(w.label, w.tag.show(), w.count);
 }

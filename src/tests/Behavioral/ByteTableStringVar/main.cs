@@ -22,9 +22,11 @@ private static readonly object bytesˢ = (@string)" bytes="u8;
 
 internal static void dump(@string name, @string s) {
     fmt.Print(name, lenˢ, len(s), bytesˢ);
+
     for (nint i = 0; i < len(s); i++) {
         fmt.Print(s[i], (@string)" "u8);
     }
+
     fmt.Println();
 }
 
@@ -44,11 +46,15 @@ internal static void Main() {
     dump(varTableˢ, varTable);
     dump(varSingleˢ, varSingle);
     dump(varTypedˢ, varTyped);
+
     fmt.Println(indexˢ, constTable[2], varTable[2], constTable[4], varTable[4]);
+
     @string local = ""u8 + ((@string)(new byte[]{0xff, 0x80})) + "\x02"u8;
     dump(localˢ, local);
+
     var b = slice<byte>("" + ((@string)(new byte[]{0xff, 0x80})));
     fmt.Println(bytesˢ2, len(b), b[0], b[1]);
+
     dump(constTextˢ, constText);
     fmt.Println(varTextˢ, varText, len(varText));
 }

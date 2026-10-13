@@ -28,18 +28,26 @@ private static readonly @string absentˢ = "absent"u8;
 
 internal static void Main() {
     var r = newResponse();
+
     r.Header()[contentTypeˢ] = new @string[]{"text/plain"u8}.slice();
     r.Header()[xTraceˢ] = new @string[]{"a"u8, "b"u8}.slice();
+
     fmt.Println((~r).hdr[contentTypeˢ], len((~r).hdr[xTraceˢ]));
+
     var c = new Counts(new map<@string, nint>{});
     var cʗ1 = c;
     Counts get() => cʗ1;
+
     get()[hitsˢ] = 3;
     get()[hitsˢ] = get()[hitsˢ] + 1;
+
     fmt.Println(c[hitsˢ], len(c));
+
     fmt.Println(r.Header()[contentTypeˢ][0]);
+
     var (absent, ok) = r.Header()[absentˢ, ꟷ];
     fmt.Println(absent == default!, ok);
+
     delete(r.Header(), "X-Trace"u8);
     fmt.Println(len(r.Header()), len((~r).hdr));
 }

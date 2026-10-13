@@ -53,12 +53,14 @@ internal static void Main() {
     ref var m = ref heap(new myType(), out var Ꮡm);
     var (n, err) = write(Ꮡm, slice<byte>("expr"u8));
     fmt.Println(myTypeWriteˢ, n, err, Ꮡm.of(myType.ᏑBuffer).String());
+
     var m2 = Ꮡ(new myType(nil));
     
     var m2ʗ1 = m2;
     var wv = (slice<byte> p1) => m2ʗ1.Write(p1);
     (n, err) = wv(slice<byte>("value"u8));
     fmt.Println(myTypeWriteˢ2, n, err, m2.of(myType.ᏑBuffer).String());
+
     ref var m3 = ref heap(new myType(), out var Ꮡm3);
     Ꮡm3.of(myType.ᏑBuffer).WriteString(abcˢ);
     var lv = Ꮡm3.Len;
@@ -81,6 +83,7 @@ internal static void Main() {
     
     var sv = (@string p1) => recvʗ1.Say(p1);
     fmt.Println(ownSayˢ2, sv(whyˢ));
+
     fmt.Println(asValueˢ, strings.ToUpper(fmt.Sprint(((Func<Func<ж<myType>, slice<byte>, (nint, error)>, nint>)(f => {
         ref var t = ref heap(new myType(), out var Ꮡt);
         var (k, _) = f(Ꮡt, slice<byte>("xyz"u8));

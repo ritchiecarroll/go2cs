@@ -22,15 +22,20 @@ private static readonly object cloneHasBˢ = (@string)"clone has b:"u8;
 
 internal static void Main() {
     var m = new map<@string, nint>{["a"u8] = 1, ["b"u8] = 2, ["c"u8] = 3};
+
     var mc = clone(m)._<map<@string, nint>>();
+
     mc["a"u8] = 99;
     mc["d"u8] = 4;
     delete(mc, "b"u8);
+
     fmt.Println(origLenˢ, len(m), cloneLenˢ, len(mc));
     fmt.Println(origAˢ, m["a"u8], cloneAˢ, mc["a"u8]);
+
     var (_, origHasD) = m["d"u8, ꟷ];
     var (_, origHasB) = m["b"u8, ꟷ];
     fmt.Println(origHasDˢ, origHasD, origHasBˢ, origHasB);
+
     var (_, cloneHasB) = mc["b"u8, ꟷ];
     fmt.Println(cloneCˢ, mc["c"u8], cloneDˢ, mc["d"u8], cloneHasBˢ, cloneHasB);
 }

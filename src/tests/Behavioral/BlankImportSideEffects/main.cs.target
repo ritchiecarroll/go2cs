@@ -22,6 +22,7 @@ private static readonly object countˢ = (@string)"count:"u8;
 
 internal static void Main() {
     fmt.Println(countAtInitˢ, countAtInit);
+
     foreach (var (_, name) in new @string[]{"jpeglike"u8, "pnglike"u8, "giflike"u8}.slice()) {
         {
             var (describe, ok) = registry.Lookup(name); if (ok){
@@ -31,6 +32,7 @@ internal static void Main() {
             }
         }
     }
+
     fmt.Println(countˢ, registry.Count());
 }
 

@@ -89,15 +89,19 @@ internal static nint localHeapAnon() {
 internal static void Main() {
     pool[0].item = 5;
     pool[1].item = 6;
+
     nums[0] = 11;
     nums[2] = 13;
+
     var p = Ꮡaddr;
     p.Value[0] = 21;
     p.Value[1] = 22;
+
     fmt.Println(pool[0].item, pool[1].item);
     fmt.Println(nums[0], nums[2], addr[0], addr[1]);
     fmt.Println(statsTotal());
     fmt.Println(localHeapAnon());
+
     var (noPtr, sliceLen, count, noTag) = composedReads();
     fmt.Println(noPtr, sliceLen, count, noTag);
     fmt.Println(reservedIsNil());

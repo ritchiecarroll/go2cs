@@ -62,14 +62,17 @@ internal static void Main() {
     var pp = new ж<node>[]{Ꮡ(new node(inner: (@string)"p1"u8))}.slice();
     var pq = new ж<pair>[]{Ꮡ(new pair("q1"u8, (@string)"q2"u8))}.slice();
     var sp = new array<any>(3){[1] = (@string)"sp"u8};
+
     describe(keyedˢ, (~n).inner);
     fmt.Println(labelˢ, p.label);
     describe(positionalˢ, p.value);
     describe(mapvalˢ, m["k"u8]);
+
     foreach (var (k, v) in mk) {
         describe(mapkeyˢ, k);
         fmt.Println(mapkeyvalˢ, v);
     }
+
     describe(slice0ˢ, s[0]);
     describe(slice1ˢ, s[1]);
     describe(array0ˢ, arr[0]);

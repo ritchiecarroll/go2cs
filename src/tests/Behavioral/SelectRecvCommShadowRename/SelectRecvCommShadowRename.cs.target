@@ -20,6 +20,7 @@ internal static void Main() {
         channel<nint> cΔ1 = default!;
         cΔ1 = new channel<nint>(2);
         cΔ1.ᐸꟷ(40 + loop);
+
         var selᴛ1 = cΔ1;
         switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
         case 0 when selᴛ1.ꟷᐳ(out var x): {
@@ -30,6 +31,7 @@ internal static void Main() {
             fmt.Println(emptyˢ);
             break;
         }}
+
         cΔ1.ᐸꟷ(50 + loop);
         var selᴛ2 = cΔ1;
         switch (trySelect(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
@@ -41,6 +43,7 @@ internal static void Main() {
             fmt.Println(empty2ˢ);
             break;
         }}
+
         var selᴛ3 = cΔ1;
         switch (trySelect(ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
         case 0 when selᴛ3.ꟷᐳ(out var x): {
@@ -51,6 +54,7 @@ internal static void Main() {
             fmt.Println(drainedˢ);
             break;
         }}
+
         var d = new channel<nint>(1);
         var selᴛ4 = d.ᐸꟷ(7, ꓸꓸꓸ);
         var selᴛ5 = cΔ1;
@@ -65,6 +69,7 @@ internal static void Main() {
         }}
         fmt.Println((@string)"d"u8, ᐸꟷ(d));
     }
+
     channel<@string> c = default!;
     c = new channel<@string>(1);
     c.ᐸꟷ(tailˢ);

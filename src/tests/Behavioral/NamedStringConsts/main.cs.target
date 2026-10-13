@@ -54,15 +54,21 @@ internal static void Main() {
     fmt.Println(describe(equivalent));
     fmt.Println(describe(moreGeneral));
     fmt.Println(describe(((relationship)(@string)"x"u8)));
+
     relationship localRel = localRelᶜ;
     fmt.Println(describe(localRel));
+
     fmt.Println(equivalent.tag());
+
     @string plain = plainᶜ;
     fmt.Println(plain);
+
     fmt.Println(opLoad == ((relationship)(@string)opLoadˢ), opStore == opLoad, opStore.tag(), opDelete.tag());
     fmt.Println(describe(opLoad));
+
     relationship localOp = localOpᶜ;
     fmt.Println(localOp.tag(), localOp == ((relationship)(@string)opLocalˢ));
+
     @string untypedOp = untypedOpᶜ;
     fmt.Println(untypedOp, len(untypedOp));
 }

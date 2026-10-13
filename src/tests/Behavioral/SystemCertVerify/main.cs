@@ -37,6 +37,7 @@ internal static void Main() {
         fmt.Println(generateKeyErrorˢ, err);
         return;
     }
+
     var now = time.Now();
     var template = Ꮡ(new x509.Certificate(
         SerialNumber: big.NewInt(20260818),
@@ -49,25 +50,31 @@ internal static void Main() {
         IsCA: true,
         BasicConstraintsValid: true
     ));
+
     (var der, err) = x509.CreateCertificate(rand.Reader, template, template, key.of(ecdsa.PrivateKey.ᏑPublicKey), key.OrTypedNil());
     if (err != default!) {
         fmt.Println(createCertificateErrorˢ, err);
         return;
     }
     fmt.Println(createdDerˢ, len(der) > 0);
+
     (var cert, err) = x509.ParseCertificate(der);
     if (err != default!) {
         fmt.Println(parseCertificateErrorˢ, err);
         return;
     }
     fmt.Println(parsedCnˢ, (~cert).Subject.CommonName);
+
     (var chains, err) = cert.Verify(new x509.VerifyOptions(nil));
     fmt.Println(verifyChainsˢ, len(chains));
     fmt.Println(verifyErrorˢ, err);
     fmt.Println(unknownAuthorityˢ, isUnknownAuthority(err));
+
     (_, err) = cert.Verify(new x509.VerifyOptions(DNSName: "go2cs.example"u8));
     fmt.Println(verifyWithDnsnameErrorˢ, err);
+
     fmt.Println(hostnameMismatchˢ, cert.VerifyHostname(otherExampleˢ) != default!);
+
     walkChain(der);
 }
 
@@ -93,12 +100,14 @@ internal static void walkChain(slice<byte> der) {
             return;
         }
         defer(syscall.CertFreeCertificateContext, ctx, ref ᒐ);
+
         (var store, err) = syscall.CertOpenStore(syscall.CERT_STORE_PROV_MEMORY, 0, 0, syscall.CERT_STORE_DEFER_CLOSE_UNTIL_LAST_FREE_FLAG, 0);
         if (err != default!) {
             fmt.Println(openStoreErrorˢ, err);
             return;
         }
         defer(syscall.CertCloseStore, store, (uint32)(0), ref ᒐ);
+
         ref var storeCtx = ref heap<ж<syscall.CertContext>>(out var ᏑstoreCtx);
         {
             var errΔ1 = syscall.CertAddCertificateContextToStore(store, ctx, syscall.CERT_STORE_ADD_ALWAYS, ᏑstoreCtx); if (errΔ1 != default!) {
@@ -107,16 +116,20 @@ internal static void walkChain(slice<byte> der) {
             }
         }
         defer(syscall.CertFreeCertificateContext, storeCtx, ref ᒐ);
+
         fmt.Println(storeContextNonNilˢ, storeCtx != nil);
         fmt.Println(storeHandleRoundTripsˢ, (~storeCtx).Store == store);
         fmt.Println(storeContextDerLengthˢ, (nint)(~storeCtx).Length == len(der));
+
         var serverAuth = slice<byte>("1.3.6.1.5.5.7.3.1\x00"u8);
         var oids = new ж<byte>[]{Ꮡ(serverAuth, 0)}.slice();
+
         var para = @new<syscall.CertChainPara>();
         para.Value.Size = (uint32)/* unsafe.Sizeof(*para) */ (uintptr)80;
         para.Value.RequestedUsage.Type = syscall.USAGE_MATCH_TYPE_OR;
         para.Value.RequestedUsage.Usage.Length = (uint32)len(oids);
         para.Value.RequestedUsage.Usage.UsageIdentifiers = Ꮡ(oids, 0);
+
         ref var chainCtx = ref heap<ж<syscall.CertChainContext>>(out var ᏑchainCtx);
         {
             var errΔ2 = syscall.CertGetCertificateChain(((syscallꓸHandle)0), storeCtx, nil, (~storeCtx).Store, para, 0, 0, ᏑchainCtx); if (errΔ2 != default!) {
@@ -125,15 +138,19 @@ internal static void walkChain(slice<byte> der) {
             }
         }
         defer(syscall.CertFreeCertificateChain, chainCtx, ref ᒐ);
+
         fmt.Println(chainCountˢ, (~chainCtx).ChainCount);
         fmt.Println(chainReportsUntrustedˢ, (uint32)((~chainCtx).TrustStatus.ErrorStatus & (uint32)syscall.CERT_TRUST_IS_UNTRUSTED_ROOT) != 0);
+
         var simpleChains = @unsafe.Slice((~chainCtx).Chains, (~chainCtx).ChainCount);
         var last = simpleChains[(~chainCtx).ChainCount - 1];
         fmt.Println(simpleChainElementsˢ, (~last).NumElements);
+
         var elements = @unsafe.Slice((~last).Elements, (~last).NumElements);
         var leaf = elements[0].Value.CertContext;
         var encoded = @unsafe.Slice((~leaf).EncodedCert, (~leaf).Length);
         fmt.Println(leafDerRoundTripsˢ, bytes.Equal(encoded, der));
+
         checkSSLPolicy(chainCtx);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -148,6 +165,7 @@ private static readonly object policyUntrustedˢ = (@string)"policy untrusted:"u
 
 internal static void checkSSLPolicy(ж<syscall.CertChainContext> ᏑchainCtx) {
     const uint32 allowUnknownCA = 0x00000010;
+
     fmt.Println(policyMatchˢ, sslPolicyError(ᏑchainCtx, go2csExampleˢ, allowUnknownCA));
     fmt.Println(policyMismatchˢ, sslPolicyError(ᏑchainCtx, otherExampleˢ, allowUnknownCA));
     fmt.Println(policyUntrustedˢ, sslPolicyError(ᏑchainCtx, go2csExampleˢ, 0));
@@ -163,16 +181,19 @@ internal static @string sslPolicyError(ж<syscall.CertChainContext> ᏑchainCtx,
     if (err != default!) {
         return utf16Errorˢ;
     }
+
     var sslPara = Ꮡ(new syscall.SSLExtraCertChainPolicyPara(
         AuthType: syscall.AUTHTYPE_SERVER,
         ServerName: servernamep
     ));
     sslPara.Value.Size = (uint32)/* unsafe.Sizeof(*sslPara) */ (uintptr)24;
+
     var para = Ꮡ(new syscall.CertChainPolicyPara(
         Flags: flags,
         ExtraPolicyPara: ((syscall.Pointer)ManagedPointerTokens.MintOpaque(sslPara))
     ));
     para.Value.Size = (uint32)/* unsafe.Sizeof(*para) */ (uintptr)16;
+
     ref var status = ref heap<syscall.CertChainPolicyStatus>(out var Ꮡstatus);
     status = new syscall.CertChainPolicyStatus(nil);
     {
@@ -180,6 +201,7 @@ internal static @string sslPolicyError(ж<syscall.CertChainContext> ᏑchainCtx,
             return "call error: "u8 + errΔ1.Error();
         }
     }
+
     var exprᴛ1 = status.Error;
     if (exprᴛ1 is 0) {
         return "ok"u8;

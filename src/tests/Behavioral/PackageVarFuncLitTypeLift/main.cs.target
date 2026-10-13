@@ -37,6 +37,7 @@ internal static void Main() {
     foreach (var (_, m) in makers) {
         fmt.Println(m.label, m.build(worldˢ).Greet());
     }
+
     fmt.Println(varFirstLabel, varFirst.Greet());
 }
 

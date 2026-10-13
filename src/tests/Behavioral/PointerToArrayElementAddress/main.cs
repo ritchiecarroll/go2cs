@@ -24,6 +24,7 @@ internal static void Main() {
     for (nint j = 0; j < 3; j++) {
         fmt.Println(g.Value[j][0], g.Value[j][1], g.Value[j][2], g.Value[j][3]);
     }
+
     var first = g.at<row>(0);
     first.Value[0] = 99;
     fmt.Println(g.Value[0][0]);

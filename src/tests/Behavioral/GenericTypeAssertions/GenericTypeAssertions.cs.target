@@ -14,6 +14,7 @@ public static any GetValue(nint index) {
         new Box<@string>(Value: "hello"u8),
         new Box<float64>(Value: 3.14D)
     }.slice();
+
     if (index >= 0 && index < len(values)) {
         return values[index];
     }
@@ -26,11 +27,13 @@ private static readonly object unknownBoxTypeˢ = (@string)"Unknown box type"u8;
 
 internal static void Main() {
     var value = GetValue(0);
+
     {
         var (intBox, ok) = value._<Box<nint>>(ᐧ); if (ok) {
             fmt.Printf("Found an int box with value: %d\n"u8, intBox.Value);
         }
     }
+
     {
         var (strBox, ok) = value._<Box<@string>>(ᐧ); if (ok){
             fmt.Printf("Found a string box with value: %s\n"u8, strBox.Value);
@@ -38,6 +41,7 @@ internal static void Main() {
             fmt.Println(notAStringBoxˢ);
         }
     }
+
     var switchᴛ1 = GetValue(1);
     switch (switchᴛ1.type()) {
     case Box<nint> v: {

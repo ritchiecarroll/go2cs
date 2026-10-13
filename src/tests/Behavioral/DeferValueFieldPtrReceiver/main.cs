@@ -46,6 +46,7 @@ internal static void Main() {
     var b = Ꮡ(new builder(nil));
     b.run();
     fmt.Println(afterˢ, (~b).c.n);
+
     var x = Ꮡ(new builder(nil));
     var xʗ1 = x;
     ((Action)(() => {

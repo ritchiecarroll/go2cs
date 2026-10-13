@@ -20,7 +20,9 @@ private static readonly @string greeterˢ = "greeter"u8;
 
 public static @string Describe(Greeter g, any original) {
     any v = g;
+
     var (_, again) = v._<Greeter>(ᐧ);
+
     @string kind = otherˢ;
     switch (v.type()) {
     case @string: {

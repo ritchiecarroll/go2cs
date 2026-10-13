@@ -22,6 +22,7 @@ internal static void Main() {
             fmt.Println(fatalInterfacesˢ, err);
             return;
         }
+
         ж<Δnet.Interface> chosen = default!;
         foreach (var (i, _) in ifis) {
             if ((Δnet.Flags)(ifis[i].Flags & Δnet.FlagUp) != 0 && (Δnet.Flags)(ifis[i].Flags & Δnet.FlagMulticast) != 0) {
@@ -33,7 +34,9 @@ internal static void Main() {
             fmt.Println(noMulticastCapableˢ);
             return;
         }
+
         var gaddr = Ꮡ(new Δnet.UDPAddr(IP: Δnet.IPv4(224, 0, 0, 254), Port: 0));
+
         (var c, err) = Δnet.ListenMulticastUDP(udp4ˢ, chosen, gaddr);
         fmt.Println(joinErrIsNilˢ, err == default!);
         if (err != default!) {
@@ -42,6 +45,7 @@ internal static void Main() {
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
+
         var local = c.LocalAddr()._<ж<Δnet.UDPAddr>>();
         fmt.Println(localIpIsUnsetˢ, (~local).IP.IsUnspecified());
         fmt.Println(localPortBoundˢ, (~local).Port != 0);

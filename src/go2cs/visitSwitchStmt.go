@@ -113,6 +113,9 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, target LabeledStmt
 }
 
 func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
+	v.noteClauseSpans(switchStmt.Body)
+	defer v.trimTrailingLineBreak()
+
 	// A tagged switch whose tag is the CONSTANT `true` (`switch c := s[i]; true { case cond: … }`
 	// — strconv readFloat) is Go's idiom for an expressionless switch with an init statement:
 	// each boolean case CONDITION matches when it holds. Normalize to the expressionless form
@@ -321,6 +324,8 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			reorderedClauses = append(reorderedClauses, caseClause)
 			reorderedFlags = append(reorderedFlags, caseHasFallthroughStmt[i])
 			caseClauses = reorderedClauses
+			v.holdClauseComments(caseClause.Colon)
+			defer v.releaseClauseComments(caseClause.Colon)
 			caseHasFallthroughStmt = reorderedFlags
 			break
 		}
@@ -581,6 +586,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 
 		// Write "if" statements for each case clause
 		for i, caseClause := range caseClauses {
+			v.writeAboveLabelComments(caseClause.Colon)
 			v.writeOutput("")
 
 			caseFallsThrough := false
@@ -720,9 +726,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 				v.continueTargetStack = append(v.continueTargetStack, &continueTargetEntry{isWrapper: true})
 			}
 
-			for _, stmt := range caseClause.Body {
-				v.visitListStmt(stmt)
-			}
+			v.visitStatementList(caseClause.Body, caseClause.Colon)
 
 			if switchBreakWrap {
 				v.continueTargetStack = v.continueTargetStack[:len(v.continueTargetStack)-1]
@@ -798,6 +802,8 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 				v.outputBuilder.WriteString(v.newline)
 			}
 
+			v.writeAboveLabelComments(caseClause.Colon)
+
 			if caseClause.List == nil {
 				v.writeOutput("default: {")
 			} else {
@@ -824,9 +830,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			// and suppress the mandatory `break;` (CS8070 on a final case, CS0163 otherwise).
 			v.lastStatementWasReturn = false
 
-			for _, stmt := range caseClause.Body {
-				v.visitListStmt(stmt)
-			}
+			v.visitStatementList(caseClause.Body, caseClause.Colon)
 
 			v.outputBuilder.WriteString(v.newline)
 
@@ -848,6 +852,8 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			if clauseIndex > 0 {
 				v.outputBuilder.WriteString(v.newline)
 			}
+
+			v.writeAboveLabelComments(caseClause.Colon)
 
 			if caseClause.List == nil {
 				v.writeOutput("default: {")
@@ -916,9 +922,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			// and suppress the mandatory `break;` (CS8070 on a final case, CS0163 otherwise).
 			v.lastStatementWasReturn = false
 
-			for _, stmt := range caseClause.Body {
-				v.visitListStmt(stmt)
-			}
+			v.visitStatementList(caseClause.Body, caseClause.Colon)
 
 			v.outputBuilder.WriteString(v.newline)
 

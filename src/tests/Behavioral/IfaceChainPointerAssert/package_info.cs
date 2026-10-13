@@ -52,7 +52,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("IfaceChainPointerAssert.go", "IfaceChainPointerAssert.cs", "ABMwgKKA6ICigAAUBISGhoCCgpSogoaUxKiChICClKaAgpSmlLTEqIKAgpQ=")]
+[assembly: go.GoPositionMap("IfaceChainPointerAssert.go", "IfaceChainPointerAssert.cs", "ABMwgKKA6ICigAAUBISWloCCgpS4gpaUxLiClICClLaAgpS2lLTEuIKAgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go;

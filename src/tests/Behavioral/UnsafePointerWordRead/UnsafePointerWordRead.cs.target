@@ -15,10 +15,12 @@ internal static void Main() {
     u = (uintptr)0xC0FFEE;
     @unsafe.Pointer q = ~Ꮡ(new @unsafe.Pointer(~Ꮡu));
     fmt.Println(uintptrWordRoundTripsˢ, (uintptr)q == 0xC0FFEE);
+
     ref var c = ref heap<channel<nint>>(out var Ꮡc);
     c = new channel<nint>(1);
     @unsafe.Pointer p = ~Ꮡ(new @unsafe.Pointer((uintptr)Ꮡc));
     fmt.Println(liveChannelWordIsNonNilˢ, p != nil);
+
     @unsafe.Pointer p2 = ~Ꮡ(new @unsafe.Pointer((uintptr)Ꮡc));
     fmt.Println(reReadAgreesˢ, (uintptr)p == (uintptr)p2);
 }

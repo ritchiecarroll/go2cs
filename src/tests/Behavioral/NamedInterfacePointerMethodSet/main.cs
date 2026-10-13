@@ -71,24 +71,33 @@ private static readonly @string gboxStringˢ = "gbox-string    "u8;
 internal static void Main() {
     var (s, ok) = pmslib.TrySpeak(new PtrOnly(name: "a"u8));
     report(ptrOnlyValueˢ, s, ok);
+
     (s, ok) = pmslib.TrySpeak(Ꮡ(new PtrOnly(name: "a"u8)));
     report(ptrOnlyPointerˢ, s, ok);
+
     (s, ok) = pmslib.TrySpeak(new ValOnly(name: "b"u8));
     report(valOnlyValueˢ, s, ok);
+
     (s, ok) = pmslib.TrySpeak(Ꮡ(new ValOnly(name: "b"u8)));
     report(valOnlyPointerˢ, s, ok);
+
     (s, ok) = pmslib.TrySpeak(new Mixed(n: 41));
     report(mixedValueˢ, s, ok);
+
     var pm = Ꮡ(new Mixed(n: 41));
     pm.Bump();
     (s, ok) = pmslib.TrySpeak(pm.OrTypedNil());
     report(mixedPointerˢ, s, ok);
+
     (s, ok) = pmslib.TrySpeak(new WrongSig(nil));
     report(wrongSigˢ, s, ok);
+
     (s, ok) = pmslib.TrySpeak((nint)(42));
     report(intˢ, s, ok);
+
     (s, ok) = pmslib.TryGet(new gbox<nint>(v: 7));
     report(gboxIntˢ, s, ok);
+
     (s, ok) = pmslib.TryGet(new gbox<@string>(v: "g"u8));
     report(gboxStringˢ, s, ok);
 }

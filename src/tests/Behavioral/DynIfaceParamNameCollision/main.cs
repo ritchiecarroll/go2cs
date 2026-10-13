@@ -72,8 +72,11 @@ internal static void apply(any v) {
 
 internal static void Main() {
     serve(new pusher(id: "v"u8));
+
     serve(Ꮡ(new pusher(id: "p"u8)));
+
     apply(Ꮡ(new setter(id: "s"u8)));
+
     apply(new pusher(id: "x"u8));
 }
 

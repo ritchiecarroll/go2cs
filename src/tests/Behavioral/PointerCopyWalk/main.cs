@@ -39,6 +39,7 @@ internal static void Main() {
     var third = Ꮡ(new node(val: 3));
     var second = Ꮡ(new node(val: 2, next: third));
     var first = Ꮡ(new node(val: 1, next: second));
+
     fmt.Println((~last(first)).val);
     fmt.Println(length(first));
     fmt.Println(sum(first));

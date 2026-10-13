@@ -30,9 +30,11 @@ internal static void Main() {
     if (fileVersion.isValid()) {
         fmt.Println(fileVersion.tag());
     }
+
     @string cause = ""u8;
     mutate(ref cause);
     fmt.Println("cause:" + cause);
+
     @string label = "x"u8;
     for (nint i = 0; i < 2; i++) {
         label = label + "y"u8;

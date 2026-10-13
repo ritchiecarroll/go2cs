@@ -42,18 +42,22 @@ internal static void Main() {
     @try(sStringMustPanicˢ, () => {
         reflect.ValueOf(ᏑdstString).Elem().Set(reflect.ValueOf(((S)(@string)"x"u8)));
     });
+
     ref var dstB = ref heap<B>(out var ᏑdstB);
     @try(byteBMustBeOkˢ, () => {
         reflect.ValueOf(ᏑdstB).Elem().Set(reflect.ValueOf(slice<byte>("y"u8)));
     });
+
     ref var dstBytes = ref heap<slice<byte>>(out var ᏑdstBytes);
     @try(bByteMustBeOkˢ, () => {
         reflect.ValueOf(ᏑdstBytes).Elem().Set(reflect.ValueOf(((B)slice<byte>((@string)"z"u8))));
     });
+
     ref var dstS = ref heap(new S(), out var ᏑdstS);
     @try(stringSMustPanicˢ, () => {
         reflect.ValueOf(ᏑdstS).Elem().Set(reflect.ValueOf((@string)"w"u8));
     });
+
     var st = reflect.TypeOf((@string)""u8);
     var St = reflect.TypeOf(((S)(@string)""u8));
     var bt = reflect.TypeOf(slice<byte>(default!));

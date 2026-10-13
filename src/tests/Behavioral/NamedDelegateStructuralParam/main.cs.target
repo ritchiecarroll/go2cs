@@ -27,12 +27,16 @@ internal static void Main() {
     Handler h = describe;
     fmt.Println(invoke(new Func<nint, @string, @string>(h), 1, "a"u8));
     fmt.Println(h.tag());
+
     Func<nint, @string, @string> p = describe;
     fmt.Println(invoke(p, 2, "b"u8));
+
     fmt.Println(invoke(describe, 3, "c"u8));
     fmt.Println(invoke((nint n, @string s) => s + "!"u8, 4, "d"u8));
+
     Handler h2 = (nint n, @string s) => fmt.Sprintf("%s/%d"u8, s, n);
     fmt.Println(invoke(new Func<nint, @string, @string>(h2), 5, "e"u8));
+
     var sc = Ꮡ(new screen(prefix: "#"u8));
     
     var scʗ1 = sc;

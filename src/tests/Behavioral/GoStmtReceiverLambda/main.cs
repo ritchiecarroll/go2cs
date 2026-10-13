@@ -54,15 +54,19 @@ private static readonly object valueRecvNullaryGoˢ = (@string)"value-recv nulla
 
 internal static partial void Main() {
     var e = Ꮡ(new engine(tally: Ꮡ(new counter(done: new channel<bool>(1)))));
+
     e.start(5);
     ᐸꟷ((~(~e).tally).done);
     fmt.Println(afterStartˢ, (~(~e).tally).n);
+
     e.start(7);
     ᐸꟷ((~(~e).tally).done);
     fmt.Println(afterSecondStartˢ, (~(~e).tally).n);
+
     e.ping();
     ᐸꟷ((~(~e).tally).done);
     fmt.Println(pingedˢ, (~(~e).tally).n);
+
     ref var vs = ref heap<valueSender>(out var Ꮡvs);
     vs = new valueSender(c: new channel<nint>(0));
     var vsʗ1 = vs;

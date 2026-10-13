@@ -28,18 +28,25 @@ internal static void Main() {
     p1 = ((ж<nint>)nil);
     ref var p2 = ref heap<ж<nint>>(out var Ꮡp2);
     p2 = ((ж<nint>)nil);
+
     var pp1 = Ꮡp1;
     var pp2 = Ꮡp2;
+
     fmt.Println(pp1Pp2ˢ, pp1 == pp2);
+
     fmt.Println(pp1Nilˢ, pp1 == nil);
+
     fmt.Println(pp1Nilˢ2, pp1.ValueSlot == nil);
     fmt.Println(pp1Pp2ˢ2, pp1.ValueSlot == pp2.ValueSlot);
+
     var alias = pp1;
     fmt.Println(aliasPp1ˢ, alias == pp1);
+
     ref var n = ref heap<nint>(out var Ꮡn);
     n = 42;
     alias.ValueSlot = Ꮡn;
     fmt.Println(p1Setˢ, pp1.ValueSlot != nil, (pp1.ValueSlot).Value);
+
     ref var v = ref heap<nint>(out var Ꮡv);
     v = 5;
     ref var c = ref heap<ж<nint>>(out var Ꮡc);
@@ -47,14 +54,17 @@ internal static void Main() {
     ref var d = ref heap<ж<nint>>(out var Ꮡd);
     d = Ꮡv;
     fmt.Println((@string)"c==d"u8, c == d, (@string)"&c==&d"u8, Ꮡc == Ꮡd);
+
     var keys = new map<ж<ж<nint>>, @string>{[Ꮡc] = "c"u8, [Ꮡd] = "d"u8};
     fmt.Println(keysˢ, len(keys), keys[Ꮡc], keys[Ꮡd]);
+
     ref var late = ref heap<ж<nint>>(out var Ꮡlate);
     var lp = Ꮡlate;
     var stable = new map<ж<ж<nint>>, @string>{[lp] = "stable"u8};
     fmt.Println(beforeˢ, stable[lp]);
     late = Ꮡv;
     fmt.Println(afterˢ, stable[lp], len(stable), (lp.ValueSlot).Value);
+
     ref var h = ref heap(new holder(), out var Ꮡh);
     var fp = Ꮡh.of(holder.Ꮡp);
     var fs = Ꮡh.of(holder.Ꮡs);

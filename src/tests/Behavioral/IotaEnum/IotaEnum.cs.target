@@ -208,8 +208,10 @@ private static readonly @string unknownˢ = "unknown"u8;
 internal static @string stateMachine(nint step) {
     const nint stateInit = iota;
     const nint stateDict = 1;
+
     const int64 wideLocal = /* iota */ 0;
     int64 offset = wideLocal;
+
     var exprᴛ1 = step;
     if (exprᴛ1 == stateInit) {
         return fmt.Sprintf("init[%d]"u8, offset);

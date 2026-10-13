@@ -179,6 +179,7 @@ internal static void Main() {
         note(callbackOkˢ);
     });
     show(normalˢ, open);
+
     open = true;
     ((Action)(() => {
         GoFrame ᒐ = default;
@@ -195,6 +196,7 @@ internal static void Main() {
         finally { ᒐ.Run(); }
     }))();
     show(panickedˢ, open);
+
     ((Action)(() => {
         GoFrame ᒐ = default;
         try {
@@ -207,6 +209,7 @@ internal static void Main() {
         finally { ᒐ.Run(); }
     }))();
     show(deepˢ, open);
+
     ((Action)(() => {
         GoFrame ᒐ = default;
         try {
@@ -220,6 +223,7 @@ internal static void Main() {
         finally { ᒐ.Run(); }
     }))();
     show(calleePanicˢ, open);
+
     ((Action)(() => {
         GoFrame ᒐ = default;
         try {

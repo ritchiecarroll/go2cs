@@ -84,7 +84,9 @@ internal static void direct(any v) {
 
 internal static void Main() {
     commandContext(new harness(name: "cmd"u8, deadline: 100));
+
     direct(new gate(name: "v"u8));
+
     direct(Ꮡ(new gate(name: "p"u8)));
 }
 

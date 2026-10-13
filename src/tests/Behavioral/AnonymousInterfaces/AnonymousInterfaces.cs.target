@@ -198,9 +198,11 @@ internal static void Main() {
     testCompositeLiteral();
     testInlineField();
     testInterfaceEmbedding(new embeddedImpl(nil));
+
     var tl = Ꮡ(new tally(nil));
     var (n, err) = tl.fill(new byteRepeatжReader(Ꮡ(new byteRepeat(left: 10))));
     fmt.Println(n, err == default!, (~tl).total);
+
     var fr = new frame(data: new quad(new byte[]{1, 2, 3, 4}.array()));
     fmt.Println(checksum(ref fr));
 }

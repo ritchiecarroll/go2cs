@@ -29,14 +29,20 @@ internal static (Δtime.Duration, float64, nint) foldedConstant() {
 
 internal static void Main() {
     var stamp = Δtime.Date(2009, Δtime.February, 4, 21, 0, 57, 12345600, Δtime.ΔUTC);
+
     fmt.Println((@string)"1:"u8, describe(stamp));
+
     var timeΔ1 = stamp;
     fmt.Println((@string)"2:"u8, timeΔ1.Format(layout));
+
     fmt.Println((@string)"3:"u8, qualifiedDurations(), qualifiedLocations());
+
     var (d, secs, east) = foldedConstant();
     fmt.Println((@string)"4:"u8, d, secs, east);
+
     nint frac = 4;
     fmt.Println((@string)"5:"u8, ((@string)"012345678"u8.slice(0, frac)) + "000000000"u8.slice(0, 9 - frac));
+
     fmt.Println((@string)"6:"u8, dotImported());
 }
 

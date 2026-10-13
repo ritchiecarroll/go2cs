@@ -38,13 +38,18 @@ private static readonly object controlˢ = (@string)"control:"u8;
 internal static void Main() {
     var pf = pick<@string>;
     fmt.Println(controlˢ, reflect.TypeOf((pf).OrTypedNilFunc()).String(), pf(new @string[]{"a"u8, "b"u8, "c"u8}.slice()));
+
     fmt.Println(reflect.TypeOf(pick<@string>).String());
     fmt.Println(reflect.TypeOf(pair<@string, nint>).String());
+
     show(pick<nint>);
     show(pair<nint, bool>);
+
     fmt.Printf("%T\n"u8, pick<float64>);
     fmt.Printf("%T\n"u8, pair<@string, @string>);
+
     fmt.Println(reflect.TypeOf(returned()).String());
+
     fmt.Println(apply(describe<any>, (nint)(42)));
     fmt.Println(apply(describe<any>, (@string)"go"u8));
 }

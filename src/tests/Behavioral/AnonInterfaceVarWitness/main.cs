@@ -50,9 +50,11 @@ internal static void Main() {
     var a = Ꮡ(new thing(n: 7));
     var b = Ꮡ(new thing(n: 7));
     var c = Ꮡ(new thing(n: 8));
+
     fmt.Println(a.Equal(b.OrTypedNil()), a.Equal(c.OrTypedNil()), a.Public());
     fmt.Println(labeler.Label());
     fmt.Println(origin.x, origin.y);
+
     _ᴛ1 eq = new thingж_ᴛ1(a);
     fmt.Println(eq.Equal(b.OrTypedNil()), eq.Equal(c.OrTypedNil()));
 }

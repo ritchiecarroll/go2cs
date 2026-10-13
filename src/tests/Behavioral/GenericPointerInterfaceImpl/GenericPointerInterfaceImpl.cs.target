@@ -122,10 +122,13 @@ private static readonly @string b384ˢ = "b384"u8;
 internal static void Main() {
     Curve c1 = new curveжCurve<p224жpoint>(Ꮡ(new curve<p224жpoint>(name: "c224"u8, newPoint: () => newP224(), @base: Ꮡ(new p224(v: 3)))));
     Curve c2 = new curveжCurve<p384жpoint>(Ꮡ(new curve<p384жpoint>(name: "c384"u8, newPoint: () => newP384(), @base: Ꮡ(new p384(v: 5)))));
+
     fmt.Println(describe<p224жpoint>(Ꮡ(new p224(v: 4))), describe<p384жpoint>(Ꮡ(new p384(v: 6))));
     fmt.Println(build<p224жpoint>(() => newP224(), b224ˢ), build<p384жpoint>(() => newP384(), b384ˢ));
+
     fmt.Println(c1.Name(), c1.BaseLabel(), c1.Combined(), c1.Fresh());
     fmt.Println(c2.Name(), c2.BaseLabel(), c2.Combined(), c2.Fresh());
+
     foreach (var (_, c) in new Curve[]{c1, c2}.slice()) {
         fmt.Println(c.Name(), (@string)"->"u8, c.BaseLabel(), (@string)"->"u8, c.Combined(), (@string)"->"u8, c.Fresh());
     }

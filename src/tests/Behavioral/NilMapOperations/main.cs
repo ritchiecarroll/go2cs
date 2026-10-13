@@ -28,23 +28,32 @@ private static readonly object deleteOkˢ = (@string)"delete ok"u8;
 
 internal static void Main() {
     map<@string, nint> m = default!;
+
     fmt.Println(m["a"u8]);
+
     var (v, ok) = m["a"u8, ꟷ];
     fmt.Println(v, ok);
+
     fmt.Println(len(m));
+
     nint count = 0;
     foreach ((_, _) in m) {
         count++;
     }
     fmt.Println(count);
+
     delete(m, "a"u8);
     fmt.Println(deleteOkˢ);
+
     fmt.Println(m == default!);
+
     var e = new map<@string, nint>{};
     fmt.Println(e == default!);
     fmt.Println(len(e));
+
     tryWrite(m);
     fmt.Println(writePanicked);
+
     tryWrite(new map<@string, nint>{});
     fmt.Println(writePanicked);
 }

@@ -34,6 +34,7 @@ internal partial struct writeOps_opClose /*dyn*/ {
 
 internal static void writeOps() {
     var ops = new writeOps_testFnc[]{new writeOps_opWrite("abc"u8), new writeOps_opClose("eof"u8), new writeOps_opWrite("de"u8)}.slice();
+
     foreach (var (_, op) in ops) {
         switch (op.type()) {
         case writeOps_opWrite v: {
@@ -45,6 +46,7 @@ internal static void writeOps() {
             break;
         }}
     }
+
     fmt.Println(writeOpsOpsˢ, len(ops));
 }
 
@@ -65,7 +67,9 @@ internal partial struct fileOps_makeSparse /*dyn*/ {
 internal static void fileOps() {
     var makers = new fileOps_fileMaker[]{new fileOps_makeReg(4), new fileOps_makeSparse(8, 2)}.slice();
     var tests = new fileOps_testFnc[]{new fileOps_makeReg(1), new fileOps_makeSparse(3, 1), new fileOps_makeReg(2)}.slice();
+
     var total = (int64)0;
+
     foreach (var (_, m) in makers) {
         switch (m.type()) {
         case fileOps_makeReg v: {
@@ -77,6 +81,7 @@ internal static void fileOps() {
             break;
         }}
     }
+
     fmt.Println(fileOpsMakersˢ, len(makers), testsˢ, len(tests), totalˢ, total);
 }
 
@@ -86,6 +91,7 @@ private static readonly object localAliasesˢ = (@string)"localAliases:"u8;
 internal static void localAliases() {
     var h = new localAliases_hdr(Name: "small.txt"u8, Size: 5);
     Header plain = h;
+
     fmt.Println(localAliasesˢ, h, plain, plain.String(), new Header(Name: "raw"u8, Size: 1));
 }
 
@@ -99,8 +105,10 @@ private static readonly object aliasedIfaceConvˢ = (@string)"aliasedIfaceConv:"
 internal static void aliasedIfaceConv() {
     aliasedIfaceConv_S s = new Header(Name: "alias.txt"u8, Size: 2);
     namer n = new fmt_Stringerᴠnamer(s);
+
     fmt.Stringer direct = new Header(Name: "direct.txt"u8, Size: 4);
     namer d = new fmt_Stringerᴠnamer(direct);
+
     fmt.Println(aliasedIfaceConvˢ, n.String(), d.String());
 }
 

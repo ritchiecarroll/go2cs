@@ -16,6 +16,7 @@ internal static partial void Main() {
         fmt.Println(theWorkerServedWhileMainˢ);
         os.Exit(0);
     });
+
     select();
 }
 

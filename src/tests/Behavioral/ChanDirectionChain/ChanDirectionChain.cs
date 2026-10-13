@@ -38,9 +38,11 @@ internal partial struct main_i /*dyn*/ {
 
 internal static void Main() {
     var intT = reflect.TypeOf((nint)(0));
+
     var both = reflect.ChanOf(reflect.BothDir, intT);
     var recv = reflect.ChanOf(reflect.RecvDir, intT);
     var send = reflect.ChanOf(reflect.SendDir, intT);
+
     fmt.Println(chanChanIntˢ, reflect.ChanOf(reflect.BothDir, both).String());
     fmt.Println(chanChanIntˢ2, reflect.ChanOf(reflect.SendDir, both).String());
     fmt.Println(chanChanIntˢ3, reflect.ChanOf(reflect.BothDir, recv).String());
@@ -48,14 +50,18 @@ internal static void Main() {
     fmt.Println(chanChanIntˢ5, reflect.ChanOf(reflect.RecvDir, both).String());
     fmt.Println(chanChanIntˢ6, reflect.ChanOf(reflect.SendDir, recv).String());
     fmt.Println(chanChanIntˢ7, reflect.ChanOf(reflect.RecvDir, recv).String());
+
     fmt.Println(elemOfChanChanIntˢ, reflect.ChanOf(reflect.BothDir, recv).Elem().String());
     fmt.Println(elemDirˢ, reflect.ChanOf(reflect.BothDir, recv).Elem().ChanDir());
+
     channel<nint> nilChan = default!;
     fmt.Println(identityChanOfBothIntˢ,
         AreEqual(reflect.ChanOf(reflect.BothDir, intT), reflect.TypeOf(nilChan)));
+
     channel<channel<nint>> nilNested = default!;
     fmt.Println(identityChanOfBothChanˢ,
         AreEqual(reflect.ChanOf(reflect.BothDir, both), reflect.TypeOf(nilNested)));
+
     channel/*<-*/<channel<nint>> vLeft = channel/*<-*/<channel<nint>>.SendOnly;
     channel</*<-*/channel<nint>> vRight = channel</*<-*/channel<nint>>.Nil(ChanCargo.Of(new GoChanDir[] { GoChanDir.Both, GoChanDir.Recv }, null));
     fmt.Println(valueZeroVarChanChanIntˢ, reflect.TypeOf(vLeft).String());
@@ -69,12 +75,14 @@ internal static void Main() {
     fmt.Println(valueFieldChanChanIntˢ, reflect.TypeOf(new main_i()).Field(0).Type.String());
     var p = Ꮡ(channel</*<-*/channel<nint>>.Nil(ChanCargo.Of(new GoChanDir[] { GoChanDir.Both, GoChanDir.Recv }, null)));
     fmt.Println(valueNewChanChanIntElemˢ, reflect.TypeOf(p.OrTypedNil()).Elem().String());
+
     var ca = new channel<array<nint>>(0, ChanCargo.Of(null, new nint[] { 3 }));
     fmt.Println(valueMakeChan3Intˢ, reflect.TypeOf(ca).String(), reflect.TypeOf(ca).Elem().Len());
     channel/*<-*/<array<array<byte>>> cb = channel/*<-*/<array<array<byte>>>.Nil(ChanCargo.Of(new GoChanDir[] { GoChanDir.Send }, new nint[] { 2, 4 }));
     fmt.Println(valueZeroVarChan24Byteˢ, reflect.TypeOf(cb).String(), reflect.TypeOf(cb).Elem().Len(), reflect.TypeOf(cb).Elem().Elem().Len());
     var na = channel<array<nint>>.Nil(ChanCargo.Of(null, new nint[] { 5 }));
     fmt.Println(valueNilConvChan5Intˢ, reflect.TypeOf(na).String(), reflect.TypeOf(na).Elem().Len());
+
     var c3 = reflect.TypeOf(new channel<array<nint>>(0, ChanCargo.Of(null, new nint[] { 3 })));
     fmt.Println(assignableChan3IntChan4ˢ, c3.AssignableTo(reflect.ChanOf(reflect.BothDir, reflect.ArrayOf(4, intT))));
     fmt.Println(assignableChan3IntChan3ˢ, c3.AssignableTo(reflect.ChanOf(reflect.BothDir, reflect.ArrayOf(3, intT))));

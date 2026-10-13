@@ -16,6 +16,7 @@ private static readonly @string didNotRunˢ = "DID NOT RUN"u8;
 
 internal static @string registered() {
     var done = new channel<EmptyStruct>(0);
+
     var doneʗ1 = done;
     ((Action)(() => {
         var p = Ꮡ(new payload(n: 1));
@@ -25,6 +26,7 @@ internal static @string registered() {
         });
         _ = p.Value.n;
     }))();
+
     for (nint i = 0; i < 400; i++) {
         var selᴛ1 = done;
         var selᴛ2 = time.After(5 * time.Millisecond);
@@ -42,6 +44,7 @@ internal static @string registered() {
 
 internal static @string cleared() {
     var done = new channel<EmptyStruct>(0);
+
     var doneʗ1 = done;
     ((Action)(() => {
         var p = Ꮡ(new payload(n: 2));
@@ -52,6 +55,7 @@ internal static @string cleared() {
         runtime.SetFinalizer(p.OrTypedNil(), default!);
         _ = p.Value.n;
     }))();
+
     for (nint i = 0; i < 40; i++) {
         var selᴛ3 = done;
         var selᴛ4 = time.After(5 * time.Millisecond);

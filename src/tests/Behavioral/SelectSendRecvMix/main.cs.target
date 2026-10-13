@@ -37,6 +37,7 @@ internal static void Main() {
         }}
     }
     fmt.Println(roundsˢ, rounds, recvGotˢ, recvGot, sentToˢ, sentTo, outˢ, ᐸꟷ(@out));
+
     var ch = new channel<nint>(1);
     ch.ᐸꟷ(3);
     nint took = 0;
@@ -51,6 +52,7 @@ internal static void Main() {
         break;
     }}
     fmt.Println(tookˢ, took, lenˢ, len(ch));
+
     var selᴛ5 = ch.ᐸꟷ(8, ꓸꓸꓸ);
     var selᴛ6 = ch;
     switch (select(selᴛ5, ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {

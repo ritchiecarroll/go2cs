@@ -67,13 +67,17 @@ internal static @string fromInit;
 internal static partial void Main() {
     var c = Ꮡ(new counter(nil));
     var b = Ꮡ(new box<nint>(v: 1));
+
     var lit = [MethodImpl(MethodImplOptions.NoInlining)] @string () => here();
     @string call(Func<@string> f) => f();
+
     [MethodImpl(MethodImplOptions.NoInlining)] @string local() {
         var (pc, _, _, _) = runtime.Caller(0);
         return runtime.FuncForPC(pc).Name();
     }
+
     var (name, n) = pair();
+
     fmt.Println(plain());
     fmt.Println(variadic(1, 2));
     fmt.Println(name, n);

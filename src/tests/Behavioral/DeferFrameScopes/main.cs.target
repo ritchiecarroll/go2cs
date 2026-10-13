@@ -52,12 +52,14 @@ internal static (@string label, nint score) classify(nint n) {
             score += 100;
             label = "<"u8 + label + ">"u8;
         }, ref ᒐ);
+
         for (nint i = 0; i < 3; i++) {
             if (i == 2 && n == 2) {
                 (label, score) = (fromLoopˢ, i);
                 goto ᒐdone;
             }
         }
+
         switch (n) {
         case 3: {
             (label, score) = (fromSwitchˢ, 3);
@@ -72,6 +74,7 @@ internal static (@string label, nint score) classify(nint n) {
             score = n;
             goto ᒐdone;
         }
+
         (label, score) = (fallthroughˢ, n);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -114,14 +117,18 @@ internal static nint mixedScopes() {
     GoFrame ᒐ = default;
     try {
         nint total = 0;
+
         defer((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), mixedDeferTotalˢ, total, ref ᒐ);
+
         nint add(nint n) => n * 2;
         var addʗ1 = add;
         void bump() {
             total += addʗ1(3);
         }
+
         bump();
         bump();
+
         ((Action)(() => {
             GoFrame ᒐ = default;
             try {
@@ -133,6 +140,7 @@ internal static nint mixedScopes() {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }))();
+
         fmt.Println(mixedBodyTotalˢ, total);
         return total;
     }
@@ -157,9 +165,11 @@ internal static @string /*msg*/ guarded(bool boom) {
                 }
             }
         }, ref ᒐ);
+
         if (boom) {
             throw panic("frame boom");
         }
+
         msg = noPanicˢ;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -174,6 +184,7 @@ internal static void Main() {
     manyDefers();
     loopDefers(3);
     loopDefers(0);
+
     var (ᴛ1, ᴛ2) = classify(2);
     fmt.Println(ᴛ1, ᴛ2);
     var (ᴛ3, ᴛ4) = classify(3);
@@ -184,8 +195,10 @@ internal static void Main() {
     fmt.Println(ᴛ7, ᴛ8);
     var (ᴛ9, ᴛ10) = classify(0);
     fmt.Println(ᴛ9, ᴛ10);
+
     nestedDeferScopes();
     fmt.Println(mixedReturnedˢ, mixedScopes());
+
     fmt.Println(guarded(false));
     fmt.Println(guarded(true));
 }

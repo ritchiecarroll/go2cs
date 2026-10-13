@@ -10,10 +10,13 @@ private static readonly object beforeGoroutinePanicˢ = (@string)"before gorouti
 
 internal static partial void Main() {
     fmt.Println(beforeGoroutinePanicˢ);
+
     var done = new channel<EmptyStruct>(0);
+
     goǃ(() => {
         throw panic("goroutine boom");
     });
+
     ᐸꟷ(done);
 }
 

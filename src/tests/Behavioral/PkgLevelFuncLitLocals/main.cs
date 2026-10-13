@@ -99,14 +99,17 @@ internal static Func<nint> single = () => {
 
 internal static slice<nint> inDecl() {
     slice<nint> @out = default!;
+
     ref var a = ref heap(new counter(), out var Ꮡa);
     Ꮡa.inc(3);
     Ꮡa.inc(4);
     @out = append(@out, a.get());
+
     ref var b = ref heap<counter>(out var Ꮡb);
     b = new counter(n: 10);
     Ꮡb.inc(5);
     @out = append(@out, b.get());
+
     return @out;
 }
 

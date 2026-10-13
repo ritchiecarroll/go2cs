@@ -124,13 +124,18 @@ private static readonly object viaClosureˢ = (@string)"viaClosure:"u8;
 internal static void Main() {
     var (n, sum) = viaLocal();
     fmt.Println(viaLocalˢ, n, sum);
+
     (n, sum) = viaParam(new counter(n: 40));
     fmt.Println(viaParamˢ, n, sum);
+
     var r = viaNamedResult();
     fmt.Println(viaNamedResultˢ, r.n, r.calls);
+
     fmt.Println(viaFieldChainˢ, viaFieldChain());
+
     var (ln, total) = viaNamedSlice();
     fmt.Println(viaNamedSliceˢ, ln, total);
+
     fmt.Println(valueReceiverCopiesˢ, valueReceiverCopies());
     fmt.Println(pointerBaseNoPromotionˢ, pointerBaseNoPromotion());
     fmt.Println(directCallStaysUnboxedˢ, directCallStaysUnboxed());

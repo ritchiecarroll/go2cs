@@ -15,6 +15,7 @@ internal static partial void run() {
         return pcsʗ1[casi];
     }
     fmt.Println(casePC(0), casePC(2));
+
     var vals = new uint64[]{100, 200}.slice();
     var valsʗ1 = vals;
     uint64 getU64(nint i) {
@@ -24,6 +25,7 @@ internal static partial void run() {
         return valsʗ1[i];
     }
     fmt.Println(getU64(1), getU64(-1));
+
     var tab = new uint32[]{7, 8, 9}.slice();
     var tabʗ1 = tab;
     uint32 getU32(nint i) {
@@ -33,6 +35,7 @@ internal static partial void run() {
         return tabʗ1[i];
     }
     fmt.Println(getU32(2), getU32(5));
+
     var sizes = new nuint[]{4, 16, 64}.slice();
     var sizesʗ1 = sizes;
     nuint getU(nint i) {
@@ -42,6 +45,7 @@ internal static partial void run() {
         return sizesʗ1[i];
     }
     fmt.Println(getU(0), getU(-1));
+
     nint pick(bool b) {
         if (b) {
             return -1;
