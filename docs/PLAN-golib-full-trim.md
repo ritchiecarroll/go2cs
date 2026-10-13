@@ -558,3 +558,33 @@ absent without them (rows G, G+(iii)).
      fixed in its runner); generator timing esctime (ReportAnalyzer logs), wall A/B escwall; registry counts from
      escwall's prototype builds (134-137 packages, 651-662 registrations per OS); escape census escount (std: 346
      container-escape sites in 59 packages). Master genprobe P: ef3tab4, 19,579 s alone, 386,929,664 B. -->
+
+### 9.12 The method-set scan under a full trim (AMENDED 2026-10-12, G)
+
+Section 3's "largest risk" was real. Under Native AOT with a full trim, fmt printed `reflect.Array` as `17`, and so did
+every named type whose `String()` fmt reaches only by duck typing (`time.Duration`, a program's own types). Two breaks:
+the type's Go methods lost their metadata, so golib's method-set scan saw no package class at all; and the interface's
+shell lost its constructor, so `AdapterBinder` could not build one. Each fix alone still printed `17`.
+
+**Seated as `claude/g-trim-methodset-keep`** (on `cf5b534a1c`): golib's `GoInterfaceShellAttribute` keeps its shells'
+constructors (`[DynamicallyAccessedMembers]` on its `Type` parameters); go2cs-gen's TypeGenerator names each Go method
+of a type in a `[DynamicDependency("Name", typeof(pkg_package))]` on the type's generated `ToString` override, which both
+trimmers keep exactly when the type is boxed. The name carries no parameter list: a full signature crashed ILLink on
+the template-default publish (IL1012, a `NullReferenceException` in `DocumentationSignatureParser.AllParametersMatch`),
+the same ILLink bug as 3b's fix row, at a second site. Sizes against `cf5b534a1c`: full trim consumer +20.15%, genprobe
+and the c32 probes +13.6% to +13.9%; template-default publish +0.12% to +0.13%. genprobe now equals Go's output under a
+full trim: its stop at `buildFieldAccessor` was fmt walking struct fields after the Stringer assertion missed.
+
+**Measured, not seated: keep Go-EXPORTED methods only.** Full trim consumer +1.81 MB (+7.1%) instead of +5.13 MB
+(+20.1%); the Stringer probe equals Go's output either way. **Its residual**: under a full trim only, an assertion that
+needs an UNEXPORTED method and has no nominal adapter misses. In Go only an interface declared in the method's own
+package can carry it (the sealed-interface idiom, go/ast's `exprNode` marker), and the generator usually emits a
+nominal adapter there, but not always. **Gate**: eligible only once a census of the converted corpus shows that no
+unexported-method assertion lacks a nominal adapter. COORD ruling 2026-10-12, under the owner's rule that Go behavior
+outranks size.
+
+<!-- G, 2026-10-12. Stringer probe scratch/str-probe (Go output via go1.24.13), cells strbat s1 (cf5b534a1c, "17"),
+     s2 (method-set keep alone), s4 (shell attribute alone), s3/s5 (both, Go-equal), s6 (exported only, Go-equal);
+     stage diagnosis strdiag (D1-D9); mechanism test ddtest (standalone, boxed kept / unboxed not, name-only under ILC
+     and ILLink); consumer F mskpre 30,568,960 B, mskx 27,254,272 B; seat battery seat-msk (2eb9be7ccc, record amended
+     to ec6df12120), its first run seat-msk-3d5a (full signatures, DP IL1012 x4); DP sizes dpub cells.tsv base-cf5b, msk. -->
