@@ -34,14 +34,15 @@ import (
 // markers. Every other trailing comment keeps the single space it is written with. The pass changes only spaces, never
 // a line count, so the position map is unaffected.
 //
-// The marker follows the comment rather than preceding it, so code that inspects a comment's text before it is written
-// (its `//` or `/*` opening) reads it unchanged. It marks a comment only where it ends its line: a `//` comment always
-// does, and a single-line `/* */` comment does as a spec's or field's trailing comment (writeCommentString), so a free
-// block comment, which can sit inside an expression, is never marked.
+// A spec's or field's trailing comment (writeCommentString) is written straight into the output, so its marker precedes
+// it and records no length: the comment starts where the marker was, which holds for a block comment that continues
+// onto later lines too. A free comment's text is held and inspected before it is written (its `//` or `/*` opening), so
+// its marker follows it and records its length; only a `//` comment is marked that way, since it always ends its line
+// and a free block comment can sit inside an expression.
 
-// AlignMarker delimits a trailing-comment alignment marker: AlignMarker <run> : <comment length in bytes>
-// AlignMarker, written directly after the comment. Like the position sentinel it is a byte that cannot occur in
-// emitted C#.
+// AlignMarker delimits a trailing-comment alignment marker: AlignMarker <run> : <length> AlignMarker, written directly
+// after a comment of length bytes, or directly before one with a length of 0. Like the position sentinel it is a byte
+// that cannot occur in emitted C#.
 const AlignMarker = "\x01"
 
 // goAlignedRuns answers, for a file's single-line trailing comments that sit in a run gofmt aligned, the run each
@@ -74,7 +75,7 @@ func goAlignedRuns(fset *token.FileSet, file *ast.File) map[token.Pos]int {
 	for _, group := range file.Comments {
 		start := fset.Position(group.Pos())
 
-		if start.Line < 1 || start.Line > len(lines) || fset.Position(group.End()).Line != start.Line {
+		if start.Line < 1 || start.Line > len(lines) {
 			continue
 		}
 
@@ -136,16 +137,27 @@ func goAlignedRuns(fset *token.FileSet, file *ast.File) map[token.Pos]int {
 	return runs
 }
 
-// alignMarkerFor answers the marker to write after comment, or "" when it is not in a run gofmt aligned. A block
-// comment is marked only when endsLine says the caller writes it at the end of its line.
-func (v *Visitor) alignMarkerFor(comment *ast.Comment, endsLine bool) string {
+// alignMarkerAfter answers the marker to write after a free `//` comment, or "" when it is not in a run gofmt aligned.
+func (v *Visitor) alignMarkerAfter(comment *ast.Comment) string {
 	run, ok := v.alignedRuns[comment.Slash]
 
-	if !ok || !endsLine && !strings.HasPrefix(comment.Text, "//") {
+	if !ok || !strings.HasPrefix(comment.Text, "//") {
 		return ""
 	}
 
 	return fmt.Sprintf("%s%d:%d%s", AlignMarker, run, len(carriedComment(comment.Text)), AlignMarker)
+}
+
+// alignMarkerBefore answers the marker to write before a spec's or field's trailing comment, or "" when it is not in a
+// run gofmt aligned.
+func (v *Visitor) alignMarkerBefore(comment *ast.Comment) string {
+	run, ok := v.alignedRuns[comment.Slash]
+
+	if !ok {
+		return ""
+	}
+
+	return fmt.Sprintf("%s%d:0%s", AlignMarker, run, AlignMarker)
 }
 
 // alignedLine is one line of an aligned block: its index in the file's lines, and its comment.
@@ -245,9 +257,9 @@ func alignTrailingComments(text string) (string, alignedFile) {
 			lines[index] = stripped
 		}
 
-		// Only a marker that ends its line, directly after a comment of the length it records, starts a comment
-		// that can be aligned.
-		if markerEnd != len(stripped) || run == 0 || length < 2 || length > markerEnd {
+		// A marker after a comment must end its line and follow a comment of the length it records; a marker
+		// before one (length 0) is followed by it.
+		if run == 0 || length > 0 && (markerEnd != len(stripped) || length < 2 || length > markerEnd) {
 			continue
 		}
 

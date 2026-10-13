@@ -331,10 +331,10 @@ func (v *Visitor) writeCommentString(builder *strings.Builder, comment *ast.Comm
 		// their column once the file's text is final (trailingCommentAlignment.go).
 		if targetPos > token.NoPos {
 			builder.WriteString(" ")
+			builder.WriteString(v.alignMarkerBefore(comment))
 		}
 
 		builder.WriteString(carriedComment(comment.Text))
-		builder.WriteString(v.alignMarkerFor(comment, targetPos > token.NoPos))
 	}
 }
 

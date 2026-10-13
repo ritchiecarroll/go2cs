@@ -88,7 +88,7 @@ func (v *Visitor) visitFile(file *ast.File) {
 		// Create standalone comments map
 		for _, commentGroup := range file.Comments {
 			for _, comment := range commentGroup.List {
-				v.standAloneComments[comment.Slash] = carriedComment(comment.Text) + v.alignMarkerFor(comment, false)
+				v.standAloneComments[comment.Slash] = carriedComment(comment.Text) + v.alignMarkerAfter(comment)
 			}
 		}
 
