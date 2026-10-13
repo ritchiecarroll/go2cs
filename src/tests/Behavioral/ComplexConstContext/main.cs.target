@@ -35,30 +35,40 @@ internal static void Main() {
     foreach (var (_, h) in huge) {
         fmt.Println(real(h));
     }
+
     var c = complex((float64)(0D), (float64)(gHalfPi));
     fmt.Println(real(c), imag(c));
+
     float64 q = 7 / 2;
     var e = complex(7 / 2, 0D);
     fmt.Println(q, real(e), imag(e));
+
     fmt.Println((float64)(gHalfPi / 2D));
+
     float64 rf = 1.5D;
     var r = complex(rf, 0D);
     fmt.Println(real(r), imag(r));
+
     showComplex(cRationalˢ, cRational);
     showComplex(cNegImagˢ, cNegImag);
     showComplex(cPureImagˢ, cPureImag);
     showComplex(cWideEnoughˢ, cWideEnough);
     showComplex(cFoldedˢ, cFolded);
     fmt.Println(c64ˢ, real(c64), imag(c64));
+
     complex128 local = /* 0.5 - 0.25i */ 0.5D + -0.25D.i();
     showComplex(localˢ, local);
+
     var over = complex((float64)(maxFloat32 * 2D), (float64)(maxFloat32 * 2D));
     fmt.Printf("over %T %v %v\n"u8, over, real(over), imag(over));
     fmt.Println(overFitsFloat32ˢ, (float64)(float32)real(over) == real(over));
+
     var pair = complex((float64)(gHalfPi), (float64)(gHalfPi));
     fmt.Printf("pair %T %v %v\n"u8, pair, real(pair), imag(pair));
+
     complex64 narrow = complex((float32)(gHalfPi), (float32)(gHalfPi));
     fmt.Printf("narrow %T %v %v\n"u8, narrow, real(narrow), imag(narrow));
+
     float64 rf64 = 2D;
     var mixed = complex(rf64, gHalfPi);
     fmt.Printf("mixed %T %v %v\n"u8, mixed, real(mixed), imag(mixed));

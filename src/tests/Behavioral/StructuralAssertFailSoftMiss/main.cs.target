@@ -33,12 +33,14 @@ internal static @string describe(any x) {
             return "string getter: "u8 + g.Get();
         }
     }
+
     return notAStringGetterˢ;
 }
 
 internal static void Main() {
     fmt.Println(describe(new box<@string>(v: "hello"u8)));
     fmt.Println(describe(new box<nint>(v: 5)));
+
     fmt.Println(describe(Ꮡ(new keeper<@string>(v: "kept"u8))));
     fmt.Println(describe(Ꮡ(new keeper<nint>(v: 7))));
 }

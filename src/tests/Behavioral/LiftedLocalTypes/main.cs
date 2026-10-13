@@ -27,7 +27,9 @@ internal static void Main() {
     p = new main_point(X: 1, Y: 2);
     fmt.Println(p.X + p.Y);
     fmt.Printf("%T %T\n"u8, p, Ꮡp);
+
     describe(nint (nint x) => 0);
+
     embeddedLocalTypes();
     foreignUnderlyingLocalTypes();
     foreignUnderlyingLocalTypesAgain();
@@ -56,11 +58,15 @@ internal partial struct embeddedLocalTypes_ptrHolder /*dyn*/ {
 internal static void embeddedLocalTypes() {
     var h = new embeddedLocalTypes_holder(1, 2, new embeddedLocalTypes_embed(Q: 3));
     fmt.Println(h.myInt, h.MyInt, h.embed.Q);
+
     fmt.Println(h.Q);
+
     var k = new embeddedLocalTypes_holder(myInt: 4, MyInt: 5, embed: new embeddedLocalTypes_embed(Q: 6));
     fmt.Println(k.myInt, k.MyInt, k.Q);
+
     k.myInt = 7;
     fmt.Println(k.myInt);
+
     ref var i = ref heap<embeddedLocalTypes_myInt>(out var Ꮡi);
     i = ((embeddedLocalTypes_myInt)8);
     ref var e = ref heap<embeddedLocalTypes_embed>(out var Ꮡe);
@@ -69,6 +75,7 @@ internal static void embeddedLocalTypes() {
     pp.myInt.Value = 10;
     pp.embed.Value.Q = 11;
     fmt.Println(pp.myInt.Value, (~pp.embed).Q, pp.Q);
+
     fmt.Printf("%T\n"u8, h.embed);
 }
 
@@ -90,6 +97,7 @@ internal static void foreignUnderlyingLocalTypes() {
     foreignUnderlyingLocalTypes_myDur d = default!;
     var pd = @new<foreignUnderlyingLocalTypes_myDur>();
     fmt.Println(d == pd.Value, pd != nil);
+
     {
         var pi = @new<foreignUnderlyingLocalTypes_inner>();
         fmt.Println(pi != nil);

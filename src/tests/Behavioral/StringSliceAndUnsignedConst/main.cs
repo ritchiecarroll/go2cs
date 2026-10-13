@@ -17,13 +17,18 @@ private static readonly @string cpuFeatureOnˢ = "cpu.feature=on"u8;
 
 internal static void Main() {
     fmt.Println(takesUint32(0x80000000U));
+
     fmt.Println(big);
     fmt.Println(hashLoad);
+
     @string env = cpuFeatureOnˢ;
+
     fmt.Println(env[..4] == "cpu.");
+
     @string field = default!;
     (field, env) = (env[..4], env[5..]);
     fmt.Println(field, env);
+
     (field, env) = (env, "");
     fmt.Printf("[%s][%s]\n"u8, field, env);
 }

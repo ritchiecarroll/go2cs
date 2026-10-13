@@ -20,6 +20,7 @@ private static readonly object mixedTookRealˢ = (@string)"mixed took real"u8;
 
 internal static void Main() {
     channel<nint> nilRecv = default!;
+
     var selᴛ1 = nilRecv;
     switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
     case 0 when selᴛ1.ꟷᐳ(out var v): {
@@ -30,7 +31,9 @@ internal static void Main() {
         fmt.Println(nilRecvDefaultˢ);
         break;
     }}
+
     fmt.Println(nilLenˢ, len(nilRecv), nilCapˢ, cap(nilRecv));
+
     var selᴛ2 = nilRecv;
     switch (trySelect(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
     case 0 when selᴛ2.ꟷᐳ(out var v, out var ok): {
@@ -41,7 +44,9 @@ internal static void Main() {
         fmt.Println(nilCommaOkDefaultˢ);
         break;
     }}
+
     var ready = new channel<nint>(1);
+
     var selᴛ3 = ready;
     switch (trySelect(ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
     case 0 when selᴛ3.ꟷᐳ(out var v): {
@@ -52,7 +57,9 @@ internal static void Main() {
         fmt.Println(realEmptyDefaultˢ);
         break;
     }}
+
     ready.ᐸꟷ(7);
+
     var selᴛ4 = ready;
     switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
     case 0 when selᴛ4.ꟷᐳ(out var v): {
@@ -63,7 +70,9 @@ internal static void Main() {
         fmt.Println(realDefaultˢ);
         break;
     }}
+
     ready.ᐸꟷ(9);
+
     var selᴛ5 = nilRecv;
     var selᴛ6 = ready;
     switch (select(ᐸꟷ(selᴛ5, ꓸꓸꓸ), ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {

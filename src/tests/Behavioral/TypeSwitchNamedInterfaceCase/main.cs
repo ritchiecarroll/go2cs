@@ -139,24 +139,32 @@ internal static void Main() {
     shape s = new circleжshape(c);
     sizer z = new circleжsizer(c);
     _ = z;
+
     any x = s;
     fmt.Println(describe(x));
+
     any raw = Ꮡ(new circle(r: 7));
     fmt.Println(describe(raw));
+
     fmt.Println(describe(new dot(tag: 3)));
     fmt.Println(describe((nint)(42)));
+
     error e = new errMarkжerror(Ꮡ(new errMark(code: 5)));
     any anyErr = e;
     fmt.Println(describe(anyErr));
     fmt.Println(describe(Ꮡ(new errMark(code: 6))));
+
     fmt.Println(firstConcrete(c.OrTypedNil()));
     fmt.Println(firstInterface(c.OrTypedNil()));
+
     fmt.Println(multi(c.OrTypedNil()));
     fmt.Println(multi(Ꮡ(new errMark(code: 8))));
     fmt.Println(multi(default!));
     fmt.Println(multi(1.5D));
+
     fmt.Println(viaInterfaceTag(new circleжshape(c)));
     fmt.Println(viaInterfaceTag(new dot(tag: 4)));
+
     switch (x.type()) {
     case {} Δt when Δt._<shape>(out var t): {
         t.grow(10);

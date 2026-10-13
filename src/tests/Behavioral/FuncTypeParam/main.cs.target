@@ -25,15 +25,19 @@ internal static nint invoke(this runner r, ж<atomic.Int32> Ꮡv) {
 internal static void Main() {
     ref var v = ref heap(new atomic.Int32(), out var Ꮡv);
     Ꮡv.Store(10);
+
     nint n = apply(Ꮡv, (ж<atomic.Int32> x) => (nint)x.Load() + 5);
     fmt.Println(n);
+
     consume(Ꮡv, (ж<atomic.Int32> x) => {
         x.Store(99);
     });
     fmt.Println(Ꮡv.Load());
+
     var @double = new runner(gen: (ж<atomic.Int32> x) => (nint)x.Load() * 2
     );
     fmt.Println(@double.invoke(Ꮡv));
+
     var seven = new runner(gen: (ж<atomic.Int32> x) => 7
     );
     fmt.Println(seven.invoke(Ꮡv));

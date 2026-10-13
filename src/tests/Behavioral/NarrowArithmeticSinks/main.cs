@@ -50,6 +50,7 @@ internal static void arm(@string @class, Func<@string> f) {
         if (len(os.Args) > 1 && os.Args[1] != @class) {
             return;
         }
+
         defer(() => {
             {
                 var r = recover(); if (r != default!) {
@@ -57,6 +58,7 @@ internal static void arm(@string @class, Func<@string> f) {
                 }
             }
         }, ref ᒐ);
+
         fmt.Println(@class + ":", f());
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -128,12 +130,16 @@ internal static void Main() {
         return show(ᐸꟷ(ch));
     });
     arm(typeOnlyˢ, () => show((uint8)(u / 3)) + " "u8 + show((int8)(a % 7)) + " "u8 + show((uint8)((u >> (int)(1)))) + " "u8 + show((int8)(+a)) + " "u8 + show((int8)(~a)));
+
     arm(namedAnyˢ, () => {
         I i = (int8)(a + a);
         return show(i);
     });
+
     arm(genericˢ, () => gen((int8)(a + a)) + " "u8 + gen((uint8)(u + u)));
+
     arm(wideningˢ, () => fmt.Sprint((nint)((uint8)(u + u)), (@string)" "u8, (int64)((int8)(a + a)), (@string)" "u8, (float64)((int8)(a + a)), (@string)" "u8, (nint)((byte)(c - (rune)'0')), (@string)" "u8, (uint32)((uint16)(z + z)), (@string)" "u8, (int32)((int16)(w + w))));
+
     var tbl = new slice<nint>(256);
     foreach (var (k, _) in tbl) {
         tbl[k] = k;
@@ -148,15 +154,19 @@ internal static void Main() {
     arm(stringIndexˢ, () => fmt.Sprint(str[(uint8)(d + 10)]));
     var tblʗ2 = tbl;
     arm(sliceBoundˢ, () => fmt.Sprint(len(tblʗ2.slice((uint8)(u + u))), (@string)" "u8, len(tblʗ2.slice(0, (uint8)(u + u))), (@string)" "u8, str.slice((uint8)(d + 10))));
+
     arm(shiftCountˢ, () => {
         var y = (uint32)1;
         y.LshAssign((uint64)((uint8)(d + 10)));
         return fmt.Sprint(((nint)1).Lsh((uint64)((uint8)(u + u - 140))), (@string)" "u8, ((uint32)1).Lsh((uint64)((uint8)(d + 10))), (@string)" "u8, y);
     });
+
     arm(divremOperandˢ, () => fmt.Sprint((int8)((int8)(a + a) / 2), (@string)" "u8, (int8)((int8)(a + a) % 7), (@string)" "u8, (uint8)((uint8)(u + u) / 3)));
     arm(shrOperandˢ, () => fmt.Sprint((int8)(((int8)(a + a) >> (int)(1))), (@string)" "u8, (uint8)(((uint8)(u + u) >> (int)(4)))));
     arm(minint81ˢ, () => fmt.Sprint((int8)(m8 / n1), (@string)" "u8, (int8)(m8 % n1)));
+
     arm(parenCompareˢ, () => fmt.Sprint((int8)(a + a) < 0, (@string)" "u8, (uint8)(u + u) == 144));
+
     arm(switchTagˢ, () => {
         switch ((uint8)(u + u)) {
         case 144: {
@@ -182,6 +192,7 @@ internal static void Main() {
 
         return unwrappedˢ;
     });
+
     arm(interfaceCaseˢ, () => {
         any x = (int8)50;
         any y = (uint8)66;
@@ -198,6 +209,7 @@ internal static void Main() {
 
         return r;
     });
+
     arm(guardedShrˢ, () => {
         int8 x = (int8)(((int8)(a + a)).Rsh(n));
         any y = ((uint8)(u + u)).Rsh(n);
@@ -207,11 +219,13 @@ internal static void Main() {
         any y = ((int8)(a + a)).Lsh(n);
         return fmt.Sprint((nint)(((int8)(a + a)).Lsh(n)), (@string)" "u8, y, (@string)" "u8, (int8)((((int8)(a + a)).Lsh(n)) / 3), (@string)" "u8, (nint)(((int8)((h >> (int)(1)))).Lsh((n + 1))), (@string)" "u8, ((uint8)(u + w8)).Lsh((uint64)(8)));
     });
+
     var tblʗ3 = tbl;
     arm(unaryXorPlusˢ, () => {
         int8 q = (int8)((int8)(~(a + a)) / 2);
         return fmt.Sprint((nint)((int8)(~(a + a))), (@string)" "u8, q, (@string)" "u8, (int8)(((int8)(~(a + a)) >> (int)(1))), (@string)" "u8, tblʗ3[(uint8)(+(u + u))], (@string)" "u8, (nint)((int8)(+(a * a))));
     });
+
     var tblʗ4 = tbl;
     arm(makeAndBoundsˢ, () => fmt.Sprint(len(new slice<nint>((uint8)(u + u))), (@string)" "u8, cap(new slice<nint>(0, (uint8)(u + u))), (@string)" "u8, cap(tblʗ4.slice(0, 1, (uint8)(u + u)))));
     arm(divisorˢ, () => {
@@ -225,11 +239,14 @@ internal static void Main() {
         Func<byte, @string> f = (byte b) => fmt.Sprint(b);
         return f((byte)(u + w8)) + " "u8 + f((byte)((u >> (int)(1))));
     });
+
     arm(invariantˢ, () => fmt.Sprint((int8)(u + u), (@string)" "u8, (int8)(a + a + a), (@string)" "u8, (uint8)(w + w)));
+
     arm(builtinArgˢ, () => {
         var b = append(new byte[]{}.slice(), (byte)(u + u), (byte)(u * 2), (byte)(u - 1));
         return fmt.Sprint(min((int8)(a + a), (int8)(0)), (@string)" "u8, max((uint8)(u + u), (uint8)(0)), (@string)" "u8, b);
     });
+
     arm(parenDefineˢ, () => {
         var t2 = (int8)(a + a);
         return show(t2);

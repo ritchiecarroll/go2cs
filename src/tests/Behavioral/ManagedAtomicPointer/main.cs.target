@@ -29,9 +29,12 @@ internal static void identity() {
     @unsafe.Pointer pa = @unsafe.Pointer.FromPinnedBox(Ꮡa);
     @unsafe.Pointer pb = @unsafe.Pointer.FromPinnedBox(Ꮡb);
     @unsafe.Pointer pn = default!;
+
     fmt.Println(pa == pa, pa == pb, pa != pb);
     fmt.Println(pn == pn, pn == pa, pa != pn);
+
     fmt.Println(@unsafe.Pointer.FromPinnedBox(Ꮡa) == pa);
+
     var table = new @unsafe.Pointer[]{default!, pa, pb}.slice();
     nint same = 0;
     nint diff = 0;
@@ -45,6 +48,7 @@ internal static void identity() {
         }
     }
     fmt.Println(same, diff);
+
     ref var l = ref heap(new lazyProc(), out var Ꮡl);
     @unsafe.Pointer fp = @unsafe.Pointer.FromBox(Ꮡl.of(lazyProc.Ꮡp));
     fmt.Println(fp == @unsafe.Pointer.FromBox(Ꮡl.of(lazyProc.Ꮡp)), fp == pa);

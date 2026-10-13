@@ -17,6 +17,7 @@ internal static void Main() {
     nint b = 20;
     (a, b) = Swap<nint>(a, b);
     fmt.Printf("After swap: a=%d, b=%d\n"u8, a, b);
+
     @string x = helloˢ;
     @string y = worldˢ;
     (x, y) = Swap(x, y);

@@ -17,15 +17,20 @@ private static readonly object afterResetˢ = (@string)"after Reset:"u8;
 
 internal static void Main() {
     fmt.Println(initiallyIgnoredˢ, signal.Ignored(Δos.Interrupt));
+
     signal.Ignore(Δos.Interrupt);
     fmt.Println(afterIgnoreˢ, signal.Ignored(Δos.Interrupt));
+
     var c = new channel<osꓸSignal>(1);
     signal.Notify(c.WithDirection(GoChanDir.Send), Δos.Interrupt);
     fmt.Println(afterNotifyˢ, signal.Ignored(Δos.Interrupt));
+
     signal.Stop(c.WithDirection(GoChanDir.Send));
     fmt.Println(afterStopˢ, signal.Ignored(Δos.Interrupt));
+
     signal.Ignore(Δos.Interrupt);
     fmt.Println(afterIgnoreAgainˢ, signal.Ignored(Δos.Interrupt));
+
     signal.Reset(Δos.Interrupt);
     fmt.Println(afterResetˢ, signal.Ignored(Δos.Interrupt));
 }

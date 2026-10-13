@@ -28,6 +28,7 @@ internal static void Main() {
     AliasImportLibꓸNamed nr = (nint x) => {
         return (x + 100, x > 0);
     };
+
     a();
     var (r, err) = m(5);
     fmt.Println(funcˢ, f(1), g(new AliasImportLibꓸB2(V: 3)).V, d(2 * time.ΔSecond), r, err, v(1, 2, 3), AliasImportLib.ApplyVar(v, 4, 5));

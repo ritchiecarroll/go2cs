@@ -45,13 +45,16 @@ private static readonly object otherIsNotMarshalerˢ = (@string)"other is not Ma
 internal static void Main() {
     var s = newStringish(7);
     fmt.Println(s.Str());
+
     var m = s._<Marshaler>();
     fmt.Println(m.Marshal());
+
     {
         var (m2, ok) = s._<Marshaler>(ᐧ); if (ok) {
             fmt.Println((@string)"ok"u8, m2.Marshal());
         }
     }
+
     Stringish s2 = new otherжStringish(Ꮡ(new other(nil)));
     {
         var (_, ok) = s2._<Marshaler>(ᐧ); if (ok){

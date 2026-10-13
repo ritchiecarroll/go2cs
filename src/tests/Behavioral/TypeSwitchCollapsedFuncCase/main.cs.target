@@ -69,6 +69,7 @@ internal static void Main() {
         var (@out, err) = exec(h, from, to);
         fmt.Println(@out, err, kind(h));
     }
+
     {
         var (f, ok) = hooks[2]._<Func<reflectꓸValue, reflectꓸValue, (any, error)>>(ᐧ); if (ok) {
             var (@out, _) = f(reflect.ValueOf((nint)(5)), to);

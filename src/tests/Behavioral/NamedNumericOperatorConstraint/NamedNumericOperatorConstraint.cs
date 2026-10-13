@@ -23,9 +23,11 @@ internal static void Main() {
     stringID a = 12345;
     stringID b = 11;
     fmt.Println(mix(a, b));
+
     offset x = -8;
     offset y = 5;
     fmt.Println(mix(x, y));
+
     fmt.Println(mix(((stringID)255), ((stringID)3)), mix(((offset)100), ((offset)9)));
 }
 

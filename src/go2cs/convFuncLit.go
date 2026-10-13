@@ -763,9 +763,16 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	savedPendingKeepAlive := v.pendingSyscallKeepAlive
 	v.pendingSyscallKeepAlive = nil
 
+	// A comment past the literal's closing brace is not its body's: `func(x int) int { return x + 1 }, // c`
+	// labels the element the literal is, and the list holding it writes it there.
+	savedFuncLitRbrace := v.funcLitRbrace
+	v.funcLitRbrace = funcLit.Body.Rbrace
+
 	v.pushBlock()
 	v.visitBlockStmt(funcLit.Body, blockStatementContext)
 	body := v.popBlockAppend(false)
+
+	v.funcLitRbrace = savedFuncLitRbrace
 
 	v.assertNoPendingKeepAlive("func literal")
 	v.pendingSyscallKeepAlive = savedPendingKeepAlive

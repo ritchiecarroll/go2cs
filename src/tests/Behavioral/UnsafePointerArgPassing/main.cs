@@ -22,10 +22,13 @@ internal static void Main() {
     ref var @base = ref heap(new int64(), out var Ꮡbase);
     @base = 100;
     @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡbase);
+
     @unsafe.Pointer q = (uintptr)add(p, 16);
     @unsafe.Pointer r = (uintptr)add(p, 0);
+
     fmt.Println((uintptr)q - (uintptr)p == 16);
     fmt.Println((uintptr)r == (uintptr)p);
+
     var c = Ꮡ(new counter(nil));
     c.add(3);
     c.add(4);

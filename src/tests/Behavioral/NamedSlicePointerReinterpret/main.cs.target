@@ -40,6 +40,7 @@ internal static void Main() {
     fmt.Println(len(p.ValueSlot));
     fmt.Println(((@string)b));
     fmt.Println(len(b));
+
     ж<Buf> makeBuf() {
         ref var s = ref heap<slice<byte>>(out var Ꮡs);
         s = new slice<byte>(0, 4);
@@ -48,16 +49,19 @@ internal static void Main() {
     var q = makeBuf();
     q.ValueSlot = append(q.ValueSlot, (byte)((rune)'x'), (byte)((rune)'y'));
     fmt.Println(((@string)(slice<byte>)q.ValueSlot));
+
     ref var src = ref heap<slice<byte>>(out var Ꮡsrc);
     src = new slice<byte>(0, 4);
     fmt.Println(fillVia(Ꮡsrc));
     fmt.Println(((@string)src));
     fmt.Println(len(src));
+
     var h = Ꮡ(new handler(nil));
     h.preformat(alpha1ˢ);
     h.preformat(beta2ˢ);
     h.preformat(gamma3ˢ);
     fmt.Println(((@string)(~h).preformatted), len((~h).preformatted), (~h).groups);
+
     var t = h.of(handler.Ꮡpreformatted).Reinterpret<slice<byte>, Buf>();
     t.ValueSlot = (t.ValueSlot)[..7];
     fmt.Println(((@string)(~h).preformatted), len((~h).preformatted));

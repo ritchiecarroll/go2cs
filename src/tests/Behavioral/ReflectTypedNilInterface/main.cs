@@ -110,41 +110,52 @@ internal static void Main() {
     for (nint i = 0; i < rs.Len(); i++) {
         report(fmt.Sprintf("slice[%d]"u8, i), rs.Index(i));
     }
+
     array<ж<Tag>> a = new(2);
     a[1] = Ꮡ(new Tag(N: 7));
     var ra = reflect.ValueOf(a);
     for (nint i = 0; i < ra.Len(); i++) {
         report(fmt.Sprintf("array[%d]"u8, i), ra.Index(i));
     }
+
     var h = new holder(T: Ꮡ(new Tag(N: 42)));
     var rh = reflect.ValueOf(h);
     for (nint i = 0; i < rh.NumField(); i++) {
         report("field "u8 + rh.Type().Field(i).Name, rh.Field(i));
     }
+
     var m = new map<@string, ж<Blob>>{["nil"u8] = default!};
     var it = reflect.ValueOf(m).MapRange();
     while (it.Next()) {
         report("map["u8 + it.Key().String() + "]"u8, it.Value());
     }
+
     var rn = reflect.New(reflect.TypeOf(((ж<Blob>)nil))).Elem();
     report(newBlobElemˢ, rn);
+
     var iface = rs.Index(0).Interface();
     fmt.Printf("roundtrip: ==(*Blob)(nil) %v, ==nil %v\n"u8, AreEqual(iface, ((ж<Blob>)nil)), iface == default!);
+
     fmt.Printf("elem-of-typed-nil valid=%v\n"u8, rs.Index(0).Elem().IsValid());
+
     ж<Blob> np = default!;
     var si = new main_si(I: np.OrTypedNil());
     var f = reflect.ValueOf(si).Field(0);
     fmt.Printf("ifaceField: kind=%v isNil=%v isZero=%v elemKind=%v elemIsNil=%v\n"u8,
         f.Kind(), f.IsNil(), f.IsZero(), f.Elem().Kind(), f.Elem().IsNil());
+
     var sn = new main_si();
     var fn = reflect.ValueOf(sn).Field(0);
     fmt.Printf("nilIfaceField: isNil=%v isZero=%v elemValid=%v\n"u8, fn.IsNil(), fn.IsZero(), fn.Elem().IsValid());
+
     ж<Blob> np2 = default!;
     var sp = new main_sp(P: np2);
     var pf = reflect.ValueOf(sp).Field(0);
     fmt.Printf("call-into-any: %s\n"u8, reflect.ValueOf(sink).Call(new reflectꓸValue[]{pf}.slice())[0].String());
+
     var concrete = reflect.ValueOf(@string (ж<Blob> b) => fmt.Sprintf("concrete nil=%v"u8, b == nil));
     fmt.Printf("call-into-concrete: %s\n"u8, concrete.Call(new reflectꓸValue[]{pf}.slice())[0].String());
+
     ж<Stamp> stamp = default!;
     var sh = new main_sh(S: stamp);
     var si2 = reflect.ValueOf(sh).Field(0).Interface();

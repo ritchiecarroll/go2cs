@@ -46,10 +46,12 @@ internal static void Main() {
     var m = new map<any, any>{};
     var v = reflect.ValueOf(m);
     var keyType = v.Type().Key();
+
     v.SetMapIndex(reflect.Zero(keyType), reflect.ValueOf(nilKeyˢ));
     show(afterNilKeyˢ, m);
     fmt.Println(mapIndexNilˢ, v.MapIndex(reflect.Zero(keyType)));
     fmt.Println(mNilˢ, m[default!]);
+
     var h = new holder(nil);
     var pk = reflect.ValueOf(h).Field(0);
     v.SetMapIndex(pk, reflect.ValueOf(typedNilKeyˢ));
@@ -58,10 +60,12 @@ internal static void Main() {
     fmt.Println(mNilStillˢ, m[default!]);
     fmt.Println(mapIndexTNilˢ, v.MapIndex(pk));
     fmt.Println(mapIndexNilStillˢ, v.MapIndex(reflect.Zero(keyType)));
+
     v.SetMapIndex(reflect.Zero(keyType), reflect.ValueOf(againˢ));
     fmt.Println(mNilAfterOverwriteˢ, m[default!]);
     v.SetMapIndex(reflect.Zero(keyType), new reflectꓸValue(nil));
     show(afterDeleteNilKeyˢ, m);
+
     var keys = v.MapKeys();
     fmt.Println(mapKeysˢ, len(keys));
     foreach (var (_, k) in keys) {

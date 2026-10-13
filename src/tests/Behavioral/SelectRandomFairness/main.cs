@@ -13,6 +13,7 @@ internal static void Main() {
     var b = new channel<nint>(1);
     nint aCount = 0;
     nint bCount = 0;
+
     for (nint i = 0; i < 200; i++) {
         a.ᐸꟷ(1);
         b.ᐸꟷ(1);
@@ -37,6 +38,7 @@ internal static void Main() {
             break;
         }}
     }
+
     fmt.Println(totalˢ, aCount + bCount);
     fmt.Println(bothBranchesTakenˢ, aCount > 0 && bCount > 0);
 }

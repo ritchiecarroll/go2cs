@@ -36,6 +36,7 @@ internal static void unconnectedRoundTrip() {
         }
         var serverʗ1 = server;
         defer(() => serverʗ1.Close(), ref ᒐ);
+
         (var client, err) = Δnet.ListenPacket(udp4ˢ, "127.0.0.1:0"u8);
         if (err != default!) {
             fmt.Println(ipv4ClientListenFailedˢ);
@@ -43,6 +44,7 @@ internal static void unconnectedRoundTrip() {
         }
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         var payload = slice<byte>("datagram-payload"u8);
         {
             (_, err) = client.WriteTo(payload, server.LocalAddr()); if (err != default!) {
@@ -50,6 +52,7 @@ internal static void unconnectedRoundTrip() {
                 return;
             }
         }
+
         server.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
         var buf = new slice<byte>(64);
         (var n, var from, err) = server.ReadFrom(buf);
@@ -57,8 +60,10 @@ internal static void unconnectedRoundTrip() {
             fmt.Println(ipv4ReadFromFailedˢ);
             return;
         }
+
         fmt.Printf("ipv4: bytesMatch=%v\n"u8, ((sstring)(buf.slice(0, n))) == ((sstring)payload));
         fmt.Printf("ipv4: senderAddrMatchesClient=%v\n"u8, from.String() == client.LocalAddr().String());
+
         {
             (_, err) = server.WriteTo(slice<byte>("reply"u8), from); if (err != default!) {
                 fmt.Println(ipv4ReplyWriteToFailedˢ);
@@ -93,6 +98,7 @@ internal static void zeroLengthDatagram() {
         }
         var serverʗ1 = server;
         defer(() => serverʗ1.Close(), ref ᒐ);
+
         (var client, err) = Δnet.ListenPacket(udp4ˢ, "127.0.0.1:0"u8);
         if (err != default!) {
             fmt.Println(zerolenClientListenˢ);
@@ -100,6 +106,7 @@ internal static void zeroLengthDatagram() {
         }
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         {
             (_, err) = client.WriteTo(new byte[]{}.slice(), server.LocalAddr()); if (err != default!) {
                 fmt.Println(zerolenWriteToFailedˢ);
@@ -133,6 +140,7 @@ internal static void connectedRoundTrip() {
         }
         var serverʗ1 = server;
         defer(() => serverʗ1.Close(), ref ᒐ);
+
         (var conn, err) = Δnet.Dial(udp4ˢ, server.LocalAddr().String());
         if (err != default!) {
             fmt.Println(connectedDialFailedˢ);
@@ -140,6 +148,7 @@ internal static void connectedRoundTrip() {
         }
         var connʗ1 = conn;
         defer(() => connʗ1.Close(), ref ᒐ);
+
         {
             (_, err) = conn.Write(slice<byte>("connected-payload"u8)); if (err != default!) {
                 fmt.Println(connectedWriteFailedˢ);
@@ -155,6 +164,7 @@ internal static void connectedRoundTrip() {
         }
         fmt.Printf("connected: bytesMatch=%v senderMatchesLocal=%v\n"u8,
             ((sstring)(buf.slice(0, n))) == "connected-payload"u8, from.String() == conn.LocalAddr().String());
+
         {
             (_, err) = server.WriteTo(slice<byte>("connected-reply"u8), from); if (err != default!) {
                 fmt.Println(connectedReplyFailedˢ);
@@ -186,6 +196,7 @@ internal static void ipv6RoundTrip() {
         }
         var serverʗ1 = server;
         defer(() => serverʗ1.Close(), ref ᒐ);
+
         (var client, err) = Δnet.ListenPacket(udp6ˢ, "[::1]:0"u8);
         if (err != default!) {
             fmt.Println(ipv6AvailableFalseˢ);
@@ -193,7 +204,9 @@ internal static void ipv6RoundTrip() {
         }
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         fmt.Println(ipv6AvailableTrueˢ);
+
         {
             (_, err) = client.WriteTo(slice<byte>("v6-payload"u8), server.LocalAddr()); if (err != default!) {
                 fmt.Println(ipv6WriteToFailedˢ);

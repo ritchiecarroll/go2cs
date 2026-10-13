@@ -95,23 +95,32 @@ internal static void Main() {
     var r = Ꮡ(new reader(src: "hello world"u8));
     var w = Ꮡ(new writer(nil));
     var d = Ꮡ(new duplex(r, w));
+
     readWriteCloser rwc = new duplexжreadWriteCloser(d);
+
     var buf = new slice<byte>(5);
     var (n, err) = rwc.Read(buf);
     fmt.Println(readˢ, n, ((@string)(buf.slice(0, n))), err == default!);
+
     (n, err) = rwc.Write(buf.slice(0, n));
     fmt.Println(writeˢ, n, err == default!);
+
     fmt.Println(aliasedˢ, (~r).pos, w.String());
+
     fmt.Println(closeˢ, rwc.Close() == default!, (~r).pos, (~w).flush);
+
     readWriter rw = d.Value;
     (n, _) = rw.Write(slice<byte>("!"u8));
     fmt.Println(valueFormˢ, n, w.String());
+
     var f = Ꮡ(new foreign(strings.NewReader(abcˢ), Ꮡ(new strings.Builder(nil))));
     readStringWriter rsw = new foreignжreadStringWriter(f);
+
     var fbuf = new slice<byte>(3);
     (n, _) = rsw.Read(fbuf);
     var (n2, _) = rsw.WriteString(((sstring)(fbuf.slice(0, n))) + "def"u8);
     fmt.Println(foreignˢ, n, n2, (~f).Builder.String());
+
     readStringWriter frsw = f.Value;
     var (n3, _) = frsw.WriteString("gh"u8);
     fmt.Println(foreignValueFormˢ, n3, (~f).Builder.String());

@@ -36,11 +36,14 @@ internal static void Main() {
     GoFrame ᒐ = default;
     try {
         nint n = 1;
+
         var @base = (uintptr)4;
         var off = (uintptr)2;
+
         defer(triple, multiValueEagerˢ, n, ref ᒐ);
         defer(single, singleResultˢ, ref ᒐ);
         defer(quad, sysConst, @base + off, (uintptr)(65536), (uintptr)(0), ref ᒐ);
+
         n = 99;
         fmt.Println(bodyDoneNˢ, n);
     }

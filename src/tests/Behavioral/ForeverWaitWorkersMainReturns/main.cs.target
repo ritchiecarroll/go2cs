@@ -11,6 +11,7 @@ private static readonly object mainReturnedWithThreeˢ = (@string)"main returned
 
 internal static partial void Main() {
     channel<nint> nilc = default!;
+
     goǃ(() => {
         select();
     });
@@ -22,7 +23,9 @@ internal static partial void Main() {
     goǃ(() => {
         nilcʗ2.ᐸꟷ(1);
     });
+
     time.Sleep(500 * time.Millisecond);
+
     fmt.Println(mainReturnedWithThreeˢ);
 }
 

@@ -35,11 +35,13 @@ private static readonly object fatalUnsetenvˢ = (@string)"FATAL Unsetenv"u8;
 
 internal static void Main() {
     var hiddenSet = os.Setenv(hiddenName, hidˢ) == default!;
+
     var before = syscall.Environ();
     if (len(before) == 0) {
         fmt.Println(fatalEmptyEnvironmentˢ);
         os.Exit(1);
     }
+
     foreach (var (_, s) in sentinels) {
         {
             var err = os.Setenv(s.name, s.value); if (err != default!) {
@@ -48,20 +50,28 @@ internal static void Main() {
             }
         }
     }
+
     var after = syscall.Environ();
+
     fmt.Printf("delta %d\n"u8, len(after) - len(before));
+
     fmt.Println(sentinelsViaSyscallˢ);
     foreach (var (_, e) in collect(after)) {
         fmt.Println(ascii(e));
     }
+
     fmt.Println(sentinelsViaOsEnvironˢ);
     foreach (var (_, e) in collect(os.Environ())) {
         fmt.Println(ascii(e));
     }
+
     fmt.Printf("getenv-agrees %v\n"u8, getenvAgrees(after));
+
     fmt.Printf("hidden %v %v %v\n"u8, hiddenSet, contains(after, hiddenName + "="), hasHidden(after));
+
     var (bad, why) = malformed(after);
     fmt.Printf("well-formed %v %s\n"u8, bad == ""u8, why);
+
     var stable = true;
     for (nint i = 0; i < 50; i++) {
         if (len(syscall.Environ()) != len(after)) {
@@ -70,6 +80,7 @@ internal static void Main() {
         }
     }
     fmt.Printf("stable %v\n"u8, stable);
+
     {
         var err = os.Unsetenv(sentinels[0].name); if (err != default!) {
             fmt.Println(fatalUnsetenvˢ, err);
@@ -153,6 +164,7 @@ private static readonly @string hexDigitsᶜ = "0123456789abcdef"u8;
 
 internal static @string ascii(@string s) {
     @string hexDigits = hexDigitsᶜ;
+
     var @out = new slice<byte>(0, len(s));
     foreach (var (_, r) in s) {
         if (r >= 0x20 && r < 0x7f) {

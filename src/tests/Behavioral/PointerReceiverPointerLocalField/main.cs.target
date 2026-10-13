@@ -32,9 +32,11 @@ internal static partial ж<holder> get(ж<holder> Ꮡh) {
 internal static void Main() {
     var @base = Ꮡ(new holder(nil));
     var h = get(@base);
+
     h.of(holder.Ꮡs).inc();
     h.of(holder.Ꮡs).inc();
     h.of(holder.Ꮡs).add(10);
+
     fmt.Println(@base.of(holder.Ꮡs).get());
 }
 

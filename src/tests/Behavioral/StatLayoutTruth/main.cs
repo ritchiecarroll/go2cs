@@ -55,6 +55,7 @@ internal static void Main() {
             return;
         }
         defer(os.RemoveAll, dir, ref ᒐ);
+
         @string sub = filepath.Join(dir, subˢ);
         {
             var errΔ1 = os.Mkdir(sub, 493); if (errΔ1 != default!) {
@@ -76,12 +77,14 @@ internal static void Main() {
                 return;
             }
         }
+
         (var fi, err) = os.Stat(dir);
         if (err != default!) {
             fmt.Println(statDirErrorˢ, err);
             return;
         }
         fmt.Println(statDirIsDirˢ, fi.IsDir(), isRegularˢ, fi.Mode().IsRegular());
+
         (fi, err) = os.Stat(@file);
         if (err != default!) {
             fmt.Println(statFileErrorˢ, err);
@@ -89,12 +92,14 @@ internal static void Main() {
         }
         fmt.Println(statFileIsDirˢ, fi.IsDir(), isRegularˢ, fi.Mode().IsRegular(), sizeˢ, fi.Size(), nameˢ, fi.Name());
         fmt.Println(statFileModtimeWithinAˢ, time.Since(fi.ModTime()) < (time.Duration)(86400000000000L), nonzeroˢ, !fi.ModTime().IsZero());
+
         (fi, err) = os.Lstat(@file);
         if (err != default!) {
             fmt.Println(lstatFileErrorˢ, err);
             return;
         }
         fmt.Println(lstatFileSizeˢ, fi.Size(), isRegularˢ, fi.Mode().IsRegular());
+
         (var f, err) = os.Open(@file);
         if (err != default!) {
             fmt.Println(openErrorˢ, err);
@@ -107,14 +112,17 @@ internal static void Main() {
             return;
         }
         fmt.Println(fstatSizeˢ, fi.Size(), isRegularˢ, fi.Mode().IsRegular());
+
         (var matches, err) = filepath.Glob(filepath.Join(dir, txtˢ));
         fmt.Println(globTxtˢ, len(matches), err);
+
         (var entries, err) = os.ReadDir(dir);
         fmt.Println(readdirˢ, len(entries), err);
         foreach (var (_, e) in entries) {
             var (info, ierr) = e.Info();
             fmt.Println(entryˢ, e.Name(), isDirˢ, e.IsDir(), infoAgreesˢ, ierr == default! && info.IsDir() == e.IsDir());
         }
+
         nint visited = 0;
         nint files = 0;
         var werr = filepath.WalkDir(dir, error (@string p, fs.DirEntry d, error errΔ4) => {
@@ -128,6 +136,7 @@ internal static void Main() {
             return default!;
         });
         fmt.Println(walkdirVisitedˢ, visited, filesˢ, files, errˢ, werr);
+
         fmt.Println(pid0ˢ, os.Getpid() > 0, ppid0ˢ, os.Getppid() >= 0);
         fmt.Println(uidCallableˢ, os.Getuid() >= -1, gidCallableˢ, os.Getgid() >= -1);
     }

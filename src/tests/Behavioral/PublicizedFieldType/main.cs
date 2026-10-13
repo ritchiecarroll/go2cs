@@ -47,12 +47,15 @@ internal static void Main() {
     cr.Lo = 65;
     cr.Item = new inner(v: 9);
     cr.Lvl = ((level)3);
+
     fmt.Println(cr.Lo);
     fmt.Println(cr.Delta[0]);
     fmt.Println(cr.Item.v);
     fmt.Println(cr.Lvl);
+
     var b = new EncBuffer(new coder(tag: "png"u8, seq: 7));
     fmt.Println(b.tag, b.seq);
+
     fmt.Println(cr.Tally(), cr.Weigh(3));
 }
 

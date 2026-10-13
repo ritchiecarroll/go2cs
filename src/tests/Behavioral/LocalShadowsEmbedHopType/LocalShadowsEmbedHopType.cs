@@ -76,6 +76,7 @@ internal static void Main() {
     h.Write(slice<byte>("go2cs"u8));
     fmt.Println(h.Sum(default!));
     fmt.Println((~h).finalized);
+
     var d = Ꮡ(new DeepHash(nil));
     d.of(DeepHash.Ꮡdeep).of(deep.Ꮡacc).of(acc.Ꮡinner).Add(slice<byte>("go2cs"u8));
     ref var @out = ref heap(new array<byte>(4), out var Ꮡout);

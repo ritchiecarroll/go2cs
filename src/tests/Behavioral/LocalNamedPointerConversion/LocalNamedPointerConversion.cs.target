@@ -41,6 +41,7 @@ internal static void inClosure() {
         (dps.Value).i = 3;
         fmt.Println(inClosureˢ, (~ps).i);
     }
+
     run();
 }
 
@@ -65,6 +66,7 @@ internal static void Main() {
     topLevel();
     inClosure();
     fromNil();
+
     var p = new itemPtr(Ꮡ(new item(4)));
     fmt.Println(packageLevelˢ, (p.Value).n);
 }

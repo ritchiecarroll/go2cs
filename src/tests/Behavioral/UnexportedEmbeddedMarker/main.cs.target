@@ -36,6 +36,7 @@ internal static void Main() {
     c.Add(5);
     c.Add(3);
     fmt.Println(counterˢ, c.Value());
+
     Counter d = default!;
     fmt.Println(zeroˢ, d.Value());
 }

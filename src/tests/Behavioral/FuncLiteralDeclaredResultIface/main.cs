@@ -19,6 +19,7 @@ internal static void Main() {
         var (ᴛ1, ᴛ2) = os.Open(name);
         return (new os_FileжReadCloser(ᴛ1), ᴛ2);
     };
+
     use(open);
 }
 

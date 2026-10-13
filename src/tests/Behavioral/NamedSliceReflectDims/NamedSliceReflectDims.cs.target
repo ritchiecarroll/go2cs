@@ -24,12 +24,15 @@ internal static void Main() {
     UUIDs u = GoReflect.WithElemDims(new UUID[]{}.slice(), 16);
     Rows r = GoReflect.WithElemDims(new array<nint>[]{}.slice(), 3);
     fmt.Println(namedEmptyˢ, reflect.TypeOf(u).Elem().Len(), reflect.TypeOf(r).Elem().Len());
+
     var rows = GoReflect.WithElemDims(new array<nint>[]{new nint[]{1, 2, 3}.array()}.slice(), 3);
     Rows window = GoReflect.WithElemDims(rows[..0], 3);
     fmt.Println(namedWindowˢ, reflect.TypeOf(window).Elem().Len());
     Rows full = rows;
+
     fmt.Println(unnamedEmptyˢ, reflect.TypeOf(GoReflect.WithElemDims(new UUID[]{}.slice(), 16)).Elem().Len(), reflect.TypeOf(GoReflect.WithElemDims(new array<nint>[]{}.slice(), 3)).Elem().Len());
     fmt.Println(namedNonEmptyˢ, reflect.TypeOf(full).Elem().Len());
+
     fmt.Println(namedNonArrayˢ, reflect.TypeOf(new Names(new @string[]{}.slice())).Elem().Kind());
 }
 

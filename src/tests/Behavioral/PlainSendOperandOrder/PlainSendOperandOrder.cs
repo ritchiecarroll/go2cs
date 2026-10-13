@@ -52,16 +52,19 @@ private static readonly object bareˢ = (@string)"bare:"u8;
 
 internal static partial void Main() {
     var ch = new channel<nint>(8);
+
     var chanᴛ2 = chanFor(ch);
     var (ᴛ3, ᴛ4) = pair();
     chanᴛ2.ᐸꟷ(must(ᴛ3, ᴛ4));
     fmt.Println(callˢ, log, ᐸꟷ(ch));
+
     log = default!;
     var chans = new channel<nint>[]{default!, ch}.slice();
     var chanᴛ3 = chans[idx()];
     var (ᴛ5, ᴛ6) = pair();
     chanᴛ3.ᐸꟷ(must(ᴛ5, ᴛ6));
     fmt.Println(indexˢ, log, ᐸꟷ(ch));
+
     log = default!;
     var done = new channel<bool>(0);
     var chʗ1 = ch;
@@ -74,9 +77,11 @@ internal static partial void Main() {
     });
     ᐸꟷ(done);
     fmt.Println((@string)"go:"u8, log, ᐸꟷ(ch));
+
     log = default!;
     deferredSend(ch);
     fmt.Println(deferˢ, log, ᐸꟷ(ch));
+
     log = default!;
     var (ᴛ9, ᴛ10) = pair();
     ch.ᐸꟷ(must(ᴛ9, ᴛ10));

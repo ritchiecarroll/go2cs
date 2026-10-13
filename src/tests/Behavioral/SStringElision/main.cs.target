@@ -34,43 +34,66 @@ internal static void Main() {
     if (s == "go2cs"u8) {
         fmt.Println(matchˢ);
     }
+
     var digits = slice<byte>("2468"u8);
     sstring d = ((sstring)digits);
     fmt.Println((nint)d[0] + (nint)d[3] + len(d));
+
     var scratch = slice<byte>("AB"u8);
     @string t = ((@string)scratch);
     scratch[0] = (rune)'X';
     if (t == "AB"u8) {
         fmt.Println(copySafeˢ);
     }
+
     @string u = ((@string)slice<byte>("printed"u8));
     fmt.Println(u);
+
     fmt.Println(returnedString());
+
     var tag = slice<byte>("v2"u8);
     sstring tagᴛ1 = ((sstring)tag);
     if (tagᴛ1 == "v2"u8) {
         fmt.Println(taggedˢ);
     }
+
     @string want = "v2"u8;
     if (tagᴛ1 == want) {
         fmt.Println(wantedˢ);
     }
+
     fmt.Println(classifyˢ, classify(slice<byte>("rust"u8)));
+
     fmt.Println(pickˢ, pick(slice<byte>("b"u8)));
+
     fmt.Println(prefixˢ, prefix(slice<byte>("GET /x"u8)));
+
     fmt.Println(matchVarˢ, matchVar(slice<byte>("go2cs"u8), go2csˢ));
+
     fmt.Println(matchFieldˢ, matchField(slice<byte>("prod"u8), new config(name: "prod"u8)));
+
     fmt.Println(twoConvˢ, matchTwoConversions(slice<byte>("abc"u8), slice<byte>("abc"u8)));
+
     fmt.Println(callOperandˢ, staysHeapCallOperand(slice<byte>("y"u8), () => "y"u8));
+
     fmt.Println(switchTagˢ, switchTag(slice<byte>("put"u8)));
+
     fmt.Println(switchLocalˢ, switchLocal(slice<byte>("off"u8)));
+
     fmt.Println(switchMagicˢ, switchMagic(slice<byte>("PK"u8)));
+
     fmt.Println(switchCallˢ, switchCall(slice<byte>("q"u8)));
+
     fmt.Println(concatLocalˢ, concatLocal(slice<byte>("go"u8), "2cs"u8));
+
     fmt.Println(concatLitˢ, concatLit(slice<byte>("v"u8)));
+
     fmt.Println(concatVarˢ, concatVar(slice<byte>("k"u8), "v"u8));
+
     fmt.Println(concatTwoˢ, concatTwo(slice<byte>("x"u8), slice<byte>("y"u8)));
+
     fmt.Println(concatCallˢ, concatCall(slice<byte>("q"u8), () => "z"u8));
+
     fmt.Println(concatObjˢ, concatObj(slice<byte>("x"u8)));
 }
 

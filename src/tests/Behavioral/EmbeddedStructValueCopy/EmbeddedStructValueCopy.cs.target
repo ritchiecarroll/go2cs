@@ -69,24 +69,29 @@ internal static void Main() {
     b.extra = 20;
     fmt.Println(assignAˢ, a.n, a.tag, a.extra);
     fmt.Println(assignBˢ, b.n, b.tag, b.extra);
+
     var src = new mid(inner: new inner(n: 3, tag: "src"u8), extra: 30);
     var got = byValue(src);
     fmt.Println(callSrcˢ, src.n, src.tag, src.extra);
     fmt.Println(callGotˢ, got.n, got.tag, got.extra);
+
     var d = Ꮡ(new deep(mid: new mid(inner: new inner(n: 4, tag: "d"u8), extra: 40), label: "orig"u8));
     var c = derefCopy(ref (d).DerefOrNull());
     fmt.Println(derefDˢ, (~d).n, (~d).tag, (~d).label);
     fmt.Println(derefCˢ, c.n, c.tag, c.label);
+
     var shared = Ꮡ(new inner(n: 7, tag: "shared"u8));
     var h1 = new ptrHolder(inner: shared, name: "h1"u8);
     var h2 = h1;
     h2.inner = Ꮡ(new inner(n: 8, tag: "other"u8));
     fmt.Println(ptrH1ˢ, h1.n, h1.tag, h1.name);
     fmt.Println(ptrH2ˢ, h2.n, h2.tag, h2.name);
+
     var h3 = h1;
     h3.n = 70;
     fmt.Println(ptrSharedH1ˢ, h1.n);
     fmt.Println(ptrSharedH3ˢ, h3.n);
+
     var arr = new mid[]{new(inner: new inner(n: 11, tag: "e0"u8), extra: 1), new(inner: new inner(n: 12, tag: "e1"u8), extra: 2)}.slice();
     var e = arr[0];
     e.n = 111;

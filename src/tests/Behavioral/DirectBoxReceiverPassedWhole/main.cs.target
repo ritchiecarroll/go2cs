@@ -40,6 +40,7 @@ internal static void Main() {
     var c = Ꮡ(new mc(n: 9));
     c.reset();
     fmt.Println((~c).n);
+
     var w = c.wrapped();
     w.p.Value.n = 42;
     fmt.Println((~c).n, w.tag);

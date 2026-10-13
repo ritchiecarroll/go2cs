@@ -33,43 +33,58 @@ private static readonly @string packOneArgDerivedˢ = "packOneArgDerived"u8;
 internal static void Main() {
     slice<byte> zero = default!;
     probe(zeroValueˢ, zero == default!, len(zero), cap(zero));
+
     var emptyLit = new byte[]{}.slice();
     probe(emptyLiteralˢ, emptyLit == default!, len(emptyLit), cap(emptyLit));
+
     var emptyStr = slice<byte>(""u8);
     probe(emptyStringConvˢ, emptyStr == default!, len(emptyStr), cap(emptyStr));
+
     var nilConv = slice<byte>(default!);
     probe(nilConversionˢ, nilConv == default!, len(nilConv), cap(nilConv));
+
     var nilReslice = zero[0..0];
     probe(nilResliceˢ, nilReslice == default!, len(nilReslice), cap(nilReslice));
+
     var made = new slice<byte>(0);
     probe(makeZeroˢ, made == default!, len(made), cap(made));
+
     var x = new byte[]{1, 2}.slice();
     probe(resliceToEmptyˢ, x[..0] == default!, len(x[..0]), cap(x[..0]));
+
     var tail = x[2..2];
     probe(resliceTailCapZeroˢ, tail == default!, len(tail), cap(tail));
+
     var appendNilNothing = append(slice<byte>(default!));
     probe(appendNilNothingˢ, appendNilNothing == default!, len(appendNilNothing), cap(appendNilNothing));
+
     var appendEmptyNothing = append(new byte[]{}.slice());
     probe(appendEmptyNothingˢ, appendEmptyNothing == default!, len(appendEmptyNothing), cap(appendEmptyNothing));
+
     var cloneShape = appendꓸꓸꓸ(new byte[]{}.slice(), x[..0]);
     probe(cloneShapeˢ, cloneShape == default!, len(cloneShape), cap(cloneShape));
+
     var trim = x;
     while (len(trim) > 0) {
         trim = trim.slice(0, len(trim) - 1);
     }
     probe(trimShapeˢ, trim == default!, len(trim), cap(trim));
+
     slice<@string> zs = default!;
     probe(stringSliceZeroˢ, zs == default!, len(zs), cap(zs));
     probe(stringSliceEmptyˢ, new @string[]{}.slice() == default!, len(new @string[]{}.slice()), cap(new @string[]{}.slice()));
+
     variadic(packZeroArgsˢ);
     variadic(packOneArgˢ, 1);
     variadic(packTwoArgsˢ, 1, 2);
+
     slice<byte> nilPack = default!;
     variadic("spreadNil"u8, nilPack.ꓸꓸꓸ);
     variadic("spreadEmptyLiteral"u8, new byte[]{}.slice().ꓸꓸꓸ);
     variadic("spreadMakeZero"u8, new slice<byte>(0).ꓸꓸꓸ);
     variadic("spreadResliceTailCapZero"u8, x[2..2].ꓸꓸꓸ);
     variadic("spreadNonEmpty"u8, x.ꓸꓸꓸ);
+
     variadicDerived(packZeroArgsDerivedˢ);
     variadicDerived(packOneArgDerivedˢ, 9);
 }

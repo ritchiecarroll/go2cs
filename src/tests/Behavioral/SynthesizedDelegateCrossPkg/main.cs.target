@@ -8,6 +8,7 @@ partial class main_package {
 
 internal static void Main() {
     fmt.Println(CrossPkgFuncLib.Count(new Func<CrossPkgLibꓸStatus, bool>(CrossPkgFuncLib.Hot)));
+
     Func<CrossPkgLibꓸStatus, bool> pick = CrossPkgFuncLib.Hot;
     fmt.Println(CrossPkgFuncLib.Count(pick));
 }

@@ -20,6 +20,7 @@ internal static void Main() {
     var b = Ꮡ(new Node(sym: Ꮡ(new sym(Value: 2, Name: "b"u8)), Weight: 20));
     a.Value.sym.Value.Node = b;
     b.Value.sym.Value.Node = a;
+
     fmt.Println((~a).Value, (~a).Name, (~a).Weight);
     fmt.Println((~(~(~a).sym).Node).Name, (~(~(~a).sym).Node).Weight);
     fmt.Println((~(~(~b).sym).Node).Name, (~b).Value);

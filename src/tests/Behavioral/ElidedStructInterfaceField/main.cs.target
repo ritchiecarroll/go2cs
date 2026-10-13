@@ -35,13 +35,16 @@ internal static void Main() {
         new(new pointerErrжerror(Ꮡ(new pointerErr("pointer-receiver"u8))), "pointer-receiver"u8),
         new(new valueErr("value-receiver"u8), "value-receiver"u8)
     }.slice();
+
     foreach (var (_, c) in cases) {
         fmt.Printf("%s | %s\n"u8, c.err.Error(), c.want);
     }
+
     var ptrCases = new ж<main_ptrCases>[]{
         Ꮡ(new main_ptrCases("embedded-pointer"u8, new pointerErrжerror(Ꮡ(new pointerErr("embedded-pointer"u8))))),
         Ꮡ(new main_ptrCases("embedded-value"u8, new valueErr("embedded-value"u8)))
     }.slice();
+
     foreach (var (_, c) in ptrCases) {
         fmt.Printf("%s | %s\n"u8, (~c).error.Error(), (~c).want);
     }

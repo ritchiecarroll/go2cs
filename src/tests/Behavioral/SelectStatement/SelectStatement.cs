@@ -85,6 +85,7 @@ internal static partial void sieve() {
         var ch1 = new channel<nint>(0);
         goǃ(filter, ch.WithDirection(GoChanDir.Recv), ch1.WithDirection(GoChanDir.Send), prime);
         ch = ch1;
+
         if (prime > 40) {
             break;
         }
@@ -108,19 +109,24 @@ private static readonly object racedˢ = (@string)"raced:"u8;
 
 internal static partial void Main() {
     var ch = new channel<nint>(2);
+
     ch.ᐸꟷ(1);
     ch.ᐸꟷ(2);
+
     fmt.Println(ᐸꟷ(ch));
     fmt.Println(ᐸꟷ(ch));
+
     var a = new slice<nint>(2);
     var ch1 = new channel<nint>(0);
     var ch2 = new channel<nint>(0);
     var ch3 = new channel<nint>(0);
     var ch4 = new channel<nint>(0);
+
     goǃ(g1, ch1);
     goǃ(g2, ch2);
     goǃ(g1, ch3);
     goǃ(g2, ch4);
+
     for (nint i = 0; i < 4; i++) {
         var selᴛ3 = ch1;
         var selᴛ4 = ch2;
@@ -144,8 +150,10 @@ internal static partial void Main() {
             break;
         }}
     }
+
     ch1 = default!;
     close(ch2);
+
     var selᴛ7 = ch1.ᐸꟷ(1, ꓸꓸꓸ);
     var selᴛ8 = ch1;
     var selᴛ9 = ch2;
@@ -172,7 +180,9 @@ internal static partial void Main() {
         fmt.Println(unexpectedˢ, a[f()]);
         break;
     }}
+
     var s = new nint[]{7, 2, 8, -9, 4, 0}.slice();
+
     var c = new channel<nint>(0);
     goǃ(sum, s.slice(0, len(s) / 2), c);
     goǃ(sum, s.slice(len(s) / 2), c);
@@ -192,14 +202,18 @@ internal static partial void Main() {
         quitʗ1.ᐸꟷ(0);
     });
     fibonacci(fΔ1, quit);
+
     var mychanl = new channel<@string>(0);
+
     goǃ(sendOnly, mychanl.WithDirection(GoChanDir.Send));
+
     var (result, ok) = ᐸꟷ(mychanl, ꟷ);
     fmt.Println(result, ok);
     foreach (var v in range(((IntSlice)s).All())) {
         fmt.Println(v);
     }
     sieve();
+
     var ca = new channel<@string>(1);
     var cb = new channel<@string>(1);
     ca.ᐸꟷ(helloˢ);
@@ -208,6 +222,7 @@ internal static partial void Main() {
     fmt.Println(poll(done));
     close(done);
     fmt.Println(poll(done));
+
     var (r, outerPrimary) = raceSend();
     fmt.Println(racedˢ, r.value, r.primary, outerPrimary);
 }

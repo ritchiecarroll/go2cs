@@ -56,21 +56,28 @@ internal static void Main() {
     (s[0], s[1]) = (1, 2);
     var stale = s[..4];
     (stale[2], stale[3]) = (99, 99);
+
     var e = extend(s, 2);
     fmt.Println(inPlaceˢ, len(e), cap(e), e, Ꮡ(e, 0) == Ꮡ(s, 0));
+
     var f = extend(s, 3);
     fmt.Println(growsˢ, len(f), cap(f), f, Ꮡ(f, 0) == Ꮡ(s, 0));
+
     slice<nint> none = default!;
     var n = extend(none, 3);
     fmt.Println(nilˢ, len(n), cap(n), n);
     fmt.Println(zeroˢ, len(extend(s, 0)), extend(default!, 0) == default!);
+
     var g = Grow(new nint[]{1, 2}.slice(), 5);
     fmt.Println(growˢ, len(g), cap(g) >= 7, g);
+
     var b = growGeneric<slice<byte>, byte>(slice<byte>("ab"u8), 2);
     fmt.Println(genericˢ, len(b), b);
     var p = growGeneric<slice<point>, point>(new point[]{new(1, 2)}.slice(), 1);
     fmt.Println(genericStructˢ, p);
+
     fmt.Println(refusedˢ, withCap(new nint[]{1}.slice(), 2), named(new nint[]{1}.slice(), 1), arrays(default!, 2));
+
     var sʗ1 = s;
     ((Action)(() => {
         GoFrame ᒐ = default;

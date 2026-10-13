@@ -66,6 +66,7 @@ func (v *Visitor) visitIdent(ident *ast.Ident, identType types.Type, name string
 	if !v.inFunction {
 		target.WriteString(v.newline)
 	}
+	v.writePendingTypeDoc(target)
 
 	// A lifted function-local type's Go name rides its accessibility record where one is written.
 	localName, localNameRecord := v.recordedLocalName(identType, getSanitizedIdentifier(name))

@@ -88,21 +88,26 @@ internal static void Main() {
     describe(pubˢ, reflect.TypeOf(new Pub(nil)));
     describe(namedˢ, reflect.TypeOf(new Named(nil)));
     describe("X"u8, reflect.TypeOf(new X(nil)));
+
     visible(pubˢ, reflect.TypeOf(new Pub(nil)));
     visible("X"u8, reflect.TypeOf(new X(nil)));
+
     var v = reflect.ValueOf(new w(new E(7)));
     fmt.Println(wErrorCanInterfaceˢ, v.Field(0).CanInterface());
     fmt.Println(wErrorElemCanInterfaceˢ, v.Field(0).Elem().CanInterface());
     fmt.Println(wErrorElemCodeˢ, v.Field(0).Elem().Field(0).CanInterface());
     fmt.Println(wErrorElemCodeˢ2, v.Field(0).Elem().Field(0).Int());
+
     var p = reflect.ValueOf(new Pub(new S(3)));
     fmt.Println(pubStringerCanInterfaceˢ, p.Field(0).CanInterface());
     fmt.Println(pubStringerElemNˢ, p.Field(0).Elem().Field(0).CanInterface());
+
     fmt.Printf("%v\n"u8, new w(new E(7)));
     fmt.Printf("%+v\n"u8, new Pub(new S(3)));
     fmt.Printf("%#v\n"u8, new w(new E(7)));
     fmt.Printf("%#v\n"u8, new Pub(new S(3)));
     fmt.Printf("%#v\n"u8, new Named(new S(3)));
+
     var twin = reflect.StructOf(new reflect.StructField[]{new(Name: "Stringer"u8, Type: reflect.TypeOf(((ж<fmt.Stringer>)nil)).Elem(), Anonymous: true)}.slice());
     var plain = reflect.StructOf(new reflect.StructField[]{new(Name: "Stringer"u8, Type: reflect.TypeOf(((ж<fmt.Stringer>)nil)).Elem())}.slice());
     fmt.Println(pubAnonymousTwinˢ, reflect.TypeOf(new Pub(nil)).ConvertibleTo(twin));
@@ -110,10 +115,12 @@ internal static void Main() {
     fmt.Println(namedAnonymousTwinˢ, reflect.TypeOf(new Named(nil)).ConvertibleTo(twin));
     fmt.Println(namedNamedTwinˢ, reflect.TypeOf(new Named(nil)).ConvertibleTo(plain));
     fmt.Println(pubNamedˢ, reflect.TypeOf(new Pub(nil)).ConvertibleTo(reflect.TypeOf(new Named(nil))));
+
     foreach (var (_, value) in new any[]{new Pub(new S(3)), new Named(new S(3)), new Tagged(new S(3), 1), new Omitted(new S(3), 1), new Pub(nil)}.slice()) {
         var (b, err) = json.Marshal(value);
         fmt.Printf("json %T: %s %v\n"u8, value, b, err);
     }
+
     foreach (var (_, value) in new any[]{new X(new E(7), 1), new Pub(new S(3)), new Named(new S(3))}.slice()) {
         var (b, err) = xml.Marshal(value);
         fmt.Printf("xml %T: %s %v\n"u8, value, b, err);

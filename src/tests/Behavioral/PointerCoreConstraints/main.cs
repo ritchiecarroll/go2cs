@@ -120,34 +120,45 @@ internal static void Main() {
     var p1 = clone<thing>(Ꮡt1);
     t1.n = 42;
     fmt.Println((~p1).n, (~p1).s, t1.n);
+
     ref var n = ref heap<nint>(out var Ꮡn);
     n = 7;
     var pn = clone<nint>(Ꮡn);
     n = 100;
     fmt.Println(pn.Value, n);
+
     var g = getThrough<thing>(Ꮡt1);
     fmt.Println(g.n, g.s);
+
     setThrough(Ꮡn, 55);
     fmt.Println(n);
+
     var pr = cloneRev<thing>(Ꮡt1);
     pr.Value.n = 9;
     fmt.Println((~pr).n, t1.n);
+
     var pa = pick<thing>(Ꮡt1, p1, true);
     fmt.Println(pa == Ꮡt1, pick<thing>(Ꮡt1, p1, false) == p1);
+
     var pc = cloneChain<nint>(Ꮡn, 3);
     n = 1000;
     fmt.Println(pc.Value, n);
+
     aliasWrite(Ꮡn, 77);
     fmt.Println(n);
+
     fmt.Println(orZero<nint>(nil), orZero<nint>(Ꮡn));
+
     setThrough<nint>(Ꮡn, 8);
     fmt.Println(n);
     var pf = clone<thing>(Ꮡt1);
     fmt.Println((~pf).s);
+
     var fv = clone<thing>;
     var pv = fv(Ꮡt1);
     t1.s = changedˢ;
     fmt.Println((~pv).s, t1.s);
+
     var pn1 = cloneNamed<thing>(Ꮡt1);
     var pn2 = cloneEmbedded<thing>(Ꮡt1);
     fmt.Println((~pn1).s, (~pn2).s);

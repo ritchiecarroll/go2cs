@@ -49,17 +49,21 @@ public static @string Tag(this Blank b) {
 
 public static (@string, bool) TryName(any v) {
     var (n, ok) = v._<Named>(ᐧ);
+
     if (!ok) {
         return ("-", false);
     }
+
     return (n.Name(), true);
 }
 
 public static (nint, bool) TrySize(any v) {
     var (s, ok) = v._<Sized>(ᐧ);
+
     if (!ok) {
         return (-1, false);
     }
+
     return (s.Size(), true);
 }
 

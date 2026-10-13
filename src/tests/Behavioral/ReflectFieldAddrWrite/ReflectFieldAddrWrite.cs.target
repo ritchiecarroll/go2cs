@@ -36,14 +36,18 @@ private static readonly @string depthˢ = "depth"u8;
 internal static void Main() {
     ref var c = ref heap<conf>(out var Ꮡc);
     c = new conf(name: "cfg"u8, version: "v0"u8, depth: 3);
+
     boolFieldAddr(Ꮡc, traceˢ).Value = true;
     stringFieldAddr(Ꮡc, versionˢ).Value = "v1"u8;
     intFieldAddr(Ꮡc, depthˢ).Value = 7;
+
     fmt.Println(c.name, c.trace, c.version, c.depth);
+
     var p1 = boolFieldAddr(Ꮡc, traceˢ);
     var p2 = boolFieldAddr(Ꮡc, traceˢ);
     p1.Value = false;
     fmt.Println(p1.Value, p2.Value, c.trace, p1 == p2);
+
     fmt.Println(c.name, c.version, c.depth);
 }
 

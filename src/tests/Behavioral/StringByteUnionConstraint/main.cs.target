@@ -51,8 +51,10 @@ internal static void Main() {
     var bs = slice<byte>(str);
     @string hel = helˢ;
     var helBytes = slice<byte>(hel);
+
     fmt.Println(sumStringˢ, byteSum(str));
     fmt.Println(sumByteˢ, byteSum(bs));
+
     fmt.Println(prefixStringˢ, prefixMatch(str, hel));
     fmt.Println(prefixByteˢ, prefixMatch(bs, helBytes));
     fmt.Println(prefixMissˢ, prefixMatch(str, xyzˢ));

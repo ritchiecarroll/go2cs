@@ -62,17 +62,21 @@ internal static void Main() {
     fmt.Println(namedNilˢ, addrOfNamed(nil));
     fmt.Println(ptrptrNilˢ, addrOfPtrPtr(nil));
     fmt.Println(basicNilˢ, addrOfBasic(nil));
+
     ref var h = ref heap(new Handle(), out var Ꮡh);
     h = 3;
     fmt.Println(namedNonnilNonzeroˢ, addrOfNamed(Ꮡh) != 0);
+
     ref var u = ref heap(new uint16(), out var Ꮡu);
     u = 9;
     ref var pu = ref heap<ж<uint16>>(out var Ꮡpu);
     pu = Ꮡu;
     fmt.Println(ptrptrNonnilNonzeroˢ, addrOfPtrPtr(Ꮡpu) != 0);
     fmt.Println(basicNonnilNonzeroˢ, addrOfBasic(Ꮡu) != 0);
+
     var (addr, val) = liveAlias(Ꮡh);
     fmt.Println(liveAliasNonzeroˢ, addr != 0, valueˢ, val, readbackˢ, h);
+
     var root = newNode(1, nil);
     var child = newNode(2, root);
     var grand = newNode(3, child);

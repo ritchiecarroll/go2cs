@@ -36,8 +36,10 @@ internal static void Main() {
             }
         }
     );
+
     var (rec, err) = r.load(r.cache, alphaˢ, (@string s) => ("-" + s, default!));
     fmt.Println((~rec).Name, (~rec).Hits, err);
+
     r.notify[hitˢ](rec, "t1"u8);
     fmt.Println(len(r.cache), (~r.cache[alphaˢ]).Hits);
 }

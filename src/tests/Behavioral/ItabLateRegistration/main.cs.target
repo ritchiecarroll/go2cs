@@ -19,13 +19,16 @@ internal static void round(@string tag) {
     q = new lib.Square(S: 4);
     ref var b = ref heap<lib.Blank>(out var Ꮡb);
     b = new lib.Blank(N: 5);
+
     for (nint i = 0; i < 3; i++) {
         var (n1, ok1) = lib.TryName(Ꮡc);
         var (n2, ok2) = lib.TryName(Ꮡq);
         fmt.Println(tag, nameˢ, i, n1, ok1, n2, ok2);
     }
+
     var (n3, ok3) = lib.TryName(Ꮡb);
     fmt.Println(tag, missˢ, n3, ok3);
+
     var (s1, ok4) = lib.TrySize(Ꮡc);
     var (s2, ok5) = lib.TrySize(Ꮡq);
     var (s3, ok6) = lib.TrySize(Ꮡb);
@@ -43,8 +46,10 @@ private static readonly @string afterˢ = "after "u8;
 
 internal static void Main() {
     round(beforeˢ);
+
     var (pn, ps) = primeLate();
     fmt.Println(primedˢ, pn, ps);
+
     round(afterˢ);
 }
 

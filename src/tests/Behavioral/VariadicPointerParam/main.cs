@@ -110,9 +110,11 @@ internal static void Main() {
     var a = Ꮡ(new box(v: 1));
     var b = Ꮡ(new box(v: 2));
     var c = Ꮡ(new box(v: 3));
+
     fmt.Println(total(a, b, c));
     fmt.Println(total());
     fmt.Println(total(a));
+
     var boxes = new ж<box>[]{a, b, c, Ꮡ(new box(v: 4))}.slice();
     fmt.Println(total(boxes.ꓸꓸꓸ));
     replaceFirst(boxes.ꓸꓸꓸ);
@@ -124,10 +126,13 @@ internal static void Main() {
     fmt.Println(deferredNamedLen(a, b, c));
     fmt.Println(capturedLen(a, b, c));
     fmt.Println(appendedLen(a, b));
+
     fmt.Println(countPtrs(@unsafe.Pointer.FromPinnedBox(a), @unsafe.Pointer.FromPinnedBox(b), @unsafe.Pointer.FromPinnedBox(c)));
     fmt.Println(countPtrs());
+
     fmt.Println(totalLens(slice<byte>("ab"u8), slice<byte>("cde"u8)));
     fmt.Println(totalLens());
+
     fmt.Println(pairTotal(a, b, c));
 }
 

@@ -85,16 +85,21 @@ internal static void Main() {
     a.Value.next = b;
     b.Value.next = c;
     c.Value.next = a;
+
     fmt.Println(sumWalk(a, 6));
     fmt.Println((~firstAfter(a, 4)).val);
+
     var seen = new map<ж<node>, bool>{};
     fmt.Println(markSeen(a, seen), markSeen(a, seen), markSeen(b, seen));
+
     var x = Ꮡ(new node(val: 100));
     var y = Ꮡ(new node(val: 20));
     x.Value.next = y;
     fmt.Println(chainˢ, walkChain(x));
+
     var dup = Ꮡ(new node(val: 5));
     fmt.Println(visitLocalˢ, visitLocal(new ж<node>[]{dup, dup, x}.slice()));
+
     slice<ж<node>> list = default!;
     list = collect(list, a);
     list = collect(list, b);

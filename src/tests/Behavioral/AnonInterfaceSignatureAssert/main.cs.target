@@ -53,12 +53,14 @@ internal static void Main() {
     var e1 = new simpleErr("boom"u8);
     var m = new multiWrap(errs: new error[]{e1}.slice());
     var s = new singleWrap(err: e1);
+
     var (ms, mm) = classify(m);
     fmt.Printf("multiWrap:  single=%v multi=%v\n"u8, ms, mm);
     var (ss, sm) = classify(s);
     fmt.Printf("singleWrap: single=%v multi=%v\n"u8, ss, sm);
     var (es, em) = classify(e1);
     fmt.Printf("simpleErr:  single=%v multi=%v\n"u8, es, em);
+
     {
         var (u, ok) = ((any)m)._<classify_typeᴛ1>(ᐧ); if (ok) {
             fmt.Println(multiUnwrapCountˢ, len(u.Unwrap()));

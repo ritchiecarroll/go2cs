@@ -41,16 +41,19 @@ private static readonly object bumpedˢ = (@string)"bumped"u8;
 internal static void Main() {
     var b = new byte[]{7, 9}.slice();
     var c = Ꮡ(new counter(nil));
+
     for (nint i = 0; i < 200; i++) {
         @string k = keeper(b, i % 2);
         @string m = c.bump();
         @string f = forward(b, 1);
+
         if (i == 0 || i == 199) {
             fmt.Println(k);
             fmt.Println(m);
             fmt.Println(f);
         }
     }
+
     fmt.Println(bumpedˢ, (~c).n);
 }
 

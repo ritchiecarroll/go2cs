@@ -21,6 +21,7 @@ internal static void Main() {
     foreach (var (_, v) in values) {
         fmt.Printf("%v %T\n"u8, v, v);
     }
+
     @string s = "v"u8;
     fmt.Printf("%v %T\n"u8, (any)(s), (any)(s));
 }

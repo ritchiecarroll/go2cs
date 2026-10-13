@@ -138,35 +138,50 @@ private static readonly object recvIfaceˢ = (@string)"recv iface  :"u8;
 internal static void Main() {
     var p = clipParam(new Rect(0, 16));
     fmt.Println(paramˢ, p.Min, p.Max);
+
     var b = bumpParamField(new Box(new Rect(1, 2), 3));
     fmt.Println(paramFieldˢ, b.R.Min, b.R.Max, b.Tag);
+
     var a = bumpParamElem(new nint[]{7, 8, 9}.array());
     fmt.Println(paramElemˢ, a[0], a[1], a[2]);
+
     var (lo, hi) = readOnlyParam(new Rect(3, 4));
     fmt.Println(paramRoˢ, lo, hi);
+
     var l = clipLocal();
     fmt.Println(localˢ, l.Min, l.Max);
+
     fmt.Println(plainˢ, plainParam(new Rect(2, 20)));
+
     var orig = new Rect(0, 16);
     var clipped = clipParam(orig);
     fmt.Println(callerˢ, orig.Min, orig.Max, (@string)"->"u8, clipped.Min, clipped.Max);
+
     var rb = new Box(new Rect(0, 16), 6);
     fmt.Println(recvˢ, rb.BumpedRecv(), callerˢ2, rb.Tag);
+
     var (rlo, rhi) = rb.ClippedRecv();
     fmt.Println(recvFieldˢ, rlo, rhi, callerˢ2, rb.R.Min, rb.R.Max);
+
     var rt = new Trio(new nint[]{7, 8, 9}.array());
     var (e0, e1, e2) = rt.BumpedElemRecv();
     fmt.Println(recvElemˢ, e0, e1, e2, callerˢ2, rt[0], rt[1], rt[2]);
+
     var rn = new Nums(new nint[]{1, 2, 3}.slice());
     fmt.Println(recvSliceˢ, rn.BumpedElemSliceRecv(), callerˢ2, rn[1]);
+
     var (rro, rrt) = rb.ReadOnlyRecv();
     fmt.Println(recvRoˢ, rro, rrt);
+
     ref var rp = ref heap<Box>(out var Ꮡrp);
     rp = new Box(new Rect(0, 16), 6);
     fmt.Println(recvPtrˢ, Ꮡrp.BumpedPtrRecv(), callerˢ2, rp.Tag);
+
     fmt.Println(recvPlainˢ, rb.PlainRecv());
+
     var rq = Ꮡ(new Box(new Rect(0, 16), 6));
     fmt.Println(recvViaPtrˢ, (~rq).BumpedRecv(), callerˢ2, (~rq).Tag);
+
     Bumper iface = new Box(new Rect(0, 16), 6);
     fmt.Println(recvIfaceˢ, iface.BumpedRecv());
 }

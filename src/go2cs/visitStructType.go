@@ -265,7 +265,12 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	if target == nil {
 		target = v.outputBuilder
 
-		if !v.inFunction {
+		// Under `-comments` a struct visitValueSpec lifts ahead of its var opens a line only when the
+		// current one is not already empty: after the line break the spec writes, or after its doc,
+		// another made a run of blank lines before the struct, or separated the doc from it
+		// (docs/PLAN-comment-and-spacing-parity.md, class L). A type declaration keeps its line break,
+		// which is what separates it from the declaration before it.
+		if !v.inFunction && !(v.options.includeComments && v.inValueSpec && v.currentLine() == "") {
 			target.WriteString(v.newline)
 		}
 	}

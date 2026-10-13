@@ -51,11 +51,15 @@ internal partial interface main_type /*dyn*/ {
 
 internal static void Main() {
     var values = new any[]{((calc)7)}.slice();
+
     var (v, ok) = values[0]._<main_type>(ᐧ);
+
     fmt.Println((@string)"ok"u8, ok);
+
     if (!ok) {
         return;
     }
+
     for (nint i = 0; i < 2; i++) {
         fmt.Println(i, v.Zero());
         fmt.Println(i, v.One(1));

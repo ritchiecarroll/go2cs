@@ -38,15 +38,19 @@ internal static void Main() {
     var p = Ꮡ(new Img(new colorlike.NRGBA(R: 0x99, G: 0x99, B: 0x99, A: 0xff)));
     var got = p.At();
     var want = new colorlike.NRGBA(R: 0x99, G: 0x99, B: 0x99, A: 0xff);
+
     fmt.Println((@string)"eq:"u8, AreEqual(got, want), AreEqual(want, got));
     fmt.Println((@string)"ne:"u8, AreEqual(got, new colorlike.NRGBA(R: 1, G: 2, B: 3, A: 4)));
+
     colorlike.Color w2 = want;
     fmt.Println(ifaceEqˢ, AreEqual(got, w2));
+
     var (v, ok) = got._<colorlike.NRGBA>(ᐧ);
     fmt.Println(assertˢ, ok, v.R, v.A);
     var (_, badOK) = got._<colorlike.Gray>(ᐧ);
     fmt.Println(assertMissˢ, badOK);
     fmt.Println(assert1ˢ, got._<colorlike.NRGBA>().G);
+
     switch (got.type()) {
     case colorlike.Gray t: {
         fmt.Println(switchˢ, grayˢ, t.Y);
@@ -61,6 +65,7 @@ internal static void Main() {
         fmt.Println(switchˢ, defaultˢ);
         break;
     }}
+
     var alt = p.Alt();
     fmt.Println(altEqˢ, AreEqual(alt, new colorlike.Gray(Y: 7)), AreEqual(alt, got));
     var (g, gok) = alt._<colorlike.Gray>(ᐧ);
@@ -74,9 +79,12 @@ internal static void Main() {
         fmt.Println(altSwitchˢ, grayˢ, t.Y);
         break;
     }}
+
     fmt.Printf("type: %T %T\n"u8, got, alt);
+
     var (r, gg, b, a) = got.RGBA();
     fmt.Println(rgbaˢ, r, gg, b, a);
+
     var seen = new map<colorlike.Color, @string>{};
     seen[got] = fromIfaceˢ;
     fmt.Println(mapˢ, seen[want], len(seen));

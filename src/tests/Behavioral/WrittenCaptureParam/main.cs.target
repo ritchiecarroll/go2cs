@@ -100,12 +100,17 @@ private static readonly object declSliceRedeclareˢ = (@string)"declSliceRedecla
 internal static void Main() {
     var a = new label(name: "alpha"u8);
     var b = new label(name: "beta"u8);
+
     var (before, after) = declRedeclare(a);
     fmt.Println(declRedeclareˢ, before, after);
+
     fmt.Println(declDeferObserverˢ, declDeferObserver(a, b));
+
     fmt.Println(declClosureWriteˢ, declClosureWrite(b));
+
     (before, after) = litRedeclare(a);
     fmt.Println(litRedeclareˢ, before, after);
+
     var (x, y) = declSliceRedeclare(new nint[]{1, 2, 3}.slice());
     fmt.Println(declSliceRedeclareˢ, x, y);
 }

@@ -72,22 +72,29 @@ internal static partial void Main() {
     ref var t = ref heap<T>(out var Ꮡt);
     t = new T(n: 1);
     var p = Ꮡt;
+
     fmt.Println(methodExpressionValueˢ, nameOf(((Func<T, nint>)(valueMethod))));
     fmt.Println(methodExpressionPointerˢ, nameOf(((Func<ж<T>, nint>)(pointerMethod))));
     fmt.Println(methodExpressionPromotedˢ, nameOf(((Func<ж<T>, nint>)([GoWrapper("(*T).valueMethod")] (p0) => valueMethod(panicwrapRecv(p0, "value method main.T.valueMethod called using nil *T pointer").Value)))));
+
     fmt.Println(methodValuePointerˢ, nameOf(p.pointerMethod));
     fmt.Println(methodValueTPointerˢ, nameOf((Ꮡt).pointerMethod));
     fmt.Println(methodValueAddressableTˢ, nameOf(Ꮡt.pointerMethod));
     fmt.Println(methodValueInsideAˢ, boundInsideLiteral(p));
+
     fmt.Println(literalReturnedByAˢ, nameOf((makeLiteral()).OrTypedNilFunc()));
     var (first, second) = twoLiterals();
     fmt.Println(firstLiteralˢ, nameOf((first).OrTypedNilFunc()));
     fmt.Println(secondLiteralˢ, nameOf((second).OrTypedNilFunc()));
+
     fmt.Println(packageFunctionˢ, nameOf(nameOf));
+
     var inMain = nint () => 3;
     fmt.Println(literalInsideMainˢ, nameOf((inMain).OrTypedNilFunc()));
+
     var (pc, _, _, _) = runtime.Caller(0);
     fmt.Println(mainSOwnFrameˢ, runtime.FuncForPC(pc).Name());
+
     fmt.Stringer s = ((named)1);
     fmt.Println(interfaceMethodValueˢ, nameOf(s.String));
 }

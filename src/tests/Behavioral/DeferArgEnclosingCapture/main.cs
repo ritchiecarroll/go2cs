@@ -40,6 +40,7 @@ private static readonly object sourceUntouchedˢ = (@string)"source untouched:"u
 internal static void Main() {
     ref var @base = ref heap<Tally>(out var Ꮡbase);
     @base = new Tally(total: 2, log: "d"u8);
+
     var baseʗ1 = @base;
     ((Action)(() => {
         GoFrame ᒐ = default;
@@ -51,6 +52,7 @@ internal static void Main() {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }))();
+
     var baseʗ2 = @base;
     ((Action)(() => {
         GoFrame ᒐ = default;
@@ -60,7 +62,9 @@ internal static void Main() {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }))();
+
     var done = new channel<bool>(0);
+
     var baseʗ3 = @base;
     var doneʗ1 = done;
     ((Action)([MethodImpl(MethodImplOptions.NoInlining)] () => {
@@ -70,7 +74,9 @@ internal static void Main() {
             doneʗ2.ᐸꟷ(true);
         }, baseʗ3);
     }))();
+
     ᐸꟷ(done);
+
     fmt.Println(sourceUntouchedˢ, @base.total, @base.log);
 }
 

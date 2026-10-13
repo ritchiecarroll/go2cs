@@ -59,15 +59,18 @@ internal static void Main() {
     var (total, log) = f(seed, 3);
     fmt.Println(assignedˢ, total, log);
     fmt.Println(callerCopyUntouchedˢ, seed.total, seed.log);
+
     var (total2, log2) = ((Func<Tally, (nint, @string)>)(tʗp => {
         ref var t = ref heap(tʗp, out var Ꮡt);
         Ꮡt.Add(7);
         return (t.total, t.log);
     }))(new Tally(total: 1, log: "i"u8));
     fmt.Println(iifeˢ, total2, log2);
+
     var @base = new Tally(total: 2, log: "d"u8);
     runDeferred(@base);
     fmt.Println(deferredSourceUntouchedˢ, @base.total, @base.log);
+
     (nint, @string) g(Tally tʗp) {
         ref var t = ref heap(tʗp, out var Ꮡt);
         void bump() {
@@ -79,6 +82,7 @@ internal static void Main() {
     }
     var (total4, log4) = g(new Tally(total: 3, log: "n"u8));
     fmt.Println(nestedˢ, total4, log4);
+
     (nint, @string) h(Tally tʗp, params ꓸꓸꓸnint nsʗp) {
         var ns = nsʗp.sslice();
         ref var t = ref heap(tʗp, out var Ꮡt);

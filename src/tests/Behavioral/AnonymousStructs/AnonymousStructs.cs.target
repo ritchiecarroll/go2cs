@@ -35,10 +35,13 @@ internal static void cycleMemo() {
     var seen = new map<any, EmptyStruct>{};
     ref var a = ref heap<nint>(out var Ꮡa);
     a = 10;
+
     var memo = new cycleMemo_memo(Ꮡa, 2);
+
     var (_, before) = seen[memo, ꟷ];
     seen[memo] = new EmptyStruct();
     var (_, after) = seen[memo, ꟷ];
+
     var got = memo.ptr._<ж<nint>>();
     fmt.Printf("cycleMemo: val=%d len=%d before=%t after=%t\n"u8, got.Value, memo.len, before, after);
 }
@@ -59,32 +62,50 @@ internal partial struct main_type /*dyn*/ {
 internal static void Main() {
     var namedPerson = new Person(Name: "Alice"u8, Age: 30);
     var anonPerson = new processAnonymousStruct_data(Name: "Bob"u8, Age: 25);
+
     any someInterface = anonPerson;
+
     var (_, ok) = someInterface._<processAnonymousStruct_data>(ᐧ);
+
     fmt.Println(anonymousStructTypeˢ, ok);
+
     someInterface = namedPerson;
+
     (_, ok) = someInterface._<processAnonymousStruct_data>(ᐧ);
+
     fmt.Println(namedStructWithIdenticalˢ, ok);
+
     fmt.Println(functionParameterTestsˢ);
+
     processAnonymousStruct(new processAnonymousStruct_data(Name: "Charlie"u8, Age: 40));
+
     processAnonymousStruct(anonPerson);
+
     processAnonymousStruct(new processAnonymousStruct_data(namedPerson.Name, namedPerson.Age));
+
     fmt.Println(packageGlobalAnonymousˢ);
     fmt.Printf("settings: Verbose=%t Retries=%d\n"u8, settings.Verbose, settings.Retries);
+
     var pRetries = Ꮡsettings.of(settingsᴛ1.ᏑRetries);
     pRetries.Value = 5;
     fmt.Printf("after &settings.Retries=5: *p=%d global=%d\n"u8, pRetries.Value, settings.Retries);
+
     fmt.Println(inFunctionVarSliceOfˢ);
+
     slice<main_type> sects = new main_type[]{
         new("text"u8, 100),
         new("data"u8, 200),
         new("syms"u8, 300)
     }.slice();
+
     var total = (uint32)0;
+
     foreach (var (_, sect) in sects) {
         total += sect.size;
     }
+
     fmt.Printf("sections=%d total=%d first=%s\n"u8, len(sects), total, sects[0].name);
+
     fmt.Println(anonymousStructWithEmptyˢ);
     cycleMemo();
 }

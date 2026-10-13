@@ -91,9 +91,11 @@ internal static void Main() {
     fmt.Println(classify(true));
     fmt.Println(classify(2.5D));
     fmt.Println(callsˢ, calls);
+
     fmt.Println(recovered(boomˢ));
     fmt.Println(recovered((nint)(9)));
     fmt.Println(recovered(1.25D));
+
     var ch = new channel<any>(1);
     ch.ᐸꟷ((nint)(5));
     fmt.Println(fromChan(ch));

@@ -23,6 +23,7 @@ internal static void Main() {
     var c = Ꮡ(new config(size: 10, tag: 3));
     var f = scaler(c);
     fmt.Println(f(5));
+
     var inc = mutate(c);
     inc();
     inc();

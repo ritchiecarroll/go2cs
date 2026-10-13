@@ -18,16 +18,20 @@ private static readonly object pointerˢ = (@string)"pointer:"u8;
 
 internal static void Main() {
     any data = new Map(new map<@string, any>{["a"u8] = (nint)(1)});
+
     {
         var (mΔ1, okΔ1) = data._<Map>(ᐧ); if (okΔ1) {
             fmt.Println(commaOkˢ, len(mΔ1), mΔ1["a"u8]);
         }
     }
+
     var m = data._<Map>();
     fmt.Println(singleˢ, m["a"u8]);
+
     any other = (nint)(5);
     var (_, ok) = other._<Map>(ᐧ);
     fmt.Println(mismatchˢ, ok);
+
     any p = Ꮡ(new point(1, 2));
     {
         var (pt, okΔ2) = p._<ж<point>>(ᐧ); if (okΔ2) {

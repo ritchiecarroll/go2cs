@@ -11,7 +11,9 @@ internal static void Main() {
     buf[1] = 0x7856;
     var l = ~Ꮡbuf.Reinterpret<array<uint16>, uint32>();
     fmt.Println(l);
+
     fmt.Println(buf[0], buf[2]);
+
     var a = (uintptr)Ꮡbuf;
     var b = (uintptr)Ꮡbuf;
     fmt.Println(a == b);

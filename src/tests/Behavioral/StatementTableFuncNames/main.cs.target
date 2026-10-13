@@ -56,6 +56,7 @@ internal static partial void table() {
         new((Ꮡ(new W(nil))).Write, "promoted method value"u8),
         new(nint () => 2, "second literal in the table"u8)
     }.slice();
+
     foreach (var (_, row) in rows) {
         fmt.Printf("%-48s %s\n"u8, row.label + ":", nameOf(row.fn));
     }

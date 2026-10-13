@@ -143,6 +143,7 @@ internal static void Main() {
     nint i = 7;
     rune r = (rune)'A';
     var f = 2.5D;
+
     fmt.Println(varLitZeroˢ, variadicEq(n, (nint)(0)));
     fmt.Println(varLitIntˢ, variadicEq(i, (nint)(7)));
     fmt.Println(varNamedˢ, variadicEq(i, (nint)(namedInt)));
@@ -153,73 +154,93 @@ internal static void Main() {
     fmt.Println(varRuneNamedˢ, variadicEq(r, (int32)(namedRune)));
     fmt.Println(varFloatLitˢ, variadicEq(f, 2.5D));
     fmt.Println(varFloatNmdˢ, variadicEq(f, (float64)(namedFloat)));
+
     fmt.Println(parLitˢ, paramEq(i, (nint)(7)));
     fmt.Println(parNamedˢ, paramEq(i, (nint)(namedInt)));
     fmt.Println(parRuneLitˢ, paramEq(r, (rune)'A'));
     fmt.Println(parFloatLitˢ, paramEq(f, 2.5D));
+
     any av = (nint)(7);
     any ar = (rune)'A';
     any af = 2.5D;
     fmt.Println(asnLitˢ, AreEqual(av, ((any)i)));
     fmt.Println(asnRuneLitˢ, AreEqual(ar, ((any)r)));
     fmt.Println(asnFloatLitˢ, AreEqual(af, ((any)f)));
+
     var sl = new any[]{(nint)(7), (rune)'A', 2.5D, (nint)(namedInt)}.slice();
     fmt.Println(slcLitˢ, AreEqual(sl[0], ((any)i)));
     fmt.Println(slcRuneLitˢ, AreEqual(sl[1], ((any)r)));
     fmt.Println(slcFloatLitˢ, AreEqual(sl[2], ((any)f)));
     fmt.Println(slcNamedˢ, AreEqual(sl[3], ((any)i)));
+
     var mk = new map<any, @string>{[(nint)(7)] = "seven"u8, [(rune)'A'] = "letter"u8, [2.5D] = "half"u8};
     fmt.Println(mapkeyLitˢ, mk[((any)i)], mk[((any)r)], mk[((any)f)]);
     fmt.Println(mapkeyLookupˢ, mk[(nint)(7)], mk[(rune)'A'], mk[2.5D], mk[(nint)(namedInt)]);
     var (_, mkMiss) = mk[(int32)7, ꟷ];
     fmt.Println(mapkeyMissˢ, mkMiss);
+
     var mv = new map<@string, any>{["i"u8] = (nint)(7), ["r"u8] = (rune)'A', ["f"u8] = 2.5D};
     fmt.Println(mapvalLitˢ, AreEqual(mv["i"u8], ((any)i)), AreEqual(mv["r"u8], ((any)r)), AreEqual(mv["f"u8], ((any)f)));
+
     var hk = new holder(v: (nint)(7));
     var hp = new holder((nint)(7));
     fmt.Println(structKeyedˢ, AreEqual(hk.v, ((any)i)));
     fmt.Println(structPositˢ, AreEqual(hp.v, ((any)i)));
+
     var ch = new channel<any>(1);
     ch.ᐸꟷ((nint)(7));
     fmt.Println(chanSendˢ, AreEqual(ᐸꟷ(ch), ((any)i)));
+
     fmt.Println(retLitˢ, AreEqual(retLit(), ((any)n)));
     fmt.Println(retNamedˢ, AreEqual(retNamed(), ((any)i)));
     fmt.Println(retRuneLitˢ, AreEqual(retRuneL(), ((any)r)));
     fmt.Println(retFloatLitˢ, AreEqual(retFloatL(), ((any)f)));
+
     nint wide = unchecked((nint)(1099511627776L));
     fmt.Println(wideLitˢ, variadicEq(wide, unchecked((nint)(1099511627776L))));
     fmt.Println(wideNamedˢ, variadicEq(wide, (nint)(namedWide)));
     fmt.Println(wideKindsˢ, kindOf(unchecked((nint)(1099511627776L))), kindOf((nint)(namedWide)));
+
     fmt.Println(kindsLitˢ, kindOf((nint)(0)), kindOf((rune)'A'), kindOf(2.5D));
     fmt.Println(kindsNamedˢ, kindOf((nint)(namedInt)), kindOf((int32)(namedRune)), kindOf((float64)(namedFloat)));
     fmt.Println(kindsValueˢ, kindOf(i), kindOf(r), kindOf(f));
+
     var (iv, iok) = ((any)(nint)(7))._<nint>(ᐧ);
     var (rv, rok) = ((any)(rune)'A')._<int32>(ᐧ);
     var (fv, fok) = ((any)2.5D)._<float64>(ᐧ);
     fmt.Println(assertLitˢ, iv, iok, rv, rok, fv, fok);
+
     @string s = seedˢ;
     fmt.Println(strVarLitˢ, variadicEq(s, seedˢ));
     fmt.Println(strVarCatˢ, variadicEq(s, (@string)("se" + "ed")));
     fmt.Println(strVarNamedˢ, variadicEq(s, namedStr), variadicEq(s, typedStr));
     fmt.Println(strParLitˢ, paramEq(s, seedˢ), paramEq(seedˢ, seedˢ));
+
     any sv = seedˢ;
     any sc = (@string)("se" + "ed");
     fmt.Println(strAsnLitˢ, AreEqual(sv, ((any)s)), AreEqual(sc, ((any)s)));
+
     var ssl = new any[]{(@string)"seed"u8, (@string)("se" + "ed")}.slice();
     fmt.Println(strSlcˢ, AreEqual(ssl[0], ((any)s)), AreEqual(ssl[1], ((any)s)));
+
     var smk = new map<any, @string>{[(@string)"seed"u8] = "hit"u8};
     fmt.Println(strMapkeyˢ, smk[seedˢ], smk[((any)s)]);
+
     var smv = new map<@string, any>{["k"u8] = (@string)"seed"u8, ["c"u8] = (@string)("se"u8 + "ed"u8)};
     fmt.Println(strMapvalˢ, AreEqual(smv["k"u8], ((any)s)), AreEqual(smv["c"u8], ((any)s)));
+
     var shk = new holder(v: (@string)"seed"u8);
     var shp = new holder((@string)"seed"u8);
     var shc = new holder(v: (@string)("se"u8 + "ed"u8));
     fmt.Println(strStructˢ, AreEqual(shk.v, ((any)s)), AreEqual(shp.v, ((any)s)), AreEqual(shc.v, ((any)s)));
+
     var sch = new channel<any>(1);
     sch.ᐸꟷ(seedˢ);
     fmt.Println(strChanˢ, AreEqual(ᐸꟷ(sch), ((any)s)));
+
     fmt.Println(strRetˢ, AreEqual(retStrL(), ((any)s)));
     fmt.Println(strConvˢ, AreEqual(((any)(@string)("seed"u8)), ((any)s)));
+
     var (stv, stok) = ((any)(@string)("seed"u8))._<@string>(ᐧ);
     fmt.Println(strAssertˢ, stv, stok);
     fmt.Println(strKindsˢ, kindOf(seedˢ), kindOf((@string)("se" + "ed")), kindOf(namedStr), kindOf(typedStr), kindOf(s));

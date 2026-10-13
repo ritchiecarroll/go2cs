@@ -33,10 +33,12 @@ private static readonly object definedTypeMethodsˢ = (@string)"defined-type met
 internal static void Main() {
     handler = other;
     fmt.Println(handler == other);
+
     ref var c = ref heap(new counter(), out var Ꮡc);
     Ꮡc.Store(10);
     _ = Ꮡc.Add(5);
     fmt.Println(definedTypeMethodsˢ);
+
     uintptr seed = 42;
     var h = ((handleT)seed);
     var k = openKey(h);

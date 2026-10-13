@@ -87,16 +87,20 @@ internal static void blankFuncValues() {
     _ = (stateFn)(lexNumber);
     _ = (Funcꓸꓸꓸ<nint, nint>)(total);
     _ = (Funcꓸꓸꓸ<@string, any, @string>)(fmt.Sprintfᶠ);
+
     var c = Ꮡ(new counter(nil));
     
     var cʗ1 = c;
     _ = (Func<nint, nint>)((nint p1) => cʗ1.bump(p1));
     _ = (Func<@string, nint>)((@string sΔ1) => len(sΔ1));
+
     var f = pair;
     _ = f;
+
     stateFn state = lexText;
     state = lexNumber;
     _ = state;
+
     var (s, _) = f(pairˢ, 1);
     fmt.Println(s, count(), total(1, 2, 3), c.bump(5));
 }

@@ -30,6 +30,7 @@ internal static slice<ж<nint>> collectPointers(slice<nint> s) {
 internal static void Main() {
     var s = new nint[]{10, 20, 30}.slice();
     fmt.Println(sumWithinIter(s));
+
     var ptrs = collectPointers(s);
     foreach (var (_, p) in ptrs) {
         fmt.Print(p.Value, (@string)" "u8);

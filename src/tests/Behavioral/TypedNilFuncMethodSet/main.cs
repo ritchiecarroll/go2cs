@@ -43,18 +43,24 @@ private static readonly object plainˢ = (@string)"plain      "u8;
 
 internal static void Main() {
     Fn fn = default!;
+
     fmt.Printf("%v\n"u8, (fn).OrTypedNilFunc());
     fmt.Println((fn).OrTypedNilFunc());
     fmt.Printf("%v\n"u8, new Fn[]{fn}.array());
     fmt.Printf("%s|%T\n"u8, (fn).OrTypedNilFunc(), (fn).OrTypedNilFunc());
+
     any x = (fn).OrTypedNilFunc();
+
     var (s, ok) = x._<fmt.Stringer>(ᐧ);
     fmt.Println(stringerˢ, ok, s != default!);
+
     if (ok) {
         fmt.Println(stringˢ, s.String());
     }
+
     (var f2, ok) = x._<Fn>(ᐧ);
     fmt.Println(concreteˢ, ok, f2 == default!);
+
     switch (x.type()) {
     case {} Δv when Δv._<fmt.Stringer>(out var v): {
         fmt.Println(switchStringerˢ, v.String());
@@ -65,8 +71,10 @@ internal static void Main() {
         fmt.Println(switchDefaultˢ);
         break;
     }}
+
     G g = default!;
     any y = (g).OrTypedNilFunc();
+
     {
         var (gg, okΔ1) = y._<Getter>(ᐧ); if (okΔ1){
             fmt.Println(getterˢ, gg.Get());
@@ -74,12 +82,16 @@ internal static void Main() {
             fmt.Println(getterMissˢ);
         }
     }
+
     (_, ok) = y._<fmt.Stringer>(ᐧ);
     fmt.Println(gStringerˢ, ok);
+
     (_, ok) = x._<Both>(ᐧ);
     fmt.Println(fnBothˢ, ok);
+
     Func<nint> plain = default!;
     any z = (plain).OrTypedNilFunc();
+
     (_, ok) = z._<fmt.Stringer>(ᐧ);
     fmt.Println(plainˢ, ok, z != default!);
     fmt.Printf("%v|%T\n"u8, (plain).OrTypedNilFunc(), (plain).OrTypedNilFunc());

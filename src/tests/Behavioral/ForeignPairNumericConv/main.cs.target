@@ -15,10 +15,13 @@ private static readonly object localToForeignˢ = (@string)"local to foreign:"u8
 
 internal static void Main() {
     var tok = convlib.NewToken(0x2A);
+
     var h = ((convlib.Handle)(uintptr)tok);
     fmt.Println(foreignPairˢ, (uintptr)h, h.String());
+
     var id = ((LocalID)(uintptr)tok);
     fmt.Println(foreignToLocalˢ, (uintptr)id);
+
     var back = ((convlib.Token)(uintptr)id);
     fmt.Println(localToForeignˢ, back.Raw());
 }

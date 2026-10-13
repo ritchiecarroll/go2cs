@@ -652,6 +652,7 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
     array<byte> tagLen = new(10);
     nint nameLenLen = writeVarint(nameLen[..], len(n));
     nint tagLenLen = writeVarint(tagLen[..], len(tag));
+
     byte bits = default!;
     nint l = 1 + nameLenLen + len(n);
     if (exported) {
@@ -664,6 +665,7 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
     if (embedded) {
         bits |= (byte)((byte)(1 << (int)(3)));
     }
+
     var b = new slice<byte>(l);
     b[0] = bits;
     copy(b[1..], nameLen.slice(0, nameLenLen));
@@ -673,6 +675,7 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
         copy(tb, tagLen.slice(0, tagLenLen));
         copy(tb.slice(tagLenLen), tag);
     }
+
     return new ΔName(Bytes: Ꮡ(b, 0));
 }
 

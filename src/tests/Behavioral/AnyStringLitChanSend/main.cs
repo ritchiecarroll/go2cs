@@ -67,6 +67,7 @@ internal static void Main() {
     ch.ᐸꟷ((nint)(42));
     describe(sendˢ, ᐸꟷ(ch));
     describe(sendˢ, ᐸꟷ(ch));
+
     var sel = new channel<any>(1);
     var selᴛ1 = sel.ᐸꟷ(selˢ, ꓸꓸꓸ);
     switch (select(selᴛ1)) {
@@ -74,16 +75,20 @@ internal static void Main() {
         describe(selectˢ, ᐸꟷ(sel));
         break;
     }}
+
     var sc = new channel<@string>(1);
     sc.ᐸꟷ(plainˢ);
     fmt.Println(stringChanˢ, ᐸꟷ(sc));
+
     var vs = new channel<speaker>(1);
     vs.ᐸꟷ(new dog(name: "rex"u8));
     fmt.Println((ᐸꟷ(vs)).speak());
+
     var ps = new channel<speaker>(1);
     var c = Ꮡ(new cat(name: "tom"u8));
     ps.ᐸꟷ(new catжspeaker(c));
     fmt.Println((ᐸꟷ(ps)).speak());
+
     var rt = new channel<any>(1);
     rt.ᐸꟷ(assertˢ);
     var got = ᐸꟷ(rt);

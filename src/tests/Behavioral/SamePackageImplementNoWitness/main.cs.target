@@ -41,15 +41,20 @@ private static readonly object localˢ = (@string)"local:"u8;
 internal static void Main() {
     ledger.Metric m = new ledger.Counter(N: 7);
     var want = new ledger.Counter(N: 7);
+
     fmt.Printf("counter: %v %T\n"u8, m, m);
+
     fmt.Println((@string)"eq:"u8, AreEqual(m, want), AreEqual(want, m));
     fmt.Println((@string)"ne:"u8, AreEqual(m, new ledger.Counter(N: 8)));
+
     ledger.Metric g = ((ledger.Gauge)4);
     fmt.Printf("gauge: %v %T %d\n"u8, g, g, g.Value());
+
     var (c, ok) = m._<ledger.Counter>(ᐧ);
     fmt.Println(assertˢ, ok, c.N);
     var (_, badOK) = m._<ledger.Gauge>(ᐧ);
     fmt.Println(assertMissˢ, badOK);
+
     switch (g.type()) {
     case ledger.Counter t: {
         fmt.Println(switchˢ, counterˢ, t.N);
@@ -64,24 +69,34 @@ internal static void Main() {
         fmt.Println(switchˢ, defaultˢ);
         break;
     }}
+
     var seen = new map<ledger.Metric, @string>{};
     seen[m] = fromIfaceˢ;
     fmt.Println(mapˢ, seen[want], len(seen));
+
     fmt.Println(callˢ, m.Value());
+
     var sc = ((ledger.Metric)((ledger.Gauge)9));
     fmt.Println(explicitˢ, sc.Value());
+
     ledger.Metric f = new ledger_MeterᴠMetric(new ledger.Meter(() => 11));
     fmt.Println(funcˢ, f.Value());
+
     ledger.Metric p = new ledger.TallyжMetric(Ꮡ(new ledger.Tally(N: 5)));
     fmt.Println(ptrˢ, p.Value());
+
     var (tp, tok) = p._<ж<ledger.Tally>>(ᐧ);
     fmt.Println(ptrAssertˢ, tok, (~tp).N);
     var (_, tbad) = p._<ledger.Counter>(ᐧ);
     fmt.Println(ptrAssertMissˢ, tbad);
+
     fmt.Println(hiddenˢ, ledger.Depth(3));
+
     fmt.Println(unexportedTargetˢ, ledger.Count(6));
+
     var b = new ledger.Box<nint>(V: 9);
     fmt.Println(genericˢ, b.Value(), b.V);
+
     fmt.Println(localˢ, new Stamp(S: "s"u8).Mark());
 }
 

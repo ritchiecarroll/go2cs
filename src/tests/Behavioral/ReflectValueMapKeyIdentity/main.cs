@@ -31,6 +31,7 @@ internal static void Main() {
         keys[k] = new EmptyStruct();
     }
     fmt.Println(distinctKeysˢ, len(keys));
+
     nint matched = 0;
     foreach (var (k, _) in keys) {
         foreach (var (_, field) in new @string[]{"Vstring"u8, "Vint"u8, "Vbool"u8}.slice()) {
@@ -40,6 +41,7 @@ internal static void Main() {
         }
     }
     fmt.Println(matchedFieldsˢ, matched);
+
     @string a = strings.Repeat("a"u8, 2);
     @string b = strings.Repeat("b"u8, 2);
     fmt.Println(differentStringsEqualˢ, reflect.ValueOf(a) == reflect.ValueOf(b));
@@ -48,9 +50,11 @@ internal static void Main() {
     ref var s2 = ref heap<pair>(out var Ꮡs2);
     s2 = new pair(b, 2);
     fmt.Println(differentStructsEqualˢ, reflect.ValueOf(s1) == reflect.ValueOf(s2));
+
     var v = reflect.ValueOf(a);
     var w = v;
     fmt.Println(copyEqualˢ, v == w);
+
     var p = Ꮡs1;
     fmt.Println(samePointerEqualˢ, reflect.ValueOf(p.OrTypedNil()) == reflect.ValueOf(p.OrTypedNil()));
     var q = Ꮡs2;
@@ -58,6 +62,7 @@ internal static void Main() {
     fmt.Println(sameMapEqualˢ, reflect.ValueOf(m) == reflect.ValueOf(m));
     var other = new map<@string, any>{};
     fmt.Println(differentMapsEqualˢ, reflect.ValueOf(m) == reflect.ValueOf(other));
+
     fmt.Println(zeroEqualˢ, new reflectꓸValue(nil) == new reflectꓸValue(nil));
 }
 

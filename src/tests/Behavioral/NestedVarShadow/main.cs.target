@@ -98,8 +98,10 @@ internal static void Main() {
     var rd = strings.NewReader("hi"u8);
     var (rn, rs) = pkgParamShadow(rd);
     fmt.Println(rn, rs);
+
     var fl = Ꮡ(new @file(ΔΔfile: strings.NewReader(xyzˢ)));
     fmt.Println(fl.readOne(), fl.readOne());
+
     fmt.Println(forwardOk());
 }
 

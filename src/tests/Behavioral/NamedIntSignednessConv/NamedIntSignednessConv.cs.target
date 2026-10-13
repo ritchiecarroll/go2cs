@@ -20,8 +20,10 @@ internal static void Main() {
     timestamp ts = 1234567890;
     var t = toTime(ts);
     fmt.Println((int64)t);
+
     var back = toTimestamp(t + 1);
     fmt.Println((uint64)back);
+
     timestamp big = 18446744073709551615UL;
     fmt.Println((int64)toTime(big));
 }

@@ -26,6 +26,7 @@ internal static void Main() {
     var nilGreetable = wrap(default!);
     var (nilGreeter, nilOk) = nilGreetable._<Greeter>(ᐧ);
     fmt.Println(nilOk, nilGreeter == default!);
+
     var realGreetable = wrap((@string name) => {
         fmt.Println(helloˢ, name);
     });

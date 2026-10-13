@@ -16,16 +16,19 @@ internal static void Main() {
         n++;
     }
     fmt.Println(n);
+
     nint m = 0;
     for (idx cΔ2 = ((idx)4); cΔ2 > ((idx)0); cΔ2--) {
         m++;
     }
     fmt.Println(m);
+
     sidx d = 3;
     d++;
     d++;
     d--;
     fmt.Println(d == ((sidx)4));
+
     var c = ((cx)complex(1D, 2D));
     c++;
     c--;

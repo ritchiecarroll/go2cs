@@ -49,26 +49,35 @@ private static readonly object b5IntResultˢ = (@string)"B5 int result:"u8;
 internal static void Main() {
     var g = slice<Value> (slice<Value> @in) => default!;
     fmt.Println(a1SliceResultˢ, g(default!) == default!, len(g(default!)));
+
     var m = map<@string, nint> (@string k) => default!;
     fmt.Println(a2MapResultˢ, applyMap(m) == default!, len(m("x"u8)));
+
     var p = ж<Value> () => default!;
     fmt.Println(a3PointerResultˢ, p() == nil);
+
     var c = channel<nint> () => default!;
     fmt.Println(a4ChanResultˢ, applyChan(c) == default!);
+
     var fn = Func<nint, nint> () => default!;
     fmt.Println(a5FuncResultˢ, applyFunc(fn) == default!);
+
     fmt.Println(a6SliceResultLambdaˢ, apply(g) == default!);
     fmt.Println(a7PointerResultLambdaˢ, applyPtr(p) == nil);
+
     var e = error (nint x) => default!;
     fmt.Println(b1ErrorResultˢ, applyErr(e) == default!);
+
     void v(@string a, @string b) {
         _ = a;
         _ = b;
     }
     v("x"u8, "y"u8);
     fmt.Println(b2VoidLambdaRanˢ);
+
     slice<Value> r() => new Value[]{new(N: 7)}.slice();
     fmt.Println(b3SliceResultNonNilˢ, r()[0].N);
+
     slice<Value> mix(bool b) {
         if (b) {
             return default!;
@@ -76,6 +85,7 @@ internal static void Main() {
         return new Value[]{new(N: 3)}.slice();
     }
     fmt.Println(b4MixedArmsˢ, mix(true) == default!, mix(false)[0].N);
+
     nint num(nint x) => x * 2;
     fmt.Println(b5IntResultˢ, num(21));
 }

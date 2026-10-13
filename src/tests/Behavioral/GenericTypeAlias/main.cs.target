@@ -40,11 +40,13 @@ internal static void Main() {
     Pair<@string, bool> sp2 = sp;
     var m = new map<nint, @string>{[1] = "one"u8};
     fmt.Println(localˢ, p, sp, sp2, m[1], swap<nint>(new Pair<nint, nint>(Key: 1, Val: 2)));
+
     Pair<@string, nint> pair = p;
     p = pair;
     any pi = p;
     var (_, isPair) = pi._<Pair<@string, nint>>(ᐧ);
     fmt.Println(identityˢ, pair, isPair);
+
     lib.Box<nint> a = new lib.Box<nint>(V: 5);
     a.Set(6);
     ref var b = ref heap(new lib.Box<nint>(), out var Ꮡb);
@@ -58,9 +60,11 @@ internal static void Main() {
     var n = new lib.Box<float64>(V: 1.5D);
     fmt.Println(crossˢ, a.Get(), b.Get(), len(s), l, f(4), lib.Twice(f, 3), n.Get());
     fmt.Println(genericˢ, lib.Sum<nint>(l), lib.Sum<float64>(new float64[]{0.5D, 0.25D}.slice()), wrap((@string)"w").Get());
+
     Pairs ps = new Pair<@string, nint>[]{new(Key: "k"u8, Val: 9)}.slice();
     GenericTypeAliasLibꓸIntBox ib = lib.NewBox<nint>(8);
     fmt.Println(plainˢ, ps, lib.Label("w"u8), lib.Unbox(ib));
+
     aliasedImport();
 }
 

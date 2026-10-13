@@ -30,11 +30,13 @@ internal static void Main() {
     var b = ((counts)c);
     b.vals[1] = 99;
     fmt.Println(toBaseˢ, c.vals[1], b.vals[1]);
+
     counts x = new();
     x.vals[2] = 7;
     var w = ((Counts)x);
     w.vals[2] = 88;
     fmt.Println(toWrapperˢ, x.vals[2], w.vals[2]);
+
     Grid g = new();
     g.cells[1][2] = 3;
     g.tags[1].vals[0] = 4;
@@ -42,6 +44,7 @@ internal static void Main() {
     h.cells[1][2] = 30;
     h.tags[1].vals[0] = 40;
     fmt.Println(nestedˢ, g.cells[1][2], g.tags[1].vals[0], h.cells[1][2], h.tags[1].vals[0]);
+
     var d = c.ΔClone();
     d.vals[1] = 11;
     fmt.Println(assignmentˢ, c.vals[1], d.vals[1]);

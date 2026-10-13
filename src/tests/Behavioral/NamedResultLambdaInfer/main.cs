@@ -24,6 +24,7 @@ internal static (slice<nint> evens, slice<nint> odds, error err) parse(slice<nin
         }
         return (e, o, default!);
     }
+
     return classify(items);
 }
 

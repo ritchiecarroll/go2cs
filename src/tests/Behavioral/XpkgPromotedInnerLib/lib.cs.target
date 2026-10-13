@@ -41,6 +41,7 @@ public static @string String(this Inner i) {
 
 public static partial bool Where(this Inner i) {
     var (_, _, _, ok) = runtime.Caller(1);
+
     return ok;
 }
 

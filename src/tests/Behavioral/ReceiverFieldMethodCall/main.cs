@@ -94,6 +94,7 @@ private static readonly object caseTwinˢ = (@string)"case twin:"u8;
 internal static void Main() {
     ref var fl = ref heap(new Flag(), out var Ꮡfl);
     fl.label = hitsˢ;
+
     Ꮡfl.Reset(10);
     fmt.Println(fl.Label(), startˢ, fl.Value());
     fmt.Println(incrˢ, Ꮡfl.Incr());

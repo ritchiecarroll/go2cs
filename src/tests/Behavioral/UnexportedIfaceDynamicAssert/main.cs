@@ -148,23 +148,28 @@ private static readonly object missˢ = (@string)"miss"u8;
 internal static void Main() {
     ref var bufs = ref heap<Buffers>(out var Ꮡbufs);
     bufs = new Buffers(new slice<byte>[]{slice<byte>("go"u8), slice<byte>("2"u8), slice<byte>("cs"u8)}.slice());
+
     var tcpSink = Ꮡ(new sink(nil));
     var tcp = Ꮡ(new TCPConn(new conn(fd: tcpSink)));
     Δio.Writer w = new TCPConnжWriter(tcp);
     var (n, err) = Ꮡbufs.WriteTo(w);
     report(tcpConnˢ, ref (tcpSink).DerefOrNull(), n, err);
+
     var connSink = Ꮡ(new sink(nil));
     var c = Ꮡ(new conn(fd: connSink));
     (n, err) = Ꮡbufs.WriteTo(new connжWriter(c));
     report(connˢ, ref (connSink).DerefOrNull(), n, err);
+
     var vsSink = Ꮡ(new sink(nil));
     var vs = new ValueSink(new valueSink(fd: vsSink));
     (n, err) = Ꮡbufs.WriteTo(vs);
     report(valueSinkˢ, ref (vsSink).DerefOrNull(), n, err);
+
     var plainSink = Ꮡ(new sink(nil));
     var p = Ꮡ(new PlainConn(new plainConn(fd: plainSink)));
     (n, err) = Ꮡbufs.WriteTo(new PlainConnжWriter(p));
     report(plainConnˢ, ref (plainSink).DerefOrNull(), n, err);
+
     {
         var (wv, ok) = w._<buffersWriter>(ᐧ); if (ok){
             ref var more = ref heap<Buffers>(out var Ꮡmore);

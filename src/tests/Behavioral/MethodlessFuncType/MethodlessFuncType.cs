@@ -39,19 +39,24 @@ private static readonly object lookupˢ = (@string)"lookup:"u8;
 
 internal static void Main() {
     ref var log = ref heap<slice<@string>>(out var Ꮡlog);
+
     var (n, rel, err) = grab("a"u8, Ꮡlog);
     consume(rel, default!);
     fmt.Println((@string)"n:"u8, n, errˢ, err == default!);
+
     var h = new holder(release: makeReleaser(fieldˢ, Ꮡlog), name: "h"u8);
     h.release(fmt.Errorf("boom"u8));
     consume(h.release, default!);
+
     Action<error> r = makeReleaser(directˢ, Ꮡlog);
     r(default!);
     consume(r, fmt.Errorf("late"u8));
+
     Func<@string, (@string, bool)> find = default!;
     find = (@string s) => (s + "!", len(s) > 0);
     var (p, okp) = find("q"u8);
     fmt.Println(lookupˢ, p, okp);
+
     foreach (var (_, line) in log) {
         fmt.Println(line);
     }

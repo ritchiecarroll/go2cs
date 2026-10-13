@@ -50,12 +50,16 @@ private static readonly object multicastIPsAreMulticastˢ = (@string)"multicast 
 
 internal static void Main() {
     fmt.Println(netInterfacesˢ);
+
     var (ifs, err) = Δnet.Interfaces();
     fmt.Println(errorˢ, err);
+
     if (err != default!) {
         return;
     }
+
     fmt.Println(interfacesReportedˢ, len(ifs) > 0);
+
     var indexesPositive = true;
     var indexesUnique = true;
     var namesNonEmpty = true;
@@ -65,9 +69,12 @@ internal static void Main() {
     var hardwareAddrsWithinMax = true;
     var sixByteHardwareAddr = false;
     nint loopbacks = 0;
+
     var seenIndex = new map<nint, bool>{};
     var seenName = new map<@string, bool>{};
+
     Δnet.Interface loopback = default!;
+
     foreach (var (_, ifi) in ifs) {
         if (ifi.Index <= 0) {
             indexesPositive = false;
@@ -76,6 +83,7 @@ internal static void Main() {
             indexesUnique = false;
         }
         seenIndex[ifi.Index] = true;
+
         if (ifi.Name == ""u8) {
             namesNonEmpty = false;
         }
@@ -86,15 +94,18 @@ internal static void Main() {
             namesUnique = false;
         }
         seenName[ifi.Name] = true;
+
         if (ifi.MTU != -1 && (ifi.MTU <= 0 || ifi.MTU > 65536)) {
             mtusPlausible = false;
         }
+
         if (len(ifi.HardwareAddr) > 8) {
             hardwareAddrsWithinMax = false;
         }
         if (len(ifi.HardwareAddr) == 6) {
             sixByteHardwareAddr = true;
         }
+
         if ((Δnet.Flags)(ifi.Flags & Δnet.FlagLoopback) != 0) {
             if (loopbacks == 0) {
                 loopback = ifi;
@@ -102,6 +113,7 @@ internal static void Main() {
             loopbacks++;
         }
     }
+
     fmt.Println(indexesPositiveˢ, indexesPositive);
     fmt.Println(indexesUniqueˢ, indexesUnique);
     fmt.Println(namesNonEmptyˢ, namesNonEmpty);
@@ -110,6 +122,7 @@ internal static void Main() {
     fmt.Println(mtUsPlausibleˢ, mtusPlausible);
     fmt.Println(hardwareAddressesWithinˢ, hardwareAddrsWithinMax);
     fmt.Println(someAdapterReportsASixˢ, sixByteHardwareAddr);
+
     fmt.Println(theLoopbackPseudoˢ);
     fmt.Println(presentˢ, loopbacks > 0);
     fmt.Println(indexPositiveˢ, loopback.Index > 0);
@@ -121,36 +134,47 @@ internal static void Main() {
     fmt.Println(multicastˢ, (Δnet.Flags)(loopback.Flags & Δnet.FlagMulticast) != 0);
     fmt.Println(notBroadcastˢ, (Δnet.Flags)(loopback.Flags & Δnet.FlagBroadcast) == 0);
     fmt.Println(notPointToPointˢ, (Δnet.Flags)(loopback.Flags & Δnet.FlagPointToPoint) == 0);
+
     fmt.Println(lookupRoundTripsˢ);
     var byIndexAgrees = true;
     var byNameAgrees = true;
+
     foreach (var (_, ifi) in ifs) {
         var (found, errΔ1) = Δnet.InterfaceByIndex(ifi.Index);
         if (errΔ1 != default! || found == nil || (~found).Index != ifi.Index || (~found).Name != ifi.Name) {
             byIndexAgrees = false;
         }
+
         (found, errΔ1) = Δnet.InterfaceByName(ifi.Name);
         if (errΔ1 != default! || found == nil || (~found).Index != ifi.Index || (~found).Name != ifi.Name) {
             byNameAgrees = false;
         }
     }
+
     fmt.Println(interfaceByIndexAgreesˢ, byIndexAgrees);
     fmt.Println(interfaceByNameAgreesˢ, byNameAgrees);
+
     (_, err) = Δnet.InterfaceByName(go2csNoSuchAdapterˢ);
     fmt.Println(unknownNameIsAnErrorˢ, err != default!);
+
     fmt.Println(netInterfaceAddrsˢ);
+
     (var addrs, err) = Δnet.InterfaceAddrs();
     fmt.Println(errorˢ, err);
+
     if (err != default!) {
         return;
     }
+
     fmt.Println(addressesReportedˢ, len(addrs) > 0);
+
     var ipsValid = true;
     var masksValid = true;
     var anycastIPsValid = true;
     var loopback4 = false;
     var loopback6 = false;
     var nonLoopback = false;
+
     foreach (var (_, addr) in addrs) {
         switch (addr.type()) {
         case ж<Δnet.IPNet> a: {
@@ -193,19 +217,23 @@ internal static void Main() {
             break;
         }}
     }
+
     fmt.Println(unicastIPsAre4Or16Bytesˢ, ipsValid);
     fmt.Println(unicastMasksAgreeWithTheˢ, masksValid);
     fmt.Println(anycastIPsAre4Or16Bytesˢ, anycastIPsValid);
     fmt.Println(presentˢ2, loopback4);
     fmt.Println(presentˢ3, loopback6);
     fmt.Println(someNonLoopbackAddressˢ, nonLoopback);
+
     fmt.Println(perInterfaceAddressesˢ);
+
     nint perInterface = 0;
     var perInterfaceErr = false;
     nint multicast = 0;
     var multicastErr = false;
     var multicastIsMulticast = true;
     var multicastIPsValid = true;
+
     foreach (var (_, vᴛ1) in ifs) {
         ref var ifi = ref heap(new Δnet.Interface(), out var Ꮡifi);
         ifi = vᴛ1;
@@ -215,11 +243,13 @@ internal static void Main() {
             perInterfaceErr = true;
         }
         perInterface += len(ua);
+
         (var ma, errΔ2) = Ꮡifi.MulticastAddrs();
         if (errΔ2 != default!) {
             multicastErr = true;
         }
         multicast += len(ma);
+
         foreach (var (_, addr) in ma) {
             var (a, ok) = addr._<ж<Δnet.IPAddr>>(ᐧ);
             if (!ok) {
@@ -235,6 +265,7 @@ internal static void Main() {
             }
         }
     }
+
     fmt.Println(addrsErrorsˢ, perInterfaceErr);
     fmt.Println(multicastAddrsErrorsˢ, multicastErr);
     fmt.Println(perInterfaceAddressesSumˢ, perInterface == len(addrs));
@@ -247,11 +278,13 @@ internal static bool printable(@string s) {
     if (s == ""u8) {
         return false;
     }
+
     foreach (var (_, r) in s) {
         if (r < 0x20 || r == 0x7f) {
             return false;
         }
     }
+
     return true;
 }
 

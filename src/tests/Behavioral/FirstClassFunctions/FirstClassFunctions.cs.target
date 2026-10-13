@@ -107,6 +107,7 @@ internal static void Main() {
         strategies[kΔ1] = stayAtK(kΔ1 + 1);
     }
     var (wins, games) = roundRobin(strategies);
+
     nint k = default!;
     foreach (var (iᴛ1, _) in strategies) {
         k = iᴛ1;
@@ -114,23 +115,29 @@ internal static void Main() {
         fmt.Printf("Wins, losses staying at k =% 4d: %s\n"u8,
             k + 1, ratioString(wins[k], games - wins[k]));
     }
+
     var converted = (Func<score, (score, bool)>)(stay);
     var (result, turnIsOver) = converted(new score(player: 3, opponent: 5, thisTurn: 7));
     fmt.Println(convertedFuncTypeCallˢ, result.player, result.opponent, result.thisTurn, turnIsOver);
+
     var m = new machine(split: (@string s) => (len(s), s + "!", default!));
     var (n, @out, serr) = m.split("hi"u8);
     fmt.Println(n, @out, serr == default!);
+
     var p = new provider(produce: (nint x) => x * 2);
     var r = new registry(h: new handler(p.produce));
     fmt.Println(r.h(21));
+
     tagged tg = new handlerᴠtagged(r.h);
     fmt.Println(tg.tag(), r.h(1));
+
     var wk = Ꮡ(new worker(n: 3));
     {
         var err = wk.initWorker(0); if (err == default!) {
             fmt.Println(wk.run(new byte[]{1, 2}.slice()), lastN.Value);
         }
     }
+
     var res = new resolver(
         lookupPackage: (@string name) => {
             if (name == "fmt"u8) {
@@ -144,12 +151,14 @@ internal static void Main() {
     );
     var (ip, found) = res.lookupPackage(fmtˢ);
     fmt.Println(ip, found, res.lookupSym(""u8, printfˢ), res.lookupSym("T"u8, "M"u8));
+
     (any, error) fetch() {
         var (ᴛ1, ᴛ2) = fetchPair();
         return (ᴛ1, ᴛ2);
     }
     var (got, gerr) = fetch();
     fmt.Println(collapseHoistˢ, got, gerr == default!);
+
     fmt.Println(passThrough());
 }
 

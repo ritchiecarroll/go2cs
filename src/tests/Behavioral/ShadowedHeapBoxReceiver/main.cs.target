@@ -30,7 +30,9 @@ internal static nint compute() {
         });
         return bΔ1.Sum();
     }
+
     nint a = inner();
+
     ref var b = ref heap(new Builder(), out var Ꮡb);
     Ꮡb.With((ж<Builder> bΔ5) => {
         bΔ5.Value.n += a;

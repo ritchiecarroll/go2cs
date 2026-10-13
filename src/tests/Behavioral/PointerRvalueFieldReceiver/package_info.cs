@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("PointerRvalueFieldReceiver.go", "PointerRvalueFieldReceiver.cs", "AAoSgAAGFJaA6oCkhIKGgoKCgoKGgoIAABCCgg==")]
+[assembly: go.GoPositionMap("PointerRvalueFieldReceiver.go", "PointerRvalueFieldReceiver.cs", "AAoSgAAGFJaA6oCkhIKWgoKCgoKWgoIAARCCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

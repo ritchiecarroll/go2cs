@@ -43,6 +43,7 @@ internal static void Main() {
             fmt.Println(valueNotWidenedOkˢ);
         }
     }
+
     fooer p = new gadgetжfooer(Ꮡ(new gadget(2)));
     {
         var (b, ok) = p._<main_type>(ᐧ); if (ok){

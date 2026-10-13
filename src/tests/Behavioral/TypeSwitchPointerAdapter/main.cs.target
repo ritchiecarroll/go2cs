@@ -106,16 +106,20 @@ internal static void Main() {
     var c = Ꮡ(new circle(r: 1));
     var q = Ꮡ(new square(s: 2));
     var d = new dot(tag: 3);
+
     fmt.Println(classify(new circleжshape(c)));
     fmt.Println(classify(new squareжshape(q)));
     fmt.Println(classify(d));
     fmt.Println(classify(default!));
+
     fmt.Println(classifyMulti(new circleжshape(c)));
     fmt.Println(classifyMulti(new squareжshape(q)));
     fmt.Println(classifyMulti(d));
+
     grow(new circleжshape(c));
     grow(new squareжshape(q));
     fmt.Println((~c).r, (~q).s);
+
     any x = c.OrTypedNil();
     switch (x.type()) {
     case ж<circle>: {

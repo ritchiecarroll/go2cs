@@ -68,19 +68,25 @@ private static readonly object bagassignˢ = (@string)"bagassign:"u8;
 internal static void Main() {
     Describer d = new Reg(new map<@string, ж<Item>>{["a"u8] = Ꮡ(new Item(Name: "alpha"u8, N: 1))});
     fmt.Println(declˢ, d.Describe());
+
     d = new Reg(new map<@string, ж<Item>>{
         ["a"u8] = Ꮡ(new Item(Name: "beta"u8, N: 2)),
         ["b"u8] = Ꮡ(new Item(Name: "gamma"u8, N: 3))
     });
     fmt.Println(assignˢ, d.Describe());
+
     Reg c = default!;
     c = new Reg(new map<@string, ж<Item>>{["a"u8] = Ꮡ(new Item(Name: "delta"u8, N: 4))});
     fmt.Println(concreteˢ, c.Describe());
+
     c["a"u8].Value.N = 40;
     fmt.Println(mutatedˢ, c.Describe());
+
     fmt.Println(argˢ, take(new Reg(new map<@string, ж<Item>>{["b"u8] = Ꮡ(new Item(Name: "epsilon"u8, N: 5))})));
+
     d = new List(new ж<Item>[]{Ꮡ(new Item(Name: "zeta"u8, N: 6)), Ꮡ(new Item(Name: "eta"u8, N: 7))}.slice());
     fmt.Println(sliceˢ, d.Describe());
+
     Describer b = new Bag(new map<@string, Describer>{["r"u8] = new Reg(new map<@string, ж<Item>>{["a"u8] = Ꮡ(new Item(Name: "theta"u8, N: 8))})});
     fmt.Println(bagdeclˢ, b.Describe());
     b = new Bag(new map<@string, Describer>{["r"u8] = new Reg(new map<@string, ж<Item>>{["a"u8] = Ꮡ(new Item(Name: "iota"u8, N: 9))}), ["s"u8] = new List(new ж<Item>[]{Ꮡ(new Item(Name: "kappa"u8, N: 10))}.slice())

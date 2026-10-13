@@ -103,19 +103,23 @@ internal static void Main() {
     var (_, lower) = e[keyˢ2, ꟷ];
     var (_, raw) = e[keyˢ, ꟷ];
     fmt.Println(exactSetRanˢ, lower, raw);
+
     var b = new Bag(new map<@string, nint>{});
     b.Add("n"u8, 2);
     b.Add("n"u8, 3);
     fmt.Println(exactAddAccumulatedˢ, b["n"u8]);
+
     var c = new Cache(new map<@string, nint>{["a"u8] = 1});
     fmt.Println(exactRemoveˢ, c.Remove("a"u8), c.Remove("a"u8), len(c));
     c["b"u8] = 2;
     c.Clear();
     fmt.Println(exactClearˢ, cleared, len(c));
     fmt.Println(exactContainsKeyˢ, c.ContainsKey(alwaysˢ), c.ContainsKey("b"u8));
+
     var h = new Hdr(new map<@string, slice<@string>>{});
     h.Set(acceptˢ, "x"u8);
     fmt.Println(controlSetˢ, len(h[acceptˢ2]), len(h[acceptˢ]));
+
     var envs = new map<@string, Env>{["x"u8] = new map<@string, @string>{}};
     envs["x"u8].Set‿(mixedˢ, "m"u8);
     var (_, nestedRaw) = envs["x"u8][mixedˢ, ꟷ];
@@ -124,16 +128,20 @@ internal static void Main() {
     var named = new main_named(m: new map<@string, Env>{["y"u8] = new map<@string, @string>{}});
     named.m["y"u8].Set‿("Q"u8, "q"u8);
     fmt.Println(nestedAssignInFieldˢ, named.m["y"u8]["Q"u8]);
+
     var pe = new PEnv(new map<@string, @string>{});
     pe.Set(lowˢ, "p"u8);
     var penvs = new map<@string, PEnv>{["z"u8] = new map<@string, @string>{}};
     penvs["z"u8].Set‿(lowˢ, "r"u8);
     fmt.Println(pointerSetˢ, pe[lowˢ2], len(pe), nestedRawˢ, penvs["z"u8][lowˢ], len(penvs["z"u8]));
+
     var u = new Uniq<@string>(new map<@string, EmptyStruct>{["a"u8] = new()});
     fmt.Println(genericRemoveˢ, u.Remove("a"u8), u.Remove("a"u8), len(u));
+
     var p = new Pipe(1);
     p.Send(4);
     fmt.Println(exactSendˢ, sends, ᐸꟷ<nint>(p));
+
     var sets = new map<@string, ΔSet>{["a"u8] = new map<@string, nint>{}};
     sets["a"u8].Set‿("k"u8, 7);
     fmt.Println(namedSetNestedˢ, sets["a"u8]["k"u8], len(sets["a"u8]));

@@ -26,16 +26,19 @@ private static readonly object lookupOtherˢ = (@string)"lookup other:"u8;
 internal static void Main() {
     var p = Ꮡ(new node(id: 1));
     var q = Ꮡ(new node(id: 2));
+
     any direct = p.OrTypedNil();
     fmt.Println(directPˢ, AreEqual(direct, p));
     fmt.Println(directPˢ2, !AreEqual(direct, p));
     fmt.Println(directQˢ, AreEqual(direct, q));
+
     error err = new nodeжerror(p);
     any widened = err;
     fmt.Println(widenedPˢ, AreEqual(widened, p));
     fmt.Println(widenedPˢ2, !AreEqual(widened, p));
     fmt.Println(pWidenedˢ, AreEqual(p, widened));
     fmt.Println(widenedQˢ, AreEqual(widened, q));
+
     fmt.Println(lookupˢ, lookup(err, p));
     fmt.Println(lookupOtherˢ, lookup(err, q));
 }
@@ -48,6 +51,7 @@ internal static @string lookup(any key, ж<node> Ꮡwant) {
     if (AreEqual(key, Ꮡwant)) {
         return foundˢ;
     }
+
     return missingˢ;
 }
 

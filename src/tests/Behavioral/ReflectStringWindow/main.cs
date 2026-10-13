@@ -34,6 +34,7 @@ internal static void Main() {
         fmt.Printf("index %d: kind=%v type=%v val=%v canAddr=%v canSet=%v\n"u8,
             i, e.Kind(), e.Type(), e.Interface(), e.CanAddr(), e.CanSet());
     }
+
     var b = new box(S: "abcdef"u8, B: slice<byte>("wxyz"u8));
     var rb = reflect.ValueOf(b);
     var sv = rb.Field(0);
@@ -41,23 +42,29 @@ internal static void Main() {
     show(named25ˢ, sv.Slice(2, 5));
     show(named0ˢ, sv.Slice(0, 0));
     show(named66ˢ, sv.Slice(6, 6));
+
     ref var plain = ref heap<reflectꓸValue>(out var Ꮡplain);
     plain = reflect.ValueOf(abcdefˢ);
     show(plain14ˢ, plain.Slice(1, 4));
+
     var full = new nint[]{0, 1, 2, 3, 4, 5, 6, 7}.slice();
     ref var rf = ref heap<reflectꓸValue>(out var Ꮡrf);
     rf = reflect.ValueOf(full);
     var t3 = rf.Slice3(2, 5, 6);
     fmt.Printf("slice3 slice: len=%d cap=%d val=%v\n"u8, t3.Len(), t3.Cap(), t3.Interface());
+
     t3.Index(0).SetInt(99);
     fmt.Printf("slice3 aliases parent: %v\n"u8, full);
+
     ref var arr = ref heap<array<nint>>(out var Ꮡarr);
     arr = new nint[]{10, 11, 12, 13, 14, 15}.array();
     var ra = reflect.ValueOf(Ꮡarr).Elem();
     var a3 = ra.Slice3(1, 3, 5);
     fmt.Printf("slice3 array: len=%d cap=%d val=%v\n"u8, a3.Len(), a3.Cap(), a3.Interface());
+
     var bs = rb.Field(1);
     fmt.Printf("bytes [1:3]: %v\n"u8, bs.Slice(1, 3).Interface());
+
     var sʗ1 = s;
 
     var plainʗ1 = plain;

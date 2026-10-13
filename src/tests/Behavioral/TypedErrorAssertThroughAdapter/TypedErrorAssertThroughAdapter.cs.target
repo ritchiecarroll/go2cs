@@ -49,8 +49,10 @@ internal static void Main() {
     var p = err._<ж<myErr>>();
     p.Value.code = 7;
     fmt.Println(ptrAssertˢ, (~p).code, err.Error());
+
     var v = valueSourced()._<valErr>();
     fmt.Println(valAssertˢ, v.tag, v.Error());
+
     {
         var (_, ok) = valueSourced()._<ж<myErr>>(ᐧ); if (ok){
             fmt.Println(ptrMissWrongˢ);
@@ -65,6 +67,7 @@ internal static void Main() {
             fmt.Println(valMissOkˢ);
         }
     }
+
     ((Action)(() => {
         GoFrame ᒐ = default;
         try {
@@ -81,6 +84,7 @@ internal static void Main() {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }))();
+
     {
         var (s, ok) = pointerSourced()._<main_type>(ᐧ); if (ok){
             fmt.Println(ifaceAssertˢ, s.Error());

@@ -20,10 +20,13 @@ private static readonly object commaokHitˢ = (@string)"commaok hit:"u8;
 internal static void mapMiss() {
     var x = entity2[notthereˢ, () => new array<rune>(2)].Clone();
     fmt.Println(missˢ, len(x), x[0], x[1]);
+
     var y = entity2[notEqualTildeˢ, () => new array<rune>(2)].Clone();
     fmt.Println(hitˢ, len(y), y[0], y[1]);
+
     var (z, ok) = entity2[alsomissingˢ, () => new array<rune>(2), ꟷ];
     fmt.Println(commaokˢ, ok, len(z), z[0], z[1]);
+
     var (w, ok2) = entity2[notEqualTildeˢ, () => new array<rune>(2), ꟷ];
     fmt.Println(commaokHitˢ, ok2, len(w), w[0], w[1]);
 }
@@ -38,6 +41,7 @@ private static readonly object nestedHitˢ = (@string)"nested hit:"u8;
 internal static void mapMissNested() {
     var n = nested[zzzˢ, () => new array<array<nint>>(2, () => new(3))].Clone();
     fmt.Println(nestedMissˢ, len(n), len(n[0]), len(n[1]), n[0][2], n[1][0]);
+
     var h = nested["a"u8, () => new array<array<nint>>(2, () => new(3))].Clone();
     fmt.Println(nestedHitˢ, len(h), len(h[0]), h[0][2], h[1][0]);
 }
@@ -53,9 +57,11 @@ internal static void namedMap() {
     quadMap nilMap = default!;
     var v = nilMap[7, () => new array<byte>(4)].Clone();
     fmt.Println(nilNamedˢ, len(v), v[0], v[3]);
+
     var empty = new quadMap(0);
     var e = empty[9, () => new array<byte>(4)].Clone();
     fmt.Println(emptyNamedˢ, len(e), e[0], e[3]);
+
     empty[9] = new byte[]{(rune)'a', (rune)'b', (rune)'c', (rune)'d'}.array();
     var (got, ok) = empty[9, () => new array<byte>(4), ꟷ];
     fmt.Println(namedHitˢ, ok, len(got), got[0], got[3]);
@@ -69,6 +75,7 @@ internal static void plainNilAndEmpty() {
     map<@string, array<rune>> nilMap = default!;
     var a = nilMap["x"u8, () => new array<rune>(2)].Clone();
     fmt.Println(nilPlainˢ, len(a), a[0], a[1]);
+
     var emptyMap = new map<@string, array<rune>>{};
     var b = emptyMap["x"u8, () => new array<rune>(2)].Clone();
     fmt.Println(emptyPlainˢ, len(b), b[0], b[1]);

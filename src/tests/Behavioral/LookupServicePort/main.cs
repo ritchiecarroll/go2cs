@@ -20,12 +20,15 @@ internal static void Main() {
         new("tcp6"u8, "https"u8),
         new("tcp"u8, "go2cs-no-such-service"u8)
     }.slice();
+
     foreach (var (_, q) in queries) {
         var (port, err) = Δnet.LookupPort(q.network, q.service);
+
         if (err != default!) {
             fmt.Printf("%s/%s -> error\n"u8, q.network, q.service);
             continue;
         }
+
         fmt.Printf("%s/%s -> %d\n"u8, q.network, q.service, port);
     }
 }

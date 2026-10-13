@@ -52,6 +52,7 @@ internal static void check(@string label, any value) {
             fmt.Println(label, readWriterNoˢ);
         }
     }
+
     {
         var (r, ok) = value._<iolike.Reader>(ᐧ); if (ok){
             fmt.Println(label, readerYesˢ, r.Read());
@@ -59,6 +60,7 @@ internal static void check(@string label, any value) {
             fmt.Println(label, readerNoˢ);
         }
     }
+
     fmt.Println(label, numMethodˢ, reflect.TypeOf(value).NumMethod());
 }
 
@@ -88,7 +90,9 @@ internal partial struct LocalPromotion_inner /*dyn*/ {
 public static void LocalPromotion() {
     var w = new LocalPromotion_inner(Reader: new iolike.Base(Tag: "local"u8));
     fmt.Println(localDirectˢ, w.Reader.Read());
+
     any v = w;
+
     {
         var (r, ok) = v._<iolike.Reader>(ᐧ); if (ok){
             fmt.Println(localAssertˢ, r.Read());
@@ -110,6 +114,7 @@ private static readonly object conflictedNumMethodˢ = (@string)"conflicted NumM
 
 internal static void checkConflicted() {
     any v = new conflicted(Base: new iolike.Base(Tag: "conf"u8));
+
     {
         var (_, ok) = v._<iolike.Reader>(ᐧ); if (ok){
             fmt.Println(conflictedReaderYesˢ);
@@ -117,6 +122,7 @@ internal static void checkConflicted() {
             fmt.Println(conflictedReaderNoˢ);
         }
     }
+
     fmt.Println(conflictedNumMethodˢ, reflect.TypeOf(v).NumMethod());
 }
 
@@ -151,6 +157,7 @@ private static readonly object valˢ = (@string)"val:"u8;
 
 internal static void checkPointerOnly() {
     any ptr = Ꮡ(new pointerOnly(nil));
+
     {
         var (rw, ok) = ptr._<iolike.ReadWriter>(ᐧ); if (ok){
             fmt.Println(pointerOnlyPtrYesˢ, rw.Write("x"u8));
@@ -158,7 +165,9 @@ internal static void checkPointerOnly() {
             fmt.Println(pointerOnlyPtrNoˢ);
         }
     }
+
     any val = new pointerOnly(nil);
+
     {
         var (_, ok) = val._<iolike.ReadWriter>(ᐧ); if (ok){
             fmt.Println(pointerOnlyValYesˢ);
@@ -166,6 +175,7 @@ internal static void checkPointerOnly() {
             fmt.Println(pointerOnlyValNoˢ);
         }
     }
+
     fmt.Println(pointerOnlyNumMethodPtrˢ, reflect.TypeOf(ptr).NumMethod(), valˢ, reflect.TypeOf(val).NumMethod());
 }
 

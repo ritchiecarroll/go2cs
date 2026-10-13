@@ -14,6 +14,7 @@ internal static void Main() {
         First: "answer"u8,
         Second: 42
     );
+
     fmt.Printf("Pair: %v, %v\n"u8, p.First, p.Second);
 }
 

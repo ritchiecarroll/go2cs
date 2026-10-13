@@ -29,12 +29,15 @@ internal static void Main() {
     foreach (var (_, tt) in tests) {
         fmt.Println(tt.name, tt.n);
     }
+
     fmt.Println(half(unchecked((nint)(4611686018427387903L))));
     fmt.Println(half(unchecked((nint)(2305843009213693948L))));
     fmt.Println(half((nint)(2147483648L - 1)));
     fmt.Println(half(2000000000 - 8));
+
     nint local = unchecked((nint)(576460752303423487L));
     fmt.Println(local);
+
     nint boundary = (nint)(2147483648L - 1);
     fmt.Println(boundary);
 }

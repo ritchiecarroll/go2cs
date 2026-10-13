@@ -53,6 +53,7 @@ internal static void Main() {
         return errΔ1;
     }
     fmt.Println(probe(8, default!), probe(3, default!));
+
     takesAFunction(new Func<@string>(foo));
     Func<@string> f = returnsAFunction();
     f();

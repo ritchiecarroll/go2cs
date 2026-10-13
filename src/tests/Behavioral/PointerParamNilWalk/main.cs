@@ -91,10 +91,13 @@ internal static void Main() {
     doubleList(list);
     fmt.Println(sumList(list));
     fmt.Println(sumList(nil));
+
     fmt.Println(sumEveryOther(list));
     fmt.Println(sumEveryOther(nil));
+
     bumpFirstViaTuple(list);
     fmt.Println(sumList(list));
+
     var @short = build(1, 2);
     fmt.Println(dropIfShort(@short, 100) == nil);
     fmt.Println(sumList(@short));

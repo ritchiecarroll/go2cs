@@ -101,15 +101,20 @@ private static readonly object guardˢ = (@string)"guard:"u8;
 internal static void Main() {
     ж<elem> e1 = default!;
     tryEager(zerovarˢ, ref (e1).DerefOrNull());
+
     tryEager(literalˢ, ref ((ж<elem>)default!).DerefOrNull());
+
     any i = nilElem().OrTypedNil();
     var e3 = i._<ж<elem>>();
     tryEager(boxedˢ, ref (e3).DerefOrNull());
+
     ref var good = ref heap<elem>(out var Ꮡgood);
     good = new elem(x: 40);
     tryEager(liveˢ, ref good);
     fmt.Println(goodXˢ, good.x);
+
     deferredFault();
+
     fmt.Println(guardˢ, nilGuard(nil));
     fmt.Println(guardˢ, nilGuard(Ꮡgood));
 }

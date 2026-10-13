@@ -52,6 +52,7 @@ private static readonly object directˢ = (@string)"direct"u8;
 internal static void Main() {
     exercise(new cellжswapper(Ꮡ(new cell(value: (nint)(1)))));
     exercise(new frozen(label: "static"u8));
+
     var c = Ꮡ(new cell(value: (nint)(42)));
     fmt.Println(c.CompareAndSwap(directˢ, (nint)(42), (nint)(43)), c.Guard("l"u8, "b"u8, 1));
 }

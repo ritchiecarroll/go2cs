@@ -59,6 +59,7 @@ internal static void Main() {
     m[i1] = 1;
     m[i2] = 2;
     fmt.Println(m);
+
     var n = new map<V, nint>();
     V v1 = new T1("foo"u8);
     V v2 = new T2("bar"u8);

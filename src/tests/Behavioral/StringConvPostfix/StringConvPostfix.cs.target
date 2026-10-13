@@ -13,22 +13,29 @@ internal static void Main() {
         b = append(b, ((@string)ch).ꓸꓸꓸ);
     }
     fmt.Println(((@string)b));
+
     var bs = new byte[]{(rune)'H', (rune)'i'}.slice();
     fmt.Println((((@string)bs))[0]);
+
     fmt.Println(len(((@string)bs)));
+
     slice<byte> m = default!;
     m = append(m, ((@string)(rune)(rune)'世').ꓸꓸꓸ);
     fmt.Println(len(m));
+
     slice<byte> eb = default!;
     eb = append(eb, ((@string)"runtime error: "u8).ꓸꓸꓸ);
     eb = append(eb, ((@string)"oops"u8).ꓸꓸꓸ);
     fmt.Println(((@string)eb), len(eb));
+
     nint tag = 7;
     fmt.Println((@string)("g=" + "\tm="), tag);
     fmt.Println((@string)("a" + "b" + "c"));
+
     sink w = default!;
     w = append(w, (byte)((rune)'h'), (byte)((rune)'i'));
     fmt.Println(((@string)(slice<byte>)w), len(w));
+
     var glyphs = new map<@string, rune>{
         ["frak"u8] = (rune)0x1D504,
         ["ae"u8] = (rune)'\U000000C6'

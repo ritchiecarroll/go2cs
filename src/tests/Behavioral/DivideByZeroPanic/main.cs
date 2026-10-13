@@ -72,10 +72,13 @@ internal static bool /*ok*/ outerGuard(nint a, nint b) {
 internal static void Main() {
     var (q, rec) = safeDiv(10, 2);
     fmt.Println(q, rec);
+
     var (q2, rec2) = safeDiv(7, 0);
     fmt.Println(q2, rec2);
+
     var (m, mrec) = safeMod(9, 0);
     fmt.Println(m, mrec);
+
     fmt.Println(outerGuard(4, 2));
     fmt.Println(outerGuard(4, 0));
 }

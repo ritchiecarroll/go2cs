@@ -34,10 +34,12 @@ internal static void Main() {
     var b = Ꮡ(new item(name: "beta"u8));
     table = addItem(table, a);
     table = addItem(table, b);
+
     foreach (var (_, e) in table) {
         var (it, err) = e.get();
         fmt.Println((~it).name, err);
     }
+
     fmt.Println((~pick(a)()).name);
     fmt.Println((~passthrough(b)).name);
 }

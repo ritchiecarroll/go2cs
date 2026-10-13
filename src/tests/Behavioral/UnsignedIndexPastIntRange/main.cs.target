@@ -60,6 +60,7 @@ internal static void Main() {
     ref var nk = ref heap<block>(out var Ꮡnk);
     nk = new block(new byte[]{1, 2, 3, 4}.array());
     var pa = Ꮡa;
+
     uint64 u64 = (uint64)(4294967296L + 5);
     uint32 u32 = unchecked((uint32)(4294967295UL));
     nuint u = unchecked((nuint)(9223372036854775810UL));
@@ -68,12 +69,14 @@ internal static void Main() {
     uint32 in32 = 7;
     uint64 in64 = 2;
     uint8 b8 = 250;
+
     @try(stringUint64ˢ, () => s[u64]);
     @try(stringUintˢ, () => s[u]);
     @try(stringUintptrˢ, () => s[up]);
     @try(stringInt64ˢ, () => s[(nint)(i64)]);
     @try(stringUint32ˢ, () => s[u32]);
     @try(namedStringUint64ˢ, () => np[u64]);
+
     var bʗ1 = b;
     @try(sliceUintˢ, () => bʗ1[u]);
     var bʗ2 = b;
@@ -93,6 +96,7 @@ internal static void Main() {
     });
     var paʗ1 = pa;
     @try(pointerToArrayUintˢ, () => paʗ1.Value[u]);
+
     @try(stringInRangeˢ, () => s[in32]);
     var bʗ5 = b;
     @try(sliceInRangeˢ, () => bʗ5[in64]);

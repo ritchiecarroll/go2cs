@@ -57,10 +57,13 @@ internal static void use<T>(T v)
 {
     var c = v.Clone();
     fmt.Println(c.Name(), c.Size(), v.Name(), v.Size());
+
     var ok = v.Each(leafˢ, (T child) => {
         fmt.Println(eachˢ, child.Name(), child.Size());
     });
+
     var picked = v.Pick(T () => v.Clone());
+
     fmt.Println(ok, picked.Name(), picked.Size());
 }
 
@@ -84,16 +87,21 @@ private static readonly @string outerˢ = "outer"u8;
 internal static void Main() {
     use<ImplжConstrained>(Ꮡ(new Impl("alpha"u8, 1)));
     use<ImplжConstrained>(Ꮡ(new Impl("beta"u8, 10)));
+
     fmt.Println(second<ImplжConstrained>(Ꮡ(new Impl("gamma"u8, 100))));
+
     callback<ImplжConstrained>(Ꮡ(new Impl("delta"u8, 1000)), (ImplжConstrained tΔ1Δp, nint mode) => {
         var tΔ1 = (ж<Impl>)tΔ1Δp;
         fmt.Println(tΔ1.Name(), tΔ1.Size(), mode);
     });
+
     @string t = outerˢ;
+
     callback<ImplжConstrained>(Ꮡ(new Impl("epsilon"u8, 2000)), (ImplжConstrained tΔ2Δp, nint mode) => {
         var tΔ2 = (ж<Impl>)tΔ2Δp;
         fmt.Println(tΔ2.Name(), tΔ2.Size(), mode);
     });
+
     fmt.Println(t);
 }
 

@@ -29,6 +29,7 @@ internal static void Main() {
         c.add(more.ꓸꓸꓸ);
     });
     fmt.Println((~s).buf);
+
     var t = Ꮡ(new sink(nil));
     t.add(7);
     t.add((byte)(rune)'A', (byte)(rune)'B');

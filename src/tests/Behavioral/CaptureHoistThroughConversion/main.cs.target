@@ -43,12 +43,14 @@ internal static partial void Main() {
         @out.ᐸꟷ(fmt.Sprint(aʗ1[0], i));
     })), (nint)(10));
     fmt.Println(ᐸꟷ(@out));
+
     var b = new @string[]{"b="u8}.slice();
     var bʗ1 = b;
     goǃ(run, new Handler((nint i) => {
         @out.ᐸꟷ(fmt.Sprint(bʗ1[0], i));
     }), (nint)(20));
     fmt.Println(ᐸꟷ(@out));
+
     var hc = new channel<Handler>(1);
     var c = new @string[]{"c="u8}.slice();
     var cʗ1 = c;
@@ -57,6 +59,7 @@ internal static partial void Main() {
     }));
     (ᐸꟷ(hc))(30);
     fmt.Println(ᐸꟷ(@out));
+
     var fc = new channel<Action<nint>>(1);
     var d = new @string[]{"d="u8}.slice();
     var dʗ1 = d;
@@ -65,6 +68,7 @@ internal static partial void Main() {
     });
     (ᐸꟷ(fc))(40);
     fmt.Println(ᐸꟷ(@out));
+
     var ic = new channel<Iface>(1);
     var e = new @string[]{"e="u8}.slice();
     var eʗ1 = e;
@@ -73,14 +77,17 @@ internal static partial void Main() {
     })));
     (ᐸꟷ(ic)).Do(50);
     fmt.Println(ᐸꟷ(@out));
+
     var f = new @string[]{"f="u8}.slice();
     var fʗ1 = f;
     run(new Handler((nint i) => {
         @out.ᐸꟷ(fmt.Sprint(fʗ1[0], i));
     }), 60);
     fmt.Println(ᐸꟷ(@out));
+
     makeHandler(new @string[]{"g="u8}.slice())(70);
     fmt.Println(ᐸꟷ(@out));
+
     var h = new @string[]{"h="u8}.slice();
     var hʗ1 = h;
     ((Action)(() => {
@@ -95,6 +102,7 @@ internal static partial void Main() {
         finally { ᒐ.Run(); }
     }))();
     fmt.Println(ᐸꟷ(@out));
+
     var i9 = new @string[]{"i="u8}.slice();
     var i9ʗ1 = i9;
     var hv = new Handler((nint i) => {
@@ -102,6 +110,7 @@ internal static partial void Main() {
     });
     hv(90);
     fmt.Println(ᐸꟷ(@out));
+
     var j = new @string[]{"j="u8}.slice();
     var jʗ1 = j;
     goǃ(runBare, (nint i) => {

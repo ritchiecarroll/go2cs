@@ -42,16 +42,20 @@ internal static void Main() {
     ref var t = ref heap<T>(out var Ꮡt);
     t = new T(n: 1);
     var p = Ꮡt;
+
     var tʗ1 = t;
     fmt.Println(methodValueValueReceiverˢ, nameOf(() => tʗ1.valueMethod()));
     var recvʗ1 = ~p;
     fmt.Println(methodValueViaPointerˢ, nameOf(() => recvʗ1.valueMethod()));
+
     var literal = () => Ꮡt.Value.valueMethod();
     fmt.Println(literalCallingTheSameˢ, nameOf((literal).OrTypedNilFunc()));
+
     var tʗ2 = t;
     var bound = () => tʗ2.valueMethod();
     t.n = 2;
     fmt.Println(boundReceiverIsACopyˢ, bound());
+
     var tʗ3 = t;
     call(() => tʗ3.walk());
 }

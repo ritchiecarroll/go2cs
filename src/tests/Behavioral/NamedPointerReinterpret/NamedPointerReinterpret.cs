@@ -61,14 +61,18 @@ internal static void Main() {
     var pv = pb.Reinterpret<@base, view>();
     var bb = ((@base)(pv.Value));
     fmt.Println(bb.a, bb.b);
+
     any boxed = ((intRef)nil);
     fmt.Println(classify(boxed));
     ref var n = ref heap<int64>(out var Ꮡn);
     n = (int64)5;
     intRef r = Ꮡn;
     fmt.Println(r.Value, classify(r));
+
     fmt.Println(consume(abcdˢ));
+
     fmt.Println(sliceToArray(new byte[]{1, 2, 3, 4}.slice()));
+
     var v2 = new view(new @base(a: 5, b: 6));
     fmt.Println(v2.a + v2.b);
 }

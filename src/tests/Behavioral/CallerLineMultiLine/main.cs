@@ -94,25 +94,33 @@ internal static void Main() {
     show(false, pkgSliceˢ, pkgSlice);
     show(false, pkgSumˢ, pkgSum);
     show(false, pkgStructsˢ, pkgStructs);
+
     (Ꮡ(new chain(nil))).Add(1).Add(2).Add(3).Done("S1"u8);
+
     show(false, (@string)"S2"u8, three(line(),
         line(),
         line()));
+
     nint sum = line() + line() + line();
     show(false, (@string)"S3"u8, sum);
+
     var f = line;
     show(false, (@string)"S4"u8, f(),
         f());
+
     impl im = default!;
     show(false, (@string)"S5"u8, im.Line(),
         im.Line());
+
     if (rec(line()) && rec(line())) {
         show(true, (@string)"S6"u8, recorded);
     }
+
     var local = new nint[]{line(),
         line()
     }.slice();
     show(false, (@string)"S7"u8, local);
+
     show(false, (@string)"S8"u8, ret());
 }
 

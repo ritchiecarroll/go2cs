@@ -57,7 +57,9 @@ private static readonly object nilInterfaceMissesˢ = (@string)"nil interface mi
 
 internal static void Main() {
     readCloser rc = new connжreadCloser(Ꮡ(new conn(data: "init"u8)));
+
     reader r = new readCloserᴠreader(rc);
+
     {
         var (p, ok) = r._<ж<conn>>(ᐧ); if (ok){
             p.Value.data = mutatedˢ;
@@ -66,8 +68,10 @@ internal static void Main() {
             fmt.Println(chainAssertMissedˢ);
         }
     }
+
     fmt.Println(throughChainˢ, r.Read());
     fmt.Println(throughSourceˢ, rc.Close());
+
     switch (r.type()) {
     case ж<conn> v: {
         fmt.Println(switchConnˢ, (~v).data);
@@ -78,8 +82,10 @@ internal static void Main() {
         fmt.Println(switchDefaultˢ);
         break;
     }}
+
     readCloser vrc = new valConn(tag: "v1"u8);
     reader vr = new readCloserᴠreader(vrc);
+
     {
         var (_, ok) = vr._<ж<conn>>(ᐧ); if (ok){
             fmt.Println(valueChainWronglyˢ);
@@ -87,6 +93,7 @@ internal static void Main() {
             fmt.Println(valueChainMissesConnˢ, vr.Read());
         }
     }
+
     {
         var (v, ok) = vr._<valConn>(ᐧ); if (ok){
             fmt.Println(valueChainAssertsValConnˢ, v.tag);
@@ -94,6 +101,7 @@ internal static void Main() {
             fmt.Println(valueChainMissedValConnˢ);
         }
     }
+
     switch (vr.type()) {
     case ж<conn> v: {
         fmt.Println(valueSwitchWronglyˢ, (~v).data);
@@ -108,6 +116,7 @@ internal static void Main() {
         fmt.Println(valueSwitchDefaultˢ);
         break;
     }}
+
     reader empty = default!;
     {
         var (_, ok) = empty._<ж<conn>>(ᐧ); if (ok){

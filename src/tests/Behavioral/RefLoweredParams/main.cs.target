@@ -110,27 +110,34 @@ internal static void Main() {
     addTo(ref total, 5);
     addTo(ref total, 7);
     fmt.Println(totalˢ, total);
+
     ref var v = ref heap<vec>(out var Ꮡv);
     v = new vec(x: 1, y: 2);
     scale(ref v, 3);
     fmt.Println(vecˢ, v.x, v.y);
+
     var p = Ꮡv;
     @double(ref (p).DerefOrNull());
     fmt.Println(vec2ˢ, v.x, v.y);
+
     var arr = new uint64[]{10, 20, 30}.array();
     addTo(ref arr[1], 1);
     fmt.Println(arrˢ, arr[0], arr[1], arr[2]);
+
     var ᴛ1 = new vec(x: 4, y: 5);
     showVec(ref ᴛ1);
+
     deferReads();
     fmt.Println(deferWroteˢ, deferWrites());
     fmt.Println(goSetˢ, goWrites());
+
     var f = boxedBump;
     ref var n = ref heap(new uint64(), out var Ꮡn);
     n = 9;
     f(Ꮡn);
     boxedBump(Ꮡn);
     fmt.Println((@string)"n:"u8, n);
+
     fmt.Println(guardedNilˢ, guarded(nil));
     ref var g = ref heap(new uint64(), out var Ꮡg);
     g = 8;

@@ -55,19 +55,24 @@ private static readonly @string relˢ = "Rel"u8;
 internal static void Main() {
     @string root = filepath.Join(os.TempDir(), fmt.Sprintf("go2cs_findfirstfile_%d"u8, os.Getpid()));
     os.RemoveAll(root);
+
     build(root);
+
     foreach (var (_, d) in dirs) {
         fmt.Printf("-- enumerate %s --\n"u8, ascii(shown(d.rel)));
         foreach (var (_, e) in enumerate(filepath.Join(root, d.rel))) {
             fmt.Printf("%s alt=%s dir=%v size=%d mtime=%d\n"u8, ascii(e.name), ascii(e.alt), e.isDir, e.size, e.mtime);
         }
     }
+
     fmt.Println(singleLookupˢ);
     var one = lookup(filepath.Join(root, readMeTxtˢ));
     fmt.Printf("%s alt=%s dir=%v size=%d mtime=%d\n"u8, ascii(one.name), ascii(one.alt), one.isDir, one.size, one.mtime);
+
     fmt.Println(missingˢ);
     var (_, err) = find(filepath.Join(root, noSuchFileTxtˢ));
     fmt.Println(AreEqual(err, syscall.ERROR_FILE_NOT_FOUND));
+
     fmt.Println(canonicalCaseˢ);
     (var rootEval, err) = filepath.EvalSymlinks(root);
     if (err != default!) {
@@ -84,6 +89,7 @@ internal static void Main() {
         }
         fmt.Println(ascii(rel));
     }
+
     os.RemoveAll(root);
 }
 
@@ -100,6 +106,7 @@ internal static void build(@string root) {
             }
         }
     }
+
     foreach (var (_, f) in files) {
         var body = new slice<byte>(f.size);
         foreach (var (i, _) in body) {
@@ -111,6 +118,7 @@ internal static void build(@string root) {
             }
         }
     }
+
     foreach (var (_, f) in files) {
         {
             var err = os.Chtimes(filepath.Join(root, f.rel), f.stamp, f.stamp); if (err != default!) {
@@ -139,12 +147,15 @@ internal static slice<entry> enumerate(@string dir) {
         if (err != default!) {
             fatal(utf16PtrFromStringˢ, err);
         }
+
         ref var data = ref heap(new syscall.Win32finddata(), out var Ꮡdata);
+
         (var h, err) = syscall.FindFirstFile(pattern, Ꮡdata);
         if (err != default!) {
             fatal(findFirstFileˢ, err);
         }
         defer(syscall.FindClose, h, ref ᒐ);
+
         slice<entry> @out = default!;
         while (ᐧ) {
             {
@@ -161,6 +172,7 @@ internal static slice<entry> enumerate(@string dir) {
                 }
             }
         }
+
         var outʗ1 = @out;
         sort.Slice(@out, (nint i, nint j) => outʗ1[i].name < outʗ1[j].name);
         return @out;
@@ -182,12 +194,15 @@ internal static (entry, error) find(@string path) {
     if (err != default!) {
         return (new entry(nil), err);
     }
+
     ref var data = ref heap(new syscall.Win32finddata(), out var Ꮡdata);
+
     (var h, err) = syscall.FindFirstFile(p, Ꮡdata);
     if (err != default!) {
         return (new entry(nil), err);
     }
     syscall.FindClose(h);
+
     var (e, _) = toEntry(Ꮡdata);
     return (e, default!);
 }
@@ -230,6 +245,7 @@ private static readonly @string hexDigitsᶜ = "0123456789abcdef"u8;
 
 internal static @string ascii(@string s) {
     @string hexDigits = hexDigitsᶜ;
+
     var @out = new slice<byte>(0, len(s));
     foreach (var (_, r) in s) {
         if (r >= 0x20 && r < 0x7f) {

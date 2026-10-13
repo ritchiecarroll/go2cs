@@ -13,6 +13,7 @@ private static readonly object lineˢ = (@string)"line:"u8;
 
 internal static void flush(this ref tracker t) {
     fmt.Printf("flush: %d lines\n"u8, len(t.lines));
+
     foreach (var (_, l) in t.lines) {
         fmt.Println(lineˢ, l);
     }

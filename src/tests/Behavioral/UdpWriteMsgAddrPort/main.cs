@@ -51,9 +51,12 @@ internal static void writeMsgAddrPortRoundTrip(@string network, @string host) {
         defer(() => serverʗ1.Close(), ref ᒐ);
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         fmt.Printf("addrport %s: available=true\n"u8, network);
+
         var target = netip.AddrPortFrom(netip.MustParseAddr(host), (uint16)(~server.LocalAddr()._<ж<Δnet.UDPAddr>>()).Port);
         var clientPort = (uint16)(~client.LocalAddr()._<ж<Δnet.UDPAddr>>()).Port;
+
         var payload = slice<byte>("write-msg-addr-port-payload"u8);
         var buf = new slice<byte>(64);
         nint writes = 0;
@@ -62,13 +65,16 @@ internal static void writeMsgAddrPortRoundTrip(@string network, @string host) {
         nint sender = 0;
         nint oob0 = 0;
         nint flag0 = 0;
+
         for (nint i = 0; i < rounds; i++) {
             _ = new slice<byte>(512);
+
             var (n, oobn, err) = client.WriteMsgUDPAddrPort(payload, default!, target);
             if (err != default! || n != len(payload) || oobn != 0) {
                 break;
             }
             writes++;
+
             server.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
             (var rn, var roobn, var flags, var from, err) = server.ReadMsgUDPAddrPort(buf, default!);
             if (err != default!) {
@@ -88,6 +94,7 @@ internal static void writeMsgAddrPortRoundTrip(@string network, @string host) {
                 flag0++;
             }
         }
+
         fmt.Printf("addrport %s: writes=%d reads=%d bytes=%d sender=%d oobn0=%d flags0=%d\n"u8,
             network, writes, reads, bytes, sender, oob0, flag0);
     }
@@ -107,9 +114,12 @@ internal static void writeMsgUDPRoundTrip(@string network, @string host) {
         defer(() => serverʗ1.Close(), ref ᒐ);
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         fmt.Printf("udpaddr %s: available=true\n"u8, network);
+
         var target = server.LocalAddr()._<ж<Δnet.UDPAddr>>();
         nint clientPort = client.LocalAddr()._<ж<Δnet.UDPAddr>>().Value.Port;
+
         var payload = slice<byte>("write-msg-udpaddr-payload"u8);
         var buf = new slice<byte>(64);
         nint writes = 0;
@@ -118,13 +128,16 @@ internal static void writeMsgUDPRoundTrip(@string network, @string host) {
         nint sender = 0;
         nint oob0 = 0;
         nint flag0 = 0;
+
         for (nint i = 0; i < rounds; i++) {
             _ = new slice<byte>(512);
+
             var (n, oobn, err) = client.WriteMsgUDP(payload, default!, target);
             if (err != default! || n != len(payload) || oobn != 0) {
                 break;
             }
             writes++;
+
             server.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L)));
             (var rn, var roobn, var flags, var from, err) = server.ReadMsgUDP(buf, default!);
             if (err != default!) {
@@ -144,6 +157,7 @@ internal static void writeMsgUDPRoundTrip(@string network, @string host) {
                 flag0++;
             }
         }
+
         fmt.Printf("udpaddr %s: writes=%d reads=%d bytes=%d sender=%d oobn0=%d flags0=%d\n"u8,
             network, writes, reads, bytes, sender, oob0, flag0);
     }

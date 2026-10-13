@@ -28,6 +28,7 @@ internal static void Main() {
     m.Store((@string)"a"u8, (nint)(1));
     var (v, ok) = m.Load((@string)"a"u8);
     fmt.Println(v, ok);
+
     var d = newDirect();
     d.Store((@string)"b"u8, (nint)(2));
     (v, ok) = d._<ж<Δsync.Map>>().Load((@string)"b"u8);

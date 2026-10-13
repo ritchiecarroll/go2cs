@@ -48,17 +48,21 @@ internal static void Main() {
     var got = typedCastDeref(Ꮡsrc);
     got[0] = 99;
     fmt.Println(copyˢ, got, originalˢ, src);
+
     ref var pair = ref heap(new array<uintptr>(2), out var Ꮡpair);
 
     pair = new uintptr[]{7, 8}.array();
     var gotPair = typedCastDerefDirect(Ꮡpair);
     gotPair[1] = 77;
     fmt.Println(directCopyˢ, gotPair, originalˢ, pair);
+
     var h = typedCastDerefIntoStruct(Ꮡsrc);
     h.r[2] = 33;
     fmt.Println(structFieldCopyˢ, h.r, originalˢ, src);
+
     typedCastDerefAssign(Ꮡsrc);
     fmt.Println(assignedThroughˢ, src);
+
     ref var r = ref heap(new Row(), out var Ꮡr);
     ref var u = ref heap(new array<uintptr>(2), out var Ꮡu);
     _ = castDerefReturn(@unsafe.Pointer.FromPinnedBox(Ꮡr));

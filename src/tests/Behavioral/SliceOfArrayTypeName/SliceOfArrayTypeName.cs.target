@@ -42,11 +42,13 @@ internal static void Main() {
     show(map2IntIntˢ, new map<array<nint>, slice<nint>>{[new nint[]{}.array(2)] = default!});
     show(gridˢ, GoReflect.WithElemDims(new Grid[]{new nint[]{}.array(3)}.slice(), 3));
     show(byteˢ, new ж<array<byte>>[]{Ꮡ(new byte[]{}.array(4))}.slice());
+
     ref var unexportedOnly = ref heap<main_unexportedOnly>(out var ᏑunexportedOnly);
     ref var mixedExportedness = ref heap<main_mixedExportedness>(out var ᏑmixedExportedness);
     fmt.Println(ifaceUnexportedˢ, reflect.TypeOf(ᏑunexportedOnly).Elem().String());
     fmt.Println(ifaceMixedˢ, reflect.TypeOf(ᏑmixedExportedness).Elem().String());
     fmt.Println(ifaceEmptyˢ, reflect.TypeOf(@new<any>()).Elem().String());
+
     fmt.Printf("slice-of-array Elem().String()=%s Len()=%d\n"u8,
         reflect.TypeOf(GoReflect.WithElemDims(new array<uint8>[]{new uint8[]{}.array(6)}.slice(), 6)).Elem().String(),
         reflect.TypeOf(GoReflect.WithElemDims(new array<uint8>[]{new uint8[]{}.array(6)}.slice(), 6)).Elem().Len());

@@ -44,13 +44,16 @@ internal static partial void Main() {
         fmt.Println(notLinuxNothingToObserveˢ);
         return;
     }
+
     if (os.Geteuid() != 0) {
         fmt.Println(skipNeedsRootThisSeamˢ);
         return;
     }
+
     var tidCh = new channel<nint>(0);
     var release = new channel<EmptyStruct>(0);
     var done = new channel<@string>(0);
+
     var doneʗ1 = done;
     var releaseʗ1 = release;
     var tidChʗ1 = tidCh;
@@ -67,22 +70,28 @@ internal static partial void Main() {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     nint parked = ᐸꟷ(tidCh);
     nint self = syscall.Gettid();
+
     fmt.Println(beforeMainˢ, gidLine(self));
     fmt.Println(beforeParkedˢ, gidLine(parked));
+
     {
         var err = syscall.Setegid(1); if (err != default!) {
             fmt.Println(setegid1Failedˢ, err);
             return;
         }
     }
+
     @string mainAfter = gidLine(self);
     fmt.Println(afterMainˢ, mainAfter);
+
     close(release);
     @string parkedAfter = ᐸꟷ(done);
     fmt.Println(afterParkedˢ, parkedAfter);
     fmt.Println(theParkedThreadFollowedˢ, parkedAfter == mainAfter);
+
     {
         var err = syscall.Setegid(0); if (err != default!) {
             fmt.Println(restoreFailedˢ, err);
