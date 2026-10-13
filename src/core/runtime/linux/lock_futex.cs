@@ -38,6 +38,7 @@ internal static bool notetsleep(ж<note> Ꮡn, int64 ns) {
     if (gp != (~(~gp).m).g0 && (~(~gp).m).preemptoff != ""u8) {
         @throw(notetsleepNotOnG0ˢ);
     }
+
     return notetsleep_internal(Ꮡn, ns);
 }
 
@@ -57,6 +58,7 @@ internal static void semacreate(ref m mp) {
 //go:nosplit
 internal static int32 semasleep(int64 ns) {
     var mp = getg().Value.m;
+
     for (var v = atomic.Xadd(mp.of(m.Ꮡwaitsema), -1); ᐧ ; v = atomic.Load(mp.of(m.Ꮡwaitsema))) {
         if ((int32)v >= 0) {
             return 0;

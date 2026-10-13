@@ -87,7 +87,9 @@ internal static void writeHeader(this ref ResponseRecorder rw, slice<byte> b, @s
     if (len(str) > 512) {
         str = str[..512];
     }
+
     var m = rw.Header();
+
     var (_, hasType) = m[contentTypeˢ, ꟷ];
     var hasTE = m.Get(transferEncodingˢ) != ""u8;
     if (!hasType && !hasTE) {
@@ -96,6 +98,7 @@ internal static void writeHeader(this ref ResponseRecorder rw, slice<byte> b, @s
         }
         m.Set(contentTypeˢ, http.DetectContentType(b));
     }
+
     rw.WriteHeader(200);
 }
 
@@ -141,6 +144,7 @@ public static void WriteHeader(this ref ResponseRecorder rw, nint code) {
     if (rw.wroteHeader) {
         return;
     }
+
     checkWriteHeaderCode(code);
     rw.Code = code;
     rw.wroteHeader = true;
@@ -203,6 +207,7 @@ public static ж<http.Response> Result(this ref ResponseRecorder rw) {
         res.Value.Body = http.NoBody;
     }
     res.Value.ContentLength = parseContentLength((~res).Header.Get(contentLengthˢ));
+
     {
         var (trailers, ok) = rw.snapHeader[trailerˢ, ꟷ]; if (ok) {
             res.Value.Trailer = new httpꓸHeader(len(trailers));

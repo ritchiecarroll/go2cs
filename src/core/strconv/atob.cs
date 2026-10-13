@@ -19,7 +19,6 @@ public static (bool, error) ParseBool(@string str) {
     if (exprᴛ1 == "0"u8 || exprᴛ1 == "f"u8 || exprᴛ1 == "F"u8 || exprᴛ1 == "false"u8 || exprᴛ1 == "FALSE"u8 || exprᴛ1 == "False"u8) {
         return (false, default!);
     }
-
     return (false, new NumErrorжerror(syntaxError(parseBoolˢ, str)));
 }
 

@@ -84,6 +84,7 @@ public static (slice<byte>, error) Marshal(this ref RouteMessage m) {
     return m.marshal();
 }
 
+// A RIBType represents a type of routing information base.
 partial struct RIBType /*num:nint*/;
 
 public static RIBType RIBTypeRoute => /* syscall.NET_RT_DUMP */ 1;

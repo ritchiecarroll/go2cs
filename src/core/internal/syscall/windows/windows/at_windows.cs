@@ -16,19 +16,19 @@ partial class windows_package {
 // the set of invented O_ values in syscall/types_windows.go
 // to avoid overlap.
 public static UntypedInt O_DIRECTORY => 0x100000; // target must be a directory
-
 public static UntypedInt O_NOFOLLOW_ANY => 0x20000000; // disallow symlinks anywhere in the path
-
 public static UntypedInt O_OPEN_REPARSE => 0x40000000; // FILE_OPEN_REPARSE_POINT, used by Lstat
 
 public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @string name, nint flag, uint32 perm) {
     if (len(name) == 0) {
         return (syscall.InvalidHandle, syscall.ERROR_FILE_NOT_FOUND);
     }
+
     uint32 access = default!;
     uint32 options = default!;
     var exprᴛ1 = (nint)(flag & (nint)((nint)((nint)(UntypedInt)(syscall.O_RDONLY | syscall.O_WRONLY) | (nint)syscall.O_RDWR)));
     if (exprᴛ1 == syscall.O_RDONLY) {
+        // FILE_GENERIC_READ includes FILE_LIST_DIRECTORY.
         access = FILE_GENERIC_READ;
     }
     else if (exprᴛ1 == syscall.O_WRONLY) {
@@ -40,12 +40,10 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
         options |= (uint32)(FILE_NON_DIRECTORY_FILE);
     }
     else { /* default: */
+        // Stat opens files without requesting read or write permissions,
+        // but we still need to request SYNCHRONIZE.
         access = SYNCHRONIZE;
     }
-
-    // FILE_GENERIC_READ includes FILE_LIST_DIRECTORY.
-    // Stat opens files without requesting read or write permissions,
-    // but we still need to request SYNCHRONIZE.
     if ((nint)(flag & (nint)syscall.O_CREAT) != 0) {
         access |= (uint32)(FILE_GENERIC_WRITE);
     }
@@ -66,6 +64,7 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
     }
     // Allow File.Stat.
     access |= (uint32)((uint32)((UntypedInt)(STANDARD_RIGHTS_READ | FILE_READ_ATTRIBUTES) | (uint32)FILE_READ_EA));
+
     var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES(nil));
     if ((nint)(flag & (nint)O_NOFOLLOW_ANY) != 0) {
         objAttrs.Value.Attributes |= (uint32)(OBJ_DONT_REPARSE);
@@ -78,9 +77,11 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
             return (syscall.InvalidHandle, errΔ1);
         }
     }
+
     if ((nint)(flag & (nint)O_OPEN_REPARSE) != 0) {
         options |= (uint32)(FILE_OPEN_REPARSE_POINT);
     }
+
     // We don't use FILE_OVERWRITE/FILE_OVERWRITE_IF, because when opening
     // a file with FILE_ATTRIBUTE_READONLY these will replace an existing
     // file with a new, read-only one.
@@ -106,6 +107,7 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
     if ((uint32)(perm & (uint32)syscall.S_IWRITE) == 0) {
         fileAttrs = FILE_ATTRIBUTE_READONLY;
     }
+
     ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
     var err = NtCreateFile(
         Ꮡh,
@@ -122,6 +124,7 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
     if (err != default!) {
         return (h, ntCreateFileError(err, flag));
     }
+
     if ((nint)(flag & (nint)syscall.O_TRUNC) != 0) {
         err = syscall.Ftruncate(h, 0);
         if (err != default!) {
@@ -129,6 +132,7 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
             return (syscall.InvalidHandle, err);
         }
     }
+
     return (h, default!);
 }
 
@@ -144,22 +148,21 @@ internal static error ntCreateFileError(error err, nint flag) {
         return syscall.ELOOP;
     }
     if (exprᴛ1 == STATUS_NOT_A_DIRECTORY) {
+        // ENOTDIR is the errno returned by open when O_DIRECTORY is specified
+        // and the target is not a directory.
+        //
+        // NtCreateFile can return STATUS_NOT_A_DIRECTORY under other circumstances,
+        // such as when opening "file/" where "file" is not a directory.
+        // (This might be Windows version dependent.)
+        //
+        // Only map STATUS_NOT_A_DIRECTORY to ENOTDIR when O_DIRECTORY is specified.
         if ((nint)(flag & (nint)O_DIRECTORY) != 0) {
-            // ENOTDIR is the errno returned by open when O_DIRECTORY is specified
-            // and the target is not a directory.
-            //
-            // NtCreateFile can return STATUS_NOT_A_DIRECTORY under other circumstances,
-            // such as when opening "file/" where "file" is not a directory.
-            // (This might be Windows version dependent.)
-            //
-            // Only map STATUS_NOT_A_DIRECTORY to ENOTDIR when O_DIRECTORY is specified.
             return syscall.ENOTDIR;
         }
     }
     else if (exprᴛ1 == STATUS_FILE_IS_A_DIRECTORY) {
         return syscall.EISDIR;
     }
-
     return s.Errno();
 }
 
@@ -211,8 +214,10 @@ public static error Deleteat(syscallꓸHandle dirfd, @string name) {
             return ntCreateFileError(err, 0);
         }
         defer(syscall.CloseHandle, h, ref ᒐ);
+
         const uint32 FileDispositionInformation = 13;
         const uint32 FileDispositionInformationEx = 64;
+
         // First, attempt to delete the file using POSIX semantics
         // (which permit a file to be deleted while it is still open).
         // This matches the behavior of DeleteFileW.
@@ -220,11 +225,12 @@ public static error Deleteat(syscallꓸHandle dirfd, @string name) {
             h,
             Ꮡ(new IO_STATUS_BLOCK(nil)),
             (uintptr)Ꮡ(new FILE_DISPOSITION_INFORMATION_EX(
-                Flags: (uint32)((UntypedInt)((UntypedInt)(FILE_DISPOSITION_DELETE | FILE_DISPOSITION_FORCE_IMAGE_SECTION_CHECK) | FILE_DISPOSITION_POSIX_SEMANTICS) | (uint32)FILE_DISPOSITION_IGNORE_READONLY_ATTRIBUTE)
-            )), // This differs from DeleteFileW, but matches os.Remove's
- // behavior on Unix platforms of permitting deletion of
- // read-only files.
-
+                Flags: (uint32)((UntypedInt)((UntypedInt)(FILE_DISPOSITION_DELETE | FILE_DISPOSITION_FORCE_IMAGE_SECTION_CHECK) | FILE_DISPOSITION_POSIX_SEMANTICS) |
+                    // This differs from DeleteFileW, but matches os.Remove's
+                    // behavior on Unix platforms of permitting deletion of
+                    // read-only files.
+                    (uint32)FILE_DISPOSITION_IGNORE_READONLY_ATTRIBUTE)
+            )),
             (uint32)/* unsafe.Sizeof(FILE_DISPOSITION_INFORMATION_EX{}) */ (uintptr)4,
             FileDispositionInformationEx);
         var exprᴛ1 = err;

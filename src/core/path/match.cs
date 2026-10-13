@@ -107,8 +107,8 @@ Scan:
     for (i = 0; i < len(pattern); i++) {
         switch (pattern[i]) {
         case (rune)'\\': {
+            // error check handled in matchChunk: bad pattern.
             if (i + 1 < len(pattern)) {
-                // error check handled in matchChunk: bad pattern.
                 i++;
             }
             break;
@@ -127,7 +127,6 @@ Scan:
             }
             break;
         }}
-
 continue_Scan:;
     }
 break_Scan:;
@@ -159,16 +158,16 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
                 s = s.slice(n);
             }
             chunk = chunk[1..];
+            // possibly negated
             var negated = false;
             if (len(chunk) > 0 && chunk[0] == (rune)'^') {
-                // possibly negated
                 negated = true;
                 chunk = chunk[1..];
             }
+            // parse all ranges
             var match = false;
             nint nrange = 0;
             while (ᐧ) {
-                // parse all ranges
                 if (len(chunk) > 0 && chunk[0] == (rune)']' && nrange > 0) {
                     chunk = chunk[1..];
                     break;
@@ -223,7 +222,6 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
             }
             chunk = chunk[1..];
         }
-
     }
     if (failed) {
         return ("", false, default!);

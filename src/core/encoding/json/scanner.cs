@@ -117,28 +117,20 @@ internal static void freeScanner(ж<scanner> Ꮡscan) {
 // It is okay to ignore the return value of any particular
 // call to scanner.state: if one call returns scanError,
 // every subsequent call will return scanError too.
+// Continue.
 internal static UntypedInt scanContinue => iota; // uninteresting byte
-
 internal static UntypedInt scanBeginLiteral => 1; // end implied by next result != scanContinue
-
 internal static UntypedInt scanBeginObject => 2; // begin object
-
 internal static UntypedInt scanObjectKey => 3; // just finished object key (string)
-
 internal static UntypedInt scanObjectValue => 4; // just finished non-last object value
-
 internal static UntypedInt scanEndObject => 5; // end object (implies scanObjectValue if possible)
-
 internal static UntypedInt scanBeginArray => 6; // begin array
-
 internal static UntypedInt scanArrayValue => 7; // just finished array value
-
 internal static UntypedInt scanEndArray => 8; // end array (implies scanArrayValue if possible)
-
 internal static UntypedInt scanSkipSpace => 9; // space byte; can skip; known to be last "continue" result
 
+// Stop.
 internal static UntypedInt scanEnd => 10; // top-level value ended *before* this byte; known to be first "stop" result
-
 internal static UntypedInt scanError => 11; // hit an error, scanner.err.
 
 // These values are stored in the parseState stack.
@@ -146,9 +138,7 @@ internal static UntypedInt scanError => 11; // hit an error, scanner.err.
 // being scanned. If the parser is inside a nested value
 // the parseState describes the nested state, outermost at entry 0.
 internal static UntypedInt parseObjectKey => iota; // parsing object key (before colon)
-
 internal static UntypedInt parseObjectValue => 1; // parsing object value (after colon)
-
 internal static UntypedInt parseArrayValue => 2; // parsing array value
 
 // This limits the max nesting depth to prevent stack overflow.
@@ -253,29 +243,23 @@ internal static nint stateBeginValue(ж<scanner> Ꮡs, byte c) {
         s.step = stateNeg;
         return scanBeginLiteral;
     }
-    case (rune)'0': {
+    case (rune)'0': { // beginning of 0.123
         s.step = state0;
         return scanBeginLiteral;
     }
-    case (rune)'t': {
+    case (rune)'t': { // beginning of true
         s.step = stateT;
         return scanBeginLiteral;
     }
-    case (rune)'f': {
+    case (rune)'f': { // beginning of false
         s.step = stateF;
         return scanBeginLiteral;
     }
-    case (rune)'n': {
+    case (rune)'n': { // beginning of null
         s.step = stateN;
         return scanBeginLiteral;
     }}
-
-    // beginning of 0.123
-    // beginning of true
-    // beginning of false
-    // beginning of null
-    if ((rune)'1' <= c && c <= (rune)'9') {
-        // beginning of 1234.5
+    if ((rune)'1' <= c && c <= (rune)'9') { // beginning of 1234.5
         s.step = state1;
         return scanBeginLiteral;
     }
@@ -368,7 +352,6 @@ internal static nint stateEndValue(ж<scanner> Ꮡs, byte c) {
         }
         return s.error(c, afterArrayElementˢ);
     }
-
     return s.error(c, ""u8);
 }
 
@@ -425,7 +408,6 @@ internal static nint stateInStringEsc(ж<scanner> Ꮡs, byte c) {
         s.step = stateInStringEscU;
         return scanContinue;
     }}
-
     return s.error(c, inStringEscapeCodeˢ);
 }
 
@@ -751,6 +733,7 @@ internal static @string quoteChar(byte c) {
     if (c == (rune)'"') {
         return @"'""'"u8;
     }
+
     // use quoted string with different quotation marks
     @string s = strconv.Quote(((@string)c));
     return "'" + s.slice(1, len(s) - 1) + "'";

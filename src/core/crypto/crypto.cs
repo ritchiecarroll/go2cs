@@ -3,7 +3,31 @@
 // license that can be found in the LICENSE file.
 
 // Package crypto collects common cryptographic constants.
+
+// PublicKey represents a public key using an unspecified algorithm.
+//
+// Although this type is an empty interface for backwards compatibility reasons,
+// all public key types in the standard library implement the following interface
+//
+//	interface{
+//	    Equal(x crypto.PublicKey) bool
+//	}
+//
+// which can be used for increased type safety within applications.
 global using PublicKey = object;
+
+// PrivateKey represents a private key using an unspecified algorithm.
+//
+// Although this type is an empty interface for backwards compatibility reasons,
+// all private key types in the standard library implement the following interface
+//
+//	interface{
+//	    Public() crypto.PublicKey
+//	    Equal(x crypto.PrivateKey) bool
+//	}
+//
+// as well as purpose-specific interfaces such as [Signer] and [Decrypter], which
+// can be used for increased type safety within applications.
 global using PrivateKey = object;
 global using DecrypterOpts = object;
 
@@ -15,6 +39,8 @@ using strconv = strconv_package;
 
 partial class crypto_package {
 
+// Hash identifies a cryptographic hash function that is implemented in another
+// package.
 partial struct Hash /*num:nuint*/;
 
 // HashFunc simply returns the value of h so that [Hash] implements [SignerOpts].
@@ -105,7 +131,6 @@ public static @string String(this Hash h) {
     { /* default: */
         return "unknown hash value "u8 + strconv.Itoa((nint)(nuint)h);
     }
-
 }
 
 public static Hash MD4 => /* 1 + iota */ 1;              // import golang.org/x/crypto/md4

@@ -13,13 +13,36 @@
 //
 // See "The Laws of Reflection" for an introduction to reflection in Go:
 // https://golang.org/doc/articles/laws_of_reflection.html
+
+// uncommonType is present only for defined types or types with methods
+// (if T is a defined type, the uncommonTypes for T and *T have methods).
+// Using a pointer to this struct reduces the overall size required
+// to describe a non-defined type with no methods.
 global using uncommonType = go.@internal.abi_package.UncommonType;
 global using aNameOff = go.@internal.abi_package.NameOff;
 global using aTypeOff = go.@internal.abi_package.TypeOff;
 global using aTextOff = go.@internal.abi_package.TextOff;
+
+// arrayType represents a fixed array type.
 global using arrayType = go.@internal.abi_package.ΔArrayType;
+
+// chanType represents a channel type.
 global using chanType = go.@internal.abi_package.ChanType;
+
+// funcType represents a function type.
+//
+// A *rtype for each in and out parameter is stored in an array that
+// directly follows the funcType (and possibly its uncommonType). So
+// a function type with one method, one input, and one output is:
+//
+//	struct {
+//		funcType
+//		uncommonType
+//		[2]*rtype    // [0] is in, [1] is out
+//	}
 global using funcType = go.@internal.abi_package.ΔFuncType;
+
+// Struct field
 global using structField = go.@internal.abi_package.StructField;
 
 namespace go;
@@ -229,8 +252,6 @@ partial interface ΔType {
     ж<uncommonType> uncommon();
 }
 
-partial struct ΔKind /*num:nuint*/;
-
 // BUG(rsc): FieldByName and related functions consider struct field names to be equal
 // if the names are equal, even if they are unexported names originating
 // in different packages. The practical effect of this is that the result of
@@ -243,6 +264,11 @@ partial struct ΔKind /*num:nuint*/;
  * A few are known to ../runtime/type.go to convey to debuggers.
  * They are also known to ../internal/abi/type.go.
  */
+
+// A Kind represents the specific kind of type that a [Type] represents.
+// The zero Kind is not a valid kind.
+partial struct ΔKind /*num:nuint*/;
+
 public static ΔKind Invalid => /* iota */ 0;
 public static ΔKind ΔBool => 1;
 public static ΔKind ΔInt => 2;
@@ -293,6 +319,7 @@ internal static ж<abi.UncommonType> uncommon(this ж<rtype> Ꮡt) {
     return Ꮡt.of(rtype.Ꮡt).Uncommon();
 }
 
+// ChanDir represents a channel type's direction.
 partial struct ΔChanDir /*num:nint*/;
 
 public static ΔChanDir RecvDir => /* 1 << iota */ 1;                 // <-chan
@@ -632,7 +659,6 @@ internal static bool OverflowComplex(this ж<rtype> Ꮡt, complex128 x) {
     if (exprᴛ1 == Complex128) {
         return false;
     }
-
     throw panic("reflect: OverflowComplex of non-complex type " + Ꮡt.String());
 }
 
@@ -647,7 +673,6 @@ internal static bool OverflowFloat(this ж<rtype> Ꮡt, float64 x) {
     if (exprᴛ1 == Float64) {
         return false;
     }
-
     throw panic("reflect: OverflowFloat of non-float type " + Ꮡt.String());
 }
 
@@ -661,7 +686,6 @@ internal static bool OverflowInt(this ж<rtype> Ꮡt, int64 x) {
         var trunc = (x.Lsh((uint64)((64 - bitSize)))).Rsh((uint64)((64 - bitSize)));
         return x != trunc;
     }
-
     throw panic("reflect: OverflowInt of non-int type " + Ꮡt.String());
 }
 
@@ -675,7 +699,6 @@ internal static bool OverflowUint(this ж<rtype> Ꮡt, uint64 x) {
         var trunc = (x.Lsh((uint64)((64 - bitSize)))).Rsh((uint64)((64 - bitSize)));
         return x != trunc;
     }
-
     throw panic("reflect: OverflowUint of non-uint type " + Ꮡt.String());
 }
 
@@ -692,7 +715,6 @@ internal static bool CanSeq(this ж<rtype> Ꮡt) {
     if (exprᴛ1 == ΔPointer) {
         return Ꮡt.Elem().Kind() == Array;
     }
-
     return false;
 }
 
@@ -727,7 +749,6 @@ internal static bool CanSeq2(this ж<rtype> Ꮡt) {
     if (exprᴛ1 == ΔPointer) {
         return Ꮡt.Elem().Kind() == Array;
     }
-
     return false;
 }
 
@@ -787,15 +808,14 @@ public static @string String(this ΔChanDir d) {
     if (exprᴛ1 == BothDir) {
         return chanˢ3;
     }
-
     return "ChanDir"u8 + strconv.Itoa((nint)d);
 }
 
 // Method returns the i'th method in the type's method set.
 internal static ΔMethod /*m*/ Method(this ж<interfaceType> Ꮡt, nint i) {
     ΔMethod m = new();
-
     ref var t = ref Ꮡt.DerefOrNull();
+
     if (i < 0 || i >= len(t.Methods)) {
         return m;
     }
@@ -822,8 +842,8 @@ internal static nint NumMethod(this ref interfaceType t) {
 internal static (ΔMethod m, bool ok) MethodByName(this ж<interfaceType> Ꮡt, @string name) {
     ΔMethod m = new();
     bool ok = default!;
-
     ref var t = ref Ꮡt.DerefOrNull();
+
     if (Ꮡt == nil) {
         return (m, ok);
     }
@@ -857,6 +877,14 @@ public static bool IsExported(this StructField f) {
     return f.PkgPath == ""u8;
 }
 
+// A StructTag is the tag string in a struct field.
+//
+// By convention, tag strings are a concatenation of
+// optionally space-separated key:"value" pairs.
+// Each key is a non-empty string consisting of non-control
+// characters other than space (U+0020 ' '), quote (U+0022 '"'),
+// and colon (U+003A ':').  Each value is quoted using U+0022 '"'
+// characters and Go string literal syntax.
 partial struct StructTag /*@string*/;
 
 // Get returns the value associated with key in the tag string.
@@ -888,6 +916,7 @@ public static (@string value, bool ok) Lookup(this StructTag tag, @string key) {
         if (tag == ""u8) {
             break;
         }
+
         // Scan to colon. A space, a quote or a control character is a syntax error.
         // Strictly speaking, control chars include the range [0x7f, 0x9f], not just
         // [0x00, 0x1f], but in practice, we ignore the multi-byte control characters
@@ -901,6 +930,7 @@ public static (@string value, bool ok) Lookup(this StructTag tag, @string key) {
         }
         @string name = ((@string)(tag.slice(0, i)));
         tag = tag.slice(i + 1);
+
         // Scan quoted string to find value.
         i = 1;
         while (i < len(tag) && tag[i] != (rune)'"') {
@@ -914,6 +944,7 @@ public static (@string value, bool ok) Lookup(this StructTag tag, @string key) {
         }
         @string qvalue = ((@string)(tag.slice(0, i + 1)));
         tag = tag.slice(i + 1);
+
         if (key == name) {
             var (valueΔ1, err) = strconv.Unquote(qvalue);
             if (err != default!) {
@@ -945,6 +976,7 @@ internal static StructField /*f*/ Field(this ref structType t, nint i) {
         }
     }
     f.Offset = p.Value.Offset;
+
     // We can't safely use this optimization on js or wasi,
     // which do not appear to support read-only data.
     if (i < 256 && runtime.GOOS != "js"u8 && runtime.GOOS != "wasip1"u8){
@@ -1007,7 +1039,6 @@ internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType
     StructField result = default!;
     bool ok = default!;
 
-    ref var t = ref Ꮡt.DerefOrNull();
     // This uses the same condition that the Go language does: there must be a unique instance
     // of the match at a given depth level. If there are multiple instances of a match at the
     // same depth, they annihilate each other and inhibit any possible match at a lower level.
@@ -1017,6 +1048,7 @@ internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType
     // and next lists the fields on the next lower level.
     var current = new fieldScan[]{}.slice();
     var next = new fieldScan[]{new(typ: Ꮡt)}.slice();
+
     // nextCount records the number of times an embedded type has been
     // encountered and considered for queueing in the 'next' slice.
     // We only queue the first one, but we increment the count on each.
@@ -1024,16 +1056,19 @@ internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType
     // then it annihilates itself and need not be considered at all when we
     // process that next depth level.
     map<ж<structType>, nint> nextCount = default!;
+
     // visited records the structs that have been considered already.
     // Embedded pointer fields can create cycles in the graph of
     // reachable embedded types; visited avoids following those cycles.
     // It also avoids duplicated effort: if we didn't find the field in an
     // embedded type T at level 2, we won't find it in one at level 4 either.
     var visited = new map<ж<structType>, bool>{};
+
     while (len(next) > 0) {
         (current, next) = (next, current[..0]);
         var count = nextCount;
         nextCount = default!;
+
         // Process all the fields at this depth, now listed in 'current'.
         // The loop queues embedded fields found in 'next', for processing during the next
         // iteration. The multiplicity of the 'current' field counts is recorded
@@ -1059,6 +1094,7 @@ internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType
                         ntyp = ntyp.Elem();
                     }
                 }
+
                 // Does it match?
                 if (match(fname)) {
                     // Potential match
@@ -1073,6 +1109,7 @@ internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType
                     ok = true;
                     continue;
                 }
+
                 // Queue embedded struct fields for processing with next level,
                 // but only if we haven't seen a match yet at this level and only
                 // if the embedded types haven't already been queued.
@@ -1109,8 +1146,8 @@ internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType
 internal static (StructField f, bool present) FieldByName(this ж<structType> Ꮡt, @string name) {
     StructField f = default!;
     bool present = default!;
-
     ref var t = ref Ꮡt.DerefOrNull();
+
     // Quick check for top-level name, or struct without embedded fields.
     var hasEmbeds = false;
     if (name != ""u8) {
@@ -1165,12 +1202,14 @@ internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) {
     if ((~at).PtrToThis != 0) {
         return Ꮡt.typeOff((~at).PtrToThis);
     }
+
     // Check the cache.
     {
         var (piΔ1, ok) = ᏑptrMap.Load(Ꮡt.OrTypedNil()); if (ok) {
             return piΔ1._<ж<ptrType>>().of(ptrType.ᏑType);
         }
     }
+
     // Look in known types.
     @string s = "*"u8 + Ꮡt.String();
     foreach (var (_, tt) in typesByString(s)) {
@@ -1181,6 +1220,7 @@ internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) {
         var (piΔ2, _) = ᏑptrMap.LoadOrStore(Ꮡt.OrTypedNil(), p.OrTypedNil());
         return piΔ2._<ж<ptrType>>().of(ptrType.ᏑType);
     }
+
     // Create a new ptrType starting with the description
     // of an *unsafe.Pointer.
     ref var iptr = ref heap<any>(out var Ꮡiptr);
@@ -1189,15 +1229,19 @@ internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) {
     var prototype = ~Ꮡiptr.Reinterpret<any, ж<ptrType>>();
     ref var pp = ref heap<ptrType>(out var Ꮡpp);
     pp = prototype.Value;
+
     pp.Str = resolveReflectName(newName(s, ""u8, false, false));
     pp.PtrToThis = 0;
+
     // For the type structures linked into the binary, the
     // compiler provides a good hash of the string.
     // Create a good hash for the new string by using
     // the FNV-1 hash's mixing function to combine the
     // old hash and the new "*".
     pp.Hash = fnv1(t.t.Hash, (rune)'*');
+
     pp.Elem = at;
+
     var (pi, _) = ᏑptrMap.LoadOrStore(Ꮡt.OrTypedNil(), Ꮡpp);
     return pi._<ж<ptrType>>().of(ptrType.ᏑType);
 }
@@ -1244,9 +1288,6 @@ internal static bool Comparable(this ref rtype t) {
 // https://golang.org/doc/go_spec.html#Assignability
 // T and V must be both of Chan kind.
 internal static bool specialChannelAssignability(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
-    ref var T = ref ᏑT.DerefOrNull();
-    ref var V = ref ᏑV.DerefOrNull();
-
     // Special case:
     // x is a bidirectional channel value, T is a channel type,
     // x's type V and T have identical element types,
@@ -1267,14 +1308,17 @@ internal static bool directlyAssignable(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
     if (ᏑT == ᏑV) {
         return true;
     }
+
     // Otherwise at least one of T and V must not be defined
     // and they must have the same kind.
     if (T.HasName() && V.HasName() || T.Kind() != V.Kind()) {
         return false;
     }
+
     if (T.Kind() == abi.Chan && specialChannelAssignability(ᏑT, ᏑV)) {
         return true;
     }
+
     // x's type T and V must have identical underlying types.
     return haveIdenticalUnderlyingType(ᏑT, ᏑV, true);
 }
@@ -1286,9 +1330,11 @@ internal static bool haveIdenticalType(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV, boo
     if (cmpTags) {
         return ᏑT == ᏑV;
     }
+
     if (nameFor(ᏑT) != nameFor(ᏑV) || T.Kind() != V.Kind() || pkgPathFor(ᏑT) != pkgPathFor(ᏑV)) {
         return false;
     }
+
     return haveIdenticalUnderlyingType(ᏑT, ᏑV, false);
 }
 
@@ -1330,8 +1376,10 @@ internal static ж<abi.Type> rtypeOff(@unsafe.Pointer section, int32 off) {
 internal static slice<ж<abi.Type>> typesByString(@string s) {
     var (sections, offset) = typelinks();
     slice<ж<abi.Type>> ret = default!;
+
     foreach (var (offsI, offs) in offset) {
         @unsafe.Pointer section = sections[offsI];
+
         // We are looking for the first index i where the string becomes >= s.
         // This is a copy of sort.Search, with f(h) replaced by (*typ[h].String() >= s).
         nint i = 0;
@@ -1346,6 +1394,7 @@ internal static slice<ж<abi.Type>> typesByString(@string s) {
             }
         }
         // i == j, f(i-1) == false, and f(j) (= f(i)) == true  =>  answer is i.
+
         // Having found the first, linear scan forward to find the last.
         // We could do a second binary search, but the caller is going
         // to do a linear scan anyway.
@@ -1377,7 +1426,6 @@ partial struct cacheKey {
 // The funcLookupCache caches FuncOf lookups.
 // FuncOf does not share the common lookupCache since cacheKey is not
 // sufficient to represent functions unambiguously.
-
 partial struct funcLookupCacheᴛ1 /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; } // Guards stores (but not loads) on m.
     // m is a map[uint32][]*rtype keyed by the hash calculated in FuncOf.
@@ -1407,6 +1455,7 @@ internal static ΔType initFuncTypes(nint n) {
         if (funcTypes[n] != default!) {
             return funcTypes[n];
         }
+
         funcTypes[n] = StructOf(new StructField[]{
             new(
                 Name: "FuncType"u8,
@@ -1492,12 +1541,10 @@ internal static bool isReflexive(ж<abi.Type> Ꮡt) {
         return true;
     }
     { /* default: */
+        // Func, Map, Slice, Invalid
         throw panic("isReflexive called on non-key type " + stringFor(Ꮡt));
     }
-
 }
-
-// Func, Map, Slice, Invalid
 
 // needKeyUpdate reports whether map overwrites require the key to be copied.
 internal static bool needKeyUpdate(ж<abi.Type> Ꮡt) {
@@ -1508,6 +1555,9 @@ internal static bool needKeyUpdate(ж<abi.Type> Ꮡt) {
         return false;
     }
     if (exprᴛ1 == Float32 || exprᴛ1 == Float64 || exprᴛ1 == Complex64 || exprᴛ1 == Complex128 || exprᴛ1 == ΔInterface || exprᴛ1 == ΔString) {
+        // Float keys can be updated from +0 to -0.
+        // String keys can be updated to use a smaller backing store.
+        // Interfaces might have floats or strings in them.
         return true;
     }
     if (exprᴛ1 == Array) {
@@ -1517,9 +1567,6 @@ internal static bool needKeyUpdate(ж<abi.Type> Ꮡt) {
     if (exprᴛ1 == Struct) {
         var tt = Ꮡt.Reinterpret<abi.Type, structType>();
         foreach (var (_, f) in (~tt).Fields) {
-            // Float keys can be updated from +0 to -0.
-            // String keys can be updated to use a smaller backing store.
-            // Interfaces might have floats or strings in them.
             if (needKeyUpdate(f.Typ)) {
                 return true;
             }
@@ -1527,12 +1574,10 @@ internal static bool needKeyUpdate(ж<abi.Type> Ꮡt) {
         return false;
     }
     { /* default: */
+        // Func, Map, Slice, Invalid
         throw panic("needKeyUpdate called on non-key type " + stringFor(Ꮡt));
     }
-
 }
-
-// Func, Map, Slice, Invalid
 
 // hashMightPanic reports whether the hash of a map key of type t might panic.
 internal static bool hashMightPanic(ж<abi.Type> Ꮡt) {
@@ -1558,7 +1603,6 @@ internal static bool hashMightPanic(ж<abi.Type> Ꮡt) {
     { /* default: */
         return false;
     }
-
 }
 
 // emitGCMask writes the GC mask for [n]typ into out, starting at bit
@@ -1608,10 +1652,12 @@ internal static bool isValidFieldName(@string fieldName) {
         if (i == 0 && !isLetter(c)) {
             return false;
         }
+
         if (!(isLetter(c) || Δunicode.IsDigit(c))) {
             return false;
         }
     }
+
     return len(fieldName) > 0;
 }
 
@@ -1650,9 +1696,7 @@ internal static bool isRegularMemory(ΔType t) {
             }
             return true;
         }}
-
     }
-
     return false;
 }
 
@@ -1679,6 +1723,7 @@ internal static (structField, @string) runtimeStructField(StructField field) {
     if (field.Anonymous && field.PkgPath != ""u8) {
         throw panic("reflect.StructOf: field \"" + field.Name + "\" is anonymous but has PkgPath set");
     }
+
     if (field.IsExported()) {
         // Best-effort check for misuse.
         // Since this field will be treated as exported, not much harm done if Unicode lowercase slips through.
@@ -1687,6 +1732,7 @@ internal static (structField, @string) runtimeStructField(StructField field) {
             throw panic("reflect.StructOf: field \"" + field.Name + "\" is unexported but missing PkgPath");
         }
     }
+
     resolveReflectType(field.Type.common()); // install in runtime
     var f = new structField(
         Name: newName(field.Name, ((@string)field.Tag), field.IsExported(), field.Anonymous),
@@ -1705,9 +1751,9 @@ internal static uintptr typeptrdata(ж<abi.Type> Ꮡt) {
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == abi.Struct) {
         var st = Ꮡt.Reinterpret<abi.Type, structType>();
+        // find the last field that has pointers.
         nint field = -1;
         foreach (var (i, _) in (~st).Fields) {
-            // find the last field that has pointers.
             var ft = (~st).Fields[i].Typ;
             if (ft.Pointers()) {
                 field = i;
@@ -1722,7 +1768,6 @@ internal static uintptr typeptrdata(ж<abi.Type> Ꮡt) {
     { /* default: */
         throw panic("reflect.typeptrdata: unexpected type, " + stringFor(Ꮡt));
     }
-
 }
 
 // go2cs generated this placeholder — func ArrayOf is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -1761,9 +1806,9 @@ internal static ref Δsync.Map layoutCache => ref ᏑlayoutCache.Value; // map[l
 internal static (ж<abi.Type> frametype, ж<Δsync.Pool> framePool, abiDesc abid) funcLayout(ж<funcType> Ꮡt, ж<abi.Type> Ꮡrcvr) {
     ж<Δsync.Pool> framePool = default!;
     abiDesc abid = new();
-
     ref var t = ref Ꮡt.DerefOrNull();
     ref var rcvr = ref Ꮡrcvr.DerefOrNull();
+
     if (Ꮡt.of(funcType.ᏑType).Kind() != abi.Func) {
         throw panic("reflect: funcLayout of non-func type " + stringFor(Ꮡt.of(funcType.ᏑType)));
     }
@@ -1777,21 +1822,24 @@ internal static (ж<abi.Type> frametype, ж<Δsync.Pool> framePool, abiDesc abid
             return (ltΔ1.t, ltΔ1.framePool, ltΔ1.abid.ΔClone());
         }
     }
+
     // Compute the ABI layout.
     abid = newAbiDesc(Ꮡt, Ꮡrcvr);
+
     // build dummy rtype holding gc program
     var x = Ꮡ(new abi.Type(
-        Align_: goarch.PtrSize, // Don't add spill space here; it's only necessary in
- // reflectcall's frame, not in the allocated frame.
- // TODO(mknyszek): Remove this comment when register
- // spill space in the frame is no longer required.
-
+        Align_: goarch.PtrSize,
+        // Don't add spill space here; it's only necessary in
+        // reflectcall's frame, not in the allocated frame.
+        // TODO(mknyszek): Remove this comment when register
+        // spill space in the frame is no longer required.
         Size_: align(abid.retOffset + abid.ret.stackBytes, goarch.PtrSize),
         PtrBytes: (uintptr)(~abid.stackPtrs).n * (uintptr)goarch.PtrSize
     ));
     if ((~abid.stackPtrs).n > 0) {
         x.Value.GCData = Ꮡ((~abid.stackPtrs).data, 0);
     }
+
     @string s = default!;
     if (Ꮡrcvr != nil){
         s = "methodargs("u8 + stringFor(Ꮡrcvr) + ")("u8 + stringFor(Ꮡt.of(funcType.ᏑType)) + ")"u8;
@@ -1799,6 +1847,7 @@ internal static (ж<abi.Type> frametype, ж<Δsync.Pool> framePool, abiDesc abid
         s = "funcargs("u8 + stringFor(Ꮡt.of(funcType.ᏑType)) + ")"u8;
     }
     x.Value.Str = resolveReflectName(newName(s, ""u8, false, false));
+
     // cache result for future callers
     var xʗ1 = x;
     framePool = Ꮡ(new Δsync.Pool(New: () => @unsafe.Pointer.OrTypedNil((uintptr)unsafe_New(xʗ1))

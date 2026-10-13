@@ -62,7 +62,6 @@ internal static (ж<netFD>, error) newFileFD(ж<os.File> Ꮡf) {
         poll.CloseFunc(s);
         return (default!, syscall.EPROTONOSUPPORT);
     }}
-
     (var fd, err) = newFD(s, family, sotype, ""u8);
     if (err != default!) {
         poll.CloseFunc(s);
@@ -99,7 +98,6 @@ internal static (Conn, error) fileConn(ж<os.File> Ꮡf) {
     case ж<UnixAddr>: {
         return (new UnixConnжConn(newUnixConn(fd)), default!);
     }}
-
     fd.Close();
     return (default!, syscall.EINVAL);
 }
@@ -135,7 +133,6 @@ internal static (PacketConn, error) filePacketConn(ж<os.File> Ꮡf) {
     case ж<UnixAddr>: {
         return (new UnixConnжPacketConn(newUnixConn(fd)), default!);
     }}
-
     fd.Close();
     return (default!, syscall.EINVAL);
 }

@@ -22,12 +22,24 @@ partial struct MutatorUtil {
     public float64 Util;
 }
 
+// UtilFlags controls the behavior of MutatorUtilization.
 partial struct UtilFlags /*num:nint*/;
 
+// UtilSTW means utilization should account for STW events.
+// This includes non-GC STW events, which are typically user-requested.
 public static UtilFlags UtilSTW => /* 1 << iota */ 1;
+// UtilBackground means utilization should account for
+// background mark workers.
 public static UtilFlags UtilBackground => 2;
+// UtilAssist means utilization should account for mark
+// assists.
 public static UtilFlags UtilAssist => 4;
+// UtilSweep means utilization should account for sweeping.
 public static UtilFlags UtilSweep => 8;
+
+// UtilPerProc means each P should be given a separate
+// utilization function. Otherwise, there is a single function
+// and each P is given a fraction of the utilization.
 public static UtilFlags UtilPerProc => 16;
 
 // Set up a bunch of analysis state.
@@ -64,15 +76,18 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
     var bgMark = new map<GoID, bool>();
     var procs = new MutatorUtilizationV2_procsCount[]{}.slice();
     var seenSync = false;
+
     // Helpers.
     bool handleSTW(ΔRange r) => (UtilFlags)(flags & UtilSTW) != 0 && isGCSTW(r);
     bool handleMarkAssist(ΔRange r) => (UtilFlags)(flags & UtilAssist) != 0 && isGCMarkAssist(r);
     bool handleSweep(ΔRange r) => (UtilFlags)(flags & UtilSweep) != 0 && isGCSweep(r);
+
     // Iterate through the trace, tracking mutator utilization.
     ж<ΔEvent> lastEv = default!;
     foreach (var (i, _) in events) {
         var ev = Ꮡ(events, i);
         lastEv = ev;
+
         // Process the event.
         var exprᴛ1 = (~ev).Kind();
         if (exprᴛ1 == EventSync) {
@@ -108,13 +123,13 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                 }
             } while (false);
         }
-
         if (len(ps) == 0) {
             // We can't start doing any analysis until we see what GOMAXPROCS is.
             // It will show up very early in the trace, but we need to be robust to
             // something else being emitted beforehand.
             continue;
         }
+
         var exprᴛ2 = (~ev).Kind();
         var matchᴛ1 = false;
         if (exprᴛ2 == EventRangeActive) { matchᴛ1 = true;
@@ -125,42 +140,42 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                     // active events will just be redundant.
                     break;
                 }
+                // This range is active back to the start of the trace. We're failing to account
+                // for this since we just found out about it now. Fix up the mutator utilization.
+                //
+                // N.B. A trace can't start during a STW, so we don't handle it here.
                 var r = (~ev).Range();
                 var matchᴛ2 = false;
                 if (handleMarkAssist(r)) {
                     do {
                         if (!states[(~ev).Goroutine()].Executing()) {
-                            // This range is active back to the start of the trace. We're failing to account
-                            // for this since we just found out about it now. Fix up the mutator utilization.
-                            //
-                            // N.B. A trace can't start during a STW, so we don't handle it here.
                             // If the goroutine isn't executing, then the fact that it was in mark
                             // assist doesn't actually count.
                             break;
                         }
+                        // This G has been in a mark assist *and running on its P* since the start
+                        // of the trace.
                         fallthrough = true;
                     } while (false);
                 }
                 if (fallthrough || !matchᴛ2 && (handleSweep(r))) { matchᴛ2 = true;
                     do {
+                        // This P has been in sweep (or mark assist, from above) in the start of the trace.
+                        //
+                        // We don't need to do anything if UtilPerProc is set. If we get an event like
+                        // this for a running P, it must show up the first time a P is mentioned. Therefore,
+                        // this P won't actually have any MutatorUtils on its list yet.
+                        //
+                        // However, if UtilPerProc isn't set, then we probably have data from other procs
+                        // and from previous events. We need to fix that up.
                         if ((UtilFlags)(flags & UtilPerProc) != 0) {
-                            // This G has been in a mark assist *and running on its P* since the start
-                            // of the trace.
-                            // This P has been in sweep (or mark assist, from above) in the start of the trace.
-                            //
-                            // We don't need to do anything if UtilPerProc is set. If we get an event like
-                            // this for a running P, it must show up the first time a P is mentioned. Therefore,
-                            // this P won't actually have any MutatorUtils on its list yet.
-                            //
-                            // However, if UtilPerProc isn't set, then we probably have data from other procs
-                            // and from previous events. We need to fix that up.
                             break;
                         }
+                        // Subtract out 1/gomaxprocs mutator utilization for all time periods
+                        // from the beginning of the trace until now.
                         nint mi = 0;
                         nint pi = 0;
                         while (mi < len(@out[0])) {
-                            // Subtract out 1/gomaxprocs mutator utilization for all time periods
-                            // from the beginning of the trace until now.
                             if (pi < len(procs) - 1 && procs[pi + 1].time < @out[0][mi].Time) {
                                 pi++;
                                 continue;
@@ -173,15 +188,14 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                         }
                     } while (false);
                 }
-
+                // After accounting for the portion we missed, this just acts like the
+                // beginning of a new range.
                 fallthrough = true;
             } while (false);
         }
         if (fallthrough || !matchᴛ1 && exprᴛ2 == EventRangeBegin) { matchᴛ1 = true;
             var r = (~ev).Range();
             if (handleSTW(r)){
-                // After accounting for the portion we missed, this just acts like the
-                // beginning of a new range.
                 stw++;
             } else 
             if (handleSweep(r)){
@@ -267,6 +281,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                 }
             }
             var muΔ1 = new MutatorUtil((int64)(~ev).Time(), 1D - (float64)gcPs / (float64)len(ps));
+
             // Record the utilization change. (Since
             // len(ps) == len(out), we know len(out) > 0.)
             @out[0] = addUtil(@out[0], muΔ1);
@@ -282,10 +297,12 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
             }
         }
     }
+
     // No events in the stream.
     if (lastEv == nil) {
         return default!;
     }
+
     // Add final 0 utilization event to any remaining series. This
     // is important to mark the end of the trace. The exact value
     // shouldn't matter since no window should extend beyond this,
@@ -314,6 +331,9 @@ internal static slice<MutatorUtil> addUtil(slice<MutatorUtil> util, MutatorUtil 
     return append(util, mu);
 }
 
+// totalUtil is total utilization, measured in nanoseconds. This is a
+// separate type primarily to distinguish it from mean utilization,
+// which is also a float64.
 partial struct totalUtil /*num:float64*/;
 
 internal static totalUtil totalUtilOf(float64 meanUtil, int64 dur) {
@@ -378,6 +398,7 @@ internal static mmuSeries newMMUSeries(slice<MutatorUtil> util) {
         sums[j] = sum;
         prev = u;
     }
+
     // Divide the utilization curve up into equal size
     // non-overlapping "bands" and compute a summary for each of
     // these bands.
@@ -410,6 +431,7 @@ internal static mmuSeries newMMUSeries(slice<MutatorUtil> util) {
         }
         bands[i] = new mmuBand(minUtil, cumUtil, leftSum);
     }
+
     return s;
 }
 
@@ -533,11 +555,13 @@ internal static bool addMU(this ж<accumulator> Ꮡacc, int64 timeΔ1, float64 m
         acc.mmu = mu;
     }
     acc.bound = acc.mmu;
+
     if (acc.nWorst == 0) {
         // If the minimum has reached zero, it can't go any
         // lower, so we can stop early.
         return mu == 0D;
     }
+
     // Consider adding this window to the n worst.
     if (len(acc.wHeap) < acc.nWorst || mu < acc.wHeap[0].MutatorUtil) {
         // This window is lower than the K'th worst window.
@@ -557,12 +581,14 @@ internal static bool addMU(this ж<accumulator> Ꮡacc, int64 timeΔ1, float64 m
                 }
             }
         }
+
         heap.Push(new utilHeapжInterface(Ꮡacc.of(accumulator.ᏑwHeap)), new UtilWindow(timeΔ1, mu));
         if (len(acc.wHeap) > acc.nWorst) {
             heap.Pop(new utilHeapжInterface(Ꮡacc.of(accumulator.ᏑwHeap)));
         }
 keep:;
     }
+
     if (len(acc.wHeap) < acc.nWorst){
         // We don't have N windows yet, so keep accumulating.
         acc.bound = 1.0D;
@@ -570,6 +596,7 @@ keep:;
         // Anything above the least worst window has no effect.
         acc.bound = math.Max(acc.bound, acc.wHeap[0].MutatorUtil);
     }
+
     if (acc.mud != nil) {
         if (acc.lastTime != math.MaxInt64) {
             // Update distribution.
@@ -590,6 +617,7 @@ keep:;
         // just keep accumulating this band.
         return false;
     }
+
     // If we've found enough 0 utilizations, we can stop immediately.
     return len(acc.wHeap) == acc.nWorst && acc.wHeap[0].MutatorUtil == 0D;
 }
@@ -632,6 +660,7 @@ public static slice<float64> MUD(this ref MMUCurve c, time.Duration window, slic
     if (len(quantiles) == 0) {
         return new float64[]{}.slice();
     }
+
     // Each unrefined band contributes a known total mass to the
     // distribution (bandDur except at the end), but in an unknown
     // way. However, we know that all the mass it contributes must
@@ -664,12 +693,14 @@ public static slice<float64> MUD(this ref MMUCurve c, time.Duration window, slic
         }
     }
     var qMass = (float64)duration * maxQ;
+
     // Accumulate the MUD until we have precise information for
     // everything to the left of qMass.
     ref var acc = ref heap<accumulator>(out var Ꮡacc);
     acc = new accumulator(mmu: 1.0D, bound: 1.0D, preciseMass: qMass, mud: @new<mud>());
     acc.mud.setTrackMass(qMass);
     c.mmu(window, Ꮡacc);
+
     // Evaluate the quantiles on the accumulated MUD.
     var @out = new slice<float64>(len(quantiles));
     foreach (var (i, _) in @out) {
@@ -702,6 +733,7 @@ internal static void mmu(this ref MMUCurve c, time.Duration window, ж<accumulat
         acc.mmu = 0D;
         return;
     }
+
     ref var bandU = ref heap<bandUtilHeap>(out var ᏑbandU);
     var windows = new slice<time.Duration>(len(c.series));
     foreach (var (i, vᴛ1) in c.series) {
@@ -713,6 +745,7 @@ internal static void mmu(this ref MMUCurve c, time.Duration window, ж<accumulat
                 windows[i] = max;
             }
         }
+
         var bandU1 = ((bandUtilHeap)s.mkBandUtil(i, windows[i]));
         if (bandU == default!){
             bandU = bandU1;
@@ -720,8 +753,10 @@ internal static void mmu(this ref MMUCurve c, time.Duration window, ж<accumulat
             bandU = appendꓸꓸꓸ(bandU, bandU1);
         }
     }
+
     // Process bands from lowest utilization bound to highest.
     heap.Init(new bandUtilHeapжInterface(ᏑbandU));
+
     // Refine each band into a precise window and MMU until
     // refining the next lowest band can no longer affect the MMU
     // or windows.
@@ -755,6 +790,7 @@ internal static slice<bandUtil> mkBandUtil(this ref mmuSeries c, nint series, ti
         // some window and the mean for any bands that are
         // completely covered by all windows.
         totalUtil util = default!;
+
         // Find the lowest and second lowest of the partial
         // bands.
         var l = c.bands[i].minUtil;
@@ -782,16 +818,18 @@ internal static slice<bandUtil> mkBandUtil(this ref mmuSeries c, nint series, ti
                 midBand = math.Min(l, r1);
                 break;
             }}
-
             util += totalUtilOf(midBand, tailDur);
         }
+
         // Add the total mean MU of bands that are completely
         // overlapped by all windows.
         if (minBands > 2) {
             util += c.bands[i + minBands - 1].cumUtil - c.bands[i + 1].cumUtil;
         }
+
         bandU[i] = new bandUtil(series, i, util.mean(window));
     }
+
     return bandU;
 }
 
@@ -801,6 +839,7 @@ internal static void bandMMU(this ref mmuSeries c, nint bandIdx, time.Duration w
     ref var acc = ref Ꮡacc.DerefOrNull();
 
     var util = c.util;
+
     // We think of the mutator utilization over time as the
     // box-filtered utilization function, which we call the
     // "windowed mutator utilization function". The resulting
@@ -834,11 +873,13 @@ internal static void bandMMU(this ref mmuSeries c, nint bandIdx, time.Duration w
         if (timeΔ1 == endTime) {
             break;
         }
+
         // The maximum slope of the windowed mutator
         // utilization function is 1/window, so we can always
         // advance the time by at least (mu - mmu) * window
         // without dropping below mmu.
         var minTime = timeΔ1 + (int64)((mu - acc.bound) * (float64)(int64)window);
+
         // Advance the window to the next time where either
         // the left or right edge of the window encounters a
         // change in the utilization curve.

@@ -77,8 +77,10 @@ public static @string Clean(@string path) {
     if (path == ""u8) {
         return "."u8;
     }
+
     var rooted = path[0] == (rune)'/';
     nint n = len(path);
+
     // Invariants:
     //	reading from path; r is index of next byte to process.
     //	writing to buf; w is index of next byte to write.
@@ -91,33 +93,34 @@ public static @string Clean(@string path) {
         @out.append((rune)'/');
         (r, dotdot) = (1, 1);
     }
+
     while (r < n) {
         switch (ᐧ) {
         case {} when path[r] is (rune)'/': {
+            // empty path element
             r++;
             break;
         }
         case {} when path[r] == (rune)'.' && (r + 1 == n || path[r + 1] == (rune)'/'): {
+            // . element
             r++;
             break;
         }
         case {} when path[r] == (rune)'.' && path[r + 1] == (rune)'.' && (r + 2 == n || path[r + 2] == (rune)'/'): {
+            // .. element: remove to last /
             r += 2;
             switch (ᐧ) {
             case {} when @out.w > dotdot: {
+                // can backtrack
                 @out.w--;
                 while (@out.w > dotdot && @out.index(@out.w) != (rune)'/') {
-                    // empty path element
-                    // . element
-                    // .. element: remove to last /
-                    // can backtrack
                     @out.w--;
                 }
                 break;
             }
             case {} when !rooted: {
+                // cannot backtrack, but not rooted, so append .. element.
                 if (@out.w > 0) {
-                    // cannot backtrack, but not rooted, so append .. element.
                     @out.append((rune)'/');
                 }
                 @out.append((rune)'.');
@@ -125,27 +128,27 @@ public static @string Clean(@string path) {
                 dotdot = @out.w;
                 break;
             }}
-
             break;
         }
         default: {
+            // real path element.
+            // add slash if needed
             if (rooted && @out.w != 1 || !rooted && @out.w != 0) {
-                // real path element.
-                // add slash if needed
                 @out.append((rune)'/');
             }
+            // copy element
             for (; r < n && path[r] != (rune)'/'; r++) {
-                // copy element
                 @out.append(path[r]);
             }
             break;
         }}
-
     }
+
     // Turn empty string into "."
     if (@out.w == 0) {
         return "."u8;
     }
+
     return @out.@string();
 }
 

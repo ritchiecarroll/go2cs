@@ -58,8 +58,8 @@ using static go.net.http.cookiejar_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/cookiejar/jar.go", "jar.cs", "AEieAcKmgpQAGjqSrLKssoKUqJKClIKCkoKmqJKssqjygpSCgpSEgoSCgpaCgoKWgoKigoKClIKUgoKClIKClMyCgIKkgIKklIKW3LKo8oKUgpSCgpSChIKEhIKCgoKUgoKCgIKCtpSCloCCgpSCgqSCgpaCgpTGqKKCgoKCuIKCgqaCqqKCgpSClKiSgpaCgoKCpoKClIKm3IKoksqUqqKCloKClAAHGAANAoSClJaCgqiCkoKClIKClIKUgqiCgoKElKSkpqiCzJaSppYADyKCAAoYzISmloKUlu6ogoCCppTcgpY=", "214-222:1")]
-[assembly: go.GoPositionMap("net/http/cookiejar/punycode.go", "punycode.cs", "ACFG0oKCgoKCgoKUpoKClIKCgoKmgoKUgoKCgoKUlIKUgoKCgpKClIKUgpSCgoKClIKUpoKUpKSokoKUlIKCgoKUAAgYsoKUgoKCgoKUpg==")]
+[assembly: go.GoPositionMap("net/http/cookiejar/jar.go", "jar.cs", "AEieAcKmgpQAGjqSrLKssoKUqJKClIKCkoKmqJKssqjygpSCgpSUgpSCgqaCgoKmgoKigoKClIKUgoKClIKClNyCgIKkgIKklIKW3LKo8oKUgpSCgpSClIKUlIKCgoKUgoKCgIKCtpSCpoCCgpSCgqSCgqaCgpTGqKKCgoKCuIKCgqaCqqKCgpSClKiSgqaCgoKCpoKClIKm3IKoksqUqqKCpoKClAAHGAANApSClKaCgriCkoKClIKClIKUgriCgoKUlKSkpqiCzJaSpqYADyKCAAsY3JSmpoKUpu64goCCppTsgqY=", "214-222:1")]
+[assembly: go.GoPositionMap("net/http/cookiejar/punycode.go", "punycode.cs", "ABtG0oKCgoKCgoKUpoKClIKCgoKmgoKUgoKCgoKUlIKUgoKCgpKClIKUgpSCgoKClIKUpoKUpJSokoKUlIKCgoKUAAgYsoKUgoKCgoKUpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

@@ -10,6 +10,14 @@ using @internal.runtime;
 
 partial class runtime_package {
 
+// lfstack is the head of a lock-free stack.
+//
+// The zero value of lfstack is an empty list.
+//
+// This stack is intrusive. Nodes must embed lfnode as the first field.
+//
+// The stack does not keep GC-visible pointers to nodes, so the caller
+// must ensure the nodes are allocated outside the Go heap.
 partial struct lfstack /*num:uint64*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

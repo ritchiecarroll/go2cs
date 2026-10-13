@@ -57,9 +57,11 @@ internal static UntypedInt mutexSpinning => 0x100;
 internal static UntypedInt mutexStackLocked => 0x200;
 internal static UntypedInt mutexMMask => 0x3FF;
 internal static UntypedInt mutexMOffset => /* mallocHeaderSize */ 8; // alignment of heap-allocated Ms (those other than m0)
+
 internal static UntypedInt mutexActiveSpinCount => 4;
 internal static UntypedInt mutexActiveSpinSize => 30;
 internal static UntypedInt mutexPassiveSpinCount => 1;
+
 internal static UntypedInt mutexTailWakePeriod => 16;
 
 //go:nosplit
@@ -133,18 +135,17 @@ internal static muintptr mutexWaitListHead(uintptr v) {
 internal static bool mutexPreferLowLatency(ж<mutex> Ꮡl) {
     var exprᴛ1 = Ꮡl;
     if (exprᴛ1 == Ꮡsched.of(schedt.Ꮡlock)) {
+        // We often expect sched.lock to pass quickly between Ms in a way that
+        // each M has unique work to do: for instance when we stop-the-world
+        // (bringing each P to idle) or add new netpoller-triggered work to the
+        // global run queue.
         return true;
     }
     { /* default: */
         return false;
     }
-
 }
 
-// We often expect sched.lock to pass quickly between Ms in a way that
-// each M has unique work to do: for instance when we stop-the-world
-// (bringing each P to idle) or add new netpoller-triggered work to the
-// global run queue.
 // go2cs generated this placeholder — func mutexContended is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static void @lock(ж<mutex> Ꮡl) {

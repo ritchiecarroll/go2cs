@@ -128,7 +128,6 @@ Scan:
             }
             break;
         }}
-
 continue_Scan:;
     }
 break_Scan:;
@@ -160,16 +159,16 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
                 s = s.slice(n);
             }
             chunk = chunk[1..];
+            // possibly negated
             var negated = false;
             if (len(chunk) > 0 && chunk[0] == (rune)'^') {
-                // possibly negated
                 negated = true;
                 chunk = chunk[1..];
             }
+            // parse all ranges
             var match = false;
             nint nrange = 0;
             while (ᐧ) {
-                // parse all ranges
                 if (len(chunk) > 0 && chunk[0] == (rune)']' && nrange > 0) {
                     chunk = chunk[1..];
                     break;
@@ -226,7 +225,6 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
             }
             chunk = chunk[1..];
         }
-
     }
     if (failed) {
         return ("", false, default!);
@@ -283,6 +281,7 @@ internal static (slice<@string> matches, error err) globWithLimit(@string patter
     if (depth == pathSeparatorsLimit) {
         return (default!, ErrBadPattern);
     }
+
     // Check pattern is well-formed.
     {
         var (_, errΔ1) = Match(pattern, ""u8); if (errΔ1 != default!) {
@@ -297,6 +296,7 @@ internal static (slice<@string> matches, error err) globWithLimit(@string patter
         }
         return (new @string[]{pattern}.slice(), default!);
     }
+
     var (dir, @file) = Split(pattern);
     nint volumeLen = 0;
     if (runtime.GOOS == "windows"u8){
@@ -304,13 +304,16 @@ internal static (slice<@string> matches, error err) globWithLimit(@string patter
     } else {
         dir = cleanGlobPath(dir);
     }
+
     if (!hasMeta(dir.slice(volumeLen))) {
         return glob(dir, @file, default!);
     }
+
     // Prevent infinite recursion. See issue 15879.
     if (dir == pattern) {
         return (default!, ErrBadPattern);
     }
+
     slice<@string> m = default!;
     (m, err) = globWithLimit(dir, depth + 1);
     if (err != default!) {
@@ -332,15 +335,13 @@ internal static @string cleanGlobPath(@string path) {
         return "."u8;
     }
     if (exprᴛ1 == ((@string)(rune)Separator)) {
+        // do nothing to the path
         return path;
     }
     { /* default: */
         return path.slice(0, len(path) - 1); // chop off trailing separator
     }
-
 }
-
-// do nothing to the path
 
 // cleanGlobPathWindows is windows version of cleanGlobPath.
 internal static (nint prefixLen, @string cleaned) cleanGlobPathWindows(@string path) {
@@ -349,22 +350,19 @@ internal static (nint prefixLen, @string cleaned) cleanGlobPathWindows(@string p
     case {} when path == ""u8: {
         return (0, ".");
     }
-    case {} when vollen + 1 == len(path) && os.IsPathSeparator(path[len(path) - 1]): {
+    case {} when vollen + 1 == len(path) && os.IsPathSeparator(path[len(path) - 1]): { // /, \, C:\ and C:/
+        // do nothing to the path
         return (vollen + 1, path);
     }
-    case {} when vollen == len(path) && len(path) == 2: {
+    case {} when vollen == len(path) && len(path) == 2: { // C:
         return (vollen, path + "."); // convert C: into C:.
     }
     default: {
         if (vollen >= len(path)) {
-            // /, \, C:\ and C:/
-            // do nothing to the path
-            // C:
             vollen = len(path) - 1;
         }
         return (vollen, path.slice(0, len(path) - 1)); // chop off trailing separator
     }}
-
 }
 
 // glob searches for files matching pattern in the directory dir
@@ -390,8 +388,10 @@ internal static (slice<@string> m, error e) glob(@string dir, @string pattern, s
         }
         var dʗ1 = d;
         defer(() => dʗ1.Close(), ref ᒐ);
+
         var (names, _) = d.Readdirnames(-1);
         slices.Sort<slice<@string>, @string>(names);
+
         foreach (var (_, n) in names) {
             var (matched, errΔ1) = Match(pattern, n);
             if (errΔ1 != default!) {

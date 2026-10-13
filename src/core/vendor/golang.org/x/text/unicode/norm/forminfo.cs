@@ -45,6 +45,7 @@ partial struct ΔProperties {
     internal uint16 index;
 }
 
+// functions dispatchable per form
 // type lookupFunc is a methodless func type — rendered inline as its base delegate
 
 // formInfo holds Form-specific functions and tables.
@@ -104,6 +105,15 @@ public static bool BoundaryAfter(this ΔProperties p) {
     return p.isInert();
 }
 
+// We pack quick check data in 4 bits:
+//
+//	5:    Combines forward  (0 == false, 1 == true)
+//	4..3: NFC_QC Yes(00), No (10), or Maybe (11)
+//	2:    NFD_QC Yes (0) or No (1). No also means there is a decomposition.
+//	1..0: Number of trailing non-starters.
+//
+// When all 4 bits are zero, the character is inert, meaning it is never
+// influenced by normalization.
 partial struct qcInfo /*num:uint8*/;
 
 internal static bool isYesC(this ΔProperties p) {

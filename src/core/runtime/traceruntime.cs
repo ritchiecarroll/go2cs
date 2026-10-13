@@ -18,9 +18,8 @@ partial struct gTraceState {
 // reset resets the gTraceState for a new goroutine.
 internal static void reset(this ref gTraceState s) {
     s.seq = new uint64[]{}.array(2);
+    // N.B. s.statusTraced is managed and cleared separately.
 }
-
-// N.B. s.statusTraced is managed and cleared separately.
 
 // mTraceState is per-M state for the tracer.
 partial struct mTraceState {
@@ -72,6 +71,13 @@ internal static void lockRankMayTraceFlush() {
     lockWithRankMayAcquire(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock), getLockRank(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock)));
 }
 
+// traceBlockReason is an enumeration of reasons a goroutine might block.
+// This is the interface the rest of the runtime uses to tell the
+// tracer why a goroutine blocked. The tracer then propagates this information
+// into the trace however it sees fit.
+//
+// Note that traceBlockReasons should not be compared, since reasons that are
+// distinct by name may *not* be distinct by value.
 partial struct traceBlockReason /*num:uint8*/;
 
 internal static traceBlockReason traceBlockGeneric => /* iota */ 0;
@@ -112,6 +118,10 @@ internal static array<@string> traceBlockReasonStrings = new golib.SparseArray<@
     [traceBlockSynctest] = "synctest"u8
 }.array();
 
+// traceGoStopReason is an enumeration of reasons a goroutine might yield.
+//
+// Note that traceGoStopReasons should not be compared, since reasons that are
+// distinct by name may *not* be distinct by value.
 partial struct traceGoStopReason /*num:uint8*/;
 
 internal static traceGoStopReason traceGoStopGeneric => /* iota */ 0;
@@ -186,8 +196,10 @@ internal static traceLocker traceAcquireEnabled() {
     // buffer flushes are rare. Record the lock edge even if it doesn't happen
     // this time.
     lockRankMayTraceFlush();
+
     // Prevent preemption.
     var mp = acquirem();
+
     // Check if we're already tracing. It's safe to be reentrant in general,
     // because this function (and the invariants of traceLocker.writer) ensure
     // that it is.
@@ -195,6 +207,7 @@ internal static traceLocker traceAcquireEnabled() {
         mp.Value.trace.reentered++;
         return new traceLocker(mp, ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡgen).Load());
     }
+
     // Acquire the trace seqlock. This prevents traceAdvance from moving forward
     // until all Ms are observed to be outside of their seqlock critical section.
     //
@@ -205,6 +218,7 @@ internal static traceLocker traceAcquireEnabled() {
     if (debugTraceReentrancy && seq % 2 != 1) {
         @throw(badUseOfTraceSeqlockˢ);
     }
+
     // N.B. This load of gen appears redundant with the one in traceEnabled.
     // However, it's very important that the gen we use for writing to the trace
     // is acquired under a traceLocker so traceAdvance can make sure no stale
@@ -534,6 +548,7 @@ internal static void ProcSteal(this traceLocker tl, ж<Δp> Ꮡpp, bool inSyscal
     // Grab the M ID we stole from.
     var mStolenFrom = pp.trace.mSyscallID;
     pp.trace.mSyscallID = -1;
+
     // Emit the status of the P we're stealing. We may be just about to do this when creating the event
     // writer but it's not guaranteed, even if inSyscall is true. Although it might seem like from a
     // syscall context we're always stealing a P for ourselves, we may have not wired it up yet (so
@@ -544,6 +559,7 @@ internal static void ProcSteal(this traceLocker tl, ж<Δp> Ꮡpp, bool inSyscal
         // to trigger more in-progress events.
         tl.writer().writeProcStatus((uint64)pp.id, traceProcSyscallAbandoned, pp.trace.inSweep).end();
     }
+
     // The status of the proc and goroutine, if we need to emit one here, is not evident from the
     // context of just emitting this event alone. There are two cases. Either we're trying to steal
     // the P just to get its attention (e.g. STW or sysmon retake) or we're trying to steal a P for
@@ -655,7 +671,6 @@ internal static void trace_userRegion(uint64 id, uint64 mode, @string name) {
     default: {
         return;
     }}
-
     tl.eventWriter(traceGoRunning, traceProcRunning).@event(ev, ((traceArg)id), tl.@string(name), tl.stack(3));
     traceRelease(tl);
 }
@@ -680,9 +695,8 @@ internal static void trace_userLog(uint64 id, @string category, @string message)
 //
 // sched.lock must be held to synchronize with traceAdvance.
 internal static void traceThreadDestroy(ж<m> Ꮡmp) {
-    ref var mp = ref Ꮡmp.DerefOrNull();
-
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
+
     // Flush all outstanding buffers to maintain the invariant
     // that an M only has active buffers while on sched.freem
     // or allm.

@@ -95,6 +95,7 @@ internal static float64 log(float64 x) {
     const float64 L5 = 1.818357216161805012e-01; /* 3FC74664 96CB03DE */
     const float64 L6 = 1.531383769920937332e-01; /* 3FC39A09 D078C69F */
     const float64 L7 = 1.479819860511658591e-01; /* 3FC2F112 DF3E5244 */
+
     // special cases
     switch (ᐧ) {
     case {} when IsNaN(x) || IsInf(x, 1): {
@@ -115,6 +116,7 @@ internal static float64 log(float64 x) {
     }
     var f = f1 - 1D;
     var k = (float64)ki;
+
     // compute
     var s = f / (2D + f);
     var s2 = s * s;

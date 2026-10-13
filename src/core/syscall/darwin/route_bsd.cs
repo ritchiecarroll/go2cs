@@ -111,7 +111,6 @@ internal static (Sockaddr, error) parseSockaddrInet(slice<byte> b, byte family) 
     { /* default: */
         return (default!, EINVAL);
     }
-
 }
 
 internal const nint offsetofInet4 = /* int(unsafe.Offsetof(RawSockaddrInet4{}.Addr)) */ 4;
@@ -165,17 +164,15 @@ internal static (Sockaddr, error) parseNetworkLayerAddr(slice<byte> b, byte fami
         copy((~sa).Addr[..], b[(int)(offsetofInet4)..]);
         return (new SockaddrInet4жSockaddr(sa), default!);
     }
-    default: {
+    default: { // an old fashion, AF_UNSPEC or unknown means AF_INET
         var sa = Ꮡ(new SockaddrInet4(nil));
         if (l - 1 < offsetofInet4){
-            // an old fashion, AF_UNSPEC or unknown means AF_INET
             copy((~sa).Addr[..], b.slice(1, l));
         } else {
             copy((~sa).Addr[..], b.slice(l - offsetofInet4, l));
         }
         return (new SockaddrInet4жSockaddr(sa), default!);
     }}
-
 }
 
 // RouteRIB returns routing information base, as known as RIB,
@@ -264,7 +261,6 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref RouteMessage m) {
             sas[i] = sa;
             b = b.slice(rsaAlignOf((nint)b[0]));
         }
-
     }
     return (sas[..], default!);
 }
@@ -335,7 +331,6 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceAddrMessage 
             sas[i] = sa;
             b = b.slice(rsaAlignOf((nint)b[0]));
         }
-
     }
     return (sas[..], default!);
 }

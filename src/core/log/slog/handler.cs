@@ -107,8 +107,8 @@ internal static error Handle(this ж<defaultHandler> Ꮡh, context.Context ctx, 
     GoFrame ᒐ = default;
     try {
         r = r.ΔClone();
-
         ref var h = ref Ꮡh.DerefOrNull();
+
         var buf = buffer.New();
         buf.WriteString(r.Level.String());
         buf.WriteByte((rune)' ');
@@ -172,12 +172,17 @@ partial struct HandlerOptions {
 }
 
 // Keys for "built-in" attributes.
+// TimeKey is the key used by the built-in handlers for the time
+// when the log method is called. The associated Value is a [time.Time].
 public static readonly @string TimeKey = "time"u8;
-
+// LevelKey is the key used by the built-in handlers for the level
+// of the log call. The associated value is a [Level].
 public static readonly @string LevelKey = "level"u8;
-
+// MessageKey is the key used by the built-in handlers for the
+// message of the log call. The associated value is a string.
 public static readonly @string MessageKey = "msg"u8;
-
+// SourceKey is the key used by the built-in handlers for the source file
+// and line of the log call. The associated value is a *[Source].
 public static readonly @string SourceKey = "source"u8;
 
 partial struct commonHandler {
@@ -205,11 +210,9 @@ internal static ж<commonHandler> clone(this ref commonHandler h) {
         groups: slices.Clip<slice<@string>, @string>(h.groups),
         nOpenGroups: h.nOpenGroups,
         w: h.w,
-        mu: h.mu
+        mu: h.mu // mutex shared among all clones of this handler
     ));
 }
-
-// mutex shared among all clones of this handler
 
 // enabled reports whether l is greater than or equal to the
 // minimum level.
@@ -275,8 +278,8 @@ internal static error handle(this ж<commonHandler> Ꮡh, Record r) {
     GoFrame ᒐ = default;
     try {
         r = r.ΔClone();
-
         ref var h = ref Ꮡh.DerefOrNull();
+
         ref var state = ref heap<handleState>(out var Ꮡstate);
         state = Ꮡh.newHandleState(buffer.New(), true, ""u8);
         defer(Ꮡstate.free, ref ᒐ);
@@ -322,6 +325,7 @@ internal static error handle(this ж<commonHandler> Ꮡh, Record r) {
         state.groups = stateGroups; // Restore groups passed to ReplaceAttrs.
         Ꮡstate.appendNonBuiltIns(r);
         state.buf.WriteByte((rune)'\n');
+
         h.mu.Lock();
         defer(Ꮡh.Value.mu.Unlock, ref ᒐ);
         var (_, err) = h.w.Write(state.buf.ValueSlot);
@@ -333,8 +337,8 @@ internal static error handle(this ж<commonHandler> Ꮡh, Record r) {
 
 internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) {
     r = r.ΔClone();
-
     ref var s = ref Ꮡs.DerefOrNull();
+
     // preformatted Attrs
     {
         var pfa = s.h.Value.preformattedAttrs; if (len(pfa) > 0) {
@@ -470,8 +474,8 @@ internal static void closeGroup(this ref handleState s, @string name) {
         s.buf.WriteByte((rune)'}');
     } else {
         (s.prefix.ValueSlot) = (s.prefix.ValueSlot).slice(0, len(s.prefix.ValueSlot) - len(name) - 1);
+        /* for keyComponentSep */
     }
-    /* for keyComponentSep */
     s.sep = s.h.attrSep();
     if (s.groups != nil) {
         s.groups.ValueSlot = (s.groups.ValueSlot).slice(0, len(s.groups.ValueSlot) - 1);
@@ -614,11 +618,13 @@ internal static void appendValue(this ж<handleState> Ꮡs, Value v) {
                             return;
                         }
                     }
+
                     // Otherwise just print the original panic message.
                     Ꮡs.Value.appendString(fmt.Sprintf("!PANIC: %v"u8, r));
                 }
             }
         }, ref ᒐ);
+
         error err = default!;
         if ((~s.h).json){
             err = appendJSONValue(Ꮡs, v);

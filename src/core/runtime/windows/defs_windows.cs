@@ -10,10 +10,13 @@ internal static UntypedInt _PROT_NONE => 0;
 internal static UntypedInt _PROT_READ => 1;
 internal static UntypedInt _PROT_WRITE => 2;
 internal static UntypedInt _PROT_EXEC => 4;
+
 internal static UntypedInt _MAP_ANON => 1;
 internal static UntypedInt _MAP_PRIVATE => 2;
+
 internal static UntypedInt _DUPLICATE_SAME_ACCESS => 0x2;
 internal static UntypedInt _THREAD_PRIORITY_HIGHEST => 0x2;
+
 internal static UntypedInt _SIGINT => 0x2;
 internal static UntypedInt _SIGTERM => 0xF;
 internal static UntypedInt _CTRL_C_EVENT => 0x0;
@@ -21,6 +24,7 @@ internal static UntypedInt _CTRL_BREAK_EVENT => 0x1;
 internal static UntypedInt _CTRL_CLOSE_EVENT => 0x2;
 internal static UntypedInt _CTRL_LOGOFF_EVENT => 0x5;
 internal static UntypedInt _CTRL_SHUTDOWN_EVENT => 0x6;
+
 internal static UntypedInt _EXCEPTION_ACCESS_VIOLATION => 0xc0000005;
 internal static UntypedInt _EXCEPTION_IN_PAGE_ERROR => 0xc0000006;
 internal static UntypedInt _EXCEPTION_BREAKPOINT => 0x80000003;
@@ -32,8 +36,10 @@ internal static UntypedInt _EXCEPTION_FLT_OVERFLOW => 0xc0000091;
 internal static UntypedInt _EXCEPTION_FLT_UNDERFLOW => 0xc0000093;
 internal static UntypedInt _EXCEPTION_INT_DIVIDE_BY_ZERO => 0xc0000094;
 internal static UntypedInt _EXCEPTION_INT_OVERFLOW => 0xc0000095;
+
 internal static UntypedInt _INFINITE => 0xffffffff;
 internal static UntypedInt _WAIT_TIMEOUT => 0x102;
+
 internal static UntypedInt _EXCEPTION_CONTINUE_EXECUTION => /* -0x1 */ -1;
 internal static UntypedInt _EXCEPTION_CONTINUE_SEARCH => 0x0;
 internal static UntypedInt _EXCEPTION_CONTINUE_SEARCH_SEH => 0x1;

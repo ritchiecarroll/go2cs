@@ -30,6 +30,7 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
 
     x.mode = invalid;
     x.expr = new ast.IdentжExpr(Ꮡe);
+
     var (scope, obj) = Ꮡcheck.of(Checker.Ꮡenvironment).lookupScope(e.Name);
     var exprᴛ1 = obj;
     if (AreEqual(exprᴛ1, default!)) {
@@ -46,7 +47,6 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
             return; // avoid follow-on errors
         }
     }
-
     // Because the representation of any depends on gotypesalias, we don't check
     // pointer identity here.
     if (obj.Name() == "any"u8 && obj.Parent() == Universe) {
@@ -55,6 +55,7 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
         }
     }
     check.recordUse(Ꮡe, obj);
+
     // If we want a type but don't have one, stop right here and avoid potential problems
     // with missing underlying types. This also gives better error messages in some cases
     // (see go.dev/issue/65344).
@@ -71,6 +72,7 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
         }
         return;
     }
+
     // Type-check the object.
     // Only call Checker.objDecl if the object doesn't have a type yet
     // (in which case we must actually determine it) or the object is a
@@ -88,6 +90,7 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
         typ = obj.Type(); // type must have been assigned by Checker.objDecl
     }
     assert(typ != default!);
+
     // The object may have been dot-imported.
     // If so, mark the respective package as used.
     // (This code is only needed for dot-imports. Without them,
@@ -97,6 +100,7 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
             check.usedPkgNames[pkgName] = true;
         }
     }
+
     switch (obj.type()) {
     case ж<PkgName> objΔ1: {
         Ꮡcheck.errorf(new ast_Identжpositioner(Ꮡe), InvalidPkgUse, "use of package %s not in selector"u8, (~objΔ1).name);
@@ -129,10 +133,10 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
         break;
     }
     case ж<Var> objΔ1: {
+        // It's ok to mark non-local variables, but ignore variables
+        // from other packages to avoid potential race conditions with
+        // dot-imported variables.
         if ((~objΔ1).pkg == check.pkg) {
-            // It's ok to mark non-local variables, but ignore variables
-            // from other packages to avoid potential race conditions with
-            // dot-imported variables.
             check.usedVars[objΔ1] = true;
         }
         check.addDeclDep(new VarжObject(objΔ1));
@@ -161,6 +165,7 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
         throw panic("unreachable");
         break;
     }}
+
     x.typ = typ;
 }
 
@@ -188,6 +193,7 @@ internal static void validVarType(this ж<Checker> Ꮡcheck, ast.Expr e, ΔType 
     if (isTypeParam(typ)) {
         return;
     }
+
     // We don't want to call under() or complete interfaces while we are in
     // the middle of type-checking parameter declarations that might belong
     // to interface methods. Delay this check to the end of type-checking.
@@ -289,14 +295,16 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
                 }
             }, ref ᒐ);
         }
+
         switch (e0.type()) {
         case ж<ast.BadExpr> e: {
+            // ignore - error reported before
             break;
         }
         case ж<ast.Ident> e: {
-// ignore - error reported before
             ref var x = ref heap(new operand(), out var Ꮡx);
             Ꮡcheck.ident(Ꮡx, e, Ꮡdef, true);
+
             var exprᴛ1 = x.mode;
             if (exprᴛ1 == typexpr) {
                 var typΔ2 = x.typ;
@@ -304,20 +312,20 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
                 T = typΔ2; goto ᒐdone;
             }
             if (exprᴛ1 == invalid) {
+                // ignore - error reported before
             }
             else if (exprᴛ1 == novalue) {
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), // ignore - error reported before
- NotAType, "%s used as type"u8, Ꮡx);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NotAType, "%s used as type"u8, Ꮡx);
             }
             else { /* default: */
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NotAType, "%s is not a type"u8, Ꮡx);
             }
-
             break;
         }
         case ж<ast.SelectorExpr> e: {
             ref var x = ref heap(new operand(), out var Ꮡx);
             Ꮡcheck.selector(Ꮡx, e, Ꮡdef, true);
+
             var exprᴛ2 = x.mode;
             if (exprᴛ2 == typexpr) {
                 var typΔ4 = x.typ;
@@ -325,15 +333,14 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
                 T = typΔ4; goto ᒐdone;
             }
             if (exprᴛ2 == invalid) {
+                // ignore - error reported before
             }
             else if (exprᴛ2 == novalue) {
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), // ignore - error reported before
- NotAType, "%s used as type"u8, Ꮡx);
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NotAType, "%s used as type"u8, Ꮡx);
             }
             else { /* default: */
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), NotAType, "%s is not a type"u8, Ꮡx);
             }
-
             break;
         }
         case ж<ast.IndexExpr> _:
@@ -344,9 +351,9 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
             T = Ꮡcheck.instantiatedType(ix, Ꮡdef); goto ᒐdone;
         }
         case ж<ast.ParenExpr> e: {
-            T = Ꮡcheck.definedType((~e).X, // Generic types must be instantiated before they can be used in any form.
- // Consequently, generic types cannot be parenthesized.
- Ꮡdef); goto ᒐdone;
+            // Generic types must be instantiated before they can be used in any form.
+            // Consequently, generic types cannot be parenthesized.
+            T = Ꮡcheck.definedType((~e).X, Ꮡdef); goto ᒐdone;
         }
         case ж<ast.ArrayType> e: {
             if ((~e).Len == default!) {
@@ -355,12 +362,13 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
                 typΔ5.Value.elem = Ꮡcheck.varType((~e).Elt);
                 T = new SliceжΔType(typΔ5); goto ᒐdone;
             }
+
             var typΔ6 = @new<Array>();
             setDefType(Ꮡdef, new ArrayжΔType(typΔ6));
+            // Provide a more specific error when encountering a [...] array
+            // rather than leaving it to the handling of the ... expression.
             {
                 var (_, ok) = (~e).Len._<ж<ast.Ellipsis>>(ᐧ); if (ok){
-                    // Provide a more specific error when encountering a [...] array
-                    // rather than leaving it to the handling of the ... expression.
                     Ꮡcheck.error(new ast_Exprᴠpositioner((~e).Len), BadDotDotDotSyntax, invalidUseOfArrayOutsideˢ);
                     typΔ6.Value.len = -1;
                 } else {
@@ -371,13 +379,13 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
             if ((~typΔ6).len >= 0) {
                 T = new ArrayжΔType(typΔ6); goto ᒐdone;
             }
+            // report error if we encountered [...]
             break;
         }
         case ж<ast.Ellipsis> e: {
-            Ꮡcheck.error(new ast_Ellipsisжpositioner(e), // report error if we encountered [...]
- // dots are handled explicitly where they are legal
- // (array composite literals and parameter lists)
- InvalidDotDotDot, invalidUseOfˢ);
+            // dots are handled explicitly where they are legal
+            // (array composite literals and parameter lists)
+            Ꮡcheck.error(new ast_Ellipsisжpositioner(e), InvalidDotDotDot, invalidUseOfˢ);
             Ꮡcheck.use((~e).Elt);
             break;
         }
@@ -392,11 +400,11 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
             typΔ8.Value.@base = new BasicжΔType(Typ[Invalid]); // avoid nil base in invalid recursive type declaration
             setDefType(Ꮡdef, new PointerжΔType(typΔ8));
             typΔ8.Value.@base = Ꮡcheck.varType((~e).X);
+            // If typ.base is invalid, it's unlikely that *base is particularly
+            // useful - even a valid dereferenciation will lead to an invalid
+            // type again, and in some cases we get unexpected follow-on errors
+            // (e.g., go.dev/issue/49005). Return an invalid type instead.
             if (!isValid((~typΔ8).@base)) {
-                // If typ.base is invalid, it's unlikely that *base is particularly
-                // useful - even a valid dereferenciation will lead to an invalid
-                // type again, and in some cases we get unexpected follow-on errors
-                // (e.g., go.dev/issue/49005). Return an invalid type instead.
                 T = new BasicжΔType(Typ[Invalid]); goto ᒐdone;
             }
             T = new PointerжΔType(typΔ8); goto ᒐdone;
@@ -416,16 +424,18 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
         case ж<ast.MapType> e: {
             var typΔ11 = @new<Map>();
             setDefType(Ꮡdef, new MapжΔType(typΔ11));
+
             typΔ11.Value.key = Ꮡcheck.varType((~e).Key);
             typΔ11.Value.elem = Ꮡcheck.varType((~e).Value);
+
+            // spec: "The comparison operators == and != must be fully defined
+            // for operands of the key type; thus the key type must not be a
+            // function, map, or slice."
+            //
+            // Delay this check because it requires fully setup types;
+            // it is safe to continue in any case (was go.dev/issue/6667).
             var typʗ1 = typΔ11;
             check.later(() => {
-                // spec: "The comparison operators == and != must be fully defined
-                // for operands of the key type; thus the key type must not be a
-                // function, map, or slice."
-                //
-                // Delay this check because it requires fully setup types;
-                // it is safe to continue in any case (was go.dev/issue/6667).
                 if (!Comparable((~typʗ1).key)) {
                     @string why = default!;
                     if (isTypeParam((~typʗ1).key)) {
@@ -434,14 +444,17 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
                     Ꮡcheck.errorf(new ast_Exprᴠpositioner((~e).Key), IncomparableMapKey, "invalid map key type %s%s"u8, (~typʗ1).key, why);
                 }
             }).describef(new ast_Exprᴠpositioner((~e).Key), "check map key %s"u8, (~typΔ11).key);
+
             T = new MapжΔType(typΔ11); goto ᒐdone;
         }
         case ж<ast.ChanType> e: {
             var typΔ12 = @new<Chan>();
             setDefType(Ꮡdef, new ChanжΔType(typΔ12));
+
             ChanDir dir = SendRecv;
             var exprᴛ3 = (~e).Dir;
             if (exprᴛ3 == (ast.ChanDir)((ast.ChanDir)(ast.SEND | ast.RECV))) {
+                // nothing to do
             }
             else if (exprᴛ3 == ast.SEND) {
                 dir = SendOnly;
@@ -450,8 +463,8 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
                 dir = RecvOnly;
             }
             else { /* default: */
-                Ꮡcheck.errorf(new ast_ChanTypeжpositioner(e), // nothing to do
- InvalidSyntaxTree, "unknown channel direction %d"u8, (~e).Dir);
+                Ꮡcheck.errorf(new ast_ChanTypeжpositioner(e), InvalidSyntaxTree, "unknown channel direction %d"u8, (~e).Dir);
+                // ok to continue
             }
 
             typΔ12.Value.dir = dir;
@@ -460,11 +473,11 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
         }
         default: {
             var e = e0;
-            Ꮡcheck.errorf(new ast_Exprᴠpositioner(e0), // ok to continue
- NotAType, "%s is not a type"u8, e0);
+            Ꮡcheck.errorf(new ast_Exprᴠpositioner(e0), NotAType, "%s is not a type"u8, e0);
             Ꮡcheck.use(e0);
             break;
         }}
+
         var typ = Typ[Invalid];
         setDefType(Ꮡdef, new BasicжΔType(typ));
         T = new BasicжΔType(typ);
@@ -522,9 +535,11 @@ internal static ΔType /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<in
                 Ꮡcheck.trace(Ꮡix.Value.Pos(), "=> %s"u8, res);
             }, ref ᒐ);
         }
+
         defer(() => {
             setDefType(Ꮡdef, res);
         }, ref ᒐ);
+
         ref var cause = ref heap(new @string(), out var Ꮡcause);
         var typ = Ꮡcheck.genericType(ix.x, Ꮡcause);
         if (cause != ""u8) {
@@ -540,11 +555,13 @@ internal static ΔType /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<in
             }
         }
         var gtyp = typ._<ΔgenericType>();
+
         // evaluate arguments
         var targs = Ꮡcheck.typeList(ix.indices);
         if (targs == default!) {
             res = new BasicжΔType(Typ[Invalid]); goto ᒐdone;
         }
+
         // create instance
         // The instance is not generic anymore as it has type arguments, but unless
         // instantiation failed, it still satisfies the genericType interface because
@@ -554,6 +571,7 @@ internal static ΔType /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<in
         if (inst == default!) {
             res = new BasicжΔType(Typ[Invalid]); goto ᒐdone;
         }
+
         // For Named types, orig.tparams may not be set up, so we need to do expansion later.
         var instʗ1 = inst;
         var targsʗ1 = targs;
@@ -562,6 +580,7 @@ internal static ΔType /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<in
             // and so it must be resolved during type-checking so that we can report
             // errors.
             Ꮡcheck.Value.recordInstance(Ꮡix.Value.orig, targsʗ1, instʗ1);
+
             @string name = instʗ1._<instantiatedType_type>().Obj().Value.name;
             var tparams = instʗ1.TypeParams().list();
             if (Ꮡcheck.validateTArgLen(Ꮡix.Value.Pos(), name, len(tparams), len(targsʗ1))) {
@@ -580,6 +599,7 @@ internal static ΔType /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<in
                 }
             }
         }).describef(new indexedExprжpositioner(Ꮡix), "verify instantiation %s"u8, inst);
+
         res = inst;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -614,6 +634,7 @@ internal static int64 arrayLength(this ж<Checker> Ꮡcheck, ast.Expr e) {
             }
         }
     }
+
     ref var x = ref heap(new operand(), out var Ꮡx);
     Ꮡcheck.expr(nil, Ꮡx, e);
     if (x.mode != constant_) {
@@ -622,6 +643,7 @@ internal static int64 arrayLength(this ж<Checker> Ꮡcheck, ast.Expr e) {
         }
         return -1;
     }
+
     if (isUntyped(x.typ) || isInteger(x.typ)) {
         {
             var val = constant.ToInt(x.val); if (val.Kind() == constant.Int) {
@@ -635,6 +657,7 @@ internal static int64 arrayLength(this ж<Checker> Ꮡcheck, ast.Expr e) {
             }
         }
     }
+
     @string msg = default!;
     if (isInteger(x.typ)){
         msg = invalidArrayLengthSˢ;

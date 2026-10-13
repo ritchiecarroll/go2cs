@@ -15,6 +15,7 @@ using go.@internal.trace.@event;
 
 partial class trace_package {
 
+// timestamp is an unprocessed timestamp.
 partial struct timestamp /*num:uint64*/;
 
 // batch represents a batch of trace events.
@@ -60,6 +61,7 @@ internal static (batch, uint64, error) readBatch(readBatch_r r) {
             return (new batch(nil), 0, fmt.Errorf("expected batch event, got %s"u8, go122.EventString(typ)));
         }
     }
+
     // Read the experiment of we have one.
     @event.Experiment exp = @event.NoExperiment;
     if (((@event.Type)b) == go122.EvExperimentalBatch) {
@@ -69,6 +71,7 @@ internal static (batch, uint64, error) readBatch(readBatch_r r) {
         }
         exp = ((@event.Experiment)(nuint)e);
     }
+
     // Read the batch header: gen (generation), thread (M) ID, base timestamp
     // for the batch.
     (var gen, err) = binary.ReadUvarint(r);
@@ -83,6 +86,7 @@ internal static (batch, uint64, error) readBatch(readBatch_r r) {
     if (err != default!) {
         return (new batch(nil), gen, fmt.Errorf("error reading batch timestamp: %w"u8, err));
     }
+
     // Read in the size of the batch to follow.
     (var size, err) = binary.ReadUvarint(r);
     if (err != default!) {
@@ -91,6 +95,7 @@ internal static (batch, uint64, error) readBatch(readBatch_r r) {
     if (size > go122.MaxBatchSize) {
         return (new batch(nil), gen, fmt.Errorf("invalid batch size %d, maximum is %d"u8, size, (nint)(go122.MaxBatchSize)));
     }
+
     // Copy out the batch for later processing.
     ref var data = ref heap(new bytes.Buffer(), out var Ꮡdata);
     data.Grow((nint)size);
@@ -101,6 +106,7 @@ internal static (batch, uint64, error) readBatch(readBatch_r r) {
     if (err != default!) {
         return (new batch(nil), gen, fmt.Errorf("copying batch data: %w"u8, err));
     }
+
     // Return the batch.
     return (new batch(
         m: ((ThreadID)(int64)m),

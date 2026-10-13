@@ -143,11 +143,11 @@ internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dir
                         mm[tag] = new protoPod(mf: f);
                     }
                 }
+                // FIXME: should probably check file length and hash here for
+                // the duplicate.
             }
         }
     }
-    // FIXME: should probably check file length and hash here for
-    // the duplicate.
     var counterRE = regexp.MustCompile(fmt.Sprintf(coverage.CounterFileRegexp, coverage.CounterFilePref));
     foreach (var (k, f) in files) {
         @string @base = filepath.Base(f);

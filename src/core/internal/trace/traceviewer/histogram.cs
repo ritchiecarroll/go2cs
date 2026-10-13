@@ -55,13 +55,16 @@ public static template.HTML ToHTML(this ж<TimeHistogram> Ꮡh, Func<time.Durati
     if (Ꮡh == nil || h.Count == 0) {
         return ((template.HTML)(@string)""u8);
     }
+
     const nint barWidth = 400;
+
     nint maxCount = 0;
     foreach (var (_, count) in h.Buckets) {
         if (count > maxCount) {
             maxCount = count;
         }
     }
+
     var w = @new<strings.Builder>();
     fmt.Fprintf(new strings_BuilderжWriter(w), @"<table>"u8);
     for (nint i = h.MinBucket; i <= h.MaxBucket; i++) {

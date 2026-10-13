@@ -15,7 +15,6 @@ internal static bool parseable(this RIBType typ) {
     { /* default: */
         return true;
     }
-
 }
 
 // RouteMetrics represents route metrics.

@@ -111,12 +111,15 @@ internal static void end(this ж<dloggerImpl> Ꮡl) {
     if (!l.w.writeFrameAt(l.w.r.end, size)) {
         @throw(recordTooLargeˢ);
     }
+
     // Commit the record.
     l.w.r.end = l.w.write;
+
     // Attempt to return this logger to the cache.
     if (putCachedDlogger(ref (Ꮡl).DerefOrNull())) {
         return;
     }
+
     // Return the logger to the global pool.
     Ꮡl.of(dloggerImpl.Ꮡowned).Store(0);
 }
@@ -131,6 +134,7 @@ internal static UntypedInt debugLogPtr => 7;
 internal static UntypedInt debugLogString => 8;
 internal static UntypedInt debugLogConstString => 9;
 internal static UntypedInt debugLogStringOverflow => 10;
+
 internal static UntypedInt debugLogPC => 11;
 internal static UntypedInt debugLogTraceback => 12;
 
@@ -294,8 +298,8 @@ internal static readonly @string notAPointerTypeˢ = "not a pointer type"u8;
 //go:nosplit
 internal static ж<dloggerImpl> p(this ж<dloggerImpl> Ꮡl, any xʗp) {
     ref var l = ref Ꮡl.DerefOrNull();
-
     ref var x = ref heap(xʗp, out var Ꮡx);
+
     l.w.@byte(debugLogPtr);
     if (x == default!){
         l.w.uvarint(0);
@@ -308,7 +312,6 @@ internal static ж<dloggerImpl> p(this ж<dloggerImpl> Ꮡl, any xʗp) {
         else { /* default: */
             @throw(notAPointerTypeˢ);
         }
-
     }
     return Ꮡl;
 }
@@ -385,7 +388,11 @@ partial struct debugLogBuf {
     internal array<byte> b = new(debugLogBytes);
 }
 
+// debugLogHeaderSize is the number of bytes in the framing
+// header of every dlog record.
 internal static UntypedInt debugLogHeaderSize => 2;
+
+// debugLogSyncSize is the number of bytes in a sync record.
 internal static UntypedInt debugLogSyncSize => /* debugLogHeaderSize + 2*8 */ 18;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -546,6 +553,7 @@ internal static uint64 /*tick*/ peek(this ref debugLogReader r) {
         r.nano = r.readUint64LEAt(r.begin + (uint64)debugLogHeaderSize + 8);
         r.begin += debugLogSyncSize;
     }
+
     // Peek tick delta.
     if (r.begin + size > r.end) {
         return ~(uint64)0;
@@ -577,10 +585,12 @@ internal static (uint64 end, uint64 tick, uint64 nano, nint Δp) header(this ref
     var size = (uint64)r.readUint16LEAt(r.begin);
     end = r.begin + size;
     r.begin += debugLogHeaderSize;
+
     // Read tick, nano, and p.
     tick = r.uvarint() + r.tick;
     nano = r.uvarint() + r.nano;
     Δp = (nint)r.varint();
+
     return (end, tick, nano, Δp);
 }
 

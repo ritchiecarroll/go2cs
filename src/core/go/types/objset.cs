@@ -12,6 +12,8 @@ namespace go.go;
 
 partial class types_package {
 
+// An objset is a set of objects identified by their unique id.
+// The zero value for objset is a ready-to-use empty objset.
 partial struct objset /*map[@string, Object]*/;
 
 // insert attempts to insert an object obj into objset s.

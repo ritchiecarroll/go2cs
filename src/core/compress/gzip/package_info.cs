@@ -53,8 +53,8 @@ using static go.compress.gzip_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("compress/gzip/gunzip.go", "gunzip.cs", "AB5AhJaWkoKUAChg8oKAgqSssriAgpSkggACJgAQAq7CgoKCgpSCgpSClJSWgoKClJTO0oAABxCkgpSCgKa2goSCgIKkgoKAgqSCloKCgIKkloKAgqSWgoCCpIKCqIKClJSosoKWgoKCgpSogIKCpIKCgoKUloKUhICCuKyw")]
-[assembly: go.GoPositionMap("compress/gzip/gzip.go", "gzip.cs", "ACxiAAgCggACEuKClIKCpoKCgpQAChzC2JKClIKCgpSC2tSCgoKUgqaCgoKUlJSCpoKCqqKClJSCgoKClIKUgpSmlIKSgpSCgoKUgoKCpoKCgqaCgoKmgqaCgoIAAhYACAKClIKUgoKCpoKssoKUgpSCgoKCpoKClIKCgg==")]
+[assembly: go.GoPositionMap("compress/gzip/gunzip.go", "gunzip.cs", "AB9AlJaWkoKUAChg8oKAgqSssriAgpSkggACJgAQAq7CgoKCgpSCgpSClJSmgoKClJTO0oAABxCkgpSCgKa2gpSCgIKkgoKAgqSCpoKCgIKkpoKAgqSmgoCCpIKCuIKClJSosoKmgoKCgpS4gIKCpIKCgoKUpoKUlICCyKyw")]
+[assembly: go.GoPositionMap("compress/gzip/gzip.go", "gzip.cs", "AChiAAgCggACEuKClIKCpoKCgpQACRzC2JKClIKCgpSC2tSCgoKUgqaCgoKUlJSCpoKCqqKClJSCgoKClIKUgpSmlIKSgpSCgoKUgoKCpoKCgqaCgoKmgqaCgoIAAhYACAKClIKUgoKCpoKssoKUgpSCgoKCpoKClIKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;

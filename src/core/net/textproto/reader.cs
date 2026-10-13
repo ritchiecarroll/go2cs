@@ -135,20 +135,22 @@ internal static (slice<byte>, error) readContinuedLineSlice(this ref Reader r, i
     if (validateFirstLine == default!) {
         return (default!, fmt.Errorf("missing validateFirstLine func"u8));
     }
+
     // Read the first line.
     var (line, err) = r.readLineSlice(lim);
     if (err != default!) {
         return (default!, err);
     }
-    if (len(line) == 0) {
-        // blank line - no continuation
+    if (len(line) == 0) { // blank line - no continuation
         return (line, default!);
     }
+
     {
         var errΔ1 = validateFirstLine(line); if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
     }
+
     // Optimistically assume that we have started to buffer the next line
     // and it starts with an ASCII letter (the next header key), or a blank
     // line, so we can avoid copying that buffered data around in memory
@@ -159,13 +161,16 @@ internal static (slice<byte>, error) readContinuedLineSlice(this ref Reader r, i
             return (trim(line), default!);
         }
     }
+
     // ReadByte or the next readLineSlice will flush the read buffer;
     // copy the slice into buf.
     r.buf = appendꓸꓸꓸ(r.buf[..0], trim(line));
+
     if (lim < 0) {
         lim = math.MaxInt64;
     }
     lim -= (int64)len(r.buf);
+
     // Read continuation lines.
     while (r.skipSpace() > 0) {
         r.buf = append(r.buf, (byte)((rune)' '));
@@ -304,6 +309,7 @@ public static (nint code, @string message, error err) ReadResponse(this ref Read
         if (errΔ1 != default!) {
             return (0, "", errΔ1);
         }
+
         nint code2 = default!;
         @string moreMessage = default!;
         (code2, continued, moreMessage, errΔ1) = parseCodeLine(line, 0);
@@ -357,21 +363,16 @@ partial struct dotReader {
 internal static (nint n, error err) Read(this ж<dotReader> Ꮡd, slice<byte> b) {
     nint n = default!;
     error err = default!;
-
     ref var d = ref Ꮡd.DerefOrNull();
+
     // Run data through a simple state machine to
     // elide leading dots, rewrite trailing \r\n into \n,
     // and detect ending .\r\n line.
     const nint stateBeginLine = iota; // beginning of line; initial state; must be zero
-    
     const nint stateDot = 1; // read . at beginning of line
-    
     const nint stateDotCR = 2; // read .\r at beginning of line
-    
     const nint stateCR = 3;  // read \r (possibly at end of line)
-    
     const nint stateData = 4; // reading data in middle of line
-    
     const nint stateEOF = 5; // reached .\r\n end marker line
     var br = d.r.Value.R;
     while (n < len(b) && d.state != stateEOF) {
@@ -411,6 +412,8 @@ internal static (nint n, error err) Read(this ж<dotReader> Ꮡd, slice<byte> b)
                 d.state = stateEOF;
                 continue;
             }
+            // Not part of .\r\n.
+            // Consume leading dot and emit saved \r.
             br.UnreadByte();
             c = (rune)'\r';
             d.state = stateData;
@@ -418,11 +421,10 @@ internal static (nint n, error err) Read(this ж<dotReader> Ꮡd, slice<byte> b)
         else if (exprᴛ1 == stateCR) {
             do {
                 if (c == (rune)'\n') {
-                    // Not part of .\r\n.
-                    // Consume leading dot and emit saved \r.
                     d.state = stateBeginLine;
                     break;
                 }
+                // Not part of \r\n. Emit saved \r
                 br.UnreadByte();
                 c = (rune)'\r';
                 d.state = stateData;
@@ -430,7 +432,6 @@ internal static (nint n, error err) Read(this ж<dotReader> Ꮡd, slice<byte> b)
         }
         else if (exprᴛ1 == stateData) {
             if (c == (rune)'\r') {
-                // Not part of \r\n. Emit saved \r
                 d.state = stateCR;
                 continue;
             }
@@ -438,7 +439,6 @@ internal static (nint n, error err) Read(this ж<dotReader> Ꮡd, slice<byte> b)
                 d.state = stateBeginLine;
             }
         }
-
         b[n] = c;
         n++;
     }
@@ -491,6 +491,7 @@ public static (slice<@string>, error) ReadDotLines(this ref Reader r) {
             }
             break;
         }
+
         // Dot by itself marks end; otherwise cut one dot.
         if (len(line) > 0 && line[0] == (rune)'.') {
             if (len(line) == 1) {
@@ -547,12 +548,15 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
         }
         strs = new slice<@string>(hint);
     }
+
     var m = new MIMEHeader(hint);
+
     // Account for 400 bytes of overhead for the MIMEHeader, plus 200 bytes per entry.
     // Benchmarking map creation as of go1.20, a one-entry MIMEHeader is 416 bytes and large
     // MIMEHeaders average about 200 bytes per entry.
     maxMemory -= 400;
     const int64 mapEntryOverhead = 200;
+
     // The first line cannot start with a leading space.
     {
         var (buf, err) = r.R.Peek(1); if (err == default! && (buf[0] == (rune)' ' || buf[0] == (rune)'\t')) {
@@ -564,11 +568,13 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
             return (m, ((ProtocolError)("malformed MIME header initial line: "u8 + ((sstring)line))));
         }
     }
+
     while (ᐧ) {
         var (kv, err) = r.readContinuedLineSlice(maxMemory, mustHaveFieldNameColon);
         if (len(kv) == 0) {
             return (m, err);
         }
+
         // Key ends at first colon.
         var (k, v, ok) = bytes.Cut(kv, colon);
         if (!ok) {
@@ -583,12 +589,15 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
                 return (m, ((ProtocolError)("malformed MIME header line: "u8 + ((sstring)kv))));
             }
         }
+
         maxHeaders--;
         if (maxHeaders < 0) {
             return (default!, errMessageTooLarge);
         }
+
         // Skip initial spaces in value.
         @string value = ((@string)bytes.TrimLeft(v, " \t"u8));
+
         var vv = m[key];
         if (vv == default!) {
             maxMemory -= (int64)len(key);
@@ -609,6 +618,7 @@ public static (MIMEHeader, error) readMIMEHeader(ж<Reader> Ꮡr, int64 maxMemor
         } else {
             m[key] = append(vv, value);
         }
+
         if (err != default!) {
             return (m, err);
         }
@@ -776,6 +786,7 @@ internal static (@string, bool ok) canonicalMIMEHeaderKey(slice<byte> a) {
     if (len(a) == 0) {
         return ("", false);
     }
+
     // See if a looks like a header key. If not, return it unchanged.
     var noCanon = false;
     foreach (var (_, c) in a) {
@@ -795,6 +806,7 @@ internal static (@string, bool ok) canonicalMIMEHeaderKey(slice<byte> a) {
     if (noCanon) {
         return (((@string)a), true);
     }
+
     var upper = true;
     foreach (var (i, vᴛ1) in a) {
         var c = vᴛ1;

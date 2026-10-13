@@ -14,6 +14,7 @@ using encoding;
 
 partial class gosym_package {
 
+// version of the pclntab
 partial struct version /*num:nint*/;
 
 internal static version verUnknown => /* iota */ 0;
@@ -112,7 +113,6 @@ internal static (slice<byte> b, uint64 pc, nint line) parse(this ref LineTable t
             continue;
             break;
         }}
-
         pc += oldQuantum;
     }
     return (b, pc, line);
@@ -211,24 +211,27 @@ internal static void parsePclnTab(this ж<LineTable> Ꮡt) {
         if (t.version != verUnknown) {
             return;
         }
+
         // Note that during this function, setting the version is the last thing we do.
         // If we set the version too early, and parsing failed (likely as a panic on
         // slice lookups), we'd have a mistaken version.
         //
         // Error paths through this code will default the version to 1.1.
         t.version = ver11;
+
         if (!disableRecover) {
             defer(() => {
                 // If we panic parsing, assume it's a Go 1.1 pclntab.
                 recover();
             }, ref ᒐ);
         }
+
         // Check header: 4-byte magic, two zeros, pc quantum, pointer size.
-        if (len(t.Data) < 16 || t.Data[4] != 0 || t.Data[5] != 0 || (t.Data[6] != 1 && t.Data[6] != 2 && t.Data[6] != 4) || (t.Data[7] != 4 && t.Data[7] != 8)) {
-            // pc quantum
-            // pointer size
+        if (len(t.Data) < 16 || t.Data[4] != 0 || t.Data[5] != 0 || (t.Data[6] != 1 && t.Data[6] != 2 && t.Data[6] != 4) || // pc quantum
+            (t.Data[7] != 4 && t.Data[7] != 8)) { // pointer size
             return;
         }
+
         version possibleVersion = default!;
         var leMagic = binary.LittleEndian.Uint32(t.Data);
         var beMagic = binary.BigEndian.Uint32(t.Data);
@@ -268,14 +271,16 @@ internal static void parsePclnTab(this ж<LineTable> Ꮡt) {
         default: {
             return;
         }}
-
         t.version = possibleVersion;
+
         // quantum and ptrSize are the same between 1.2, 1.16, and 1.18
         t.quantum = (uint32)t.Data[6];
         t.ptrsize = (uint32)t.Data[7];
+
         uint64 offset(uint32 word) => Ꮡt.Value.uintptr(Ꮡt.Value.Data.slice((nint)(8 + word * Ꮡt.Value.ptrsize)));
         var offsetʗ1 = offset;
         slice<byte> data(uint32 word) => Ꮡt.Value.Data.slice((nint)(offsetʗ1(word)));
+
         var exprᴛ1 = possibleVersion;
         if (exprᴛ1 == ver118 || exprᴛ1 == ver120) {
             t.nfunctab = (uint32)offset(0);
@@ -318,7 +323,6 @@ internal static void parsePclnTab(this ж<LineTable> Ꮡt) {
         else { /* default: */
             throw panic("unreachable");
         }
-
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -336,6 +340,7 @@ internal static slice<Func> go12Funcs(this ж<LineTable> Ꮡt) {
                 recover();
             }, ref ᒐ);
         }
+
         var ft = Ꮡt.funcTab();
         var funcs = new slice<Func>(ft.Count(), () => new(nil));
         var syms = new slice<Sym>(len(funcs));
@@ -572,6 +577,7 @@ internal static bool step(this ref LineTable t, ж<slice<byte>> Ꮡp, ж<uint64>
 internal static int32 pcvalue(this ref LineTable t, uint32 off, uint64 entry, uint64 targetpc) {
     ref var p = ref heap<slice<byte>>(out var Ꮡp);
     p = t.pctab.slice((nint)(off));
+
     ref var val = ref heap<int32>(out var Ꮡval);
     val = (int32)(-1);
     ref var pc = ref heap<uint64>(out var Ꮡpc);
@@ -594,6 +600,7 @@ internal static uint64 findFileLine(this ref LineTable t, uint64 entry, uint32 f
     if (filetab == 0 || linetab == 0) {
         return 0;
     }
+
     ref var fp = ref heap<slice<byte>>(out var Ꮡfp);
     fp = t.pctab.slice((nint)(filetab));
     ref var fl = ref heap<slice<byte>>(out var Ꮡfl);
@@ -648,6 +655,7 @@ internal static nint /*line*/ go12PCToLine(this ж<LineTable> Ꮡt, uint64 pc) {
                 line = -1;
             }
         }, ref ᒐ);
+
         var f = Ꮡt.findFunc(pc);
         if (f.IsZero()) {
             line = -1; goto ᒐdone;
@@ -673,6 +681,7 @@ internal static @string /*file*/ go12PCToFile(this ж<LineTable> Ꮡt, uint64 pc
                 @file = ""u8;
             }
         }, ref ᒐ);
+
         var f = Ꮡt.findFunc(pc);
         if (f.IsZero()) {
             @file = ""u8; goto ᒐdone;
@@ -687,8 +696,7 @@ internal static @string /*file*/ go12PCToFile(this ж<LineTable> Ꮡt, uint64 pc
             @file = t.@string(t.binary.Uint32(t.filetab.slice(4 * fno))); goto ᒐdone;
         }
         // Go ≥ 1.16
-        if (fno < 0) {
-            // 0 is valid for ≥ 1.16
+        if (fno < 0) { // 0 is valid for ≥ 1.16
             @file = ""u8; goto ᒐdone;
         }
         var cuoff = f.cuOffset();
@@ -716,11 +724,13 @@ internal static uint64 /*pc*/ go12LineToPC(this ж<LineTable> Ꮡt, @string @fil
                 pc = 0;
             }
         }, ref ᒐ);
+
         Ꮡt.initFileMap();
         var (filenum, ok) = t.fileMap[@file, ꟷ];
         if (!ok) {
             pc = 0; goto ᒐdone;
         }
+
         // Scan all functions.
         // If this turns out to be a bottleneck, we could build a map[int32][]int32
         // mapping file number to a list of functions with code from that file.
@@ -758,10 +768,12 @@ internal static void initFileMap(this ж<LineTable> Ꮡt) {
 
         t.mu.Lock();
         ᒐd1 = true;
+
         if (t.fileMap != default!) {
             return;
         }
         var m = new map<@string, uint32>();
+
         if (t.version == ver12){
             for (var i = (uint32)1; i < t.nfiletab; i++) {
                 @string s = t.@string(t.binary.Uint32(t.filetab.slice((nint)(4 * i))));
@@ -794,6 +806,7 @@ internal static void go12MapFiles(this ж<LineTable> Ꮡt, map<@string, ж<Obj>>
                 recover();
             }, ref ᒐ);
         }
+
         Ꮡt.initFileMap();
         foreach (var (@file, _) in t.fileMap) {
             m[@file] = Ꮡobj;

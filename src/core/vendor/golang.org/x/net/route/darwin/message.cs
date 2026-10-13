@@ -19,6 +19,8 @@ partial interface ΔSys {
     ΔSysType SysType();
 }
 
+// A SysType represents a type of operating system-specific
+// information.
 partial struct ΔSysType /*num:nint*/;
 
 public static ΔSysType SysMetrics => /* iota */ 0;

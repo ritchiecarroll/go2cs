@@ -44,19 +44,12 @@ partial class log_package {
 //
 //	2009/01/23 01:23:23.123123 /a/b/c/d.go:23: message
 public static UntypedInt Ldate => /* 1 << iota */ 1; // the date in the local time zone: 2009/01/23
-
 public static UntypedInt Ltime => 2;        // the time in the local time zone: 01:23:23
-
 public static UntypedInt Lmicroseconds => 4; // microsecond resolution: 01:23:23.123123.  assumes Ltime.
-
 public static UntypedInt Llongfile => 8;    // full file name and line number: /a/b/c/d.go:23
-
 public static UntypedInt Lshortfile => 16;   // final file name element and line number: d.go:23. overrides Llongfile
-
 public static UntypedInt LUTC => 32;         // if Ldate or Ltime is set, use UTC rather than the local time zone
-
 public static UntypedInt Lmsgprefix => 64;   // move the "prefix" from the beginning of the line to before the message
-
 public static UntypedInt LstdFlags => /* Ldate | Ltime */ 3; // initial values for the standard logger
 
 // A Logger represents an active logging object that generates lines of
@@ -226,11 +219,14 @@ internal static partial error output(this ж<Logger> Ꮡl, uintptr pc, nint call
         if (Ꮡl.of(Logger.ᏑisDiscard).Load()) {
             return default!;
         }
+
         var now = time.Now(); // get this early.
+
         // Load prefix and flag once so that their value is consistent within
         // this call regardless of any concurrent changes to their value.
         @string prefix = Ꮡl.Prefix();
         nint flag = Ꮡl.Flags();
+
         @string @file = default!;
         nint line = default!;
         if ((nint)(flag & (nint)((nint)((nint)Lshortfile | (nint)Llongfile))) != 0) {
@@ -251,6 +247,7 @@ internal static partial error output(this ж<Logger> Ꮡl, uintptr pc, nint call
                 line = f.Line;
             }
         }
+
         var buf = getBuffer();
         defer(putBuffer, buf, ref ᒐ);
         formatHeader(ref (buf).DerefOrNull(), now, prefix, flag, @file, line);
@@ -258,6 +255,7 @@ internal static partial error output(this ж<Logger> Ꮡl, uintptr pc, nint call
         if (len(buf.ValueSlot) == 0 || (buf.ValueSlot)[len(buf.ValueSlot) - 1] != (rune)'\n') {
             buf.ValueSlot = append(buf.ValueSlot, (byte)((rune)'\n'));
         }
+
         l.outMu.Lock();
         defer(Ꮡl.of(Logger.ᏑoutMu).Unlock, ref ᒐ);
         var (_, err) = l.@out.Write(buf.ValueSlot);

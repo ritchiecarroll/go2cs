@@ -56,14 +56,18 @@ internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> l
         // Not sure what this is, so leave alone.
         return list;
     }
+
     if (text == ""u8) {
         return list;
     }
+
     // Parse comment and reformat as text.
     ref var p = ref heap(new comment.Parser(), out var Ꮡp);
     var d = Ꮡp.Parse(text);
+
     ref var pr = ref heap(new comment.Printer(), out var Ꮡpr);
     text = ((@string)Ꮡpr.Comment(d));
+
     // For /* */ comment, return one big comment with text inside.
     ref var slash = ref heap<tokenꓸPos>(out var Ꮡslash);
     slash = list[0].Value.Slash;
@@ -74,6 +78,7 @@ internal static slice<ж<ast.Comment>> formatDocComment(slice<ж<ast.Comment>> l
         ));
         return new ж<ast.Comment>[]{c}.slice();
     }
+
     // For // comment, return sequence of // lines.
     slice<ж<ast.Comment>> @out = default!;
     while (text != ""u8) {
@@ -123,6 +128,7 @@ internal static bool isDirective(@string c) {
     if (strings.HasPrefix(c, lineˢ) || strings.HasPrefix(c, externˢ) || strings.HasPrefix(c, exportˢ)) {
         return true;
     }
+
     // "//[a-z0-9]+:[a-z0-9]"
     // (The // has been removed.)
     nint colon = strings.Index(c, ":"u8);

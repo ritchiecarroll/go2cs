@@ -61,27 +61,16 @@ assumed by the product vendor.
 
 // Trigonometric constants in 13-bit fixed point format.
 internal static UntypedInt fix_0_298631336 => 2446;
-
 internal static UntypedInt fix_0_390180644 => 3196;
-
 internal static UntypedInt fix_0_541196100 => 4433;
-
 internal static UntypedInt fix_0_765366865 => 6270;
-
 internal static UntypedInt fix_0_899976223 => 7373;
-
 internal static UntypedInt fix_1_175875602 => 9633;
-
 internal static UntypedInt fix_1_501321110 => 12299;
-
 internal static UntypedInt fix_1_847759065 => 15137;
-
 internal static UntypedInt fix_1_961570560 => 16069;
-
 internal static UntypedInt fix_2_053119869 => 16819;
-
 internal static UntypedInt fix_2_562915447 => 20995;
-
 internal static UntypedInt fix_3_072711026 => 25172;
 
 internal static UntypedInt constBits => 13;
@@ -105,24 +94,29 @@ internal static void fdct(ж<block> Ꮡb) {
         var x5 = s[5];
         var x6 = s[6];
         var x7 = s[7];
+
         var tmp0 = x0 + x7;
         var tmp1 = x1 + x6;
         var tmp2 = x2 + x5;
         var tmp3 = x3 + x4;
+
         var tmp10 = tmp0 + tmp3;
         var tmp12 = tmp0 - tmp3;
         var tmp11 = tmp1 + tmp2;
         var tmp13 = tmp1 - tmp2;
+
         tmp0 = x0 - x7;
         tmp1 = x1 - x6;
         tmp2 = x2 - x5;
         tmp3 = x3 - x4;
+
         s[0] = ((tmp10 + tmp11 - (int32)(8 * centerJSample)) << (int)(pass1Bits));
         s[4] = ((tmp10 - tmp11) << (int)(pass1Bits));
         var z1 = (tmp12 + tmp13) * (int32)fix_0_541196100;
         z1 += (int32)(1 << (int)((constBits - pass1Bits - 1)));
         s[2] = ((z1 + tmp12 * (int32)fix_0_765366865) >> (int)((constBits - pass1Bits)));
         s[6] = ((z1 - tmp13 * (int32)fix_1_847759065) >> (int)((constBits - pass1Bits)));
+
         tmp10 = tmp0 + tmp3;
         tmp11 = tmp1 + tmp2;
         tmp12 = tmp0 + tmp2;
@@ -137,6 +131,7 @@ internal static void fdct(ж<block> Ꮡb) {
         tmp11 *= -fix_2_562915447;
         tmp12 *= -fix_0_390180644;
         tmp13 *= -fix_1_961570560;
+
         tmp12 += z1;
         tmp13 += z1;
         s[1] = ((tmp0 + tmp10 + tmp12) >> (int)((constBits - pass1Bits)));
@@ -151,20 +146,25 @@ internal static void fdct(ж<block> Ꮡb) {
         var tmp1 = b[1 * 8 + x] + b[6 * 8 + x];
         var tmp2 = b[2 * 8 + x] + b[5 * 8 + x];
         var tmp3 = b[3 * 8 + x] + b[4 * 8 + x];
+
         var tmp10 = tmp0 + tmp3 + (int32)(1 << (int)((pass1Bits - 1)));
         var tmp12 = tmp0 - tmp3;
         var tmp11 = tmp1 + tmp2;
         var tmp13 = tmp1 - tmp2;
+
         tmp0 = b[0 * 8 + x] - b[7 * 8 + x];
         tmp1 = b[1 * 8 + x] - b[6 * 8 + x];
         tmp2 = b[2 * 8 + x] - b[5 * 8 + x];
         tmp3 = b[3 * 8 + x] - b[4 * 8 + x];
+
         b[0 * 8 + x] = ((tmp10 + tmp11) >> (int)(pass1Bits));
         b[4 * 8 + x] = ((tmp10 - tmp11) >> (int)(pass1Bits));
+
         var z1 = (tmp12 + tmp13) * (int32)fix_0_541196100;
         z1 += (int32)(1 << (int)((constBits + pass1Bits - 1)));
         b[2 * 8 + x] = ((z1 + tmp12 * (int32)fix_0_765366865) >> (int)((constBits + pass1Bits)));
         b[6 * 8 + x] = ((z1 - tmp13 * (int32)fix_1_847759065) >> (int)((constBits + pass1Bits)));
+
         tmp10 = tmp0 + tmp3;
         tmp11 = tmp1 + tmp2;
         tmp12 = tmp0 + tmp2;
@@ -179,6 +179,7 @@ internal static void fdct(ж<block> Ꮡb) {
         tmp11 *= -fix_2_562915447;
         tmp12 *= -fix_0_390180644;
         tmp13 *= -fix_1_961570560;
+
         tmp12 += z1;
         tmp13 += z1;
         b[1 * 8 + x] = ((tmp0 + tmp10 + tmp12) >> (int)((constBits + pass1Bits)));

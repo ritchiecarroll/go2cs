@@ -95,14 +95,12 @@ public static (ж<UDPAddr>, error) ResolveUDPAddr(@string network, @string addre
     var exprᴛ1 = network;
     if (exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8) {
     }
-    else if (exprᴛ1 == ""u8) {
+    else if (exprᴛ1 == ""u8) { // a hint wildcard for Go 1.0 undocumented behavior
         network = udpˢ;
     }
     else { /* default: */
         return (default!, ((UnknownNetworkError)network));
     }
-
-    // a hint wildcard for Go 1.0 undocumented behavior
     var (addrs, err) = DefaultResolver.internetAddrList(context.Background(), network, address);
     if (err != default!) {
         return (default!, err);
@@ -190,8 +188,8 @@ public static (nint n, netip.AddrPort addr, error err) ReadFromUDPAddrPort(this 
     nint n = default!;
     netip.AddrPort addr = default!;
     error err = default!;
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
         return (0, new netip.AddrPort(nil), syscall.EINVAL);
     }
@@ -231,8 +229,8 @@ public static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) Re
     nint flags = default!;
     netip.AddrPort addr = default!;
     error err = default!;
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
         return (0, 0, 0, new netip.AddrPort(nil), syscall.EINVAL);
     }
@@ -301,8 +299,8 @@ public static (nint n, nint oobn, error err) WriteMsgUDP(this ж<UDPConn> Ꮡc, 
     nint n = default!;
     nint oobn = default!;
     error err = default!;
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
         return (0, 0, syscall.EINVAL);
     }
@@ -318,8 +316,8 @@ public static (nint n, nint oobn, error err) WriteMsgUDPAddrPort(this ж<UDPConn
     nint n = default!;
     nint oobn = default!;
     error err = default!;
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
         return (0, 0, syscall.EINVAL);
     }
@@ -348,7 +346,6 @@ public static (ж<UDPConn>, error) DialUDP(@string network, ж<UDPAddr> Ꮡladdr
     else { /* default: */
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: Ꮡladdr.opAddr(), Addr: Ꮡraddr.opAddr(), Err: ((UnknownNetworkError)network)))));
     }
-
     if (Ꮡraddr == nil) {
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: Ꮡladdr.opAddr(), Addr: default!, Err: errMissingAddress))));
     }
@@ -378,7 +375,6 @@ public static (ж<UDPConn>, error) ListenUDP(@string network, ж<UDPAddr> Ꮡlad
     else { /* default: */
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default!, Addr: Ꮡladdr.opAddr(), Err: ((UnknownNetworkError)network)))));
     }
-
     if (Ꮡladdr == nil) {
         Ꮡladdr = Ꮡ(new UDPAddr(nil)); laddr = ref Ꮡladdr.DerefOrNull();
     }
@@ -419,7 +415,6 @@ public static (ж<UDPConn>, error) ListenMulticastUDP(@string network, ж<Interf
     else { /* default: */
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default!, Addr: Ꮡgaddr.opAddr(), Err: ((UnknownNetworkError)network)))));
     }
-
     if (Ꮡgaddr == nil || gaddr.IP == default!) {
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default!, Addr: Ꮡgaddr.opAddr(), Err: errMissingAddress))));
     }

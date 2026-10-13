@@ -13,6 +13,13 @@ using @internal.runtime;
 partial class runtime_package {
 
 internal static UntypedInt _WorkbufSize => 2048; // in bytes; larger values result in less contention
+
+// workbufAlloc is the number of bytes to allocate at a time
+// for new workbufs. This must be a multiple of pageSize and
+// should be a multiple of _WorkbufSize.
+//
+// Larger values reduce workbuf allocation overhead. Smaller
+// values reduce heap fragmentation.
 internal static UntypedInt workbufAlloc => /* 32 << 10 */ 32768;
 
 /* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void initΔ3() {
@@ -108,9 +115,9 @@ internal static void put(this ref gcWork w, uintptr obj) {
     if (wbuf == nil){
         w.init();
         wbuf = w.wbuf1;
+        // wbuf is empty at this point.
     } else 
     if ((~wbuf).nobj == len((~wbuf).obj)) {
-        // wbuf is empty at this point.
         (w.wbuf1, w.wbuf2) = (w.wbuf2, w.wbuf1);
         wbuf = w.wbuf1;
         if ((~wbuf).nobj == len((~wbuf).obj)) {
@@ -121,8 +128,10 @@ internal static void put(this ref gcWork w, uintptr obj) {
             flushed = true;
         }
     }
+
     wbuf.Value.obj[(~wbuf).nobj] = obj;
     wbuf.Value.nobj++;
+
     // If we put a buffer on full, let the GC controller know so
     // it can encourage more workers to run. We delay this until
     // the end of put so that w is in a consistent state, since
@@ -141,6 +150,7 @@ internal static bool putFast(this ref gcWork w, uintptr obj) {
     if (wbuf == nil || (~wbuf).nobj == len((~wbuf).obj)) {
         return false;
     }
+
     wbuf.Value.obj[(~wbuf).nobj] = obj;
     wbuf.Value.nobj++;
     return true;
@@ -154,12 +164,14 @@ internal static void putBatch(this ref gcWork w, slice<uintptr> obj) {
     if (len(obj) == 0) {
         return;
     }
+
     var flushed = false;
     var wbuf = w.wbuf1;
     if (wbuf == nil) {
         w.init();
         wbuf = w.wbuf1;
     }
+
     while (len(obj) > 0) {
         while ((~wbuf).nobj == len((~wbuf).obj)) {
             putfull(wbuf);
@@ -172,6 +184,7 @@ internal static void putBatch(this ref gcWork w, slice<uintptr> obj) {
         wbuf.Value.nobj += n;
         obj = obj.slice(n);
     }
+
     if (flushed && gcphase == _GCmark) {
         ᏑgcController.enlistWorker();
     }
@@ -189,8 +202,8 @@ internal static uintptr tryGet(this ref gcWork w) {
     if (wbuf == nil) {
         w.init();
         wbuf = w.wbuf1;
+        // wbuf is empty at this point.
     }
-    // wbuf is empty at this point.
     if ((~wbuf).nobj == 0) {
         (w.wbuf1, w.wbuf2) = (w.wbuf2, w.wbuf1);
         wbuf = w.wbuf1;
@@ -204,6 +217,7 @@ internal static uintptr tryGet(this ref gcWork w) {
             w.wbuf1 = wbuf;
         }
     }
+
     wbuf.Value.nobj--;
     return (~wbuf).obj[(~wbuf).nobj];
 }
@@ -218,6 +232,7 @@ internal static uintptr tryGetFast(this ref gcWork w) {
     if (wbuf == nil || (~wbuf).nobj == 0) {
         return 0;
     }
+
     wbuf.Value.nobj--;
     return (~wbuf).obj[(~wbuf).nobj];
 }
@@ -239,6 +254,7 @@ internal static void dispose(this ref gcWork w) {
                 w.flushedWork = true;
             }
             w.wbuf1 = default!;
+
             wbuf = w.wbuf2;
             if ((~wbuf).nobj == 0){
                 putempty(wbuf);
@@ -438,6 +454,7 @@ internal static ж<workbuf> handoff(ж<workbuf> Ꮡb) {
     b.nobj -= n;
     b1.Value.nobj = n;
     memmove(@unsafe.Pointer.FromBox(b1.at(workbuf.Ꮡobj, 0)), @unsafe.Pointer.FromBox(Ꮡb.at(workbuf.Ꮡobj, b.nobj)), (uintptr)n * /* unsafe.Sizeof(b1.obj[0]) */ (uintptr)8);
+
     // Put b on full list - let first half of b get stolen.
     putfull(Ꮡb);
     return b1;

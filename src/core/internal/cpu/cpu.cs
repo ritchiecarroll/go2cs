@@ -29,7 +29,6 @@ public static uintptr CacheLineSize = CacheLinePadSize;
 // HasAVX and HasAVX2 are only set if the OS does support XMM and YMM registers
 // in addition to the cpuid feature bit being set.
 // The struct is padded to avoid false sharing.
-
 partial struct X86ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasAES;
@@ -60,7 +59,6 @@ public static ref X86ᴛ1 X86 => ref ᏑX86.Value;
 
 // The booleans in ARM contain the correspondingly named cpu feature bit.
 // The struct is padded to avoid false sharing.
-
 partial struct ARMᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasVFPv4;
@@ -72,7 +70,6 @@ public static ARMᴛ1 ARM;
 
 // The booleans in ARM64 contain the correspondingly named cpu feature bit.
 // The struct is padded to avoid false sharing.
-
 partial struct ARM64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasAES;
@@ -91,7 +88,6 @@ public static ARM64ᴛ1 ARM64;
 
 // The booleans in Loong64 contain the correspondingly named cpu feature bit.
 // The struct is padded to avoid false sharing.
-
 partial struct Loong64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasLSX; // support 128-bit vector extension
@@ -101,7 +97,6 @@ partial struct Loong64ᴛ1 /*dyn*/ {
     internal CacheLinePad __;
 }
 public static Loong64ᴛ1 Loong64;
-
 
 partial struct MIPS64Xᴛ1 /*dyn*/ {
     internal CacheLinePad _;
@@ -115,7 +110,6 @@ public static MIPS64Xᴛ1 MIPS64X;
 // require kernel support to work (darn, scv), so there are feature bits for
 // those as well. The minimum processor requirement is POWER8 (ISA 2.07).
 // The struct is padded to avoid false sharing.
-
 partial struct PPC64ᴛ1 /*dyn*/ {
     internal CacheLinePad _;
     public bool HasDARN; // Hardware random number generator (requires kernel enablement)
@@ -126,7 +120,6 @@ partial struct PPC64ᴛ1 /*dyn*/ {
     internal CacheLinePad __;
 }
 public static PPC64ᴛ1 PPC64;
-
 
 partial struct S390Xᴛ1 /*dyn*/ {
     internal CacheLinePad _;
@@ -213,6 +206,7 @@ field:
         }
         @string key = field.slice(4, i);
         @string value = field.slice(i + 1); // e.g. "SSE2", "on"
+
         bool enable = default!;
         var exprᴛ1 = value;
         if (exprᴛ1 == "on"u8) {
@@ -233,6 +227,7 @@ field:
             }
             goto continue_field;
         }
+
         foreach (var (iΔ2, _) in options) {
             if (options[iΔ2].Name == key) {
                 options[iΔ2].Specified = true;
@@ -240,18 +235,22 @@ field:
                 goto continue_field;
             }
         }
+
         print((@string)"GODEBUG: unknown cpu feature \""u8, key, (@string)"\"\n"u8);
 continue_field:;
     }
 break_field:;
+
     foreach (var (_, o) in options) {
         if (!o.Specified) {
             continue;
         }
+
         if (o.Enable && !o.Feature.Value) {
             print((@string)"GODEBUG: can not enable \""u8, o.Name, (@string)"\", missing CPU support\n"u8);
             continue;
         }
+
         o.Feature.Value = o.Enable;
     }
 }

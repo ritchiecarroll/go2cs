@@ -58,6 +58,7 @@ partial struct conf {
     internal mdnsTest mdnsTest; // assume /etc/mdns.allow exists, for testing
 }
 
+// mdnsTest is for testing only.
 partial struct mdnsTest /*num:nint*/;
 
 internal static mdnsTest mdnsFromSystem => /* iota */ 0;
@@ -89,6 +90,7 @@ internal static void initConfVal() {
         confVal.Value.netGo = netGoBuildTag || dnsMode == "go"u8;
         confVal.Value.netCgo = netCgoBuildTag || dnsMode == "cgo"u8;
         confVal.Value.dnsDebugLevel = debugLevel;
+
         if ((~confVal).dnsDebugLevel > 0) {
             defer(() => {
                 if ((~confVal).dnsDebugLevel > 1) {
@@ -125,22 +127,26 @@ internal static void initConfVal() {
                     }
                     break;
                 }}
-
             }, ref ᒐ);
         }
+
         // The remainder of this function sets preferCgo based on
         // conditions that will not change during program execution.
+
         // By default, prefer the go resolver.
         confVal.Value.preferCgo = false;
+
         // If the cgo resolver is not available, we can't prefer it.
         if (!cgoAvailable) {
             return;
         }
+
         // Some operating systems always prefer the cgo resolver.
         if (goosPrefersCgo()) {
             confVal.Value.preferCgo = true;
             return;
         }
+
         // The remaining checks are specific to Unix systems.
         var exprᴛ1 = runtime.GOOS;
         if (exprᴛ1 == "plan9"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
@@ -156,6 +162,7 @@ internal static void initConfVal() {
             confVal.Value.preferCgo = true;
             return;
         }
+
         // OpenBSD apparently lets you override the location of resolv.conf
         // with ASR_CONFIG. If we notice that, defer to libc.
         if (runtime.GOOS == "openbsd"u8 && os.Getenv(asrConfigˢ) != ""u8) {
@@ -171,31 +178,29 @@ internal static void initConfVal() {
 // the cgo resolver.
 internal static bool goosPrefersCgo() {
     var exprᴛ1 = runtime.GOOS;
+    // Historically on Windows and Plan 9 we prefer the
+    // cgo resolver (which doesn't use the cgo tool) rather than
+    // the go resolver. This is because originally these
+    // systems did not support the go resolver.
+    // Keep it this way for better compatibility.
+    // Perhaps we can revisit this some day.
     if (exprᴛ1 == "windows"u8 || exprᴛ1 == "plan9"u8) {
         return true;
     }
+    // Darwin pops up annoying dialog boxes if programs try to
+    // do their own DNS requests, so prefer cgo.
     if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8) {
         return true;
     }
+    // DNS requests don't work on Android, so prefer the cgo resolver.
+    // Issue #10714.
     if (exprᴛ1 == "android"u8) {
         return true;
     }
     { /* default: */
         return false;
     }
-
 }
-
-// Historically on Windows and Plan 9 we prefer the
-// cgo resolver (which doesn't use the cgo tool) rather than
-// the go resolver. This is because originally these
-// systems did not support the go resolver.
-// Keep it this way for better compatibility.
-// Perhaps we can revisit this some day.
-// Darwin pops up annoying dialog boxes if programs try to
-// do their own DNS requests, so prefer cgo.
-// DNS requests don't work on Android, so prefer the cgo resolver.
-// Issue #10714.
 
 // mustUseGoResolver reports whether a DNS lookup of any sort is
 // required to use the go resolver. The provided Resolver is optional.
@@ -206,6 +211,7 @@ internal static bool mustUseGoResolver(this ref conf c, ж<Resolver> Ꮡr) {
     if (!cgoAvailable) {
         return true;
     }
+
     if (runtime.GOOS == "plan9"u8) {
         // TODO(bradfitz): for now we only permit use of the PreferGo
         // implementation when there's a non-nil Resolver with a
@@ -218,6 +224,7 @@ internal static bool mustUseGoResolver(this ref conf c, ж<Resolver> Ꮡr) {
             return false;
         }
     }
+
     return c.netGo || Ꮡr.preferGo();
 }
 
@@ -277,6 +284,7 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
 
     // fallbackOrder is the order we return if we can't figure it out.
     ΔhostLookupOrder fallbackOrder = default!;
+
     bool canUseCgo = default!;
     if (c.mustUseGoResolver(Ꮡr)){
         // Go resolver was explicitly requested
@@ -300,10 +308,12 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
             // with backslashes or '%'.
             return (hostLookupCgo, default!);
         }
+
         // If something is unrecognized, use cgo.
         fallbackOrder = hostLookupCgo;
         canUseCgo = true;
     }
+
     // On systems that don't use /etc/resolv.conf or /etc/nsswitch.conf, we are done.
     var exprᴛ1 = c.goos;
     if (exprᴛ1 == "windows"u8 || exprᴛ1 == "plan9"u8 || exprᴛ1 == "android"u8 || exprᴛ1 == "ios"u8) {
@@ -315,16 +325,20 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
     // That will use cgo unless the Go resolver was explicitly requested.
     // If we do figure out the order, return something other
     // than fallbackOrder to use the Go resolver with that order.
+
     dnsConf = getSystemDNSConfig();
+
     if (canUseCgo && (~dnsConf).err != default! && !errors.Is((~dnsConf).err, fs.ErrNotExist) && !errors.Is((~dnsConf).err, fs.ErrPermission)) {
         // We can't read the resolv.conf file, so use cgo if we can.
         return (hostLookupCgo, dnsConf);
     }
+
     if (canUseCgo && (~dnsConf).unknownOpt) {
         // We didn't recognize something in resolv.conf,
         // so use cgo if we can.
         return (hostLookupCgo, dnsConf);
     }
+
     // OpenBSD is unique and doesn't use nsswitch.conf.
     // It also doesn't support mDNS.
     if (c.goos == "openbsd"u8) {
@@ -334,6 +348,7 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
         if (errors.Is((~dnsConf).err, fs.ErrNotExist)) {
             return (hostLookupFiles, dnsConf);
         }
+
         var lookup = dnsConf.Value.lookup;
         if (len(lookup) == 0) {
             // https://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man5/resolv.conf.5
@@ -368,15 +383,17 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
             return (hostLookupFiles, dnsConf);
         }
         { /* default: */
+            // Unrecognized.
             return (fallbackOrder, dnsConf);
         }
 
+        // We always return before this point.
+        // The code below is for non-OpenBSD.
     }
-    // Unrecognized.
-    // We always return before this point.
-    // The code below is for non-OpenBSD.
+
     // Canonicalize the hostname by removing any trailing dot.
     hostname = stringslite.TrimSuffix(hostname, "."u8);
+
     var nss = getSystemNSS();
     var srcs = (~nss).sources[hostsˢ];
     // If /etc/nsswitch.conf doesn't exist or doesn't specify any
@@ -388,6 +405,7 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
             // which the go resolver doesn't support.
             return (hostLookupCgo, dnsConf);
         }
+
         return (hostLookupFilesDNS, dnsConf);
     }
     if ((~nss).err != default!) {
@@ -395,8 +413,10 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
         // we have nothing to base an order on.
         return (fallbackOrder, dnsConf);
     }
+
     bool hasDNSSource = default!;
     bool hasDNSSourceChecked = default!;
+
     bool filesSource = default!;
     bool dnsSource = default!;
     @string first = default!;
@@ -418,12 +438,13 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
             }
             continue;
         }
+
         if (canUseCgo) {
             switch (ᐧ) {
             case {} when hostname != ""u8 && src.source == "myhostname"u8: {
+                // Let the cgo resolver handle myhostname
+                // if we are looking up the local hostname.
                 if (isLocalhost(hostname) || isGateway(hostname) || isOutbound(hostname)) {
-                    // Let the cgo resolver handle myhostname
-                    // if we are looking up the local hostname.
                     return (hostLookupCgo, dnsConf);
                 }
                 var (hn, err) = getHostname();
@@ -441,6 +462,7 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
                     // libc might (via Avahi, etc) and use cgo.
                     return (hostLookupCgo, dnsConf);
                 }
+
                 // We don't parse mdns.allow files. They're rare. If one
                 // exists, it might list other TLDs (besides .local) or even
                 // '*', so just let libc deal with it.
@@ -460,7 +482,6 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
                 else if (exprᴛ3 == mdnsAssumeDoesNotExist) {
                     haveMDNSAllow = false;
                 }
-
                 if (haveMDNSAllow) {
                     return (hostLookupCgo, dnsConf);
                 }
@@ -468,11 +489,11 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
                 break;
             }
             default: {
+                // Some source we don't know how to deal with.
                 return (hostLookupCgo, dnsConf);
             }}
-
         }
-        // Some source we don't know how to deal with.
+
         if (!hasDNSSourceChecked) {
             hasDNSSourceChecked = true;
             foreach (var (_, v) in srcs.slice(i + 1)) {
@@ -482,6 +503,7 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
                 }
             }
         }
+
         // If we saw a source we don't recognize, which can only
         // happen if we can't use the cgo resolver, treat it as DNS,
         // but only when there is no dns in all other sources.
@@ -492,6 +514,7 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
             }
         }
     }
+
     // Cases where Go can handle it without cgo and C thread overhead,
     // or where the Go resolver has been forced.
     switch (ᐧ) {

@@ -4,6 +4,9 @@
 
 // Package xml implements a simple XML 1.0 parser that
 // understands XML name spaces.
+
+// A Token is an interface holding one of the token types:
+// [StartElement], [EndElement], [CharData], [Comment], [ProcInst], or [Directive].
 global using ΔToken = object;
 
 namespace go.encoding;
@@ -73,6 +76,9 @@ partial struct EndElement {
     public Name Name;
 }
 
+// A CharData represents XML character data (raw text),
+// in which XML escape sequences have been replaced by
+// the characters they represent.
 partial struct CharData /*[]byte*/;
 
 // Copy creates a new copy of CharData.
@@ -80,6 +86,8 @@ public static CharData Copy(this CharData c) {
     return ((CharData)bytes.Clone(c));
 }
 
+// A Comment represents an XML comment of the form <!--comment-->.
+// The bytes do not include the <!-- and --> comment markers.
 partial struct Comment /*[]byte*/;
 
 // Copy creates a new copy of Comment.
@@ -99,6 +107,8 @@ public static ProcInst Copy(this ProcInst p) {
     return p;
 }
 
+// A Directive represents an XML directive of the form <!text>.
+// The bytes do not include the <! and > markers.
 partial struct Directive /*[]byte*/;
 
 // Copy creates a new copy of Directive.
@@ -305,11 +315,11 @@ public static (ΔToken, error) Token(this ref Decoder d) {
     switch (t.type()) {
     case StartElement t1ᴛ1: {
         ref var t1 = ref heap(t1ᴛ1, out var Ꮡt1);
+        // In XML name spaces, the translations listed in the
+        // attributes apply to the element name and
+        // to the other attribute names, so process
+        // the translations first.
         foreach (var (_, a) in t1.Attr) {
-            // In XML name spaces, the translations listed in the
-            // attributes apply to the element name and
-            // to the other attribute names, so process
-            // the translations first.
             if (a.Name.Space == xmlnsPrefix) {
                 var (v, ok) = d.ns[a.Name.Local, ꟷ];
                 d.pushNs(a.Name.Local, v, ok);
@@ -322,6 +332,7 @@ public static (ΔToken, error) Token(this ref Decoder d) {
                 d.ns[""u8] = a.Value;
             }
         }
+
         d.pushElement(t1.Name);
         d.translate(Ꮡt1.of(StartElement.ᏑName), true);
         foreach (var (i, _) in t1.Attr) {
@@ -365,7 +376,6 @@ internal static void translate(this ref Decoder d, ж<Name> Ꮡn, bool isElement
     case {} when n.Space == ""u8 && n.Local == xmlnsPrefix: {
         return;
     }}
-
     {
         var (v, ok) = d.ns[n.Space, ꟷ]; if (ok){
             n.Space = v;
@@ -521,6 +531,7 @@ internal static bool popElement(this ref Decoder d, ж<EndElement> Ꮡt) {
     }}
 
     d.translate(Ꮡt.of(EndElement.ᏑName), true);
+
     // Pop stack until a Start or EOF is on the top, undoing the
     // translations that were associated with the element we just closed.
     while (d.stk != nil && (~d.stk).kind != stkStart && (~d.stk).kind != stkEOF) {
@@ -531,6 +542,7 @@ internal static bool popElement(this ref Decoder d, ж<EndElement> Ꮡt) {
             delete(d.ns, (~sΔ1).name.Local);
         }
     }
+
     return true;
 }
 
@@ -593,10 +605,12 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
         d.needClose = false;
         return (new EndElement(d.toClose), default!);
     }
+
     var (b, ok) = d.getc();
     if (!ok) {
         return (default!, d.err);
     }
+
     if (b != (rune)'<') {
         // Text section.
         d.ungetc(b);
@@ -606,6 +620,7 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
         }
         return (((CharData)data), default!);
     }
+
     {
         (b, ok) = d.mustgetc(); if (!ok) {
             return (default!, d.err);
@@ -663,6 +678,7 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
         }
         var data = d.buf.Bytes();
         data = data.slice(0, len(data) - 2); // chop ?>
+
         if (targetΔ1 == "xml"u8) {
             @string content = ((@string)data);
             @string ver = procInst(versionˢ, content);
@@ -690,18 +706,17 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
         return (new ProcInst(targetΔ1, data), default!);
     }
     case (rune)'!': {
+        // <!: Maybe comment, maybe CDATA.
         {
             (b, ok) = d.mustgetc(); if (!ok) {
-                // <!: Maybe comment, maybe CDATA.
                 return (default!, d.err);
             }
         }
         switch (b) {
-        case (rune)'-': {
+        case (rune)'-': { // <!-
+            // Probably <!-- for a comment.
             {
                 (b, ok) = d.mustgetc(); if (!ok) {
-                    // <!-
-                    // Probably <!-- for a comment.
                     return (default!, d.err);
                 }
             }
@@ -709,8 +724,8 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
                 d.err = d.syntaxError(invalidSequenceNotPartOfˢ);
                 return (default!, d.err);
             }
+            // Look for terminator.
             d.buf.Reset();
-// Look for terminator.
             byte b0 = default!;
             byte b1 = default!;
             while (ᐧ) {
@@ -734,10 +749,9 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
             data = data.slice(0, len(data) - 3); // chop -->
             return (((Comment)data), default!);
         }
-        case (rune)'[': {
+        case (rune)'[': { // <![
+            // Probably <![CDATA[.
             for (nint i = 0; i < 6; i++) {
-                // <![
-                // Probably <![CDATA[.
                 {
                     (b, ok) = d.mustgetc(); if (!ok) {
                         return (default!, d.err);
@@ -748,22 +762,22 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
                     return (default!, d.err);
                 }
             }
-            var data = d.text(-1, // Have <![CDATA[.  Read text until ]]>.
- true);
+            // Have <![CDATA[.  Read text until ]]>.
+            var data = d.text(-1, true);
             if (data == default!) {
                 return (default!, d.err);
             }
             return (((CharData)data), default!);
         }}
 
+        // Probably a directive: <!DOCTYPE ...>, <!ENTITY ...>, etc.
+        // We don't care, but accumulate for caller. Quoted angle
+        // brackets do not count for nesting.
         d.buf.Reset();
         d.buf.WriteByte(b);
         var inquote = (uint8)0;
         nint depth = 0;
         while (ᐧ) {
-            // Probably a directive: <!DOCTYPE ...>, <!ENTITY ...>, etc.
-            // We don't care, but accumulate for caller. Quoted angle
-            // brackets do not count for nesting.
             {
                 (b, ok) = d.mustgetc(); if (!ok) {
                     return (default!, d.err);
@@ -780,6 +794,7 @@ HandleB:
                 break;
             }
             case {} when inquote is not 0: {
+                // in quotes, no special action
                 break;
             }
             case {} when b == (rune)'\'' || b == (rune)'"': {
@@ -791,10 +806,9 @@ HandleB:
                 break;
             }
             case {} when b == (rune)'<' && inquote == 0: {
+                // Look for <!-- to begin comment.
                 @string s = "!--"u8;
                 for (nint i = 0; i < len(s); i++) {
-                    // in quotes, no special action
-                    // Look for <!-- to begin comment.
                     {
                         (b, ok) = d.mustgetc(); if (!ok) {
                             return (default!, d.err);
@@ -808,8 +822,9 @@ HandleB:
                         goto HandleB;
                     }
                 }
+
+                // Remove < that was written above.
                 d.buf.Truncate(d.buf.Len() - 1);
-// Remove < that was written above.
 
                 // Look for terminator.
                 byte b0 = default!;
@@ -825,20 +840,21 @@ HandleB:
                     }
                     (b0, b1) = (b1, b);
                 }
+
+                // Replace the comment with a space in the returned Directive
+                // body, so that markup parts that were separated by the comment
+                // (like a "<" and a "!") don't get joined when re-encoding the
+                // Directive, taking new semantic meaning.
                 d.buf.WriteByte((rune)' ');
                 break;
             }}
-
         }
         return (((Directive)d.buf.Bytes()), default!);
     }}
 
-    // Replace the comment with a space in the returned Directive
-    // body, so that markup parts that were separated by the comment
-    // (like a "<" and a "!") don't get joined when re-encoding the
-    // Directive, taking new semantic meaning.
     // Must be an open element like <a href="foo">
     d.ungetc(b);
+
     Name name = default!;
     bool empty = default!;
     slice<Attr> attr = default!;
@@ -850,6 +866,7 @@ HandleB:
             return (default!, d.err);
         }
     }
+
     attr = new Attr[]{}.slice();
     while (ᐧ) {
         d.space();
@@ -875,6 +892,7 @@ HandleB:
             break;
         }
         d.ungetc(b);
+
         var a = new Attr(nil);
         {
             (a.Name, ok) = d.nsname(); if (!ok) {
@@ -965,7 +983,6 @@ internal static void space(this ref Decoder d) {
             d.ungetc(b);
             return;
         }}
-
     }
 }
 
@@ -1085,6 +1102,7 @@ Input:
             }
             goto break_Input;
         }
+
         // <![CDATA[ section ends with ]]>.
         // It is an error for ]]> to appear in ordinary text,
         // but it is allowed in quoted strings.
@@ -1096,6 +1114,7 @@ Input:
             d.err = d.syntaxError(unescapedNotInCdataˢ);
             return default!;
         }
+
         // Stop reading text if we see a <.
         if (b == (rune)'<' && !cdata) {
             if (quote >= 0) {
@@ -1192,6 +1211,7 @@ Input:
                     }
                 }
             }
+
             if (haveText) {
                 d.buf.Truncate(before);
                 d.buf.WriteString(text);
@@ -1209,21 +1229,24 @@ Input:
             d.err = d.syntaxError("invalid character entity "u8 + ent);
             return default!;
         }
+
         // We must rewrite unescaped \r and \r\n into \n.
         if (b == (rune)'\r'){
             d.buf.WriteByte((rune)'\n');
         } else 
         if (b1 == (rune)'\r' && b == (rune)'\n'){
-        } else {
             // Skip \r\n--we already wrote \n.
+        } else {
             d.buf.WriteByte(b);
         }
+
         (b0, b1) = (b1, b);
 continue_Input:;
     }
 break_Input:;
     var data = d.buf.Bytes();
     data = data.slice(0, len(data) - trunc);
+
     // Inspect each rune for being a disallowed character.
     var buf = data;
     while (len(buf) > 0) {
@@ -1238,6 +1261,7 @@ break_Input:;
             return default!;
         }
     }
+
     return data;
 }
 
@@ -1280,6 +1304,7 @@ internal static (@string s, bool ok) name(this ref Decoder d) {
     if (!d.readName()) {
         return ("", false);
     }
+
     // Now we check the characters.
     var b = d.buf.Bytes();
     if (!isName(b)) {
@@ -1306,6 +1331,7 @@ internal static bool /*ok*/ readName(this ref Decoder d) {
         return false;
     }
     d.buf.WriteByte(b);
+
     while (ᐧ) {
         {
             (b, ok) = d.mustgetc(); if (!ok) {
@@ -1696,7 +1722,8 @@ internal static ж<unicode.RangeTable> second = Ꮡ(new unicode.RangeTable(
 public static map<@string, @string> HTMLEntity;
 internal static void initᴛHTMLEntity() { HTMLEntity = htmlEntity; }
 
-/*
+internal static map<@string, @string> htmlEntity = new map<@string, @string>{
+    /*
 		hget http://www.w3.org/TR/html4/sgml/entities.html |
 		ssam '
 			,y /\&gt;/ x/\&lt;(.|\n)+/ s/\n/ /g
@@ -1704,7 +1731,6 @@ internal static void initᴛHTMLEntity() { HTMLEntity = htmlEntity; }
 			,s/\&lt;!ENTITY ([^ ]+) .*U\+([0-9A-F][0-9A-F][0-9A-F][0-9A-F]) .+/	"\1": "\\u\2",/g
 		'
 	*/
-internal static map<@string, @string> htmlEntity = new map<@string, @string>{
     ["nbsp"u8] = "\u00A0"u8,
     ["iexcl"u8] = "\u00A1"u8,
     ["cent"u8] = "\u00A2"u8,
@@ -1966,11 +1992,11 @@ internal static map<@string, @string> htmlEntity = new map<@string, @string>{
 public static slice<@string> HTMLAutoClose;
 internal static void initᴛHTMLAutoClose() { HTMLAutoClose = htmlAutoClose; }
 
-/*
+internal static slice<@string> htmlAutoClose = new @string[]{
+    /*
 		hget http://www.w3.org/TR/html4/loose.dtd |
 		9 sed -n 's/<!ELEMENT ([^ ]*) +- O EMPTY.+/	"\1",/p' | tr A-Z a-z
 	*/
-internal static slice<@string> htmlAutoClose = new @string[]{
     "basefont"u8,
     "br"u8,
     "area"u8,
@@ -2055,7 +2081,6 @@ internal static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline)
             continue;
             break;
         }}
-
         {
             var (_, errΔ1) = w.Write(s.slice(last, i - width)); if (errΔ1 != default!) {
                 return errΔ1;
@@ -2121,7 +2146,6 @@ internal static void EscapeString(this ref printer p, @string s) {
             continue;
             break;
         }}
-
         p.WriteString(s.slice(last, i - width));
         p.Write(esc);
         last = i;
@@ -2151,6 +2175,7 @@ internal static error emitCDATA(io.Writer w, slice<byte> s) {
             return errΔ1;
         }
     }
+
     while (ᐧ) {
         var (before, after, ok) = bytes.Cut(s, cdataEnd);
         if (!ok) {
@@ -2169,11 +2194,13 @@ internal static error emitCDATA(io.Writer w, slice<byte> s) {
         }
         s = after;
     }
+
     {
         var (_, errΔ4) = w.Write(s); if (errΔ4 != default!) {
             return errΔ4;
         }
     }
+
     var (_, err) = w.Write(cdataEnd);
     return err;
 }

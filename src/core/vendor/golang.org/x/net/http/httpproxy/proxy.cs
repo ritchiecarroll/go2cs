@@ -155,6 +155,7 @@ internal static (ж<url.URL>, error) proxyForURL(this ref config cfg, ж<url.URL
     if (!cfg.useProxy(canonicalAddr(ᏑreqURL))) {
         return (default!, default!);
     }
+
     return (proxy, default!);
 }
 
@@ -162,6 +163,7 @@ internal static (ж<url.URL>, error) parseProxy(@string proxy) {
     if (proxy == ""u8) {
         return (default!, default!);
     }
+
     var (proxyURL, err) = url.Parse(proxy);
     if (err != default! || (~proxyURL).Scheme == ""u8 || (~proxyURL).Host == ""u8) {
         // proxy was bogus. Try prepending "http://" to it and
@@ -201,7 +203,9 @@ internal static bool useProxy(this ref config cfg, @string addr) {
             return false;
         }
     }
+
     addr = strings.ToLower(strings.TrimSpace(host));
+
     if (ip != default!) {
         foreach (var (_, m) in cfg.ipMatchers) {
             if (m.match(addr, port, ip)) {
@@ -228,6 +232,7 @@ internal static void init(this ref config c) {
             c.httpsProxy = parsed;
         }
     }
+
     foreach (var (_, vᴛ1) in strings.Split(c.NoProxy, ","u8)) {
         var p = vᴛ1;
 
@@ -235,11 +240,13 @@ internal static void init(this ref config c) {
         if (len(p) == 0) {
             continue;
         }
+
         if (p == "*"u8) {
             c.ipMatchers = new matcher[]{new allMatch(nil)}.slice();
             c.domainMatchers = new matcher[]{new allMatch(nil)}.slice();
             return;
         }
+
         // IPv4/CIDR, IPv6/CIDR
         {
             var (_, pnet, errΔ1) = net.ParseCIDR(p); if (errΔ1 == default!) {
@@ -247,6 +254,7 @@ internal static void init(this ref config c) {
                 continue;
             }
         }
+
         // IPv4:port, [IPv6]:port
         var (phost, pport, err) = net.SplitHostPort(p);
         if (err == default!){
@@ -267,10 +275,12 @@ internal static void init(this ref config c) {
                 continue;
             }
         }
+
         if (len(phost) == 0) {
             // There is no host part, likely the entry is malformed; ignore.
             continue;
         }
+
         // domain.com or domain.com:80
         // foo.com matches bar.foo.com
         // .domain.com or .domain.com:port

@@ -15,6 +15,7 @@ partial class exportdata_package {
 internal static nint readArchiveHeader(ж<bufio.Reader> Ꮡb, @string name) {
     // architecture-independent object file output
     UntypedInt HeaderSize = 60;
+
     array<byte> buf = new(60); /* HeaderSize */
     {
         var (_, err) = io.ReadFull(new bufio_ReaderжReader(Ꮡb), buf[..]); if (err != default!) {

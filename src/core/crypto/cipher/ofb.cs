@@ -33,6 +33,7 @@ public static Stream NewOFB(Block b, slice<byte> iv) {
     if (fips140only.Enabled) {
         throw panic("crypto/cipher: use of OFB is not allowed in FIPS 140-only mode");
     }
+
     nint blockSize = b.BlockSize();
     if (len(iv) != blockSize) {
         throw panic("cipher.NewOFB: IV length must equal block size");
@@ -47,6 +48,7 @@ public static Stream NewOFB(Block b, slice<byte> iv) {
         @out: new slice<byte>(0, bufSize),
         outUsed: 0
     ));
+
     copy((~x).cipher, iv);
     return new ofbжStream(x);
 }

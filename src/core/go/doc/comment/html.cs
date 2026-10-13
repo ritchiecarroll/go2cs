@@ -211,7 +211,6 @@ internal static void escape(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @st
             start = i + 1;
             break;
         }}
-
     }
     @out.WriteString(s.slice(start));
 }

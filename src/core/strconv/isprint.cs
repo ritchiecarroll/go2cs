@@ -615,8 +615,7 @@ internal static slice<uint32> isPrint32 = new uint32[]{
     0x0e0100, 0x0e01ef
 }.slice();
 
-// add 0x10000 to each entry
-internal static slice<uint16> isNotPrint32 = new uint16[]{
+internal static slice<uint16> isNotPrint32 = new uint16[]{ // add 0x10000 to each entry
     0x000c,
     0x0027,
     0x003b,

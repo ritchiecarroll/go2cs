@@ -74,17 +74,16 @@ public static @string UTF16ToString(slice<uint16> s) {
             break;
         }
         default: {
+            // r is a non-surrogate that decodes to 3 bytes,
+            // or is an unpaired surrogate (also 3 bytes in WTF-8),
+            // or is one half of a valid surrogate pair.
+            // If it is half of a pair, we will add 3 for the second surrogate
+            // (total of 6) and overestimate by 2 bytes for the pair,
+            // since the resulting rune only requires 4 bytes.
             maxLen += 3;
             break;
         }}
-
     }
-    // r is a non-surrogate that decodes to 3 bytes,
-    // or is an unpaired surrogate (also 3 bytes in WTF-8),
-    // or is one half of a valid surrogate pair.
-    // If it is half of a pair, we will add 3 for the second surrogate
-    // (total of 6) and overestimate by 2 bytes for the pair,
-    // since the resulting rune only requires 4 bytes.
     var buf = decodeWTF16(s, new slice<byte>(0, maxLen));
     return @unsafe.String(@unsafe.SliceData(buf), len(buf));
 }
@@ -92,8 +91,6 @@ public static @string UTF16ToString(slice<uint16> s) {
 // utf16PtrToString is like UTF16ToString, but takes *uint16
 // as a parameter instead of []uint16.
 internal static @string utf16PtrToString(ж<uint16> Ꮡp) {
-    ref var p = ref Ꮡp.DerefOrNull();
-
     if (Ꮡp == nil) {
         return ""u8;
     }
@@ -128,6 +125,13 @@ public static (ж<uint16>, error) UTF16PtrFromString(@string s) {
     return (Ꮡ(a, 0), default!);
 }
 
+// Errno is the Windows error number.
+//
+// Errno values can be tested against error values using [errors.Is].
+// For example:
+//
+//	_, _, err := syscall.Syscall(...)
+//	if errors.Is(err, fs.ErrNotExist) ...
 partial struct Errno /*num:uintptr*/;
 
 internal static uint32 langid(uint16 pri, uint16 sub) {
@@ -183,7 +187,6 @@ public static bool Is(this Errno e, error target) {
     if (AreEqual(exprᴛ1, errorspkg.ErrUnsupported)) {
         return e == _ERROR_NOT_SUPPORTED || e == _ERROR_CALL_NOT_IMPLEMENTED || e == ENOSYS || e == ENOTSUP || e == EOPNOTSUPP || e == EWINDOWS;
     }
-
     return false;
 }
 
@@ -351,7 +354,6 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
     else if (exprᴛ1 == O_RDWR) {
         access = (uint32)((uint32)GENERIC_READ | (uint32)GENERIC_WRITE);
     }
-
     if ((nint)(flag & (nint)O_CREAT) != 0) {
         access |= (uint32)(GENERIC_WRITE);
     }
@@ -404,7 +406,6 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
         createmode = OPEN_EXISTING;
         break;
     }}
-
     (var h, err) = createFile(namep, access, sharemode, sa, createmode, attrs, 0);
     if (h == InvalidHandle) {
         if (AreEqual(err, ERROR_ACCESS_DENIED) && ((nint)(flag & (nint)O_WRONLY) != 0 || (nint)(flag & (nint)O_RDWR) != 0)) {
@@ -507,11 +508,14 @@ internal static error setFilePointerEx(ΔHandle handle, int64 distToMove, ж<int
         // Different 32-bit systems disgaree about whether distToMove starts 8-byte aligned.
         var exprᴛ1 = runtime.GOARCH;
         if (exprᴛ1 == "386"u8) {
+            // distToMove is a LARGE_INTEGER, which is 64 bits.
             var ᴋ1 = ᏑnewFilePointer;
                         (_, _, e1) = Syscall6(procSetFilePointerEx.Addr(), 5, (uintptr)handle, (uintptr)distToMove, (uintptr)((distToMove >> (int)(32))), (uintptr)ᴋ1, (uintptr)whence, 0);
             System.GC.KeepAlive(ᴋ1);
         }
         else if (exprᴛ1 == "arm"u8) {
+            // distToMove must be 8-byte aligned per ARM calling convention
+            // https://docs.microsoft.com/en-us/cpp/build/overview-of-arm-abi-conventions#stage-c-assignment-of-arguments-to-registers-and-stack
             var ᴋ2 = ᏑnewFilePointer;
                         (_, _, e1) = Syscall6(procSetFilePointerEx.Addr(), 6, (uintptr)handle, 0, (uintptr)distToMove, (uintptr)((distToMove >> (int)(32))), (uintptr)ᴋ2, (uintptr)whence);
             System.GC.KeepAlive(ᴋ2);
@@ -519,11 +523,7 @@ internal static error setFilePointerEx(ΔHandle handle, int64 distToMove, ж<int
         else { /* default: */
             throw panic("unsupported 32-bit architecture");
         }
-
     }
-    // distToMove is a LARGE_INTEGER, which is 64 bits.
-    // distToMove must be 8-byte aligned per ARM calling convention
-    // https://docs.microsoft.com/en-us/cpp/build/overview-of-arm-abi-conventions#stage-c-assignment-of-arguments-to-registers-and-stack
     if (e1 != 0) {
         return errnoErr(e1);
     }
@@ -548,7 +548,6 @@ public static (int64 newoffset, error err) Seek(ΔHandle fd, int64 offset, nint 
         w = FILE_END;
         break;
     }}
-
     err = setFilePointerEx(fd, offset, Ꮡnewoffset, w);
     return (newoffset, err);
 }
@@ -914,6 +913,7 @@ internal static (@unsafe.Pointer, int32, error) sockaddr(this ж<SockaddrUnix> �
         // Don't count trailing NUL for abstract address.
         sl--;
     }
+
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrUnix.Ꮡraw)), sl, default!);
 }
 
@@ -1009,7 +1009,6 @@ internal static error /*err*/ wsaSendtoInet6(ΔHandle s, ж<WSABuf> Ꮡbufs, uin
 public static error LoadGetAddrInfo() {
     return procGetAddrInfoW.Find();
 }
-
 
 partial struct connectExFuncᴛ1 /*dyn*/ {
     internal Δsync.Once once;
@@ -1371,12 +1370,14 @@ public static (nint n, error err) Readlink(@string path, slice<byte> buf) {
             (n, err) = (-1, err); goto ᒐdone;
         }
         defer(CloseHandle, fd, ref ᒐ);
+
         var rdbbuf = new slice<byte>(MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
         ref var bytesReturned = ref heap(new uint32(), out var ᏑbytesReturned);
         err = DeviceIoControl(fd, FSCTL_GET_REPARSE_POINT, nil, 0, Ꮡ(rdbbuf, 0), (uint32)len(rdbbuf), ᏑbytesReturned, nil);
         if (err != default!) {
             (n, err) = (-1, err); goto ᒐdone;
         }
+
         var rdb = Ꮡ(rdbbuf, 0).Reinterpret<byte, reparseDataBuffer>();
         @string s = default!;
         var exprᴛ1 = (~rdb).ReparseTag;
@@ -1388,18 +1389,20 @@ public static (nint n, error err) Readlink(@string path, slice<byte> buf) {
                 if (len(s) >= 4 && s[..4] == @"\??\"){
                     s = s[4..];
                     switch (ᐧ) {
-                    case {} when len(s) >= 2 && s[1] == (rune)':': {
+                    case {} when len(s) >= 2 && s[1] == (rune)':': { // \??\C:\foo\bar
+                        // do nothing
                         break;
                     }
-                    case {} when len(s) >= 4 && s[..4] == @"UNC\": {
+                    case {} when len(s) >= 4 && s[..4] == @"UNC\": { // \??\UNC\foo\bar
                         s = @"\\" + s[4..];
                         break;
                     }
                     default: {
+                        // unexpected; do nothing
                         break;
                     }}
-
                 } else {
+                    // unexpected; do nothing
                 }
             }
         }
@@ -1407,25 +1410,19 @@ public static (nint n, error err) Readlink(@string path, slice<byte> buf) {
             var data = rdb.of(reparseDataBuffer.ᏑreparseBuffer).Reinterpret<byte, mountPointReparseBuffer>();
             var p = array<uint16>.AliasPointer(data.at(mountPointReparseBuffer.ᏑPathBuffer, 0), 65535);
             s = UTF16ToString((~p).slice((~data).SubstituteNameOffset / 2, (uint16)((~data).SubstituteNameOffset + (~data).SubstituteNameLength) / 2));
-            if (len(s) >= 4 && s[..4] == @"\??\"){
-                // \??\C:\foo\bar
-                // do nothing
-                // \??\UNC\foo\bar
-                // unexpected; do nothing
-                // unexpected; do nothing
-                // \??\C:\foo\bar
+            if (len(s) >= 4 && s[..4] == @"\??\"){ // \??\C:\foo\bar
                 s = s[4..];
             } else {
+                // unexpected; do nothing
             }
         }
         else { /* default: */
+            // the path is not a symlink or junction but another type of reparse
+            // point
             (n, err) = (-1, ENOENT); goto ᒐdone;
         }
-
-        // unexpected; do nothing
-        // the path is not a symlink or junction but another type of reparse
-        // point
         n = copy(buf, slice<byte>(s));
+
         (n, err) = (n, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

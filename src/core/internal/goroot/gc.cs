@@ -43,7 +43,6 @@ public static bool IsStandardPackage(@string goroot, @string compiler, @string p
     { /* default: */
         throw panic("unknown compiler " + compiler);
     }
-
 }
 
 // gccgoSearch holds the gccgo search directories.
@@ -77,6 +76,7 @@ internal static void init(this ref gccgoDirs gd) {
     if (err != default!) {
         return;
     }
+
     (var allDirs, err) = exec.Command(bin, printSearchDirsˢ).Output();
     if (err != default!) {
         return;
@@ -91,6 +91,7 @@ internal static void init(this ref gccgoDirs gd) {
         return;
     }
     @string machine = strings.TrimSpace(((@string)machineB));
+
     var dirsEntries = strings.Split(((@string)allDirs), "\n"u8);
     @string prefix = prefixᶜ;
     slice<@string> dirs = default!;
@@ -103,6 +104,7 @@ internal static void init(this ref gccgoDirs gd) {
     if (len(dirs) == 0) {
         return;
     }
+
     slice<@string> lastDirs = default!;
     foreach (var (_, dir) in dirs) {
         @string goDir = filepath.Join(dir, "go", version);
@@ -139,10 +141,12 @@ internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
     if (strings.Contains(path.slice(0, i), "."u8)) {
         return false;
     }
+
     if (path == "unsafe"u8) {
         // Special case.
         return true;
     }
+
     Ꮡgd.of(gccgoDirs.Ꮡonce).Do(Ꮡgd.init);
     if (gd.dirs == default!) {
         // We couldn't find the gccgo search directories.
@@ -150,6 +154,7 @@ internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
         // '.', is that this is a standard library package.
         return true;
     }
+
     foreach (var (_, dir) in gd.dirs) {
         @string full = filepath.Join(dir, path) + ".gox"u8;
         {
@@ -158,6 +163,7 @@ internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
             }
         }
     }
+
     return false;
 }
 

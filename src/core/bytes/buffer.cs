@@ -22,20 +22,19 @@ partial struct Buffer {
     internal readOp lastRead; // last read operation, so that Unread* can work correctly.
 }
 
+// The readOp constants describe the last action performed on
+// the buffer, so that UnreadRune and UnreadByte can check for
+// invalid usage. opReadRuneX constants are chosen such that
+// converted to int they correspond to the rune size that was read.
 partial struct readOp /*num:int8*/;
 
 // Don't use iota for these, as the values need to correspond with the
 // names and comments, which is easier to see when being explicit.
 internal static readOp opRead => -1;   // Any other read operation.
-
 internal static readOp opInvalid => 0; // Non-read operation.
-
 internal static readOp opReadRune1 => 1; // Read rune of size 1.
-
 internal static readOp opReadRune2 => 2; // Read rune of size 2.
-
 internal static readOp opReadRune3 => 3; // Read rune of size 3.
-
 internal static readOp opReadRune4 => 4; // Read rune of size 4.
 
 // ErrTooLarge is passed to panic if memory cannot be allocated to store data in a buffer.
@@ -235,6 +234,7 @@ public static (int64 n, error err) ReadFrom(this ref Buffer b, io.Reader r) {
         if (m < 0) {
             throw panic(errNegativeRead);
         }
+
         b.buf = b.buf.slice(0, i + m);
         n += (int64)m;
         if (AreEqual(e, io.EOF)) {

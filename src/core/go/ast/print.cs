@@ -14,6 +14,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class ast_package {
 
+// A FieldFilter may be provided to [Fprint] to control the output.
 // type FieldFilter is a methodless func type — rendered inline as its base delegate
 
 // NotNilFilter is a [FieldFilter] that returns true for field values
@@ -23,7 +24,6 @@ public static bool NotNilFilter(@string _, reflectꓸValue v) {
     if (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func || exprᴛ1 == reflect.ΔInterface || exprᴛ1 == reflect.Map || exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.ΔSlice) {
         return !v.IsNil();
     }
-
     return true;
 }
 
@@ -51,9 +51,9 @@ internal static error /*err*/ fprint(io.Writer w, ж<token.FileSet> Ꮡfset, any
             fset: Ꮡfset,
             filter: f,
             ptrmap: new map<any, nint>(),
-            last: (rune)'\n'
+            last: (rune)'\n' // force printing of line number on first line
         );
-        // force printing of line number on first line
+
         // install error handler
         defer(() => {
             {
@@ -62,6 +62,7 @@ internal static error /*err*/ fprint(io.Writer w, ж<token.FileSet> Ꮡfset, any
                 }
             }
         }, ref ᒐ);
+
         // print x
         if (x == default!) {
             Ꮡp.printf("nil\n"u8);
@@ -161,6 +162,7 @@ internal static void print(this ж<printer> Ꮡp, reflectꓸValue x) {
         Ꮡp.printf("nil"u8);
         return;
     }
+
     var exprᴛ1 = x.Kind();
     if (exprᴛ1 == reflect.ΔInterface) {
         Ꮡp.print(x.Elem());
@@ -182,12 +184,12 @@ internal static void print(this ж<printer> Ꮡp, reflectꓸValue x) {
     }
     else if (exprᴛ1 == reflect.ΔPointer) {
         Ꮡp.printf("*"u8);
+        // type-checked ASTs may contain cycles - use ptrmap
+        // to keep track of objects that have been printed
+        // already and print the respective line number instead
         var ptr = x.Interface();
         {
             var (line, exists) = p.ptrmap[ptr, ꟷ]; if (exists){
-                // type-checked ASTs may contain cycles - use ptrmap
-                // to keep track of objects that have been printed
-                // already and print the respective line number instead
                 Ꮡp.printf("(obj @ %d)"u8, line);
             } else {
                 p.ptrmap[ptr] = p.line;
@@ -259,22 +261,21 @@ internal static void print(this ж<printer> Ꮡp, reflectꓸValue x) {
         var v = x.Interface();
         switch (v.type()) {
         case @string vΔ1: {
-            Ꮡp.printf("%q"u8, // print strings in quotes
- vΔ1);
+            // print strings in quotes
+            Ꮡp.printf("%q"u8, vΔ1);
             return;
         }
         case tokenꓸPos vΔ1: {
+            // position values can be printed nicely if we have a file set
             if (p.fset != nil) {
-                // position values can be printed nicely if we have a file set
                 Ꮡp.printf("%s"u8, p.fset.Position(vΔ1));
                 return;
             }
             break;
         }}
-        Ꮡp.printf("%v"u8, // default
- v);
+        // default
+        Ꮡp.printf("%v"u8, v);
     }
-
 }
 
 } // end ast_package

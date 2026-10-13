@@ -70,6 +70,7 @@ internal static void init(this ж<parser> Ꮡp, ж<tokenꓸFile> Ꮡfile, slice<
         Ꮡp.Value.errors.Add(pos, msg);
     };
     p.scanner.Init(p.@file, src, new Action<tokenꓸPosition, @string>(eh), scanner.ScanComments);
+
     p.top = true;
     p.mode = mode;
     p.trace = (Mode)(mode & Trace) != 0; // for convenience (p.trace is used frequently)
@@ -161,8 +162,8 @@ internal static void next0(this ref parser p) {
             p.printTrace(s);
             break;
         }}
-
     }
+
     while (ᐧ) {
         (p.pos, p.tok, p.lit) = p.scanner.Scan();
         if (p.tok == token.COMMENT){
@@ -200,8 +201,10 @@ internal static (ж<ast.Comment> comment, nint endline) consumeComment(this ref 
             }
         }
     }
+
     comment = Ꮡ(new ast.Comment(Slash: p.pos, Text: p.lit));
     p.next0();
+
     return (comment, endline);
 }
 
@@ -220,9 +223,11 @@ internal static (ж<ast.CommentGroup> comments, nint endline) consumeCommentGrou
         (comment, endline) = p.consumeComment();
         list = append(list, comment);
     }
+
     // add comment group to the comments list
     comments = Ꮡ(new ast.CommentGroup(List: list));
     p.comments = append(p.comments, comments);
+
     return (comments, endline);
 }
 
@@ -245,9 +250,11 @@ internal static void next(this ref parser p) {
     p.lineComment = default!;
     tokenꓸPos prev = p.pos;
     p.next0();
+
     if (p.tok == token.COMMENT) {
         ж<ast.CommentGroup> comment = default!;
         nint endline = default!;
+
         if (p.@file.Line(p.pos) == p.@file.Line(prev)) {
             // The comment is on same line as the previous token; it
             // cannot be a lead comment but may be a line comment.
@@ -258,11 +265,13 @@ internal static void next(this ref parser p) {
                 p.lineComment = comment;
             }
         }
+
         // consume successor comments, if any
         endline = -1;
         while (p.tok == token.COMMENT) {
             (comment, endline) = p.consumeCommentGroup(1);
         }
+
         if (endline + 1 == p.@file.Line(p.pos)) {
             // The next token is following on the line immediately after the
             // comment group, thus the last comment group is a lead comment.
@@ -286,7 +295,9 @@ internal static void error(this ж<parser> Ꮡp, tokenꓸPos pos, @string msg) {
         if (p.trace) {
             defer(un, trace(Ꮡp, "error: "u8 + msg), ref ᒐ);
         }
+
         var epos = p.@file.Position(pos);
+
         // If AllErrors is not set, discard errors reported on the same line
         // as the last recorded error and stop parsing if there are more than
         // 10 errors.
@@ -299,6 +310,7 @@ internal static void error(this ж<parser> Ꮡp, tokenꓸPos pos, @string msg) {
                 throw panic(new bailout(nil));
             }
         }
+
         p.errors.Add(epos, msg);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -318,6 +330,7 @@ internal static void errorExpected(this ж<parser> Ꮡp, tokenꓸPos pos, @strin
             break;
         }
         case {} when p.tok.IsLiteral(): {
+            // print 123 rather than 'INT', etc.
             msg += ", found "u8 + p.lit;
             break;
         }
@@ -325,9 +338,7 @@ internal static void errorExpected(this ж<parser> Ꮡp, tokenꓸPos pos, @strin
             msg += ", found '"u8 + p.tok.String() + "'"u8;
             break;
         }}
-
     }
-    // print 123 rather than 'INT', etc.
     Ꮡp.error(pos, msg);
 }
 
@@ -346,8 +357,8 @@ internal static tokenꓸPos expect(this ж<parser> Ꮡp, token.Token tok) {
 // if the expected token is not found.
 internal static tokenꓸPos /*pos*/ expect2(this ж<parser> Ꮡp, token.Token tok) {
     tokenꓸPos pos = default!;
-
     ref var p = ref Ꮡp.DerefOrNull();
+
     if (p.tok == tok){
         pos = p.pos;
     } else {
@@ -372,15 +383,15 @@ internal static tokenꓸPos expectClosing(this ж<parser> Ꮡp, token.Token tok,
 // expectSemi consumes a semicolon and returns the applicable line comment.
 internal static ж<ast.CommentGroup> /*comment*/ expectSemi(this ж<parser> Ꮡp) {
     ж<ast.CommentGroup> comment = default!;
-
     ref var p = ref Ꮡp.DerefOrNull();
+
     // semicolon is optional before a closing ')' or '}'
     if (p.tok != token.RPAREN && p.tok != token.RBRACE) {
         var exprᴛ1 = p.tok;
         var matchᴛ1 = false;
         if (exprᴛ1 == token.COMMA) { matchᴛ1 = true;
-            Ꮡp.errorExpected(p.pos, // permit a ',' instead of a ';' but complain
- "';'"u8);
+            // permit a ',' instead of a ';' but complain
+            Ꮡp.errorExpected(p.pos, "';'"u8);
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ1 == token.SEMICOLON) {
@@ -399,7 +410,6 @@ internal static ж<ast.CommentGroup> /*comment*/ expectSemi(this ж<parser> Ꮡp
             Ꮡp.errorExpected(p.pos, "';'"u8);
             p.advance(stmtStart);
         }
-
     }
     return default!;
 }
@@ -451,15 +461,15 @@ internal static void advance(this ref parser p, map<token.Token, bool> to) {
                 p.syncCnt = 0;
                 return;
             }
+            // Reaching here indicates a parser bug, likely an
+            // incorrect token list in this function, but it only
+            // leads to skipping of possibly correct code if a
+            // previous error is present, and thus is preferred
+            // over a non-terminating parse.
         }
     }
 }
 
-// Reaching here indicates a parser bug, likely an
-// incorrect token list in this function, but it only
-// leads to skipping of possibly correct code if a
-// previous error is present, and thus is preferred
-// over a non-terminating parse.
 internal static map<token.Token, bool> stmtStart = new map<token.Token, bool>{
     [token.BREAK] = true,
     [token.CONST] = true,
@@ -551,6 +561,7 @@ internal static slice<ж<ast.Ident>> /*list*/ parseIdentList(this ж<parser> Ꮡ
         if (p.trace) {
             defer(un, trace(Ꮡp, identListˢ), ref ᒐ);
         }
+
         list = append(list, Ꮡp.parseIdent());
         while (p.tok == token.COMMA) {
             p.next();
@@ -578,6 +589,7 @@ internal static slice<ast.Expr> /*list*/ parseExprList(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, expressionListˢ), ref ᒐ);
         }
+
         list = append(list, Ꮡp.parseExpr());
         while (p.tok == token.COMMA) {
             p.next();
@@ -613,7 +625,9 @@ internal static ast.Expr parseType(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, typeˢ), ref ᒐ);
         }
+
         var typ = Ꮡp.tryIdentOrType();
+
         if (typ == default!) {
             ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
             pos = p.pos;
@@ -621,6 +635,7 @@ internal static ast.Expr parseType(this ж<parser> Ꮡp) {
             p.advance(exprEnd);
             return new ast.BadExprжExpr(Ꮡ(new ast.BadExpr(From: pos, To: p.pos)));
         }
+
         return typ;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -638,10 +653,12 @@ internal static ast.Expr parseQualifiedIdent(this ж<parser> Ꮡp, ж<ast.Ident>
         if (p.trace) {
             defer(un, trace(Ꮡp, qualifiedIdentˢ), ref ᒐ);
         }
+
         var typ = Ꮡp.parseTypeName(Ꮡident);
         if (p.tok == token.LBRACK) {
             typ = Ꮡp.parseTypeInstance(typ);
         }
+
         return typ;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -661,15 +678,18 @@ internal static ast.Expr parseTypeName(this ж<parser> Ꮡp, ж<ast.Ident> Ꮡid
         if (p.trace) {
             defer(un, trace(Ꮡp, typeNameˢ), ref ᒐ);
         }
+
         if (Ꮡident == nil) {
             Ꮡident = Ꮡp.parseIdent(); ident = ref Ꮡident.DerefOrNull();
         }
+
         if (p.tok == token.PERIOD) {
             // ident is a package name
             p.next();
             var sel = Ꮡp.parseIdent();
             return new ast.SelectorExprжExpr(Ꮡ(new ast.SelectorExpr(X: new ast.IdentжExpr(Ꮡident), Sel: sel)));
         }
+
         return new ast.IdentжExpr(Ꮡident);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -690,6 +710,7 @@ internal static ж<ast.ArrayType> parseArrayType(this ж<parser> Ꮡp, tokenꓸP
         if (p.trace) {
             defer(un, trace(Ꮡp, arrayTypeˢ), ref ᒐ);
         }
+
         if (len == default!) {
             p.exprLev++;
             // always permit ellipsis for more fault-tolerant parsing
@@ -724,11 +745,11 @@ internal static (ж<ast.Ident>, ast.Expr) parseArrayFieldOrTypeInstance(this ж<
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
-        ref var x = ref Ꮡx.DerefOrNull();
 
         if (p.trace) {
             defer(un, trace(Ꮡp, arrayFieldOrTypeInstanceˢ), ref ᒐ);
         }
+
         ref var lbrack = ref heap<tokenꓸPos>(out var Ꮡlbrack);
         lbrack = Ꮡp.expect(token.LBRACK);
         tokenꓸPos trailingComma = token.NoPos; // if valid, the position of a trailing comma preceding the ']'
@@ -748,11 +769,13 @@ internal static (ж<ast.Ident>, ast.Expr) parseArrayFieldOrTypeInstance(this ж<
             p.exprLev--;
         }
         tokenꓸPos rbrack = Ꮡp.expect(token.RBRACK);
+
         if (len(args) == 0) {
             // x []E
             var elt = Ꮡp.parseType();
             return (Ꮡx, new ast.ArrayTypeжExpr(Ꮡ(new ast.ArrayType(Lbrack: lbrack, Elt: elt))));
         }
+
         // x [P]E or x[P]
         if (len(args) == 1) {
             var elt = Ꮡp.tryIdentOrType();
@@ -765,6 +788,7 @@ internal static (ж<ast.Ident>, ast.Expr) parseArrayFieldOrTypeInstance(this ж<
                 return (Ꮡx, new ast.ArrayTypeжExpr(Ꮡ(new ast.ArrayType(Lbrack: lbrack, Len: args[0], Elt: elt))));
             }
         }
+
         // x[P], x[P1, P2], ...
         return (default!, packIndexExpr(new ast.IdentжExpr(Ꮡx), lbrack, args, rbrack));
     }
@@ -785,7 +809,9 @@ internal static ж<ast.Field> parseFieldDecl(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, fieldDeclˢ), ref ᒐ);
         }
+
         var doc = p.leadComment;
+
         slice<ж<ast.Ident>> names = default!;
         ast.Expr typ = default!;
         var exprᴛ1 = p.tok;
@@ -849,8 +875,8 @@ internal static ж<ast.Field> parseFieldDecl(this ж<parser> Ꮡp) {
                 // (T)
                 typ = Ꮡp.parseQualifiedIdent(nil);
             }
+            // expect closing ')' but no need to complain if missing
             if (p.tok == token.RPAREN) {
-                // expect closing ')' but no need to complain if missing
                 p.next();
             }
         }
@@ -867,7 +893,9 @@ internal static ж<ast.Field> parseFieldDecl(this ж<parser> Ꮡp) {
             tag = Ꮡ(new ast.BasicLit(ValuePos: p.pos, Kind: p.tok, Value: p.lit));
             p.next();
         }
+
         var comment = Ꮡp.expectSemi();
+
         var field = Ꮡ(new ast.Field(Doc: doc, Names: names, Type: typ, Tag: tag, Comment: comment));
         return field;
     }
@@ -886,6 +914,7 @@ internal static ж<ast.StructType> parseStructType(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, structTypeˢ), ref ᒐ);
         }
+
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = Ꮡp.expect(token.STRUCT);
         ref var lbrace = ref heap<tokenꓸPos>(out var Ꮡlbrace);
@@ -899,6 +928,7 @@ internal static ж<ast.StructType> parseStructType(this ж<parser> Ꮡp) {
         }
         ref var rbrace = ref heap<tokenꓸPos>(out var Ꮡrbrace);
         rbrace = Ꮡp.expect(token.RBRACE);
+
         return Ꮡ(new ast.StructType(
             Struct: pos,
             Fields: Ꮡ(new ast.FieldList(
@@ -923,9 +953,11 @@ internal static ж<ast.StarExpr> parsePointerType(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, pointerTypeˢ), ref ᒐ);
         }
+
         ref var star = ref heap<tokenꓸPos>(out var Ꮡstar);
         star = Ꮡp.expect(token.MUL);
         var @base = Ꮡp.parseType();
+
         return Ꮡ(new ast.StarExpr(Star: star, X: @base));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -943,9 +975,11 @@ internal static ж<ast.Ellipsis> parseDotsType(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, dotsTypeˢ), ref ᒐ);
         }
+
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = Ꮡp.expect(token.ELLIPSIS);
         var elt = Ꮡp.parseType();
+
         return Ꮡ(new ast.Ellipsis(ΔEllipsis: pos, Elt: elt));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -972,6 +1006,7 @@ internal static field /*f*/ parseParamDecl(this ж<parser> Ꮡp, ж<ast.Ident> �
         if (p.trace) {
             defer(un, trace(Ꮡp, paramDeclˢ), ref ᒐ);
         }
+
         token.Token ptok = p.tok;
         if (Ꮡname != nil){
             p.tok = token.IDENT; // force token.IDENT case in switch below
@@ -980,10 +1015,11 @@ internal static field /*f*/ parseParamDecl(this ж<parser> Ꮡp, ж<ast.Ident> �
             // "~" ...
             f = new field(nil, Ꮡp.embeddedElem(default!)); goto ᒐdone;
         }
+
         var exprᴛ1 = p.tok;
         if (exprᴛ1 == token.IDENT) {
+            // name
             if (Ꮡname != nil){
-                // name
                 f.name = Ꮡname;
                 p.tok = ptok;
             } else {
@@ -991,25 +1027,25 @@ internal static field /*f*/ parseParamDecl(this ж<parser> Ꮡp, ж<ast.Ident> �
             }
             var exprᴛ2 = p.tok;
             if (exprᴛ2 == token.IDENT || exprᴛ2 == token.MUL || exprᴛ2 == token.ARROW || exprᴛ2 == token.FUNC || exprᴛ2 == token.CHAN || exprᴛ2 == token.MAP || exprᴛ2 == token.STRUCT || exprᴛ2 == token.INTERFACE || exprᴛ2 == token.LPAREN) {
+                // name type
                 f.typ = Ꮡp.parseType();
             }
             else if (exprᴛ2 == token.LBRACK) {
+                // name "[" type1, ..., typeN "]" or name "[" n "]" type
                 (f.name, f.typ) = Ꮡp.parseArrayFieldOrTypeInstance(f.name);
             }
             else if (exprᴛ2 == token.ELLIPSIS) {
+                // name "..." type
                 f.typ = new ast.EllipsisжExpr(Ꮡp.parseDotsType());
                 goto ᒐdone; // don't allow ...type "|" ...
             }
             else if (exprᴛ2 == token.PERIOD) {
+                // name "." ...
                 f.typ = Ꮡp.parseQualifiedIdent(f.name);
                 f.name = default!;
             }
             else if (exprᴛ2 == token.TILDE) {
                 if (typeSetsOK) {
-                    // name type
-                    // name "[" type1, ..., typeN "]" or name "[" n "]" type
-                    // name "..." type
-                    // name "." ...
                     f.typ = Ꮡp.embeddedElem(default!);
                     goto ᒐdone;
                 }
@@ -1022,22 +1058,21 @@ internal static field /*f*/ parseParamDecl(this ж<parser> Ꮡp, ж<ast.Ident> �
                     goto ᒐdone;
                 }
             }
-
         }
         else if (exprᴛ1 == token.MUL || exprᴛ1 == token.ARROW || exprᴛ1 == token.FUNC || exprᴛ1 == token.LBRACK || exprᴛ1 == token.CHAN || exprᴛ1 == token.MAP || exprᴛ1 == token.STRUCT || exprᴛ1 == token.INTERFACE || exprᴛ1 == token.LPAREN) {
+            // type
             f.typ = Ꮡp.parseType();
         }
         else if (exprᴛ1 == token.ELLIPSIS) {
+            // "..." type
+            // (always accepted)
             f.typ = new ast.EllipsisжExpr(Ꮡp.parseDotsType());
             goto ᒐdone; // don't allow ...type "|" ...
         }
         else { /* default: */
-            Ꮡp.errorExpected(p.pos, // type
- // "..." type
- // (always accepted)
- // TODO(rfindley): this is incorrect in the case of type parameter lists
- //                 (should be "']'" in that case)
- "')'"u8);
+            // TODO(rfindley): this is incorrect in the case of type parameter lists
+            //                 (should be "']'" in that case)
+            Ꮡp.errorExpected(p.pos, "')'"u8);
             p.advance(exprEnd);
         }
 
@@ -1071,8 +1106,10 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
         if (p.trace) {
             defer(un, trace(Ꮡp, parameterListˢ), ref ᒐ);
         }
+
         // Type parameters are the only parameter list closed by ']'.
         var tparams = closing == token.RBRACK;
+
         tokenꓸPos pos0 = p.pos;
         if (Ꮡname0 != nil){
             pos0 = name0.Pos();
@@ -1080,14 +1117,17 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
         if (typ0 != default!) {
             pos0 = typ0.Pos();
         }
+
         // Note: The code below matches the corresponding code in the syntax
         //       parser closely. Changes must be reflected in either parser.
         //       For the code to match, we use the local []field list that
         //       corresponds to []syntax.Field. At the end, the list must be
         //       converted into an []*ast.Field.
+
         slice<field> list = default!;
         nint named = default!;   // number of parameters that have an explicit name and type
         nint typed = default!;   // number of parameters that have an explicit type
+
         while (Ꮡname0 != nil || p.tok != closing && p.tok != token.EOF) {
             field par = default!;
             if (typ0 != default!){
@@ -1114,9 +1154,11 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
             }
             p.next();
         }
+
         if (len(list) == 0) {
             goto ᒐdone; // not uncommon
         }
+
         // distribute parameter types (len(list) > 0)
         if (named == 0){
             // all unnamed => found names are type names
@@ -1201,6 +1243,7 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
                 Ꮡp.error(errPos, msg);
             }
         }
+
         // Convert list to []*ast.Field.
         // If list contains types only, each type gets its own ast.Field.
         if (named == 0) {
@@ -1211,6 +1254,7 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
             }
             goto ᒐdone;
         }
+
         // If the parameter list consists of named parameters with types,
         // collect all names with the same types into a single ast.Field.
         ref var names = ref heap<slice<ж<ast.Ident>>>(out var Ꮡnames);
@@ -1253,6 +1297,7 @@ internal static (ж<ast.FieldList> tparams, ж<ast.FieldList> @params) parsePara
         if (p.trace) {
             defer(un, trace(Ꮡp, parametersˢ), ref ᒐ);
         }
+
         if (acceptTParams && p.tok == token.LBRACK) {
             ref var openingΔ1 = ref heap<tokenꓸPos>(out var ᏑopeningΔ1);
             openingΔ1 = p.pos;
@@ -1268,12 +1313,15 @@ internal static (ж<ast.FieldList> tparams, ж<ast.FieldList> @params) parsePara
                 tparams = default!; // avoid follow-on errors
             }
         }
+
         ref var opening = ref heap<tokenꓸPos>(out var Ꮡopening);
         opening = Ꮡp.expect(token.LPAREN);
+
         slice<ж<ast.Field>> fields = default!;
         if (p.tok != token.RPAREN) {
             fields = Ꮡp.parseParameterList(nil, default!, token.RPAREN);
         }
+
         ref var rparen = ref heap<tokenꓸPos>(out var Ꮡrparen);
         rparen = Ꮡp.expect(token.RPAREN);
         @params = Ꮡ(new ast.FieldList(Opening: opening, List: fields, Closing: rparen));
@@ -1294,16 +1342,19 @@ internal static ж<ast.FieldList> parseResult(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, resultˢ), ref ᒐ);
         }
+
         if (p.tok == token.LPAREN) {
             var (_, results) = Ꮡp.parseParameters(false);
             return results;
         }
+
         var typ = Ꮡp.tryIdentOrType();
         if (typ != default!) {
             var list = new slice<ж<ast.Field>>(1);
             list[0] = Ꮡ(new ast.Field(Type: typ));
             return Ꮡ(new ast.FieldList(List: list));
         }
+
         return default!;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1322,6 +1373,7 @@ internal static ж<ast.FuncType> parseFuncType(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, funcTypeˢ), ref ᒐ);
         }
+
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = Ꮡp.expect(token.FUNC);
         var (tparams, @params) = Ꮡp.parseParameters(true);
@@ -1329,6 +1381,7 @@ internal static ж<ast.FuncType> parseFuncType(this ж<parser> Ꮡp) {
             Ꮡp.error(tparams.Pos(), functionTypeMustHaveNoˢ);
         }
         var results = Ꮡp.parseResult();
+
         return Ꮡ(new ast.FuncType(Func: pos, Params: @params, Results: results));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1348,6 +1401,7 @@ internal static ж<ast.Field> parseMethodSpec(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, methodSpecˢ), ref ᒐ);
         }
+
         var doc = p.leadComment;
         slice<ж<ast.Ident>> idents = default!;
         ast.Expr typ = default!;
@@ -1356,6 +1410,7 @@ internal static ж<ast.Field> parseMethodSpec(this ж<parser> Ꮡp) {
             var (ident, _) = x._<ж<ast.Ident>>(ᐧ); if (ident != nil){
                 switch (ᐧ) {
                 case {} when p.tok == token.LBRACK: {
+                    // generic method or embedded instantiated type
                     tokenꓸPos lbrack = p.pos;
                     p.next();
                     p.exprLev++;
@@ -1363,7 +1418,6 @@ internal static ж<ast.Field> parseMethodSpec(this ж<parser> Ꮡp) {
                     p.exprLev--;
                     {
                         var (name0, _) = xΔ2._<ж<ast.Ident>>(ᐧ); if (name0 != nil && p.tok != token.COMMA && p.tok != token.RBRACK){
-                            // generic method or embedded instantiated type
                             // generic method m[T any]
                             //
                             // Interface methods do not have type parameters. We parse them for a
@@ -1371,6 +1425,7 @@ internal static ж<ast.Field> parseMethodSpec(this ж<parser> Ꮡp) {
                             _ = Ꮡp.parseParameterList(name0, default!, token.RBRACK);
                             _ = Ꮡp.expect(token.RBRACK);
                             Ꮡp.error(lbrack, interfaceMethodMustHaveˢ);
+
                             // TODO(rfindley) refactor to share code with parseFuncType.
                             var (_, @params) = Ꮡp.parseParameters(false);
                             var results = Ꮡp.parseResult();
@@ -1403,21 +1458,20 @@ internal static ж<ast.Field> parseMethodSpec(this ж<parser> Ꮡp) {
                     break;
                 }
                 case {} when p.tok == token.LPAREN: {
+                    // ordinary method
+                    // TODO(rfindley) refactor to share code with parseFuncType.
                     var (_, @params) = Ꮡp.parseParameters(false);
                     var results = Ꮡp.parseResult();
-                    idents = new ж<ast.Ident>[]{ // ordinary method
- // TODO(rfindley) refactor to share code with parseFuncType.
-ident}.slice();
+                    idents = new ж<ast.Ident>[]{ident}.slice();
                     typ = new ast.FuncTypeжExpr(Ꮡ(new ast.FuncType(Func: token.NoPos, Params: @params, Results: results)));
                     break;
                 }
                 default: {
+                    // embedded type
                     typ = x;
                     break;
                 }}
-
             } else {
-                // embedded type
                 // embedded, possibly instantiated type
                 typ = x;
                 if (p.tok == token.LBRACK) {
@@ -1426,6 +1480,7 @@ ident}.slice();
                 }
             }
         }
+
         // Comment is added at the callsite: the field below may joined with
         // additional type specs using '|'.
         // TODO(rfindley) this should be refactored.
@@ -1485,6 +1540,7 @@ internal static ast.Expr embeddedTerm(this ж<parser> Ꮡp) {
             tΔ1.Value.X = Ꮡp.parseType();
             return new ast.UnaryExprжExpr(tΔ1);
         }
+
         var t = Ꮡp.tryIdentOrType();
         if (t == default!) {
             ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
@@ -1493,6 +1549,7 @@ internal static ast.Expr embeddedTerm(this ж<parser> Ꮡp) {
             p.advance(exprEnd);
             return new ast.BadExprжExpr(Ꮡ(new ast.BadExpr(From: pos, To: p.pos)));
         }
+
         return t;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1510,11 +1567,14 @@ internal static ж<ast.InterfaceType> parseInterfaceType(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, interfaceTypeˢ), ref ᒐ);
         }
+
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = Ꮡp.expect(token.INTERFACE);
         ref var lbrace = ref heap<tokenꓸPos>(out var Ꮡlbrace);
         lbrace = Ꮡp.expect(token.LBRACE);
+
         slice<ж<ast.Field>> list = default!;
+
 parseElements:
         while (ᐧ) {
             switch (ᐧ) {
@@ -1545,14 +1605,15 @@ parseElements:
                 }
                 break;
             }}
-
 continue_parseElements:;
         }
 break_parseElements:;
+
         // TODO(rfindley): the error produced here could be improved, since we could
         // accept an identifier, 'type', or a '}' at this point.
         ref var rbrace = ref heap<tokenꓸPos>(out var Ꮡrbrace);
         rbrace = Ꮡp.expect(token.RBRACE);
+
         return Ꮡ(new ast.InterfaceType(
             Interface: pos,
             Methods: Ꮡ(new ast.FieldList(
@@ -1577,12 +1638,14 @@ internal static ж<ast.MapType> parseMapType(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, mapTypeˢ), ref ᒐ);
         }
+
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = Ꮡp.expect(token.MAP);
         Ꮡp.expect(token.LBRACK);
         var key = Ꮡp.parseType();
         Ꮡp.expect(token.RBRACK);
         var value = Ꮡp.parseType();
+
         return Ꮡ(new ast.MapType(Map: pos, Key: key, Value: value));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1600,6 +1663,7 @@ internal static ж<ast.ChanType> parseChanType(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, chanTypeˢ), ref ᒐ);
         }
+
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = p.pos;
         ref var dir = ref heap<ast.ChanDir>(out var Ꮡdir);
@@ -1618,6 +1682,7 @@ internal static ж<ast.ChanType> parseChanType(this ж<parser> Ꮡp) {
             dir = ast.RECV;
         }
         var value = Ꮡp.parseType();
+
         return Ꮡ(new ast.ChanType(Begin: pos, Arrow: arrow, Dir: dir, Value: value));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1635,6 +1700,7 @@ internal static ast.Expr parseTypeInstance(this ж<parser> Ꮡp, ast.Expr typ) {
         if (p.trace) {
             defer(un, trace(Ꮡp, typeInstanceˢ), ref ᒐ);
         }
+
         ref var opening = ref heap<tokenꓸPos>(out var Ꮡopening);
         opening = Ꮡp.expect(token.LBRACK);
         p.exprLev++;
@@ -1647,8 +1713,10 @@ internal static ast.Expr parseTypeInstance(this ж<parser> Ꮡp, ast.Expr typ) {
             p.next();
         }
         p.exprLev--;
+
         ref var closing = ref heap<tokenꓸPos>(out var Ꮡclosing);
         closing = Ꮡp.expectClosing(token.RBRACK, typeArgumentListˢ);
+
         if (len(list) == 0) {
             Ꮡp.errorExpected(closing, typeArgumentListˢ);
             return new ast.IndexExprжExpr(Ꮡ(new ast.IndexExpr(
@@ -1658,6 +1726,7 @@ internal static ast.Expr parseTypeInstance(this ж<parser> Ꮡp, ast.Expr typ) {
                 Rbrack: closing
             )));
         }
+
         return packIndexExpr(typ, opening, list, closing);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1670,6 +1739,7 @@ internal static ast.Expr tryIdentOrType(this ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         defer(ᴛ1 => decNestLev(ref ᴛ1.DerefOrNull()), incNestLev(Ꮡp), ref ᒐ);
+
         var exprᴛ1 = p.tok;
         if (exprᴛ1 == token.IDENT) {
             var typ = Ꮡp.parseTypeName(nil);
@@ -1731,6 +1801,7 @@ internal static slice<ast.Stmt> /*list*/ parseStmtList(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, statementListˢ), ref ᒐ);
         }
+
         while (p.tok != token.CASE && p.tok != token.DEFAULT && p.tok != token.RBRACE && p.tok != token.EOF) {
             list = append(list, Ꮡp.parseStmt());
         }
@@ -1751,11 +1822,13 @@ internal static ж<ast.BlockStmt> parseBody(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, bodyˢ), ref ᒐ);
         }
+
         ref var lbrace = ref heap<tokenꓸPos>(out var Ꮡlbrace);
         lbrace = Ꮡp.expect(token.LBRACE);
         var list = Ꮡp.parseStmtList();
         ref var rbrace = ref heap<tokenꓸPos>(out var Ꮡrbrace);
         rbrace = Ꮡp.expect2(token.RBRACE);
+
         return Ꮡ(new ast.BlockStmt(Lbrace: lbrace, List: list, Rbrace: rbrace));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1773,11 +1846,13 @@ internal static ж<ast.BlockStmt> parseBlockStmt(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, blockStmtˢ), ref ᒐ);
         }
+
         ref var lbrace = ref heap<tokenꓸPos>(out var Ꮡlbrace);
         lbrace = Ꮡp.expect(token.LBRACE);
         var list = Ꮡp.parseStmtList();
         ref var rbrace = ref heap<tokenꓸPos>(out var Ꮡrbrace);
         rbrace = Ꮡp.expect2(token.RBRACE);
+
         return Ꮡ(new ast.BlockStmt(Lbrace: lbrace, List: list, Rbrace: rbrace));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1797,14 +1872,17 @@ internal static ast.Expr parseFuncTypeOrLit(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, funcTypeOrLitˢ), ref ᒐ);
         }
+
         var typ = Ꮡp.parseFuncType();
         if (p.tok != token.LBRACE) {
             // function type only
             return new ast.FuncTypeжExpr(typ);
         }
+
         p.exprLev++;
         var body = Ꮡp.parseBody();
         p.exprLev--;
+
         return new ast.FuncLitжExpr(Ꮡ(new ast.FuncLit(Type: typ, Body: body)));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1826,6 +1904,7 @@ internal static ast.Expr parseOperand(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, operandˢ), ref ᒐ);
         }
+
         var exprᴛ1 = p.tok;
         if (exprᴛ1 == token.IDENT) {
             var x = Ꮡp.parseIdent();
@@ -1852,14 +1931,14 @@ internal static ast.Expr parseOperand(this ж<parser> Ꮡp) {
         }
 
         {
-            var typ = Ꮡp.tryIdentOrType(); if (typ != default!) {
-                // do not consume trailing type parameters
+            var typ = Ꮡp.tryIdentOrType(); if (typ != default!) { // do not consume trailing type parameters
                 // could be type for composite literal or conversion
                 var (_, isIdent) = typ._<ж<ast.Ident>>(ᐧ);
                 assert(!isIdent, typeCannotBeIdentifierˢ);
                 return typ;
             }
         }
+
         // we have an error
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = p.pos;
@@ -1882,7 +1961,9 @@ internal static ast.Expr parseSelector(this ж<parser> Ꮡp, ast.Expr x) {
         if (p.trace) {
             defer(un, trace(Ꮡp, selectorˢ), ref ᒐ);
         }
+
         var sel = Ꮡp.parseIdent();
+
         return new ast.SelectorExprжExpr(Ꮡ(new ast.SelectorExpr(X: x, Sel: sel)));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1900,6 +1981,7 @@ internal static ast.Expr parseTypeAssertion(this ж<parser> Ꮡp, ast.Expr x) {
         if (p.trace) {
             defer(un, trace(Ꮡp, typeAssertionˢ), ref ᒐ);
         }
+
         ref var lparen = ref heap<tokenꓸPos>(out var Ꮡlparen);
         lparen = Ꮡp.expect(token.LPAREN);
         ast.Expr typ = default!;
@@ -1911,6 +1993,7 @@ internal static ast.Expr parseTypeAssertion(this ж<parser> Ꮡp, ast.Expr x) {
         }
         ref var rparen = ref heap<tokenꓸPos>(out var Ꮡrparen);
         rparen = Ꮡp.expect(token.RPAREN);
+
         return new ast.TypeAssertExprжExpr(Ꮡ(new ast.TypeAssertExpr(X: x, Type: typ, Lparen: lparen, Rparen: rparen)));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1929,6 +2012,7 @@ internal static ast.Expr parseIndexOrSliceOrInstance(this ж<parser> Ꮡp, ast.E
         if (p.trace) {
             defer(un, trace(Ꮡp, "parseIndexOrSliceOrInstance"u8), ref ᒐ);
         }
+
         ref var lbrack = ref heap<tokenꓸPos>(out var Ꮡlbrack);
         lbrack = Ꮡp.expect(token.LBRACK);
         if (p.tok == token.RBRACK) {
@@ -1946,6 +2030,7 @@ internal static ast.Expr parseIndexOrSliceOrInstance(this ж<parser> Ꮡp, ast.E
             )));
         }
         p.exprLev++;
+
         UntypedInt N = 3; // change the 3 to 2 to disable 3-index slices
         slice<ast.Expr> args = default!;
         array<ast.Expr> index = new(3); /* N */
@@ -1958,8 +2043,8 @@ internal static ast.Expr parseIndexOrSliceOrInstance(this ж<parser> Ꮡp, ast.E
         nint ncolons = 0;
         var exprᴛ1 = p.tok;
         if (exprᴛ1 == token.COLON) {
+            // slice expression
             while (p.tok == token.COLON && ncolons < len(colons)) {
-                // slice expression
                 colons[ncolons] = p.pos;
                 ncolons++;
                 p.next();
@@ -1969,8 +2054,8 @@ internal static ast.Expr parseIndexOrSliceOrInstance(this ж<parser> Ꮡp, ast.E
             }
         }
         else if (exprᴛ1 == token.COMMA) {
-            args = append(args, // instance expression
- index[0]);
+            // instance expression
+            args = append(args, index[0]);
             while (p.tok == token.COMMA) {
                 p.next();
                 if (p.tok != token.RBRACK && p.tok != token.EOF) {
@@ -1982,6 +2067,7 @@ internal static ast.Expr parseIndexOrSliceOrInstance(this ж<parser> Ꮡp, ast.E
         p.exprLev--;
         ref var rbrack = ref heap<tokenꓸPos>(out var Ꮡrbrack);
         rbrack = Ꮡp.expect(token.RBRACK);
+
         if (ncolons > 0) {
             // slice expression
             ref var slice3 = ref heap<bool>(out var Ꮡslice3);
@@ -2001,10 +2087,12 @@ internal static ast.Expr parseIndexOrSliceOrInstance(this ж<parser> Ꮡp, ast.E
             }
             return new ast.SliceExprжExpr(Ꮡ(new ast.SliceExpr(X: x, Lbrack: lbrack, Low: index[0], High: index[1], Max: index[2], Slice3: slice3, Rbrack: rbrack)));
         }
+
         if (len(args) == 0) {
             // index expression
             return new ast.IndexExprжExpr(Ꮡ(new ast.IndexExpr(X: x, Lbrack: lbrack, Index: index[0], Rbrack: rbrack)));
         }
+
         // instance expression
         return packIndexExpr(x, lbrack, args, rbrack);
     }
@@ -2024,6 +2112,7 @@ internal static ж<ast.CallExpr> parseCallOrConversion(this ж<parser> Ꮡp, ast
         if (p.trace) {
             defer(un, trace(Ꮡp, callOrConversionˢ), ref ᒐ);
         }
+
         ref var lparen = ref heap<tokenꓸPos>(out var Ꮡlparen);
         lparen = Ꮡp.expect(token.LPAREN);
         p.exprLev++;
@@ -2043,6 +2132,7 @@ internal static ж<ast.CallExpr> parseCallOrConversion(this ж<parser> Ꮡp, ast
         p.exprLev--;
         ref var rparen = ref heap<tokenꓸPos>(out var Ꮡrparen);
         rparen = Ꮡp.expectClosing(token.RPAREN, argumentListˢ);
+
         return Ꮡ(new ast.CallExpr(Fun: fun, Lparen: lparen, Args: list, Ellipsis: ellipsis, Rparen: rparen));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -2060,10 +2150,13 @@ internal static ast.Expr parseValue(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, elementˢ), ref ᒐ);
         }
+
         if (p.tok == token.LBRACE) {
             return Ꮡp.parseLiteralValue(default!);
         }
+
         var x = Ꮡp.parseExpr();
+
         return x;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -2078,6 +2171,7 @@ internal static ast.Expr parseElement(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, elementˢ), ref ᒐ);
         }
+
         var x = Ꮡp.parseValue();
         if (p.tok == token.COLON) {
             ref var colon = ref heap<tokenꓸPos>(out var Ꮡcolon);
@@ -2085,6 +2179,7 @@ internal static ast.Expr parseElement(this ж<parser> Ꮡp) {
             p.next();
             x = new ast.KeyValueExprжExpr(Ꮡ(new ast.KeyValueExpr(Key: x, Colon: colon, Value: Ꮡp.parseValue())));
         }
+
         return x;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -2104,6 +2199,7 @@ internal static slice<ast.Expr> /*list*/ parseElementList(this ж<parser> Ꮡp) 
         if (p.trace) {
             defer(un, trace(Ꮡp, elementListˢ), ref ᒐ);
         }
+
         while (p.tok != token.RBRACE && p.tok != token.EOF) {
             list = append(list, Ꮡp.parseElement());
             if (!Ꮡp.atComma(compositeLiteralˢ, token.RBRACE)) {
@@ -2126,9 +2222,11 @@ internal static ast.Expr parseLiteralValue(this ж<parser> Ꮡp, ast.Expr typ) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         defer(ᴛ1 => decNestLev(ref ᴛ1.DerefOrNull()), incNestLev(Ꮡp), ref ᒐ);
+
         if (p.trace) {
             defer(un, trace(Ꮡp, literalValueˢ), ref ᒐ);
         }
+
         ref var lbrace = ref heap<tokenꓸPos>(out var Ꮡlbrace);
         lbrace = Ꮡp.expect(token.LBRACE);
         slice<ast.Expr> elts = default!;
@@ -2158,6 +2256,7 @@ internal static ast.Expr parsePrimaryExpr(this ж<parser> Ꮡp, ast.Expr x) {
         if (p.trace) {
             defer(un, trace(Ꮡp, primaryExprˢ), ref ᒐ);
         }
+
         if (x == default!) {
             x = Ꮡp.parseOperand();
         }
@@ -2184,18 +2283,17 @@ internal static ast.Expr parsePrimaryExpr(this ж<parser> Ꮡp, ast.Expr x) {
                     ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
                     pos = p.pos;
                     Ꮡp.errorExpected(pos, selectorOrTypeAssertionˢ);
+                    // TODO(rFindley) The check for token.RBRACE below is a targeted fix
+                    //                to error recovery sufficient to make the x/tools tests to
+                    //                pass with the new parsing logic introduced for type
+                    //                parameters. Remove this once error recovery has been
+                    //                more generally reconsidered.
                     if (p.tok != token.RBRACE) {
-                        // TODO(rFindley) The check for token.RBRACE below is a targeted fix
-                        //                to error recovery sufficient to make the x/tools tests to
-                        //                pass with the new parsing logic introduced for type
-                        //                parameters. Remove this once error recovery has been
-                        //                more generally reconsidered.
                         p.next(); // make progress
                     }
                     var sel = Ꮡ(new ast.Ident(NamePos: pos, Name: "_"u8));
                     x = new ast.SelectorExprжExpr(Ꮡ(new ast.SelectorExpr(X: x, Sel: sel)));
                 }
-
             }
             else if (exprᴛ1 == token.LBRACK) {
                 x = Ꮡp.parseIndexOrSliceOrInstance(x);
@@ -2204,47 +2302,46 @@ internal static ast.Expr parsePrimaryExpr(this ж<parser> Ꮡp, ast.Expr x) {
                 x = new ast.CallExprжExpr(Ꮡp.parseCallOrConversion(x));
             }
             else if (exprᴛ1 == token.LBRACE) {
+                // operand may have returned a parenthesized complit
+                // type; accept it but complain if we have a complit
                 var t = ast.Unparen(x);
+                // determine if '{' belongs to a composite literal or a block statement
                 switch (t.type()) {
                 case ж<ast.BadExpr> _:
                 case ж<ast.Ident> _:
                 case ж<ast.SelectorExpr> _: {
                     if (p.exprLev < 0) {
-                        // operand may have returned a parenthesized complit
-                        // type; accept it but complain if we have a complit
-                        // determine if '{' belongs to a composite literal or a block statement
                         return x;
                     }
+                    // x is possibly a composite literal type
                     break;
                 }
                 case ж<ast.IndexExpr> _:
                 case ж<ast.IndexListExpr> _: {
                     if (p.exprLev < 0) {
-                        // x is possibly a composite literal type
                         return x;
                     }
+                    // x is possibly a composite literal type
                     break;
                 }
                 case ж<ast.ArrayType> _:
                 case ж<ast.StructType> _:
                 case ж<ast.MapType> _: {
+                    // x is a composite literal type
                     break;
                 }
                 default: {
                     return x;
                 }}
-
                 if (!AreEqual(t, x)) {
-                    // x is possibly a composite literal type
-                    // x is a composite literal type
                     Ꮡp.error(t.Pos(), cannotParenthesizeTypeInˢ);
+                    // already progressed, no need to advance
                 }
                 x = Ꮡp.parseLiteralValue(x);
             }
             else { /* default: */
                 return x;
             }
-
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -2256,16 +2353,17 @@ internal static readonly @string unaryExprˢ = "UnaryExpr"u8;
 internal static readonly @string chanˢ = "'chan'"u8;
 internal static readonly @string channelTypeˢ = "channel type"u8;
 
-// already progressed, no need to advance
 internal static ast.Expr parseUnaryExpr(this ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
 
         defer(ᴛ1 => decNestLev(ref ᴛ1.DerefOrNull()), incNestLev(Ꮡp), ref ᒐ);
+
         if (p.trace) {
             defer(un, trace(Ꮡp, unaryExprˢ), ref ᒐ);
         }
+
         var exprᴛ1 = p.tok;
         if (exprᴛ1 == token.ADD || exprᴛ1 == token.SUB || exprᴛ1 == token.NOT || exprᴛ1 == token.XOR || exprᴛ1 == token.AND || exprᴛ1 == token.TILDE) {
             ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
@@ -2277,27 +2375,30 @@ internal static ast.Expr parseUnaryExpr(this ж<parser> Ꮡp) {
             return new ast.UnaryExprжExpr(Ꮡ(new ast.UnaryExpr(OpPos: pos, Op: op, X: x)));
         }
         if (exprᴛ1 == token.ARROW) {
+            // channel type or receive expression
             ref var arrow = ref heap<tokenꓸPos>(out var Ꮡarrow);
             arrow = p.pos;
             p.next();
+
+            // If the next token is token.CHAN we still don't know if it
+            // is a channel type or a receive operation - we only know
+            // once we have found the end of the unary expression. There
+            // are two cases:
+            //
+            //   <- type  => (<-type) must be channel type
+            //   <- expr  => <-(expr) is a receive from an expression
+            //
+            // In the first case, the arrow must be re-associated with
+            // the channel type parsed already:
+            //
+            //   <- (chan type)    =>  (<-chan type)
+            //   <- (chan<- type)  =>  (<-chan (<-type))
+
             var x = Ꮡp.parseUnaryExpr();
+
+            // determine which case we have
             {
                 var (typ, ok) = x._<ж<ast.ChanType>>(ᐧ); if (ok) {
-                    // channel type or receive expression
-                    // If the next token is token.CHAN we still don't know if it
-                    // is a channel type or a receive operation - we only know
-                    // once we have found the end of the unary expression. There
-                    // are two cases:
-                    //
-                    //   <- type  => (<-type) must be channel type
-                    //   <- expr  => <-(expr) is a receive from an expression
-                    //
-                    // In the first case, the arrow must be re-associated with
-                    // the channel type parsed already:
-                    //
-                    //   <- (chan type)    =>  (<-chan type)
-                    //   <- (chan<- type)  =>  (<-chan (<-type))
-                    // determine which case we have
                     // (<-type)
                     // re-associate position info and <-
                     ast.ChanDir dir = ast.SEND;
@@ -2313,19 +2414,21 @@ internal static ast.Expr parseUnaryExpr(this ж<parser> Ꮡp) {
                     if (dir == ast.SEND) {
                         Ꮡp.errorExpected(arrow, channelTypeˢ);
                     }
+
                     return x;
                 }
             }
-            return new ast.UnaryExprжExpr(Ꮡ(new ast.UnaryExpr( // <-(expr)
-OpPos: arrow, Op: token.ARROW, X: x)));
+
+            // <-(expr)
+            return new ast.UnaryExprжExpr(Ꮡ(new ast.UnaryExpr(OpPos: arrow, Op: token.ARROW, X: x)));
         }
         if (exprᴛ1 == token.MUL) {
+            // pointer type or unary "*" expression
             ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
             pos = p.pos;
             p.next();
             var x = Ꮡp.parseUnaryExpr();
-            return new ast.StarExprжExpr(Ꮡ(new ast.StarExpr( // pointer type or unary "*" expression
-Star: pos, X: x)));
+            return new ast.StarExprжExpr(Ꮡ(new ast.StarExpr(Star: pos, X: x)));
         }
 
         return Ꮡp.parsePrimaryExpr(default!);
@@ -2357,6 +2460,7 @@ internal static ast.Expr parseBinaryExpr(this ж<parser> Ꮡp, ast.Expr x, nint 
         if (p.trace) {
             defer(un, trace(Ꮡp, binaryExprˢ), ref ᒐ);
         }
+
         if (x == default!) {
             x = Ꮡp.parseUnaryExpr();
         }
@@ -2396,6 +2500,7 @@ internal static ast.Expr parseExpr(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, expressionˢ), ref ᒐ);
         }
+
         return Ꮡp.parseBinaryExpr(default!, token.LowestPrec + 1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -2417,9 +2522,7 @@ internal static ast.Expr parseRhs(this ж<parser> Ꮡp) {
 
 // Parsing modes for parseSimpleStmt.
 internal static UntypedInt basic => iota;
-
 internal static UntypedInt labelOk => 1;
-
 internal static UntypedInt rangeOk => 2;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -2439,15 +2542,17 @@ internal static (ast.Stmt, bool) parseSimpleStmt(this ж<parser> Ꮡp, nint mode
         if (p.trace) {
             defer(un, trace(Ꮡp, simpleStmtˢ), ref ᒐ);
         }
+
         var x = Ꮡp.parseList(false);
+
         var exprᴛ1 = p.tok;
         if (exprᴛ1 == token.DEFINE || exprᴛ1 == token.ASSIGN || exprᴛ1 == token.ADD_ASSIGN || exprᴛ1 == token.SUB_ASSIGN || exprᴛ1 == token.MUL_ASSIGN || exprᴛ1 == token.QUO_ASSIGN || exprᴛ1 == token.REM_ASSIGN || exprᴛ1 == token.AND_ASSIGN || exprᴛ1 == token.OR_ASSIGN || exprᴛ1 == token.XOR_ASSIGN || exprᴛ1 == token.SHL_ASSIGN || exprᴛ1 == token.SHR_ASSIGN || exprᴛ1 == token.AND_NOT_ASSIGN) {
+            // assignment statement, possibly part of a range clause
             ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
             pos = p.pos;
             ref var tok = ref heap<token.Token>(out var Ꮡtok);
             tok = p.tok;
             p.next();
-// assignment statement, possibly part of a range clause
             slice<ast.Expr> y = default!;
             var isRange = false;
             if (mode == rangeOk && p.tok == token.RANGE && (tok == token.DEFINE || tok == token.ASSIGN)){
@@ -2464,16 +2569,17 @@ internal static (ast.Stmt, bool) parseSimpleStmt(this ж<parser> Ꮡp, nint mode
 
         if (len(x) > 1) {
             Ꮡp.errorExpected(x[0].Pos(), expressionˢ2);
+            // continue with first expression
         }
-        // continue with first expression
+
         var exprᴛ2 = p.tok;
         if (exprᴛ2 == token.COLON) {
+            // labeled statement
             ref var colon = ref heap<tokenꓸPos>(out var Ꮡcolon);
             colon = p.pos;
             p.next();
             {
                 var (label, isIdent) = x[0]._<ж<ast.Ident>>(ᐧ); if (mode == labelOk && isIdent) {
-                    // labeled statement
                     // Go spec: The scope of a label is the body of the function
                     // in which it is declared and excludes the body of any nested
                     // function.
@@ -2481,26 +2587,26 @@ internal static (ast.Stmt, bool) parseSimpleStmt(this ж<parser> Ꮡp, nint mode
                     return (new ast.LabeledStmtжStmt(stmt), false);
                 }
             }
-            Ꮡp.error(colon, // The label declaration typically starts at x[0].Pos(), but the label
- // declaration may be erroneous due to a token after that position (and
- // before the ':'). If SpuriousErrors is not set, the (only) error
- // reported for the line is the illegal label error instead of the token
- // before the ':' that caused the problem. Thus, use the (latest) colon
- // position for error reporting.
- illegalLabelDeclarationˢ);
+            // The label declaration typically starts at x[0].Pos(), but the label
+            // declaration may be erroneous due to a token after that position (and
+            // before the ':'). If SpuriousErrors is not set, the (only) error
+            // reported for the line is the illegal label error instead of the token
+            // before the ':' that caused the problem. Thus, use the (latest) colon
+            // position for error reporting.
+            Ꮡp.error(colon, illegalLabelDeclarationˢ);
             return (new ast.BadStmtжStmt(Ꮡ(new ast.BadStmt(From: x[0].Pos(), To: colon + 1))), false);
         }
         if (exprᴛ2 == token.ARROW) {
+            // send statement
             ref var arrow = ref heap<tokenꓸPos>(out var Ꮡarrow);
             arrow = p.pos;
             p.next();
             var y = Ꮡp.parseRhs();
-            return (new ast.SendStmtжStmt(Ꮡ(new ast.SendStmt( // send statement
-Chan: x[0], Arrow: arrow, Value: y))), false);
+            return (new ast.SendStmtжStmt(Ꮡ(new ast.SendStmt(Chan: x[0], Arrow: arrow, Value: y))), false);
         }
         if (exprᴛ2 == token.INC || exprᴛ2 == token.DEC) {
-            var s = Ꮡ(new ast.IncDecStmt( // increment or decrement
-X: x[0], TokPos: p.pos, Tok: p.tok));
+            // increment or decrement
+            var s = Ꮡ(new ast.IncDecStmt(X: x[0], TokPos: p.pos, Tok: p.tok));
             p.next();
             return (new ast.IncDecStmtжStmt(s), false);
         }
@@ -2545,6 +2651,7 @@ internal static ast.Stmt parseGoStmt(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, goStmtˢ), ref ᒐ);
         }
+
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = Ꮡp.expect(token.GO);
         var call = Ꮡp.parseCallExpr("go"u8);
@@ -2552,6 +2659,7 @@ internal static ast.Stmt parseGoStmt(this ж<parser> Ꮡp) {
         if (call == nil) {
             return new ast.BadStmtжStmt(Ꮡ(new ast.BadStmt(From: pos, To: pos + 2))); // len("go")
         }
+
         return new ast.GoStmtжStmt(Ꮡ(new ast.GoStmt(Go: pos, Call: call)));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -2570,6 +2678,7 @@ internal static ast.Stmt parseDeferStmt(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, deferStmtˢ), ref ᒐ);
         }
+
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = Ꮡp.expect(token.DEFER);
         var call = Ꮡp.parseCallExpr(deferˢ);
@@ -2577,6 +2686,7 @@ internal static ast.Stmt parseDeferStmt(this ж<parser> Ꮡp) {
         if (call == nil) {
             return new ast.BadStmtжStmt(Ꮡ(new ast.BadStmt(From: pos, To: pos + 5))); // len("defer")
         }
+
         return new ast.DeferStmtжStmt(Ꮡ(new ast.DeferStmt(Defer: pos, Call: call)));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -2594,6 +2704,7 @@ internal static ж<ast.ReturnStmt> parseReturnStmt(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, returnStmtˢ), ref ᒐ);
         }
+
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = p.pos;
         Ꮡp.expect(token.RETURN);
@@ -2602,6 +2713,7 @@ internal static ж<ast.ReturnStmt> parseReturnStmt(this ж<parser> Ꮡp) {
             x = Ꮡp.parseList(true);
         }
         Ꮡp.expectSemi();
+
         return Ꮡ(new ast.ReturnStmt(Return: pos, Results: x));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -2619,6 +2731,7 @@ internal static ж<ast.BranchStmt> parseBranchStmt(this ж<parser> Ꮡp, token.T
         if (p.trace) {
             defer(un, trace(Ꮡp, branchStmtˢ), ref ᒐ);
         }
+
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = Ꮡp.expect(tok);
         ж<ast.Ident> label = default!;
@@ -2626,6 +2739,7 @@ internal static ж<ast.BranchStmt> parseBranchStmt(this ж<parser> Ꮡp, token.T
             label = Ꮡp.parseIdent();
         }
         Ꮡp.expectSemi();
+
         return Ꮡ(new ast.BranchStmt(TokPos: pos, Tok: tok, Label: label));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -2672,16 +2786,18 @@ internal partial struct parseIfHeader_semi /*dyn*/ {
 internal static (ast.Stmt init, ast.Expr cond) parseIfHeader(this ж<parser> Ꮡp) {
     ast.Stmt init = default!;
     ast.Expr cond = default!;
-
     ref var p = ref Ꮡp.DerefOrNull();
+
     if (p.tok == token.LBRACE) {
         Ꮡp.error(p.pos, missingConditionInIfˢ);
         cond = new ast.BadExprжExpr(Ꮡ(new ast.BadExpr(From: p.pos, To: p.pos)));
         return (init, cond);
     }
     // p.tok != token.LBRACE
+
     nint prevLev = p.exprLev;
     p.exprLev = -1;
+
     if (p.tok != token.SEMICOLON) {
         // accept potential variable declaration but complain
         if (p.tok == token.VAR) {
@@ -2690,6 +2806,7 @@ internal static (ast.Stmt init, ast.Expr cond) parseIfHeader(this ж<parser> Ꮡ
         }
         (init, _) = Ꮡp.parseSimpleStmt(basic);
     }
+
     ast.Stmt condStmt = default!;
     parseIfHeader_semi semi = default!;
     if (p.tok != token.LBRACE){
@@ -2707,6 +2824,7 @@ internal static (ast.Stmt init, ast.Expr cond) parseIfHeader(this ж<parser> Ꮡ
         condStmt = init;
         init = default!;
     }
+
     if (condStmt != default!){
         cond = Ꮡp.makeExpr(condStmt, booleanExpressionˢ);
     } else 
@@ -2717,10 +2835,12 @@ internal static (ast.Stmt init, ast.Expr cond) parseIfHeader(this ж<parser> Ꮡ
             Ꮡp.error(semi.pos, missingConditionInIfˢ);
         }
     }
+
     // make sure we have a valid AST
     if (cond == default!) {
         cond = new ast.BadExprжExpr(Ꮡ(new ast.BadExpr(From: p.pos, To: p.pos)));
     }
+
     p.exprLev = prevLev;
     return (init, cond);
 }
@@ -2735,13 +2855,17 @@ internal static ж<ast.IfStmt> parseIfStmt(this ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         defer(ᴛ1 => decNestLev(ref ᴛ1.DerefOrNull()), incNestLev(Ꮡp), ref ᒐ);
+
         if (p.trace) {
             defer(un, trace(Ꮡp, ifStmtˢ), ref ᒐ);
         }
+
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = Ꮡp.expect(token.IF);
+
         var (init, cond) = Ꮡp.parseIfHeader();
         var body = Ꮡp.parseBlockStmt();
+
         ast.Stmt else_ = default!;
         if (p.tok == token.ELSE){
             p.next();
@@ -2757,10 +2881,10 @@ internal static ж<ast.IfStmt> parseIfStmt(this ж<parser> Ꮡp) {
                 Ꮡp.errorExpected(p.pos, ifStatementOrBlockˢ);
                 else_ = new ast.BadStmtжStmt(Ꮡ(new ast.BadStmt(From: p.pos, To: p.pos)));
             }
-
         } else {
             Ꮡp.expectSemi();
         }
+
         return Ꮡ(new ast.IfStmt(If: pos, Init: init, Cond: cond, Body: body, Else: else_));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -2778,6 +2902,7 @@ internal static ж<ast.CaseClause> parseCaseClause(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, caseClauseˢ), ref ᒐ);
         }
+
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = p.pos;
         slice<ast.Expr> list = default!;
@@ -2787,9 +2912,11 @@ internal static ж<ast.CaseClause> parseCaseClause(this ж<parser> Ꮡp) {
         } else {
             Ꮡp.expect(token.DEFAULT);
         }
+
         ref var colon = ref heap<tokenꓸPos>(out var Ꮡcolon);
         colon = Ꮡp.expect(token.COLON);
         var body = Ꮡp.parseStmtList();
+
         return Ꮡ(new ast.CaseClause(Case: pos, List: list, Colon: colon, Body: body));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -2807,23 +2934,22 @@ internal static readonly @string expectedFoundˢ = "expected ':=', found '='"u8;
 internal static bool isTypeSwitchGuard(this ж<parser> Ꮡp, ast.Stmt s) {
     switch (s.type()) {
     case ж<ast.ExprStmt> t: {
+        // x.(type)
         return isTypeSwitchAssert((~t).X);
     }
     case ж<ast.AssignStmt> t: {
+        // v := x.(type)
         if (len((~t).Lhs) == 1 && len((~t).Rhs) == 1 && isTypeSwitchAssert((~t).Rhs[0])) {
-            // x.(type)
-            // v := x.(type)
             var exprᴛ1 = (~t).Tok;
             var matchᴛ1 = false;
             if (exprᴛ1 == token.ASSIGN) {
-                Ꮡp.error((~t).TokPos, // permit v = x.(type) but complain
- expectedFoundˢ);
+                // permit v = x.(type) but complain
+                Ꮡp.error((~t).TokPos, expectedFoundˢ);
                 fallthrough = true;
             }
             if (fallthrough || !matchᴛ1 && exprᴛ1 == token.DEFINE) { matchᴛ1 = true;
                 return true;
             }
-
         }
         break;
     }}
@@ -2842,8 +2968,10 @@ internal static ast.Stmt parseSwitchStmt(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, switchStmtˢ), ref ᒐ);
         }
+
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = Ꮡp.expect(token.SWITCH);
+
         ast.Stmt s1 = default!;
         ast.Stmt s2 = default!;
         if (p.tok != token.LBRACE) {
@@ -2874,6 +3002,7 @@ internal static ast.Stmt parseSwitchStmt(this ж<parser> Ꮡp) {
             }
             p.exprLev = prevLev;
         }
+
         var typeSwitch = Ꮡp.isTypeSwitchGuard(s2);
         ref var lbrace = ref heap<tokenꓸPos>(out var Ꮡlbrace);
         lbrace = Ꮡp.expect(token.LBRACE);
@@ -2885,9 +3014,11 @@ internal static ast.Stmt parseSwitchStmt(this ж<parser> Ꮡp) {
         rbrace = Ꮡp.expect(token.RBRACE);
         Ꮡp.expectSemi();
         var body = Ꮡ(new ast.BlockStmt(Lbrace: lbrace, List: list, Rbrace: rbrace));
+
         if (typeSwitch) {
             return new ast.TypeSwitchStmtжStmt(Ꮡ(new ast.TypeSwitchStmt(Switch: pos, Init: s1, Assign: s2, Body: body)));
         }
+
         return new ast.SwitchStmtжStmt(Ꮡ(new ast.SwitchStmt(Switch: pos, Init: s1, Tag: Ꮡp.makeExpr(s2, switchExpressionˢ), Body: body)));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -2906,6 +3037,7 @@ internal static ж<ast.CommClause> parseCommClause(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, commClauseˢ), ref ᒐ);
         }
+
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = p.pos;
         ast.Stmt comm = default!;
@@ -2916,8 +3048,8 @@ internal static ж<ast.CommClause> parseCommClause(this ж<parser> Ꮡp) {
                 // SendStmt
                 if (len(lhs) > 1) {
                     Ꮡp.errorExpected(lhs[0].Pos(), expressionˢ2);
+                    // continue with first expression
                 }
-                // continue with first expression
                 ref var arrow = ref heap<tokenꓸPos>(out var Ꮡarrow);
                 arrow = p.pos;
                 p.next();
@@ -2943,8 +3075,8 @@ internal static ж<ast.CommClause> parseCommClause(this ж<parser> Ꮡp) {
                         // lhs must be single receive operation
                         if (len(lhs) > 1) {
                             Ꮡp.errorExpected(lhs[0].Pos(), expressionˢ2);
+                            // continue with first expression
                         }
-                        // continue with first expression
                         comm = new ast.ExprStmtжStmt(Ꮡ(new ast.ExprStmt(X: lhs[0])));
                     }
                 }
@@ -2952,9 +3084,11 @@ internal static ж<ast.CommClause> parseCommClause(this ж<parser> Ꮡp) {
         } else {
             Ꮡp.expect(token.DEFAULT);
         }
+
         ref var colon = ref heap<tokenꓸPos>(out var Ꮡcolon);
         colon = Ꮡp.expect(token.COLON);
         var body = Ꮡp.parseStmtList();
+
         return Ꮡ(new ast.CommClause(Case: pos, Comm: comm, Colon: colon, Body: body));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -2972,6 +3106,7 @@ internal static ж<ast.SelectStmt> parseSelectStmt(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, selectStmtˢ), ref ᒐ);
         }
+
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = Ꮡp.expect(token.SELECT);
         ref var lbrace = ref heap<tokenꓸPos>(out var Ꮡlbrace);
@@ -2984,6 +3119,7 @@ internal static ж<ast.SelectStmt> parseSelectStmt(this ж<parser> Ꮡp) {
         rbrace = Ꮡp.expect(token.RBRACE);
         Ꮡp.expectSemi();
         var body = Ꮡ(new ast.BlockStmt(Lbrace: lbrace, List: list, Rbrace: rbrace));
+
         return Ꮡ(new ast.SelectStmt(Select: pos, Body: body));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -3003,8 +3139,10 @@ internal static ast.Stmt parseForStmt(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, forStmtˢ), ref ᒐ);
         }
+
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = Ꮡp.expect(token.FOR);
+
         ast.Stmt s1 = default!;
         ast.Stmt s2 = default!;
         ast.Stmt s3 = default!;
@@ -3039,8 +3177,10 @@ internal static ast.Stmt parseForStmt(this ж<parser> Ꮡp) {
             }
             p.exprLev = prevLev;
         }
+
         var body = Ꮡp.parseBlockStmt();
         Ꮡp.expectSemi();
+
         if (isRange) {
             var @as = s2._<ж<ast.AssignStmt>>();
             // check lhs
@@ -3048,6 +3188,7 @@ internal static ast.Stmt parseForStmt(this ж<parser> Ꮡp) {
             ast.Expr value = default!;
             switch (len((~@as).Lhs)) {
             case 0: {
+                // nothing to do
                 break;
             }
             case 1: {
@@ -3059,11 +3200,9 @@ internal static ast.Stmt parseForStmt(this ж<parser> Ꮡp) {
                 break;
             }
             default: {
-                Ꮡp.errorExpected((~@as).Lhs[len((~@as).Lhs) - 1].Pos(), // nothing to do
- atMost2Expressionsˢ);
+                Ꮡp.errorExpected((~@as).Lhs[len((~@as).Lhs) - 1].Pos(), atMost2Expressionsˢ);
                 return new ast.BadStmtжStmt(Ꮡ(new ast.BadStmt(From: pos, To: Ꮡp.safePos(body.End()))));
             }}
-
             // parseSimpleStmt returned a right-hand side that
             // is a single unary expression of the form "range x"
             var x = (~@as).Rhs[0]._<ж<ast.UnaryExpr>>().Value.X;
@@ -3078,6 +3217,7 @@ internal static ast.Stmt parseForStmt(this ж<parser> Ꮡp) {
                 Body: body
             )));
         }
+
         // regular for statement
         return new ast.ForStmtжStmt(Ꮡ(new ast.ForStmt(
             For: pos,
@@ -3102,24 +3242,25 @@ internal static ast.Stmt /*s*/ parseStmt(this ж<parser> Ꮡp) {
         ref var p = ref Ꮡp.DerefOrNull();
 
         defer(ᴛ1 => decNestLev(ref ᴛ1.DerefOrNull()), incNestLev(Ꮡp), ref ᒐ);
+
         if (p.trace) {
             defer(un, trace(Ꮡp, statementˢ), ref ᒐ);
         }
+
         var exprᴛ1 = p.tok;
         if (exprᴛ1 == token.CONST || exprᴛ1 == token.TYPE || exprᴛ1 == token.VAR) {
             s = new ast.DeclStmtжStmt(Ꮡ(new ast.DeclStmt(Decl: Ꮡp.parseDecl(stmtStart))));
         }
-        else if (exprᴛ1 == token.IDENT || exprᴛ1 == token.INT || exprᴛ1 == token.FLOAT || exprᴛ1 == token.IMAG || exprᴛ1 == token.CHAR || exprᴛ1 == token.STRING || exprᴛ1 == token.FUNC || exprᴛ1 == token.LPAREN || exprᴛ1 == token.LBRACK || exprᴛ1 == token.STRUCT || exprᴛ1 == token.MAP || exprᴛ1 == token.CHAN || exprᴛ1 == token.INTERFACE || exprᴛ1 == token.ADD || exprᴛ1 == token.SUB || exprᴛ1 == token.MUL || exprᴛ1 == token.AND || exprᴛ1 == token.XOR || exprᴛ1 == token.ARROW || exprᴛ1 == token.NOT) {
+        else if (exprᴛ1 == token.IDENT || exprᴛ1 == token.INT || exprᴛ1 == token.FLOAT || exprᴛ1 == token.IMAG || exprᴛ1 == token.CHAR || exprᴛ1 == token.STRING || exprᴛ1 == token.FUNC || exprᴛ1 == token.LPAREN || exprᴛ1 == token.LBRACK || exprᴛ1 == token.STRUCT || exprᴛ1 == token.MAP || exprᴛ1 == token.CHAN || exprᴛ1 == token.INTERFACE || exprᴛ1 == token.ADD || exprᴛ1 == token.SUB || exprᴛ1 == token.MUL || exprᴛ1 == token.AND || exprᴛ1 == token.XOR || exprᴛ1 == token.ARROW || exprᴛ1 == token.NOT) { // unary operators
+            // tokens that may start an expression
+            // operands
+            // composite types
             (s, _) = Ꮡp.parseSimpleStmt(labelOk);
+            // because of the required look-ahead, labeled statements are
+            // parsed by parseSimpleStmt - don't expect a semicolon after
+            // them
             {
                 var (_, isLabeledStmt) = s._<ж<ast.LabeledStmt>>(ᐧ); if (!isLabeledStmt) {
-                    // tokens that may start an expression
-                    // operands
-                    // composite types
-                    // unary operators
-                    // because of the required look-ahead, labeled statements are
-                    // parsed by parseSimpleStmt - don't expect a semicolon after
-                    // them
                     Ꮡp.expectSemi();
                 }
             }
@@ -3153,25 +3294,24 @@ internal static ast.Stmt /*s*/ parseStmt(this ж<parser> Ꮡp) {
             s = Ꮡp.parseForStmt();
         }
         else if (exprᴛ1 == token.SEMICOLON) {
-            s = new ast.EmptyStmtжStmt(Ꮡ(new ast.EmptyStmt( // Is it ever possible to have an implicit semicolon
- // producing an empty statement in a valid program?
- // (handle correctly anyway)
-Semicolon: p.pos, Implicit: p.lit == "\n"u8)));
+            // Is it ever possible to have an implicit semicolon
+            // producing an empty statement in a valid program?
+            // (handle correctly anyway)
+            s = new ast.EmptyStmtжStmt(Ꮡ(new ast.EmptyStmt(Semicolon: p.pos, Implicit: p.lit == "\n"u8)));
             p.next();
         }
         else if (exprᴛ1 == token.RBRACE) {
-            s = new ast.EmptyStmtжStmt(Ꮡ(new ast.EmptyStmt( // a semicolon may be omitted before a closing "}"
-Semicolon: p.pos, Implicit: true)));
+            // a semicolon may be omitted before a closing "}"
+            s = new ast.EmptyStmtжStmt(Ꮡ(new ast.EmptyStmt(Semicolon: p.pos, Implicit: true)));
         }
         else { /* default: */
+            // no statement found
             ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
             pos = p.pos;
-            Ꮡp.errorExpected(pos, // no statement found
- statementˢ2);
+            Ꮡp.errorExpected(pos, statementˢ2);
             p.advance(stmtStart);
             s = new ast.BadStmtжStmt(Ꮡ(new ast.BadStmt(From: pos, To: p.pos)));
         }
-
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -3195,6 +3335,7 @@ internal static ast.Spec parseImportSpec(this ж<parser> Ꮡp, ж<ast.CommentGro
         if (p.trace) {
             defer(un, trace(Ꮡp, importSpecˢ), ref ᒐ);
         }
+
         ж<ast.Ident> ident = default!;
         var exprᴛ1 = p.tok;
         if (exprᴛ1 == token.IDENT) {
@@ -3220,6 +3361,7 @@ internal static ast.Spec parseImportSpec(this ж<parser> Ꮡp, ж<ast.CommentGro
             p.advance(exprEnd);
         }
         var comment = Ꮡp.expectSemi();
+
         // collect imports
         var spec = Ꮡ(new ast.ImportSpec(
             Doc: Ꮡdoc,
@@ -3228,6 +3370,7 @@ internal static ast.Spec parseImportSpec(this ж<parser> Ꮡp, ж<ast.CommentGro
             Comment: comment
         ));
         p.imports = append(p.imports, spec);
+
         return new ast.ImportSpecжSpec(spec);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -3242,13 +3385,14 @@ internal static ast.Spec parseValueSpec(this ж<parser> Ꮡp, ж<ast.CommentGrou
         if (p.trace) {
             defer(un, trace(Ꮡp, keyword.String() + "Spec"u8), ref ᒐ);
         }
+
         var idents = Ꮡp.parseIdentList();
         ast.Expr typ = default!;
         slice<ast.Expr> values = default!;
         var exprᴛ1 = keyword;
         if (exprᴛ1 == token.CONST) {
+            // always permit optional type and initialization for more tolerant parsing
             if (p.tok != token.EOF && p.tok != token.SEMICOLON && p.tok != token.RPAREN) {
-                // always permit optional type and initialization for more tolerant parsing
                 typ = Ꮡp.tryIdentOrType();
                 if (p.tok == token.ASSIGN) {
                     p.next();
@@ -3268,8 +3412,8 @@ internal static ast.Spec parseValueSpec(this ж<parser> Ꮡp, ж<ast.CommentGrou
         else { /* default: */
             throw panic("unreachable");
         }
-
         var comment = Ꮡp.expectSemi();
+
         var spec = Ꮡ(new ast.ValueSpec(
             Doc: Ꮡdoc,
             Names: idents,
@@ -3295,6 +3439,7 @@ internal static void parseGenericType(this ж<parser> Ꮡp, ж<ast.TypeSpec> Ꮡ
         if (p.trace) {
             defer(un, trace(Ꮡp, parseGenericTypeˢ), ref ᒐ);
         }
+
         var list = Ꮡp.parseParameterList(Ꮡname0, typ0, token.RBRACK);
         ref var closePos = ref heap<tokenꓸPos>(out var ᏑclosePos);
         closePos = Ꮡp.expect(token.RBRACK);
@@ -3323,8 +3468,10 @@ internal static ast.Spec parseTypeSpec(this ж<parser> Ꮡp, ж<ast.CommentGroup
         if (p.trace) {
             defer(un, trace(Ꮡp, typeSpecˢ), ref ᒐ);
         }
+
         var name = Ꮡp.parseIdent();
         var spec = Ꮡ(new ast.TypeSpec(Doc: Ꮡdoc, Name: name));
+
         if (p.tok == token.LBRACK){
             // spec.Name "[" ...
             // array/slice type or type parameter list
@@ -3388,7 +3535,9 @@ internal static ast.Spec parseTypeSpec(this ж<parser> Ꮡp, ж<ast.CommentGroup
             }
             spec.Value.Type = Ꮡp.parseType();
         }
+
         spec.Value.Comment = Ꮡp.expectSemi();
+
         return new ast.TypeSpecжSpec(spec);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -3439,7 +3588,6 @@ internal static (ж<ast.Ident>, ast.Expr) extractName(ast.Expr x, bool force) {
                 }
             }
         }
-
         break;
     }
     case ж<ast.CallExpr> xΔ1: {
@@ -3495,6 +3643,7 @@ internal static ж<ast.GenDecl> parseGenDecl(this ж<parser> Ꮡp, token.Token k
         if (p.trace) {
             defer(un, trace(Ꮡp, "GenDecl("u8 + keyword.String() + ")"u8), ref ᒐ);
         }
+
         var doc = p.leadComment;
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = Ꮡp.expect(keyword);
@@ -3512,6 +3661,7 @@ internal static ж<ast.GenDecl> parseGenDecl(this ж<parser> Ꮡp, token.Token k
         } else {
             list = append(list, f(nil, keyword, 0));
         }
+
         return Ꮡ(new ast.GenDecl(
             Doc: doc,
             TokPos: pos,
@@ -3538,14 +3688,18 @@ internal static ж<ast.FuncDecl> parseFuncDecl(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, functionDeclˢ), ref ᒐ);
         }
+
         var doc = p.leadComment;
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
         pos = Ꮡp.expect(token.FUNC);
+
         ж<ast.FieldList> recv = default!;
         if (p.tok == token.LPAREN) {
             (_, recv) = Ꮡp.parseParameters(false);
         }
+
         var ident = Ꮡp.parseIdent();
+
         var (tparams, @params) = Ꮡp.parseParameters(true);
         if (recv != nil && tparams != nil) {
             // Method declarations do not have type parameters. We parse them for a
@@ -3554,6 +3708,7 @@ internal static ж<ast.FuncDecl> parseFuncDecl(this ж<parser> Ꮡp) {
             tparams = default!;
         }
         var results = Ꮡp.parseResult();
+
         ж<ast.BlockStmt> body = default!;
         var exprᴛ1 = p.tok;
         if (exprᴛ1 == token.LBRACE) {
@@ -3603,6 +3758,7 @@ internal static ast.Decl parseDecl(this ж<parser> Ꮡp, map<token.Token, bool> 
         if (p.trace) {
             defer(un, trace(Ꮡp, declarationˢ), ref ᒐ);
         }
+
         Func<ж<ast.CommentGroup>, token.Token, nint, ast.Spec> f = default!;
         var exprᴛ1 = p.tok;
         if (exprᴛ1 == token.IMPORT) {
@@ -3646,11 +3802,13 @@ internal static ж<ast.File> parseFile(this ж<parser> Ꮡp) {
         if (p.trace) {
             defer(un, trace(Ꮡp, fileˢ), ref ᒐ);
         }
+
         // Don't bother parsing the rest if we had errors scanning the first token.
         // Likely not a Go source file at all.
         if (p.errors.Len() != 0) {
             return default!;
         }
+
         // package clause
         var doc = p.leadComment;
         ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
@@ -3662,17 +3820,20 @@ internal static ж<ast.File> parseFile(this ж<parser> Ꮡp) {
             Ꮡp.error(p.pos, invalidPackageNameˢ);
         }
         Ꮡp.expectSemi();
+
         // Don't bother parsing the rest if we had errors parsing the package clause.
         // Likely not a Go source file at all.
         if (p.errors.Len() != 0) {
             return default!;
         }
+
         slice<ast.Decl> decls = default!;
         if ((Mode)(p.mode & PackageClauseOnly) == 0) {
             // import decls
             while (p.tok == token.IMPORT) {
                 decls = append(decls, (ast.Decl)(new ast.GenDeclжDecl(Ꮡp.parseGenDecl(token.IMPORT, new Func<ж<ast.CommentGroup>, token.Token, nint, ast.Spec>(Ꮡp.parseImportSpec)))));
             }
+
             if ((Mode)(p.mode & ImportsOnly) == 0) {
                 // rest of package body
                 token.Token prev = token.IMPORT;
@@ -3682,16 +3843,18 @@ internal static ж<ast.File> parseFile(this ж<parser> Ꮡp) {
                         Ꮡp.error(p.pos, importsMustAppearBeforeˢ);
                     }
                     prev = p.tok;
+
                     decls = append(decls, Ꮡp.parseDecl(declStart));
                 }
             }
         }
+
         var f = Ꮡ(new ast.File(
             Doc: doc,
             Package: pos,
             Name: ident,
-            Decls: decls, // File{Start,End} are set by the defer in the caller.
-
+            Decls: decls,
+            // File{Start,End} are set by the defer in the caller.
             Imports: p.imports,
             Comments: p.comments,
             GoVersion: p.goVersion
@@ -3703,6 +3866,7 @@ internal static ж<ast.File> parseFile(this ж<parser> Ꮡp) {
         if ((Mode)(p.mode & SkipObjectResolution) == 0) {
             resolveFile(ref (f).DerefOrNull(), p.@file, declErr);
         }
+
         return f;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -3732,7 +3896,6 @@ internal static ast.Expr packIndexExpr(ast.Expr x, tokenꓸPos lbrack, slice<ast
             Rbrack: rbrack
         )));
     }}
-
 }
 
 } // end parser_package

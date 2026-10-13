@@ -44,21 +44,24 @@ public static ж<CoverageMetaFileWriter> NewCoverageMetaFileWriter(@string mfnam
 
 public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<byte> finalHash, slice<slice<byte>> blobs, coverage.CounterMode mode, coverage.CounterGranularity granularity) {
     finalHash = finalHash.Clone();
-
     ref var m = ref Ꮡm.DerefOrNull();
+
     var mhsz = (uint64)/* unsafe.Sizeof(coverage.MetaFileHeader{}) */ (uintptr)56;
     var stSize = m.stab.Size();
     var stOffset = mhsz + (uint64)(16 * len(blobs));
     var preambleLength = stOffset + (uint64)stSize;
+
     if (m.debug) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= sizeof(MetaFileHeader)=%d\n"u8, mhsz);
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= preambleLength=%d stSize=%d\n"u8, preambleLength, stSize);
     }
+
     // Compute total size
     var tlen = preambleLength;
     for (nint i = 0; i < len(blobs); i++) {
         tlen += (uint64)len(blobs[i]);
     }
+
     // Emit header
     var mh = new coverage.MetaFileHeader(
         Magic: coverage.CovMetaMagic.Clone(),
@@ -77,9 +80,11 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
             return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);
         }
     }
+
     if (m.debug) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= len(blobs) is %d\n"u8, mh.Entries);
     }
+
     // Emit package offsets section followed by package lengths section.
     var off = preambleLength;
     var off2 = mhsz;
@@ -110,12 +115,14 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
         }
         off2 += 8;
     }
+
     // Emit string table
     {
         err = Ꮡm.of(CoverageMetaFileWriter.Ꮡstab).Write(new bufio_WriterжWriter(m.w)); if (err != default!) {
             return err;
         }
     }
+
     // Now emit blobs themselves.
     foreach (var (k, blob) in blobs) {
         if (m.debug) {
@@ -134,6 +141,7 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
         }
         off2 += (uint64)len(blob);
     }
+
     // Flush writer, and we're done.
     {
         err = m.w.Flush(); if (err != default!) {

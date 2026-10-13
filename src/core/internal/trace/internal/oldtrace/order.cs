@@ -23,6 +23,7 @@ internal static gStatus gDead => /* iota */ 0;
 internal static gStatus gRunnable => 1;
 internal static gStatus gRunning => 2;
 internal static gStatus gWaiting => 3;
+
 internal const uint64 unordered = /* ^uint64(0) */ 18446744073709551615;
 internal const uint64 garbage = /* ^uint64(0) - 1 */ 18446744073709551614;
 internal const uint64 noseq = /* ^uint64(0) */ 18446744073709551615;
@@ -56,14 +57,14 @@ internal static (uint64 g, gState init, gState next) stateTransition(ref Event e
         return (g, init, next);
     }
     if (exprᴛ1 == EvGoStartLocal) {
+        // noseq means that this event is ready for merging as soon as
+        // frontier reaches it (EvGoStartLocal is emitted on the same P
+        // as the corresponding EvGoCreate/EvGoUnblock, and thus the latter
+        // is already merged).
+        // seqinc is a stub for cases when event increments g sequence,
+        // but since we don't know current seq we also don't know next seq.
         g = ev.G;
-        init = new gState( // noseq means that this event is ready for merging as soon as
- // frontier reaches it (EvGoStartLocal is emitted on the same P
- // as the corresponding EvGoCreate/EvGoUnblock, and thus the latter
- // is already merged).
- // seqinc is a stub for cases when event increments g sequence,
- // but since we don't know current seq we also don't know next seq.
-noseq, gRunnable);
+        init = new gState(noseq, gRunnable);
         next = new gState(seqinc, gRunning);
         return (g, init, next);
     }
@@ -98,13 +99,12 @@ noseq, gRunnable);
         return (g, init, next);
     }
     { /* default: */
+        // no ordering requirements
         g = unordered;
         return (g, init, next);
     }
-
 }
 
-// no ordering requirements
 internal static bool transitionReady(uint64 g, gState curr, gState init) {
     return g == unordered || (init.seq == noseq || init.seq == curr.seq) && init.status == curr.status;
 }
@@ -131,7 +131,6 @@ internal static error transition(map<uint64, gState> gs, uint64 g, gState init, 
         next.seq = curr.seq + 1;
         break;
     }}
-
     gs[g] = next;
     return default!;
 }
@@ -144,8 +143,8 @@ internal static bool Less(this ref orderEventList l, nint i, nint j) {
 
 internal static void Push(this ж<orderEventList> Ꮡh, orderEvent x) {
     x = x.ΔClone();
-
     ref var h = ref Ꮡh.DerefOrNull();
+
     h = builtin.append(h, x.ΔClone());
     heapUp(Ꮡh, len(h) - 1);
 }
@@ -180,8 +179,7 @@ internal static bool heapDown(ж<orderEventList> Ꮡh, nint i0, nint n) {
     nint i = i0;
     while (ᐧ) {
         nint j1 = 2 * i + 1;
-        if (j1 >= n || j1 < 0) {
-            // j1 < 0 after int overflow
+        if (j1 >= n || j1 < 0) { // j1 < 0 after int overflow
             break;
         }
         nint j = j1; // left child

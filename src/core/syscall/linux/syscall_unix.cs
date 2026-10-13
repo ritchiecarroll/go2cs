@@ -53,13 +53,16 @@ internal static (slice<byte> data, error err) Mmap(this ж<mmapper> Ꮡm, nint f
         if (length <= 0) {
             (data, err) = (default!, EINVAL); goto ᒐdone;
         }
+
         // Map the requested memory.
         var (addr, errno) = m.mmap(0, (uintptr)length, prot, flags, fd, offset);
         if (errno != default!) {
             (data, err) = (default!, errno); goto ᒐdone;
         }
+
         // Use unsafe to turn addr into a []byte.
         var b = @unsafe.Slice((ж<byte>)(uintptr)((@unsafe.Pointer)addr), length);
+
         // Register mapping in m and return it.
         var p = Ꮡ(b, cap(b) - 1);
         Ꮡm.of(mmapper.ᏑMutex).Lock();
@@ -81,6 +84,7 @@ internal static error /*err*/ Munmap(this ж<mmapper> Ꮡm, slice<byte> data) {
         if (len(data) == 0 || len(data) != cap(data)) {
             err = EINVAL; goto ᒐdone;
         }
+
         // Find the base of the mapping.
         var p = Ꮡ(data, cap(data) - 1);
         Ꮡm.of(mmapper.ᏑMutex).Lock();
@@ -89,6 +93,7 @@ internal static error /*err*/ Munmap(this ж<mmapper> Ꮡm, slice<byte> data) {
         if (b == default! || Ꮡ(b, 0) != Ꮡ(data, 0)) {
             err = EINVAL; goto ᒐdone;
         }
+
         // Unmap the memory and update m.
         {
             var errno = m.munmap((uintptr)Ꮡ(b, 0), (uintptr)len(b)); if (errno != default!) {
@@ -103,6 +108,20 @@ internal static error /*err*/ Munmap(this ж<mmapper> Ꮡm, slice<byte> data) {
     ᒐdone: return err;
 }
 
+// An Errno is an unsigned number describing an error condition.
+// It implements the error interface. The zero Errno is by convention
+// a non-error, so code to convert from Errno to error should use:
+//
+//	err = nil
+//	if errno != 0 {
+//		err = errno
+//	}
+//
+// Errno values can be tested against error values using [errors.Is].
+// For example:
+//
+//	_, _, err := syscall.Syscall(...)
+//	if errors.Is(err, fs.ErrNotExist) ...
 partial struct Errno /*num:uintptr*/;
 
 public static @string Error(this Errno e) {
@@ -129,7 +148,6 @@ public static bool Is(this Errno e, error target) {
     if (AreEqual(exprᴛ1, errorspkg.ErrUnsupported)) {
         return e == ENOSYS || e == ENOTSUP || e == EOPNOTSUPP;
     }
-
     return false;
 }
 
@@ -144,9 +162,7 @@ public static bool Timeout(this Errno e) {
 // Do the interface allocations only once for common
 // Errno values.
 internal static error errEAGAIN = ((Errno)EAGAIN);
-
 internal static error errEINVAL = ((Errno)EINVAL);
-
 internal static error errENOENT = ((Errno)ENOENT);
 
 // errnoErr returns common boxed Errno values, to prevent
@@ -165,10 +181,11 @@ internal static error errnoErr(Errno e) {
     if (exprᴛ1 == ENOENT) {
         return errENOENT;
     }
-
     return e;
 }
 
+// A Signal is a number describing a process signal.
+// It implements the [os.Signal] interface.
 partial struct ΔSignal /*num:nint*/;
 
 public static void Signal(this ΔSignal s) {
@@ -500,8 +517,6 @@ public static error /*err*/ SetsockoptString(nint fd, nint level, nint opt, @str
 }
 
 public static error /*err*/ SetsockoptTimeval(nint fd, nint level, nint opt, ж<Timeval> Ꮡtv) {
-    ref var tv = ref Ꮡtv.DerefOrNull();
-
     return setsockopt(fd, level, opt, @unsafe.Pointer.FromPinnedBox(Ꮡtv), /* unsafe.Sizeof(*tv) */ (uintptr)16);
 }
 

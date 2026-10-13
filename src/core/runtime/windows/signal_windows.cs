@@ -14,11 +14,13 @@ partial class runtime_package {
 internal static UntypedInt _SEM_FAILCRITICALERRORS => 0x0001;
 internal static UntypedInt _SEM_NOGPFAULTERRORBOX => 0x0002;
 internal static UntypedInt _SEM_NOOPENFILEERRORBOX => 0x8000;
+
 internal static UntypedInt _WER_FAULT_REPORTING_NO_UI => 0x0020;
 
 internal static void preventErrorDialogs() {
     var errormode = stdcall0(_GetErrorMode);
     stdcall1(_SetErrorMode, (uintptr)((uintptr)((uintptr)(errormode | (uintptr)_SEM_FAILCRITICALERRORS) | (uintptr)_SEM_NOGPFAULTERRORBOX) | (uintptr)_SEM_NOOPENFILEERRORBOX));
+
     // Disable WER fault reporting UI.
     // Do this even if WER is disabled as a whole,
     // as WER might be enabled later with setTraceback("wer")
@@ -86,6 +88,7 @@ internal static bool isgoexception(ref exceptionrecord info, ж<context> Ꮡr) {
     if (r.ip() < firstmoduledata.text || firstmoduledata.etext < r.ip()) {
         return false;
     }
+
     // Go will only handle some exceptions.
     var exprᴛ1 = info.exceptioncode;
     if (exprᴛ1 == _EXCEPTION_ACCESS_VIOLATION) {
@@ -108,13 +111,11 @@ internal static bool isgoexception(ref exceptionrecord info, ж<context> Ꮡr) {
     }
     else if (exprᴛ1 == _EXCEPTION_BREAKPOINT) {
     }
-    else if (exprᴛ1 == _EXCEPTION_ILLEGAL_INSTRUCTION) {
+    else if (exprᴛ1 == _EXCEPTION_ILLEGAL_INSTRUCTION) { // breakpoint arrives this way on arm64
     }
     else { /* default: */
         return false;
     }
-
-    // breakpoint arrives this way on arm64
     return true;
 }
 
@@ -154,6 +155,7 @@ internal static int32 sigtrampgo(ж<exceptionpointers> Ꮡep, nint kind) {
     if (gp == nil) {
         return _EXCEPTION_CONTINUE_SEARCH;
     }
+
     Func<ж<exceptionrecord>, ж<context>, ж<g>, int32> fn = default!;
     var exprᴛ1 = kind;
     if (exprᴛ1 == callbackVEH) {
@@ -196,6 +198,7 @@ internal static int32 sigtrampgo(ж<exceptionpointers> Ꮡep, nint kind) {
     if (ret == _EXCEPTION_CONTINUE_SEARCH) {
         return ret;
     }
+
     // Check if we need to set up the control flow guard workaround.
     // On Windows, the stack pointer in the context must lie within
     // system stack limits when we resume from exception.
@@ -233,6 +236,7 @@ internal static int32 exceptionhandler(ж<exceptionrecord> Ꮡinfo, ж<context> 
     if (!isgoexception(ref (Ꮡinfo).DerefOrNull(), Ꮡr)) {
         return _EXCEPTION_CONTINUE_SEARCH;
     }
+
     if (gp.throwsplit || isAbort(Ꮡr)) {
         // We can't safely sigpanic because it may grow the stack.
         // Or this is a call to abort.
@@ -240,7 +244,9 @@ internal static int32 exceptionhandler(ж<exceptionrecord> Ꮡinfo, ж<context> 
         // Crash now.
         winthrow(Ꮡinfo, Ꮡr, Ꮡgp);
     }
+
     // After this point, it is safe to grow the stack.
+
     // Make it look like a call to the signal func.
     // Have to pass arguments out of band since
     // augmenting the stack frame would break
@@ -249,6 +255,7 @@ internal static int32 exceptionhandler(ж<exceptionrecord> Ꮡinfo, ж<context> 
     gp.sigcode0 = info.exceptioninformation[0];
     gp.sigcode1 = info.exceptioninformation[1];
     gp.sigpc = r.ip();
+
     // Only push runtime·sigpanic if r.ip() != 0.
     // If r.ip() == 0, probably panicked because of a
     // call to a nil func. Not pushing that onto sp will
@@ -349,6 +356,7 @@ internal static int32 lastcontinuehandler(ж<exceptionrecord> Ꮡinfo, ж<contex
         // should not take responsibility of crashing the process.
         return _EXCEPTION_CONTINUE_SEARCH;
     }
+
     // VEH is called before SEH, but arm64 MSVC DLLs use SEH to trap
     // illegal instructions during runtime initialization to determine
     // CPU features, so if we make it to the last handler and we're
@@ -358,6 +366,7 @@ internal static int32 lastcontinuehandler(ж<exceptionrecord> Ꮡinfo, ж<contex
     if (GOARCH == "arm64"u8 && info.exceptioncode == _EXCEPTION_ILLEGAL_INSTRUCTION && (r.ip() < firstmoduledata.text || firstmoduledata.etext < r.ip())) {
         return _EXCEPTION_CONTINUE_SEARCH;
     }
+
     winthrow(Ꮡinfo, Ꮡr, Ꮡgp);
     return 0; // not reached
 }
@@ -371,18 +380,21 @@ internal static void winthrow(ж<exceptionrecord> Ꮡinfo, ж<context> Ꮡr, ж<
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     var g0 = getg();
-    if (Ꮡpanicking.Load() != 0) {
-        // traceback already printed
+
+    if (Ꮡpanicking.Load() != 0) { // traceback already printed
         exit(2);
     }
     Ꮡpanicking.Store(1);
+
     // In case we're handling a g0 stack overflow, blow away the
     // g0 stack bounds so we have room to print the traceback. If
     // this somehow overflows the stack, the OS will trap it.
     g0.Value.stack.lo = 0;
     g0.Value.stackguard0 = (~g0).stack.lo + (uintptr)stackGuard;
     g0.Value.stackguard1 = g0.Value.stackguard0;
+
     print((@string)"Exception "u8, ((Δhex)(uint64)info.exceptioncode), (@string)" "u8, ((Δhex)(uint64)info.exceptioninformation[0]), (@string)" "u8, ((Δhex)(uint64)info.exceptioninformation[1]), (@string)" "u8, ((Δhex)(uint64)r.ip()), (@string)"\n"u8);
+
     print((@string)"PC="u8, ((Δhex)(uint64)r.ip()), (@string)"\n"u8);
     if ((~(~g0).m).incgo && Ꮡgp == (~(~g0).m).g0 && (~(~g0).m).curg != nil) {
         if (iscgo) {
@@ -391,17 +403,21 @@ internal static void winthrow(ж<exceptionrecord> Ꮡinfo, ж<context> Ꮡr, ж<
         Ꮡgp = g0.Value.m.Value.curg; gp = ref Ꮡgp.DerefOrNull();
     }
     print((@string)"\n"u8);
+
     g0.Value.m.Value.throwing = throwTypeRuntime;
     (~g0).m.of(m.Ꮡcaughtsig).set(Ꮡgp);
+
     var (level, _, docrash) = gotraceback();
     if (level > 0) {
         tracebacktrap(r.ip(), r.sp(), r.lr(), Ꮡgp);
         tracebackothers(Ꮡgp);
         dumpregs(ref (Ꮡr).DerefOrNull());
     }
+
     if (docrash) {
         dieFromException(Ꮡinfo, Ꮡr);
     }
+
     exit(2);
 }
 
@@ -414,6 +430,7 @@ internal static void sigpanic() {
     if (!canpanic()) {
         @throw(unexpectedSignalDuringˢ);
     }
+
     var exprᴛ1 = (~gp).sig;
     if (exprᴛ1 == _EXCEPTION_ACCESS_VIOLATION || exprᴛ1 == _EXCEPTION_IN_PAGE_ERROR) {
         if ((~gp).sigcode1 < 0x1000) {
@@ -441,7 +458,6 @@ internal static void sigpanic() {
     else if (exprᴛ1 == _EXCEPTION_FLT_DENORMAL_OPERAND || exprᴛ1 == _EXCEPTION_FLT_DIVIDE_BY_ZERO || exprᴛ1 == _EXCEPTION_FLT_INEXACT_RESULT || exprᴛ1 == _EXCEPTION_FLT_OVERFLOW || exprᴛ1 == _EXCEPTION_FLT_UNDERFLOW) {
         panicfloat();
     }
-
     @throw(faultˢ);
 }
 

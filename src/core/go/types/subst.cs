@@ -57,9 +57,11 @@ internal static ΔType lookup(this substMap m, ж<TypeParam> Ꮡtpar) {
 // One of expanding or ctxt must be non-nil.
 internal static ΔType subst(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔType typ, substMap smap, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) {
     assert(Ꮡexpanding != nil || Ꮡctxt != nil);
+
     if (smap.empty()) {
         return typ;
     }
+
     // common cases
     switch (typ.type()) {
     case ж<Basic> t: {
@@ -68,6 +70,7 @@ internal static ΔType subst(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔType 
     case ж<TypeParam> t: {
         return smap.lookup(t);
     }}
+
     // general case
     ref var subst = ref heap<subster>(out var Ꮡsubst);
     subst = new subster(
@@ -93,32 +96,34 @@ internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
 
     switch (typ.type()) {
     case null: {
+        // Call typOrNil if it's possible that typ is nil.
         throw panic("nil typ");
         break;
     }
     case ж<Basic> t: {
+        // nothing to do
         break;
     }
     case ж<Alias> t: {
+        // This code follows the code for *Named types closely.
+        // TODO(gri) try to factor better
         var orig = t.Origin();
         nint n = orig.TypeParams().Len();
         if (n == 0) {
-            // Call typOrNil if it's possible that typ is nil.
-            // nothing to do
-            // This code follows the code for *Named types closely.
-            // TODO(gri) try to factor better
             return new AliasжΔType(t); // type is not parameterized
         }
+
+        // TODO(gri) do we need this for Alias types?
         if (t.TypeArgs().Len() != n) {
-            // TODO(gri) do we need this for Alias types?
             return new BasicжΔType(Typ[Invalid]); // error reported elsewhere
         }
+
+        // already instantiated
+        // For each (existing) type argument determine if it needs
+        // to be substituted; i.e., if it is or contains a type parameter
+        // that has a type argument for it.
         {
-            var targs = substList<ΔType>(t.TypeArgs().list(), // already instantiated
- // For each (existing) type argument determine if it needs
- // to be substituted; i.e., if it is or contains a type parameter
- // that has a type argument for it.
- Ꮡsubst.typ); if (targs != default!) {
+            var targs = substList<ΔType>(t.TypeArgs().list(), Ꮡsubst.typ); if (targs != default!) {
                 return new AliasжΔType(subst.check.newAliasInstance(subst.pos, (~t).orig, targs, subst.expanding, subst.ctxt));
             }
         }
@@ -159,28 +164,29 @@ internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
         return new TupleжΔType(Ꮡsubst.tuple(t));
     }
     case ж<ΔSignature> t: {
+        // Preserve the receiver: it is handled during *Interface and *Named type
+        // substitution.
+        //
+        // Naively doing the substitution here can lead to an infinite recursion in
+        // the case where the receiver is an interface. For example, consider the
+        // following declaration:
+        //
+        //  type T[A any] struct { f interface{ m() } }
+        //
+        // In this case, the type of f is an interface that is itself the receiver
+        // type of all of its methods. Because we have no type name to break
+        // cycles, substituting in the recv results in an infinite loop of
+        // recv->interface->recv->interface->...
         var recv = t.Value.recv;
+
         var @params = Ꮡsubst.tuple((~t).@params);
         var results = Ꮡsubst.tuple((~t).results);
         if (@params != (~t).@params || results != (~t).results) {
-            // Preserve the receiver: it is handled during *Interface and *Named type
-            // substitution.
-            //
-            // Naively doing the substitution here can lead to an infinite recursion in
-            // the case where the receiver is an interface. For example, consider the
-            // following declaration:
-            //
-            //  type T[A any] struct { f interface{ m() } }
-            //
-            // In this case, the type of f is an interface that is itself the receiver
-            // type of all of its methods. Because we have no type name to break
-            // cycles, substituting in the recv results in an infinite loop of
-            // recv->interface->recv->interface->...
             return new ΔSignatureжΔType(Ꮡ(new ΔSignature(
-                rparams: (~t).rparams, // TODO(gri) why can't we nil out tparams here, rather than in instantiate?
-
-                tparams: (~t).tparams, // instantiated signatures have a nil scope
-
+                rparams: (~t).rparams,
+                // TODO(gri) why can't we nil out tparams here, rather than in instantiate?
+                tparams: (~t).tparams,
+                // instantiated signatures have a nil scope
                 recv: recv,
                 @params: @params,
                 results: results,
@@ -230,9 +236,9 @@ internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
             // need to create new interface methods to hold the instantiated
             // receiver. This is handled by Named.expandUnderlying.
             (iface.Value.methods, _) = replaceRecvType(methods, new InterfaceжΔType(t), new InterfaceжΔType(iface));
+
             // If check != nil, check.newInterface will have saved the interface for later completion.
-            if (subst.check == nil) {
-                // golang/go#61561: all newly created interfaces must be completed
+            if (subst.check == nil) { // golang/go#61561: all newly created interfaces must be completed
                 iface.typeSet();
             }
             return new InterfaceжΔType(iface);
@@ -255,25 +261,27 @@ internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
         break;
     }
     case ж<Named> t: {
+        // subst is called during expansion, so in this function we need to be
+        // careful not to call any methods that would cause t to be expanded: doing
+        // so would result in deadlock.
+        //
+        // So we call t.Origin().TypeParams() rather than t.TypeParams().
         var orig = t.Origin();
         nint n = orig.TypeParams().Len();
         if (n == 0) {
-            // subst is called during expansion, so in this function we need to be
-            // careful not to call any methods that would cause t to be expanded: doing
-            // so would result in deadlock.
-            //
-            // So we call t.Origin().TypeParams() rather than t.TypeParams().
             return new NamedжΔType(t); // type is not parameterized
         }
+
         if (t.TypeArgs().Len() != n) {
             return new BasicжΔType(Typ[Invalid]); // error reported elsewhere
         }
+
+        // already instantiated
+        // For each (existing) type argument determine if it needs
+        // to be substituted; i.e., if it is or contains a type parameter
+        // that has a type argument for it.
         {
-            var targs = substList<ΔType>(t.TypeArgs().list(), // already instantiated
- // For each (existing) type argument determine if it needs
- // to be substituted; i.e., if it is or contains a type parameter
- // that has a type argument for it.
- Ꮡsubst.typ); if (targs != default!) {
+            var targs = substList<ΔType>(t.TypeArgs().list(), Ꮡsubst.typ); if (targs != default!) {
                 // Create a new instance and populate the context to avoid endless
                 // recursion. The position used here is irrelevant because validation only
                 // occurs on t (we don't call validType on named), but we use subst.pos to
@@ -291,6 +299,7 @@ internal static ΔType typ(this ж<subster> Ꮡsubst, ΔType typ) {
         throw panic("unreachable");
         break;
     }}
+
     return typ;
 }
 

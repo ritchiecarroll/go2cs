@@ -40,12 +40,13 @@ public static slice<byte> GHASH(/*[16]*/ ж<array<byte>> Ꮡkey, params Span<sli
 // Each input is zero-padded to 128-bit before being absorbed.
 internal static void ghash(/*[16]*/ ж<array<byte>> Ꮡout, /*[16]*/ ж<array<byte>> ᏑH, params Span<slice<byte>> inputsʗp) {
     var inputs = inputsʗp.sslice();
-
     ref var @out = ref Ꮡout.DerefOrNull();
     ref var H = ref ᏑH.DerefOrNull();
+
     // productTable contains the first sixteen powers of the key, H.
     // However, they are in bit reversed order.
     array<gcmFieldElement> productTable = new(16);
+
     // We precompute 16 multiples of H. However, when we do lookups
     // into this table we'll be using bits from a field element and
     // therefore the bits will be in the reverse order. So normally one
@@ -56,14 +57,17 @@ internal static void ghash(/*[16]*/ ж<array<byte>> Ꮡout, /*[16]*/ ж<array<by
         byteorder.BEUint64(H[8..])
     );
     productTable[reverseBits(1)] = x;
+
     for (nint i = 2; i < 16; i += 2) {
         productTable[reverseBits(i)] = ghashDouble(ref productTable[reverseBits(i / 2)]);
         productTable[reverseBits(i + 1)] = ghashAdd(ref productTable[reverseBits(i)], ref x);
     }
+
     gcmFieldElement y = default!;
     foreach (var (_, input) in inputs) {
         ghashUpdate(ref productTable, ref y, input);
     }
+
     byteorder.BEPutUint64(@out[..], y.low);
     byteorder.BEPutUint64(@out[8..], y.high);
 }
@@ -86,10 +90,12 @@ internal static gcmFieldElement /*double*/ ghashDouble(ref gcmFieldElement x) {
     gcmFieldElement @double = default!;
 
     var msbSet = (uint64)(x.high & 1) == 1;
+
     // Because of the bit-ordering, doubling is actually a right shift.
     @double.high = (x.high >> (int)(1));
     @double.high |= (uint64)((x.low << (int)(63)));
     @double.low = (x.low >> (int)(1));
+
     // If the most-significant bit was set before shifting then it,
     // conceptually, becomes a term of x^128. This is greater than the
     // irreducible polynomial so the result has to be reduced. The
@@ -100,6 +106,7 @@ internal static gcmFieldElement /*double*/ ghashDouble(ref gcmFieldElement x) {
     if (msbSet) {
         @double.low ^= (uint64)(0xe100000000000000UL);
     }
+
     return @double;
 }
 
@@ -111,11 +118,13 @@ internal static slice<uint16> ghashReductionTable = new uint16[]{
 // ghashMul sets y to y*H, where H is the GCM key, fixed during New.
 internal static void ghashMul(ref array<gcmFieldElement> productTable, ref gcmFieldElement y) {
     gcmFieldElement z = default!;
+
     for (nint i = 0; i < 2; i++) {
         var word = y.high;
         if (i == 1) {
             word = y.low;
         }
+
         // Multiplication works by multiplying z by 16 and adding in
         // one of the precomputed multiples of H.
         for (nint j = 0; j < 64; j += 4) {
@@ -124,14 +133,17 @@ internal static void ghashMul(ref array<gcmFieldElement> productTable, ref gcmFi
             z.high |= (uint64)((z.low << (int)(60)));
             z.low >>= (int)(4);
             z.low ^= (uint64)(((uint64)ghashReductionTable[msw] << (int)(48)));
+
             // the values in |table| are ordered for little-endian bit
             // positions. See the comment in New.
             var t = productTable[(uint64)(word & 0xf)];
+
             z.low ^= (uint64)(t.low);
             z.high ^= (uint64)(t.high);
             word >>= (int)(4);
         }
     }
+
     y = z;
 }
 
@@ -151,6 +163,7 @@ internal static void updateBlocks(ref array<gcmFieldElement> productTable, ref g
 internal static void ghashUpdate(ref array<gcmFieldElement> productTable, ref gcmFieldElement y, slice<byte> data) {
     nint fullBlocks = (((len(data) >> (int)(4))) << (int)(4));
     updateBlocks(ref productTable, ref y, data.slice(0, fullBlocks));
+
     if (len(data) != fullBlocks) {
         array<byte> partialBlock = new(16); /* gcmBlockSize */
         copy(partialBlock[..], data.slice(fullBlocks));

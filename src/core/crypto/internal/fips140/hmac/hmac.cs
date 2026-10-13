@@ -61,6 +61,7 @@ public static slice<byte> Sum(this ref HMAC h, slice<byte> @in) {
 
     nint origLen = len(@in);
     @in = h.inner.Sum(@in);
+
     if (h.marshaled){
         {
             var err = h.outer._<marshalable>().UnmarshalBinary(h.opad); if (err != default!) {
@@ -96,8 +97,10 @@ public static void Reset(this ref HMAC h) {
         }
         return;
     }
+
     h.inner.Reset();
     h.inner.Write(h.ipad);
+
     // If the underlying hash is marshalable, we can save some time by saving a
     // copy of the hash state now, and restoring it on future calls to Reset and
     // Sum instead of writing ipad/opad every time.
@@ -119,16 +122,19 @@ public static void Reset(this ref HMAC h) {
     if (!outerOK) {
         return;
     }
+
     var (imarshal, err) = marshalableInner.MarshalBinary();
     if (err != default!) {
         return;
     }
+
     h.outer.Reset();
     h.outer.Write(h.opad);
     (var omarshal, err) = marshalableOuter.MarshalBinary();
     if (err != default!) {
         return;
     }
+
     // Marshaling succeeded; save the marshaled state for later
     h.ipad = imarshal;
     h.opad = omarshal;
@@ -178,6 +184,7 @@ public static ж<HMAC> New<H>(Func<H> h, slice<byte> key)
         hm.Value.opad[i] ^= (byte)(0x5c);
     }
     (~hm).inner.Write((~hm).ipad);
+
     return hm;
 }
 

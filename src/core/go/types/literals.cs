@@ -49,7 +49,6 @@ internal static void langCompat(this ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡl
 }
 
 internal static void basicLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.BasicLit> Ꮡe) {
-    ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -72,7 +71,6 @@ internal static void basicLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
             return;
         }
     }
-
     x.setConst(e.Kind, e.Value);
     if (x.mode == invalid) {
         // The parser already establishes syntactic correctness.
@@ -146,13 +144,14 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
     ΔType typ = default!;
     ΔType @base = default!;
     bool isElem = default!;    // true if composite literal is an element of an enclosing composite literal
+
     switch (ᐧ) {
     case {} when e.Type != default!: {
+        // composite literal type present - use it
+        // [...]T array types may only appear with composite literals.
+        // Check for them here so we don't have to handle ... in general.
         {
             var (atyp, _) = e.Type._<ж<ast.ArrayType>>(ᐧ); if (atyp != nil && isdddArray(ref (atyp).DerefOrNull())) {
-                // composite literal type present - use it
-                // [...]T array types may only appear with composite literals.
-                // Check for them here so we don't have to handle ... in general.
                 // We have an "open" [...]T array type.
                 // Create a new ArrayType with unknown length (-1)
                 // and finish setting it up after analyzing the literal.
@@ -166,12 +165,12 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
         break;
     }
     case {} when hint != default!: {
+        // no composite literal type present - use hint (element type of enclosing type)
         typ = hint;
         @base = typ;
+        // *T implies &T{}
         {
             var (b, ok) = deref(coreType(@base)); if (ok) {
-                // no composite literal type present - use hint (element type of enclosing type)
-                // *T implies &T{}
                 @base = b;
             }
         }
@@ -179,20 +178,20 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
         break;
     }
     default: {
-        Ꮡcheck.error(new ast_CompositeLitжpositioner(Ꮡe), // TODO(gri) provide better error messages depending on context
- UntypedLit, missingTypeInCompositeˢ);
+        // TODO(gri) provide better error messages depending on context
+        Ꮡcheck.error(new ast_CompositeLitжpositioner(Ꮡe), UntypedLit, missingTypeInCompositeˢ);
+        // continue with invalid type so that elements are "used" (go.dev/issue/69092)
         typ = new BasicжΔType(Typ[Invalid]);
         @base = typ;
         break;
     }}
 
-    // continue with invalid type so that elements are "used" (go.dev/issue/69092)
     var switchᴛ9 = coreType(@base);
     switch (switchᴛ9.type()) {
     case ж<Struct> utyp: {
+        // Prevent crash if the struct referred to is not yet set up.
+        // See analogous comment for *Array.
         if ((~utyp).fields == default!) {
-            // Prevent crash if the struct referred to is not yet set up.
-            // See analogous comment for *Array.
             Ꮡcheck.error(new ast_CompositeLitжpositioner(Ꮡe), InvalidTypeCycle, invalidRecursiveTypeˢ);
             x.mode = invalid;
             return;
@@ -200,12 +199,12 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
         if (len(e.Elts) == 0) {
             break;
         }
+        // Convention for error messages on invalid struct literals:
+        // we mention the struct type only if it clarifies the error
+        // (e.g., a duplicate field error doesn't need the struct type).
         var fields = utyp.Value.fields;
         {
             var (_, ok) = e.Elts[0]._<ж<ast.KeyValueExpr>>(ᐧ); if (ok){
-                // Convention for error messages on invalid struct literals:
-                // we mention the struct type only if it clarifies the error
-                // (e.g., a duplicate field error doesn't need the struct type).
                 // all elements must have keys
                 var visited = new slice<bool>(len(fields));
                 foreach (var (_, eΔ1) in e.Elts) {
@@ -270,31 +269,31 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
                 }
                 if (len(e.Elts) < len(fields)) {
                     Ꮡcheck.errorf(inNode(new ast.CompositeLitжNode(Ꮡe), e.Rbrace), InvalidStructLit, "too few values in struct literal of type %s"u8, @base);
+                    // ok to continue
                 }
             }
         }
         break;
     }
     case ж<Array> utyp: {
+        // Prevent crash if the array referred to is not yet set up. Was go.dev/issue/18643.
+        // This is a stop-gap solution. Should use Checker.objPath to report entire
+        // path starting with earliest declaration in the source. TODO(gri) fix this.
         if ((~utyp).elem == default!) {
-            // ok to continue
-            // Prevent crash if the array referred to is not yet set up. Was go.dev/issue/18643.
-            // This is a stop-gap solution. Should use Checker.objPath to report entire
-            // path starting with earliest declaration in the source. TODO(gri) fix this.
             Ꮡcheck.error(new ast_CompositeLitжpositioner(Ꮡe), InvalidTypeCycle, invalidRecursiveTypeˢ);
             x.mode = invalid;
             return;
         }
         var n = Ꮡcheck.indexedElts(e.Elts, (~utyp).elem, (~utyp).len);
+        // If we have an array of unknown length (usually [...]T arrays, but also
+        // arrays [n]T where n is invalid) set the length now that we know it and
+        // record the type for the array (usually done by check.typ which is not
+        // called for [...]T). We handle [...]T arrays and arrays with invalid
+        // length the same here because it makes sense to "guess" the length for
+        // the latter if we have a composite literal; e.g. for [n]int{1, 2, 3}
+        // where n is invalid for some reason, it seems fair to assume it should
+        // be 3 (see also Checked.arrayLength and go.dev/issue/27346).
         if ((~utyp).len < 0) {
-            // If we have an array of unknown length (usually [...]T arrays, but also
-            // arrays [n]T where n is invalid) set the length now that we know it and
-            // record the type for the array (usually done by check.typ which is not
-            // called for [...]T). We handle [...]T arrays and arrays with invalid
-            // length the same here because it makes sense to "guess" the length for
-            // the latter if we have a composite literal; e.g. for [n]int{1, 2, 3}
-            // where n is invalid for some reason, it seems fair to assume it should
-            // be 3 (see also Checked.arrayLength and go.dev/issue/27346).
             utyp.Value.len = n;
             // e.Type is missing if we have a composite literal element
             // that is itself a composite literal with omitted type. In
@@ -307,9 +306,9 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
         break;
     }
     case ж<Slice> utyp: {
+        // Prevent crash if the slice referred to is not yet set up.
+        // See analogous comment for *Array.
         if ((~utyp).elem == default!) {
-            // Prevent crash if the slice referred to is not yet set up.
-            // See analogous comment for *Array.
             Ꮡcheck.error(new ast_CompositeLitжpositioner(Ꮡe), InvalidTypeCycle, invalidRecursiveTypeˢ);
             x.mode = invalid;
             return;
@@ -318,19 +317,19 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
         break;
     }
     case ж<Map> utyp: {
+        // Prevent crash if the map referred to is not yet set up.
+        // See analogous comment for *Array.
         if ((~utyp).key == default! || (~utyp).elem == default!) {
-            // Prevent crash if the map referred to is not yet set up.
-            // See analogous comment for *Array.
             Ꮡcheck.error(new ast_CompositeLitжpositioner(Ꮡe), InvalidTypeCycle, invalidRecursiveTypeˢ);
             x.mode = invalid;
             return;
         }
+        // If the map key type is an interface (but not a type parameter),
+        // the type of a constant key must be considered when checking for
+        // duplicates.
         var keyIsInterface = isNonTypeParamInterface((~utyp).key);
         var visited = new map<any, slice<ΔType>>(len(e.Elts));
         foreach (var (_, eΔ3) in e.Elts) {
-            // If the map key type is an interface (but not a type parameter),
-            // the type of a constant key must be considered when checking for
-            // duplicates.
             var (kv, _) = eΔ3._<ж<ast.KeyValueExpr>>(ᐧ);
             if (kv == nil) {
                 Ꮡcheck.error(new ast_Exprᴠpositioner(eΔ3), MissingLitKey, missingKeyInMapLiteralˢ);
@@ -368,11 +367,11 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
     }
     default: {
         var utyp = switchᴛ9;
+        // when "using" all elements unpack KeyValueExpr
+        // explicitly because check.use doesn't accept them
         foreach (var (_, vᴛ1) in e.Elts) {
             var eΔ4 = vᴛ1;
 
-            // when "using" all elements unpack KeyValueExpr
-            // explicitly because check.use doesn't accept them
             {
                 var (kv, _) = eΔ4._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
                     // Ideally, we should also "use" kv.Key but we can't know
@@ -383,8 +382,8 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
             }
             Ꮡcheck.use(eΔ4);
         }
+        // if utyp is invalid, an error was reported before
         if (isValid(utyp)) {
-            // if utyp is invalid, an error was reported before
             @string qualifier = default!;
             if (isElem) {
                 qualifier = elementˢ;
@@ -399,6 +398,7 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
         }
         break;
     }}
+
     x.mode = value;
     x.typ = typ;
 }
@@ -411,8 +411,6 @@ internal static readonly @string arrayOrSliceLiteralˢ = "array or slice literal
 // the literal length if known (length >= 0). It returns the length of the
 // literal (maximum index value + 1).
 internal static int64 indexedElts(this ж<Checker> Ꮡcheck, slice<ast.Expr> elts, ΔType typ, int64 length) {
-    ref var check = ref Ꮡcheck.DerefOrNull();
-
     var visited = new map<int64, bool>(len(elts));
     int64 index = default!;
     int64 max = default!;
@@ -440,6 +438,7 @@ internal static int64 indexedElts(this ж<Checker> Ꮡcheck, slice<ast.Expr> elt
                 validIndex = true;
             }
         }
+
         // if we have a valid index, check for duplicate entries
         if (validIndex) {
             if (visited[index]) {
@@ -451,6 +450,7 @@ internal static int64 indexedElts(this ж<Checker> Ꮡcheck, slice<ast.Expr> elt
         if (index > max) {
             max = index;
         }
+
         // check element against composite literal element type
         ref var x = ref heap(new operand(), out var Ꮡx);
         Ꮡcheck.exprWithHint(Ꮡx, eval, typ);

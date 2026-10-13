@@ -256,8 +256,7 @@ internal static @string name(this ref ipv6ZoneCache zc, nint index) {
         (name, ok) = zoneCache.toName[index, ꟷ];
         ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RUnlock();
     }
-    if (!ok) {
-        // last resort
+    if (!ok) { // last resort
         name = itoa.Uitoa((nuint)index);
     }
     return name;
@@ -277,8 +276,7 @@ internal static nint index(this ref ipv6ZoneCache zc, @string name) {
         (index, ok) = zoneCache.toIndex[name, ꟷ];
         ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RUnlock();
     }
-    if (!ok) {
-        // last resort
+    if (!ok) { // last resort
         (index, _, _) = dtoi(name);
     }
     return index;

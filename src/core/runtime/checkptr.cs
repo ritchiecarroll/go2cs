@@ -19,6 +19,7 @@ internal static void checkptrAlignment(@unsafe.Pointer Δp, ж<_type> Ꮡelem, u
     if (Δp == nil) {
         return;
     }
+
     // Check that (*[n]elem)(p) is appropriately aligned.
     // Note that we allow unaligned pointers if the types they point to contain
     // no pointers themselves. See issue 37298.
@@ -26,6 +27,7 @@ internal static void checkptrAlignment(@unsafe.Pointer Δp, ж<_type> Ꮡelem, u
     if (elem.Pointers() && (uintptr)((uintptr)Δp & ((uintptr)elem.Align_ - 1)) != 0) {
         @throw(checkptrMisalignedˢ);
     }
+
     // Check that (*[n]elem)(p) doesn't straddle multiple heap objects.
     // TODO(mdempsky): Fix #46938 so we don't need to worry about overflow here.
     if (checkptrStraddles(Δp, n * elem.Size_)) {
@@ -39,14 +41,17 @@ internal static bool checkptrStraddles(@unsafe.Pointer ptr, uintptr size) {
     if (size <= 1) {
         return false;
     }
+
     // Check that add(ptr, size-1) won't overflow. This avoids the risk
     // of producing an illegal pointer value (assuming ptr is legal).
     if ((uintptr)ptr >= ((uintptr)0 - (size - 1))) {
         return true;
     }
     @unsafe.Pointer end = (uintptr)add(ptr, size - 1);
+
     // TODO(mdempsky): Detect when [ptr, end] contains Go allocations,
     // but neither ptr nor end point into one themselves.
+
     return checkptrBase(ptr) != checkptrBase(end);
 }
 
@@ -58,6 +63,7 @@ internal static void checkptrArithmetic(@unsafe.Pointer Δp, slice<@unsafe.Point
     if (0 < (uintptr)Δp && (uintptr)Δp < minLegalPointer) {
         @throw(checkptrPointerˢ);
     }
+
     // Check that if the computed pointer p points into a heap
     // object, then one of the original pointers must have pointed
     // into the same object.
@@ -65,11 +71,13 @@ internal static void checkptrArithmetic(@unsafe.Pointer Δp, slice<@unsafe.Point
     if (@base == 0) {
         return;
     }
+
     foreach (var (_, original) in originals) {
         if (@base == checkptrBase(original)) {
             return;
         }
     }
+
     @throw(checkptrPointerˢ2);
 }
 
@@ -105,12 +113,14 @@ internal static uintptr checkptrBase(@unsafe.Pointer Δp) {
             return 1;
         }
     }
+
     // heap (must check after stack because of #35068)
     {
         var (@base, _, _) = findObject((uintptr)Δp, 0, 0); if (@base != 0) {
             return @base;
         }
     }
+
     // data or bss
     foreach (var (_, datap) in activeModules()) {
         if ((~datap).data <= (uintptr)Δp && (uintptr)Δp < (~datap).edata) {
@@ -120,6 +130,7 @@ internal static uintptr checkptrBase(@unsafe.Pointer Δp) {
             return (~datap).bss;
         }
     }
+
     return 0;
 }
 

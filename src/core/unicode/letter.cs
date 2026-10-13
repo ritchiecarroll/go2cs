@@ -59,6 +59,8 @@ partial struct CaseRange {
     public d Delta;
 }
 
+// SpecialCase represents language-specific case mappings such as Turkish.
+// Methods of SpecialCase customize (by overriding) the standard mappings.
 partial struct SpecialCase /*[]CaseRange*/;
 
 // BUG(r): There is no mechanism for full case folding, that is, for
@@ -66,11 +68,8 @@ partial struct SpecialCase /*[]CaseRange*/;
 
 // Indices into the Delta arrays inside CaseRanges for case mapping.
 public static UntypedInt UpperCase => iota;
-
 public static UntypedInt LowerCase => 1;
-
 public static UntypedInt TitleCase => 2;
-
 public static UntypedInt MaxCase => 3;
 
 /* [MaxCase]rune */
@@ -99,6 +98,7 @@ internal static bool is16(slice<Range16> ranges, uint16 r) {
         }
         return false;
     }
+
     // binary search over ranges
     nint lo = 0;
     nint hi = len(ranges);
@@ -131,6 +131,7 @@ internal static bool is32(slice<Range32> ranges, uint32 r) {
         }
         return false;
     }
+
     // binary search over ranges
     nint lo = 0;
     nint hi = len(ranges);
@@ -291,8 +292,7 @@ public static rune ToLower(rune r) {
 // ToTitle maps the rune to title case.
 public static rune ToTitle(rune r) {
     if (r <= MaxASCII) {
-        if ((rune)'a' <= r && r <= (rune)'z') {
-            // title case is upper case for ASCII
+        if ((rune)'a' <= r && r <= (rune)'z') { // title case is upper case for ASCII
             r -= (rune)'a' - (rune)'A';
         }
         return r;
@@ -358,9 +358,11 @@ public static rune SimpleFold(rune r) {
     if (r < 0 || r > MaxRune) {
         return r;
     }
+
     if ((nint)r < len(asciiFold)) {
         return (rune)asciiFold[r];
     }
+
     // Consult caseOrbit table for special cases.
     nint lo = 0;
     nint hi = len(caseOrbit);
@@ -375,6 +377,7 @@ public static rune SimpleFold(rune r) {
     if (lo < len(caseOrbit) && (rune)caseOrbit[lo].From == r) {
         return (rune)caseOrbit[lo].To;
     }
+
     // No folding specified. This is a one- or two-element
     // equivalence class containing rune and ToLower(rune)
     // and ToUpper(rune) if they are different from rune.

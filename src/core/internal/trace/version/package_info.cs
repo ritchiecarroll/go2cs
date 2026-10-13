@@ -49,7 +49,7 @@ using static go.@internal.trace.version_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/version/version.go", "version.cs", "ABw2AAcekqaCggAFEKKCgoKUgpSokg==", "", "", "29=Specs/1/2/7,Specs/2/2/11")]
+[assembly: go.GoPositionMap("internal/trace/version/version.go", "version.cs", "ABg2AAwekqaCggAFEKKCgoKUgpSokg==", "", "", "25=Specs/1/2/7,Specs/2/2/11")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;

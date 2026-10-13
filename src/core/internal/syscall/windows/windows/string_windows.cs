@@ -28,7 +28,6 @@ public static (ж<NTUnicodeString>, error) NewNTUnicodeString(@string s) {
     // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdmsec/nf-wdmsec-wdmlibrtlinitunicodestringex
     return (Ꮡ(new NTUnicodeString(
         Length: (uint16)(n - 2), // subtract 2 bytes for the NUL terminator
-
         MaximumLength: n,
         Buffer: Ꮡ(s16, 0)
     )), default!);

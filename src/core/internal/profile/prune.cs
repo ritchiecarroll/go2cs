@@ -15,6 +15,7 @@ partial class profile_package {
 public static void Prune(this ref Profile p, ж<regexp.Regexp> ᏑdropRx, ж<regexp.Regexp> ᏑkeepRx) {
     var prune = new map<uint64, bool>();
     var pruneBeneath = new map<uint64, bool>();
+
     foreach (var (_, loc) in p.Location) {
         nint i = default!;
         for (i = len((~loc).Line) - 1; i >= 0; i--) {
@@ -33,9 +34,11 @@ public static void Prune(this ref Profile p, ж<regexp.Regexp> ᏑdropRx, ж<reg
                 }
             }
         }
+
         if (i >= 0) {
             // Found matching entry to prune.
             pruneBeneath[(~loc).ID] = true;
+
             // Remove the matching location.
             if (i == len((~loc).Line) - 1){
                 // Matched the top entry: prune the whole location.
@@ -45,6 +48,7 @@ public static void Prune(this ref Profile p, ж<regexp.Regexp> ᏑdropRx, ж<reg
             }
         }
     }
+
     // Prune locs from each Sample
     foreach (var (_, sample) in p.Sample) {
         // Scan from the root to the leaves to find the prune location.
@@ -78,6 +82,7 @@ public static error RemoveUninteresting(this ref Profile p) {
     ж<regexp.Regexp> keep = default!;
     ж<regexp.Regexp> drop = default!;
     error err = default!;
+
     if (p.DropFrames != ""u8) {
         {
             (drop, err) = regexp.Compile("^("u8 + p.DropFrames + ")$"u8); if (err != default!) {

@@ -42,26 +42,25 @@ public static ж<ΔRat> SetFloat64(this ж<ΔRat> Ꮡz, float64 f) {
     var mantissa = (uint64)(bits & ((uint64)(4503599627370496L - 1)));
     nint exp = (nint)((uint64)(((bits >> (int)(52))) & (uint64)expMask));
     var exprᴛ1 = exp;
-    if (exprᴛ1 == expMask) {
+    if (exprᴛ1 == expMask) { // non-finite
         return default!;
     }
-    if (exprᴛ1 is 0) {
+    if (exprᴛ1 is 0) { // denormal
         exp -= 1022;
     }
-    else { /* default: */
+    else { /* default: */ // normal
         mantissa |= (uint64)(((uint64)1 << (int)(52)));
         exp -= 1023;
     }
 
-    // non-finite
-    // denormal
-    // normal
     nint shift = 52 - exp;
+
     // Optimization (?): partially pre-normalise.
     while ((uint64)(mantissa & 1) == 0 && shift > 0) {
         mantissa >>= (int)(1);
         shift--;
     }
+
     Ꮡz.of(big_package.ΔRat.Ꮡa).SetUint64(mantissa);
     z.a.neg = f < 0D;
     Ꮡz.of(big_package.ΔRat.Ꮡb).Set(intOne);
@@ -81,14 +80,20 @@ internal static (float32 f, bool exact) quotToFloat32(nat a, nat b) {
     float32 f = default!;
     bool exact = default!;
 
+    // float size in bits
     UntypedInt Fsize = 32;
+
+    // mantissa
     UntypedInt Msize = 23;
     UntypedInt Msize1 = /* Msize + 1 */ 24; // incl. implicit 1
     UntypedInt Msize2 = /* Msize1 + 1 */ 25;
+
+    // exponent
     UntypedInt Esize = /* Fsize - Msize1 */ 8;
     UntypedInt Ebias = /* 1<<(Esize-1) - 1 */ 127;
     UntypedInt Emin = /* 1 - Ebias */ -126;
     UntypedInt Emax = /* Ebias */ 127;
+
     // TODO(adonovan): specialize common degenerate cases: 1.0, integers.
     nint alen = a.bitLen();
     if (alen == 0) {
@@ -98,6 +103,7 @@ internal static (float32 f, bool exact) quotToFloat32(nat a, nat b) {
     if (blen == 0) {
         throw panic("division by zero");
     }
+
     // 1. Left-shift A or B such that quotient A/B is in [1<<Msize1, 1<<(Msize2+1)
     // (Msize2 bits if A < B when they are left-aligned, Msize2+1 bits if A >= B).
     // This is 2 or 3 more than the float32 mantissa field width of Msize:
@@ -117,6 +123,7 @@ internal static (float32 f, bool exact) quotToFloat32(nat a, nat b) {
             b2 = b2.shl(b2, (nuint)(-shift));
         }
     }
+
     // 2. Compute quotient and remainder (q, r).  NB: due to the
     // extra shift, the low-order bit of q is logically the
     // high-order bit of r.
@@ -124,6 +131,7 @@ internal static (float32 f, bool exact) quotToFloat32(nat a, nat b) {
     (q, var r) = q.div(a2, a2, b2); // (recycle a2)
     var mantissa = low32(q);
     var haveRem = len(r) > 0; // mantissa&1 && !haveRem => remainder is exactly half
+
     // 3. If quotient didn't fit in Msize2 bits, redo division by b2<<1
     // (in effect---we accomplish this incrementally).
     if ((mantissa >> (int)(Msize2)) == 1) {
@@ -136,6 +144,7 @@ internal static (float32 f, bool exact) quotToFloat32(nat a, nat b) {
     if ((mantissa >> (int)(Msize1)) != 1) {
         throw panic(fmt.Sprintf("expected exactly %d bits of result"u8, (nint)(Msize2)));
     }
+
     // 4. Rounding.
     if ((nint)(Emin - Msize) <= exp && exp <= Emin) {
         // Denormal case; lose 'shift' bits of precision.
@@ -160,6 +169,7 @@ internal static (float32 f, bool exact) quotToFloat32(nat a, nat b) {
         }
     }
     mantissa >>= (int)(1); // discard rounding bit.  Mantissa now scaled by 1<<Msize1.
+
     f = (float32)math.Ldexp((float64)mantissa, exp - (nint)Msize1);
     if (math.IsInf((float64)f, 0)) {
         exact = false;
@@ -175,14 +185,20 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
     float64 f = default!;
     bool exact = default!;
 
+    // float size in bits
     UntypedInt Fsize = 64;
+
+    // mantissa
     UntypedInt Msize = 52;
     UntypedInt Msize1 = /* Msize + 1 */ 53; // incl. implicit 1
     UntypedInt Msize2 = /* Msize1 + 1 */ 54;
+
+    // exponent
     UntypedInt Esize = /* Fsize - Msize1 */ 11;
     UntypedInt Ebias = /* 1<<(Esize-1) - 1 */ 1023;
     UntypedInt Emin = /* 1 - Ebias */ -1022;
     UntypedInt Emax = /* Ebias */ 1023;
+
     // TODO(adonovan): specialize common degenerate cases: 1.0, integers.
     nint alen = a.bitLen();
     if (alen == 0) {
@@ -192,6 +208,7 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
     if (blen == 0) {
         throw panic("division by zero");
     }
+
     // 1. Left-shift A or B such that quotient A/B is in [1<<Msize1, 1<<(Msize2+1)
     // (Msize2 bits if A < B when they are left-aligned, Msize2+1 bits if A >= B).
     // This is 2 or 3 more than the float64 mantissa field width of Msize:
@@ -211,6 +228,7 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
             b2 = b2.shl(b2, (nuint)(-shift));
         }
     }
+
     // 2. Compute quotient and remainder (q, r).  NB: due to the
     // extra shift, the low-order bit of q is logically the
     // high-order bit of r.
@@ -218,6 +236,7 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
     (q, var r) = q.div(a2, a2, b2); // (recycle a2)
     var mantissa = low64(q);
     var haveRem = len(r) > 0; // mantissa&1 && !haveRem => remainder is exactly half
+
     // 3. If quotient didn't fit in Msize2 bits, redo division by b2<<1
     // (in effect---we accomplish this incrementally).
     if ((mantissa >> (int)(Msize2)) == 1) {
@@ -230,6 +249,7 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
     if ((mantissa >> (int)(Msize1)) != 1) {
         throw panic(fmt.Sprintf("expected exactly %d bits of result"u8, (nint)(Msize2)));
     }
+
     // 4. Rounding.
     if ((nint)(Emin - Msize) <= exp && exp <= Emin) {
         // Denormal case; lose 'shift' bits of precision.
@@ -254,6 +274,7 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
         }
     }
     mantissa >>= (int)(1); // discard rounding bit.  Mantissa now scaled by 1<<Msize1.
+
     f = math.Ldexp((float64)mantissa, exp - (nint)Msize1);
     if (math.IsInf(f, 0)) {
         exact = false;
@@ -455,28 +476,27 @@ internal static ж<ΔRat> norm(this ж<ΔRat> Ꮡz) {
 
     var matchᴛ1 = false;
     if (len(z.a.abs) is 0) { matchᴛ1 = true;
+        // z == 0; normalize sign and denominator
         z.a.neg = false;
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1 && len(z.b.abs) is 0) {
+        // z is integer; normalize denominator
         z.b.abs = z.b.abs.setWord(1);
     }
     else if (!matchᴛ1) { /* default: */
+        // z is fraction; normalize numerator and denominator
         var neg = z.a.neg;
         z.a.neg = false;
         z.b.neg = false;
         {
-            var f = NewInt(0).lehmerGCD(nil, // z == 0; normalize sign and denominator
- // z is integer; normalize denominator
- // z is fraction; normalize numerator and denominator
- nil, Ꮡz.of(big_package.ΔRat.Ꮡa), Ꮡz.of(big_package.ΔRat.Ꮡb)); if (f.Cmp(intOne) != 0) {
+            var f = NewInt(0).lehmerGCD(nil, nil, Ꮡz.of(big_package.ΔRat.Ꮡa), Ꮡz.of(big_package.ΔRat.Ꮡb)); if (f.Cmp(intOne) != 0) {
                 (z.a.abs, _) = z.a.abs.div(default!, z.a.abs, (~f).abs);
                 (z.b.abs, _) = z.b.abs.div(default!, z.b.abs, (~f).abs);
             }
         }
         z.a.neg = neg;
     }
-
     return Ꮡz;
 }
 
@@ -494,7 +514,6 @@ internal static nat mulDenom(nat z, nat x, nat y) {
     case {} when len(y) is 0: {
         return z.set(x);
     }}
-
     return z.mul(x, y);
 }
 

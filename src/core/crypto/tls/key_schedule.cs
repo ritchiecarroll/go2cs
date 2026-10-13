@@ -38,8 +38,8 @@ internal static readonly @string keyˢ = "key"u8;
 internal static (slice<byte> key, slice<byte> iv) trafficKey(this ж<cipherSuiteTLS13> Ꮡc, slice<byte> trafficSecret) {
     slice<byte> key = default!;
     slice<byte> iv = default!;
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     var recvʗ1 = c.hash;
     key = tls13.ExpandLabel<fips140.Hash>(widen<hash.Hash, fips140.Hash>(() => recvʗ1.New(), elemᴛ0 => new hash_HashᴠHash(elemᴛ0)), trafficSecret, keyˢ, default!, c.keyLen);
     var recvʗ2 = c.hash;
@@ -92,6 +92,7 @@ internal static (ж<ecdh.PrivateKey>, error) generateECDHEKey(io.Reader rand, Cu
     if (!ok) {
         return (default!, errors.New(tlsInternalErrorˢ6));
     }
+
     return curve.GenerateKey(rand);
 }
 
@@ -112,7 +113,6 @@ internal static (ecdhꓸCurve, bool) curveForCurveID(CurveID id) {
     { /* default: */
         return (default!, false);
     }
-
 }
 
 internal static (CurveID, bool) curveIDForCurve(ecdhꓸCurve curve) {
@@ -132,7 +132,6 @@ internal static (CurveID, bool) curveIDForCurve(ecdhꓸCurve curve) {
     { /* default: */
         return (0, false);
     }
-
 }
 
 } // end tls_package

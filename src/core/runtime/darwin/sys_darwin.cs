@@ -119,8 +119,8 @@ internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscall9(uintptr f
     uintptr r1 = default!;
     uintptr r2 = default!;
     uintptr err = default!;
-
     ref var args = ref heap(new syscall_syscall9_args(fn, a1, a2, a3, a4, a5, a6, a7, a8, a9), out var Ꮡargs);
+
     entersyscall();
     libcCall((@unsafe.Pointer)abi.FuncPCABI0(syscall9), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
     exitsyscall();
@@ -388,8 +388,7 @@ internal static partial void pthread_kill_trampoline();
 //
 //go:nosplit
 internal static void osinit_hack() {
-    if (GOOS == "darwin"u8) {
-        // not ios
+    if (GOOS == "darwin"u8) { // not ios
         libcCall((@unsafe.Pointer)abi.FuncPCABI0(osinit_hack_trampoline), nil);
     }
     return;
@@ -544,8 +543,8 @@ internal partial struct open_args /*dyn*/ {
 //go:cgo_unsafe_args
 internal static int32 /*ret*/ open(ж<byte> Ꮡname, int32 mode, int32 perm) {
     int32 ret = default!;
-
     ref var args = ref heap(new open_args((uintptr)Ꮡname.OrTypedNil(), mode, perm), out var Ꮡargs);
+
     ret = libcCall((@unsafe.Pointer)abi.FuncPCABI0(open_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
     KeepAlive(Ꮡname.OrTypedNil());
     return ret;
@@ -593,8 +592,8 @@ internal partial struct sigaltstack_args /*dyn*/ {
 //go:cgo_unsafe_args
 internal static void sigaltstack(ж<stackt> Ꮡnew, ж<stackt> Ꮡold) {
     ref var @new = ref Ꮡnew.DerefOrNull();
-
     ref var args = ref heap(new sigaltstack_args((uintptr)Ꮡnew.OrTypedNil(), (uintptr)Ꮡold.OrTypedNil()), out var Ꮡargs);
+
     if (Ꮡnew != nil && (int32)(@new.ss_flags & (int32)_SS_DISABLE) != 0 && @new.ss_size == 0) {
         // Despite the fact that Darwin's sigaltstack man page says it ignores the size
         // when SS_DISABLE is set, it doesn't. sigaltstack returns ENOMEM
@@ -912,8 +911,6 @@ internal partial struct mach_vm_region_args /*dyn*/ {
 //
 //go:linkname mach_vm_region runtime/pprof.mach_vm_region
 internal static int32 mach_vm_region(ж<uint64> Ꮡaddress, ж<uint64> Ꮡregion_size, @unsafe.Pointer info) {
-    ref var address = ref Ꮡaddress.DerefOrNull();
-
     // kern_return_t mach_vm_region(
     // 	vm_map_read_t target_task,
     // 	mach_vm_address_t *address,

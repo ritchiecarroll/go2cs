@@ -49,12 +49,15 @@ tail
 """.Raw();
     @string oneLine = cNoNewlineHereˢ;
     @string interpreted = keepsItsCrˢ;
+
     foreach (var (_, s) in new @string[]{plain, trailing, pemBlock, describe("p"u8), chain, oneLine, interpreted}.slice()) {
         fmt.Println(len(s));
         fmt.Printf("%q\n"u8, s);
     }
+
     fmt.Println(len(rawBytes));
     fmt.Printf("%q\n"u8, rawBytes);
+
     var h = (uint32)2166136261U;
     for (nint i = 0; i < len(pemBlock); i++) {
         h = ((uint32)(h ^ (uint32)pemBlock[i])) * 16777619;

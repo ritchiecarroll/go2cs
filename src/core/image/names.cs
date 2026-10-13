@@ -8,9 +8,13 @@ using image;
 
 partial class image_package {
 
+// Black is an opaque black uniform image.
 public static ж<Uniform> Black = NewUniform(color.Black);
+// White is an opaque white uniform image.
 public static ж<Uniform> White = NewUniform(color.White);
+// Transparent is a fully transparent uniform image.
 public static ж<Uniform> Transparent = NewUniform(color.Transparent);
+// Opaque is a fully opaque uniform image.
 public static ж<Uniform> ΔOpaque = NewUniform(color.Opaque);
 
 // Uniform is an infinite-sized [Image] of uniform color.

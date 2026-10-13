@@ -86,6 +86,7 @@ public static (ж<P521Element>, error) SetBytes(this ж<P521Element> Ꮡe, slice
     if (len(v) != p521ElementLen) {
         return (default!, errors.New(invalidP521Elementˢ));
     }
+
     // Check for non-canonical encodings (p + k, 2p + k, etc.) by comparing to
     // the encoding of -1 mod p, so p - 1, the highest canonical encoding.
     slice<byte> minusOneEncoding = @new<P521Element>().Sub(
@@ -98,6 +99,7 @@ public static (ж<P521Element>, error) SetBytes(this ж<P521Element> Ꮡe, slice
             return (default!, errors.New(invalidP521Elementˢ));
         }
     }
+
     ref var @in = ref heap(new array<byte>(66), out var Ꮡin);
     copy(@in[..], v);
     p521InvertEndianness(@in[..]);

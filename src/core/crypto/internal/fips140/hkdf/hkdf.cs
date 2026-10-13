@@ -22,6 +22,7 @@ public static slice<byte> Extract<H>(Func<H> h, slice<byte> secret, slice<byte> 
     var extractor = hmac.New(h, salt);
     hmac.MarkAsUsedInKDF(extractor);
     extractor.Write(secret);
+
     return extractor.Sum(default!);
 }
 
@@ -33,6 +34,7 @@ public static slice<byte> Expand<H>(Func<H> h, slice<byte> pseudorandomKey, @str
     hmac.MarkAsUsedInKDF(expander);
     uint8 counter = default!;
     slice<byte> buf = default!;
+
     while (len(@out) < keyLen) {
         counter++;
         if (counter == 0) {
@@ -49,6 +51,7 @@ public static slice<byte> Expand<H>(Func<H> h, slice<byte> pseudorandomKey, @str
         remain = min(remain, len(buf));
         @out = appendꓸꓸꓸ(@out, buf.slice(0, remain));
     }
+
     return @out;
 }
 

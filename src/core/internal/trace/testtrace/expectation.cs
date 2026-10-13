@@ -65,7 +65,6 @@ public static (ж<Expectation>, error) ParseExpectation(slice<byte> data) {
         else { /* default: */
             return (exp, fmt.Errorf("bad header line: %q"u8, s.Text()));
         }
-
         return (exp, default!);
     }
     return (exp, s.Err());

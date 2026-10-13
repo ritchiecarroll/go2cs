@@ -64,7 +64,6 @@ public static (ж<UnixAddr>, error) ResolveUnixAddr(@string network, @string add
     { /* default: */
         return (default!, ((UnknownNetworkError)network));
     }
-
 }
 
 // UnixConn is an implementation of the [Conn] interface for connections
@@ -160,8 +159,8 @@ public static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) Read
     nint flags = default!;
     ж<UnixAddr> addr = default!;
     error err = default!;
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
         return (0, 0, 0, default!, syscall.EINVAL);
     }
@@ -214,8 +213,8 @@ public static (nint n, nint oobn, error err) WriteMsgUnix(this ж<UnixConn> Ꮡc
     nint n = default!;
     nint oobn = default!;
     error err = default!;
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
         return (0, 0, syscall.EINVAL);
     }
@@ -243,7 +242,6 @@ public static (ж<UnixConn>, error) DialUnix(@string network, ж<UnixAddr> Ꮡla
     else { /* default: */
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: Ꮡladdr.opAddr(), Addr: Ꮡraddr.opAddr(), Err: ((UnknownNetworkError)network)))));
     }
-
     var sd = Ꮡ(new sysDialer(network: network, address: Ꮡraddr.String()));
     var (c, err) = sd.dialUnix(context.Background(), Ꮡladdr, Ꮡraddr);
     if (err != default!) {
@@ -356,8 +354,8 @@ public static error SetDeadline(this ж<UnixListener> Ꮡl, time.Time t) {
 public static (ж<os.File> f, error err) File(this ж<UnixListener> Ꮡl) {
     ж<os.File> f = default!;
     error err = default!;
-
     ref var l = ref Ꮡl.DerefOrNull();
+
     if (!Ꮡl.ok()) {
         return (default!, syscall.EINVAL);
     }
@@ -378,7 +376,6 @@ public static (ж<UnixListener>, error) ListenUnix(@string network, ж<UnixAddr>
     else { /* default: */
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default!, Addr: Ꮡladdr.opAddr(), Err: ((UnknownNetworkError)network)))));
     }
-
     if (Ꮡladdr == nil) {
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default!, Addr: Ꮡladdr.opAddr(), Err: errMissingAddress))));
     }
@@ -400,7 +397,6 @@ public static (ж<UnixConn>, error) ListenUnixgram(@string network, ж<UnixAddr>
     else { /* default: */
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default!, Addr: Ꮡladdr.opAddr(), Err: ((UnknownNetworkError)network)))));
     }
-
     if (Ꮡladdr == nil) {
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default!, Addr: default!, Err: errMissingAddress))));
     }

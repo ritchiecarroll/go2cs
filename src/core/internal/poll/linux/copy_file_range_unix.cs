@@ -19,6 +19,7 @@ public static (int64 written, bool handled, error err) CopyFileRange(ж<FD> Ꮡd
     if (!supportCopyFileRange()) {
         return (0, false, default!);
     }
+
     while (remain > 0) {
         var max = remain;
         if (max > maxCopyFileRangeRound) {
@@ -34,6 +35,7 @@ public static (int64 written, bool handled, error err) CopyFileRange(ж<FD> Ꮡd
             return (written, handled, err);
         }
     }
+
     return (written, true, default!);
 }
 

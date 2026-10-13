@@ -17,17 +17,11 @@ partial class idna_package {
 // All computation is done with int32s, so that overflow behavior is identical
 // regardless of whether int is 32-bit or 64-bit.
 internal const int32 @base = 36;
-
 internal const int32 damp = 700;
-
 internal const int32 initialBias = 72;
-
 internal const int32 initialN = 128;
-
 internal const int32 skew = 38;
-
 internal const int32 tmax = 26;
-
 internal const int32 tmin = 1;
 
 internal static error punyError(@string s) {
@@ -195,7 +189,6 @@ internal static (int32 digit, bool ok) decodeDigit(byte x) {
     case {} when (rune)'a' <= x && x <= (rune)'z': {
         return ((int32)((byte)(x - (rune)'a')), true);
     }}
-
     return (0, false);
 }
 
@@ -207,7 +200,6 @@ internal static byte encodeDigit(int32 digit) {
     case {} when 26 <= digit && digit < 36: {
         return (byte)(digit + ((rune)'0' - 26));
     }}
-
     throw panic("idna: internal error in punycode encoding");
 }
 

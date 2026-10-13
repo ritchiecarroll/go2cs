@@ -15,10 +15,24 @@ using System.Runtime.CompilerServices;
 
 partial class runtime_package {
 
+// throwType indicates the current type of ongoing throw, which affects the
+// amount of detail printed to stderr. Higher values include more detail.
 partial struct throwType /*num:uint32*/;
 
+// throwTypeNone means that we are not throwing.
 internal static throwType throwTypeNone => /* iota */ 0;
+
+// throwTypeUser is a throw due to a problem with the application.
+//
+// These throws do not include runtime frames, system goroutines, or
+// frame metadata.
 internal static throwType throwTypeUser => 1;
+
+// throwTypeRuntime is a throw due to a problem with Go itself.
+//
+// These throws include as much information as possible to aid in
+// debugging the runtime, including runtime frames, system goroutines,
+// and frame metadata.
 internal static throwType throwTypeRuntime => 2;
 
 // We have two different ways of doing defers. The older way involves creating a
@@ -309,6 +323,7 @@ internal static void deferproc(Action fn) {
         // go code on the system stack can't defer
         @throw(deferOnSystemStackˢ);
     }
+
     var d = newdefer();
     d.Value.link = gp.Value._defer;
     gp.Value._defer = d;
@@ -318,6 +333,7 @@ internal static void deferproc(Action fn) {
     // storing it to d.sp because GetCallerSP's result is a
     // uintptr stack pointer.
     d.Value.sp = sys.GetCallerSP();
+
     // deferproc returns 0 normally.
     // a deferred func that stops a panic
     // makes the deferproc return 1.
@@ -325,10 +341,10 @@ internal static void deferproc(Action fn) {
     // checks the return value and jumps to the
     // end of the function if deferproc returns != 0.
     return0();
+    // No code can go here - the C return register has
+    // been set and must not be clobbered.
 }
 
-// No code can go here - the C return register has
-// been set and must not be clobbered.
 internal static error rangeDoneError = ((error)((errorString)(@string)"range function continued iteration after function for loop body returned false"u8));
 
 internal static error rangePanicError = ((error)((errorString)(@string)"range function continued iteration after loop body panic"u8));
@@ -355,7 +371,6 @@ internal static partial void panicrangestate(nint state) {
     else if (exprᴛ1 == abi.RF_MISSING_PANIC) {
         throw panic(rangeMissingPanicError);
     }
-
     @throw(unexpectedStatePassedToˢ);
 }
 
@@ -435,10 +450,12 @@ internal static any deferrangefunc() {
         // go code on the system stack can't defer
         @throw(deferOnSystemStackˢ);
     }
+
     var fn = findfunc(sys.GetCallerPC());
     if (fn.deferreturn == 0) {
         @throw(noDeferreturnˢ);
     }
+
     var d = newdefer();
     d.Value.link = gp.Value._defer;
     gp.Value._defer = d;
@@ -447,8 +464,10 @@ internal static any deferrangefunc() {
     // storing it to d.sp because GetCallerSP's result is a
     // uintptr stack pointer.
     d.Value.sp = sys.GetCallerSP();
+
     d.Value.rangefunc = true;
     d.Value.head = @new<atomic.Pointer<_defer>>();
+
     return (~d).head.OrTypedNil();
 }
 
@@ -478,6 +497,7 @@ internal static void deferprocat(Action fn, any frame) {
             break;
         }
     }
+
     // Must be last - see deferproc above.
     return0();
 }
@@ -494,6 +514,7 @@ internal static void deferconvert(ж<_defer> Ꮡd0) {
     }
     var tail = d0.link;
     d0.rangefunc = false;
+
     ж<_defer> d = default!;
     while (ᐧ) {
         d = head.Load();
@@ -552,11 +573,12 @@ internal static void deferprocStack(ж<_defer> Ꮡd) {
     (Ꮡd.of(_defer.Ꮡlink).Reinterpret<ж<_defer>, uintptr>()).Value = (uintptr)(~gp)._defer;
     (Ꮡd.of(_defer.Ꮡhead).Reinterpret<ж<atomic.Pointer<_defer>>, uintptr>()).Value = 0;
     (gp.of(g.Ꮡ_defer).Reinterpret<ж<_defer>, uintptr>()).Value = (uintptr)Ꮡd;
+
     return0();
+    // No code can go here - the C return register has
+    // been set and must not be clobbered.
 }
 
-// No code can go here - the C return register has
-// been set and must not be clobbered.
 // Each P holds a pool for defers.
 
 // Allocate a Defer, usually using per-P pool.
@@ -585,6 +607,7 @@ internal static ж<_defer> newdefer() {
     }
     releasem(ref (mp).DerefOrNull());
     (mp, pp) = (default!, default!);
+
     if (d == nil) {
         // Allocate new defer.
         d = @new<_defer>();
@@ -604,9 +627,11 @@ internal static void popDefer(ref g gp) {
     gp._defer = d.Value.link;
     d.Value.link = default!;
     // After this point we can copy the stack.
+
     if (!(~d).heap) {
         return;
     }
+
     var mp = acquirem();
     var pp = (~mp).p.ptr();
     if (len((~pp).deferpool) == cap((~pp).deferpool)) {
@@ -630,8 +655,11 @@ internal static void popDefer(ref g gp) {
         sched.deferpool = first;
         unlock(Ꮡsched.of(schedt.Ꮡdeferlock));
     }
+
     d.Value = new _defer(nil);
+
     pp.Value.deferpool = append((~pp).deferpool, d);
+
     releasem(ref (mp).DerefOrNull());
     (mp, pp) = (default!, default!);
 }
@@ -642,6 +670,7 @@ internal static void popDefer(ref g gp) {
 internal static void deferreturn() {
     ref var Δp = ref heap(new _panic(), out var Ꮡp);
     Δp.deferreturn = true;
+
     Ꮡp.start(sys.GetCallerPC(), (@unsafe.Pointer)sys.GetCallerSP());
     while (ᐧ) {
         var (fn, ok) = Ꮡp.nextDefer();
@@ -669,6 +698,7 @@ internal static void preprintpanics(ж<_panic> Ꮡp) {
             var switchᴛ1 = recover();
             switch (switchᴛ1.type()) {
             case null: {
+                // nothing to do
                 break;
             }
             case @string r: {
@@ -681,7 +711,6 @@ internal static void preprintpanics(ж<_panic> Ꮡp) {
                 break;
             }}
         }, ref ᒐ);
-        // nothing to do
         while (Ꮡp != nil) {
             switch (Δp.arg.type()) {
             case {} Δv when Δv._<error>(out var v): {
@@ -795,6 +824,7 @@ internal static void gopanic(any e) {
             panicnil.IncNonDefault();
         }
     }
+
     var gp = getg();
     if ((~(~gp).m).curg != gp) {
         print((@string)"panic: "u8);
@@ -802,6 +832,7 @@ internal static void gopanic(any e) {
         print((@string)"\n"u8);
         @throw(panicOnSystemStackˢ);
     }
+
     if ((~(~gp).m).mallocing != 0) {
         print((@string)"panic: "u8);
         printpanicval(e);
@@ -823,9 +854,12 @@ internal static void gopanic(any e) {
         print((@string)"\n"u8);
         @throw(panicHoldingLocksˢ);
     }
+
     ref var Δp = ref heap(new _panic(), out var Ꮡp);
     Δp.arg = e;
+
     ᏑrunningPanicDefers.Add(1);
+
     Ꮡp.start(sys.GetCallerPC(), (@unsafe.Pointer)sys.GetCallerSP());
     while (ᐧ) {
         var (fn, ok) = Ꮡp.nextDefer();
@@ -834,6 +868,7 @@ internal static void gopanic(any e) {
         }
         fn();
     }
+
     // If we're tracing, flush the current generation to make the trace more
     // readable.
     //
@@ -843,11 +878,13 @@ internal static void gopanic(any e) {
     if (traceEnabled()) {
         traceAdvance(false);
     }
+
     // ran out of deferred calls - old-school panic now
     // Because it is unsafe to call arbitrary user code after freezing
     // the world, we call preprintpanics to invoke all necessary Error
     // and String methods to prepare the panic strings before startpanic.
     preprintpanics(Ꮡp);
+
     fatalpanic(Ꮡp); // should not return
     (((ж<nint>)nil)).Value = 0; // not reached
 }
@@ -859,28 +896,35 @@ internal static void start(this ж<_panic> Ꮡp, uintptr pc, @unsafe.Pointer sp)
     ref var Δp = ref Ꮡp.DerefOrNull();
 
     var gp = getg();
+
     // Record the caller's PC and SP, so recovery can identify panics
     // that have been recovered. Also, so that if p is from Goexit, we
     // can restart its defer processing loop if a recovered panic tries
     // to jump past it.
     Δp.startPC = sys.GetCallerPC();
     Δp.startSP = (@unsafe.Pointer)sys.GetCallerSP();
+
     if (Δp.deferreturn) {
         Δp.sp = sp;
+
         {
             var s = (ж<savedOpenDeferState>)(uintptr)((~gp).param); if (s != nil) {
                 // recovery saved some state for us, so that we can resume
                 // calling open-coded defers without unwinding the stack.
                 gp.Value.param = default!;
+
                 Δp.retpc = s.Value.retpc;
                 Δp.deferBitsPtr = (ж<byte>)(uintptr)(add(sp, (~s).deferBitsOffset));
                 Δp.slotsPtr = (uintptr)add(sp, (~s).slotsOffset);
             }
         }
+
         return;
     }
+
     Δp.link = gp.Value._panic;
     gp.Value._panic = Ꮡp;
+
     // Initialize state machine, and find the first frame with a defer.
     //
     // Note: We could use startPC and startSP here, but callers will
@@ -904,21 +948,26 @@ internal static (Action, bool) nextDefer(this ж<_panic> Ꮡp) {
     ref var Δp = ref Ꮡp.DerefOrNull();
 
     var gp = getg();
+
     if (!Δp.deferreturn) {
         if ((~gp)._panic != Ꮡp) {
             @throw(badPanicStackˢ);
         }
+
         if (Δp.recovered) {
             mcall(recovery); // does not return
             @throw(recoveryFailedˢ);
         }
     }
+
     // The assembler adjusts p.argp in wrapper functions that shouldn't
     // be visible to recover(), so we need to restore it each iteration.
     Δp.argp = (uintptr)add(Δp.startSP, sys.MinFrameSize);
+
     while (ᐧ) {
         while (Δp.deferBitsPtr != nil) {
             var bits = Δp.deferBitsPtr.Value;
+
             // Check whether any open-coded defers are still pending.
             //
             // Note: We need to check this upfront (rather than after
@@ -931,13 +980,17 @@ internal static (Action, bool) nextDefer(this ж<_panic> Ꮡp) {
                 Δp.deferBitsPtr = default!;
                 break;
             }
+
             // Find index of top bit set.
             var i = 7 - (uintptr)sys.LeadingZeros8(bits);
+
             // Clear bit and store it back.
             bits &= unchecked((uint8)~(uint8)(((uint8)1).Lsh((uint64)(i))));
             Δp.deferBitsPtr.Value = bits;
+
             return (((ж<Action>)(uintptr)(add(Δp.slotsPtr, i * (uintptr)goarch.PtrSize))).ValueSlot, true);
         }
+
 Recheck:
         {
             var d = gp.Value._defer; if (d != nil && (~d).sp == (uintptr)Δp.sp) {
@@ -946,16 +999,21 @@ Recheck:
                     popDefer(ref (gp).DerefOrNull());
                     goto Recheck;
                 }
+
                 var fn = d.Value.fn;
+
                 // TODO(mdempsky): Instead of having each deferproc call have
                 // its own "deferreturn(); return" sequence, we should just make
                 // them reuse the one we emit for open-coded defers.
                 Δp.retpc = d.Value.pc;
+
                 // Unlink and free.
                 popDefer(ref (gp).DerefOrNull());
+
                 return (fn, true);
             }
         }
+
         if (!Ꮡp.nextFrame()) {
             return (default!, false);
         }
@@ -965,11 +1023,12 @@ Recheck:
 // nextFrame finds the next frame that contains deferred calls, if any.
 internal static bool /*ok*/ nextFrame(this ж<_panic> Ꮡp) {
     bool ok = default!;
-
     ref var Δp = ref Ꮡp.DerefOrNull();
+
     if (Δp.lr == 0) {
         return false;
     }
+
     var gp = getg();
     var gpʗ1 = gp;
     systemstack(() => {
@@ -979,6 +1038,7 @@ internal static bool /*ok*/ nextFrame(this ж<_panic> Ꮡp) {
                 limit = d.Value.sp;
             }
         }
+
         ref var u = ref heap(new unwinder(), out var Ꮡu);
         Ꮡu.initAt(Ꮡp.Value.lr, (uintptr)Ꮡp.Value.fp, 0, gpʗ1, 0);
         while (ᐧ) {
@@ -986,23 +1046,30 @@ internal static bool /*ok*/ nextFrame(this ж<_panic> Ꮡp) {
                 Ꮡp.Value.lr = 0;
                 return; // ok == false
             }
+
             // TODO(mdempsky): If we populate u.frame.fn.deferreturn for
             // every frame containing a defer (not just open-coded defers),
             // then we can simply loop until we find the next frame where
             // it's non-zero.
+
             if (u.frame.sp == limit) {
                 break; // found a frame with linked defers
             }
+
             if (Ꮡp.Value.initOpenCodedDefers(u.frame.fn, (@unsafe.Pointer)u.frame.varp)) {
                 break; // found a frame with open-coded defers
             }
+
             Ꮡu.next();
         }
+
         Ꮡp.Value.lr = u.frame.lr;
         Ꮡp.Value.sp = (@unsafe.Pointer)u.frame.sp;
         Ꮡp.Value.fp = (@unsafe.Pointer)u.frame.fp;
+
         ok = true;
     });
+
     return ok;
 }
 
@@ -1014,18 +1081,23 @@ internal static bool initOpenCodedDefers(this ref _panic Δp, ΔfuncInfo fn, @un
     if (fd == nil) {
         return false;
     }
+
     if (fn.deferreturn == 0) {
         @throw(missingDeferreturnˢ);
     }
+
     (var deferBitsOffset, fd) = readvarintUnsafe(fd);
     var deferBitsPtr = (ж<uint8>)(uintptr)(add(varp, ((uintptr)0 - (uintptr)deferBitsOffset)));
     if (deferBitsPtr.Value == 0) {
         return false; // has open-coded defers, but none pending
     }
+
     (var slotsOffset, fd) = readvarintUnsafe(fd);
+
     Δp.retpc = fn.entry() + (uintptr)fn.deferreturn;
     Δp.deferBitsPtr = deferBitsPtr;
     Δp.slotsPtr = (uintptr)add(varp, ((uintptr)0 - (uintptr)slotsOffset));
+
     return true;
 }
 
@@ -1128,6 +1200,7 @@ internal static void recovery(ж<g> Ꮡgp) {
     var Δp = gp._panic;
     var (pc, sp, fp) = (Δp.Value.retpc, (uintptr)(~Δp).sp, (uintptr)(~Δp).fp);
     var (p0, saveOpenDeferState) = (Δp, (~Δp).deferBitsPtr != nil && (~Δp).deferBitsPtr.Value != 0);
+
     // Unwind the panic stack.
     for (; Δp != nil && (uintptr)(~Δp).startSP < sp; Δp = Δp.Value.link) {
         // Don't allow jumping past a pending Goexit.
@@ -1154,13 +1227,15 @@ internal static void recovery(ж<g> Ꮡgp) {
             saveOpenDeferState = false; // goexit is unwinding the stack anyway
             break;
         }
+
         ᏑrunningPanicDefers.Add(-1);
     }
     gp._panic = Δp;
-    if (Δp == nil) {
-        // must be done with signal
+
+    if (Δp == nil) { // must be done with signal
         gp.sig = 0;
     }
+
     if (gp.param != nil) {
         @throw(unexpectedGpParamˢ);
     }
@@ -1169,14 +1244,16 @@ internal static void recovery(ж<g> Ꮡgp) {
         // defers for it to call, save enough state for it to be able to
         // pick up where p0 left off.
         gp.param = @unsafe.Pointer.FromPinnedBox(Ꮡ(new savedOpenDeferState(
-            retpc: (~p0).retpc, // We need to save deferBitsPtr and slotsPtr too, but those are
- // stack pointers. To avoid issues around heap objects pointing
- // to the stack, save them as offsets from SP.
+            retpc: (~p0).retpc,
 
+            // We need to save deferBitsPtr and slotsPtr too, but those are
+            // stack pointers. To avoid issues around heap objects pointing
+            // to the stack, save them as offsets from SP.
             deferBitsOffset: (uintptr)(~p0).deferBitsPtr - (uintptr)(~p0).sp,
             slotsOffset: (uintptr)(~p0).slotsPtr - (uintptr)(~p0).sp
         )));
     }
+
     // TODO(mdempsky): Currently, we rely on frames containing "defer"
     // to end with "CALL deferreturn; RET". This allows deferreturn to
     // finish running any pending defers in the frame.
@@ -1200,11 +1277,13 @@ internal static void recovery(ж<g> Ꮡgp) {
     // overhead of the "deferreturn" call when there aren't actually any
     // pending defers left, and shrink the TEXT size of compiled
     // binaries. (Admittedly, both of these are modest savings.)
+
     // Ensure we're recovering within the appropriate stack.
     if (sp != 0 && (sp < gp.stack.lo || gp.stack.hi < sp)) {
         print((@string)"recover: "u8, ((Δhex)(uint64)sp), (@string)" not in ["u8, ((Δhex)(uint64)gp.stack.lo), (@string)", "u8, ((Δhex)(uint64)gp.stack.hi), (@string)"]\n"u8);
         @throw(badRecoveryˢ);
     }
+
     // Make the deferproc for this d return again,
     // this time returning 1. The calling function will
     // jump to the standard return epilogue.
@@ -1216,20 +1295,19 @@ internal static void recovery(ж<g> Ꮡgp) {
     // support frame pointers, since nothing consumes them.
     switch (ᐧ) {
     case {} when ᐧᐧ: {
+        // on x86, fp actually points one word higher than the top of
+        // the frame since the return address is saved on the stack by
+        // the caller
         gp.sched.bp = fp - (uintptr)(2 * goarch.PtrSize);
         break;
     }
     case {} when goarch.IsArm64 != 0: {
+        // on arm64, the architectural bp points one word higher
+        // than the sp. fp is totally useless to us here, because it
+        // only gets us to the caller's fp.
         gp.sched.bp = sp - (uintptr)goarch.PtrSize;
         break;
     }}
-
-    // on x86, fp actually points one word higher than the top of
-    // the frame since the return address is saved on the stack by
-    // the caller
-    // on arm64, the architectural bp points one word higher
-    // than the sp. fp is totally useless to us here, because it
-    // only gets us to the caller's fp.
     // The value in ret is delivered IN A REGISTER, even if there is a
     // stack ABI.
     gp.sched.ret = 1;
@@ -1245,9 +1323,11 @@ internal static void fatalthrow(throwType t) {
     var pc = sys.GetCallerPC();
     var sp = sys.GetCallerSP();
     var gp = getg();
+
     if ((~(~gp).m).throwing == throwTypeNone) {
         gp.Value.m.Value.throwing = t;
     }
+
     // Switch to the system stack to avoid any stack growth, which may make
     // things worse if the runtime is in a bad state.
     var gpʗ1 = gp;
@@ -1255,15 +1335,19 @@ internal static void fatalthrow(throwType t) {
         if (isSecureMode()) {
             exit(2);
         }
+
         startpanic_m();
+
         if (dopanic_m(gpʗ1, pc, sp)) {
             // crash uses a decent amount of nosplit stack and we're already
             // low on stack in throw, so crash on the system stack (unlike
             // fatalpanic).
             crash();
         }
+
         exit(2);
     });
+
     (((ж<nint>)nil)).Value = 0; // not reached
 }
 
@@ -1288,19 +1372,24 @@ internal static void fatalpanic(ж<_panic> Ꮡmsgs) {
             // block main from exiting, so now OK to
             // decrement runningPanicDefers.
             ᏑrunningPanicDefers.Add(-1);
+
             printpanics(ref (Ꮡmsgs).DerefOrNull());
         }
+
         docrash = dopanic_m(gpʗ1, pc, sp);
     });
+
     if (docrash) {
         // By crashing outside the above systemstack call, debuggers
         // will not be confused when generating a backtrace.
         // Function crash is marked nosplit to avoid stack growth.
         crash();
     }
+
     systemstack(() => {
         exit(2);
     });
+
     (((ж<nint>)nil)).Value = 0; // not reached
 }
 
@@ -1318,8 +1407,7 @@ internal static void fatalpanic(ж<_panic> Ꮡmsgs) {
 //go:nowritebarrierrec
 internal static bool startpanic_m() {
     var gp = getg();
-    if (mheap_.cachealloc.size == 0) {
-        // very early
+    if (mheap_.cachealloc.size == 0) { // very early
         print((@string)"runtime: panic before malloc heap initialized\n"u8);
     }
     // Disallow malloc during an unrecoverable panic. A panic
@@ -1327,48 +1415,49 @@ internal static bool startpanic_m() {
     // malloc itself. We want to catch if an allocation ever does
     // happen (even if we're not in one of these situations).
     gp.Value.m.Value.mallocing++;
+
     // If we're dying because of a bad lock count, set it to a
     // good lock count so we don't recursively panic below.
     if ((~(~gp).m).locks < 0) {
         gp.Value.m.Value.locks = 1;
     }
+
     var exprᴛ1 = (~(~gp).m).dying;
     var matchᴛ1 = false;
     if (exprᴛ1 is 0) { matchᴛ1 = true;
+        // Setting dying >0 has the side-effect of disabling this G's writebuf.
         gp.Value.m.Value.dying = 1;
         Ꮡpanicking.Add(1);
         @lock(Ꮡpaniclk);
         if (debug.schedtrace > 0 || debug.scheddetail > 0) {
-            // Setting dying >0 has the side-effect of disabling this G's writebuf.
             schedtrace(true);
         }
         freezetheworld();
         return true;
     }
     if (exprᴛ1 is 1) { matchᴛ1 = true;
+        // Something failed while panicking.
+        // Just print a stack trace and exit.
         gp.Value.m.Value.dying = 2;
         print((@string)"panic during panic\n"u8);
         return false;
     }
     if (exprᴛ1 is 2) { matchᴛ1 = true;
+        // This is a genuine bug in the runtime, we couldn't even
+        // print the stack trace successfully.
         gp.Value.m.Value.dying = 3;
         print((@string)"stack trace unavailable\n"u8);
         exit(4);
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1) { /* default: */
+        // Can't even print! Just exit.
         exit(5);
         return false; // Need to return something.
     }
     return default!;
-
 }
 
-// Something failed while panicking.
-// Just print a stack trace and exit.
-// This is a genuine bug in the runtime, we couldn't even
-// print the stack trace successfully.
-// Can't even print! Just exit.
 internal static bool didothers;
 
 internal static ж<mutex> Ꮡdeadlock = new StandardBox<mutex>(new mutex(nil));
@@ -1388,6 +1477,7 @@ internal static bool dopanic_m(ж<g> Ꮡgp, uintptr pc, uintptr sp) {
         }
         print((@string)" code="u8, ((Δhex)(uint64)gp.sigcode0), (@string)" addr="u8, ((Δhex)(uint64)gp.sigcode1), (@string)" pc="u8, ((Δhex)(uint64)gp.sigpc), (@string)"]\n"u8);
     }
+
     var (level, all, docrash) = gotraceback();
     if (level > 0) {
         if (Ꮡgp != (~gp.m).curg) {
@@ -1408,6 +1498,7 @@ internal static bool dopanic_m(ж<g> Ꮡgp, uintptr pc, uintptr sp) {
         }
     }
     unlock(Ꮡpaniclk);
+
     if (Ꮡpanicking.Add(-1) != 0) {
         // Some other m is panicking too.
         // Let it print what it needs to print.
@@ -1416,7 +1507,9 @@ internal static bool dopanic_m(ж<g> Ꮡgp, uintptr pc, uintptr sp) {
         @lock(Ꮡdeadlock);
         @lock(Ꮡdeadlock);
     }
+
     printDebugLog();
+
     return docrash;
 }
 
@@ -1427,6 +1520,7 @@ internal static bool dopanic_m(ж<g> Ꮡgp, uintptr pc, uintptr sp) {
 internal static bool canpanic() {
     var gp = getg();
     var mp = acquirem();
+
     // Is it okay for gp to panic instead of crashing the program?
     // Yes, as long as it is running Go code, not runtime code,
     // and not stuck in a system call.

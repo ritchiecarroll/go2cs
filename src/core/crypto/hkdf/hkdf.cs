@@ -58,10 +58,12 @@ public static (slice<byte>, error) Expand<H>(Func<H> h, slice<byte> pseudorandom
             return (default!, err);
         }
     }
+
     nint limit = fh().Size() * 255;
     if (keyLength > limit) {
         return (default!, errors.New(hkdfRequestedKeyLengthˢ));
     }
+
     return (hkdf.Expand(widen<hash.Hash, fips140.Hash>(fh, elemᴛ0 => new hash_HashᴠHash(elemᴛ0)), pseudorandomKey, info, keyLength), default!);
 }
 
@@ -77,10 +79,12 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, slice<byte> secret, s
             return (default!, err);
         }
     }
+
     nint limit = fh().Size() * 255;
     if (keyLength > limit) {
         return (default!, errors.New(hkdfRequestedKeyLengthˢ));
     }
+
     return (hkdf.Key(widen<hash.Hash, fips140.Hash>(fh, elemᴛ0 => new hash_HashᴠHash(elemᴛ0)), secret, salt, info, keyLength), default!);
 }
 

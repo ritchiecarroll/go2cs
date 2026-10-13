@@ -7,6 +7,10 @@ using strconv = strconv_package;
 
 partial class tls_package {
 
+// An AlertError is a TLS alert.
+//
+// When using a QUIC transport, QUICConn methods will return an error
+// which wraps AlertError rather than sending a TLS alert.
 partial struct AlertError /*num:uint8*/;
 
 public static @string Error(this AlertError e) {
@@ -15,6 +19,7 @@ public static @string Error(this AlertError e) {
 
 partial struct alert /*num:uint8*/;
 
+// alert level
 internal static UntypedInt alertLevelWarning => 1;
 internal static UntypedInt alertLevelError => 2;
 

@@ -100,9 +100,11 @@ internal static float64 exp(float64 x) {
     const float64 Ln2Hi = 6.93147180369123816490e-01;
     const float64 Ln2Lo = 1.90821492927058770002e-10;
     const float64 Log2e = 1.44269504088896338700e+00;
+
     const float64 Overflow = 7.09782712893383973096e+02;
     const float64 Underflow = -7.45133219101941108420e+02;
     UntypedFloat NearZero = /* 1.0 / (1 << 28) */ 3.725290298461914e-09; // 2**-28
+
     // special cases
     switch (ᐧ) {
     case {} when IsNaN(x) || IsInf(x, 1): {
@@ -132,9 +134,9 @@ internal static float64 exp(float64 x) {
         k = (nint)(Log2e * x + 0.5D);
         break;
     }}
-
     var hi = x - (float64)k * Ln2Hi;
     var lo = (float64)k * Ln2Lo;
+
     // compute
     return expmulti(hi, lo, k);
 }
@@ -152,8 +154,10 @@ public static float64 Exp2(float64 x) {
 internal static float64 exp2(float64 x) {
     const float64 Ln2Hi = 6.93147180369123816490e-01;
     const float64 Ln2Lo = 1.90821492927058770002e-10;
+
     const float64 Overflow = 1.0239999999999999e+03;
     const float64 Underflow = -1.0740e+03;
+
     // special cases
     switch (ᐧ) {
     case {} when IsNaN(x) || IsInf(x, 1): {
@@ -181,10 +185,10 @@ internal static float64 exp2(float64 x) {
         k = (nint)(x - 0.5D);
         break;
     }}
-
     var t = x - (float64)k;
     var hi = t * Ln2Hi;
     var lo = -t * Ln2Lo;
+
     // compute
     return expmulti(hi, lo, k);
 }
@@ -196,6 +200,7 @@ internal static float64 expmulti(float64 hi, float64 lo, nint k) {
     const float64 P3 = 6.61375632143793436117e-05; /* 0x3F11566A; 0xAF25DE2C */
     const float64 P4 = -1.65339022054652515390e-06; /* 0xBEBBBD41; 0xC5D26BF1 */
     const float64 P5 = 4.13813679705723846039e-08; /* 0x3E663769; 0x72BEA4D0 */
+
     var r = hi - lo;
     var t = r * r;
     var c = r - t * (P1 + t * (P2 + t * (P3 + t * (P4 + t * P5))));

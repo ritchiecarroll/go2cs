@@ -7,6 +7,8 @@ using strings = strings_package;
 
 partial class json_package {
 
+// tagOptions is the string following a comma in a struct field's "json"
+// tag, or the empty string. It does not include the leading comma.
 partial struct tagOptions /*@string*/;
 
 // parseTag splits a struct field's json tag into its name and

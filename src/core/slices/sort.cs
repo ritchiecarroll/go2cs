@@ -201,6 +201,7 @@ internal static sortedHint unknownHint => /* iota */ 0;
 internal static sortedHint increasingHint => 1;
 internal static sortedHint decreasingHint => 2;
 
+// xorshift paper: https://www.jstatsoft.org/article/view/v008i14/xorshift.pdf
 partial struct xorshift /*num:uint64*/;
 
 internal static uint64 Next(this ref xorshift r) {

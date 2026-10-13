@@ -72,6 +72,7 @@ internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) {
     default: {
         break;
     }}
+
     var selᴛ2 = p.wrCh;
     var selᴛ3 = p.done;
     switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
@@ -114,6 +115,7 @@ internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
             defer(Ꮡp.of(pipe.ᏑwrMu).Unlock, ref ᒐ);
             break;
         }}
+
         for (var once = true; once || len(b) > 0; once = false) {
             var selᴛ5 = p.wrCh.ᐸꟷ(b, ꓸꓸꓸ);
             var selᴛ6 = p.done;

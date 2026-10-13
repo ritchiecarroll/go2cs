@@ -165,8 +165,8 @@ public static nint BlockSize(this ref Digest d) {
 public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
     nint nn = default!;
     error err = default!;
-
     ref var d = ref Ꮡd.DerefOrNull();
+
     nn = len(p);
     d.len += (uint64)nn;
     if (d.nx > 0) {
@@ -214,15 +214,19 @@ internal static array<byte> checkSum(this ж<Digest> Ꮡd) {
     } else {
         t = 64 + 56 - len % 64;
     }
+
     // Length in bits.
     len <<= (int)(3);
     var padlen = tmp.slice(0, (nint)(t + 8));
     byteorder.BEPutUint64(padlen.slice((nint)(t + 0)), len);
     Ꮡd.Write(padlen);
+
     if (d.nx != 0) {
         throw panic("d.nx != 0");
     }
+
     array<byte> digest = new(32); /* size */
+
     byteorder.BEPutUint32(digest[0..], d.h[0]);
     byteorder.BEPutUint32(digest[4..], d.h[1]);
     byteorder.BEPutUint32(digest[8..], d.h[2]);
@@ -233,6 +237,7 @@ internal static array<byte> checkSum(this ж<Digest> Ꮡd) {
     if (!d.is224) {
         byteorder.BEPutUint32(digest[28..], d.h[7]);
     }
+
     return digest.Clone();
 }
 

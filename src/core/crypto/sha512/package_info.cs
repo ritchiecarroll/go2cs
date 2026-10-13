@@ -53,7 +53,7 @@ using static go.crypto.sha512_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/sha512/sha512.go", "sha512.cs", "ABUogoKCggAIMsKClK7CrsKuwoKUqJKClIKCgoKokoKUgoKCgqiSgoKCgqiSgoKCgg==")]
+[assembly: go.GoPositionMap("crypto/sha512/sha512.go", "sha512.cs", "ABUogoKCggASMsKClK7CrsKuwoKUqJKClIKCgoKokoKUgoKCgqiSgoKCgqiSgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

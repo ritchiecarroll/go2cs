@@ -123,8 +123,7 @@ internal static (slice<ΔAddr>, error) interfaceAddrTable(ж<Interface> Ꮡifi) 
                 copy(ip, (~sa).IP[..]);
                 break;
             }}
-            if (ip != default! && mask != default!) {
-                // NetBSD may contain route.LinkAddr
+            if (ip != default! && mask != default!) { // NetBSD may contain route.LinkAddr
                 ifat = append(ifat, (ΔAddr)(new IPNetжΔAddr(Ꮡ(new IPNet(IP: ip, Mask: mask)))));
             }
             break;

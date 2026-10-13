@@ -176,11 +176,13 @@ public static (slice<byte>, error) Marshal(any v) {
     try {
         var e = newEncodeState();
         defer(ᏑencodeStatePool.Put, e.OrTypedNil(), ref ᒐ);
+
         var err = e.marshal(v, new encOpts(escapeHTML: true));
         if (err != default!) {
             return (default!, err);
         }
         var buf = appendꓸꓸꓸ(slice<byte>(default!), e.of(encodeState.ᏑBuffer).Bytes());
+
         return (buf, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -348,7 +350,6 @@ internal static bool isEmptyValue(reflectꓸValue v) {
     if (exprᴛ1 == reflect.ΔBool || exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64 || exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr || exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64 || exprᴛ1 == reflect.ΔInterface || exprᴛ1 == reflect.ΔPointer) {
         return v.IsZero();
     }
-
     return false;
 }
 
@@ -381,12 +382,12 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> typeEncoder(re
             return fiΔ1._<Action<ж<encodeState>, reflectꓸValue, encOpts>>();
         }
     }
+
     // To deal with recursive types, populate the map with an
     // indirect func before we build it. This type waits on the
     // real func (f) to be ready and then calls it. This indirect
     // func is only used for recursive types.
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
-    
     ref var f = ref heap<Action<ж<encodeState>, reflectꓸValue, encOpts>>(out var Ꮡf);
     Ꮡwg.Add(1);
     var (fi, loaded) = ᏑencoderCache.LoadOrStore(t, new Action<ж<encodeState>, reflectꓸValue, encOpts>((ж<encodeState> e, reflectꓸValue v, encOpts opts) => {
@@ -396,6 +397,7 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> typeEncoder(re
     if (loaded) {
         return fi._<Action<ж<encodeState>, reflectꓸValue, encOpts>>();
     }
+
     // Compute the real encoder and replace the indirect func with it.
     f = newTypeEncoder(t, true);
     Ꮡwg.Done();
@@ -425,6 +427,7 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newTypeEncoder
     if (t.Implements(textMarshalerType)) {
         return textMarshalerEncoder;
     }
+
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == reflect.ΔBool) {
         return boolEncoder;
@@ -465,7 +468,6 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newTypeEncoder
     { /* default: */
         return unsupportedTypeEncoder;
     }
-
 }
 
 internal static void invalidValueEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts _) {
@@ -585,6 +587,7 @@ internal static void encode(this floatEncoder bits, ж<encodeState> Ꮡe, reflec
     if (math.IsInf(f, 0) || math.IsNaN(f)) {
         e.error(new UnsupportedValueErrorжerror(Ꮡ(new UnsupportedValueError(v, strconv.FormatFloat(f, (rune)'g', -1, (nint)bits)))));
     }
+
     // Convert as if by ES6 number to string conversion.
     // This matches most other JSON generators.
     // See golang.org/issue/6384 and golang.org/issue/14135.
@@ -662,6 +665,7 @@ internal static bool isValidNumber(@string s) {
     if (s == ""u8) {
         return false;
     }
+
     // Optional -
     if (s[0] == (rune)'-') {
         s = s[1..];
@@ -669,6 +673,7 @@ internal static bool isValidNumber(@string s) {
             return false;
         }
     }
+
     // Digits
     switch (ᐧ) {
     default: {
@@ -693,6 +698,7 @@ internal static bool isValidNumber(@string s) {
             s = s[1..];
         }
     }
+
     // e or E followed by an optional - or + and
     // 1 or more digits.
     if (len(s) >= 2 && (s[0] == (rune)'e' || s[0] == (rune)'E')) {
@@ -707,6 +713,7 @@ internal static bool isValidNumber(@string s) {
             s = s[1..];
         }
     }
+
     // Make sure we are at the end.
     return s == ""u8;
 }
@@ -740,6 +747,7 @@ internal static void encode(this structEncoder se, ж<encodeState> Ꮡe, reflect
 FieldLoop:
     foreach (var (i, _) in se.fields.list) {
         var f = Ꮡ(se.fields.list, i);
+
         // Find the nested struct field by following f.index.
         var fv = v;
         foreach (var (_, iΔ1) in (~f).index) {
@@ -751,6 +759,7 @@ FieldLoop:
             }
             fv = fv.Field(iΔ1);
         }
+
         if (((~f).omitEmpty && isEmptyValue(fv)) || ((~f).omitZero && ((~f).isZero == default! && fv.IsZero() || ((~f).isZero != default! && (~f).isZero(fv))))) {
             continue;
         }
@@ -807,11 +816,10 @@ internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflectꓸ
             }
         }
         Ꮡe.of(encodeState.ᏑBuffer).WriteByte((rune)'{');
+
         // Extract and sort the keys.
         slice<reflectWithString> sv = new slice<reflectWithString>(v.Len(), () => new());
-        
         ж<reflect.MapIter> mi = v.MapRange();
-        
         error err = default!;
         for (nint i = 0; mi.Next(); i++) {
             {
@@ -822,6 +830,7 @@ internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflectꓸ
             sv[i].v = mi.Value();
         }
         slices.SortFunc(sv, (reflectWithString i, reflectWithString j) => strings.Compare(i.ks, j.ks));
+
         foreach (var (i, kv) in sv) {
             if (i > 0) {
                 Ꮡe.of(encodeState.ᏑBuffer).WriteByte((rune)',');
@@ -846,7 +855,6 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newMapEncoder(
             return unsupportedTypeEncoder;
         }
     }
-
     var me = new mapEncoder(typeEncoder(t.Elem()));
     var meʗ1 = me;
     return (ж<encodeState> p1, reflectꓸValue p2, encOpts p3) => meʗ1.encode(p1, p2, p3);
@@ -857,6 +865,7 @@ internal static void encodeByteSlice(ж<encodeState> Ꮡe, reflectꓸValue v, en
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
     }
+
     var s = v.Bytes();
     var b = Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer();
     b = append(b, (byte)((rune)'"'));
@@ -1010,16 +1019,15 @@ internal static bool isValidTag(@string s) {
     foreach (var (_, c) in s) {
         switch (ᐧ) {
         case {} when strings.ContainsRune("!#$%&()*+-./:;<=>?@[]^_{|}~ "u8, c): {
+            // Backslash and quote chars are reserved, but
+            // otherwise any punctuation chars are allowed
+            // in a tag name.
             break;
         }
         case {} when !unicode.IsLetter(c) && !unicode.IsDigit(c): {
             return false;
         }}
-
     }
-    // Backslash and quote chars are reserved, but
-    // otherwise any punctuation chars are allowed
-    // in a tag name.
     return true;
 }
 
@@ -1058,7 +1066,6 @@ internal static (@string, error) resolveKeyName(reflectꓸValue k) {
     if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) {
         return (strconv.FormatUint(k.Uint(), 10), default!);
     }
-
     throw panic("unexpected map key type");
 }
 
@@ -1101,15 +1108,14 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
                     break;
                 }
                 default: {
-                    dst = append(dst, // This encodes bytes < 0x20 except for \b, \f, \n, \r and \t.
- // If escapeHTML is set, it also escapes <, >, and &
- // because they can lead to security holes when
- // user-controlled strings are rendered into JSON
- // and served to some browsers.
- (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(b >> (int)(4))], hex[(byte)(b & 0xF)]);
+                    // This encodes bytes < 0x20 except for \b, \f, \n, \r and \t.
+                    // If escapeHTML is set, it also escapes <, >, and &
+                    // because they can lead to security holes when
+                    // user-controlled strings are rendered into JSON
+                    // and served to some browsers.
+                    dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(b >> (int)(4))], hex[(byte)(b & 0xF)]);
                     break;
                 }}
-
                 i++;
                 start = i;
                 continue;
@@ -1197,23 +1203,30 @@ internal static structFields typeFields(reflectꓸType t) {
     // Anonymous fields to explore at the current level and the next.
     var current = new field[]{}.slice();
     var next = new field[]{new(typ: t)}.slice();
+
     // Count of queued names for current level and the next.
     map<reflectꓸType, nint> count = default!;
     map<reflectꓸType, nint> nextCount = default!;
+
     // Types already visited at an earlier level.
     var visited = new map<reflectꓸType, bool>{};
+
     // Fields found.
     slice<field> fields = default!;
+
     // Buffer to run appendHTMLEscape on field names.
     slice<byte> nameEscBuf = default!;
+
     while (len(next) > 0) {
         (current, next) = (next, current[..0]);
         (count, nextCount) = (nextCount, new map<reflectꓸType, nint>{});
+
         foreach (var (_, f) in current) {
             if (visited[f.typ]) {
                 continue;
             }
             visited[f.typ] = true;
+
             // Scan f.typ for fields to include.
             for (nint i = 0; i < f.typ.NumField(); i++) {
                 var sf = f.typ.Field(i);
@@ -1226,10 +1239,10 @@ internal static structFields typeFields(reflectꓸType t) {
                         // Ignore embedded fields of unexported non-struct types.
                         continue;
                     }
-                } else 
-                if (!sf.IsExported()) {
                     // Do not ignore embedded fields of unexported struct types
                     // since they may have exported fields.
+                } else 
+                if (!sf.IsExported()) {
                     // Ignore unexported non-embedded fields.
                     continue;
                 }
@@ -1244,11 +1257,13 @@ internal static structFields typeFields(reflectꓸType t) {
                 var index = new slice<nint>(len(f.index) + 1);
                 copy(index, f.index);
                 index[len(f.index)] = i;
+
                 var ft = sf.Type;
                 if (ft.Name() == ""u8 && ft.Kind() == reflect.ΔPointer) {
                     // Follow pointer.
                     ft = ft.Elem();
                 }
+
                 // Only strings, floats, integers, and booleans can be quoted.
                 var quoted = false;
                 if (opts.Contains(stringˢ)) {
@@ -1256,8 +1271,8 @@ internal static structFields typeFields(reflectꓸType t) {
                     if (exprᴛ1 == reflect.ΔBool || exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64 || exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr || exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64 || exprᴛ1 == reflect.ΔString) {
                         quoted = true;
                     }
-
                 }
+
                 // Record found field and index sequence.
                 if (name != ""u8 || !sf.Anonymous || ft.Kind() != reflect.Struct) {
                     var tagged = name != ""u8;
@@ -1274,10 +1289,12 @@ internal static structFields typeFields(reflectꓸType t) {
                         quoted: quoted
                     );
                     field.nameBytes = slice<byte>(field.name);
+
                     // Build nameEscHTML and nameNonEsc ahead of time.
                     nameEscBuf = appendHTMLEscape(nameEscBuf[..0], field.nameBytes);
                     field.nameEscHTML = @""""u8 + ((sstring)nameEscBuf) + @""":"u8;
                     field.nameNonEsc = @""""u8 + field.name + @""":"u8;
+
                     if (field.omitZero) {
                         var tΔ2 = sf.Type;
                         // Provide a function that uses a type's IsZero method.
@@ -1313,8 +1330,8 @@ internal static structFields typeFields(reflectꓸType t) {
                             };
                             break;
                         }}
-
                     }
+
                     fields = append(fields, field);
                     if (count[f.typ] > 1) {
                         // If there were multiple instances, add a second,
@@ -1325,6 +1342,7 @@ internal static structFields typeFields(reflectꓸType t) {
                     }
                     continue;
                 }
+
                 // Record new anonymous struct to explore in next round.
                 nextCount[ft]++;
                 if (nextCount[ft] == 1) {
@@ -1333,6 +1351,7 @@ internal static structFields typeFields(reflectꓸType t) {
             }
         }
     }
+
     slices.SortFunc(fields, (field a, field b) => {
         // sort field by name, breaking ties with depth, then
         // breaking ties with "name came from json tag", then
@@ -1355,8 +1374,10 @@ internal static structFields typeFields(reflectꓸType t) {
         }
         return slices.Compare<slice<nint>, nint>(a.index, b.index);
     });
+
     // Delete all fields that are hidden by the Go rules for embedded fields,
     // except that fields with JSON tags are promoted.
+
     // The fields are sorted in primary order of name, secondary order
     // of field index length. Loop over names; for each name, delete
     // hidden fields by choosing the one dominant field that survives.
@@ -1372,8 +1393,7 @@ internal static structFields typeFields(reflectꓸType t) {
                 break;
             }
         }
-        if (advance == 1) {
-            // Only one field with this name
+        if (advance == 1) { // Only one field with this name
             @out = append(@out, fi);
             continue;
         }
@@ -1382,8 +1402,10 @@ internal static structFields typeFields(reflectꓸType t) {
             @out = append(@out, dominant);
         }
     }
+
     fields = @out;
     slices.SortFunc(fields, (field i, field j) => slices.Compare<slice<nint>, nint>(i.index, j.index));
+
     foreach (var (i, _) in fields) {
         var f = Ꮡ(fields, i);
         f.Value.encoder = typeEncoder(typeByIndex(t, (~f).index));

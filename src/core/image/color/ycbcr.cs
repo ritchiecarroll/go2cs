@@ -15,10 +15,12 @@ public static (uint8, uint8, uint8) RGBToYCbCr(uint8 r, uint8 g, uint8 b) {
     var r1 = (int32)r;
     var g1 = (int32)g;
     var b1 = (int32)b;
+
     // yy is in range [0,0xff].
     //
     // Note that 19595 + 38470 + 7471 equals 65536.
     var yy = ((19595 * r1 + 38470 * g1 + 7471 * b1 + (int32)(1 << (int)(15))) >> (int)(16));
+
     // The bit twiddling below is equivalent to
     //
     // cb := (-11056*r1 - 21712*g1 + 32768*b1 + 257<<15) >> 16
@@ -40,6 +42,7 @@ public static (uint8, uint8, uint8) RGBToYCbCr(uint8 r, uint8 g, uint8 b) {
     } else {
         cb = ~((cb >> (int)(31)));
     }
+
     // Note that 32768 - 27440 - 5328 equals 0.
     var cr = 32768 * r1 - 27440 * g1 - 5328 * b1 + (int32)(257 << (int)(15));
     if ((uint32)((uint32)cr & 0xff000000U) == 0){
@@ -47,6 +50,7 @@ public static (uint8, uint8, uint8) RGBToYCbCr(uint8 r, uint8 g, uint8 b) {
     } else {
         cr = ~((cr >> (int)(31)));
     }
+
     return ((uint8)yy, (uint8)cb, (uint8)cr);
 }
 
@@ -111,6 +115,7 @@ public static (uint8, uint8, uint8) YCbCrToRGB(uint8 y, uint8 cb, uint8 cr) {
     var yy1 = (int32)y * 0x10101;
     var cb1 = (int32)cb - 128;
     var cr1 = (int32)cr - 128;
+
     // The bit twiddling below is equivalent to
     //
     // r := (yy1 + 91881*cr1) >> 16
@@ -130,18 +135,21 @@ public static (uint8, uint8, uint8) YCbCrToRGB(uint8 y, uint8 cb, uint8 cr) {
     } else {
         r = ~((r >> (int)(31)));
     }
+
     var g = yy1 - 22554 * cb1 - 46802 * cr1;
     if ((uint32)((uint32)g & 0xff000000U) == 0){
         g >>= (int)(16);
     } else {
         g = ~((g >> (int)(31)));
     }
+
     var b = yy1 + 116130 * cb1;
     if ((uint32)((uint32)b & 0xff000000U) == 0){
         b >>= (int)(16);
     } else {
         b = ~((b >> (int)(31)));
     }
+
     return ((uint8)r, (uint8)g, (uint8)b);
 }
 
@@ -180,6 +188,7 @@ public static (uint32, uint32, uint32, uint32) RGBA(this YCbCr c) {
     var yy1 = (int32)c.Y * 0x10101;
     var cb1 = (int32)c.Cb - 128;
     var cr1 = (int32)c.Cr - 128;
+
     // The bit twiddling below is equivalent to
     //
     // r := (yy1 + 91881*cr1) >> 8
@@ -197,18 +206,21 @@ public static (uint32, uint32, uint32, uint32) RGBA(this YCbCr c) {
     } else {
         r = (int32)(~((r >> (int)(31))) & 0xffff);
     }
+
     var g = yy1 - 22554 * cb1 - 46802 * cr1;
     if ((uint32)((uint32)g & 0xff000000U) == 0){
         g >>= (int)(8);
     } else {
         g = (int32)(~((g >> (int)(31))) & 0xffff);
     }
+
     var b = yy1 + 116130 * cb1;
     if ((uint32)((uint32)b & 0xff000000U) == 0){
         b >>= (int)(8);
     } else {
         b = (int32)(~((b >> (int)(31))) & 0xffff);
     }
+
     return ((uint32)r, (uint32)g, (uint32)b, 0xffff);
 }
 
@@ -238,6 +250,7 @@ public static (uint32, uint32, uint32, uint32) RGBA(this NYCbCrA c) {
     var yy1 = (int32)c.Y * 0x10101;
     var cb1 = (int32)c.Cb - 128;
     var cr1 = (int32)c.Cr - 128;
+
     // The bit twiddling below is equivalent to
     //
     // r := (yy1 + 91881*cr1) >> 8
@@ -255,18 +268,21 @@ public static (uint32, uint32, uint32, uint32) RGBA(this NYCbCrA c) {
     } else {
         r = (int32)(~((r >> (int)(31))) & 0xffff);
     }
+
     var g = yy1 - 22554 * cb1 - 46802 * cr1;
     if ((uint32)((uint32)g & 0xff000000U) == 0){
         g >>= (int)(8);
     } else {
         g = (int32)(~((g >> (int)(31))) & 0xffff);
     }
+
     var b = yy1 + 116130 * cb1;
     if ((uint32)((uint32)b & 0xff000000U) == 0){
         b >>= (int)(8);
     } else {
         b = (int32)(~((b >> (int)(31))) & 0xffff);
     }
+
     // The second part of this method applies the alpha.
     var a = (uint32)c.A * 0x101;
     return ((uint32)r * a / 0xffff, (uint32)g * a / 0xffff, (uint32)b * a / 0xffff, a);
@@ -285,12 +301,14 @@ internal static Color nYCbCrAModel(Color c) {
         return new NYCbCrA(cΔ1, 0xff);
     }}
     var (r, g, b, a) = c.RGBA();
+
     // Convert from alpha-premultiplied to non-alpha-premultiplied.
     if (a != 0) {
         r = (r * 0xffff) / a;
         g = (g * 0xffff) / a;
         b = (b * 0xffff) / a;
     }
+
     var (y, u, v) = RGBToYCbCr((uint8)((r >> (int)(8))), (uint8)((g >> (int)(8))), (uint8)((b >> (int)(8))));
     return new NYCbCrA(new YCbCr(Y: y, Cb: u, Cr: v), (uint8)((a >> (int)(8))));
 }

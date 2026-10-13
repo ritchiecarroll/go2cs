@@ -35,10 +35,12 @@ internal static void set(this ж<pipeDeadline> Ꮡd, time.Time t) {
 
         d.mu.Lock();
         ᒐd1 = true;
+
         if (d.timer != nil && !d.timer.Stop()) {
             ᐸꟷ(d.cancel); // Wait for the timer callback to finish and close cancel
         }
         d.timer = default!;
+
         // Time is zero, then there is no deadline.
         var closed = isClosedChan(d.cancel.WithDirection(GoChanDir.Recv));
         if (t.IsZero()) {
@@ -47,6 +49,7 @@ internal static void set(this ж<pipeDeadline> Ꮡd, time.Time t) {
             }
             return;
         }
+
         // Time in the future, setup a timer to cancel in the future.
         {
             var dur = time.Until(t); if (dur > 0) {
@@ -59,6 +62,7 @@ internal static void set(this ж<pipeDeadline> Ꮡd, time.Time t) {
                 return;
             }
         }
+
         // Time in the past, so close immediately.
         if (!closed) {
             builtin.close(d.cancel);
@@ -137,6 +141,7 @@ public static (Conn, Conn) Pipe() {
     var cn2 = new channel<nint>(0);
     var done1 = new channel<EmptyStruct>(0);
     var done2 = new channel<EmptyStruct>(0);
+
     var p1 = Ꮡ(new pipe(
         rdRx: cb1, rdTx: cn1,
         wrTx: cb2, wrRx: cn2,

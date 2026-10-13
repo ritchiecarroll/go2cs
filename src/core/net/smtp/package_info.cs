@@ -59,7 +59,7 @@ using static go.net.smtp_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("net/smtp/auth.go", "auth.cs", "ACxqAAgCpoL2/IKUgpSC1oKUlAAGFsLWgqaCgoKCgpQ=")]
-[assembly: go.GoPositionMap("net/smtp/smtp.go", "smtp.cs", "ADpqooKClIKqooKCgoKUgoKokqiygoKCgqYABRDygIKkgpSCqOKCgpSCgoIACArCgoLqwoKClIKCgoKCgqaAgqSC2sKAgqSCgpSCgoKs4oKClN7CgIKkgIKkgqzSgIKkgoKCgpSCgqKCgpS2tMSClJSCgpSClIKClAAGEPKAgqSAgqSCgoCCpICCtoLcsoCCpIIACxCCgoLe4oKClAAHMgAWAoCCpIKAgraCgpSSgIKkgIKCgpSAgsaCgIKkgIK2gIKkgoCCtoKClIKClIKClN7igIKkgpSCgtqigIKkgtqigIKkgtiygoKClNiSgpQ=")]
+[assembly: go.GoPositionMap("net/smtp/smtp.go", "smtp.cs", "ADpqooKClIKqooKCgoKUgoKokqiygoKCgqYABRDygIKkgpSCqOKCgpSCgoIACArCgoLqwoKClIKCgoKCgqaAgqSC2sKAgqSCgpSCgoKs4oKClN7CgIKkgIKkgqzSgIKkgoKCgpSCgqKCgpTGtKSClJSCgpSClIKClAAGEPKAgqSAgqSCgoCCpICCtoLcsoCCpIIACxCCgoLe4oKClAAHMgAWAoCCpIKAgraCgpSSgIKkgIKCgpSAgsaCgIKkgIK2gIKkgoCCtoKClIKClIKClN7igIKkgpSCgtqigIKkgtqigIKkgtiygoKClNiSgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

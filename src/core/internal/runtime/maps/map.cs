@@ -255,7 +255,9 @@ public static ж<ΔMap> NewMap(ж<abi.SwissMapType> Ꮡmt, uintptr hint, ж<ΔMa
     if (Ꮡm == nil) {
         Ꮡm = @new<ΔMap>(); m = ref Ꮡm.DerefOrNull();
     }
+
     m.seed = (uintptr)rand();
+
     if (hint <= abi.SwissMapGroupSlots) {
         // A small map can fill all 8 slots, so no need to increase
         // target capacity.
@@ -271,19 +273,22 @@ public static ж<ΔMap> NewMap(ж<abi.SwissMapType> Ꮡmt, uintptr hint, ж<ΔMa
         // have a group. The control word is already initialized.
         return Ꮡm;
     }
+
     // Full size map.
+
     // Set initial capacity to hold hint entries without growing in the
     // average case.
     var targetCapacity = (hint * (uintptr)abi.SwissMapGroupSlots) / (uintptr)maxAvgGroupLoad;
-    if (targetCapacity < hint) {
-        // overflow
+    if (targetCapacity < hint) { // overflow
         return Ꮡm; // return an empty map.
     }
+
     var dirSize = ((uint64)targetCapacity + (uint64)maxTableCapacity - 1) / (uint64)maxTableCapacity;
     (dirSize, var overflow) = alignUpPow2(dirSize);
     if (overflow || dirSize > (uint64)math.MaxUintptr) {
         return Ꮡm; // return an empty map.
     }
+
     // Reject hints that are obviously too large.
     (var groups, overflow) = math.MulUintptr((uintptr)dirSize, maxTableCapacity);
     if (overflow){
@@ -294,15 +299,20 @@ public static ж<ΔMap> NewMap(ж<abi.SwissMapType> Ꮡmt, uintptr hint, ж<ΔMa
             return Ꮡm; // return an empty map.
         }
     }
+
     m.globalDepth = (uint8)sys.TrailingZeros64(dirSize);
     m.globalShift = depthToShift(m.globalDepth);
+
     var directory = new slice<ж<table>>((nint)(dirSize));
+
     foreach (var (i, _) in directory) {
         // TODO: Think more about initial table capacity.
         directory[i] = newTable(Ꮡmt, (uint64)targetCapacity / dirSize, i, m.globalDepth);
     }
+
     m.dirPtr = @unsafe.Pointer.FromBox(Ꮡ(directory, 0));
     m.dirLen = len(directory);
+
     return Ꮡm;
 }
 
@@ -367,10 +377,12 @@ internal static void installTableSplit(this ref ΔMap m, ж<table> Ꮡold, ж<ta
         m.dirPtr = @unsafe.Pointer.FromBox(Ꮡ(newDir, 0));
         m.dirLen = len(newDir);
     }
+
     // N.B. left and right may still consume multiple indicies if the
     // directory has grown multiple times since old was last split.
     left.index = old.index;
     m.replaceTable(Ꮡleft);
+
     nint entries = ((nint)1).Lsh((uint64)((uint8)(m.globalDepth - left.localDepth)));
     right.index = left.index + entries;
     m.replaceTable(Ꮡright);
@@ -395,13 +407,17 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref ΔM
     if (m.Used() == 0) {
         return (default!, default!, false);
     }
+
     if (m.writing != 0) {
         fatal(concurrentMapReadAndMapˢ);
     }
+
     var hash = typ.Hasher(key, m.seed);
+
     if (m.dirLen == 0) {
         return m.getWithKeySmall(Ꮡtyp, hash, key);
     }
+
     var idx = m.directoryIndex(hash);
     return m.directoryAt(idx).getWithKey(Ꮡtyp, hash, key);
 }
@@ -412,14 +428,18 @@ internal static (@unsafe.Pointer, bool) getWithoutKey(this ref ΔMap m, ж<abi.S
     if (m.Used() == 0) {
         return (default!, false);
     }
+
     if (m.writing != 0) {
         fatal(concurrentMapReadAndMapˢ);
     }
+
     var hash = typ.Hasher(key, m.seed);
+
     if (m.dirLen == 0) {
         var (_, elem, ok) = m.getWithKeySmall(Ꮡtyp, hash, key);
         return (elem, ok);
     }
+
     var idx = m.directoryIndex(hash);
     return m.directoryAt(idx).getWithoutKey(Ꮡtyp, hash, key);
 }
@@ -430,18 +450,22 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall(this re
     var g = new groupReference(
         data: m.dirPtr
     );
+
     var h2Δ1 = (uint8)h2(hash);
     var ctrls = g.ctrls().Value;
+
     for (var i = (uintptr)0; i < abi.SwissMapGroupSlots; i++) {
         var c = (uint8)(uint64)ctrls;
         ctrls >>= (int)(8);
         if (c != h2Δ1) {
             continue;
         }
+
         @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
         if (typ.IndirectKey()) {
             slotKey = ((ж<@unsafe.Pointer>)(uintptr)(slotKey)).Value;
         }
+
         if ((~typ.Key).Equal(key, slotKey)) {
             @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
             if (typ.IndirectElem()) {
@@ -450,6 +474,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall(this re
             return (slotKey, slotElem, true);
         }
     }
+
     return (default!, default!, false);
 }
 
@@ -474,38 +499,48 @@ public static @unsafe.Pointer PutSlot(this ж<ΔMap> Ꮡm, ж<abi.SwissMapType> 
     if (m.writing != 0) {
         fatal(concurrentMapWritesˢ);
     }
+
     var hash = typ.Hasher(key, m.seed);
+
     // Set writing after calling Hasher, since Hasher may panic, in which
     // case we have not actually done a write.
     m.writing ^= (uint8)(1); // toggle, see comment on writing
+
     if (m.dirPtr == nil) {
         m.growToSmall(Ꮡtyp);
     }
+
     if (m.dirLen == 0) {
         if (m.used < abi.SwissMapGroupSlots) {
             @unsafe.Pointer elem = (uintptr)m.putSlotSmall(Ꮡtyp, hash, key);
+
             if (m.writing == 0) {
                 fatal(concurrentMapWritesˢ);
             }
             m.writing ^= (uint8)(1);
+
             return elem;
         }
+
         // Can't fit another entry, grow to full size map.
         //
         // TODO(prattmic): If this is an update to an existing key then
         // we actually don't need to grow.
         m.growToTable(Ꮡtyp);
     }
+
     while (ᐧ) {
         var idx = m.directoryIndex(hash);
         var (elem, ok) = m.directoryAt(idx).PutSlot(Ꮡtyp, Ꮡm, hash, key);
         if (!ok) {
             continue;
         }
+
         if (m.writing == 0) {
             fatal(concurrentMapWritesˢ);
         }
         m.writing ^= (uint8)(1);
+
         return elem;
     }
 }
@@ -519,10 +554,13 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abi.SwissMapTy
     var g = new groupReference(
         data: m.dirPtr
     );
+
     var match = (~g.ctrls()).matchH2(h2(hash));
+
     // Look for an existing slot containing this key.
     while (match != 0) {
         var iΔ1 = match.first();
+
         @unsafe.Pointer slotKeyΔ1 = (uintptr)g.key(Ꮡtyp, iΔ1);
         if (typ.IndirectKey()) {
             slotKeyΔ1 = ((ж<@unsafe.Pointer>)(uintptr)(slotKeyΔ1)).Value;
@@ -531,14 +569,17 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abi.SwissMapTy
             if (typ.NeedKeyUpdate()) {
                 typedmemmove(typ.Key, slotKeyΔ1, key);
             }
+
             @unsafe.Pointer slotElemΔ1 = (uintptr)g.elem(Ꮡtyp, iΔ1);
             if (typ.IndirectElem()) {
                 slotElemΔ1 = ((ж<@unsafe.Pointer>)(uintptr)(slotElemΔ1)).Value;
             }
+
             return slotElemΔ1;
         }
         match = match.removeFirst();
     }
+
     // There can't be deleted slots, small maps can't have them
     // (see deleteSmall). Use matchEmptyOrDeleted as it is a bit
     // more efficient than matchEmpty.
@@ -547,7 +588,9 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abi.SwissMapTy
         fatal(smallMapWithNoEmptySlotˢ);
         return default!;
     }
+
     var i = match.first();
+
     @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
     if (typ.IndirectKey()) {
         @unsafe.Pointer kmem = (uintptr)newobject(typ.Key);
@@ -555,20 +598,24 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abi.SwissMapTy
         slotKey = kmem;
     }
     typedmemmove(typ.Key, slotKey, key);
+
     @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
     if (typ.IndirectElem()) {
         @unsafe.Pointer emem = (uintptr)newobject(typ.Elem);
         ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = emem;
         slotElem = emem;
     }
+
     g.ctrls().set(i, ((ctrl)(uint8)h2(hash)));
     m.used++;
+
     return slotElem;
 }
 
 internal static void growToSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp) {
     var grp = newGroups(ref (Ꮡtyp).DerefOrNull(), 1);
     m.dirPtr = grp.data;
+
     var g = new groupReference(
         data: m.dirPtr
     );
@@ -579,29 +626,39 @@ internal static void growToTable(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp) 
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var tab = newTable(Ꮡtyp, 2 * abi.SwissMapGroupSlots, 0, 0);
+
     var g = new groupReference(
         data: m.dirPtr
     );
+
     for (var i = (uintptr)0; i < abi.SwissMapGroupSlots; i++) {
         if (((ctrl)(g.ctrls().get(i) & ctrlEmpty)) == ctrlEmpty) {
             // Empty
             continue;
         }
+
         @unsafe.Pointer key = (uintptr)g.key(Ꮡtyp, i);
         if (typ.IndirectKey()) {
             key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
         }
+
         @unsafe.Pointer elem = (uintptr)g.elem(Ꮡtyp, i);
         if (typ.IndirectElem()) {
             elem = ((ж<@unsafe.Pointer>)(uintptr)(elem)).Value;
         }
+
         var hash = typ.Hasher(key, m.seed);
+
         tab.uncheckedPutSlot(Ꮡtyp, hash, key, elem);
     }
+
     var directory = new slice<ж<table>>(1);
+
     directory[0] = tab;
+
     m.dirPtr = @unsafe.Pointer.FromBox(Ꮡ(directory, 0));
     m.dirLen = len(directory);
+
     m.globalDepth = 0;
     m.globalShift = depthToShift(m.globalDepth);
 }
@@ -618,25 +675,31 @@ public static void Delete(this ж<ΔMap> Ꮡm, ж<abi.SwissMapType> Ꮡtyp, @uns
         }
         return;
     }
+
     if (m.writing != 0) {
         fatal(concurrentMapWritesˢ);
     }
+
     var hash = typ.Hasher(key, m.seed);
+
     // Set writing after calling Hasher, since Hasher may panic, in which
     // case we have not actually done a write.
     m.writing ^= (uint8)(1); // toggle, see comment on writing
+
     if (m.dirLen == 0){
         m.deleteSmall(Ꮡtyp, hash, key);
     } else {
         var idx = m.directoryIndex(hash);
         m.directoryAt(idx).Delete(Ꮡtyp, Ꮡm, hash, key);
     }
+
     if (m.used == 0) {
         // Reset the hash seed to make it more difficult for attackers
         // to repeatedly trigger hash collisions. See
         // https://go.dev/issue/25237.
         m.seed = (uintptr)rand();
     }
+
     if (m.writing == 0) {
         fatal(concurrentMapWritesˢ);
     }
@@ -649,7 +712,9 @@ internal static void deleteSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, 
     var g = new groupReference(
         data: m.dirPtr
     );
+
     var match = (~g.ctrls()).matchH2(h2(hash));
+
     while (match != 0) {
         var i = match.first();
         @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
@@ -659,6 +724,7 @@ internal static void deleteSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, 
         }
         if ((~typ.Key).Equal(key, slotKey)) {
             m.used--;
+
             if (typ.IndirectKey()){
                 // Clearing the pointer is sufficient.
                 ((ж<@unsafe.Pointer>)(uintptr)(origSlotKey)).Value = default!;
@@ -667,6 +733,7 @@ internal static void deleteSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, 
                 // Only bother clearing if there are pointers.
                 typedmemclr(typ.Key, slotKey);
             }
+
             @unsafe.Pointer slotElem = (uintptr)g.elem(Ꮡtyp, i);
             if (typ.IndirectElem()){
                 // Clearing the pointer is sufficient.
@@ -679,6 +746,7 @@ internal static void deleteSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp, 
                 // https://go.dev/issue/25936.
                 typedmemclr(typ.Elem, slotElem);
             }
+
             // We only have 1 group, so it is OK to immediately
             // reuse deleted slots.
             g.ctrls().set(i, ctrlEmpty);
@@ -695,10 +763,12 @@ public static void Clear(this ж<ΔMap> Ꮡm, ж<abi.SwissMapType> Ꮡtyp) {
     if (Ꮡm == nil || m.Used() == 0) {
         return;
     }
+
     if (m.writing != 0) {
         fatal(concurrentMapWritesˢ);
     }
     m.writing ^= (uint8)(1); // toggle, see comment on writing
+
     if (m.dirLen == 0){
         m.clearSmall(Ꮡtyp);
     } else {
@@ -713,11 +783,13 @@ public static void Clear(this ж<ΔMap> Ꮡm, ж<abi.SwissMapType> Ꮡtyp) {
         }
         m.used = 0;
         m.clearSeq++;
+        // TODO: shrink directory?
     }
-    // TODO: shrink directory?
+
     // Reset the hash seed to make it more difficult for attackers to
     // repeatedly trigger hash collisions. See https://go.dev/issue/25237.
     m.seed = (uintptr)rand();
+
     if (m.writing == 0) {
         fatal(concurrentMapWritesˢ);
     }
@@ -730,8 +802,10 @@ internal static void clearSmall(this ref ΔMap m, ж<abi.SwissMapType> Ꮡtyp) {
     var g = new groupReference(
         data: m.dirPtr
     );
+
     typedmemclr(typ.Group, g.data);
     g.ctrls().setEmpty();
+
     m.used = 0;
     m.clearSeq++;
 }

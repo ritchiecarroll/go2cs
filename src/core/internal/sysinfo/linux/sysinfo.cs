@@ -20,11 +20,13 @@ internal static void initᴛCPUName() { CPUName = sync.OnceValue(@string () => {
             return name;
         }
     }
+
     {
         @string name = osCPUInfoName(); if (name != ""u8) {
             return name;
         }
     }
+
     return ""u8;
 }); }
 

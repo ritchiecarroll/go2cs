@@ -19,10 +19,11 @@ partial struct normWriter {
 internal static (nint n, error err) Write(this ж<normWriter> Ꮡw, slice<byte> data) {
     nint n = default!;
     error err = default!;
-
     ref var w = ref Ꮡw.DerefOrNull();
+
     // Process data in pieces to keep w.buf size bounded.
     const nint chunk = 4000;
+
     while (len(data) > 0) {
         // Normalize into w.buf.
         nint m = len(data);
@@ -34,6 +35,7 @@ internal static (nint n, error err) Write(this ж<normWriter> Ꮡw, slice<byte> 
         w.buf = doAppend(Ꮡw.of(normWriter.Ꮡrb), w.buf, 0);
         data = data.slice(m);
         n += m;
+
         // Write out complete prefix, save remainder.
         // Note that lastBoundary looks back at most 31 runes.
         nint i = lastBoundary(ref nonnil(ref w).rb.f, w.buf);
@@ -103,6 +105,7 @@ internal static (nint, error) Read(this ж<normReader> Ꮡr, slice<byte> p) {
         nint outn = copy(r.outbuf, r.outbuf.slice(r.lastBoundary));
         r.outbuf = r.outbuf.slice(0, outn);
         r.bufStart = 0;
+
         var (n, err) = r.r.Read(r.inbuf);
         r.rb.src = inputBytes(r.inbuf.slice(0, n));
         (r.rb.nsrc, r.err) = (n, err);

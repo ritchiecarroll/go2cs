@@ -63,7 +63,7 @@ using static go.sync_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("sync/cond.go", "cond.cs", "ACxgkgACJAARAoKCgoIAAhTygq7CggAQOLI=")]
+[assembly: go.GoPositionMap("sync/cond.go", "cond.cs", "ACxgkgACJAARAoKCgoIAAhTygq7CggAROLI=")]
 [assembly: go.GoPositionMap("sync/hashtriemap.go", "hashtriemap.cs", "ACxisqiSqJKssqqiqJKqoqyyAAIQ0gACHAALAg==")]
 [assembly: go.GoPositionMap("sync/runtime.go", "runtime.cs", "AAkc5gACFAAJAgABEgAIBqampqaigoKmkg==")]
 // </GoSourcePositionMaps>

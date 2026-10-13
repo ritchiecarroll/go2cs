@@ -64,8 +64,8 @@ using static go.@internal.reflectlite_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/reflectlite/type.go", "type.cs", "AHWsAoKmgqaCpoLaooKCgoKC+oKClIKmgoKUgoLmgoKUgoKCgpSmgoIAAhoACw7kgqaCpoIABBaApIKCgpSmgoKClAAEHIKClIKCgoKUtLSUpoKmgoKClM6CgoKUpoKCgpSmgoKClKaCgoKUpoKCgpSmgoKClKaCgoKUAAIU8qqiAAQagoKUgoKmggAEvgEACQSCuoKoprKCloKWAATYAdKClA==")]
-[assembly: go.GoPositionMap("internal/reflectlite/value.go", "value.cs", "AEugAYKmgoKUptyqooKUgpSokoKClJSCloKSgoKUuLYACgyCAAw0goKUAAQgooKUgr6ygqaClIIAAxLSAAi8AdKqoqzGAAQykoKUAAQskoKCpgACFAAJHAAICpiCgsaClLiUgoKUlLgABRTypprKsoI=")]
+[assembly: go.GoPositionMap("internal/reflectlite/type.go", "type.cs", "AIgBrAKCpoKmgqaC2qKCgoKCgvqCgpSCpoKClIKC5oKClIKCgoKUpoKCAAIaAAsO5IKmgqaCAAQWgKSCgoKUpoKCgpQABByCgpSCgoKClLSklKaCpoKCgpTOgoKClKaCgoKUpoKCgpSmgoKClKaCgoKUpoKCgpSmgoKClAACFPKqogAEGoKClIKCpoIABL4BAAkEgsqCuKaygqaCpgAE2AHSgpQ=")]
+[assembly: go.GoPositionMap("internal/reflectlite/value.go", "value.cs", "AEugAYKmgoKUptyqooKUgpSokoKClJSCpoKCgoKU2MbsggAMNIKClAAEIKKClIK+soKmgpSCAAMS0gAIvAHSqqKsxgAEMpKClAAELJKCgqYAAhQACRwACAq4goKmgpS4lIKClJS4AAUU8qaayrKC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

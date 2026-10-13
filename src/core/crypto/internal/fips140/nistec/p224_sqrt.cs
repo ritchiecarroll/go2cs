@@ -17,9 +17,6 @@ internal static ref sync.Once p224GGOnce => ref Ꮡp224GGOnce.Value;
 
 // p224SqrtCandidate sets r to a square root candidate for x. r and x must not overlap.
 internal static void p224SqrtCandidate(ж<fiat.P224Element> Ꮡr, ж<fiat.P224Element> Ꮡx) {
-    ref var r = ref Ꮡr.DerefOrNull();
-    ref var x = ref Ꮡx.DerefOrNull();
-
     // Since p = 1 mod 4, we can't use the exponentiation by (p + 1) / 4 like
     // for the other primes. Instead, implement a variation of Tonelli–Shanks.
     // The constant-time implementation is adapted from Thomas Pornin's ecGFp5.
@@ -41,8 +38,10 @@ internal static void p224SqrtCandidate(ж<fiat.P224Element> Ꮡr, ж<fiat.P224El
             }
         }
     });
+
     // r <- x^((q+1)/2) = x^(2^127)
     // v <- x^q = x^(2^128-1)
+
     // Compute x^(2^127-1) first.
     //
     // The sequence of 10 multiplications and 126 squarings is derived from the
@@ -66,6 +65,7 @@ internal static void p224SqrtCandidate(ж<fiat.P224Element> Ꮡr, ж<fiat.P224El
     //
     ж<fiat.P224Element> t0 = @new<fiat.P224Element>();
     ж<fiat.P224Element> t1 = @new<fiat.P224Element>();
+
     Ꮡr.Square(Ꮡx);
     Ꮡr.Mul(Ꮡx, Ꮡr);
     Ꮡr.Square(Ꮡr);
@@ -104,18 +104,23 @@ internal static void p224SqrtCandidate(ж<fiat.P224Element> Ꮡr, ж<fiat.P224El
         t0.Square(t0);
     }
     Ꮡr.Mul(Ꮡr, t0);
+
     // v = x^(2^127-1)^2 * x
     var v = @new<fiat.P224Element>().Square(Ꮡr);
     v.Mul(v, Ꮡx);
+
     // r = x^(2^127-1) * x
     Ꮡr.Mul(Ꮡr, Ꮡx);
+
     // for i = n-1 down to 1:
     //     w = v^(2^(i-1))
     //     if w == -1 then:
     //         v <- v*GG[n-i]
     //         r <- r*GG[n-i-1]
+
     ж<fiat.P224Element> p224MinusOne = @new<fiat.P224Element>().Sub(
         @new<fiat.P224Element>(), @new<fiat.P224Element>().One());
+
     for (nint i = 96 - 1; i >= 1; i--) {
         var w = @new<fiat.P224Element>().Set(v);
         for (nint j = 0; j < i - 1; j++) {

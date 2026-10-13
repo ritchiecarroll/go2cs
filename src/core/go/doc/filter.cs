@@ -40,11 +40,11 @@ internal static bool matchDecl(ref ast.GenDecl d, Func<@string, bool> f) {
             if (f((~(~v).Name).Name)) {
                 return true;
             }
+            // We don't match ordinary parameters in filterFuncs, so by analogy don't
+            // match type parameters here.
             switch ((~v).Type.type()) {
             case ж<ast.StructType> t: {
-                if (matchFields((~t).Fields, // We don't match ordinary parameters in filterFuncs, so by analogy don't
- // match type parameters here.
- f)) {
+                if (matchFields((~t).Fields, f)) {
                     return true;
                 }
                 break;

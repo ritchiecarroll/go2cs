@@ -113,7 +113,6 @@ internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offse
         }
         break;
     }}
-
     r.offset = newOffset;
     return (r.offset, default!);
 }

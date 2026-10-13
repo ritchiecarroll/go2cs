@@ -12,6 +12,9 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class types_package {
 
+// A goVersion is a Go language version string of the form "go1.%d"
+// where d is the minor version number. goVersion strings don't
+// contain release numbers ("go1.20.1" is not a valid goVersion).
 partial struct goVersion /*@string*/;
 
 // asGoVersion returns v as a goVersion (e.g., "go1.20.1" becomes "go1.20").
@@ -31,6 +34,7 @@ internal static nint cmp(this goVersion x, goVersion y) {
     return version.Compare(((@string)x), ((@string)y));
 }
 
+// Go versions that introduced language changes
 internal static goVersion go1_9 = asGoVersion("go1.9"u8);
 internal static goVersion go1_13 = asGoVersion("go1.13"u8);
 internal static goVersion go1_14 = asGoVersion("go1.14"u8);
@@ -40,6 +44,8 @@ internal static goVersion go1_20 = asGoVersion("go1.20"u8);
 internal static goVersion go1_21 = asGoVersion("go1.21"u8);
 internal static goVersion go1_22 = asGoVersion("go1.22"u8);
 internal static goVersion go1_23 = asGoVersion("go1.23"u8);
+
+// current (deployed) Go version
 internal static goVersion go_current = asGoVersion(fmt.Sprintf("go1.%d"u8, (nint)(goversion.Version)));
 
 // allowVersion reports whether the current effective Go version
@@ -53,8 +59,8 @@ internal static bool allowVersion(this ref Checker check, goVersion want) {
 // which are used to report a version error if allowVersion returns false.
 internal static bool verifyVersionf(this ж<Checker> Ꮡcheck, positioner at, goVersion v, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
-
     ref var check = ref Ꮡcheck.DerefOrNull();
+
     if (!check.allowVersion(v)) {
         Ꮡcheck.versionErrorf(at, v, format, args.ꓸꓸꓸ);
         return false;

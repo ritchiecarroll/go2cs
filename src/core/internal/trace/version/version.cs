@@ -12,6 +12,7 @@ using go.@internal.trace.@event;
 
 partial class version_package {
 
+// Version represents the version of a trace file.
 partial struct Version /*num:uint32*/;
 
 public static Version Go111 => 11;
@@ -21,16 +22,16 @@ public static Version Go122 => 22;
 public static Version Go123 => 23;
 public static Version Current => /* Go123 */ 23;
 
-// Go 1.11–1.21 use a different parser and are only set here for the sake of
-// Version.Valid.
-// Go 1.23 adds backwards-incompatible events, but
-// traces produced by Go 1.22 are also always valid
-// Go 1.23 traces.
 internal static map<Version, slice<Δevent.Spec>> versions = new map<Version, slice<Δevent.Spec>>{
+    // Go 1.11–1.21 use a different parser and are only set here for the sake of
+    // Version.Valid.
     [Go111] = default!,
     [Go119] = default!,
     [Go121] = default!,
     [Go122] = go122.Specs(),
+    // Go 1.23 adds backwards-incompatible events, but
+    // traces produced by Go 1.22 are also always valid
+    // Go 1.23 traces.
     [Go123] = go122.Specs()
 };
 

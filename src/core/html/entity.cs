@@ -10,9 +10,6 @@ partial class html_package {
 // All entities that do not end with ';' are 6 or fewer bytes long.
 internal static UntypedInt longestEntityWithoutSemicolon => 6;
 
-// TODO(nigeltao): Handle replacements that are wider than their names.
-// "nLt;":                     {'\u226A', '\u20D2'},
-// "nGt;":                     {'\u226B', '\u20D2'},
 // entityMaps returns entity and entity2.
 //
 // entity is a map from HTML entity names to their values. The semicolon matters:
@@ -2165,7 +2162,11 @@ internal static Func<(map<@string, rune>, map<@string, array<rune>>)> entityMaps
         ["yen"u8] = (rune)'\U000000A5',
         ["yuml"u8] = (rune)'\U000000FF'
     };
+
     entity2 = new map<@string, array<rune>>{
+        // TODO(nigeltao): Handle replacements that are wider than their names.
+        // "nLt;":                     {'\u226A', '\u20D2'},
+        // "nGt;":                     {'\u226B', '\u20D2'},
         ["NotEqualTilde;"u8] = new rune[]{(rune)'\u2242', (rune)'\u0338'}.array(),
         ["NotGreaterFullEqual;"u8] = new rune[]{(rune)'\u2267', (rune)'\u0338'}.array(),
         ["NotGreaterGreater;"u8] = new rune[]{(rune)'\u226B', (rune)'\u0338'}.array(),
@@ -2258,6 +2259,7 @@ internal static Func<(map<@string, rune>, map<@string, array<rune>>)> entityMaps
         ["vsupnE;"u8] = new rune[]{(rune)'\u2ACC', (rune)'\uFE00'}.array(),
         ["vsupne;"u8] = new rune[]{(rune)'\u228B', (rune)'\uFE00'}.array()
     };
+
     return (entity, entity2);
 });
 

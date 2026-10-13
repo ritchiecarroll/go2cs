@@ -37,11 +37,13 @@ public static (ж<File>, error) CreateTemp(@string dir, @string pattern) {
     if (dir == ""u8) {
         dir = TempDir();
     }
+
     var (prefix, suffix, err) = prefixAndSuffix(pattern);
     if (err != default!) {
         return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "createtemp"u8, Path: pattern, Err: err))));
     }
     prefix = joinPath(dir, prefix);
+
     nint @try = 0;
     while (ᐧ) {
         @string name = prefix + nextRandom() + suffix;
@@ -93,11 +95,13 @@ public static (@string, error) MkdirTemp(@string dir, @string pattern) {
     if (dir == ""u8) {
         dir = TempDir();
     }
+
     var (prefix, suffix, err) = prefixAndSuffix(pattern);
     if (err != default!) {
         return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirtemp"u8, Path: pattern, Err: err))));
     }
     prefix = joinPath(dir, prefix);
+
     nint @try = 0;
     while (ᐧ) {
         @string name = prefix + nextRandom() + suffix;

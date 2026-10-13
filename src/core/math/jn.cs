@@ -66,9 +66,9 @@ public static float64 Jn(nint n, float64 x) {
     case {} when IsInf(x, 0): {
         return 0D;
     }}
-
     // J(-n, x) = (-1)**n * J(n, x), J(n, -x) = (-1)**n * J(n, x)
     // Thus, J(-n, x) = J(n, -x)
+
     if (n == 0) {
         return J0(x);
     }
@@ -91,8 +91,7 @@ public static float64 Jn(nint n, float64 x) {
     float64 b = default!;
     if ((float64)n <= x){
         // Safe to use J(n+1,x)=2n/x *J(n,x)-J(n-1,x)
-        if (x >= (float64)Two302){
-            // x > 2**302
+        if (x >= (float64)Two302){ // x > 2**302
             // (x >> n**2)
             //          Jn(x) = cos(x-(2n+1)*pi/4)*sqrt(2/x*pi)
             //          Yn(x) = sin(x-(2n+1)*pi/4)*sqrt(2/x*pi)
@@ -126,7 +125,6 @@ public static float64 Jn(nint n, float64 x) {
                     break;
                 }}
             }
-
             b = /* (1 / SqrtPi) */ 0.5641895835477563D * temp / Sqrt(x);
         } else {
             b = J1(x);
@@ -135,12 +133,10 @@ public static float64 Jn(nint n, float64 x) {
             }
         }
     } else {
-        if (x < TwoM29){
-            // x < 2**-29
+        if (x < TwoM29){ // x < 2**-29
             // x is tiny, return the first Taylor expansion of J(n,x)
             // J(n,x) = 1/n!*(x/2)**n  - ...
-            if (n > 33){
-                // underflow
+            if (n > 33){ // underflow
                 b = 0D;
             } else {
                 var temp = x * 0.5D;
@@ -206,6 +202,7 @@ public static float64 Jn(nint n, float64 x) {
             //  long double 1.1356523406294143949491931077970765006170e+04
             //  then recurrent value may overflow and the result is
             //  likely underflow to zero
+
             var tmp = (float64)n;
             var v = 2D / x;
             tmp = tmp * Log(Abs(v * tmp));
@@ -282,8 +279,7 @@ public static float64 Yn(nint n, float64 x) {
         return Y1(x);
     }
     float64 b = default!;
-    if (x >= (float64)Two302){
-        // x > 2**302
+    if (x >= (float64)Two302){ // x > 2**302
         // (x >> n**2)
         //	    Jn(x) = cos(x-(2n+1)*pi/4)*sqrt(2/x*pi)
         //	    Yn(x) = sin(x-(2n+1)*pi/4)*sqrt(2/x*pi)
@@ -317,7 +313,6 @@ public static float64 Yn(nint n, float64 x) {
                 break;
             }}
         }
-
         b = /* (1 / SqrtPi) */ 0.5641895835477563D * temp / Sqrt(x);
     } else {
         var a = Y0(x);

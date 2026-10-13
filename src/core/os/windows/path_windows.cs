@@ -65,6 +65,7 @@ internal static @string addExtendedPrefix(@string path) {
             return path;
         }
     }
+
     // Do nothing (and don't allocate) if the path is "short".
     // Empirically (at least on the Windows Server 2013 builder),
     // the kernel is arbitrarily okay with < 248 bytes. That
@@ -93,11 +94,13 @@ internal static @string addExtendedPrefix(@string path) {
         pathLength += len(getwdCache.dir) + 1;
         ᏑgetwdCache.of(getwdCacheᴛ1.ᏑMutex).Unlock();
     }
+
     if (pathLength < 248) {
         // Don't fix. (This is how Go 1.7 and earlier worked,
         // not automatically generating the \\?\ form)
         return path;
     }
+
     bool isUNC = default!;
     bool isDevice = default!;
     if (len(path) >= 2 && IsPathSeparator(path[0]) && IsPathSeparator(path[1])) {
@@ -115,11 +118,12 @@ internal static @string addExtendedPrefix(@string path) {
         prefix = new uint16[]{(rune)'\\', (rune)'\\', (rune)'?', (rune)'\\', (rune)'U', (rune)'N', (rune)'C', (rune)'\\'}.slice();
     } else 
     if (isDevice){
-    } else {
         // Don't add the extended prefix to device paths, as it would
         // change its meaning.
+    } else {
         prefix = new uint16[]{(rune)'\\', (rune)'\\', (rune)'?', (rune)'\\'}.slice();
     }
+
     var (p, err) = syscall.UTF16FromString(path);
     if (err != default!) {
         return path;

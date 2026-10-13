@@ -31,6 +31,7 @@ public static (slice<byte>, error) ReadData(io.Reader r, uint64 n) {
         // a buffer large enough. Treat this as a read failure.
         return (default!, io.ErrUnexpectedEOF);
     }
+
     if (n < chunk) {
         var bufΔ1 = new slice<byte>((nint)(n));
         var (_, err) = io.ReadFull(r, bufΔ1);
@@ -39,6 +40,7 @@ public static (slice<byte>, error) ReadData(io.Reader r, uint64 n) {
         }
         return (bufΔ1, default!);
     }
+
     slice<byte> buf = default!;
     var buf1 = new slice<byte>(chunk);
     while (n > 0) {
@@ -68,6 +70,7 @@ public static (slice<byte>, error) ReadDataAt(io.ReaderAt r, uint64 n, int64 off
         // a buffer large enough. Treat this as a read failure.
         return (default!, io.ErrUnexpectedEOF);
     }
+
     if (n < chunk) {
         var bufΔ1 = new slice<byte>((nint)(n));
         var (_, err) = r.ReadAt(bufΔ1, off);
@@ -80,6 +83,7 @@ public static (slice<byte>, error) ReadDataAt(io.ReaderAt r, uint64 n, int64 off
         }
         return (bufΔ1, default!);
     }
+
     slice<byte> buf = default!;
     var buf1 = new slice<byte>(chunk);
     while (n > 0) {

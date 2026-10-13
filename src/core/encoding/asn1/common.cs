@@ -18,48 +18,28 @@ partial class asn1_package {
 
 // ASN.1 tags represent the type of the following object.
 public static UntypedInt TagBoolean => 1;
-
 public static UntypedInt TagInteger => 2;
-
 public static UntypedInt TagBitString => 3;
-
 public static UntypedInt TagOctetString => 4;
-
 public static UntypedInt TagNull => 5;
-
 public static UntypedInt TagOID => 6;
-
 public static UntypedInt TagEnum => 10;
-
 public static UntypedInt TagUTF8String => 12;
-
 public static UntypedInt TagSequence => 16;
-
 public static UntypedInt TagSet => 17;
-
 public static UntypedInt TagNumericString => 18;
-
 public static UntypedInt TagPrintableString => 19;
-
 public static UntypedInt TagT61String => 20;
-
 public static UntypedInt TagIA5String => 22;
-
 public static UntypedInt TagUTCTime => 23;
-
 public static UntypedInt TagGeneralizedTime => 24;
-
 public static UntypedInt TagGeneralString => 27;
-
 public static UntypedInt TagBMPString => 30;
 
 // ASN.1 class types represent the namespace of the tag.
 public static UntypedInt ClassUniversal => 0;
-
 public static UntypedInt ClassApplication => 1;
-
 public static UntypedInt ClassContextSpecific => 2;
-
 public static UntypedInt ClassPrivate => 3;
 
 partial struct tagAndLength {
@@ -189,7 +169,6 @@ internal static fieldParameters /*ret*/ parseFieldParameters(@string str) {
             ret.omitEmpty = true;
             break;
         }}
-
     }
     return ret;
 }
@@ -219,7 +198,6 @@ internal static (bool matchAny, nint tagNumber, bool isCompound, bool ok) getUni
     if (AreEqual(exprᴛ1, bigIntType)) {
         return (false, TagInteger, false, true);
     }
-
     var exprᴛ2 = t.Kind();
     if (exprᴛ2 == reflect.ΔBool) {
         return (false, TagBoolean, false, true);
@@ -242,7 +220,6 @@ internal static (bool matchAny, nint tagNumber, bool isCompound, bool ok) getUni
     if (exprᴛ2 == reflect.ΔString) {
         return (false, TagPrintableString, false, true);
     }
-
     return (false, 0, false, false);
 }
 

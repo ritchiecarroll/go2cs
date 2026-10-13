@@ -42,18 +42,22 @@ public static slice<byte> TestingOnlyExpandedBytes1024(ж<DecapsulationKey1024> 
     ref var dk = ref Ꮡdk.DerefOrNull();
 
     var b = new slice<byte>(0, decapsulationKeySize1024);
+
     // ByteEncode₁₂(s)
     foreach (var (i, _) in dk.s) {
         b = polyByteEncode(b, dk.s[i]);
     }
+
     // ByteEncode₁₂(t) || ρ
     foreach (var (i, _) in dk.t) {
         b = polyByteEncode(b, dk.t[i]);
     }
     b = appendꓸꓸꓸ(b, dk.ρ[..]);
+
     // H(ek) || z
     b = appendꓸꓸꓸ(b, dk.h[..]);
     b = appendꓸꓸꓸ(b, dk.z[..]);
+
     return b;
 }
 
@@ -169,6 +173,7 @@ public static (ж<DecapsulationKey1024>, error) TestingOnlyNewDecapsulationKey10
     if (len(b) != decapsulationKeySize1024) {
         return (default!, errors.New(mlkemInvalidNistˢ));
     }
+
     var dk = Ꮡ(new DecapsulationKey1024(nil));
     foreach (var (i, _) in (~dk).s) {
         error errΔ1 = default!;
@@ -178,6 +183,7 @@ public static (ж<DecapsulationKey1024>, error) TestingOnlyNewDecapsulationKey10
         }
         b = b[(int)(encodingSize12)..];
     }
+
     var (ek, err) = NewEncapsulationKey1024(b[..(int)(EncapsulationKeySize1024)]);
     if (err != default!) {
         return (default!, err);
@@ -186,16 +192,20 @@ public static (ж<DecapsulationKey1024>, error) TestingOnlyNewDecapsulationKey10
     dk.Value.h = ek.Value.h.Clone();
     dk.Value.encryptionKey1024 = ek.Value.encryptionKey1024.ΔClone();
     b = b[(int)(EncapsulationKeySize1024)..];
+
     if (!bytes_package.Equal((~dk).h[..], b[..32])) {
         return (default!, errors.New(mlkemInconsistentHEkInˢ));
     }
     b = b[32..];
+
     copy((~dk).z[..], b);
+
     // Generate a random d value for use in Bytes(). This is a safety mechanism
     // that avoids returning a broken key vs a random key if this function is
     // called in contravention of the TestingOnlyNewDecapsulationKey1024 function
     // comment advising against it.
     drbg.Read((~dk).d[..]);
+
     return (dk, default!);
 }
 
@@ -210,18 +220,21 @@ internal static void kemKeyGen1024(ж<DecapsulationKey1024> Ꮡdk, /*[32]*/ ж<a
 
     dk.d = d.Clone();
     dk.z = z.Clone();
+
     var g = sha3.New512();
     g.Write(d[..]);
     g.Write(new byte[]{k1024}.slice()); // Module dimension as a domain separator.
     var G = g.Sum(new slice<byte>(0, 64));
     var (ρ, σ) = (G[..32], G[32..]);
     dk.ρ = new array<byte>(ρ, 32);
+
     var A = Ꮡdk.of(DecapsulationKey1024.Ꮡa);
     for (var i = (byte)0; i < k1024; i++) {
         for (var j = (byte)0; j < k1024; j++) {
             A.Value[(byte)(i * (byte)k1024 + j)] = sampleNTT(ρ, j, i);
         }
     }
+
     byte N = default!;
     var s = Ꮡdk.of(DecapsulationKey1024.Ꮡs);
     foreach (var (i, _) in s.Value) {
@@ -233,14 +246,15 @@ internal static void kemKeyGen1024(ж<DecapsulationKey1024> Ꮡdk, /*[32]*/ ж<a
         e[i] = ntt(samplePolyCBD(σ, N));
         N++;
     }
+
     var t = Ꮡdk.of(DecapsulationKey1024.Ꮡt);
-    foreach (var (i, _) in t.Value) {
-        // t = A ◦ s + e
+    foreach (var (i, _) in t.Value) { // t = A ◦ s + e
         t.Value[i] = e[i].Clone();
         foreach (var (j, _) in s.Value) {
             t.Value[i] = polyAdd<nttElement>(t.Value[i], nttMul(A.Value[i * (nint)k1024 + j], s.Value[j]));
         }
     }
+
     var H = sha3.New256();
     var ek = dk.EncapsulationKey().Bytes();
     H.Write(ek);
@@ -305,8 +319,8 @@ public static (slice<byte> sharedKey, slice<byte> ciphertext) EncapsulateInterna
 internal static (slice<byte> K, slice<byte> c) kemEncaps1024(/*[1568]*/ ж<array<byte>> Ꮡcc, ref EncapsulationKey1024 ek, /*[32]*/ ж<array<byte>> Ꮡm) {
     slice<byte> K = default!;
     slice<byte> c = default!;
-
     ref var m = ref Ꮡm.DerefOrNull();
+
     var g = sha3.New512();
     g.Write(m[..]);
     g.Write(ek.h[..]);
@@ -338,9 +352,11 @@ internal static (ж<EncapsulationKey1024>, error) parseEK1024(ж<EncapsulationKe
     if (len(ekPKE) != EncapsulationKeySize1024) {
         return (default!, errors.New(mlkemInvalidˢ));
     }
+
     var h = sha3.New256();
     h.Write(ekPKE);
     h.Sum(ek.h[..0]);
+
     foreach (var (i, _) in ek.t) {
         error err = default!;
         (ek.t[i], err) = polyByteDecode<nttElement>(ekPKE[..(int)(encodingSize12)]);
@@ -350,11 +366,13 @@ internal static (ж<EncapsulationKey1024>, error) parseEK1024(ж<EncapsulationKe
         ekPKE = ekPKE[(int)(encodingSize12)..];
     }
     copy(ek.ρ[..], ekPKE);
+
     for (var i = (byte)0; i < k1024; i++) {
         for (var j = (byte)0; j < k1024; j++) {
             ek.a[(byte)(i * (byte)k1024 + j)] = sampleNTT(ek.ρ[..], j, i);
         }
     }
+
     return (Ꮡek, default!);
 }
 
@@ -376,6 +394,7 @@ internal static slice<byte> pkeEncrypt1024(/*[1568]*/ ж<array<byte>> Ꮡcc, ref
         N++;
     }
     var e2 = samplePolyCBD(rnd, N);
+
     var u = GoReflect.WithElemDims(new slice<ringElement>(k1024), 256); // NTT⁻¹(AT ◦ r) + e1
     foreach (var (i, _) in u) {
         u[i] = e1[i].Clone();
@@ -384,12 +403,15 @@ internal static slice<byte> pkeEncrypt1024(/*[1568]*/ ж<array<byte>> Ꮡcc, ref
             u[i] = polyAdd<ringElement>(u[i], inverseNTT(nttMul(ex.a[j * (nint)k1024 + i], r[j])));
         }
     }
+
     var μ = ringDecodeAndDecompress1(ref (Ꮡm).DerefOrNull());
+
     nttElement vNTT = default!;                  // t⊺ ◦ r
     foreach (var (i, _) in ex.t) {
         vNTT = polyAdd(vNTT, nttMul(ex.t[i], r[i]));
     }
     var v = polyAdd(polyAdd(inverseNTT(vNTT), e2), μ);
+
     var c = cc[..0];
     foreach (var (_, vᴛ1) in u) {
         var f = vᴛ1.Clone();
@@ -397,6 +419,7 @@ internal static slice<byte> pkeEncrypt1024(/*[1568]*/ ж<array<byte>> Ꮡcc, ref
         c = ringCompressAndEncode11(c, f);
     }
     c = ringCompressAndEncode5(c, v);
+
     return c;
 }
 
@@ -438,6 +461,7 @@ internal static slice<byte> /*K*/ kemDecaps1024(ref DecapsulationKey1024 dk, /*[
     J.Read(Kout);
     ref var cc = ref heap(new array<byte>(1568), out var Ꮡcc);
     var c1 = pkeEncrypt1024(Ꮡcc, ref nonnil(ref dk).encryptionKey1024, Ꮡ(array<byte>.Alias(m, 32)), r);
+
     subtle.ConstantTimeCopy(subtle.ConstantTimeCompare(c[..], c1), Kout, Kprime);
     return Kout;
 }
@@ -454,13 +478,16 @@ internal static slice<byte> pkeDecrypt1024(ref decryptionKey1024 dx, /*[1568]*/ 
         var bΔ1 = Ꮡ(array<byte>.Alias(c.slice((nint)encodingSize11 * i, (nint)encodingSize11 * (i + 1)), 352));
         u[i] = ringDecodeAndDecompress11(bΔ1);
     }
+
     var b = Ꮡ(array<byte>.Alias(c[(int)(encodingSize11 * k1024)..], 160));
     var v = ringDecodeAndDecompress5(b);
+
     nttElement mask = default!;                  // s⊺ ◦ NTT(u)
     foreach (var (i, _) in dx.s) {
         mask = polyAdd(mask, nttMul(dx.s[i], ntt(u[i])));
     }
     var w = polySub(v, inverseNTT(mask));
+
     return ringCompressAndEncode1(default!, w);
 }
 

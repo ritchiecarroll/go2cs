@@ -9,6 +9,10 @@ using @internal.runtime;
 
 partial class runtime_package {
 
+// traceGoStatus is the status of a goroutine.
+//
+// They correspond directly to the various goroutine
+// statuses.
 partial struct traceGoStatus /*num:uint8*/;
 
 internal static traceGoStatus traceGoBad => /* iota */ 0;
@@ -17,12 +21,25 @@ internal static traceGoStatus traceGoRunning => 2;
 internal static traceGoStatus traceGoSyscall => 3;
 internal static traceGoStatus traceGoWaiting => 4;
 
+// traceProcStatus is the status of a P.
+//
+// They mostly correspond to the various P statuses.
 partial struct traceProcStatus /*num:uint8*/;
 
 internal static traceProcStatus traceProcBad => /* iota */ 0;
 internal static traceProcStatus traceProcRunning => 1;
 internal static traceProcStatus traceProcIdle => 2;
 internal static traceProcStatus traceProcSyscall => 3;
+
+// traceProcSyscallAbandoned is a special case of
+// traceProcSyscall. It's used in the very specific case
+// where the first a P is mentioned in a generation is
+// part of a ProcSteal event. If that's the first time
+// it's mentioned, then there's no GoSyscallBegin to
+// connect the P stealing back to at that point. This
+// special state indicates this to the parser, so it
+// doesn't try to find a GoSyscallEndBlocked that
+// corresponds with the ProcSteal.
 internal static traceProcStatus traceProcSyscallAbandoned => 4;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -40,12 +57,14 @@ internal static traceWriter writeGoStatus(this traceWriter w, uint64 goid, int64
         print((@string)"runtime: goid="u8, goid, (@string)"\n"u8);
         @throw(attemptedToTraceABadˢ);
     }
+
     // Trace the status.
     if (stackID == 0){
         w = w.@event(traceEvGoStatus, ((traceArg)goid), ((traceArg)(uint64)mid), ((traceArg)(uint64)(uint8)status));
     } else {
         w = w.@event(traceEvGoStatusStack, ((traceArg)goid), ((traceArg)(uint64)mid), ((traceArg)(uint64)(uint8)status), ((traceArg)stackID));
     }
+
     // Trace any special ranges that are in-progress.
     if (markAssist) {
         w = w.@event(traceEvGCMarkAssistActive, ((traceArg)goid));
@@ -83,11 +102,11 @@ internal static traceWriter writeProcStatusForP(this traceWriter w, ж<Δp> Ꮡp
     }
     else if (exprᴛ1 == _Prunning) {
         status = traceProcRunning;
+        // There's a short window wherein the goroutine may have entered _Gsyscall
+        // but it still owns the P (it's not in _Psyscall yet). The goroutine entering
+        // _Gsyscall is the tracer's signal that the P its bound to is also in a syscall,
+        // so we need to emit a status that matches. See #64318.
         if ((~w.mp).p.ptr() == Ꮡpp && (~w.mp).curg != nil && (uint32)(readgstatus((~w.mp).curg) & ~(uint32)_Gscan) == _Gsyscall) {
-            // There's a short window wherein the goroutine may have entered _Gsyscall
-            // but it still owns the P (it's not in _Psyscall yet). The goroutine entering
-            // _Gsyscall is the tracer's signal that the P its bound to is also in a syscall,
-            // so we need to emit a status that matches. See #64318.
             status = traceProcSyscall;
         }
     }
@@ -97,7 +116,6 @@ internal static traceWriter writeProcStatusForP(this traceWriter w, ж<Δp> Ꮡp
     else { /* default: */
         @throw(attemptToTraceInvalidOrˢ);
     }
-
     w = w.writeProcStatus((uint64)pp.id, status, pp.trace.inSweep);
     return w;
 }
@@ -120,8 +138,10 @@ internal static traceWriter writeProcStatus(this traceWriter w, uint64 pid, trac
         print((@string)"runtime: pid="u8, pid, (@string)"\n"u8);
         @throw(attemptedToTraceABadˢ2);
     }
+
     // Trace the status.
     w = w.@event(traceEvProcStatus, ((traceArg)pid), ((traceArg)(uint64)(uint8)status));
+
     // Trace any special ranges that are in-progress.
     if (inSweep) {
         w = w.@event(traceEvGCSweepActive, ((traceArg)pid));
@@ -155,15 +175,15 @@ internal static traceGoStatus goStatusToTraceGoStatus(uint32 status, waitReason 
         tgs = traceGoSyscall;
     }
     else if (exprᴛ1 == _Gwaiting || exprᴛ1 == _Gpreempted) {
+        // There are a number of cases where a G might end up in
+        // _Gwaiting but it's actually running in a non-preemptive
+        // state but needs to present itself as preempted to the
+        // garbage collector and traceAdvance (via suspendG). In
+        // these cases, we're not going to emit an event, and we
+        // want these goroutines to appear in the final trace as
+        // if they're running, not blocked.
         tgs = traceGoWaiting;
         if (status == _Gwaiting && wr.isWaitingForSuspendG()) {
-            // There are a number of cases where a G might end up in
-            // _Gwaiting but it's actually running in a non-preemptive
-            // state but needs to present itself as preempted to the
-            // garbage collector and traceAdvance (via suspendG). In
-            // these cases, we're not going to emit an event, and we
-            // want these goroutines to appear in the final trace as
-            // if they're running, not blocked.
             tgs = traceGoRunning;
         }
     }
@@ -173,7 +193,6 @@ internal static traceGoStatus goStatusToTraceGoStatus(uint32 status, waitReason 
     else { /* default: */
         @throw(triedToTraceGoroutineˢ);
     }
-
     return tgs;
 }
 

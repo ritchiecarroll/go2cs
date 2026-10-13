@@ -68,6 +68,7 @@ internal static ж<Δhchan> makechan64(ref chantype t, int64 size) {
     if ((int64)(nint)size != size) {
         throw panic(((plainError)(@string)makechanSizeOutOfRangeˢ));
     }
+
     return makechan(ref t, (nint)size);
 }
 
@@ -77,6 +78,7 @@ internal static readonly @string makechanBadAlignmentˢ = "makechan: bad alignme
 
 internal static ж<Δhchan> makechan(ref chantype t, nint size) {
     var elem = t.Elem;
+
     // compiler checks this but be safe.
     if ((~elem).Size_ >= ((uintptr)1 << (int)(16))) {
         @throw(makechanInvalidChannelˢ);
@@ -84,10 +86,12 @@ internal static ж<Δhchan> makechan(ref chantype t, nint size) {
     if ((uintptr)(hchanSize % (uintptr)maxAlign) != 0 || (~elem).Align_ > maxAlign) {
         @throw(makechanBadAlignmentˢ);
     }
+
     var (mem, overflow) = math.MulUintptr((~elem).Size_, (uintptr)size);
     if (overflow || mem > (uintptr)((uintptr)maxAlloc - hchanSize) || size < 0) {
         throw panic(((plainError)(@string)makechanSizeOutOfRangeˢ));
     }
+
     // Hchan does not contain pointers interesting for GC when elements stored in buf do not contain pointers.
     // buf points into the same allocation, elemtype is persistent.
     // SudoG's are referenced from their owning thread so they can't be collected.
@@ -95,23 +99,23 @@ internal static ж<Δhchan> makechan(ref chantype t, nint size) {
     ж<Δhchan> c = default!;
     switch (ᐧ) {
     case {} when mem == 0: {
-        c = (ж<Δhchan>)(uintptr)(mallocgc(hchanSize, // Queue or element size is zero.
- nil, true));
+        // Queue or element size is zero.
+        c = (ж<Δhchan>)(uintptr)(mallocgc(hchanSize, nil, true));
+        // Race detector uses this location for synchronization.
         c.Value.buf = (uintptr)c.raceaddr();
         break;
     }
     case {} when !elem.Pointers(): {
-        c = (ж<Δhchan>)(uintptr)(mallocgc(hchanSize + mem, // Race detector uses this location for synchronization.
- // Elements do not contain pointers.
- // Allocate hchan and buf in one call.
- nil, true));
+        // Elements do not contain pointers.
+        // Allocate hchan and buf in one call.
+        c = (ж<Δhchan>)(uintptr)(mallocgc(hchanSize + mem, nil, true));
         c.Value.buf = (uintptr)add(@unsafe.Pointer.FromPinnedBox(c), hchanSize);
         break;
     }
     default: {
+        // Elements contain pointers.
         c = @new<Δhchan>();
-        c.Value.buf = (uintptr)mallocgc(mem, // Elements contain pointers.
- elem, true);
+        c.Value.buf = (uintptr)mallocgc(mem, elem, true);
         break;
     }}
 
@@ -122,6 +126,7 @@ internal static ж<Δhchan> makechan(ref chantype t, nint size) {
         c.Value.synctest = true;
     }
     lockInit(c.of(runtime_package.Δhchan.Ꮡlock), lockRankHchan);
+
     if (debugChan) {
         print((@string)"makechan: chan="u8, c.OrTypedNil(), (@string)"; elemsize="u8, (~elem).Size_, (@string)"; dataqsiz="u8, size, (@string)"\n"u8);
     }
@@ -196,15 +201,19 @@ internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, 
         gopark(default!, nil, waitReasonChanSendNilChan, traceBlockForever, 2);
         @throw(unreachableˢ);
     }
+
     if (debugChan) {
         print((@string)"chansend: chan="u8, Ꮡc.OrTypedNil(), (@string)"\n"u8);
     }
+
     if (raceenabled) {
         racereadpc((uintptr)Ꮡc.raceaddr(), callerpc, abi.FuncPCABIInternal(chansend));
     }
+
     if (c.synctest && (~getg()).syncGroup == nil) {
         throw panic(((plainError)(@string)sendOnSynctestChannelˢ));
     }
+
     // Fast path: check for failed non-blocking operation without acquiring the lock.
     //
     // After observing that the channel is not closed, we observe that the channel is
@@ -224,15 +233,19 @@ internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, 
     if (!block && c.closed == 0 && full(ref (Ꮡc).DerefOrNull())) {
         return false;
     }
+
     int64 t0 = default!;
     if (blockprofilerate > 0) {
         t0 = cputicks();
     }
+
     @lock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
+
     if (c.closed != 0) {
         unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
         throw panic(((plainError)(@string)sendOnClosedChannelˢ));
     }
+
     {
         var sg = c.recvq.dequeue(); if (sg != nil) {
             // Found a waiting receiver. We pass the value we want to send
@@ -243,6 +256,7 @@ internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, 
             return true;
         }
     }
+
     if (c.qcount < c.dataqsiz) {
         // Space is available in the channel buffer. Enqueue the element to send.
         @unsafe.Pointer qp = (uintptr)chanbuf(Ꮡc, c.sendx);
@@ -258,10 +272,12 @@ internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, 
         unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
         return true;
     }
+
     if (!block) {
         unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
         return false;
     }
+
     // Block on the channel. Some receiver will complete our operation for us.
     var gp = getg();
     var mysg = acquireSudog();
@@ -294,6 +310,7 @@ internal static bool chansend(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block, 
     // stack object, but sudogs aren't considered as roots of the
     // stack tracer.
     KeepAlive(@unsafe.Pointer.OrTypedNil(ep));
+
     // someone woke us up.
     if (mysg != (~gp).waiting) {
         @throw(gWaitingListIsCorruptedˢ);
@@ -435,18 +452,23 @@ internal static void closechan(ж<Δhchan> Ꮡc) {
     if (Ꮡc == nil) {
         throw panic(((plainError)(@string)closeOfNilChannelˢ));
     }
+
     @lock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
     if (c.closed != 0) {
         unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
         throw panic(((plainError)(@string)closeOfClosedChannelˢ));
     }
+
     if (raceenabled) {
         var callerpc = sys.GetCallerPC();
         racewritepc((uintptr)Ꮡc.raceaddr(), callerpc, abi.FuncPCABIInternal(closechan));
         racerelease((uintptr)Ꮡc.raceaddr());
     }
+
     c.closed = 1;
+
     gList glist = default!;
+
     // release all readers
     while (ᐧ) {
         var sg = c.recvq.dequeue();
@@ -468,6 +490,7 @@ internal static void closechan(ж<Δhchan> Ꮡc) {
         }
         glist.push(gp);
     }
+
     // release all writers (they will panic)
     while (ᐧ) {
         var sg = c.sendq.dequeue();
@@ -487,6 +510,7 @@ internal static void closechan(ж<Δhchan> Ꮡc) {
         glist.push(gp);
     }
     unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
+
     // Ready all Gs now that we've dropped the channel lock.
     while (!glist.empty()) {
         var gp = glist.pop();
@@ -541,13 +565,14 @@ internal static readonly @string receiveOnSynctestChannelˢ = "receive on syncte
 internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsafe.Pointer ep, bool block) {
     bool selected = default!;
     bool received = default!;
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     // raceenabled: don't need to check ep, as it is always on the stack
     // or is new memory allocated by reflect.
     if (debugChan) {
         print((@string)"chanrecv: chan="u8, Ꮡc.OrTypedNil(), (@string)"\n"u8);
     }
+
     if (Ꮡc == nil) {
         if (!block) {
             return (selected, received);
@@ -555,12 +580,15 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
         gopark(default!, nil, waitReasonChanReceiveNilChan, traceBlockForever, 2);
         @throw(unreachableˢ);
     }
+
     if (c.synctest && (~getg()).syncGroup == nil) {
         throw panic(((plainError)(@string)receiveOnSynctestChannelˢ));
     }
+
     if (c.timer != nil) {
         c.timer.maybeRunChan();
     }
+
     // Fast path: check for failed non-blocking operation without acquiring the lock.
     if (!block && empty(Ꮡc)) {
         // After observing that the channel is not ready for receiving, we observe whether the
@@ -593,11 +621,14 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
             return (true, false);
         }
     }
+
     int64 t0 = default!;
     if (blockprofilerate > 0) {
         t0 = cputicks();
     }
+
     @lock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
+
     if (c.closed != 0){
         if (c.qcount == 0) {
             if (raceenabled) {
@@ -609,8 +640,8 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
             }
             return (true, false);
         }
-    } else {
         // The channel has been closed, but the channel's buffer have data.
+    } else {
         // Just found waiting sender with not closed.
         {
             var sg = c.sendq.dequeue(); if (sg != nil) {
@@ -625,6 +656,7 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
             }
         }
     }
+
     if (c.qcount > 0) {
         // Receive directly from queue
         @unsafe.Pointer qp = (uintptr)chanbuf(Ꮡc, c.recvx);
@@ -643,10 +675,12 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
         unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
         return (true, true);
     }
+
     if (!block) {
         unlock(Ꮡc.of(runtime_package.Δhchan.Ꮡlock));
         return (false, false);
     }
+
     // no sender available: block on this channel.
     var gp = getg();
     var mysg = acquireSudog();
@@ -659,6 +693,7 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
     mysg.Value.elem = ep;
     mysg.Value.waitlink = default!;
     gp.Value.waiting = mysg;
+
     mysg.Value.g = gp;
     mysg.Value.isSelect = false;
     mysg.Value.c = Ꮡc;
@@ -667,6 +702,7 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
     if (c.timer != nil) {
         blockTimerChan(ref (Ꮡc).DerefOrNull());
     }
+
     // Signal to anyone trying to shrink our stack that we're about
     // to park on a channel. The window between when this G's status
     // changes and when we set gp.activeStackChans is not safe for
@@ -677,6 +713,7 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
         reason = waitReasonSynctestChanReceive;
     }
     gopark(chanparkcommit, @unsafe.Pointer.FromPinnedBox(Ꮡc.of(runtime_package.Δhchan.Ꮡlock)), reason, traceBlockChanRecv, 2);
+
     // someone woke us up
     if (mysg != (~gp).waiting) {
         @throw(gWaitingListIsCorruptedˢ);
@@ -920,6 +957,7 @@ internal static ж<sudog> dequeue(this ref waitq q) {
             q.first = y;
             sgp.Value.next = default!; // mark as removed (see dequeueSudoG)
         }
+
         // if a goroutine was put on this queue because of a
         // select, there is a small window between the goroutine
         // being woken up by a different case and it grabbing the
@@ -934,6 +972,7 @@ internal static ж<sudog> dequeue(this ref waitq q) {
                 continue;
             }
         }
+
         return sgp;
     }
 }

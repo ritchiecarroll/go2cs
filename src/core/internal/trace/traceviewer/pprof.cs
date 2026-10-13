@@ -46,6 +46,7 @@ public static http.HandlerFunc SVGProfileHandlerFunc(Func<ж<http.Request>, (sli
         try {
             if (r.FormValue(rawˢ) != ""u8) {
                 w.Header().Set(contentTypeˢ, applicationOctetStreamˢ);
+
                 void failf(@string s, params ꓸꓸꓸany argsʗp) {
                     var args = argsʗp.sslice();
                     w.Header().Set(contentTypeˢ, textPlainCharsetUtf8ˢ);
@@ -65,6 +66,7 @@ public static http.HandlerFunc SVGProfileHandlerFunc(Func<ж<http.Request>, (sli
                 }
                 return;
             }
+
             var (blockf, err) = os.CreateTemp(""u8, blockˢ);
             if (err != default!) {
                 http.Error(w, fmt.Sprintf("failed to create temp file: %v"u8, err), http.StatusInternalServerError);

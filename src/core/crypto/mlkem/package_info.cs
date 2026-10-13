@@ -49,7 +49,7 @@ using static go.crypto.mlkem_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/mlkem/mlkem.go", "mlkem.cs", "AB9YooKClqqigoKWrLKuwqqiAAgWooKClqiSrsIACBaigoKWqqKCgpassq7CqqIACBaigoKWqJKuwg==")]
+[assembly: go.GoPositionMap("crypto/mlkem/mlkem.go", "mlkem.cs", "ACpYooKCpqqigoKmrLKuwqqiAAgWooKCpqiSrsIACBaigoKmqqKCgqassq7CqqIACBaigoKmqJKuwg==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

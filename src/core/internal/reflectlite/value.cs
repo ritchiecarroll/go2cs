@@ -116,9 +116,9 @@ internal static any packEface(Value v) {
         if ((flag)(v.flag & flagIndir) == 0) {
             throw panic("bad indir");
         }
+        // Value is indirect, and so is the interface we're making.
         @unsafe.Pointer ptr = v.ptr;
         if ((flag)(v.flag & flagAddr) != 0) {
-            // Value is indirect, and so is the interface we're making.
             @unsafe.Pointer c = (uintptr)unsafe_New(t);
             typedmemmove(t, c, ptr);
             ptr = c;
@@ -127,17 +127,16 @@ internal static any packEface(Value v) {
         break;
     }
     case {} when (flag)(v.flag & flagIndir) != 0: {
+        // Value is indirect, but interface is direct. We need
+        // to load the data at v.ptr into the interface data word.
         e.Value.Data = ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
         break;
     }
     default: {
+        // Value is direct, and so is the interface.
         e.Value.Data = v.ptr;
         break;
     }}
-
-    // Value is indirect, but interface is direct. We need
-    // to load the data at v.ptr into the interface data word.
-    // Value is direct, and so is the interface.
     // Now, fill in the type portion. We're very careful here not
     // to have any operation between the e.word and e.typ assignments
     // that would let the garbage collector observe the partially-built
@@ -273,11 +272,11 @@ internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡds
     // }
     switch (ᐧ) {
     case {} when directlyAssignable(Ꮡdst, v.typ()): {
+        // Overwrite type so that they match.
+        // Same memory layout, so no harm done.
         var fl = (flag)((flag)(v.flag & ((flag)(flagAddr | flagIndir))) | v.flag.ro());
         fl |= (flag)(((flag)(uintptr)(uint8)dst.Kind()));
-        return new Value( // Overwrite type so that they match.
- // Same memory layout, so no harm done.
-Ꮡdst, v.ptr, fl);
+        return new Value(Ꮡdst, v.ptr, fl);
     }
     case {} when implements(Ꮡdst, v.typ()): {
         if (target == nil) {
@@ -331,7 +330,6 @@ internal static void escapes(any x) {
         dummy.x = x;
     }
 }
-
 
 partial struct dummyᴛ1 /*dyn*/ {
     internal bool b;

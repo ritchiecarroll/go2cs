@@ -112,8 +112,10 @@ internal static (nint n, error err) writeSlice(io.Writer w, slice<byte> buf, int
     for (; n < m && p + (nint)binary.MaxVarintLen64 <= builtin.len(buf); n++) {
         p += binary.PutUvarint(buf.slice(p), (uint64)data.get(n));
     }
+
     // update buffer size
     binary.PutVarint(buf, (int64)p);
+
     // write buffer
     (_, err) = w.Write(buf.slice(0, p));
     return (n, err);
@@ -138,18 +140,21 @@ internal static (nint n, error err) readSlice(io.Reader r, slice<byte> buf, ints
         return (0, errTooBig);
     }
     nint size = (nint)size64;
+
     // read buffer w/o the size
     {
         (_, err) = io.ReadFull(r, buf.slice(binary.MaxVarintLen64, size)); if (err != default!) {
             return (n, err);
         }
     }
+
     // decode as many elements as present in buf
     for (nint p = binary.MaxVarintLen64; p < size; n++) {
         var (x, w) = binary.Uvarint(buf.slice(p));
         data.set(n, (int64)x);
         p += w;
     }
+
     return (n, err);
 }
 
@@ -159,6 +164,7 @@ internal static UntypedInt bufSize => /* 16 << 10 */ 16384; // reasonable for Be
 public static error Read(this ref Index x, io.Reader r) {
     // buffer for all reads
     var buf = new slice<byte>(bufSize);
+
     // read length
     var (n64, err) = readInt(r, buf);
     if (err != default!) {
@@ -168,6 +174,7 @@ public static error Read(this ref Index x, io.Reader r) {
         return errTooBig;
     }
     nint n = (nint)n64;
+
     // allocate space
     if (2 * n < cap(x.data) || cap(x.data) < n || x.sa.int32 != default! && n > maxData32 || x.sa.int64 != default! && n <= maxData32){
         // new data is significantly smaller or larger than
@@ -185,12 +192,14 @@ public static error Read(this ref Index x, io.Reader r) {
         x.data = x.data.slice(0, n);
         x.sa = x.sa.Δslice(0, n);
     }
+
     // read data
     {
         var (_, errΔ1) = io.ReadFull(r, x.data); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
+
     // read index
     var sa = x.sa;
     while (sa.len() > 0) {
@@ -207,18 +216,21 @@ public static error Read(this ref Index x, io.Reader r) {
 public static error Write(this ref Index x, io.Writer w) {
     // buffer for all writes
     var buf = new slice<byte>(bufSize);
+
     // write length
     {
         var err = writeInt(w, buf, builtin.len(x.data)); if (err != default!) {
             return err;
         }
     }
+
     // write data
     {
         var (_, err) = w.Write(x.data); if (err != default!) {
             return err;
         }
     }
+
     // write index
     var sa = x.sa;
     while (sa.len() > 0) {
@@ -295,17 +307,19 @@ public static slice<nint> /*result*/ Lookup(this ж<Index> Ꮡx, slice<byte> s, 
 // or if n == 0.
 public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж<regexp.Regexp> Ꮡr, nint n) {
     slice<slice<nint>> result = default!;
-
     ref var x = ref Ꮡx.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
+
     // a non-empty literal prefix is used to determine possible
     // match start indices with Lookup
     var (prefix, complete) = r.LiteralPrefix();
     var lit = slice<byte>(prefix);
+
     // worst-case scenario: no literal prefix
     if (prefix == ""u8) {
         return Ꮡr.FindAllIndex(x.data, n);
     }
+
     // if regexp is a literal just use Lookup and convert its
     // result into match pairs
     if (complete) {
@@ -352,11 +366,13 @@ public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж
         }
         return result;
     }
+
     // regexp has a non-empty literal prefix; Lookup(lit) computes
     // the indices of possible complete matches; use these as starting
     // points for anchored searches
     // (regexp "^" matches beginning of input, not beginning of line)
     Ꮡr = regexp.MustCompile("^"u8 + r.String()); r = ref Ꮡr.DerefOrNull(); // compiles because r compiled
+
     // same comment about Lookup applies here as in the loop above
     for (nint n1 = n; ᐧ ; n1 += 2 * (n - builtin.len(result))) {
         /* overflow ok */

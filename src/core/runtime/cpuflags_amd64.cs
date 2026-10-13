@@ -10,7 +10,11 @@ partial class runtime_package {
 
 internal static uint8 memmoveBits;
 
+// avxSupported indicates that the CPU supports AVX instructions.
 internal static UntypedInt avxSupported => /* 1 << 0 */ 1;
+
+// repmovsPreferred indicates that REP MOVSx instruction is more
+// efficient on the CPU.
 internal static UntypedInt repmovsPreferred => /* 1 << 1 */ 2;
 
 /* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void initΔ1() {

@@ -41,8 +41,8 @@ public static ж<Object> Lookup(this ref Scope s, @string name) {
 // it inserts obj and returns nil.
 public static ж<Object> /*alt*/ Insert(this ref Scope s, ж<Object> Ꮡobj) {
     ж<Object> alt = default!;
-
     ref var obj = ref Ꮡobj.DerefOrNull();
+
     {
         alt = s.Objects[obj.Name]; if (alt == nil) {
             s.Objects[obj.Name] = Ꮡobj;
@@ -161,27 +161,22 @@ public static tokenꓸPos Pos(this ref Object obj) {
         break;
     }
     case ж<Scope> d: {
+        // predeclared object - nothing to do for now
         break;
     }}
-    // predeclared object - nothing to do for now
     return token.NoPos;
 }
 
+// ObjKind describes what an [Object] represents.
 partial struct ObjKind /*num:nint*/;
 
 // The list of possible [Object] kinds.
 public static ObjKind Bad => /* iota */ 0;  // for error handling
-
 public static ObjKind Pkg => 1;  // package
-
 public static ObjKind Con => 2;  // constant
-
 public static ObjKind Typ => 3;  // type
-
 public static ObjKind Var => 4;  // variable
-
 public static ObjKind Fun => 5;  // function or method
-
 public static ObjKind Lbl => 6;  // label
 
 internal static array<@string> objKindStrings = new golib.SparseArray<@string>{

@@ -17,8 +17,7 @@ internal static uintptr /*reqSize*/ roundupsize(uintptr size, bool noscan) {
     reqSize = size;
     if (reqSize <= (uintptr)(maxSmallSize - mallocHeaderSize)) {
         // Small object.
-        if (!noscan && reqSize > minSizeForMallocHeader) {
-            // !noscan && !heapBitsInSpan(reqSize)
+        if (!noscan && reqSize > minSizeForMallocHeader) { // !noscan && !heapBitsInSpan(reqSize)
             reqSize += mallocHeaderSize;
         }
         // (reqSize - size) is either mallocHeaderSize or 0. We need to subtract mallocHeaderSize

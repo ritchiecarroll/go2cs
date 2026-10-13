@@ -58,6 +58,7 @@ internal static sortedHint unknownHint => /* iota */ 0;
 internal static sortedHint increasingHint => 1;
 internal static sortedHint decreasingHint => 2;
 
+// xorshift paper: https://www.jstatsoft.org/article/view/v008i14/xorshift.pdf
 partial struct xorshift /*num:uint64*/;
 
 internal static uint64 Next(this ref xorshift r) {
@@ -110,9 +111,11 @@ public static bool IsSorted(Interface data) {
     return true;
 }
 
+// Convenience types for common cases
+
+// IntSlice attaches the methods of Interface to []int, sorting in increasing order.
 partial struct IntSlice /*[]nint*/;
 
-// Convenience types for common cases
 public static nint Len(this IntSlice x) {
     return len(x);
 }
@@ -130,6 +133,8 @@ public static void Sort(this IntSlice x) {
     Sort((Interface)(x));
 }
 
+// Float64Slice implements Interface for a []float64, sorting in increasing order,
+// with not-a-number (NaN) values ordered before other values.
 partial struct Float64Slice /*[]float64*/;
 
 public static nint Len(this Float64Slice x) {
@@ -160,6 +165,7 @@ public static void Sort(this Float64Slice x) {
     Sort((Interface)(x));
 }
 
+// StringSlice attaches the methods of Interface to []string, sorting in increasing order.
 partial struct StringSlice /*[]@string*/;
 
 public static nint Len(this StringSlice x) {

@@ -25,6 +25,7 @@ internal static error read(slice<byte> b) {
     // at least Linux, FreeBSD, DragonFly, and Oracle Solaris, but we don't make
     // use of that.
     nint maxSize = math.MaxInt32;
+
     // Oracle Solaris has a limit of 133120 bytes. Very specific.
     //
     //    The getrandom() and getentropy() functions fail if: [...]
@@ -35,6 +36,7 @@ internal static error read(slice<byte> b) {
     if (runtime.GOOS == "solaris"u8) {
         maxSize = 133120;
     }
+
     while (len(b) > 0) {
         nint size = len(b);
         if (size > maxSize) {

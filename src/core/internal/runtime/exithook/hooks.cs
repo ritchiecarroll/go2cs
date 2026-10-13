@@ -34,6 +34,8 @@ internal static ж<atomic.Uint64> ᏑrunGoid = new StandardBox<atomic.Uint64>(de
 internal static ref atomic.Uint64 runGoid => ref ᏑrunGoid.Value;
 internal static slice<Hook> hooks;
 internal static bool running;
+
+// runtime sets these for us
 public static Action Gosched;
 public static Func<uint64> Goid;
 public static Action<@string> Throw;
@@ -68,6 +70,7 @@ public static void Run(nint code) {
         defer(Ꮡlocked.Store, (int32)(0), ref ᒐ);
         ᏑrunGoid.Store(Goid());
         defer(ᏑrunGoid.Store, (uint64)(0), ref ᒐ);
+
         defer(() => {
             {
                 var e = recover(); if (e != default!) {
@@ -75,6 +78,7 @@ public static void Run(nint code) {
                 }
             }
         }, ref ᒐ);
+
         while (len(hooks) > 0) {
             var h = hooks[len(hooks) - 1];
             hooks = hooks.slice(0, len(hooks) - 1);

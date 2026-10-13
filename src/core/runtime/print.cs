@@ -10,10 +10,14 @@ using @internal.runtime;
 
 partial class runtime_package {
 
+// The compiler knows that a print of a value of this type
+// should use printhex instead of printuint (decimal).
 partial struct Δhex /*num:uint64*/;
 
 // go2cs generated this placeholder — func bytes is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+// printBacklog is a circular buffer of messages written with the builtin
+// print* functions, for use in postmortem analysis of core dumps.
 internal static array<byte> printBacklog = new(512);
 internal static nint printBacklogIndex;
 
@@ -26,6 +30,7 @@ internal static nint printBacklogIndex;
 // from the runtime data structures in the core file.
 internal static void recordForPanic(slice<byte> b) {
     printlock();
+
     if (Ꮡpanicking.Load() == 0) {
         // Not actively crashing: maintain circular buffer of print output.
         for (nint i = 0; i < len(b); ) {
@@ -35,6 +40,7 @@ internal static void recordForPanic(slice<byte> b) {
             printBacklogIndex %= len(printBacklog);
         }
     }
+
     printunlock();
 }
 
@@ -83,6 +89,7 @@ internal static void gwrite(slice<byte> b) {
         writeErr(b);
         return;
     }
+
     nint n = copy((~gp).writebuf.slice(len((~gp).writebuf), cap((~gp).writebuf)), b);
     gp.Value.writebuf = (~gp).writebuf.slice(0, len((~gp).writebuf) + n);
 }
@@ -140,6 +147,7 @@ internal static void printfloat(float64 v) {
             v = -v;
             buf[0] = (rune)'-';
         }
+
         // normalize
         while (v >= 10D) {
             e++;
@@ -149,6 +157,7 @@ internal static void printfloat(float64 v) {
             e--;
             v *= 10D;
         }
+
         // round
         var h = 5.0D;
         for (nint i = 0; i < n; i++) {
@@ -160,6 +169,7 @@ internal static void printfloat(float64 v) {
             v /= 10D;
         }
     }
+
     // format +d.dddd+edd
     for (nint i = 0; i < n; i++) {
         nint s = (nint)v;
@@ -169,12 +179,14 @@ internal static void printfloat(float64 v) {
     }
     buf[1] = buf[2];
     buf[2] = (rune)'.';
+
     buf[n + 2] = (rune)'e';
     buf[n + 3] = (rune)'+';
     if (e < 0) {
         e = -e;
         buf[n + 3] = (rune)'-';
     }
+
     buf[n + 4] = (byte)((byte)(e / 100) + (rune)'0');
     buf[n + 5] = (byte)((byte)(e / 10) % 10 + (rune)'0');
     buf[n + 6] = (byte)((byte)(e % 10) + (rune)'0');
@@ -274,6 +286,7 @@ internal static void hexdumpWords(uintptr Δp, uintptr end, Func<uintptr, byte> 
             }
             print(((Δhex)(uint64)(Δp + i)), (@string)": "u8);
         }
+
         if (mark != default!) {
             markbuf[0] = mark(Δp + i);
             if (markbuf[0] == 0) {
@@ -284,6 +297,7 @@ internal static void hexdumpWords(uintptr Δp, uintptr end, Func<uintptr, byte> 
         var val = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)(Δp + i));
         print(((Δhex)(uint64)val));
         print((@string)" "u8);
+
         // Can we symbolize val?
         var fn = findfunc(val);
         if (fn.valid()) {

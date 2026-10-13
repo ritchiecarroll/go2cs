@@ -35,6 +35,9 @@ internal static UntypedInt dsbyteSHA3 => 0b00000110;
 internal static UntypedInt dsbyteKeccak => 0b00000001;
 internal static UntypedInt dsbyteShake => 0b00011111;
 internal static UntypedInt dsbyteCShake => 0b00000100;
+
+// rateK[c] is the rate in bytes for Keccak[c] where c is the capacity in
+// bits. Given the sponge size is 1600 bits, the rate is 1600 - c bits.
 internal static UntypedInt rateK256 => /* (1600 - 256) / 8 */ 168;
 internal static UntypedInt rateK448 => /* (1600 - 448) / 8 */ 144;
 internal static UntypedInt rateK512 => /* (1600 - 512) / 8 */ 136;

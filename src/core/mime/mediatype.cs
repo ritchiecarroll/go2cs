@@ -38,6 +38,7 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
             Ꮡb.WriteString(strings.ToLower(sub));
         }
     }
+
     foreach (var (_, attribute) in slices.Sorted(maps.Keys<map<@string, @string>, @string, @string>(param))) {
         @string value = param[attribute];
         Ꮡb.WriteByte((rune)';');
@@ -46,14 +47,17 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
             return ""u8;
         }
         Ꮡb.WriteString(strings.ToLower(attribute));
+
         var needEnc = needsEncoding(value);
         if (needEnc) {
             // RFC 2231 section 4
             Ꮡb.WriteByte((rune)'*');
         }
         Ꮡb.WriteByte((rune)'=');
+
         if (needEnc) {
             Ꮡb.WriteString(utf8ˢ3);
+
             nint offsetΔ1 = 0;
             for (nint index = 0; index < len(value); index++) {
                 var ch = value[index];
@@ -62,6 +66,7 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
                 if (ch <= (rune)' ' || ch >= 0x7F || ch == (rune)'*' || ch == (rune)'\'' || ch == (rune)'%' || isTSpecial((rune)ch)) {
                     Ꮡb.WriteString(value.slice(offsetΔ1, index));
                     offsetΔ1 = index + 1;
+
                     Ꮡb.WriteByte((rune)'%');
                     Ꮡb.WriteByte(upperhex[(ch >> (int)(4))]);
                     Ꮡb.WriteByte(upperhex[(byte)(ch & 0x0F)]);
@@ -70,10 +75,12 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
             Ꮡb.WriteString(value.slice(offsetΔ1));
             continue;
         }
+
         if (isToken(value)) {
             Ꮡb.WriteString(value);
             continue;
         }
+
         Ꮡb.WriteByte((rune)'"');
         nint offset = 0;
         for (nint index = 0; index < len(value); index++) {
@@ -142,15 +149,19 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
 
     var (@base, _, _) = strings.Cut(v, ";"u8);
     mediatype = strings.TrimSpace(strings.ToLower(@base));
+
     err = checkMediaTypeDisposition(mediatype);
     if (err != default!) {
         return ("", default!, err);
     }
+
     @params = new map<@string, @string>();
+
     // Map of base parameter name -> parameter name -> value
     // for parameters containing a '*' character.
     // Lazily initialized.
     map<@string, map<@string, @string>> continuation = default!;
+
     v = v.slice(len(@base));
     while (len(v) > 0) {
         v = strings.TrimLeftFunc(v, Δunicode.IsSpace);
@@ -167,6 +178,7 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
             // Parse error.
             return (mediatype, default!, ErrInvalidMediaParameter);
         }
+
         var pmap = @params;
         {
             var (baseName, _, ok) = strings.Cut(key, "*"u8); if (ok) {
@@ -191,6 +203,7 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
         pmap[key] = value;
         v = rest;
     }
+
     // Stitch together any continuations or things with stars
     // (i.e. RFC 2231 things with stars: "foo*0" or "foo*")
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
@@ -206,6 +219,7 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
                 continue;
             }
         }
+
         buf.Reset();
         var valid = false;
         for (nint n = 0; ᐧ ; n++) {
@@ -238,6 +252,7 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
             @params[key] = buf.String();
         }
     }
+
     return (mediatype, @params, err);
 }
 
@@ -298,6 +313,7 @@ internal static (@string value, @string rest) consumeValue(@string v) {
     if (v[0] != (rune)'"') {
         return consumeToken(v);
     }
+
     // parse a quoted-string
     var buffer = @new<strings.Builder>();
     for (nint i = 1; i < len(v); i++) {
@@ -338,6 +354,7 @@ internal static (@string param, @string value, @string rest) consumeMediaParam(@
     if (!strings.HasPrefix(rest, ";"u8)) {
         return ("", "", v);
     }
+
     rest = rest[1..]; // consume semicolon
     rest = strings.TrimLeftFunc(rest, Δunicode.IsSpace);
     (param, rest) = consumeToken(rest);
@@ -345,6 +362,7 @@ internal static (@string param, @string value, @string rest) consumeMediaParam(@
     if (param == ""u8) {
         return ("", "", v);
     }
+
     rest = strings.TrimLeftFunc(rest, Δunicode.IsSpace);
     if (!strings.HasPrefix(rest, "="u8)) {
         return ("", "", v);
@@ -380,6 +398,7 @@ internal static (@string, error) percentHexUnescape(@string s) {
     if (percents == 0) {
         return (s, default!);
     }
+
     var t = new slice<byte>(len(s) - 2 * percents);
     nint j = 0;
     for (nint i = 0; i < len(s); ) {
@@ -396,7 +415,6 @@ internal static (@string, error) percentHexUnescape(@string s) {
             i++;
             break;
         }}
-
     }
     return (((@string)t), default!);
 }
@@ -412,7 +430,6 @@ internal static bool ishex(byte c) {
     case {} when (rune)'A' <= c && c <= (rune)'F': {
         return true;
     }}
-
     return false;
 }
 
@@ -427,7 +444,6 @@ internal static byte unhex(byte c) {
     case {} when (rune)'A' <= c && c <= (rune)'F': {
         return (byte)(c - (rune)'A' + 10);
     }}
-
     return 0;
 }
 

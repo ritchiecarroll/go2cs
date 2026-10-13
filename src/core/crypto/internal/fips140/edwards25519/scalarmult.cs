@@ -22,7 +22,6 @@ internal static ж<array<affineLookupTable>> basepointTable() {
     return ᏑbasepointTablePrecomp.of(basepointTablePrecompᴛ1.Ꮡtable);
 }
 
-
 partial struct basepointTablePrecompᴛ1 /*dyn*/ {
     internal array<affineLookupTable> table = new(32, () => new());
     internal sync.Once initOnce;
@@ -35,10 +34,8 @@ internal static ref basepointTablePrecompᴛ1 basepointTablePrecomp => ref Ꮡba
 //
 // The scalar multiplication is done in constant time.
 public static ж<Point> ScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡx) {
-    ref var v = ref Ꮡv.DerefOrNull();
-    ref var x = ref Ꮡx.DerefOrNull();
-
     var basepointTableΔ1 = basepointTable();
+
     // Write x = sum(x_i * 16^i) so  x*B = sum( B*x_i*16^i )
     // as described in the Ed25519 paper
     //
@@ -51,9 +48,11 @@ public static ж<Point> ScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡx) {
     // We use a lookup table for each i to get x_i*16^(2*i)*B
     // and do four doublings to multiply by 16.
     var digits = Ꮡx.signedRadix16();
+
     var multiple = Ꮡ(new affineCached(nil));
     var tmp1 = Ꮡ(new projP1xP1(nil));
     var tmp2 = Ꮡ(new projP2(nil));
+
     // Accumulate the odd components first
     Ꮡv.Set(NewIdentityPoint());
     for (nint i = 1; i < 64; i += 2) {
@@ -61,6 +60,7 @@ public static ж<Point> ScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡx) {
         tmp1.AddAffine(Ꮡv, multiple);
         Ꮡv.fromP1xP1(tmp1);
     }
+
     // Multiply by 16
     tmp2.FromP3(Ꮡv); // tmp2 =    v in P2 coords
     tmp1.Double(tmp2); // tmp1 =  2*v in P1xP1 coords
@@ -71,12 +71,14 @@ public static ж<Point> ScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡx) {
     tmp2.FromP1xP1(tmp1); // tmp2 =  8*v in P2 coords
     tmp1.Double(tmp2); // tmp1 = 16*v in P1xP1 coords
     Ꮡv.fromP1xP1(tmp1); // now v = 16*(odd components)
+
     // Accumulate the even components
     for (nint i = 0; i < 64; i += 2) {
         basepointTableΔ1.Value[i / 2].SelectInto(multiple, digits[i]);
         tmp1.AddAffine(Ꮡv, multiple);
         Ꮡv.fromP1xP1(tmp1);
     }
+
     return Ꮡv;
 }
 
@@ -84,12 +86,11 @@ public static ж<Point> ScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡx) {
 //
 // The scalar multiplication is done in constant time.
 public static ж<Point> ScalarMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡx, ж<Point> Ꮡq) {
-    ref var v = ref Ꮡv.DerefOrNull();
-    ref var x = ref Ꮡx.DerefOrNull();
-
     checkInitialized(Ꮡq);
+
     projLookupTable table = new();
     table.FromP3(Ꮡq);
+
     // Write x = sum(x_i * 16^i)
     // so  x*Q = sum( Q*x_i*16^i )
     //         = Q*x_0 + 16*(Q*x_1 + 16*( ... + Q*x_63) ... )
@@ -98,11 +99,13 @@ public static ж<Point> ScalarMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡx, ж<Poin
     // We use the lookup table to get the x_i*Q values
     // and do four doublings to compute 16*Q
     var digits = Ꮡx.signedRadix16();
+
     // Unwrap first loop iteration to save computing 16*identity
     var multiple = Ꮡ(new projCached(nil));
     var tmp1 = Ꮡ(new projP1xP1(nil));
     var tmp2 = Ꮡ(new projP2(nil));
     table.SelectInto(multiple, digits[63]);
+
     Ꮡv.Set(NewIdentityPoint());
     tmp1.Add(Ꮡv, multiple); // tmp1 = x_63*Q in P1xP1 coords
     for (nint i = 62; i >= 0; i--) {
@@ -131,7 +134,6 @@ internal static ж<nafLookupTable8> basepointNafTable() {
     return ᏑbasepointNafTablePrecomp.of(basepointNafTablePrecompᴛ1.Ꮡtable);
 }
 
-
 partial struct basepointNafTablePrecompᴛ1 /*dyn*/ {
     internal nafLookupTable8 table;
     internal sync.Once initOnce;
@@ -144,10 +146,8 @@ internal static ref basepointNafTablePrecompᴛ1 basepointNafTablePrecomp => ref
 //
 // Execution time depends on the inputs.
 public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> Ꮡa, ж<Point> ᏑA, ж<Scalar> Ꮡb) {
-    ref var v = ref Ꮡv.DerefOrNull();
-    ref var a = ref Ꮡa.DerefOrNull();
-
     checkInitialized(ᏑA);
+
     // Similarly to the single variable-base approach, we compute
     // digits and use them with a lookup table.  However, because
     // we are allowed to do variable-time operations, we don't
@@ -161,6 +161,7 @@ public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scal
     // sparse as possible.  Intuitively, this "condenses" the
     // "mass" of the scalar onto sparse coefficients (meaning
     // fewer additions).
+
     var basepointNafTableΔ1 = basepointNafTable();
     nafLookupTable5 aTable = new();
     aTable.FromP3(ᏑA);
@@ -168,6 +169,7 @@ public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scal
     // corresponding to a bigger table.
     var aNaf = Ꮡa.nonAdjacentForm(5);
     var bNaf = Ꮡb.nonAdjacentForm(8);
+
     // Find the first nonzero coefficient.
     nint i = 255;
     for (nint j = i; j >= 0; j--) {
@@ -175,16 +177,19 @@ public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scal
             break;
         }
     }
+
     var multA = Ꮡ(new projCached(nil));
     var multB = Ꮡ(new affineCached(nil));
     var tmp1 = Ꮡ(new projP1xP1(nil));
     var tmp2 = Ꮡ(new projP2(nil));
     tmp2.Zero();
+
     // Move from high to low bits, doubling the accumulator
     // at each iteration and checking whether there is a nonzero
     // coefficient to look up a multiple of.
     for (; i >= 0; i--) {
         tmp1.Double(tmp2);
+
         // Only update v if we have a nonzero coeff to add in.
         if (aNaf[i] > 0){
             Ꮡv.fromP1xP1(tmp1);
@@ -196,6 +201,7 @@ public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scal
             aTable.SelectInto(multA, (int8)(-aNaf[i]));
             tmp1.Sub(Ꮡv, multA);
         }
+
         if (bNaf[i] > 0){
             Ꮡv.fromP1xP1(tmp1);
             basepointNafTableΔ1.SelectInto(multB, bNaf[i]);
@@ -206,8 +212,10 @@ public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scal
             basepointNafTableΔ1.SelectInto(multB, (int8)(-bNaf[i]));
             tmp1.SubAffine(Ꮡv, multB);
         }
+
         tmp2.FromP1xP1(tmp1);
     }
+
     Ꮡv.fromP2(tmp2);
     return Ꮡv;
 }

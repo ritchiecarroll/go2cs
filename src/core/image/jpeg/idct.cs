@@ -46,12 +46,14 @@ internal static UntypedInt w3 => 2408; // 2048*sqrt(2)*cos(3*pi/16)
 internal static UntypedInt w5 => 1609; // 2048*sqrt(2)*cos(5*pi/16)
 internal static UntypedInt w6 => 1108; // 2048*sqrt(2)*cos(6*pi/16)
 internal static UntypedInt w7 => 565; // 2048*sqrt(2)*cos(7*pi/16)
+
 internal static UntypedInt w1pw7 => /* w1 + w7 */ 3406;
 internal static UntypedInt w1mw7 => /* w1 - w7 */ 2276;
 internal static UntypedInt w2pw6 => /* w2 + w6 */ 3784;
 internal static UntypedInt w2mw6 => /* w2 - w6 */ 1568;
 internal static UntypedInt w3pw5 => /* w3 + w5 */ 4017;
 internal static UntypedInt w3mw5 => /* w3 - w5 */ 799;
+
 internal static UntypedInt r2 => 181; // 256/sqrt(2)
 
 // idct performs a 2-D Inverse Discrete Cosine Transformation.
@@ -84,6 +86,7 @@ internal static void idct(ж<block> Ꮡsrc) {
             s[7] = dc;
             continue;
         }
+
         // Prescale.
         var x0 = ((s[0] << (int)(11))) + 128;
         var x1 = (s[4] << (int)(11));
@@ -93,6 +96,7 @@ internal static void idct(ж<block> Ꮡsrc) {
         var x5 = s[7];
         var x6 = s[5];
         var x7 = s[3];
+
         // Stage 1.
         var x8 = (int32)w7 * (x4 + x5);
         x4 = x8 + (int32)w1mw7 * x4;
@@ -100,6 +104,7 @@ internal static void idct(ж<block> Ꮡsrc) {
         x8 = (int32)w3 * (x6 + x7);
         x6 = x8 - (int32)w3mw5 * x6;
         x7 = x8 - (int32)w3pw5 * x7;
+
         // Stage 2.
         x8 = x0 + x1;
         x0 -= x1;
@@ -110,6 +115,7 @@ internal static void idct(ж<block> Ꮡsrc) {
         x4 -= x6;
         x6 = x5 + x7;
         x5 -= x7;
+
         // Stage 3.
         x7 = x8 + x3;
         x8 -= x3;
@@ -117,6 +123,7 @@ internal static void idct(ж<block> Ꮡsrc) {
         x0 -= x2;
         x2 = (((int32)r2 * (x4 + x5) + 128) >> (int)(8));
         x4 = (((int32)r2 * (x4 - x5) + 128) >> (int)(8));
+
         // Stage 4.
         s[0] = ((x7 + x1) >> (int)(8));
         s[1] = ((x3 + x2) >> (int)(8));
@@ -127,12 +134,14 @@ internal static void idct(ж<block> Ꮡsrc) {
         s[6] = ((x3 - x2) >> (int)(8));
         s[7] = ((x7 - x1) >> (int)(8));
     }
+
     // Vertical 1-D IDCT.
     for (nint x = 0; x < 8; x++) {
         // Similar to the horizontal 1-D IDCT case, if all the AC components are zero, then the IDCT is trivial.
         // However, after performing the horizontal 1-D IDCT, there are typically non-zero AC components, so
         // we do not bother to check for the all-zero case.
         var s = src.Value.slice(x, x + 57, x + 57); // Small cap improves performance, see https://golang.org/issue/27857
+
         // Prescale.
         var y0 = ((s[8 * 0] << (int)(8))) + 8192;
         var y1 = (s[8 * 4] << (int)(8));
@@ -142,6 +151,7 @@ internal static void idct(ж<block> Ꮡsrc) {
         var y5 = s[8 * 7];
         var y6 = s[8 * 5];
         var y7 = s[8 * 3];
+
         // Stage 1.
         var y8 = (int32)w7 * (y4 + y5) + 4;
         y4 = ((y8 + (int32)w1mw7 * y4) >> (int)(3));
@@ -149,6 +159,7 @@ internal static void idct(ж<block> Ꮡsrc) {
         y8 = (int32)w3 * (y6 + y7) + 4;
         y6 = ((y8 - (int32)w3mw5 * y6) >> (int)(3));
         y7 = ((y8 - (int32)w3pw5 * y7) >> (int)(3));
+
         // Stage 2.
         y8 = y0 + y1;
         y0 -= y1;
@@ -159,6 +170,7 @@ internal static void idct(ж<block> Ꮡsrc) {
         y4 -= y6;
         y6 = y5 + y7;
         y5 -= y7;
+
         // Stage 3.
         y7 = y8 + y3;
         y8 -= y3;
@@ -166,6 +178,7 @@ internal static void idct(ж<block> Ꮡsrc) {
         y0 -= y2;
         y2 = (((int32)r2 * (y4 + y5) + 128) >> (int)(8));
         y4 = (((int32)r2 * (y4 - y5) + 128) >> (int)(8));
+
         // Stage 4.
         s[8 * 0] = ((y7 + y1) >> (int)(14));
         s[8 * 1] = ((y3 + y2) >> (int)(14));

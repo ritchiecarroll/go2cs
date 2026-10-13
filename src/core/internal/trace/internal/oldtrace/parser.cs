@@ -27,6 +27,9 @@ using go.@internal.trace;
 
 partial class oldtrace_package {
 
+// Timestamp represents a count of nanoseconds since the beginning of the trace.
+// They can only be meaningfully compared with other timestamps from the same
+// trace.
 partial struct Timestamp /*num:int64*/;
 
 // Event describes one event in the trace.
@@ -52,6 +55,7 @@ partial struct Frame {
     public nint Line;
 }
 
+// Special P identifiers:
 public static UntypedInt FakeP => /* 1000000 + iota */ 1000000;
 public static UntypedInt TimerP => 1000001; // contains timer unblocks
 public static UntypedInt NetpollP => 1000002; // contains network unblocks
@@ -137,6 +141,7 @@ internal static (ж<parser>, error) newParser(io.Reader r, version.Version ver) 
             if (err != default!) {
                 return (default!, err);
             }
+
             buf = new slice<byte>((nint)(end - cur));
             (_, err) = io.ReadFull(r, buf);
             if (err != default!) {
@@ -182,6 +187,7 @@ internal static (Trace, error) parse(this ж<parser> Ꮡp) {
         defer(() => {
             Ꮡp.Value.data = default!;
         }, ref ᒐ);
+
         // We parse a trace by running the following steps in order:
         //
         // 1. In the initial pass we collect information about batches (their
@@ -197,24 +203,29 @@ internal static (Trace, error) parse(this ж<parser> Ꮡp) {
         //    dedicated, fake Ps.
         //
         // 4. Finally, we validate the trace.
+
         p.strings = new map<uint64, @string>();
         p.batchOffsets = new map<int32, slice<batchOffset>>();
         p.lastGs = new map<int32, uint64>();
         p.stacks = new map<uint32, slice<uint64>>();
         p.pcs = new map<uint64, Frame>();
         p.inlineStringsMapping = new map<@string, nint>();
+
         {
             var errΔ1 = p.collectBatchesAndCPUSamples(); if (errΔ1 != default!) {
                 return (new Trace(nil), errΔ1);
             }
         }
+
         var (events, err) = p.parseEventBatches();
         if (err != default!) {
             return (new Trace(nil), err);
         }
+
         if (p.ticksPerSec == 0) {
             return (new Trace(nil), errors.New(noEvFrequencyEventˢ));
         }
+
         if (events.Len() > 0) {
             // Translate cpu ticks to real time.
             var minTs = events.Ptr(0).Value.Ts;
@@ -232,11 +243,13 @@ internal static (Trace, error) parse(this ж<parser> Ꮡp) {
                 }
             }
         }
+
         {
             var errΔ2 = Ꮡp.postProcessTrace(events); if (errΔ2 != default!) {
                 return (new Trace(nil), errΔ2);
             }
         }
+
         var res = new Trace(
             Version: p.ver,
             Events: events,
@@ -375,13 +388,16 @@ internal static (Events, error) parseEventBatches(this ref parser p) {
         b = b.ΔClone();
         return cmp.Compare(a.Ts, b.Ts);
     });
+
     var allProcs = new slice<proc>(0, len(p.batchOffsets));
     foreach (var (pid, _) in p.batchOffsets) {
         allProcs = builtin.append(allProcs, new proc(pid: pid));
     }
     allProcs = builtin.append(allProcs, new proc(pid: ProfileP, events: p.cpuSamples));
+
     ref var events = ref heap<Events>(out var Ꮡevents);
     events = new Events(nil);
+
     // Merge events as long as at least one P has more events
     var gs = new map<uint64, gState>();
     // Note: technically we don't need a priority queue here. We're only ever
@@ -392,6 +408,7 @@ internal static (Events, error) parseEventBatches(this ref parser p) {
     // already be in the queue. Furthermore, on average, we only have one P to
     // look at in each iteration, because all other Ps are already in the queue.
     ref var frontier = ref heap<orderEventList>(out var Ꮡfrontier);
+
     var availableProcs = new slice<ж<proc>>(len(allProcs));
     foreach (var (i, _) in allProcs) {
         availableProcs[i] = Ꮡ(allProcs, i);
@@ -400,6 +417,7 @@ internal static (Events, error) parseEventBatches(this ref parser p) {
 pidLoop:
         for (nint i = 0; i < len(availableProcs); i++) {
             var proc = availableProcs[i];
+
             while (len((~proc).events) == 0) {
                 // Call loadBatch in a loop because sometimes batches are empty
                 var (evs, err) = p.loadBatch((~proc).pid, (~proc).buf[..0]);
@@ -420,8 +438,10 @@ pidLoop:
                     proc.Value.events = evs;
                 }
             }
+
             var ev = Ꮡ((~proc).events, 0);
             var (gΔ1, initΔ1, _) = stateTransition(ref (ev).DerefOrNull());
+
             // TODO(dh): This implementation matches the behavior of the
             // upstream 'go tool trace', and works in practice, but has run into
             // the following inconsistency during fuzzing: what happens if
@@ -439,12 +459,14 @@ pidLoop:
             (availableProcs[i], availableProcs[len(availableProcs) - 1]) = (availableProcs[len(availableProcs) - 1], availableProcs[i]);
             availableProcs = availableProcs.slice(0, len(availableProcs) - 1);
             Ꮡfrontier.Push(new orderEvent(ev.Value.ΔClone(), proc));
+
             // We swapped the element at i with another proc, so look at the
             // index again
             i--;
 continue_pidLoop:;
         }
 break_pidLoop:;
+
         if (len(frontier) == 0) {
             foreach (var (i, _) in allProcs) {
                 if (!allProcs[i].done) {
@@ -454,11 +476,13 @@ break_pidLoop:;
             break;
         }
         var f = Ꮡfrontier.Pop();
+
         // We're computing the state transition twice, once when computing the
         // frontier, and now to apply the transition. This is fine because
         // stateTransition is a pure function. Computing it again is cheaper
         // than storing large items in the frontier.
         var (g, init, next) = stateTransition(ref f.ev);
+
         // Get rid of "Local" events, they are intended merely for ordering.
         var exprᴛ1 = f.ev.Type;
         if (exprᴛ1 == EvGoStartLocal) {
@@ -470,8 +494,8 @@ break_pidLoop:;
         else if (exprᴛ1 == EvGoSysExitLocal) {
             f.ev.Type = EvGoSysExit;
         }
-
         events.append(f.ev);
+
         {
             var err = transition(gs, g, init, next); if (err != default!) {
                 return (new Events(nil), err);
@@ -479,12 +503,14 @@ break_pidLoop:;
         }
         availableProcs = builtin.append(availableProcs, f.proc);
     }
+
     // At this point we have a consistent stream of events. Make sure time
     // stamps respect the ordering. The tests will skip (not fail) the test case
     // if they see this error.
     if (!sort.IsSorted(new EventsжInterface(Ꮡevents))) {
         return (new Events(nil), ErrTimeOrder);
     }
+
     // The last part is giving correct timestamps to EvGoSysExit events. The
     // problem with EvGoSysExit is that actual syscall exit timestamp
     // (ev.Args[2]) is potentially acquired long before event emission. So far
@@ -515,9 +541,9 @@ break_pidLoop:;
             }
             ev.Value.Ts = ts;
         }
-
     }
     sort.Stable(new EventsжInterface(Ꮡevents));
+
     return (events, default!);
 }
 
@@ -537,19 +563,23 @@ internal static error collectBatchesAndCPUSamples(this ref parser p) {
         if (raw.typ == EvNone) {
             continue;
         }
+
         if (raw.typ == EvBatch) {
             var bo = new batchOffset(offset: raw.batchOffset);
             p.batchOffsets[raw.batchPid] = builtin.append(p.batchOffsets[raw.batchPid], bo);
             curP = raw.batchPid;
         }
+
         var batches = p.batchOffsets[curP];
         if (len(batches) == 0) {
             return fmt.Errorf("read event %d with current P of %d, but P has no batches yet"u8,
                 raw.typ, curP);
         }
         batches[len(batches) - 1].numEvents++;
+
         if (raw.typ == EvCPUSample) {
             var e = new Event(Type: raw.typ);
+
             nint argOffset = 1;
             nint narg = raw.argNum();
             if (len(raw.args) != narg) {
@@ -562,10 +592,12 @@ internal static error collectBatchesAndCPUSamples(this ref parser p) {
                     e.Args[i - argOffset] = raw.args[i];
                 }
             }
+
             e.Ts = ((Timestamp)(int64)e.Args[0]);
             e.P = (int32)e.Args[1];
             e.G = e.Args[2];
             e.Args[0] = 0;
+
             // Most events are written out by the active P at the exact moment
             // they describe. CPU profile samples are different because they're
             // written to the tracing log after some delay, by a separate worker
@@ -582,6 +614,7 @@ internal static error collectBatchesAndCPUSamples(this ref parser p) {
             p.cpuSamples = builtin.append(p.cpuSamples, e.ΔClone());
         }
     }
+
     return default!;
 }
 
@@ -624,6 +657,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
     // represent the values 0–3. The value 3 (on the wire) indicates that
     // arguments are prefixed by their byte length, to encode >=3 arguments.
     const byte inlineArgs = 3;
+
     // Read event type and number of arguments (1 byte).
     var (b, ok) = p.readByte();
     if (!ok) {
@@ -646,6 +680,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
     if (typ == EvNone || typ >= EvCount || EventDescriptions[typ].minVersion > p.ver) {
         return fmt.Errorf("unknown event type %d"u8, typ);
     }
+
     var exprᴛ1 = typ;
     if (exprᴛ1 == EvString) {
         if ((nuint)(flags & (nuint)skipStrings) != 0){
@@ -691,6 +726,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
             }
             p.strings[id] = ((@string)buf);
         }
+
         ev.typ = EvNone;
         return default!;
     }
@@ -700,25 +736,30 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
                 return fmt.Errorf("EvBatch has wrong number of arguments: got %d, want %d"u8, narg, want);
             }
         }
+
+        // -1 because we've already read the first byte of the batch
         nint off = p.off - 1;
+
         var (pid, err) = p.readVal();
         if (err != default!) {
-            // -1 because we've already read the first byte of the batch
             return err;
         }
         if (pid != math.MaxUint64 && pid > math.MaxInt32) {
             return fmt.Errorf("processor ID %d is larger than maximum of %d"u8, pid, (uint64)math.MaxUint);
         }
+
         int32 pid32 = default!;
         if (pid == math.MaxUint64){
             pid32 = -1;
         } else {
             pid32 = (int32)pid;
         }
+
         (var v, err) = p.readVal();
         if (err != default!) {
             return err;
         }
+
         ev = new rawEvent(
             typ: EvBatch,
             args: p.args[..0],
@@ -755,6 +796,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
             if (err != default!) {
                 return fmt.Errorf("failed to read event %d argument: %w"u8, typ, err);
             }
+
             {
                 var limit = (uint64)2048; if (v > limit) {
                     // At the time of Go 1.19, v seems to be at most 128. Set 2048
@@ -762,6 +804,7 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
                     return fmt.Errorf("failed to read event %d argument: length-prefixed argument too big: %d bytes, limit is %d"u8, typ, v, limit);
                 }
             }
+
             if ((nuint)(flags & (nuint)skipArgs) == 0 || typ == EvCPUSample){
                 var (buf, errΔ1) = p.readFull((nint)v);
                 if (errΔ1 != default!) {
@@ -802,10 +845,10 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
                 }
             }
         }
+
         p.args = ev.args[..0];
         return default!;
     }
-
 }
 
 // loadBatch loads the next batch for pid and appends its contents to events.
@@ -818,10 +861,13 @@ internal static (slice<Event>, error) loadBatch(this ref parser p, int32 pid, sl
     nint offset = offsets[0].offset;
     offsets = offsets[1..];
     p.batchOffsets[pid] = offsets;
+
     p.off = offset;
+
     if (cap(events) < n) {
         events = new slice<Event>(0, () => new(), n);
     }
+
     var gotHeader = false;
     ref var raw = ref heap(new rawEvent(), out var Ꮡraw);
     ref var ev = ref heap(new Event(), out var Ꮡev);
@@ -843,6 +889,7 @@ internal static (slice<Event>, error) loadBatch(this ref parser p, int32 pid, sl
                 gotHeader = true;
             }
         }
+
         err = p.parseEvent(Ꮡraw, Ꮡev);
         if (err != default!) {
             return (default!, err);
@@ -851,6 +898,7 @@ internal static (slice<Event>, error) loadBatch(this ref parser p, int32 pid, sl
             events = builtin.append(events, ev.ΔClone());
         }
     }
+
     return (events, default!);
 }
 
@@ -935,6 +983,7 @@ internal static error parseEvent(this ref parser p, ж<rawEvent> Ꮡraw, ж<Even
                 var @file = raw.args[2 + i * 4 + 2];
                 var line = raw.args[2 + i * 4 + 3];
                 stk[i] = pc;
+
                 {
                     var (_, ok) = p.pcs[pc, ꟷ]; if (!ok) {
                         p.pcs[pc] = new Frame(PC: pc, Fn: fn, File: @file, Line: (nint)line);
@@ -945,11 +994,11 @@ internal static error parseEvent(this ref parser p, ж<rawEvent> Ꮡraw, ж<Even
         }
     }
     else if (exprᴛ1 == EvCPUSample) {
+        // These events get parsed during the indexing step and don't strictly
+        // belong to the batch.
     }
     else { /* default: */
-        ev = new Event( // These events get parsed during the indexing step and don't strictly
- // belong to the batch.
-Type: raw.typ, P: p.lastP, G: p.lastG);
+        ev = new Event(Type: raw.typ, P: p.lastP, G: p.lastG);
         nint argOffset = default!;
         ev.Ts = p.lastTs + ((Timestamp)(int64)raw.args[0]);
         argOffset = 1;
@@ -973,16 +1022,16 @@ Type: raw.typ, P: p.lastP, G: p.lastG);
             ev.G = ev.Args[0];
         }
         else if (exprᴛ2 == EvUserTaskCreate) {
+            // e.Args 0: taskID, 1:parentID, 2:nameID
         }
         else if (exprᴛ2 == EvUserRegion) {
+            // e.Args 0: taskID, 1: mode, 2:nameID
         }
         else if (exprᴛ2 == EvUserLog) {
+            // e.Args 0: taskID, 1:keyID, 2: stackID, 3: messageID
+            // raw.sargs 0: message
             {
                 var (id, ok) = p.inlineStringsMapping[raw.sargs[0], ꟷ]; if (ok){
-                    // e.Args 0: taskID, 1:parentID, 2:nameID
-                    // e.Args 0: taskID, 1: mode, 2:nameID
-                    // e.Args 0: taskID, 1:keyID, 2: stackID, 3: messageID
-                    // raw.sargs 0: message
                     ev.Args[3] = (uint64)id;
                 } else {
                     nint idΔ1 = len(p.inlineStrings);
@@ -1029,6 +1078,7 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
     const nint gRunnable = 1;
     const nint gRunning = 2;
     const nint gWaiting = 3;
+
     var gs = new map<uint64, postProcessTrace_gdesc>();
     var ps = new map<int32, postProcessTrace_pdesc>();
     var tasks = new map<uint64, ж<Event>>(); // task id to task creation events
@@ -1036,6 +1086,7 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
     gs[0] = new postProcessTrace_gdesc(state: gRunning);
     ж<Event> evGC = default!;
     ref var evSTW = ref heap<ж<Event>>(out var ᏑevSTW);
+
     error checkRunning(postProcessTrace_pdesc pΔ1, postProcessTrace_gdesc g, ж<Event> ev, bool allowG0) {
         @string name = EventDescriptions[(~ev).Type].Name;
         if (g.state != gRunning) {
@@ -1049,8 +1100,10 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
         }
         return default!;
     }
+
     for (nint evIdx = 0; evIdx < events.Len(); evIdx++) {
         var ev = events.Ptr(evIdx);
+
         var exprᴛ1 = (~ev).Type;
         if (exprᴛ1 == EvProcStart) {
             var pΔ3 = ps[(~ev).P];
@@ -1058,6 +1111,7 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
                 return fmt.Errorf("p %d is running before start (time %d)"u8, (~ev).P, (~ev).Ts);
             }
             pΔ3.running = true;
+
             ps[(~ev).P] = pΔ3;
         }
         else if (exprᴛ1 == EvProcStop) {
@@ -1069,6 +1123,7 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
                 return fmt.Errorf("p %d is running a goroutine %d during stop (time %d)"u8, (~ev).P, pΔ4.g, (~ev).Ts);
             }
             pΔ4.running = false;
+
             ps[(~ev).P] = pΔ4;
         }
         else if (exprᴛ1 == EvGCStart) {
@@ -1076,11 +1131,11 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
                 return fmt.Errorf("previous GC is not ended before a new one (time %d)"u8, (~ev).Ts);
             }
             evGC = ev;
+            // Attribute this to the global GC state.
             ev.Value.P = GCP;
         }
         else if (exprᴛ1 == EvGCDone) {
             if (evGC == nil) {
-                // Attribute this to the global GC state.
                 return fmt.Errorf("bogus GC end (time %d)"u8, (~ev).Ts);
             }
             evGC = default!;
@@ -1105,6 +1160,7 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
                 return fmt.Errorf("previous sweeping is not ended before a new one (time %d)"u8, (~ev).Ts);
             }
             pΔ5.evSweep = ev;
+
             ps[(~ev).P] = pΔ5;
         }
         else if (exprᴛ1 == EvGCMarkAssistStart) {
@@ -1113,15 +1169,17 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
                 return fmt.Errorf("previous mark assist is not ended before a new one (time %d)"u8, (~ev).Ts);
             }
             g.evMarkAssist = ev;
+
             gs[(~ev).G] = g;
         }
         else if (exprᴛ1 == EvGCMarkAssistDone) {
+            // Unlike most events, mark assists can be in progress when a
+            // goroutine starts tracing, so we can't report an error here.
             var g = gs[(~ev).G];
             if (g.evMarkAssist != nil) {
-                // Unlike most events, mark assists can be in progress when a
-                // goroutine starts tracing, so we can't report an error here.
                 g.evMarkAssist = default!;
             }
+
             gs[(~ev).G] = g;
         }
         else if (exprᴛ1 == EvGCSweepDone) {
@@ -1130,6 +1188,7 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
                 return fmt.Errorf("bogus sweeping end (time %d)"u8, (~ev).Ts);
             }
             pΔ6.evSweep = default!;
+
             ps[(~ev).P] = pΔ6;
         }
         else if (exprᴛ1 == EvGoWaiting) {
@@ -1139,6 +1198,7 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
             }
             g.state = gWaiting;
             g.ev = ev;
+
             gs[(~ev).G] = g;
         }
         else if (exprᴛ1 == EvGoInSyscall) {
@@ -1148,6 +1208,7 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
             }
             g.state = gWaiting;
             g.ev = ev;
+
             gs[(~ev).G] = g;
         }
         else if (exprᴛ1 == EvGoCreate) {
@@ -1181,9 +1242,11 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
                 ev.Value.StkID = (uint32)(~g.evCreate).Args[1];
                 g.evCreate = default!;
             }
+
             if (g.ev != nil) {
                 g.ev = default!;
             }
+
             gs[(~ev).G] = g;
             ps[(~ev).P] = pΔ8;
         }
@@ -1198,10 +1261,11 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
             g.evStart = default!;
             g.state = gDead;
             pΔ9.g = 0;
-            if ((~ev).Type == EvGoEnd) {
-                // flush all active regions
+
+            if ((~ev).Type == EvGoEnd) { // flush all active regions
                 delete(activeRegions, (~ev).G);
             }
+
             gs[(~ev).G] = g;
             ps[(~ev).P] = pΔ9;
         }
@@ -1217,6 +1281,7 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
             g.evStart = default!;
             pΔ10.g = 0;
             g.ev = ev;
+
             gs[(~ev).G] = g;
             ps[(~ev).P] = pΔ10;
         }
@@ -1249,6 +1314,7 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
                 }
             }
             g.ev = ev;
+
             gs[(~ev).G] = g;
         }
         else if (exprᴛ1 == EvGoSysBlock) {
@@ -1262,6 +1328,7 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
             g.state = gWaiting;
             g.evStart = default!;
             pΔ13.g = 0;
+
             gs[(~ev).G] = g;
             ps[(~ev).P] = pΔ13;
         }
@@ -1272,6 +1339,7 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
             }
             g.state = gRunnable;
             g.ev = ev;
+
             gs[(~ev).G] = g;
         }
         else if (exprᴛ1 == EvGoSleep || exprᴛ1 == EvGoBlock || exprᴛ1 == EvGoBlockSend || exprᴛ1 == EvGoBlockRecv || exprᴛ1 == EvGoBlockSelect || exprᴛ1 == EvGoBlockSync || exprᴛ1 == EvGoBlockCond || exprᴛ1 == EvGoBlockNet || exprᴛ1 == EvGoBlockGC) {
@@ -1286,6 +1354,7 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
             g.ev = ev;
             g.evStart = default!;
             pΔ14.g = 0;
+
             gs[(~ev).G] = g;
             ps[(~ev).P] = pΔ14;
         }
@@ -1305,20 +1374,17 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
         else if (exprᴛ1 == EvUserRegion) {
             var mode = (~ev).Args[1];
             var regions = activeRegions[(~ev).G];
-            if (mode == 0){
-                // region start
+            if (mode == 0){ // region start
                 activeRegions[(~ev).G] = builtin.append(regions, ev); // push
             } else 
-            if (mode == 1){
-                // region end
+            if (mode == 1){ // region end
                 nint n = len(regions);
-                if (n > 0) {
-                    // matching region start event is in the trace.
+                if (n > 0) { // matching region start event is in the trace.
                     var s = regions[n - 1];
-                    if ((~s).Args[0] != (~ev).Args[0] || (~s).Args[2] != (~ev).Args[2]) {
-                        // task id, region name mismatch
+                    if ((~s).Args[0] != (~ev).Args[0] || (~s).Args[2] != (~ev).Args[2]) { // task id, region name mismatch
                         return fmt.Errorf("misuse of region in goroutine %d: span end %q when the inner-most active span start event is %q"u8, (~ev).G, ev.OrTypedNil(), s.OrTypedNil());
                     }
+
                     if (n > 1){
                         activeRegions[(~ev).G] = regions.slice(0, n - 1);
                     } else {
@@ -1337,6 +1403,7 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
             ev.Value.StkID = 0;
         }
     }
+
     // TODO(mknyszek): restore stacks for EvGoStart events.
     return default!;
 }
@@ -1388,7 +1455,6 @@ internal static nint argNum(this ref rawEvent raw) {
     if (exprᴛ1 == EvBatch || exprᴛ1 == EvFrequency || exprᴛ1 == EvTimerGoroutine) {
         return narg;
     }
-
     narg++; // timestamp
     return narg;
 }
@@ -1396,115 +1462,56 @@ internal static nint argNum(this ref rawEvent raw) {
 // Event types in the trace.
 // Verbatim copy from src/runtime/trace.go with the "trace" prefix removed.
 public static @event.Type EvNone => 0;            // unused
-
 public static @event.Type EvBatch => 1;           // start of per-P batch of events [pid, timestamp]
-
 public static @event.Type EvFrequency => 2;       // contains tracer timer frequency [frequency (ticks per second)]
-
 public static @event.Type EvStack => 3;           // stack [stack id, number of PCs, array of {PC, func string ID, file string ID, line}]
-
 public static @event.Type EvGomaxprocs => 4;      // current value of GOMAXPROCS [timestamp, GOMAXPROCS, stack id]
-
 public static @event.Type EvProcStart => 5;       // start of P [timestamp, thread id]
-
 public static @event.Type EvProcStop => 6;        // stop of P [timestamp]
-
 public static @event.Type EvGCStart => 7;         // GC start [timestamp, seq, stack id]
-
 public static @event.Type EvGCDone => 8;          // GC done [timestamp]
-
 public static @event.Type EvSTWStart => 9;        // GC mark termination start [timestamp, kind]
-
 public static @event.Type EvSTWDone => 10;         // GC mark termination done [timestamp]
-
 public static @event.Type EvGCSweepStart => 11;    // GC sweep start [timestamp, stack id]
-
 public static @event.Type EvGCSweepDone => 12;     // GC sweep done [timestamp, swept, reclaimed]
-
 public static @event.Type EvGoCreate => 13;        // goroutine creation [timestamp, new goroutine id, new stack id, stack id]
-
 public static @event.Type EvGoStart => 14;         // goroutine starts running [timestamp, goroutine id, seq]
-
 public static @event.Type EvGoEnd => 15;           // goroutine ends [timestamp]
-
 public static @event.Type EvGoStop => 16;          // goroutine stops (like in select{}) [timestamp, stack]
-
 public static @event.Type EvGoSched => 17;         // goroutine calls Gosched [timestamp, stack]
-
 public static @event.Type EvGoPreempt => 18;       // goroutine is preempted [timestamp, stack]
-
 public static @event.Type EvGoSleep => 19;         // goroutine calls Sleep [timestamp, stack]
-
 public static @event.Type EvGoBlock => 20;         // goroutine blocks [timestamp, stack]
-
 public static @event.Type EvGoUnblock => 21;       // goroutine is unblocked [timestamp, goroutine id, seq, stack]
-
 public static @event.Type EvGoBlockSend => 22;     // goroutine blocks on chan send [timestamp, stack]
-
 public static @event.Type EvGoBlockRecv => 23;     // goroutine blocks on chan recv [timestamp, stack]
-
 public static @event.Type EvGoBlockSelect => 24;   // goroutine blocks on select [timestamp, stack]
-
 public static @event.Type EvGoBlockSync => 25;     // goroutine blocks on Mutex/RWMutex [timestamp, stack]
-
 public static @event.Type EvGoBlockCond => 26;     // goroutine blocks on Cond [timestamp, stack]
-
 public static @event.Type EvGoBlockNet => 27;      // goroutine blocks on network [timestamp, stack]
-
 public static @event.Type EvGoSysCall => 28;       // syscall enter [timestamp, stack]
-
 public static @event.Type EvGoSysExit => 29;       // syscall exit [timestamp, goroutine id, seq, real timestamp]
-
 public static @event.Type EvGoSysBlock => 30;      // syscall blocks [timestamp]
-
 public static @event.Type EvGoWaiting => 31;       // denotes that goroutine is blocked when tracing starts [timestamp, goroutine id]
-
 public static @event.Type EvGoInSyscall => 32;     // denotes that goroutine is in syscall when tracing starts [timestamp, goroutine id]
-
 public static @event.Type EvHeapAlloc => 33;       // gcController.heapLive change [timestamp, heap live bytes]
-
 public static @event.Type EvHeapGoal => 34;        // gcController.heapGoal change [timestamp, heap goal bytes]
-
 public static @event.Type EvTimerGoroutine => 35;  // denotes timer goroutine [timer goroutine id]
-
 public static @event.Type EvFutileWakeup => 36;    // denotes that the previous wakeup of this goroutine was futile [timestamp]
-
 public static @event.Type EvString => 37;          // string dictionary entry [ID, length, string]
-
 public static @event.Type EvGoStartLocal => 38;    // goroutine starts running on the same P as the last event [timestamp, goroutine id]
-
 public static @event.Type EvGoUnblockLocal => 39;  // goroutine is unblocked on the same P as the last event [timestamp, goroutine id, stack]
-
 public static @event.Type EvGoSysExitLocal => 40;  // syscall exit on the same P as the last event [timestamp, goroutine id, real timestamp]
-
 public static @event.Type EvGoStartLabel => 41;    // goroutine starts running with label [timestamp, goroutine id, seq, label string id]
-
 public static @event.Type EvGoBlockGC => 42;       // goroutine blocks on GC assist [timestamp, stack]
-
 public static @event.Type EvGCMarkAssistStart => 43; // GC mark assist start [timestamp, stack]
-
 public static @event.Type EvGCMarkAssistDone => 44; // GC mark assist done [timestamp]
-
 public static @event.Type EvUserTaskCreate => 45;  // trace.NewTask [timestamp, internal task id, internal parent id, stack, name string]
-
 public static @event.Type EvUserTaskEnd => 46;     // end of task [timestamp, internal task id, stack]
-
 public static @event.Type EvUserRegion => 47;      // trace.WithRegion [timestamp, internal task id, mode(0:start, 1:end), name string]
-
 public static @event.Type EvUserLog => 48;         // trace.Log [timestamp, internal id, key string id, stack, value string]
-
 public static @event.Type EvCPUSample => 49;       // CPU profiling sample [timestamp, stack, real timestamp, real P id (-1 when absent), goroutine id]
-
 public static @event.Type EvCount => 50;
-
-// in 1.5 format it was {"p", "seq", "ticks"}
-// in 1.5 format it was {"freq", "unused"}
-// in 1.5 format it was {}
-// <= 1.9, args was {} (implicitly {0})
-// before 1.9, format was {}
-// in 1.5 format it was {"g"}
-// in 1.5 format it was {"g"}
-// in 1.5 format it was {"g", "unused"}
 
 partial struct EventDescriptionsᴛ1 /*dyn*/ {
     public @string Name;
@@ -1515,27 +1522,27 @@ partial struct EventDescriptionsᴛ1 /*dyn*/ {
 }
 public static ж<array<EventDescriptionsᴛ1>> ᏑEventDescriptions = new StandardBox<array<EventDescriptionsᴛ1>>(new golib.SparseArray<EventDescriptionsᴛ1>{
     [EvNone] = new("None"u8, 5, false, new @string[]{}.slice(), default!),
-    [EvBatch] = new("Batch"u8, 5, false, new @string[]{"p"u8, "ticks"u8}.slice(), default!),
-    [EvFrequency] = new("Frequency"u8, 5, false, new @string[]{"freq"u8}.slice(), default!),
+    [EvBatch] = new("Batch"u8, 5, false, new @string[]{"p"u8, "ticks"u8}.slice(), default!), // in 1.5 format it was {"p", "seq", "ticks"}
+    [EvFrequency] = new("Frequency"u8, 5, false, new @string[]{"freq"u8}.slice(), default!), // in 1.5 format it was {"freq", "unused"}
     [EvStack] = new("Stack"u8, 5, false, new @string[]{"id"u8, "siz"u8}.slice(), default!),
     [EvGomaxprocs] = new("Gomaxprocs"u8, 5, true, new @string[]{"procs"u8}.slice(), default!),
     [EvProcStart] = new("ProcStart"u8, 5, false, new @string[]{"thread"u8}.slice(), default!),
     [EvProcStop] = new("ProcStop"u8, 5, false, new @string[]{}.slice(), default!),
-    [EvGCStart] = new("GCStart"u8, 5, true, new @string[]{"seq"u8}.slice(), default!),
+    [EvGCStart] = new("GCStart"u8, 5, true, new @string[]{"seq"u8}.slice(), default!), // in 1.5 format it was {}
     [EvGCDone] = new("GCDone"u8, 5, false, new @string[]{}.slice(), default!),
-    [EvSTWStart] = new("GCSTWStart"u8, 5, false, new @string[]{"kindid"u8}.slice(), new @string[]{"kind"u8}.slice()),
+    [EvSTWStart] = new("GCSTWStart"u8, 5, false, new @string[]{"kindid"u8}.slice(), new @string[]{"kind"u8}.slice()), // <= 1.9, args was {} (implicitly {0})
     [EvSTWDone] = new("GCSTWDone"u8, 5, false, new @string[]{}.slice(), default!),
     [EvGCSweepStart] = new("GCSweepStart"u8, 5, true, new @string[]{}.slice(), default!),
-    [EvGCSweepDone] = new("GCSweepDone"u8, 5, false, new @string[]{"swept"u8, "reclaimed"u8}.slice(), default!),
+    [EvGCSweepDone] = new("GCSweepDone"u8, 5, false, new @string[]{"swept"u8, "reclaimed"u8}.slice(), default!), // before 1.9, format was {}
     [EvGoCreate] = new("GoCreate"u8, 5, true, new @string[]{"g"u8, "stack"u8}.slice(), default!),
-    [EvGoStart] = new("GoStart"u8, 5, false, new @string[]{"g"u8, "seq"u8}.slice(), default!),
+    [EvGoStart] = new("GoStart"u8, 5, false, new @string[]{"g"u8, "seq"u8}.slice(), default!), // in 1.5 format it was {"g"}
     [EvGoEnd] = new("GoEnd"u8, 5, false, new @string[]{}.slice(), default!),
     [EvGoStop] = new("GoStop"u8, 5, true, new @string[]{}.slice(), default!),
     [EvGoSched] = new("GoSched"u8, 5, true, new @string[]{}.slice(), default!),
     [EvGoPreempt] = new("GoPreempt"u8, 5, true, new @string[]{}.slice(), default!),
     [EvGoSleep] = new("GoSleep"u8, 5, true, new @string[]{}.slice(), default!),
     [EvGoBlock] = new("GoBlock"u8, 5, true, new @string[]{}.slice(), default!),
-    [EvGoUnblock] = new("GoUnblock"u8, 5, true, new @string[]{"g"u8, "seq"u8}.slice(), default!),
+    [EvGoUnblock] = new("GoUnblock"u8, 5, true, new @string[]{"g"u8, "seq"u8}.slice(), default!), // in 1.5 format it was {"g"}
     [EvGoBlockSend] = new("GoBlockSend"u8, 5, true, new @string[]{}.slice(), default!),
     [EvGoBlockRecv] = new("GoBlockRecv"u8, 5, true, new @string[]{}.slice(), default!),
     [EvGoBlockSelect] = new("GoBlockSelect"u8, 5, true, new @string[]{}.slice(), default!),
@@ -1549,7 +1556,7 @@ public static ж<array<EventDescriptionsᴛ1>> ᏑEventDescriptions = new Standa
     [EvGoInSyscall] = new("GoInSyscall"u8, 5, false, new @string[]{"g"u8}.slice(), default!),
     [EvHeapAlloc] = new("HeapAlloc"u8, 5, false, new @string[]{"mem"u8}.slice(), default!),
     [EvHeapGoal] = new("HeapGoal"u8, 5, false, new @string[]{"mem"u8}.slice(), default!),
-    [EvTimerGoroutine] = new("TimerGoroutine"u8, 5, false, new @string[]{"g"u8}.slice(), default!),
+    [EvTimerGoroutine] = new("TimerGoroutine"u8, 5, false, new @string[]{"g"u8}.slice(), default!), // in 1.5 format it was {"g", "unused"}
     [EvFutileWakeup] = new("FutileWakeup"u8, 5, false, new @string[]{}.slice(), default!),
     [EvString] = new("String"u8, 7, false, new @string[]{}.slice(), default!),
     [EvGoStartLocal] = new("GoStartLocal"u8, 7, false, new @string[]{"g"u8}.slice(), default!),
@@ -1572,6 +1579,7 @@ internal static slice<uint64> allocateStack(this ref parser p, uint64 size) {
     if (size == 0) {
         return default!;
     }
+
     // Stacks are plentiful but small. For our "Staticcheck on std" trace with
     // 11e6 events, we have roughly 500,000 stacks, using 200 MiB of memory. To
     // avoid making 500,000 small allocations we allocate backing arrays 1 MiB
@@ -1622,6 +1630,7 @@ public static ΔSTWReason STWReadMetricsSlow => 13;
 public static ΔSTWReason STWReadMemStatsSlow => 14;
 public static ΔSTWReason STWPageCachePagesLeaked => 15;
 public static ΔSTWReason STWResetDebugLog => 16;
+
 public static UntypedInt NumSTWReasons => 17;
 
 } // end oldtrace_package

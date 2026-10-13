@@ -21,6 +21,7 @@ internal static void minimizeBytes(slice<byte> v, Func<slice<byte>, bool> @try, 
         // make sure that it is equal to the correct value, v, before exiting
         // this function.
         defer((ᴛ1, ᴛ2) => copy(ᴛ1, ᴛ2), tmp, v, ref ᒐ);
+
         // First, try to cut the tail.
         for (nint n = 1024; n != 0; n /= 2) {
             while (len(v) > n) {
@@ -35,6 +36,7 @@ internal static void minimizeBytes(slice<byte> v, Func<slice<byte>, bool> @try, 
                 v = candidate;
             }
         }
+
         // Then, try to remove each individual byte.
         for (nint i = 0; i < len(v) - 1; i++) {
             if (shouldStop()) {
@@ -53,6 +55,7 @@ internal static void minimizeBytes(slice<byte> v, Func<slice<byte>, bool> @try, 
             // of the loop with the new value.
             i--;
         }
+
         // Then, try to remove each possible subset of bytes.
         for (nint i = 0; i < len(v) - 1; i++) {
             copy(tmp, v.slice(0, i));
@@ -71,6 +74,7 @@ internal static void minimizeBytes(slice<byte> v, Func<slice<byte>, bool> @try, 
                 j = len(v);
             }
         }
+
         // Then, try to make it more simplified and human-readable by trying to replace each
         // byte with a printable character.
         var printableChars = slice<byte>("012789ABCXYZabcxyz !\"#$%&'()*+,."u8);
@@ -78,6 +82,7 @@ internal static void minimizeBytes(slice<byte> v, Func<slice<byte>, bool> @try, 
             if (shouldStop()) {
                 return;
             }
+
             foreach (var (_, pc) in printableChars) {
                 v[i] = pc;
                 if (@try(v)) {

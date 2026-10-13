@@ -69,14 +69,13 @@ partial struct KemID /*num:uint16*/;
 
 public static UntypedInt DHKEM_X25519_HKDF_SHA256 => 0x0020;
 
-// RFC 9180 Section 7.1
-
 partial struct SupportedKEMsᴛ1 /*dyn*/ {
     internal ecdhꓸCurve curve;
     internal crypto.Hash hash;
     internal uint16 nSecret;
 }
 public static map<uint16, SupportedKEMsᴛ1> SupportedKEMs = new map<uint16, SupportedKEMsᴛ1>{
+    // RFC 9180 Section 7.1
     [DHKEM_X25519_HKDF_SHA256] = new(ecdh.X25519(), crypto.SHA256, 32)
 };
 
@@ -109,9 +108,9 @@ internal static slice<byte> ExtractAndExpand(this ж<dhKEM> Ꮡdh, slice<byte> d
 
 internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) Encap(this ж<dhKEM> Ꮡdh, ж<ecdhꓸPublicKey> ᏑpubRecipient) {
     error err = default!;
-
     ref var dh = ref Ꮡdh.DerefOrNull();
     ref var pubRecipient = ref ᏑpubRecipient.DerefOrNull();
+
     ж<ecdh.PrivateKey> privEph = default!;
     if (testingOnlyGenerateKey != default!){
         (privEph, err) = testingOnlyGenerateKey();
@@ -126,8 +125,10 @@ internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) Enca
         return (default!, default!, err);
     }
     var encPubEph = privEph.PublicKey().Bytes();
+
     var encPubRecip = pubRecipient.Bytes();
     var kemContext = appendꓸꓸꓸ(encPubEph, encPubRecip);
+
     return (Ꮡdh.ExtractAndExpand(dhVal, kemContext), encPubEph, default!);
 }
 
@@ -144,6 +145,7 @@ internal static (slice<byte>, error) Decap(this ж<dhKEM> Ꮡdh, slice<byte> enc
         return (default!, err);
     }
     var kemContext = appendꓸꓸꓸ(encPubEph, secRecipient.PublicKey().Bytes());
+
     return (Ꮡdh.ExtractAndExpand(dhVal, kemContext), default!);
 }
 
@@ -179,14 +181,13 @@ public static UntypedInt AEAD_AES_128_GCM => 0x0001;
 public static UntypedInt AEAD_AES_256_GCM => 0x0002;
 public static UntypedInt AEAD_ChaCha20Poly1305 => 0x0003;
 
-// RFC 9180, Section 7.3
-
 partial struct SupportedAEADsᴛ1 /*dyn*/ {
     internal nint keySize;
     internal nint nonceSize;
     internal Func<slice<byte>, (cipher.AEAD, error)> aead;
 }
 public static map<uint16, SupportedAEADsᴛ1> SupportedAEADs = new map<uint16, SupportedAEADsᴛ1>{
+    // RFC 9180, Section 7.3
     [AEAD_AES_128_GCM] = new(keySize: 16, nonceSize: 12, aead: aesGCMNew),
     [AEAD_AES_256_GCM] = new(keySize: 32, nonceSize: 12, aead: aesGCMNew),
     [AEAD_ChaCha20Poly1305] = new(keySize: chacha20poly1305.KeySize, nonceSize: chacha20poly1305.ΔNonceSize, aead: chacha20poly1305.New)
@@ -196,8 +197,8 @@ partial struct KDFID /*num:uint16*/;
 
 public static UntypedInt KDF_HKDF_SHA256 => 0x0001;
 
-// RFC 9180, Section 7.2
 public static map<uint16, Func<ж<hkdfKDF>>> SupportedKDFs = new map<uint16, Func<ж<hkdfKDF>>>{
+    // RFC 9180, Section 7.2
     [KDF_HKDF_SHA256] = () => Ꮡ(new hkdfKDF(crypto.SHA256))
 };
 
@@ -213,30 +214,34 @@ internal static readonly @string expˢ = "exp"u8;
 
 internal static (ж<context>, error) newContext(slice<byte> sharedSecret, uint16 kemID, uint16 kdfID, uint16 aeadID, slice<byte> info) {
     var sid = suiteID(kemID, kdfID, aeadID);
+
     var (kdfInit, ok) = SupportedKDFs[kdfID, ꟷ];
     if (!ok) {
         return (default!, errors.New(unsupportedKdfIdˢ));
     }
     var kdf = kdfInit();
+
     (var aeadInfo, ok) = SupportedAEADs[aeadID, ꟷ];
     if (!ok) {
         return (default!, errors.New(unsupportedAeadIdˢ));
     }
+
     var pskIDHash = kdf.LabeledExtract(sid, default!, pskIdHashˢ, default!);
     var infoHash = kdf.LabeledExtract(sid, default!, infoHashˢ, info);
     var ksContext = appendꓸꓸꓸ(new byte[]{0}.slice(), pskIDHash);
     ksContext = appendꓸꓸꓸ(ksContext, infoHash);
+
     var secret = kdf.LabeledExtract(sid, sharedSecret, secretˢ, default!);
-    var key = kdf.LabeledExpand(sid, secret, keyˢ, ksContext, (uint16)aeadInfo.keySize);
-    /* Nk - key size for AEAD */
-    var baseNonce = kdf.LabeledExpand(sid, secret, baseNonceˢ, ksContext, (uint16)aeadInfo.nonceSize);
-    /* Nn - nonce size for AEAD */
-    var exporterSecret = kdf.LabeledExpand(sid, secret, expˢ, ksContext, (uint16)(~kdf).hash.Size());
-    /* Nh - hash output size of the kdf*/
+
+    var key = kdf.LabeledExpand(sid, secret, keyˢ, ksContext, (uint16)aeadInfo.keySize /* Nk - key size for AEAD */);
+    var baseNonce = kdf.LabeledExpand(sid, secret, baseNonceˢ, ksContext, (uint16)aeadInfo.nonceSize /* Nn - nonce size for AEAD */);
+    var exporterSecret = kdf.LabeledExpand(sid, secret, expˢ, ksContext, (uint16)(~kdf).hash.Size() /* Nh - hash output size of the kdf*/);
+
     var (aead, err) = aeadInfo.aead(key);
     if (err != default!) {
         return (default!, err);
     }
+
     return (Ꮡ(new context(
         aead: aead,
         sharedSecret: sharedSecret,
@@ -256,10 +261,12 @@ public static (slice<byte>, ж<Sender>, error) SetupSender(uint16 kemID, uint16 
     if (err != default!) {
         return (default!, default!, err);
     }
+
     (var context, err) = newContext(sharedSecret, kemID, kdfID, aeadID, info);
     if (err != default!) {
         return (default!, default!, err);
     }
+
     return (encapsulatedKey, Ꮡ(new Sender(context)), default!);
 }
 
@@ -272,10 +279,12 @@ public static (ж<Receipient>, error) SetupReceipient(uint16 kemID, uint16 kdfID
     if (err != default!) {
         return (default!, err);
     }
+
     (var context, err) = newContext(sharedSecret, kemID, kdfID, aeadID, info);
     if (err != default!) {
         return (default!, err);
     }
+
     return (Ꮡ(new Receipient(context)), default!);
 }
 

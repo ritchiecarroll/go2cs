@@ -24,8 +24,8 @@ partial struct batchCursor {
 
 internal static (bool ok, error err) nextEvent(this ж<batchCursor> Ꮡb, slice<batch> batches, frequency freq) {
     error err = default!;
-
     ref var b = ref Ꮡb.DerefOrNull();
+
     // Batches should generally always have at least one event,
     // but let's be defensive about that and accept empty batches.
     while (b.idx < len(batches) && len(batches[b.idx].data) == b.dataOff) {
@@ -48,8 +48,10 @@ internal static (bool ok, error err) nextEvent(this ж<batchCursor> Ꮡb, slice<
     }
     // Complete the timestamp from the cursor's last timestamp.
     b.ev.time = freq.mul(tsdiff) + b.lastTs;
+
     // Move the cursor's timestamp forward.
     b.lastTs = b.ev.time;
+
     // Move the cursor forward.
     b.dataOff += n;
     return (true, default!);
@@ -76,18 +78,21 @@ internal static (nint, timestamp, error) readTimedBaseEvent(slice<byte> b, ref b
         return (0, 0, fmt.Errorf("found invalid event type: %v"u8, typ));
     }
     e.typ = typ;
+
     // Get spec.
     var spec = Ꮡ(specs, typ);
     if (len((~spec).Args) == 0 || !(~spec).IsTimedEvent) {
         return (0, 0, fmt.Errorf("found event without a timestamp: type=%v"u8, typ));
     }
     nint n = 1;
+
     // Read timestamp diff.
     var (ts, nb) = binary.Uvarint(b.slice(n));
     if (nb <= 0) {
         return (0, 0, fmt.Errorf("found invalid uvarint for timestamp"u8));
     }
     n += nb;
+
     // Read the rest of the arguments.
     for (nint i = 0; i < len((~spec).Args) - 1; i++) {
         var (arg, nbΔ1) = binary.Uvarint(b.slice(n));
@@ -103,6 +108,7 @@ internal static (nint, timestamp, error) readTimedBaseEvent(slice<byte> b, ref b
 internal static slice<ж<batchCursor>> heapInsert(slice<ж<batchCursor>> heap, ж<batchCursor> Ꮡbc) {
     // Add the cursor to the end of the heap.
     heap = append(heap, Ꮡbc);
+
     // Sift the new entry up to the right place.
     heapSiftUp(heap, len(heap) - 1);
     return heap;

@@ -29,9 +29,7 @@ partial class binary_package {
 
 // MaxVarintLenN is the maximum length of a varint-encoded N-bit integer.
 public static UntypedInt MaxVarintLen16 => 3;
-
 public static UntypedInt MaxVarintLen32 => 5;
-
 public static UntypedInt MaxVarintLen64 => 10;
 
 // AppendUvarint appends the varint-encoded form of x,

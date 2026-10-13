@@ -94,10 +94,13 @@ internal static void mapiterinit(ж<abi.SwissMapType> Ꮡt, ж<mapsꓸMap> Ꮡm,
         var callerpc = sys.GetCallerPC();
         racereadpc(@unsafe.Pointer.FromPinnedBox(Ꮡm), callerpc, abi.FuncPCABIInternal(mapiterinit));
     }
+
     it.typ = Ꮡt;
+
     it.it = @new<maps.Iter>();
     it.it.Init(Ꮡt, Ꮡm);
     it.it.Next();
+
     it.key = (uintptr)it.it.Key();
     it.elem = (uintptr)it.it.Elem();
 }
@@ -146,7 +149,9 @@ internal static void mapiternext(ж<linknameIter> Ꮡit) {
         var callerpc = sys.GetCallerPC();
         racereadpc(@unsafe.Pointer.FromPinnedBox(it.it.Map()), callerpc, abi.FuncPCABIInternal(mapiternext));
     }
+
     it.it.Next();
+
     it.key = (uintptr)it.it.Key();
     it.elem = (uintptr)it.it.Elem();
 }

@@ -86,6 +86,7 @@ public static (ж<P384Element>, error) SetBytes(this ж<P384Element> Ꮡe, slice
     if (len(v) != p384ElementLen) {
         return (default!, errors.New(invalidP384Elementˢ));
     }
+
     // Check for non-canonical encodings (p + k, 2p + k, etc.) by comparing to
     // the encoding of -1 mod p, so p - 1, the highest canonical encoding.
     slice<byte> minusOneEncoding = @new<P384Element>().Sub(
@@ -98,6 +99,7 @@ public static (ж<P384Element>, error) SetBytes(this ж<P384Element> Ꮡe, slice
             return (default!, errors.New(invalidP384Elementˢ));
         }
     }
+
     ref var @in = ref heap(new array<byte>(48), out var Ꮡin);
     copy(@in[..], v);
     p384InvertEndianness(@in[..]);

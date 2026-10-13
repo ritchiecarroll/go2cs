@@ -179,13 +179,16 @@ internal static GoroutineExecStats /*ret*/ snapshotStat(this ref GoroutineSummar
     GoroutineExecStats ret = default!;
 
     ret = g.GoroutineExecStats.clone();
+
     if (g.goroutineSummary == nil) {
         return ret; // Already finalized; no pending state.
     }
+
     // Set the total time if necessary.
     if (g.TotalTime == 0) {
         ret.TotalTime = lastTs.Sub(g.CreationTime);
     }
+
     // Add in time since lastTs.
     if (g.lastStartTime != 0) {
         ret.ExecTime += lastTs.Sub(g.lastStartTime);
@@ -218,7 +221,9 @@ internal static void finalize(this ref GoroutineSummary g, ΔTime lastTs, ж<ΔE
         g.EndTime = trigger.Time();
     }
     var finalStat = g.snapshotStat(lastTs);
+
     g.GoroutineExecStats = finalStat;
+
     // System goroutines are never part of regions, even though they
     // "inherit" a task due to creation (EvGoCreate) from within a region.
     // This may happen e.g. if the first GC is triggered within a region,
@@ -288,53 +293,56 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
         s.syncTs = ev.Time();
     }
     s.lastTs = ev.Time();
+
     var exprᴛ1 = ev.Kind();
+    // Record sync time for the RangeActive events.
     if (exprᴛ1 == EventSync) {
         s.syncTs = ev.Time();
     }
+    // Handle state transitions.
     else if (exprᴛ1 == EventStateTransition) {
         var st = ev.StateTransition();
         var exprᴛ2 = st.Resource.Kind;
+        // Handle goroutine transitions, which are the meat of this computation.
         if (exprᴛ2 == ResourceGoroutine) {
             do {
                 ref var id = ref heap<GoID>(out var Ꮡid);
                 id = st.Resource.Goroutine();
                 var (old, @new) = st.Goroutine();
                 if (old == @new) {
-                    // Record sync time for the RangeActive events.
-                    // Handle state transitions.
-                    // Handle goroutine transitions, which are the meat of this computation.
                     // Skip these events; they're not telling us anything new.
                     break;
                 }
+
+                // Handle transition out.
                 var g = s.gs[id];
                 var exprᴛ3 = old;
                 if (exprᴛ3 == GoUndetermined || exprᴛ3 == GoNotExist) {
-                    g = Ꮡ(new GoroutineSummary( // Handle transition out.
-ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
+                    g = Ꮡ(new GoroutineSummary(ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
+                    // If we're coming out of GoUndetermined, then the creation time is the
+                    // time of the last sync.
                     if (old == GoUndetermined){
-                        // If we're coming out of GoUndetermined, then the creation time is the
-                        // time of the last sync.
                         g.Value.CreationTime = s.syncTs;
                     } else {
                         g.Value.CreationTime = ev.Time();
                     }
+                    // The goroutine is being created, or it's being named for the first time.
                     g.Value.lastRangeTime = new map<@string, ΔTime>();
                     g.Value.BlockTimeByReason = new map<@string, time.Duration>();
                     g.Value.RangeTime = new map<@string, time.Duration>();
+
+                    // When a goroutine is newly created, inherit the task
+                    // of the active region. For ease handling of this
+                    // case, we create a fake region description with the
+                    // task id. This isn't strictly necessary as this
+                    // goroutine may not be associated with the task, but
+                    // it can be convenient to see all children created
+                    // during a region.
+                    //
+                    // N.B. ev.Goroutine() will always be NoGoroutine for the
+                    // Undetermined case, so this is will simply not fire.
                     {
                         var creatorG = s.gs[ev.Goroutine()]; if (creatorG != nil && len((~creatorG).activeRegions) > 0) {
-                            // The goroutine is being created, or it's being named for the first time.
-                            // When a goroutine is newly created, inherit the task
-                            // of the active region. For ease handling of this
-                            // case, we create a fake region description with the
-                            // task id. This isn't strictly necessary as this
-                            // goroutine may not be associated with the task, but
-                            // it can be convenient to see all children created
-                            // during a region.
-                            //
-                            // N.B. ev.Goroutine() will always be NoGoroutine for the
-                            // Undetermined case, so this is will simply not fire.
                             var regions = creatorG.Value.activeRegions;
                             var sΔ8 = regions[len(regions) - 1];
                             g.Value.activeRegions = new ж<UserRegionSummary>[]{Ꮡ(new UserRegionSummary(TaskID: (~sΔ8).TaskID, Start: Ꮡev))}.slice();
@@ -343,27 +351,27 @@ ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
                     s.gs[(~g).ID] = g;
                 }
                 else if (exprᴛ3 == GoRunning) {
+                    // Record execution time as we transition out of running
                     g.Value.ExecTime += ev.Time().Sub((~g).lastStartTime);
                     g.Value.lastStartTime = 0;
                 }
                 else if (exprᴛ3 == GoWaiting) {
+                    // Record block time as we transition out of waiting.
                     if ((~g).lastBlockTime != 0) {
-                        // Record execution time as we transition out of running
-                        // Record block time as we transition out of waiting.
                         g.Value.BlockTimeByReason[(~g).lastBlockReason] += ev.Time().Sub((~g).lastBlockTime);
                         g.Value.lastBlockTime = 0;
                     }
                 }
                 else if (exprᴛ3 == GoRunnable) {
+                    // Record sched latency time as we transition out of runnable.
                     if ((~g).lastRunnableTime != 0) {
-                        // Record sched latency time as we transition out of runnable.
                         g.Value.SchedWaitTime += ev.Time().Sub((~g).lastRunnableTime);
                         g.Value.lastRunnableTime = 0;
                     }
                 }
                 else if (exprᴛ3 == GoSyscall) {
+                    // Record syscall execution time and syscall block time as we transition out of syscall.
                     if ((~g).lastSyscallTime != 0) {
-                        // Record syscall execution time and syscall block time as we transition out of syscall.
                         if ((~g).lastSyscallBlockTime != 0){
                             g.Value.SyscallBlockTime += ev.Time().Sub((~g).lastSyscallBlockTime);
                             g.Value.SyscallTime += (~g).lastSyscallBlockTime.Sub((~g).lastSyscallTime);
@@ -372,17 +380,18 @@ ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
                         }
                         g.Value.lastSyscallTime = 0;
                         g.Value.lastSyscallBlockTime = 0;
+
                         // Clear the syscall map.
                         delete(s.syscallingP, s.syscallingG[id]);
                         delete(s.syscallingG, id);
                     }
                 }
 
+                // The goroutine hasn't been identified yet. Take the transition stack
+                // and identify the goroutine by the root frame of that stack.
+                // This root frame will be identical for all transitions on this
+                // goroutine, because it represents its immutable start point.
                 if ((~g).Name == ""u8) {
-                    // The goroutine hasn't been identified yet. Take the transition stack
-                    // and identify the goroutine by the root frame of that stack.
-                    // This root frame will be identical for all transitions on this
-                    // goroutine, because it represents its immutable start point.
                     foreach (var frame in range<StackFrame>(st.Stack.Frames().Invoke)) {
                         // NB: this PC won't actually be consistent for
                         // goroutines which existed at the start of the
@@ -393,13 +402,14 @@ ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
                         g.Value.Name = frame.Func;
                     }
                 }
+
+                // Handle transition in.
                 var exprᴛ4 = @new;
                 var matchᴛ1 = false;
                 if (exprᴛ4 == GoRunning) { matchᴛ1 = true;
+                    // We started running. Record it.
                     g.Value.lastStartTime = ev.Time();
                     if ((~g).StartTime == 0) {
-                        // Handle transition in.
-                        // We started running. Record it.
                         g.Value.StartTime = ev.Time();
                     }
                 }
@@ -413,27 +423,26 @@ ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
                             g.Value.lastBlockReason = st.Reason;
                             break;
                         }
+                        // "Forever" is like goroutine death.
                         fallthrough = true;
                     } while (false);
                 }
                 if (fallthrough || !matchᴛ1 && exprᴛ4 == GoNotExist) {
-                    g.finalize(ev.Time(), // "Forever" is like goroutine death.
- Ꮡev);
+                    g.finalize(ev.Time(), Ꮡev);
                 }
                 else if (exprᴛ4 == GoSyscall) { matchᴛ1 = true;
                     s.syscallingP[ev.Proc()] = id;
                     s.syscallingG[id] = ev.Proc();
                     g.Value.lastSyscallTime = ev.Time();
                 }
-
             } while (false);
         }
+        // Handle procs to detect syscall blocking, which si identifiable as a
+        // proc going idle while the goroutine it was attached to is in a syscall.
         else if (exprᴛ2 == ResourceProc) {
             var id = st.Resource.Proc();
             var (old, @new) = st.Proc();
             if (old != @new && @new == ProcIdle) {
-                // Handle procs to detect syscall blocking, which si identifiable as a
-                // proc going idle while the goroutine it was attached to is in a syscall.
                 {
                     var (goid, ok) = s.syscallingP[id, ꟷ]; if (ok) {
                         var g = s.gs[goid];
@@ -443,32 +452,30 @@ ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
                 }
             }
         }
-
     }
+    // Handle ranges of all kinds.
     else if (exprᴛ1 == EventRangeBegin || exprᴛ1 == EventRangeActive) {
         do {
             var r = ev.Range();
-// Handle ranges of all kinds.
             ж<GoroutineSummary> g = default!;
             var exprᴛ5 = r.Scope.Kind;
             if (exprᴛ5 == ResourceGoroutine) {
+                // Simple goroutine range. We attribute the entire range regardless of
+                // goroutine stats. Lots of situations are still identifiable, e.g. a
+                // goroutine blocked often in mark assist will have both high mark assist
+                // and high block times. Those interested in a deeper view can look at the
+                // trace viewer.
                 g = s.gs[r.Scope.Goroutine()];
             }
             else if (exprᴛ5 == ResourceProc) {
+                // N.B. These ranges are not actually bound to the goroutine, they're
+                // bound to the P. But if we happen to be on the P the whole time, let's
+                // try to attribute it to the goroutine. (e.g. GC sweeps are here.)
                 g = s.gs[ev.Goroutine()];
                 if (g != nil) {
-                    // Simple goroutine range. We attribute the entire range regardless of
-                    // goroutine stats. Lots of situations are still identifiable, e.g. a
-                    // goroutine blocked often in mark assist will have both high mark assist
-                    // and high block times. Those interested in a deeper view can look at the
-                    // trace viewer.
-                    // N.B. These ranges are not actually bound to the goroutine, they're
-                    // bound to the P. But if we happen to be on the P the whole time, let's
-                    // try to attribute it to the goroutine. (e.g. GC sweeps are here.)
                     s.rangesP[new rangeP(id: r.Scope.Proc(), name: r.Name)] = ev.Goroutine();
                 }
             }
-
             if (g == nil) {
                 break;
             }
@@ -505,7 +512,6 @@ ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
                     }
                 }
             }
-
             if (g == nil) {
                 break;
             }
@@ -517,20 +523,20 @@ ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
             delete((~g).lastRangeTime, r.Name);
         } while (false);
     }
+    // Handle user-defined regions.
     else if (exprᴛ1 == EventRegionBegin) {
         var g = s.gs[ev.Goroutine()];
         var r = ev.Region();
-        var region = Ꮡ(new UserRegionSummary( // Handle user-defined regions.
-
+        var region = Ꮡ(new UserRegionSummary(
             Name: r.Type,
             TaskID: r.Task,
             Start: Ꮡev,
             GoroutineExecStats: g.snapshotStat(ev.Time())
         ));
         g.Value.activeRegions = append((~g).activeRegions, region);
+        // Associate the region and current goroutine to the task.
         var task = s.getOrAddTask(r.Task);
-        task.Value.Regions = append((~task).Regions, // Associate the region and current goroutine to the task.
- region);
+        task.Value.Regions = append((~task).Regions, region);
         task.Value.Goroutines[(~g).ID] = g;
     }
     else if (exprᴛ1 == EventRegionEnd) {
@@ -544,8 +550,8 @@ ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
                 sd = regionStk[n - 1];
                 regionStk = regionStk.slice(0, n - 1);
                 g.Value.activeRegions = regionStk;
-            } else {
                 // N.B. No need to add the region to a task; the EventRegionBegin already handled it.
+            } else {
                 // This is an "end" without a start. Just fabricate the region now.
                 sd = Ꮡ(new UserRegionSummary(Name: r.Type, TaskID: r.Task));
                 // Associate the region and current goroutine to the task.
@@ -558,22 +564,22 @@ ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
         sd.Value.End = Ꮡev;
         g.Value.Regions = append((~g).Regions, sd);
     }
+    // Handle tasks and logs.
     else if (exprᴛ1 == EventTaskBegin || exprᴛ1 == EventTaskEnd) {
+        // Initialize the task.
         var t = ev.Task();
         var task = s.getOrAddTask(t.ID);
         task.Value.Name = t.Type;
         task.Value.Goroutines[ev.Goroutine()] = s.gs[ev.Goroutine()];
         if (ev.Kind() == EventTaskBegin){
-            // Handle tasks and logs.
-            // Initialize the task.
             task.Value.Start = Ꮡev;
         } else {
             task.Value.End = Ꮡev;
         }
+        // Initialize the parent, if one exists and it hasn't been done yet.
+        // We need to avoid doing it twice, otherwise we could appear twice
+        // in the parent's Children list.
         if (t.Parent != NoTask && (~task).Parent == nil) {
-            // Initialize the parent, if one exists and it hasn't been done yet.
-            // We need to avoid doing it twice, otherwise we could appear twice
-            // in the parent's Children list.
             var parent = s.getOrAddTask(t.Parent);
             task.Value.Parent = parent;
             parent.Value.Children = append((~parent).Children, task);
@@ -581,13 +587,12 @@ ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
     }
     else if (exprᴛ1 == EventLog) {
         var log = ev.Log();
+        // Just add the log to the task. We'll create the task if it
+        // doesn't exist (it's just been mentioned now).
         var task = s.getOrAddTask(log.Task);
         task.Value.Goroutines[ev.Goroutine()] = s.gs[ev.Goroutine()];
-        task.Value.Logs = append((~task).Logs, // Just add the log to the task. We'll create the task if it
- // doesn't exist (it's just been mentioned now).
- Ꮡev);
+        task.Value.Logs = append((~task).Logs, Ꮡev);
     }
-
 }
 
 internal static ж<UserTaskSummary> getOrAddTask(this ref Summarizer s, TaskID id) {
@@ -604,6 +609,7 @@ internal static ж<UserTaskSummary> getOrAddTask(this ref Summarizer s, TaskID i
 public static ж<Summary> ΔFinalize(this ref Summarizer s) {
     foreach (var (_, g) in s.gs) {
         g.finalize(s.lastTs, nil);
+
         // Sort based on region start time.
         slices.SortFunc((~g).Regions, (ж<UserRegionSummary> a, ж<UserRegionSummary> b) => {
             var x = a.Value.Start;

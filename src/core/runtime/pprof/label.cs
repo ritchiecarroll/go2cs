@@ -49,9 +49,11 @@ internal static @string String(this ж<labelMap> Ꮡl) {
         return ""u8;
     }
     var keyVals = new slice<@string>(0, len(l.list));
+
     foreach (var (_, lbl) in l.list) {
         keyVals = append(keyVals, fmt.Sprintf("%q:%q"u8, lbl.key, lbl.value));
     }
+
     slices.Sort<slice<@string>, @string>(keyVals);
     return "{"u8 + strings_package.Join(keyVals, ", "u8) + "}"u8;
 }
@@ -70,32 +72,31 @@ internal static LabelSet mergeLabelSets(LabelSet left, LabelSet right) {
     if (len(right.list) == 0) {
         return left;
     }
+
     nint l = 0;
     nint r = 0;
     var result = new slice<label>(0, len(right.list));
     while (l < len(left.list) && r < len(right.list)) {
         var exprᴛ1 = strings_package.Compare(left.list[l].key, right.list[r].key);
-        if (exprᴛ1 == -1) {
-            result = append(result, // left key < right key
- left.list[l]);
+        if (exprᴛ1 == -1) { // left key < right key
+            result = append(result, left.list[l]);
             l++;
         }
-        else if (exprᴛ1 is 1) {
-            result = append(result, // right key < left key
- right.list[r]);
+        else if (exprᴛ1 is 1) { // right key < left key
+            result = append(result, right.list[r]);
             r++;
         }
-        else if (exprᴛ1 is 0) {
-            result = append(result, // keys are equal, right value overwrites left value
- right.list[r]);
+        else if (exprᴛ1 is 0) { // keys are equal, right value overwrites left value
+            result = append(result, right.list[r]);
             l++;
             r++;
         }
-
     }
+
     // Append the remaining elements
     result = appendꓸꓸꓸ(result, left.list.slice(l));
     result = appendꓸꓸꓸ(result, right.list.slice(r));
+
     return new LabelSet(list: result);
 }
 

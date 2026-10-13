@@ -59,8 +59,8 @@ using static go.crypto.ecdh_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/ecdh/ecdh.go", "ecdh.cs", "AEKIAZaiAAIU8oKClKiCABI2AA4CgpSolqIAAhTygoKUqIKmgqqi", "", "", "87=ConstantTimeCompare/1/1/1;151=ConstantTimeCompare/1/1/1")]
-[assembly: go.GoPositionMap("crypto/ecdh/nist.go", "nist.cs", "ABkwgtaigoKClIKClNyWgpaCgpYACRSCgoKUgoKUgpTWooKCgpSCgpTcloKClAAJFNbGgpS4goKClJSCgpSUpgAJEIKUAAIQ0KQABRgAAxLQpAAFGAADEtCkAAUY", "", "", "45=Bytes/1/1/3;60=Bytes/1/2/2,PublicKey/1/2/6,Bytes/2/2/6,PublicKey/2/2/7;100=Clone/1/1/2,Bytes/1/1/3;112=Clone/1/1/2,PublicKey/1/2/6,Bytes/1/1/6,PublicKey/2/2/7;136=Clone/1/1/2")]
-[assembly: go.GoPositionMap("crypto/ecdh/x25519.go", "x25519.cs", "ABQ20KT4gtaCgpSCgoCCpNaCgpSClIKCuO6CgpSClAAIDLKCgoKUpoKEgoKChOKCgoKEgoKCgoKCgoSCgoKCgoKCgoKCgoKEgoKCgpaChIKCqJKCgpQ=", "", "", "75=Clone/1/1/2;89=Clone/1/1/2")]
+[assembly: go.GoPositionMap("crypto/ecdh/nist.go", "nist.cs", "ABkwgtaigoKClIKClNymgqaCgqYACRSCgoKUgoKUgpTWooKCgpSCgpTcpoKClAAJFNbGgpS4goKClJSCgpSUpgAJEIKUAAIQ0KQABRgAAxLQpAAFGAADEtCkAAUY", "", "", "45=Bytes/1/1/3;63=Bytes/1/2/2,PublicKey/1/2/6,Bytes/2/2/6,PublicKey/2/2/7;103=Clone/1/1/2,Bytes/1/1/3;116=Clone/1/1/2,PublicKey/1/2/6,Bytes/1/1/6,PublicKey/2/2/7;140=Clone/1/1/2")]
+[assembly: go.GoPositionMap("crypto/ecdh/x25519.go", "x25519.cs", "ABQ20KT4gtaCgpSCgoCCpNaCgpSClIKCuO6CgpSClAAIDLKCgoKUpoKUgoKClOKCgoKUgoKCgoKCgpSCgoKCgoKCgoKCgoKUgoKCgqaClIKCqJKCgpQ=", "", "", "75=Clone/1/1/2;89=Clone/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

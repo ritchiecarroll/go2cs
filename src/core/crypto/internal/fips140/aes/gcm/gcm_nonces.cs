@@ -80,6 +80,7 @@ public static slice<byte> Seal(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> ds
     if (len(nonce) != gcmStandardNonceSize) {
         throw panic("crypto/cipher: incorrect nonce length given to GCM");
     }
+
     var counter = byteorder.BEUint64(nonce.slice(len(nonce) - 8));
     if (!g.ready) {
         // The first invocation sets the fixed name encoding and start counter.
@@ -91,6 +92,7 @@ public static slice<byte> Seal(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> ds
         throw panic("crypto/cipher: incorrect module name given to GCMWithCounterNonce");
     }
     counter -= g.start;
+
     // Ensure the counter is monotonically increasing.
     if (counter == math.MaxUint64) {
         throw panic("crypto/cipher: counter wrapped");
@@ -99,6 +101,7 @@ public static slice<byte> Seal(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> ds
         throw panic("crypto/cipher: counter decreased");
     }
     g.next = counter + 1;
+
     fips140.RecordApproved();
     return Ꮡg.of(GCMWithCounterNonce.Ꮡg).sealAfterIndicator(dst, nonce, plaintext, data);
 }
@@ -140,7 +143,9 @@ public static slice<byte> Seal(this ж<GCMForTLS12> Ꮡg, slice<byte> dst, slice
     if (len(nonce) != gcmStandardNonceSize) {
         throw panic("crypto/cipher: incorrect nonce length given to GCM");
     }
+
     var counter = byteorder.BEUint64(nonce.slice(len(nonce) - 8));
+
     // Ensure the counter is monotonically increasing.
     if (counter == math.MaxUint64) {
         throw panic("crypto/cipher: counter wrapped");
@@ -149,6 +154,7 @@ public static slice<byte> Seal(this ж<GCMForTLS12> Ꮡg, slice<byte> dst, slice
         throw panic("crypto/cipher: counter decreased");
     }
     g.next = counter + 1;
+
     fips140.RecordApproved();
     return Ꮡg.of(GCMForTLS12.Ꮡg).sealAfterIndicator(dst, nonce, plaintext, data);
 }
@@ -189,6 +195,7 @@ public static slice<byte> Seal(this ж<GCMForTLS13> Ꮡg, slice<byte> dst, slice
     if (len(nonce) != gcmStandardNonceSize) {
         throw panic("crypto/cipher: incorrect nonce length given to GCM");
     }
+
     var counter = byteorder.BEUint64(nonce.slice(len(nonce) - 8));
     if (!g.ready) {
         // In the first call, the counter is zero, so we learn the XOR mask.
@@ -196,6 +203,7 @@ public static slice<byte> Seal(this ж<GCMForTLS13> Ꮡg, slice<byte> dst, slice
         g.mask = counter;
     }
     counter ^= (uint64)(g.mask);
+
     // Ensure the counter is monotonically increasing.
     if (counter == math.MaxUint64) {
         throw panic("crypto/cipher: counter wrapped");
@@ -204,6 +212,7 @@ public static slice<byte> Seal(this ж<GCMForTLS13> Ꮡg, slice<byte> dst, slice
         throw panic("crypto/cipher: counter decreased");
     }
     g.next = counter + 1;
+
     fips140.RecordApproved();
     return Ꮡg.of(GCMForTLS13.Ꮡg).sealAfterIndicator(dst, nonce, plaintext, data);
 }
@@ -246,6 +255,7 @@ public static slice<byte> Seal(this ж<GCMForSSH> Ꮡg, slice<byte> dst, slice<b
     if (len(nonce) != gcmStandardNonceSize) {
         throw panic("crypto/cipher: incorrect nonce length given to GCM");
     }
+
     var counter = byteorder.BEUint64(nonce.slice(len(nonce) - 8));
     if (!g.ready) {
         // In the first call we learn the start value.
@@ -253,6 +263,7 @@ public static slice<byte> Seal(this ж<GCMForSSH> Ꮡg, slice<byte> dst, slice<b
         g.start = counter;
     }
     counter -= g.start;
+
     // Ensure the counter is monotonically increasing.
     if (counter == math.MaxUint64) {
         throw panic("crypto/cipher: counter wrapped");
@@ -261,6 +272,7 @@ public static slice<byte> Seal(this ж<GCMForSSH> Ꮡg, slice<byte> dst, slice<b
         throw panic("crypto/cipher: counter decreased");
     }
     g.next = counter + 1;
+
     fips140.RecordApproved();
     return Ꮡg.of(GCMForSSH.Ꮡg).sealAfterIndicator(dst, nonce, plaintext, data);
 }

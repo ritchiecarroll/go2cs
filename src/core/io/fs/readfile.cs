@@ -38,12 +38,14 @@ public static (slice<byte>, error) ReadFile(FS fsys, @string name) {
                 return fsysΔ1.ReadFile(name);
             }
         }
+
         var (@file, err) = fsys.Open(name);
         if (err != default!) {
             return (default!, err);
         }
         var fileʗ1 = @file;
         defer(() => fileʗ1.Close(), ref ᒐ);
+
         nint size = default!;
         {
             var (info, errΔ1) = @file.Stat(); if (errΔ1 == default!) {
@@ -53,6 +55,7 @@ public static (slice<byte>, error) ReadFile(FS fsys, @string name) {
                 }
             }
         }
+
         var data = new slice<byte>(0, size + 1);
         while (ᐧ) {
             if (len(data) >= cap(data)) {

@@ -46,8 +46,14 @@ partial struct p224Uint1 /*num:uint64*/;
 
 partial struct p224Int1 /*num:int64*/;
 
+// The type p224MontgomeryDomainFieldElement is a field element in the Montgomery domain.
+//
+// Bounds: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
 partial struct p224MontgomeryDomainFieldElement /*[4]uint64*/;
 
+// The type p224NonMontgomeryDomainFieldElement is a field element NOT in the Montgomery domain.
+//
+// Bounds: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
 partial struct p224NonMontgomeryDomainFieldElement /*[4]uint64*/;
 
 // p224CmovznzU64 is a single-word conditional move.

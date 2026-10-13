@@ -60,10 +60,12 @@ public static ж<http.Request> NewRequestWithContext(context.Context ctx, @strin
         throw panic("invalid NewRequest arguments; " + err.Error());
     }
     req = req.WithContext(ctx);
+
     // HTTP/1.0 was used above to avoid needing a Host field. Change it to 1.1 here.
     req.Value.Proto = http11ˢ;
     req.Value.ProtoMinor = 1;
     req.Value.Close = false;
+
     if (body != default!) {
         switch (body.type()) {
         case ж<bytes.Buffer> v: {
@@ -91,13 +93,16 @@ public static ж<http.Request> NewRequestWithContext(context.Context ctx, @strin
             }
         }
     }
+
     // 192.0.2.0/24 is "TEST-NET" in RFC 5737 for use solely in
     // documentation and example source code and should not be
     // used publicly.
     req.Value.RemoteAddr = "192.0.2.1:1234"u8;
+
     if ((~req).Host == ""u8) {
         req.Value.Host = exampleComˢ;
     }
+
     if (strings.HasPrefix(target, httpsˢ)) {
         req.Value.TLS = Ꮡ(new tlsꓸConnectionState(
             Version: tls.VersionTLS12,
@@ -105,6 +110,7 @@ public static ж<http.Request> NewRequestWithContext(context.Context ctx, @strin
             ServerName: (~req).Host
         ));
     }
+
     return req;
 }
 

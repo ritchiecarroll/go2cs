@@ -78,6 +78,7 @@ internal static slice<byte> itoa(slice<byte> buf, uint64 val) {
     return buf.slice(i);
 }
 
+// An errorString represents a runtime error described by a single string.
 partial struct errorString /*@string*/;
 
 internal static void RuntimeError(this errorString e) {
@@ -108,6 +109,9 @@ internal static uintptr Addr(this errorAddressString e) {
     return e.addr;
 }
 
+// plainError represents a runtime error described a string without
+// the prefix "runtime error: " after invoking errorString.Error().
+// See Issue #14965.
 partial struct plainError /*@string*/;
 
 internal static void RuntimeError(this plainError e) {
@@ -132,13 +136,16 @@ partial struct boundsError {
 partial struct boundsErrorCode /*num:uint8*/;
 
 internal static boundsErrorCode boundsIndex => /* iota */ 0; // s[x], 0 <= x < len(s) failed
+
 internal static boundsErrorCode boundsSliceAlen => 1; // s[?:x], 0 <= x <= len(s) failed
 internal static boundsErrorCode boundsSliceAcap => 2; // s[?:x], 0 <= x <= cap(s) failed
 internal static boundsErrorCode boundsSliceB => 3; // s[x:y], 0 <= x <= y failed (but boundsSliceA didn't happen)
+
 internal static boundsErrorCode boundsSlice3Alen => 4; // s[?:?:x], 0 <= x <= len(s) failed
 internal static boundsErrorCode boundsSlice3Acap => 5; // s[?:?:x], 0 <= x <= cap(s) failed
 internal static boundsErrorCode boundsSlice3B => 6; // s[?:x:y], 0 <= x <= y failed (but boundsSlice3A didn't happen)
 internal static boundsErrorCode boundsSlice3C => 7; // s[x:y:?], 0 <= x <= y failed (but boundsSlice3A/B didn't happen)
+
 internal static boundsErrorCode boundsConvert => 8; // (*[x]T)(s), 0 <= x <= len(s) failed
 
 // Note: in the above, len(s) and cap(s) are stored in y
@@ -208,7 +215,6 @@ internal static @string Error(this boundsError e) {
             b = appendIntStr(b, (int64)e.y, true);
             break;
         }}
-
     }
     return ((@string)b);
 }
@@ -312,6 +318,7 @@ internal static void printanycustomtype(any iʗp) {
 
     var eface = efaceOf(Ꮡi);
     @string typestring = toRType((~eface)._type).@string();
+
     var exprᴛ1 = (~(~eface)._type).Kind_;
     if (exprᴛ1 == abi.ΔString) {
         print(typestring, (@string)@"("""u8);
@@ -369,7 +376,6 @@ internal static void printanycustomtype(any iʗp) {
     else { /* default: */
         print((@string)"("u8, typestring, (@string)") "u8, @unsafe.Pointer.OrTypedNil((~eface).data));
     }
-
 }
 
 // printindented prints s, replacing "\n" with "\n\t".

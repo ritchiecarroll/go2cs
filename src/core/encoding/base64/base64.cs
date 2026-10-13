@@ -46,10 +46,12 @@ public static ж<Encoding> NewEncoding(@string encoder) {
     if (len(encoder) != 64) {
         throw panic("encoding alphabet is not 64-bytes long");
     }
+
     var e = @new<Encoding>();
     e.Value.padChar = StdPadding;
     copy((~e).encode[..], encoder);
     copy((~e).decodeMap[..], decodeMapInitialize);
+
     for (nint i = 0; i < len(encoder); i++) {
         // Note: While we document that the alphabet cannot contain
         // the padding character, we do not enforce it since we do not know
@@ -63,7 +65,6 @@ public static ж<Encoding> NewEncoding(@string encoder) {
             throw panic("encoding alphabet includes duplicate symbols");
             break;
         }}
-
         e.Value.decodeMap[encoder[i]] = (uint8)i;
     }
     return e;
@@ -88,7 +89,6 @@ public static ж<Encoding> WithPadding(this Encoding encʗp, rune padding) {
         throw panic("padding contained in alphabet");
         break;
     }}
-
     enc.padChar = padding;
     return Ꮡenc;
 }
@@ -141,19 +141,23 @@ public static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> sr
     // loop below means a nil check at every operation. Lift that nil check
     // outside of the loop to speed up the encoder.
     _ = enc.encode;
+
     nint di = 0;
     nint si = 0;
     nint n = (len(src) / 3) * 3;
     while (si < n) {
         // Convert 3x 8bit source bytes into 4 bytes
         nuint valΔ1 = (nuint)((nuint)(((nuint)src[si + 0] << (int)(16)) | ((nuint)src[si + 1] << (int)(8))) | (nuint)src[si + 2]);
+
         dst[di + 0] = enc.encode[(nuint)((valΔ1 >> (int)(18)) & 0x3F)];
         dst[di + 1] = enc.encode[(nuint)((valΔ1 >> (int)(12)) & 0x3F)];
         dst[di + 2] = enc.encode[(nuint)((valΔ1 >> (int)(6)) & 0x3F)];
         dst[di + 3] = enc.encode[(nuint)(valΔ1 & 0x3F)];
+
         si += 3;
         di += 4;
     }
+
     nint remain = len(src) - si;
     if (remain == 0) {
         return;
@@ -163,8 +167,10 @@ public static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> sr
     if (remain == 2) {
         val |= (nuint)(((nuint)src[si + 1] << (int)(8)));
     }
+
     dst[di + 0] = enc.encode[(nuint)((val >> (int)(18)) & 0x3F)];
     dst[di + 1] = enc.encode[(nuint)((val >> (int)(12)) & 0x3F)];
+
     switch (remain) {
     case 2: {
         dst[di + 2] = enc.encode[(nuint)((val >> (int)(6)) & 0x3F)];
@@ -180,7 +186,6 @@ public static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> sr
         }
         break;
     }}
-
 }
 
 // AppendEncode appends the base64 encoded src to dst
@@ -215,6 +220,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
     if (e.err != default!) {
         return (0, e.err);
     }
+
     // Leading fringe.
     if (e.nbuf > 0) {
         nint i = default!;
@@ -235,6 +241,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
         }
         e.nbuf = 0;
     }
+
     // Large interior chunks.
     while (len(p) >= 3) {
         nint nn = len(e.@out) / 4 * 3;
@@ -251,6 +258,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
         n += nn;
         p = p.slice(nn);
     }
+
     // Trailing fringe.
     copy(e.buf[..], p);
     e.nbuf = len(p);
@@ -308,8 +316,10 @@ internal static (nint nsi, nint n, error err) decodeQuantum(this ref Encoding en
     // Decode quantum using the base64 alphabet
     array<byte> dbuf = new(4);
     nint dlen = 4;
+
     // Lift the nil check outside of the loop.
     _ = enc.decodeMap;
+
     for (nint j = 0; j < len(dbuf); j++) {
         if (len(src) == si) {
             switch (ᐧ) {
@@ -319,34 +329,37 @@ internal static (nint nsi, nint n, error err) decodeQuantum(this ref Encoding en
             case {} when (j == 1) || (enc.padChar != NoPadding): {
                 return (si, 0, ((CorruptInputError)(int64)(si - j)));
             }}
-
             dlen = j;
             break;
         }
         var @in = src[si];
         si++;
+
         var @out = enc.decodeMap[@in];
         if (@out != 0xff) {
             dbuf[j] = @out;
             continue;
         }
+
         if (@in == (rune)'\n' || @in == (rune)'\r') {
             j--;
             continue;
         }
+
         if ((rune)@in != enc.padChar) {
             return (si, 0, ((CorruptInputError)(int64)(si - 1)));
         }
+
         // We've reached the end and there's padding
         switch (j) {
         case 0 or 1: {
+            // incorrect padding
             return (si, 0, ((CorruptInputError)(int64)(si - 1)));
         }
         case 2: {
+            // "==" is expected, the first "=" is already consumed.
+            // skip over newlines
             while (si < len(src) && (src[si] == (rune)'\n' || src[si] == (rune)'\r')) {
-                // incorrect padding
-                // "==" is expected, the first "=" is already consumed.
-                // skip over newlines
                 si++;
             }
             if (si == len(src)) {
@@ -357,6 +370,7 @@ internal static (nint nsi, nint n, error err) decodeQuantum(this ref Encoding en
                 // incorrect padding
                 return (si, 0, ((CorruptInputError)(int64)(si - 1)));
             }
+
             si++;
             break;
         }}
@@ -372,6 +386,7 @@ internal static (nint nsi, nint n, error err) decodeQuantum(this ref Encoding en
         dlen = j;
         break;
     }
+
     // Convert 4x 6bit source bytes into 3 bytes
     nuint val = (nuint)((nuint)((nuint)(((nuint)dbuf[0] << (int)(18)) | ((nuint)dbuf[1] << (int)(12))) | ((nuint)dbuf[2] << (int)(6))) | (nuint)dbuf[3]);
     (dbuf[2], dbuf[1], dbuf[0]) = ((byte)((val >> (int)(0))), (byte)((val >> (int)(8))), (byte)((val >> (int)(16))));
@@ -411,6 +426,7 @@ public static (slice<byte>, error) AppendDecode(this ref Encoding enc, slice<byt
         n--;
     }
     n = decodedLen(n, NoPadding);
+
     dst = slices.Grow<slice<byte>, byte>(dst, n);
     (n, var err) = enc.Decode(dst.slice(len(dst)).slice(0, n), src);
     return (dst.slice(0, len(dst) + n), err);
@@ -445,10 +461,13 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
         d.@out = d.@out.slice(n);
         return (n, default!);
     }
+
     if (d.err != default!) {
         return (0, d.err);
     }
+
     // This code assumes that d.r strips supported whitespace ('\r' and '\n').
+
     // Refill buffer.
     while (d.nbuf < 4 && d.readErr == default!) {
         nint nn = len(p) / 3 * 4;
@@ -461,6 +480,7 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
         (nn, d.readErr) = d.r.Read(d.buf.slice(d.nbuf, nn));
         d.nbuf += nn;
     }
+
     if (d.nbuf < 4) {
         if ((~d.enc).padChar == NoPadding && d.nbuf > 0) {
             // Decode final fragment, without padding.
@@ -483,6 +503,7 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
         }
         return (0, d.err);
     }
+
     // Decode chunk into p, or d.out and then p if p is too small.
     nint nr = d.nbuf / 4 * 4;
     nint nw = d.nbuf / 4 * 3;
@@ -512,10 +533,12 @@ public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst,
     if (len(src) == 0) {
         return (0, default!);
     }
+
     // Lift the nil check outside of the loop. enc.decodeMap is directly
     // used later in this function, to let the compiler know that the
     // receiver can't be nil.
     _ = enc.decodeMap;
+
     nint si = 0;
     while (strconv.IntSize >= 64 && len(src) - si >= 8 && len(dst) - n >= 8) {
         var src2 = src.slice(si, si + 8);
@@ -542,6 +565,7 @@ public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst,
             }
         }
     }
+
     while (len(src) - si >= 4 && len(dst) - n >= 4) {
         var src2 = src.slice(si, si + 4);
         {
@@ -563,6 +587,7 @@ public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst,
             }
         }
     }
+
     while (si < len(src)) {
         nint ninc = default!;
         (si, ninc, err) = enc.decodeQuantum(dst.slice(n), src, si);

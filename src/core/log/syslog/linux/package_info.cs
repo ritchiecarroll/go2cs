@@ -62,7 +62,7 @@ using static go.log.syslog_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("log/syslog/syslog.go", "syslog.cs", "AFfWAcIABRQACQKCloKUlAAGEIKUgoKUAAgKwpSCloKCgqaCgoK4griosqjigoSCgoKU2qKCqqKCqqKCqqKCqqKCqqKCqqKCqqKCptKEgoSCgIK2gIKk2rSCgpaCgsqmgriCppSCpqaCrsKCgpQ=", "", "", "305=Getpid/1/1/2;311=Getpid/1/1/2")]
+[assembly: go.GoPositionMap("log/syslog/syslog.go", "syslog.cs", "AGHWAcIABRQACQKCpoKUpAAHEIKkgoKUAAgKwpSCpoKCgqaCgoK4griosqjigpSCgoKU2qKCqqKCqqKCqqKCqqKCqqKCqqKCqqKCptKUgpSCgIK2gIKk2rSCgqaCgsqmgriCppSCpqaCrsKCgpQ=", "", "", "324=Getpid/1/1/2;330=Getpid/1/1/2")]
 [assembly: go.GoPositionMap("log/syslog/syslog_unix.go", "syslog_unix.cs", "AA8iooKCgoKCgrg=")]
 // </GoSourcePositionMaps>
 

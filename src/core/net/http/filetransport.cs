@@ -111,6 +111,7 @@ internal static void sendResponse(this ref populateResponse pr) {
         return;
     }
     pr.sentResponse = true;
+
     if (pr.hasContent) {
         pr.res.Value.ContentLength = -1;
     }
@@ -126,6 +127,7 @@ internal static void WriteHeader(this ref populateResponse pr, nint code) {
         return;
     }
     pr.wroteHeader = true;
+
     pr.res.Value.StatusCode = code;
     pr.res.Value.Status = fmt.Sprintf("%d %s"u8, code, StatusText(code));
 }

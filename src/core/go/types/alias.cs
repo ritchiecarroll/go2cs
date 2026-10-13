@@ -136,6 +136,7 @@ internal static ΔType unalias(ж<Alias> Ꮡa0) {
     if (t == default!) {
         throw panic(fmt.Sprintf("non-terminated alias %s"u8, (~a0.obj).name));
     }
+
     // Memoize the type only if valid.
     // In the presence of unfinished cyclic declarations, Unalias
     // would otherwise latch the invalid value (#66704).
@@ -144,6 +145,7 @@ internal static ΔType unalias(ж<Alias> Ꮡa0) {
     if (!AreEqual(t, Typ[Invalid])) {
         a0.actual = t;
     }
+
     return t;
 }
 
@@ -168,10 +170,12 @@ internal static ж<Alias> newAlias(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡob
     if (obj.typ == default!) {
         obj.typ = new AliasжΔType(a);
     }
+
     // Ensure that a.actual is set at the end of type checking.
     if (Ꮡcheck != nil) {
         check.needsCleanup(new Aliasжcleaner(a));
     }
+
     return a;
 }
 
@@ -197,6 +201,7 @@ internal static void cleanup(this ж<Alias> Ꮡa) {
     // Ensure a.actual is set before types are published,
     // so Unalias is a pure "getter", not a "setter".
     var actual = Unalias(new AliasжΔType(Ꮡa));
+
     if (AreEqual(actual, Typ[Invalid])) {
         // We don't set a.actual to Typ[Invalid] during type checking,
         // as it may indicate that the RHS is not fully set up.

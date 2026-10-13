@@ -20,9 +20,9 @@ public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) {
     }
     var exprᴛ1 = re.Op;
     if (exprᴛ1 == OpCapture || exprᴛ1 == OpConcat || exprᴛ1 == OpAlternate) {
+        // Simplify children, building new Regexp if children change.
         var nre = Ꮡre;
         foreach (var (i, sub) in re.Sub) {
-            // Simplify children, building new Regexp if children change.
             var nsub = sub.Simplify();
             if (nre == Ꮡre && nsub != sub) {
                 // Start a copy.
@@ -42,23 +42,27 @@ public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) {
         return simplify1(re.Op, re.Flags, sub, Ꮡre);
     }
     if (exprᴛ1 == OpRepeat) {
+        // Special special case: x{0} matches the empty string
+        // and doesn't even need to consider x.
         if (re.Min == 0 && re.Max == 0) {
-            // Special special case: x{0} matches the empty string
-            // and doesn't even need to consider x.
             return Ꮡ(new Regexp(Op: OpEmptyMatch));
         }
+
+        // The fun begins.
         var sub = re.Sub[0].Simplify();
+
+        // x{n,} means at least n matches of x.
         if (re.Max == -1) {
-            // The fun begins.
-            // x{n,} means at least n matches of x.
             // Special case: x{0,} is x*.
             if (re.Min == 0) {
                 return simplify1(OpStar, re.Flags, sub, nil);
             }
+
             // Special case: x{1,} is x+.
             if (re.Min == 1) {
                 return simplify1(OpPlus, re.Flags, sub, nil);
             }
+
             // General case: x{4,} is xxxx+.
             var nre = Ꮡ(new Regexp(Op: OpConcat));
             nre.Value.Sub = (~nre).Sub0[..0];
@@ -68,14 +72,17 @@ public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) {
             nre.Value.Sub = builtin.append((~nre).Sub, simplify1(OpPlus, re.Flags, sub, nil));
             return nre;
         }
+
+        // Special case x{0} handled above.
+
+        // Special case: x{1} is just x.
         if (re.Min == 1 && re.Max == 1) {
-            // Special case x{0} handled above.
-            // Special case: x{1} is just x.
             return sub;
         }
-// General case: x{n,m} means n copies of x and m copies of x?
-// The machine will do less work if we nest the final m copies,
-// so that x{2,5} = xx(x(x(x)?)?)?
+
+        // General case: x{n,m} means n copies of x and m copies of x?
+        // The machine will do less work if we nest the final m copies,
+        // so that x{2,5} = xx(x(x(x)?)?)?
 
         // Build leading prefix: xx.
         ж<Regexp> prefix = default!;
@@ -86,8 +93,9 @@ public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) {
                 prefix.Value.Sub = builtin.append((~prefix).Sub, sub);
             }
         }
+
+        // Build and attach suffix: (x(x(x)?)?)?
         if (re.Max > re.Min) {
-            // Build and attach suffix: (x(x(x)?)?)?
             var suffix = simplify1(OpQuest, re.Flags, sub, nil);
             for (nint i = re.Min + 1; i < re.Max; i++) {
                 var nre2 = Ꮡ(new Regexp(Op: OpConcat));
@@ -102,9 +110,10 @@ public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) {
         if (prefix != nil) {
             return prefix;
         }
-        return Ꮡ(new Regexp( // Some degenerate case like min > max or min < max < 0.
- // Handle as impossible match.
-Op: OpNoMatch));
+
+        // Some degenerate case like min > max or min < max < 0.
+        // Handle as impossible match.
+        return Ꮡ(new Regexp(Op: OpNoMatch));
     }
 
     return Ꮡre;
@@ -141,6 +150,7 @@ internal static ж<Regexp> simplify1(Op op, Flags flags, ж<Regexp> Ꮡsub, ж<R
     if (Ꮡre != nil && re.Op == op && (Flags)(re.Flags & NonGreedy) == (Flags)(flags & NonGreedy) && Ꮡsub == re.Sub[0]) {
         return Ꮡre;
     }
+
     Ꮡre = Ꮡ(new Regexp(Op: op, Flags: flags)); re = ref Ꮡre.DerefOrNull();
     re.Sub = builtin.append(re.Sub0[..0], Ꮡsub);
     return Ꮡre;

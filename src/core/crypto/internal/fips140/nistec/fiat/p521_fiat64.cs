@@ -46,8 +46,14 @@ partial struct p521Uint1 /*num:uint64*/;
 
 partial struct p521Int1 /*num:int64*/;
 
+// The type p521MontgomeryDomainFieldElement is a field element in the Montgomery domain.
+//
+// Bounds: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
 partial struct p521MontgomeryDomainFieldElement /*[9]uint64*/;
 
+// The type p521NonMontgomeryDomainFieldElement is a field element NOT in the Montgomery domain.
+//
+// Bounds: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
 partial struct p521NonMontgomeryDomainFieldElement /*[9]uint64*/;
 
 // p521CmovznzU64 is a single-word conditional move.

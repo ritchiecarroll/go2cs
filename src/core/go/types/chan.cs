@@ -13,13 +13,12 @@ partial struct Chan {
     internal ΔType elem;
 }
 
+// A ChanDir value indicates a channel direction.
 partial struct ChanDir /*num:nint*/;
 
 // The direction of a channel is indicated by one of these constants.
 public static ChanDir SendRecv => /* iota */ 0;
-
 public static ChanDir SendOnly => 1;
-
 public static ChanDir RecvOnly => 2;
 
 // NewChan returns a new channel type for the given direction and element type.

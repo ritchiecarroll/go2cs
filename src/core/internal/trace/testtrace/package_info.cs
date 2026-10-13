@@ -62,9 +62,9 @@ using static go.@internal.trace.testtrace_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/testtrace/expectation.go", "expectation.cs", "ABUukgACENKClIKUgpSokoKCgoK2goKUgoKUpKSUpoKCgpSCgpQ=")]
+[assembly: go.GoPositionMap("internal/trace/testtrace/expectation.go", "expectation.cs", "ABUukgACENKClIKUgpSokoKCgoK2goKUgoKUpJSUpoKCgpSCgpQ=")]
 [assembly: go.GoPositionMap("internal/trace/testtrace/format.go", "format.cs", "ABAgkoKClIKUgpSClIKClIKCgpSCgoKUgpSAgraCgpQ=")]
-[assembly: go.GoPositionMap("internal/trace/testtrace/validation.go", "validation.cs", "ACxYkgAIGOKWgoKUpqiElqSCpJaSlJbGhqKYkpSUgoCCxoKAgsaCgIIACByCAAkCloKSkpSClIKUgoKClJSClIKWkoKCgpSCpIKmlIKCgpSClMqCkpKUgpSClIKCgpSUgpSClpKCgoKUgqSCgoKClIKU7IKUkpSkgraClMiCpJSUlqqCgMKClAAEEPSmgoKmgoKCpoKCpoKCgpSCgpSmwsiClIKUgoKUgpSCgpSCgoKClKa0griUggAIEqKmgg==", "321-337:1")]
+[assembly: go.GoPositionMap("internal/trace/testtrace/validation.go", "validation.cs", "ACxYkgAIGOKmgoKUpriUpqSClKaClKa2poK4gpSUgoCCxoKAgsaCgIIAEByCgqaCkoKUgpSClIKCgpSUgpSCpoKCgoKUgqSCppSCgoKUgpTagpKClIKUgpSCgoKUlIKUgqaCgoKClIKkgoKCgpSClOyClIKUpIK2gpTIgpSUlKbagoCCgpQACRCUpoKCpoKCgqaCgqaCgoKUgoKUpsLIgpSClIKClIKUgoKUgoKCgpSmtIK4lIIACBKipoI=", "321-337:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;

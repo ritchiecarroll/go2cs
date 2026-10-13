@@ -27,7 +27,6 @@ partial class runtime_package {
 // Trace state.
 
 // trace is global tracing context.
-
 partial struct Δtraceᴛ1 /*dyn*/ {
     // trace.lock must only be acquired on the system stack where
     // stack splits cannot happen while it is held.
@@ -164,6 +163,7 @@ internal partial struct traceAdvance_untracedG /*dyn*/ {
 //go:linkname traceAdvance
 internal static void traceAdvance(bool stopTrace) {
     semacquire(ᏑtraceAdvanceSema);
+
     // Get the gen that we're advancing from. In this function we don't really care much
     // about the generation we're advancing _into_ since we'll do all the cleanup in this
     // generation for the next advancement.
@@ -173,6 +173,7 @@ internal static void traceAdvance(bool stopTrace) {
         semrelease(ᏑtraceAdvanceSema);
         return;
     }
+
     // Write an EvFrequency event for this generation.
     //
     // N.B. This may block for quite a while to get a good frequency estimate, so make sure we do
@@ -227,10 +228,12 @@ internal static void traceAdvance(bool stopTrace) {
             ᏑuntracedGs.ValueSlot = append(ᏑuntracedGs.ValueSlot, Ꮡug.Value);
         }
     });
+
     if (!stopTrace) {
         // Re-register runtime goroutine labels and stop/block reasons.
         traceRegisterLabelsAndReasons(traceNextGen(gen));
     }
+
     // Now that we've done some of the heavy stuff, prevent the world from stopping.
     // This is necessary to ensure the consistency of the STW events. If we're feeling
     // adventurous we could lift this restriction and add a STWActive event, but the
@@ -240,6 +243,7 @@ internal static void traceAdvance(bool stopTrace) {
     // through this. We want to get this done as soon as possible.
     semacquire(Ꮡworldsema);
     var mp = acquirem();
+
     // Advance the generation or stop the trace.
     Δtrace.lastNonZeroGen = gen;
     if (stopTrace){
@@ -252,6 +256,7 @@ internal static void traceAdvance(bool stopTrace) {
             ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡshutdown).Store(true);
             ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡgen).Store(0);
             unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+
             // Clear trace.enabled. It is totally OK for this value to be stale,
             // because traceAcquire will always double-check gen.
             Δtrace.enabled = false;
@@ -259,6 +264,7 @@ internal static void traceAdvance(bool stopTrace) {
     } else {
         ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡgen).Store(traceNextGen(gen));
     }
+
     // Emit a ProcsChange event so we have one on record for each generation.
     // Let's emit it as soon as possible so that downstream tools can rely on the value
     // being there fairly soon in a generation.
@@ -270,6 +276,7 @@ internal static void traceAdvance(bool stopTrace) {
         tl.Gomaxprocs(gomaxprocs);
         traceRelease(tl);
     }
+
     // Emit a GCActive event in the new generation if necessary.
     //
     // It's important that we do this before allowing stop-the-worlds again,
@@ -279,12 +286,14 @@ internal static void traceAdvance(bool stopTrace) {
         tl.GCActive();
         traceRelease(tl);
     }
+
     // Preemption is OK again after this. If the world stops or whatever it's fine.
     // We're just cleaning up the last generation after this point.
     //
     // We also don't care if the GC starts again after this for the same reasons.
     releasem(ref (mp).DerefOrNull());
     semrelease(Ꮡworldsema);
+
     // Snapshot allm and freem.
     //
     // Snapshotting after the generation counter update is sufficient.
@@ -313,6 +322,7 @@ internal static void traceAdvance(bool stopTrace) {
         mToFlush = mpΔ2;
     }
     unlock(Ꮡsched.of(schedt.Ꮡlock));
+
     // Iterate over our snapshot, flushing every buffer until we're done.
     //
     // Because trace writers read the generation while the seqlock is
@@ -324,6 +334,7 @@ internal static void traceAdvance(bool stopTrace) {
         // Track iterations for some rudimentary deadlock detection.
         nint i = 0;
         var detectedDeadlock = false;
+
         while (ᏑmToFlush.ValueSlot != nil) {
             var prev = ᏑmToFlush;
             for (var mpΔ3 = prev.ValueSlot; mpΔ3 != nil; ) {
@@ -345,6 +356,7 @@ internal static void traceAdvance(bool stopTrace) {
                     }
                 }
                 unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+
                 // Remove the m from the flush list.
                 prev.ValueSlot = mpΔ3.Value.trace.link;
                 mpΔ3.Value.trace.link = default!;
@@ -354,6 +366,7 @@ internal static void traceAdvance(bool stopTrace) {
             if (ᏑmToFlush.ValueSlot != nil) {
                 osyield();
             }
+
             if (debugDeadlock) {
                 // Try to detect a deadlock. We probably shouldn't loop here
                 // this many times.
@@ -368,9 +381,11 @@ internal static void traceAdvance(bool stopTrace) {
             }
         }
     });
+
     // At this point, the old generation is fully flushed minus stack and string
     // tables, CPU samples, and goroutines that haven't run at all during the last
     // generation.
+
     // Check to see if any Gs still haven't had events written out for them.
     var statusWriter = unsafeTraceWriter(gen, nil);
     foreach (var (_, ug) in untracedGs) {
@@ -386,8 +401,10 @@ internal static void traceAdvance(bool stopTrace) {
         statusWriter = statusWriter.writeGoStatus(ug.goid, ug.mid, status, ug.inMarkAssist, ug.stackID);
     }
     statusWriter.flush().end();
+
     // Read everything out of the last gen's CPU profile buffer.
     traceReadCPU(gen);
+
     // Flush CPU samples, stacks, and strings for the last generation. This is safe,
     // because we're now certain no M is writing to the last generation.
     //
@@ -397,12 +414,14 @@ internal static void traceAdvance(bool stopTrace) {
     ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(gen % 2)).dump(gen);
     ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑtypeTab, (ulong)(gen % 2)).dump(gen);
     ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).reset(gen);
+
     // That's it. This generation is done producing buffers.
     systemstack(() => {
         @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
         ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑflushedGen).Store(gen);
         unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
     });
+
     // Perform status reset on dead Ps because they just appear as idle.
     //
     // Preventing preemption is sufficient to access allp safely. allp is only
@@ -416,11 +435,14 @@ internal static void traceAdvance(bool stopTrace) {
         pp.of(runtime_package.Δp.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).readyNextGen(traceNextGen(gen));
     }
     releasem(ref (mp).DerefOrNull());
+
     if (stopTrace){
         // Acquire the shutdown sema to begin the shutdown process.
         semacquire(ᏑtraceShutdownSema);
+
         // Finish off CPU profile reading.
         traceStopReadCPU();
+
         // Reset debug.malloc if necessary. Note that this is set in a racy
         // way; that's OK. Some mallocs may still enter into the debug.malloc
         // block, but they won't generate events because tracing is disabled.
@@ -448,11 +470,13 @@ internal static void traceAdvance(bool stopTrace) {
         });
         semrelease(Ꮡworldsema);
     }
+
     // Block until the trace reader has finished processing the last generation.
     semacquire(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2)));
     if (raceenabled) {
         raceacquire(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2))));
     }
+
     // Double-check that things look as we expect after advancing and perform some
     // final cleanup if the trace has fully stopped.
     systemstack(() => {
@@ -479,6 +503,7 @@ internal static void traceAdvance(bool stopTrace) {
         }
         unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
     });
+
     if (stopTrace) {
         // Clear the sweep state on every P for the next time tracing is enabled.
         //
@@ -500,12 +525,14 @@ internal static void traceAdvance(bool stopTrace) {
         }
         releasem(ref (mpΔ5).DerefOrNull());
     }
+
     // Release the advance semaphore. If stopTrace is true we're still holding onto
     // traceShutdownSema.
     //
     // Do a direct handoff. Don't let one caller of traceAdvance starve
     // other calls to traceAdvance.
     semrelease1(ᏑtraceAdvanceSema, true, 0);
+
     if (stopTrace) {
         // Stop the traceAdvancer. We can't be holding traceAdvanceSema here because
         // we'll deadlock (we're blocked on the advancer goroutine exiting, but it
@@ -566,10 +593,12 @@ internal static (slice<byte> buf, bool park) readTrace0() {
                 getg().Value.racectx = 0;
             }, ref ᒐ);
         }
+
         // This function must not allocate while holding trace.lock:
         // allocation can call heap allocate, which will try to emit a trace
         // event while holding heap lock.
         @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+
         if (ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡreader).Load() != nil) {
             // More than one goroutine reads trace. This is bad.
             // But we rather do not crash the program because of tracing,
@@ -592,7 +621,9 @@ internal static (slice<byte> buf, bool park) readTrace0() {
             unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
             (buf, park) = (slice<byte>("go 1.23 trace\x00\x00\x00"u8), false); goto ᒐdone;
         }
+
         // Read the next buffer.
+
         if (ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑreaderGen).Load() == 0) {
             ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑreaderGen).Store(1);
         }
@@ -600,6 +631,7 @@ internal static (slice<byte> buf, bool park) readTrace0() {
         while (ᐧ) {
             assertLockHeld(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
             gen = ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑreaderGen).Load();
+
             // Check to see if we need to block for more data in this generation
             // or if we need to move our generation forward.
             if (!Δtrace.full[gen % 2].empty()) {
@@ -613,6 +645,7 @@ internal static (slice<byte> buf, bool park) readTrace0() {
             if (ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑflushedGen).Load() == gen) {
                 if (ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡshutdown).Load()) {
                     unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+
                     // Wake up anyone waiting for us to be done with this generation.
                     //
                     // Do this after reading trace.shutdown, because the thread we're
@@ -624,6 +657,7 @@ internal static (slice<byte> buf, bool park) readTrace0() {
                         racerelease(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2))));
                     }
                     semrelease(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2)));
+
                     // We're shutting down, and the last generation is fully
                     // read. We're done.
                     (buf, park) = (default!, false); goto ᒐdone;
@@ -633,6 +667,7 @@ internal static (slice<byte> buf, bool park) readTrace0() {
                 // we're reading from and try again.
                 ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑreaderGen).Store(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡgen).Load());
                 unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+
                 // Wake up anyone waiting for us to be done with this generation.
                 //
                 // Do this after reading gen to make sure we can't have the trace
@@ -642,6 +677,7 @@ internal static (slice<byte> buf, bool park) readTrace0() {
                     racerelease(@unsafe.Pointer.FromPinnedBox(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2))));
                 }
                 semrelease(ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑdoneSema, (ulong)(gen % 2)));
+
                 // Reacquire the lock and go back to the top of the loop.
                 @lock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
                 continue;
@@ -728,6 +764,7 @@ internal static partial void start(this ж<traceAdvancerState> Ꮡs) {
         while (traceEnabled()) {
             // Set a timer to wake us up
             Ꮡs.Value.timer.sleep((int64)debug.traceadvanceperiod);
+
             // Try to advance the trace.
             traceAdvance(false);
         }
@@ -844,8 +881,10 @@ internal static void close(this ж<wakeableSleep> Ꮡs) {
     }
     var wakeup = s.wakeup;
     s.wakeup = default!;
+
     // Close the channel.
     builtin.close(wakeup);
+
     if (raceenabled) {
         racerelease(@unsafe.Pointer.FromPinnedBox(Ꮡs.of(wakeableSleep.Ꮡlock)));
     }

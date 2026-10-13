@@ -8,6 +8,7 @@ using @internal.runtime;
 
 partial class runtime_package {
 
+// pageBits is a bitmap representing one bit per page in a palloc chunk.
 /* [pallocChunkPages / 64]uint64 */
 partial struct pageBits /*[8]uint64*/;
 
@@ -123,6 +124,11 @@ internal static nuint /*s*/ popcntRange(this ref pageBits b, nuint i, nuint n) {
     return s;
 }
 
+// pallocBits is a bitmap that tracks page allocations for at most one
+// palloc chunk.
+//
+// The precise representation is an implementation detail, but for the
+// sake of documentation, 0s are free pages and 1s are allocated pages.
 partial struct pallocBits /*pageBits*/;
 
 // summarize returns a packed summary of the bitmap in pallocBits.
@@ -142,6 +148,7 @@ internal static pallocSum summarize(this ж<pallocBits> Ꮡb) {
         }
         nuint t = (nuint)sys.TrailingZeros64(x);
         nuint l = (nuint)sys.LeadingZeros64(x);
+
         // Finish any region spanning the uint64s
         cur += t;
         if (start == notSetYet) {
@@ -157,6 +164,7 @@ internal static pallocSum summarize(this ж<pallocBits> Ꮡb) {
         return packPallocSum(n, n, n);
     }
     most = builtin.max(most, cur);
+
     if (most >= 64 - 2) {
         // There is no way an internal run of zeros could beat max.
         return packPallocSum(start, most, cur);
@@ -166,16 +174,18 @@ internal static pallocSum summarize(this ж<pallocBits> Ꮡb) {
 outer:
     for (nint i = 0; i < 8; i++) {
         var x = b.Value[i];
+
         // Look inside this uint64. We have a pattern like
         // 000000 1xxxxx1 000000
         // We need to look inside the 1xxxxx1 for any contiguous
         // region of zeros.
+
         // We already know the trailing zeros are no larger than max. Remove them.
         x >>= (int)((nint)(sys.TrailingZeros64(x) & 63));
-        if ((uint64)(x & (x + 1)) == 0) {
-            // no more zeros (except at the top).
+        if ((uint64)(x & (x + 1)) == 0) { // no more zeros (except at the top).
             continue;
         }
+
         // Strategy: shrink all runs of zeros by max. If any runs of zero
         // remain, then we've identified a larger maximum zero run.
         nuint Δp = most; // number of zeros we still need to shrink by.
@@ -186,16 +196,14 @@ outer:
                 if (Δp <= k) {
                     // Shift p ones down into the top of each run of zeros.
                     x |= (uint64)((x >> (int)(((nuint)(Δp & 63)))));
-                    if ((uint64)(x & (x + 1)) == 0) {
-                        // no more zeros (except at the top).
+                    if ((uint64)(x & (x + 1)) == 0) { // no more zeros (except at the top).
                         goto continue_outer;
                     }
                     break;
                 }
                 // Shift k ones down into the top of each run of zeros.
                 x |= (uint64)((x >> (int)(((nuint)(k & 63)))));
-                if ((uint64)(x & (x + 1)) == 0) {
-                    // no more zeros (except at the top).
+                if ((uint64)(x & (x + 1)) == 0) { // no more zeros (except at the top).
                     goto continue_outer;
                 }
                 Δp -= k;
@@ -203,14 +211,14 @@ outer:
                 // This allows us to shift farther in the next iteration.
                 k *= 2;
             }
+
             // The length of the lowest-order zero run is an increment to our maximum.
             nuint j = (nuint)sys.TrailingZeros64(~x); // count contiguous trailing ones
             x >>= (int)((nuint)(j & 63)); // remove trailing ones
             j = (nuint)sys.TrailingZeros64(x); // count contiguous trailing zeros
             x >>= (int)((nuint)(j & 63)); // remove zeros
             most += j; // we have a new maximum!
-            if ((uint64)(x & (x + 1)) == 0) {
-                // no more zeros (except at the top).
+            if ((uint64)(x & (x + 1)) == 0) { // no more zeros (except at the top).
                 goto continue_outer;
             }
             Δp = j; // remove j more zeros from each zero run.

@@ -50,8 +50,8 @@ using static go.@internal.dag_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/dag/alg.go", "alg.cs", "AAcQkoSCgpaCgsyykoSCkoKUgpSClIKUgpSqtIKCgoKC", "29-38:1")]
-[assembly: go.GoPositionMap("internal/dag/parse.go", "parse.cs", "ADlygqaCgIKkgoKCpoKmgqaCpqKCgpSGrLKChIKCmJKSlIKCgpSCgoKUgpSCgpSAgpTugoKCzIKCgoK4lN6CgoKCzIKWAAsYgujSgoKUpMS2hIKCgoKCgpSUgpSCgoKClIKUlgAMFpLYsoKCpIKUpKSEgoL+ooKClKSCgqaClIKmgoKUgqaCpIKmgoKUgoKC", "88-90:1;108-110:1;196-206:1")]
+[assembly: go.GoPositionMap("internal/dag/alg.go", "alg.cs", "AAcQkpSCgqaCgsyykpSCkoKUgpSClIKUgpSqtIKCgoKC", "29-38:1")]
+[assembly: go.GoPositionMap("internal/dag/parse.go", "parse.cs", "ADlygqaCgIKkgoKCpoKmgqaCpqKCgpSGrLKClIKCqJKSlIKCgpSCgoKUgpSCgpSAgpT+goKC3IKCgoK4lO6CgoKC3IKmAAsYgujSgoKUpMS2lIKCgoKCgpSUgpSCgoKClIKUlgAMFpLYsoKCpIKUpJSUgoL+ooKClKSCgqaClIKmgoKUgqaCpIKmgoKUgoKC", "88-90:1;108-110:1;196-206:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

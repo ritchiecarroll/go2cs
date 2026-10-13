@@ -90,7 +90,6 @@ internal static bool isServiceAccount(ж<syscall.SID> Ꮡsid) {
     if (exprᴛ1 == windows.SECURITY_LOCAL_SYSTEM_RID || exprᴛ1 == windows.SECURITY_LOCAL_SERVICE_RID || exprᴛ1 == windows.SECURITY_NETWORK_SERVICE_RID) {
         return true;
     }
-
     return false;
 }
 
@@ -102,7 +101,6 @@ internal static bool isValidUserAccountType(ж<syscall.SID> Ꮡsid, uint32 sidTy
     if (exprᴛ1 == syscall.SidTypeWellKnownGroup) {
         return isServiceAccount(Ꮡsid);
     }
-
     return false;
 }
 
@@ -112,22 +110,21 @@ internal static bool isValidGroupAccountType(uint32 sidType) {
         return true;
     }
     if (exprᴛ1 == syscall.SidTypeWellKnownGroup) {
+        // Some well-known groups are also considered service accounts,
+        // so isValidUserAccountType would return true for them.
+        // We have historically allowed them in LookupGroup and LookupGroupId,
+        // so don't treat them as invalid here.
         return true;
     }
     if (exprᴛ1 == syscall.SidTypeAlias) {
+        // https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/7b2aeb27-92fc-41f6-8437-deb65d950921#gt_0387e636-5654-4910-9519-1f8326cf5ec0
+        // SidTypeAlias should also be treated as a group type next to SidTypeGroup
+        // and SidTypeWellKnownGroup:
+        // "alias object -> resource group: A group object..."
+        //
+        // Tests show that "Administrators" can be considered of type SidTypeAlias.
         return true;
     }
-
-    // Some well-known groups are also considered service accounts,
-    // so isValidUserAccountType would return true for them.
-    // We have historically allowed them in LookupGroup and LookupGroupId,
-    // so don't treat them as invalid here.
-    // https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/7b2aeb27-92fc-41f6-8437-deb65d950921#gt_0387e636-5654-4910-9519-1f8326cf5ec0
-    // SidTypeAlias should also be treated as a group type next to SidTypeGroup
-    // and SidTypeWellKnownGroup:
-    // "alias object -> resource group: A group object..."
-    //
-    // Tests show that "Administrators" can be considered of type SidTypeAlias.
     return false;
 }
 
@@ -205,6 +202,8 @@ internal static (ж<User>, error) newUser(@string uid, @string gid, @string dir,
     return (u, default!);
 }
 
+// unused variables (in this implementation)
+// modified during test to exercise code paths in the cgo implementation.
 internal static nint userBuffer = 0;
 internal static nint groupBuffer = 0;
 

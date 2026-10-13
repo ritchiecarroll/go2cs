@@ -29,7 +29,6 @@ internal static bool debug;
     else { /* default: */
         throw panic("fips140: unknown GODEBUG setting fips140=" + v);
     }
-
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -47,16 +46,18 @@ public static error Supported() {
     if (asanEnabled) {
         return errors.New(fips1403ModeIsˢ);
     }
+
     // See EnableFIPS in cmd/internal/obj/fips.go for commentary.
     switch (ᐧ) {
     case {} when (runtime.GOARCH == "wasm"u8) || (runtime.GOOS == "windows"u8 && runtime.GOARCH == "386"u8) || (runtime.GOOS == "windows"u8 && runtime.GOARCH == "arm"u8) || (runtime.GOOS == "openbsd"u8) || (runtime.GOOS == "aix"u8): {
+        // due to -fexecute-only, see #70880
         return errors.New("FIPS 140-3 mode is not supported on "u8 + runtime.GOOS + "-"u8 + runtime.GOARCH);
     }}
 
-    // due to -fexecute-only, see #70880
     if (boringEnabled) {
         return errors.New(fips1403ModeIsˢ2);
     }
+
     return default!;
 }
 

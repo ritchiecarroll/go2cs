@@ -18,9 +18,12 @@ using go.crypto.@internal.fips140;
 
 partial class sha3_package {
 
+// spongeDirection indicates the direction bytes are flowing through the sponge.
 partial struct spongeDirection /*num:nint*/;
 
+// spongeAbsorbing indicates that the sponge is absorbing input.
 internal static spongeDirection spongeAbsorbing => /* iota */ 0;
+// spongeSqueezing indicates that the sponge is being squeezed.
 internal static spongeDirection spongeSqueezing => 1;
 
 partial struct Digest {
@@ -107,21 +110,25 @@ public static (nint n, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
 internal static (nint n, error err) writeGeneric(this ж<Digest> Ꮡd, slice<byte> p) {
     nint n = default!;
     error err = default!;
-
     ref var d = ref Ꮡd.DerefOrNull();
+
     if (d.state != spongeAbsorbing) {
         throw panic("sha3: Write after Read");
     }
+
     n = len(p);
+
     while (len(p) > 0) {
         nint x = subtle.XORBytes(d.a.slice(d.n, d.rate), d.a.slice(d.n, d.rate), p);
         d.n += x;
         p = p.slice(x);
+
         // If the sponge is full, apply the permutation.
         if (d.n == d.rate) {
             Ꮡd.permute();
         }
     }
+
     return (n, err);
 }
 
@@ -129,23 +136,27 @@ internal static (nint n, error err) writeGeneric(this ж<Digest> Ꮡd, slice<byt
 internal static (nint n, error err) readGeneric(this ж<Digest> Ꮡd, slice<byte> @out) {
     nint n = default!;
     error err = default!;
-
     ref var d = ref Ꮡd.DerefOrNull();
+
     // If we're still absorbing, pad and apply the permutation.
     if (d.state == spongeAbsorbing) {
         Ꮡd.padAndPermute();
     }
+
     n = len(@out);
+
     // Now, do the squeezing.
     while (len(@out) > 0) {
         // Apply the permutation if we've squeezed the sponge dry.
         if (d.n == d.rate) {
             Ꮡd.permute();
         }
+
         nint x = copy(@out, d.a.slice(d.n, d.rate));
         d.n += x;
         @out = @out.slice(x);
     }
+
     return (n, err);
 }
 
@@ -160,6 +171,7 @@ internal static slice<byte> sumGeneric(this ref Digest d, slice<byte> b) {
     if (d.state != spongeAbsorbing) {
         throw panic("sha3: Sum after Read");
     }
+
     // Make a copy of the original hash so that caller can keep writing
     // and summing.
     var dup = d.Clone();
@@ -172,6 +184,7 @@ internal static readonly @string magicSHA3 = "sha\x08"u8;
 internal static readonly @string magicShake = "sha\x09"u8;
 internal static readonly @string magicCShake = "sha\x0a"u8;
 internal static readonly @string magicKeccak = "sha\x0b"u8;
+// magic || rate || main state || n || sponge direction
 internal const nint marshaledSize = /* len(magicSHA3) + 1 + 200 + 1 + 1 */ 207;
 
 public static (slice<byte>, error) MarshalBinary(this ref Digest d) {
@@ -195,7 +208,6 @@ public static (slice<byte>, error) AppendBinary(this ref Digest d, slice<byte> b
     else { /* default: */
         throw panic("unknown dsbyte");
     }
-
     // rate is at most 168, and n is at most rate.
     b = append(b, (byte)d.rate);
     b = appendꓸꓸꓸ(b, d.a[..]);
@@ -212,6 +224,7 @@ public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
     if (len(b) != marshaledSize) {
         return errors.New(sha3InvalidHashStateˢ);
     }
+
     @string magic = ((@string)(b[..(int)(len(magicSHA3))]));
     b = b[(int)(len(magicSHA3))..];
     switch (ᐧ) {
@@ -236,8 +249,10 @@ public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
     if (rate != d.rate) {
         return errors.New(sha3InvalidHashStateˢ3);
     }
+
     copy(d.a[..], b);
     b = b[(int)(len(d.a))..];
+
     nint n = (nint)b[0];
     spongeDirection state = ((spongeDirection)(nint)b[1]);
     if (n > d.rate) {
@@ -248,6 +263,7 @@ public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
         return errors.New(sha3InvalidHashStateˢ);
     }
     d.state = state;
+
     return default!;
 }
 

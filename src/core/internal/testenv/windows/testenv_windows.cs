@@ -21,6 +21,7 @@ internal static Func<(bool, @string)> hasSymlink = sync.OnceValues((bool, @strin
             throw panic("failed to create temp directory: " + err.Error());
         }
         defer(os.RemoveAll, tmpdir, ref ᒐ);
+
         err = os.Symlink("target"u8, filepath.Join(tmpdir, "symlink"));
         switch (ᐧ) {
         case {} when err == default!: {
@@ -32,7 +33,6 @@ internal static Func<(bool, @string)> hasSymlink = sync.OnceValues((bool, @strin
         case {} when errors.Is(err, Δsyscall.ERROR_PRIVILEGE_NOT_HELD): {
             return (false, ": you don't have enough privileges to create symlinks");
         }}
-
         return (false, "");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }

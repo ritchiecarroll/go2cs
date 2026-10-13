@@ -46,7 +46,6 @@ public static (cipher.Block, error) NewCipher(slice<byte> key) {
         break;
         break;
     }}
-
     if (boring.Enabled) {
         return boring.NewAESCipher(key);
     }

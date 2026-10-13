@@ -74,6 +74,7 @@ public static ж<ΔScope> Innermost(this ж<ΔScope> Ꮡs, tokenꓸPos pos) {
             }
         }
     }
+
     if (s.Contains(pos)) {
         foreach (var (_, sΔ2) in s.children) {
             if (sΔ2.Contains(pos)) {

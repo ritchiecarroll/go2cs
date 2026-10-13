@@ -157,18 +157,20 @@ internal static (slice<byte>, error) appendIndent(slice<byte> dst, slice<byte> s
                 depth++;
                 dst = appendNewline(dst, prefix, indent, depth);
             }
+
             // Emit semantically uninteresting bytes
             // (in particular, punctuation in strings) unmodified.
             if (v == scanContinue) {
                 dst = append(dst, c);
                 continue;
             }
+
             // Add spacing around real punctuation.
             switch (c) {
             case (rune)'{' or (rune)'[': {
+                // delay indent so that empty object and array are formatted as {} and [].
                 needIndent = true;
-                dst = append(dst, // delay indent so that empty object and array are formatted as {} and [].
- c);
+                dst = append(dst, c);
                 break;
             }
             case (rune)',': {
@@ -195,7 +197,6 @@ internal static (slice<byte>, error) appendIndent(slice<byte> dst, slice<byte> s
                 dst = append(dst, c);
                 break;
             }}
-
         }
         if (scan.eof() == scanError) {
             return (dst.slice(0, origLen), (~scan).err);

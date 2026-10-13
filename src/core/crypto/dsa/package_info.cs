@@ -51,7 +51,7 @@ using static go.crypto.dsa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/dsa/dsa.go", "dsa.cs", "AC9eABAmwoIABRCSlIKkgqSCpIKkpoKEgoKCgoSCgoCCpoKChIKWgoCCpoKEgoKCgoKWgpaCgsiCgoSChIKCgoKWguzCgpaCloKEgoKClIKCqIKCgq7CgoIAAhwAEAKClpiCgoKUhIKCgoKCgoKUyoKohIKEgpaEgoKCgoSCzIKWAAISAAoCgqqCloKUgpaCgpaCgpSEgoKCgoKCgoKE")]
+[assembly: go.GoPositionMap("crypto/dsa/dsa.go", "dsa.cs", "AC9eABImwoIABxCSlIKkgqSCpIKkpoKUgoKCgpSCgoCCtoKClIKmgoCCtoKUgoKCgoKmgqaCgtiCgpSClIKCgoKmguzCgqaCpoKUgoKClIKCuIKCgq7CgoIAAhwAEAKCpriCgoKUlIKCgoKCgoKUyoK4lIKUgqaUgoKCgpSC3IKmAAISAAoCgsqCpoKUgqaCgqaCgpSUgoKCgoKCgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

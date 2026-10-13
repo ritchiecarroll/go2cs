@@ -57,6 +57,7 @@ internal static @unsafe.Pointer runtime_mapaccess1(ж<abi.SwissMapType> Ꮡtyp, 
     if (asan.Enabled && Ꮡm != nil) {
         asan.Read(key, (~typ.Key).Size_);
     }
+
     if (Ꮡm == nil || m.Used() == 0) {
         {
             var err = mapKeyError(Ꮡtyp, key); if (err != default!) {
@@ -65,10 +66,13 @@ internal static @unsafe.Pointer runtime_mapaccess1(ж<abi.SwissMapType> Ꮡtyp, 
         }
         return @unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0));
     }
+
     if (m.writing != 0) {
         fatal(concurrentMapReadAndMapˢ);
     }
+
     var hash = typ.Hasher(key, m.seed);
+
     if (m.dirLen <= 0) {
         var (_, elem, ok) = m.getWithKeySmall(Ꮡtyp, hash, key);
         if (!ok) {
@@ -76,16 +80,21 @@ internal static @unsafe.Pointer runtime_mapaccess1(ж<abi.SwissMapType> Ꮡtyp, 
         }
         return elem;
     }
+
     // Select table.
     var idx = m.directoryIndex(hash);
     var t = m.directoryAt(idx);
+
     // Probe table.
     var seq = makeProbeSeq(h1(hash), (~t).groups.lengthMask);
     for (; ᐧ ; seq = seq.next()) {
         var g = t.of(table.Ꮡgroups).group(Ꮡtyp, seq.offset);
+
         var match = (~g.ctrls()).matchH2(h2(hash));
+
         while (match != 0) {
             var i = match.first();
+
             @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
             @unsafe.Pointer slotKeyOrig = slotKey;
             if (typ.IndirectKey()) {
@@ -100,6 +109,7 @@ internal static @unsafe.Pointer runtime_mapaccess1(ж<abi.SwissMapType> Ꮡtyp, 
             }
             match = match.removeFirst();
         }
+
         match = (~g.ctrls()).matchEmpty();
         if (match != 0) {
             // Finding an empty slot means we've reached the end of
@@ -126,6 +136,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2(ж<abi.SwissMapType> 
     if (asan.Enabled && Ꮡm != nil) {
         asan.Read(key, (~typ.Key).Size_);
     }
+
     if (Ꮡm == nil || m.Used() == 0) {
         {
             var err = mapKeyError(Ꮡtyp, key); if (err != default!) {
@@ -134,10 +145,13 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2(ж<abi.SwissMapType> 
         }
         return (@unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0)), false);
     }
+
     if (m.writing != 0) {
         fatal(concurrentMapReadAndMapˢ);
     }
+
     var hash = typ.Hasher(key, m.seed);
+
     if (m.dirLen == 0) {
         var (_, elem, ok) = m.getWithKeySmall(Ꮡtyp, hash, key);
         if (!ok) {
@@ -145,16 +159,21 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2(ж<abi.SwissMapType> 
         }
         return (elem, true);
     }
+
     // Select table.
     var idx = m.directoryIndex(hash);
     var t = m.directoryAt(idx);
+
     // Probe table.
     var seq = makeProbeSeq(h1(hash), (~t).groups.lengthMask);
     for (; ᐧ ; seq = seq.next()) {
         var g = t.of(table.Ꮡgroups).group(Ꮡtyp, seq.offset);
+
         var match = (~g.ctrls()).matchH2(h2(hash));
+
         while (match != 0) {
             var i = match.first();
+
             @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
             @unsafe.Pointer slotKeyOrig = slotKey;
             if (typ.IndirectKey()) {
@@ -169,6 +188,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2(ж<abi.SwissMapType> 
             }
             match = match.removeFirst();
         }
+
         match = (~g.ctrls()).matchEmpty();
         if (match != 0) {
             // Finding an empty slot means we've reached the end of
@@ -201,43 +221,56 @@ internal static @unsafe.Pointer runtime_mapassign(ж<abi.SwissMapType> Ꮡtyp, �
     if (m.writing != 0) {
         fatal(concurrentMapWritesˢ);
     }
+
     var hash = typ.Hasher(key, m.seed);
+
     // Set writing after calling Hasher, since Hasher may panic, in which
     // case we have not actually done a write.
     m.writing ^= (uint8)(1); // toggle, see comment on writing
+
     if (m.dirPtr == nil) {
         m.growToSmall(Ꮡtyp);
     }
+
     if (m.dirLen == 0) {
         if (m.used < abi.SwissMapGroupSlots) {
             @unsafe.Pointer elem = (uintptr)m.putSlotSmall(Ꮡtyp, hash, key);
+
             if (m.writing == 0) {
                 fatal(concurrentMapWritesˢ);
             }
             m.writing ^= (uint8)(1);
+
             return elem;
         }
+
         // Can't fit another entry, grow to full size map.
         m.growToTable(Ꮡtyp);
     }
+
     @unsafe.Pointer slotElem = default!;
 outer:
     while (ᐧ) {
         // Select table.
         var idx = m.directoryIndex(hash);
         var t = m.directoryAt(idx);
+
         var seq = makeProbeSeq(h1(hash), (~t).groups.lengthMask);
+
         // As we look for a match, keep track of the first deleted slot
         // we find, which we'll use to insert the new entry if
         // necessary.
         groupReference firstDeletedGroup = default!;
         uintptr firstDeletedSlot = default!;
+
         for (; ᐧ ; seq = seq.next()) {
             var g = t.of(table.Ꮡgroups).group(Ꮡtyp, seq.offset);
             var match = (~g.ctrls()).matchH2(h2(hash));
+
             // Look for an existing slot containing this key.
             while (match != 0) {
                 var i = match.first();
+
                 @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
                 @unsafe.Pointer slotKeyOrig = slotKey;
                 if (typ.IndirectKey()) {
@@ -247,15 +280,18 @@ outer:
                     if (typ.NeedKeyUpdate()) {
                         typedmemmove(typ.Key, slotKey, key);
                     }
+
                     slotElem = (@unsafe.Pointer)((uintptr)slotKeyOrig + typ.ElemOff);
                     if (typ.IndirectElem()) {
                         slotElem = ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value;
                     }
+
                     t.checkInvariants(Ꮡtyp, Ꮡm);
                     goto break_outer;
                 }
                 match = match.removeFirst();
             }
+
             // No existing slot for this key in this group. Is this the end
             // of the probe sequence?
             match = (~g.ctrls()).matchEmpty();
@@ -263,6 +299,7 @@ outer:
                 // Finding an empty slot means we've reached the end of
                 // the probe sequence.
                 uintptr i = default!;
+
                 // If we found a deleted slot along the way, we
                 // can replace it without consuming growthLeft.
                 if (firstDeletedGroup.data != nil){
@@ -273,6 +310,7 @@ outer:
                     // Otherwise, use the empty slot.
                     i = match.first();
                 }
+
                 // If there is room left to grow, just insert the new entry.
                 if ((~t).growthLeft > 0) {
                     @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, i);
@@ -283,22 +321,27 @@ outer:
                         slotKey = kmem;
                     }
                     typedmemmove(typ.Key, slotKey, key);
+
                     slotElem = (@unsafe.Pointer)((uintptr)slotKeyOrig + typ.ElemOff);
                     if (typ.IndirectElem()) {
                         @unsafe.Pointer emem = (uintptr)newobject(typ.Elem);
                         ((ж<@unsafe.Pointer>)(uintptr)(slotElem)).Value = emem;
                         slotElem = emem;
                     }
+
                     g.ctrls().set(i, ((ctrl)(uint8)h2(hash)));
                     t.Value.growthLeft--;
                     t.Value.used++;
                     m.used++;
+
                     t.checkInvariants(Ꮡtyp, Ꮡm);
                     goto break_outer;
                 }
+
                 t.rehash(Ꮡtyp, Ꮡm);
                 goto continue_outer;
             }
+
             // No empty slots in this group. Check for a deleted
             // slot, which we'll use if we don't find a match later
             // in the probe sequence.
@@ -317,10 +360,12 @@ outer:
 continue_outer:;
     }
 break_outer:;
+
     if (m.writing == 0) {
         fatal(concurrentMapWritesˢ);
     }
     m.writing ^= (uint8)(1);
+
     return slotElem;
 }
 

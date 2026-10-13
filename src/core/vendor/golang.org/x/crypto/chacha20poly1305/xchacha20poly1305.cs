@@ -42,6 +42,7 @@ internal static slice<byte> Seal(this ref xchacha20poly1305 x, slice<byte> dst, 
     if (len(nonce) != NonceSizeX) {
         throw panic("chacha20poly1305: bad nonce length passed to Seal");
     }
+
     // XChaCha20-Poly1305 technically supports a 64-bit counter, so there is no
     // size limit. However, since we reuse the ChaCha20-Poly1305 implementation,
     // the second half of the counter is not available. This is unlikely to be
@@ -50,12 +51,15 @@ internal static slice<byte> Seal(this ref xchacha20poly1305 x, slice<byte> dst, 
     if ((uint64)len(plaintext) > (uint64)((274877906944L) - 64)) {
         throw panic("chacha20poly1305: plaintext too large");
     }
+
     var c = @new<chacha20poly1305>();
     var (hKey, _) = chacha20.HChaCha20(x.key[..], nonce[0..16]);
     copy((~c).key[..], hKey);
+
     // The first 4 bytes of the final nonce are unused counter space.
     var cNonce = new slice<byte>(ΔNonceSize);
     copy(cNonce[4..12], nonce[16..24]);
+
     return c.seal(dst, cNonce[..], plaintext, additionalData);
 }
 
@@ -69,12 +73,15 @@ internal static (slice<byte>, error) Open(this ref xchacha20poly1305 x, slice<by
     if ((uint64)len(ciphertext) > (uint64)((274877906944L) - 48)) {
         throw panic("chacha20poly1305: ciphertext too large");
     }
+
     var c = @new<chacha20poly1305>();
     var (hKey, _) = chacha20.HChaCha20(x.key[..], nonce[0..16]);
     copy((~c).key[..], hKey);
+
     // The first 4 bytes of the final nonce are unused counter space.
     var cNonce = new slice<byte>(ΔNonceSize);
     copy(cNonce[4..12], nonce[16..24]);
+
     return c.open(dst, cNonce[..], ciphertext, additionalData);
 }
 

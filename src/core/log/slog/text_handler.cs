@@ -136,7 +136,6 @@ internal static error appendTextValue(ж<handleState> Ꮡs, Value v) {
     else { /* default: */
         s.buf.ValueSlot = v.append(s.buf.ValueSlot);
     }
-
     return default!;
 }
 

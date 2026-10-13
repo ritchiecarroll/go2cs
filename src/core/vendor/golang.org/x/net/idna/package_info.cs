@@ -56,12 +56,12 @@ using static go.vendor.golang.org.x.net.idna_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/idna/idna10.0.0.go", "idna10.0.0.cs", "AB5cABACqJIABBbSgL7CgLqigAADENKmgpSCgoKClAAEFNKAvsKCggADHAAKAoAAAxTygLqigoKCgoIAAxgACAKCgoIAGj6CggADGAAKAoKCrsKuwpKC6qKCgpSUgpSClIKUgpS8mpiYhJIACxQAChIAEiSAooLKgKKCqsKCgoKmgtyClIKCgqaClJSCgoKCppSCgoKUuKSCpoKCgoK4goKSgoKClIKUgoK4gpSCgpSCpqbogoKmxIKUgoKClJS6gsSUpoKCuIKUpKbCAAEQwoKCgoKCgoKUlIKCgpSUpIKClKSCpKaSpJSUgqaCgqaUAAsYgoKCpoKmgoKUpoKClIKCgpSokoKCgqaCgsqCgpTcgpSClLaClLaCuLSmooK4goKClICCpJQADyYAJ2CigoKUlIKClIKmgpSUgoKCpoKUgoKCgpKClIKClICCpIKUgpSmgoKCpg==", "64-64:1;72-72:1;78-78:1;87-101:1;110-110:1;118-121:1;135-135:1;146-146:1;152-158:1;170-174:1")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/idna/punycode.go", "punycode.cs", "ACA+gKaSgpSCgpSClIKCgqaCgoKCgoKUgoKUgoKClIKCkoKUgpSCgqaClIKCgoKClIKCgpQAAhDSgoKCgoKCgpSmgoKUgoKCgoKmgoKUgoKCgoKUlIKUgoKCgpKClIKUgpSCgoKClIKUqJKCgpSmgpSkpKSmgpSkpKiSgpSUgoKCgpQ=")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/idna/tables15.0.0.go", "tables15.0.0.cs", "AClyAN4BxgeygpSkpKKUgoKClKSSlIKCgpSCgoKClKSSlIKCgpSCgoKClIKCgoKUtqqigpKUgpKUgpKUgpKUrLKClKSkopSCgoKUpJKUgoKClIKCgoKUpJKUgoKClIKCgoKUgoKCgpS2qqKCkpSCkpSCkpSCkpTsgqiSlKSCAI0BDADtC5wZAJIC9AQAsQIG")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/idna/idna10.0.0.go", "idna10.0.0.cs", "AB5cABACqJIABRbSgL7CgLqigAADENKmgpSCgoKClAAEFNKAvsKCggADHAAKAoAAAxTygLqigoKCgoIAAxgACAKCgoIAGj6CggADGAAKAoKCrsKuwpKC6qKCgpSUgpSClIKUgpTc2sjIlJIACxQAChIAEiSAooLKgKKCqsKCgoKmgtyClIKCgqaClJSCgoKCppSCgoKUuKSCpoKCgoK4goKSgoKClIKUgoK4gpSCgpSCpqbogoKmxIKUgoKClJTagpSUpoKCuIKUlKbCAAEQwoKCgoKCgoKUlIKCgpSUpIKClKSCpLaClJSUgqaCgqaUAAsYgoKCpoKmgoKUpoKClIKCgpSokoKCgqaCgsqCgpTcgpSClLaClLaCyJSmooK4goKClICCpJQADiYAKGCigoKUlIKClIKmgpSUgoKCpoKUgoKCgpKClIKClICCpIKUgpSmgoKCpg==", "64-64:1;72-72:1;78-78:1;87-101:1;110-110:1;118-121:1;135-135:1;146-146:1;152-158:1;170-174:1")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/idna/punycode.go", "punycode.cs", "ABo+gKaSgpSCgpSClIKCgqaCgoKCgoKUgoKUgoKClIKCkoKUgpSCgqaClIKCgoKClIKCgpQAAhDSgoKCgoKCgpSmgoKUgoKCgoKmgoKUgoKCgoKUlIKUgoKCgpKClIKUgpSCgoKClIKUqJKCgpSmgpSkpJSmgpSklKiSgpSUgoKCgpQ=")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/idna/tables15.0.0.go", "tables15.0.0.cs", "AAxyAPoBxgeygpSkpIKUgoKClKSClIKCgpSCgoKClKSClIKCgpSCgoKClIKCgoKUpqqigoKUgoKUgoKUgoKUrLKClKSkgpSCgoKUpIKUgoKClIKCgoKUpIKUgoKClIKCgoKUgoKCgpSmqqKCgpSCgpSCgpSCgpTsgqiSlKSC3ADNDJwZALkC9ASm")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/idna/trie.go", "trie.cs", "ABUq3JzCgoKCgoKCgoKUgpSm")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/idna/trie13.0.0.go", "trie13.0.0.cs", "AAkaooKCgpSClJSCgqY=")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/idna/trieval.go", "trieval.cs", "ADe8AYKmgoKClKaCgpSmgqaC")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/idna/trieval.go", "trieval.cs", "AFa8AYKmgoKClKaCgpSmgqaC")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.net;

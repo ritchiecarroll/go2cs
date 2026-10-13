@@ -34,6 +34,7 @@ internal static ref atomic.Pointer<Rlimit> origRlimitNofile => ref ᏑorigRlimit
             ᏑorigRlimitNofile.Store(Ꮡlim);
             ref var nlim = ref heap<Rlimit>(out var Ꮡnlim);
             nlim = lim;
+
             // We set Cur to Max - 1 so that we are more likely to
             // detect cases where another process uses prlimit
             // to change our resource limits. The theory is that
@@ -41,6 +42,7 @@ internal static ref atomic.Pointer<Rlimit> origRlimitNofile => ref ᏑorigRlimit
             // than using prlimit to change to Cur == Max - 1.
             // The place we check for this is in exec_linux.go.
             nlim.Cur = nlim.Max - 1;
+
             adjustFileLimit(ref nlim);
             setrlimit(RLIMIT_NOFILE, Ꮡnlim);
         }

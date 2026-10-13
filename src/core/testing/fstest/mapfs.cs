@@ -13,6 +13,23 @@ using go.io;
 
 partial class fstest_package {
 
+// A MapFS is a simple in-memory file system for use in tests,
+// represented as a map from path names (arguments to Open)
+// to information about the files or directories they represent.
+//
+// The map need not include parent directories for files contained
+// in the map; those will be synthesized if needed.
+// But a directory can still be included by setting the [MapFile.Mode]'s [fs.ModeDir] bit;
+// this may be necessary for detailed control over the directory's [fs.FileInfo]
+// or to create an empty directory.
+//
+// File system operations read directly from the map,
+// so that the file system can be changed by editing the map as needed.
+// An implication is that file system operations must not run concurrently
+// with changes to the map, which would be a race.
+// Another implication is that opening or reading a directory requires
+// iterating over the entire map, so a MapFS should typically be used with not more
+// than a few hundred entries or directory reads.
 partial struct MapFS /*map[@string, ж<MapFile>]*/;
 
 // A MapFile describes a single file in a [MapFS].
@@ -37,6 +54,7 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
         // Ordinary file
         return (new openMapFileжFile(Ꮡ(new openMapFile(name, new mapFileInfo(path.Base(name), @file), 0))), default!);
     }
+
     // Directory, possibly synthesized.
     // Note that file can be nil here: the map need not contain explicit parent directories for all its files.
     // But file can also be non-nil, in case the user wants to set metadata for the directory explicitly.
@@ -84,6 +102,7 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
         list = append(list, new mapFileInfo(nameΔ1, Ꮡ(new MapFile(Mode: (fs.FileMode)(fs.ModeDir | 365)))));
     }
     slices.SortFunc(list, (mapFileInfo a, mapFileInfo b) => strings.Compare(a.name, b.name));
+
     if (@file == nil) {
         @file = Ꮡ(new MapFile(Mode: (fs.FileMode)(fs.ModeDir | 365)));
     }
@@ -200,6 +219,7 @@ internal static (nint, error) Read(this ref openMapFile f, slice<byte> b) {
 internal static (int64, error) Seek(this ref openMapFile f, int64 offset, nint whence) {
     switch (whence) {
     case 0: {
+        // offset += 0
         break;
     }
     case 1: {
@@ -210,8 +230,6 @@ internal static (int64, error) Seek(this ref openMapFile f, int64 offset, nint w
         offset += (int64)len((~f.f).Data);
         break;
     }}
-
-    // offset += 0
     if (offset < 0 || offset > (int64)len((~f.f).Data)) {
         return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "seek"u8, Path: f.path, Err: fs.ErrInvalid))));
     }

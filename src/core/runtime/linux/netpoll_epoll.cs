@@ -129,6 +129,7 @@ retry:
         if (ev.Events == 0) {
             continue;
         }
+
         if (~Ꮡev.of(syscall.EpollEvent.ᏑData).Reinterpret<array<byte>, ж<uintptr>>() == ᏑnetpollEventFd) {
             if (ev.Events != syscall.EPOLLIN) {
                 println((@string)"runtime: netpoll: eventfd ready for"u8, ev.Events);
@@ -147,6 +148,7 @@ retry:
             }
             continue;
         }
+
         int32 mode = default!;
         if ((uint32)(ev.Events & ((uint32)((UntypedInt)((UntypedInt)(syscall.EPOLLIN | syscall.EPOLLRDHUP) | syscall.EPOLLHUP) | (uint32)syscall.EPOLLERR))) != 0) {
             mode += (rune)'r';

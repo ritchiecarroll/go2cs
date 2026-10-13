@@ -19,6 +19,10 @@ using vendor.golang.org.x.net.http;
 
 partial class http_package {
 
+// A Header represents the key-value pairs in an HTTP header.
+//
+// The keys should be in canonical form, as returned by
+// [CanonicalHeaderKey].
 partial struct ΔHeader /*map[@string, slice<@string>]*/;
 
 // Add adds the key, value pair to the header.
@@ -95,6 +99,7 @@ public static ΔHeader Clone(this ΔHeader h) {
     if (h == default!) {
         return default!;
     }
+
     // Find total number of values.
     nint nv = 0;
     foreach (var (_, vv) in h) {

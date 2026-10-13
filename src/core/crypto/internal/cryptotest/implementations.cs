@@ -24,21 +24,22 @@ private static readonly @string baseˢ = "Base"u8;
 // implementation of the package registered with crypto/internal/impl. If there
 // are no alternative implementations for pkg, f is invoked directly once.
 public static void TestAllImplementations(ж<testing.T> Ꮡt, @string pkg, Action<ж<testing.T>> f) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // BoringCrypto bypasses the multiple Go implementations.
     if (Δboring.Enabled) {
         f(Ꮡt);
         return;
     }
+
     var impls = impl.List(pkg);
     if (len(impls) == 0) {
         f(Ꮡt);
         return;
     }
+
     Ꮡt.Cleanup(() => {
         impl.Reset(pkg);
     });
+
     foreach (var (_, name) in impls) {
         {
             var available = impl.Select(pkg, name); if (available){
@@ -62,6 +63,7 @@ public static void TestAllImplementations(ж<testing.T> Ꮡt, @string pkg, Actio
             }
         }
     }
+
     // Test the generic implementation.
     impl.Select(pkg, ""u8);
     Ꮡt.Run(baseˢ, f);

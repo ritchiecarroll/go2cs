@@ -42,6 +42,9 @@ public static SecTrustSettingsDomain SecTrustSettingsDomainUser => /* iota */ 0;
 public static SecTrustSettingsDomain SecTrustSettingsDomainAdmin => 1;
 public static SecTrustSettingsDomain SecTrustSettingsDomainSystem => 2;
 
+// various macOS error codes that can be returned from
+// SecTrustEvaluateWithError that we can map to Go cert
+// verification error types.
 public static UntypedInt ErrSecCertificateExpired => -67818;
 public static UntypedInt ErrSecHostNameMismatch => -67602;
 public static UntypedInt ErrSecNotTrusted => -67843;

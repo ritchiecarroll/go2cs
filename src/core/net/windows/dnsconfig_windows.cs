@@ -28,15 +28,18 @@ internal static ж<dnsConfig> /*conf*/ dnsReadConfig(@string ignoredFilename) {
         if (err != default!) {
             goto ᒐdone;
         }
+
         foreach (var (_, aa) in aas) {
             // Only take interfaces whose OperStatus is IfOperStatusUp(0x01) into DNS configs.
             if ((~aa).OperStatus != windows.IfOperStatusUp) {
                 continue;
             }
+
             // Only take interfaces which have at least one gateway
             if ((~aa).FirstGatewayAddress == nil) {
                 continue;
             }
+
             for (var dns = aa.Value.FirstDnsServerAddress; dns != nil; dns = dns.Value.Next) {
                 var (sa, errΔ1) = (~dns).Address.Sockaddr.Sockaddr();
                 if (errΔ1 != default!) {
@@ -63,10 +66,10 @@ internal static ж<dnsConfig> /*conf*/ dnsReadConfig(@string ignoredFilename) {
                 }
                 default: {
                     var saΔ1 = sa;
+                    // Unexpected type.
                     continue;
                     break;
                 }}
-                // Unexpected type.
                 conf.Value.servers = append((~conf).servers, JoinHostPort(ip.String(), "53"u8));
             }
         }

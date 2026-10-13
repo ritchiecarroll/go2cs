@@ -146,6 +146,7 @@ internal static bool isGroupMember(nint gid) {
     if (err != default!) {
         return false;
     }
+
     foreach (var (_, g) in groups) {
         if (g == gid) {
             return true;
@@ -158,11 +159,13 @@ internal static bool isCapDacOverrideSet() {
     uintptr _CAP_DAC_OVERRIDE = 1;
     ref var c = ref heap(new caps(), out var Ꮡc);
     c.hdr.version = _LINUX_CAPABILITY_VERSION_3;
+
     var ᴋ0 = Ꮡc.of(caps.Ꮡhdr);
     var ᴋ1 = Ꮡc.at(caps.Ꮡdata, 0);
         var (_, _, err) = RawSyscall(SYS_CAPGET, (uintptr)ᴋ0, (uintptr)ᴋ1, 0);
     System.GC.KeepAlive(ᴋ0);
     System.GC.KeepAlive(ᴋ1);
+
     return err == 0 && (uint32)(c.data[0].effective & capToMask(_CAP_DAC_OVERRIDE)) != 0;
 }
 
@@ -172,6 +175,7 @@ public static error /*err*/ Faccessat(nint dirfd, @string path, uint32 mode, nin
     if (flags == 0) {
         return faccessat(dirfd, path, mode);
     }
+
     // Attempt to use the newer faccessat2, which supports flags directly,
     // falling back if it doesn't exist.
     //
@@ -186,24 +190,29 @@ public static error /*err*/ Faccessat(nint dirfd, @string path, uint32 mode, nin
             }
         }
     }
+
     // The Linux kernel faccessat system call does not take any flags.
     // The glibc faccessat implements the flags itself; see
     // https://sourceware.org/git/?p=glibc.git;a=blob;f=sysdeps/unix/sysv/linux/faccessat.c;hb=HEAD
     // Because people naturally expect syscall.Faccessat to act
     // like C faccessat, we do the same.
+
     if ((nint)(flags & (nint)~((UntypedInt)(_AT_SYMLINK_NOFOLLOW | _AT_EACCESS))) != 0) {
         return EINVAL;
     }
+
     ref var st = ref heap(new Stat_t(), out var Ꮡst);
     {
         var errΔ2 = fstatat(dirfd, path, Ꮡst, (nint)(flags & (nint)_AT_SYMLINK_NOFOLLOW)); if (errΔ2 != default!) {
             return errΔ2;
         }
     }
+
     mode &= (uint32)(7);
     if (mode == 0) {
         return default!;
     }
+
     // Fallback to checking permission bits.
     nint uid = default!;
     if ((nint)(flags & (nint)_AT_EACCESS) != 0){
@@ -217,6 +226,7 @@ public static error /*err*/ Faccessat(nint dirfd, @string path, uint32 mode, nin
     } else {
         uid = Getuid();
     }
+
     if (uid == 0) {
         if ((uint32)(mode & 1) == 0) {
             // Root can read and write any file.
@@ -228,6 +238,7 @@ public static error /*err*/ Faccessat(nint dirfd, @string path, uint32 mode, nin
         }
         return EACCES;
     }
+
     uint32 fmode = default!;
     if ((uint32)uid == st.Uid){
         fmode = (uint32)(((st.Mode >> (int)(6))) & 7);
@@ -238,15 +249,18 @@ public static error /*err*/ Faccessat(nint dirfd, @string path, uint32 mode, nin
         } else {
             gid = Getgid();
         }
+
         if ((uint32)gid == st.Gid || isGroupMember((nint)st.Gid)){
             fmode = (uint32)(((st.Mode >> (int)(3))) & 7);
         } else {
             fmode = (uint32)(st.Mode & 7);
         }
     }
+
     if ((uint32)(fmode & mode) == mode) {
         return default!;
     }
+
     return EACCES;
 }
 
@@ -388,6 +402,7 @@ public static (@string wd, error err) Getwd() {
     if (buf[0] != (rune)'/') {
         return ("", ENOENT);
     }
+
     return (((@string)(buf.slice(0, n - 1))), default!);
 }
 
@@ -402,10 +417,12 @@ public static (slice<nint> gids, error err) Getgroups() {
     if (n == 0) {
         return (default!, default!);
     }
+
     // Sanity check group count. Max is 1<<16 on Linux.
     if (n < 0 || n > (1 << (int)(20))) {
         return (default!, EINVAL);
     }
+
     var a = new slice<_Gid_t>(n);
     (n, err) = getgroups(n, Ꮡ(a, 0));
     if (err != default!) {
@@ -490,8 +507,8 @@ public static nint TrapCause(this WaitStatus w) {
 public static (nint wpid, error err) Wait4(nint pid, ж<WaitStatus> Ꮡwstatus, nint options, ж<Rusage> Ꮡrusage) {
     nint wpid = default!;
     error err = default!;
-
     ref var wstatus = ref Ꮡwstatus.DerefOrNull();
+
     ref var status = ref heap(new _C_int(), out var Ꮡstatus);
     (wpid, err) = wait4(pid, Ꮡstatus, options, Ꮡrusage);
     if (Ꮡwstatus != nil) {
@@ -534,6 +551,7 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix
         // Don't count trailing NUL for abstract address.
         sl--;
     }
+
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.of(SockaddrUnix.Ꮡraw)), sl, default!);
 }
 
@@ -686,6 +704,7 @@ internal static (nint count, error err) ptracePeek(nint req, nint pid, uintptr a
     // The ptrace syscall differs from glibc's ptrace.
     // Peeks returns the word in *data, not as the return value.
     ref var buf = ref heap(new array<byte>(8), out var Ꮡbuf);
+
     // Leading edge. PEEKTEXT/PEEKDATA don't require aligned
     // access (PEEKUSER warns that it might), but if we don't
     // align our reads, we might straddle an unmapped page
@@ -700,6 +719,7 @@ internal static (nint count, error err) ptracePeek(nint req, nint pid, uintptr a
         n += copy(@out, buf.slice((nint)(addr % (uintptr)sizeofPtr)));
         @out = @out.slice(n);
     }
+
     // Remainder.
     while (len(@out) > 0) {
         // We use an internal buffer to guarantee alignment.
@@ -712,6 +732,7 @@ internal static (nint count, error err) ptracePeek(nint req, nint pid, uintptr a
         n += copied;
         @out = @out.slice(copied);
     }
+
     return (n, default!);
 }
 
@@ -744,6 +765,7 @@ internal static (nint count, error err) ptracePoke(nint pokeReq, nint peekReq, n
         }
         data = data.slice(n);
     }
+
     // Interior.
     while (len(data) > sizeofPtr) {
         var word = (Ꮡ(data, 0).Reinterpret<byte, uintptr>()).Value;
@@ -754,6 +776,7 @@ internal static (nint count, error err) ptracePoke(nint pokeReq, nint peekReq, n
         n += sizeofPtr;
         data = data[(int)(sizeofPtr)..];
     }
+
     // Trailing edge.
     if (len(data) > 0) {
         ref var buf = ref heap(new array<byte>(8), out var Ꮡbuf);
@@ -769,6 +792,7 @@ internal static (nint count, error err) ptracePoke(nint pokeReq, nint peekReq, n
         }
         n += len(data);
     }
+
     return (n, default!);
 }
 
@@ -783,8 +807,6 @@ public static (nint count, error err) PtracePokeData(nint pid, uintptr addr, sli
 internal static UntypedInt _NT_PRSTATUS => 1;
 
 public static error /*err*/ PtraceGetRegs(nint pid, ж<PtraceRegs> Ꮡregsout) {
-    ref var regsout = ref Ꮡregsout.DerefOrNull();
-
     ref var iov = ref heap(new Iovec(), out var Ꮡiov);
     iov.Base = Ꮡregsout.Reinterpret<PtraceRegs, byte>();
     iov.SetLen((nint)/* unsafe.Sizeof(*regsout) */ (uintptr)216);
@@ -792,8 +814,6 @@ public static error /*err*/ PtraceGetRegs(nint pid, ж<PtraceRegs> Ꮡregsout) {
 }
 
 public static error /*err*/ PtraceSetRegs(nint pid, ж<PtraceRegs> Ꮡregs) {
-    ref var regs = ref Ꮡregs.DerefOrNull();
-
     ref var iov = ref heap(new Iovec(), out var Ꮡiov);
     iov.Base = Ꮡregs.Reinterpret<PtraceRegs, byte>();
     iov.SetLen((nint)/* unsafe.Sizeof(*regs) */ (uintptr)216);

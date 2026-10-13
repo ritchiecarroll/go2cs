@@ -104,10 +104,12 @@ public static iter.Seq<Slice> Chunk<Slice, E>(Slice s, nint n)
     if (n < 1) {
         throw panic("cannot be less than 1");
     }
+
     return (Func<Slice, bool> yield) => {
         for (nint i = 0; i < len(s); i += n) {
             // Clamp the last chunk to the slice bound as necessary.
             nint end = min(n, len(subslice<Slice, E>(s, i)));
+
             // Set the capacity of each chunk so that appending to a chunk does
             // not modify the original slice.
             if (!yield(subslice3<Slice, E>(s, i, i + end, i + end))) {

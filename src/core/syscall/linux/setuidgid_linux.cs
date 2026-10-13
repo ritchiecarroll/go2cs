@@ -7,10 +7,13 @@ namespace go;
 partial class syscall_package {
 
 internal static UntypedInt sys_GETEUID => /* SYS_GETEUID */ 107;
+
 internal static UntypedInt sys_SETGID => /* SYS_SETGID */ 106;
 internal static UntypedInt sys_SETUID => /* SYS_SETUID */ 105;
+
 internal static UntypedInt sys_SETREGID => /* SYS_SETREGID */ 114;
 internal static UntypedInt sys_SETREUID => /* SYS_SETREUID */ 113;
+
 internal static UntypedInt sys_SETRESGID => /* SYS_SETRESGID */ 119;
 internal static UntypedInt sys_SETRESUID => /* SYS_SETRESUID */ 117;
 

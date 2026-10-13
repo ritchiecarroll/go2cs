@@ -265,6 +265,7 @@ internal static void reflectcallmove(ж<_type> Ꮡtyp, @unsafe.Pointer dst, @uns
         bulkBarrierPreWrite((uintptr)dst, (uintptr)src, size, nil);
     }
     memmove(dst, src, size);
+
     // Move pointers returned in registers to a place where the GC can see them.
     foreach (var (i, _) in regs.Ints) {
         if (regs.ReturnIsPtr.Get(i)) {
@@ -293,6 +294,7 @@ internal static nint typedslicecopy(ж<_type> Ꮡtyp, @unsafe.Pointer dstPtr, ni
     if (n == 0) {
         return 0;
     }
+
     // The compiler emits calls to typedslicecopy before
     // instrumentation runs, so unlike the other copying and
     // assignment operations, it's not instrumented in the calling
@@ -311,12 +313,15 @@ internal static nint typedslicecopy(ж<_type> Ꮡtyp, @unsafe.Pointer dstPtr, ni
         asanwrite(dstPtr, (uintptr)n * typ.Size_);
         asanread(srcPtr, (uintptr)n * typ.Size_);
     }
+
     if (goexperiment.CgoCheck2) {
         cgoCheckSliceCopy(Ꮡtyp, dstPtr, srcPtr, n);
     }
+
     if (dstPtr == srcPtr) {
         return n;
     }
+
     // Note: No point in checking typ.PtrBytes here:
     // compiler only emits calls to typedslicecopy for types with pointers,
     // and growslice and reflect_typedslicecopy check for pointers

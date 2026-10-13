@@ -83,12 +83,14 @@ internal static (ж<PrivateKey>, error) newPrivateKey(ж<bigmod.Modulus> Ꮡn, n
         return (default!, err);
     }
     var dP = bigmod.NewNat().Mod(Ꮡd, pMinusOneMod).Bytes(pMinusOneMod);
+
     var qMinusOne = q.Nat().SubOne(Ꮡq);
     (var qMinusOneMod, err) = bigmod.NewModulus(qMinusOne.Bytes(Ꮡq));
     if (err != default!) {
         return (default!, err);
     }
     var dQ = bigmod.NewNat().Mod(Ꮡd, qMinusOneMod).Bytes(qMinusOneMod);
+
     // Constant-time modular inversion with prime modulus by Fermat's Little
     // Theorem: qInv = q⁻¹ mod p = q^(p-2) mod p.
     if (p.Nat().IsOdd() == 0) {
@@ -98,6 +100,7 @@ internal static (ж<PrivateKey>, error) newPrivateKey(ж<bigmod.Modulus> Ꮡn, n
     var pMinusTwo = p.Nat().SubOne(Ꮡp).SubOne(Ꮡp).Bytes(Ꮡp);
     var qInv = bigmod.NewNat().Mod(q.Nat(), Ꮡp);
     qInv.Exp(qInv, pMinusTwo, Ꮡp);
+
     var pk = Ꮡ(new PrivateKey(
         pub: new ΔPublicKey(
             N: Ꮡn, E: e
@@ -136,6 +139,7 @@ public static (ж<PrivateKey>, error) NewPrivateKeyWithPrecomputation(slice<byte
     if (err != default!) {
         return (default!, err);
     }
+
     var pk = Ꮡ(new PrivateKey(
         pub: new ΔPublicKey(
             N: n, E: e
@@ -218,6 +222,7 @@ internal static readonly @string cryptoRsaDTooSmallˢ = "crypto/rsa: d too small
 // is allowed to modify priv.fipsApproved.
 internal static error checkPrivateKey(ref PrivateKey priv) {
     priv.fipsApproved = true;
+
     {
         var (fipsApproved, errΔ1) = checkPublicKey(ref nonnil(ref priv).pub); if (errΔ1 != default!){
             return errΔ1;
@@ -226,18 +231,22 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
             priv.fipsApproved = false;
         }
     }
+
     if (priv.dP == default!) {
         // Legacy and deprecated multi-prime keys.
         priv.fipsApproved = false;
         return default!;
     }
+
     var N = priv.pub.N;
     var p = priv.p;
     var q = priv.q;
+
     // FIPS 186-5, Section 5.1 requires "that p and q be of the same bit length."
     if (p.BitLen() != q.BitLen()) {
         priv.fipsApproved = false;
     }
+
     // Check that pq ≡ 1 mod N (and that p < N and q < N).
     var pN = bigmod.NewNat().ExpandFor(N);
     {
@@ -254,6 +263,7 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     if (pN.Mul(qN, N).IsZero() != 1) {
         return errors.New(cryptoRsaPQNˢ);
     }
+
     // Check that de ≡ 1 mod p-1, and de ≡ 1 mod q-1.
     //
     // This implies that e is coprime to each p-1 as e has a multiplicative
@@ -277,6 +287,7 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     if (de.IsOne() != 1) {
         return errors.New(cryptoRsaInvalidCrtˢ);
     }
+
     (var qMinus1, err) = bigmod.NewModulus(q.Nat().SubOne(q).Bytes(q));
     if (err != default!) {
         return errors.New(cryptoRsaInvalidPrimeˢ);
@@ -290,6 +301,7 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     if (de.IsOne() != 1) {
         return errors.New(cryptoRsaInvalidCrtˢ);
     }
+
     // Check that qInv * q ≡ 1 mod p.
     (var qP, err) = bigmod.NewNat().SetOverflowingBytes(q.Nat().Bytes(q), p);
     if (err != default!) {
@@ -299,6 +311,7 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     if (qP.Mul(priv.qInv, p).IsOne() != 1) {
         return errors.New(cryptoRsaInvalidCrtˢ2);
     }
+
     // Check that |p - q| > 2^(nlen/2 - 100).
     //
     // If p and q are very close to each other, then N=pq can be trivially
@@ -326,6 +339,7 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     if (diff.BitLenVarTime() <= N.BitLen() / 2 - 100) {
         return errors.New(cryptoRsaPQTooSmallˢ);
     }
+
     // Check that d > 2^(nlen/2).
     //
     // See section 3 of https://crypto.stanford.edu/~dabo/papers/RSA-survey.pdf
@@ -335,6 +349,7 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     if (priv.d.BitLenVarTime() <= N.BitLen() / 2) {
         return errors.New(cryptoRsaDTooSmallˢ);
     }
+
     return default!;
 }
 
@@ -436,13 +451,16 @@ internal static (slice<byte>, error) decrypt(ref PrivateKey priv, slice<byte> ci
     if (!priv.fipsApproved) {
         fips140.RecordNonApproved();
     }
+
     ж<bigmodꓸNat> m = default!;
     var N = priv.pub.N;
     nint E = priv.pub.E;
+
     var (c, err) = bigmod.NewNat().SetBytes(ciphertext, N);
     if (err != default!) {
         return (default!, ErrDecryption);
     }
+
     if (priv.dP == default!){
         // Legacy codepath for deprecated multi-prime keys.
         fips140.RecordNonApproved();
@@ -463,12 +481,14 @@ internal static (slice<byte>, error) decrypt(ref PrivateKey priv, slice<byte> ci
         // m = m + m2 mod N
         m.Add(m2.ExpandFor(N), N);
     }
+
     if (check) {
         var c1 = bigmod.NewNat().ExpShortVarTime(m, (nuint)E, N);
         if (c1.Equal(c) != 1) {
             return (default!, ErrDecryption);
         }
     }
+
     return (m.Bytes(N), default!);
 }
 

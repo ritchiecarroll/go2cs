@@ -62,10 +62,10 @@ using static go.@internal.coverage.cfile_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/cfile/apis.go", "apis.cs", "ABEikoKUqJKClIKUgqiSgpSokoKUgqaCgpSCloK4qJKCgpSCADl4goKUgoKmgoKmpg==")]
-[assembly: go.GoPositionMap("internal/coverage/cfile/emit.go", "emit.cs", "ACNKAESgAbKClIKCgoKmgoKWgoKCloCCgoLagoKUgoKUpoKCgpSsxN6Clt6EgoKCooKClJSCgoK6goKigIKkgoKClIKCuoKWgoKChKqigoKUgpaE3oCCuIKAgrassoKUgIKCgtykgpSWgqiCAAYQgIKkgqiAgqSAgsqAgqaokoCCpAACEAAIBoKCgpSCgoKCpqzSgoKCgoKCgpQAAhwADQKCgpSCloKAgraCgIK2rNKAgqSAgsqAgqasstaihIKigpSmgoSCgoKUloKCgpSCgqiCgoKCuoKCgoKmlIKWgoKCpgAHEoKCgpKCgIKUggAIEJaCgIK4lIKmAAcQ0oKCgpSCgqrCgoCCpAACENKmgoKEgpSCgoKCooKClJSCgg==", "455-461:1", "", "171=Getenv/1/1/2;239=Getenv/1/1/2;291=Getenv/1/1/4")]
+[assembly: go.GoPositionMap("internal/coverage/cfile/apis.go", "apis.cs", "ABEikoKUqJKClIKUgqiSgpSokoKUgqaCgpSCpoK4qJKCgpSCADt4goKUgoKmgoKmpg==")]
+[assembly: go.GoPositionMap("internal/coverage/cfile/emit.go", "emit.cs", "ACNKAFGgAbKClIKCgoKmgoKmgoKCpoCCgoLagoKUgoKUpoKCgpSsxO6Cpu6UgoKCooKClJSCgoLKgoKigIKkgoKClIKCyoKmgoKClKqigoKUgqaU7oCCyIKAgrassoKUgIKCgtykgpSmgriCAAcQgIKkgriAgqSAgtqAgraokoCCpAACEAAIBoKCgpSCgoKCpqzSgoKCgoKCgpQAAhwADQKCgpSCpoKAgraCgIK2rNKAgqSAgtqAgrasstailIKigpSmgpSCgoKUpoKCgpSCgriCgoKCyoKCgoKmlIKmgoKCpgAIEoKCgpKCgIKUggAIEKaCgILIlIKmAAcQ0oKCgpSCgqrCgoCCpAACENKmgoKUgpSCgoKCooKClJSCgg==", "455-461:1", "", "188=Getenv/1/1/2;264=Getenv/1/1/2;320=Getenv/1/1/4")]
 [assembly: go.GoPositionMap("internal/coverage/cfile/hooks.go", "hooks.cs", "AAo4ABYIgoKU")]
-[assembly: go.GoPositionMap("internal/coverage/cfile/testsupport.go", "testsupport.cs", "AB484pKCqILKgIKkgIIABxCCgpiSgoKCgoKUkoKCzAAIEoKCgoKUgIK4goCCgILagIK4goCCpIKAgrgADBbkgoKUkpSCgoKUgoKUgoCCuJaygoKUkoKCgpSCgoKClIKogoCUgILGgoKU2IKAgsqCgoKCgoKUgoKCgoKAgraCgoKmgpSCgpS4AAkOhqKCgpSAggAHEIKCgIKkgoKAgrYAAhLigpSWgoKCgoKUgqaChIKUgoKCpqaClA==", "69-74:1;138-140:1;159-193:2", "", "87=NewFormatter/1/1/2")]
+[assembly: go.GoPositionMap("internal/coverage/cfile/testsupport.go", "testsupport.cs", "AB484pKCuILKgIKkgIIACBCCgqiSgoKCgoKUkoKC3AAIEoKCgoKUgILIgoCCgILqgILIgoCCpIKAgsgADBbkgoKUkpSCgoKUgoKUgoCCyKaygoKUkoKCgpSCgoKClIK4goCUgILGgoKU6IKAgtqCgoKCgoKUgoKCgoKAgraCgoKmgpSCgpS4AAkOhqKCgpSAggAIEIKCgIKkgoKAgrYAAhLigpSmgoKCgoKUgqaClIKUgoKCpqaClA==", "69-74:1;138-140:1;159-193:2", "", "91=NewFormatter/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

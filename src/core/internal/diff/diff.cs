@@ -51,11 +51,13 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
     }
     var x = lines(old);
     var y = lines(@new);
+
     // Print diff header.
     ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
     fmt.Fprintf(new bytes_BufferжWriter(Ꮡout), "diff %s %s\n"u8, oldName, newName);
     fmt.Fprintf(new bytes_BufferжWriter(Ꮡout), "--- %s\n"u8, oldName);
     fmt.Fprintf(new bytes_BufferжWriter(Ꮡout), "+++ %s\n"u8, newName);
+
     // Loop over matches to consider,
     // expanding each match to include surrounding lines,
     // and then printing diff chunks.
@@ -63,17 +65,15 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
     // tgs returns a leading {0,0} and trailing {len(x), len(y)} pair
     // in the sequence of matches.
     pair done = default!;           // printed up to x[:done.x] and y[:done.y]
-    
     pair chunk = default!;         // start lines of current chunk
-    
     pair count = default!;         // number of lines from each side in current chunk
-    
     slice<@string> ctext = default!;             // lines for current chunk
     foreach (var (_, m) in tgs(x, y)) {
         if (m.x < done.x) {
             // Already handled scanning forward from earlier match.
             continue;
         }
+
         // Expand matching lines as far as possible,
         // establishing that x[start.x:end.x] == y[start.y:end.y].
         // Note that on the first (or last) iteration we may (or definitely do)
@@ -88,6 +88,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
             end.x++;
             end.y++;
         }
+
         // Emit the mismatched lines before start into this chunk.
         // (No effect on first sentinel iteration, when start = {0,0}.)
         foreach (var (_, s) in x.slice(done.x, start.x)) {
@@ -98,6 +99,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
             ctext = append(ctext, "+"u8 + s);
             count.y++;
         }
+
         // If we're not at EOF and have too few common lines,
         // the chunk includes all the common lines and continues.
         UntypedInt C = 3; // number of context lines
@@ -110,6 +112,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
             done = end;
             continue;
         }
+
         // End chunk with common lines for context.
         if (len(ctext) > 0) {
             nint n = end.x - start.x;
@@ -122,6 +125,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
                 count.y++;
             }
             done = new pair(start.x + n, start.y + n);
+
             // Format and emit chunk.
             // Convert line numbers to 1-indexed.
             // Special case: empty file shows up as 0,0 not 1,0.
@@ -139,10 +143,12 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
             count.y = 0;
             ctext = ctext[..0];
         }
+
         // If we reached EOF, we're done.
         if (end.x >= len(x) && end.y >= len(y)) {
             break;
         }
+
         // Otherwise start a new chunk.
         chunk = new pair(end.x - (nint)C, end.y - (nint)C);
         foreach (var (_, s) in x.slice(chunk.x, end.x)) {
@@ -152,6 +158,7 @@ public static slice<byte> Diff(@string oldName, slice<byte> old, @string newName
         }
         done = end;
     }
+
     return @out.Bytes();
 }
 
@@ -198,6 +205,7 @@ internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
             }
         }
     }
+
     // Now unique strings can be identified by m[s] = -1+-4.
     //
     // Gather the indexes of those strings in x and y, building:
@@ -221,6 +229,7 @@ internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
             }
         }
     }
+
     // Apply Algorithm A from Szymanski's paper.
     // In those terms, A = J = inv and B = [0, n).
     // We add sentinel pairs {0,0}, and {len(x),len(y)}

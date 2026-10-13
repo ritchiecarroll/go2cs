@@ -52,6 +52,7 @@ internal static uint64 wyhash(slice<byte> key, uint64 seed, uint64 len) {
     uint64 a = default!;
     uint64 b = default!;
     seed ^= (uint64)(hashkey[0]);
+
     if (i > 16) {
         if (i > 48) {
             var seed1 = seed;
@@ -83,7 +84,6 @@ internal static uint64 wyhash(slice<byte> key, uint64 seed, uint64 len) {
         b = (uint64)((r4(p.slice((nint)(i - 4))) << (int)(32)) | r4(p.slice((nint)(i - 4 - n))));
         break;
     }}
-
     return mix((uint64)((uint64)m5 ^ len), mix((uint64)(a ^ hashkey[1]), (uint64)(b ^ seed)));
 }
 
@@ -179,10 +179,10 @@ internal static void appendT(ж<Hash> Ꮡh, reflectꓸValue v) {
     }
     if (exprᴛ1 == reflect.ΔUnsafePointer || exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.Chan) {
         array<byte> buf = new(8);
-        byteorder.LEPutUint64(buf[..], // because pointing to the abi.Escape call in comparableReady,
- // So this is ok to hash pointer,
- // this way because we know their target won't be moved.
- (uint64)v.Pointer());
+        // because pointing to the abi.Escape call in comparableReady,
+        // So this is ok to hash pointer,
+        // this way because we know their target won't be moved.
+        byteorder.LEPutUint64(buf[..], (uint64)v.Pointer());
         h.Write(buf[..]);
         return;
     }
@@ -190,7 +190,6 @@ internal static void appendT(ж<Hash> Ꮡh, reflectꓸValue v) {
         appendT(Ꮡh, v.Elem());
         return;
     }
-
     throw panic(errors.New("maphash: hash of unhashable type "u8 + v.Type().String()));
 }
 

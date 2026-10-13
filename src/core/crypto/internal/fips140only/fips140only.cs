@@ -29,7 +29,6 @@ public static bool ApprovedHash(hash.Hash h) {
     default: {
         return false;
     }}
-
 }
 
 public static bool ApprovedRandomReader(io.Reader r) {

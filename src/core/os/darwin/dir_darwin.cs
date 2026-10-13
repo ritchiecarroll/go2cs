@@ -49,7 +49,6 @@ internal static FileMode dtToType(uint8 typ) {
     if (exprᴛ1 == syscall.DT_SOCK) {
         return ModeSocket;
     }
-
     return ~((fs.FileMode)((fs.FileMode)0));
 }
 

@@ -86,11 +86,14 @@ internal static (slice<byte> d, @string s) formatBits(slice<byte> dst, uint64 u,
         throw panic("strconv: illegal AppendInt/FormatInt base");
     }
     // 2 <= base && base <= len(digits)
+
     array<byte> a = new(65); /* 64 + 1 */                     // +1 for sign of 64bit value in base 2
     nint i = len(a);
+
     if (neg) {
         u = ((uint64)0 - u);
     }
+
     // convert bits
     // We use uint values where we can because those will
     // fit into a single register even on a 32bit machine.
@@ -112,14 +115,17 @@ internal static (slice<byte> d, @string s) formatBits(slice<byte> dst, uint64 u,
                     a[i + 1] = smallsString[isΔ1 + 1];
                     a[i + 0] = smallsString[isΔ1 + 0];
                 }
+
                 // us < 10, since it contains the last digit
                 // from the initial 9-digit us.
                 i--;
                 a[i] = smallsString[usΔ1 * 2 + 1];
+
                 u = q;
             }
+            // u < 1e9
         }
-        // u < 1e9
+
         // u guaranteed to fit into a uint
         nuint us = (nuint)u;
         while (us >= 100) {
@@ -129,6 +135,7 @@ internal static (slice<byte> d, @string s) formatBits(slice<byte> dst, uint64 u,
             a[i + 1] = smallsString[isΔ2 + 1];
             a[i + 0] = smallsString[isΔ2 + 0];
         }
+
         // us < 100
         nuint @is = us * 2;
         i--;
@@ -167,11 +174,13 @@ internal static (slice<byte> d, @string s) formatBits(slice<byte> dst, uint64 u,
         i--;
         a[i] = digits[(nuint)u];
     }
+
     // add sign, if any
     if (neg) {
         i--;
         a[i] = (rune)'-';
     }
+
     if (append_) {
         d = appendꓸꓸꓸ(dst, a.slice(i));
         return (d, s);

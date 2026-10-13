@@ -54,8 +54,10 @@ internal static traceWriter dumpTypesRec(ж<traceMapNode> Ꮡnode, traceWriter w
 
     var typ = (ж<abi.Type>)(uintptr)(~Ꮡ(new @unsafe.Pointer((uintptr)Ꮡ(node.data, 0))));
     @string typName = toRType(typ).@string();
+
     // The maximum number of bytes required to hold the encoded type.
     nint maxBytes = (nint)(1 + 5 * traceBytesPerNumber) + len(typName);
+
     // Estimate the size of this record. This
     // bound is pretty loose, but avoids counting
     // lots of varint sizes.
@@ -67,6 +69,7 @@ internal static traceWriter dumpTypesRec(ж<traceMapNode> Ꮡnode, traceWriter w
         // Annotate the batch as containing types.
         w.@byte((byte)traceAllocFreeTypesBatch);
     }
+
     // Emit type.
     w.varint((uint64)node.id);
     w.varint((uint64)(uintptr)typ);
@@ -74,6 +77,7 @@ internal static traceWriter dumpTypesRec(ж<traceMapNode> Ꮡnode, traceWriter w
     w.varint((uint64)(~typ).PtrBytes);
     w.varint((uint64)len(typName));
     w.stringData(typName);
+
     // Recursively walk all child nodes.
     foreach (var (i, _) in node.children) {
         @unsafe.Pointer child = (uintptr)Ꮡnode.at(traceMapNode.Ꮡchildren, i).Load();

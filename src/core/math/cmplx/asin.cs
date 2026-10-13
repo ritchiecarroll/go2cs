@@ -69,7 +69,6 @@ public static complex128 Asin(complex128 x) {
             default: {
                 return NaN();
             }}
-
             break;
         }
         case {} when math.IsInf(im, 0): {
@@ -83,14 +82,12 @@ public static complex128 Asin(complex128 x) {
             default: {
                 return complex(math.Copysign(0D, re), im);
             }}
-
             break;
         }
         case {} when math.IsInf(re, 0): {
             return complex(math.Copysign(math.Pi / 2D, re), math.Copysign(re, im));
         }}
     }
-
     var ct = complex(-imag(x), real(x)); // i * x
     var xx = x * x;
     var x1 = complex(1D - real(xx), -imag(xx)); // 1 - x*x
@@ -121,7 +118,6 @@ public static complex128 Asinh(complex128 x) {
             default: {
                 return complex(re, math.Copysign(0.0D, im));
             }}
-
             break;
         }
         case {} when math.IsNaN(re): {
@@ -135,14 +131,12 @@ public static complex128 Asinh(complex128 x) {
             default: {
                 return NaN();
             }}
-
             break;
         }
         case {} when math.IsInf(im, 0): {
             return complex(math.Copysign(im, re), math.Copysign(math.Pi / 2D, im));
         }}
     }
-
     var xx = x * x;
     var x1 = complex(1D + real(xx), imag(xx)); // 1 + x*x
     return Log(x + Sqrt(x1)); // log(x + sqrt(1 + x*x))
@@ -233,7 +227,6 @@ public static complex128 Atan(complex128 x) {
             return NaN();
         }}
     }
-
     var x2 = real(x) * real(x);
     var a = 1D - x2 - imag(x) * imag(x);
     if (a == 0D) {
@@ -241,6 +234,7 @@ public static complex128 Atan(complex128 x) {
     }
     var t = 0.5D * math.Atan2(2D * real(x), a);
     var w = reducePi(t);
+
     t = imag(x) - 1D;
     var b = x2 + t * t;
     if (b == 0D) {

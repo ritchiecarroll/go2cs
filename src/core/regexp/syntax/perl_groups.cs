@@ -6,20 +6,17 @@ namespace go.regexp;
 
 partial class syntax_package {
 
-/* \d */
-internal static slice<rune> code1 = new rune[]{
+internal static slice<rune> code1 = new rune[]{ /* \d */
     0x30, 0x39
 }.slice();
 
-/* \s */
-internal static slice<rune> code2 = new rune[]{
+internal static slice<rune> code2 = new rune[]{ /* \s */
     0x9, 0xa,
     0xc, 0xd,
     0x20, 0x20
 }.slice();
 
-/* \w */
-internal static slice<rune> code3 = new rune[]{
+internal static slice<rune> code3 = new rune[]{ /* \w */
     0x30, 0x39,
     0x41, 0x5a,
     0x5f, 0x5f,
@@ -35,85 +32,71 @@ internal static map<@string, charGroup> perlGroup = new map<@string, charGroup>{
     [@"\W"u8] = new(-1, code3)
 };
 
-/* [:alnum:] */
-internal static slice<rune> code4 = new rune[]{
+internal static slice<rune> code4 = new rune[]{ /* [:alnum:] */
     0x30, 0x39,
     0x41, 0x5a,
     0x61, 0x7a
 }.slice();
 
-/* [:alpha:] */
-internal static slice<rune> code5 = new rune[]{
+internal static slice<rune> code5 = new rune[]{ /* [:alpha:] */
     0x41, 0x5a,
     0x61, 0x7a
 }.slice();
 
-/* [:ascii:] */
-internal static slice<rune> code6 = new rune[]{
+internal static slice<rune> code6 = new rune[]{ /* [:ascii:] */
     0x0, 0x7f
 }.slice();
 
-/* [:blank:] */
-internal static slice<rune> code7 = new rune[]{
+internal static slice<rune> code7 = new rune[]{ /* [:blank:] */
     0x9, 0x9,
     0x20, 0x20
 }.slice();
 
-/* [:cntrl:] */
-internal static slice<rune> code8 = new rune[]{
+internal static slice<rune> code8 = new rune[]{ /* [:cntrl:] */
     0x0, 0x1f,
     0x7f, 0x7f
 }.slice();
 
-/* [:digit:] */
-internal static slice<rune> code9 = new rune[]{
+internal static slice<rune> code9 = new rune[]{ /* [:digit:] */
     0x30, 0x39
 }.slice();
 
-/* [:graph:] */
-internal static slice<rune> code10 = new rune[]{
+internal static slice<rune> code10 = new rune[]{ /* [:graph:] */
     0x21, 0x7e
 }.slice();
 
-/* [:lower:] */
-internal static slice<rune> code11 = new rune[]{
+internal static slice<rune> code11 = new rune[]{ /* [:lower:] */
     0x61, 0x7a
 }.slice();
 
-/* [:print:] */
-internal static slice<rune> code12 = new rune[]{
+internal static slice<rune> code12 = new rune[]{ /* [:print:] */
     0x20, 0x7e
 }.slice();
 
-/* [:punct:] */
-internal static slice<rune> code13 = new rune[]{
+internal static slice<rune> code13 = new rune[]{ /* [:punct:] */
     0x21, 0x2f,
     0x3a, 0x40,
     0x5b, 0x60,
     0x7b, 0x7e
 }.slice();
 
-/* [:space:] */
-internal static slice<rune> code14 = new rune[]{
+internal static slice<rune> code14 = new rune[]{ /* [:space:] */
     0x9, 0xd,
     0x20, 0x20
 }.slice();
 
-/* [:upper:] */
-internal static slice<rune> code15 = new rune[]{
+internal static slice<rune> code15 = new rune[]{ /* [:upper:] */
     0x41, 0x5a
 }.slice();
 
-/* [:word:] */
-internal static slice<rune> code16 = new rune[]{
+internal static slice<rune> code16 = new rune[]{ /* [:word:] */
     0x30, 0x39,
     0x41, 0x5a,
     0x5f, 0x5f,
     0x61, 0x7a
 }.slice();
 
-/* [:xdigit:] */
-internal static slice<rune> code17 = new rune[]{
+internal static slice<rune> code17 = new rune[]{ /* [:xdigit:] */
     0x30, 0x39,
     0x41, 0x46,
     0x61, 0x66

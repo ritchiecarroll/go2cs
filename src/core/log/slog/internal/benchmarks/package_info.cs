@@ -59,7 +59,7 @@ using static go.log.slog.@internal.benchmarks_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("log/slog/internal/benchmarks/benchmarks.go", "benchmarks.cs", "ACJGuJY=", "", "", "41=String/1/1/1,Int/1/1/2,Duration/1/1/3,Time/1/1/4,Any/1/1/5")]
-[assembly: go.GoPositionMap("log/slog/internal/benchmarks/handlers.go", "handlers.cs", "AB08gqaA9NKClIKCgpSCgoKCgpKCgoKClIKC1qKUpKSkpKSkpIKUxMbIoqaCpoIADyCCpoCkooKCpoKmguyAooCkgqaC", "50-56:1")]
+[assembly: go.GoPositionMap("log/slog/internal/benchmarks/handlers.go", "handlers.cs", "AB08gqaA9NKCpIKCgpSCgoKCgpKCgoKClIKC1qKUpKSkpKSkpIKUxMa4oqaCpoIADyCCpoCkooKCpoKmguyAooCkgqaC", "50-56:1")]
 // </GoSourcePositionMaps>
 
 namespace go.log.slog.@internal;

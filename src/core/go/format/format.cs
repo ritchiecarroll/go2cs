@@ -27,9 +27,12 @@ partial class format_package {
 
 // Keep these in sync with cmd/gofmt/gofmt.go.
 internal static UntypedInt tabWidth => 8;
-
 internal static printer.Mode printerMode => /* printer.UseSpaces | printer.TabIndent | printerNormalizeNumbers */ 1073741830;
 
+// printerNormalizeNumbers means to canonicalize number literal prefixes
+// and exponents while printing. See https://golang.org/doc/go1.13#gofmt.
+//
+// This value is defined in go/printer specifically for go/format and cmd/gofmt.
 internal static UntypedInt printerNormalizeNumbers => /* 1 << 30 */ 1073741824;
 
 internal static ж<printer.Config> Ꮡconfig = new StandardBox<printer.Config>(new printer.Config(Mode: printerMode, Tabwidth: tabWidth));
@@ -65,6 +68,7 @@ public static error Node(io.Writer dst, ж<token.FileSet> Ꮡfset, any node) {
         }
         break;
     }}
+
     // Sort imports if necessary.
     if (@file != nil && hasUnsortedImports(ref (@file).DerefOrNull())) {
         // Make a copy of the AST because ast.SortImports is destructive.
@@ -80,12 +84,14 @@ public static error Node(io.Writer dst, ж<token.FileSet> Ꮡfset, any node) {
             return fmt.Errorf("format.Node internal error (%s)"u8, err);
         }
         ast.SortImports(Ꮡfset, @file);
+
         // Use new file with sorted imports.
         node = @file.OrTypedNil();
         if (cnode != nil) {
             node = Ꮡ(new printer.CommentedNode(Node: @file.OrTypedNil(), Comments: (~cnode).Comments));
         }
     }
+
     return Ꮡconfig.Fprint(dst, Ꮡfset, node);
 }
 
@@ -103,11 +109,13 @@ public static (slice<byte>, error) Source(slice<byte> src) {
     if (err != default!) {
         return (default!, err);
     }
+
     if (sourceAdj == default!) {
         // Complete source file.
         // TODO(gri) consider doing this always.
         ast.SortImports(fset, @file);
     }
+
     return format(fset, @file, sourceAdj, indentAdj, src, config);
 }
 
@@ -124,8 +132,8 @@ internal static bool hasUnsortedImports(ref ast.File @file) {
             // TODO(gri) Should check if they are sorted already.
             return true;
         }
+        // Ungrouped imports are sorted by default.
     }
-    // Ungrouped imports are sorted by default.
     return false;
 }
 

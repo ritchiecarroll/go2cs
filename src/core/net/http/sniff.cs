@@ -22,10 +22,12 @@ public static @string DetectContentType(slice<byte> data) {
     if (builtin.len(data) > sniffLen) {
         data = data[..(int)(sniffLen)];
     }
+
     // Index of the first non-whitespace byte in data.
     nint firstNonWS = 0;
     for (; firstNonWS < builtin.len(data) && isWS(data[firstNonWS]); firstNonWS++) {
     }
+
     foreach (var (_, sig) in sniffSignatures) {
         {
             @string ct = sig.match(data, firstNonWS); if (ct != ""u8) {
@@ -33,6 +35,7 @@ public static @string DetectContentType(slice<byte> data) {
             }
         }
     }
+
     return applicationOctetStreamˢ; // fallback
 }
 
@@ -43,7 +46,6 @@ internal static bool isWS(byte b) {
     case (rune)'\t' or (rune)'\n' or (rune)'\x0c' or (rune)'\r' or (rune)' ': {
         return true;
     }}
-
     return false;
 }
 
@@ -54,7 +56,6 @@ internal static bool isTT(byte b) {
     case (rune)' ' or (rune)'>': {
         return true;
     }}
-
     return false;
 }
 
@@ -76,8 +77,6 @@ partial interface sniffSig {
 // 6.2.0.2. video/mp4
 // 6.2.0.3. video/webm
 // Font types
-// 34 NULL bytes followed by the string "LP"
-// 34 NULL bytes followed by \xF\xF
 // Archive types
 // RAR's signatures are incorrectly defined by the MIME spec as per
 //    https://github.com/whatwg/mimesniff/issues/63
@@ -134,7 +133,9 @@ internal static slice<sniffSig> sniffSignatures = new sniffSig[]{((htmlSig)slice
     pat: slice<byte>("RIFF\x00\x00\x00\x00WAVE"u8),
     ct: "audio/wave"u8
 ))), new mp4Sig(nil), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>(((@string)(new byte[]{0x1a, 0x45, 0xdf, 0xa3}))), "video/webm"u8))), new maskedSigжsniffSig(Ꮡ(new maskedSig(
+    // 34 NULL bytes followed by the string "LP"
     pat: slice<byte>("\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00LP"u8),
+    // 34 NULL bytes followed by \xF\xF
     mask: slice<byte>(((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff}))),
     ct: "application/vnd.ms-fontobject"u8
 ))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("\x00\x01\x00\x00"u8), "font/ttf"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("OTTO"u8), "font/otf"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("ttcf"u8), "font/collection"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("wOFF"u8), "font/woff"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("wOF2"u8), "font/woff2"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>(((@string)(new byte[]{0x1f, 0x8b, 0x08}))), "application/x-gzip"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("PK\x03\x04"u8), "application/zip"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("Rar!\x1A\x07\x00"u8), "application/x-rar-compressed"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("Rar!\x1A\x07\x01\x00"u8), "application/x-rar-compressed"u8))), new exactSigжsniffSig(Ꮡ(new exactSig(slice<byte>("\x00\x61\x73\x6D"u8), "application/wasm"u8))), new textSig(nil)
@@ -247,7 +248,6 @@ internal static @string match(this textSig _, slice<byte> data, nint firstNonWS)
         case {} when (b <= 0x08) || (b == 0x0B) || (0x0E <= b && b <= 0x1A) || (0x1C <= b && b <= 0x1F): {
             return ""u8;
         }}
-
     }
     return textPlainCharsetUtf8ˢ;
 }

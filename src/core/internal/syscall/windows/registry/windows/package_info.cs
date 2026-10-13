@@ -53,8 +53,8 @@ using static go.@internal.syscall.windows.registry_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/syscall/windows/registry/key.go", "key.cs", "ADOKAZIAAhDSgoKUgoKClKjogoSmgoKCkoKCgpSUgoKUgpSUtAAFEPKCgpSClKiSAAwckoKmgpQ=")]
-[assembly: go.GoPositionMap("internal/syscall/windows/registry/zsyscall_windows.go", "zsyscall_windows.cs", "ABM0opSk2qiChIKCgoKCgpaiAAoCgpSmoqKClKaiooKUpqIADAKClKaiAAgCgpSmosKClKaywoKClA==")]
+[assembly: go.GoPositionMap("internal/syscall/windows/registry/key.go", "key.cs", "AD6KAZIAAhDSgoKUgoKClKjogpSmgoKCkoKCgpSUgoKUgpSUtAAFEPKCgpSClKiSAAwckoKmgpQ=")]
+[assembly: go.GoPositionMap("internal/syscall/windows/registry/zsyscall_windows.go", "zsyscall_windows.cs", "ABM0opSkyqiClIKCgoKCgpaiAAoCgpSmoqKClKaiooKUpqIADAKClKaiAAgCgpSmosKClKaywoKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.syscall.windows;

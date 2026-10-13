@@ -24,6 +24,7 @@ public static (nint ns, syscall.Sockaddr sa, error err) Accept4(this ж<Switch> 
         Ꮡsw.of(Switch.Ꮡfmu).RLock();
         var f = sw.fltab[FilterAccept];
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
+
         (var af, err) = f.apply(so);
         if (err != default!) {
             (ns, sa, err) = (-1, default!, err); goto ᒐdone;
@@ -37,6 +38,7 @@ public static (nint ns, syscall.Sockaddr sa, error err) Accept4(this ж<Switch> 
                 (ns, sa, err) = (-1, default!, err); goto ᒐdone;
             }
         }
+
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         defer(Ꮡsw.of(Switch.Ꮡsmu).Unlock, ref ᒐ);
         if ((~so).Err != default!) {

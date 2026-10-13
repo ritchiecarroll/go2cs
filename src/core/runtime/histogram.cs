@@ -10,11 +10,63 @@ using @internal.runtime;
 
 partial class runtime_package {
 
+// For the time histogram type, we use an HDR histogram.
+// Values are placed in buckets based solely on the most
+// significant set bit. Thus, buckets are power-of-2 sized.
+// Values are then placed into sub-buckets based on the value of
+// the next timeHistSubBucketBits most significant bits. Thus,
+// sub-buckets are linear within a bucket.
+//
+// Therefore, the number of sub-buckets (timeHistNumSubBuckets)
+// defines the error. This error may be computed as
+// 1/timeHistNumSubBuckets*100%. For example, for 16 sub-buckets
+// per bucket the error is approximately 6%.
+//
+// The number of buckets (timeHistNumBuckets), on the
+// other hand, defines the range. To avoid producing a large number
+// of buckets that are close together, especially for small numbers
+// (e.g. 1, 2, 3, 4, 5 ns) that aren't very useful, timeHistNumBuckets
+// is defined in terms of the least significant bit (timeHistMinBucketBits)
+// that needs to be set before we start bucketing and the most
+// significant bit (timeHistMaxBucketBits) that we bucket before we just
+// dump it into a catch-all bucket.
+//
+// As an example, consider the configuration:
+//
+//    timeHistMinBucketBits = 9
+//    timeHistMaxBucketBits = 48
+//    timeHistSubBucketBits = 2
+//
+// Then:
+//
+//    011000001
+//    ^--
+//    │ ^
+//    │ └---- Next 2 bits -> sub-bucket 3
+//    └------- Bit 9 unset -> bucket 0
+//
+//    110000001
+//    ^--
+//    │ ^
+//    │ └---- Next 2 bits -> sub-bucket 2
+//    └------- Bit 9 set -> bucket 1
+//
+//    1000000010
+//    ^-- ^
+//    │ ^ └-- Lower bits ignored
+//    │ └---- Next 2 bits -> sub-bucket 0
+//    └------- Bit 10 set -> bucket 2
+//
+// Following this pattern, bucket 38 will have the bit 46 set. We don't
+// have any buckets for higher values, so we spill the rest into an overflow
+// bucket containing values of 2^47-1 nanoseconds or approx. 1 day or more.
+// This range is more than enough to handle durations produced by the runtime.
 internal static UntypedInt timeHistMinBucketBits => 9;
 internal static UntypedInt timeHistMaxBucketBits => 48; // Note that this is exclusive; 1 higher than the actual range.
 internal static UntypedInt timeHistSubBucketBits => 2;
 internal static UntypedInt timeHistNumSubBuckets => /* 1 << timeHistSubBucketBits */ 4;
 internal static UntypedInt timeHistNumBuckets => /* timeHistMaxBucketBits - timeHistMinBucketBits + 1 */ 40;
+// Two extra buckets, one for underflow, one for overflow.
 internal static UntypedInt timeHistTotalBuckets => /* timeHistNumBuckets*timeHistNumSubBuckets + 2 */ 162;
 
 // timeHistogram represents a distribution of durations in
@@ -119,6 +171,7 @@ internal static slice<float64> timeHistogramMetricsBuckets() {
     var b = new slice<float64>(timeHistTotalBuckets + 1);
     // Underflow bucket.
     b[0] = float64NegInf();
+
     for (nint j = 0; j < timeHistNumSubBuckets; j++) {
         // No bucket bit for the first few buckets. Just sub-bucket bits after the
         // min bucket bit.

@@ -82,13 +82,13 @@ public static bool Equal(this ref PublicKey pub, cryptoꓸPublicKey x) {
     if (!ok) {
         return false;
     }
-    return bigIntEqual(pub.X, (~xx).X) && bigIntEqual(pub.Y, (~xx).Y) && AreEqual(pub.Curve, (~xx).Curve);
+    return bigIntEqual(pub.X, (~xx).X) && bigIntEqual(pub.Y, (~xx).Y) &&
+        // Standard library Curve implementations are singletons, so this check
+        // will work for those. Other Curves might be equivalent even if not
+        // singletons, but there is no definitive way to check for that, and
+        // better to err on the side of safety.
+        AreEqual(pub.Curve, (~xx).Curve);
 }
-
-// Standard library Curve implementations are singletons, so this check
-// will work for those. Other Curves might be equivalent even if not
-// singletons, but there is no definitive way to check for that, and
-// better to err on the side of safety.
 
 // PrivateKey represents an ECDSA private key.
 partial struct PrivateKey {
@@ -128,7 +128,6 @@ internal static ecdhꓸCurve curveToECDH(elliptic.Curve c) {
     { /* default: */
         return default!;
     }
-
 }
 
 // Public returns the public key corresponding to priv.
@@ -184,6 +183,7 @@ public static (slice<byte>, error) Sign(this ж<PrivateKey> Ꮡpriv, io.Reader r
 // and may change between calls and/or between versions.
 public static (ж<PrivateKey>, error) GenerateKey(elliptic.Curve c, io.Reader rand) {
     randutil.MaybeReadByte(rand);
+
     if (boring.Enabled && AreEqual(rand, boring.RandReader)) {
         var (x, y, d, err) = boring.GenerateKeyECDSA((~c.Params()).Name);
         if (err != default!) {
@@ -192,6 +192,7 @@ public static (ж<PrivateKey>, error) GenerateKey(elliptic.Curve c, io.Reader ra
         return (Ꮡ(new PrivateKey(PublicKey: new PublicKey(Curve: c, X: bbig.Dec(x), Y: bbig.Dec(y)), D: bbig.Dec(d))), default!);
     }
     boring.UnreachableExceptTests();
+
     var exprᴛ1 = c.Params();
     if (exprᴛ1 == elliptic.P224().Params()) {
         return generateFIPS<ecdsa.P224PointжPoint>(c, ecdsa.P224(), rand);
@@ -208,7 +209,6 @@ public static (ж<PrivateKey>, error) GenerateKey(elliptic.Curve c, io.Reader ra
     { /* default: */
         return generateLegacy(c, rand);
     }
-
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -243,6 +243,7 @@ public static (slice<byte>, error) SignASN1(io.Reader rand, ж<PrivateKey> Ꮡpr
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     randutil.MaybeReadByte(rand);
+
     if (boring.Enabled && AreEqual(rand, boring.RandReader)) {
         var (b, err) = boringPrivateKey(Ꮡpriv);
         if (err != default!) {
@@ -251,6 +252,7 @@ public static (slice<byte>, error) SignASN1(io.Reader rand, ж<PrivateKey> Ꮡpr
         return boring.SignMarshalECDSA(b, hash);
     }
     boring.UnreachableExceptTests();
+
     var exprᴛ1 = priv.Curve.Params();
     if (exprᴛ1 == elliptic.P224().Params()) {
         return signFIPS<ecdsa.P224PointжPoint>(ecdsa.P224(), ref (Ꮡpriv).DerefOrNull(), rand, hash);
@@ -267,7 +269,6 @@ public static (slice<byte>, error) SignASN1(io.Reader rand, ж<PrivateKey> Ꮡpr
     { /* default: */
         return signLegacy(ref (Ꮡpriv).DerefOrNull(), rand, hash);
     }
-
 }
 
 internal static (slice<byte>, error) signFIPS<P>(ж<ecdsa.Curve<P>> Ꮡc, ref PrivateKey priv, io.Reader rand, slice<byte> hash)
@@ -322,7 +323,6 @@ internal static (slice<byte>, error) signRFC6979(ref PrivateKey priv, slice<byte
     { /* default: */
         return (default!, errors.New(ecdsaCurveNotSupportedByˢ));
     }
-
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -398,6 +398,7 @@ public static bool VerifyASN1(ж<PublicKey> Ꮡpub, slice<byte> hash, slice<byte
         return boring.VerifyECDSA(key, hash, sig);
     }
     boring.UnreachableExceptTests();
+
     var exprᴛ1 = pub.Curve.Params();
     if (exprᴛ1 == elliptic.P224().Params()) {
         return verifyFIPS<ecdsa.P224PointжPoint>(ecdsa.P224(), ref (Ꮡpub).DerefOrNull(), hash, sig);
@@ -414,7 +415,6 @@ public static bool VerifyASN1(ж<PublicKey> Ꮡpub, slice<byte> hash, slice<byte
     { /* default: */
         return verifyLegacy(ref (Ꮡpub).DerefOrNull(), hash, sig);
     }
-
 }
 
 internal static bool verifyFIPS<P>(ж<ecdsa.Curve<P>> Ꮡc, ref PublicKey pub, slice<byte> hash, slice<byte> sig)

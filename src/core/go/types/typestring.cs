@@ -17,6 +17,16 @@ using token = global::go.go.token_package;
 
 partial class types_package {
 
+// A Qualifier controls how named package-level objects are printed in
+// calls to [TypeString], [ObjectString], and [SelectionString].
+//
+// These three formatting routines call the Qualifier for each
+// package-level object O, and if the Qualifier returns a non-empty
+// string p, the object is printed in the form p.O.
+// If it returns an empty string, only the object name O is printed.
+//
+// Using a nil Qualifier is equivalent to using (*[Package]).Path: the
+// object is qualified by the import path, e.g., "encoding/json.Marshal".
 // type Qualifier is a methodless func type — rendered inline as its base delegate
 
 // RelativeTo returns a [Qualifier] that fully qualifies members of
@@ -122,15 +132,16 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
         }
         w.seen[typ] = true;
         defer((ᴛ1, ᴛ2) => delete(ᴛ1, ᴛ2), Ꮡw.Value.seen, typ, ref ᒐ);
+
         switch (typ.type()) {
         case null: {
             w.error(nilˢ2);
             break;
         }
         case ж<Basic> t: {
+            // exported basic types go into package unsafe
+            // (currently this is just unsafe.Pointer)
             if (isExported((~t).name)) {
-                // exported basic types go into package unsafe
-                // (currently this is just unsafe.Pointer)
                 {
                     var (obj, _) = (~Unsafe).scope.Lookup((~t).name)._<ж<TypeName>>(ᐧ); if (obj != nil) {
                         w.typeName(obj);
@@ -159,6 +170,7 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
                 if (i > 0) {
                     w.@byte((rune)';');
                 }
+
                 // If disambiguating one struct for another, look for the first unexported field.
                 // Do this first in case of nested structs; tag the first-outermost field.
                 var pkgAnnotate = false;
@@ -167,6 +179,7 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
                     pkgAnnotate = true;
                     w.pkgInfo = false; // only tag once
                 }
+
                 // This doesn't do the right thing for embedded type
                 // aliases where we should print the alias name, not
                 // the aliased type (see go.dev/issue/44410).
@@ -208,9 +221,9 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
             break;
         }
         case ж<Union> t: {
+            // Unions only appear as (syntactic) embedded elements
+            // in interfaces and syntactically cannot be empty.
             if (t.Len() == 0) {
-                // Unions only appear as (syntactic) embedded elements
-                // in interfaces and syntactically cannot be empty.
                 w.error(emptyUnionˢ);
                 break;
             }
@@ -286,9 +299,9 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
             var exprᴛ1 = (~t).dir;
             if (exprᴛ1 == SendRecv) {
                 s = chanˢ3;
+                // chan (<-chan T) requires parentheses
                 {
                     var (c, _) = (~t).elem._<ж<Chan>>(ᐧ); if (c != nil && (~c).dir == RecvOnly) {
-                        // chan (<-chan T) requires parentheses
                         parens = true;
                     }
                 }
@@ -302,7 +315,6 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
             else { /* default: */
                 w.error(unknownChannelDirectionˢ);
             }
-
             w.@string(s);
             if (parens) {
                 w.@byte((rune)'(');
@@ -314,9 +326,9 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
             break;
         }
         case ж<Named> t: {
+            // If hashing, write a unique prefix for t to represent its identity, since
+            // named type identity is pointer identity.
             if (w.ctxt != nil) {
-                // If hashing, write a unique prefix for t to represent its identity, since
-                // named type identity is pointer identity.
                 w.@string(strconv.Itoa(w.ctxt.getID(new NamedжΔType(t))));
             }
             w.typeName((~t).obj); // when hashing written for readability of the hash only
@@ -324,8 +336,7 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
                 // instantiated type
                 Ꮡw.typeList((~(~t).inst).targs.list());
             } else 
-            if (w.ctxt == nil && t.TypeParams().Len() != 0) {
-                // For type hashing, don't need to format the TypeParams
+            if (w.ctxt == nil && t.TypeParams().Len() != 0) { // For type hashing, don't need to format the TypeParams
                 // parameterized type
                 Ꮡw.tParamList(t.TypeParams().list());
             }
@@ -371,8 +382,7 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
                     // instantiated type
                     Ꮡw.typeList(list);
                 } else 
-                if (w.ctxt == nil && t.TypeParams().Len() != 0) {
-                    // For type hashing, don't need to format the TypeParams
+                if (w.ctxt == nil && t.TypeParams().Len() != 0) { // For type hashing, don't need to format the TypeParams
                     // parameterized type
                     Ꮡw.tParamList(t.TypeParams().list());
                 }
@@ -385,6 +395,8 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
         }
         default: {
             var t = typ;
+            // For externally defined implementations of Type.
+            // Note: In this case cycles won't be caught.
             w.@string(t.String());
             break;
         }}
@@ -392,9 +404,6 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// For externally defined implementations of Type.
-// Note: In this case cycles won't be caught.
 
 // typeSet writes a canonical hash for an interface type set.
 internal static void typeSet(this ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
@@ -413,6 +422,7 @@ internal static void typeSet(this ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
     }
     switch (ᐧ) {
     case {} when s.terms.isAll(): {
+        // nothing to do
         break;
     }
     case {} when s.terms.isEmpty(): {
@@ -420,7 +430,6 @@ internal static void typeSet(this ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
         break;
     }
     default: {
-// nothing to do
         slice<@string> termHashes = default!;
         foreach (var (_, Δterm) in s.terms) {
             // terms are not canonically sorted, so we sort their hashes instead.
@@ -438,7 +447,6 @@ internal static void typeSet(this ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
         w.@string(strings.Join(termHashes, "|"u8));
         break;
     }}
-
 }
 
 internal static void typeList(this ж<typeWriter> Ꮡw, slice<ΔType> list) {
@@ -556,18 +564,22 @@ internal static void signature(this ж<typeWriter> Ꮡw, ж<ΔSignature> Ꮡsig)
             }
             Ꮡw.tParamList(sig.TypeParams().list());
         }
+
         Ꮡw.tuple(sig.@params, sig.variadic);
+
         nint n = sig.results.Len();
         if (n == 0) {
             // no result
             return;
         }
+
         w.@byte((rune)' ');
         if (n == 1 && (w.ctxt != nil || (~(~sig.results).vars[0]).name == ""u8)) {
             // single unnamed result (if type hashing, name must be ignored)
             Ꮡw.typ((~(~sig.results).vars[0]).typ);
             return;
         }
+
         // multiple or named result(s)
         Ꮡw.tuple(sig.results, false);
     }

@@ -69,6 +69,7 @@ internal static void formatString(this ref formatter f, slice<byte> b, @string s
     if (len(s) < len(b)) {
         b[len(s)] = 0;
     }
+
     // Some buggy readers treat regular files with a trailing slash
     // in the V7 path field as a directory even though the full path
     // recorded elsewhere (e.g., via PAX record) contains no trailing slash.
@@ -107,6 +108,7 @@ internal static int64 parseNumeric(this ref parser p, slice<byte> b) {
         if ((byte)(b[0] & 0x40) != 0) {
             inv = 0xff;
         }
+
         uint64 x = default!;
         foreach (var (i, vᴛ1) in b) {
             var c = vᴛ1;
@@ -130,6 +132,7 @@ internal static int64 parseNumeric(this ref parser p, slice<byte> b) {
         }
         return (int64)x;
     }
+
     // Normal case is base-8 (octal) format.
     return p.parseOctal(b);
 }
@@ -141,6 +144,7 @@ internal static void formatNumeric(this ref formatter f, slice<byte> b, int64 x)
         f.formatOctal(b, x);
         return;
     }
+
     if (fitsInBase256(len(b), x)) {
         for (nint i = len(b) - 1; i >= 0; i--) {
             b[i] = (byte)x;
@@ -149,6 +153,7 @@ internal static void formatNumeric(this ref formatter f, slice<byte> b, int64 x)
         b[0] |= (byte)(0x80); // Highest bit indicates binary format
         return;
     }
+
     f.formatOctal(b, 0); // Last resort, just write zero
     f.err = ErrFieldTooLong;
 }
@@ -160,6 +165,7 @@ internal static int64 parseOctal(this ref parser p, slice<byte> b) {
     // So we remove leading and trailing NULs and spaces to
     // be sure.
     b = bytes.Trim(b, " \x00"u8);
+
     if (len(b) == 0) {
         return 0;
     }
@@ -175,6 +181,7 @@ internal static void formatOctal(this ref formatter f, slice<byte> b, int64 x) {
         x = 0; // Last resort, just write zero
         f.err = ErrFieldTooLong;
     }
+
     @string s = strconv.FormatInt(x, 8);
     // Add leading zeros, but leave room for a NUL.
     {
@@ -197,8 +204,10 @@ internal static bool fitsInOctal(nint n, int64 x) {
 // which is allowed for by the PAX specification, but not always portable.
 internal static (time.Time, error) parsePAXTime(@string s) {
     const nint maxNanoSecondDigits = 9;
+
     // Split string into seconds and sub-seconds parts.
     var (ss, sn, _) = strings.Cut(s, "."u8);
+
     // Parse the seconds.
     var (secs, err) = strconv.ParseInt(ss, 10, 64);
     if (err != default!) {
@@ -207,6 +216,7 @@ internal static (time.Time, error) parsePAXTime(@string s) {
     if (len(sn) == 0) {
         return (time.Unix(secs, 0), default!); // No sub-second values
     }
+
     // Parse the nanoseconds.
     if (strings.Trim(sn, "0123456789"u8) != ""u8) {
         return (new time.Time(nil), ErrHeader);
@@ -231,6 +241,7 @@ internal static @string /*s*/ formatPAXTime(time.Time ts) {
     if (nsecs == 0) {
         return strconv.FormatInt(secs, 10);
     }
+
     // If seconds is negative, then perform correction.
     @string sign = ""u8;
     if (secs < 0) {
@@ -253,6 +264,7 @@ internal static (@string k, @string v, @string r, error err) parsePAXRecord(@str
     if (!ok) {
         return ("", "", s, ErrHeader);
     }
+
     // Parse the first token as a decimal integer.
     var (n, perr) = strconv.ParseInt(nStr, 10, 0); // Intentionally parse as native int
     if (perr != default! || n < 5 || n > (int64)len(s)) {
@@ -262,6 +274,7 @@ internal static (@string k, @string v, @string r, error err) parsePAXRecord(@str
     if (n <= 0) {
         return ("", "", s, ErrHeader);
     }
+
     // Extract everything between the space and the final newline.
     @string rec = rest.slice(0, (nint)(n - 1));
     @string nl = rest.slice((nint)(n - 1), (nint)(n));
@@ -269,11 +282,13 @@ internal static (@string k, @string v, @string r, error err) parsePAXRecord(@str
     if (nl != "\n"u8) {
         return ("", "", s, ErrHeader);
     }
+
     // The first equals separates the key from the value.
     (k, v, ok) = strings.Cut(rec, "="u8);
     if (!ok) {
         return ("", "", s, ErrHeader);
     }
+
     if (!validPAXRecord(k, v)) {
         return ("", "", s, ErrHeader);
     }
@@ -286,10 +301,12 @@ internal static (@string, error) formatPAXRecord(@string k, @string v) {
     if (!validPAXRecord(k, v)) {
         return ("", ErrHeader);
     }
+
     const nint padding = 3; // Extra padding for ' ', '=', and '\n'
     nint size = len(k) + len(v) + padding;
     size += len(strconv.Itoa(size));
     @string record = strconv.Itoa(size) + " "u8 + k + "="u8 + v + "\n"u8;
+
     // Final adjustment if adding size field increased the record size.
     if (len(record) != size) {
         size = len(record);
@@ -319,7 +336,6 @@ internal static bool validPAXRecord(@string k, @string v) {
     { /* default: */
         return !hasNUL(k);
     }
-
 }
 
 } // end tar_package

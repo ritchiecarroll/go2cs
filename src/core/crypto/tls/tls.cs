@@ -164,21 +164,25 @@ internal static (ж<Conn>, error) dial(context.Context ctx, ж<net.Dialer> Ꮡne
             var cancelʗ1 = cancel;
             defer(() => cancelʗ1(), ref ᒐ);
         }
+
         if (!netDialer.Deadline.IsZero()) {
             Action cancel = default!;
             (ctx, cancel) = context.WithDeadline(ctx, netDialer.Deadline);
             var cancelʗ2 = cancel;
             defer(() => cancelʗ2(), ref ᒐ);
         }
+
         var (rawConn, err) = ᏑnetDialer.DialContext(ctx, network, addr);
         if (err != default!) {
             return (default!, err);
         }
+
         nint colonPos = strings.LastIndex(addr, ":"u8);
         if (colonPos == -1) {
             colonPos = len(addr);
         }
         @string hostname = addr.slice(0, colonPos);
+
         if (Ꮡconfig == nil) {
             Ꮡconfig = defaultConfig(); config = ref Ꮡconfig.DerefOrNull();
         }
@@ -190,6 +194,7 @@ internal static (ж<Conn>, error) dial(context.Context ctx, ж<net.Dialer> Ꮡne
             c.Value.ServerName = hostname;
             Ꮡconfig = c; config = ref Ꮡconfig.DerefOrNull();
         }
+
         var conn = Client(rawConn, Ꮡconfig);
         {
             var errΔ1 = conn.HandshakeContext(ctx); if (errΔ1 != default!) {
@@ -304,6 +309,7 @@ internal static readonly @string tlsUnknownPublicKeyˢ = "tls: unknown public ke
 // in the GODEBUG environment variable.
 public static (Certificate, error) X509KeyPair(slice<byte> certPEMBlock, slice<byte> keyPEMBlock) {
     (Certificate, error) fail(error errΔ1) => (new Certificate(nil), errΔ1);
+
     Certificate cert = default!;
     slice<@string> skippedBlockTypes = default!;
     while (ᐧ) {
@@ -318,6 +324,7 @@ public static (Certificate, error) X509KeyPair(slice<byte> certPEMBlock, slice<b
             skippedBlockTypes = append(skippedBlockTypes, (~certDERBlock).Type);
         }
     }
+
     if (len(cert.ΔCertificate) == 0) {
         if (len(skippedBlockTypes) == 0) {
             return fail(errors.New(tlsFailedToFindAnyPemˢ));
@@ -327,6 +334,7 @@ public static (Certificate, error) X509KeyPair(slice<byte> certPEMBlock, slice<b
         }
         return fail(fmt.Errorf("tls: failed to find \"CERTIFICATE\" PEM block in certificate input after skipping PEM blocks of the following types: %v"u8, skippedBlockTypes));
     }
+
     skippedBlockTypes = skippedBlockTypes[..0];
     ж<pem.Block> keyDERBlock = default!;
     while (ᐧ) {
@@ -345,21 +353,25 @@ public static (Certificate, error) X509KeyPair(slice<byte> certPEMBlock, slice<b
         }
         skippedBlockTypes = append(skippedBlockTypes, (~keyDERBlock).Type);
     }
+
     // We don't need to parse the public key for TLS, but we so do anyway
     // to check that it looks sane and matches the private key.
     var (x509Cert, err) = Δx509.ParseCertificate(cert.ΔCertificate[0]);
     if (err != default!) {
         return fail(err);
     }
+
     if (x509keypairleaf.Value() != "0"u8){
         cert.Leaf = x509Cert;
     } else {
         x509keypairleaf.IncNonDefault();
     }
+
     (cert.PrivateKey, err) = parsePrivateKey((~keyDERBlock).Bytes);
     if (err != default!) {
         return fail(err);
     }
+
     switch ((~x509Cert).PublicKey.type()) {
     case ж<rsa.PublicKey> pub: {
         var (priv, ok) = cert.PrivateKey._<ж<rsa.PrivateKey>>(ᐧ);
@@ -395,6 +407,7 @@ public static (Certificate, error) X509KeyPair(slice<byte> certPEMBlock, slice<b
         var pub = (~x509Cert).PublicKey;
         return fail(errors.New(tlsUnknownPublicKeyˢ));
     }}
+
     return (cert, default!);
 }
 
@@ -431,6 +444,7 @@ internal static (cryptoꓸPrivateKey, error) parsePrivateKey(slice<byte> der) {
             return (key.OrTypedNil(), default!);
         }
     }
+
     return (default!, errors.New(tlsFailedToParsePrivateˢ));
 }
 

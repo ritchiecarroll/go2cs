@@ -34,6 +34,7 @@ public static void Read(slice<byte> b) {
             sysrand.Read(b);
             return;
         }
+
         // At every read, 128 random bits from the operating system are mixed as
         // additional input, to make the output as strong as non-FIPS randomness.
         // This is not credited as entropy for FIPS purposes, as allowed by Section
@@ -42,8 +43,10 @@ public static void Read(slice<byte> b) {
         ref var additionalInput = ref heap<ж<array<byte>>>(out var ᏑadditionalInput);
         additionalInput = Ꮡ(new array<byte>(48));
         sysrand.Read((~additionalInput)[..16]);
+
         var drbg = Ꮡdrbgs.Get()._<ж<Counter>>();
         defer(Ꮡdrbgs.Put, drbg.OrTypedNil(), ref ᒐ);
+
         while (len(b) > 0) {
             nint size = min(len(b), (nint)(maxRequestSize));
             {
@@ -86,6 +89,7 @@ public static error ReadWithReader(io.Reader r, slice<byte> b) {
             return default!;
         }
     }
+
     fips140.RecordNonApproved();
     randutil.MaybeReadByte(r);
     var (_, err) = io.ReadFull(r, b);
@@ -101,6 +105,7 @@ public static error ReadWithReaderDeterministic(io.Reader r, slice<byte> b) {
             return default!;
         }
     }
+
     fips140.RecordNonApproved();
     var (_, err) = io.ReadFull(r, b);
     return err;

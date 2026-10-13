@@ -104,8 +104,7 @@ internal static bool down(Interface h, nint i0, nint n) {
     nint i = i0;
     while (ᐧ) {
         nint j1 = 2 * i + 1;
-        if (j1 >= n || j1 < 0) {
-            // j1 < 0 after int overflow
+        if (j1 >= n || j1 < 0) { // j1 < 0 after int overflow
             break;
         }
         nint j = j1; // left child

@@ -54,9 +54,9 @@ using static go.os.user_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("os/user/lookup.go", "lookup.cs", "AAwcntKAkoKUkgAMGKKAgqSqooCCpKqiqqKokg==", "22-22:1")]
-[assembly: go.GoPositionMap("os/user/lookup_windows.go", "lookup_windows.cs", "ABEigoKCgoKUgqaCAAUugoKCgoKmgoLKqqKSgoKCgpSClILKgqYABxCElJikpoKUpKSmgpSsAAIQAAwEqOKCgpSClNjSgoKUgoKClOiSgoKUgpQABF6CkpKClO4ABRSIsqKCgpSCgoKUgoKUkoKUkoKUkoKUkoKUkqaU7sSs0oKCuIKClKaCgpSCgoCCpIKm2uKUgpSClAAEeIKCgpSCgpSCypSCggALGILKgoKUlKaCgoKUgpSmgoKClKaCkoKUpoKCgpSSgpSClKaCgoCmooKClIKCgpSCgoKUlMSCpoKClIKClIKC2oKCpg==", "256-300:1;310-320:1;330-332:2;501-519:1", "", "86=GetSidIdentifierAuthority/1/1/1")]
-[assembly: go.GoPositionMap("os/user/user.go", "user.cs", "AEOKAYLOgs6CzoI=")]
+[assembly: go.GoPositionMap("os/user/lookup.go", "lookup.cs", "AAwcntKAkoKUkgALGKKAgqSqooCCpKqiqqKokg==", "22-22:1")]
+[assembly: go.GoPositionMap("os/user/lookup_windows.go", "lookup_windows.cs", "ABEigoKCgoKUgqaCAAUugoKCgoKmgoLKqqKSgoKCgpSClILKgqYABxCElJiUpoKUpJSmgpTsAAgQlKjigoKUgpTY0oKClIKCgpTokoKClIKUAARegpKSgpTuAAcUiLKigoKUgoKClIKClJKClJKClJKClJKClJKmlO7ErNKCgriCgpSmgoKUgoKAgqSCptrilIKUgpQABHiCgoKUgoKUgsqUgoIACxiCyoKClJSmgoKClIKUpoKCgpSmgpKClKaCgoKUkoKUgpSmgoKApqKCgpSCgoKUgoKClJTEgqaCgpSCgpSCgtqCgqY=", "256-300:1;310-320:1;330-332:2;501-519:1", "", "86=GetSidIdentifierAuthority/1/1/1")]
+[assembly: go.GoPositionMap("os/user/user.go", "user.cs", "AEKKAYLugu6C7oI=")]
 // </GoSourcePositionMaps>
 
 namespace go.os;

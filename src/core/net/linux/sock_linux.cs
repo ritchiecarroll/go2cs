@@ -23,6 +23,7 @@ internal static nint maxAckBacklog(nint n) {
     if (major > 4 || (major == 4 && minor >= 1)) {
         size = 32;
     }
+
     nuint max = ((nuint)1).Lsh((int64)(size)) - 1;
     if ((nuint)n > max) {
         n = (nint)max;
@@ -51,6 +52,7 @@ internal static nint maxListenerBacklog() {
         if (n == 0 || !ok) {
             return syscall.SOMAXCONN;
         }
+
         if (n > (1 << (int)(16)) - 1) {
             return maxAckBacklog(n);
         }

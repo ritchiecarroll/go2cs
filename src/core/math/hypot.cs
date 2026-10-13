@@ -35,7 +35,6 @@ internal static float64 hypot(float64 p, float64 q) {
     case {} when IsNaN(p) || IsNaN(q): {
         return NaN();
     }}
-
     if (p < q) {
         (p, q) = (q, p);
     }

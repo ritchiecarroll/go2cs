@@ -143,6 +143,7 @@ internal static slice<byte> appendJSONMayExpand(this ж<Map> Ꮡv, slice<byte> b
         afterCommaDelim = (rune)'\n';
         mayAppendNewline = (slice<byte> bΔ2) => append(bΔ2, (byte)((rune)'\n'));
     }
+
     b = append(b, (byte)((rune)'{'));
     b = mayAppendNewline(b);
     var first = true;
@@ -231,6 +232,7 @@ public static void Set(this ж<Map> Ꮡv, @string key, Var av) {
             }
         }
     }
+
     Ꮡv.of(Map.Ꮡm).Store(key, av);
 }
 
@@ -244,6 +246,7 @@ public static void Add(this ж<Map> Ꮡv, @string key, int64 delta) {
             Ꮡv.addKey(key);
         }
     }
+
     // Add to Int; ignore otherwise.
     {
         var (iv, okΔ1) = i._<ж<Int>>(ᐧ); if (okΔ1) {
@@ -262,6 +265,7 @@ public static void AddFloat(this ж<Map> Ꮡv, @string key, float64 delta) {
             Ꮡv.addKey(key);
         }
     }
+
     // Add to Float; ignore otherwise.
     {
         var (iv, okΔ1) = i._<ж<Float>>(ᐧ); if (okΔ1) {
@@ -334,6 +338,8 @@ public static void Set(this ж<ΔString> Ꮡv, @string value) {
     Ꮡv.of(expvar_package.ΔString.Ꮡs).Store(value);
 }
 
+// Func implements [Var] by calling the function
+// and formatting the returned value using JSON.
 public delegate any Func();
 
 public static any Value(this Func f) {
@@ -477,7 +483,6 @@ internal static slice<byte> appendJSONQuote(slice<byte> b, @string s) {
                 b = append(b, (byte)((rune)'\\'), (byte)((rune)'u'), hex[(rune)(((r >> (int)(12))) & 0xf)], hex[(rune)(((r >> (int)(8))) & 0xf)], hex[(rune)(((r >> (int)(4))) & 0xf)], hex[(rune)(((r >> (int)(0))) & 0xf)]);
                 break;
             }}
-
             break;
         }
         case {} when r < utf8.RuneSelf: {
@@ -488,7 +493,6 @@ internal static slice<byte> appendJSONQuote(slice<byte> b, @string s) {
             b = utf8.AppendRune(b, r);
             break;
         }}
-
     }
     b = append(b, (byte)((rune)'"'));
     return b;

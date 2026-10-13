@@ -20,14 +20,35 @@ public static error ErrProcessDone = errors.New("os: process already finished"u8
 
 partial struct processMode /*num:uint8*/;
 
+// modePID means that Process operations such use the raw PID from the
+// Pid field. handle is not used.
+//
+// This may be due to the host not supporting handles, or because
+// Process was created as a literal, leaving handle unset.
+//
+// This must be the zero value so Process literals get modePID.
 internal static processMode modePID => /* iota */ 0;
+
+// modeHandle means that Process operations use handle, which is
+// initialized with an OS process handle.
+//
+// Note that Release and Wait will deactivate and eventually close the
+// handle, so acquire may fail, indicating the reason.
 internal static processMode modeHandle => 1;
 
 partial struct processStatus /*num:uint64*/;
 
+// PID/handle OK to use.
 internal static processStatus statusOK => 0;
+
+// statusDone indicates that the PID/handle should not be used because
+// the process is done (has been successfully Wait'd on).
 internal static processStatus statusDone => /* 1 << 62 */ unchecked((processStatus)4611686018427387904);
+
+// statusReleased indicates that the PID/handle should not be used
+// because the process is released.
 internal static processStatus statusReleased => /* 1 << 63 */ unchecked((processStatus)9223372036854775808);
+
 internal static UntypedInt processStatusMask => /* 0x3 << 62 */ 13835058055282163712;
 
 // Process stores the information about a process created by [StartProcess].
@@ -98,9 +119,9 @@ internal static ж<Process> newDoneProcess(nint pid) {
     var p = Ꮡ(new Process(
         Pid: pid,
         mode: modeHandle
+        // N.B Since we set statusDone, handle will never actually be
+        // used, so its value doesn't matter.
     ));
-    // N.B Since we set statusDone, handle will never actually be
-    // used, so its value doesn't matter.
     p.of(Process.Ꮡstate).Store((uint64)statusDone); // No persistent reference, as there is no handle.
     runtime.SetFinalizer(p.OrTypedNil(), ((Func<ж<Process>, error>)(Release)));
     return p;
@@ -112,6 +133,7 @@ internal static (uintptr, processStatus) handleTransientAcquire(this ж<Process>
     if (p.mode != modeHandle) {
         throw panic("handleTransientAcquire called in invalid mode");
     }
+
     while (ᐧ) {
         var refs = Ꮡp.of(Process.Ꮡstate).Load();
         if ((uint64)(refs & (uint64)processStatusMask) != 0) {
@@ -131,6 +153,7 @@ internal static void handleTransientRelease(this ж<Process> Ꮡp) {
     if (p.mode != modeHandle) {
         throw panic("handleTransientRelease called in invalid mode");
     }
+
     while (ᐧ) {
         var state = Ꮡp.of(Process.Ꮡstate).Load();
         var refs = (uint64)(state & ~(uint64)processStatusMask);
@@ -171,6 +194,7 @@ internal static processStatus handlePersistentRelease(this ж<Process> Ꮡp, pro
     if (p.mode != modeHandle) {
         throw panic("handlePersistentRelease called in invalid mode");
     }
+
     while (ᐧ) {
         var refs = Ꮡp.of(Process.Ꮡstate).Load();
         var status = ((processStatus)((uint64)(refs & (uint64)processStatusMask)));
@@ -204,6 +228,7 @@ internal static processStatus pidStatus(this ж<Process> Ꮡp) {
     if (p.mode != modePID) {
         throw panic("pidStatus called in invalid mode");
     }
+
     return ((processStatus)Ꮡp.of(Process.Ꮡstate).Load());
 }
 
@@ -213,6 +238,7 @@ internal static void pidDeactivate(this ж<Process> Ꮡp, processStatus reason) 
     if (p.mode != modePID) {
         throw panic("pidDeactivate called in invalid mode");
     }
+
     // Both Release and successful Wait will deactivate the PID. Only one
     // of those should win, so nothing left to do here if the compare
     // fails.
@@ -303,8 +329,6 @@ public static (ж<Process>, error) StartProcess(@string name, slice<@string> arg
 // rendering it unusable in the future.
 // Release only needs to be called if [Process.Wait] is not.
 public static error Release(this ж<Process> Ꮡp) {
-    ref var p = ref Ꮡp.DerefOrNull();
-
     // Note to future authors: the Release API is cursed.
     //
     // On Unix and Plan 9, Release sets p.Pid = -1. This is the only part of the

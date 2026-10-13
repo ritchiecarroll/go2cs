@@ -35,8 +35,8 @@ internal static void record(this ref Checker check, ж<operand> Ꮡx) {
     else { /* default: */
         typ = x.typ;
     }
-
     assert(x.expr != default! && typ != default!);
+
     if (isUntyped(typ)){
         // delay type and value recording until we know the type
         // or until the end of type checking
@@ -55,6 +55,7 @@ internal static void recordUntyped(this ж<Checker> Ꮡcheck) {
     if (!debug && !check.recordTypes()) {
         return; // nothing to do
     }
+
     foreach (var (x, info) in check.untyped) {
         if (debug && isTyped(new BasicжΔType(info.typ))) {
             Ꮡcheck.dump(vSTypeSIsTypedˢ, x.Pos(), x, info.typ.OrTypedNil());

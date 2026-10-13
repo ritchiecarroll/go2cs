@@ -39,6 +39,7 @@ internal static (driver.Result, error) ctxDriverExec(context.Context ctx, driver
     if (err != default!) {
         return (default!, err);
     }
+
     var selᴛ2 = ctx.Done();
     switch (trySelect(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
     case 0 when selᴛ2.ꟷᐳ(out _): {
@@ -58,6 +59,7 @@ internal static (driver.Rows, error) ctxDriverQuery(context.Context ctx, driver.
     if (err != default!) {
         return (default!, err);
     }
+
     var selᴛ3 = ctx.Done();
     switch (trySelect(ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
     case 0 when selᴛ3.ꟷᐳ(out _): {
@@ -79,6 +81,7 @@ internal static (driver.Result, error) ctxDriverStmtExec(context.Context ctx, dr
     if (err != default!) {
         return (default!, err);
     }
+
     var selᴛ4 = ctx.Done();
     switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
     case 0 when selᴛ4.ꟷᐳ(out _): {
@@ -100,6 +103,7 @@ internal static (driver.Rows, error) ctxDriverStmtQuery(context.Context ctx, dri
     if (err != default!) {
         return (default!, err);
     }
+
     var selᴛ5 = ctx.Done();
     switch (trySelect(ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
     case 0 when selᴛ5.ꟷᐳ(out _): {
@@ -128,21 +132,25 @@ internal static (driver.Tx, error) ctxDriverBegin(context.Context ctx, ж<TxOpti
             return ciCtx.BeginTx(ctx, dopts);
         }
     }
+
     if (Ꮡopts != nil) {
         // Check the transaction level. If the transaction level is non-default
         // then return an error here as the BeginTx driver value is not supported.
         if (opts.Isolation != LevelDefault) {
             return (default!, errors.New(sqlDriverDoesNotSupportˢ));
         }
+
         // If a read-only transaction is requested return an error as the
         // BeginTx driver value is not supported.
         if (opts.ReadOnly) {
             return (default!, errors.New(sqlDriverDoesNotSupportˢ2));
         }
     }
+
     if (ctx.Done() == default!) {
         return ci.Begin();
     }
+
     var (txi, err) = ci.Begin();
     if (err == default!) {
         var selᴛ6 = ctx.Done();

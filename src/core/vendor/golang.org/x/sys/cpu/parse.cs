@@ -25,6 +25,7 @@ internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@stri
             break;
         }
     }
+
     (nint, bool) next() {
         for (nint i = 0; i < len(rel); i++) {
             if (rel[i] == (rune)'.') {

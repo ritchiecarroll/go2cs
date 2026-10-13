@@ -58,17 +58,18 @@ public static int64 /*result*/ Alignof(this ж<StdSizes> Ꮡs, ΔType T) {
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             assert(result >= 1);
         }, ref ᒐ);
+
         // For arrays and structs, alignment is defined in terms
         // of alignment of the elements and fields, respectively.
         var switchᴛ14 = under(T);
         switch (switchᴛ14.type()) {
         case ж<Array> t: {
+            // spec: "For a variable x of array type: unsafe.Alignof(x)
+            // is the same as unsafe.Alignof(x[0]), but at least 1."
             result = Ꮡs.Alignof((~t).elem); goto ᒐdone;
         }
         case ж<Struct> t: {
             if (len((~t).fields) == 0 && _IsSyncAtomicAlign64(T)) {
-                // spec: "For a variable x of array type: unsafe.Alignof(x)
-                // is the same as unsafe.Alignof(x[0]), but at least 1."
                 // Special case: sync/atomic.align64 is an
                 // empty struct we recognize as a signal that
                 // the struct it contains must be
@@ -78,11 +79,12 @@ public static int64 /*result*/ Alignof(this ж<StdSizes> Ꮡs, ΔType T) {
                 // cmd/compile/internal/types/size.go:calcStructOffset
                 result = 8; goto ᒐdone;
             }
+
+            // spec: "For a variable x of struct type: unsafe.Alignof(x)
+            // is the largest of the values unsafe.Alignof(x.f) for each
+            // field f of x, but at least 1."
             var max = (int64)1;
             foreach (var (_, f) in (~t).fields) {
-                // spec: "For a variable x of struct type: unsafe.Alignof(x)
-                // is the largest of the values unsafe.Alignof(x.f) for each
-                // field f of x, but at least 1."
                 {
                     var aΔ1 = Ꮡs.Alignof((~f).typ); if (aΔ1 > max) {
                         max = aΔ1;
@@ -94,16 +96,16 @@ public static int64 /*result*/ Alignof(this ж<StdSizes> Ꮡs, ΔType T) {
         case ж<Slice> _:
         case ж<Interface> _: {
             var t = switchᴛ14;
+            // Multiword data structures are effectively structs
+            // in which each element has size WordSize.
+            // Type parameters lead to variable sizes/alignments;
+            // StdSizes.Alignof won't be called for them.
             assert(!isTypeParam(T));
             result = s.WordSize; goto ᒐdone;
         }
         case ж<Basic> t: {
+            // Strings are like slices and interfaces.
             if ((BasicInfo)(t.Info() & IsString) != 0) {
-                // Multiword data structures are effectively structs
-                // in which each element has size WordSize.
-                // Type parameters lead to variable sizes/alignments;
-                // StdSizes.Alignof won't be called for them.
-                // Strings are like slices and interfaces.
                 result = s.WordSize; goto ᒐdone;
             }
             break;
@@ -207,23 +209,22 @@ public static int64 Sizeof(this ж<StdSizes> Ꮡs, ΔType T) {
         if (n <= 0) {
             return 0;
         }
+        // n > 0
         var esize = Ꮡs.Sizeof((~t).elem);
         if (esize < 0) {
-            // n > 0
             return -1; // element too large
         }
         if (esize == 0) {
             return 0; // 0-size element
         }
+        // esize > 0
         var a = Ꮡs.Alignof((~t).elem);
-        var ea = align(esize, // esize > 0
- a); // possibly < 0 if align overflows
+        var ea = align(esize, a); // possibly < 0 if align overflows
         if (ea < 0) {
             return -1;
         }
+        // ea >= 1
         var n1 = n - 1; // n1 >= 0
-// ea >= 1
-
         // Final size is ea*n1 + esize; and size must be <= maxInt64.
         const int64 maxInt64 = /* 1<<63 - 1 */ 9223372036854775807;
         if (n1 > 0 && ea > maxInt64 / n1) {
@@ -248,6 +249,8 @@ public static int64 Sizeof(this ж<StdSizes> Ꮡs, ΔType T) {
         return offs + size; // may overflow to < 0 which is ok
     }
     case ж<Interface> t: {
+        // Type parameters lead to variable sizes/alignments;
+        // StdSizes.Sizeof won't be called for them.
         assert(!isTypeParam(T));
         return s.WordSize * 2;
     }
@@ -257,13 +260,9 @@ public static int64 Sizeof(this ж<StdSizes> Ꮡs, ΔType T) {
         throw panic("unreachable");
         break;
     }}
-    // Type parameters lead to variable sizes/alignments;
-    // StdSizes.Sizeof won't be called for them.
     return s.WordSize; // catch-all
 }
 
-// When adding more architectures here,
-// update the doc string of SizesFor below.
 // common architecture word sizes and alignments
 internal static map<@string, ж<gcSizes>> gcArchSizes = new map<@string, ж<gcSizes>>{
     ["386"u8] = Ꮡ(new gcSizes(4, 4)),
@@ -282,6 +281,8 @@ internal static map<@string, ж<gcSizes>> gcArchSizes = new map<@string, ж<gcSi
     ["s390x"u8] = Ꮡ(new gcSizes(8, 8)),
     ["sparc64"u8] = Ꮡ(new gcSizes(8, 8)),
     ["wasm"u8] = Ꮡ(new gcSizes(8, 8))
+    // When adding more architectures here,
+    // update the doc string of SizesFor below.
 };
 
 // SizesFor returns the Sizes used by a compiler for an architecture.
@@ -306,7 +307,6 @@ public static Sizes SizesFor(@string compiler, @string arch) {
             }
         }
     }
-
     return default!;
 }
 

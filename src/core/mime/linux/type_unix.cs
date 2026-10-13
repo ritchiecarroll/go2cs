@@ -39,6 +39,7 @@ internal static error loadMimeGlobsFile(@string filename) {
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         var scanner = bufio.NewScanner(new os_FileжReader(f));
         while (scanner.Scan()) {
             // Each line should be of format: weight:mimetype:glob[:morefields...]
@@ -49,6 +50,7 @@ internal static error loadMimeGlobsFile(@string filename) {
             if (fields[0][0] == (rune)'#' || fields[2][0] != (rune)'*' || fields[2][1] != (rune)'.') {
                 continue;
             }
+
             @string extension = fields[2][1..];
             if (strings.ContainsAny(extension, "?*["u8)) {
                 // Not a bare extension, but a glob. Ignore for now:
@@ -70,6 +72,7 @@ internal static error loadMimeGlobsFile(@string filename) {
                     continue;
                 }
             }
+
             setExtensionType(extension, fields[1]);
         }
         {
@@ -92,6 +95,7 @@ internal static void loadMimeFile(@string filename) {
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         var scanner = bufio.NewScanner(new os_FileжReader(f));
         while (scanner.Scan()) {
             var fields = strings.Fields(scanner.Text());
@@ -124,6 +128,7 @@ internal static void initMimeUnix() {
             }
         }
     }
+
     // Fallback if no system-generated mimetype database exists.
     foreach (var (_, filename) in typeFiles) {
         loadMimeFile(filename);

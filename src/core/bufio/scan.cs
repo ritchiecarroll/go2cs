@@ -40,18 +40,44 @@ partial struct Scanner {
     internal bool done;      // Scan has finished.
 }
 
+// SplitFunc is the signature of the split function used to tokenize the
+// input. The arguments are an initial substring of the remaining unprocessed
+// data and a flag, atEOF, that reports whether the [Reader] has no more data
+// to give. The return values are the number of bytes to advance the input
+// and the next token to return to the user, if any, plus an error, if any.
+//
+// Scanning stops if the function returns an error, in which case some of
+// the input may be discarded. If that error is [ErrFinalToken], scanning
+// stops with no error. A non-nil token delivered with [ErrFinalToken]
+// will be the last token, and a nil token with [ErrFinalToken]
+// immediately stops the scanning.
+//
+// Otherwise, the [Scanner] advances the input. If the token is not nil,
+// the [Scanner] returns it to the user. If the token is nil, the
+// Scanner reads more data and continues scanning; if there is no more
+// data--if atEOF was true--the [Scanner] returns. If the data does not
+// yet hold a complete token, for instance if it has no newline while
+// scanning lines, a [SplitFunc] can return (0, nil, nil) to signal the
+// [Scanner] to read more data into the slice and try again with a
+// longer slice starting at the same point in the input.
+//
+// The function is never called with an empty data slice unless atEOF
+// is true. If atEOF is true, however, data may be non-empty and,
+// as always, holds unprocessed text.
 // type SplitFunc is a methodless func type — rendered inline as its base delegate
 
 // Errors returned by Scanner.
 public static error ErrTooLong = errors.New("bufio.Scanner: token too long"u8);
-
 public static error ErrNegativeAdvance = errors.New("bufio.Scanner: SplitFunc returns negative advance count"u8);
-
 public static error ErrAdvanceTooFar = errors.New("bufio.Scanner: SplitFunc returns advance count beyond input"u8);
-
 public static error ErrBadReadCount = errors.New("bufio.Scanner: Read returned impossible count"u8);
 
+// MaxScanTokenSize is the maximum size used to buffer a token
+// unless the user provides an explicit buffer with [Scanner.Buffer].
+// The actual maximum token size may be smaller as the buffer
+// may need to include, for instance, a newline.
 public static UntypedInt MaxScanTokenSize => /* 64 * 1024 */ 65536;
+
 internal static UntypedInt startBufSize => 4096; // Size of initial allocation for buffer.
 
 // NewScanner returns a new [Scanner] to read from r.
@@ -280,10 +306,12 @@ public static (nint advance, slice<byte> token, error err) ScanRunes(slice<byte>
     if (atEOF && len(data) == 0) {
         return (0, default!, default!);
     }
+
     // Fast path 1: ASCII.
     if (data[0] < utf8.RuneSelf) {
         return (1, data[0..1], default!);
     }
+
     // Fast path 2: Correct UTF-8 decode without error.
     var (_, width) = utf8.DecodeRune(data);
     if (width > 1) {
@@ -291,6 +319,7 @@ public static (nint advance, slice<byte> token, error err) ScanRunes(slice<byte>
         // non-ASCII rune.
         return (width, data.slice(0, width), default!);
     }
+
     // We know it's an error: we have width==1 and implicitly r==utf8.RuneError.
     // Is the error because there wasn't a full rune to be decoded?
     // FullRune distinguishes correctly between erroneous and incomplete encodings.
@@ -298,6 +327,7 @@ public static (nint advance, slice<byte> token, error err) ScanRunes(slice<byte>
         // Incomplete; get more bytes.
         return (0, default!, default!);
     }
+
     // We have a real UTF-8 encoding error. Return a properly encoded error rune
     // but advance only one byte. This matches the behavior of a range loop over
     // an incorrectly encoded string.
@@ -349,7 +379,6 @@ internal static bool isSpace(rune r) {
         case (rune)'\u0085' or (rune)'\u00A0': {
             return true;
         }}
-
         return false;
     }
     // High-valued ones.
@@ -360,7 +389,6 @@ internal static bool isSpace(rune r) {
     case (rune)'\u1680' or (rune)'\u2028' or (rune)'\u2029' or (rune)'\u202f' or (rune)'\u205f' or (rune)'\u3000': {
         return true;
     }}
-
     return false;
 }
 

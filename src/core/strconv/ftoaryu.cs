@@ -44,10 +44,12 @@ internal static void ryuFtoaFixed32(ref decimalSlice d, uint32 mant, nint exp, n
     //     2^(e2+24) >= 10^(-q+prec-1)
     // or q = -mulByLog2Log10(e2+24) + prec - 1
     nint q = -mulByLog2Log10(e2 + 24) + prec - 1;
+
     // Now compute mant*(2^e2)*(10^q).
     // Is it an exact computation?
     // Only small positive powers of 10 are exact (5^28 has 66 bits).
     var exact = q <= 27 && q >= 0;
+
     var (di, dexp2, d0) = mult64bitPow10(mant, e2, q);
     if (dexp2 >= 0) {
         throw panic("not enough significant bits after mult64bitPow10");
@@ -63,6 +65,7 @@ internal static void ryuFtoaFixed32(ref decimalSlice d, uint32 mant, nint exp, n
     // Remove extra lower bits and keep rounding info.
     nuint extra = (nuint)(-dexp2);
     var extraMask = (uint32)(((uint32)1).Lsh(extra) - 1);
+
     (di, var dfrac) = (di.Rsh(extra), (uint32)(di & extraMask));
     var roundUp = false;
     if (exact){
@@ -111,10 +114,12 @@ internal static void ryuFtoaFixed64(ref decimalSlice d, uint64 mant, nint exp, n
     // The minimal required exponent is -mulByLog2Log10(1025)+18 = -291
     // The maximal required exponent is mulByLog2Log10(1074)+18 = 342
     nint q = -mulByLog2Log10(e2 + 54) + prec - 1;
+
     // Now compute mant*(2^e2)*(10^q).
     // Is it an exact computation?
     // Only small positive powers of 10 are exact (5^55 has 128 bits).
     var exact = q <= 55 && q >= 0;
+
     var (di, dexp2, d0) = mult128bitPow10(mant, e2, q);
     if (dexp2 >= 0) {
         throw panic("not enough significant bits after mult128bitPow10");
@@ -130,6 +135,7 @@ internal static void ryuFtoaFixed64(ref decimalSlice d, uint64 mant, nint exp, n
     // Remove extra lower bits and keep rounding info.
     nuint extra = (nuint)(-dexp2);
     var extraMask = (uint64)(((uint64)1).Lsh(extra) - 1);
+
     (di, var dfrac) = (di.Rsh(extra), (uint64)(di & extraMask));
     var roundUp = false;
     if (exact){
@@ -170,8 +176,7 @@ internal static void formatDecimal(ref decimalSlice d, uint64 m, bool trunc, boo
         } else 
         if (b < 5){
             roundUp = false;
-        } else {
-            // b == 5
+        } else { // b == 5
             // round up if there are trailing digits,
             // or if the new value of m is odd (round-to-even convention)
             roundUp = trunc || (uint64)(m & 1) == 1;
@@ -240,6 +245,7 @@ internal static void ryuFtoaShortest(ref decimalSlice d, uint64 mant, nint exp, 
     }
     // Find 10^q *larger* than 2^-e2
     nint q = mulByLog2Log10(-e2) + 1;
+
     // We are going to multiply by 10^q using 128-bit arithmetic.
     // The exponent is the same for all 3 numbers.
     uint64 dl = default!;
@@ -537,6 +543,7 @@ internal static (uint64 resM, nint resE, bool exact) mult128bitPow10(uint64 m, n
         pow[0] += 1;
     }
     e2 += mulByLog10Log2(q) - 127 + 119;
+
     // long multiplication
     var (l1, l0) = bits.Mul64(m, pow[0]);
     var (h1, h0) = bits.Mul64(m, pow[1]);

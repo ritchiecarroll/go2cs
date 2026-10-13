@@ -60,15 +60,15 @@ internal static @string htmlEscaper(params ꓸꓸꓸany argsʗp) {
     return htmlReplacer(s, htmlReplacementTable, true);
 }
 
-// https://www.w3.org/TR/html5/syntax.html#attribute-value-(unquoted)-state
-// U+0000 NULL Parse error. Append a U+FFFD REPLACEMENT
-// CHARACTER character to the current attribute's value.
-// "
-// and similarly
-// https://www.w3.org/TR/html5/syntax.html#before-attribute-value-state
 // htmlReplacementTable contains the runes that need to be escaped
 // inside a quoted attribute value or in a text node.
 internal static slice<@string> htmlReplacementTable = new slice<@string>(63){
+    // https://www.w3.org/TR/html5/syntax.html#attribute-value-(unquoted)-state
+    // U+0000 NULL Parse error. Append a U+FFFD REPLACEMENT
+    // CHARACTER character to the current attribute's value.
+    // "
+    // and similarly
+    // https://www.w3.org/TR/html5/syntax.html#before-attribute-value-state
     [0] = "\uFFFD"u8,
     [(rune)'"'] = "&#34;"u8,
     [(rune)'&'] = "&amp;"u8,
@@ -89,9 +89,6 @@ internal static slice<@string> htmlNormReplacementTable = new slice<@string>(63)
     [(rune)'>'] = "&gt;"u8
 };
 
-// A parse error in the attribute value (unquoted) and
-// before attribute value states.
-// Treated as a quoting character by IE.
 // htmlNospaceReplacementTable contains the runes that need to be escaped
 // inside an unquoted attribute value.
 // The set of runes escaped is the union of the HTML specials and
@@ -124,12 +121,12 @@ internal static slice<@string> htmlNospaceReplacementTable = new slice<@string>(
     [(rune)'<'] = "&lt;"u8,
     [(rune)'='] = "&#61;"u8,
     [(rune)'>'] = "&gt;"u8,
+    // A parse error in the attribute value (unquoted) and
+    // before attribute value states.
+    // Treated as a quoting character by IE.
     [(rune)'`'] = "&#96;"u8
 };
 
-// A parse error in the attribute value (unquoted) and
-// before attribute value states.
-// Treated as a quoting character by IE.
 // htmlNospaceNormReplacementTable is like htmlNospaceReplacementTable but
 // without '&' to avoid over-encoding existing entities.
 internal static slice<@string> htmlNospaceNormReplacementTable = new slice<@string>(97){
@@ -146,6 +143,9 @@ internal static slice<@string> htmlNospaceNormReplacementTable = new slice<@stri
     [(rune)'<'] = "&lt;"u8,
     [(rune)'='] = "&#61;"u8,
     [(rune)'>'] = "&gt;"u8,
+    // A parse error in the attribute value (unquoted) and
+    // before attribute value states.
+    // Treated as a quoting character by IE.
     [(rune)'`'] = "&#96;"u8
 };
 
@@ -174,10 +174,10 @@ internal static @string htmlReplacer(@string s, slice<@string> replacementTable,
             }
         } else 
         if (badRunes){
-        } else 
-        if (0xfdd0 <= r && r <= 0xfdef || 0xfff0 <= r && r <= 0xffff) {
             // No-op.
             // IE does not allow these ranges in unquoted attrs.
+        } else 
+        if (0xfdd0 <= r && r <= 0xfdef || 0xfff0 <= r && r <= 0xffff) {
             if (written == 0) {
                 b.Grow(len(s));
             }
@@ -283,7 +283,6 @@ internal static @string htmlNameFilter(params ꓸꓸꓸany argsʗp) {
         default: {
             return filterFailsafe;
         }}
-
     }
     return s;
 }

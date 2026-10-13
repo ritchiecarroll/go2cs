@@ -106,6 +106,15 @@ internal static void consume(ref slice<slice<byte>> v, int64 n) {
 public static Action<nint> TestHookDidWritev = (nint wrote) => {
 };
 
+// String is an internal string definition for methods/functions
+// that is not intended for use outside the standard libraries.
+//
+// Other packages in std that import internal/poll and have some
+// exported APIs (now we've got some in net.rawConn) which are only used
+// internally and are not intended to be used outside the standard libraries,
+// Therefore, we make those APIs use internal types like poll.FD or poll.String
+// in their function signatures to disable the usability of these APIs from
+// external codebase.
 partial struct String /*@string*/;
 
 } // end poll_package

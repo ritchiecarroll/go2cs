@@ -35,10 +35,13 @@ public static void ΔMain(Action<ж<Trace>> f) {
         }
         var outʗ1 = @out;
         defer(() => outʗ1.Close(), ref ᒐ);
+
         // Create a new trace.
         var trace = NewTrace();
+
         // Call the generator.
         f(trace);
+
         // Write out the generator's state.
         {
             var (_, errΔ1) = @out.Write(trace.Generate()); if (errΔ1 != default!) {
@@ -134,19 +137,23 @@ public static slice<byte> Generate(this ref Trace t) {
     if (err != default!) {
         throw panic(err.Error());
     }
+
     // Write raw top-level events.
     foreach (var (_, e) in t.events) {
         tw.WriteEvent(e);
     }
+
     // Write generations.
     foreach (var (_, g) in t.gens) {
         g.writeEventsTo(tw);
     }
+
     // Expectation file contents.
     var expect = slice<byte>("SUCCESS\n"u8);
     if (t.bad) {
         expect = slice<byte>(fmt.Sprintf("FAILURE %q\n"u8, t.badMatch.OrTypedNil()));
     }
+
     // Create the test file's contents.
     return txtar.Format(Ꮡ(new txtar.Archive(
         Files: new txtar.File[]{
@@ -263,10 +270,12 @@ internal static void writeEventsTo(this ж<ΔGeneration> Ꮡg, ж<raw.TextWriter
     foreach (var (_, bΔ1) in g.batches) {
         bΔ1.writeEventsTo(Ꮡtw);
     }
+
     // Write frequency.
     var b = Ꮡg.newStructuralBatch();
     b.RawEvent(go122.EvFrequency, default!, 15625000);
     b.writeEventsTo(Ꮡtw);
+
     // Write stacks.
     b = Ꮡg.newStructuralBatch();
     b.RawEvent(go122.EvStacks, default!);
@@ -279,6 +288,7 @@ internal static void writeEventsTo(this ж<ΔGeneration> Ꮡg, ж<raw.TextWriter
             args = append(args, f.PC, g.String(f.Func), g.String(f.File), f.Line);
         }
         b.RawEvent(go122.EvStack, default!, args.ꓸꓸꓸ);
+
         // Flush the batch if necessary.
         if (!g.ignoreStackBatchSizeLimit && (~b).size > (uint64)(go122.MaxBatchSize / 2)) {
             b.writeEventsTo(Ꮡtw);
@@ -286,11 +296,13 @@ internal static void writeEventsTo(this ж<ΔGeneration> Ꮡg, ж<raw.TextWriter
         }
     }
     b.writeEventsTo(Ꮡtw);
+
     // Write strings.
     b = Ꮡg.newStructuralBatch();
     b.RawEvent(go122.EvStrings, default!);
     foreach (var (s, id) in g.strings) {
         b.RawEvent(go122.EvString, slice<byte>(s), id);
+
         // Flush the batch if necessary.
         if (!g.ignoreStringBatchSizeLimit && (~b).size > (uint64)(go122.MaxBatchSize / 2)) {
             b.writeEventsTo(Ꮡtw);
@@ -386,7 +398,6 @@ internal static uint64 uintArgFor(this ref ΔBatch b, any arg, @string argSpec) 
     else { /* default: */
         throw panic(fmt.Sprintf("unsupported arg type %q for spec %q"u8, typStr, argSpec));
     }
-
     return u;
 }
 
@@ -397,6 +408,7 @@ public static void RawEvent(this ref ΔBatch b, @event.Type typ, slice<byte> dat
     var args = argsʗp.sslice();
 
     var ev = (~b.gen).trace.createEvent(typ, data, args.ꓸꓸꓸ);
+
     // Compute the size of the event and add it to the batch.
     b.size += 1; // One byte for the event header.
     array<byte> buf = new(10); /* binary.MaxVarintLen64 */
@@ -407,6 +419,7 @@ public static void RawEvent(this ref ΔBatch b, @event.Type typ, slice<byte> dat
         b.size += (uint64)binary.PutUvarint(buf[..], (uint64)len(data));
         b.size += (uint64)len(data);
     }
+
     // Add the event.
     b.events = append(b.events, ev);
 }
@@ -425,8 +438,11 @@ internal static void writeEventsTo(this ref ΔBatch b, ж<raw.TextWriter> Ꮡtw)
     }
 }
 
+// Seq represents a sequence counter.
 partial struct Seq /*num:uint64*/;
 
+// Time represents a low-level trace timestamp (which does not necessarily
+// correspond to nanoseconds, like trace.Time does).
 partial struct Time /*num:uint64*/;
 
 } // end testkit_package

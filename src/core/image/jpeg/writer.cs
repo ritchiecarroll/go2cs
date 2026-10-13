@@ -46,13 +46,12 @@ internal static quantIndex quantIndexLuminance => /* iota */ 0;
 internal static quantIndex quantIndexChrominance => 1;
 internal static quantIndex nQuantIndex => 2;
 
-// Luminance.
-// Chrominance.
 // unscaledQuant are the unscaled quantization tables in zig-zag order. Each
 // encoder copies and scales the tables according to its quality parameter.
 // The values are derived from section K.1 of the spec, after converting from
 // natural to zig-zag order.
 internal static array<array<byte>> unscaledQuant = new array<byte>[]{
+    // Luminance.
     new byte[]{
         16, 11, 12, 14, 12, 10, 16, 14,
         13, 14, 18, 17, 16, 19, 24, 40,
@@ -62,6 +61,7 @@ internal static array<array<byte>> unscaledQuant = new array<byte>[]{
         87, 69, 55, 56, 80, 109, 81, 87,
         95, 98, 103, 104, 103, 62, 77, 113,
         121, 112, 100, 120, 92, 101, 103, 99}.array(),
+    // Chrominance.
     new byte[]{
         17, 18, 18, 24, 21, 24, 47, 26,
         26, 47, 99, 66, 56, 66, 99, 99,
@@ -89,10 +89,6 @@ partial struct huffmanSpec {
     internal slice<byte> value;
 }
 
-// Luminance DC.
-// Luminance AC.
-// Chrominance DC.
-// Chrominance AC.
 // theHuffmanSpec is the Huffman encoding specifications.
 //
 // This encoder uses the same Huffman encoding for all images. It is also the
@@ -104,10 +100,12 @@ partial struct huffmanSpec {
 // 4-bit Size. There are 16 valid Runs and 10 valid Sizes, plus two special R|S
 // cases: 0|0 (meaning EOB) and F|0 (meaning ZRL).
 internal static array<huffmanSpec> theHuffmanSpec = new huffmanSpec[]{
+    // Luminance DC.
     new(
         new byte[]{0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0}.array(),
         new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}.slice()
     ),
+    // Luminance AC.
     new(
         new byte[]{0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 125}.array(),
         new byte[]{
@@ -134,10 +132,12 @@ internal static array<huffmanSpec> theHuffmanSpec = new huffmanSpec[]{
             0xf9, 0xfa
         }.slice()
     ),
+    // Chrominance DC.
     new(
         new byte[]{0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0}.array(),
         new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}.slice()
     ),
+    // Chrominance AC.
     new(
         new byte[]{0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 119}.array(),
         new byte[]{
@@ -166,6 +166,10 @@ internal static array<huffmanSpec> theHuffmanSpec = new huffmanSpec[]{
     )
 }.array();
 
+// huffmanLUT is a compiled look-up table representation of a huffmanSpec.
+// Each value maps to a uint32 of which the 8 most significant bits hold the
+// codeword size in bits and the 24 least significant bits hold the codeword.
+// The maximum codeword size is 16 bits.
 partial struct huffmanLUT /*[]uint32*/;
 
 internal static void init(this ref huffmanLUT h, huffmanSpec s) {
@@ -526,18 +530,20 @@ internal static void writeSOS(this ref encoder e, image.Image m) {
         e.write(sosHeaderYCbCr);
         break;
     }}
-
+    // Scratch buffers to hold the YCbCr values.
+    // The blocks are in natural (not zig-zag) order.
     ref var b = ref heap(new block(), out var Ꮡb);
     array<block> cb = new(4);
     array<block> cr = new(4);
+    // DC components are delta-encoded.
     int32 prevDCY = default!;
     int32 prevDCCb = default!;
     int32 prevDCCr = default!;
     var bounds = m.Bounds();
     switch (m.type()) {
+    // TODO(wathiede): switch on m.ColorModel() instead of type.
     case ж<image.Gray> mΔ1: {
         for (nint y = bounds.Min.Y; y < bounds.Max.Y; y += 8) {
-            // TODO(wathiede): switch on m.ColorModel() instead of type.
             for (nint x = bounds.Min.X; x < bounds.Max.X; x += 8) {
                 var p = image.Pt(x, y);
                 grayToY(mΔ1, p, ref b);
@@ -642,12 +648,11 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
     // Compute number of components based on input image type.
     nint nComponent = 3;
     switch (m.type()) {
+    // TODO(wathiede): switch on m.ColorModel() instead of type.
     case ж<image.Gray>: {
         nComponent = 1;
         break;
     }}
-
-    // TODO(wathiede): switch on m.ColorModel() instead of type.
     // Write the Start Of Image marker.
     e.buf[0] = 0xff;
     e.buf[1] = 0xd8;

@@ -48,6 +48,7 @@ internal static (slice<@string> matches, error err) globWithLimit(FS fsys, @stri
             return fsysΔ1.Glob(pattern);
         }
     }
+
     // Check pattern is well-formed.
     {
         var (_, errΔ1) = path.Match(pattern, ""u8); if (errΔ1 != default!) {
@@ -62,15 +63,19 @@ internal static (slice<@string> matches, error err) globWithLimit(FS fsys, @stri
         }
         return (new @string[]{pattern}.slice(), default!);
     }
+
     var (dir, @file) = path.Split(pattern);
     dir = cleanGlobPath(dir);
+
     if (!hasMeta(dir)) {
         return glob(fsys, dir, @file, default!);
     }
+
     // Prevent infinite recursion. See issue 15879.
     if (dir == pattern) {
         return (default!, path.ErrBadPattern);
     }
+
     slice<@string> m = default!;
     (m, err) = globWithLimit(fsys, dir, depth + 1);
     if (err != default!) {
@@ -94,7 +99,6 @@ internal static @string cleanGlobPath(@string path) {
     { /* default: */
         return path.slice(0, len(path) - 1); // chop off trailing separator
     }
-
 }
 
 // glob searches for files matching pattern in the directory dir
@@ -110,6 +114,7 @@ internal static (slice<@string> m, error e) glob(FS fs, @string dir, @string pat
     if (err != default!) {
         return (m, e); // ignore I/O error
     }
+
     foreach (var (_, info) in infos) {
         @string n = info.Name();
         var (matched, errΔ1) = path.Match(pattern, n);
@@ -131,7 +136,6 @@ internal static bool hasMeta(@string path) {
         case (rune)'*' or (rune)'?' or (rune)'[' or (rune)'\\': {
             return true;
         }}
-
     }
     return false;
 }

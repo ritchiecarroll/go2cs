@@ -46,8 +46,14 @@ partial struct p384Uint1 /*num:uint64*/;
 
 partial struct p384Int1 /*num:int64*/;
 
+// The type p384MontgomeryDomainFieldElement is a field element in the Montgomery domain.
+//
+// Bounds: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
 partial struct p384MontgomeryDomainFieldElement /*[6]uint64*/;
 
+// The type p384NonMontgomeryDomainFieldElement is a field element NOT in the Montgomery domain.
+//
+// Bounds: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
 partial struct p384NonMontgomeryDomainFieldElement /*[6]uint64*/;
 
 // p384CmovznzU64 is a single-word conditional move.

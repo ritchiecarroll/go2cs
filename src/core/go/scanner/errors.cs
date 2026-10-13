@@ -30,6 +30,8 @@ public static @string Error(this ΔError e) {
     return e.Msg;
 }
 
+// ErrorList is a list of *Errors.
+// The zero value for an ErrorList is an empty ErrorList ready to use.
 partial struct ErrorList /*[]ж<ΔError>*/;
 
 // Add adds an [Error] with given position and error message to an [ErrorList].
@@ -105,7 +107,6 @@ public static @string Error(this ErrorList p) {
     case 1: {
         return (~p[0]).Error();
     }}
-
     return fmt.Sprintf("%s (and %d more errors)"u8, p[0].OrTypedNil(), len(p) - 1);
 }
 

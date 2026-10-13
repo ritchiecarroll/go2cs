@@ -34,7 +34,6 @@ internal static (float64 frac, nint exp) frexp(float64 f) {
     case {} when IsInf(f, 0) || IsNaN(f): {
         return (f, 0);
     }}
-
     (f, exp) = normalize(f);
     var x = Float64bits(f);
     exp += (nint)((uint64)(((x >> (int)(shift))) & (uint64)mask)) - (nint)bias + 1;

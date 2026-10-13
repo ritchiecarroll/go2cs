@@ -8,11 +8,19 @@ using @unsafe = unsafe_package;
 
 partial class metrics_package {
 
+// ValueKind is a tag for a metric [Value] which indicates its type.
 partial struct ValueKind /*num:nint*/;
 
+// KindBad indicates that the Value has no type and should not be used.
 public static ValueKind KindBad => /* iota */ 0;
+
+// KindUint64 indicates that the type of the Value is a uint64.
 public static ValueKind KindUint64 => 1;
+
+// KindFloat64 indicates that the type of the Value is a float64.
 public static ValueKind KindFloat64 => 2;
+
+// KindFloat64Histogram indicates that the type of the Value is a *Float64Histogram.
 public static ValueKind KindFloat64Histogram => 3;
 
 // Value represents a metric value returned by the runtime.

@@ -61,6 +61,7 @@ internal static @unsafe.Pointer makeslicecopy(ж<_type> Ꮡet, nint tolen, nint 
         tomem = et.Size_ * (uintptr)tolen;
         copymem = tomem;
     }
+
     @unsafe.Pointer to = default!;
     if (!et.Pointers()){
         to = (uintptr)mallocgc(tomem, nil, false);
@@ -80,6 +81,7 @@ internal static @unsafe.Pointer makeslicecopy(ж<_type> Ꮡet, nint tolen, nint 
             bulkBarrierPreWriteSrcOnly((uintptr)to, (uintptr)from, copymem, Ꮡet);
         }
     }
+
     if (raceenabled) {
         var callerpc = sys.GetCallerPC();
         var pc = abi.FuncPCABIInternal(makeslicecopy);
@@ -91,7 +93,9 @@ internal static @unsafe.Pointer makeslicecopy(ж<_type> Ꮡet, nint tolen, nint 
     if (asanenabled) {
         asanread(from, copymem);
     }
+
     memmove(to, from, copymem);
+
     return to;
 }
 
@@ -120,6 +124,7 @@ internal static @unsafe.Pointer makeslice(ж<_type> Ꮡet, nint len, nint cap) {
         }
         panicmakeslicecap();
     }
+
     return (uintptr)mallocgc(mem, Ꮡet, true);
 }
 
@@ -128,10 +133,12 @@ internal static @unsafe.Pointer makeslice64(ж<_type> Ꮡet, int64 len64, int64 
     if ((int64)len != len64) {
         panicmakeslicelen();
     }
+
     nint cap = (nint)cap64;
     if ((int64)cap != cap64) {
         panicmakeslicecap();
     }
+
     return (uintptr)makeslice(Ꮡet, len, cap);
 }
 
@@ -196,15 +203,19 @@ internal static Δsliceᴛ growslice(@unsafe.Pointer oldPtr, nint newLen, nint o
     if (asanenabled) {
         asanread(oldPtr, (uintptr)(oldLen * (nint)et.Size_));
     }
+
     if (newLen < 0) {
         throw panic(((errorString)(@string)growsliceLenOutOfRangeˢ));
     }
+
     if (et.Size_ == 0) {
         // append should not create a slice with nil pointer but non-zero len.
         // We assume that append doesn't need to preserve oldPtr in this case.
         return new Δsliceᴛ(@unsafe.Pointer.FromBox(Ꮡzerobase), newLen, newLen);
     }
+
     nint newcap = nextslicecap(newLen, oldCap);
+
     bool overflow = default!;
     uintptr lenmem = default!;
     uintptr newlenmem = default!;
@@ -273,6 +284,7 @@ internal static Δsliceᴛ growslice(@unsafe.Pointer oldPtr, nint newLen, nint o
     if (overflow || capmem > maxAlloc) {
         throw panic(((errorString)(@string)growsliceLenOutOfRangeˢ));
     }
+
     @unsafe.Pointer Δp = default!;
     if (!et.Pointers()){
         Δp = (uintptr)mallocgc(capmem, nil, false);
@@ -295,6 +307,7 @@ internal static Δsliceᴛ growslice(@unsafe.Pointer oldPtr, nint newLen, nint o
         }
     }
     memmove(Δp, oldPtr, lenmem);
+
     return new Δsliceᴛ(Δp.Value, newLen, newcap);
 }
 
@@ -305,6 +318,7 @@ internal static nint nextslicecap(nint newLen, nint oldCap) {
     if (newLen > doublecap) {
         return newLen;
     }
+
     UntypedInt threshold = 256;
     if (oldCap < threshold) {
         return doublecap;
@@ -314,6 +328,7 @@ internal static nint nextslicecap(nint newLen, nint oldCap) {
         // to growing 1.25x for large slices. This formula
         // gives a smooth-ish transition between the two.
         newcap += ((newcap + (nint)(3 * threshold)) >> (int)(2));
+
         // We need to check `newcap >= newLen` and whether `newcap` overflowed.
         // newLen is guaranteed to be larger than zero, hence
         // when newcap overflows then `uint(newcap) > uint(newLen)`.
@@ -322,6 +337,7 @@ internal static nint nextslicecap(nint newLen, nint oldCap) {
             break;
         }
     }
+
     // Set newcap to the requested cap when
     // the newcap calculation overflowed.
     if (newcap <= 0) {
@@ -368,13 +384,16 @@ internal static nint slicecopy(@unsafe.Pointer toPtr, nint toLen, @unsafe.Pointe
     if (fromLen == 0 || toLen == 0) {
         return 0;
     }
+
     nint n = fromLen;
     if (toLen < n) {
         n = toLen;
     }
+
     if (width == 0) {
         return n;
     }
+
     var size = (uintptr)n * width;
     if (raceenabled) {
         var callerpc = sys.GetCallerPC();
@@ -390,8 +409,8 @@ internal static nint slicecopy(@unsafe.Pointer toPtr, nint toLen, @unsafe.Pointe
         asanread(fromPtr, size);
         asanwrite(toPtr, size);
     }
-    if (size == 1){
-        // common case worth about 2x to do here
+
+    if (size == 1){ // common case worth about 2x to do here
         // TODO: is this still worth it with new memmove impl?
         ((ж<byte>)(uintptr)(toPtr)).Value = ((ж<byte>)(uintptr)(fromPtr)).Value; // known to be a byte pointer
     } else {

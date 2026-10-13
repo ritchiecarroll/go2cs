@@ -7,8 +7,7 @@ namespace go;
 partial class runtime_package {
 
 internal static void checkfds() {
+    // Nothing to do on non-Unix platforms.
 }
-
-// Nothing to do on non-Unix platforms.
 
 } // end runtime_package

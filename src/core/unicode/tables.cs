@@ -3751,97 +3751,51 @@ internal static ж<RangeTable> _Zs = Ꮡ(new RangeTable(
 
 // These variables have type *RangeTable.
 public static ж<RangeTable> Cc = _Cc; // Cc is the set of Unicode characters in category Cc (Other, control).
-
 public static ж<RangeTable> Cf = _Cf; // Cf is the set of Unicode characters in category Cf (Other, format).
-
 public static ж<RangeTable> Co = _Co; // Co is the set of Unicode characters in category Co (Other, private use).
-
 public static ж<RangeTable> Cs = _Cs; // Cs is the set of Unicode characters in category Cs (Other, surrogate).
-
 public static ж<RangeTable> Digit = _Nd; // Digit is the set of Unicode characters with the "decimal digit" property.
-
 public static ж<RangeTable> Nd = _Nd; // Nd is the set of Unicode characters in category Nd (Number, decimal digit).
-
 public static ж<RangeTable> Letter = _L; // Letter/L is the set of Unicode letters, category L.
-
 public static ж<RangeTable> L = _L;
-
 public static ж<RangeTable> Lm = _Lm; // Lm is the set of Unicode characters in category Lm (Letter, modifier).
-
 public static ж<RangeTable> Lo = _Lo; // Lo is the set of Unicode characters in category Lo (Letter, other).
-
 public static ж<RangeTable> Lower = _Ll; // Lower is the set of Unicode lower case letters.
-
 public static ж<RangeTable> Ll = _Ll; // Ll is the set of Unicode characters in category Ll (Letter, lowercase).
-
 public static ж<RangeTable> Mark = _M; // Mark/M is the set of Unicode mark characters, category M.
-
 public static ж<RangeTable> M = _M;
-
 public static ж<RangeTable> Mc = _Mc; // Mc is the set of Unicode characters in category Mc (Mark, spacing combining).
-
 public static ж<RangeTable> Me = _Me; // Me is the set of Unicode characters in category Me (Mark, enclosing).
-
 public static ж<RangeTable> Mn = _Mn; // Mn is the set of Unicode characters in category Mn (Mark, nonspacing).
-
 public static ж<RangeTable> Nl = _Nl; // Nl is the set of Unicode characters in category Nl (Number, letter).
-
 public static ж<RangeTable> No = _No; // No is the set of Unicode characters in category No (Number, other).
-
 public static ж<RangeTable> Number = _N; // Number/N is the set of Unicode number characters, category N.
-
 public static ж<RangeTable> N = _N;
-
 public static ж<RangeTable> Other = _C; // Other/C is the set of Unicode control and special characters, category C.
-
 public static ж<RangeTable> C = _C;
-
 public static ж<RangeTable> Pc = _Pc; // Pc is the set of Unicode characters in category Pc (Punctuation, connector).
-
 public static ж<RangeTable> Pd = _Pd; // Pd is the set of Unicode characters in category Pd (Punctuation, dash).
-
 public static ж<RangeTable> Pe = _Pe; // Pe is the set of Unicode characters in category Pe (Punctuation, close).
-
 public static ж<RangeTable> Pf = _Pf; // Pf is the set of Unicode characters in category Pf (Punctuation, final quote).
-
 public static ж<RangeTable> Pi = _Pi; // Pi is the set of Unicode characters in category Pi (Punctuation, initial quote).
-
 public static ж<RangeTable> Po = _Po; // Po is the set of Unicode characters in category Po (Punctuation, other).
-
 public static ж<RangeTable> Ps = _Ps; // Ps is the set of Unicode characters in category Ps (Punctuation, open).
-
 public static ж<RangeTable> Punct = _P; // Punct/P is the set of Unicode punctuation characters, category P.
-
 public static ж<RangeTable> P = _P;
-
 public static ж<RangeTable> Sc = _Sc; // Sc is the set of Unicode characters in category Sc (Symbol, currency).
-
 public static ж<RangeTable> Sk = _Sk; // Sk is the set of Unicode characters in category Sk (Symbol, modifier).
-
 public static ж<RangeTable> Sm = _Sm; // Sm is the set of Unicode characters in category Sm (Symbol, math).
-
 public static ж<RangeTable> So = _So; // So is the set of Unicode characters in category So (Symbol, other).
-
 public static ж<RangeTable> Space = _Z; // Space/Z is the set of Unicode space characters, category Z.
-
 public static ж<RangeTable> Z = _Z;
-
 public static ж<RangeTable> Symbol = _S; // Symbol/S is the set of Unicode symbol characters, category S.
-
 public static ж<RangeTable> S = _S;
-
 public static ж<RangeTable> Title = _Lt; // Title is the set of Unicode title case letters.
-
 public static ж<RangeTable> Lt = _Lt; // Lt is the set of Unicode characters in category Lt (Letter, titlecase).
-
 public static ж<RangeTable> Upper = _Lu; // Upper is the set of Unicode upper case letters.
-
 public static ж<RangeTable> Lu = _Lu; // Lu is the set of Unicode characters in category Lu (Letter, uppercase).
-
 public static ж<RangeTable> Zl = _Zl; // Zl is the set of Unicode characters in category Zl (Separator, line).
-
 public static ж<RangeTable> Zp = _Zp; // Zp is the set of Unicode characters in category Zp (Separator, paragraph).
-
 public static ж<RangeTable> Zs = _Zs; // Zs is the set of Unicode characters in category Zs (Separator, space).
 
 // Scripts is the set of Unicode script tables.
@@ -5877,329 +5831,167 @@ internal static ж<RangeTable> _Zanabazar_Square = Ꮡ(new RangeTable(
 
 // These variables have type *RangeTable.
 public static ж<RangeTable> Adlam = _Adlam;                 // Adlam is the set of Unicode characters in script Adlam.
-
 public static ж<RangeTable> Ahom = _Ahom;                  // Ahom is the set of Unicode characters in script Ahom.
-
 public static ж<RangeTable> Anatolian_Hieroglyphs = _Anatolian_Hieroglyphs; // Anatolian_Hieroglyphs is the set of Unicode characters in script Anatolian_Hieroglyphs.
-
 public static ж<RangeTable> Arabic = _Arabic;                // Arabic is the set of Unicode characters in script Arabic.
-
 public static ж<RangeTable> Armenian = _Armenian;              // Armenian is the set of Unicode characters in script Armenian.
-
 public static ж<RangeTable> Avestan = _Avestan;               // Avestan is the set of Unicode characters in script Avestan.
-
 public static ж<RangeTable> Balinese = _Balinese;              // Balinese is the set of Unicode characters in script Balinese.
-
 public static ж<RangeTable> Bamum = _Bamum;                 // Bamum is the set of Unicode characters in script Bamum.
-
 public static ж<RangeTable> Bassa_Vah = _Bassa_Vah;             // Bassa_Vah is the set of Unicode characters in script Bassa_Vah.
-
 public static ж<RangeTable> Batak = _Batak;                 // Batak is the set of Unicode characters in script Batak.
-
 public static ж<RangeTable> Bengali = _Bengali;               // Bengali is the set of Unicode characters in script Bengali.
-
 public static ж<RangeTable> Bhaiksuki = _Bhaiksuki;             // Bhaiksuki is the set of Unicode characters in script Bhaiksuki.
-
 public static ж<RangeTable> Bopomofo = _Bopomofo;              // Bopomofo is the set of Unicode characters in script Bopomofo.
-
 public static ж<RangeTable> Brahmi = _Brahmi;                // Brahmi is the set of Unicode characters in script Brahmi.
-
 public static ж<RangeTable> Braille = _Braille;               // Braille is the set of Unicode characters in script Braille.
-
 public static ж<RangeTable> Buginese = _Buginese;              // Buginese is the set of Unicode characters in script Buginese.
-
 public static ж<RangeTable> Buhid = _Buhid;                 // Buhid is the set of Unicode characters in script Buhid.
-
 public static ж<RangeTable> Canadian_Aboriginal = _Canadian_Aboriginal;   // Canadian_Aboriginal is the set of Unicode characters in script Canadian_Aboriginal.
-
 public static ж<RangeTable> Carian = _Carian;                // Carian is the set of Unicode characters in script Carian.
-
 public static ж<RangeTable> Caucasian_Albanian = _Caucasian_Albanian;    // Caucasian_Albanian is the set of Unicode characters in script Caucasian_Albanian.
-
 public static ж<RangeTable> Chakma = _Chakma;                // Chakma is the set of Unicode characters in script Chakma.
-
 public static ж<RangeTable> Cham = _Cham;                  // Cham is the set of Unicode characters in script Cham.
-
 public static ж<RangeTable> Cherokee = _Cherokee;              // Cherokee is the set of Unicode characters in script Cherokee.
-
 public static ж<RangeTable> Chorasmian = _Chorasmian;            // Chorasmian is the set of Unicode characters in script Chorasmian.
-
 public static ж<RangeTable> Common = _Common;                // Common is the set of Unicode characters in script Common.
-
 public static ж<RangeTable> Coptic = _Coptic;                // Coptic is the set of Unicode characters in script Coptic.
-
 public static ж<RangeTable> Cuneiform = _Cuneiform;             // Cuneiform is the set of Unicode characters in script Cuneiform.
-
 public static ж<RangeTable> Cypriot = _Cypriot;               // Cypriot is the set of Unicode characters in script Cypriot.
-
 public static ж<RangeTable> Cypro_Minoan = _Cypro_Minoan;          // Cypro_Minoan is the set of Unicode characters in script Cypro_Minoan.
-
 public static ж<RangeTable> Cyrillic = _Cyrillic;              // Cyrillic is the set of Unicode characters in script Cyrillic.
-
 public static ж<RangeTable> Deseret = _Deseret;               // Deseret is the set of Unicode characters in script Deseret.
-
 public static ж<RangeTable> Devanagari = _Devanagari;            // Devanagari is the set of Unicode characters in script Devanagari.
-
 public static ж<RangeTable> Dives_Akuru = _Dives_Akuru;           // Dives_Akuru is the set of Unicode characters in script Dives_Akuru.
-
 public static ж<RangeTable> Dogra = _Dogra;                 // Dogra is the set of Unicode characters in script Dogra.
-
 public static ж<RangeTable> Duployan = _Duployan;              // Duployan is the set of Unicode characters in script Duployan.
-
 public static ж<RangeTable> Egyptian_Hieroglyphs = _Egyptian_Hieroglyphs;  // Egyptian_Hieroglyphs is the set of Unicode characters in script Egyptian_Hieroglyphs.
-
 public static ж<RangeTable> Elbasan = _Elbasan;               // Elbasan is the set of Unicode characters in script Elbasan.
-
 public static ж<RangeTable> Elymaic = _Elymaic;               // Elymaic is the set of Unicode characters in script Elymaic.
-
 public static ж<RangeTable> Ethiopic = _Ethiopic;              // Ethiopic is the set of Unicode characters in script Ethiopic.
-
 public static ж<RangeTable> Georgian = _Georgian;              // Georgian is the set of Unicode characters in script Georgian.
-
 public static ж<RangeTable> Glagolitic = _Glagolitic;            // Glagolitic is the set of Unicode characters in script Glagolitic.
-
 public static ж<RangeTable> Gothic = _Gothic;                // Gothic is the set of Unicode characters in script Gothic.
-
 public static ж<RangeTable> Grantha = _Grantha;               // Grantha is the set of Unicode characters in script Grantha.
-
 public static ж<RangeTable> Greek = _Greek;                 // Greek is the set of Unicode characters in script Greek.
-
 public static ж<RangeTable> Gujarati = _Gujarati;              // Gujarati is the set of Unicode characters in script Gujarati.
-
 public static ж<RangeTable> Gunjala_Gondi = _Gunjala_Gondi;         // Gunjala_Gondi is the set of Unicode characters in script Gunjala_Gondi.
-
 public static ж<RangeTable> Gurmukhi = _Gurmukhi;              // Gurmukhi is the set of Unicode characters in script Gurmukhi.
-
 public static ж<RangeTable> Han = _Han;                   // Han is the set of Unicode characters in script Han.
-
 public static ж<RangeTable> Hangul = _Hangul;                // Hangul is the set of Unicode characters in script Hangul.
-
 public static ж<RangeTable> Hanifi_Rohingya = _Hanifi_Rohingya;       // Hanifi_Rohingya is the set of Unicode characters in script Hanifi_Rohingya.
-
 public static ж<RangeTable> Hanunoo = _Hanunoo;               // Hanunoo is the set of Unicode characters in script Hanunoo.
-
 public static ж<RangeTable> Hatran = _Hatran;                // Hatran is the set of Unicode characters in script Hatran.
-
 public static ж<RangeTable> Hebrew = _Hebrew;                // Hebrew is the set of Unicode characters in script Hebrew.
-
 public static ж<RangeTable> Hiragana = _Hiragana;              // Hiragana is the set of Unicode characters in script Hiragana.
-
 public static ж<RangeTable> Imperial_Aramaic = _Imperial_Aramaic;      // Imperial_Aramaic is the set of Unicode characters in script Imperial_Aramaic.
-
 public static ж<RangeTable> Inherited = _Inherited;             // Inherited is the set of Unicode characters in script Inherited.
-
 public static ж<RangeTable> Inscriptional_Pahlavi = _Inscriptional_Pahlavi; // Inscriptional_Pahlavi is the set of Unicode characters in script Inscriptional_Pahlavi.
-
 public static ж<RangeTable> Inscriptional_Parthian = _Inscriptional_Parthian; // Inscriptional_Parthian is the set of Unicode characters in script Inscriptional_Parthian.
-
 public static ж<RangeTable> Javanese = _Javanese;              // Javanese is the set of Unicode characters in script Javanese.
-
 public static ж<RangeTable> Kaithi = _Kaithi;                // Kaithi is the set of Unicode characters in script Kaithi.
-
 public static ж<RangeTable> Kannada = _Kannada;               // Kannada is the set of Unicode characters in script Kannada.
-
 public static ж<RangeTable> Katakana = _Katakana;              // Katakana is the set of Unicode characters in script Katakana.
-
 public static ж<RangeTable> Kawi = _Kawi;                  // Kawi is the set of Unicode characters in script Kawi.
-
 public static ж<RangeTable> Kayah_Li = _Kayah_Li;              // Kayah_Li is the set of Unicode characters in script Kayah_Li.
-
 public static ж<RangeTable> Kharoshthi = _Kharoshthi;            // Kharoshthi is the set of Unicode characters in script Kharoshthi.
-
 public static ж<RangeTable> Khitan_Small_Script = _Khitan_Small_Script;   // Khitan_Small_Script is the set of Unicode characters in script Khitan_Small_Script.
-
 public static ж<RangeTable> Khmer = _Khmer;                 // Khmer is the set of Unicode characters in script Khmer.
-
 public static ж<RangeTable> Khojki = _Khojki;                // Khojki is the set of Unicode characters in script Khojki.
-
 public static ж<RangeTable> Khudawadi = _Khudawadi;             // Khudawadi is the set of Unicode characters in script Khudawadi.
-
 public static ж<RangeTable> Lao = _Lao;                   // Lao is the set of Unicode characters in script Lao.
-
 public static ж<RangeTable> Latin = _Latin;                 // Latin is the set of Unicode characters in script Latin.
-
 public static ж<RangeTable> Lepcha = _Lepcha;                // Lepcha is the set of Unicode characters in script Lepcha.
-
 public static ж<RangeTable> Limbu = _Limbu;                 // Limbu is the set of Unicode characters in script Limbu.
-
 public static ж<RangeTable> Linear_A = _Linear_A;              // Linear_A is the set of Unicode characters in script Linear_A.
-
 public static ж<RangeTable> Linear_B = _Linear_B;              // Linear_B is the set of Unicode characters in script Linear_B.
-
 public static ж<RangeTable> Lisu = _Lisu;                  // Lisu is the set of Unicode characters in script Lisu.
-
 public static ж<RangeTable> Lycian = _Lycian;                // Lycian is the set of Unicode characters in script Lycian.
-
 public static ж<RangeTable> Lydian = _Lydian;                // Lydian is the set of Unicode characters in script Lydian.
-
 public static ж<RangeTable> Mahajani = _Mahajani;              // Mahajani is the set of Unicode characters in script Mahajani.
-
 public static ж<RangeTable> Makasar = _Makasar;               // Makasar is the set of Unicode characters in script Makasar.
-
 public static ж<RangeTable> Malayalam = _Malayalam;             // Malayalam is the set of Unicode characters in script Malayalam.
-
 public static ж<RangeTable> Mandaic = _Mandaic;               // Mandaic is the set of Unicode characters in script Mandaic.
-
 public static ж<RangeTable> Manichaean = _Manichaean;            // Manichaean is the set of Unicode characters in script Manichaean.
-
 public static ж<RangeTable> Marchen = _Marchen;               // Marchen is the set of Unicode characters in script Marchen.
-
 public static ж<RangeTable> Masaram_Gondi = _Masaram_Gondi;         // Masaram_Gondi is the set of Unicode characters in script Masaram_Gondi.
-
 public static ж<RangeTable> Medefaidrin = _Medefaidrin;           // Medefaidrin is the set of Unicode characters in script Medefaidrin.
-
 public static ж<RangeTable> Meetei_Mayek = _Meetei_Mayek;          // Meetei_Mayek is the set of Unicode characters in script Meetei_Mayek.
-
 public static ж<RangeTable> Mende_Kikakui = _Mende_Kikakui;         // Mende_Kikakui is the set of Unicode characters in script Mende_Kikakui.
-
 public static ж<RangeTable> Meroitic_Cursive = _Meroitic_Cursive;      // Meroitic_Cursive is the set of Unicode characters in script Meroitic_Cursive.
-
 public static ж<RangeTable> Meroitic_Hieroglyphs = _Meroitic_Hieroglyphs;  // Meroitic_Hieroglyphs is the set of Unicode characters in script Meroitic_Hieroglyphs.
-
 public static ж<RangeTable> Miao = _Miao;                  // Miao is the set of Unicode characters in script Miao.
-
 public static ж<RangeTable> Modi = _Modi;                  // Modi is the set of Unicode characters in script Modi.
-
 public static ж<RangeTable> Mongolian = _Mongolian;             // Mongolian is the set of Unicode characters in script Mongolian.
-
 public static ж<RangeTable> Mro = _Mro;                   // Mro is the set of Unicode characters in script Mro.
-
 public static ж<RangeTable> Multani = _Multani;               // Multani is the set of Unicode characters in script Multani.
-
 public static ж<RangeTable> Myanmar = _Myanmar;               // Myanmar is the set of Unicode characters in script Myanmar.
-
 public static ж<RangeTable> Nabataean = _Nabataean;             // Nabataean is the set of Unicode characters in script Nabataean.
-
 public static ж<RangeTable> Nag_Mundari = _Nag_Mundari;           // Nag_Mundari is the set of Unicode characters in script Nag_Mundari.
-
 public static ж<RangeTable> Nandinagari = _Nandinagari;           // Nandinagari is the set of Unicode characters in script Nandinagari.
-
 public static ж<RangeTable> New_Tai_Lue = _New_Tai_Lue;           // New_Tai_Lue is the set of Unicode characters in script New_Tai_Lue.
-
 public static ж<RangeTable> Newa = _Newa;                  // Newa is the set of Unicode characters in script Newa.
-
 public static ж<RangeTable> Nko = _Nko;                   // Nko is the set of Unicode characters in script Nko.
-
 public static ж<RangeTable> Nushu = _Nushu;                 // Nushu is the set of Unicode characters in script Nushu.
-
 public static ж<RangeTable> Nyiakeng_Puachue_Hmong = _Nyiakeng_Puachue_Hmong; // Nyiakeng_Puachue_Hmong is the set of Unicode characters in script Nyiakeng_Puachue_Hmong.
-
 public static ж<RangeTable> Ogham = _Ogham;                 // Ogham is the set of Unicode characters in script Ogham.
-
 public static ж<RangeTable> Ol_Chiki = _Ol_Chiki;              // Ol_Chiki is the set of Unicode characters in script Ol_Chiki.
-
 public static ж<RangeTable> Old_Hungarian = _Old_Hungarian;         // Old_Hungarian is the set of Unicode characters in script Old_Hungarian.
-
 public static ж<RangeTable> Old_Italic = _Old_Italic;            // Old_Italic is the set of Unicode characters in script Old_Italic.
-
 public static ж<RangeTable> Old_North_Arabian = _Old_North_Arabian;     // Old_North_Arabian is the set of Unicode characters in script Old_North_Arabian.
-
 public static ж<RangeTable> Old_Permic = _Old_Permic;            // Old_Permic is the set of Unicode characters in script Old_Permic.
-
 public static ж<RangeTable> Old_Persian = _Old_Persian;           // Old_Persian is the set of Unicode characters in script Old_Persian.
-
 public static ж<RangeTable> Old_Sogdian = _Old_Sogdian;           // Old_Sogdian is the set of Unicode characters in script Old_Sogdian.
-
 public static ж<RangeTable> Old_South_Arabian = _Old_South_Arabian;     // Old_South_Arabian is the set of Unicode characters in script Old_South_Arabian.
-
 public static ж<RangeTable> Old_Turkic = _Old_Turkic;            // Old_Turkic is the set of Unicode characters in script Old_Turkic.
-
 public static ж<RangeTable> Old_Uyghur = _Old_Uyghur;            // Old_Uyghur is the set of Unicode characters in script Old_Uyghur.
-
 public static ж<RangeTable> Oriya = _Oriya;                 // Oriya is the set of Unicode characters in script Oriya.
-
 public static ж<RangeTable> Osage = _Osage;                 // Osage is the set of Unicode characters in script Osage.
-
 public static ж<RangeTable> Osmanya = _Osmanya;               // Osmanya is the set of Unicode characters in script Osmanya.
-
 public static ж<RangeTable> Pahawh_Hmong = _Pahawh_Hmong;          // Pahawh_Hmong is the set of Unicode characters in script Pahawh_Hmong.
-
 public static ж<RangeTable> Palmyrene = _Palmyrene;             // Palmyrene is the set of Unicode characters in script Palmyrene.
-
 public static ж<RangeTable> Pau_Cin_Hau = _Pau_Cin_Hau;           // Pau_Cin_Hau is the set of Unicode characters in script Pau_Cin_Hau.
-
 public static ж<RangeTable> Phags_Pa = _Phags_Pa;              // Phags_Pa is the set of Unicode characters in script Phags_Pa.
-
 public static ж<RangeTable> Phoenician = _Phoenician;            // Phoenician is the set of Unicode characters in script Phoenician.
-
 public static ж<RangeTable> Psalter_Pahlavi = _Psalter_Pahlavi;       // Psalter_Pahlavi is the set of Unicode characters in script Psalter_Pahlavi.
-
 public static ж<RangeTable> Rejang = _Rejang;                // Rejang is the set of Unicode characters in script Rejang.
-
 public static ж<RangeTable> Runic = _Runic;                 // Runic is the set of Unicode characters in script Runic.
-
 public static ж<RangeTable> Samaritan = _Samaritan;             // Samaritan is the set of Unicode characters in script Samaritan.
-
 public static ж<RangeTable> Saurashtra = _Saurashtra;            // Saurashtra is the set of Unicode characters in script Saurashtra.
-
 public static ж<RangeTable> Sharada = _Sharada;               // Sharada is the set of Unicode characters in script Sharada.
-
 public static ж<RangeTable> Shavian = _Shavian;               // Shavian is the set of Unicode characters in script Shavian.
-
 public static ж<RangeTable> Siddham = _Siddham;               // Siddham is the set of Unicode characters in script Siddham.
-
 public static ж<RangeTable> SignWriting = _SignWriting;           // SignWriting is the set of Unicode characters in script SignWriting.
-
 public static ж<RangeTable> Sinhala = _Sinhala;               // Sinhala is the set of Unicode characters in script Sinhala.
-
 public static ж<RangeTable> Sogdian = _Sogdian;               // Sogdian is the set of Unicode characters in script Sogdian.
-
 public static ж<RangeTable> Sora_Sompeng = _Sora_Sompeng;          // Sora_Sompeng is the set of Unicode characters in script Sora_Sompeng.
-
 public static ж<RangeTable> Soyombo = _Soyombo;               // Soyombo is the set of Unicode characters in script Soyombo.
-
 public static ж<RangeTable> Sundanese = _Sundanese;             // Sundanese is the set of Unicode characters in script Sundanese.
-
 public static ж<RangeTable> Syloti_Nagri = _Syloti_Nagri;          // Syloti_Nagri is the set of Unicode characters in script Syloti_Nagri.
-
 public static ж<RangeTable> Syriac = _Syriac;                // Syriac is the set of Unicode characters in script Syriac.
-
 public static ж<RangeTable> Tagalog = _Tagalog;               // Tagalog is the set of Unicode characters in script Tagalog.
-
 public static ж<RangeTable> Tagbanwa = _Tagbanwa;              // Tagbanwa is the set of Unicode characters in script Tagbanwa.
-
 public static ж<RangeTable> Tai_Le = _Tai_Le;                // Tai_Le is the set of Unicode characters in script Tai_Le.
-
 public static ж<RangeTable> Tai_Tham = _Tai_Tham;              // Tai_Tham is the set of Unicode characters in script Tai_Tham.
-
 public static ж<RangeTable> Tai_Viet = _Tai_Viet;              // Tai_Viet is the set of Unicode characters in script Tai_Viet.
-
 public static ж<RangeTable> Takri = _Takri;                 // Takri is the set of Unicode characters in script Takri.
-
 public static ж<RangeTable> Tamil = _Tamil;                 // Tamil is the set of Unicode characters in script Tamil.
-
 public static ж<RangeTable> Tangsa = _Tangsa;                // Tangsa is the set of Unicode characters in script Tangsa.
-
 public static ж<RangeTable> Tangut = _Tangut;                // Tangut is the set of Unicode characters in script Tangut.
-
 public static ж<RangeTable> Telugu = _Telugu;                // Telugu is the set of Unicode characters in script Telugu.
-
 public static ж<RangeTable> Thaana = _Thaana;                // Thaana is the set of Unicode characters in script Thaana.
-
 public static ж<RangeTable> Thai = _Thai;                  // Thai is the set of Unicode characters in script Thai.
-
 public static ж<RangeTable> Tibetan = _Tibetan;               // Tibetan is the set of Unicode characters in script Tibetan.
-
 public static ж<RangeTable> Tifinagh = _Tifinagh;              // Tifinagh is the set of Unicode characters in script Tifinagh.
-
 public static ж<RangeTable> Tirhuta = _Tirhuta;               // Tirhuta is the set of Unicode characters in script Tirhuta.
-
 public static ж<RangeTable> Toto = _Toto;                  // Toto is the set of Unicode characters in script Toto.
-
 public static ж<RangeTable> Ugaritic = _Ugaritic;              // Ugaritic is the set of Unicode characters in script Ugaritic.
-
 public static ж<RangeTable> Vai = _Vai;                   // Vai is the set of Unicode characters in script Vai.
-
 public static ж<RangeTable> Vithkuqi = _Vithkuqi;              // Vithkuqi is the set of Unicode characters in script Vithkuqi.
-
 public static ж<RangeTable> Wancho = _Wancho;                // Wancho is the set of Unicode characters in script Wancho.
-
 public static ж<RangeTable> Warang_Citi = _Warang_Citi;           // Warang_Citi is the set of Unicode characters in script Warang_Citi.
-
 public static ж<RangeTable> Yezidi = _Yezidi;                // Yezidi is the set of Unicode characters in script Yezidi.
-
 public static ж<RangeTable> Yi = _Yi;                    // Yi is the set of Unicode characters in script Yi.
-
 public static ж<RangeTable> Zanabazar_Square = _Zanabazar_Square;      // Zanabazar_Square is the set of Unicode characters in script Zanabazar_Square.
 
 // Properties is the set of Unicode property tables.
@@ -7400,73 +7192,39 @@ internal static ж<RangeTable> _White_Space = Ꮡ(new RangeTable(
 
 // These variables have type *RangeTable.
 public static ж<RangeTable> ASCII_Hex_Digit = _ASCII_Hex_Digit;                   // ASCII_Hex_Digit is the set of Unicode characters with property ASCII_Hex_Digit.
-
 public static ж<RangeTable> Bidi_Control = _Bidi_Control;                      // Bidi_Control is the set of Unicode characters with property Bidi_Control.
-
 public static ж<RangeTable> Dash = _Dash;                              // Dash is the set of Unicode characters with property Dash.
-
 public static ж<RangeTable> Deprecated = _Deprecated;                        // Deprecated is the set of Unicode characters with property Deprecated.
-
 public static ж<RangeTable> Diacritic = _Diacritic;                         // Diacritic is the set of Unicode characters with property Diacritic.
-
 public static ж<RangeTable> Extender = _Extender;                          // Extender is the set of Unicode characters with property Extender.
-
 public static ж<RangeTable> Hex_Digit = _Hex_Digit;                         // Hex_Digit is the set of Unicode characters with property Hex_Digit.
-
 public static ж<RangeTable> Hyphen = _Hyphen;                            // Hyphen is the set of Unicode characters with property Hyphen.
-
 public static ж<RangeTable> IDS_Binary_Operator = _IDS_Binary_Operator;               // IDS_Binary_Operator is the set of Unicode characters with property IDS_Binary_Operator.
-
 public static ж<RangeTable> IDS_Trinary_Operator = _IDS_Trinary_Operator;              // IDS_Trinary_Operator is the set of Unicode characters with property IDS_Trinary_Operator.
-
 public static ж<RangeTable> Ideographic = _Ideographic;                       // Ideographic is the set of Unicode characters with property Ideographic.
-
 public static ж<RangeTable> Join_Control = _Join_Control;                      // Join_Control is the set of Unicode characters with property Join_Control.
-
 public static ж<RangeTable> Logical_Order_Exception = _Logical_Order_Exception;           // Logical_Order_Exception is the set of Unicode characters with property Logical_Order_Exception.
-
 public static ж<RangeTable> Noncharacter_Code_Point = _Noncharacter_Code_Point;           // Noncharacter_Code_Point is the set of Unicode characters with property Noncharacter_Code_Point.
-
 public static ж<RangeTable> Other_Alphabetic = _Other_Alphabetic;                  // Other_Alphabetic is the set of Unicode characters with property Other_Alphabetic.
-
 public static ж<RangeTable> Other_Default_Ignorable_Code_Point = _Other_Default_Ignorable_Code_Point; // Other_Default_Ignorable_Code_Point is the set of Unicode characters with property Other_Default_Ignorable_Code_Point.
-
 public static ж<RangeTable> Other_Grapheme_Extend = _Other_Grapheme_Extend;             // Other_Grapheme_Extend is the set of Unicode characters with property Other_Grapheme_Extend.
-
 public static ж<RangeTable> Other_ID_Continue = _Other_ID_Continue;                 // Other_ID_Continue is the set of Unicode characters with property Other_ID_Continue.
-
 public static ж<RangeTable> Other_ID_Start = _Other_ID_Start;                    // Other_ID_Start is the set of Unicode characters with property Other_ID_Start.
-
 public static ж<RangeTable> Other_Lowercase = _Other_Lowercase;                   // Other_Lowercase is the set of Unicode characters with property Other_Lowercase.
-
 public static ж<RangeTable> Other_Math = _Other_Math;                        // Other_Math is the set of Unicode characters with property Other_Math.
-
 public static ж<RangeTable> Other_Uppercase = _Other_Uppercase;                   // Other_Uppercase is the set of Unicode characters with property Other_Uppercase.
-
 public static ж<RangeTable> Pattern_Syntax = _Pattern_Syntax;                    // Pattern_Syntax is the set of Unicode characters with property Pattern_Syntax.
-
 public static ж<RangeTable> Pattern_White_Space = _Pattern_White_Space;               // Pattern_White_Space is the set of Unicode characters with property Pattern_White_Space.
-
 public static ж<RangeTable> Prepended_Concatenation_Mark = _Prepended_Concatenation_Mark;      // Prepended_Concatenation_Mark is the set of Unicode characters with property Prepended_Concatenation_Mark.
-
 public static ж<RangeTable> Quotation_Mark = _Quotation_Mark;                    // Quotation_Mark is the set of Unicode characters with property Quotation_Mark.
-
 public static ж<RangeTable> Radical = _Radical;                           // Radical is the set of Unicode characters with property Radical.
-
 public static ж<RangeTable> Regional_Indicator = _Regional_Indicator;                // Regional_Indicator is the set of Unicode characters with property Regional_Indicator.
-
 public static ж<RangeTable> STerm = _Sentence_Terminal;                 // STerm is an alias for Sentence_Terminal.
-
 public static ж<RangeTable> Sentence_Terminal = _Sentence_Terminal;                 // Sentence_Terminal is the set of Unicode characters with property Sentence_Terminal.
-
 public static ж<RangeTable> Soft_Dotted = _Soft_Dotted;                       // Soft_Dotted is the set of Unicode characters with property Soft_Dotted.
-
 public static ж<RangeTable> Terminal_Punctuation = _Terminal_Punctuation;              // Terminal_Punctuation is the set of Unicode characters with property Terminal_Punctuation.
-
 public static ж<RangeTable> Unified_Ideograph = _Unified_Ideograph;                 // Unified_Ideograph is the set of Unicode characters with property Unified_Ideograph.
-
 public static ж<RangeTable> Variation_Selector = _Variation_Selector;                // Variation_Selector is the set of Unicode characters with property Variation_Selector.
-
 public static ж<RangeTable> White_Space = _White_Space;                       // White_Space is the set of Unicode characters with property White_Space.
 
 // CaseRanges is the table describing case mappings for all letters with
@@ -7805,519 +7563,263 @@ internal static slice<CaseRange> _CaseRanges = new CaseRange[]{
     new(0x1E922, 0x1E943, new d(new rune[]{-34, 0, -34}.array()))
 }.slice();
 
-// '\x00'
-// '\x01'
-// '\x02'
-// '\x03'
-// '\x04'
-// '\x05'
-// '\x06'
-// '\a'
-// '\b'
-// '\t'
-// '\n'
-// '\v'
-// '\f'
-// '\r'
-// '\x0e'
-// '\x0f'
-// '\x10'
-// '\x11'
-// '\x12'
-// '\x13'
-// '\x14'
-// '\x15'
-// '\x16'
-// '\x17'
-// '\x18'
-// '\x19'
-// '\x1a'
-// '\x1b'
-// '\x1c'
-// '\x1d'
-// '\x1e'
-// '\x1f'
-// ' '
-// '!'
-// '"'
-// '#'
-// '$'
-// '%'
-// '&'
-// '\''
-// '('
-// ')'
-// '*'
-// '+'
-// ','
-// '-'
-// '.'
-// '/'
-// '0'
-// '1'
-// '2'
-// '3'
-// '4'
-// '5'
-// '6'
-// '7'
-// '8'
-// '9'
-// ':'
-// ';'
-// '<'
-// '='
-// '>'
-// '?'
-// '@'
-// 'A'
-// 'B'
-// 'C'
-// 'D'
-// 'E'
-// 'F'
-// 'G'
-// 'H'
-// 'I'
-// 'J'
-// 'K'
-// 'L'
-// 'M'
-// 'N'
-// 'O'
-// 'P'
-// 'Q'
-// 'R'
-// 'S'
-// 'T'
-// 'U'
-// 'V'
-// 'W'
-// 'X'
-// 'Y'
-// 'Z'
-// '['
-// '\\'
-// ']'
-// '^'
-// '_'
-// '`'
-// 'a'
-// 'b'
-// 'c'
-// 'd'
-// 'e'
-// 'f'
-// 'g'
-// 'h'
-// 'i'
-// 'j'
-// 'k'
-// 'l'
-// 'm'
-// 'n'
-// 'o'
-// 'p'
-// 'q'
-// 'r'
-// 's'
-// 't'
-// 'u'
-// 'v'
-// 'w'
-// 'x'
-// 'y'
-// 'z'
-// '{'
-// '|'
-// '}'
-// '~'
-// '\x7f'
-// '\u0080'
-// '\u0081'
-// '\u0082'
-// '\u0083'
-// '\u0084'
-// '\u0085'
-// '\u0086'
-// '\u0087'
-// '\u0088'
-// '\u0089'
-// '\u008a'
-// '\u008b'
-// '\u008c'
-// '\u008d'
-// '\u008e'
-// '\u008f'
-// '\u0090'
-// '\u0091'
-// '\u0092'
-// '\u0093'
-// '\u0094'
-// '\u0095'
-// '\u0096'
-// '\u0097'
-// '\u0098'
-// '\u0099'
-// '\u009a'
-// '\u009b'
-// '\u009c'
-// '\u009d'
-// '\u009e'
-// '\u009f'
-// '\u00a0'
-// '¡'
-// '¢'
-// '£'
-// '¤'
-// '¥'
-// '¦'
-// '§'
-// '¨'
-// '©'
-// 'ª'
-// '«'
-// '¬'
-// '\u00ad'
-// '®'
-// '¯'
-// '°'
-// '±'
-// '²'
-// '³'
-// '´'
-// 'µ'
-// '¶'
-// '·'
-// '¸'
-// '¹'
-// 'º'
-// '»'
-// '¼'
-// '½'
-// '¾'
-// '¿'
-// 'À'
-// 'Á'
-// 'Â'
-// 'Ã'
-// 'Ä'
-// 'Å'
-// 'Æ'
-// 'Ç'
-// 'È'
-// 'É'
-// 'Ê'
-// 'Ë'
-// 'Ì'
-// 'Í'
-// 'Î'
-// 'Ï'
-// 'Ð'
-// 'Ñ'
-// 'Ò'
-// 'Ó'
-// 'Ô'
-// 'Õ'
-// 'Ö'
-// '×'
-// 'Ø'
-// 'Ù'
-// 'Ú'
-// 'Û'
-// 'Ü'
-// 'Ý'
-// 'Þ'
-// 'ß'
-// 'à'
-// 'á'
-// 'â'
-// 'ã'
-// 'ä'
-// 'å'
-// 'æ'
-// 'ç'
-// 'è'
-// 'é'
-// 'ê'
-// 'ë'
-// 'ì'
-// 'í'
-// 'î'
-// 'ï'
-// 'ð'
-// 'ñ'
-// 'ò'
-// 'ó'
-// 'ô'
-// 'õ'
-// 'ö'
-// '÷'
-// 'ø'
-// 'ù'
-// 'ú'
-// 'û'
-// 'ü'
-// 'ý'
-// 'þ'
-// 'ÿ'
 internal static array<uint8> properties = new array<uint8>(256){
-    [0x00] = pC,
-    [0x01] = pC,
-    [0x02] = pC,
-    [0x03] = pC,
-    [0x04] = pC,
-    [0x05] = pC,
-    [0x06] = pC,
-    [0x07] = pC,
-    [0x08] = pC,
-    [0x09] = pC,
-    [0x0A] = pC,
-    [0x0B] = pC,
-    [0x0C] = pC,
-    [0x0D] = pC,
-    [0x0E] = pC,
-    [0x0F] = pC,
-    [0x10] = pC,
-    [0x11] = pC,
-    [0x12] = pC,
-    [0x13] = pC,
-    [0x14] = pC,
-    [0x15] = pC,
-    [0x16] = pC,
-    [0x17] = pC,
-    [0x18] = pC,
-    [0x19] = pC,
-    [0x1A] = pC,
-    [0x1B] = pC,
-    [0x1C] = pC,
-    [0x1D] = pC,
-    [0x1E] = pC,
-    [0x1F] = pC,
-    [0x20] = (uint8)((uint8)pZ | (uint8)pp),
-    [0x21] = (uint8)((uint8)pP | (uint8)pp),
-    [0x22] = (uint8)((uint8)pP | (uint8)pp),
-    [0x23] = (uint8)((uint8)pP | (uint8)pp),
-    [0x24] = (uint8)((uint8)pS | (uint8)pp),
-    [0x25] = (uint8)((uint8)pP | (uint8)pp),
-    [0x26] = (uint8)((uint8)pP | (uint8)pp),
-    [0x27] = (uint8)((uint8)pP | (uint8)pp),
-    [0x28] = (uint8)((uint8)pP | (uint8)pp),
-    [0x29] = (uint8)((uint8)pP | (uint8)pp),
-    [0x2A] = (uint8)((uint8)pP | (uint8)pp),
-    [0x2B] = (uint8)((uint8)pS | (uint8)pp),
-    [0x2C] = (uint8)((uint8)pP | (uint8)pp),
-    [0x2D] = (uint8)((uint8)pP | (uint8)pp),
-    [0x2E] = (uint8)((uint8)pP | (uint8)pp),
-    [0x2F] = (uint8)((uint8)pP | (uint8)pp),
-    [0x30] = (uint8)((uint8)pN | (uint8)pp),
-    [0x31] = (uint8)((uint8)pN | (uint8)pp),
-    [0x32] = (uint8)((uint8)pN | (uint8)pp),
-    [0x33] = (uint8)((uint8)pN | (uint8)pp),
-    [0x34] = (uint8)((uint8)pN | (uint8)pp),
-    [0x35] = (uint8)((uint8)pN | (uint8)pp),
-    [0x36] = (uint8)((uint8)pN | (uint8)pp),
-    [0x37] = (uint8)((uint8)pN | (uint8)pp),
-    [0x38] = (uint8)((uint8)pN | (uint8)pp),
-    [0x39] = (uint8)((uint8)pN | (uint8)pp),
-    [0x3A] = (uint8)((uint8)pP | (uint8)pp),
-    [0x3B] = (uint8)((uint8)pP | (uint8)pp),
-    [0x3C] = (uint8)((uint8)pS | (uint8)pp),
-    [0x3D] = (uint8)((uint8)pS | (uint8)pp),
-    [0x3E] = (uint8)((uint8)pS | (uint8)pp),
-    [0x3F] = (uint8)((uint8)pP | (uint8)pp),
-    [0x40] = (uint8)((uint8)pP | (uint8)pp),
-    [0x41] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x42] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x43] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x44] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x45] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x46] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x47] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x48] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x49] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x4A] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x4B] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x4C] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x4D] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x4E] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x4F] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x50] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x51] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x52] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x53] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x54] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x55] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x56] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x57] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x58] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x59] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x5A] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x5B] = (uint8)((uint8)pP | (uint8)pp),
-    [0x5C] = (uint8)((uint8)pP | (uint8)pp),
-    [0x5D] = (uint8)((uint8)pP | (uint8)pp),
-    [0x5E] = (uint8)((uint8)pS | (uint8)pp),
-    [0x5F] = (uint8)((uint8)pP | (uint8)pp),
-    [0x60] = (uint8)((uint8)pS | (uint8)pp),
-    [0x61] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x62] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x63] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x64] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x65] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x66] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x67] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x68] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x69] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x6A] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x6B] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x6C] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x6D] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x6E] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x6F] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x70] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x71] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x72] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x73] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x74] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x75] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x76] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x77] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x78] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x79] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x7A] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x7B] = (uint8)((uint8)pP | (uint8)pp),
-    [0x7C] = (uint8)((uint8)pS | (uint8)pp),
-    [0x7D] = (uint8)((uint8)pP | (uint8)pp),
-    [0x7E] = (uint8)((uint8)pS | (uint8)pp),
-    [0x7F] = pC,
-    [0x80] = pC,
-    [0x81] = pC,
-    [0x82] = pC,
-    [0x83] = pC,
-    [0x84] = pC,
-    [0x85] = pC,
-    [0x86] = pC,
-    [0x87] = pC,
-    [0x88] = pC,
-    [0x89] = pC,
-    [0x8A] = pC,
-    [0x8B] = pC,
-    [0x8C] = pC,
-    [0x8D] = pC,
-    [0x8E] = pC,
-    [0x8F] = pC,
-    [0x90] = pC,
-    [0x91] = pC,
-    [0x92] = pC,
-    [0x93] = pC,
-    [0x94] = pC,
-    [0x95] = pC,
-    [0x96] = pC,
-    [0x97] = pC,
-    [0x98] = pC,
-    [0x99] = pC,
-    [0x9A] = pC,
-    [0x9B] = pC,
-    [0x9C] = pC,
-    [0x9D] = pC,
-    [0x9E] = pC,
-    [0x9F] = pC,
-    [0xA0] = pZ,
-    [0xA1] = (uint8)((uint8)pP | (uint8)pp),
-    [0xA2] = (uint8)((uint8)pS | (uint8)pp),
-    [0xA3] = (uint8)((uint8)pS | (uint8)pp),
-    [0xA4] = (uint8)((uint8)pS | (uint8)pp),
-    [0xA5] = (uint8)((uint8)pS | (uint8)pp),
-    [0xA6] = (uint8)((uint8)pS | (uint8)pp),
-    [0xA7] = (uint8)((uint8)pP | (uint8)pp),
-    [0xA8] = (uint8)((uint8)pS | (uint8)pp),
-    [0xA9] = (uint8)((uint8)pS | (uint8)pp),
-    [0xAA] = (uint8)((uint8)pLo | (uint8)pp),
-    [0xAB] = (uint8)((uint8)pP | (uint8)pp),
-    [0xAC] = (uint8)((uint8)pS | (uint8)pp),
-    [0xAD] = 0,
-    [0xAE] = (uint8)((uint8)pS | (uint8)pp),
-    [0xAF] = (uint8)((uint8)pS | (uint8)pp),
-    [0xB0] = (uint8)((uint8)pS | (uint8)pp),
-    [0xB1] = (uint8)((uint8)pS | (uint8)pp),
-    [0xB2] = (uint8)((uint8)pN | (uint8)pp),
-    [0xB3] = (uint8)((uint8)pN | (uint8)pp),
-    [0xB4] = (uint8)((uint8)pS | (uint8)pp),
-    [0xB5] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xB6] = (uint8)((uint8)pP | (uint8)pp),
-    [0xB7] = (uint8)((uint8)pP | (uint8)pp),
-    [0xB8] = (uint8)((uint8)pS | (uint8)pp),
-    [0xB9] = (uint8)((uint8)pN | (uint8)pp),
-    [0xBA] = (uint8)((uint8)pLo | (uint8)pp),
-    [0xBB] = (uint8)((uint8)pP | (uint8)pp),
-    [0xBC] = (uint8)((uint8)pN | (uint8)pp),
-    [0xBD] = (uint8)((uint8)pN | (uint8)pp),
-    [0xBE] = (uint8)((uint8)pN | (uint8)pp),
-    [0xBF] = (uint8)((uint8)pP | (uint8)pp),
-    [0xC0] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC1] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC2] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC3] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC4] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC5] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC6] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC7] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC8] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC9] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xCA] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xCB] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xCC] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xCD] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xCE] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xCF] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD0] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD1] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD2] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD3] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD4] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD5] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD6] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD7] = (uint8)((uint8)pS | (uint8)pp),
-    [0xD8] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD9] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xDA] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xDB] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xDC] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xDD] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xDE] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xDF] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE0] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE1] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE2] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE3] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE4] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE5] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE6] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE7] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE8] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE9] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xEA] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xEB] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xEC] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xED] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xEE] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xEF] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF0] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF1] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF2] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF3] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF4] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF5] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF6] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF7] = (uint8)((uint8)pS | (uint8)pp),
-    [0xF8] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF9] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xFA] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xFB] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xFC] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xFD] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xFE] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xFF] = (uint8)((uint8)pLl | (uint8)pp)
+    [0x00] = pC, // '\x00'
+    [0x01] = pC, // '\x01'
+    [0x02] = pC, // '\x02'
+    [0x03] = pC, // '\x03'
+    [0x04] = pC, // '\x04'
+    [0x05] = pC, // '\x05'
+    [0x06] = pC, // '\x06'
+    [0x07] = pC, // '\a'
+    [0x08] = pC, // '\b'
+    [0x09] = pC, // '\t'
+    [0x0A] = pC, // '\n'
+    [0x0B] = pC, // '\v'
+    [0x0C] = pC, // '\f'
+    [0x0D] = pC, // '\r'
+    [0x0E] = pC, // '\x0e'
+    [0x0F] = pC, // '\x0f'
+    [0x10] = pC, // '\x10'
+    [0x11] = pC, // '\x11'
+    [0x12] = pC, // '\x12'
+    [0x13] = pC, // '\x13'
+    [0x14] = pC, // '\x14'
+    [0x15] = pC, // '\x15'
+    [0x16] = pC, // '\x16'
+    [0x17] = pC, // '\x17'
+    [0x18] = pC, // '\x18'
+    [0x19] = pC, // '\x19'
+    [0x1A] = pC, // '\x1a'
+    [0x1B] = pC, // '\x1b'
+    [0x1C] = pC, // '\x1c'
+    [0x1D] = pC, // '\x1d'
+    [0x1E] = pC, // '\x1e'
+    [0x1F] = pC, // '\x1f'
+    [0x20] = (uint8)((uint8)pZ | (uint8)pp), // ' '
+    [0x21] = (uint8)((uint8)pP | (uint8)pp), // '!'
+    [0x22] = (uint8)((uint8)pP | (uint8)pp), // '"'
+    [0x23] = (uint8)((uint8)pP | (uint8)pp), // '#'
+    [0x24] = (uint8)((uint8)pS | (uint8)pp), // '$'
+    [0x25] = (uint8)((uint8)pP | (uint8)pp), // '%'
+    [0x26] = (uint8)((uint8)pP | (uint8)pp), // '&'
+    [0x27] = (uint8)((uint8)pP | (uint8)pp), // '\''
+    [0x28] = (uint8)((uint8)pP | (uint8)pp), // '('
+    [0x29] = (uint8)((uint8)pP | (uint8)pp), // ')'
+    [0x2A] = (uint8)((uint8)pP | (uint8)pp), // '*'
+    [0x2B] = (uint8)((uint8)pS | (uint8)pp), // '+'
+    [0x2C] = (uint8)((uint8)pP | (uint8)pp), // ','
+    [0x2D] = (uint8)((uint8)pP | (uint8)pp), // '-'
+    [0x2E] = (uint8)((uint8)pP | (uint8)pp), // '.'
+    [0x2F] = (uint8)((uint8)pP | (uint8)pp), // '/'
+    [0x30] = (uint8)((uint8)pN | (uint8)pp), // '0'
+    [0x31] = (uint8)((uint8)pN | (uint8)pp), // '1'
+    [0x32] = (uint8)((uint8)pN | (uint8)pp), // '2'
+    [0x33] = (uint8)((uint8)pN | (uint8)pp), // '3'
+    [0x34] = (uint8)((uint8)pN | (uint8)pp), // '4'
+    [0x35] = (uint8)((uint8)pN | (uint8)pp), // '5'
+    [0x36] = (uint8)((uint8)pN | (uint8)pp), // '6'
+    [0x37] = (uint8)((uint8)pN | (uint8)pp), // '7'
+    [0x38] = (uint8)((uint8)pN | (uint8)pp), // '8'
+    [0x39] = (uint8)((uint8)pN | (uint8)pp), // '9'
+    [0x3A] = (uint8)((uint8)pP | (uint8)pp), // ':'
+    [0x3B] = (uint8)((uint8)pP | (uint8)pp), // ';'
+    [0x3C] = (uint8)((uint8)pS | (uint8)pp), // '<'
+    [0x3D] = (uint8)((uint8)pS | (uint8)pp), // '='
+    [0x3E] = (uint8)((uint8)pS | (uint8)pp), // '>'
+    [0x3F] = (uint8)((uint8)pP | (uint8)pp), // '?'
+    [0x40] = (uint8)((uint8)pP | (uint8)pp), // '@'
+    [0x41] = (uint8)((uint8)pLu | (uint8)pp), // 'A'
+    [0x42] = (uint8)((uint8)pLu | (uint8)pp), // 'B'
+    [0x43] = (uint8)((uint8)pLu | (uint8)pp), // 'C'
+    [0x44] = (uint8)((uint8)pLu | (uint8)pp), // 'D'
+    [0x45] = (uint8)((uint8)pLu | (uint8)pp), // 'E'
+    [0x46] = (uint8)((uint8)pLu | (uint8)pp), // 'F'
+    [0x47] = (uint8)((uint8)pLu | (uint8)pp), // 'G'
+    [0x48] = (uint8)((uint8)pLu | (uint8)pp), // 'H'
+    [0x49] = (uint8)((uint8)pLu | (uint8)pp), // 'I'
+    [0x4A] = (uint8)((uint8)pLu | (uint8)pp), // 'J'
+    [0x4B] = (uint8)((uint8)pLu | (uint8)pp), // 'K'
+    [0x4C] = (uint8)((uint8)pLu | (uint8)pp), // 'L'
+    [0x4D] = (uint8)((uint8)pLu | (uint8)pp), // 'M'
+    [0x4E] = (uint8)((uint8)pLu | (uint8)pp), // 'N'
+    [0x4F] = (uint8)((uint8)pLu | (uint8)pp), // 'O'
+    [0x50] = (uint8)((uint8)pLu | (uint8)pp), // 'P'
+    [0x51] = (uint8)((uint8)pLu | (uint8)pp), // 'Q'
+    [0x52] = (uint8)((uint8)pLu | (uint8)pp), // 'R'
+    [0x53] = (uint8)((uint8)pLu | (uint8)pp), // 'S'
+    [0x54] = (uint8)((uint8)pLu | (uint8)pp), // 'T'
+    [0x55] = (uint8)((uint8)pLu | (uint8)pp), // 'U'
+    [0x56] = (uint8)((uint8)pLu | (uint8)pp), // 'V'
+    [0x57] = (uint8)((uint8)pLu | (uint8)pp), // 'W'
+    [0x58] = (uint8)((uint8)pLu | (uint8)pp), // 'X'
+    [0x59] = (uint8)((uint8)pLu | (uint8)pp), // 'Y'
+    [0x5A] = (uint8)((uint8)pLu | (uint8)pp), // 'Z'
+    [0x5B] = (uint8)((uint8)pP | (uint8)pp), // '['
+    [0x5C] = (uint8)((uint8)pP | (uint8)pp), // '\\'
+    [0x5D] = (uint8)((uint8)pP | (uint8)pp), // ']'
+    [0x5E] = (uint8)((uint8)pS | (uint8)pp), // '^'
+    [0x5F] = (uint8)((uint8)pP | (uint8)pp), // '_'
+    [0x60] = (uint8)((uint8)pS | (uint8)pp), // '`'
+    [0x61] = (uint8)((uint8)pLl | (uint8)pp), // 'a'
+    [0x62] = (uint8)((uint8)pLl | (uint8)pp), // 'b'
+    [0x63] = (uint8)((uint8)pLl | (uint8)pp), // 'c'
+    [0x64] = (uint8)((uint8)pLl | (uint8)pp), // 'd'
+    [0x65] = (uint8)((uint8)pLl | (uint8)pp), // 'e'
+    [0x66] = (uint8)((uint8)pLl | (uint8)pp), // 'f'
+    [0x67] = (uint8)((uint8)pLl | (uint8)pp), // 'g'
+    [0x68] = (uint8)((uint8)pLl | (uint8)pp), // 'h'
+    [0x69] = (uint8)((uint8)pLl | (uint8)pp), // 'i'
+    [0x6A] = (uint8)((uint8)pLl | (uint8)pp), // 'j'
+    [0x6B] = (uint8)((uint8)pLl | (uint8)pp), // 'k'
+    [0x6C] = (uint8)((uint8)pLl | (uint8)pp), // 'l'
+    [0x6D] = (uint8)((uint8)pLl | (uint8)pp), // 'm'
+    [0x6E] = (uint8)((uint8)pLl | (uint8)pp), // 'n'
+    [0x6F] = (uint8)((uint8)pLl | (uint8)pp), // 'o'
+    [0x70] = (uint8)((uint8)pLl | (uint8)pp), // 'p'
+    [0x71] = (uint8)((uint8)pLl | (uint8)pp), // 'q'
+    [0x72] = (uint8)((uint8)pLl | (uint8)pp), // 'r'
+    [0x73] = (uint8)((uint8)pLl | (uint8)pp), // 's'
+    [0x74] = (uint8)((uint8)pLl | (uint8)pp), // 't'
+    [0x75] = (uint8)((uint8)pLl | (uint8)pp), // 'u'
+    [0x76] = (uint8)((uint8)pLl | (uint8)pp), // 'v'
+    [0x77] = (uint8)((uint8)pLl | (uint8)pp), // 'w'
+    [0x78] = (uint8)((uint8)pLl | (uint8)pp), // 'x'
+    [0x79] = (uint8)((uint8)pLl | (uint8)pp), // 'y'
+    [0x7A] = (uint8)((uint8)pLl | (uint8)pp), // 'z'
+    [0x7B] = (uint8)((uint8)pP | (uint8)pp), // '{'
+    [0x7C] = (uint8)((uint8)pS | (uint8)pp), // '|'
+    [0x7D] = (uint8)((uint8)pP | (uint8)pp), // '}'
+    [0x7E] = (uint8)((uint8)pS | (uint8)pp), // '~'
+    [0x7F] = pC, // '\x7f'
+    [0x80] = pC, // '\u0080'
+    [0x81] = pC, // '\u0081'
+    [0x82] = pC, // '\u0082'
+    [0x83] = pC, // '\u0083'
+    [0x84] = pC, // '\u0084'
+    [0x85] = pC, // '\u0085'
+    [0x86] = pC, // '\u0086'
+    [0x87] = pC, // '\u0087'
+    [0x88] = pC, // '\u0088'
+    [0x89] = pC, // '\u0089'
+    [0x8A] = pC, // '\u008a'
+    [0x8B] = pC, // '\u008b'
+    [0x8C] = pC, // '\u008c'
+    [0x8D] = pC, // '\u008d'
+    [0x8E] = pC, // '\u008e'
+    [0x8F] = pC, // '\u008f'
+    [0x90] = pC, // '\u0090'
+    [0x91] = pC, // '\u0091'
+    [0x92] = pC, // '\u0092'
+    [0x93] = pC, // '\u0093'
+    [0x94] = pC, // '\u0094'
+    [0x95] = pC, // '\u0095'
+    [0x96] = pC, // '\u0096'
+    [0x97] = pC, // '\u0097'
+    [0x98] = pC, // '\u0098'
+    [0x99] = pC, // '\u0099'
+    [0x9A] = pC, // '\u009a'
+    [0x9B] = pC, // '\u009b'
+    [0x9C] = pC, // '\u009c'
+    [0x9D] = pC, // '\u009d'
+    [0x9E] = pC, // '\u009e'
+    [0x9F] = pC, // '\u009f'
+    [0xA0] = pZ, // '\u00a0'
+    [0xA1] = (uint8)((uint8)pP | (uint8)pp), // '¡'
+    [0xA2] = (uint8)((uint8)pS | (uint8)pp), // '¢'
+    [0xA3] = (uint8)((uint8)pS | (uint8)pp), // '£'
+    [0xA4] = (uint8)((uint8)pS | (uint8)pp), // '¤'
+    [0xA5] = (uint8)((uint8)pS | (uint8)pp), // '¥'
+    [0xA6] = (uint8)((uint8)pS | (uint8)pp), // '¦'
+    [0xA7] = (uint8)((uint8)pP | (uint8)pp), // '§'
+    [0xA8] = (uint8)((uint8)pS | (uint8)pp), // '¨'
+    [0xA9] = (uint8)((uint8)pS | (uint8)pp), // '©'
+    [0xAA] = (uint8)((uint8)pLo | (uint8)pp), // 'ª'
+    [0xAB] = (uint8)((uint8)pP | (uint8)pp), // '«'
+    [0xAC] = (uint8)((uint8)pS | (uint8)pp), // '¬'
+    [0xAD] = 0, // '\u00ad'
+    [0xAE] = (uint8)((uint8)pS | (uint8)pp), // '®'
+    [0xAF] = (uint8)((uint8)pS | (uint8)pp), // '¯'
+    [0xB0] = (uint8)((uint8)pS | (uint8)pp), // '°'
+    [0xB1] = (uint8)((uint8)pS | (uint8)pp), // '±'
+    [0xB2] = (uint8)((uint8)pN | (uint8)pp), // '²'
+    [0xB3] = (uint8)((uint8)pN | (uint8)pp), // '³'
+    [0xB4] = (uint8)((uint8)pS | (uint8)pp), // '´'
+    [0xB5] = (uint8)((uint8)pLl | (uint8)pp), // 'µ'
+    [0xB6] = (uint8)((uint8)pP | (uint8)pp), // '¶'
+    [0xB7] = (uint8)((uint8)pP | (uint8)pp), // '·'
+    [0xB8] = (uint8)((uint8)pS | (uint8)pp), // '¸'
+    [0xB9] = (uint8)((uint8)pN | (uint8)pp), // '¹'
+    [0xBA] = (uint8)((uint8)pLo | (uint8)pp), // 'º'
+    [0xBB] = (uint8)((uint8)pP | (uint8)pp), // '»'
+    [0xBC] = (uint8)((uint8)pN | (uint8)pp), // '¼'
+    [0xBD] = (uint8)((uint8)pN | (uint8)pp), // '½'
+    [0xBE] = (uint8)((uint8)pN | (uint8)pp), // '¾'
+    [0xBF] = (uint8)((uint8)pP | (uint8)pp), // '¿'
+    [0xC0] = (uint8)((uint8)pLu | (uint8)pp), // 'À'
+    [0xC1] = (uint8)((uint8)pLu | (uint8)pp), // 'Á'
+    [0xC2] = (uint8)((uint8)pLu | (uint8)pp), // 'Â'
+    [0xC3] = (uint8)((uint8)pLu | (uint8)pp), // 'Ã'
+    [0xC4] = (uint8)((uint8)pLu | (uint8)pp), // 'Ä'
+    [0xC5] = (uint8)((uint8)pLu | (uint8)pp), // 'Å'
+    [0xC6] = (uint8)((uint8)pLu | (uint8)pp), // 'Æ'
+    [0xC7] = (uint8)((uint8)pLu | (uint8)pp), // 'Ç'
+    [0xC8] = (uint8)((uint8)pLu | (uint8)pp), // 'È'
+    [0xC9] = (uint8)((uint8)pLu | (uint8)pp), // 'É'
+    [0xCA] = (uint8)((uint8)pLu | (uint8)pp), // 'Ê'
+    [0xCB] = (uint8)((uint8)pLu | (uint8)pp), // 'Ë'
+    [0xCC] = (uint8)((uint8)pLu | (uint8)pp), // 'Ì'
+    [0xCD] = (uint8)((uint8)pLu | (uint8)pp), // 'Í'
+    [0xCE] = (uint8)((uint8)pLu | (uint8)pp), // 'Î'
+    [0xCF] = (uint8)((uint8)pLu | (uint8)pp), // 'Ï'
+    [0xD0] = (uint8)((uint8)pLu | (uint8)pp), // 'Ð'
+    [0xD1] = (uint8)((uint8)pLu | (uint8)pp), // 'Ñ'
+    [0xD2] = (uint8)((uint8)pLu | (uint8)pp), // 'Ò'
+    [0xD3] = (uint8)((uint8)pLu | (uint8)pp), // 'Ó'
+    [0xD4] = (uint8)((uint8)pLu | (uint8)pp), // 'Ô'
+    [0xD5] = (uint8)((uint8)pLu | (uint8)pp), // 'Õ'
+    [0xD6] = (uint8)((uint8)pLu | (uint8)pp), // 'Ö'
+    [0xD7] = (uint8)((uint8)pS | (uint8)pp), // '×'
+    [0xD8] = (uint8)((uint8)pLu | (uint8)pp), // 'Ø'
+    [0xD9] = (uint8)((uint8)pLu | (uint8)pp), // 'Ù'
+    [0xDA] = (uint8)((uint8)pLu | (uint8)pp), // 'Ú'
+    [0xDB] = (uint8)((uint8)pLu | (uint8)pp), // 'Û'
+    [0xDC] = (uint8)((uint8)pLu | (uint8)pp), // 'Ü'
+    [0xDD] = (uint8)((uint8)pLu | (uint8)pp), // 'Ý'
+    [0xDE] = (uint8)((uint8)pLu | (uint8)pp), // 'Þ'
+    [0xDF] = (uint8)((uint8)pLl | (uint8)pp), // 'ß'
+    [0xE0] = (uint8)((uint8)pLl | (uint8)pp), // 'à'
+    [0xE1] = (uint8)((uint8)pLl | (uint8)pp), // 'á'
+    [0xE2] = (uint8)((uint8)pLl | (uint8)pp), // 'â'
+    [0xE3] = (uint8)((uint8)pLl | (uint8)pp), // 'ã'
+    [0xE4] = (uint8)((uint8)pLl | (uint8)pp), // 'ä'
+    [0xE5] = (uint8)((uint8)pLl | (uint8)pp), // 'å'
+    [0xE6] = (uint8)((uint8)pLl | (uint8)pp), // 'æ'
+    [0xE7] = (uint8)((uint8)pLl | (uint8)pp), // 'ç'
+    [0xE8] = (uint8)((uint8)pLl | (uint8)pp), // 'è'
+    [0xE9] = (uint8)((uint8)pLl | (uint8)pp), // 'é'
+    [0xEA] = (uint8)((uint8)pLl | (uint8)pp), // 'ê'
+    [0xEB] = (uint8)((uint8)pLl | (uint8)pp), // 'ë'
+    [0xEC] = (uint8)((uint8)pLl | (uint8)pp), // 'ì'
+    [0xED] = (uint8)((uint8)pLl | (uint8)pp), // 'í'
+    [0xEE] = (uint8)((uint8)pLl | (uint8)pp), // 'î'
+    [0xEF] = (uint8)((uint8)pLl | (uint8)pp), // 'ï'
+    [0xF0] = (uint8)((uint8)pLl | (uint8)pp), // 'ð'
+    [0xF1] = (uint8)((uint8)pLl | (uint8)pp), // 'ñ'
+    [0xF2] = (uint8)((uint8)pLl | (uint8)pp), // 'ò'
+    [0xF3] = (uint8)((uint8)pLl | (uint8)pp), // 'ó'
+    [0xF4] = (uint8)((uint8)pLl | (uint8)pp), // 'ô'
+    [0xF5] = (uint8)((uint8)pLl | (uint8)pp), // 'õ'
+    [0xF6] = (uint8)((uint8)pLl | (uint8)pp), // 'ö'
+    [0xF7] = (uint8)((uint8)pS | (uint8)pp), // '÷'
+    [0xF8] = (uint8)((uint8)pLl | (uint8)pp), // 'ø'
+    [0xF9] = (uint8)((uint8)pLl | (uint8)pp), // 'ù'
+    [0xFA] = (uint8)((uint8)pLl | (uint8)pp), // 'ú'
+    [0xFB] = (uint8)((uint8)pLl | (uint8)pp), // 'û'
+    [0xFC] = (uint8)((uint8)pLl | (uint8)pp), // 'ü'
+    [0xFD] = (uint8)((uint8)pLl | (uint8)pp), // 'ý'
+    [0xFE] = (uint8)((uint8)pLl | (uint8)pp), // 'þ'
+    [0xFF] = (uint8)((uint8)pLl | (uint8)pp) // 'ÿ'
 };
 
 internal static array<uint16> asciiFold = new uint16[]{

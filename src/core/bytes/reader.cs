@@ -157,7 +157,6 @@ public static (int64, error) Seek(this ref Reader r, int64 offset, nint whence) 
     else { /* default: */
         return (0, errors.New(bytesReaderSeekInvalidˢ));
     }
-
     if (abs < 0) {
         return (0, errors.New(bytesReaderSeekNegativeˢ));
     }

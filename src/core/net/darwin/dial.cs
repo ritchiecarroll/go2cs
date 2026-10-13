@@ -14,9 +14,20 @@ using System.Runtime.CompilerServices;
 
 partial class net_package {
 
+// defaultTCPKeepAliveIdle is a default constant value for TCP_KEEPIDLE.
+// See go.dev/issue/31510 for details.
 internal static time.Duration defaultTCPKeepAliveIdle => /* 15 * time.Second */ 15000000000;
+
+// defaultTCPKeepAliveInterval is a default constant value for TCP_KEEPINTVL.
+// It is the same as defaultTCPKeepAliveIdle, see go.dev/issue/31510 for details.
 internal static time.Duration defaultTCPKeepAliveInterval => /* 15 * time.Second */ 15000000000;
+
+// defaultTCPKeepAliveCount is a default constant value for TCP_KEEPCNT.
 internal static UntypedInt defaultTCPKeepAliveCount => 9;
+
+// For the moment, MultiPath TCP is used by default with listeners, if
+// available, but not with dialers.
+// See go.dev/issue/56539
 internal const bool defaultMPTCPEnabledListen = true;
 internal const bool defaultMPTCPEnabledDial = false;
 
@@ -28,8 +39,11 @@ internal const bool defaultMPTCPEnabledDial = false;
 //	3 == MPTCP enabled on dialers only
 internal static ж<godebug.Setting> multipathtcp = godebug.New("multipathtcp"u8);
 
+// mptcpStatusDial is a tristate for Multipath TCP on clients,
+// see go.dev/issue/56539
 partial struct mptcpStatusDial /*num:uint8*/;
 
+// The value 0 is the system default, linked to defaultMPTCPEnabledDial
 internal static mptcpStatusDial mptcpUseDefaultDial => /* iota */ 0;
 internal static mptcpStatusDial mptcpEnabledDial => 1;
 internal static mptcpStatusDial mptcpDisabledDial => 2;
@@ -46,8 +60,10 @@ internal static bool get(this ref mptcpStatusDial m) {
     // If MPTCP is forced via GODEBUG=multipathtcp=1
     if (multipathtcp.Value() == "1"u8 || multipathtcp.Value() == "3"u8) {
         multipathtcp.IncNonDefault();
+
         return true;
     }
+
     return defaultMPTCPEnabledDial;
 }
 
@@ -59,8 +75,11 @@ internal static void set(this ref mptcpStatusDial m, bool use) {
     }
 }
 
+// mptcpStatusListen is a tristate for Multipath TCP on servers,
+// see go.dev/issue/56539
 partial struct mptcpStatusListen /*num:uint8*/;
 
+// The value 0 is the system default, linked to defaultMPTCPEnabledListen
 internal static mptcpStatusListen mptcpUseDefaultListen => /* iota */ 0;
 internal static mptcpStatusListen mptcpEnabledListen => 1;
 internal static mptcpStatusListen mptcpDisabledListen => 2;
@@ -78,8 +97,10 @@ internal static bool get(this ref mptcpStatusListen m) {
     // enabled on dialers, but not on listeners.
     if (multipathtcp.Value() == "0"u8 || multipathtcp.Value() == "3"u8) {
         multipathtcp.IncNonDefault();
+
         return false;
     }
+
     return defaultMPTCPEnabledListen;
 }
 
@@ -217,8 +238,7 @@ internal static time.Time minNonzeroTime(time.Time a, time.Time b) {
 internal static time.Time /*earliest*/ deadline(this ref Dialer d, context.Context ctx, time.Time now) {
     time.Time earliest = default!;
 
-    if (d.Timeout != 0) {
-        // including negative, for historical reasons
+    if (d.Timeout != 0) { // including negative, for historical reasons
         earliest = now.Add(d.Timeout);
     }
     {
@@ -273,8 +293,7 @@ internal static (@string afnet, nint proto, error err) parseNetwork(context.Cont
     error err = default!;
 
     nint i = bytealg.LastIndexByteString(network, (rune)':');
-    if (i < 0) {
-        // no colon
+    if (i < 0) { // no colon
         var exprᴛ1 = network;
         if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8) {
         }
@@ -290,7 +309,6 @@ internal static (@string afnet, nint proto, error err) parseNetwork(context.Cont
         else { /* default: */
             return ("", 0, ((UnknownNetworkError)network));
         }
-
         return (network, 0, default!);
     }
     afnet = network.slice(0, i);
@@ -306,7 +324,6 @@ internal static (@string afnet, nint proto, error err) parseNetwork(context.Cont
         }
         return (afnet, protoΔ2, default!);
     }
-
     return ("", 0, ((UnknownNetworkError)network));
 }
 
@@ -332,7 +349,6 @@ internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, contex
         }
         return (new addrList(new ΔAddr[]{new UnixAddrжΔAddr(addrΔ2)}.slice()), default!);
     }
-
     (var addrs, err) = Ꮡr.internetAddrList(ctx, afnet, addr);
     if (err != default! || op != "dial"u8 || hint == default!) {
         return (addrs, err);
@@ -560,6 +576,7 @@ public static partial (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Co
                 ctx = subCtx;
             }
         }
+
         // Shadow the nettrace (if any) during resolve so Connect events don't fire for DNS lookups.
         var resolveCtx = ctx;
         {
@@ -571,15 +588,18 @@ public static partial (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Co
                 resolveCtx = context.WithValue(resolveCtx, new nettrace.TraceKey(nil), Ꮡshadow);
             }
         }
+
         var (addrs, err) = d.resolver().resolveAddrList(resolveCtx, dialˢ, network, address, d.LocalAddr);
         if (err != default!) {
             return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: default!, Addr: default!, Err: err))));
         }
+
         var sd = Ꮡ(new sysDialer(
             Dialer: d,
             network: network,
             address: address
         ));
+
         addrList primaries = default!;
         addrList fallbacks = default!;
         if (d.dualStack() && network == "tcp"u8){
@@ -587,6 +607,7 @@ public static partial (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Co
         } else {
             primaries = addrs;
         }
+
         return sd.dialParallel(ctx, primaries, fallbacks);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -610,9 +631,11 @@ internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, con
         if (len(fallbacks) == 0) {
             return Ꮡsd.dialSerial(ctx, primaries);
         }
+
         var returned = new channel<EmptyStruct>(0);
         defer(ᴛ1 => builtin.close(ᴛ1), returned, ref ᒐ);
         var results = new channel<dialParallel_dialResult>(0); // unbuffered
+
         var fallbacksʗ1 = fallbacks;
         var primariesʗ1 = primaries;
         var resultsʗ1 = results;
@@ -636,18 +659,22 @@ internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, con
                 break;
             }}
         }
+
         dialParallel_dialResult primary = default!;
         dialParallel_dialResult fallback = default!;
+
         // Start the main racer.
         var (primaryCtx, primaryCancel) = context.WithCancel(ctx);
         var primaryCancelʗ1 = primaryCancel;
         defer(() => primaryCancelʗ1(), ref ᒐ);
         var startRacerʗ1 = startRacer;
         goǃ(startRacerʗ1, primaryCtx, (bool)true);
+
         // Start the timer for the fallback racer.
         var fallbackTimer = time.NewTimer(Ꮡsd.of(sysDialer.ᏑDialer).fallbackDelay());
         var fallbackTimerʗ1 = fallbackTimer;
         defer(() => fallbackTimerʗ1.Stop(), ref ᒐ);
+
         while (ᐧ) {
             var selᴛ7 = (~fallbackTimer).C;
             var selᴛ8 = results;
@@ -695,6 +722,7 @@ internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Conte
         ref var sd = ref Ꮡsd.DerefOrNull();
 
         error firstErr = default!;    // The error from the first address is most relevant.
+
         foreach (var (i, ra) in ras) {
             var selᴛ9 = ctx.Done();
             switch (trySelect(ᐸꟷ(selᴛ9, ꓸꓸꓸ))) {
@@ -704,6 +732,7 @@ internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Conte
             default: {
                 break;
             }}
+
             var dialCtx = ctx;
             {
                 var (deadline, hasDeadline) = ctx.Deadline(); if (hasDeadline) {
@@ -723,6 +752,7 @@ internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Conte
                     }
                 }
             }
+
             var (c, err) = Ꮡsd.dialSingle(dialCtx, ra);
             if (err == default!) {
                 return (c, default!);
@@ -731,6 +761,7 @@ internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Conte
                 firstErr = err;
             }
         }
+
         if (firstErr == default!) {
             firstErr = new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: sd.network, Source: default!, Addr: default!, Err: errMissingAddress)));
         }

@@ -60,6 +60,7 @@ internal static void init(this ж<@decimal> Ꮡx, nat m, nint shift) {
         x.exp = 0;
         return;
     }
+
     // Optimization: If we need to shift right, first remove any trailing
     // zero bits from m to reduce shift amount that needs to be done in
     // decimal format (since that is likely slower).
@@ -72,11 +73,13 @@ internal static void init(this ж<@decimal> Ꮡx, nat m, nint shift) {
         m = ((nat)default!).shr(m, sΔ1);
         shift += (nint)sΔ1;
     }
+
     // Do any shift left in binary representation.
     if (shift > 0) {
         m = ((nat)default!).shl(m, (nuint)shift);
         shift = 0;
     }
+
     // Convert mantissa into decimal representation.
     var s = m.utoa(10);
     nint n = len(s);
@@ -87,6 +90,7 @@ internal static void init(this ж<@decimal> Ꮡx, nat m, nint shift) {
         n--;
     }
     x.mant = appendꓸꓸꓸ(x.mant[..0], s.slice(0, n));
+
     // Do any (remaining) shift right in decimal representation.
     if (shift < 0) {
         while (shift < (nint)(-maxShift)) {
@@ -118,6 +122,7 @@ internal static void shr(ref @decimal x, nuint s) {
         n *= 10;
     }
     x.exp += 1 - r;
+
     // read a digit, write a digit
     nint w = 0; // write index
     Word mask = (((Word)1) << (int)(s)) - 1;
@@ -130,6 +135,7 @@ internal static void shr(ref @decimal x, nuint s) {
         w++;
         n = n * 10 + ch - (rune)'0';
     }
+
     // write extra digits that still fit
     while (n > 0 && w < len(x.mant)) {
         Word d = (n >> (int)(s));
@@ -139,6 +145,7 @@ internal static void shr(ref @decimal x, nuint s) {
         n = n * 10;
     }
     x.mant = x.mant.slice(0, w); // the number may be shorter (e.g. 1024 >> 10)
+
     // append additional digits that didn't fit
     while (n > 0) {
         Word d = (n >> (int)(s));
@@ -146,6 +153,7 @@ internal static void shr(ref @decimal x, nuint s) {
         x.mant = append(x.mant, (byte)(nuint)(d + (rune)'0'));
         n = n * 10;
     }
+
     trim(ref x);
 }
 
@@ -153,9 +161,11 @@ internal static @string String(this ref @decimal x) {
     if (len(x.mant) == 0) {
         return "0"u8;
     }
+
     slice<byte> buf = default!;
     switch (ᐧ) {
     case {} when x.exp is <= 0: {
+        // 0.00ddd
         buf = new slice<byte>(0, 2 + (-x.exp) + len(x.mant));
         buf = append(buf, ((@string)"0."u8).ꓸꓸꓸ);
         buf = appendZeros(buf, -x.exp);
@@ -163,13 +173,16 @@ internal static @string String(this ref @decimal x) {
         break;
     }
     case {} when x.exp < len(x.mant): {
+        /* 0 < */
+        // dd.ddd
         buf = new slice<byte>(0, 1 + len(x.mant));
         buf = appendꓸꓸꓸ(buf, x.mant.slice(0, x.exp));
         buf = append(buf, (byte)((rune)'.'));
         buf = appendꓸꓸꓸ(buf, x.mant.slice(x.exp));
         break;
     }
-    default: {
+    default: { // len(x.mant) <= x.exp
+        // ddd00
         buf = new slice<byte>(0, x.exp);
         buf = appendꓸꓸꓸ(buf, x.mant);
         buf = appendZeros(buf, x.exp - len(x.mant));
@@ -208,6 +221,7 @@ internal static void round(this ж<@decimal> Ꮡx, nint n) {
     if (n < 0 || n >= len(x.mant)) {
         return; // nothing to do
     }
+
     if (shouldRoundUp(ref (Ꮡx).DerefOrNull(), n)){
         x.roundUp(n);
     } else {
@@ -220,10 +234,12 @@ internal static void roundUp(this ref @decimal x, nint n) {
         return; // nothing to do
     }
     // 0 <= n < len(x.mant)
+
     // find first digit < '9'
     while (n > 0 && x.mant[n - 1] >= (rune)'9') {
         n--;
     }
+
     if (n == 0) {
         // all digits are '9's => round up to '1' and update exponent
         x.mant[0] = (rune)'1'; // ok since len(x.mant) > n
@@ -231,12 +247,13 @@ internal static void roundUp(this ref @decimal x, nint n) {
         x.exp++;
         return;
     }
+
     // n > 0 && x.mant[n-1] < '9'
     x.mant[n - 1]++;
     x.mant = x.mant.slice(0, n);
+    // x already trimmed
 }
 
-// x already trimmed
 internal static void roundDown(this ж<@decimal> Ꮡx, nint n) {
     ref var x = ref Ꮡx.DerefOrNull();
 

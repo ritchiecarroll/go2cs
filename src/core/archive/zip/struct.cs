@@ -30,7 +30,6 @@ partial class zip_package {
 
 // Compression methods.
 public const uint16 Store = 0; // no compression
-
 public const uint16 Deflate = 8; // DEFLATE compressed
 
 internal static UntypedInt fileHeaderSignature => 0x04034b50;
@@ -46,15 +45,31 @@ internal static UntypedInt dataDescriptorLen => 16; // four uint32: descriptor s
 internal static UntypedInt dataDescriptor64Len => 24; // two uint32: signature, crc32 | two uint64: compressed size, size
 internal static UntypedInt directory64LocLen => 20; //
 internal static UntypedInt directory64EndLen => 56; // + extra
+
+// Constants for the first byte in CreatorVersion.
 internal static UntypedInt creatorFAT => 0;
 internal static UntypedInt creatorUnix => 3;
 internal static UntypedInt creatorNTFS => 11;
 internal static UntypedInt creatorVFAT => 14;
 internal static UntypedInt creatorMacOSX => 19;
+
+// Version numbers.
 internal static UntypedInt zipVersion20 => 20; // 2.0
 internal static UntypedInt zipVersion45 => 45; // 4.5 (reads and writes zip64 archives)
+
+// Limits for non zip64 files.
 internal static UntypedInt uint16max => /* (1 << 16) - 1 */ 65535;
 internal static UntypedInt uint32max => /* (1 << 32) - 1 */ 4294967295;
+
+// Extra header IDs.
+//
+// IDs 0..31 are reserved for official use by PKWARE.
+// IDs above that range are defined by third-party vendors.
+// Since ZIP lacked high precision timestamps (nor an official specification
+// of the timezone used for the date fields), many competing extra fields
+// have been invented. Pervasive use effectively makes them "official".
+//
+// See http://mdfs.net/Docs/Comp/Archiving/Zip/ExtraField
 internal static UntypedInt zip64ExtraID => 0x0001; // Zip64 extended information
 internal static UntypedInt ntfsExtraID => 0x000a; // NTFS
 internal static UntypedInt unixExtraID => 0x000d; // UNIX
@@ -233,16 +248,16 @@ internal static ж<timeꓸLocation> timeZone(time.Duration offset) {
 // See: https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-dosdatetimetofiletime
 internal static time.Time msDosTimeToTime(uint16 dosDate, uint16 dosTime) {
     return time.Date(
-        (nint)((uint16)((dosDate >> (int)(9)) + 1980)), // date bits 0-4: day of month; 5-8: month; 9-15: years since 1980
-
+        // date bits 0-4: day of month; 5-8: month; 9-15: years since 1980
+        (nint)((uint16)((dosDate >> (int)(9)) + 1980)),
         ((timeꓸMonth)(nint)((uint16)((dosDate >> (int)(5)) & 0xf))),
-        (nint)((uint16)(dosDate & 0x1f)), // time bits 0-4: second/2; 5-10: minute; 11-15: hour
+        (nint)((uint16)(dosDate & 0x1f)),
 
+        // time bits 0-4: second/2; 5-10: minute; 11-15: hour
         (nint)((dosTime >> (int)(11))),
         (nint)((uint16)((dosTime >> (int)(5)) & 0x3f)),
         (nint)((uint16)((uint16)(dosTime & 0x1f) * 2)),
         0, // nanoseconds
-
         time.ΔUTC);
 }
 
@@ -276,6 +291,8 @@ public static void SetModTime(this ref FileHeader h, time.Time t) {
     (h.ModifiedDate, h.ModifiedTime) = timeToMsDosTime(t);
 }
 
+// Unix constants. The specification doesn't mention them,
+// but these seem to be the values agreed on by tools.
 internal static UntypedInt s_IFMT => 0xf000;
 internal static UntypedInt s_IFSOCK => 0xc000;
 internal static UntypedInt s_IFLNK => 0xa000;
@@ -287,6 +304,7 @@ internal static UntypedInt s_IFIFO => 0x1000;
 internal static UntypedInt s_ISUID => 0x800;
 internal static UntypedInt s_ISGID => 0x400;
 internal static UntypedInt s_ISVTX => 0x200;
+
 internal static UntypedInt msdosDir => 0x10;
 internal static UntypedInt msdosReadOnly => 0x01;
 
@@ -301,7 +319,6 @@ public static fs.FileMode /*mode*/ Mode(this ref FileHeader h) {
     else if (exprᴛ1 == creatorNTFS || exprᴛ1 == creatorVFAT || exprᴛ1 == creatorFAT) {
         mode = msdosModeToFileMode(h.ExternalAttrs);
     }
-
     if (len(h.Name) > 0 && h.Name[len(h.Name) - 1] == (rune)'/') {
         mode |= (fs.FileMode)(fs.ModeDir);
     }
@@ -312,6 +329,7 @@ public static fs.FileMode /*mode*/ Mode(this ref FileHeader h) {
 public static void SetMode(this ref FileHeader h, fs.FileMode mode) {
     h.CreatorVersion = (uint16)((uint16)(h.CreatorVersion & 0xff) | (uint16)(creatorUnix << (int)(8)));
     h.ExternalAttrs = (fileModeToUnixMode(mode) << (int)(16));
+
     // set MSDOS attributes too, as the original zip does.
     if ((fs.FileMode)(mode & fs.ModeDir) != 0) {
         h.ExternalAttrs |= (uint32)(msdosDir);
@@ -368,7 +386,6 @@ internal static uint32 fileModeToUnixMode(fs.FileMode mode) {
     else { /* default: */
         m = s_IFREG;
     }
-
     if ((fs.FileMode)(mode & fs.ModeSetuid) != 0) {
         m |= (uint32)(s_ISUID);
     }
@@ -400,12 +417,11 @@ internal static fs.FileMode unixModeToFileMode(uint32 m) {
         mode |= (fs.FileMode)(fs.ModeSymlink);
     }
     else if (exprᴛ1 == s_IFREG) {
+        // nothing to do
     }
     else if (exprᴛ1 == s_IFSOCK) {
         mode |= (fs.FileMode)(fs.ModeSocket);
     }
-
-    // nothing to do
     if ((uint32)(m & (uint32)s_ISGID) != 0) {
         mode |= (fs.FileMode)(fs.ModeSetgid);
     }

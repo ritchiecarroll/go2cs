@@ -42,6 +42,8 @@ public static @string Error(this ref ΔError e) {
     return fmt.Sprintf("%03d %s"u8, e.Code, e.Msg);
 }
 
+// A ProtocolError describes a protocol violation such
+// as an invalid response or a hung-up connection.
 partial struct ProtocolError /*@string*/;
 
 public static @string Error(this ProtocolError p) {

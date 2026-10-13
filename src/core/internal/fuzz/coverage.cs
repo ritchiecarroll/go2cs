@@ -100,6 +100,10 @@ internal static bool coverageEnabled;
 internal static void initᴛcoverageEnabled() { coverageEnabled = len(coverage()) > 0; }
 internal static slice<byte> coverageSnapshot;
 internal static void initᴛcoverageSnapshot() { coverageSnapshot = new slice<byte>(len(coverage())); }
+
+// _counters and _ecounters mark the start and end, respectively, of where
+// the 8-bit coverage counters reside in memory. They're known to cmd/link,
+// which specially assigns their addresses for this purpose.
 internal static ж<array<byte>> Ꮡ_counters = new StandardBox<array<byte>>(new array<byte>(0));
 internal static ref array<byte> _counters => ref Ꮡ_counters.Value;
 internal static ж<array<byte>> Ꮡ_ecounters = new StandardBox<array<byte>>(new array<byte>(0));

@@ -88,10 +88,12 @@ internal static (ж<activeCert>, error) newCert(this ж<certCache> Ꮡcc, slice<
             return (Ꮡcc.active(entryΔ1._<ж<cacheEntry>>()), default!);
         }
     }
+
     var (cert, err) = Δx509.ParseCertificate(der);
     if (err != default!) {
         return (default!, err);
     }
+
     var entry = Ꮡ(new cacheEntry(cert: cert));
     {
         var (entryΔ2, loaded) = Ꮡcc.of(certCache.ᏑMap).LoadOrStore(((@string)der), entry.OrTypedNil()); if (loaded) {

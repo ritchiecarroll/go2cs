@@ -8,9 +8,9 @@ namespace go;
 partial class runtime_package {
 
 internal static void initSecureMode() {
+    // We have already initialized the secureMode bool in sysauxv.
 }
 
-// We have already initialized the secureMode bool in sysauxv.
 internal static bool isSecureMode() {
     return secureMode;
 }

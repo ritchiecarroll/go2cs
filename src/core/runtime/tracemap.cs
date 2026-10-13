@@ -68,6 +68,7 @@ internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer dat
         return (0, false);
     }
     var hash = memhash(data, 0, size);
+
     ж<traceMapNode> newNode = default!;
     var m = Ꮡtab.of(traceMap.Ꮡroot);
     var hashIter = hash;

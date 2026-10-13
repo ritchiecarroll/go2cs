@@ -73,28 +73,39 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
     var pr = new PkgDecoder(
         pkgPath: pkgPath
     );
+
     // TODO(mdempsky): Implement direct indexing of input string to
     // avoid copying the position information.
+
     var r = strings.NewReader(input);
+
     ref var ver = ref heap(new uint32(), out var Ꮡver);
     assert(binary.Read(new strings_ReaderжReader(r), binary.LittleEndian, Ꮡver) == default!);
     pr.version = ((ΔVersion)ver);
+
     if (pr.version >= numVersions) {
         throw panic(fmt.Errorf("cannot decode %q, export data version %d is greater than maximum supported version %d"u8, pkgPath, pr.version, (nint)(numVersions - 1)));
     }
+
     if (pr.version.Has(Flags)) {
         ref var flags = ref heap(new uint32(), out var Ꮡflags);
         assert(binary.Read(new strings_ReaderжReader(r), binary.LittleEndian, Ꮡflags) == default!);
         pr.sync = (uint32)(flags & (uint32)flagSyncMarkers) != 0;
     }
+
     assert(binary.Read(new strings_ReaderжReader(r), binary.LittleEndian, pr.elemEndsEnds[..]) == default!);
+
     pr.elemEnds = new slice<uint32>((nint)(pr.elemEndsEnds[len(pr.elemEndsEnds) - 1]));
     assert(binary.Read(new strings_ReaderжReader(r), binary.LittleEndian, pr.elemEnds[..]) == default!);
+
     var (pos, err) = r.Seek(0, io.SeekCurrent);
     assert(err == default!);
+
     pr.elemData = input.slice((nint)(pos));
+
     const nint fingerprintSize = 8;
     assert(len(pr.elemData) - fingerprintSize == (nint)pr.elemEnds[len(pr.elemEnds) - 1]);
+
     return pr.ΔClone();
 }
 
@@ -136,11 +147,13 @@ public static nint AbsIdx(this ref PkgDecoder pr, RelocKind k, Index idx) {
 // index) pair.
 public static @string DataIdx(this ref PkgDecoder pr, RelocKind k, Index idx) {
     nint absIdx = pr.AbsIdx(k, idx);
+
     uint32 start = default!;
     if (absIdx > 0) {
         start = pr.elemEnds[absIdx - 1];
     }
     var end = pr.elemEnds[absIdx];
+
     return pr.elemData.slice((nint)(start), (nint)(end));
 }
 
@@ -188,6 +201,7 @@ public static Decoder NewDecoderRaw(this ж<PkgDecoder> Ꮡpr, RelocKind k, Inde
         k: k,
         Idx: idx
     );
+
     r.Data.Reset(pr.DataIdx(k, idx));
     Ꮡr.Sync(SyncRelocs);
     r.Relocs = new slice<RelocEnt>(Ꮡr.Len());
@@ -195,6 +209,7 @@ public static Decoder NewDecoderRaw(this ж<PkgDecoder> Ꮡpr, RelocKind k, Inde
         Ꮡr.Sync(SyncReloc);
         r.Relocs[i] = new RelocEnt(((RelocKind)(int32)Ꮡr.Len()), ((Index)(int32)Ꮡr.Len()));
     }
+
     return r;
 }
 
@@ -207,6 +222,7 @@ public static Decoder TempDecoderRaw(this ж<PkgDecoder> Ꮡpr, RelocKind k, Ind
         k: k,
         Idx: idx
     );
+
     r.Data.Reset(pr.DataIdx(k, idx));
     Ꮡr.Sync(SyncRelocs);
     nint l = Ꮡr.Len();
@@ -220,6 +236,7 @@ public static Decoder TempDecoderRaw(this ж<PkgDecoder> Ꮡpr, RelocKind k, Ind
         Ꮡr.Sync(SyncReloc);
         r.Relocs[i] = new RelocEnt(((RelocKind)(int32)Ꮡr.Len()), ((Index)(int32)Ꮡr.Len()));
     }
+
     return r;
 }
 
@@ -279,6 +296,7 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
 
 internal static int64 rawVarint(this ж<Decoder> Ꮡr) {
     var ux = Ꮡr.rawUvarint();
+
     // Zig-zag decode.
     var x = (int64)((ux >> (int)(1)));
     if ((uint64)(ux & 1) != 0) {
@@ -303,15 +321,18 @@ public static partial void Sync(this ж<Decoder> Ꮡr, SyncMarker mWant) {
     if (!(~r.common).sync) {
         return;
     }
+
     var (pos, _) = r.Data.Seek(0, io.SeekCurrent);
     SyncMarker mHave = ((SyncMarker)(nint)Ꮡr.rawUvarint());
     var writerPCs = new slice<nint>((nint)(Ꮡr.rawUvarint()));
     foreach (var (i, _) in writerPCs) {
         writerPCs[i] = (nint)Ꮡr.rawUvarint();
     }
+
     if (mHave == mWant) {
         return;
     }
+
     // There's some tension here between printing:
     //
     // (1) full file paths that tools can recognize (e.g., so emacs
@@ -327,7 +348,9 @@ public static partial void Sync(this ж<Decoder> Ꮡr, SyncMarker mWant) {
     // paths if they would be shorter, or rewrite file paths to contain
     // "$GOROOT" (like objabi.AbsFile does) if tools can be taught how
     // to reliably expand that again.
+
     fmt.Printf("export data desync: package %q, section %v, index %v, offset %v\n"u8, (~r.common).pkgPath, r.k, r.Idx, pos);
+
     fmt.Printf("\nfound %v, written at:\n"u8, mHave);
     if (len(writerPCs) == 0) {
         fmt.Printf("\t[stack trace unavailable; recompile package %q with -d=syncframes]\n"u8, (~r.common).pkgPath);
@@ -335,12 +358,14 @@ public static partial void Sync(this ж<Decoder> Ꮡr, SyncMarker mWant) {
     foreach (var (_, pc) in writerPCs) {
         fmt.Printf("\t%s\n"u8, r.common.StringIdx(r.rawReloc(RelocString, pc)));
     }
+
     fmt.Printf("\nexpected %v, reading at:\n"u8, mWant);
     array<uintptr> readerPCs = new(32);               // TODO(mdempsky): Dynamically size?
     nint n = Δruntime.Callers(2, readerPCs[..]);
     foreach (var (_, pc) in fmtFrames(readerPCs.slice(0, n).ꓸꓸꓸ)) {
         fmt.Printf("\t%s\n"u8, pc);
     }
+
     // We already printed a stack trace for the reader, so now we can
     // simply exit. Printing a second one with panic or base.Fatalf
     // would just be noise.
@@ -474,7 +499,6 @@ internal static constant.Value scalar(this ж<Decoder> Ꮡr) {
             throw panic(fmt.Errorf("unexpected scalar tag: %v"u8, tag));
         }
     }
-
 }
 
 internal static ж<bigꓸInt> bigInt(this ж<Decoder> Ꮡr) {
@@ -531,9 +555,12 @@ public static (@string, @string, CodeObj) PeekObj(this ж<PkgDecoder> Ꮡpr, Ind
         rcode = Ꮡr.Code(SyncCodeObj);
         pr.RetireDecoder(Ꮡr);
     }
+
     @string path = Ꮡpr.PeekPkgPath(ridx);
     assert(name != ""u8);
+
     CodeObj tag = ((CodeObj)rcode);
+
     return (path, name, tag);
 }
 

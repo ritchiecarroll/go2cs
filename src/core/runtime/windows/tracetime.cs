@@ -39,6 +39,7 @@ partial class runtime_package {
 // and ppc64le.
 internal static UntypedInt traceTimeDiv => /* (1-osHasLowResClockInt)*64 + osHasLowResClockInt*(256-224*(goarch.IsPpc64|goarch.IsPpc64le)) */ 256;
 
+// traceTime represents a timestamp for the trace.
 partial struct traceTime /*num:uint64*/;
 
 // traceClockNow returns a monotonic timestamp. The clock this function gets
@@ -76,12 +77,14 @@ internal static uint64 traceClockUnitsPerSecond() {
 // freq is the number of trace clock units per second.
 internal static void traceFrequency(uintptr gen) {
     var w = unsafeTraceWriter(gen, nil);
+
     // Ensure we have a place to write to.
-    (w, _) = w.ensure(1 + traceBytesPerNumber);
-    /* traceEvFrequency + frequency */
+    (w, _) = w.ensure(1 + traceBytesPerNumber /* traceEvFrequency + frequency */);
+
     // Write out the string.
     w.@byte((byte)traceEvFrequency);
     w.varint(traceClockUnitsPerSecond());
+
     // Immediately flush the buffer.
     var wʗ1 = w;
     systemstack(() => {

@@ -78,6 +78,7 @@ internal static (reflectꓸValue value, bool ok) sizedValue(reflectꓸType t, ж
             return (m.Generate(Ꮡrand, size), true);
         }
     }
+
     var v = reflect.New(t).Elem();
     {
         var concrete = t;
@@ -185,9 +186,9 @@ internal static (reflectꓸValue value, bool ok) sizedValue(reflectꓸType t, ж
         }
         else if (exprᴛ1 == reflect.Struct) {
             nint n = v.NumField();
+            // Divide sizeLeft evenly among the struct fields.
             nint sizeLeft = size;
             if (n > sizeLeft){
-                // Divide sizeLeft evenly among the struct fields.
                 sizeLeft = 1;
             } else 
             if (n > 0) {
@@ -253,9 +254,12 @@ internal static nint /*maxCount*/ getMaxCount(this ref Config c) {
             maxCount = defaultMaxCount.Value;
         }
     }
+
     return maxCount;
 }
 
+// A SetupError is the result of an error in the way that check is being
+// used, independent of the functions being tested.
 partial struct SetupError /*@string*/;
 
 public static @string Error(this SetupError s) {
@@ -309,28 +313,34 @@ public static error Check(any f, ж<Config> Ꮡconfig) {
     if (Ꮡconfig == nil) {
         Ꮡconfig = ᏑdefaultConfig; config = ref Ꮡconfig.DerefOrNull();
     }
+
     var (fVal, fType, ok) = functionAndType(f);
     if (!ok) {
         return ((SetupError)(@string)argumentIsNotAFunctionˢ);
     }
+
     if (fType.NumOut() != 1) {
         return ((SetupError)(@string)functionDoesNotReturnOneˢ);
     }
     if (fType.Out(0).Kind() != reflect.ΔBool) {
         return ((SetupError)(@string)functionDoesNotReturnAˢ);
     }
+
     var arguments = new slice<reflectꓸValue>(fType.NumIn(), () => new(nil));
     var rand = config.getRand();
     nint maxCount = config.getMaxCount();
+
     for (nint i = 0; i < maxCount; i++) {
         var err = arbitraryValues(arguments, fType, ref (Ꮡconfig).DerefOrNull(), rand);
         if (err != default!) {
             return err;
         }
+
         if (!fVal.Call(arguments)[0].Bool()) {
             return new CheckErrorжerror(Ꮡ(new CheckError(i + 1, toInterfaces(arguments))));
         }
     }
+
     return default!;
 }
 
@@ -349,6 +359,7 @@ public static error CheckEqual(any f, any g, ж<Config> Ꮡconfig) {
     if (Ꮡconfig == nil) {
         Ꮡconfig = ᏑdefaultConfig; config = ref Ꮡconfig.DerefOrNull();
     }
+
     var (x, xType, ok) = functionAndType(f);
     if (!ok) {
         return ((SetupError)(@string)fIsNotAFunctionˢ);
@@ -357,23 +368,29 @@ public static error CheckEqual(any f, any g, ж<Config> Ꮡconfig) {
     if (!ok) {
         return ((SetupError)(@string)gIsNotAFunctionˢ);
     }
+
     if (!AreEqual(xType, yType)) {
         return ((SetupError)(@string)functionsHaveDifferentˢ);
     }
+
     var arguments = new slice<reflectꓸValue>(xType.NumIn(), () => new(nil));
     var rand = config.getRand();
     nint maxCount = config.getMaxCount();
+
     for (nint i = 0; i < maxCount; i++) {
         var err = arbitraryValues(arguments, xType, ref (Ꮡconfig).DerefOrNull(), rand);
         if (err != default!) {
             return err;
         }
+
         var xOut = toInterfaces(x.Call(arguments));
         var yOut = toInterfaces(y.Call(arguments));
+
         if (!reflect.DeepEqual(xOut, yOut)) {
             return new CheckEqualErrorжerror(Ꮡ(new CheckEqualError(new CheckError(i + 1, toInterfaces(arguments)), xOut, yOut)));
         }
     }
+
     return default!;
 }
 
@@ -386,6 +403,7 @@ internal static error /*err*/ arbitraryValues(slice<reflectꓸValue> args, refle
         config.Values(args, Ꮡrand);
         return err;
     }
+
     for (nint j = 0; j < len(args); j++) {
         bool ok = default!;
         (args[j], ok) = Value(f.In(j), Ꮡrand);
@@ -394,6 +412,7 @@ internal static error /*err*/ arbitraryValues(slice<reflectꓸValue> args, refle
             return err;
         }
     }
+
     return err;
 }
 

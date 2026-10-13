@@ -18,6 +18,7 @@ internal static float64 inf2one(float64 f) {
 internal static complex128 complex128div(complex128 n, complex128 m) {
     float64 e = default!;                  // complex(e, f) = n/m
     float64 f = default!;
+
     // Algorithm for robust complex division as described in
     // Robert L. Smith: Algorithm 116: Complex division. Commun. ACM 5(8): 435 (1962).
     if (abs(real(m)) >= abs(imag(m))){
@@ -31,11 +32,13 @@ internal static complex128 complex128div(complex128 n, complex128 m) {
         e = (real(n) * ratio + imag(n)) / denom;
         f = (imag(n) * ratio - real(n)) / denom;
     }
+
     if (isNaN(e) && isNaN(f)) {
         // Correct final result to infinities and zeros if applicable.
         // Matches C99: ISO/IEC 9899:1999 - G.5.1  Multiplicative operators.
         var (a, b) = (real(n), imag(n));
         var (c, d) = (real(m), imag(m));
+
         switch (ᐧ) {
         case {} when m == 0D && (!isNaN(a) || !isNaN(b)): {
             e = copysign(inf, c) * a;
@@ -56,8 +59,8 @@ internal static complex128 complex128div(complex128 n, complex128 m) {
             f = 0D * (b * c - a * d);
             break;
         }}
-
     }
+
     return complex(e, f);
 }
 

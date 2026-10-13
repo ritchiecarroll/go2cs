@@ -201,6 +201,7 @@ internal static void addSec(this ref Time t, int64 d) {
         // Move to ext.
         t.stripMono();
     }
+
     // Check if the sum of t.ext and d overflows and handle it properly.
     var sum = t.ext + d;
     if ((sum > t.ext) == (d > 0)){
@@ -305,7 +306,6 @@ public static nint Compare(this Time t, Time u) {
     case {} when tc > uc: {
         return +1;
     }}
-
     return 0;
 }
 
@@ -321,6 +321,7 @@ public static bool Equal(this Time t, Time u) {
     return t.sec() == u.sec() && t.nsec() == u.nsec();
 }
 
+// A Month specifies a month of the year (January = 1, ...).
 partial struct ΔMonth /*num:nint*/;
 
 public static ΔMonth January => /* 1 + iota */ 1;
@@ -346,6 +347,7 @@ public static @string String(this ΔMonth m) {
     return "%!Month("u8 + ((sstring)(buf.slice(n))) + ")"u8;
 }
 
+// A Weekday specifies a day of the week (Sunday = 0, ...).
 partial struct ΔWeekday /*num:nint*/;
 
 public static ΔWeekday Sunday => /* iota */ 0;
@@ -528,49 +530,62 @@ public static @string String(this ΔWeekday d) {
 // for each. These are never stored in interfaces nor allocated,
 // so their type information does not appear in Go binaries.
 internal static UntypedInt secondsPerMinute => 60;
-
 internal static UntypedInt secondsPerHour => /* 60 * secondsPerMinute */ 3600;
-
 internal static UntypedInt secondsPerDay => /* 24 * secondsPerHour */ 86400;
-
 internal static UntypedInt secondsPerWeek => /* 7 * secondsPerDay */ 604800;
-
 internal static UntypedInt daysPer400Years => /* 365*400 + 97 */ 146097;
 
+// Days from March 1 through end of year
 internal static UntypedInt marchThruDecember => /* 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30 + 31 */ 306;
 
+// absoluteYears is the number of years we subtract from internal time to get absolute time.
+// This value must be 0 mod 400, and it defines the “absolute zero instant”
+// mentioned in the “Computations on Times” comment above: March 1, -absoluteYears.
+// Dates before the absolute epoch will not compute correctly,
+// but otherwise the value can be changed as needed.
 internal static UntypedInt absoluteYears => 292277022400;
 
+// The year of the zero Time.
+// Assumed by the unixToInternal computation below.
 internal static UntypedInt internalYear => 1;
 
+// Offsets to convert between internal and absolute or Unix times.
 internal const int64 absoluteToInternal = /* -(absoluteYears*365.2425 + marchThruDecember) * secondsPerDay */ -9223371966606163200;
-
 internal const int64 internalToAbsolute = /* -absoluteToInternal */ 9223371966606163200;
 
 internal const int64 unixToInternal = /* (1969*365 + 1969/4 - 1969/100 + 1969/400) * secondsPerDay */ 62135596800;
-
 internal const int64 internalToUnix = /* -unixToInternal */ -62135596800;
 
 internal const int64 absoluteToUnix = /* absoluteToInternal + internalToUnix */ -9223372028741760000;
-
 internal const int64 unixToAbsolute = /* unixToInternal + internalToAbsolute */ 9223372028741760000;
 
 internal const int64 wallToInternal = /* (1884*365 + 1884/4 - 1884/100 + 1884/400) * secondsPerDay */ 59453308800;
 
+// An absSeconds counts the number of seconds since the absolute zero instant.
 partial struct absSeconds /*num:uint64*/;
 
+// An absDays counts the number of days since the absolute zero instant.
 partial struct absDays /*num:uint64*/;
 
+// An absCentury counts the number of centuries since the absolute zero instant.
 partial struct absCentury /*num:uint64*/;
 
+// An absCyear counts the number of years since the start of a century.
 partial struct absCyear /*num:nint*/;
 
+// An absYday counts the number of days since the start of a year.
+// Note that absolute years start on March 1.
 partial struct absYday /*num:nint*/;
 
+// An absMonth counts the number of months since the start of a year.
+// absMonth=0 denotes March.
 partial struct absMonth /*num:nint*/;
 
+// An absLeap is a single bit (0 or 1) denoting whether a given year is a leap year.
 partial struct absLeap /*num:nint*/;
 
+// An absJanFeb is a single bit (0 or 1) denoting whether a given day falls in January or February.
+// That is a special case because the absolute years start in March (unlike normal calendar years).
 partial struct absJanFeb /*num:nint*/;
 
 // dateToAbsDays takes a standard year/month/day and returns the
@@ -585,6 +600,7 @@ internal static absDays dateToAbsDays(int64 year, ΔMonth month, nint day) {
     }
     amonth += 12 * janFeb;
     var y = (uint64)year - (uint64)janFeb + (uint64)absoluteYears;
+
     // For amonth is in the range [3,14], we want:
     //
     //	ayday := (153*amonth - 457) / 5
@@ -604,10 +620,12 @@ internal static absDays dateToAbsDays(int64 year, ΔMonth month, nint day) {
     // (Note that there is no saved division, because the compiler
     // implements / 5 without division in all cases.)
     var ayday = ((979 * amonth - 2919) >> (int)(5));
+
     var century = y / 100;
     var cyear = (uint32)(y % 100);
     var cday = 1461 * cyear / 4;
     var centurydays = 146097 * century / 4;
+
     return ((absDays)(centurydays + (uint64)((int64)(cday + ayday) + (int64)day - 1)));
 }
 
@@ -625,6 +643,7 @@ internal static (absCentury century, absCyear cyear, absYday ayday) split(this a
     // See “Computations on Times” comment above.
     var d = 4 * (uint64)days + 3;
     century = ((absCentury)(d / 146097));
+
     // This should be
     //	cday := uint32(d % 146097) / 4
     //	cd := 4*cday + 3
@@ -634,6 +653,7 @@ internal static (absCentury century, absCyear cyear, absYday ayday) split(this a
     // but of course (x>>2<<2)+3 == x|3,
     // so do that instead.
     var cd = (uint32)((uint32)(d % 146097) | 3);
+
     // For cdays in the range [0,146097] (100 years), we want:
     //
     //	cyear := (4 cdays + 3) / 1461
@@ -907,6 +927,9 @@ public static nint YearDay(this Time t) {
     return yday;
 }
 
+// A Duration represents the elapsed time between two instants
+// as an int64 nanosecond count. The representation limits the
+// largest representable duration to approximately 290 years.
 partial struct Duration /*num:int64*/;
 
 internal static Duration minDuration => /* -1 << 63 */ -9223372036854775808;
@@ -925,15 +948,10 @@ internal static Duration maxDuration => /* 1<<63 - 1 */ 9223372036854775807;
 //	seconds := 10
 //	fmt.Print(time.Duration(seconds)*time.Second) // prints 10s
 public static Duration ΔNanosecond => 1;
-
 public static Duration Microsecond => /* 1000 * Nanosecond */ 1000;
-
 public static Duration Millisecond => /* 1000 * Microsecond */ 1000000;
-
 public static Duration ΔSecond => /* 1000 * Millisecond */ 1000000000;
-
 public static Duration ΔMinute => /* 60 * Second */ 60000000000;
-
 public static Duration ΔHour => /* 60 * Minute */ 3600000000000;
 
 // String returns a string representing the duration in the form "72h3m0.5s".
@@ -955,11 +973,13 @@ internal static nint format(this Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
 
     // Largest time is 2540400h10m10.000000000s
     nint w = 32;
+
     var u = (uint64)(int64)d;
     var neg = d < 0;
     if (neg) {
         u = ((uint64)0 - u);
     }
+
     if (u < (uint64)(int64)ΔSecond){
         // Special case: if duration is smaller than a second,
         // use smaller units, like 1.2ms
@@ -973,41 +993,44 @@ internal static nint format(this Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
             return w;
         }
         case {} when u < (uint64)(int64)Microsecond: {
+            // print nanoseconds
             prec = 0;
             buf[w] = (rune)'n';
             break;
         }
         case {} when u < (uint64)(int64)Millisecond: {
+            // print microseconds
             prec = 3;
+            // U+00B5 'µ' micro sign == 0xC2 0xB5
             w--; // Need room for two bytes.
-            copy(buf.slice(w), // print nanoseconds
- // print microseconds
- // U+00B5 'µ' micro sign == 0xC2 0xB5
- "µ"u8);
+            copy(buf.slice(w), "µ"u8);
             break;
         }
         default: {
+            // print milliseconds
             prec = 6;
             buf[w] = (rune)'m';
             break;
         }}
-
-        // print milliseconds
         (w, u) = fmtFrac(buf.slice(0, w), u, prec);
         w = fmtInt(buf.slice(0, w), u);
     } else {
         w--;
         buf[w] = (rune)'s';
+
         (w, u) = fmtFrac(buf.slice(0, w), u, 9);
+
         // u is now integer seconds
         w = fmtInt(buf.slice(0, w), u % 60);
         u /= 60;
+
         // u is now integer minutes
         if (u > 0) {
             w--;
             buf[w] = (rune)'m';
             w = fmtInt(buf.slice(0, w), u % 60);
             u /= 60;
+
             // u is now integer hours
             // Stop at hours because days can be different lengths.
             if (u > 0) {
@@ -1017,10 +1040,12 @@ internal static nint format(this Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
             }
         }
     }
+
     if (neg) {
         w--;
         buf[w] = (rune)'-';
     }
+
     return w;
 }
 
@@ -1173,7 +1198,6 @@ public static Duration Abs(this Duration d) {
     default: {
         return -d;
     }}
-
 }
 
 // Add returns the time t+d.
@@ -1222,7 +1246,6 @@ public static Duration Sub(this Time t, Time u) {
     default: {
         return maxDuration; // t - u is positive out of range
     }}
-
 }
 
 internal static Duration subMono(int64 t, int64 u) {
@@ -1286,6 +1309,7 @@ internal static nint daysBefore(ΔMonth m) {
     if (m >= March) {
         adj = -2;
     }
+
     // With the -2 adjustment after February,
     // we need to compute the running sum of:
     //	0  31  30  31  30  31  30  31  31  30  31  30  31
@@ -1488,6 +1512,7 @@ public static (slice<byte>, error) AppendBinary(this Time t, slice<byte> b) {
     int16 offsetMin = default!;   // minutes east of UTC. -1 is UTC.
     int8 offsetSec = default!;
     var version = timeBinaryVersionV1;
+
     if (t.Location() == ΔUTC){
         offsetMin = (int16)(-1);
     } else {
@@ -1496,19 +1521,19 @@ public static (slice<byte>, error) AppendBinary(this Time t, slice<byte> b) {
             version = timeBinaryVersionV2;
             offsetSec = (int8)(offset % 60);
         }
+
         offset /= 60;
         if (offset < -32768 || offset == -1 || offset > 32767) {
             return (b, errors.New(timeMarshalBinaryˢ));
         }
         offsetMin = (int16)offset;
     }
+
     var sec = t.sec();
     var nsec = t.nsec();
     b = append(b,
         version, // byte 0 : version
-
         (byte)((sec >> (int)(56))), // bytes 1-8: seconds
-
         (byte)((sec >> (int)(48))),
         (byte)((sec >> (int)(40))),
         (byte)((sec >> (int)(32))),
@@ -1517,12 +1542,10 @@ public static (slice<byte>, error) AppendBinary(this Time t, slice<byte> b) {
         (byte)((sec >> (int)(8))),
         (byte)sec,
         (byte)((nsec >> (int)(24))), // bytes 9-12: nanoseconds
-
         (byte)((nsec >> (int)(16))),
         (byte)((nsec >> (int)(8))),
         (byte)nsec,
         (byte)((offsetMin >> (int)(8))), // bytes 13-14: zone offset in minutes
-
         (byte)offsetMin);
     if (version == timeBinaryVersionV2) {
         b = append(b, (byte)offsetSec);
@@ -1550,33 +1573,37 @@ public static error UnmarshalBinary(this ref Time t, slice<byte> data) {
     if (len(buf) == 0) {
         return errors.New(timeUnmarshalBinaryNoˢ);
     }
+
     var version = buf[0];
     if (version != timeBinaryVersionV1 && version != timeBinaryVersionV2) {
         return errors.New(timeUnmarshalBinaryˢ);
     }
-    nint wantLen = 1 + 8 + 4 + 2;
+
+    nint wantLen = 1 + /*sec*/ 8 + /*nsec*/ 4 + /*zone offset*/ 2;
     /*version*/
-    /*sec*/
-    /*nsec*/
-    /*zone offset*/
     if (version == timeBinaryVersionV2) {
         wantLen++;
     }
     if (len(buf) != wantLen) {
         return errors.New(timeUnmarshalBinaryˢ2);
     }
+
     buf = buf[1..];
     var sec = (int64)((int64)((int64)((int64)((int64)((int64)((int64)((int64)buf[7] | ((int64)buf[6] << (int)(8))) | ((int64)buf[5] << (int)(16))) | ((int64)buf[4] << (int)(24))) | ((int64)buf[3] << (int)(32))) | ((int64)buf[2] << (int)(40))) | ((int64)buf[1] << (int)(48))) | ((int64)buf[0] << (int)(56)));
+
     buf = buf[8..];
     var nsec = (int32)((int32)((int32)((int32)buf[3] | ((int32)buf[2] << (int)(8))) | ((int32)buf[1] << (int)(16))) | ((int32)buf[0] << (int)(24)));
+
     buf = buf[4..];
     nint offset = (nint)((int16)((int16)buf[1] | (int16)((int16)buf[0] << (int)(8)))) * 60;
     if (version == timeBinaryVersionV2) {
         offset += (nint)buf[2];
     }
+
     t = new Time(nil);
     t.wall = (uint64)nsec;
     t.ext = sec;
+
     if (offset == -1 * 60){
         t.setLoc(ᏑutcLoc);
     } else 
@@ -1587,6 +1614,7 @@ public static error UnmarshalBinary(this ref Time t, slice<byte> data) {
             t.setLoc(FixedZone(""u8, offset));
         }
     }
+
     return default!;
 }
 
@@ -1764,17 +1792,21 @@ public static Time Date(nint year, ΔMonth month, nint day, nint hour, nint min,
     if (Ꮡloc == nil) {
         throw panic("time: missing Location in call to Date");
     }
+
     // Normalize month, overflowing into year.
     nint m = (nint)month - 1;
     (year, m) = norm(year, m, 12);
     month = ((ΔMonth)m) + 1;
+
     // Normalize nsec, sec, min, hour, overflowing into day.
     (sec, nsec) = norm(sec, nsec, 1000000000);
     (min, sec) = norm(min, sec, 60);
     (hour, min) = norm(hour, min, 60);
     (day, hour) = norm(day, hour, 24);
+
     // Convert to absolute time and then Unix time.
     var unix = (int64)(uint64)dateToAbsDays((int64)year, month, day) * (int64)secondsPerDay + (int64)(hour * (nint)secondsPerHour + min * (nint)secondsPerMinute + sec) + absoluteToUnix;
+
     // Look for zone offset for expected time, so we can adjust to UTC.
     // The lookup function expects UTC, so first we pass unix in the
     // hope that it will not be too close to a zone transition,
@@ -1789,6 +1821,7 @@ public static Time Date(nint year, ΔMonth month, nint day, nint hour, nint min,
         }
         unix -= (int64)offset;
     }
+
     var t = unixTime(unix, (int32)nsec);
     t.setLoc(Ꮡloc);
     return t;
@@ -1850,19 +1883,27 @@ internal static (nint qmod2, Duration r) div(Time t, Duration d) {
             sec--; // sec >= 1 before the -- so safe
         }
     }
+
     switch (ᐧ) {
+    // Special case: 2d divides 1 second.
     case {} when d < ΔSecond && ΔSecond % (d + d) == 0: {
         qmod2 = (nint)((nint)(quo(nsec, (int32)(int64)d)) & 1);
         r = ((Duration)(int64)(rem(nsec, (int32)(int64)d)));
         break;
     }
+    // Special case: d is a multiple of 1 second.
     case {} when d % ΔSecond == 0: {
         var d1 = (int64)(d / ΔSecond);
         qmod2 = (nint)((nint)(quo(sec, d1)) & 1);
         r = ((Duration)(rem(sec, d1))) * ΔSecond + ((Duration)(int64)nsec);
         break;
     }
+    // General case.
+    // This could be faster if more cleverness were applied,
+    // but it's really only here to avoid special case restrictions in the API.
+    // No one will care about these cases.
     default: {
+        // Compute nanoseconds as 128-bit number.
         var secΔ2 = (uint64)sec;
         var tmp = ((secΔ2 >> (int)(32))) * 1000000000;
         var u1 = (tmp >> (int)(32));
@@ -1871,23 +1912,17 @@ internal static (nint qmod2, Duration r) div(Time t, Duration d) {
         var u0x = u0;
         u0 = u0 + tmp;
         if (u0 < u0x) {
-            // Special case: 2d divides 1 second.
-            // Special case: d is a multiple of 1 second.
-            // General case.
-            // This could be faster if more cleverness were applied,
-            // but it's really only here to avoid special case restrictions in the API.
-            // No one will care about these cases.
-            // Compute nanoseconds as 128-bit number.
             u1++;
         }
         (u0x, u0) = (u0, u0 + (uint64)nsec);
         if (u0 < u0x) {
             u1++;
         }
+
+        // Compute remainder by subtracting r<<k for decreasing k.
+        // Quotient parity is whether we subtract on last round.
         var d1 = (uint64)(int64)d;
         while ((d1 >> (int)(63)) != 1) {
-            // Compute remainder by subtracting r<<k for decreasing k.
-            // Quotient parity is whether we subtract on last round.
             d1 <<= (int)(1);
         }
         var d0 = (uint64)0;

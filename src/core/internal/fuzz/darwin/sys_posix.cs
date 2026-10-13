@@ -24,6 +24,7 @@ internal static (ж<sharedMem>, error) sharedMemMapFile(ж<os.File> Ꮡf, nint s
     if (err != default!) {
         return (default!, err);
     }
+
     return (Ꮡ(new sharedMem(f: Ꮡf, region: region, removeOnClose: removeOnClose)), default!);
 }
 
@@ -123,21 +124,18 @@ internal static (osꓸSignal, bool) terminationSignal(error err) {
 // with status 2 if not recovered, which we handle as a crash.
 internal static bool isCrashSignal(osꓸSignal signal) {
     var exprᴛ1 = signal;
-    if (AreEqual(exprᴛ1, Δsyscall.SIGILL) || AreEqual(exprᴛ1, Δsyscall.SIGTRAP) || AreEqual(exprᴛ1, Δsyscall.SIGABRT) || AreEqual(exprᴛ1, Δsyscall.SIGBUS) || AreEqual(exprᴛ1, Δsyscall.SIGFPE) || AreEqual(exprᴛ1, Δsyscall.SIGSEGV) || AreEqual(exprᴛ1, Δsyscall.SIGPIPE)) {
+    if (AreEqual(exprᴛ1, Δsyscall.SIGILL) || AreEqual(exprᴛ1, Δsyscall.SIGTRAP) || AreEqual(exprᴛ1, Δsyscall.SIGABRT) || AreEqual(exprᴛ1, Δsyscall.SIGBUS) || AreEqual(exprᴛ1, Δsyscall.SIGFPE) || AreEqual(exprᴛ1, Δsyscall.SIGSEGV) || AreEqual(exprᴛ1, Δsyscall.SIGPIPE)) { // sent data to closed pipe or socket
+        // illegal instruction
+        // breakpoint
+        // abort() called
+        // invalid memory access (e.g., misaligned address)
+        // math error, e.g., integer divide by zero
+        // invalid memory access (e.g., write to read-only)
         return true;
     }
     { /* default: */
         return false;
     }
-
 }
-
-// illegal instruction
-// breakpoint
-// abort() called
-// invalid memory access (e.g., misaligned address)
-// math error, e.g., integer divide by zero
-// invalid memory access (e.g., write to read-only)
-// sent data to closed pipe or socket
 
 } // end fuzz_package

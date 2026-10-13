@@ -18,10 +18,12 @@ public static (syscallꓸHandle s, error err) WSASocket(this ж<Switch> Ꮡsw, i
         ref var sw = ref Ꮡsw.DerefOrNull();
 
         Ꮡsw.of(Switch.Ꮡonce).Do(Ꮡsw.init);
+
         var so = Ꮡ(new Status(Cookie: cookie((nint)family, (nint)sotype, (nint)proto)));
         Ꮡsw.of(Switch.Ꮡfmu).RLock();
         var (f, _) = sw.fltab[FilterSocket, ꟷ];
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
+
         (var af, err) = f.apply(so);
         if (err != default!) {
             (s, err) = (syscall.InvalidHandle, err); goto ᒐdone;
@@ -35,6 +37,7 @@ public static (syscallꓸHandle s, error err) WSASocket(this ж<Switch> Ꮡsw, i
                 (s, err) = (syscall.InvalidHandle, err); goto ᒐdone;
             }
         }
+
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         defer(Ꮡsw.of(Switch.Ꮡsmu).Unlock, ref ᒐ);
         if ((~so).Err != default!) {
@@ -64,6 +67,7 @@ public static error /*err*/ Closesocket(this ж<Switch> Ꮡsw, syscallꓸHandle 
         Ꮡsw.of(Switch.Ꮡfmu).RLock();
         var (f, _) = sw.fltab[FilterClose, ꟷ];
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
+
         (var af, err) = f.apply(so);
         if (err != default!) {
             goto ᒐdone;
@@ -74,6 +78,7 @@ public static error /*err*/ Closesocket(this ж<Switch> Ꮡsw, syscallꓸHandle 
                 goto ᒐdone;
             }
         }
+
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         defer(Ꮡsw.of(Switch.Ꮡsmu).Unlock, ref ᒐ);
         if ((~so).Err != default!) {
@@ -103,6 +108,7 @@ public static error /*err*/ Connect(this ж<Switch> Ꮡsw, syscallꓸHandle s, s
         Ꮡsw.of(Switch.Ꮡfmu).RLock();
         var (f, _) = sw.fltab[FilterConnect, ꟷ];
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
+
         (var af, err) = f.apply(so);
         if (err != default!) {
             goto ᒐdone;
@@ -113,6 +119,7 @@ public static error /*err*/ Connect(this ж<Switch> Ꮡsw, syscallꓸHandle s, s
                 goto ᒐdone;
             }
         }
+
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         defer(Ꮡsw.of(Switch.Ꮡsmu).Unlock, ref ᒐ);
         if ((~so).Err != default!) {
@@ -141,6 +148,7 @@ public static error /*err*/ ConnectEx(this ж<Switch> Ꮡsw, syscallꓸHandle s,
         Ꮡsw.of(Switch.Ꮡfmu).RLock();
         var (f, _) = sw.fltab[FilterConnect, ꟷ];
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
+
         (var af, err) = f.apply(so);
         if (err != default!) {
             goto ᒐdone;
@@ -151,6 +159,7 @@ public static error /*err*/ ConnectEx(this ж<Switch> Ꮡsw, syscallꓸHandle s,
                 goto ᒐdone;
             }
         }
+
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         defer(Ꮡsw.of(Switch.Ꮡsmu).Unlock, ref ᒐ);
         if ((~so).Err != default!) {
@@ -179,6 +188,7 @@ public static error /*err*/ Listen(this ж<Switch> Ꮡsw, syscallꓸHandle s, ni
         Ꮡsw.of(Switch.Ꮡfmu).RLock();
         var (f, _) = sw.fltab[FilterListen, ꟷ];
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
+
         (var af, err) = f.apply(so);
         if (err != default!) {
             goto ᒐdone;
@@ -189,6 +199,7 @@ public static error /*err*/ Listen(this ж<Switch> Ꮡsw, syscallꓸHandle s, ni
                 goto ᒐdone;
             }
         }
+
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         defer(Ꮡsw.of(Switch.Ꮡsmu).Unlock, ref ᒐ);
         if ((~so).Err != default!) {
@@ -217,6 +228,7 @@ public static error AcceptEx(this ж<Switch> Ꮡsw, syscallꓸHandle ls, syscall
         Ꮡsw.of(Switch.Ꮡfmu).RLock();
         var (f, _) = sw.fltab[FilterAccept, ꟷ];
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
+
         var (af, err) = f.apply(so);
         if (err != default!) {
             return err;
@@ -227,6 +239,7 @@ public static error AcceptEx(this ж<Switch> Ꮡsw, syscallꓸHandle ls, syscall
                 return err;
             }
         }
+
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         ᒐd1 = true;
         if ((~so).Err != default!) {

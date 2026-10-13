@@ -223,7 +223,6 @@ internal static (Addr, error) parseInetAddr(nint af, slice<byte> b) {
     { /* default: */
         return (default!, errInvalidAddr);
     }
-
 }
 
 // parseKernelInetAddr parses b as an internet address in conventional
@@ -264,7 +263,6 @@ internal static (nint, Addr, error) parseKernelInetAddr(nint af, slice<byte> b) 
     // Don't reorder case expressions.
     // The case expressions for IPv6 must come first.
     UntypedInt off4 = 4; // offset of in_addr
-    
     UntypedInt off6 = 8; // offset of in6_addr
     switch (ᐧ) {
     case {} when b[0] == sizeofSockaddrInet6: {
@@ -286,17 +284,15 @@ internal static (nint, Addr, error) parseKernelInetAddr(nint af, slice<byte> b) 
         copy((~a).IP[..], b[(int)(off4)..(int)(off4 + 4)]);
         return ((nint)b[0], new Inet4AddrжAddr(a), default!);
     }
-    default: {
+    default: { // an old fashion, AF_UNSPEC or unknown means AF_INET
         var a = Ꮡ(new Inet4Addr(nil));
         if (l - 1 < off4){
-            // an old fashion, AF_UNSPEC or unknown means AF_INET
             copy((~a).IP[..], b.slice(1, l));
         } else {
             copy((~a).IP[..], b.slice(l - (nint)off4, l));
         }
         return ((nint)b[0], new Inet4AddrжAddr(a), default!);
     }}
-
 }
 
 // A DefaultAddr represents an address of various operating
@@ -433,9 +429,9 @@ internal static (slice<Addr>, error) parseAddrs(nuint attrs, Func<nint, slice<by
                 b = b.slice(l);
             }
             else if (exprᴛ1 == syscall.AF_INET || exprᴛ1 == syscall.AF_INET6) {
+                // #70528: if the sockaddrlen is 0, no address to parse inside,
+                // skip over the record.
                 if (b[0] > 0) {
-                    // #70528: if the sockaddrlen is 0, no address to parse inside,
-                    // skip over the record.
                     af = (nint)b[1];
                     var (a, err) = parseInetAddr(af, b);
                     if (err != default!) {
@@ -462,7 +458,6 @@ internal static (slice<Addr>, error) parseAddrs(nuint attrs, Func<nint, slice<by
                     b = b.slice(ll);
                 }
             }
-
         } else {
             var (a, err) = parseDefaultAddr(b);
             if (err != default!) {

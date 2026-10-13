@@ -17,10 +17,16 @@ partial interface writer :
     error Flush();
 }
 
+// A code is a 12 bit value, stored as a uint32 when encoding to avoid
+// type conversions when shifting bits.
 internal static UntypedInt maxCode => /* 1<<12 - 1 */ 4095;
 internal static UntypedInt invalidCode => /* 1<<32 - 1 */ 4294967295;
+// There are 1<<12 possible codes, which is an upper bound on the number of
+// valid hash table entries at any given point in time. tableSize is 4x that.
 internal static UntypedInt tableSize => /* 4 * 1 << 12 */ 16384;
 internal static UntypedInt tableMask => /* tableSize - 1 */ 16383;
+// A hash table entry is a uint32. Zero is an invalid entry since the
+// lower 12 bits of a valid entry must be a non-literal code.
 internal static UntypedInt invalidEntry => 0;
 
 // Writer is an LZW compressor. It writes the compressed form of the data
@@ -124,8 +130,8 @@ internal static readonly @string lzwInputByteTooLargeForˢ = "lzw: input byte to
 // Write writes a compressed representation of p to w's underlying writer.
 public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) {
     nint n = default!;
-
     ref var w = ref Ꮡw.DerefOrNull();
+
     if (w.err != default!) {
         return (0, w.err);
     }
@@ -304,7 +310,6 @@ internal static void init(this ref Writer w, io.Writer dst, Order order, nint li
         w.err = errors.New(lzwUnknownOrderˢ);
         return;
     }
-
     if (litWidth < 2 || 8 < litWidth) {
         w.err = fmt.Errorf("lzw: litWidth %d out of range"u8, litWidth);
         return;

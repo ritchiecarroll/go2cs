@@ -69,6 +69,7 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
         return (default!, false);
     }
     // len(s) > 0
+
     // parse fraction a/b, if any
     {
         nint sep = strings.Index(s, "/"u8); if (sep >= 0) {
@@ -96,13 +97,16 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
             return (Ꮡz.norm(), true);
         }
     }
+
     // parse floating-point number
     var r = strings.NewReader(s);
+
     // sign
     var (neg, err) = scanSign(new strings_ReaderжByteScanner(r));
     if (err != default!) {
         return (default!, false);
     }
+
     // mantissa
     nint @base = default!;
     nint fcount = default!;  // fractional digit count; valid if <= 0
@@ -110,6 +114,7 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
     if (err != default!) {
         return (default!, false);
     }
+
     // exponent
     int64 exp = default!;
     nint ebase = default!;
@@ -117,17 +122,20 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
     if (err != default!) {
         return (default!, false);
     }
+
     // there should be no unread characters left
     {
         (_, err) = r.ReadByte(); if (!AreEqual(err, io.EOF)) {
             return (default!, false);
         }
     }
+
     // special-case 0 (see also issue #16176)
     if (len(z.a.abs) == 0) {
         return (Ꮡz.norm(), true);
     }
     // len(z.a.abs) > 0
+
     // The mantissa may have a radix point (fcount <= 0) and there
     // may be a nonzero exponent exp. The radix point amounts to a
     // division by base**(-fcount), which equals a multiplication by
@@ -138,6 +146,7 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
     // may reduce the size of shift/multiplication factors or
     // divisors required to create the final fraction, depending
     // on the actual floating-point value.
+
     // determine binary or decimal exponent contribution of radix point
     int64 exp2 = default!;
     int64 exp5 = default!;
@@ -164,9 +173,9 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
         else if (!matchᴛ1) { /* default: */
             throw panic("unexpected mantissa base");
         }
-
+        // fcount consumed - not needed anymore
     }
-    // fcount consumed - not needed anymore
+
     // take actual exponent into account
     var exprᴛ2 = ebase;
     var matchᴛ2 = false;
@@ -180,8 +189,8 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
     else if (!matchᴛ2) { /* default: */
         throw panic("unexpected exponent base");
     }
-
     // exp consumed - not needed anymore
+
     // apply exp5 contributions
     // (start with exp5 so the numbers to multiply are smaller)
     if (exp5 != 0){
@@ -207,6 +216,7 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
     } else {
         z.b.abs = z.b.abs.setWord(1);
     }
+
     // apply exp2 contributions
     if (exp2 < -10000000 || exp2 > 10000000) {
         return (default!, false); // avoid excessively large exponents
@@ -217,7 +227,9 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
     if (exp2 < 0) {
         z.b.abs = z.b.abs.shl(z.b.abs, (nuint)(-exp2));
     }
+
     z.a.neg = neg && len(z.a.abs) > 0; // 0 has no sign
+
     return (Ꮡz.norm(), true);
 }
 
@@ -250,6 +262,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
         }
         return (0, 10, err);
     }
+
     // exponent char
     var exprᴛ1 = ch;
     var matchᴛ1 = false;
@@ -279,11 +292,13 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
         }
         (ch, err) = r.ReadByte();
     }
+
     // prev encodes the previously seen char: it is one
     // of '_', '0' (a digit), or '.' (anything else). A
     // valid separator '_' may only occur after a digit.
     var prev = (rune)'.';
     var invalSep = false;
+
     // exponent value
     var hasDigits = false;
     while (err == default!) {
@@ -303,6 +318,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
         }
         (ch, err) = r.ReadByte();
     }
+
     if (AreEqual(err, io.EOF)) {
         err = default!;
     }
@@ -316,6 +332,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
     if (err == default! && (invalSep || prev == (rune)'_')) {
         err = errInvalSep;
     }
+
     return (exp, @base, err);
 }
 
@@ -358,6 +375,7 @@ public static @string FloatString(this ж<ΔRat> Ꮡx, nint prec) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     slice<byte> buf = default!;
+
     if (x.IsInt()) {
         buf = Ꮡx.of(big_package.ΔRat.Ꮡa).Append(buf, 10);
         if (prec > 0) {
@@ -369,13 +387,17 @@ public static @string FloatString(this ж<ΔRat> Ꮡx, nint prec) {
         return ((@string)buf);
     }
     // x.b.abs != 0
+
     var (q, r) = ((nat)default!).div(((nat)default!), x.a.abs, x.b.abs);
+
     var p = natOne;
     if (prec > 0) {
         p = ((nat)default!).expNN(natTen, ((nat)default!).setUint64((uint64)prec), default!, false);
     }
+
     r = r.mul(r, p);
     (r, var r2) = r.div(((nat)default!), r, x.b.abs);
+
     // see if we need to round up
     r2 = r2.add(r2, r2);
     if (x.b.abs.cmp(r2) <= 0) {
@@ -385,10 +407,12 @@ public static @string FloatString(this ж<ΔRat> Ꮡx, nint prec) {
             r = ((nat)default!).sub(r, p);
         }
     }
+
     if (x.a.neg) {
         buf = append(buf, (byte)((rune)'-'));
     }
     buf = appendꓸꓸꓸ(buf, q.utoa(10)); // itoa ignores sign if q == 0
+
     if (prec > 0) {
         buf = append(buf, (byte)((rune)'.'));
         var rs = r.utoa(10);
@@ -397,6 +421,7 @@ public static @string FloatString(this ж<ΔRat> Ꮡx, nint prec) {
         }
         buf = appendꓸꓸꓸ(buf, rs);
     }
+
     return ((@string)buf);
 }
 
@@ -427,12 +452,14 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
     // For details see:
     // https://en.wikipedia.org/wiki/Repeating_decimal#Reciprocals_of_integers_not_coprime_to_10
     var d = Ꮡx.Denom().Value.abs; // d >= 1
+
     // Determine p2 by counting factors of 2.
     // p2 corresponds to the trailing zero bits in d.
     // Do this first to reduce q as much as possible.
     nat q = default!;
     nuint p2 = d.trailingZeroBits();
     q = q.shr(d, p2);
+
     // Determine p5 by counting factors of 5.
     // Build a table starting with an initial power of 5,
     // and use repeated squaring until the factor doesn't
@@ -452,6 +479,7 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
         tab = append(tab, f);
         f = ((nat)default!).sqr(f); // nat(nil) to ensure a new f for each table entry
     }
+
     // Factor q using the table entries, if any.
     // We start with the largest factor f = tab[len(tab)-1]
     // that evenly divides q. It does so at most once because
@@ -468,6 +496,7 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
             }
         }
     }
+
     // If fp != 1, we may still have multiples of 5 left.
     while (ᐧ) {
         {
@@ -478,6 +507,7 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
         p5++;
         q = q.set(t);
     }
+
     return ((nint)max(p2, p5), q.cmp(natOne) == 0);
 }
 

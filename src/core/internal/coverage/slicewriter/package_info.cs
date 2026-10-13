@@ -49,7 +49,7 @@ using static go.@internal.coverage.slicewriter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/slicewriter/slicewriter.go", "slicewriter.cs", "ABQsgoKCgoKUgoKuwpSClIKkgoKUgqSCgpSCtqqipoKCgoKUgoI=")]
+[assembly: go.GoPositionMap("internal/coverage/slicewriter/slicewriter.go", "slicewriter.cs", "ABQsgoKCgoKUgoKuwpSClIKkgoKUgqSCgpSCpqqipoKCgoKUgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

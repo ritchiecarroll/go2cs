@@ -51,6 +51,7 @@ public static error Write(this ref Writer w, slice<@string> record) {
     if (!validDelim(w.Comma)) {
         return errInvalidDelim;
     }
+
     foreach (var (n, vᴛ1) in record) {
         var field = vᴛ1;
 
@@ -61,6 +62,7 @@ public static error Write(this ref Writer w, slice<@string> record) {
                 }
             }
         }
+
         // If we don't have to have a quoted field then just
         // write out the field and continue to the next field.
         if (!w.fieldNeedsQuotes(field)) {
@@ -71,6 +73,7 @@ public static error Write(this ref Writer w, slice<@string> record) {
             }
             continue;
         }
+
         {
             var errΔ3 = w.w.WriteByte((rune)'"'); if (errΔ3 != default!) {
                 return errΔ3;
@@ -82,6 +85,7 @@ public static error Write(this ref Writer w, slice<@string> record) {
             if (i < 0) {
                 i = len(field);
             }
+
             // Copy verbatim everything before the special character.
             {
                 var (_, errΔ4) = w.w.WriteString(field.slice(0, i)); if (errΔ4 != default!) {
@@ -89,6 +93,7 @@ public static error Write(this ref Writer w, slice<@string> record) {
                 }
             }
             field = field.slice(i);
+
             // Encode the special character.
             if (len(field) > 0) {
                 error errΔ5 = default!;
@@ -111,7 +116,6 @@ public static error Write(this ref Writer w, slice<@string> record) {
                     }
                     break;
                 }}
-
                 field = field[1..];
                 if (errΔ5 != default!) {
                     return errΔ5;
@@ -174,9 +178,11 @@ internal static bool fieldNeedsQuotes(this ref Writer w, @string field) {
     if (field == ""u8) {
         return false;
     }
+
     if (field == @"\."u8) {
         return true;
     }
+
     if (w.Comma < utf8.RuneSelf){
         for (nint i = 0; i < len(field); i++) {
             var c = field[i];
@@ -189,6 +195,7 @@ internal static bool fieldNeedsQuotes(this ref Writer w, @string field) {
             return true;
         }
     }
+
     var (r1, _) = utf8.DecodeRuneInString(field);
     return unicode.IsSpace(r1);
 }

@@ -35,6 +35,7 @@ internal static (FileInfo, error) stat(@string funcname, @string name, bool foll
         if (err != default!) {
             return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: funcname, Path: name, Err: err))));
         }
+
         // Try GetFileAttributesEx first, because it is faster than CreateFile.
         // See https://golang.org/issues/19922#issuecomment-300031421 for details.
         ref var fa = ref heap(new syscall.Win32FileAttributeData(), out var Ꮡfa);
@@ -50,6 +51,7 @@ internal static (FileInfo, error) stat(@string funcname, @string name, bool foll
             }
             return (new fileStatжFileInfo(fs), default!);
         }
+
         // GetFileAttributesEx fails with ERROR_SHARING_VIOLATION error for
         // files like c:\pagefile.sys. Use FindFirstFile for such files.
         if (AreEqual(err, windows.ERROR_SHARING_VIOLATION)) {
@@ -70,12 +72,14 @@ internal static (FileInfo, error) stat(@string funcname, @string name, bool foll
                 return (new fileStatжFileInfo(fs), default!);
             }
         }
+
         // Use CreateFile to determine whether the file is a name surrogate and, if so,
         // save information about the link target.
         // Set FILE_FLAG_BACKUP_SEMANTICS so that CreateFile will create the handle
         // even if name refers to a directory.
         uint32 flags = (uint32)((uint32)syscall.FILE_FLAG_BACKUP_SEMANTICS | (uint32)syscall.FILE_FLAG_OPEN_REPARSE_POINT);
         (var h, err) = syscall.CreateFile(namep, 0, 0, nil, syscall.OPEN_EXISTING, flags, 0);
+
         if (AreEqual(err, windows.ERROR_INVALID_PARAMETER)) {
             // Console handles, like "\\.\con", require generic read access. See
             // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew#consoles.
@@ -89,6 +93,7 @@ internal static (FileInfo, error) stat(@string funcname, @string name, bool foll
             // FileInfo with a known-accurate Mode, we must return an error.
             return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "CreateFile"u8, Path: name, Err: err))));
         }
+
         (var fi, err) = statHandle(name, h);
         syscall.CloseHandle(h);
         if (err == default! && followSurrogates && fi._<ж<fileStat>>().isReparseTagNameSurrogate()) {
@@ -119,7 +124,6 @@ internal static (FileInfo, error) statHandle(@string name, syscallꓸHandle h) {
     if (exprᴛ1 == syscall.FILE_TYPE_PIPE || exprᴛ1 == syscall.FILE_TYPE_CHAR) {
         return (new fileStatжFileInfo(Ꮡ(new fileStat(name: filepathlite.Base(name), filetype: ft))), default!);
     }
-
     (var fs, err) = newFileStatFromGetFileInformationByHandle(name, h);
     if (err != default!) {
         return (default!, err);

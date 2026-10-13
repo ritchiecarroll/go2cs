@@ -24,46 +24,27 @@ partial class png_package {
 
 // Color type, as per the PNG spec.
 internal static UntypedInt ctGrayscale => 0;
-
 internal static UntypedInt ctTrueColor => 2;
-
 internal static UntypedInt ctPaletted => 3;
-
 internal static UntypedInt ctGrayscaleAlpha => 4;
-
 internal static UntypedInt ctTrueColorAlpha => 6;
 
 // A cb is a combination of color type and bit depth.
 internal static UntypedInt cbInvalid => iota;
-
 internal static UntypedInt cbG1 => 1;
-
 internal static UntypedInt cbG2 => 2;
-
 internal static UntypedInt cbG4 => 3;
-
 internal static UntypedInt cbG8 => 4;
-
 internal static UntypedInt cbGA8 => 5;
-
 internal static UntypedInt cbTC8 => 6;
-
 internal static UntypedInt cbP1 => 7;
-
 internal static UntypedInt cbP2 => 8;
-
 internal static UntypedInt cbP4 => 9;
-
 internal static UntypedInt cbP8 => 10;
-
 internal static UntypedInt cbTCA8 => 11;
-
 internal static UntypedInt cbG16 => 12;
-
 internal static UntypedInt cbGA16 => 13;
-
 internal static UntypedInt cbTC16 => 14;
-
 internal static UntypedInt cbTCA16 => 15;
 
 internal static bool cbPaletted(nint cb) {
@@ -76,20 +57,14 @@ internal static bool cbTrueColor(nint cb) {
 
 // Filter type, as per the PNG spec.
 internal static UntypedInt ftNone => 0;
-
 internal static UntypedInt ftSub => 1;
-
 internal static UntypedInt ftUp => 2;
-
 internal static UntypedInt ftAverage => 3;
-
 internal static UntypedInt ftPaeth => 4;
-
 internal static UntypedInt nFilter => 5;
 
 // Interlace type.
 internal static UntypedInt itNone => 0;
-
 internal static UntypedInt itAdam7 => 1;
 
 // interlaceScan defines the placement and size of a pass for Adam7 interlacing.
@@ -116,15 +91,10 @@ internal static slice<interlaceScan> interlacing = new interlaceScan[]{
 // have any other chunks between them).
 // https://www.w3.org/TR/PNG/#5ChunkOrdering
 internal static UntypedInt dsStart => iota;
-
 internal static UntypedInt dsSeenIHDR => 1;
-
 internal static UntypedInt dsSeenPLTE => 2;
-
 internal static UntypedInt dsSeentRNS => 3;
-
 internal static UntypedInt dsSeenIDAT => 4;
-
 internal static UntypedInt dsSeenIEND => 5;
 
 internal static readonly @string pngHeader = ((@string)(new byte[]{0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a}));
@@ -147,6 +117,7 @@ partial struct decoder {
     internal array<byte> transparent = new(6);
 }
 
+// A FormatError reports that the input is not a valid PNG.
 partial struct FormatError /*@string*/;
 
 public static @string Error(this FormatError e) {
@@ -155,6 +126,7 @@ public static @string Error(this FormatError e) {
 
 internal static FormatError chunkOrderError = ((FormatError)(@string)"chunk out of order"u8);
 
+// An UnsupportedError reports that the input uses a valid but unimplemented PNG feature.
 partial struct UnsupportedError /*@string*/;
 
 public static @string Error(this UnsupportedError e) {
@@ -189,6 +161,7 @@ internal static error parseIHDR(this ref decoder d, uint32 length) {
         return ((FormatError)(@string)invalidInterlaceMethodˢ);
     }
     d.interlace = (nint)d.tmp[12];
+
     var w = (int32)binary.BigEndian.Uint32(d.tmp[0..4]);
     var h = (int32)binary.BigEndian.Uint32(d.tmp[4..8]);
     if (w <= 0 || h <= 0) {
@@ -203,6 +176,7 @@ internal static error parseIHDR(this ref decoder d, uint32 length) {
     if (nPixels != (nPixels * 8) / 8) {
         return ((UnsupportedError)(@string)dimensionOverflowˢ);
     }
+
     d.cb = cbInvalid;
     d.depth = (nint)d.tmp[8];
     switch (d.depth) {
@@ -214,7 +188,6 @@ internal static error parseIHDR(this ref decoder d, uint32 length) {
         else if (exprᴛ1 == ctPaletted) {
             d.cb = cbP1;
         }
-
         break;
     }
     case 2: {
@@ -225,7 +198,6 @@ internal static error parseIHDR(this ref decoder d, uint32 length) {
         else if (exprᴛ2 == ctPaletted) {
             d.cb = cbP2;
         }
-
         break;
     }
     case 4: {
@@ -236,7 +208,6 @@ internal static error parseIHDR(this ref decoder d, uint32 length) {
         else if (exprᴛ3 == ctPaletted) {
             d.cb = cbP4;
         }
-
         break;
     }
     case 8: {
@@ -256,7 +227,6 @@ internal static error parseIHDR(this ref decoder d, uint32 length) {
         else if (exprᴛ4 == ctTrueColorAlpha) {
             d.cb = cbTCA8;
         }
-
         break;
     }
     case 16: {
@@ -273,10 +243,8 @@ internal static error parseIHDR(this ref decoder d, uint32 length) {
         else if (exprᴛ5 == ctTrueColorAlpha) {
             d.cb = cbTCA16;
         }
-
         break;
     }}
-
     if (d.cb == cbInvalid) {
         return ((UnsupportedError)fmt.Sprintf("bit depth %d, color type %d"u8, d.tmp[8], d.tmp[9]));
     }
@@ -315,13 +283,12 @@ internal static error parsePLTE(this ref decoder d, uint32 length) {
         d.palette = d.palette.slice(0, np);
     }
     else if (exprᴛ1 == cbTC8 || exprᴛ1 == cbTCA8 || exprᴛ1 == cbTC16 || exprᴛ1 == cbTCA16) {
+        // As per the PNG spec, a PLTE chunk is optional (and for practical purposes,
+        // ignorable) for the ctTrueColor and ctTrueColorAlpha color types (section 4.1.2).
     }
     else { /* default: */
         return ((FormatError)(@string)plteColorTypeMismatchˢ);
     }
-
-    // As per the PNG spec, a PLTE chunk is optional (and for practical purposes,
-    // ignorable) for the ctTrueColor and ctTrueColorAlpha color types (section 4.1.2).
     return d.verifyChecksum();
 }
 
@@ -340,6 +307,7 @@ internal static error parsetRNS(this ref decoder d, uint32 length) {
             return err;
         }
         d.crc.Write(d.tmp.slice(0, n));
+
         copy(d.transparent[..], d.tmp.slice(0, (nint)(length)));
         var exprᴛ2 = d.cb;
         if (exprᴛ2 == cbG1) {
@@ -351,7 +319,6 @@ internal static error parsetRNS(this ref decoder d, uint32 length) {
         else if (exprᴛ2 == cbG4) {
             d.transparent[1] *= 0x11;
         }
-
         d.useTransparent = true;
     }
     else if (exprᴛ1 == cbTC8 || exprᴛ1 == cbTC16) {
@@ -363,6 +330,7 @@ internal static error parsetRNS(this ref decoder d, uint32 length) {
             return err;
         }
         d.crc.Write(d.tmp.slice(0, n));
+
         copy(d.transparent[..], d.tmp.slice(0, (nint)(length)));
         d.useTransparent = true;
     }
@@ -375,6 +343,7 @@ internal static error parsetRNS(this ref decoder d, uint32 length) {
             return err;
         }
         d.crc.Write(d.tmp.slice(0, n));
+
         if (len(d.palette) < n) {
             d.palette = d.palette.slice(0, n);
         }
@@ -386,7 +355,6 @@ internal static error parsetRNS(this ref decoder d, uint32 length) {
     else { /* default: */
         return ((FormatError)(@string)tRNSColorTypeMismatchˢ);
     }
-
     return d.verifyChecksum();
 }
 
@@ -475,6 +443,7 @@ internal static (image.Image, error) decode(this ж<decoder> Ꮡd) {
                 }
             }
         }
+
         // Check for EOF, to verify the zlib checksum.
         nint n = 0;
         for (nint i = 0; n == 0 && err == default!; i++) {
@@ -489,6 +458,7 @@ internal static (image.Image, error) decode(this ж<decoder> Ꮡd) {
         if (n != 0 || d.idatLength != 0) {
             return (default!, ((FormatError)(@string)tooMuchPixelDataˢ));
         }
+
         return (img, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -590,11 +560,11 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
         nrgba64 = image.NewNRGBA64(image.Rect(0, 0, width, height));
         img = new image.NRGBA64жImage(nrgba64);
     }
-
     if (allocateOnly) {
         return (img, default!);
     }
     nint bytesPerPixel = (bitsPerPixel + 7) / 8;
+
     // The +1 is for the per-row filter type, which is at cr[0].
     var rowSize = 1 + ((int64)bitsPerPixel * (int64)width + 7) / 8;
     if (rowSize != (int64)(nint)rowSize) {
@@ -603,6 +573,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
     // cr and pr are the bytes for the current and previous row.
     var cr = new slice<uint8>((nint)(rowSize));
     var pr = new slice<uint8>((nint)(rowSize));
+
     for (nint y = 0; y < height; y++) {
         // Read the decompressed bytes.
         var (_, err) = io.ReadFull(r, cr);
@@ -612,15 +583,16 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
             }
             return (default!, err);
         }
+
         // Apply the filter.
         var cdat = cr[1..];
         var pdat = pr[1..];
         var exprᴛ2 = cr[0];
         if (exprᴛ2 == ftNone) {
+            // No-op.
         }
         else if (exprᴛ2 == ftSub) {
             for (nint i = bytesPerPixel; i < len(cdat); i++) {
-                // No-op.
                 cdat[i] += cdat[i - bytesPerPixel];
             }
         }
@@ -630,10 +602,10 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
             }
         }
         else if (exprᴛ2 == ftAverage) {
+            // The first column has no column to the left of it, so it is a
+            // special case. We know that the first column exists because we
+            // check above that width != 0, and so len(cdat) != 0.
             for (nint i = 0; i < bytesPerPixel; i++) {
-                // The first column has no column to the left of it, so it is a
-                // special case. We know that the first column exists because we
-                // check above that width != 0, and so len(cdat) != 0.
                 cdat[i] += (uint8)(pdat[i] / 2);
             }
             for (nint i = bytesPerPixel; i < len(cdat); i++) {
@@ -899,6 +871,7 @@ internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader
         // The current row for y is the previous row for y+1.
         (pr, cr) = (cr, pr);
     }
+
     return (img, default!);
 }
 
@@ -987,8 +960,8 @@ internal static void mergePassInto(this ref decoder d, image.Image dst, image.Im
 
 internal static error /*err*/ parseIDAT(this ж<decoder> Ꮡd, uint32 length) {
     error err = default!;
-
     ref var d = ref Ꮡd.DerefOrNull();
+
     d.idatLength = length;
     (d.img, err) = Ꮡd.decode();
     if (err != default!) {
@@ -1019,6 +992,7 @@ internal static error parseChunk(this ж<decoder> Ꮡd, bool configOnly) {
     var length = binary.BigEndian.Uint32(d.tmp[..4]);
     d.crc.Reset();
     d.crc.Write(d.tmp[4..8]);
+
     // Read the chunk data.
     var exprᴛ1 = ((sstring)(d.tmp[4..8]));
     if (exprᴛ1 == "IHDR"u8) {
@@ -1079,7 +1053,6 @@ internal static error parseChunk(this ж<decoder> Ꮡd, bool configOnly) {
         d.stage = dsSeenIEND;
         return d.parseIEND(length);
     }
-
     if (length > 0x7fffffff) {
         return ((FormatError)fmt.Sprintf("Bad chunk length: %d"u8, length));
     }
@@ -1168,6 +1141,7 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
             return (new image.Config(nil), err);
         }
     }
+
     while (ᐧ) {
         {
             var err = d.parseChunk(true); if (err != default!) {
@@ -1177,6 +1151,7 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
                 return (new image.Config(nil), err);
             }
         }
+
         if (cbPaletted((~d).cb)){
             if ((~d).stage >= dsSeentRNS) {
                 break;
@@ -1187,6 +1162,7 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
             }
         }
     }
+
     color.Model cm = default!;
     var exprᴛ1 = (~d).cb;
     if (exprᴛ1 == cbG1 || exprᴛ1 == cbG2 || exprᴛ1 == cbG4 || exprᴛ1 == cbG8) {
@@ -1216,7 +1192,6 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
     else if (exprᴛ1 == cbTCA16) {
         cm = color.NRGBA64Model;
     }
-
     return (new image.Config(
         ColorModel: cm,
         Width: (~d).width,

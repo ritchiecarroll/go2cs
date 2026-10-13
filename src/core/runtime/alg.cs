@@ -106,7 +106,6 @@ internal static uintptr f32hash(@unsafe.Pointer Δp, uintptr h) {
     default: {
         return memhash(Δp, h, 4);
     }}
-
 }
 
 internal static uintptr f64hash(@unsafe.Pointer Δp, uintptr h) {
@@ -121,7 +120,6 @@ internal static uintptr f64hash(@unsafe.Pointer Δp, uintptr h) {
     default: {
         return memhash(Δp, h, 8);
     }}
-
 }
 
 internal static uintptr c64hash(@unsafe.Pointer Δp, uintptr h) {
@@ -218,7 +216,6 @@ internal static uintptr typehash(ж<_type> Ꮡt, @unsafe.Pointer Δp, uintptr h)
         { /* default: */
             return memhash(Δp, h, t.Size_);
         }
-
     }
     var exprᴛ2 = (abiꓸKind)(t.Kind_ & abi.KindMask);
     if (exprᴛ2 == abi.Float32) {
@@ -261,13 +258,12 @@ internal static uintptr typehash(ж<_type> Ꮡt, @unsafe.Pointer Δp, uintptr h)
         return h;
     }
     { /* default: */
+        // Should never happen, as typehash should only be called
+        // with comparable types.
         throw panic(((errorString)("hash of unhashable type "u8 + toRType(Ꮡt).@string())));
     }
-
 }
 
-// Should never happen, as typehash should only be called
-// with comparable types.
 internal static error mapKeyError(ж<maptype> Ꮡt, @unsafe.Pointer Δp) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -306,9 +302,11 @@ internal static error mapKeyError2(ж<_type> Ꮡt, @unsafe.Pointer Δp) {
             tΔ2 = a.Value.tab.Value.Type;
             pdata = a.of(iface.Ꮡdata);
         }
+
         if ((~tΔ2).Equal == default!) {
             return ((errorString)("hash of unhashable type "u8 + toRType(tΔ2).@string()));
         }
+
         if (isDirectIface(ref (tΔ2).DerefOrNull())){
             return mapKeyError2(tΔ2, @unsafe.Pointer.FromBox(pdata));
         } else {
@@ -341,12 +339,10 @@ internal static error mapKeyError2(ж<_type> Ꮡt, @unsafe.Pointer Δp) {
         return default!;
     }
     { /* default: */
+        // Should never happen, keep this case for robustness.
         return ((errorString)("hash of unhashable type "u8 + toRType(Ꮡt).@string()));
     }
-
 }
-
-// Should never happen, keep this case for robustness.
 
 //go:linkname reflect_typehash reflect.typehash
 internal static uintptr reflect_typehash(ж<_type> Ꮡt, @unsafe.Pointer Δp, uintptr h) {
@@ -507,10 +503,9 @@ internal static array<uintptr> hashkey = new(4);
 
 internal static void alginit() {
     // Install AES hash algorithms if the instructions needed are present.
-    if ((GOARCH == "386"u8 || GOARCH == "amd64"u8) && cpu.X86.HasAES && cpu.X86.HasSSSE3 && cpu.X86.HasSSE41) {
-        // AESENC
-        // PSHUFB
-        // PINSR{D,Q}
+    if ((GOARCH == "386"u8 || GOARCH == "amd64"u8) && cpu.X86.HasAES && // AESENC
+        cpu.X86.HasSSSE3 && // PSHUFB
+        cpu.X86.HasSSE41) { // PINSR{D,Q}
         initAlgAES();
         return;
     }

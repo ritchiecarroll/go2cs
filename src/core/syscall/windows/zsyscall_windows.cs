@@ -26,7 +26,6 @@ internal static error errnoErr(Errno e) {
     if (exprᴛ1 == errnoERROR_IO_PENDING) {
         return errERROR_IO_PENDING;
     }
-
     // TODO: add more here, after collecting data on the common
     // error values see on Windows. (perhaps when running
     // all.bat?)
@@ -44,6 +43,7 @@ internal static ж<LazyDLL> modsecur32 = NewLazyDLL(sysdll.Add("secur32.dll"u8))
 internal static ж<LazyDLL> modshell32 = NewLazyDLL(sysdll.Add("shell32.dll"u8));
 internal static ж<LazyDLL> moduserenv = NewLazyDLL(sysdll.Add("userenv.dll"u8));
 internal static ж<LazyDLL> modws2_32 = NewLazyDLL(sysdll.Add("ws2_32.dll"u8));
+
 internal static ж<LazyProc> procConvertSidToStringSidW = modadvapi32.NewProc("ConvertSidToStringSidW"u8);
 internal static ж<LazyProc> procConvertStringSidToSidW = modadvapi32.NewProc("ConvertStringSidToSidW"u8);
 internal static ж<LazyProc> procCopySid = modadvapi32.NewProc("CopySid"u8);

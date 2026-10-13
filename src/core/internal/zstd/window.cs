@@ -42,12 +42,14 @@ internal static void save(this ref window w, slice<byte> buf) {
     if (builtin.len(buf) == 0) {
         return;
     }
+
     if (builtin.len(buf) >= w.size) {
         nint from = builtin.len(buf) - w.size;
         w.data = appendꓸꓸꓸ(w.data[..0], buf.slice(from));
         w.off = 0;
         return;
     }
+
     // Update off to point to the oldest remaining byte.
     nint free = w.size - builtin.len(w.data);
     if (free == 0){
@@ -73,6 +75,7 @@ internal static slice<byte> appendTo(this ref window w, slice<byte> buf, uint32 
     var dataLen = (uint32)builtin.len(w.data);
     from += (uint32)w.off;
     to += (uint32)w.off;
+
     var wrap = false;
     if (from > dataLen) {
         from -= dataLen;
@@ -82,6 +85,7 @@ internal static slice<byte> appendTo(this ref window w, slice<byte> buf, uint32 
         to -= dataLen;
         wrap = !wrap;
     }
+
     if (wrap){
         buf = appendꓸꓸꓸ(buf, w.data.slice((nint)(from)));
         return appendꓸꓸꓸ(buf, w.data.slice(0, (nint)(to)));

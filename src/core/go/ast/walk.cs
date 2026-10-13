@@ -37,17 +37,18 @@ public static void Walk(Visitor v, Node node) {
             return;
         }
     }
+
     // walk children
     // (the order of the cases matches the order
     // of the corresponding node types in ast.go)
     switch (node.type()) {
+    // Comments and fields
     case ж<Comment> n: {
+        // nothing to do
         break;
     }
     case ж<CommentGroup> n: {
-        walkList(v, // Comments and fields
- // nothing to do
- widen<ж<Comment>, Node>((~n).List, elemᴛ1 => new CommentжNode(elemᴛ1)));
+        walkList(v, widen<ж<Comment>, Node>((~n).List, elemᴛ1 => new CommentжNode(elemᴛ1)));
         break;
     }
     case ж<Field> n: {
@@ -70,16 +71,16 @@ public static void Walk(Visitor v, Node node) {
         walkList(v, widen<ж<Field>, Node>((~n).List, elemᴛ1 => new FieldжNode(elemᴛ1)));
         break;
     }
+    // Expressions
     case ж<BadExpr> _:
     case ж<Ident> _:
     case ж<BasicLit> _: {
         var n = node;
+        // nothing to do
         break;
     }
     case ж<Ellipsis> n: {
         if ((~n).Elt != default!) {
-            // Expressions
-            // nothing to do
             Walk(v, (~n).Elt);
         }
         break;
@@ -158,9 +159,9 @@ public static void Walk(Visitor v, Node node) {
         Walk(v, (~n).Value);
         break;
     }
+    // Types
     case ж<ArrayType> n: {
         if ((~n).Len != default!) {
-            // Types
             Walk(v, (~n).Len);
         }
         Walk(v, (~n).Elt);
@@ -195,21 +196,21 @@ public static void Walk(Visitor v, Node node) {
         Walk(v, (~n).Value);
         break;
     }
+    // Statements
     case ж<BadStmt> n: {
+        // nothing to do
         break;
     }
     case ж<DeclStmt> n: {
-        Walk(v, // Statements
- // nothing to do
- (~n).Decl);
+        Walk(v, (~n).Decl);
         break;
     }
     case ж<EmptyStmt> n: {
+        // nothing to do
         break;
     }
     case ж<LabeledStmt> n: {
-        Walk(v, // nothing to do
- new IdentжNode((~n).Label));
+        Walk(v, new IdentжNode((~n).Label));
         Walk(v, (~n).Stmt);
         break;
     }
@@ -322,9 +323,9 @@ public static void Walk(Visitor v, Node node) {
         Walk(v, new BlockStmtжNode((~n).Body));
         break;
     }
+    // Declarations
     case ж<ImportSpec> n: {
         if ((~n).Doc != nil) {
-            // Declarations
             Walk(v, new CommentGroupжNode((~n).Doc));
         }
         if ((~n).Name != nil) {
@@ -365,11 +366,11 @@ public static void Walk(Visitor v, Node node) {
         break;
     }
     case ж<BadDecl> n: {
+        // nothing to do
         break;
     }
     case ж<GenDecl> n: {
         if ((~n).Doc != nil) {
-            // nothing to do
             Walk(v, new CommentGroupжNode((~n).Doc));
         }
         walkList(v, (~n).Specs);
@@ -389,20 +390,20 @@ public static void Walk(Visitor v, Node node) {
         }
         break;
     }
+    // Files and packages
     case ж<File> n: {
         if ((~n).Doc != nil) {
-            // Files and packages
             Walk(v, new CommentGroupжNode((~n).Doc));
         }
         Walk(v, new IdentжNode((~n).Name));
         walkList(v, (~n).Decls);
+        // don't walk n.Comments - they have been
+        // visited already through the individual
+        // nodes
         break;
     }
     case ж<Package> n: {
         foreach (var (_, f) in (~n).Files) {
-            // don't walk n.Comments - they have been
-            // visited already through the individual
-            // nodes
             Walk(v, new FileжNode(f));
         }
         break;
@@ -412,6 +413,7 @@ public static void Walk(Visitor v, Node node) {
         throw panic(fmt.Sprintf("ast.Walk: unexpected node type %T"u8, n));
         break;
     }}
+
     v.Visit(default!);
 }
 

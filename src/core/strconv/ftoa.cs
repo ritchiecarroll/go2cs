@@ -86,6 +86,7 @@ internal static slice<byte> genericFtoa(slice<byte> dst, float64 val, byte fmt, 
     var neg = bits.Rsh(((~flt).expbits + (~flt).mantbits)) != 0;
     nint exp = (nint)((nint)(bits.Rsh((~flt).mantbits)) & (((nint)1).Lsh((~flt).expbits) - 1));
     var mant = (uint64)(bits & (((uint64)1).Lsh((~flt).mantbits) - 1));
+
     var exprᴛ1 = exp;
     if (exprᴛ1 == ((nint)1).Lsh((~flt).expbits) - 1) {
         // Inf, NaN
@@ -103,19 +104,18 @@ internal static slice<byte> genericFtoa(slice<byte> dst, float64 val, byte fmt, 
             s = infˢ2;
             break;
         }}
-
         return append(dst, s.ꓸꓸꓸ);
     }
     if (exprᴛ1 is 0) {
+        // denormalized
         exp++;
     }
     else { /* default: */
+        // add implicit top bit
         mant |= (uint64)(((uint64)1).Lsh((~flt).mantbits));
     }
-
-    // denormalized
-    // add implicit top bit
     exp += flt.Value.bias;
+
     // Pick off easy binary, hex formats.
     if (fmt == (rune)'b') {
         return fmtB(dst, neg, mant, exp, ref (flt).DerefOrNull());
@@ -123,9 +123,11 @@ internal static slice<byte> genericFtoa(slice<byte> dst, float64 val, byte fmt, 
     if (fmt == (rune)'x' || fmt == (rune)'X') {
         return fmtX(dst, prec, fmt, neg, mant, exp, ref (flt).DerefOrNull());
     }
+
     if (!optimize) {
         return bigFtoa(dst, prec, fmt, neg, mant, exp, ref (flt).DerefOrNull());
     }
+
     decimalSlice digs = default!;
     var ok = false;
     // Negative precision means "only as much as needed to be exact."
@@ -150,7 +152,6 @@ internal static slice<byte> genericFtoa(slice<byte> dst, float64 val, byte fmt, 
             prec = digs.nd;
             break;
         }}
-
     } else 
     if (fmt != (rune)'f') {
         // Fixed number of digits.
@@ -168,11 +169,10 @@ internal static slice<byte> genericFtoa(slice<byte> dst, float64 val, byte fmt, 
             break;
         }
         default: {
+            // Invalid mode.
             digits = 1;
             break;
         }}
-
-        // Invalid mode.
         array<byte> buf = new(24);
         if (bitSize == 32 && digits <= 9){
             digs.d = buf[..];
@@ -215,7 +215,6 @@ internal static slice<byte> bigFtoa(slice<byte> dst, nint prec, byte fmt, bool n
             prec = digs.nd;
             break;
         }}
-
     } else {
         // Round appropriately.
         switch (fmt) {
@@ -234,7 +233,6 @@ internal static slice<byte> bigFtoa(slice<byte> dst, nint prec, byte fmt, bool n
             d.Round(prec);
             break;
         }}
-
         digs = new decimalSlice(d: (~d).d[..], nd: (~d).nd, dp: (~d).dp);
     }
     return formatDigits(dst, shortest, neg, digs, prec, fmt);
@@ -249,15 +247,15 @@ internal static slice<byte> formatDigits(slice<byte> dst, bool shortest, bool ne
         return fmtF(dst, neg, digs, prec);
     }
     case (rune)'g' or (rune)'G': {
+        // trailing fractional zeros in 'e' form will be trimmed.
         nint eprec = prec;
         if (eprec > digs.nd && digs.nd >= digs.dp) {
-            // trailing fractional zeros in 'e' form will be trimmed.
             eprec = digs.nd;
         }
+        // %e is used if the exponent from the conversion
+        // is less than -4 or greater than or equal to the precision.
+        // if precision was the shortest possible, use precision 6 for this decision.
         if (shortest) {
-            // %e is used if the exponent from the conversion
-            // is less than -4 or greater than or equal to the precision.
-            // if precision was the shortest possible, use precision 6 for this decision.
             eprec = 6;
         }
         nint exp = digs.dp - 1;
@@ -287,9 +285,11 @@ internal static void roundShortest(ж<@decimal> Ꮡd, uint64 mant, nint exp, ref
         d.nd = 0;
         return;
     }
+
     // Compute upper and lower such that any decimal number
     // between upper and lower (possibly inclusive)
     // will round to the original floating point number.
+
     // We may see at once that the number is already shortest.
     //
     // Suppose d is not denormal, so that 2^exp <= d < 10^dp.
@@ -305,12 +305,14 @@ internal static void roundShortest(ж<@decimal> Ꮡd, uint64 mant, nint exp, ref
         // The number is already shortest.
         return;
     }
+
     // d = mant << (exp - mantbits)
     // Next highest floating point number is mant+1 << exp-mantbits.
     // Our upper bound is halfway between, mant*2+1 << exp-mantbits-1.
     var upper = @new<@decimal>();
     upper.Assign(mant * 2 + 1);
     upper.Shift(exp - (nint)flt.mantbits - 1);
+
     // d = mant << (exp - mantbits)
     // Next lowest floating point number is mant-1 << exp-mantbits,
     // unless mant-1 drops the significant bit and exp is not the minimum exp,
@@ -329,10 +331,12 @@ internal static void roundShortest(ж<@decimal> Ꮡd, uint64 mant, nint exp, ref
     var lower = @new<@decimal>();
     lower.Assign(mantlo * 2 + 1);
     lower.Shift(explo - (nint)flt.mantbits - 1);
+
     // The upper and lower bounds are possible outputs only if
     // the original mantissa is even, so that IEEE round-to-even
     // would round to the original mantissa and not the neighbors.
     var inclusive = mant % 2 == 0;
+
     // As we walk the digits we want to know whether rounding up would fall
     // within the upper bound. This is tracked by upperdelta:
     //
@@ -345,6 +349,7 @@ internal static void roundShortest(ж<@decimal> Ꮡd, uint64 mant, nint exp, ref
     // If upperdelta == 2, then the difference is greater than 1
     // and we know that rounding up falls within the bound.
     uint8 upperdelta = default!;
+
     // Now we can figure out the minimum number of digits required.
     // Walk along until d has distinguished itself from upper and lower.
     for (nint ui = 0; ᐧ ; ui++) {
@@ -368,36 +373,38 @@ internal static void roundShortest(ж<@decimal> Ꮡd, uint64 mant, nint exp, ref
         if (ui < (~upper).nd) {
             u = (~upper).d[ui];
         }
+
         // Okay to round down (truncate) if lower has a different digit
         // or if lower is inclusive and is exactly the result of rounding
         // down (i.e., and we have reached the final digit of lower).
         var okdown = l != m || inclusive && li + 1 == (~lower).nd;
+
         switch (ᐧ) {
         case {} when upperdelta == 0 && (byte)(m + 1) < u: {
+            // Example:
+            // m = 12345xxx
+            // u = 12347xxx
             upperdelta = 2;
             break;
         }
         case {} when upperdelta == 0 && m != u: {
+            // Example:
+            // m = 12345xxx
+            // u = 12346xxx
             upperdelta = 1;
             break;
         }
         case {} when upperdelta == 1 && (m != (rune)'9' || u != (rune)'0'): {
+            // Example:
+            // m = 1234598x
+            // u = 1234600x
             upperdelta = 2;
             break;
         }}
-
-        // Example:
-        // m = 12345xxx
-        // u = 12347xxx
-        // Example:
-        // m = 12345xxx
-        // u = 12346xxx
-        // Example:
-        // m = 1234598x
-        // u = 1234600x
         // Okay to round up if upper has a different digit and either upper
         // is inclusive or upper is bigger than the result of rounding up.
         var okup = upperdelta > 0 && (inclusive || upperdelta > 1 || ui + 1 < (~upper).nd);
+
         // If it's okay to do either, then round to the nearest one.
         // If it's okay to do only one, do it.
         switch (ᐧ) {
@@ -413,7 +420,6 @@ internal static void roundShortest(ж<@decimal> Ꮡd, uint64 mant, nint exp, ref
             d.RoundUp(mi + 1);
             return;
         }}
-
     }
 }
 
@@ -428,12 +434,14 @@ internal static slice<byte> fmtE(slice<byte> dst, bool neg, decimalSlice d, nint
     if (neg) {
         dst = append(dst, (byte)((rune)'-'));
     }
+
     // first digit
     var ch = (byte)(rune)'0';
     if (d.nd != 0) {
         ch = d.d[0];
     }
     dst = append(dst, ch);
+
     // .moredigits
     if (prec > 0) {
         dst = append(dst, (byte)((rune)'.'));
@@ -447,11 +455,11 @@ internal static slice<byte> fmtE(slice<byte> dst, bool neg, decimalSlice d, nint
             dst = append(dst, (byte)((rune)'0'));
         }
     }
+
     // e±
     dst = append(dst, fmt);
     nint exp = d.dp - 1;
-    if (d.nd == 0) {
-        // special case: 0 has exponent 0
+    if (d.nd == 0) { // special case: 0 has exponent 0
         exp = 0;
     }
     if (exp < 0){
@@ -461,6 +469,7 @@ internal static slice<byte> fmtE(slice<byte> dst, bool neg, decimalSlice d, nint
         ch = (rune)'+';
     }
     dst = append(dst, ch);
+
     // dd or ddd
     switch (ᐧ) {
     case {} when exp is < 10: {
@@ -485,6 +494,7 @@ internal static slice<byte> fmtF(slice<byte> dst, bool neg, decimalSlice d, nint
     if (neg) {
         dst = append(dst, (byte)((rune)'-'));
     }
+
     // integer, padded with zeros as needed.
     if (d.dp > 0){
         nint m = min(d.nd, d.dp);
@@ -495,6 +505,7 @@ internal static slice<byte> fmtF(slice<byte> dst, bool neg, decimalSlice d, nint
     } else {
         dst = append(dst, (byte)((rune)'0'));
     }
+
     // fraction
     if (prec > 0) {
         dst = append(dst, (byte)((rune)'.'));
@@ -508,6 +519,7 @@ internal static slice<byte> fmtF(slice<byte> dst, bool neg, decimalSlice d, nint
             dst = append(dst, ch);
         }
     }
+
     return dst;
 }
 
@@ -517,16 +529,20 @@ internal static slice<byte> fmtB(slice<byte> dst, bool neg, uint64 mant, nint ex
     if (neg) {
         dst = append(dst, (byte)((rune)'-'));
     }
+
     // mantissa
     (dst, _) = formatBits(dst, mant, 10, false, true);
+
     // p
     dst = append(dst, (byte)((rune)'p'));
+
     // ±exponent
     exp -= (nint)flt.mantbits;
     if (exp >= 0) {
         dst = append(dst, (byte)((rune)'+'));
     }
     (dst, _) = formatBits(dst, (uint64)exp, 10, exp < 0, true);
+
     return dst;
 }
 
@@ -535,12 +551,14 @@ internal static slice<byte> fmtX(slice<byte> dst, nint prec, byte fmt, bool neg,
     if (mant == 0) {
         exp = 0;
     }
+
     // Shift digits so leading 1 (if any) is at bit 1<<60.
     mant.LshAssign(60 - flt.mantbits);
     while (mant != 0 && (uint64)(mant & (((uint64)1 << (int)(60)))) == 0) {
         mant <<= (int)(1);
         exp--;
     }
+
     // Round if requested.
     if (prec >= 0 && prec < 15) {
         nuint shift = (nuint)(prec * 4);
@@ -556,15 +574,18 @@ internal static slice<byte> fmtX(slice<byte> dst, nint prec, byte fmt, bool neg,
             exp++;
         }
     }
+
     @string hex = lowerhex;
     if (fmt == (rune)'X') {
         hex = upperhex;
     }
+
     // sign, 0x, leading digit
     if (neg) {
         dst = append(dst, (byte)((rune)'-'));
     }
     dst = append(dst, (byte)((rune)'0'), fmt, (byte)((rune)'0' + (byte)((uint64)(((mant >> (int)(60))) & 1))));
+
     // .fraction
     mant <<= (int)(4); // remove leading 0 or 1
     if (prec < 0 && mant != 0){
@@ -581,6 +602,7 @@ internal static slice<byte> fmtX(slice<byte> dst, nint prec, byte fmt, bool neg,
             mant <<= (int)(4);
         }
     }
+
     // p±
     var ch = (byte)(rune)'P';
     if (fmt == lower(fmt)) {
@@ -594,6 +616,7 @@ internal static slice<byte> fmtX(slice<byte> dst, nint prec, byte fmt, bool neg,
         ch = (rune)'+';
     }
     dst = append(dst, ch);
+
     // dd or ddd or dddd
     switch (ᐧ) {
     case {} when exp is < 100: {

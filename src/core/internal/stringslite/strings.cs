@@ -45,8 +45,8 @@ public static nint Index(@string s, @string substr) {
         return -1;
     }
     case {} when n <= bytealg.MaxLen: {
+        // Use brute force when s and substr both are small
         if (len(s) <= bytealg.MaxBruteForce) {
-            // Use brute force when s and substr both are small
             return bytealg.IndexString(s, substr);
         }
         var c0Δ2 = substr[0];
@@ -80,7 +80,6 @@ public static nint Index(@string s, @string substr) {
         }
         return -1;
     }}
-
     var c0 = substr[0];
     var c1 = substr[1];
     nint i = 0;

@@ -4,17 +4,35 @@
 
 // Package reflectlite implements lightweight version of reflect, not using
 // any package except for "runtime", "unsafe", and "internal/abi"
+
+// A Kind represents the specific kind of type that a Type represents.
+// The zero Kind is not a valid kind.
 global using Kind = go.@internal.abi_package.ΔKind;
 global using nameOff = go.@internal.abi_package.NameOff;
 global using typeOff = go.@internal.abi_package.TypeOff;
 global using textOff = go.@internal.abi_package.TextOff;
+
+// uncommonType is present only for defined types or types with methods
+// (if T is a defined type, the uncommonTypes for T and *T have methods).
+// Using a pointer to this struct reduces the overall size required
+// to describe a non-defined type with no methods.
 global using uncommonType = go.@internal.abi_package.UncommonType;
+
+// arrayType represents a fixed array type.
 global using arrayType = go.@internal.abi_package.ΔArrayType;
+
+// chanType represents a channel type.
 global using chanType = go.@internal.abi_package.ChanType;
 global using funcType = go.@internal.abi_package.ΔFuncType;
 global using interfaceType = go.@internal.abi_package.ΔInterfaceType;
+
+// ptrType represents a pointer type.
 global using ptrType = go.@internal.abi_package.PtrType;
+
+// sliceType represents a slice type.
 global using sliceType = go.@internal.abi_package.SliceType;
+
+// structType represents a struct type.
 global using structType = go.@internal.abi_package.ΔStructType;
 
 namespace go.@internal;
@@ -79,6 +97,7 @@ partial interface ΔType {
  */
 public static abiꓸKind Ptr => /* abi.Pointer */ 22;
 
+// Import-and-export these constants as necessary
 public static abiꓸKind Interface => /* abi.Interface */ 20;
 public static abiꓸKind Slice => /* abi.Slice */ 23;
 public static abiꓸKind ΔString => /* abi.String */ 24;
@@ -261,7 +280,6 @@ internal static @string Name(this rtype t) {
             sqBrackets--;
             break;
         }}
-
         i--;
     }
     return s.slice(i + 1);
@@ -384,11 +402,13 @@ internal static bool directlyAssignable(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
     if (ᏑT == ᏑV) {
         return true;
     }
+
     // Otherwise at least one of T and V must not be defined
     // and they must have the same kind.
     if (T.HasName() && V.HasName() || T.Kind() != V.Kind()) {
         return false;
     }
+
     // x's type T and V must  have identical underlying types.
     return haveIdenticalUnderlyingType(ᏑT, ᏑV, true);
 }
@@ -400,9 +420,11 @@ internal static bool haveIdenticalType(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV, boo
     if (cmpTags) {
         return ᏑT == ᏑV;
     }
+
     if (toRType(ᏑT).Name() != toRType(ᏑV).Name() || T.Kind() != V.Kind()) {
         return false;
     }
+
     return haveIdenticalUnderlyingType(ᏑT, ᏑV, false);
 }
 

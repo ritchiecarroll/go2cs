@@ -38,10 +38,12 @@ partial struct dictDecoder {
 // the contents of dict.
 internal static void init(this ref dictDecoder dd, nint size, slice<byte> dict) {
     dd = new dictDecoder(hist: dd.hist);
+
     if (cap(dd.hist) < size) {
         dd.hist = new slice<byte>(size);
     }
     dd.hist = dd.hist.slice(0, size);
+
     if (len(dict) > len(dd.hist)) {
         dict = dict.slice(len(dict) - len(dd.hist));
     }
@@ -106,6 +108,7 @@ internal static nint writeCopy(this ref dictDecoder dd, nint dist, nint length) 
     if (endPos > len(dd.hist)) {
         endPos = len(dd.hist);
     }
+
     // Copy non-overlapping section after destination position.
     //
     // This section is non-overlapping in that the copy length for this section
@@ -118,6 +121,7 @@ internal static nint writeCopy(this ref dictDecoder dd, nint dist, nint length) 
         dstPos += copy(dd.hist.slice(dstPos, endPos), dd.hist.slice(srcPos));
         srcPos = 0;
     }
+
     // Copy possibly overlapping section before destination position.
     //
     // This section can overlap if the copy length for this section is larger
@@ -135,6 +139,7 @@ internal static nint writeCopy(this ref dictDecoder dd, nint dist, nint length) 
     while (dstPos < endPos) {
         dstPos += copy(dd.hist.slice(dstPos, endPos), dd.hist.slice(srcPos, dstPos));
     }
+
     dd.wrPos = dstPos;
     return dstPos - dstBase;
 }
@@ -153,10 +158,12 @@ internal static nint tryWriteCopy(this ref dictDecoder dd, nint dist, nint lengt
     }
     nint dstBase = dstPos;
     nint srcPos = dstPos - dist;
+
     // Copy possibly overlapping section before destination position.
     while (dstPos < endPos) {
         dstPos += copy(dd.hist.slice(dstPos, endPos), dd.hist.slice(srcPos, dstPos));
     }
+
     dd.wrPos = dstPos;
     return dstPos - dstBase;
 }

@@ -31,6 +31,7 @@ public static error WriteEvent(this ref TextWriter w, Event e) {
     if (e.Version != w.v) {
         return fmt.Errorf("mismatched version between writer (go 1.%d) and event (go 1.%d)"u8, w.v, e.Version);
     }
+
     // Write event.
     var (_, err) = fmt.Fprintln(w.w, e.String());
     return err;

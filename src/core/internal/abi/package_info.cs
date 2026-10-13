@@ -57,14 +57,14 @@ using static go.@internal.abi_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/abi/abi.go", "abi.cs", "ACxegoKClIKCgpSCgoKUAAIYAAkCgpSCgpQABRCSAAIS4g==")]
+[assembly: go.GoPositionMap("internal/abi/abi.go", "abi.cs", "ACxegoKClIKCgpSCgoKUAAIYAAkCgpSCgpQABxCSAAIS4g==")]
 [assembly: go.GoPositionMap("internal/abi/compiletype.go", "compiletype.cs", "AAce8KaQqKCmkKaQ")]
 [assembly: go.GoPositionMap("internal/abi/escape.go", "escape.cs", "AAkmAAoCgu6SgpQ=")]
 [assembly: go.GoPositionMap("internal/abi/funcpc.go", "funcpc.cs", "AAgsAA4S")]
-[assembly: go.GoPositionMap("internal/abi/map_noswiss.go", "map_noswiss.cs", "ACBQsqSSpJKkkqSS")]
+[assembly: go.GoPositionMap("internal/abi/map_noswiss.go", "map_noswiss.cs", "ACJQsqSSpJKkkqSS")]
 [assembly: go.GoPositionMap("internal/abi/map_swiss.go", "map_swiss.cs", "AC9qkqSSpJKkkg==")]
 [assembly: go.GoPositionMap("internal/abi/switch.go", "switch.cs", "AB9AgoK4lKQ=")]
-[assembly: go.GoPositionMap("internal/abi/type.go", "type.cs", "AFyYApKClKYAH1SSgoCCpKaApIKokKaSqJKmgoKUABkuooKU1qKClAACFPIAEjKCAD9EsoKUlKSsrKysrKysAA5+soKUqJCmkKSAAAgQgoKClKaigoKUqJAAGj6CpoKmgqaCAAYyggANHIIAJVKi2qKokqiSqJLaooKCgoKCzJKClIKssoKCgoKClOqSgpSCqJKClIKCpoKClIKUgoKChIKCgpSCgpSCloKCgoKCgoKW")]
+[assembly: go.GoPositionMap("internal/abi/type.go", "type.cs", "AIMBmAKSgpSmAB9UkoKAgqSmgKSCqJCmkqiSpoKClAAZLqKClNaigpQAAhTyABIyggA/RLKClJSkrKysrKysrAANfrKClKiQppCkgAAIEIKCgpSmooKClKiQABo+gqaCpoKmggAGMoIADRyCACVSotqiqJKokqiS2qKCgoKCgsySgpSCrLKCgoKCgpTqkoKUgqiSgpSCgqaCgpSClIKCgpSCgoKUgoKUgqaCgoKCgoKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

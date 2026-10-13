@@ -58,6 +58,8 @@ partial struct gclink {
     internal gclinkptr next;
 }
 
+// A gclinkptr is a pointer to a gclink, but it is opaque
+// to the garbage collector.
 partial struct gclinkptr /*num:uintptr*/;
 
 // ptr returns the *gclink form of p.
@@ -98,15 +100,15 @@ internal static ж<mcache> allocmcache() {
 // resources, such as statistics, so donate them to
 // a different mcache (the recipient).
 internal static void freemcache(ж<mcache> Ꮡc) {
-    ref var c = ref Ꮡc.DerefOrNull();
-
     systemstack(() => {
         Ꮡc.Value.releaseAll();
         stackcache_clear(ref (Ꮡc).DerefOrNull());
+
         // NOTE(rsc,rlh): If gcworkbuffree comes back, we need to coordinate
         // with the stealing of gcworkbufs during garbage collection to avoid
         // a race where the workbuf is double-freed.
         // gcworkbuffree(c.gcworkbuf)
+
         @lock(Ꮡmheap_.of(mheap.Ꮡlock));
         Ꮡmheap_.of(mheap.Ꮡcachealloc).free(@unsafe.Pointer.FromPinnedBox(Ꮡc));
         unlock(Ꮡmheap_.of(mheap.Ꮡlock));
@@ -146,6 +148,7 @@ internal static readonly @string spanHasNoFreeSpaceˢ = "span has no free space"
 internal static void refill(this ref mcache c, spanClass spc) {
     // Return the current cached span to the central lists.
     var s = c.alloc[spc];
+
     if ((~s).allocCount != (~s).nelems) {
         @throw(refillOfSpanWithFreeˢ);
     }
@@ -155,35 +158,44 @@ internal static void refill(this ref mcache c, spanClass spc) {
             @throw(badSweepgenInRefillˢ);
         }
         mheap_.central[spc].mcentral.uncacheSpan(s);
+
         // Count up how many slots were used and record it.
         var stats = Ꮡmemstats.of(mstats.ᏑheapStats).acquire();
         var slotsUsed = (int64)(~s).allocCount - (int64)(~s).allocCountBeforeCache;
         atomic.Xadd64(stats.at(heapStatsDelta.ᏑsmallAllocCount, (nint)(spc.sizeclass())), slotsUsed);
+
         // Flush tinyAllocs.
         if (spc == tinySpanClass) {
             atomic.Xadd64(stats.of(heapStatsDelta.ᏑtinyAllocCount), (int64)c.tinyAllocs);
             c.tinyAllocs = 0;
         }
         Ꮡmemstats.of(mstats.ᏑheapStats).release();
+
         // Count the allocs in inconsistent, internal stats.
         var bytesAllocated = slotsUsed * (int64)(~s).elemsize;
         ᏑgcController.of(gcControllerState.ᏑtotalAlloc).Add(bytesAllocated);
+
         // Clear the second allocCount just to be safe.
         s.Value.allocCountBeforeCache = 0;
     }
+
     // Get a new cached span from the central lists.
     s = mheap_.central[spc].mcentral.cacheSpan();
     if (s == nil) {
         @throw(outOfMemoryˢ);
     }
+
     if ((~s).allocCount == (~s).nelems) {
         @throw(spanHasNoFreeSpaceˢ);
     }
+
     // Indicate that this span is cached and prevent asynchronous
     // sweeping in the next sweep phase.
     s.Value.sweepgen = mheap_.sweepgen + 3;
+
     // Store the current alloc count for accounting later.
     s.Value.allocCountBeforeCache = s.Value.allocCount;
+
     // Update heapLive and flush scanAlloc.
     //
     // We have not yet allocated anything new into the span, but we
@@ -200,6 +212,7 @@ internal static void refill(this ref mcache c, spanClass spc) {
     var usedBytes = (uintptr)(~s).allocCount * (~s).elemsize;
     ᏑgcController.update((int64)((~s).npages * (uintptr)pageSize) - (int64)usedBytes, (int64)c.scanAlloc);
     c.scanAlloc = 0;
+
     c.alloc[spc] = s;
 }
 
@@ -212,27 +225,34 @@ internal static ж<mspan> allocLarge(this ref mcache c, uintptr size, bool nosca
     if ((uintptr)(size & (uintptr)_PageMask) != 0) {
         npages++;
     }
+
     // Deduct credit for this span allocation and sweep if
     // necessary. mHeap_Alloc will also sweep npages, so this only
     // pays the debt down to npage pages.
     deductSweepCredit(npages * (uintptr)_PageSize, npages);
+
     var spc = makeSpanClass(0, noscan);
     var s = Ꮡmheap_.alloc(npages, spc);
     if (s == nil) {
         @throw(outOfMemoryˢ);
     }
+
     // Count the alloc in consistent, external stats.
     var stats = Ꮡmemstats.of(mstats.ᏑheapStats).acquire();
     atomic.Xadd64(stats.of(heapStatsDelta.ᏑlargeAlloc), (int64)(npages * (uintptr)pageSize));
     atomic.Xadd64(stats.of(heapStatsDelta.ᏑlargeAllocCount), 1);
     Ꮡmemstats.of(mstats.ᏑheapStats).release();
+
     // Count the alloc in inconsistent, internal stats.
     ᏑgcController.of(gcControllerState.ᏑtotalAlloc).Add((int64)(npages * (uintptr)pageSize));
+
     // Update heapLive.
     ᏑgcController.update((int64)((~s).npages * (uintptr)pageSize), 0);
+
     // Put the large span in the mcentral swept list so that it's
     // visible to the background sweeper.
     mheap_.central[spc].mcentral.fullSwept(mheap_.sweepgen).push(s);
+
     // Adjust s.limit down to the object-containing part of the span.
     //
     // This is just to create a slightly tighter bound on the limit.
@@ -249,6 +269,7 @@ internal static void releaseAll(this ref mcache c) {
     // Take this opportunity to flush scanAlloc.
     var scanAlloc = (int64)c.scanAlloc;
     c.scanAlloc = 0;
+
     var sg = mheap_.sweepgen;
     var dHeapLive = (int64)0;
     foreach (var (i, _) in c.alloc) {
@@ -256,13 +277,16 @@ internal static void releaseAll(this ref mcache c) {
         if (s != Ꮡemptymspan) {
             var slotsUsed = (int64)(~s).allocCount - (int64)(~s).allocCountBeforeCache;
             s.Value.allocCountBeforeCache = 0;
+
             // Adjust smallAllocCount for whatever was allocated.
             var statsΔ1 = Ꮡmemstats.of(mstats.ᏑheapStats).acquire();
             atomic.Xadd64(statsΔ1.at(heapStatsDelta.ᏑsmallAllocCount, (nint)(((spanClass)(uint8)i).sizeclass())), slotsUsed);
             Ꮡmemstats.of(mstats.ᏑheapStats).release();
+
             // Adjust the actual allocs in inconsistent, internal stats.
             // We assumed earlier that the full span gets allocated.
             ᏑgcController.of(gcControllerState.ᏑtotalAlloc).Add(slotsUsed * (int64)(~s).elemsize);
+
             if ((~s).sweepgen != sg + 1) {
                 // refill conservatively counted unallocated slots in gcController.heapLive.
                 // Undo this.
@@ -271,6 +295,7 @@ internal static void releaseAll(this ref mcache c) {
                 // recomputed since caching this span, so we don't do this for stale spans.
                 dHeapLive -= (int64)((uint16)((~s).nelems - (~s).allocCount)) * (int64)(~s).elemsize;
             }
+
             // Release the span to the mcentral.
             mheap_.central[i].mcentral.uncacheSpan(s);
             c.alloc[i] = Ꮡemptymspan;
@@ -279,11 +304,13 @@ internal static void releaseAll(this ref mcache c) {
     // Clear tinyalloc pool.
     c.tiny = 0;
     c.tinyoffset = 0;
+
     // Flush tinyAllocs.
     var stats = Ꮡmemstats.of(mstats.ᏑheapStats).acquire();
     atomic.Xadd64(stats.of(heapStatsDelta.ᏑtinyAllocCount), (int64)c.tinyAllocs);
     c.tinyAllocs = 0;
     Ꮡmemstats.of(mstats.ᏑheapStats).release();
+
     // Update heapLive and heapScan.
     ᏑgcController.update(dHeapLive, scanAlloc);
 }

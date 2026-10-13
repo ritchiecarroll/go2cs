@@ -93,7 +93,6 @@ internal static nint goamd64() {
             return 4;
         }
     }
-
     Error = fmt.Errorf("invalid GOAMD64: must be v1, v2, v3, v4"u8);
     return (nint)((byte)(DefaultGOAMD64[len("v")] - (rune)'0'));
 }
@@ -107,7 +106,6 @@ internal static @string gofips140() {
     if (exprᴛ1 == "off"u8 || exprᴛ1 == "latest"u8 || exprᴛ1 == "inprocess"u8 || exprᴛ1 == "certified"u8) {
         return v;
     }
-
     if (isFIPSVersion(v)) {
         return v;
     }
@@ -179,6 +177,7 @@ internal static GoarmFeatures /*g*/ goarm() {
         def = "7"u8;
     }
     @string v = envOr(goarmˢ, def);
+
     var floatSpecified = false;
     if (strings.HasSuffix(v, softFloatOpt)) {
         g.SoftFloat = true;
@@ -189,6 +188,7 @@ internal static GoarmFeatures /*g*/ goarm() {
         floatSpecified = true;
         v = v.slice(0, len(v) - len(hardFloatOpt));
     }
+
     var exprᴛ1 = v;
     if (exprᴛ1 == "5"u8) {
         g.Version = 5;
@@ -246,6 +246,7 @@ public static (Goarm64Features g, error e) ParseGoarm64(@string v) {
 
     @string lseOpt = lseOptᶜ;
     @string cryptoOpt = cryptoOptᶜ;
+
     g.LSE = false;
     g.Crypto = false;
     // We allow any combination of suffixes, in any order
@@ -255,24 +256,27 @@ public static (Goarm64Features g, error e) ParseGoarm64(@string v) {
             v = v.slice(0, len(v) - len(lseOpt));
             continue;
         }
+
         if (strings.HasSuffix(v, cryptoOpt)) {
             g.Crypto = true;
             v = v.slice(0, len(v) - len(cryptoOpt));
             continue;
         }
+
         break;
     }
+
     var exprᴛ1 = v;
     if (exprᴛ1 == "v8.0"u8) {
         g.Version = v;
     }
     else if (exprᴛ1 == "v8.1"u8 || exprᴛ1 == "v8.2"u8 || exprᴛ1 == "v8.3"u8 || exprᴛ1 == "v8.4"u8 || exprᴛ1 == "v8.5"u8 || exprᴛ1 == "v8.6"u8 || exprᴛ1 == "v8.7"u8 || exprᴛ1 == "v8.8"u8 || exprᴛ1 == "v8.9"u8 || exprᴛ1 == "v9.0"u8 || exprᴛ1 == "v9.1"u8 || exprᴛ1 == "v9.2"u8 || exprᴛ1 == "v9.3"u8 || exprᴛ1 == "v9.4"u8 || exprᴛ1 == "v9.5"u8) {
         g.Version = v;
+        // LSE extension is mandatory starting from 8.1
         g.LSE = true;
     }
     else { /* default: */
-        e = fmt.Errorf("invalid GOARM64: must start with v8.{0-9} or v9.{0-5} and may optionally end in %q and/or %q"u8, // LSE extension is mandatory starting from 8.1
-
+        e = fmt.Errorf("invalid GOARM64: must start with v8.{0-9} or v9.{0-5} and may optionally end in %q and/or %q"u8,
             lseOpt, cryptoOpt);
         g.Version = DefaultGOARM64;
     }
@@ -297,14 +301,18 @@ public static bool Supports(this Goarm64Features g, @string s) {
     if (len(s) != 4) {
         return false;
     }
+
     var major = s[1];
     var minor = s[3];
+
     // We only accept "v{8-9}.{0-9}. Everything else is malformed.
     if (major < (rune)'8' || major > (rune)'9' || minor < (rune)'0' || minor > (rune)'9' || s[0] != (rune)'v' || s[2] != (rune)'.') {
         return false;
     }
+
     var g_major = g.Version[1];
     var g_minor = g.Version[3];
+
     if (major == g_major){
         return minor <= g_minor;
     } else 
@@ -327,7 +335,6 @@ internal static @string gomips() {
             return v;
         }
     }
-
     Error = fmt.Errorf("invalid GOMIPS: must be hardfloat, softfloat"u8);
     return DefaultGOMIPS;
 }
@@ -343,7 +350,6 @@ internal static @string gomips64() {
             return v;
         }
     }
-
     Error = fmt.Errorf("invalid GOMIPS64: must be hardfloat, softfloat"u8);
     return DefaultGOMIPS64;
 }
@@ -365,7 +371,6 @@ internal static nint goppc64() {
             return 10;
         }
     }
-
     Error = fmt.Errorf("invalid GOPPC64: must be power8, power9, power10"u8);
     return (nint)((byte)(DefaultGOPPC64[len("power")] - (rune)'0'));
 }
@@ -384,7 +389,6 @@ internal static nint goriscv64() {
             return 22;
         }
     }
-
     Error = fmt.Errorf("invalid GORISCV64: must be rva20u64, rva22u64"u8);
     @string v = DefaultGORISCV64[(int)(len("rva"))..];
     nint i = strings.IndexFunc(v, (rune r) => r < (rune)'0' || r > (rune)'9');
@@ -423,12 +427,11 @@ internal static gowasmFeatures /*f*/ gowasm() {
             f.SignExt = true;
         }
         else if (exprᴛ1 == ""u8) {
+            // ignore
         }
         else { /* default: */
-            Error = fmt.Errorf("invalid GOWASM: no such feature %q"u8, // ignore
- opt);
+            Error = fmt.Errorf("invalid GOWASM: no such feature %q"u8, opt);
         }
-
     }
     return f;
 }
@@ -490,7 +493,6 @@ public static (@string name, @string value) GOGOARCH() {
     if (exprᴛ1 == "wasm"u8) {
         return (gowasmˢ, GOWASM.String());
     }
-
     return ("", "");
 }
 
@@ -520,8 +522,8 @@ internal static slice<@string> gogoarchTags() {
         for (nint i = 0; i <= minor; i++) {
             list = append(list, fmt.Sprintf("%s.v%d.%d"u8, GOARCH, major, i));
         }
+        // ARM64 v9.x also includes support of v8.x+5 (i.e. v9.1 includes v8.(1+5) = v8.6).
         if (major == 9) {
-            // ARM64 v9.x also includes support of v8.x+5 (i.e. v9.1 includes v8.(1+5) = v8.6).
             for (nint i = 0; i <= minor + 5 && i <= 9; i++) {
                 list = append(list, fmt.Sprintf("%s.v%d.%d"u8, GOARCH, (nint)(8), i));
             }
@@ -558,7 +560,6 @@ internal static slice<@string> gogoarchTags() {
         }
         return list;
     }
-
     return default!;
 }
 

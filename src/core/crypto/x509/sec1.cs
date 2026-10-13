@@ -55,6 +55,7 @@ public static (slice<byte>, error) MarshalECPrivateKey(ж<ecdsa.PrivateKey> Ꮡk
     if (!ok) {
         return (default!, errors.New(x509UnknownEllipticCurveˢ));
     }
+
     return marshalECPrivateKeyWithOID(ref (Ꮡkey).DerefOrNull(), oid);
 }
 
@@ -118,6 +119,7 @@ internal static (ж<ecdsa.PrivateKey> key, error err) parseECPrivateKey(ж<asn1.
     if (privKey.Version != ecPrivKeyVersion) {
         return (default!, fmt.Errorf("x509: unknown EC private key version %d"u8, privKey.Version));
     }
+
     elliptic.Curve curve = default!;
     if (ᏑnamedCurveOID != nil){
         curve = namedCurveFromOID(namedCurveOID);
@@ -127,6 +129,7 @@ internal static (ж<ecdsa.PrivateKey> key, error err) parseECPrivateKey(ж<asn1.
     if (curve == default!) {
         return (default!, errors.New(x509UnknownEllipticCurveˢ));
     }
+
     var k = @new<bigꓸInt>().SetBytes(privKey.PrivateKey);
     var curveOrder = curve.Params().Value.N;
     if (k.Cmp(curveOrder) >= 0) {
@@ -135,7 +138,9 @@ internal static (ж<ecdsa.PrivateKey> key, error err) parseECPrivateKey(ж<asn1.
     var priv = @new<ecdsa.PrivateKey>();
     priv.Value.Curve = curve;
     priv.Value.D = k;
+
     var privateKey = new slice<byte>((curveOrder.BitLen() + 7) / 8);
+
     // Some private keys have leading zero padding. This is invalid
     // according to [SEC1], but this code will ignore it.
     while (builtin.len(privKey.PrivateKey) > builtin.len(privateKey)) {
@@ -144,11 +149,13 @@ internal static (ж<ecdsa.PrivateKey> key, error err) parseECPrivateKey(ж<asn1.
         }
         privKey.PrivateKey = privKey.PrivateKey[1..];
     }
+
     // Some private keys remove all leading zeros, this is also invalid
     // according to [SEC1] but since OpenSSL used to do this, we ignore
     // this too.
     copy(privateKey.slice(builtin.len(privateKey) - builtin.len(privKey.PrivateKey)), privKey.PrivateKey);
     (priv.Value.X, priv.Value.Y) = curve.ScalarBaseMult(privateKey);
+
     return (priv, default!);
 }
 

@@ -58,10 +58,12 @@ public static bool ValidPath(@string name) {
     if (!utf8.ValidString(name)) {
         return false;
     }
+
     if (name == "."u8) {
         // special case
         return true;
     }
+
     // Iterate over elements in name, checking each.
     while (ᐧ) {
         nint i = 0;
@@ -139,13 +141,9 @@ partial interface ReadDirFile :
 // Errors returned by file systems can be tested against these errors
 // using [errors.Is].
 public static error ErrInvalid = errInvalid(); // "invalid argument"
-
 public static error ErrPermission = errPermission(); // "permission denied"
-
 public static error ErrExist = errExist(); // "file already exists"
-
 public static error ErrNotExist = errNotExist(); // "file does not exist"
-
 public static error ErrClosed = errClosed(); // "file already closed"
 
 internal static error errInvalid() {
@@ -178,6 +176,11 @@ partial interface FileInfo {
     any Sys();           // underlying data source (can return nil)
 }
 
+// A FileMode represents a file's mode and permission bits.
+// The bits have the same definition on all systems, so that
+// information about files can be moved from one system
+// to another portably. Not all bits apply to all systems.
+// The only required bit is [ModeDir] for directories.
 partial struct FileMode /*num:uint32*/;
 
 // The defined file mode bits are the most significant bits of the [FileMode].
@@ -185,32 +188,23 @@ partial struct FileMode /*num:uint32*/;
 // The values of these bits should be considered part of the public API and
 // may be used in wire protocols or disk representations: they must not be
 // changed, although new bits might be added.
+// The single letters are the abbreviations
+// used by the String method's formatting.
 public static FileMode ModeDir => /* 1 << (32 - 1 - iota) */ 2147483648;                         // d: is a directory
-
 public static FileMode ModeAppend => 1073741824;                      // a: append-only
-
 public static FileMode ModeExclusive => 536870912;                   // l: exclusive use
-
 public static FileMode ModeTemporary => 268435456;                   // T: temporary file; Plan 9 only
-
 public static FileMode ModeSymlink => 134217728;                     // L: symbolic link
-
 public static FileMode ModeDevice => 67108864;                      // D: device file
-
 public static FileMode ModeNamedPipe => 33554432;                   // p: named pipe (FIFO)
-
 public static FileMode ModeSocket => 16777216;                      // S: Unix domain socket
-
 public static FileMode ModeSetuid => 8388608;                      // u: setuid
-
 public static FileMode ModeSetgid => 4194304;                      // g: setgid
-
 public static FileMode ModeCharDevice => 2097152;                  // c: Unix character device, when ModeDevice is set
-
 public static FileMode ModeSticky => 1048576;                      // t: sticky
-
 public static FileMode ModeIrregular => 524288;                   // ?: non-regular file; nothing else is known about this file
 
+// Mask for the type bits. For regular files, none will be set.
 public static FileMode ModeType => /* ModeDir | ModeSymlink | ModeNamedPipe | ModeSocket | ModeDevice | ModeCharDevice | ModeIrregular */ 2401763328;
 
 public static FileMode ModePerm => /* 0777 */ 511;  // Unix permission bits

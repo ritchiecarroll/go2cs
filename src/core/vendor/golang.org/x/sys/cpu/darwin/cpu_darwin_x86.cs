@@ -35,6 +35,7 @@ internal static bool darwinKernelVersionCheck(nint major, nint minor, nint patch
     if (err != default!) {
         return false;
     }
+
     array<nint> mmp = new(3);
     nint c = 0;
 Loop:
@@ -58,7 +59,6 @@ Loop:
         default: {
             return false;
         }}
-
 continue_Loop:;
     }
 break_Loop:;

@@ -32,11 +32,13 @@ internal static float64 mod(float64 x, float64 y) {
         return NaN();
     }
     y = Abs(y);
+
     var (yfr, yexp) = Frexp(y);
     var r = x;
     if (x < 0D) {
         r = -x;
     }
+
     while (r >= y) {
         var (rfr, rexp) = Frexp(r);
         if (rfr < yfr) {

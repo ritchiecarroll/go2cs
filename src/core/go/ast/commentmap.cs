@@ -19,6 +19,9 @@ internal static void sortComments(slice<ж<CommentGroup>> list) {
     slices.SortFunc(list, (ж<CommentGroup> a, ж<CommentGroup> b) => cmp.Compare(a.Pos(), b.Pos()));
 }
 
+// A CommentMap maps an AST node to a list of comment groups
+// associated with it. See [NewCommentMap] for a description of
+// the association.
 partial struct CommentMap /*map[Node, slice<ж<CommentGroup>>]*/;
 
 internal static void addComment(this CommentMap cmap, Node n, ж<CommentGroup> Ꮡc) {
@@ -42,10 +45,10 @@ internal static slice<Node> nodeList(Node n) {
         case ж<Comment> _: {
             return false;
         }}
-
         Ꮡlist.ValueSlot = append(Ꮡlist.ValueSlot, nΔ1);
         return true;
     });
+
     // Note: The current implementation assumes that Inspect traverses the
     //       AST in depth-first and thus _source_ order. If AST traversal
     //       does not follow source order, the sorting call below will be
@@ -57,6 +60,7 @@ internal static slice<Node> nodeList(Node n) {
     //       }
     //       return cmp.Compare(a.End(), b.End())
     // })
+
     return list;
 }
 
@@ -82,6 +86,8 @@ internal static void next(this ref commentListReader r) {
     }
 }
 
+// A nodeStack keeps track of nested nodes.
+// A node lower on the stack lexically contains the nodes higher on the stack.
 partial struct nodeStack /*[]Node*/;
 
 // push pops all nodes that appear lexically before n
@@ -125,26 +131,27 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
     if (len(comments) == 0) {
         return default!; // no comments to map
     }
+
     var cmap = new CommentMap(0);
+
     // set up comment reader r
     var tmp = new slice<ж<CommentGroup>>(len(comments));
     copy(tmp, comments); // don't change incoming comments
     sortComments(tmp);
     var r = new commentListReader(fset: Ꮡfset, list: tmp); // !r.eol() because len(comments) > 0
     r.next();
+
     // create node list in lexical order
     var nodes = nodeList(node);
     nodes = append(nodes, (Node)(default!)); // append sentinel
+
     // set up iteration variables
     Node p = default!;                       // previous node
-    
     tokenꓸPosition pend = default!;                           // end of p
-    
     Node pg = default!;                     // previous node group (enclosing nodes of "importance")
-    
     tokenꓸPosition pgend = default!;                         // end of pg
-    
     nodeStack stack = default!;                    // stack of node groups
+
     foreach (var (_, q) in nodes) {
         tokenꓸPosition qpos = default!;
         if (q != default!){
@@ -156,6 +163,7 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
             qpos.Offset = infinity;
             qpos.Line = infinity;
         }
+
         // process comments before current node
         while (r.end.Offset <= qpos.Offset) {
             // determine recent node group
@@ -173,23 +181,23 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
             Node assoc = default!;
             switch (ᐧ) {
             case {} when pg != default! && (pgend.Line == r.pos.Line || pgend.Line + 1 == r.pos.Line && r.end.Line + 1 < qpos.Line): {
+                // 1) comment starts on same line as previous node group ends, or
+                // 2) comment starts on the line immediately after the
+                //    previous node group and there is an empty line before
+                //    the current node
+                // => associate comment with previous node group
                 assoc = pg;
                 break;
             }
             case {} when p != default! && (pend.Line == r.pos.Line || pend.Line + 1 == r.pos.Line && r.end.Line + 1 < qpos.Line || q == default!): {
+                // same rules apply as above for p rather than pg,
+                // but also associate with p if we are at the end (q == nil)
                 assoc = p;
                 break;
             }
             default: {
+                // otherwise, associate comment with current node
                 if (q == default!) {
-                    // 1) comment starts on same line as previous node group ends, or
-                    // 2) comment starts on the line immediately after the
-                    //    previous node group and there is an empty line before
-                    //    the current node
-                    // => associate comment with previous node group
-                    // same rules apply as above for p rather than pg,
-                    // but also associate with p if we are at the end (q == nil)
-                    // otherwise, associate comment with current node
                     // we can only reach here if there was no p
                     // which would imply that there were no nodes
                     throw panic("internal error: no comments should be associated with sentinel");
@@ -197,16 +205,17 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
                 assoc = q;
                 break;
             }}
-
             cmap.addComment(assoc, r.comment);
             if (r.eol()) {
                 return cmap;
             }
             r.next();
         }
+
         // update previous node
         p = q;
         pend = Ꮡfset.Position(p.End());
+
         // update previous node group if we see an "important" node
         switch (q.type()) {
         case ж<File> _:
@@ -217,8 +226,8 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
             stack.push(q);
             break;
         }}
-
     }
+
     return cmap;
 }
 
@@ -267,6 +276,7 @@ public static slice<ж<CommentGroup>> Comments(this CommentMap cmap) {
 internal static @string summary(slice<ж<CommentGroup>> list) {
     UntypedInt maxLen = 40;
     bytes.Buffer buf = default!;
+
     // collect comments text
 loop:
     foreach (var (_, group) in list) {
@@ -282,11 +292,13 @@ loop:
 continue_loop:;
     }
 break_loop:;
+
     // truncate if too long
     if (buf.Len() > maxLen) {
         buf.Truncate(maxLen - 3);
         buf.WriteString("..."u8);
     }
+
     // replace any invisibles with blanks
     var bytesΔ1 = buf.Bytes();
     foreach (var (i, b) in bytesΔ1) {
@@ -295,8 +307,8 @@ break_loop:;
             bytesΔ1[i] = (rune)' ';
             break;
         }}
-
     }
+
     return ((@string)bytesΔ1);
 }
 
@@ -316,6 +328,7 @@ public static @string String(this CommentMap cmap) {
         }
         return cmp.Compare(a.End(), b.End());
     });
+
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf), commentMapˢ);
     foreach (var (_, node) in nodes) {

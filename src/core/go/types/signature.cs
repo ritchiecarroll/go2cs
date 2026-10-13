@@ -146,6 +146,7 @@ internal static void funcType(this ж<Checker> Ꮡcheck, ж<ΔSignature> Ꮡsig,
         check.recordScope(new ast.FuncTypeжNode(Ꮡftyp), check.scope);
         sig.scope = check.scope;
         ᒐd1 = true;
+
         // collect method receiver, if any
         ж<Var> recv = default!;
         ж<TypeParamList> rparams = default!;
@@ -154,13 +155,14 @@ internal static void funcType(this ж<Checker> Ꮡcheck, ж<ΔSignature> Ꮡsig,
             {
                 nint n = len(recvPar.List); if (n > 1) {
                     Ꮡcheck.error(new ast_Fieldжpositioner(recvPar.List[n - 1]), InvalidRecv, methodHasMultipleˢ);
+                    // continue with first one
                 }
             }
-            // continue with first one
             // all type parameters' scopes start after the method name
             tokenꓸPos scopePosΔ1 = ftyp.Pos();
             (recv, rparams) = Ꮡcheck.collectRecv(recvPar.List[0], scopePosΔ1);
         }
+
         // collect and declare function type parameters
         if (ftyp.TypeParams != nil) {
             // Always type-check method type parameters but complain that they are not allowed.
@@ -171,9 +173,11 @@ internal static void funcType(this ж<Checker> Ꮡcheck, ж<ΔSignature> Ꮡsig,
             }
             Ꮡcheck.collectTypeParams(Ꮡsig.of(types_package.ΔSignature.Ꮡtparams), ftyp.TypeParams);
         }
+
         // collect ordinary and result parameters
         var (pnames, @params, variadic) = Ꮡcheck.collectParams(ftyp.Params, true);
         var (rnames, results, _) = Ꮡcheck.collectParams(ftyp.Results, false);
+
         // declare named receiver, ordinary, and result parameters
         tokenꓸPos scopePos = ftyp.End(); // all parameter's scopes start after the signature
         if (recv != nil && (~recv).name != ""u8) {
@@ -181,6 +185,7 @@ internal static void funcType(this ж<Checker> Ꮡcheck, ж<ΔSignature> Ꮡsig,
         }
         Ꮡcheck.declareParams(pnames, @params, scopePos);
         Ꮡcheck.declareParams(rnames, results, scopePos);
+
         sig.recv = recv;
         sig.rparams = rparams;
         sig.@params = NewTuple(@params.ꓸꓸꓸ);
@@ -208,6 +213,7 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
     // The receiver name rname, the pointer indirection, and the
     // receiver type parameters rtparams may not be present.
     var (rptr, rbase, rtparams) = Ꮡcheck.unpackRecv(rparam.Type, true);
+
     // Determine the receiver base type.
     ΔType recvType = new BasicжΔType(Typ[Invalid]);
     ж<TypeParamList> recvTParamsList = default!;
@@ -248,11 +254,13 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
                     break;
                 }
                 case ж<Alias> tΔ1: {
+                    // Methods on generic aliases are not permitted.
+                    // Only report an error if the alias type is valid.
                     if (isValid(unalias(tΔ1))) {
-                        // Methods on generic aliases are not permitted.
-                        // Only report an error if the alias type is valid.
                         Ꮡcheck.errorf(new ast_Exprᴠpositioner(rbase), InvalidRecv, "cannot define new methods on generic alias type %s"u8, tΔ1.OrTypedNil());
                     }
+                    // Ok to continue but do not set basetype in this case so that
+                    // recvType remains invalid (was bug, see go.dev/issue/70417).
                     break;
                 }
                 default: {
@@ -261,14 +269,13 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
                     break;
                 }}
             } else {
-                // Ok to continue but do not set basetype in this case so that
-                // recvType remains invalid (was bug, see go.dev/issue/70417).
                 if (cause != ""u8) {
                     Ꮡcheck.errorf(new ast_Exprᴠpositioner(rbase), InvalidRecv, "%s"u8, cause);
                 }
+                // Ok to continue but do not set baseType (see comment above).
             }
         }
-        // Ok to continue but do not set baseType (see comment above).
+
         // Collect the type parameters declared by the receiver (see also
         // Checker.collectTypeParams). The scope of the type parameter T in
         // "func (r T[T]) f() {}" starts after f, not at r, so we declare it
@@ -284,6 +291,7 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
             check.recordTypeAndValue(new ast.IdentжExpr(rparamΔ1), typexpr, new TypeParamжΔType(tpar), default!);
         }
         recvTParamsList = bindTParams(recvTParams);
+
         // Get the type parameter bounds from the receiver base type
         // and set them for the respective (local) receiver type parameters.
         if (baseType != nil) {
@@ -302,6 +310,7 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
                 @string got = measure(len(recvTParams), typeParameterˢ);
                 Ꮡcheck.errorf(new ast_Exprᴠpositioner(rbase), BadRecv, "receiver declares %s, but receiver base type declares %d"u8, got, len(baseTParams));
             }
+
             // The type parameters declared by the receiver also serve as
             // type arguments for the receiver type. Instantiate the receiver.
             Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(rbase), go1_18, "type instantiation"u8);
@@ -311,13 +320,16 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
             }
             recvType = Ꮡcheck.instance(rparam.Type.Pos(), new NamedжΔgenericType(baseType), targs, nil, check.context());
             check.recordInstance(rbase, targs, recvType);
+
             // Reestablish pointerness if needed (but avoid a pointer to an invalid type).
             if (rptr && isValid(recvType)) {
                 recvType = new PointerжΔType(NewPointer(recvType));
             }
+
             check.recordParenthesizedRecvTypes(rparam.Type, recvType);
         }
     }
+
     // Make sure we have no more than one receiver name.
     ж<ast.Ident> rname = default!;
     {
@@ -328,20 +340,22 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
             rname = rparam.Names[0];
         }
     }
+
     // Create the receiver parameter.
     // recvType is invalid if baseType was never set.
     ж<Var> recv = default!;
     if (rname != nil && (~rname).Name != ""u8){
         // named receiver
         recv = NewParam(rname.Pos(), check.pkg, (~rname).Name, recvType);
-    } else {
         // In this case, the receiver is declared by the caller
         // because it must be declared after any type parameters
         // (otherwise it might shadow one of them).
+    } else {
         // anonymous receiver
         recv = NewParam(rparam.Pos(), check.pkg, ""u8, recvType);
         check.recordImplicit(new ast.FieldжNode(Ꮡrparam), new VarжObject(recv));
     }
+
     // Delay validation of receiver type as it may cause premature expansion of types
     // the receiver type is dependent on (see go.dev/issue/51232, go.dev/issue/51233).
     var rbaseʗ1 = rbase;
@@ -349,6 +363,7 @@ internal static (ж<Var>, ж<TypeParamList>) collectRecv(this ж<Checker> Ꮡche
     check.later(() => {
         Ꮡcheck.validRecv(new ast_Exprᴠpositioner(rbaseʗ1), recvʗ1);
     }).describef(new Varжpositioner(recv), "validRecv(%s)"u8, recv.OrTypedNil());
+
     return (recv, recvTParamsList);
 }
 
@@ -382,10 +397,10 @@ internal static void recordParenthesizedRecvTypes(this ref Checker check, ast.Ex
         }
         case ж<ast.StarExpr> e: {
             expr = e.Value.X;
+            // In a correct program, typ must be an unnamed
+            // pointer type. But be careful and don't panic.
             var (ptr, _) = typ._<ж<Pointer>>(ᐧ);
             if (ptr == nil) {
-                // In a correct program, typ must be an unnamed
-                // pointer type. But be careful and don't panic.
                 return; // something is wrong
             }
             typ = ptr.Value.@base;
@@ -409,12 +424,13 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
     slice<ж<ast.Ident>> names = default!;
     slice<ж<Var>> @params = default!;
     bool variadic = default!;
-
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var list = ref Ꮡlist.DerefOrNull();
+
     if (Ꮡlist == nil) {
         return (names, @params, variadic);
     }
+
     bool named = default!;
     bool anonymous = default!;
     foreach (var (i, field) in list.List) {
@@ -426,10 +442,10 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
                     variadic = true;
                 } else {
                     Ꮡcheck.softErrorf(new ast_Ellipsisжpositioner(t), MisplacedDotDotDot, "can only use ... with final parameter in list"u8);
+                    // ignore ... and continue
                 }
             }
         }
-        // ignore ... and continue
         var typ = Ꮡcheck.varType(ftype);
         // The parser ensures that f.Tag is nil and we don't
         // care if a constructed AST contains a non-nil tag.
@@ -438,8 +454,8 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
             foreach (var (_, name) in (~field).Names) {
                 if ((~name).Name == ""u8) {
                     Ꮡcheck.error(new ast_Identжpositioner(name), InvalidSyntaxTree, anonymousParameterˢ);
+                    // ok to continue
                 }
-                // ok to continue
                 var par = NewParam(name.Pos(), check.pkg, (~name).Name, typ);
                 // named parameter is declared by caller
                 names = append(names, name);
@@ -455,10 +471,12 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
             anonymous = true;
         }
     }
+
     if (named && anonymous) {
         Ꮡcheck.error(new ast_FieldListжpositioner(Ꮡlist), InvalidSyntaxTree, listContainsBothNamedAndˢ);
+        // ok to continue
     }
-    // ok to continue
+
     // For a variadic function, change the last parameter's type from T to []T.
     // Since we type-checked T rather than ...T, we also need to retro-actively
     // record the type for ...T.
@@ -467,6 +485,7 @@ internal static (slice<ж<ast.Ident>> names, slice<ж<Var>> @params, bool variad
         last.Value.typ = new SliceжΔType(Ꮡ(new Slice(elem: (~last).typ)));
         check.recordTypeAndValue((~list.List[len(list.List) - 1]).Type, typexpr, (~last).typ, default!);
     }
+
     return (names, @params, variadic);
 }
 
@@ -510,8 +529,8 @@ internal static void validRecv(this ж<Checker> Ꮡcheck, positioner pos, ж<Var
         var switchᴛ13 = T.under();
         switch (switchᴛ13.type()) {
         case ж<Basic> u: {
+            // unsafe.Pointer is treated like a regular pointer
             if ((~u).kind == UnsafePointer) {
-                // unsafe.Pointer is treated like a regular pointer
                 cause = unsafePointerˢ;
             }
             break;
@@ -523,12 +542,12 @@ internal static void validRecv(this ж<Checker> Ꮡcheck, positioner pos, ж<Var
             break;
         }
         case ж<TypeParam> u: {
+            // The underlying type of a receiver base type cannot be a
+            // type parameter: "type T[P any] P" is not a valid declaration.
             throw panic("unreachable");
             break;
         }}
         if (cause != ""u8) {
-            // The underlying type of a receiver base type cannot be a
-            // type parameter: "type T[P any] P" is not a valid declaration.
             Ꮡcheck.errorf(pos, InvalidRecv, "invalid receiver type %s (%s)"u8, rtyp, cause);
         }
         break;

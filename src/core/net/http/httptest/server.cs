@@ -160,6 +160,7 @@ public static void StartTLS(this ж<Server> Ꮡs) {
     if (err != default!) {
         throw panic(fmt.Sprintf("httptest: NewTLSServer: %v"u8, err));
     }
+
     var existingConfig = s.TLS;
     if (existingConfig != nil){
         s.TLS = existingConfig.Clone();
@@ -247,6 +248,7 @@ public static void Close(this ж<Server> Ꮡs) {
             defer(() => tʗ1.Stop(), ref ᒐ);
         }
         s.mu.Unlock();
+
         // Not part of httptest.Server's correctness, but assume most
         // users of httptest.Server will be using the standard
         // transport, so help them out and close any idle connections for them.
@@ -255,6 +257,7 @@ public static void Close(this ж<Server> Ꮡs) {
                 t.CloseIdleConnections();
             }
         }
+
         // Also close the client idle connections.
         if (s.client != nil) {
             {
@@ -263,6 +266,7 @@ public static void Close(this ж<Server> Ꮡs) {
                 }
             }
         }
+
         Ꮡs.of(Server.Ꮡwg).Wait();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -304,6 +308,7 @@ public static partial void CloseClientConnections(this ж<Server> Ꮡs) {
             goǃ(Ꮡs.closeConnChan, c, ch.WithDirection(GoChanDir.Send));
         }
         s.mu.Unlock();
+
         // Wait for outstanding closes to finish.
         //
         // Out of paranoia for making a late change in Go 1.6, we
@@ -321,6 +326,7 @@ public static partial void CloseClientConnections(this ж<Server> Ꮡs) {
                 break;
             }
             case 1 when selᴛ2.ꟷᐳ(out _): {
+                // Too slow. Give up.
                 return;
             }}
         }
@@ -328,8 +334,6 @@ public static partial void CloseClientConnections(this ж<Server> Ꮡs) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Too slow. Give up.
 
 // Certificate returns the certificate used by the server, or nil if
 // the server doesn't use TLS.
@@ -370,6 +374,7 @@ internal static void wrap(this ж<Server> Ꮡs) {
         try {
             Ꮡs.Value.mu.Lock();
             defer(Ꮡs.of(Server.Ꮡmu).Unlock, ref ᒐ);
+
             var exprᴛ1 = cs;
             if (exprᴛ1 == http.StateNew) {
                 {
@@ -380,11 +385,11 @@ internal static void wrap(this ж<Server> Ꮡs) {
                 if (Ꮡs.Value.conns == default!) {
                     Ꮡs.Value.conns = new map<net.Conn, http.ConnState>();
                 }
+                // Add c to the set of tracked conns and increment it to the
+                // waitgroup.
                 Ꮡs.of(Server.Ꮡwg).Add(1);
                 Ꮡs.Value.conns[c] = cs;
                 if (Ꮡs.Value.closed) {
-                    // Add c to the set of tracked conns and increment it to the
-                    // waitgroup.
                     // Probably just a socket-late-binding dial from
                     // the default transport that lost the race (and
                     // thus this connection is now idle and will
@@ -416,10 +421,10 @@ internal static void wrap(this ж<Server> Ꮡs) {
                 }
             }
             else if (exprᴛ1 == http.StateHijacked || exprᴛ1 == http.StateClosed) {
+                // Remove c from the set of tracked conns and decrement it from the
+                // waitgroup, unless it was previously removed.
                 {
                     var (_, ok) = Ꮡs.Value.conns[c, ꟷ]; if (ok) {
-                        // Remove c from the set of tracked conns and decrement it from the
-                        // waitgroup, unless it was previously removed.
                         delete(Ꮡs.Value.conns, c);
                         // Keep Close from returning until the user's ConnState hook
                         // (if any) finishes.
@@ -427,7 +432,6 @@ internal static void wrap(this ж<Server> Ꮡs) {
                     }
                 }
             }
-
             if (oldHookʗ1 != default!) {
                 oldHookʗ1(c, cs);
             }

@@ -51,6 +51,7 @@ internal static ж<stringFinder> makeStringFinder(@string pattern) {
     ));
     // last is the index of the last character in the pattern.
     nint last = len(pattern) - 1;
+
     // Build bad character table.
     // Bytes not in the pattern can skip one pattern's length.
     foreach (var (i, _) in (~f).badCharSkip) {
@@ -62,6 +63,7 @@ internal static ж<stringFinder> makeStringFinder(@string pattern) {
     for (nint i = 0; i < last; i++) {
         f.Value.badCharSkip[pattern[i]] = last - i;
     }
+
     // Build good suffix table.
     // First pass: set each value to the next index which starts a prefix of
     // pattern.
@@ -81,6 +83,7 @@ internal static ж<stringFinder> makeStringFinder(@string pattern) {
             f.Value.goodSuffixSkip[last - lenSuffix] = lenSuffix + last - i;
         }
     }
+
     return f;
 }
 

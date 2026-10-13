@@ -40,10 +40,12 @@ internal static readonly @string outOfMemoryAllocatingˢ4 = "out of memory alloc
 // The world must be stopped.
 internal static void startCheckmarks() {
     assertWorldStopped();
+
     // Clear all checkmarks.
     foreach (var (_, ai) in mheap_.allArenas) {
         var arena = mheap_.arenas[ai.l1()].Value[ai.l2()];
         var bitmap = arena.Value.checkmarks;
+
         if (bitmap == nil){
             // Allocate bitmap on first use.
             bitmap = (ж<checkmarksMap>)(uintptr)(persistentalloc(/* unsafe.Sizeof(*bitmap) */ (uintptr)65536, 0, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
@@ -84,22 +86,28 @@ internal static bool setCheckmark(uintptr obj, uintptr @base, uintptr off, markB
         printlock();
         print((@string)"runtime: checkmarks found unexpected unmarked object obj="u8, ((Δhex)(uint64)obj), (@string)"\n"u8);
         print((@string)"runtime: found obj at *("u8, ((Δhex)(uint64)@base), (@string)"+"u8, ((Δhex)(uint64)off), (@string)")\n"u8);
+
         // Dump the source (base) object
         gcDumpObject(baseˢ, @base, off);
+
         // Dump the object
         gcDumpObject(objˢ, obj, ~(uintptr)0);
+
         getg().Value.m.Value.traceback = 2;
         @throw(checkmarkFoundUnmarkedˢ);
     }
+
     arenaIdx ai = arenaIndex(obj);
     var arena = mheap_.arenas[ai.l1()].Value[ai.l2()];
     var arenaWord = (obj / (uintptr)heapArenaBytes / 8) % (uintptr)len((~(~arena).checkmarks).b);
     var mask = (byte)((byte)(1 << (int)(((obj / (uintptr)heapArenaBytes) % 8))));
     var bytep = (~arena).checkmarks.at(checkmarksMap.Ꮡb, (ulong)(arenaWord));
+
     if ((uint8)(atomic.Load8(bytep) & mask) != 0) {
         // Already checkmarked.
         return true;
     }
+
     atomic.Or8(bytep, mask);
     return false;
 }

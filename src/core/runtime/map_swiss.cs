@@ -15,6 +15,7 @@ using @internal.runtime;
 
 partial class runtime_package {
 
+// TODO: remove? These are used by tests but not the actual map
 internal static UntypedInt loadFactorNum => 7;
 internal static UntypedInt loadFactorDen => 8;
 
@@ -69,6 +70,7 @@ internal static ж<mapsꓸMap> makemap(ж<abi.SwissMapType> Ꮡt, nint hint, ж<
     if (hint < 0) {
         hint = 0;
     }
+
     return maps.NewMap(Ꮡt, (uintptr)hint, Ꮡm, maxAlloc);
 }
 
@@ -152,6 +154,7 @@ internal static void mapdelete(ж<abi.SwissMapType> Ꮡt, ж<mapsꓸMap> Ꮡm, @
     if (asanenabled && Ꮡm != nil) {
         asanread(key, (~t.Key).Size_);
     }
+
     Ꮡm.Delete(Ꮡt, key);
 }
 
@@ -166,6 +169,7 @@ internal static void mapIterStart(ж<abi.SwissMapType> Ꮡt, ж<mapsꓸMap> Ꮡm
         var callerpc = sys.GetCallerPC();
         racereadpc(@unsafe.Pointer.FromPinnedBox(Ꮡm), callerpc, abi.FuncPCABIInternal(mapIterStart));
     }
+
     it.Init(Ꮡt, Ꮡm);
     it.Next();
 }
@@ -179,6 +183,7 @@ internal static void mapIterNext(ж<maps.Iter> Ꮡit) {
         var callerpc = sys.GetCallerPC();
         racereadpc(@unsafe.Pointer.FromPinnedBox(it.Map()), callerpc, abi.FuncPCABIInternal(mapIterNext));
     }
+
     it.Next();
 }
 
@@ -189,6 +194,7 @@ internal static void mapclear(ж<abi.SwissMapType> Ꮡt, ж<mapsꓸMap> Ꮡm) {
         var pc = abi.FuncPCABIInternal(mapclear);
         racewritepc(@unsafe.Pointer.FromPinnedBox(Ꮡm), callerpc, pc);
     }
+
     Ꮡm.Clear(Ꮡt);
 }
 
@@ -219,6 +225,7 @@ internal static ж<mapsꓸMap> reflect_makemap(ж<abi.SwissMapType> Ꮡt, nint c
         @throw(runtimeReflectMakemapˢ);
     }
     // TODO: other checks
+
     return makemap(Ꮡt, cap, nil);
 }
 
@@ -350,11 +357,13 @@ internal static ж<mapsꓸMap> mapclone2(ж<abi.SwissMapType> Ꮡt, ж<mapsꓸMa
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     var dst = makemap(Ꮡt, (nint)src.Used(), nil);
+
     maps.Iter iter = default!;
     iter.Init(Ꮡt, Ꮡsrc);
     for (iter.Next(); (uintptr)iter.Key() != nil; iter.Next()) {
         dst.Put(Ꮡt, (uintptr)iter.Key(), (uintptr)iter.Elem());
     }
+
     return dst;
 }
 

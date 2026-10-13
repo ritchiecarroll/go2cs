@@ -67,6 +67,7 @@ internal static @string instanceHash(this ж<Context> Ꮡctxt, ΔType orig, slic
     assert(Ꮡctxt != nil);
     assert(orig != default!);
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+
     var h = newTypeHasher(Ꮡbuf, Ꮡctxt);
     h.@string(strconv.Itoa(Ꮡctxt.getID(orig)));
     // Because we've already written the unique origin ID this call to h.typ is
@@ -78,6 +79,7 @@ internal static @string instanceHash(this ж<Context> Ꮡctxt, ΔType orig, slic
         // isGeneric handles *Signature types.
         h.typeList(targs);
     }
+
     return strings.ReplaceAll(Ꮡbuf.String(), " "u8, "#"u8);
 }
 
@@ -91,6 +93,7 @@ internal static ΔType lookup(this ж<Context> Ꮡctxt, @string h, ΔType orig, 
 
         ctxt.mu.Lock();
         ᒐd1 = true;
+
         foreach (var (_, e) in ctxt.typeMap[h]) {
             if (identicalInstance(orig, targs, e.orig, e.targs)) {
                 return e.instance;
@@ -100,6 +103,7 @@ internal static ΔType lookup(this ж<Context> Ꮡctxt, @string h, ΔType orig, 
                 throw panic(fmt.Sprintf("non-identical instances: (orig: %s, targs: %v) and %s"u8, orig, targs, e.instance));
             }
         }
+
         return default!;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -117,8 +121,10 @@ internal static ΔType update(this ж<Context> Ꮡctxt, @string h, ΔType orig, 
         ref var ctxt = ref Ꮡctxt.DerefOrNull();
 
         assert(inst != default!);
+
         ctxt.mu.Lock();
         ᒐd1 = true;
+
         foreach (var (_, e) in ctxt.typeMap[h]) {
             if (inst == default! || Identical(inst, e.instance)) {
                 return e.instance;
@@ -128,11 +134,13 @@ internal static ΔType update(this ж<Context> Ꮡctxt, @string h, ΔType orig, 
                 throw panic(fmt.Sprintf("%s and %s are not identical"u8, inst, e.instance));
             }
         }
+
         ctxt.typeMap[h] = append(ctxt.typeMap[h], new ctxtEntry(
             orig: orig,
             targs: targs,
             instance: inst
         ));
+
         return inst;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }

@@ -26,6 +26,7 @@ internal static slice<@string> splitList(@string path) {
     if (path == ""u8) {
         return new @string[]{}.slice();
     }
+
     // Split path, respecting but preserving quotes.
     var list = new @string[]{}.slice();
     nint start = 0;
@@ -44,13 +45,14 @@ internal static slice<@string> splitList(@string path) {
                 break;
             }}
         }
-
     }
     list = append(list, path.slice(start));
+
     // Remove quotes.
     foreach (var (i, s) in list) {
         list[i] = strings.ReplaceAll(s, @""""u8, @""u8);
     }
+
     return list;
 }
 
@@ -76,44 +78,43 @@ internal static @string join(slice<@string> elem) {
 
         switch (ᐧ) {
         case {} when b.Len() is 0: {
+            // Add the first non-empty path element unchanged.
             break;
         }
         case {} when os.IsPathSeparator(lastChar): {
+            // If the path ends in a slash, strip any leading slashes from the next
+            // path element to avoid creating a UNC path (any path starting with "\\")
+            // from non-UNC elements.
+            //
+            // The correct behavior for Join when the first element is an incomplete UNC
+            // path (for example, "\\") is underspecified. We currently join subsequent
+            // elements so Join("\\", "host", "share") produces "\\host\share".
             while (len(e) > 0 && os.IsPathSeparator(e[0])) {
-                // Add the first non-empty path element unchanged.
-                // If the path ends in a slash, strip any leading slashes from the next
-                // path element to avoid creating a UNC path (any path starting with "\\")
-                // from non-UNC elements.
-                //
-                // The correct behavior for Join when the first element is an incomplete UNC
-                // path (for example, "\\") is underspecified. We currently join subsequent
-                // elements so Join("\\", "host", "share") produces "\\host\share".
                 e = e[1..];
             }
-            if (b.Len() == 1 && strings.HasPrefix(e, // If the path is \ and the next path element is ??,
- // add an extra .\ to create \.\?? rather than \??\
- // (a Root Local Device path).
- "??"u8) && (len(e) == len("??") || os.IsPathSeparator(e[2]))) {
+            // If the path is \ and the next path element is ??,
+            // add an extra .\ to create \.\?? rather than \??\
+            // (a Root Local Device path).
+            if (b.Len() == 1 && strings.HasPrefix(e, "??"u8) && (len(e) == len("??") || os.IsPathSeparator(e[2]))) {
                 Ꮡb.WriteString(@".\"u8);
             }
             break;
         }
         case {} when lastChar is (rune)':': {
+            // If the path ends in a colon, keep the path relative to the current directory
+            // on a drive and don't add a separator. Preserve leading slashes in the next
+            // path element, which may make the path absolute.
+            //
+            // 	Join(`C:`, `f`) = `C:f`
+            //	Join(`C:`, `\f`) = `C:\f`
             break;
         }
         default: {
+            // In all other cases, add a separator between elements.
             Ꮡb.WriteByte((rune)'\\');
             lastChar = (rune)'\\';
             break;
         }}
-
-        // If the path ends in a colon, keep the path relative to the current directory
-        // on a drive and don't add a separator. Preserve leading slashes in the next
-        // path element, which may make the path absolute.
-        //
-        // 	Join(`C:`, `f`) = `C:f`
-        //	Join(`C:`, `\f`) = `C:\f`
-        // In all other cases, add a separator between elements.
         if (len(e) > 0) {
             Ꮡb.WriteString(e);
             lastChar = e[len(e) - 1];

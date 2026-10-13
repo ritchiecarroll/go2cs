@@ -12,6 +12,9 @@ internal static UntypedInt _SIG_BLOCK => 0;
 internal static UntypedInt _SIG_UNBLOCK => 1;
 internal static UntypedInt _SIG_SETMASK => 2;
 
+// It's hard to tease out exactly how big a Sigset is, but
+// rt_sigprocmask crashes if we get it wrong, so if binaries
+// are running, this is right.
 partial struct sigset /*[2]uint32*/;
 
 internal static ж<sigset> Ꮡsigset_all = new StandardBox<sigset>(new sigset(new uint32[]{~(uint32)0, ~(uint32)0}.array()));

@@ -36,11 +36,13 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
     if ((~md).typemap != default!) {
         return ("", default!, default!, pluginAlreadyLoadedˢ);
     }
+
     foreach (var (_, pmd) in activeModules()) {
         if ((~pmd).pluginpath == (~md).pluginpath) {
             md.Value.bad = true;
             return ("", default!, default!, pluginAlreadyLoadedˢ);
         }
+
         if (inRange((~pmd).text, (~pmd).etext, (~md).text, (~md).etext) || inRange((~pmd).bss, (~pmd).ebss, (~md).bss, (~md).ebss) || inRange((~pmd).data, (~pmd).edata, (~md).data, (~md).edata) || inRange((~pmd).types, (~pmd).etypes, (~md).types, (~md).etypes)) {
             println((@string)"plugin: new module data overlaps with previous moduledata"u8);
             println((@string)"\tpmd.text-etext="u8, ((Δhex)(uint64)(~pmd).text), (@string)"-"u8, ((Δhex)(uint64)(~pmd).etext));
@@ -60,16 +62,20 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
             return ("", default!, default!, "plugin was built with a different version of package " + pkghash.modulename);
         }
     }
+
     // Initialize the freshly loaded module.
     modulesinit();
     typelinksinit();
+
     pluginftabverify(md);
     moduledataverify1(md);
+
     @lock(ᏑitabLock);
     foreach (var (_, i) in (~md).itablinks) {
         itabAdd(i);
     }
     unlock(ᏑitabLock);
+
     // Build a map of symbol names to symbols. Here in the runtime
     // we fill out the first word of the interface, the type. We
     // pass these zero value interfaces to the plugin package,
@@ -85,6 +91,7 @@ internal static (@string path, map<@string, any> syms, slice<ж<initTask>> initT
         ref var val = ref heap<any>(out var Ꮡval);
         var valp = (ж<array<@unsafe.Pointer>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡval));
         (valp.Value)[0] = @unsafe.Pointer.FromPinnedBox(t);
+
         @string name = symName.Name();
         if ((abiꓸKind)((~t).Kind_ & abi.KindMask) == abi.Func) {
             name = "."u8 + name;
@@ -107,8 +114,10 @@ internal static void pluginftabverify(ж<moduledata> Ꮡmd) {
         if (md.minpc <= entry && entry <= md.maxpc) {
             continue;
         }
+
         var f = new ΔfuncInfo(Ꮡ(md.pclntable, md.ftab[i].funcoff).Reinterpret<byte, _func>(), Ꮡmd);
         @string name = funcname(f);
+
         // A common bug is f.entry has a relocation to a duplicate
         // function symbol, meaning if we search for its PC we get
         // a valid entry with a name that is useful for debugging.

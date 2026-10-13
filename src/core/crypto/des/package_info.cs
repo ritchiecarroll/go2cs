@@ -53,9 +53,9 @@ using static go.crypto.des_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/des/block.go", "block.cs", "AAsYgoKChIKEgoKmgqiCloKqooSCioKKgoqCigAJFLKCgpSmgoKCgoKogoKWhAAFELSCgpaCggAKGoKCAAkYgoIAChqCAAkWqsaChIKChIKChIKChIKCgqrCgoKUgoKClKiSloKWgpaUlL6y")]
-[assembly: go.GoPositionMap("crypto/des/cipher.go", "cipher.cs", "ABcqggAKEpKCloKWgoKmgKSCgpSClIKUpoKClIKUgpQAChKSgpaCloKCgoKmgKSCgpSClIKWgoKEgoSClIKUgpaChIKmgoKUgpSCloKChIKEgpSClIKWgoSC")]
-[assembly: go.GoPositionMap("crypto/des/const.go", "const.cs", "AA8cAAwaAAwaAAkUAAgSAAsYABIWACt4")]
+[assembly: go.GoPositionMap("crypto/des/block.go", "block.cs", "AAsYgoKClIKUgoKmgriCpoKqopSCmoKagpqCmgAJFLKCgpSmgoKCgoK4goKmlAAFELSCgqaCggAMGoKCAAsYgoIADBqCAAoWqsaClIKClIKClIKClIKCgqrCgoKUgoKClKiSpoKmgqaUlL6y")]
+[assembly: go.GoPositionMap("crypto/des/cipher.go", "cipher.cs", "ABcqggAKEpKCpoKmgoKmgKSCgpSClIKUpoKClIKUgpQAChKSgqaCpoKCgoKmgKSCgpSClIKmgoKUgpSClIKUgqaClIKmgoKUgpSCpoKClIKUgpSClIKmgpSC")]
+[assembly: go.GoPositionMap("crypto/des/const.go", "const.cs", "AA8cAAwaAAwaAAkUAAgSAAsYAAoWADN4")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

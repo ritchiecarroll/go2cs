@@ -40,6 +40,7 @@ public static slice<byte> Text(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     if ((~tp).width == 0) {
         tp.Value.width = 80 - utf8.RuneCountInString((~tp).prefix);
     }
+
     ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
     foreach (var (i, x) in d.Content) {
         if (i > 0 && blankBefore(x)) {
@@ -158,6 +159,7 @@ internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @s
     p.oneLongLine(Ꮡp.of(textPrinter.Ꮡlong), x);
     var words = strings.Fields(p.@long.String());
     p.@long.Reset();
+
     slice<nint> seq = default!;
     if (p.width < 0 || len(words) == 0){
         seq = new nint[]{0, len(words)}.slice(); // one long line
@@ -271,9 +273,9 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
         case {} when s.lo > t.lo: {
             return +1;
         }}
-
         return 0;
     }
+
     // total[j] is the total number of runes
     // (including separating spaces) in words[:j].
     var total = new slice<nint>(len(words) + 1);
@@ -281,6 +283,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
     foreach (var (i, s) in words) {
         total[1 + i] = total[i] + utf8.RuneCountInString(s) + 1;
     }
+
     // weight returns weight(i, j).
     var totalʗ1 = total;
     var wordsʗ1 = words;
@@ -290,6 +293,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
         if (j == len(wordsʗ1) && nΔ1 <= max) {
             return new wrap_score(0, 0);
         }
+
         // Otherwise the weight is the penalty plus the square of the number of
         // characters remaining on the line or by which the line goes over.
         // In the latter case, that value goes in the hi part of the score.
@@ -301,6 +305,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
         }
         return new wrap_score(0, v + p);
     }
+
     // The rest of this function is “The Basic Algorithm” from
     // Hirschberg and Larmore's conference paper,
     // using the same names as in the paper.
@@ -309,6 +314,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
     var addʗ1 = add;
     var weightʗ1 = weight;
     wrap_score g(nint i, nint j) => addʗ1(Ꮡf.ValueSlot[i], weightʗ1(i, j));
+
     var cmpʗ1 = cmp;
     var gʗ1 = g;
     var wordsʗ2 = words;
@@ -324,6 +330,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
         }
         return cmpʗ1(gʗ1(c, k), gʗ1(b, k)) <= 0;
     }
+
     // d is a one-ended deque implemented as a slice.
     var d = new slice<nint>(1, len(words));
     d[0] = 0;
@@ -349,6 +356,7 @@ internal static slice<nint> /*seq*/ wrap(slice<@string> words, nint max) {
         }
     }
     bestleft = append(bestleft, d[0]);
+
     // Recover least weight sequence from bestleft.
     nint n = 1;
     for (nint m = len(words); m > 0; m = bestleft[m]) {
@@ -368,7 +376,6 @@ internal static int64 wrapPenalty(@string s) {
     case (rune)'.' or (rune)',' or (rune)':' or (rune)';': {
         return 0;
     }}
-
     return 64;
 }
 

@@ -65,7 +65,6 @@ public static complex128 Exp(complex128 x) {
                 }
                 break;
             }}
-
             break;
         }
         case {} when math.IsNaN(re): {
@@ -75,7 +74,6 @@ public static complex128 Exp(complex128 x) {
             break;
         }}
     }
-
     var r = math.Exp(real(x));
     var (s, c) = math.Sincos(imag(x));
     return complex(r * c, r * s);

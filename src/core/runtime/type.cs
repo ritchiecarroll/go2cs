@@ -62,7 +62,6 @@ internal static @string name(this Δrtype t) {
             sqBrackets--;
             break;
         }}
-
         i--;
     }
     return s.slice(i + 1);
@@ -87,7 +86,6 @@ internal static @string pkgpath(this Δrtype t) {
         var it = t.Type.Reinterpret<abi.Type, interfacetype>();
         return (~it).PkgPath.Name();
     }
-
     return ""u8;
 }
 
@@ -124,42 +122,42 @@ internal static ж<byte> getGCMaskOnDemand(ж<_type> Ꮡt) {
     // TODO: we could use &t.GCData as the slot, but types are
     // in read-only memory currently.
     @unsafe.Pointer addr = @unsafe.Pointer.FromPinnedBox(t.GCData);
+
     if (GOOS == "aix"u8) {
         addr = (uintptr)add(addr, firstmoduledata.data - aixStaticDataBase);
     }
+
     while (ᐧ) {
         ref var Δp = ref heap<ж<byte>>(out var Ꮡp);
         Δp = (ж<byte>)(uintptr)(atomic.Loadp(addr));
         var exprᴛ1 = Δp;
-        if (exprᴛ1 == ᏑinProgress) {
+        if (exprᴛ1 == ᏑinProgress) { // Someone else is currently building it.
+            // Just wait until the builder is done.
+            // We can't block here, so spinning while having
+            // the OS thread yield is about the best we can do.
             osyield();
             continue;
         }
-        else if (exprᴛ1 == default!) {
-            if (!atomic.Casp1((ж<@unsafe.Pointer>)(uintptr)(addr), // Already built.
- // Someone else is currently building it.
- // Just wait until the builder is done.
- // We can't block here, so spinning while having
- // the OS thread yield is about the best we can do.
- // Not built yet.
- // Attempt to get exclusive access to build it.
- nil, @unsafe.Pointer.FromPinnedBox(ᏑinProgress))) {
+        else if (exprᴛ1 == default!) { // Not built yet.
+            // Attempt to get exclusive access to build it.
+            if (!atomic.Casp1((ж<@unsafe.Pointer>)(uintptr)(addr), nil, @unsafe.Pointer.FromPinnedBox(ᏑinProgress))) {
                 continue;
             }
-            var bytes = (uintptr)goarch.PtrSize * divRoundUp(t.PtrBytes / (uintptr)goarch.PtrSize, // Build gcmask for this type.
- 8 * goarch.PtrSize);
+
+            // Build gcmask for this type.
+            var bytes = (uintptr)goarch.PtrSize * divRoundUp(t.PtrBytes / (uintptr)goarch.PtrSize, 8 * goarch.PtrSize);
             Δp = (ж<byte>)(uintptr)(persistentalloc(bytes, goarch.PtrSize, Ꮡmemstats.of(mstats.Ꮡother_sys)));
             systemstack(() => {
                 buildGCMask(Ꮡt, new bitCursor(ptr: Ꮡp.ValueSlot, n: 0));
             });
-            atomic.StorepNoWB(addr, // Store the newly-built gcmask for future callers.
- @unsafe.Pointer.FromPinnedBox(Δp));
-            return Δp;
-        }
-        else { /* default: */
-            return Δp;
-        }
 
+            // Store the newly-built gcmask for future callers.
+            atomic.StorepNoWB(addr, @unsafe.Pointer.FromPinnedBox(Δp));
+            return Δp;
+        }
+        else { /* default: */ // Already built.
+            return Δp;
+        }
     }
 }
 
@@ -177,10 +175,12 @@ internal static void write(this bitCursor b, ж<byte> Ꮡdata, uintptr cnt) {
 
     // Starting byte for writing.
     var Δp = addb(b.ptr, b.n / 8);
+
     // Note: if we're starting halfway through a byte, we load the
     // existing lower bits so we don't clobber them.
     var n = b.n % 8; // # of valid bits in buf
     var buf = (uintptr)((uintptr)(Δp.Value) & (((uintptr)1).Lsh((uint64)(n)) - 1)); // buffered bits to start
+
     // Work 8 bits at a time.
     while (cnt > 8) {
         // Read 8 more bits, now buf has 8-15 valid bits in it.
@@ -197,6 +197,7 @@ internal static void write(this bitCursor b, ж<byte> Ꮡdata, uintptr cnt) {
     // Read remaining bits.
     buf |= (uintptr)(((uintptr)((uintptr)(data) & (((uintptr)1).Lsh((uint64)(cnt)) - 1))).Lsh((uint64)(n)));
     n += cnt;
+
     // Flush remaining bits.
     if (n > 8) {
         Δp.Value = (byte)buf;
@@ -282,7 +283,6 @@ top:
     else { /* default: */
         @throw(unexpectedKindˢ);
     }
-
 }
 
 // reflectOffs holds type offsets defined at run time by the reflect package.
@@ -298,7 +298,6 @@ top:
 // do not overlap with any compile-time module offsets.
 //
 // Entries are created by reflect.addReflectOff.
-
 partial struct reflectOffsᴛ1 /*dyn*/ {
     internal mutex @lock;
     internal int32 next;
@@ -341,6 +340,7 @@ internal static abiꓸName resolveNameOff(@unsafe.Pointer ptrInModule, nameOff o
             return new abiꓸName(Bytes: (ж<byte>)(uintptr)((@unsafe.Pointer)resΔ1));
         }
     }
+
     // No module found. see if it is a run time name.
     reflectOffsLock();
     var (res, found) = reflectOffs.m[(int32)off, ꟷ];
@@ -464,6 +464,7 @@ internal static void typelinksinit() {
         return;
     }
     var typehash = new map<uint32, slice<ж<_type>>>(len(firstmoduledata.typelinks));
+
     var modules = activeModules();
     var prev = modules[0];
     foreach (var (_, md) in modules[1..]) {
@@ -487,6 +488,7 @@ collect:
 continue_collect:;
         }
 break_collect:;
+
         if ((~md).typemap == default!) {
             // If any of this module's typelinks match a type from a
             // prior module, prefer that prior type by adding the offset
@@ -506,6 +508,7 @@ break_collect:;
                 md.Value.typemap[((typeOff)tl)] = t;
             }
         }
+
         prev = md;
     }
 }
@@ -544,10 +547,12 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
             return true;
         }
     }
+
     // mark these types as seen, and thus equivalent which prevents an infinite loop if
     // the two types are identical, but recursively defined and loaded from
     // different modules
     seen[tp] = new EmptyStruct();
+
     if (Ꮡt == Ꮡv) {
         return true;
     }
@@ -693,7 +698,6 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
         @throw(runtimeImpossibleTypeˢ);
         return false;
     }
-
 }
 
 } // end runtime_package

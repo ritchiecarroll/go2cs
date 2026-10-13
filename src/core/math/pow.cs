@@ -14,6 +14,7 @@ internal static bool isOddInt(float64 x) {
         // on some architectures (and does so on arm64). See issue #57465.
         return false;
     }
+
     var (xi, xf) = Modf(x);
     return xf == 0D && (int64)((int64)xi & 1) == 1;
 }
@@ -77,7 +78,6 @@ internal static float64 pow(float64 x, float64 y) {
             }
             return 0D;
         }}
-
         break;
     }
     case {} when IsInf(y, 0): {
@@ -91,7 +91,6 @@ internal static float64 pow(float64 x, float64 y) {
         default: {
             return Inf(1);
         }}
-
         break;
     }
     case {} when IsInf(x, 0): {
@@ -105,7 +104,6 @@ internal static float64 pow(float64 x, float64 y) {
         case {} when y is > 0D: {
             return Inf(1);
         }}
-
         break;
     }
     case {} when y is 0.5D: {
@@ -132,11 +130,12 @@ internal static float64 pow(float64 x, float64 y) {
         default: {
             return Inf(1);
         }}
-
     }
+
     // ans = a1 * 2**ae (= 1 for now).
     var a1 = 1.0D;
     nint ae = 0;
+
     // ans *= x**yf
     if (yf != 0D) {
         if (yf > 0.5D) {
@@ -145,6 +144,7 @@ internal static float64 pow(float64 x, float64 y) {
         }
         a1 = Exp(yf * Log(x));
     }
+
     // ans *= x**yi
     // by multiplying in successive squarings
     // of x according to bits of yi.
@@ -171,6 +171,7 @@ internal static float64 pow(float64 x, float64 y) {
             xe--;
         }
     }
+
     // ans = a1*2**ae
     // if y < 0 { ans = 1 / ans }
     // but in the opposite order

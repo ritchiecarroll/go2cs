@@ -57,15 +57,14 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
                 pStates: new map<ProcID, ж<pState>>(),
                 gStates: new map<GoID, ж<gState>>(),
                 activeTasks: new map<TaskID, taskState>()
-            ), // Don't emit a sync event when we first go to emit events.
-
+            ),
+            // Don't emit a sync event when we first go to emit events.
             emittedSync: true
         )), default!);
     }
     { /* default: */
         return (default!, fmt.Errorf("unknown or unsupported version go 1.%d"u8, v));
     }
-
 }
 
 // ReadEvent reads a single event from the stream.
@@ -87,6 +86,7 @@ public static (ΔEvent e, error err) ReadEvent(this ж<Reader> Ꮡr) {
             }
             (e, err) = (evΔ1.ΔClone(), default!); goto ᒐdone;
         }
+
         // Go 1.22+ trace parsing algorithm.
         //
         // (1) Read in all the batches for the next generation from the stream.
@@ -101,6 +101,7 @@ public static (ΔEvent e, error err) ReadEvent(this ж<Reader> Ꮡr) {
         // (6) Select the latest event for the selected M and get it ready to be returned.
         // (7) Read the next event for the selected M and update the min-heap.
         // (8) Return the selected event, goto (5) on the next call.
+
         // Set us up to track the last timestamp and fix up
         // the timestamp of any event that comes through.
         defer(() => {
@@ -117,12 +118,14 @@ public static (ΔEvent e, error err) ReadEvent(this ж<Reader> Ꮡr) {
             }
             Ꮡr.Value.lastTs = e.@base.time;
         }, ref ᒐ);
+
         // Consume any events in the ordering first.
         {
             var (evΔ2, okΔ1) = r.order.Next(); if (okΔ1) {
                 (e, err) = (evΔ2.ΔClone(), default!); goto ᒐdone;
             }
         }
+
         // Check if we need to refresh the generation.
         if (len(r.frontier) == 0 && len(r.cpuSamples) == 0) {
             if (!r.emittedSync) {
@@ -147,8 +150,10 @@ public static (ΔEvent e, error err) ReadEvent(this ж<Reader> Ꮡr) {
                 (e, err) = (new ΔEvent(nil), errΔ2); goto ᒐdone;
             }
             r.spillErr = errΔ2;
+
             // Reset CPU samples cursor.
             r.cpuSamples = r.gen.Value.cpuSamples;
+
             // Reset frontier.
             foreach (var (_, vᴛ1) in (~r.gen).batchMs) {
                 ref var m = ref heap(new ThreadID(), out var Ꮡm);
@@ -166,16 +171,19 @@ public static (ΔEvent e, error err) ReadEvent(this ж<Reader> Ꮡr) {
                 }
                 r.frontier = heapInsert(r.frontier, bc);
             }
+
             // Reset emittedSync.
             r.emittedSync = false;
         }
         (bool, error) tryAdvance(nint i) {
             var bc = Ꮡr.Value.frontier[i];
+
             {
                 var (okΔ3, errΔ4) = Ꮡr.of(Reader.Ꮡorder).Advance(bc.of(batchCursor.Ꮡev), (~Ꮡr.Value.gen).evTable, (~bc).m, (~Ꮡr.Value.gen).gen); if (!okΔ3 || errΔ4 != default!) {
                     return (okΔ3, errΔ4);
                 }
             }
+
             // Refresh the cursor's event.
             var (okΔ4, errΔ5) = bc.nextEvent((~Ꮡr.Value.gen).batches[(~bc).m], (~Ꮡr.Value.gen).freq);
             if (errΔ5 != default!) {
@@ -231,6 +239,7 @@ public static (ΔEvent e, error err) ReadEvent(this ж<Reader> Ꮡr) {
                 }
             }
         }
+
         // Pick off the next event on the queue. At this point, one must exist.
         var (ev, ok) = r.order.Next();
         if (!ok) {

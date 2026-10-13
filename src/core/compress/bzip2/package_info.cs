@@ -52,10 +52,10 @@ using static go.compress.bzip2_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("compress/bzip2/bit_reader.go", "bit_reader.cs", "ABUyooKClKzSgoKClIKClIKCAA8igoKmgoKmgoKmgg==")]
-[assembly: go.GoPositionMap("compress/bzip2/bzip2.go", "bzip2.cs", "AA0mwgAVNLKCggANELKEgoKCqIKCloKCloKCgpSmwoKWgoKCgpSClJaCgoKUpu6CAAcUgoKCgoKUloKCgoSCgoKWgpSUhIKWAAgGooKCgoKogoKogpyCkrqCkpSCgpyylIKCgoKUgoKUgoKClIKUgpSAggAEXwATbsKCgoKCgoKUuoKCgoKCgoKCgsyUqIKCuoKogoKCgoKClJSClLqCgoKCgqaEgpaClIKCgoKUgpSClKaUgoKogoKUgpSCyoKWhIKCgoKUgpSCgpaChJSClIKogpSWpoKUgoKCgpSWuAAHEoKClIKCloK6goKCgoKEAAIaAAoCgoKCloKCgpYABhCCgoKCgoKUpryigoKU")]
-[assembly: go.GoPositionMap("compress/bzip2/huffman.go", "huffman.cs", "ACNO0oSChIKUgsq6hIKUlqaCgpSUzgAJEoKWqIKCgpaCgIKk3oKEgoKClIKCprqIgoIAEybyloKCgoKogoQACxqCzMqWgpSWgoKElIKUloKWlIKUlg==", "106-111:1;135-137:2")]
-[assembly: go.GoPositionMap("compress/bzip2/move_to_front.go", "move_to_front.cs", "AAkkooKUqqKCloKClKbqgoKCqJI=")]
+[assembly: go.GoPositionMap("compress/bzip2/bit_reader.go", "bit_reader.cs", "ABUyooKClKzSgoKClIKClIKCABAigoKmgoKmgoKmgg==")]
+[assembly: go.GoPositionMap("compress/bzip2/bzip2.go", "bzip2.cs", "ABQmggAVNLKCggANELKUgoKCuIKCpoKCpoKCgpSmwoKmgoKCgpSClKaCgoKUpu6CAAcUgoKCgoKUpoKCgpSCgoKmgpSUlIKmAAgGooKCgoK4goK4gqyCgsqCgpSCgtyClIKCgoKUgoKUgoKClIKUgpSAggAEXwASbsKCgoKCgoKUyoKCgoKCgoKCgtyUuIKCyoK4goKCgoKClJSClMqCgoKCgqaUgqaClIKCgoKUgpSClKaUgoK4goKUgpSCyoKmlIKCgoKUgpSCgqaClJSClIK4gpSmpoKUgoKCgpSmuAAIEoKClIKCpoLKgoKCgoKUAAIaAAoCgoKCpoKCgqYABhCCgoKCgoKUpryigoKU")]
+[assembly: go.GoPositionMap("compress/bzip2/huffman.go", "huffman.cs", "ACNO0pSClIKUgsrKlIKUpqaCgpSUzgAJEoKmuIKCgqaCgIKk7oKUgoKClIKCpsqYgoIAEybypoKCgoK4gpQACxqC3MqmgpSmgoKUlIKUpoKmlIKUpg==", "106-111:1;135-137:2")]
+[assembly: go.GoPositionMap("compress/bzip2/move_to_front.go", "move_to_front.cs", "ABAkooKUqqKCpoKClKbqgoKCqJI=")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;

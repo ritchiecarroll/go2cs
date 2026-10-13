@@ -104,12 +104,13 @@ internal static (bitvector argMap, bool hasReflectStackObj) argMapInternal(this 
     // Extract argument bitmaps for reflect stubs from the calls they made to reflect.
     var exprᴛ1 = funcname(f);
     if (exprᴛ1 == "reflect.makeFuncStub"u8 || exprᴛ1 == "reflect.methodValueCall"u8) {
+        // These take a *reflect.methodValue as their
+        // context register and immediately save it to 0(SP).
+        // Get the methodValue from 0(SP).
         var arg0 = frame.sp + (uintptr)sys.MinFrameSize;
+
         var minSP = frame.fp;
         if (!usesLR) {
-            // These take a *reflect.methodValue as their
-            // context register and immediately save it to 0(SP).
-            // Get the methodValue from 0(SP).
             // The CALL itself pushes a word.
             // Undo that adjustment.
             minSP -= goarch.PtrSize;
@@ -134,11 +135,11 @@ internal static (bitvector argMap, bool hasReflectStackObj) argMapInternal(this 
         }
         hasReflectStackObj = true;
         var mv = ~(ж<ж<reflectMethodValue>>)(uintptr)((@unsafe.Pointer)arg0);
+        // Figure out whether the return values are valid.
+        // Reflect will update this value after it copies
+        // in the return values.
         var retValid = ~(ж<bool>)(uintptr)((@unsafe.Pointer)(arg0 + (uintptr)(4 * goarch.PtrSize)));
         if ((~mv).fn != f.entry()) {
-            // Figure out whether the return values are valid.
-            // Reflect will update this value after it copies
-            // in the return values.
             print((@string)"runtime: confused by "u8, funcname(f), (@string)"\n"u8);
             @throw(reflectMismatchˢ);
         }
@@ -152,7 +153,6 @@ internal static (bitvector argMap, bool hasReflectStackObj) argMapInternal(this 
             }
         }
     }
-
     return (argMap, hasReflectStackObj);
 }
 
@@ -172,6 +172,7 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
         // Frame is dead. Return empty bitvectors.
         return (locals, args, objs);
     }
+
     var f = frame.fn;
     var pcdata = (int32)(-1);
     if (targetpc != f.entry()) {
@@ -188,6 +189,7 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
         // at the function prologue, assume so and hope for the best.
         pcdata = 0;
     }
+
     // Local variables.
     var size = frame.varp - frame.sp;
     uintptr minsize = default!;
@@ -198,7 +200,6 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
     else { /* default: */
         minsize = sys.MinFrameSize;
     }
-
     if (size > minsize) {
         var stackid = pcdata;
         var stkmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_LocalsPointerMaps));
@@ -222,6 +223,7 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
             print((@string)"      no locals to adjust\n"u8);
         }
     }
+
     // Arguments. First fetch frame size and special-case argument maps.
     bool isReflect = default!;
     (args, isReflect) = frame.argMapInternal();
@@ -244,6 +246,7 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
             args = stackmapdata(stackmap, pcdata);
         }
     }
+
     // stack objects.
     if ((GOARCH == "amd64"u8 || GOARCH == "arm64"u8 || GOARCH == "loong64"u8 || GOARCH == "ppc64"u8 || GOARCH == "ppc64le"u8 || GOARCH == "riscv64"u8) && /* unsafe.Sizeof(abi.RegArgs{}) */ (uintptr)272 > 0 && isReflect){
         // For reflect.makeFuncStub and reflect.methodValueCall,
@@ -258,13 +261,14 @@ internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs
             Δp = (uintptr)add(Δp, goarch.PtrSize);
             var r0 = (ж<stackObjectRecord>)(uintptr)(noescape(Δp));
             objs = @unsafe.Slice(r0, (nint)n);
+            // Note: the noescape above is needed to keep
+            // getStackMap from "leaking param content:
+            // frame".  That leak propagates up to getgcmask, then
+            // GCMask, then verifyGCInfo, which converts the stack
+            // gcinfo tests into heap gcinfo tests :(
         }
     }
-    // Note: the noescape above is needed to keep
-    // getStackMap from "leaking param content:
-    // frame".  That leak propagates up to getgcmask, then
-    // GCMask, then verifyGCInfo, which converts the stack
-    // gcinfo tests into heap gcinfo tests :(
+
     return (locals, args, objs);
 }
 
@@ -294,7 +298,6 @@ internal static void stkobjinit() {
     }
     methodValueCallFrameObjs[0] = new stackObjectRecord(
         off: -(int32)alignUp((~abiRegArgsType).Size_, 8), // It's always the highest address local.
-
         size: (int32)(~abiRegArgsType).Size_,
         ptrBytes: (int32)(~abiRegArgsType).PtrBytes,
         gcdataoff: (uint32)((uintptr)getGCMask(abiRegArgsType) - (~mod).rodata)

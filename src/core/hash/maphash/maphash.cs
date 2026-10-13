@@ -46,6 +46,7 @@ public static uint64 Bytes(ΔSeed seed, slice<byte> b) {
     if (state == 0) {
         throw panic("maphash: use of uninitialized Seed");
     }
+
     if (len(b) > bufSize) {
         b = b.slice(0, len(b), len(b)); // merge len and cap calculations when reslicing
         while (len(b) > bufSize) {
@@ -153,8 +154,8 @@ public static (nint, error) Write(this ref Hash h, slice<byte> b) {
         }
         b = b.slice(k);
         h.flush();
+        // No need to set h.n = 0 here; it happens just before exit.
     }
-    // No need to set h.n = 0 here; it happens just before exit.
     // Process as many full buffers as possible, without copying, and calling initSeed only once.
     if (len(b) > bufSize) {
         h.initSeed();

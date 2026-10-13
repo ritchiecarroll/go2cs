@@ -19,6 +19,20 @@ using ꓸꓸꓸreflectꓸValue = Span<reflectꓸValue>;
 
 partial class template_package {
 
+// FuncMap is the type of the map defining the mapping from names to functions.
+// Each function must have either a single return value, or two return values of
+// which the second has type error. In that case, if the second (error)
+// return value evaluates to non-nil during execution, execution terminates and
+// Execute returns that error.
+//
+// Errors returned by Execute wrap the underlying error; call [errors.As] to
+// unwrap them.
+//
+// When template execution invokes a function with an argument list, that list
+// must be assignable to the function's parameter types. Functions meant to
+// apply to arguments of arbitrary type can use parameters of type interface{} or
+// of type [reflect.Value]. Similarly, functions meant to return a result of arbitrary
+// type can return interface{} or [reflect.Value].
 partial struct FuncMap /*map[@string, any]*/;
 
 // builtins returns the FuncMap.
@@ -39,23 +53,17 @@ internal static FuncMap builtins() {
         ["print"u8] = ((Funcꓸꓸꓸ<any, @string>)(fmt.Sprint)),
         ["printf"u8] = ((Funcꓸꓸꓸ<@string, any, @string>)(fmt.Sprintfᶠ)),
         ["println"u8] = ((Funcꓸꓸꓸ<any, @string>)(fmt.Sprintln)),
-        ["urlquery"u8] = ((Funcꓸꓸꓸ<any, @string>)(URLQueryEscaper)), // Comparisons
+        ["urlquery"u8] = ((Funcꓸꓸꓸ<any, @string>)(URLQueryEscaper)),
 
+        // Comparisons
         ["eq"u8] = ((Funcꓸꓸꓸ<reflectꓸValue, reflectꓸValue, (bool, error)>)(eq)), // ==
-
         ["ge"u8] = ge, // >=
-
         ["gt"u8] = gt, // >
-
         ["le"u8] = le, // <=
-
         ["lt"u8] = lt, // <
-
-        ["ne"u8] = ne
+        ["ne"u8] = ne // !=
     });
 }
-
-// !=
 
 partial struct builtinFuncsOnceᴛ1 /*dyn*/ {
     public partial ref sync_package.Once Once { get; }
@@ -126,7 +134,6 @@ internal static error goodFunc(@string name, reflectꓸType typ) {
             return fmt.Errorf("function %s has %d return values; should be 1 or 2"u8, name, typ.NumOut());
         }}
     }
-
 }
 
 // goodName reports whether the function name is a valid identifier.
@@ -145,7 +152,6 @@ internal static bool goodName(@string name) {
         case {} when !unicode.IsLetter(r) && !unicode.IsDigit(r): {
             return false;
         }}
-
     }
     return true;
 }
@@ -207,7 +213,6 @@ internal static bool intLike(reflectꓸKind typ) {
     if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) {
         return true;
     }
-
     return false;
 }
 
@@ -227,7 +232,6 @@ internal static (nint, error) indexArg(reflectꓸValue index, nint cap) {
     else { /* default: */
         return (0, fmt.Errorf("cannot index slice/array with type %s"u8, index.Type()));
     }
-
     if (x < 0 || (nint)x < 0 || (nint)x > cap) {
         return (0, fmt.Errorf("index out of range: %d"u8, x));
     }
@@ -278,13 +282,12 @@ internal static (reflectꓸValue, error) index(reflectꓸValue item, params ꓸ�
             }
         }
         else if (exprᴛ1 == reflect.Invalid) {
+            // the loop holds invariant: item.IsValid()
             throw panic("unreachable");
         }
         else { /* default: */
-            return (new reflectꓸValue(nil), fmt.Errorf("can't index item of type %s"u8, // the loop holds invariant: item.IsValid()
- item.Type()));
+            return (new reflectꓸValue(nil), fmt.Errorf("can't index item of type %s"u8, item.Type()));
         }
-
     }
     return (item, default!);
 }
@@ -319,7 +322,6 @@ internal static (reflectꓸValue, error) Δslice(reflectꓸValue item, params �
     else { /* default: */
         return (new reflectꓸValue(nil), fmt.Errorf("can't slice item of type %s"u8, item.Type()));
     }
-
     // set default values for cases item[:], item[i:].
     var idx = new nint[]{0, item.Len()}.array(3);
     foreach (var (i, index) in indexes) {
@@ -355,7 +357,6 @@ internal static (nint, error) length(reflectꓸValue item) {
     if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Map || exprᴛ1 == reflect.ΔSlice || exprᴛ1 == reflect.ΔString) {
         return (item.Len(), default!);
     }
-
     return (0, fmt.Errorf("len of type %s"u8, item.Type()));
 }
 
@@ -379,6 +380,7 @@ internal static (reflectꓸValue, error) call(@string name, reflectꓸValue fn, 
     if (typ.Kind() != reflect.Func) {
         return (new reflectꓸValue(nil), fmt.Errorf("non-function %s of type %s"u8, name, typ));
     }
+
     {
         var err = goodFunc(name, typ); if (err != default!) {
             return (new reflectꓸValue(nil), err);
@@ -406,6 +408,7 @@ internal static (reflectꓸValue, error) call(@string name, reflectꓸValue fn, 
         if (!typ.IsVariadic() || i < numIn - 1) {
             argType = typ.In(i);
         }
+
         error err = default!;
         {
             (argv[i], err) = prepareArg(arg, argType); if (err != default!) {
@@ -510,7 +513,6 @@ internal static (kind, error) basicKind(reflectꓸValue v) {
     if (exprᴛ1 == reflect.ΔString) {
         return (stringKind, default!);
     }
-
     return (invalidKind, errBadComparisonType);
 }
 
@@ -523,7 +525,6 @@ internal static bool isNil(reflectꓸValue v) {
     if (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func || exprᴛ1 == reflect.ΔInterface || exprᴛ1 == reflect.Map || exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.ΔSlice) {
         return v.IsNil();
     }
-
     return false;
 }
 
@@ -571,7 +572,6 @@ internal static (bool, error) eq(reflectꓸValue arg1, params ꓸꓸꓸreflect�
                 }
                 break;
             }}
-
         } else {
             var exprᴛ1 = k1;
             if (exprᴛ1 == boolKind) {
@@ -605,7 +605,6 @@ internal static (bool, error) eq(reflectꓸValue arg1, params ꓸꓸꓸreflect�
                     truth = AreEqual(arg1.Interface(), arg.Interface());
                 }
             }
-
         }
         if (truth) {
             return (true, default!);
@@ -648,7 +647,6 @@ internal static (bool, error) lt(reflectꓸValue arg1, reflectꓸValue arg2) {
         default: {
             return (false, errBadComparison);
         }}
-
     } else {
         var exprᴛ1 = k1;
         if (exprᴛ1 == boolKind || exprᴛ1 == complexKind) {
@@ -669,7 +667,6 @@ internal static (bool, error) lt(reflectꓸValue arg1, reflectꓸValue arg2) {
         else { /* default: */
             throw panic("invalid kind");
         }
-
     }
     return (truth, default!);
 }
@@ -746,7 +743,6 @@ public static void HTMLEscape(io.Writer w, slice<byte> b) {
             continue;
             break;
         }}
-
         w.Write(b.slice(last, i));
         w.Write(html);
         last = i + 1;
@@ -776,6 +772,7 @@ public static @string HTMLEscaper(params ꓸꓸꓸany argsʗp) {
 // JavaScript escaping.
 internal static slice<byte> jsLowUni = slice<byte>(@"\u00"u8);
 internal static slice<byte> hex = slice<byte>("0123456789ABCDEF"u8);
+
 internal static slice<byte> jsBackslash = slice<byte>(@"\\"u8);
 internal static slice<byte> jsApos = slice<byte>(@"\'"u8);
 internal static slice<byte> jsQuot = slice<byte>(@"\"""u8);
@@ -789,11 +786,13 @@ public static void JSEscape(io.Writer w, slice<byte> b) {
     nint last = 0;
     for (nint i = 0; i < len(b); i++) {
         var c = b[i];
+
         if (!jsIsSpecial((rune)c)) {
             // fast path: nothing to do
             continue;
         }
         w.Write(b.slice(last, i));
+
         if (c < utf8.RuneSelf){
             // Quotes, slashes and angle brackets get quoted.
             // Control characters get written as \u00XX.
@@ -833,7 +832,6 @@ public static void JSEscape(io.Writer w, slice<byte> b) {
                 w.Write(hex.slice(bΔ2, (byte)(bΔ2 + 1)));
                 break;
             }}
-
         } else {
             // Unicode rune.
             var (r, size) = utf8.DecodeRune(b.slice(i));
@@ -865,7 +863,6 @@ internal static bool jsIsSpecial(rune r) {
     case (rune)'\\' or (rune)'\'' or (rune)'"' or (rune)'<' or (rune)'>' or (rune)'&' or (rune)'=': {
         return true;
     }}
-
     return r < (rune)' ' || utf8.RuneSelf <= r;
 }
 

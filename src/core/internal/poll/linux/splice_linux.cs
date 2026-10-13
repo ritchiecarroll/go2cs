@@ -13,7 +13,16 @@ using go.@internal.syscall;
 
 partial class poll_package {
 
+// spliceNonblock doesn't make the splice itself necessarily nonblocking
+// (because the actual file descriptors that are spliced from/to may block
+// unless they have the O_NONBLOCK flag set), but it makes the splice pipe
+// operations nonblocking.
 internal static UntypedInt spliceNonblock => 0x2;
+
+// maxSpliceSize is the maximum amount of data Splice asks
+// the kernel to move in a single call to splice(2).
+// We use 1MB as Splice writes data through a pipe, and 1MB is the default maximum pipe buffer size,
+// which is determined by /proc/sys/fs/pipe-max-size.
 internal static UntypedInt maxSpliceSize => /* 1 << 20 */ 1048576;
 
 // Splice transfers at most remain bytes of data from src to dst, using the
@@ -27,8 +36,6 @@ public static (int64 written, bool handled, error err) Splice(ж<FD> Ꮡdst, ж<
     error err = default!;
     GoFrame ᒐ = default;
     try {
-        ref var src = ref Ꮡsrc.DerefOrNull();
-
         (var p, err) = getPipe();
         if (err != default!) {
             (written, handled, err) = (0, false, err); goto ᒐdone;
@@ -58,6 +65,7 @@ public static (int64 written, bool handled, error err) Splice(ж<FD> Ꮡdst, ж<
                 break;
             }
             p.Value.data += inPipe;
+
             (n, err) = splicePump(Ꮡdst, (~p).rfd, inPipe);
             if (n > 0) {
                 written += (int64)n;
@@ -259,12 +267,14 @@ internal static ж<splicePipe> newPipe() {
             return default!;
         }
     }
+
     // Splice will loop writing maxSpliceSize bytes from the source to the pipe,
     // and then write those bytes from the pipe to the destination.
     // Set the pipe buffer size to maxSpliceSize to optimize that.
     // Ignore errors here, as a smaller buffer size will work,
     // although it will require more system calls.
     unix.Fcntl(fds[0], Δsyscall.F_SETPIPE_SZ, maxSpliceSize);
+
     return Ꮡ(new splicePipe(splicePipeFields: new splicePipeFields(rfd: fds[0], wfd: fds[1])));
 }
 

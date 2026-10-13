@@ -101,14 +101,13 @@ partial struct @object {
     internal tokenꓸPos scopePos_;
 }
 
+// color encodes the color of an object (see Checker.objDecl for details).
 public partial struct Δcolor /*num:uint32*/;
 
 // An object may be painted in one of three colors.
 // Color values other than white or black are considered grey.
 internal static Δcolor white => /* iota */ 0;
-
 internal static Δcolor black => 1;
-
 internal static Δcolor grey => 2; // must be > white and black
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -127,7 +126,6 @@ public static @string String(this Δcolor c) {
     { /* default: */
         return greyˢ;
     }
-
 }
 
 // colorFor returns the (initial) color for an object depending on
@@ -257,6 +255,7 @@ internal static nint cmp(this ж<@object> Ꮡa, ж<@object> Ꮡb) {
     if (Ꮡa == Ꮡb) {
         return 0;
     }
+
     // Nil before non-nil.
     if (Ꮡa == nil) {
         return -1;
@@ -264,6 +263,7 @@ internal static nint cmp(this ж<@object> Ꮡa, ж<@object> Ꮡb) {
     if (Ꮡb == nil) {
         return +1;
     }
+
     // Exported functions before non-exported.
     var ea = isExported(a.name);
     var eb = isExported(b.name);
@@ -273,6 +273,7 @@ internal static nint cmp(this ж<@object> Ꮡa, ж<@object> Ꮡb) {
         }
         return +1;
     }
+
     // Order by name and then (for non-exported names) by package.
     if (a.name != b.name) {
         return strings.Compare(a.name, b.name);
@@ -280,6 +281,7 @@ internal static nint cmp(this ж<@object> Ꮡa, ж<@object> Ꮡb) {
     if (!ea) {
         return strings.Compare((~a.pkg).path, (~b.pkg).path);
     }
+
     return 0;
 }
 
@@ -360,13 +362,19 @@ public static bool IsAlias(this ж<TypeName> Ꮡobj) {
     case null: {
         return false;
     }
+    // case *Alias:
+    //	handled by default case
     case ж<Basic> t: {
+        // unsafe.Pointer is not an alias.
         if (obj.pkg == Unsafe) {
-            // case *Alias:
-            //	handled by default case
-            // unsafe.Pointer is not an alias.
             return false;
         }
+        // Any user-defined type name for a basic type is an alias for a
+        // basic type (because basic types are pre-declared in the Universe
+        // scope, outside any package scope), and so is any type name with
+        // a different name than the name of the basic type it refers to.
+        // Additionally, we need to look for "byte" and "rune" because they
+        // are aliases but have the same names (for better error messages).
         return obj.pkg != nil || (~t).name != obj.name || AreEqual(t, universeByte) || AreEqual(t, universeRune);
     }
     case ж<Named> t: {
@@ -380,13 +388,6 @@ public static bool IsAlias(this ж<TypeName> Ꮡobj) {
         return true;
     }}
 }
-
-// Any user-defined type name for a basic type is an alias for a
-// basic type (because basic types are pre-declared in the Universe
-// scope, outside any package scope), and so is any type name with
-// a different name than the name of the basic type it refers to.
-// Additionally, we need to look for "byte" and "rune" because they
-// are aliases but have the same names (for better error messages).
 
 // A Variable represents a declared variable (including function parameters and results, and struct fields).
 partial struct Var {
@@ -468,11 +469,11 @@ public static ж<Func> NewFunc(tokenꓸPos pos, ж<Package> Ꮡpkg, @string name
     if (Ꮡsig != nil){
         typ = new ΔSignatureжΔType(Ꮡsig);
     } else {
+        // Don't store a (typed) nil *Signature.
+        // We can't simply replace it with new(Signature) either,
+        // as this would violate object.{Type,color} invariants.
+        // TODO(adonovan): propose to disallow NewFunc with nil *Signature.
     }
-    // Don't store a (typed) nil *Signature.
-    // We can't simply replace it with new(Signature) either,
-    // as this would violate object.{Type,color} invariants.
-    // TODO(adonovan): propose to disallow NewFunc with nil *Signature.
     return Ꮡ(new Func(new @object(nil, pos, Ꮡpkg, name, typ, 0, colorFor(typ), nopos), false, nil));
 }
 
@@ -543,6 +544,7 @@ internal static bool hasPtrRecv(this ref Func obj) {
             return isPtr;
         }
     }
+
     // If a method's type is not set it may be a method/function that is:
     // 1) client-supplied (via NewFunc with no signature), or
     // 2) internally created but not yet type-checked.
@@ -597,6 +599,7 @@ internal static void writeObject(ж<bytes.Buffer> Ꮡbuf, Object obj, Func<ж<Pa
 
     ж<TypeName> tname = default!;
     var typ = obj.Type();
+
     switch (obj.type()) {
     case ж<PkgName> objΔ1: {
         fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), "package %s"u8, objΔ1.of(PkgName.Ꮡobject).Name());
@@ -654,24 +657,28 @@ internal static void writeObject(ж<bytes.Buffer> Ꮡbuf, Object obj, Func<ж<Pa
         throw panic(fmt.Sprintf("writeObject(%T)"u8, objΔ1));
         break;
     }}
+
     buf.WriteByte((rune)' ');
+
     // For package-level objects, qualify the name.
     if (obj.Pkg() != nil && AreEqual((~obj.Pkg()).scope.Lookup(obj.Name()), obj)) {
         buf.WriteString(packagePrefix(obj.Pkg(), qf));
     }
     buf.WriteString(obj.Name());
+
     if (typ == default!) {
         return;
     }
+
     if (tname != nil) {
         switch (typ.type()) {
         case ж<Basic> t: {
+            // Don't print anything more for basic types since there's
+            // no more information.
             return;
         }
         case {} Δt when Δt._<ΔgenericType>(out var t): {
             if (t.TypeParams().Len() > 0) {
-                // Don't print anything more for basic types since there's
-                // no more information.
                 newTypeWriter(Ꮡbuf, qf).tParamList(t.TypeParams().list());
             }
             break;
@@ -679,8 +686,7 @@ internal static void writeObject(ж<bytes.Buffer> Ꮡbuf, Object obj, Func<ж<Pa
         if (tname.IsAlias()){
             buf.WriteString(" ="u8);
             {
-                var (alias, ok) = typ._<ж<Alias>>(ᐧ); if (ok) {
-                    // materialized? (gotypesalias=1)
+                var (alias, ok) = typ._<ж<Alias>>(ᐧ); if (ok) { // materialized? (gotypesalias=1)
                     typ = alias.Value.fromRHS;
                 }
             }
@@ -695,6 +701,7 @@ internal static void writeObject(ж<bytes.Buffer> Ꮡbuf, Object obj, Func<ж<Pa
             }
         }
     }
+
     // Special handling for any: because WriteType will format 'any' as 'any',
     // resulting in the object string `type any = any` rather than `type any =
     // interface{}`. To avoid this, swap in a different empty interface.
@@ -702,6 +709,7 @@ internal static void writeObject(ж<bytes.Buffer> Ꮡbuf, Object obj, Func<ж<Pa
         assert(Identical(typ, new InterfaceжΔType(ᏑemptyInterface)));
         typ = new InterfaceжΔType(ᏑemptyInterface);
     }
+
     buf.WriteByte((rune)' ');
     WriteType(Ꮡbuf, typ, qf);
 }

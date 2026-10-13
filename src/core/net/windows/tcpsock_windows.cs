@@ -17,6 +17,7 @@ public static error SetKeepAliveConfig(this ж<TCPConn> Ꮡc, KeepAliveConfig co
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
         return syscall.EINVAL;
     }
+
     {
         var err = setKeepAlive(c.fd, config.Enable); if (err != default!) {
             return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
@@ -44,6 +45,7 @@ public static error SetKeepAliveConfig(this ж<TCPConn> Ꮡc, KeepAliveConfig co
             return new OpErrorжerror(Ꮡ(new OpError(Op: "set"u8, Net: (~c.fd).net, Source: (~c.fd).laddr, Addr: (~c.fd).raddr, Err: err)));
         }
     }
+
     return default!;
 }
 

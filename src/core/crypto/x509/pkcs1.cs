@@ -78,17 +78,21 @@ public static (ж<rsa.PrivateKey>, error) ParsePKCS1PrivateKey(slice<byte> der) 
         }
         return (default!, err);
     }
+
     if (priv.Version > 1) {
         return (default!, errors.New(x509UnsupportedPrivateˢ));
     }
+
     if (priv.N.Sign() <= 0 || priv.D.Sign() <= 0 || priv.P.Sign() <= 0 || priv.Q.Sign() <= 0 || priv.Dp != nil && priv.Dp.Sign() <= 0 || priv.Dq != nil && priv.Dq.Sign() <= 0 || priv.Qinv != nil && priv.Qinv.Sign() <= 0) {
         return (default!, errors.New(x509PrivateKeyContainsˢ));
     }
+
     var key = @new<rsa.PrivateKey>();
     key.Value.PublicKey = new rsa.PublicKey(
         E: priv.E,
         N: priv.N
     );
+
     key.Value.D = priv.D;
     key.Value.Primes = new slice<ж<bigꓸInt>>(2 + builtin.len(priv.AdditionalPrimes));
     key.Value.Primes[0] = priv.P;
@@ -101,9 +105,10 @@ public static (ж<rsa.PrivateKey>, error) ParsePKCS1PrivateKey(slice<byte> der) 
             return (default!, errors.New(x509PrivateKeyContainsˢ2));
         }
         key.Value.Primes[i + 2] = a.Prime;
+        // We ignore the other two values because rsa will calculate
+        // them as needed.
     }
-    // We ignore the other two values because rsa will calculate
-    // them as needed.
+
     key.Precompute();
     {
         var errΔ3 = key.Validate(); if (errΔ3 != default!) {
@@ -121,9 +126,11 @@ public static (ж<rsa.PrivateKey>, error) ParsePKCS1PrivateKey(slice<byte> der) 
                     }
                 }
             }
+
             return (default!, errΔ3);
         }
     }
+
     return (key, default!);
 }
 
@@ -140,10 +147,12 @@ public static slice<byte> MarshalPKCS1PrivateKey(ж<rsa.PrivateKey> Ꮡkey) {
     ref var key = ref Ꮡkey.DerefOrNull();
 
     key.Precompute();
+
     nint version = 0;
     if (builtin.len(key.Primes) > 2) {
         version = 1;
     }
+
     var priv = new pkcs1PrivateKey(
         Version: version,
         N: key.N,
@@ -155,12 +164,14 @@ public static slice<byte> MarshalPKCS1PrivateKey(ж<rsa.PrivateKey> Ꮡkey) {
         Dq: key.Precomputed.Dq,
         Qinv: key.Precomputed.Qinv
     );
+
     priv.AdditionalPrimes = new slice<pkcs1AdditionalRSAPrime>(builtin.len(key.Precomputed.CRTValues));
     foreach (var (i, values) in key.Precomputed.CRTValues) {
         priv.AdditionalPrimes[i].Prime = key.Primes[2 + i];
         priv.AdditionalPrimes[i].Exp = values.Exp;
         priv.AdditionalPrimes[i].Coeff = values.Coeff;
     }
+
     var (b, _) = asn1.Marshal(priv);
     return b;
 }
@@ -187,12 +198,14 @@ public static (ж<rsa.PublicKey>, error) ParsePKCS1PublicKey(slice<byte> der) {
     if (builtin.len(rest) > 0) {
         return (default!, new asn1.SyntaxError(Msg: "trailing data"u8));
     }
+
     if (pub.N.Sign() <= 0 || pub.E <= 0) {
         return (default!, errors.New(x509PublicKeyContainsˢ));
     }
     if (pub.E > (nint)(2147483648L - 1)) {
         return (default!, errors.New(x509PublicKeyContainsˢ2));
     }
+
     return (Ꮡ(new rsa.PublicKey(
         E: pub.E,
         N: pub.N

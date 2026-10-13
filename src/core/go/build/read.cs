@@ -105,6 +105,7 @@ internal static byte readByteNoBuf(this ref importReader r) {
             err = errNUL;
         }
     }
+
     if (err != default!) {
         if (AreEqual(err, io.EOF)){
             r.eof = true;
@@ -135,6 +136,7 @@ internal static byte peekByte(this ref importReader r, bool skipSpace) {
         }
         return 0;
     }
+
     // Use r.peek as first input byte.
     // Don't just return r.peek here: it might have been left by peekByte(false)
     // and this might be peekByte(true).
@@ -174,7 +176,6 @@ internal static byte peekByte(this ref importReader r, bool skipSpace) {
                 continue;
                 break;
             }}
-
         }
         break;
     }
@@ -214,12 +215,12 @@ Reswitch:
             break;
         }
         case (rune)' ' or (rune)'\t': {
+            // leave startLine alone
             break;
         }
         case (rune)'"': {
             startLine = false;
             while (r.err == default!) {
-                // leave startLine alone
                 if (r.eof) {
                     r.syntaxError();
                 }
@@ -319,10 +320,8 @@ break_SkipSlashSlash:;
                 startLine = true;
                 break;
             }}
-
             break;
         }}
-
         break_Reswitch:;
     }
     return false;
@@ -390,7 +389,6 @@ internal static void readString(this ref importReader r) {
         r.syntaxError();
         break;
     }}
-
 }
 
 // readImport reads an import clause - optional identifier followed by quoted string -
@@ -441,6 +439,7 @@ internal static readonly @string importˢ = "import"u8;
 // not for syntax errors in the file itself.
 internal static error readGoInfo(io.Reader f, ref fileInfo info) {
     var r = newImportReader(info.name, f);
+
     r.readKeyword(packageˢ);
     r.readIdent();
     while (r.peekByte(true) == (rune)'i') {
@@ -455,12 +454,15 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
             r.readImport();
         }
     }
+
     info.header = r.Value.buf;
+
     // If we stopped successfully before EOF, we read a byte that told us we were done.
     // Return all but that last byte, which would cause a syntax error if we let it through.
     if ((~r).err == default! && !(~r).eof) {
         info.header = (~r).buf.slice(0, len((~r).buf) - 1);
     }
+
     // If we stopped for a syntax error, consume the whole file so that
     // we are sure we don't change the errors that go/parser returns.
     if (AreEqual((~r).err, errSyntax)) {
@@ -473,14 +475,17 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
     if ((~r).err != default!) {
         return (~r).err;
     }
+
     if (info.fset == nil) {
         return default!;
     }
+
     // Parse file header & record imports.
     (info.parsed, info.parseErr) = parser.ParseFile(info.fset, info.name, info.header, (parser.Mode)(parser.ImportsOnly | parser.ParseComments));
     if (info.parseErr != default!) {
         return default!;
     }
+
     var hasEmbed = false;
     foreach (var (_, decl) in (~info.parsed).Decls) {
         var (d, ok) = decl._<ж<ast.GenDecl>>(ᐧ);
@@ -507,6 +512,7 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
             if (path == "embed"u8) {
                 hasEmbed = true;
             }
+
             var doc = spec.Value.Doc;
             if (doc == nil && len((~d).Specs) == 1) {
                 doc = d.Value.Doc;
@@ -514,6 +520,7 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
             info.imports = append(info.imports, new fileImport(path, spec.Pos(), doc));
         }
     }
+
     // Extract directives.
     foreach (var (_, group) in (~info.parsed).Comments) {
         if (group.Pos() >= (~info.parsed).Package) {
@@ -525,6 +532,7 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
             }
         }
     }
+
     // If the file imports "embed",
     // we have to look for //go:embed comments
     // in the remainder of the file.
@@ -554,6 +562,7 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
             }
         }
     }
+
     return default!;
 }
 
@@ -589,6 +598,7 @@ internal static (slice<fileEmbed>, error) parseGoEmbed(@string args, tokenꓸPos
         @string trim = strings.TrimLeftFunc(args, unicode.IsSpace);
         trimBytesʗ1(len(args) - len(trim));
     }
+
     slice<fileEmbed> list = default!;
     for (trimSpace(); args != ""u8; trimSpace()) {
         @string path = default!;
@@ -638,8 +648,8 @@ Switch:
             }
             break;
         }}
-
         break_Switch:;
+
         if (args != ""u8) {
             var (r, _) = utf8.DecodeRuneInString(args);
             if (!unicode.IsSpace(r)) {

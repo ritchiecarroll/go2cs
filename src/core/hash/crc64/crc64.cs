@@ -19,10 +19,13 @@ partial class crc64_package {
 public static UntypedInt ΔSize => 8;
 
 // Predefined polynomials.
+// The ISO polynomial, defined in ISO 3309 and used in HDLC.
 public static UntypedInt ISO => 0xD800000000000000;
 
+// The ECMA polynomial, defined in ECMA 182.
 public static UntypedInt ECMA => 0xC96C5795D7870F42;
 
+// Table is a 256-word table representing the polynomial for efficient processing.
 partial struct Table /*[256]uint64*/;
 
 internal static ж<ж<array<Table>>> Ꮡslicing8TableISO = new StandardBox<ж<array<Table>>>(default(ж<array<Table>>));
@@ -51,7 +54,6 @@ public static ж<Table> MakeTable(uint64 poly) {
     { /* default: */
         return makeTable(poly);
     }
-
 }
 
 internal static ж<Table> makeTable(uint64 poly) {
@@ -154,9 +156,9 @@ internal static uint64 update(uint64 crc, ref Table tab, slice<byte> p) {
         } else 
         if (tab == slicing8TableISO.Value[0]){
             helperTable = slicing8TableISO;
+            // For smaller sizes creating extended table takes too much time
         } else 
         if (len(p) >= 2048){
-            // For smaller sizes creating extended table takes too much time
             // According to the tests between various x86 and arm CPUs, 2k is a reasonable
             // threshold for now. This may change in the future.
             helperTable = makeSlicingBy8Table(ref tab);

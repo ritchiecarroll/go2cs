@@ -95,10 +95,10 @@ internal static uint64 uint64n(this ref Rand r, uint64 n) {
     if (is32bit && (uint64)(uint32)n == n) {
         return (uint64)r.uint32n((uint32)n);
     }
-    if ((uint64)(n & (n - 1)) == 0) {
-        // n is power of two, can mask
+    if ((uint64)(n & (n - 1)) == 0) { // n is power of two, can mask
         return (uint64)(r.Uint64() & (n - 1));
     }
+
     // Suppose we have a uint64 x uniform in the range [0,2⁶⁴)
     // and want to reduce it to the range [0,n) preserving exact uniformity.
     // We can simulate a scaling arbitrary precision x * (n/2⁶⁴) by
@@ -142,8 +142,7 @@ internal static uint64 uint64n(this ref Rand r, uint64 n) {
 // uint32n is an identical computation to uint64n
 // but optimized for 32-bit systems.
 internal static uint32 uint32n(this ref Rand r, uint32 n) {
-    if ((uint32)(n & (n - 1)) == 0) {
-        // n is power of two, can mask
+    if ((uint32)(n & (n - 1)) == 0) { // n is power of two, can mask
         return (uint32)((uint32)r.Uint64() & (n - 1));
     }
     // On 64-bit systems we still use the uint64 code below because
@@ -251,6 +250,7 @@ public static void Shuffle(this ref Rand r, nint n, Action<nint, nint> swap) {
     if (n < 0) {
         throw panic("invalid argument to Shuffle");
     }
+
     // Fisher-Yates shuffle: https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
     // Shuffle really ought not be called with n that doesn't fit in 32 bits.
     // Not only will it take a very long time, but with 2³¹! possible permutations,

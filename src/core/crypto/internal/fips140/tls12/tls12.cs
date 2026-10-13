@@ -20,6 +20,7 @@ public static slice<byte> PRF<H>(Func<H> hash, slice<byte> secret, @string label
     var labelAndSeed = new slice<byte>(len(label) + len(seed));
     copy(labelAndSeed, label);
     copy(labelAndSeed.slice(len(label)), seed);
+
     var result = new slice<byte>(keyLen);
     pHash(hash, result, secret, labelAndSeed);
     return result;
@@ -32,6 +33,7 @@ internal static void pHash<H>(Func<H> hash, slice<byte> result, slice<byte> secr
     var h = hmac.New(hash, secret);
     h.Write(seed);
     var a = h.Sum(default!);
+
     while (len(result) > 0) {
         h.Reset();
         h.Write(a);
@@ -39,6 +41,7 @@ internal static void pHash<H>(Func<H> hash, slice<byte> result, slice<byte> secr
         var b = h.Sum(default!);
         nint n = copy(result, b);
         result = result.slice(n);
+
         h.Reset();
         h.Write(a);
         a = h.Sum(default!);

@@ -221,7 +221,6 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
     default: {
         return (default!, errors.New(tlsInvalidSessionˢ));
     }}
-
     switch (earlyData) {
     case 0: {
         ss.Value.EarlyData = false;
@@ -234,7 +233,6 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
     default: {
         return (default!, errors.New(tlsInvalidSessionˢ));
     }}
-
     foreach (var (_, certΔ1) in cert.ΔCertificate) {
         var (c, err) = globalCertCache.newCert(certΔ1);
         if (err != default!) {
@@ -342,11 +340,13 @@ internal static (slice<byte>, error) encryptTicket(this ref Config c, slice<byte
     if (len(ticketKeys) == 0) {
         return (default!, errors.New(tlsInternalErrorSessionˢ));
     }
+
     var encrypted = new slice<byte>((nint)aes.BlockSize + len(state) + (nint)sha256.Size);
     var iv = encrypted[..(int)(aes.BlockSize)];
     var ciphertext = encrypted.slice(aes.BlockSize, len(encrypted) - (nint)sha256.Size);
     var authenticated = encrypted.slice(0, len(encrypted) - (nint)sha256.Size);
     var macBytes = encrypted.slice(len(encrypted) - (nint)sha256.Size);
+
     {
         var (_, errΔ1) = io.ReadFull(c.rand(), iv); if (errΔ1 != default!) {
             return (default!, errΔ1);
@@ -358,9 +358,11 @@ internal static (slice<byte>, error) encryptTicket(this ref Config c, slice<byte
         return (default!, errors.New("tls: failed to create cipher while encrypting ticket: "u8 + err.Error()));
     }
     cipher.NewCTR(block, iv).XORKeyStream(ciphertext, state);
+
     var mac = hmac.New(sha256.New, key.hmacKey[..]);
     mac.Write(authenticated);
     mac.Sum(macBytes[..0]);
+
     return (encrypted, default!);
 }
 
@@ -387,27 +389,33 @@ internal static slice<byte> decryptTicket(this ref Config c, slice<byte> encrypt
     if (len(encrypted) < (nint)(aes.BlockSize + sha256.Size)) {
         return default!;
     }
+
     var iv = encrypted[..(int)(aes.BlockSize)];
     var ciphertext = encrypted.slice(aes.BlockSize, len(encrypted) - (nint)sha256.Size);
     var authenticated = encrypted.slice(0, len(encrypted) - (nint)sha256.Size);
     var macBytes = encrypted.slice(len(encrypted) - (nint)sha256.Size);
+
     foreach (var (_, vᴛ1) in ticketKeys) {
         var key = vᴛ1.ΔClone();
 
         var mac = hmac.New(sha256.New, key.hmacKey[..]);
         mac.Write(authenticated);
         var expected = mac.Sum(default!);
+
         if (subtle.ConstantTimeCompare(macBytes, expected) != 1) {
             continue;
         }
+
         var (block, err) = aes.NewCipher(key.aesKey[..]);
         if (err != default!) {
             return default!;
         }
         var plaintext = new slice<byte>(len(ciphertext));
         cipher.NewCTR(block, iv).XORKeyStream(plaintext, ciphertext);
+
         return plaintext;
     }
+
     return default!;
 }
 

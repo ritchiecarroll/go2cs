@@ -56,7 +56,7 @@ using static go.crypto.rand_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/rand/rand.go", "rand.cs", "ACJCgoKClO6CgoKUlKwABBAADAqAgpSCgqSCgpQ=")]
 [assembly: go.GoPositionMap("crypto/rand/text.go", "text.cs", "AAkc5IKCgpQ=")]
-[assembly: go.GoPositionMap("crypto/rand/util.go", "util.cs", "ABMiooKUgpaEgoKWgoSCgIK4yoKmgoK4hIKCzuKClIKUgpSmlIKCloSCgoK6hIKC")]
+[assembly: go.GoPositionMap("crypto/rand/util.go", "util.cs", "ABMiooKUgqaUgoKmgpSCgILIyoKmgoK4lIKCzuKClIKUgpSmlIKCppSCgoLKlIKC")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

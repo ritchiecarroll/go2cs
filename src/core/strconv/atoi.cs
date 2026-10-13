@@ -76,20 +76,23 @@ internal static readonly @string fnParseUintᶜ = "ParseUint"u8;
 // A sign prefix is not permitted.
 public static (uint64, error) ParseUint(@string s, nint @base, nint bitSize) {
     @string fnParseUint = fnParseUintᶜ;
+
     if (s == ""u8) {
         return (0, new NumErrorжerror(syntaxError(fnParseUint, s)));
     }
+
     var base0 = @base == 0;
+
     @string s0 = s;
     switch (ᐧ) {
     case {} when 2 <= @base && @base <= 36: {
+        // valid base; nothing to do
         break;
     }
     case {} when @base is 0: {
+        // Look for octal, hex prefix.
         @base = 10;
         if (s[0] == (rune)'0') {
-            // valid base; nothing to do
-            // Look for octal, hex prefix.
             switch (ᐧ) {
             case {} when len(s) >= 3 && lower(s[1]) == (rune)'b': {
                 @base = 2;
@@ -111,7 +114,6 @@ public static (uint64, error) ParseUint(@string s, nint @base, nint bitSize) {
                 s = s[1..];
                 break;
             }}
-
         }
         break;
     }
@@ -125,6 +127,7 @@ public static (uint64, error) ParseUint(@string s, nint @base, nint bitSize) {
     if (bitSize < 0 || bitSize > 64) {
         return (0, new NumErrorжerror(bitSizeError(fnParseUint, s0, bitSize)));
     }
+
     // Cutoff is the smallest number such that cutoff*base > maxUint64.
     // Use compile-time constants for common cases.
     uint64 cutoff = default!;
@@ -143,6 +146,7 @@ public static (uint64, error) ParseUint(@string s, nint @base, nint bitSize) {
     }}
 
     var maxVal = ((uint64)1).Lsh((nuint)bitSize) - 1;
+
     var underscores = false;
     uint64 n = default!;
     foreach (var (_, c) in slice<byte>(s)) {
@@ -168,11 +172,13 @@ public static (uint64, error) ParseUint(@string s, nint @base, nint bitSize) {
         if (d >= (byte)@base) {
             return (0, new NumErrorжerror(syntaxError(fnParseUint, s0)));
         }
+
         if (n >= cutoff) {
             // n*base overflows
             return (maxVal, new NumErrorжerror(rangeError(fnParseUint, s0)));
         }
         n *= (uint64)@base;
+
         var n1 = n + (uint64)d;
         if (n1 < n || n1 > maxVal) {
             // n+d overflows
@@ -180,9 +186,11 @@ public static (uint64, error) ParseUint(@string s, nint @base, nint bitSize) {
         }
         n = n1;
     }
+
     if (underscores && !underscoreOK(s0)) {
         return (0, new NumErrorжerror(syntaxError(fnParseUint, s0)));
     }
+
     return (n, default!);
 }
 
@@ -218,9 +226,11 @@ public static (int64 i, error err) ParseInt(@string s, nint @base, nint bitSize)
     error err = default!;
 
     @string fnParseInt = fnParseIntᶜ;
+
     if (s == ""u8) {
         return (0, new NumErrorжerror(syntaxError(fnParseInt, s)));
     }
+
     // Pick off leading sign.
     @string s0 = s;
     var neg = false;
@@ -231,6 +241,7 @@ public static (int64 i, error err) ParseInt(@string s, nint @base, nint bitSize)
         neg = true;
         s = s[1..];
     }
+
     // Convert unsigned and check range.
     uint64 un = default!;
     (un, err) = ParseUint(s, @base, bitSize);
@@ -239,9 +250,11 @@ public static (int64 i, error err) ParseInt(@string s, nint @base, nint bitSize)
         err._<ж<NumError>>().Value.Num = stringslite.Clone(s0);
         return (0, err);
     }
+
     if (bitSize == 0) {
         bitSize = IntSize;
     }
+
     var cutoff = (uint64)(((uint64)1).Lsh((nuint)(bitSize - 1)));
     if (!neg && un >= cutoff) {
         return ((int64)(cutoff - 1), new NumErrorжerror(rangeError(fnParseInt, s0)));
@@ -262,6 +275,7 @@ internal static readonly @string fnAtoiᶜ = "Atoi"u8;
 // Atoi is equivalent to ParseInt(s, 10, 0), converted to type int.
 public static (nint, error) Atoi(@string s) {
     @string fnAtoi = fnAtoiᶜ;
+
     nint sLen = len(s);
     if (intSize == 32 && (0 < sLen && sLen < 10) || intSize == 64 && (0 < sLen && sLen < 19)) {
         // Fast path for small integers that fit int type.
@@ -272,6 +286,7 @@ public static (nint, error) Atoi(@string s) {
                 return (0, new NumErrorжerror(syntaxError(fnAtoi, s0)));
             }
         }
+
         nint n = 0;
         foreach (var (_, vᴛ1) in slice<byte>(s)) {
             var ch = vᴛ1;
@@ -287,6 +302,7 @@ public static (nint, error) Atoi(@string s) {
         }
         return (n, default!);
     }
+
     // Slow path for invalid, big, or underscored integers.
     var (i64, err) = ParseInt(s, 10, 0);
     {
@@ -308,10 +324,12 @@ internal static bool underscoreOK(@string s) {
     // ! for none of the above.
     var saw = (rune)'^';
     nint i = 0;
+
     // Optional sign.
     if (len(s) >= 1 && (s[0] == (rune)'-' || s[0] == (rune)'+')) {
         s = s[1..];
     }
+
     // Optional base prefix.
     var hex = false;
     if (len(s) >= 2 && s[0] == (rune)'0' && (lower(s[1]) == (rune)'b' || lower(s[1]) == (rune)'o' || lower(s[1]) == (rune)'x')) {
@@ -319,6 +337,7 @@ internal static bool underscoreOK(@string s) {
         saw = (rune)'0'; // base prefix counts as a digit for "underscore as digit separator"
         hex = lower(s[1]) == (rune)'x';
     }
+
     // Number proper.
     for (; i < len(s); i++) {
         // Digits are always okay.

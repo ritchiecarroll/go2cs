@@ -11,8 +11,18 @@ using compress;
 
 partial class zip_package {
 
+// A Compressor returns a new compressing writer, writing to w.
+// The WriteCloser's Close method must be used to flush pending data to w.
+// The Compressor itself must be safe to invoke from multiple goroutines
+// simultaneously, but each returned writer will be used only by
+// one goroutine at a time.
 // type Compressor is a methodless func type — rendered inline as its base delegate
 
+// A Decompressor returns a new decompressing reader, reading from r.
+// The [io.ReadCloser]'s Close method must be used to release associated resources.
+// The Decompressor itself must be safe to invoke from multiple goroutines
+// simultaneously, but each returned reader will be used only by
+// one goroutine at a time.
 // type Decompressor is a methodless func type — rendered inline as its base delegate
 
 internal static ж<sync.Pool> ᏑflateWriterPool = new StandardBox<sync.Pool>(default(sync.Pool));
@@ -143,6 +153,7 @@ internal static ref sync.Map decompressors => ref Ꮡdecompressors.Value; // map
 [GoInit] internal static void init() {
     Ꮡcompressors.Store(Store, new Func<io.Writer, (io.WriteCloser, error)>((io.Writer w) => (new nopCloserжWriteCloser(Ꮡ(new nopCloser(w))), default!)));
     Ꮡcompressors.Store(Deflate, new Func<io.Writer, (io.WriteCloser, error)>((io.Writer w) => (newFlateWriter(w), default!)));
+
     Ꮡdecompressors.Store(Store, NilSafeDelegateConversion<Func<io.Reader, io.ReadCloser>, Func<io.Reader, io.ReadCloser>>(io.NopCloser));
     Ꮡdecompressors.Store(Deflate, new Func<io.Reader, io.ReadCloser>(newFlateReader));
 }

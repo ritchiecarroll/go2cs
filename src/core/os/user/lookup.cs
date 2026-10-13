@@ -30,7 +30,6 @@ public static (ж<User>, error) Current() {
 }
 
 // cache of the current user
-
 partial struct cacheᴛ1 /*dyn*/ {
     public partial ref sync_package.Once Once { get; }
     internal ж<User> u;

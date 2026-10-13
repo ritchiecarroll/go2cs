@@ -66,7 +66,6 @@ internal static float64 atanh(float64 x) {
     case {} when x == -1D: {
         return Inf(-1);
     }}
-
     var sign = false;
     if (x < 0D) {
         x = -x;
@@ -87,7 +86,6 @@ internal static float64 atanh(float64 x) {
         temp = 0.5D * Log1p((x + x) / (1D - x));
         break;
     }}
-
     if (sign) {
         temp = -temp;
     }

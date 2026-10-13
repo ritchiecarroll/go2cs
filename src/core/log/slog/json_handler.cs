@@ -130,11 +130,11 @@ internal static error appendJSONValue(ж<handleState> Ꮡs, Value v) {
         s.buf.ValueSlot = strconv.AppendUint(s.buf.ValueSlot, v.Uint64(), 10);
     }
     else if (exprᴛ1 == KindFloat64) {
+        // json.Marshal is funny about floats; it doesn't
+        // always match strconv.AppendFloat. So just call it.
+        // That's expensive, but floats are rare.
         {
-            var err = appendJSONMarshal(s.buf, // json.Marshal is funny about floats; it doesn't
- // always match strconv.AppendFloat. So just call it.
- // That's expensive, but floats are rare.
- v.Float64()); if (err != default!) {
+            var err = appendJSONMarshal(s.buf, v.Float64()); if (err != default!) {
                 return err;
             }
         }
@@ -143,8 +143,8 @@ internal static error appendJSONValue(ж<handleState> Ꮡs, Value v) {
         s.buf.ValueSlot = strconv.AppendBool(s.buf.ValueSlot, v.Bool());
     }
     else if (exprᴛ1 == KindDuration) {
-        s.buf.ValueSlot = strconv.AppendInt(s.buf.ValueSlot, // Do what json.Marshal does.
- (int64)v.Duration(), 10);
+        // Do what json.Marshal does.
+        s.buf.ValueSlot = strconv.AppendInt(s.buf.ValueSlot, (int64)v.Duration(), 10);
     }
     else if (exprᴛ1 == KindTime) {
         Ꮡs.appendTime(v.Time());
@@ -163,7 +163,6 @@ internal static error appendJSONValue(ж<handleState> Ꮡs, Value v) {
     else { /* default: */
         throw panic(fmt.Sprintf("bad kind: %s"u8, v.Kind()));
     }
-
     return default!;
 }
 
@@ -201,6 +200,7 @@ internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) 
     void str(@string sΔ1) {
         buf = builtin.append(buf, sΔ1.ꓸꓸꓸ);
     }
+
     nint start = 0;
     for (nint i = 0; i < len(s); ) {
         {
@@ -231,13 +231,12 @@ internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) 
                     break;
                 }
                 default: {
+                    // This encodes bytes < 0x20 except for \t, \n and \r.
                     str(u00ˢ);
                     @char(hex[(b >> (int)(4))]);
                     @char(hex[(byte)(b & 0xF)]);
                     break;
                 }}
-
-                // This encodes bytes < 0x20 except for \t, \n and \r.
                 i++;
                 start = i;
                 continue;

@@ -31,8 +31,11 @@ partial interface Node :
     void writeTo(ж<strings.Builder> _);
 }
 
+// NodeType identifies the type of a parse tree node.
 partial struct NodeType /*num:nint*/;
 
+// Pos represents a byte position in the original input text from which
+// this template was parsed.
 partial struct Pos /*num:nint*/;
 
 public static Pos Position(this Pos p) {
@@ -668,9 +671,9 @@ internal static (ж<NumberNode>, error) newNumber(this ж<Tree> Ꮡt, Pos pos, @
         return (n, default!);
     }
     if (exprᴛ1 == itemComplex) {
+        // fmt.Sscan can parse the pair, so let it do the work.
         {
-            var (_, errΔ4) = fmt.Sscan(text, // fmt.Sscan can parse the pair, so let it do the work.
- n.of(NumberNode.ᏑComplex128)); if (errΔ4 != default!) {
+            var (_, errΔ4) = fmt.Sscan(text, n.of(NumberNode.ᏑComplex128)); if (errΔ4 != default!) {
                 return (default!, errΔ4);
             }
         }
@@ -678,7 +681,6 @@ internal static (ж<NumberNode>, error) newNumber(this ж<Tree> Ꮡt, Pos pos, @
         n.simplifyComplex();
         return (n, default!);
     }
-
     // Imaginary constants can only be complex unless they are zero.
     if (len(text) > 0 && text[len(text) - 1] == (rune)'i') {
         var (f, errΔ5) = strconv.ParseFloat(text.slice(0, len(text) - 1), 64);
@@ -905,7 +907,6 @@ internal static void writeTo(this ref BranchNode b, ж<strings.Builder> Ꮡsb) {
     else { /* default: */
         throw panic("unknown branch type");
     }
-
     Ꮡsb.WriteString("{{"u8);
     Ꮡsb.WriteString(name);
     Ꮡsb.WriteByte((rune)' ');
@@ -937,7 +938,6 @@ public static Node Copy(this ref BranchNode b) {
     { /* default: */
         throw panic("unknown branch type");
     }
-
 }
 
 // IfNode represents an {{if}} action and its commands.

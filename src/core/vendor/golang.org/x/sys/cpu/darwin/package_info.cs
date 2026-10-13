@@ -66,15 +66,15 @@ using static go.vendor.golang.org.x.sys.cpu_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/byteorder.go", "byteorder.cs", "ABUogoKmgoKogoKmgoKsogABFAACEKQ=")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/cpu.go", "cpu.cs", "AO8BvgOCgoIAFCSCgoKCgoKClJSClIKCgpSUgpSkpIKmgoKClJaCgoKCqLaCgpaCgpaCgpY=")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/cpu_darwin_x86.go", "cpu_darwin_x86.cs", "AAg2ABICqJKCgoKWgoKCgpS0goLGtNaClA==")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/byteorder.go", "byteorder.cs", "ABUogoKmgoKogoKmgoKsogABFAACEJQ=")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/cpu.go", "cpu.cs", "AOgBvgOCgoIAFCSCgoKCgoKClJSClIKCgpSkgpSkpIKmgoKClKaCgoKCuMaCgqaCgqaCgqY=")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/cpu_darwin_x86.go", "cpu_darwin_x86.cs", "AAg2ABICqJKCgoKmgoKCgpS0goLGtMaClA==")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/cpu_gc_x86.go", "cpu_gc_x86.cs", "AAgWuA==")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/cpu_x86.go", "cpu_x86.cs", "AAwaggAuYISEhIKWgoSCgoKCgoKCgoKChKSClISUpqiEgpaCgoKCgoKEgoKCgoKCgoKCgoKCgoKCgoKCgoSCloKCpoI=")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/parse.go", "parse.cs", "AAkcAAsEgoKCqIKCgoKCpoKClICCpICCpII=", "23-34:1")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/cpu_x86.go", "cpu_x86.cs", "AAwaggAvYISUlIKmgpSCgoKCgoKCgoKClKSClJSUpriUgqaCgoKCgoKUgoKCgoKCgoKCgoKCgoKCgoKCgpSCpoKCpoI=")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/parse.go", "parse.cs", "AAkcAAsEgoKCuIKCgoKCpoKClICCpICCpII=", "23-34:1")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/runtime_auxv.go", "runtime_auxv.cs", "AAsWgoKU")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/runtime_auxv_go121.go", "runtime_auxv_go121.cs", "AAocpII=")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/syscall_darwin_x86_gc.go", "syscall_darwin_x86_gc.cs", "ABEotLqClAAFEJKCgpSUgAAHEqbMkpKSgIKkAAUQkoAABxKmrA==")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/sys/cpu/syscall_darwin_x86_gc.go", "syscall_darwin_x86_gc.cs", "ABEolLqCpAAFEJKCgpSUgAAHErbMkpKSgIKkAAUQkoAABxK2rA==")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.sys;

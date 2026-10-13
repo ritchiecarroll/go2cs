@@ -17,22 +17,72 @@ using io = io_package;
 
 partial class trace_package {
 
+// EventKind indicates the kind of event this is.
+//
+// Use this information to obtain a more specific event that
+// allows access to more detailed information.
 partial struct EventKind /*num:uint16*/;
 
 public static EventKind EventBad => /* iota */ 0;
+
+// EventKindSync is an event that indicates a global synchronization
+// point in the trace. At the point of a sync event, the
+// trace reader can be certain that all resources (e.g. threads,
+// goroutines) that have existed until that point have been enumerated.
 public static EventKind EventSync => 1;
+
+// EventMetric is an event that represents the value of a metric at
+// a particular point in time.
 public static EventKind EventMetric => 2;
+
+// EventLabel attaches a label to a resource.
 public static EventKind EventLabel => 3;
+
+// EventStackSample represents an execution sample, indicating what a
+// thread/proc/goroutine was doing at a particular point in time via
+// its backtrace.
+//
+// Note: Samples should be considered a close approximation of
+// what a thread/proc/goroutine was executing at a given point in time.
+// These events may slightly contradict the situation StateTransitions
+// describe, so they should only be treated as a best-effort annotation.
 public static EventKind EventStackSample => 4;
+
+// EventRangeBegin and EventRangeEnd are a pair of generic events representing
+// a special range of time. Ranges are named and scoped to some resource
+// (identified via ResourceKind). A range that has begun but has not ended
+// is considered active.
+//
+// EvRangeBegin and EvRangeEnd will share the same name, and an End will always
+// follow a Begin on the same instance of the resource. The associated
+// resource ID can be obtained from the Event. ResourceNone indicates the
+// range is globally scoped. That is, any goroutine/proc/thread can start or
+// stop, but only one such range may be active at any given time.
+//
+// EventRangeActive is like EventRangeBegin, but indicates that the range was
+// already active. In this case, the resource referenced may not be in the current
+// context.
 public static EventKind EventRangeBegin => 5;
 public static EventKind EventRangeActive => 6;
 public static EventKind EventRangeEnd => 7;
+
+// EvTaskBegin and EvTaskEnd are a pair of events representing a runtime/trace.Task.
 public static EventKind EventTaskBegin => 8;
 public static EventKind EventTaskEnd => 9;
+
+// EventRegionBegin and EventRegionEnd are a pair of events represent a runtime/trace.Region.
 public static EventKind EventRegionBegin => 10;
 public static EventKind EventRegionEnd => 11;
+
+// EventLog represents a runtime/trace.Log call.
 public static EventKind EventLog => 12;
+
+// EventStateTransition represents a state change for some resource.
 public static EventKind EventStateTransition => 13;
+
+// EventExperimental is an experimental event that is unvalidated and exposed in a raw form.
+// Users are expected to understand the format and perform their own validation. These events
+// may always be safely ignored.
 public static EventKind EventExperimental => 14;
 
 // String returns a string form of the EventKind.
@@ -63,6 +113,25 @@ internal static array<@string> eventKindStrings = new golib.SparseArray<@string>
 
 internal static ΔTime maxTime => /* Time(math.MaxInt64) */ 9223372036854775807;
 
+// Time is a timestamp in nanoseconds.
+//
+// It corresponds to the monotonic clock on the platform that the
+// trace was taken, and so is possible to correlate with timestamps
+// for other traces taken on the same machine using the same clock
+// (i.e. no reboots in between).
+//
+// The actual absolute value of the timestamp is only meaningful in
+// relation to other timestamps from the same clock.
+//
+// BUG: Timestamps coming from traces on Windows platforms are
+// only comparable with timestamps from the same trace. Timestamps
+// across traces cannot be compared, because the system clock is
+// not used as of Go 1.22.
+//
+// BUG: Traces produced by Go versions 1.21 and earlier cannot be
+// compared with timestamps from other traces taken on the same
+// machine. This is because the system clock was not used at all
+// to collect those timestamps.
 partial struct ΔTime /*num:int64*/;
 
 // Sub subtracts t0 from t, returning the duration in nanoseconds.
@@ -132,9 +201,15 @@ partial struct RangeAttribute {
     public Value Value;
 }
 
+// TaskID is the internal ID of a task used to disambiguate tasks (even if they
+// are of the same type).
 partial struct TaskID /*num:uint64*/;
 
+// NoTask indicates the lack of a task.
 public static TaskID NoTask => /* TaskID(^uint64(0)) */ unchecked((TaskID)18446744073709551615);
+
+// BackgroundTask is the global task that events are attached to if there was
+// no other task in the context at the point the event was emitted.
 public static TaskID BackgroundTask => /* TaskID(0) */ 0;
 
 // Task provides details about a Task event.
@@ -372,7 +447,6 @@ public static ΔMetric Metric(this ΔEvent e) {
     else { /* default: */
         throw panic(fmt.Sprintf("internal error: unexpected event type for Metric kind: %s"u8, go122.EventString(e.@base.typ)));
     }
-
     return m;
 }
 
@@ -413,10 +487,10 @@ public static ΔRange Range(this ΔEvent e) {
     ΔRange r = default!;
     var exprᴛ1 = e.@base.typ;
     if (exprᴛ1 == go122.EvSTWBegin || exprᴛ1 == go122.EvSTWEnd) {
+        // N.B. ordering.advance smuggles in the STW reason as e.base.args[0]
+        // for go122.EvSTWEnd (it's already there for Begin).
         r.Name = "stop-the-world ("u8 + e.table.of(evTable.Ꮡstrings).mustGet(((stringID)e.@base.args[0])) + ")"u8;
-        r.Scope = new ResourceID( // N.B. ordering.advance smuggles in the STW reason as e.base.args[0]
- // for go122.EvSTWEnd (it's already there for Begin).
-Kind: ResourceGoroutine, id: (int64)e.Goroutine());
+        r.Scope = new ResourceID(Kind: ResourceGoroutine, id: (int64)e.Goroutine());
     }
     else if (exprᴛ1 == go122.EvGCBegin || exprᴛ1 == go122.EvGCActive || exprᴛ1 == go122.EvGCEnd) {
         r.Name = gcConcurrentMarkPhaseˢ;
@@ -444,7 +518,6 @@ Kind: ResourceGoroutine, id: (int64)e.Goroutine());
     else { /* default: */
         throw panic(fmt.Sprintf("internal error: unexpected event type for Range kind: %s"u8, go122.EventString(e.@base.typ)));
     }
-
     return r;
 }
 
@@ -497,7 +570,6 @@ public static ΔTask Task(this ΔEvent e) {
     else { /* default: */
         throw panic(fmt.Sprintf("internal error: unexpected event type for Task kind: %s"u8, go122.EventString(e.@base.typ)));
     }
-
     return new ΔTask(
         ID: ((TaskID)e.@base.args[0]),
         Parent: parentID,
@@ -562,9 +634,9 @@ public static ΔStateTransition StateTransition(this ΔEvent e) {
         s = procStateTransition(e.ctx.P, ProcRunning, ProcIdle);
     }
     else if (exprᴛ1 == go122.EvProcSteal) {
+        // N.B. ordering.advance populates e.base.extra.
         var beforeState = ProcRunning;
         if (((go122.ProcStatus)(uint8)e.@base.extra(version.Go122)[0]) == go122.ProcSyscallAbandoned) {
-            // N.B. ordering.advance populates e.base.extra.
             // We've lost information because this ProcSteal advanced on a
             // SyscallAbandoned state. Treat the P as idle because ProcStatus
             // treats SyscallAbandoned as Idle. Otherwise we'll have an invalid
@@ -574,8 +646,8 @@ public static ΔStateTransition StateTransition(this ΔEvent e) {
         s = procStateTransition(((ProcID)(int64)e.@base.args[0]), beforeState, ProcIdle);
     }
     else if (exprᴛ1 == go122.EvProcStatus) {
-        s = procStateTransition(((ProcID)(int64)e.@base.args[0]), // N.B. ordering.advance populates e.base.extra.
- ((ProcState)(uint8)e.@base.extra(version.Go122)[0]), go122ProcStatus2ProcState[e.@base.args[1]]);
+        // N.B. ordering.advance populates e.base.extra.
+        s = procStateTransition(((ProcID)(int64)e.@base.args[0]), ((ProcState)(uint8)e.@base.extra(version.Go122)[0]), go122ProcStatus2ProcState[e.@base.args[1]]);
     }
     else if (exprᴛ1 == go122.EvGoCreate || exprᴛ1 == go122.EvGoCreateBlocked) {
         var status = GoRunnable;
@@ -609,10 +681,10 @@ public static ΔStateTransition StateTransition(this ΔEvent e) {
         s.Stack = e.Stack(); // This event references the resource the event happened on.
     }
     else if (exprᴛ1 == go122.EvGoUnblock || exprᴛ1 == go122.EvGoSwitch || exprᴛ1 == go122.EvGoSwitchDestroy) {
-        s = goStateTransition(((GoID)(int64)e.@base.args[0]), // N.B. GoSwitch and GoSwitchDestroy both emit additional events, but
- // the first thing they both do is unblock the goroutine they name,
- // identically to an unblock event (even their arguments match).
- GoWaiting, GoRunnable);
+        // N.B. GoSwitch and GoSwitchDestroy both emit additional events, but
+        // the first thing they both do is unblock the goroutine they name,
+        // identically to an unblock event (even their arguments match).
+        s = goStateTransition(((GoID)(int64)e.@base.args[0]), GoWaiting, GoRunnable);
     }
     else if (exprᴛ1 == go122.EvGoSyscallBegin) {
         s = goStateTransition(e.ctx.G, GoRunning, GoSyscall);
@@ -634,7 +706,6 @@ public static ΔStateTransition StateTransition(this ΔEvent e) {
     else { /* default: */
         throw panic(fmt.Sprintf("internal error: unexpected event type for StateTransition kind: %s"u8, go122.EventString(e.@base.typ)));
     }
-
     return s;
 }
 
@@ -792,7 +863,6 @@ public static @string String(this ΔEvent e) {
                 var (old, @new) = s.Proc();
                 fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " ProcID=%d %s->%s"u8, id, old, @new);
             }
-
             if (s.Stack != NoStack) {
                 fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb));
                 fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb), transitionStackˢ);
@@ -807,7 +877,6 @@ public static @string String(this ΔEvent e) {
             fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Name=%s ArgNames=%v Args=%v"u8, r.Name, r.ArgNames, r.Args);
         }
     }
-
     {
         var stk = e.Stack(); if (stk != NoStack) {
             fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb));
@@ -830,6 +899,7 @@ internal static error validateTableIDs(this ΔEvent e) {
         return default!;
     }
     var spec = go122.Specs()[e.@base.typ];
+
     // Check stacks.
     foreach (var (_, i) in spec.StackIDs) {
         var id = ((stackID)e.@base.args[i - 1]);
@@ -840,6 +910,7 @@ internal static error validateTableIDs(this ΔEvent e) {
     }
     // N.B. Strings referenced by stack frames are validated
     // early on, when reading the stacks in to begin with.
+
     // Check strings.
     foreach (var (_, i) in spec.StringIDs) {
         var id = ((stringID)e.@base.args[i - 1]);

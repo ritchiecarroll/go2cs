@@ -143,8 +143,8 @@ public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, i
     // back-patch it later.
     array<byte> digest = new(16);
     copy(digest[..], b.h.Sum(default!));
-    var mh = new coverage.MetaSymbolHeader( // hash and length initially zero, will be back-patched
-
+    var mh = new coverage.MetaSymbolHeader(
+        // hash and length initially zero, will be back-patched
         PkgPath: (uint32)b.pkgpath,
         PkgName: (uint32)b.pkgname,
         ModulePath: (uint32)b.modpath,
@@ -161,12 +161,15 @@ public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, i
         }
     }
     var off = (int64)coverage.CovMetaHeaderSize;
+
     // Write function offsets section
     off = b.emitFuncOffsets(w, off);
+
     // Check for any errors up to this point.
     if (b.werr != default!) {
         return (digest.Clone(), b.werr);
     }
+
     // Write string table.
     {
         var err = Ꮡb.of(CoverageMetaDataBuilder.Ꮡstab).Write(w); if (err != default!) {
@@ -174,6 +177,7 @@ public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, i
         }
     }
     off += (int64)b.stab.Size();
+
     // Write functions
     foreach (var (_, f) in b.funcs) {
         error err = default!;
@@ -182,6 +186,7 @@ public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, i
             return (digest.Clone(), err);
         }
     }
+
     // Back-patch the length.
     var totalLength = (uint32)off;
     {

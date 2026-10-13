@@ -24,9 +24,13 @@ using io = io_package;
 
 partial class lzw_package {
 
+// Order specifies the bit ordering in an LZW data stream.
 partial struct Order /*num:nint*/;
 
+// LSB means Least Significant Bits first, as used in the GIF file format.
 public static Order LSB => /* iota */ 0;
+// MSB means Most Significant Bits first, as used in the TIFF and PDF
+// file formats.
 public static Order MSB => 1;
 
 internal static UntypedInt maxWidth => 12;
@@ -145,10 +149,10 @@ loop:
         }
         switch (ᐧ) {
         case {} when code < r.clear: {
+            // We have a literal code.
             r.output[r.o] = (uint8)code;
             r.o++;
             if (r.last != decoderInvalidCode) {
-                // We have a literal code.
                 // Save what the hi code expands to.
                 r.suffix[r.hi] = (uint8)code;
                 r.prefix[r.hi] = r.last;
@@ -183,8 +187,8 @@ loop:
                 i--;
                 c = r.last;
             }
+            // Copy the suffix chain into output and then write that to w.
             while (c >= r.clear) {
-                // Copy the suffix chain into output and then write that to w.
                 r.output[i] = r.suffix[c];
                 i--;
                 c = r.prefix[c];
@@ -203,7 +207,6 @@ loop:
             goto break_loop;
             break;
         }}
-
         (r.last, r.hi) = (code, (uint16)(r.hi + 1));
         if (r.hi >= r.overflow) {
             if (r.hi > r.overflow) {
@@ -284,11 +287,11 @@ internal static void init(this ref Reader r, io.Reader src, Order order, nint li
         r.err = errors.New(lzwUnknownOrderˢ);
         return;
     }
-
     if (litWidth < 2 || 8 < litWidth) {
         r.err = fmt.Errorf("lzw: litWidth %d out of range"u8, litWidth);
         return;
     }
+
     var (br, ok) = src._<io.ByteReader>(ᐧ);
     if (!ok && src != default!) {
         br = new bufio_ReaderжByteReader(bufio.NewReader(src));

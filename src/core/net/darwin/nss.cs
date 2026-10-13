@@ -55,16 +55,19 @@ internal static void tryUpdate(this ж<nsswitchConfig> Ꮡconf) {
         ref var conf = ref Ꮡconf.DerefOrNull();
 
         Ꮡconf.of(nsswitchConfig.ᏑinitOnce).Do(Ꮡconf.init);
+
         // Ensure only one update at a time checks nsswitch.conf
         if (!conf.tryAcquireSema()) {
             return;
         }
         ᒐd1 = true;
+
         var now = time.Now();
         if (conf.lastChecked.After(now.Add((time.Duration)(-5000000000L)))) {
             return;
         }
         conf.lastChecked = now;
+
         time.Time mtime = default!;
         {
             var (fi, err) = os.Stat(nssConfigPath); if (err == default!) {
@@ -74,6 +77,7 @@ internal static void tryUpdate(this ж<nsswitchConfig> Ꮡconf) {
         if (mtime.Equal((~conf.nssConf).mtime)) {
             return;
         }
+
         var nssConf = parseNSSConfFile(nssConfigPath);
         conf.mu.Lock();
         conf.nssConf = nssConf;
@@ -153,10 +157,9 @@ internal static bool standardStatusAction(this nssCriterion c, bool last) {
         def = continueˢ;
     }
     else { /* default: */
+        // Unknown status
         return false;
     }
-
-    // Unknown status
     if (last && c.action == "return"u8) {
         return true;
     }
@@ -176,6 +179,7 @@ internal static ж<nssConf> parseNSSConfFile(@string Δfile) {
         if (err != default!) {
             return Ꮡ(new nssConf(err: err));
         }
+
         var conf = parseNSSConf(f);
         conf.Value.mtime = mtime;
         return conf;

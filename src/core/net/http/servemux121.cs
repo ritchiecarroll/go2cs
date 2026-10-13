@@ -56,6 +56,7 @@ internal static void handle(this ж<serveMux121> Ꮡmux, @string pattern, ΔHand
 
         Ꮡmux.of(serveMux121.Ꮡmu).Lock();
         ᒐd1 = true;
+
         if (pattern == ""u8) {
             throw panic("http: invalid pattern");
         }
@@ -67,6 +68,7 @@ internal static void handle(this ж<serveMux121> Ꮡmux, @string pattern, ΔHand
                 throw panic("http: multiple registrations for " + pattern);
             }
         }
+
         if (mux.m == default!) {
             mux.m = new map<@string, muxEntry>();
         }
@@ -75,6 +77,7 @@ internal static void handle(this ж<serveMux121> Ꮡmux, @string pattern, ΔHand
         if (pattern[builtin.len(pattern) - 1] == (rune)'/') {
             mux.es = appendSorted(mux.es, e);
         }
+
         if (pattern[0] != (rune)'/') {
             mux.hosts = true;
         }
@@ -108,9 +111,8 @@ internal static void handleFunc(this ж<serveMux121> Ꮡmux, @string pattern, Ac
 // Formerly ServeMux.Handler.
 internal static (ΔHandler h, @string pattern) findHandler(this ж<serveMux121> Ꮡmux, ж<Request> Ꮡr) {
     @string pattern = default!;
-
-    ref var mux = ref Ꮡmux.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
+
     // CONNECT requests are not canonicalized.
     if (r.Method == "CONNECT"u8) {
         // If r.URL.Path is /tree and its handler is not registered,
@@ -121,13 +123,16 @@ internal static (ΔHandler h, @string pattern) findHandler(this ж<serveMux121> 
                 return (RedirectHandler(u.String(), StatusMovedPermanently), (~u).Path);
             }
         }
+
         return Ꮡmux.handler(r.Host, (~r.URL).Path);
     }
+
     // All other requests have any port stripped and path cleaned
     // before passing to mux.handler.
     @string host = stripHostPort(r.Host);
     ref var path = ref heap<@string>(out var Ꮡpath);
     path = cleanPath((~r.URL).Path);
+
     // If the given path is /tree and its handler is not registered,
     // redirect for /tree/.
     {
@@ -135,11 +140,13 @@ internal static (ΔHandler h, @string pattern) findHandler(this ж<serveMux121> 
             return (RedirectHandler(u.String(), StatusMovedPermanently), (~u).Path);
         }
     }
+
     if (path != (~r.URL).Path) {
         (_, pattern) = Ꮡmux.handler(host, path);
         var u = Ꮡ(new url.URL(Path: path, RawQuery: (~r.URL).RawQuery));
         return (RedirectHandler(u.String(), StatusMovedPermanently), pattern);
     }
+
     return Ꮡmux.handler(host, (~r.URL).Path);
 }
 
@@ -154,6 +161,7 @@ internal static (ΔHandler h, @string pattern) handler(this ж<serveMux121> Ꮡm
 
         Ꮡmux.of(serveMux121.Ꮡmu).RLock();
         defer(Ꮡmux.of(serveMux121.Ꮡmu).RUnlock, ref ᒐ);
+
         // Host-specific pattern takes precedence over generic ones
         if (mux.hosts) {
             (h, pattern) = mux.match(host + path);
@@ -178,6 +186,7 @@ internal static (ΔHandler h, @string pattern) match(this ref serveMux121 mux, @
     if (ok) {
         return (v.h, v.pattern);
     }
+
     // Check for longest valid match.  mux.es contains all patterns
     // that end in / sorted from longest to shortest.
     foreach (var (_, e) in mux.es) {
@@ -212,6 +221,7 @@ internal static (ж<url.URL>, bool) redirectToPathSlash(this ж<serveMux121> Ꮡ
 // not path -- see comments at ServeMux.
 internal static bool shouldRedirectRLocked(this ref serveMux121 mux, @string host, @string path) {
     var p = new @string[]{path, host + path}.slice();
+
     foreach (var (_, c) in p) {
         {
             var (_, exist) = mux.m[c, ꟷ]; if (exist) {
@@ -219,6 +229,7 @@ internal static bool shouldRedirectRLocked(this ref serveMux121 mux, @string hos
             }
         }
     }
+
     nint n = builtin.len(path);
     if (n == 0) {
         return false;
@@ -230,6 +241,7 @@ internal static bool shouldRedirectRLocked(this ref serveMux121 mux, @string hos
             }
         }
     }
+
     return false;
 }
 

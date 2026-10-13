@@ -79,6 +79,7 @@ public static @string Clean(@string path) {
         return originalPath + "."u8;
     }
     var rooted = IsPathSeparator(path[0]);
+
     // Invariants:
     //	reading from path; r is index of next byte to process.
     //	writing to buf; w is index of next byte to write.
@@ -92,33 +93,34 @@ public static @string Clean(@string path) {
         @out.append(Separator);
         (r, dotdot) = (1, 1);
     }
+
     while (r < n) {
         switch (ᐧ) {
         case {} when IsPathSeparator(path[r]): {
+            // empty path element
             r++;
             break;
         }
         case {} when path[r] == (rune)'.' && (r + 1 == n || IsPathSeparator(path[r + 1])): {
+            // . element
             r++;
             break;
         }
         case {} when path[r] == (rune)'.' && path[r + 1] == (rune)'.' && (r + 2 == n || IsPathSeparator(path[r + 2])): {
+            // .. element: remove to last separator
             r += 2;
             switch (ᐧ) {
             case {} when @out.w > dotdot: {
+                // can backtrack
                 @out.w--;
                 while (@out.w > dotdot && !IsPathSeparator(@out.index(@out.w))) {
-                    // empty path element
-                    // . element
-                    // .. element: remove to last separator
-                    // can backtrack
                     @out.w--;
                 }
                 break;
             }
             case {} when !rooted: {
+                // cannot backtrack, but not rooted, so append .. element.
                 if (@out.w > 0) {
-                    // cannot backtrack, but not rooted, so append .. element.
                     @out.append(Separator);
                 }
                 @out.append((rune)'.');
@@ -126,27 +128,27 @@ public static @string Clean(@string path) {
                 dotdot = @out.w;
                 break;
             }}
-
             break;
         }
         default: {
+            // real path element.
+            // add slash if needed
             if (rooted && @out.w != 1 || !rooted && @out.w != 0) {
-                // real path element.
-                // add slash if needed
                 @out.append(Separator);
             }
+            // copy element
             for (; r < n && !IsPathSeparator(path[r]); r++) {
-                // copy element
                 @out.append(path[r]);
             }
             break;
         }}
-
     }
+
     // Turn empty string into "."
     if (@out.w == 0) {
         @out.append((rune)'.');
     }
+
     postClean(ref @out); // avoid creating absolute paths on Windows
     return FromSlash(@out.@string());
 }

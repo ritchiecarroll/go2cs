@@ -29,6 +29,7 @@ public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> �
                 return (0, errΔ2);
             }
         }
+
         slice<Δsyscall.Iovec> iovecs = default!;
         if (fd.iovecs != nil) {
             iovecs = fd.iovecs.ValueSlot;
@@ -41,6 +42,7 @@ public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> �
             // IOV_MAX is set to XOPEN_IOV_MAX on AIX and Solaris.
             maxVec = 16;
         }
+
         int64 n = default!;
         error err = default!;
         while (len(v) > 0) {
@@ -66,6 +68,7 @@ public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> �
                 fd.iovecs = @new<slice<Δsyscall.Iovec>>();
             }
             fd.iovecs.ValueSlot = iovecs; // cache
+
             uintptr wrote = default!;
             (wrote, err) = writev(fd.Sysfd, iovecs);
             if (wrote == ~(uintptr)0) {

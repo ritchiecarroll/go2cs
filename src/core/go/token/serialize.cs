@@ -31,6 +31,7 @@ public static error Read(this ж<FileSet> Ꮡs, Func<any, error> decode) {
             return err;
         }
     }
+
     Ꮡs.of(FileSet.Ꮡmutex).Lock();
     s.@base = ss.Base;
     var files = new slice<ж<ΔFile>>(len(ss.Files));
@@ -47,6 +48,7 @@ public static error Read(this ж<FileSet> Ꮡs, Func<any, error> decode) {
     s.files = files;
     Ꮡs.of(FileSet.Ꮡlast).Store(nil);
     Ꮡs.of(FileSet.Ꮡmutex).Unlock();
+
     return default!;
 }
 
@@ -55,6 +57,7 @@ public static error Write(this ж<FileSet> Ꮡs, Func<any, error> encode) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     serializedFileSet ss = default!;
+
     Ꮡs.of(FileSet.Ꮡmutex).Lock();
     ss.Base = s.@base;
     var files = new slice<serializedFile>(len(s.files));
@@ -71,6 +74,7 @@ public static error Write(this ж<FileSet> Ꮡs, Func<any, error> encode) {
     }
     ss.Files = files;
     Ꮡs.of(FileSet.Ꮡmutex).Unlock();
+
     return encode(ss);
 }
 

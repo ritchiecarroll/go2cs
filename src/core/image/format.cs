@@ -25,7 +25,6 @@ partial struct format {
 // Formats is the list of registered formats.
 internal static ж<Δsync.Mutex> ᏑformatsMu = new StandardBox<Δsync.Mutex>(default(Δsync.Mutex));
 internal static ref Δsync.Mutex formatsMu => ref ᏑformatsMu.Value;
-
 internal static ж<atomic.Value> ᏑatomicFormats = new StandardBox<atomic.Value>(default(atomic.Value));
 internal static ref atomic.Value atomicFormats => ref ᏑatomicFormats.Value;
 

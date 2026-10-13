@@ -18,8 +18,6 @@ partial struct Info {
     public bool Opaque;   // setting does not export information to runtime/metrics using [internal/godebug.Setting.IncNonDefault]
 }
 
-// bug #66217: remove Opaque
-//{Name: "multipartfiles", Package: "mime/multipart"},
 // All is the table of known settings, sorted by Name.
 //
 // Note: After adding entries to this table, run 'go generate runtime/metrics'
@@ -47,7 +45,8 @@ public static ж<slice<Info>> ᏑAll = new StandardBox<slice<Info>>(new Info[]{
     new(Name: "httpmuxgo121"u8, Package: "net/http"u8, Changed: 22, Old: "1"u8),
     new(Name: "httpservecontentkeepheaders"u8, Package: "net/http"u8, Changed: 23, Old: "1"u8),
     new(Name: "installgoroot"u8, Package: "go/build"u8),
-    new(Name: "jstmpllitinterp"u8, Package: "html/template"u8, Opaque: true),
+    new(Name: "jstmpllitinterp"u8, Package: "html/template"u8, Opaque: true), // bug #66217: remove Opaque
+    //{Name: "multipartfiles", Package: "mime/multipart"},
     new(Name: "multipartmaxheaders"u8, Package: "mime/multipart"u8),
     new(Name: "multipartmaxparts"u8, Package: "mime/multipart"u8),
     new(Name: "multipathtcp"u8, Package: "net"u8, Changed: 24, Old: "0"u8),
