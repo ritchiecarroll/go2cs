@@ -117,15 +117,10 @@ partial struct COFFSymbolAuxFormat5 {
 // These constants make up the possible values for the 'Selection'
 // field in an AuxFormat5.
 public static UntypedInt IMAGE_COMDAT_SELECT_NODUPLICATES => 1;
-
 public static UntypedInt IMAGE_COMDAT_SELECT_ANY => 2;
-
 public static UntypedInt IMAGE_COMDAT_SELECT_SAME_SIZE => 3;
-
 public static UntypedInt IMAGE_COMDAT_SELECT_EXACT_MATCH => 4;
-
 public static UntypedInt IMAGE_COMDAT_SELECT_ASSOCIATIVE => 5;
-
 public static UntypedInt IMAGE_COMDAT_SELECT_LARGEST => 6;
 
 // go2cs generated this placeholder — func COFFSymbolReadSectionDefAux is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])

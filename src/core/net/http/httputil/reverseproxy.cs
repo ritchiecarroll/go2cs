@@ -218,7 +218,6 @@ internal static @string singleJoiningSlash(@string a, @string b) {
     case {} when !aslash && !bslash: {
         return a + "/"u8 + b;
     }}
-
     return a + b;
 }
 
@@ -233,8 +232,10 @@ internal static (@string path, @string rawpath) joinURLPath(ж<url.URL> Ꮡa, ж
     // whether a slash should be added
     @string apath = a.EscapedPath();
     @string bpath = b.EscapedPath();
+
     var aslash = strings.HasSuffix(apath, "/"u8);
     var bslash = strings.HasPrefix(bpath, "/"u8);
+
     switch (ᐧ) {
     case {} when aslash && bslash: {
         return (a.Path + b.Path[1..], apath + bpath[1..]);
@@ -242,7 +243,6 @@ internal static (@string path, @string rawpath) joinURLPath(ж<url.URL> Ꮡa, ж
     case {} when !aslash && !bslash: {
         return (a.Path + "/" + b.Path, apath + "/" + bpath);
     }}
-
     return (a.Path + b.Path, apath + bpath);
 }
 
@@ -295,9 +295,6 @@ internal static void copyHeader(httpꓸHeader dst, httpꓸHeader src) {
     }
 }
 
-// non-standard but still sent by libcurl and rejected by e.g. google
-// canonicalized version of "TE"
-// not Trailers per URL above; https://www.rfc-editor.org/errata_search.php?eid=4522
 // Hop-by-hop headers. These are removed when sent to the backend.
 // As of RFC 7230, hop-by-hop headers are required to appear in the
 // Connection header field. These are the headers defined by the
@@ -305,12 +302,12 @@ internal static void copyHeader(httpꓸHeader dst, httpꓸHeader src) {
 // compatibility.
 internal static slice<@string> hopHeaders = new @string[]{
     "Connection"u8,
-    "Proxy-Connection"u8,
+    "Proxy-Connection"u8, // non-standard but still sent by libcurl and rejected by e.g. google
     "Keep-Alive"u8,
     "Proxy-Authenticate"u8,
     "Proxy-Authorization"u8,
-    "Te"u8,
-    "Trailer"u8,
+    "Te"u8, // canonicalized version of "TE"
+    "Trailer"u8, // not Trailers per URL above; https://www.rfc-editor.org/errata_search.php?eid=4522
     "Transfer-Encoding"u8,
     "Upgrade"u8
 }.slice();
@@ -367,21 +364,22 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
         if (transport == default!) {
             transport = http.DefaultTransport;
         }
+
         var ctx = req.Context();
         if (ctx.Done() != default!){
+            // CloseNotifier predates context.Context, and has been
+            // entirely superseded by it. If the request contains
+            // a Context that carries a cancellation signal, don't
+            // bother spinning up a goroutine to watch the CloseNotify
+            // channel (if any).
+            //
+            // If the request Context has a nil Done channel (which
+            // means it is either context.Background, or a custom
+            // Context implementation with no cancellation signal),
+            // then consult the CloseNotifier if available.
         } else 
         {
             var (cn, ok) = rw._<http.CloseNotifier>(ᐧ); if (ok) {
-                // CloseNotifier predates context.Context, and has been
-                // entirely superseded by it. If the request contains
-                // a Context that carries a cancellation signal, don't
-                // bother spinning up a goroutine to watch the CloseNotify
-                // channel (if any).
-                //
-                // If the request Context has a nil Done channel (which
-                // means it is either context.Background, or a custom
-                // Context implementation with no cancellation signal),
-                // then consult the CloseNotifier if available.
                 Action cancel = default!;
                 (ctx, cancel) = context.WithCancel(ctx);
                 var cancelʗ1 = cancel;
@@ -404,6 +402,7 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
                 });
             }
         }
+
         var outreq = req.Clone(ctx);
         if (req.ContentLength == 0) {
             outreq.Value.Body = default!; // Issue 16036: nil Body for http.Transport retries
@@ -421,10 +420,12 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
         if ((~outreq).Header == default!) {
             outreq.Value.Header = new httpꓸHeader(0); // Issue 33142: historical behavior was to always allocate
         }
+
         if ((p.Director != default!) == (p.Rewrite != default!)) {
             Ꮡp.getErrorHandler()(rw, Ꮡreq, errors.New(reverseProxyMustHaveˢ));
             return;
         }
+
         if (p.Director != default!) {
             p.Director(outreq);
             if ((~outreq).Form != default!) {
@@ -432,12 +433,14 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
             }
         }
         outreq.Value.Close = false;
+
         @string reqUpType = upgradeType((~outreq).Header);
         if (!ascii.IsPrint(reqUpType)) {
             Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("client tried to switch to invalid protocol %q"u8, reqUpType));
             return;
         }
         removeHopByHopHeaders((~outreq).Header);
+
         // Issue 21096: tell backend applications that care about trailer support
         // that we support trailers. (We do, but we don't go out of our way to
         // advertise that unless the incoming client request thought it was worth
@@ -446,12 +449,14 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
         if (httpguts.HeaderValuesContainsToken(req.Header["Te"u8], trailersˢ)) {
             (~outreq).Header.Set("Te"u8, trailersˢ);
         }
+
         // After stripping all the hop-by-hop connection headers above, add back any
         // necessary for protocol upgrades, such as for websockets.
         if (reqUpType != ""u8) {
             (~outreq).Header.Set(connectionˢ, upgradeˢ);
             (~outreq).Header.Set(upgradeˢ, reqUpType);
         }
+
         if (p.Rewrite != default!){
             // Strip client-provided forwarding headers.
             // The Rewrite func may use SetXForwarded to set new values
@@ -460,8 +465,10 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
             (~outreq).Header.Del(xForwardedForˢ);
             (~outreq).Header.Del(xForwardedHostˢ);
             (~outreq).Header.Del(xForwardedProtoˢ);
+
             // Remove unparsable query parameters from the outbound request.
             outreq.Value.URL.Value.RawQuery = cleanQueryParams((~(~outreq).URL).RawQuery);
+
             var pr = Ꮡ(new ProxyRequest(
                 In: Ꮡreq,
                 Out: outreq
@@ -485,6 +492,7 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
                 }
             }
         }
+
         {
             var (_, ok) = (~outreq).Header[userAgentˢ, ꟷ]; if (!ok) {
                 // If the outbound request doesn't have a User-Agent header set,
@@ -492,6 +500,7 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
                 (~outreq).Header.Set(userAgentˢ, ""u8);
             }
         }
+
         ref var roundTripMutex = ref heap(new sync.Mutex(), out var ᏑroundTripMutex);
         bool roundTripDone = default!;
         var trace = Ꮡ(new httptrace.ClientTrace(
@@ -508,6 +517,7 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
                     var h = rw.Header();
                     copyHeader(h, ((httpꓸHeader)(map<@string, slice<@string>>)header));
                     rw.WriteHeader(code);
+
                     // Clear headers, it's not automatically done by ResponseWriter.WriteHeader() for 1xx responses
                     clear(h);
                     return default!;
@@ -517,6 +527,7 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
             }
         ));
         outreq = outreq.WithContext(httptrace.WithClientTrace(outreq.Context(), trace));
+
         var (res, err) = transport.RoundTrip(outreq);
         ᏑroundTripMutex.Lock();
         roundTripDone = true;
@@ -525,6 +536,7 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
             Ꮡp.getErrorHandler()(rw, outreq, err);
             return;
         }
+
         // Deal with 101 Switching Protocols responses: (WebSocket, h2c, etc)
         if ((~res).StatusCode == http.StatusSwitchingProtocols) {
             if (!Ꮡp.modifyResponse(rw, res, outreq)) {
@@ -533,11 +545,15 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
             Ꮡp.handleUpgradeResponse(rw, outreq, res);
             return;
         }
+
         removeHopByHopHeaders((~res).Header);
+
         if (!Ꮡp.modifyResponse(rw, res, outreq)) {
             return;
         }
+
         copyHeader(rw.Header(), (~res).Header);
+
         // The "Trailer" header isn't included in the Transport's response,
         // at least for *http.Transport. Build it up from Trailer.
         nint announcedTrailers = len((~res).Trailer);
@@ -548,7 +564,9 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
             }
             rw.Header().Add(trailerˢ, strings.Join(trailerKeys, ", "u8));
         }
+
         rw.WriteHeader((~res).StatusCode);
+
         err = Ꮡp.copyResponse(rw, (~res).Body, p.flushInterval(res));
         if (err != default!) {
             var resʗ1 = res;
@@ -563,16 +581,19 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
             throw panic(http.ErrAbortHandler);
         }
         (~res).Body.Close(); // close now, instead of defer, to populate res.Trailer
+
         if (len((~res).Trailer) > 0) {
             // Force chunking if we saw a response trailer.
             // This prevents net/http from calculating the length for short
             // bodies and adding a Content-Length.
             http.NewResponseController(rw).Flush();
         }
+
         if (len((~res).Trailer) == announcedTrailers) {
             copyHeader(rw.Header(), (~res).Trailer);
             return;
         }
+
         foreach (var (kᴛ1, vv) in (~res).Trailer) {
             var k = kᴛ1;
 
@@ -641,6 +662,7 @@ internal static time.Duration flushInterval(this ref ReverseProxy p, ж<http.Res
     ref var res = ref Ꮡres.DerefOrNull();
 
     @string resCT = res.Header.Get(contentTypeˢ);
+
     // For Server-Sent Events responses, flush immediately.
     // The MIME type is defined in https://www.w3.org/TR/eventsource/#text-event-stream
     {
@@ -648,10 +670,12 @@ internal static time.Duration flushInterval(this ref ReverseProxy p, ж<http.Res
             return -1; // negative means immediately
         }
     }
+
     // We might have the case of streaming for which Content-Length might be unset.
     if (res.ContentLength == -1) {
         return -1;
     }
+
     return p.FlushInterval;
 }
 
@@ -661,6 +685,7 @@ internal static error copyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWrit
         ref var p = ref Ꮡp.DerefOrNull();
 
         io.Writer w = new http_ResponseWriterᴠWriter(dst);
+
         if (flushInterval != 0) {
             var mlw = Ꮡ(new maxLatencyWriter(
                 dst: new http_ResponseWriterᴠWriter(dst),
@@ -669,11 +694,14 @@ internal static error copyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWrit
             ));
             var mlwʗ1 = mlw;
             defer(mlwʗ1.stop, ref ᒐ);
+
             // set up initial timer so headers get flushed even if body writes are delayed
             mlw.Value.flushPending = true;
             mlw.Value.t = time.AfterFunc(flushInterval, mlw.delayedFlush);
+
             w = new maxLatencyWriterжWriter(mlw);
         }
+
         slice<byte> buf = default!;
         if (p.BufferPool != default!) {
             buf = p.BufferPool.Get();
@@ -775,8 +803,7 @@ internal static void delayedFlush(this ж<maxLatencyWriter> Ꮡm) {
 
         m.mu.Lock();
         ᒐd1 = true;
-        if (!m.flushPending) {
-            // if stop was called but AfterFunc already started this goroutine
+        if (!m.flushPending) { // if stop was called but AfterFunc already started this goroutine
             return;
         }
         m.flush();
@@ -818,8 +845,7 @@ internal static partial void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, h
 
         @string reqUpType = upgradeType(req.Header);
         @string resUpType = upgradeType(res.Header);
-        if (!ascii.IsPrint(resUpType)) {
-            // We know reqUpType is ASCII, it's checked by the caller.
+        if (!ascii.IsPrint(resUpType)) { // We know reqUpType is ASCII, it's checked by the caller.
             Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("backend tried to switch to invalid protocol %q"u8, resUpType));
             return;
         }
@@ -827,17 +853,20 @@ internal static partial void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, h
             Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("backend tried to switch protocol %q when %q was requested"u8, resUpType, reqUpType));
             return;
         }
+
         var (backConn, ok) = res.Body._<io.ReadWriteCloser>(ᐧ);
         if (!ok) {
             Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("internal error: 101 switching protocols response with non-writable body"u8));
             return;
         }
+
         var rc = http.NewResponseController(rw);
         var (conn, brw, hijackErr) = rc.Hijack();
         if (errors.Is(hijackErr, new http.ProtocolErrorжerror(http.ErrNotSupported))) {
             Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("can't switch protocols using non-Hijacker ResponseWriter type %T"u8, rw));
             return;
         }
+
         var backConnCloseCh = new channel<bool>(0);
         var backConnʗ1 = backConn;
         var backConnCloseChʗ1 = backConnCloseCh;
@@ -856,13 +885,16 @@ internal static partial void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, h
             backConnʗ1.Close();
         });
         defer(ᴛ1 => close(ᴛ1), backConnCloseCh, ref ᒐ);
+
         if (hijackErr != default!) {
             Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("Hijack failed on protocol switch: %v"u8, hijackErr));
             return;
         }
         var connʗ1 = conn;
         defer(() => connʗ1.Close(), ref ᒐ);
+
         copyHeader(rw.Header(), res.Header);
+
         res.Header = rw.Header();
         res.Body = default!; // so res.Write only writes the headers; we have res.Body in backConn above
         {
@@ -927,7 +959,6 @@ internal static @string cleanQueryParams(@string s) {
             i++;
             break;
         }}
-
     }
     return s;
 }
@@ -943,7 +974,6 @@ internal static bool ishex(byte c) {
     case {} when (rune)'A' <= c && c <= (rune)'F': {
         return true;
     }}
-
     return false;
 }
 

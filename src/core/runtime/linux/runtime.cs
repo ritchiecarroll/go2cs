@@ -81,6 +81,7 @@ internal static int64 ticksPerSecond() {
     if (r != 0) {
         return r;
     }
+
     // Compute the conversion rate.
     while (ᐧ) {
         @lock(Ꮡticks.of(ticksType.Ꮡlock));
@@ -89,9 +90,11 @@ internal static int64 ticksPerSecond() {
             unlock(Ꮡticks.of(ticksType.Ꮡlock));
             return r;
         }
+
         // Grab the current time in both clocks.
         var nowTime = nanotime();
         var nowTicks = cputicks();
+
         // See if we can use these times.
         if (nowTicks > ticks.startTicks && nowTime - ticks.startTime > minTimeForTicksPerSecond) {
             // Perform the calculation with floats. We don't want to risk overflow.
@@ -106,6 +109,7 @@ internal static int64 ticksPerSecond() {
             break;
         }
         unlock(Ꮡticks.of(ticksType.Ꮡlock));
+
         // Sleep in one millisecond increments until we have a reliable time.
         timeSleep(1_000_000);
     }
@@ -260,7 +264,9 @@ internal static uintptr setCrashFD(uintptr fd) {
     if (Ꮡpanicking.Load() > 0) {
         return ~(uintptr)0;
     }
+
     var old = ᏑcrashFD.Swap(fd);
+
     // If we are panicking, don't return the old FD to runtime/debug for
     // closing. writeErrData may have already read the old FD from crashFD
     // before the swap and closing it would cause the write to be lost [1].

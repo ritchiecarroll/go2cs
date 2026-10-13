@@ -137,8 +137,10 @@ internal static void InitMsg(this ж<operation> Ꮡo, slice<byte> p, slice<byte>
     o.InitBuf(p);
     o.msg.Buffers = Ꮡo.of(operation.Ꮡbuf);
     o.msg.BufferCount = 1;
+
     o.msg.Name = default!;
     o.msg.Namelen = 0;
+
     o.msg.Flags = 0;
     o.msg.Control.Len = (uint32)len(oob);
     o.msg.Control.Buf = default!;
@@ -160,6 +162,7 @@ internal static (nint, error) execIO(ж<operation> Ꮡo, Func<ж<operation>, err
     if ((~o.fd).pd.runtimeCtx == 0) {
         return (0, errors.New(internalErrorPollingOnˢ));
     }
+
     var fd = o.fd;
     // Notify runtime netpoll about starting IO.
     var err = fd.of(FD.Ꮡpd).prepare((nint)o.mode, (~fd).isFile);
@@ -170,21 +173,20 @@ internal static (nint, error) execIO(ж<operation> Ꮡo, Func<ж<operation>, err
     err = submit(Ꮡo);
     var exprᴛ1 = err;
     if (AreEqual(exprᴛ1, default!)) {
+        // IO completed immediately
         if ((~o.fd).skipSyncNotif) {
-            // IO completed immediately
             // No completion message will follow, so return immediately.
             return ((nint)o.qty, default!);
         }
+        // Need to get our completion message anyway.
     }
     else if (AreEqual(exprᴛ1, Δsyscall.ERROR_IO_PENDING)) {
+        // IO started, and we have to wait for its completion.
         err = default!;
     }
     else { /* default: */
         return (0, err);
     }
-
-    // Need to get our completion message anyway.
-    // IO started, and we have to wait for its completion.
     // Wait for our request to complete.
     err = fd.of(FD.Ꮡpd).wait((nint)o.mode, (~fd).isFile);
     if (err == default!) {
@@ -203,12 +205,11 @@ internal static (nint, error) execIO(ж<operation> Ꮡo, Func<ж<operation>, err
     var netpollErr = err;
     var exprᴛ2 = netpollErr;
     if (AreEqual(exprᴛ2, ErrNetClosing) || AreEqual(exprᴛ2, ErrFileClosing) || AreEqual(exprᴛ2, ErrDeadlineExceeded)) {
+        // will deal with those.
     }
     else { /* default: */
         throw panic("unexpected runtime.netpoll error: " + netpollErr.Error());
     }
-
-    // will deal with those.
     // Cancel our request.
     err = Δsyscall.CancelIoEx((~fd).Sysfd, Ꮡo.of(operation.Ꮡo));
     // Assuming ERROR_NOT_FOUND is returned, if IO is completed.
@@ -220,8 +221,7 @@ internal static (nint, error) execIO(ж<operation> Ꮡo, Func<ж<operation>, err
     fd.of(FD.Ꮡpd).waitCanceled((nint)o.mode);
     err = windows.WSAGetOverlappedResult((~fd).Sysfd, Ꮡo.of(operation.Ꮡo), Ꮡo.of(operation.Ꮡqty), false, Ꮡo.of(operation.Ꮡflags));
     if (err != default!) {
-        if (AreEqual(err, Δsyscall.ERROR_OPERATION_ABORTED)) {
-            // IO Canceled
+        if (AreEqual(err, Δsyscall.ERROR_OPERATION_ABORTED)) { // IO Canceled
             err = netpollErr;
         }
         return (0, err);
@@ -267,6 +267,7 @@ partial struct FD {
     internal fileKind kind;
 }
 
+// fileKind describes the kind of file.
 partial struct fileKind /*num:byte*/;
 
 internal static fileKind kindNet => /* iota */ 0;
@@ -292,6 +293,7 @@ public static (@string, error) Init(this ж<FD> Ꮡfd, @string net, bool pollabl
     if (initErr != default!) {
         return ("", initErr);
     }
+
     var exprᴛ1 = net;
     if (exprᴛ1 == "file"u8 || exprᴛ1 == "dir"u8) {
         fd.kind = kindFile;
@@ -308,8 +310,8 @@ public static (@string, error) Init(this ж<FD> Ꮡfd, @string net, bool pollabl
     else { /* default: */
         return ("", errors.New("internal error: unknown network type "u8 + net));
     }
-
     fd.isFile = fd.kind != kindNet;
+
     error err = default!;
     if (pollable) {
         // Only call init for a network socket.
@@ -338,7 +340,6 @@ public static (@string, error) Init(this ж<FD> Ꮡfd, @string net, bool pollabl
         if (exprᴛ2 == "tcp"u8 || exprᴛ2 == "tcp4"u8 || exprᴛ2 == "tcp6"u8 || exprᴛ2 == "udp"u8 || exprᴛ2 == "udp4"u8 || exprᴛ2 == "udp6"u8) {
             flags |= (uint8)(Δsyscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS);
         }
-
         var errΔ1 = Δsyscall.SetFileCompletionNotificationModes(fd.Sysfd, flags);
         if (errΔ1 == default! && (uint8)(flags & (uint8)Δsyscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS) != 0) {
             fd.skipSyncNotif = true;
@@ -358,7 +359,6 @@ public static (@string, error) Init(this ж<FD> Ꮡfd, @string net, bool pollabl
             return (wsaioctlˢ, errΔ3);
         }
     }
-
     fd.rop.mode = (rune)'r';
     fd.wop.mode = (rune)'w';
     fd.rop.fd = Ꮡfd;
@@ -380,13 +380,12 @@ internal static error destroy(this ж<FD> Ꮡfd) {
     error err = default!;
     var exprᴛ1 = fd.kind;
     if (exprᴛ1 == kindNet) {
+        // The net package uses the CloseFunc variable for testing.
         err = CloseFunc(fd.Sysfd);
     }
     else { /* default: */
         err = Δsyscall.CloseHandle(fd.Sysfd);
     }
-
-    // The net package uses the CloseFunc variable for testing.
     fd.Sysfd = Δsyscall.InvalidHandle;
     runtime_Semrelease(Ꮡfd.of(FD.Ꮡcsema));
     return err;
@@ -431,9 +430,11 @@ public static (nint, error) Read(this ж<FD> Ꮡfd, slice<byte> buf) {
             }
         }
         ᒐd1 = true;
+
         if (len(buf) > maxRW) {
             buf = buf[..(int)(maxRW)];
         }
+
         nint n = default!;
         error err = default!;
         if (fd.isFile){
@@ -452,7 +453,6 @@ public static (nint, error) Read(this ж<FD> Ꮡfd, slice<byte> buf) {
                     err = ErrFileClosing;
                 }
             }
-
             if (err != default!) {
                 n = 0;
             }
@@ -482,6 +482,7 @@ internal static (nint, error) readConsole(this ref FD fd, slice<byte> b) {
     if (len(b) == 0) {
         return (0, default!);
     }
+
     if (fd.readuint16 == default!) {
         // Note: syscall.ReadConsole fails for very large buffers.
         // The limit is somewhere around (but not exactly) 16384.
@@ -489,6 +490,7 @@ internal static (nint, error) readConsole(this ref FD fd, slice<byte> b) {
         fd.readuint16 = new slice<uint16>(0, 10000);
         fd.readbyte = new slice<byte>(0, 4 * cap(fd.readuint16));
     }
+
     while (fd.readbyteOffset >= len(fd.readbyte)) {
         nint n = cap(fd.readuint16) - len(fd.readuint16);
         if (n > len(b)) {
@@ -528,12 +530,12 @@ internal static (nint, error) readConsole(this ref FD fd, slice<byte> b) {
             break;
         }
     }
+
     var src = fd.readbyte.slice(fd.readbyteOffset);
     nint i = default!;
     for (i = 0; i < len(src) && i < len(b); i++) {
         var x = src[i];
-        if (x == 0x1A) {
-            // Ctrl-Z
+        if (x == 0x1A) { // Ctrl-Z
             if (i == 0) {
                 fd.readbyteOffset++;
             }
@@ -563,9 +565,11 @@ public static (nint, error) Pread(this ж<FD> Ꮡfd, slice<byte> b, int64 off) {
             }
         }
         defer(() => Ꮡfd.decref(), ref ᒐ);
+
         if (len(b) > maxRW) {
             b = b[..(int)(maxRW)];
         }
+
         fd.l.Lock();
         defer(Ꮡfd.of(FD.Ꮡl).Unlock, ref ᒐ);
         var (curoffset, e) = Δsyscall.Seek(fd.Sysfd, 0, io.SeekCurrent);
@@ -730,6 +734,7 @@ public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> buf) {
             fd.l.Lock();
             ᒐd2 = true;
         }
+
         nint ntotal = 0;
         while (len(buf) > 0) {
             var b = buf;
@@ -752,7 +757,6 @@ public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> buf) {
                         err = ErrFileClosing;
                     }
                 }
-
                 if (err != default!) {
                     n = 0;
                 }
@@ -794,6 +798,7 @@ internal static (nint, error) writeConsole(this ref FD fd, slice<byte> b) {
         fd.lastbits = new slice<byte>(len(b));
         copy(fd.lastbits, b);
     }
+
     // syscall.WriteConsole seems to fail, if given large buffer.
     // So limit the buffer to 16000 characters. This number was
     // discovered by experimenting with syscall.WriteConsole.
@@ -836,6 +841,7 @@ public static (nint, error) Pwrite(this ж<FD> Ꮡfd, slice<byte> buf, int64 off
             }
         }
         defer(() => Ꮡfd.decref(), ref ᒐ);
+
         fd.l.Lock();
         defer(Ꮡfd.of(FD.Ꮡl).Unlock, ref ᒐ);
         var (curoffset, e) = Δsyscall.Seek(fd.Sysfd, 0, io.SeekCurrent);
@@ -843,6 +849,7 @@ public static (nint, error) Pwrite(this ж<FD> Ꮡfd, slice<byte> buf, int64 off
             return (0, e);
         }
         defer(Δsyscall.Seek, Ꮡfd.Value.Sysfd, curoffset, (nint)(io.SeekStart), ref ᒐ);
+
         nint ntotal = 0;
         while (len(buf) > 0) {
             var b = buf;
@@ -914,6 +921,7 @@ public static (nint, error) WriteTo(this ж<FD> Ꮡfd, slice<byte> buf, syscall�
             }
         }
         ᒐd1 = true;
+
         if (len(buf) == 0) {
             // handle zero-byte payload
             var o = Ꮡfd.of(FD.Ꮡwop);
@@ -922,6 +930,7 @@ public static (nint, error) WriteTo(this ж<FD> Ꮡfd, slice<byte> buf, syscall�
             var (n, err) = execIO(o, (ж<operation> oΔ1) => Δsyscall.WSASendto((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡbuf), 1, oΔ1.of(operation.Ꮡqty), 0, (~oΔ1).sa, oΔ1.of(operation.Ꮡo), nil));
             return (n, err);
         }
+
         nint ntotal = 0;
         while (len(buf) > 0) {
             var b = buf;
@@ -957,6 +966,7 @@ public static (nint, error) WriteToInet4(this ж<FD> Ꮡfd, slice<byte> buf, ж<
             }
         }
         ᒐd1 = true;
+
         if (len(buf) == 0) {
             // handle zero-byte payload
             var o = Ꮡfd.of(FD.Ꮡwop);
@@ -964,6 +974,7 @@ public static (nint, error) WriteToInet4(this ж<FD> Ꮡfd, slice<byte> buf, ж<
             var (n, err) = execIO(o, (ж<operation> oΔ1) => windows.WSASendtoInet4((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡbuf), 1, oΔ1.of(operation.Ꮡqty), 0, Ꮡsa4, oΔ1.of(operation.Ꮡo), nil));
             return (n, err);
         }
+
         nint ntotal = 0;
         while (len(buf) > 0) {
             var b = buf;
@@ -998,6 +1009,7 @@ public static (nint, error) WriteToInet6(this ж<FD> Ꮡfd, slice<byte> buf, ж<
             }
         }
         ᒐd1 = true;
+
         if (len(buf) == 0) {
             // handle zero-byte payload
             var o = Ꮡfd.of(FD.Ꮡwop);
@@ -1005,6 +1017,7 @@ public static (nint, error) WriteToInet6(this ж<FD> Ꮡfd, slice<byte> buf, ж<
             var (n, err) = execIO(o, (ж<operation> oΔ1) => windows.WSASendtoInet6((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡbuf), 1, oΔ1.of(operation.Ꮡqty), 0, Ꮡsa6, oΔ1.of(operation.Ꮡo), nil));
             return (n, err);
         }
+
         nint ntotal = 0;
         while (len(buf) > 0) {
             var b = buf;
@@ -1055,12 +1068,14 @@ internal static (@string, error) acceptOne(this ж<FD> Ꮡfd, syscallꓸHandle s
         CloseFunc(s);
         return (acceptexˢ, err);
     }
+
     // Inherit properties of the listening socket.
     err = Δsyscall.Setsockopt(s, Δsyscall.SOL_SOCKET, Δsyscall.SO_UPDATE_ACCEPT_CONTEXT, Ꮡfd.of(FD.ᏑSysfd).Reinterpret<syscallꓸHandle, byte>(), (int32)/* unsafe.Sizeof(fd.Sysfd) */ (uintptr)8);
     if (err != default!) {
         CloseFunc(s);
         return (setsockoptˢ, err);
     }
+
     return ("", default!);
 }
 
@@ -1076,6 +1091,7 @@ public static (syscallꓸHandle, slice<Δsyscall.RawSockaddrAny>, uint32, @strin
             }
         }
         ᒐd1 = true;
+
         var o = Ꮡfd.of(FD.Ꮡrop);
         array<Δsyscall.RawSockaddrAny> rawsa = new(2, () => new());
         while (ᐧ) {
@@ -1083,10 +1099,12 @@ public static (syscallꓸHandle, slice<Δsyscall.RawSockaddrAny>, uint32, @strin
             if (err != default!) {
                 return (Δsyscall.InvalidHandle, default!, 0, "", err);
             }
+
             (var errcall, err) = Ꮡfd.acceptOne(s, rawsa[..], o);
             if (err == default!) {
                 return (s, rawsa[..], (uint32)(~o).rsan, "", default!);
             }
+
             // Sometimes we see WSAECONNRESET and ERROR_NETNAME_DELETED is
             // returned here. These happen if connection reset is received
             // before AcceptEx could complete. These errors relate to new
@@ -1098,18 +1116,16 @@ public static (syscallꓸHandle, slice<Δsyscall.RawSockaddrAny>, uint32, @strin
             }
             var exprᴛ1 = errno;
             if (exprᴛ1 == Δsyscall.ERROR_NETNAME_DELETED || exprᴛ1 == Δsyscall.WSAECONNRESET) {
+                // ignore these and try again
             }
             else { /* default: */
                 return (Δsyscall.InvalidHandle, default!, 0, errcall, err);
             }
-
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { if (ᒐd1) Ꮡfd.readUnlock(); ᒐ.Run(); }
 }
-
-// ignore these and try again
 
 // Seek wraps syscall.Seek.
 public static (int64, error) Seek(this ж<FD> Ꮡfd, int64 offset, nint whence) {
@@ -1128,8 +1144,10 @@ public static (int64, error) Seek(this ж<FD> Ꮡfd, int64 offset, nint whence) 
             }
         }
         ᒐd1 = true;
+
         fd.l.Lock();
         ᒐd2 = true;
+
         return Δsyscall.Seek(fd.Sysfd, offset, whence);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1149,6 +1167,7 @@ public static error Fchmod(this ж<FD> Ꮡfd, uint32 mode) {
             }
         }
         ᒐd1 = true;
+
         ref var d = ref heap(new Δsyscall.ByHandleFileInformation(), out var Ꮡd);
         {
             var err = Δsyscall.GetFileInformationByHandle(fd.Sysfd, Ꮡd); if (err != default!) {
@@ -1164,6 +1183,7 @@ public static error Fchmod(this ж<FD> Ꮡfd, uint32 mode) {
         if (attrs == d.FileAttributes) {
             return default!;
         }
+
         ref var du = ref heap(new windows.FILE_BASIC_INFO(), out var Ꮡdu);
         du.FileAttributes = attrs;
         return windows.SetFileInformationByHandle(fd.Sysfd, windows.FileBasicInfo, @unsafe.Pointer.FromPinnedBox(Ꮡdu), (uint32)/* unsafe.Sizeof(du) */ (uintptr)40);
@@ -1246,6 +1266,7 @@ public static error RawRead(this ж<FD> Ꮡfd, Func<uintptr, bool> f) {
             if (f((uintptr)fd.Sysfd)) {
                 return default!;
             }
+
             // Use a zero-byte read as a way to get notified when this
             // socket is readable. h/t https://stackoverflow.com/a/42019668/332798
             var o = Ꮡfd.of(FD.Ꮡrop);
@@ -1255,9 +1276,9 @@ public static error RawRead(this ж<FD> Ꮡfd, Func<uintptr, bool> f) {
             }
             var (_, err) = execIO(o, (ж<operation> oΔ1) => Δsyscall.WSARecv((~(~oΔ1).fd).Sysfd, oΔ1.of(operation.Ꮡbuf), 1, oΔ1.of(operation.Ꮡqty), oΔ1.of(operation.Ꮡflags), oΔ1.of(operation.Ꮡo), nil));
             if (AreEqual(err, windows.WSAEMSGSIZE)){
+                // expected with a 0-byte peek, ignore.
             } else 
             if (err != default!) {
-                // expected with a 0-byte peek, ignore.
                 return err;
             }
         }
@@ -1279,9 +1300,11 @@ public static error RawWrite(this ж<FD> Ꮡfd, Func<uintptr, bool> f) {
             }
         }
         ᒐd1 = true;
+
         if (f((uintptr)fd.Sysfd)) {
             return default!;
         }
+
         // TODO(tmm1): find a way to detect socket writability
         return Δsyscall.EWINDOWS;
     }
@@ -1326,9 +1349,11 @@ public static (nint, nint, nint, syscallꓸSockaddr, error) ReadMsg(this ж<FD> 
             }
         }
         ᒐd1 = true;
+
         if (len(p) > maxRW) {
             p = p[..(int)(maxRW)];
         }
+
         var o = Ꮡfd.of(FD.Ꮡrop);
         o.InitMsg(p, oob);
         if ((~o).rsa == nil) {
@@ -1362,9 +1387,11 @@ public static (nint, nint, nint, error) ReadMsgInet4(this ж<FD> Ꮡfd, slice<by
             }
         }
         ᒐd1 = true;
+
         if (len(p) > maxRW) {
             p = p[..(int)(maxRW)];
         }
+
         var o = Ꮡfd.of(FD.Ꮡrop);
         o.InitMsg(p, oob);
         if ((~o).rsa == nil) {
@@ -1397,9 +1424,11 @@ public static (nint, nint, nint, error) ReadMsgInet6(this ж<FD> Ꮡfd, slice<by
             }
         }
         ᒐd1 = true;
+
         if (len(p) > maxRW) {
             p = p[..(int)(maxRW)];
         }
+
         var o = Ꮡfd.of(FD.Ꮡrop);
         o.InitMsg(p, oob);
         if ((~o).rsa == nil) {
@@ -1432,12 +1461,14 @@ public static (nint, nint, error) WriteMsg(this ж<FD> Ꮡfd, slice<byte> p, sli
         if (len(p) > maxRW) {
             return (0, 0, errors.New(packetIsTooLargeOnly1gbˢ));
         }
+
         {
             var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != default!) {
                 return (0, 0, errΔ1);
             }
         }
         ᒐd1 = true;
+
         var o = Ꮡfd.of(FD.Ꮡwop);
         o.InitMsg(p, oob);
         if (sa != default!) {
@@ -1468,12 +1499,14 @@ public static (nint, nint, error) WriteMsgInet4(this ж<FD> Ꮡfd, slice<byte> p
         if (len(p) > maxRW) {
             return (0, 0, errors.New(packetIsTooLargeOnly1gbˢ));
         }
+
         {
             var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != default!) {
                 return (0, 0, errΔ1);
             }
         }
         ᒐd1 = true;
+
         var o = Ꮡfd.of(FD.Ꮡwop);
         o.InitMsg(p, oob);
         if ((~o).rsa == nil) {
@@ -1499,12 +1532,14 @@ public static (nint, nint, error) WriteMsgInet6(this ж<FD> Ꮡfd, slice<byte> p
         if (len(p) > maxRW) {
             return (0, 0, errors.New(packetIsTooLargeOnly1gbˢ));
         }
+
         {
             var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != default!) {
                 return (0, 0, errΔ1);
             }
         }
         ᒐd1 = true;
+
         var o = Ꮡfd.of(FD.Ꮡwop);
         o.InitMsg(p, oob);
         if ((~o).rsa == nil) {
@@ -1529,6 +1564,7 @@ public static (nint, @string, error) DupCloseOnExec(nint fd) {
     if (err != default!) {
         return (0, getCurrentProcessˢ, err);
     }
+
     ref var nfd = ref heap(new syscallꓸHandle(), out var Ꮡnfd);
     const bool inherit = false; // analogous to CLOEXEC
     {

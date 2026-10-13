@@ -12,6 +12,8 @@ using go.sync;
 
 partial class slog_package {
 
+// A Level is the importance or severity of a log event.
+// The higher the level, the more important or severe the event.
 partial struct ΔLevel /*num:nint*/;
 
 // Names for common levels.
@@ -39,11 +41,8 @@ partial struct ΔLevel /*num:nint*/;
 // does not. But those OpenTelemetry levels can still be represented as slog
 // Levels by using the appropriate integers.
 public static ΔLevel LevelDebug => -4;
-
 public static ΔLevel LevelInfo => 0;
-
 public static ΔLevel LevelWarn => 4;
-
 public static ΔLevel LevelError => 8;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -68,6 +67,7 @@ public static @string String(this ΔLevel l) {
         }
         return fmt.Sprintf("%s%+d"u8, @base, val);
     }
+
     switch (ᐧ) {
     case {} when l < LevelInfo: {
         return str(debugˢ, l - LevelDebug);
@@ -81,7 +81,6 @@ public static @string String(this ΔLevel l) {
     default: {
         return str(errorˢ, l - LevelError);
     }}
-
 }
 
 // MarshalJSON implements [encoding/json.Marshaler]
@@ -141,6 +140,7 @@ internal static error /*err*/ parse(this ж<ΔLevel> Ꮡl, @string s) {
                 err = fmt.Errorf("slog: level string %q: %w"u8, s, err);
             }
         }, ref ᒐ);
+
         @string name = s;
         nint offset = 0;
         {
@@ -168,7 +168,6 @@ internal static error /*err*/ parse(this ж<ΔLevel> Ꮡl, @string s) {
         else { /* default: */
             err = errors.New(unknownNameˢ); goto ᒐdone;
         }
-
         l += ((ΔLevel)offset);
         err = default!;
     }

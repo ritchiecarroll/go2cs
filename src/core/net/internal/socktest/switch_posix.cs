@@ -28,7 +28,6 @@ internal static @string familyString(nint family) {
     { /* default: */
         return fmt.Sprintf("%d"u8, family);
     }
-
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -55,7 +54,6 @@ internal static @string typeString(nint sotype) {
     else { /* default: */
         s = fmt.Sprintf("%d"u8, (nint)(sotype & 0xff));
     }
-
     {
         nuint flags = (nuint)((nuint)sotype & (nuint)~(nuint)0xff); if (flags != 0) {
             s += fmt.Sprintf("|%#x"u8, flags);
@@ -83,7 +81,6 @@ internal static @string protocolString(nint proto) {
     { /* default: */
         return fmt.Sprintf("%d"u8, proto);
     }
-
 }
 
 } // end socktest_package

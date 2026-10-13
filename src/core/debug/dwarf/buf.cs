@@ -90,6 +90,7 @@ internal static @string @string(this ref buf b) {
         b.error(underflowˢ);
         return ""u8;
     }
+
     @string s = ((@string)(b.data.slice(0, i)));
     b.data = b.data.slice(i + 1);
     b.off += ((Offset)(uint32)(i + 1));
@@ -185,7 +186,6 @@ internal static uint64 addr(this ref buf b) {
     case 8: {
         return b.uint64();
     }}
-
     b.error(unknownAddressSizeˢ);
     return 0;
 }

@@ -89,11 +89,13 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
         SpinbitMutex: haveXchg8,
         SyncHashTrieMap: true
     );
+
     // Start with the statically enabled set of experiments.
     var flags = Ꮡ(new ExperimentFlags(
         Flags: baseline,
         baseline: baseline
     ));
+
     // Pick up any changes to the baseline configuration from the
     // GOEXPERIMENT environment. This can be set at make.bash time
     // and overridden at build time.
@@ -107,6 +109,7 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
             var fieldʗ1 = field;
                         names[strings.ToLower(rt.Field(i).Name)] = (bool p1) => fieldʗ1.SetBool(p1);
         }
+
         // "regabi" is an alias for all working regabi
         // subexperiments, and not an experiment itself. Doing
         // this as an alias make both "regabi" and "noregabi"
@@ -116,6 +119,7 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
             flagsʗ1.Value.RegabiWrappers = v;
             flagsʗ1.Value.RegabiArgs = v;
         };
+
         // Parse names.
         foreach (var (_, vᴛ1) in strings.Split(goexp, ","u8)) {
             var f = vᴛ1;
@@ -141,6 +145,7 @@ public static (ж<ExperimentFlags>, error) ParseGOEXPERIMENT(@string goos, @stri
             set(val);
         }
     }
+
     if (regabiAlwaysOn) {
         flags.Value.RegabiWrappers = true;
         flags.Value.RegabiArgs = true;

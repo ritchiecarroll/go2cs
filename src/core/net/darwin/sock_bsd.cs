@@ -25,12 +25,11 @@ internal static nint maxListenerBacklog() {
         (n, err) = syscall.SysctlUint32(kernIpcSoacceptqueueˢ);
     }
     else if (exprᴛ1 == "netbsd"u8) {
+        // NOTE: NetBSD has no somaxconn-like kernel state so far
     }
     else if (exprᴛ1 == "openbsd"u8) {
         (n, err) = syscall.SysctlUint32(kernSomaxconnˢ);
     }
-
-    // NOTE: NetBSD has no somaxconn-like kernel state so far
     if (n == 0 || err != default!) {
         return syscall.SOMAXCONN;
     }

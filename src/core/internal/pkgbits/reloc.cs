@@ -5,8 +5,11 @@ namespace go.@internal;
 
 partial class pkgbits_package {
 
+// A RelocKind indicates a particular section within a unified IR export.
 partial struct RelocKind /*num:int32*/;
 
+// An Index represents a bitstream element index within a particular
+// section.
 partial struct Index /*num:int32*/;
 
 // A relocEnt (relocation entry) is an entry in an element's local
@@ -20,7 +23,6 @@ partial struct RelocEnt {
 
 // Reserved indices within the meta relocation section.
 public static Index PublicRootIdx => 0;
-
 public static Index PrivateRootIdx => 1;
 
 public static RelocKind RelocString => /* iota */ 0;
@@ -33,6 +35,7 @@ public static RelocKind RelocObj => 6;
 public static RelocKind RelocObjExt => 7;
 public static RelocKind RelocObjDict => 8;
 public static RelocKind RelocBody => 9;
+
 internal static UntypedInt numRelocs => /* iota */ 10;
 
 } // end pkgbits_package

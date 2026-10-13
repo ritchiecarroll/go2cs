@@ -16,6 +16,9 @@ internal static ж<Δsync.Map> ᏑmimeTypes = new StandardBox<Δsync.Map>(defaul
 internal static ref Δsync.Map mimeTypes => ref ᏑmimeTypes.Value;  // map[string]string; ".Z" => "application/x-compress"
 internal static ж<Δsync.Map> ᏑmimeTypesLower = new StandardBox<Δsync.Map>(default(Δsync.Map));
 internal static ref Δsync.Map mimeTypesLower => ref ᏑmimeTypesLower.Value; // map[string]string; ".z" => "application/x-compress"
+
+// extensions maps from MIME type to list of lowercase file
+// extensions: "image/jpeg" => [".jpg", ".jpeg"]
 internal static ж<Δsync.Mutex> ᏑextensionsMu = new StandardBox<Δsync.Mutex>(default(Δsync.Mutex));
 internal static ref Δsync.Mutex extensionsMu => ref ᏑextensionsMu.Value; // Guards stores (but not loads) on extensions.
 internal static ж<Δsync.Map> Ꮡextensions = new StandardBox<Δsync.Map>(default(Δsync.Map));
@@ -28,12 +31,14 @@ internal static void setMimeTypes(map<@string, @string> lowerExt, map<@string, @
         ᏑmimeTypes.Clear();
         ᏑmimeTypesLower.Clear();
         Ꮡextensions.Clear();
+
         foreach (var (k, v) in lowerExt) {
             ᏑmimeTypesLower.Store(k, v);
         }
         foreach (var (k, v) in mixExt) {
             ᏑmimeTypes.Store(k, v);
         }
+
         ᏑextensionsMu.Lock();
         defer(ᏑextensionsMu.Unlock, ref ᒐ);
         foreach (var (k, v) in lowerExt) {
@@ -111,12 +116,14 @@ internal static void initMime() {
 // Text types have the charset parameter set to "utf-8" by default.
 public static @string TypeByExtension(@string ext) {
     Ꮡonce.Do(initMime);
+
     // Case-sensitive lookup.
     {
         var (v, ok) = ᏑmimeTypes.Load(ext); if (ok) {
             return v._<@string>();
         }
     }
+
     // Case-insensitive lookup.
     // Optimistically assume a short ASCII extension and be
     // allocation-free in that case.
@@ -151,6 +158,7 @@ public static (slice<@string>, error) ExtensionsByType(@string typ) {
     if (err != default!) {
         return (default!, err);
     }
+
     Ꮡonce.Do(initMime);
     var (s, ok) = Ꮡextensions.Load(justType);
     if (!ok) {
@@ -188,8 +196,10 @@ internal static error setExtensionType(@string extension, @string mimeType) {
             mimeType = FormatMediaType(mimeType, param);
         }
         @string extLower = strings.ToLower(extension);
+
         ᏑmimeTypes.Store(extension, mimeType);
         ᏑmimeTypesLower.Store(extLower, mimeType);
+
         ᏑextensionsMu.Lock();
         defer(ᏑextensionsMu.Unlock, ref ᒐ);
         slice<@string> exts = default!;

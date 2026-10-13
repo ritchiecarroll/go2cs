@@ -270,6 +270,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\nugetgoTestdataEol_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\psQuestionMarkVariable_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\publishedCounterReset_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\retiredHandOwns_test.go" />
     <None Include="$(MSBuildThisFileDirectory)liftedTypeNames.go" />
     <None Include="$(MSBuildThisFileDirectory)lineEndingSeams_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameCycleGuard_test.go" />

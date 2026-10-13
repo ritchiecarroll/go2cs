@@ -50,8 +50,8 @@ using static go.crypto.@internal.fips140_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/cast.go", "cast.cs", "AA0iAAkKAAQeAA0CgpSCloKClIKClIIABiAADAKClIKWgoKUgoKUgg==")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/fips140.go", "fips140.cs", "ABAigoKUpILGAAgKAAcQgqictoKW1oLaxg==")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/cast.go", "cast.cs", "AA0iAAkKAAQeAA0CgpSCpoKClIKClIIABiAADAKClIKmgoKUgoKUgg==")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/fips140.go", "fips140.cs", "ABAigoKUpILG+gAHEIK4rKaCptaC2sY=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/indicator.go", "indicator.cs", "AAkoAA4GAAgSkgACENIAAhTygryi")]
 // </GoSourcePositionMaps>
 

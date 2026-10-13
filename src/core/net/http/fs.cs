@@ -29,6 +29,22 @@ using go.path;
 
 partial class http_package {
 
+// A Dir implements [FileSystem] using the native file system restricted to a
+// specific directory tree.
+//
+// While the [FileSystem.Open] method takes '/'-separated paths, a Dir's string
+// value is a directory path on the native file system, not a URL, so it is separated
+// by [filepath.Separator], which isn't necessarily '/'.
+//
+// Note that Dir could expose sensitive files and directories. Dir will follow
+// symlinks pointing out of the directory tree, which can be especially dangerous
+// if serving from a directory in which users are able to create arbitrary symlinks.
+// Dir will also allow access to files and directories starting with a period,
+// which could expose sensitive directories like .git or sensitive files like
+// .htpasswd. To exclude files with a leading period, remove the files/directories
+// from the server or create a custom FileSystem implementation.
+//
+// An empty Dir is treated as ".".
 partial struct Dir /*@string*/;
 
 // mapOpenError maps the provided non-nil error from opening name
@@ -38,6 +54,7 @@ internal static error mapOpenError(error originalErr, @string name, rune sep, Fu
     if (errors.Is(originalErr, fs.ErrNotExist) || errors.Is(originalErr, fs.ErrPermission)) {
         return originalErr;
     }
+
     var parts = strings.Split(name, ((@string)sep));
     foreach (var (i, _) in parts) {
         if (parts[i] == "") {
@@ -160,6 +177,7 @@ internal static void dirList(ResponseWriter w, ж<Request> Ꮡr, File f) {
             dirs = list;
         }
     }
+
     if (err != default!) {
         logf(Ꮡr, "http: error reading directory: %v"u8, err);
         Error(w, errorReadingDirectoryˢ, StatusInternalServerError);
@@ -167,6 +185,7 @@ internal static void dirList(ResponseWriter w, ж<Request> Ꮡr, File f) {
     }
     var dirsʗ1 = dirs;
     sort.Slice(dirs, (nint i, nint j) => dirsʗ1.name(i) < dirsʗ1.name(j));
+
     w.Header().Set(contentTypeˢ, textHtmlCharsetUtf8ˢ);
     fmt.Fprintf(new ResponseWriterᴠWriter(w), "<!doctype html>\n"u8);
     fmt.Fprintf(new ResponseWriterᴠWriter(w), "<meta name=\"viewport\" content=\"width=device-width\">\n"u8);
@@ -195,6 +214,7 @@ internal static ж<godebug.Setting> httpservecontentkeepheaders = godebug.New("h
 // the error path needs to clear them, since they may not be meant for errors.
 internal static void serveError(ResponseWriter w, @string text, nint code) {
     var h = w.Header();
+
     var nonDefault = false;
     foreach (var (_, k) in new @string[]{
         "Cache-Control"u8,
@@ -214,6 +234,7 @@ internal static void serveError(ResponseWriter w, @string text, nint code) {
     if (nonDefault) {
         httpservecontentkeepheaders.IncNonDefault();
     }
+
     Error(w, text, code);
 }
 
@@ -294,7 +315,9 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
         if (done) {
             return;
         }
+
         nint code = StatusOK;
+
         // If Content-Type isn't set, use the file's extension to find it, but
         // if the Content-Type is unset explicitly, do not sniff the type.
         var (ctypes, haveType) = w.Header()[contentTypeˢ, ꟷ];
@@ -317,6 +340,7 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
         if (builtin.len(ctypes) > 0) {
             ctype = ctypes[0];
         }
+
         var (size, err) = sizeFunc();
         if (err != default!) {
             serveError(w, err.Error(), StatusInternalServerError);
@@ -327,6 +351,7 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
             serveError(w, negativeContentSizeˢ, StatusInternalServerError);
             return;
         }
+
         // handle Content-Range header.
         var sendSize = size;
         io.Reader sendContent = content;
@@ -363,20 +388,20 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
         }
         switch (ᐧ) {
         case {} when builtin.len(ranges) is 1: {
+            // RFC 7233, Section 4.1:
+            // "If a single part is being transferred, the server
+            // generating the 206 response MUST generate a
+            // Content-Range header field, describing what range
+            // of the selected representation is enclosed, and a
+            // payload consisting of the range.
+            // ...
+            // A server MUST NOT generate a multipart response to
+            // a request for a single range, since a client that
+            // does not request multiple parts might not support
+            // multipart responses."
             var ra = ranges[0];
             {
-                var (_, errΔ6) = content.Seek(ra.start, // RFC 7233, Section 4.1:
- // "If a single part is being transferred, the server
- // generating the 206 response MUST generate a
- // Content-Range header field, describing what range
- // of the selected representation is enclosed, and a
- // payload consisting of the range.
- // ...
- // A server MUST NOT generate a multipart response to
- // a request for a single range, since a client that
- // does not request multiple parts might not support
- // multipart responses."
- io.SeekStart); if (errΔ6 != default!) {
+                var (_, errΔ6) = content.Seek(ra.start, io.SeekStart); if (errΔ6 != default!) {
                     serveError(w, errΔ6.Error(), StatusRequestedRangeNotSatisfiable);
                     return;
                 }
@@ -389,6 +414,7 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
         case {} when builtin.len(ranges) is > 1: {
             sendSize = rangesMIMESize(ranges, ctype, size);
             code = StatusPartialContent;
+
             var (pr, pw) = io.Pipe();
             var mw = multipart.NewWriter(new io.PipeWriterжWriter(pw));
             w.Header().Set(contentTypeˢ, "multipart/byteranges; boundary="u8 + mw.Boundary());
@@ -428,6 +454,7 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
         }}
 
         w.Header().Set(acceptRangesˢ, bytesˢ);
+
         // We should be able to unconditionally set the Content-Length here.
         //
         // However, there is a pattern observed in the wild that this breaks:
@@ -457,6 +484,7 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
             w.Header().Set(contentLengthˢ, strconv.FormatInt(sendSize, 10));
         }
         w.WriteHeader(code);
+
         if (r.Method != "HEAD"u8) {
             io.CopyN(new ResponseWriterᴠWriter(w), sendContent, sendSize);
         }
@@ -482,6 +510,7 @@ internal static (@string etag, @string remain) scanETag(@string s) {
     for (nint i = start + 1; i < builtin.len(s); i++) {
         var c = s[i];
         switch (ᐧ) {
+        // Character values allowed in ETags.
         case {} when c == 0x21 || c >= 0x23 && c <= 0x7E || c >= 0x80: {
             break;
         }
@@ -491,9 +520,7 @@ internal static (@string etag, @string remain) scanETag(@string s) {
         default: {
             return ("", "");
         }}
-
     }
-    // Character values allowed in ETags.
     return ("", "");
 }
 
@@ -509,6 +536,8 @@ internal static bool etagWeakMatch(@string a, @string b) {
     return strings.TrimPrefix(a, "W/"u8) == strings.TrimPrefix(b, "W/"u8);
 }
 
+// condResult is the result of an HTTP request precondition check.
+// See https://tools.ietf.org/html/rfc7232 section 3.
 partial struct condResult /*num:nint*/;
 
 internal static condResult condNone => /* iota */ 0;
@@ -545,6 +574,7 @@ internal static condResult checkIfMatch(ResponseWriter w, ref Request r) {
         }
         im = remain;
     }
+
     return condFalse;
 }
 
@@ -560,6 +590,7 @@ internal static condResult checkIfUnmodifiedSince(ref Request r, time.Time modti
     if (err != default!) {
         return condNone;
     }
+
     // The Last-Modified header truncates sub-second precision so
     // the modtime needs to be truncated too.
     modtime = modtime.Truncate(time.ΔSecond);
@@ -750,6 +781,7 @@ internal static void serveFile(ResponseWriter w, ж<Request> Ꮡr, FileSystem fs
         ref var r = ref Ꮡr.DerefOrNull();
 
         @string indexPage = indexPageᶜ;
+
         // redirect .../index.html to .../
         // can't use Redirect() because that would make the path absolute,
         // which would be a problem running under StripPrefix
@@ -757,6 +789,7 @@ internal static void serveFile(ResponseWriter w, ж<Request> Ꮡr, FileSystem fs
             localRedirect(w, ref (Ꮡr).DerefOrNull(), "./"u8);
             return;
         }
+
         var (f, err) = fs.Open(name);
         if (err != default!) {
             var (msg, code) = toHTTPError(err);
@@ -765,12 +798,14 @@ internal static void serveFile(ResponseWriter w, ж<Request> Ꮡr, FileSystem fs
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         (var d, err) = f.Stat();
         if (err != default!) {
             var (msg, code) = toHTTPError(err);
             serveError(w, msg, code);
             return;
         }
+
         if (redirect) {
             // redirect to canonical path: / at end of directory url
             // r.URL.Path always begins with /
@@ -793,6 +828,7 @@ internal static void serveFile(ResponseWriter w, ж<Request> Ꮡr, FileSystem fs
                 return;
             }
         }
+
         if (d.IsDir()) {
             @string url = r.URL.Value.Path;
             // redirect if the directory name doesn't end in a slash
@@ -800,6 +836,7 @@ internal static void serveFile(ResponseWriter w, ж<Request> Ꮡr, FileSystem fs
                 localRedirect(w, ref (Ꮡr).DerefOrNull(), path.Base(url) + "/"u8);
                 return;
             }
+
             // use contents of index.html for directory, if present
             @string index = strings.TrimSuffix(name, "/"u8) + indexPage;
             var (ff, errΔ1) = fs.Open(index);
@@ -813,6 +850,7 @@ internal static void serveFile(ResponseWriter w, ж<Request> Ꮡr, FileSystem fs
                 }
             }
         }
+
         // Still a directory? (we didn't find an index.html file)
         if (d.IsDir()) {
             if (checkIfModifiedSince(ref (Ꮡr).DerefOrNull(), d.ModTime()) == condFalse) {
@@ -823,6 +861,7 @@ internal static void serveFile(ResponseWriter w, ж<Request> Ꮡr, FileSystem fs
             dirList(w, Ꮡr, f);
             return;
         }
+
         // serveContent will check modification time
         var dʗ1 = d;
         var sizeFunc = (int64, error) () => (dʗ1.Size(), default!);
@@ -1188,6 +1227,7 @@ internal static (slice<httpRange>, error) parseRange(@string s, int64 size) {
     return (ranges, default!);
 }
 
+// countingWriter counts how many bytes have been written to it.
 partial struct countingWriter /*num:int64*/;
 
 internal static (nint n, error err) Write(this ref countingWriter w, slice<byte> p) {

@@ -20,19 +20,23 @@ internal static error removeAll(@string path) {
             // of RemoveAll. See issue 28830.
             return default!;
         }
+
         // The rmdir system call does not permit removing ".",
         // so we don't permit it either.
         if (endsWithDot(path)) {
             return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "RemoveAll"u8, Path: path, Err: syscall.EINVAL)));
         }
+
         // Simple case: if Remove works, we're done.
         var err = Remove(path);
         if (err == default! || IsNotExist(err)) {
             return default!;
         }
+
         // RemoveAll recurses by deleting the path base from
         // its parent directory
         var (parentDir, @base) = splitPath(path);
+
         (var parent, err) = Open(parentDir);
         if (IsNotExist(err)) {
             // If parent does not exist, base cannot exist. Fail silently
@@ -43,6 +47,7 @@ internal static error removeAll(@string path) {
         }
         var parentʗ1 = parent;
         defer(() => parentʗ1.Close(), ref ᒐ);
+
         {
             var errΔ1 = removeAllFrom(parent, @base); if (errΔ1 != default!) {
                 {
@@ -61,14 +66,13 @@ internal static error removeAll(@string path) {
 }
 
 internal static error removeAllFrom(ж<File> Ꮡparent, @string @base) {
-    ref var parent = ref Ꮡparent.DerefOrNull();
-
     nint parentFd = (nint)Ꮡparent.Fd();
     // Simple case: if Unlink (aka remove) works, we're done.
     var err = ignoringEINTR(() => unix.Unlinkat(parentFd, @base, 0));
     if (err == default! || IsNotExist(err)) {
         return default!;
     }
+
     // EISDIR means that we have a directory, and we need to
     // remove its contents.
     // EPERM or EACCES means that we don't have write permission on
@@ -79,11 +83,13 @@ internal static error removeAllFrom(ж<File> Ꮡparent, @string @base) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "unlinkat"u8, Path: @base, Err: err)));
     }
     var uErr = err;
+
     // Remove the directory's entries.
     error recurseErr = default!;
     while (ᐧ) {
         const nint reqSize = 1024;
         nint respSize = default!;
+
         // Open the directory to recurse into
         var (@file, errΔ1) = openDirAt(parentFd, @base);
         if (errΔ1 != default!) {
@@ -97,8 +103,10 @@ internal static error removeAllFrom(ж<File> Ꮡparent, @string @base) {
             recurseErr = new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openfdat"u8, Path: @base, Err: errΔ1)));
             break;
         }
+
         while (ᐧ) {
             nint numErr = 0;
+
             var (names, readErr) = @file.Readdirnames(reqSize);
             // Errors other than EOF should stop us from continuing.
             if (readErr != default! && !AreEqual(readErr, Δio.EOF)) {
@@ -108,6 +116,7 @@ internal static error removeAllFrom(ж<File> Ꮡparent, @string @base) {
                 }
                 return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readdirnames"u8, Path: @base, Err: readErr)));
             }
+
             respSize = len(names);
             foreach (var (_, name) in names) {
                 var errΔ2 = removeAllFrom(@file, name);
@@ -123,28 +132,33 @@ internal static error removeAllFrom(ж<File> Ꮡparent, @string @base) {
                     }
                 }
             }
+
             // If we can delete any entry, break to start new iteration.
             // Otherwise, we discard current names, get next entries and try deleting them.
             if (numErr != reqSize) {
                 break;
             }
         }
+
         // Removing files from the directory may have caused
         // the OS to reshuffle it. Simply calling Readdirnames
         // again may skip some entries. The only reliable way
         // to avoid this is to close and re-open the
         // directory. See issue 20841.
         @file.Close();
+
         // Finish when the end of the directory is reached
         if (respSize < reqSize) {
             break;
         }
     }
+
     // Remove the directory itself.
     var unlinkError = ignoringEINTR(() => unix.Unlinkat(parentFd, @base, unix.AT_REMOVEDIR));
     if (unlinkError == default! || IsNotExist(unlinkError)) {
         return default!;
     }
+
     if (recurseErr != default!) {
         return recurseErr;
     }
@@ -164,9 +178,11 @@ internal static (ж<File>, error) openDirAt(nint dirfd, @string name) {
     if (err != default!) {
         return (default!, err);
     }
+
     if (!supportsCloseOnExec) {
         syscall.CloseOnExec(r);
     }
+
     // We use kindNoPoll because we know that this is a directory.
     return (newFile(r, name, kindNoPoll, false), default!);
 }

@@ -73,6 +73,7 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
                 }}
             });
         }
+
         var b = new slice<byte>(0, 6 + builtin.len(host)); // the size here is just an estimate
         b = append(b, (byte)(socksVersion5));
         if (builtin.len(d.AuthMethods) == 0 || d.Authenticate == default!){
@@ -92,6 +93,7 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
                 goto ᒐdone;
             }
         }
+
         {
             (_, ctxErr) = io.ReadFull(new net_ConnᴠReader(c), b[..2]); if (ctxErr != default!) {
                 goto ᒐdone;
@@ -111,6 +113,7 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
                 }
             }
         }
+
         b = b[..0];
         b = append(b, (byte)(socksVersion5), (byte)(nint)d.cmd, (byte)(0));
         {
@@ -144,6 +147,7 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
                 goto ᒐdone;
             }
         }
+
         {
             (_, ctxErr) = io.ReadFull(new net_ConnᴠReader(c), b[..4]); if (ctxErr != default!) {
                 goto ᒐdone;
@@ -182,7 +186,6 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
         else { /* default: */
             (_ᴛ1, ctxErr) = (default!, errors.New("unknown address type "u8 + strconv.Itoa((nint)b[3]))); goto ᒐdone;
         }
-
         if (cap(b) < l){
             b = new slice<byte>(l);
         } else {
@@ -221,6 +224,7 @@ internal static (@string, nint, error) sockssplitHostPort(@string address) {
     return (host, portnum, default!);
 }
 
+// A Command represents a SOCKS command.
 partial struct socksCommand /*num:nint*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -238,11 +242,12 @@ internal static @string String(this socksCommand cmd) {
     { /* default: */
         return "socks "u8 + strconv.Itoa((nint)cmd);
     }
-
 }
 
+// An AuthMethod represents a SOCKS authentication method.
 public partial struct socksAuthMethod /*num:nint*/;
 
+// A Reply represents a SOCKS command reply code.
 partial struct socksReply /*num:nint*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -288,26 +293,20 @@ internal static @string String(this socksReply code) {
     { /* default: */
         return "unknown code: "u8 + strconv.Itoa((nint)code);
     }
-
 }
 
 // Wire protocol constants.
 internal static UntypedInt socksVersion5 => 0x05;
 
 internal static UntypedInt socksAddrTypeIPv4 => 0x01;
-
 internal static UntypedInt socksAddrTypeFQDN => 0x03;
-
 internal static UntypedInt socksAddrTypeIPv6 => 0x04;
 
 internal static socksCommand socksCmdConnect => 0x01; // establishes an active-open forward proxy connection
-
 internal static socksCommand sockscmdBind => 0x02;   // establishes a passive-open forward proxy connection
 
 internal static socksAuthMethod socksAuthMethodNotRequired => 0x00;        // no authentication required
-
 internal static socksAuthMethod socksAuthMethodUsernamePassword => 0x02;   // use username/password
-
 internal static socksAuthMethod socksAuthMethodNoAcceptableMethods => 0xff; // no acceptable authentication methods
 
 internal static socksReply socksStatusSucceeded => 0x00;
@@ -498,14 +497,12 @@ internal static error validateTarget(this ref socksDialer d, @string network, @s
     else { /* default: */
         return errors.New(networkNotImplementedˢ);
     }
-
     var exprᴛ2 = d.cmd;
     if (exprᴛ2 == socksCmdConnect || exprᴛ2 == sockscmdBind) {
     }
     else { /* default: */
         return errors.New(commandNotImplementedˢ);
     }
-
     return default!;
 }
 
@@ -571,10 +568,10 @@ internal static error Authenticate(this ref socksUsernamePassword up, context.Co
         b = append(b, up.Username.ꓸꓸꓸ);
         b = append(b, (byte)builtin.len(up.Password));
         b = append(b, up.Password.ꓸꓸꓸ);
+        // TODO(mikio): handle IO deadlines and cancelation if
+        // necessary
         {
             var (_, err) = rw.Write(b); if (err != default!) {
-                // TODO(mikio): handle IO deadlines and cancelation if
-                // necessary
                 return err;
             }
         }
@@ -591,7 +588,6 @@ internal static error Authenticate(this ref socksUsernamePassword up, context.Co
         }
         return default!;
     }
-
     return errors.New("unsupported authentication method "u8 + strconv.Itoa((nint)auth));
 }
 

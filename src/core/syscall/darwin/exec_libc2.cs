@@ -60,20 +60,16 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
     // Declare all variables at top in case any
     // declarations require heap allocation (e.g., err1).
     uintptr r1 = default!;
-    
     nint nextfd = default!;
-    
     nint i = default!;
-    
     error err = default!;
-    
     ref var pgrp = ref heap(new _C_int(), out var Ꮡpgrp);
-    
     ж<Credential> cred = default!;
-    
     uintptr ngroups = default!;
     uintptr groups = default!;
+
     var rlim = ᏑorigRlimitNofile.Load();
+
     // guard against side effects of shuffling fds below.
     // Make sure that nextfd is beyond any currently open files so
     // that we can't run the risk of overwriting any of them.
@@ -86,6 +82,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
         fd[iΔ1] = (nint)ufd;
     }
     nextfd++;
+
     // About to call fork.
     // No more allocation or calls of non-assembly functions.
     runtime_BeforeFork();
@@ -94,12 +91,15 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
         runtime_AfterFork();
         return (0, err1);
     }
+
     if (r1 != 0) {
         // parent; return PID
         runtime_AfterFork();
         return ((nint)r1, 0);
     }
+
     // Fork succeeded, now in child.
+
     // Enable tracing if requested.
     if (sys.Ptrace) {
         {
@@ -109,6 +109,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
             }
         }
     }
+
     // Session ID
     if (sys.Setsid) {
         (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_setsid_trampoline), 0, 0, 0);
@@ -116,6 +117,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
             goto childerror;
         }
     }
+
     // Set process group
     if (sys.Setpgid || sys.Foreground) {
         // Place child in process group.
@@ -124,6 +126,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
             goto childerror;
         }
     }
+
     if (sys.Foreground) {
         // This should really be pid_t, however _C_int (aka int32) is
         // generally equivalent.
@@ -135,6 +138,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
             }
             pgrp = ((_C_int)(int32)r1);
         }
+
         // Place process group in foreground.
         var ᴋ0 = Ꮡpgrp;
                 (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_ioctl_trampoline), (uintptr)sys.Ctty, (uintptr)TIOCSPGRP, (uintptr)ᴋ0);
@@ -143,9 +147,11 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
             goto childerror;
         }
     }
+
     // Restore the signal mask. We do this after TIOCSPGRP to avoid
     // having the kernel send a SIGTTOU signal to the process group.
     runtime_AfterForkInChild();
+
     // Chroot
     if (Ꮡchroot != nil) {
         var ᴋ1 = Ꮡchroot;
@@ -155,6 +161,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
             goto childerror;
         }
     }
+
     // User and groups
     {
         cred = sys.Credential; if (cred != nil) {
@@ -179,6 +186,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
             }
         }
     }
+
     // Chdir
     if (Ꮡdir != nil) {
         var ᴋ2 = Ꮡdir;
@@ -188,6 +196,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
             goto childerror;
         }
     }
+
     // Pass 1: look for fd[i] < i and move those up above len(fd)
     // so that pass 2 won't stomp on an fd it needs later.
     if (pipe < nextfd) {
@@ -208,8 +217,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
     }
     for (i = 0; i < len(fd); i++) {
         if (fd[i] >= 0 && fd[i] < i) {
-            if (nextfd == pipe) {
-                // don't stomp on pipe
+            if (nextfd == pipe) { // don't stomp on pipe
                 nextfd++;
             }
             if (runtime.GOOS == "openbsd"u8){
@@ -228,6 +236,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
             nextfd++;
         }
     }
+
     // Pass 2: dup fd[i] down onto i.
     for (i = 0; i < len(fd); i++) {
         if (fd[i] == -1) {
@@ -250,6 +259,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
             goto childerror;
         }
     }
+
     // By convention, we don't close-on-exec the fds we are
     // started with, so if len(fd) < 3, close 0, 1, 2 as needed.
     // Programs that know they inherit fds >= 3 will need
@@ -257,6 +267,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
     for (i = len(fd); i < 3; i++) {
         rawSyscall(abi.FuncPCABI0(libc_close_trampoline), (uintptr)i, 0, 0);
     }
+
     // Detach fd 0 from tty
     if (sys.Noctty) {
         (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_ioctl_trampoline), 0, (uintptr)TIOCNOTTY, 0);
@@ -264,6 +275,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
             goto childerror;
         }
     }
+
     // Set the controlling TTY to Ctty
     if (sys.Setctty) {
         (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_ioctl_trampoline), (uintptr)sys.Ctty, (uintptr)TIOCSCTTY, 0);
@@ -271,12 +283,14 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
             goto childerror;
         }
     }
+
     // Restore original rlimit.
     if (rlim != nil) {
         var ᴋ3 = rlim;
                 rawSyscall(abi.FuncPCABI0(libc_setrlimit_trampoline), (uintptr)RLIMIT_NOFILE, (uintptr)ᴋ3, 0);
         System.GC.KeepAlive(ᴋ3);
     }
+
     // Time to exec.
     var ᴋ4 = Ꮡargv0;
     var ᴋ5 = @unsafe.Pointer.FromBox(Ꮡ(argv, 0));
@@ -285,6 +299,7 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
     System.GC.KeepAlive(ᴋ4);
     System.GC.KeepAlive(ᴋ5);
     System.GC.KeepAlive(ᴋ6);
+
 childerror:
     var ᴋ7 = @unsafe.Pointer.FromBox(Ꮡerr1);
         rawSyscall(abi.FuncPCABI0(libc_write_trampoline), (uintptr)pipe, (uintptr)ᴋ7, /* unsafe.Sizeof(err1) */ (uintptr)8);
@@ -297,8 +312,7 @@ childerror:
 
 // forkAndExecFailureCleanup cleans up after an exec failure.
 internal static void forkAndExecFailureCleanup(ref ProcAttr attr, ref SysProcAttr sys) {
+    // Nothing to do.
 }
-
-// Nothing to do.
 
 } // end syscall_package

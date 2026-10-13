@@ -50,8 +50,6 @@ partial struct CrashOptions {
 // If called concurrently with a crash, some in-progress output may be written
 // to the old file even after an overriding SetCrashOutput returns.
 public static error SetCrashOutput(ж<os.File> Ꮡf, CrashOptions opts) {
-    ref var f = ref Ꮡf.DerefOrNull();
-
     var fd = ~(uintptr)0;
     if (Ꮡf != nil) {
         // The runtime will write to this file descriptor from

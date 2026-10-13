@@ -23,7 +23,9 @@ internal static void labels(this ж<Checker> Ꮡcheck, ж<ast.BlockStmt> Ꮡbody
 
     // set of all labels in this body
     var all = NewScope(nil, body.Pos(), body.End(), labelˢ);
+
     var fwdJumps = Ꮡcheck.blockBranches(all, nil, nil, body.List);
+
     // If there are any forward jumps left, no label was found for
     // the corresponding goto statements. Either those labels were
     // never defined, or they are inside blocks and not reachable
@@ -44,6 +46,7 @@ internal static void labels(this ж<Checker> Ꮡcheck, ж<ast.BlockStmt> Ꮡbody
         }
         Ꮡcheck.errorf(new ast_Identжpositioner((~jmp).Label), code, msg, name);
     }
+
     // spec: "It is illegal to define a label that is never used."
     foreach (var (name, vᴛ1) in (~all).elems) {
         var obj = vᴛ1;
@@ -112,12 +115,12 @@ internal static ж<ast.LabeledStmt> enclosingTarget(this ж<block> Ꮡb, @string
 // all is the scope of all declared labels, parent the set of labels declared in the immediately
 // enclosing block, and lstmt is the labeled statement this block is associated with (or nil).
 internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡcheck, ж<ΔScope> Ꮡall, ж<block> Ꮡparent, ж<ast.LabeledStmt> Ꮡlstmt, slice<ast.Stmt> list) {
-    ref var check = ref Ꮡcheck.DerefOrNull();
-
     var b = Ꮡ(new block(parent: Ꮡparent, lstmt: Ꮡlstmt));
+
     tokenꓸPos varDeclPos = default!;
     ref var fwdJumps = ref heap<slice<ж<ast.BranchStmt>>>(out var ᏑfwdJumps);
     ref var badJumps = ref heap<slice<ж<ast.BranchStmt>>>(out var ᏑbadJumps);
+
     // All forward jumps jumping over a variable declaration are possibly
     // invalid (they may still jump out of the block and be ok).
     // recordVarDecl records them for the given position.
@@ -125,13 +128,16 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
         varDeclPos = pos;
         ᏑbadJumps.ValueSlot = appendꓸꓸꓸ(ᏑbadJumps.ValueSlot[..0], ᏑfwdJumps.ValueSlot); // copy fwdJumps to badJumps
     }
+
     bool jumpsOverVarDecl(ж<ast.BranchStmt> jmp) => varDeclPos.IsValid() && slices.Contains(ᏑbadJumps.ValueSlot, jmp);
+
     var bʗ1 = b;
     void blockBranches(ж<ast.LabeledStmt> lstmtΔ1, slice<ast.Stmt> listΔ1) {
         // Unresolved forward jumps inside the nested block
         // become forward jumps in the current block.
         ᏑfwdJumps.ValueSlot = appendꓸꓸꓸ(ᏑfwdJumps.ValueSlot, Ꮡcheck.blockBranches(Ꮡall, bʗ1, lstmtΔ1, listΔ1));
     }
+
     ref var stmtBranches = ref heap<Action<ast.Stmt>>(out var ᏑstmtBranches);
     var bʗ2 = b;
     var blockBranchesʗ1 = blockBranches;
@@ -148,9 +154,9 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
             break;
         }
         case ж<ast.LabeledStmt> sΔ1: {
+            // declare non-blank label
             {
                 @string name = sΔ1.Value.Label.Value.Name; if (name != "_"u8) {
-                    // declare non-blank label
                     var lbl = NewLabel((~sΔ1).Label.Pos(), Ꮡcheck.Value.pkg, name);
                     {
                         var alt = Ꮡall.Insert(new LabelжObject(lbl)); if (alt != default!){
@@ -159,8 +165,8 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
                             err.addf(new Labelжpositioner(lbl), "label %s already declared"u8, name);
                             err.addAltDecl(alt);
                             err.report();
-                        } else {
                             // ok to continue
+                        } else {
                             bʗ2.insert(sΔ1);
                             Ꮡcheck.Value.recordDef((~sΔ1).Label, new LabelжObject(lbl));
                         }
@@ -179,9 +185,9 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
                                     "goto %s jumps over variable declaration at line %d"u8,
                                     name,
                                     Ꮡcheck.Value.fset.Position(varDeclPos).Line);
+                                // ok to continue
                             }
                         } else {
-                            // ok to continue
                             // no match - record new forward jump
                             ᏑfwdJumps.ValueSlot[i] = jmp;
                             i++;
@@ -198,16 +204,17 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
             if ((~sΔ1).Label == nil) {
                 return; // checked in 1st pass (check.stmt)
             }
+
+            // determine and validate target
             @string name = sΔ1.Value.Label.Value.Name;
             var exprᴛ1 = (~sΔ1).Tok;
             if (exprᴛ1 == token.BREAK) {
+                // spec: "If there is a label, it must be that of an enclosing
+                // "for", "switch", or "select" statement, and that is the one
+                // whose execution terminates."
                 var valid = false;
                 {
                     var t = bʗ2.enclosingTarget(name); if (t != nil) {
-                        // determine and validate target
-                        // spec: "If there is a label, it must be that of an enclosing
-                        // "for", "switch", or "select" statement, and that is the one
-                        // whose execution terminates."
                         switch ((~t).Stmt.type()) {
                         case ж<ast.SwitchStmt> _:
                         case ж<ast.TypeSwitchStmt> _:
@@ -217,7 +224,6 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
                             valid = true;
                             break;
                         }}
-
                     }
                 }
                 if (!valid) {
@@ -226,18 +232,17 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
                 }
             }
             else if (exprᴛ1 == token.CONTINUE) {
+                // spec: "If there is a label, it must be that of an enclosing
+                // "for" statement, and that is the one whose execution advances."
                 var valid = false;
                 {
                     var t = bʗ2.enclosingTarget(name); if (t != nil) {
-                        // spec: "If there is a label, it must be that of an enclosing
-                        // "for" statement, and that is the one whose execution advances."
                         switch ((~t).Stmt.type()) {
                         case ж<ast.ForStmt> _:
                         case ж<ast.RangeStmt> _: {
                             valid = true;
                             break;
                         }}
-
                     }
                 }
                 if (!valid) {
@@ -257,10 +262,10 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
                 return;
             }
 
+            // record label use
             var obj = Ꮡall.Value.Lookup(name);
             obj._<ж<Label>>().Value.used = true;
-            Ꮡcheck.Value.recordUse((~sΔ1).Label, // record label use
- obj);
+            Ꮡcheck.Value.recordUse((~sΔ1).Label, obj);
             break;
         }
         case ж<ast.AssignStmt> sΔ1: {
@@ -309,9 +314,11 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
             break;
         }}
     };
+
     foreach (var (_, s) in list) {
         stmtBranches(s);
     }
+
     return fwdJumps;
 }
 

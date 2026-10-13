@@ -56,7 +56,7 @@ using static go.@internal.sync_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/sync/mutex.go", "mutex.cs", "ACB65IKClKas0oKCzIKWgpTWooKCgoKCpriElIKCgpSUgpSC3IKUpoKUlIKCpoKClIKCgsqClILclIKUgpSogr7SgoKogqboooKUgoLugqaCgoKUAAcQ", "", "", "90=CompareAndSwapInt32/1/1/1")]
+[assembly: go.GoPositionMap("internal/sync/mutex.go", "mutex.cs", "ADl65IKClKas0oKC3IKmgpTWooKCgoKCpriElIKCgpSUgpSC3IKUpoKUlIKCpoKClIKCgsqClILclIKUgpS4gr7SgoK4gqboooKUgoLugqaCgoKUAAcQ", "", "", "117=CompareAndSwapInt32/1/1/1")]
 [assembly: go.GoPositionMap("internal/sync/runtime.go", "runtime.cs", "AAkqAA0WAAoM2sampg==")]
 // </GoSourcePositionMaps>
 

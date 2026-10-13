@@ -77,8 +77,8 @@ internal static ж<Ident> fieldName(Expr x) {
 
 internal static bool /*removedFields*/ filterFieldList(ж<FieldList> Ꮡfields, Func<@string, bool> filter, bool export) {
     bool removedFields = default!;
-
     ref var fields = ref Ꮡfields.DerefOrNull();
+
     if (Ꮡfields == nil) {
         return false;
     }
@@ -317,12 +317,18 @@ internal static bool filterPackage(ref Package pkg, Func<@string, bool> f, bool 
     return hasDecls;
 }
 
-partial struct MergeMode /*num:nuint*/;
-
 // ----------------------------------------------------------------------------
 // Merging of package files
+
+// The MergeMode flags control the behavior of [MergePackageFiles].
+partial struct MergeMode /*num:nuint*/;
+
+// If set, duplicate function declarations are excluded.
 public static MergeMode FilterFuncDuplicates => /* 1 << iota */ 1;
+// If set, comments that are not associated with a specific
+// AST node (as Doc or Comment) are excluded.
 public static MergeMode FilterUnassociatedComments => 2;
+// If set, duplicate import declarations are excluded.
 public static MergeMode FilterImportDuplicates => 4;
 
 // nameOf returns the function (foo) or method name (foo.bar) for
@@ -345,9 +351,9 @@ internal static @string nameOf(ref FuncDecl f) {
                     return (~p).Name + "."u8 + (~f.Name).Name;
                 }
             }
+            // otherwise assume a function instead
         }
     }
-    // otherwise assume a function instead
     return (~f.Name).Name;
 }
 
@@ -386,6 +392,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
         }
     }
     slices.Sort<slice<@string>, @string>(filenames);
+
     // Collect package comments from all package files into a single
     // CommentGroup - the collected package documentation. In general
     // there should be only one file with a package comment; but it's
@@ -417,6 +424,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
         }
         doc = Ꮡ(new CommentGroup(list));
     }
+
     // Collect declarations from all package files.
     slice<Decl> decls = default!;
     if (ndecls > 0) {
@@ -465,6 +473,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
                 iΔ2++;
             }
         }
+
         // Eliminate nil entries from the decls list if entries were
         // filtered. We do this using a 2nd pass in order to not disturb
         // the original declaration order in the source (otherwise, this
@@ -481,6 +490,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
             decls = decls.slice(0, iΔ2);
         }
     }
+
     // Collect import specs from all package files.
     slice<ж<ImportSpec>> imports = default!;
     if ((MergeMode)(mode & FilterImportDuplicates) != 0){
@@ -510,6 +520,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
             imports = appendꓸꓸꓸ(imports, (~f).Imports);
         }
     }
+
     // Collect comments from all package files.
     slice<ж<CommentGroup>> comments = default!;
     if ((MergeMode)(mode & FilterUnassociatedComments) == 0) {
@@ -520,6 +531,7 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
             iΔ3 += copy(comments.slice(iΔ3), (~f).Comments);
         }
     }
+
     // TODO(gri) need to compute unresolved identifiers!
     return Ꮡ(new File(doc, pos, NewIdent(pkg.Name), decls, minPos, maxPos, pkg.Scope, imports, default!, comments, ""u8));
 }

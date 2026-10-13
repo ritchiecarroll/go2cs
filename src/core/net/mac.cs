@@ -7,6 +7,7 @@ partial class net_package {
 
 internal static readonly @string hexDigit = "0123456789abcdef"u8;
 
+// A HardwareAddr represents a physical hardware address.
 partial struct HardwareAddr /*[]byte*/;
 
 public static @string String(this HardwareAddr a) {
@@ -42,6 +43,7 @@ public static (HardwareAddr hw, error err) ParseMAC(@string s) {
     if (len(s) < 14) {
         goto error;
     }
+
     if (s[2] == (rune)':' || s[2] == (rune)'-'){
         if ((len(s) + 1) % 3 != 0) {
             goto error;
@@ -88,6 +90,7 @@ public static (HardwareAddr hw, error err) ParseMAC(@string s) {
         goto error;
     }
     return (hw, default!);
+
 error:
     return (default!, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid MAC address"u8, Addr: s))));
 }

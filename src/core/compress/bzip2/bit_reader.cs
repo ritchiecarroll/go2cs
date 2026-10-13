@@ -48,6 +48,7 @@ internal static uint64 /*n*/ ReadBits64(this ref bitReader br, nuint bits) {
         br.n |= (uint64)((uint64)b);
         br.bits += 8;
     }
+
     // br.n looks like this (assuming that br.bits = 14 and bits = 6):
     // Bit: 111111
     //      5432109876543210

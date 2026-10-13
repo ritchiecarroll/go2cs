@@ -53,22 +53,17 @@ partial class elf_package {
 
 // Indexes into the Header.Ident array.
 public static UntypedInt EI_CLASS => 4; /* Class of machine. */
-
 public static UntypedInt EI_DATA => 5; /* Data format. */
-
 public static UntypedInt EI_VERSION => 6; /* ELF format version. */
-
 public static UntypedInt EI_OSABI => 7; /* Operating system / ABI identification */
-
 public static UntypedInt EI_ABIVERSION => 8; /* ABI version */
-
 public static UntypedInt EI_PAD => 9; /* Start of padding (per SVR4 ABI). */
-
 public static UntypedInt EI_NIDENT => 16; /* Size of e_ident array. */
 
 // Initial magic number for ELF files.
 public static readonly @string ELFMAG = "\u007fELF"u8;
 
+// Version is found in Header.Ident[EI_VERSION] and Header.Version.
 partial struct Version /*num:byte*/;
 
 public static Version EV_NONE => 0;
@@ -87,6 +82,7 @@ public static @string GoString(this Version i) {
     return stringName((uint32)(byte)i, versionStrings, true);
 }
 
+// Class is found in Header.Ident[EI_CLASS] and Header.Class.
 partial struct Class /*num:byte*/;
 
 public static Class ELFCLASSNONE => 0; /* Unknown class. */
@@ -107,6 +103,7 @@ public static @string GoString(this Class i) {
     return stringName((uint32)(byte)i, classStrings, true);
 }
 
+// Data is found in Header.Ident[EI_DATA] and Header.Data.
 partial struct ΔData /*num:byte*/;
 
 public static ΔData ELFDATANONE => 0; /* Unknown data format. */
@@ -127,6 +124,7 @@ public static @string GoString(this ΔData i) {
     return stringName((uint32)(byte)i, dataStrings, true);
 }
 
+// OSABI is found in Header.Ident[EI_OSABI] and Header.OSABI.
 partial struct OSABI /*num:byte*/;
 
 public static OSABI ELFOSABI_NONE => 0;       /* UNIX System V ABI */
@@ -181,6 +179,7 @@ public static @string GoString(this OSABI i) {
     return stringName((uint32)(byte)i, osabiStrings, true);
 }
 
+// Type is found in Header.Type.
 partial struct Type /*num:uint16*/;
 
 public static Type ET_NONE => 0;      /* Unknown type. */
@@ -213,6 +212,7 @@ public static @string GoString(this Type i) {
     return stringName((uint32)(uint16)i, typeStrings, true);
 }
 
+// Machine is found in Header.Machine.
 partial struct Machine /*num:uint16*/;
 
 public static Machine EM_NONE => 0;          /* Unknown machine. */
@@ -398,12 +398,13 @@ public static Machine EM_RISCV => 243;         /* RISC-V */
 public static Machine EM_LANAI => 244;         /* Lanai 32-bit processor */
 public static Machine EM_BPF => 247;           /* Linux BPF – in-kernel virtual machine */
 public static Machine EM_LOONGARCH => 258;     /* LoongArch */
+
+/* Non-standard or deprecated. */
 public static Machine EM_486 => 6;            /* Intel i486. */
 public static Machine EM_MIPS_RS4_BE => 10;    /* MIPS R4000 Big-Endian */
 public static Machine EM_ALPHA_STD => 41;      /* Digital Alpha (standard value). */
 public static Machine EM_ALPHA => 0x9026;          /* Alpha (written in the absence of an ABI) */
 
-/* Non-standard or deprecated. */
 internal static slice<intName> machineStrings = new intName[]{
     new(0, "EM_NONE"u8),
     new(1, "EM_M32"u8),
@@ -588,6 +589,8 @@ internal static slice<intName> machineStrings = new intName[]{
     new(244, "EM_LANAI"u8),
     new(247, "EM_BPF"u8),
     new(258, "EM_LOONGARCH"u8),
+
+    /* Non-standard or deprecated. */
     new(6, "EM_486"u8),
     new(10, "EM_MIPS_RS4_BE"u8),
     new(41, "EM_ALPHA_STD"u8),
@@ -602,6 +605,7 @@ public static @string GoString(this Machine i) {
     return stringName((uint32)(uint16)i, machineStrings, true);
 }
 
+// Special section indices.
 partial struct SectionIndex /*num:nint*/;
 
 public static SectionIndex SHN_UNDEF => 0;        /* Undefined, missing, irrelevant. */
@@ -632,6 +636,7 @@ public static @string GoString(this SectionIndex i) {
     return stringName((uint32)(nint)i, shnStrings, true);
 }
 
+// Section type.
 partial struct SectionType /*num:uint32*/;
 
 public static SectionType SHT_NULL => 0;                  /* inactive */
@@ -705,6 +710,7 @@ public static @string GoString(this SectionType i) {
     return stringName((uint32)i, shtStrings, true);
 }
 
+// Section flags.
 partial struct SectionFlag /*num:uint32*/;
 
 public static SectionFlag SHF_WRITE => 0x1;                   /* Section contains writable data. */
@@ -743,6 +749,7 @@ public static @string GoString(this SectionFlag i) {
     return flagName((uint32)i, shfStrings, true);
 }
 
+// Section compression type.
 partial struct CompressionType /*num:nint*/;
 
 public static CompressionType COMPRESS_ZLIB => 1;          /* ZLIB compression. */
@@ -769,6 +776,7 @@ public static @string GoString(this CompressionType i) {
     return stringName((uint32)(nint)i, compressionStrings, true);
 }
 
+// Prog.Type
 partial struct ProgType /*num:nint*/;
 
 public static ProgType PT_NULL => 0;  /* Unused entry. */
@@ -779,35 +787,45 @@ public static ProgType PT_NOTE => 4;  /* Auxiliary information. */
 public static ProgType PT_SHLIB => 5; /* Reserved (not used). */
 public static ProgType PT_PHDR => 6;  /* Location of program header itself. */
 public static ProgType PT_TLS => 7;   /* Thread local storage segment */
+
 public static ProgType PT_LOOS => 0x60000000;        /* First OS-specific. */
+
 public static ProgType PT_GNU_EH_FRAME => 0x6474e550;        /* Frame unwind information */
 public static ProgType PT_GNU_STACK => 0x6474e551;           /* Stack flags */
 public static ProgType PT_GNU_RELRO => 0x6474e552;           /* Read only after relocs */
 public static ProgType PT_GNU_PROPERTY => 0x6474e553;        /* GNU property */
 public static ProgType PT_GNU_MBIND_LO => 0x6474e555;        /* Mbind segments start */
 public static ProgType PT_GNU_MBIND_HI => 0x6474f554;        /* Mbind segments finish */
+
 public static ProgType PT_PAX_FLAGS => 0x65041580;        /* PAX flags */
+
 public static ProgType PT_OPENBSD_RANDOMIZE => 0x65a3dbe6;        /* Random data */
 public static ProgType PT_OPENBSD_WXNEEDED => 0x65a3dbe7;         /* W^X violations */
 public static ProgType PT_OPENBSD_NOBTCFI => 0x65a3dbe8;          /* No branch target CFI */
 public static ProgType PT_OPENBSD_BOOTDATA => 0x65a41be6;         /* Boot arguments */
+
 public static ProgType PT_SUNW_EH_FRAME => 0x6474e550;        /* Frame unwind information */
 public static ProgType PT_SUNWSTACK => 0x6ffffffb;            /* Stack segment */
+
 public static ProgType PT_HIOS => 0x6fffffff;        /* Last OS-specific. */
+
 public static ProgType PT_LOPROC => 0x70000000;        /* First processor-specific type. */
+
 public static ProgType PT_ARM_ARCHEXT => 0x70000000;        /* Architecture compatibility */
 public static ProgType PT_ARM_EXIDX => 0x70000001;          /* Exception unwind tables */
+
 public static ProgType PT_AARCH64_ARCHEXT => 0x70000000;        /* Architecture compatibility */
 public static ProgType PT_AARCH64_UNWIND => 0x70000001;         /* Exception unwind tables */
+
 public static ProgType PT_MIPS_REGINFO => 0x70000000;         /* Register usage */
 public static ProgType PT_MIPS_RTPROC => 0x70000001;          /* Runtime procedures */
 public static ProgType PT_MIPS_OPTIONS => 0x70000002;         /* Options */
 public static ProgType PT_MIPS_ABIFLAGS => 0x70000003;        /* ABI flags */
+
 public static ProgType PT_S390_PGSTE => 0x70000000;        /* 4k page table size */
+
 public static ProgType PT_HIPROC => 0x7fffffff;        /* Last processor-specific type. */
 
-// We don't list the processor-dependent ProgTypes,
-// as the values overlap.
 internal static slice<intName> ptStrings = new intName[]{
     new(0, "PT_NULL"u8),
     new(1, "PT_LOAD"u8),
@@ -829,6 +847,8 @@ internal static slice<intName> ptStrings = new intName[]{
     new(0x6ffffffb, "PT_SUNWSTACK"u8),
     new(0x6fffffff, "PT_HIOS"u8),
     new(0x70000000, "PT_LOPROC"u8),
+    // We don't list the processor-dependent ProgTypes,
+    // as the values overlap.
     new(0x7fffffff, "PT_HIPROC"u8)
 }.slice();
 
@@ -840,6 +860,7 @@ public static @string GoString(this ProgType i) {
     return stringName((uint32)(nint)i, ptStrings, true);
 }
 
+// Prog.Flag
 partial struct ProgFlag /*num:uint32*/;
 
 public static ProgFlag PF_X => 0x1;               /* Executable. */
@@ -862,6 +883,7 @@ public static @string GoString(this ProgFlag i) {
     return flagName((uint32)i, pfStrings, true);
 }
 
+// Dyn.Tag
 partial struct DynTag /*num:nint*/;
 
 public static DynTag DT_NULL => 0;        /* Terminating entry. */
@@ -903,8 +925,10 @@ public static DynTag DT_ENCODING => 32;    /* Values greater than or equal to DT
 public static DynTag DT_PREINIT_ARRAY => 32;  /* Address of the array of pointers to pre-initialization functions. */
 public static DynTag DT_PREINIT_ARRAYSZ => 33; /* Size in bytes of the array of pre-initialization functions. */
 public static DynTag DT_SYMTAB_SHNDX => 34;   /* Address of SHT_SYMTAB_SHNDX section. */
+
 public static DynTag DT_LOOS => 0x6000000d;        /* First OS-specific */
 public static DynTag DT_HIOS => 0x6ffff000;        /* Last OS-specific */
+
 public static DynTag DT_VALRNGLO => 0x6ffffd00;
 public static DynTag DT_GNU_PRELINKED => 0x6ffffdf5;
 public static DynTag DT_GNU_CONFLICTSZ => 0x6ffffdf6;
@@ -918,6 +942,7 @@ public static DynTag DT_POSFLAG_1 => 0x6ffffdfd;
 public static DynTag DT_SYMINSZ => 0x6ffffdfe;
 public static DynTag DT_SYMINENT => 0x6ffffdff;
 public static DynTag DT_VALRNGHI => 0x6ffffdff;
+
 public static DynTag DT_ADDRRNGLO => 0x6ffffe00;
 public static DynTag DT_GNU_HASH => 0x6ffffef5;
 public static DynTag DT_TLSDESC_PLT => 0x6ffffef6;
@@ -931,6 +956,7 @@ public static DynTag DT_PLTPAD => 0x6ffffefd;
 public static DynTag DT_MOVETAB => 0x6ffffefe;
 public static DynTag DT_SYMINFO => 0x6ffffeff;
 public static DynTag DT_ADDRRNGHI => 0x6ffffeff;
+
 public static DynTag DT_VERSYM => 0x6ffffff0;
 public static DynTag DT_RELACOUNT => 0x6ffffff9;
 public static DynTag DT_RELCOUNT => 0x6ffffffa;
@@ -939,7 +965,9 @@ public static DynTag DT_VERDEF => 0x6ffffffc;
 public static DynTag DT_VERDEFNUM => 0x6ffffffd;
 public static DynTag DT_VERNEED => 0x6ffffffe;
 public static DynTag DT_VERNEEDNUM => 0x6fffffff;
+
 public static DynTag DT_LOPROC => 0x70000000;        /* First processor-specific type. */
+
 public static DynTag DT_MIPS_RLD_VERSION => 0x70000001;
 public static DynTag DT_MIPS_TIME_STAMP => 0x70000002;
 public static DynTag DT_MIPS_ICHECKSUM => 0x70000003;
@@ -986,20 +1014,23 @@ public static DynTag DT_MIPS_AUX_DYNAMIC => 0x70000031;
 public static DynTag DT_MIPS_PLTGOT => 0x70000032;
 public static DynTag DT_MIPS_RWPLT => 0x70000034;
 public static DynTag DT_MIPS_RLD_MAP_REL => 0x70000035;
+
 public static DynTag DT_PPC_GOT => 0x70000000;
 public static DynTag DT_PPC_OPT => 0x70000001;
+
 public static DynTag DT_PPC64_GLINK => 0x70000000;
 public static DynTag DT_PPC64_OPD => 0x70000001;
 public static DynTag DT_PPC64_OPDSZ => 0x70000002;
 public static DynTag DT_PPC64_OPT => 0x70000003;
+
 public static DynTag DT_SPARC_REGISTER => 0x70000001;
+
 public static DynTag DT_AUXILIARY => 0x7ffffffd;
 public static DynTag DT_USED => 0x7ffffffe;
 public static DynTag DT_FILTER => 0x7fffffff;
+
 public static DynTag DT_HIPROC => 0x7fffffff;        /* Last processor-specific type. */
 
-// We don't list the processor-dependent DynTags,
-// as the values overlap.
 internal static slice<intName> dtStrings = new intName[]{
     new(0, "DT_NULL"u8),
     new(1, "DT_NEEDED"u8),
@@ -1073,6 +1104,8 @@ internal static slice<intName> dtStrings = new intName[]{
     new(0x6ffffffe, "DT_VERNEED"u8),
     new(0x6fffffff, "DT_VERNEEDNUM"u8),
     new(0x70000000, "DT_LOPROC"u8),
+    // We don't list the processor-dependent DynTags,
+    // as the values overlap.
     new(0x7ffffffd, "DT_AUXILIARY"u8),
     new(0x7ffffffe, "DT_USED"u8),
     new(0x7fffffff, "DT_FILTER"u8)
@@ -1086,6 +1119,7 @@ public static @string GoString(this DynTag i) {
     return stringName((uint32)(nint)i, dtStrings, true);
 }
 
+// DT_FLAGS values.
 partial struct DynFlag /*num:nint*/;
 
 public static DynFlag DF_ORIGIN => 0x0001;    /* Indicates that the object being loaded may
@@ -1117,38 +1151,83 @@ public static @string GoString(this DynFlag i) {
     return flagName((uint32)(nint)i, dflagStrings, true);
 }
 
+// DT_FLAGS_1 values.
 partial struct DynFlag1 /*num:uint32*/;
 
+// Indicates that all relocations for this object must be processed before
+// returning control to the program.
 public static DynFlag1 DF_1_NOW => 0x00000001;
+// Unused.
 public static DynFlag1 DF_1_GLOBAL => 0x00000002;
+// Indicates that the object is a member of a group.
 public static DynFlag1 DF_1_GROUP => 0x00000004;
+// Indicates that the object cannot be deleted from a process.
 public static DynFlag1 DF_1_NODELETE => 0x00000008;
+// Meaningful only for filters. Indicates that all associated filtees be
+// processed immediately.
 public static DynFlag1 DF_1_LOADFLTR => 0x00000010;
+// Indicates that this object's initialization section be run before any other
+// objects loaded.
 public static DynFlag1 DF_1_INITFIRST => 0x00000020;
+// Indicates that the object cannot be added to a running process with dlopen.
 public static DynFlag1 DF_1_NOOPEN => 0x00000040;
+// Indicates the object requires $ORIGIN processing.
 public static DynFlag1 DF_1_ORIGIN => 0x00000080;
+// Indicates that the object should use direct binding information.
 public static DynFlag1 DF_1_DIRECT => 0x00000100;
+// Unused.
 public static DynFlag1 DF_1_TRANS => 0x00000200;
+// Indicates that the objects symbol table is to interpose before all symbols
+// except the primary load object, which is typically the executable.
 public static DynFlag1 DF_1_INTERPOSE => 0x00000400;
+// Indicates that the search for dependencies of this object ignores any
+// default library search paths.
 public static DynFlag1 DF_1_NODEFLIB => 0x00000800;
+// Indicates that this object is not dumped by dldump. Candidates are objects
+// with no relocations that might get included when generating alternative
+// objects using.
 public static DynFlag1 DF_1_NODUMP => 0x00001000;
+// Identifies this object as a configuration alternative object generated by
+// crle. Triggers the runtime linker to search for a configuration file $ORIGIN/ld.config.app-name.
 public static DynFlag1 DF_1_CONFALT => 0x00002000;
+// Meaningful only for filtees. Terminates a filters search for any
+// further filtees.
 public static DynFlag1 DF_1_ENDFILTEE => 0x00004000;
+// Indicates that this object has displacement relocations applied.
 public static DynFlag1 DF_1_DISPRELDNE => 0x00008000;
+// Indicates that this object has displacement relocations pending.
 public static DynFlag1 DF_1_DISPRELPND => 0x00010000;
+// Indicates that this object contains symbols that cannot be directly
+// bound to.
 public static DynFlag1 DF_1_NODIRECT => 0x00020000;
+// Reserved for internal use by the kernel runtime-linker.
 public static DynFlag1 DF_1_IGNMULDEF => 0x00040000;
+// Reserved for internal use by the kernel runtime-linker.
 public static DynFlag1 DF_1_NOKSYMS => 0x00080000;
+// Reserved for internal use by the kernel runtime-linker.
 public static DynFlag1 DF_1_NOHDR => 0x00100000;
+// Indicates that this object has been edited or has been modified since the
+// objects original construction by the link-editor.
 public static DynFlag1 DF_1_EDITED => 0x00200000;
+// Reserved for internal use by the kernel runtime-linker.
 public static DynFlag1 DF_1_NORELOC => 0x00400000;
+// Indicates that the object contains individual symbols that should interpose
+// before all symbols except the primary load object, which is typically the
+// executable.
 public static DynFlag1 DF_1_SYMINTPOSE => 0x00800000;
+// Indicates that the executable requires global auditing.
 public static DynFlag1 DF_1_GLOBAUDIT => 0x01000000;
+// Indicates that the object defines, or makes reference to singleton symbols.
 public static DynFlag1 DF_1_SINGLETON => 0x02000000;
+// Indicates that the object is a stub.
 public static DynFlag1 DF_1_STUB => 0x04000000;
+// Indicates that the object is a position-independent executable.
 public static DynFlag1 DF_1_PIE => 0x08000000;
+// Indicates that the object is a kernel module.
 public static DynFlag1 DF_1_KMOD => 0x10000000;
+// Indicates that the object is a weak standard filter.
 public static DynFlag1 DF_1_WEAKFILTER => 0x20000000;
+// Unused.
 public static DynFlag1 DF_1_NOCOMMON => 0x40000000;
 
 internal static slice<intName> dflag1Strings = new intName[]{
@@ -1193,6 +1272,7 @@ public static @string GoString(this DynFlag1 i) {
     return flagName((uint32)i, dflag1Strings, true);
 }
 
+// NType values; used in core files.
 partial struct NType /*num:nint*/;
 
 public static NType NT_PRSTATUS => 1; /* Process status. */
@@ -1213,6 +1293,7 @@ public static @string GoString(this NType i) {
     return stringName((uint32)(nint)i, ntypeStrings, true);
 }
 
+/* Symbol Binding - ELFNN_ST_BIND - st_info */
 partial struct SymBind /*num:nint*/;
 
 public static SymBind STB_LOCAL => 0; /* Local symbol */
@@ -1241,6 +1322,7 @@ public static @string GoString(this SymBind i) {
     return stringName((uint32)(nint)i, stbStrings, true);
 }
 
+/* Symbol type - ELFNN_ST_TYPE - st_info */
 partial struct SymType /*num:nint*/;
 
 public static SymType STT_NOTYPE => 0; /* Unspecified type. */
@@ -1254,6 +1336,8 @@ public static SymType STT_LOOS => 10;   /* Reserved range for operating system *
 public static SymType STT_HIOS => 12;   /*   specific semantics. */
 public static SymType STT_LOPROC => 13; /* reserved range for processor */
 public static SymType STT_HIPROC => 15; /*   specific semantics. */
+
+/* Non-standard symbol types. */
 public static SymType STT_RELC => 8;     /* Complex relocation expression. */
 public static SymType STT_SRELC => 9;    /* Signed complex relocation expression. */
 public static SymType STT_GNU_IFUNC => 10; /* Indirect code object. */
@@ -1282,6 +1366,7 @@ public static @string GoString(this SymType i) {
     return stringName((uint32)(nint)i, sttStrings, true);
 }
 
+/* Symbol visibility - ELFNN_ST_VISIBILITY - st_other */
 partial struct SymVis /*num:nint*/;
 
 public static SymVis STV_DEFAULT => 0x0;   /* Default visibility (see binding). */
@@ -1304,11 +1389,13 @@ public static @string GoString(this SymVis i) {
     return stringName((uint32)(nint)i, stvStrings, true);
 }
 
-partial struct R_X86_64 /*num:nint*/;
-
 /*
  * Relocation types.
  */
+
+// Relocation types for x86-64.
+partial struct R_X86_64 /*num:nint*/;
+
 public static R_X86_64 R_X86_64_NONE => 0;           /* No relocation. */
 public static R_X86_64 R_X86_64_64 => 1;             /* Add 64 bit symbol value. */
 public static R_X86_64 R_X86_64_PC32 => 2;           /* PC-relative 32 bit signed sym value. */
@@ -1407,6 +1494,7 @@ public static @string GoString(this R_X86_64 i) {
     return stringName((uint32)(nint)i, rx86_64Strings, true);
 }
 
+// Relocation types for AArch64 (aka arm64)
 partial struct R_AARCH64 /*num:nint*/;
 
 public static R_AARCH64 R_AARCH64_NONE => 0;
@@ -1681,6 +1769,7 @@ public static @string GoString(this R_AARCH64 i) {
     return stringName((uint32)(nint)i, raarch64Strings, true);
 }
 
+// Relocation types for Alpha.
 partial struct R_ALPHA /*num:nint*/;
 
 public static R_ALPHA R_ALPHA_NONE => 0;          /* No reloc */
@@ -1751,6 +1840,7 @@ public static @string GoString(this R_ALPHA i) {
     return stringName((uint32)(nint)i, ralphaStrings, true);
 }
 
+// Relocation types for ARM.
 partial struct R_ARM /*num:nint*/;
 
 public static R_ARM R_ARM_NONE => 0;             /* No relocation. */
@@ -2053,6 +2143,7 @@ public static @string GoString(this R_ARM i) {
     return stringName((uint32)(nint)i, rarmStrings, true);
 }
 
+// Relocation types for 386.
 partial struct R_386 /*num:nint*/;
 
 public static R_386 R_386_NONE => 0;         /* No relocation. */
@@ -2151,6 +2242,7 @@ public static @string GoString(this R_386 i) {
     return stringName((uint32)(nint)i, r386Strings, true);
 }
 
+// Relocation types for MIPS.
 partial struct R_MIPS /*num:nint*/;
 
 public static R_MIPS R_MIPS_NONE => 0;
@@ -2188,6 +2280,7 @@ public static R_MIPS R_MIPS_ADD_IMMEDIATE => 34;
 public static R_MIPS R_MIPS_PJUMP => 35;
 public static R_MIPS R_MIPS_RELGOT => 36;
 public static R_MIPS R_MIPS_JALR => 37;
+
 public static R_MIPS R_MIPS_TLS_DTPMOD32 => 38;   /* Module number 32 bit */
 public static R_MIPS R_MIPS_TLS_DTPREL32 => 39;   /* Module-relative offset 32 bit */
 public static R_MIPS R_MIPS_TLS_DTPMOD64 => 40;   /* Module number 64 bit */
@@ -2201,6 +2294,7 @@ public static R_MIPS R_MIPS_TLS_TPREL32 => 47;    /* TP-relative offset, 32 bit 
 public static R_MIPS R_MIPS_TLS_TPREL64 => 48;    /* TP-relative offset, 64 bit */
 public static R_MIPS R_MIPS_TLS_TPREL_HI16 => 49; /* TP-relative offset, high 16 bits */
 public static R_MIPS R_MIPS_TLS_TPREL_LO16 => 50; /* TP-relative offset, low 16 bits */
+
 public static R_MIPS R_MIPS_PC32 => 248; /* 32 bit PC relative reference */
 
 internal static slice<intName> rmipsStrings = new intName[]{
@@ -2263,6 +2357,7 @@ public static @string GoString(this R_MIPS i) {
     return stringName((uint32)(nint)i, rmipsStrings, true);
 }
 
+// Relocation types for LoongArch.
 partial struct R_LARCH /*num:nint*/;
 
 public static R_LARCH R_LARCH_NONE => 0;
@@ -2473,6 +2568,12 @@ public static @string GoString(this R_LARCH i) {
     return stringName((uint32)(nint)i, rlarchStrings, true);
 }
 
+// Relocation types for PowerPC.
+//
+// Values that are shared by both R_PPC and R_PPC64 are prefixed with
+// R_POWERPC_ in the ELF standard. For the R_PPC type, the relevant
+// shared relocations have been renamed with the prefix R_PPC_.
+// The original name follows the value in a comment.
 partial struct R_PPC /*num:nint*/;
 
 public static R_PPC R_PPC_NONE => 0;           // R_POWERPC_NONE
@@ -2641,6 +2742,12 @@ public static @string GoString(this R_PPC i) {
     return stringName((uint32)(nint)i, rppcStrings, true);
 }
 
+// Relocation types for 64-bit PowerPC or Power Architecture processors.
+//
+// Values that are shared by both R_PPC and R_PPC64 are prefixed with
+// R_POWERPC_ in the ELF standard. For the R_PPC64 type, the relevant
+// shared relocations have been renamed with the prefix R_PPC64_.
+// The original name follows the value in a comment.
 partial struct R_PPC64 /*num:nint*/;
 
 public static R_PPC64 R_PPC64_NONE => 0;              // R_POWERPC_NONE
@@ -2977,6 +3084,7 @@ public static @string GoString(this R_PPC64 i) {
     return stringName((uint32)(nint)i, rppc64Strings, true);
 }
 
+// Relocation types for RISC-V processors.
 partial struct R_RISCV /*num:nint*/;
 
 public static R_RISCV R_RISCV_NONE => 0;         /* No relocation. */
@@ -3099,6 +3207,7 @@ public static @string GoString(this R_RISCV i) {
     return stringName((uint32)(nint)i, rriscvStrings, true);
 }
 
+// Relocation types for s390x processors.
 partial struct R_390 /*num:nint*/;
 
 public static R_390 R_390_NONE => 0;
@@ -3235,6 +3344,7 @@ public static @string GoString(this R_390 i) {
     return stringName((uint32)(nint)i, r390Strings, true);
 }
 
+// Relocation types for SPARC.
 partial struct R_SPARC /*num:nint*/;
 
 public static R_SPARC R_SPARC_NONE => 0;
@@ -3586,6 +3696,7 @@ partial struct intName {
     internal @string s;
 }
 
+// Dynamic version flags.
 partial struct DynamicVersionFlag /*num:uint16*/;
 
 public static DynamicVersionFlag VER_FLG_BASE => 0x1; /* Version definition of the file. */
@@ -3601,6 +3712,7 @@ internal static @string stringName(uint32 i, slice<intName> names, bool goSyntax
             return n.s;
         }
     }
+
     // second pass - look for smaller to add with.
     // assume sorted already
     for (nint j = len(names) - 1; j >= 0; j--) {
@@ -3613,6 +3725,7 @@ internal static @string stringName(uint32 i, slice<intName> names, bool goSyntax
             return s + "+"u8 + strconv.FormatUint((uint64)(i - n.i), 10);
         }
     }
+
     return strconv.FormatUint((uint64)i, 10);
 }
 

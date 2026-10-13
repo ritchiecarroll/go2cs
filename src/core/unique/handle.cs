@@ -48,13 +48,13 @@ public static Handle<T> Make<T>(T value) {
         ma = addUniqueMap<T>(typ).OrTypedNil();
     }
     var m = ma._<ж<uniqueMap<T>>>();
+
     // Keep around any values we allocate for insertion. There
     // are a few different ways we can race with other threads
     // and create values that we might discard. By keeping
     // the first one we make around, we can avoid generating
     // more than one per racing thread.
     ref var toInsert = ref heap<ж<T>>(out var ᏑtoInsert);  // Keep this around to keep it alive.
-    
     ref var toInsertWeak = ref heap(new weak.Pointer<T>(), out var ᏑtoInsertWeak);
     var mʗ1 = m;
     (T, weak.Pointer<T>) newValue() {
@@ -88,8 +88,25 @@ public static Handle<T> Make<T>(T value) {
     return new Handle<T>(ptr);
 }
 
+// uniqueMaps is an index of type-specific concurrent maps used for unique.Make.
+//
+// The two-level map might seem odd at first since the HashTrieMap could have "any"
+// as its key type, but the issue is escape analysis. We do not want to force lookups
+// to escape the argument, and using a type-specific map allows us to avoid that where
+// possible (for example, for strings and plain-ol'-data structs). We also get the
+// benefit of not cramming every different type into a single map, but that's certainly
+// not enough to outweigh the cost of two map lookups. What is worth it though, is saving
+// on those allocations.
 internal static ж<isync.HashTrieMap<ж<abi.Type>, any>> ᏑuniqueMaps = new StandardBox<isync.HashTrieMap<ж<abi.Type>, any>>(default(isync.HashTrieMap<ж<abi.Type>, any>));
 internal static ref isync.HashTrieMap<ж<abi.Type>, any> uniqueMaps => ref ᏑuniqueMaps.Value;                                            // any is always a *uniqueMap[T].
+
+// cleanupFuncs are functions that clean up dead weak pointers in type-specific
+// maps in uniqueMaps. We express cleanup this way because there's no way to iterate
+// over the sync.Map and call functions on the type-specific data structures otherwise.
+// These cleanup funcs each close over one of these type-specific maps.
+//
+// cleanupMu protects cleanupNotify and is held across the entire cleanup. Used for testing.
+// cleanupNotify is a test-only mechanism that allow tests to wait for the cleanup to run.
 internal static ж<Δsync.Mutex> ᏑcleanupMu = new StandardBox<Δsync.Mutex>(default(Δsync.Mutex));
 internal static ref Δsync.Mutex cleanupMu => ref ᏑcleanupMu.Value;
 internal static ж<Δsync.Mutex> ᏑcleanupFuncsMu = new StandardBox<Δsync.Mutex>(default(Δsync.Mutex));
@@ -138,19 +155,23 @@ internal static void registerCleanup() {
     runtime_registerUniqueMapCleanup(() => {
         // Lock for cleanup.
         ᏑcleanupMu.Lock();
+
         // Grab funcs to run.
         ᏑcleanupFuncsMu.Lock();
         var cf = cleanupFuncs;
         ᏑcleanupFuncsMu.Unlock();
+
         // Run cleanup.
         foreach (var (_, f) in cf) {
             f();
         }
+
         // Run cleanup notifications.
         foreach (var (_, f) in cleanupNotify) {
             f();
         }
         cleanupNotify = default!;
+
         // Finished.
         ᏑcleanupMu.Unlock();
     });

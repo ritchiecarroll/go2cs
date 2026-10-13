@@ -198,7 +198,9 @@ public static (ж<Matcher>, error) New(@string pattern) {
     if (pattern == ""u8) {
         return (default!, default!);
     }
+
     var m = @new<Matcher>();
+
     @string p = pattern;
     // Special case for leading 'q' so that 'qn' quietly disables, e.g. fmahash=qn to disable fma
     // Any instance of 'v' disables 'q'.
@@ -218,6 +220,7 @@ public static (ж<Matcher>, error) New(@string pattern) {
             return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
         }
     }
+
     // Allow multiple !, each negating the last, so that “bisect cmd !PATTERN” works
     // even when bisect chooses to add its own !.
     m.Value.enable = true;
@@ -228,11 +231,13 @@ public static (ж<Matcher>, error) New(@string pattern) {
             return (default!, new parseErrorжerror(Ꮡ(new parseError("invalid pattern syntax: "u8 + pattern))));
         }
     }
+
     if (p == "n"u8) {
         // n is an alias for !y.
         m.Value.enable = !(~m).enable;
         p = "y"u8;
     }
+
     // Parse actual pattern syntax.
     var result = true;
     var bits = (uint64)0;
@@ -244,8 +249,7 @@ public static (ж<Matcher>, error) New(@string pattern) {
         if (i < len(p)) {
             c = p[i];
         }
-        if (i == start && wid == 1 && c == (rune)'x') {
-            // leading x for hex
+        if (i == start && wid == 1 && c == (rune)'x') { // leading x for hex
             start = i + 1;
             wid = 4;
             continue;
@@ -307,7 +311,6 @@ public static (ж<Matcher>, error) New(@string pattern) {
             start = i + 1;
             wid = 1;
         }
-
     }
     return (m, default!);
 }
@@ -447,11 +450,13 @@ internal static partial bool stack(this ж<Matcher> Ꮡm, Writer w) {
     if (n <= 1) {
         return false;
     }
+
     var @base = stk[0];
     // normalize PCs
     foreach (var (i, _) in stk.slice(0, n)) {
         stk[i] -= @base;
     }
+
     var h = Hash(stk.slice(0, n));
     if (Ꮡm.ShouldPrint(h)) {
         ж<dedup> d = default!;
@@ -465,6 +470,7 @@ internal static partial bool stack(this ж<Matcher> Ꮡm, Writer w) {
                 break;
             }
         }
+
         if (m.MarkerOnly()){
             if (!d.seenLossy(h)) {
                 PrintMarker(w, h);
@@ -502,8 +508,10 @@ public static error PrintMarker(Writer w, uint64 h) {
 // with each line preceded by the marker for h.
 internal static error printStack(Writer w, uint64 h, slice<uintptr> stk) {
     var buf = new slice<byte>(0, 2048);
+
     array<byte> prefixBuf = new(100);
     var prefix = AppendMarker(prefixBuf[..0], h);
+
     var frames = Δruntime.CallersFrames(stk);
     while (ᐧ) {
         var (f, more) = frames.Next();
@@ -570,6 +578,7 @@ public static (@string @short, uint64 id, bool ok) CutMarker(@string line) {
             break;
         }
     }
+
     // Scan to ].
     nint j = i + len(prefix);
     while (j < len(line) && line[j] != (rune)']') {
@@ -578,12 +587,12 @@ public static (@string @short, uint64 id, bool ok) CutMarker(@string line) {
     if (j >= len(line)) {
         return (line, 0, false);
     }
+
     // Parse id.
     @string idstr = line.slice(i + len(prefix), j);
     if (len(idstr) >= 3 && idstr[..2] == "0x"){
         // parse hex
-        if (len(idstr) > 2 + 16) {
-            // max 0x + 16 digits
+        if (len(idstr) > 2 + 16) { // max 0x + 16 digits
             return (line, 0, false);
         }
         for (nint iΔ1 = 2; iΔ1 < len(idstr); iΔ1++) {
@@ -604,11 +613,9 @@ public static (@string @short, uint64 id, bool ok) CutMarker(@string line) {
                     break;
                 }}
             }
-
         }
     } else {
-        if (idstr == ""u8 || len(idstr) > 64) {
-            // min 1 digit, max 64 digits
+        if (idstr == ""u8 || len(idstr) > 64) { // min 1 digit, max 64 digits
             return (line, 0, false);
         }
         // parse binary
@@ -625,9 +632,9 @@ public static (@string @short, uint64 id, bool ok) CutMarker(@string line) {
                     break;
                 }}
             }
-
         }
     }
+
     // Construct shortened line.
     // Remove at most one space from around the marker,
     // so that "foo [marker] bar" shortens to "foo bar".
@@ -652,16 +659,16 @@ public static uint64 Hash(params ꓸꓸꓸany dataʗp) {
         switch (v.type()) {
         default: {
             var vΔ1 = v;
+            // Note: Not printing the type, because reflect.ValueOf(v)
+            // would make the interfaces prepared by the caller escape
+            // and therefore allocate. This way, Hash(file, line) runs
+            // without any allocation. It should be clear from the
+            // source code calling Hash what the bad argument was.
             throw panic("bisect.Hash: unexpected argument type");
             break;
         }
         case @string vΔ1: {
-            h = fnvString(h, // Note: Not printing the type, because reflect.ValueOf(v)
- // would make the interfaces prepared by the caller escape
- // and therefore allocate. This way, Hash(file, line) runs
- // without any allocation. It should be clear from the
- // source code calling Hash what the bad argument was.
- vΔ1);
+            h = fnvString(h, vΔ1);
             break;
         }
         case byte vΔ1: {
@@ -845,6 +852,7 @@ internal static bool seenLossy(this ref dedup d, uint64 h) {
             return true;
         }
     }
+
     // Compute index in set to evict as hash of current set.
     var ch = offset64;
     foreach (var (_, x) in cache.Value) {

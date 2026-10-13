@@ -121,6 +121,7 @@ public static (ж<CertPool>, error) SystemCertPool() {
             return (sysRoots.Clone(), default!);
         }
     }
+
     return loadSystemRoots();
 }
 
@@ -138,6 +139,7 @@ internal static slice<potentialParent> findPotentialParents(this ж<CertPool> �
     if (Ꮡs == nil) {
         return default!;
     }
+
     // consider all candidates where cert.Issuer matches cert.Subject.
     // when picking possible candidates the list is built in the order
     // of match plausibility as to save cycles in buildChains:
@@ -166,8 +168,8 @@ internal static slice<potentialParent> findPotentialParents(this ж<CertPool> �
             mismatchKeyID = append(mismatchKeyID, new potentialParent(candidate, constraint));
             break;
         }}
-
     }
+
     nint found = builtin.len(matchingKeyID) + builtin.len(oneKeyID) + builtin.len(mismatchKeyID);
     if (found == 0) {
         return default!;
@@ -210,10 +212,12 @@ internal static void addCertFunc(this ref CertPool s, sum224 rawSum224, @string 
     if (getCert == default!) {
         throw panic("getCert can't be nil");
     }
+
     // Check that the certificate isn't being added twice.
     if (s.haveSum[rawSum224]) {
         return;
     }
+
     s.haveSum[rawSum224] = true;
     s.lazyCerts = append(s.lazyCerts, new lazyCert(
         rawSubject: slice<byte>(rawSubject),
@@ -246,6 +250,7 @@ public static bool /*ok*/ AppendCertsFromPEM(this ref CertPool s, slice<byte> pe
         if ((~block).Type != "CERTIFICATE"u8 || builtin.len((~block).Headers) != 0) {
             continue;
         }
+
         ref var certBytes = ref heap<slice<byte>>(out var ᏑcertBytes);
         certBytes = block.Value.Bytes;
         var (cert, err) = ParseCertificate(certBytes);
@@ -263,6 +268,7 @@ public static bool /*ok*/ AppendCertsFromPEM(this ref CertPool s, slice<byte> pe
         }, default!);
         ok = true;
     }
+
     return ok;
 }
 

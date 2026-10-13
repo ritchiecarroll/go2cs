@@ -6,6 +6,7 @@ namespace go.@internal;
 
 partial class profile_package {
 
+// TagMatch selects tags for filtering
 // type TagMatch is a methodless func type — rendered inline as its base delegate
 
 // FilterSamplesByTag removes all samples from the profile, except

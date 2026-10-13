@@ -13,6 +13,7 @@ partial struct SchedReqs {
     public Constraint Goroutine;
 }
 
+// Constraint represents a various presence requirements.
 partial struct Constraint /*num:uint8*/;
 
 public static Constraint MustNotHave => /* iota */ 0;

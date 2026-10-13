@@ -60,6 +60,28 @@ public static @string String(this ΔPosition pos) {
     return s;
 }
 
+// Pos is a compact encoding of a source position within a file set.
+// It can be converted into a [Position] for a more convenient, but much
+// larger, representation.
+//
+// The Pos value for a given file is a number in the range [base, base+size],
+// where base and size are specified when a file is added to the file set.
+// The difference between a Pos value and the corresponding file base
+// corresponds to the byte offset of that position (represented by the Pos value)
+// from the beginning of the file. Thus, the file base offset is the Pos value
+// representing the first byte in the file.
+//
+// To create the Pos value for a specific source offset (measured in bytes),
+// first add the respective file to the current file set using [FileSet.AddFile]
+// and then call [File.Pos](offset) for that file. Given a Pos value p
+// for a specific file set fset, the corresponding [Position] value is
+// obtained by calling fset.Position(p).
+//
+// Pos values can be compared directly with the usual comparison operators:
+// If two Pos values p and q are in the same file, comparing p and q is
+// equivalent to comparing the respective source file offsets. If p and q
+// are in different files, p < q is true if the file implied by p was added
+// to the respective file set before the file implied by q.
 partial struct ΔPos /*num:nint*/;
 
 // The zero value for [Pos] is NoPos; there is no file and line information
@@ -187,6 +209,7 @@ public static bool SetLines(this ж<ΔFile> Ꮡf, slice<nint> lines) {
             return false;
         }
     }
+
     // set lines table
     f.mutex.Lock();
     f.lines = lines;
@@ -210,6 +233,7 @@ public static void SetLinesForContent(this ж<ΔFile> Ꮡf, slice<byte> content)
             line = offset + 1;
         }
     }
+
     // set lines table
     f.mutex.Lock();
     f.lines = lines;
@@ -297,8 +321,7 @@ internal static nint fixOffset(this ref ΔFile f, nint offset) {
     // only generate this code if needed
     if (debug) {
         throw panic(fmt.Sprintf("offset %d out of bounds [%d, %d] (position %d out of bounds [%d, %d])"u8,
-            (nint)(0), /* for symmetry */
- offset, f.size,
+            (nint)(0), /* for symmetry */ offset, f.size,
             f.@base + offset, f.@base, f.@base + f.size));
     }
     return 0;
@@ -353,8 +376,8 @@ internal static (@string filename, nint line, nint column) unpack(this ж<ΔFile
     @string filename = default!;
     nint line = default!;
     nint column = default!;
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     f.mutex.Lock();
     filename = f.name;
     {
@@ -398,8 +421,8 @@ internal static (@string filename, nint line, nint column) unpack(this ж<ΔFile
 
 internal static ΔPosition /*pos*/ position(this ж<ΔFile> Ꮡf, ΔPos p, bool adjusted) {
     ΔPosition pos = default!;
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     nint offset = f.fixOffset((nint)p - f.@base);
     pos.Offset = offset;
     (pos.Filename, pos.Line, pos.Column) = Ꮡf.unpack(offset, adjusted);
@@ -462,11 +485,9 @@ partial struct FileSet {
 // NewFileSet creates a new file set.
 public static ж<FileSet> NewFileSet() {
     return Ꮡ(new FileSet(
-        @base: 1
+        @base: 1 // 0 == NoPos
     ));
 }
-
-// 0 == NoPos
 
 // Base returns the minimum base offset that must be provided to
 // [FileSet.AddFile] when adding the next file.
@@ -502,6 +523,7 @@ public static ж<ΔFile> AddFile(this ж<FileSet> Ꮡs, @string filename, nint @
 
         // Allocate f outside the critical section.
         var f = Ꮡ(new ΔFile(name: filename, size: size, lines: new nint[]{0}.slice()));
+
         Ꮡs.of(FileSet.Ꮡmutex).Lock();
         ᒐd1 = true;
         if (@base < 0) {
@@ -543,8 +565,10 @@ public static void RemoveFile(this ж<FileSet> Ꮡs, ж<ΔFile> Ꮡfile) {
         ref var @file = ref Ꮡfile.DerefOrNull();
 
         Ꮡs.of(FileSet.Ꮡlast).CompareAndSwap(Ꮡfile, nil); // clear last file cache
+
         Ꮡs.of(FileSet.Ꮡmutex).Lock();
         ᒐd1 = true;
+
         {
             nint i = searchFiles(s.files, @file.@base); if (i >= 0 && s.files[i] == Ꮡfile) {
                 var last = Ꮡ(s.files, len(s.files) - 1);
@@ -597,8 +621,10 @@ internal static ж<ΔFile> @file(this ж<FileSet> Ꮡs, ΔPos p) {
                 return f;
             }
         }
+
         Ꮡs.of(FileSet.Ꮡmutex).RLock();
         ᒐd1 = true;
+
         // p is not in last file - search all files
         {
             nint i = searchFiles(s.files, (nint)p); if (i >= 0) {

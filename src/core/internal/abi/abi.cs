@@ -80,6 +80,8 @@ public static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintpt
     return (@unsafe.Pointer)((uintptr)@unsafe.Pointer.FromBox(Ꮡ(r.Ints, reg)) + offset);
 }
 
+// IntArgRegBitmap is a bitmap large enough to hold one bit per
+// integer argument/return register.
 /* [(IntArgRegs + 7) / 8]uint8 */
 partial struct IntArgRegBitmap /*[2]uint8*/;
 

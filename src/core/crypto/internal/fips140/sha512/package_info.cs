@@ -50,8 +50,8 @@ using static go.crypto.@internal.fips140.sha512_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/sha512/cast.go", "cast.cs", "AAwagoK4AAkUgoKAgqQ=", "14-35:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/sha512/sha512.go", "sha512.cs", "AEKeAYKUgoKCgoKCgqSCgoKCgoKCpIKCgoKCgoKkgoKCgoKCgqSkggAIFoKmgpSkpKSkpIKCgoKCgoKCgoKC5oKClAANDKSClIKCgoKCgoKCgoKCgqaCqJKCgqiSgoKokoKCqJKCgqaCpoCkwoKCgoKCgoKUlIKCgpSClKaClIKCgqa0goKCgoKUqIK4goSCloKCgoKCgoKCgpY=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/sha512/sha512block.go", "sha512block.cs", "AA0aAFKmAYKCgoKCgpaCgoKChJaEgoSEgoKCgoKCgpaCgoKCgoKChJY=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/sha512/sha512.go", "sha512.cs", "AEyeAYKUgoKCgoKCgqSCgoKCgoKCpIKCgoKCgoKkgoKCgoKCgqSUggAIFoKmgpSkpKSklIKCgoKCgoKCgoKC5oKClAANDJSClIKCgoKCgoKCgoKCgqaCqJKCgqiSgoKokoKCqJKCgqaCpoCkwoKCgoKCgoKUlIKCgpSClKaClIKCgqa0goKCgoKUuIK4gpSCpoKCgoKCgoKCgqY=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/sha512/sha512block.go", "sha512block.cs", "AA0aAFKmAYKCgoKCgpaCgoKClKaUgpSUgoKCgoKCgqaCgoKCgoKClKY=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/sha512/sha512block_noasm.go", "sha512block_noasm.cs", "AAgSgg==")]
 // </GoSourcePositionMaps>
 

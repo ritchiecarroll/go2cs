@@ -44,6 +44,7 @@ internal static (slice<_C_int> mib, error err) nametomib(@string name) {
     error err = default!;
 
     uintptr siz = /* unsafe.Sizeof(mib[0]) */ 4;
+
     // NOTE(rsc): It seems strange to set the buffer to have
     // size CTL_MAXNAME+2 but use only CTL_MAXNAME
     // as the size. I don't know why the +2 is here, but the
@@ -54,11 +55,13 @@ internal static (slice<_C_int> mib, error err) nametomib(@string name) {
     ref var buf = ref heap(new array<_C_int>(14), out var Ꮡbuf);
     ref var n = ref heap<uintptr>(out var Ꮡn);
     n = (uintptr)CTL_MAXNAME * siz;
+
     var p = Ꮡbuf.at<_C_int>(0).Reinterpret<_C_int, byte>();
     (var bytes, err) = ByteSliceFromString(name);
     if (err != default!) {
         return (default!, err);
     }
+
     // Magic sysctl: "setting" 0.3 to a string name
     // lets you read back the array of integers form.
     {
@@ -277,8 +280,6 @@ public static (nint n, error err) Getdirentries(nint fd, slice<byte> buf, ж<uin
     error err = default!;
     GoFrame ᒐ = default;
     try {
-        ref var basep = ref Ꮡbasep.DerefOrNull();
-
         // Simulate Getdirentries using fdopendir/readdir_r/closedir.
         // We store the number of entries to skip in the seek
         // offset of fd. See issue #31368.
@@ -286,11 +287,11 @@ public static (nint n, error err) Getdirentries(nint fd, slice<byte> buf, ж<uin
         // of calling Getdirentries or ReadDirent repeatedly.
         // It won't handle assigning the results of lseek to *basep, or handle
         // the directory being edited underfoot.
-        (var skip, err) = Seek(fd, 0, 1);
-        /* SEEK_CUR */
+        (var skip, err) = Seek(fd, 0, 1 /* SEEK_CUR */);
         if (err != default!) {
             (n, err) = (0, err); goto ᒐdone;
         }
+
         // We need to duplicate the incoming file descriptor
         // because the caller expects to retain control of it, but
         // fdopendir expects to take control of its argument.
@@ -307,6 +308,7 @@ public static (nint n, error err) Getdirentries(nint fd, slice<byte> buf, ж<uin
             (n, err) = (0, err); goto ᒐdone;
         }
         defer(closedir, d, ref ᒐ);
+
         int64 cnt = default!;
         while (ᐧ) {
             ref var entry = ref heap(new Dirent(), out var Ꮡentry);
@@ -339,11 +341,11 @@ public static (nint n, error err) Getdirentries(nint fd, slice<byte> buf, ж<uin
         }
         // Set the seek offset of the input fd to record
         // how many files we've already returned.
-        (_, err) = Seek(fd, cnt, 0);
-        /* SEEK_SET */
+        (_, err) = Seek(fd, cnt, 0 /* SEEK_SET */);
         if (err != default!) {
             goto ᒐdone;
         }
+
         (n, err) = (n, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

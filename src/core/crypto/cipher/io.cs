@@ -44,8 +44,7 @@ public static (nint n, error err) Write(this StreamWriter w, slice<byte> src) {
     var c = new slice<byte>(len(src));
     w.S.XORKeyStream(c, src);
     (n, err) = w.W.Write(c);
-    if (n != len(src) && err == default!) {
-        // should never happen
+    if (n != len(src) && err == default!) { // should never happen
         err = io.ErrShortWrite;
     }
     return (n, err);

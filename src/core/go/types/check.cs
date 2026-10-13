@@ -301,24 +301,27 @@ internal static void needsCleanup(this ref Checker check, cleaner c) {
 // [Package] files may be added incrementally via checker.Files.
 public static ж<Checker> NewChecker(ж<Config> Ꮡconf, ж<token.FileSet> Ꮡfset, ж<Package> Ꮡpkg, ж<ΔInfo> Ꮡinfo) {
     ref var conf = ref Ꮡconf.DerefOrNull();
-    ref var pkg = ref Ꮡpkg.DerefOrNull();
     ref var info = ref Ꮡinfo.DerefOrNull();
 
     // make sure we have a configuration
     if (Ꮡconf == nil) {
         Ꮡconf = @new<Config>(); conf = ref Ꮡconf.DerefOrNull();
     }
+
     // make sure we have an info struct
     if (Ꮡinfo == nil) {
         Ꮡinfo = @new<ΔInfo>(); info = ref Ꮡinfo.DerefOrNull();
     }
+
     // Note: clients may call NewChecker with the Unsafe package, which is
     // globally shared and must not be mutated. Therefore NewChecker must not
     // mutate *pkg.
     //
     // (previously, pkg.goVersion was mutated here: go.dev/issue/61212)
+
     // In go/types, conf._EnableAlias is controlled by gotypesalias.
     conf._EnableAlias = gotypesalias.Value() != "0"u8;
+
     return Ꮡ(new Checker(
         conf: Ꮡconf,
         ctxt: conf.Context,
@@ -346,18 +349,21 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
     check.files = default!;
     check.imports = default!;
     check.dotImportMap = default!;
+
     check.firstErr = default!;
     check.methods = default!;
     check.untyped = default!;
     check.delayed = default!;
     check.objPath = default!;
     check.cleaners = default!;
+
     // We must initialize usedVars and usedPkgNames both here and in NewChecker,
     // because initFiles is not called in the CheckExpr or Eval codepaths, yet we
     // want to free this memory at the end of Files ('used' predicates are
     // only needed in the context of a given file).
     check.usedVars = new map<ж<Var>, bool>();
     check.usedPkgNames = new map<ж<PkgName>, bool>();
+
     // determine package name and collect valid files
     var pkg = check.pkg;
     foreach (var (_, @file) in files) {
@@ -378,28 +384,31 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
             }
             else if (!matchᴛ1) { /* default: */
                 Ꮡcheck.errorf(((atPos)(~@file).Package), MismatchedPkgName, "package %s; expected package %s"u8, name, (~pkg).name);
+                // ignore this file
             }
         }
-
     }
-    // ignore this file
+
     // reuse Info.FileVersions if provided
     var versions = check.Info.Value.FileVersions;
     if (versions == default!) {
         versions = new map<ж<ast.File>, @string>();
     }
     check.versions = versions;
+
     goVersion pkgVersion = asGoVersion((~check.conf).GoVersion);
     if (pkgVersion.isValid() && len(files) > 0 && pkgVersion.cmp(go_current) > 0) {
         Ꮡcheck.errorf(new ast_Fileжpositioner(files[0]), TooNew, "package requires newer Go version %v (application built with %v)"u8,
             pkgVersion, go_current);
     }
+
     // determine Go version for each file
     foreach (var (_, @file) in check.files) {
         // use unaltered Config.GoVersion by default
         // (This version string may contain dot-release numbers as in go1.20.1,
         // unlike file versions which are Go language versions only, if valid.)
         @string v = check.conf.Value.GoVersion;
+
         // If the file specifies a version, use max(fileVersion, go1.21).
         {
             goVersion fileVersion = asGoVersion((~@file).GoVersion); if (fileVersion.isValid()) {
@@ -414,6 +423,7 @@ internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> fi
                 // change was made, while being backwards compatible with versions of
                 // go before the new //go:build semantics were introduced.
                 v = ((@string)versionMax(fileVersion, go1_21));
+
                 // Report a specific error for each tagged file that's too new.
                 // (Normally the build system will have filtered files by version,
                 // but clients can present arbitrary files to the type checker.)
@@ -450,11 +460,13 @@ internal static void handleBailout(this ж<Checker> Ꮡcheck, ж<error> Ꮡerr) 
         case null:
         case bailout _: {
             var p = switchᴛ5;
+            // normal return or early exit
             err = check.firstErr;
             break;
         }
         default: {
             var p = switchᴛ5;
+            // re-panic
             throw panic(p);
             break;
         }}
@@ -463,26 +475,25 @@ internal static void handleBailout(this ж<Checker> Ꮡcheck, ж<error> Ꮡerr) 
     finally { ᒐ.Run(); }
 }
 
-// normal return or early exit
-// re-panic
-
 // Files checks the provided files as part of the checker's package.
 public static error /*err*/ Files(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> files) {
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
-
         ref var err = ref Ꮡerr.ValueSlot;
+
         if (check.pkg == Unsafe) {
             // Defensive handling for Unsafe, which cannot be type checked, and must
             // not be mutated. See https://go.dev/issue/61212 for an example of where
             // Unsafe is passed to NewChecker.
             err = default!; goto ᒐdone;
         }
+
         // Avoid early returns here! Nearly all errors can be
         // localized to a piece of syntax and needn't prevent
         // type-checking of the rest of the package.
+
         defer(Ꮡcheck.handleBailout, Ꮡerr, ref ᒐ);
         Ꮡcheck.checkFiles(files);
     }
@@ -523,36 +534,48 @@ internal static void checkFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> f
             }
             defer(atomic.AddInt32, Ꮡ_aliasAny, (int32)(1), ref ᒐ);
         }
+
         void print(@string msg) {
             if ((~Ꮡcheck.Value.conf)._Trace) {
                 fmt.Println();
                 fmt.Println(msg);
             }
         }
+
         print(initFilesˢ);
         Ꮡcheck.initFiles(files);
+
         print(collectObjectsˢ);
         Ꮡcheck.collectObjects();
+
         print(packageObjectsˢ);
         Ꮡcheck.packageObjects();
+
         print(processDelayedˢ);
         Ꮡcheck.processDelayed(0); // incl. all functions
+
         print(cleanupˢ);
         check.cleanup();
+
         print(initOrderˢ);
         Ꮡcheck.initOrder();
+
         if (!(~check.conf).DisableUnusedImportCheck) {
             print(unusedImportsˢ);
             Ꮡcheck.unusedImports();
         }
+
         print(recordUntypedˢ);
         Ꮡcheck.recordUntyped();
+
         if (check.firstErr == default!) {
             // TODO(mdempsky): Ensure monomorph is safe when errors exist.
             Ꮡcheck.monomorph();
         }
+
         check.pkg.Value.goVersion = check.conf.Value.GoVersion;
         check.pkg.Value.complete = true;
+
         // no longer needed - release memory
         check.imports = default!;
         check.dotImportMap = default!;
@@ -563,6 +586,9 @@ internal static void checkFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> f
         check.usedVars = default!;
         check.usedPkgNames = default!;
         check.ctxt = default!;
+
+        // TODO(gri): shouldn't the cleanup above occur after the bailout?
+        // TODO(gri) There's more memory we should release at this point.
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -570,9 +596,6 @@ internal static void checkFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> f
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string delayedPˢ = "-- delayed %p"u8;
-
-// TODO(gri): shouldn't the cleanup above occur after the bailout?
-// TODO(gri) There's more memory we should release at this point.
 
 // processDelayed processes all delayed actions pushed after top.
 internal static void processDelayed(this ж<Checker> Ꮡcheck, nint top) {
@@ -596,6 +619,7 @@ internal static void processDelayed(this ж<Checker> Ꮡcheck, nint top) {
         }
         check.version = a.Value.version; // reestablish the effective Go version captured earlier
         (~a).f(); // may append to check.delayed
+
         if ((~check.conf)._Trace) {
             fmt.Println();
         }
@@ -617,16 +641,14 @@ internal static void cleanup(this ref Checker check) {
 // go/types doesn't support recording of types directly in the AST.
 // dummy function to match types2 code.
 internal static void recordTypeAndValueInSyntax(this ref Checker check, ast.Expr x, operandMode mode, ΔType typ, constant.Value val) {
+    // nothing to do
 }
-
-// nothing to do
 
 // go/types doesn't support recording of types directly in the AST.
 // dummy function to match types2 code.
 internal static void recordCommaOkTypesInSyntax(this ref Checker check, ast.Expr x, ΔType t0, ΔType t1) {
+    // nothing to do
 }
-
-// nothing to do
 
 // instantiatedIdent determines the identifier of the type instantiated in expr.
 // Helper function for recordInstance in recording.go.
@@ -637,7 +659,7 @@ internal static ж<ast.Ident> instantiatedIdent(ast.Expr expr) {
         selOrIdent = e.Value.X;
         break;
     }
-    case ж<ast.IndexListExpr> e: {
+    case ж<ast.IndexListExpr> e: { // only exists in go/ast, not syntax
         selOrIdent = e.Value.X;
         break;
     }
@@ -647,7 +669,6 @@ internal static ж<ast.Ident> instantiatedIdent(ast.Expr expr) {
         selOrIdent = e;
         break;
     }}
-    // only exists in go/ast, not syntax
     switch (selOrIdent.type()) {
     case ж<ast.Ident> x: {
         return x;
@@ -655,6 +676,7 @@ internal static ж<ast.Ident> instantiatedIdent(ast.Expr expr) {
     case ж<ast.SelectorExpr> x: {
         return (~x).Sel;
     }}
+
     // extra debugging of go.dev/issue/63933
     throw panic(sprintf(nil, default!, true, "instantiated ident not found; please report: %s"u8, expr));
 }

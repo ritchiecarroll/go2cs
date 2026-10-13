@@ -64,8 +64,8 @@ using static go.crypto.ecdsa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa.go", "ecdsa.cs", "ADlm4oKClIKUAAIQ0oKClAAQIrKCgpSCgpSmgpSkpKTKkqyygoKUqtIAAiIADgKClAACENKEgoKClJSElKSkpKT4ooKUgoKUygABFAAKAoSCgoKUlISUpKSkpMiigsqCgsqCgpT2goKUgoKUlKSkpKT4ooKClJKClIKClKaCgqKClNrCgpSCgpSSgpQAAxLygoKClJSElKSkpKTIooKClIKClICCpNaygoKKlKaigoKUpqKCgpSmooKClKaigoKU6MKUgpSCpoKCgoKC2MKUlIKCgg==", "298-301:1;315-320:1", "285=crypto.Hash.New", "448=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
-[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa_legacy.go", "ecdsa_legacy.cs", "ABksooKWgoKWgoKCgqyygoKCloKCgpSmzgAJAoKCloKCgoqUpqKCloaSgIKkgpSClJaCgpSygoKCgpaEgoKCqIKCgoKCgqgAAhIACQKClIKClKaCgpaCgpSEgoSClIKogoSCgoKEgoKEgpSCppjSgoKCgIKkgIKkgoI=", "", "", "82=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
+[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa.go", "ecdsa.cs", "ADlm4oKClIKUAAIQ0oKClAAQIrKCgpSCgpSmgpSkpKS6kqyygoKUqtIAAiIADgKClAACENKUgoKClJSUlKSkpKToooKUgoKUygABFAAKApSCgoKUlJSUpKSkpLiigsqCgsqCgpT2goKUgoKUlKSkpKToooKClJKClIKClKaCgqKClNrCgpSCgpSSgpQAAxLygoKClJSUlKSkpKS4ooKClIKClICCpNaygoKKlKaigoKUpqKCgpSmooKClKaigoKU6MKUgpSCpoKCgoKC2MKUlIKCgg==", "298-301:1;315-320:1", "285=crypto.Hash.New", "448=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
+[assembly: go.GoPositionMap("crypto/ecdsa/ecdsa_legacy.go", "ecdsa_legacy.cs", "ABksooKmgoKmgoKCgqyygoKCpoKCgpSmzgAJAoKCpoKCgoqUpqKCppaSgIKkgpSClKaCgpSygoKCgqaUgoKCuIKCgoKCgrgAAhIACQKClIKClKaCgqaCgpSUgpSClIK4gpSCgoKUgoKUgpSCppjSgoKCgIKkgIKkgoI=", "", "", "86=Empty/1/2/1,ReadASN1Integer/1/2/2,ReadASN1Integer/2/2/3,Empty/2/2/4")]
 [assembly: go.GoPositionMap("crypto/ecdsa/notboring.go", "notboring.cs", "AAsWgqSC")]
 // </GoSourcePositionMaps>
 

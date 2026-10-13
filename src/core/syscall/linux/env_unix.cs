@@ -10,11 +10,20 @@ using Δsync = sync_package;
 
 partial class syscall_package {
 
+// envOnce guards initialization by copyenv, which populates env.
 internal static ж<Δsync.Once> ᏑenvOnce = new StandardBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once envOnce => ref ᏑenvOnce.Value;
+
+// envLock guards env and envs.
 internal static ж<Δsync.RWMutex> ᏑenvLock = new StandardBox<Δsync.RWMutex>(default(Δsync.RWMutex));
 internal static ref Δsync.RWMutex envLock => ref ᏑenvLock.Value;
+
+// env maps from an environment variable to its first occurrence in envs.
 internal static map<@string, nint> env;
+
+// envs is provided by the runtime. elements are expected to
+// be of the form "key=value". An empty string means deleted
+// (or a duplicate to be ignored).
 internal static slice<@string> envs = runtime_envs();
 
 /*linkname*/ internal static partial slice<@string> runtime_envs() {
@@ -49,8 +58,10 @@ public static error Unsetenv(@string key) {
     GoFrame ᒐ = default;
     try {
         ᏑenvOnce.Do(copyenv);
+
         ᏑenvLock.Lock();
         defer(ᏑenvLock.Unlock, ref ᒐ);
+
         {
             var (i, ok) = env[key, ꟷ]; if (ok) {
                 envs[i] = ""u8;
@@ -73,8 +84,10 @@ public static (@string value, bool found) Getenv(@string key) {
         if (len(key) == 0) {
             (value, found) = ("", false); goto ᒐdone;
         }
+
         ᏑenvLock.RLock();
         defer(ᏑenvLock.RUnlock, ref ᒐ);
+
         var (i, ok) = env[key, ꟷ];
         if (!ok) {
             (value, found) = ("", false); goto ᒐdone;
@@ -112,8 +125,10 @@ public static error Setenv(@string key, @string value) {
                 }
             }
         }
+
         ᏑenvLock.Lock();
         defer(ᏑenvLock.Unlock, ref ᒐ);
+
         var (i, ok) = env[key, ꟷ];
         @string kv = key + "="u8 + value;
         if (ok){
@@ -134,8 +149,10 @@ public static void Clearenv() {
     GoFrame ᒐ = default;
     try {
         ᏑenvOnce.Do(copyenv);
+
         ᏑenvLock.Lock();
         defer(ᏑenvLock.Unlock, ref ᒐ);
+
         foreach (var (k, _) in env) {
             runtimeUnsetenv(k);
         }

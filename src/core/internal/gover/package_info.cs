@@ -49,7 +49,7 @@ using static go.@internal.gover_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/gover/gover.go", "gover.cs", "AB5I0oKEgIKkgIKkgIKkgJKkgIKkrLKClAACGAAJAoKokoKClKiSqqKGkoKClJSCgqiCqIKClKaClKiCgu6UqIKCgpSUgpSCgpSCgpaqooKClJKUqqKClIKUgpSClL7EgoKClJSUgpSU")]
+[assembly: go.GoPositionMap("internal/gover/gover.go", "gover.cs", "AB5I0oKUgIKkgIKkgIKkgIKkgIKkrLKClAACGAAJAoKokoKClKiSqqKWkoKClJSCgriCuIKClKaClLiCgu6UuIKCgpSUgpSCgpSCgqaqooKClIKUqqKClIKUgpSClL7EgoKClJSUgpSU")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

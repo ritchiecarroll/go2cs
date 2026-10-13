@@ -78,6 +78,7 @@ public static (slice<byte> priv, ж<bigꓸInt> x, ж<bigꓸInt> y, error err) Ge
     nint bitSize = N.BitLen();
     nint byteLen = (bitSize + 7) / 8;
     priv = new slice<byte>(byteLen);
+
     while (x == nil) {
         (_, err) = io.ReadFull(rand, priv);
         if (err != default!) {
@@ -89,10 +90,12 @@ public static (slice<byte> priv, ж<bigꓸInt> x, ж<bigꓸInt> y, error err) Ge
         // This is because, in tests, rand will return all zeros and we don't
         // want to get the point at infinity and loop forever.
         priv[1] ^= (byte)(0x42);
+
         // If the scalar is out of range, sample another random number.
         if (@new<bigꓸInt>().SetBytes(priv).Cmp(N) >= 0) {
             continue;
         }
+
         (x, y) = curve.ScalarBaseMult(priv);
     }
     return (priv, x, y, err);
@@ -109,11 +112,15 @@ public static slice<byte> Marshal(Curve curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt>
     ref var y = ref Ꮡy.DerefOrNull();
 
     panicIfNotOnCurve(curve, Ꮡx, Ꮡy);
+
     nint byteLen = ((~curve.Params()).BitSize + 7) / 8;
+
     var ret = new slice<byte>(1 + 2 * byteLen);
     ret[0] = 4; // uncompressed point
+
     x.FillBytes(ret.slice(1, 1 + byteLen));
     y.FillBytes(ret.slice(1 + byteLen, 1 + 2 * byteLen));
+
     return ret;
 }
 
@@ -159,12 +166,12 @@ public static (ж<bigꓸInt> x, ж<bigꓸInt> y) Unmarshal(Curve curve, slice<by
             return c.Unmarshal(data);
         }
     }
+
     nint byteLen = ((~curve.Params()).BitSize + 7) / 8;
     if (len(data) != 1 + 2 * byteLen) {
         return (default!, default!);
     }
-    if (data[0] != 4) {
-        // uncompressed form
+    if (data[0] != 4) { // uncompressed form
         return (default!, default!);
     }
     var p = curve.Params().Value.P;
@@ -191,12 +198,12 @@ public static (ж<bigꓸInt> x, ж<bigꓸInt> y) UnmarshalCompressed(Curve curve
             return c.UnmarshalCompressed(data);
         }
     }
+
     nint byteLen = ((~curve.Params()).BitSize + 7) / 8;
     if (len(data) != 1 + byteLen) {
         return (default!, default!);
     }
-    if (data[0] != 2 && data[0] != 3) {
-        // compressed form
+    if (data[0] != 2 && data[0] != 3) { // compressed form
         return (default!, default!);
     }
     var p = curve.Params().Value.P;
@@ -228,6 +235,7 @@ internal static void panicIfNotOnCurve(Curve curve, ж<bigꓸInt> Ꮡx, ж<big�
     if (x.Sign() == 0 && y.Sign() == 0) {
         return;
     }
+
     if (!curve.IsOnCurve(Ꮡx, Ꮡy)) {
         throw panic("crypto/elliptic: attempted operation on invalid point");
     }

@@ -88,6 +88,7 @@ public static uintptr Fd(this ж<File> Ꮡf) {
     if (Ꮡf == nil) {
         return ~((uintptr)0);
     }
+
     // If we put the file descriptor into nonblocking mode,
     // then set it to blocking mode before we return it,
     // because historically we have always returned a descriptor
@@ -96,6 +97,7 @@ public static uintptr Fd(this ж<File> Ꮡf) {
     if (f.nonblock) {
         Ꮡf.of(File.Ꮡpfd).SetBlocking();
     }
+
     return (uintptr)f.pfd.Sysfd;
 }
 
@@ -113,6 +115,7 @@ public static ж<File> NewFile(uintptr fd, @string name) {
     if (fdi < 0) {
         return default!;
     }
+
     var (flags, err) = unix.Fcntl(fdi, syscall.F_GETFL, 0);
     if (err != default!) {
         flags = 0;
@@ -136,15 +139,26 @@ public static ж<File> net_newUnixFile(nint fd, @string name) {
     if (fd < 0) {
         throw panic("invalid FD");
     }
+
     return newFile(fd, name, kindSock, true);
 }
 
+// newFileKind describes the kind of file to newFile.
 partial struct newFileKind /*num:nint*/;
 
+// kindNewFile means that the descriptor was passed to us via NewFile.
 internal static newFileKind kindNewFile => /* iota */ 0;
+// kindOpenFile means that the descriptor was opened using
+// Open, Create, or OpenFile.
 internal static newFileKind kindOpenFile => 1;
+// kindPipe means that the descriptor was opened using Pipe.
 internal static newFileKind kindPipe => 2;
+// kindSock means that the descriptor is a network file descriptor
+// that was created from net package and was opened using net_newUnixFile.
 internal static newFileKind kindSock => 3;
+// kindNoPoll means that we should not put the descriptor into
+// non-blocking mode, because we know it is not a pipe or FIFO.
+// Used by openDirAt and openDirNolog for directories.
 internal static newFileKind kindNoPoll => 4;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -164,7 +178,9 @@ internal static ж<File> newFile(nint fd, @string name, newFileKind kind, bool n
         stdoutOrErr: fd == 1 || fd == 2
     ))
     ));
+
     var pollable = kind == kindOpenFile || kind == kindPipe || kind == kindSock || nonBlocking;
+
     // Things like regular files and FIFOs in kqueue on *BSD/Darwin
     // may not work properly (or accurately according to its manual).
     // As a result, we should avoid adding those to the kqueue-based
@@ -179,26 +195,27 @@ internal static ж<File> newFile(nint fd, @string name, newFileKind kind, bool n
             ref var st = ref heap(new syscall.Stat_t(), out var Ꮡst);
             var err = ignoringEINTR(() => syscall.Fstat(fd, Ꮡst));
             var typ = (uint16)(st.Mode & (uint16)syscall.S_IFMT);
+            // Don't try to use kqueue with regular files on *BSDs.
+            // On FreeBSD a regular file is always
+            // reported as ready for writing.
+            // On Dragonfly, NetBSD and OpenBSD the fd is signaled
+            // only once as ready (both read and write).
+            // Issue 19093.
+            // Also don't add directories to the netpoller.
             if (err == default! && (typ == syscall.S_IFREG || typ == syscall.S_IFDIR)) {
-                // Don't try to use kqueue with regular files on *BSDs.
-                // On FreeBSD a regular file is always
-                // reported as ready for writing.
-                // On Dragonfly, NetBSD and OpenBSD the fd is signaled
-                // only once as ready (both read and write).
-                // Issue 19093.
-                // Also don't add directories to the netpoller.
                 pollable = false;
             }
+
+            // In addition to the behavior described above for regular files,
+            // on Darwin, kqueue does not work properly with fifos:
+            // closing the last writer does not cause a kqueue event
+            // for any readers. See issue #24164.
             if ((runtime.GOOS == "darwin"u8 || runtime.GOOS == "ios"u8) && typ == syscall.S_IFIFO) {
-                // In addition to the behavior described above for regular files,
-                // on Darwin, kqueue does not work properly with fifos:
-                // closing the last writer does not cause a kqueue event
-                // for any readers. See issue #24164.
                 pollable = false;
             }
         }
-
     }
+
     var clearNonBlock = false;
     if (pollable) {
         // The descriptor is already in non-blocking mode.
@@ -219,6 +236,7 @@ internal static ж<File> newFile(nint fd, @string name, newFileKind kind, bool n
             }
         }
     }
+
     // An error here indicates a failure to register
     // with the netpoll system. That can happen for
     // a file descriptor that is not supported by
@@ -235,6 +253,7 @@ internal static ж<File> newFile(nint fd, @string name, newFileKind kind, bool n
             }
         }
     }
+
     runtime.SetFinalizer((~f).@file.OrTypedNil(), ((Func<ж<@file>, error>)(close)));
     return f;
 }
@@ -269,6 +288,7 @@ internal static (ж<File>, error) openFileNolog(@string name, nint flag, FileMod
             }
         }
     }
+
     nint r = default!;
     ref var s = ref heap(new poll.SysFile(), out var Ꮡs);
     ref var e = ref heap<error>(out var Ꮡe);
@@ -280,15 +300,18 @@ internal static (ж<File>, error) openFileNolog(@string name, nint flag, FileMod
     if (e != default!) {
         return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: e))));
     }
+
     // open(2) itself won't handle the sticky bit on *BSD and Solaris
     if (setSticky) {
         setStickyBit(name);
     }
+
     // There's a race here with fork/exec, which we are
     // content to live with. See ../syscall/exec_unix.go.
     if (!supportsCloseOnExec) {
         syscall.CloseOnExec(r);
     }
+
     var f = newFile(r, name, kindOpenFile, unix.HasNonblockFlag(flag));
     f.Value.pfd.SysFile = s;
     return (f, default!);
@@ -305,9 +328,11 @@ internal static (ж<File>, error) openDirNolog(@string name) {
     if (e != default!) {
         return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: e))));
     }
+
     if (!supportsCloseOnExec) {
         syscall.CloseOnExec(r);
     }
+
     var f = newFile(r, name, kindNoPoll, false);
     f.Value.pfd.SysFile = s;
     return (f, default!);
@@ -333,6 +358,7 @@ internal static error close(this ж<@file> Ꮡfile) {
             err = new fs.PathErrorжerror(Ꮡ(new PathError(Op: "close"u8, Path: @file.name, Err: e)));
         }
     }
+
     // no need for a finalizer anymore
     runtime.SetFinalizer(Ꮡfile.OrTypedNil(), default!);
     return err;
@@ -384,6 +410,7 @@ public static error Remove(@string name) {
     if (e1 == default!) {
         return default!;
     }
+
     // Both failed: figure out which error to return.
     // OS X and Linux differ on whether unlink(dir)
     // returns EISDIR, so can't use that. However,
@@ -498,10 +525,12 @@ internal static (DirEntry, error) newUnixDirent(@string parent, @string name, Fi
     if (typ != ~((fs.FileMode)((fs.FileMode)0)) && !testingForceReadDirLstat) {
         return (new unixDirentжDirEntry(ude), default!);
     }
+
     var (info, err) = lstat(parent + "/"u8 + name);
     if (err != default!) {
         return (default!, err);
     }
+
     ude.Value.typ = info.Mode().Type();
     ude.Value.info = info;
     return (new unixDirentжDirEntry(ude), default!);

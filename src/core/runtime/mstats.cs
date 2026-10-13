@@ -331,11 +331,13 @@ internal static readonly @string mappedReadyAndOtherˢ = "mappedReady and other 
 // The world must be stopped.
 internal static void readmemstats_m(ref MemStats stats) {
     assertWorldStopped();
+
     // Flush mcaches to mcentral before doing anything else.
     //
     // Flushing to the mcentral may in general cause stats to
     // change as mcentral data structures are manipulated.
     systemstack(flushallmcaches);
+
     // Calculate memory allocator stats.
     // During program execution we only count number of frees and amount of freed memory.
     // Current number of alive objects in the heap and amount of alive heap memory
@@ -343,29 +345,35 @@ internal static void readmemstats_m(ref MemStats stats) {
     // Total number of mallocs is calculated as number of frees plus number of alive objects.
     // Similarly, total amount of allocated memory is calculated as amount of freed memory
     // plus amount of alive heap memory.
+
     // Collect consistent stats, which are the source-of-truth in some cases.
     ref var consStats = ref heap(new heapStatsDelta(), out var ᏑconsStats);
     Ꮡmemstats.of(mstats.ᏑheapStats).unsafeRead(ᏑconsStats);
+
     // Collect large allocation stats.
     var totalAlloc = consStats.largeAlloc;
     var nMalloc = consStats.largeAllocCount;
     var totalFree = consStats.largeFree;
     var nFree = consStats.largeFreeCount;
+
     // Collect per-sizeclass stats.
     array<MemStats_BySize> bySize = new(68); /* _NumSizeClasses */
     foreach (var (i, _) in bySize) {
         bySize[i].Size = (uint32)class_to_size[i];
+
         // Malloc stats.
         var a = consStats.smallAllocCount[i];
         totalAlloc += a * (uint64)class_to_size[i];
         nMalloc += a;
         bySize[i].Mallocs = a;
+
         // Free stats.
         var f = consStats.smallFreeCount[i];
         totalFree += f * (uint64)class_to_size[i];
         nFree += f;
         bySize[i].Frees = f;
     }
+
     // Account for tiny allocations.
     // For historical reasons, MemStats includes tiny allocations
     // in both the total free and total alloc count. This double-counts
@@ -374,12 +382,17 @@ internal static void readmemstats_m(ref MemStats stats) {
     // currently not done because it would be too expensive.
     nFree += consStats.tinyAllocCount;
     nMalloc += consStats.tinyAllocCount;
+
     // Calculate derived stats.
+
     var stackInUse = (uint64)consStats.inStacks;
     var gcWorkBufInUse = (uint64)consStats.inWorkBufs;
     var gcProgPtrScalarBitsInUse = (uint64)consStats.inPtrScalarBits;
+
     var totalMapped = ᏑgcController.of(gcControllerState.ᏑheapInUse).load() + ᏑgcController.of(gcControllerState.ᏑheapFree).load() + ᏑgcController.of(gcControllerState.ᏑheapReleased).load() + Ꮡmemstats.of(mstats.Ꮡstacks_sys).load() + Ꮡmemstats.of(mstats.Ꮡmspan_sys).load() + Ꮡmemstats.of(mstats.Ꮡmcache_sys).load() + Ꮡmemstats.of(mstats.Ꮡbuckhash_sys).load() + Ꮡmemstats.of(mstats.ᏑgcMiscSys).load() + Ꮡmemstats.of(mstats.Ꮡother_sys).load() + stackInUse + gcWorkBufInUse + gcProgPtrScalarBitsInUse;
+
     var heapGoal = ᏑgcController.heapGoal();
+
     if (doubleCheckReadMemStats) {
         // Only check this if we're debugging. It would be bad to crash an application
         // just because the debugging stats are wrong. We mostly rely on tests to catch
@@ -440,7 +453,9 @@ internal static void readmemstats_m(ref MemStats stats) {
         unlock(ᏑΔtrace.of(Δtraceᴛ1.Ꮡlock));
         unlock(Ꮡsched.of(schedt.Ꮡsysmonlock));
     }
+
     // We've calculated all the values we need. Now, populate stats.
+
     stats.Alloc = totalAlloc - totalFree;
     stats.TotalAlloc = totalAlloc;
     stats.Sys = totalMapped;
@@ -491,6 +506,7 @@ internal static void readmemstats_m(ref MemStats stats) {
     stats.NumForcedGC = memstats.numforcedgc;
     stats.GCCPUFraction = memstats.gc_cpu_fraction;
     stats.EnableGC = true;
+
     // stats.BySize and bySize might not match in length.
     // That's OK, stats.BySize cannot change due to backwards
     // compatibility issues. copy will copy the minimum amount
@@ -518,12 +534,15 @@ internal static void readGCStats_m(ref slice<uint64> pauses) {
     if (cap(Δp) < len(memstats.pause_ns) + 3) {
         @throw(shortSlicePassedToˢ);
     }
+
     // Pass back: pauses, pause ends, last gc (absolute time), number of gc, total pause ns.
     @lock(Ꮡmheap_.of(mheap.Ꮡlock));
+
     var n = memstats.numgc;
     if (n > (uint32)len(memstats.pause_ns)) {
         n = (uint32)len(memstats.pause_ns);
     }
+
     // The pause buffer is circular. The most recent pause is at
     // pause_ns[(numgc-1)%len(pause_ns)], and then backward
     // from there to go back farther in time. We deliver the times
@@ -534,6 +553,7 @@ internal static void readGCStats_m(ref slice<uint64> pauses) {
         Δp[i] = memstats.pause_ns[j];
         Δp[n + i] = memstats.pause_end[j];
     }
+
     Δp[n + n] = memstats.last_gc_unix;
     Δp[n + n + 1] = (uint64)memstats.numgc;
     Δp[n + n + 2] = memstats.pause_total_ns;
@@ -548,6 +568,7 @@ internal static void readGCStats_m(ref slice<uint64> pauses) {
 //go:nowritebarrier
 internal static void flushmcache(nint i) {
     assertWorldStopped();
+
     var Δp = allp[i];
     var c = Δp.Value.mcache;
     if (c == nil) {
@@ -559,6 +580,9 @@ internal static void flushmcache(nint i) {
 
 // go2cs generated this placeholder — func flushallmcaches is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+// sysMemStat represents a global system statistic that is managed atomically.
+//
+// This type must structurally be a uint64 so that mstats aligns with MemStats.
 partial struct sysMemStat /*num:uint64*/;
 
 // load atomically reads the value of the stat.
@@ -624,6 +648,7 @@ internal static void merge(this ref heapStatsDelta a, ж<heapStatsDelta> Ꮡb) {
     a.inStacks += b.inStacks;
     a.inWorkBufs += b.inWorkBufs;
     a.inPtrScalarBits += b.inPtrScalarBits;
+
     a.tinyAllocCount += b.tinyAllocCount;
     a.largeAlloc += b.largeAlloc;
     a.largeAllocCount += b.largeAllocCount;
@@ -756,6 +781,7 @@ internal static void unsafeRead(this ref consistentHeapStats m, ж<heapStatsDelt
     ref var @out = ref Ꮡout.DerefOrNull();
 
     assertWorldStopped();
+
     foreach (var (i, _) in m.stats) {
         @out.merge(Ꮡ(m.stats, i));
     }
@@ -767,6 +793,7 @@ internal static void unsafeRead(this ref consistentHeapStats m, ж<heapStatsDelt
 // be donated elsewhere before clearing.
 internal static void unsafeClear(this ref consistentHeapStats m) {
     assertWorldStopped();
+
     foreach (var (i, _) in m.stats) {
         m.stats[i] = new heapStatsDelta(nil);
     }
@@ -811,11 +838,8 @@ internal static void accumulate(this ref cpuStats s, int64 now, bool gcMarkPhase
     // N.B. Mark termination and sweep termination pauses are
     // accumulated in work.cpuStats at the end of their respective pauses.
     int64 markAssistCpu = default!;
-    
     int64 markDedicatedCpu = default!;
-    
     int64 markFractionalCpu = default!;
-    
     int64 markIdleCpu = default!;
     if (gcMarkPhase) {
         // N.B. These stats may have stale values if the GC is not
@@ -825,22 +849,28 @@ internal static void accumulate(this ref cpuStats s, int64 now, bool gcMarkPhase
         markFractionalCpu = ᏑgcController.of(gcControllerState.ᏑfractionalMarkTime).Load();
         markIdleCpu = ᏑgcController.of(gcControllerState.ᏑidleMarkTime).Load();
     }
+
     // The rest of the stats below are either derived from the above or
     // are reset on each mark termination.
+
     var scavAssistCpu = ᏑΔscavenge.of(runtime_package.Δscavengeᴛ1.ᏑassistTime).Load();
     var scavBgCpu = ᏑΔscavenge.of(runtime_package.Δscavengeᴛ1.ᏑbackgroundTime).Load();
+
     // Update cumulative GC CPU stats.
     s.GCAssistTime += markAssistCpu;
     s.GCDedicatedTime += markDedicatedCpu + markFractionalCpu;
     s.GCIdleTime += markIdleCpu;
     s.GCTotalTime += markAssistCpu + markDedicatedCpu + markFractionalCpu + markIdleCpu;
+
     // Update cumulative scavenge CPU stats.
     s.ScavengeAssistTime += scavAssistCpu;
     s.ScavengeBgTime += scavBgCpu;
     s.ScavengeTotalTime += scavAssistCpu + scavBgCpu;
+
     // Update total CPU.
     s.TotalTime = sched.totaltime + (now - sched.procresizetime) * (int64)gomaxprocs;
     s.IdleTime += Ꮡsched.of(schedt.ᏑidleTime).Load();
+
     // Compute userTime. We compute this indirectly as everything that's not the above.
     //
     // Since time spent in _Pgcstop is covered by gcPauseTime, and time spent in _Pidle

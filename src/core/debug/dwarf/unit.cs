@@ -57,6 +57,7 @@ internal static (slice<unit>, error) parseUnits(this ж<Data> Ꮡd) {
     if (b.err != default!) {
         return (default!, b.err);
     }
+
     // Again, this time writing them down.
     b = makeBuf(Ꮡd, new unknownFormat(nil), infoˢ, 0, d.info);
     var units = new slice<unit>(nunit);
@@ -98,14 +99,14 @@ internal static (slice<unit>, error) parseUnits(this ж<Data> Ꮡd) {
         if (vers < 5) {
             u.Value.asize = (nint)b.uint8();
         }
+
         var exprᴛ1 = (~u).utype;
         if (exprᴛ1 == utSkeleton || exprᴛ1 == utSplitCompile) {
             b.uint64(); // unit ID
         }
         else if (exprᴛ1 == utType || exprᴛ1 == utSplitType) {
             b.uint64(); // type signature
-            if ((~u).is64){
-                // type offset
+            if ((~u).is64){ // type offset
                 b.uint64();
             } else {
                 b.uint32();

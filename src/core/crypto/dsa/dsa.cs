@@ -47,6 +47,8 @@ partial struct PrivateKey {
 // this error must be handled.
 public static error ErrInvalidPublicKey = errors.New("crypto/dsa: invalid public key"u8);
 
+// ParameterSizes is an enumeration of the acceptable bit lengths of the primes
+// in a set of DSA parameters. See FIPS 186-3, section 4.2.
 partial struct ParameterSizes /*num:nint*/;
 
 public static ParameterSizes L1024N160 => /* iota */ 0;
@@ -70,10 +72,12 @@ public static error GenerateParameters(ж<Parameters> Ꮡparams, io.Reader rand,
     if (fips140only.Enabled) {
         return errors.New(cryptoDsaUseOfDsaIsNotˢ);
     }
+
     // This function doesn't follow FIPS 186-3 exactly in that it doesn't
     // use a verification seed to generate the primes. The verification
     // seed doesn't appear to be exported or used by other code and
     // omitting it makes the code cleaner.
+
     nint L = default!;
     nint N = default!;
     var exprᴛ1 = sizes;
@@ -99,11 +103,13 @@ public static error GenerateParameters(ж<Parameters> Ꮡparams, io.Reader rand,
 
     var qBytes = new slice<byte>(N / 8);
     var pBytes = new slice<byte>(L / 8);
+
     var q = @new<bigꓸInt>();
     var p = @new<bigꓸInt>();
     var rem = @new<bigꓸInt>();
     var one = @new<bigꓸInt>();
     one.SetInt64(1);
+
 GeneratePrimes:
     while (ᐧ) {
         {
@@ -111,20 +117,25 @@ GeneratePrimes:
                 return err;
             }
         }
+
         qBytes[len(qBytes) - 1] |= (byte)(1);
         qBytes[0] |= (byte)(0x80);
         q.SetBytes(qBytes);
+
         if (!q.ProbablyPrime(numMRTests)) {
             continue;
         }
+
         for (nint i = 0; i < 4 * L; i++) {
             {
                 var (_, err) = io.ReadFull(rand, pBytes); if (err != default!) {
                     return err;
                 }
             }
+
             pBytes[len(pBytes) - 1] |= (byte)(1);
             pBytes[0] |= (byte)(0x80);
+
             p.SetBytes(pBytes);
             rem.Mod(p, q);
             rem.Sub(rem, one);
@@ -132,9 +143,11 @@ GeneratePrimes:
             if (p.BitLen() < L) {
                 continue;
             }
+
             if (!p.ProbablyPrime(numMRTests)) {
                 continue;
             }
+
             @params.P = p;
             @params.Q = q;
             goto break_GeneratePrimes;
@@ -142,17 +155,21 @@ GeneratePrimes:
 continue_GeneratePrimes:;
     }
 break_GeneratePrimes:;
+
     var h = @new<bigꓸInt>();
     h.SetInt64(2);
     var g = @new<bigꓸInt>();
+
     var pm1 = @new<bigꓸInt>().Sub(p, one);
     var e = @new<bigꓸInt>().Div(pm1, q);
+
     while (ᐧ) {
         g.Exp(h, e, p);
         if (g.Cmp(one) == 0) {
             h.Add(h, one);
             continue;
         }
+
         @params.G = g;
         return default!;
     }
@@ -169,11 +186,14 @@ public static error GenerateKey(ж<PrivateKey> Ꮡpriv, io.Reader rand) {
     if (fips140only.Enabled) {
         return errors.New(cryptoDsaUseOfDsaIsNotˢ);
     }
+
     if (priv.P == nil || priv.Q == nil || priv.G == nil) {
         return errors.New(cryptoDsaParametersNotˢ);
     }
+
     var x = @new<bigꓸInt>();
     var xBytes = new slice<byte>(priv.Q.BitLen() / 8);
+
     while (ᐧ) {
         var (_, err) = io.ReadFull(rand, xBytes);
         if (err != default!) {
@@ -184,6 +204,7 @@ public static error GenerateKey(ж<PrivateKey> Ꮡpriv, io.Reader rand) {
             break;
         }
     }
+
     priv.X = x;
     priv.Y = @new<bigꓸInt>();
     priv.Y.Exp(priv.G, x, priv.P);
@@ -215,19 +236,23 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rand,
     ж<bigꓸInt> r = default!;
     ж<bigꓸInt> s = default!;
     error err = default!;
-
     ref var priv = ref Ꮡpriv.DerefOrNull();
+
     if (fips140only.Enabled) {
         return (default!, default!, errors.New(cryptoDsaUseOfDsaIsNotˢ));
     }
+
     randutil.MaybeReadByte(rand);
+
     // FIPS 186-3, section 4.6
+
     nint n = priv.Q.BitLen();
     if (priv.Q.Sign() <= 0 || priv.P.Sign() <= 0 || priv.G.Sign() <= 0 || priv.X.Sign() <= 0 || n % 8 != 0) {
         err = ErrInvalidPublicKey;
         return (r, s, err);
     }
     n >>= (int)(3);
+
     nint attempts = default!;
     for (attempts = 10; attempts > 0; attempts--) {
         var k = @new<bigꓸInt>();
@@ -246,27 +271,35 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rand,
                 break;
             }
         }
+
         var kInv = fermatInverse(k, priv.Q);
+
         r = @new<bigꓸInt>().Exp(priv.G, k, priv.P);
         r.Mod(r, priv.Q);
+
         if (r.Sign() == 0) {
             continue;
         }
+
         var z = k.SetBytes(hash);
+
         s = @new<bigꓸInt>().Mul(priv.X, r);
         s.Add(s, z);
         s.Mod(s, priv.Q);
         s.Mul(s, kInv);
         s.Mod(s, priv.Q);
+
         if (s.Sign() != 0) {
             break;
         }
     }
+
     // Only degenerate private keys will require more than a handful of
     // attempts.
     if (attempts == 0) {
         return (default!, default!, ErrInvalidPublicKey);
     }
+
     return (r, s, err);
 }
 
@@ -284,25 +317,31 @@ public static bool Verify(ж<PublicKey> Ꮡpub, slice<byte> hash, ж<bigꓸInt> 
     if (fips140only.Enabled) {
         throw panic("crypto/dsa: use of DSA is not allowed in FIPS 140-only mode");
     }
+
     // FIPS 186-3, section 4.7
+
     if (pub.P.Sign() == 0) {
         return false;
     }
+
     if (r.Sign() < 1 || Ꮡr.Cmp(pub.Q) >= 0) {
         return false;
     }
     if (s.Sign() < 1 || Ꮡs.Cmp(pub.Q) >= 0) {
         return false;
     }
+
     var w = @new<bigꓸInt>().ModInverse(Ꮡs, pub.Q);
     if (w == nil) {
         return false;
     }
+
     nint n = pub.Q.BitLen();
     if (n % 8 != 0) {
         return false;
     }
     var z = @new<bigꓸInt>().SetBytes(hash);
+
     var u1 = @new<bigꓸInt>().Mul(z, w);
     u1.Mod(u1, pub.Q);
     var u2 = w.Mul(Ꮡr, w);
@@ -312,6 +351,7 @@ public static bool Verify(ж<PublicKey> Ꮡpub, slice<byte> hash, ж<bigꓸInt> 
     v.Mul(v, u2);
     v.Mod(v, pub.P);
     v.Mod(v, pub.Q);
+
     return v.Cmp(Ꮡr) == 0;
 }
 

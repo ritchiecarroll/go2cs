@@ -17,7 +17,6 @@ public static bool IsNaN(complex128 x) {
     case {} when math.IsNaN(real(x)) || math.IsNaN(imag(x)): {
         return true;
     }}
-
     return false;
 }
 

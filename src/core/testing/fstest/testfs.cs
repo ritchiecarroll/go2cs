@@ -162,6 +162,7 @@ internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) {
             t.errorf("%s: ReadDir(-1): %w"u8, dir, err);
             return;
         }
+
         // Check all children.
         @string prefix = default!;
         if (dir == "."u8){
@@ -187,7 +188,6 @@ internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) {
                 continue;
                 break;
             }}
-
             @string path = prefix + name;
             t.checkStat(path, info);
             Ꮡt.checkOpen(path);
@@ -197,6 +197,7 @@ internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) {
                 Ꮡt.checkFile(path);
             }
         }
+
         // Check ReadDir(-1) at EOF.
         (var list2, err) = d.ReadDir(-1);
         if (len(list2) > 0 || err != default!) {
@@ -204,6 +205,7 @@ internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) {
             t.errorf("%s: ReadDir(-1) at EOF = %d entries, %w, wanted 0 entries, nil"u8, dir, len(list2), err);
             return;
         }
+
         // Check ReadDir(1) at EOF (different results).
         (list2, err) = d.ReadDir(1);
         if (len(list2) > 0 || !AreEqual(err, io.EOF)) {
@@ -211,15 +213,18 @@ internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) {
             t.errorf("%s: ReadDir(1) at EOF = %d entries, %w, wanted 0 entries, EOF"u8, dir, len(list2), err);
             return;
         }
+
         // Check that close does not report an error.
         {
             var errΔ1 = d.Close(); if (errΔ1 != default!) {
                 t.errorf("%s: Close: %w"u8, dir, errΔ1);
             }
         }
+
         // Check that closing twice doesn't crash.
         // The return value doesn't matter.
         d.Close();
+
         // Reopen directory, read a second time, make sure contents match.
         {
             d = t.openDir(dir); if (d == default!) {
@@ -234,6 +239,7 @@ internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) {
             return;
         }
         Ꮡt.checkDirList(dir, firstOpenReadDir1Vsˢ, list, list2);
+
         // Reopen directory, read a third time in pieces, make sure contents match.
         {
             d = t.openDir(dir); if (d == default!) {
@@ -267,6 +273,7 @@ internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) {
             }
         }
         Ꮡt.checkDirList(dir, firstOpenReadDir1VsThirdˢ, list, list2);
+
         // If fsys has ReadDir, check that it matches and is sorted.
         {
             var (fsys, ok) = t.fsys._<fs.ReadDirFS>(ᐧ); if (ok) {
@@ -276,6 +283,7 @@ internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) {
                     return;
                 }
                 Ꮡt.checkDirList(dir, firstOpenReadDir1VsFsysˢ, list, list2Δ1);
+
                 for (nint i = 0; i + 1 < len(list2Δ1); i++) {
                     if (list2Δ1[i].Name() >= list2Δ1[i + 1].Name()) {
                         t.errorf("%s: fsys.ReadDir: list not sorted: %s before %s"u8, dir, list2Δ1[i].Name(), list2Δ1[i + 1].Name());
@@ -283,6 +291,7 @@ internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) {
                 }
             }
         }
+
         // Check fs.ReadDir as well.
         (list2, err) = fs.ReadDir(t.fsys, dir);
         if (err != default!) {
@@ -290,11 +299,13 @@ internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) {
             return;
         }
         Ꮡt.checkDirList(dir, firstOpenReadDir1VsFsˢ, list, list2);
+
         for (nint i = 0; i + 1 < len(list2); i++) {
             if (list2[i].Name() >= list2[i + 1].Name()) {
                 t.errorf("%s: fs.ReadDir: list not sorted: %s before %s"u8, dir, list2[i].Name(), list2[i + 1].Name());
             }
         }
+
         t.checkGlob(dir, list2);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -323,6 +334,7 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
             return;
         }
     }
+
     // Make a complex glob pattern prefix that only matches dir.
     @string glob = default!;
     if (dir != "."u8) {
@@ -355,12 +367,12 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
                     pattern = append(pattern, (rune)((rune)'['), (rune)((rune)'\\'), r, (rune)((rune)'-'), (rune)((rune)'\\'), r, (rune)((rune)']'));
                     break;
                 }}
-
             }
             elem[i] = ((@string)pattern);
         }
         glob = strings.Join(elem, "/"u8) + "/"u8;
     }
+
     // Test that malformed patterns are detected.
     // The error is likely path.ErrBadPattern but need not be.
     {
@@ -368,6 +380,7 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
             t.errorf("%s: Glob(%#q): bad pattern not detected"u8, dir, glob + "nonexist/[]");
         }
     }
+
     // Try to find a letter that appears in only some of the final names.
     var c = (rune)(rune)'a';
     for (; c <= (rune)'z'; c++) {
@@ -387,12 +400,14 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
         c = (rune)'a';
     }
     glob += "*"u8 + ((@string)c) + "*"u8;
+
     slice<@string> want = default!;
     foreach (var (_, d) in list) {
         if (strings.ContainsRune(d.Name(), c)) {
             want = append(want, path.Join(dir, d.Name()));
         }
     }
+
     var (names, err) = t.fsys._<fs.GlobFS>().Glob(glob);
     if (err != default!) {
         t.errorf("%s: Glob(%#q): %w"u8, dir, glob, err);
@@ -401,10 +416,12 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
     if (slices.Equal<slice<@string>, @string>(want, names)) {
         return;
     }
+
     if (!slices.IsSorted<slice<@string>, @string>(names)) {
         t.errorf("%s: Glob(%#q): unsorted output:\n%s"u8, dir, glob, strings.Join(names, "\n"u8));
         slices.Sort<slice<@string>, @string>(names);
     }
+
     slice<@string> problems = default!;
     while (len(want) > 0 || len(names) > 0) {
         switch (ᐧ) {
@@ -422,7 +439,6 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
             names = names[1..];
             break;
         }}
-
     }
     t.errorf("%s: Glob(%#q): wrong output:\n%s"u8, dir, glob, strings.Join(problems, "\n"u8));
 }
@@ -447,6 +463,7 @@ internal static void checkStat(this ref fsTester t, @string path, fs.DirEntry en
     if (fentry != fientry && (fs.FileMode)(entry.Type() & fs.ModeSymlink) == 0) {
         t.errorf("%s: mismatch:\n\tentry = %s\n\tfile.Stat() = %s"u8, path, fentry, fientry);
     }
+
     (var einfo, err) = entry.Info();
     if (err != default!) {
         t.errorf("%s: entry.Info: %w"u8, path, err);
@@ -466,6 +483,7 @@ internal static void checkStat(this ref fsTester t, @string path, fs.DirEntry en
             t.errorf("%s: mismatch:\n\tentry.Info() = %s\n\tfile.Stat() = %s\n"u8, path, feinfo, finfo);
         }
     }
+
     // Stat should be the same as Open+Stat, even for symlinks.
     (var info2, err) = fs.Stat(t.fsys, path);
     if (err != default!) {
@@ -476,6 +494,7 @@ internal static void checkStat(this ref fsTester t, @string path, fs.DirEntry en
     if (finfo2 != finfo) {
         t.errorf("%s: fs.Stat(...) = %s\n\twant %s"u8, path, finfo2, finfo);
     }
+
     {
         var (fsys, ok) = t.fsys._<fs.StatFS>(ᐧ); if (ok) {
             var (info2Δ1, errΔ1) = fsys.Stat(path);
@@ -506,10 +525,12 @@ internal static void checkDirList(this ж<fsTester> Ꮡt, @string dir, @string d
             }
         }
     }
+
     foreach (var (_, entry1) in list1) {
         old[entry1.Name()] = entry1;
         checkMode(entry1);
     }
+
     slice<@string> diffs = default!;
     foreach (var (_, entry2) in list2) {
         var entry1 = old[entry2.Name()];
@@ -526,15 +547,18 @@ internal static void checkDirList(this ж<fsTester> Ꮡt, @string dir, @string d
     foreach (var (_, entry1) in old) {
         diffs = append(diffs, "- "u8 + formatEntry(entry1));
     }
+
     if (len(diffs) == 0) {
         return;
     }
+
     slices.SortFunc(diffs, (@string a, @string b) => {
         var fa = strings.Fields(a);
         var fb = strings.Fields(b);
         // sort by name (i < j) and then +/- (j < i, because + < -)
         return strings.Compare(fa[1] + " " + fb[0], fb[1] + " " + fa[0]);
     });
+
     t.errorf("%s: diff %s:\n\t%s"u8, dir, desc, strings.Join(diffs, "\n\t"u8));
 }
 
@@ -551,26 +575,31 @@ internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) {
         ref var t = ref Ꮡt.DerefOrNull();
 
         t.files = append(t.files, @file);
+
         // Read entire file.
         var (f, err) = t.fsys.Open(@file);
         if (err != default!) {
             t.errorf("%s: Open: %w"u8, @file, err);
             return;
         }
+
         (var data, err) = io.ReadAll(new fs_FileᴠReader(f));
         if (err != default!) {
             f.Close();
             t.errorf("%s: Open+ReadAll: %w"u8, @file, err);
             return;
         }
+
         {
             var errΔ1 = f.Close(); if (errΔ1 != default!) {
                 t.errorf("%s: Close: %w"u8, @file, errΔ1);
             }
         }
+
         // Check that closing twice doesn't crash.
         // The return value doesn't matter.
         f.Close();
+
         // Check that ReadFile works if present.
         {
             var (fsys, ok) = t.fsys._<fs.ReadFileFS>(ᐧ); if (ok) {
@@ -580,6 +609,7 @@ internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) {
                     return;
                 }
                 t.checkFileRead(@file, readAllVsFsysReadFileˢ, data, data2Δ1);
+
                 // Modify the data and check it again. Modifying the
                 // returned byte slice should not affect the next call.
                 foreach (var (i, _) in data2Δ1) {
@@ -591,6 +621,7 @@ internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) {
                     return;
                 }
                 t.checkFileRead(@file, readallVsSecondFsysˢ, data, data2Δ1);
+
                     var fsysʗ1 = fsys;
                 t.checkBadPath(@file, readFileˢ,
                     (@string name) => {
@@ -599,6 +630,7 @@ internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) {
                     });
             }
         }
+
         // Check that fs.ReadFile works with t.fsys.
         (var data2, err) = fs.ReadFile(t.fsys, @file);
         if (err != default!) {
@@ -606,6 +638,7 @@ internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) {
             return;
         }
         t.checkFileRead(@file, readAllVsFsReadFileˢ, data, data2);
+
         // Use iotest.TestReader to check small reads, Seek, ReadAt.
         (f, err) = t.fsys.Open(@file);
         if (err != default!) {
@@ -674,6 +707,7 @@ internal static void checkBadPath(this ref fsTester t, @string @file, @string de
                 @file + "/../" + @file.slice(i + 1));
         }
     }
+
     foreach (var (_, b) in bad) {
         {
             var err = open(b); if (err == default!) {

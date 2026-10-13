@@ -11,12 +11,15 @@ partial class runtime_package {
 internal const nuint mantbits64 = 52;
 internal const nuint expbits64 = 11;
 internal static UntypedInt bias64 => /* -1<<(expbits64-1) + 1 */ -1023;
+
 internal const uint64 nan64 = /* (1<<expbits64-1)<<mantbits64 + 1<<(mantbits64-1) */ 9221120237041090560;                                            // quiet NaN, 0 payload
 internal const uint64 inf64 = /* (1<<expbits64 - 1) << mantbits64 */ 9218868437227405312;
 internal const uint64 neg64 = /* 1 << (expbits64 + mantbits64) */ 9223372036854775808;
+
 internal const nuint mantbits32 = 23;
 internal const nuint expbits32 = 8;
 internal static UntypedInt bias32 => /* -1<<(expbits32-1) + 1 */ -127;
+
 internal const uint32 nan32 = /* (1<<expbits32-1)<<mantbits32 + 1<<(mantbits32-1) */ 2143289344;                                            // quiet NaN, 0 payload
 internal const uint32 inf32 = /* (1<<expbits32 - 1) << mantbits32 */ 2139095040;
 internal const uint32 neg32 = /* 1 << (expbits32 + mantbits32) */ 2147483648;
@@ -31,6 +34,7 @@ internal static (uint64 sign, uint64 mant, nint exp, bool inf, bool nan) funpack
     sign = (uint64)(f & (((uint64)1 << (int)((mantbits64 + expbits64)))));
     mant = (uint64)(f & ((uint64)(4503599627370496L - 1)));
     exp = (nint)((nint)((f >> (int)(mantbits64))) & (nint)((1 << (int)(expbits64)) - 1));
+
     var exprᴛ1 = exp;
     if (exprᴛ1 == (1 << (int)(expbits64)) - 1) {
         if (mant != 0) {
@@ -41,8 +45,8 @@ internal static (uint64 sign, uint64 mant, nint exp, bool inf, bool nan) funpack
         return (sign, mant, exp, inf, nan);
     }
     if (exprᴛ1 is 0) {
+        // denormalized
         if (mant != 0) {
-            // denormalized
             exp += bias64 + 1;
             while (mant < ((uint64)1 << (int)(mantbits64))) {
                 mant <<= (int)(1);
@@ -51,11 +55,10 @@ internal static (uint64 sign, uint64 mant, nint exp, bool inf, bool nan) funpack
         }
     }
     else { /* default: */
+        // add implicit top bit
         mant |= (uint64)(((uint64)1 << (int)(mantbits64)));
         exp += bias64;
     }
-
-    // add implicit top bit
     return (sign, mant, exp, inf, nan);
 }
 
@@ -69,6 +72,7 @@ internal static (uint32 sign, uint32 mant, nint exp, bool inf, bool nan) funpack
     sign = (uint32)(f & (((uint32)1 << (int)((mantbits32 + expbits32)))));
     mant = (uint32)(f & ((1 << (int)(mantbits32)) - 1));
     exp = (nint)((nint)((f >> (int)(mantbits32))) & (nint)((1 << (int)(expbits32)) - 1));
+
     var exprᴛ1 = exp;
     if (exprᴛ1 == (1 << (int)(expbits32)) - 1) {
         if (mant != 0) {
@@ -79,8 +83,8 @@ internal static (uint32 sign, uint32 mant, nint exp, bool inf, bool nan) funpack
         return (sign, mant, exp, inf, nan);
     }
     if (exprᴛ1 is 0) {
+        // denormalized
         if (mant != 0) {
-            // denormalized
             exp += bias32 + 1;
             while (mant < ((uint32)1 << (int)(mantbits32))) {
                 mant <<= (int)(1);
@@ -89,11 +93,10 @@ internal static (uint32 sign, uint32 mant, nint exp, bool inf, bool nan) funpack
         }
     }
     else { /* default: */
+        // add implicit top bit
         mant |= (uint32)(((uint32)1 << (int)(mantbits32)));
         exp += bias32;
     }
-
-    // add implicit top bit
     return (sign, mant, exp, inf, nan);
 }
 
@@ -206,43 +209,38 @@ internal static uint32 fpack32(uint32 sign, uint32 mant, nint exp, uint32 trunc)
 internal static uint64 fadd64(uint64 f, uint64 g) {
     var (fs, fm, fe, fi, fn) = funpack64(f);
     var (gs, gm, ge, gi, gn) = funpack64(g);
+
     // Special cases.
     switch (ᐧ) {
-    case {} when fn || gn: {
+    case {} when fn || gn: { // NaN + x or x + NaN = NaN
         return nan64;
     }
-    case {} when fi && gi && fs != gs: {
+    case {} when fi && gi && fs != gs: { // +Inf + -Inf or -Inf + +Inf = NaN
         return nan64;
     }
-    case {} when fi: {
+    case {} when fi: { // ±Inf + g = ±Inf
         return f;
     }
-    case {} when gi: {
+    case {} when gi: { // f + ±Inf = ±Inf
         return g;
     }
-    case {} when fm == 0 && gm == 0 && fs != 0 && gs != 0: {
+    case {} when fm == 0 && gm == 0 && fs != 0 && gs != 0: { // -0 + -0 = -0
         return f;
     }
-    case {} when fm is 0: {
+    case {} when fm is 0: { // 0 + g = g but 0 + -0 = +0
         if (gm == 0) {
-            // NaN + x or x + NaN = NaN
-            // +Inf + -Inf or -Inf + +Inf = NaN
-            // ±Inf + g = ±Inf
-            // f + ±Inf = ±Inf
-            // -0 + -0 = -0
-            // 0 + g = g but 0 + -0 = +0
             g ^= (uint64)(gs);
         }
         return g;
     }
-    case {} when gm is 0: {
+    case {} when gm is 0: { // f + 0 = f
         return f;
     }}
 
-    // f + 0 = f
     if (fe < ge || fe == ge && fm < gm) {
         (f, g, fs, fm, fe, gs, gm, ge) = (g, f, gs, gm, ge, fs, fm, fe);
     }
+
     nuint shift = (nuint)(fe - ge);
     fm <<= (int)(2);
     gm <<= (int)(2);
@@ -273,29 +271,25 @@ internal static uint64 fneg64(uint64 f) {
 internal static uint64 fmul64(uint64 f, uint64 g) {
     var (fs, fm, fe, fi, fn) = funpack64(f);
     var (gs, gm, ge, gi, gn) = funpack64(g);
+
     // Special cases.
     switch (ᐧ) {
-    case {} when fn || gn: {
+    case {} when fn || gn: { // NaN * g or f * NaN = NaN
         return nan64;
     }
-    case {} when fi && gi: {
+    case {} when fi && gi: { // Inf * Inf = Inf (with sign adjusted)
         return (uint64)(f ^ gs);
     }
-    case {} when (fi && gm == 0) || (fm == 0 && gi): {
+    case {} when (fi && gm == 0) || (fm == 0 && gi): { // 0 * Inf = Inf * 0 = NaN
         return nan64;
     }
-    case {} when fm is 0: {
+    case {} when fm is 0: { // 0 * x = 0 (with sign adjusted)
         return (uint64)(f ^ gs);
     }
-    case {} when gm is 0: {
+    case {} when gm is 0: { // x * 0 = 0 (with sign adjusted)
         return (uint64)(g ^ fs);
     }}
 
-    // NaN * g or f * NaN = NaN
-    // Inf * Inf = Inf (with sign adjusted)
-    // 0 * Inf = Inf * 0 = NaN
-    // 0 * x = 0 (with sign adjusted)
-    // x * 0 = 0 (with sign adjusted)
     // 53-bit * 53-bit = 107- or 108-bit
     var (lo, hi) = mullu(fm, gm);
     nuint shift = mantbits64 - 1;
@@ -307,33 +301,29 @@ internal static uint64 fmul64(uint64 f, uint64 g) {
 internal static uint64 fdiv64(uint64 f, uint64 g) {
     var (fs, fm, fe, fi, fn) = funpack64(f);
     var (gs, gm, ge, gi, gn) = funpack64(g);
+
     // Special cases.
     switch (ᐧ) {
-    case {} when fn || gn: {
+    case {} when fn || gn: { // NaN / g = f / NaN = NaN
         return nan64;
     }
-    case {} when fi && gi: {
+    case {} when fi && gi: { // ±Inf / ±Inf = NaN
         return nan64;
     }
-    case {} when !fi && !gi && fm == 0 && gm == 0: {
+    case {} when !fi && !gi && fm == 0 && gm == 0: { // 0 / 0 = NaN
         return nan64;
     }
-    case {} when (fi) || (!gi && gm == 0): {
+    case {} when (fi) || (!gi && gm == 0): { // Inf / g = f / 0 = Inf
         return (uint64)((uint64)(fs ^ gs) ^ inf64);
     }
-    case {} when (gi) || (fm == 0): {
+    case {} when (gi) || (fm == 0): { // f / Inf = 0 / g = Inf
         return (uint64)((uint64)(fs ^ gs) ^ 0);
     }}
-
-    // NaN / g = f / NaN = NaN
-    // ±Inf / ±Inf = NaN
-    // 0 / 0 = NaN
-    // Inf / g = f / 0 = Inf
-    // f / Inf = 0 / g = Inf
     _ = fi;
     _ = fn;
     _ = gi;
     _ = gn;
+
     // 53-bit<<54 / 53-bit = 53- or 54-bit.
     nuint shift = mantbits64 + 2;
     var (q, r) = divlu(fm.Rsh((64 - shift)), fm.Lsh(shift), gm);
@@ -369,19 +359,23 @@ internal static uint64 f32to64(uint32 f) {
 internal static (int32 cmp, bool isnan) fcmp64(uint64 f, uint64 g) {
     var (fs, fm, _, fi, fn) = funpack64(f);
     var (gs, gm, _, gi, gn) = funpack64(g);
+
     switch (ᐧ) {
-    case {} when (fn) || (gn): {
+    case {} when (fn) || (gn): { // flag NaN
         return (0, true);
     }
-    case {} when !fi && !gi && fm == 0 && gm == 0: {
+    case {} when !fi && !gi && fm == 0 && gm == 0: { // ±0 == ±0
         return (0, false);
     }
-    case {} when fs > gs: {
+    case {} when fs > gs: { // f < 0, g > 0
         return (-1, false);
     }
-    case {} when fs < gs: {
+    case {} when fs < gs: { // f > 0, g < 0
         return (+1, false);
     }
+    // Same sign, not NaN.
+    // Can compare encodings directly now.
+    // Reverse for sign.
     case {} when (fs == 0 && f < g) || (fs != 0 && f > g): {
         return (-1, false);
     }
@@ -389,13 +383,6 @@ internal static (int32 cmp, bool isnan) fcmp64(uint64 f, uint64 g) {
         return (+1, false);
     }}
 
-    // flag NaN
-    // ±0 == ±0
-    // f < 0, g > 0
-    // f > 0, g < 0
-    // Same sign, not NaN.
-    // Can compare encodings directly now.
-    // Reverse for sign.
     // f == g
     return (0, false);
 }
@@ -404,19 +391,16 @@ internal static (int64 val, bool ok) f64toint(uint64 f) {
     int64 val = default!;
 
     var (fs, fm, fe, fi, fn) = funpack64(f);
+
     switch (ᐧ) {
-    case {} when (fi) || (fn): {
+    case {} when (fi) || (fn): { // NaN
         return (0, false);
     }
-    case {} when fe < -1: {
+    case {} when fe < -1: { // f < 0.5
         return (0, false);
     }
-    case {} when fe is > 63: {
-        if (fs != 0 && fm == 0) {
-            // NaN
-            // f < 0.5
-            // f >= 2^63
-            // f == -2^63
+    case {} when fe is > 63: { // f >= 2^63
+        if (fs != 0 && fm == 0) { // f == -2^63
             return (-9223372036854775808L, true);
         }
         if (fs != 0) {
@@ -465,6 +449,7 @@ internal static uint32 /*f*/ fintto32(int64 val) {
         mant >>= (int)(1);
         exp++;
     }
+
     return fpack32((uint32)((fs >> (int)(32))), (uint32)mant, exp, trunc);
 }
 
@@ -489,15 +474,18 @@ internal static (uint64 lo, uint64 hi) mullu(uint64 u, uint64 v) {
 // adapted from hacker's delight
 internal static (uint64 q, uint64 r) divlu(uint64 u1, uint64 u0, uint64 v) {
     const uint64 b = /* 1 << 32 */ 4294967296;
+
     if (u1 >= v) {
         return (18446744073709551615UL, 18446744073709551615UL);
     }
+
     // s = nlz(v); v <<= s
     nuint s = (nuint)0;
     while ((uint64)(v & (((uint64)1 << (int)(63)))) == 0) {
         s++;
         v <<= (int)(1);
     }
+
     var vn1 = (v >> (int)(32));
     var vn0 = (uint64)(v & ((uint64)(4294967296L - 1)));
     var un32 = (uint64)(u1.Lsh(s) | u0.Rsh((64 - s)));
@@ -506,6 +494,7 @@ internal static (uint64 q, uint64 r) divlu(uint64 u1, uint64 u0, uint64 v) {
     var un0 = (uint64)(un10 & ((uint64)(4294967296L - 1)));
     var q1 = un32 / vn1;
     var rhat = un32 - q1 * vn1;
+
 again1:
     if (q1 >= b || q1 * vn0 > b * rhat + un1) {
         q1--;
@@ -514,9 +503,11 @@ again1:
             goto again1;
         }
     }
+
     var un21 = un32 * b + un1 - q1 * v;
     var q0 = un21 / vn1;
     rhat = un21 - q0 * vn1;
+
 again2:
     if (q0 >= b || q0 * vn0 > b * rhat + un0) {
         q0--;
@@ -525,6 +516,7 @@ again2:
             goto again2;
         }
     }
+
     return (q1 * b + q0, (un21 * b + un0 - q0 * v).Rsh(s));
 }
 

@@ -49,7 +49,7 @@ using static go.container.ring_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("container/ring/ring.go", "ring.cs", "ABMkooKCqLKClKiygpSqwoKUlILGgsaokoKUgoKCgpSCggACJAASAoKCpoKCgpSssoKUqqKCgoKCpqrCgoKC")]
+[assembly: go.GoPositionMap("container/ring/ring.go", "ring.cs", "ABMkooKCqLKClKiygpSqwoKUlILGgraokoKUgoKCgpSCggACJAASAoKCpoKCgpSssoKUqqKCgoKCpqrCgoKC")]
 // </GoSourcePositionMaps>
 
 namespace go.container;

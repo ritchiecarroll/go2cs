@@ -66,8 +66,8 @@ public static void Init(this ж<State> Ꮡs, /*[32]*/ array<byte> seed) {
 // Init64 seeds the state with the given seed value.
 public static void Init64(this ж<State> Ꮡs, /*[4]*/ array<uint64> seed) {
     seed = seed.Clone();
-
     ref var s = ref Ꮡs.DerefOrNull();
+
     s.seed = seed.Clone();
     block(Ꮡs.of(State.Ꮡseed), Ꮡs.of(State.Ꮡbuf), 0);
     s.c = 0;

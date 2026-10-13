@@ -25,6 +25,7 @@ public static error Fsync(this ж<FD> Ꮡfd) {
         ᒐd1 = true;
         return ignoringEINTR(() => {
             var (_, err) = unix.Fcntl(Ꮡfd.Value.Sysfd, Δsyscall.F_FULLFSYNC, 0);
+
             // There are scenarios such as SMB mounts where fcntl will fail
             // with ENOTSUP. In those cases fallback to fsync.
             // See #64215

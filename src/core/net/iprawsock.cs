@@ -78,8 +78,7 @@ internal static ΔAddr opAddr(this ж<IPAddr> Ꮡa) {
 // See func [Dial] for a description of the network and address
 // parameters.
 public static (ж<IPAddr>, error) ResolveIPAddr(@string network, @string address) {
-    if (network == ""u8) {
-        // a hint wildcard for Go 1.0 undocumented behavior
+    if (network == ""u8) { // a hint wildcard for Go 1.0 undocumented behavior
         network = "ip"u8;
     }
     var (afnet, _, err) = parseNetwork(context.Background(), network, false);
@@ -92,7 +91,6 @@ public static (ж<IPAddr>, error) ResolveIPAddr(@string network, @string address
     else { /* default: */
         return (default!, ((UnknownNetworkError)network));
     }
-
     (var addrs, err) = DefaultResolver.internetAddrList(context.Background(), afnet, address);
     if (err != default!) {
         return (default!, err);
@@ -161,8 +159,8 @@ public static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) ReadMs
     nint flags = default!;
     ж<IPAddr> addr = default!;
     error err = default!;
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
         return (0, 0, 0, default!, syscall.EINVAL);
     }
@@ -215,8 +213,8 @@ public static (nint n, nint oobn, error err) WriteMsgIP(this ж<IPConn> Ꮡc, sl
     nint n = default!;
     nint oobn = default!;
     error err = default!;
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
         return (0, 0, syscall.EINVAL);
     }

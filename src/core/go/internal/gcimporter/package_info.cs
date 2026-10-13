@@ -67,9 +67,9 @@ using static go.go.@internal.gcimporter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/internal/gcimporter/gcimporter.go", "gcimporter.cs", "ABUs8oKCpoKUloCCpIKClJSCgoKClKiAgriSgpSClKaUlIKCgoKUhIKE", "62-67:1")]
-[assembly: global::go.GoPositionMap("go/internal/gcimporter/support.go", "support.cs", "ABAggoK4ogAPIN6CgoKWgpSCqKaCgoKCpoIAFiySgoKUgoKClA==", "64-69:1")]
-[assembly: global::go.GoPositionMap("go/internal/gcimporter/ureader.go", "ureader.cs", "ACVUkqriAAwehIKCgpamgoKUgpaEgpaCmJKCgqaGhIIAGzqC3ILcgqqygoKogoKCpqKmooCCpoKCzoTGgoKWtJSCgqqygqbGgIKmgoKmooKUpKSmgIKmhIKEqrKmgoKClKaygoKCgpSWgIKmgoKChIKCpoCCpoKmooCspoKCgoKUpqaCpIKkpKSkpKSkAAJJggAFUIKCgoKCgoKChIKCgpSmpoKCgpSmooKChIKCgoKWgpaCggAIFISmgoSCgoSmgoSCgpamgoSCgoSqsoSCloKEgoKWpqSCgoKChIKEgpaCgqiAgqaChIKEkpaagoKClIKmgoKCpoKCgqaEgoKEhIqAsoKCgoSCloKCloKCpoSCuIKCAAKDAQADjAGmpISCgoCCpoKCloKCgoKCqKimos6CAAUQgoKChIKWgoIADR6CooKopoKCgoSChIKmgKKAooCkgoKuwoKU2LaUgoKCpII=", "100-102:1;481-483:1;635-639:1", "", "50=NumElems/1/3/11,NumElems/2/3/12,NumElems/3/3/13;125=NewDecoder/1/1/1;132=TempDecoder/1/1/1")]
+[assembly: global::go.GoPositionMap("go/internal/gcimporter/gcimporter.go", "gcimporter.cs", "ABUs8oKCpoKUpoCCpIKClJSCgoKClLiAgsiSgpSClKaUpIKCgoKUlIKE", "62-67:1")]
+[assembly: global::go.GoPositionMap("go/internal/gcimporter/support.go", "support.cs", "ABAggoK4ogAPIN6CgoKmgpSCuKaCgoKCpoIAFiySgoKUgoKClA==", "64-69:1")]
+[assembly: global::go.GoPositionMap("go/internal/gcimporter/ureader.go", "ureader.cs", "ACVUkqriAAwelIKCgqamgoKUgqaUgqaCqJKCgqaGlIIAGzqC3ILcgqqygoK4goKCpqKmooCCtoKC7pSmgoKmtJSCgqqygqbGgIK2goKmooKUpKSmgIK2lIKUqrKmgoKClKaygoKCgpSmgIK2goKClIKCpoCCtoKmooCspoKCgoKUpqaCpIKkpKSkpKSkAAJJggAEUIKCgoKCgoKClIKCgpSmpoKCgpSmooKClIKCgoKmgqaCggAJFJSmgpSCgpSmgpSCgqamgpSCgpSqspSCpoKUgoKmpqSCgoKClIKUgqaCgriAgraClIKUkqaagoKClIKmgoKCpoKCgqaUgoKUlMqAgoKCgpSCpoKCpoKCtpSCuIKCAAKDAQADjAGmpJSCgoCCtoKCpoKCgoKCuLimou6CAAcQgoKClIKmgoIADh6CooK4poKCgpSClIKmgKKAooCkgoKuwoKU2LaUgoKClII=", "100-102:1;481-483:1;635-639:1", "", "50=NumElems/1/3/11,NumElems/2/3/12,NumElems/3/3/13;132=NewDecoder/1/1/1;139=TempDecoder/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;

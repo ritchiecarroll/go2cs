@@ -62,7 +62,6 @@ internal static Word /*p*/ pow(Word x, nint n) {
 
 // scan errors
 internal static error errNoDigits = errors.New("number has no digits"u8);
-
 internal static error errInvalSep = errors.New("'_' must separate successive digits"u8);
 
 // scan scans the number corresponding to the longest possible prefix
@@ -120,14 +119,17 @@ internal static (nat res, nint b, nint count, error err) scan(this nat z, io.Byt
     if (!baseOk) {
         throw panic(fmt.Sprintf("invalid number base %d"u8, @base));
     }
+
     // prev encodes the previously seen char: it is one
     // of '_', '0' (a digit), or '.' (anything else). A
     // valid separator '_' may only occur after a digit
     // and if base == 0.
     var prev = (rune)'.';
     var invalSep = false;
+
     // one char look-ahead
     (var ch, err) = r.ReadByte();
+
     // determine actual base
     b = @base;
     nint prefix = 0;
@@ -159,7 +161,6 @@ internal static (nat res, nint b, nint count, error err) scan(this nat z, io.Byt
                     }
                     break;
                 }}
-
                 if (prefix != 0) {
                     count = 0; // prefix is not counted
                     if (prefix != (rune)'0') {
@@ -169,6 +170,7 @@ internal static (nat res, nint b, nint count, error err) scan(this nat z, io.Byt
             }
         }
     }
+
     // convert string
     // Algorithm: Collect digits in groups of at most n digits in di
     // and then use mulAddWW for every such group to add them to the
@@ -217,16 +219,17 @@ internal static (nat res, nint b, nint count, error err) scan(this nat z, io.Byt
                 d1 = MaxBase + 1;
                 break;
             }}
-
             if (d1 >= b1) {
                 r.UnreadByte(); // ch does not belong to number anymore
                 break;
             }
             prev = (rune)'0';
             count++;
+
             // collect d1 in di
             di = di * b1 + d1;
             i++;
+
             // if di is "full", add it to the result
             if (i == n) {
                 z = z.mulAddWW(z, bn, di);
@@ -234,15 +237,19 @@ internal static (nat res, nint b, nint count, error err) scan(this nat z, io.Byt
                 i = 0;
             }
         }
+
         (ch, err) = r.ReadByte();
     }
+
     if (AreEqual(err, io.EOF)) {
         err = default!;
     }
+
     // other errors take precedence over invalid separators
     if (err == default! && (invalSep || prev == (rune)'_')) {
         err = errInvalSep;
     }
+
     if (count == 0) {
         // no digits found
         if (prefix == (rune)'0') {
@@ -252,16 +259,19 @@ internal static (nat res, nint b, nint count, error err) scan(this nat z, io.Byt
         }
         err = errNoDigits; // fall through; result will be 0
     }
+
     // add remaining digits to result
     if (i > 0) {
         z = z.mulAddWW(z, pow(b1, i), di);
     }
     res = z.norm();
+
     // adjust count for fraction, if any
     if (dp >= 0) {
         // 0 <= dp <= count
         count = dp - count;
     }
+
     return (res, b, count, err);
 }
 
@@ -276,17 +286,20 @@ internal static slice<byte> itoa(this nat x, bool neg, nint @base) {
     if (@base < 2 || @base > MaxBase) {
         throw panic("invalid base");
     }
+
     // x == 0
     if (len(x) == 0) {
         return slice<byte>("0"u8);
     }
     // len(x) > 0
+
     // allocate buffer for conversion
     nint i = (nint)((float64)x.bitLen() / math.Log2((float64)@base)) + 1; // off by 1 at most
     if (neg) {
         i++;
     }
     var s = new slice<byte>(i);
+
     // convert power of two and non power of two bases separately
     {
         Word b = ((Word)(nuint)@base); if (b == (Word)(b & ((Word)0 - b))){
@@ -295,6 +308,7 @@ internal static slice<byte> itoa(this nat x, bool neg, nint @base) {
             Word mask = (Word)((nuint)1 << (int)(shift)) - 1;
             Word w = x[0]; // current word
             nuint nbits = (nuint)_W; // number of unprocessed bits in w
+
             // convert less-significant words (include leading zeros)
             for (nint k = 1; k < len(x); k++) {
                 // convert full digits
@@ -304,6 +318,7 @@ internal static slice<byte> itoa(this nat x, bool neg, nint @base) {
                     w >>= (int)(shift);
                     nbits -= shift;
                 }
+
                 // convert any partial leading digit and advance to next word
                 if (nbits == 0){
                     // no partial digit remaining, just advance
@@ -314,11 +329,13 @@ internal static slice<byte> itoa(this nat x, bool neg, nint @base) {
                     w |= (Word)((x[k] << (int)(nbits)));
                     i--;
                     s[i] = digits[(Word)(w & mask)];
+
                     // advance
                     w = (x[k] >> (int)((shift - nbits)));
                     nbits = (nuint)_W - (shift - nbits);
                 }
             }
+
             // convert digits of most-significant word w (omit leading zeros)
             while (w != 0) {
                 i--;
@@ -327,13 +344,17 @@ internal static slice<byte> itoa(this nat x, bool neg, nint @base) {
             }
         } else {
             var (bb, ndigits) = maxPow(b);
+
             // construct table of successive squares of bb*leafSize to use in subdivisions
             // result (table != nil) <=> (len(x) > leafSize > 0)
             var table = divisors(len(x), b, ndigits, bb);
+
             // preserve x, create local copy for use by convertWords
             var q = ((nat)default!).set(x);
+
             // convert q to string s in base b
             q.convertWords(s, b, ndigits, bb, table);
+
             // strip leading zeros
             // (x != 0; thus s must contain at least one non-zero digit
             // and the loop will terminate)
@@ -343,10 +364,12 @@ internal static slice<byte> itoa(this nat x, bool neg, nint @base) {
             }
         }
     }
+
     if (neg) {
         i--;
         s[i] = (rune)'-';
     }
+
     return s.slice(i);
 }
 
@@ -384,14 +407,17 @@ internal static void convertWords(this nat q, slice<byte> s, Word b, nint ndigit
                     throw panic("internal inconsistency");
                 }
             }
+
             // split q into the two digit number (q'*bbb + r) to form independent subblocks
             (q, rΔ1) = q.div(rΔ1, q, table[index].bbb);
+
             // convert subblocks and collect results in s[:h] and s[h:]
             nint h = len(s) - table[index].ndigits;
             rΔ1.convertWords(s.slice(h), b, ndigits, bb, table.slice(0, index));
             s = s.slice(0, h); // == q.convertWords(s, b, ndigits, bb, table[0:index+1])
         }
     }
+
     // having split any large blocks now process the remaining (small) block iteratively
     nint i = len(s);
     Word r = default!;
@@ -421,9 +447,9 @@ internal static void convertWords(this nat q, slice<byte> s, Word b, nint ndigit
             }
         }
     }
+
     // prepend high-order zeros
-    while (i > 0) {
-        // while need more leading zeros
+    while (i > 0) { // while need more leading zeros
         i--;
         s[i] = (rune)'0';
     }
@@ -441,7 +467,6 @@ partial struct divisor {
     internal nint nbits; // bit length of divisor (discounting leading zeros) ~= log2(bbb)
     internal nint ndigits; // digit length of divisor in terms of output base digits
 }
-
 
 partial struct cacheBase10ᴛ1 /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; }
@@ -461,11 +486,13 @@ internal static slice<divisor> divisors(nint m, Word b, nint ndigits, Word bb) {
     if (leafSize == 0 || m <= leafSize) {
         return default!;
     }
+
     // determine k where (bb**leafSize)**(2**k) >= sqrt(x)
     nint k = 1;
     for (nint words = leafSize; words < (m >> (int)(1)) && k < len(cacheBase10.table); words <<= (int)(1)) {
         k++;
     }
+
     // reuse and extend existing table of divisors or create new table as appropriate
     slice<divisor> table = default!;               // for b == 10, table overlaps with cacheBase10.table
     if (b == 10){
@@ -474,6 +501,7 @@ internal static slice<divisor> divisors(nint m, Word b, nint ndigits, Word bb) {
     } else {
         table = new slice<divisor>(k); // create new table for this conversion
     }
+
     // extend table
     if (table[k - 1].ndigits == 0) {
         // add new entries as needed
@@ -487,19 +515,23 @@ internal static slice<divisor> divisors(nint m, Word b, nint ndigits, Word bb) {
                     table[i].bbb = ((nat)default!).sqr(table[i - 1].bbb);
                     table[i].ndigits = 2 * table[i - 1].ndigits;
                 }
+
                 // optimization: exploit aggregated extra bits in macro blocks
                 larger = ((nat)default!).set(table[i].bbb);
                 while (mulAddVWW(larger, larger, b, 0) == 0) {
                     table[i].bbb = table[i].bbb.set(larger);
                     table[i].ndigits++;
                 }
+
                 table[i].nbits = table[i].bbb.bitLen();
             }
         }
     }
+
     if (b == 10) {
         ᏑcacheBase10.of(cacheBase10ᴛ1.ᏑMutex).Unlock();
     }
+
     return table;
 }
 

@@ -200,7 +200,6 @@ public static @string String(this Code i) {
     default: {
         return "Code("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
     }}
-
 }
 
 } // end errors_package

@@ -52,20 +52,25 @@ internal static void initOptions() {
         new(Name: "sse3"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE3)),
         new(Name: "sse41"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE41)),
         new(Name: "sse42"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE42)),
-        new(Name: "ssse3"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSSE3)), // These capabilities should always be enabled on amd64:
+        new(Name: "ssse3"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSSE3)),
 
+        // These capabilities should always be enabled on amd64:
         new(Name: "sse2"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE2), Required: runtime.GOARCH == "amd64"u8)
     }.slice();
 }
 
 internal static void archInit() {
     Initialized = true;
+
     var (maxID, _, _, _) = cpuid(0, 0);
+
     if (maxID < 1) {
         return;
     }
+
     var (_, _, ecx1, edx1) = cpuid(1, 0);
     X86.HasSSE2 = isSet(26, edx1);
+
     X86.HasSSE3 = isSet(0, ecx1);
     X86.HasPCLMULQDQ = isSet(1, ecx1);
     X86.HasSSSE3 = isSet(9, ecx1);
@@ -77,6 +82,7 @@ internal static void archInit() {
     X86.HasAES = isSet(25, ecx1);
     X86.HasOSXSAVE = isSet(27, ecx1);
     X86.HasRDRAND = isSet(30, ecx1);
+
     bool osSupportsAVX = default!;
     bool osSupportsAVX512 = default!;
     // For XGETBV, OSXSAVE bit is required and sufficient.
@@ -84,6 +90,7 @@ internal static void archInit() {
         var (eax, _) = xgetbv();
         // Check if XMM and YMM registers have OS support.
         osSupportsAVX = isSet(1, eax) && isSet(2, eax);
+
         if (runtime.GOOS == "darwin"u8){
             // Darwin requires special AVX512 checks, see cpu_darwin_x86.go
             osSupportsAVX512 = osSupportsAVX && darwinSupportsAVX512();
@@ -92,10 +99,13 @@ internal static void archInit() {
             osSupportsAVX512 = osSupportsAVX && isSet(5, eax) && isSet(6, eax) && isSet(7, eax);
         }
     }
+
     X86.HasAVX = isSet(28, ecx1) && osSupportsAVX;
+
     if (maxID < 7) {
         return;
     }
+
     var (_, ebx7, ecx7, edx7) = cpuid(7, 0);
     X86.HasBMI1 = isSet(3, ebx7);
     X86.HasAVX2 = isSet(5, ebx7) && osSupportsAVX;
@@ -103,6 +113,7 @@ internal static void archInit() {
     X86.HasERMS = isSet(9, ebx7);
     X86.HasRDSEED = isSet(18, ebx7);
     X86.HasADX = isSet(19, ebx7);
+
     X86.HasAVX512 = isSet(16, ebx7) && osSupportsAVX512; // Because avx-512 foundation is the core required extension
     if (X86.HasAVX512) {
         X86.HasAVX512F = true;
@@ -123,9 +134,11 @@ internal static void archInit() {
         X86.HasAVX512VAES = isSet(9, ecx7);
         X86.HasAVX512VBMI2 = isSet(6, ecx7);
         X86.HasAVX512BITALG = isSet(12, ecx7);
+
         var (eax71, _, _, _) = cpuid(7, 1);
         X86.HasAVX512BF16 = isSet(5, eax71);
     }
+
     X86.HasAMXTile = isSet(24, edx7);
     X86.HasAMXInt8 = isSet(25, edx7);
     X86.HasAMXBF16 = isSet(22, edx7);

@@ -30,16 +30,16 @@ internal static bool isTerminating(this ref Checker check, ast.Stmt s, @string l
     case ж<ast.DeferStmt> _:
     case ж<ast.RangeStmt> _: {
         var sΔ1 = s;
+        // no chance
         break;
     }
     case ж<ast.LabeledStmt> sΔ1: {
-        return check.isTerminating((~sΔ1).Stmt, // no chance
- (~(~sΔ1).Label).Name);
+        return check.isTerminating((~sΔ1).Stmt, (~(~sΔ1).Label).Name);
     }
     case ж<ast.ExprStmt> sΔ1: {
+        // calling the predeclared (possibly parenthesized) panic() function is terminating
         {
             var (call, ok) = ast.Unparen((~sΔ1).X)._<ж<ast.CallExpr>>(ᐧ); if (ok && check.isPanic[call]) {
-                // calling the predeclared (possibly parenthesized) panic() function is terminating
                 return true;
             }
         }
@@ -84,6 +84,7 @@ internal static bool isTerminating(this ref Checker check, ast.Stmt s, @string l
         }
         break;
     }}
+
     return false;
 }
 
@@ -140,11 +141,11 @@ internal static bool hasBreak(ast.Stmt s, @string label, bool @implicit) {
     case ж<ast.DeferStmt> _:
     case ж<ast.ReturnStmt> _: {
         var sΔ1 = s;
+        // no chance
         break;
     }
     case ж<ast.LabeledStmt> sΔ1: {
-        return hasBreak((~sΔ1).Stmt, // no chance
- label, @implicit);
+        return hasBreak((~sΔ1).Stmt, label, @implicit);
     }
     case ж<ast.BranchStmt> sΔ1: {
         if ((~sΔ1).Tok == token.BREAK) {
@@ -202,6 +203,7 @@ internal static bool hasBreak(ast.Stmt s, @string label, bool @implicit) {
         }
         break;
     }}
+
     return false;
 }
 

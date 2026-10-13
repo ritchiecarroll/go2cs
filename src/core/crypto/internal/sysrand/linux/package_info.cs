@@ -60,7 +60,7 @@ using static go.crypto.@internal.sysrand_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/sysrand/rand.go", "rand.cs", "ABQmgqwACxDipoKkgIKCgpSUgsQADRCCgpSClIK4gpSU", "60-62:1")]
-[assembly: go.GoPositionMap("crypto/internal/sysrand/rand_getrandom.go", "rand_getrandom.cs", "AA8iAAoWAAcSgpaCgoKUgqaUuJSClJQ=")]
+[assembly: go.GoPositionMap("crypto/internal/sysrand/rand_getrandom.go", "rand_getrandom.cs", "AA8iAAoWAAgSgqaCgoKUgqaUuJSClJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;

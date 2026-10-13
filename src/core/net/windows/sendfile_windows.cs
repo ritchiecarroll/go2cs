@@ -29,6 +29,7 @@ internal static (int64 written, error err, bool handled) sendFile(ж<netFD> Ꮡf
     bool handled = default!;
 
     int64 n = 0;     // by default, copy until EOF.
+
     var (lr, ok) = r._<ж<Δio.LimitedReader>>(ᐧ);
     if (ok) {
         (n, r) = (lr.Value.N, lr.Value.R);
@@ -36,17 +37,21 @@ internal static (int64 written, error err, bool handled) sendFile(ж<netFD> Ꮡf
             return (0, default!, true);
         }
     }
+
     (var f, ok) = r._<ж<os.File>>(ᐧ);
     if (!ok) {
         return (0, default!, false);
     }
+
     (written, err) = poll.SendFile(Ꮡfd.of(netFD.Ꮡpfd), ((syscallꓸHandle)f.Fd()), n);
     if (err != default!) {
         err = wrapSyscallError(transmitfileˢ, err);
     }
+
     // If any byte was copied, regardless of any error
     // encountered mid-way, handled must be set to true.
     handled = written > 0;
+
     return (written, err, handled);
 }
 

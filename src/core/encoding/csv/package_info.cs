@@ -50,8 +50,8 @@ using static go.encoding.csv_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/csv/reader.go", "reader.cs", "AEqUAYKClIKUpoC4kpKWlpSCAEKkAZIABR4ADAKCgpSUAAIS4oKUgqyyAAca8oKCgpSClAADEMKCgoKCgpSUgoKUgqaClICCgqSokoKUqJKCpoKCmJKCgoKCgpSCgpSUgpiSgoKSgoKCgoKCgoaCgpSClJSCgoKUpoKAgpKCtoKCgoKCgpSmgoKCgoKUgoKCgKaSgraCgpKCtpKCtsaS1JSCgpSCgoKClIK4goKUgoLqgrqCgoKUgoKCgqiCgv6ClA==", "333-335:1", "", "170=NewReader/1/1/2")]
-[assembly: go.GoPositionMap("encoding/csv/writer.go", "writer.cs", "ACVOkgAFFMKClqKCgILcgoCCpJaAgqSUgoKogIKkloKClLSCxoKUxoKCuICCtoKClJSqoqqigqqigoKCpgACHgAMAoKWgpaCgoKCuIKogg==", "", "", "40=NewWriter/1/1/2")]
+[assembly: go.GoPositionMap("encoding/csv/reader.go", "reader.cs", "AEqUAYKClIKUpoC4goKmlpSCAEKkAZIABR4ADAKCgpSUAAIS4oKUgqyyAAca8oKCgpSClAADEMKCgoKCgpSUgoKUgqaClICCgqSokoKUqJKCpoKCqJKCgoKCgpSCgpSUgqiSgoKSgoKCgoKCgoaCgpSClJSCgoKUpoKAgpKCtoKCgoKCgpSmgoKCgoKUgoKCgLaCgsaCgoKCxoKCxsaCxJSCgpSCgoKClIK4goKUgoLqgsqCgoKUgoKCgriCgv6ClA==", "333-335:1", "", "169=NewReader/1/1/2")]
+[assembly: go.GoPositionMap("encoding/csv/writer.go", "writer.cs", "ACVOkgAFFMKCpqKCgILsgoCCpKaAgqSUgoK4gIKkpoKClLSCxoKUtoKCuICCtoKClJSqoqqigqqigoKCpgACHgAMAoKmgqaCgoKCuIK4gg==", "", "", "40=NewWriter/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;

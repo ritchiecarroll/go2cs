@@ -49,6 +49,7 @@ internal static @string lookupError(this ж<Checker> Ꮡcheck, ΔType typ, @stri
     const nint misspelled = 2; // found object with different spelling
     const nint unexported = 3; // found object with name differing only in first letter
     const nint inaccessible = 4; // found object with matching name but inaccessible from the current package
+
     // determine case
     nint e = missing;
     @string alt = default!;           // alternative spelling of selector; if any
@@ -75,6 +76,7 @@ internal static @string lookupError(this ж<Checker> Ꮡcheck, ΔType typ, @stri
             e = inaccessible;
         }
     }
+
     if (structLit){
         var exprᴛ1 = e;
         if (exprᴛ1 == missing) {
@@ -89,7 +91,6 @@ internal static @string lookupError(this ж<Checker> Ꮡcheck, ΔType typ, @stri
         if (exprᴛ1 == inaccessible) {
             return Ꮡcheck.sprintf("cannot refer to unexported field %s in struct literal of type %s"u8, alt, typ);
         }
-
     } else {
         @string what = objectˢ;
         switch (obj.type()) {
@@ -101,7 +102,6 @@ internal static @string lookupError(this ж<Checker> Ꮡcheck, ΔType typ, @stri
             what = methodˢ;
             break;
         }}
-
         var exprᴛ2 = e;
         if (exprᴛ2 == missing) {
             return Ꮡcheck.sprintf("type %s has no field or method %s"u8, typ, sel);
@@ -115,8 +115,8 @@ internal static @string lookupError(this ж<Checker> Ꮡcheck, ΔType typ, @stri
         if (exprᴛ2 == inaccessible) {
             return Ꮡcheck.sprintf("cannot refer to unexported %s %s"u8, what, alt);
         }
-
     }
+
     throw panic("unreachable");
 }
 

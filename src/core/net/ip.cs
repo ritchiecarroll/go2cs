@@ -21,11 +21,23 @@ partial class net_package {
 
 // IP address lengths (bytes).
 public static UntypedInt IPv4len => 4;
-
 public static UntypedInt IPv6len => 16;
 
+// An IP is a single IP address, a slice of bytes.
+// Functions in this package accept either 4-byte (IPv4)
+// or 16-byte (IPv6) slices as input.
+//
+// Note that in this documentation, referring to an
+// IP address as an IPv4 address or an IPv6 address
+// is a semantic property of the address, not just the
+// length of the byte slice: a 16-byte slice can still
+// be an IPv4 address.
 partial struct IP /*[]byte*/;
 
+// An IPMask is a bitmask that can be used to manipulate
+// IP addresses for IP addressing and routing.
+//
+// See type [IPNet] and func [ParseCIDR] for details.
 partial struct IPMask /*[]byte*/;
 
 // An IPNet represents an IP network.
@@ -86,24 +98,16 @@ public static IPMask CIDRMask(nint ones, nint bits) {
 
 // Well-known IPv4 addresses
 public static IP IPv4bcast = IPv4(255, 255, 255, 255); // limited broadcast
-
 public static IP IPv4allsys = IPv4(224, 0, 0, 1); // all systems
-
 public static IP IPv4allrouter = IPv4(224, 0, 0, 2); // all routers
-
 public static IP IPv4zero = IPv4(0, 0, 0, 0); // all zeros
 
 // Well-known IPv6 addresses
 public static IP IPv6zero = new IP(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}.slice());
-
 public static IP IPv6unspecified = new IP(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}.slice());
-
 public static IP IPv6loopback = new IP(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}.slice());
-
 public static IP IPv6interfacelocalallnodes = new IP(new byte[]{0xff, 0x01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x01}.slice());
-
 public static IP IPv6linklocalallnodes = new IP(new byte[]{0xff, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x01}.slice());
-
 public static IP IPv6linklocalallrouters = new IP(new byte[]{0xff, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x02}.slice());
 
 // IsUnspecified reports whether ip is an unspecified address, either
@@ -227,9 +231,7 @@ public static IP To16(this IP ip) {
 
 // Default route masks for IPv4.
 internal static IPMask classAMask = IPv4Mask(0xff, 0, 0, 0);
-
 internal static IPMask classBMask = IPv4Mask(0xff, 0xff, 0, 0);
-
 internal static IPMask classCMask = IPv4Mask(0xff, 0xff, 0xff, 0);
 
 // DefaultMask returns the default IP mask for the IP address ip.
@@ -251,7 +253,6 @@ public static IPMask DefaultMask(this IP ip) {
     default: {
         return classCMask;
     }}
-
 }
 
 internal static bool allFF(slice<byte> b) {
@@ -295,9 +296,11 @@ public static @string String(this IP ip) {
     if (len(ip) == 0) {
         return nilˢ;
     }
+
     if (len(ip) != IPv4len && len(ip) != IPv6len) {
         return "?"u8 + hexString(ip);
     }
+
     slice<byte> buf = default!;
     var exprᴛ1 = len(ip);
     if (exprᴛ1 == IPv4len) {
@@ -308,7 +311,6 @@ public static @string String(this IP ip) {
         const nint maxCap = /* len("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff") */ 39;
         buf = new slice<byte>(0, maxCap);
     }
-
     buf = ip.appendTo(buf);
     return ((@string)buf);
 }
@@ -353,6 +355,7 @@ public static (slice<byte>, error) AppendText(this IP ip, slice<byte> b) {
     if (len(ip) != IPv4len && len(ip) != IPv6len) {
         return (b, new AddrErrorжerror(Ꮡ(new AddrError(Err: "invalid IP address"u8, Addr: hexString(ip)))));
     }
+
     return (ip.appendTo(b), default!);
 }
 
@@ -486,7 +489,6 @@ internal static (IP ip, IPMask m) networkNumberAndMask(ref IPNet n) {
     else { /* default: */
         return (default!, default!);
     }
-
     return (ip, m);
 }
 
@@ -575,10 +577,12 @@ public static (IP, ж<IPNet>, error) ParseCIDR(@string s) {
     if (!found) {
         return (default!, default!, new ParseErrorжerror(Ꮡ(new ParseError(Type: "CIDR address"u8, Text: s))));
     }
+
     var (ipAddr, err) = netip.ParseAddr(addr);
     if (err != default! || ipAddr.Zone() != ""u8) {
         return (default!, default!, new ParseErrorжerror(Ꮡ(new ParseError(Type: "CIDR address"u8, Text: s))));
     }
+
     var (n, i, ok) = dtoi(mask);
     if (!ok || i != len(mask) || n < 0 || n > ipAddr.BitLen()) {
         return (default!, default!, new ParseErrorжerror(Ꮡ(new ParseError(Type: "CIDR address"u8, Text: s))));

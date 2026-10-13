@@ -27,7 +27,6 @@ internal static error errnoErr(syscall.Errno e) {
     if (exprᴛ1 == errnoERROR_IO_PENDING) {
         return errERROR_IO_PENDING;
     }
-
     // TODO: add more here, after collecting data on the common
     // error values see on Windows. (perhaps when running
     // all.bat?)
@@ -43,6 +42,7 @@ internal static ж<syscall.LazyDLL> modntdll = syscall.NewLazyDLL(sysdll.Add("nt
 internal static ж<syscall.LazyDLL> modpsapi = syscall.NewLazyDLL(sysdll.Add("psapi.dll"u8));
 internal static ж<syscall.LazyDLL> moduserenv = syscall.NewLazyDLL(sysdll.Add("userenv.dll"u8));
 internal static ж<syscall.LazyDLL> modws2_32 = syscall.NewLazyDLL(sysdll.Add("ws2_32.dll"u8));
+
 internal static ж<syscall.LazyProc> procAdjustTokenPrivileges = modadvapi32.NewProc("AdjustTokenPrivileges"u8);
 internal static ж<syscall.LazyProc> procDuplicateTokenEx = modadvapi32.NewProc("DuplicateTokenEx"u8);
 internal static ж<syscall.LazyProc> procGetSidIdentifierAuthority = modadvapi32.NewProc("GetSidIdentifierAuthority"u8);

@@ -168,6 +168,7 @@ public static (slice<byte>, error) Sign(this ж<PrivateKey> Ꮡpriv, io.Reader r
             return SignPSS(rand, Ꮡpriv, (~pssOpts).Hash, digest, pssOpts);
         }
     }
+
     return SignPKCS1v15(rand, Ꮡpriv, opts.HashFunc(), digest);
 }
 
@@ -183,6 +184,7 @@ public static (slice<byte> plaintext, error err) Decrypt(this ж<PrivateKey> Ꮡ
     if (opts == default!) {
         return DecryptPKCS1v15(rand, Ꮡpriv, ciphertext);
     }
+
     switch (opts.type()) {
     case ж<OAEPOptions> optsΔ1: {
         if ((~optsΔ1).MGFHash == 0){
@@ -309,6 +311,7 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader random, nint bits) {
             return (default!, errΔ1);
         }
     }
+
     if (boring.Enabled && AreEqual(random, boring.RandReader) && (bits == 2048 || bits == 3072 || bits == 4096)) {
         var (bN, bE, bD, bP, bQ, bDp, bDq, bQinv, errΔ2) = boring.GenerateKeyRSA(bits);
         if (errΔ2 != default!) {
@@ -326,6 +329,7 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader random, nint bits) {
         if (!E.IsInt64() || (int64)(nint)e64 != e64) {
             return (default!, errors.New(cryptoRsaGeneratedKeyˢ));
         }
+
         var keyΔ1 = Ꮡ(new PrivateKey(
             PublicKey: new PublicKey(
                 N: NΔ1,
@@ -337,12 +341,12 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader random, nint bits) {
                 Dp: Dp,
                 Dq: Dq,
                 Qinv: Qinv,
-                CRTValues: new slice<CRTValue>(0)
+                CRTValues: new slice<CRTValue>(0) // non-nil, to match Precompute
             )
         ));
-        // non-nil, to match Precompute
         return (keyΔ1, default!);
     }
+
     if (fips140only.Enabled && bits < 2048) {
         return (default!, errors.New(cryptoRsaUseOfKeysˢ));
     }
@@ -352,6 +356,7 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader random, nint bits) {
     if (fips140only.Enabled && !fips140only.ApprovedRandomReader(random)) {
         return (default!, errors.New(cryptoRsaOnlyCryptoRandˢ));
     }
+
     var (k, err) = rsa.GenerateKey(random, bits);
     if (bits < 256 && err != default!) {
         // Toy-sized keys have a non-negligible chance of hitting two hard
@@ -387,10 +392,9 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader random, nint bits) {
             Dp: @new<bigꓸInt>().SetBytes(dP),
             Dq: @new<bigꓸInt>().SetBytes(dQ),
             Qinv: @new<bigꓸInt>().SetBytes(qInv),
-            CRTValues: new slice<CRTValue>(0)
+            CRTValues: new slice<CRTValue>(0) // non-nil, to match Precompute
         )
     ));
-    // non-nil, to match Precompute
     return (key, default!);
 }
 
@@ -425,12 +429,16 @@ public static (ж<PrivateKey>, error) GenerateMultiPrimeKey(io.Reader random, ni
     if (fips140only.Enabled) {
         return (default!, errors.New(cryptoRsaMultiPrimeRsaIsˢ));
     }
+
     randutil.MaybeReadByte(random);
+
     var priv = @new<PrivateKey>();
     priv.Value.E = 65537;
+
     if (nprimes < 2) {
         return (default!, errors.New(cryptoRsaˢ));
     }
+
     if (bits < 64) {
         var primeLimit = (float64)(((uint64)1).Lsh((nuint)(quo(bits, nprimes))));
         // pi approximates the number of primes less than primeLimit
@@ -445,7 +453,9 @@ public static (ж<PrivateKey>, error) GenerateMultiPrimeKey(io.Reader random, ni
             return (default!, errors.New(cryptoRsaTooFewPrimesOfˢ));
         }
     }
+
     var primes = new slice<ж<bigꓸInt>>(nprimes);
+
 NextSetOfPrimes:
     while (ᐧ) {
         nint todo = bits;
@@ -471,6 +481,7 @@ NextSetOfPrimes:
             }
             todo -= primes[i].BitLen();
         }
+
         // Make sure that primes is pairwise unequal.
         foreach (var (i, prime) in primes) {
             for (nint j = 0; j < i; j++) {
@@ -479,6 +490,7 @@ NextSetOfPrimes:
                 }
             }
         }
+
         var n = @new<bigꓸInt>().Set(bigOne);
         var totient = @new<bigꓸInt>().Set(bigOne);
         var pminus1 = @new<bigꓸInt>();
@@ -493,9 +505,11 @@ NextSetOfPrimes:
             // For nprimes > 2 we hope it does not happen often.
             goto continue_NextSetOfPrimes;
         }
+
         priv.Value.D = @new<bigꓸInt>();
         var e = big.NewInt((int64)(~priv).E);
         var ok = (~priv).D.ModInverse(e, totient);
+
         if (ok != nil) {
             priv.Value.Primes = primes;
             priv.Value.N = n;
@@ -504,12 +518,14 @@ NextSetOfPrimes:
 continue_NextSetOfPrimes:;
     }
 break_NextSetOfPrimes:;
+
     priv.Precompute();
     {
         var err = priv.Validate(); if (err != default!) {
             return (default!, err);
         }
     }
+
     return (priv, default!);
 }
 
@@ -532,6 +548,7 @@ public static void Precompute(this ref PrivateKey priv) {
     if (priv.Precomputed.fips != nil) {
         return;
     }
+
     var (precomputed, err) = priv.precompute();
     if (err != default!) {
         // We don't have a way to report errors, so just leave the key
@@ -548,6 +565,7 @@ internal static readonly @string cryptoRsaPrimeQIsNilˢ = "crypto/rsa: prime Q i
 
 internal static (PrecomputedValues, error) precompute(this ref PrivateKey priv) {
     PrecomputedValues precomputed = default!;
+
     if (priv.N == nil) {
         return (precomputed, errors.New(cryptoRsaMissingPublicˢ));
     }
@@ -563,6 +581,7 @@ internal static (PrecomputedValues, error) precompute(this ref PrivateKey priv) 
     if (priv.Primes[1] == nil) {
         return (precomputed, errors.New(cryptoRsaPrimeQIsNilˢ));
     }
+
     // If the CRT values are already set, use them.
     if (priv.Precomputed.Dp != nil && priv.Precomputed.Dq != nil && priv.Precomputed.Qinv != nil) {
         var (kΔ1, errΔ1) = rsa.NewPrivateKeyWithPrecomputation(priv.N.Bytes(), priv.E, priv.D.Bytes(),
@@ -576,11 +595,13 @@ internal static (PrecomputedValues, error) precompute(this ref PrivateKey priv) 
         precomputed.CRTValues = new slice<CRTValue>(0);
         return (precomputed, default!);
     }
+
     var (k, err) = rsa.NewPrivateKey(priv.N.Bytes(), priv.E, priv.D.Bytes(),
         priv.Primes[0].Bytes(), priv.Primes[1].Bytes());
     if (err != default!) {
         return (precomputed, err);
     }
+
     precomputed.fips = k;
     var (_, _, _, _, _, dP, dQ, qInv) = k.Export();
     precomputed.Dp = @new<bigꓸInt>().SetBytes(dP);
@@ -597,14 +618,17 @@ internal static readonly @string cryptoRsaPrimeFactorsAreˢ = "crypto/rsa: prime
 
 internal static (PrecomputedValues, error) precomputeLegacy(this ref PrivateKey priv) {
     PrecomputedValues precomputed = default!;
+
     var (k, err) = rsa.NewPrivateKeyWithoutCRT(priv.N.Bytes(), priv.E, priv.D.Bytes());
     if (err != default!) {
         return (precomputed, err);
     }
     precomputed.fips = k;
+
     if (len(priv.Primes) < 2) {
         return (precomputed, default!);
     }
+
     // Ensure the Mod and ModInverse calls below don't panic.
     foreach (var (_, prime) in priv.Primes) {
         if (prime == nil) {
@@ -614,28 +638,36 @@ internal static (PrecomputedValues, error) precomputeLegacy(this ref PrivateKey 
             return (precomputed, errors.New(cryptoRsaPrimeFactorIs1ˢ));
         }
     }
+
     precomputed.Dp = @new<bigꓸInt>().Sub(priv.Primes[0], bigOne);
     precomputed.Dp.Mod(priv.D, precomputed.Dp);
+
     precomputed.Dq = @new<bigꓸInt>().Sub(priv.Primes[1], bigOne);
     precomputed.Dq.Mod(priv.D, precomputed.Dq);
+
     precomputed.Qinv = @new<bigꓸInt>().ModInverse(priv.Primes[1], priv.Primes[0]);
     if (precomputed.Qinv == nil) {
         return (precomputed, errors.New(cryptoRsaPrimeFactorsAreˢ));
     }
+
     var r = @new<bigꓸInt>().Mul(priv.Primes[0], priv.Primes[1]);
     precomputed.CRTValues = new slice<CRTValue>(len(priv.Primes) - 2);
     for (nint i = 2; i < len(priv.Primes); i++) {
         var prime = priv.Primes[i];
         var values = Ꮡ(precomputed.CRTValues, i - 2);
+
         values.Value.Exp = @new<bigꓸInt>().Sub(prime, bigOne);
         (~values).Exp.Mod(priv.D, (~values).Exp);
+
         values.Value.R = @new<bigꓸInt>().Set(r);
         values.Value.Coeff = @new<bigꓸInt>().ModInverse(r, prime);
         if ((~values).Coeff == nil) {
             return (precomputed, errors.New(cryptoRsaPrimeFactorsAreˢ));
         }
+
         r.Mul(r, prime);
     }
+
     return (precomputed, default!);
 }
 

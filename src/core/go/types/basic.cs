@@ -7,9 +7,12 @@ namespace go.go;
 
 partial class types_package {
 
+// BasicKind describes the kind of basic type.
 partial struct BasicKind /*num:nint*/;
 
 public static BasicKind Invalid => /* iota */ 0;  // type is invalid
+
+// predeclared types
 public static BasicKind Bool => 1;
 public static BasicKind Int => 2;
 public static BasicKind Int8 => 3;
@@ -28,6 +31,8 @@ public static BasicKind Complex64 => 15;
 public static BasicKind Complex128 => 16;
 public static BasicKind ΔString => 17;
 public static BasicKind UnsafePointer => 18;
+
+// types for untyped values
 public static BasicKind UntypedBool => 19;
 public static BasicKind ΔUntypedInt => 20;
 public static BasicKind UntypedRune => 21;
@@ -35,30 +40,25 @@ public static BasicKind ΔUntypedFloat => 22;
 public static BasicKind ΔUntypedComplex => 23;
 public static BasicKind UntypedString => 24;
 public static BasicKind UntypedNil => 25;
+
+// aliases
 public static BasicKind Byte => /* Uint8 */ 8;
 public static BasicKind Rune => /* Int32 */ 5;
 
+// BasicInfo is a set of flags describing properties of a basic type.
 partial struct BasicInfo /*num:nint*/;
 
 // Properties of basic types.
 public static BasicInfo IsBoolean => /* 1 << iota */ 1;
-
 public static BasicInfo IsInteger => 2;
-
 public static BasicInfo IsUnsigned => 4;
-
 public static BasicInfo IsFloat => 8;
-
 public static BasicInfo IsComplex => 16;
-
 public static BasicInfo IsString => 32;
-
 public static BasicInfo IsUntyped => 64;
 
 public static BasicInfo IsOrdered => /* IsInteger | IsFloat | IsString */ 42;
-
 public static BasicInfo IsNumeric => /* IsInteger | IsFloat | IsComplex */ 26;
-
 public static BasicInfo IsConstType => /* IsBoolean | IsNumeric | IsString */ 59;
 
 // A Basic represents a basic type.

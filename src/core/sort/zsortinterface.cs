@@ -39,10 +39,12 @@ internal static void heapSort(Interface data, nint a, nint b) {
     nint first = a;
     nint lo = 0;
     nint hi = b - a;
+
     // Build heap with greatest element at top.
     for (nint i = (hi - 1) / 2; i >= 0; i--) {
         siftDown(data, i, hi, first);
     }
+
     // Pop elements, largest first, into end of data.
     for (nint i = hi - 1; i >= 0; i--) {
         data.Swap(first, first + i);
@@ -58,24 +60,30 @@ internal static void heapSort(Interface data, nint a, nint b) {
 // limit is the number of allowed bad (very unbalanced) pivots before falling back to heapsort.
 internal static void pdqsort(Interface data, nint a, nint b, nint limit) {
     const nint maxInsertion = 12;
+
     bool wasBalanced = true;   // whether the last partitioning was reasonably balanced
     bool wasPartitioned = true; // whether the slice was already partitioned
+
     while (ᐧ) {
         nint length = b - a;
+
         if (length <= maxInsertion) {
             insertionSort(data, a, b);
             return;
         }
+
         // Fall back to heapsort if too many bad choices were made.
         if (limit == 0) {
             heapSort(data, a, b);
             return;
         }
+
         // If the last partitioning was imbalanced, we need to breaking patterns.
         if (!wasBalanced) {
             breakPatterns(data, a, b);
             limit--;
         }
+
         var (pivot, hint) = choosePivot(data, a, b);
         if (hint == decreasingHint) {
             reverseRange(data, a, b);
@@ -85,12 +93,14 @@ internal static void pdqsort(Interface data, nint a, nint b, nint limit) {
             pivot = (b - 1) - (pivot - a);
             hint = increasingHint;
         }
+
         // The slice is likely already sorted.
         if (wasBalanced && wasPartitioned && hint == increasingHint) {
             if (partialInsertionSort(data, a, b)) {
                 return;
             }
         }
+
         // Probably the slice contains many duplicate elements, partition the slice into
         // elements equal to and elements greater than the pivot.
         if (a > 0 && !data.Less(a - 1, pivot)) {
@@ -98,8 +108,10 @@ internal static void pdqsort(Interface data, nint a, nint b, nint limit) {
             a = midΔ1;
             continue;
         }
+
         var (mid, alreadyPartitioned) = partition(data, a, b, pivot);
         wasPartitioned = alreadyPartitioned;
+
         nint leftLen = mid - a;
         nint rightLen = b - mid;
         nint balanceThreshold = length / 8;
@@ -123,6 +135,7 @@ internal static (nint newpivot, bool alreadyPartitioned) partition(Interface dat
     data.Swap(a, pivot);
     nint i = a + 1;
     nint j = b - 1; // i and j are inclusive of the elements remaining to be partitioned
+
     while (i <= j && data.Less(i, a)) {
         i++;
     }
@@ -136,6 +149,7 @@ internal static (nint newpivot, bool alreadyPartitioned) partition(Interface dat
     data.Swap(i, j);
     i++;
     j--;
+
     while (ᐧ) {
         while (i <= j && data.Less(i, a)) {
             i++;
@@ -160,6 +174,7 @@ internal static nint /*newpivot*/ partitionEqual(Interface data, nint a, nint b,
     data.Swap(a, pivot);
     nint i = a + 1;
     nint j = b - 1; // i and j are inclusive of the elements remaining to be partitioned
+
     while (ᐧ) {
         while (i <= j && !data.Less(a, i)) {
             i++;
@@ -186,13 +201,17 @@ internal static bool partialInsertionSort(Interface data, nint a, nint b) {
         while (i < b && !data.Less(i, i - 1)) {
             i++;
         }
+
         if (i == b) {
             return true;
         }
+
         if (b - a < shortestShifting) {
             return false;
         }
+
         data.Swap(i, i - 1);
+
         // Shift the smaller one to the left.
         if (i - a >= 2) {
             for (nint jΔ1 = i - 1; jΔ1 >= 1; jΔ1--) {
@@ -222,6 +241,7 @@ internal static void breakPatterns(Interface data, nint a, nint b) {
     if (length >= 8) {
         var random = ((xorshift)(uint64)length);
         nuint modulus = nextPowerOfTwo(length);
+
         for (nint idx = a + (length / 4) * 2 - 1; idx <= a + (length / 4) * 2 + 1; idx++) {
             nint other = (nint)((nuint)((nuint)random.Next() & (modulus - 1)));
             if (other >= length) {
@@ -240,11 +260,14 @@ internal static void breakPatterns(Interface data, nint a, nint b) {
 internal static (nint pivot, sortedHint hint) choosePivot(Interface data, nint a, nint b) {
     const nint shortestNinther = 50;
     const nint maxSwaps = /* 4 * 3 */ 12;
+
     nint l = b - a;
+
     nint swaps = default!;
     nint i = a + l / 4 * 1;
     nint j = a + l / 4 * 2;
     nint k = a + l / 4 * 3;
+
     if (l >= 8) {
         if (l >= shortestNinther) {
             // Tukey ninther method, the idea came from Rust's implementation.
@@ -255,6 +278,7 @@ internal static (nint pivot, sortedHint hint) choosePivot(Interface data, nint a
         // Find the median among i, j, k and stores it into j.
         j = median(data, i, j, k, ref swaps);
     }
+
     var exprᴛ1 = swaps;
     if (exprᴛ1 is 0) {
         return (j, increasingHint);
@@ -265,7 +289,6 @@ internal static (nint pivot, sortedHint hint) choosePivot(Interface data, nint a
     { /* default: */
         return (j, unknownHint);
     }
-
 }
 
 // order2 returns x,y where data[x] <= data[y], where x,y=a,b or x,y=b,a.
@@ -316,6 +339,7 @@ internal static void stable(Interface data, nint n) {
         b += blockSize;
     }
     insertionSort(data, a, n);
+
     while (blockSize < n) {
         (a, b) = (0, 2 * blockSize);
         while (b <= n) {
@@ -375,6 +399,7 @@ internal static void symMerge(Interface data, nint a, nint m, nint b) {
         }
         return;
     }
+
     // Avoid unnecessary recursions of symMerge
     // by direct insertion of data[m] into data[a:m]
     // if data[m:b] only contains one element.
@@ -398,6 +423,7 @@ internal static void symMerge(Interface data, nint a, nint m, nint b) {
         }
         return;
     }
+
     nint mid = (nint)(((nuint)(a + b) >> (int)(1)));
     nint n = mid + m;
     nint start = default!;
@@ -410,6 +436,7 @@ internal static void symMerge(Interface data, nint a, nint m, nint b) {
         r = m;
     }
     nint p = n - 1;
+
     while (start < r) {
         nint c = (nint)(((nuint)(start + r) >> (int)(1)));
         if (!data.Less(p - c, c)){
@@ -418,6 +445,7 @@ internal static void symMerge(Interface data, nint a, nint m, nint b) {
             r = c;
         }
     }
+
     nint end = n - start;
     if (start < m && m < end) {
         rotate(data, start, m, end);
@@ -437,6 +465,7 @@ internal static void symMerge(Interface data, nint a, nint m, nint b) {
 internal static void rotate(Interface data, nint a, nint m, nint b) {
     nint i = m - a;
     nint j = b - m;
+
     while (i != j) {
         if (i > j){
             swapRange(data, m - i, m, j);

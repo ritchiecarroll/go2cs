@@ -77,6 +77,7 @@ internal static traceWriter @event(this traceWriter w, traceEv ev, params ꓸꓸ
     // the stack growth related invariants for writing events.
     // Make sure we have room.
     (w, _) = w.ensure(1 + (len(args) + 1) * (nint)traceBytesPerNumber);
+
     // Compute the timestamp diff that we'll put in the trace.
     var ts = traceClockNow();
     if (ts <= (~w.traceBuf).lastTime) {
@@ -84,6 +85,7 @@ internal static traceWriter @event(this traceWriter w, traceEv ev, params ꓸꓸ
     }
     var tsDiff = (uint64)(ts - (~w.traceBuf).lastTime);
     w.traceBuf.Value.lastTime = ts;
+
     // Write out event.
     w.@byte((byte)ev);
     w.varint(tsDiff);
@@ -180,11 +182,13 @@ internal static traceWriter refill(this traceWriter w) {
     w.traceBuf.Value.lastTime = ts;
     w.traceBuf.Value.link = default!;
     w.traceBuf.Value.pos = 0;
+
     // Tolerate a nil mp.
     var mID = ~(uint64)0;
     if (w.mp != nil) {
         mID = (uint64)(~w.mp).procid;
     }
+
     // Write the buffer's header.
     if (w.exp == traceNoExperiment){
         w.@byte((byte)traceEvEventBatch);
@@ -352,6 +356,7 @@ internal static void traceBufFlush(ж<traceBuf> Ꮡbuf, uintptr gen) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     assertLockHeld(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
+
     // Write out the non-header length of the batch in the header.
     //
     // Note: the length of the header is not included to make it easier
@@ -362,6 +367,7 @@ internal static void traceBufFlush(ж<traceBuf> Ꮡbuf, uintptr gen) {
     // padding.
     buf.varintAt(buf.lenPos, (uint64)(buf.pos - (buf.lenPos + (nint)traceBytesPerNumber)));
     Δtrace.full[gen % 2].push(Ꮡbuf);
+
     // Notify the scheduler that there's work available and that the trace
     // reader should be scheduled.
     if (!ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑworkAvailable).Load()) {

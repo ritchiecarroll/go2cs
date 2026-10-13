@@ -62,7 +62,6 @@ internal static void changegstatus(this ж<synctestGroup> Ꮡsg, ж<g> Ꮡgp, ui
             wasRunning = false;
         }
     }
-
     var isRunning = true;
     var exprᴛ2 = newval;
     if (exprᴛ2 == _Gdead) {
@@ -74,12 +73,12 @@ internal static void changegstatus(this ж<synctestGroup> Ꮡsg, ж<g> Ꮡgp, ui
             isRunning = false;
         }
     }
-
     // It's possible for wasRunning == isRunning while totalDelta != 0;
     // for example, if a new goroutine is created in a non-running state.
     if (wasRunning == isRunning && totalDelta == 0) {
         return;
     }
+
     @lock(Ꮡsg.of(synctestGroup.Ꮡmu));
     sg.total += totalDelta;
     if (wasRunning != isRunning) {
@@ -183,6 +182,7 @@ internal static void synctestRun(Action fʗp) {
         if (Ꮡdebug.of(debugᴛ1.Ꮡasynctimerchan).Load() != 0) {
             throw panic("synctest.Run not supported with asynctimerchan!=0");
         }
+
         var gp = getg();
         if ((~gp).syncGroup != nil) {
             throw panic("synctest.Run called from within a synctest bubble");
@@ -201,8 +201,10 @@ internal static void synctestRun(Action fʗp) {
         defer(() => {
             gpʗ1.Value.syncGroup = default!;
         }, ref ᒐ);
+
         var fv = ~Ꮡf.Reinterpret<Action, ж<funcval>>();
         newproc(fv);
+
         var sg = gp.Value.syncGroup;
         @lock(sg.of(synctestGroup.Ꮡmu));
         sg.Value.active++;
@@ -229,6 +231,7 @@ internal static void synctestRun(Action fʗp) {
             }
             sg.Value.now = next;
         }
+
         nint total = sg.Value.total;
         unlock(sg.of(synctestGroup.Ꮡmu));
         if (total != 1) {
@@ -276,6 +279,7 @@ internal static void synctestWait() {
     gp.Value.syncGroup.Value.waiting = true;
     unlock((~gp).syncGroup.of(synctestGroup.Ꮡmu));
     gopark(synctestwait_c, nil, waitReasonSynctestWait, traceBlockSynctest, 0);
+
     @lock((~gp).syncGroup.of(synctestGroup.Ꮡmu));
     gp.Value.syncGroup.Value.active--;
     if ((~(~gp).syncGroup).active < 0) {
@@ -284,6 +288,7 @@ internal static void synctestWait() {
     gp.Value.syncGroup.Value.waiter = default!;
     gp.Value.syncGroup.Value.waiting = false;
     unlock((~gp).syncGroup.of(synctestGroup.Ꮡmu));
+
     // Establish a happens-before relationship on the activity of the now-blocked
     // goroutines in the group.
     if (raceenabled) {

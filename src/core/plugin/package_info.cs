@@ -50,7 +50,7 @@ using static go.plugin_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("plugin/plugin.go", "plugin.cs", "AFOmAbKuwg==")]
+[assembly: go.GoPositionMap("plugin/plugin.go", "plugin.cs", "AHGmAbKuwg==")]
 [assembly: go.GoPositionMap("plugin/plugin_stubs.go", "plugin_stubs.cs", "AA0WgqaC")]
 // </GoSourcePositionMaps>
 

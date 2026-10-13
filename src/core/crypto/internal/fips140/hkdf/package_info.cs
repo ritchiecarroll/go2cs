@@ -51,7 +51,7 @@ using static go.crypto.@internal.fips140.hkdf_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/hkdf/cast.go", "cast.cs", "AA8egoK43IKClA==", "16-32:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/hkdf/hkdf.go", "hkdf.cs", "AAwYooKUgpSCgoSmooKCgoKEgoKClIKUgoKCgoKClqaigg==")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/hkdf/hkdf.go", "hkdf.cs", "AAwYooKUgpSCgpSmooKCgoKUgoKClIKUgoKCgoKCpqaigg==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

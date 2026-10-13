@@ -163,14 +163,29 @@ internal static void unlock(this ж<timers> Ꮡts) {
     // entire time, never 0. This is important for pidleput deciding
     // whether ts is empty.
     Ꮡts.of(timers.Ꮡlen).Store((uint32)len(ts.heap));
+
     unlock(Ꮡts.of(timers.Ꮡmu));
 }
 
 // Timer state field.
+// timerHeaped is set when the timer is stored in some P's heap.
 internal const uint8 timerHeaped = /* 1 << iota */ 1;
 
+// timerModified is set when t.when has been modified
+// but the heap's heap[i].when entry still needs to be updated.
+// That change waits until the heap in which
+// the timer appears can be locked and rearranged.
+// timerModified is only set when timerHeaped is also set.
 internal const uint8 timerModified = 2;
 
+// timerZombie is set when the timer has been stopped
+// but is still present in some P's heap.
+// Only set when timerHeaped is also set.
+// It is possible for timerModified and timerZombie to both
+// be set, meaning that the timer was modified and then stopped.
+// A timer sending to a channel may be placed in timerZombie
+// to take it out of the heap even though the timer is not stopped,
+// as long as nothing is reading from the channel.
 internal const uint8 timerZombie = 4;
 
 // timerDebug enables printing a textual debug trace of all timer operations to stderr.
@@ -270,6 +285,7 @@ internal static bool /*updated*/ updateHeap(this ж<timer> Ꮡt) {
         ts.deleteMin();
         return true;
     }
+
     if ((uint8)(t.state & timerModified) != 0) {
         // Update ts.heap[0].when and move within heap.
         t.state &= unchecked((uint8)~(uint8)(timerModified));
@@ -278,6 +294,7 @@ internal static bool /*updated*/ updateHeap(this ж<timer> Ꮡt) {
         ts.updateMinWhenHeap();
         return true;
     }
+
     return false;
 }
 
@@ -299,6 +316,7 @@ internal static void timeSleep(int64 ns) {
     if (ns <= 0) {
         return;
     }
+
     var gp = getg();
     var t = gp.Value.timer;
     if (t == nil) {
@@ -318,8 +336,7 @@ internal static void timeSleep(int64 ns) {
         }
     }
     var when = now + ns;
-    if (when < 0) {
-        // check for overflow.
+    if (when < 0) { // check for overflow.
         when = maxWhen;
     }
     gp.Value.sleepWhen = when;
@@ -444,6 +461,7 @@ internal static void addHeap(this ж<timers> Ꮡts, ж<timer> Ꮡt) {
     if (ᏑnetpollInited.Load() == 0) {
         netpollGenericInit();
     }
+
     if (t.ts != nil) {
         @throw(tsSetInTimerˢ);
     }
@@ -497,6 +515,7 @@ internal static bool stop(this ж<timer> Ꮡt) {
     if (!async && t.isChan) {
         @lock(Ꮡt.of(timer.ᏑsendLock));
     }
+
     Ꮡt.@lock();
     Ꮡt.trace(stopˢ);
     if (async) {
@@ -511,10 +530,12 @@ internal static bool stop(this ж<timer> Ꮡt) {
     }
     var pending = t.when > 0;
     t.when = 0;
+
     if (!async && t.isChan) {
         // Stop any future sends with stale values.
         // See timer.unlockAndRun.
         t.seq++;
+
         // If there is currently a send in progress,
         // incrementing seq is going to prevent that
         // send from actually happening. That means
@@ -531,6 +552,7 @@ internal static bool stop(this ж<timer> Ꮡt) {
             pending = true;
         }
     }
+
     return pending;
 }
 
@@ -583,9 +605,11 @@ internal static bool modify(this ж<timer> Ꮡt, int64 when, int64 period, Actio
         @throw(timerPeriodMustBeNonˢ);
     }
     var async = Ꮡdebug.of(debugᴛ1.Ꮡasynctimerchan).Load() != 0;
+
     if (!async && t.isChan) {
         @lock(Ꮡt.of(timer.ᏑsendLock));
     }
+
     Ꮡt.@lock();
     if (async) {
         Ꮡt.maybeRunAsync();
@@ -598,6 +622,7 @@ internal static bool modify(this ж<timer> Ꮡt, int64 when, int64 period, Actio
         t.arg = arg;
         t.seq = seq;
     }
+
     var wake = false;
     var pending = t.when > 0;
     t.when = when;
@@ -621,11 +646,14 @@ internal static bool modify(this ж<timer> Ꮡt, int64 when, int64 period, Actio
             }
         }
     }
+
     var add = Ꮡt.needsAdd();
+
     if (!async && t.isChan) {
         // Stop any future sends with stale values.
         // See timer.unlockAndRun.
         t.seq++;
+
         // If there is currently a send in progress,
         // incrementing seq is going to prevent that
         // send from actually happening. That means
@@ -642,12 +670,14 @@ internal static bool modify(this ж<timer> Ꮡt, int64 when, int64 period, Actio
         }
         unlock(Ꮡt.of(timer.ᏑsendLock));
     }
+
     if (add) {
         Ꮡt.maybeAdd();
     }
     if (wake) {
         wakeNetPoller(when);
     }
+
     return pending;
 }
 
@@ -761,6 +791,7 @@ internal static void cleanHead(this ж<timers> Ꮡts) {
         if (len(ts.heap) == 0) {
             return;
         }
+
         // This loop can theoretically run for a while, and because
         // it is holding timersLock it cannot be preempted.
         // If someone is trying to preempt us, just return.
@@ -768,6 +799,7 @@ internal static void cleanHead(this ж<timers> Ꮡts) {
         if ((~gp).preemptStop) {
             return;
         }
+
         // Delete zombies from tail of heap. It requires no heap adjustments at all,
         // and doing so increases the chances that when we swap out a zombie
         // in heap[0] for the tail of the heap, we'll get a non-zombie timer,
@@ -787,14 +819,17 @@ internal static void cleanHead(this ж<timers> Ꮡts) {
                 continue;
             }
         }
+
         var t = ts.heap[0].timer;
         if ((~t).ts != Ꮡts) {
             @throw(badTsˢ);
         }
+
         if ((uint8)(t.of(timer.Ꮡastate).Load() & ((uint8)(timerModified | timerZombie))) == 0) {
             // Fast path: head of timers does not need adjustment.
             return;
         }
+
         t.@lock();
         var updated = t.updateHeap();
         t.unlock();
@@ -869,6 +904,7 @@ internal static void adjust(this ж<timers> Ꮡts, int64 now, bool force) {
             return;
         }
     }
+
     // minWhenModified is a lower bound on the earliest t.when
     // among the timerModified timers. We want to make it more precise:
     // we are going to scan the heap and clean out all the timerModified bits,
@@ -921,6 +957,7 @@ internal static void adjust(this ж<timers> Ꮡts, int64 now, bool force) {
     // will see the timerModified and do a full lock.
     Ꮡts.of(timers.ᏑminWhenHeap).Store(Ꮡts.wakeTime());
     Ꮡts.of(timers.ᏑminWhenModified).Store(0);
+
     var changed = false;
     for (nint i = 0; i < len(ts.heap); i++) {
         var tw = Ꮡ(ts.heap, i);
@@ -928,10 +965,12 @@ internal static void adjust(this ж<timers> Ꮡts, int64 now, bool force) {
         if ((~t).ts != Ꮡts) {
             @throw(badTsˢ);
         }
+
         if ((uint8)(t.of(timer.Ꮡastate).Load() & ((uint8)(timerModified | timerZombie))) == 0) {
             // Does not need adjustment.
             continue;
         }
+
         t.@lock();
         switch (ᐧ) {
         case {} when (uint8)((~t).state & timerHeaped) == 0: {
@@ -956,13 +995,14 @@ internal static void adjust(this ж<timers> Ꮡts, int64 now, bool force) {
             changed = true;
             break;
         }}
-
         t.unlock();
     }
+
     if (changed) {
         ts.initHeap();
     }
     Ꮡts.updateMinWhenHeap();
+
     if (verifyTimers) {
         Ꮡts.verify();
     }
@@ -1004,8 +1044,8 @@ internal static readonly @string checkˢ = "check"u8;
 internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> Ꮡts, int64 now) {
     int64 pollUntil = default!;
     bool ran = default!;
-
     ref var ts = ref Ꮡts.DerefOrNull();
+
     Ꮡts.trace(checkˢ);
     // If it's not yet time for the first timer, or the first adjusted
     // timer, then there is nothing to do.
@@ -1014,9 +1054,11 @@ internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> �
         // No timers to run or adjust.
         return (now, 0, false);
     }
+
     if (now == 0) {
         now = nanotime();
     }
+
     // If this is the local P, and there are a lot of deleted timers,
     // clear them out. We only do this for the local P to reduce
     // lock contention on timersLock.
@@ -1025,10 +1067,12 @@ internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> �
         badTimer();
     }
     var force = Ꮡts == (~(~getg()).m).p.ptr().of(runtime_package.Δp.Ꮡtimers) && (nint)zombies > (nint)Ꮡts.of(timers.Ꮡlen).Load() / 4;
+
     if (now < next && !force) {
         // Next timer is not ready to run, and we don't need to clear deleted timers.
         return (now, next, false);
     }
+
     Ꮡts.@lock();
     if (len(ts.heap) > 0) {
         Ꮡts.adjust(now, false);
@@ -1044,6 +1088,7 @@ internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> �
             }
             ran = true;
         }
+
         // Note: Delaying the forced adjustment until after the ts.run
         // (as opposed to calling ts.adjust(now, force) above)
         // is significantly faster under contention, such as in
@@ -1055,6 +1100,7 @@ internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> �
         }
     }
     Ꮡts.unlock();
+
     return (now, pollUntil, ran);
 }
 
@@ -1083,23 +1129,28 @@ Redo:
     if ((~t).ts != Ꮡts) {
         @throw(badTsˢ);
     }
+
     if ((uint8)(t.of(timer.Ꮡastate).Load() & ((uint8)(timerModified | timerZombie))) == 0 && tw.when > now) {
         // Fast path: not ready to run.
         return tw.when;
     }
+
     t.@lock();
     if (t.updateHeap()) {
         t.unlock();
         goto Redo;
     }
+
     if ((uint8)((~t).state & timerHeaped) == 0 || (uint8)((~t).state & timerModified) != 0) {
         badTimer();
     }
+
     if ((~t).when > now) {
         // Not ready to run.
         t.unlock();
         return (~t).when;
     }
+
     t.unlockAndRun(now);
     assertLockHeld(Ꮡts.of(timers.Ꮡmu)); // t is unlocked now, but not ts
     return 0;
@@ -1136,9 +1187,11 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now) {
         }
         raceacquirectx((~tsLocal).raceCtx, (uintptr)@unsafe.Pointer.FromRef(ref t));
     }
+
     if ((uint8)(t.state & ((uint8)(timerModified | timerZombie))) != 0) {
         badTimer();
     }
+
     var f = t.f;
     var arg = t.arg;
     var seq = t.seq;
@@ -1147,8 +1200,7 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now) {
     if (t.period > 0){
         // Leave in heap but adjust next time to fire.
         next = t.when + t.period * (1 + quo(delay, t.period));
-        if (next < 0) {
-            // check for overflow.
+        if (next < 0) { // check for overflow.
             next = maxWhen;
         }
     } else {
@@ -1164,6 +1216,7 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now) {
         }
         Ꮡt.updateHeap();
     }
+
     var async = Ꮡdebug.of(debugᴛ1.Ꮡasynctimerchan).Load() != 0;
     if (!async && t.isChan && t.period == 0) {
         // Tell Stop/Reset that we are sending a value.
@@ -1171,7 +1224,9 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now) {
             @throw(tooManyConcurrentTimerˢ);
         }
     }
+
     Ꮡt.unlock();
+
     if (raceenabled) {
         // Temporarily use the current P's racectx for g0.
         var gp = getg();
@@ -1180,9 +1235,11 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now) {
         }
         gp.Value.racectx = (~(~gp).m).p.ptr().Value.timers.raceCtx;
     }
+
     if (ts != nil) {
         ts.unlock();
     }
+
     if (ts != nil && (~ts).syncGroup != nil) {
         // Temporarily use the timer's synctest group for the G running this timer.
         var gp = getg();
@@ -1192,6 +1249,7 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now) {
         gp.Value.syncGroup = ts.Value.syncGroup;
         (~ts).syncGroup.changegstatus(gp, _Gdead, _Grunning);
     }
+
     if (!async && t.isChan) {
         // For a timer channel, we want to make sure that no stale sends
         // happen after a t.stop or t.modify, but we cannot hold t.mu
@@ -1212,6 +1270,7 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now) {
         // started to send the value. That lets them correctly return
         // true meaning that no value was sent.
         @lock(Ꮡt.of(timer.ᏑsendLock));
+
         if (t.period == 0) {
             // We are committed to possibly sending a value
             // based on seq, so no need to keep telling
@@ -1220,23 +1279,29 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now) {
                 @throw(mismatchedIsSendingˢ);
             }
         }
+
         if (t.seq != seq) {
             f = (any _Δp0, uintptr _Δp1, int64 _Δp2) => {
             };
         }
     }
+
     f(arg, seq, delay);
+
     if (!async && t.isChan) {
         unlock(Ꮡt.of(timer.ᏑsendLock));
     }
+
     if (ts != nil && (~ts).syncGroup != nil) {
         var gp = getg();
         (~ts).syncGroup.changegstatus(gp, _Grunning, _Gdead);
         gp.Value.syncGroup = default!;
     }
+
     if (ts != nil) {
         ts.@lock();
     }
+
     if (raceenabled) {
         var gp = getg();
         gp.Value.racectx = 0;
@@ -1259,6 +1324,7 @@ internal static void verify(this ж<timers> Ꮡts) {
             // First timer has no parent.
             continue;
         }
+
         // The heap is timerHeapN-ary. See siftupTimer and siftdownTimer.
         nint Δp = (nint)((nuint)(i - 1) / (nuint)timerHeapN);
         if (tw.when < ts.heap[Δp].when) {
@@ -1306,6 +1372,7 @@ internal static void updateMinWhenModified(this ж<timers> Ꮡts, int64 when) {
 // This is only called by sysmon and checkdead.
 internal static int64 timeSleepUntil() {
     var next = (int64)maxWhen;
+
     // Prevent allp slice changes. This is like retake.
     @lock(ᏑallpLock);
     foreach (var (_, pp) in allp) {
@@ -1314,6 +1381,7 @@ internal static int64 timeSleepUntil() {
             // allp but not yet created new Ps.
             continue;
         }
+
         {
             var w = pp.of(runtime_package.Δp.Ꮡtimers).wakeTime(); if (w != 0) {
                 next = min(next, w);
@@ -1321,6 +1389,7 @@ internal static int64 timeSleepUntil() {
         }
     }
     unlock(ᏑallpLock);
+
     return next;
 }
 
@@ -1460,6 +1529,7 @@ internal static void maybeRunChan(this ж<timer> Ꮡt) {
         // is in charge of sending when appropriate.
         return;
     }
+
     Ꮡt.@lock();
     var now = nanotime();
     if ((uint8)(t.state & timerHeaped) != 0 || t.when == 0 || t.when > now) {
@@ -1491,7 +1561,9 @@ internal static void blockTimerChan(ref Δhchan c) {
     if (!(~t).isChan) {
         badTimer();
     }
+
     t.Value.blocked++;
+
     // If this is the first enqueue after a recent dequeue,
     // the timer may still be in the heap but marked as a zombie.
     // Unmark it in this case, if the timer is still pending.
@@ -1499,6 +1571,7 @@ internal static void blockTimerChan(ref Δhchan c) {
         t.Value.state &= unchecked((uint8)~(uint8)(timerZombie));
         (~t).ts.of(timers.Ꮡzombies).Add(-1);
     }
+
     // t.maybeAdd must be called with t unlocked,
     // because it needs to lock t.ts before t.
     // Then it will do nothing if t.needsAdd(state) is false.

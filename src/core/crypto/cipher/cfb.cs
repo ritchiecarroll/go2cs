@@ -33,6 +33,7 @@ internal static void XORKeyStream(this ref cfb x, slice<byte> dst, slice<byte> s
             x.b.Encrypt(x.@out, x.next);
             x.outUsed = 0;
         }
+
         if (x.decrypt) {
             // We can precompute a larger segment of the
             // keystream on decryption. This will allow
@@ -97,6 +98,7 @@ internal static Stream newCFB(Block block, slice<byte> iv, bool decrypt) {
         decrypt: decrypt
     ));
     copy((~x).next, iv);
+
     return new cfbжStream(x);
 }
 

@@ -43,6 +43,7 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
     }
     var old = ContextClientTrace(ctx);
     Ꮡtrace.compose(old);
+
     ctx = context.WithValue(ctx, new clientEventContextKey(nil), Ꮡtrace.OrTypedNil());
     if (Ꮡtrace.hasNetHooks()) {
         var nt = Ꮡ(new nettrace.Trace(
@@ -184,10 +185,12 @@ internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> Ꮡold) 
             tf.Set(of);
             continue;
         }
+
         // Make a copy of tf for tf to call. (Otherwise it
         // creates a recursive call cycle and stack overflows)
         ref var tfCopy = ref heap<reflectꓸValue>(out var ᏑtfCopy);
         tfCopy = reflect.ValueOf(tf.Interface());
+
         // We need to call both tf and of in some order.
         var ofʗ1 = of;
         var tfCopyʗ1 = tfCopy;

@@ -70,6 +70,9 @@ partial struct Root {
     internal ж<root> root;
 }
 
+// Maximum number of symbolic links we will follow when resolving a file in a root.
+// 8 is __POSIX_SYMLOOP_MAX (the minimum allowed value for SYMLOOP_MAX),
+// and a common limit.
 internal static UntypedInt rootMaxSymlinks => 8;
 
 // OpenRoot opens the named directory.
@@ -217,6 +220,7 @@ internal static (slice<@string>, @string suffixSep, error err) splitPathInRoot(@
     if (IsPathSeparator(s[0])) {
         return (default!, "", errPathEscapes);
     }
+
     if (runtime.GOOS == "windows"u8) {
         // Windows cleans paths before opening them.
         (s, err) = rootCleanPath(s, prefix, suffix);
@@ -226,6 +230,7 @@ internal static (slice<@string>, @string suffixSep, error err) splitPathInRoot(@
         prefix = default!;
         suffix = default!;
     }
+
     var parts = appendꓸꓸꓸ(new @string[]{}.slice(), prefix);
     nint i = 0;
     nint j = 1;
@@ -290,6 +295,7 @@ internal static (slice<DirEntry>, error) ReadDir(this ж<rootFS> Ꮡrfs, @string
         if (!isValidRootFSPath(name)) {
             return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readdir"u8, Path: name, Err: ErrInvalid))));
         }
+
         // This isn't efficient: We just open a regular file and ReadDir it.
         // Ideally, we would skip creating a *File entirely and operate directly
         // on the file descriptor, but that will require some extensive reworking

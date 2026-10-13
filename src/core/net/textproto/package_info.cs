@@ -60,11 +60,11 @@ using static go.net.textproto_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/textproto/header.go", "header.cs", "AAkaooKssgACENKClIKClAACENKClKiS")]
+[assembly: go.GoPositionMap("net/textproto/header.go", "header.cs", "AAsaooKssgACENKClIKClAACENKClKiS")]
 [assembly: go.GoPositionMap("net/textproto/pipeline.go", "pipeline.cs", "ACFIsoKCgoKqoqqiqqKqogAMINKCgoKUgoKUgoKs0oKCgpSCgoKUgoKUgoI=")]
-[assembly: go.GoPositionMap("net/textproto/reader.go", "reader.cs", "ABQsAAke0qqigqiSgoKUrLKCgoKCgpSCpoKUgoKmAAIqABICgqqigoKUgoKUqqKCgpQAAhDSgqiCgpSSloCC7oKChMyEgpSWgoKClIKClJSokoKCgpSUgoKUlKbSgoKUptKCgpSCgoKClIKGlAACKAAVAoKClAACOgAeAoKCgoKCgoKWgoKCgoKCgpSClIKUlAACJgASAoKCAAcS2AANEIKCgoKCgpSUlIKClIKClKaCgpSCgpSmgoKYgoK2ooKWgoK2koKUgraClIKUgpSqooKUgqa+sq7IsoKCgoKCgpSogoKUlJSmAAEqABMCAAIQ+LKCgoKUlrqCloCCgoKClKaCgoKogoKUgoKUgoKogoKohIKCgpSCgpTKgoKUloLOoKqygpSmmNSCgoKUgoKCgpSUlJSUAAIWAAkEgoKCgpSCgpSCgpSUAAcaAAgKABcmAAUgAAwMAAsIAAIcAAoCgqiCgoKmuIKUlIKWguqCkoKUgpS4gIKkAAgQgoIAKFI=")]
-[assembly: go.GoPositionMap("net/textproto/textproto.go", "textproto.cs", "AChQgs6CAA4gkgAGEJKqooKClAACNgAcAoKCgoKClKiSgpSClKiSgpSClKaCpoKC", "", "", "65=NewReader/1/1/1,NewWriter/1/1/2")]
-[assembly: go.GoPositionMap("net/textproto/writer.go", "writer.cs", "ABMqkqaSlrKCgoIAAhQACQKCgqaCggANILKCgoKkgpSUpoKUgoK4goK2gIKklKaigpSCtIKkgqSk")]
+[assembly: go.GoPositionMap("net/textproto/reader.go", "reader.cs", "ABQsAAke0qqigqiSgoKUrLKCgoKCgpSCpoKUgoKmAAIqABICgqqigoKUgoKUqqKCgpQAAhDSgriCgpSCpoCC/oKChNyUgpSmgoKClIKClJSokoKCgpSUgoKUlKbSgoKUptKCgpSCgoKClIKGlAACKAAVAoKClAACOgAeAoKCgoKCgoKmgoKCgoKCgpSClIKUlAACJgASAoKCAAcS2AAIEIKCgoKCgpSUlIKClIKClKaCgpSCgpSmgoK4goK2goKmgoK2goKUgqaClIKUgpSqooKUgqa+sq7IsoKCgoKCgpS4goKUlJSmAAEqABMCAAIQ+LKCgoKUpsqCpoCCgoKClLaCgoK4goKUgoKUgoK4goK4lIKCgpSCgpTKgoKUpoLOoKqygpSmmNSCgoKUgoKCgpSUlJSUAAIWAAkEgoKCgpSCgpSCgpSUAAcaAAgKABcmAAUgAAwMAAsIAAIcAAoCgriCgoKmuIKUlIKmguqCkoKUgpS4gIKkAAgQgoIAKFI=")]
+[assembly: go.GoPositionMap("net/textproto/textproto.go", "textproto.cs", "AChQgu6CAA4gkgAGEJKqooKClAACNgAcAoKCgoKClKiSgpSClKiSgpSClKaCpoKC", "", "", "67=NewReader/1/1/1,NewWriter/1/1/2")]
+[assembly: go.GoPositionMap("net/textproto/writer.go", "writer.cs", "ABMqkqaSlrKCgoIAAhQACQKCgqaCggANILKCgoKkgpSUpoKUgoK4goKmgIKklKaigpSCtIKkgqSU")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

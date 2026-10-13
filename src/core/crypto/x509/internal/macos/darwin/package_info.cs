@@ -61,8 +61,8 @@ using static go.crypto.x509.@internal.macOS_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/x509/internal/macos/corefoundation.go", "corefoundation.cs", "ABY+4oKCgqqigoKUgoKokoKCAAgUkoKigqSasoK0gqSYsqSClKTskoKkgpSkmJKCpJiSgqSYkoKkmJKCpJiSgqSYkqSYkpKkmJKkmJKCpJiSgqSYkqTIkoKClKSWqrKCgpQ=")]
-[assembly: go.GoPositionMap("crypto/x509/internal/macos/security.go", "security.cs", "ADWIAYIACRaSkpKSlLyypIKSgpSkvLKkgpKClKSYkoKkgpSkmLKCgqaClNSYsoKCgpSSgpTUmJKCgpSkmJKCooKUpJiykuSClKSYkoKigoKCgoKClKSYkoKkmJKCgpSkyJKCgpSCgqQ=")]
+[assembly: go.GoPositionMap("crypto/x509/internal/macos/corefoundation.go", "corefoundation.cs", "AB0+koKCgqqigoKUgoKokoKCAAgUkoKigqSasoK0gqSYsqSClKTskoKkgpSkmJKCpJiSgqSYkoKkmJKCpJiSgqSYkqSYkpKkmJKkmJKCpJiSgqSYkqTIkoKClKSWqrKCgpQ=")]
+[assembly: go.GoPositionMap("crypto/x509/internal/macos/security.go", "security.cs", "ADiIAYIACRaSkpKSlLyypIKSgpSkvLKkgpKClKSYkoKkgpSkmLKCgqaClNSYsoKCgpSSgpTUmJKCgpSkmJKCooKUpJiykuSClKSYkoKigoKCgoKClKSYkoKkmJKCgpSkyJKCgpSCgqQ=")]
 // </GoSourcePositionMaps>
 
 // Dynamically imported C entry points are recorded here, one `GoCgoImportDynamic` attribute

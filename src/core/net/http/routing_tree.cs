@@ -267,10 +267,9 @@ internal static void matchingMethodsPath(this ж<routingNode> Ꮡn, @string path
         }
         return true;
     });
+    // Don't look at the empty child. If there were an empty
+    // child, it would match on any method, but we only
+    // call this when we fail to match on a method.
 }
-
-// Don't look at the empty child. If there were an empty
-// child, it would match on any method, but we only
-// call this when we fail to match on a method.
 
 } // end http_package

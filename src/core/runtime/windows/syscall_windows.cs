@@ -12,7 +12,6 @@ using ꓸꓸꓸuintptr = Span<uintptr>;
 partial class runtime_package {
 
 // cbs stores all registered Go callbacks.
-
 partial struct cbsᴛ1 /*dyn*/ {
     internal mutex @lock; // use cbsLock / cbsUnlock for race instrumentation.
     internal array<winCallback> ctxt = new(2000);
@@ -47,6 +46,7 @@ partial struct winCallback {
     internal abiDesc abiMap;
 }
 
+// abiPartKind is the action an abiPart should take.
 partial struct abiPartKind /*num:nint*/;
 
 internal static abiPartKind abiPartBad => /* iota */ 0;
@@ -116,11 +116,13 @@ internal static void assignArg(this ref abiDesc Δp, ж<_type> Ꮡt) {
             throw panic("compileCallback: float arguments not supported");
         }
     }
+
     if (t.Size_ == 0) {
         // The Go ABI aligns for zero-sized types.
         Δp.dstStackSize = alignUp(Δp.dstStackSize, (uintptr)t.Align_);
         return;
     }
+
     // In the C ABI, we're already on a word boundary.
     // Also, sub-word-sized fastcall register arguments
     // are stored to the least-significant bytes of the
@@ -128,6 +130,7 @@ internal static void assignArg(this ref abiDesc Δp, ж<_type> Ꮡt) {
     // architectures are little endian, so srcStackOffset
     // is already pointing to the right place for smaller
     // arguments. The same is true on arm.
+
     var oldParts = Δp.parts;
     if (Δp.tryRegAssignArg(Ꮡt, 0)){
         // Account for spill space.
@@ -140,8 +143,10 @@ internal static void assignArg(this ref abiDesc Δp, ж<_type> Ꮡt) {
         // Register assignment failed.
         // Undo the work and stack assign.
         Δp.parts = oldParts;
+
         // The Go ABI aligns arguments.
         Δp.dstStackSize = alignUp(Δp.dstStackSize, (uintptr)t.Align_);
+
         // Copy just the size of the argument. Note that this
         // could be a small by-value struct, but C and Go
         // struct layouts are compatible, so we can copy these
@@ -159,6 +164,7 @@ internal static void assignArg(this ref abiDesc Δp, ж<_type> Ꮡt) {
         // The Go ABI packs arguments.
         Δp.dstStackSize += t.Size_;
     }
+
     // cdecl, stdcall, fastcall, and arm pad arguments to word size.
     // TODO(rsc): On arm and arm64 do we need to skip the caller's saved LR?
     Δp.srcStackSize += goarch.PtrSize;
@@ -177,12 +183,12 @@ internal static bool tryRegAssignArg(this ref abiDesc Δp, ж<_type> Ꮡt, uintp
         var k = (abiꓸKind)(t.Kind_ & abi.KindMask);
         var exprᴛ1 = k;
         if (exprᴛ1 == abi.Bool || exprᴛ1 == abi.Int || exprᴛ1 == abi.Int8 || exprᴛ1 == abi.Int16 || exprᴛ1 == abi.Int32 || exprᴛ1 == abi.Uint || exprᴛ1 == abi.Uint8 || exprᴛ1 == abi.Uint16 || exprᴛ1 == abi.Uint32 || exprᴛ1 == abi.Uintptr || exprᴛ1 == abi.Pointer || exprᴛ1 == abi.UnsafePointer) {
-            return Δp.assignReg(t.Size_, // Assign a register for all these types.
- offset);
+            // Assign a register for all these types.
+            return Δp.assignReg(t.Size_, offset);
         }
         if (exprᴛ1 == abi.Int64 || exprᴛ1 == abi.Uint64) {
+            // Only register-assign if the registers are big enough.
             if (goarch.PtrSize == 8) {
-                // Only register-assign if the registers are big enough.
                 return Δp.assignReg(t.Size_, offset);
             }
         }
@@ -203,7 +209,6 @@ internal static bool tryRegAssignArg(this ref abiDesc Δp, ж<_type> Ꮡt, uintp
             return true;
         }
     }
-
     // Pointer-sized types such as maps and channels are currently
     // not supported.
     throw panic("compileCallback: type " + toRType(Ꮡt).@string() + " is currently not supported for use in system callbacks");
@@ -251,14 +256,13 @@ internal static uintptr callbackasmAddr(nint i) {
         entrySize = 5;
     }
     else if (exprᴛ1 == "arm"u8 || exprᴛ1 == "arm64"u8) {
+        // On ARM and ARM64, each entry is a MOV instruction
+        // followed by a branch instruction
         entrySize = 8;
     }
     else { /* default: */
         throw panic("unsupported architecture");
     }
-
-    // On ARM and ARM64, each entry is a MOV instruction
-    // followed by a branch instruction
     return abi.FuncPCABI0(callbackasm) + (uintptr)(i * entrySize);
 }
 
@@ -280,10 +284,12 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
         // cdecl is only meaningful on 386.
         cdecl = false;
     }
+
     if (fn._type == nil || ((abiꓸKind)((~fn._type).Kind_ & abi.KindMask)) != abi.Func) {
         throw panic("compileCallback: expected function with one uintptr-sized result");
     }
     var ft = fn._type.FuncType();
+
     // Check arguments and construct ABI translation.
     abiDesc abiMap = default!;
     foreach (var (_, t) in ft.InSlice()) {
@@ -293,6 +299,7 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
     // already aligned.
     abiMap.dstStackSize = alignUp(abiMap.dstStackSize, goarch.PtrSize);
     abiMap.retOffset = abiMap.dstStackSize;
+
     if (len(ft.OutSlice()) != 1) {
         throw panic("compileCallback: expected function with one uintptr-sized result");
     }
@@ -313,6 +320,7 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
         // be passed in the first register.
         abiMap.dstStackSize += goarch.PtrSize;
     }
+
     // TODO(mknyszek): Remove dstSpill from this calculation when we no longer have
     // caller reserved spill space.
     var frameSize = alignUp(abiMap.dstStackSize, goarch.PtrSize);
@@ -320,14 +328,18 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
     if (frameSize > callbackMaxFrame) {
         throw panic("compileCallback: function argument frame too large");
     }
+
     // For cdecl, the callee is responsible for popping its
     // arguments from the C stack.
     uintptr retPop = default!;
     if (cdecl) {
         retPop = abiMap.srcStackSize;
     }
+
     var key = new winCallbackKey((ж<funcval>)(uintptr)(fn.data), cdecl);
+
     cbsLock();
+
     // Check if this callback is already registered.
     {
         var (nΔ1, ok) = cbs.index[key, ꟷ]; if (ok) {
@@ -335,6 +347,7 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
             return callbackasmAddr(nΔ1);
         }
     }
+
     // Register the callback.
     if (cbs.index == default!) {
         cbs.index = new map<winCallbackKey, nint>();
@@ -348,6 +361,7 @@ internal static uintptr /*code*/ compileCallback(eface fn, bool cdecl) {
     cbs.ctxt[n] = c;
     cbs.index[key] = n;
     cbs.n++;
+
     cbsUnlock();
     return callbackasmAddr(n);
 }
@@ -375,6 +389,7 @@ partial struct callbackArgs {
 internal static void callbackWrap(ref callbackArgs a) {
     var c = cbs.ctxt[a.index];
     a.retPop = c.retPop;
+
     // Convert from C to Go ABI.
     ref var regs = ref heap(new abi.RegArgs(), out var Ꮡregs);
     ref var frame = ref heap(new array<byte>(512), out var Ꮡframe);
@@ -391,15 +406,17 @@ internal static void callbackWrap(ref callbackArgs a) {
         else { /* default: */
             throw panic("bad ABI description");
         }
-
     }
+
     // TODO(mknyszek): Remove this when we no longer have
     // caller reserved spill space.
     var frameSize = alignUp(c.abiMap.dstStackSize, goarch.PtrSize);
     frameSize += c.abiMap.dstSpill;
+
     // Even though this is copying back results, we can pass a nil
     // type because those results must not require write barriers.
     reflectcall(nil, @unsafe.Pointer.FromPinnedBox(c.fn), (uintptr)noescape(goArgs), (uint32)c.abiMap.dstStackSize, (uint32)c.abiMap.retOffset, (uint32)frameSize, Ꮡregs);
+
     // Extract the result.
     //
     // There's always exactly one return value, one pointer in size.
@@ -526,6 +543,7 @@ internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscalln(uintptr f
     if (n > maxArgs) {
         throw panic("runtime: SyscallN has too many arguments");
     }
+
     // The cgocall parameters are stored in m instead of in
     // the stack because the stack can move during fn if it
     // calls back into Go.

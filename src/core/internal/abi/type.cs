@@ -43,6 +43,8 @@ partial struct Type {
     public TypeOff PtrToThis; // type for pointer to this type, may be zero
 }
 
+// A Kind represents the specific kind of type that a Type represents.
+// The zero Kind is not a valid kind.
 partial struct ΔKind /*num:uint8*/;
 
 public static ΔKind Invalid => /* iota */ 0;
@@ -73,21 +75,58 @@ public static ΔKind ΔString => 24;
 public static ΔKind Struct => 25;
 public static ΔKind UnsafePointer => 26;
 
+// TODO (khr, drchase) why aren't these in TFlag?  Investigate, fix if possible.
 public static ΔKind KindDirectIface => /* 1 << 5 */ 32;
 public static ΔKind KindMask => /* (1 << 5) - 1 */ 31;
 
+// TFlag is used by a Type to signal what extra type information is
+// available in the memory directly following the Type value.
 partial struct TFlag /*num:uint8*/;
 
+// TFlagUncommon means that there is a data with a type, UncommonType,
+// just beyond the shared-per-type common data.  That is, the data
+// for struct types will store their UncommonType at one offset, the
+// data for interface types will store their UncommonType at a different
+// offset.  UncommonType is always accessed via a pointer that is computed
+// using trust-us-we-are-the-implementors pointer arithmetic.
+//
+// For example, if t.Kind() == Struct and t.tflag&TFlagUncommon != 0,
+// then t has UncommonType data and it can be accessed as:
+//
+//	type structTypeUncommon struct {
+//		structType
+//		u UncommonType
+//	}
+//	u := &(*structTypeUncommon)(unsafe.Pointer(t)).u
 public static TFlag TFlagUncommon => /* 1 << 0 */ 1;
+
+// TFlagExtraStar means the name in the str field has an
+// extraneous '*' prefix. This is because for most types T in
+// a program, the type *T also exists and reusing the str data
+// saves binary size.
 public static TFlag TFlagExtraStar => /* 1 << 1 */ 2;
+
+// TFlagNamed means the type has a name.
 public static TFlag TFlagNamed => /* 1 << 2 */ 4;
+
+// TFlagRegularMemory means that equal and hash functions can treat
+// this type as a single region of t.size bytes.
 public static TFlag TFlagRegularMemory => /* 1 << 3 */ 8;
+
+// TFlagGCMaskOnDemand means that the GC pointer bitmask will be
+// computed on demand at runtime instead of being precomputed at
+// compile time. If this flag is set, the GCData field effectively
+// has type **byte instead of *byte. The runtime will store a
+// pointer to the GC pointer bitmask in *GCData.
 public static TFlag TFlagGCMaskOnDemand => /* 1 << 4 */ 16;
 
+// NameOff is the offset to a name from moduledata.types.  See resolveNameOff in runtime.
 partial struct NameOff /*num:int32*/;
 
+// TypeOff is the offset to a type from moduledata.types.  See resolveTypeOff in runtime.
 partial struct TypeOff /*num:int32*/;
 
+// TextOff is an offset from the top of a text section.  See (rtype).textOff in runtime.
 partial struct TextOff /*num:int32*/;
 
 // String returns the name of k.
@@ -342,7 +381,6 @@ public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) {
     { /* default: */
         return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ7>()).Value.u);
     }
-
 }
 
 // go2cs generated this placeholder — func Elem is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -609,6 +647,7 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
     array<byte> tagLen = new(10);
     nint nameLenLen = writeVarint(nameLen[..], len(n));
     nint tagLenLen = writeVarint(tagLen[..], len(tag));
+
     byte bits = default!;
     nint l = 1 + nameLenLen + len(n);
     if (exported) {
@@ -621,6 +660,7 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
     if (embedded) {
         bits |= (byte)((byte)(1 << (int)(3)));
     }
+
     var b = new slice<byte>(l);
     b[0] = bits;
     copy(b[1..], nameLen.slice(0, nameLenLen));
@@ -630,11 +670,18 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
         copy(tb, tagLen.slice(0, tagLenLen));
         copy(tb.slice(tagLenLen), tag);
     }
+
     return new ΔName(Bytes: Ꮡ(b, 0));
 }
 
 public static UntypedInt TraceArgsLimit => 10; // print no more than 10 args/components
 public static UntypedInt TraceArgsMaxDepth => 5; // no more than 5 layers of nesting
+
+// maxLen is a (conservative) upper bound of the byte stream length. For
+// each arg/component, it has no more than 2 bytes of data (size, offset),
+// and no more than one {, }, ... at each level (it cannot have both the
+// data and ... unless it is the last one, just be conservative). Plus 1
+// for _endSeq.
 public static UntypedInt TraceArgsMaxLen => /* (TraceArgsMaxDepth*3+2)*TraceArgsLimit + 1 */ 171;
 
 // Populate the data.
@@ -650,15 +697,10 @@ public static UntypedInt TraceArgsMaxLen => /* (TraceArgsMaxDepth*3+2)*TraceArgs
 //   - 0xfc - print ... (more args/fields/elements)
 //   - 0xfb - print _ (offset too large)
 public static UntypedInt TraceArgsEndSeq => 0xff;
-
 public static UntypedInt TraceArgsStartAgg => 0xfe;
-
 public static UntypedInt TraceArgsEndAgg => 0xfd;
-
 public static UntypedInt TraceArgsDotdotdot => 0xfc;
-
 public static UntypedInt TraceArgsOffsetTooLarge => 0xfb;
-
 public static UntypedInt TraceArgsSpecial => 0xf0; // above this are operators, below this are ordinary offsets
 
 // MaxPtrmaskBytes is the maximum length of a GC ptrmask bitmap,

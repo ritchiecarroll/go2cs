@@ -64,6 +64,7 @@ public static uint64 Uint64(this ж<Zipf> Ꮡz) {
         throw panic("rand: nil Zipf");
     }
     var k = 0.0D;
+
     while (ᐧ) {
         var r = z.r.Float64(); // r on [0,1]
         var ur = z.hxm + r * z.hx0minusHxm;

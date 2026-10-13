@@ -66,9 +66,7 @@ partial struct addrDetail {
 // z0, z4, and z6noz are sentinel Addr.z values.
 // See the Addr type's field docs.
 internal static unique.Handle<addrDetail> z0;
-
 internal static unique.Handle<addrDetail> z4 = unique.Make<addrDetail>(new addrDetail(nil));
-
 internal static unique.Handle<addrDetail> z6noz = unique.Make<addrDetail>(new addrDetail(isV6: true));
 
 // IPv6LinkLocalAllNodes returns the IPv6 link-local all nodes multicast
@@ -136,11 +134,10 @@ public static (ΔAddr, error) ParseAddr(@string s) {
             return parseIPv6(s);
         }
         case (rune)'%': {
-            return (new ΔAddr(nil), new parseAddrError( // Assume that this was trying to be an IPv6 address with
- // a zone specifier, but the address is missing.
-@in: s, msg: "missing IPv6 address"u8));
+            // Assume that this was trying to be an IPv6 address with
+            // a zone specifier, but the address is missing.
+            return (new ΔAddr(nil), new parseAddrError(@in: s, msg: "missing IPv6 address"u8));
         }}
-
     }
     return (new ΔAddr(nil), new parseAddrError(@in: s, msg: "unable to parse IP"u8));
 }
@@ -226,6 +223,7 @@ internal static (ΔAddr ip, error err) parseIPv4(@string s) {
 // parseIPv6 parses s as an IPv6 address (in form "2001:db8::68").
 internal static (ΔAddr, error) parseIPv6(@string @in) {
     @string s = @in;
+
     // Split off the zone right from the start. Yes it's a second scan
     // of the string, but trying to handle it inline makes a bunch of
     // other inner loop conditionals more expensive, and it ends up
@@ -239,8 +237,10 @@ internal static (ΔAddr, error) parseIPv6(@string @in) {
             return (new ΔAddr(nil), new parseAddrError(@in: @in, msg: "zone must be a non-empty string"u8));
         }
     }
+
     array<byte> ip = new(16);
     nint ellipsis = -1; // position of ellipsis in ip
+
     // Might have leading ellipsis
     if (len(s) >= 2 && s[0] == (rune)':' && s[1] == (rune)':') {
         ellipsis = 0;
@@ -250,6 +250,7 @@ internal static (ΔAddr, error) parseIPv6(@string @in) {
             return (IPv6Unspecified().WithZone(zone), default!);
         }
     }
+
     // Loop, parsing hex numbers followed by colon.
     i = 0;
     while (i < 16) {
@@ -283,6 +284,7 @@ internal static (ΔAddr, error) parseIPv6(@string @in) {
             // No digits found, fail.
             return (new ΔAddr(nil), new parseAddrError(@in: @in, msg: "each colon-separated field must have at least one digit"u8, at: s));
         }
+
         // If followed by dot, might be in trailing IPv4.
         if (off < len(s) && s[off] == (rune)'.') {
             if (ellipsis < 0 && i != 12) {
@@ -293,6 +295,7 @@ internal static (ΔAddr, error) parseIPv6(@string @in) {
                 // Not enough room.
                 return (new ΔAddr(nil), new parseAddrError(@in: @in, msg: "too many hex fields to fit an embedded IPv4 at the end of the address"u8, at: s));
             }
+
             nint end = len(@in);
             if (len(zone) > 0) {
                 end -= len(zone) + 1;
@@ -305,15 +308,18 @@ internal static (ΔAddr, error) parseIPv6(@string @in) {
             i += 4;
             break;
         }
+
         // Save this 16-bit chunk.
         ip[i] = (byte)((acc >> (int)(8)));
         ip[i + 1] = (byte)acc;
         i += 2;
+
         // Stop at end of string.
         s = s.slice(off);
         if (len(s) == 0) {
             break;
         }
+
         // Otherwise must be followed by colon and more.
         if (s[0] != (rune)':'){
             return (new ΔAddr(nil), new parseAddrError(@in: @in, msg: "unexpected character, want colon"u8, at: s));
@@ -322,24 +328,25 @@ internal static (ΔAddr, error) parseIPv6(@string @in) {
             return (new ΔAddr(nil), new parseAddrError(@in: @in, msg: "colon must be followed by more characters"u8, at: s));
         }
         s = s[1..];
+
         // Look for ellipsis.
         if (s[0] == (rune)':') {
-            if (ellipsis >= 0) {
-                // already have one
+            if (ellipsis >= 0) { // already have one
                 return (new ΔAddr(nil), new parseAddrError(@in: @in, msg: "multiple :: in address"u8, at: s));
             }
             ellipsis = i;
             s = s[1..];
-            if (len(s) == 0) {
-                // can be at end
+            if (len(s) == 0) { // can be at end
                 break;
             }
         }
     }
+
     // Must have used entire string.
     if (len(s) != 0) {
         return (new ΔAddr(nil), new parseAddrError(@in: @in, msg: "trailing garbage after address"u8, at: s));
     }
+
     // If didn't parse enough, expand ellipsis.
     if (i < 16){
         if (ellipsis < 0) {
@@ -369,7 +376,6 @@ public static (ΔAddr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
     case 16: {
         return (AddrFrom16(new array<byte>(Δslice, 16)), true);
     }}
-
     return (new ΔAddr(nil), false);
 }
 
@@ -422,7 +428,6 @@ public static nint BitLen(this ΔAddr ip) {
     if (exprᴛ1 == z4) {
         return 32;
     }
-
     return 128;
 }
 
@@ -546,6 +551,7 @@ public static bool IsLinkLocalUnicast(this ΔAddr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
+
     // Dynamic Configuration of IPv4 Link-Local Addresses
     // https://datatracker.ietf.org/doc/html/rfc3927#section-2.1
     if (ip.Is4()) {
@@ -564,6 +570,7 @@ public static bool IsLoopback(this ΔAddr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
+
     // Requirements for Internet Hosts -- Communication Layers (3.2.1.3 Addressing)
     // https://datatracker.ietf.org/doc/html/rfc1122#section-3.2.1.3
     if (ip.Is4()) {
@@ -582,6 +589,7 @@ public static bool IsMulticast(this ΔAddr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
+
     // Host Extensions for IP Multicasting (4. HOST GROUP ADDRESSES)
     // https://datatracker.ietf.org/doc/html/rfc1112#section-4
     if (ip.Is4()) {
@@ -611,6 +619,7 @@ public static bool IsLinkLocalMulticast(this ΔAddr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
+
     // IPv4 Multicast Guidelines (4. Local Network Control Block (224.0.0/24))
     // https://datatracker.ietf.org/doc/html/rfc5771#section-4
     if (ip.Is4()) {
@@ -638,14 +647,17 @@ public static bool IsGlobalUnicast(this ΔAddr ip) {
         // Invalid or zero-value.
         return false;
     }
+
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
+
     // Match package net's IsGlobalUnicast logic. Notably private IPv4 addresses
     // and ULA IPv6 addresses are still considered "global unicast".
     if (ip.Is4() && (ip == IPv4Unspecified() || ip == AddrFrom4(new byte[]{255, 255, 255, 255}.array()))) {
         return false;
     }
+
     return ip != IPv6Unspecified() && !ip.IsLoopback() && !ip.IsMulticast() && !ip.IsLinkLocalUnicast();
 }
 
@@ -657,17 +669,20 @@ public static bool IsPrivate(this ΔAddr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
+
     // Match the stdlib's IsPrivate logic.
     if (ip.Is4()) {
         // RFC 1918 allocates 10.0.0.0/8, 172.16.0.0/12, and 192.168.0.0/16 as
         // private IPv4 address subnets.
         return ip.v4(0) == 10 || (ip.v4(0) == 172 && (uint8)(ip.v4(1) & 0xf0) == 16) || (ip.v4(0) == 192 && ip.v4(1) == 168);
     }
+
     if (ip.Is6()) {
         // RFC 4193 allocates fc00::/7 as the unique local unicast IPv6 address
         // subnet.
         return (uint8)(ip.v6(0) & 0xfe) == 0xfc;
     }
+
     return false; // zero value
 }
 
@@ -707,7 +722,6 @@ public static (ΔPrefix, error) Prefix(this ΔAddr ip, nint b) {
             return (new ΔPrefix(nil), errors.New("prefix length "u8 + itoa.Itoa(b) + " too large for IPv6"u8));
         }
     }
-
     ip.addr = ip.addr.and(mask6(effectiveBits));
     return (PrefixFrom(ip, b), default!);
 }
@@ -758,7 +772,6 @@ public static slice<byte> AsSlice(this ΔAddr ip) {
         byteorder.BEPutUint64(ret[8..], ip.addr.lo);
         return ret[..];
     }
-
 }
 
 // Next returns the address following ip.
@@ -823,7 +836,6 @@ public static @string String(this ΔAddr ip) {
         }
         return ip.string6();
     }
-
 }
 
 // AppendTo appends a text encoding of ip,
@@ -843,7 +855,6 @@ public static slice<byte> AppendTo(this ΔAddr ip, slice<byte> b) {
         }
         return ip.appendTo6(b);
     }
-
 }
 
 // digits is a string of the hex digits from 0 to f. It's used in
@@ -951,6 +962,7 @@ internal static slice<byte> appendTo6(this ΔAddr ip, slice<byte> ret) {
             }
         }
     }
+
     for (var i = (uint8)0; i < 8; i++) {
         if (i == zeroStart){
             ret = append(ret, (byte)((rune)':'), (byte)((rune)':'));
@@ -962,8 +974,10 @@ internal static slice<byte> appendTo6(this ΔAddr ip, slice<byte> ret) {
         if (i > 0) {
             ret = append(ret, (byte)((rune)':'));
         }
+
         ret = appendHex(ret, ip.v6u16(i));
     }
+
     if (ip.z != z6noz) {
         ret = append(ret, (byte)((rune)'%'));
         ret = append(ret, ip.Zone().ꓸꓸꓸ);
@@ -986,8 +1000,10 @@ public static @string StringExpanded(this ΔAddr ip) {
         if (i > 0) {
             ret = append(ret, (byte)((rune)':'));
         }
+
         ret = appendHexPad(ret, ip.v6u16(i));
     }
+
     if (ip.z != z6noz) {
         // The addition of a zone will cause a second allocation, but when there
         // is no zone the ret slice will be stack allocated.
@@ -1026,7 +1042,6 @@ public static (slice<byte>, error) MarshalText(this ΔAddr ip) {
             buf = new slice<byte>(0, maxCap);
         } while (false);
     }
-
     return ip.AppendText(buf);
 }
 
@@ -1058,7 +1073,6 @@ public static (slice<byte>, error) AppendBinary(this ΔAddr ip, slice<byte> b) {
         b = byteorder.BEAppendUint64(b, ip.addr.lo);
         b = append(b, ip.Zone().ꓸꓸꓸ);
     }
-
     return (b, default!);
 }
 
@@ -1073,7 +1087,6 @@ internal static nint marshalBinarySize(this ΔAddr ip) {
     { /* default: */
         return 16 + len(ip.Zone());
     }
-
 }
 
 // MarshalBinary implements the [encoding.BinaryMarshaler] interface.
@@ -1108,7 +1121,6 @@ public static error UnmarshalBinary(this ref ΔAddr ip, slice<byte> b) {
         ip = AddrFrom16(new array<byte>(b[..16], 16)).WithZone(((@string)(b[16..])));
         return default!;
     }}
-
     return errors.New(unexpectedSliceSizeˢ);
 }
 
@@ -1154,6 +1166,7 @@ internal static (@string ip, @string port, bool v6, error err) splitAddrPort(@st
     if (i == -1) {
         return ("", "", false, errors.New(notAnIpPortˢ));
     }
+
     (ip, port) = (s.slice(0, i), s.slice(i + 1));
     if (len(ip) == 0) {
         return ("", "", false, errors.New(noIpˢ));
@@ -1168,6 +1181,7 @@ internal static (@string ip, @string port, bool v6, error err) splitAddrPort(@st
         ip = ip.slice(1, len(ip) - 1);
         v6 = true;
     }
+
     return (ip, port, v6, default!);
 }
 
@@ -1255,7 +1269,6 @@ public static @string String(this AddrPort p) {
         }
         b = append(b, (byte)((rune)']'));
     }
-
     b = append(b, (byte)((rune)':'));
     b = strconv.AppendUint(b, (uint64)p.port, 10);
     return ((@string)b);
@@ -1281,7 +1294,6 @@ public static slice<byte> AppendTo(this AddrPort p, slice<byte> b) {
         }
         b = append(b, (byte)((rune)']'));
     }
-
     b = append(b, (byte)((rune)':'));
     b = strconv.AppendUint(b, (uint64)p.port, 10);
     return b;
@@ -1309,7 +1321,6 @@ public static (slice<byte>, error) MarshalText(this AddrPort p) {
         const nint maxCap = /* len("[ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff%enp5s0]:65535") */ 54;
         buf = new slice<byte>(0, maxCap);
     }
-
     return p.AppendText(buf);
 }
 
@@ -1468,11 +1479,14 @@ public static (ΔPrefix, error) ParsePrefix(@string s) {
     if (ip.Is6() && ip.z != z6noz) {
         return (new ΔPrefix(nil), new parsePrefixError(@in: s, msg: "IPv6 zones cannot be present in a prefix"u8));
     }
+
     @string bitsStr = s.slice(i + 1);
+
     // strconv.Atoi accepts a leading sign and leading zeroes, but we don't want that.
     if (len(bitsStr) > 1 && (bitsStr[0] < (rune)'1' || bitsStr[0] > (rune)'9')) {
         return (new ΔPrefix(nil), new parsePrefixError(@in: s, msg: "bad bits after slash: "u8 + strconv.Quote(bitsStr)));
     }
+
     (var bits, err) = strconv.Atoi(bitsStr);
     if (err != default!) {
         return (new ΔPrefix(nil), new parsePrefixError(@in: s, msg: "bad bits after slash: "u8 + strconv.Quote(bitsStr)));
@@ -1568,6 +1582,7 @@ public static bool Overlaps(this ΔPrefix p, ΔPrefix o) {
     if (minBits == 0) {
         return true;
     }
+
     // One of these Prefix calls might look redundant, but we don't require
     // that p and o values are normalized (via Prefix.Masked) first,
     // so the Prefix call on the one that's already minBits serves to zero
@@ -1596,6 +1611,7 @@ public static slice<byte> AppendTo(this ΔPrefix p, slice<byte> b) {
     if (!p.IsValid()) {
         return append(b, ((@string)"invalid Prefix"u8).ꓸꓸꓸ);
     }
+
     // p.ip is non-nil, because p is valid.
     if (p.ip.z == z4){
         b = p.ip.appendTo4(b);
@@ -1607,6 +1623,7 @@ public static slice<byte> AppendTo(this ΔPrefix p, slice<byte> b) {
             b = p.ip.appendTo6(b);
         }
     }
+
     b = append(b, (byte)((rune)'/'));
     b = appendDecimal(b, (uint8)p.Bits());
     return b;
@@ -1634,7 +1651,6 @@ public static (slice<byte>, error) MarshalText(this ΔPrefix p) {
         const nint maxCap = /* len("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff%enp5s0/128") */ 50;
         buf = new slice<byte>(0, maxCap);
     }
-
     return p.AppendText(buf);
 }
 

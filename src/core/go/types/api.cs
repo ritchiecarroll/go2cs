@@ -92,6 +92,7 @@ partial interface Importer {
     (ж<Package>, error) Import(@string path);
 }
 
+// ImportMode is reserved for future use.
 partial struct ImportMode /*num:nint*/;
 
 // An ImporterFrom resolves import paths to packages; it
@@ -403,7 +404,6 @@ public static bool IsValue(this TypeAndValue tv) {
     if (exprᴛ1 == constant_ || exprᴛ1 == variable || exprᴛ1 == mapindex || exprᴛ1 == value || exprᴛ1 == commaok || exprᴛ1 == commaerr) {
         return true;
     }
-
     return false;
 }
 

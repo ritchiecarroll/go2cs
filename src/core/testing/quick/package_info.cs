@@ -61,7 +61,7 @@ using static go.testing.quick_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("testing/quick/quick.go", "quick.cs", "ABQoAAgUsoKClKiygoKUqLIABhSyrNKAgqaCgKSkpKSkpKSkpKSkpKSkpKSkgoKCgoKClLaClIKClIK2goKCgoKClLaCgoKUtoKCgpSkhIKSkoKUgoKClLa2ABk0koKUqsKCgoKUqM6AAAgQggAJFIIAByQAEQKCloKCloKUgpaCgoSCgoKWgqj+4oKWgoKUgoKWgpaCgoSCgoKWgoSCqKrCgoKWgoKCgoKopsKCgoKUgqaCgoKUpoKCgpQ=")]
+[assembly: go.GoPositionMap("testing/quick/quick.go", "quick.cs", "ABQoAAgUsoKClKiygoKUqLIABhSyrNKAgraCgKSkpKSkpKSkpKSkpKSkpKSkgoKCgoKClLaClIKClIK2goKCgoKClLaCgoKUtoKCgpSklIKCkoKUgoKClLa2ABk0koKUqsKCgoKUuO6AAAgQggAJFIIAByQAEQKCpoKCpoKUgqaCgpSCgoKmgrj+4oKmgoKUgoKmgqaCgpSCgoKmgpSCuKrCgoKmgoKCgoK4psKCgoKUgqaCgoKUpoKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;

@@ -29,6 +29,7 @@ internal static void readProtocols() {
         }
         var fileʗ1 = Δfile;
         defer(fileʗ1.close, ref ᒐ);
+
         for (var (line, ok) = Δfile.readLine(); ok; (line, ok) = Δfile.readLine()) {
             // tcp    6   TCP    # transmission control protocol
             {

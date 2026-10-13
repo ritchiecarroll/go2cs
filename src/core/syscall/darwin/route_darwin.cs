@@ -27,7 +27,6 @@ internal static RoutingMessage toRoutingMessage(this ж<anyMessage> Ꮡany, slic
         var p = Ꮡany.Reinterpret<anyMessage, InterfaceMulticastAddrMessage>();
         return new InterfaceMulticastAddrMessageжRoutingMessage(Ꮡ(new InterfaceMulticastAddrMessage(Header: (~p).Header.ΔClone(), Data: b.slice(SizeofIfmaMsghdr2, any.Msglen))));
     }
-
     return default!;
 }
 
@@ -73,7 +72,6 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMulticastAdd
             sas[i] = new SockaddrDatalinkжSockaddr(sa);
             b = b.slice(l);
         }
-
     }
     return (sas[..], default!);
 }

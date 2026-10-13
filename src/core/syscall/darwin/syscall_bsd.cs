@@ -45,10 +45,12 @@ public static (slice<nint> gids, error err) Getgroups() {
     if (n == 0) {
         return (default!, default!);
     }
+
     // Sanity check group count. Max is 16 on BSD.
     if (n < 0 || n > 1000) {
         return (default!, EINVAL);
     }
+
     var a = new slice<_Gid_t>(n);
     (n, err) = getgroups(n, Ꮡ(a, 0));
     if (err != default!) {
@@ -65,6 +67,7 @@ public static error /*err*/ Setgroups(slice<nint> gids) {
     if (len(gids) == 0) {
         return setgroups(0, nil);
     }
+
     var a = new slice<_Gid_t>(len(gids));
     foreach (var (i, v) in gids) {
         a[i] = ((_Gid_t)(uint32)v);
@@ -91,6 +94,7 @@ partial struct WaitStatus /*num:uint32*/;
 internal static UntypedInt mask => 0x7F;
 internal static UntypedInt core => 0x80;
 internal static UntypedInt shift => 8;
+
 internal static UntypedInt exited => 0;
 internal static UntypedInt stopped => 0x7F;
 
@@ -144,8 +148,8 @@ public static nint TrapCause(this WaitStatus w) {
 public static (nint wpid, error err) Wait4(nint pid, ж<WaitStatus> Ꮡwstatus, nint options, ж<Rusage> Ꮡrusage) {
     nint wpid = default!;
     error err = default!;
-
     ref var wstatus = ref Ꮡwstatus.DerefOrNull();
+
     ref var status = ref heap(new _C_int(), out var Ꮡstatus);
     (wpid, err) = wait4(pid, Ꮡstatus, options, Ꮡrusage);
     if (Ꮡwstatus != nil) {
@@ -321,6 +325,7 @@ public static (@string value, error err) Sysctl(@string name) {
     if (err != default!) {
         return ("", err);
     }
+
     // Find size.
     ref var n = ref heap<uintptr>(out var Ꮡn);
     n = (uintptr)0;
@@ -332,6 +337,7 @@ public static (@string value, error err) Sysctl(@string name) {
     if (n == 0) {
         return ("", default!);
     }
+
     // Read into buffer of that size.
     var buf = new slice<byte>((nint)(n));
     {
@@ -339,6 +345,7 @@ public static (@string value, error err) Sysctl(@string name) {
             return ("", err);
         }
     }
+
     // Throw away terminating NUL.
     if (n > 0 && buf[n - 1] == (rune)'\x00') {
         n--;
@@ -354,6 +361,7 @@ public static (uint32 value, error err) SysctlUint32(@string name) {
     if (err != default!) {
         return (0, err);
     }
+
     // Read into buffer of that size.
     ref var n = ref heap<uintptr>(out var Ꮡn);
     n = (uintptr)4;

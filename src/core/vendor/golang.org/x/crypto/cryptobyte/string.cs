@@ -19,6 +19,8 @@ namespace go.vendor.golang.org.x.crypto;
 
 partial class cryptobyte_package {
 
+// String represents a string of bytes. It provides methods for parsing
+// fixed-length and length-prefixed values from it.
 partial struct String /*[]byte*/;
 
 // read advances a String by n bytes and returns them. If less than n bytes

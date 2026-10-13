@@ -33,7 +33,6 @@ internal static map<@string, nint> protocols = new map<@string, nint>{
     ["ipv6-icmp"u8] = 58
 };
 
-// ʕ◔ϖ◔ʔ
 // services contains minimal mappings between services names and port
 // numbers for platforms that don't have a complete list of port numbers.
 //
@@ -46,7 +45,7 @@ internal static map<@string, map<@string, nint>> services = new map<@string, map
     ["tcp"u8] = new map<@string, nint>{
         ["ftp"u8] = 21,
         ["ftps"u8] = 990,
-        ["gopher"u8] = 70,
+        ["gopher"u8] = 70, // ʕ◔ϖ◔ʔ
         ["http"u8] = 80,
         ["https"u8] = 443,
         ["imap2"u8] = 143,
@@ -90,10 +89,9 @@ internal static readonly @string tcpˢ = "tcp"u8;
 
 internal static (nint port, error error) lookupPortMap(@string network, @string service) {
     var exprᴛ1 = network;
-    if (exprᴛ1 == "ip"u8) {
+    if (exprᴛ1 == "ip"u8) { // no hints
         {
-            var (p, err) = lookupPortMapWithNetwork(tcpˢ, // no hints
- "ip"u8, service); if (err == default!) {
+            var (p, err) = lookupPortMapWithNetwork(tcpˢ, "ip"u8, service); if (err == default!) {
                 return (p, default!);
             }
         }
@@ -105,7 +103,6 @@ internal static (nint port, error error) lookupPortMap(@string network, @string 
     if (exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8) {
         return lookupPortMapWithNetwork(udpˢ, udpˢ, service);
     }
-
     return (0, new DNSErrorжerror(Ꮡ(new DNSError(Err: "unknown network"u8, Name: network + "/"u8 + service))));
 }
 
@@ -267,6 +264,7 @@ public static (slice<IP>, error) LookupIP(this ж<Resolver> Ꮡr, context.Contex
     if (err != default!) {
         return (default!, err);
     }
+
     var ips = new slice<IP>(0, len(addrs));
     foreach (var (_, addr) in addrs) {
         ips = append(ips, (~addr._<ж<IPAddr>>()).IP);
@@ -364,12 +362,14 @@ internal static partial (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> �
             resolverFunc = alt;
         }
     }
+
     // We don't want a cancellation of ctx to affect the
     // lookupGroup operation. Otherwise if our context gets
     // canceled it might cause an error to be returned to a lookup
     // using a completely different context. However we need to preserve
     // only the values in context. See Issue 28600.
     var (lookupGroupCtx, lookupGroupCancel) = context.WithCancel(withUnexpiredValuesPreserved(ctx));
+
     @string lookupKey = network + "\u0000"u8 + host;
     ᏑdnsWaitGroup.Add(1);
     var lookupGroupCtxʗ1 = lookupGroupCtx;
@@ -378,6 +378,7 @@ internal static partial (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> �
         var (ᴛ1, ᴛ2) = testHookLookupIP(lookupGroupCtxʗ1, resolverFuncʗ1, network, host);
         return (ᴛ1, ᴛ2);
     });
+
     void dnsWaitGroupDone(/*<-*/channel<singleflight.Result> chΔ1, Action cancelFn) {
         ᐸꟷ(chΔ1);
         ᏑdnsWaitGroup.Done();
@@ -387,14 +388,14 @@ internal static partial (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> �
     var selᴛ17 = ch;
     switch (select(ᐸꟷ(selᴛ16, ꓸꓸꓸ), ᐸꟷ(selᴛ17, ꓸꓸꓸ))) {
     case 0 when selᴛ16.ꟷᐳ(out _): {
+        // Our context was canceled. If we are the only
+        // goroutine looking up this key, then drop the key
+        // from the lookupGroup and cancel the lookup.
+        // If there are other goroutines looking up this key,
+        // let the lookup continue uncanceled, and let later
+        // lookups with the same key share the result.
+        // See issues 8602, 20703, 22724.
         if (Ꮡr.getLookupGroup().ForgetUnshared(lookupKey)){
-            // Our context was canceled. If we are the only
-            // goroutine looking up this key, then drop the key
-            // from the lookupGroup and cancel the lookup.
-            // If there are other goroutines looking up this key,
-            // let the lookup continue uncanceled, and let later
-            // lookups with the same key share the result.
-            // See issues 8602, 20703, 22724.
             lookupGroupCancel();
             var dnsWaitGroupDoneʗ1 = dnsWaitGroupDone;
             goǃ(dnsWaitGroupDoneʗ1, ch, () => {
@@ -473,14 +474,12 @@ public static (nint port, error err) LookupPort(this ж<Resolver> Ꮡr, context.
         var exprᴛ1 = network;
         if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8 || exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8 || exprᴛ1 == "ip"u8) {
         }
-        else if (exprᴛ1 == ""u8) {
+        else if (exprᴛ1 == ""u8) { // a hint wildcard for Go 1.0 undocumented behavior
             network = "ip"u8;
         }
         else { /* default: */
-            return (0, new AddrErrorжerror(Ꮡ(new AddrError( // a hint wildcard for Go 1.0 undocumented behavior
-Err: "unknown network"u8, Addr: network))));
+            return (0, new AddrErrorжerror(Ꮡ(new AddrError(Err: "unknown network"u8, Addr: network))));
         }
-
         (port, err) = Ꮡr.lookupPort(ctx, network, service);
         if (err != default!) {
             return (0, err);

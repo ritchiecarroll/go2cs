@@ -21,6 +21,7 @@ internal static (@string name, error err) hostname() {
         // from /proc is not allowed on Android.
         ref var un = ref heap(new syscall.Utsname(), out var Ꮡun);
         err = syscall.Uname(Ꮡun);
+
         array<byte> buf = new(512);                 // Enough for a DNS name.
         foreach (var (i, b) in un.Nodename[..]) {
             buf[i] = (uint8)b;
@@ -40,16 +41,19 @@ internal static (@string name, error err) hostname() {
             }
             (name, err) = (localhostˢ, default!); goto ᒐdone;
         }
+
         (var f, err) = Open(procSysKernelHostnameˢ);
         if (err != default!) {
             (name, err) = ("", err); goto ᒐdone;
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         (var n, err) = f.Read(buf[..]);
         if (err != default!) {
             (name, err) = ("", err); goto ᒐdone;
         }
+
         if (n > 0 && buf[n - 1] == (rune)'\n') {
             n--;
         }

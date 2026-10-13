@@ -144,6 +144,7 @@ using global::go.net;
 
 partial class rpc_package {
 
+// Defaults used by HandleHTTP
 public static readonly @string DefaultRPCPath = "/_goRPC_"u8;
 public static readonly @string DefaultDebugPath = "/debug/rpc"u8;
 
@@ -255,10 +256,13 @@ internal static error register(this ж<Server> Ꮡserver, any rcvr, @string name
         return errors.New(sΔ2);
     }
     s.Value.name = sname;
+
     // Install the methods
     s.Value.method = suitableMethods((~s).typ, logRegisterError);
+
     if (len((~s).method) == 0) {
         @string str = ""u8;
+
         // To help the user, see if a pointer receiver would work.
         var method = suitableMethods(reflect.PointerTo((~s).typ), false);
         if (len(method) != 0){
@@ -269,6 +273,7 @@ internal static error register(this ж<Server> Ꮡserver, any rcvr, @string name
         log.Print(str);
         return errors.New(str);
     }
+
     {
         var (_, dup) = Ꮡserver.of(Server.ᏑserviceMap).LoadOrStore(sname, s.OrTypedNil()); if (dup) {
             return errors.New("rpc: service already defined: "u8 + sname);
@@ -371,8 +376,8 @@ internal static void sendResponse(this ж<Server> Ꮡserver, ж<sync.Mutex> Ꮡs
 
 public static nuint /*n*/ NumCalls(this ж<methodType> Ꮡm) {
     nuint n = default!;
-
     ref var m = ref Ꮡm.DerefOrNull();
+
     Ꮡm.of(methodType.ᏑMutex).Lock();
     n = m.numCalls;
     Ꮡm.of(methodType.ᏑMutex).Unlock();
@@ -605,6 +610,7 @@ internal static (ж<service> service, ж<methodType> mtype, ж<Request> req, ref
         codec.ReadRequestBody(default!);
         return (service, mtype, req, argv, replyv, keepReading, err);
     }
+
     // Decode the argument value.
     var argIsValue = false; // if true, need to indirect before calling.
     if ((~mtype).ArgType.Kind() == reflect.ΔPointer){
@@ -622,7 +628,9 @@ internal static (ж<service> service, ж<methodType> mtype, ж<Request> req, ref
     if (argIsValue) {
         argv = argv.Elem();
     }
+
     replyv = reflect.New((~mtype).ReplyType.Elem());
+
     var exprᴛ1 = (~mtype).ReplyType.Elem().Kind();
     if (exprᴛ1 == reflect.Map) {
         replyv.Elem().Set(reflect.MakeMap((~mtype).ReplyType.Elem()));
@@ -630,7 +638,6 @@ internal static (ж<service> service, ж<methodType> mtype, ж<Request> req, ref
     else if (exprᴛ1 == reflect.ΔSlice) {
         replyv.Elem().Set(reflect.MakeSlice((~mtype).ReplyType.Elem(), 0, 0));
     }
-
     return (service, mtype, req, argv, replyv, keepReading, err);
 }
 
@@ -640,8 +647,8 @@ internal static (ж<service> svc, ж<methodType> mtype, ж<Request> req, bool ke
     ж<Request> req = default!;
     bool keepReading = default!;
     error err = default!;
-
     ref var server = ref Ꮡserver.DerefOrNull();
+
     // Grab the request header.
     req = Ꮡserver.getRequest();
     err = codec.ReadRequestHeader(req);
@@ -653,9 +660,11 @@ internal static (ж<service> svc, ж<methodType> mtype, ж<Request> req, bool ke
         err = errors.New("rpc: server cannot decode request: "u8 + err.Error());
         return (svc, mtype, req, keepReading, err);
     }
+
     // We read the header successfully. If we see an error now,
     // we can still recover and move on to the next request.
     keepReading = true;
+
     nint dot = strings.LastIndex((~req).ServiceMethod, "."u8);
     if (dot < 0) {
         err = errors.New("rpc: service/method request ill-formed: "u8 + (~req).ServiceMethod);
@@ -663,6 +672,7 @@ internal static (ж<service> svc, ж<methodType> mtype, ж<Request> req, bool ke
     }
     @string serviceName = (~req).ServiceMethod.slice(0, dot);
     @string methodName = (~req).ServiceMethod.slice(dot + 1);
+
     // Look up the request.
     var (svci, ok) = Ꮡserver.of(Server.ᏑserviceMap).Load(serviceName);
     if (!ok) {

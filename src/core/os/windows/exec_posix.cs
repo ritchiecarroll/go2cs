@@ -20,7 +20,6 @@ partial class os_package {
 // os.Process.Signal is not implemented; it will return an error instead of
 // sending a signal.
 public static ΔSignal Interrupt = new syscall_ΔSignalᴠΔSignal(((syscallꓸSignal)syscall.SIGINT));
-
 public static ΔSignal ΔKill = new syscall_ΔSignalᴠΔSignal(((syscallꓸSignal)syscall.SIGKILL));
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -28,8 +27,8 @@ internal static readonly @string chdirˢ = "chdir"u8;
 
 internal static (ж<Process> p, error err) startProcess(@string name, slice<@string> argv, ж<ProcAttr> Ꮡattr) {
     error err = default!;
-
     ref var attr = ref Ꮡattr.DerefOrNull();
+
     // If there is no SysProcAttr (ie. no Chroot or changed
     // UID/GID), double-check existence of the directory we want
     // to chdir into. We can make the error clearer this way.
@@ -42,6 +41,7 @@ internal static (ж<Process> p, error err) startProcess(@string name, slice<@str
             }
         }
     }
+
     var (attrSys, shouldDupPidfd) = ensurePidfd(attr.Sys);
     var sysattr = Ꮡ(new syscall.ProcAttr(
         Dir: attr.Dir,
@@ -58,12 +58,16 @@ internal static (ж<Process> p, error err) startProcess(@string name, slice<@str
     foreach (var (_, f) in attr.Files) {
         sysattr.Value.Files = append((~sysattr).Files, f.Fd());
     }
+
     var (pid, h, e) = syscall.StartProcess(name, argv, sysattr);
+
     // Make sure we don't run the finalizers of attr.Files.
     runtime.KeepAlive(Ꮡattr.OrTypedNil());
+
     if (e != default!) {
         return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "fork/exec"u8, Path: name, Err: e))));
     }
+
     // For Windows, syscall.StartProcess above already returned a process handle.
     if (runtime.GOOS != "windows"u8) {
         bool ok = default!;
@@ -72,6 +76,7 @@ internal static (ж<Process> p, error err) startProcess(@string name, slice<@str
             return (newPIDProcess(pid), default!);
         }
     }
+
     return (newHandleProcess(pid, h), default!);
 }
 
@@ -122,11 +127,9 @@ public static @string String(this ж<ProcessState> Ꮡp) {
     switch (ᐧ) {
     case {} when status.Exited(): {
         nint code = status.ExitStatus();
-        if (runtime.GOOS == "windows"u8 && (nuint)code >= ((nuint)1 << (int)(16))){
-            // windows uses large hex numbers
+        if (runtime.GOOS == "windows"u8 && (nuint)code >= ((nuint)1 << (int)(16))){ // windows uses large hex numbers
             res = "exit status "u8 + itoa.Uitox((nuint)code);
-        } else {
-            // unix systems use small decimal integers
+        } else { // unix systems use small decimal integers
             res = "exit status "u8 + itoa.Itoa(code); // unix
         }
         break;
@@ -146,7 +149,6 @@ public static @string String(this ж<ProcessState> Ꮡp) {
         res = continuedˢ;
         break;
     }}
-
     if (status.CoreDump()) {
         res += " (core dumped)"u8;
     }

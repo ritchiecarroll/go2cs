@@ -126,6 +126,7 @@ internal static void cleanup(this ref TypeParam t) {
 // iface returns the constraint interface of t.
 internal static ж<Interface> iface(this ref TypeParam t) {
     var bound = t.bound;
+
     // determine constraint interface
     ж<Interface> ityp = default!;
     switch (under(bound).type()) {
@@ -144,12 +145,14 @@ internal static ж<Interface> iface(this ref TypeParam t) {
         ityp = u;
         break;
     }}
+
     // If we don't have an interface, wrap constraint into an implicit interface.
     if (ityp == nil) {
         ityp = NewInterfaceType(default!, new ΔType[]{bound}.slice());
         ityp.Value.@implicit = true;
         t.bound = new InterfaceжΔType(ityp); // update t.bound for next time (optimization)
     }
+
     // compute type set if necessary
     if ((~ityp).tset == nil) {
         // pos is used for tracing output; start with the type parameter position.
@@ -162,6 +165,7 @@ internal static ж<Interface> iface(this ref TypeParam t) {
         }
         computeInterfaceTypeSet(t.check, pos, ityp);
     }
+
     return ityp;
 }
 

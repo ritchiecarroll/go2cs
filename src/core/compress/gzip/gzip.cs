@@ -18,13 +18,9 @@ partial class gzip_package {
 // These constants are copied from the flate package, so that code that imports
 // "compress/gzip" does not also have to import "compress/flate".
 public static UntypedInt NoCompression => /* flate.NoCompression */ 0;
-
 public static UntypedInt BestSpeed => /* flate.BestSpeed */ 1;
-
 public static UntypedInt BestCompression => /* flate.BestCompression */ 9;
-
 public static UntypedInt DefaultCompression => /* flate.DefaultCompression */ -1;
-
 public static UntypedInt HuffmanOnly => /* flate.HuffmanOnly */ -2;
 
 // A Writer is an io.WriteCloser.
@@ -77,9 +73,8 @@ internal static void init(this ref Writer z, io.Writer w, nint level) {
     }
     z = new Writer(
         Header: new Header(
-            OS: 255
-        ), // unknown
-
+            OS: 255 // unknown
+        ),
         w: w,
         level: level,
         compressor: compressor

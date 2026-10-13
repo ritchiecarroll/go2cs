@@ -35,8 +35,8 @@ internal static (slice<byte>, error) readSource(@string filename, any src) {
             return (s, default!);
         }
         case ж<bytes.Buffer> s: {
+            // is io.Reader, but src is already available in []byte form
             if (s != nil) {
-                // is io.Reader, but src is already available in []byte form
                 return (s.Bytes(), default!);
             }
             break;
@@ -49,6 +49,9 @@ internal static (slice<byte>, error) readSource(@string filename, any src) {
     return os.ReadFile(filename);
 }
 
+// A Mode value is a set of flags (or 0).
+// They control the amount of source code parsed and other optional
+// parser functionality.
 partial struct Mode /*num:nuint*/;
 
 public static Mode PackageClauseOnly => /* 1 << iota */ 1;                      // stop parsing after package clause
@@ -90,17 +93,20 @@ public static (ж<ast.File> f, error err) ParseFile(ж<token.FileSet> Ꮡfset, @
     GoFrame ᒐ = default;
     try {
         ref var fset = ref Ꮡfset.DerefOrNull();
-
         ref var err = ref Ꮡerr.ValueSlot;
+
         if (Ꮡfset == nil) {
             throw panic("parser.ParseFile: no token.FileSet provided (fset == nil)");
         }
+
         // get source
         (var text, err) = readSource(filename, src);
         if (err != default!) {
             (f, err) = (default!, err); goto ᒐdone;
         }
+
         var @file = Ꮡfset.AddFile(filename, -1, len(text));
+
         ref var p = ref heap(new parser(), out var Ꮡp);
         var fileʗ1 = @file;
         defer(() => {
@@ -117,6 +123,7 @@ public static (ж<ast.File> f, error err) ParseFile(ж<token.FileSet> Ꮡfset, @
                     }
                 }
             }
+
             // set result values
             if (f == nil) {
                 // source is not a valid Go source file - satisfy
@@ -127,13 +134,16 @@ public static (ж<ast.File> f, error err) ParseFile(ж<token.FileSet> Ꮡfset, @
                     Scope: ast.NewScope(nil)
                 ));
             }
+
             // Ensure the start/end are consistent,
             // whether parsing succeeded or not.
             f.Value.FileStart = ((tokenꓸPos)fileʗ1.Base());
             f.Value.FileEnd = ((tokenꓸPos)(fileʗ1.Base() + fileʗ1.Size()));
+
             Ꮡp.Value.errors.Sort();
             Ꮡerr.ValueSlot = Ꮡp.Value.errors.Err();
         }, ref ᒐ);
+
         // parse source
         Ꮡp.init(@file, text, mode);
         f = Ꮡp.parseFile();
@@ -163,6 +173,7 @@ public static (map<@string, ж<ast.Package>> pkgs, error first) ParseDir(ж<toke
     if (err != default!) {
         return (default!, err);
     }
+
     pkgs = new map<@string, ж<ast.Package>>();
     foreach (var (_, d) in list) {
         if (d.IsDir() || !strings.HasSuffix(d.Name(), ".go"u8)) {
@@ -197,6 +208,7 @@ public static (map<@string, ж<ast.Package>> pkgs, error first) ParseDir(ж<toke
             }
         }
     }
+
     return (pkgs, first);
 }
 
@@ -216,16 +228,18 @@ public static (ast.Expr expr, error err) ParseExprFrom(ж<token.FileSet> Ꮡfset
     GoFrame ᒐ = default;
     try {
         ref var fset = ref Ꮡfset.DerefOrNull();
-
         ref var err = ref Ꮡerr.ValueSlot;
+
         if (Ꮡfset == nil) {
             throw panic("parser.ParseExprFrom: no token.FileSet provided (fset == nil)");
         }
+
         // get source
         (var text, err) = readSource(filename, src);
         if (err != default!) {
             (expr, err) = (default!, err); goto ᒐdone;
         }
+
         ref var p = ref heap(new parser(), out var Ꮡp);
         defer(() => {
             {
@@ -244,10 +258,12 @@ public static (ast.Expr expr, error err) ParseExprFrom(ж<token.FileSet> Ꮡfset
             Ꮡp.Value.errors.Sort();
             Ꮡerr.ValueSlot = Ꮡp.Value.errors.Err();
         }, ref ᒐ);
+
         // parse expr
         var @file = Ꮡfset.AddFile(filename, -1, len(text));
         Ꮡp.init(@file, text, mode);
         expr = Ꮡp.parseRhs();
+
         // If a semicolon was inserted, consume it;
         // report an error if there's more tokens.
         if (p.tok == token.SEMICOLON && p.lit == "\n"u8) {

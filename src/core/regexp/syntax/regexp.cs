@@ -25,9 +25,11 @@ partial struct Regexp {
     public @string Name;    // capturing name, for OpCapture
 }
 
+//go:generate stringer -type Op -trimprefix Op
+
+// An Op is a single regular expression operator.
 partial struct Op /*num:uint8*/;
 
-//go:generate stringer -type Op -trimprefix Op
 // Operators are listed in precedence order, tightest binding to weakest.
 // Character class operators are listed simplest to most complex
 // (OpLiteral, OpCharClass, OpAnyCharNotNL, OpAnyChar).
@@ -66,8 +68,8 @@ public static bool Equal(this ж<Regexp> Ꮡx, ж<Regexp> Ꮡy) {
     }
     var exprᴛ1 = x.Op;
     if (exprᴛ1 == OpEndText) {
+        // The parse flags remember whether this is \z or \Z.
         if ((Flags)(x.Flags & WasDollar) != (Flags)(y.Flags & WasDollar)) {
-            // The parse flags remember whether this is \z or \Z.
             return false;
         }
     }
@@ -92,10 +94,10 @@ public static bool Equal(this ж<Regexp> Ꮡx, ж<Regexp> Ꮡy) {
             return false;
         }
     }
-
     return true;
 }
 
+// printFlags is a bit set indicating which flags (including non-capturing parens) to print around a regexp.
 partial struct printFlags /*num:uint8*/;
 
 internal static printFlags flagI => /* 1 << iota */ 1;        // (?i:
@@ -108,9 +110,6 @@ internal static UntypedInt negShift => 5;     // flagI<<negShift is (?-i:
 // addSpan enables the flags f around start..last,
 // by setting flags[start] = f and flags[last] = flagOff.
 internal static void addSpan(ж<Regexp> Ꮡstart, ж<Regexp> Ꮡlast, printFlags f, ref map<ж<Regexp>, printFlags> flags) {
-    ref var start = ref Ꮡstart.DerefOrNull();
-    ref var last = ref Ꮡlast.DerefOrNull();
-
     if (flags == default!) {
         flags = new map<ж<Regexp>, printFlags>();
     }
@@ -126,10 +125,10 @@ internal static void addSpan(ж<Regexp> Ꮡstart, ж<Regexp> Ꮡlast, printFlags
 internal static (printFlags must, printFlags cant) calcFlags(ref Regexp re, ref map<ж<Regexp>, printFlags> flags) {
     var exprᴛ1 = re.Op;
     if (exprᴛ1 == OpLiteral) {
+        // If literal is fold-sensitive, return (flagI, 0) or (0, flagI)
+        // according to whether (?i) is active.
+        // If literal is not fold-sensitive, return 0, 0.
         foreach (var (_, r) in re.Rune) {
-            // If literal is fold-sensitive, return (flagI, 0) or (0, flagI)
-            // according to whether (?i) is active.
-            // If literal is not fold-sensitive, return 0, 0.
             if (minFold <= r && r <= maxFold && unicode.SimpleFold(r) != r) {
                 if ((Flags)(re.Flags & FoldCase) != 0){
                     return (flagI, 0);
@@ -141,9 +140,9 @@ internal static (printFlags must, printFlags cant) calcFlags(ref Regexp re, ref 
         return (0, 0);
     }
     if (exprᴛ1 == OpCharClass) {
+        // If literal is fold-sensitive, return 0, flagI - (?i) has been compiled out.
+        // If literal is not fold-sensitive, return 0, 0.
         for (nint i = 0; i < len(re.Rune); i += 2) {
-            // If literal is fold-sensitive, return 0, flagI - (?i) has been compiled out.
-            // If literal is not fold-sensitive, return 0, 0.
             var lo = max((rune)(minFold), re.Rune[i]);
             var hi = min((rune)(maxFold), re.Rune[i + 1]);
             for (var r = lo; r <= hi; r++) {
@@ -156,21 +155,17 @@ internal static (printFlags must, printFlags cant) calcFlags(ref Regexp re, ref 
         }
         return (0, 0);
     }
-    if (exprᴛ1 == OpAnyCharNotNL) {
+    if (exprᴛ1 == OpAnyCharNotNL) { // (?-s).
         return (0, flagS);
     }
-    if (exprᴛ1 == OpAnyChar) {
+    if (exprᴛ1 == OpAnyChar) { // (?s).
         return (flagS, 0);
     }
-    if (exprᴛ1 == OpBeginLine || exprᴛ1 == OpEndLine) {
+    if (exprᴛ1 == OpBeginLine || exprᴛ1 == OpEndLine) { // (?m)^ (?m)$
         return (flagM, 0);
     }
     if (exprᴛ1 == OpEndText) {
-        if ((Flags)(re.Flags & WasDollar) != 0) {
-            // (?-s).
-            // (?s).
-            // (?m)^ (?m)$
-            // (?-m)$
+        if ((Flags)(re.Flags & WasDollar) != 0) { // (?-m)$
             return (0, flagM);
         }
         return (0, 0);
@@ -222,7 +217,6 @@ internal static (printFlags must, printFlags cant) calcFlags(ref Regexp re, ref 
     { /* default: */
         return (0, 0);
     }
-
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -271,6 +265,7 @@ internal static void writeRegexp(ж<strings.Builder> Ꮡb, ж<Regexp> Ꮡre, pri
             Ꮡb.WriteString(@"(?:"u8);
             defer(Ꮡb.WriteString, (@string)@")", ref ᒐ);
         }
+
         var exprᴛ1 = re.Op;
         if (exprᴛ1 == OpNoMatch) {
             Ꮡb.WriteString(x00X10ffffˢ);
@@ -367,6 +362,7 @@ internal static void writeRegexp(ж<strings.Builder> Ꮡb, ж<Regexp> Ꮡre, pri
                 p = flagPrec;
             }
             writeRegexp(Ꮡb, sub, p, flags);
+
             var exprᴛ2 = re.Op;
             if (exprᴛ2 == OpStar) {
                 Ꮡb.WriteRune((rune)'*');
@@ -388,7 +384,6 @@ internal static void writeRegexp(ж<strings.Builder> Ꮡb, ж<Regexp> Ꮡre, pri
                 }
                 Ꮡb.WriteRune((rune)'}');
             }
-
             if ((Flags)(re.Flags & NonGreedy) != 0) {
                 Ꮡb.WriteRune((rune)'?');
             }
@@ -413,7 +408,6 @@ internal static void writeRegexp(ж<strings.Builder> Ꮡb, ж<Regexp> Ꮡre, pri
         else { /* default: */
             Ꮡb.WriteString("<invalid op"u8 + strconv.Itoa((nint)(uint8)re.Op) + ">"u8);
         }
-
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -441,6 +435,7 @@ internal static void escape(ж<strings.Builder> Ꮡb, rune r, bool force) {
         Ꮡb.WriteRune(r);
         return;
     }
+
     switch (r) {
     case (rune)'\a': {
         Ꮡb.WriteString(@"\a"u8);
@@ -481,7 +476,6 @@ internal static void escape(ж<strings.Builder> Ꮡb, rune r, bool force) {
         Ꮡb.WriteString(@"}"u8);
         break;
     }}
-
 }
 
 // MaxCap walks the regexp to find the maximum capture index.

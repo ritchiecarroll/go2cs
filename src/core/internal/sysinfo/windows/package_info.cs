@@ -50,7 +50,7 @@ using static go.@internal.sysinfo_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/sysinfo/cpuinfo_stub.go", "cpuinfo_stub.cs", "AAgSgg==")]
-[assembly: go.GoPositionMap("internal/sysinfo/sysinfo.go", "sysinfo.cs", "AA8cgoCCpoCCpg==")]
+[assembly: go.GoPositionMap("internal/sysinfo/sysinfo.go", "sysinfo.cs", "AA8cgoCCtoCCtg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

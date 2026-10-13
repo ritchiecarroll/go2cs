@@ -137,6 +137,7 @@ internal static void sigNoteSetup(ж<note> _) {
     }
     closeonexec(sigNoteRead);
     closeonexec(sigNoteWrite);
+
     // Make the write end of the pipe non-blocking, so that if the pipe
     // buffer is somehow full we will not block in the signal handler.
     // Leave the read end of the pipe blocking so that we will block
@@ -169,6 +170,7 @@ internal static void osinit() {
     // can look at the environment first.
     ncpu = getncpu();
     physPageSize = getPageSize();
+
     osinit_hack();
 }
 
@@ -240,6 +242,7 @@ internal static void newosproc(ж<m> Ꮡmp) {
     if (false) {
         print((@string)"newosproc stk="u8, @unsafe.Pointer.OrTypedNil(stk), (@string)" m="u8, Ꮡmp.OrTypedNil(), (@string)" g="u8, mp.g0.OrTypedNil(), (@string)" id="u8, mp.id, (@string)" ostk="u8, Ꮡ(mp), (@string)"\n"u8);
     }
+
     // Initialize an attribute object.
     ref var attr = ref heap(new pthreadattr(), out var Ꮡattr);
     int32 err = default!;
@@ -248,6 +251,7 @@ internal static void newosproc(ж<m> Ꮡmp) {
         writeErrStr(failthreadcreate);
         exit(1);
     }
+
     // Find out OS stack size for our own stack guard.
     ref var stacksize = ref heap(new uintptr(), out var Ꮡstacksize);
     if (pthread_attr_getstacksize(Ꮡattr, Ꮡstacksize) != 0) {
@@ -255,11 +259,13 @@ internal static void newosproc(ж<m> Ꮡmp) {
         exit(1);
     }
     mp.g0.Value.stack.hi = stacksize; // for mstart
+
     // Tell the pthread library we won't join with this thread.
     if (pthread_attr_setdetachstate(Ꮡattr, _PTHREAD_CREATE_DETACHED) != 0) {
         writeErrStr(failthreadcreate);
         exit(1);
     }
+
     // Finally, create the thread. It starts at mstart_stub, which does some low-level
     // setup and then calls mstart.
     ref var oset = ref heap(new sigset(), out var Ꮡoset);
@@ -292,6 +298,7 @@ internal static void newosproc0(uintptr stacksizeʗp, uintptr fn) {
         writeErrStr(failthreadcreate);
         exit(1);
     }
+
     // The caller passes in a suggested stack size,
     // from when we allocated the stack and thread ourselves,
     // without libpthread. Now that we're using libpthread,
@@ -303,11 +310,13 @@ internal static void newosproc0(uintptr stacksizeʗp, uintptr fn) {
     }
     g0.stack.hi = stacksize; // for mstart
     Ꮡmemstats.of(mstats.Ꮡstacks_sys).add((int64)stacksize);
+
     // Tell the pthread library we won't join with this thread.
     if (pthread_attr_setdetachstate(Ꮡattr, _PTHREAD_CREATE_DETACHED) != 0) {
         writeErrStr(failthreadcreate);
         exit(1);
     }
+
     // Finally, create the thread. It starts at mstart_stub, which does some low-level
     // setup and then calls mstart.
     ref var oset = ref heap(new sigset(), out var Ꮡoset);
@@ -406,8 +415,7 @@ internal static void setsig(uint32 i, uintptr fn) {
     ref var sa = ref heap(new usigactiont(), out var Ꮡsa);
     sa.sa_flags = (int32)((UntypedInt)(_SA_SIGINFO | _SA_ONSTACK) | (int32)_SA_RESTART);
     sa.sa_mask = ~(uint32)0;
-    if (fn == abi.FuncPCABIInternal(sighandler)) {
-        // abi.FuncPCABIInternal(sighandler) matches the callers in signal_unix.go
+    if (fn == abi.FuncPCABIInternal(sighandler)) { // abi.FuncPCABIInternal(sighandler) matches the callers in signal_unix.go
         if (iscgo){
             fn = abi.FuncPCABI0(cgoSigtramp);
         } else {
@@ -481,14 +489,13 @@ public static @string executablePath;
 internal static readonly @string executablePathˢ = "executable_path="u8;
 
 internal static void sysargs(int32 argc, ж<ж<byte>> Ꮡargv) {
-    ref var argv = ref Ꮡargv.DerefOrNull();
-
     // skip over argv, envv and the first string will be the path
     var n = argc + 1;
     while (argv_index(Ꮡargv, n) != nil) {
         n++;
     }
     executablePath = gostringnocopy(argv_index(Ꮡargv, n + 1));
+
     // strip "executable_path=" prefix if available, it's added after OS X 10.11.
     executablePath = stringslite.TrimPrefix(executablePath, executablePathˢ);
 }

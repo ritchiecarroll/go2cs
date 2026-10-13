@@ -12,123 +12,71 @@ partial struct lockRank /*num:nint*/;
 internal static lockRank lockRankUnknown => /* iota */ 0;
 
 internal static lockRank lockRankSysmon => 1;
-
 internal static lockRank lockRankScavenge => 2;
-
 internal static lockRank lockRankForcegc => 3;
-
 internal static lockRank lockRankDefer => 4;
-
 internal static lockRank lockRankSweepWaiters => 5;
-
 internal static lockRank lockRankAssistQueue => 6;
-
 internal static lockRank lockRankStrongFromWeakQueue => 7;
-
 internal static lockRank lockRankSweep => 8;
-
 internal static lockRank lockRankTestR => 9;
-
 internal static lockRank lockRankTestW => 10;
-
 internal static lockRank lockRankTimerSend => 11;
-
 internal static lockRank lockRankAllocmW => 12;
-
 internal static lockRank lockRankExecW => 13;
-
 internal static lockRank lockRankCpuprof => 14;
-
 internal static lockRank lockRankPollCache => 15;
-
 internal static lockRank lockRankPollDesc => 16;
-
 internal static lockRank lockRankWakeableSleep => 17;
-
 internal static lockRank lockRankHchan => 18;
-
+// SCHED
 internal static lockRank lockRankAllocmR => 19;
-
 internal static lockRank lockRankExecR => 20;
-
 internal static lockRank lockRankSched => 21;
-
 internal static lockRank lockRankAllg => 22;
-
 internal static lockRank lockRankAllp => 23;
-
 internal static lockRank lockRankNotifyList => 24;
-
 internal static lockRank lockRankSudog => 25;
-
 internal static lockRank lockRankTimers => 26;
-
 internal static lockRank lockRankTimer => 27;
-
 internal static lockRank lockRankNetpollInit => 28;
-
 internal static lockRank lockRankRoot => 29;
-
 internal static lockRank lockRankItab => 30;
-
 internal static lockRank lockRankReflectOffs => 31;
-
 internal static lockRank lockRankSynctest => 32;
-
 internal static lockRank lockRankUserArenaState => 33;
-
+// TRACEGLOBAL
 internal static lockRank lockRankTraceBuf => 34;
-
 internal static lockRank lockRankTraceStrings => 35;
-
+// MALLOC
 internal static lockRank lockRankFin => 36;
-
 internal static lockRank lockRankSpanSetSpine => 37;
-
 internal static lockRank lockRankMspanSpecial => 38;
-
 internal static lockRank lockRankTraceTypeTab => 39;
-
+// MPROF
 internal static lockRank lockRankGcBitsArenas => 40;
-
 internal static lockRank lockRankProfInsert => 41;
-
 internal static lockRank lockRankProfBlock => 42;
-
 internal static lockRank lockRankProfMemActive => 43;
-
 internal static lockRank lockRankProfMemFuture => 44;
-
+// STACKGROW
 internal static lockRank lockRankGscan => 45;
-
 internal static lockRank lockRankStackpool => 46;
-
 internal static lockRank lockRankStackLarge => 47;
-
 internal static lockRank lockRankHchanLeaf => 48;
-
+// WB
 internal static lockRank lockRankWbufSpans => 49;
-
 internal static lockRank lockRankMheap => 50;
-
 internal static lockRank lockRankMheapSpecial => 51;
-
 internal static lockRank lockRankGlobalAlloc => 52;
-
+// TRACE
 internal static lockRank lockRankTrace => 53;
-
 internal static lockRank lockRankTraceStackTab => 54;
-
 internal static lockRank lockRankPanic => 55;
-
 internal static lockRank lockRankDeadlock => 56;
-
 internal static lockRank lockRankRaceFini => 57;
-
 internal static lockRank lockRankAllocmRInternal => 58;
-
 internal static lockRank lockRankExecRInternal => 59;
-
 internal static lockRank lockRankTestRInternal => 60;
 
 // lockRankLeafRank is the rank of lock that does not have a declared rank,

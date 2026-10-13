@@ -125,6 +125,7 @@ public static partial error Start(io.Writer w) {
     try {
         Ꮡtracing.of(tracingᴛ1.ᏑMutex).Lock();
         defer(Ꮡtracing.of(tracingᴛ1.ᏑMutex).Unlock, ref ᒐ);
+
         {
             var err = runtime.StartTrace(); if (err != default!) {
                 return err;
@@ -154,12 +155,12 @@ public static void Stop() {
         Ꮡtracing.of(tracingᴛ1.ᏑMutex).Lock();
         defer(Ꮡtracing.of(tracingᴛ1.ᏑMutex).Unlock, ref ᒐ);
         Ꮡtracing.of(tracingᴛ1.Ꮡenabled).Store(false);
+
         runtime.StopTrace();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
 
 partial struct tracingᴛ1 /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; } // gate mutators (Start, Stop)

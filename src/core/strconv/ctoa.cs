@@ -17,11 +17,13 @@ public static @string FormatComplex(complex128 c, byte fmt, nint prec, nint bitS
         throw panic("invalid bitSize");
     }
     bitSize >>= (int)(1); // complex64 uses float32 internally
+
     // Check if imaginary part has a sign. If not, add one.
     @string im = FormatFloat(imag(c), fmt, prec, bitSize);
     if (im[0] != (rune)'+' && im[0] != (rune)'-') {
         im = "+"u8 + im;
     }
+
     return "("u8 + FormatFloat(real(c), fmt, prec, bitSize) + im + "i)"u8;
 }
 

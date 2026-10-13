@@ -14,12 +14,15 @@ partial class md5_package {
 internal static void blockGeneric(ref digest dig, slice<byte> p) {
     // load state
     var (a, b, c, d) = (dig.s[0], dig.s[1], dig.s[2], dig.s[3]);
+
     for (nint i = 0; i <= len(p) - (nint)ΔBlockSize; i += ΔBlockSize) {
         // eliminate bounds checks on p
         var q = p.slice(i);
         q = q.slice(0, ΔBlockSize, ΔBlockSize);
+
         // save current state
         var (aa, bb, cc, dd) = (a, b, c, d);
+
         // load input block
         var x0 = byteorder.LEUint32(q[(int)(4 * 0x0)..]);
         var x1 = byteorder.LEUint32(q[(int)(4 * 0x1)..]);
@@ -37,6 +40,7 @@ internal static void blockGeneric(ref digest dig, slice<byte> p) {
         var xd = byteorder.LEUint32(q[(int)(4 * 0xd)..]);
         var xe = byteorder.LEUint32(q[(int)(4 * 0xe)..]);
         var xf = byteorder.LEUint32(q[(int)(4 * 0xf)..]);
+
         // round 1
         a = b + bits.RotateLeft32(((uint32)(((uint32)(((uint32)(c ^ d)) & b)) ^ d)) + a + x0 + 0xd76aa478U, 7);
         d = a + bits.RotateLeft32(((uint32)(((uint32)(((uint32)(b ^ c)) & a)) ^ c)) + d + x1 + 0xe8c7b756U, 12);
@@ -54,6 +58,7 @@ internal static void blockGeneric(ref digest dig, slice<byte> p) {
         d = a + bits.RotateLeft32(((uint32)(((uint32)(((uint32)(b ^ c)) & a)) ^ c)) + d + xd + 0xfd987193U, 12);
         c = d + bits.RotateLeft32(((uint32)(((uint32)(((uint32)(a ^ b)) & d)) ^ b)) + c + xe + 0xa679438eU, 17);
         b = c + bits.RotateLeft32(((uint32)(((uint32)(((uint32)(d ^ a)) & c)) ^ a)) + b + xf + 0x49b40821, 22);
+
         // round 2
         a = b + bits.RotateLeft32(((uint32)(((uint32)(((uint32)(b ^ c)) & d)) ^ c)) + a + x1 + 0xf61e2562U, 5);
         d = a + bits.RotateLeft32(((uint32)(((uint32)(((uint32)(a ^ b)) & c)) ^ b)) + d + x6 + 0xc040b340U, 9);
@@ -71,6 +76,7 @@ internal static void blockGeneric(ref digest dig, slice<byte> p) {
         d = a + bits.RotateLeft32(((uint32)(((uint32)(((uint32)(a ^ b)) & c)) ^ b)) + d + x2 + 0xfcefa3f8U, 9);
         c = d + bits.RotateLeft32(((uint32)(((uint32)(((uint32)(d ^ a)) & b)) ^ a)) + c + x7 + 0x676f02d9, 14);
         b = c + bits.RotateLeft32(((uint32)(((uint32)(((uint32)(c ^ d)) & a)) ^ d)) + b + xc + 0x8d2a4c8aU, 20);
+
         // round 3
         a = b + bits.RotateLeft32(((uint32)((uint32)(b ^ c) ^ d)) + a + x5 + 0xfffa3942U, 4);
         d = a + bits.RotateLeft32(((uint32)((uint32)(a ^ b) ^ c)) + d + x8 + 0x8771f681U, 11);
@@ -88,6 +94,7 @@ internal static void blockGeneric(ref digest dig, slice<byte> p) {
         d = a + bits.RotateLeft32(((uint32)((uint32)(a ^ b) ^ c)) + d + xc + 0xe6db99e5U, 11);
         c = d + bits.RotateLeft32(((uint32)((uint32)(d ^ a) ^ b)) + c + xf + 0x1fa27cf8, 16);
         b = c + bits.RotateLeft32(((uint32)((uint32)(c ^ d) ^ a)) + b + x2 + 0xc4ac5665U, 23);
+
         // round 4
         a = b + bits.RotateLeft32(((uint32)(c ^ ((uint32)(b | ~d)))) + a + x0 + 0xf4292244U, 6);
         d = a + bits.RotateLeft32(((uint32)(b ^ ((uint32)(a | ~c)))) + d + x7 + 0x432aff97, 10);
@@ -105,12 +112,14 @@ internal static void blockGeneric(ref digest dig, slice<byte> p) {
         d = a + bits.RotateLeft32(((uint32)(b ^ ((uint32)(a | ~c)))) + d + xb + 0xbd3af235U, 10);
         c = d + bits.RotateLeft32(((uint32)(a ^ ((uint32)(d | ~b)))) + c + x2 + 0x2ad7d2bb, 15);
         b = c + bits.RotateLeft32(((uint32)(d ^ ((uint32)(c | ~a)))) + b + x9 + 0xeb86d391U, 21);
+
         // add saved state
         a += aa;
         b += bb;
         c += cc;
         d += dd;
     }
+
     // save state
     (dig.s[0], dig.s[1], dig.s[2], dig.s[3]) = (a, b, c, d);
 }

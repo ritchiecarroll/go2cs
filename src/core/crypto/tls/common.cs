@@ -38,6 +38,9 @@ public static UntypedInt VersionTLS10 => 0x0301;
 public static UntypedInt VersionTLS11 => 0x0302;
 public static UntypedInt VersionTLS12 => 0x0303;
 public static UntypedInt VersionTLS13 => 0x0304;
+
+// Deprecated: SSLv3 is cryptographically broken, and is no longer
+// supported by this package. See golang.org/issue/32716.
 public static UntypedInt VersionSSL30 => 0x0300;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -70,7 +73,6 @@ public static @string VersionName(uint16 version) {
     { /* default: */
         return fmt.Sprintf("0x%04X"u8, version);
     }
-
 }
 
 internal static UntypedInt maxPlaintext => 16384; // maximum plaintext payload length
@@ -81,6 +83,7 @@ internal static UntypedInt maxHandshake => 65536; // maximum handshake we suppor
 internal static UntypedInt maxHandshakeCertificateMsg => 262144; // maximum certificate message size (256 KiB)
 internal static UntypedInt maxUselessRecords => 16; // maximum number of consecutive non-advancing records
 
+// TLS record types.
 partial struct recordType /*num:uint8*/;
 
 internal static recordType recordTypeChangeCipherSpec => 20;
@@ -90,35 +93,20 @@ internal static recordType recordTypeApplicationData => 23;
 
 // TLS handshake message types.
 internal const uint8 typeHelloRequest = 0;
-
 internal const uint8 typeClientHello = 1;
-
 internal const uint8 typeServerHello = 2;
-
 internal const uint8 typeNewSessionTicket = 4;
-
 internal const uint8 typeEndOfEarlyData = 5;
-
 internal const uint8 typeEncryptedExtensions = 8;
-
 internal const uint8 typeCertificate = 11;
-
 internal const uint8 typeServerKeyExchange = 12;
-
 internal const uint8 typeCertificateRequest = 13;
-
 internal const uint8 typeServerHelloDone = 14;
-
 internal const uint8 typeCertificateVerify = 15;
-
 internal const uint8 typeClientKeyExchange = 16;
-
 internal const uint8 typeFinished = 20;
-
 internal const uint8 typeCertificateStatus = 22;
-
 internal const uint8 typeKeyUpdate = 24;
-
 internal const uint8 typeMessageHash = 254;       // synthetic message
 
 // TLS compression types.
@@ -126,50 +114,37 @@ internal const uint8 compressionNone = 0;
 
 // TLS extension numbers
 internal const uint16 extensionServerName = 0;
-
 internal const uint16 extensionStatusRequest = 5;
-
 internal const uint16 extensionSupportedCurves = 10;      // supported_groups in TLS 1.3, see RFC 8446, Section 4.2.7
-
 internal const uint16 extensionSupportedPoints = 11;
-
 internal const uint16 extensionSignatureAlgorithms = 13;
-
 internal const uint16 extensionALPN = 16;
-
 internal const uint16 extensionSCT = 18;
-
 internal const uint16 extensionExtendedMasterSecret = 23;
-
 internal const uint16 extensionSessionTicket = 35;
-
 internal const uint16 extensionPreSharedKey = 41;
-
 internal const uint16 extensionEarlyData = 42;
-
 internal const uint16 extensionSupportedVersions = 43;
-
 internal const uint16 extensionCookie = 44;
-
 internal const uint16 extensionPSKModes = 45;
-
 internal const uint16 extensionCertificateAuthorities = 47;
-
 internal const uint16 extensionSignatureAlgorithmsCert = 50;
-
 internal const uint16 extensionKeyShare = 51;
-
 internal const uint16 extensionQUICTransportParameters = 57;
-
 internal const uint16 extensionRenegotiationInfo = 0xff01;
-
 internal const uint16 extensionECHOuterExtensions = 0xfd00;
-
 internal const uint16 extensionEncryptedClientHello = 0xfe0d;
 
 // TLS signaling cipher suite values
 internal const uint16 scsvRenegotiation = 0x00ff;
 
+// CurveID is the type of a TLS identifier for a key exchange mechanism. See
+// https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-parameters-8.
+//
+// In TLS 1.2, this registry used to support only elliptic curves. In TLS 1.3,
+// it was extended to other groups and renamed NamedGroup. See RFC 8446, Section
+// 4.2.7. It was then also extended to other mechanisms, such as hybrid
+// post-quantum KEMs.
 partial struct CurveID /*num:uint16*/;
 
 public static CurveID CurveP256 => 23;
@@ -194,7 +169,6 @@ partial struct keyShare {
 
 // TLS 1.3 PSK Key Exchange Modes. See RFC 8446, Section 4.2.9.
 internal const uint8 pskModePlain = 0;
-
 internal const uint8 pskModeDHE = 1;
 
 // TLS 1.3 PSK Identity. Can be a Session Ticket, or a reference to a saved
@@ -213,17 +187,13 @@ internal const uint8 statusTypeOCSP = 1;
 
 // Certificate types (for certificateRequestMsg)
 internal static UntypedInt certTypeRSASign => 1;
-
 internal static UntypedInt certTypeECDSASign => 64; // ECDSA or EdDSA keys, see RFC 8422, Section 3.
 
 // Signature algorithms (for internal signaling use). Starting at 225 to avoid overlap with
 // TLS 1.2 codepoints (RFC 5246, Appendix A.4.1), with which these have nothing to do.
 internal const uint8 signaturePKCS1v15 = /* iota + 225 */ 225;
-
 internal const uint8 signatureRSAPSS = 226;
-
 internal const uint8 signatureECDSA = 227;
-
 internal const uint8 signatureEd25519 = 228;
 
 // directSigning is a standard Hash value that signals that no pre-hashing
@@ -231,16 +201,18 @@ internal const uint8 signatureEd25519 = 228;
 // hash function associated with the Ed25519 signature scheme.
 internal static crypto.Hash directSigning = 0;
 
-// See RFC 8446, Section 4.1.3.
 // helloRetryRequestRandom is set as the Random value of a ServerHello
 // to signal that the message is actually a HelloRetryRequest.
-internal static slice<byte> helloRetryRequestRandom = new byte[]{
+internal static slice<byte> helloRetryRequestRandom = new byte[]{ // See RFC 8446, Section 4.1.3.
     0xCF, 0x21, 0xAD, 0x74, 0xE5, 0x9A, 0x61, 0x11,
     0xBE, 0x1D, 0x8C, 0x02, 0x1E, 0x65, 0xB8, 0x91,
     0xC2, 0xA2, 0x11, 0x16, 0x7A, 0xBB, 0x8C, 0x5E,
     0x07, 0x9E, 0x09, 0xE2, 0xC8, 0xA8, 0x33, 0x9C
 }.slice();
 
+// downgradeCanaryTLS12 or downgradeCanaryTLS11 is embedded in the server
+// random as a downgrade protection if the server would be capable of
+// negotiating a higher version. See RFC 8446, Section 4.1.3.
 internal static readonly @string downgradeCanaryTLS12 = "DOWNGRD\x01"u8;
 internal static readonly @string downgradeCanaryTLS11 = "DOWNGRD\x00"u8;
 
@@ -326,12 +298,30 @@ public static (slice<byte>, error) ExportKeyingMaterial(this ref ΔConnectionSta
     return cs.ekm(label, context, length);
 }
 
+// ClientAuthType declares the policy the server will follow for
+// TLS Client Authentication.
 partial struct ClientAuthType /*num:nint*/;
 
+// NoClientCert indicates that no client certificate should be requested
+// during the handshake, and if any certificates are sent they will not
+// be verified.
 public static ClientAuthType NoClientCert => /* iota */ 0;
+// RequestClientCert indicates that a client certificate should be requested
+// during the handshake, but does not require that the client send any
+// certificates.
 public static ClientAuthType RequestClientCert => 1;
+// RequireAnyClientCert indicates that a client certificate should be requested
+// during the handshake, and that at least one certificate is required to be
+// sent by the client, but that certificate is not required to be valid.
 public static ClientAuthType RequireAnyClientCert => 2;
+// VerifyClientCertIfGiven indicates that a client certificate should be requested
+// during the handshake, but does not require that the client sends a
+// certificate. If the client does send a certificate it is required to be
+// valid.
 public static ClientAuthType VerifyClientCertIfGiven => 3;
+// RequireAndVerifyClientCert indicates that a client certificate should be requested
+// during the handshake, and that at least one valid certificate is required
+// to be sent by the client.
 public static ClientAuthType RequireAndVerifyClientCert => 4;
 
 // requiresClientCert reports whether the ClientAuthType requires a client
@@ -344,7 +334,6 @@ internal static bool requiresClientCert(ClientAuthType c) {
     { /* default: */
         return false;
     }
-
 }
 
 // ClientSessionCache is a cache of ClientSessionState objects that can be used
@@ -364,19 +353,31 @@ partial interface ClientSessionCache {
     void Put(@string sessionKey, ж<ClientSessionState> cs);
 }
 
+//go:generate stringer -linecomment -type=SignatureScheme,CurveID,ClientAuthType -output=common_string.go
+
+// SignatureScheme identifies a signature algorithm supported by TLS. See
+// RFC 8446, Section 4.2.3.
 partial struct SignatureScheme /*num:uint16*/;
 
-//go:generate stringer -linecomment -type=SignatureScheme,CurveID,ClientAuthType -output=common_string.go
+// RSASSA-PKCS1-v1_5 algorithms.
 public static SignatureScheme PKCS1WithSHA256 => 0x0401;
 public static SignatureScheme PKCS1WithSHA384 => 0x0501;
 public static SignatureScheme PKCS1WithSHA512 => 0x0601;
+
+// RSASSA-PSS algorithms with public key OID rsaEncryption.
 public static SignatureScheme PSSWithSHA256 => 0x0804;
 public static SignatureScheme PSSWithSHA384 => 0x0805;
 public static SignatureScheme PSSWithSHA512 => 0x0806;
+
+// ECDSA algorithms. Only constrained to a specific curve in TLS 1.3.
 public static SignatureScheme ECDSAWithP256AndSHA256 => 0x0403;
 public static SignatureScheme ECDSAWithP384AndSHA384 => 0x0503;
 public static SignatureScheme ECDSAWithP521AndSHA512 => 0x0603;
+
+// EdDSA algorithms.
 public static SignatureScheme Ed25519 => 0x0807;
+
+// Legacy signature and hash algorithms for TLS 1.2.
 public static SignatureScheme PKCS1WithSHA1 => 0x0201;
 public static SignatureScheme ECDSAWithSHA1 => 0x0203;
 
@@ -463,10 +464,31 @@ public static context.Context Context(this ref CertificateRequestInfo c) {
     return c.ctx;
 }
 
+// RenegotiationSupport enumerates the different levels of support for TLS
+// renegotiation. TLS renegotiation is the act of performing subsequent
+// handshakes on a connection after the first. This significantly complicates
+// the state machine and has been the source of numerous, subtle security
+// issues. Initiating a renegotiation is not supported, but support for
+// accepting renegotiation requests may be enabled.
+//
+// Even when enabled, the server may not change its identity between handshakes
+// (i.e. the leaf certificate must be the same). Additionally, concurrent
+// handshake and application data flow is not permitted so renegotiation can
+// only be used with protocols that synchronise with the renegotiation, such as
+// HTTPS.
+//
+// Renegotiation is not defined in TLS 1.3.
 partial struct RenegotiationSupport /*num:nint*/;
 
+// RenegotiateNever disables renegotiation.
 public static RenegotiationSupport RenegotiateNever => /* iota */ 0;
+
+// RenegotiateOnceAsClient allows a remote server to request
+// renegotiation once per connection.
 public static RenegotiationSupport RenegotiateOnceAsClient => 1;
+
+// RenegotiateFreelyAsClient allows a remote server to repeatedly
+// request renegotiation.
 public static RenegotiationSupport RenegotiateFreelyAsClient => 2;
 
 // A Config structure is used to configure a TLS client or server.
@@ -788,7 +810,12 @@ partial struct EncryptedClientHelloKey {
     public bool SendAsRetry;
 }
 
+// ticketKeyLifetime is how long a ticket key remains valid and can be used to
+// resume a client connection.
 internal static time.Duration ticketKeyLifetime => /* 7 * 24 * time.Hour */ 604800000000000; // 7 days
+
+// ticketKeyRotation is how often the server should rotate the session ticket key
+// that is used for new tickets.
 internal static time.Duration ticketKeyRotation => /* 24 * time.Hour */ 86400000000000;
 
 // ticketKey is the internal representation of a session ticket key.
@@ -804,9 +831,10 @@ partial struct ticketKey {
 // bytes and this function expands that into sufficient name and key material.
 internal static ticketKey /*key*/ ticketKeyFromBytes(this ref Config c, /*[32]*/ array<byte> b) {
     ticketKey key = new();
-
     b = b.Clone();
+
     var hashed = sha512.Sum512(b[..]);
+
     // The first 16 bytes of the hash used to be exposed on the wire as a ticket
     // prefix. They MUST NOT be used as a secret. In the future, it would make
     // sense to use a proper KDF here, like HKDF with a fixed salt.
@@ -899,6 +927,7 @@ internal static void initLegacySessionTicketKeyRLocked(this ж<Config> Ꮡc) {
         if (c.SessionTicketKey != new byte[]{}.array(32) && (bytes.HasPrefix(c.SessionTicketKey[..], deprecatedSessionTicketKey) || len(c.sessionTicketKeys) > 0)) {
             return;
         }
+
         // We need to write some data, so get an exclusive lock and re-check any conditions.
         Ꮡc.of(Config.Ꮡmutex).RUnlock();
         ᒐd1 = true;
@@ -957,6 +986,7 @@ internal static slice<ticketKey> ticketKeys(this ж<Config> Ꮡc, ж<Config> Ꮡ
             }
             ᏑconfigForClient.of(Config.Ꮡmutex).RUnlock();
         }
+
         Ꮡc.of(Config.Ꮡmutex).RLock();
         ᒐd1 = true;
         if (c.SessionTicketsDisabled) {
@@ -970,6 +1000,7 @@ internal static slice<ticketKey> ticketKeys(this ж<Config> Ꮡc, ж<Config> Ꮡ
         if (len(c.autoSessionTicketKeys) > 0 && c.time().Sub(c.autoSessionTicketKeys[0].created) < ticketKeyRotation) {
             return c.autoSessionTicketKeys;
         }
+
         // autoSessionTicketKeys are managed by auto-rotation.
         Ꮡc.of(Config.Ꮡmutex).RUnlock();
         ᒐd2 = true;
@@ -1020,12 +1051,14 @@ public static void SetSessionTicketKeys(this ж<Config> Ꮡc, slice<array<byte>>
     if (len(keys) == 0) {
         throw panic("tls: keys must have at least one key");
     }
+
     var newKeys = new slice<ticketKey>(len(keys), () => new());
     foreach (var (i, vᴛ1) in keys) {
         var bytes = vᴛ1.Clone();
 
         newKeys[i] = c.ticketKeyFromBytes(bytes);
     }
+
     Ꮡc.of(Config.Ꮡmutex).Lock();
     c.sessionTicketKeys = newKeys;
     Ꮡc.of(Config.Ꮡmutex).Unlock();
@@ -1188,13 +1221,16 @@ internal static (ж<Certificate>, error) getCertificate(this ref Config c, ж<Cl
             return (cert, err);
         }
     }
+
     if (len(c.Certificates) == 0) {
         return (default!, errNoCertificates);
     }
+
     if (len(c.Certificates) == 1) {
         // There's only one choice, so no point doing any work.
         return (Ꮡ(c.Certificates, 0), default!);
     }
+
     if (c.NameToCertificate != default!) {
         @string name = strings.ToLower(clientHello.ServerName);
         {
@@ -1213,6 +1249,7 @@ internal static (ж<Certificate>, error) getCertificate(this ref Config c, ж<Cl
             }
         }
     }
+
     foreach (var (_, vᴛ1) in c.Certificates) {
         ref var cert = ref heap(new Certificate(), out var Ꮡcert);
         cert = vᴛ1;
@@ -1223,6 +1260,7 @@ internal static (ж<Certificate>, error) getCertificate(this ref Config c, ж<Cl
             }
         }
     }
+
     // If nothing matches, return the first certificate.
     return (Ꮡ(c.Certificates, 0), default!);
 }
@@ -1261,6 +1299,7 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
     if (!ok) {
         return errors.New(noMutuallySupportedˢ);
     }
+
     // If the client specified the name they are trying to connect to, the
     // certificate needs to be valid for it.
     if (chi.ServerName != ""u8) {
@@ -1274,6 +1313,7 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
             }
         }
     }
+
     // supportsRSAFallback returns nil if the certificate and connection support
     // the static RSA key exchange, and unsupported otherwise. The logic for
     // supporting static RSA is completely disjoint from the logic for
@@ -1314,6 +1354,7 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
         }
         return default!;
     }
+
     // If the client sent the signature_algorithms extension, ensure it supports
     // schemes we can use with this certificate and TLS version.
     if (len(chi.SignatureSchemes) > 0) {
@@ -1323,16 +1364,19 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
             }
         }
     }
+
     // In TLS 1.3 we are done because supported_groups is only relevant to the
     // ECDHE computation, point format negotiation is removed, cipher suites are
     // only relevant to the AEAD choice, and static RSA does not exist.
     if (vers == VersionTLS13) {
         return default!;
     }
+
     // The only signed key exchange we support is ECDHE.
     if (!supportsECDHE(config, vers, chi.SupportedCurves, chi.SupportedPoints)) {
         return supportsRSAFallback(errors.New(clientDoesnTSupportEcdheˢ));
     }
+
     bool ecdsaCipherSuite = default!;
     {
         var (priv, okΔ3) = c.PrivateKey._<crypto.Signer>(ᐧ); if (okΔ3){
@@ -1353,7 +1397,6 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
                 else { /* default: */
                     return supportsRSAFallback(unsupportedCertificateError(ref (Ꮡc).DerefOrNull()));
                 }
-
                 bool curveOk = default!;
                 foreach (var (_, cΔ2) in chi.SupportedCurves) {
                     if (cΔ2 == curve && config.supportsCurve(vers, cΔ2)) {
@@ -1385,6 +1428,7 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
             return supportsRSAFallback(unsupportedCertificateError(ref (Ꮡc).DerefOrNull()));
         }
     }
+
     // Make sure that there is a mutually supported cipher suite that works with
     // this certificate. Cipher suite selection will then apply the logic in
     // reverse to pick it. See also serverHandshakeState.cipherSuiteOk.
@@ -1409,6 +1453,7 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
     if (cipherSuite == nil) {
         return supportsRSAFallback(errors.New(clientDoesnTSupportAnyˢ));
     }
+
     return default!;
 }
 
@@ -1426,9 +1471,11 @@ public static error SupportsCertificate(this ref CertificateRequestInfo cri, ж<
             return err;
         }
     }
+
     if (len(cri.AcceptableCAs) == 0) {
         return default!;
     }
+
     foreach (var (j, cert) in c.ΔCertificate) {
         var x509Cert = c.Leaf;
         // Parse the certificate if this isn't the leaf node, or if
@@ -1441,6 +1488,7 @@ public static error SupportsCertificate(this ref CertificateRequestInfo cri, ж<
                 }
             }
         }
+
         foreach (var (_, ca) in cri.AcceptableCAs) {
             if (bytes.Equal((~x509Cert).RawIssuer, ca)) {
                 return default!;
@@ -1486,10 +1534,13 @@ internal static error writeKeyLog(this ref Config c, @string label, slice<byte> 
     if (c.KeyLogWriter == default!) {
         return default!;
     }
+
     var logLine = fmt.Appendf(default!, "%s %x %x\n"u8, label, clientRandom, secret);
+
     ᏑwriterMutex.Lock();
     var (_, err) = c.KeyLogWriter.Write(logLine);
     ᏑwriterMutex.Unlock();
+
     return err;
 }
 
@@ -1563,6 +1614,7 @@ partial struct lruSessionCacheEntry {
 // is used instead.
 public static ClientSessionCache NewLRUClientSessionCache(nint capacity) {
     const nint defaultSessionCacheCapacity = 64;
+
     if (capacity < 1) {
         capacity = defaultSessionCacheCapacity;
     }
@@ -1583,6 +1635,7 @@ internal static void Put(this ж<lruSessionCache> Ꮡc, @string sessionKey, ж<C
 
         Ꮡc.of(lruSessionCache.ᏑMutex).Lock();
         ᒐd1 = true;
+
         {
             var (elemΔ1, ok) = c.m[sessionKey, ꟷ]; if (ok) {
                 if (Ꮡcs == nil){
@@ -1596,11 +1649,13 @@ internal static void Put(this ж<lruSessionCache> Ꮡc, @string sessionKey, ж<C
                 return;
             }
         }
+
         if (c.q.Len() < c.capacity) {
             var entryΔ2 = Ꮡ(new lruSessionCacheEntry(sessionKey, Ꮡcs));
             c.m[sessionKey] = c.q.PushFront(entryΔ2.OrTypedNil());
             return;
         }
+
         var elem = c.q.Back();
         var entry = (~elem).Value._<ж<lruSessionCacheEntry>>();
         delete(c.m, (~entry).sessionKey);
@@ -1623,6 +1678,7 @@ internal static (ж<ClientSessionState>, bool) Get(this ж<lruSessionCache> Ꮡc
 
         Ꮡc.of(lruSessionCache.ᏑMutex).Lock();
         ᒐd1 = true;
+
         {
             var (elem, ok) = c.m[sessionKey, ꟷ]; if (ok) {
                 c.q.MoveToFront(elem);
@@ -1691,15 +1747,18 @@ internal static (slice<slice<ж<Δx509.Certificate>>>, error) fipsAllowedChains(
     if (!fips140tls.Required()) {
         return (chains, default!);
     }
+
     var permittedChains = new slice<slice<ж<Δx509.Certificate>>>(0, len(chains));
     foreach (var (_, chain) in chains) {
         if (fipsAllowChain(chain)) {
             permittedChains = append(permittedChains, chain);
         }
     }
+
     if (len(permittedChains) == 0) {
         return (default!, errors.New(tlsNoFipsCompatibleˢ));
     }
+
     return (permittedChains, default!);
 }
 
@@ -1707,11 +1766,13 @@ internal static bool fipsAllowChain(slice<ж<Δx509.Certificate>> chain) {
     if (len(chain) == 0) {
         return false;
     }
+
     foreach (var (_, cert) in chain) {
         if (!fipsAllowCert(ref (cert).DerefOrNull())) {
             return false;
         }
     }
+
     return true;
 }
 
@@ -1726,6 +1787,7 @@ internal static bool fipsAllowCert(ref Δx509.Certificate c) {
     case ж<ecdsa.PublicKey> k: {
         return AreEqual((~k).Curve, elliptic.P256()) || AreEqual((~k).Curve, elliptic.P384()) || AreEqual((~k).Curve, elliptic.P521());
     }}
+
     return false;
 }
 

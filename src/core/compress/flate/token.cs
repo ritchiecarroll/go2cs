@@ -5,6 +5,9 @@ namespace go.compress;
 
 partial class flate_package {
 
+// 2 bits:   type   0 = literal  1=EOF  2=Match   3=Unused
+// 8 bits:   xlength = length - MIN_MATCH_LENGTH
+// 22 bits   xoffset = offset - MIN_OFFSET_SIZE, or literal
 internal static UntypedInt lengthShift => 22;
 internal static UntypedInt offsetMask => /* 1<<lengthShift - 1 */ 4194303;
 internal static UntypedInt typeMask => /* 3 << 30 */ 3221225472;

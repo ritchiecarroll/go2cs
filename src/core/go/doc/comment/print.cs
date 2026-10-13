@@ -110,7 +110,6 @@ public static @string DefaultURL(this ref DocLink l, @string baseURL) {
         default: {
             return baseURL + l.ImportPath + slash + "#"u8 + l.Name;
         }}
-
     }
     if (l.Recv != ""u8) {
         return "#"u8 + l.Recv + "."u8 + l.Name;
@@ -167,6 +166,7 @@ public static slice<byte> Comment(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
         }
         cp.block(Ꮡout, x);
     }
+
     // Print one block containing all the link definitions that were used,
     // and then a second block containing all the unused ones.
     // This makes it easy to clean up the unused ones: gofmt and
@@ -189,6 +189,7 @@ public static slice<byte> Comment(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
             }
         }
     }
+
     return @out.Bytes();
 }
 

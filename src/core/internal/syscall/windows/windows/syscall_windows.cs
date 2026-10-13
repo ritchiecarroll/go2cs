@@ -19,8 +19,6 @@ public static bool CanUseLongPaths { get => go.runtime_package.canUseLongPaths; 
 // UTF16PtrToString is like UTF16ToString, but takes *uint16
 // as a parameter instead of []uint16.
 public static @string UTF16PtrToString(ж<uint16> Ꮡp) {
-    ref var p = ref Ꮡp.DerefOrNull();
-
     if (Ꮡp == nil) {
         return ""u8;
     }
@@ -186,6 +184,8 @@ public static UntypedInt IfOperStatusLowerLayerDown => 7;
 //sys	SetFileInformationByHandle(handle syscall.Handle, fileInformationClass uint32, buf unsafe.Pointer, bufsize uint32) (err error) = kernel32.SetFileInformationByHandle
 //sys	VirtualQuery(address uintptr, buffer *MemoryBasicInformation, length uintptr) (err error) = kernel32.VirtualQuery
 //sys	GetTempPath2(buflen uint32, buf *uint16) (n uint32, err error) = GetTempPath2W
+
+// flags for CreateToolhelp32Snapshot
 public static UntypedInt TH32CS_SNAPMODULE => 0x08;
 public static UntypedInt TH32CS_SNAPMODULE32 => 0x10;
 
@@ -210,12 +210,15 @@ public static uintptr SizeofModuleEntry32 => /* unsafe.Sizeof(ModuleEntry32{}) *
 //sys	Module32Next(snapshot syscall.Handle, moduleEntry *ModuleEntry32) (err error) = kernel32.Module32NextW
 public static UntypedInt WSA_FLAG_OVERLAPPED => 0x01;
 public static UntypedInt WSA_FLAG_NO_HANDLE_INHERIT => 0x80;
+
 public static syscall.Errno WSAEINVAL => 10022;
 public static syscall.Errno WSAEMSGSIZE => 10040;
 public static syscall.Errno WSAEAFNOSUPPORT => 10047;
+
 public static UntypedInt MSG_PEEK => 0x2;
 public static UntypedInt MSG_TRUNC => 0x0100;
 public static UntypedInt MSG_CTRUNC => 0x0200;
+
 internal static uintptr socket_error => /* uintptr(^uint32(0)) */ unchecked((uintptr)4294967295);
 
 public static ж<syscall.GUID> ᏑWSAID_WSASENDMSG = new StandardBox<syscall.GUID>(new syscall.GUID(
@@ -233,7 +236,6 @@ public static ж<syscall.GUID> ᏑWSAID_WSARECVMSG = new StandardBox<syscall.GUI
     Data4: new byte[]{0x8a, 0x53, 0xe5, 0x4f, 0xe3, 0x51, 0xc3, 0x22}.array()
 ));
 public static ref syscall.GUID WSAID_WSARECVMSG => ref ᏑWSAID_WSARECVMSG.Value;
-
 
 partial struct sendRecvMsgFuncᴛ1 /*dyn*/ {
     internal sync.Once once;
@@ -270,6 +272,7 @@ public static UntypedInt ComputerNamePhysicalDnsHostname => 5;
 public static UntypedInt ComputerNamePhysicalDnsDomain => 6;
 public static UntypedInt ComputerNamePhysicalDnsFullyQualified => 7;
 public static UntypedInt ComputerNameMax => 8;
+
 public static UntypedInt MOVEFILE_REPLACE_EXISTING => 0x1;
 public static UntypedInt MOVEFILE_COPY_ALLOWED => 0x2;
 public static UntypedInt MOVEFILE_DELAY_UNTIL_REBOOT => 0x4;
@@ -303,7 +306,6 @@ public static UntypedInt MB_ERR_INVALID_CHARS => 8;
 
 // Constants from lmshare.h
 public static UntypedInt STYPE_DISKTREE => 0x00;
-
 public static UntypedInt STYPE_TEMPORARY => 0x40000000;
 
 partial struct SHARE_INFO_2 {
@@ -321,6 +323,7 @@ partial struct SHARE_INFO_2 {
 //sys  NetShareDel(serverName *uint16, netName *uint16, reserved uint32) (neterr error) = netapi32.NetShareDel
 public static UntypedInt FILE_NAME_NORMALIZED => 0x0;
 public static UntypedInt FILE_NAME_OPENED => 0x8;
+
 public static UntypedInt VOLUME_NAME_DOS => 0x0;
 public static UntypedInt VOLUME_NAME_GUID => 0x1;
 public static UntypedInt VOLUME_NAME_NONE => 0x4;
@@ -416,10 +419,13 @@ public static partial int64 QueryPerformanceCounter();
 //go:linkname QueryPerformanceFrequency
 public static partial int64 QueryPerformanceFrequency();
 
-partial struct NTStatus /*num:uint32*/;
-
 // Implemented in runtime package.
 //sys   GetModuleHandle(modulename *uint16) (handle syscall.Handle, err error) = kernel32.GetModuleHandleW
+
+// NTStatus corresponds with NTSTATUS, error values returned by ntdll.dll and
+// other native functions.
+partial struct NTStatus /*num:uint32*/;
+
 public static syscall.Errno Errno(this NTStatus s) {
     return rtlNtStatusToDosErrorNoTeb(s);
 }
@@ -437,13 +443,9 @@ public static @string Error(this NTStatus s) {
 // At the moment, we only need a couple, so just put them here manually.
 // If this list starts getting long, we should consider generating the full set.
 public static NTStatus STATUS_FILE_IS_A_DIRECTORY => 0xC00000BA;
-
 public static NTStatus STATUS_DIRECTORY_NOT_EMPTY => 0xC0000101;
-
 public static NTStatus STATUS_NOT_A_DIRECTORY => 0xC0000103;
-
 public static NTStatus STATUS_CANNOT_DELETE => 0xC0000121;
-
 public static NTStatus STATUS_REPARSE_POINT_ENCOUNTERED => 0xC000050B;
 
 // NT Native APIs

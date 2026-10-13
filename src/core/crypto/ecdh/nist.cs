@@ -50,13 +50,16 @@ internal static (ж<PrivateKey>, error) GenerateKey(this ж<nistCurve> Ꮡc, io.
         ));
         return (kΔ1, default!);
     }
+
     if (fips140only.Enabled && !fips140only.ApprovedRandomReader(rand)) {
         return (default!, errors.New(cryptoEcdhOnlyCryptoRandˢ));
     }
+
     var (privateKey, err) = c.generate(rand);
     if (err != default!) {
         return (default!, err);
     }
+
     var k = Ꮡ(new PrivateKey(
         curve: new nistCurveжΔCurve(Ꮡc),
         privateKey: privateKey.Bytes(),
@@ -105,6 +108,7 @@ internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<nistCurve> Ꮡc, s
         ));
         return (kΔ1, default!);
     }
+
     var (fk, err) = c.newPrivateKey(key);
     if (err != default!) {
         return (default!, err);

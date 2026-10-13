@@ -33,6 +33,7 @@ public static ж<P521Element> Invert(this ж<P521Element> Ꮡe, ж<P521Element> 
     //
     ж<P521Element> z = @new<P521Element>().Set(Ꮡe);
     ж<P521Element> t0 = @new<P521Element>();
+
     z.Square(Ꮡx);
     z.Mul(Ꮡx, z);
     t0.Square(z);
@@ -82,6 +83,7 @@ public static ж<P521Element> Invert(this ж<P521Element> Ꮡe, ж<P521Element> 
         z.Square(z);
     }
     z.Mul(Ꮡx, z);
+
     return Ꮡe.Set(z);
 }
 

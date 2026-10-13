@@ -9,6 +9,10 @@ using sync = sync_package;
 
 partial class buffer_package {
 
+// Buffer is a byte buffer.
+//
+// This implementation is adapted from the unexported type buffer
+// in go/src/fmt/print.go.
 partial struct Buffer /*[]byte*/;
 
 // Having an initial size gives a dramatic speedup.

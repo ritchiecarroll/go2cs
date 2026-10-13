@@ -12,6 +12,41 @@ using io = io_package;
 
 partial class types_package {
 
+// SelectionKind describes the kind of a selector expression x.f
+// (excluding qualified identifiers).
+//
+// If x is a struct or *struct, a selector expression x.f may denote a
+// sequence of selection operations x.a.b.c.f. The SelectionKind
+// describes the kind of the final (explicit) operation; all the
+// previous (implicit) operations are always field selections.
+// Each element of Indices specifies an implicit field (a, b, c)
+// by its index in the struct type of the field selection operand.
+//
+// For a FieldVal operation, the final selection refers to the field
+// specified by Selection.Obj.
+//
+// For a MethodVal operation, the final selection refers to a method.
+// If the "pointerness" of the method's declared receiver does not
+// match that of the effective receiver after implicit field
+// selection, then an & or * operation is implicitly applied to the
+// receiver variable or value.
+// So, x.f denotes (&x.a.b.c).f when f requires a pointer receiver but
+// x.a.b.c is a non-pointer variable; and it denotes (*x.a.b.c).f when
+// f requires a non-pointer receiver but x.a.b.c is a pointer value.
+//
+// All pointer indirections, whether due to implicit or explicit field
+// selections or * operations inserted for "pointerness", panic if
+// applied to a nil pointer, so a method call x.f() may panic even
+// before the function call.
+//
+// By contrast, a MethodExpr operation T.f is essentially equivalent
+// to a function literal of the form:
+//
+//	func(x T, args) (results) { return x.f(args) }
+//
+// Consequently, any implicit field selections and * operations
+// inserted for "pointerness" are not evaluated until the function is
+// called, so a T.f or (*T).f expression never panics.
 partial struct SelectionKind /*num:nint*/;
 
 public static SelectionKind FieldVal => /* iota */ 0;    // x.f is a struct field selector
@@ -62,6 +97,8 @@ public static Object Obj(this ref Selection s) {
 public static ΔType Type(this ref Selection s) {
     var exprᴛ1 = s.kind;
     if (exprᴛ1 == MethodVal) {
+        // The type of x.f is a method with its receiver type set
+        // to the type of x.
         ref var sig = ref heap<ΔSignature>(out var Ꮡsig);
         sig = (~s.obj._<ж<Func>>()).typ._<ж<ΔSignature>>().Value;
         ref var recv = ref heap<Var>(out var Ꮡrecv);
@@ -71,18 +108,16 @@ public static ΔType Type(this ref Selection s) {
         return new ΔSignatureжΔType(Ꮡsig);
     }
     if (exprᴛ1 == MethodExpr) {
+        // The type of x.f is a function (without receiver)
+        // and an additional first argument with the same type as x.
+        // TODO(gri) Similar code is already in call.go - factor!
+        // TODO(gri) Compute this eagerly to avoid allocations.
         ref var sig = ref heap<ΔSignature>(out var Ꮡsig);
         sig = (~s.obj._<ж<Func>>()).typ._<ж<ΔSignature>>().Value;
         ref var arg0 = ref heap<Var>(out var Ꮡarg0);
         arg0 = sig.recv.Value;
         sig.recv = default!;
         arg0.typ = s.recv;
-// The type of x.f is a method with its receiver type set
-// to the type of x.
-// The type of x.f is a function (without receiver)
-// and an additional first argument with the same type as x.
-// TODO(gri) Similar code is already in call.go - factor!
-// TODO(gri) Compute this eagerly to avoid allocations.
         slice<ж<Var>> @params = default!;
         if (sig.@params != nil) {
             @params = sig.@params.Value.vars;
@@ -155,7 +190,6 @@ public static @string SelectionString(ж<Selection> Ꮡs, Func<ж<Package>, @str
     else { /* default: */
         throw panic("unreachable");
     }
-
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     buf.WriteString(k);
     buf.WriteByte((rune)'(');

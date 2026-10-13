@@ -19,9 +19,7 @@ partial class runtime_package {
 // are the "crash" and "all" settings and the remaining
 // bits are the traceback value (0 off, 1 on, 2 include system).
 internal static UntypedInt tracebackCrash => /* 1 << iota */ 1;
-
 internal static UntypedInt tracebackAll => 2;
-
 internal static UntypedInt tracebackShift => /* iota */ 2;
 
 internal static ж<uint32> Ꮡtraceback_cache = new StandardBox<uint32>(((uint32)2 << (int)(tracebackShift)));
@@ -94,6 +92,7 @@ internal static void goenvs_unix() {
     while (argv_index(argv, argc + 1 + n) != nil) {
         n++;
     }
+
     envs = new slice<@string>(n);
     for (var i = (int32)0; i < n; i++) {
         envs[i] = gostring(argv_index(argv, argc + 1 + i));
@@ -217,6 +216,7 @@ internal static void check() {
     ref var m = ref heap(new array<byte>(4), out var Ꮡm);
     check_x1t x1 = default!;
     check_y1t y1 = default!;
+
     if (/* unsafe.Sizeof(a) */ (uintptr)1 != 1) {
         @throw(badAˢ);
     }
@@ -262,9 +262,11 @@ internal static void check() {
     if (/* unsafe.Sizeof(y1) */ (uintptr)2 != 2) {
         @throw(badUnsafeSizeofY1ˢ);
     }
+
     if (timediv(12345000054321L, 1000000000, Ꮡe) != 12345 || e != 54321) {
         @throw(badTimedivˢ);
     }
+
     ref var z = ref heap(new uint32(), out var Ꮡz);
     z = 1;
     if (!atomic.Cas(Ꮡz, 1, 2)) {
@@ -273,6 +275,7 @@ internal static void check() {
     if (z != 2) {
         @throw(cas2ˢ);
     }
+
     z = 4;
     if (atomic.Cas(Ꮡz, 5, 6)) {
         @throw(cas3ˢ);
@@ -280,6 +283,7 @@ internal static void check() {
     if (z != 4) {
         @throw(cas4ˢ);
     }
+
     z = 0xffffffffU;
     if (!atomic.Cas(Ꮡz, 0xffffffffU, 0xfffffffeU)) {
         @throw(cas5ˢ);
@@ -287,16 +291,19 @@ internal static void check() {
     if (z != 0xfffffffeU) {
         @throw(cas6ˢ);
     }
+
     m = new byte[]{1, 1, 1, 1}.array();
     atomic.Or8(Ꮡm.at<byte>(1), 0xf0);
     if (m[0] != 1 || m[1] != 0xf1 || m[2] != 1 || m[3] != 1) {
         @throw(atomicor8ˢ);
     }
+
     m = new byte[]{0xff, 0xff, 0xff, 0xff}.array();
     atomic.And8(Ꮡm.at<byte>(1), 0x1);
     if (m[0] != 0xff || m[1] != 0x1 || m[2] != 0xff || m[3] != 0xff) {
         @throw(atomicand8ˢ);
     }
+
     (Ꮡj.Reinterpret<float64, uint64>()).Value = ~(uint64)0;
     if (j == j) {
         @throw(float64nanˢ);
@@ -304,6 +311,7 @@ internal static void check() {
     if (!(j != j)) {
         @throw(float64nan1ˢ);
     }
+
     (Ꮡj1.Reinterpret<float64, uint64>()).Value = ~(uint64)1;
     if (j == j1) {
         @throw(float64nan2ˢ);
@@ -311,6 +319,7 @@ internal static void check() {
     if (!(j != j1)) {
         @throw(float64nan3ˢ);
     }
+
     (Ꮡi.Reinterpret<float32, uint32>()).Value = ~(uint32)0;
     if (i == i) {
         @throw(float32nanˢ);
@@ -318,6 +327,7 @@ internal static void check() {
     if (i == i) {
         @throw(float32nan1ˢ);
     }
+
     (Ꮡi1.Reinterpret<float32, uint32>()).Value = ~(uint32)1;
     if (i == i1) {
         @throw(float32nan2ˢ);
@@ -325,10 +335,13 @@ internal static void check() {
     if (i == i1) {
         @throw(float32nan3ˢ);
     }
+
     testAtomic64();
+
     if (fixedStack != round2(fixedStack)) {
         @throw(fixedStackIsNotPowerOf2ˢ);
     }
+
     if (!checkASM()) {
         @throw(assemblyChecksFailedˢ);
     }
@@ -345,7 +358,6 @@ partial struct dbgVar {
 // except for "memprofilerate" since there is an
 // existing int var for that value, which may
 // already have an initial value.
-
 partial struct debugᴛ1 /*dyn*/ {
     internal int32 cgocheck;
     internal int32 clobberfree;
@@ -455,10 +467,13 @@ internal static void parsedebugvars() {
         debug.madvdontneed = 1;
     }
     debug.traceadvanceperiod = defaultTraceAdvancePeriod;
+
     @string godebug = gogetenv(godebugˢ);
+
     var Δp = @new<@string>();
     Δp.Value = godebug;
     ᏑgodebugEnv.Store(Δp);
+
     // apply runtime defaults, if any
     foreach (var (_, v) in dbgvars) {
         if ((~v).def != 0) {
@@ -471,12 +486,16 @@ internal static void parsedebugvars() {
             }
         }
     }
+
     // apply compile-time GODEBUG settings
     parsegodebug(godebugDefault, default!);
+
     // apply environment settings
     parsegodebug(godebug, default!);
+
     debug.malloc = ((int32)(debug.inittrace | debug.sbrk)) != 0;
     debug.profstackdepth = min(debug.profstackdepth, (int32)(maxProfStackDepth));
+
     setTraceback(gogetenv(gotracebackˢ));
     traceback_env = traceback_cache;
 }
@@ -545,6 +564,7 @@ internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
         if (seen != default!) {
             seen[key] = true;
         }
+
         // Update MemProfileRate directly here since it
         // is int, not int32, and should only be updated
         // if specified in GODEBUG.
@@ -571,6 +591,7 @@ internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
             }
         }
     }
+
     if (debug.cgocheck > 1) {
         @throw(cgocheck1ModeIsNoLongerˢ);
     }
@@ -614,13 +635,14 @@ internal static void setTraceback(@string level) {
             }
         }
     }
-
     // when C owns the process, simply exit'ing the process on fatal errors
     // and panics is surprising. Be louder and abort instead.
     if (islibrary || isarchive) {
         t |= (uint32)(tracebackCrash);
     }
+
     t |= (uint32)(traceback_env);
+
     atomic.Store(Ꮡtraceback_cache, t);
 }
 

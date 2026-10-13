@@ -22,7 +22,6 @@ partial class gif_package {
 
 // Graphic control extension fields.
 internal static UntypedInt gcLabel => 0xF9;
-
 internal static UntypedInt gcBlockSize => 0x04;
 
 internal static array<nint> log2Lookup = new nint[]{2, 4, 8, 16, 32, 64, 128, 256}.array();
@@ -80,12 +79,14 @@ internal static error WriteByte(this blockWriter b, byte c) {
     if ((~b.e).err != default!) {
         return (~b.e).err;
     }
+
     // Append c to buffered sub-block.
     b.e.Value.buf[0]++;
     b.e.Value.buf[(~b.e).buf[0]] = c;
     if ((~b.e).buf[0] < 255) {
         return default!;
     }
+
     // Flush block
     b.e.write((~b.e).buf[..256]);
     b.e.Value.buf[0] = 0;
@@ -151,10 +152,12 @@ internal static void writeHeader(this ref encoder e) {
     if (e.err != default!) {
         return;
     }
+
     // Logical screen width and height.
     byteorder.LEPutUint16(e.buf[0..2], (uint16)e.g.Config.Width);
     byteorder.LEPutUint16(e.buf[2..4], (uint16)e.g.Config.Height);
     e.write(e.buf[..4]);
+
     {
         var (p, ok) = e.g.Config.ColorModel._<Δcolor.Palette>(ᐧ); if (ok && len(p) > 0){
             nint paddedSize = log2(len(p)); // Size of Global Color Table: 2^(1+n).
@@ -178,6 +181,7 @@ internal static void writeHeader(this ref encoder e) {
             e.write(e.buf[..3]);
         }
     }
+
     // Add animation info if necessary.
     if (len(e.g.Image) > 1 && e.g.LoopCount >= 0) {
         e.buf[0] = 0x21; // Extension Introducer.
@@ -255,10 +259,12 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
     if (e.err != default!) {
         return;
     }
+
     if (len(pm.Palette) == 0) {
         e.err = errors.New(gifCannotEncodeImageˢ);
         return;
     }
+
     var b = pm.Bounds();
     if (b.Min.X < 0 || b.Max.X >= (1 << (int)(16)) || b.Min.Y < 0 || b.Max.Y >= (1 << (int)(16))) {
         e.err = errors.New(gifImageBlockIsTooLargeˢ);
@@ -268,6 +274,7 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
         e.err = errors.New(gifImageBlockIsOutOfˢ);
         return;
     }
+
     nint transparentIndex = -1;
     foreach (var (i, c) in pm.Palette) {
         if (c == default!) {
@@ -281,6 +288,7 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
             }
         }
     }
+
     if (delay > 0 || disposal != 0 || transparentIndex != -1) {
         e.buf[0] = sExtension; // Extension Introducer.
         e.buf[1] = gcLabel; // Graphic Control Label.
@@ -291,6 +299,7 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
             e.buf[3] = (byte)(0x00 | (byte)(disposal << (int)(2)));
         }
         byteorder.LEPutUint16(e.buf[4..6], (uint16)delay); // Delay Time (1/100ths of a second)
+
         // Transparent color index.
         if (transparentIndex != -1){
             e.buf[6] = (uint8)transparentIndex;
@@ -306,6 +315,7 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
     byteorder.LEPutUint16(e.buf[5..7], (uint16)b.Dx());
     byteorder.LEPutUint16(e.buf[7..9], (uint16)b.Dy());
     e.write(e.buf[..9]);
+
     // To determine whether or not this frame's palette is the same as the
     // global palette, we can check a couple things. First, do they actually
     // point to the same []color.Color? If so, they are equal so long as the
@@ -334,11 +344,13 @@ internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> �
             }
         }
     }
+
     nint litWidth = paddedSize + 1;
     if (litWidth < 2) {
         litWidth = 2;
     }
     e.writeByte((uint8)litWidth); // LZW Minimum Code Size.
+
     var bw = new blockWriter(e: Ꮡe);
     bw.setup();
     var lzww = lzw.NewWriter(bw, lzw.LSB, litWidth);
@@ -390,9 +402,11 @@ public static error EncodeAll(io.Writer w, ж<GIF> Ꮡg) {
     if (len(g.Image) == 0) {
         return errors.New(gifMustProvideAtLeastOneˢ);
     }
+
     if (len(g.Image) != len(g.Delay)) {
         return errors.New(gifMismatchedImageAndˢ);
     }
+
     ref var e = ref heap<encoder>(out var Ꮡe);
     e = new encoder(g: g);
     // The GIF.Disposal, GIF.Config and GIF.BackgroundIndex fields were added
@@ -413,6 +427,7 @@ public static error EncodeAll(io.Writer w, ж<GIF> Ꮡg) {
             }
         }
     }
+
     {
         var (ww, ok) = w._<writer>(ᐧ); if (ok){
             e.w = ww;
@@ -420,6 +435,7 @@ public static error EncodeAll(io.Writer w, ж<GIF> Ꮡg) {
             e.w = new bufio_Writerжwriter(bufio.NewWriter(w));
         }
     }
+
     e.writeHeader();
     foreach (var (i, pm) in g.Image) {
         var disposal = (uint8)0;
@@ -445,6 +461,7 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
     if (b.Dx() >= (1 << (int)(16)) || b.Dy() >= (1 << (int)(16))) {
         return errors.New(gifImageIsTooLargeToˢ);
     }
+
     var opts = new Options(nil);
     if (Ꮡo != nil) {
         opts = o;
@@ -455,6 +472,7 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
     if (opts.Drawer == default!) {
         opts.Drawer = draw.FloydSteinberg;
     }
+
     var (pm, _) = m._<ж<image.Paletted>>(ᐧ);
     if (pm == nil) {
         {
@@ -479,6 +497,7 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
         }
         opts.Drawer.Draw(new image_PalettedжImage(pm), b, m, b.Min);
     }
+
     // When calling Encode instead of EncodeAll, the single-frame image is
     // translated such that its top-left corner is (0, 0), so that the single
     // frame completely fills the overall GIF's bounds.
@@ -488,6 +507,7 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
         dup.Rect = dup.Rect.Sub(dup.Rect.Min);
         pm = Ꮡdup;
     }
+
     return EncodeAll(w, Ꮡ(new GIF(
         Image: new ж<image.Paletted>[]{pm}.slice(),
         Delay: new nint[]{0}.slice(),

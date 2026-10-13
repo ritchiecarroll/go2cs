@@ -7,24 +7,34 @@ using fmt = fmt_package;
 
 partial class trace_package {
 
+// ThreadID is the runtime-internal M structure's ID. This is unique
+// for each OS thread.
 partial struct ThreadID /*num:int64*/;
 
 // NoThread indicates that the relevant events don't correspond to any
 // thread in particular.
 public static ThreadID NoThread => /* ThreadID(-1) */ -1;
 
+// ProcID is the runtime-internal G structure's id field. This is unique
+// for each P.
 partial struct ProcID /*num:int64*/;
 
 // NoProc indicates that the relevant events don't correspond to any
 // P in particular.
 public static ProcID NoProc => /* ProcID(-1) */ -1;
 
+// GoID is the runtime-internal G structure's goid field. This is unique
+// for each goroutine.
 partial struct GoID /*num:int64*/;
 
 // NoGoroutine indicates that the relevant events don't correspond to any
 // goroutine in particular.
 public static GoID NoGoroutine => /* GoID(-1) */ -1;
 
+// GoState represents the state of a goroutine.
+//
+// New GoStates may be added in the future. Users of this type must be robust
+// to that possibility.
 partial struct GoState /*num:uint8*/;
 
 public static GoState GoUndetermined => /* iota */ 0;  // No information is known about the goroutine.
@@ -69,10 +79,13 @@ public static @string String(this GoState s) {
     if (exprᴛ1 == GoSyscall) {
         return syscallˢ;
     }
-
     return badˢ;
 }
 
+// ProcState represents the state of a proc.
+//
+// New ProcStates may be added in the future. Users of this type must be robust
+// to that possibility.
 partial struct ProcState /*num:uint8*/;
 
 public static ProcState ProcUndetermined => /* iota */ 0;  // No information is known about the proc.
@@ -106,10 +119,13 @@ public static @string String(this ProcState s) {
     if (exprᴛ1 == ProcIdle) {
         return idleˢ;
     }
-
     return badˢ;
 }
 
+// ResourceKind indicates a kind of resource that has a state machine.
+//
+// New ResourceKinds may be added in the future. Users of this type must be robust
+// to that possibility.
 partial struct ResourceKind /*num:uint8*/;
 
 public static ResourceKind ResourceNone => /* iota */ 0;       // No resource.
@@ -140,7 +156,6 @@ public static @string String(this ResourceKind r) {
     if (exprᴛ1 == ResourceThread) {
         return threadˢ;
     }
-
     return badˢ;
 }
 
@@ -170,7 +185,6 @@ public static ResourceID MakeResourceID<T>(T id)
         rd.Kind = ResourceThread;
         break;
     }}
-
     rd.id = (int64)ConvertToUInt64<T>(id);
     return rd;
 }

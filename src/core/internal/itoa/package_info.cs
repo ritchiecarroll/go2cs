@@ -49,7 +49,7 @@ using static go.@internal.itoa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/itoa/itoa.go", "itoa.cs", "AAgUkoKUqJKSlIKCgoKCgqaCzJKSlIKCgoKCgqaCgoKCgg==")]
+[assembly: go.GoPositionMap("internal/itoa/itoa.go", "itoa.cs", "AAgUkoKUqJKClIKCgoKCgqaCzJKClIKCgoKCgqaCgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

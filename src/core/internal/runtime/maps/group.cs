@@ -12,14 +12,33 @@ using go.@internal.runtime;
 
 partial class maps_package {
 
+// Maximum load factor prior to growing.
+//
+// 7/8 is the same load factor used by Abseil, but Abseil defaults to
+// 16 slots per group, so they get two empty slots vs our one empty
+// slot. We may want to reevaluate if this is best for us.
 internal static UntypedInt maxAvgGroupLoad => 7;
+
 internal static ctrl ctrlEmpty => 0b10000000;
 internal static ctrl ctrlDeleted => 0b11111110;
+
 internal static UntypedInt bitsetLSB => 0x0101010101010101;
 internal static UntypedInt bitsetMSB => 0x8080808080808080;
 internal const uint64 bitsetEmpty = /* bitsetLSB * uint64(ctrlEmpty) */ 9259542123273814144;
 internal const uint64 bitsetDeleted = /* bitsetLSB * uint64(ctrlDeleted) */ 18374403900871474942;
 
+// bitset represents a set of slots within a group.
+//
+// The underlying representation depends on GOARCH.
+//
+// On AMD64, bitset uses one bit per slot, where the bit is set if the slot is
+// part of the set. All of the ctrlGroup.match* methods are replaced with
+// intrinsics that return this packed representation.
+//
+// On other architectures, bitset uses one byte per slot, where each byte is
+// either 0x80 if the slot is part of the set or 0x00 otherwise. This makes it
+// convenient to calculate for an entire group at once using standard
+// arithemetic instructions.
 partial struct bitset /*num:uint64*/;
 
 // first returns the relative index of the first control byte in the group that
@@ -86,8 +105,18 @@ internal static bitset bitsetShiftOutLowest(bitset b) {
     return (b >> (int)(8));
 }
 
+// Each slot in the hash table has a control byte which can have one of three
+// states: empty, deleted, and full. They have the following bit patterns:
+//
+//	  empty: 1 0 0 0 0 0 0 0
+//	deleted: 1 1 1 1 1 1 1 0
+//	   full: 0 h h h h h h h  // h represents the H1 hash bits
+//
+// TODO(prattmic): Consider inverting the top bit so that the zero value is empty.
 partial struct ctrl /*num:uint8*/;
 
+// ctrlGroup is a fixed size array of abi.SwissMapGroupSlots control bytes
+// stored in a uint64.
 partial struct ctrlGroup /*num:uint64*/;
 
 // get returns the i-th control byte.
@@ -251,6 +280,7 @@ internal static @unsafe.Pointer key(this ref groupReference g, ж<abi.SwissMapTy
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var offset = groupSlotsOffset + i * typ.SlotSize;
+
     return (@unsafe.Pointer)((uintptr)g.data + offset);
 }
 
@@ -259,6 +289,7 @@ internal static @unsafe.Pointer elem(this ref groupReference g, ж<abi.SwissMapT
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var offset = groupSlotsOffset + i * typ.SlotSize + typ.ElemOff;
+
     return (@unsafe.Pointer)((uintptr)g.data + offset);
 }
 
@@ -278,8 +309,8 @@ partial struct groupsReference {
 //
 // Length must be a power of two.
 internal static groupsReference newGroups(ref abi.SwissMapType typ, uint64 length) {
-    return new groupsReference( // TODO: make the length type the same throughout.
-
+    return new groupsReference(
+        // TODO: make the length type the same throughout.
         data: (uintptr)newarray(typ.Group, (nint)length),
         lengthMask: length - 1
     );
@@ -292,6 +323,7 @@ internal static groupReference group(this ref groupsReference g, ж<abi.SwissMap
     // TODO(prattmic): Do something here about truncation on cast to
     // uintptr on 32-bit systems?
     var offset = (uintptr)i * typ.GroupSize;
+
     return new groupReference(
         data: (@unsafe.Pointer)((uintptr)g.data + offset)
     );

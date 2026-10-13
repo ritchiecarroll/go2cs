@@ -12,7 +12,6 @@ using ꓸꓸꓸosꓸSignal = Span<osꓸSignal>;
 
 partial class signal_package {
 
-
 partial struct handlersᴛ1 /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; }
     // Map a channel to the signals that should be sent to it.
@@ -58,8 +57,10 @@ internal static void cancel(slice<osꓸSignal> sigs, Action<nint> action) {
     try {
         Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
         defer(Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock, ref ᒐ);
+
         void remove(nint n) {
             handler zerohandler = new();
+
             foreach (var (c, h) in handlers.m) {
                 if (h.want(n)) {
                     handlers.@ref[n]--;
@@ -69,8 +70,10 @@ internal static void cancel(slice<osꓸSignal> sigs, Action<nint> action) {
                     }
                 }
             }
+
             action(n);
         }
+
         if (len(sigs) == 0){
             for (nint n = 0; n < numSig; n++) {
                 remove(n);
@@ -101,6 +104,10 @@ public static bool Ignored(osꓸSignal sig) {
     return sn >= 0 && signalIgnored(sn);
 }
 
+// watchSignalLoopOnce guards calling the conditionally
+// initialized watchSignalLoop. If watchSignalLoop is non-nil,
+// it will be run in a goroutine lazily once Notify is invoked.
+// See Issue 21576.
 internal static ж<sync.Once> ᏑwatchSignalLoopOnce = new StandardBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once watchSignalLoopOnce => ref ᏑwatchSignalLoopOnce.Value;
 internal static Action watchSignalLoop;
@@ -129,8 +136,10 @@ public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSig
         if (c == default!) {
             throw panic("os/signal: Notify using nil channel");
         }
+
         Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
         defer(Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock, ref ᒐ);
+
         var h = handlers.m[c];
         if (h == nil) {
             if (handlers.m == default!) {
@@ -139,6 +148,7 @@ public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSig
             h = @new<handler>();
             handlers.m[c] = h;
         }
+
         var hʗ1 = h;
         void add(nint n) {
             if (n < 0) {
@@ -148,6 +158,7 @@ public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSig
                 hʗ1.set(n);
                 if (handlers.@ref[n] == 0) {
                     enableSignal(n);
+
                     // The runtime requires that we enable a
                     // signal before starting the watcher.
                     ᏑwatchSignalLoopOnce.Do([MethodImpl(MethodImplOptions.NoInlining)] () => {
@@ -159,6 +170,7 @@ public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSig
                 handlers.@ref[n]++;
             }
         }
+
         if (len(sig) == 0){
             for (nint n = 0; n < numSig; n++) {
                 add(n);
@@ -187,12 +199,14 @@ public static void Reset(params ꓸꓸꓸosꓸSignal sigʗp) {
 // When Stop returns, it is guaranteed that c will receive no more signals.
 public static void Stop(channel/*<-*/<osꓸSignal> c) {
     Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
+
     var h = handlers.m[c];
     if (h == nil) {
         Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock();
         return;
     }
     delete(handlers.m, c);
+
     for (nint n = 0; n < numSig; n++) {
         if (h.want(n)) {
             handlers.@ref[n]--;
@@ -201,6 +215,7 @@ public static void Stop(channel/*<-*/<osꓸSignal> c) {
             }
         }
     }
+
     // Signals will no longer be delivered to the channel.
     // We want to avoid a race for a signal such as SIGINT:
     // it should be either delivered to the channel,
@@ -211,16 +226,22 @@ public static void Stop(channel/*<-*/<osꓸSignal> c) {
     // to send it on the channel, put the channel on a list of
     // channels being stopped and wait for signal delivery to
     // quiesce before fully removing it.
+
     handlers.stopping = append(handlers.stopping, new stopping(c, h));
+
     Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock();
+
     signalWaitUntilIdle();
+
     Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
+
     foreach (var (i, s) in handlers.stopping) {
         if (s.c == c) {
             handlers.stopping = slices.Delete<slice<stopping>, stopping>(handlers.stopping, i, i + 1);
             break;
         }
     }
+
     Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock();
 }
 
@@ -237,8 +258,10 @@ internal static void process(osꓸSignal sig) {
         if (n < 0) {
             return;
         }
+
         Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
         defer(Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock, ref ᒐ);
+
         foreach (var (c, h) in handlers.m) {
             if (h.want(n)) {
                 // send but do not block for it
@@ -252,6 +275,7 @@ internal static void process(osꓸSignal sig) {
                 }}
             }
         }
+
         // Avoid the race mentioned in Stop.
         foreach (var (_, d) in handlers.stopping) {
             if (d.h.want(n)) {

@@ -22,6 +22,8 @@ using encoding;
 
 partial class fcgi_package {
 
+// recType is a record type, as defined by
+// https://web.archive.org/web/20150420080736/http://www.fastcgi.com/drupal/node/6?q=node/22#S8
 public partial struct recType /*num:uint8*/;
 
 internal static recType typeBeginRequest => 1;
@@ -134,8 +136,8 @@ internal static readonly @string fcgiInvalidHeaderVersionˢ = "fcgi: invalid hea
 
 internal static error /*err*/ read(this ж<record> Ꮡrec, io.Reader r) {
     error err = default!;
-
     ref var rec = ref Ꮡrec.DerefOrNull();
+
     {
         err = binary.Read(r, binary.BigEndian, Ꮡrec.of(record.Ꮡh)); if (err != default!) {
             return err;

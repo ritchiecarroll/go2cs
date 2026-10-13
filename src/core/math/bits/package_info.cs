@@ -50,7 +50,7 @@ using static go.math.bits_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("math/bits/bits.go", "bits.cs", "ABYysKaQppCmkKaQ/u4ABhCSgpSokqiSgqaokoKmqJKCAAwaAA0YkoKUqJKokqiSqAABKAATAoKCgoKCggACEuKClK7CgoKuwoKCrsKCgq7CgoKssoKUqJKokqiSgoKCgqiSgoKCggACENKClKyyrLKCgqyygoKCrLKClKiSqLKCgpSosoKClIKClKiygoKUgoKUgoKUAAUwAAgCgoKCAAIQAAgCuIIABTAACALKggACEAAIApSCAAUwAAgCgoIAAhAACAKCgoKCgoKCgoKCgoIAAhLigoKUgq7ygpSCgq7CgpSCqIKWgoSYgoKCgoKCgoSCgoKCqIKChIKCgoKorLKClKyyrAAJDoI=")]
+[assembly: go.GoPositionMap("math/bits/bits.go", "bits.cs", "ABYysKaQppCmkKaQ/u4ABhCSgpSokqiSgqaokoKmqJKCAAwaAA0YkoKUqJKokqiSqAABKAATAoKCgoKCggACEuKClK7CgoKuwoKCrsKCgq7CgoKssoKUqJKokqiSgoKCgqiSgoKCggACENKClKyyrLKCgqyygoKCrLKClKiSqLKCgpSosoKClIKClKiygoKUgoKUgoKUAAUwAAgCgoKCAAIQAAgCuIIABTAACALKggACEAAIApSCAAUwAAgCgoIAAhAACAKCgoKCgoKCgoKCgoIAAhLigoKUgq7ygpSCgq7CgpSCuIKmgpSYgoKCgoKCgpSCgoKCuIKClIKCgoK4rLKClKyyrAAJDoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.math;

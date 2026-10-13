@@ -65,6 +65,7 @@ public static (any v, error err, bool shared) Do(this ж<Group> Ꮡg, @string ke
     c.of(call.Ꮡwg).Add(1);
     g.m[key] = c;
     g.mu.Unlock();
+
     Ꮡg.doCall(c, key, fn);
     return ((~c).val, (~c).err, (~c).dups > 0);
 }
@@ -91,7 +92,9 @@ public static partial /*<-*/channel<Result> DoChan(this ж<Group> Ꮡg, @string 
     c.of(call.Ꮡwg).Add(1);
     g.m[key] = c;
     g.mu.Unlock();
+
     goǃ(Ꮡg.doCall, c, key, fn);
+
     return ch.WithDirection(GoChanDir.Recv);
 }
 
@@ -101,6 +104,7 @@ internal static void doCall(this ж<Group> Ꮡg, ж<call> Ꮡc, @string key, Fun
     ref var c = ref Ꮡc.DerefOrNull();
 
     (c.val, c.err) = fn();
+
     g.mu.Lock();
     Ꮡc.of(call.Ꮡwg).Done();
     if (g.m[key] == Ꮡc) {

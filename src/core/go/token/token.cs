@@ -13,187 +13,121 @@ using global::go.unicode;
 
 partial class token_package {
 
+// Token is the set of lexical tokens of the Go programming language.
 partial struct Token /*num:nint*/;
 
 // The list of tokens.
+// Special tokens
 public static Token ILLEGAL => /* iota */ 0;
-
 public static Token EOF => 1;
-
 public static Token COMMENT => 2;
 
 internal static Token literal_beg => 3;
-
+// Identifiers and basic type literals
+// (these tokens stand for classes of literals)
 public static Token IDENT => 4; // main
-
 public static Token INT => 5; // 12345
-
 public static Token FLOAT => 6; // 123.45
-
 public static Token IMAG => 7; // 123.45i
-
 public static Token CHAR => 8; // 'a'
-
 public static Token STRING => 9; // "abc"
-
 internal static Token literal_end => 10;
 
 internal static Token operator_beg => 11;
-
+// Operators and delimiters
 public static Token ADD => 12; // +
-
 public static Token SUB => 13; // -
-
 public static Token MUL => 14; // *
-
 public static Token QUO => 15; // /
-
 public static Token REM => 16; // %
 
 public static Token AND => 17; // &
-
 public static Token OR => 18; // |
-
 public static Token XOR => 19; // ^
-
 public static Token SHL => 20; // <<
-
 public static Token SHR => 21; // >>
-
 public static Token AND_NOT => 22; // &^
 
 public static Token ADD_ASSIGN => 23; // +=
-
 public static Token SUB_ASSIGN => 24; // -=
-
 public static Token MUL_ASSIGN => 25; // *=
-
 public static Token QUO_ASSIGN => 26; // /=
-
 public static Token REM_ASSIGN => 27; // %=
 
 public static Token AND_ASSIGN => 28; // &=
-
 public static Token OR_ASSIGN => 29; // |=
-
 public static Token XOR_ASSIGN => 30; // ^=
-
 public static Token SHL_ASSIGN => 31; // <<=
-
 public static Token SHR_ASSIGN => 32; // >>=
-
 public static Token AND_NOT_ASSIGN => 33; // &^=
 
 public static Token LAND => 34; // &&
-
 public static Token LOR => 35; // ||
-
 public static Token ARROW => 36; // <-
-
 public static Token INC => 37; // ++
-
 public static Token DEC => 38; // --
 
 public static Token EQL => 39; // ==
-
 public static Token LSS => 40; // <
-
 public static Token GTR => 41; // >
-
 public static Token ASSIGN => 42; // =
-
 public static Token NOT => 43; // !
 
 public static Token NEQ => 44; // !=
-
 public static Token LEQ => 45; // <=
-
 public static Token GEQ => 46; // >=
-
 public static Token DEFINE => 47; // :=
-
 public static Token ELLIPSIS => 48; // ...
 
 public static Token LPAREN => 49; // (
-
 public static Token LBRACK => 50; // [
-
 public static Token LBRACE => 51; // {
-
 public static Token COMMA => 52; // ,
-
 public static Token PERIOD => 53; // .
 
 public static Token RPAREN => 54; // )
-
 public static Token RBRACK => 55; // ]
-
 public static Token RBRACE => 56; // }
-
 public static Token SEMICOLON => 57; // ;
-
 public static Token COLON => 58; // :
-
 internal static Token operator_end => 59;
 
 internal static Token keyword_beg => 60;
-
+// Keywords
 public static Token BREAK => 61;
-
 public static Token CASE => 62;
-
 public static Token CHAN => 63;
-
 public static Token CONST => 64;
-
 public static Token CONTINUE => 65;
 
 public static Token DEFAULT => 66;
-
 public static Token DEFER => 67;
-
 public static Token ELSE => 68;
-
 public static Token FALLTHROUGH => 69;
-
 public static Token FOR => 70;
 
 public static Token FUNC => 71;
-
 public static Token GO => 72;
-
 public static Token GOTO => 73;
-
 public static Token IF => 74;
-
 public static Token IMPORT => 75;
 
 public static Token INTERFACE => 76;
-
 public static Token MAP => 77;
-
 public static Token PACKAGE => 78;
-
 public static Token RANGE => 79;
-
 public static Token RETURN => 80;
 
 public static Token SELECT => 81;
-
 public static Token STRUCT => 82;
-
 public static Token SWITCH => 83;
-
 public static Token TYPE => 84;
-
 public static Token VAR => 85;
-
 internal static Token keyword_end => 86;
 
 internal static Token additional_beg => 87;
-
+// additional tokens, handled in an ad-hoc manner
 public static Token TILDE => 88;
-
 internal static Token additional_end => 89;
 
 internal static array<@string> tokens = new golib.SparseArray<@string>{
@@ -303,9 +237,7 @@ public static @string String(this Token tok) {
 // precedence serves as "catch-all" precedence for selector,
 // indexing, and other operator and delimiter tokens.
 public static UntypedInt LowestPrec => 0; // non-operators
-
 public static UntypedInt UnaryPrec => 6;
-
 public static UntypedInt HighestPrec => 7;
 
 // Precedence returns the operator precedence of the binary
@@ -328,7 +260,6 @@ public static nint Precedence(this Token op) {
     if (exprᴛ1 == MUL || exprᴛ1 == QUO || exprᴛ1 == REM || exprᴛ1 == SHL || exprᴛ1 == SHR || exprᴛ1 == AND || exprᴛ1 == AND_NOT) {
         return 5;
     }
-
     return LowestPrec;
 }
 

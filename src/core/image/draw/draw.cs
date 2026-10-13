@@ -44,9 +44,12 @@ partial interface Quantizer {
     color.Palette Quantize(color.Palette p, image.Image m);
 }
 
+// Op is a Porter-Duff compositing operator.
 partial struct Op /*num:nint*/;
 
+// Over specifies ``(src in mask) over dst''.
 public static Op Over => /* iota */ 0;
+// Src specifies ``src in mask''.
 public static Op Src => 1;
 
 // Draw implements the [Drawer] interface by calling the Draw function with this
@@ -124,6 +127,7 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
     if (r.Empty()) {
         return;
     }
+
     // Fast paths for special cases. If none of them apply, then we fall back
     // to general but slower implementations.
     //
@@ -154,11 +158,11 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                     return;
                 }
                 case ж<image.YCbCr> src0: {
-                    if (imageutil.DrawYCbCr(dst0, // An image.YCbCr is always fully opaque, and so if the
- // mask is nil (i.e. fully opaque) then the op is
- // effectively always Src. Similarly for image.Gray and
- // image.CMYK.
- r, src0, sp)) {
+                    // An image.YCbCr is always fully opaque, and so if the
+                    // mask is nil (i.e. fully opaque) then the op is
+                    // effectively always Src. Similarly for image.Gray and
+                    // image.CMYK.
+                    if (imageutil.DrawYCbCr(dst0, r, src0, sp)) {
                         return;
                     }
                     break;
@@ -187,10 +191,10 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                         drawGrayMaskOver(dst0, r, src0, sp, mask0, mp);
                         return;
                     }
+                    // Case order matters. The next case (image.RGBA64Image) is an
+                    // interface type that the concrete types above also implement.
                     case {} Δsrc0 when Δsrc0._<image.RGBA64Image>(out var src0): {
-                        drawRGBA64ImageMaskOver(dst0, // Case order matters. The next case (image.RGBA64Image) is an
- // interface type that the concrete types above also implement.
- r, src0, sp, mask0, mp);
+                        drawRGBA64ImageMaskOver(dst0, r, src0, sp, mask0, mp);
                         return;
                     }}
                 }
@@ -287,6 +291,7 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
         }
         break;
     }}
+
     nint x0 = r.Min.X;
     nint x1 = r.Max.X;
     nint dx = 1;
@@ -297,12 +302,14 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
         (x0, x1, dx) = (x1 - 1, x0 - 1, -1);
         (y0, y1, dy) = (y1 - 1, y0 - 1, -1);
     }
+
     // FALLBACK1.17
     //
     // Try the draw.RGBA64Image and image.RGBA64Image interfaces, part of the
     // standard library since Go 1.17. These are like the draw.Image and
     // image.Image interfaces but they can avoid allocations from converting
     // concrete color types to the color.Color interface type.
+
     {
         var (dst0, _) = dst._<RGBA64Image>(ᐧ); if (dst0 != default!) {
             {
@@ -343,8 +350,8 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                                     switch (ᐧ) {
                                     case {} when ma is 0: {
                                         if (op == Over){
-                                        } else {
                                             // No-op.
+                                        } else {
                                             dst0.SetRGBA64(x, y, new color.RGBA64(nil));
                                         }
                                         break;
@@ -374,7 +381,6 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                                         }
                                         break;
                                     }}
-
                                 }
                             }
                             return;
@@ -384,10 +390,12 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
             }
         }
     }
+
     // FALLBACK1.0
     //
     // If none of the faster code paths above apply, use the draw.Image and
     // image.Image interfaces, part of the standard library since Go 1.0.
+
     ref var @out = ref heap(new color.RGBA64(), out var Ꮡout);
     nint sy = sp.Y + y0 - r.Min.Y;
     nint my = mp.Y + y0 - r.Min.Y;
@@ -402,8 +410,8 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
             switch (ᐧ) {
             case {} when ma is 0: {
                 if (op == Over){
-                } else {
                     // No-op.
+                } else {
                     dst.Set(x, y, color.Transparent);
                 }
                 break;
@@ -427,14 +435,13 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                     @out.B = (uint16)(sb * ma / (uint32)m);
                     @out.A = (uint16)(sa * ma / (uint32)m);
                 }
-                dst.Set(x, // The third argument is &out instead of out (and out is
- // declared outside of the inner loop) to avoid the implicit
- // conversion to color.Color here allocating memory in the
- // inner loop if sizeof(color.RGBA64) > sizeof(uintptr).
- y, new color.RGBA64жColor(Ꮡout));
+                // The third argument is &out instead of out (and out is
+                // declared outside of the inner loop) to avoid the implicit
+                // conversion to color.Color here allocating memory in the
+                // inner loop if sizeof(color.RGBA64) > sizeof(uintptr).
+                dst.Set(x, y, new color.RGBA64жColor(Ꮡout));
                 break;
             }}
-
         }
     }
 }
@@ -452,6 +459,7 @@ internal static void drawFillOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, ui
             var dg = Ꮡ(dst.Pix, i + 1);
             var db = Ꮡ(dst.Pix, i + 2);
             var da = Ꮡ(dst.Pix, i + 3);
+
             dr.Value = (uint8)((((uint32)(dr.Value) * a / (uint32)m + sr) >> (int)(8)));
             dg.Value = (uint8)((((uint32)(dg.Value) * a / (uint32)m + sg) >> (int)(8)));
             db.Value = (uint8)((((uint32)(db.Value) * a / (uint32)m + sb) >> (int)(8)));
@@ -523,8 +531,10 @@ internal static void drawCopyOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, ж
             var sg = (uint32)s[1] * 0x101;
             var sb = (uint32)s[2] * 0x101;
             var sa = (uint32)s[3] * 0x101;
+
             // The 0x101 is here for the same reason as in drawRGBA.
             var a = ((uint32)m - sa) * 0x101;
+
             var d = dpix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
             d[0] = (uint8)((((uint32)d[0] * a / (uint32)m + sr) >> (int)(8)));
             d[1] = (uint8)((((uint32)d[1] * a / (uint32)m + sg) >> (int)(8)));
@@ -568,11 +578,13 @@ internal static void drawNRGBAOver(ref imageꓸRGBA dst, image.Rectangle r, ref 
     nint i1 = (r.Max.X - dst.Rect.Min.X) * 4;
     nint si0 = (sp.X - src.Rect.Min.X) * 4;
     nint yMax = r.Max.Y - dst.Rect.Min.Y;
+
     nint y = r.Min.Y - dst.Rect.Min.Y;
     nint sy = sp.Y - src.Rect.Min.Y;
     for (; y != yMax; (y, sy) = (y + 1, sy + 1)) {
         var dpix = dst.Pix.slice(y * dst.Stride);
         var spix = src.Pix.slice(sy * src.Stride);
+
         for ((nint i, nint si) = (i0, si0); i < i1; (i, si) = (i + 4, si + 4)) {
             // Convert from non-premultiplied color to pre-multiplied color.
             var s = spix.slice(si, si + 4, si + 4); // Small cap improves performance, see https://golang.org/issue/27857
@@ -580,13 +592,16 @@ internal static void drawNRGBAOver(ref imageꓸRGBA dst, image.Rectangle r, ref 
             var sr = (uint32)s[0] * sa / 0xff;
             var sg = (uint32)s[1] * sa / 0xff;
             var sb = (uint32)s[2] * sa / 0xff;
+
             var d = dpix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
             var dr = (uint32)d[0];
             var dg = (uint32)d[1];
             var db = (uint32)d[2];
             var da = (uint32)d[3];
+
             // The 0x101 is here for the same reason as in drawRGBA.
             var a = ((uint32)m - sa) * 0x101;
+
             d[0] = (uint8)(((dr * a / (uint32)m + sr) >> (int)(8)));
             d[1] = (uint8)(((dg * a / (uint32)m + sg) >> (int)(8)));
             d[2] = (uint8)(((db * a / (uint32)m + sb) >> (int)(8)));
@@ -600,11 +615,13 @@ internal static void drawNRGBASrc(ref imageꓸRGBA dst, image.Rectangle r, ref i
     nint i1 = (r.Max.X - dst.Rect.Min.X) * 4;
     nint si0 = (sp.X - src.Rect.Min.X) * 4;
     nint yMax = r.Max.Y - dst.Rect.Min.Y;
+
     nint y = r.Min.Y - dst.Rect.Min.Y;
     nint sy = sp.Y - src.Rect.Min.Y;
     for (; y != yMax; (y, sy) = (y + 1, sy + 1)) {
         var dpix = dst.Pix.slice(y * dst.Stride);
         var spix = src.Pix.slice(sy * src.Stride);
+
         for ((nint i, nint si) = (i0, si0); i < i1; (i, si) = (i + 4, si + 4)) {
             // Convert from non-premultiplied color to pre-multiplied color.
             var s = spix.slice(si, si + 4, si + 4); // Small cap improves performance, see https://golang.org/issue/27857
@@ -612,6 +629,7 @@ internal static void drawNRGBASrc(ref imageꓸRGBA dst, image.Rectangle r, ref i
             var sr = (uint32)s[0] * sa / 0xff;
             var sg = (uint32)s[1] * sa / 0xff;
             var sb = (uint32)s[2] * sa / 0xff;
+
             var d = dpix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
             d[0] = (uint8)((sr >> (int)(8)));
             d[1] = (uint8)((sg >> (int)(8)));
@@ -626,11 +644,13 @@ internal static void drawGray(ref imageꓸRGBA dst, image.Rectangle r, ref image
     nint i1 = (r.Max.X - dst.Rect.Min.X) * 4;
     nint si0 = (sp.X - src.Rect.Min.X) * 1;
     nint yMax = r.Max.Y - dst.Rect.Min.Y;
+
     nint y = r.Min.Y - dst.Rect.Min.Y;
     nint sy = sp.Y - src.Rect.Min.Y;
     for (; y != yMax; (y, sy) = (y + 1, sy + 1)) {
         var dpix = dst.Pix.slice(y * dst.Stride);
         var spix = src.Pix.slice(sy * src.Stride);
+
         for ((nint i, nint si) = (i0, si0); i < i1; (i, si) = (i + 4, si + 1)) {
             var p = spix[si];
             var d = dpix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
@@ -647,11 +667,13 @@ internal static void drawCMYK(ref imageꓸRGBA dst, image.Rectangle r, ref image
     nint i1 = (r.Max.X - dst.Rect.Min.X) * 4;
     nint si0 = (sp.X - src.Rect.Min.X) * 4;
     nint yMax = r.Max.Y - dst.Rect.Min.Y;
+
     nint y = r.Min.Y - dst.Rect.Min.Y;
     nint sy = sp.Y - src.Rect.Min.Y;
     for (; y != yMax; (y, sy) = (y + 1, sy + 1)) {
         var dpix = dst.Pix.slice(y * dst.Stride);
         var spix = src.Pix.slice(sy * src.Stride);
+
         for ((nint i, nint si) = (i0, si0); i < i1; (i, si) = (i + 4, si + 4)) {
             var s = spix.slice(si, si + 4, si + 4); // Small cap improves performance, see https://golang.org/issue/27857
             var d = dpix.slice(i, i + 4, i + 4);
@@ -677,8 +699,10 @@ internal static void drawGlyphOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, �
                 continue;
             }
             ma |= (uint32)((ma << (int)(8)));
+
             // The 0x101 is here for the same reason as in drawRGBA.
             var a = ((uint32)m - (sa * ma / (uint32)m)) * 0x101;
+
             var d = dst.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
             d[0] = (uint8)((((uint32)d[0] * a + sr * ma) / (uint32)m >> (int)(8)));
             d[1] = (uint8)((((uint32)d[1] * a + sg * ma) / (uint32)m >> (int)(8)));
@@ -708,6 +732,7 @@ internal static void drawGrayMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r
             (y0, y1, dy) = (y1 - 1, y0 - 1, -1);
         }
     }
+
     nint sy = sp.Y + y0 - r.Min.Y;
     nint my = mp.Y + y0 - r.Min.Y;
     nint sx0 = sp.X + x0 - r.Min.X;
@@ -724,11 +749,13 @@ internal static void drawGrayMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r
             var syΔ1 = (uint32)src.Pix[si];
             syΔ1 |= (uint32)((syΔ1 << (int)(8)));
             var sa = (uint32)0xffff;
+
             var d = dst.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
             var dr = (uint32)d[0];
             var dg = (uint32)d[1];
             var db = (uint32)d[2];
             var da = (uint32)d[3];
+
             // dr, dg, db and da are all 8-bit color at the moment, ranging in [0,255].
             // We work in 16-bit color, and so would normally do:
             // dr |= dr << 8
@@ -736,6 +763,7 @@ internal static void drawGrayMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r
             // (which is a 16-bit color, ranging in [0,65535]) by 0x101.
             // This yields the same result, but is fewer arithmetic operations.
             var a = ((uint32)m - (sa * ma / (uint32)m)) * 0x101;
+
             d[0] = (uint8)(((dr * a + syΔ1 * ma) / (uint32)m >> (int)(8)));
             d[1] = (uint8)(((dg * a + syΔ1 * ma) / (uint32)m >> (int)(8)));
             d[2] = (uint8)(((db * a + syΔ1 * ma) / (uint32)m >> (int)(8)));
@@ -762,6 +790,7 @@ internal static void drawRGBAMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r
             (y0, y1, dy) = (y1 - 1, y0 - 1, -1);
         }
     }
+
     nint sy = sp.Y + y0 - r.Min.Y;
     nint my = mp.Y + y0 - r.Min.Y;
     nint sx0 = sp.X + x0 - r.Min.X;
@@ -788,6 +817,7 @@ internal static void drawRGBAMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r
             var dg = (uint32)d[1];
             var db = (uint32)d[2];
             var da = (uint32)d[3];
+
             // dr, dg, db and da are all 8-bit color at the moment, ranging in [0,255].
             // We work in 16-bit color, and so would normally do:
             // dr |= dr << 8
@@ -795,6 +825,7 @@ internal static void drawRGBAMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r
             // (which is a 16-bit color, ranging in [0,65535]) by 0x101.
             // This yields the same result, but is fewer arithmetic operations.
             var a = ((uint32)m - (sa * ma / (uint32)m)) * 0x101;
+
             d[0] = (uint8)(((dr * a + sr * ma) / (uint32)m >> (int)(8)));
             d[1] = (uint8)(((dg * a + sg * ma) / (uint32)m >> (int)(8)));
             d[2] = (uint8)(((db * a + sb * ma) / (uint32)m >> (int)(8)));
@@ -820,6 +851,7 @@ internal static void drawRGBA64ImageMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rect
             (y0, y1, dy) = (y1 - 1, y0 - 1, -1);
         }
     }
+
     nint sy = sp.Y + y0 - r.Min.Y;
     nint my = mp.Y + y0 - r.Min.Y;
     nint sx0 = sp.X + x0 - r.Min.X;
@@ -838,6 +870,7 @@ internal static void drawRGBA64ImageMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rect
             var dg = (uint32)d[1];
             var db = (uint32)d[2];
             var da = (uint32)d[3];
+
             // dr, dg, db and da are all 8-bit color at the moment, ranging in [0,255].
             // We work in 16-bit color, and so would normally do:
             // dr |= dr << 8
@@ -845,6 +878,7 @@ internal static void drawRGBA64ImageMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rect
             // (which is a 16-bit color, ranging in [0,65535]) by 0x101.
             // This yields the same result, but is fewer arithmetic operations.
             var a = ((uint32)m - ((uint32)srgba.A * ma / (uint32)m)) * 0x101;
+
             d[0] = (uint8)(((dr * a + (uint32)srgba.R * ma) / (uint32)m >> (int)(8)));
             d[1] = (uint8)(((dg * a + (uint32)srgba.G * ma) / (uint32)m >> (int)(8)));
             d[2] = (uint8)(((db * a + (uint32)srgba.B * ma) / (uint32)m >> (int)(8)));
@@ -869,6 +903,7 @@ internal static void drawRGBA(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, image.
             (y0, y1, dy) = (y1 - 1, y0 - 1, -1);
         }
     }
+
     nint sy = sp.Y + y0 - r.Min.Y;
     nint my = mp.Y + y0 - r.Min.Y;
     nint sx0 = sp.X + x0 - r.Min.X;
@@ -876,6 +911,7 @@ internal static void drawRGBA(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, image.
     nint sx1 = sx0 + (x1 - x0);
     nint i0 = dst.PixOffset(x0, y0);
     nint di = dx * 4;
+
     // Try the image.RGBA64Image interface, part of the standard library since
     // Go 1.17.
     //
@@ -956,6 +992,7 @@ internal static void drawRGBA(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, image.
             }
         }
     }
+
     // Use the image.Image interface, part of the standard library since Go
     // 1.0.
     //
@@ -974,6 +1011,7 @@ internal static void drawRGBA(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, image.
                 var dg = (uint32)d[1];
                 var db = (uint32)d[2];
                 var da = (uint32)d[3];
+
                 // dr, dg, db and da are all 8-bit color at the moment, ranging in [0,255].
                 // We work in 16-bit color, and so would normally do:
                 // dr |= dr << 8
@@ -981,6 +1019,7 @@ internal static void drawRGBA(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, image.
                 // (which is a 16-bit color, ranging in [0,65535]) by 0x101.
                 // This yields the same result, but is fewer arithmetic operations.
                 var a = ((uint32)m - (sa * ma / (uint32)m)) * 0x101;
+
                 d[0] = (uint8)(((dr * a + sr * ma) / (uint32)m >> (int)(8)));
                 d[1] = (uint8)(((dg * a + sg * ma) / (uint32)m >> (int)(8)));
                 d[2] = (uint8)(((db * a + sb * ma) / (uint32)m >> (int)(8)));
@@ -1043,6 +1082,7 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
             (pix, stride) = ((~p).Pix.slice(p.PixOffset(r.Min.X, r.Min.Y)), p.Value.Stride);
         }
     }
+
     // quantErrorCurr and quantErrorNext are the Floyd-Steinberg quantization
     // errors that have been propagated to the pixels in the current and next
     // rows. The +2 simplifies calculation near the edges.
@@ -1077,6 +1117,7 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
         };
         break;
     }}
+
     // Loop over each source pixel.
     ref var @out = ref heap<color.RGBA64>(out var Ꮡout);
     @out = new color.RGBA64(A: 0xffff);
@@ -1092,6 +1133,7 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
                 eb = clamp(eb + quantErrorCurr[x + 1][2] / 16);
                 ea = clamp(ea + quantErrorCurr[x + 1][3] / 16);
             }
+
             if (palette != default!){
                 // Find the closest palette color in Euclidean R,G,B,A space:
                 // the one that minimizes sum-squared-difference.
@@ -1110,6 +1152,7 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
                     }
                 }
                 pix[y * stride + x] = (byte)bestIndex;
+
                 if (!floydSteinberg) {
                     continue;
                 }
@@ -1127,6 +1170,7 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
                 // conversion to color.Color here allocating memory in the
                 // inner loop if sizeof(color.RGBA64) > sizeof(uintptr).
                 dst.Set(r.Min.X + x, r.Min.Y + y, new color.RGBA64жColor(Ꮡout));
+
                 if (!floydSteinberg) {
                     continue;
                 }
@@ -1136,6 +1180,7 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
                 eb -= (int32)sb;
                 ea -= (int32)sa;
             }
+
             // Propagate the Floyd-Steinberg quantization error.
             quantErrorNext[x + 0][0] += er * 3;
             quantErrorNext[x + 0][1] += eg * 3;
@@ -1154,6 +1199,7 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
             quantErrorCurr[x + 2][2] += eb * 7;
             quantErrorCurr[x + 2][3] += ea * 7;
         }
+
         // Recycle the quantization error buffers.
         if (floydSteinberg) {
             (quantErrorCurr, quantErrorNext) = (quantErrorNext, quantErrorCurr);

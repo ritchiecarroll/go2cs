@@ -5,6 +5,9 @@ namespace go.@internal.trace;
 
 partial class event_package {
 
+// Type indicates an event's type from which its arguments and semantics can be
+// derived. Its representation matches the wire format's representation of the event
+// types that precede all event data.
 partial struct Type /*num:uint8*/;
 
 // Spec is a specification for a trace event. It contains sufficient information
@@ -62,30 +65,20 @@ partial struct Spec {
     public Experiment Experiment;
 }
 
-// sequence number
-// P status
-// G status
-// trace.GoID
-// trace.ThreadID
-// trace.ProcID
-// string ID
-// stack ID
-// uint64
-// trace.TaskID
 // ArgTypes is a list of valid argument types for use in Args.
 //
 // See the documentation of Args for more details.
 public static array<@string> ArgTypes = new @string[]{
-    "seq"u8,
-    "pstatus"u8,
-    "gstatus"u8,
-    "g"u8,
-    "m"u8,
-    "p"u8,
-    "string"u8,
-    "stack"u8,
-    "value"u8,
-    "task"u8
+    "seq"u8, // sequence number
+    "pstatus"u8, // P status
+    "gstatus"u8, // G status
+    "g"u8, // trace.GoID
+    "m"u8, // trace.ThreadID
+    "p"u8, // trace.ProcID
+    "string"u8, // string ID
+    "stack"u8, // stack ID
+    "value"u8, // uint64
+    "task"u8 // trace.TaskID
 }.array();
 
 // Names is a helper that produces a mapping of event names to event types.
@@ -97,6 +90,7 @@ public static map<@string, Type> Names(slice<Spec> specs) {
     return nameToType;
 }
 
+// Experiment is an experiment ID that events may be associated with.
 partial struct Experiment /*num:nuint*/;
 
 // NoExperiment is the reserved ID 0 indicating no experiment.

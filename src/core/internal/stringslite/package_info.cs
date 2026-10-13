@@ -49,7 +49,7 @@ using static go.@internal.stringslite_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/stringslite/strings.go", "strings.cs", "ABAggqaCpoKmgoKUpKSClKSmkpSCgoKCgoKmgoKUlIKUgpSCgoKUpqSCgoKCgoKCgoKUlIKUgoKUgoKUpqaCgIKkpoKClKaCgpSmgoKUpoKClKaCgpSCgg==")]
+[assembly: go.GoPositionMap("internal/stringslite/strings.go", "strings.cs", "ABAggqaCpoKmgoKUpKSClKS2gpSCgoKCgoKmgoKUlIKUgpSCgoKUppSCgoKCgoKCgoKUlIKUgoKUgoKUpqaCgIKkpoKClKaCgpSmgoKUpoKClKaCgpSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

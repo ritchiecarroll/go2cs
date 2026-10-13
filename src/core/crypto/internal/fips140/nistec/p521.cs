@@ -66,14 +66,14 @@ public static (ж<P521Point>, error) SetBytes(this ж<P521Point> Ꮡp, slice<byt
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (ᐧ) {
+    // Point at infinity.
     case {} when len(b) == 1 && b[0] == 0: {
         return (Ꮡp.Set(NewP521Point()), default!);
     }
+    // Uncompressed form.
     case {} when len(b) == (nint)(1 + 2 * p521ElementLength) && b[0] == 4: {
         var (x, err) = @new<fiat.P521Element>().SetBytes(b[1..(int)(1 + p521ElementLength)]);
         if (err != default!) {
-            // Point at infinity.
-            // Uncompressed form.
             return (default!, err);
         }
         (var y, err) = @new<fiat.P521Element>().SetBytes(b[(int)(1 + p521ElementLength)..]);
@@ -90,23 +90,26 @@ public static (ж<P521Point>, error) SetBytes(this ж<P521Point> Ꮡp, slice<byt
         p.z.One();
         return (Ꮡp, default!);
     }
+    // Compressed form.
     case {} when len(b) == (nint)(1 + p521ElementLength) && (b[0] == 2 || b[0] == 3): {
         var (x, err) = @new<fiat.P521Element>().SetBytes(b[1..]);
         if (err != default!) {
-            // Compressed form.
             return (default!, err);
         }
-        var y = p521Polynomial(@new<fiat.P521Element>(), // y² = x³ - 3x + b
- x);
+
+        // y² = x³ - 3x + b
+        var y = p521Polynomial(@new<fiat.P521Element>(), x);
         if (!p521Sqrt(y, y)) {
             return (default!, errors.New(invalidP521Compressedˢ));
         }
+
+        // Select the positive or negative root, as indicated by the least
+        // significant bit, based on the encoding type byte.
         var otherRoot = @new<fiat.P521Element>();
-        otherRoot.Sub(otherRoot, // Select the positive or negative root, as indicated by the least
- // significant bit, based on the encoding type byte.
- y);
+        otherRoot.Sub(otherRoot, y);
         var cond = (byte)((byte)(y.Bytes()[p521ElementLength - 1] & 1) ^ (byte)(b[0] & 1));
         y.Select(otherRoot, y, (nint)cond);
+
         p.x.Set(x);
         p.y.Set(y);
         p.z.One();
@@ -115,7 +118,6 @@ public static (ж<P521Point>, error) SetBytes(this ж<P521Point> Ꮡp, slice<byt
     default: {
         return (default!, errors.New(invalidP521PointEncodingˢ));
     }}
-
 }
 
 internal static ж<fiat.P521Element> _p521B;
@@ -134,9 +136,11 @@ internal static ж<fiat.P521Element> p521B() {
 internal static ж<fiat.P521Element> p521Polynomial(ж<fiat.P521Element> Ꮡy2, ж<fiat.P521Element> Ꮡx) {
     Ꮡy2.Square(Ꮡx);
     Ꮡy2.Mul(Ꮡy2, Ꮡx);
+
     var threeX = @new<fiat.P521Element>().Add(Ꮡx, Ꮡx);
     threeX.Add(threeX, Ꮡx);
     Ꮡy2.Sub(Ꮡy2, threeX);
+
     return Ꮡy2.Add(Ꮡy2, p521B());
 }
 
@@ -144,9 +148,6 @@ internal static ж<fiat.P521Element> p521Polynomial(ж<fiat.P521Element> Ꮡy2, 
 internal static readonly @string p521PointNotOnCurveˢ = "P521 point not on curve"u8;
 
 internal static error p521CheckOnCurve(ж<fiat.P521Element> Ꮡx, ж<fiat.P521Element> Ꮡy) {
-    ref var x = ref Ꮡx.DerefOrNull();
-    ref var y = ref Ꮡy.DerefOrNull();
-
     // y² = x³ - 3x + b
     var rhs = p521Polynomial(@new<fiat.P521Element>(), Ꮡx);
     var lhs = @new<fiat.P521Element>().Square(Ꮡy);
@@ -172,9 +173,11 @@ internal static slice<byte> bytes(this ref P521Point p, /*[133]*/ ж<array<byte>
     if (p.z.IsZero() == 1) {
         return append(@out[..0], (byte)(0));
     }
+
     var zinv = @new<fiat.P521Element>().Invert(p.z);
     var x = @new<fiat.P521Element>().Mul(p.x, zinv);
     var y = @new<fiat.P521Element>().Mul(p.y, zinv);
+
     var buf = append(@out[..0], (byte)(4));
     buf = appendꓸꓸꓸ(buf, x.Bytes());
     buf = appendꓸꓸꓸ(buf, y.Bytes());
@@ -199,8 +202,10 @@ internal static (slice<byte>, error) bytesX(this ref P521Point p, /*[66]*/ ж<ar
     if (p.z.IsZero() == 1) {
         return (default!, errors.New(p521PointIsThePointAtˢ));
     }
+
     var zinv = @new<fiat.P521Element>().Invert(p.z);
     var x = @new<fiat.P521Element>().Mul(p.x, zinv);
+
     return (appendꓸꓸꓸ(@out[..0], x.Bytes()), default!);
 }
 
@@ -220,9 +225,11 @@ internal static slice<byte> bytesCompressed(this ref P521Point p, /*[67]*/ ж<ar
     if (p.z.IsZero() == 1) {
         return append(@out[..0], (byte)(0));
     }
+
     var zinv = @new<fiat.P521Element>().Invert(p.z);
     var x = @new<fiat.P521Element>().Mul(p.x, zinv);
     var y = @new<fiat.P521Element>().Mul(p.y, zinv);
+
     // Encode the sign of the y coordinate (indicated by the least significant
     // bit) as the encoding type (2 or 3).
     var buf = append(@out[..0], (byte)(2));
@@ -282,6 +289,7 @@ public static ж<P521Point> Add(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж
     z3.Mul(t4, z3); // Z3 := t4 * Z3
     t1.Mul(t3, t0); // t1 := t3 * t0
     z3.Add(z3, t1); // Z3 := Z3 + t1
+
     q.x.Set(x3);
     q.y.Set(y3);
     q.z.Set(z3);
@@ -329,6 +337,7 @@ public static ж<P521Point> Double(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp) 
     z3.Mul(t0, t1); // Z3 := t0 * t1
     z3.Add(z3, z3); // Z3 := Z3 + Z3
     z3.Add(z3, z3); // Z3 := Z3 + Z3
+
     q.x.Set(x3);
     q.y.Set(y3);
     q.z.Set(z3);
@@ -347,6 +356,9 @@ public static ж<P521Point> Select(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1,
     return Ꮡq;
 }
 
+// A p521Table holds the first 15 multiples of a point at offset -1, so [1]P
+// is at table[0], [15]P is at table[14], and [0]P is implicitly the identity
+// point.
 partial struct p521Table /*[15]ж<P521Point>*/;
 
 // Select selects the n-th multiple of the table base point into p. It works in
@@ -364,9 +376,6 @@ internal static void Select(this ref p521Table table, ж<P521Point> Ꮡp, uint8 
 
 // ScalarMult sets p = scalar * q, and returns p.
 public static (ж<P521Point>, error) ScalarMult(this ж<P521Point> Ꮡp, ж<P521Point> Ꮡq, slice<byte> scalar) {
-    ref var p = ref Ꮡp.DerefOrNull();
-    ref var q = ref Ꮡq.DerefOrNull();
-
     // Compute a p521Table for the base point q. The explicit NewP521Point
     // calls get inlined, letting the allocations live on the stack.
     p521Table table = new p521Table(new ж<P521Point>[]{NewP521Point(), NewP521Point(), NewP521Point(),
@@ -378,6 +387,7 @@ public static (ж<P521Point>, error) ScalarMult(this ж<P521Point> Ꮡp, ж<P521
         table[i].Double(table[i / 2]);
         table[i + 1].Add(table[i], Ꮡq);
     }
+
     // Instead of doing the classic double-and-add chain, we do it with a
     // four-bit window: we double four times, and then add [0-15]P.
     var t = NewP521Point();
@@ -391,17 +401,21 @@ public static (ж<P521Point>, error) ScalarMult(this ж<P521Point> Ꮡp, ж<P521
             Ꮡp.Double(Ꮡp);
             Ꮡp.Double(Ꮡp);
         }
+
         var windowValue = (byte)((@byte >> (int)(4)));
         table.Select(t, windowValue);
         Ꮡp.Add(Ꮡp, t);
+
         Ꮡp.Double(Ꮡp);
         Ꮡp.Double(Ꮡp);
         Ꮡp.Double(Ꮡp);
         Ꮡp.Double(Ꮡp);
+
         windowValue = (byte)(@byte & 0b1111);
         table.Select(t, windowValue);
         Ꮡp.Add(Ꮡp, t);
     }
+
     return (Ꮡp, default!);
 }
 
@@ -440,6 +454,7 @@ public static (ж<P521Point>, error) ScalarBaseMult(this ж<P521Point> Ꮡp, sli
         return (default!, errors.New(invalidScalarLengthˢ));
     }
     var tables = p.generatorTable();
+
     // This is also a scalar multiplication with a four-bit window like in
     // ScalarMult, but in this case the doublings are precomputed. The value
     // [windowValue]G added at iteration k would normally get doubled
@@ -454,11 +469,13 @@ public static (ж<P521Point>, error) ScalarBaseMult(this ж<P521Point> Ꮡp, sli
         tables.Value[tableIndex].Select(t, windowValue);
         Ꮡp.Add(Ꮡp, t);
         tableIndex--;
+
         windowValue = (byte)(@byte & 0b1111);
         tables.Value[tableIndex].Select(t, windowValue);
         Ꮡp.Add(Ꮡp, t);
         tableIndex--;
     }
+
     return (Ꮡp, default!);
 }
 

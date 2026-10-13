@@ -28,7 +28,6 @@ public static slice<byte> Rot13(slice<byte> data) {
             @out[i] = (byte)(c - 13);
             break;
         }}
-
     }
     return @out;
 }
@@ -50,6 +49,7 @@ public static (@string path, error err) DecodeToTempFile(@string name) {
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         (var tmp, err) = os.CreateTemp(""u8, obscuretestdataDecodedˢ);
         if (err != default!) {
             (path, err) = ("", err); goto ᒐdone;

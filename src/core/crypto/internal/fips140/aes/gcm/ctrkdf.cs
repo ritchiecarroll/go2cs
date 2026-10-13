@@ -35,13 +35,17 @@ public static array<byte> DeriveKey(this ж<CounterKDF> Ꮡkdf, byte label, /*[1
 
     fips140.RecordApproved();
     array<byte> output = new(32);
+
     array<byte> input = new(16); /* aes.ΔBlockSize */
     input[2] = label;
     copy(input[4..], context[..]);
+
     input[1] = 0x01; // i = 1
     var K1 = Ꮡkdf.of(CounterKDF.Ꮡmac).MAC(input[..]);
+
     input[1] = 0x02; // i = 2
     var K2 = Ꮡkdf.of(CounterKDF.Ꮡmac).MAC(input[..]);
+
     copy(output[..], K1[..]);
     copy(output[(int)(aes.ΔBlockSize)..], K2[..]);
     return output.Clone();

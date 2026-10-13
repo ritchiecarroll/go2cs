@@ -9,12 +9,14 @@ partial class abi_package {
 
 // Map constants common to several packages
 // runtime/runtime-gdb.py:MapTypePrinter contains its own copy
+// Maximum number of key/elem pairs a bucket can hold.
 public static UntypedInt OldMapBucketCountBits => 3; // log2 of number of elements in a bucket.
-
 public static UntypedInt OldMapBucketCount => /* 1 << OldMapBucketCountBits */ 8;
 
+// Maximum key or elem size to keep inline (instead of mallocing per element).
+// Must fit in a uint8.
+// Note: fast map functions cannot handle big elems (bigger than MapMaxElemBytes).
 public static UntypedInt OldMapMaxKeyBytes => 128;
-
 public static UntypedInt OldMapMaxElemBytes => 128; // Must fit in a uint8.
 
 partial struct OldMapType {

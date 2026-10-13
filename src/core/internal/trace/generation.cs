@@ -65,6 +65,7 @@ internal static (ж<generation>, ж<spilledBatch>, error) readGeneration(ж<bufi
         }
         Ꮡspill = default!; spill = ref Ꮡspill.DerefOrNull();
     }
+
     // Read batches one at a time until we either hit EOF or
     // the next generation.
     error spillErr = default!;
@@ -93,8 +94,7 @@ internal static (ж<generation>, ж<spilledBatch>, error) readGeneration(ж<bufi
             // Initialize gen.
             g.Value.gen = gen;
         }
-        if (gen == (~g).gen + 1) {
-            // TODO: advance this the same way the runtime does.
+        if (gen == (~g).gen + 1) { // TODO: advance this the same way the runtime does.
             Ꮡspill = Ꮡ(new spilledBatch(gen: gen, batch: Ꮡb)); spill = ref Ꮡspill.DerefOrNull();
             break;
         }
@@ -114,6 +114,7 @@ internal static (ж<generation>, ж<spilledBatch>, error) readGeneration(ж<bufi
             }
         }
     }
+
     // Check some invariants.
     if ((~g).freq == 0D) {
         return (default!, default!, fmt.Errorf("no frequency event found"u8));
@@ -123,15 +124,18 @@ internal static (ж<generation>, ж<spilledBatch>, error) readGeneration(ж<bufi
     // truth is the order things appear in the trace and the partial order sequence
     // numbers on certain events. If it turns out the batch order is actually incorrect
     // we'll very likely fail to advance a partial order from the frontier.
+
     // Compactify stacks and strings for better lookup performance later.
     g.of(generation.Ꮡstacks).compactify();
     g.of(generation.Ꮡstrings).compactify();
+
     // Validate stacks.
     {
         var err = validateStackStrings(g.of(generation.Ꮡstacks), g.of(generation.Ꮡstrings), (~g).pcs); if (err != default!) {
             return (default!, default!, err);
         }
     }
+
     // Fix up the CPU sample timestamps, now that we have freq.
     foreach (var (i, _) in (~g).cpuSamples) {
         var s = Ꮡ((~g).cpuSamples, i);
@@ -202,7 +206,6 @@ internal static error processBatch(ж<generation> Ꮡg, batch b) {
         g.batches[b.m] = append(g.batches[b.m], b);
         break;
     }}
-
     return default!;
 }
 
@@ -250,6 +253,7 @@ internal static error addStrings(ж<dataTable<stringID, @string>> ᏑstringTable
     if (err != default! || ((@event.Type)hdr) != go122.EvStrings) {
         return fmt.Errorf("missing strings batch header"u8);
     }
+
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     while (r.Len() != 0) {
         // Read the header.
@@ -260,11 +264,13 @@ internal static error addStrings(ж<dataTable<stringID, @string>> ᏑstringTable
         if (((@event.Type)ev) != go122.EvString) {
             return fmt.Errorf("expected string event, got %d"u8, ev);
         }
+
         // Read the string's ID.
         (var id, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
             return errΔ1;
         }
+
         // Read the string's length.
         (var len, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
@@ -273,6 +279,7 @@ internal static error addStrings(ж<dataTable<stringID, @string>> ᏑstringTable
         if (len > go122.MaxStringSize) {
             return fmt.Errorf("invalid string size %d, maximum is %d"u8, len, (nint)(go122.MaxStringSize));
         }
+
         // Copy out the string.
         (var n, errΔ1) = io.CopyN(new strings_BuilderжWriter(Ꮡsb), new bytes_ReaderжReader(r), (int64)len);
         if (n != (int64)len) {
@@ -281,6 +288,7 @@ internal static error addStrings(ж<dataTable<stringID, @string>> ᏑstringTable
         if (errΔ1 != default!) {
             return fmt.Errorf("copying string data: %w"u8, errΔ1);
         }
+
         // Add the string to the map.
         @string s = sb.String();
         sb.Reset();
@@ -307,6 +315,7 @@ internal static error addStacks(ж<dataTable<stackID, stack>> ᏑstackTable, map
     if (err != default! || ((@event.Type)hdr) != go122.EvStacks) {
         return fmt.Errorf("missing stacks batch header"u8);
     }
+
     while (r.Len() != 0) {
         // Read the header.
         var (ev, errΔ1) = r.ReadByte();
@@ -316,11 +325,13 @@ internal static error addStacks(ж<dataTable<stackID, stack>> ᏑstackTable, map
         if (((@event.Type)ev) != go122.EvStack) {
             return fmt.Errorf("expected stack event, got %d"u8, ev);
         }
+
         // Read the stack's ID.
         (var id, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
             return errΔ1;
         }
+
         // Read how many frames are in each stack.
         (var nFrames, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
@@ -329,6 +340,7 @@ internal static error addStacks(ж<dataTable<stackID, stack>> ᏑstackTable, map
         if (nFrames > go122.MaxFramesPerStack) {
             return fmt.Errorf("invalid stack size %d, maximum is %d"u8, nFrames, (nint)(go122.MaxFramesPerStack));
         }
+
         // Each frame consists of 4 fields: pc, funcID (string), fileID (string), line.
         var frames = new slice<uint64>(0, (nint)(nFrames));
         for (var i = (uint64)0; i < nFrames; i++) {
@@ -350,6 +362,7 @@ internal static error addStacks(ж<dataTable<stackID, stack>> ᏑstackTable, map
                 return fmt.Errorf("reading frame %d's line for stack %d: %w"u8, i + 1, id, errΔ2);
             }
             frames = append(frames, pc);
+
             {
                 var (_, ok) = pcs[pc, ꟷ]; if (!ok) {
                     pcs[pc] = new frame(
@@ -361,6 +374,7 @@ internal static error addStacks(ж<dataTable<stackID, stack>> ᏑstackTable, map
                 }
             }
         }
+
         // Add the stack to the map.
         {
             var errΔ3 = stackTable.insert(((stackID)id), new stack(pcs: frames)); if (errΔ3 != default!) {
@@ -383,6 +397,7 @@ internal static (slice<cpuSample>, error) addCPUSamples(slice<cpuSample> samples
     if (err != default! || ((@event.Type)hdr) != go122.EvCPUSamples) {
         return (default!, fmt.Errorf("missing CPU samples batch header"u8));
     }
+
     while (r.Len() != 0) {
         // Read the header.
         var (ev, errΔ1) = r.ReadByte();
@@ -392,23 +407,27 @@ internal static (slice<cpuSample>, error) addCPUSamples(slice<cpuSample> samples
         if (((@event.Type)ev) != go122.EvCPUSample) {
             return (default!, fmt.Errorf("expected CPU sample event, got %d"u8, ev));
         }
+
         // Read the sample's timestamp.
         (var ts, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
+
         // Read the sample's M.
         (var m, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
         var mid = ((ThreadID)(int64)m);
+
         // Read the sample's P.
         (var p, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
         var pid = ((ProcID)(int64)p);
+
         // Read the sample's G.
         (var g, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
@@ -418,11 +437,13 @@ internal static (slice<cpuSample>, error) addCPUSamples(slice<cpuSample> samples
         if (g == 0) {
             goid = NoGoroutine;
         }
+
         // Read the sample's stack.
         (var s, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
+
         // Add the sample to the slice.
         samples = append(samples, new cpuSample(
             schedCtx: new schedCtx(
@@ -431,7 +452,6 @@ internal static (slice<cpuSample>, error) addCPUSamples(slice<cpuSample> samples
                 G: goid
             ),
             time: ((ΔTime)(int64)ts), // N.B. this is really a "timestamp," not a Time.
-
             stack: ((stackID)s)
         ));
     }
@@ -445,6 +465,7 @@ internal static (frequency, error) parseFreq(batch b) {
     }
     var r = bytes.NewReader(b.data);
     r.ReadByte(); // Consume the EvFrequency byte.
+
     // Read the frequency. It'll come out as timestamp units per second.
     var (f, err) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
     if (err != default!) {

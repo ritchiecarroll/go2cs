@@ -40,7 +40,6 @@ internal static uint64 readIntBE(slice<byte> b, uintptr size) {
     { /* default: */
         throw panic("syscall: readInt with unsupported size");
     }
-
 }
 
 internal static uint64 readIntLE(slice<byte> b, uintptr size) {
@@ -60,7 +59,6 @@ internal static uint64 readIntLE(slice<byte> b, uintptr size) {
     { /* default: */
         throw panic("syscall: readInt with unsupported size");
     }
-
 }
 
 // ParseDirent parses up to max directory entries in buf,
@@ -85,8 +83,7 @@ public static (nint consumed, nint count, slice<@string> newnames) ParseDirent(s
         }
         // See src/os/dir_unix.go for the reason why this condition is
         // excluded on wasip1 and linux.
-        if (ino == 0 && runtime.GOOS != "linux"u8 && runtime.GOOS != "wasip1"u8) {
-            // File absent in directory.
+        if (ino == 0 && runtime.GOOS != "linux"u8 && runtime.GOOS != "wasip1"u8) { // File absent in directory.
             continue;
         }
         const uint64 namoff = /* uint64(unsafe.Offsetof(Dirent{}.Name)) */ 19;

@@ -41,11 +41,13 @@ internal static void feMulGeneric(ж<Element> Ꮡv, ref Element a, ref Element b
     var a2 = a.l2;
     var a3 = a.l3;
     var a4 = a.l4;
+
     var b0 = b.l0;
     var b1 = b.l1;
     var b2 = b.l2;
     var b3 = b.l3;
     var b4 = b.l4;
+
     // Limb multiplication works like pen-and-paper columnar multiplication, but
     // with 51-bit limbs instead of digits.
     //
@@ -77,40 +79,47 @@ internal static void feMulGeneric(ж<Element> Ꮡv, ref Element a, ref Element b
     //              r4      r3      r2      r1      r0
     //
     // Finally we add up the columns into wide, overlapping limbs.
+
     var a1_19 = a1 * 19;
     var a2_19 = a2 * 19;
     var a3_19 = a3 * 19;
     var a4_19 = a4 * 19;
+
     // r0 = a0×b0 + 19×(a1×b4 + a2×b3 + a3×b2 + a4×b1)
     var r0 = mul64(a0, b0);
     r0 = addMul64(r0, a1_19, b4);
     r0 = addMul64(r0, a2_19, b3);
     r0 = addMul64(r0, a3_19, b2);
     r0 = addMul64(r0, a4_19, b1);
+
     // r1 = a0×b1 + a1×b0 + 19×(a2×b4 + a3×b3 + a4×b2)
     var r1 = mul64(a0, b1);
     r1 = addMul64(r1, a1, b0);
     r1 = addMul64(r1, a2_19, b4);
     r1 = addMul64(r1, a3_19, b3);
     r1 = addMul64(r1, a4_19, b2);
+
     // r2 = a0×b2 + a1×b1 + a2×b0 + 19×(a3×b4 + a4×b3)
     var r2 = mul64(a0, b2);
     r2 = addMul64(r2, a1, b1);
     r2 = addMul64(r2, a2, b0);
     r2 = addMul64(r2, a3_19, b4);
     r2 = addMul64(r2, a4_19, b3);
+
     // r3 = a0×b3 + a1×b2 + a2×b1 + a3×b0 + 19×a4×b4
     var r3 = mul64(a0, b3);
     r3 = addMul64(r3, a1, b2);
     r3 = addMul64(r3, a2, b1);
     r3 = addMul64(r3, a3, b0);
     r3 = addMul64(r3, a4_19, b4);
+
     // r4 = a0×b4 + a1×b3 + a2×b2 + a3×b1 + a4×b0
     var r4 = mul64(a0, b4);
     r4 = addMul64(r4, a1, b3);
     r4 = addMul64(r4, a2, b2);
     r4 = addMul64(r4, a3, b1);
     r4 = addMul64(r4, a4, b0);
+
     // After the multiplication, we need to reduce (carry) the five coefficients
     // to obtain a result with limbs that are at most slightly larger than 2⁵¹,
     // to respect the Element invariant.
@@ -137,16 +146,19 @@ internal static void feMulGeneric(ж<Element> Ꮡv, ref Element a, ref Element b
     //     r4 < 5 × 2⁵² × 2⁵²
     //     r4 < 2¹⁰⁷
     //
+
     var c0 = shiftRightBy51(r0);
     var c1 = shiftRightBy51(r1);
     var c2 = shiftRightBy51(r2);
     var c3 = shiftRightBy51(r3);
     var c4 = shiftRightBy51(r4);
+
     var rr0 = (uint64)(r0.lo & maskLow51Bits) + c4 * 19;
     var rr1 = (uint64)(r1.lo & maskLow51Bits) + c0;
     var rr2 = (uint64)(r2.lo & maskLow51Bits) + c1;
     var rr3 = (uint64)(r3.lo & maskLow51Bits) + c2;
     var rr4 = (uint64)(r4.lo & maskLow51Bits) + c3;
+
     // Now all coefficients fit into 64-bit registers but are still too large to
     // be passed around as an Element. We therefore do one last carry chain,
     // where the carries will be small enough to fit in the wiggle room above 2⁵¹.
@@ -162,6 +174,7 @@ internal static void feSquareGeneric(ж<Element> Ꮡv, ref Element a) {
     var l2 = a.l2;
     var l3 = a.l3;
     var l4 = a.l4;
+
     // Squaring works precisely like multiplication above, but thanks to its
     // symmetry we get to group a few terms together.
     //
@@ -186,43 +199,54 @@ internal static void feSquareGeneric(ж<Element> Ꮡv, ref Element a) {
     //
     // With precomputed 2×, 19×, and 2×19× terms, we can compute each limb with
     // only three Mul64 and four Add64, instead of five and eight.
+
     var l0_2 = l0 * 2;
     var l1_2 = l1 * 2;
+
     var l1_38 = l1 * 38;
     var l2_38 = l2 * 38;
     var l3_38 = l3 * 38;
+
     var l3_19 = l3 * 19;
     var l4_19 = l4 * 19;
+
     // r0 = l0×l0 + 19×(l1×l4 + l2×l3 + l3×l2 + l4×l1) = l0×l0 + 19×2×(l1×l4 + l2×l3)
     var r0 = mul64(l0, l0);
     r0 = addMul64(r0, l1_38, l4);
     r0 = addMul64(r0, l2_38, l3);
+
     // r1 = l0×l1 + l1×l0 + 19×(l2×l4 + l3×l3 + l4×l2) = 2×l0×l1 + 19×2×l2×l4 + 19×l3×l3
     var r1 = mul64(l0_2, l1);
     r1 = addMul64(r1, l2_38, l4);
     r1 = addMul64(r1, l3_19, l3);
+
     // r2 = l0×l2 + l1×l1 + l2×l0 + 19×(l3×l4 + l4×l3) = 2×l0×l2 + l1×l1 + 19×2×l3×l4
     var r2 = mul64(l0_2, l2);
     r2 = addMul64(r2, l1, l1);
     r2 = addMul64(r2, l3_38, l4);
+
     // r3 = l0×l3 + l1×l2 + l2×l1 + l3×l0 + 19×l4×l4 = 2×l0×l3 + 2×l1×l2 + 19×l4×l4
     var r3 = mul64(l0_2, l3);
     r3 = addMul64(r3, l1_2, l2);
     r3 = addMul64(r3, l4_19, l4);
+
     // r4 = l0×l4 + l1×l3 + l2×l2 + l3×l1 + l4×l0 = 2×l0×l4 + 2×l1×l3 + l2×l2
     var r4 = mul64(l0_2, l4);
     r4 = addMul64(r4, l1_2, l3);
     r4 = addMul64(r4, l2, l2);
+
     var c0 = shiftRightBy51(r0);
     var c1 = shiftRightBy51(r1);
     var c2 = shiftRightBy51(r2);
     var c3 = shiftRightBy51(r3);
     var c4 = shiftRightBy51(r4);
+
     var rr0 = (uint64)(r0.lo & maskLow51Bits) + c4 * 19;
     var rr1 = (uint64)(r1.lo & maskLow51Bits) + c0;
     var rr2 = (uint64)(r2.lo & maskLow51Bits) + c1;
     var rr3 = (uint64)(r3.lo & maskLow51Bits) + c2;
     var rr4 = (uint64)(r4.lo & maskLow51Bits) + c3;
+
     v = new Element(rr0, rr1, rr2, rr3, rr4);
     Ꮡv.carryPropagate();
 }
@@ -237,6 +261,7 @@ internal static ж<Element> carryPropagateGeneric(this ж<Element> Ꮡv) {
     var c2 = (v.l2 >> (int)(51));
     var c3 = (v.l3 >> (int)(51));
     var c4 = (v.l4 >> (int)(51));
+
     // c4 is at most 64 - 51 = 13 bits, so c4*19 is at most 18 bits, and
     // the final l0 will be at most 52 bits. Similarly for the rest.
     v.l0 = (uint64)(v.l0 & maskLow51Bits) + c4 * 19;
@@ -244,6 +269,7 @@ internal static ж<Element> carryPropagateGeneric(this ж<Element> Ꮡv) {
     v.l2 = (uint64)(v.l2 & maskLow51Bits) + c1;
     v.l3 = (uint64)(v.l3 & maskLow51Bits) + c2;
     v.l4 = (uint64)(v.l4 & maskLow51Bits) + c3;
+
     return Ꮡv;
 }
 

@@ -129,7 +129,6 @@ public static nint LastIndex(slice<byte> s, slice<byte> sep) {
     case {} when n > len(s): {
         return -1;
     }}
-
     return bytealg.LastIndexRabinKarp(s, sep);
 }
 
@@ -194,6 +193,7 @@ next:
             }
         }
         return -1;
+
 fallback:
         if (haveFastIndex){
             // Switch to bytealg.Index, if available, or a brute force search when
@@ -224,7 +224,6 @@ break_loop:;
         }
         return -1;
     }}
-
 }
 
 // IndexAny interprets s as a sequence of UTF-8-encoded Unicode code points.
@@ -412,6 +411,7 @@ internal static slice<slice<byte>> genSplit(slice<byte> s, slice<byte> sep, nint
     if (n > len(s) + 1) {
         n = len(s) + 1;
     }
+
     var a = new slice<slice<byte>>(n);
     n--;
     nint i = 0;
@@ -490,10 +490,12 @@ public static slice<slice<byte>> Fields(slice<byte> s) {
         n += (nint)(wasSpace & ~isSpace);
         wasSpace = isSpace;
     }
+
     if (setBits >= utf8.RuneSelf) {
         // Some runes in the input slice are not ASCII.
         return FieldsFunc(s, Δunicode.IsSpace);
     }
+
     // ASCII fast path
     var a = new slice<slice<byte>>(n);
     nint na = 0;
@@ -518,8 +520,7 @@ public static slice<slice<byte>> Fields(slice<byte> s) {
         }
         fieldStart = i;
     }
-    if (fieldStart < len(s)) {
-        // Last field might end at EOF.
+    if (fieldStart < len(s)) { // Last field might end at EOF.
         a[na] = s.slice(fieldStart, len(s), len(s));
     }
     return a;
@@ -541,6 +542,7 @@ internal partial struct FieldsFunc_span /*dyn*/ {
 // and assumes that f always returns the same value for a given c.
 public static slice<slice<byte>> FieldsFunc(slice<byte> s, Func<rune, bool> f) {
     var spans = new slice<FieldsFunc_span>(0, 32);
+
     // Find the field start and end indices.
     // Doing this in a separate pass (rather than slicing the string s
     // and collecting the result substrings right away) is significantly
@@ -564,15 +566,18 @@ public static slice<slice<byte>> FieldsFunc(slice<byte> s, Func<rune, bool> f) {
         }
         i += size;
     }
+
     // Last field might end at EOF.
     if (start >= 0) {
         spans = append(spans, new FieldsFunc_span(start, len(s)));
     }
+
     // Create subslices from recorded field indices.
     var a = new slice<slice<byte>>(len(spans));
     foreach (var (i, span) in spans) {
         a[i] = s.slice(span.start, span.end, span.end);
     }
+
     return a;
 }
 
@@ -586,6 +591,7 @@ public static slice<byte> Join(slice<slice<byte>> s, slice<byte> sep) {
         // Just return a copy.
         return appendꓸꓸꓸ(slice<byte>(default!), s[0]);
     }
+
     nint n = default!;
     if (len(sep) > 0) {
         if (len(sep) >= maxInt / (len(s) - 1)) {
@@ -599,6 +605,7 @@ public static slice<byte> Join(slice<slice<byte>> s, slice<byte> sep) {
         }
         n += len(v);
     }
+
     var b = bytealg.MakeNoZero(n).slice(0, n, n);
     nint bp = copy(b, s[0]);
     foreach (var (_, v) in s[1..]) {
@@ -662,6 +669,7 @@ public static slice<byte> Repeat(slice<byte> b, nint count) {
     if (count == 0) {
         return new byte[]{}.slice();
     }
+
     // Since we cannot return an error on overflow,
     // we should panic if the repeat will generate an overflow.
     // See golang.org/issue/16237.
@@ -673,9 +681,11 @@ public static slice<byte> Repeat(slice<byte> b, nint count) {
         throw panic("bytes: Repeat output length overflow");
     }
     nint n = (nint)lo; // lo = len(b) * count
+
     if (len(b) == 0) {
         return new byte[]{}.slice();
     }
+
     // Past a certain chunk size it is counterproductive to use
     // larger chunks as the source of the write, as when the source
     // is too large we are basically just thrashing the CPU D-cache.
@@ -715,8 +725,8 @@ public static slice<byte> ToUpper(slice<byte> s) {
         }
         hasLower = hasLower || ((rune)'a' <= c && c <= (rune)'z');
     }
-    if (isASCII) {
-        // optimize for ASCII-only byte slices.
+
+    if (isASCII) { // optimize for ASCII-only byte slices.
         if (!hasLower) {
             // Just return a copy.
             return appendꓸꓸꓸ(slice<byte>(""u8), s);
@@ -746,8 +756,8 @@ public static slice<byte> ToLower(slice<byte> s) {
         }
         hasUpper = hasUpper || ((rune)'A' <= c && c <= (rune)'Z');
     }
-    if (isASCII) {
-        // optimize for ASCII-only byte slices.
+
+    if (isASCII) { // optimize for ASCII-only byte slices.
         if (!hasUpper) {
             return appendꓸꓸꓸ(slice<byte>(""u8), s);
         }
@@ -837,7 +847,6 @@ internal static bool isSeparator(rune r) {
         case {} when r is (rune)'_': {
             return false;
         }}
-
         return true;
     }
     // Letters and digits are not separators
@@ -968,6 +977,14 @@ internal static nint lastIndexFunc(slice<byte> s, Func<rune, bool> f, bool truth
     return -1;
 }
 
+// asciiSet is a 32-byte value, where each bit represents the presence of a
+// given ASCII character in the set. The 128-bits of the lower 16 bytes,
+// starting with the least-significant bit of the lowest word to the
+// most-significant bit of the highest word, map to the full range of all
+// 128 ASCII characters. The 128-bits of the upper 16 bytes will be zeroed,
+// ensuring that any non-ASCII character will be reported as not in the set.
+// This allocates a total of 32 bytes even though the upper half
+// is unused to avoid bounds checks in asciiSet.contains.
 partial struct asciiSet /*[8]uint32*/;
 
 // makeASCIISet creates a set of ASCII characters and reports whether all
@@ -1160,6 +1177,7 @@ public static slice<byte> TrimSpace(slice<byte> s) {
             break;
         }
     }
+
     // Now look for the first ASCII non-space byte from the end
     nint stop = len(s);
     for (; stop > start; stop--) {
@@ -1171,6 +1189,7 @@ public static slice<byte> TrimSpace(slice<byte> s) {
             break;
         }
     }
+
     // At this point s[start:stop] starts and ends with an ASCII
     // non-space bytes, so we're done. Non-ASCII cases have already
     // been handled above.
@@ -1215,6 +1234,7 @@ public static slice<byte> Replace(slice<byte> s, slice<byte> old, slice<byte> @n
     if (n < 0 || m < n) {
         n = m;
     }
+
     // Apply replacements to buffer.
     var t = new slice<byte>(len(s) + n * (len(@new) - len(old)));
     nint w = 0;
@@ -1258,10 +1278,12 @@ public static bool EqualFold(slice<byte> s, slice<byte> t) {
         if ((byte)(sr | tr) >= utf8.RuneSelf) {
             goto hasUnicode;
         }
+
         // Easy case.
         if (tr == sr) {
             continue;
         }
+
         // Make sr < tr to simplify what follows.
         if (tr < sr) {
             (tr, sr) = (sr, tr);
@@ -1274,6 +1296,7 @@ public static bool EqualFold(slice<byte> s, slice<byte> t) {
     }
     // Check if we've exhausted both strings.
     return len(s) == len(t);
+
 hasUnicode:
     s = s.slice(i);
     t = t.slice(i);
@@ -1293,11 +1316,14 @@ hasUnicode:
             var (rΔ2, size) = utf8.DecodeRune(t);
             (tr, t) = (rΔ2, t.slice(size));
         }
+
         // If they match, keep going; if not, return false.
+
         // Easy case.
         if (tr == sr) {
             continue;
         }
+
         // Make sr < tr to simplify what follows.
         if (tr < sr) {
             (tr, sr) = (sr, tr);
@@ -1310,6 +1336,7 @@ hasUnicode:
             }
             return false;
         }
+
         // General case. SimpleFold(x) returns the next equivalent rune > x
         // or wraps around to smaller values.
         var r = Δunicode.SimpleFold(sr);
@@ -1321,6 +1348,7 @@ hasUnicode:
         }
         return false;
     }
+
     // One string is empty. Are both?
     return len(s) == len(t);
 }
@@ -1345,8 +1373,8 @@ public static nint Index(slice<byte> s, slice<byte> sep) {
         return -1;
     }
     case {} when n <= bytealg.MaxLen: {
+        // Use brute force when s and sep both are small
         if (len(s) <= bytealg.MaxBruteForce) {
-            // Use brute force when s and sep both are small
             return bytealg.Index(s, sep);
         }
         var c0Δ2 = sep[0];
@@ -1380,7 +1408,6 @@ public static nint Index(slice<byte> s, slice<byte> sep) {
         }
         return -1;
     }}
-
     var c0 = sep[0];
     var c1 = sep[1];
     nint i = 0;

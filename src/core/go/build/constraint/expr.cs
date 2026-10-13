@@ -76,7 +76,6 @@ public static @string String(this ref NotExpr x) {
         s = "("u8 + s + ")"u8;
         break;
     }}
-
     return "!"u8 + s;
 }
 
@@ -198,11 +197,14 @@ internal static (@string expr, bool ok) splitGoBuild(@string line) {
     if (strings.Contains(line, "\n"u8)) {
         return ("", false);
     }
+
     if (!strings.HasPrefix(line, goBuildˢ)) {
         return ("", false);
     }
+
     line = strings.TrimSpace(line);
     line = line[(int)(len("//go:build"))..];
+
     // If strings.TrimSpace finds more to trim after removing the //go:build prefix,
     // it means that the prefix was followed by a space, making this a //go:build line
     // (as opposed to a //go:buildsomethingelse line).
@@ -211,6 +213,7 @@ internal static (@string expr, bool ok) splitGoBuild(@string line) {
     if (len(line) == len(trim) && line != ""u8) {
         return ("", false);
     }
+
     return (trim, true);
 }
 
@@ -243,6 +246,7 @@ internal static (Expr x, error err) parseExpr(@string text) {
                 }
             }
         }, ref ᒐ);
+
         var p = Ꮡ(new exprParser(s: text));
         x = p.or();
         if ((~p).tok != ""u8) {
@@ -336,6 +340,7 @@ internal static Expr atom(this ж<exprParser> Ꮡp) {
             p.lex();
             return x;
         }
+
         if (!p.isTag) {
             if (p.tok == ""u8) {
                 throw panic(Ꮡ(new SyntaxError(Offset: p.pos, Err: "unexpected end of expression"u8)));
@@ -394,6 +399,7 @@ internal static void lex(this ref exprParser p) {
         var (c, _) = utf8.DecodeRuneInString(p.s.slice(p.i));
         throw panic(Ꮡ(new SyntaxError(Offset: p.i, Err: "invalid syntax at "u8 + ((@string)c))));
     }
+
     p.pos = p.i;
     p.i += len(tag);
     p.tok = p.s.slice(p.pos, p.i);
@@ -420,16 +426,19 @@ internal static (@string expr, bool ok) splitPlusBuild(@string line) {
     if (strings.Contains(line, "\n"u8)) {
         return ("", false);
     }
+
     if (!strings.HasPrefix(line, "//"u8)) {
         return ("", false);
     }
     line = line[(int)(len("//"))..];
     // Note the space is optional; "//+build" is recognized too.
     line = strings.TrimSpace(line);
+
     if (!strings.HasPrefix(line, buildˢ)) {
         return ("", false);
     }
     line = line[(int)(len("+build"))..];
+
     // If strings.TrimSpace finds more to trim after removing the +build prefix,
     // it means that the prefix was followed by a space, making this a +build line
     // (as opposed to a +buildsomethingelse line).
@@ -438,6 +447,7 @@ internal static (@string expr, bool ok) splitPlusBuild(@string line) {
     if (len(line) == len(trim) && line != ""u8) {
         return ("", false);
     }
+
     return (trim, true);
 }
 
@@ -451,6 +461,7 @@ internal static (Expr, error) parsePlusBuildExpr(@string text) {
     // but uses of old syntax were always very simple.
     const nint maxOldSize = 100;
     nint size = 0;
+
     Expr x = default!;
     foreach (var (_, clause) in strings.Fields(text)) {
         Expr y = default!;
@@ -530,6 +541,7 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
     // This rewrite is both efficient and commonly needed, so it's worth doing.
     // Essentially all other possible rewrites are too expensive and too rarely needed.
     x = pushNot(x, false);
+
     // Split into AND of ORs of ANDs of literals (tag or NOT tag).
     slice<slice<slice<Expr>>> split = default!;
     foreach (var (_, or) in appendSplitAnd(default!, x)) {
@@ -546,12 +558,12 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
                 default: {
                     return (default!, errComplex);
                 }}
-
             }
             ands = append(ands, lits);
         }
         split = append(split, ands);
     }
+
     // If all the ORs have length 1 (no actual OR'ing going on),
     // push the top-level ANDs to the bottom level, so that we get
     // one // +build line instead of many.
@@ -568,6 +580,7 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
         }
         split = new slice<slice<Expr>>[]{new slice<Expr>[]{lits}.slice()}.slice();
     }
+
     // Prepare the +build lines.
     slice<@string> lines = default!;
     foreach (var (_, or) in split) {
@@ -584,6 +597,7 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
         }
         lines = append(lines, line);
     }
+
     return (lines, default!);
 }
 
@@ -594,12 +608,12 @@ internal static Expr pushNot(Expr x, bool not) {
     switch (x.type()) {
     default: {
         var xΔ1 = x;
+        // unreachable
         return xΔ1;
     }
     case ж<NotExpr> xΔ1: {
         {
             var (_, ok) = (~xΔ1).X._<ж<TagExpr>>(ᐧ); if (ok && !not) {
-                // unreachable
                 return new NotExprжExpr(xΔ1);
             }
         }

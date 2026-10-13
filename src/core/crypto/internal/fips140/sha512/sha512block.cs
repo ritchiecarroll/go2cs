@@ -107,12 +107,17 @@ internal static void blockGeneric(ref Digest dig, slice<byte> p) {
             var t1 = (uint64)((uint64)(bits.RotateLeft64(v1, -19) ^ bits.RotateLeft64(v1, -61)) ^ ((v1 >> (int)(6))));
             var v2 = w[i - 15];
             var t2 = (uint64)((uint64)(bits.RotateLeft64(v2, -1) ^ bits.RotateLeft64(v2, -8)) ^ ((v2 >> (int)(7))));
+
             w[i] = t1 + w[i - 7] + t2 + w[i - 16];
         }
+
         var (a, b, c, d, e, f, g, h) = (h0, h1, h2, h3, h4, h5, h6, h7);
+
         for (nint i = 0; i < 80; i++) {
             var t1 = h + ((uint64)((uint64)(bits.RotateLeft64(e, -14) ^ bits.RotateLeft64(e, -18)) ^ bits.RotateLeft64(e, -41))) + ((uint64)(((uint64)(e & f)) ^ ((uint64)(~e & g)))) + _K[i] + w[i];
+
             var t2 = ((uint64)((uint64)(bits.RotateLeft64(a, -28) ^ bits.RotateLeft64(a, -34)) ^ bits.RotateLeft64(a, -39))) + ((uint64)((uint64)(((uint64)(a & b)) ^ ((uint64)(a & c))) ^ ((uint64)(b & c))));
+
             h = g;
             g = f;
             f = e;
@@ -122,6 +127,7 @@ internal static void blockGeneric(ref Digest dig, slice<byte> p) {
             b = a;
             a = t1 + t2;
         }
+
         h0 += a;
         h1 += b;
         h2 += c;
@@ -130,8 +136,10 @@ internal static void blockGeneric(ref Digest dig, slice<byte> p) {
         h5 += f;
         h6 += g;
         h7 += h;
+
         p = p[(int)(chunk)..];
     }
+
     (dig.h[0], dig.h[1], dig.h[2], dig.h[3], dig.h[4], dig.h[5], dig.h[6], dig.h[7]) = (h0, h1, h2, h3, h4, h5, h6, h7);
 }
 

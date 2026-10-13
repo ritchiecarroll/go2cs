@@ -13,6 +13,7 @@ partial struct Value {
     internal uint64 scalar;
 }
 
+// ValueKind is the type of a dynamically-typed value from a trace.
 partial struct ValueKind /*num:uint8*/;
 
 public static ValueKind ValueBad => /* iota */ 0;
@@ -47,7 +48,6 @@ internal static @string valueAsString(Value v) {
     if (exprᴛ1 == ValueUint64) {
         return fmt.Sprintf("Uint64(%d)"u8, v.scalar);
     }
-
     return badˢ;
 }
 

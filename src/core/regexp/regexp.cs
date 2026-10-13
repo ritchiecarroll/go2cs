@@ -174,6 +174,7 @@ internal static (ж<Regexp>, error) compile(@string expr, syntax.Flags mode, boo
     ref var maxCap = ref heap<nint>(out var ᏑmaxCap);
     maxCap = re.MaxCap();
     var capNames = re.CapNames();
+
     re = re.Simplify();
     (var prog, err) = syntax.Compile(re);
     if (err != default!) {
@@ -207,12 +208,14 @@ internal static (ж<Regexp>, error) compile(@string expr, syntax.Flags mode, boo
         regexp.Value.prefixBytes = slice<byte>((~regexp).prefix);
         (regexp.Value.prefixRune, _) = utf8.DecodeRuneInString((~regexp).prefix);
     }
+
     nint n = len((~prog).Inst);
     nint i = 0;
     while (matchSize[i] != 0 && matchSize[i] < n) {
         i++;
     }
     regexp.Value.mpool = i;
+
     return (regexp, default!);
 }
 
@@ -223,7 +226,6 @@ internal static (ж<Regexp>, error) compile(@string expr, syntax.Flags mode, boo
 // so matchPool[0] has 16*2*128 = 4kB queues, etc.
 // The final matchPool is a catch-all for very large queues.
 internal static array<nint> matchSize = new nint[]{128, 512, 2048, 16384, 0}.array();
-
 internal static ж<array<Δsync.Pool>> ᏑmatchPool = new StandardBox<array<Δsync.Pool>>(new array<Δsync.Pool>(5));
 internal static ref array<Δsync.Pool> matchPool => ref ᏑmatchPool.Value;
 
@@ -245,11 +247,11 @@ internal static ж<machine> get(this ж<Regexp> Ꮡre) {
             t.Value.cap = new slice<nint>(re.matchcap);
         }
     }
+
     // Allocate queues if needed.
     // Or reallocate, for "large" match pool.
     nint n = matchSize[re.mpool];
-    if (n == 0) {
-        // large pool
+    if (n == 0) { // large pool
         n = len((~re.prog).Inst);
     }
     if (len((~m).q0.sparse) < n) {
@@ -313,7 +315,6 @@ internal static nint minInputLen(ref syntax.Regexp re) {
     { /* default: */
         return 0;
     }
-
 }
 
 // MustCompile is like [Compile] but panics if the expression cannot be parsed.
@@ -636,18 +637,21 @@ internal static slice<byte> replaceAll(this ж<Regexp> Ꮡre, slice<byte> bsrc, 
     if (nmatch > (~re.prog).NumCap) {
         nmatch = re.prog.Value.NumCap;
     }
+
     array<nint> dstCap = new(2);
     while (searchPos <= endPos) {
         var a = Ꮡre.doExecute(default!, bsrc, src, searchPos, nmatch, dstCap[..0]);
         if (len(a) == 0) {
             break; // no more matches
         }
+
         // Copy the unmatched characters before this match.
         if (bsrc != default!){
             buf = appendꓸꓸꓸ(buf, bsrc.slice(lastMatchEnd, a[0]));
         } else {
             buf = append(buf, src.slice(lastMatchEnd, a[0]).ꓸꓸꓸ);
         }
+
         // Now insert a copy of the replacement string, but not for a
         // match of the empty string immediately after another match.
         // (Otherwise, we get double replacement for patterns that
@@ -656,6 +660,7 @@ internal static slice<byte> replaceAll(this ж<Regexp> Ꮡre, slice<byte> bsrc, 
             buf = repl(buf, a);
         }
         lastMatchEnd = a[1];
+
         // Advance past this match; always advance at least one character.
         nint width = default!;
         if (bsrc != default!){
@@ -674,12 +679,14 @@ internal static slice<byte> replaceAll(this ж<Regexp> Ꮡre, slice<byte> bsrc, 
             searchPos = a[1];
         }
     }
+
     // Copy the unmatched characters after the last match.
     if (bsrc != default!){
         buf = appendꓸꓸꓸ(buf, bsrc.slice(lastMatchEnd));
     } else {
         buf = append(buf, src.slice(lastMatchEnd).ꓸꓸꓸ);
     }
+
     return buf;
 }
 
@@ -751,6 +758,7 @@ public static @string QuoteMeta(@string s) {
     if (i >= len(s)) {
         return s;
     }
+
     var b = new slice<byte>(2 * len(s) - i);
     copy(b, s.slice(0, i));
     nint j = i;
@@ -794,11 +802,13 @@ internal static void allMatches(this ж<Regexp> Ꮡre, @string s, slice<byte> b,
     } else {
         end = len(b);
     }
+
     for ((nint pos, nint i, nint prevMatchEnd) = (0, 0, -1); i < n && pos <= end; ) {
         var matches = Ꮡre.doExecute(default!, b, s, pos, (~re.prog).NumCap, default!);
         if (len(matches) == 0) {
             break;
         }
+
         var accept = true;
         if (matches[1] == pos){
             // We've found an empty match.
@@ -824,6 +834,7 @@ internal static void allMatches(this ж<Regexp> Ꮡre, @string s, slice<byte> b,
             pos = matches[1];
         }
         prevMatchEnd = matches[1];
+
         if (accept) {
             deliver(re.pad(matches));
             i++;
@@ -1026,6 +1037,7 @@ internal static (@string name, nint num, @string rest, bool ok) extract(@string 
         }
         i++;
     }
+
     // Parse number.
     num = 0;
     for (nint iΔ1 = 0; iΔ1 < len(name); iΔ1++) {
@@ -1039,6 +1051,7 @@ internal static (@string name, nint num, @string rest, bool ok) extract(@string 
     if (name[0] == (rune)'0' && len(name) > 1) {
         num = -1;
     }
+
     rest = str.slice(i);
     ok = true;
     return (name, num, rest, ok);
@@ -1282,26 +1295,32 @@ public static slice<@string> Split(this ж<Regexp> Ꮡre, @string s, nint n) {
     if (n == 0) {
         return default!;
     }
+
     if (len(re.expr) > 0 && len(s) == 0) {
         return new @string[]{""u8}.slice();
     }
+
     var matches = Ꮡre.FindAllStringIndex(s, n);
     var strings = new slice<@string>(0, len(matches));
+
     nint beg = 0;
     nint end = 0;
     foreach (var (_, match) in matches) {
         if (n > 0 && len(strings) >= n - 1) {
             break;
         }
+
         end = match[0];
         if (match[1] != 0) {
             strings = append(strings, s.slice(beg, end));
         }
         beg = match[1];
     }
+
     if (end != len(s)) {
         strings = append(strings, s.slice(beg));
     }
+
     return strings;
 }
 

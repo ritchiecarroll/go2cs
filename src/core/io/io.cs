@@ -19,9 +19,7 @@ partial class io_package {
 
 // Seek whence values.
 public static UntypedInt SeekStart => 0; // seek relative to the origin of the file
-
 public static UntypedInt SeekCurrent => 1; // seek relative to the current offset
-
 public static UntypedInt SeekEnd => 2; // seek relative to the end
 
 // ErrShortWrite means that a write accepted fewer bytes than requested
@@ -574,7 +572,6 @@ public static (int64, error) Seek(this ref SectionReader s, int64 offset, nint w
     else { /* default: */
         return (0, errWhence);
     }
-
     if (offset < s.@base) {
         return (0, errOffset);
     }
@@ -642,6 +639,7 @@ public static (nint n, error err) WriteAt(this ref OffsetWriter o, slice<byte> p
     if (off < 0) {
         return (0, errOffset);
     }
+
     off += o.@base;
     return o.w.WriteAt(p, off);
 }
@@ -657,7 +655,6 @@ public static (int64, error) Seek(this ref OffsetWriter o, int64 offset, nint wh
     else { /* default: */
         return (0, errWhence);
     }
-
     if (offset < o.@base) {
         return (0, errOffset);
     }
@@ -788,6 +785,7 @@ public static (slice<byte>, error) ReadAll(Reader r) {
             }
             return (b, err);
         }
+
         if (len(b) == cap(b)) {
             // Add more capacity (let append pick how much).
             b = append(b, (byte)(0)).slice(0, len(b));

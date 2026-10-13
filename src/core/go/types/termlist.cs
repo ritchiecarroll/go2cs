@@ -9,6 +9,11 @@ using strings = strings_package;
 
 partial class types_package {
 
+// A termlist represents the type set represented by the union
+// t1 ∪ y2 ∪ ... tn of the type sets of the terms t1 to tn.
+// A termlist is in normal form if all terms are disjoint.
+// termlist operations don't require the operands to be in
+// normal form.
 partial struct termlist /*[]ж<Δterm>*/;
 
 // allTermlist represents the set of all types.
@@ -107,6 +112,7 @@ internal static termlist intersect(this termlist xl, termlist yl) {
     if (xl.isEmpty() || yl.isEmpty()) {
         return default!;
     }
+
     // Quadratic algorithm, but good enough for now.
     // TODO(gri) fix asymptotic performance
     termlist rl = default!;
@@ -153,6 +159,7 @@ internal static bool subsetOf(this termlist xl, termlist yl) {
     if (yl.isEmpty()) {
         return xl.isEmpty();
     }
+
     // each term x of xl must be a subset of yl
     foreach (var (_, x) in xl) {
         if (!yl.supersetOf(x)) {

@@ -184,19 +184,12 @@ internal static Color Convert(this ref modelFunc m, Color c) {
 
 // Models for the standard color types.
 public static Model RGBAModel = ModelFunc(rgbaModel);
-
 public static Model RGBA64Model = ModelFunc(rgba64Model);
-
 public static Model NRGBAModel = ModelFunc(nrgbaModel);
-
 public static Model NRGBA64Model = ModelFunc(nrgba64Model);
-
 public static Model AlphaModel = ModelFunc(alphaModel);
-
 public static Model Alpha16Model = ModelFunc(alpha16Model);
-
 public static Model GrayModel = ModelFunc(grayModel);
-
 public static Model Gray16Model = ModelFunc(gray16Model);
 
 internal static Color rgbaModel(Color c) {
@@ -286,6 +279,7 @@ internal static Color grayModel(Color c) {
         }
     }
     var (r, g, b, _) = c.RGBA();
+
     // These coefficients (the fractions 0.299, 0.587 and 0.114) are the same
     // as those given by the JFIF specification and used by func RGBToYCbCr in
     // ycbcr.go.
@@ -295,6 +289,7 @@ internal static Color grayModel(Color c) {
     // The 24 is 16 + 8. The 16 is the same as used in RGBToYCbCr. The 8 is
     // because the return value is 8 bit color, not 16 bit color.
     var y = ((19595 * r + 38470 * g + 7471 * b + ((uint32)1 << (int)(15))) >> (int)(24));
+
     return new Gray((uint8)y);
 }
 
@@ -305,15 +300,18 @@ internal static Color gray16Model(Color c) {
         }
     }
     var (r, g, b, _) = c.RGBA();
+
     // These coefficients (the fractions 0.299, 0.587 and 0.114) are the same
     // as those given by the JFIF specification and used by func RGBToYCbCr in
     // ycbcr.go.
     //
     // Note that 19595 + 38470 + 7471 equals 65536.
     var y = ((19595 * r + 38470 * g + 7471 * b + ((uint32)1 << (int)(15))) >> (int)(16));
+
     return new Gray16((uint16)y);
 }
 
+// Palette is a palette of colors.
 partial struct Palette /*[]Color*/;
 
 // Convert returns the palette color closest to c in Euclidean R,G,B space.
@@ -377,11 +375,8 @@ internal static uint32 sqDiff(uint32 x, uint32 y) {
 
 // Standard colors.
 public static Gray16 Black = new Gray16(0);
-
 public static Gray16 White = new Gray16(0xffff);
-
 public static Alpha16 Transparent = new Alpha16(0);
-
 public static Alpha16 Opaque = new Alpha16(0xffff);
 
 } // end color_package

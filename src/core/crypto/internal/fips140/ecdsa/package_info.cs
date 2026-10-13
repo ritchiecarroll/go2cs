@@ -64,9 +64,9 @@ using static go.crypto.@internal.fips140.ecdsa_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/cast.go", "cast.cs", "ABEglAAWLoIADhiigoKCgoKUyIKCgri4ggAMGoKCgpSAgqSClMiCgoKCAAwagoKClICCpIKU", "55-63:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa.go", "ecdsa.cs", "ABo2gqaCAAcQggAfPqKCgoKUgqaAtIK4gqbugLSCyoKm3IC0griCpgAHEIC0griCpgAJFMKCgoKUgoKUgqb4goKUqNKEhoKW7oIAAhIACAKCgoCCAAsYgKaClAAHEICCgqaCABEmAAoCgpSCzoKAggAIEoQAAhAACwKClIKCgqrCgoLmtoKClIKogoSCgpSCgsyCloKEgoKUgoKWgpao0oKUgoKClMyqAAgKgIKCgILGgoIAAxLSgpSCgoKCpgAFFAAMAoKUgoL2toKCloKClIKUgoKUgpaCloKWgoKmgoKmgoKWgoKWgpQ=", "187-189:1;320-323:1", "", "217=Bytes/1/2/3,Bytes/2/2/5")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa.go", "ecdsa.cs", "ABo2gqaCAAcQggAfPqKCgoKUgqaAtIK4gqbugLSCyoKm3IC0griCpgAHEIC0griCpgAJFMKCgoKUgoKUgqb4goKUqNKUhoKm7oIAAhIACAKCgoCCAAwYgKaClAAIEICCgraCABEmAAoCgpSC7oKAggAJEpQAAhAACwKClIKCgqrCgoLmtoKClIK4gpSCgpSCgtyCpoKUgoKUgoKmgqao0oKUgoKClNyqAAgKgIKCgILGgoIAAxLSgpSCgoKCpgAFFAAMAoKUgoL2toKCpoKClIKUgoKUgqaCpoKmgoKmgoKmgoKmgoKmgpQ=", "187-189:1;320-323:1", "", "219=Bytes/1/2/3,Bytes/2/2/5")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/ecdsa_noasm.go", "ecdsa_noasm.cs", "AAgSoqai")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/hmacdrbg.go", "hmacdrbg.cs", "ACFMzuy0hKqWlqiCgoKCgpS0goKCgraUgoKUgoKCgoKUtIKCgoK2lIKChIKCAAIQ8qaigoCCyqSEgpaCloKmgoKCAAYSgoKClIKChA==", "56-58:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/ecdsa/hmacdrbg.go", "hmacdrbg.cs", "ACJM/uy0lKqmpriCgoKCgpS0goKCgraUgoKUgoKCgoKUtIKCgoK2lIKClIKCAAIQ8qaigoCCyqSUgqaCpoKmgoKCAAgSgoKClIKClA==", "56-58:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

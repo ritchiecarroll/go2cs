@@ -59,21 +59,24 @@ internal static void writeString(this ж<traceStringTable> Ꮡt, uintptr gen, ui
     if (len(s) > maxTraceStringLen) {
         s = s[..(int)(maxTraceStringLen)];
     }
+
     @lock(Ꮡt.of(traceStringTable.Ꮡlock));
     var w = unsafeTraceWriter(gen, t.buf);
+
     // Ensure we have a place to write to.
     bool flushed = default!;
-    (w, flushed) = w.ensure((nint)(2 + 2 * traceBytesPerNumber) + len(s));
-    /* traceEvStrings + traceEvString + ID + len + string data */
+    (w, flushed) = w.ensure((nint)(2 + 2 * traceBytesPerNumber) + len(s) /* traceEvStrings + traceEvString + ID + len + string data */);
     if (flushed) {
         // Annotate the batch as containing strings.
         w.@byte((byte)traceEvStrings);
     }
+
     // Write out the string.
     w.@byte((byte)traceEvString);
     w.varint(id);
     w.varint((uint64)len(s));
     w.stringData(s);
+
     // Store back buf in case it was updated during ensure.
     t.buf = w.traceBuf;
     unlock(Ꮡt.of(traceStringTable.Ꮡlock));
@@ -94,6 +97,7 @@ internal static void reset(this ж<traceStringTable> Ꮡt, uintptr gen) {
         });
         t.buf = default!;
     }
+
     // Reset the table.
     Ꮡt.of(traceStringTable.Ꮡtab).reset();
 }

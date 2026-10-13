@@ -43,16 +43,19 @@ partial class aes_package {
 internal static void encryptBlockGeneric(ref blockExpanded c, slice<byte> dst, slice<byte> src) {
     checkGenericIsExpected();
     var xk = c.enc[..];
+
     _ = src[15]; // early bounds check
     var s0 = byteorder.BEUint32(src[0..4]);
     var s1 = byteorder.BEUint32(src[4..8]);
     var s2 = byteorder.BEUint32(src[8..12]);
     var s3 = byteorder.BEUint32(src[12..16]);
+
     // First round just XORs input with key.
     s0 ^= (uint32)(xk[0]);
     s1 ^= (uint32)(xk[1]);
     s2 ^= (uint32)(xk[2]);
     s3 ^= (uint32)(xk[3]);
+
     // Middle rounds shuffle using tables.
     nint k = 4;
     uint32 t0 = default!;
@@ -67,15 +70,18 @@ internal static void encryptBlockGeneric(ref blockExpanded c, slice<byte> dst, s
         k += 4;
         (s0, s1, s2, s3) = (t0, t1, t2, t3);
     }
+
     // Last round uses s-box directly and XORs to produce output.
     s0 = (uint32)((uint32)((uint32)(((uint32)sbox0[(t0 >> (int)(24))] << (int)(24)) | ((uint32)sbox0[(uint32)((t1 >> (int)(16)) & 0xff)] << (int)(16))) | ((uint32)sbox0[(uint32)((t2 >> (int)(8)) & 0xff)] << (int)(8))) | (uint32)sbox0[(uint32)(t3 & 0xff)]);
     s1 = (uint32)((uint32)((uint32)(((uint32)sbox0[(t1 >> (int)(24))] << (int)(24)) | ((uint32)sbox0[(uint32)((t2 >> (int)(16)) & 0xff)] << (int)(16))) | ((uint32)sbox0[(uint32)((t3 >> (int)(8)) & 0xff)] << (int)(8))) | (uint32)sbox0[(uint32)(t0 & 0xff)]);
     s2 = (uint32)((uint32)((uint32)(((uint32)sbox0[(t2 >> (int)(24))] << (int)(24)) | ((uint32)sbox0[(uint32)((t3 >> (int)(16)) & 0xff)] << (int)(16))) | ((uint32)sbox0[(uint32)((t0 >> (int)(8)) & 0xff)] << (int)(8))) | (uint32)sbox0[(uint32)(t1 & 0xff)]);
     s3 = (uint32)((uint32)((uint32)(((uint32)sbox0[(t3 >> (int)(24))] << (int)(24)) | ((uint32)sbox0[(uint32)((t0 >> (int)(16)) & 0xff)] << (int)(16))) | ((uint32)sbox0[(uint32)((t1 >> (int)(8)) & 0xff)] << (int)(8))) | (uint32)sbox0[(uint32)(t2 & 0xff)]);
+
     s0 ^= (uint32)(xk[k + 0]);
     s1 ^= (uint32)(xk[k + 1]);
     s2 ^= (uint32)(xk[k + 2]);
     s3 ^= (uint32)(xk[k + 3]);
+
     _ = dst[15]; // early bounds check
     byteorder.BEPutUint32(dst[0..4], s0);
     byteorder.BEPutUint32(dst[4..8], s1);
@@ -87,16 +93,19 @@ internal static void encryptBlockGeneric(ref blockExpanded c, slice<byte> dst, s
 internal static void decryptBlockGeneric(ref blockExpanded c, slice<byte> dst, slice<byte> src) {
     checkGenericIsExpected();
     var xk = c.dec[..];
+
     _ = src[15]; // early bounds check
     var s0 = byteorder.BEUint32(src[0..4]);
     var s1 = byteorder.BEUint32(src[4..8]);
     var s2 = byteorder.BEUint32(src[8..12]);
     var s3 = byteorder.BEUint32(src[12..16]);
+
     // First round just XORs input with key.
     s0 ^= (uint32)(xk[0]);
     s1 ^= (uint32)(xk[1]);
     s2 ^= (uint32)(xk[2]);
     s3 ^= (uint32)(xk[3]);
+
     // Middle rounds shuffle using tables.
     nint k = 4;
     uint32 t0 = default!;
@@ -111,15 +120,18 @@ internal static void decryptBlockGeneric(ref blockExpanded c, slice<byte> dst, s
         k += 4;
         (s0, s1, s2, s3) = (t0, t1, t2, t3);
     }
+
     // Last round uses s-box directly and XORs to produce output.
     s0 = (uint32)((uint32)((uint32)(((uint32)sbox1[(t0 >> (int)(24))] << (int)(24)) | ((uint32)sbox1[(uint32)((t3 >> (int)(16)) & 0xff)] << (int)(16))) | ((uint32)sbox1[(uint32)((t2 >> (int)(8)) & 0xff)] << (int)(8))) | (uint32)sbox1[(uint32)(t1 & 0xff)]);
     s1 = (uint32)((uint32)((uint32)(((uint32)sbox1[(t1 >> (int)(24))] << (int)(24)) | ((uint32)sbox1[(uint32)((t0 >> (int)(16)) & 0xff)] << (int)(16))) | ((uint32)sbox1[(uint32)((t3 >> (int)(8)) & 0xff)] << (int)(8))) | (uint32)sbox1[(uint32)(t2 & 0xff)]);
     s2 = (uint32)((uint32)((uint32)(((uint32)sbox1[(t2 >> (int)(24))] << (int)(24)) | ((uint32)sbox1[(uint32)((t1 >> (int)(16)) & 0xff)] << (int)(16))) | ((uint32)sbox1[(uint32)((t0 >> (int)(8)) & 0xff)] << (int)(8))) | (uint32)sbox1[(uint32)(t3 & 0xff)]);
     s3 = (uint32)((uint32)((uint32)(((uint32)sbox1[(t3 >> (int)(24))] << (int)(24)) | ((uint32)sbox1[(uint32)((t2 >> (int)(16)) & 0xff)] << (int)(16))) | ((uint32)sbox1[(uint32)((t1 >> (int)(8)) & 0xff)] << (int)(8))) | (uint32)sbox1[(uint32)(t0 & 0xff)]);
+
     s0 ^= (uint32)(xk[k + 0]);
     s1 ^= (uint32)(xk[k + 1]);
     s2 ^= (uint32)(xk[k + 2]);
     s3 ^= (uint32)(xk[k + 3]);
+
     _ = dst[15]; // early bounds check
     byteorder.BEPutUint32(dst[0..4], s0);
     byteorder.BEPutUint32(dst[4..8], s1);
@@ -143,6 +155,7 @@ internal static void expandKeyGeneric(ж<blockExpanded> Ꮡc, slice<byte> key) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     checkGenericIsExpected();
+
     // Encryption key setup.
     nint i = default!;
     nint nk = len(key) / 4;
@@ -159,6 +172,7 @@ internal static void expandKeyGeneric(ж<blockExpanded> Ꮡc, slice<byte> key) {
         }
         c.enc[i] = (uint32)(c.enc[i - nk] ^ t);
     }
+
     // Derive decryption key from encryption key.
     // Reverse the 4-word round key sets from enc to produce dec.
     // All sets but the first and last get the MixColumn transform applied.

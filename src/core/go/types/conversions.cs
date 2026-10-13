@@ -22,15 +22,16 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
     ref var x = ref Ꮡx.DerefOrNull();
 
     var constArg = x.mode == constant_;
+
     bool constConvertibleTo(ΔType TΔ1, ж<constant.Value> val) {
         {
             var (t, _) = under(TΔ1)._<ж<Basic>>(ᐧ);
             switch (ᐧ) {
             case {} when t == nil: {
+                // nothing to do
                 break;
             }
-            case {} when representableConst(Ꮡx.Value.val, // nothing to do
- Ꮡcheck, t, val): {
+            case {} when representableConst(Ꮡx.Value.val, Ꮡcheck, t, val): {
                 return true;
             }
             case {} when isInteger(Ꮡx.Value.typ) && isString(new BasicжΔType(t)): {
@@ -46,19 +47,19 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
                 return true;
             }}
         }
-
         return false;
     }
+
     bool ok = default!;
     ref var cause = ref heap(new @string(), out var Ꮡcause);
     switch (ᐧ) {
     case {} when constArg && isConstType(T): {
-        ok = constConvertibleTo(T, // constant conversion
- Ꮡx.of(operand.Ꮡval));
+        // constant conversion
+        ok = constConvertibleTo(T, Ꮡx.of(operand.Ꮡval));
+        // A conversion from an integer constant to an integer type
+        // can only fail if there's overflow. Give a concise error.
+        // (go.dev/issue/63563)
         if (!ok && isInteger(x.typ) && isInteger(T)) {
-            // A conversion from an integer constant to an integer type
-            // can only fail if there's overflow. Give a concise error.
-            // (go.dev/issue/63563)
             Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConversion, "constant %s overflows %s"u8, x.val, T);
             x.mode = invalid;
             return;
@@ -66,13 +67,13 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
         break;
     }
     case {} when constArg && isTypeParam(T): {
+        // x is convertible to T if it is convertible
+        // to each specific type in the type set of T.
+        // If T's type set is empty, or if it doesn't
+        // have specific types, constant x cannot be
+        // converted.
         var constConvertibleToʗ1 = constConvertibleTo;
-        ok = underIs(T, // x is convertible to T if it is convertible
- // to each specific type in the type set of T.
- // If T's type set is empty, or if it doesn't
- // have specific types, constant x cannot be
- // converted.
- (ΔType u) => {
+        ok = underIs(T, (ΔType u) => {
             // u is nil if there are no specific type terms
             if (u == default!) {
                 Ꮡcause.Value = Ꮡcheck.sprintf("%s does not contain specific types"u8, T);
@@ -96,12 +97,12 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
         break;
     }
     case {} when Ꮡx.convertibleTo(Ꮡcheck, T, Ꮡcause): {
+        // non-constant conversion
         ok = true;
         x.mode = value;
         break;
     }}
 
-    // non-constant conversion
     if (!ok) {
         if (cause != ""u8){
             Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConversion, "cannot convert %s to type %s: %s"u8, Ꮡx.OrTypedNil(), T, cause);
@@ -111,6 +112,7 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
         x.mode = invalid;
         return;
     }
+
     // The conversion argument types are final. For untyped values the
     // conversion provides the type, per the spec: "A constant may be
     // given a type explicitly by a constant declaration or conversion,...".
@@ -125,9 +127,9 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
         // - For constant integer to string conversions, keep the argument type.
         //   (See also the TODO below.)
         if (isTypes2 && AreEqual(x.typ, Typ[UntypedNil])){
+            // ok
         } else 
         if (isNonTypeParamInterface(T) || constArg && !isConstType(T) || !isTypes2 && x.isNil()){
-            // ok
             final = Default(x.typ); // default type of untyped nil is untyped nil
         } else 
         if (x.mode == constant_ && isInteger(x.typ) && allString(T)) {
@@ -135,6 +137,7 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
         }
         Ꮡcheck.updateExprType(x.expr, final, true);
     }
+
     x.typ = T;
 }
 
@@ -167,6 +170,7 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
             return true;
         }
     }
+
     var origT = T;
     var V = Unalias(x.typ);
     T = Unalias(T);
@@ -174,11 +178,13 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
     var Tu = under(T);
     var (Vp, _) = V._<ж<TypeParam>>(ᐧ);
     var (Tp, _) = T._<ж<TypeParam>>(ᐧ);
+
     // "V and T have identical underlying types if tags are ignored
     // and V and T are not type parameters"
     if (IdenticalIgnoreTags(Vu, Tu) && Vp == nil && Tp == nil) {
         return true;
     }
+
     // "V and T are unnamed pointer types and their pointer base types
     // have identical underlying types if tags are ignored
     // and their pointer base types are not type parameters"
@@ -193,22 +199,27 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
             }
         }
     }
+
     // "V and T are both integer or floating point types"
     if (isIntegerOrFloat(Vu) && isIntegerOrFloat(Tu)) {
         return true;
     }
+
     // "V and T are both complex types"
     if (isComplex(Vu) && isComplex(Tu)) {
         return true;
     }
+
     // "V is an integer or a slice of bytes or runes and T is a string type"
     if ((isInteger(Vu) || isBytesOrRunes(Vu)) && isString(Tu)) {
         return true;
     }
+
     // "V is a string and T is a slice of bytes or runes"
     if (isString(Vu) && isBytesOrRunes(Tu)) {
         return true;
     }
+
     // package unsafe:
     // "any pointer or value of underlying type uintptr can be converted into a unsafe.Pointer"
     if ((isPointer(Vu) || isUintptr(Vu)) && isUnsafePointer(Tu)) {
@@ -218,6 +229,7 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
     if (isUnsafePointer(Vu) && (isPointer(Tu) || isUintptr(Tu))) {
         return true;
     }
+
     // "V is a slice, T is an array or pointer-to-array type,
     // and the slice and array types have identical element types."
     {
@@ -256,10 +268,12 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
             }}
         }
     }
+
     // optimization: if we don't have type parameters, we're done
     if (Vp == nil && Tp == nil) {
         return false;
     }
+
     void errorf(@string format, params ꓸꓸꓸany argsʗp) {
         var args = argsʗp.sslice();
         if (Ꮡcheck != nil && Ꮡcause != nil) {
@@ -270,6 +284,7 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
             Ꮡcause.Value = msg;
         }
     }
+
     // generic cases with specific type terms
     // (generic operands cannot be constants, so we can ignore x.val)
     switch (ᐧ) {

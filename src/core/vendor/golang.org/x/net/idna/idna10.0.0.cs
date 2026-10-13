@@ -53,6 +53,7 @@ public static (@string, error) ToUnicode(@string s) {
     return Punycode.process(s, false);
 }
 
+// An Option configures a Profile at creation time.
 // type Option is a methodless func type — rendered inline as its base delegate
 
 // Transitional sets a Profile to use the Transitional mapping as defined in UTS
@@ -278,14 +279,27 @@ public static @string String(this ref Profile p) {
     return s;
 }
 
+// Punycode is a Profile that does raw punycode processing with a minimum
+// of validation.
 public static ж<Profile> Punycode;
 internal static void initᴛPunycode() { Punycode = punycode; }
+
+// Lookup is the recommended profile for looking up domain names, according
+// to Section 5 of RFC 5891. The exact configuration of this profile may
+// change over time.
 public static ж<Profile> Lookup;
 internal static void initᴛLookup() { Lookup = Δlookup; }
+
+// Display is the recommended profile for displaying domain names.
+// The configuration of this profile may change over time.
 public static ж<Profile> Display;
 internal static void initᴛDisplay() { Display = display; }
+
+// Registration is the recommended profile for checking whether a given
+// IDN is valid for registration, according to Section 4 of RFC 5891.
 public static ж<Profile> Registration;
 internal static void initᴛRegistration() { Registration = registration; }
+
 internal static ж<Profile> punycode = Ꮡ(new Profile(nil));
 internal static ж<Profile> Δlookup;
 internal static void initᴛΔlookup() { Δlookup = Ꮡ(new Profile(new options(
@@ -459,8 +473,8 @@ internal static (@string mapped, bool isBidi, error err) normalize(ж<Profile> �
 
 internal static (@string idem, bool bidi, error err) validateRegistration(ж<Profile> Ꮡp, @string s) {
     bool bidi = default!;
-
     ref var p = ref Ꮡp.DerefOrNull();
+
     // TODO: filter need for normalization in loop below.
     if (!norm.NFC.IsNormalString(s)) {
         return (s, false, new labelErrorжerror(Ꮡ(new labelError(s, "V1"u8))));
@@ -473,15 +487,14 @@ internal static (@string idem, bool bidi, error err) validateRegistration(ж<Pro
         bidi = bidi || ((info)v).isBidi(s.slice(i));
         // Copy bytes not copied so far.
         var exprᴛ1 = p.simplify(((info)v).category());
+        // TODO: handle the NV8 defined in the Unicode idna data set to allow
+        // for strict conformance to IDNA2008.
         if (exprᴛ1 == valid || exprᴛ1 == deviation) {
         }
         else if (exprᴛ1 == disallowed || exprᴛ1 == mapped || exprᴛ1 == unknown || exprᴛ1 == ignored) {
             var (r, _) = utf8.DecodeRuneInString(s.slice(i));
             return (s, bidi, ((runeError)r));
         }
-
-        // TODO: handle the NV8 defined in the Unicode idna data set to allow
-        // for strict conformance to IDNA2008.
         i += sz;
     }
     return (s, bidi, default!);
@@ -498,17 +511,17 @@ internal static bool isBidi(this info c, @string s) {
     if (exprᴛ1 == bidi.R || exprᴛ1 == bidi.AL || exprᴛ1 == bidi.AN) {
         return true;
     }
-
     return false;
 }
 
 internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> Ꮡp, @string s) {
     bool bidi = default!;
     error err = default!;
-
     ref var p = ref Ꮡp.DerefOrNull();
+
     slice<byte> b = default!;
     nint k = default!;
+
     // combinedInfoBits contains the or-ed bits of all runes. We use this
     // to derive the mayNeedNorm bit later. This may trigger normalization
     // overeagerly, but it will not do so in the common case. The end result
@@ -547,13 +560,12 @@ internal static (@string vm, bool bidi, error err) validateAndMap(ж<Profile> �
         }
         else if (exprᴛ1 == ignored) {
             b = append(b, s.slice(k, start).ꓸꓸꓸ);
+            // drop the rune
         }
         else if (exprᴛ1 == unknown) {
-            b = append(b, // drop the rune
- s.slice(k, start).ꓸꓸꓸ);
+            b = append(b, s.slice(k, start).ꓸꓸꓸ);
             b = append(b, ((@string)"\ufffd"u8).ꓸꓸꓸ);
         }
-
         k = i;
     }
     if (k == 0){
@@ -657,10 +669,9 @@ internal static Δcategory simplify(this ref Profile p, Δcategory cat) {
         }
     }
     else if (exprᴛ1 == validNV8 || exprᴛ1 == validXV8) {
+        // TODO: handle V2008
         cat = valid;
     }
-
-    // TODO: handle V2008
     return cat;
 }
 
@@ -699,7 +710,6 @@ internal static joinState stateBeforeVirama => 3;
 internal static joinState stateAfter => 4;
 internal static joinState stateFAIL => 5;
 
-// no-op as we can't accept joiners here
 internal static slice<array<joinState>> joinStates = GoReflect.WithElemDims(new golib.SparseArray<array<joinState>>{
     [stateStart] = new golib.SparseArray<joinState>{
         [joiningL] = stateBefore,
@@ -729,6 +739,7 @@ internal static slice<array<joinState>> joinStates = GoReflect.WithElemDims(new 
         [joinZWNJ] = stateFAIL,
         [joinZWJ] = stateFAIL,
         [joinVirama] = stateAfter}.array(8),
+    // no-op as we can't accept joiners here
     [stateFAIL] = new golib.SparseArray<joinState>{
         [0] = stateFAIL,
         [joiningL] = stateFAIL,

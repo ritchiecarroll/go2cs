@@ -64,8 +64,18 @@ StackGuard - StackSmall bytes at the bottom.
 The linkers explore all possible call traces involving non-splitting
 functions to make sure that this limit cannot be violated.
 */
+
+// stackSystem is a number of additional bytes to add
+// to each stack below the usual guard area for OS-specific
+// purposes like signal handling. Used on Windows, Plan 9,
+// and iOS because they do not use a separate stack.
 internal static UntypedInt stackSystem => /* goos.IsWindows*4096 + goos.IsPlan9*512 + goos.IsIos*goarch.IsArm64*1024 */ 0;
+
+// The minimum size of stack used by Go code
 internal static UntypedInt stackMin => 2048;
+
+// The minimum stack size to allocate.
+// The hackery here rounds fixedStack0 up to a power of 2.
 internal static UntypedInt fixedStack0 => /* stackMin + stackSystem */ 2048;
 internal static UntypedInt fixedStack1 => /* fixedStack0 - 1 */ 2047;
 internal static UntypedInt fixedStack2 => /* fixedStack1 | (fixedStack1 >> 1) */ 2047;
@@ -74,24 +84,54 @@ internal static UntypedInt fixedStack4 => /* fixedStack3 | (fixedStack3 >> 4) */
 internal static UntypedInt fixedStack5 => /* fixedStack4 | (fixedStack4 >> 8) */ 2047;
 internal static UntypedInt fixedStack6 => /* fixedStack5 | (fixedStack5 >> 16) */ 2047;
 internal static UntypedInt fixedStack => /* fixedStack6 + 1 */ 2048;
+
+// stackNosplit is the maximum number of bytes that a chain of NOSPLIT
+// functions can use.
+// This arithmetic must match that in cmd/internal/objabi/stack.go:StackNosplit.
 internal static UntypedInt stackNosplit => /* abi.StackNosplitBase * sys.StackGuardMultiplier */ 800;
+
+// The stack guard is a pointer this many bytes above the
+// bottom of the stack.
+//
+// The guard leaves enough room for a stackNosplit chain of NOSPLIT calls
+// plus one stackSmall frame plus stackSystem bytes for the OS.
+// This arithmetic must match that in cmd/internal/objabi/stack.go:StackLimit.
 internal static UntypedInt stackGuard => /* stackNosplit + stackSystem + abi.StackSmall */ 928;
 
+// stackDebug == 0: no logging
+//            == 1: logging of per-stack operations
+//            == 2: logging of per-frame operations
+//            == 3: logging of per-word updates
+//            == 4: logging of per-word reads
 internal static UntypedInt stackDebug => 0;
 internal static UntypedInt stackFromSystem => 0; // allocate stacks from system memory instead of the heap
 internal static UntypedInt stackFaultOnFree => 0; // old stacks are mapped noaccess to detect use after free
 internal static UntypedInt stackNoCache => 0; // disable per-P small stack caches
+
+// check the BP links during traceback.
 internal const bool debugCheckBP = false;
 
 internal static nint stackPoisonCopy = 0; // fill stack that should not be accessed with garbage, to detect bad dereferences during copy
 
 internal static UntypedInt uintptrMask => /* 1<<(8*goarch.PtrSize) - 1 */ 18446744073709551615;
+
 // The values below can be stored to g.stackguard0 to force
 // the next stack check to fail.
 // These are all larger than any real SP.
+
+// Goroutine preemption request.
+// 0xfffffade in hex.
 internal static UntypedInt stackPreempt => /* uintptrMask & -1314 */ 18446744073709550302;
+
+// Thread is forking. Causes a split stack check failure.
+// 0xfffffb2e in hex.
 internal static UntypedInt stackFork => /* uintptrMask & -1234 */ 18446744073709550382;
+
+// Force a stack movement. Used for debugging.
+// 0xfffffeed in hex.
 internal static UntypedInt stackForceMove => /* uintptrMask & -275 */ 18446744073709551341;
+
+// stackPoisonMin is the lowest allowed stack poison value.
 internal static UntypedInt stackPoisonMin => /* uintptrMask & -4096 */ 18446744073709547520;
 
 // Global pool of spans that have free stacks.
@@ -100,7 +140,6 @@ internal static UntypedInt stackPoisonMin => /* uintptrMask & -4096 */ 184467440
 //	order = log_2(size/FixedStack)
 //
 // There is a free list for each order.
-
 partial struct stackpoolᴛ1 /*dyn*/ {
     internal stackpoolItem item;
     internal array<byte> _ = new(40);
@@ -115,7 +154,6 @@ partial struct stackpoolItem {
 }
 
 // Global pool of large stack spans.
-
 partial struct stackLargeᴛ1 /*dyn*/ {
     internal mutex @lock;
     internal array<mSpanList> free = new(35); // free lists by log_2(s.npages)
@@ -242,6 +280,7 @@ internal static void stackcacherefill(ref mcache c, uint8 order) {
     if (stackDebug >= 1) {
         print((@string)"stackcacherefill order="u8, order, (@string)"\n"u8);
     }
+
     // Grab some stacks from the global cache.
     // Grab half of the allowed capacity (to prevent thrashing).
     gclinkptr list = default!;
@@ -321,6 +360,7 @@ internal static Δstack @stackalloc(uint32 n) {
     if (stackDebug >= 1) {
         print((@string)"stackalloc "u8, n, (@string)"\n"u8);
     }
+
     if (debug.efence != 0 || stackFromSystem != 0) {
         n = (uint32)alignUp((uintptr)n, physPageSize);
         @unsafe.Pointer vΔ1 = (uintptr)sysAlloc((uintptr)n, Ꮡmemstats.of(mstats.Ꮡstacks_sys));
@@ -329,6 +369,7 @@ internal static Δstack @stackalloc(uint32 n) {
         }
         return new Δstack((uintptr)vΔ1, (uintptr)vΔ1 + (uintptr)n);
     }
+
     // Small stacks are allocated with a fixed-size free-list allocator.
     // If we need a stack of a bigger size, we fall back on allocating
     // a dedicated span.
@@ -364,6 +405,7 @@ internal static Δstack @stackalloc(uint32 n) {
         ж<mspan> s = default!;
         var npage = ((uintptr)n >> (int)(_PageShift));
         nint log2npage = stacklog2(npage);
+
         // Try to get a stack from the large stack cache.
         @lock(ᏑstackLarge.of(stackLargeᴛ1.Ꮡlock));
         if (!stackLarge.free[log2npage].isEmpty()) {
@@ -371,7 +413,9 @@ internal static Δstack @stackalloc(uint32 n) {
             ᏑstackLarge.at(stackLargeᴛ1.Ꮡfree, log2npage).remove(s);
         }
         unlock(ᏑstackLarge.of(stackLargeᴛ1.Ꮡlock));
+
         lockWithRankMayAcquire(Ꮡmheap_.of(mheap.Ꮡlock), lockRankMheap);
+
         if (s == nil) {
             // Allocate a new stack from the heap.
             s = Ꮡmheap_.allocManual(npage, spanAllocStack);
@@ -383,6 +427,7 @@ internal static Δstack @stackalloc(uint32 n) {
         }
         v = (@unsafe.Pointer)s.@base();
     }
+
     if (traceAllocFreeEnabled()) {
         var Δtrace = traceAcquire();
         if (Δtrace.ok()) {
@@ -647,6 +692,7 @@ internal static void adjustframe(ж<stkframe> Ꮡframe, ref adjustinfo adjinfo) 
     if (stackDebug >= 2) {
         print((@string)"    adjusting "u8, funcname(f), (@string)" frame=["u8, ((Δhex)(uint64)frame.sp), (@string)","u8, ((Δhex)(uint64)frame.fp), (@string)"] pc="u8, ((Δhex)(uint64)frame.pc), (@string)" continpc="u8, ((Δhex)(uint64)frame.continpc), (@string)"\n"u8);
     }
+
     // Adjust saved frame pointer if there is one.
     if ((goarch.ArchFamily == goarch.AMD64 || goarch.ArchFamily == goarch.ARM64) && frame.argp - frame.varp == (uintptr)(2 * goarch.PtrSize)) {
         if (stackDebug >= 3) {
@@ -668,14 +714,17 @@ internal static void adjustframe(ж<stkframe> Ꮡframe, ref adjustinfo adjinfo) 
         // by the caller in its frame (one word below its SP).
         adjustpointer(ref adjinfo, (@unsafe.Pointer)frame.varp);
     }
+
     ref var locals = ref heap<bitvector>(out var Ꮡlocals);
     ref var args = ref heap<bitvector>(out var Ꮡargs);
     (locals, args, var objs) = frame.getStackMap(true);
+
     // Adjust local variables if stack frame has been allocated.
     if (locals.n > 0) {
         var size = (uintptr)locals.n * (uintptr)goarch.PtrSize;
         adjustpointers((@unsafe.Pointer)(frame.varp - size), Ꮡlocals, ref adjinfo, f);
     }
+
     // Adjust arguments.
     if (args.n > 0) {
         if (stackDebug >= 3) {
@@ -683,6 +732,7 @@ internal static void adjustframe(ж<stkframe> Ꮡframe, ref adjustinfo adjinfo) 
         }
         adjustpointers((@unsafe.Pointer)frame.argp, Ꮡargs, ref adjinfo, new ΔfuncInfo(nil));
     }
+
     // Adjust pointers in all stack objects (whether they are live or not).
     // See comments in mgcmark.go:scanframeworker.
     if (frame.varp != 0) {
@@ -793,6 +843,7 @@ internal static uintptr syncadjustsudogs(ref g gp, uintptr used, ref adjustinfo 
     if (gp.waiting == nil) {
         return 0;
     }
+
     // Lock channels to prevent concurrent send/receive.
     ж<Δhchan> lastc = default!;
     for (var sg = gp.waiting; sg != nil; sg = sg.Value.waitlink) {
@@ -810,8 +861,10 @@ internal static uintptr syncadjustsudogs(ref g gp, uintptr used, ref adjustinfo 
         }
         lastc = sg.Value.c;
     }
+
     // Adjust sudogs.
     adjustsudogs(ref gp, ref adjinfo);
+
     // Copy the part of the stack the sudogs point in to
     // while holding the lock to prevent races on
     // send/receive slots.
@@ -822,6 +875,7 @@ internal static uintptr syncadjustsudogs(ref g gp, uintptr used, ref adjustinfo 
         sgsize = adjinfo.sghi - oldBot;
         memmove((@unsafe.Pointer)newBot, (@unsafe.Pointer)oldBot, sgsize);
     }
+
     // Unlock channels.
     lastc = default!;
     for (var sg = gp.waiting; sg != nil; sg = sg.Value.waitlink) {
@@ -830,6 +884,7 @@ internal static uintptr syncadjustsudogs(ref g gp, uintptr used, ref adjustinfo 
         }
         lastc = sg.Value.c;
     }
+
     return sgsize;
 }
 
@@ -856,6 +911,7 @@ internal static void copystack(ж<g> Ꮡgp, uintptr newsize) {
     // It's also fine if we have no P, addScannableStack can deal with
     // that case.
     ᏑgcController.addScannableStack((~(~getg()).m).p.ptr(), (int64)newsize - (int64)(old.hi - old.lo));
+
     // allocate new stack
     var @new = @stackalloc((uint32)newsize);
     if (stackPoisonCopy != 0) {
@@ -864,10 +920,12 @@ internal static void copystack(ж<g> Ꮡgp, uintptr newsize) {
     if (stackDebug >= 1) {
         print((@string)"copystack gp="u8, Ꮡgp.OrTypedNil(), (@string)" ["u8, ((Δhex)(uint64)old.lo), (@string)" "u8, ((Δhex)(uint64)(old.hi - used)), (@string)" "u8, ((Δhex)(uint64)old.hi), (@string)"]"u8, (@string)" -> ["u8, ((Δhex)(uint64)@new.lo), (@string)" "u8, ((Δhex)(uint64)(@new.hi - used)), (@string)" "u8, ((Δhex)(uint64)@new.hi), (@string)"]/"u8, newsize, (@string)"\n"u8);
     }
+
     // Compute adjustment.
     adjustinfo adjinfo = default!;
     adjinfo.old = old;
     adjinfo.delta = @new.hi - old.hi;
+
     // Adjust sudogs, synchronizing with channel ops if necessary.
     var ncopy = used;
     if (!gp.activeStackChans){
@@ -888,12 +946,15 @@ internal static void copystack(ж<g> Ꮡgp, uintptr newsize) {
         // of the stack, so there's little cost in handling
         // everything below it carefully.)
         adjinfo.sghi = findsghi(ref (Ꮡgp).DerefOrNull(), old);
+
         // Synchronize with channel ops and copy the part of
         // the stack they may interact with.
         ncopy -= syncadjustsudogs(ref (Ꮡgp).DerefOrNull(), used, ref adjinfo);
     }
+
     // Copy the stack (or the rest of it) to the new location
     memmove((@unsafe.Pointer)(@new.hi - ncopy), (@unsafe.Pointer)(old.hi - ncopy), ncopy);
+
     // Adjust remaining structures that have pointers into stacks.
     // We have to do most of these before we traceback the new
     // stack because gentraceback uses them.
@@ -903,16 +964,19 @@ internal static void copystack(ж<g> Ꮡgp, uintptr newsize) {
     if (adjinfo.sghi != 0) {
         adjinfo.sghi += adjinfo.delta;
     }
+
     // Swap out old stack for new one
     gp.stack = @new;
     gp.stackguard0 = @new.lo + (uintptr)stackGuard; // NOTE: might clobber a preempt request
     gp.sched.sp = @new.hi - used;
     gp.stktopsp += adjinfo.delta;
+
     // Adjust pointers in the new stack.
     ref var u = ref heap(new unwinder(), out var Ꮡu);
     for (Ꮡu.init(Ꮡgp, 0); u.valid(); Ꮡu.next()) {
         adjustframe(Ꮡu.of(unwinder.Ꮡframe), ref adjinfo);
     }
+
     // free old stack
     if (stackPoisonCopy != 0) {
         fillstack(old, 0xfc);
@@ -964,7 +1028,9 @@ internal static void newstack() {
         traceback(morebufΔ1.pc, morebufΔ1.sp, morebufΔ1.lr, morebufΔ1.g.ptr());
         @throw(runtimeWrongGoroutineInˢ);
     }
+
     var gp = thisg.Value.m.Value.curg;
+
     if ((~(~(~thisg).m).curg).throwsplit) {
         // Update syscallsp, syscallpc in case traceback uses them.
         var morebufΔ2 = thisg.Value.m.Value.morebuf;
@@ -981,19 +1047,23 @@ internal static void newstack() {
             (@string)" sp="u8, ((Δhex)(uint64)(~gp).sched.sp), (@string)" stack=["u8, ((Δhex)(uint64)(~gp).stack.lo), (@string)", "u8, ((Δhex)(uint64)(~gp).stack.hi), (@string)"]\n"u8,
             (@string)"\tmorebuf={pc:"u8, ((Δhex)(uint64)morebufΔ2.pc), (@string)" sp:"u8, ((Δhex)(uint64)morebufΔ2.sp), (@string)" lr:"u8, ((Δhex)(uint64)morebufΔ2.lr), (@string)"}\n"u8,
             (@string)"\tsched={pc:"u8, ((Δhex)(uint64)(~gp).sched.pc), (@string)" sp:"u8, ((Δhex)(uint64)(~gp).sched.sp), (@string)" lr:"u8, ((Δhex)(uint64)(~gp).sched.lr), (@string)" ctxt:"u8, @unsafe.Pointer.OrTypedNil((~gp).sched.ctxt), (@string)"}\n"u8);
+
         thisg.Value.m.Value.traceback = 2; // Include runtime frames
         traceback(morebufΔ2.pc, morebufΔ2.sp, morebufΔ2.lr, gp);
         @throw(runtimeStackSplitAtBadˢ);
     }
+
     var morebuf = thisg.Value.m.Value.morebuf;
     thisg.Value.m.Value.morebuf.pc = 0;
     thisg.Value.m.Value.morebuf.lr = 0;
     thisg.Value.m.Value.morebuf.sp = 0;
     thisg.Value.m.Value.morebuf.g = 0;
+
     // NOTE: stackguard0 may change underfoot, if another thread
     // is about to try to preempt gp. Read it just once and use that same
     // value now and below.
     var stackguard0 = atomic.Loaduintptr(gp.of(g.Ꮡstackguard0));
+
     // Be conservative about where we preempt.
     // We are interested in preempting user Go code, not runtime code.
     // If we're holding locks, mallocing, or preemption is disabled, don't
@@ -1015,6 +1085,7 @@ internal static void newstack() {
             gogo(gp.of(g.Ꮡsched)); // never return
         }
     }
+
     if ((~gp).stack.lo == 0) {
         @throw(missingStackInNewstackˢ);
     }
@@ -1033,6 +1104,7 @@ internal static void newstack() {
         print((@string)"runtime: split stack overflow: "u8, ((Δhex)(uint64)sp), (@string)" < "u8, ((Δhex)(uint64)(~gp).stack.lo), (@string)"\n"u8);
         @throw(runtimeSplitStackˢ);
     }
+
     if (preempt) {
         if (gp == (~(~thisg).m).g0) {
             @throw(runtimePreemptG0ˢ);
@@ -1040,21 +1112,26 @@ internal static void newstack() {
         if ((~(~thisg).m).p == 0 && (~(~thisg).m).locks == 0) {
             @throw(runtimeGIsRunningButPIsˢ);
         }
+
         if ((~gp).preemptShrink) {
             // We're at a synchronous safe point now, so
             // do the pending stack shrink.
             gp.Value.preemptShrink = false;
             shrinkstack(gp);
         }
+
         if ((~gp).preemptStop) {
             preemptPark(gp); // never returns
         }
+
         // Act like goroutine called runtime.Gosched.
         gopreempt_m(gp); // never return
     }
+
     // Allocate a bigger segment and move the stack.
     var oldsize = (~gp).stack.hi - (~gp).stack.lo;
     var newsize = oldsize * 2;
+
     // Make sure we grow at least as much as needed to fit the new frame.
     // (This is just an optimization - the caller of morestack will
     // recheck the bounds on return.)
@@ -1068,12 +1145,14 @@ internal static void newstack() {
             }
         }
     }
+
     if (stackguard0 == stackForceMove) {
         // Forced stack movement used for debugging.
         // Don't double the stack (or we may quickly run out
         // if this is done repeatedly).
         newsize = oldsize;
     }
+
     if (newsize > maxstacksize || newsize > maxstackceiling) {
         if (maxstacksize < maxstackceiling){
             print((@string)"runtime: goroutine stack exceeds "u8, maxstacksize, (@string)"-byte limit\n"u8);
@@ -1083,9 +1162,11 @@ internal static void newstack() {
         print((@string)"runtime: sp="u8, ((Δhex)(uint64)sp), (@string)" stack=["u8, ((Δhex)(uint64)(~gp).stack.lo), (@string)", "u8, ((Δhex)(uint64)(~gp).stack.hi), (@string)"]\n"u8);
         @throw(stackOverflowˢ);
     }
+
     // The goroutine must be executing in order to call newstack,
     // so it must be Grunning (or Gscanrunning).
     casgstatus(gp, _Grunning, _Gcopystack);
+
     // The concurrent GC will not scan the stack while we are doing the copy since
     // the gp is in a Gcopystack status.
     copystack(gp, newsize);
@@ -1175,6 +1256,7 @@ internal static void freeStackSpans() {
         }
         unlock(Ꮡstackpool.at<stackpoolᴛ1>(order).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡmu));
     }
+
     // Free large stack spans.
     @lock(ᏑstackLarge.of(stackLargeᴛ1.Ꮡlock));
     foreach (var (i, _) in stackLarge.free) {
@@ -1243,6 +1325,7 @@ internal static void gcComputeStartingStackSize() {
     if (debug.adaptivestackstart == 0) {
         return;
     }
+
     // For details, see the design doc at
     // https://docs.google.com/document/d/1YDlGIdVTPnmUiTAavlZxBI1d9pwGQgZT7IKFKlIXohQ/edit?usp=sharing
     // The basic algorithm is to track the average size of stacks

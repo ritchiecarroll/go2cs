@@ -37,6 +37,7 @@ internal static (bool matched, error err2) matchZoneKey(registry.Key zones, @str
             (matched, err2) = (false, err); goto ᒐdone;
         }
         defer(() => k.Close(), ref ᒐ);
+
         @string std = default!;
         @string dlt = default!;
         // Try MUI_Std and MUI_Dlt first, fallback to Std and Dlt if *any* error occurs
@@ -44,8 +45,7 @@ internal static (bool matched, error err2) matchZoneKey(registry.Key zones, @str
         if (err == default!) {
             (dlt, err) = k.GetMUIStringValue(muiDltˢ);
         }
-        if (err != default!) {
-            // Fallback to Std and Dlt
+        if (err != default!) { // Fallback to Std and Dlt
             {
                 (std, _, err) = k.GetStringValue(stdˢ); if (err != default!) {
                     (matched, err2) = (false, err); goto ᒐdone;
@@ -57,6 +57,7 @@ internal static (bool matched, error err2) matchZoneKey(registry.Key zones, @str
                 }
             }
         }
+
         if (std != stdname) {
             (matched, err2) = (false, default!); goto ᒐdone;
         }
@@ -83,6 +84,7 @@ internal static (@string, error) toEnglishName(@string stdname, @string dstname)
             return ("", err);
         }
         defer(() => k.Close(), ref ᒐ);
+
         (var names, err) = k.ReadSubKeyNames();
         if (err != default!) {
             return ("", err);
@@ -167,13 +169,17 @@ internal static void initLocalFromTZI(ж<syscall.Timezoneinformation> Ꮡi) {
     ref var i = ref Ꮡi.DerefOrNull();
 
     var l = ᏑlocalLoc;
+
     l.Value.name = localˢ;
+
     nint nzone = 1;
     if (i.StandardDate.Month > 0) {
         nzone++;
     }
     l.Value.zone = new slice<zone>(nzone);
+
     var (stdname, dstname) = abbrev(ref (Ꮡi).DerefOrNull());
+
     var std = Ꮡ((~l).zone, 0);
     std.Value.name = stdname;
     if (nzone == 1) {
@@ -187,14 +193,17 @@ internal static void initLocalFromTZI(ж<syscall.Timezoneinformation> Ꮡi) {
         (~l).tx[0].index = 0;
         return;
     }
+
     // StandardBias must be ignored if StandardDate is not set,
     // so this computation is delayed until after the nzone==1
     // return above.
     std.Value.offset = -(nint)(i.Bias + i.StandardBias) * 60;
+
     var dst = Ꮡ((~l).zone, 1);
     dst.Value.name = dstname;
     dst.Value.offset = -(nint)(i.Bias + i.DaylightBias) * 60;
     dst.Value.isDST = true;
+
     // Arrange so that d0 is first transition date, d1 second,
     // i0 is index of zone after first transition, i1 second.
     var d0 = Ꮡi.of(syscall.Timezoneinformation.ᏑStandardDate);
@@ -205,8 +214,10 @@ internal static void initLocalFromTZI(ж<syscall.Timezoneinformation> Ꮡi) {
         (d0, d1) = (d1, d0);
         (i0, i1) = (i1, i0);
     }
+
     // 2 tx per year, 100 years on each side of this year
     l.Value.tx = new slice<zoneTrans>(400);
+
     var t = Now().UTC();
     nint year = t.Year();
     nint txi = 0;
@@ -215,6 +226,7 @@ internal static void initLocalFromTZI(ж<syscall.Timezoneinformation> Ꮡi) {
         tx.Value.when = pseudoUnix(y, ref (d0).DerefOrNull()) - (int64)(~l).zone[i1].offset;
         tx.Value.index = (uint8)i0;
         txi++;
+
         tx = Ꮡ((~l).tx, txi);
         tx.Value.when = pseudoUnix(y, ref (d1).DerefOrNull()) - (int64)(~l).zone[i0].offset;
         tx.Value.index = (uint8)i1;

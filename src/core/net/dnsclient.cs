@@ -94,6 +94,7 @@ internal static bool isDomainName(@string s) {
     if (s == "."u8) {
         return true;
     }
+
     // See RFC 1035, RFC 3696.
     // Presentation format has dots before every label except the first, and the
     // terminal empty label is optional here because we assume fully-qualified
@@ -106,6 +107,7 @@ internal static bool isDomainName(@string s) {
     if (l == 0 || l > 254 || l == 254 && s[l - 1] != (rune)'.') {
         return false;
     }
+
     var last = (byte)(rune)'.';
     var nonNumeric = false; // true once we've seen a letter or hyphen
     nint partlen = 0;
@@ -121,13 +123,13 @@ internal static bool isDomainName(@string s) {
             break;
         }
         case {} when (rune)'0' <= c && c <= (rune)'9': {
+            // fine
             partlen++;
             break;
         }
         case {} when c is (rune)'-': {
+            // Byte before dash cannot be dot.
             if (last == (rune)'.') {
-                // fine
-                // Byte before dash cannot be dot.
                 return false;
             }
             partlen++;
@@ -135,8 +137,8 @@ internal static bool isDomainName(@string s) {
             break;
         }
         case {} when c is (rune)'.': {
+            // Byte before dot cannot be dot, dash.
             if (last == (rune)'.' || last == (rune)'-') {
-                // Byte before dot cannot be dot, dash.
                 return false;
             }
             if (partlen > 63 || partlen == 0) {
@@ -145,12 +147,12 @@ internal static bool isDomainName(@string s) {
             partlen = 0;
             break;
         }}
-
         last = c;
     }
     if (last == (rune)'-' || partlen > 63) {
         return false;
     }
+
     return nonNumeric;
 }
 
@@ -177,6 +179,7 @@ partial struct SRV {
     public uint16 Weight;
 }
 
+// byPriorityWeight sorts SRV records by ascending priority and weight.
 partial struct byPriorityWeight /*[]ж<SRV>*/;
 
 // shuffleByWeight shuffles SRV records by weight using the algorithm
@@ -229,6 +232,7 @@ partial struct MX {
     public uint16 Pref;
 }
 
+// byPref sorts MX records by preference
 partial struct byPref /*[]ж<MX>*/;
 
 // sort reorders MX records as specified in RFC 5321.

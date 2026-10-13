@@ -318,8 +318,8 @@ internal static void buildIndex(this ref stackScanState s) {
 // If n == 0, returns nil, x.
 internal static (ж<stackObject> root, ж<stackObjectBuf> restBuf, nint restIdx) binarySearchTree(ж<stackObjectBuf> Ꮡx, nint idx, nint n) {
     ж<stackObject> root = default!;
-
     ref var x = ref Ꮡx.DerefOrNull();
+
     if (n == 0) {
         return (default!, Ꮡx, idx);
     }

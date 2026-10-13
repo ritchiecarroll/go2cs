@@ -112,6 +112,7 @@ internal static (context, nint) tTag(context c, slice<byte> s) {
             err: errorf(ErrBadHTML, default!, 0, "expected space, attr name, or end of tag, but got %q"u8, s.slice(i))
         ), len(s));
     }
+
     @string attrName = strings.ToLower(((@string)(s.slice(i, j))));
     if (c.element == elementScript && attrName == "type"u8){
         attr = attrScriptType;
@@ -129,8 +130,8 @@ internal static (context, nint) tTag(context c, slice<byte> s) {
         else if (exprᴛ1 == contentTypeSrcset) {
             attr = attrSrcset;
         }
-
     }
+
     if (j == len(s)){
         state = stateAttrName;
     } else {
@@ -194,7 +195,6 @@ internal static (context, nint) tBeforeValue(context c, slice<byte> s) {
         (delim, i) = (delimDoubleQuote, i + 1);
         break;
     }}
-
     (c.state, c.delim) = (attrStartStates[c.attr], delim);
     return (c, i);
 }
@@ -328,18 +328,17 @@ internal static (context, nint) tJS(context c, slice<byte> s) {
                 err: errorf(ErrSlashAmbig, default!, 0, "'/' could start a division or regexp: %.32q"u8, s.slice(i))
             ), len(s));
         }}
-
         break;
     }
+    // ECMAScript supports HTML style comments for legacy reasons, see Appendix
+    // B.1.1 "HTML-like Comments". The handling of these comments is somewhat
+    // confusing. Multi-line comments are not supported, i.e. anything on lines
+    // between the opening and closing tokens is not considered a comment, but
+    // anything following the opening or closing token, on the same line, is
+    // ignored. As such we simply treat any line prefixed with "<!--" or "-->"
+    // as if it were actually prefixed with "//" and move on.
     case (rune)'<': {
-        if (i + 3 < len(s) && bytes.Equal(commentStart, // ECMAScript supports HTML style comments for legacy reasons, see Appendix
- // B.1.1 "HTML-like Comments". The handling of these comments is somewhat
- // confusing. Multi-line comments are not supported, i.e. anything on lines
- // between the opening and closing tokens is not considered a comment, but
- // anything following the opening or closing token, on the same line, is
- // ignored. As such we simply treat any line prefixed with "<!--" or "-->"
- // as if it were actually prefixed with "//" and move on.
- s.slice(i, i + 4))) {
+        if (i + 3 < len(s) && bytes.Equal(commentStart, s.slice(i, i + 4))) {
             (c.state, i) = (stateJSHTMLOpenCmt, i + 3);
         }
         break;
@@ -350,17 +349,17 @@ internal static (context, nint) tJS(context c, slice<byte> s) {
         }
         break;
     }
+    // ECMAScript also supports "hashbang" comment lines, see Section 12.5.
     case (rune)'#': {
         if (i + 1 < len(s) && s[i + 1] == (rune)'!') {
-            // ECMAScript also supports "hashbang" comment lines, see Section 12.5.
             (c.state, i) = (stateJSLineCmt, i + 1);
         }
         break;
     }
     case (rune)'{': {
+        // We only care about tracking brace depth if we are inside of a
+        // template literal.
         if (len(c.jsBraceDepth) == 0) {
-            // We only care about tracking brace depth if we are inside of a
-            // template literal.
             return (c, i + 1);
         }
         c.jsBraceDepth[len(c.jsBraceDepth) - 1]++;
@@ -370,12 +369,12 @@ internal static (context, nint) tJS(context c, slice<byte> s) {
         if (len(c.jsBraceDepth) == 0) {
             return (c, i + 1);
         }
+        // There are no cases where a brace can be escaped in the JS context
+        // that are not syntax errors, it seems. Because of this we can just
+        // count "\}" as "}" and move on, the script is already broken as
+        // fully fledged parsers will just fail anyway.
         c.jsBraceDepth[len(c.jsBraceDepth) - 1]--;
         if (c.jsBraceDepth[len(c.jsBraceDepth) - 1] >= 0) {
-            // There are no cases where a brace can be escaped in the JS context
-            // that are not syntax errors, it seems. Because of this we can just
-            // count "\}" as "}" and move on, the script is already broken as
-            // fully fledged parsers will just fail anyway.
             return (c, i + 1);
         }
         c.jsBraceDepth = c.jsBraceDepth.slice(0, len(c.jsBraceDepth) - 1);
@@ -386,7 +385,6 @@ internal static (context, nint) tJS(context c, slice<byte> s) {
         throw panic("unreachable");
         break;
     }}
-
     return (c, i + 1);
 }
 
@@ -417,13 +415,13 @@ internal static (context, nint) tJSTmpl(context c, slice<byte> s) {
             break;
         }
         case (rune)'`': {
+            // end
             c.state = stateJS;
             return (c, i + 1);
         }}
-
-        // end
         k = i + 1;
     }
+
     return (c, len(s));
 }
 
@@ -466,10 +464,10 @@ internal static (context, nint) tJSDelimited(context c, slice<byte> s) {
             break;
         }
         case (rune)'/': {
-            if (i > 0 && i + 7 <= len(s) && bytes.Equal(bytes.ToLower(s.slice(i - 1, i + 7)), // If "</script" appears in a regex literal, the '/' should not
- // close the regex literal, and it will later be escaped to
- // "\x3C/script" in escapeText.
- slice<byte>("</script"u8))){
+            // If "</script" appears in a regex literal, the '/' should not
+            // close the regex literal, and it will later be escaped to
+            // "\x3C/script" in escapeText.
+            if (i > 0 && i + 7 <= len(s) && bytes.Equal(bytes.ToLower(s.slice(i - 1, i + 7)), slice<byte>("</script"u8))){
                 i++;
             } else 
             if (!inCharset) {
@@ -479,16 +477,16 @@ internal static (context, nint) tJSDelimited(context c, slice<byte> s) {
             break;
         }
         default: {
+            // end delimiter
             if (!inCharset) {
-                // end delimiter
                 (c.state, c.jsCtx) = (stateJS, jsCtxDivOp);
                 return (c, i + 1);
             }
             break;
         }}
-
         k = i + 1;
     }
+
     if (inCharset) {
         // This can be fixed by making context richer if interpolation
         // into charsets is desired.
@@ -497,6 +495,7 @@ internal static (context, nint) tJSDelimited(context c, slice<byte> s) {
             err: errorf(ErrPartialCharset, default!, 0, "unfinished JS regexp charset: %q"u8, s)
         ), len(s));
     }
+
     return (c, len(s));
 }
 
@@ -518,7 +517,6 @@ internal static (context, nint) tBlockCmt(context c, slice<byte> s) {
     else { /* default: */
         throw panic(c.state.String());
     }
-
     return (c, i + 2);
 }
 
@@ -532,18 +530,18 @@ internal static (context, nint) tLineCmt(context c, slice<byte> s) {
     }
     else if (exprᴛ1 == stateCSSLineCmt) {
         (lineTerminators, endState) = ("\n\f\r", stateCSS);
+        // Line comments are not part of any published CSS standard but
+        // are supported by the 4 major browsers.
+        // This defines line comments as
+        //     LINECOMMENT ::= "//" [^\n\f\d]*
+        // since https://www.w3.org/TR/css3-syntax/#SUBTOK-nl defines
+        // newlines:
+        //     nl ::= #xA | #xD #xA | #xD | #xC
     }
     else { /* default: */
         throw panic(c.state.String());
     }
 
-    // Line comments are not part of any published CSS standard but
-    // are supported by the 4 major browsers.
-    // This defines line comments as
-    //     LINECOMMENT ::= "//" [^\n\f\d]*
-    // since https://www.w3.org/TR/css3-syntax/#SUBTOK-nl defines
-    // newlines:
-    //     nl ::= #xA | #xD #xA | #xD | #xC
     nint i = bytes.IndexAny(s, lineTerminators);
     if (i == -1) {
         return (c, len(s));
@@ -593,8 +591,8 @@ internal static (context, nint) tCSS(context c, slice<byte> s) {
         }
         switch (s[i]) {
         case (rune)'(': {
-            var p = bytes.TrimRight(s.slice(0, i), // Look for url to the left.
- "\t\n\f\r "u8);
+            // Look for url to the left.
+            var p = bytes.TrimRight(s.slice(0, i), "\t\n\f\r "u8);
             if (endsWithCSSKeyword(p, urlˢ)) {
                 nint j = len(s) - len(bytes.TrimLeft(s.slice(i + 1), "\t\n\f\r "u8));
                 switch (ᐧ) {
@@ -610,7 +608,6 @@ internal static (context, nint) tCSS(context c, slice<byte> s) {
                     c.state = stateCSSURL;
                     break;
                 }}
-
                 return (c, j);
             }
             break;
@@ -626,7 +623,6 @@ internal static (context, nint) tCSS(context c, slice<byte> s) {
                     c.state = stateCSSBlockCmt;
                     return (c, i + 2);
                 }}
-
             }
             break;
         }
@@ -638,7 +634,6 @@ internal static (context, nint) tCSS(context c, slice<byte> s) {
             c.state = stateCSSSqStr;
             return (c, i + 1);
         }}
-
         k = i + 1;
     }
 }
@@ -654,14 +649,14 @@ internal static (context, nint) tCSSStr(context c, slice<byte> s) {
         endAndEsc = @"\'"u8;
     }
     else if (exprᴛ1 == stateCSSURL) {
+        // Unquoted URLs end with a newline or close parenthesis.
+        // The below includes the wc (whitespace character) and nl.
         endAndEsc = "\\\t\n\f\r )"u8;
     }
     else { /* default: */
         throw panic(c.state.String());
     }
 
-    // Unquoted URLs end with a newline or close parenthesis.
-    // The below includes the wc (whitespace character) and nl.
     nint k = 0;
     while (ᐧ) {
         nint i = k + bytes.IndexAny(s.slice(k), endAndEsc);
@@ -702,17 +697,16 @@ internal static (nint, ж<ΔError>) eatAttrName(slice<byte> s, nint i) {
             return (j, default!);
         }
         case (rune)'\'' or (rune)'"' or (rune)'<': {
-            return (-1, errorf(ErrBadHTML, // These result in a parse warning in HTML5 and are
- // indicative of serious problems if seen in an attr
- // name in a template.
- default!, 0, "%q in attribute name: %.32q"u8, s.slice(j, j + 1), s));
+            // These result in a parse warning in HTML5 and are
+            // indicative of serious problems if seen in an attr
+            // name in a template.
+            return (-1, errorf(ErrBadHTML, default!, 0, "%q in attribute name: %.32q"u8, s.slice(j, j + 1), s));
         }
         default: {
+            // No-op.
             break;
         }}
-
     }
-    // No-op.
     return (len(s), default!);
 }
 
@@ -760,14 +754,13 @@ internal static nint eatWhiteSpace(slice<byte> s, nint i) {
     for (nint j = i; j < len(s); j++) {
         switch (s[j]) {
         case (rune)' ' or (rune)'\t' or (rune)'\n' or (rune)'\f' or (rune)'\r': {
+            // No-op.
             break;
         }
         default: {
             return j;
         }}
-
     }
-    // No-op.
     return len(s);
 }
 

@@ -122,6 +122,11 @@ internal static ж<thread> alloc(this ref machine m, ж<syntax.Inst> Ꮡi) {
     return t;
 }
 
+// A lazyFlag is a lazily-evaluated syntax.EmptyOp,
+// for checking zero-width flags like ^ $ \A \z \B \b.
+// It records the pair of relevant runes and does not
+// determine the implied flags until absolutely necessary
+// (most of the time, that means never).
 partial struct lazyFlag /*num:uint64*/;
 
 internal static lazyFlag newLazyFlag(rune r1, rune r2) {
@@ -179,8 +184,7 @@ internal static bool match(this ж<machine> Ꮡm, input i, nint pos) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var startCond = m.re.Value.cond;
-    if (startCond == ~((syntax.EmptyOp)((syntax.EmptyOp)0))) {
-        // impossible
+    if (startCond == ~((syntax.EmptyOp)((syntax.EmptyOp)0))) { // impossible
         return false;
     }
     m.matched = false;
@@ -314,7 +318,6 @@ internal static void step(this ref machine m, ж<queue> Ꮡrunq, ж<queue> Ꮡne
         else { /* default: */
             throw panic("bad inst");
         }
-
         if (add) {
             t = m.add(Ꮡnextq, (~i).Out, nextPos, (~t).cap, ᏑnextCond, t);
         }
@@ -343,19 +346,21 @@ Again:
             return Ꮡt;
         }
     }
+
     nint j = len(q.dense);
     q.dense = q.dense.slice(0, j + 1);
     var d = Ꮡ(q.dense, j);
     d.Value.t = default!;
     d.Value.pc = pc;
     q.sparse[pc] = (uint32)j;
+
     var i = Ꮡ((~m.p).Inst, pc);
     var exprᴛ1 = (~i).Op;
     if (exprᴛ1 == syntax.InstFail) {
+        // nothing
     }
     else if (exprᴛ1 == syntax.InstAlt || exprᴛ1 == syntax.InstAltMatch) {
-        Ꮡt = m.add(Ꮡq, // nothing
- (~i).Out, pos, cap, Ꮡcond, Ꮡt); t = ref Ꮡt.DerefOrNull();
+        Ꮡt = m.add(Ꮡq, (~i).Out, pos, cap, Ꮡcond, Ꮡt); t = ref Ꮡt.DerefOrNull();
         pc = i.Value.Arg;
         goto Again;
     }
@@ -395,7 +400,6 @@ Again:
     else { /* default: */
         throw panic("unhandled");
     }
-
     return Ꮡt;
 }
 
@@ -427,21 +431,24 @@ internal static slice<nint> doOnePass(this ж<Regexp> Ꮡre, io.RuneReader ir, s
     ref var re = ref Ꮡre.DerefOrNull();
 
     var startCond = re.cond;
-    if (startCond == ~((syntax.EmptyOp)((syntax.EmptyOp)0))) {
-        // impossible
+    if (startCond == ~((syntax.EmptyOp)((syntax.EmptyOp)0))) { // impossible
         return default!;
     }
+
     var m = newOnePassMachine();
     if (cap((~m).matchcap) < ncap){
         m.Value.matchcap = new slice<nint>(ncap);
     } else {
         m.Value.matchcap = (~m).matchcap.slice(0, ncap);
     }
+
     var matched = false;
     foreach (var (iΔ1, _) in (~m).matchcap) {
         m.Value.matchcap[iΔ1] = -1;
     }
+
     var (i, _) = m.of(onePassMachine.Ꮡinputs).init(ir, ib, @is);
+
     var (r, r1) = (endOfText, endOfText);
     nint width = 0;
     nint width1 = 0;
@@ -492,16 +499,16 @@ internal static slice<nint> doOnePass(this ж<Regexp> Ꮡre, io.RuneReader ir, s
             }
         }
         else if (exprᴛ1 == syntax.InstRuneAny) {
+            // Nothing
         }
         else if (exprᴛ1 == syntax.InstRuneAnyNotNL) {
             if (r == (rune)'\n') {
-                // Nothing
                 goto Return;
             }
         }
+        // peek at the input rune to see which branch of the Alt to take
         else if (exprᴛ1 == syntax.InstAlt || exprᴛ1 == syntax.InstAltMatch) {
-            pc = (nint)onePassNext(inst, // peek at the input rune to see which branch of the Alt to take
- r);
+            pc = (nint)onePassNext(inst, r);
             continue;
         }
         else if (exprᴛ1 == syntax.InstFail) {
@@ -525,7 +532,6 @@ internal static slice<nint> doOnePass(this ж<Regexp> Ꮡre, io.RuneReader ir, s
         else { /* default: */
             throw panic("bad inst");
         }
-
         if (width == 0) {
             break;
         }
@@ -536,11 +542,13 @@ internal static slice<nint> doOnePass(this ж<Regexp> Ꮡre, io.RuneReader ir, s
             (r1, width1) = i.step(pos + width);
         }
     }
+
 Return:
     if (!matched) {
         freeOnePassMachine(m);
         return default!;
     }
+
     dstCap = appendꓸꓸꓸ(dstCap, (~m).matchcap);
     freeOnePassMachine(m);
     return dstCap;
@@ -562,22 +570,27 @@ internal static slice<nint> doExecute(this ж<Regexp> Ꮡre, io.RuneReader r, sl
         // Make sure 'return dstCap' is non-nil.
         dstCap = arrayNoInts.slice(0, 0, 0);
     }
+
     if (r == default! && len(b) + len(s) < re.minInputLen) {
         return default!;
     }
+
     if (re.onepass != nil) {
         return Ꮡre.doOnePass(r, b, s, pos, ncap, dstCap);
     }
     if (r == default! && len(b) + len(s) < re.maxBitStateLen) {
         return Ꮡre.backtrack(b, s, pos, ncap, dstCap);
     }
+
     var m = Ꮡre.get();
     var (i, _) = m.of(machine.Ꮡinputs).init(r, b, s);
+
     m.init(ncap);
     if (!m.match(i, pos)) {
         re.put(m);
         return default!;
     }
+
     dstCap = appendꓸꓸꓸ(dstCap, (~m).matchcap);
     re.put(m);
     return dstCap;

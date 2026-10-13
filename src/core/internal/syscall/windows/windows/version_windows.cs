@@ -38,13 +38,13 @@ internal static bool supportTCPKeepAliveIdle;
 internal static bool supportTCPKeepAliveInterval;
 internal static bool supportTCPKeepAliveCount;
 
-// Fallback to checking the Windows version.
 internal static Action initTCPKeepAlive;
 internal static void initᴛinitTCPKeepAlive() { initTCPKeepAlive = sync.OnceFunc(() => {
     GoFrame ᒐ = default;
     try {
         var (s, err) = WSASocket(syscall.AF_INET, syscall.SOCK_STREAM, syscall.IPPROTO_TCP, nil, 0, WSA_FLAG_NO_HANDLE_INHERIT);
         if (err != default!) {
+            // Fallback to checking the Windows version.
             var (major, _, build) = Version();
             supportTCPKeepAliveIdle = major >= 10 && build >= 16299;
             supportTCPKeepAliveInterval = major >= 10 && build >= 16299;
@@ -95,16 +95,16 @@ internal static void initᴛSupportTCPInitialRTONoSYNRetransmissions() { Support
     return major >= 10 && build >= 16299;
 }); }
 
-// First call to get the required buffer size in bytes.
-// Ignore the error, it will always fail.
-// Second call to get the actual protocols.
 // SupportUnixSocket indicates whether the current Windows version supports
 // Unix Domain Sockets.
 // The minimal requirement is Windows 10.0.17063.
 public static Func<bool> SupportUnixSocket = sync.OnceValue(bool () => {
     ref var size = ref heap(new uint32(), out var Ꮡsize);
+    // First call to get the required buffer size in bytes.
+    // Ignore the error, it will always fail.
     (_, _) = syscall.WSAEnumProtocols(nil, nil, Ꮡsize);
     var n = (int32)size / (int32)/* unsafe.Sizeof(syscall.WSAProtocolInfo{}) */ (uintptr)628;
+    // Second call to get the actual protocols.
     var buf = new slice<syscall.WSAProtocolInfo>(n, () => new());
     (n, var err) = syscall.WSAEnumProtocols(nil, Ꮡ(buf, 0), Ꮡsize);
     if (err != default!) {

@@ -27,11 +27,13 @@ public static (ж<BuildInfo> info, bool ok) ReadBuildInfo() {
     if (err != default!) {
         return (default!, false);
     }
+
     // The go version is stored separately from other build info, mostly for
     // historical reasons. It is not part of the modinfo() string, and
     // ParseBuildInfo does not recognize it. We inject it here to hide this
     // awkwardness from the user.
     bi.Value.GoVersion = runtime.Version();
+
     return (bi, true);
 }
 
@@ -144,6 +146,7 @@ public static @string String(this ref BuildInfo bi) {
         }
         fmt.Fprintf(new strings_BuilderжWriter(buf), "build\t%s=%s\n"u8, key, value);
     }
+
     return buf.String();
 }
 
@@ -185,6 +188,7 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
                 err = fmt.Errorf("could not parse Go build info: line %d: %w"u8, lineNum, err);
             }
         }, ref ᒐ);
+
         @string pathLine = pathLineᶜ;
         @string modLine = modLineᶜ;
         @string depLine = depLineᶜ;
@@ -192,6 +196,7 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
         @string buildLine = buildLineᶜ;
         @string newline = newlineᶜ;
         @string tab = tabᶜ;
+
         (Module, error) readModuleLine(slice<@string> elem) {
             if (len(elem) != 2 && len(elem) != 3) {
                 return (new Module(nil), fmt.Errorf("expected 2 or 3 columns; got %d"u8, len(elem)));
@@ -207,6 +212,7 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
                 Sum: sum
             ), default!);
         }
+
         bi = @new<BuildInfo>();
         ж<Module> last = default!;
         @string line = default!;
@@ -263,6 +269,7 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
                 if (len(kv) < 1) {
                     (bi, err) = (default!, fmt.Errorf("build line missing '='"u8)); goto ᒐdone;
                 }
+
                 @string key = default!;
                 @string rawValue = default!;
                 switch (kv[0]) {
@@ -316,12 +323,11 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
                         }
                         break;
                     }}
-
                 }
+
                 bi.Value.Settings = append((~bi).Settings, new BuildSetting(Key: key, Value: value));
                 break;
             }}
-
             lineNum++;
         }
         (bi, err) = (bi, default!);

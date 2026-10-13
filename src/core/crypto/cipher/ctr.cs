@@ -83,6 +83,7 @@ internal static void refill(this ref ctr x) {
     while (remain <= len(x.@out) - bs) {
         x.b.Encrypt(x.@out.slice(remain), x.Δctr);
         remain += bs;
+
         // Increment counter
         for (nint i = len(x.Δctr) - 1; i >= 0; i--) {
             x.Δctr[i]++;

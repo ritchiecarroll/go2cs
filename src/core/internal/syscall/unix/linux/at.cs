@@ -14,12 +14,14 @@ public static error Unlinkat(nint dirfd, @string path, nint flags) {
     if (err != default!) {
         return err;
     }
+
     var ᴋ0 = p;
         var (_, _, errno) = syscall.Syscall(unlinkatTrap, (uintptr)dirfd, (uintptr)ᴋ0, (uintptr)flags);
     System.GC.KeepAlive(ᴋ0);
     if (errno != 0) {
         return errno;
     }
+
     return default!;
 }
 
@@ -28,12 +30,14 @@ public static (nint, error) Openat(nint dirfd, @string path, nint flags, uint32 
     if (err != default!) {
         return (0, err);
     }
+
     var ᴋ1 = p;
         var (fd, _, errno) = syscall.Syscall6(openatTrap, (uintptr)dirfd, (uintptr)ᴋ1, (uintptr)flags, (uintptr)perm, 0, 0);
     System.GC.KeepAlive(ᴋ1);
     if (errno != 0) {
         return (0, errno);
     }
+
     return ((nint)fd, default!);
 }
 
@@ -56,6 +60,7 @@ public static (nint, error) Readlinkat(nint dirfd, @string path, slice<byte> buf
     if (errno != 0) {
         return (0, errno);
     }
+
     return ((nint)n, default!);
 }
 
@@ -64,6 +69,7 @@ public static error Mkdirat(nint dirfd, @string path, uint32 mode) {
     if (err != default!) {
         return err;
     }
+
     var ᴋ4 = p;
         var (_, _, errno) = syscall.Syscall6(mkdiratTrap, (uintptr)dirfd, (uintptr)ᴋ4, (uintptr)mode, 0, 0, 0);
     System.GC.KeepAlive(ᴋ4);

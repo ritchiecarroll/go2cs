@@ -60,8 +60,8 @@ using static go.@internal.buildcfg_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/buildcfg/cfg.go", "cfg.cs", "ABcukpKSkpKSkpKSkpKStAAGEJKCgriCgIKk1oKApKSkpLSC1oKClKSClIKqooKUgoKUgoKUgoKqooKClAAHEIKCgpSUAAsGopiClJSEgoKCgpSCgpaUpKSkgriClAAOHoKCgpSClAAIBrKagpSCgoKCloKCgpaWlKaEpKSm1qKCqrSCloKWhpaChIKSlJTogoCktILWgoCktILWgoCkpKS0gtaCgKSktIKChoIABxCCgoKUgpTWooKUpMjG1oKmgoKCpoLcgpTaopSkpKSkpKSkpKaClKSCgpSkgoKUpIKCgoKWkoKmpKSkgoKUpIKClKSCgpSClKQ=", "314-316:1")]
-[assembly: go.GoPositionMap("internal/buildcfg/exp.go", "exp.cs", "AB8+goKCgpQADhzO2tKUgqaClKYAChYABhCUgoKCgoLukoKoooKUuIKUgoKUgoKUqIKCpoKCpoKUqqKuwoKCgoKUgoKCgoKClIKClLiqoqqi", "109-112:1", "102=reflect.Value.SetBool")]
+[assembly: go.GoPositionMap("internal/buildcfg/cfg.go", "cfg.cs", "ABcukpKSkpKSkpKSkpKStAAGEJKCgriCgIKk1oKApKSkpKSC1oKClJSClIKqooKUgoKUgoKUgoKqooKClAAHEIKCgpSUAAsGopiClJSUgoKCgpSCgqaUpKSkgriClAAOHoKCgpSClAAIBrKqgpSCgoKCpoKCgqamlKaUpJSm1qKCqrSCpoKmhqaClIKSlJTogoCkpILWgoCkpILWgoCkpKSkgtaCgKSkpIKChoIABxCCgoKUgpTWooKUpNim1oKmgoKCpoLcgpTaopSkpKSkpKSklKaClKSCgpSkgoKUpIKCgoKmgoKmpKSkgoKUpIKClKSCgpSClJQ=", "314-316:1")]
+[assembly: go.GoPositionMap("internal/buildcfg/exp.go", "exp.cs", "AB8+goKCgpQADhzO2tKUgqaClKYACxYABxCUgoKCgoL+koK4ooKUuIKUgoKUgoKUuIKCpoKCpoKUqqKuwoKCgoKUgoKCgoKClIKClLiqoqqi", "109-112:1", "102=reflect.Value.SetBool")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

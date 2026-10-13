@@ -51,14 +51,18 @@ internal static ΔValue makeMethodValue(@string op, ΔValue v) {
     if ((flag)(v.flag & flagMethod) == 0) {
         throw panic("reflect: internal error: invalid use of makeMethodValue");
     }
+
     // Ignoring the flagMethod bit, v describes the receiver, not the method type.
     var fl = (flag)(v.flag & ((flag)((flag)(flagRO | flagAddr) | flagIndir)));
     fl |= (flag)(((flag)(uintptr)(uint8)v.typ().Kind()));
     ref var rcvr = ref heap<ΔValue>(out var Ꮡrcvr);
     rcvr = new ΔValue(v.typ(), v.ptr, fl);
+
     // v.Type returns the actual type of the method value.
     var ftyp = v.Type()._<ж<rtype>>().Reinterpret<rtype, abi.Type>().FuncType();
+
     var code = methodValueCallCodePtr();
+
     // methodValue contains a stack map for use by the runtime
     var (_, _, abid) = funcLayout(ftyp, nil);
     var fv = Ꮡ(new methodValue(
@@ -71,10 +75,12 @@ internal static ΔValue makeMethodValue(@string op, ΔValue v) {
         method: ((nint)(uintptr)v.flag >> (int)(flagMethodShift)),
         rcvr: rcvr
     ));
+
     // Cause panic if method is not appropriate.
     // The panic would still happen during the call if we omit this,
     // but we want Interface() and other operations to fail early.
     methodReceiver(op, (~fv).rcvr, (~fv).method);
+
     return new ΔValue(ftyp.of(funcType.ᏑType).Common(), @unsafe.Pointer.FromPinnedBox(fv), (flag)((flag)(v.flag & flagRO) | ((flag)(uintptr)(nuint)Func)));
 }
 

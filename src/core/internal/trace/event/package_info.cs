@@ -49,8 +49,8 @@ using static go.@internal.trace.event_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/event/event.go", "event.cs", "AE2cAQAMHJKCgpQ=")]
-[assembly: go.GoPositionMap("internal/trace/event/requirements.go", "requirements.cs", "ABc0")]
+[assembly: go.GoPositionMap("internal/trace/event/event.go", "event.cs", "AEacAQAMHJKCgpQ=")]
+[assembly: go.GoPositionMap("internal/trace/event/requirements.go", "requirements.cs", "ABg0")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;

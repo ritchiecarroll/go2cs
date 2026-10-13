@@ -52,6 +52,7 @@ internal static void Main() {
     (_, err) = self.Verify(new x509.VerifyOptions(nil));
     ref var unknown = ref heap(new x509.UnknownAuthorityError(), out var Ꮡunknown);
     fmt.Printf("self-signed: %T, UnknownAuthorityError %v\n"u8, err, errors.As(err, Ꮡunknown));
+
     var (leafBlock, _) = pem.Decode(slice<byte>(googleLeaf));
     var (interBlock, _) = pem.Decode(slice<byte>(gtsIntermediate));
     (var leaf, err) = x509.ParseCertificate((~leafBlock).Bytes);
@@ -116,7 +117,7 @@ zWfTn1IcKhA3IC7A1n/5bkkWD1Xi1mdWFQ6DQDMp//667zz7pKOgFMlB93aPDjvI
 c78zEqNswn6xGKXpWF5xVwdFcsx9HKhJ6UAi2bQ/KQ1yb7LPUOR6wXXWrG1cLnNP
 i8eNLnKL9PXQ+5SwJFCzfEhcIZuhzg==
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string gtsIntermediate = """
 -----BEGIN CERTIFICATE-----
@@ -151,6 +152,6 @@ AJ2xDx8hcFH1mt0G/FX0Kw4zd8NLQsLxdxP8c4CU6x+7Nz/OAipmsHMdMqUybDKw
 juDEI/9bfU1lcKwrmz3O2+BtjjKAvpafkmO8l7tdufThcV4q5O8DIrGKZTqPwJNl
 1IXNDw9bg1kWRxYtnCQ6yICmJhSFm/Y3m6xv+cXDBlHz4n/FsRC6UfTd
 -----END CERTIFICATE-----
-"""u8;
+"""u8.Raw();
 
 } // end main_package

@@ -128,8 +128,8 @@ internal static (nint, @string, error) cmd(this ж<Client> Ꮡc, nint expectCode
     GoFrame ᒐ = default;
     try {
         var args = argsʗp.sslice();
-
         ref var c = ref Ꮡc.DerefOrNull();
+
         var (id, err) = c.Text.Cmd(format, args.ꓸꓸꓸ);
         if (err != default!) {
             return (0, "", err);
@@ -276,15 +276,14 @@ public static error Auth(this ж<Client> Ꮡc, ΔAuth a) {
             break;
         }
         case 235: {
+            // the last message isn't base64 because it isn't a challenge
             msg = slice<byte>(msg64);
             break;
         }
         default: {
-            err = new textproto.ΔErrorжerror(Ꮡ(new textprotoꓸError( // the last message isn't base64 because it isn't a challenge
-Code: code, Msg: msg64)));
+            err = new textproto.ΔErrorжerror(Ꮡ(new textprotoꓸError(Code: code, Msg: msg64)));
             break;
         }}
-
         if (err == default!) {
             (resp, err) = a.Next(msg, code == 334);
         }

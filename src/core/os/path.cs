@@ -27,7 +27,9 @@ public static error MkdirAll(@string path, FileMode perm) {
         }
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdir"u8, Path: path, Err: syscall.ENOTDIR)));
     }
+
     // Slow path: make sure parent exists and then call Mkdir for path.
+
     // Extract the parent folder from path by first removing any trailing
     // path separator and then scanning backward until finding a path
     // separator or reaching the beginning of the string.
@@ -41,6 +43,7 @@ public static error MkdirAll(@string path, FileMode perm) {
     if (i < 0) {
         i = 0;
     }
+
     // If there is a parent directory, and it is not the volume name,
     // recurse to ensure parent directory exists.
     {
@@ -51,6 +54,7 @@ public static error MkdirAll(@string path, FileMode perm) {
             }
         }
     }
+
     // Parent now exists; invoke Mkdir and use its result.
     err = Mkdir(path, perm);
     if (err != default!) {

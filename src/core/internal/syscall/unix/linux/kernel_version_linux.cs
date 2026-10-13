@@ -20,6 +20,7 @@ public static (nint major, nint minor) KernelVersion() {
             return (major, minor);
         }
     }
+
     array<nint> values = new(2);
     nint value = default!;
     nint vi = default!;
@@ -37,6 +38,7 @@ public static (nint major, nint minor) KernelVersion() {
             value = 0;
         }
     }
+
     return (values[0], values[1]);
 }
 

@@ -28,6 +28,9 @@ using syscall = syscall_package;
 
 partial class registry_package {
 
+// Registry key security and access rights.
+// See https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-key-security-and-access-rights
+// for details.
 public static UntypedInt ALL_ACCESS => 0xf003f;
 public static UntypedInt CREATE_LINK => 0x00020;
 public static UntypedInt CREATE_SUB_KEY => 0x00004;
@@ -41,8 +44,16 @@ public static UntypedInt WOW64_32KEY => 0x00200;
 public static UntypedInt WOW64_64KEY => 0x00100;
 public static UntypedInt WRITE => 0x20006;
 
+// Key is a handle to an open Windows registry key.
+// Keys can be obtained by calling OpenKey; there are
+// also some predefined root keys such as CURRENT_USER.
+// Keys can be used directly in the Windows API.
 partial struct Key /*global::go.syscall_package.ΔHandle*/;
 
+// Windows defines some predefined root keys that are always open.
+// An application can use these keys as entry points to the registry.
+// Normally these keys are used in OpenKey to open new keys,
+// but they can also be used anywhere a Key is required.
 public static Key CLASSES_ROOT => /* Key(syscall.HKEY_CLASSES_ROOT) */ unchecked((Key)(syscallꓸHandle)2147483648);
 public static Key CURRENT_USER => /* Key(syscall.HKEY_CURRENT_USER) */ unchecked((Key)(syscallꓸHandle)2147483649);
 public static Key LOCAL_MACHINE => /* Key(syscall.HKEY_LOCAL_MACHINE) */ unchecked((Key)(syscallꓸHandle)2147483650);
@@ -81,6 +92,7 @@ public static (slice<@string>, error) ReadSubKeyNames(this Key k) {
         // its current thread. See #49320.
         runtime.LockOSThread();
         defer(runtime.UnlockOSThread, ref ᒐ);
+
         var names = new slice<@string>(0);
         // Registry key size limit is 255 bytes and described there:
         // https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-element-size-limits

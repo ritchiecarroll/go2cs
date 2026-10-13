@@ -67,7 +67,7 @@ using static go.expvar_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("expvar/expvar.go", "expvar.cs", "AD50gqaCpoKmgqaCAAcQgqaCpoKokoKCgoKCgsySAA8ggqaCpoKCgoKCloKCgoKClIKCgpS0xLaCgoKo4oKCgoLY4oKUgoKUoqSCgoKmuICCgIKCyKiSgoKCgoK6gILKkoKCgoKCuoCCyuKCgoKCgrSqAAgCgoKCgoK0/oKCqqKmgqaCzoKmgoIACRLSgIKkgoKCoqiiqpKCgqaCgoKmgoKCpoKCgqyy5oKCrLKmgqaCgoKmgoKUlILYkoKCgpSUtLS0tOa0xoI=", "136-136:1;139-139:2;145-160:3")]
+[assembly: go.GoPositionMap("expvar/expvar.go", "expvar.cs", "AD50gqaCpoKmgqaCAAcQgqaCpoKokoKCgoKCgsySAA8ggqaCpoKCgoKCpoKCgoKClIKCgpS0xLaCgoKo4oKCgoLY4oKUgoKUoqSCgoKmuICCgIKC2KiSgoKCgoLKgILKkoKCgoKCyoCCyuKCgoKCgrSqAAgCgoKCgoK0/oKCqqKmgqaC7oKmgoIACRLSgIKkgoKCoqiiqpKCgqaCgoKmgoKCpoKCgqyy5oKCrLKmgqaCgoKmgoKUlILYkoKCgpSUtLS0tNa0toI=", "136-136:1;139-139:2;145-160:3")]
 // </GoSourcePositionMaps>
 
 namespace go;

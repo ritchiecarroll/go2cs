@@ -90,10 +90,20 @@ partial struct Note {
     public @string Body;   // note body text
 }
 
+// Mode values control the operation of [New] and [NewFromFiles].
 partial struct Mode /*num:nint*/;
 
+// AllDecls says to extract documentation for all package-level
+// declarations, not just exported ones.
 public static Mode AllDecls => /* 1 << iota */ 1;
+
+// AllMethods says to show all embedded methods, not just the ones of
+// invisible (unexported) anonymous fields.
 public static Mode AllMethods => 2;
+
+// PreserveAST says to leave the AST unmodified. Originally, pieces of
+// the AST such as function bodies were nil-ed out to save memory in
+// godoc, but not all programs want that behavior.
 public static Mode PreserveAST => 4;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -125,10 +135,12 @@ public static ж<Package> New(ж<ast.Package> Ꮡpkg, @string importPath, Mode m
         importByName: r.importByName,
         syms: new map<@string, bool>()
     ));
+
     p.collectValues((~p).Consts);
     p.collectValues((~p).Vars);
     p.collectTypes((~p).Types);
     p.collectFuncs((~p).Funcs);
+
     return p;
 }
 
@@ -196,8 +208,8 @@ internal static readonly @string testGoˢ = "_test.go"u8;
 // unless the PreserveAST Mode bit is on.
 public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> Ꮡfset, slice<ж<ast.File>> files, @string importPath, params ꓸꓸꓸany optsʗp) {
     var opts = optsʗp.sslice();
-
     ref var fset = ref Ꮡfset.DerefOrNull();
+
     // Check for invalid API usage.
     if (Ꮡfset == nil) {
         throw panic(fmt.Errorf("doc.NewFromFiles: no token.FileSet provided (fset == nil)"u8));
@@ -205,13 +217,13 @@ public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> Ꮡfset, slice
     Mode mode = default!;
     switch (len(opts)) {
     case 0: {
+        // There can only be 0 or 1 options, so a simple switch works for now.
+        // Nothing to do.
         break;
     }
     case 1: {
         var (m, ok) = opts[0]._<Mode>(ᐧ);
         if (!ok) {
-            // There can only be 0 or 1 options, so a simple switch works for now.
-            // Nothing to do.
             throw panic(fmt.Errorf("doc.NewFromFiles: option argument type must be doc.Mode"u8));
         }
         mode = m;
@@ -224,7 +236,6 @@ public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> Ꮡfset, slice
 
     // Collect .go and _test.go files.
     map<@string, ж<ast.File>> goFiles = new map<@string, ж<ast.File>>();
-    
     slice<ж<ast.File>> testGoFiles = default!;
     foreach (var (i, _) in files) {
         var f = Ꮡfset.File(files[i].Pos());
@@ -246,10 +257,11 @@ public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> Ꮡfset, slice
                 return (default!, fmt.Errorf("file files[%d] filename %q does not have a .go extension"u8, i, name));
             }}
         }
-
     }
+
     // TODO(dmitshur,gri): A relatively high level call to ast.NewPackage with a simpleImporter
     // ast.Importer implementation is made below. It might be possible to short-circuit and simplify.
+
     // Compute package documentation.
     var (pkg, _) = ast.NewPackage(Ꮡfset, goFiles, new Func<map<@string, ж<ast.Object>>, @string, (ж<ast.Object>, error)>(simpleImporter), nil); // Ignore errors that can happen due to unresolved identifiers.
     var p = New(pkg, importPath, mode);

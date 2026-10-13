@@ -37,12 +37,11 @@ internal static void fillFileStatFromSys(ж<fileStat> Ꮡfs, @string name) {
         fs.mode |= (fs.FileMode)(ModeSymlink);
     }
     else if (exprᴛ1 == syscall.S_IFREG) {
+        // nothing to do
     }
     else if (exprᴛ1 == syscall.S_IFSOCK) {
         fs.mode |= (fs.FileMode)(ModeSocket);
     }
-
-    // nothing to do
     if ((uint32)(fs.sys.Mode & (uint32)syscall.S_ISGID) != 0) {
         fs.mode |= (fs.FileMode)(ModeSetgid);
     }

@@ -42,10 +42,12 @@ internal static (int64 written, error err, bool handled) sendFile(ж<netFD> Ꮡc
     if (!ok) {
         return (0, default!, false);
     }
+
     (var sc, err) = f.SyscallConn();
     if (err != default!) {
         return (0, default!, false);
     }
+
     ref var werr = ref heap<error>(out var Ꮡwerr);
     err = sc.Read((uintptr fd) => {
         (written, Ꮡwerr.ValueSlot, handled) = poll.SendFile(Ꮡc.of(netFD.Ꮡpfd), (nint)fd, remain);
@@ -54,9 +56,11 @@ internal static (int64 written, error err, bool handled) sendFile(ж<netFD> Ꮡc
     if (err == default!) {
         err = werr;
     }
+
     if (lr != nil) {
         lr.Value.N = remain - written;
     }
+
     return (written, wrapSyscallError(sendfileˢ, err), handled);
 }
 

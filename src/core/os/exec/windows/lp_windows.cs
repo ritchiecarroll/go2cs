@@ -44,9 +44,9 @@ internal static (@string, error) findExecutable(@string @file, slice<@string> ex
         if (chkStat(@file) == default!) {
             return (@file, default!);
         }
+        // Keep checking exts below, so that programs with weird names
+        // like "foo.bat.exe" will resolve instead of failing.
     }
-    // Keep checking exts below, so that programs with weird names
-    // like "foo.bat.exe" will resolve instead of failing.
     foreach (var (_, e) in exts) {
         {
             @string f = @file + e; if (chkStat(f) == default!) {
@@ -76,6 +76,7 @@ public static (@string, error) LookPath(@string @file) {
             return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, err))));
         }
     }
+
     return lookPath(@file, pathExt());
 }
 
@@ -94,6 +95,7 @@ internal static (@string, error) lookExtensions(@string path, @string dir) {
             return ("", new ΔErrorжerror(Ꮡ(new ΔError(path, errΔ1))));
         }
     }
+
     if (filepath.Base(path) == path) {
         path = "."u8 + ((@string)(rune)filepath.Separator) + path;
     }
@@ -163,6 +165,7 @@ internal static (@string, error) lookPath(@string @file, slice<@string> exts) {
         }
         return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, err))));
     }
+
     // On Windows, creating the NoDefaultCurrentDirectoryInExePath
     // environment variable (with any value or no value!) signals that
     // path lookups should skip the current directory.
@@ -173,7 +176,6 @@ internal static (@string, error) lookPath(@string @file, slice<@string> exts) {
     // https://docs.microsoft.com/en-us/windows/win32/api/processenv/nf-processenv-needcurrentdirectoryforexepathw
     // See also go.dev/issue/43947.
     @string dotf = default!;
-    
     error dotErr = default!;
     {
         var (_, found) = os.LookupEnv("NoDefaultCurrentDirectoryInExePath"u8); if (!found) {
@@ -188,6 +190,7 @@ internal static (@string, error) lookPath(@string @file, slice<@string> exts) {
             }
         }
     }
+
     @string path = os.Getenv(pathˢ);
     foreach (var (_, dir) in filepath.SplitList(path)) {
         if (dir == ""u8) {
@@ -195,6 +198,7 @@ internal static (@string, error) lookPath(@string @file, slice<@string> exts) {
             // (See https://go.dev/issue/61493#issuecomment-1649724826.)
             continue;
         }
+
         {
             var (f, err) = findExecutable(filepath.Join(dir, @file), exts); if (err == default!) {
                 if (dotErr != default!) {
@@ -211,6 +215,7 @@ internal static (@string, error) lookPath(@string @file, slice<@string> exts) {
                         return (dotf, dotErr);
                     }
                 }
+
                 if (!filepath.IsAbs(f)) {
                     if (execerrdot.Value() != "0"u8) {
                         // If this is the same relative path that we already found,
@@ -228,6 +233,7 @@ internal static (@string, error) lookPath(@string @file, slice<@string> exts) {
             }
         }
     }
+
     if (dotErr != default!) {
         return (dotf, dotErr);
     }

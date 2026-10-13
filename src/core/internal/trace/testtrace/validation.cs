@@ -58,9 +58,10 @@ public static ж<Validator> NewValidator() {
 // Returns an error if validation fails.
 public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
     ev = ev.ΔClone();
-
     ref var v = ref Ꮡv.DerefOrNull();
+
     var e = @new<errAccumulator>();
+
     // Validate timestamp order.
     if (v.lastTs != 0){
         if (ev.Time() <= v.lastTs){
@@ -71,38 +72,41 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
     } else {
         v.lastTs = ev.Time();
     }
+
     // Validate event stack.
     checkStack(e, ev.Stack());
+
     var exprᴛ1 = ev.Kind();
     if (exprᴛ1 == trace.EventSync) {
+        // Just record that we've seen a Sync at some point.
         v.seenSync = true;
     }
     else if (exprᴛ1 == trace.EventMetric) {
         var m = ev.Metric();
-        if (!strings.Contains(m.Name, // Just record that we've seen a Sync at some point.
- ":"u8)) {
+        if (!strings.Contains(m.Name, ":"u8)) {
             // Should have a ":" as per runtime/metrics convention.
             e.Errorf("invalid metric name %q"u8, m.Name);
         }
+        // Make sure the value is OK.
         if (m.Value.Kind() == trace.ValueBad) {
-            // Make sure the value is OK.
             e.Errorf("invalid value"u8);
         }
         var exprᴛ2 = m.Value.Kind();
         if (exprᴛ2 == trace.ValueUint64) {
+            // Just make sure it doesn't panic.
             _ = m.Value.Uint64();
         }
-
     }
     else if (exprᴛ1 == trace.EventLabel) {
         var l = ev.Label();
+
+        // Check label.
         if (l.ΔΔLabel == ""u8) {
-            // Just make sure it doesn't panic.
-            // Check label.
             e.Errorf("invalid label %q"u8, l.ΔΔLabel);
         }
+
+        // Check label resource.
         if (l.Resource.Kind == trace.ResourceNone) {
-            // Check label resource.
             e.Errorf("label resource none"u8);
         }
         var exprᴛ3 = l.Resource.Kind;
@@ -130,29 +134,28 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
                 }
             }
         }
-
     }
     else if (exprᴛ1 == trace.EventStackSample) {
+        // Not much to check here. It's basically a sched context and a stack.
+        // The sched context is also not guaranteed to align with other events.
+        // We already checked the stack above.
     }
     else if (exprᴛ1 == trace.EventStateTransition) {
+        // Validate state transitions.
+        //
+        // TODO(mknyszek): A lot of logic is duplicated between goroutines and procs.
+        // The two are intentionally handled identically; from the perspective of the
+        // API, resources all have the same general properties. Consider making this
+        // code generic over resources and implementing validation just once.
         var tr = ev.StateTransition();
-        checkStack(e, // Not much to check here. It's basically a sched context and a stack.
- // The sched context is also not guaranteed to align with other events.
- // We already checked the stack above.
- // Validate state transitions.
- //
- // TODO(mknyszek): A lot of logic is duplicated between goroutines and procs.
- // The two are intentionally handled identically; from the perspective of the
- // API, resources all have the same general properties. Consider making this
- // code generic over resources and implementing validation just once.
- tr.Stack);
+        checkStack(e, tr.Stack);
         var exprᴛ4 = tr.Resource.Kind;
         if (exprᴛ4 == trace.ResourceGoroutine) {
+            // Basic state transition validation.
             var id = tr.Resource.Goroutine();
             ref var newΔ5 = ref heap<trace.GoState>(out var ᏑnewΔ5);
             (var old, newΔ5) = tr.Goroutine();
             if (newΔ5 == trace.GoUndetermined) {
-                // Basic state transition validation.
                 e.Errorf("transition to undetermined state for goroutine %d"u8, id);
             }
             if (v.seenSync && old == trace.GoUndetermined) {
@@ -174,8 +177,8 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
                 state = Ꮡ(new goState(state: newΔ5));
                 v.gs[id] = state;
             }
+            // Validate sched context.
             if (newΔ5.Executing()){
-                // Validate sched context.
                 var ctx = Ꮡv.getOrCreateThread(e, ev, ev.Thread());
                 if (ctx != nil) {
                     if ((~ctx).G != trace.NoGoroutine && (~ctx).G != id) {
@@ -204,11 +207,11 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
             }
         }
         else if (exprᴛ4 == trace.ResourceProc) {
+            // Basic state transition validation.
             var id = tr.Resource.Proc();
             ref var newΔ6 = ref heap<trace.ProcState>(out var ᏑnewΔ6);
             (var old, newΔ6) = tr.Proc();
             if (newΔ6 == trace.ProcUndetermined) {
-                // Basic state transition validation.
                 e.Errorf("transition to undetermined state for proc %d"u8, id);
             }
             if (v.seenSync && old == trace.ProcUndetermined) {
@@ -230,8 +233,8 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
                 state = Ꮡ(new procState(state: newΔ6));
                 v.ps[id] = state;
             }
+            // Validate sched context.
             if (newΔ6.Executing()){
-                // Validate sched context.
                 var ctx = Ꮡv.getOrCreateThread(e, ev, ev.Thread());
                 if (ctx != nil) {
                     if ((~ctx).P != trace.NoProc && (~ctx).P != id) {
@@ -254,14 +257,13 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
                 }
             }
         }
-
     }
     else if (exprᴛ1 == trace.EventRangeBegin || exprᴛ1 == trace.EventRangeActive || exprᴛ1 == trace.EventRangeEnd) {
+        // Validate ranges.
         var r = ev.Range();
         var exprᴛ5 = ev.Kind();
         if (exprᴛ5 == trace.EventRangeBegin) {
-            if (v.hasRange(r.Scope, // Validate ranges.
- r.Name)) {
+            if (v.hasRange(r.Scope, r.Name)) {
                 e.Errorf("already active range %q on %v begun again"u8, r.Name, r.Scope);
             }
             v.addRange(r.Scope, r.Name);
@@ -277,12 +279,11 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
             }
             v.deleteRange(r.Scope, r.Name);
         }
-
     }
     else if (exprᴛ1 == trace.EventTaskBegin) {
+        // Validate task begin.
         var t = ev.Task();
         if (t.ID == trace.NoTask || t.ID == trace.BackgroundTask) {
-            // Validate task begin.
             // The background task should never have an event emitted for it.
             e.Errorf("found invalid task ID for task of type %s"u8, t.Type);
         }
@@ -290,16 +291,16 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
             // It's not possible for a task to be a subtask of the background task.
             e.Errorf("found background task as the parent for task of type %s"u8, t.Type);
         }
+        // N.B. Don't check the task type. Empty string is a valid task type.
         v.tasks[t.ID] = t.Type;
     }
     else if (exprᴛ1 == trace.EventTaskEnd) {
+        // Validate task end.
+        // We can see a task end without a begin, so ignore a task without information.
+        // Instead, if we've seen the task begin, just make sure the task end lines up.
         var t = ev.Task();
         {
             var (typ, ok) = v.tasks[t.ID, ꟷ]; if (ok) {
-                // N.B. Don't check the task type. Empty string is a valid task type.
-                // Validate task end.
-                // We can see a task end without a begin, so ignore a task without information.
-                // Instead, if we've seen the task begin, just make sure the task end lines up.
                 if (t.Type != typ) {
                     e.Errorf("task end type %q doesn't match task start type %q for task %d"u8, t.Type, typ, t.ID);
                 }
@@ -308,14 +309,13 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
         }
     }
     else if (exprᴛ1 == trace.EventLog) {
+        // There's really not much here to check, except that we can
+        // generate a Log. The category and message are entirely user-created,
+        // so we can't make any assumptions as to what they are. We also
+        // can't validate the task, because proving the task's existence is very
+        // much best-effort.
         _ = ev.Log();
     }
-
-    // There's really not much here to check, except that we can
-    // generate a Log. The category and message are entirely user-created,
-    // so we can't make any assumptions as to what they are. We also
-    // can't validate the task, because proving the task's existence is very
-    // much best-effort.
     return e.Errors();
 }
 
@@ -349,9 +349,9 @@ internal static void deleteRange(this ref Validator v, trace.ResourceID r, @stri
 
 internal static ж<schedContext> getOrCreateThread(this ж<Validator> Ꮡv, ж<errAccumulator> Ꮡe, traceꓸEvent ev, trace.ThreadID m) {
     ev = ev.ΔClone();
-
     ref var v = ref Ꮡv.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
+
     var evʗ1 = ev;
     bool lenient() {
         // Be lenient about GoUndetermined -> GoSyscall transitions if they

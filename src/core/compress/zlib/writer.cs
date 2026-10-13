@@ -18,13 +18,9 @@ partial class zlib_package {
 // These constants are copied from the flate package, so that code that imports
 // "compress/zlib" does not also have to import "compress/flate".
 public static UntypedInt NoCompression => /* flate.NoCompression */ 0;
-
 public static UntypedInt BestSpeed => /* flate.BestSpeed */ 1;
-
 public static UntypedInt BestCompression => /* flate.BestCompression */ 9;
-
 public static UntypedInt DefaultCompression => /* flate.DefaultCompression */ -1;
-
 public static UntypedInt HuffmanOnly => /* flate.HuffmanOnly */ -2;
 
 // A Writer takes data written to it and writes the compressed
@@ -122,7 +118,6 @@ internal static error /*err*/ writeHeader(this ref Writer z) {
     else { /* default: */
         throw panic("unreachable");
     }
-
     if (z.dict != default!) {
         z.scratch[1] |= (byte)((byte)(1 << (int)(5)));
     }

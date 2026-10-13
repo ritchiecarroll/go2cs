@@ -21,6 +21,10 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class scanner_package {
 
+// An ErrorHandler may be provided to [Scanner.Init]. If a syntax error is
+// encountered and a handler was installed, the handler is called with a
+// position and an error message. The position points to the beginning of
+// the offending token.
 // type ErrorHandler is a methodless func type — rendered inline as its base delegate
 
 // A Scanner holds the scanner's internal state while processing
@@ -72,9 +76,9 @@ internal static void next(this ref Scanner s) {
             break;
         }
         case {} when r >= utf8.RuneSelf: {
+            // not ASCII
             (r, w) = utf8.DecodeRune(s.src.slice(s.rdOffset));
             if (r == utf8.RuneError && w == 1){
-                // not ASCII
                 s.error(s.offset, illegalUtf8Encodingˢ);
             } else 
             if (r == bom && s.offset > 0) {
@@ -82,7 +86,6 @@ internal static void next(this ref Scanner s) {
             }
             break;
         }}
-
         s.rdOffset += w;
         s.ch = r;
     } else {
@@ -104,6 +107,8 @@ internal static byte peek(this ref Scanner s) {
     return 0;
 }
 
+// A mode value is a set of flags (or 0).
+// They control scanner behavior.
 partial struct Mode /*num:nuint*/;
 
 public static Mode ScanComments => /* 1 << iota */ 1;          // return comments as COMMENT tokens
@@ -135,12 +140,14 @@ public static void Init(this ref Scanner s, ж<tokenꓸFile> Ꮡfile, slice<byte
     s.src = src;
     s.err = err;
     s.mode = mode;
+
     s.ch = (rune)' ';
     s.offset = 0;
     s.rdOffset = 0;
     s.lineOffset = 0;
     s.insertSemi = false;
     s.ErrorCount = 0;
+
     s.next();
     if (s.ch == bom) {
         s.next(); // ignore BOM at file beginning
@@ -172,6 +179,7 @@ internal static (@string, nint) scanComment(this ref Scanner s) {
     nint next = -1; // position immediately following the comment; < 0 means invalid comment
     nint numCR = 0;
     nint nlOffset = 0; // offset of first newline within /*...*/ comment
+
     if (s.ch == (rune)'/') {
         //-style comment
         // (the final '\n' is not considered part of the comment)
@@ -189,6 +197,7 @@ internal static (@string, nint) scanComment(this ref Scanner s) {
         }
         goto exit;
     }
+
     /*-style comment */
     s.next();
     while (s.ch >= 0) {
@@ -206,9 +215,12 @@ internal static (@string, nint) scanComment(this ref Scanner s) {
             goto exit;
         }
     }
+
     s.error(offs, commentNotTerminatedˢ);
+
 exit:
     var lit = s.src.slice(offs, s.offset);
+
     // On Windows, a (//-comment) line may end in "\r\n".
     // Remove the final '\r' before analyzing the text for
     // line directives (matching the compiler). Remove any
@@ -218,15 +230,17 @@ exit:
         lit = lit.slice(0, len(lit) - 1);
         numCR--;
     }
+
     // interpret line directives
     // (//line directives must start at the beginning of the current line)
-    if (next >= 0 && (lit[1] == (rune)'*' || offs == s.lineOffset) && bytes.HasPrefix(lit[2..], /* implies valid comment */
- prefix)) {
+    if (next >= 0 /* implies valid comment */ && (lit[1] == (rune)'*' || offs == s.lineOffset) && bytes.HasPrefix(lit[2..], prefix)) {
         s.updateLineInfo(next, offs, lit);
     }
+
     if (numCR > 0) {
         lit = stripCR(lit, lit[1] == (rune)'*');
     }
+
     return (((@string)lit), nlOffset);
 }
 
@@ -242,16 +256,19 @@ internal static void updateLineInfo(this ref Scanner s, nint next, nint offs, sl
     }
     text = text[7..]; // lop off leading "//line " or "/*line "
     offs += 7;
+
     var (i, n, ok) = trailingDigits(text);
     if (i == 0) {
         return; // ignore (not a line directive)
     }
     // i > 0
+
     if (!ok) {
         // text has a suffix :xxx but xxx is not a number
         s.error(offs + i, "invalid line number: "u8 + ((sstring)(text.slice(i))));
         return;
     }
+
     // Put a cap on the maximum size of line and column numbers.
     // 30 bits allows for some additional space before wrapping an int32.
     // Keep this consistent with cmd/compile/internal/syntax.PosMax.
@@ -272,10 +289,12 @@ internal static void updateLineInfo(this ref Scanner s, nint next, nint offs, sl
         //line filename:line
         line = n;
     }
+
     if (line == 0 || line > maxLineCol) {
         s.error(offs + i, "invalid line number: "u8 + ((sstring)(text.slice(i))));
         return;
     }
+
     // If we have a column (//line filename:line:col form),
     // an empty filename means to use the previous filename.
     @string filename = ((@string)(text.slice(0, i - 1))); // lop off ":line", and trim white space
@@ -291,6 +310,7 @@ internal static void updateLineInfo(this ref Scanner s, nint next, nint offs, sl
             filename = filepath.Join(s.dir, filename);
         }
     }
+
     s.@file.AddLineColumnInfo(next, filename, line, col);
 }
 
@@ -319,6 +339,7 @@ internal static bool isDigit(rune ch) {
 // scanning performance significantly.
 internal static @string scanIdentifier(this ref Scanner s) {
     nint offs = s.offset;
+
     // Optimize for the common case of an ASCII identifier.
     //
     // Ranging over s.src[s.rdOffset:] lets us avoid some bounds checks, and
@@ -356,6 +377,7 @@ internal static @string scanIdentifier(this ref Scanner s) {
     s.offset = len(s.src);
     s.rdOffset = len(s.src);
     s.ch = eof;
+
 exit:
     return ((@string)(s.src.slice(offs, s.offset)));
 }
@@ -368,7 +390,6 @@ internal static nint digitVal(rune ch) {
     case {} when (rune)'a' <= lower(ch) && lower(ch) <= (rune)'f': {
         return (nint)(lower(ch) - (rune)'a' + 10);
     }}
-
     return 16; // larger than any legal digit val
 }
 
@@ -392,8 +413,8 @@ internal static bool isHex(rune ch) {
 // digits (bit 0 is set), or separators '_' (bit 1 is set).
 internal static nint /*digsep*/ digits(this ref Scanner s, nint @base, ж<nint> Ꮡinvalid) {
     nint digsep = default!;
-
     ref var invalid = ref Ꮡinvalid.DerefOrNull();
+
     if (@base <= 10){
         var max = (rune)((rune)'0' + @base);
         while (isDecimal(s.ch) || s.ch == (rune)'_') {
@@ -428,11 +449,13 @@ internal static readonly @string mustSeparateSuccessiveˢ = "'_' must separate s
 internal static (token.Token, @string) scanNumber(this ref Scanner s) {
     nint offs = s.offset;
     token.Token tok = token.ILLEGAL;
+
     nint @base = 10; // number base
     var prefix = (rune)0; // one of 0 (decimal), '0' (0-octal), 'x', 'o', or 'b'
     nint digsep = 0; // bit 0: digit present, bit 1: '_' present
     ref var invalid = ref heap<nint>(out var Ꮡinvalid);
     invalid = -1; // index of invalid digit in literal, or < 0
+
     // integer part
     if (s.ch != (rune)'.') {
         tok = token.INT;
@@ -459,10 +482,10 @@ internal static (token.Token, @string) scanNumber(this ref Scanner s) {
                 digsep = 1; // leading 0
                 break;
             }}
-
         }
         digsep |= (nint)(s.digits(@base, Ꮡinvalid));
     }
+
     // fractional part
     if (s.ch == (rune)'.') {
         tok = token.FLOAT;
@@ -472,9 +495,11 @@ internal static (token.Token, @string) scanNumber(this ref Scanner s) {
         s.next();
         digsep |= (nint)(s.digits(@base, Ꮡinvalid));
     }
+
     if ((nint)(digsep & 1) == 0) {
         s.error(s.offset, litname(prefix) + " has no digits"u8);
     }
+
     // exponent
     {
         var e = lower(s.ch); if (e == (rune)'e' || e == (rune)'p'){
@@ -487,7 +512,6 @@ internal static (token.Token, @string) scanNumber(this ref Scanner s) {
                 s.errorf(s.offset, "%q exponent requires hexadecimal mantissa"u8, s.ch);
                 break;
             }}
-
             s.next();
             tok = token.FLOAT;
             if (s.ch == (rune)'+' || s.ch == (rune)'-') {
@@ -503,11 +527,13 @@ internal static (token.Token, @string) scanNumber(this ref Scanner s) {
             s.error(s.offset, hexadecimalMantissaˢ);
         }
     }
+
     // suffix 'i'
     if (s.ch == (rune)'i') {
         tok = token.IMAG;
         s.next();
     }
+
     @string lit = ((@string)(s.src.slice(offs, s.offset)));
     if (tok == token.INT && invalid >= 0) {
         s.errorf(invalid, "invalid digit %q in %s"u8, lit[invalid - offs], litname(prefix));
@@ -519,6 +545,7 @@ internal static (token.Token, @string) scanNumber(this ref Scanner s) {
             }
         }
     }
+
     return (tok, lit);
 }
 
@@ -539,7 +566,6 @@ internal static @string litname(rune prefix) {
     case (rune)'b': {
         return binaryLiteralˢ;
     }}
-
     return decimalLiteralˢ;
 }
 
@@ -548,6 +574,7 @@ internal static nint invalidSep(@string x) {
     var x1 = (rune)' '; // prefix char, we only care if it's 'x'
     var d = (rune)'.'; // digit, one of '_', '0' (a digit), or '.' (anything else)
     nint i = 0;
+
     // a prefix counts as a digit
     if (len(x) >= 2 && x[0] == (rune)'0') {
         x1 = lower((rune)x[1]);
@@ -556,6 +583,7 @@ internal static nint invalidSep(@string x) {
             i = 2;
         }
     }
+
     // mantissa and exponent
     for (; i < len(x); i++) {
         var p = d; // previous digit
@@ -578,11 +606,11 @@ internal static nint invalidSep(@string x) {
             d = (rune)'.';
             break;
         }}
-
     }
     if (d == (rune)'_') {
         return len(x) - 1;
     }
+
     return -1;
 }
 
@@ -597,6 +625,7 @@ internal static readonly @string escapeSequenceIsInvalidˢ = "escape sequence is
 // it returns true.
 internal static bool scanEscape(this ref Scanner s, rune quote) {
     nint offs = s.offset;
+
     nint n = default!;
     uint32 @base = default!;
     uint32 max = default!;
@@ -644,10 +673,12 @@ internal static bool scanEscape(this ref Scanner s, rune quote) {
         s.next();
         n--;
     }
+
     if (x > max || 0xD800 <= x && x < 0xE000) {
         s.error(offs, escapeSequenceIsInvalidˢ);
         return false;
     }
+
     return true;
 }
 
@@ -658,6 +689,7 @@ internal static readonly @string illegalRuneLiteralˢ = "illegal rune literal"u8
 internal static @string scanRune(this ref Scanner s) {
     // '\'' opening already consumed
     nint offs = s.offset - 1;
+
     var valid = true;
     nint n = 0;
     while (ᐧ) {
@@ -679,12 +711,14 @@ internal static @string scanRune(this ref Scanner s) {
             if (!s.scanEscape((rune)'\'')) {
                 valid = false;
             }
+            // continue to read to closing quote
         }
     }
-    // continue to read to closing quote
+
     if (valid && n != 1) {
         s.error(offs, illegalRuneLiteralˢ);
     }
+
     return ((@string)(s.src.slice(offs, s.offset)));
 }
 
@@ -694,6 +728,7 @@ internal static readonly @string stringLiteralNotˢ = "string literal not termin
 internal static @string scanString(this ref Scanner s) {
     // '"' opening already consumed
     nint offs = s.offset - 1;
+
     while (ᐧ) {
         var ch = s.ch;
         if (ch == (rune)'\n' || ch < 0) {
@@ -708,6 +743,7 @@ internal static @string scanString(this ref Scanner s) {
             s.scanEscape((rune)'"');
         }
     }
+
     return ((@string)(s.src.slice(offs, s.offset)));
 }
 
@@ -734,6 +770,7 @@ internal static readonly @string rawStringLiteralNotˢ = "raw string literal not
 internal static @string scanRawString(this ref Scanner s) {
     // '`' opening already consumed
     nint offs = s.offset - 1;
+
     var hasCR = false;
     while (ᐧ) {
         var ch = s.ch;
@@ -749,10 +786,12 @@ internal static @string scanRawString(this ref Scanner s) {
             hasCR = true;
         }
     }
+
     var lit = s.src.slice(offs, s.offset);
     if (hasCR) {
         lit = stripCR(lit, false);
     }
+
     return ((@string)lit);
 }
 
@@ -846,9 +885,12 @@ scanAgain:
         s.nlPos = token.NoPos;
         return (pos, tok, lit);
     }
+
     s.skipWhitespace();
+
     // current token start
     pos = s.@file.Pos(s.offset);
+
     // determine token value
     var insertSemi = false;
     {
@@ -863,7 +905,6 @@ scanAgain:
                 if (exprᴛ1 == token.IDENT || exprᴛ1 == token.BREAK || exprᴛ1 == token.CONTINUE || exprᴛ1 == token.FALLTHROUGH || exprᴛ1 == token.RETURN) {
                     insertSemi = true;
                 }
-
             } else {
                 insertSemi = true;
                 tok = token.IDENT;
@@ -886,6 +927,9 @@ scanAgain:
                 tok = token.EOF;
             }
             else if (exprᴛ2 is (rune)'\n') {
+                // we only reach here if s.insertSemi was
+                // set in the first place and exited early
+                // from s.skipWhitespace()
                 s.insertSemi = false; // newline consumed
                 return (pos, token.SEMICOLON, "\n");
             }
@@ -905,15 +949,12 @@ scanAgain:
                 lit = s.scanRawString();
             }
             else if (exprᴛ2 is (rune)':') {
-                tok = s.switch2(token.COLON, // we only reach here if s.insertSemi was
- // set in the first place and exited early
- // from s.skipWhitespace()
- token.DEFINE);
+                tok = s.switch2(token.COLON, token.DEFINE);
             }
             else if (exprᴛ2 is (rune)'.') {
+                // fractions starting with a '.' are handled by outer switch
                 tok = token.PERIOD;
                 if (s.ch == (rune)'.' && s.peek() == (rune)'.') {
-                    // fractions starting with a '.' are handled by outer switch
                     s.next();
                     s.next(); // consume last '.'
                     tok = token.ELLIPSIS;
@@ -1023,8 +1064,8 @@ scanAgain:
                 tok = token.TILDE;
             }
             else { /* default: */
+                // next reports unexpected BOMs - don't repeat
                 if (ch != bom) {
-                    // next reports unexpected BOMs - don't repeat
                     // Report an informative error for U+201[CD] quotation
                     // marks, which are easily introduced via copy and paste.
                     if (ch == (rune)'“' || ch == (rune)'”'){
@@ -1037,14 +1078,13 @@ scanAgain:
                 tok = token.ILLEGAL;
                 lit = ((@string)ch);
             }
-
             break;
         }}
     }
-
     if ((Mode)(s.mode & dontInsertSemis) == 0) {
         s.insertSemi = insertSemi;
     }
+
     return (pos, tok, lit);
 }
 

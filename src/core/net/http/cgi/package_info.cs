@@ -74,9 +74,9 @@ using static go.net.http.cgi_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/cgi/cgi_main.go", "cgi_main.cs", "ABgmgpSCpPqigoKWgoKWgoKCloKCgoSClpSCgpSWhIKWgoKWgsqCgpQADAiSlJSUpIKkgqSCgoKUgoKClICCgqSCgoKmgoKCpoKm", "105-134:1")]
-[assembly: go.GoPositionMap("net/http/cgi/child.go", "child.cs", "ABc4woKClIKUpoKCgoCCtgAQCqKCgoKWgoKCgpaCgoSEgIKCgpSmgIK4goKUgIK4gpSCgoLMgIKmlIKClJSCgpS4goKClLqChK7CgoKUgpSClMqCgoCCpAALGIKmgqaCgpSClKaClIKUgq7CgpSCgoCCpIKC", "", "", "169=NewWriter/1/1/3")]
-[assembly: go.GoPositionMap("net/http/cgi/host.go", "host.cs", "ACdIlIKUpKSkpKSkABs+goKUAAIUAAkCgoKAgoKCgoLIgqb20oKCgpaChIKClICCpgAMHICCpqaAgpSmgpaigpSUgoKUloKUgIKmgoKUhIKAgriCgIK4gpaEkoKClJSCloKClu6ClIKCgpaCgoKUgIKkkpSCgoKCgoKCgoKClIKUgoKClIKClIKCgoKUgoKUgpSCgpSCgoKClLTGgoKCloCCgoKUgriCgoKWgsyCgqiEgoLutKSigpS4ooKCgoIAChYAChamgpSkquY=", "221-224:1", "", "155=RequestURI/1/1/7;246=stderr/1/1/5")]
+[assembly: go.GoPositionMap("net/http/cgi/cgi_main.go", "cgi_main.cs", "ABgmgpSClPqigoKmgoKmgoKCpoKCgpSCppSCgpSmlIKmgoKmgsqCgpQADAiSlJSUpIKkgpSCgoKUgoKClICCgqSCgoKmgoKCpoKm", "105-134:1")]
+[assembly: go.GoPositionMap("net/http/cgi/child.go", "child.cs", "ABc4woKClIKUpoKCgoCCtgAQCqKCgoKmgoKCgqaCgpSUgIKCgpS2gILIgoKUgILIgpSCgoLcgIK2lIKClJSCgpS4goKClMqClK7CgoKUgpSClMqCgoCCpAALGIKmgqaCgpSClKaClIKUgq7CgpSCgoCCpIKC", "", "", "180=NewWriter/1/1/3")]
+[assembly: go.GoPositionMap("net/http/cgi/host.go", "host.cs", "ACdIlIKUpKSkpKSUABs+goKUAAIUAAkCgoKAgoKCgoLIgqb20oKCgqaClIKClICCtgANHICCpraAgpS2gqaigpSUgoKUpoKUgIK2goKUlIKAgsiCgILIgqaUkoKClJSCpoKCpu6ClIKCgqaCgoKUgIKkkqSCgoKCgoKCgoKClIKUgoKClIKClIKCgoKUgoKUgpSCgpSCgoKClLS2goKCpoCCgoKUgsiCgoKmgtyCgriUgoLutKSigpS4ooKCgoIAChYAChamgpSk2qY=", "221-224:1", "", "157=RequestURI/1/1/7;261=stderr/1/1/5")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

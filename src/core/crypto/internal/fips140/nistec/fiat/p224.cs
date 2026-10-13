@@ -86,6 +86,7 @@ public static (ж<P224Element>, error) SetBytes(this ж<P224Element> Ꮡe, slice
     if (len(v) != p224ElementLen) {
         return (default!, errors.New(invalidP224Elementˢ));
     }
+
     // Check for non-canonical encodings (p + k, 2p + k, etc.) by comparing to
     // the encoding of -1 mod p, so p - 1, the highest canonical encoding.
     slice<byte> minusOneEncoding = @new<P224Element>().Sub(
@@ -98,6 +99,7 @@ public static (ж<P224Element>, error) SetBytes(this ж<P224Element> Ꮡe, slice
             return (default!, errors.New(invalidP224Elementˢ));
         }
     }
+
     ref var @in = ref heap(new array<byte>(28), out var Ꮡin);
     copy(@in[..], v);
     p224InvertEndianness(@in[..]);

@@ -71,6 +71,7 @@ internal static error ReadRequestHeader(this ж<serverCodec> Ꮡc, ж<rpc.Reques
         }
     }
     r.ServiceMethod = c.req.Method;
+
     // JSON request id can be any JSON value;
     // RPC package expects uint64.  Translate to
     // internal uint64 and save JSON on the side.
@@ -80,6 +81,7 @@ internal static error ReadRequestHeader(this ж<serverCodec> Ꮡc, ж<rpc.Reques
     c.req.Id = default!;
     r.Seq = c.seq;
     c.mutex.Unlock();
+
     return default!;
 }
 
@@ -90,6 +92,7 @@ internal static error ReadRequestBody(this ref serverCodec c, any x) {
     if (c.req.Params == nil) {
         return errMissingParams;
     }
+
     // JSON params is array value.
     // RPC params is struct.
     // Unmarshal into array containing struct for now.
@@ -117,6 +120,7 @@ internal static error WriteResponse(this ж<serverCodec> Ꮡc, ж<rpc.Response> 
     }
     delete(c.pending, r.Seq);
     c.mutex.Unlock();
+
     if (b == nil) {
         // Invalid request so no id. Use JSON null.
         b = Ꮡnull;

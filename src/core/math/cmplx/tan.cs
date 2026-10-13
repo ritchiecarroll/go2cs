@@ -67,14 +67,12 @@ public static complex128 Tan(complex128 x) {
             case {} when math.IsInf(re, 0) || math.IsNaN(re): {
                 return complex(math.Copysign(0D, re), math.Copysign(1D, im));
             }}
-
             return complex(math.Copysign(0D, math.Sin(2D * re)), math.Copysign(1D, im));
         }
         case {} when re == 0D && math.IsNaN(im): {
             return x;
         }}
     }
-
     var d = math.Cos(2D * real(x)) + math.Cosh(2D * imag(x));
     if (math.Abs(d) < 0.25D) {
         d = tanSeries(x);
@@ -107,14 +105,12 @@ public static complex128 Tanh(complex128 x) {
             case {} when math.IsInf(im, 0) || math.IsNaN(im): {
                 return complex(math.Copysign(1D, re), math.Copysign(0D, im));
             }}
-
             return complex(math.Copysign(1D, re), math.Copysign(0D, math.Sin(2D * im)));
         }
         case {} when im == 0D && math.IsNaN(re): {
             return x;
         }}
     }
-
     var d = math.Cosh(2D * real(x)) + math.Cos(2D * imag(x));
     if (d == 0D) {
         return Inf();
@@ -142,23 +138,26 @@ internal static float64 reducePi(float64 x) {
     const float64 reduceThreshold = /* 1 << 30 */ 1.073741824e+09;
     if (math.Abs(x) < reduceThreshold) {
         // Use Cody-Waite reduction in three parts.
+        // PI1, PI2 and PI3 comprise an extended precision value of PI
+        // such that PI ~= PI1 + PI2 + PI3. The parts are chosen so
+        // that PI1 and PI2 have an approximately equal number of trailing
+        // zero bits. This ensures that t*PI1 and t*PI2 are exact for
+        // large integer values of t. The full precision PI3 ensures the
+        // approximation of PI is accurate to 102 bits to handle cancellation
+        // during subtraction.
         const float64 PI1 = 3.141592502593994; // 0x400921fb40000000
-        
         const float64 PI2 = 1.5099578831723193e-07; // 0x3e84442d00000000
-        
         const float64 PI3 = 1.0780605716316238e-14; // 0x3d08469898cc5170
         var t = x / (float64)math.Pi;
         t += 0.5D;
         t = (float64)(int64)t; // int64(t) = the multiple
         return ((x - t * PI1) - t * PI2) - t * PI3;
     }
+
     // Must apply Payne-Hanek range reduction
     const uint64 mask = 0x7FF;
-    
     UntypedInt shift = /* 64 - 11 - 1 */ 52;
-    
     UntypedInt bias = 1023;
-    
     const uint64 fracMask = /* 1<<shift - 1 */ 4503599627370495;
     // Extract out the integer and exponent such that,
     // x = ix * 2 ** exp.
@@ -166,6 +165,7 @@ internal static float64 reducePi(float64 x) {
     nint exp = (nint)((uint64)((ix >> (int)(shift)) & mask)) - (nint)bias - (nint)shift;
     ix &= (uint64)(fracMask);
     ix |= (uint64)(((uint64)1 << (int)(shift)));
+
     // mPi is the binary digits of 1/Pi as a uint64 array,
     // that is, 1/Pi = Sum mPi[i]*2^(-64*i).
     // 19 64-bit digits give 1216 bits of precision
@@ -245,6 +245,7 @@ internal static float64 tanSeries(complex128 z) {
         var t = y2 + x2;
         t /= f;
         d += t;
+
         rn++;
         f *= rn;
         rn++;

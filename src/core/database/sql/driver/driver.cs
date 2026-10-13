@@ -36,6 +36,22 @@
 // is called before reusing the connection for another query. If a connection is
 // never returned to the connection pool but is immediately reused, then
 // ResetSession is called prior to reuse but IsValid is not called.
+
+// Value is a value that drivers must be able to handle.
+// It is either nil, a type handled by a database driver's [NamedValueChecker]
+// interface, or an instance of one of these types:
+//
+//	int64
+//	float64
+//	bool
+//	[]byte
+//	string
+//	time.Time
+//
+// If the driver supports cursors, a returned Value may also implement the [Rows] interface
+// in this package. This is used, for example, when a user selects a cursor
+// such as "select cursor(select * from my_table) from dual". If the [Rows]
+// from the select is closed, the cursor [Rows] will also be closed.
 global using Value = object;
 
 namespace go.database.sql;
@@ -242,6 +258,10 @@ partial interface ConnPrepareContext {
     (Stmt, error) PrepareContext(context.Context ctx, @string query);
 }
 
+// IsolationLevel is the transaction isolation level stored in [TxOptions].
+//
+// This type should be considered identical to [database/sql.IsolationLevel] along
+// with any values defined on it.
 partial struct IsolationLevel /*num:nint*/;
 
 // TxOptions holds the transaction options.
@@ -495,6 +515,8 @@ partial interface Tx {
     error Rollback();
 }
 
+// RowsAffected implements [Result] for an INSERT or UPDATE operation
+// which mutates a number of rows.
 partial struct ΔRowsAffected /*num:int64*/;
 
 internal static Result _ᴛ1ʗ = ((ΔRowsAffected)0);

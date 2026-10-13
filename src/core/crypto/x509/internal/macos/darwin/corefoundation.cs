@@ -18,12 +18,14 @@ using go.@internal;
 
 partial class macOS_package {
 
-partial struct CFRef /*num:uintptr*/;
-
 // Core Foundation linker flags for the external linker. See Issue 42459.
 //
 //go:cgo_ldflag "-framework"
 //go:cgo_ldflag "CoreFoundation"
+
+// CFRef is an opaque reference to a Core Foundation object. It is a pointer,
+// but to memory not owned by Go, so not an unsafe.Pointer.
+partial struct CFRef /*num:uintptr*/;
 
 // CFDataToSlice returns a copy of the contents of data as a bytes slice.
 public static slice<byte> CFDataToSlice(CFRef data) {

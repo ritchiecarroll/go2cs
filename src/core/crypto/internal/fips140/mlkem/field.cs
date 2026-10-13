@@ -11,6 +11,7 @@ using go.crypto.@internal.fips140deps;
 
 partial class mlkem_package {
 
+// fieldElement is an integer modulo q, an element of ℤ_q. It is always reduced.
 public partial struct fieldElement /*num:uint16*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -82,6 +83,7 @@ internal static uint16 compress(fieldElement x, uint8 d) {
     var dividend = ((uint32)(uint16)x).Lsh((uint64)(d)); // x * 2ᵈ
     var quotient = (uint32)(((uint64)dividend * (uint64)barrettMultiplier >> (int)(barrettShift)));
     var remainder = dividend - quotient * (uint32)q;
+
     // Since the remainder is in the range [0, 2q), not [0, q), we need to
     // portion it into three spans for rounding.
     //
@@ -96,6 +98,7 @@ internal static uint16 compress(fieldElement x, uint8 d) {
     // bit of the difference will be set.
     quotient += (uint32)((((uint32)(q / 2) - remainder) >> (int)(31)) & 1);
     quotient += (uint32)((((uint32)(q + q / 2) - remainder) >> (int)(31)) & 1);
+
     // quotient might have overflowed at this point, so reduce it by masking.
     uint32 mask = (((uint32)1).Lsh((uint64)(d))) - 1;
     return (uint16)((uint32)(quotient & mask));
@@ -108,14 +111,18 @@ internal static fieldElement decompress(uint16 y, uint8 d) {
     // rounding up (see FIPS 203, Section 2.3).
     var dividend = (uint32)y * (uint32)q;
     var quotient = dividend.Rsh((uint64)(d)); // (y * q) / 2ᵈ
+
     // The d'th least-significant bit of the dividend (the most significant bit
     // of the remainder) is 1 for the top half of the values that divide to the
     // same quotient, which are the ones that round up.
     quotient += (uint32)(dividend.Rsh((uint64)((uint8)(d - 1))) & 1);
+
     // quotient is at most (2¹¹-1) * q / 2¹¹ + 1 = 3328, so it didn't overflow.
     return ((fieldElement)(uint16)quotient);
 }
 
+// ringElement is a polynomial, an element of R_q, represented as an array
+// according to FIPS 203, Section 2.4.4.
 /* [n]fieldElement */
 partial struct ringElement /*[256]fieldElement*/;
 
@@ -437,8 +444,10 @@ internal static ringElement samplePolyCBD(slice<byte> s, byte b) {
     prf.Write(new byte[]{b}.slice());
     var B = new slice<byte>(64 * 2); // η = 2
     prf.Read(B);
+
     // SamplePolyCBD simply draws four (2η) bits for each coefficient, and adds
     // the first two and subtracts the last two.
+
     ringElement f = default!;
     for (nint i = 0; i < n; i += 2) {
         var bΔ1 = B[i / 2];
@@ -450,6 +459,8 @@ internal static ringElement samplePolyCBD(slice<byte> s, byte b) {
     return f.Clone();
 }
 
+// nttElement is an NTT representation, an element of T_q, represented as an
+// array according to FIPS 203, Section 2.4.4.
 /* [n]fieldElement */
 partial struct nttElement /*[256]fieldElement*/;
 
@@ -535,6 +546,7 @@ internal static nttElement sampleNTT(slice<byte> rho, byte ii, byte jj) {
     var B = sha3.NewShake128();
     B.Write(rho);
     B.Write(new byte[]{ii, jj}.slice());
+
     // SampleNTT essentially draws 12 bits at a time from r, interprets them in
     // little-endian, and rejects values higher than q, until it drew 256
     // values. (The rejection rate is approximately 19%.)
@@ -558,6 +570,7 @@ internal static nttElement sampleNTT(slice<byte> rho, byte ii, byte jj) {
     // Note that in little-endian, the rightmost bits are the most significant
     // bits (dropped with a mask) and the leftmost bits are the least
     // significant bits (dropped with a right shift).
+
     nttElement a = default!;
     nint j = default!;              // index into a
     array<byte> buf = new(24);               // buffered reads from B

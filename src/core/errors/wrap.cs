@@ -48,6 +48,7 @@ public static bool Is(error err, error target) {
     if (err == default! || target == default!) {
         return AreEqual(err, target);
     }
+
     var isComparable = reflectlite.TypeOf(target).Comparable();
     return @is(err, target, isComparable);
 }

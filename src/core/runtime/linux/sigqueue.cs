@@ -46,7 +46,6 @@ partial class runtime_package {
 // which may be running in a different thread. That race is unavoidable,
 // as there is no connection between handling a signal and receiving one,
 // but atomic instructions should minimize it.
-
 partial struct sigᴛ1 /*dyn*/ {
     internal note note;
     internal array<uint32> mask = new(3);
@@ -75,14 +74,17 @@ internal static bool sigsend(uint32 s) {
     if (s >= (uint32)(32 * len(sig.wanted))) {
         return false;
     }
+
     Ꮡsig.of(sigᴛ1.Ꮡdelivering).Add(1);
     // We are running in the signal handler; defer is not available.
+
     {
         var w = atomic.Load(Ꮡsig.at(sigᴛ1.Ꮡwanted, (ulong)(s / 32))); if ((uint32)(w & bit) == 0) {
             Ꮡsig.of(sigᴛ1.Ꮡdelivering).Add(-1);
             return false;
         }
     }
+
     // Add signal to outgoing queue.
     while (ᐧ) {
         var mask = sig.mask[s / 32];
@@ -94,6 +96,7 @@ internal static bool sigsend(uint32 s) {
             break;
         }
     }
+
     // Notify receiver that queue has new bit.
 Send:
     while (ᐧ) {
@@ -104,11 +107,11 @@ Send:
             }
         }
         else if (exprᴛ1 == sigSending) {
+            // notification already pending
             goto break_Send;
         }
         else if (exprᴛ1 == sigReceiving) {
-            if (Ꮡsig.of(sigᴛ1.Ꮡstate).CompareAndSwap(sigReceiving, // notification already pending
- sigIdle)) {
+            if (Ꮡsig.of(sigᴛ1.Ꮡstate).CompareAndSwap(sigReceiving, sigIdle)) {
                 if (GOOS == "darwin"u8 || GOOS == "ios"u8) {
                     sigNoteWakeup(Ꮡsig.of(sigᴛ1.Ꮡnote));
                     goto break_Send;
@@ -120,10 +123,10 @@ Send:
         else { /* default: */
             @throw(sigsendInconsistentStateˢ);
         }
-
 continue_Send:;
     }
 break_Send:;
+
     Ꮡsig.of(sigᴛ1.Ꮡdelivering).Add(-1);
     return true;
 }
@@ -144,6 +147,7 @@ public static uint32 signal_recv() {
                 return i;
             }
         }
+
         // Wait for updates to be available from signal sender.
 Receive:
         while (ᐧ) {
@@ -167,10 +171,10 @@ Receive:
             else { /* default: */
                 @throw(signalRecvInconsistentˢ);
             }
-
 continue_Receive:;
         }
 break_Receive:;
+
         // Incorporate updates from sender into local copy.
         foreach (var (i, _) in sig.mask) {
             sig.recv[i] = atomic.Xchg(Ꮡsig.at(sigᴛ1.Ꮡmask, i), 0);
@@ -196,6 +200,7 @@ public static void signalWaitUntilIdle() {
     while (Ꮡsig.of(sigᴛ1.Ꮡdelivering).Load() != 0) {
         Gosched();
     }
+
     // Although WaitUntilIdle seems like the right name for this
     // function, the state we are looking for is sigReceiving, not
     // sigIdle.  The sigIdle state is really more like sigProcessing.
@@ -217,15 +222,19 @@ public static void signal_enable(uint32 s) {
             noteclear(Ꮡsig.of(sigᴛ1.Ꮡnote));
         }
     }
+
     if (s >= (uint32)(len(sig.wanted) * 32)) {
         return;
     }
+
     var w = sig.wanted[s / 32];
     w |= (uint32)(((uint32)1 << (int)(((uint32)(s & 31)))));
     atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡwanted, (ulong)(s / 32)), w);
+
     var i = sig.ignored[s / 32];
     i &= unchecked((uint32)~(uint32)(((uint32)1 << (int)(((uint32)(s & 31))))));
     atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡignored, (ulong)(s / 32)), i);
+
     sigenable(s);
 }
 
@@ -237,6 +246,7 @@ public static void signal_disable(uint32 s) {
         return;
     }
     sigdisable(s);
+
     var w = sig.wanted[s / 32];
     w &= unchecked((uint32)~(uint32)(((uint32)1 << (int)(((uint32)(s & 31))))));
     atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡwanted, (ulong)(s / 32)), w);
@@ -250,9 +260,11 @@ public static void signal_ignore(uint32 s) {
         return;
     }
     sigignore(s);
+
     var w = sig.wanted[s / 32];
     w &= unchecked((uint32)~(uint32)(((uint32)1 << (int)(((uint32)(s & 31))))));
     atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡwanted, (ulong)(s / 32)), w);
+
     var i = sig.ignored[s / 32];
     i |= (uint32)(((uint32)1 << (int)(((uint32)(s & 31)))));
     atomic.Store(Ꮡsig.at(sigᴛ1.Ꮡignored, (ulong)(s / 32)), i);

@@ -68,6 +68,7 @@ internal static ж<File> newFile(syscallꓸHandle h, @string name, @string kind)
             }
         }
     }
+
     var f = Ꮡ(new File(Ꮡ(new @file(
         pfd: new poll.FD(
             Sysfd: h,
@@ -78,9 +79,11 @@ internal static ж<File> newFile(syscallꓸHandle h, @string name, @string kind)
     ))
     ));
     runtime.SetFinalizer((~f).@file.OrTypedNil(), ((Func<ж<@file>, error>)(close)));
+
     // Ignore initialization errors.
     // Assume any problems will show up in later I/O.
     f.of(File.Ꮡpfd).Init(kind, false);
+
     return f;
 }
 
@@ -147,6 +150,7 @@ internal static error close(this ж<@file> Ꮡfile) {
             err = new fs.PathErrorжerror(Ꮡ(new PathError(Op: "close"u8, Path: @file.name, Err: e)));
         }
     }
+
     // no need for a finalizer anymore
     runtime.SetFinalizer(Ꮡfile.OrTypedNil(), default!);
     return err;
@@ -200,6 +204,7 @@ public static error Remove(@string name) {
     if (e != default!) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "remove"u8, Path: name, Err: e)));
     }
+
     // Go file interface forces us to know whether
     // name is a file or directory. Try both.
     e = syscall.DeleteFile(p);
@@ -210,6 +215,7 @@ public static error Remove(@string name) {
     if (e1 == default!) {
         return default!;
     }
+
     // Both failed: figure out which error to return.
     if (!AreEqual(e1, e)) {
         var (a, e2) = syscall.GetFileAttributes(p);
@@ -270,9 +276,9 @@ internal static @string tempDir() {
             continue;
         }
         if (n == 3 && b[1] == (rune)':' && b[2] == (rune)'\\'){
+            // Do nothing for path, like C:\.
         } else 
         if (n > 0 && b[n - 1] == (rune)'\\') {
-            // Do nothing for path, like C:\.
             // Otherwise remove terminating \.
             n--;
         }
@@ -305,6 +311,7 @@ public static error Link(@string oldname, @string newname) {
 public static error Symlink(@string oldname, @string newname) {
     // '/' does not work in link's content
     oldname = filepathlite.FromSlash(oldname);
+
     // need the exact location of the oldname when it's relative to determine if it's a directory
     @string destpath = oldname;
     {
@@ -324,8 +331,10 @@ public static error Symlink(@string oldname, @string newname) {
             }
         }
     }
+
     var (fi, err) = Stat(destpath);
     var isdir = err == default! && fi.IsDir();
+
     (var n, err) = syscall.UTF16PtrFromString(fixLongPath(newname));
     if (err != default!) {
         return new LinkErrorжerror(Ꮡ(new LinkError("symlink"u8, oldname, newname, err)));
@@ -345,6 +354,7 @@ public static error Symlink(@string oldname, @string newname) {
     if (err != default!) {
         return new LinkErrorжerror(Ꮡ(new LinkError("symlink"u8, oldname, newname, err)));
     }
+
     uint32 flags = windows.SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE;
     if (isdir) {
         flags |= (uint32)(syscall.SYMBOLIC_LINK_FLAG_DIRECTORY);
@@ -401,25 +411,25 @@ internal static (@string, error) normaliseLinkPath(@string path) {
         // we have path that start with \??\
         @string s = path[4..];
         switch (ᐧ) {
-        case {} when len(s) >= 2 && s[1] == (rune)':': {
+        case {} when len(s) >= 2 && s[1] == (rune)':': { // \??\C:\foo\bar
             return (s, default!);
         }
-        case {} when len(s) >= 4 && s[..4] == @"UNC\": {
+        case {} when len(s) >= 4 && s[..4] == @"UNC\": { // \??\UNC\foo\bar
             return (@"\\" + s[4..], default!);
         }}
 
-        // \??\C:\foo\bar
-        // \??\UNC\foo\bar
         // \??\Volume{abc}\
         if (winreadlinkvolume.Value() != "0"u8) {
             return (@"\\?\" + path[4..], default!);
         }
         winreadlinkvolume.IncNonDefault();
+
         var (h, err) = openSymlink(path);
         if (err != default!) {
             return ("", err);
         }
         defer(syscall.CloseHandle, h, ref ᒐ);
+
         var buf = new slice<uint16>(100);
         while (ᐧ) {
             var (n, errΔ1) = windows.GetFinalPathNameByHandle(h, Ꮡ(buf, 0), (uint32)len(buf), windows.VOLUME_NAME_DOS);

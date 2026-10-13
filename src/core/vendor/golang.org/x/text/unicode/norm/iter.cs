@@ -80,7 +80,6 @@ public static (int64, error) Seek(this ref Iter i, int64 offset, nint whence) {
     default: {
         return (0, fmt.Errorf("norm: invalid whence"u8));
     }}
-
     if (abs < 0) {
         return (0, fmt.Errorf("norm: negative position"u8));
     }
@@ -313,7 +312,6 @@ internal static slice<byte> /*next*/ nextDecomposed(ж<Iter> Ꮡi) {
                         }
                         return d;
                     }
-
                     copy(i.buf.slice(outp), d);
                     outp = p;
                     (inCopyStart, outCopyStart) = (i.p, outp);
@@ -373,9 +371,9 @@ internal static slice<byte> /*next*/ nextDecomposed(ж<Iter> Ꮡi) {
     }
     return i.buf.slice(0, outp);
 doNorm:
-    i.rb.src.copySlice(i.buf.slice(outCopyStart), // Insert what we have decomposed so far in the reorderBuffer.
- // As we will only reorder, there will always be enough room.
- inCopyStart, i.p);
+    i.rb.src.copySlice(i.buf.slice(outCopyStart), inCopyStart, i.p);
+    // Insert what we have decomposed so far in the reorderBuffer.
+    // As we will only reorder, there will always be enough room.
     Ꮡi.of(Iter.Ꮡrb).insertDecomposed(i.buf.slice(0, outp));
     return doNormDecomposed(Ꮡi);
 }

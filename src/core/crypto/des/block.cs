@@ -13,8 +13,10 @@ internal static void cryptBlock(slice<uint64> subkeys, slice<byte> dst, slice<by
     var b = byteorder.BEUint64(src);
     b = permuteInitialBlock(b);
     var (left, right) = ((uint32)((b >> (int)(32))), (uint32)b);
+
     left = (uint32)(((left << (int)(1))) | ((left >> (int)(31))));
     right = (uint32)(((right << (int)(1))) | ((right >> (int)(31))));
+
     if (decrypt){
         for (nint i = 0; i < 8; i++) {
             (left, right) = feistel(left, right, subkeys[15 - 2 * i], subkeys[15 - (2 * i + 1)]);
@@ -24,8 +26,10 @@ internal static void cryptBlock(slice<uint64> subkeys, slice<byte> dst, slice<by
             (left, right) = feistel(left, right, subkeys[2 * i], subkeys[2 * i + 1]);
         }
     }
+
     left = (uint32)(((left << (int)(31))) | ((left >> (int)(1))));
     right = (uint32)(((right << (int)(31))) | ((right >> (int)(1))));
+
     // switch left & right and perform final permutation
     var preOutput = (uint64)((((uint64)right << (int)(32))) | (uint64)left);
     byteorder.BEPutUint64(dst, permuteFinalBlock(preOutput));
@@ -35,14 +39,19 @@ internal static void cryptBlock(slice<uint64> subkeys, slice<byte> dst, slice<by
 // feistelBoxOnce.Do(initFeistelBox) first.
 internal static (uint32 lout, uint32 rout) feistel(uint32 l, uint32 r, uint64 k0, uint64 k1) {
     uint32 t = default!;
+
     t = (uint32)(r ^ (uint32)((k0 >> (int)(32))));
     l ^= (uint32)((uint32)((uint32)((uint32)(feistelBox[7][(uint32)(t & 0x3f)] ^ feistelBox[5][(uint32)(((t >> (int)(8))) & 0x3f)]) ^ feistelBox[3][(uint32)(((t >> (int)(16))) & 0x3f)]) ^ feistelBox[1][(uint32)(((t >> (int)(24))) & 0x3f)]));
+
     t = (uint32)(((uint32)(((r << (int)(28))) | ((r >> (int)(4))))) ^ (uint32)k0);
     l ^= (uint32)((uint32)((uint32)((uint32)(feistelBox[6][(uint32)((t) & 0x3f)] ^ feistelBox[4][(uint32)(((t >> (int)(8))) & 0x3f)]) ^ feistelBox[2][(uint32)(((t >> (int)(16))) & 0x3f)]) ^ feistelBox[0][(uint32)(((t >> (int)(24))) & 0x3f)]));
+
     t = (uint32)(l ^ (uint32)((k1 >> (int)(32))));
     r ^= (uint32)((uint32)((uint32)((uint32)(feistelBox[7][(uint32)(t & 0x3f)] ^ feistelBox[5][(uint32)(((t >> (int)(8))) & 0x3f)]) ^ feistelBox[3][(uint32)(((t >> (int)(16))) & 0x3f)]) ^ feistelBox[1][(uint32)(((t >> (int)(24))) & 0x3f)]));
+
     t = (uint32)(((uint32)(((l << (int)(28))) | ((l >> (int)(4))))) ^ (uint32)k1);
     r ^= (uint32)((uint32)((uint32)((uint32)(feistelBox[6][(uint32)((t) & 0x3f)] ^ feistelBox[4][(uint32)(((t >> (int)(8))) & 0x3f)]) ^ feistelBox[2][(uint32)(((t >> (int)(16))) & 0x3f)]) ^ feistelBox[0][(uint32)(((t >> (int)(24))) & 0x3f)]));
+
     return (l, r);
 }
 
@@ -70,13 +79,16 @@ internal static void initFeistelBox() {
             for (nint j = 0; j < 16; j++) {
                 var f = ((uint64)sBoxes[s][i][j]).Lsh((4 * (7 - (nuint)s)));
                 f = permuteBlock(f, permutationFunction[..]);
+
                 // Row is determined by the 1st and 6th bit.
                 // Column is the middle four bits.
                 var row = (uint8)((nint)(((((nint)(i & 2)) << (int)(4))) | (nint)(i & 1)));
                 var col = (uint8)((j << (int)(1)));
                 var t = (uint8)(row | col);
+
                 // The rotation was performed in the feistel rounds, being factored out and now mixed into the feistelBox.
                 f = (uint64)(((f << (int)(1))) | ((f >> (int)(31))));
+
                 feistelBox[s][t] = (uint32)f;
             }
         }
@@ -90,10 +102,12 @@ internal static uint64 permuteInitialBlock(uint64 block) {
     var b1 = (block >> (int)(48));
     var b2 = (block << (int)(48));
     block ^= (uint64)((uint64)((uint64)((uint64)(b1 ^ b2) ^ (b1 << (int)(48))) ^ (b2 >> (int)(48))));
+
     // block = b1 b0 b5 b4 b3 b2 b7 b6
     b1 = (uint64)((block >> (int)(32)) & 0xff00ff);
     b2 = ((uint64)(block & 0xff00ff00U));
     block ^= (uint64)((uint64)((uint64)((uint64)((b1 << (int)(32)) ^ b2) ^ (b1 << (int)(8))) ^ (b2 << (int)(24)))); // exchange b0 b4 with b3 b7
+
     // block is now b1 b3 b5 b7 b0 b2 b4 b6, the permutation:
     //                  ...  8
     //                  ... 24
@@ -103,10 +117,12 @@ internal static uint64 permuteInitialBlock(uint64 block) {
     // 23 22 21 20 19 18 17 16
     //                  ... 32
     //                  ... 48
+
     // exchange 4,5,6,7 with 32,33,34,35 etc.
     b1 = (uint64)(block & 0x0f0f00000f0f0000UL);
     b2 = (uint64)(block & 0x0000f0f00000f0f0UL);
     block ^= (uint64)((uint64)((uint64)((uint64)(b1 ^ b2) ^ (b1 >> (int)(12))) ^ (b2 << (int)(12))));
+
     // block is the permutation:
     //
     //   [+8]         [+40]
@@ -115,10 +131,12 @@ internal static uint64 permuteInitialBlock(uint64 block) {
     // 23 22 21 20
     //  3  2  1  0
     // 19 18 17 16    [+32]
+
     // exchange 0,1,4,5 with 18,19,22,23
     b1 = (uint64)(block & 0x3300330033003300UL);
     b2 = (uint64)(block & 0x00cc00cc00cc00ccUL);
     block ^= (uint64)((uint64)((uint64)((uint64)(b1 ^ b2) ^ (b1 >> (int)(6))) ^ (b2 << (int)(6))));
+
     // block is the permutation:
     // 15 14
     // 13 12
@@ -128,9 +146,11 @@ internal static uint64 permuteInitialBlock(uint64 block) {
     //  5  4
     //  3  2
     //  1  0 [+16] [+32] [+64]
+
     // exchange 0,2,4,6 with 9,11,13,15:
     b1 = (uint64)(block & 0xaaaaaaaa55555555UL);
     block ^= (uint64)((uint64)((uint64)(b1 ^ (b1 >> (int)(33))) ^ (b1 << (int)(33))));
+
     // block is the permutation:
     // 6 14 22 30 38 46 54 62
     // 4 12 20 28 36 44 52 60
@@ -150,15 +170,19 @@ internal static uint64 permuteFinalBlock(uint64 block) {
     // but in reverse order.
     var b1 = (uint64)(block & 0xaaaaaaaa55555555UL);
     block ^= (uint64)((uint64)((uint64)(b1 ^ (b1 >> (int)(33))) ^ (b1 << (int)(33))));
+
     b1 = (uint64)(block & 0x3300330033003300UL);
     var b2 = (uint64)(block & 0x00cc00cc00cc00ccUL);
     block ^= (uint64)((uint64)((uint64)((uint64)(b1 ^ b2) ^ (b1 >> (int)(6))) ^ (b2 << (int)(6))));
+
     b1 = (uint64)(block & 0x0f0f00000f0f0000UL);
     b2 = (uint64)(block & 0x0000f0f00000f0f0UL);
     block ^= (uint64)((uint64)((uint64)((uint64)(b1 ^ b2) ^ (b1 >> (int)(12))) ^ (b2 << (int)(12))));
+
     b1 = (uint64)((block >> (int)(32)) & 0xff00ff);
     b2 = ((uint64)(block & 0xff00ff00U));
     block ^= (uint64)((uint64)((uint64)((uint64)((b1 << (int)(32)) ^ b2) ^ (b1 << (int)(8))) ^ (b2 << (int)(24))));
+
     b1 = (block >> (int)(48));
     b2 = (block << (int)(48));
     block ^= (uint64)((uint64)((uint64)((uint64)(b1 ^ b2) ^ (b1 << (int)(48))) ^ (b2 >> (int)(48))));
@@ -185,12 +209,15 @@ internal static slice<uint32> /*out*/ ksRotate(uint32 @in) {
 // creates 16 56-bit subkeys from the original key.
 internal static void generateSubkeys(this ref desCipher c, slice<byte> keyBytes) {
     ᏑfeistelBoxOnce.Do(initFeistelBox);
+
     // apply PC1 permutation to key
     var key = byteorder.BEUint64(keyBytes);
     var permutedKey = permuteBlock(key, permutedChoice1[..]);
+
     // rotate halves of permuted key according to the rotation schedule
     var leftRotations = ksRotate((uint32)((permutedKey >> (int)(28))));
     var rightRotations = ksRotate(((uint32)((permutedKey << (int)(4))) >> (int)(4)));
+
     // generate subkeys
     for (nint i = 0; i < 16; i++) {
         // combine halves to form 56-bit input to PC2

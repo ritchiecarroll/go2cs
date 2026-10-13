@@ -136,31 +136,37 @@ internal static slice<uintptr> runtime_expandFinalInlineFrame(slice<uintptr> stk
     }
     var pc = stk[len(stk) - 1];
     var tracepc = pc - 1;
+
     var f = findfunc(tracepc);
     if (!f.valid()) {
         // Not a Go function.
         return stk;
     }
+
     var (u, uf) = newInlineUnwinder(f, tracepc);
     if (!u.isInlined(uf)) {
         // Nothing inline at tracepc.
         return stk;
     }
+
     // Treat the previous func as normal. We haven't actually checked, but
     // since this pc was included in the stack, we know it shouldn't be
     // elided.
     var calleeID = abi.FuncIDNormal;
+
     // Remove pc from stk; we'll re-add it below.
     stk = stk.slice(0, len(stk) - 1);
+
     for (; uf.valid(); uf = u.next(uf)) {
         var funcID = u.srcFunc(uf).funcID;
         if (funcID == abi.FuncIDWrapper && elideWrapperCalling(calleeID)){
-        } else {
             // ignore wrappers
+        } else {
             stk = append(stk, uf.pc + 1);
         }
         calleeID = funcID;
     }
+
     return stk;
 }
 
@@ -171,10 +177,12 @@ internal static slice<Frame> expandCgoFrames(uintptr pc) {
     ref var arg = ref heap<cgoSymbolizerArg>(out var Ꮡarg);
     arg = new cgoSymbolizerArg(pc: pc);
     callCgoSymbolizer(Ꮡarg);
+
     if (arg.@file == nil && arg.funcName == nil) {
         // No useful information from symbolizer.
         return default!;
     }
+
     slice<Frame> frames = default!;
     while (ᐧ) {
         frames = append(frames, new Frame(
@@ -184,20 +192,22 @@ internal static slice<Frame> expandCgoFrames(uintptr pc) {
             File: gostring(arg.@file),
             Line: (nint)arg.lineno,
             Entry: arg.entry
+            // funcInfo is zero, which implies !funcInfo.valid().
+            // That ensures that we use the File/Line info given here.
         ));
-        // funcInfo is zero, which implies !funcInfo.valid().
-        // That ensures that we use the File/Line info given here.
         if (arg.more == 0) {
             break;
         }
         callCgoSymbolizer(Ꮡarg);
     }
+
     // No more frames for this PC. Tell the symbolizer we are done.
     // We don't try to maintain a single cgoSymbolizerArg for the
     // whole use of Frames, because there would be no good way to tell
     // the symbolizer when we are done.
     arg.pc = 0;
     callCgoSymbolizer(Ꮡarg);
+
     return frames;
 }
 
@@ -409,6 +419,7 @@ internal static void modulesinit() {
             ᏑgcController.addGlobals((int64)(scanDataSize + scanBSSSize));
         }
     }
+
     // Modules appear in the moduledata linked list in the order they are
     // loaded by the dynamic loader, with one exception: the
     // firstmoduledata itself the module that contains the runtime. This
@@ -425,6 +436,7 @@ internal static void modulesinit() {
             break;
         }
     }
+
     atomicstorep(@unsafe.Pointer.FromBox(ᏑmodulesSlice), @unsafe.Pointer.FromPinnedBox(modules));
 }
 
@@ -489,6 +501,7 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
             (@string)"text="u8, ((Δhex)(uint64)datap.text), (@string)"pluginpath="u8, datap.pluginpath);
         @throw(invalidFunctionSymbolˢ);
     }
+
     // ftab is lookup table for function by program counter.
     nint nftab = len(datap.ftab) - 1;
     for (nint i = 0; i < nftab; i++) {
@@ -510,12 +523,14 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
             @throw(invalidRuntimeSymbolˢ);
         }
     }
+
     var min = datap.textAddr(datap.ftab[0].entryoff);
     var max = datap.textAddr(datap.ftab[nftab].entryoff);
     if (datap.minpc != min || datap.maxpc != max) {
         println((@string)"minpc="u8, ((Δhex)(uint64)datap.minpc), (@string)"min="u8, ((Δhex)(uint64)min), (@string)"maxpc="u8, ((Δhex)(uint64)datap.maxpc), (@string)"max="u8, ((Δhex)(uint64)max));
         @throw(minpcOrMaxpcInvalidˢ);
     }
+
     foreach (var (_, modulehash) in datap.modulehashes) {
         if (modulehash.linktimehash != modulehash.runtimehash.Value) {
             println((@string)"abi mismatch detected between"u8, datap.modulename, (@string)"and"u8, modulehash.modulename);
@@ -556,8 +571,7 @@ internal static uintptr textAddr(this ref moduledata md, uint32 off32) {
                 break;
             }
         }
-        if (res > md.etext && GOARCH != "wasm"u8) {
-            // on wasm, functions do not live in the same address space as the linear memory
+        if (res > md.etext && GOARCH != "wasm"u8) { // on wasm, functions do not live in the same address space as the linear memory
             println((@string)"runtime: textAddr"u8, ((Δhex)(uint64)res), (@string)"out of range"u8, ((Δhex)(uint64)md.text), (@string)"-"u8, ((Δhex)(uint64)md.etext));
             @throw(runtimeTextOffsetOutOfˢ);
         }
@@ -624,8 +638,7 @@ internal static @string funcName(this ref moduledata md, int32 nameOff) {
 // number of the func keyword.
 internal static int32 startLine(this ж<Func> Ꮡf) {
     var fn = Ꮡf.raw();
-    if (fn.isInlined()) {
-        // inlined version
+    if (fn.isInlined()) { // inlined version
         var fi = fn.Reinterpret<_func, funcinl>();
         return (~fi).startLine;
     }
@@ -702,19 +715,24 @@ internal static ΔfuncInfo findfunc(uintptr pc) {
         return new ΔfuncInfo(nil);
     }
     uintptr nsub = /* uintptr(len(findfuncbucket{}.subbuckets)) */ 16;
+
     var (pcOff, ok) = datap.textOff(pc);
     if (!ok) {
         return new ΔfuncInfo(nil);
     }
+
     var x = (uintptr)pcOff + (~datap).text - (~datap).minpc; // TODO: are datap.text and datap.minpc always equal?
     var b = x / (uintptr)abi.FuncTabBucketSize;
     var i = x % (uintptr)abi.FuncTabBucketSize / (uintptr)((uintptr)abi.FuncTabBucketSize / nsub);
+
     var ffb = (ж<findfuncbucket>)(uintptr)(add((@unsafe.Pointer)(~datap).findfunctab, b * /* unsafe.Sizeof(findfuncbucket{}) */ (uintptr)20));
     var idx = (~ffb).idx + (uint32)(~ffb).subbuckets[i];
+
     // Find the ftab entry.
     while ((~datap).ftab[idx + 1].entryoff <= pcOff) {
         idx++;
     }
+
     var funcoff = (~datap).ftab[idx].funcoff;
     return new ΔfuncInfo(Ꮡ((~datap).pclntable, funcoff).Reinterpret<byte, _func>(), datap);
 }
@@ -784,9 +802,11 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
     // If true, when we get a cache hit, still look up the data and make sure it
     // matches the cached contents.
     const bool debugCheckCache = false;
+
     if (off == 0) {
         return (-1, 0);
     }
+
     // Check the cache. This speeds up walks of deep stacks, which
     // tend to have the same recursive functions over and over,
     // or repetitive stacks between goroutines.
@@ -830,6 +850,7 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
         cache.Value.inUse--;
         releasem(ref (mp).DerefOrNull());
     }
+
     if (!f.valid()) {
         if (strict && Ꮡpanicking.Load() == 0) {
             println((@string)"runtime: no module data for"u8, ((Δhex)(uint64)f.entry()));
@@ -878,16 +899,20 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
                 cache.Value.inUse--;
                 releasem(ref (mp).DerefOrNull());
             }
+
             return (val, prevpc);
         }
         prevpc = pc;
     }
+
     // If there was a table, it should have covered all program counters.
     // If not, something is wrong.
     if (Ꮡpanicking.Load() != 0 || !strict) {
         return (-1, 0);
     }
+
     print((@string)"runtime: invalid pc-encoded table f="u8, funcname(f), (@string)" pc="u8, ((Δhex)(uint64)pc), (@string)" targetpc="u8, ((Δhex)(uint64)targetpc), (@string)" tab="u8, Δp, (@string)"\n"u8);
+
     Δp = (~datap).pctab.slice((nint)(off));
     pc = f.entry();
     val = -1;
@@ -899,6 +924,7 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
         }
         print((@string)"\tvalue="u8, val, (@string)" until pc="u8, ((Δhex)(uint64)pc), (@string)"\n"u8);
     }
+
     @throw(invalidRuntimeSymbolˢ);
     return (-1, 0);
 }
@@ -1038,6 +1064,7 @@ internal static @unsafe.Pointer funcdata(ΔfuncInfo f, uint8 i) {
     var @base = f.datap.Value.gofunc; // load gofunc address early so that we calculate during cache misses
     var Δp = (uintptr)Ꮡ(f).of(runtime_package.ΔfuncInfo.Ꮡnfuncdata) + /* unsafe.Sizeof(f.nfuncdata) */ (uintptr)1 + (uintptr)f.npcdata * 4 + (uintptr)i * 4;
     var off = ~(ж<uint32>)(uintptr)((@unsafe.Pointer)Δp);
+
     // Return off == ^uint32(0) ? 0 : f.datap.gofunc + uintptr(off), but without branches.
     // The compiler calculates mask on most architectures using conditional assignment.
     uintptr mask = default!;
@@ -1063,6 +1090,7 @@ internal static (slice<byte> newp, bool ok) step(slice<byte> Δp, ref uintptr pc
     }
     val += (int32)((uint32)(((uint32)0 - ((uint32)(uvdelta & 1))) ^ ((uvdelta >> (int)(1)))));
     Δp = Δp.slice((nint)(n));
+
     var pcdelta = (uint32)Δp[0];
     n = 1;
     if ((uint32)(pcdelta & 0x80) != 0) {

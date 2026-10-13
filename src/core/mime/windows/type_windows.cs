@@ -21,8 +21,7 @@ internal static void initMimeWindows() {
         return;
     }
     foreach (var (_, name) in names) {
-        if (len(name) < 2 || name[0] != (rune)'.') {
-            // looking for extensions only
+        if (len(name) < 2 || name[0] != (rune)'.') { // looking for extensions only
             continue;
         }
         var (k, errΔ1) = registry.OpenKey(registry.CLASSES_ROOT, name, registry.READ);
@@ -34,6 +33,7 @@ internal static void initMimeWindows() {
         if (errΔ1 != default!) {
             continue;
         }
+
         // There is a long-standing problem on Windows: the
         // registry sometimes records that the ".js" extension
         // should be "text/plain". See issue #32350. While
@@ -43,6 +43,7 @@ internal static void initMimeWindows() {
         if (name == ".js"u8 && (v == "text/plain"u8 || v == "text/plain; charset=utf-8"u8)) {
             continue;
         }
+
         setExtensionType(name, v);
     }
 }

@@ -94,14 +94,12 @@ public static (ж<TCPAddr>, error) ResolveTCPAddr(@string network, @string addre
     var exprᴛ1 = network;
     if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8) {
     }
-    else if (exprᴛ1 == ""u8) {
+    else if (exprᴛ1 == ""u8) { // a hint wildcard for Go 1.0 undocumented behavior
         network = tcpˢ;
     }
     else { /* default: */
         return (default!, ((UnknownNetworkError)network));
     }
-
-    // a hint wildcard for Go 1.0 undocumented behavior
     var (addrs, err) = DefaultResolver.internetAddrList(context.Background(), network, address);
     if (err != default!) {
         return (default!, err);
@@ -363,7 +361,6 @@ public static (ж<TCPConn>, error) DialTCP(@string network, ж<TCPAddr> Ꮡladdr
     else { /* default: */
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: Ꮡladdr.opAddr(), Addr: Ꮡraddr.opAddr(), Err: ((UnknownNetworkError)network)))));
     }
-
     if (Ꮡraddr == nil) {
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: Ꮡladdr.opAddr(), Addr: default!, Err: errMissingAddress))));
     }
@@ -476,8 +473,8 @@ public static error SetDeadline(this ж<TCPListener> Ꮡl, time.Time t) {
 public static (ж<os.File> f, error err) File(this ж<TCPListener> Ꮡl) {
     ж<os.File> f = default!;
     error err = default!;
-
     ref var l = ref Ꮡl.DerefOrNull();
+
     if (!Ꮡl.ok()) {
         return (default!, syscall.EINVAL);
     }
@@ -506,7 +503,6 @@ public static (ж<TCPListener>, error) ListenTCP(@string network, ж<TCPAddr> �
     else { /* default: */
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default!, Addr: Ꮡladdr.opAddr(), Err: ((UnknownNetworkError)network)))));
     }
-
     if (Ꮡladdr == nil) {
         Ꮡladdr = Ꮡ(new TCPAddr(nil)); laddr = ref Ꮡladdr.DerefOrNull();
     }

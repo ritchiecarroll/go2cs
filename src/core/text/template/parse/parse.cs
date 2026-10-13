@@ -35,6 +35,7 @@ partial struct Tree {
     internal nint rangeDepth;
 }
 
+// A mode value is a set of flags (or 0). Modes control parser behavior.
 partial struct Mode /*num:nuint*/;
 
 public static Mode ParseComments => /* 1 << iota */ 1;       // parse comments and add them to AST
@@ -278,9 +279,9 @@ public static (ж<Tree> tree, error err) Parse(this ж<Tree> Ꮡt, @string text,
     GoFrame ᒐ = default;
     try {
         var funcs = funcsʗp.slice();
-
         ref var t = ref Ꮡt.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
+
         defer(Ꮡt.recover, Ꮡerr, ref ᒐ);
         t.ParseName = t.Name;
         var lexer = lex(t.Name, text, leftDelim, rightDelim);
@@ -387,7 +388,6 @@ internal static void parse(this ж<Tree> Ꮡt) {
                 t.Root.append(n);
             }
         }
-
     }
 }
 
@@ -425,8 +425,8 @@ internal static void parseDefinition(this ж<Tree> Ꮡt) {
 internal static (ж<ListNode> list, Node next) itemList(this ж<Tree> Ꮡt) {
     ж<ListNode> list = default!;
     Node next = default!;
-
     ref var t = ref Ꮡt.DerefOrNull();
+
     list = Ꮡt.newList(t.peekNonSpace().pos);
     while (t.peekNonSpace().typ != itemEOF) {
         var n = Ꮡt.textOrAction();
@@ -434,7 +434,6 @@ internal static (ж<ListNode> list, Node next) itemList(this ж<Tree> Ꮡt) {
         if (exprᴛ1 == nodeEnd || exprᴛ1 == nodeElse) {
             return (list, n);
         }
-
         list.append(n);
     }
     t.errorf("unexpected EOF"u8);
@@ -471,7 +470,6 @@ internal static Node textOrAction(this ж<Tree> Ꮡt) {
                 t.unexpected(token, inputˢ);
             }
         }
-
         return default!;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -526,7 +524,6 @@ internal static Node /*n*/ action(this ж<Tree> Ꮡt) {
             return Ꮡt.withControl();
         }
     }
-
     t.backup();
     var token = t.peek();
     // Do not pop variables; they persist until "end".
@@ -576,8 +573,8 @@ internal static Node continueControl(this ж<Tree> Ꮡt, Pos pos, nint line) {
 //	declarations? command ('|' command)*
 internal static ж<PipeNode> /*pipe*/ pipeline(this ж<Tree> Ꮡt, @string context, itemType end) {
     ж<PipeNode> pipe = default!;
-
     ref var t = ref Ꮡt.DerefOrNull();
+
     var token = t.peekNonSpace();
     pipe = Ꮡt.newPipeline(token.pos, token.line, default!);
     // Are there declarations or assignments?
@@ -606,15 +603,14 @@ decls:
                 if (context == "range"u8 && len((~pipe).Decl) < 2) {
                     var exprᴛ1 = t.peekNonSpace().typ;
                     if (exprᴛ1 == itemVariable || exprᴛ1 == itemRightDelim || exprᴛ1 == itemRightParen) {
+                        // second initialized variable in a range pipeline
                         goto decls;
                     }
                     else { /* default: */
                         t.errorf("range can only initialize variables"u8);
                     }
-
                 }
-                t.errorf("too many declarations in %s"u8, // second initialized variable in a range pipeline
- context);
+                t.errorf("too many declarations in %s"u8, context);
                 break;
             }
             case {} when tokenAfterVariable.typ == itemSpace: {
@@ -625,7 +621,6 @@ decls:
                 t.backup2(v);
                 break;
             }}
-
         }
     }
     while (ᐧ) {
@@ -633,8 +628,8 @@ decls:
             var tokenΔ1 = t.nextNonSpace();
             var exprᴛ2 = tokenΔ1.typ;
             if (exprᴛ2 == end) {
-                t.checkPipeline(pipe, // At this point, the pipeline is complete
- context);
+                // At this point, the pipeline is complete
+                t.checkPipeline(pipe, context);
                 return pipe;
             }
             if (exprᴛ2 == itemBool || exprᴛ2 == itemCharConstant || exprᴛ2 == itemComplex || exprᴛ2 == itemDot || exprᴛ2 == itemField || exprᴛ2 == itemIdentifier || exprᴛ2 == itemNumber || exprᴛ2 == itemNil || exprᴛ2 == itemRawString || exprᴛ2 == itemString || exprᴛ2 == itemVariable || exprᴛ2 == itemLeftParen) {
@@ -645,7 +640,6 @@ decls:
                 t.unexpected(tokenΔ1, context);
             }
         }
-
     }
 }
 
@@ -660,10 +654,9 @@ internal static void checkPipeline(this ref Tree t, ж<PipeNode> Ꮡpipe, @strin
     foreach (var (i, c) in pipe.Cmds[1..]) {
         var exprᴛ1 = (~c).Args[0].Type();
         if (exprᴛ1 == NodeBool || exprᴛ1 == NodeDot || exprᴛ1 == NodeNil || exprᴛ1 == NodeNumber || exprᴛ1 == NodeString) {
-            t.errorf("non executable command in pipeline stage %d"u8, // With A|B|C, pipeline stage 2 is B
- i + 2);
+            // With A|B|C, pipeline stage 2 is B
+            t.errorf("non executable command in pipeline stage %d"u8, i + 2);
         }
-
     }
 }
 
@@ -688,21 +681,20 @@ internal static (Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<Li
             t.rangeDepth--;
         }
         var exprᴛ1 = next.Type();
-        if (exprᴛ1 == nodeEnd) {
+        if (exprᴛ1 == nodeEnd) { //done
         }
         else if (exprᴛ1 == nodeElse) {
+            // Special case for "else if" and "else with".
+            // If the "else" is followed immediately by an "if" or "with",
+            // the elseControl will have left the "if" or "with" token pending. Treat
+            //	{{if a}}_{{else if b}}_{{end}}
+            //  {{with a}}_{{else with b}}_{{end}}
+            // as
+            //	{{if a}}_{{else}}{{if b}}_{{end}}{{end}}
+            //  {{with a}}_{{else}}{{with b}}_{{end}}{{end}}.
+            // To do this, parse the "if" or "with" as usual and stop at it {{end}};
+            // the subsequent{{end}} is assumed. This technique works even for long if-else-if chains.
             if (context == "if"u8 && t.peek().typ == itemIf){
-                //done
-                // Special case for "else if" and "else with".
-                // If the "else" is followed immediately by an "if" or "with",
-                // the elseControl will have left the "if" or "with" token pending. Treat
-                //	{{if a}}_{{else if b}}_{{end}}
-                //  {{with a}}_{{else with b}}_{{end}}
-                // as
-                //	{{if a}}_{{else}}{{if b}}_{{end}}{{end}}
-                //  {{with a}}_{{else}}{{with b}}_{{end}}{{end}}.
-                // To do this, parse the "if" or "with" as usual and stop at it {{end}};
-                // the subsequent{{end}} is assumed. This technique works even for long if-else-if chains.
                 t.next(); // Consume the "if" token.
                 elseList = Ꮡt.newList(next.Position());
                 elseList.append(Ꮡt.ifControl());
@@ -718,7 +710,6 @@ internal static (Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<Li
                 }
             }
         }
-
         (pos, line, pipe, list, elseList) = (pipe.Position(), (~pipe).Line, pipe, list, elseList);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -810,9 +801,11 @@ internal static Node blockControl(this ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     @string context = contextᶜ1;
+
     var token = t.nextNonSpace();
     @string name = t.parseTemplateName(token, context);
     var pipe = Ꮡt.pipeline(context, itemRightDelim);
+
     var block = New(name); // name will be updated once we know it.
     block.Value.text = t.text;
     block.Value.Mode = t.Mode;
@@ -825,6 +818,7 @@ internal static Node blockControl(this ж<Tree> Ꮡt) {
     }
     block.add();
     block.stopParse();
+
     return new TemplateNodeжNode(Ꮡt.newTemplate(token.pos, token.line, name, pipe));
 }
 
@@ -866,7 +860,6 @@ internal static @string /*name*/ parseTemplateName(this ref Tree t, item token, 
     else { /* default: */
         t.unexpected(token, context);
     }
-
     return name;
 }
 
@@ -899,13 +892,12 @@ internal static ж<CommandNode> command(this ж<Tree> Ꮡt) {
                 t.backup();
             }
             else if (exprᴛ1 == itemPipe) {
+                // nothing here; break loop below
             }
             else { /* default: */
-                t.unexpected(token, // nothing here; break loop below
- operandˢ);
+                t.unexpected(token, operandˢ);
             }
         }
-
         break;
     }
     if (len((~cmd).Args) == 0) {
@@ -951,7 +943,6 @@ internal static Node operand(this ж<Tree> Ꮡt) {
         else { /* default: */
             node = new ChainNodeжNode(chain);
         }
-
     }
     return node;
 }
@@ -1016,7 +1007,6 @@ internal static Node term(this ж<Tree> Ꮡt) {
             return new StringNodeжNode(Ꮡt.newString(token.pos, token.val, s));
         }
     }
-
     t.backup();
     return default!;
 }

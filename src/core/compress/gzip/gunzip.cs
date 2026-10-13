@@ -28,7 +28,9 @@ internal static UntypedInt flagExtra => /* 1 << 2 */ 4;
 internal static UntypedInt flagName => /* 1 << 3 */ 8;
 internal static UntypedInt flagComment => /* 1 << 4 */ 16;
 
+// ErrChecksum is returned when reading GZIP data that has an invalid checksum.
 public static error ErrChecksum = errors.New("gzip: invalid checksum"u8);
+// ErrHeader is returned when reading GZIP data that has an invalid header.
 public static error ErrHeader = errors.New("gzip: invalid header"u8);
 
 internal static binary.littleEndian le = binary.LittleEndian;
@@ -156,6 +158,7 @@ internal static (@string, error) readString(this ref Reader z) {
         if (z.buf[i] == 0) {
             // Digest covers the NUL terminator.
             z.digest = crc32.Update(z.digest, crc32.IEEETable, z.buf.slice(0, i + 1));
+
             // Strings are ISO 8859-1, Latin-1 (RFC 1952, section 2.3.1).
             if (needConv) {
                 var s = new slice<rune>(0, i);
@@ -201,6 +204,7 @@ internal static (Header hdr, error err) readHeader(this ref Reader z) {
     // z.buf[8] is XFL and is currently ignored.
     hdr.OS = z.buf[9];
     z.digest = crc32.ChecksumIEEE(z.buf[..10]);
+
     if ((byte)(flg & (byte)flagExtra) != 0) {
         {
             (_, err) = io.ReadFull(z.r, z.buf[..2]); if (err != default!) {
@@ -217,6 +221,7 @@ internal static (Header hdr, error err) readHeader(this ref Reader z) {
         z.digest = crc32.Update(z.digest, crc32.IEEETable, data);
         hdr.Extra = data;
     }
+
     @string s = default!;
     if ((byte)(flg & (byte)flagName) != 0) {
         {
@@ -226,6 +231,7 @@ internal static (Header hdr, error err) readHeader(this ref Reader z) {
         }
         hdr.Name = s;
     }
+
     if ((byte)(flg & (byte)flagComment) != 0) {
         {
             (s, err) = z.readString(); if (err != default!) {
@@ -234,6 +240,7 @@ internal static (Header hdr, error err) readHeader(this ref Reader z) {
         }
         hdr.Comment = s;
     }
+
     if ((byte)(flg & (byte)flagHdrCrc) != 0) {
         {
             (_, err) = io.ReadFull(z.r, z.buf[..2]); if (err != default!) {
@@ -245,6 +252,7 @@ internal static (Header hdr, error err) readHeader(this ref Reader z) {
             return (hdr, ErrHeader);
         }
     }
+
     z.digest = 0;
     if (z.decompressor == default!){
         z.decompressor = flate.NewReader(z.r);
@@ -261,6 +269,7 @@ public static (nint n, error err) Read(this ref Reader z, slice<byte> p) {
     if (z.err != default!) {
         return (0, z.err);
     }
+
     while (n == 0) {
         (n, z.err) = z.decompressor.Read(p);
         z.digest = crc32.Update(z.digest, crc32.IEEETable, p.slice(0, n));
@@ -269,6 +278,7 @@ public static (nint n, error err) Read(this ref Reader z, slice<byte> p) {
             // In the normal case we return here.
             return (n, z.err);
         }
+
         // Finished file; check checksum and size.
         {
             var (_, errΔ1) = io.ReadFull(z.r, z.buf[..8]); if (errΔ1 != default!) {
@@ -283,17 +293,20 @@ public static (nint n, error err) Read(this ref Reader z, slice<byte> p) {
             return (n, z.err);
         }
         (z.digest, z.size) = (0, 0);
+
         // File is ok; check if there is another.
         if (!z.multistream) {
             return (n, io.EOF);
         }
         z.err = default!; // Remove io.EOF
+
         {
             (_, z.err) = z.readHeader(); if (z.err != default!) {
                 return (n, z.err);
             }
         }
     }
+
     return (n, default!);
 }
 

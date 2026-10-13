@@ -263,6 +263,7 @@ public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>>
         var l = slog.New(ht);
         c.f(l);
     }
+
     // Collect and check the results.
     slice<error> errs = default!;
     var res = results();

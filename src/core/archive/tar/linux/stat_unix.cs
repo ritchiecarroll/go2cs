@@ -65,6 +65,7 @@ internal static error statUnix(fs.FileInfo fi, ж<Header> Ꮡh, bool doNameLooku
     }
     h.AccessTime = statAtime(sys);
     h.ChangeTime = statCtime(sys);
+
     // Best effort at populating Devmajor and Devminor.
     if (h.Typeflag == TypeChar || h.Typeflag == TypeBlock) {
         var dev = (uint64)(~sys).Rdev; // May be int32 or uint32
@@ -77,6 +78,7 @@ internal static error statUnix(fs.FileInfo fi, ж<Header> Ꮡh, bool doNameLooku
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
         }
         else if (exprᴛ1 == "linux"u8) {
+            // Copied from golang.org/x/sys/unix/dev_linux.go.
             var major = (uint32)((((uint64)(dev & 0x00000000000fff00)) >> (int)(8)));
             major |= (uint32)((uint32)((((uint64)(dev & 0xfffff00000000000UL)) >> (int)(32))));
             var minor = (uint32)((((uint64)(dev & 0x00000000000000ff)) >> (int)(0)));
@@ -84,43 +86,41 @@ internal static error statUnix(fs.FileInfo fi, ж<Header> Ꮡh, bool doNameLooku
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
         }
         else if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8) {
+            // Copied from golang.org/x/sys/unix/dev_darwin.go.
             var major = (uint32)((uint64)(((dev >> (int)(24))) & 0xff));
             var minor = (uint32)((uint64)(dev & 0xffffff));
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
         }
         else if (exprᴛ1 == "dragonfly"u8) {
+            // Copied from golang.org/x/sys/unix/dev_dragonfly.go.
             var major = (uint32)((uint64)(((dev >> (int)(8))) & 0xff));
             var minor = (uint32)((uint64)(dev & 0xffff00ffU));
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
         }
         else if (exprᴛ1 == "freebsd"u8) {
+            // Copied from golang.org/x/sys/unix/dev_freebsd.go.
             var major = (uint32)((uint64)(((dev >> (int)(8))) & 0xff));
             var minor = (uint32)((uint64)(dev & 0xffff00ffU));
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
         }
         else if (exprᴛ1 == "netbsd"u8) {
+            // Copied from golang.org/x/sys/unix/dev_netbsd.go.
             var major = (uint32)((((uint64)(dev & 0x000fff00)) >> (int)(8)));
             var minor = (uint32)((((uint64)(dev & 0x000000ff)) >> (int)(0)));
             minor |= (uint32)((uint32)((((uint64)(dev & 0xfff00000U)) >> (int)(12))));
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
         }
         else if (exprᴛ1 == "openbsd"u8) {
+            // Copied from golang.org/x/sys/unix/dev_openbsd.go.
             var major = (uint32)((((uint64)(dev & 0x0000ff00)) >> (int)(8)));
             var minor = (uint32)((((uint64)(dev & 0x000000ff)) >> (int)(0)));
             minor |= (uint32)((uint32)((((uint64)(dev & 0xffff0000U)) >> (int)(8))));
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
         }
         else { /* default: */
+            // TODO: Implement solaris (see https://golang.org/issue/8106)
         }
-
     }
-    // Copied from golang.org/x/sys/unix/dev_linux.go.
-    // Copied from golang.org/x/sys/unix/dev_darwin.go.
-    // Copied from golang.org/x/sys/unix/dev_dragonfly.go.
-    // Copied from golang.org/x/sys/unix/dev_freebsd.go.
-    // Copied from golang.org/x/sys/unix/dev_netbsd.go.
-    // Copied from golang.org/x/sys/unix/dev_openbsd.go.
-    // TODO: Implement solaris (see https://golang.org/issue/8106)
     return default!;
 }
 

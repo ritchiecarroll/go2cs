@@ -82,6 +82,7 @@ internal static ΔType coreString(ΔType t) {
     if (!isTypeParam(t)) {
         return under(t); // untyped string remains untyped
     }
+
     ref var su = ref heap<ΔType>(out var Ꮡsu);
     var hasString = false;
     typeset(t, (ΔType _, ΔType u) => {
@@ -120,6 +121,7 @@ internal static ΔType match(ΔType x, ΔType y) {
     if (Identical(x, y)) {
         return x;
     }
+
     // We may have channels that differ in direction only.
     {
         var (xΔ1, _) = x._<ж<Chan>>(ᐧ); if (xΔ1 != nil) {
@@ -134,11 +136,11 @@ internal static ΔType match(ΔType x, ΔType y) {
                     case {} when (~yΔ1).dir == SendRecv: {
                         return new ChanжΔType(xΔ1);
                     }}
-
                 }
             }
         }
     }
+
     // types are different
     return default!;
 }

@@ -24,7 +24,6 @@ public static float64 Logb(float64 x) {
     case {} when IsNaN(x): {
         return x;
     }}
-
     return (float64)ilogb(x);
 }
 
@@ -47,7 +46,6 @@ public static nint Ilogb(float64 x) {
     case {} when IsInf(x, 0): {
         return MaxInt32;
     }}
-
     return ilogb(x);
 }
 

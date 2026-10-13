@@ -22,8 +22,6 @@ internal static readonly @string cgoWriteBarrierFail = "unpinned Go pointer stor
 //go:nosplit
 //go:nowritebarrier
 internal static void cgoCheckPtrWrite(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointer src) {
-    ref var dst = ref Ꮡdst.DerefOrNull();
-
     if (!mainStarted) {
         // Something early in startup hates this function.
         // Don't start doing any actual checking until the
@@ -36,28 +34,33 @@ internal static void cgoCheckPtrWrite(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointe
     if (cgoIsGoPointer(@unsafe.Pointer.FromPinnedBox(Ꮡdst))) {
         return;
     }
+
     // If we are running on the system stack then dst might be an
     // address on the stack, which is OK.
     var gp = getg();
     if (gp == (~(~gp).m).g0 || gp == (~(~gp).m).gsignal) {
         return;
     }
+
     // Allocating memory can write to various mfixalloc structs
     // that look like they are non-Go memory.
     if ((~(~gp).m).mallocing != 0) {
         return;
     }
+
     // If the object is pinned, it's safe to store it in C memory. The GC
     // ensures it will not be moved or freed.
     if (isPinned(src)) {
         return;
     }
+
     // It's OK if writing to memory allocated by persistentalloc.
     // Do this check last because it is more expensive and rarely true.
     // If it is false the expense doesn't matter since we are crashing.
     if (inPersistentAlloc((uintptr)Ꮡdst)) {
         return;
     }
+
     systemstack(() => {
         println((@string)"write of unpinned Go pointer"u8, ((Δhex)(uint64)(uintptr)src), (@string)"to non-Go memory"u8, ((Δhex)(uint64)(uintptr)Ꮡdst));
         @throw(cgoWriteBarrierFail);
@@ -146,6 +149,7 @@ internal static void cgoCheckTypedBlock(ж<_type> Ꮡtyp, @unsafe.Pointer src, u
             size = ptrdataSize;
         }
     }
+
     cgoCheckBits(src, getGCMask(Ꮡtyp), off, size);
 }
 
@@ -197,6 +201,7 @@ internal static void cgoCheckUsingType(ж<_type> Ꮡtyp, @unsafe.Pointer src, ui
     if (!typ.Pointers()) {
         return;
     }
+
     // Anything past typ.PtrBytes is not a pointer.
     if (typ.PtrBytes <= off) {
         return;
@@ -206,6 +211,7 @@ internal static void cgoCheckUsingType(ж<_type> Ꮡtyp, @unsafe.Pointer src, ui
             size = ptrdataSize;
         }
     }
+
     cgoCheckBits(src, getGCMask(Ꮡtyp), off, size);
 }
 

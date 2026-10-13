@@ -124,8 +124,8 @@ internal static readonly @string cryptoMd5UseOfMd5IsNotˢ = "crypto/md5: use of 
 internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) {
     nint nn = default!;
     error err = default!;
-
     ref var d = ref Ꮡd.DerefOrNull();
+
     if (fips140only.Enabled) {
         return (0, errors.New(cryptoMd5UseOfMd5IsNotˢ));
     }
@@ -176,6 +176,7 @@ internal static array<byte> checkSum(this ж<digest> Ꮡd) {
     if (fips140only.Enabled) {
         throw panic("crypto/md5: use of MD5 is not allowed in FIPS 140-only mode");
     }
+
     // Append 0x80 to the end of the message and then append zeros
     // until the length is a multiple of 56 bytes. Finally append
     // 8 bytes representing the message length in bits.
@@ -185,11 +186,13 @@ internal static array<byte> checkSum(this ж<digest> Ꮡd) {
     var pad = (55 - d.len) % 64; // calculate number of padding bytes
     byteorder.LEPutUint64(tmp.slice((nint)(1 + pad)), (d.len << (int)(3))); // append length in bits
     Ꮡd.Write(tmp.slice(0, (nint)(1 + pad + 8)));
+
     // The previous write ensures that a whole number of
     // blocks (i.e. a multiple of 64 bytes) have been hashed.
     if (d.nx != 0) {
         throw panic("d.nx != 0");
     }
+
     array<byte> digest = new(16); /* ΔSize */
     byteorder.LEPutUint32(digest[0..], d.s[0]);
     byteorder.LEPutUint32(digest[4..], d.s[1]);

@@ -98,6 +98,7 @@ internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offse
             // Restart at the beginning.
             r.start();
         }
+
         // Read until we reach offset.
         array<byte> buf = new(512);
         while (r.offset < newOffset) {
@@ -113,7 +114,6 @@ internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offse
         }
         break;
     }}
-
     r.offset = newOffset;
     return (r.offset, default!);
 }

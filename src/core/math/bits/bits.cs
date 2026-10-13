@@ -524,12 +524,15 @@ public static (uint64 quo, uint64 rem) Div64(uint64 hi, uint64 lo, uint64 y) {
     if (y <= hi) {
         throw panic(overflowError);
     }
+
     // If high part is zero, we can directly return the results.
     if (hi == 0) {
         return (lo / y, lo % y);
     }
+
     nuint s = (nuint)LeadingZeros64(y);
     y.LshAssign(s);
+
     UntypedInt two32 = /* 1 << 32 */ 4294967296;
     const uint64 mask32 = /* two32 - 1 */ 4294967295;
     var yn1 = (y >> (int)(32));
@@ -540,6 +543,7 @@ public static (uint64 quo, uint64 rem) Div64(uint64 hi, uint64 lo, uint64 y) {
     var un0 = (uint64)(un10 & mask32);
     var q1 = un32 / yn1;
     var rhat = un32 - q1 * yn1;
+
     while (q1 >= two32 || q1 * yn0 > (uint64)two32 * rhat + un1) {
         q1--;
         rhat += yn1;
@@ -547,9 +551,11 @@ public static (uint64 quo, uint64 rem) Div64(uint64 hi, uint64 lo, uint64 y) {
             break;
         }
     }
+
     var un21 = un32 * (uint64)two32 + un1 - q1 * y;
     var q0 = un21 / yn1;
     rhat = un21 - q0 * yn1;
+
     while (q0 >= two32 || q0 * yn0 > (uint64)two32 * rhat + un0) {
         q0--;
         rhat += yn1;
@@ -557,6 +563,7 @@ public static (uint64 quo, uint64 rem) Div64(uint64 hi, uint64 lo, uint64 y) {
             break;
         }
     }
+
     return (q1 * (uint64)two32 + q0, (un21 * (uint64)two32 + un0 - q0 * y).Rsh(s));
 }
 

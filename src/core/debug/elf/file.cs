@@ -139,16 +139,19 @@ public static io.ReadSeeker Open(this ж<ΔSection> Ꮡs) {
     if (s.Type == SHT_NOBITS) {
         return new io.SectionReaderжReadSeeker(io.NewSectionReader(new nobitsSectionReaderжReaderAt(Ꮡ(new nobitsSectionReader(nil))), 0, (int64)s.Size));
     }
+
     Func<io.Reader, (io.ReadCloser, error)> zrd = default!;
     if ((SectionFlag)(s.Flags & SHF_COMPRESSED) == 0){
         if (!strings.HasPrefix(s.Name, zdebugˢ)) {
             return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
         }
+
         var b = new slice<byte>(12);
         var (n, _) = s.sr.ReadAt(b, 0);
         if (n != 12 || ((sstring)(b[..4])) != "ZLIB"u8) {
             return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
         }
+
         s.compressionOffset = 12;
         s.compressionType = COMPRESS_ZLIB;
         s.Size = binary.BigEndian.Uint64(b[4..12]);
@@ -159,6 +162,7 @@ public static io.ReadSeeker Open(this ж<ΔSection> Ꮡs) {
             "SHF_COMPRESSED applies only to non-allocable sections"u8, s.compressionType)))
         );
     }
+
     var exprᴛ1 = s.compressionType;
     if (exprᴛ1 == COMPRESS_ZLIB) {
         zrd = zlib.NewReader;
@@ -170,6 +174,7 @@ public static io.ReadSeeker Open(this ж<ΔSection> Ꮡs) {
     if (zrd == default!) {
         return new errorReader(new FormatErrorжerror(Ꮡ(new FormatError((int64)s.Offset, "unknown compression type"u8, s.compressionType))));
     }
+
         var zrdʗ1 = zrd;
     return new readSeekerFromReaderжReadSeeker(Ꮡ(new readSeekerFromReader(
         reset: () => {
@@ -288,6 +293,7 @@ public static ж<ΔSection> SectionByType(this ref File f, SectionType typ) {
 // The ELF binary is expected to start at position 0 in the ReaderAt.
 public static (ж<File>, error) NewFile(io.ReaderAt r) {
     var sr = io.NewSectionReader(r, 0, 9223372036854775807L);
+
     // Read and decode ELF identifier
     array<uint8> ident = new(16);
     {
@@ -298,16 +304,17 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     if (ident[0] != (rune)'\x7f' || ident[1] != (rune)'E' || ident[2] != (rune)'L' || ident[3] != (rune)'F') {
         return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "bad magic number"u8, ident[0..4]))));
     }
+
     var f = @new<File>();
     f.Value.Class = ((Class)ident[EI_CLASS]);
     var exprᴛ1 = (~f).Class;
     if (exprᴛ1 == ELFCLASS32) {
     }
     else if (exprᴛ1 == ELFCLASS64) {
+        // ok
     }
     else { /* default: */
-        return (default!, new FormatErrorжerror(Ꮡ(new FormatError( // ok
-0, "unknown ELF class"u8, (~f).Class))));
+        return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "unknown ELF class"u8, (~f).Class))));
     }
 
     f.Value.Data = ((ΔData)ident[EI_DATA]);
@@ -322,14 +329,16 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     else { /* default: */
         return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "unknown ELF data encoding"u8, (~f).Data))));
     }
-
     f.Value.ByteOrder = bo;
+
     f.Value.Version = ((Version)ident[EI_VERSION]);
     if ((~f).Version != EV_CURRENT) {
         return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "unknown ELF version"u8, (~f).Version))));
     }
+
     f.Value.OSABI = ((OSABI)ident[EI_OSABI]);
     f.Value.ABIVersion = ident[EI_ABIVERSION];
+
     // Read ELF file header
     ref var phoff = ref heap(new int64(), out var Ꮡphoff);
     ref var phentsize = ref heap(new nint(), out var Ꮡphentsize);
@@ -396,12 +405,15 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     if (phoff < 0) {
         return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "invalid phoff"u8, phoff))));
     }
+
     if (shoff == 0 && shnum != 0) {
         return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "invalid ELF shnum for shoff=0"u8, shnum))));
     }
+
     if (shnum > 0 && shstrndx >= shnum) {
         return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "invalid ELF shstrndx"u8, shstrndx))));
     }
+
     nint wantPhentsize = default!;
     nint wantShentsize = default!;
     var exprᴛ4 = (~f).Class;
@@ -413,10 +425,10 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         wantPhentsize = 2 * 4 + 6 * 8;
         wantShentsize = 4 * 4 + 6 * 8;
     }
-
     if (phnum > 0 && phentsize < wantPhentsize) {
         return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "invalid ELF phentsize"u8, phentsize))));
     }
+
     // Read program headers
     f.Value.Progs = new slice<ж<Prog>>(phnum);
     var (phdata, err) = saferio.ReadDataAt(new io.SectionReaderжReaderAt(sr), (uint64)phnum * (uint64)phentsize, phoff);
@@ -453,7 +465,6 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
                 Align: bo.Uint64(phdata.slice((nint)(off + /* unsafe.Offsetof(ph.Align) */ (uintptr)48)))
             );
         }
-
         if ((int64)(~p).Off < 0) {
             return (default!, new FormatErrorжerror(Ꮡ(new FormatError(phoff + (int64)off, "invalid program header offset"u8, (~p).Off))));
         }
@@ -464,6 +475,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         p.Value.ReaderAt = new io.SectionReaderжReaderAt(p.Value.sr);
         f.Value.Progs[i] = p;
     }
+
     // If the number of sections is greater than or equal to SHN_LORESERVE
     // (0xff00), shnum has the value zero and the actual number of section
     // header table entries is contained in the sh_size field of the section
@@ -495,13 +507,14 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             typ = sh.Value.Type;
             link = sh.Value.Link;
         }
-
         if (((SectionType)typ) != SHT_NULL) {
             return (default!, new FormatErrorжerror(Ꮡ(new FormatError(shoff, "invalid type of the initial section"u8, ((SectionType)typ)))));
         }
+
         if (shnum < (nint)SHN_LORESERVE) {
             return (default!, new FormatErrorжerror(Ꮡ(new FormatError(shoff, "invalid ELF shnum contained in sh_size"u8, shnum))));
         }
+
         // If the section name string table section index is greater than or
         // equal to SHN_LORESERVE (0xff00), this member has the value
         // SHN_XINDEX (0xffff) and the actual index of the section name
@@ -514,9 +527,11 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             }
         }
     }
+
     if (shnum > 0 && shentsize < wantShentsize) {
         return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "invalid ELF shentsize"u8, shentsize))));
     }
+
     // Read section headers
     nint c = saferio.SliceCap<ΔSection>((uint64)shnum);
     if (c < 0) {
@@ -565,7 +580,6 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
                 Entsize: bo.Uint64(shdata.slice((nint)(off + /* unsafe.Offsetof(sh.Entsize) */ (uintptr)56)))
             );
         }
-
         if ((int64)(~s).Offset < 0) {
             return (default!, new FormatErrorжerror(Ꮡ(new FormatError(shoff + (int64)off, "invalid section offset"u8, (int64)(~s).Offset))));
         }
@@ -573,6 +587,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             return (default!, new FormatErrorжerror(Ꮡ(new FormatError(shoff + (int64)off, "invalid section size"u8, (int64)(~s).FileSize))));
         }
         s.Value.sr = io.NewSectionReader(r, (int64)(~s).Offset, (int64)(~s).FileSize);
+
         if ((SectionFlag)((~s).Flags & SHF_COMPRESSED) == 0){
             s.Value.ReaderAt = new io.SectionReaderжReaderAt(s.Value.sr);
             s.Value.Size = s.Value.FileSize;
@@ -605,13 +620,15 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
                 s.Value.Addralign = bo.Uint64(chdata[(int)(/* unsafe.Offsetof(ch.Addralign) */ (uintptr)16)..]);
                 s.Value.compressionOffset = (int64)/* unsafe.Sizeof(ch) */ (uintptr)24;
             }
-
         }
+
         f.Value.Sections = append((~f).Sections, s);
     }
+
     if (len((~f).Sections) == 0) {
         return (f, default!);
     }
+
     // Load section header string table.
     if (shstrndx == 0) {
         // If the file has no section name string table,
@@ -633,6 +650,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             return (default!, new FormatErrorжerror(Ꮡ(new FormatError(shoff + (int64)(i * shentsize), "bad section name index"u8, names[i]))));
         }
     }
+
     return (f, default!);
 }
 
@@ -666,6 +684,7 @@ internal static (slice<Symbol>, slice<byte>, error) getSymbols32(this ref File f
     if (symtabSection == nil) {
         return (default!, default!, ErrNoSymbols);
     }
+
     var (data, err) = symtabSection.Data();
     if (err != default!) {
         return (default!, default!, fmt.Errorf("cannot load symbol section: %w"u8, err));
@@ -676,13 +695,17 @@ internal static (slice<Symbol>, slice<byte>, error) getSymbols32(this ref File f
     if (len(data) % (nint)Sym32Size != 0) {
         return (default!, default!, errors.New(lengthOfSymbolSectionIsˢ));
     }
+
     (var strdata, err) = f.stringTable((~symtabSection).Link);
     if (err != default!) {
         return (default!, default!, fmt.Errorf("cannot load string table section: %w"u8, err));
     }
+
     // The first entry is all zeros.
     data = data[(int)(Sym32Size)..];
+
     var symbols = new slice<Symbol>(len(data) / (nint)Sym32Size);
+
     nint i = 0;
     Sym32 sym = default!;
     while (len(data) > 0) {
@@ -702,6 +725,7 @@ internal static (slice<Symbol>, slice<byte>, error) getSymbols32(this ref File f
         i++;
         data = data[(int)(Sym32Size)..];
     }
+
     return (symbols, strdata, default!);
 }
 
@@ -713,6 +737,7 @@ internal static (slice<Symbol>, slice<byte>, error) getSymbols64(this ref File f
     if (symtabSection == nil) {
         return (default!, default!, ErrNoSymbols);
     }
+
     var (data, err) = symtabSection.Data();
     if (err != default!) {
         return (default!, default!, fmt.Errorf("cannot load symbol section: %w"u8, err));
@@ -720,13 +745,17 @@ internal static (slice<Symbol>, slice<byte>, error) getSymbols64(this ref File f
     if (len(data) % (nint)Sym64Size != 0) {
         return (default!, default!, errors.New(lengthOfSymbolSectionIsˢ2));
     }
+
     (var strdata, err) = f.stringTable((~symtabSection).Link);
     if (err != default!) {
         return (default!, default!, fmt.Errorf("cannot load string table section: %w"u8, err));
     }
+
     // The first entry is all zeros.
     data = data[(int)(Sym64Size)..];
+
     var symbols = new slice<Symbol>(len(data) / (nint)Sym64Size);
+
     nint i = 0;
     Sym64 sym = default!;
     while (len(data) > 0) {
@@ -746,6 +775,7 @@ internal static (slice<Symbol>, slice<byte>, error) getSymbols64(this ref File f
         i++;
         data = data[(int)(Sym64Size)..];
     }
+
     return (symbols, strdata, default!);
 }
 
@@ -754,6 +784,7 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
     if (start < 0 || start >= len(section)) {
         return ("", false);
     }
+
     for (nint end = start; end < len(section); end++) {
         if (section[end] == 0) {
             return (((@string)(section.slice(start, end))), true);
@@ -819,7 +850,6 @@ internal static error applyRelocations(this ref File f, slice<byte> dst, slice<b
     default: {
         return errors.New(applyRelocationsNotˢ);
     }}
-
 }
 
 // canApplyRelocation reports whether we should try to apply a
@@ -840,16 +870,20 @@ internal static error applyRelocationsAMD64(this ref File f, slice<byte> dst, sl
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
     }
+
     var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
+
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela64(), out var Ꮡrela);
+
     while (b.Len() > 0) {
         binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
         var symNo = (rela.Info >> (int)(32));
         R_X86_64 t = ((R_X86_64)(nint)((uint64)(rela.Info & 0xffff)));
+
         if (symNo == 0 || symNo > (uint64)len(symbols)) {
             continue;
         }
@@ -857,9 +891,11 @@ internal static error applyRelocationsAMD64(this ref File f, slice<byte> dst, sl
         if (!canApplyRelocation(ref (sym).DerefOrNull())) {
             continue;
         }
+
         // There are relocations, so this must be a normal
         // object file.  The code below handles only basic relocations
         // of the form S + A (symbol plus addend).
+
         var exprᴛ1 = t;
         if (exprᴛ1 == R_X86_64_64) {
             if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
@@ -875,8 +911,8 @@ internal static error applyRelocationsAMD64(this ref File f, slice<byte> dst, sl
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
-
     }
+
     return default!;
 }
 
@@ -888,20 +924,25 @@ internal static error applyRelocations386(this ref File f, slice<byte> dst, slic
     if (len(rels) % 8 != 0) {
         return errors.New(lengthOfRelocationˢ2);
     }
+
     var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
+
     var b = bytes.NewReader(rels);
     ref var rel = ref heap(new Rel32(), out var Ꮡrel);
+
     while (b.Len() > 0) {
         binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrel);
         var symNo = (rel.Info >> (int)(8));
         R_386 t = ((R_386)(nint)((uint32)(rel.Info & 0xff)));
+
         if (symNo == 0 || symNo > (uint32)len(symbols)) {
             continue;
         }
         var sym = Ꮡ(symbols, symNo - 1);
+
         if (t == R_386_32) {
             if (rel.Off + 4 >= (uint32)len(dst)) {
                 continue;
@@ -911,6 +952,7 @@ internal static error applyRelocations386(this ref File f, slice<byte> dst, slic
             f.ByteOrder.PutUint32(dst.slice((nint)(rel.Off), (nint)(rel.Off + 4)), val);
         }
     }
+
     return default!;
 }
 
@@ -919,20 +961,25 @@ internal static error applyRelocationsARM(this ref File f, slice<byte> dst, slic
     if (len(rels) % 8 != 0) {
         return errors.New(lengthOfRelocationˢ2);
     }
+
     var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
+
     var b = bytes.NewReader(rels);
     ref var rel = ref heap(new Rel32(), out var Ꮡrel);
+
     while (b.Len() > 0) {
         binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrel);
         var symNo = (rel.Info >> (int)(8));
         R_ARM t = ((R_ARM)(nint)((uint32)(rel.Info & 0xff)));
+
         if (symNo == 0 || symNo > (uint32)len(symbols)) {
             continue;
         }
         var sym = Ꮡ(symbols, symNo - 1);
+
         var exprᴛ1 = t;
         if (exprᴛ1 == R_ARM_ABS32) {
             if (rel.Off + 4 >= (uint32)len(dst)) {
@@ -942,8 +989,8 @@ internal static error applyRelocationsARM(this ref File f, slice<byte> dst, slic
             val += (uint32)(~sym).Value;
             f.ByteOrder.PutUint32(dst.slice((nint)(rel.Off), (nint)(rel.Off + 4)), val);
         }
-
     }
+
     return default!;
 }
 
@@ -952,16 +999,20 @@ internal static error applyRelocationsARM64(this ref File f, slice<byte> dst, sl
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
     }
+
     var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
+
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela64(), out var Ꮡrela);
+
     while (b.Len() > 0) {
         binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
         var symNo = (rela.Info >> (int)(32));
         R_AARCH64 t = ((R_AARCH64)(nint)((uint64)(rela.Info & 0xffff)));
+
         if (symNo == 0 || symNo > (uint64)len(symbols)) {
             continue;
         }
@@ -969,9 +1020,11 @@ internal static error applyRelocationsARM64(this ref File f, slice<byte> dst, sl
         if (!canApplyRelocation(ref (sym).DerefOrNull())) {
             continue;
         }
+
         // There are relocations, so this must be a normal
         // object file.  The code below handles only basic relocations
         // of the form S + A (symbol plus addend).
+
         var exprᴛ1 = t;
         if (exprᴛ1 == R_AARCH64_ABS64) {
             if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
@@ -987,8 +1040,8 @@ internal static error applyRelocationsARM64(this ref File f, slice<byte> dst, sl
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
-
     }
+
     return default!;
 }
 
@@ -1000,16 +1053,20 @@ internal static error applyRelocationsPPC(this ref File f, slice<byte> dst, slic
     if (len(rels) % 12 != 0) {
         return errors.New(lengthOfRelocationˢ3);
     }
+
     var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
+
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela32(), out var Ꮡrela);
+
     while (b.Len() > 0) {
         binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
         var symNo = (rela.Info >> (int)(8));
         R_PPC t = ((R_PPC)(nint)((uint32)(rela.Info & 0xff)));
+
         if (symNo == 0 || symNo > (uint32)len(symbols)) {
             continue;
         }
@@ -1017,6 +1074,7 @@ internal static error applyRelocationsPPC(this ref File f, slice<byte> dst, slic
         if (!canApplyRelocation(ref (sym).DerefOrNull())) {
             continue;
         }
+
         var exprᴛ1 = t;
         if (exprᴛ1 == R_PPC_ADDR32) {
             if (rela.Off + 4 >= (uint32)len(dst) || rela.Addend < 0) {
@@ -1025,8 +1083,8 @@ internal static error applyRelocationsPPC(this ref File f, slice<byte> dst, slic
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
-
     }
+
     return default!;
 }
 
@@ -1035,16 +1093,20 @@ internal static error applyRelocationsPPC64(this ref File f, slice<byte> dst, sl
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
     }
+
     var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
+
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela64(), out var Ꮡrela);
+
     while (b.Len() > 0) {
         binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
         var symNo = (rela.Info >> (int)(32));
         R_PPC64 t = ((R_PPC64)(nint)((uint64)(rela.Info & 0xffff)));
+
         if (symNo == 0 || symNo > (uint64)len(symbols)) {
             continue;
         }
@@ -1052,6 +1114,7 @@ internal static error applyRelocationsPPC64(this ref File f, slice<byte> dst, sl
         if (!canApplyRelocation(ref (sym).DerefOrNull())) {
             continue;
         }
+
         var exprᴛ1 = t;
         if (exprᴛ1 == R_PPC64_ADDR64) {
             if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
@@ -1067,8 +1130,8 @@ internal static error applyRelocationsPPC64(this ref File f, slice<byte> dst, sl
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
-
     }
+
     return default!;
 }
 
@@ -1077,20 +1140,25 @@ internal static error applyRelocationsMIPS(this ref File f, slice<byte> dst, sli
     if (len(rels) % 8 != 0) {
         return errors.New(lengthOfRelocationˢ2);
     }
+
     var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
+
     var b = bytes.NewReader(rels);
     ref var rel = ref heap(new Rel32(), out var Ꮡrel);
+
     while (b.Len() > 0) {
         binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrel);
         var symNo = (rel.Info >> (int)(8));
         R_MIPS t = ((R_MIPS)(nint)((uint32)(rel.Info & 0xff)));
+
         if (symNo == 0 || symNo > (uint32)len(symbols)) {
             continue;
         }
         var sym = Ꮡ(symbols, symNo - 1);
+
         var exprᴛ1 = t;
         if (exprᴛ1 == R_MIPS_32) {
             if (rel.Off + 4 >= (uint32)len(dst)) {
@@ -1100,8 +1168,8 @@ internal static error applyRelocationsMIPS(this ref File f, slice<byte> dst, sli
             val += (uint32)(~sym).Value;
             f.ByteOrder.PutUint32(dst.slice((nint)(rel.Off), (nint)(rel.Off + 4)), val);
         }
-
     }
+
     return default!;
 }
 
@@ -1110,12 +1178,15 @@ internal static error applyRelocationsMIPS64(this ref File f, slice<byte> dst, s
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
     }
+
     var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
+
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela64(), out var Ꮡrela);
+
     while (b.Len() > 0) {
         binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
         uint64 symNo = default!;
@@ -1127,6 +1198,7 @@ internal static error applyRelocationsMIPS64(this ref File f, slice<byte> dst, s
             symNo = (uint64)(rela.Info & 0xffffffffU);
             t = ((R_MIPS)(nint)((rela.Info >> (int)(56))));
         }
+
         if (symNo == 0 || symNo > (uint64)len(symbols)) {
             continue;
         }
@@ -1134,6 +1206,7 @@ internal static error applyRelocationsMIPS64(this ref File f, slice<byte> dst, s
         if (!canApplyRelocation(ref (sym).DerefOrNull())) {
             continue;
         }
+
         var exprᴛ1 = t;
         if (exprᴛ1 == R_MIPS_64) {
             if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
@@ -1149,8 +1222,8 @@ internal static error applyRelocationsMIPS64(this ref File f, slice<byte> dst, s
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
-
     }
+
     return default!;
 }
 
@@ -1159,18 +1232,22 @@ internal static error applyRelocationsLOONG64(this ref File f, slice<byte> dst, 
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
     }
+
     var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
+
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela64(), out var Ꮡrela);
+
     while (b.Len() > 0) {
         binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
         uint64 symNo = default!;
         R_LARCH t = default!;
         symNo = (rela.Info >> (int)(32));
         t = ((R_LARCH)(nint)((uint64)(rela.Info & 0xffff)));
+
         if (symNo == 0 || symNo > (uint64)len(symbols)) {
             continue;
         }
@@ -1178,6 +1255,7 @@ internal static error applyRelocationsLOONG64(this ref File f, slice<byte> dst, 
         if (!canApplyRelocation(ref (sym).DerefOrNull())) {
             continue;
         }
+
         var exprᴛ1 = t;
         if (exprᴛ1 == R_LARCH_64) {
             if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
@@ -1193,8 +1271,8 @@ internal static error applyRelocationsLOONG64(this ref File f, slice<byte> dst, 
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
-
     }
+
     return default!;
 }
 
@@ -1203,16 +1281,20 @@ internal static error applyRelocationsRISCV64(this ref File f, slice<byte> dst, 
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
     }
+
     var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
+
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela64(), out var Ꮡrela);
+
     while (b.Len() > 0) {
         binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
         var symNo = (rela.Info >> (int)(32));
         R_RISCV t = ((R_RISCV)(nint)((uint64)(rela.Info & 0xffff)));
+
         if (symNo == 0 || symNo > (uint64)len(symbols)) {
             continue;
         }
@@ -1220,6 +1302,7 @@ internal static error applyRelocationsRISCV64(this ref File f, slice<byte> dst, 
         if (!canApplyRelocation(ref (sym).DerefOrNull())) {
             continue;
         }
+
         var exprᴛ1 = t;
         if (exprᴛ1 == R_RISCV_64) {
             if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
@@ -1235,8 +1318,8 @@ internal static error applyRelocationsRISCV64(this ref File f, slice<byte> dst, 
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
-
     }
+
     return default!;
 }
 
@@ -1245,16 +1328,20 @@ internal static error applyRelocationss390x(this ref File f, slice<byte> dst, sl
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
     }
+
     var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
+
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela64(), out var Ꮡrela);
+
     while (b.Len() > 0) {
         binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
         var symNo = (rela.Info >> (int)(32));
         R_390 t = ((R_390)(nint)((uint64)(rela.Info & 0xffff)));
+
         if (symNo == 0 || symNo > (uint64)len(symbols)) {
             continue;
         }
@@ -1262,6 +1349,7 @@ internal static error applyRelocationss390x(this ref File f, slice<byte> dst, sl
         if (!canApplyRelocation(ref (sym).DerefOrNull())) {
             continue;
         }
+
         var exprᴛ1 = t;
         if (exprᴛ1 == R_390_64) {
             if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
@@ -1277,8 +1365,8 @@ internal static error applyRelocationss390x(this ref File f, slice<byte> dst, sl
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
-
     }
+
     return default!;
 }
 
@@ -1287,16 +1375,20 @@ internal static error applyRelocationsSPARC64(this ref File f, slice<byte> dst, 
     if (len(rels) % 24 != 0) {
         return errors.New(lengthOfRelocationˢ);
     }
+
     var (symbols, _, err) = f.getSymbols(SHT_SYMTAB);
     if (err != default!) {
         return err;
     }
+
     var b = bytes.NewReader(rels);
     ref var rela = ref heap(new Rela64(), out var Ꮡrela);
+
     while (b.Len() > 0) {
         binary.Read(new bytes_ReaderжReader(b), f.ByteOrder, Ꮡrela);
         var symNo = (rela.Info >> (int)(32));
         R_SPARC t = ((R_SPARC)(nint)((uint64)(rela.Info & 0xff)));
+
         if (symNo == 0 || symNo > (uint64)len(symbols)) {
             continue;
         }
@@ -1304,6 +1396,7 @@ internal static error applyRelocationsSPARC64(this ref File f, slice<byte> dst, 
         if (!canApplyRelocation(ref (sym).DerefOrNull())) {
             continue;
         }
+
         var exprᴛ1 = t;
         if (exprᴛ1 == R_SPARC_64 || exprᴛ1 == R_SPARC_UA64) {
             if (rela.Off + 8 >= (uint64)len(dst) || rela.Addend < 0) {
@@ -1319,8 +1412,8 @@ internal static error applyRelocationsSPARC64(this ref File f, slice<byte> dst, 
             var val32 = (uint32)(~sym).Value + (uint32)rela.Addend;
             f.ByteOrder.PutUint32(dst.slice((nint)(rela.Off), (nint)(rela.Off + 4)), val32);
         }
-
     }
+
     return default!;
 }
 
@@ -1347,7 +1440,6 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
         default: {
             return ""u8;
         }}
-
     }
     // sectionData gets the data for s, checks its size, and
     // applies any applicable relations.
@@ -1356,12 +1448,14 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
         if (errΔ1 != default! && (uint64)len(b) < (~s).Size) {
             return (default!, errΔ1);
         }
+
         if (Ꮡf.Value.Type == ET_EXEC) {
             // Do not apply relocations to DWARF sections for ET_EXEC binaries.
             // Relocations should already be applied, and .rela sections may
             // contain incorrect data.
             return (b, default!);
         }
+
         foreach (var (_, r) in Ꮡf.Value.Sections) {
             if ((~r).Type != SHT_RELA && (~r).Type != SHT_REL) {
                 continue;
@@ -1380,6 +1474,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
         }
         return (b, default!);
     }
+
     // There are many DWARf sections, but these are the ones
     // the debug/dwarf package started with.
     map<@string, slice<byte>> dat = new map<@string, slice<byte>>{["abbrev"u8] = default!, ["info"u8] = default!, ["str"u8] = default!, ["line"u8] = default!, ["ranges"u8] = default!};
@@ -1399,10 +1494,12 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
         }
         dat[suffix] = b;
     }
+
     var (d, err) = dwarf.New(dat[abbrevˢ], default!, default!, dat[infoˢ], dat[lineˢ], default!, dat[rangesˢ], dat[strˢ]);
     if (err != default!) {
         return (default!, err);
     }
+
     // Look for DWARF4 .debug_types sections and DWARF5 sections.
     foreach (var (i, s) in f.Sections) {
         @string suffix = dwarfSuffix(s);
@@ -1415,10 +1512,12 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
                 continue;
             }
         }
+
         var (b, errΔ4) = sectionData(i, s);
         if (errΔ4 != default!) {
             return (default!, errΔ4);
         }
+
         if (suffix == "types"u8){
             {
                 var errΔ5 = d.AddTypes(fmt.Sprintf("types-%d"u8, i), b); if (errΔ5 != default!) {
@@ -1433,6 +1532,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) {
             }
         }
     }
+
     return (d, default!);
 }
 
@@ -1504,6 +1604,7 @@ public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
     return (all, default!);
 }
 
+// VersionIndex is the type of a [Symbol] version index.
 partial struct VersionIndex /*num:uint16*/;
 
 // IsHidden reports whether the symbol is hidden within the version.
@@ -1563,12 +1664,14 @@ internal static error dynamicVersions(this ref File f, slice<byte> str) {
         // Already initialized.
         return default!;
     }
+
     // Accumulate verdef information.
     var vd = f.SectionByType(SHT_GNU_VERDEF);
     if (vd == nil) {
         return default!;
     }
     var (d, _) = vd.Data();
+
     slice<DynamicVersion> dynVers = default!;
     nint i = 0;
     while (ᐧ) {
@@ -1585,9 +1688,11 @@ internal static error dynamicVersions(this ref File f, slice<byte> str) {
         var cnt = f.ByteOrder.Uint16(d.slice(i + 6, i + 8));
         var aux = f.ByteOrder.Uint32(d.slice(i + 12, i + 16));
         var next = f.ByteOrder.Uint32(d.slice(i + 16, i + 20));
+
         if (cnt == 0) {
             return new FormatErrorжerror(Ꮡ(new FormatError((int64)((~vd).Offset + (uint64)i), "dynamic version has no name"u8, default!)));
         }
+
         @string name = default!;
         @string depName = default!;
         slice<@string> deps = default!;
@@ -1599,25 +1704,31 @@ internal static error dynamicVersions(this ref File f, slice<byte> str) {
             var vname = f.ByteOrder.Uint32(d.slice(j, j + 4));
             var vnext = f.ByteOrder.Uint32(d.slice(j + 4, j + 8));
             (depName, _) = getString(str, (nint)vname);
+
             if (c == 0){
                 name = depName;
             } else {
                 deps = append(deps, depName);
             }
+
             j += (nint)vnext;
         }
+
         dynVers = append(dynVers, new DynamicVersion(
             Name: name,
             Index: ndx,
             Flags: flags,
             Deps: deps
         ));
+
         if (next == 0) {
             break;
         }
         i += (nint)next;
     }
+
     f.dynVers = dynVers;
+
     return default!;
 }
 
@@ -1639,6 +1750,7 @@ public static (slice<DynamicVersion>, error) DynamicVersions(this ref File f) {
             return (default!, errors.New(dynamicVersionsMissingˢ));
         }
     }
+
     return (f.dynVers, default!);
 }
 
@@ -1648,12 +1760,14 @@ internal static error dynamicVersionNeeds(this ref File f, slice<byte> str) {
         // Already initialized.
         return default!;
     }
+
     // Accumulate verneed information.
     var vn = f.SectionByType(SHT_GNU_VERNEED);
     if (vn == nil) {
         return default!;
     }
     var (d, _) = vn.Data();
+
     slice<DynamicVersionNeed> dynVerNeeds = default!;
     nint i = 0;
     while (ᐧ) {
@@ -1670,6 +1784,7 @@ internal static error dynamicVersionNeeds(this ref File f, slice<byte> str) {
         var aux = f.ByteOrder.Uint32(d.slice(i + 8, i + 12));
         var next = f.ByteOrder.Uint32(d.slice(i + 12, i + 16));
         var (@file, _) = getString(str, (nint)fileoff);
+
         slice<DynamicVersionDep> deps = default!;
         nint j = i + (nint)aux;
         for (nint c = 0; c < (nint)cnt; c++) {
@@ -1681,26 +1796,32 @@ internal static error dynamicVersionNeeds(this ref File f, slice<byte> str) {
             var nameoff = f.ByteOrder.Uint32(d.slice(j + 8, j + 12));
             var nextΔ1 = f.ByteOrder.Uint32(d.slice(j + 12, j + 16));
             var (depName, _) = getString(str, (nint)nameoff);
+
             deps = append(deps, new DynamicVersionDep(
                 Flags: flags,
                 Index: index,
                 Dep: depName
             ));
+
             if (nextΔ1 == 0) {
                 break;
             }
             j += (nint)nextΔ1;
         }
+
         dynVerNeeds = append(dynVerNeeds, new DynamicVersionNeed(
             Name: @file,
             Needs: deps
         ));
+
         if (next == 0) {
             break;
         }
         i += (nint)next;
     }
+
     f.dynVerNeeds = dynVerNeeds;
+
     return default!;
 }
 
@@ -1722,6 +1843,7 @@ public static (slice<DynamicVersionNeed>, error) DynamicVersionNeeds(this ref Fi
             return (default!, errors.New(dynamicVersionNeedsˢ));
         }
     }
+
     return (f.dynVerNeeds, default!);
 }
 
@@ -1735,6 +1857,7 @@ internal static (bool, error) gnuVersionInit(this ref File f, slice<byte> str) {
         return (false, default!);
     }
     var (d, _) = vs.Data();
+
     f.gnuVersym = d;
     {
         var err = f.dynamicVersions(str); if (err != default!) {
@@ -1763,9 +1886,11 @@ internal static (bool hasVersion, VersionIndex versionIndex, @string version, @s
     }
     var vi = ((VersionIndex)f.ByteOrder.Uint16(s));
     var ndx = vi.Index();
+
     if (ndx == 0 || ndx == 1) {
         return (true, vi, "", "");
     }
+
     foreach (var (_, v) in f.dynVerNeeds) {
         foreach (var (_, n) in v.Needs) {
             if (ndx == n.Index) {
@@ -1773,11 +1898,13 @@ internal static (bool hasVersion, VersionIndex versionIndex, @string version, @s
             }
         }
     }
+
     foreach (var (_, v) in f.dynVers) {
         if (ndx == v.Index) {
             return (true, vi, v.Name, "");
         }
     }
+
     return (false, 0, "", "");
 }
 
@@ -1803,7 +1930,6 @@ public static (slice<@string>, error) DynString(this ref File f, DynTag tag) {
     else { /* default: */
         return (default!, fmt.Errorf("non-string-valued tag %v"u8, tag));
     }
-
     var ds = f.SectionByType(SHT_DYNAMIC);
     if (ds == nil) {
         // not dynamic, so no libraries
@@ -1813,6 +1939,7 @@ public static (slice<@string>, error) DynString(this ref File f, DynTag tag) {
     if (err != default!) {
         return (default!, err);
     }
+
     nint dynSize = 8;
     if (f.Class == ELFCLASS64) {
         dynSize = 16;
@@ -1820,6 +1947,7 @@ public static (slice<@string>, error) DynString(this ref File f, DynTag tag) {
     if (len(d) % dynSize != 0) {
         return (default!, errors.New(lengthOfDynamicSectionIsˢ));
     }
+
     (var str, err) = f.stringTable((~ds).Link);
     if (err != default!) {
         return (default!, err);
@@ -1839,7 +1967,6 @@ public static (slice<@string>, error) DynString(this ref File f, DynTag tag) {
             v = f.ByteOrder.Uint64(d[8..16]);
             d = d[16..];
         }
-
         if (t == tag) {
             var (s, ok) = getString(str, (nint)v);
             if (ok) {
@@ -1861,6 +1988,7 @@ public static (slice<uint64>, error) DynValue(this ref File f, DynTag tag) {
     if (err != default!) {
         return (default!, err);
     }
+
     nint dynSize = 8;
     if (f.Class == ELFCLASS64) {
         dynSize = 16;
@@ -1868,6 +1996,7 @@ public static (slice<uint64>, error) DynValue(this ref File f, DynTag tag) {
     if (len(d) % dynSize != 0) {
         return (default!, errors.New(lengthOfDynamicSectionIsˢ));
     }
+
     // Parse the .dynamic section as a string of bytes.
     slice<uint64> vals = default!;
     while (len(d) > 0) {
@@ -1884,7 +2013,6 @@ public static (slice<uint64>, error) DynValue(this ref File f, DynTag tag) {
             v = f.ByteOrder.Uint64(d[8..16]);
             d = d[16..];
         }
-
         if (t == tag) {
             vals = append(vals, v);
         }

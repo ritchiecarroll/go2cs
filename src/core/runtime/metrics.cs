@@ -12,10 +12,17 @@ using ꓸꓸꓸstatDep = Span<runtime_package.statDep>;
 
 partial class runtime_package {
 
+// metrics is a map of runtime/metrics keys to data used by the runtime
+// to sample each metric's value. metricsInit indicates it has been
+// initialized.
+//
+// These fields are protected by metricsSema which should be
+// locked/unlocked with metricsLock() / metricsUnlock().
 internal static ж<uint32> ᏑmetricsSema = new StandardBox<uint32>(1);
 internal static ref uint32 metricsSema => ref ᏑmetricsSema.Value;
 internal static bool metricsInit;
 internal static map<@string, metricData> metrics;
+
 internal static slice<float64> sizeClassBuckets;
 internal static slice<float64> timeHistBuckets;
 
@@ -40,6 +47,7 @@ internal static void initMetrics() {
     if (metricsInit) {
         return;
     }
+
     sizeClassBuckets = new slice<float64>(_NumSizeClasses, _NumSizeClasses + 1);
     // Skip size class 0 which is a stand-in for large objects, but large
     // objects are tracked separately (and they actually get placed in
@@ -60,6 +68,7 @@ internal static void initMetrics() {
         sizeClassBuckets[i] = (float64)((uint16)(class_to_size[i] + 1));
     }
     sizeClassBuckets = append(sizeClassBuckets, float64Inf());
+
     timeHistBuckets = timeHistogramMetricsBuckets();
     metrics = new map<@string, metricData>{
         ["/cgo/go-to-c-calls:calls"u8] = new(
@@ -446,11 +455,13 @@ internal static void initMetrics() {
             }
         )
     };
+
     foreach (var (_, info) in godebugs.All) {
         if (!info.Opaque) {
             metrics["/godebug/non-default-behavior/"u8 + info.Name + ":events"u8] = new metricData(compute: compute0);
         }
     }
+
     metricsInit = true;
 }
 
@@ -484,6 +495,8 @@ internal static void godebug_registerMetric(@string name, Func<uint64> read) {
     metricsUnlock();
 }
 
+// statDep is a dependency on a group of statistics
+// that a metric might have.
 partial struct statDep /*num:nuint*/;
 
 internal static statDep heapStatsDep => /* iota */ 0; // corresponds to heapStatsAggregate
@@ -492,6 +505,9 @@ internal static statDep cpuStatsDep => 2; // corresponds to cpuStatsAggregate
 internal static statDep gcStatsDep => 3;  // corresponds to gcStatsAggregate
 internal static statDep numStatsDeps => 4;
 
+// statDepSet represents a set of statDeps.
+//
+// Under the hood, it's a bitmap.
 partial struct statDepSet /*[1]uint64*/;
 
 // makeStatDepSet creates a new statDepSet from a list of statDeps.
@@ -576,6 +592,7 @@ internal static void compute(this ж<heapStatsAggregate> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡmemstats.of(mstats.ᏑheapStats).read(Ꮡa.of(heapStatsAggregate.ᏑheapStatsDelta));
+
     // Calculate derived stats.
     a.totalAllocs = a.largeAllocCount;
     a.totalFrees = a.largeFreeCount;
@@ -625,6 +642,7 @@ internal static void compute(this ж<sysStatsAggregate> Ꮡa) {
     a.heapGoal = ᏑgcController.heapGoal();
     a.gcCyclesDone = (uint64)memstats.numgc;
     a.gcCyclesForced = (uint64)memstats.numforcedgc;
+
     systemstack(() => {
         @lock(Ꮡmheap_.of(mheap.Ꮡlock));
         Ꮡa.Value.mSpanSys = Ꮡmemstats.of(mstats.Ꮡmspan_sys).load();
@@ -644,13 +662,12 @@ partial struct cpuStatsAggregate {
 // compute populates the cpuStatsAggregate with values from the runtime.
 internal static void compute(this ref cpuStatsAggregate a) {
     a.cpuStats = work.cpuStats;
+    // TODO(mknyszek): Update the CPU stats again so that we're not
+    // just relying on the STW snapshot. The issue here is that currently
+    // this will cause non-monotonicity in the "user" CPU time metric.
+    //
+    // a.cpuStats.accumulate(nanotime(), gcphase == _GCmark)
 }
-
-// TODO(mknyszek): Update the CPU stats again so that we're not
-// just relying on the STW snapshot. The issue here is that currently
-// this will cause non-monotonicity in the "user" CPU time metric.
-//
-// a.cpuStats.accumulate(nanotime(), gcphase == _GCmark)
 
 // gcStatsAggregate represents various GC stats obtained from the runtime
 // acquired together to avoid skew and inconsistencies.
@@ -715,13 +732,16 @@ internal static void ensure(this ж<statAggregate> Ꮡa, ж<statDepSet> Ꮡdeps)
         else if (exprᴛ1 == gcStatsDep) {
             a.gcStats.compute();
         }
-
     }
     a.ensured = a.ensured.union(missing);
 }
 
+// metricKind is a runtime copy of runtime/metrics.ValueKind and
+// must be kept structurally identical to that type.
 partial struct metricKind /*num:nint*/;
 
+// These values must be kept identical to their corresponding Kind* values
+// in the runtime/metrics package.
 internal static metricKind metricKindBad => /* iota */ 0;
 internal static metricKind metricKindUint64 => 1;
 internal static metricKind metricKindFloat64 => 2;
@@ -790,12 +810,15 @@ public static slice<@string> readMetricNames() {
     initMetrics();
     nint n = len(metrics);
     metricsUnlock();
+
     var list = new slice<@string>(0, n);
+
     metricsLock();
     foreach (var (name, _) in metrics) {
         list = append(list, name);
     }
     metricsUnlock();
+
     return list;
 }
 
@@ -804,8 +827,10 @@ public static slice<@string> readMetricNames() {
 //go:linkname readMetrics runtime/metrics.runtime_readMetrics
 internal static void readMetrics(@unsafe.Pointer samplesp, nint len, nint cap) {
     metricsLock();
+
     // Ensure the map is initialized.
     initMetrics();
+
     // Read the metrics.
     readMetricsLocked(samplesp, len, cap);
     metricsUnlock();

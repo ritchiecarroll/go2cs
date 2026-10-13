@@ -39,6 +39,7 @@ public static (nint nDst, nint nSrc, error err) Transform(this Form f, slice<byt
         (nDst, nSrc, err) = f.transform(dst.slice(n), src.slice(n), atEOF);
         return (nDst + n, nSrc + n, err);
     }
+
     if (err == default! && n < len(src) && !atEOF) {
         err = go.vendor.golang.org.x.text.transform_package.ErrShortSrc;
     }
@@ -78,6 +79,7 @@ internal static (nint nDst, nint nSrc, error err) transform(this Form f, slice<b
         }
         nDst = len(dst) - len(rb.@out);
         nSrc = end;
+
         // Next quickSpan.
         end = rb.nsrc;
         var eof = atEOF;

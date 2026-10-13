@@ -20,6 +20,7 @@ internal static (slice<@string>, error) listGroups(ref User u) {
     var userGID = ((_C_gid_t)ug);
     var nameC = new slice<byte>(len(u.Username) + 1);
     copy(nameC, u.Username);
+
     ref var n = ref heap<_C_int>(out var Ꮡn);
     n = ((_C_int)256);
     ref var gidsC = ref heap<slice<_C_gid_t>>(out var ᏑgidsC);

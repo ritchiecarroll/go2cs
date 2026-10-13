@@ -21,6 +21,8 @@ partial class trace_package {
 // i.e. anything that could reasonably be represented as a baseEvent.
 internal static UntypedInt maxArgs => 5;
 
+// timedEventArgs is an array that is able to hold the arguments for any
+// timed event.
 /* [maxArgs - 1]uint64 */
 partial struct timedEventArgs /*[4]uint64*/;
 
@@ -39,7 +41,6 @@ internal static slice<uint64> extra(this ref baseEvent e, version.Version v) {
     if (exprᴛ1 == version.Go122) {
         return e.args.slice(len(go122.Specs()[e.typ].Args) - 1);
     }
-
     throw panic(fmt.Sprintf("unsupported version: go 1.%d"u8, v));
 }
 
@@ -221,6 +222,7 @@ internal static E mustGet<EI, E>(this ref dataTable<EI, E> d, EI id)
     return data;
 }
 
+// frequency is nanoseconds per timestamp unit.
 partial struct frequency /*num:float64*/;
 
 // mul multiplies an unprocessed to produce a time in nanoseconds.
@@ -228,10 +230,13 @@ internal static ΔTime mul(this frequency f, timestamp t) {
     return ((ΔTime)(int64)((float64)(uint64)t * (float64)f));
 }
 
+// stringID is an index into the string table for a generation.
 partial struct stringID /*num:uint64*/;
 
+// extraStringID is an index into the extra string table for a generation.
 partial struct extraStringID /*num:uint64*/;
 
+// stackID is an index into the stack table for a generation.
 partial struct stackID /*num:uint64*/;
 
 // cpuSample represents a CPU profiling sample captured by the trace.

@@ -232,6 +232,7 @@ public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@strin
             pkgs = append(pkgs, importpath);
         }
     }
+
     error rep(uint64 cov, uint64 tot) {
         if (tot != 0){
             {
@@ -250,6 +251,7 @@ public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@strin
         }
         return default!;
     }
+
     slices.Sort<slice<@string>, @string>(pkgs);
     uint64 totalStmts = default!;
     uint64 coveredStmts = default!;
@@ -288,6 +290,7 @@ public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@strin
             }
         }
     }
+
     return default!;
 }
 
@@ -321,6 +324,7 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
         defer(() => tabberʗ1.Flush(), ref ᒐ);
         var allStmts = (uint64)0;
         var covStmts = (uint64)0;
+
         // Emit functions for each package, sorted by import path.
         foreach (var (_, importpath) in slices.Sorted(maps.Keys<map<@string, ж<pstate>>, @string, ж<pstate>>(fm.pm))) {
             var p = fm.pm[importpath];
@@ -331,6 +335,7 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
             foreach (var (u, _) in (~p).unitTable) {
                 units = append(units, u);
             }
+
             // Within a package, sort the units, then walk through the
             // sorted array. Each time we hit a new function, emit the
             // summary entry for the previous function, then make one last

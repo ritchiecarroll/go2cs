@@ -15,6 +15,7 @@ internal static readonly @string pipeˢ = "pipe"u8;
 // It returns the files and an error, if any.
 public static (ж<File> r, ж<File> w, error err) Pipe() {
     array<nint> p = new(2);
+
     // See ../syscall/exec.go for description of lock.
     syscall.ᏑForkLock.RLock();
     var e = syscall.Pipe(p[0..]);
@@ -25,6 +26,7 @@ public static (ж<File> r, ж<File> w, error err) Pipe() {
     syscall.CloseOnExec(p[0]);
     syscall.CloseOnExec(p[1]);
     syscall.ᏑForkLock.RUnlock();
+
     return (newFile(p[0], "|0"u8, kindPipe, false), newFile(p[1], "|1"u8, kindPipe, false), default!);
 }
 

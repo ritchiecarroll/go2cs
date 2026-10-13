@@ -35,8 +35,8 @@ internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
         if (exprᴛ1 == statusReleased) {
             (ps, err) = (default!, syscall.EINVAL); goto ᒐdone;
         }
-
         defer(Ꮡp.handleTransientRelease, ref ᒐ);
+
         var (s, e) = syscall.WaitForSingleObject(((syscallꓸHandle)handle), syscall.INFINITE);
         var exprᴛ2 = s;
         if (exprᴛ2 == syscall.WAIT_OBJECT_0) {
@@ -50,7 +50,6 @@ internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
         else { /* default: */
             (ps, err) = (default!, errors.New(osUnexpectedResultFromˢ)); goto ᒐdone;
         }
-
         ref var ec = ref heap(new uint32(), out var Ꮡec);
         e = syscall.GetExitCodeProcess(((syscallꓸHandle)handle), Ꮡec);
         if (e != default!) {
@@ -84,8 +83,8 @@ internal static error signal(this ж<Process> Ꮡp, ΔSignal sig) {
         if (exprᴛ1 == statusReleased) {
             return syscall.EINVAL;
         }
-
         defer(Ꮡp.handleTransientRelease, ref ᒐ);
+
         if (AreEqual(sig, ΔKill)) {
             ref var terminationHandle = ref heap(new syscallꓸHandle(), out var ᏑterminationHandle);
             var e = syscall.DuplicateHandle(~((syscallꓸHandle)((syscallꓸHandle)0)), ((syscallꓸHandle)handle), ~((syscallꓸHandle)((syscallꓸHandle)0)), ᏑterminationHandle, syscall.PROCESS_TERMINATE, false, 0);
@@ -115,6 +114,7 @@ internal static error release(this ж<Process> Ꮡp) {
             return syscall.EINVAL;
         }
     }
+
     // no need for a finalizer anymore
     runtime.SetFinalizer(Ꮡp.OrTypedNil(), default!);
     return default!;
@@ -193,7 +193,6 @@ internal static (slice<byte> arg, @string rest) readNextArg(@string cmd) {
             continue;
             break;
         }}
-
         b = appendBSBytes(b, nslash);
         nslash = 0;
         b = append(b, c);

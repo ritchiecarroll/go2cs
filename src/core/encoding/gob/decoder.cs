@@ -55,6 +55,7 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
     dec.Value.decoderCache = new map<reflectꓸType, map<typeId, ж<ж<decEngine>>>>();
     dec.Value.ignorerCache = new map<typeId, ж<ж<decEngine>>>();
     dec.Value.countBuf = new slice<byte>(9); // counts may be uint64s (unlikely!), require 9 bytes
+
     return dec;
 }
 
@@ -70,6 +71,7 @@ internal static void recvType(this ж<Decoder> Ꮡdec, typeId id) {
         dec.err = errors.New(gobDuplicateTypeReceivedˢ);
         return;
     }
+
     // Type:
     var wire = @new<wireType>();
     Ꮡdec.decodeValue(tWireType, reflect.ValueOf(wire.OrTypedNil()));
@@ -105,6 +107,7 @@ internal static void readMessage(this ref Decoder dec, nint nbytes) {
         // The buffer should always be empty now.
         throw panic("non-empty decoder buffer");
     }
+
     // Read the data
     slice<byte> buf = default!;
     (buf, dec.err) = saferio.ReadData(dec.r, (uint64)nbytes);
@@ -242,15 +245,16 @@ public static error DecodeValue(this ж<Decoder> Ꮡdec, reflectꓸValue v) {
 
         if (v.IsValid()) {
             if (v.Kind() == reflect.ΔPointer && !v.IsNil()){
+                // That's okay, we'll store through the pointer.
             } else 
             if (!v.CanSet()) {
-                // That's okay, we'll store through the pointer.
                 return errors.New(gobDecodeValueOfˢ);
             }
         }
         // Make sure we're single-threaded through here.
         dec.mutex.Lock();
         ᒐd1 = true;
+
         dec.buf.Reset(); // In case data lingers from previous invocation.
         dec.err = default!;
         var id = Ꮡdec.decodeTypeSequence(false);

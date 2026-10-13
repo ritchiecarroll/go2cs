@@ -63,6 +63,7 @@ public static (@string, error) LookPath(@string @file) {
             return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, err))));
         }
     }
+
     if (strings.Contains(@file, "/"u8)) {
         var err = findExecutable(@file);
         if (err == default!) {

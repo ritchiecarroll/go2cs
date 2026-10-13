@@ -1,6 +1,15 @@
 // Copyright 2010 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
+// A Token holds a value of one of these types:
+//
+//   - [Delim], for the four JSON delimiters [ ] { }
+//   - bool, for JSON booleans
+//   - float64, for JSON numbers
+//   - [Number], for JSON numbers
+//   - string, for JSON string literals
+//   - nil, for JSON null
 global using ΔToken = object;
 
 namespace go.encoding;
@@ -56,14 +65,17 @@ public static error Decode(this ж<Decoder> Ꮡdec, any v) {
     if (dec.err != default!) {
         return dec.err;
     }
+
     {
         var errΔ1 = dec.tokenPrepareForDecode(); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
+
     if (!dec.tokenValueAllowed()) {
         return new SyntaxErrorжerror(Ꮡ(new SyntaxError(msg: "not at beginning of value"u8, Offset: dec.InputOffset())));
     }
+
     // Read whole value into buffer.
     var (n, err) = Ꮡdec.readValue();
     if (err != default!) {
@@ -71,12 +83,15 @@ public static error Decode(this ж<Decoder> Ꮡdec, any v) {
     }
     Ꮡdec.of(Decoder.Ꮡd).init(dec.buf.slice(dec.scanp, dec.scanp + n));
     dec.scanp += n;
+
     // Don't save err from unmarshal into dec.err:
     // the connection is still usable since we read a complete JSON
     // object from it before the error happened.
     err = Ꮡdec.of(Decoder.Ꮡd).unmarshal(v);
+
     // fixup token streaming state
     dec.tokenValueEnd();
+
     return err;
 }
 
@@ -92,6 +107,7 @@ internal static (nint, error) readValue(this ж<Decoder> Ꮡdec) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     dec.scan.reset();
+
     nint scanp = dec.scanp;
     error err = default!;
 Input:
@@ -104,17 +120,17 @@ Input:
             dec.scan.bytes++;
             var exprᴛ1 = dec.scan.step(Ꮡdec.of(Decoder.Ꮡscan), c);
             if (exprᴛ1 == scanEnd) {
+                // scanEnd is delayed one byte so we decrement
+                // the scanner bytes count by 1 to ensure that
+                // this value is correct in the next call of Decode.
                 dec.scan.bytes--;
                 goto break_Input;
             }
             else if (exprᴛ1 == scanEndObject || exprᴛ1 == scanEndArray) {
-                if (stateEndValue(Ꮡdec.of(Decoder.Ꮡscan), // scanEnd is delayed one byte so we decrement
- // the scanner bytes count by 1 to ensure that
- // this value is correct in the next call of Decode.
- // scanEnd is delayed one byte.
- // We might block trying to get that byte from src,
- // so instead invent a space byte.
- (rune)' ') == scanEnd) {
+                // scanEnd is delayed one byte.
+                // We might block trying to get that byte from src,
+                // so instead invent a space byte.
+                if (stateEndValue(Ꮡdec.of(Decoder.Ꮡscan), (rune)' ') == scanEnd) {
                     scanp++;
                     goto break_Input;
                 }
@@ -123,8 +139,8 @@ Input:
                 dec.err = dec.scan.err;
                 return (0, dec.scan.err);
             }
-
         }
+
         // Did the last read have an error?
         // Delayed until now to allow buffer scan.
         if (err != default!) {
@@ -139,6 +155,7 @@ Input:
             dec.err = err;
             return (0, err);
         }
+
         nint n = scanp - dec.scanp;
         err = dec.refill();
         scanp = dec.scanp + n;
@@ -157,6 +174,7 @@ internal static error refill(this ref Decoder dec) {
         dec.buf = dec.buf.slice(0, nΔ1);
         dec.scanp = 0;
     }
+
     // Grow buffer if not large enough.
     const nint minRead = 512;
     if (cap(dec.buf) - len(dec.buf) < minRead) {
@@ -164,9 +182,11 @@ internal static error refill(this ref Decoder dec) {
         copy(newBuf, dec.buf);
         dec.buf = newBuf;
     }
+
     // Read. Delay error for next iteration (after scan).
     var (n, err) = dec.r.Read(dec.buf.slice(len(dec.buf), cap(dec.buf)));
     dec.buf = dec.buf.slice(0, len(dec.buf) + n);
+
     return err;
 }
 
@@ -208,12 +228,15 @@ public static error Encode(this ж<Encoder> Ꮡenc, any v) {
         if (enc.err != default!) {
             return enc.err;
         }
+
         var e = newEncodeState();
         defer(ᏑencodeStatePool.Put, e.OrTypedNil(), ref ᒐ);
+
         var err = e.marshal(v, new encOpts(escapeHTML: enc.escapeHTML));
         if (err != default!) {
             return err;
         }
+
         // Terminate each value with a newline.
         // This makes the output look a little nicer
         // when debugging, and some kind of space
@@ -221,6 +244,7 @@ public static error Encode(this ж<Encoder> Ꮡenc, any v) {
         // so that the reader knows there aren't more
         // digits coming.
         e.of(encodeState.ᏑBuffer).WriteByte((rune)'\n');
+
         var b = e.of(encodeState.ᏑBuffer).Bytes();
         if (enc.indentPrefix != ""u8 || enc.indentValue != ""u8) {
             (enc.indentBuf, err) = appendIndent(enc.indentBuf[..0], b, enc.indentPrefix, enc.indentValue);
@@ -259,6 +283,9 @@ public static void SetEscapeHTML(this ref Encoder enc, bool on) {
     enc.escapeHTML = on;
 }
 
+// RawMessage is a raw encoded JSON value.
+// It implements [Marshaler] and [Unmarshaler] and can
+// be used to delay JSON decoding or precompute a JSON encoding.
 partial struct RawMessage /*[]byte*/;
 
 // MarshalJSON returns m as the JSON encoding of m.
@@ -325,7 +352,6 @@ internal static error tokenPrepareForDecode(this ref Decoder dec) {
         dec.scanp++;
         dec.tokenState = tokenObjectValue;
     }
-
     return default!;
 }
 
@@ -334,7 +360,6 @@ internal static bool tokenValueAllowed(this ref Decoder dec) {
     if (exprᴛ1 == tokenTopValue || exprᴛ1 == tokenArrayStart || exprᴛ1 == tokenArrayValue || exprᴛ1 == tokenObjectValue) {
         return true;
     }
-
     return false;
 }
 
@@ -346,9 +371,9 @@ internal static void tokenValueEnd(this ref Decoder dec) {
     else if (exprᴛ1 == tokenObjectValue) {
         dec.tokenState = tokenObjectComma;
     }
-
 }
 
+// A Delim is a JSON array or object delimiter, one of [ ] { or }.
 partial struct Delim /*num:rune*/;
 
 public static @string String(this Delim d) {
@@ -462,7 +487,6 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
             }
             return (x, default!);
         }
-
     }
 }
 
@@ -494,7 +518,6 @@ internal static (ΔToken, error) tokenError(this ref Decoder dec, byte c) {
     else if (exprᴛ1 == tokenObjectComma) {
         context = afterObjectKeyValuePairˢ2;
     }
-
     return (default!, new SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character "u8 + quoteChar(c) + context, dec.InputOffset()))));
 }
 

@@ -250,6 +250,10 @@ public static Context TODO() {
     return new todoCtx(nil);
 }
 
+// A CancelFunc tells an operation to abandon its work.
+// A CancelFunc does not wait for the work to stop.
+// A CancelFunc may be called by multiple goroutines simultaneously.
+// After the first call, subsequent calls to a CancelFunc do nothing.
 // type CancelFunc is a methodless func type — rendered inline as its base delegate
 
 // WithCancel returns a derived context that points to the parent context
@@ -267,6 +271,16 @@ public static (Context ctx, Action cancel) WithCancel(Context parent) {
     });
 }
 
+// A CancelCauseFunc behaves like a [CancelFunc] but additionally sets the cancellation cause.
+// This cause can be retrieved by calling [Cause] on the canceled Context or on
+// any of its derived Contexts.
+//
+// If the context has already been canceled, CancelCauseFunc does not set the cause.
+// For example, if childContext is derived from parentContext:
+//   - if parentContext is canceled with cause1 before childContext is canceled with cause2,
+//     then Cause(parentContext) == Cause(childContext) == cause1
+//   - if childContext is canceled with cause2 before parentContext is canceled with cause1,
+//     then Cause(parentContext) == cause1 and Cause(childContext) == cause2
 // type CancelCauseFunc is a methodless func type — rendered inline as its base delegate
 
 // WithCancelCause behaves like [WithCancel] but returns a [CancelCauseFunc] instead of a [CancelFunc].
@@ -515,20 +529,23 @@ internal static partial void propagateCancel(this ж<cancelCtx> Ꮡc, Context pa
     ref var c = ref Ꮡc.DerefOrNull();
 
     c.Context = parent;
+
     var done = parent.Done();
     if (done == default!) {
         return; // parent is never canceled
     }
+
     var selᴛ1 = done;
     switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
     case 0 when selᴛ1.ꟷᐳ(out _): {
-        child.cancel(false, // parent is already canceled
- parent.Err(), Cause(parent));
+        // parent is already canceled
+        child.cancel(false, parent.Err(), Cause(parent));
         return;
     }
     default: {
         break;
     }}
+
     {
         var (p, ok) = parentCancelCtx(parent); if (ok) {
             // parent is a *cancelCtx, or derives from one.
@@ -546,6 +563,7 @@ internal static partial void propagateCancel(this ж<cancelCtx> Ꮡc, Context pa
             return;
         }
     }
+
     {
         var (a, ok) = parent._<afterFuncer>(ᐧ); if (ok) {
             // parent implements an AfterFunc method.
@@ -561,6 +579,7 @@ internal static partial void propagateCancel(this ж<cancelCtx> Ꮡc, Context pa
             return;
         }
     }
+
     Ꮡgoroutines.Add(1);
     goǃ(() => {
         var selᴛ2 = parent.Done();
@@ -624,6 +643,7 @@ internal static void cancel(this ж<cancelCtx> Ꮡc, bool removeFromParent, erro
     }
     c.children = default!;
     c.mu.Unlock();
+
     if (removeFromParent) {
         removeChild(c.Context, new cancelCtxжcanceler(Ꮡc));
     }

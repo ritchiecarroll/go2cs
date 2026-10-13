@@ -109,10 +109,12 @@ internal static (slice<byte>, error) ecdh(this ref x25519Curve c, ж<PrivateKey>
 
 internal static void x25519ScalarMult(slice<byte> dst, slice<byte> scalar, slice<byte> point) {
     array<byte> e = new(32);
+
     copy(e[..], scalar[..]);
     e[0] &= (byte)(248);
     e[31] &= (byte)(127);
     e[31] |= (byte)(64);
+
     ref var x1 = ref heap(new field.Element(), out var Ꮡx1);
     ref var x2 = ref heap(new field.Element(), out var Ꮡx2);
     ref var z2 = ref heap(new field.Element(), out var Ꮡz2);
@@ -124,6 +126,7 @@ internal static void x25519ScalarMult(slice<byte> dst, slice<byte> scalar, slice
     Ꮡx2.One();
     Ꮡx3.Set(Ꮡx1);
     Ꮡz3.One();
+
     nint swap = 0;
     for (nint pos = 254; pos >= 0; pos--) {
         var b = (byte)(e[pos / 8].Rsh((nuint)((nint)(pos & 7))));
@@ -132,6 +135,7 @@ internal static void x25519ScalarMult(slice<byte> dst, slice<byte> scalar, slice
         x2.Swap(Ꮡx3, swap);
         z2.Swap(Ꮡz3, swap);
         swap = (nint)b;
+
         Ꮡtmp0.Subtract(Ꮡx3, Ꮡz3);
         Ꮡtmp1.Subtract(Ꮡx2, Ꮡz2);
         Ꮡx2.Add(Ꮡx2, Ꮡz2);
@@ -145,14 +149,17 @@ internal static void x25519ScalarMult(slice<byte> dst, slice<byte> scalar, slice
         Ꮡx2.Multiply(Ꮡtmp1, Ꮡtmp0);
         Ꮡtmp1.Subtract(Ꮡtmp1, Ꮡtmp0);
         Ꮡz2.Square(Ꮡz2);
+
         Ꮡz3.Mult32(Ꮡtmp1, 121666);
         Ꮡx3.Square(Ꮡx3);
         Ꮡtmp0.Add(Ꮡtmp0, Ꮡz3);
         Ꮡz3.Multiply(Ꮡx1, Ꮡz2);
         Ꮡz2.Multiply(Ꮡtmp1, Ꮡtmp0);
     }
+
     x2.Swap(Ꮡx3, swap);
     z2.Swap(Ꮡz3, swap);
+
     Ꮡz2.Invert(Ꮡz2);
     Ꮡx2.Multiply(Ꮡx2, Ꮡz2);
     copy(dst[..], x2.Bytes());

@@ -21,14 +21,10 @@ partial class x509_package {
 //go:linkname systemRoots
 internal static ж<sync.Once> Ꮡonce = new StandardBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once once => ref Ꮡonce.Value;
-
 internal static ж<sync.RWMutex> ᏑsystemRootsMu = new StandardBox<sync.RWMutex>(default(sync.RWMutex));
 internal static ref sync.RWMutex systemRootsMu => ref ᏑsystemRootsMu.Value;
-
 public static ж<CertPool> systemRoots;
-
 internal static error systemRootsErr;
-
 internal static bool fallbacksSet;
 
 internal static ж<CertPool> systemRootsPool() {
@@ -80,15 +76,19 @@ public static void SetFallbackRoots(ж<CertPool> Ꮡroots) {
         if (Ꮡroots == nil) {
             throw panic("roots must be non-nil");
         }
+
         // trigger initSystemRoots if it hasn't already been called before we
         // take the lock
         _ = systemRootsPool();
+
         ᏑsystemRootsMu.Lock();
         defer(ᏑsystemRootsMu.Unlock, ref ᒐ);
+
         if (fallbacksSet) {
             throw panic("SetFallbackRoots has already been called");
         }
         fallbacksSet = true;
+
         if (systemRoots != nil && (systemRoots.len() > 0 || (~systemRoots).systemPool)) {
             if (x509usefallbackroots.Value() != "1"u8) {
                 return;

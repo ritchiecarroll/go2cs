@@ -5,6 +5,8 @@ namespace go.net;
 
 partial class textproto_package {
 
+// A MIMEHeader represents a MIME-style header mapping
+// keys to sets of values.
 partial struct MIMEHeader /*map[@string, slice<@string>]*/;
 
 // Add adds the key, value pair to the header.

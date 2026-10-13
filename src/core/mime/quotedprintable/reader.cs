@@ -35,11 +35,10 @@ internal static (byte, error) fromHex(byte b) {
     case {} when b >= (rune)'A' && b <= (rune)'F': {
         return ((byte)(b - (rune)'A' + 10), default!);
     }
+    // Accept badly encoded bytes.
     case {} when b >= (rune)'a' && b <= (rune)'f': {
         return ((byte)(b - (rune)'a' + 10), default!);
     }}
-
-    // Accept badly encoded bytes.
     return (0, fmt.Errorf("quotedprintable: invalid hex byte 0x%02x"u8, b));
 }
 
@@ -69,7 +68,6 @@ internal static bool isQPDiscardWhitespace(rune r) {
     case (rune)'\n' or (rune)'\r' or (rune)' ' or (rune)'\t': {
         return true;
     }}
-
     return false;
 }
 
@@ -97,6 +95,7 @@ public static (nint n, error err) Read(this ref Reader r, slice<byte> p) {
                 return (n, r.rerr);
             }
             (r.line, r.rerr) = r.br.ReadSlice((rune)'\n');
+
             // Does the line end in CRLF instead of just LF?
             var hasLF = bytes.HasSuffix(r.line, lf);
             var hasCR = bytes.HasSuffix(r.line, crlf);
@@ -119,6 +118,7 @@ public static (nint n, error err) Read(this ref Reader r, slice<byte> p) {
             continue;
         }
         var b = r.line[0];
+
         switch (ᐧ) {
         case {} when b is (rune)'=': {
             (b, err) = readHexByte(r.line[1..]);
@@ -138,15 +138,14 @@ public static (nint n, error err) Read(this ref Reader r, slice<byte> p) {
             break;
         }
         case {} when b is >= 0x80: {
+            // As an extension to RFC 2045, we accept
+            // values >= 0x80 without complaint. Issue 22597.
             break;
             break;
         }
         case {} when b < (rune)' ' || b > (rune)'~': {
-            return (n, fmt.Errorf("quotedprintable: invalid unescaped byte 0x%02x in body"u8, // As an extension to RFC 2045, we accept
- // values >= 0x80 without complaint. Issue 22597.
- b));
+            return (n, fmt.Errorf("quotedprintable: invalid unescaped byte 0x%02x in body"u8, b));
         }}
-
         p[0] = b;
         p = p[1..];
         r.line = r.line[1..];

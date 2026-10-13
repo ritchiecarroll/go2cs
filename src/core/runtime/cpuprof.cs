@@ -19,7 +19,17 @@ using @internal.runtime;
 partial class runtime_package {
 
 internal static UntypedInt maxCPUProfStack => 64;
+
+// profBufWordCount is the size of the CPU profile buffer's storage for the
+// header and stack of each sample, measured in 64-bit words. Every sample
+// has a required header of two words. With a small additional header (a
+// word or two) and stacks at the profiler's maximum length of 64 frames,
+// that capacity can support 1900 samples or 19 thread-seconds at a 100 Hz
+// sample rate, at a cost of 1 MiB.
 internal static UntypedInt profBufWordCount => /* 1 << 17 */ 131072;
+// profBufTagCount is the size of the CPU profile buffer's storage for the
+// goroutine tags associated with each sample. A capacity of 1<<14 means
+// room for 16k samples, or 160 thread-seconds at a 100 Hz sample rate.
 internal static UntypedInt profBufTagCount => /* 1 << 14 */ 16384;
 
 partial struct cpuProfile {
@@ -61,6 +71,7 @@ public static void SetCPUProfileRate(nint hz) {
     if (hz > 1000000) {
         hz = 1000000;
     }
+
     @lock(Ꮡcpuprof.of(cpuProfile.Ꮡlock));
     if (hz > 0){
         if (cpuprof.on || cpuprof.log != nil) {
@@ -68,6 +79,7 @@ public static void SetCPUProfileRate(nint hz) {
             unlock(Ꮡcpuprof.of(cpuProfile.Ꮡlock));
             return;
         }
+
         cpuprof.on = true;
         cpuprof.log = newProfBuf(1, profBufWordCount, profBufTagCount);
         var hdr = new uint64[]{(uint64)hz}.array();
@@ -96,8 +108,8 @@ internal static void add(this ref cpuProfile Δp, ж<@unsafe.Pointer> ᏑtagPtr,
         // TODO: Is it safe to osyield here? https://go.dev/issue/52672
         osyield();
     }
-    if (Ꮡprof.of(profᴛ1.Ꮡhz).Load() != 0) {
-        // implies cpuprof.log != nil
+
+    if (Ꮡprof.of(profᴛ1.Ꮡhz).Load() != 0) { // implies cpuprof.log != nil
         if (Δp.numExtra > 0 || Δp.lostExtra > 0 || Δp.lostAtomic > 0) {
             Δp.addExtra();
         }
@@ -108,6 +120,7 @@ internal static void add(this ref cpuProfile Δp, ж<@unsafe.Pointer> ᏑtagPtr,
         // changing the argument here.
         cpuprof.log.write(ᏑtagPtr, nanotime(), hdr[..], stk);
     }
+
     Ꮡprof.of(profᴛ1.ᏑsignalLock).Store(0);
 }
 
@@ -132,6 +145,7 @@ internal static void addNonGo(this ref cpuProfile Δp, slice<uintptr> stk) {
         // TODO: Is it safe to osyield here? https://go.dev/issue/52672
         osyield();
     }
+
     if (cpuprof.numExtra + 1 + len(stk) < len(cpuprof.extra)){
         nint i = cpuprof.numExtra;
         cpuprof.extra[i] = (uintptr)(1 + len(stk));
@@ -140,6 +154,7 @@ internal static void addNonGo(this ref cpuProfile Δp, slice<uintptr> stk) {
     } else {
         cpuprof.lostExtra++;
     }
+
     Ꮡprof.of(profᴛ1.ᏑsignalLock).Store(0);
 }
 
@@ -156,6 +171,7 @@ internal static void addExtra(this ref cpuProfile Δp) {
         i += (nint)Δp.extra[i];
     }
     Δp.numExtra = 0;
+
     // Report any lost events.
     if (Δp.lostExtra > 0) {
         var hdrΔ1 = new uint64[]{Δp.lostExtra}.array();
@@ -166,6 +182,7 @@ internal static void addExtra(this ref cpuProfile Δp) {
         Δp.log.write(nil, 0, hdrΔ1[..], lostStk[..]);
         Δp.lostExtra = 0;
     }
+
     if (Δp.lostAtomic > 0) {
         var hdrΔ2 = new uint64[]{Δp.lostAtomic}.array();
         var lostStk = new uintptr[]{

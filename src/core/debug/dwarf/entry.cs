@@ -30,6 +30,7 @@ partial struct afield {
     internal int64 val; // for formImplicitConst
 }
 
+// a map from entry format ids to their descriptions
 partial struct abbrevTable /*map[uint32, abbrev]*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -45,6 +46,7 @@ internal static (abbrevTable, error) parseAbbrev(this ж<Data> Ꮡd, uint64 off,
             return (mΔ1, default!);
         }
     }
+
     var data = d.abbrev;
     if (off > (uint64)len(data)){
         data = default!;
@@ -53,6 +55,7 @@ internal static (abbrevTable, error) parseAbbrev(this ж<Data> Ꮡd, uint64 off,
     }
     ref var b = ref heap<buf>(out var Ꮡb);
     b = makeBuf(Ꮡd, new unknownFormat(nil), abbrevˢ, 0, data);
+
     // Error handling is simplified by the buf getters
     // returning an endless stream of 0s after an error.
     var m = new abbrevTable(0);
@@ -62,6 +65,7 @@ internal static (abbrevTable, error) parseAbbrev(this ж<Data> Ꮡd, uint64 off,
         if (id == 0) {
             break;
         }
+
         // Walk over attributes, counting.
         nint n = 0;
         var b1 = b; // Read from copy of b.
@@ -81,6 +85,7 @@ internal static (abbrevTable, error) parseAbbrev(this ж<Data> Ꮡd, uint64 off,
         if (b1.err != default!) {
             return (default!, b1.err);
         }
+
         // Walk over attributes again, this time writing them down.
         abbrev a = default!;
         a.tag = ((Tag)(uint32)b.@uint());
@@ -96,6 +101,7 @@ internal static (abbrevTable, error) parseAbbrev(this ж<Data> Ꮡd, uint64 off,
         }
         b.@uint();
         b.@uint();
+
         m[id] = a;
     }
     if (b.err != default!) {
@@ -131,7 +137,6 @@ internal static map<Attr, bool> attrIsExprloc = new map<Attr, bool>{
     [AttrStride] = true
 };
 
-// The following are new in DWARF 5.
 // attrPtrClass indicates the *ptr class of attributes that have
 // encoding formSecOffset in DWARF 4 or formData* in DWARF 2 and 3.
 internal static map<Attr, Class> attrPtrClass = new map<Attr, Class>{
@@ -148,6 +153,7 @@ internal static map<Attr, Class> attrPtrClass = new map<Attr, Class>{
     [AttrUseLocation] = ClassLocListPtr,
     [AttrVtableElemLoc] = ClassLocListPtr,
     [AttrRanges] = ClassRangeListPtr,
+    // The following are new in DWARF 5.
     [AttrStrOffsetsBase] = ClassStrOffsetsPtr,
     [AttrAddrBase] = ClassAddrPtr,
     [AttrRnglistsBase] = ClassRngListsPtr,
@@ -171,25 +177,25 @@ internal static Class formToClass(format form, Attr attr, nint vers, ж<buf> Ꮡ
         return ClassAddress;
     }
     if (exprᴛ1 == formDwarfBlock1 || exprᴛ1 == formDwarfBlock2 || exprᴛ1 == formDwarfBlock4 || exprᴛ1 == formDwarfBlock) {
+        // In DWARF 2 and 3, ClassExprLoc was encoded as a
+        // block. DWARF 4 distinguishes ClassBlock and
+        // ClassExprLoc, but there are no attributes that can
+        // be both, so we also promote ClassBlock values in
+        // DWARF 4 that should be ClassExprLoc in case
+        // producers get this wrong.
         if (attrIsExprloc[attr]) {
-            // In DWARF 2 and 3, ClassExprLoc was encoded as a
-            // block. DWARF 4 distinguishes ClassBlock and
-            // ClassExprLoc, but there are no attributes that can
-            // be both, so we also promote ClassBlock values in
-            // DWARF 4 that should be ClassExprLoc in case
-            // producers get this wrong.
             return ClassExprLoc;
         }
         return ClassBlock;
     }
     if (exprᴛ1 == formData1 || exprᴛ1 == formData2 || exprᴛ1 == formData4 || exprᴛ1 == formData8 || exprᴛ1 == formSdata || exprᴛ1 == formUdata || exprᴛ1 == formData16 || exprᴛ1 == formImplicitConst) {
+        // In DWARF 2 and 3, ClassPtr was encoded as a
+        // constant. Unlike ClassExprLoc/ClassBlock, some
+        // DWARF 4 attributes need to distinguish Class*Ptr
+        // from ClassConstant, so we only do this promotion
+        // for versions 2 and 3.
         {
             var (@class, ok) = attrPtrClass[attr, ꟷ]; if (vers < 4 && ok) {
-                // In DWARF 2 and 3, ClassPtr was encoded as a
-                // constant. Unlike ClassExprLoc/ClassBlock, some
-                // DWARF 4 attributes need to distinguish Class*Ptr
-                // from ClassConstant, so we only do this promotion
-                // for versions 2 and 3.
                 return @class;
             }
         }
@@ -208,11 +214,11 @@ internal static Class formToClass(format form, Attr attr, nint vers, ж<buf> Ꮡ
         return ClassString;
     }
     if (exprᴛ1 == formSecOffset) {
+        // DWARF 4 defines four *ptr classes, but doesn't
+        // distinguish them in the encoding. Disambiguate
+        // these classes using the attribute.
         {
             var (@class, ok) = attrPtrClass[attr, ꟷ]; if (ok) {
-                // DWARF 4 defines four *ptr classes, but doesn't
-                // distinguish them in the encoding. Disambiguate
-                // these classes using the attribute.
                 return @class;
             }
         }
@@ -237,7 +243,6 @@ internal static Class formToClass(format form, Attr attr, nint vers, ж<buf> Ꮡ
         b.error(cannotDetermineClassOfˢ);
         return 0;
     }
-
 }
 
 // An entry is a sequence of attribute/value pairs.
@@ -277,27 +282,106 @@ partial struct Field {
     public Class Class;
 }
 
+// A Class is the DWARF 4 class of an attribute value.
+//
+// In general, a given attribute's value may take on one of several
+// possible classes defined by DWARF, each of which leads to a
+// slightly different interpretation of the attribute.
+//
+// DWARF version 4 distinguishes attribute value classes more finely
+// than previous versions of DWARF. The reader will disambiguate
+// coarser classes from earlier versions of DWARF into the appropriate
+// DWARF 4 class. For example, DWARF 2 uses "constant" for constants
+// as well as all types of section offsets, but the reader will
+// canonicalize attributes in DWARF 2 files that refer to section
+// offsets to one of the Class*Ptr classes, even though these classes
+// were only defined in DWARF 3.
 partial struct Class /*num:nint*/;
 
+// ClassUnknown represents values of unknown DWARF class.
 public static Class ClassUnknown => /* iota */ 0;
+
+// ClassAddress represents values of type uint64 that are
+// addresses on the target machine.
 public static Class ClassAddress => 1;
+
+// ClassBlock represents values of type []byte whose
+// interpretation depends on the attribute.
 public static Class ClassBlock => 2;
+
+// ClassConstant represents values of type int64 that are
+// constants. The interpretation of this constant depends on
+// the attribute.
 public static Class ClassConstant => 3;
+
+// ClassExprLoc represents values of type []byte that contain
+// an encoded DWARF expression or location description.
 public static Class ClassExprLoc => 4;
+
+// ClassFlag represents values of type bool.
 public static Class ClassFlag => 5;
+
+// ClassLinePtr represents values that are an int64 offset
+// into the "line" section.
 public static Class ClassLinePtr => 6;
+
+// ClassLocListPtr represents values that are an int64 offset
+// into the "loclist" section.
 public static Class ClassLocListPtr => 7;
+
+// ClassMacPtr represents values that are an int64 offset into
+// the "mac" section.
 public static Class ClassMacPtr => 8;
+
+// ClassRangeListPtr represents values that are an int64 offset into
+// the "rangelist" section.
 public static Class ClassRangeListPtr => 9;
+
+// ClassReference represents values that are an Offset offset
+// of an Entry in the info section (for use with Reader.Seek).
+// The DWARF specification combines ClassReference and
+// ClassReferenceSig into class "reference".
 public static Class ClassReference => 10;
+
+// ClassReferenceSig represents values that are a uint64 type
+// signature referencing a type Entry.
 public static Class ClassReferenceSig => 11;
+
+// ClassString represents values that are strings. If the
+// compilation unit specifies the AttrUseUTF8 flag (strongly
+// recommended), the string value will be encoded in UTF-8.
+// Otherwise, the encoding is unspecified.
 public static Class ClassString => 12;
+
+// ClassReferenceAlt represents values of type int64 that are
+// an offset into the DWARF "info" section of an alternate
+// object file.
 public static Class ClassReferenceAlt => 13;
+
+// ClassStringAlt represents values of type int64 that are an
+// offset into the DWARF string section of an alternate object
+// file.
 public static Class ClassStringAlt => 14;
+
+// ClassAddrPtr represents values that are an int64 offset
+// into the "addr" section.
 public static Class ClassAddrPtr => 15;
+
+// ClassLocList represents values that are an int64 offset
+// into the "loclists" section.
 public static Class ClassLocList => 16;
+
+// ClassRngList represents values that are a uint64 offset
+// from the base of the "rnglists" section.
 public static Class ClassRngList => 17;
+
+// ClassRngListsPtr represents values that are an int64 offset
+// into the "rnglists" section. These are used as the base for
+// ClassRngList values.
 public static Class ClassRngListsPtr => 18;
+
+// ClassStrOffsetsPtr represents values that are an int64
+// offset into the "str_offsets" section.
 public static Class ClassStrOffsetsPtr => 19;
 
 //go:generate stringer -type=Class
@@ -332,6 +416,8 @@ public static ж<Field> AttrField(this ref Entry e, Attr a) {
     return default!;
 }
 
+// An Offset represents the location of an [Entry] within the DWARF info.
+// (See [Reader.Seek].)
 partial struct Offset /*num:uint32*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -387,11 +473,13 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
         Field: new slice<Field>(len(a.field))
     ));
     slice<entry_delayed> delay = default!;
+
     @string resolveStrx(uint64 strBase, uint64 offΔ1) {
         offΔ1 += strBase;
         if ((uint64)(nint)offΔ1 != offΔ1) {
             Ꮡb.Value.error(dwFormStrxOffsetOutOfˢ);
         }
+
         var b1 = makeBuf(Ꮡb.Value.dwarf, Ꮡb.Value.format, strOffsetsˢ, 0, (~Ꮡb.Value.dwarf).strOffsets);
         b1.skip((nint)offΔ1);
         var (is64, _) = Ꮡb.Value.format.dwarf64();
@@ -415,6 +503,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
         }
         return val;
     }
+
     uint64 resolveRnglistx(uint64 rnglistsBase, uint64 offΔ2) {
         var (is64, _) = Ꮡb.Value.format.dwarf64();
         if (is64){
@@ -426,6 +515,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
         if ((uint64)(nint)offΔ2 != offΔ2) {
             Ꮡb.Value.error(dwFormRnglistxOffsetOutˢ);
         }
+
         var b1 = makeBuf(Ꮡb.Value.dwarf, Ꮡb.Value.format, rnglistsˢ, 0, (~Ꮡb.Value.dwarf).rngLists);
         b1.skip((nint)offΔ2);
         if (is64){
@@ -442,6 +532,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
         }
         return rnglistsBase + offΔ2;
     }
+
     foreach (var (i, _) in (~e).Field) {
         (~e).Field[i].Attr = a.field[i].attr;
         (~e).Field[i].Class = a.field[i].@class;
@@ -452,12 +543,12 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
         }
         any val = default!;
         var exprᴛ1 = fmt;
+        // address
         if (exprᴛ1 == formAddr) {
             val = b.addr();
         }
         else if (exprᴛ1 == formAddrx || exprᴛ1 == formAddrx1 || exprᴛ1 == formAddrx2 || exprᴛ1 == formAddrx3 || exprᴛ1 == formAddrx4) {
             do {
-// address
                 uint64 offΔ6 = default!;
                 var exprᴛ2 = fmt;
                 if (exprᴛ2 == formAddrx) {
@@ -475,13 +566,13 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
                 else if (exprᴛ2 == formAddrx4) {
                     offΔ6 = (uint64)b.uint32();
                 }
-
                 if ((~b.dwarf).addr == default!) {
                     b.error(dwFormAddrxWithNoDebugˢ);
                 }
                 if (b.err != default!) {
                     return default!;
                 }
+
                 // We have to adjust by the offset of the
                 // compilation unit. This won't work if the
                 // program uses Reader.Seek to skip over the
@@ -494,6 +585,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
                     delay = append(delay, new entry_delayed(i, offΔ6, formAddrx));
                     break;
                 }
+
                 error err = default!;
                 (val, err) = b.dwarf.debugAddr(b.format, (uint64)addrBase, offΔ6);
                 if (err != default!) {
@@ -504,6 +596,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
                 }
             } while (false);
         }
+        // block
         else if (exprᴛ1 == formDwarfBlock1) {
             val = b.bytes((nint)b.uint8());
         }
@@ -516,6 +609,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
         else if (exprᴛ1 == formDwarfBlock) {
             val = b.bytes((nint)b.@uint());
         }
+        // constant
         else if (exprᴛ1 == formData1) {
             val = (int64)b.uint8();
         }
@@ -540,22 +634,20 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
         else if (exprᴛ1 == formImplicitConst) {
             val = a.field[i].val;
         }
+        // flag
         else if (exprᴛ1 == formFlag) {
             val = b.uint8() == 1;
         }
+        // New in DWARF 4.
         else if (exprᴛ1 == formFlagPresent) {
+            // The attribute is implicitly indicated as present, and no value is
+            // encoded in the debugging information entry itself.
             val = true;
         }
+        // reference to other entry
         else if (exprᴛ1 == formRefAddr) {
             nint versΔ2 = b.format.version();
             if (versΔ2 == 0){
-                // block
-                // constant
-                // flag
-                // New in DWARF 4.
-                // The attribute is implicitly indicated as present, and no value is
-                // encoded in the debugging information entry itself.
-                // reference to other entry
                 b.error(unknownVersionForDwFormˢ);
             } else 
             if (versΔ2 == 2){
@@ -587,11 +679,11 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
         else if (exprᴛ1 == formRefUdata) {
             val = ((Offset)(uint32)b.@uint()) + ubase;
         }
+        // string
         else if (exprᴛ1 == formString) {
             val = b.@string();
         }
         else if (exprᴛ1 == formStrp || exprᴛ1 == formLineStrp) {
-// string
             uint64 offΔ7 = default!;        // offset into .debug_str
             var (is64, known) = b.format.dwarf64();
             if (!known){
@@ -644,7 +736,6 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
                 else if (exprᴛ3 == formStrx4) {
                     offΔ8 = (uint64)b.uint32();
                 }
-
                 if (len((~b.dwarf).strOffsets) == 0) {
                     b.error(dwFormStrxWithNoDebugStrˢ);
                 }
@@ -660,6 +751,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
                 } else {
                     offΔ8 *= 4;
                 }
+
                 // We have to adjust by the offset of the
                 // compilation unit. This won't work if the
                 // program uses Reader.Seek to skip over the
@@ -672,6 +764,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
                     delay = append(delay, new entry_delayed(i, offΔ8, formStrx));
                     break;
                 }
+
                 val = resolveStrx((uint64)strBase, offΔ8);
             } while (false);
         }
@@ -686,12 +779,12 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
                 val = b.uint32();
             }
         }
+        // lineptr, loclistptr, macptr, rangelistptr
+        // New in DWARF 4, but clang can generate them with -gdwarf-2.
+        // Section reference, replacing use of formData4 and formData8.
         else if (exprᴛ1 == formSecOffset || exprᴛ1 == formGnuRefAlt || exprᴛ1 == formGnuStrpAlt) {
             var (is64, known) = b.format.dwarf64();
             if (!known){
-                // lineptr, loclistptr, macptr, rangelistptr
-                // New in DWARF 4, but clang can generate them with -gdwarf-2.
-                // Section reference, replacing use of formData4 and formData8.
                 b.error("unknown size for form 0x"u8 + strconv.FormatInt((int64)(uint32)fmt, 16));
             } else 
             if (is64){
@@ -700,10 +793,15 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
                 val = (int64)b.uint32();
             }
         }
+        // exprloc
+        // New in DWARF 4.
         else if (exprᴛ1 == formExprloc) {
             val = b.bytes((nint)b.@uint());
         }
+        // reference
+        // New in DWARF 4.
         else if (exprᴛ1 == formRefSig8) {
+            // 64-bit type signature.
             val = b.uint64();
         }
         else if (exprᴛ1 == formRefSup4) {
@@ -712,19 +810,14 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
         else if (exprᴛ1 == formRefSup8) {
             val = b.uint64();
         }
+        // loclist
         else if (exprᴛ1 == formLoclistx) {
             val = b.@uint();
         }
+        // rnglist
         else if (exprᴛ1 == formRnglistx) {
             do {
                 var offΔ9 = b.@uint();
-// exprloc
-// New in DWARF 4.
-// reference
-// New in DWARF 4.
-// 64-bit type signature.
-// loclist
-// rnglist
 
                 // We have to adjust by the rnglists_base of
                 // the compilation unit. This won't work if
@@ -738,6 +831,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
                     delay = append(delay, new entry_delayed(i, offΔ9, formRnglistx));
                     break;
                 }
+
                 val = resolveRnglistx((uint64)rnglistsBase, offΔ9);
             } while (false);
         }
@@ -750,6 +844,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
     if (b.err != default!) {
         return default!;
     }
+
     foreach (var (_, del) in delay) {
         var exprᴛ4 = del.fmt;
         if (exprᴛ4 == formAddrx) {
@@ -775,8 +870,8 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, abbrevTable 
                 return default!;
             }
         }
-
     }
+
     return e;
 }
 
@@ -835,6 +930,7 @@ public static void Seek(this ref ΔReader r, Offset off) {
         r.cu = default!;
         return;
     }
+
     nint i = d.offsetToUnit(off);
     if (i == -1) {
         r.err = errors.New(offsetOutOfRangeˢ);
@@ -908,6 +1004,7 @@ public static void SkipChildren(this ж<ΔReader> Ꮡr) {
     if (r.err != default! || !r.lastChildren) {
         return;
     }
+
     // If the last entry had a sibling attribute,
     // that attribute gives the offset of the next
     // sibling, so we can avoid decoding the
@@ -916,10 +1013,12 @@ public static void SkipChildren(this ж<ΔReader> Ꮡr) {
         r.Seek(r.lastSibling);
         return;
     }
+
     if (r.lastUnit && r.unit + 1 < len((~r.d).unit)) {
         r.nextUnit();
         return;
     }
+
     while (ᐧ) {
         var (e, err) = Ꮡr.Next();
         if (err != default! || e == nil || (~e).Tag == 0) {
@@ -1000,7 +1099,9 @@ public static (slice<array<uint64>>, error) Ranges(this ж<Data> Ꮡd, ж<Entry>
     ref var e = ref Ꮡe.DerefOrNull();
 
     slice<array<uint64>> ret = default!;
+
     var (low, lowOK) = e.Val(AttrLowpc)._<uint64>(ᐧ);
+
     uint64 high = default!;
     bool highOK = default!;
     var highField = e.AttrField(AttrHighpc);
@@ -1016,17 +1117,19 @@ public static (slice<array<uint64>>, error) Ranges(this ж<Data> Ꮡd, ж<Entry>
                 highOK = true;
             }
         }
-
     }
+
     if (lowOK && highOK) {
         ret = append(ret, new uint64[]{low, high}.array());
     }
+
     ж<unit> u = default!;
     {
         nint uidx = Ꮡd.offsetToUnit(e.Offset); if (uidx >= 0 && uidx < len(d.unit)) {
             u = Ꮡ(d.unit, uidx);
         }
     }
+
     if (u != nil && (~u).vers >= 5 && d.rngLists != default!) {
         // DWARF version 5 and later
         var field = e.AttrField(AttrRanges);
@@ -1059,8 +1162,8 @@ public static (slice<array<uint64>>, error) Ranges(this ж<Data> Ꮡd, ж<Entry>
         { /* default: */
             return (ret, default!);
         }
-
     }
+
     // DWARF version 2 through 4
     var (ranges, rangesOK) = e.Val(AttrRanges)._<int64>(ᐧ);
     if (rangesOK && d.ranges != default!) {
@@ -1070,6 +1173,7 @@ public static (slice<array<uint64>>, error) Ranges(this ж<Data> Ꮡd, ж<Entry>
         }
         return Ꮡd.dwarf2Ranges(u, @base, ranges, ret);
     }
+
     return (ret, default!);
 }
 
@@ -1101,6 +1205,7 @@ internal static (ж<Entry>, uint64, error) baseAddressForEntry(this ж<Data> Ꮡ
             return (default!, 0, b.err);
         }
     }
+
     {
         var (cuEntry, cuEntryOK) = cu.Val(AttrEntrypc)._<uint64>(ᐧ); if (cuEntryOK){
             return (cu, cuEntry, default!);
@@ -1111,6 +1216,7 @@ internal static (ж<Entry>, uint64, error) baseAddressForEntry(this ж<Data> Ꮡ
             }
         }
     }
+
     return (cu, 0, default!);
 }
 
@@ -1128,15 +1234,18 @@ internal static (slice<array<uint64>>, error) dwarf2Ranges(this ж<Data> Ꮡd, �
     while (len(buf.data) > 0) {
         var low = buf.addr();
         var high = buf.addr();
+
         if (low == 0 && high == 0) {
             break;
         }
+
         if (low == (~(uint64)0).Rsh((nuint)((8 - u.addrsize()) * 8))){
             @base = high;
         } else {
             ret = append(ret, new uint64[]{@base + low, @base + high}.array());
         }
     }
+
     return (ret, default!);
 }
 
@@ -1153,6 +1262,7 @@ internal static (slice<array<uint64>>, error) dwarf5Ranges(this ж<Data> Ꮡd, �
     if (Ꮡcu != nil) {
         (addrBase, _) = cu.Val(AttrAddrBase)._<int64>(ᐧ);
     }
+
     var buf = makeBuf(Ꮡd, new unitжdataFormat(Ꮡu), rnglistsˢ, 0, d.rngLists);
     buf.skip((nint)ranges);
     while (ᐧ) {
@@ -1175,6 +1285,7 @@ internal static (slice<array<uint64>>, error) dwarf5Ranges(this ж<Data> Ꮡd, �
         else if (exprᴛ1 == rleStartxEndx) {
             var startIdx = buf.@uint();
             var endIdx = buf.@uint();
+
             var (start, err) = Ꮡd.debugAddr(new unitжdataFormat(Ꮡu), (uint64)addrBase, startIdx);
             if (err != default!) {
                 return (default!, err);
@@ -1212,7 +1323,6 @@ internal static (slice<array<uint64>>, error) dwarf5Ranges(this ж<Data> Ꮡd, �
             var lenΔ3 = buf.@uint();
             ret = append(ret, new uint64[]{start, start + lenΔ3}.array());
         }
-
     }
 }
 
@@ -1224,9 +1334,11 @@ internal static (uint64, error) debugAddr(this ж<Data> Ꮡd, dataFormat format,
     ref var d = ref Ꮡd.DerefOrNull();
 
     var off = idx * (uint64)format.addrsize() + addrBase;
+
     if ((uint64)(nint)off != off) {
         return (0, errors.New(offsetOutOfRangeˢ));
     }
+
     var b = makeBuf(Ꮡd, format, addrˢ, 0, d.addr);
     b.skip((nint)off);
     var val = b.addr();

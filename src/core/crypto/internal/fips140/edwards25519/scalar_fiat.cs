@@ -46,8 +46,14 @@ partial struct fiatScalarUint1 /*num:uint64*/;
 
 partial struct fiatScalarInt1 /*num:int64*/;
 
+// The type fiatScalarMontgomeryDomainFieldElement is a field element in the Montgomery domain.
+//
+// Bounds: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
 partial struct fiatScalarMontgomeryDomainFieldElement /*[4]uint64*/;
 
+// The type fiatScalarNonMontgomeryDomainFieldElement is a field element NOT in the Montgomery domain.
+//
+// Bounds: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
 partial struct fiatScalarNonMontgomeryDomainFieldElement /*[4]uint64*/;
 
 // fiatScalarCmovznzU64 is a single-word conditional move.

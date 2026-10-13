@@ -60,10 +60,12 @@ public static (ж<Message> msg, error err) ReadMessage(io.Reader r) {
     error err = default!;
 
     var tp = textproto.NewReader(bufio.NewReader(r));
+
     (var hdr, err) = readHeader(tp);
     if (err != default! && (!AreEqual(err, io.EOF) || builtin.len(hdr) == 0)) {
         return (default!, err);
     }
+
     return (Ꮡ(new Message(
         Header: ((Header)hdr),
         Body: new bufio_ReaderжReader((~tp).R)
@@ -81,6 +83,7 @@ internal static (map<@string, slice<@string>>, error) readHeader(ж<textproto.Re
     ref var r = ref Ꮡr.DerefOrNull();
 
     var m = new map<@string, slice<@string>>();
+
     // The first line cannot start with a leading space.
     {
         var (buf, err) = r.R.Peek(1); if (err == default! && (buf[0] == (rune)' ' || buf[0] == (rune)'\t')) {
@@ -91,24 +94,30 @@ internal static (map<@string, slice<@string>>, error) readHeader(ж<textproto.Re
             return (m, errors.New("malformed initial line: "u8 + line));
         }
     }
+
     while (ᐧ) {
         var (kv, err) = r.ReadContinuedLine();
         if (kv == ""u8) {
             return (m, err);
         }
+
         // Key ends at first colon.
         var (k, v, ok) = strings.Cut(kv, ":"u8);
         if (!ok) {
             return (m, errors.New("malformed header line: "u8 + kv));
         }
         @string key = textproto.CanonicalMIMEHeaderKey(k);
+
         // Permit empty key, because that is what we did in the past.
         if (key == ""u8) {
             continue;
         }
+
         // Skip initial spaces in value.
         @string value = strings.TrimLeft(v, " \t"u8);
+
         m[key] = append(m[key], value);
+
         if (err != default!) {
             return (m, err);
         }
@@ -119,7 +128,6 @@ internal static (map<@string, slice<@string>>, error) readHeader(ж<textproto.Re
 // These are tried in order.
 internal static ж<sync.Once> ᏑdateLayoutsBuildOnce = new StandardBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once dateLayoutsBuildOnce => ref ᏑdateLayoutsBuildOnce.Value;
-
 internal static slice<@string> dateLayouts;
 
 internal static void buildDateLayouts() {
@@ -130,6 +138,7 @@ internal static void buildDateLayouts() {
     var seconds = new @string[]{":05"u8, ""u8}.array(); // second
     // "-0700 (MST)" is not in RFC 5322, but is common.
     var zones = new @string[]{"-0700"u8, "MST"u8, "UT"u8}.array(); // zone = (("+" / "-") 4DIGIT) / "UT" / "GMT" / ...
+
     foreach (var (_, dow) in dows.ΔRangeSnapshot()) {
         foreach (var (_, day) in days.ΔRangeSnapshot()) {
             foreach (var (_, year) in years.ΔRangeSnapshot()) {
@@ -160,6 +169,7 @@ public static (time.Time, error) ParseDate(@string date) {
     // Re-using some addrParser methods which support obsolete text, i.e. non-printable ASCII
     var p = new addrParser(date, nil);
     p.skipSpace();
+
     // RFC 5322: zone = (FWS ( "+" / "-" ) 4DIGIT) / obs-zone
     // zone length is always 5 chars unless obsolete (obs-zone)
     {
@@ -178,6 +188,7 @@ public static (time.Time, error) ParseDate(@string date) {
                     indΔ1++;
                 }
             }
+
             if (indΔ1 != -1 && builtin.len(p.s) >= indΔ1 + 5) {
                 // The last letter T of the obsolete time zone is checked when no standard time zone is found.
                 // If T is misplaced, the date to parse is garbage.
@@ -198,6 +209,7 @@ public static (time.Time, error) ParseDate(@string date) {
     return (new time.Time(nil), errors.New(mailHeaderCouldNotBeˢ));
 }
 
+// A Header represents the key-value pairs in a mail message header.
 partial struct Header /*map[@string, slice<@string>]*/;
 
 // Get gets the first value associated with the given key.
@@ -287,6 +299,7 @@ public static @string String(this ref Address a) {
     } else {
         (local, domain) = (a.ΔAddress.slice(0, at), a.ΔAddress.slice(at + 1));
     }
+
     // Add quotes if needed
     var quoteLocal = false;
     foreach (var (i, r) in local) {
@@ -307,10 +320,13 @@ public static @string String(this ref Address a) {
     if (quoteLocal) {
         local = quoteString(local);
     }
+
     @string s = "<"u8 + local + "@"u8 + domain + ">"u8;
+
     if (a.Name == ""u8) {
         return s;
     }
+
     // If every character is printable ASCII, quoting is simple.
     var allPrintable = true;
     foreach (var (_, r) in a.Name) {
@@ -324,6 +340,7 @@ public static @string String(this ref Address a) {
     if (allPrintable) {
         return quoteString(a.Name) + " "u8 + s;
     }
+
     // Text in an encoded-word in a display-name must not contain certain
     // characters like quotes or parentheses (see RFC 2047 section 5.3).
     // When this is the case encode the name using base64 encoding.
@@ -347,15 +364,18 @@ internal static (slice<ж<Address>>, error) parseAddressList(this ж<addrParser>
     slice<ж<Address>> list = default!;
     while (ᐧ) {
         p.skipSpace();
+
         // allow skipping empty entries (RFC5322 obs-addr-list)
         if (p.consume((rune)',')) {
             continue;
         }
+
         var (addrs, err) = Ꮡp.parseAddress(true);
         if (err != default!) {
             return (default!, err);
         }
         list = appendꓸꓸꓸ(list, addrs);
+
         if (!p.skipCFWS()) {
             return (default!, errors.New(mailMisformattedˢ));
         }
@@ -365,6 +385,7 @@ internal static (slice<ж<Address>>, error) parseAddressList(this ж<addrParser>
         if (p.peek() != (rune)',') {
             return (default!, errors.New(mailExpectedCommaˢ));
         }
+
         // Skip empty entries for obs-addr-list.
         while (p.consume((rune)',')) {
             p.skipSpace();
@@ -417,9 +438,11 @@ internal static (slice<ж<Address>>, error) parseAddress(this ж<addrParser> Ꮡ
     if (p.empty()) {
         return (default!, errors.New(mailNoAddressˢ));
     }
+
     // address = mailbox / group
     // mailbox = name-addr / addr-spec
     // group = display-name ":" [group-list] ";" [CFWS]
+
     // addr-spec has a more restricted grammar than name-addr,
     // so try parsing it first, and fallback to name-addr.
     // TODO(dsymonds): Is this really correct?
@@ -433,6 +456,7 @@ internal static (slice<ж<Address>>, error) parseAddress(this ж<addrParser> Ꮡ
                 return (default!, err);
             }
         }
+
         return (new ж<Address>[]{Ꮡ(new Address(
             Name: displayNameΔ1,
             ΔAddress: spec))
@@ -440,6 +464,7 @@ internal static (slice<ж<Address>>, error) parseAddress(this ж<addrParser> Ꮡ
     }
     debug.Printf("parseAddress: not an addr-spec: %v"u8, err);
     debug.Printf("parseAddress: state is now %q"u8, p.s);
+
     // display-name
     @string displayName = default!;
     if (p.peek() != (rune)'<') {
@@ -449,6 +474,7 @@ internal static (slice<ж<Address>>, error) parseAddress(this ж<addrParser> Ꮡ
         }
     }
     debug.Printf("parseAddress: displayName=%q"u8, displayName);
+
     p.skipSpace();
     if (handleGroup) {
         if (p.consume((rune)':')) {
@@ -482,6 +508,7 @@ internal static (slice<ж<Address>>, error) parseAddress(this ж<addrParser> Ꮡ
         return (default!, errors.New(mailUnclosedAngleAddrˢ));
     }
     debug.Printf("parseAddress: spec=%q"u8, spec);
+
     return (new ж<Address>[]{Ꮡ(new Address(
         Name: displayName,
         ΔAddress: spec))
@@ -500,6 +527,7 @@ internal static (slice<ж<Address>>, error) consumeGroupList(this ж<addrParser>
         }
         return (group, default!);
     }
+
     while (ᐧ) {
         p.skipSpace();
         // embedded groups not allowed.
@@ -508,6 +536,7 @@ internal static (slice<ж<Address>>, error) consumeGroupList(this ж<addrParser>
             return (default!, err);
         }
         group = appendꓸꓸꓸ(group, addrs);
+
         if (!p.skipCFWS()) {
             return (default!, errors.New(mailMisformattedˢ));
         }
@@ -539,6 +568,7 @@ internal static (@string spec, error err) consumeAddrSpec(this ж<addrParser> �
         ref var p = ref Ꮡp.DerefOrNull();
 
         debug.Printf("consumeAddrSpec: %q"u8, p.s);
+
         ref var orig = ref heap<addrParser>(out var Ꮡorig);
         orig = p;
         var origʗ1 = orig;
@@ -547,6 +577,7 @@ internal static (@string spec, error err) consumeAddrSpec(this ж<addrParser> �
                 Ꮡp.Value = origʗ1;
             }
         }, ref ᒐ);
+
         // local-part = dot-atom / quoted-string
         @string localPart = default!;
         p.skipSpace();
@@ -569,15 +600,18 @@ internal static (@string spec, error err) consumeAddrSpec(this ж<addrParser> �
             debug.Printf("consumeAddrSpec: failed: %v"u8, err);
             (spec, err) = ("", err); goto ᒐdone;
         }
+
         if (!p.consume((rune)'@')) {
             (spec, err) = ("", errors.New(mailMissingInAddrSpecˢ)); goto ᒐdone;
         }
+
         // domain = dot-atom / domain-literal
         @string domain = default!;
         p.skipSpace();
         if (p.empty()) {
             (spec, err) = ("", errors.New(mailNoDomainInAddrSpecˢ)); goto ᒐdone;
         }
+
         if (p.peek() == (rune)'['){
             // domain-literal
             (domain, err) = p.consumeDomainLiteral();
@@ -591,6 +625,7 @@ internal static (@string spec, error err) consumeAddrSpec(this ж<addrParser> �
                 (spec, err) = ("", err); goto ᒐdone;
             }
         }
+
         (spec, err) = (localPart + "@" + domain, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -604,6 +639,7 @@ internal static (@string phrase, error err) consumePhrase(this ref addrParser p)
     error err = default!;
 
     debug.Printf("consumePhrase: [%s]"u8, p.s);
+
     // phrase = 1*word
     slice<@string> words = default!;
     bool isPrevEncoded = default!;
@@ -614,6 +650,7 @@ internal static (@string phrase, error err) consumePhrase(this ref addrParser p)
                 return ("", errors.New(mailMisformattedˢ));
             }
         }
+
         // word = atom / quoted-string
         @string word = default!;
         p.skipSpace();
@@ -633,6 +670,7 @@ internal static (@string phrase, error err) consumePhrase(this ref addrParser p)
                 (word, isEncoded, err) = p.decodeRFC2047Word(word);
             }
         }
+
         if (err != default!) {
             break;
         }
@@ -661,10 +699,13 @@ internal static (@string qs, error err) consumeQuotedString(this ref addrParser 
     // Assume first byte is '"'.
     nint i = 1;
     var qsb = new slice<rune>(0, 10);
+
     var escaped = false;
+
 Loop:
     while (ᐧ) {
         var (r, size) = utf8.DecodeRuneInString(p.s.slice(i));
+
         switch (ᐧ) {
         case {} when size is 0: {
             return ("", errors.New(mailUnclosedQuotedStringˢ));
@@ -673,18 +714,19 @@ Loop:
             return ("", fmt.Errorf("mail: invalid utf-8 in quoted-string: %q"u8, p.s));
         }
         case {} when escaped: {
+            //  quoted-pair = ("\" (VCHAR / WSP))
             if (!isVchar(r) && !isWSP(r)) {
-                //  quoted-pair = ("\" (VCHAR / WSP))
                 return ("", fmt.Errorf("mail: bad character in quoted-string: %q"u8, r));
             }
+
             qsb = append(qsb, r);
             escaped = false;
             break;
         }
         case {} when isQtext(r) || isWSP(r): {
-            qsb = append(qsb, // qtext (printable US-ASCII excluding " and \), or
- // FWS (almost; we're ignoring CRLF)
- r);
+            // qtext (printable US-ASCII excluding " and \), or
+            // FWS (almost; we're ignoring CRLF)
+            qsb = append(qsb, r);
             break;
         }
         case {} when r is (rune)'"': {
@@ -721,6 +763,7 @@ internal static (@string atom, error err) consumeAtom(this ref addrParser p, boo
     @string atom = default!;
 
     nint i = 0;
+
 Loop:
     while (ᐧ) {
         var (r, size) = utf8.DecodeRuneInString(p.s.slice(i));
@@ -736,10 +779,10 @@ Loop:
             i += size;
             break;
         }}
-
 continue_Loop:;
     }
 break_Loop:;
+
     if (i == 0) {
         return ("", errors.New(mailInvalidStringˢ));
     }
@@ -768,6 +811,7 @@ internal static (@string, error) consumeDomainLiteral(this ref addrParser p) {
     if (!p.consume((rune)'[')) {
         return ("", errors.New(mailMissingInDomainˢ));
     }
+
     // Parse the dtext
     @string dtext = p.s;
     nint dtextLen = 0;
@@ -778,6 +822,7 @@ internal static (@string, error) consumeDomainLiteral(this ref addrParser p) {
         if (p.peek() == (rune)']') {
             break;
         }
+
         var (r, size) = utf8.DecodeRuneInString(p.s);
         if (size == 1 && r == utf8.RuneError) {
             return ("", fmt.Errorf("mail: invalid utf-8 in domain-literal: %q"u8, p.s));
@@ -785,18 +830,22 @@ internal static (@string, error) consumeDomainLiteral(this ref addrParser p) {
         if (!isDtext(r)) {
             return ("", fmt.Errorf("mail: bad character in domain-literal: %q"u8, r));
         }
+
         dtextLen += size;
         p.s = p.s.slice(size);
     }
     dtext = dtext.slice(0, dtextLen);
+
     // Skip the trailing ]
     if (!p.consume((rune)']')) {
         return ("", errors.New(mailUnclosedDomainˢ));
     }
+
     // Check if the domain literal is an IP address
     if (net.ParseIP(dtext) == default!) {
         return ("", fmt.Errorf("mail: invalid IP address in domain-literal: %q"u8, dtext));
     }
+
     return ("[" + dtext + "]", default!);
 }
 
@@ -811,6 +860,7 @@ internal static (@string, error) consumeDisplayNameComment(this ref addrParser p
     if (!ok) {
         return ("", errors.New(mailMisformattedˢ));
     }
+
     // TODO(stapelberg): parse quoted-string within comment
     var words = strings.FieldsFunc(comment, (rune r) => r == (rune)' ' || r == (rune)'\t');
     foreach (var (idx, word) in words) {
@@ -822,6 +872,7 @@ internal static (@string, error) consumeDisplayNameComment(this ref addrParser p
             words[idx] = decoded;
         }
     }
+
     return (strings.Join(words, " "u8), default!);
 }
 
@@ -853,28 +904,34 @@ internal static nint len(this ref addrParser p) {
 // skipCFWS skips CFWS as defined in RFC5322.
 internal static bool skipCFWS(this ref addrParser p) {
     p.skipSpace();
+
     while (ᐧ) {
         if (!p.consume((rune)'(')) {
             break;
         }
+
         {
             var (_, ok) = p.consumeComment(); if (!ok) {
                 return false;
             }
         }
+
         p.skipSpace();
     }
+
     return true;
 }
 
 internal static (@string, bool) consumeComment(this ref addrParser p) {
     // '(' already consumed.
     nint depth = 1;
+
     @string comment = default!;
     while (ᐧ) {
         if (p.empty() || depth == 0) {
             break;
         }
+
         if (p.peek() == (rune)'\\' && p.len() > 1){
             p.s = p.s[1..];
         } else 
@@ -889,6 +946,7 @@ internal static (@string, bool) consumeComment(this ref addrParser p) {
         }
         p.s = p.s[1..];
     }
+
     return (comment, depth == 0);
 }
 
@@ -900,6 +958,7 @@ internal static (@string word, bool isEncoded, error err) decodeRFC2047Word(this
     if (dec == nil) {
         dec = Ꮡrfc2047Decoder;
     }
+
     // Substitute our own CharsetReader function so that we can tell
     // whether an error from the Decode method was due to the
     // CharsetReader (meaning the charset is invalid).
@@ -924,6 +983,7 @@ internal static (@string word, bool isEncoded, error err) decodeRFC2047Word(this
     if (err == default!) {
         return (word, true, default!);
     }
+
     // If the error came from the character set reader
     // (meaning the character set itself is invalid
     // but the decoding worked fine until then),
@@ -932,6 +992,7 @@ internal static (@string word, bool isEncoded, error err) decodeRFC2047Word(this
     if (charsetReaderError) {
         return (s, true, err);
     }
+
     // Ignore invalid RFC 2047 encoded-word errors.
     return (s, false, default!);
 }
@@ -954,12 +1015,10 @@ internal static bool isAtext(rune r, bool dot) {
     case (rune)'.': {
         return dot;
     }
-    case (rune)'(' or (rune)')' or (rune)'<' or (rune)'>' or (rune)'[' or (rune)']' or (rune)':' or (rune)';' or (rune)'@' or (rune)'\\' or (rune)',' or (rune)'"': {
+    // RFC 5322 3.2.3. specials
+    case (rune)'(' or (rune)')' or (rune)'<' or (rune)'>' or (rune)'[' or (rune)']' or (rune)':' or (rune)';' or (rune)'@' or (rune)'\\' or (rune)',' or (rune)'"': { // RFC 5322 3.2.3. specials
         return false;
     }}
-
-    // RFC 5322 3.2.3. specials
-    // RFC 5322 3.2.3. specials
     return isVchar(r);
 }
 

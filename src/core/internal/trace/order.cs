@@ -53,10 +53,12 @@ internal static (bool, error) Advance(this ж<ordering> Ꮡo, ж<baseEvent> Ꮡe
         // Set the initial gen if necessary.
         o.initialGen = gen;
     }
+
     schedCtx curCtx = default!;
     schedCtx newCtx = default!;
     curCtx.M = m;
     newCtx.M = m;
+
     ж<mState> ms = default!;
     if (m == NoThread){
         curCtx.P = NoProc;
@@ -77,6 +79,7 @@ internal static (bool, error) Advance(this ж<ordering> Ꮡo, ж<baseEvent> Ꮡe
         curCtx.G = ms.Value.g;
         newCtx = curCtx;
     }
+
     var f = orderingDispatch[ev.typ];
     if (f == default!) {
         return (false, fmt.Errorf("bad event type found while ordering: %v"u8, ev.typ));
@@ -92,24 +95,16 @@ internal static (bool, error) Advance(this ж<ordering> Ꮡo, ж<baseEvent> Ꮡe
 
 // type orderingHandleFunc is a methodless func type — rendered inline as its base delegate
 
-// Procs.
-// Goroutines.
-// STW.
-// GC events.
-// Annotations.
-// Coroutines. Added in Go 1.23.
-// GoStatus event with a stack. Added in Go 1.23.
-// Experimental events.
-// Experimental heap span events. Added in Go 1.23.
-// Experimental heap object events. Added in Go 1.23.
-// Experimental goroutine stack events. Added in Go 1.23.
 internal static array<Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>> orderingDispatch;
 internal static void initᴛorderingDispatch() { orderingDispatch = new golib.SparseArray<Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>>{
+    // Procs.
     [go122.EvProcsChange] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAnnotation)),
     [go122.EvProcStart] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceProcStart)),
     [go122.EvProcStop] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceProcStop)),
     [go122.EvProcSteal] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceProcSteal)),
     [go122.EvProcStatus] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceProcStatus)),
+
+    // Goroutines.
     [go122.EvGoCreate] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoCreate)),
     [go122.EvGoCreateSyscall] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoCreateSyscall)),
     [go122.EvGoStart] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStart)),
@@ -122,8 +117,12 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     [go122.EvGoSyscallEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSyscallEnd)),
     [go122.EvGoSyscallEndBlocked] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSyscallEndBlocked)),
     [go122.EvGoStatus] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStatus)),
+
+    // STW.
     [go122.EvSTWBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeBegin)),
     [go122.EvSTWEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeEnd)),
+
+    // GC events.
     [go122.EvGCActive] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCActive)),
     [go122.EvGCBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCBegin)),
     [go122.EvGCEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGCEnd)),
@@ -135,22 +134,36 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     [go122.EvGCMarkAssistEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoRangeEnd)),
     [go122.EvHeapAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceHeapMetric)),
     [go122.EvHeapGoal] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceHeapMetric)),
+
+    // Annotations.
     [go122.EvGoLabel] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAnnotation)),
     [go122.EvUserTaskBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceUserTaskBegin)),
     [go122.EvUserTaskEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceUserTaskEnd)),
     [go122.EvUserRegionBegin] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceUserRegionBegin)),
     [go122.EvUserRegionEnd] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceUserRegionEnd)),
     [go122.EvUserLog] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAnnotation)),
+
+    // Coroutines. Added in Go 1.23.
     [go122.EvGoSwitch] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSwitch)),
     [go122.EvGoSwitchDestroy] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoSwitch)),
     [go122.EvGoCreateBlocked] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoCreate)),
+
+    // GoStatus event with a stack. Added in Go 1.23.
     [go122.EvGoStatusStack] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceGoStatus)),
+
+    // Experimental events.
+
+    // Experimental heap span events. Added in Go 1.23.
     [go122.EvSpan] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
     [go122.EvSpanAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
     [go122.EvSpanFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
+
+    // Experimental heap object events. Added in Go 1.23.
     [go122.EvHeapObject] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
     [go122.EvHeapObjectAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
     [go122.EvHeapObjectFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
+
+    // Experimental goroutine stack events. Added in Go 1.23.
     [go122.EvGoroutineStack] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
     [go122.EvGoroutineStackAlloc] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree)),
     [go122.EvGoroutineStackFree] = ((Func<ж<ordering>, ж<baseEvent>, ж<evTable>, ThreadID, uint64, schedCtx, (schedCtx, bool, error)>)(advanceAllocFree))
@@ -197,6 +210,7 @@ internal static (schedCtx, bool, error) advanceProcStatus(this ref ordering o, �
         }
     }
     ev.extra(version.Go122)[0] = (uint64)(uint8)oldState; // Smuggle in the old state for StateTransition.
+
     // Bind the proc to the new context, if it's running.
     var newCtx = curCtx;
     if (status == go122.ProcRunning || status == go122.ProcSyscall) {
@@ -232,6 +246,7 @@ internal static (schedCtx, bool, error) advanceProcStart(this ref ordering o, ж
 
     var pid = ((ProcID)(int64)ev.args[0]);
     var seq = makeSeq(gen, ev.args[1]);
+
     // Try to advance. We might fail here due to sequencing, because the P hasn't
     // had a status emitted, or because we already have a P and we're in a syscall,
     // and we haven't observed that it was stolen from us yet.
@@ -320,17 +335,21 @@ internal static (schedCtx, bool, error) advanceProcSteal(this ref ordering o, ж
     // bind another P. This P is about to go ProcIdle anyway.
     var oldStatus = state.Value.status;
     ev.extra(version.Go122)[0] = (uint64)(uint8)oldStatus;
+
     // Update the P's status and sequence number.
     state.Value.status = go122.ProcIdle;
     state.Value.seq = seq;
+
     // If we've lost information then don't try to do anything with the M.
     // It may have moved on and we can't be sure.
     if (oldStatus == go122.ProcSyscallAbandoned) {
         o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
         return (curCtx, true, default!);
     }
+
     // Validate that the M we're stealing from is what we expect.
     var mid = ((ThreadID)(int64)ev.args[2]); // The M we're stealing from.
+
     var newCtx = curCtx;
     if (mid == curCtx.M) {
         // We're stealing from ourselves. This behaves like a ProcStop.
@@ -341,15 +360,18 @@ internal static (schedCtx, bool, error) advanceProcSteal(this ref ordering o, ж
         o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
         return (newCtx, true, default!);
     }
+
     // We're stealing from some other M.
     (var mState, ok) = o.mStates[mid, ꟷ];
     if (!ok) {
         return (curCtx, false, fmt.Errorf("stole proc from non-existent thread %d"u8, mid));
     }
+
     // Make sure we're actually stealing the right P.
     if ((~mState).p != pid) {
         return (curCtx, false, fmt.Errorf("tried to steal proc %d from thread %d, but got proc %d instead"u8, pid, mid, (~mState).p));
     }
+
     // Tell the M it has no P so it can proceed.
     //
     // This is safe because we know the P was in a syscall and
@@ -369,6 +391,7 @@ internal static (schedCtx, bool, error) advanceGoStatus(this ref ordering o, ж<
     var mid = ((ThreadID)(int64)ev.args[1]);
     ref var status = ref heap<go122.GoStatus>(out var Ꮡstatus);
     status = ((go122.GoStatus)(uint8)ev.args[2]);
+
     if ((nint)(uint8)status >= len(go122GoStatus2GoState)) {
         return (curCtx, false, fmt.Errorf("invalid status for goroutine %d: %d"u8, gid, status));
     }
@@ -389,21 +412,22 @@ internal static (schedCtx, bool, error) advanceGoStatus(this ref ordering o, ж<
         }
     }
     ev.args[2] = (uint64)(((uint64)(uint8)oldState << (int)(32)) | (uint64)(uint8)status); // Smuggle in the old state for StateTransition.
+
     var newCtx = curCtx;
     var exprᴛ1 = status;
     if (exprᴛ1 == go122.GoRunning) {
+        // Bind the goroutine to the new context, since it's running.
         newCtx.G = gid;
     }
     else if (exprᴛ1 == go122.GoSyscall) {
         do {
             if (mid == NoThread) {
-                // Bind the goroutine to the new context, since it's running.
                 return (curCtx, false, fmt.Errorf("found goroutine %d in syscall without a thread"u8, gid));
             }
+            // Is the syscall on this thread? If so, bind it to the context.
+            // Otherwise, we're talking about a G sitting in a syscall on an M.
+            // Validate the named M.
             if (mid == curCtx.M) {
-                // Is the syscall on this thread? If so, bind it to the context.
-                // Otherwise, we're talking about a G sitting in a syscall on an M.
-                // Validate the named M.
                 if (gen != o.initialGen && curCtx.G != gid) {
                     // If this isn't the first generation, we *must* have seen this
                     // binding occur already. Even if the G was blocked in a syscall
@@ -414,13 +438,13 @@ internal static (schedCtx, bool, error) advanceGoStatus(this ref ordering o, ж<
                 newCtx.G = gid;
                 break;
             }
+            // Now we're talking about a thread and goroutine that have been
+            // blocked on a syscall for the entire generation. This case must
+            // not have a P; the runtime makes sure that all Ps are traced at
+            // the beginning of a generation, which involves taking a P back
+            // from every thread.
             var (ms, ok) = o.mStates[mid, ꟷ];
             if (ok){
-                // Now we're talking about a thread and goroutine that have been
-                // blocked on a syscall for the entire generation. This case must
-                // not have a P; the runtime makes sure that all Ps are traced at
-                // the beginning of a generation, which involves taking a P back
-                // from every thread.
                 // This M has been seen. That means we must have seen this
                 // goroutine go into a syscall on this thread at some point.
                 if ((~ms).g != gid) {
@@ -436,14 +460,13 @@ internal static (schedCtx, bool, error) advanceGoStatus(this ref ordering o, ж<
                 // has just been sitting in a syscall on this M. Create
                 // a state for it.
                 o.mStates[mid] = Ꮡ(new mState(g: gid, p: NoProc));
+                // Don't set curCtx.G in this case because this event is the
+                // binding event (and curCtx represents the "before" state).
             }
+            // Update the current context to the M we're talking about.
             curCtx.M = mid;
         } while (false);
     }
-
-    // Don't set curCtx.G in this case because this event is the
-    // binding event (and curCtx represents the "before" state).
-    // Update the current context to the M we're talking about.
     o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
     return (newCtx, true, default!);
 }
@@ -506,21 +529,20 @@ internal static (schedCtx, bool, error) advanceGoStopExec(this ref ordering o, �
     var newCtx = curCtx;
     var exprᴛ1 = ev.typ;
     if (exprᴛ1 == go122.EvGoDestroy) {
-        delete(o.gStates, // This goroutine is exiting itself.
- curCtx.G);
+        // This goroutine is exiting itself.
+        delete(o.gStates, curCtx.G);
         newCtx.G = NoGoroutine;
     }
     else if (exprᴛ1 == go122.EvGoStop) {
+        // Goroutine stopped (yielded). It's runnable but not running on this M.
         state.Value.status = go122.GoRunnable;
         newCtx.G = NoGoroutine;
     }
     else if (exprᴛ1 == go122.EvGoBlock) {
+        // Goroutine blocked. It's waiting now and not running on this M.
         state.Value.status = go122.GoWaiting;
         newCtx.G = NoGoroutine;
     }
-
-    // Goroutine stopped (yielded). It's runnable but not running on this M.
-    // Goroutine blocked. It's waiting now and not running on this M.
     o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
     return (newCtx, true, default!);
 }
@@ -607,31 +629,32 @@ internal static (schedCtx, bool, error) advanceGoSwitch(this ref ordering o, ж<
         return (curCtx, false, default!);
     }
     o.queue.push(new ΔEvent(table: Ꮡevt, ctx: curCtx, @base: ev.ΔClone()));
+
     // Update the state of the executing goroutine and emit an event for it
     // (GoSwitch and GoSwitchDestroy will be interpreted as GoUnblock events
     // for nextg).
     var exprᴛ1 = ev.typ;
     if (exprᴛ1 == go122.EvGoSwitch) {
+        // Goroutine blocked. It's waiting now and not running on this M.
         curGState.Value.status = go122.GoWaiting;
-        o.queue.push(makeEvent(Ꮡevt, // Goroutine blocked. It's waiting now and not running on this M.
- // Emit a GoBlock event.
- // TODO(mknyszek): Emit a reason.
- curCtx, go122.EvGoBlock, ev.time, 0, /* no reason */
- 0));
+
+        // Emit a GoBlock event.
+        // TODO(mknyszek): Emit a reason.
+        o.queue.push(makeEvent(Ꮡevt, curCtx, go122.EvGoBlock, ev.time, 0, /* no reason */ 0 /* no stack */));
     }
     else if (exprᴛ1 == go122.EvGoSwitchDestroy) {
-        delete(o.gStates, /* no stack */
- // This goroutine is exiting itself.
- curCtx.G);
-        o.queue.push(makeEvent(Ꮡevt, // Emit a GoDestroy event.
- curCtx, go122.EvGoDestroy, ev.time));
-    }
+        // This goroutine is exiting itself.
+        delete(o.gStates, curCtx.G);
 
+        // Emit a GoDestroy event.
+        o.queue.push(makeEvent(Ꮡevt, curCtx, go122.EvGoDestroy, ev.time));
+    }
     // Update the state of the next goroutine.
     nextGState.Value.status = go122.GoRunning;
     nextGState.Value.seq = seq;
     var newCtx = curCtx;
     newCtx.G = nextg;
+
     // Queue an event for the next goroutine starting to run.
     var startCtx = curCtx;
     startCtx.G = NoGoroutine;
@@ -702,6 +725,7 @@ internal static (schedCtx, bool, error) advanceGoSyscallEnd(this ref ordering o,
         return (curCtx, false, fmt.Errorf("%s event for goroutine that's not %s"u8, go122.EventString(ev.typ), GoRunning));
     }
     state.Value.status = go122.GoRunning;
+
     // Transfer the P back to running from syscall.
     (var pState, ok) = o.pStates[curCtx.P, ꟷ];
     if (!ok) {
@@ -821,6 +845,7 @@ internal static (schedCtx, bool, error) advanceGoDestroySyscall(this ref orderin
     delete(o.gStates, curCtx.G);
     var newCtx = curCtx;
     newCtx.G = NoGoroutine;
+
     // If we have a proc, then we're dissociating from it now. See the comment at the top of the case.
     if (curCtx.P != NoProc) {
         var (pState, okΔ1) = o.pStates[curCtx.P, ꟷ];
@@ -833,6 +858,7 @@ internal static (schedCtx, bool, error) advanceGoDestroySyscall(this ref orderin
         // See the go122-create-syscall-reuse-thread-id test case for more details.
         pState.Value.status = go122.ProcSyscallAbandoned;
         newCtx.P = NoProc;
+
         // Queue an extra self-ProcSteal event.
         var extra = makeEvent(Ꮡevt, curCtx, go122.EvProcSteal, ev.time, (uint64)(int64)curCtx.P);
         extra.@base.extra(version.Go122)[0] = (uint64)(uint8)go122.ProcSyscall;
@@ -869,6 +895,7 @@ internal static (schedCtx, bool, error) advanceUserTaskBegin(this ref ordering o
         parentID = NoTask;
         ev.args[1] = (uint64)NoTask;
     }
+
     // Validate the name and record it. We'll need to pass it through to
     // EvUserTaskEnd.
     var nameID = ((stringID)ev.args[2]);
@@ -1247,6 +1274,7 @@ internal static error validateCtx(schedCtx ctx, @event.SchedReqs reqs) {
     if (reqs.Thread == @event.MustNotHave && ctx.M != NoThread) {
         return fmt.Errorf("expected no thread but had one"u8);
     }
+
     // Check proc requirements.
     if (reqs.Proc == @event.MustHave && ctx.P == NoProc){
         return fmt.Errorf("expected a proc but didn't have one"u8);
@@ -1254,6 +1282,7 @@ internal static error validateCtx(schedCtx ctx, @event.SchedReqs reqs) {
     if (reqs.Proc == @event.MustNotHave && ctx.P != NoProc) {
         return fmt.Errorf("expected no proc but had one"u8);
     }
+
     // Check goroutine requirements.
     if (reqs.Goroutine == @event.MustHave && ctx.G == NoGoroutine){
         return fmt.Errorf("expected a goroutine but didn't have one"u8);
@@ -1264,6 +1293,9 @@ internal static error validateCtx(schedCtx ctx, @event.SchedReqs reqs) {
     return default!;
 }
 
+// gcState is a trinary variable for the current state of the GC.
+//
+// The third state besides "enabled" and "disabled" is "undetermined."
 partial struct gcState /*num:uint8*/;
 
 internal static gcState gcUndetermined => /* iota */ 0;
@@ -1288,7 +1320,6 @@ internal static @string String(this gcState s) {
     if (exprᴛ1 == gcRunning) {
         return runningˢ;
     }
-
     return badˢ;
 }
 
@@ -1500,12 +1531,14 @@ internal static void grow<T>(this ref queue<T> q) {
         q.buf = new slice<T>(2);
         return;
     }
+
     // Create new buf and copy data over.
     var newBuf = new slice<T>(len(q.buf) * 2);
     nint pivot = q.start % len(q.buf);
     var (first, last) = (q.buf.slice(pivot), q.buf.slice(0, pivot));
     copy(newBuf.slice(0, len(first)), first);
     copy(newBuf.slice(len(first)), last);
+
     // Update the queue state.
     q.start = 0;
     q.end = len(q.buf);

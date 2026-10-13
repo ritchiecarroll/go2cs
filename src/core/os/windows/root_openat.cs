@@ -121,10 +121,12 @@ internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, Func<sy
             }
         }
         defer(r.root.decref, ref ᒐ);
+
         (var parts, var suffixSep, err) = splitPathInRoot(name, default!, default!);
         if (err != default!) {
             goto ᒐdone;
         }
+
         var rootfd = r.root.Value.fd;
         var dirfd = rootfd;
         defer(() => {
@@ -132,6 +134,7 @@ internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, Func<sy
                 syscall.Close(dirfd);
             }
         }, ref ᒐ);
+
         // When resolving .. path components, we restart path resolution from the root.
         // (We can't openat(dir, "..") to move up to the parent directory,
         // because dir may have moved since we opened it.)
@@ -140,6 +143,7 @@ internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, Func<sy
         // caused by .. components. If *both* limits are exceeded, we halt the operation.
         const nint maxSteps = 255;
         const nint maxRestarts = 8;
+
         nint i = 0;
         nint steps = 0;
         nint restarts = 0;
@@ -149,6 +153,7 @@ internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, Func<sy
             if (steps > maxSteps && restarts > maxRestarts) {
                 (ret, err) = (ret, syscall.ENAMETOOLONG); goto ᒐdone;
             }
+
             if (parts[i] == "..") {
                 // Resolve one or more parent ("..") path components.
                 //
@@ -175,6 +180,7 @@ internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, Func<sy
                 dirfd = rootfd;
                 continue;
             }
+
             if (i == len(parts) - 1){
                 // This is the last path element.
                 // Call f to decide what to do with it.
@@ -203,6 +209,7 @@ internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, Func<sy
                     }
                 }
             }
+
             {
                 var (e, ok) = err._<errSymlink>(ᐧ); if (ok) {
                     symlinks++;
@@ -235,6 +242,7 @@ internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, Func<sy
                     continue;
                 }
             }
+
             i++;
         }
     }
@@ -243,6 +251,8 @@ internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, Func<sy
     ᒐdone: return (ret, err);
 }
 
+// errSymlink reports that a file being operated on is actually a symlink,
+// and the target of that symlink.
 partial struct errSymlink /*@string*/;
 
 internal static @string Error(this errSymlink _) {

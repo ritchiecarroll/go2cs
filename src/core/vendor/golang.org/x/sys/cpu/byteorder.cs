@@ -49,7 +49,6 @@ internal static byteOrder hostByteOrder() {
     if (exprᴛ1 == "armbe"u8 || exprᴛ1 == "arm64be"u8 || exprᴛ1 == "m68k"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64p32"u8 || exprᴛ1 == "ppc"u8 || exprᴛ1 == "ppc64"u8 || exprᴛ1 == "s390"u8 || exprᴛ1 == "s390x"u8 || exprᴛ1 == "shbe"u8 || exprᴛ1 == "sparc"u8 || exprᴛ1 == "sparc64"u8) {
         return new bigEndian(nil);
     }
-
     throw panic("unknown architecture");
 }
 

@@ -10,6 +10,8 @@ using go.@internal.trace;
 partial class go122_package {
 
 public static @event.Type EvNone => /* iota */ 0; // unused
+
+// Structural events.
 public static @event.Type EvEventBatch => 1; // start of per-M batch of events [generation, M ID, timestamp, batch length]
 public static @event.Type EvStacks => 2; // start of a section of the stack table [...EvStack]
 public static @event.Type EvStack => 3; // stack table entry [ID, ...{PC, func string ID, file string ID, line #}]
@@ -18,11 +20,15 @@ public static @event.Type EvString => 5; // string dictionary entry [ID, length,
 public static @event.Type EvCPUSamples => 6; // start of a section of CPU samples [...EvCPUSample]
 public static @event.Type EvCPUSample => 7; // CPU profiling sample [timestamp, M ID, P ID, goroutine ID, stack ID]
 public static @event.Type EvFrequency => 8; // timestamp units per sec [freq]
+
+// Procs.
 public static @event.Type EvProcsChange => 9; // current value of GOMAXPROCS [timestamp, GOMAXPROCS, stack ID]
 public static @event.Type EvProcStart => 10; // start of P [timestamp, P ID, P seq]
 public static @event.Type EvProcStop => 11; // stop of P [timestamp]
 public static @event.Type EvProcSteal => 12; // P was stolen [timestamp, P ID, P seq, M ID]
 public static @event.Type EvProcStatus => 13; // P status at the start of a generation [timestamp, P ID, status]
+
+// Goroutines.
 public static @event.Type EvGoCreate => 14; // goroutine creation [timestamp, new goroutine ID, new stack ID, stack ID]
 public static @event.Type EvGoCreateSyscall => 15; // goroutine appears in syscall (cgo callback) [timestamp, new goroutine ID]
 public static @event.Type EvGoStart => 16; // goroutine starts running [timestamp, goroutine ID, goroutine seq]
@@ -35,8 +41,12 @@ public static @event.Type EvGoSyscallBegin => 22; // syscall enter [timestamp, P
 public static @event.Type EvGoSyscallEnd => 23; // syscall exit [timestamp]
 public static @event.Type EvGoSyscallEndBlocked => 24; // syscall exit and it blocked at some point [timestamp]
 public static @event.Type EvGoStatus => 25; // goroutine status at the start of a generation [timestamp, goroutine ID, thread ID, status]
+
+// STW.
 public static @event.Type EvSTWBegin => 26; // STW start [timestamp, kind]
 public static @event.Type EvSTWEnd => 27; // STW done [timestamp]
+
+// GC events.
 public static @event.Type EvGCActive => 28; // GC active [timestamp, seq]
 public static @event.Type EvGCBegin => 29; // GC start [timestamp, seq, stack ID]
 public static @event.Type EvGCEnd => 30; // GC done [timestamp, seq]
@@ -48,41 +58,48 @@ public static @event.Type EvGCMarkAssistBegin => 35; // GC mark assist start [ti
 public static @event.Type EvGCMarkAssistEnd => 36; // GC mark assist done [timestamp]
 public static @event.Type EvHeapAlloc => 37; // gcController.heapLive change [timestamp, heap alloc in bytes]
 public static @event.Type EvHeapGoal => 38; // gcController.heapGoal() change [timestamp, heap goal in bytes]
+
+// Annotations.
 public static @event.Type EvGoLabel => 39; // apply string label to current running goroutine [timestamp, label string ID]
 public static @event.Type EvUserTaskBegin => 40; // trace.NewTask [timestamp, internal task ID, internal parent task ID, name string ID, stack ID]
 public static @event.Type EvUserTaskEnd => 41; // end of a task [timestamp, internal task ID, stack ID]
 public static @event.Type EvUserRegionBegin => 42; // trace.{Start,With}Region [timestamp, internal task ID, name string ID, stack ID]
 public static @event.Type EvUserRegionEnd => 43; // trace.{End,With}Region [timestamp, internal task ID, name string ID, stack ID]
 public static @event.Type EvUserLog => 44; // trace.Log [timestamp, internal task ID, key string ID, value string ID, stack]
+
+// Coroutines. Added in Go 1.23.
 public static @event.Type EvGoSwitch => 45; // goroutine switch (coroswitch) [timestamp, goroutine ID, goroutine seq]
 public static @event.Type EvGoSwitchDestroy => 46; // goroutine switch and destroy [timestamp, goroutine ID, goroutine seq]
 public static @event.Type EvGoCreateBlocked => 47; // goroutine creation (starts blocked) [timestamp, new goroutine ID, new stack ID, stack ID]
+
+// GoStatus with stack. Added in Go 1.23.
 public static @event.Type EvGoStatusStack => 48; // goroutine status at the start of a generation, with a stack [timestamp, goroutine ID, M ID, status, stack ID]
+
+// Batch event for an experimental batch with a custom format. Added in Go 1.23.
 public static @event.Type EvExperimentalBatch => 49; // start of extra data [experiment ID, generation, M ID, timestamp, batch length, batch data...]
 
 // Experiments.
+// AllocFree is the alloc-free events experiment.
 public static @event.Experiment AllocFree => /* 1 + iota */ 1;
 
 // Experimental events.
 internal static @event.Type _ᴛ1ʗ => /* 127 + iota */ 127;
+
 // Experimental events for AllocFree.
 
+// Experimental heap span events. Added in Go 1.23.
 public static @event.Type EvSpan => 128; // heap span exists [timestamp, id, npages, type/class]
-
 public static @event.Type EvSpanAlloc => 129; // heap span alloc [timestamp, id, npages, type/class]
-
 public static @event.Type EvSpanFree => 130; // heap span free [timestamp, id]
 
+// Experimental heap object events. Added in Go 1.23.
 public static @event.Type EvHeapObject => 131; // heap object exists [timestamp, id, type]
-
 public static @event.Type EvHeapObjectAlloc => 132; // heap object alloc [timestamp, id, type]
-
 public static @event.Type EvHeapObjectFree => 133; // heap object free [timestamp, id]
 
+// Experimental goroutine stack events. Added in Go 1.23.
 public static @event.Type EvGoroutineStack => 134; // stack exists [timestamp, id, order]
-
 public static @event.Type EvGoroutineStackAlloc => 135; // stack alloc [timestamp, id, order]
-
 public static @event.Type EvGoroutineStackFree => 136; // stack free [timestamp, id]
 
 // EventString returns the name of a Go 1.22 event.
@@ -97,14 +114,8 @@ public static slice<@event.Spec> Specs() {
     return specs[..];
 }
 
-// "Structural" Events.
-// N.B. There's clearly a timestamp here, but these Events
-// are special in that they don't appear in the regular
-// M streams.
-// Easier to represent for raw readers.
-// "Timed" Events.
-// Experimental events.
 internal static array<@event.Spec> specs = new golib.SparseArray<@event.Spec>{
+    // "Structural" Events.
     [EvEventBatch] = new @event.Spec(
         Name: "EventBatch"u8,
         Args: new @string[]{"gen"u8, "m"u8, "time"u8, "size"u8}.slice()
@@ -131,6 +142,9 @@ internal static array<@event.Spec> specs = new golib.SparseArray<@event.Spec>{
     [EvCPUSample] = new @event.Spec(
         Name: "CPUSample"u8,
         Args: new @string[]{"time"u8, "m"u8, "p"u8, "g"u8, "stack"u8}.slice()
+        // N.B. There's clearly a timestamp here, but these Events
+        // are special in that they don't appear in the regular
+        // M streams.
     ),
     [EvFrequency] = new @event.Spec(
         Name: "Frequency"u8,
@@ -139,8 +153,10 @@ internal static array<@event.Spec> specs = new golib.SparseArray<@event.Spec>{
     [EvExperimentalBatch] = new @event.Spec(
         Name: "ExperimentalBatch"u8,
         Args: new @string[]{"exp"u8, "gen"u8, "m"u8, "time"u8}.slice(),
-        HasData: true
+        HasData: true // Easier to represent for raw readers.
     ),
+
+    // "Timed" Events.
     [EvProcsChange] = new @event.Spec(
         Name: "ProcsChange"u8,
         Args: new @string[]{"dt"u8, "procs_value"u8, "stack"u8}.slice(),
@@ -376,6 +392,8 @@ internal static array<@event.Spec> specs = new golib.SparseArray<@event.Spec>{
         IsTimedEvent: true,
         StackIDs: new nint[]{4}.slice()
     ),
+
+    // Experimental events.
     [EvSpan] = new @event.Spec(
         Name: "Span"u8,
         Args: new @string[]{"dt"u8, "id"u8, "npages_value"u8, "kindclass"u8}.slice(),
@@ -461,7 +479,6 @@ public static @string String(this GoStatus s) {
     if (exprᴛ1 == GoWaiting) {
         return waitingˢ;
     }
-
     return badˢ;
 }
 
@@ -487,10 +504,10 @@ public static @string String(this ProcStatus s) {
     if (exprᴛ1 == ProcSyscall) {
         return syscallˢ;
     }
-
     return badˢ;
 }
 
+// Various format-specific constants.
 public static UntypedInt MaxBatchSize => /* 64 << 10 */ 65536;
 public static UntypedInt MaxFramesPerStack => 128;
 public static UntypedInt MaxStringSize => /* 1 << 10 */ 1024;

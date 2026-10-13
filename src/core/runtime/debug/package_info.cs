@@ -59,9 +59,9 @@ using static go.runtime.debug_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("runtime/debug/garbage.go", "garbage.cs", "ABU+AAoM0oIABxKCgoKCgoKEgpSCgpaCgriCgoKCgpQABCAACwKuwgACHgAMAgACIgAOAgACJgAQAgACGAAKFgAKbgA1Ag==")]
-[assembly: go.GoPositionMap("runtime/debug/mod.go", "mod.cs", "AA0eqrKCgpSCgoLehAA2eJKokuiSgoKUgpSCkoKCgoKCgoKUgpSUgpSClIKCgpSCgpSWABcSAAoCgoKCqAAGFIKClIKCgpTegryCgoKUlIK0goKCgsaCgoKCgsaCgpSClMq0goKWkpSmgoKUgpSAgqSCtoKCgpSCyIKClIKCgsiCgtq0lA==", "116-130:1;160-164:1;176-190:2")]
-[assembly: go.GoPositionMap("runtime/debug/stack.go", "stack.cs", "ABEikqqigoKCgpQACCYADQKCABk0goKUgpSApqSo")]
+[assembly: go.GoPositionMap("runtime/debug/garbage.go", "garbage.cs", "ABU+AAoM0oIACBKCgoKCgoKUgpSCgqaCgriCgoKCgpQABCAACwKuwgACHgAMAgACIgAOAgACJgAQAgACGAAKFgAKbgA1Ag==")]
+[assembly: go.GoPositionMap("runtime/debug/mod.go", "mod.cs", "AA0eqrKCgpSCgoLulAA2eJKokuiSgoKUgpSCkoKCgoKCgoKUgpSUgpSClIKCgpSCgpSmABcSAAoCgoKCuAAHFIKClIKCgpTugryCgoKUlIK0goKCgsaCgoKCgsaCgpSClMq0goKmkpSmgoKUgpSAgqSCtoKCgpSCyIKClIKCgsiCgtqklA==", "116-130:1;160-164:1;176-190:2")]
+[assembly: go.GoPositionMap("runtime/debug/stack.go", "stack.cs", "ABEikqqigoKCgpQACCYACwKCABk0goKUgpSApqSo")]
 [assembly: go.GoPositionMap("runtime/debug/stubs.go", "stubs.cs", "AAkYopKSkpKS")]
 // </GoSourcePositionMaps>
 

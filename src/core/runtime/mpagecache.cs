@@ -79,16 +79,19 @@ internal static void flush(this ref pageCache c, ж<pageAlloc> Ꮡp) {
     ref var Δp = ref Ꮡp.DerefOrNull();
 
     assertLockHeld(Δp.mheapLock);
+
     if (c.empty()) {
         return;
     }
     chunkIdx ci = chunkIndex(c.@base);
     nuint pi = chunkPageIndex(c.@base);
+
     // This method is called very infrequently, so just do the
     // slower, safer thing by iterating over each bit individually.
     for (nuint i = (nuint)0; i < 64; i++) {
         if ((uint64)(c.cache & (((uint64)1).Lsh(i))) != 0) {
             Δp.chunkOf(ci).of(pallocData.ᏑpallocBits).free1(pi + i);
+
             // Update density statistics.
             Ꮡp.of(pageAlloc.Ꮡscav).of(pageAlloc_scav.Ꮡindex).free(ci, pi + i, 1);
         }
@@ -96,6 +99,7 @@ internal static void flush(this ref pageCache c, ж<pageAlloc> Ꮡp) {
             Δp.chunkOf(ci).of(pallocData.Ꮡscavenged).setRange(pi + i, 1);
         }
     }
+
     // Since this is a lot like a free, we need to make sure
     // we update the searchAddr just like free does.
     {
@@ -118,6 +122,7 @@ internal static void flush(this ref pageCache c, ж<pageAlloc> Ꮡp) {
 //go:systemstack
 internal static pageCache allocToCache(this ref pageAlloc Δp) {
     assertLockHeld(Δp.mheapLock);
+
     // If the searchAddr refers to a region which has a higher address than
     // any known chunk, then we know we're out of memory.
     if (chunkIndex(Δp.searchAddr.addr()) >= Δp.end) {
@@ -156,16 +161,19 @@ internal static pageCache allocToCache(this ref pageAlloc Δp) {
             scav: chunk.of(pallocData.Ꮡscavenged).block64(chunkPageIndex(addr))
         );
     }
+
     // Set the page bits as allocated and clear the scavenged bits, but
     // be careful to only set and clear the relevant bits.
     nuint cpi = chunkPageIndex(c.@base);
     chunk.of(pallocData.ᏑpallocBits).allocPages64(cpi, c.cache);
-    chunk.of(pallocData.Ꮡscavenged).clearBlock64(cpi, (uint64)(c.cache & c.scav));
-    /* free and scavenged */
+    chunk.of(pallocData.Ꮡscavenged).clearBlock64(cpi, (uint64)(c.cache & c.scav) /* free and scavenged */);
+
     // Update as an allocation, but note that it's not contiguous.
     Δp.update(c.@base, pageCachePages, false, true);
+
     // Update density statistics.
     Δp.scav.index.alloc(ci, (nuint)sys.OnesCount64(c.cache));
+
     // Set the search address to the last page represented by the cache.
     // Since all of the pages in this block are going to the cache, and we
     // searched for the first free page, we can confidently start at the

@@ -53,7 +53,7 @@ using static go.crypto.ed25519_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/ed25519/ed25519.go", "ed25519.cs", "ACZewoKClM6SgoKokoKClKyyAAYYAA4IgoKUgoKAgqSUtJKUpLQADiCQrtKCloKAgqaCgq7UgoKmgoKUlKrGgoKmuIKClIIAAhDSAAUcAA0CgIKkgoKUlLSSlKS0")]
+[assembly: go.GoPositionMap("crypto/ed25519/ed25519.go", "ed25519.cs", "ACtewoKClN6SgoKokoKClKyyAAYYAA4IgoKUgoKAgqSUpIKUpKQADSCQrtKCpoKAgraCgq7UgoKmgoKUlKrGgoKmuIKClIIAAhDSAAUcAA0CgIKkgoKUlKSClKSk")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

@@ -22,6 +22,7 @@ internal static (ж<User>, error) lookupUser(@string username) {
     bool found = default!;
     var nameC = new slice<byte>(len(username) + 1);
     copy(nameC, username);
+
     var nameCʗ1 = nameC;
     var err = retryWithBuffer(userBuffer, (slice<byte> buf) => {
         syscall.Errno errno = default!;
@@ -49,6 +50,7 @@ internal static (ж<User>, error) lookupUserId(@string uid) {
 internal static (ж<User>, error) lookupUnixUid(nint uid) {
     _C_struct_passwd pwd = default!;
     bool found = default!;
+
     var err = retryWithBuffer(userBuffer, (slice<byte> buf) => {
         syscall.Errno errno = default!;
         (pwd, found, errno) = _C_getpwuid_r(((_C_uid_t)uid),
@@ -83,8 +85,10 @@ internal static ж<User> buildUser(ref _C_struct_passwd pwd) {
 internal static (ж<Group>, error) lookupGroup(@string groupname) {
     _C_struct_group grp = default!;
     bool found = default!;
+
     var cname = new slice<byte>(len(groupname) + 1);
     copy(cname, groupname);
+
     var cnameʗ1 = cname;
     var err = retryWithBuffer(groupBuffer, (slice<byte> buf) => {
         syscall.Errno errno = default!;
@@ -112,6 +116,7 @@ internal static (ж<Group>, error) lookupGroupId(@string gid) {
 internal static (ж<Group>, error) lookupUnixGid(nint gid) {
     _C_struct_group grp = default!;
     bool found = default!;
+
     var err = retryWithBuffer(groupBuffer, (slice<byte> buf) => {
         syscall.Errno errno = default!;
         (grp, found, errno) = _C_getgrgid_r(((_C_gid_t)gid),
@@ -166,10 +171,10 @@ internal static error retryWithBuffer(bufferKind kind, Func<slice<byte>, syscall
             return default!;
         } else 
         if (runtime.GOOS == "aix"u8 && errno + 1 == 0){
-        } else 
-        if (errno != syscall.ERANGE) {
             // On AIX getpwuid_r appears to return -1,
             // not ERANGE, on buffer overflow.
+        } else 
+        if (errno != syscall.ERANGE) {
             return errno;
         }
         nint newSize = len(buf) * 2;

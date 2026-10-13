@@ -74,38 +74,29 @@ public static @string Name(this ref File f) {
 // to a file opened later.
 public static ж<File> Stdin;
 internal static void initᴛStdin() { Stdin = NewFile((uintptr)syscall.Stdin, "/dev/stdin"u8); }
-
 public static ж<File> Stdout;
 internal static void initᴛStdout() { Stdout = NewFile((uintptr)syscall.Stdout, "/dev/stdout"u8); }
-
 public static ж<File> Stderr;
 internal static void initᴛStderr() { Stderr = NewFile((uintptr)syscall.Stderr, "/dev/stderr"u8); }
 
 // Flags to OpenFile wrapping those of the underlying system. Not all
 // flags may be implemented on a given system.
+// Exactly one of O_RDONLY, O_WRONLY, or O_RDWR must be specified.
 public const nint O_RDONLY = /* syscall.O_RDONLY */ 0;             // open the file read-only.
-
 public const nint O_WRONLY = /* syscall.O_WRONLY */ 1;             // open the file write-only.
-
 public const nint O_RDWR = /* syscall.O_RDWR */ 2;               // open the file read-write.
-
+// The remaining values may be or'ed in to control behavior.
 public const nint O_APPEND = /* syscall.O_APPEND */ 1024;             // append data to the file when writing.
-
 public const nint O_CREATE = /* syscall.O_CREAT */ 64;             // create a new file if none exists.
-
 public const nint O_EXCL = /* syscall.O_EXCL */ 128;               // used with O_CREATE, file must not exist.
-
 public const nint O_SYNC = /* syscall.O_SYNC */ 1052672;               // open for synchronous I/O.
-
 public const nint O_TRUNC = /* syscall.O_TRUNC */ 512;              // truncate regular writable file when opened.
 
 // Seek whence values.
 //
 // Deprecated: Use io.SeekStart, io.SeekCurrent, and io.SeekEnd.
 public const nint SEEK_SET = 0; // seek relative to the origin of the file
-
 public const nint SEEK_CUR = 1; // seek relative to the current offset
-
 public const nint SEEK_END = 2; // seek relative to the end
 
 // LinkError records an error during a link or symlink or rename
@@ -133,8 +124,8 @@ internal static readonly @string readˢ = "read"u8;
 // At end of file, Read returns 0, io.EOF.
 public static (nint n, error err) Read(this ж<File> Ꮡf, slice<byte> b) {
     nint n = default!;
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     {
         var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != default!) {
             return (0, errΔ1);
@@ -154,16 +145,18 @@ internal static readonly @string negativeOffsetˢ = "negative offset"u8;
 public static (nint n, error err) ReadAt(this ж<File> Ꮡf, slice<byte> b, int64 off) {
     nint n = default!;
     error err = default!;
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     {
         var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != default!) {
             return (0, errΔ1);
         }
     }
+
     if (off < 0) {
         return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readat"u8, Path: f.name, Err: errors.New(negativeOffsetˢ)))));
     }
+
     while (len(b) > 0) {
         var (m, e) = Ꮡf.pread(b, off);
         if (e != default!) {
@@ -183,8 +176,8 @@ internal static readonly @string writeˢ = "write"u8;
 // ReadFrom implements io.ReaderFrom.
 public static (int64 n, error err) ReadFrom(this ж<File> Ꮡf, Δio.Reader r) {
     int64 n = default!;
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     {
         var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != default!) {
             return (0, errΔ1);
@@ -226,8 +219,8 @@ internal static (int64, error) genericReadFrom(ж<File> Ꮡf, Δio.Reader r) {
 public static (nint n, error err) Write(this ж<File> Ꮡf, slice<byte> b) {
     nint n = default!;
     error err = default!;
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     {
         var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != default!) {
             return (0, errΔ1);
@@ -240,10 +233,13 @@ public static (nint n, error err) Write(this ж<File> Ꮡf, slice<byte> b) {
     if (n != len(b)) {
         err = Δio.ErrShortWrite;
     }
+
     epipecheck(ref (Ꮡf).DerefOrNull(), e);
+
     if (e != default!) {
         err = f.wrapErr(writeˢ, e);
     }
+
     return (n, err);
 }
 
@@ -257,8 +253,8 @@ internal static error errWriteAtInAppendMode = errors.New("os: invalid use of Wr
 public static (nint n, error err) WriteAt(this ж<File> Ꮡf, slice<byte> b, int64 off) {
     nint n = default!;
     error err = default!;
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     {
         var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != default!) {
             return (0, errΔ1);
@@ -267,9 +263,11 @@ public static (nint n, error err) WriteAt(this ж<File> Ꮡf, slice<byte> b, int
     if (f.appendMode) {
         return (0, errWriteAtInAppendMode);
     }
+
     if (off < 0) {
         return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "writeat"u8, Path: f.name, Err: errors.New(negativeOffsetˢ)))));
     }
+
     while (len(b) > 0) {
         var (m, e) = Ꮡf.pwrite(b, off);
         if (e != default!) {
@@ -286,8 +284,8 @@ public static (nint n, error err) WriteAt(this ж<File> Ꮡf, slice<byte> b, int
 // WriteTo implements io.WriterTo.
 public static (int64 n, error err) WriteTo(this ж<File> Ꮡf, Δio.Writer w) {
     int64 n = default!;
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     {
         var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != default!) {
             return (0, errΔ1);
@@ -362,17 +360,21 @@ public static (nint n, error err) WriteString(this ж<File> Ꮡf, @string s) {
 public static error Mkdir(@string name, FileMode perm) {
     @string longName = fixLongPath(name);
     var e = ignoringEINTR(() => syscall.Mkdir(longName, syscallMode(perm)));
+
     if (e != default!) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdir"u8, Path: name, Err: e)));
     }
+
     // mkdir(2) itself won't handle the sticky bit on *BSD and Solaris
     if (!supportsCreateWithStickyBit && (FileMode)(perm & ModeSticky) != 0) {
         e = setStickyBit(name);
+
         if (e != default!) {
             Remove(name);
             return e;
         }
     }
+
     return default!;
 }
 
@@ -447,6 +449,7 @@ public static (ж<File>, error) OpenFile(@string name, nint flag, FileMode perm)
         return (default!, err);
     }
     f.Value.appendMode = (nint)(flag & O_APPEND) != 0;
+
     return (f, default!);
 }
 
@@ -551,6 +554,7 @@ internal static readonly @string pathInXdgCacheHomeIsˢ = "path in $XDG_CACHE_HO
 // the path in $XDG_CACHE_HOME is relative, then it will return an error.
 public static (@string, error) UserCacheDir() {
     @string dir = default!;
+
     var exprᴛ1 = runtime.GOOS;
     if (exprᴛ1 == "windows"u8) {
         dir = Getenv(localAppDataˢ);
@@ -572,10 +576,9 @@ public static (@string, error) UserCacheDir() {
         }
         dir += "/lib/cache"u8;
     }
-    else { /* default: */
+    else { /* default: */ // Unix
         dir = Getenv(xdgCacheHomeˢ);
         if (dir == ""u8){
-            // Unix
             dir = Getenv(homeˢ);
             if (dir == ""u8) {
                 return ("", errors.New(neitherXdgCacheHomeNorˢ));
@@ -612,6 +615,7 @@ internal static readonly @string pathInXdgConfigHomeIsˢ = "path in $XDG_CONFIG_
 // the path in $XDG_CONFIG_HOME is relative, then it will return an error.
 public static (@string, error) UserConfigDir() {
     @string dir = default!;
+
     var exprᴛ1 = runtime.GOOS;
     if (exprᴛ1 == "windows"u8) {
         dir = Getenv(appDataˢ);
@@ -633,10 +637,9 @@ public static (@string, error) UserConfigDir() {
         }
         dir += "/lib"u8;
     }
-    else { /* default: */
+    else { /* default: */ // Unix
         dir = Getenv(xdgConfigHomeˢ);
         if (dir == ""u8){
-            // Unix
             dir = Getenv(homeˢ);
             if (dir == ""u8) {
                 return ("", errors.New(neitherXdgConfigHomeNorˢ));
@@ -676,7 +679,6 @@ public static (@string, error) UserHomeDir() {
     else if (exprᴛ1 == "plan9"u8) {
         (env, enverr) = (homeˢ2, homeˢ4);
     }
-
     {
         @string v = Getenv(env); if (v != ""u8) {
             return (v, default!);
@@ -690,7 +692,6 @@ public static (@string, error) UserHomeDir() {
     if (exprᴛ2 == "ios"u8) {
         return ("/", default!);
     }
-
     return ("", errors.New(enverr + " is not defined"u8));
 }
 
@@ -927,6 +928,7 @@ internal static (slice<byte>, error) readFileContents(ж<File> Ꮡf) {
         }
     }
     size++; // one byte for final read at EOF
+
     // If a file claims a small size, read at least 512 bytes.
     // In particular, files in Linux's /proc claim size 0 but
     // then do not work right if read in small pieces,
@@ -934,6 +936,7 @@ internal static (slice<byte>, error) readFileContents(ж<File> Ꮡf) {
     if (size < 512) {
         size = 512;
     }
+
     var data = new slice<byte>(0, size);
     while (ᐧ) {
         var (n, err) = Ꮡf.Read(data.slice(len(data), cap(data)));
@@ -944,6 +947,7 @@ internal static (slice<byte>, error) readFileContents(ж<File> Ꮡf) {
             }
             return (data, err);
         }
+
         if (len(data) >= cap(data)) {
             var d = append(data.slice(0, cap(data)), (byte)(0));
             data = d.slice(0, len(data));

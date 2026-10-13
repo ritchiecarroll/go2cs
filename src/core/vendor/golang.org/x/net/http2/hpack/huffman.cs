@@ -121,9 +121,13 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
             return ErrInvalidHuffman;
         }
     }
+
     return default!;
 }
 
+// incomparable is a zero-width, non-comparable type. Adding it to a struct
+// makes that struct also non-comparable, and generally doesn't add
+// any size (as long as it's first).
 partial struct incomparable /*[0]Action*/;
 
 partial struct node {
@@ -155,8 +159,10 @@ internal static void buildRootHuffmanNode() {
     lazyRootHuffmanNode = newInternalNode();
     // allocate a leaf node for each of the 256 symbols
     var leaves = Ꮡ(new array<node>(256));
+
     foreach (var (sym, code) in huffmanCodes.ΔRangeSnapshot()) {
         var codeLen = huffmanCodeLen[sym];
+
         var cur = lazyRootHuffmanNode;
         while (codeLen > 8) {
             codeLen -= 8;
@@ -169,6 +175,7 @@ internal static void buildRootHuffmanNode() {
         var shift = (uint8)(8 - codeLen);
         nint start = (nint)(uint8)(code.Lsh((uint64)(shift)));
         nint end = (nint)(((nint)1).Lsh((uint64)(shift)));
+
         leaves.Value[sym].sym = (byte)sym;
         leaves.Value[sym].codeLen = codeLen;
         for (nint i = start; i < start + end; i++) {
@@ -183,7 +190,6 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
     // This relies on the maximum huffman code length being 30 (See tables.go huffmanCodeLen array)
     // So if a uint64 buffer has less than 32 valid bits can always accommodate another huffmanCode.
     uint64 x = default!;             // buffer
-    
     nuint n = default!;           // number valid of bits present in x
     for (nint i = 0; i < builtin.len(s); i++) {
         var c = s[i];
@@ -223,7 +229,6 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
         var yΔ4 = (uint16)((x >> (int)(8)));
         return append(dst, (byte)((yΔ4 >> (int)(8))), (byte)yΔ4, (byte)x);
     }}
-
     //	case 4:
     var y = (uint32)x;
     return append(dst, (byte)((y >> (int)(24))), (byte)((y >> (int)(16))), (byte)((y >> (int)(8))), (byte)y);

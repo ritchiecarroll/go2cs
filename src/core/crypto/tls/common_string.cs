@@ -68,7 +68,6 @@ public static @string String(this SignatureScheme i) {
     default: {
         return "SignatureScheme("u8 + strconv.FormatInt((int64)(uint16)i, 10) + ")"u8;
     }}
-
 }
 
 internal static void _ᴛ2() {
@@ -103,7 +102,6 @@ public static @string String(this CurveID i) {
     default: {
         return "CurveID("u8 + strconv.FormatInt((int64)(uint16)i, 10) + ")"u8;
     }}
-
 }
 
 internal static void _ᴛ3() {

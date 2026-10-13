@@ -86,6 +86,9 @@ public static @string String(this Protocols p) {
     return "{"u8 + strings.Join(s, ","u8) + "}"u8;
 }
 
+// incomparable is a zero-width, non-comparable type. Adding it to a struct
+// makes that struct also non-comparable, and generally doesn't add
+// any size (as long as it's first).
 partial struct incomparable /*[0]Action*/;
 
 // maxInt64 is the effective "infinite" value for the Server and
@@ -195,6 +198,7 @@ public static (int64, error) WriteTo(this noBody _Δp0, io.Writer _Δp1) {
     return (0, default!);
 }
 
+// verify that an io.Copy from NoBody won't require a buffer:
 internal static io.WriterTo _ᴛ7ʗ = NoBody;
 internal static io.ReadCloser _ᴛ8ʗ = NoBody;
 

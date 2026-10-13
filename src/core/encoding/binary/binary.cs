@@ -289,11 +289,13 @@ public static error Read(io.Reader r, ByteOrder order, any data) {
                     return err;
                 }
             }
+
             if (decodeFast(bs, order, data)) {
                 return default!;
             }
         }
     }
+
     // Fallback to reflect-based decoding.
     var v = reflect.ValueOf(data);
     nint size = -1;
@@ -305,10 +307,10 @@ public static error Read(io.Reader r, ByteOrder order, any data) {
     else if (exprᴛ1 == reflect.ΔSlice) {
         size = dataSize(v);
     }
-
     if (size < 0) {
         return errors.New("binary.Read: invalid type "u8 + reflect.TypeOf(data).String());
     }
+
     var d = Ꮡ(new decoder(new coder(order: order, buf: new slice<byte>(size))));
     {
         var (_, err) = io.ReadFull(r, (~d).buf); if (err != default!) {
@@ -329,11 +331,13 @@ public static (nint, error) Decode(slice<byte> buf, ByteOrder order, any data) {
             if (len(buf) < n) {
                 return (0, errBufferTooSmall);
             }
+
             if (decodeFast(buf, order, data)) {
                 return (n, default!);
             }
         }
     }
+
     // Fallback to reflect-based decoding.
     var v = reflect.ValueOf(data);
     nint size = -1;
@@ -345,10 +349,10 @@ public static (nint, error) Decode(slice<byte> buf, ByteOrder order, any data) {
     else if (exprᴛ1 == reflect.ΔSlice) {
         size = dataSize(v);
     }
-
     if (size < 0) {
         return (0, errors.New("binary.Decode: invalid type "u8 + reflect.TypeOf(data).String()));
     }
+
     if (len(buf) < size) {
         return (0, errBufferTooSmall);
     }
@@ -404,8 +408,7 @@ internal static bool decodeFast(slice<byte> bs, ByteOrder order, any data) {
         break;
     }
     case slice<bool> dataΔ1: {
-        foreach (var (i, x) in bs) {
-            // Easier to loop over the input for 8-bit values.
+        foreach (var (i, x) in bs) { // Easier to loop over the input for 8-bit values.
             dataΔ1[i] = x != 0;
         }
         break;
@@ -491,16 +494,19 @@ public static error Write(io.Writer w, ByteOrder order, any data) {
                 bs = new slice<byte>(n);
                 encodeFast(bs, order, data);
             }
+
             var (_, errΔ1) = w.Write(bs);
             return errΔ1;
         }
     }
+
     // Fallback to reflect-based encoding.
     var v = reflect.Indirect(reflect.ValueOf(data));
     nint size = dataSize(v);
     if (size < 0) {
         return errors.New("binary.Write: some values are not fixed-sized in type "u8 + reflect.TypeOf(data).String());
     }
+
     var buf = new slice<byte>(size);
     var e = Ꮡ(new encoder(new coder(order: order, buf: buf)));
     e.value(v);
@@ -519,16 +525,19 @@ public static (nint, error) Encode(slice<byte> buf, ByteOrder order, any data) {
             if (len(buf) < n) {
                 return (0, errBufferTooSmall);
             }
+
             encodeFast(buf, order, data);
             return (n, default!);
         }
     }
+
     // Fallback to reflect-based encoding.
     var v = reflect.Indirect(reflect.ValueOf(data));
     nint size = dataSize(v);
     if (size < 0) {
         return (0, errors.New("binary.Encode: some values are not fixed-sized in type "u8 + reflect.TypeOf(data).String()));
     }
+
     if (len(buf) < size) {
         return (0, errBufferTooSmall);
     }
@@ -550,12 +559,14 @@ public static (slice<byte>, error) Append(slice<byte> buf, ByteOrder order, any 
             return (bufΔ1, default!);
         }
     }
+
     // Fallback to reflect-based encoding.
     var v = reflect.Indirect(reflect.ValueOf(data));
     nint size = dataSize(v);
     if (size < 0) {
         return (default!, errors.New("binary.Append: some values are not fixed-sized in type "u8 + reflect.TypeOf(data).String()));
     }
+
     (buf, var pos) = ensure(buf, size);
     var e = Ꮡ(new encoder(new coder(order: order, buf: pos)));
     e.value(v);
@@ -880,6 +891,7 @@ internal static nint dataSize(reflectꓸValue v) {
                 return sizeΔ2._<nint>() * v.Len();
             }
         }
+
         nint size = @sizeof(t);
         if (size >= 0) {
             if (t.Kind() == reflect.Struct) {
@@ -1112,7 +1124,6 @@ internal static void value(this ref decoder d, reflectꓸValue v) {
             math.Float64frombits(d.uint64()),
             math.Float64frombits(d.uint64())));
     }
-
 }
 
 internal static void value(this ref encoder e, reflectꓸValue v) {
@@ -1186,7 +1197,6 @@ internal static void value(this ref encoder e, reflectꓸValue v) {
         e.uint64(math.Float64bits(real(x)));
         e.uint64(math.Float64bits(imag(x)));
     }
-
 }
 
 internal static void skip(this ref decoder d, reflectꓸValue v) {

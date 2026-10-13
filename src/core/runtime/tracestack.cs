@@ -14,7 +14,15 @@ using atomic = @internal.runtime.atomic_package;
 
 partial class runtime_package {
 
+// Maximum number of PCs in a single stack trace.
+// Since events contain only stack id rather than whole stack trace,
+// we can allow quite large values here.
 internal static UntypedInt traceStackSize => 128;
+
+// logicalStackSentinel is a sentinel value at pcBuf[0] signifying that
+// pcBuf[1:] holds a logical stack requiring no further processing. Any other
+// value at pcBuf[0] represents a skip value to apply to the physical stack in
+// pcBuf[1:] after inline expansion.
 internal static uintptr logicalStackSentinel => /* ^uintptr(0) */ unchecked((uintptr)18446744073709551615);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -34,12 +42,14 @@ internal static partial uint64 traceStack(nint skip, ж<g> Ꮡgp, uintptr gen) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     array<uintptr> pcBuf = new(128); /* traceStackSize */
+
     // Figure out gp and mp for the backtrace.
     ж<m> mp = default!;
     if (Ꮡgp == nil) {
         mp = getg().Value.m;
         Ꮡgp = mp.Value.curg; gp = ref Ꮡgp.DerefOrNull();
     }
+
     // Double-check that we own the stack we're about to trace.
     if (debug.traceCheckStackOwnership != 0 && Ꮡgp != nil) {
         var status = readgstatus(Ꮡgp);
@@ -63,9 +73,9 @@ internal static partial uint64 traceStack(nint skip, ж<g> Ꮡgp, uintptr gen) {
                 print((@string)"runtime: gp="u8, @unsafe.Pointer.FromPinnedBox(Ꮡgp), (@string)" gp.goid="u8, gp.goid, (@string)" status="u8, gStatusStrings[status], (@string)"\n"u8);
                 @throw(attemptedToTraceStackOfAˢ);
             }
-
         }
     }
+
     if (Ꮡgp != nil && mp == nil) {
         // We're getting the backtrace for a G that's not currently executing.
         // It may still have an M, if it's locked to some M.
@@ -163,13 +173,16 @@ internal static traceWriter dumpStacksRec(ж<traceMapNode> Ꮡnode, traceWriter 
     ref var node = ref Ꮡnode.DerefOrNull();
 
     var Δstack = @unsafe.Slice(Ꮡ(node.data, 0).Reinterpret<byte, uintptr>(), (uintptr)len(node.data) / /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8);
+
     // N.B. This might allocate, but that's OK because we're not writing to the M's buffer,
     // but one we're about to create (with ensure).
     nint n = fpunwindExpand(stackBuf, Δstack);
     var frames = makeTraceFrames(w.gen, stackBuf.slice(0, n));
+
     // The maximum number of bytes required to hold the encoded stack, given that
     // it contains N frames.
     nint maxBytes = 1 + (2 + 4 * len(frames)) * (nint)traceBytesPerNumber;
+
     // Estimate the size of this record. This
     // bound is pretty loose, but avoids counting
     // lots of varint sizes.
@@ -180,6 +193,7 @@ internal static traceWriter dumpStacksRec(ж<traceMapNode> Ꮡnode, traceWriter 
     if (flushed) {
         w.@byte((byte)traceEvStacks);
     }
+
     // Emit stack event.
     w.@byte((byte)traceEvStack);
     w.varint((uint64)node.id);
@@ -190,6 +204,7 @@ internal static traceWriter dumpStacksRec(ж<traceMapNode> Ꮡnode, traceWriter 
         w.varint(frame.fileID);
         w.varint(frame.line);
     }
+
     // Recursively walk all child nodes.
     foreach (var (i, _) in node.children) {
         @unsafe.Pointer child = (uintptr)Ꮡnode.at(traceMapNode.Ꮡchildren, i).Load();
@@ -226,6 +241,7 @@ partial struct traceFrame {
 internal static traceFrame makeTraceFrame(uintptr gen, Frame f) {
     traceFrame frame = default!;
     frame.PC = f.PC;
+
     @string fn = f.Function;
     const nint maxLen = /* 1 << 10 */ 1024;
     if (len(fn) > maxLen) {
@@ -286,9 +302,12 @@ internal static nint fpunwindExpand(slice<uintptr> dst, slice<uintptr> pcBuf) {
         // applied, just return it without the sentinel value in pcBuf[0].
         return copy(dst, pcBuf[1..]);
     }
+
     nint n = default!;
     abi.FuncID lastFuncID = abi.FuncIDNormal;
     uintptr skip = pcBuf[0];
+    // skipOrAdd skips or appends retPC to newPCBuf and returns true if more
+    // pcs can be added.
 
     var dstʗ1 = dst;
     Func<uintptr, bool> skipOrAdd = (uintptr retPC) => {
@@ -301,6 +320,7 @@ internal static nint fpunwindExpand(slice<uintptr> dst, slice<uintptr> pcBuf) {
         }
         return n < len(dstʗ1);
     };
+
 outer:
     foreach (var (_, retPC) in pcBuf[1..]) {
         var callPC = retPC - 1;
@@ -315,14 +335,15 @@ outer:
             }
             continue;
         }
+
         var (u, uf) = newInlineUnwinder(fi, callPC);
         for (; uf.valid(); uf = u.next(uf)) {
             var sf = u.srcFunc(uf);
             if (sf.funcID == abi.FuncIDWrapper && elideWrapperCalling(lastFuncID)){
+                // ignore wrappers
             } else 
             {
                 var more = skipOrAdd(uf.pc + 1); if (!more) {
-                    // ignore wrappers
                     goto break_outer;
                 }
             }

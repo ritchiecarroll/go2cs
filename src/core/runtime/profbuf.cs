@@ -100,8 +100,10 @@ partial struct profBuf {
     internal note wait;
 }
 
+// A profAtomic is the atomically-accessed word holding a profIndex.
 partial struct profAtomic /*num:uint64*/;
 
+// A profIndex is the packet tag and data counts and flags bits, described above.
 partial struct profIndex /*num:uint64*/;
 
 internal static profIndex profReaderSleeping => /* 1 << 32 */ unchecked((profIndex)4294967296);   // reader is sleeping and must be woken up
@@ -175,10 +177,9 @@ internal static (uint32 count, uint64 time) takeOverflow(this ж<profBuf> Ꮡb) 
 // incrementOverflow records a single overflow at time now.
 // It is racing against a possible takeOverflow in the reader.
 internal static void incrementOverflow(this ж<profBuf> Ꮡb, int64 now) {
-    ref var b = ref Ꮡb.DerefOrNull();
-
     while (ᐧ) {
         var overflow = Ꮡb.of(profBuf.Ꮡoverflow).Load();
+
         // Once we see b.overflow reach 0, it's stable: no one else is changing it underfoot.
         // We need to set overflowTime if we're incrementing b.overflow from 0.
         if ((uint32)overflow == 0) {
@@ -211,6 +212,7 @@ internal static ж<profBuf> newProfBuf(nint hdrsize, nint bufwords, nint tags) {
             bufwords = min;
         }
     }
+
     // Buffer sizes must be power of two, so that we don't have to
     // worry about uint32 wraparound changing the effective position
     // within the buffers. We store 30 bits of count; limiting to 28
@@ -225,6 +227,7 @@ internal static ж<profBuf> newProfBuf(nint hdrsize, nint bufwords, nint tags) {
     for (i = 1; i < tags; i <<= (int)(1)) {
     }
     tags = i;
+
     var b = @new<profBuf>();
     b.Value.hdrsize = (uintptr)hdrsize;
     b.Value.data = new slice<uint64>(bufwords);
@@ -240,10 +243,12 @@ internal static bool canWriteRecord(this ж<profBuf> Ꮡb, nint nstk) {
 
     var br = Ꮡb.of(profBuf.Ꮡr).load();
     var bw = Ꮡb.of(profBuf.Ꮡw).load();
+
     // room for tag?
     if (countSub(br.tagCount(), bw.tagCount()) + len(b.tags) < 1) {
         return false;
     }
+
     // room for data?
     nint nd = countSub(br.dataCount(), bw.dataCount()) + len(b.data);
     nint want = 2 + (nint)b.hdrsize + nstk;
@@ -266,12 +271,15 @@ internal static bool canWriteTwoRecords(this ж<profBuf> Ꮡb, nint nstk1, nint 
 
     var br = Ꮡb.of(profBuf.Ꮡr).load();
     var bw = Ꮡb.of(profBuf.Ꮡw).load();
+
     // room for tag?
     if (countSub(br.tagCount(), bw.tagCount()) + len(b.tags) < 2) {
         return false;
     }
+
     // room for data?
     nint nd = countSub(br.dataCount(), bw.dataCount()) + len(b.data);
+
     // first record
     nint want = 2 + (nint)b.hdrsize + nstk1;
     nint i = (nint)(bw.dataCount() % (uint32)len(b.data));
@@ -283,6 +291,7 @@ internal static bool canWriteTwoRecords(this ж<profBuf> Ꮡb, nint nstk1, nint 
     }
     i += want;
     nd -= want;
+
     // second record
     want = 2 + (nint)b.hdrsize + nstk2;
     if (i + want > len(b.data)) {
@@ -326,6 +335,7 @@ internal static void wakeupExtra(this ж<profBuf> Ꮡb) {
     }
 }
 
+// profBufReadMode specifies whether to block when no data is available to read.
 public partial struct profBufReadMode /*num:nint*/;
 
 internal static profBufReadMode profBufBlocking => /* iota */ 0;
@@ -340,12 +350,14 @@ internal static readonly @string runtimeMalformedProfBufˢ2 = "runtime: malforme
 internal static (slice<uint64> data, slice<@unsafe.Pointer> tags, bool eof) read(this ж<profBuf> Ꮡb, profBufReadMode mode) {
     slice<uint64> data = default!;
     slice<@unsafe.Pointer> tags = default!;
-
     ref var b = ref Ꮡb.DerefOrNull();
+
     if (Ꮡb == nil) {
         return (default!, default!, true);
     }
+
     var br = b.rNext;
+
     // Commit previous read, returning that part of the ring to the writer.
     // First clear tags that have now been read, both to avoid holding
     // up the memory they point at for longer than necessary
@@ -365,6 +377,7 @@ internal static (slice<uint64> data, slice<@unsafe.Pointer> tags, bool eof) read
         }
         Ꮡb.of(profBuf.Ꮡr).store(br);
     }
+
 Read:
     var bw = Ꮡb.of(profBuf.Ꮡw).load();
     nint numData = countSub(bw.dataCount(), br.dataCount());
@@ -397,6 +410,7 @@ Read:
             Ꮡb.of(profBuf.Ꮡw).cas(bw, (profIndex)(bw & ~profWriteExtra));
             goto Read;
         }
+
         // Nothing to read right now.
         // Return or sleep according to mode.
         if (mode == profBufNonBlocking) {
@@ -426,6 +440,7 @@ Read:
             data = data.slice(0, numData);
         }
     }
+
     nint ntag = countSub(bw.tagCount(), br.tagCount());
     if (ntag == 0) {
         @throw(runtimeMalformedProfBufˢ);
@@ -434,6 +449,7 @@ Read:
     if (len(tags) > ntag) {
         tags = tags.slice(0, ntag);
     }
+
     // Count out whole data records until either data or tags is done.
     // They are always in sync in the buffer, but due to an end-of-slice
     // wraparound we might need to stop early and return the rest
@@ -447,8 +463,10 @@ Read:
         di += (nint)data[di];
         ti++;
     }
+
     // Remember how much we returned, to commit read on next call.
     b.rNext = br.addCountsAndClearFlags(skip + di, ti);
+
     if (raceenabled) {
         // Match racereleasemerge in runtime_setProfLabel,
         // so that the setting of the labels in runtime_setProfLabel
@@ -461,6 +479,7 @@ Read:
         // atomics to read those queue indices.
         raceacquire(@unsafe.Pointer.FromBox(ᏑlabelSync));
     }
+
     return (data.slice(0, di), tags.slice(0, ti), false);
 }
 

@@ -48,6 +48,7 @@ partial interface Load {
     slice<byte> Raw();
 }
 
+// A LoadBytes is the uninterpreted bytes of a Mach-O load command.
 partial struct LoadBytes /*[]byte*/;
 
 public static slice<byte> Raw(this LoadBytes b) {
@@ -233,6 +234,7 @@ public static error Close(this ref File f) {
 public static (ж<File>, error) NewFile(io.ReaderAt r) {
     var f = @new<File>();
     var sr = io.NewSectionReader(r, 0, 9223372036854775807L);
+
     // Read and decode Mach magic to determine byte order, size.
     // Magic32 and Magic64 differ only in the bottom bit.
     array<byte> ident = new(4);
@@ -262,6 +264,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             return (default!, errΔ2);
         }
     }
+
     // Then load commands.
     ref var offset = ref heap<int64>(out var Ꮡoffset);
     offset = (int64)fileHeaderSize32;
@@ -489,7 +492,6 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         else { /* default: */
             f.Value.Loads = append((~f).Loads, (Load)(((LoadBytes)cmddat)));
         }
-
         if (s != nil) {
             if ((int64)(~s).Offset < 0) {
                 return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, "invalid section offset"u8, (~s).Offset))));
@@ -568,24 +570,28 @@ internal static error pushSection(this ref File f, ж<ΔSection> Ꮡsh, io.Reade
     f.Sections = append(f.Sections, Ꮡsh);
     sh.sr = io.NewSectionReader(r, (int64)sh.Offset, (int64)sh.Size);
     sh.ReaderAt = new io.SectionReaderжReaderAt(sh.sr);
+
     if (sh.Nreloc > 0) {
         var (reldat, err) = saferio.ReadDataAt(r, (uint64)sh.Nreloc * 8, (int64)sh.Reloff);
         if (err != default!) {
             return err;
         }
         var b = bytes.NewReader(reldat);
+
         var bo = f.ByteOrder;
+
         sh.Relocs = new slice<Reloc>((nint)(sh.Nreloc));
         foreach (var (i, _) in sh.Relocs) {
             var rel = Ꮡ(sh.Relocs, i);
+
             ref var ri = ref heap(new relocInfo(), out var Ꮡri);
             {
                 var errΔ1 = binary.Read(new bytes_ReaderжReader(b), bo, Ꮡri); if (errΔ1 != default!) {
                     return errΔ1;
                 }
             }
-            if ((uint32)(ri.Addr & (((uint32)1 << (int)(31)))) != 0){
-                // scattered
+
+            if ((uint32)(ri.Addr & (((uint32)1 << (int)(31)))) != 0){ // scattered
                 rel.Value.Addr = (uint32)(ri.Addr & ((1 << (int)(24)) - 1));
                 rel.Value.Type = (uint8)((uint32)(((ri.Addr >> (int)(24))) & ((1 << (int)(4)) - 1)));
                 rel.Value.Len = (uint8)((uint32)(((ri.Addr >> (int)(28))) & ((1 << (int)(2)) - 1)));
@@ -613,10 +619,10 @@ internal static error pushSection(this ref File f, ж<ΔSection> Ꮡsh, io.Reade
                 else { /* default: */
                     throw panic("unreachable");
                 }
-
             }
         }
     }
+
     return default!;
 }
 
@@ -677,7 +683,6 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
         default: {
             return ""u8;
         }}
-
         // Mach-O executables truncate section names to 16 characters, mangling some DWARF sections.
         // As of DWARFv5 these are the only problematic section names (see DWARFv5 Appendix G).
         foreach (var (_, longname) in new @string[]{
@@ -701,6 +706,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
         if (errΔ1 != default! && (uint64)len(b) < (~s).Size) {
             return (default!, errΔ1);
         }
+
         if (len(b) >= 12 && ((sstring)(b[..4])) == "ZLIB"u8) {
             var dlen = binary.BigEndian.Uint64(b[4..12]);
             var dbuf = new slice<byte>((nint)(dlen));
@@ -722,6 +728,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
         }
         return (b, default!);
     }
+
     // There are many other DWARF sections, but these
     // are the ones the debug/dwarf package uses.
     // Don't bother loading others.
@@ -742,10 +749,12 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
         }
         dat[suffix] = b;
     }
+
     var (d, err) = dwarf.New(dat[abbrevˢ], default!, default!, dat[infoˢ], dat[lineˢ], default!, dat[rangesˢ], dat[strˢ]);
     if (err != default!) {
         return (default!, err);
     }
+
     // Look for DWARF4 .debug_types sections and DWARF5 sections.
     foreach (var (i, s) in f.Sections) {
         @string suffix = dwarfSuffix(s);
@@ -758,10 +767,12 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
                 continue;
             }
         }
+
         var (b, errΔ6) = sectionData(s);
         if (errΔ6 != default!) {
             return (default!, errΔ6);
         }
+
         if (suffix == "types"u8){
             errΔ6 = d.AddTypes(fmt.Sprintf("types-%d"u8, i), b);
         } else {
@@ -771,6 +782,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
             return (default!, errΔ6);
         }
     }
+
     return (d, default!);
 }
 
@@ -781,6 +793,7 @@ public static (slice<@string>, error) ImportedSymbols(this ref File f) {
     if (f.Dysymtab == nil || f.Symtab == nil) {
         return (default!, new FormatErrorжerror(Ꮡ(new FormatError(0, "missing symbol table"u8, default!))));
     }
+
     var st = f.Symtab;
     var dt = f.Dysymtab;
     slice<@string> all = default!;

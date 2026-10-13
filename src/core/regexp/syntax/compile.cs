@@ -50,6 +50,7 @@ internal static patchList append(this patchList l1, ж<Prog> Ꮡp, patchList l2)
     if (l2.head == 0) {
         return l1;
     }
+
     var i = Ꮡ(p.Inst, (l1.tail >> (int)(1)));
     if ((uint32)(l1.tail & 1) == 0){
         i.Value.Out = l2.head;
@@ -179,7 +180,6 @@ internal static frag compile(this ref compiler c, ж<Regexp> Ꮡre) {
         }
         return f;
     }
-
     throw panic("regexp: unhandled case in compile");
 }
 
@@ -204,6 +204,7 @@ internal static frag cap(this ref compiler c, uint32 arg) {
     var f = c.inst(InstCapture);
     f.@out = makePatchList((f.i << (int)(1)));
     (~c.p).Inst[f.i].Arg = arg;
+
     if ((~c.p).NumCap < (nint)arg + 1) {
         c.p.Value.NumCap = (nint)arg + 1;
     }
@@ -215,7 +216,9 @@ internal static frag cat(this ref compiler c, frag f1, frag f2) {
     if (f1.i == 0 || f2.i == 0) {
         return new frag(nil);
     }
+
     // TODO: elide nop
+
     f1.@out.patch(c.p, f2.i);
     return new frag(f1.i, f2.@out, f1.nullable && f2.nullable);
 }
@@ -228,6 +231,7 @@ internal static frag alt(this ref compiler c, frag f1, frag f2) {
     if (f2.i == 0) {
         return f1;
     }
+
     var f = c.inst(InstAlt);
     var i = Ꮡ((~c.p).Inst, f.i);
     i.Value.Out = f1.i;
@@ -302,6 +306,7 @@ internal static frag rune(this ref compiler c, slice<rune> r, Flags flags) {
     }
     i.Value.Arg = (uint32)(uint16)flags;
     f.@out = makePatchList((f.i << (int)(1)));
+
     // Special cases for exec machine.
     switch (ᐧ) {
     case {} when (Flags)(flags & FoldCase) == 0 && (len(r) == 1 || len(r) == 2 && r[0] == r[1]): {

@@ -54,9 +54,11 @@ public static (slice<byte> ivKey, slice<byte> key, slice<byte> macKey) Keys<Hash
         }
         return keyΔ1.slice(0, length);
     }
+
     ivKey = generateKeyMaterial(d.ivTag, ivKeyLen);
     key = generateKeyMaterial(d.keyTag, keyLen);
     macKey = generateKeyMaterial(d.macKeyTag, macKeyLen);
+
     return (ivKey, key, macKey);
 }
 

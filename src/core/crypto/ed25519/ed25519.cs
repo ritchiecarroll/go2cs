@@ -29,11 +29,16 @@ using go.crypto.@internal.fips140;
 
 partial class ed25519_package {
 
+// PublicKeySize is the size, in bytes, of public keys as used in this package.
 public static UntypedInt PublicKeySize => 32;
+// PrivateKeySize is the size, in bytes, of private keys as used in this package.
 public static UntypedInt PrivateKeySize => 64;
+// SignatureSize is the size, in bytes, of signatures generated and verified by this package.
 public static UntypedInt SignatureSize => 64;
+// SeedSize is the size, in bytes, of private key seeds. These are the private key representations used by RFC 8032.
 public static UntypedInt SeedSize => 32;
 
+// PublicKey is the type of Ed25519 public keys.
 partial struct PublicKey /*[]byte*/;
 
 // Any methods implemented on PublicKey might need to also be implemented on
@@ -48,6 +53,7 @@ public static bool Equal(this PublicKey pub, cryptoꓸPublicKey x) {
     return subtle.ConstantTimeCompare(pub, xx) == 1;
 }
 
+// PrivateKey is the type of Ed25519 private keys. It implements [crypto.Signer].
 partial struct PrivateKey /*[]byte*/;
 
 // Public returns the [PublicKey] corresponding to priv.
@@ -104,25 +110,21 @@ public static (slice<byte> signature, error err) Sign(this PrivateKey priv, io.R
         }
     }
     switch (ᐧ) {
-    case {} when hash == crypto.SHA512: {
-        return ed25519.SignPH(k, // Ed25519ph
- message, context);
+    case {} when hash == crypto.SHA512: { // Ed25519ph
+        return ed25519.SignPH(k, message, context);
     }
-    case {} when hash == ((crypto.Hash)0) && context != ""u8: {
+    case {} when hash == ((crypto.Hash)0) && context != ""u8: { // Ed25519ctx
         if (fips140only.Enabled) {
-            // Ed25519ctx
             return (default!, errors.New(cryptoEd25519UseOfˢ));
         }
         return ed25519.SignCtx(k, message, context);
     }
-    case {} when hash == ((crypto.Hash)0): {
-        return (ed25519.Sign(k, // Ed25519
- message), default!);
+    case {} when hash == ((crypto.Hash)0): { // Ed25519
+        return (ed25519.Sign(k, message), default!);
     }
     default: {
         return (default!, errors.New(ed25519ExpectedOptsˢ));
     }}
-
 }
 
 // Options can be used with [PrivateKey.Sign] or [VerifyWithOptions]
@@ -149,12 +151,14 @@ public static (PublicKey, PrivateKey, error) GenerateKey(io.Reader rand) {
     if (rand == default!) {
         rand = cryptorand.Reader;
     }
+
     var seed = new slice<byte>(SeedSize);
     {
         var (_, err) = io.ReadFull(rand, seed); if (err != default!) {
             return (default!, default!, err);
         }
     }
+
     var privateKey = NewKeyFromSeed(seed);
     var publicKey = privateKey.Public()._<PublicKey>();
     return (publicKey, privateKey, default!);
@@ -238,25 +242,21 @@ public static error VerifyWithOptions(PublicKey publicKey, slice<byte> message, 
         return err;
     }
     switch (ᐧ) {
-    case {} when opts.Hash == crypto.SHA512: {
-        return ed25519.VerifyPH(k, // Ed25519ph
- message, sig, opts.Context);
+    case {} when opts.Hash == crypto.SHA512: { // Ed25519ph
+        return ed25519.VerifyPH(k, message, sig, opts.Context);
     }
-    case {} when opts.Hash == ((crypto.Hash)0) && opts.Context != ""u8: {
+    case {} when opts.Hash == ((crypto.Hash)0) && opts.Context != ""u8: { // Ed25519ctx
         if (fips140only.Enabled) {
-            // Ed25519ctx
             return errors.New(cryptoEd25519UseOfˢ);
         }
         return ed25519.VerifyCtx(k, message, sig, opts.Context);
     }
-    case {} when opts.Hash == ((crypto.Hash)0): {
-        return ed25519.Verify(k, // Ed25519
- message, sig);
+    case {} when opts.Hash == ((crypto.Hash)0): { // Ed25519
+        return ed25519.Verify(k, message, sig);
     }
     default: {
         return errors.New(ed25519ExpectedOptsHashˢ);
     }}
-
 }
 
 } // end ed25519_package

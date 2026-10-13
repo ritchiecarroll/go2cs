@@ -35,14 +35,15 @@ public static (slice<@string> env, error err) Default(ж<syscall.SysProcAttr> �
             (env, err) = (default!, err); goto ᒐdone;
         }
         defer(Δwindows.DestroyEnvironmentBlock, blockp, ref ᒐ);
+
         uintptr size = /* unsafe.Sizeof(*blockp) */ 2;
-        while (blockp.Value != 0) {
-            // environment block ends with empty string
+        while (blockp.Value != 0) { // environment block ends with empty string
             // find NUL terminator
             @unsafe.Pointer end = (uintptr)@unsafe.Add(@unsafe.Pointer.FromPinnedBox(blockp), size);
             while (~(ж<uint16>)(uintptr)(end) != 0) {
                 end = (uintptr)@unsafe.Add(end, size);
             }
+
             var entry = @unsafe.Slice(blockp, ((uintptr)end - (uintptr)blockp) / 2);
             env = append(env, syscall.UTF16ToString(entry));
             blockp = (ж<uint16>)(uintptr)(@unsafe.Add(end, size));

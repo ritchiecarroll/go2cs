@@ -105,8 +105,8 @@ internal static @string sprintf(ж<token.FileSet> Ꮡfset, Func<ж<Package>, @st
 // check may be nil.
 internal static @string sprintf(this ж<Checker> Ꮡcheck, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
-
     ref var check = ref Ꮡcheck.DerefOrNull();
+
     ж<token.FileSet> fset = default!;
     Func<ж<Package>, @string> qf = default!;
     if (Ꮡcheck != nil) {
@@ -118,8 +118,8 @@ internal static @string sprintf(this ж<Checker> Ꮡcheck, @string format, param
 
 internal static void trace(this ж<Checker> Ꮡcheck, tokenꓸPos pos, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
-
     ref var check = ref Ꮡcheck.DerefOrNull();
+
     fmt.Printf("%s:\t%s%s\n"u8,
         check.fset.Position(pos),
         strings.Repeat(".  "u8, check.indent),
@@ -129,8 +129,8 @@ internal static void trace(this ж<Checker> Ꮡcheck, tokenꓸPos pos, @string f
 // dump is only needed for debugging
 internal static void dump(this ж<Checker> Ꮡcheck, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
-
     ref var check = ref Ꮡcheck.DerefOrNull();
+
     fmt.Println(sprintf(check.fset, new Func<ж<Package>, @string>(Ꮡcheck.qualifier), true, format, args.ꓸꓸꓸ));
 }
 
@@ -162,12 +162,14 @@ internal static void markImports(this ref Checker check, ж<Package> Ꮡpkg) {
         return;
     }
     check.seenPkgMap[Ꮡpkg] = true;
+
     var (forName, ok) = check.pkgPathMap[pkg.name, ꟷ];
     if (!ok) {
         forName = new map<@string, bool>();
         check.pkgPathMap[pkg.name] = forName;
     }
     forName[pkg.path] = true;
+
     foreach (var (_, imp) in pkg.imports) {
         check.markImports(imp);
     }
@@ -178,8 +180,7 @@ internal static @string stripAnnotations(@string s) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     foreach (var (_, r) in s) {
         // strip #'s and subscript digits
-        if (r < (rune)'₀' || (rune)'₀' + 10 <= r) {
-            // '₀' == U+2080
+        if (r < (rune)'₀' || (rune)'₀' + 10 <= r) { // '₀' == U+2080
             Ꮡbuf.WriteRune(r);
         }
     }

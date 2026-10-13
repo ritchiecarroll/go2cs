@@ -51,7 +51,7 @@ using static go.crypto.aes_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/aes/aes.go", "aes.cs", "AB44gq7CgpSktIKU")]
+[assembly: go.GoPositionMap("crypto/aes/aes.go", "aes.cs", "AB44gq7CgpSkpIKU")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

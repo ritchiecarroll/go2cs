@@ -33,8 +33,8 @@ public static error SetsockoptInet4Addr(this ж<FD> Ꮡfd, nint level, nint name
     bool ᒐd1 = false;
     try {
         arg = arg.Clone();
-
         ref var fd = ref Ꮡfd.DerefOrNull();
+
         {
             var err = Ꮡfd.incref(); if (err != default!) {
                 return err;

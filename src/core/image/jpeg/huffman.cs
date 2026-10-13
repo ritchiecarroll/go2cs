@@ -116,6 +116,7 @@ internal static error processDHT(this ref decoder d, nint n) {
             return ((FormatError)(@string)badThValueˢ);
         }
         var h = Ꮡ(d.huff[tc], th);
+
         // Read nCodes and h.vals (and derive h.nCodes).
         // nCodes[i] is the number of codes with code length i.
         // h.nCodes is the total number of codes.
@@ -140,6 +141,7 @@ internal static error processDHT(this ref decoder d, nint n) {
                 return err;
             }
         }
+
         // Derive the look-up table.
         clear((~h).lut[..]);
         uint32 x = default!;
@@ -161,6 +163,7 @@ internal static error processDHT(this ref decoder d, nint n) {
                 x++;
             }
         }
+
         // Derive minCodes, maxCodes, and valsIndices.
         int32 c = default!;
         int32 index = default!;
@@ -194,6 +197,7 @@ internal static (uint8, error) decodeHuffman(this ref decoder d, ж<huffman> Ꮡ
     if (h.nCodes == 0) {
         return (0, ((FormatError)(@string)uninitializedHuffmanˢ));
     }
+
     if (d.bits.n < 8) {
         {
             var err = d.ensureNBits(8); if (err != default!) {
@@ -218,6 +222,7 @@ internal static (uint8, error) decodeHuffman(this ref decoder d, ж<huffman> Ꮡ
             return ((uint8)((v >> (int)(8))), default!);
         }
     }
+
 slowPath:
     for ((nint i, var code) = (0, (int32)0); i < maxCodeLength; i++) {
         if (d.bits.n == 0) {

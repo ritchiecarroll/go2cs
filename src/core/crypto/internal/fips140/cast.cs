@@ -46,6 +46,7 @@ public static void CAST(@string name, Func<error> f) {
     if (!Enabled) {
         return;
     }
+
     var err = f();
     if (name == failfipscast) {
         err = errors.New(simulatedCastFailureˢ);
@@ -81,6 +82,7 @@ public static void PCT(@string name, Func<error> f) {
     if (!Enabled) {
         return;
     }
+
     var err = f();
     if (name == failfipscast) {
         err = errors.New(simulatedPctFailureˢ);

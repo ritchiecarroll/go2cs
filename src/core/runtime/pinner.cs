@@ -88,13 +88,17 @@ internal static bool setPinned(@unsafe.Pointer ptr, bool pin) {
         // nothing to do, silently ignore it.
         return false;
     }
+
     // ensure that the span is swept, b/c sweeping accesses the specials list
     // w/o locks.
     var mp = acquirem();
     span.ensureSwept();
     KeepAlive(@unsafe.Pointer.OrTypedNil(ptr)); // make sure ptr is still alive after span is swept
+
     var objIndex = span.objIndex((uintptr)ptr);
+
     @lock(span.of(mspan.Ꮡspeciallock)); // guard against concurrent calls of setPinned on same span
+
     var pinnerBits = span.getPinnerBits();
     if (pinnerBits == nil) {
         pinnerBits = span.newPinnerBits();
@@ -184,6 +188,7 @@ internal static void set(this ref pinState v, bool val, bool multipin) {
     }
 }
 
+// pinnerBits is the same type as gcBits but has different methods.
 partial struct pinnerBits /*gcBits*/;
 
 // ofObject returns the pinState of the n'th object.
@@ -228,8 +233,10 @@ internal static void refreshPinnerBits(this ж<mspan> Ꮡs) {
     if (Δp == nil) {
         return;
     }
+
     var hasPins = false;
     var bytes = alignUp(s.pinnerBitSize(), 8);
+
     // Iterate over each 8-byte chunk and check for pins. Note that
     // newPinnerBits guarantees that pinnerBits will be 8-byte aligned, so we
     // don't have to worry about edge cases, irrelevant bits will simply be
@@ -240,6 +247,7 @@ internal static void refreshPinnerBits(this ж<mspan> Ꮡs) {
             break;
         }
     }
+
     if (hasPins){
         var newPinnerBits = s.newPinnerBits();
         memmove(@unsafe.Pointer.FromPinnedBox(newPinnerBits.of(pinnerBits.Ꮡx)), @unsafe.Pointer.FromPinnedBox(Δp.of(pinnerBits.Ꮡx)), bytes);

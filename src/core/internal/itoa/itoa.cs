@@ -16,8 +16,7 @@ public static @string Itoa(nint val) {
 
 // Uitoa converts val to a decimal string.
 public static @string Uitoa(nuint val) {
-    if (val == 0) {
-        // avoid string allocation
+    if (val == 0) { // avoid string allocation
         return "0"u8;
     }
     array<byte> buf = new(20);               // big enough for 64bit value base 10
@@ -37,8 +36,7 @@ internal static readonly @string hex = "0123456789abcdef"u8;
 
 // Uitox converts val (a uint) to a hexadecimal string.
 public static @string Uitox(nuint val) {
-    if (val == 0) {
-        // avoid string allocation
+    if (val == 0) { // avoid string allocation
         return "0x0"u8;
     }
     array<byte> buf = new(20);               // big enough for 64bit value base 16 + 0x

@@ -65,24 +65,17 @@ public static bool HasGoBuild() {
         // run go build.
         return false;
     }
+
     return tryGoBuild() == default!;
 }
 
-// To run 'go build', we need to be able to exec a 'go' command.
-// We somewhat arbitrarily choose to exec 'go tool -n compile' because that
-// also confirms that cmd/go can find the compiler. (Before CL 472096,
-// we sometimes ended up with cmd/go installed in the test environment
-// without a cmd/compile it could use to actually build things.)
-// We can assume that we always have a complete Go toolchain available.
-// However, this platform requires a C linker to build even pure Go
-// programs, including tests. Do we have one in the test environment?
-// (On Android, for example, the device running the test might not have a
-// C toolchain installed.)
-//
-// If CC is set explicitly, assume that we do. Otherwise, use 'go env CC'
-// to determine which toolchain it would use by default.
 internal static Func<error> tryGoBuild;
 internal static void initᴛtryGoBuild() { tryGoBuild = sync.OnceValue(error () => {
+    // To run 'go build', we need to be able to exec a 'go' command.
+    // We somewhat arbitrarily choose to exec 'go tool -n compile' because that
+    // also confirms that cmd/go can find the compiler. (Before CL 472096,
+    // we sometimes ended up with cmd/go installed in the test environment
+    // without a cmd/compile it could use to actually build things.)
     var (goToolΔ1, err) = goTool();
     if (err != default!) {
         return err;
@@ -102,7 +95,16 @@ internal static void initᴛtryGoBuild() { tryGoBuild = sync.OnceValue(error () 
             return errΔ1;
         }
     }
+
     if (platform.MustLinkExternal(Δruntime.GOOS, Δruntime.GOARCH, false)) {
+        // We can assume that we always have a complete Go toolchain available.
+        // However, this platform requires a C linker to build even pure Go
+        // programs, including tests. Do we have one in the test environment?
+        // (On Android, for example, the device running the test might not have a
+        // C toolchain installed.)
+        //
+        // If CC is set explicitly, assume that we do. Otherwise, use 'go env CC'
+        // to determine which toolchain it would use by default.
         if (os.Getenv("CC"u8) == ""u8) {
             var cmdΔ1 = exec.Command(goToolΔ1, "env"u8, "CC");
             cmdΔ1.Value.Env = origEnv;
@@ -158,7 +160,6 @@ public static bool HasParallelism() {
     if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
         return false;
     }
-
     return true;
 }
 
@@ -190,48 +191,51 @@ public static @string GoToolPath(testing.TB t) {
     return path;
 }
 
-// If runtime.GOROOT() is non-empty, assume that it is valid.
-//
-// (It might not be: for example, the user may have explicitly set GOROOT
-// to the wrong directory. But this case is
-// rare, and if that happens the user can fix what they broke.)
-// runtime.GOROOT doesn't know where GOROOT is (perhaps because the test
-// binary was built with -trimpath).
-//
-// Since this is internal/testenv, we can cheat and assume that the caller
-// is a test of some package in a subdirectory of GOROOT/src. ('go test'
-// runs the test in the directory containing the packaged under test.) That
-// means that if we start walking up the tree, we should eventually find
-// GOROOT/src/go.mod, and we can report the parent directory of that.
-//
-// Notably, this works even if we can't run 'go env GOROOT' as a
-// subprocess.
-// dir is either "." or only a volume name.
-// dir cannot be GOROOT/src if it doesn't end in "src".
-// Found "module std", which is the module declaration in GOROOT/src!
 internal static Func<(@string, error)> findGOROOT = sync.OnceValues((@string path, error err) () => {
     error err = default!;
     {
         @string pathΔ1 = Δruntime.GOROOT(); if (pathΔ1 != ""u8) {
+            // If runtime.GOROOT() is non-empty, assume that it is valid.
+            //
+            // (It might not be: for example, the user may have explicitly set GOROOT
+            // to the wrong directory. But this case is
+            // rare, and if that happens the user can fix what they broke.)
             return (pathΔ1, default!);
         }
     }
+
+    // runtime.GOROOT doesn't know where GOROOT is (perhaps because the test
+    // binary was built with -trimpath).
+    //
+    // Since this is internal/testenv, we can cheat and assume that the caller
+    // is a test of some package in a subdirectory of GOROOT/src. ('go test'
+    // runs the test in the directory containing the packaged under test.) That
+    // means that if we start walking up the tree, we should eventually find
+    // GOROOT/src/go.mod, and we can report the parent directory of that.
+    //
+    // Notably, this works even if we can't run 'go env GOROOT' as a
+    // subprocess.
+
     (var cwd, err) = os.Getwd();
     if (err != default!) {
         return ("", fmt.Errorf("finding GOROOT: %w"u8, err));
     }
+
     @string dir = cwd;
     while (ᐧ) {
         @string parent = filepath.Dir(dir);
         if (parent == dir) {
+            // dir is either "." or only a volume name.
             return ("", fmt.Errorf("failed to locate GOROOT/src in any parent directory"u8));
         }
+
         {
             @string @base = filepath.Base(dir); if (@base != "src"u8) {
                 dir = parent;
-                continue;
+                continue; // dir cannot be GOROOT/src if it doesn't end in "src".
             }
         }
+
         var (b, errΔ1) = os.ReadFile(filepath.Join(dir, "go.mod"));
         if (errΔ1 != default!) {
             if (os.IsNotExist(errΔ1)) {
@@ -241,11 +245,13 @@ internal static Func<(@string, error)> findGOROOT = sync.OnceValues((@string pat
             return ("", fmt.Errorf("finding GOROOT: %w"u8, errΔ1));
         }
         @string goMod = ((@string)b);
+
         while (goMod != ""u8) {
             @string line = default!;
             (line, goMod, _) = strings.Cut(goMod, "\n"u8);
             var fields = strings.Fields(line);
             if (len(fields) >= 2 && fields[0] == "module" && fields[1] == "std") {
+                // Found "module std", which is the module declaration in GOROOT/src!
                 return (parent, default!);
             }
         }
@@ -292,7 +298,6 @@ public static void MustHaveSource(testing.TB t) {
         t.Helper();
         t.Skip("skipping test: no source tree on " + Δruntime.GOOS);
     }
-
 }
 
 // HasExternalNetwork reports whether the current system can use
@@ -446,7 +451,6 @@ public static bool CPUIsSlow() {
     if (exprᴛ1 == "arm"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8 || exprᴛ1 == "wasm"u8) {
         return true;
     }
-
     return false;
 }
 
@@ -489,11 +493,13 @@ public static void WriteImportcfg(testing.TB t, @string dstPath, map<@string, @s
     var pkgs = pkgsʗp.sslice();
 
     t.Helper();
+
     var icfg = @new<bytes.Buffer>();
     icfg.WriteString(importConfigˢ);
     foreach (var (k, v) in packageFiles) {
         fmt.Fprintf(new bytes_BufferжWriter(icfg), "packagefile %s=%s\n"u8, k, v);
     }
+
     if (len(pkgs) > 0) {
         // Use 'go list' to resolve any missing packages and rewrite the import map.
         var cmd = Command(t, GoToolPath(t), listˢ, exportˢ, depsˢ, "-f", ifNeImportPathCommandˢ);
@@ -503,6 +509,7 @@ public static void WriteImportcfg(testing.TB t, @string dstPath, map<@string, @s
         if (err != default!) {
             t.Fatalf("%v: %v\n%s"u8, cmd.OrTypedNil(), err, (~cmd).Stderr);
         }
+
         foreach (var (_, line) in strings.Split(((@string)@out), "\n"u8)) {
             if (line == ""u8) {
                 continue;
@@ -516,6 +523,7 @@ public static void WriteImportcfg(testing.TB t, @string dstPath, map<@string, @s
             }
         }
     }
+
     {
         var err = os.WriteFile(dstPath, icfg.Bytes(), 438); if (err != default!) {
             t.Fatal(err);

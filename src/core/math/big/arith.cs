@@ -13,9 +13,11 @@ using go.math;
 
 partial class big_package {
 
+// A Word represents a single digit of a multi-precision unsigned integer.
 partial struct Word /*num:nuint*/;
 
 internal static UntypedInt _S => /* _W / 8 */ 8; // word size in bytes
+
 internal static UntypedInt _W => /* bits.UintSize */ 64; // word size in bits
 internal static readonly GoBigConst _B = /* 1 << _W */    // digit base
     GoBigConst.Parse("18446744073709551616");

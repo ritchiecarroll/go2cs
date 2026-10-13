@@ -43,11 +43,13 @@ internal static (ж<Root>, error) newRoot(nint fd, @string name) {
         syscall.Close(fd);
         return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: errors.New(notADirectoryˢ)))));
     }
+
     // There's a race here with fork/exec, which we are
     // content to live with. See ../syscall/exec_unix.go.
     if (!supportsCloseOnExec) {
         syscall.CloseOnExec(fd);
     }
+
     var r = Ꮡ(new Root(Ꮡ(new root(
         fd: fd,
         name: name

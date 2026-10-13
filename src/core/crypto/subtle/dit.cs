@@ -35,9 +35,12 @@ public static partial void WithDataIndependentTiming(Action f) {
             f();
             return;
         }
+
         runtime.LockOSThread();
         defer(runtime.UnlockOSThread, ref ᒐ);
+
         var alreadyEnabled = sys.EnableDIT();
+
         // disableDIT is called in a deferred function so that if f panics we will
         // still disable DIT, in case the panic is recovered further up the stack.
         defer(() => {
@@ -45,6 +48,7 @@ public static partial void WithDataIndependentTiming(Action f) {
                 sys.DisableDIT();
             }
         }, ref ᒐ);
+
         f();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

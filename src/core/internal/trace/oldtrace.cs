@@ -54,6 +54,7 @@ partial struct oldTraceConverter {
     internal slice<uint64> builtinToStringID;
 }
 
+// Block reasons
 internal static UntypedInt sForever => iota;
 internal static UntypedInt sPreempted => 1;
 internal static UntypedInt sGosched => 2;
@@ -66,6 +67,8 @@ internal static UntypedInt sSyncCond => 8;
 internal static UntypedInt sSelect => 9;
 internal static UntypedInt sEmpty => 10;
 internal static UntypedInt sMarkAssistWait => 11;
+
+// STW kinds
 internal static UntypedInt sSTWUnknown => 12;
 internal static UntypedInt sSTWGCMarkTermination => 13;
 internal static UntypedInt sSTWGCSweepTermination => 14;
@@ -83,6 +86,7 @@ internal static UntypedInt sSTWReadMetricsSlow => 25;
 internal static UntypedInt sSTWReadMemStatsSlow => 26;
 internal static UntypedInt sSTWPageCachePagesLeaked => 27;
 internal static UntypedInt sSTWResetDebugLog => 28;
+
 internal static UntypedInt sLast => 29;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -128,7 +132,9 @@ internal static error init(this ж<oldTraceConverter> Ꮡit, oldtrace.Trace pr) 
     it.seenProcs = new map<ProcID, EmptyStruct>();
     it.procMs = new map<ProcID, ThreadID>();
     it.lastTs = -1;
+
     var evt = it.evt;
+
     // Convert from oldtracer's Strings map to our dataTable.
     uint64 max = default!;
     foreach (var (id, s) in pr.Strings) {
@@ -138,6 +144,7 @@ internal static error init(this ж<oldTraceConverter> Ꮡit, oldtrace.Trace pr) 
         }
     }
     pr.Strings = default!;
+
     // Add all strings used for UserLog. In the old trace format, these were
     // stored inline and didn't have IDs. We generate IDs for them.
     if (max + (uint64)len(pr.InlineStrings) < max) {
@@ -159,6 +166,7 @@ internal static error init(this ж<oldTraceConverter> Ꮡit, oldtrace.Trace pr) 
     }
     max += (uint64)len(pr.InlineStrings);
     pr.InlineStrings = default!;
+
     // Add strings that the converter emits explicitly.
     if (max + (uint64)sLast < max) {
         return errors.New(traceContainsTooManyˢ);
@@ -199,15 +207,19 @@ internal static error init(this ж<oldTraceConverter> Ꮡit, oldtrace.Trace pr) 
     addBuiltin(sSTWReadMemStatsSlow, readMemStatsSlowTestˢ);
     addBuiltin(sSTWPageCachePagesLeaked, pageCachePagesLeakedTestˢ);
     addBuiltin(sSTWResetDebugLog, resetDebugLogTestˢ);
+
     if (addErr != default!) {
         // This should be impossible but let's be safe.
         return fmt.Errorf("couldn't add strings: %w"u8, addErr);
     }
+
     it.evt.of(evTable.Ꮡstrings).compactify();
+
     // Convert stacks.
     foreach (var (id, stk) in pr.Stacks) {
         evt.of(evTable.Ꮡstacks).insert(((stackID)(uint64)id), new stack(pcs: stk));
     }
+
     // OPT(dh): if we could share the frame type between this package and
     // oldtrace we wouldn't have to copy the map.
     foreach (var (pc, f) in pr.PCs) {
@@ -232,6 +244,7 @@ internal static (ΔEvent, error) next(this ж<oldTraceConverter> Ꮡit) {
     if (len(it.extra) > 0) {
         var evΔ1 = it.extra[0].ΔClone();
         it.extra = it.extra[1..];
+
         if (len(it.extra) == 0) {
             it.extra = it.extraArr[..0];
         }
@@ -243,17 +256,21 @@ internal static (ΔEvent, error) next(this ж<oldTraceConverter> Ꮡit) {
         it.lastTs = evΔ1.@base.time;
         return (evΔ1.ΔClone(), default!);
     }
+
     var (oev, ok) = it.events.Pop();
     if (!ok) {
         return (new ΔEvent(nil), io.EOF);
     }
+
     var (ev, err) = Ꮡit.convertEvent(oev);
+
     if (AreEqual(err, errSkip)){
         return Ꮡit.next();
     } else 
     if (err != default!) {
         return (new ΔEvent(nil), err);
     }
+
     // Two events aren't allowed to fall on the same timestamp in the new API,
     // but this may happen when we produce EvGoStatus events
     if (ev.@base.time <= it.lastTs) {
@@ -279,6 +296,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<oldTraceConverter>
     @event.Type mappedType = default!;
     timedEventArgs mappedArgs = default!;
     copy(mappedArgs[..], ev.Args[..]);
+
     var exprᴛ1 = ev.Type;
     if (exprᴛ1 == oldtrace.EvGomaxprocs) {
         mappedType = go122.EvProcsChange;
@@ -291,8 +309,8 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<oldTraceConverter>
                 // received neither GoWaiting, GoInSyscall, or GoStart. These are goroutines that are in
                 // the states _Gidle or _Grunnable.
                 it.extra = append(it.extra, new ΔEvent(
-                    ctx: new schedCtx( // G: GoID(gid),
-
+                    ctx: new schedCtx(
+                        // G: GoID(gid),
                         G: NoGoroutine,
                         P: NoProc,
                         M: NoThread
@@ -456,10 +474,10 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<oldTraceConverter>
         mappedArgs = new timedEventArgs(new uint64[]{(uint64)it.builtinToStringID[sMarkAssistWait], (uint64)ev.StkID}.array(4));
     }
     else if (exprᴛ1 == oldtrace.EvGoSysCall) {
+        // Look for the next event for the same G to determine if the syscall
+        // blocked.
         var blocked = false;
         Ꮡit.of(oldTraceConverter.Ꮡevents).All()((ж<oldtrace.Event> nev) => {
-            // Look for the next event for the same G to determine if the syscall
-            // blocked.
             if ((~nev).G != Ꮡev.Value.G) {
                 return true;
             }
@@ -491,6 +509,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<oldTraceConverter>
                     args: new timedEventArgs(new array<uint64>(4){[1] = (uint64)ev.StkID})
                 )
             );
+
             var out2 = new ΔEvent(
                 ctx: out1.ctx,
                 table: it.evt,
@@ -500,6 +519,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<oldTraceConverter>
                     args: new timedEventArgs(new uint64[4].array())
                 )
             );
+
             it.extra = append(it.extra, out2.ΔClone());
             return (out1.ΔClone(), default!);
         }
@@ -517,10 +537,10 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<oldTraceConverter>
     }
     else if (exprᴛ1 == oldtrace.EvGoInSyscall) {
         mappedType = go122.EvGoStatus;
-        mappedArgs = new timedEventArgs(new uint64[]{ // In the new tracer, GoStatus with GoSyscall knows what thread the
- // syscall is on. In the old tracer, EvGoInSyscall doesn't contain that
- // information and all we can do here is specify NoThread.
-ev.Args[0], ~(uint64)0, (uint64)(uint8)go122.GoSyscall}.array(4));
+        // In the new tracer, GoStatus with GoSyscall knows what thread the
+        // syscall is on. In the old tracer, EvGoInSyscall doesn't contain that
+        // information and all we can do here is specify NoThread.
+        mappedArgs = new timedEventArgs(new uint64[]{ev.Args[0], ~(uint64)0, (uint64)(uint8)go122.GoSyscall}.array(4));
         delete(it.createdPreInit, ((GoID)(int64)ev.Args[0]));
     }
     else if (exprᴛ1 == oldtrace.EvHeapAlloc) {
@@ -547,10 +567,10 @@ ev.Args[0], ~(uint64)0, (uint64)(uint8)go122.GoSyscall}.array(4));
     }
     else if (exprᴛ1 == oldtrace.EvUserTaskEnd) {
         mappedType = go122.EvUserTaskEnd;
+        // Event.Task expects the parent and name to be smuggled in extra args
+        // and as extra strings.
         var (ts, ok) = it.tasks[((TaskID)ev.Args[0]), ꟷ];
         if (ok){
-            // Event.Task expects the parent and name to be smuggled in extra args
-            // and as extra strings.
             delete(it.tasks, ((TaskID)ev.Args[0]));
             mappedArgs = new timedEventArgs(new uint64[]{
                 ev.Args[0],
@@ -564,18 +584,15 @@ ev.Args[0], ~(uint64)0, (uint64)(uint8)go122.GoSyscall}.array(4));
     }
     else if (exprᴛ1 == oldtrace.EvUserRegion) {
         switch (ev.Args[1]) {
-        case 0: {
+        case 0: { // start
             mappedType = go122.EvUserRegionBegin;
             break;
         }
-        case 1: {
+        case 1: { // end
             mappedType = go122.EvUserRegionEnd;
             break;
         }}
-
-        mappedArgs = new timedEventArgs(new uint64[]{ // start
- // end
-ev.Args[0], ev.Args[2], (uint64)ev.StkID}.array(4));
+        mappedArgs = new timedEventArgs(new uint64[]{ev.Args[0], ev.Args[2], (uint64)ev.StkID}.array(4));
     }
     else if (exprᴛ1 == oldtrace.EvUserLog) {
         mappedType = go122.EvUserLog;
@@ -583,12 +600,12 @@ ev.Args[0], ev.Args[2], (uint64)ev.StkID}.array(4));
     }
     else if (exprᴛ1 == oldtrace.EvCPUSample) {
         mappedType = go122.EvCPUSample;
-        mappedArgs = new timedEventArgs(new uint64[]{ // When emitted by the Go 1.22 tracer, CPU samples have 5 arguments:
- // timestamp, M, P, G, stack. However, after they get turned into Event,
- // they have the arguments stack, M, P, G.
- //
- // In Go 1.21, CPU samples did not have Ms.
-(uint64)ev.StkID, ~(uint64)0, (uint64)ev.P, ev.G}.array());
+        // When emitted by the Go 1.22 tracer, CPU samples have 5 arguments:
+        // timestamp, M, P, G, stack. However, after they get turned into Event,
+        // they have the arguments stack, M, P, G.
+        //
+        // In Go 1.21, CPU samples did not have Ms.
+        mappedArgs = new timedEventArgs(new uint64[]{(uint64)ev.StkID, ~(uint64)0, (uint64)ev.P, ev.G}.array());
     }
     else { /* default: */
         return (new ΔEvent(nil), fmt.Errorf("unexpected event type %v"u8, ev.Type));
@@ -601,6 +618,7 @@ ev.Args[0], ev.Args[2], (uint64)ev.StkID}.array(4));
             }
         }
     }
+
     var m = NoThread;
     if (ev.P != -1 && ev.Type != oldtrace.EvCPUSample) {
         {

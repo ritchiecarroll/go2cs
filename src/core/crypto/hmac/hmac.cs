@@ -46,8 +46,8 @@ public static hash.Hash New(Func<hash.Hash> h, slice<byte> key) {
         if (hm != default!) {
             return hm;
         }
+        // BoringCrypto did not recognize h, so fall through to standard Go code.
     }
-    // BoringCrypto did not recognize h, so fall through to standard Go code.
     h = fips140hash.UnwrapNew(h);
     if (fips140only.Enabled) {
         if (len(key) < 112 / 8) {

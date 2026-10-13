@@ -20,11 +20,13 @@ internal static uintptr _INVALID_HANDLE_VALUE => /* ^uintptr(0) */ unchecked((ui
 // defined values because the only way to set the key of an overlapped entry
 // is using the iocphandle, which is not accessible to user code.
 internal static UntypedInt netpollSourceReady => /* iota + 1 */ 1;
-
 internal static UntypedInt netpollSourceBreak => 2;
-
 internal static UntypedInt netpollSourceTimer => 3;
 
+// sourceBits is the number of bits needed to represent a source.
+// 4 bits can hold 16 different sources, which is more than enough.
+// It is set to a low value so the overlapped entry key can
+// contain as much bits as possible for the pollDesc pointer.
 internal static UntypedInt sourceBits => 4; // 4 bits can hold 16 different sources, which is more than enough.
 internal static UntypedInt sourceMasks => /* 1<<sourceBits - 1 */ 15;
 
@@ -34,8 +36,6 @@ internal static readonly @string runtimeSourceValueIsTooˢ = "runtime: source va
 // packNetpollKey creates a key from a source and a tag.
 // Bits that don't fit in the result are discarded.
 internal static uintptr packNetpollKey(uint8 source, ж<pollDesc> Ꮡpd) {
-    ref var pd = ref Ꮡpd.DerefOrNull();
-
     // TODO: Consider combining the source with pd.fdseq to detect stale pollDescs.
     if (source > (uint8)(((1 << (int)(sourceBits))) - 1)) {
         // Also fail on 64-bit systems, even though it can hold more bits.
@@ -73,6 +73,7 @@ internal static ж<pollOperation> pollOperationFromOverlappedEntry(ref overlappe
         return default!;
     }
     var op = e.ov.Reinterpret<overlapped, pollOperation>();
+
     // Check that the key matches the pollDesc pointer.
     bool keyMatch = default!;
     if (goarch.PtrSize == 4){
@@ -96,6 +97,7 @@ partial struct overlappedEntry {
 }
 
 internal static uintptr iocphandle = _INVALID_HANDLE_VALUE; // completion port io handle
+
 internal static ж<atomic.Uint32> ᏑnetpollWakeSig = new StandardBox<atomic.Uint32>(default(atomic.Uint32));
 internal static ref atomic.Uint32 netpollWakeSig => ref ᏑnetpollWakeSig.Value; // used to avoid duplicate calls of netpollBreak
 
@@ -151,15 +153,18 @@ internal static (gList, int32) netpoll(int64 delay) {
     if (iocphandle == _INVALID_HANDLE_VALUE) {
         return (new gList(nil), 0);
     }
+
     ref var entries = ref heap(new array<overlappedEntry>(64), out var Ꮡentries);
     uint32 wait = default!;
     ref var toRun = ref heap(new gList(), out var ᏑtoRun);
     var mp = getg().Value.m;
+
     if (delay >= 1000000000000000) {
         // An arbitrary cap on how long to wait for a timer.
         // 1e15 ns == ~11.5 days.
         delay = 1000000000000000;
     }
+
     if (delay > 0 && (~mp).waitIocpHandle != 0) {
         // GetQueuedCompletionStatusEx doesn't use a high resolution timer internally,
         // so we use a separate higher resolution timer associated with a wait completion
@@ -213,9 +218,9 @@ internal static (gList, int32) netpoll(int64 delay) {
                 // Entry from outside the Go runtime and internal/poll, ignore.
                 continue;
             }
+            // Entry from internal/poll.
             var mode = op.Value.mode;
             if (mode != (rune)'r' && mode != (rune)'w') {
-                // Entry from internal/poll.
                 println((@string)"runtime: GetQueuedCompletionStatusEx returned net_op with invalid mode="u8, mode);
                 @throw(runtimeNetpollFailedˢ);
             }
@@ -229,13 +234,12 @@ internal static (gList, int32) netpoll(int64 delay) {
             }
         }
         else if (exprᴛ1 == netpollSourceTimer) {
+            // TODO: We could avoid calling NtCancelWaitCompletionPacket for expired wait completion packets.
         }
         else { /* default: */
-            println((@string)"runtime: GetQueuedCompletionStatusEx returned net_op with invalid key="u8, // TODO: We could avoid calling NtCancelWaitCompletionPacket for expired wait completion packets.
- (~e).key);
+            println((@string)"runtime: GetQueuedCompletionStatusEx returned net_op with invalid key="u8, (~e).key);
             @throw(runtimeNetpollFailedˢ);
         }
-
     }
     return (toRun, delta);
 }
@@ -260,14 +264,14 @@ internal static bool /*signaled*/ netpollQueueTimer(int64 delay) {
     var exprᴛ1 = errno;
     var matchᴛ1 = false;
     if (exprᴛ1 == STATUS_CANCELLED) { matchᴛ1 = true;
+        // STATUS_CANCELLED is returned when the associated timer has already expired,
+        // in which automatically cancels the wait completion packet.
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1 && exprᴛ1 == STATUS_SUCCESS) { matchᴛ1 = true;
         ref var dt = ref heap<int64>(out var Ꮡdt);
         dt = -delay / 100; // relative sleep (negative), 100ns units
-        if (stdcall6(_SetWaitableTimer, // STATUS_CANCELLED is returned when the associated timer has already expired,
- // in which automatically cancels the wait completion packet.
- (~mp).waitIocpTimer, (uintptr)Ꮡdt, 0, 0, 0, 0) == 0) {
+        if (stdcall6(_SetWaitableTimer, (~mp).waitIocpTimer, (uintptr)Ꮡdt, 0, 0, 0, 0) == 0) {
             println((@string)"runtime: SetWaitableTimer failed; errno="u8, getlasterror());
             @throw(runtimeNetpollFailedˢ);
         }
@@ -280,17 +284,16 @@ internal static bool /*signaled*/ netpollQueueTimer(int64 delay) {
         }
     }
     else if (exprᴛ1 == STATUS_PENDING) {
+        // STATUS_PENDING is returned if the wait operation can't be canceled yet.
+        // This can happen if this thread was woken up by another event, such as a netpollBreak,
+        // and the timer expired just while calling NtCancelWaitCompletionPacket, in which case
+        // this call fails to cancel the association to avoid a race condition.
+        // This is a rare case, so we can just avoid using the high resolution timer this time.
     }
     else if (!matchᴛ1) { /* default: */
-        println((@string)"runtime: NtCancelWaitCompletionPacket failed; errno="u8, // STATUS_PENDING is returned if the wait operation can't be canceled yet.
- // This can happen if this thread was woken up by another event, such as a netpollBreak,
- // and the timer expired just while calling NtCancelWaitCompletionPacket, in which case
- // this call fails to cancel the association to avoid a race condition.
- // This is a rare case, so we can just avoid using the high resolution timer this time.
- errno);
+        println((@string)"runtime: NtCancelWaitCompletionPacket failed; errno="u8, errno);
         @throw(runtimeNetpollFailedˢ);
     }
-
     return signaled;
 }
 

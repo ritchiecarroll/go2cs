@@ -76,7 +76,6 @@ internal static error verifyHandshakeSignature(uint8 sigType, cryptoꓸPublicKey
     default: {
         return errors.New(internalErrorUnknownˢ);
     }}
-
     return default!;
 }
 
@@ -133,7 +132,6 @@ internal static (uint8 sigType, crypto.Hash hash, error err) typeAndHashFromSign
     else { /* default: */
         return (0, 0, fmt.Errorf("unsupported signature algorithm: %v"u8, signatureAlgorithm));
     }
-
     var exprᴛ2 = signatureAlgorithm;
     if (exprᴛ2 == PKCS1WithSHA1 || exprᴛ2 == ECDSAWithSHA1) {
         hash = crypto.SHA1;
@@ -153,7 +151,6 @@ internal static (uint8 sigType, crypto.Hash hash, error err) typeAndHashFromSign
     else { /* default: */
         return (0, 0, fmt.Errorf("unsupported signature algorithm: %v"u8, signatureAlgorithm));
     }
-
     return (sigType, hash, default!);
 }
 
@@ -169,23 +166,16 @@ internal static (uint8 sigType, crypto.Hash hash, error err) legacyTypeAndHashFr
         return (signatureECDSA, crypto.SHA1, default!);
     }
     case ed25519.PublicKey: {
+        // RFC 8422 specifies support for Ed25519 in TLS 1.0 and 1.1,
+        // but it requires holding on to a handshake transcript to do a
+        // full signature, and not even OpenSSL bothers with the
+        // complexity, so we can't even test it properly.
         return (0, 0, fmt.Errorf("tls: Ed25519 public keys are not supported before TLS 1.2"u8));
     }
     default: {
-        return (0, 0, fmt.Errorf("tls: unsupported public key: %T"u8, // RFC 8422 specifies support for Ed25519 in TLS 1.0 and 1.1,
- // but it requires holding on to a handshake transcript to do a
- // full signature, and not even OpenSSL bothers with the
- // complexity, so we can't even test it properly.
- pub));
+        return (0, 0, fmt.Errorf("tls: unsupported public key: %T"u8, pub));
     }}
-
 }
-
-// RSA-PSS is used with PSSSaltLengthEqualsHash, and requires
-//    emLen >= hLen + sLen + 2
-// PKCS #1 v1.5 uses prefixes from hashPrefixes in crypto/rsa, and requires
-//    emLen >= len(prefix) + hLen + 11
-// TLS 1.3 dropped support for PKCS #1 v1.5 in favor of RSA-PSS.
 
 partial struct rsaSignatureSchemesᴛ1 /*dyn*/ {
     internal SignatureScheme scheme;
@@ -193,9 +183,14 @@ partial struct rsaSignatureSchemesᴛ1 /*dyn*/ {
     internal uint16 maxVersion;
 }
 internal static slice<rsaSignatureSchemesᴛ1> rsaSignatureSchemes = new rsaSignatureSchemesᴛ1[]{
+    // RSA-PSS is used with PSSSaltLengthEqualsHash, and requires
+    //    emLen >= hLen + sLen + 2
     new(PSSWithSHA256, crypto.SHA256.Size() * 2 + 2, VersionTLS13),
     new(PSSWithSHA384, crypto.SHA384.Size() * 2 + 2, VersionTLS13),
     new(PSSWithSHA512, crypto.SHA512.Size() * 2 + 2, VersionTLS13),
+    // PKCS #1 v1.5 uses prefixes from hashPrefixes in crypto/rsa, and requires
+    //    emLen >= len(prefix) + hLen + 11
+    // TLS 1.3 dropped support for PKCS #1 v1.5 in favor of RSA-PSS.
     new(PKCS1WithSHA256, 19 + crypto.SHA256.Size() + 11, VersionTLS12),
     new(PKCS1WithSHA384, 19 + crypto.SHA384.Size() + 11, VersionTLS12),
     new(PKCS1WithSHA512, 19 + crypto.SHA512.Size() + 11, VersionTLS12),
@@ -213,6 +208,7 @@ internal static slice<SignatureScheme> signatureSchemesForCertificate(uint16 ver
     if (!ok) {
         return default!;
     }
+
     slice<SignatureScheme> sigAlgs = default!;
     var switchᴛ1 = priv.Public();
     switch (switchᴛ1.type()) {
@@ -241,7 +237,6 @@ internal static slice<SignatureScheme> signatureSchemesForCertificate(uint16 ver
         else { /* default: */
             return default!;
         }
-
         break;
     }
     case ж<rsa.PublicKey> pub: {
@@ -262,6 +257,7 @@ internal static slice<SignatureScheme> signatureSchemesForCertificate(uint16 ver
         var pub = switchᴛ1;
         return default!;
     }}
+
     if (cert.SupportedSignatureAlgorithms != default!) {
         slice<SignatureScheme> filteredSigAlgs = default!;
         foreach (var (_, sigAlg) in sigAlgs) {
@@ -321,6 +317,7 @@ internal static error unsupportedCertificateError(ref Certificate cert) {
         return fmt.Errorf("tls: certificate private key (%T) does not implement crypto.Signer"u8,
             cert.PrivateKey);
     }
+
     var switchᴛ2 = signer.Public();
     switch (switchᴛ2.type()) {
     case ж<ecdsa.PublicKey> pub: {
@@ -334,7 +331,6 @@ internal static error unsupportedCertificateError(ref Certificate cert) {
         else { /* default: */
             return fmt.Errorf("tls: unsupported certificate curve (%s)"u8, (~(~pub).Curve.Params()).Name);
         }
-
         break;
     }
     case ж<rsa.PublicKey> pub: {
@@ -347,9 +343,11 @@ internal static error unsupportedCertificateError(ref Certificate cert) {
         var pub = switchᴛ2;
         return fmt.Errorf("tls: unsupported certificate key (%T)"u8, pub);
     }}
+
     if (cert.SupportedSignatureAlgorithms != default!) {
         return fmt.Errorf("tls: peer doesn't support the certificate custom signature algorithms"u8);
     }
+
     return fmt.Errorf("tls: internal error: unsupported key (%T)"u8, cert.PrivateKey);
 }
 

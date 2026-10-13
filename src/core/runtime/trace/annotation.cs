@@ -44,26 +44,27 @@ public static (context.Context ctx, ж<Task> task) NewTask(context.Context pctx,
     userTaskCreate(id, pid, taskType);
     var s = Ꮡ(new Task(id: id));
     return (context.WithValue(pctx, new traceContextKey(nil), s.OrTypedNil()), s);
+
+    // We allocate a new task even when
+    // the tracing is disabled because the context and task
+    // can be used across trace enable/disable boundaries,
+    // which complicates the problem.
+    //
+    // For example, consider the following scenario:
+    //   - trace is enabled.
+    //   - trace.WithRegion is called, so a new context ctx
+    //     with a new region is created.
+    //   - trace is disabled.
+    //   - trace is enabled again.
+    //   - trace APIs with the ctx is called. Is the ID in the task
+    //   a valid one to use?
+    //
+    // TODO(hyangah): reduce the overhead at least when
+    // tracing is disabled. Maybe the id can embed a tracing
+    // round number and ignore ids generated from previous
+    // tracing round.
 }
 
-// We allocate a new task even when
-// the tracing is disabled because the context and task
-// can be used across trace enable/disable boundaries,
-// which complicates the problem.
-//
-// For example, consider the following scenario:
-//   - trace is enabled.
-//   - trace.WithRegion is called, so a new context ctx
-//     with a new region is created.
-//   - trace is disabled.
-//   - trace is enabled again.
-//   - trace APIs with the ctx is called. Is the ID in the task
-//   a valid one to use?
-//
-// TODO(hyangah): reduce the overhead at least when
-// tracing is disabled. Maybe the id can embed a tracing
-// round number and ignore ids generated from previous
-// tracing round.
 internal static ж<Task> fromContext(context.Context ctx) {
     {
         var (s, ok) = ctx.Value(new traceContextKey(nil))._<ж<Task>>(ᐧ); if (ok) {

@@ -18,6 +18,7 @@ public static @string FormatFileInfo(FileInfo info) {
     var b = new slice<byte>(0, 40 + len(name));
     b = append(b, info.Mode().String().ꓸꓸꓸ);
     b = append(b, (byte)((rune)' '));
+
     var size = info.Size();
     uint64 usize = default!;
     if (size >= 0){
@@ -37,12 +38,15 @@ public static @string FormatFileInfo(FileInfo info) {
     buf[i] = (byte)((rune)'0' + usize);
     b = appendꓸꓸꓸ(b, buf.slice(i));
     b = append(b, (byte)((rune)' '));
+
     b = append(b, info.ModTime().Format(time.DateTime).ꓸꓸꓸ);
     b = append(b, (byte)((rune)' '));
+
     b = append(b, name.ꓸꓸꓸ);
     if (info.IsDir()) {
         b = append(b, (byte)((rune)'/'));
     }
+
     return ((@string)b);
 }
 
@@ -55,10 +59,12 @@ public static @string FormatFileInfo(FileInfo info) {
 public static @string FormatDirEntry(DirEntry dir) {
     @string name = dir.Name();
     var b = new slice<byte>(0, 5 + len(name));
+
     // The Type method does not return any permission bits,
     // so strip them from the string.
     @string mode = dir.Type().String();
     mode = mode.slice(0, len(mode) - 9);
+
     b = append(b, mode.ꓸꓸꓸ);
     b = append(b, (byte)((rune)' '));
     b = append(b, name.ꓸꓸꓸ);

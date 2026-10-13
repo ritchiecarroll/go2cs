@@ -110,6 +110,7 @@ internal static partial (nint, error) Write(this ref handlerWriter w, slice<byte
         runtime.Callers(4, pcs[..]);
         pc = pcs[0];
     }
+
     // Remove final newline.
     nint origLen = len(buf); // Report that the entire buf was written.
     buf = bytes.TrimSuffix(buf, new byte[]{(rune)'\n'}.slice());
@@ -143,8 +144,8 @@ public static ΔHandler Handler(this ref Logger l) {
 // attributes as if by [Logger.Log].
 public static ж<Logger> With(this ж<Logger> Ꮡl, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
-
     ref var l = ref Ꮡl.DerefOrNull();
+
     if (len(args) == 0) {
         return Ꮡl;
     }

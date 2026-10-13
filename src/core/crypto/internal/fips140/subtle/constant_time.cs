@@ -13,10 +13,13 @@ public static nint ConstantTimeCompare(slice<byte> x, slice<byte> y) {
     if (len(x) != len(y)) {
         return 0;
     }
+
     byte v = default!;
+
     for (nint i = 0; i < len(x); i++) {
         v |= (byte)((byte)(x[i] ^ y[i]));
     }
+
     return ConstantTimeByteEq(v, 0);
 }
 
@@ -43,6 +46,7 @@ public static void ConstantTimeCopy(nint v, slice<byte> x, slice<byte> y) {
     if (len(x) != len(y)) {
         throw panic("subtle: slices have different lengths");
     }
+
     var xmask = (byte)(v - 1);
     var ymask = (byte)(~(v - 1));
     for (nint i = 0; i < len(x); i++) {

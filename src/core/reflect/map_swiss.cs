@@ -2,7 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 //go:build goexperiment.swissmap
+
+// mapType represents a map type.
+//
+// TODO(prattmic): Only used within this file, could be cleaned up.
 global using mapType = go.@internal.abi_package.SwissMapType;
+
+// TODO(prattmic): only for sharing the linkname declarations with old maps.
+// Remove with old maps.
 global using hiter = go.@internal.runtime.maps_package.Iter;
 
 namespace go;
@@ -36,6 +43,7 @@ internal static (ΔType, ΔType) groupAndSlotOf(ΔType ktyp, ΔType etyp) {
     if (etyp.Size() > abi.SwissMapMaxElemBytes) {
         etyp = PointerTo(etyp);
     }
+
     var fields = new StructField[]{
         new(
             Name: "Key"u8,
@@ -47,6 +55,7 @@ internal static (ΔType, ΔType) groupAndSlotOf(ΔType ktyp, ΔType etyp) {
         )
     }.slice();
     var slot = StructOf(fields);
+
     fields = new StructField[]{
         new(
             Name: "Ctrl"u8,
@@ -75,6 +84,7 @@ internal static partial void mapIterStart(ж<abi.SwissMapType> Ꮡt, ж<mapsꓸM
         var callerpc = sys.GetCallerPC();
         race.ReadPC(@unsafe.Pointer.FromPinnedBox(Ꮡm), callerpc, abi.FuncPCABIInternal(mapIterStart));
     }
+
     it.Init(Ꮡt, Ꮡm);
     it.Next();
 }
@@ -89,6 +99,7 @@ internal static partial void mapIterNext(ж<maps.Iter> Ꮡit) {
         var callerpc = sys.GetCallerPC();
         race.ReadPC(@unsafe.Pointer.FromPinnedBox(it.Map()), callerpc, abi.FuncPCABIInternal(mapIterNext));
     }
+
     it.Next();
 }
 

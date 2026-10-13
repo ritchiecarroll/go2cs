@@ -13,7 +13,6 @@ partial class runtime_package {
 //go:noescape
 internal static partial nint vgetrandom1(ж<byte> buf, uintptr length, uint32 flags, uintptr state, uintptr stateSize);
 
-
 partial struct vgetrandomAllocᴛ1 /*dyn*/ {
     internal slice<uintptr> states;
     internal mutex statesLock;
@@ -35,6 +34,7 @@ internal static void vgetrandomInit() {
     if (vdsoGetrandomSym == 0) {
         return;
     }
+
     ref var @params = ref heap(new vgetrandomInit_params(), out var Ꮡparams);
     if (vgetrandom1(nil, 0, 0, (uintptr)Ꮡparams, ~(uintptr)0) != 0) {
         return;
@@ -42,6 +42,7 @@ internal static void vgetrandomInit() {
     vgetrandomAlloc.stateSize = (uintptr)@params.SizeOfOpaqueState;
     vgetrandomAlloc.mmapProt = (int32)@params.MmapProt;
     vgetrandomAlloc.mmapFlags = (int32)@params.MmapFlags;
+
     lockInit(ᏑvgetrandomAlloc.of(vgetrandomAllocᴛ1.ᏑstatesLock), lockRankLeafRank);
 }
 
@@ -82,6 +83,7 @@ internal static void vgetrandomDestroy(ref m mp) {
     if (mp.vgetrandomState == 0) {
         return;
     }
+
     @lock(ᏑvgetrandomAlloc.of(vgetrandomAllocᴛ1.ᏑstatesLock));
     vgetrandomAlloc.states = append(vgetrandomAlloc.states, mp.vgetrandomState);
     unlock(ᏑvgetrandomAlloc.of(vgetrandomAllocᴛ1.ᏑstatesLock));
@@ -94,6 +96,7 @@ public static (nint ret, bool supported) vgetrandom(slice<byte> Δp, uint32 flag
     if (vgetrandomAlloc.stateSize == 0) {
         return (-1, false);
     }
+
     // We use getg().m instead of acquirem() here, because always taking
     // the lock is slightly more expensive than not always taking the lock.
     // However, we *do* require that m doesn't migrate elsewhere during the
@@ -105,6 +108,7 @@ public static (nint ret, bool supported) vgetrandom(slice<byte> Δp, uint32 flag
     // is very much the slow path, in the sense that it only ever happens
     // once over the entire lifetime of an m. So, a simple getg().m suffices.
     var mp = getg().Value.m;
+
     if ((~mp).vgetrandomState == 0) {
         mp.Value.locks++;
         var state = vgetrandomGetState();

@@ -34,6 +34,7 @@ private static readonly @string dataˢ = "\n\tdata="u8;
 // and emitted by the TextWriter.
 public static @string String(this ref Event e) {
     var spec = e.Version.Specs()[e.Ev];
+
     ref var s = ref heap(new strings.Builder(), out var Ꮡs);
     Ꮡs.WriteString(spec.Name);
     foreach (var (i, _) in spec.Args) {

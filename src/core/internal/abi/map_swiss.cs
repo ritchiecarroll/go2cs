@@ -9,18 +9,21 @@ partial class abi_package {
 
 // Map constants common to several packages
 // runtime/runtime-gdb.py:MapTypePrinter contains its own copy
+// Number of bits in the group.slot count.
 public static UntypedInt SwissMapGroupSlotsBits => 3;
 
+// Number of slots in a group.
 public static UntypedInt SwissMapGroupSlots => /* 1 << SwissMapGroupSlotsBits */ 8; // 8
 
+// Maximum key or elem size to keep inline (instead of mallocing per element).
+// Must fit in a uint8.
 public static UntypedInt SwissMapMaxKeyBytes => 128;
-
 public static UntypedInt SwissMapMaxElemBytes => 128;
 
 internal static UntypedInt ctrlEmpty => 0b10000000;
-
 internal static UntypedInt bitsetLSB => 0x0101010101010101;
 
+// Value of control word with all empty slots.
 public const uint64 SwissMapCtrlEmpty = /* bitsetLSB * uint64(ctrlEmpty) */ 9259542123273814144;
 
 partial struct SwissMapType {
@@ -38,11 +41,8 @@ partial struct SwissMapType {
 
 // Flag values
 public static UntypedInt SwissMapNeedKeyUpdate => /* 1 << iota */ 1;
-
 public static UntypedInt SwissMapHashMightPanic => 2;
-
 public static UntypedInt SwissMapIndirectKey => 4;
-
 public static UntypedInt SwissMapIndirectElem => 8;
 
 public static bool NeedKeyUpdate(this ref SwissMapType mt) {

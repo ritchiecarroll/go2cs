@@ -182,8 +182,11 @@ partial struct SID_IDENTIFIER_AUTHORITY {
 }
 
 public static UntypedInt SID_REVISION => 1;
+// https://learn.microsoft.com/en-us/windows/win32/services/localsystem-account
 public static UntypedInt SECURITY_LOCAL_SYSTEM_RID => 18;
+// https://learn.microsoft.com/en-us/windows/win32/services/localservice-account
 public static UntypedInt SECURITY_LOCAL_SERVICE_RID => 19;
+// https://learn.microsoft.com/en-us/windows/win32/services/networkservice-account
 public static UntypedInt SECURITY_NETWORK_SERVICE_RID => 20;
 
 public static SID_IDENTIFIER_AUTHORITY SECURITY_NT_AUTHORITY = new SID_IDENTIFIER_AUTHORITY(

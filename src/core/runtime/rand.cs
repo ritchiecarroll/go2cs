@@ -24,7 +24,6 @@ internal static slice<byte> startupRand;
 // It is only used at startup and for creating new m's.
 // Otherwise the per-m random state should be used
 // by calling goodrand.
-
 partial struct globalRandᴛ1 /*dyn*/ {
     internal mutex @lock;
     internal array<byte> seed = new(32);
@@ -47,10 +46,12 @@ internal static void randinit() {
     if (globalRand.init) {
         fatal(randinitTwiceˢ);
     }
+
     var seed = ᏑglobalRand.of(globalRandᴛ1.Ꮡseed);
-    if (len(startupRand) >= 16 && !allZero(startupRand[..8]) && !allZero(startupRand[8..16])){
+    if (len(startupRand) >= 16 &&
         // Check that at least the first two words of startupRand weren't
         // cleared by any libc initialization.
+        !allZero(startupRand[..8]) && !allZero(startupRand[8..16])){
         foreach (var (i, c) in startupRand) {
             seed.Value[i % 32] ^= (byte)(c);
         }
@@ -65,6 +66,7 @@ internal static void randinit() {
     }
     ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Init(seed.Value);
     builtin.clear((~seed)[..]);
+
     if (startupRand != default!) {
         // Overwrite startupRand instead of clearing it, in case cgo programs
         // access it after we used it.
@@ -84,6 +86,7 @@ internal static void randinit() {
         }
         startupRand = default!;
     }
+
     globalRand.init = true;
     unlock(ᏑglobalRand.of(globalRandᴛ1.Ꮡlock));
 }
@@ -246,6 +249,7 @@ internal static uint32 cheaprand() {
         var (hi, lo) = math.Mul64((~mp).cheaprand, (uint64)((~mp).cheaprand ^ 0xe7037ed1a0b428dbUL));
         return (uint32)((uint64)(hi ^ lo));
     }
+
     // Implement xorshift64+: 2 32-bit xorshift sequences added together.
     // Shift triplet [17,7,16] was calculated as indicated in Marsaglia's
     // Xorshift paper: https://www.jstatsoft.org/article/view/v008i14/xorshift.pdf

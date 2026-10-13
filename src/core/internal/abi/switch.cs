@@ -42,7 +42,6 @@ public static bool UseInterfaceSwitchCache(@string goarch) {
     { /* default: */
         return false;
     }
-
 }
 
 partial struct TypeAssert {

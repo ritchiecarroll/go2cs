@@ -60,15 +60,18 @@ public static PkgEncoder NewPkgEncoder(ΔVersion version, nint syncFrames) {
 // package fingerprint.
 public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.Writer out0) {
     array<byte> fingerprint = new(8);
-
     ref var pw = ref Ꮡpw.DerefOrNull();
+
     var h = sha256.New();
     var @out = io.MultiWriter(out0, h);
+
     var outʗ1 = @out;
     void writeUint32(uint32 x) {
         assert(binary.Write(outʗ1, binary.LittleEndian, x) == default!);
     }
+
     writeUint32((uint32)pw.version);
+
     if (pw.version.Has(Flags)) {
         uint32 flags = default!;
         if (pw.SyncMarkers()) {
@@ -76,12 +79,14 @@ public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.W
         }
         writeUint32(flags);
     }
+
     // Write elemEndsEnds.
     uint32 sum = default!;
     foreach (var (_, elems) in Ꮡpw.of(PkgEncoder.Ꮡelems).Value) {
         sum += (uint32)len(elems);
         writeUint32(sum);
     }
+
     // Write elemEnds.
     sum = 0;
     foreach (var (_, elems) in Ꮡpw.of(PkgEncoder.Ꮡelems).Value) {
@@ -90,6 +95,7 @@ public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.W
             writeUint32(sum);
         }
     }
+
     // Write elemData.
     foreach (var (_, elems) in Ꮡpw.of(PkgEncoder.Ꮡelems).Value) {
         foreach (var (_, elem) in elems) {
@@ -97,10 +103,12 @@ public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.W
             assert(errΔ1 == default!);
         }
     }
+
     // Write fingerprint.
     copy(fingerprint[..], h.Sum(default!));
     var (_, err) = out0.Write(fingerprint[..]);
     assert(err == default!);
+
     return fingerprint;
 }
 
@@ -113,6 +121,7 @@ public static Index StringIdx(this ref PkgEncoder pw, @string s) {
             return idxΔ1;
         }
     }
+
     var idx = ((Index)(int32)len(pw.elems[RelocString]));
     pw.elems[RelocString] = append(pw.elems[RelocString], s);
     pw.stringsIdx[s] = idx;
@@ -137,6 +146,7 @@ public static Encoder NewEncoderRaw(this ж<PkgEncoder> Ꮡpw, RelocKind k) {
 
     var idx = ((Index)(int32)len(pw.elems[k]));
     pw.elems[k] = append(pw.elems[k], ""u8); // placeholder
+
     return new Encoder(
         p: Ꮡpw,
         k: k,
@@ -161,9 +171,11 @@ public static Index Flush(this ж<Encoder> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
+
     // Backup the data so we write the relocations at the front.
     ref var tmp = ref heap(new bytes.Buffer(), out var Ꮡtmp);
     io.Copy(new bytes_BufferжWriter(Ꮡtmp), new bytes_BufferжReader(Ꮡw.of(Encoder.ᏑData)));
+
     // TODO(mdempsky): Consider writing these out separately so they're
     // easier to strip, along with function bodies, so that we can prune
     // down to just the data that's relevant to go/types.
@@ -178,9 +190,11 @@ public static Index Flush(this ж<Encoder> Ꮡw) {
         w.Len((nint)(int32)rEnt.Kind);
         w.Len((nint)(int32)rEnt.Idx);
     }
+
     io.Copy(new strings_BuilderжWriter(Ꮡsb), new bytes_BufferжReader(Ꮡw.of(Encoder.ᏑData)));
     io.Copy(new strings_BuilderжWriter(Ꮡsb), new bytes_BufferжReader(Ꮡtmp));
     (~w.p).elems[w.k][w.Idx] = sb.String();
+
     return w.Idx;
 }
 
@@ -203,6 +217,7 @@ internal static void rawVarint(this ref Encoder w, int64 x) {
     if (x < 0) {
         ux = ~ux;
     }
+
     w.rawUvarint(ux);
 }
 
@@ -217,6 +232,7 @@ internal static nint rawReloc(this ref Encoder w, RelocKind r, Index idx) {
     } else {
         w.RelocMap = new map<RelocEnt, uint32>();
     }
+
     nint i = len(w.Relocs);
     w.RelocMap[e] = (uint32)i;
     w.Relocs = append(w.Relocs, e);
@@ -227,6 +243,7 @@ public static partial void Sync(this ref Encoder w, SyncMarker m) {
     if (!w.p.SyncMarkers()) {
         return;
     }
+
     // Writing out stack frame string references requires working
     // relocations, but writing out the relocations themselves involves
     // sync markers. To prevent infinite recursion, we simply trim the
@@ -237,6 +254,7 @@ public static partial void Sync(this ref Encoder w, SyncMarker m) {
         nint n = Δruntime.Callers(2, pcs);
         frames = fmtFrames(pcs.slice(0, n).ꓸꓸꓸ);
     }
+
     // TODO(mdempsky): Save space by writing out stack frames as a
     // linked list so we can share common stack frames.
     w.rawUvarint((uint64)(nint)m);

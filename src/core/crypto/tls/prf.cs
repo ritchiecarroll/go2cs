@@ -36,6 +36,7 @@ internal static void pHash(slice<byte> result, slice<byte> secret, slice<byte> s
     var h = hmac.New(hashΔ1, secret);
     h.Write(seed);
     var a = h.Sum(default!);
+
     nint j = 0;
     while (j < len(result)) {
         h.Reset();
@@ -44,6 +45,7 @@ internal static void pHash(slice<byte> result, slice<byte> secret, slice<byte> s
         var b = h.Sum(default!);
         copy(result.slice(j), b);
         j += len(b);
+
         h.Reset();
         h.Write(a);
         a = h.Sum(default!);
@@ -55,16 +57,20 @@ internal static slice<byte> prf10(slice<byte> secret, @string label, slice<byte>
     var result = new slice<byte>(keyLen);
     var hashSHA1 = sha1.New;
     var hashMD5 = md5.New;
+
     var labelAndSeed = new slice<byte>(len(label) + len(seed));
     copy(labelAndSeed, label);
     copy(labelAndSeed.slice(len(label)), seed);
+
     var (s1, s2) = splitPreMasterSecret(secret);
     pHash(result, s1, labelAndSeed, hashMD5);
     var result2 = new slice<byte>(len(result));
     pHash(result2, s2, labelAndSeed, hashSHA1);
+
     foreach (var (i, b) in result2) {
         result[i] ^= (byte)(b);
     }
+
     return result;
 }
 
@@ -100,7 +106,6 @@ internal static (Func<slice<byte>, @string, slice<byte>, nint, slice<byte>>, cry
     { /* default: */
         throw panic("unknown version");
     }
-
 }
 
 internal static Func<slice<byte>, @string, slice<byte>, nint, slice<byte>> prfForVersion(uint16 version, ref cipherSuite suite) {
@@ -114,6 +119,7 @@ internal static slice<byte> masterFromPreMasterSecret(uint16 version, ref cipher
     var seed = new slice<byte>(0, len(clientRandom) + len(serverRandom));
     seed = appendꓸꓸꓸ(seed, clientRandom);
     seed = appendꓸꓸꓸ(seed, serverRandom);
+
     return prfForVersion(version, ref suite)(preMasterSecret, masterSecretLabel, seed, masterSecretLength);
 }
 
@@ -144,6 +150,7 @@ internal static (slice<byte> clientMAC, slice<byte> serverMAC, slice<byte> clien
     var seed = new slice<byte>(0, len(serverRandom) + len(clientRandom));
     seed = appendꓸꓸꓸ(seed, serverRandom);
     seed = appendꓸꓸꓸ(seed, clientRandom);
+
     nint n = 2 * macLen + 2 * keyLen + 2 * ivLen;
     var keyMaterial = prfForVersion(version, ref suite)(masterSecret, keyExpansionLabel, seed, n);
     clientMAC = keyMaterial.slice(0, macLen);
@@ -165,10 +172,12 @@ internal static ΔfinishedHash newFinishedHash(uint16 version, ref cipherSuite c
     if (version >= VersionTLS12) {
         buffer = new byte[]{}.slice();
     }
+
     var (prf, hash) = prfAndHashForVersion(version, ref cipherSuite);
     if (hash != 0) {
         return new ΔfinishedHash(hash.New(), hash.New(), default!, default!, buffer, version, prf);
     }
+
     return new ΔfinishedHash(sha1.New(), sha1.New(), md5.New(), md5.New(), buffer, version, prf);
 }
 
@@ -189,13 +198,16 @@ partial struct ΔfinishedHash {
 internal static (nint n, error err) Write(this ref ΔfinishedHash h, slice<byte> msg) {
     h.client.Write(msg);
     h.server.Write(msg);
+
     if (h.version < VersionTLS12) {
         h.clientMD5.Write(msg);
         h.serverMD5.Write(msg);
     }
+
     if (h.buffer != default!) {
         h.buffer = appendꓸꓸꓸ(h.buffer, msg);
     }
+
     return (len(msg), default!);
 }
 
@@ -203,6 +215,7 @@ internal static slice<byte> Sum(this ΔfinishedHash h) {
     if (h.version >= VersionTLS12) {
         return h.client.Sum(default!);
     }
+
     var @out = new slice<byte>(0, md5.ΔSize + sha1.ΔSize);
     @out = h.clientMD5.Sum(@out);
     return h.client.Sum(@out);
@@ -226,17 +239,21 @@ internal static slice<byte> hashForClientCertificate(this ΔfinishedHash h, uint
     if ((h.version >= VersionTLS12 || sigType == signatureEd25519) && h.buffer == default!) {
         throw panic("tls: handshake hash for a client certificate requested after discarding the handshake buffer");
     }
+
     if (sigType == signatureEd25519) {
         return h.buffer;
     }
+
     if (h.version >= VersionTLS12) {
         var hash = hashAlg.New();
         hash.Write(h.buffer);
         return hash.Sum(default!);
     }
+
     if (sigType == signatureECDSA) {
         return h.server.Sum(default!);
     }
+
     return h.Sum();
 }
 
@@ -274,8 +291,8 @@ internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> ekmFromMa
     return (@string label, slice<byte> context, nint length) => {
         var exprᴛ1 = label;
         if (exprᴛ1 == "client finished"u8 || exprᴛ1 == "server finished"u8 || exprᴛ1 == "master secret"u8 || exprᴛ1 == "key expansion"u8) {
-            return (default!, fmt.Errorf("crypto/tls: reserved ExportKeyingMaterial label: %s"u8, // These values are reserved and may not be used.
- label));
+            // These values are reserved and may not be used.
+            return (default!, fmt.Errorf("crypto/tls: reserved ExportKeyingMaterial label: %s"u8, label));
         }
 
         nint seedLen = len(serverRandomʗ1) + len(clientRandomʗ1);
@@ -283,8 +300,10 @@ internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> ekmFromMa
             seedLen += 2 + len(context);
         }
         var seed = new slice<byte>(0, seedLen);
+
         seed = appendꓸꓸꓸ(seed, clientRandomʗ1);
         seed = appendꓸꓸꓸ(seed, serverRandomʗ1);
+
         if (context != default!) {
             if (len(context) >= (1 << (int)(16))) {
                 return (default!, fmt.Errorf("crypto/tls: ExportKeyingMaterial context too long"u8));
@@ -292,6 +311,7 @@ internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> ekmFromMa
             seed = append(seed, (byte)((len(context) >> (int)(8))), (byte)len(context));
             seed = appendꓸꓸꓸ(seed, context);
         }
+
         return (prfForVersion(version, ref (Ꮡsuite).DerefOrNull())(masterSecretʗ1, label, seed, length), default!);
     };
 }

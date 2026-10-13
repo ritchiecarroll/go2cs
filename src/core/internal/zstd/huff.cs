@@ -28,13 +28,15 @@ internal static readonly @string huffmanTableTooSmallˢ = "Huffman table too sma
 // RFC 4.2.1.
 internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> Ꮡr, block data, nint off, slice<uint16> table) {
     nint tableBits = default!;
-
     ref var r = ref Ꮡr.DerefOrNull();
+
     if (off >= builtin.len(data)) {
         return (0, 0, r.makeEOFError(off));
     }
+
     var hdr = data[off];
     off++;
+
     array<uint8> weights = new(256);
     nint count = default!;
     if (hdr < 128){
@@ -47,23 +49,29 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
             return (0, 0, errΔ1);
         }
         var fseTable = r.fseScratch;
+
         if (off + (nint)hdr > builtin.len(data)) {
             return (0, 0, r.makeEOFError(off));
         }
+
         (var rbr, errΔ1) = Ꮡr.makeReverseBitReader(data, off + (nint)hdr - 1, noff);
         if (errΔ1 != default!) {
             return (0, 0, errΔ1);
         }
+
         (var state1, errΔ1) = rbr.val((uint8)fseBits);
         if (errΔ1 != default!) {
             return (0, 0, errΔ1);
         }
+
         (var state2, errΔ1) = rbr.val((uint8)fseBits);
         if (errΔ1 != default!) {
             return (0, 0, errΔ1);
         }
+
         // There are two independent FSE streams, tracked by
         // state1 and state2. We decode them alternately.
+
         while (ᐧ) {
             var pt = Ꮡ(fseTable, state1);
             if (!rbr.fetch((~pt).bits)) {
@@ -75,17 +83,22 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
                 count += 2;
                 break;
             }
+
             var (v, errΔ2) = rbr.val((~pt).bits);
             if (errΔ2 != default!) {
                 return (0, 0, errΔ2);
             }
             state1 = (uint32)(~pt).@base + v;
+
             if (count >= 255) {
                 return (0, 0, rbr.makeError(huffmanCountOverflowˢ));
             }
+
             weights[count] = pt.Value.sym;
             count++;
+
             pt = Ꮡ(fseTable, state2);
+
             if (!rbr.fetch((~pt).bits)) {
                 if (count >= 254) {
                     return (0, 0, rbr.makeError(huffmanCountOverflowˢ));
@@ -95,17 +108,21 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
                 count += 2;
                 break;
             }
+
             (v, errΔ2) = rbr.val((~pt).bits);
             if (errΔ2 != default!) {
                 return (0, 0, errΔ2);
             }
             state2 = (uint32)(~pt).@base + v;
+
             if (count >= 255) {
                 return (0, 0, rbr.makeError(huffmanCountOverflowˢ));
             }
+
             weights[count] = pt.Value.sym;
             count++;
         }
+
         off += (nint)hdr;
     } else {
         // The table is not compressed. Each weight is 4 bits.
@@ -120,7 +137,9 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
             weights[i + 1] = (uint8)((byte)(b & 0xf));
         }
     }
+
     // RFC 4.2.1.3.
+
     array<uint32> weightMark = new(13);
     var weightMask = (uint32)0;
     foreach (var (_, w) in weights.slice(0, count)) {
@@ -135,13 +154,16 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
     if (weightMask == 0) {
         return (0, 0, r.makeError(off, badHuffmanWeightsˢ));
     }
+
     tableBits = 32 - bits.LeadingZeros32(weightMask);
     if (tableBits > maxHuffmanBits) {
         return (0, 0, r.makeError(off, badHuffmanWeightsˢ));
     }
+
     if (builtin.len(table) < ((nint)1).Lsh((int64)(tableBits))) {
         return (0, 0, r.makeError(off, huffmanTableTooSmallˢ));
     }
+
     // Work out the last weight value, which is omitted because
     // the weights must sum to a power of two.
     var left = (((uint32)1).Lsh((int64)(tableBits))) - weightMask;
@@ -158,9 +180,11 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
     weights[count] = (uint8)(highBit + 1);
     count++;
     weightMark[highBit + 1]++;
+
     if (weightMark[1] < 2 || (uint32)(weightMark[1] & 1) != 0) {
         return (0, 0, r.makeError(off, badHuffmanWeightsˢ));
     }
+
     // Change weightMark from a count of weights to the index of
     // the first symbol for that weight. We shift the indexes to
     // also store how many we have seen so far,
@@ -170,6 +194,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
         next += weightMark[i + 1].Lsh((int64)(i));
         weightMark[i + 1] = cur;
     }
+
     foreach (var (i, w) in weights.slice(0, count)) {
         if (w == 0) {
             continue;
@@ -182,6 +207,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
         }
         weightMark[w] += length;
     }
+
     return (tableBits, off, default!);
 }
 

@@ -65,14 +65,12 @@ public static complex128 Sin(complex128 x) {
             case {} when math.IsInf(re, 0) || math.IsNaN(re): {
                 return complex(math.NaN(), im);
             }}
-
             break;
         }
         case {} when re == 0D && math.IsNaN(im): {
             return x;
         }}
     }
-
     var (s, c) = math.Sincos(real(x));
     var (sh, ch) = sinhcosh(imag(x));
     return complex(s * ch, c * sh);
@@ -107,14 +105,12 @@ public static complex128 Sinh(complex128 x) {
             case {} when math.IsInf(im, 0) || math.IsNaN(im): {
                 return complex(re, math.NaN());
             }}
-
             break;
         }
         case {} when im == 0D && math.IsNaN(re): {
             return complex(math.NaN(), im);
         }}
     }
-
     var (s, c) = math.Sincos(imag(x));
     var (sh, ch) = sinhcosh(real(x));
     return complex(c * sh, s * ch);
@@ -154,14 +150,12 @@ public static complex128 Cos(complex128 x) {
             case {} when math.IsInf(re, 0) || math.IsNaN(re): {
                 return complex(math.Inf(1), math.NaN());
             }}
-
             break;
         }
         case {} when re == 0D && math.IsNaN(im): {
             return complex(math.NaN(), 0D);
         }}
     }
-
     var (s, c) = math.Sincos(real(x));
     var (sh, ch) = sinhcosh(imag(x));
     return complex(c * ch, -s * sh);
@@ -195,14 +189,12 @@ public static complex128 Cosh(complex128 x) {
             case {} when math.IsInf(im, 0) || math.IsNaN(im): {
                 return complex(math.Inf(1), math.NaN());
             }}
-
             break;
         }
         case {} when im == 0D && math.IsNaN(re): {
             return complex(math.NaN(), im);
         }}
     }
-
     var (s, c) = math.Sincos(imag(x));
     var (sh, ch) = sinhcosh(real(x));
     return complex(c * ch, s * sh);

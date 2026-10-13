@@ -73,6 +73,7 @@ public static (ж<Data>, error) New(slice<byte> abbrev, slice<byte> aranges, sli
         typeCache: new map<Offset, ΔType>(),
         typeSigs: new map<uint64, ж<typeUnit>>()
     ));
+
     // Sniff .debug_info to figure out byte order.
     // 32-bit DWARF: 4 byte length, 2 byte version.
     // 64-bit DWARf: 4 bytes of 0xff, 8 byte length, 2 byte version.
@@ -141,7 +142,6 @@ public static error AddSection(this ref Data d, @string name, slice<byte> conten
     else if (exprᴛ1 == ".debug_rnglists"u8) {
         d.rngLists = contents;
     }
-
     // Just ignore names that we don't yet support.
     return err;
 }

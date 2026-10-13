@@ -29,11 +29,15 @@ public partial struct hmacDRBG {
 internal static UntypedInt reseedInterval => /* 1 << 48 */ 281474976710656;
 internal static UntypedInt maxRequestSize => /* (1 << 19) / 8 */ 65536;
 
+// plainPersonalizationString is used by HMAC_DRBG as-is.
 partial struct plainPersonalizationString /*[]byte*/;
 
 internal static void isPersonalizationString(this plainPersonalizationString _) {
 }
 
+// Each entry in blockAlignedPersonalizationString is written to the HMAC at a
+// block boundary, as specified in draft-irtf-cfrg-det-sigs-with-noise-04,
+// Section 4.
 partial struct blockAlignedPersonalizationString /*[]slice<byte>*/;
 
 internal static void isPersonalizationString(this blockAlignedPersonalizationString _) {
@@ -48,14 +52,18 @@ internal static ж<hmacDRBG> newDRBG<H>(Func<H> hash, slice<byte> entropy, slice
 {
     // HMAC_DRBG_Instantiate_algorithm, per Section 10.1.2.3.
     fips140.RecordApproved();
+
     var d = Ꮡ(new hmacDRBG(
         newHMAC: (slice<byte> key) => hmac.New(hash, key)
     ));
     nint size = hash().Size();
+
     // K = 0x00 0x00 0x00 ... 0x00
     var K = new slice<byte>(size);
+
     // V = 0x01 0x01 0x01 ... 0x01
     d.Value.V = bytes.Repeat(new byte[]{0x01}.slice(), size);
+
     // HMAC_DRBG_Update, per Section 10.1.2.2.
     // K = HMAC (K, V || 0x00 || provided_data)
     var h = hmac.New(hash, K);
@@ -107,6 +115,7 @@ internal static ж<hmacDRBG> newDRBG<H>(Func<H> hash, slice<byte> entropy, slice
     h = hmac.New(hash, K);
     h.Write((~d).V);
     d.Value.V = h.Sum((~d).V[..0]);
+
     d.Value.hK = h;
     d.Value.reseedCounter = 1;
     return d;
@@ -138,12 +147,15 @@ internal static void pad000(ж<hmac.HMAC> Ꮡh, nint writtenSoFar) {
 public static void Generate(this ref hmacDRBG d, slice<byte> @out) {
     // HMAC_DRBG_Generate_algorithm, per Section 10.1.2.5.
     fips140.RecordApproved();
+
     if (len(@out) > maxRequestSize) {
         throw panic("ecdsa: internal error: request size exceeds maximum");
     }
+
     if (d.reseedCounter > reseedInterval) {
         throw panic("ecdsa: reseed interval exceeded");
     }
+
     nint tlen = 0;
     while (tlen < len(@out)) {
         // V = HMAC_K(V)
@@ -153,9 +165,11 @@ public static void Generate(this ref hmacDRBG d, slice<byte> @out) {
         d.V = d.hK.Sum(d.V[..0]);
         tlen += copy(@out.slice(tlen), d.V);
     }
+
     // Note that if this function shows up on ECDSA-level profiles, this can be
     // optimized in the common case by deferring the rest to the next Generate
     // call, which will never come in nearly all cases.
+
     // HMAC_DRBG_Update, per Section 10.1.2.2, without provided_data.
     // K = HMAC (K, V || 0x00)
     d.hK.Reset();
@@ -166,6 +180,7 @@ public static void Generate(this ref hmacDRBG d, slice<byte> @out) {
     d.hK = d.newHMAC(K);
     d.hK.Write(d.V);
     d.V = d.hK.Sum(d.V[..0]);
+
     d.reseedCounter++;
 }
 

@@ -9,6 +9,7 @@ using ꓸꓸꓸstring = Span<@string>;
 
 partial class template_package {
 
+// missingKeyAction defines how to respond to indexing a map with a key that is not present.
 partial struct missingKeyAction /*num:nint*/;
 
 internal static missingKeyAction mapInvalid => /* iota */ 0;  // Return an invalid reflect.Value.
@@ -39,8 +40,8 @@ partial struct option {
 //		Execution stops immediately with an error.
 public static ж<Template> Option(this ж<Template> Ꮡt, params ꓸꓸꓸstring optʗp) {
     var opt = optʗp.sslice();
-
     ref var t = ref Ꮡt.DerefOrNull();
+
     t.init();
     foreach (var (_, s) in opt) {
         t.setOption(s);
@@ -70,9 +71,7 @@ internal static void setOption(this ref Template t, @string opt) {
                     t.option.missingKey = mapError;
                     return;
                 }
-
             }
-
         }
     }
     throw panic("unrecognized option: " + opt);

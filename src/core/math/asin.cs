@@ -37,12 +37,14 @@ internal static float64 asin(float64 x) {
     if (x > 1D) {
         return NaN(); // special case
     }
+
     var temp = Sqrt(1D - x * x);
     if (x > 0.7D){
         temp = /* Pi / 2 */ 1.5707963267948966D - satan(temp / x);
     } else {
         temp = satan(x / temp);
     }
+
     if (sign) {
         temp = -temp;
     }

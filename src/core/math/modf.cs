@@ -32,11 +32,12 @@ internal static (float64 @int, float64 frac) modf(float64 f) {
         case {} when f is 0D: {
             return (f, f); // Return -0, -0 when f == -0
         }}
-
         return (0D, f);
     }
+
     var x = Float64bits(f);
     nuint e = (nuint)((nuint)((x >> (int)(shift))) & (nuint)mask) - (nuint)bias;
+
     // Keep the top 12+e bits, the integer part; clear the rest.
     if (e < 64 - 12) {
         x &= unchecked((uint64)~(uint64)(((uint64)1).Lsh((64 - 12 - e)) - 1));

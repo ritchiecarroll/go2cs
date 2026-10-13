@@ -56,8 +56,8 @@ using static go.image.gif_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/gif/reader.go", "reader.cs", "ABUqgoIAKlaCgoKUpoKCgpQAKV6CgpSCgpSCloKCgriCgoKCqIKCqqKClIKCgqiCggACFgAIApSSlJamgoKSgpKCzIKCkoKWqMSAgpSmhIKClIKWgoKClJSAgsiAgqaCuIKUptqCgoKUgoKUgoKAgpSAgtimgoKCgpSSgoKUpoKCgpSClKTIgpKWpLSCgILcgoKClIKUgqaCgoKUgsqCgIKkgpSCgoKCgpSClNbCgoKUgoKCgqaClJSClJSAgtyCgoKUtoKClIKmgoKSgIKClAANGoCCgpTKgIKSgriCgoLMgpaCgoLKgoIACAaCgIKkgoKCggAQJIKU3IKCgpSAgqQADBIABhCygoKCgoKCgoKCgqaqooKAgqQAIEaigoCCpAALGKqigoCCpO6C")]
-[assembly: go.GoPositionMap("image/gif/writer.go", "writer.cs", "ABs0lIKCgqYAIkSCpoKmgoKogoKCqIKCqqKCgIK2pqaClIKClKaCgpSmgoKUpoKClOaCgpSCgqiCgoSAgoKCgoKCgoKCgpS4goKCuIKCgoKCgoKClIKCgoL4goKUgoKUxoCClIKkgoKUgpSUpoKCgoKW9rKCloKCloKCgpSCgpaCgoKClICCgriCgoKCgpSUloKUlIKUgoKCgoLMgoCClIKCgpTKgqaCuIKClISCgoKAgoKCgqaCgoKCyIIAFSjCgpaClsiClIKCgpKCgIK4gIKUpoKCgoKUlIKC2MSCgpaCgpSClIKWgoKAgoKCgtrKgoKUzIKSgpY=", "", "", "241=Equal/2/2/1;491=Dx/1/1/5,Dy/1/1/6")]
+[assembly: go.GoPositionMap("image/gif/reader.go", "reader.cs", "ABUqgoIAIlaCgoKUpoKCgpQAKV6CgpSCgpSCpoKCgriCgoKCuIKCqqKClIKCgriCggACFgAIApSSlKamgoKSgpKC3IKCkoKmqMSAgpS2lIKClIKmgoKClJSAgsiAgraCuIKUpsqCgoKUgoKUgoKAgpSAgtimgoKCgpSSgoKUpoKCgpSClKTYgoKmpJSCgILsgoKClIKUgqaCgoKUgsqCgIKkgpSCgoKCgpSClNbCgoKUgoKCgqaClJSClJSAgtyCgoKUtoKClIKmgoKSgIKClAANGoCCgpTagIKSgsiCgoLcgqaCgoLKgoIACAaCgIKkgoKCggARJIKU3IKCgpSAgqQACBIABhCygoKCgoKCgoKCgqaqooKAgqQAIEaigoCCpAALGKqigoCCpO6C")]
+[assembly: go.GoPositionMap("image/gif/writer.go", "writer.cs", "ABo0lIKCgqYAIkSCpoKmgoK4goKCuIKCqqKCgIK2pqaClIKClKaCgpSmgoKUpoKClOaCgpSCgriCgpSAgoKCgoKCgoKCgpS4goKCyIKCgoKCgoKClIKCgoL4goKUgoKUxoCClIKkgoKUgpSUpoKCgoKW9rKCpoKCpoKCgpSCgqaCgoKClICCgsiCgoKCgpSUpoKUlIKUgoKCgoLcgoCClIKCgpTKgqaCyIKClJSCgoKAgoKCgqaCgoKCyIIAFSjCgqaCpsiClIKCgpKCgILIgIKUtoKCgoKUlIKC2MSCgqaCgpSClIKmgoKAgoKCgtrKgoKU3IKSgqY=", "", "", "245=Equal/2/2/1;511=Dx/1/1/5,Dy/1/1/6")]
 // </GoSourcePositionMaps>
 
 namespace go.image;

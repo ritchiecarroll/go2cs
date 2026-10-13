@@ -11,9 +11,7 @@ partial class bytealg_package {
 
 // Offsets into internal/cpu records for use in assembly.
 internal static uintptr offsetX86HasSSE42 => /* unsafe.Offsetof(cpu.X86.HasSSE42) */ 84;
-
 internal static uintptr offsetX86HasAVX2 => /* unsafe.Offsetof(cpu.X86.HasAVX2) */ 67;
-
 internal static uintptr offsetX86HasPOPCNT => /* unsafe.Offsetof(cpu.X86.HasPOPCNT) */ 78;
 
 internal static uintptr offsetS390xHasVX => /* unsafe.Offsetof(cpu.S390X.HasVX) */ 80;

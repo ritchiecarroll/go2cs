@@ -187,7 +187,6 @@ partial struct Profile {
 }
 
 // profiles records all registered profiles.
-
 partial struct profilesᴛ1 /*dyn*/ {
     internal sync.Mutex mu;
     internal map<@string, ж<Profile>> m;
@@ -216,11 +215,10 @@ internal static void initᴛheapProfile() { heapProfile = Ꮡ(new Profile(
     write: writeHeap
 )); }
 
-// identical to heap profile
 internal static ж<Profile> allocsProfile;
 internal static void initᴛallocsProfile() { allocsProfile = Ꮡ(new Profile(
     name: "allocs"u8,
-    count: countHeap,
+    count: countHeap, // identical to heap profile
     write: writeAlloc
 )); }
 
@@ -303,10 +301,12 @@ public static slice<ж<Profile>> Profiles() {
     try {
         lockProfiles();
         defer(unlockProfiles, ref ᒐ);
+
         var all = new slice<ж<Profile>>(0, len(profiles.m));
         foreach (var (_, p) in profiles.m) {
             all = append(all, p);
         }
+
         slices.SortFunc(all, (ж<Profile> a, ж<Profile> b) => strings_package.Compare((~a).name, (~b).name));
         return all;
     }
@@ -366,6 +366,7 @@ public static partial void Add(this ж<Profile> Ꮡp, any value, nint skip) {
         if (p.write != default!) {
             throw panic("pprof: Add called on built-in Profile " + p.name);
         }
+
         var stk = new slice<uintptr>(32);
         nint n = runtime.Callers(skip + 1, stk[..]);
         stk = stk.slice(0, n);
@@ -373,6 +374,7 @@ public static partial void Add(this ж<Profile> Ꮡp, any value, nint skip) {
             // The value for skip is too large, and there's no stack trace to record.
             stk = new uintptr[]{abi.FuncPCABIInternal(lostProfileEvent)}.slice();
         }
+
         p.mu.Lock();
         ᒐd1 = true;
         if (p.m[value] != default!) {
@@ -424,6 +426,7 @@ public static error WriteTo(this ж<Profile> Ꮡp, io.Writer w, nint debug) {
     if (p.write != default!) {
         return p.write(w, debug);
     }
+
     // Obtain consistent snapshot under lock; then process without lock.
     p.mu.Lock();
     var all = new slice<slice<uintptr>>(0, len(p.m));
@@ -431,8 +434,10 @@ public static error WriteTo(this ж<Profile> Ꮡp, io.Writer w, nint debug) {
         all = append(all, stk);
     }
     p.mu.Unlock();
+
     // Map order is non-deterministic; make output deterministic.
     slices.SortFunc<slice<slice<uintptr>>, slice<uintptr>>(all, slices.Compare<slice<uintptr>, uintptr>);
+
     return printCountProfile(w, debug, p.name, ((stackProfile)all));
 }
 
@@ -494,7 +499,9 @@ internal static error printCountCycleProfile(io.Writer w, @string countName, @st
     b.of(profileBuilder.Ꮡpb).int64Opt(tagProfile_Period, 1);
     b.pbValueType(tagProfile_SampleType, countName, countˢ);
     b.pbValueType(tagProfile_SampleType, cycleName, nanosecondsˢ);
+
     var cpuGHz = (float64)pprof_cyclesPerSecond() / 1e9D;
+
     var values = new int64[]{0, 0}.slice();
     slice<uint64> locs = default!;
     var expandedStack = pprof_makeProfStack();
@@ -543,7 +550,9 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
         }
         count[k]++;
     }
+
     sort.Sort(new keysByCountжInterface(Ꮡ(new keysByCount(keys, count))));
+
     if (debug > 0) {
         // Print debug profile in legacy format
         var tw = tabwriter.NewWriter(w, 1, 8, 1, (rune)'\t', 0);
@@ -554,11 +563,13 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
         }
         return tw.Flush();
     }
+
     // Output profile in protobuf form.
     var b = newProfileBuilder(w);
     b.pbValueType(tagProfile_PeriodType, name, countˢ);
     b.of(profileBuilder.Ꮡpb).int64Opt(tagProfile_Period, 1);
     b.pbValueType(tagProfile_SampleType, name, countˢ);
+
     var values = new int64[]{0}.slice();
     slice<uint64> locs = default!;
     foreach (var (_, k) in keys) {
@@ -678,6 +689,7 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
         memStats = @new<runtime.MemStats>();
         runtime.ReadMemStats(memStats);
     }
+
     // Find out how many records there are (the call
     // pprof_memProfileInternal(nil, true) below),
     // allocate that many records, and get the data.
@@ -697,15 +709,19 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
             p = p.slice(0, n);
             break;
         }
+        // Profile grew; try again.
     }
-    // Profile grew; try again.
+
     if (debug == 0) {
         return writeHeapProto(w, p, (int64)runtime.MemProfileRate, defaultSampleType);
     }
+
     slices.SortFunc(p, (profilerecord.MemProfileRecord a, profilerecord.MemProfileRecord bΔ1) => cmp.Compare(a.InUseBytes(), bΔ1.InUseBytes()));
+
     var b = bufio.NewWriter(w);
     var tw = tabwriter.NewWriter(new bufio_WriterжWriter(b), 1, 8, 1, (rune)'\t', 0);
     w = new tabwriter_WriterжWriter(tw);
+
     runtime.MemProfileRecord total = new();
     foreach (var (i, _) in p) {
         var r = Ꮡ(p, i);
@@ -714,10 +730,12 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
         total.FreeBytes += r.Value.FreeBytes;
         total.FreeObjects += r.Value.FreeObjects;
     }
+
     // Technically the rate is MemProfileRate not 2*MemProfileRate,
     // but early versions of the C++ heap profiler reported 2*MemProfileRate,
     // so that's what pprof has come to expect.
     nint rate = 2 * runtime.MemProfileRate;
+
     // pprof reads a profile with alloc == inuse as being a "2-column" profile
     // (objects and bytes, not distinguishing alloc from inuse),
     // but then such a profile can't be merged using pprof *.prof with
@@ -729,10 +747,12 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
     if (inUseBytes == allocBytes) {
         allocBytes++;
     }
+
     fmt.Fprintf(w, "heap profile: %d: %d [%d: %d] @ heap/%d\n"u8,
         total.InUseObjects(), inUseBytes,
         total.AllocObjects, allocBytes,
         rate);
+
     foreach (var (i, _) in p) {
         var r = Ꮡ(p, i);
         fmt.Fprintf(w, "%d: %d [%d: %d] @"u8,
@@ -744,6 +764,7 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
         fmt.Fprintf(w, "\n"u8);
         printStackRecord(w, (~r).Stack, false);
     }
+
     // Print memstats information too.
     // Pprof will ignore, but useful for people
     var s = memStats;
@@ -754,18 +775,21 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
     fmt.Fprintf(w, "# Lookups = %d\n"u8, (~s).Lookups);
     fmt.Fprintf(w, "# Mallocs = %d\n"u8, (~s).Mallocs);
     fmt.Fprintf(w, "# Frees = %d\n"u8, (~s).Frees);
+
     fmt.Fprintf(w, "# HeapAlloc = %d\n"u8, (~s).HeapAlloc);
     fmt.Fprintf(w, "# HeapSys = %d\n"u8, (~s).HeapSys);
     fmt.Fprintf(w, "# HeapIdle = %d\n"u8, (~s).HeapIdle);
     fmt.Fprintf(w, "# HeapInuse = %d\n"u8, (~s).HeapInuse);
     fmt.Fprintf(w, "# HeapReleased = %d\n"u8, (~s).HeapReleased);
     fmt.Fprintf(w, "# HeapObjects = %d\n"u8, (~s).HeapObjects);
+
     fmt.Fprintf(w, "# Stack = %d / %d\n"u8, (~s).StackInuse, (~s).StackSys);
     fmt.Fprintf(w, "# MSpan = %d / %d\n"u8, (~s).MSpanInuse, (~s).MSpanSys);
     fmt.Fprintf(w, "# MCache = %d / %d\n"u8, (~s).MCacheInuse, (~s).MCacheSys);
     fmt.Fprintf(w, "# BuckHashSys = %d\n"u8, (~s).BuckHashSys);
     fmt.Fprintf(w, "# GCSys = %d\n"u8, (~s).GCSys);
     fmt.Fprintf(w, "# OtherSys = %d\n"u8, (~s).OtherSys);
+
     fmt.Fprintf(w, "# NextGC = %d\n"u8, (~s).NextGC);
     fmt.Fprintf(w, "# LastGC = %d\n"u8, (~s).LastGC);
     fmt.Fprintf(w, "# PauseNs = %d\n"u8, (~s).PauseNs);
@@ -774,8 +798,10 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
     fmt.Fprintf(w, "# NumForcedGC = %d\n"u8, (~s).NumForcedGC);
     fmt.Fprintf(w, "# GCCPUFraction = %v\n"u8, (~s).GCCPUFraction);
     fmt.Fprintf(w, "# DebugGC = %v\n"u8, (~s).DebugGC);
+
     // Also flush out MaxRSS on supported platforms.
     addMaxRSS(w);
+
     tw.Flush();
     return b.Flush();
 }
@@ -846,6 +872,7 @@ internal static error writeRuntimeProfile(io.Writer w, nint debug, @string name,
     slice<profilerecord.StackRecord> p = default!;
     slice<@unsafe.Pointer> labels = default!;
     var (n, ok) = fetch(default!, default!);
+
     while (ᐧ) {
         // Allocate room for a slightly bigger profile,
         // in case a few more entries have been added
@@ -857,8 +884,9 @@ internal static error writeRuntimeProfile(io.Writer w, nint debug, @string name,
             p = p.slice(0, n);
             break;
         }
+        // Profile grew; try again.
     }
-    // Profile grew; try again.
+
     return printCountProfile(w, debug, name, new runtimeProfileжcountProfile(Ꮡ(new runtimeProfile(p, labels))));
 }
 
@@ -878,7 +906,6 @@ internal static slice<uintptr> Stack(this ref runtimeProfile p, nint i) {
 internal static ж<labelMap> Label(this ref runtimeProfile p, nint i) {
     return (ж<labelMap>)(uintptr)(p.labels[i]);
 }
-
 
 partial struct cpuᴛ1 /*dyn*/ {
     public partial ref go.sync_package.Mutex Mutex { get; }
@@ -912,6 +939,7 @@ public static partial error StartCPUProfile(io.Writer w) {
         // convert sample counts to seconds. Instead of requiring
         // each client to specify the frequency, we hard code it.
         const nint hz = 100;
+
         Ꮡcpu.of(cpuᴛ1.ᏑMutex).Lock();
         defer(Ꮡcpu.of(cpuᴛ1.ᏑMutex).Unlock, ref ᒐ);
         if (cpu.done == default!) {
@@ -972,6 +1000,7 @@ public static void StopCPUProfile() {
     try {
         Ꮡcpu.of(cpuᴛ1.ᏑMutex).Lock();
         defer(Ꮡcpu.of(cpuᴛ1.ᏑMutex).Unlock, ref ᒐ);
+
         if (!cpu.profiling) {
             return;
         }
@@ -1027,13 +1056,17 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
             break;
         }
     }
+
     slices.SortFunc(p, (profilerecord.BlockProfileRecord a, profilerecord.BlockProfileRecord bΔ1) => cmp.Compare(bΔ1.Cycles, a.Cycles));
+
     if (debug <= 0) {
         return printCountCycleProfile(w, contentionsˢ, delayˢ, p);
     }
+
     var b = bufio.NewWriter(w);
     var tw = tabwriter.NewWriter(w, 1, 8, 1, (rune)'\t', 0);
     w = new tabwriter_WriterжWriter(tw);
+
     fmt.Fprintf(w, "--- %v:\n"u8, name);
     fmt.Fprintf(w, "cycles/second=%v\n"u8, pprof_cyclesPerSecond());
     if (name == "mutex"u8) {
@@ -1053,6 +1086,7 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
             printStackRecord(w, stack, true);
         }
     }
+
     if (tw != nil) {
         tw.Flush();
     }

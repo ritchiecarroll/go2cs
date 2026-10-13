@@ -12,6 +12,8 @@ using net = net_package;
 
 partial class tls_package {
 
+// QUICEncryptionLevel represents a QUIC encryption level used to transmit
+// handshake messages.
 partial struct QUICEncryptionLevel /*num:nint*/;
 
 public static QUICEncryptionLevel QUICEncryptionLevelInitial => /* QUICEncryptionLevel(iota) */ 0;
@@ -42,7 +44,6 @@ public static @string String(this QUICEncryptionLevel l) {
     { /* default: */
         return fmt.Sprintf("QUICEncryptionLevel(%v)"u8, (nint)l);
     }
-
 }
 
 // A QUICConn represents a connection which uses a QUIC implementation as the underlying
@@ -65,17 +66,63 @@ partial struct QUICConfig {
     public bool EnableSessionEvents;
 }
 
+// A QUICEventKind is a type of operation on a QUIC connection.
 partial struct QUICEventKind /*num:nint*/;
 
+// QUICNoEvent indicates that there are no events available.
 public static QUICEventKind QUICNoEvent => /* iota */ 0;
+
+// QUICSetReadSecret and QUICSetWriteSecret provide the read and write
+// secrets for a given encryption level.
+// QUICEvent.Level, QUICEvent.Data, and QUICEvent.Suite are set.
+//
+// Secrets for the Initial encryption level are derived from the initial
+// destination connection ID, and are not provided by the QUICConn.
 public static QUICEventKind QUICSetReadSecret => 1;
 public static QUICEventKind QUICSetWriteSecret => 2;
+
+// QUICWriteData provides data to send to the peer in CRYPTO frames.
+// QUICEvent.Data is set.
 public static QUICEventKind QUICWriteData => 3;
+
+// QUICTransportParameters provides the peer's QUIC transport parameters.
+// QUICEvent.Data is set.
 public static QUICEventKind QUICTransportParameters => 4;
+
+// QUICTransportParametersRequired indicates that the caller must provide
+// QUIC transport parameters to send to the peer. The caller should set
+// the transport parameters with QUICConn.SetTransportParameters and call
+// QUICConn.NextEvent again.
+//
+// If transport parameters are set before calling QUICConn.Start, the
+// connection will never generate a QUICTransportParametersRequired event.
 public static QUICEventKind QUICTransportParametersRequired => 5;
+
+// QUICRejectedEarlyData indicates that the server rejected 0-RTT data even
+// if we offered it. It's returned before QUICEncryptionLevelApplication
+// keys are returned.
+// This event only occurs on client connections.
 public static QUICEventKind QUICRejectedEarlyData => 6;
+
+// QUICHandshakeDone indicates that the TLS handshake has completed.
 public static QUICEventKind QUICHandshakeDone => 7;
+
+// QUICResumeSession indicates that a client is attempting to resume a previous session.
+// [QUICEvent.SessionState] is set.
+//
+// For client connections, this event occurs when the session ticket is selected.
+// For server connections, this event occurs when receiving the client's session ticket.
+//
+// The application may set [QUICEvent.SessionState.EarlyData] to false before the
+// next call to [QUICConn.NextEvent] to decline 0-RTT even if the session supports it.
 public static QUICEventKind QUICResumeSession => 8;
+
+// QUICStoreSession indicates that the server has provided state permitting
+// the client to resume the session.
+// [QUICEvent.SessionState] is set.
+// The application should use [QUICConn.StoreSession] session to store the [SessionState].
+// The application may modify the [SessionState] before storing it.
+// This event only occurs on client connections.
 public static QUICEventKind QUICStoreSession => 9;
 
 // A QUICEvent is an event occurring on a QUIC connection.
@@ -212,8 +259,8 @@ public static error Close(this ref QUICConn q) {
     }
     (~(~q.conn).quic).cancel();
     foreach (var _ᴛ1 in (~(~q.conn).quic).blockedc) {
+        // Wait for the handshake goroutine to return.
     }
-    // Wait for the handshake goroutine to return.
     return (~q.conn).handshakeErr;
 }
 

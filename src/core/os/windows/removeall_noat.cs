@@ -18,17 +18,20 @@ internal static error removeAll(@string path) {
         // of RemoveAll. See issue 28830.
         return default!;
     }
+
     // The rmdir system call permits removing "." on Plan 9,
     // so we don't permit it to remain consistent with the
     // "at" implementation of RemoveAll.
     if (endsWithDot(path)) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "RemoveAll"u8, Path: path, Err: syscall.EINVAL)));
     }
+
     // Simple case: if Remove works, we're done.
     var err = Remove(path);
     if (err == default! || IsNotExist(err)) {
         return default!;
     }
+
     // Otherwise, is this a directory we need to recurse into?
     var (dir, serr) = Lstat(path);
     if (serr != default!) {
@@ -43,6 +46,7 @@ internal static error removeAll(@string path) {
         // Not a directory; return the error from Remove.
         return err;
     }
+
     // Remove contents & return first error.
     err = default!;
     while (ᐧ) {
@@ -54,12 +58,15 @@ internal static error removeAll(@string path) {
             }
             return errΔ1;
         }
+
         const nint reqSize = 1024;
         slice<@string> names = default!;
         error readErr = default!;
+
         while (ᐧ) {
             nint numErr = 0;
             (names, readErr) = fd.Readdirnames(reqSize);
+
             foreach (var (_, name) in names) {
                 var err1Δ1 = RemoveAll(path + ((@string)(rune)PathSeparator) + name);
                 if (errΔ1 == default!) {
@@ -69,18 +76,21 @@ internal static error removeAll(@string path) {
                     numErr++;
                 }
             }
+
             // If we can delete any entry, break to start new iteration.
             // Otherwise, we discard current names, get next entries and try deleting them.
             if (numErr != reqSize) {
                 break;
             }
         }
+
         // Removing files from the directory may have caused
         // the OS to reshuffle it. Simply calling Readdirnames
         // again may skip some entries. The only reliable way
         // to avoid this is to close and re-open the
         // directory. See issue 20841.
         fd.Close();
+
         if (AreEqual(readErr, Δio.EOF)) {
             break;
         }
@@ -91,6 +101,7 @@ internal static error removeAll(@string path) {
         if (len(names) == 0) {
             break;
         }
+
         // We don't want to re-open unnecessarily, so if we
         // got fewer than request names from Readdirnames, try
         // simply removing the directory now. If that
@@ -100,6 +111,7 @@ internal static error removeAll(@string path) {
             if (err1Δ2 == default! || IsNotExist(err1Δ2)) {
                 return default!;
             }
+
             if (errΔ1 != default!) {
                 // We got some error removing the
                 // directory contents, and since we
@@ -112,6 +124,7 @@ internal static error removeAll(@string path) {
             }
         }
     }
+
     // Remove directory.
     var err1 = Remove(path);
     if (err1 == default! || IsNotExist(err1)) {

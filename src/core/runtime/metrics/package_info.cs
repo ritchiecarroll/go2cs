@@ -52,7 +52,7 @@ using static go.runtime.metrics_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("runtime/metrics/description.go", "description.cs", "ADVuALgClgamgoKUgoKCggAHFKiS")]
-[assembly: go.GoPositionMap("runtime/metrics/value.go", "value.cs", "ABhKkqyygpSssoKUrLKClA==")]
+[assembly: go.GoPositionMap("runtime/metrics/value.go", "value.cs", "ACBKkqyygpSssoKUrLKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.runtime;

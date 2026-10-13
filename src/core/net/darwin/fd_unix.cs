@@ -92,12 +92,12 @@ internal static partial (syscall.Sockaddr rsa, error ret) connect(this ж<netFD>
                 (rsa, ret) = (default!, default!); goto ᒐdone;
             }
             else if (AreEqual(exprᴛ1, syscall.EINVAL)) { matchᴛ1 = true;
+                // On Solaris and illumos we can see EINVAL if the socket has
+                // already been accepted and closed by the server.  Treat this
+                // as a successful connection--writes to the socket will see
+                // EOF.  For details and a test case in C see
+                // https://golang.org/issue/6828.
                 if (runtime.GOOS == "solaris"u8 || runtime.GOOS == "illumos"u8) {
-                    // On Solaris and illumos we can see EINVAL if the socket has
-                    // already been accepted and closed by the server.  Treat this
-                    // as a successful connection--writes to the socket will see
-                    // EOF.  For details and a test case in C see
-                    // https://golang.org/issue/6828.
                     (rsa, ret) = (default!, default!); goto ᒐdone;
                 }
                 fallthrough = true;
@@ -106,7 +106,6 @@ internal static partial (syscall.Sockaddr rsa, error ret) connect(this ж<netFD>
                 (rsa, ret) = (default!, os.NewSyscallError(connectˢ, err)); goto ᒐdone;
             }
         }
-
         {
             var err = Ꮡfd.of(netFD.Ꮡpfd).Init(fd.net, true); if (err != default!) {
                 (rsa, ret) = (default!, err); goto ᒐdone;
@@ -118,6 +117,7 @@ internal static partial (syscall.Sockaddr rsa, error ret) connect(this ж<netFD>
                 defer(Ꮡfd.of(netFD.Ꮡpfd).SetWriteDeadline, noDeadline, ref ᒐ);
             }
         }
+
         // Start the "interrupter" goroutine, if this context might be canceled.
         //
         // The interrupter goroutine waits for the context to be done and
@@ -154,6 +154,9 @@ internal static partial (syscall.Sockaddr rsa, error ret) connect(this ж<netFD>
                 var selᴛ13 = doneʗ2;
                 switch (select(ᐸꟷ(selᴛ12, ꓸꓸꓸ), ᐸꟷ(selᴛ13, ꓸꓸꓸ))) {
                 case 0 when selᴛ12.ꟷᐳ(out _): {
+                    // Force the runtime's poller to immediately give up
+                    // waiting for writability, unblocking waitWrite
+                    // below.
                     Ꮡfd.of(netFD.Ꮡpfd).SetWriteDeadline(aLongTimeAgo);
                     testHookCanceledDial();
                     interruptResʗ2.ᐸꟷ(ctx.Err());
@@ -165,9 +168,7 @@ internal static partial (syscall.Sockaddr rsa, error ret) connect(this ж<netFD>
                 }}
             });
         }
-        // Force the runtime's poller to immediately give up
-        // waiting for writability, unblocking waitWrite
-        // below.
+
         while (ᐧ) {
             // Performing multiple connect system calls on a
             // non-blocking socket under Unix variants does not
@@ -203,11 +204,11 @@ internal static partial (syscall.Sockaddr rsa, error ret) connect(this ж<netFD>
                     (rsa, ret) = (default!, default!); goto ᒐdone;
                 }
                 else if (exprᴛ2 == ((syscall.Errno)0)) {
+                    // The runtime poller can wake us up spuriously;
+                    // see issues 14548 and 19289. Check that we are
+                    // really connected; if not, wait again.
                     {
                         var (rsaΔ2, errΔ3) = syscall.Getpeername(fd.pfd.Sysfd); if (errΔ3 == default!) {
-                            // The runtime poller can wake us up spuriously;
-                            // see issues 14548 and 19289. Check that we are
-                            // really connected; if not, wait again.
                             (rsa, ret) = (rsaΔ2, default!); goto ᒐdone;
                         }
                     }
@@ -216,7 +217,6 @@ internal static partial (syscall.Sockaddr rsa, error ret) connect(this ж<netFD>
                     (rsa, ret) = (default!, os.NewSyscallError(connectˢ, errΔ1)); goto ᒐdone;
                 }
             }
-
             runtime.KeepAlive(Ꮡfd.OrTypedNil());
         }
     }
@@ -228,8 +228,8 @@ internal static partial (syscall.Sockaddr rsa, error ret) connect(this ж<netFD>
 internal static (ж<netFD> netfd, error err) accept(this ж<netFD> Ꮡfd) {
     ж<netFD> netfd = default!;
     error err = default!;
-
     ref var fd = ref Ꮡfd.DerefOrNull();
+
     (var d, var rsa, var errcall, err) = Ꮡfd.of(netFD.Ꮡpfd).Accept();
     if (err != default!) {
         if (errcall != ""u8) {
@@ -237,6 +237,7 @@ internal static (ж<netFD> netfd, error err) accept(this ж<netFD> Ꮡfd) {
         }
         return (default!, err);
     }
+
     {
         (netfd, err) = newFD(d, fd.family, fd.sotype, fd.net); if (err != default!) {
             poll.CloseFunc(d);
@@ -261,8 +262,8 @@ internal static (ж<netFD> netfd, error err) accept(this ж<netFD> Ꮡfd) {
 
 internal static (ж<os.File> f, error err) dup(this ж<netFD> Ꮡfd) {
     error err = default!;
-
     ref var fd = ref Ꮡfd.DerefOrNull();
+
     (var ns, var call, err) = Ꮡfd.of(netFD.Ꮡpfd).Dup();
     if (err != default!) {
         if (call != ""u8) {
@@ -270,6 +271,7 @@ internal static (ж<os.File> f, error err) dup(this ж<netFD> Ꮡfd) {
         }
         return (default!, err);
     }
+
     return (newUnixFile(ns, fd.name()), default!);
 }
 

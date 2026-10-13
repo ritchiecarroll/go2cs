@@ -20,12 +20,18 @@ using @internal;
 
 partial class adler32_package {
 
+// mod is the largest prime that is less than 65536.
 internal static UntypedInt mod => 65521;
+// nmax is the largest n such that
+// 255 * n * (n+1) / 2 + (n+1) * (mod-1) <= 2^32-1.
+// It is mentioned in RFC 1950 (search for "5552").
 internal static UntypedInt nmax => 5552;
 
 // The size of an Adler-32 checksum in bytes.
 public static UntypedInt ΔSize => 4;
 
+// digest represents the partial evaluation of a checksum.
+// The low 16 bits are s1, the high 16 bits are s2.
 partial struct digest /*num:uint32*/;
 
 internal static void Reset(this ref digest d) {

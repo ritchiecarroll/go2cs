@@ -62,7 +62,6 @@ public static http.HandlerFunc MMUHandlerFunc(slice<Range> ranges, Func<trace.Ut
             mmuʗ1.HandleDetails(w, r);
             return;
         }
-
         http.ServeContent(w, r, ""u8, new time.Time(nil), new strings_ReaderжReadSeeker(strings.NewReader(templMMU)));
     };
 }
@@ -110,6 +109,7 @@ internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) get
         m.cache[flags] = entry;
     }
     m.mu.Unlock();
+
     var entryʗ1 = entry;
     entry.of(mmuCacheEntry.Ꮡinit).Do(() => {
         var (util, err) = Ꮡm.Value.f(flags);
@@ -130,6 +130,7 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
         http.Error(w, fmt.Sprintf("failed to produce MMU data: %v"u8, err), http.StatusInternalServerError);
         return;
     }
+
     slice<float64> quantiles = default!;
     foreach (var (_, flagStr) in strings.Split(Ꮡr.FormValue(flagsˢ), "|"u8)) {
         if (flagStr == "mut"u8) {
@@ -137,6 +138,7 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
             break;
         }
     }
+
     // Find a nice starting point for the plot.
     var xMin = time.ΔSecond;
     while (xMin > 1) {
@@ -179,6 +181,7 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
         }
         plot[i][0] = (float64)(int64)window;
     }
+
     // Create JSON response.
     err = json.NewEncoder(new http_ResponseWriterᴠWriter(w)).Encode(new map<@string, any>{["xMin"u8] = (int64)xMin, ["xMax"u8] = (int64)xMax, ["quantiles"u8] = quantiles, ["curve"u8] = plot});
     if (err != default!) {
@@ -396,6 +399,7 @@ internal static void HandleDetails(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<
         http.Error(w, fmt.Sprintf("failed to produce MMU data: %v"u8, err), http.StatusInternalServerError);
         return;
     }
+
     @string windowStr = Ꮡr.FormValue(windowˢ);
     (var window, err) = strconv.ParseUint(windowStr, 10, 64);
     if (err != default!) {
@@ -403,11 +407,13 @@ internal static void HandleDetails(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<
         return;
     }
     var worst = mmuCurve.Examples(((time.Duration)(int64)window), 10);
+
     // Construct a link for each window.
     slice<linkedUtilWindow> links = default!;
     foreach (var (_, ui) in worst) {
         links = append(links, m.newLinkedUtilWindow(ui, ((time.Duration)(int64)window)));
     }
+
     err = json.NewEncoder(new http_ResponseWriterᴠWriter(w)).Encode(links);
     if (err != default!) {
         log.Printf("failed to serialize trace: %v"u8, err);

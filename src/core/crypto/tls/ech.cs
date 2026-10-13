@@ -118,6 +118,7 @@ internal static (bool skip, echConfig ec, error err) parseECHConfig(slice<byte> 
         }
         ec.Extensions = append(ec.Extensions, e);
     }
+
     return (false, ec, default!);
 }
 
@@ -233,6 +234,7 @@ internal static (slice<byte>, error) encodeInnerClientHello(ж<clientHelloMsg> �
         return (default!, err);
     }
     h = h[4..]; // strip four byte prefix
+
     nint paddingLen = default!;
     if (inner.serverName != ""u8){
         paddingLen = max(0, maxNameLength - len(inner.serverName));
@@ -240,6 +242,7 @@ internal static (slice<byte>, error) encodeInnerClientHello(ж<clientHelloMsg> �
         paddingLen = maxNameLength + 9;
     }
     paddingLen = 31 - ((len(h) + paddingLen - 1) % 32);
+
     return (appendꓸꓸꓸ(h, makeꓸꓸꓸ<byte>(paddingLen)), default!);
 }
 
@@ -275,11 +278,10 @@ internal static readonly @string tlsInvalidInnerClientˢ = "tls: invalid inner c
 internal static (slice<rawExtension>, error) extractRawExtensions(ref clientHelloMsg hello) {
     ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
     s = ((cryptobyte.String)hello.original);
-    if (!s.Skip(4 + 2 + 32) || !skipUint8LengthPrefixed(Ꮡs) || !skipUint16LengthPrefixed(Ꮡs) || !skipUint8LengthPrefixed(Ꮡs)) {
-        // header, version, random
-        // session ID
-        // cipher suites
-        // compression methods
+    if (!s.Skip(4 + 2 + 32) || // header, version, random
+        !skipUint8LengthPrefixed(Ꮡs) || // session ID
+        !skipUint16LengthPrefixed(Ꮡs) || // cipher suites
+        !skipUint8LengthPrefixed(Ꮡs)) { // compression methods
         return (default!, errors.New(tlsMalformedOuterClientˢ));
     }
     slice<rawExtension> rawExtensions = default!;
@@ -287,6 +289,7 @@ internal static (slice<rawExtension>, error) extractRawExtensions(ref clientHell
     if (!s.ReadUint16LengthPrefixed(Ꮡextensions)) {
         return (default!, errors.New(tlsMalformedOuterClientˢ));
     }
+
     while (!extensions.Empty()) {
         ref var extension = ref heap(new uint16(), out var Ꮡextension);
         ref var extData = ref heap<cryptobyte.String>(out var ᏑextData);
@@ -305,8 +308,6 @@ internal static readonly @string tlsClientSentEncryptedˢ = "tls: client sent en
 internal static readonly @string tlsClientSentEncryptedˢ2 = "tls: client sent encrypted_client_hello extension but did not offer TLS 1.3"u8;
 
 internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHelloMsg> Ꮡouter, slice<byte> encoded) {
-    ref var outer = ref Ꮡouter.DerefOrNull();
-
     // Reconstructing the inner client hello from its encoded form is somewhat
     // complicated. It is missing its header (message type and length), session
     // ID, and the extensions may be compressed. Since we need to put the
@@ -325,6 +326,7 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
     if (!innerReader.ReadBytes(ᏑversionAndRandom, 2 + 32) || !readUint8LengthPrefixed(ᏑinnerReader, ᏑsessionID) || len(sessionID) != 0 || !readUint16LengthPrefixed(ᏑinnerReader, ᏑcipherSuites) || !readUint8LengthPrefixed(ᏑinnerReader, ᏑcompressionMethods) || !innerReader.ReadUint16LengthPrefixed(Ꮡextensions)) {
         return (default!, errors.New(tlsInvalidInnerClientˢ));
     }
+
     // The specification says we must verify that the trailing padding is all
     // zeros. This is kind of weird for TLS messages, where we generally just
     // throw away any trailing garbage.
@@ -333,10 +335,12 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
             return (default!, errors.New(tlsInvalidInnerClientˢ));
         }
     }
+
     var (rawOuterExts, err) = extractRawExtensions(ref (Ꮡouter).DerefOrNull());
     if (err != default!) {
         return (default!, err);
     }
+
     var recon = cryptobyte.NewBuilder(default!);
     recon.AddUint8(typeClientHello);
     var rawOuterExtsʗ1 = rawOuterExts;
@@ -400,6 +404,7 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
             }
         });
     });
+
     (var reconBytes, err) = recon.Bytes();
     if (err != default!) {
         return (default!, err);
@@ -408,9 +413,11 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
     if (!inner.unmarshal(reconBytes)) {
         return (default!, errors.New(tlsInvalidReconstructedˢ));
     }
+
     if (!bytes.Equal((~inner).encryptedClientHello, new byte[]{(uint8)innerECHExt}.slice())) {
         return (default!, errInvalidECHExt);
     }
+
     var hasTLS13 = false;
     foreach (var (_, v) in (~inner).supportedVersions) {
         // Skip GREASE values (values of the form 0x?A0A).
@@ -421,6 +428,7 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
         if ((uint16)(v & 0x0F0F) == 0x0A0A && (uint16)(v & 0xff) == (uint16)((v >> (int)(8)))) {
             continue;
         }
+
         // Ensure at least TLS 1.3 is offered.
         if (v == VersionTLS13){
             hasTLS13 = true;
@@ -430,9 +438,11 @@ internal static (ж<clientHelloMsg>, error) decodeInnerClientHello(ж<clientHell
             return (default!, errors.New(tlsClientSentEncryptedˢ));
         }
     }
+
     if (!hasTLS13) {
         return (default!, errors.New(tlsClientSentEncryptedˢ2));
     }
+
     return (inner, default!);
 }
 
@@ -599,6 +609,7 @@ internal static (echExtType echType, echCipher cs, uint8 configID, slice<byte> e
         err = errMalformedECHExt;
         return (echType, cs, configID, encap, payload, err);
     }
+
     // NOTE: clone encap and payload so that mutating them does not mutate the
     // raw extension bytes.
     return (echType, cs, configID, bytes.Clone(encap), bytes.Clone(payload), default!);
@@ -628,14 +639,18 @@ internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClie
         } else {
             Ꮡc.sendAlert(alertDecodeError);
         }
+
         return (default!, default!, errInvalidECHExt);
     }
+
     if (echType == innerECHExt) {
         return (Ꮡouter, Ꮡ(new echServerContext(inner: true)), default!);
     }
+
     if (len((~c.config).EncryptedClientHelloKeys) == 0) {
         return (Ꮡouter, default!, default!);
     }
+
     foreach (var (_, echKey) in (~c.config).EncryptedClientHelloKeys) {
         var (skip, config, errΔ1) = parseECHConfig(echKey.Config);
         if (errΔ1 != default! || skip) {
@@ -656,28 +671,34 @@ internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClie
             // attempt next trial decryption
             continue;
         }
+
         (var encodedInner, errΔ1) = decryptECHPayload(hpkeContext, outer.original, payload);
         if (errΔ1 != default!) {
             // attempt next trial decryption
             continue;
         }
+
         // NOTE: we do not enforce that the sent server_name matches the ECH
         // configs PublicName, since this is not particularly important, and
         // the client already had to know what it was in order to properly
         // encrypt the payload. This is only a MAY in the spec, so we're not
         // doing anything revolutionary.
+
         (var echInner, errΔ1) = decodeInnerClientHello(Ꮡouter, encodedInner);
         if (errΔ1 != default!) {
             Ꮡc.sendAlert(alertIllegalParameter);
             return (default!, default!, errInvalidECHExt);
         }
+
         c.echAccepted = true;
+
         return (echInner, Ꮡ(new echServerContext(
             hpkeContext: hpkeContext,
             configID: configID,
             ciphersuite: echCiphersuite
         )), default!);
     }
+
     return (Ꮡouter, default!, default!);
 }
 

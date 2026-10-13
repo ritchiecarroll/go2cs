@@ -310,6 +310,7 @@ internal static error decodeInt64s(ref buffer b, ж<slice<int64>> Ꮡx) {
         while (len(data) > 0) {
             uint64 u = default!;
             error err = default!;
+
             {
                 (u, data, err) = decodeVarint(data); if (err != default!) {
                     return err;
@@ -350,6 +351,7 @@ internal static error decodeUint64s(ref buffer b, ж<slice<uint64>> Ꮡx) {
         while (len(data) > 0) {
             uint64 uΔ1 = default!;
             error err = default!;
+
             {
                 (uΔ1, data, err) = decodeVarint(data); if (err != default!) {
                     return err;

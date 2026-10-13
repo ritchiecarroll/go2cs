@@ -16,11 +16,22 @@ using go.crypto.@internal.fips140;
 
 partial class mlkem_package {
 
+// SharedKeySize is the size of a shared key produced by ML-KEM.
 public static UntypedInt SharedKeySize => 32;
+
+// SeedSize is the size of a seed used to generate a decapsulation key.
 public static UntypedInt SeedSize => 64;
+
+// CiphertextSize768 is the size of a ciphertext produced by ML-KEM-768.
 public static UntypedInt CiphertextSize768 => 1088;
+
+// EncapsulationKeySize768 is the size of an ML-KEM-768 encapsulation key.
 public static UntypedInt EncapsulationKeySize768 => 1184;
+
+// CiphertextSize1024 is the size of a ciphertext produced by ML-KEM-1024.
 public static UntypedInt CiphertextSize1024 => 1568;
+
+// EncapsulationKeySize1024 is the size of an ML-KEM-1024 encapsulation key.
 public static UntypedInt EncapsulationKeySize1024 => 1568;
 
 // DecapsulationKey768 is the secret key used to decapsulate a shared key
@@ -36,6 +47,7 @@ public static (ж<DecapsulationKey768>, error) GenerateKey768() {
     if (err != default!) {
         return (default!, err);
     }
+
     return (Ꮡ(new DecapsulationKey768(key)), default!);
 }
 
@@ -46,6 +58,7 @@ public static (ж<DecapsulationKey768>, error) NewDecapsulationKey768(slice<byte
     if (err != default!) {
         return (default!, err);
     }
+
     return (Ꮡ(new DecapsulationKey768(key)), default!);
 }
 
@@ -83,6 +96,7 @@ public static (ж<EncapsulationKey768>, error) NewEncapsulationKey768(slice<byte
     if (err != default!) {
         return (default!, err);
     }
+
     return (Ꮡ(new EncapsulationKey768(key)), default!);
 }
 
@@ -112,6 +126,7 @@ public static (ж<DecapsulationKey1024>, error) GenerateKey1024() {
     if (err != default!) {
         return (default!, err);
     }
+
     return (Ꮡ(new DecapsulationKey1024(key)), default!);
 }
 
@@ -122,6 +137,7 @@ public static (ж<DecapsulationKey1024>, error) NewDecapsulationKey1024(slice<by
     if (err != default!) {
         return (default!, err);
     }
+
     return (Ꮡ(new DecapsulationKey1024(key)), default!);
 }
 
@@ -159,6 +175,7 @@ public static (ж<EncapsulationKey1024>, error) NewEncapsulationKey1024(slice<by
     if (err != default!) {
         return (default!, err);
     }
+
     return (Ꮡ(new EncapsulationKey1024(key)), default!);
 }
 

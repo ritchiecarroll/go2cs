@@ -14,10 +14,14 @@ using slices = slices_package;
 
 partial class fmtsort_package {
 
-partial struct SortedMap /*[]KeyValue*/;
-
 // Note: Throughout this package we avoid calling reflect.Value.Interface as
 // it is not always legal to do so and it's easier to avoid the issue than to face it.
+
+// SortedMap is a slice of KeyValue pairs that simplifies sorting
+// and iterating over map entries.
+//
+// Each KeyValue pair contains a map key and its corresponding value.
+partial struct SortedMap /*[]KeyValue*/;
 
 // KeyValue holds a single key and value pair found in a map.
 partial struct KeyValue {
@@ -102,7 +106,6 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
         default: {
             return -1;
         }}
-
     }
     else if (exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.ΔUnsafePointer) {
         return cmp.Compare(aVal.Pointer(), bVal.Pointer());
@@ -148,12 +151,10 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
         return compare(aVal.Elem(), bVal.Elem());
     }
     else { /* default: */
+        // Certain types cannot appear as keys (maps, funcs, slices), but be explicit.
         throw panic("bad type in compare: " + aType.String());
     }
-
 }
-
-// Certain types cannot appear as keys (maps, funcs, slices), but be explicit.
 
 // nilCompare checks whether either value is nil. If not, the boolean is false.
 // If either value is nil, the boolean is true and the integer is the comparison

@@ -126,6 +126,7 @@ internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) 
     if (pattern == "."u8) {
         return (new @string[]{"."u8}.slice(), default!);
     }
+
     @string full = f.dir + "/"u8 + pattern;
     var (list, err) = Glob(f.fsys, full);
     foreach (var (i, name) in list) {

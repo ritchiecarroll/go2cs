@@ -50,6 +50,7 @@ public static @string String(this RDNSequence r) {
             if (j > 0) {
                 s += "+"u8;
             }
+
             @string oidString = tv.Type.String();
             var (typeName, ok) = attributeTypeNames[oidString, ꟷ];
             if (!ok) {
@@ -58,12 +59,16 @@ public static @string String(this RDNSequence r) {
                     s += oidString + "=#"u8 + hex.EncodeToString(derBytes);
                     continue; // No value escaping necessary.
                 }
+
                 typeName = oidString;
             }
+
             @string valueString = fmt.Sprint(tv.Value);
             var escaped = new slice<rune>(0, len(valueString));
+
             foreach (var (k, c) in valueString) {
                 var escape = false;
+
                 switch (c) {
                 case (rune)',' or (rune)'+' or (rune)'"' or (rune)'\\' or (rune)'<' or (rune)'>' or (rune)';': {
                     escape = true;
@@ -84,9 +89,11 @@ public static @string String(this RDNSequence r) {
                     escaped = append(escaped, c);
                 }
             }
+
             s += typeName + "="u8 + ((@string)escaped);
         }
     }
+
     return s;
 }
 
@@ -144,12 +151,14 @@ public static void FillFromRDNSequence(this ref Name n, ж<RDNSequence> Ꮡrdns)
         if (len(rdn) == 0) {
             continue;
         }
+
         foreach (var (_, atv) in rdn) {
             n.Names = append(n.Names, atv);
             var (value, ok) = atv.Value._<@string>(ᐧ);
             if (!ok) {
                 continue;
             }
+
             var t = atv.Type;
             if (len(t) == 4 && t[0] == 2 && t[1] == 5 && t[2] == 4) {
                 switch (t[3]) {
@@ -189,7 +198,6 @@ public static void FillFromRDNSequence(this ref Name n, ж<RDNSequence> Ꮡrdns)
                     n.PostalCode = append(n.PostalCode, value);
                     break;
                 }}
-
             }
         }
     }
@@ -213,11 +221,13 @@ internal static RDNSequence appendRDNs(this Name n, RDNSequence @in, slice<@stri
     if (len(values) == 0 || oidInAttributeTypeAndValue(oid, n.ExtraNames)) {
         return @in;
     }
+
     var s = new slice<AttributeTypeAndValue>(len(values));
     foreach (var (i, value) in values) {
         s[i].Type = oid;
         s[i].Value = value;
     }
+
     return append(@in, (RelativeDistinguishedNameSET)(s));
 }
 
@@ -252,6 +262,7 @@ public static RDNSequence /*ret*/ ToRDNSequence(this Name n) {
     foreach (var (_, atv) in n.ExtraNames) {
         ret = append(ret, (RelativeDistinguishedNameSET)(new AttributeTypeAndValue[]{atv}.slice()));
     }
+
     return ret;
 }
 
@@ -267,12 +278,11 @@ public static @string String(this Name n) {
             if (len(t) == 4 && t[0] == 2 && t[1] == 5 && t[2] == 4) {
                 switch (t[3]) {
                 case 3 or 5 or 6 or 7 or 8 or 9 or 10 or 11 or 17: {
+                    // These attributes were already parsed into named fields.
                     continue;
                     break;
                 }}
-
             }
-            // These attributes were already parsed into named fields.
             // Place non-standard parsed values at the beginning of the sequence
             // so they will be at the end of the string. See Issue 39924.
             rdns = append(rdns, (RelativeDistinguishedNameSET)(new AttributeTypeAndValue[]{atv}.slice()));

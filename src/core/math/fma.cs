@@ -13,19 +13,19 @@ internal static uint64 zero(uint64 x) {
         return 1;
     }
     return 0;
+    // branchless:
+    // return ((x>>1 | x&1) - 1) >> 63
 }
 
-// branchless:
-// return ((x>>1 | x&1) - 1) >> 63
 internal static uint64 nonzero(uint64 x) {
     if (x != 0) {
         return 1;
     }
     return 0;
+    // branchless:
+    // return 1 - ((x>>1|x&1)-1)>>63
 }
 
-// branchless:
-// return 1 - ((x>>1|x&1)-1)>>63
 internal static (uint64 r1, uint64 r2) shl(uint64 u1, uint64 u2, nuint n) {
     uint64 r1 = default!;
     uint64 r2 = default!;
@@ -76,7 +76,6 @@ internal static (uint64 r1, uint64 r2) shrcompress(uint64 u1, uint64 u2, nuint n
         r2 |= (uint64)(nonzero((uint64)((uint64)(u1 & (((uint64)1).Lsh((n - 64)) - 1)) | u2)));
         break;
     }}
-
     return (r1, r2);
 }
 
@@ -101,6 +100,7 @@ internal static (uint32 sign, int32 exp, uint64 mantissa) split(uint64 b) {
     sign = (uint32)((b >> (int)(63)));
     exp = (int32)((int32)((b >> (int)(52))) & (int32)mask);
     mantissa = (uint64)(b & (uint64)fracMask);
+
     if (exp == 0){
         // Normalize value if subnormal.
         nuint shift = (nuint)(bits.LeadingZeros64(mantissa) - 11);
@@ -117,6 +117,7 @@ internal static (uint32 sign, int32 exp, uint64 mantissa) split(uint64 b) {
 // (That is, FMA returns the fused multiply-add of x, y, and z.)
 public static float64 FMA(float64 x, float64 y, float64 z) {
     var (bx, by, bz) = (Float64bits(x), Float64bits(y), Float64bits(z));
+
     // Inf or NaN or zero involved. At most one rounding will occur.
     if (x == 0.0D || y == 0.0D || z == 0.0D || (uint64)(bx & (uint64)uvinf) == uvinf || (uint64)(by & (uint64)uvinf) == uvinf) {
         return x * y + z;
@@ -126,34 +127,42 @@ public static float64 FMA(float64 x, float64 y, float64 z) {
     if ((uint64)(bz & (uint64)uvinf) == uvinf) {
         return z;
     }
+
     // Inputs are (sub)normal.
     // Split x, y, z into sign, exponent, mantissa.
     var (xs, xe, xm) = split(bx);
     var (ys, ye, ym) = split(by);
     var (zs, ze, zm) = split(bz);
+
     // Compute product p = x*y as sign, exponent, two-word mantissa.
     // Start with exponent. "is normal" bit isn't subtracted yet.
     var pe = xe + ye - (int32)bias + 1;
+
     // pm1:pm2 is the double-word mantissa for the product p.
     // Shift left to leave top bit in product. Effectively
     // shifts the 106-bit product to the left by 21.
     var (pm1, pm2) = bits.Mul64((xm << (int)(10)), (ym << (int)(11)));
     var (zm1, zm2) = ((zm << (int)(10)), (uint64)0);
     var ps = (uint32)(xs ^ ys); // product sign
+
     // normalize to 62nd bit
     nuint is62zero = (nuint)((uint64)(((~pm1 >> (int)(62))) & 1));
     (pm1, pm2) = shl(pm1, pm2, is62zero);
     pe -= (int32)is62zero;
+
     // Swap addition operands so |p| >= |z|
     if (pe < ze || pe == ze && pm1 < zm1) {
         (ps, pe, pm1, pm2, zs, ze, zm1, zm2) = (zs, ze, zm1, zm2, ps, pe, pm1, pm2);
     }
+
     // Special case: if p == -z the result is always +0 since neither operand is zero.
     if (ps != zs && pe == ze && pm1 == zm1 && pm2 == zm2) {
         return 0D;
     }
+
     // Align significands
     (zm1, zm2) = shrcompress(zm1, zm2, (nuint)(pe - ze));
+
     // Compute resulting significands, normalizing if necessary.
     uint64 m = default!;
     uint64 c = default!;
@@ -173,6 +182,7 @@ public static float64 FMA(float64 x, float64 y, float64 z) {
         (m, pm2) = shl(pm1, pm2, (nuint)(nz - 1));
         m |= (uint64)(nonzero(pm2));
     }
+
     // Round and break ties to even
     if (pe > (int32)(1022 + bias) || pe == (int32)(1022 + bias) && ((m + ((uint64)1 << (int)(9))) >> (int)(63)) == 1) {
         // rounded value overflows exponent range

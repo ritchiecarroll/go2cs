@@ -1,6 +1,9 @@
 // Copyright 2016 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
+// A DirEntry is an entry read from a directory
+// (using the [ReadDir] function or a [File.ReadDir] method).
 global using DirEntry = go.io.fs_package.DirEntry;
 
 namespace go;
@@ -125,6 +128,7 @@ public static (slice<DirEntry>, error) ReadDir(@string name) {
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         (var dirs, err) = f.ReadDir(-1);
         slices.SortFunc(dirs, (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
         return (dirs, err);
@@ -160,6 +164,7 @@ public static error CopyFS(@string dir, fs.FS fsys) {
             if (err != default!) {
                 return err;
             }
+
             (var fpath, err) = filepathlite.Localize(path);
             if (err != default!) {
                 return err;
@@ -169,12 +174,14 @@ public static error CopyFS(@string dir, fs.FS fsys) {
             if (d.IsDir()) {
                 return MkdirAll(newPath, 511);
             }
+
             // TODO(panjf2000): handle symlinks with the help of fs.ReadLinkFS
             // 		once https://go.dev/issue/49580 is done.
             //		we also need filepathlite.IsLocal from https://go.dev/cl/564295.
             if (!d.Type().IsRegular()) {
                 return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "CopyFS"u8, Path: path, Err: ErrInvalid)));
             }
+
             (var r, err) = fsys.Open(path);
             if (err != default!) {
                 return err;
@@ -189,6 +196,7 @@ public static error CopyFS(@string dir, fs.FS fsys) {
             if (err != default!) {
                 return err;
             }
+
             {
                 var (_, errΔ1) = Δio.Copy(new FileжWriter(w), new fs_FileᴠReader(r)); if (errΔ1 != default!) {
                     w.Close();

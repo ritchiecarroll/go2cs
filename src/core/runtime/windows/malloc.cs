@@ -111,18 +111,109 @@ partial class runtime_package {
 internal static UntypedInt maxTinySize => /* _TinySize */ 16;
 internal const int8 tinySizeClass = /* _TinySizeClass */ 2;
 internal static UntypedInt maxSmallSize => /* _MaxSmallSize */ 32768;
+
 internal static UntypedInt pageShift => /* _PageShift */ 13;
 internal static UntypedInt pageSize => /* _PageSize */ 8192;
+
 internal static UntypedInt _PageSize => /* 1 << _PageShift */ 8192;
 internal static UntypedInt _PageMask => /* _PageSize - 1 */ 8191;
+
+// _64bit = 1 on 64-bit systems, 0 on 32-bit systems
 internal static UntypedInt _64bit => /* 1 << (^uintptr(0) >> 63) / 2 */ 1;
+
+// Tiny allocator parameters, see "Tiny allocator" comment in malloc.go.
 internal static UntypedInt _TinySize => 16;
 internal const int8 _TinySizeClass = /* int8(2) */ 2;
+
 internal static UntypedInt _FixAllocChunk => /* 16 << 10 */ 16384; // Chunk size for FixAlloc
+
+// Per-P, per order stack segment cache size.
 internal static UntypedInt _StackCacheSize => /* 32 * 1024 */ 32768;
+
+// Number of orders that get caching. Order 0 is FixedStack
+// and each successive order is twice as large.
+// We want to cache 2KB, 4KB, 8KB, and 16KB stacks. Larger stacks
+// will be allocated directly.
+// Since FixedStack is different on different systems, we
+// must vary NumStackOrders to keep the same maximum cached size.
+//   OS               | FixedStack | NumStackOrders
+//   -----------------+------------+---------------
+//   linux/darwin/bsd | 2KB        | 4
+//   windows/32       | 4KB        | 3
+//   windows/64       | 8KB        | 2
+//   plan9            | 4KB        | 3
 internal static UntypedInt _NumStackOrders => /* 4 - goarch.PtrSize/4*goos.IsWindows - 1*goos.IsPlan9 */ 2;
+
+// heapAddrBits is the number of bits in a heap address. On
+// amd64, addresses are sign-extended beyond heapAddrBits. On
+// other arches, they are zero-extended.
+//
+// On most 64-bit platforms, we limit this to 48 bits based on a
+// combination of hardware and OS limitations.
+//
+// amd64 hardware limits addresses to 48 bits, sign-extended
+// to 64 bits. Addresses where the top 16 bits are not either
+// all 0 or all 1 are "non-canonical" and invalid. Because of
+// these "negative" addresses, we offset addresses by 1<<47
+// (arenaBaseOffset) on amd64 before computing indexes into
+// the heap arenas index. In 2017, amd64 hardware added
+// support for 57 bit addresses; however, currently only Linux
+// supports this extension and the kernel will never choose an
+// address above 1<<47 unless mmap is called with a hint
+// address above 1<<47 (which we never do).
+//
+// arm64 hardware (as of ARMv8) limits user addresses to 48
+// bits, in the range [0, 1<<48).
+//
+// ppc64, mips64, and s390x support arbitrary 64 bit addresses
+// in hardware. On Linux, Go leans on stricter OS limits. Based
+// on Linux's processor.h, the user address space is limited as
+// follows on 64-bit architectures:
+//
+// Architecture  Name              Maximum Value (exclusive)
+// ---------------------------------------------------------------------
+// amd64         TASK_SIZE_MAX     0x007ffffffff000 (47 bit addresses)
+// arm64         TASK_SIZE_64      0x01000000000000 (48 bit addresses)
+// ppc64{,le}    TASK_SIZE_USER64  0x00400000000000 (46 bit addresses)
+// mips64{,le}   TASK_SIZE64       0x00010000000000 (40 bit addresses)
+// s390x         TASK_SIZE         1<<64 (64 bit addresses)
+//
+// These limits may increase over time, but are currently at
+// most 48 bits except on s390x. On all architectures, Linux
+// starts placing mmap'd regions at addresses that are
+// significantly below 48 bits, so even if it's possible to
+// exceed Go's 48 bit limit, it's extremely unlikely in
+// practice.
+//
+// On 32-bit platforms, we accept the full 32-bit address
+// space because doing so is cheap.
+// mips32 only has access to the low 2GB of virtual memory, so
+// we further limit it to 31 bits.
+//
+// On ios/arm64, although 64-bit pointers are presumably
+// available, pointers are truncated to 33 bits in iOS <14.
+// Furthermore, only the top 4 GiB of the address space are
+// actually available to the application. In iOS >=14, more
+// of the address space is available, and the OS can now
+// provide addresses outside of those 33 bits. Pick 40 bits
+// as a reasonable balance between address space usage by the
+// page allocator, and flexibility for what mmap'd regions
+// we'll accept for the heap. We can't just move to the full
+// 48 bits because this uses too much address space for older
+// iOS versions.
+// TODO(mknyszek): Once iOS <14 is deprecated, promote ios/arm64
+// to a 48-bit address space like every other arm64 platform.
+//
+// WebAssembly currently has a limit of 4GB linear memory.
 internal static UntypedInt heapAddrBits => /* (_64bit*(1-goarch.IsWasm)*(1-goos.IsIos*goarch.IsArm64))*48 + (1-_64bit+goarch.IsWasm)*(32-(goarch.IsMips+goarch.IsMipsle)) + 40*goos.IsIos*goarch.IsArm64 */ 48;
+
+// maxAlloc is the maximum size of an allocation. On 64-bit,
+// it's theoretically possible to allocate 1<<heapAddrBits bytes. On
+// 32-bit, however, this is one less than 1<<32 because the
+// number of bytes in the address space doesn't actually fit
+// in a uintptr.
 internal static UntypedInt maxAlloc => /* (1 << heapAddrBits) - (1-_64bit)*1 */ 281474976710656;
+
 // The number of bits in a heap address, the size of heap
 // arenas, and the L1 and L2 arena map sizes are related by
 //
@@ -137,19 +228,118 @@ internal static UntypedInt maxAlloc => /* (1 << heapAddrBits) - (1-_64bit)*1 */ 
 //      ios/arm64         40         4MB           1  256K  (2MB)
 //       */32-bit         32         4MB           1  1024  (4KB)
 //     */mips(le)         31         4MB           1   512  (2KB)
+
+// heapArenaBytes is the size of a heap arena. The heap
+// consists of mappings of size heapArenaBytes, aligned to
+// heapArenaBytes. The initial heap mapping is one arena.
+//
+// This is currently 64MB on 64-bit non-Windows and 4MB on
+// 32-bit and on Windows. We use smaller arenas on Windows
+// because all committed memory is charged to the process,
+// even if it's not touched. Hence, for processes with small
+// heaps, the mapped arena space needs to be commensurate.
+// This is particularly important with the race detector,
+// since it significantly amplifies the cost of committed
+// memory.
 internal static UntypedInt heapArenaBytes => /* 1 << logHeapArenaBytes */ 4194304;
+
 internal static UntypedInt heapArenaWords => /* heapArenaBytes / goarch.PtrSize */ 524288;
+
+// logHeapArenaBytes is log_2 of heapArenaBytes. For clarity,
+// prefer using heapArenaBytes where possible (we need the
+// constant to compute some other constants).
 internal static UntypedInt logHeapArenaBytes => /* (6+20)*(_64bit*(1-goos.IsWindows)*(1-goarch.IsWasm)*(1-goos.IsIos*goarch.IsArm64)) + (2+20)*(_64bit*goos.IsWindows) + (2+20)*(1-_64bit) + (2+20)*goarch.IsWasm + (2+20)*goos.IsIos*goarch.IsArm64 */ 22;
+
+// heapArenaBitmapWords is the size of each heap arena's bitmap in uintptrs.
 internal static UntypedInt heapArenaBitmapWords => /* heapArenaWords / (8 * goarch.PtrSize) */ 8192;
+
 internal static UntypedInt pagesPerArena => /* heapArenaBytes / pageSize */ 512;
+
+// arenaL1Bits is the number of bits of the arena number
+// covered by the first level arena map.
+//
+// This number should be small, since the first level arena
+// map requires PtrSize*(1<<arenaL1Bits) of space in the
+// binary's BSS. It can be zero, in which case the first level
+// index is effectively unused. There is a performance benefit
+// to this, since the generated code can be more efficient,
+// but comes at the cost of having a large L2 mapping.
+//
+// We use the L1 map on 64-bit Windows because the arena size
+// is small, but the address space is still 48 bits, and
+// there's a high cost to having a large L2.
 internal static UntypedInt arenaL1Bits => /* 6 * (_64bit * goos.IsWindows) */ 6;
+
+// arenaL2Bits is the number of bits of the arena number
+// covered by the second level arena index.
+//
+// The size of each arena map allocation is proportional to
+// 1<<arenaL2Bits, so it's important that this not be too
+// large. 48 bits leads to 32MB arena index allocations, which
+// is about the practical threshold.
 internal static UntypedInt arenaL2Bits => /* heapAddrBits - logHeapArenaBytes - arenaL1Bits */ 20;
+
+// arenaL1Shift is the number of bits to shift an arena frame
+// number by to compute an index into the first level arena map.
 internal static UntypedInt arenaL1Shift => /* arenaL2Bits */ 20;
+
+// arenaBits is the total bits in a combined arena map index.
+// This is split between the index into the L1 arena map and
+// the L2 arena map.
 internal static UntypedInt arenaBits => /* arenaL1Bits + arenaL2Bits */ 26;
+
+// arenaBaseOffset is the pointer value that corresponds to
+// index 0 in the heap arena map.
+//
+// On amd64, the address space is 48 bits, sign extended to 64
+// bits. This offset lets us handle "negative" addresses (or
+// high addresses if viewed as unsigned).
+//
+// On aix/ppc64, this offset allows to keep the heapAddrBits to
+// 48. Otherwise, it would be 60 in order to handle mmap addresses
+// (in range 0x0a00000000000000 - 0x0afffffffffffff). But in this
+// case, the memory reserved in (s *pageAlloc).init for chunks
+// is causing important slowdowns.
+//
+// On other platforms, the user address space is contiguous
+// and starts at 0, so no offset is necessary.
 internal static UntypedInt arenaBaseOffset => /* 0xffff800000000000*goarch.IsAmd64 + 0x0a00000000000000*goos.IsAix */ 18446603336221196288;
+// A typed version of this constant that will make it into DWARF (for viewcore).
 internal static uintptr arenaBaseOffsetUintptr => /* uintptr(arenaBaseOffset) */ unchecked((uintptr)18446603336221196288);
+
+// Max number of threads to run garbage collection.
+// 2, 3, and 4 are all plausible maximums depending
+// on the hardware details of the machine. The garbage
+// collector scales well to 32 cpus.
 internal static UntypedInt _MaxGcproc => 32;
+
+// minLegalPointer is the smallest possible legal pointer.
+// This is the smallest possible architectural page size,
+// since we assume that the first page is never mapped.
+//
+// This should agree with minZeroPage in the compiler.
 internal static uintptr minLegalPointer => 4096;
+
+// minHeapForMetadataHugePages sets a threshold on when certain kinds of
+// heap metadata, currently the arenas map L2 entries and page alloc bitmap
+// mappings, are allowed to be backed by huge pages. If the heap goal ever
+// exceeds this threshold, then huge pages are enabled.
+//
+// These numbers are chosen with the assumption that huge pages are on the
+// order of a few MiB in size.
+//
+// The kind of metadata this applies to has a very low overhead when compared
+// to address space used, but their constant overheads for small heaps would
+// be very high if they were to be backed by huge pages (e.g. a few MiB makes
+// a huge difference for an 8 MiB heap, but barely any difference for a 1 GiB
+// heap). The benefit of huge pages is also not worth it for small heaps,
+// because only a very, very small part of the metadata is used for small heaps.
+//
+// N.B. If the heap goal exceeds the threshold then shrinks to a very small size
+// again, then huge pages will still be enabled for this mapping. The reason is that
+// there's no point unless we're also returning the physical memory for these
+// metadata mappings back to the OS. That would be quite complex to do in general
+// as the heap is likely fragmented after a reduction in heap size.
 internal static UntypedInt minHeapForMetadataHugePages => /* 1 << 30 */ 1073741824;
 
 // physPageSize is the size in bytes of the OS's physical pages.
@@ -173,7 +363,6 @@ internal static uintptr physPageSize;
 // The purpose of physHugePageShift is to avoid doing divisions in
 // performance critical functions.
 internal static uintptr physHugePageSize;
-
 internal static nuint physHugePageShift;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -193,11 +382,13 @@ internal static void mallocinit() {
     if (class_to_size[_TinySizeClass] != _TinySize) {
         @throw(badTinySizeClassˢ);
     }
+
     if ((UntypedInt)(heapArenaBitmapWords & (heapArenaBitmapWords - 1)) != 0) {
         // heapBits expects modular arithmetic on bitmap
         // addresses to work.
         @throw(heapArenaBitmapWordsNotAˢ);
     }
+
     // Check physPageSize.
     if (physPageSize == 0) {
         // The OS init code failed to fetch the physical page size.
@@ -269,9 +460,11 @@ internal static void mallocinit() {
     if (minSizeForMallocHeader / goarch.PtrSize > 8 * goarch.PtrSize) {
         @throw(maxPointerScanBitmapSizeˢ);
     }
+
     if (minTagBits > taggedPointerBits) {
         @throw(taggedPointerBitsTooˢ);
     }
+
     // Initialize the heap.
     Ꮡmheap_.init();
     mcache0 = allocmcache();
@@ -283,12 +476,13 @@ internal static void mallocinit() {
         lockInit(ᏑprofMemFutureLock.at<mutex>(i), lockRankProfMemFuture);
     }
     lockInit(ᏑglobalAlloc.of(globalAllocᴛ1.Ꮡmutex), lockRankGlobalAlloc);
+
     // Create initial arena growth hints.
     if (isSbrkPlatform){
-    } else 
-    if (goarch.PtrSize == 8){
         // Don't generate hints on sbrk platforms. We can
         // only grow the break sequentially.
+    } else 
+    if (goarch.PtrSize == 8){
         // On a 64-bit machine, we pick the following hints
         // because:
         //
@@ -334,11 +528,11 @@ internal static void mallocinit() {
             uintptr Δp = default!;
             switch (ᐧ) {
             case {} when raceenabled: {
+                // The TSAN runtime requires the heap
+                // to be in the range [0x00c000000000,
+                // 0x00e000000000).
                 Δp = (uintptr)(((uintptr)i << (int)(32)) | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(824633720832L)));
                 if (Δp >= (uintptr)((uintptr)uintptrMask & (uintptr)unchecked((nint)0x00e000000000L))) {
-                    // The TSAN runtime requires the heap
-                    // to be in the range [0x00c000000000,
-                    // 0x00e000000000).
                     continue;
                 }
                 break;
@@ -364,7 +558,6 @@ internal static void mallocinit() {
                 Δp = (uintptr)(((uintptr)i << (int)(40)) | (uintptr)(uintptr)((uintptr)uintptrMask & (uintptr)(824633720832L)));
                 break;
             }}
-
             // Switch to generating hints for user arenas if we've gone
             // through about half the hints. In race mode, take only about
             // a quarter; we don't have very much space to work with.
@@ -398,6 +591,7 @@ internal static void mallocinit() {
         if (meta != 0) {
             Ꮡmheap_.of(mheap.ᏑheapArenaAlloc).init(meta, arenaMetaSize, true);
         }
+
         // We want to start the arena low, but if we're linked
         // against C code, it's possible global constructors
         // have called malloc and adjusted the process' brk.
@@ -406,6 +600,7 @@ internal static void mallocinit() {
         // the region somewhere else, likely at a high
         // address).
         var procBrk = sbrk0();
+
         // If we ask for the end of the data segment but the
         // operating system requires a little more space
         // before we can start allocating, it will give out a
@@ -439,6 +634,7 @@ internal static void mallocinit() {
         var hint = (ж<arenaHint>)(uintptr)(Ꮡmheap_.of(mheap.ᏑarenaHintAlloc).alloc());
         hint.Value.addr = Δp;
         (hint.Value.next, mheap_.arenaHints) = (mheap_.arenaHints, hint);
+
         // Place the hint for user arenas just after the large reservation.
         //
         // While this potentially competes with the hint above, in practice we probably
@@ -483,11 +679,13 @@ internal static readonly @string outOfMemoryAllocatingˢ3 = "out of memory alloc
 internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, uintptr n, ж<ж<arenaHint>> ᏑhintList, bool register) {
     @unsafe.Pointer v = default!;
     uintptr size = default!;
-
     ref var h = ref Ꮡh.DerefOrNull();
     ref var hintList = ref ᏑhintList.DerefOrNull();
+
     assertLockHeld(Ꮡh.of(mheap.Ꮡlock));
+
     n = alignUp(n, heapArenaBytes);
+
     if (ᏑhintList == Ꮡh.of(mheap.ᏑarenaHints)) {
         // First, try the arena pre-reservation.
         // Newly-used mappings are considered released.
@@ -500,6 +698,7 @@ internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, 
             goto mapped;
         }
     }
+
     // Try to grow the heap at a hint address.
     while (hintList != nil) {
         var hint = hintList;
@@ -538,6 +737,7 @@ internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, 
         hintList = hint.Value.next;
         h.arenaHintAlloc.free(@unsafe.Pointer.FromPinnedBox(hint));
     }
+
     if (size == 0) {
         if (raceenabled) {
             // The race detector assumes the heap lives in
@@ -546,6 +746,7 @@ internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, 
             // a nice failure.
             @throw(tooManyAddressSpaceˢ);
         }
+
         // All of the hints failed, so we'll take any
         // (sufficiently aligned) address the kernel will give
         // us.
@@ -553,6 +754,7 @@ internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, 
         if (v == nil) {
             return (default!, 0);
         }
+
         // Create new hints for extending this region.
         var hint = (ж<arenaHint>)(uintptr)(h.arenaHintAlloc.alloc());
         (hint.Value.addr, hint.Value.down) = ((uintptr)v, true);
@@ -561,6 +763,7 @@ internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, 
         hint.Value.addr = (uintptr)v + size;
         (hint.Value.next, mheap_.arenaHints) = (mheap_.arenaHints, hint);
     }
+
     // Check for bad pointers or pointers we can't use.
     {
         @string bad = default!;
@@ -581,9 +784,11 @@ internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, 
             @throw(memoryReservationExceedsˢ);
         }
     }
+
     if ((uintptr)((uintptr)v & (uintptr)(heapArenaBytes - 1)) != 0) {
         @throw(misroundedAllocationInˢ);
     }
+
 mapped:
     for (arenaIdx ri = arenaIndex((uintptr)v); ri <= arenaIndex((uintptr)v + size - 1); ri++) {
         // Create arena metadata.
@@ -608,6 +813,7 @@ mapped:
             }
             atomic.StorepNoWB(@unsafe.Pointer.FromBox(Ꮡ(h.arenas, ri.l1())), @unsafe.Pointer.FromPinnedBox(l2));
         }
+
         if (l2.Value[ri.l2()] != nil) {
             @throw(arenaAlreadyInitializedˢ);
         }
@@ -619,6 +825,7 @@ mapped:
                 @throw(outOfMemoryAllocatingˢ2);
             }
         }
+
         // Register the arena in allArenas if requested.
         if (register) {
             if (len(h.allArenas) == cap(h.allArenas)) {
@@ -633,14 +840,15 @@ mapped:
                 var oldSlice = h.allArenas;
                 (Ꮡh.of(mheap.ᏑallArenas).Reinterpret<slice<arenaIdx>, notInHeapSlice>()).Value = new notInHeapSlice(newArray, len(h.allArenas), (nint)(sizeΔ1 / (uintptr)goarch.PtrSize));
                 copy(h.allArenas, oldSlice);
+                // Do not free the old backing array because
+                // there may be concurrent readers. Since we
+                // double the array each time, this can lead
+                // to at most 2x waste.
             }
-            // Do not free the old backing array because
-            // there may be concurrent readers. Since we
-            // double the array each time, this can lead
-            // to at most 2x waste.
             h.allArenas = h.allArenas.slice(0, len(h.allArenas) + 1);
             h.allArenas[len(h.allArenas) - 1] = ri;
         }
+
         // Store atomically just in case an object from the
         // new heap arena becomes visible before the heap lock
         // is released (which shouldn't happen, but there's
@@ -649,10 +857,12 @@ mapped:
 continue_mapped:;
     }
 break_mapped:;
+
     // Tell the race detector about the new heap memory.
     if (raceenabled) {
         racemapshadow(v, size);
     }
+
     return (v, size);
 }
 
@@ -684,11 +894,11 @@ retry:
         return ((@unsafe.Pointer)Δp, size + align);
     }
     case {} when ᐧᐧ: {
-        sysFreeOS((@unsafe.Pointer)Δp, // On Windows we can't release pieces of a
- // reservation, so we release the whole thing and
- // re-reserve the aligned sub-region. This may race,
- // so we may have to try again.
- size + align);
+        // On Windows we can't release pieces of a
+        // reservation, so we release the whole thing and
+        // re-reserve the aligned sub-region. This may race,
+        // so we may have to try again.
+        sysFreeOS((@unsafe.Pointer)Δp, size + align);
         Δp = alignUp(Δp, align);
         @unsafe.Pointer p2 = (uintptr)sysReserve((@unsafe.Pointer)Δp, size);
         if (Δp != (uintptr)p2) {
@@ -701,12 +911,12 @@ retry:
             }
             goto retry;
         }
+        // Success.
         return (p2, size);
     }
     default: {
-        var pAligned = alignUp(Δp, // Success.
- // Trim off the unaligned parts.
- align);
+        // Trim off the unaligned parts.
+        var pAligned = alignUp(Δp, align);
         sysFreeOS((@unsafe.Pointer)Δp, pAligned - Δp);
         var end = pAligned + size;
         var endLen = (Δp + size + align) - end;
@@ -715,7 +925,6 @@ retry:
         }
         return ((@unsafe.Pointer)pAligned, size);
     }}
-
 }
 
 // enableMetadataHugePages enables huge pages for various sources of heap metadata.
@@ -736,6 +945,7 @@ internal static void enableMetadataHugePages(this ж<mheap> Ꮡh) {
 
     // Enable huge pages for page structure.
     h.pages.enableChunkHugePages();
+
     // Grab the lock and set arenasHugePages if it's not.
     //
     // Once arenasHugePages is set, all new L2 entries will be eligible for
@@ -747,6 +957,7 @@ internal static void enableMetadataHugePages(this ж<mheap> Ꮡh) {
     }
     h.arenasHugePages = true;
     unlock(Ꮡh.of(mheap.Ꮡlock));
+
     // N.B. The arenas L1 map is quite small on all platforms, so it's fine to
     // just iterate over the whole thing.
     foreach (var (i, _) in h.arenas) {
@@ -814,11 +1025,14 @@ internal static (gclinkptr v, ж<mspan> s, bool checkGCTrigger) nextFree(this re
         c.refill(spc);
         checkGCTrigger = true;
         s = c.alloc[spc];
+
         freeIndex = s.nextFreeIndex();
     }
+
     if (freeIndex >= (~s).nelems) {
         @throw(freeIndexIsNotValidˢ);
     }
+
     v = ((gclinkptr)((uintptr)freeIndex * (~s).elemsize + s.@base()));
     s.Value.allocCount++;
     if ((~s).allocCount > (~s).nelems) {
@@ -865,14 +1079,17 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
             @throw(mallocgcCalledWithˢ);
         }
     }
+
     // Short-circuit zero-sized allocation requests.
     if (size == 0) {
         return @unsafe.Pointer.FromBox(Ꮡzerobase);
     }
+
     // It's possible for any malloc to trigger sweeping, which may in
     // turn queue finalizers. Record this dynamic lock edge.
     // N.B. Compiled away if lockrank experiment is not enabled.
     lockRankMayQueueFinalizer();
+
     // Pre-malloc debug hooks.
     if (debug.malloc) {
         {
@@ -881,6 +1098,7 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
             }
         }
     }
+
     // For ASAN, we allocate extra memory around each allocation called the "redzone."
     // These "redzones" are marked as unaddressable.
     uintptr asanRZ = default!;
@@ -888,10 +1106,12 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
         asanRZ = redZoneSize(size);
         size += asanRZ;
     }
+
     // Assist the GC if needed.
     if (gcBlackenEnabled != 0) {
         deductAssistCredit(size);
     }
+
     // Actually do the allocation.
     @unsafe.Pointer x = default!;
     uintptr elemsize = default!;
@@ -911,6 +1131,7 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
     } else {
         (x, elemsize) = mallocgcLarge(size, Ꮡtyp, needzero);
     }
+
     // Notify sanitizers, if enabled.
     if (raceenabled) {
         racemalloc(x, size - asanRZ);
@@ -928,6 +1149,7 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
         asanpoison((uintptr)@unsafe.Add(x, size - asanRZ), asanRZ);
         asanunpoison(x, size - asanRZ);
     }
+
     // Adjust our GC assist debt to account for internal fragmentation.
     if (gcBlackenEnabled != 0 && elemsize != 0) {
         {
@@ -936,6 +1158,7 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
             }
         }
     }
+
     // Post-malloc debug hooks.
     if (debug.malloc) {
         postMallocgcDebug(x, elemsize, Ꮡtyp);
@@ -963,6 +1186,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcTiny(uintptr size, ж<_type> 
         }
     }
     mp.Value.mallocing = 1;
+
     // Tiny allocator.
     //
     // Tiny allocator combines several tiny allocation requests
@@ -1039,6 +1263,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcTiny(uintptr size, ж<_type> 
         c.Value.tiny = (uintptr)x;
         c.Value.tinyoffset = size;
     }
+
     // Ensure that the stores above that initialize x to
     // type-safe memory and set the heap bits occur before
     // the caller can make x observable to the garbage
@@ -1056,6 +1281,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcTiny(uintptr size, ж<_type> 
     // conservative scanning considers this pointer dead until
     // this point.
     span.Value.freeIndexForScan = span.Value.freeindex;
+
     // Allocate black during GC.
     // All slots hold nil so no scanning is needed.
     // This may be racing with GC so do it atomically if there can be
@@ -1063,6 +1289,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcTiny(uintptr size, ж<_type> 
     if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     }
+
     // Note cache c only valid while m acquired; see #47302
     //
     // N.B. Use the full size because that matches how the GC
@@ -1078,6 +1305,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcTiny(uintptr size, ж<_type> 
     }
     mp.Value.mallocing = 0;
     releasem(ref (mp).DerefOrNull());
+
     if (checkGCTrigger) {
         {
             var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
@@ -1085,6 +1313,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcTiny(uintptr size, ж<_type> 
             }
         }
     }
+
     if (raceenabled) {
         // Pad tinysize allocations so they are aligned with the end
         // of the tinyalloc region. This ensures that any arithmetic
@@ -1123,6 +1352,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallNoscan(uintptr size, ж<
         }
     }
     mp.Value.mallocing = 1;
+
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     uint8 sizeclass = default!;
@@ -1142,6 +1372,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallNoscan(uintptr size, ж<
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, size);
     }
+
     // Ensure that the stores above that initialize x to
     // type-safe memory and set the heap bits occur before
     // the caller can make x observable to the garbage
@@ -1159,6 +1390,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallNoscan(uintptr size, ж<
     // conservative scanning considers this pointer dead until
     // this point.
     span.Value.freeIndexForScan = span.Value.freeindex;
+
     // Allocate black during GC.
     // All slots hold nil so no scanning is needed.
     // This may be racing with GC so do it atomically if there can be
@@ -1166,6 +1398,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallNoscan(uintptr size, ж<
     if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     }
+
     // Note cache c only valid while m acquired; see #47302
     //
     // N.B. Use the full size because that matches how the GC
@@ -1181,6 +1414,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallNoscan(uintptr size, ж<
     }
     mp.Value.mallocing = 0;
     releasem(ref (mp).DerefOrNull());
+
     if (checkGCTrigger) {
         {
             var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
@@ -1215,6 +1449,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanNoHeader(uintptr siz
         }
     }
     mp.Value.mallocing = 1;
+
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     var sizeclass = size_to_class8[divRoundUp(size, smallSizeDiv)];
@@ -1236,6 +1471,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanNoHeader(uintptr siz
         c.Value.scanAlloc += heapSetTypeNoHeader((uintptr)x, size, Ꮡtyp, span);
     }
     size = (uintptr)class_to_size[sizeclass];
+
     // Ensure that the stores above that initialize x to
     // type-safe memory and set the heap bits occur before
     // the caller can make x observable to the garbage
@@ -1253,6 +1489,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanNoHeader(uintptr siz
     // conservative scanning considers this pointer dead until
     // this point.
     span.Value.freeIndexForScan = span.Value.freeindex;
+
     // Allocate black during GC.
     // All slots hold nil so no scanning is needed.
     // This may be racing with GC so do it atomically if there can be
@@ -1260,6 +1497,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanNoHeader(uintptr siz
     if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     }
+
     // Note cache c only valid while m acquired; see #47302
     //
     // N.B. Use the full size because that matches how the GC
@@ -1275,6 +1513,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanNoHeader(uintptr siz
     }
     mp.Value.mallocing = 0;
     releasem(ref (mp).DerefOrNull());
+
     if (checkGCTrigger) {
         {
             var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
@@ -1308,6 +1547,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanHeader(uintptr size,
         }
     }
     mp.Value.mallocing = 1;
+
     var checkGCTrigger = false;
     var c = getMCache(ref (mp).DerefOrNull());
     size += mallocHeaderSize;
@@ -1331,6 +1571,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanHeader(uintptr size,
     var header = (ж<ж<_type>>)(uintptr)(x);
     x = (uintptr)add(x, mallocHeaderSize);
     c.Value.scanAlloc += heapSetTypeSmallHeader((uintptr)x, size - (uintptr)mallocHeaderSize, Ꮡtyp, header, span);
+
     // Ensure that the stores above that initialize x to
     // type-safe memory and set the heap bits occur before
     // the caller can make x observable to the garbage
@@ -1348,6 +1589,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanHeader(uintptr size,
     // conservative scanning considers this pointer dead until
     // this point.
     span.Value.freeIndexForScan = span.Value.freeindex;
+
     // Allocate black during GC.
     // All slots hold nil so no scanning is needed.
     // This may be racing with GC so do it atomically if there can be
@@ -1355,6 +1597,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanHeader(uintptr size,
     if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     }
+
     // Note cache c only valid while m acquired; see #47302
     //
     // N.B. Use the full size because that matches how the GC
@@ -1370,6 +1613,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanHeader(uintptr size,
     }
     mp.Value.mallocing = 0;
     releasem(ref (mp).DerefOrNull());
+
     if (checkGCTrigger) {
         {
             var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
@@ -1394,6 +1638,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcLarge(uintptr size, ж<_type>
         }
     }
     mp.Value.mallocing = 1;
+
     var c = getMCache(ref (mp).DerefOrNull());
     // For large allocations, keep track of zeroed state so that
     // bulk zeroing can be happen later in a preemptible context.
@@ -1403,6 +1648,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcLarge(uintptr size, ж<_type>
     span.Value.largeType = default!; // Tell the GC not to look at this yet.
     size = span.Value.elemsize;
     @unsafe.Pointer x = (@unsafe.Pointer)span.@base();
+
     // Ensure that the store above that sets largeType to
     // nil happens before the caller can make x observable
     // to the garbage collector.
@@ -1421,6 +1667,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcLarge(uintptr size, ж<_type>
     // conservative scanning considers this pointer dead until
     // this point.
     span.Value.freeIndexForScan = span.Value.freeindex;
+
     // Allocate black during GC.
     // All slots hold nil so no scanning is needed.
     // This may be racing with GC so do it atomically if there can be
@@ -1428,6 +1675,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcLarge(uintptr size, ж<_type>
     if (writeBarrier.enabled) {
         gcmarknewobject(span, (uintptr)x);
     }
+
     // Note cache c only valid while m acquired; see #47302
     //
     // N.B. Use the full size because that matches how the GC
@@ -1443,12 +1691,14 @@ internal static (@unsafe.Pointer, uintptr) mallocgcLarge(uintptr size, ж<_type>
     }
     mp.Value.mallocing = 0;
     releasem(ref (mp).DerefOrNull());
+
     // Check to see if we need to trigger the GC.
     {
         var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
             gcStart(t);
         }
     }
+
     // Objects can be zeroed late in a context where preemption can occur.
     //
     // x will keep the memory alive.
@@ -1456,6 +1706,7 @@ internal static (@unsafe.Pointer, uintptr) mallocgcLarge(uintptr size, ж<_type>
         // N.B. size == fullSize always in this case.
         memclrNoHeapPointersChunked(size, x); // This is a possible preemption point: see #47302
     }
+
     // Set the type and run the publication barrier while non-preemptible. We need to make
     // sure that between heapSetTypeLarge and publicationBarrier we cannot get preempted,
     // otherwise the GC could potentially observe non-zeroed memory but largeType set on weak
@@ -1480,8 +1731,6 @@ internal static (@unsafe.Pointer, uintptr) mallocgcLarge(uintptr size, ж<_type>
 }
 
 internal static @unsafe.Pointer preMallocgcDebug(uintptr size, ж<_type> Ꮡtyp) {
-    ref var typ = ref Ꮡtyp.DerefOrNull();
-
     if (debug.sbrk != 0) {
         var align = (uintptr)16;
         if (Ꮡtyp != nil) {
@@ -1518,6 +1767,7 @@ internal static void postMallocgcDebug(@unsafe.Pointer x, uintptr elemsize, ж<_
         // Init functions are executed sequentially in a single goroutine.
         inittrace.bytes += (uint64)elemsize;
     }
+
     if (traceAllocFreeEnabled()) {
         var Δtrace = traceAcquire();
         if (Δtrace.ok()) {
@@ -1542,6 +1792,7 @@ internal static void deductAssistCredit(uintptr size) {
     // Charge the allocation against the G. We'll account
     // for internal fragmentation at the end of mallocgc.
     assistG.Value.gcAssistBytes -= (int64)size;
+
     if ((~assistG).gcAssistBytes < 0) {
         // This G is in debt. Assist the GC to correct
         // this before allocating. This must happen
@@ -1560,6 +1811,7 @@ internal static void deductAssistCredit(uintptr size) {
 // pointers, this allows the GC to run before it is all cleared.
 internal static void memclrNoHeapPointersChunked(uintptr size, @unsafe.Pointer x) {
     var v = (uintptr)x;
+
     // got this from benchmarking. 128k is too small, 512k is too large.
     uintptr chunkBytes = /* 256 * 1024 */ 262144;
     var vsize = v + size;
@@ -1707,6 +1959,7 @@ internal static int64 nextSample() {
             }
         }
     }
+
     return (int64)fastexprand(MemProfileRate);
 }
 
@@ -1747,8 +2000,7 @@ internal static int32 fastexprand(nint mean) {
 internal static int64 nextSampleNoFP() {
     // Set first allocation sample size.
     nint rate = MemProfileRate;
-    if (rate > 0x3fffffff) {
-        // make 2*rate not overflow
+    if (rate > 0x3fffffff) { // make 2*rate not overflow
         rate = 0x3fffffff;
     }
     if (rate != 0) {
@@ -1761,7 +2013,6 @@ partial struct persistentAlloc {
     internal ж<notInHeap> @base;
     internal uintptr off;
 }
-
 
 partial struct globalAllocᴛ1 /*dyn*/ {
     internal partial ref mutex mutex { get; }
@@ -1896,7 +2147,6 @@ internal static uintptr redZoneSize(uintptr userSize) {
     default: {
         return ((uintptr)16 << (int)(7));
     }}
-
 }
 
 } // end runtime_package

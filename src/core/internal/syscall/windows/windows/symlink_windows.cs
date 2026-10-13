@@ -8,9 +8,14 @@ using syscall = syscall_package;
 partial class windows_package {
 
 public static syscall.Errno ERROR_INVALID_PARAMETER => 87;
+
 public static UntypedInt FILE_SUPPORTS_OBJECT_IDS => 0x00010000;
 public static UntypedInt FILE_SUPPORTS_OPEN_BY_FILE_ID => 0x01000000;
+
+// symlink support for CreateSymbolicLink() starting with Windows 10 (1703, v10.0.14972)
 public static UntypedInt SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE => 0x2;
+
+// FileInformationClass values
 public static UntypedInt FileBasicInfo => 0; // FILE_BASIC_INFO
 public static UntypedInt FileStandardInfo => 1; // FILE_STANDARD_INFO
 public static UntypedInt FileNameInfo => 2; // FILE_NAME_INFO

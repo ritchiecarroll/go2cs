@@ -40,19 +40,24 @@ public static bool ProbablyPrime(this ref ΔInt x, nint n) {
     if (x.neg || len(x.abs) == 0) {
         return false;
     }
+
     // primeBitMask records the primes < 64.
     const uint64 primeBitMask = /* 1<<2 | 1<<3 | 1<<5 | 1<<7 |
 	1<<11 | 1<<13 | 1<<17 | 1<<19 | 1<<23 | 1<<29 | 1<<31 |
 	1<<37 | 1<<41 | 1<<43 | 1<<47 | 1<<53 | 1<<59 | 1<<61 */ 2891462833508853932;
+
     Word w = x.abs[0];
     if (len(x.abs) == 1 && w < 64) {
         return (uint64)(primeBitMask & (((uint64)1).Lsh(w))) != 0;
     }
+
     if ((Word)(w & 1) == 0) {
         return false; // x is even
     }
+
     UntypedInt primesA = /* 3 * 5 * 7 * 11 * 13 * 17 * 19 * 23 * 37 */ 4127218095;
     UntypedInt primesB = /* 29 * 31 * 41 * 43 * 47 * 53 */ 3948078067;
+
     uint32 rA = default!;
     uint32 rB = default!;
     var exprᴛ1 = _W;
@@ -72,6 +77,7 @@ public static bool ProbablyPrime(this ref ΔInt x, nint n) {
     if (rA % 3 == 0 || rA % 5 == 0 || rA % 7 == 0 || rA % 11 == 0 || rA % 13 == 0 || rA % 17 == 0 || rA % 19 == 0 || rA % 23 == 0 || rA % 37 == 0 || rB % 29 == 0 || rB % 31 == 0 || rB % 41 == 0 || rB % 43 == 0 || rB % 47 == 0 || rB % 53 == 0) {
         return false;
     }
+
     return x.abs.probablyPrimeMillerRabin(n + 1, true) && x.abs.probablyPrimeLucas();
 }
 
@@ -85,12 +91,15 @@ internal static bool probablyPrimeMillerRabin(this nat n, nint reps, bool force2
     // determine q, k such that nm1 = q << k
     nuint k = nm1.trailingZeroBits();
     var q = ((nat)default!).shr(nm1, k);
+
     var nm3 = ((nat)default!).sub(nm1, natTwo);
     var randΔ1 = rand.New(rand.NewSource((int64)(nuint)n[0]));
+
     nat x = default!;
     nat y = default!;
     nat quotient = default!;
     nint nm3Len = nm3.bitLen();
+
 NextRandom:
     for (nint i = 0; i < reps; i++) {
         if (i == reps - 1 && force2){
@@ -117,6 +126,7 @@ NextRandom:
 continue_NextRandom:;
     }
 break_NextRandom:;
+
     return true;
 }
 
@@ -154,6 +164,7 @@ internal static bool probablyPrimeLucas(this nat n) {
     if ((Word)(n[0] & 1) == 0) {
         return n.cmp(natTwo) == 0;
     }
+
     // Baillie-OEIS "method C" for choosing D, P, Q,
     // as in https://oeis.org/A217719/a217719.txt:
     // try increasing P ≥ 3 such that D = P² - 4 (so Q = 1)
@@ -196,6 +207,7 @@ internal static bool probablyPrimeLucas(this nat n) {
             }
         }
     }
+
     // Grantham definition of "extra strong Lucas pseudoprime", after Thm 2.3 on p. 876
     // (D, P, Q above have become Δ, b, 1):
     //
@@ -212,6 +224,7 @@ internal static bool probablyPrimeLucas(this nat n) {
     nint r = (nint)s.trailingZeroBits();
     s = s.shr(s, (nuint)r);
     var nm2 = ((nat)default!).sub(n, natTwo); // n-2
+
     // We apply the "almost extra strong" test, which checks the above conditions
     // except for U_s ≡ 0 mod n, which allows us to avoid computing any U_k values.
     // Jacobsen points out that maybe we should just do the full extra strong test:
@@ -220,6 +233,7 @@ internal static bool probablyPrimeLucas(this nat n) {
     // at the cost of a single modular inversion. This computation is easy and fast in GMP,
     // so we can get the full extra-strong test at essentially the same performance as the
     // almost extra strong test."
+
     // Compute Lucas sequence V_s(b, 1), where:
     //
     //	V(0) = 2
@@ -268,6 +282,7 @@ internal static bool probablyPrimeLucas(this nat n) {
             (t2, vk) = t2.div(vk, t1, n);
         }
     }
+
     // Now k=s, so vk = V(s). Check V(s) ≡ ±2 (mod n).
     if (vk.cmp(natTwo) == 0 || vk.cmp(nm2) == 0) {
         // Check U(s) ≡ 0.
@@ -291,16 +306,15 @@ internal static bool probablyPrimeLucas(this nat n) {
             return true;
         }
     }
+
     // Check V(2^t s) ≡ 0 mod n for some 0 ≤ t < r-1.
     for (nint t = 0; t < r - 1; t++) {
-        if (len(vk) == 0) {
-            // vk == 0
+        if (len(vk) == 0) { // vk == 0
             return true;
         }
         // Optimization: V(k) = 2 is a fixed point for V(k') = V(k)² - 2,
         // so if V(k) = 2, we can stop: we will never find a future V(k) == 0.
-        if (len(vk) == 1 && vk[0] == 2) {
-            // vk == 2
+        if (len(vk) == 1 && vk[0] == 2) { // vk == 2
             return false;
         }
         // k' = 2k

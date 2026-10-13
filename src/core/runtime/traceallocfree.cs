@@ -13,7 +13,6 @@ partial class runtime_package {
 
 // Batch type values for the alloc/free experiment.
 internal static UntypedInt traceAllocFreeTypesBatch => iota; // Contains types. [{id, address, size, ptrspan, name length, name string} ...]
-
 internal static UntypedInt traceAllocFreeInfoBatch => 1; // Contains info for interpreting events. [min heap addr, page size, min heap align, min stack align]
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -25,6 +24,7 @@ internal static readonly @string traceSnapshotMemoryˢ = "traceSnapshotMemory: t
 // The world must be stopped and tracing must be enabled when this function is called.
 internal static void traceSnapshotMemory(uintptr gen) {
     assertWorldStopped();
+
     // Write a batch containing information that'll be necessary to
     // interpret the events.
     bool flushed = default!;
@@ -34,19 +34,23 @@ internal static void traceSnapshotMemory(uintptr gen) {
         // Annotate the batch as containing additional info.
         w.@byte((byte)traceAllocFreeInfoBatch);
     }
+
     // Emit info.
     w.varint((uint64)runtime_package.Δtrace.minPageHeapAddr);
     w.varint((uint64)pageSize);
     w.varint((uint64)minHeapAlign);
     w.varint((uint64)fixedStack);
+
     // Finish writing the batch.
     w.flush().end();
+
     // Start tracing.
     ref var traceΔ1 = ref heap<traceLocker>(out var ᏑtraceΔ1);
     traceΔ1 = traceAcquire();
     if (!traceΔ1.ok()) {
         @throw(traceSnapshotMemoryˢ);
     }
+
     // Write out all the heap spans and heap objects.
     foreach (var (_, s) in mheap_.allspans) {
         if (s.of(mspan.Ꮡstate).get() == mSpanDead) {
@@ -54,10 +58,12 @@ internal static void traceSnapshotMemory(uintptr gen) {
         }
         // It's some kind of span, so trace that it exists.
         traceΔ1.SpanExists(s);
+
         // Write out allocated objects if it's a heap span.
         if (s.of(mspan.Ꮡstate).get() != mSpanInUse) {
             continue;
         }
+
         // Find all allocated objects.
         var abits = s.allocBitsForIndex(0);
         for (var i = (uintptr)0; i < (uintptr)(~s).nelems; i++) {
@@ -68,6 +74,7 @@ internal static void traceSnapshotMemory(uintptr gen) {
             abits.advance();
         }
     }
+
     // Write out all the goroutine stacks.
     var traceʗ1 = traceΔ1;
     forEachGRace((ж<g> gp) => {

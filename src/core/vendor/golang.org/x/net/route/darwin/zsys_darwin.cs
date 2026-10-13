@@ -11,9 +11,11 @@ internal static UntypedInt sizeofIfMsghdr2Darwin15 => 0xa0;
 internal static UntypedInt sizeofIfmaMsghdr2Darwin15 => 0x14;
 internal static UntypedInt sizeofIfDataDarwin15 => 0x60;
 internal static UntypedInt sizeofIfData64Darwin15 => 0x80;
+
 internal static UntypedInt sizeofRtMsghdrDarwin15 => 0x5c;
 internal static UntypedInt sizeofRtMsghdr2Darwin15 => 0x5c;
 internal static UntypedInt sizeofRtMetricsDarwin15 => 0x38;
+
 internal static UntypedInt sizeofSockaddrStorage => 0x80;
 internal static UntypedInt sizeofSockaddrInet => 0x10;
 internal static UntypedInt sizeofSockaddrInet6 => 0x1c;

@@ -34,6 +34,7 @@ internal static CTR newCTR(ref Block b, slice<byte> iv) {
     if (len(iv) != ΔBlockSize) {
         throw panic("bad IV length");
     }
+
     return new CTR(
         b: b,
         ivlo: byteorder.BEUint64(iv[8..16]),
@@ -46,6 +47,7 @@ public static void XORKeyStream(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte> 
     ref var c = ref Ꮡc.DerefOrNull();
 
     Ꮡc.XORKeyStreamAt(dst, src, c.offset);
+
     uint64 carry = default!;
     (c.offset, carry) = bits.Add64(c.offset, (uint64)len(src), 0);
     if (carry != 0) {
@@ -84,7 +86,9 @@ public static void XORKeyStreamAt(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte
         throw panic("crypto/aes: invalid buffer overlap");
     }
     fips140.RecordApproved();
+
     var (ivlo, ivhi) = add128(c.ivlo, c.ivhi, offset / (uint64)ΔBlockSize);
+
     {
         var blockOffset = offset % (uint64)ΔBlockSize; if (blockOffset != 0) {
             // We have a partial block at the beginning.
@@ -98,12 +102,14 @@ public static void XORKeyStreamAt(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte
             (ivlo, ivhi) = add128(ivlo, ivhi, 1);
         }
     }
+
     while (len(src) >= (nint)(8 * ΔBlockSize)) {
         ctrBlocks8(ref nonnil(ref c).b, Ꮡ(array<byte>.Alias(dst, 128)), Ꮡ(array<byte>.Alias(src, 128)), ivlo, ivhi);
         src = src[(int)(8 * ΔBlockSize)..];
         dst = dst[(int)(8 * ΔBlockSize)..];
         (ivlo, ivhi) = add128(ivlo, ivhi, 8);
     }
+
     // The tail can have at most 7 = 4 + 2 + 1 blocks.
     if (len(src) >= (nint)(4 * ΔBlockSize)) {
         ctrBlocks4(ref nonnil(ref c).b, Ꮡ(array<byte>.Alias(dst, 64)), Ꮡ(array<byte>.Alias(src, 64)), ivlo, ivhi);
@@ -123,6 +129,7 @@ public static void XORKeyStreamAt(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte
         dst = dst[(int)(1 * ΔBlockSize)..];
         (ivlo, ivhi) = add128(ivlo, ivhi, 1);
     }
+
     if (len(src) != 0) {
         // We have a partial block at the end.
         ref var @in = ref heap(new array<byte>(16), out var Ꮡin);

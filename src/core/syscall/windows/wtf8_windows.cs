@@ -27,10 +27,12 @@ partial class syscall_package {
 internal static UntypedInt surr1 => 0xd800;
 internal static UntypedInt surr2 => 0xdc00;
 internal static UntypedInt surr3 => 0xe000;
+
 internal static UntypedInt tx => 0b10000000;
 internal static UntypedInt t3 => 0b11100000;
 internal static UntypedInt maskx => 0b00111111;
 internal static UntypedInt mask3 => 0b00001111;
+
 internal static UntypedInt rune1Max => /* 1<<7 - 1 */ 127;
 internal static UntypedInt rune2Max => /* 1<<11 - 1 */ 2047;
 
@@ -67,22 +69,22 @@ internal static slice<byte> decodeWTF16(slice<uint16> s, slice<byte> buf) {
             var r = s[i];
             switch (ᐧ) {
             case {} when (r < surr1) || (surr3 <= r): {
+                // normal rune
                 ar = (rune)r;
                 break;
             }
             case {} when surr1 <= r && r < surr2 && i + 1 < len(s) && surr2 <= s[i + 1] && s[i + 1] < surr3: {
-                ar = utf16.DecodeRune((rune)r, // normal rune
- // valid surrogate sequence
- (rune)s[i + 1]);
+                // valid surrogate sequence
+                ar = utf16.DecodeRune((rune)r, (rune)s[i + 1]);
                 i++;
                 break;
             }
             default: {
+                // WTF-8 fallback.
+                // This only handles the 3-byte case of utf8.AppendRune,
+                // as surrogates always fall in that case.
                 ar = (rune)r;
                 if (ar > utf8.MaxRune) {
-                    // WTF-8 fallback.
-                    // This only handles the 3-byte case of utf8.AppendRune,
-                    // as surrogates always fall in that case.
                     ar = utf8.RuneError;
                 }
                 buf = append(buf, (byte)((byte)t3 | (byte)((ar >> (int)(12)))), (byte)((byte)tx | (byte)((byte)((ar >> (int)(6))) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)ar & (byte)maskx)));
@@ -90,7 +92,6 @@ internal static slice<byte> decodeWTF16(slice<uint16> s, slice<byte> buf) {
                 break;
             }}
         }
-
         buf = utf8.AppendRune(buf, ar);
     }
     return buf;

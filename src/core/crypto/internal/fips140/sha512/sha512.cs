@@ -14,10 +14,20 @@ using go.crypto.@internal.fips140deps;
 
 partial class sha512_package {
 
+// size512 is the size, in bytes, of a SHA-512 checksum.
 internal static UntypedInt size512 => 64;
+
+// size224 is the size, in bytes, of a SHA-512/224 checksum.
 internal static UntypedInt size224 => 28;
+
+// size256 is the size, in bytes, of a SHA-512/256 checksum.
 internal static UntypedInt size256 => 32;
+
+// size384 is the size, in bytes, of a SHA-384 checksum.
 internal static UntypedInt size384 => 48;
+
+// blockSize is the block size, in bytes, of the SHA-512/224,
+// SHA-512/256, SHA-384 and SHA-512 hash functions.
 internal static UntypedInt blockSize => 128;
 
 internal static UntypedInt chunk => 128;
@@ -109,7 +119,6 @@ public static void Reset(this ref Digest d) {
     else { /* default: */
         throw panic("unknown size");
     }
-
     d.nx = 0;
     d.len = 0;
 }
@@ -141,7 +150,6 @@ public static (slice<byte>, error) AppendBinary(this ref Digest d, slice<byte> b
     else { /* default: */
         throw panic("unknown size");
     }
-
     b = byteorder.BEAppendUint64(b, d.h[0]);
     b = byteorder.BEAppendUint64(b, d.h[1]);
     b = byteorder.BEAppendUint64(b, d.h[2]);
@@ -180,7 +188,6 @@ public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
     default: {
         return errors.New(cryptoSha512InvalidHashˢ);
     }}
-
     if (len(b) != marshaledSize) {
         return errors.New(cryptoSha512InvalidHashˢ2);
     }
@@ -242,8 +249,8 @@ public static nint BlockSize(this ref Digest d) {
 public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) {
     nint nn = default!;
     error err = default!;
-
     ref var d = ref Ꮡd.DerefOrNull();
+
     nn = len(p);
     d.len += (uint64)nn;
     if (d.nx > 0) {
@@ -288,6 +295,7 @@ internal static array<byte> checkSum(this ж<Digest> Ꮡd) {
     } else {
         t = 128 + 112 - len % 128;
     }
+
     // Length in bits.
     len <<= (int)(3);
     var padlen = tmp.slice(0, (nint)(t + 16));
@@ -296,9 +304,11 @@ internal static array<byte> checkSum(this ж<Digest> Ꮡd) {
     // byteorder.BEPutUint64(padlen[t+0:], 0)
     byteorder.BEPutUint64(padlen.slice((nint)(t + 8)), len);
     Ꮡd.Write(padlen);
+
     if (d.nx != 0) {
         throw panic("d.nx != 0");
     }
+
     array<byte> digest = new(64); /* size512 */
     byteorder.BEPutUint64(digest[0..], d.h[0]);
     byteorder.BEPutUint64(digest[8..], d.h[1]);
@@ -310,6 +320,7 @@ internal static array<byte> checkSum(this ж<Digest> Ꮡd) {
         byteorder.BEPutUint64(digest[48..], d.h[6]);
         byteorder.BEPutUint64(digest[56..], d.h[7]);
     }
+
     return digest.Clone();
 }
 

@@ -525,11 +525,13 @@ internal static (nat q, nat r) div(this nat z, nat z2, nat u, nat v) {
     if (len(v) == 0) {
         throw panic("division by zero");
     }
+
     if (u.cmp(v) < 0) {
         q = z[..0];
         r = z2.set(u);
         return (q, r);
     }
+
     if (len(v) == 1) {
         // Short division: long optimized for a single-word divisor.
         // In that case, the 2-by-1 guess is all we need at each step.
@@ -538,6 +540,7 @@ internal static (nat q, nat r) div(this nat z, nat z2, nat u, nat v) {
         r = z2.setWord(r2);
         return (q, r);
     }
+
     (q, r) = z.divLarge(z2, u, v);
     return (q, r);
 }
@@ -563,7 +566,6 @@ internal static (nat q, Word r) divW(this nat z, nat x, Word y) {
         q = z[..0]; // result is 0
         return (q, r);
     }}
-
     // m > 0
     z = z.make(m);
     r = divWVW(z, 0, x, y);
@@ -607,6 +609,7 @@ internal static (nat q, nat r) divLarge(this nat z, nat u, nat uIn, nat vIn) {
 
     nint n = len(vIn);
     nint m = len(uIn) - n;
+
     // Scale the inputs so vIn's top bit is 1 (see “Scaling Inputs” above).
     // vIn is treated as a read-only input (it may be in use by another
     // goroutine), so we must make a copy.
@@ -617,12 +620,14 @@ internal static (nat q, nat r) divLarge(this nat z, nat u, nat uIn, nat vIn) {
     shlVU(v, vIn, shift);
     u = u.make(len(uIn) + 1);
     u[len(uIn)] = shlVU(u.slice(0, len(uIn)), uIn, shift);
+
     // The caller should not pass aliased z and u, since those are
     // the two different outputs, but correct just in case.
     if (alias(z, u)) {
         z = default!;
     }
     q = z.make(m + 1);
+
     // Use basic or recursive long division depending on size.
     if (n < divRecursiveThreshold){
         q.divBasic(u, v);
@@ -630,10 +635,13 @@ internal static (nat q, nat r) divLarge(this nat z, nat u, nat uIn, nat vIn) {
         q.divRecursive(u, v);
     }
     putNat(vp);
+
     q = q.norm();
+
     // Undo scaling of remainder.
     shrVU(u, u, shift);
     r = u.norm();
+
     return (q, r);
 }
 
@@ -643,30 +651,35 @@ internal static (nat q, nat r) divLarge(this nat z, nat u, nat uIn, nat vIn) {
 internal static void divBasic(this nat q, nat u, nat v) {
     nint n = len(v);
     nint m = len(u) - n;
+
     var qhatvp = getNat(n + 1);
     var qhatv = qhatvp.ValueSlot;
+
     // Set up for divWW below, precomputing reciprocal argument.
     Word vn1 = v[n - 1];
     Word rec = reciprocalWord(vn1);
+
     // Invent a leading 0 for u, for the first iteration.
     // Invariant: ujn == u[j+n] in each iteration.
     Word ujn = ((Word)0);
+
     // Compute each digit of quotient.
     for (nint j = m; j >= 0; j--) {
         // Compute the 2-by-1 guess q̂.
         Word qhat = ((Word)_M);
+
         // ujn ≤ vn1, or else q̂ would be more than one digit.
         // For ujn == vn1, we set q̂ to the max digit M above.
         // Otherwise, we compute the 2-by-1 guess.
         if (ujn != vn1) {
             Word rhat = default!;
             (qhat, rhat) = divWW(ujn, u[j + n - 1], vn1, rec);
+
             // Refine q̂ to a 3-by-2 guess. See “Refining Guesses” above.
             Word vn2 = v[n - 2];
             var (x1, x2) = mulWW(qhat, vn2);
             Word ujn2 = u[j + n - 2];
-            while (greaterThan(x1, x2, rhat, ujn2)) {
-                // x1x2 > r̂ u[j+n-2]
+            while (greaterThan(x1, x2, rhat, ujn2)) { // x1x2 > r̂ u[j+n-2]
                 qhat--;
                 Word prevRhat = rhat;
                 rhat += vn1;
@@ -680,12 +693,14 @@ internal static void divBasic(this nat q, nat u, nat v) {
                 (x1, x2) = mulWW(qhat, vn2);
             }
         }
+
         // Compute q̂·v.
         qhatv[n] = mulAddVWW(qhatv.slice(0, n), v, qhat, 0);
         nint qhl = len(qhatv);
         if (j + qhl > len(u) && qhatv[n] == 0) {
             qhl--;
         }
+
         // Subtract q̂·v from the current section of u.
         // If it underflows, q̂·v > u, which we fix up
         // by decrementing q̂ and adding v back.
@@ -699,7 +714,9 @@ internal static void divBasic(this nat q, nat u, nat v) {
             }
             qhat--;
         }
+
         ujn = u[j + n - 1];
+
         // Save quotient digit.
         // Caller may know the top digit is zero and not leave room for it.
         if (j == m && m == len(q) && qhat == 0) {
@@ -707,6 +724,7 @@ internal static void divBasic(this nat q, nat u, nat v) {
         }
         q[j] = qhat;
     }
+
     putNat(qhatvp);
 }
 
@@ -733,8 +751,10 @@ internal static void divRecursive(this nat z, nat u, nat v) {
     nint recDepth = 2 * bits.Len((nuint)len(v));
     var tmp = getNat(3 * len(v));
     var temps = new slice<ж<nat>>(recDepth);
+
     clear(z);
     z.divRecursiveStep(u, v, 0, tmp, temps);
+
     // Free temporaries.
     foreach (var (_, n) in temps) {
         if (n != nil) {
@@ -761,17 +781,20 @@ internal static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ж<n
         clear(z);
         return;
     }
+
     // Fall back to basic division if the problem is now small enough.
     nint n = len(v);
     if (n < divRecursiveThreshold) {
         z.divBasic(u, v);
         return;
     }
+
     // Nothing to do if u is shorter than v (implies u < v).
     nint m = len(u) - n;
     if (m < 0) {
         return;
     }
+
     // We consider B digits in a row as a single wide digit.
     // (See “Recursive Division” above.)
     //
@@ -779,12 +802,14 @@ internal static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ж<n
     // which is something entirely different.
     // TODO(rsc): Look into whether using ⌈n/2⌉ is better than ⌊n/2⌋.
     nint B = n / 2;
+
     // Allocate a nat for qhat below.
     if (temps[depth] == nil){
         temps[depth] = getNat(n); // TODO(rsc): Can be just B+1.
     } else {
         temps[depth].ValueSlot = (~temps[depth]).make(B + 1);
     }
+
     // Compute each wide digit of the quotient.
     //
     // TODO(rsc): Change the loop to be
@@ -804,13 +829,16 @@ internal static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ж<n
         // s is the number of digits to drop from the 3B- and 2B-digit chunks.
         // We drop B-1 to be left with 2B+1 and B+1.
         nint sΔ1 = (B - 1);
+
         // uu is the up-to-3B-digit section of u we are working on.
         var uu = u.slice(j - B);
+
         // Compute the 2-by-1 guess q̂, leaving r̂ in uu[s:B+n].
         var qhatΔ1 = temps[depth].ValueSlot;
         clear(qhatΔ1);
         qhatΔ1.divRecursiveStep(uu.slice(sΔ1, B + n), v.slice(sΔ1), depth + 1, Ꮡtmp, temps);
         qhatΔ1 = qhatΔ1.norm();
+
         // Extend to a 3-by-2 quotient and remainder.
         // Because divRecursiveStep overwrote the top part of uu with
         // the remainder r̂, the full uu already contains the equivalent
@@ -818,6 +846,7 @@ internal static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ж<n
         // Subtracting q̂·vₙ₋₂ from it will compute the full-length remainder.
         // If that subtraction underflows, q̂·v > u, which we fix up
         // by decrementing q̂ and adding v back, same as in long division.
+
         // TODO(rsc): Instead of subtract and fix-up, this code is computing
         // q̂·vₙ₋₂ and decrementing q̂ until that product is ≤ u.
         // But we can do the subtraction directly, as in the comment above
@@ -847,7 +876,9 @@ internal static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ж<n
         addAt(z, qhatΔ1, j - B);
         j -= B;
     }
+
     // TODO(rsc): Rewrite loop as described above and delete all this code.
+
     // Now u < (v<<B), compute lower bits in the same way.
     // Choose shift = B-1 again.
     nint s = B - 1;
@@ -881,6 +912,7 @@ internal static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ж<n
     if (c > 0) {
         throw panic("impossible");
     }
+
     // Done!
     addAt(z, qhat.norm(), 0);
 }

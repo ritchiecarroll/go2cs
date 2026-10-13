@@ -46,6 +46,7 @@ internal static (@string, error) rootCleanPath(@string s, slice<@string> prefix,
     if (stringslite.IndexByte(s, (rune)'?') >= 0) {
         return ("", windows.ERROR_INVALID_NAME);
     }
+
     @string fixedPrefix = fixedPrefixᶜ;
     var buf = slice<byte>(fixedPrefix);
     foreach (var (_, p) in prefix) {
@@ -59,10 +60,12 @@ internal static (@string, error) rootCleanPath(@string s, slice<@string> prefix,
         buf = appendꓸꓸꓸ(buf, slice<byte>(p));
     }
     s = ((@string)buf);
+
     (s, var err) = syscall.FullPath(s);
     if (err != default!) {
         return ("", err);
     }
+
     (s, var ok) = stringslite.CutPrefix(s, fixedPrefix);
     if (!ok) {
         return ("", errPathEscapes);
@@ -71,9 +74,11 @@ internal static (@string, error) rootCleanPath(@string s, slice<@string> prefix,
     if (s == ""u8) {
         s = "."u8;
     }
+
     if (!filepathlite.IsLocal(s)) {
         return ("", errPathEscapes);
     }
+
     return (s, default!);
 }
 
@@ -106,6 +111,7 @@ internal static (ж<Root>, error) newRoot(syscallꓸHandle fd, @string name) {
         syscall.CloseHandle(fd);
         return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: errors.New(notADirectoryˢ)))));
     }
+
     var r = Ꮡ(new Root(Ꮡ(new root(
         fd: fd,
         name: name

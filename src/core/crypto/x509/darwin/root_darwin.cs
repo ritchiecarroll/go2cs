@@ -42,6 +42,7 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
                 macOS.CFArrayAppendValue(certs, sc);
             }
         }
+
         var policies = macOS.CFArrayCreateMutable();
         defer(macOS.ReleaseCFArray, policies, ref ᒐ);
         (var sslPolicy, err) = macOS.SecPolicyCreateSSL(opts.DNSName);
@@ -49,11 +50,13 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
             (chains, err) = (default!, err); goto ᒐdone;
         }
         macOS.CFArrayAppendValue(policies, sslPolicy);
+
         (var trustObj, err) = macOS.SecTrustCreateWithCertificates(certs, policies);
         if (err != default!) {
             (chains, err) = (default!, err); goto ᒐdone;
         }
         defer(macOS.CFRelease, trustObj, ref ᒐ);
+
         if (!opts.CurrentTime.IsZero()) {
             var dateRef = macOS.TimeToCFDateRef(opts.CurrentTime);
             defer(macOS.CFRelease, dateRef, ref ᒐ);
@@ -63,10 +66,12 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
                 }
             }
         }
+
         // TODO(roland): we may want to allow passing in SCTs via VerifyOptions and
         // set them via SecTrustSetSignedCertificateTimestamps, since Apple will
         // always enforce its SCT requirements, and there are still _some_ people
         // using TLS or OCSP for that.
+
         {
             var (ret, errΔ3) = macOS.SecTrustEvaluateWithError(trustObj); if (errΔ3 != default!) {
                 var exprᴛ1 = ret;
@@ -82,9 +87,9 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
                 { /* default: */
                     (chains, err) = (default!, fmt.Errorf("x509: %s"u8, errΔ3)); goto ᒐdone;
                 }
-
             }
         }
+
         var chain = new slice<ж<Certificate>>[]{new ж<Certificate>[]{}.slice()}.slice();
         nint numCerts = macOS.SecTrustGetCertificateCount(trustObj);
         for (nint i = 0; i < numCerts; i++) {
@@ -102,6 +107,7 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
             // This should _never_ happen, but to be safe
             (chains, err) = (default!, errors.New(x509MacOSCertificateˢ)); goto ᒐdone;
         }
+
         if (opts.DNSName != ""u8) {
             // If we have a DNS name, apply our own name verification
             {
@@ -110,19 +116,23 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
                 }
             }
         }
+
         var keyUsages = opts.KeyUsages;
         if (builtin.len(keyUsages) == 0) {
             keyUsages = new ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice();
         }
+
         // If any key usage is acceptable then we're done.
         foreach (var (_, usage) in keyUsages) {
             if (usage == ExtKeyUsageAny) {
                 (chains, err) = (chain, default!); goto ᒐdone;
             }
         }
+
         if (!checkChainForKeyUsage(chain[0], keyUsages)) {
             (chains, err) = (default!, new CertificateInvalidError(Ꮡc, IncompatibleUsage, ""u8)); goto ᒐdone;
         }
+
         (chains, err) = (chain, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
