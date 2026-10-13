@@ -142,6 +142,35 @@ program. A converted project trims in partial mode: the .NET framework is trimme
 converted packages and the app itself are kept whole, so the members they reach by reflection survive the
 publish. A project may set its own `TrimMode`.
 
+**Runtime settings for deep-recursion or batch programs (opt-in).** A converted app runs with the .NET defaults:
+tiered compilation with quick JIT, and background garbage collection. Two documented settings can help a program
+that recurses very deeply or runs as a batch job. Set them as build properties in the app's project file, or pass
+them to `dotnet build` / `dotnet publish` with `-p:`. The converter does not set either of them for an app; they
+are a choice for the program's owner, and each has a cost.
+
+```xml
+<ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>   <!-- background GC off -->
+<TieredCompilationQuickJit>false</TieredCompilationQuickJit>       <!-- quick JIT off -->
+```
+
+Each garbage collection walks every live stack frame. A Go program that recurses tens of thousands of levels
+deep pays for that walk on every collection. Background GC also keeps the young-generation budget small, so
+those collections come often. Measured on go-cmp's cyclic transformer tests (65,536 levels of recursion), the
+default settings took 54.9 s:
+
+| Setting | That deep-recursion run | A typical program | Cost |
+|---|---|---|---|
+| `ConcurrentGarbageCollection=false` | 17.3 s | within a few percent (the 15 [Performance](Performance.md) benchmarks: 1.00x to 1.02x on average) | **every full collection blocks the program**, which a long-running server with a large heap will notice; peak memory up to 1.8x on allocation-heavy programs |
+| `TieredCompilationQuickJit=false` | 24.8 s | **0.94x** for a published app, whose golib and packages carry ReadyToRun code; **1.10x** on average for an IL-only build (`dotnet build`, `dotnet run`), and up to **2.2x** slower on interface-heavy code, which loses dynamic profile-guided optimization | about **27% more startup time** published, **50%** IL-only |
+| both | 9.6 s | 0.94x published; 1.10x IL-only | both of the above |
+
+Do not set `TieredCompilation=false` instead of quick JIT. A published app's ReadyToRun code is then never
+re-optimized, and the measured suite ran 1.19x slower on average, up to 3.6x on one benchmark.
+
+Converted **test hosts** (the `*.tests.csproj` that `-tests` emits) already run with background GC off: the
+test-host template sets `ConcurrentGarbageCollection=false`, and the `-tests` runner sets
+`DOTNET_gcConcurrent=0`. Quick JIT stays on there.
+
 _Expected output:_
 
 ![colorapp-output](images/colorapp-output.png)
