@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static go2cs.Common;
 using static go2cs.Symbols;
@@ -119,7 +120,7 @@ internal class StructTypeTemplate : TemplateBase
 
                 // Constructors
                 {{Constructors}}
-                {{ValueCloneImplementation}}{{GoZeroRegistration}}{{GoZeroConstructionHook}}{{TypeOpsSourceMembers}}
+                {{ValueCloneImplementation}}{{GoZeroRegistration}}{{GoZeroConstructionHook}}{{TypeOpsSourceMembers}}{{FieldBoxTableMembers}}
                 // Handle comparisons between struct '{{NonGenericStructName}}' instances
                 {{EqualsMember}}
                 public override bool Equals(object? obj) => obj is {{StructName}} other && Equals(other);
@@ -208,6 +209,9 @@ internal class StructTypeTemplate : TemplateBase
             if (TypeOpsScope.Wants(StructName))
                 bases.Add("global::go.IGoTypeOpsSource");
 
+            if (WantsFieldBoxTable)
+                bases.Add("global::go.IGoFieldBoxSource");
+
             return bases.Count == 0 ? "" : $" : {string.Join(", ", bases)}";
         }
     }
@@ -220,6 +224,55 @@ internal class StructTypeTemplate : TemplateBase
     // under Native AOT; naming them here per struct grew the package consumer's full-trim executable ~50% (measured).
     private string TypeOpsSourceMembers => !TypeOpsScope.Wants(StructName) ? "" :
         $"\r\n{TypeElemIndent}global::go.IGoTypeOps global::go.IGoTypeOpsSource.TypeOps => global::go.GoTypeOps<{StructName}>.Instance;\r\n";
+
+    // reflect's field-box table (golib's IGoFieldBoxSource; trim stage 3d, family E): an addressable Value.Field(i) builds
+    // the field's alias box through this compiled switch -- the same view converted code builds for `&s.f`, box.of(S.Ꮡf) --
+    // where golib emitted a DynamicMethod, which Native AOT cannot run. Keyed by the GO field name (golib's projection:
+    // the converter's Δ collision marker stripped); a blank field, whose `_` repeats, by its C# name, through a generated
+    // object-parameter accessor (blanks have no Ꮡ accessor: Go gives them no address, but reflect still reads them).
+    // On EVERY struct with fields, not only the operations face's (TypeOpsScope): that rule misses a struct whose pointer
+    // its compilation reaches only through `&s` of an inferred variable, which is how most reflect.ValueOf(&s) calls look.
+    private bool WantsFieldBoxTable => StructMembers.Count > 0;
+
+    private string FieldBoxTableMembers
+    {
+        get
+        {
+            if (!WantsFieldBoxTable)
+                return "";
+
+            StringBuilder accessors = new();
+            StringBuilder arms = new();
+            HashSet<string> keys = new(StringComparer.Ordinal);
+
+            foreach ((string typeName, string memberName, _, _, _) in StructMembers)
+            {
+                string csName = GetUnsanitizedIdentifier(memberName);
+
+                if (IsGoBlankMemberName(GetSimpleName(memberName)))
+                {
+                    if (!keys.Add(csName))
+                        continue;
+
+                    string blankAccessor = $"goref_{csName}";
+                    string blankTarget = ReadOnlyZeroSizeMembers.Contains(memberName) ? ZeroSizeSlotRef(typeName) : $"ref (({PointerPrefix}<{StructName}>)box).ValueSlot.{memberName}";
+
+                    accessors.Append($"\r\n{TypeElemIndent}private static ref {typeName} {blankAccessor}(object box) => {blankTarget};");
+                    arms.Append($"\r\n{TypeElemIndent}    {SymbolDisplay.FormatLiteral(csName, true)} => (({PointerPrefix}<{StructName}>)parentBox).of({blankAccessor}),");
+                    continue;
+                }
+
+                string goName = csName.StartsWith(ShadowVarMarker, StringComparison.Ordinal) ? csName.Substring(ShadowVarMarker.Length) : csName;
+
+                if (!keys.Add(goName))
+                    continue;
+
+                arms.Append($"\r\n{TypeElemIndent}    {SymbolDisplay.FormatLiteral(goName, true)} => (({PointerPrefix}<{StructName}>)parentBox).of({AddressPrefix}{csName}),");
+            }
+
+            return $"{accessors}\r\n{TypeElemIndent}object? global::go.IGoFieldBoxSource.FieldBox(string field, object parentBox) => field switch\r\n{TypeElemIndent}{{{arms}\r\n{TypeElemIndent}    _ => null\r\n{TypeElemIndent}}};\r\n";
+        }
+    }
 
     // golib's construction hook (IGoZeroConstructed; trim stage 3b, docs/PLAN-golib-full-trim.md section 9.6): a struct
     // whose constructor builds what `default` skips -- a needy member (IsNeedy) or a directional channel's stamp
