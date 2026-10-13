@@ -2470,6 +2470,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckWsaSendtoRoundTrip() => CheckTarget("WsaSendtoRoundTrip");
 
     [TestMethod]
+    public void CheckX509SystemVerify() => CheckTarget("X509SystemVerify");
+
+    [TestMethod]
     public void CheckXpkgPromotedInnerLib() => CheckTarget("XpkgPromotedInnerLib");
 
     [TestMethod]

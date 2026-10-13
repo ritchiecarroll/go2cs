@@ -139,6 +139,21 @@ public static unsafe class NativeStructMarshal
         return (r, errno);
     }
 
+    /// <summary>
+    /// <see cref="CallLibc"/>'s form for <see cref="GoLibcCall.CallFiveAndDouble"/>: the same marshal and
+    /// nil-pointer policy over the five integer arguments, with the double carried beside them untouched.
+    /// </summary>
+    internal static nuint CallLibcWithDouble(nint fn, ReadOnlySpan<nuint> args, double f1)
+    {
+        Span<nuint> copy = stackalloc nuint[args.Length];
+        args.CopyTo(copy);
+
+        return marshalCall(copy, nilPointersAsZero: true, (fn, f1), &invokeWithDouble);
+    }
+
+    private static nuint invokeWithDouble((nint fn, double f1) state, ReadOnlySpan<nuint> a) =>
+        GoLibcCall.CallFiveAndDoubleUnmarshalled(state.fn, a, state.f1);
+
     /// <summary>Whether any of <paramref name="args"/> carries the managed-pointer-token tag.</summary>
     internal static bool AnyToken(ReadOnlySpan<nuint> args)
     {

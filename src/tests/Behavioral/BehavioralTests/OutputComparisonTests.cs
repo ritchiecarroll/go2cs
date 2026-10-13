@@ -2390,6 +2390,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckWsaSendtoRoundTrip() => CheckTarget("WsaSendtoRoundTrip");
 
     [TestMethod]
+    public void CheckX509SystemVerify() => CheckTarget("X509SystemVerify");
+
+    [TestMethod]
     public void CheckXpkgPromotedMethodSet() => CheckTarget("XpkgPromotedMethodSet");
 
     [TestMethod]

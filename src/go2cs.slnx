@@ -1119,6 +1119,7 @@
     <Project Path="tests/Behavioral/WrittenCaptureParam/WrittenCaptureParam.csproj" />
     <Project Path="tests/Behavioral/WsaProtocolInfo/WsaProtocolInfo.csproj" />
     <Project Path="tests/Behavioral/WsaSendtoRoundTrip/WsaSendtoRoundTrip.csproj" />
+    <Project Path="tests/Behavioral/X509SystemVerify/X509SystemVerify.csproj" />
     <Project Path="tests/Behavioral/XpkgPromotedInnerLib/XpkgPromotedInnerLib.csproj" />
     <Project Path="tests/Behavioral/XpkgPromotedMethodSet/XpkgPromotedMethodSet.csproj" />
     <Project Path="tests/Behavioral/XpkgPromotedMidLib/XpkgPromotedMidLib.csproj" />
