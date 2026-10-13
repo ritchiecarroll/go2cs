@@ -38,6 +38,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <IsPackable>false</IsPackable>
+    <!-- Background GC off (owner ruling 2026-10-12): a deep recursion pays a stack walk per GC, and background GC
+         caps the gen0 budget; go-cmp's cyclic transformer pair measured 24.5 s with it and 9.5 s without, outputs
+         identical. The trade-off: a full GC blocks the program. The -tests runner sets DOTNET_gcConcurrent=0 too. -->
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
     <!-- The compile view must be EXACTLY the direct references the test converter computed: a
          transitive project reference that contributes a child `go.<pkg>` namespace (e.g.
          internal/testenv dragging io/fs, namespace go.io) collides with the converter's
