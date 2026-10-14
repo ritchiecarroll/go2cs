@@ -1,6 +1,6 @@
 module go2cs
 
-go 1.24.13
+go 1.26.9
 
 require (
 	github.com/ritchiecarroll/hashset v1.0.0
