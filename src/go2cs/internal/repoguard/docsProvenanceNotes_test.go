@@ -65,11 +65,8 @@ var provenanceNoteRecordPages = map[string]string{
 
 // provenanceNoteKnownStale names, by page and resolved token, the notes that describe emission the
 // converter no longer writes. Each is excused while it fails; the visible prose beside it is the owed fix.
-var provenanceNoteKnownStale = map[string]string{
-	"docs/ConversionStrategies.md: src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:58":      "the Slices section's variable-bound example `trim[..(int)(len(trim) - 1)]`: the converter now writes `trim.slice(0, len(trim) - 1)`",
-	"docs/ConversionStrategies.md: src/tests/Behavioral/Slice3IndexWideBound/main.cs.target:11": "the three-index slice paragraph's omitted bound passed as `-1`: the converter now writes `arr.slice(0, (nint)(n), (nint)(n))`",
-	"docs/ConversionStrategies.md: src/tests/Behavioral/AppendUntypedConst/main.cs.target:28":   "the same note's `anys.slice(-1, len(anys), len(anys))`: the converter now writes `anys.slice(0, len(anys), len(anys))`, at :31",
-}
+// Empty: the three it was born with (the slice-bound examples) were fixed with their prose.
+var provenanceNoteKnownStale = map[string]string{}
 
 var (
 	provenanceNoteToken = regexp.MustCompile(

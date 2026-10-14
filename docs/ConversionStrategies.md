@@ -2308,8 +2308,9 @@ So [`recover`](#defer--panic--recover) catches it as in Go, and an unrecovered o
      mapping: src/core/golib/runtime/RuntimeErrorPanic.cs:500 (TryAsPanic adopts DivideByZeroException as
      Go's integer-divide-by-zero runtime error). -->
 
-**Slice bounds are cast to `int`.** Go's `int` bound converts to `nint`, but C#'s range syntax, `s[lo..hi]`,
-accepts only an `int`. So the converter casts each bound to `int`. Here `s.pos` is a Go `int` field:
+**A slice bound keeps its full value.** C#'s range syntax, `s[lo..hi]`, accepts only an `int`, and Go's `int`
+is `nint`. So a bound that is not a constant goes to golib's `.slice` method instead, as a `nint`, where Go's
+bounds check sees all of it. Here `s.pos` is a Go `int` field:
 
 <!-- source: src/tests/Behavioral/AdapterNameInterfaceCollision/main.go:40 -->
 ```go
@@ -3306,7 +3307,7 @@ internal static void keep(ж<pp> Ꮡq) {
 ```
 
 The Go struct `pp` becomes a C# `partial struct` ([Struct Types](#struct-types)). `slice<T>` is
-golib's Go slice, and `freeList[..(int)(n - 1)]` is Go's `freeList[:n-1]`
+golib's Go slice, and `freeList.slice(0, n - 1)` is Go's `freeList[:n-1]`
 ([Slices and Arrays](#slices-and-arrays)). golib's `@new<pp>()` is Go's `new(pp)`: it returns a box
 holding a zero `pp`.
 
@@ -4168,14 +4169,15 @@ of the C# types. `uintptr` is golib's own `uintptr` struct
 <!-- source: src/tests/Behavioral/SliceAliasing/main.go:20, :34 and :44; src/tests/Behavioral/SliceAliasing/main.cs.target:10, :18 and :24 -->
 
 `.slice(…)` is one golib method with optional bounds. With no arguments it turns a C# array into a
-`slice<T>`. With bounds it is a Go slice expression, shown in the three-index rule in this section.
+`slice<T>`. With bounds it is a Go slice expression, shown in the bound rules below.
 
 **A sub-slice shares its backing array.** `s[2:5]` becomes the C# range `s[2..5]`, and `s[2:]` becomes
-`s[2..]`. A bound that is not a literal is cast to `int` (see *A range bound is cast to `int`* below).
+`s[2..]`. A bound that is not a constant calls golib's `.slice` method instead (see *A bound that is not a
+constant calls `.slice`* below).
 A write through either slice shows through the other, as in Go. In this example `base` is a C#
 keyword, so the variable appears as `@base`
 ([Names and Glyphs](#reading-converted-code-names-and-glyphs)).
-<!-- Every uncast range bound in src/tests/Behavioral/**/*.cs.target is a literal (`[2..5]`, `[1..]`, `[..0]`); variable bounds appear cast, e.g. SliceNilVsEmpty/main.cs.target:58 `trim[..(int)(len(trim) - 1)]`. -->
+<!-- The rule: src/go2cs/convSliceExpr.go:325 `func (v *Visitor) sliceBoundsNeedMethod(sliceExpr *ast.SliceExpr) bool {` (a bound that is not a constant within int32 takes the method) and :358 `func (v *Visitor) sliceMethodCall(ident string, sliceExpr *ast.SliceExpr) (string, bool) {`; e.g. src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:69 `trim = trim.slice(0, len(trim) - 1);`. -->
 
 <!-- source: src/tests/Behavioral/SliceAliasing/main.go:18-26 -->
 ```go
@@ -4239,17 +4241,20 @@ The untyped constants passed to `append` are cast to the element type, here `uin
 C# `int` there. A plain assignment such as `x[0] = 501` needs no cast, because C# converts the constant.
 <!-- append is generic over T (src/core/golib/builtin.cs:412, :434), so T is inferred from every argument. -->
 
-**A range bound is cast to `int`.** C# ranges take `int`, but Go's `int` is `nint`. So every range bound
-that is not an integer literal is cast: `trim = trim[:len(trim)-1]` becomes
-`trim = trim[..(int)(len(trim) - 1)];`. A literal bound, as in `@base[2..5]`, needs no cast.
-<!-- source: src/tests/Behavioral/SliceNilVsEmpty/main.go:53 and src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:58 -->
+**A bound that is not a constant calls `.slice`.** A C# range takes an `int`, which would narrow a Go `int`
+(`nint`) bound before Go's bounds check could see it. So a range is kept only when every bound is a constant
+that fits in an `int`, as in `@base[2..5]`. Any other bound goes to golib's `.slice` method as a `nint`:
+`trim = trim[:len(trim)-1]` becomes `trim = trim.slice(0, len(trim) - 1);`. An omitted low bound is written
+as the `0` it means.
+<!-- source: src/tests/Behavioral/SliceNilVsEmpty/main.go:53 and src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:69 -->
 
 **A three-index slice calls `.slice(low, high, max)`.** A C# range has no capacity bound, so
-`h := base[1:3:4]` becomes `var h = @base.slice(1, 3, 4);`. An omitted bound is passed as `-1`, which
-means "use Go's default", so `arr[:n:n]` starts at 0. `.slice` takes Go's `int` (`nint`), so an `int`
-bound passes as is. Here `n` is a `uintptr`, so it is cast to `int`: `arr.slice(-1, (int)(n), (int)(n))`.
-<!-- source: src/tests/Behavioral/SliceAliasing/main.go:51 and src/tests/Behavioral/SliceAliasing/main.cs.target:29; src/tests/Behavioral/Slice3IndexWideBound/main.go:19 and src/tests/Behavioral/Slice3IndexWideBound/main.cs.target:11 -->
-<!-- A three-index bound is cast only when it is wide or unsigned: `arr[:n:n]` over a `uintptr` n becomes `arr.slice(-1, (int)(n), (int)(n))` (src/tests/Behavioral/Slice3IndexWideBound/main.go:19 and main.cs.target:11); `nint` bounds pass uncast, `var e = arr.slice(-1, k, k);` (Slice3IndexWideBound/main.cs.target:19) and `len(anys)` (src/tests/Behavioral/AppendUntypedConst/main.cs.target:28). The -1 default: src/core/golib/slice.cs:1529-1532 (missing low = 0, high = len, max = cap). -->
+`h := base[1:3:4]` becomes `var h = @base.slice(1, 3, 4);`. Go requires the high and max bounds, and an
+omitted low bound is written as the `0` it means, so `arr[:n:n]` starts at 0. `.slice` takes Go's `int`
+(`nint`), so an `int` bound passes as is. Here `n` is a `uintptr`, so it is cast to `nint`:
+`arr.slice(0, (nint)(n), (nint)(n))`.
+<!-- source: src/tests/Behavioral/SliceAliasing/main.go:51 and src/tests/Behavioral/SliceAliasing/main.cs.target:36; src/tests/Behavioral/Slice3IndexWideBound/main.go:19 and src/tests/Behavioral/Slice3IndexWideBound/main.cs.target:13 -->
+<!-- A three-index bound is cast only when it is wide or unsigned (uint, uint32, uint64, uintptr, int64): src/go2cs/convSliceExpr.go:397 `func (v *Visitor) castWideIntegerToNint(expr ast.Expr) string {`. `arr[:n:n]` over a `uintptr` n: Slice3IndexWideBound/main.cs.target:13 `var a = arr.slice(0, (nint)(n), (nint)(n));`; a `nint` bound passes uncast, main.cs.target:21 `var e = arr.slice(0, k, k);`, and so does `len(anys)`, src/tests/Behavioral/AppendUntypedConst/main.cs.target:31 `anys = append(anys.slice(0, len(anys), len(anys)), (any)(data));`. The method: src/core/golib/slice.cs:1789 `public static slice<T> slice<T>(this in slice<T> slice, nint low, nint high, nint max)`. -->
 
 **A nil slice is the default value.** `var zero []byte` becomes `slice<byte> zero = default!;`, and
 `zero == nil` becomes `zero == default!`. `default!` is C#'s default value for the type. For `slice<T>`
