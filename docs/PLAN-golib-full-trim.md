@@ -613,6 +613,14 @@ however it is spelled. reflect.StructOf's minted types stay at stage 3d.
    mechanism of the identity seat's +0.54% (its prediction was "within a few KB"; COORD 2026-10-12).
 3. The field-box table on every struct (+25.1%): measure which part is the switch and which the per-field-type
    `of<F>` instantiations, and whether a struct reached by no reflect call can drop its table.
+4. **ILC time against image size, for family E** (COORD 2026-10-14). The release's own AOT publish walls grew sharply at
+   T4, which shipped the field-box tables: MS23 linux-x64 went 4,868 to 6,965 s, win-x64 6,684 to 10,058 s, and
+   osx-x64 ran over 6 hours. That fits the +25% image, but it is not yet measured as cause.
+   - Measure ILC wall and peak working set against image size, with and without the table, on one box, one consumer
+     and one closure.
+   - Then measure whether the per-type table can be made cheaper for the compiler: fewer generic `of<F>`
+     instantiations, or a shared non-generic dispatch.
+   - A measurement, not a cut. C1 sizes the CI side.
 
 <!-- G, 2026-10-12. Field-box arms: fbxsize (arm a, face only, 35,598,848 B and the probe still red; arm b 38,228,480 B);
      seat batteries seat-fbx and seat-pid; the six-shape probe scratch/fbx-probe; the promoted-identity census
