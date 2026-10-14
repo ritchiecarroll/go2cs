@@ -154,7 +154,7 @@ foreach ($rel in $marked) {
         if ($null -ne $sFrom -and $null -ne $sTo -and $sFrom -ceq $sTo) { $class = 'touched-trivial' }
         else { $class = 'touched-substantive' }
     }
-    $results.Add([pscustomobject]@{ HandOwn = "src\core\$rel"; Upstream = $upRel; Class = $class })
+    $results.Add([pscustomobject]@{ HandOwn = "src\core\$rel"; Upstream = $upRel; UpstreamFrom = $up.From; Relocated = $up.Relocated; Class = $class })
 }
 
 # --- 3. Report, self-verified ---------------------------------------------------------------------
@@ -175,6 +175,11 @@ Write-Host '=== THE H6 REVIEW LIST (touched-substantive) ==='
 $sub = @($results | Where-Object { $_.Class -eq 'touched-substantive' })
 if ($sub.Count -eq 0) { Write-Host '  (empty -- no hand-own''s upstream source moved substantively)' }
 foreach ($r in $sub) { Write-Host ("  {0}`n      <- {1}" -f $r.HandOwn, $r.Upstream) }
+Write-Host ''
+Write-Host '=== RELOCATED (the upstream file moved between the releases; the class above compares the two paths) ==='
+$moved = @($results | Where-Object { $_.Relocated })
+if ($moved.Count -eq 0) { Write-Host '  (none)' }
+foreach ($r in $moved) { Write-Host ("  {0}`n      <- {1}  =>  {2}" -f $r.HandOwn, $r.UpstreamFrom, $r.Upstream) }
 Write-Host ''
 Write-Host '=== touched-trivial (no review owed; listed for the record) ==='
 foreach ($r in @($results | Where-Object { $_.Class -eq 'touched-trivial' })) {

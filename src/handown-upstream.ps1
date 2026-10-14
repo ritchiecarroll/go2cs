@@ -5,9 +5,19 @@
 .DESCRIPTION
     src/core/<pkg-path>/[<goos>/]<name>[_impl].cs  ->  <GOROOT>/src/<pkg-path>/<name>.go
 
+    Under layout L3 the GOOS folder is routing, so pkg/linux/x_impl.cs maps to pkg/x.go. But a release
+    can hold a REAL package named after a GOOS: Go 1.26 splits internal/runtime/syscall into
+    syscall/linux (package linux) and syscall/windows. So each release is resolved on its own:
+      the folded path (pkg/x.go) when that release has it,
+      else the unfolded path (pkg/linux/x.go) when that release has it,
+      else the folded path, absent.
+    A row whose two releases resolve to different paths is RELOCATED. A true deletion stays a deletion,
+    because the unfolded path is taken only where it exists.
+
     Resolve-HandOwnUpstream returns an object with:
       From, To      the upstream path (relative to <GOROOT>/src) used for each release
       FromExists, ToExists
+      Relocated     From and To differ
 #>
 
 function Resolve-HandOwnUpstream([string] $Rel, [string] $FromGoRoot, [string] $ToGoRoot) {
@@ -26,12 +36,24 @@ function Resolve-HandOwnUpstream([string] $Rel, [string] $FromGoRoot, [string] $
         $dirParts = @($dirParts | Select-Object -SkipLast 1)
     }
     $goName = ([System.IO.Path]::GetFileNameWithoutExtension($file) -replace '_impl$', '') + '.go'
-    $upRel = (@($dirParts) + $goName) -join '/'
+    $folded = (@($dirParts) + $goName) -join '/'
+    $unfolded = (@($parts | Select-Object -SkipLast 1) + $goName) -join '/'
+
+    $pick = {
+        param([string] $GoRoot)
+        $src = Join-Path $GoRoot 'src'
+        if (Test-Path (Join-Path $src $folded)) { return @($folded, $true) }
+        if ($unfolded -ne $folded -and (Test-Path (Join-Path $src $unfolded))) { return @($unfolded, $true) }
+        return @($folded, $false)
+    }
+    $f = & $pick $FromGoRoot
+    $t = & $pick $ToGoRoot
 
     return [pscustomobject]@{
-        From       = $upRel
-        To         = $upRel
-        FromExists = Test-Path (Join-Path (Join-Path $FromGoRoot 'src') $upRel)
-        ToExists   = Test-Path (Join-Path (Join-Path $ToGoRoot 'src') $upRel)
+        From       = $f[0]
+        To         = $t[0]
+        FromExists = $f[1]
+        ToExists   = $t[1]
+        Relocated  = ($f[0] -ne $t[0])
     }
 }
