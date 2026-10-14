@@ -156,11 +156,14 @@ every arm restoring into a fresh cache with `go.*` mapped to the feed alone:
   `dotnet run`, on a first and a second unchanged single-file publish and on a framework-dependent publish, the off
   switch prints `none`. **Measured, never gating** on E's terms; every release before the one that ships symbols fails
   RUN, PUBLISH and FDD. Its Native AOT run is the `aot-smoke` stage below, not an arm here.
-- **G** a consumer of `runtime/coverage` and `runtime/debug`, converted and compared the same way, then the RID's
-  own restored assembly of `go.internal.coverage.decodemeta` and `go.runtime.debug` read for the OS's syscall buffer
-  type: `Iovec` and not `WSABuf` off Windows, the reverse on it. The 1.24.13.6 rehearsal shipped decodemeta's Windows
-  build in `lib/` only, and a consumer died at startup on Linux and macOS (`TypeLoadException` for `WSABuf`); the
-  consumer loads decodemeta at init, so the run reads the behavior and the assembly names the cause. It gates.
+- **G** a consumer of `runtime/coverage` and `runtime/debug`, converted and compared the same way, then the assembly
+  NuGet hands this RID for `go.internal.coverage.decodemeta` and `go.runtime.debug` (`runtimes/<rid>/` when the
+  package carries one, else `lib/`) read for the OS's syscall buffer type. It must not name the other OS's type
+  (`WSABuf` off Windows, `Iovec` on it), and a `runtimes/<rid>/` twin must name this OS's type; an assembly that
+  names neither is platform-neutral and passes (1.24.13.7 ships both packages that way). The 1.24.13.6 rehearsal
+  shipped decodemeta's Windows build in `lib/` only, and a consumer died at startup on Linux and macOS
+  (`TypeLoadException` for `WSABuf`); the consumer loads decodemeta at init, so the run reads the behavior and the
+  assembly names the cause. It gates.
 
 A leg is green when arms A-D and G pass. Dispatch it at the tree that ships, before every release:
 it is what proves the packages carry what that tree's converter emits on every OS (C2's 2026-10-03 finding: N's
