@@ -153,6 +153,78 @@ Everything else may be reordered by the executing lane.
 > scratch at the new release regardless**, so they re-bank there on exactly the footing of the rows
 > that did bank.
 
+> **AMENDED 2026-10-13 — a hop that crosses TWO Go releases.** *(Drafted ahead of its first use, the
+> go1.24.13 → go1.26.9 hop; it takes effect when that hop's H1 starts.)*
+>
+> **The ladder is written for one release per hop, and that stays the default.** A hop that goes from
+> release *N* straight to *N+2*, with no release of *N+1*, is a **release fold**. *(Not to be confused
+> with H7a's **master fold**, which merges master into the release branch. They share a word and nothing
+> else; this document says "release fold" for the first and "master fold" for the second.)*
+>
+> **A release fold is admitted only by an explicit ruling, recorded where the standing rule lives**
+> ([`PLAN-corpus-upgrade.md`](PLAN-corpus-upgrade.md) §8, ⟨OQ-18⟩, or the instance plan that re-rules
+> it). The executing lane never chooses one. The reason is the one OQ-18 names: a folded hop's `.auto`
+> differential, its compile reds and its hand-own deltas each show the **union** of two releases' upstream
+> changes, so a regression can no longer be read as "this release did it", and H6's both-directions
+> question doubles.
+>
+> **A release fold therefore carries an ATTRIBUTION CHECKPOINT, and the ladder gains one rung for it.**
+> It restores, at the compile and hand-own levels, the attribution that two separate hops would have
+> given, without minting the skipped release.
+>
+> - **Where it sits:** after H4a closes, before H5's real reconvert. H4 is closed first because both
+>   conversions use **one converter binary**, built once after H4 and recorded by hash; the new
+>   release's language features are inert at the skipped release.
+> - **What it runs:** H5's seeded reconvert and H7's compile ladder, **twice**, into two scratch roots:
+>   once at the skipped release *N+1*, once at the target *N+2*. The *N+2* run **is** H5 proper, with
+>   H5's own gate. The *N+1* run pins the skipped release in the **seed only**: the repository's
+>   `version.props` never names *N+1*, nothing from that root is committed, and no golden, roster row or
+>   package is produced from it. **At *N+1*, H5c is applied in the scratch root only, never in the
+>   repository.**
+> - **The *N+1* ladder stops early, and the checkpoint says where.** No H6 work is done at *N+1*, so
+>   its ladder stops at the rung where the hand-owned files, still written for *N*, block the build.
+>   The checkpoint **states that stop**; it is not a red to triage. The reds at *N+1* are attribution
+>   evidence **up to that stop** and no further. A red at *N+2* beyond it has no *N+1* reading to be
+>   compared with, so it is read against **both** releases' source, by name, the rule the "does not do"
+>   paragraph below gives for H10.
+> - **One box runs both, serially.** Two conversions never overlap on one box, and each root takes
+>   exactly one conversion (CLAUDE.md's safety floor, items 1 and 11). Disk is H5's floor, twice.
+> - **What it yields:** every red at *N+2* is attributed before it is triaged, by comparison up to the
+>   *N+1* stop and by source reading beyond it. A site red at both
+>   releases was born at *N+1*; a site red only at *N+2* was born there; a site red at *N+1* and green
+>   at *N+2* was closed upstream, and is recorded as such with its evidence. H6's
+>   [`handown-census.ps1`](../src/handown-census.ps1) runs once per leg (*N* → *N+1*, then *N+1* → *N+2*),
+>   so each substantive hand-owned file carries the leg or legs that moved it.
+> - **Its record** is `docs/phase4/CHECKPOINT-go<N+1>-attribution.md`, named for the skipped release
+>   (`CHECKPOINT-go125-attribution.md` in the worked instance). It lists the per-class counts at both
+>   pins, the rung where the *N+1* ladder stopped, every red by site with its attribution, and the
+>   binary's hash.
+> - **Its gate:** every red at *N+2* and every substantive H6 file carries an attribution, and the
+>   record states the *N+1* stop. **A red is never triaged without one.** It is not a parity gate, and
+>   it blocks H6 and H7, not H5.
+>
+> **What the checkpoint does not do.** It does not run behavioral goldens or roster rows at the skipped
+> release: that is the cost of the second hop the fold exists to save. H9 and H10 attribute through the
+> compile-level and hand-own-level attribution above; a row that goes red at H10 with no attributed
+> cause is read against **both** releases' source, by name, before it is classified.
+>
+> **What else a release fold changes in the ladder, and nothing more:**
+>
+> - **H0** captures one baseline, at *N*. There is no baseline at *N+1*.
+> - **H1** installs **both** toolchains side by side, *N+1* on the checkpoint's box at least; H2 pins
+>   *N+2* only.
+> - **H3**'s package census, new package IDs and relocations are derived at *N+2*, against *N*.
+> - **H6**'s audit records the attribution column. Its completeness gate is unchanged.
+> - **H11** deprecates removed package IDs against what the outgoing releases actually published; the
+>   skipped release published nothing.
+> - **§7** closes with the checkpoint's cost and what it found, so the next ruling on a release fold has
+>   a measured price to weigh.
+>
+> **Worked instance — the 1.24 → 1.26 hop.** Admitted by the owner's ruling of 2026-10-11, which
+> re-rules OQ-18 for that hop; the instance plan is `PLAN-hop-go126.md` (proposed, and on its own branch
+> until it lands), whose §4 is this checkpoint with its boxes, releases and estimates named. That hop's
+> reconnaissance measured the *N+1* stop at the ladder's first rung.
+
 ### Readiness — before H0 **GATE**
 
 *(Edited in place 2026-09-26, §7 lessons 1-3: added from the 1.24.13 hop, where each item below surfaced mid-campaign
@@ -618,6 +690,9 @@ until it is.
 
 
 ### H5 — Seeded full reconvert **GATE**
+
+*(A release fold runs its attribution checkpoint here, before this stage's real reconvert: §2, AMENDED
+2026-10-13.)*
 
 **CLAUDE.md's reconvert ritual, unchanged and unabridged.** A migration is the *most* likely moment to
 skip a step of it, so the non-negotiables are restated rather than referenced:
@@ -4571,6 +4646,11 @@ healthy run look hung — and, in the other direction, what lets a hung one look
 79. **Every seat, docs seats included, runs plain `go test ./... -count=1` in `src/go2cs` at its own tip before
     admission, and the union rehearsal runs it again.** Why: union-only reds recurred at nearly every train, twice in a row
     from a docs seat failing repoguard's kramdown guard.
+    *(Extended 2026-10-13, TRAIN T4.)* The union rehearsal also reads the `-stdlib` emission check (leg E), at least its
+    union-attributable count per target (windows, linux, darwin), not only CNR. CNR re-converts the behavioral corpus
+    only, so a seat whose emission lands in `src/core` is invisible to it, to the suites and to a solution build. Why:
+    T4's four rehearsals read CNR green while one seat's uncommitted `src/core` footprint (1,548 paths, 3,772 drifted
+    files across the three targets) surfaced only at assembly.
     <!-- ledger 2026-09-22 08:18 ae2f25198; 2026-09-25 00:08 ff67c57420; 2026-09-29 12:43 d51a62eaad; 2026-09-30 14:02;
     coord-handover trainK/tK-seats-draft.txt:51. Extends §7 lesson 15. -->
 80. **At each status, read every lane's last post and unread count.** A lane is declared OFFLINE in one ledger line, with
