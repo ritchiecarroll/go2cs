@@ -1,0 +1,40 @@
+# RELOCATIONS INTO go1.26.9 -- the rows whose tests moved into this release, one `source<TAB>target` per
+# line (a source that fanned out appears once per target). -Hop reads it for each row's Receives: PROVENANCE,
+# never an expectation. Every target is in population-go1.26.9.txt.
+#
+# A FOLDED HOP: measured against the OUTGOING release, go1.24.13, not against go1.25.14 (runbook H3, AMENDED
+# 2026-10-13). population-go1.24.13.txt -> population-go1.26.9.txt is 230 -> 242: 17 added rows, 5 removed.
+#
+# DERIVED BY BODY (C2, 2026-10-14), not by name: every top-level Test/Benchmark/Fuzz/Example function of the 17
+# ADDED and 5 REMOVED rows was matched against every std _test.go of the other release (GOROOTs go1.24.13 and
+# go1.26.9 from the module proxy; cmd, vendor and testdata excluded; the ratio is difflib's over the printed
+# function). An arc needs the test bodies to have LEFT the source and ARRIVED at the target:
+#   runtime/internal/wasitest -> internal/runtime/wasitest: TestNonblock 0.98, TestTCPEcho 0.98; both files 0.99.
+#   internal/trace/internal/oldtrace -> internal/trace/internal/tracev1: parser_test.go 1.00, 3 of 3 tests at 1.00.
+#   go/ast/internal/tests -> go/ast: TestSortImportsUpdatesFileImportsField, 1.00, in go/ast/import_test.go; the
+#     source directory is gone. NOT a true removal (as at 1.25.14).
+#   strconv -> internal/strconv: PARTIAL, the source row survives. 61 of internal/strconv's test functions match
+#     strconv's at 1.24.13 (most at 1.00); 37 of them LEFT strconv (116 -> 77 functions), the other 24 are in both.
+#     Its fixture testdata/testfp.txt moved with them.
+#   runtime -> internal/strconv: PARTIAL, the source row survives. TestAtoi left runtime/string_test.go and is
+#     internal/strconv's TestAtoi at 0.84 (0.74 against strconv's own). TestAtoi32 left runtime too, and is in no
+#     go1.26.9 package. (At 1.25.14 the same pair sat in internal/runtime/strconv, which go1.26.9 removed.)
+# NOT relocations, though a name says so:
+#   crypto/internal/hpke -> crypto/hpke (the RECON's name list): its one test, TestRFC9180Vectors, scores 0.17 at
+#     best against crypto/hpke's tests, which are new; its vectors file is replaced, not moved (6 entries in the
+#     old schema, 24 in the new). crypto/internal/hpke is a TRUE REMOVAL; crypto/hpke a new row.
+#   internal/itoa -> internal/strconv (the RECON's name list): TestItoa 0.17 and TestUitoa 0.40 against their
+#     namesakes; TestUitox has none. The best cross-name scores, 0.52 to 0.57 against unrelated strconv tests,
+#     are short bodies matching short bodies. internal/itoa is a TRUE REMOVAL.
+# No origin, so NOT relocations: crypto/fips140, crypto/hpke, crypto/internal/fips140/subtle,
+# crypto/internal/fips140cache, crypto/internal/fips140only, internal/runtime/cgroup, internal/runtime/gc/scan,
+# internal/trace/testtrace, internal/trace/tracev2, math/big/internal/asmgen, testing/cryptotest, testing/synctest.
+# crypto/internal/fips140/mldsa's field tests resemble mlkem's (0.74 to 0.92), but mlkem keeps all of its own:
+# a sibling copy, not a move. internal/syscall/unix is not new: its new fchmodat_test.go and
+# kernel_version_ge_test.go are the first of its test files to survive the windows axis.
+source	target
+runtime/internal/wasitest	internal/runtime/wasitest
+internal/trace/internal/oldtrace	internal/trace/internal/tracev1
+go/ast/internal/tests	go/ast
+strconv	internal/strconv
+runtime	internal/strconv
