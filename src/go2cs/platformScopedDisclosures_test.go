@@ -301,6 +301,51 @@ func TestOutOfScopeHostFatalDoesNotWithdrawItsTest(t *testing.T) {
 	}
 }
 
+// SAME TEST, DIFFERENT CAUSE PER PLATFORM: one entry with two DISJOINTLY scoped halves, never two
+// entries of one name (the loader refuses a duplicate before any scope applies). runtime/debug's
+// TestFreeOSMemory is the first member: its second assert is codegen-liveness on windows and linux,
+// while on darwin the FIRST assert fails because the macOS CLR GC never decommits (run 38424879323).
+// The property pinned here is that a half scoped to darwin is never judged on linux: not applied to
+// its verdicts, and not offered to the orphan check when the test passes there. The orphan arm is
+// the one that matters, because a pass on linux says nothing about the darwin half.
+func TestDarwinOnlyHalfIsNeverJudgedOnLinux(t *testing.T) {
+	dir := t.TempDir()
+	body := `{"schemaVersion":1,"disclosures":[{"name":"TestFreeOSMemory","halves":[
+		{"class":"codegen-liveness","signature":"less than 16777216 released:","reason":"r","platforms":["windows","linux"]},
+		{"class":"runtime-capability","signature":"no memory released:","reason":"r","platforms":["darwin"]}]}]}`
+	if err := os.WriteFile(filepath.Join(dir, testDisclosureFileName), []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	for goos, want := range map[string]string{"windows": "codegen-liveness", "linux": "codegen-liveness", "darwin": "runtime-capability"} {
+		entries, _, _, err := loadTestDisclosures(dir, goos)
+		if err != nil {
+			t.Fatalf("%s: load: %v", goos, err)
+		}
+
+		entry, ok := entries["TestFreeOSMemory"]
+		if !ok || len(entry.Halves) != 1 || entry.Halves[0].Class != want {
+			t.Fatalf("%s must see exactly its own half (%s); got %+v", goos, want, entry.Halves)
+		}
+	}
+
+	// The orphan arm: the test PASSES on linux. Whatever the orphan report says about that, it may
+	// only be about the linux half; the darwin half was never in scope there, so it is not stale.
+	onLinux, _, _, err := loadTestDisclosures(dir, "linux")
+	if err != nil {
+		t.Fatalf("load linux: %v", err)
+	}
+	orphans := orphanedDisclosures(onLinux,
+		map[string]string{"TestFreeOSMemory": "pass"},
+		map[string]string{"TestFreeOSMemory": "pass"},
+		"linux")
+	for _, half := range onLinux["TestFreeOSMemory"].Halves {
+		if half.Class == "runtime-capability" || strings.Contains(half.Signature, "no memory released") {
+			t.Fatalf("the darwin half reached a linux judgement through the orphan check: %+v (orphans %v)", half, orphans)
+		}
+	}
+}
+
 // Deterministic order, for the same reason the orphan report is sorted: these come out of a map, and
 // a list that reshuffles run to run is one a reader cannot diff.
 func TestOutOfScopeListIsSortedByName(t *testing.T) {
