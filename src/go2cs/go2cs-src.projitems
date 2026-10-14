@@ -484,6 +484,7 @@
     <None Include="$(MSBuildThisFileDirectory)typeSignatureParsing.go" />
     <None Include="$(MSBuildThisFileDirectory)typeSwitchCollapsedFuncCase_test.go" />
     <None Include="$(MSBuildThisFileDirectory)uint8SliceLiteralConversion_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)uniformLineEndings_test.go" />
     <None Include="$(MSBuildThisFileDirectory)unsafePointerWordRead_test.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedConstAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)untypedConstOperations.go" />
