@@ -184,7 +184,9 @@ NU1102). The input is refused on any other stage and must be four numeric parts.
 
 The same `pack` job, then ONE Native AOT publish and run of `PackageSymbols` (a hand-written consumer that sets no trim
 mode of its own) on THREE shipped RIDs (win-x64, linux-x64, osx-x64): `test-package-symbols.ps1 -AotOnly`. The executable must exit 0 and print
-its `PACKAGE-SYMBOLS` line (the value printed, not judged); the publish wall time is a `READ` line. A consumer takes
+its `PACKAGE-SYMBOLS` line (the value printed, not judged); the publish wall time is a `READ` line, and so are two ILC
+readings, measured and not judged: `READ (ILC cycle-cutoff methods)` (distinct "will always throw" lines ILC logs when it cuts a
+self-nesting generic instantiation) and `READ (IlcCompile ms)` (from MSBuild's performance summary). A consumer takes
 go.lib's `TrimMode=partial` default, under which the publish compiles every referenced go.* assembly whole: about 70
 min on hosted linux for this fixture's 31 assemblies, which is why it is its own stage and not a release-smoke arm.
 Without that default, the published 1.24.13.4 crashed such an executable at startup (a full trim removed the field
