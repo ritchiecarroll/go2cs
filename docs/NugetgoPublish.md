@@ -1,0 +1,362 @@
+# Publishing a converted Go module to nuget.org
+
+> **STATUS: DRAFT (C2, 2026-10-09). Its four open questions were RULED by COORD on 2026-10-09 and are folded in
+> below; the document as a whole is not yet ruled, and nothing is executed from it until it is.**
+> Document type: a [runbook](Glossary.md#runbook). It is the procedure for any one module, on any go2cs release, and
+> names no release or module. The first wave's values (hashset, uuid, jwt/v5) and its open questions are the instance
+> plan [`PLAN-nugetgo-first-wave.md`](PLAN-nugetgo-first-wave.md). The rulings it follows (B1-B8: publisher, IDs,
+> versions, ranges, metadata, rehearsal, first wave) are in [`PLAN-nugetgo.md`](PLAN-nugetgo.md), section 8.
+
+The procedure takes one validated Go module to a signed `nugetgo.*` package on nuget.org, a row in the nugetgo
+registry, and a sample program that restores the package instead of converting the module. Steps run in order, and a
+failed gate stops the run.
+
+**Names used below.**
+
+| Name | Meaning |
+|:--|:--|
+| `R` | the go.* release the package is built against (its `ClosureVersion`) |
+| `T` | the tools tree: the go2cs commit whose converter and nugetgo scripts run every step (section 0.3) |
+| `P` | the target platform, `os/arch`, passed as `-platforms` to every conversion of the module and recorded |
+| `M`, `V` | the Go module path and its version, for example `example.com/mod` and `v1.2.3` |
+| `ID`, `PV` | the package ID and package version, from `Get-NugetgoPackageId` and `Get-NugetgoVersion` (B2, B3) |
+| `SRC` | the module's source directory: `go mod download -json M@V`, its `Dir` field |
+| `G` | one go2cs binary built from `T`, used for every conversion of this module |
+
+**Who runs what.** A *lane* runs the conversions, the packs and the consumer runs, on a lane box. The *owner* runs
+every step that needs an account or a key: creating the conversion repository, signing, both pushes, and the registry
+pull request. *COORD* reads each gate's evidence and rules before the owner's irreversible step.
+
+## 0. Preconditions
+
+Stop at the first one that fails.
+
+1. **`R` is published.** nuget.org's flat container lists `R` for `go.lib`, `go.gen` and every `go.*` package the
+   module's closure references: `https://api.nuget.org/v3-flatcontainer/go.lib/index.json` and so on. A version
+   appears there only after nuget.org's validation, some time after the push.
+2. **`R`'s record commit exists.** `release-nuget.ps1` mints the tag `nuget-R` in its Phase 1 and regenerates
+   `src/go2cs/corpus-release.txt` in Phase 4, so at the tag that file still names the previous release. The record
+   commit (`release: go2cs converted stdlib R`) is the first commit at which it reads `R`.
+3. **`T` is `R`'s record commit with every nugetgo pack-guard branch that `R` does not already contain merged onto
+   it, never rebased** (COORD ruling, 2026-10-09: master is not `T` when the train after `R` changes golib). When `R`
+   contains every guard, `T` is the record commit itself. `src/tools/nugetgo/New-NugetgoToolsTree.ps1` cuts `T` and
+   refuses, by name, each of the following:
+   - a `corpus-release.txt` at the record commit that does not read `R`;
+   - a guard branch that does not merge cleanly;
+   - any change to `src/core/golib` or `src/gen` between the record commit and `T`, because `T` must emit `R`'s dialect;
+   - a nugetgo suite that fails or does not run (`TestNugetgoSuitesPass` printing SKIP).
+
+   The script never pushes. The pack's own guards prove the rest at pack time: the published closure against `R`'s
+   go.lib and go.gen, the host-path scan of the packed bytes, and the proof's input digest.
+4. **The host reaches the services.** `proxy.golang.org`, `api.nuget.org`, `apiint.nugettest.org`, `nugetgo.net` and
+   `github.com`. The toolchain is the corpus Go (`go version`), with `GOTOOLCHAIN=local`, the .NET SDK and pwsh 7.
+   Free disk is preflighted as for any battery.
+5. **`ID` is free on nuget.org.** This reads 404, or an index listing only this project's earlier versions (`id` is
+   `ID` in lower case):
+   ```
+   curl -s -o /dev/null -w '%{http_code}' https://api.nuget.org/v3-flatcontainer/<id>/index.json
+   ```
+   If another account holds `ID`, stop: which ID a displaced conversion takes is not ruled (B5's named gap).
+6. **The conversion repository exists and is public (owner).** It is the package's `RepositoryUrl` (B6). For a
+   `canonical` row it sits under the same org on the same host as `M` (PLAN section 2); otherwise the row is
+   `community`.
+
+## 1. Convert and validate (lane, at `T`)
+
+1. Build `G` once: `go build -o <bin>/go2cs .` in `T`'s `src/go2cs`. Every conversion of this module uses this one
+   binary, because the input digest records the converter (trap 3).
+2. Convert with the module's tests, into a fresh output root `VR` (the output directory is the SECOND positional):
+   `G -recurse -tests -test-action all -platforms P -go2cspath <T>/src -module-disclosures <T>/src/tests/ModuleDisclosures <SRC> <VR>`.
+   `-module-disclosures` applies the disclosures committed for `M@V` (COORD ruling 2026-10-13); without it a module
+   whose divergences are disclosed there cannot validate. A slow module may need `-test-timeout` above its 2m default:
+   state the value used beside the proof.
+3. **Gate: the proof.** Step 2 exits 0. A tested package that did not validate makes it exit non-zero, and MODULE.md
+   names it under *Packages that did not validate* instead of giving it a row; the pack refuses to ship it (tools at
+   `claude/c2-nugetgo-binding-tested` or later). Then `VR/validation/M/MODULE.md` exists, every package row carries an
+   `Input digest`, and its disclosed and excluded declarations are read. COORD reads MODULE.md: it is what the
+   package ships as VALIDATION.md.
+4. Convert the pack's input into another fresh root `PR`: `G -recurse=nuget -platforms P -go2cspath <T>/src <SRC> <PR>`.
+5. **Gate: the binding.** Each library project under `PR/src/M` records a `GoInputDigest` equal to its MODULE.md row.
+   The pack checks this again; reading it here catches a wrong binary before a pack runs.
+
+**A module with no Go tests** (COORD ruling 2026-10-12; tools at `claude/c2-nugetgo-cobra-increment` or later). Step 2
+refuses it ("has no package with Go test files"), so there is no `VR` and no MODULE.md: skip steps 2, 3 and 5. Its
+proof is behavioral, one row per shipped RID, each run on a host of that RID (section 3, *A module with no Go tests*).
+Its sample program is committed at `T` under `src/tests/ModuleBehavior/M@V/`: `main.go`, `go.mod`, `go.sum`, and
+`mappings.txt` with the module's row.
+
+## 2. Pack (lane, at `T`)
+
+Two packs from the same two roots: the rehearsal for int.nugettest.org, and the release candidate. Neither is signed
+and neither is pushed by this step.
+
+```
+pwsh -NoProfile -File <T>/src/tools/nugetgo/nugetgo-pack.ps1 -ModulePath M -GoVersion V -Revision 0 `
+  -RecurseRoot PR -ValidationDir VR/validation/M -ClosureVersion R -Feed https://api.nuget.org/v3/index.json `
+  -OutDir <out-rehearsal> -Scratch <scratch-rehearsal> -RepositoryUrl <conversion repo> -Upstream <holder> `
+  -LicenseSpdx <SPDX expression> -Converter G [-Icon <PNG or JPEG>] [-UpstreamPublishes] [-ExcludePackage <import path>] `
+  -RehearsalSuffix int.1
+```
+
+The release candidate is the same command with `-Release` in place of `-RehearsalSuffix int.1`, and its own `-OutDir`
+and `-Scratch`. For a module with no Go tests, the rehearsal takes `-UnvalidatedReason <text>` in place of
+`-ValidationDir`, because its rows are run on the rehearsal package; the release candidate takes
+`-BehaviorProofDir <rows>` in place of `-ValidationDir`, after section 3 has written the rows. Its VALIDATION.md is then the behavioral
+page, and its Tests badge says there are no Go tests and how many RIDs ran. `-UpstreamPublishes` is given only when the module's author publishes (B6); the pack refuses the switch
+for any other org. `-ExcludePackage` names, by import path, a library package of the module that holds the module's
+own test fixtures rather than API a consumer imports; the instance plan names any such package. The pack refuses an
+exclusion that names no library of the module, and one that a packed package references. An INTERNAL package that
+no production code reaches (imported only from `_test.go` files, or by nothing) is left out without being named, and
+the pack log lists each one; one with Go tests of its own is packed and logged `kept: validated` (tools at
+`claude/c2-nugetgo-testonly-exclude` or later). `-ExcludePackage` stays the tool for a public helper. The rehearsal label
+`int.1` is ruled (COORD, 2026-10-09).
+
+**Flavors** (COORD ruling 2026-10-12; tools at `claude/c2-nugetgo-rid-packs` or later). The pack adopts the `go.*`
+release's per-OS promotion. A `-recurse` conversion emits one GOOS, so the pack converts `M`'s own source once per GOOS
+of the release's RID map (windows, linux, darwin) with `-Converter`, which is `G` from section 1. It refuses unless its
+conversion of `P`'s GOOS reproduces every packed project's `GoInputDigest`, because the digest records the converter
+(trap 3). It builds every flavor and compares the assemblies with the release's material check. If they are equal in
+meaning, the package is one neutral assembly set packed from `PR`, exactly as before. If they differ, it takes the
+release's RID-specific layout: `lib/<tfm>/` carries the windows flavor and `runtimes/<rid>/lib/<tfm>/` carries each
+RID's flavor, with every flavor's `go.*` dependencies. The pack prints which it chose and why. Without `-Converter`,
+the pack builds a converter from its own tree. That matches `G` only when `G` was built from the same directory with
+the same toolchain.
+
+The package README is `PR/src/M/nuget/README.md`, in the style of the `go.*` packages (owner, 2026-10-10). The pack
+writes it on the first pack (see *Customizing the package page* below). Its generated block holds the description,
+whose module path links the Go source at its version, a badge row, and the license line. There is no "PROOF:" in it
+or in the description (owner review, 2026-10-10). VALIDATION.md is packed beside it as a file the README links.
+`-LicenseSpdx` names the upstream license for that line (for example `MIT` or `BSD-3-Clause`): the caller states it,
+and the pack never infers it. The icon defaults to the go2cs icon the conversion carries. The README's links into the
+conversion repository name the tag `nuget-<PV>` (COORD ruling, 2026-10-10; section 4, step 5); a rehearsal package
+names its release's tag, because a rehearsal version is never tagged.
+
+### Customizing the package page
+
+The package page belongs to the module's author; the pack keeps its facts true (COORD ruling, 2026-10-10).
+
+- **The README** is `nuget/README.md` in the converted module's directory (`PR/src/M/nuget/README.md`; in a flat
+  conversion repository that is `nuget/README.md` at its root). When it is absent, the pack SEEDS it: the package ID
+  as the title, the generated block, then the root package's Go synopsis. It prints `SEEDED <path>` and says to commit
+  it. From then on the file is the author's: retitle it, rewrite the synopsis, add sections.
+- **The generated block** lies between `[//]: # (nugetgo:generated:begin)` and `[//]: # (nugetgo:generated:end)`.
+  Every pack rewrites it from what it measured: the callout with the Go-source link and the security caveat, the
+  Tests, C# Source, Go module and go2cs badges, the license line, and the artwork line when the icon is go2cs's.
+  When the file's block is stale, the pack rewrites it in the file and in the packed copy, and prints `REWRITTEN
+  with package version <PV>, tag nuget-<PV>`. A rehearsal pack writes its rehearsal version there, so commit the
+  file after the RELEASE pack. Nothing outside the block is ever touched.
+- **The pack refuses the file, by name,** when there is no fence; when a marker appears twice, an end has no begin,
+  a begin has no end, or the end comes first; when a marker is not on its own line between blank lines; and when a
+  line names `nugetgo:generated` without being the marker (an HTML comment shows as text on a page that disables
+  HTML). It also refuses a link above the block (the first link is the Go source), and today's README arms: no
+  "PROOF:", no inline code in a heading, no table over three columns, no link naming `HEAD`. The packed README must
+  equal the file byte for byte.
+- **The icon** is `nuget/icon.png` beside the README when present: PNG or JPEG, at most 1 MB, nuget.org's limits.
+  Otherwise it is the go2cs icon. `-Icon` still names one for a single pack, but it is refused when `nuget/icon.png`
+  exists, because there are then two sources.
+- Packages published before this (hashset 1.0.0 and revision 2, uuid and jwt in their first wave) keep their
+  generated READMEs. A conversion repository gets the file at its next rebuild.
+
+### The conversion repository's README
+
+The conversion repository's root `README.md` is written by hand for each conversion; no tool generates it. A
+THIRD-PARTY conversion, one published by the go2cs project and not by the module's maintainers, ENDS it with an offer
+to them (owner item, COORD ruling 2026-10-11). The author form (hashset-cs) carries no such section.
+
+```powershell
+Import-Module ./src/tools/nugetgo/NugetgoReadme.psm1
+New-NugetgoMaintainersSection -ModulePath github.com/golang-jwt/jwt/v5 -Maintainer golang-jwt
+```
+
+`-Maintainer` names who maintains the module and defaults to the module path: uuid-cs names
+`github.com/google/uuid`, jwt-cs names the org, `golang-jwt`. Paste the section at the end of the README.
+`nugetgo-pack.ps1 -ConversionReadme <path to the root README.md>` checks it (`Test-NugetgoConversionReadme`): a
+third-party README that does not end with the section for the module is refused by name, and so is an author README
+that carries one. `-ConversionReadme` is OPTIONAL today. It becomes MANDATORY for release packs, never rehearsal packs,
+in the same train as the author-owned package README, when the next sheet is cut.
+
+**Gate: both packs exit 0.** The pack itself refuses, by name: a host path in any packed file, a restored `go.*`
+closure that is not the published `R`, a proof whose input digest is not the packed project's, any read-back
+mismatch of identity, description, copyright, ranges or self-description, a README with inline code in a heading, a
+table wider than three columns or a link naming `HEAD`, a README whose generated block is missing or malformed or has
+a link above it, a package with no icon, `-Icon` given beside a `nuget/icon.png`, and, when `-ConversionReadme` is
+given, a conversion README that does not fit the description's form, and (flavors) a flavor conversion that does
+not reproduce `PR`'s digests, a flavor that does not build, a third-party require that differs by GOOS (the cobra
+increment unions them; COORD ruling 2026-10-12), a neutral package carrying `runtimes/`, and a RID-specific package
+whose `lib/` or `runtimes/<rid>/` is not the measured flavor, or whose two Mac folders differ. (Behavioral proof)
+`-BehaviorProofDir` beside `-ValidationDir` or `-UnvalidatedReason`, or for a module with Go tests; and a missing row
+for a shipped RID, a row whose outputs differ, a row recorded on another RID or GOOS than its file's, and a row whose
+assembly is not the bytes the package carries for its RID.
+
+## 3. Rehearse on int.nugettest.org (B7)
+
+1. **Owner:** push the REHEARSAL package, unsigned, to the test gallery with that gallery's own API key. The
+   release candidate never goes there.
+   ```
+   dotnet nuget push <out-rehearsal>/<ID>.<PV>-int.1.nupkg --source https://apiint.nugettest.org/v3/index.json
+   ```
+2. **Lane:** wait until int's flat container lists `PV-int.1`.
+3. **Lane:** convert the module's sample program (named in the instance plan). The registry has no row yet, so a
+   local mappings file carries the row, and the feed flag points selection at the test gallery:
+   ```
+   G -recurse=nuget -nuget-map <mappings.txt> -nuget-map-only \
+     -nuget-map-feed https://apiint.nugettest.org/v3/index.json -go2cspath <T>/src <app> <AR>
+   ```
+4. **Gate: the consumer half.** The provenance report reads `1 referenced as packages`, with
+   `PackageReference <ID> [PV-int.1]`. `go2cs.nuget.lock` pins `PV-int.1` and records the mapping source relative to
+   `AR`. No directory for `M` exists under `AR/src` or `AR/pkg`: the module was not converted locally.
+5. **Gate: the program.** Restore and run with a private `NUGET_PACKAGES` and a nuget.config that maps `nugetgo.*`
+   to the test gallery and everything else to nuget.org (`packageSourceMapping`). `dotnet run` prints exactly what
+   `go run` prints, byte for byte. A script that waits on `dotnet run` or `dotnet build` as a process passes
+   `-p:UseSharedCompilation=false` (trap 9).
+6. Record the readings (date, host nickname, `T`, both digests, the two outputs) in the instance's record.
+
+### The hosted rows
+
+For a module with no Go tests these rows are its proof. For a module WITH Go tests (COORD ruling 2026-10-12; tools
+at `claude/c2-nugetgo-sample-rows` or later) they are an additional row set beside the test proof, never in its
+place: they replace steps 3 to 5 above, which then need no owner's machine, and the release candidate takes
+`-BehaviorProofDir <rows>` beside `-ValidationDir`. Its VALIDATION.md gains a "Sample behavior" section under the test
+comparison, and its README a Sample behavior badge after the Tests badge. A tested module packed without rows is
+published exactly as before. The module's sample program and mappings row are committed at `T` under
+`src/tests/ModuleBehavior/M@V/`.
+
+After step 2, every shipped RID's row is written on a hosted runner of its own OS. No row is inferred from another.
+
+1. **Lane:** dispatch the OS matrix's `nugetgo-behavior` stage on `T`'s branch, from the Actions page or as:
+   ```
+   gh workflow run os-matrix.yml --ref <T's branch> -f stage=nugetgo-behavior \
+     -f nugetgo_module=M@V -f nugetgo_package=PV-int.1
+   ```
+   The feed defaults to int.nugettest.org. Each of the four legs (windows-latest, ubuntu-latest, macos-15,
+   macos-15-intel) runs the sample with `go run`, converts it against `PV-int.1`, builds it with `-r <rid>` and runs
+   it with dotnet (`Invoke-NugetgoBehaviorRow.ps1`), which is steps 3 to 5 above on that OS.
+2. **Lane:** fetch the rows through the annotations API, which a restricted-egress lane can reach:
+   `pwsh -File <T>/src/tools/nugetgo/Get-NugetgoBehaviorRows.ps1 -RunId <run> -OutDir <rows>`.
+3. **Gate: four rows.** Each reads `outputs-equal: true`, its `runtime-rid` is its file's RID, its `goos` is that
+   RID's GOOS, its `host` names the runner label and image version, and its `assembly` lists every assembly the
+   package carries for that RID, one `<file> sha256-<hex>` per Go package. The release candidate's pack (section 2)
+   binds each row's `assembly` to the bytes it packs for that RID, so a release whose bytes differ from the rehearsal's
+   is refused there.
+
+## 4. Publish to nuget.org (owner; irreversible)
+
+COORD rules sections 1-3 green before this step.
+
+1. **Sign** the release candidate with the certificate registered to B1's account, as `release-nuget.ps1` Phase 2
+   does: `dotnet nuget sign` with the card. nuget.org rejects an unsigned package from that account.
+2. **Verify:** `dotnet nuget verify --all <ID>.<PV>.nupkg`.
+3. **Push:** `dotnet nuget push <ID>.<PV>.nupkg --source https://api.nuget.org/v3/index.json`. A published version
+   can be unlisted but never deleted.
+4. **Lane:** wait until the flat container and the registration list `PV`. The registry's checks read both.
+5. **COORD, BEFORE step 1:** push the conversion source to the conversion repository, and mint the signed tag
+   `nuget-<PV>` on that commit (the stdlib release's order: the tag exists before the package is signed). The owner
+   sheet's first gate checks that the tag exists and resolves anonymously. The commit holds:
+   - the contents of `PR/src/M`, including the `Directory.Build.targets` the pack writes there when the upstream
+     holder is not The go2cs Authors, and `nuget/README.md` (and `nuget/icon.png`, when present) as the release pack
+     left them;
+   - `PR`'s root `Directory.Build.props` and `Directory.Build.targets`. Without the root `Directory.Build.props` the
+     project does not restore (NU1015), because `GoStdLibVersion` is set there;
+   - the module's LICENSE verbatim (B6), a README (for a third-party conversion, ending with the maintainers section:
+     section 2, "The conversion repository's README"), and a `.gitignore` for the build output (`.artifacts/`);
+   - the packed VALIDATION.md and its per-package proof pages, byte for byte as the package carries them.
+
+   The license file and VALIDATION.md sit at the repository ROOT in either layout below. The package README links
+   `<RepositoryUrl>/tree/nuget-<PV>`, `<RepositoryUrl>/blob/nuget-<PV>/VALIDATION.md` and
+   `<RepositoryUrl>/blob/nuget-<PV>/<license file>`: a tag, never `HEAD`, so an older version's page keeps its own proof
+   after a rebuild's commit replaces those files (COORD ruling, 2026-10-10). A rebuild whose C# source is unchanged still
+   gets a commit and its own tag when a file the README links changes, and a tag on the unchanged commit otherwise.
+
+   **The layout (COORD ruling, 2026-10-09).** When the pack wrote no module `Directory.Build.targets` (the upstream
+   holder is The go2cs Authors), the repository is FLAT: everything above sits at its root (hashset). When the pack
+   wrote one (a third-party holder), the repository is NESTED: the root `Directory.Build.props` and
+   `Directory.Build.targets` sit at the repository root and the contents of `PR/src/M` one directory below it. The
+   reason is that the module file imports the nearest `Directory.Build.targets` above its own directory
+   (`GetPathOfFileAbove` from its parent directory), so in a flat repository it would find none inside the repository, and the root file it
+   must import would collide with it by name. Measured on uuid (2026-10-09, a local pack with a placeholder
+   repository URL, never shipped): both layouts build, and both dlls carry the packed dll's version and copyright
+   attributes. Only the nested one imports the root file. In the flat one `NugetgoParentBuildTargets` is empty, and
+   the generated-files path falls back to a `Generated` folder in the module's own directory instead of `.artifacts`.
+   A flat repository for such a module therefore builds, but silently differs from `PR`.
+
+   Before pushing, build a fresh copy with `dotnet build -c Release -p:GoStdLibVersion=R`. For hashset (2026-10-09)
+   the dll it built carried the same version and copyright attributes as the packed one, which is what lets a rebuild
+   from the repository reproduce the package's assembly attributes.
+
+## 5. The registry row (owner, through the nugetgo repository's CI)
+
+1. If `R` is not listed in the nugetgo repository's `cmd/sitegen/go2cs-releases.txt`, a maintainer adds it in its
+   own pull request first. The row's pull request must change only `v1/mappings.txt` to be eligible for the
+   `auto-merge-eligible` label, and check 4(b) refuses a package built against an unlisted release.
+2. Open the row's pull request: one line in `v1/mappings.txt`, in sorted order, six TAB-separated fields (module path,
+   `ID`, the claimed status, the conversion repository's https URL, the date, a contact), with the pull request
+   template's checklist filled in. The pull request states `P`, which check 4(c) converts for.
+3. **Gate: the CI.** The `ci` workflow runs lint, then checks 2 to 4(b) on the row (existence, provenance, the
+   self-description's module and release), then the label job. A `canonical` row that passes every check gets
+   `auto-merge-eligible`; a `community` row never does, and waits for review.
+4. **Check 4(c), by a maintainer** (the procedure ACCEPTED by COORD on 2026-10-09, and stated in the nugetgo
+   repository's CONTRIBUTING). The self-description's sections are the packed packages' surface records
+   (`GoTypeAlias`, `GoImplement`, `GoRefPrimary`, `GoSStringTwin`), so a fresh conversion must reproduce them exactly:
+   1. Extract `go2cs/source-metadata.txt` from the package version checks 2 to 4 read, and read its `module`,
+      `module-version`, `go2cs-release`, `require` and `package` lines.
+   2. Build go2cs at the tag `nuget-<go2cs-release>`. The pack guards do not change these records, so the tag
+      reproduces what `T` wrote.
+   3. Convert `<module>@<module-version>` into an empty root `FR` with the `P` the pull request states:
+      `go2cs -recurse=nuget -platforms P -go2cspath <go2cs>/src <SRC> <FR>`.
+   4. In `src/go2cs`, regenerate the self-description: `go run ./internal/gensourcemeta -src <FR>/src -module <module>
+      -module-version <module-version> -go2cs-release <go2cs-release> -out fresh.txt`, with one
+      `-package <import path>=<assembly>` per `package` line and one `-require <module>@<version>=<nuget-id>` per
+      `require` line.
+   5. The check passes when `fresh.txt` equals the package's `go2cs/source-metadata.txt` byte for byte. A difference
+      fails the row; attach the diff to the pull request.
+5. A maintainer merges. The Pages workflow republishes the site; wait until `https://nugetgo.net/v1/mappings.txt`
+   serves the row.
+
+## 6. The sample-program demo (lane)
+
+PLAN section 6, step 5: the launch demo and the standing integration test.
+
+1. From a clean clone at `T`, with a fresh go2cs cache (`XDG_CACHE_HOME`, or `%LOCALAPPDATA%` on Windows), a private
+   `NUGET_PACKAGES` and NO `-nuget-map` flag, so the default registry answers:
+   `G -recurse=nuget -go2cspath <T>/src <app> <DR>`.
+2. **Gate.** The provenance report lists `M` with its status and the registry URL as its source, and
+   `PackageReference <ID> [PV]`. `go2cs.nuget.lock` records the registry URL and the content hash of the package
+   downloaded from nuget.org. Nothing for `M` is converted locally.
+3. **Gate.** `dotnet run` prints exactly what `go run` prints.
+4. Record the run as for section 3.
+
+## Traps
+
+1. **The release tag is not the release record.** A converter built at `nuget-R` has the previous release in
+   `corpus-release.txt` and refuses the package's self-description as another corpus release. Build `T` at or after
+   the record commit.
+2. **A tree whose golib moved past `R` cannot pack against `R`.** Its emission calls golib API the published
+   `go.lib` lacks, so the compile against the published `go.gen` fails (the 2026-10-09 hashset rehearsal, arm 2A,
+   recorded on `claude/c2-nugetgo-rehearsal`). The published-closure guard refuses an unpublished `go.lib` or `go.gen`
+   by name before compiling; the diff gate in 0.3 catches the move before any conversion.
+3. **One binary per module.** `GoInputDigest` includes the converter revision, so a rebuild of `G` between 1.2 and
+   1.4 makes the pack refuse the proof. Rebuild, then redo both conversions.
+4. **Comments do not enter the digest** (COORD ruling, 2026-10-09). `-tests` always converts with comments and the
+   pack's root need not, so the two emissions differ in line layout while their digests agree.
+5. **A rehearsal version is never published to nuget.org.** go2cs admits a `-RehearsalSuffix` version only from a
+   configured `-nuget-map-feed`. The suffix also keeps test-gallery bytes out of every NuGet cache under the release
+   version.
+6. **Signing on the test gallery is not measured.** Whether int.nugettest.org accepts a package signed with a
+   certificate registered only on nuget.org has not been tried; section 3 pushes the rehearsal unsigned.
+7. **Frames of a packed module print the `-trimpath` form** (`module@version/file.go`; owner approval, 2026-10-09).
+   Until a go.* release carries the runtime half of the host-path change, a process with `GO2CS_DEFAULT_GOROOT` set
+   prints that form under the GOROOT's `src` directory instead.
+8. **A cloud host may not reach the test gallery or nugetgo.net.** On 2026-10-09 the cloud container's proxy refused
+   both, so sections 3 and 6 run on a lane box.
+9. **A build leaves the Roslyn compiler server running, and a Windows wait counts it.** On Windows,
+   `Start-Process -Wait` waits for every process the command starts, and the compiler server a build starts stays
+   alive for minutes: the owner's hashset run of 3.5 on the i7 (2026-10-09) waited about 10 minutes.
+   `-p:UseSharedCompilation=false` keeps the build from starting it. Measured on linux: without the flag one
+   server is left running after `dotnet run`, with it none, and the output is the same. Linux does not reproduce
+   the wait itself, because there `Start-Process -Wait` waits for the process alone.
+10. **The owner's sheets start PowerShell 7 first.** The i7's default shell is Windows PowerShell 5.1, and
+    PowerShell 7 is installed there as a .NET global tool, which no longer starts once a sheet's environment block
+    has put .NET 10 first on `PATH`. So a sheet opens with `& "$env:USERPROFILE\.dotnet\tools\pwsh.exe"`, a check
+    that `$PSVersionTable.PSVersion` reads 7.x, and `Set-Location` to the go2cs clone, before its environment
+    block. It also says to stop at the first red line: a `throw` stops only its own statement, and pasted lines
+    after it keep running.
