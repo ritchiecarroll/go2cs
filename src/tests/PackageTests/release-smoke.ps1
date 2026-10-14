@@ -22,8 +22,13 @@
                             the caller passes on the platforms the README says it works on; elsewhere it is
                             a MEASUREMENT that never moves the exit code, because this arm is what measures
                             a platform before the README may name it.
+      G  PER-OS ASSETS      a consumer of runtime/coverage and runtime/debug, converted and compared the same
+                            way, then the assembly NuGet hands this RID for go.internal.coverage.decodemeta and
+                            go.runtime.debug (runtimes/<rid>/, else lib/): it must not name the other OS's syscall
+                            buffer type, and a runtimes/<rid>/ twin must name this OS's (the 1.24.13.6 release
+                            blocker). Naming neither is platform-neutral and passes.
 
-    Exit 0 when A, B and C pass (and D, with -GateWalkthrough); 1 otherwise. Every arm's evidence lands
+    Exit 0 when A, B, C and G pass (and D, with -GateWalkthrough); 1 otherwise. Every arm's evidence lands
     under -WorkRoot.
 
 .PARAMETER Feed
@@ -280,6 +285,74 @@ $behavioral = Join-Path $WorkRoot 'C-behavioral-src'
 New-Item -ItemType Directory -Force $behavioral | Out-Null
 Copy-Item (Join-Path $repoSrc 'tests/Behavioral/StatLayoutTruth/go.mod'), (Join-Path $repoSrc 'tests/Behavioral/StatLayoutTruth/main.go') $behavioral
 $verdicts += Invoke-ConvertArm 'C-StatLayoutTruth' $behavioral
+
+# ---- G: the per-OS assets of go.internal.coverage.decodemeta and go.runtime.debug ------------------
+# An assembly whose metadata names a per-OS type ships one twin per RID. The 1.24.13.6 rehearsal shipped
+# go.internal.coverage.decodemeta with its Windows build in lib/ only: its escape registry names
+# go.syscall_package.WSABuf, which no unix go.syscall defines, so a consumer died at startup on Linux and macOS
+# (TypeLoadException: Could not load type 'WSABuf' from assembly 'syscall', from the module initializer).
+# runtime/coverage's cfile imports decodemeta, so this consumer loads it at init; the run is the behavior, and the
+# restored assembly of each package for this leg's compile RID is the cause, read by name.
+# The asset NuGet hands this RID is runtimes/<rid>/lib/ when the package carries one, else lib/. A runtimes/<rid>/
+# twin exists because the assembly names a per-OS type, so it must name THIS OS's buffer type. A package with no
+# twin for this RID loads lib/, which must not name the OTHER OS's type: that is the 1.24.13.6 blocker exactly
+# (decodemeta's Windows build in lib/ only, loaded on Linux and macOS). Naming neither type is a platform-neutral
+# assembly: 1.24.13.7 ships both packages that way, their syscall dependency gone, and that is a pass, not a defect.
+function Get-GAssetVerdict([string]$PackageRoot, [string]$AssetRid, [string]$Dll, [string]$Want, [string]$Refuse) {
+    $where = "runtimes/$AssetRid/"
+    $asset = @(Get-ChildItem -LiteralPath (Join-Path $PackageRoot "runtimes/$AssetRid/lib") -Recurse -Filter $Dll -File -ErrorAction SilentlyContinue)
+    $twin = $asset.Count -gt 0
+    if (-not $twin) {
+        $where = 'lib/'
+        $asset = @(Get-ChildItem -LiteralPath (Join-Path $PackageRoot 'lib') -Recurse -Filter $Dll -File -ErrorAction SilentlyContinue)
+    }
+    if ($asset.Count -ne 1) { return @{ Fail = $true; Text = "carries $($asset.Count) $where assembly for $AssetRid, want 1 ($PackageRoot)" } }
+    $text = [System.Text.Encoding]::Latin1.GetString([System.IO.File]::ReadAllBytes($asset[0].FullName))
+    if ($text.Contains($Refuse)) { return @{ Fail = $true; Text = "$where assembly loaded on $AssetRid names $Refuse (this OS's syscall buffer type is $Want)" } }
+    if ($twin -and -not $text.Contains($Want)) { return @{ Fail = $true; Text = "$where assembly does not name $Want (a per-OS twin must name this OS's syscall buffer type)" } }
+    if ($text.Contains($Want)) { return @{ Fail = $false; Text = "$where names $Want, not $Refuse" } }
+    return @{ Fail = $false; Text = "$where names neither $Want nor $Refuse (platform-neutral)" }
+}
+
+$cov = Join-Path $WorkRoot 'G-coverage-debug-src'
+New-Item -ItemType Directory -Force $cov | Out-Null
+"module example.com/relsmokecov`n`ngo 1.24`n" | Set-Content -LiteralPath (Join-Path $cov 'go.mod') -Encoding utf8 -NoNewline
+@'
+package main
+
+import (
+	"bytes"
+	"fmt"
+	"runtime/coverage"
+	"runtime/debug"
+)
+
+func main() {
+	// runtime/coverage's cfile imports internal/coverage/decodemeta, so this program loads that package at init.
+	var meta bytes.Buffer
+	fmt.Println("WriteMeta fails without -cover:", coverage.WriteMeta(&meta) != nil)
+	fmt.Println("ClearCounters fails without -cover:", coverage.ClearCounters() != nil)
+
+	old := debug.SetGCPercent(150)
+	fmt.Println("SetGCPercent round trip:", debug.SetGCPercent(old))
+}
+'@ | Set-Content -LiteralPath (Join-Path $cov 'main.go') -Encoding utf8
+$gVerdict = Invoke-ConvertArm 'G-coverage-debug' $cov
+if ($gVerdict -like 'PASS*') {
+    $props = [System.IO.File]::ReadAllText((Join-Path $cov 'csharp/Directory.Build.props'))
+    $null = $props -match '<GoCompileRuntimeIdentifier>([^<]+)</GoCompileRuntimeIdentifier>'
+    $assetRid = $Matches[1]
+    $want, $refuse = if ($assetRid -like 'win-*') { 'WSABuf', 'Iovec' } else { 'Iovec', 'WSABuf' }
+    $cache = Join-Path $WorkRoot 'G-coverage-debug/nuget-cache'
+    $notes = @()
+    foreach ($pkg in @(@{ Id = 'go.internal.coverage.decodemeta'; Dll = 'internal.coverage.decodemeta.dll' }, @{ Id = 'go.runtime.debug'; Dll = 'runtime.debug.dll' })) {
+        $result = Get-GAssetVerdict -PackageRoot (Join-Path $cache "$($pkg.Id)/$($Version.ToLowerInvariant())") -AssetRid $assetRid -Dll $pkg.Dll -Want $want -Refuse $refuse
+        if ($result.Fail) { $gVerdict = "FAIL (G-coverage-debug): $($pkg.Id) $Version $($result.Text)"; break }
+        $notes += "$($pkg.Id) $($result.Text)"
+    }
+    if ($gVerdict -like 'PASS*') { $gVerdict += "; " + ($notes -join '; ') }
+}
+$verdicts += $gVerdict
 
 # ---- D: the README walkthrough, measured, never gating -------------------------------------------
 $walk = Join-Path $WorkRoot 'D-walkthrough-src'
