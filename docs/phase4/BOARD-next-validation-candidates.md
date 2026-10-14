@@ -26533,6 +26533,8 @@ Three entries for the seats ruled for the train after Q, most important first. E
 
 The macOS figure is the one a user needs to see: on a hosted 3-core Apple-silicon runner the publish of this 31-assembly closure does not fit in six hours, and on Intel it takes nearly five. `aot-smoke` therefore reads three RIDs and prints osx-arm64 as NOT MEASURED on every leg (COORD ruling 2026-10-07, option 2; `claude/c1-aot-smoke-three-rids`); a larger or self-hosted Apple-silicon runner is the owner's call. The route above (golib's reflection annotated, then a full trim) is also the route to a macOS number that fits.
 
+**2026-10-14, the hours were ILC's generic cycle, and osx-arm64 is read (C1):** the publish's time was golib's array/ж/slice generic cycle, which ILC expanded to its cut-off (`READ (ILC cycle-cutoff methods)`: 35,336 on linux at master, 30,718 at the 1.24.13.6 tree; IlcCompile 5,444-7,001 s of a 5,514-7,062 s publish, runs 38576996407 and 38555847362). G's e2move (merge b1ba1380b4) breaks the cycle. On its tip every RID read 0 cut-offs, linux 224 s, windows 230 s and osx-x64 654 s (run 38575258530). From master with the cycle broken, osx-arm64 published in 354 s with exit 0 (run 38587876788, bounded at 60 min). `aot-smoke` therefore reads all four RIDs, and osx-arm64 gates like linux-x64 and win-x64 (`claude/c1-aot-four-rids`). The NOT MEASURED line above is retired, not rewritten.
+
 
 ## 2026-10-06 — C2: generated twins carry no Go array dims — RECORDED
 
