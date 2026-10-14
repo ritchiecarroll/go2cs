@@ -931,6 +931,10 @@ public static partial class testing_package
     /// </remarks>
     public static double AllocsPerRun(nint runs, Action f)
     {
+        // Go 1.25: the first thing AllocsPerRun does (allocs.go:21-23), before its warmup run.
+        if (TestExecution.ParallelTestsRunning)
+            throw builtin.panic("testing: AllocsPerRun called during parallel test");
+
         // Warmup run outside the measurement window (Go does the same): first-call lazy
         // initialization — and JIT compilation here — must not count against f.
         f();
