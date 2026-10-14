@@ -859,7 +859,7 @@ func main() {
 	fmt.Println("count:", registry.Count())
 }
 ```
-<!-- source: src/tests/Behavioral/BlankImportSideEffects/main.cs.target:11-37 -->
+<!-- source: src/tests/Behavioral/BlankImportSideEffects/main.cs.target:11-39 -->
 ```csharp
 internal static nint countAtInit;
 
@@ -875,6 +875,7 @@ private static readonly object countˢ = (@string)"count:"u8;
 
 internal static void Main() {
     fmt.Println(countAtInitˢ, countAtInit);
+
     foreach (var (_, name) in new @string[]{"jpeglike"u8, "pnglike"u8, "giflike"u8}.slice()) {
         {
             var (describe, ok) = registry.Lookup(name); if (ok){
@@ -884,6 +885,7 @@ internal static void Main() {
             }
         }
     }
+
     fmt.Println(countˢ, registry.Count());
 }
 
@@ -2083,10 +2085,11 @@ var a, b uint8 = 200, 100
 // Argument context.
 fmt.Println(takeU8(a + b)) // 300 wraps to 44
 ```
-<!-- source: src/tests/Behavioral/NarrowArithmeticArg/main.cs.target:29-31 -->
+<!-- source: src/tests/Behavioral/NarrowArithmeticArg/main.cs.target:29-32 -->
 ```csharp
 uint8 a = 200;
 uint8 b = 100;
+
 fmt.Println(takeU8((uint8)(a + b)));
 ```
 
@@ -2618,7 +2621,7 @@ func main() {
 	emptyLit := []byte{}
 	probe("emptyLiteral", emptyLit == nil, len(emptyLit), cap(emptyLit))
 ```
-<!-- source: src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:8-14,33-37 -->
+<!-- source: src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:8-14,33-38 -->
 ```csharp
 internal static void probe(@string name, bool isNil, nint length, nint capacity) {
     fmt.Println(name, isNil, length, capacity);
@@ -2631,6 +2634,7 @@ private static readonly @string emptyLiteralˢ = "emptyLiteral"u8;
 internal static void Main() {
     slice<byte> zero = default!;
     probe(zeroValueˢ, zero == default!, len(zero), cap(zero));
+
     var emptyLit = new byte[]{}.slice();
     probe(emptyLiteralˢ, emptyLit == default!, len(emptyLit), cap(emptyLit));
 ```
@@ -2809,7 +2813,7 @@ func main() {
 …
 	var p point
 ```
-<!-- source: src/tests/Behavioral/ZeroValueStructVar/main.cs.target:7-24,33,36 -->
+<!-- source: src/tests/Behavioral/ZeroValueStructVar/main.cs.target:7-24,35,39 -->
 ```csharp
 partial struct holder {
     internal @string name;
@@ -2864,7 +2868,7 @@ type Embedded struct {
 	var p Padded
 	var e Embedded
 ```
-<!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:29-42,108-109 -->
+<!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:29-42,124-125 -->
 ```csharp
 partial struct Padded {
     internal bool flag;
@@ -4185,12 +4189,13 @@ d[0] = 42
 base[3] = 43
 fmt.Println(base[2], d[1])
 ```
-<!-- source: src/tests/Behavioral/SliceAliasing/main.cs.target:9-15 -->
+<!-- source: src/tests/Behavioral/SliceAliasing/main.cs.target:9-16 -->
 ```csharp
 var @base = new slice<uint32>(6);
 var d = @base[2..5];
 copy(d, new uint32[]{7, 8, 9}.slice());
 fmt.Println(@base, d, len(d), cap(d));
+
 d[0] = 42;
 @base[3] = 43;
 fmt.Println(@base[2], d[1]);
@@ -4502,10 +4507,11 @@ rs := []rune("héllo")
 fmt.Println(len(bs), string(bs))
 fmt.Println(len(rs), string(rs))
 ```
-<!-- source: src/tests/Behavioral/StringLiteralSliceConversion/main.cs.target:21-24 -->
+<!-- source: src/tests/Behavioral/StringLiteralSliceConversion/main.cs.target:21-25 -->
 ```csharp
 var bs = slice<byte>("hello"u8);
 var rs = slice<rune>((@string)"héllo");
+
 fmt.Println(len(bs), ((@string)bs));
 fmt.Println(len(rs), ((@string)rs));
 ```
@@ -4529,7 +4535,7 @@ func kind(n int) string {
 	return "other value return"
 }
 ```
-<!-- source: src/tests/Behavioral/StringLiteralHoisting/main.cs.target:6-17 and :104 -->
+<!-- source: src/tests/Behavioral/StringLiteralHoisting/main.cs.target:6-18 and :125 -->
 ```csharp
 partial class main_package {
 
@@ -4541,6 +4547,7 @@ internal static @string kind(nint n) {
     if (n == 0) {
         return zeroValueReturnˢ;
     }
+
     return otherValueReturnˢ;
 }
 …
@@ -5259,7 +5266,7 @@ func (s *Stack[T]) Pop() (T, bool) {
 	return element, true
 }
 ```
-<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:7-30 -->
+<!-- source: src/tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.cs.target:7-31 -->
 ```csharp
 partial struct Stack<T>
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
@@ -5280,6 +5287,7 @@ public static (T, bool) Pop<T>(this ref Stack<T> s)
     if (len(s.elements) == 0) {
         return (zero, false);
     }
+
     nint index = len(s.elements) - 1;
     var element = s.elements[index];
     s.elements = s.elements.slice(0, index);
@@ -8505,7 +8513,7 @@ func main() {
    fmt.Printf("Value of blue = %v\n", blue)
 }
 ```
-<!-- source: src/tests/Behavioral/StructWithPointer/StructWithPointer.cs.target:7-21 -->
+<!-- source: src/tests/Behavioral/StructWithPointer/StructWithPointer.cs.target:7-23 -->
 ```csharp
 partial struct ColorList {
     public nint Total;
@@ -8518,7 +8526,9 @@ internal static void Main() {
     var red = new ColorList(2, "red"u8, nil, nil);
     ref var blue = ref heap<ColorList>(out var Ꮡblue);
     blue = new ColorList(2, "blue"u8, nil, nil);
+
     red.Next = Ꮡblue;
+
     fmt.Printf("Value of red = %v\n"u8, red);
     fmt.Printf("Value of blue = %v\n"u8, blue);
 }
@@ -9019,7 +9029,7 @@ func main() {
 	fmt.Println(t.get(), t.n, t.label) // 11 11 t
 }
 ```
-<!-- source: src/tests/Behavioral/PointerEmbeddingPromotion/main.cs.target:7-41 -->
+<!-- source: src/tests/Behavioral/PointerEmbeddingPromotion/main.cs.target:7-42 -->
 ```csharp
 partial struct leaf {
     internal nint n;
@@ -9052,6 +9062,7 @@ internal static void Main() {
     h.bump();
     h.bump();
     fmt.Println(h.get(), h.n, h.tag);
+
     var t = new top(mid: new mid(leaf: Ꮡ(new leaf(n: 10))), label: "t"u8);
     t.bump();
     fmt.Println(t.get(), t.n, t.label);
@@ -9927,14 +9938,17 @@ may outlive the function. A C# `ref` local cannot do that, so golib's `heap(…)
 	pptr = &ptr
 	ppptr = &pptr
 ```
-<!-- source: src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:17-24 -->
+<!-- source: src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:17-27 -->
 ```csharp
     ref var a = ref heap(new nint(), out var Ꮡa);
     ref var ptr = ref heap<ж<nint>>(out var Ꮡptr);
     ref var pptr = ref heap<ж<ж<nint>>>(out var Ꮡpptr);
     ж<ж<ж<nint>>> ppptr = default!;
+
     a = 3000;
+
     ptr = Ꮡa;
+
     pptr = Ꮡptr;
     ppptr = Ꮡpptr;
 ```
@@ -9979,7 +9993,7 @@ func main() {
 	fmt.Println(base.n, base.sub.k) // 7 2
 }
 ```
-<!-- source: src/tests/Behavioral/IncDecPointerField/main.cs.target:8-29 -->
+<!-- source: src/tests/Behavioral/IncDecPointerField/main.cs.target:8-31 -->
 ```csharp
 partial struct inner {
     internal nint k;
@@ -9998,9 +10012,11 @@ internal static void Main() {
     var @base = Ꮡ(new counter(n: 5));
     @base.Value.sub.k = 3;
     var c = get(@base);
+
     c.Value.n++;
     c.Value.n++;
     c.Value.sub.k--;
+
     fmt.Println((~@base).n, (~@base).sub.k);
 }
 ```
@@ -10417,7 +10433,7 @@ func main() {
 	fmt.Println(base.n, base.sub.k) // 7 2
 }
 ```
-<!-- source: src/tests/Behavioral/IncDecPointerField/main.cs.target:8-29 -->
+<!-- source: src/tests/Behavioral/IncDecPointerField/main.cs.target:8-31 -->
 ```csharp
 partial struct inner {
     internal nint k;
@@ -10436,9 +10452,11 @@ internal static void Main() {
     var @base = Ꮡ(new counter(n: 5));
     @base.Value.sub.k = 3;
     var c = get(@base);
+
     c.Value.n++;
     c.Value.n++;
     c.Value.sub.k--;
+
     fmt.Println((~@base).n, (~@base).sub.k);
 }
 ```
@@ -10804,7 +10822,7 @@ type T2 struct {
 	t2 := *(*T2)(unsafe.Pointer(&t1))
 	fmt.Println("Value of t2.a:", t2.a)
 ```
-<!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:8-14, 60, 82-85 -->
+<!-- source: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:8-14, 60, 88-92 -->
 ```csharp
 partial struct T1 {
     internal int32 a;
@@ -10818,6 +10836,7 @@ private static readonly object valueOfT2Aˢ = (@string)"Value of t2.a:"u8;
 …
     ref var t1 = ref heap(new T1(), out var Ꮡt1);
     t1.a = 42;
+
     var t2 = ~Ꮡt1.Reinterpret<T1, T2>();
     fmt.Println(valueOfT2Aˢ, t2.a);
 ```
@@ -10826,7 +10845,7 @@ This prints `Value of t2.a: 42` under both Go and C#. `t1` is boxed as `Ꮡt1` b
 taken ([Pointers](#pointers)). `Reinterpret<T1, T2>()` returns a `ж<T2>` over the same storage, and `~`
 reads through it ([Implicit Pointer Dereferencing](#implicit-pointer-dereferencing)).
 `valueOfT2Aˢ` is the hoisted string literal ([Strings](#strings-string-and-sstring)).
-<!-- struct pun: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.go:89 -> UnsafeOperations.cs.target:84 (`var t2 = ~Ꮡt1.Reinterpret<T1, T2>();`). -->
+<!-- struct pun: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.go:89 -> UnsafeOperations.cs.target:91 (`var t2 = ~Ꮡt1.Reinterpret<T1, T2>();`). -->
 
 **A pointer passed to a system call stays alive until the call returns, as in Go.** Go guarantees this
 for `uintptr(unsafe.Pointer(p))` written directly in a `syscall.Syscall` argument list. The converter
