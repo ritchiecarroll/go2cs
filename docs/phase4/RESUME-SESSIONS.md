@@ -18,6 +18,83 @@
 
 ---
 
+## 1k. COORD STATE 2026-10-14 16:35 (START HERE for COORD; it supersedes 1j.3 and 1i for CURRENT STATE)
+
+Written so that a COORD session on ANY account can resume from GitHub alone. COORD's local memory files live on the
+i7's disk, not in the account, so treat them as a convenience. This section and `docs/phase4/LEDGER.md` (on
+`claude/mailbox`) are the record.
+
+### 1k.0 State in one screen
+
+- **Master** `7ca22d951f`. 1.24.13.7, the FINAL Go 1.24 release, was published 2026-10-14 (record `b0ef977fda`, tag
+  `nuget-1.24.13.7`).
+- **On master since the release:**
+  - G's e2move: ILC generic cycle fixed, 0 cutoffs, AOT publish in minutes.
+  - G's CRLF fix: uniform line endings, so a fresh-tree CNR is byte-identical.
+  - F-H0-3: a per-GOOS `.cs.auto` takes its own target's bytes.
+  - C1's aot-smoke: four RIDs, osx-arm64 gating, and the ILC READ lines.
+  - The nugetgo security-sentence rewording.
+- **Go 1.26 hop:** H0 CLOSED (record `docs/phase4/H0-go126-baseline.md` on master); H1 and H2 CLOSED on the campaign
+  tip **`claude/hop-go126` @ `31a53399cc`**.
+  - go.mod and version.props are at 1.26.9. x/tools v0.52.0, x/mod v0.42.0, x/sync v0.24.0.
+  - Hop seats land ONLY on the tip, by COORD's signed `--no-ff` merge. Master folds into the tip by merge, never by
+    rebase, and the tip folds into master once, at H7a.
+- **Known failing set under go1.26.9 at the tip: EXACTLY six, by name.** A seventh name is red.
+
+  | Test | Owner | Clears at |
+  |:--|:--|:--|
+  | `TestCommentParityCensus` | — | H5 |
+  | `TestCommentParityUtf8` | — | H5 |
+  | `TestTrackedFixturesMatchPinnedGoRoot` | i9 | H5 |
+  | `TestEveryStagedFixtureIsTrackedOrIgnored` | i9 | H5 |
+  | `TestLinknamePushRegistryMatchesGoSource` | P2 | H4 |
+  | `TestLinknamePullCycleGuardKeepsDownwardPullsWithoutTheGraph/math/bits` | G | H4, R1 ruled |
+
+  Host note (H1 record §5): before H2, a box without `golang.org/toolchain@v0.0.1-go1.24.13.<goos>-<goarch>` in
+  GOMODCACHE read the two fixture guards red; the i7 and G-LAPTOP are such boxes.
+- **nugetgo:** five modules are live with registry rows: hashset, uuid, jwt, x/sync 0.19.0 and pflag 1.0.9. The last
+  two were published and verified 2026-10-14 (nugetgo#8), and section 6 PASSED for both on R-LAPTOP.
+
+### 1k.1 Lanes (dispatched 2026-10-14 16:25)
+
+| Lane | Reached by | On |
+|:--|:--|:--|
+| i9 | SendMessage, full title "i9 -- Corpus migration to 1.24.13 coordination" | **OFFLINE since about 16:00**; the owner checks the box. Next: H3's second route, then H4a, the §4 checkpoint, H5. |
+| G | SendMessage "g -- resume sesstion" | H4: the math/bits R1 seat `claude/g-mathbits-pullcycle` (ruled; AOT partial and full gate), then the front end (`new(expr)`, self-referential generics). It owes a probe of whether a math/bits-only app deploys go.runtime. |
+| R | mailbox (`fleet-msg.sh R`) | H4 testing host (`Attr`, `Output`, `ArtifactDir`, `AllocsPerRun` parallel). R-LAPTOP is fully qualified, net H10 included. |
+| P2 | mailbox | H4: the linkname push-registry row (`unique.runtime_registerUniqueMapCleanup`), then the linkname bodies. Its seam with G is relayed: G edits only `varLinknamePull`. |
+| C1 | SendMessage "c1 -- corpus migration coordination" (replies by mailbox) | H6 runtime pre-read, a DRAFT `docs/phase4/PREREAD-h6-runtime-go126.md`. Darwin is held behind the hop. |
+| C2 | SendMessage "c2 -- ..." (replies by mailbox) | H3 genpopulation (route 1), then nugetgo PREP of mousetrap and cobra (no pack). Its review of R's section 6 readings is owed. |
+| P1 | mailbox | idle until H10's mechanical work |
+
+### 1k.2 Owner rulings of 2026-10-14 (the ledger has the words)
+
+- A12/O6, in the i9's session: "Standing allow: download what Go/.NET packages you need to do your tasks". It covers
+  Go modules and NuGet restores a task needs; not other installers; never a toolchain-pin change.
+- x/sync and pflag: the int rehearsal was waived (PATH B).
+- **After the hop, rebuild and republish ALL nugetgo modules** (updated README, 1.26 base). mousetrap and cobra
+  publish in that wave, not before. A rebuild of the same module version takes a fourth version part: x/sync 0.19.0 is republished with revision 1.
+- The nugetgo security sentence reads "Security: the Go standard library this package is built on includes no Go
+  security fixes released after Go <release>; review before any production use." The five conversion READMEs were
+  updated directly, and hashset-cs dropped its "PROOF:" prefix.
+
+### 1k.3 COORD's next steps, in order
+
+1. Merge each H4 seat into the tip as it posts. The gate is the tip's `go test ./...` under go1.26.9, rc captured;
+   the failing set must stay within the named six, minus what the seat clears.
+2. H3: C2's route and the i9's route must agree by name; then rule the new IDs (O5).
+3. Fold master into the tip whenever master moves (merge, gate under go1.26.9).
+4. After C2's review lands, prune the two nugetgo kit branches (bundle first).
+5. On the i9's return: H3 route 2, then H4a.
+
+### 1k.4 PASTE PROMPT for a new COORD session (any account)
+
+> You are COORD of the go2cs fleet, on the i7. Read CLAUDE.md, then `docs/phase4/RESUME-SESSIONS.md` section 1k on
+> branch `claude/coord-handover` (worktree `H:/go2cs-tmp-coord/hnd`), then the tail of `docs/phase4/LEDGER.md` on
+> `claude/mailbox` (clone `H:/Projects/go2cs-mailbox`). The Go 1.26 hop is live on `claude/hop-go126`. Re-arm the
+> inbox watcher (`tP/watch-battery-inbox.sh <mailbox tip> inbox` from `H:/go2cs-tmp-coord/coord-scratch`) as the last
+> tool call of every turn, list the agents, and post one status line to each lane naming the tip you resume at.
+
 ## 1j. COORD ROLLS TO A NEW SESSION 2026-10-06 22:50 (owner order). START HERE for COORD, then read section 1i
 
 Written 22:50 on the i7's clock by the outgoing COORD session. Section 1i below holds TRAIN Q's state (its dated
