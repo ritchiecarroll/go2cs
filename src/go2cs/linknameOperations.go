@@ -741,6 +741,52 @@ var linknamePushTargets = map[string]linknamePush{
 	"reflect.resolveNameOff": {source: "runtime.reflect_resolveNameOff", bareDecl: true},
 	"reflect.resolveTypeOff": {source: "runtime.reflect_resolveTypeOff", bareDecl: true},
 	"reflect.resolveTextOff": {source: "runtime.reflect_resolveTextOff", bareDecl: true},
+	// Go 1.26's new runtime pushes, rowed at the hop (PLAN-hop-go126 H4). Each pushing definition lives
+	// in a runtime (or os) file the corpus does not carry until H5 regenerates it, so every row below
+	// is COMPILE AT H5 (net.newWindowsFile: H6, see its row); the conversion of each consumer at
+	// go1.26.9 is what was measured here, the forwarder or refusal line it emits.
+	//
+	// crypto/fips140's per-goroutine FIPS-only bypass, pushed by runtime/fipsbypass.go into three
+	// one-arg HANDLES in crypto/fips140/enforcement.go. Each body reads or writes
+	// getg().fipsOnlyBypass, an ordinary g field, and getg() returns the running goroutine's managed g
+	// (runtime/stubs_impl.cs), so the flag is per goroutine as Go means it. HONORABLE.
+	"crypto/fips140.isBypassed":  {source: "runtime.fips140_isBypassed"},
+	"crypto/fips140.setBypass":   {source: "runtime.fips140_setBypass"},
+	"crypto/fips140.unsetBypass": {source: "runtime.fips140_unsetBypass"},
+	// crypto/subtle's data-independent-timing switch, pushed by runtime/dit.go into two one-arg HANDLES
+	// in crypto/subtle/dit.go. The bodies set g.ditWanted and g.m.ditEnabled (managed getg mints an m
+	// per goroutine) and call internal/runtime/sys.EnableDIT/DisableDIT, which on amd64 are the no_dit
+	// shapes: EnableDIT reports false and DisableDIT does nothing. So WithDataIndependentTiming runs f
+	// with DIT reported unavailable, which is Go's own amd64 answer. HONORABLE.
+	"crypto/subtle.setDITEnabled":  {source: "runtime.dit_setEnabled"},
+	"crypto/subtle.setDITDisabled": {source: "runtime.dit_setDisabled"},
+	// net's conn.File on windows, pushed by os/file_windows.go (`//go:linkname net_newWindowsFile
+	// net.newWindowsFile`) into a BARE declaration in net/fd_windows.go. COMPILE AT H6, not H5:
+	// os/windows/file_windows.cs is a hand-owned whole file, so packageFuncAccess cannot widen the
+	// pushing definition there; the H6 os rewrite must declare net_newWindowsFile public by hand.
+	"net.newWindowsFile": {source: "os.net_newWindowsFile", bareDecl: true},
+	// runtime/trace's flight-recorder clock rate, pushed by runtime/tracetime.go into a one-arg HANDLE
+	// in runtime/trace/flightrecorder.go. Ordinary converted Go over osHasLowResClock, ticksPerSecond
+	// and traceTimeDiv, returning uint64 (no unexported type crosses). HONORABLE.
+	"runtime/trace.runtime_traceClockUnitsPerSecond": {source: "runtime.traceClockUnitsPerSecond"},
+	// sync's external-test twin of unique's cleanup-queue drain, pushed by runtime/mcleanup.go into a
+	// one-arg HANDLE in sync/oncefunc_test.go (package sync_test, hence the key). Its body is the same
+	// hand-written wait as unique's, in runtime/mcleanup.cs. HONORABLE.
+	"sync_test.runtime_blockUntilEmptyCleanupQueue": {source: "runtime.sync_test_runtime_blockUntilEmptyCleanupQueue"},
+	// runtime/pprof's goroutine-leak profile, pushed by runtime/mgc.go and runtime/proc.go into two
+	// BARE declarations in runtime/pprof/runtime.go. UNHONORABLE, both: the managed model has no
+	// leak-detecting GC cycle, so a count would be a fabricated 0, and goroutineLeakGC spins on
+	// work.goroutineLeak.pending, which only that cycle clears.
+	"runtime/pprof.runtime_goroutineLeakGC": {
+		source:   "runtime.goroutineLeakGC",
+		reason:   "the pushed body waits for a goroutine-leak GC cycle the managed collector never runs, so it would spin forever",
+		bareDecl: true,
+	},
+	"runtime/pprof.runtime_goroutineleakcount": {
+		source:   "runtime.goroutineleakcount",
+		reason:   "goroutine leak detection needs a GC that marks blocked goroutines unreachable, which the managed model does not do, so any count would be a fabricated 0",
+		bareDecl: true,
+	},
 }
 
 // linknamePushSources is the reverse index of the FORWARDED entries of linknamePushTargets: the set
