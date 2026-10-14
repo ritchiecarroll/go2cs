@@ -9,7 +9,7 @@ by. For where it falls short, see [Limitations](Limitations.md).
   returns become tuples and embedded structs become promoted fields. Numeric literals keep Go's
   formatting, and `-comments` carries the Go comments across. The machinery behind Go's semantics
   stays out of the converted files, in a runtime library and compile-time source generators.
-- **Whole modules, not only files.** `-recurse` converts a module and every third-party package it
+- **Whole modules, not only files.** `-recurse=nuget` converts a module and every third-party package it
   imports, in dependency order, and writes a C# project and solution for each, ready to build
   ([Converting a real-world Go module](ConvertingAModule.md)).
 - **Nothing to stage.** With `-recurse=nuget` the standard library, the runtime and the source

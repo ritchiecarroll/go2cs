@@ -59,8 +59,10 @@ so you can read the exact C# that runs — and re-run the validation yourself. Y
 
 Run it from the root of your clone. The first argument is the package's Go source, and the second is
 the package's home in the converted tree; the converter locates the runtime and the package's
-standard-library dependencies from there, so no other flags or environment setup are needed. The first
-run builds the converted runtime and its dependencies, so it allows ten minutes.
+standard-library dependencies from there, so no other flags or environment setup are needed. The ten
+minutes are the deadline for running the tests and comparing them with `go test`; building the test host
+has its own, longer allowance, because the first build compiles the converted runtime and the package's
+standard-library dependencies.
 
 PowerShell, on Windows:
 

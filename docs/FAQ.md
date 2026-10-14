@@ -108,7 +108,7 @@ Yes. `go2cs -recurse=nuget` converts a module and every third-party package it i
 order, and writes a solution that restores and builds
 ([Converting a real-world Go module](ConvertingAModule.md)). Not every module converts cleanly yet. A
 dependency that uses assembly or `unsafe` shortcuts may need its pure-Go build tag, and real code still
-turns up converter bugs. When one dependency blocks you, `-recurse=module` converts your own packages
+turns up converter bugs. When one dependency blocks you, `-recurse=module,nuget` converts your own packages
 first. [Third-party modules: where they trip today](Limitations.md#third-party-modules-where-they-trip-today)
 is the honest list, and [Validated Modules](ValidatedModules.md) names the modules that pass their own
 tests.

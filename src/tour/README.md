@@ -36,7 +36,7 @@ The interface is deliberately parallel:
 ## Requirements
 
 - Go, at the release `src/go2cs/go.mod` names
-- .NET SDK 10.0 or later
+- The .NET 10 SDK, the one the repository's `global.json` pins
 - A local clone of this `go2cs` repository
 - Network access on the first start to install the official offline Tour and restore the go2cs NuGet
   packages, and when an exercise first imports a Go module that is not already in the local module cache

@@ -122,19 +122,17 @@ one wins when two disagree, is in [`Glossary.md`](Glossary.md#document-types).
 ## Go releases
 
 **In short.** The converted standard library is on Go 1.24.13, a release Go no longer patches, so it
-lacks the security fixes Go has issued since. Three planned moves bring it to a supported Go release
-and keep it there; the first starts when the project owner closes the Go 1.24 line.
+lacks the security fixes Go has issued since. Two planned moves bring it to a supported Go release and
+keep it there: Go 1.26, straight from 1.24, and then Go 1.27. 1.24.13.7 is the last 1.24 release.
 
 Go 1.24 left upstream support in February 2026, and the 1.25 series left it in August 2026, so
-packages built from either carry none of the Go security fixes issued since. The next three hops
-return the corpus to a supported Go release and keep it there. The Go 1.24 line is not closed: at
-least one more Go 1.24 package release is expected first, and the Go 1.25 hop starts when the project
-owner decides that line is done, in November 2026 at the earliest:
+packages built from either carry none of the Go security fixes issued since. The Go 1.24 line is
+closed: 1.24.13.7 is its last release. The next hop goes straight to Go 1.26, with no Go 1.25 release,
+and the hop after it brings Go 1.27:
 
 | Hop | When | What it involves |
 |:--|:--|:--|
-| **Go 1.25** (1.25.14, the final 1.25 patch) | After the last Go 1.24 package release; no earlier than November 2026 | No language changes. The cost is behavioral (Go 1.25's nil-check fix, updated `unicode` tables, the `AllocsPerRun` change), plus Go's testing-API additions in the converted test host and `testing/synctest` joining the corpus; then every package is re-validated. |
-| **Go 1.26** (the current 1.26.x patch) | After the Go 1.25 hop, as a separate hop | Language additions: `new(expr)` and self-referential generic constraints. |
+| **Go 1.26** (1.26.9), straight from 1.24.13 | After 1.24.13.7, the last 1.24 release | One hop across two Go releases. Go 1.25's changes are behavioral (its nil-check fix, updated `unicode` tables, the `AllocsPerRun` change) plus testing-API additions in the converted test host; Go 1.26 adds `new(expr)` and self-referential generic constraints. Every failure is first attributed to the release that caused it, by converting at 1.25.14 as well, without publishing it. Then every package is re-validated at 1.26. |
 | **Go 1.27** | Q1 2027, by about February | Generic methods, which need a conversion design first. The 1.26 series leaves support when Go 1.28 ships, around February 2027, so the corpus reaches 1.27 before then. |
 
 How often later hops run is decided ahead of the Go 1.27 hop.
@@ -153,7 +151,7 @@ following `latest`, so a machine whose default SDK moves to a newer .NET does no
 converted code under a newer C#. The converter also escapes Go identifiers that newer C# gives new
 meaning, such as `closed`, `union` and `safe` when they name a type.
 
-**A .NET 11 measurement stage follows the Go 1.25 hop**, once .NET 11 has shipped (November 2026), and
+**A .NET 11 measurement stage follows the Go 1.26 hop**, once .NET 11 has shipped (November 2026), and
 never overlaps a Go hop. It compares JIT and allocation behavior on .NET 11 over identical code, and
 reviews the deployment shape, including the full-trim publish floor, which depends on the runtime
 library's trim safety ([Native AOT and trimming](#native-aot-and-trimming);
@@ -192,8 +190,12 @@ library and the source generators:
   trim warnings are more than halved. A Native AOT publish runs on `linux-x64`, `win-x64` and `osx-x64`,
   which the check that gates each release measures with the default trim. A fully trimmed build
   (`TrimMode` set to `full`) runs for the first time, measured on `win-x64` on one development machine.
-- **In progress.** Making `reflect` work under Native AOT without generating code at run time, which
-  is what most of the remaining warnings are about.
+- **Shipped in 1.24.13.6.** `reflect` works under Native AOT without generating code at run time: the
+  source generators write the operations it needs at build time.
+- **Shipped in 1.24.13.7.** Under a fully trimmed publish, `fmt` finds a value's own `String` and `Error`
+  methods again, and reflection reaches a struct's fields through a pointer. Both cost size, and a
+  Native AOT publish now takes longer: the `osx-x64` publish no longer fits the hosted runner the release
+  check uses, so 1.24.13.7 was measured on `linux-x64` and `win-x64` only.
 - **Later stages** cover method sets and stack frames.
 
 **The cost today is real.** With the default trim, Native AOT compiles every `go.*` assembly a program
@@ -385,7 +387,7 @@ The published [performance comparison](Performance.md) measures converted C# aga
 and under Native AOT. The follow-ups run off the critical path:
 
 - **A re-baseline at the last Go 1.24 package release**, which is also the before
-  picture for the Go 1.25 hop and the .NET 11 measurement stage. It brings the TLS-handshake
+  picture for the Go 1.26 hop and the .NET 11 measurement stage. It brings the TLS-handshake
   benchmark, already in the suite, into the published table, and profiles the crypto paths behind the
   handshake gap; TLS throughput is also what retires the
   `crypto/tls` [host-limit entry](#declared-host-limits-and-their-retirement-path).
@@ -464,9 +466,8 @@ something else finishing first.
 | When | Planned |
 |:--|:--|
 | Now | macOS validation of the standard library, package by package. The trimming work for Native AOT. Further converted modules as NuGet packages. |
-| Next | At least one more Go 1.24 package release, carrying that work. The performance re-baseline at the last one. |
-| When the project owner closes the Go 1.24 line, no earlier than November 2026 | The Go 1.25 hop. |
-| After the Go 1.25 hop | The .NET 11 measurement stage (.NET 11 ships in November 2026). The Go 1.26 hop, as a separate hop. `timefmt-go` and `gojq`, as their prerequisites land. The generic-methods design for Go 1.27. The decision on how often later hops run. |
+| Next | The Go 1.26 hop, straight from 1.24.13.7, the last 1.24 release. The performance re-baseline at 1.24.13.7. |
+| After the Go 1.26 hop | The .NET 11 measurement stage (.NET 11 ships in November 2026). `timefmt-go` and `gojq`, as their prerequisites land. The generic-methods design for Go 1.27. The decision on how often later hops run. |
 | Q1 2027 | Go 1.27 hop, by about February. The cgo bridge's first phases (C library only; Linux, then Windows, then macOS). The Phase 4D design kickoff. The allocation work's design kickoff. |
 | Unscheduled | The Phase 5 stubs that no exported call reaches, each closed when a real use needs it. Interface-conversion performance work. The remaining stack-string increments. Open converter items. |
 
