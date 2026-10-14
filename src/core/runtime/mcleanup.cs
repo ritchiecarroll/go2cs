@@ -211,6 +211,18 @@ public static void Stop(this Cleanup c) {
     GoCleanupSentinel.Cancel(c.id);
 }
 
+// unique_runtime_blockUntilEmptyCleanupQueue blocks until the cleanup queue is empty or the
+// timeout is reached, and reports whether it emptied. Go 1.26 pushes it into unique's in-package
+// tests (`//go:linkname unique_runtime_blockUntilEmptyCleanupQueue unique.runtime_blockUntilEmptyCleanupQueue`),
+// whose drainCleanupQueue calls it after runtime.GC(). Go's body waits on gcCleanups, the queue
+// its cleanup goroutines read, which does not exist here: a cleanup body runs on GoFinalizerQueue
+// (see the header), so this is blockUntilEmptyFinalizerQueue's wait. PUBLIC for the forwarder the
+// converter emits in the consumer's assembly (linknamePushTargets in go2cs/linknameOperations.go).
+// Added at the Go 1.26 hop, ahead of this file's H6 rewrite. Go's timeout is nanoseconds.
+public static bool unique_runtime_blockUntilEmptyCleanupQueue(int64 timeout) {
+    return blockUntilEmptyFinalizerQueue(timeout);
+}
+
 // Every cleanup registered against one object. ConditionalWeakTable holds ONE value per key, and a
 // cleanup is explicitly many-per-object ("multiple cleanups may be attached to the same pointer"),
 // so the value is the set rather than the sentinel. The set strong-references its sentinels and the

@@ -375,14 +375,18 @@ type linknamePush struct {
 // hand-written companion that a converter-emitted body would collide with. Linking them wholesale
 // would be a regression dressed as a feature, so each entry is a judgment recorded here.
 var linknamePushTargets = map[string]linknamePush{
-	// unique's cleanup registration, pushed by runtime/mgc.go. The pushed body is ORDINARY converted
-	// Go — it makes a `chan struct{}` and starts a goroutine that drains it and calls the callback —
-	// so the managed model runs the real thing: the registration succeeds and the cleanup goroutine
-	// parks on the channel. Nothing signals it, because the converted runtime's clearpools() is
-	// driven by Go's own GC, which does not run; that is Go's OWN behavior for a program whose GC
-	// never fires (unique's map simply keeps its entries), not a fabricated answer. Before this the
-	// stub threw out of `unique.Make`'s setupMake.Do, taking net/netip and gob's TestNetIP with it.
-	"unique.runtime_registerUniqueMapCleanup": {source: "runtime.unique_runtime_registerUniqueMapCleanup"},
+	// unique's cleanup-queue drain, pushed by runtime/mcleanup.go
+	// (`//go:linkname unique_runtime_blockUntilEmptyCleanupQueue unique.runtime_blockUntilEmptyCleanupQueue`).
+	// HANDLE consumer shape, in an IN-PACKAGE test file: handle_test.go's drainCleanupQueue calls it
+	// after runtime.GC() so the canonical map's cleanups have run before checkMapsFor looks. The pushed
+	// body lives in mcleanup.go, which the corpus hand-owns (runtime/mcleanup.cs), so the body is the
+	// hand-own's: cleanups run on the same managed queue as finalizers, and it waits on that queue the
+	// way blockUntilEmptyFinalizerQueue does.
+	//
+	// Until Go 1.26 this row was unique.runtime_registerUniqueMapCleanup, pushed by runtime/mgc.go and
+	// called from unique.Make's setupMake.Do. Go 1.26 rebuilt unique's map on weak pointers and
+	// runtime.AddCleanup, and the registration and its consumer are gone.
+	"unique.runtime_blockUntilEmptyCleanupQueue": {source: "runtime.unique_runtime_blockUntilEmptyCleanupQueue"},
 	// runtime/pprof's cycles-per-second -- the ONE member of the self-symbol shape (see selfSymbolPull).
 	// runtime/cpuprof.go carries the body (`return ticksPerSecond()`) under the two-arg directive
 	// `//go:linkname pprof_cyclesPerSecond runtime/pprof.runtime_cyclesPerSecond`, and
