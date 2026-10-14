@@ -1,8 +1,9 @@
 # PLAN — the Go 1.26 hop (hop C′): go1.24.13 → go1.26.9, one fold, with an attribution checkpoint at 1.25.14
 
-> **STATUS: PROPOSED (the i9, the hop's lead, 2026-10-11); O1 and O2 RULED (owner, 2026-10-12).** The
-> rest awaits COORD's acceptance and the remaining owner hands in §2. **H0's trigger: the 1.24.13.7 release
-> record lands** (§1). It is a campaign plan, so it supplies *this* hop's target, sequencing, census, lane
+> **STATUS: RULED GO (COORD, 2026-10-14), H0 OPEN at master `b594cd90af`.** Proposed by the i9, the hop's
+> lead, 2026-10-11; O1 and O2 ruled by the owner 2026-10-12; the stage order and lanes ruled 2026-10-14
+> (Amendments). The remaining owner hands are in §2. **H0's trigger, the 1.24.13.7 release record, landed
+> 2026-10-14** (`b0ef977fda`, index row `64ffbdac2a`). It is a campaign plan, so it supplies *this* hop's target, sequencing, census, lane
 > proposal and estimates. It supplies **no procedure**. The procedure is
 > [`GoCorpusMigration.md`](GoCorpusMigration.md) (the runbook), referenced by stage and never restated.
 > Where this plan and the runbook disagree, the runbook wins, and the disagreement becomes an in-stage
@@ -74,16 +75,16 @@ re-baseline.
 **Instruments**, Readiness "Instruments". Each lands on master and is red-proved before the stage that
 needs it (lessons 2, 43):
 
-| # | Instrument | State at master `20279db5f6` (re-read at `7092f7126e` on 2026-10-12: unchanged) | Needed by |
+| # | Instrument | State at master `b594cd90af` (re-read 2026-10-14; was `20279db5f6` / `7092f7126e`) | Needed by |
 |:--|:--|:--|:--|
-| A3 | `-Hop` applies roster execution pins | **OPEN**: `src/_roster.ps1:475` and `:587` still set `Execution = $null` | H10 |
-| A7 | `src/run-h10-recon.ps1` reads the pin from `version.props` | **OPEN**: `:841–843` deny anything but `go1\.24\.13` | H10 recon leg |
-| A8 | `src/check-h6-completeness.ps1` derives the audit file from the release | **OPEN**: `:76` defaults to `AUDIT-h6-handown-go124.md`; the naming convention is NOTES Q14 | H6 |
-| A9 | `docs/phase4/hopA-inputs/shardmap.py` takes the population by release | **OPEN**: `:94` names `population-go1.24.13.txt` | H10 |
+| A3 | `-Hop` applies roster execution pins | **LANDED** in TRAIN T4 (P2, `8637b815ee`) | H10 |
+| A7 | `src/run-h10-recon.ps1` reads the pin from `version.props` | **LANDED** in TRAIN T4 (P2, `db025b1f8b`; a release matches only whole) | H10 recon leg |
+| A8 | `src/check-h6-completeness.ps1` derives the audit file from the release | **LANDED** in TRAIN T4 (P2, `1666c83e9d`; default `AUDIT-h6-handown-go<GoStdLibVersion>.md`) | H6 |
+| A9 | `docs/phase4/hopA-inputs/shardmap.py` takes the population by release | **LANDED** in TRAIN T4 (P2, `841fc39322`) | H10 |
 | A12 | x/tools and x/mod at H1 step 3 | the converter pins x/tools v0.42.0 and x/mod v0.33.0 (both `go 1.24.0`); the newest cached here are v0.48.0 and v0.38.0, both `go 1.25.0`. **Choosing a 1.26-era version needs a module fetch (§2 O6)** | H1 |
 | A13 | `src/check-roster-format.ps1` derives the population path | **DONE** (`:906`) | — |
-| A14 | the allocation-unit extractor (lesson 31's reading run) | **BUILT** (P2, `claude/p2-hop-a14-alloc-unit` `0af043ecac`, tooling only, footprint 0; runbook H10 step 3(a) names it). Lands with a train | H10 |
-| — | the repoguard retired-marker guard, "owed before the next hop's H6" (runbook H6) | OPEN | H6 |
+| A14 | the allocation-unit extractor (lesson 31's reading run) | **LANDED** in TRAIN T4 (P2, `0af043ecac`, tooling only, footprint 0; runbook H10 step 3(a) names it) | H10 |
+| — | the repoguard retired-marker guard, "owed before the next hop's H6" (runbook H6) | **LANDED** in TRAIN T4 (P2, `11579e35ea`) | H6 |
 
 **Hosts**, Readiness "Host":
 - each lane's box record: DNS, WSL `::1`, symlinks, `LongPathsEnabled`, pwsh 7, and the pinned .NET SDK;
@@ -233,27 +234,34 @@ go1.26.9 into scratch root **S26**.
 1. **Build the converter once, after H4 closes.** It already carries the 1.26 features, which are inert
    at 1.25. Record its sha256. Both roots use that same binary (runbook H5's seeded-root amendment).
 2. **H5 seeded three-target reconvert into S25** with a **scratch-only** 1.25.14 pin. The repo's
-   `version.props` is never touched; the seed carries the pin. Run H5c dry, and capture its class
-   counts.
-3. **H7's compile ladder on S25, per flavour, serially,** until zero unique sites or a stated stop. Each
-   rung's red set is **RED25**.
+   `version.props` is never touched; the seed carries the pin. Run H5c dry and capture its class
+   counts, then **apply H5c in S25 only, never in the repository**. The RECON measured that without it
+   the ladder stops at rung 1.
+3. **H7's compile ladder on S25, per flavour, serially.** It **stops early, and the record states where**:
+   no H6 work is done at 1.25.14, so the ladder stops at the rung where the hand-owned files, still
+   written for 1.24.13, block the build. That stop is not a red to triage. Each rung's red set up to the
+   stop is **RED25**: attribution evidence up to the stop and no further.
 4. **The same at go1.26.9 into S26.** This is H5 proper, with its own gate. It gives **RED26**.
 5. **Attribute the reds:**
    - each RED26 site that is also in RED25 is **1.25-born**;
    - each RED26 site that is not is **1.26-born**;
    - each RED25 site absent from RED26 was **closed by 1.26 upstream**. That is R11's other direction,
-     classified with evidence.
+     classified with evidence;
+   - a RED26 site on a rung beyond the S25 stop has no 1.25.14 reading to compare with. It is read
+     against **both** releases' source, by name.
 6. **Attribute the H6 deltas the same way.** Run `handown-census.ps1` twice, 1.24.13 → 1.25.14 and
    1.25.14 → 1.26.9. Each of the 79 substantive files then carries the release or releases that moved
    it. The H6 audit records that column.
 7. **The record:** `docs/phase4/CHECKPOINT-go125-attribution.md`. It lists the per-class counts at both
-   pins (lesson 57), every red by site with its attribution, and the binary hash.
+   pins (lesson 57), the rung where the S25 ladder stopped, every red by site with its attribution,
+   and the binary hash.
    **A red is never triaged without its attribution.**
 
 **Cost:** 4–7 lane-days, the i9 serial, plus disk at the H5 floor for two roots.
 
-**Gate:** "every RED26 site and every H6 substantive file carries an attribution". It feeds H6 and H7.
-It is not a parity gate.
+**Gate:** "every RED26 site and every H6 substantive file carries an attribution, and the record states
+the S25 stop". It blocks H6 and H7, not H5. It is not a parity gate. *(Wording aligned 2026-10-14 with
+the runbook's release-fold text, §2 AMENDED 2026-10-13, edits E1 and E2.)*
 
 **What it does not do.** It does not run behavioral goldens or roster rows at 1.25. Those would be a
 second hop's cost. Attribution at H9 and H10 rests on the compile- and H6-level attribution, plus the
@@ -266,7 +274,7 @@ GOROOTs' source by name.
 
 | Stage | What this hop does beyond the runbook text | Lanes (proposal, §7) | Lane-days (ESTIMATE) |
 |:--|:--|:--|:--|
-| **Readiness** | A3, A7, A8, A9 and A14 landed and red-proved; the retired-marker guard; host records; O2–O4 asked now | **P2 (A3, A7, A8, A9: dispatched 2026-10-12, `claude/p2-hop-readiness-a3-a9`; A14: BUILT, `0af043ecac`)**, i9 (guard); each lane its host | 8–14 |
+| **Readiness** | A3, A7, A8, A9, A14 and the retired-marker guard **LANDED in TRAIN T4** (§1). Still open at H0: P2's §9 derivation notes; A12/O6 (the module fetch, an owner ask); each lane's host record, posted at its first leg; the BoGo host, qualified by measurement at H10 | P2 (instruments, §9 notes); each lane its host | 8–14 (mostly spent) |
 | **H0** ⟲ | Seeded old-release `.cs.auto` baseline; package census; roster snapshot; the outgoing three-target manifest; the behavioral failing set by name; each box's bare `go version`. Commit every unbanked reading (lesson 48) | COORD/i7 (behavioral, manifests), i9 (census, `.auto`) | 3–5 |
 | **H1 + H2** (one pair) | go1.26.9 installed (O2); the `go` directive; x/tools and x/mod in their own commit (O6, A12), **gated by CNR byte-identical after the bump**, a full seeded corpus reconvert with hours of wall; the converter `go test` suite (about 40 min a run on G-LAPTOP); `go vet` under the new directive (clean today at 1.26.9, RECON X.7); GODEBUG defaults read against the test host (1.26 adds the heap-randomization, Green Tea and crypto-randomness classes; 1.25's `containermaxprocs`, `updatemaxprocs`, `decoratemappings`, `tlssha1` and `x509sha256skid`) | G (the converter half, 1.5–3), COORD (the pin pair) | 3–5 |
 | **H3** ⟲ | `population-go1.26.9.txt` by two routes; relocations by body; new IDs → O5; `//go:embed`, linker-synthesized linknames and new syntax, each with a probe (lesson 54) | C2 (genpopulation), i9 (independent route) | 2–3 |
@@ -277,9 +285,9 @@ GOROOTs' source by name.
 | **H6** ⟲ | **79 files, attributed (§4 step 6).** Every one gets a classified delta record. The completeness gate runs at H6 AND before the release. Split, exhaustive at the 1.26.4 census: **C1 + G, 32:** `runtime` 27, `runtime/pprof`, `internal/runtime/{syscall,maps}`, `internal/abi`, `internal/cpu`. **P2, 24:** `syscall` 9, `internal/syscall/windows` 3 + `registry` 2, `internal/poll` 2, `os` 3, `net` 3, darwin `vendor/…/route` 2. **R, 13:** `sync` 5, `internal/sync`, `unique`, `time`, `iter`, `internal/synctest`, `testing`, `internal/testenv`, `internal/godebug`. **G, 10:** `reflect` 2, `math/bits`, `hash/crc32`, `crypto/rand`, four `crypto/internal/fips140/*`, `internal/chacha8rand`. Re-split at the go1.26.9 census. **Sizing (amended 2026-10-12, measured at go1.26.9):** the 79 hand-owns map to 76 upstream files with 9,600 changed lines. **20 files are large** (≥150 changed lines; 10 of them `runtime`): `internal/poll/fd_windows.go` +658/−438, `runtime/malloc.go` +654/−244, `runtime/mcleanup.go` +660/−15, `testing/testing.go` +483/−165, `runtime/mgc.go` +464/−116, `runtime/runtime2.go` +336/−128, and so on. 56 are small. At G's rates (about 1–1.5 lane-days per large file, 0.3 per small one), H6 is **30–45**; `runtime` (25 files, 5,060 lines) is 14–20 of that | C1, G, R, P2 | **30–45** |
 | **H7** | 100% compile on the windows, linux and darwin flavours, serially per flavour; RED26 drives it | i9 (windows), G (linux), COORD or C1 (darwin) | 8–14 |
 | **H7a** | One master fold, never a rebase, after the last compile-side seat; plan the second fold at the campaign tip (lesson 25) | COORD | 1–2 |
-| **H8** ⟲ | Platform manifest; marker gate zero per target; the default-flavour build reproduces the single-target build | P2 | 2–4 |
+| **H8** ⟲ | Platform manifest; marker gate zero per target; the default-flavour build reproduces the single-target build | P2 if its legs fit a cloud session's 30 GB; else R or G. **Disk need: measured at H0's first step** (the seeded three-target root plus one flavour's build, read from the volume's free-space delta) and named in the H0 reading | 2–4 |
 | **H9** | Golden rebank on **windows** (the banking platform); predict first; Output's failing set equal by name to H0's, with APPEARED empty | COORD/i7 | 3–5 |
-| **H10** ⟲ | Census and pre-stage (the reserved pool first), then the recon leg in a throwaway worktree, then seat, plan and driver. The linux READING runs alongside; the linux BANK is its own leg. Alloc relabel (lesson 31). Every relocated row's `Receives` provenance. Address-shaped output under heap randomization is read through `addressPairs` | i9 and G (windows shards, i9 non-TLS only), C1 and P1 (linux reading and bank), COORD (dispatch and the `crypto/tls` host), P1 (disclosure re-signs) | 18–30 |
+| **H10** ⟲ | Census and pre-stage (the reserved pool first), then the recon leg in a throwaway worktree, then seat, plan and driver. The linux READING runs alongside; the linux BANK is its own leg. Alloc relabel (lesson 31). Every relocated row's `Receives` provenance. Address-shaped output under heap randomization is read through `addressPairs` | i9 and G (windows shards, i9 non-TLS only), **R on R-LAPTOP's WSL (linux reading and bank; G the second linux host)**, COORD (dispatch and the `crypto/tls` host), P1 (disclosure re-signs) | 18–30 |
 | **H11 + H12 + release** | Existence-plus-monotonicity before the first publish; badges and docs (R); the ritual rehearsed; release-smoke on four RIDs; the PIN (O10); deprecations after the publish (O9) | COORD, R, the owner | 3–5 |
 | **Total** | | | **100–165** |
 
@@ -325,12 +333,12 @@ COORD's to rule.
 | Lane | Box | Proposed hop role | Constraints |
 |:--|:--|:--|:--|
 | **i9** (lead) | windows | This plan; H0 census and `.auto`; H3's second route; H4a; **the §4 checkpoint**; H5 emission; the H7 windows flavour; H10 windows shards (non-TLS) | Owner hardware order: one heavy task at a time, `-m:4` / `-p 4`, WHEA counted; **no `crypto/tls` or TLS-using net rows** |
-| **G** | windows + linux arm | H1 converter; H4 language and front end; the H6 runtime share; the H7 linux flavour; H10 windows shards | — |
-| **R** | windows + WSL | Readiness instruments A3, A7, A9; **the H4 testing host**; the H6 sync and synctest share; H12 docs and badges | Also writes the launch plan |
-| **C1** | cloud linux | The H6 runtime share (its runtime hand-own history); the H10 linux reading and bank | No pwsh; CNR and the roster guard are COORD's |
-| **C2** | cloud linux | H3 genpopulation and relocations | Disk-limited; **also carries the owner's nugetgo modules (priority 1)**, so its hop load is kept small |
+| **G** | windows + linux arm | H1 converter; H4 language and front end; the H6 runtime share; the H7 linux flavour; H10 windows shards; the second linux host | The ILC generic-cycle root cause runs alongside, at lower priority |
+| **R** | windows + WSL | **The H4 testing host**; the H6 sync and synctest share; **the H10 linux reading and bank on R-LAPTOP's WSL**; H12 docs and badges; the overflow battery host | Also writes the launch plan |
+| **C1** | cloud linux | The H6 runtime share (its runtime hand-own history); darwin | Cloud ceiling (about 4 vCPU, 16 GB RAM, 30 GB disk, fixed): code, docs, sizing and CI dispatch only |
+| **C2** | cloud linux | H3 genpopulation and relocations | Cloud ceiling as C1; **also carries the owner's nugetgo modules (priority 1)**, so its hop load is kept small |
 | **P1** | cloud linux (Sonnet, pilot) | H10 disclosure re-signs and alloc relabels: bounded and mechanically checked | — |
-| **P2** | cloud linux | H4 linkname bodies; the H6 syscall, poll, os, net and reflect share; H8 comparands | — |
+| **P2** | cloud linux | H4 linkname bodies; the H6 syscall, poll, os, net and reflect share; H8 if its legs fit 30 GB | Cloud ceiling as C1: package builds only, purged between packages |
 | **COORD** | the i7 | Rulings; the H1/H2 pin pair; H5c review; H7a folds; H9 goldens; H10 dispatch and the `crypto/tls` host liaison; H11/H12 with the owner | — |
 
 ---
@@ -414,3 +422,35 @@ measurements; RECON X.7 on `claude/i9-go125-recon` `dc0e159ccf`):
 - **go1.25.14 for the §4 checkpoint** is installed side by side on the i9 with the user's OK in chat,
   SHA-256-matched against go.dev, so the checkpoint box's half of O2 is closed. go1.26.9 is installed
   there too.
+
+**2026-10-14 — the plan RULED GO; H0 open** (COORD, after 1.24.13.7 published from master `57ca7c1616`;
+record `b0ef977fda`, index row `64ffbdac2a`):
+- **Ruled:** the stage order exactly as written, with the runbook's release-fold text (§2, AMENDED
+  2026-10-13, landed at `10cdccc564`). The checkpoint's gate blocks H6 and H7, not H5. **§4 now uses
+  that text's wording:** H5c is applied in S25 only; the S25 ladder's stop is stated, and a RED26 site
+  beyond it is read against both releases' source.
+- **H0 base:** master `b594cd90af` (the record plus TRAIN T5, C1's AOT bound, the fold text and docs
+  fixes); version.props `1.24.13` / build `7`.
+- **Readiness re-read at the base:** A3, A7, A8, A9, A14 and the retired-marker guard are LANDED (TRAIN
+  T4, P2's seats; §1 table). Open: P2's §9 notes; A12/O6, asked of the owner; host records at each lane's
+  first leg; the BoGo host at H10. The post-hop seats (G runtime-settings, C1 cgi-symlink, the golib
+  select-fairness fix) stay held and land as the first train after the hop's record, rebased onto the
+  1.26 base.
+- **Lanes, for a new constraint:** Anthropic cloud sessions (C1, C2, P2) have a fixed ceiling of about
+  4 vCPU, 16 GB RAM and 30 GB disk. Heavy legs go to the Remote Control boxes, and the cloud lanes take
+  code, docs, sizing and CI dispatch:
+  - **H10 linux moves from C1 to R** on R-LAPTOP's WSL, with G as the second linux host. C1 keeps the
+    H6 runtime history and darwin.
+  - P2 keeps H4 linkname bodies and its H6 share, building package by package and purging between them.
+    It keeps H8 only if H8's legs fit 30 GB; that disk need is measured at H0's first step.
+  - R is the overflow battery host.
+  - G runs the ILC generic-cycle root cause alongside, at lower priority.
+- **The RECON roots are rebuilt, not reused.** They were seeded at `226afb810a`, before comment parity
+  moved emission, so their counts (RECON-go1.26 §4-§6) are predictions only.
+- **H0's first step and its predictions** (stamped by COORD):
+  - Build the converter at the base and record its sha256, then run bare `go version`.
+  - Run ONE seeded three-target go1.24.13 regen into a fresh H0 root.
+  - (a) It equals the committed production corpus on all three targets (union-attributable 0).
+  - (b) The fresh `.cs.auto` differs from the committed siblings on at least 24 of 32. Those 24 still
+    carry the receiver and plain type attribute lines that face lifts A and B removed; they were last
+    written 2026-09-13.
