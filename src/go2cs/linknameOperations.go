@@ -905,7 +905,14 @@ func typeIsPubliclyAccessible(t types.Type) bool {
 // Go 1.23 requires the remote's package to authorize the pull with a matching one-arg handle, which
 // the converter honors by emitting that remote public (see packageVarAccess) — so the forwarding
 // property compiles across the assembly boundary. The comment may sit on the GenDecl or the spec.
-func varLinknamePull(name string, options Options, docs ...*ast.CommentGroup) (ref string, pkgPath string, ok bool) {
+//
+// lateBound reports a pull whose direct reference would close a project cycle (linknamePullWouldCycle):
+// the caller then reaches the remote BY NAME through golib's LinknameVar instead of by a compiled
+// reference, so no ProjectReference is queued and the var still aliases the remote's storage. Before,
+// such a pull kept a plain field of its own, which is never Go's value: at go1.26.9 runtime imports
+// math/bits, so math/bits's pulls of runtime.overflowError / runtime.divideError became null fields and
+// bits.Div64 panicked with nil where Go's own tests assert a runtime.Error.
+func varLinknamePull(name string, options Options, docs ...*ast.CommentGroup) (ref string, pkgPath string, lateBound bool, ok bool) {
 	for _, doc := range docs {
 		if doc == nil {
 			continue
@@ -927,21 +934,25 @@ func varLinknamePull(name string, options Options, docs ...*ast.CommentGroup) (r
 			}
 
 			pkgPath = target[:dot]
-
-			// A pull whose forwarding reference would form a project-ref cycle keeps its plain-field
-			// form (the pre-feature behavior) — runtime pulling internal/syscall/windows.CanUseLongPaths.
-			if linknamePullWouldCycle(pkgPath, options) {
-				return "", "", false
-			}
-
 			remote := getSanitizedIdentifier(target[dot+1:])
 			class := RootNamespace + "." + convertImportPathToNamespace(pkgPath, PackageSuffix)
 
-			return class + "." + remote, pkgPath, true
+			// A pull whose forwarding reference would form a project-ref cycle is reached late-bound
+			// (lateBound above). A pull of the package's OWN symbol is not a cross-assembly pull at all
+			// and keeps its plain field, as before.
+			if linknamePullWouldCycle(pkgPath, options) {
+				if pkgPath == currentPackagePath {
+					return "", "", false, false
+				}
+
+				return class + "." + remote, pkgPath, true, true
+			}
+
+			return class + "." + remote, pkgPath, false, true
 		}
 	}
 
-	return "", "", false
+	return "", "", false, false
 }
 
 // varLinknameAliasForward recognizes a package var that is the FORWARDING side of an inverted

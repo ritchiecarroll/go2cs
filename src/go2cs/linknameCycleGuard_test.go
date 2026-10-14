@@ -9,8 +9,11 @@
 package main
 
 import (
+	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 
 	"golang.org/x/tools/go/packages"
@@ -97,28 +100,65 @@ func TestLinknamePullCycleGuardAnswersWithoutTheConvertSetGraph(t *testing.T) {
 // and the reason M2 (refuse every cross-package pull when there is no graph) was rejected as the
 // PRIMARY answer: it would trade W1's rare wrong answer for a common one.
 //
-// Both live pulls in the corpus point DOWNWARD and must survive: math/bits pulls runtime.overflowError
-// and runtime.divideError (math/bits/bits_errors.cs), and time's sleep_test pulls
-// runtime.haveHighResSleep. Neither target reaches back — `go list -deps runtime` contains neither
-// math/bits nor time — so both keep their forwarding property.
+// The corpus's pulls of runtime: time's sleep_test pulls runtime.haveHighResSleep, and math/bits pulls
+// runtime.overflowError and runtime.divideError (math/bits/bits_errors.go). Whether a pull points
+// downward is a property of the RELEASE, so the expected answer is the toolchain's own: the pull would
+// cycle exactly when `go list -deps runtime` (windows, the platform these guards pin) contains the
+// puller. time is downward on every release. math/bits was downward through go1.24 and is UPWARD at
+// go1.26.9, where runtime/stack.go and internal/strconv import it; that pull is then reached late-bound
+// (varLinknamePull's lateBound), never dropped to a plain field.
 //
 // RED PROOF: make the M2 fallback the primary, i.e. `return true` immediately after the
-// conversionGraph nil check. This test reports the downward pulls suppressed; the corpus loses
-// three forwarding properties and math/bits's error values become null fields again.
+// conversionGraph nil check. The time case then reports its downward pull suppressed, on any release.
 func TestLinknamePullCycleGuardKeepsDownwardPullsWithoutTheGraph(t *testing.T) {
 	goRoot := testGoRoot(t)
 
 	for _, puller := range []string{"math/bits", "time"} {
 		t.Run(puller, func(t *testing.T) {
+			want := toolchainDepsContain(t, goRoot, "runtime", puller)
+
+			if puller == "time" && want {
+				t.Fatalf("`go list -deps runtime` contains time: the fixture's always-downward case is gone, so this test no longer guards a downward pull")
+			}
+
 			linknameCycleTestState(t, nil, puller, filepath.Join(goRoot, "src", filepath.FromSlash(puller)), map[string]*packages.Package{})
 
-			if linknamePullWouldCycle("runtime", linknameCycleTestOptions()) {
-				t.Fatalf("linknamePullWouldCycle(\"runtime\") = true while converting %q with no convert-set graph.\n"+
-					"runtime does not import %s, so this pull points DOWNWARD and is safe; refusing it drops the\n"+
-					"forwarding property and restores the null-field bug the feature exists to prevent.", puller, puller)
+			if got := linknamePullWouldCycle("runtime", linknameCycleTestOptions()); got != want {
+				t.Fatalf("linknamePullWouldCycle(\"runtime\") = %v while converting %q with no convert-set graph, but the\n"+
+					"toolchain's `go list -deps runtime` says runtime reaching %s is %v. A refused downward pull drops a\n"+
+					"forwarding property; an allowed upward one closes a project cycle.", got, puller, puller, want)
 			}
 		})
 	}
+}
+
+// toolchainDepsContain reports whether `go list -deps <target>` (windows, cgo off) names pkg, from the
+// converting GOROOT's go binary: the oracle independent of the converter's own closure walk.
+func toolchainDepsContain(t *testing.T, goRoot string, target string, pkg string) bool {
+	t.Helper()
+
+	goBinary := filepath.Join(goRoot, "bin", "go")
+
+	if runtime.GOOS == "windows" {
+		goBinary += ".exe"
+	}
+
+	cmd := exec.Command(goBinary, "list", "-deps", target)
+	cmd.Dir = t.TempDir()
+	cmd.Env = append(os.Environ(), "GOROOT="+goRoot, "GOTOOLCHAIN=local", "GOOS=windows", "GOARCH="+runtime.GOARCH, "CGO_ENABLED=0", "GOWORK=off", "GOFLAGS=")
+	output, err := cmd.CombinedOutput()
+
+	if err != nil {
+		t.Fatalf("go list -deps %s: %v\n%s", target, err, output)
+	}
+
+	for _, line := range strings.Split(string(output), "\n") {
+		if strings.TrimSpace(line) == pkg {
+			return true
+		}
+	}
+
+	return false
 }
 
 // TestLinknamePullCycleGuardAgreesWithTheConvertSetGraph is the derivation guard: the graph-less

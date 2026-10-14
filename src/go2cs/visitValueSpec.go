@@ -288,13 +288,27 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 					// address, so `&zeroVal[0]` (reflect, pulling runtime.zeroVal) would reference a
 					// nonexistent `ᏑzeroVal` box (CS0103). Such a pull falls through to the addressed-
 					// global emission — the pre-feature behavior, which compiles.
-					if ref, pkgPath, ok := varLinknamePull(goIDName, v.options, declDoc, valueSpec.Doc); ok && !v.inFunction && !v.isAddressedGlobal(ident) {
+					if ref, pkgPath, lateBound, ok := varLinknamePull(goIDName, v.options, declDoc, valueSpec.Doc); ok && !v.inFunction && !v.isAddressedGlobal(ident) {
 						if i > 0 {
 							v.outputBuilder.WriteString(v.newline)
 						}
 
-						v.importQueue.Add(pkgPath)
 						csTypeName := convertToCSTypeName(v.getAliasQualifiedTypeName(def.Type(), false))
+
+						// A pull whose direct reference would close a project cycle (math/bits pulling
+						// runtime.overflowError at go1.26.9, where runtime imports math/bits) reaches the
+						// remote by name instead: the same storage, no ProjectReference. The one
+						// DynamicDependency keeps the remote's field under a trimmed or Native AOT publish.
+						if lateBound {
+							dot := strings.LastIndex(ref, ".")
+							class, remote := ref[:dot], ref[dot+1:]
+							typeName := fmt.Sprintf("%s, %s", class, strings.ReplaceAll(pkgPath, "/", "."))
+							v.writeOutput("%s static %s %s { [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields, \"%s\", \"%s\")] get => global::go.LinknameVar<%s>.Get(\"%s\", \"%s\"); set => global::go.LinknameVar<%s>.Set(\"%s\", \"%s\", value); }",
+								getAccess(goIDName), csTypeName, csIDName, class, strings.ReplaceAll(pkgPath, "/", "."), csTypeName, typeName, remote, csTypeName, typeName, remote)
+							continue
+						}
+
+						v.importQueue.Add(pkgPath)
 						v.writeOutput("%s static %s %s { get => %s; set => %s = value; }", getAccess(goIDName), csTypeName, csIDName, ref, ref)
 						continue
 					}
