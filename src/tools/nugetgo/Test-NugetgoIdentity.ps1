@@ -82,7 +82,7 @@ foreach ($c in $vs) {
 }
 
 Write-Host 'B6 -- the description: the third-party form or the author''s (owner ruling 2026-10-02)'
-$sec = 'Security: that standard library carries no Go security fixes issued after Go 1.24.13; review before any production use.'
+$sec = 'Security: the Go standard library this package is built on includes no Go security fixes released after Go 1.24.13; review before any production use.'
 $third = "unofficial go2cs C# conversion of github.com/acme/widget v1.2.3, built on the Go 1.24.13 standard library; not affiliated with or endorsed by Acme or the Go project. $sec"
 $author = "go2cs C# conversion of github.com/acme/widget v1.2.3, published by its author, built on the Go 1.24.13 standard library; not affiliated with or endorsed by the Go project. $sec"
 $ds = @(
