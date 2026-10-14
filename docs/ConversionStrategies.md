@@ -11907,7 +11907,7 @@ func joinPair(s string, err error) string {
 	return "got:" + s
 }
 ```
-<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:168-176 -->
+<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:177-185 -->
 ```csharp
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string errˢ = "err"u8;
@@ -11995,27 +11995,37 @@ A statement's trailing comment follows the statement's last C# line, after one s
         }
 ```
 
-**Comment conversion is best effort.** Most comments land where Go put them, but not every converted comment reaches its desired output location, and a few are dropped. The code behaves the same either way; only the comments differ.
+**Blank lines follow Go, in every conversion.** Where Go leaves a blank line between two statements of a body, the C# has one; where Go has none, the C# adds none. After the converter's own lines at the top of a function, such as the locals for named results, there is exactly one blank line before the Go body. Without `-comments`, a converted `switch` is still followed by a blank line whether Go has one or not.
 
-The reason is how Go's parser records comments. It attaches a comment only to a declaration, a struct field or a spec (one entry in a `const`, `var`, `type` or `import` group). A comment anywhere else, such as one inside a function body, is attached to nothing. A comment on the same line as the end of a statement is written after that statement. Any other loose comment is held and written at the next point where the converter writes loose comments, usually just before a later statement.
+**With `-comments`, a comment inside a function lands where Go put it.** Go's parser attaches a comment only to a declaration, a struct field or a spec, and never to a statement, so the converter places each of the others itself: after a statement, after the `{` of an `if`, `else` or `for`, on or above a `case` label, above a block's closing `}`, between the elements of a multi-line literal, and between operands where Go breaks the line. Here `d.nd` is the digit count of the number being formatted; the blank line, the comment that opens the group and the one after the `{` are all where Go has them:
 
-A comment after the `{` of an `if` or `for` header moves to its own line, at the top of the block. Here `d.nd` is the digit count of the number being formatted:
-
-<!-- source: Go toolchain src/strconv/ftoa.go:411-413 (Go 1.24.13; the Go source of src/core/strconv/ftoa.cs, which the repository does not hold) -->
+<!-- source: Go toolchain src/strconv/ftoa.go:405-413 (Go 1.24.13; the Go source of src/core/strconv/ftoa.cs, which the repository does not hold) -->
 ```go
+		}
+	}
+
+	// e±
+	dst = append(dst, fmt)
+	exp := d.dp - 1
 	if d.nd == 0 { // special case: 0 has exponent 0
 		exp = 0
 	}
 ```
-<!-- source: src/core/strconv/ftoa.cs:453-456 -->
+
+<!-- source: src/core/strconv/ftoa.cs:456-464 -->
 ```csharp
-    if (d.nd == 0) {
-        // special case: 0 has exponent 0
+        }
+    }
+
+    // e±
+    dst = append(dst, fmt);
+    nint exp = d.dp - 1;
+    if (d.nd == 0) { // special case: 0 has exponent 0
         exp = 0;
     }
 ```
 
-A comment after a `case` label, or after the `{` of a `switch` header, is the clearest miss. It is not written inside the case. It waits for the next point where the converter writes loose comments, and that point can be well after the `switch`. Here the comments `// normal rune` and `// needs surrogate sequence` label two cases in Go. In the C# they land after the enclosing loop has closed, just ahead of the `return`:
+A comment on a `case` line trails the converted case's header, and no blank line follows the switch's `}}` because Go has none there:
 
 <!-- source: Go toolchain src/unicode/utf16/utf16.go:68-95 (Go 1.24.13; the Go source of src/core/unicode/utf16/utf16.cs, which the repository does not hold) -->
 ```go
@@ -12048,7 +12058,8 @@ func Encode(s []rune) []uint16 {
 	return a[:n]
 }
 ```
-<!-- source: src/core/unicode/utf16/utf16.cs:64-98 -->
+
+<!-- source: src/core/unicode/utf16/utf16.cs:67-99 -->
 ```csharp
 // Encode returns the UTF-16 encoding of the Unicode code point sequence s.
 public static slice<uint16> Encode(slice<rune> s) {
@@ -12058,16 +12069,17 @@ public static slice<uint16> Encode(slice<rune> s) {
             n++;
         }
     }
+
     var a = new slice<uint16>(n);
     n = 0;
     foreach (var (_, v) in s) {
         switch (RuneLen(v)) {
-        case 1: {
+        case 1: { // normal rune
             a[n] = (uint16)v;
             n++;
             break;
         }
-        case 2: {
+        case 2: { // needs surrogate sequence
             var (r1, r2) = EncodeRune(v);
             a[n] = (uint16)r1;
             a[n + 1] = (uint16)r2;
@@ -12079,62 +12091,14 @@ public static slice<uint16> Encode(slice<rune> s) {
             n++;
             break;
         }}
-
     }
-    // normal rune
-    // needs surrogate sequence
     return a.slice(0, n);
 }
 ```
 
 `RuneLen`, `EncodeRune`, `surrSelf` and `replacementChar` are functions and constants of the same package. `rune` and `uint16` are aliases for C# `int` and `ushort` ([Integer Types and Arithmetic](#integer-types-and-arithmetic)). `foreach` is Go's `range` loop ([Loops, Range and Labels](#loops-range-and-labels)), and `new slice<uint16>(n)` and `a[..(int)(n)]` are Go's `make` and `a[:n]` ([Slices and Arrays](#slices-and-arrays)). Each case body gets its own braces and a `break`, and the `}}` plus the blank line after it is how the converter lays out every switch ([Expression Switch Statements](#expression-switch-statements)).
 
-A comment on its own line inside a `case` body can even land inside the argument list of a later statement. The code is unchanged, because a `//` comment runs only to the end of its line:
-
-<!-- source: Go toolchain src/unicode/utf16/utf16.go:97-112 (Go 1.24.13; the Go source of src/core/unicode/utf16/utf16.cs, which the repository does not hold) -->
-```go
-// AppendRune appends the UTF-16 encoding of the Unicode code point r
-// to the end of p and returns the extended buffer. If the rune is not
-// a valid Unicode code point, it appends the encoding of U+FFFD.
-func AppendRune(a []uint16, r rune) []uint16 {
-	// This function is inlineable for fast handling of ASCII.
-	switch {
-	case 0 <= r && r < surr1, surr3 <= r && r < surrSelf:
-		// normal rune
-		return append(a, uint16(r))
-	case surrSelf <= r && r <= maxRune:
-		// needs surrogate sequence
-		r1, r2 := EncodeRune(r)
-		return append(a, uint16(r1), uint16(r2))
-	}
-	return append(a, replacementChar)
-}
-```
-<!-- source: src/core/unicode/utf16/utf16.cs:100-117 -->
-```csharp
-// AppendRune appends the UTF-16 encoding of the Unicode code point r
-// to the end of p and returns the extended buffer. If the rune is not
-// a valid Unicode code point, it appends the encoding of U+FFFD.
-public static slice<uint16> AppendRune(slice<uint16> a, rune r) {
-    // This function is inlineable for fast handling of ASCII.
-    switch (ᐧ) {
-    case {} when (0 <= r && r < surr1) || (surr3 <= r && r < surrSelf): {
-        return append(a, // normal rune
- (uint16)r);
-    }
-    case {} when surrSelf <= r && r <= maxRune: {
-        var (r1, r2) = EncodeRune(r);
-        return append(a, // needs surrogate sequence
- (uint16)r1, (uint16)r2);
-    }}
-
-    return append(a, (uint16)(replacementChar));
-}
-```
-
-A Go `switch` with no tag becomes `switch (ᐧ)`, where `ᐧ` is golib's constant `true`, and each case becomes `case {} when <condition>` ([Expression Switch Statements](#expression-switch-statements)). `append` is Go's built-in, provided by golib ([Built-in Functions](#built-in-functions)). `surr1`, `surr3` and `maxRune` are constants of the same package.
-
-A comment written above one constant inside a `const ( … )` group is dropped. A doc comment directly above `const (` is kept, because Go attaches it to the whole group:
+Comments inside a `const ( … )` or `var ( … )` group keep their places too, and so do the blank lines between the group's specs. A doc comment directly above `const (` is written above the first constant:
 
 <!-- source: Go toolchain src/unicode/utf16/utf16.go:17-26 (Go 1.24.13; the Go source of src/core/unicode/utf16/utf16.cs, which the repository does not hold) -->
 ```go
@@ -12149,15 +12113,22 @@ const (
 	surrSelf = 0x10000
 )
 ```
-<!-- source: src/core/unicode/utf16/utf16.cs:16-19 -->
+
+<!-- source: src/core/unicode/utf16/utf16.cs:16-23 -->
 ```csharp
+// 0xd800-0xdc00 encodes the high 10 bits of a pair.
+// 0xdc00-0xe000 encodes the low 10 bits of a pair.
+// the value is those 20 bits plus 0x10000.
 internal static UntypedInt surr1 => 0xd800;
 internal static UntypedInt surr2 => 0xdc00;
 internal static UntypedInt surr3 => 0xe000;
+
 internal static UntypedInt surrSelf => 0x10000;
 ```
 
-**Full detail:** [Reference → Comments](ConversionStrategies-Reference/comments.md#comments) — how attached and free-floating comments are told apart, which statement positions take a trailing comment, multi-line block comments, and the shapes that still land away from where Go put them.
+**At the edges, placement is best effort.** A comment in a shape the converter writes another way, such as a block comment between an `if` condition's last operand and its `{`, is written on its own line nearby; a few are dropped. The code is the same either way. Only the comment moves.
+
+**Full detail:** [Reference → Comments](ConversionStrategies-Reference/comments.md#comments) — every placement rule with its Go and C# side by side, the blank-line rules, where a comment still lands elsewhere, and the tests that guard each.
 
 ---
 
