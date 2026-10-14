@@ -223,6 +223,13 @@ public static bool unique_runtime_blockUntilEmptyCleanupQueue(int64 timeout) {
     return blockUntilEmptyFinalizerQueue(timeout);
 }
 
+// sync_test_runtime_blockUntilEmptyCleanupQueue is the same wait, pushed into sync's EXTERNAL tests
+// (`//go:linkname sync_test_runtime_blockUntilEmptyCleanupQueue sync_test.runtime_blockUntilEmptyCleanupQueue`;
+// the consumer is oncefunc_test.go's one-arg handle). Go gives both pushes the identical body.
+public static bool sync_test_runtime_blockUntilEmptyCleanupQueue(int64 timeout) {
+    return blockUntilEmptyFinalizerQueue(timeout);
+}
+
 // Every cleanup registered against one object. ConditionalWeakTable holds ONE value per key, and a
 // cleanup is explicitly many-per-object ("multiple cleanups may be attached to the same pointer"),
 // so the value is the set rather than the sentinel. The set strong-references its sentinels and the

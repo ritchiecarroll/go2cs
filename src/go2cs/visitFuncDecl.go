@@ -2376,6 +2376,22 @@ var linknameForwardTargets = map[string]bool{
 	"syscall.fstatat":   true,
 	"syscall.ioctlPtr":  true,
 	"syscall.writev":    true,
+	// runtime's per-m ChaCha8 source, pulled by unique/canonmap.go (`//go:linkname runtime_rand
+	// runtime.rand`, Go 1.26) to seed its hash map without importing math/rand/v2, and authorized by the
+	// one-arg handle in rand.go ("Do not change signature: used via linkname from other packages").
+	// ORDINARY CONVERTED Go over getg().m.chacha8, and managed getg gives each goroutine its own m, so
+	// it returns real random bits. unique already references runtime. COMPILE AT H5, when unique's
+	// 1.26 canonmap.go first enters the corpus.
+	//
+	// NOT HERE, both pulled at 1.26 and both kept for H5 bodies rather than rowed:
+	//   - runtime.traceClockNow (runtime/trace/recorder.go): the handle exists, but the target returns
+	//     runtime's unexported traceTime, so widening it public is CS0050 and runtime/trace's uint64
+	//     would not take it (TestLinknameForwardTargetsExposeNoUnexportedTypes refuses the shape).
+	//   - syscall.utimensat (internal/syscall/unix/utimes.go, unix): the one-arg handle is only in
+	//     syscall_darwin.go, but the puller also builds on linux, where no file carries the handle,
+	//     packageFuncAccess leaves utimensat internal, and the forwarder would be CS0122.
+	//     TestLinknameForwardTargetsMatchGoSource ignores build constraints, so it would pass that row.
+	"runtime.rand": true,
 }
 
 // linknameForwardDefinitions names the DEFINITION of a linknameForwardTargets row whose symbol is not
