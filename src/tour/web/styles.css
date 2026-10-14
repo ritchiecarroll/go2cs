@@ -150,6 +150,16 @@ button {
   background: var(--red);
 }
 
+.warmup-status {
+  padding-left: 8px;
+  border-left: 1px solid #28414d;
+  white-space: nowrap;
+}
+
+.warmup-status[hidden] {
+  display: none;
+}
+
 .header-link {
   padding-left: 8px;
   border-left: 1px solid #28414d;

@@ -26,8 +26,8 @@ The interface is deliberately parallel:
   removes it.
 - Navigating to a Tour page converts it automatically.
 - Editing Go marks the C# stale until **Convert** is selected.
-- **Run with Go** optionally converts, builds, and runs .NET whenever the Go
-  program runs.
+- **Run with Go** converts, builds, and runs .NET whenever the Go program runs.
+  It is on by default; turning it off is remembered by the browser.
 - **Run** builds and executes the current conversion; it becomes **Kill** while
   the process is active.
 
@@ -98,6 +98,8 @@ Useful options:
   a duration (`15m`) or a whole number of seconds (`900`)
 - `-no-tour`: do not launch the upstream Tour process
 - `-no-open`: do not open a browser
+- `-no-warmup`: skip the .NET warmup described below, so the first lesson pays
+  the cold start itself
 
 `start.ps1` and `start.sh` pass any option they do not recognize straight
 through, so `.\src\tour\scripts\start.ps1 -Runtime nuget -solutions-url=` starts
@@ -106,11 +108,29 @@ the app with the header link removed.
 `GO_TOUR_BIN` can point to the upstream `tour` executable. `GO2CS_BIN` can point
 to an explicitly managed prebuilt go2cs executable, which skips the build entirely.
 
-## The first conversion builds go2cs
+## Startup warms up .NET
 
-Otherwise the converter is built into `src/tour/.cache` from the current
-checkout, as part of the first conversion — so that conversion can take minutes
-while later ones take seconds. A cached executable is reused across restarts
+The first trip through the pipeline after a start is the slow one: it builds
+go2cs, restores the `go.*` packages into the NuGet cache, and starts MSBuild and
+the C# compiler. The server makes that trip itself as soon as it starts, in the
+background, by converting, building, and running the Tour's own hello-world
+program in a scratch workspace of its own — the same stages, runtime, and
+environment a lesson uses. The page shows **Warming up .NET...** in the header
+while this runs and **.NET ready** briefly when it ends, so by the time a
+lesson is open its first run takes about as long as any later one.
+
+The server answers requests throughout. A conversion proceeds right away; a
+.NET build that arrives mid-warmup waits for the warmup to finish rather than
+racing it for the same packages, then builds warm. If the warmup fails, the
+server logs why and the page shows nothing: the first lesson simply pays the
+cold start. `-no-warmup` turns it off.
+
+## The converter is built from the checkout
+
+Unless `GO2CS_BIN` names one, the converter is built into `src/tour/.cache`
+from the current checkout, by the warmup (or, with `-no-warmup`, by the first
+conversion), so that first build can take minutes while later conversions take
+seconds. A cached executable is reused across restarts
 only when it is newer than every file under `src/go2cs` and still identifies
 itself when run, so a converter left by an older checkout is rebuilt rather than
 driven by a newer pipeline.
@@ -167,7 +187,7 @@ go test ./...
 go vet ./...
 ```
 
-The first conversion can take longer because go2cs is built lazily (above). Each submission gets a temporary
+Building go2cs and the first restore of the `go.*` packages are paid by the warmup (above). Each submission gets a temporary
 Go module; the server runs `go mod tidy`, recursively converts imported third-party packages, and keeps
 the generated app/dependency graph isolated from the selected runtime tree. The Code and Project tabs
 still show only the submitted app. Converted workspaces expire after 30 minutes. The request body is
