@@ -183,17 +183,23 @@ NU1102). The input is refused on any other stage and must be four numeric parts.
 ### `aot-smoke` — a Native AOT publish of a package consumer
 
 The same `pack` job, then ONE Native AOT publish and run of `PackageSymbols` (a hand-written consumer that sets no trim
-mode of its own) on THREE shipped RIDs (win-x64, linux-x64, osx-x64): `test-package-symbols.ps1 -AotOnly`. The executable must exit 0 and print
-its `PACKAGE-SYMBOLS` line (the value printed, not judged); the publish wall time is a `READ` line. A consumer takes
+mode of its own) on all FOUR shipped RIDs (win-x64, linux-x64, osx-arm64, osx-x64): `test-package-symbols.ps1 -AotOnly`. The executable must exit 0 and print
+its `PACKAGE-SYMBOLS` line (the value printed, not judged); the publish wall time is a `READ` line, and so are two ILC
+readings, measured and not judged: `READ (ILC cycle-cutoff methods)` (distinct "will always throw" lines ILC logs when it cuts a
+self-nesting generic instantiation) and `READ (IlcCompile ms)` (from MSBuild's performance summary). The cut-off count is
+deterministic; IlcCompile is not (2026-10-14: one tree read 7,001 s and 5,444 s on hosted linux, runs 38555847362 and
+38576996407, a 22% spread), so a single-run IlcCompile comparison is read against that band. A consumer takes
 go.lib's `TrimMode=partial` default, under which the publish compiles every referenced go.* assembly whole: about 70
-min on hosted linux for this fixture's 31 assemblies, which is why it is its own stage and not a release-smoke arm.
+min on hosted linux for this fixture's 31 assemblies, which is why it is its own stage and not a release-smoke arm
+(4 min since e2move broke ILC's generic cycle in golib: run 38575258530, 0 cycle cutoffs on every RID).
 Without that default, the published 1.24.13.4 crashed such an executable at startup (a full trim removed the field
 metadata golib reads). **Non-gating on its first train (Q)**; from the release after, read before every release like
 the census, and a red holds the release. It reads this tree's pack only: `published_version` is refused for it.
-**osx-arm64 is NOT MEASURED, and every leg's summary says so**: on a hosted `macos-15` (3-core arm64) runner the publish did not
-finish inside the 6 hours a hosted job may run (37523439849, cancelled at 6h00m), and 360 minutes is GitHub's ceiling, so no
-budget reaches it. osx-x64, the same darwin build, read 293 min; linux-x64 56 min; win-x64 71 min (and an open defect: the
-executable fails at startup with "no metadata token available"). A larger or self-hosted Apple-silicon runner is the owner's call.
+**osx-arm64 is read, and gates like linux-x64 and win-x64** (2026-10-14). From 2026-10-07 it was NOT MEASURED: on a hosted
+`macos-15` (3-core arm64) runner the publish did not finish inside the 6 hours a hosted job may run (37523439849, cancelled at
+6h00m; osx-x64 read 293 min, linux-x64 56, win-x64 71). Those hours were ILC's generic cycle in golib (array/ж/slice, 35,336
+cut-off methods on linux at master). With the cycle broken (e2move, merge b1ba1380b4) run 38587876788 published osx-arm64 in
+354 s (0 cut-offs, exit 0), and the plan's filter and every leg's NOT MEASURED line were retired.
 **osx-x64 is BOUNDED, not open-ended** (2026-10-14): T4's osx-x64 publish ran past 6 h and the job was cancelled in its
 native link, which took the run's conclusion with it. The AOT step now stops at `aot_bound_minutes` (330 by default). On
 osx-x64 the step is continue-on-error and the next step turns an expired bound into "NOT MEASURED (timeout)" with exit 0,
@@ -293,7 +299,7 @@ disclosure count is half of what makes a row honest.
 | `sweep-shard` | 210 min | 315 min | One convert/build/run/compare cycle per matched row; the sweep's own per-package floors are the reason this is the largest. |
 | `release-smoke` | 90 min | 135 min | The leg only: converter `go build` plus five small restore/build/run arms. The `pack` job (windows, 240 min) is separate. Provisional. |
 | `nugetgo-behavior` | 90 min | 135 min | The leg: converter `go build`, one `go run`, one conversion against the feed, and one cold restore, build and run of the sample. `release-smoke`'s leg is the closest shape. Provisional. |
-| `aot-smoke` | 240 min | 360 min | The leg only, three RIDs: one Native AOT publish of a 31-package consumer under `TrimMode=partial` -- linux 56, windows 71, osx-x64 293 min (37523439849). osx-arm64 is not run: it did not finish in 360, GitHub's ceiling. |
+| `aot-smoke` | 240 min | 360 min | The leg only, four RIDs: one Native AOT publish of a 31-package consumer under `TrimMode=partial` -- linux 56, windows 71, osx-x64 293 min before e2move (37523439849, where osx-arm64 did not finish in 360); after it, linux 212 s, windows 167 s, osx-arm64 354 s (38587876788), osx-x64 654 s (38575258530). |
 
 The macOS multiplier is 1.5x because `macos-15` (arm64) is a 3-core runner and every phase here is
 parallel-MSBuild bound. GitHub's hard ceiling for a hosted job is 360 minutes and every value stays
