@@ -728,7 +728,24 @@ public sealed class TestExecution
         // Options.Parallel parallel tests RUN simultaneously (Go's -parallel semantics).
         m_runner.AcquireParallelSlot(NestedRoot);
         m_holdsParallelSlot = true;
+
+        // Go's parallelStart.Add(1): counted here, once the test is released and holds its slot
+        // (testing.go:1805, right after t.tstate.waitParallel()), not when Parallel is called.
+        Interlocked.Increment(ref s_parallelStart);
     }
+
+    // Go's process-wide parallel accounting (testing.go:429-430). AllocsPerRun panics while they
+    // differ (allocs.go:21), so each is incremented exactly where Go increments it: parallelStart in
+    // Parallel above, parallelStop at the end of the test's run (see Execute). Go's binary exits when
+    // a test panics, so its deferred increment skips that case (didPanic); this host keeps running
+    // after a panicking test, so it counts every finished parallel test, or a later serial
+    // AllocsPerRun would panic where Go's would never have been reached.
+    private static long s_parallelStart;
+    private static long s_parallelStop;
+
+    /// <summary>Whether any parallel test is running: Go's <c>parallelStart != parallelStop</c>.</summary>
+    internal static bool ParallelTestsRunning =>
+        Interlocked.Read(ref s_parallelStart) != Interlocked.Read(ref s_parallelStop);
 
     /// <summary>
     /// Go's <c>t.TempDir()</c>: a per-test directory, removed when the test finishes.
@@ -1377,6 +1394,18 @@ public sealed class TestExecution
             }
 
             ReportEvent(new TestEvent(m_runner.Package, Name, terminal, timer.Elapsed.TotalSeconds, output, Source, Line, records, dropped));
+
+            // Go's parallelStop.Add(1) (testing.go:1949): after the cleanups and the parallel subtests,
+            // immediately before the test signals its parent, which here is the Completion that
+            // Start sets once Execute returns.
+            bool wasParallel;
+
+            lock (m_syncRoot)
+                wasParallel = m_parallel;
+
+            if (wasParallel)
+                Interlocked.Increment(ref s_parallelStop);
+
             m_runner.Completed(this);
         }
     }
