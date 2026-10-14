@@ -63,22 +63,50 @@ func newSolutionsLink(url, text string) solutionsLink {
 	return solutionsLink{URL: url, Text: text}
 }
 
-func main() {
-	addr := flag.String("addr", "127.0.0.1:4000", "Tour of go2cs address")
-	tourAddr := flag.String("tour-addr", "127.0.0.1:3999", "official Tour of Go address")
-	repoRoot := flag.String("repo", "", "go2cs repository root (auto-detected by default)")
-	defaultRuntime := flag.String("runtime", "", ".NET runtime source: core, deployed, or nuget (default: nuget, then a detected deployed stdlib, then core)")
-	deployedRoot := flag.String("deployed-root", "", "deploy-core root for the deployed stdlib runtime")
-	nugetSource := flag.String("nuget-source", "", "NuGet feed or folder containing go2cs packages")
-	nugetVersion := flag.String("nuget-version", "", "version of go2cs NuGet packages")
-	toolTimeout := flag.String("tool-timeout", "", fmt.Sprintf("budget for the one-time go2cs build (duration such as 15m, or a whole number of seconds; default %s; %s)", defaultToolTimeout, toolTimeoutEnv))
-	solutionsURL := flag.String("solutions-url", defaultSolutionsURL, "header link to exercise solutions (empty hides the link)")
-	solutionsText := flag.String("solutions-text", defaultSolutionsText, "text for the exercise-solutions link")
-	noTour := flag.Bool("no-tour", false, "do not start the official Tour process")
-	noOpen := flag.Bool("no-open", false, "do not open a browser")
-	flag.Parse()
+// serverOptions is the parsed command line.
+type serverOptions struct {
+	addr           string
+	tourAddr       string
+	repoRoot       string
+	defaultRuntime string
+	deployedRoot   string
+	nugetSource    string
+	nugetVersion   string
+	toolTimeout    string
+	solutionsURL   string
+	solutionsText  string
+	noTour         bool
+	noOpen         bool
+	noWarmup       bool
+}
 
-	root, err := resolveRepoRoot(*repoRoot)
+func parseServerOptions(args []string) (serverOptions, error) {
+	var o serverOptions
+	flags := flag.NewFlagSet(filepath.Base(os.Args[0]), flag.ExitOnError)
+	flags.StringVar(&o.addr, "addr", "127.0.0.1:4000", "Tour of go2cs address")
+	flags.StringVar(&o.tourAddr, "tour-addr", "127.0.0.1:3999", "official Tour of Go address")
+	flags.StringVar(&o.repoRoot, "repo", "", "go2cs repository root (auto-detected by default)")
+	flags.StringVar(&o.defaultRuntime, "runtime", "", ".NET runtime source: core, deployed, or nuget (default: nuget, then a detected deployed stdlib, then core)")
+	flags.StringVar(&o.deployedRoot, "deployed-root", "", "deploy-core root for the deployed stdlib runtime")
+	flags.StringVar(&o.nugetSource, "nuget-source", "", "NuGet feed or folder containing go2cs packages")
+	flags.StringVar(&o.nugetVersion, "nuget-version", "", "version of go2cs NuGet packages")
+	flags.StringVar(&o.toolTimeout, "tool-timeout", "", fmt.Sprintf("budget for the one-time go2cs build (duration such as 15m, or a whole number of seconds; default %s; %s)", defaultToolTimeout, toolTimeoutEnv))
+	flags.StringVar(&o.solutionsURL, "solutions-url", defaultSolutionsURL, "header link to exercise solutions (empty hides the link)")
+	flags.StringVar(&o.solutionsText, "solutions-text", defaultSolutionsText, "text for the exercise-solutions link")
+	flags.BoolVar(&o.noTour, "no-tour", false, "do not start the official Tour process")
+	flags.BoolVar(&o.noOpen, "no-open", false, "do not open a browser")
+	flags.BoolVar(&o.noWarmup, "no-warmup", false, "do not warm up .NET at start (the first lesson then pays the cold start)")
+	err := flags.Parse(args)
+	return o, err
+}
+
+func main() {
+	options, err := parseServerOptions(os.Args[1:])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	root, err := resolveRepoRoot(options.repoRoot)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -86,17 +114,18 @@ func main() {
 	// A budget typed on the command line is checked here rather than defaulted quietly: the
 	// operator asked for a specific one, and starting with a different budget than the one they
 	// named is how a timeout stops meaning what its caller thinks it means.
-	toolBudget, err := parseTimeoutSetting(*toolTimeout)
+	toolBudget, err := parseTimeoutSetting(options.toolTimeout)
 	if err != nil {
 		log.Fatalf("invalid -tool-timeout option: %v", err)
 	}
 
 	pipeline := newPipelineRunner(root, pipelineOptions{
-		defaultRuntime: *defaultRuntime,
-		deployedRoot:   *deployedRoot,
-		nugetSource:    *nugetSource,
-		nugetVersion:   *nugetVersion,
+		defaultRuntime: options.defaultRuntime,
+		deployedRoot:   options.deployedRoot,
+		nugetSource:    options.nugetSource,
+		nugetVersion:   options.nugetVersion,
 		toolTimeout:    toolBudget,
+		noWarmup:       options.noWarmup,
 	})
 	if _, err := pipeline.resolveRuntime(""); err != nil {
 		log.Fatalf("invalid -runtime option: %v", err)
@@ -106,8 +135,12 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	tour := newTourProxy(*tourAddr, root)
-	if !*noTour {
+	// The warmup starts before the Tour and the listener, and runs beside them: nothing waits for
+	// it except a .NET build that arrives while it is still running.
+	pipeline.startWarmup(ctx)
+
+	tour := newTourProxy(options.tourAddr, root)
+	if !options.noTour {
 		if err := tour.start(ctx); err != nil {
 			log.Printf("official Tour unavailable: %v", err)
 		}
@@ -124,23 +157,23 @@ func main() {
 		pipeline:  pipeline,
 		tour:      tour,
 		static:    http.FileServer(http.FS(staticFS)),
-		solutions: newSolutionsLink(*solutionsURL, *solutionsText),
+		solutions: newSolutionsLink(options.solutionsURL, options.solutionsText),
 	}
 
 	httpServer := &http.Server{
-		Addr:              *addr,
+		Addr:              options.addr,
 		Handler:           s.routes(),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
-	listener, err := net.Listen("tcp", *addr)
+	listener, err := net.Listen("tcp", options.addr)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	url := "http://" + listener.Addr().String()
 	log.Printf("Tour of go2cs is ready at %s", url)
-	if !*noOpen {
+	if !options.noOpen {
 		go openBrowser(url)
 	}
 
@@ -186,6 +219,7 @@ func (s *server) handleHealth(w http.ResponseWriter, _ *http.Request) {
 		"runtime":   s.pipeline.defaultRuntime,
 		"runtimes":  s.pipeline.runtimeOptions(),
 		"solutions": s.solutions,
+		"warmup":    s.pipeline.warm.status(),
 	})
 }
 
