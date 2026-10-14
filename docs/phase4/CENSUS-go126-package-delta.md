@@ -68,6 +68,9 @@ ledger exclusions still in the population). The fifth, `runtime/internal/wasites
 `wasip1/wasm`. **For COORD's ruling:** re-rule E1 onto `internal/runtime/wasitest`; until then it is an ordinary
 row that would read as all-skip.
 
+**RULED 2026-10-14 (COORD):** E1 is re-ruled onto the successor `internal/runtime/wasitest`; the reasons above hold
+file for file at 1.26.9, so it is not an all-skip row.
+
 ## 4. Relocations by body: `docs/phase4/data/relocations-go1.26.9.tsv`
 
 Every test function of the 17 added and 5 removed rows was matched against every std test of the other release
@@ -109,6 +112,8 @@ Std `testdata/` (cmd excluded): 1,916 files at 1.24.13, 2,057 at 1.26.9; 23 left
 `crypto/tls/testdata` moved no file: 122 files at both releases, **76 with new content**. That is a refresh,
 not a relocation.
 
+**RULED 2026-10-14 (COORD):** this section is the fixture list handed to the i9 for the H5 refresh.
+
 ## 6. New package IDs (O5)
 
 `go.<import path with / as .>`, one per added package. **Public, for the NuGet prefix reservation now (lesson 12):**
@@ -120,6 +125,9 @@ go.crypto.hpke    go.crypto.mlkem.mlkemtest    go.testing.cryptotest    go.testi
 The plan's O5 named three on the 1.26.4 census; `go.crypto.mlkem.mlkemtest` is the fourth (it is in plan §3.1's
 new-public list). The 25 internal IDs of §2 are packed like every internal package. Whether any needs its own
 reservation is O5's ruling.
+
+**RULED 2026-10-14 (COORD):** the four public IDs above are accepted; `go.testing.synctest` is noted as beyond O5's
+three. The 25 internal IDs follow the standing internal rule.
 
 ## 7. New constructs, each with its probe (lesson 54)
 
