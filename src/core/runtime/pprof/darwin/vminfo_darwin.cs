@@ -70,9 +70,13 @@ internal static @string regionFilename(uint64 address) {
 // the runtime package (runtime/sys_darwin.go).
 //
 //go:noescape
-internal static partial int32 mach_vm_region(ж<uint64> address, ж<uint64> region_size, @unsafe.Pointer info);
+/*linkname*/ internal static partial int32 mach_vm_region(ж<uint64> address, ж<uint64> region_size, @unsafe.Pointer info) {
+    return go.runtime_package.mach_vm_region(address, region_size, info);
+}
 
 //go:noescape
-internal static partial int32 proc_regionfilename(nint pid, uint64 address, ж<byte> buf, int64 buflen);
+/*linkname*/ internal static partial int32 proc_regionfilename(nint pid, uint64 address, ж<byte> buf, int64 buflen) {
+    return go.runtime_package.proc_regionfilename(pid, address, buf, buflen);
+}
 
 } // end pprof_package

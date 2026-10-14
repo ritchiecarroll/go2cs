@@ -80,11 +80,12 @@ func TestDeclaredNotImplementedCensus(t *testing.T) {
 	// //go:linkname push exists in this corpus), so an assembly stub cannot serve here, however many
 	// hosts it has killed. Today the controls are two pushes that do not arrive and have callers in
 	// their own package: internal/runtime/maps.mapKeyError (pushed from runtime/map_swiss.cs) and
-	// runtime/pprof.mach_vm_region (pushed from runtime/darwin/sys_darwin.cs), which the Phase 5
-	// exported-reach census confirmed a user API reaches (pprof.StartCPUProfile on darwin, arm64 and
-	// x64; docs/phase4/CENSUS-phase5-exported-reach.md). It replaced
-	// internal/coverage/cfile.getCovCounterList in the commit that bodied that one (emit_impl.cs,
-	// 2026-10-10), which moved to the negative controls below.
+	// reflect.chanlen (pushed from runtime/chan.cs, called by Value.Len in reflect/value.cs). chanlen
+	// replaced runtime/pprof.mach_vm_region in the commit that routed that push to its consumer
+	// (linknamePushTargets, 2026-10-14): vminfo_darwin.cs now forwards to runtime, so the member has a
+	// body and left the population. mach_vm_region had replaced internal/coverage/cfile.getCovCounterList
+	// in the commit that bodied that one (emit_impl.cs, 2026-10-10), which moved to the negative
+	// controls below.
 	//
 	// It named RED 7's three (fips140's getIndicator, setIndicator and fatal) until RED 7 (a) gave
 	// them bodies; they left the population and their rows left this list IN THAT SAME COMMIT, which
@@ -96,7 +97,7 @@ func TestDeclaredNotImplementedCensus(t *testing.T) {
 	// body, a member that is still stubbed replaces it in the same commit.
 	controls := []string{
 		"internal/runtime/maps/runtime_swiss.cs:mapKeyError",
-		"runtime/pprof/darwin/vminfo_darwin.cs:mach_vm_region",
+		"reflect/value.cs:chanlen",
 	}
 
 	if len(controls) == 0 {
@@ -397,6 +398,11 @@ const (
 // arguments and a float64 (golib GoLibcCall.CallFiveAndDouble). Before that, Certificate.Verify with system
 // roots threw on both mac chips.
 //
+// runtime/pprof.mach_vm_region and runtime/pprof.proc_regionfilename left when linknamePushTargets routed
+// runtime/sys_darwin.go's pushes to them (2026-10-14): runtime/pprof/darwin/vminfo_darwin.cs forwards to
+// runtime's converted bodies over libcCall. Before that, every darwin program that built a CPU or heap
+// profile died in mach_vm_region, net/http/pprof's profile handler among them (darwin wave 12).
+//
 // ⚠ EDIT THIS TABLE IN THE COMMIT THAT MOVES THE TREE, never afterwards. That is the whole mechanism.
 var declaredPushStubs = map[string]string{
 	"internal/runtime/maps.mapKeyError":                  dispositionLatent,
@@ -450,8 +456,6 @@ var declaredPushStubs = map[string]string{
 	"runtime.mapdelete_fast32":          dispositionSuppliedElsewhere,
 	"runtime.mapdelete_fast64":          dispositionSuppliedElsewhere,
 	"runtime.mapdelete_faststr":         dispositionSuppliedElsewhere,
-	"runtime/pprof.mach_vm_region":      dispositionLatent,
-	"runtime/pprof.proc_regionfilename": dispositionLatent,
 	"syscall.runtime_AfterFork":         dispositionLatent,
 	"syscall.runtime_AfterForkInChild":  dispositionLatent,
 	"syscall.runtime_BeforeFork":        dispositionLatent,

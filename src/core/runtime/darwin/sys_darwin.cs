@@ -910,7 +910,7 @@ internal partial struct mach_vm_region_args /*dyn*/ {
 // to obtaining mappings for the current process.
 //
 //go:linkname mach_vm_region runtime/pprof.mach_vm_region
-internal static int32 mach_vm_region(ж<uint64> Ꮡaddress, ж<uint64> Ꮡregion_size, @unsafe.Pointer info) {
+public static int32 mach_vm_region(ж<uint64> Ꮡaddress, ж<uint64> Ꮡregion_size, @unsafe.Pointer info) {
     // kern_return_t mach_vm_region(
     // 	vm_map_read_t target_task,
     // 	mach_vm_address_t *address,
@@ -944,7 +944,7 @@ internal partial struct proc_regionfilename_args /*dyn*/ {
 }
 
 //go:linkname proc_regionfilename runtime/pprof.proc_regionfilename
-internal static int32 proc_regionfilename(nint pid, uint64 address, ж<byte> Ꮡbuf, int64 buflen) {
+public static int32 proc_regionfilename(nint pid, uint64 address, ж<byte> Ꮡbuf, int64 buflen) {
     ref var args = ref heap<proc_regionfilename_args>(out var Ꮡargs);
     args = new proc_regionfilename_args(
         pid: pid,

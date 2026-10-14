@@ -84,7 +84,7 @@ using static go.runtime.pprof_package;
 [assembly: go.GoPositionMap("runtime/pprof/protobuf.go", "protobuf.cs", "AA4cgoKClKaCgqaUgqaClIKClIKCgoKCgpSCuIKClKaCgqaCgpSmgpSCgpSCgoKCgoKUgriCgqaCgriCgpSmgoKUuIKClMqCgqaCgoKCgoKCgg==")]
 [assembly: go.GoPositionMap("runtime/pprof/protomem.go", "protomem.cs", "ABUgkoKCgoKCgoKCpoKCooKCuIKCgIK2gqaCgpSmgoKCgpSSgriCAAIYAAkCgqampoKU", "60-64:1")]
 [assembly: go.GoPositionMap("runtime/pprof/runtime.go", "runtime.cs", "AAsgysampqqyggACFAAJAoKCgqI=")]
-[assembly: go.GoPositionMap("runtime/pprof/vminfo_darwin.go", "vminfo_darwin.cs", "AAoYgqqigpKCgpS4gpSUlLjKlLiUpoKCyoKUrtY=", "", "", "40=read64/1/1/2,regionFilename/1/1/3;58=Getpid/1/1/1")]
+[assembly: go.GoPositionMap("runtime/pprof/vminfo_darwin.go", "vminfo_darwin.cs", "AAoYgqqigpKCgpS4gpSUlLjKlLiUpoKCyoKUrvY=", "", "", "40=read64/1/1/2,regionFilename/1/1/3;58=Getpid/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.runtime;
