@@ -442,6 +442,7 @@
     <Project Path="tests/Behavioral/ElidedNestedPtrComposite/ElidedNestedPtrComposite.csproj" />
     <Project Path="tests/Behavioral/ElidedPtrElemIfaceAssign/ElidedPtrElemIfaceAssign.csproj" />
     <Project Path="tests/Behavioral/ElidedStructInterfaceField/ElidedStructInterfaceField.csproj" />
+    <Project Path="tests/Behavioral/EmbedDirectiveForms/EmbedDirectiveForms.csproj" />
     <Project Path="tests/Behavioral/EmbeddedInterfaceWitness/EmbeddedInterfaceWitness.csproj" />
     <Project Path="tests/Behavioral/EmbeddedInterfaceWitness/iolike/EmbeddedInterfaceWitness.iolike.csproj" />
     <Project Path="tests/Behavioral/EmbeddedPointerFieldIdentity/EmbeddedPointerFieldIdentity.csproj" />
