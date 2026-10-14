@@ -282,6 +282,7 @@ minutes, and names the edges. Figures in square brackets are read from the roste
 | [`drafts/reddit-dotnet.md`](drafts/reddit-dotnet.md) | r/dotnet, with the r/csharp variant |
 | [`drafts/replies.md`](drafts/replies.md) | the reply bank |
 | [`drafts/release-1.24.13.6.md`](drafts/release-1.24.13.6.md) | the GitHub Release body for 1.24.13.6 |
+| [`drafts/release-1.24.13.7.md`](drafts/release-1.24.13.7.md) | the GitHub Release body for 1.24.13.7 |
 
 ## 8. Open decisions for the owner
 
