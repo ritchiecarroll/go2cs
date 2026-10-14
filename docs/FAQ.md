@@ -156,6 +156,9 @@ And of the converter's own license:
 The same page's table gives the rest: the runtime library and the source generators are MIT, and the
 converted standard library is BSD-3-Clause, with Go's upstream notices.
 
+Running the converter, locally or in your own build, triggers no AGPL obligation; see the README's
+[License](README.md#license) section.
+
 ## Can it convert C# to Go?
 
 No. A source conversion from C# to Go would need so many restrictions on the C# that it would not be
