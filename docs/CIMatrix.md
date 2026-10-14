@@ -75,6 +75,7 @@ gh workflow run os-matrix.yml -f goos=linux  -f stage=sweep-shard -f filter=comp
 | `nugetgo_module` | `MODULE@VERSION` | `nugetgo-behavior` only, and required there. Its sample program and mappings row must exist at `src/tests/ModuleBehavior/MODULE@VERSION/` on the dispatched ref. |
 | `nugetgo_package` | a NuGet package version | `nugetgo-behavior` only, and required there: the rehearsal package every row runs (e.g. `1.1.0-int.1`). |
 | `nugetgo_feed` | a NuGet v3 feed URL, optional | `nugetgo-behavior` only. Blank takes int.nugettest.org, where the runbook rehearses. |
+| `aot_bound_minutes` | 1-340, optional | `aot-smoke` only: the AOT step's own limit. Blank takes 330 (5 h 30 m). An expired bound reads NOT MEASURED (timeout) on osx-x64 and fails the leg on linux-x64 and win-x64. A small value makes the bound fire on purpose. |
 
 There is no `all` value: one dispatch per flavor keeps each leg's artifacts, budget and verdict
 separate, which is what makes a wall readable. Dispatching all three is three cheap clicks.
@@ -193,6 +194,10 @@ the census, and a red holds the release. It reads this tree's pack only: `publis
 finish inside the 6 hours a hosted job may run (37523439849, cancelled at 6h00m), and 360 minutes is GitHub's ceiling, so no
 budget reaches it. osx-x64, the same darwin build, read 293 min; linux-x64 56 min; win-x64 71 min (and an open defect: the
 executable fails at startup with "no metadata token available"). A larger or self-hosted Apple-silicon runner is the owner's call.
+**osx-x64 is BOUNDED, not open-ended** (2026-10-14): T4's osx-x64 publish ran past 6 h and the job was cancelled in its
+native link, which took the run's conclusion with it. The AOT step now stops at `aot_bound_minutes` (330 by default). On
+osx-x64 the step is continue-on-error and the next step turns an expired bound into "NOT MEASURED (timeout)" with exit 0,
+while a publish that ENDED with a non-zero exit stays red. linux-x64 and win-x64 keep their gate: an expired bound fails them.
 
 ### `nugetgo-behavior` — one sample row per shipped RID
 

@@ -96,6 +96,11 @@ on:
         type: string
         required: false
         default: ''
+      aot_bound_minutes:
+        description: 'aot-smoke only: the AOT step''s own limit in minutes, 1-340. Blank takes 330 (5 h 30 m, under the 6-hour job ceiling). On osx-x64 an expired bound reads NOT MEASURED (timeout) and the leg ends green and readable; on linux-x64 and win-x64 it fails the leg. A small value is how the bound is made to fail on purpose.'
+        type: string
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -137,6 +142,7 @@ jobs:
       filter: ${{ steps.derive.outputs.filter }}
       dotnet: ${{ steps.derive.outputs.dotnet }}
       run-timeout: ${{ steps.derive.outputs.run-timeout }}
+      aot-bound-minutes: ${{ steps.derive.outputs.aot-bound-minutes }}
       published-version: ${{ steps.derive.outputs.published-version }}
       nugetgo-module: ${{ steps.derive.outputs.nugetgo-module }}
       nugetgo-version: ${{ steps.derive.outputs.nugetgo-version }}
@@ -155,6 +161,7 @@ jobs:
           INPUT_FILTER: ${{ inputs.filter }}
           INPUT_DOTNET: ${{ inputs.dotnet }}
           INPUT_RUN_TIMEOUT: ${{ inputs.run_timeout }}
+          INPUT_AOT_BOUND_MINUTES: ${{ inputs.aot_bound_minutes }}
           INPUT_PUBLISHED_VERSION: ${{ inputs.published_version }}
           INPUT_NUGETGO_MODULE: ${{ inputs.nugetgo_module }}
           INPUT_NUGETGO_PACKAGE: ${{ inputs.nugetgo_package }}
@@ -193,6 +200,14 @@ jobs:
               throw "run_timeout must be a whole number of seconds from 1 to 1800; got '$runTimeout'."
           }
           Write-Host "behavioral run budget: $runTimeout s per program"
+
+          # aot-smoke's own step limit. The job ceiling is 360 min on a mac leg; the step stops at this bound so an
+          # osx-x64 publish that overruns is read (NOT MEASURED) rather than cancelled with the run's conclusion.
+          $aotBound = if ($env:EVENT_NAME -eq 'schedule') { '' } else { "$env:INPUT_AOT_BOUND_MINUTES".Trim() }
+          if (-not $aotBound) { $aotBound = '330' }
+          if ($aotBound -notmatch '^[0-9]+$' -or [int]$aotBound -lt 1 -or [int]$aotBound -gt 340) {
+              throw "aot_bound_minutes must be a whole number of minutes from 1 to 340; got '$aotBound'."
+          }
 
           # The post-publish smoke: a version nuget.org already serves. Only release-smoke reads it, and a malformed
           # value FAILS the plan by name rather than reaching a restore as a version nothing serves.
@@ -310,7 +325,7 @@ jobs:
               'sweep-shard'      = 210   # one -tests convert/build/run/compare cycle per matched
                                          # row; the sweep's own per-package floors reach 120m.
               'release-smoke'    = 90    # the LEG only (the pack job has its own budget): converter
-                                         # go build + four small restore/build/run arms against the
+                                         # go build + five small restore/build/run arms against the
                                          # feed, each restoring into a fresh cache. PROVISIONAL
                                          # until the first run.
               'aot-smoke'        = 240   # the LEG only (three RIDs: no osx-arm64): ONE Native AOT publish + run of PackageSymbols
@@ -355,6 +370,7 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "filter=$filter" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dotnet=$dotnet" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "run-timeout=$runTimeout" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "aot-bound-minutes=$aotBound" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "published-version=$publishedVersion" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-module=$nugetgoModule" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-version=$nugetgoVersion" -Encoding utf8
@@ -1468,8 +1484,16 @@ jobs:
       # drops osx-arm64 (a hosted job cannot finish its publish in 6 hours) and every leg's summary says so.
       # Non-gating on its first train; from the release after, read before a release like the census.
       # -------------------------------------------------------------------------------------
+      #
+      # THE BOUND (2026-10-14, T4's osx-x64 leg cancelled at 6h00m with the publish in its native link). The step stops at
+      # aot-bound-minutes (330 unless dispatched otherwise). On osx-x64 that is continue-on-error and the step after this one
+      # turns an expired bound into a NOT MEASURED (timeout) reading; a publish that ENDED with a non-zero exit stays red
+      # there. linux-x64 and win-x64 keep their gate: an expired bound fails the leg as a cancel did.
       - name: AOT smoke — Native AOT publish and run of a package consumer
+        id: aot
         if: needs.plan.outputs.stage == 'aot-smoke'
+        timeout-minutes: ${{ fromJSON(needs.plan.outputs.aot-bound-minutes) }}
+        continue-on-error: ${{ matrix.rid == 'osx-x64' }}
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Continue'
@@ -1504,7 +1528,35 @@ jobs:
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
           & ./.github/annotate-summary.ps1 -Title "aot-smoke $goos/$rid" -Lines $summary
 
+          # The publish ended on its own (pass or fail): the bounded-leg step below reads this marker's absence as a timeout.
+          Set-Content -LiteralPath (Join-Path $art 'aot-smoke-ended.txt') -Value "exit $aotExit" -Encoding utf8
+
           exit $aotExit
+
+      - name: AOT smoke — the bounded leg's reading
+        if: always() && needs.plan.outputs.stage == 'aot-smoke' && matrix.rid == 'osx-x64' && steps.aot.outcome != 'success' && steps.aot.outcome != 'skipped'
+        shell: pwsh
+        env:
+          AOT_BOUND_MINUTES: ${{ needs.plan.outputs.aot-bound-minutes }}
+        run: |
+          $ended = Join-Path $PWD 'artifacts/aot-smoke-ended.txt'
+
+          if (Test-Path -LiteralPath $ended) {
+              # The publish finished and failed: continue-on-error must not hide that.
+              Write-Host "::error::aot-smoke osx-x64 ended with $(Get-Content -LiteralPath $ended -Raw) -- a real failure, not the bound"
+              exit 1
+          }
+
+          $summary = @(
+              "## AOT smoke -- GOOS=$env:GOOS_TARGET ($env:RID)"
+              ''
+              "NOT MEASURED (timeout): the osx-x64 Native AOT publish did not finish inside its $env:AOT_BOUND_MINUTES-minute bound; the step was stopped, not failed. linux-x64 and win-x64 remain this stage's AOT gates."
+              ''
+              'NOT MEASURED: osx-arm64 -- this stage reads three RIDs; a hosted macos-15 (3-core arm64) job cannot finish this publish inside GitHub''s 6-hour limit (run 37523439849 was cancelled at 6h00m; osx-x64, the same darwin build, read 293 min)'
+          )
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "aot-smoke $env:GOOS_TARGET/$env:RID" -Lines $summary
+          exit 0
 
       # -------------------------------------------------------------------------------------
       # nugetgo-behavior — ONE sample row, on this leg's own OS, for a nugetgo package (COORD rulings 2026-10-12): the
