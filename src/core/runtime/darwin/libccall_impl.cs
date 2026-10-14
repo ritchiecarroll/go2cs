@@ -134,6 +134,10 @@ internal static int32 libcCall(@unsafe.Pointer fn, @unsafe.Pointer arg) {
         // pthread_self_trampoline: CALL libc_pthread_self; MOVQ AX, 0(BX) -- the result lands in the
         // block's first word (the pthread wrapper's value).
         return unchecked((int32)(uint32)GoLibcCall.CallStoringResultIntoBlock(entryPoint, argsBox, s_libcCallErrnoReader, symbol));
+    case "mach_vm_region":
+        return machVMRegionDispatch(entryPoint, argsBox, symbol);
+    case "proc_regionfilename":
+        return procRegionfilenameDispatch(entryPoint, argsBox, symbol);
     }
 
     nuint r = GoLibcCall.DispatchArgsStruct(entryPoint, argsBox, s_libcCallErrnoReader, symbol);
@@ -143,6 +147,121 @@ internal static int32 libcCall(@unsafe.Pointer fn, @unsafe.Pointer arg) {
     // family reads args.ret as well, which the dispatcher has already filled. Until increment 7 this
     // returned 0 on the belief that no caller read it.
     return unchecked((int32)(uint32)r);
+}
+
+// THE REGION WALK'S TWO RECORDS (2026-10-14). runtime/pprof's machVMInfo builds every darwin CPU and
+// heap profile's mapping table from these two calls, and both blocks carry managed pointers --
+// `address`, `size`, `count` and `object_name` are ж<T> boxes, `buf` is an interior ж<byte> -- so
+// the default dispatch above refuses them by field: "field 'address' of mach_vm_region_args is a ж`1,
+// which this dispatcher cannot place in an integer register" (net/http/pprof's heap handler,
+// osx-arm64, run 38521951876). This is the per-symbol layout record that refusal names. Each scalar
+// the trampoline passes BY ADDRESS goes through a native cell, filled from its box before the call
+// and written back after it, success or failure, because libc may write a partial result; the
+// mapping name goes through a native buffer copied into the caller's slice.
+
+// mach_vm_region_trampoline (sys_darwin_amd64.s:810, sys_darwin_arm64.s:778) unpacks the block by
+// offset -- address 0, size 8, flavor 16, info 24, count 32, object_name 40 -- and calls
+// mach_vm_region(mach_task_self_, address, size, flavor, info, count, object_name). This passes all
+// seven arguments. Go's amd64 trampoline loads object_name into R10, which is not a SysV argument
+// register, so libc reads its seventh argument from the stack instead; on arm64 the seventh is X6
+// and arrives as passed. Here both arches get the cell.
+//
+// `info` is the caller's machVMRegionBasicInfoData box (runtime/pprof's type, which this package
+// cannot name). Its [8]byte Offset makes it reference-bearing, so its word is the box's ORDER TOKEN,
+// and GoLibcCall.Call hands it to NativeStructMarshal: encoded at Go's offsets into a native buffer,
+// decoded back after the call. Go's layout of that record IS the kernel's packed 36-byte
+// vm_region_basic_info_data_64_t -- that is why Go spells Offset as [8]byte -- so the marshal's
+// image is the native one. VM_REGION_BASIC_INFO_COUNT_64 (9) is the count the caller passes.
+private const int MachVMRegionAddressCell = 0;
+private const int MachVMRegionSizeCell = 8;
+private const int MachVMRegionCountCell = 16;
+private const int MachVMRegionObjectNameCell = 20;
+private const int MachVMRegionCellBytes = 24;
+
+private static int32 machVMRegionDispatch(nint entryPoint, object? argsBox, string symbol) {
+    if (argsBox is not ж<mach_vm_region_args> box) {
+        throw new InvalidOperationException($"go2cs: libcCall({symbol}): the args box is {argsBox?.GetType().Name ?? "null"}, not mach_vm_region_args");
+    }
+
+    ref mach_vm_region_args args = ref box.Value;
+
+    // mach_task_self() is a macro over this global; Go's trampoline reads it the same way
+    // (MOVQ $libc_mach_task_self_(SB), DI; MOVL 0(DI), DI).
+    nint taskSelf = GoCgoDynamicImports.Resolve("mach_task_self_", libSystemPath);
+    nint cells = System.Runtime.InteropServices.Marshal.AllocHGlobal(MachVMRegionCellBytes);
+
+    try {
+        System.Runtime.InteropServices.Marshal.WriteInt64(cells, MachVMRegionAddressCell, unchecked((long)(uint64)args.address.Value));
+        System.Runtime.InteropServices.Marshal.WriteInt64(cells, MachVMRegionSizeCell, unchecked((long)(uint64)args.size.Value));
+        System.Runtime.InteropServices.Marshal.WriteInt32(cells, MachVMRegionCountCell, unchecked((int)(uint32)args.count.Value));
+        System.Runtime.InteropServices.Marshal.WriteInt32(cells, MachVMRegionObjectNameCell, unchecked((int)(uint32)args.object_name.Value));
+
+        nuint r = GoLibcCall.Call(entryPoint, [
+            unchecked((nuint)(uint)System.Runtime.InteropServices.Marshal.ReadInt32(taskSelf)),
+            (nuint)(cells + MachVMRegionAddressCell),
+            (nuint)(cells + MachVMRegionSizeCell),
+            unchecked((nuint)(uint)(int32)args.flavor),
+            (nuint)(uintptr)args.info,
+            (nuint)(cells + MachVMRegionCountCell),
+            (nuint)(cells + MachVMRegionObjectNameCell)
+        ], GoLibcErrnoRule.None, s_libcCallErrnoReader, out _);
+
+        args.address.Value = unchecked((uint64)System.Runtime.InteropServices.Marshal.ReadInt64(cells, MachVMRegionAddressCell));
+        args.size.Value = unchecked((uint64)System.Runtime.InteropServices.Marshal.ReadInt64(cells, MachVMRegionSizeCell));
+        args.count.Value = (machMsgTypeNumber)unchecked((uint32)System.Runtime.InteropServices.Marshal.ReadInt32(cells, MachVMRegionCountCell));
+        args.object_name.Value = (machPort)unchecked((uint32)System.Runtime.InteropServices.Marshal.ReadInt32(cells, MachVMRegionObjectNameCell));
+
+        // kern_return_t, an int: the low 32 bits, as libcCall's MOVL rule reads every result.
+        return unchecked((int32)(uint32)r);
+    }
+    finally {
+        System.Runtime.InteropServices.Marshal.FreeHGlobal(cells);
+    }
+}
+
+// proc_regionfilename_trampoline (sys_darwin_amd64.s:823, sys_darwin_arm64.s:792) unpacks
+// {pid 0, address 8, buf 16, bufSize 24} and calls proc_regionfilename(pid, address, buf, bufSize),
+// which answers the number of bytes it copied (0 when the region has no file). `buf` is
+// unsafe.SliceData of the caller's []byte, an interior reference into the slice's backing store,
+// so the bytes libc writes into the native buffer are copied back through unsafe.Slice over it.
+private static int32 procRegionfilenameDispatch(nint entryPoint, object? argsBox, string symbol) {
+    if (argsBox is not ж<proc_regionfilename_args> box) {
+        throw new InvalidOperationException($"go2cs: libcCall({symbol}): the args box is {argsBox?.GetType().Name ?? "null"}, not proc_regionfilename_args");
+    }
+
+    ref proc_regionfilename_args args = ref box.Value;
+    int64 bufSize = args.bufSize;
+
+    if (bufSize < 0 || bufSize > int.MaxValue) {
+        throw new InvalidOperationException($"go2cs: libcCall({symbol}): buffer size {bufSize} is out of range");
+    }
+
+    nint buffer = System.Runtime.InteropServices.Marshal.AllocHGlobal((nint)Math.Max(bufSize, 1L));
+
+    try {
+        nuint r = GoLibcCall.Call(entryPoint, [
+            unchecked((nuint)args.pid),
+            (nuint)args.address,
+            (nuint)buffer,
+            unchecked((nuint)bufSize)
+        ], GoLibcErrnoRule.None, s_libcCallErrnoReader, out _);
+
+        int32 copied = unchecked((int32)(uint32)r);
+
+        if (copied > 0) {
+            int count = (int)Math.Min(copied, bufSize);
+            slice<byte> window = @unsafe.Slice(args.buf, (uintptr)(nuint)count);
+
+            for (int i = 0; i < count; i++) {
+                window[i] = System.Runtime.InteropServices.Marshal.ReadByte(buffer, i);
+            }
+        }
+
+        return copied;
+    }
+    finally {
+        System.Runtime.InteropServices.Marshal.FreeHGlobal(buffer);
+    }
 }
 
 } // end runtime_package
