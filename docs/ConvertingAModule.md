@@ -193,6 +193,27 @@ difference is small: testify's assertion messages, for example, do not print the
 When a module is validated, Go's own `go test` run uses the same tag, so both sides are compared on the same
 code. To convert the files a plain `go build` selects instead, pass `-module-safe-tag=false`.
 
+## Validate a converted module's tests
+
+The walkthrough above shows that a converted program runs. To check that a module behaves as it does in Go,
+convert its own `_test.go` suites as well, run them in C#, and compare every verdict with `go test`:
+
+```shell
+go2cs -tests -recurse -test-action all path/to/module out_root
+```
+
+- **Plain `-recurse` only.** `-tests` refuses `-recurse=nuget` and `-recurse=module`.
+- **The output root sits outside the module's own source tree.**
+- **The Go release must match.** A module that needs a newer Go than the converted standard library is refused,
+  as it is for a conversion.
+- **The result is a verdict per test**, matched or not, and proof pages written beside the conversion. A test whose
+  failure is a known, disclosed difference is read from a disclosure manifest
+  ([`-module-disclosures`](CommandLine.md#options)).
+
+The modules that pass are listed, with their proof pages, in [Validated Modules](ValidatedModules.md). To check one
+package of the converted standard library from a clone instead, see
+[Validate a converted test suite](BuildingGo2cs.md#validate-a-converted-test-suite).
+
 ## Optional: convert the module only, and deal with its dependencies later
 
 A dependency closure is not always convertible today — a large third-party SDK can hit a converter defect,

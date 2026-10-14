@@ -8,11 +8,12 @@ spots real code hits today.
 
 ## The short version
 
-**Good odds tonight:** pure Go that builds with Go 1.24 and `CGO_ENABLED=0`, leans mostly on the
+**Good odds tonight:** pure Go that builds with the Go release go2cs tracks and `CGO_ENABLED=0`, leans mostly on the
 standard library, and runs on x64 Windows or Linux. **A longer evening:** lots of third-party modules,
 `unsafe`, assembly fast paths, or tests that pull in testify or read `os.Args`.
 
-* **You need Go 1.24.13 itself on your PATH**, the release go2cs tracks, and **cgo is refused**.
+* **You need the Go release go2cs tracks on your PATH**, exactly the one in
+  [Requirements](README.md#requirements), and **cgo is refused**.
 * **Assembly, `//go:linkname` and deep `unsafe` tricks compile clean, then fail at run time.** Many
   libraries ship a pure-Go fallback behind a build tag, and you have to pass that tag yourself.
 * **Goroutines are real threads.** Thousands are fine. Hundreds of thousands are not.
@@ -94,9 +95,9 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   correct, validated, and slower than Go's assembly. A TLS handshake is where you will notice.
 * **Native AOT** starts much faster and holds less memory, but once running it is slower than the JIT
   on most rows of the comparison, and a publish compiles every converted package your program
-  references: hours, and from about 9.5 GB to 18 GB of memory, depending on how much of the library
-  the program uses
-  ([the cost](Performance.md#what-the-aot-column-costs-to-produce--the-honesty-footnote)).
+  references, which takes hours and a lot of memory
+  ([Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)
+  has the measurements).
 
 ## Third-party modules: where they trip today
 

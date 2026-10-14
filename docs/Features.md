@@ -24,7 +24,7 @@ by. For where it falls short, see [Limitations](Limitations.md).
 - **Repeatable output.** The same input converts to the same bytes, so converted code diffs cleanly
   in source control.
 - **Errors your tools already read.** A problem in the Go input is reported in MSBuild's error format
-  with a `GO2CS` code, which CI logs and editors pick up ([Diagnostics](BuildingGo2cs.md#diagnostics)).
+  with a `GO2CS` code, which CI logs and editors pick up ([Diagnostics](CommandLine.md#diagnostics)).
 - **Hand-written files survive.** A file you mark as manually converted is left alone by the next
   conversion ([how](ConversionStrategies.md#manually-converted-declarations)).
 - **Managed first.** The output is portable managed C#. Native interop is a last resort, not the
