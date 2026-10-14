@@ -276,3 +276,20 @@ the pin offline, warns if a source now disagrees, and refuses a package whose by
 - `-nuget-map off` turns mapping off and makes no request.
 - `-nuget-map-only`, `-nuget-map-exclude`, `-nuget-map-refresh`, `-nuget-map-canonical-only` and `-nuget-map-feed` are listed under
   [Command-line options](CommandLine.md#options). Every `-nuget-map*` flag needs `-recurse=nuget`.
+
+## Publishing your conversion: the package page
+
+When you convert a module and publish it as a NuGet package, its nuget.org page is the file
+`nuget/README.md` in the converted module's directory (the conversion repository's root when the module sits
+there). The first pack writes it, and from then on it is yours: change the title, rewrite the description under it, add usage sections. Commit it with the
+conversion.
+
+The pack still owns one block in it, between the lines `[//]: # (nugetgo:generated:begin)` and
+`[//]: # (nugetgo:generated:end)`. That block states the facts: where the C# came from and a link back to the Go
+source, the security caveat, the test badge, the versions, and the license. Every pack rewrites the block from what it
+measured, says so, and leaves everything outside it alone. Keep both marker lines, each on its own line with a blank
+line before and after, and put no link above the block. The pack refuses the file, by name, otherwise.
+
+`nuget/icon.png` beside it replaces the go2cs icon (PNG, at most 1 MB). The publishing runbook,
+[`NugetgoPublish.md`](NugetgoPublish.md#customizing-the-package-page), has the same rules in its
+"Customizing the package page" section.
