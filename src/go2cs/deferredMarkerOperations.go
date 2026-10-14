@@ -98,7 +98,7 @@ func rewriteDeferredMarkers(outputFileNames []string, description, prefix, suffi
 			showWarning("Resolving %s markers in \"%s\" changed the file's line count; the position map recorded for it is now offset (positionMapOperations.go)", description, fileName)
 		}
 
-		if err := os.WriteFile(fileName, []byte(content), 0644); err != nil {
+		if err := os.WriteFile(fileName, uniformLineEndings([]byte(content)), 0644); err != nil {
 			showWarning("Failed to resolve %s markers in \"%s\": %s", description, fileName, err)
 		}
 	}
