@@ -184,3 +184,5 @@ src/core/crypto/internal/fips140test/acvp_capabilities.json -text
 src/go2cs/csproj-template.xml      eol=crlf
 src/go2cs/test-csproj-template.xml eol=crlf
 src/go2cs/package_info-template.txt eol=crlf
+src/tests/Behavioral/EmbedDirectiveForms/testdata/** -text
+src/tests/Behavioral/EmbedDirectiveForms/capabilities.json -text
