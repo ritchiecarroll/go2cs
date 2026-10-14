@@ -1275,6 +1275,7 @@ jobs:
           $log = Join-Path $art "sweep-$goos-$rid.log"
           $sweepExit = 0
           $skipBuild = $false
+          $failedRows = [System.Collections.Generic.List[string]]::new()
 
           foreach ($name in $names) {
               & ./src/run-validated-sweep.ps1 -Filter $name -Exact -SkipBuild:$skipBuild -TestTimeout $env:SWEEP_TEST_TIMEOUT -IgnoreDiskPreflight *>&1 |
@@ -1283,6 +1284,7 @@ jobs:
               $rowExit = $LASTEXITCODE
 
               if ($rowExit -ne 0 -and $sweepExit -eq 0) { $sweepExit = $rowExit }
+              if ($rowExit -ne 0) { $failedRows.Add($name) }
 
               $skipBuild = $true
           }
@@ -1290,8 +1292,13 @@ jobs:
           # ---- per-row evidence ---------------------------------------------------------------
           # The pipeline writes each swept package's comparison record beside its converted code.
           # Those are the rows: verdict-for-verdict maps of `go test -json` against the C# host.
+          # The C# host's own results sit beside it as go2cs_test_results.json and .xml (testConversion.go
+          # sets GO2CS_TEST_RESULT / GO2CS_TEST_JUNIT to those names), and they are the only record that
+          # carries a failing test's TEXT; the comparison record carries verdicts only. Until 2026-10-13
+          # this list named 'results.json' and 'results.xml', which nothing writes, so a darwin red could
+          # not be root-caused from the artifact (darwin wave 11, run 38340386426).
           $rowsRoot = Join-Path $art 'rows'
-          $rowFiles = @('go2cs_test_comparison.json', 'results.json', 'results.xml')
+          $rowFiles = @('go2cs_test_comparison.json', 'go2cs_test_results.json', 'go2cs_test_results.xml')
           $evidence = @(Get-ChildItem -Path 'src/core' -Recurse -File -Include $rowFiles -ErrorAction SilentlyContinue)
 
           foreach ($file in $evidence) {
@@ -1303,6 +1310,50 @@ jobs:
           }
 
           Write-Host "==> collected $($evidence.Count) per-row evidence file(s)"
+
+          # A failed row's preserved attempts (the whole console output as row-output.txt, and any oracle
+          # re-run's records), which the sweep keeps under scratchpad/sweep-oracle-flake and nothing uploaded.
+          $failEvidence = Join-Path $PWD 'scratchpad/sweep-oracle-flake'
+
+          if (Test-Path -LiteralPath $failEvidence) {
+              Copy-Item -LiteralPath $failEvidence -Destination (Join-Path $art 'failing-rows') -Recurse -Force
+          }
+
+          # The failing tests' text, in the step log as well: a host that can read this log but not the
+          # artifact's blob storage can still root-cause a red. Every C# 'fail' event of each row whose
+          # sweep exited non-zero, disclosed failures included, capped at 40 lines a test and 30 tests a row.
+          # Then the last 80 lines of the row's preserved console output: a host that CRASHES writes no
+          # failing event, and its exception and stack sit there (net/http/pprof on darwin, wave 12, whose
+          # log carried the stack's last three frames and not the exception above them).
+          foreach ($name in $failedRows) {
+              $rowOutput = Get-ChildItem -Path $failEvidence -Recurse -File -Filter 'row-output.txt' -ErrorAction SilentlyContinue |
+                  Where-Object { $_.Directory.Name -eq 'runfinal' -and $_.Directory.Parent.Name -eq ($name -replace '/', '.') } |
+                  Sort-Object LastWriteTime | Select-Object -Last 1
+
+              if ($rowOutput) {
+                  Write-Host "==> row output: $name -- last 80 lines of $($rowOutput.FullName.Substring($PWD.Path.Length).TrimStart('\', '/'))"
+                  Get-Content -LiteralPath $rowOutput.FullName -Tail 80 | ForEach-Object { Write-Host "      $_" }
+              }
+
+              $resultsFile = Join-Path $PWD "src/core/$name/go2cs_test_results.json"
+
+              if (-not (Test-Path -LiteralPath $resultsFile)) {
+                  Write-Host "==> C# results: $name wrote no go2cs_test_results.json"
+                  continue
+              }
+
+              $record = $null
+              try { $record = Get-Content -LiteralPath $resultsFile -Raw | ConvertFrom-Json } catch { Write-Host "==> C# results: $name unreadable: $($_.Exception.Message)" }
+              if ($null -eq $record) { continue }
+
+              $failures = @($record.events | Where-Object { $_.action -eq 'fail' -and $_.test })
+              Write-Host "==> C# results: $name -- $($failures.Count) failing test(s)"
+
+              foreach ($failure in @($failures | Select-Object -First 30)) {
+                  Write-Host "  C# FAIL $name $($failure.test)"
+                  @("$($failure.output)" -split "`r?`n" | Select-Object -First 40) | ForEach-Object { Write-Host "      $_" }
+              }
+          }
 
           # A sweep regenerates committed test artifacts in place, so the tree is dirty afterwards
           # and it is (almost always) nothing -- CRLF phantoms and the -tests-closure class. The
