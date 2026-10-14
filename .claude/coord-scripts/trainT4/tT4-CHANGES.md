@@ -152,3 +152,21 @@ not its logs); the runs happen in `run2/go`. Every code edit is made by `tT4-r2-
   (OTHER and NOT-CLASSED printed by name). Control: a synthetic repo with one file per class read each class once.
 - `launch-fixup.sh`, `launch-fixup-measure.sh`: GOROOT reads the profile from `USERPROFILE` (the identifier census
   refused the as-run copies' literal profile path); the spelled value is the same.
+
+### 5.3 T4-19: a plant is subtracted by its LINE (the i9, 2026-10-14; the Go 1.26 hop's H0, F-H0-2, ruled by COORD)
+
+- **T4-19** `tT4-emitcheck.sh` dropped PLANT_CS (`unicode/utf8/utf8.cs`) and PLANT_SIB (`sync/pool.cs.auto`) from the
+  drift and sibling lists BY PATH (`grep -vxF`), so any REAL drift in those two files was subtracted with the plant.
+  H0's seeded three-target regen found `utf8.cs` carrying T4's comment parity since TRAIN FL, unseen by every check.
+  Now, after each conversion, `tT4-plantreal.py` (new) compares each FIRED plant file's emission with its seed minus
+  the appended plant block, CR stripped on both sides: PURE is subtracted as before; REAL stays in the lists (listed
+  in `plantreal-<arm>-<os>.txt`, archived as evidence, and named on the EMIT line as REAL-DRIFT-IN-PLANT-FILE) and is
+  attributed like any other file. The filter is `unplant`, used at all four former `grep -vxF "$PLANT_..."` sites.
+  The plant LINE reaches the helper by FILE (`$T/plantline.txt`): MSYS rewrites an argv beginning `//` into `/` when
+  it starts a native program, measured by the test below on its first run.
+- RED-FIRST: `tT4-plantreal-test.sh` (new) runs the old filter and the new one over a fixture in the check's own
+  shapes. The case `real` (a comment line added to the emission) is kept by the OLD filter 0 times of 1 (the defect)
+  and by the NEW 1 of 1; `pure` is subtracted by both; `real-crlf` reads REAL; a seed with no plant block is refused
+  (rc 2). Output: `PLANTREAL-TEST OK`.
+- `tT4-selfcheck.sh` on this folder: S1-S4, S6 ok. S5 reads CR bytes in files with no eol attribute; that is the
+  i9's autocrlf checkout, not the blobs (the committed blobs hold 0 CR; the three files above hold 0 CR on disk).

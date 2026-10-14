@@ -109,6 +109,14 @@ fi
 PLANT_SIB=src/core/sync/pool.cs.auto
 PLANT_CS=src/core/unicode/utf8/utf8.cs
 PLANT_LINE='// TRAIN T4 emission-check plant (positive control; never committed)'
+# KIT CHANGE T4-19 (the Go 1.26 hop's H0, F-H0-2; ruled COORD 2026-10-14): a plant is subtracted by its LINE, never by its
+# PATH. Through T4 every list below dropped PLANT_CS and PLANT_SIB by path, which hid any REAL drift in those two files
+# (utf8.cs carried T4's comment parity, unseen, from TRAIN FL to H0). After each conversion tT4-plantreal.py compares the
+# emitted plant file with its seed minus the appended plant block (CR stripped on both sides): PURE is subtracted as
+# before; REAL stays in the lists, in plantreal-<arm>-<os>.txt, and is attributed like any other file.
+unplant(){ # <plant path> <plantreal file>: filters a path list on stdin
+  if grep -qxF "$1" "$2" 2>/dev/null; then cat; else grep -vxF "$1"; fi
+}
 # DRAFT 2 (critic 1 #5): the GOROOT spelling is checked on its VALUE before the export (a `go env GOROOT` after the
 # export only echoes the env back); the expected spelling is derived from $HOME, never written out.
 GR=$(cygpath -w "$HOME/sdk/go1.24.13")
@@ -136,11 +144,12 @@ echo "HANDOWN derived ($M..$U): $(echo $HANDOWN | wc -w) file(s): ${HANDOWN:-non
 EDCONF=$(git -c core.quotepath=false diff --name-only "$M" "$U" -- src/core | grep -E '(^|/)\.editorconfig$' | tr '\n' ' ')
 echo "EDITORCONFIG derived ($M..$U): $(echo $EDCONF | wc -w) file(s) (converter emission, drift-compared like any file since O): ${EDCONF:-none}"
 rm -rf "$T"; mkdir -p "$T"
+printf '%s\n' "$PLANT_LINE" > "$T/plantline.txt"   # T4-19: the plant line reaches tT4-plantreal.py by file (MSYS rewrites a leading // in argv)
 EVD="${LOGDIR:-$SD/tT4-logs}/$TAG"
 archive_and_clean(){
   local rc=$? f n=0
   mkdir -p "$EVD"
-  for f in "$T"/drift-* "$T"/siblings-* "$T"/written-* "$T"/attr-* "$T"/dm-* "$T"/du-* "$T"/sm-* "$T"/su-* "$T"/sa-* "$T"/emit-* "$T"/markers-* "$T"/editorconfig-* "$T"/sd-*; do
+  for f in "$T"/drift-* "$T"/plantreal-* "$T"/siblings-* "$T"/written-* "$T"/attr-* "$T"/dm-* "$T"/du-* "$T"/sm-* "$T"/su-* "$T"/sa-* "$T"/emit-* "$T"/markers-* "$T"/editorconfig-* "$T"/sd-*; do
     [ -f "$f" ] && cp "$f" "$EVD/" && n=$((n + 1))
   done
   rm -rf "$T"/M-windows "$T"/M-linux "$T"/M-darwin "$T"/seed-M "$T"/seed-U "$T"/src-M "$T"/src-U
@@ -186,7 +195,16 @@ for arm in M U; do for os in windows linux darwin; do
   [ "$rc" = 0 ] && [ "$refuse" = 0 ] && [ "$mk" = 0 ] || emitbad=$((emitbad + 1))
   pc="plants:"; grep -qxF "$PLANT_SIB" "$T/siblings-$arm-$os.txt" && pc="$pc sib=OK" || pc="$pc sib=MISSING"
   grep -qxF "$PLANT_CS" "$T/drift-$arm-$os.txt" && pc="$pc cs=OK" || pc="$pc cs=MISSING"
-  echo "EMIT $arm-$os rc=$rc refusals=$refuse markers=$mk wall=$(( $(date +%s) - s ))s written=$(wc -l < "$T/written-$arm-$os.txt") drift=$(cut -d' ' -f1 "$T/drift-$arm-$os.txt" | grep -vcxF "$PLANT_CS") siblings=$(cut -d' ' -f1 "$T/siblings-$arm-$os.txt" | grep -vcxF "$PLANT_SIB") (plants excluded) $pc :: $(tail -n 1 "$T/emit-$arm-$os.log" | tr -d '\r' | cut -c1-140)"
+  # T4-19: read each FIRED plant by its line (a plant that did not fire is PLANT CONTROL's finding, never attributed).
+  : > "$T/plantreal-$arm-$os.txt"
+  for pl in "$PLANT_CS drift" "$PLANT_SIB siblings"; do
+    pf=${pl% *}; pk=${pl##* }
+    grep -qxF "$pf" "$T/$pk-$arm-$os.txt" || continue
+    pv=$(python "$(cygpath -w "$SD")/tT4-plantreal.py" "$(cygpath -w "$R/$pf")" "$(cygpath -w "$T/seed-$arm/$pf")" "$(cygpath -w "$T/plantline.txt")" | tr -d '\r')
+    case "$pv" in PURE) ;; REAL) echo "$pf" >> "$T/plantreal-$arm-$os.txt" ;; *) echo "ABORT plant reading $arm-$os $pf: '$pv'"; exit 3 ;; esac
+  done
+  [ -s "$T/plantreal-$arm-$os.txt" ] && pc="$pc REAL-DRIFT-IN-PLANT-FILE=[$(tr '\n' ' ' < "$T/plantreal-$arm-$os.txt")]"
+  echo "EMIT $arm-$os rc=$rc refusals=$refuse markers=$mk wall=$(( $(date +%s) - s ))s written=$(wc -l < "$T/written-$arm-$os.txt") drift=$(cut -d' ' -f1 "$T/drift-$arm-$os.txt" | unplant "$PLANT_CS" "$T/plantreal-$arm-$os.txt" | grep -c .) siblings=$(cut -d' ' -f1 "$T/siblings-$arm-$os.txt" | unplant "$PLANT_SIB" "$T/plantreal-$arm-$os.txt" | grep -c .) (plants subtracted by line, T4-19) $pc :: $(tail -n 1 "$T/emit-$arm-$os.log" | tr -d '\r' | cut -c1-140)"
 done; done
 pbad=$(for arm in M U; do for os in windows linux darwin; do grep -qxF "$PLANT_SIB" "$T/siblings-$arm-$os.txt" || echo x; grep -qxF "$PLANT_CS" "$T/drift-$arm-$os.txt" || echo x; done; done | wc -l)
 echo "PLANT CONTROL: $([ "$pbad" = 0 ] && echo "OK (both plants read as drift in all six conversions)" || echo "FAILED ($pbad of 12 plant readings missing) -- the drift instrument is not measuring; every count below is VOID")"
@@ -219,7 +237,7 @@ rm -rf "$sdc"
 echo "STANDING-DRIFT CONTROL: OK (equal hunks -> standing; a changed hunk -> attributable; a missing copy -> attributable)"
 attrtot=0; sdtot=0
 for os in windows linux darwin; do
-  cut -d' ' -f1 "$T/drift-M-$os.txt" | grep -vxF "$PLANT_CS" | LC_ALL=C sort -u > "$T/dm-$os"; cut -d' ' -f1 "$T/drift-U-$os.txt" | grep -vxF "$PLANT_CS" | LC_ALL=C sort -u > "$T/du-$os"
+  cut -d' ' -f1 "$T/drift-M-$os.txt" | unplant "$PLANT_CS" "$T/plantreal-M-$os.txt" | LC_ALL=C sort -u > "$T/dm-$os"; cut -d' ' -f1 "$T/drift-U-$os.txt" | unplant "$PLANT_CS" "$T/plantreal-U-$os.txt" | LC_ALL=C sort -u > "$T/du-$os"
   LC_ALL=C comm -13 "$T/dm-$os" "$T/du-$os" > "$T/attr-$os.txt"; : > "$T/sd-$os.txt"
   LC_ALL=C comm -12 "$T/dm-$os" "$T/du-$os" | while IFS= read -r f; do
     a=$(git show "$M:$f" 2>/dev/null | md5sum | cut -c1-12); b=$(git show "$U:$f" 2>/dev/null | md5sum | cut -c1-12)
@@ -273,7 +291,7 @@ done; done
 echo "EDITORCONFIG .editorconfig files under src/core written by any arm: $ew; committed ones a conversion DELETED: $ed (READINGS since O: ordinary emission; drift, a deletion included, is read in the union-attributable lists)"
 echo "--- REVIEW SIBLINGS (*.cs.auto; plant subtracted). Ruling 857afcb47e: the U list is what the train's sibling refresh owes"
 for os in windows linux darwin; do
-  cut -d' ' -f1 "$T/siblings-M-$os.txt" | grep -vxF "$PLANT_SIB" | LC_ALL=C sort -u > "$T/sm-$os"; cut -d' ' -f1 "$T/siblings-U-$os.txt" | grep -vxF "$PLANT_SIB" | LC_ALL=C sort -u > "$T/su-$os"
+  cut -d' ' -f1 "$T/siblings-M-$os.txt" | unplant "$PLANT_SIB" "$T/plantreal-M-$os.txt" | LC_ALL=C sort -u > "$T/sm-$os"; cut -d' ' -f1 "$T/siblings-U-$os.txt" | unplant "$PLANT_SIB" "$T/plantreal-U-$os.txt" | LC_ALL=C sort -u > "$T/su-$os"
   LC_ALL=C comm -13 "$T/sm-$os" "$T/su-$os" > "$T/sa-$os"   # M: the siblings only the UNION arm rewrites (this train's own)
   echo "$os: M-siblings=$(wc -l < "$T/sm-$os") U-siblings=$(wc -l < "$T/su-$os") U-not-M=$(wc -l < "$T/sa-$os") (U = the refresh owed; 0 only if nothing drifted; U-not-M = this train's share)"
   sed 's/^/    U /' "$T/su-$os" | head -n 40
