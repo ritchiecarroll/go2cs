@@ -98,26 +98,3 @@ and a publish without Native AOT are not affected.
      hours. Two such publishes run side by side on the same machine (ILC 8.7 and 10.3 GB, 1.3 GB left free) were
      both still compiling at the four-hour ceiling. The ~250 MB consumer above measured 243,136,000 bytes on the same
      machine and tree. -->
-
-## Under a fully trimmed Native AOT publish, fmt prints some named types raw
-
-<!-- Found 2026-10-12 by G (ledger 2026-10-12 09:20), in the tree 1.24.13.6 is built from. Two causes: golib's
-     method-set scan read trimmed metadata, and the interface shell's constructor was trimmed. The fix is the
-     seat claude/g-trim-methodset-keep, for the release after 1.24.13.6: every Go method of a boxed type is kept
-     (measured cost: the full-trim consumer about 20% larger). COORD confirmed the scope for this entry: full
-     trim only; the default publish and the JIT are unaffected. Delete this section when a release carries the
-     fix. -->
-
-**Affects 1.24.13.6, and only a Native AOT publish with `TrimMode` set to `full`.** A converted project's
-default publish, a Native AOT publish with the default trim, and a program running under the JIT are not
-affected.
-
-Go's `fmt` asks a value whether it has a `String`, `Error`, `Format` or `GoString` method, and calls it.
-Under a full trim that question is answered wrongly for a named type reached through an interface: the
-method is not found, and the value prints in its raw form. A `time.Duration` prints as a count of
-nanoseconds where Go prints `1.5s`, and a `reflect.Kind` prints as a number where Go prints `struct`. No
-error is raised, so the difference is silent.
-
-**Until the fix:** publish with the default trim, which is what a converted project does unless you
-change it. If you need a full trim, call the method yourself (`d.String()`) where the text matters. The
-fix is in the next release.
