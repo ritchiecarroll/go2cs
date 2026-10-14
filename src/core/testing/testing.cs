@@ -144,6 +144,10 @@ public static partial class testing_package
     /// </remarks>
     public interface TB
     {
+        // Go 1.26 adds ArtifactDir and Go 1.25 Attr, at the head of TB in Go's own order
+        // (testing.go's `type TB interface`); Output, from 1.25, closes it, after Context.
+        @string ArtifactDir();
+        void Attr(@string key, @string value);
         void Cleanup(Action cleanup);
         void Error(params ꓸꓸꓸany args);
         void Errorf(@string format, params ꓸꓸꓸany args);
@@ -169,6 +173,7 @@ public static partial class testing_package
         bool Skipped();
         @string TempDir();
         context_package.Context Context();
+        io_package.Writer Output();
     }
 
     /// <summary>
@@ -499,6 +504,53 @@ public static partial class testing_package
     [GoRecv] public static context_package.Context Context(this ref T t) =>
         t.RequiredExecution.Context();
 
+    /// <summary>
+    /// Go 1.25's <c>Attr</c> (testing.go:1604): Errorf on a key holding Unicode whitespace or a value
+    /// holding a carriage return or newline, each in Go's text; otherwise an <c>attr</c> event under
+    /// chatty output.
+    /// </summary>
+    [GoRecv] public static void Attr(this ref T t, @string key, @string value)
+    {
+        string k = key.ToString();
+        string v = value.ToString();
+
+        // unicode.IsSpace over the key's runes (strings.ContainsFunc); an invalid byte decodes to
+        // U+FFFD, which is not a space, as Go's range over a string reads it.
+        foreach (System.Text.Rune rune in k.EnumerateRunes())
+        {
+            if (System.Text.Rune.IsWhiteSpace(rune))
+            {
+                t.Errorf("disallowed whitespace in attribute key %q", key);
+                return;
+            }
+        }
+
+        if (v.AsSpan().IndexOfAny('\r', '\n') >= 0)
+        {
+            t.Errorf("disallowed newline in attribute value %q", value);
+            return;
+        }
+
+        t.RequiredExecution.ReportAttr(k, v);
+    }
+
+    /// <summary>Go 1.25's <c>Output</c> (testing.go:1114): a writer onto the test's log.</summary>
+    [GoRecv] public static io_package.Writer Output(this ref T t) => t.RequiredExecution.Output();
+
+    /// <summary>
+    /// Go 1.26's <c>ArtifactDir</c> (testing.go:1333): one directory per test, and
+    /// <c>Fatalf("ArtifactDir: %v", err)</c> when it cannot be made.
+    /// </summary>
+    [GoRecv] public static @string ArtifactDir(this ref T t)
+    {
+        (string? dir, string? error) = t.RequiredExecution.ArtifactDir();
+
+        if (error is not null)
+            t.Fatalf("ArtifactDir: %v", (@string)error);
+
+        return dir!;
+    }
+
     [GoRecv] public static void Parallel(this ref T t) => t.RequiredExecution.Parallel();
 
     // RecvGenerator intentionally handles ordinary receiver signatures. C# params
@@ -644,6 +696,14 @@ public static partial class testing_package
     // nil dereference. The "nothing went wrong" value for a context is a live one.
     [GoRecv] public static context_package.Context Context(this ref B b) => context_package.Background();
 
+    // Go 1.25/1.26's Attr, Output and ArtifactDir on B, compile-only like the rest of this surface:
+    // never executed, so a discarding writer and an empty directory name are enough.
+    [GoRecv] public static void Attr(this ref B b, @string key, @string value) { }
+
+    [GoRecv] public static io_package.Writer Output(this ref B b) => io_package.Discard;
+
+    [GoRecv] public static @string ArtifactDir(this ref B b) => (@string)"";
+
     /// <summary>
     /// Go 1.24's <c>B.Loop</c> — <c>for b.Loop() { … }</c>, the replacement for <c>for i := 0; i &lt; b.N; i++</c>.
     /// </summary>
@@ -782,6 +842,13 @@ public static partial class testing_package
     [GoRecv] public static void Chdir(this ref F f, @string dir) { }
 
     [GoRecv] public static context_package.Context Context(this ref F f) => context_package.Background();
+
+    // Go 1.25/1.26's Attr, Output and ArtifactDir on F, compile-only as for B above.
+    [GoRecv] public static void Attr(this ref F f, @string key, @string value) { }
+
+    [GoRecv] public static io_package.Writer Output(this ref F f) => io_package.Discard;
+
+    [GoRecv] public static @string ArtifactDir(this ref F f) => (@string)"";
 
     // Params-taking F members need the same explicit ж<F> overloads as T's and B's above (params
     // collections are ref-like Spans the RecvGenerator does not synthesize overloads for).
