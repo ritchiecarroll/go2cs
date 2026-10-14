@@ -18,7 +18,7 @@ There are two ways to get one:
   converted and published to NuGet. Add the package as a `PackageReference`, like any other. For example, the
   `hashset` module used on this page is published as `nugetgo.github.com.ritchiecarroll.hashset`:
   `dotnet add package nugetgo.github.com.ritchiecarroll.hashset`.
-- **Convert it yourself.** `go2cs -recurse <module_dir> <output_root>` converts a module and its dependencies (see
+- **Convert it yourself.** `go2cs -recurse=nuget <module_dir> <output_root>` converts a module and its dependencies (see
   [Converting a real-world module](README.md#converting-a-real-world-module)). Each Go package becomes one C#
   project; add the ones you call as `ProjectReference` items.
 

@@ -19,8 +19,8 @@ package, on Windows and Linux, and the same validation is in progress on macOS.
 
 ## 📰 NEWS — Converted code keeps Go's comments and spacing, and HTTPS works on macOS
 
-**October 14, 2026, NuGet 1.24.13.7.** Converted C# now carries Go's doc comments, in-function
-comments and blank lines where Go put them. An `https` request from a converted program works on macOS.
+**October 14, 2026, NuGet 1.24.13.7.** With `-comments`, converted C# now carries Go's doc
+comments and in-function comments where Go put them, and blank lines follow Go's in every conversion. An `https` request from a converted program works on macOS.
 Two defects in fully trimmed Native AOT publishes are fixed, including the one that printed named
 types raw. This is the last release built from Go 1.24; the next moves to Go 1.26.
 [Full announcement](NEWS.md#october-14-2026--converted-code-keeps-gos-comments-and-spacing-and-https-works-on-macos).
@@ -124,7 +124,7 @@ go2cs [options] <input_dir> [output_dir]
 
 ```shell
 go2cs -recurse=nuget module_dir out      # a module and its dependencies; the standard library comes from NuGet
-go2cs -recurse=module module_dir out     # only the module's own packages
+go2cs -recurse=module,nuget module_dir out   # only the module's own packages
 go2cs package_dir out                    # one package
 go2cs example.go out/example.cs          # one file
 go2cs -platforms linux/amd64 -recurse=nuget module_dir out-linux    # convert for another operating system
@@ -138,8 +138,8 @@ beside the Go input.
 | Option | What it does |
 |:--|:--|
 | `-recurse=nuget` | Convert a module and its third-party dependencies, in dependency order. The standard library, the runtime and the source generators are NuGet package references, so nothing is staged on your machine. Start here. |
-| `-recurse=module` | Convert only the module's own packages. Use it when a dependency does not convert yet. |
-| `-tests` | Also convert the Go test suite. With `-test-action all`, build it, run it, and compare its results with `go test`. |
+| `-recurse=module,nuget` | Convert only the module's own packages, and reference the dependencies without converting them. Use it when a dependency does not convert yet; the solution builds once the dependencies are in place. |
+| `-tests` | Also convert the Go test suite. With `-test-action all`, build it, run it, and compare its results with `go test`. For a module it takes plain `-recurse`, not `=nuget` or `=module`. |
 | `-platforms <os/arch>` | The platform to convert for. It defaults to the machine you are on. |
 | `-tags <list>` | The build tags to select files with, as in `go build -tags`. |
 | `-comments` | Carry the Go comments into the C#. |
@@ -186,7 +186,8 @@ NuGet packages. Wondering which Go modules make good conversions? The
 ## Status
 
 The whole Go standard library converts and compiles as .NET assemblies, and every package that can be
-validated passes its own Go test suite in C#, on Windows and Linux.
+validated matches its own Go test suite in C#, verdict for verdict, with every difference disclosed, on
+Windows and Linux.
 [Validated Test Packages](ValidatedTestPackages.md) carries the current counts, package by package, and
 the [Roadmap](Roadmap.md) says where the project stands and what comes next.
 

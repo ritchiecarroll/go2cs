@@ -196,16 +196,17 @@ code. To convert the files a plain `go build` selects instead, pass `-module-saf
 ## Optional: convert the module only, and deal with its dependencies later
 
 A dependency closure is not always convertible today — a large third-party SDK can hit a converter defect,
-or pull in a package go2cs cannot yet handle — and under plain `-recurse` that blocks the packages you
-actually came for. `-recurse=module` narrows the **scope** to the input module's own packages:
+or pull in a package go2cs cannot yet handle — and under `-recurse=nuget` that blocks the packages you
+actually came for. Adding `module` narrows the **scope** to the input module's own packages, and `nuget`
+keeps the NuGet references the walkthrough uses:
 
 ```shell
 cd path/to/colordemo
-go2cs -recurse=module . csharp
+go2cs -recurse=module,nuget . csharp
 ```
 
-Every package under the module's own `go.mod` converts, in dependency order, exactly as it would under the
-full `-recurse`; every third-party package is *referenced* — into `csharp/pkg/<import-path>`, the same place
+Every package under the module's own `go.mod` converts, in dependency order, exactly as it would under
+`-recurse=nuget`; every third-party package is *referenced* — into `csharp/pkg/<import-path>`, the same place
 the full run would have converted it — but never converted, so nothing about it can fail the run. The
 converter prints the referenced-but-unconverted list when it finishes:
 
@@ -220,8 +221,8 @@ Third-party packages referenced but NOT converted (-recurse=module): 4
 ```
 
 Those references are unresolved until something is written at those paths, so the generated solution does
-**not** build yet — the mode's deliberate trade. Re-running the same conversion **without** `=module` (once
-the dependencies convert) writes them at exactly those paths and resolves the references; the app's own
+**not** build yet — the mode's deliberate trade. Re-running the conversion **without** `module`, as
+`-recurse=nuget` (once the dependencies convert), writes them at exactly those paths and resolves the references; the app's own
 converted `.cs` and `.csproj` come out byte-identical either way, so nothing you have done to them is lost.
 
 ## Optional: build against a local standard library
