@@ -105,9 +105,11 @@ built the exe. That one is H1 step 1's, and it is verified by running, never by 
 behind each "(ruled)" remain recorded in that plan's §8. **Steps marked GATE are pass/fail and block
 the next; steps marked ⟲ are re-measured at every migration and never carried forward.**
 
-**Four orderings are not negotiable**, and each has a mechanical reason rather than a preference (the fourth is the
-AMENDED 2026-09-07 block below: the outgoing corpus's final release ships ahead of the H1↔H2 pair).
+**Five orderings are not negotiable**, and each has a mechanical reason rather than a preference (the fourth is the
+AMENDED 2026-09-07 block below: the outgoing corpus's final release ships ahead of the H1↔H2 pair; the fifth is the
+AMENDED 2026-10-14 block after it: toolchain-adjacent pins land before that release).
 *(Edited in place 2026-09-26, §7 fix A1: this line read "Three" after the fourth ordering was added below it.)*
+*(Edited in place 2026-10-14, Q13 ruled: this line read "Four" before the fifth ordering moved here from H1.)*
 
 - **The toolchain step and the pin bump land as ONE reviewable pair.** Between them the binary claims
   the new release (its embedded runtime version is what the NuGet compatibility guard reads) while
@@ -152,6 +154,15 @@ Everything else may be reordered by the executing lane.
 > at the anchor are neither carried forward nor owed anything special: **H10 re-derives every row from
 > scratch at the new release regardless**, so they re-bank there on exactly the footing of the rows
 > that did bank.
+
+> **AMENDED 2026-10-14 — a FIFTH ordering: toolchain-adjacent pins land BEFORE the outgoing corpus's final
+> release, never inside the hop.** A side seat that moves the .NET SDK `global.json`, the emitted `LangVersion` or a
+> C# keyword escape lands, with its regeneration, ahead of the fourth ordering's release. Inside a hop, H5 would
+> measure the csproj files such a pin moves (about 1,364 at TRAIN K) instead of inheriting them. **Ruled as decided
+> by events** (COORD, 2026-10-14, closing `phase4/NOTES-next-hop.md` §5 Q13): TRAIN K seated both pins this way, read
+> from master's first-parent merges: S1, the .NET pin (NOTES E1), merge `53eef3cda8` (seat `272afeef93`) with its
+> regeneration `4016a2269c`; S2, the C# 15 escape, merge `d87e4f883c` (seat `ac2fefdf88`). Both first shipped in
+> 1.24.13.3, four releases before the final 1.24.13.7. This rule stood in H1 as a "Default order" until then.
 
 > **AMENDED 2026-10-13 — a hop that crosses TWO Go releases.** *(Drafted ahead of its first use, the
 > go1.24.13 → go1.26.9 hop; it takes effect when that hop's H1 starts.)*
@@ -272,6 +283,9 @@ A per-box record, taken and read before H0:
 
 ### H0 — Baseline capture ⟲
 
+*(A release fold captures ONE baseline here, at the outgoing release; there is none at the skipped one: §2, AMENDED
+2026-10-13.)*
+
 Capture, on the **outgoing** toolchain and the **new** converter build, everything the migration will
 diff against: the hand-own `.cs.auto` baseline, the package census, the roster snapshot, the
 disclosure manifests — and three comparands later stages otherwise reconstruct mid-hop: the outgoing
@@ -292,11 +306,16 @@ the differential. This is a ruled decision, not a preference.
 
 ### H1 — Toolchain provisioning **GATE**
 
-**Default order** (a COORD proposal, NOTES §5 Q13, unruled at 172d437e66; TRAIN K seated it this way): any side seat
-that moves a toolchain-adjacent pin (the .NET SDK `global.json`, the emitted `LangVersion`, a C# keyword escape) lands
-and regenerates before the outgoing corpus's final release, never inside the hop.
+*(A release fold installs BOTH toolchains here, side by side, the skipped release on the checkpoint's box at least;
+H2 pins the target only: §2, AMENDED
+2026-10-13.)*
+
+**Toolchain-adjacent pins** (the .NET SDK `global.json`, the emitted `LangVersion`, a C# keyword escape) land and
+regenerate before the outgoing corpus's final release, never inside the hop: §2's FIFTH ordering.
 *(Edited in place 2026-10-01, §7 lesson 47: inside a hop, H5 would measure the csproj files such a pin moves instead
 of inheriting them. Once Q13 is ruled, cite the ruling here or move the rule into §2's orderings.)*
+*(Edited in place 2026-10-14: Q13 RULED AS DECIDED BY EVENTS; the rule moved to §2, AMENDED 2026-10-14. This
+paragraph read "Default order (a COORD proposal, NOTES §5 Q13, unruled at 172d437e66; TRAIN K seated it this way)".)*
 
 1. Install the target release **side-by-side**; confirm the target actually **executes** — run
    `<target-root>/bin/go version` and require its OUTPUT to name the exact target. **Reading
@@ -355,7 +374,8 @@ of inheriting them. Once Q13 is ruled, cite the ruling here or move the rule int
    `GO111MODULE=off` cancels a `GOTOOLCHAIN` redirect.
 7. **`go vet` under the new directive is step 2's own bill**: the directive alone enables the new release's vet
    checks, and their fixes block step 4.
-8. **Read the release's GODEBUG default changes against the test host** (1.24 dropped `winsymlink=0`, refusing
+8. **Read the release's (under a release fold, the skipped release's too) GODEBUG default changes against the test
+   host** (1.24 dropped `winsymlink=0`, refusing
    junction-staged hosts).
 *(Edited in place 2026-09-26, §7 lessons 7-9: steps 6-8 added.)*
 
@@ -484,6 +504,10 @@ the 1.23.12 pin; a cost-canary or sweep leg here takes the two-pin shape above, 
 ⚠ **Fifth arm (2026-09-08, measured on two hosts): CNR and the behavioral suite run under the two-pin PAIRING — environment re-exported to 1.23.12 (`GOROOT`, its `bin` first on PATH), `GOTOOLCHAIN` left at auto — with ZERO drift as the expectation, and the eight-member artifact set is retired from batteries.** The module graph enforces the pairing: `src/go2cs/go.mod` says `go 1.24.13` while every corpus module says `go 1.23`, so Go's toolchain rule switches ONLY the converter's build up and every behavioral or corpus package loads at 1.23.12. CNR under that shell read 722 byte-identical / 0 NOT MEASURED with the converter still go1.24.13 afterwards (i9 `ef05467a3`); the behavioral runner read all eight artifact projects green in all four phases, `Δruntime` present in every emission, goldens byte-matched, tree clean (the i7). Five mechanics ride with it. (1) The runner's staleness predicate reads `go env GOVERSION` at the RUNNER's cwd (`src/tests/Behavioral`, no module: 1.23.12) against the binary's embedded 1.24.13, so it REBUILDS the converter on every invocation — ~1.8 s, the content-addressed cache re-links only — which fails safe (never a stale binary, never a Transpile skip); CNR is immune by its unconditional `go build`. (2) The pin is ASSERTED from a directory with NO `go.mod`: inside `src/go2cs` both `go version` and `go env GOROOT` report the SWITCHED toolchain under auto while `command -v go` still resolves under the pinned root (i9 `0eef5b66c`), and the produced binary is verified with `go version <exe>`, which no cwd can switch. (3) `GOTOOLCHAIN=local` BREAKS the single-root pairing outright (the converter cannot be built under the run pin); a SPLIT pin naming `GOROOT_BUILD=<sdk>/go1.24.13` on each build and `GOROOT_CONVERT=<sdk>/go1.23.12` on each conversion needs no switch and works under either setting (G `8f73ed9a6`) — the right spelling for a hand-invoked two-arm instrument. (4) The conversion half still reaches `go` one process down — the converter's package loader shells out to it — so a module declaring ABOVE the convert pin switches SILENTLY under auto (a probe declaring `go 1.24.13` loaded the 1.24.13 stdlib with `GOROOT` naming 1.23.12; under `local` it refused verbatim; i9 `28b5ba6b4`): the corpus is held at 1.23.12 by its own `go 1.23` directives, not by the naming of roots, and an end-user `-recurse` module or a hopped corpus against a stale pin is exactly the case that moves. (5) The switch resolves through the MODULE CACHE (`golang.org/toolchain@v0.0.1-go1.24.13`), so a cold or offline box fetches at that point. The 1.24.13-pinned CNR stays as the alias defect's own instrument — the fix's acceptance is that reading dropping from eight to zero — never as a battery leg.
 
 ### H3 — Package census ⟲
+
+*(A release fold derives this stage's census, new package IDs and relocations at the target, against the outgoing
+release: §2, AMENDED
+2026-10-13.)*
 
 Diff the conversion queue's package set against the outgoing corpus: **added**, **removed**,
 **renamed or promoted**, and **experiment-gated and therefore deliberately absent**. The last category
@@ -1428,6 +1452,9 @@ Commit the regenerated file with the change that moved it; re-run if a later com
 
 
 ### H6 — The hand-own re-audit ⟲ **GATE**
+
+*(A release fold's audit records the attribution column here; the completeness gate is unchanged: §2, AMENDED
+2026-10-13.)*
 
 The step that distinguishes a corpus *upgrade* from a corpus *regeneration*, and the one a migration
 is most likely to skip **because everything compiles without it**.
@@ -3574,6 +3601,10 @@ FROM THE CLOSE SEAT ITSELF.** The seat stopped three times and each stop was rul
 
 ### H11 — Publication and compatibility guards **GATE**
 
+*(A release fold deprecates removed package IDs against what the outgoing releases actually published; the skipped
+release published nothing: §2, AMENDED
+2026-10-13.)*
+
 - The published version is the pinned Go release plus the build counter, already set at H2.
 - **Verify EXISTENCE-PLUS-MONOTONICITY with a scripted comparison before the first publish**, never
   believe it. A non-monotonic sequence on a public feed is not correctable. Whether an unreadable origin may degrade
@@ -4461,7 +4492,9 @@ healthy run look hung — and, in the other direction, what lets a hung one look
     until COORD rules NOTES-next-hop.md §5 Q13. Why: inside a hop, H5 would measure about 1,364 moved csproj instead of
     inheriting them. **Step text:** H1.
     <!-- 53eef3cda8; d87e4f883c; TRAIN K 4016a2269c; NOTES-next-hop.md E1, E2. Q13 is a COORD proposal, unruled at
-    172d437e66 (NOTES-next-hop.md:520); TRAIN K seated S1 and S2 this way. -->
+    172d437e66 (NOTES-next-hop.md:520); TRAIN K seated S1 and S2 this way.
+    2026-10-14: Q13 RULED AS DECIDED BY EVENTS (COORD). The rule's home is now §2, AMENDED 2026-10-14 (the fifth
+    ordering), which cites the merges read from master's first-parent line. -->
 48. **At H0, before H2's pin bump, commit each UNBANKED row's reading as matched / disclosed / undisclosed.** The
     denominator is their sum. Name each undisclosed test and its disposition, and mark CONTESTED any disclosure disputed
     at that reading. Why: reflect circulated as 326 of 385 against a record reading 388, and unique's "4 of 19" was
