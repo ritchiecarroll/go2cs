@@ -15,16 +15,12 @@ partial class utf8_package {
 
 // Numbers fundamental to the encoding.
 public static UntypedInt RuneError => /* '\uFFFD' */ 65533; // the "error" Rune or "Unicode replacement character"
-
 public static UntypedInt RuneSelf => 0x80; // characters below RuneSelf are represented as themselves in a single byte.
-
 public static UntypedInt MaxRune => /* '\U0010FFFF' */ 1114111; // Maximum valid Unicode code point.
-
 public static UntypedInt UTFMax => 4; // maximum number of bytes of a UTF-8 encoded Unicode character.
 
 // Code points in the surrogate range are not valid for UTF-8.
 internal static UntypedInt surrogateMin => 0xD800;
-
 internal static UntypedInt surrogateMax => 0xDFFF;
 
 internal static UntypedInt t1 => 0b00000000;
@@ -33,15 +29,24 @@ internal static UntypedInt t2 => 0b11000000;
 internal static UntypedInt t3 => 0b11100000;
 internal static UntypedInt t4 => 0b11110000;
 internal static UntypedInt t5 => 0b11111000;
+
 internal static UntypedInt maskx => 0b00111111;
 internal static UntypedInt mask2 => 0b00011111;
 internal static UntypedInt mask3 => 0b00001111;
 internal static UntypedInt mask4 => 0b00000111;
+
 internal static UntypedInt rune1Max => /* 1<<7 - 1 */ 127;
 internal static UntypedInt rune2Max => /* 1<<11 - 1 */ 2047;
 internal static UntypedInt rune3Max => /* 1<<16 - 1 */ 65535;
+
+// The default lowest and highest continuation byte.
 internal static UntypedInt locb => 0b10000000;
 internal static UntypedInt hicb => 0b10111111;
+
+// These names of these constants are chosen to give nice alignment in the
+// table below. The first nibble is an index into acceptRanges or F for
+// special one-byte cases. The second nibble is the Rune length or the
+// Status for the special one-byte case.
 internal static UntypedInt xx => 0xF1; // invalid: size 1
 internal static UntypedInt @as => 0xF0; // ASCII: size 1
 internal static UntypedInt s1 => 0x02; // accept 0, size 2
@@ -56,42 +61,26 @@ internal static UntypedInt runeErrorByte0 => /* t3 | (RuneError >> 12) */ 239;
 internal static UntypedInt runeErrorByte1 => /* tx | (RuneError>>6)&maskx */ 191;
 internal static UntypedInt runeErrorByte2 => /* tx | RuneError&maskx */ 189;
 
-//   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
-// 0x00-0x0F
-// 0x10-0x1F
-// 0x20-0x2F
-// 0x30-0x3F
-// 0x40-0x4F
-// 0x50-0x5F
-// 0x60-0x6F
-// 0x70-0x7F
-//   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
-// 0x80-0x8F
-// 0x90-0x9F
-// 0xA0-0xAF
-// 0xB0-0xBF
-// 0xC0-0xCF
-// 0xD0-0xDF
-// 0xE0-0xEF
-// 0xF0-0xFF
 // first is information about the first byte in a UTF-8 sequence.
 internal static array<uint8> first = new uint8[]{
-    @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as,
-    @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as,
-    @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as,
-    @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as,
-    @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as,
-    @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as,
-    @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as,
-    @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as,
-    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx,
-    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx,
-    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx,
-    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx,
-    xx, xx, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1,
-    s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1,
-    s2, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s4, s3, s3,
-    s5, s6, s6, s6, s7, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx
+    //   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+    @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, // 0x00-0x0F
+    @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, // 0x10-0x1F
+    @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, // 0x20-0x2F
+    @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, // 0x30-0x3F
+    @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, // 0x40-0x4F
+    @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, // 0x50-0x5F
+    @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, // 0x60-0x6F
+    @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, // 0x70-0x7F
+    //   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, // 0x80-0x8F
+    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, // 0x90-0x9F
+    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, // 0xA0-0xAF
+    xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, // 0xB0-0xBF
+    xx, xx, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, // 0xC0-0xCF
+    s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, // 0xD0-0xDF
+    s2, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s4, s3, s3, // 0xE0-0xEF
+    s5, s6, s6, s6, s7, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx // 0xF0-0xFF
 }.array();
 
 // acceptRange gives the range of valid values for the second byte in a UTF-8
@@ -184,8 +173,7 @@ public static (rune r, nint size) DecodeRune(slice<byte> p) {
     if (b1 < accept.lo || accept.hi < b1) {
         return (RuneError, 1);
     }
-    if (sz <= 2) {
-        // <= instead of == to help the compiler eliminate some bounds checks
+    if (sz <= 2) { // <= instead of == to help the compiler eliminate some bounds checks
         return ((rune)(((rune)((byte)(p0 & (byte)mask2)) << (int)(6)) | (rune)((byte)(b1 & (byte)maskx))), 2);
     }
     var b2 = p[2];
@@ -233,8 +221,7 @@ public static (rune r, nint size) DecodeRuneInString(sstring s) {
     if (s1 < accept.lo || accept.hi < s1) {
         return (RuneError, 1);
     }
-    if (sz <= 2) {
-        // <= instead of == to help the compiler eliminate some bounds checks
+    if (sz <= 2) { // <= instead of == to help the compiler eliminate some bounds checks
         return ((rune)(((rune)((byte)(s0 & (byte)mask2)) << (int)(6)) | (rune)((byte)(s1 & (byte)maskx))), 2);
     }
     var s2 = s[2];
@@ -359,7 +346,6 @@ public static nint RuneLen(rune r) {
     case {} when r <= MaxRune: {
         return 4;
     }}
-
     return -1;
 }
 
@@ -409,7 +395,6 @@ internal static nint encodeRuneNonASCII(slice<byte> p, rune r) {
             return 3;
         }}
     }
-
 }
 
 // AppendRune appends the UTF-8 encoding of r to the end of p and
@@ -441,7 +426,6 @@ internal static slice<byte> appendRuneNonASCII(slice<byte> p, rune r) {
             return append(p, (byte)(runeErrorByte0), (byte)(runeErrorByte1), (byte)(runeErrorByte2));
         }}
     }
-
 }
 
 // RuneCount returns the number of runes in p. Erroneous and short
@@ -483,6 +467,7 @@ public static bool Valid(slice<byte> p) {
     // when generating code for p[8:], bringing it to parity with
     // ValidString, which was 20% faster on long ASCII strings.
     p = p.slice(0, len(p), len(p));
+
     // Fast path. Check for and skip 8 bytes of ASCII characters per iteration.
     while (len(p) >= 8) {
         // Combining two 32 bit loads allows the same code to be used
@@ -603,7 +588,6 @@ public static bool ValidRune(rune r) {
     case {} when surrogateMax < r && r <= MaxRune: {
         return true;
     }}
-
     return false;
 }
 
