@@ -22,7 +22,8 @@ There are two ways to get one:
   [Converting a real-world module](README.md#converting-a-real-world-module)). Each Go package becomes one C#
   project; add the ones you call as `ProjectReference` items.
 
-The C# you write is the same either way.
+The C# you write is the same either way. The `go.*` packages are built and versioned together, so use one version
+of them in a project.
 
 If you convert and publish a module of your own, its nuget.org page is covered in
 [Publishing your conversion: the package page](ConvertingAModule.md#publishing-your-conversion-the-package-page).

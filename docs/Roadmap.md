@@ -199,8 +199,7 @@ library and the source generators:
 - **Later stages** cover method sets and stack frames.
 
 **The cost today is real.** With the default trim, Native AOT compiles every `go.*` assembly a program
-references in full. A program that uses `fmt` and `reflect` took about five and a half hours to publish
-on a six-core `win-x64` machine and produced an executable of about 370 MB, which ran correctly.
+references in full, so a publish takes hours and the executable is large.
 [Known issues](KnownIssues.md#a-native-aot-publish-of-a-program-that-references-the-packages-is-slow-and-large)
 has the measurements. A build, `dotnet run` and a publish without Native AOT are not affected.
 
