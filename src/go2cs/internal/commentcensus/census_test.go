@@ -203,3 +203,28 @@ func TestPreludeSeparatorIsNotADefect(t *testing.T) {
 		t.Errorf("bad: %v and %d separators, want %v and 0 separators", got, separators, want)
 	}
 }
+
+// The converter marks a function that forwards a //go:linkname push with a leading `/*linkname*/` (the
+// readProfile and mach_vm_region forwarders in runtime/pprof). The lexer reduces that comment to one space, so a
+// declaration predicate anchored at column 0 never saw these lines, and every such function was counted as
+// top:unmapped:func with its blank lines unread. The marker must not hide the declaration, and it must not make
+// an indented body statement or a line that only opens with a comment into one.
+func TestLinknameMarkedDeclarationIsADeclaration(t *testing.T) {
+	cs := lexCS(strings.Join([]string{
+		"/*linkname*/ internal static partial int32 mach_vm_region(ж<uint64> address) {",
+		"    return go.runtime_package.mach_vm_region(address);",
+		"}",
+		"internal static int32 plain(nint pid) {",
+		"    ref var args = ref heap<proc_args>(out var Ꮡargs);",
+		"/* note */ x = 1;",
+		"}",
+	}, "\n"))
+
+	want := []bool{true, false, false, true, false, false, false}
+
+	for i, w := range want {
+		if got := isCSDecl(cs, i+1); got != w {
+			t.Errorf("line %d %q: isCSDecl = %v, want %v", i+1, cs.lines[i], got, w)
+		}
+	}
+}

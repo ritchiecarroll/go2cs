@@ -813,7 +813,14 @@ var preludeRe = regexp.MustCompile(`(DerefOrNull\(\);|heap<.*>\(out var \S+\);|=
 var csDeclRe = regexp.MustCompile(`^(\[[^\]]*\]\s*)*(public|internal|private|protected|partial|static|readonly|unsafe|const|ref|file|new)\b`)
 
 func isCSDecl(cs *csFile, ln int) bool {
-	return csDeclRe.MatchString(cs.codeText[ln-1]) && !strings.HasPrefix(cs.codeText[ln-1], "partial class ") && !strings.Contains(cs.codeText[ln-1], "_package")
+	code := cs.codeText[ln-1]
+
+	// A linkname forwarder opens with the converter's `/*linkname*/` marker, which the lexer reduces to a space.
+	if strings.HasPrefix(cs.lines[ln-1], "/*linkname*/") {
+		code = strings.TrimLeft(code, " ")
+	}
+
+	return csDeclRe.MatchString(code) && !strings.HasPrefix(code, "partial class ") && !strings.Contains(code, "_package")
 }
 
 // csBodyRange returns the lines of the brace body that opens on or after line ln: its opening and closing lines.
