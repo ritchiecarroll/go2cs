@@ -138,7 +138,7 @@ Columns:
 
 | hand-own (kind) | upstream | L1 | L2 | e2e | decl | owned | first class | born |
 |---|---|--:|--:|--:|--:|---|---|---|
-| `runtime/mcleanup.cs` (whole file) | `runtime/mcleanup.go` | +570/−4 | +106/−27 | +660/−15 | 31/9 | L1, L2: `AddCleanup`, `Cleanup.Stop` | **new subsystem** (1.25 cleanup queue and its goroutines, beside the A11 managed cleanup) + semantic (1.26 `cleanupFn`, `callCleanup`) | both |
+| `runtime/mcleanup.cs` (whole file) | `runtime/mcleanup.go` | +570/−4 | +106/−27 | +660/−15 | 31/9 | L1, L2: `AddCleanup`, `Cleanup.Stop` | **new subsystem** (1.25 cleanup queue and its goroutines, beside the A11 managed cleanup) + semantic (1.26 `cleanupFn`, `callCleanup`). The hand-own also carries two bodies P2 pushed at the hop, `unique_runtime_blockUntilEmptyCleanupQueue` and `sync_test_runtime_blockUntilEmptyCleanupQueue`. The H6 rewrite keeps both (§6.1) | both |
 | `runtime/mgc_impl.cs` | `runtime/mgc.go` | +75/−60 | +396/−63 | +464/−116 | 15/20 | — | **new subsystem** (1.26 goroutine leak GC, `gcBeginWork`/`gcEndWork`); semantic (1.25 `workType`, unique-map cleanup moved out) | both, 1.26-heavy |
 | `runtime/runtime2.cs` (whole file) | `runtime/runtime2.go` | +85/−68 | +251/−60 | +336/−128 | 15/27 | L1: `_panic`, `g`, `gobuf`, `m`, `p`, `schedt`, `isIdleInSynctest`, `ncpu`, `waitReasonStrings`; L2: `_Psyscall`, `g`, `m`, `p`, `schedt`, `sudog`, … | **semantic** (struct layouts on both legs; 1.26 `_Psyscall` retired, `_Gleaked`/`_Gdeadextra`, `maybeTraceablePtr`, `mWeakPointer`) | both |
 | `runtime/runtime2_impl.cs` | `runtime/runtime2.go` | (same upstream) | | | 15/27 | L2: `maybeTraceableChan.set`, `maybeTraceablePtr.set`, `.uintptr` | semantic, read with `runtime2.cs` as one review | both |
@@ -218,3 +218,213 @@ selects.
 - No attribution of RED25 or RED26 sites. That is §4 steps 3 to 5, on the i9.
 - The H6 audit file (`AUDIT-h6-handown-go126.md`, per `check-h6-completeness.ps1`'s default) is not
   created. This record is input to it.
+
+## 6. DRAFT H6 notes, C1's six large files (2026-10-14, read at `bc9f09bf50`)
+
+> Added by C1 at COORD's S2 ruling. **Still DRAFT.** These are code-reading notes for each file: what the
+> hand-own models today, what upstream changes in Go terms, and the member-level edits expected at H6.
+> They are not the review; H6 re-reads each against the H5 emission. §6.1's design choice was put to
+> COORD as a proposal before H5.
+
+### 6.1 `runtime/mcleanup.cs` (whole file)
+
+**What the hand-own models.** A11's managed cleanup:
+- `AddCleanup` registers a sentinel whose .NET finalizer hands the body to `GoFinalizerQueue`'s single
+  runner (`mfinal.cs`).
+- A gate it shares with `SetFinalizer` holds a cleanup until its object's finalizer has run.
+- `Stop` cancels by id.
+- Its header names four divergences. The first is that cleanups run **sequentially** on the fing
+  analogue, where Go runs them concurrently.
+- Since the hop it also carries P2's two pushed bodies:
+  - `unique_runtime_blockUntilEmptyCleanupQueue`;
+  - `sync_test_runtime_blockUntilEmptyCleanupQueue`.
+
+  Both wait on the finalizer queue.
+
+**Upstream.**
+- **1.25** adds the cleanup queue: `gcCleanups` of type `cleanupQueue`, with `cleanupBlock` lists on
+  `lfnode` stacks and up to `max(GOMAXPROCS/4, 1)` dedicated goroutines (`runCleanups`), fed at sweep
+  from `mspan` specials. It also adds `debug.checkfinalizers` context records.
+- **1.26** stores a `cleanupFn` (`call`, `fn`, `arg`; the arg is boxed off the tiny allocator) in place
+  of a bare funcval, and adds two `AddCleanup` panics, each with a test:
+  - `ptr is within arg` (`TestCleanupUnreachablePointer`);
+  - `cleanup function closes over ptr` (`TestCleanupUnreachableClosure`).
+
+  `TestCleanupLost` queues 10,000 × GOMAXPROCS cleanups and needs them all within a 10 s drain.
+
+**The fact that decides the shape: the queue is not private to `mcleanup.go`.** At 1.26.9, eight
+converted runtime files reach into it:
+
+| file | what it uses |
+|---|---|
+| `metrics.go` | `readQueueStats` |
+| `mgc.go` | `lockInit(&gcCleanups.lock)` and `readQueueStats` |
+| `mgcmark.go` | walks `gcCleanups.all` as `cleanupBlock` (`alllink`, `n`, `cleanups`); `cleanupBlockPtrMask` and `cleanupFnPtrMask` |
+| `mgcsweep.go` | `flush` |
+| `mheap.go` | `specialCleanup.cleanup` of type `cleanupFn`; `enqueue` |
+| `mprof.go` | `running` |
+| `proc.go` | `needsWake`, `wake`, and `queued += pp.cleanupsQueued` |
+| `export_test.go` | `blockUntilEmpty` |
+
+So the converted runtime does not compile at 1.25.14 or 1.26.9 until the hand-own declares these.
+`runtime2.cs` owes `p.cleanupsQueued` (§6.3).
+
+**Expected edits.** These assume option A of the proposal, the surface only; the alternatives are B
+(port the queue) and C (a managed pool).
+- **Declare Go's types** from `mcleanup.cs.auto`: `cleanupFn`, `cleanupBlockHeader`, `cleanupBlock`,
+  `cleanupQueue`, `gcCleanups`, and both pointer masks.
+- **Write the methods as managed shims:**
+
+  | member | shim |
+  |---|---|
+  | `enqueue`, `flush` | unreachable: no `mspan` specials exist here |
+  | `needsWake` | false |
+  | `wake` | no-op |
+  | `all` | stays nil, so `mgcmark`'s root loop runs zero times |
+  | `readQueueStats` | real counts, from two counters on the cleanup path |
+  | `blockUntilEmpty` | the same finalizer-queue wait as P2's two bodies, which are kept |
+
+- **Panics.** The referent guard splits its message: `equal to arg` when the two pointer values are
+  equal, `within arg` when they are one allocation. A delegate-`Target` scan (the closure object and
+  any nested display classes) refuses a cleanup that closes over the referent.
+- **Divergence 3 narrows to that split.** Divergence 1 stays, unless C is ruled.
+
+### 6.2 `runtime/mgc_impl.cs` (companion)
+
+**What the hand-own models.** One body, `gcTestIsReachable` over the CLR heap. The machinery under it
+stays converted and dead.
+
+**Upstream.** `gcTestIsReachable` is unchanged on both legs. mgc.go's delta is all in converted code:
+- **1.25:** `workType`; the unique-map cleanup moved out (`unique_runtime_registerUniqueMapCleanup`
+  removed); `gcBgMarkWorkerNodePadded`.
+- **1.26:**
+  - the goroutine-leak GC (`goroutineLeakGC`, `findGoroutineLeaks`, `findMaybeRunnableGoroutines`,
+    `g.isMaybeRunnable`, linknamed from `runtime/pprof` and behind the off `GoroutineLeakProfile`
+    experiment);
+  - `gcBeginWork` and `gcEndWork`;
+  - `setSyncObjectsUntraceable` and `gcRestoreSyncObjects`, which use the new `maybeTraceablePtr`
+    (§6.3);
+  - mark-worker scheduling (`gcShouldScheduleWorker`).
+
+**Expected edits.** None to the companion.
+- **Watch at H5:** whether the converted `mgc.cs` compiles against the managed runtime's model of `allgs`
+  and `g` status, `_Gleaked` included.
+- **The review pair:** `mbitmap` (G) and this file review Green Tea's mark bits together, once H5 names
+  the `mgcmark_*` file (`go list runtime` at 1.26.9 selects `mgcmark_greenteagc.go`).
+
+### 6.3 `runtime/runtime2.cs` (whole file) and `runtime2_impl.cs` (companion)
+
+**What the hand-owns model.**
+- `runtime2.cs` carries the scheduler structs (`g`, `m`, `p`, `schedt`, `sudog`, `_panic`, `gobuf`)
+  as the managed runtime lays them out.
+- `runtime2_impl.cs` carries the pointer-as-integer types (`guintptr`, `puintptr`, `muintptr`) and
+  `setGNoWB` and `runqempty`.
+
+**Upstream, field by field** (a `go/ast` struct differ):
+
+| struct | 1.24.13 → 1.25.14 | 1.25.14 → 1.26.9 |
+|---|---|---|
+| `g` | + `syncSafePoint`, `runningCleanups`, `bubble`, `valgrindStackID`; − `syncGroup` | + `fipsOnlyBypass`, `ditWanted`, `secret`, `xRegs` |
+| `m` | − two padding `_` | + `signalSecret`, `idleNode`, `ditEnabled`, `self`; − `libcall` (windows now uses `winsyscall winlibcall`) |
+| `p` | + `cleanups`, `cleanupsQueued` | + `oldm`, `nextGCMarkWorker`, `goroutinesCreated`, `xRegs` |
+| `schedt` | + `pollingNet`, `customGOMAXPROCS`; − `runqsize` | + `nGsyscallNoP`, `goroutinesCreated` |
+| `_panic` | + `repanicked` | + `gopanicFP`; − `argp` |
+| `gobuf` | − `ret` | — |
+| `sudog` | — | `elem` becomes `maybeTraceablePtr`, `c` becomes `maybeTraceableChan` (types change, names do not) |
+
+Also changed in that file:
+- **1.25** adds three wait reasons, `mPadded` and `numCPUStartup` (`ncpu` goes).
+- **1.26** adds the goroutine states `_Gleaked`, `_Gdeadextra` and their scan twins, and retires
+  `_Psyscall` to `_Psyscall_unused`.
+
+**Expected edits.** Port each field change into `runtime2.cs`. Every `− x` is a field that converted
+code stops naming, and every `+ x` is one it starts naming. Then:
+- `maybeTraceablePtr`, `maybeTraceableChan` and `mWeakPointer` arrive as new pointer-as-integer
+  wrappers: an `uintptr` with a traceable bit. They belong beside `guintptr` in `runtime2_impl.cs`
+  under the same managed-token rule, and are the likeliest new arm-2a site in this file.
+- `sudog.elem`'s type change reaches every converted channel and select site through `.get()` and
+  `.set()`. That is H5's compile, but the wrapper's semantics are decided here.
+- The `_Psyscall` retirement changes the P-state model the scheduler converts against. Read it with
+  G's `proc.go` reading.
+
+### 6.4 `runtime/panic_impl.cs` (companion)
+
+**What the hand-own models.** `throw` and `fatal`, the fatal path (DESIGN-fatal-path.md). It prints Go's
+`fatal error:` line and exits through Go's own path, without `getcallerpc`.
+
+**Upstream.**
+- `throw` is unchanged.
+- `fatal` (1.26) reads `getg()._panic` and calls `printPreFatalDeferPanic(p)` before the fatal line.
+- The rest of `panic.go`'s delta is converted code:
+  - 1.25's `deferproc` family and `cgroup_throw`;
+  - 1.26's bounds panics by PCDATA. `panicBounds`, `panicBounds32` and `panicBounds64` decode
+    `abi.BoundsDecode` from the caller's PC and replace the 17 `panicIndex` and `panicSlice*` entry
+    points; the `goPanic*` family is re-routed through them.
+
+**Expected edits.**
+- **`fatal`:** take the `printPreFatalDeferPanic` call when `_panic` is non-nil. It prints the chain of
+  panics in flight when the fatal came (a repanicked value once), which is visible output.
+- **Bounds panics:** these need no hand-own, but a watch at H5. The converter emits its own bounds checks,
+  so whether any converted call site still names `goPanicIndex` and the others decides if the PCDATA
+  path is reachable at all. If it is, it cannot work here: there is no PCDATA. The `goPanic*` bodies
+  must then keep their pre-1.26 direct form.
+
+### 6.5 `runtime/trace_impl.cs` (companion)
+
+**What the hand-own models.** `StartTrace`, `StopTrace` and `ReadTrace`, driving golib's
+`ExecutionTracer` (Q28). It writes Go's v2 format as `go 1.23 trace` and is accepted by `go tool trace`.
+
+**Upstream.**
+- `StartTrace` (1.26) takes the clock frequency before stopping the world, and drops 1.24's long
+  stop-the-world rationale.
+- `ReadTrace` gains a named result.
+- `internal/trace/version` adds `Go125` and `Go126`; `Current` is `Go126`. `Go123` is still parsed.
+- 1.25 adds `runtime/trace`'s **flight recorder** and subscribe API, which linkname four runtime entry
+  points: `traceAdvance`, `readTrace`, `traceClockNow` and `traceClockUnitsPerSecond`.
+
+**Expected edits.**
+- The three owned bodies change little.
+- **The four new linkname targets are the item.** As converted, they reach the converted tracer's
+  buffers, which do not run here. So `trace.FlightRecorder` and the subscriber would read nothing
+  without an error. H6 routes them to `ExecutionTracer`, or refuses them by name, as the tracer seam
+  did before Q28.
+- **Whether to move the header to `go 1.26 trace`** is a second, smaller question. It depends only on
+  whether a test or oracle reads the version.
+
+### 6.6 `runtime/mprof_impl.cs` (companion)
+
+**What the hand-own models.** The block, mutex and memory profile bucket store in managed storage
+(DESIGN-managed-profiling.md I2):
+- `newBucket`;
+- the accessors `stk`, `mp` and `bp`;
+- `stkbucket` and `saveblockevent`;
+- the managed memory-profile recorder.
+
+**Upstream.**
+- 1.25 changes `stkbucket` only by the `sysAlloc` name argument (`"profiler hash buckets"`), which the
+  managed store does not call.
+- 1.25 rewrites the lock profile (`mLockProfile` start, end and `storeSlow`; `lockTimer` gone). That is
+  converted code, which reaches `saveblockevent` and `stkbucket`.
+- 1.26 adds the goroutine-leak profile (`goroutineLeakProfileWithLabels` and its concurrent and sync
+  forms, linknamed from `runtime/pprof`), behind the off `GoroutineLeakProfile` experiment.
+- 1.26 changes `mProf_Malloc`.
+
+**Expected edits.**
+- **`stkbucket`:** none, beyond reading the 1.25 call sites.
+- **The lock-profile rewrite** is the one to read with this store, because its new `storeSlow` path
+  calls `saveBlockEventStack`, which calls `stkbucket`.
+- **`mProf_Malloc`'s 1.26 change** is checked against `memProfileAlloc`, the managed recorder's entry.
+- **The leak profile** is reachable only with its experiment on. It is listed rather than ported.
+
+### 6.7 What the six add to the H6 bill
+
+**Unchanged from the plan's rates:**
+- `mcleanup`: 1 lane-day under A, 2 under C.
+- `runtime2`: 1.5. It is the widest port, and its wrapper types are a design point.
+- `trace`: about 1, for the four linkname targets.
+- `panic`, `mprof`, `mgc`: about 0.5 each.
+
+That is about 5 lane-days for the six, inside §4's 9–12 for C1's 17.
+
+**Not yet counted:** the H5-compile items §6.1 and §6.3 name. The cleanup-queue surface is a
+compile-blocker for H5 itself, not only an H6 review item.
