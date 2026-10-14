@@ -84,3 +84,46 @@ The `.com` column is the discriminating one: `.invalid` is a reserved name some 
 router answers SERVFAIL for an ordinary nonexistent `.com` name too. By the runbook's rule (only `TestLookupCNAME`
 is tolerated) the box does not qualify as configured, and re-running cannot change that, because the answer is the
 resolver's. With public IPv4 resolvers on the adapter, the same two runs re-qualify it.
+
+## Amendments
+
+*(Append-only. Each block is dated and states what changed and why. Earlier text stays as written.)*
+
+**2026-10-14 — WSL pwsh: NOT INSTALLED → pwsh 7.5.4, reachable. The reading above was wrong.** pwsh 7.5.4 is
+installed under `/opt/microsoft/powershell/7` and linked at `/usr/local/bin/pwsh`, and it starts and reports its
+version. The inventory that read "not installed" ran `command -v pwsh` under a `PATH` it had set itself without
+`/usr/local/bin`, so the lookup could not find it. The lane's root shell has `/usr/local/bin` on its `PATH`, so B3's
+item (pwsh 7 reachable by every launcher) is met on the WSL arm, and no download is owed. Every other WSL reading
+above was taken by absolute path or from `/usr/bin`, and none is affected. The Verdict's sentence naming WSL pwsh as
+an open item no longer holds; the open items are the adapter's resolvers, Developer Mode and `LongPathsEnabled` on
+Windows, and `localhost` resolving `::1` on the WSL arm.
+
+**2026-10-14 — QUALIFIED for net's H10 row, after the owner's changes.** The owner gave the wireless adapter two
+public IPv4 resolvers, set `LongPathsEnabled` to 1, and made WSL resolve `localhost` to `::1`
+(`/etc/wsl.conf` `[network] generateHosts = false`, with `::1` on the hosts file's `localhost` line). Re-read the
+same way as above:
+
+- the adapter's IPv4 resolvers are both public; IPv4 and IPv6 default routes are present, as before;
+- the one-axis probe now gets NXDOMAIN from WSL's configured resolver for all three names, as from a public resolver;
+- `LongPathsEnabled` is 1;
+- WSL's `localhost` resolves to `::1` and to the IPv4 loopback, and the setting survived a WSL restart.
+
+`go test -count=1 -timeout 40m -v net` at go1.24.13 on the WSL arm, `CGO_ENABLED=0`, `GOTOOLCHAIN=local`, from a
+directory with no `go.mod`, twice in a row:
+
+| run | pass | skip | fail | wall |
+|:--|--:|--:|--:|--:|
+| 1 | 286 | 15 | 1 | 41 s |
+| 2 | 286 | 15 | 1 | 41 s |
+
+The one failure on both runs is `TestLookupCNAME`, the tolerated drift. `TestLookupNoSuchHost` passes. (An earlier
+pass of the pair passed its first run the same way; its second was cut short by the WSL restart that applied the
+`localhost` change, so the pair was run again.) **By the runbook's rule the box qualifies.**
+
+**Still open: Developer Mode.** Its key holds no value, and an unelevated symlink is still refused by PowerShell,
+.NET and `mklink` alike. The owner is checking the switch.
+
+**2026-10-14 — Developer Mode ON; unelevated symlinks work. Every B3 item on the box now qualifies.** The owner
+turned Developer Mode on in Settings. `AllowDevelopmentWithoutDevLicense` now reads 1, and from an unelevated shell
+a symbolic link is created by PowerShell's `New-Item -ItemType SymbolicLink`, by .NET's
+`File.CreateSymbolicLink` and by `mklink` alike, each read back as a symbolic link.
