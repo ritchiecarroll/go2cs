@@ -97,3 +97,28 @@ item (pwsh 7 reachable by every launcher) is met on the WSL arm, and no download
 above was taken by absolute path or from `/usr/bin`, and none is affected. The Verdict's sentence naming WSL pwsh as
 an open item no longer holds; the open items are the adapter's resolvers, Developer Mode and `LongPathsEnabled` on
 Windows, and `localhost` resolving `::1` on the WSL arm.
+
+**2026-10-14 — QUALIFIED for net's H10 row, after the owner's changes.** The owner gave the wireless adapter two
+public IPv4 resolvers, set `LongPathsEnabled` to 1, and made WSL resolve `localhost` to `::1`
+(`/etc/wsl.conf` `[network] generateHosts = false`, with `::1` on the hosts file's `localhost` line). Re-read the
+same way as above:
+
+- the adapter's IPv4 resolvers are both public; IPv4 and IPv6 default routes are present, as before;
+- the one-axis probe now gets NXDOMAIN from WSL's configured resolver for all three names, as from a public resolver;
+- `LongPathsEnabled` is 1;
+- WSL's `localhost` resolves to `::1` and to the IPv4 loopback, and the setting survived a WSL restart.
+
+`go test -count=1 -timeout 40m -v net` at go1.24.13 on the WSL arm, `CGO_ENABLED=0`, `GOTOOLCHAIN=local`, from a
+directory with no `go.mod`, twice in a row:
+
+| run | pass | skip | fail | wall |
+|:--|--:|--:|--:|--:|
+| 1 | 286 | 15 | 1 | 41 s |
+| 2 | 286 | 15 | 1 | 41 s |
+
+The one failure on both runs is `TestLookupCNAME`, the tolerated drift. `TestLookupNoSuchHost` passes. (An earlier
+pass of the pair passed its first run the same way; its second was cut short by the WSL restart that applied the
+`localhost` change, so the pair was run again.) **By the runbook's rule the box qualifies.**
+
+**Still open: Developer Mode.** Its key holds no value, and an unelevated symlink is still refused by PowerShell,
+.NET and `mklink` alike. The owner is checking the switch.
