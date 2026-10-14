@@ -377,7 +377,7 @@ COORD's to rule.
      §5-§6 3927-3964, §7 lessons 2, 13, 19, 25, 30, 31, 42, 43, 48, 52, 54, 57, 60, 64); PLAN-corpus-upgrade.md §6, §8
      (OQ-1, OQ-10, OQ-18); RESUME-SESSIONS.md 1e and 1h on claude/coord-handover 1af8d80c09 (lanes and boxes).
      Instrument states read at master 20279db5f6 on 2026-10-11: src/_roster.ps1:475 and :587, run-h10-recon.ps1:841-843,
-     check-h6-completeness.ps1:76, shardmap.py:94, check-roster-format.ps1:906; src/go2cs/go.mod; module-cache x/tools and
+     check-h6-completeness.ps1:128 (at 20279db5f6 its audit default was a hard-coded go124 path on line 76; A8 derives it from src/version.props since), shardmap.py:94, check-roster-format.ps1:906; src/go2cs/go.mod; module-cache x/tools and
      x/mod .mod files. -->
 
 ---
