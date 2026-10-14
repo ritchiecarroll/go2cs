@@ -46,7 +46,7 @@ on:
           - linux
           - darwin
       stage:
-        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure)'
+        description: 'What to run: census (compile the corpus flavor), behavioral-smoke (harness proof), behavioral-full (the whole enumeration in slices), sweep-shard (filtered validated sweep), behavioral-stderr (run named projects directly and keep their WHOLE stderr — the runner quotes one line per death), release-smoke (pack every go.* package on windows, then consume that ONE feed on all four shipped RIDs; goos is ignored), aot-smoke (the same pack, then ONE Native AOT publish and run of a hand-written package consumer on all four RIDs; long -- each publish compiles the whole go.* closure), nugetgo-behavior (one sample row per shipped RID for a nugetgo package, each run on its own OS: the sample program run with go, and converted against the package and run with dotnet. A module with no Go tests ships the rows as its proof; a module with Go tests, beside its test proof. goos is ignored)'
         type: choice
         required: true
         default: census
@@ -58,6 +58,7 @@ on:
           - sweep-shard
           - release-smoke
           - aot-smoke
+          - nugetgo-behavior
       filter:
         description: 'Shard filter — comma-separated EXACT roster package names for sweep-shard ("sort" sweeps sort and never internal/fmtsort), project substring for behavioral-smoke. IGNORED by behavioral-full, which runs the whole enumeration in slices. Blank takes the stage default. Comma-separated project NAMES for behavioral-stderr.'
         type: string
@@ -77,6 +78,21 @@ on:
         default: ''
       run_timeout:
         description: 'Per-program RUN budget in seconds for the behavioral stages (GO2CS_RUN_TIMEOUT), 1-1800. Blank takes 120, the budget every stage used before this input existed. Raise it to tell a slow program on the 3-core macos-15 runner from a real hang: a NOT MEASURED (timeout) row says only that the budget expired. A large value on behavioral-full can exceed that stage''s job budget.'
+        type: string
+        required: false
+        default: ''
+      nugetgo_module:
+        description: 'nugetgo-behavior only: the module and its version, MODULE@VERSION (e.g. github.com/inconshreveable/mousetrap@v1.1.0). Its sample program and mappings row are read from src/tests/ModuleBehavior/MODULE@VERSION/ at the dispatched ref.'
+        type: string
+        required: false
+        default: ''
+      nugetgo_package:
+        description: 'nugetgo-behavior only: the package version every row runs: the rehearsal package, whose assemblies are the release''s (e.g. 1.1.0-int.1). The package ID is the mappings row''s.'
+        type: string
+        required: false
+        default: ''
+      nugetgo_feed:
+        description: 'nugetgo-behavior only: the NuGet v3 feed that serves the package. Blank takes int.nugettest.org (https://apiint.nugettest.org/v3/index.json), where the runbook rehearses.'
         type: string
         required: false
         default: ''
@@ -122,6 +138,10 @@ jobs:
       dotnet: ${{ steps.derive.outputs.dotnet }}
       run-timeout: ${{ steps.derive.outputs.run-timeout }}
       published-version: ${{ steps.derive.outputs.published-version }}
+      nugetgo-module: ${{ steps.derive.outputs.nugetgo-module }}
+      nugetgo-version: ${{ steps.derive.outputs.nugetgo-version }}
+      nugetgo-package: ${{ steps.derive.outputs.nugetgo-package }}
+      nugetgo-feed: ${{ steps.derive.outputs.nugetgo-feed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -136,6 +156,9 @@ jobs:
           INPUT_DOTNET: ${{ inputs.dotnet }}
           INPUT_RUN_TIMEOUT: ${{ inputs.run_timeout }}
           INPUT_PUBLISHED_VERSION: ${{ inputs.published_version }}
+          INPUT_NUGETGO_MODULE: ${{ inputs.nugetgo_module }}
+          INPUT_NUGETGO_PACKAGE: ${{ inputs.nugetgo_package }}
+          INPUT_NUGETGO_FEED: ${{ inputs.nugetgo_feed }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           $ErrorActionPreference = 'Stop'
@@ -183,6 +206,25 @@ jobs:
           $env:INPUT_GOOS = $goos
           $env:INPUT_STAGE = $stage
 
+          # nugetgo-behavior: the module, the package version and the feed. Only that stage reads them, each is refused on
+          # any other stage, and a malformed value FAILS the plan by name rather than reaching a leg. The sample program
+          # must exist at the dispatched ref: a leg would otherwise discover its absence four times over.
+          $nugetgoModule = ''; $nugetgoVersion = ''; $nugetgoPackage = ''; $nugetgoFeed = ''
+          $nugetgoGiven = if ($env:EVENT_NAME -eq 'schedule') { @() } else { @($env:INPUT_NUGETGO_MODULE, $env:INPUT_NUGETGO_PACKAGE, $env:INPUT_NUGETGO_FEED) | Where-Object { "$_".Trim() } }
+          if ($stage -eq 'nugetgo-behavior') {
+              $spec = "$env:INPUT_NUGETGO_MODULE".Trim()
+              if ($spec -notmatch '^(?<module>[a-z0-9.-]+(/[A-Za-z0-9._~-]+)+)@(?<version>v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?)$') { throw "nugetgo_module must be MODULE@VERSION, such as github.com/inconshreveable/mousetrap@v1.1.0; got '$spec'." }
+              $nugetgoModule = $Matches['module']; $nugetgoVersion = $Matches['version']
+              if (-not (Test-Path -LiteralPath "src/tests/ModuleBehavior/$spec/main.go" -PathType Leaf)) { throw "nugetgo_module: no sample program at src/tests/ModuleBehavior/$spec/main.go on this ref." }
+              $nugetgoPackage = "$env:INPUT_NUGETGO_PACKAGE".Trim()
+              if ($nugetgoPackage -notmatch '^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-[0-9A-Za-z.-]+)?$') { throw "nugetgo_package must be a NuGet package version such as 1.1.0-int.1; got '$nugetgoPackage'." }
+              $nugetgoFeed = "$env:INPUT_NUGETGO_FEED".Trim()
+              if (-not $nugetgoFeed) { $nugetgoFeed = 'https://apiint.nugettest.org/v3/index.json' }
+              if ($nugetgoFeed -notmatch '^https://[^\s]+/index\.json$') { throw "nugetgo_feed must be a NuGet v3 feed URL ending in /index.json; got '$nugetgoFeed'." }
+              Write-Host "nugetgo-behavior: $nugetgoModule $nugetgoVersion, package $nugetgoPackage from $nugetgoFeed"
+          }
+          elseif (@($nugetgoGiven).Count) { throw "nugetgo_module, nugetgo_package and nugetgo_feed apply to stage nugetgo-behavior only; got stage '$stage'." }
+
           # The Go release is READ FROM version.props, never written here. run-validated-sweep.ps1
           # and the converter both refuse a toolchain whose release differs from <GoStdLibVersion>
           # (NOT MEASURED, never a verdict), so a hardcoded version in CI would either duplicate
@@ -211,13 +253,15 @@ jobs:
           # ship for (C2, ec147f1d7f: N's converter emits unsafe.ArrayPointer, which the published 1.24.13.3
           # lacks). Three dispatches would be three packs of the same tree; one pack feeds all four legs.
           # aot-smoke reads the same pack, on THREE of the four RIDs (osx-arm64 below).
-          if ($env:INPUT_STAGE -in 'release-smoke', 'aot-smoke') {
+          # nugetgo-behavior owes a row for EVERY shipped RID, each run on its own OS (COORD ruling 2026-10-12: no row is
+          # inferred from another), so it takes the same four legs, with no pack.
+          if ($env:INPUT_STAGE -in 'release-smoke', 'aot-smoke', 'nugetgo-behavior') {
               $targets = @(
                   @{ goos = 'windows'; runner = 'windows-latest';  rid = 'win-x64'   },
                   @{ goos = 'linux';   runner = 'ubuntu-latest';   rid = 'linux-x64' },
                   @{ goos = 'darwin';  runner = 'macos-15';        rid = 'osx-arm64' },
                   @{ goos = 'darwin';  runner = 'macos-15-intel';  rid = 'osx-x64'   })
-              Write-Host "$($env:INPUT_STAGE): all four shipped RIDs from one pack (goos '$($env:INPUT_GOOS)' does not narrow it)"
+              Write-Host "$($env:INPUT_STAGE): all four shipped RIDs (goos '$($env:INPUT_GOOS)' does not narrow it)"
           }
 
           # aot-smoke does NOT read osx-arm64, and every leg's summary says so: on a hosted macos-15 (3-core arm64) runner the
@@ -275,6 +319,10 @@ jobs:
                                          # (37495989079), and the windows/mac legs of that run passed
                                          # 90/135 still compiling. The pack's order, as ruled; the
                                          # mac multiplier takes it to 360, GitHub's ceiling.
+              'nugetgo-behavior' = 90    # release-smoke's leg is the closest shape (C1, 2026-10-12): converter go build,
+                                         # one `go run`, one conversion against the feed, and one restore, build and
+                                         # run of the sample with its go.* closure restored cold. PROVISIONAL until
+                                         # the first run.
           }
 
           $entries = foreach ($t in $targets) {
@@ -308,6 +356,10 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "dotnet=$dotnet" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "run-timeout=$runTimeout" -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "published-version=$publishedVersion" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-module=$nugetgoModule" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-version=$nugetgoVersion" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-package=$nugetgoPackage" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "nugetgo-feed=$nugetgoFeed" -Encoding utf8
 
   # ---------------------------------------------------------------------------------------------
   # pack — release-smoke only: the release's own pack, as a rehearsal, on a hosted Windows runner.
@@ -1402,6 +1454,82 @@ jobs:
           & ./.github/annotate-summary.ps1 -Title "aot-smoke $goos/$rid" -Lines $summary
 
           exit $aotExit
+
+      # -------------------------------------------------------------------------------------
+      # nugetgo-behavior — ONE sample row, on this leg's own OS, for a nugetgo package (COORD rulings 2026-10-12): the
+      # proof of a module with no Go tests, or an additional row set beside a tested module's test proof. The sample
+      # under src/tests/ModuleBehavior/ run with `go run`, converted
+      # against the package on the feed, built for this RID and run with dotnet (src/tools/nugetgo/
+      # Invoke-NugetgoBehaviorRow.ps1). The row is annotated in its own step below and kept in the artifact;
+      # Get-NugetgoBehaviorRows.ps1 fetches the rows through the API, and nugetgo-pack.ps1 -BehaviorProofDir binds
+      # each to the bytes it packs for that RID.
+      # -------------------------------------------------------------------------------------
+      - name: nugetgo behavior — sample run with go, and with dotnet against the package
+        if: needs.plan.outputs.stage == 'nugetgo-behavior'
+        shell: pwsh
+        env:
+          NUGETGO_MODULE: ${{ needs.plan.outputs.nugetgo-module }}
+          NUGETGO_VERSION: ${{ needs.plan.outputs.nugetgo-version }}
+          NUGETGO_PACKAGE: ${{ needs.plan.outputs.nugetgo-package }}
+          NUGETGO_FEED: ${{ needs.plan.outputs.nugetgo-feed }}
+          # The matrix label, which the row names beside the image (ImageOS, ImageVersion) the runner reports.
+          NUGETGO_RUNNER: ${{ matrix.runner }}
+        run: |
+          $ErrorActionPreference = 'Continue'
+
+          $goos = $env:GOOS_TARGET
+          $rid = $env:RID
+          $art = Join-Path $PWD 'artifacts'
+          New-Item -ItemType Directory -Force -Path $art | Out-Null
+
+          # The sample is not a corpus project; the leg-wide GoTargetOS binding must not reach its build.
+          Remove-Item Env:GoTargetOS -ErrorAction SilentlyContinue
+
+          # The converter, built from this tree.
+          $exeName = if ($IsWindows) { 'go2cs.exe' } else { 'go2cs' }
+          Push-Location 'src/go2cs'
+          try { & go build -o "bin/$exeName" . ; $goExit = $LASTEXITCODE } finally { Pop-Location }
+          if ($goExit -ne 0) { Write-Host "::error::converter go build failed with exit $goExit"; exit $goExit }
+
+          $rows = Join-Path $art 'nugetgo-behavior'
+          $work = Join-Path $art "nugetgo-behavior-work-$rid"
+          $log = Join-Path $art "nugetgo-behavior-$goos-$rid.log"
+          # A child pwsh, so a refusal is an exit code and a log line rather than the end of this step.
+          & pwsh -NoProfile -File ./src/tools/nugetgo/Invoke-NugetgoBehaviorRow.ps1 -ModulePath $env:NUGETGO_MODULE -GoVersion $env:NUGETGO_VERSION `
+              -PackageVersion $env:NUGETGO_PACKAGE -Feed $env:NUGETGO_FEED -Rid $rid -Converter (Join-Path $PWD "src/go2cs/bin/$exeName") `
+              -OutDir $rows -Work $work *>&1 | Tee-Object -FilePath $log
+          $rowExit = $LASTEXITCODE
+
+          $row = Join-Path $rows "$rid.md"
+          $summary = @(
+              "## nugetgo behavior -- $($env:NUGETGO_MODULE) $($env:NUGETGO_VERSION) on $rid"
+              ''
+              "exit ``$rowExit`` -- package $($env:NUGETGO_PACKAGE) from $($env:NUGETGO_FEED)"
+              ''
+              '```'
+          ) + @(if (Test-Path -LiteralPath $row) { Get-Content -LiteralPath $row } else { Get-Content -LiteralPath $log | Select-Object -Last 15 }) + @('```')
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+          & ./.github/annotate-summary.ps1 -Title "nugetgo-behavior $goos/$rid" -Lines $summary
+
+          # The restored packages and the build output are large and say nothing the logs and the row do not.
+          Remove-Item -Recurse -Force (Join-Path $work 'packages') -ErrorAction SilentlyContinue
+          Get-ChildItem $work -Recurse -Directory -Include 'bin', 'obj' -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+
+          exit $rowExit
+
+      # The row in its OWN step with a fixed title, so the fetch script selects it by title and it never collides with
+      # the leg's summary chunks or a runner warning (C1, 2026-10-12). It is printed plainly too, for a human. A row is
+      # annotated whatever its verdict: a row whose outputs differ is the evidence of that.
+      - name: nugetgo behavior — the row, as an annotation
+        if: always() && needs.plan.outputs.stage == 'nugetgo-behavior'
+        shell: pwsh
+        run: |
+          $row = Join-Path $PWD "artifacts/nugetgo-behavior/$($env:RID).md"
+          if (-not (Test-Path -LiteralPath $row)) { Write-Host "no row was written for $($env:RID)"; exit 0 }
+          Import-Module ./src/tools/nugetgo/NugetgoBehaviorProof.psm1
+          $text = [System.IO.File]::ReadAllText($row)
+          Write-Host $text
+          & ./.github/annotate-summary.ps1 -Title "nugetgo-row $($env:RID)" -Lines @(ConvertTo-NugetgoRowAnnotationText -Text $text)
 
       # -------------------------------------------------------------------------------------
       # Artifacts — always, because a failed leg is the reading this workflow exists to produce.

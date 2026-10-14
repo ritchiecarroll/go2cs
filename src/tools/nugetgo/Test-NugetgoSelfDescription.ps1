@@ -82,6 +82,10 @@ try {
     Check 'a malformed go.-prefixed -ThirdPartyPackage is refused for its shape alone' ("$why" -like '*want <module>=<nuget-id>@<package-version>*' -and "$why" -notlike '*uses the "go." prefix*') "got '$why'"
     $why = Refusal { Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($plainLib) -ThirdPartyPackage @('example.com/unused=nugetgo.example.com.unused@1.0.0') }
     Check 'a -ThirdPartyPackage no packed package references is refused' ($why -like '*example.com/unused*no packed package*') "got '$why'"
+    # A flavor that does not import the module (cobra's linux flavor and mousetrap, COORD ruling 2026-10-12): the pack asks
+    # each flavor with -AllowUnreferenced and checks the UNION instead (Merge-NugetgoFlavorRequires).
+    $allowed = try { @(Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($plainLib) -ThirdPartyPackage @('example.com/unused=nugetgo.example.com.unused@1.0.0') -AllowUnreferenced) } catch { "threw: $($_.Exception.Message)" }
+    Check '-AllowUnreferenced accepts a -ThirdPartyPackage this flavor does not reference, and lists no require' ($allowed.Count -eq 0) "got '$allowed'"
     $orphan = Write-Fixture 'src/example.com/mod/orphan/example.com.mod.orphan.csproj' (Project 'example.com.mod.orphan' @('../../../../pkg/example.com/stranger/example.com.stranger.csproj'))
     $why = Refusal { Get-NugetgoThirdPartyRequires -RecurseRoot $root -Libraries @($orphan) -ThirdPartyPackage @() }
     Check 'a pkg/ reference no lock entry covers is refused' ($why -like '*example.com/stranger*go2cs.modules.lock*') "got '$why'"

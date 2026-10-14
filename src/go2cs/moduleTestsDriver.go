@@ -225,6 +225,9 @@ func runModuleTests(moduleDir string, outRoot string, options Options, corpusRel
 
 	var failed []string
 
+	// The tested packages that did not validate, for MODULE.md (import path -> the run's reason).
+	unvalidated := map[string]string{}
+
 	for _, pkg := range targets {
 		pkgOptions := options
 		pkgOptions.convertTests = true
@@ -239,6 +242,15 @@ func runModuleTests(moduleDir string, outRoot string, options Options, corpusRel
 
 		if err := convertAndActOnPackageTests(pkg.Dir, outputDir, pkgOptions); err != nil {
 			failed = append(failed, fmt.Sprintf("  %s: %v", pkg.Path, err))
+			unvalidated[pkg.Path] = err.Error()
+		}
+	}
+
+	if len(unvalidated) > 0 && recordsUnvalidatedPackages(options) {
+		if err := recordUnvalidatedModulePackages(outRoot, converter.options.mainModulePath, unvalidated); err != nil {
+			failed = append(failed, fmt.Sprintf("  MODULE.md: naming the %d package(s) that did not validate: %v", len(unvalidated), err))
+		} else {
+			fmt.Printf("\nMODULE.md names %d tested package(s) that did not validate.\n", len(unvalidated))
 		}
 	}
 
@@ -247,6 +259,12 @@ func runModuleTests(moduleDir string, outRoot string, options Options, corpusRel
 	}
 
 	return nil
+}
+
+// recordsUnvalidatedPackages reports whether a -tests -recurse run names its failed packages in MODULE.md: a run that
+// compares, unfiltered, which is the run that writes proof pages (publishesRosterArtifacts).
+func recordsUnvalidatedPackages(options Options) bool {
+	return (options.testAction == "all" || options.testAction == "compare") && strings.TrimSpace(options.testFilter) == ""
 }
 
 // convertAndActOnPackageTests is the single-package -tests flow of main() for one package: convert

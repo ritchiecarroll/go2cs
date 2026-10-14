@@ -10047,20 +10047,7 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 			"re-run WITHOUT -test-filter to bank a row.\n", options.testFilter, manifest.PackageImportPath)
 	}
 	if len(disclosed) > 0 {
-		classes := hashset.HashSet[string]{}
-		for _, name := range disclosed {
-			// A disclosed ancestor rolled up from its children has no entry, and adds its empty class as
-			// it always has; a two-half entry adds each half's.
-			if disclosure, own := disclosures[name]; own {
-				for _, part := range disclosure.parts() {
-					classes.Add(part.Class)
-				}
-			} else {
-				classes.Add("")
-			}
-		}
-		classList := classes.Keys()
-		sort.Strings(classList)
+		classList := disclosedClassList(disclosed, disclosures)
 		fmt.Printf("Validated %d tests against go test (%d skipped identically on both sides, %d disclosed-divergent (%s), %d disclosed-unsupported declarations excluded).\n",
 			len(goResults)-len(disclosed), len(result.Skipped), len(disclosed), strings.Join(classList, ", "), len(result.Excluded))
 	} else {
@@ -10515,4 +10502,23 @@ func samePath(left, right string) bool {
 // XML attribute values use escapeXMLAttributeValue (solutionGenerator.go) instead.
 func escapeCSharp(value string) string {
 	return strings.ReplaceAll(strings.ReplaceAll(value, `\`, `\\`), `"`, `\"`)
+}
+
+// disclosedClassList is the sorted set of classes the console summary names for a run's disclosed tests.
+func disclosedClassList(disclosed []string, disclosures map[string]testDisclosure) []string {
+	classes := hashset.HashSet[string]{}
+	for _, name := range disclosed {
+		// A disclosed ancestor rolled up from its children has no entry: it is the aggregate the proof
+		// page names it (COORD ruling 2026-10-13); a two-half entry adds each half's.
+		if disclosure, own := disclosures[name]; own {
+			for _, part := range disclosure.parts() {
+				classes.Add(part.Class)
+			}
+		} else {
+			classes.Add(disclosureClassAggregate)
+		}
+	}
+	classList := classes.Keys()
+	sort.Strings(classList)
+	return classList
 }
