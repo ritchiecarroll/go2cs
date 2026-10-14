@@ -1802,10 +1802,6 @@
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
-##internal.runtime.syscall@linux
-// <ExportedTypeAliases>
-// </ExportedTypeAliases>
-
 ##internal.saferio
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
