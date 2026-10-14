@@ -186,7 +186,9 @@ The same `pack` job, then ONE Native AOT publish and run of `PackageSymbols` (a 
 mode of its own) on all FOUR shipped RIDs (win-x64, linux-x64, osx-arm64, osx-x64): `test-package-symbols.ps1 -AotOnly`. The executable must exit 0 and print
 its `PACKAGE-SYMBOLS` line (the value printed, not judged); the publish wall time is a `READ` line, and so are two ILC
 readings, measured and not judged: `READ (ILC cycle-cutoff methods)` (distinct "will always throw" lines ILC logs when it cuts a
-self-nesting generic instantiation) and `READ (IlcCompile ms)` (from MSBuild's performance summary). A consumer takes
+self-nesting generic instantiation) and `READ (IlcCompile ms)` (from MSBuild's performance summary). The cut-off count is
+deterministic; IlcCompile is not (2026-10-14: one tree read 7,001 s and 5,444 s on hosted linux, runs 38555847362 and
+38576996407, a 22% spread), so a single-run IlcCompile comparison is read against that band. A consumer takes
 go.lib's `TrimMode=partial` default, under which the publish compiles every referenced go.* assembly whole: about 70
 min on hosted linux for this fixture's 31 assemblies, which is why it is its own stage and not a release-smoke arm
 (4 min since e2move broke ILC's generic cycle in golib: run 38575258530, 0 cycle cutoffs on every RID).
