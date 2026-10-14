@@ -655,10 +655,15 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 		// ($(GoTargetOS)'s default). So this is deterministic AND it keeps the Windows lane's
 		// shipped bytes exactly as they are, while a platform-exclusive package — absent from the
 		// earlier targets entirely — still lands from the only target that has it.
+		//
+		// A review sibling in a per-GOOS folder is the exception: only that GOOS's target can emit
+		// it, and every other stage merely holds the seed copy it was staged with, so "first target
+		// that has it" would hand the root back its own seed bytes (see perGOOSReviewSiblingOwner).
 		source := ""
+		owner := perGOOSReviewSiblingOwner(rawPath, emissions)
 
 		for _, emission := range emissions {
-			if _, ok := emission.artifacts[rawPath]; ok {
+			if _, ok := emission.artifacts[rawPath]; ok && (len(owner) == 0 || emission.goos == owner) {
 				source = filepath.Join(emission.root, "core", filepath.FromSlash(rawPath))
 				break
 			}
@@ -680,6 +685,34 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 	}
 
 	return sortedKeys(conditioned), residual, written, nil
+}
+
+// perGOOSReviewSiblingOwner returns the GOOS whose folder a `.cs.auto` review sibling sits in, or ""
+// for anything else: a flat sibling, or any other companion. Every staging root is a whole-tree copy
+// of the L3 seed (snapshotConvertedRoot), so a sibling under `<pkg>/linux/` is PRESENT in the
+// Windows stage too, but only as its seed copy. Only the Linux stage can rewrite it. The folder is
+// read through the snapshot's own fold, so a package whose name is a GOOS (`internal/syscall/windows`)
+// is never mistaken for a per-GOOS folder.
+//
+// Measured (H0, 2026-10-14): siginfo_linux.cs.auto and exec_unix.cs.auto were rewritten in the Linux
+// stage and kept their seed bytes in the root, because the Windows stage, first in -platforms order,
+// "had" them.
+func perGOOSReviewSiblingOwner(rawPath string, emissions []*platformEmission) string {
+	if !strings.HasSuffix(rawPath, ".cs.auto") {
+		return ""
+	}
+
+	for _, emission := range emissions {
+		if state, ok := emission.artifacts[rawPath]; ok {
+			if state.logicalPath(rawPath) == rawPath {
+				return ""
+			}
+
+			return path.Base(path.Dir(rawPath))
+		}
+	}
+
+	return ""
 }
 
 // mergePlatformProjectFile composes ONE project file out of the several a package's targets emitted,

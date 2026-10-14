@@ -2244,6 +2244,35 @@ states which roots it ran under. **State the toolchain's location beside the pin
      the one discrepancy (linux +1 at both releases) is the CGO_ENABLED axis in (d), not a disagreement.
      Script self-test 20/20 at the cut, each arm red-proved then restored. -->
 
+#### Amendment 2026-10-14 (G, F-H0-3) — per-GOOS review siblings come from their own target, and the one case the merge REFUSES
+
+**Fixed at H1:** a three-target emission now carries a `.cs.auto` that sits in a per-GOOS folder from **that GOOS's
+stage** to the root. Before, every stage held such a file as its seed copy, because each stage is a whole-tree copy
+of the L3 seed. The companion merge took the first target that *had* the file, which is Windows, so the root got its
+own seed bytes back. H0 read the lost rewrites from the linux stage instead: `siginfo_linux.cs.auto`,
+`exec_unix.cs.auto`. Flat siblings are unchanged, and the head of `-platforms` still wins for them.
+
+**By design, the merge REFUSES one shape:** a hand-owned file duplicated across GOOS folders whose `.cs.auto`
+siblings differ. The hand-own pass moves a hand-own and its sibling as ONE copy each
+(`platformHandOwn.go:257`), and two copies that disagree are an error, not a first-wins choice
+(`platformHandOwn.go:308`). Now that per-GOOS siblings carry their own target's bytes, such a pair can genuinely
+differ. If a hop meets this refusal, it is real: a hand-own that has to be split per GOOS is a hand decision, never
+a merge default. **Measured at master 65693fc862:** 9 per-GOOS `.cs.auto`, none of them in two GOOS folders of one
+package, so no current hand-own trips it.
+
+<!-- G, 2026-10-14, COORD's F-H0-3 ruling. Cause chain: platformEmit.go mergeCompanionArtifacts, the
+     "FIRST TARGET that has this artifact" source rule (master 65693fc862 lines 658-665), over stages snapshotted
+     whole by snapshotConvertedRoot (platformCensus.go:657). Evidence: the i9's H0 (logs/h0-go126/, master
+     f216c6300a): linux stage wrote siginfo_linux/exec_unix with bytes differing from the seed, and the root was
+     not rewritten; fd_writev_unix/wait_waitid were written equal in the stage (a no-op either way). Fix: the
+     source is the emission whose goos is the folder, read through the snapshot's own fold
+     (normalizeArtifactLogicalPaths), so a PACKAGE named windows (internal/syscall/windows) is not a per-GOOS
+     folder. Guard: platformCompanion_test.go, red on master (root kept "seed sibling"), flat and
+     named-package controls green on both. Census: git ls-tree of src/core for */{windows,linux,darwin}/*.cs.auto
+     = 10 rows; 9 under the fold rule (folder holds no .csproj, parent does), one GOOS folder each.
+     The 10th, internal/syscall/windows/exec_windows_test.cs.auto, is a PACKAGE named windows. G first posted
+     "10" to COORD from the unfolded grep; corrected here and in the seat post. -->
+
 
 
 
