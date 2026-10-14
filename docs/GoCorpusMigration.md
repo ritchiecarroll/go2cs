@@ -422,6 +422,13 @@ alone — but its step 1 warning block supplies the mechanism: a hop leg sets **
 under a 1.23.12 `GOROOT` converts 1.23.12 sources. Ruled `014bfe84f`, corrected `84b5913098`, measured
 `e96349c54`.
 
+*(Noted 2026-10-14, PLAN-hop-go126 §9: the releases in this ruling are the 1.23 → 1.24 hop's. At any hop, read
+"1.24.13" below as the converter's build release, the `go` directive of `src/go2cs/go.mod` after H1 step 2, and
+"1.23.12" as the corpus release, `<GoStdLibVersion>` in `src/version.props` until H2 moves it. The harness guards
+named below already read those sources: `ConverterBuildInputs.IsConverterStale` compares the binary's embedded
+release with `GOVERSION`, and the sweep's toolchain guard reads `version.props`. The hand-run steps have no
+instrument, so whoever copies them substitutes the two releases.)*
+
 **Both arms, measured at `f4d2b981b`:** building `src/go2cs` under the 1.23.12 pin exits **1** with no binary
 (`go: go.mod requires go >= 1.24.13 (running go 1.23.12; GOTOOLCHAIN=local)`); the **same** build under the
 1.24.13 pin exits **0**. Arm 2 is what makes the refusal a toolchain fact rather than a broken build.
@@ -627,6 +634,11 @@ pin_pair () {  # the H2->H5 window pairing at go1.23.12: pin_pair <GOROOT-1.23.1
      setup-convert.sh:26-28 exits rather than returning. GOTOOLCHAIN non-auto: KICKOFF-fleet.md:176 at a02ac3df3 (a user-level
      `go env -w GOTOOLCHAIN=go1.23.1` made bare `go version` report go1.23.1). Mechanics: setup-convert.sh:21-28 (2026-09-13); the
      GOMOD arm is added because that script assumes its temp dir has no module above it. -->
+*(Noted 2026-10-14, PLAN-hop-go126 §9: `pin_pair` asserts the literal `go1.23.12`, the outgoing corpus release of
+the 1.23 → 1.24 hop, in its assertion line and its usage comment. At a later hop that literal is `go` plus the
+`<GoStdLibVersion>` in `<landing>:src/version.props`, and the `<GOROOT-1.23.12>` and `<GOROOT-1.24.13>`
+placeholders name the outgoing and incoming roots. `pin` takes its release as an argument; `pin_pair` does not.
+No instrument derives either block: both are copied by hand.)*
 
 - **Build half** — `pin go1.24.13 '<GOROOT-1.24.13>' '<GOROOT-1.24.13-posix>' || exit 3`, then build (the
   seeded-roots amendment under H5; `src/go2cs/go.mod` already reads `go 1.24.13` at `a02ac3df3`); after it,
@@ -649,6 +661,12 @@ pin_pair () {  # the H2->H5 window pairing at go1.23.12: pin_pair <GOROOT-1.23.1
      After-the-run clause: COORD 214f2bf7d (loader-directory root and its VERSION printed) and 0b5d72d0e §3 (read the emission's own
      path lines; a presence check is a cheap second arm). Provenance line: 7c1d8832f:src/go2cs/toolchainResolution.go:399; ancestry
      measured 2026-09-13 (merge-base --is-ancestor false against a02ac3df3 and 44fbc381a). No-value posting: .claude/rules/docs-records.md. -->
+*(Noted 2026-10-14, PLAN-hop-go126 §9: the H4a and H5 commands from here to H5c spell the 1.23 → 1.24 hop's
+releases. `go1.24.13` (the build pin, the embedded-toolchain check, the `h5` root's pin) is the incoming release:
+`<GoStdLibVersion>` in `<H2>:src/version.props`, equal to the `go` directive of `src/go2cs/go.mod` after H1 step 2.
+`go1.23.12` (the H4a convert pin, the `h4a` root's pin) is the outgoing release: `<GoStdLibVersion>` in
+`<landing>:src/version.props`. The seeded-roots amendment's `pv` already reads both files; the literal each `pv`
+result is compared with is the hand-copied part. No instrument derives these commands.)*
 
 #### Amendment 2026-09-13 — for the 1.23 → 1.24 hop, H4a is a staging BASELINE, not a landing
 
@@ -771,6 +789,9 @@ nothing — `internal/goexperiment/exp_aliastypeparams_off.cs` (seeded, 1.23.12)
 `*.cs` so both compile, and the result is **CS0102 ×2 in a leaf essentially the whole corpus depends
 on**. A stale sibling is not a diff to classify at leisure; at a hop it is a compile error in front of
 every other measurement.
+*(Noted 2026-10-14, PLAN-hop-go126 §9: `REHEARSAL-h5-go124.md`, and every `REHEARSAL-*-go124` name in this
+stage, is the 1.23 → 1.24 hop's record, cited for what it measured. It is not an instrument input and keeps its
+name. A later hop's rehearsals are new records named for their own release; no instrument reads one.)*
 
 **So H5 gains a step, between the reconvert and the overlay:**
 
@@ -1156,6 +1177,11 @@ done
      sibling newer than the seed). Order of tests: src/reconvert-deletions.ps1:746-756 (Resolve-Principal, Test-ConversionTarget with
      Get-SourceStdSet -ForGoos, :679) before the name and marker test :758-771; std membership is flavour-dependent :498-500.
      (f) is a posting rule only: src/reconvert-deletions.ps1:153-156 asks flat files under -Goos. -->
+*(Noted 2026-10-14, PLAN-hop-go126 §9: in step 2, `-ExpectGo go1.24.13` is the incoming release and
+`-ExpectSourceGo go1.23.12` the outgoing one, as the H4a and H5 note above defines them. `reconvert-deletions.ps1`
+requires `-ExpectGo`, and derives `-ExpectSourceGo` from the `version.props` beside the script only when it is
+omitted, which after H2 names the target; that is why step 2 always passes it. In step 4, `std-1.24.13.txt` and
+"absent at go1.24.13" name the incoming release.)*
 
 **4. The UNRESOLVED disposition, row by row, posted before any removal.** The rule of record (COORD `5123a14a2`):
 an `UNRESOLVED` row is **STALE** only when BOTH hold — *not emitted by any target this run* (no copy newer than
@@ -1622,6 +1648,12 @@ hosts.)*
 - **The audit file** is `docs/phase4/AUDIT-h6-handown-go124.md`: one row per marked path. R cut the skeleton
   (`d18059950`, train 48 seat 4) and G filled it (blocks 1–19, landed on master at `4e672aa4a`, 144 of 145 rows
   classified, row 130 recorded REWRITE OWED (c)); it reaches the version branch with master at H12.
+  *(Noted 2026-10-14, PLAN-hop-go126 §9: `AUDIT-h6-handown-go124.md` is the 1.23 → 1.24 hop's audit, a record.
+  `src/check-h6-completeness.ps1` now derives its default audit from the pin as
+  `docs/phase4/AUDIT-h6-handown-go<GoStdLibVersion>.md` (`AUDIT-h6-handown-go1.26.9.md` at the 1.26.9 pin). It
+  refuses by name when that file is absent, and when `-ToGoRoot`'s `VERSION` is not the pinned release (NOTES A8,
+  `1666c83e9d`). The name is A8's default while NOTES Q14 is unruled. An earlier hop's audit is read only through
+  `-AuditFile`.)*
 <!-- The pair: COORD db6d9462f §3.2 (b). Population: 146 by handown-census.ps1's predicate against 105 by a literal grep at bd1d26faf
      (db6d9462f §1, H6 row). Identical writes skipped: src/go2cs/platformEmit.go:420-422 at a02ac3df3. Unconditional sibling create:
      a02ac3df3:src/go2cs/autoSiblingOperations.go:122-137 (os.Create). Census parameters: 44fbc381a:src/handown-census.ps1:36-39. No gate
@@ -2683,6 +2715,10 @@ a set that contains it, which is what struck four E1 rows from the roster's tabl
 *(Edited in place 2026-10-01, §7 lesson 52: the path read
 `docs/phase4/hopA-inputs/recon-lists/population-go1.24.13.txt`; the roster guard, the sweep's `-Hop` and push-nuget's
 preflight read the `docs/phase4/data/` file and refuse without it.)*
+*(Noted 2026-10-14, PLAN-hop-go126 §9: NOTES A9 has landed (`841fc39322`). `shardmap.py` reads
+`docs/phase4/data/population-go<GoStdLibVersion>.txt`, the release taken from `src/version.props`, which is the
+file the roster guard reads (A13). It refuses by name, before reading any other file, when the pin is absent or
+that release has no population file. No instrument reads the `hopA-inputs/recon-lists/` copy any more.)*
 
 ⚠ **AMENDED 2026-09-22 (the two live members COSTED, coordinator ruling; ledger 16:31 · 3469154a95;
 evidence ledger 11:36 · 553cdcbae3). The closing check above now closes.** The basis
@@ -4389,6 +4425,12 @@ healthy run look hung — and, in the other direction, what lets a hung one look
     `git grep -n -E '<outgoing release spellings>' -- 'src/*.ps1' 'src/*.sh' 'docs/phase4/**/*.py' '.claude/coord-scripts'`;
     for a hop out of 1.24.13 the pattern is `'go1\.24\.13|go124'`. Every hit is either a derivation or a named record.
     Why: hard-coded instruments silently read the old release. **Step text:** Readiness.
+    *(Noted 2026-10-14, PLAN-hop-go126 §9: the three open instances in the comment below are closed on master:
+    A7 `db025b1f8b` (the recon wrapper's pin), A8 `1666c83e9d` (the H6 audit) and A9 `841fc39322` (shardmap's
+    population). At `b594cd90af` the grep reads 42 hits. Three files still pin a release literal: the two linux fleet
+    templates (named in the comment below), and `src/check-h5c-goos-child.ps1`, whose defaults are this hop's own
+    pair (`go1.24.13`, `go1.26.9`) and go stale at the next hop. The rest are comments, help examples, self-test cases
+    and one test fixture.)*
     <!-- ledger 2026-09-29 14:01 aa4ec663c5 and 16:11 422af93f53 (the roster guard and push-nuget's preflight were found
     hard-coded and fixed). This hop's open instances: NOTES-next-hop.md §2 A7-A10 (src/run-h10-recon.ps1:841-843,
     src/check-h6-completeness.ps1:76, docs/phase4/hopA-inputs/shardmap.py:94) and §5 Q14 (one naming convention).
