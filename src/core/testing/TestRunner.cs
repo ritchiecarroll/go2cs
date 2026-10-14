@@ -95,10 +95,68 @@ public sealed class TestRunner
     /// </summary>
     internal string RunRoot { get; }
 
+    // Go 1.26's -test.artifacts: TB.ArtifactDir keeps its directory under the output directory.
+    internal bool Artifacts => m_options.Artifacts;
+
+    private readonly object m_artifactSync = new();
+    private string? m_artifactRoot;
+
+    /// <summary>
+    /// Go's run-wide artifact directory, <c>filepath.Abs(toOutputDir("_artifacts"))</c>
+    /// (testing.go:2647-2655): <c>_artifacts</c> under <c>-test.outputdir</c> when one is given, else
+    /// under the working directory. Made once, as runTests makes it before the first test.
+    /// </summary>
+    private string ArtifactRoot()
+    {
+        lock (m_artifactSync)
+        {
+            if (m_artifactRoot is null)
+            {
+                string root = Path.GetFullPath(string.IsNullOrEmpty(m_options.OutputDir)
+                    ? "_artifacts"
+                    : Path.Combine(m_options.OutputDir, "_artifacts"));
+
+                Directory.CreateDirectory(root);
+                m_artifactRoot = root;
+            }
+
+            return m_artifactRoot;
+        }
+    }
+
+    /// <summary>
+    /// One test's directory under <see cref="ArtifactRoot"/>, Go's <c>os.MkdirTemp(artifactBase, "")</c>:
+    /// a new directory with a random decimal name. Go 1.26.9's base is always the root itself (see
+    /// <see cref="TestExecution.ArtifactDir"/>).
+    /// </summary>
+    internal string MakeArtifactDir()
+    {
+        string root = ArtifactRoot();
+
+        lock (m_artifactSync)
+        {
+            while (true)
+            {
+                string dir = Path.Combine(root, ((uint)Random.Shared.NextInt64(0, uint.MaxValue)).ToString(CultureInfo.InvariantCulture));
+
+                if (Directory.Exists(dir))
+                    continue;
+
+                Directory.CreateDirectory(dir);
+                return dir;
+            }
+        }
+    }
+
     public nint RunAll()
     {
         HasRun = true;
         Stopwatch packageTimer = Stopwatch.StartNew();
+
+        // runTests makes the artifact root before the first test, whether or not a test asks (testing.go:2645).
+        if (Artifacts)
+            ArtifactRoot();
+
         m_reporter.ReportPackage("run", output: m_options.ShuffleSeed is int reportedSeed ? $"shuffle seed: {reportedSeed}" : null);
 
         for (int count = 0; count < m_options.Count; count++)
