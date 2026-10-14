@@ -122,3 +122,8 @@ pass of the pair passed its first run the same way; its second was cut short by 
 
 **Still open: Developer Mode.** Its key holds no value, and an unelevated symlink is still refused by PowerShell,
 .NET and `mklink` alike. The owner is checking the switch.
+
+**2026-10-14 — Developer Mode ON; unelevated symlinks work. Every B3 item on the box now qualifies.** The owner
+turned Developer Mode on in Settings. `AllowDevelopmentWithoutDevLicense` now reads 1, and from an unelevated shell
+a symbolic link is created by PowerShell's `New-Item -ItemType SymbolicLink`, by .NET's
+`File.CreateSymbolicLink` and by `mklink` alike, each read back as a symbolic link.
