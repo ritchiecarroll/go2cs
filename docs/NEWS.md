@@ -8,6 +8,93 @@ their full text.
 
 ---
 
+## October 14, 2026 — Converted code keeps Go's comments and spacing, and HTTPS works on macOS
+
+**NuGet 1.24.13.7.** This is the last release built from Go 1.24. The next one moves the converted
+standard library to Go 1.26.
+
+**Comments and blank lines land where Go put them.** Converted C# is meant to read like the Go it came
+from, and until now its comments and spacing did not always follow. A type's doc comment could be
+missing, a comment inside a function could land after the code it described, and the blank lines that
+group statements in a Go function were dropped or doubled. This release fixes those. One real example,
+from the converted `internal/fmtsort`. The Go:
+
+```go
+// SortedMap is a slice of KeyValue pairs that simplifies sorting
+// and iterating over map entries.
+//
+// Each KeyValue pair contains a map key and its corresponding value.
+type SortedMap []KeyValue
+```
+
+Before, the declaration stood alone, with no comment:
+
+```csharp
+partial struct SortedMap /*[]KeyValue*/;
+```
+
+Now:
+
+```csharp
+// SortedMap is a slice of KeyValue pairs that simplifies sorting
+// and iterating over map entries.
+//
+// Each KeyValue pair contains a map key and its corresponding value.
+partial struct SortedMap /*[]KeyValue*/;
+```
+
+What changed, by kind:
+
+- **Blank lines inside a function body** follow Go's, in every conversion.
+- **Doc comments** stay with the type, alias or declaration group they document.
+- **Comments inside expressions**, in a composite literal, between arguments, or beside an operand, are
+  written at their Go position.
+
+Comments are carried when you convert with `-comments`, as the converted standard library is. The blank
+lines apply to every conversion. Nothing that runs is different: the change is in comments and
+whitespace, and every validated package holds its count.
+
+**A multi-line raw string keeps its exact bytes.** A Go raw string literal that spans lines now converts
+to a C# raw string literal, closed by a call that restores Go's rule for such literals. The string has
+the same bytes as in Go however the file's line endings were checked out.
+
+**HTTPS on macOS.** Verifying a certificate against the system's roots reached an unimplemented stub on
+macOS, so an ordinary `https` request from a converted program failed there, on Intel and on Apple
+silicon. It now calls the system's own verification, as Go does.
+
+**Native AOT, fully trimmed.** Two defects that showed only in a Native AOT publish with `TrimMode` set
+to `full` are fixed. The default publish and programs running under the JIT never had them.
+
+- **`fmt` calls a value's own methods again.** A type's Go methods are no longer trimmed away when they
+  are reached only at run time, so `fmt` calls `String()` or `Error()` and no longer prints the raw
+  value. A `time.Duration` prints as `1.5s`, not as a count of nanoseconds. This is the defect 1.24.13.6
+  shipped with and listed under Known issues.
+- **Reflection reaches a struct's fields through a pointer.** Reading or setting a field by reflection on
+  a struct reached through a pointer, with `reflect.ValueOf(&v).Elem().Field(i)` or `FieldByName`, and
+  taking that field's address, now works. In 1.24.13.6 it stopped with a `PlatformNotSupportedException`.
+
+The price is size again, and the choice is the same as before: behaving like Go comes first. Measured on
+`win-x64`, a fully trimmed C# program that references the packages is about 26% larger than it was in
+1.24.13.6.
+
+**Two pointers to one field are equal, however the field was reached.** A field promoted from an embedded
+struct can be named two ways, `&s.X` and `&s.Inner.X`. The two pointers now compare equal, as they do in
+Go. Before, they could compare unequal. This one applied to every program, under the JIT as well.
+
+**Starting a goroutine is cheaper.** The runtime library recorded where each goroutine was started by
+walking the whole call stack. It now resolves that once for each `go` statement. Code that starts
+goroutines from deep recursion was the worst case, and is the one that improves most.
+
+**Converted modules.** Packages published through [nugetgo.net](https://nugetgo.net) can now carry
+separate assets for each platform, as the `go.*` packages do, for a module whose Go source differs by
+operating system.
+
+**Also in this release.** The [Tour of go2cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/tour/README.md)
+pins the converter and package versions it runs with. The README says plainly what to expect from the
+project: it is one person's work, replies are best-effort, and it says where to ask.
+
+The `go.*` packages are built and versioned together, so use one version of them in a project.
+
 ## October 12, 2026 — Reflection works under Native AOT, and macOS validation passes three quarters
 
 **NuGet 1.24.13.6.** This release is about converted Go behaving the same in more places: under Native
@@ -29,7 +116,7 @@ interface inside generic code, a container reachable only through a field anothe
 export, and a struct whose own package never takes a pointer to it.
 
 One defect is known in a fully trimmed publish: `fmt` prints some named types in their raw form
-([Known issues](KnownIssues.md#under-a-fully-trimmed-native-aot-publish-fmt-prints-some-named-types-raw)).
+([fixed in 1.24.13.7](#october-14-2026--converted-code-keeps-gos-comments-and-spacing-and-https-works-on-macos)).
 The default publish is not affected, and the fix is in the next release.
 
 **Converted modules as NuGet packages.** Three Go modules are published at

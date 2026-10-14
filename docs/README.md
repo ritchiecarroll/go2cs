@@ -17,13 +17,13 @@ machinery stays out of the converted files. Behavior comes first: a goroutine ru
 and is not rewritten into `async`. The converted Go standard library passes Go's own tests, package by
 package, on Windows and Linux, and the same validation is in progress on macOS.
 
-## 📰 NEWS — Reflection works under Native AOT, and macOS validation passes three quarters
+## 📰 NEWS — Converted code keeps Go's comments and spacing, and HTTPS works on macOS
 
-**October 12, 2026, NuGet 1.24.13.6.** Go's `reflect` now works under Native AOT without generating code at
-run time, at a measured cost in size; two calls that reached an unimplemented stub answer as Go does;
-and validation of the standard library on macOS passes three quarters of the
-[roster](ValidatedTestPackages.md).
-[Full announcement](NEWS.md#october-12-2026--reflection-works-under-native-aot-and-macos-validation-passes-three-quarters).
+**October 14, 2026, NuGet 1.24.13.7.** Converted C# now carries Go's doc comments, in-function
+comments and blank lines where Go put them. An `https` request from a converted program works on macOS.
+Two defects in fully trimmed Native AOT publishes are fixed, including the one that printed named
+types raw. This is the last release built from Go 1.24; the next moves to Go 1.26.
+[Full announcement](NEWS.md#october-14-2026--converted-code-keeps-gos-comments-and-spacing-and-https-works-on-macos).
 
 **➡ All announcements can be found in the [go2cs News Archive](NEWS.md).**
 
