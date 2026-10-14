@@ -84,3 +84,16 @@ The `.com` column is the discriminating one: `.invalid` is a reserved name some 
 router answers SERVFAIL for an ordinary nonexistent `.com` name too. By the runbook's rule (only `TestLookupCNAME`
 is tolerated) the box does not qualify as configured, and re-running cannot change that, because the answer is the
 resolver's. With public IPv4 resolvers on the adapter, the same two runs re-qualify it.
+
+## Amendments
+
+*(Append-only. Each block is dated and states what changed and why. Earlier text stays as written.)*
+
+**2026-10-14 — WSL pwsh: NOT INSTALLED → pwsh 7.5.4, reachable. The reading above was wrong.** pwsh 7.5.4 is
+installed under `/opt/microsoft/powershell/7` and linked at `/usr/local/bin/pwsh`, and it starts and reports its
+version. The inventory that read "not installed" ran `command -v pwsh` under a `PATH` it had set itself without
+`/usr/local/bin`, so the lookup could not find it. The lane's root shell has `/usr/local/bin` on its `PATH`, so B3's
+item (pwsh 7 reachable by every launcher) is met on the WSL arm, and no download is owed. Every other WSL reading
+above was taken by absolute path or from `/usr/bin`, and none is affected. The Verdict's sentence naming WSL pwsh as
+an open item no longer holds; the open items are the adapter's resolvers, Developer Mode and `LongPathsEnabled` on
+Windows, and `localhost` resolving `::1` on the WSL arm.
