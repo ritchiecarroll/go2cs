@@ -140,20 +140,14 @@ docs/phase4/hopA-inputs/*.tsv text eol=lf
 src/go2cs/corpus-release.txt text eol=lf
 src/go2cs/stdlib-metadata.txt text eol=lf
 
-# go2cs behavioral TargetComparison tests compare transpiled C# to .cs.target
-# golden files BYTE-FOR-BYTE (TargetComparisonTests.FileMatch). The converter
-# preserves the Go source's LF inside multi-line string literals, so these files
-# legitimately contain mixed CRLF/LF. With core.autocrlf=true git would rewrite
-# those LFs to CRLF on checkout and break the byte comparison. Mark the affected
-# projects' transpiled output and goldens as binary so their exact bytes survive.
-src/tests/Behavioral/Solitaire/*.cs            -text
-src/tests/Behavioral/Solitaire/*.cs.target     -text
-src/tests/Behavioral/SortArrayType/*.cs        -text
-src/tests/Behavioral/SortArrayType/*.cs.target -text
-src/tests/Behavioral/StdLibInternalAbi/*.cs        -text
-src/tests/Behavioral/StdLibInternalAbi/*.cs.target -text
-src/tests/Behavioral/UntypedConstWideMask/main.cs -text
-src/tests/Behavioral/UntypedConstWideMask/main.cs.target -text
+# No behavioral .cs or .cs.target needs a -text exception. The converter writes
+# every line break CRLF, the Go text it copies verbatim (a raw literal's body, a
+# /* */ block) included (src/go2cs/incrementalWrites.go, uniformLineEndings), so
+# a fresh emission IS the eol=crlf checkout form; and a multi-line raw literal's
+# value ends in .Raw(), which removes every CR, so a program that observes one
+# runs the same from any checkout. Solitaire, SortArrayType, StdLibInternalAbi
+# (2026-06-25) and UntypedConstWideMask (2026-07-24) were -text until 2026-10-14,
+# when the emission became uniform and their blobs were renormalized.
 
 # A captured run artifact banked as EVIDENCE, not as generated output. The board keeps it
 # because the reading is not reproducible on demand (crypto/tls TestBogoSuite shape (b) needs

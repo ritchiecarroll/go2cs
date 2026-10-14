@@ -1379,15 +1379,12 @@ namespace BehavioralRunner
 
         private static bool FilesEqual(string a, string b)
         {
-            // Compare with line endings normalized (CRLF -> LF). The converter emits CRLF for C# line
-            // endings but preserves the Go source's LF inside multi-line string literals, so a golden has
-            // mixed CRLF/LF bytes; with core.autocrlf=true git rewrites those in-string LFs to CRLF on
-            // checkout. Normalizing endings makes the comparison immune to that round-trip (a pure
-            // line-ending diff can only come from autocrlf, never from the deterministic converter), so no
-            // real regression signal is lost. NOTE: this relaxes only the golden TEXT comparison -- a
-            // project whose COMPILED program embeds and observes a multi-line string literal at runtime
-            // (e.g. Solitaire's board) still needs `-text` in .gitattributes so the on-disk .cs keeps LF
-            // newlines, else autocrlf corrupts the runtime value.
+            // Compare with line endings normalized (CRLF -> LF). Since 2026-10-14 the converter writes every
+            // line break CRLF (uniformLineEndings), the Go text it copies verbatim included, so an emission and
+            // its eol=crlf checkout agree byte for byte and this normalization no longer has a line ending to
+            // absorb; it stays until its retirement is ruled. Before, a raw literal's body kept Go's LF and a
+            // golden was mixed. No project needs `-text` for its runtime value: a multi-line raw literal ends
+            // in .Raw(), which removes every CR (Solitaire's board).
             return NormalizeLineEndings(File.ReadAllBytes(a))
                 .AsSpan()
                 .SequenceEqual(NormalizeLineEndings(File.ReadAllBytes(b)));
