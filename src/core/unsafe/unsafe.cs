@@ -1046,7 +1046,7 @@ public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.N
     // reach the original backing. The snapshot below silently swallowed them — crypto/subtle's
     // xorBytes rebuilds dst/x/y from `&dst[0]` and writes every XOR result through dst, so XORBytes
     // wrote NOTHING (its whole test matrix compared dst against its untouched 0xdd fill).
-    if (ptr.TryGetElementWindow(n, out slice<T> window))
+    if (ElementWindow.TryGet(ptr, n, out slice<T> window))
         return window;
 
     // No aliasable managed storage — a heap box, a struct field, or a REINTERPRETING pointer over a
@@ -1088,7 +1088,7 @@ public static ж<T> SliceData<T>(slice<T> slice) {
     //      threw InvalidOperationException instead of reading the element.
     //
     // The element reference also makes the round trip ALIAS rather than snapshot: unsafe.Slice's
-    // TryGetElementWindow arm rebuilds a window over the original backing, so a write through the
+    // ElementWindow.TryGet arm rebuilds a window over the original backing, so a write through the
     // rebuilt slice reaches the source — Go's semantics. Guarded by the UnsafeStringEmpty and
     // UnsafeSliceDataAliasing behavioral tests.
     //
@@ -1149,7 +1149,7 @@ public static @string String<TLen>(ж<byte> ptr, TLen len) where TLen : System.N
     // prohibition — "the bytes passed to String must not be modified as long as the returned string
     // value exists" — and a prohibition is only meaningful because the aliasing is OBSERVABLE.
     //
-    // This is the exact mirror of Slice's element-window arm above (same TryGetElementWindow, same
+    // This is the exact mirror of Slice's element-window arm above (same ElementWindow.TryGet, same
     // absolute-index bounds), and until it existed unsafe.String was the ONE member of the family
     // that snapshotted: Slice, SliceData and StringData all alias, and SliceData's own note already
     // claimed "the round trip through unsafe.String/unsafe.Slice now ALIASES instead of
@@ -1169,7 +1169,7 @@ public static @string String<TLen>(ж<byte> ptr, TLen len) where TLen : System.N
     // length), so aliasing costs +0 B per string. Guarded by GolibTests' UnsafeStringAliasingTests
     // — four aliasing arms and four invariance arms, the latter pinning that the zero-length
     // early-out above still precedes any dereference and that the snapshot arm below survives.
-    if (ptr.TryGetElementWindow(n, out slice<byte> window))
+    if (ElementWindow.TryGet(ptr, n, out slice<byte> window))
         return @string.AliasOf(window);
 
     // No aliasable managed storage — a heap box, a struct field, or a REINTERPRETING pointer over a

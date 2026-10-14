@@ -344,26 +344,6 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer
     }
 
     /// <inheritdoc/>
-    internal override bool TryGetElementWindow(int length, out slice<T> window)
-    {
-        window = default;
-
-        if (length < 0)
-            return false;
-
-        if (!TryGetElementStorage(out T[]? backing, out nint absoluteIndex))
-            return false;
-
-        // Only REAL managed element storage can be aliased; bounds exactly as before the split.
-        if (absoluteIndex < 0 || absoluteIndex + length > backing!.Length)
-            return false;
-
-        window = new slice<T>(backing, absoluteIndex, absoluteIndex + length, absoluteIndex + length);
-
-        return true;
-    }
-
-    /// <inheritdoc/>
     internal override unsafe ж<TDst>? TryPinnedReinterpret<TDst>()
     {
         if (!TryGetElementStorage(out T[]? backing, out nint absoluteIndex) ||
@@ -429,5 +409,42 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer
             default:
                 return (array.Source ?? (object)array, index);
         }
+    }
+}
+
+/// <summary>
+/// The length-element aliasing window a pointer's referent starts — what makes `unsafe.Slice(&amp;s[i], n)`
+/// alias the original backing store (crypto/subtle's xorBytes). Only an <see cref="ElemRefBox{T}"/> over REAL
+/// managed element storage has one; every other box kind answers false.
+/// </summary>
+/// <remarks>
+/// A generic METHOD on a NON-generic class, deliberately, and never a member of the ж&lt;T&gt; family. Under Native AOT
+/// with golib rooted whole (TrimMode=partial), every member gets a reflection-invoke stub that constructs the types in
+/// its signature, and an instance member is pulled in for every ж&lt;X&gt; the program constructs. As a ж&lt;T&gt; virtual this
+/// member closed a generic cycle: <c>array&lt;T&gt;.AliasPointer</c> constructs ж&lt;array&lt;X&gt;&gt;, this member's signature
+/// then constructs slice&lt;array&lt;X&gt;&gt;, and slice's implicit conversion constructs array&lt;array&lt;X&gt;&gt; — one nesting level
+/// per turn, until ILC cuts it off. That was 2,196 cutoff methods and 31.5 s of IlcCompile for a consumer holding only
+/// an array&lt;int&gt;, and a PerfTlsHandshake publish that had not finished after 14 h. Here the method is instantiated
+/// only for the T a call site names.
+/// </remarks>
+internal static class ElementWindow
+{
+    internal static bool TryGet<T>(ж<T> ptr, int length, out slice<T> window)
+    {
+        window = default;
+
+        if (ptr is not ElemRefBox<T> box || length < 0)
+            return false;
+
+        if (!box.TryGetElementStorage(out T[]? backing, out nint absoluteIndex))
+            return false;
+
+        // Only REAL managed element storage can be aliased; bounds exactly as before the split.
+        if (absoluteIndex < 0 || absoluteIndex + length > backing!.Length)
+            return false;
+
+        window = new slice<T>(backing, absoluteIndex, absoluteIndex + length, absoluteIndex + length);
+
+        return true;
     }
 }
