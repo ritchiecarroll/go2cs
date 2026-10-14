@@ -78,4 +78,75 @@ The first flavour build's measurement decides.
 
 ## 6. COORD/i7 legs
 
-filled by COORD as a dated block
+**2026-10-14 — filled by COORD.** Taken on the i7 at master `1f39d682e6`, which holds the pre-H1 seat (`338f7bfb12`)
+and e2move (`b1ba1380b4`), in a fresh worktree detached at that commit. Pin: go1.24.13 with `GOTOOLCHAIN=local`, and
+GOROOT spelled exactly as `go env GOROOT` prints it. The converter was built once under the pin
+(`go2cs.exe` sha256 `2bde00eb6a56dfa693be217f8a68ca110decd3070370bcd9417a070d66b93fe6`).
+
+### 6.1 The behavioral suite's failing set, by name (H9's base)
+
+`BehavioralRunner.exe`, all four phases, on windows/amd64 (the banking platform). rc 0, wall 5,362 s. 819 projects
+enumerated. The 7 linux-exclusive projects are skipped by name and are outside the denominators.
+
+| Phase | Pass | Fail | Skip | Timeout |
+|:--|--:|--:|--:|--:|
+| Transpile | 819 | 0 | 0 | 0 |
+| Compile | 819 | 0 | 0 | 0 |
+| Target | 819 | 0 | 0 | 0 |
+| Output | 790 | 0 | 29 | 0 |
+
+**The failing set is EMPTY in every phase.** H9's "failing set equal by name to H0's" therefore means no failures at
+all, with APPEARED empty. The 29 Output skips are exactly the projects whose `package_info.cs` lacks
+`[GoTestMatchingConsoleOutput]`, derived by the runner's own predicate. They are library or no-output projects, and
+the count matches.
+
+The run left `RawStringLineEndings/main.cs` and `X509SystemVerify/X509SystemVerify.cs` stat-dirty, with no content
+change. That is the in-literal bare-LF finding G measured on this day; its fix lands at H1, before any hop CNR gate.
+
+### 6.2 The outgoing three-target manifest (H8's comparand)
+
+`go2cs.exe -stdlib -comments -platforms windows/amd64,linux/amd64,darwin/amd64 -platform-census <fresh dir>`, under
+the go1.24.13 pin. The seed scope (`src/core`, `docs`, `version.props`) was asserted to have 0 dirty and 0 ignored
+entries before the run. rc 0, wall 1,484 s.
+
+- `platform-manifest.json`: 23,123 bytes, sha256 `9a66caa6053646cc591ecd70ba757795b604e00829c7ea835775d44bc4544a7c`,
+  schema `go2cs.platform-census/1`, comments true, build tags `purego` and `math_big_pure_go`. It is kept on the i7
+  with its three staging roots as evidence.
+- Seed: 7,257 files, equal to the tracked count under `src/core`, of which 184 are hand-owned.
+
+| Target | Queued | Failed | Emitted .cs | Emitted .csproj | Marker gate |
+|:--|--:|--:|--:|--:|--:|
+| windows/amd64 | 344 | 0 | 1,823 | 0 | 0 |
+| linux/amd64 | 342 | 0 | 1,892 | 1 | 0 |
+| darwin/amd64 | 343 | 0 | 1,896 | 1 | 0 |
+
+- Classes over the union of 2,090 emitted .cs files:
+  - shared, identical on all three targets: 1,630;
+  - variant: 84 (package_info 28, package_init 4, source 52);
+  - partial: 93;
+  - exclusive: 283.
+- 340 packages emit, and 37 of them have any delta.
+- L3 layout: 1,630 flat plus 721 per-GOOS files, against a single-platform tree of 1,823.
+- Exactly one csproj differs across targets: `log/syslog`.
+- Disk: the seeded three-target census alone (no flavour build) took 0.87 GB of free space, and the census directory is
+  0.75 GB. §5 holds the full H8 figure.
+- **For H8:** with a DIRTY seed tree (a behavioral run's bin/obj/Generated left under `src/core`), the seed hash set
+  read 28,348 files instead of 7,257. `seedCensusRoot` skips those directories, but `readCensusSeed` walks everything.
+  The run was discarded and re-run on a clean seed. H8's census therefore asserts a clean seed first.
+
+### 6.3 The i7's bare `go`
+
+`GOTOOLCHAIN=local go version`, run from a directory with no `go.mod`: `go version go1.24.13 windows/amd64`.
+
+### 6.4 The roster snapshot at `1f39d682e6`
+
+- `src/check-roster-format.ps1 -List` (pwsh 7): rc 0, "2130 checks pass (225 rows, 223 with a linux annotation, 0 with
+  an execution config, 5 excluded)".
+- `docs/ValidatedTestPackages.md` blob `aabcd852994be30c82eaa66a7dbcc4285ec96af7`.
+- Population 230: 225 banked plus 5 excluded. Implementable 225/225; headline 225/230.
+- 69,777 matching verdicts and 373 disclosed. Linux 223/223 applicable rows, with 69,617 matching and 392 disclosed.
+- 198 rows carry a `darwin:` annotation (counted from the table; the checker gates no darwin figure).
+
+Disclosure manifests: 48 `go2cs_test_disclosures.json` under `src/core`, plus 4 outside it (the validationproof test
+data and three `src/tests/ModuleDisclosures` modules). Each blob is read by `git ls-tree -r 1f39d682e6`, which is the
+reproducible form, so they are not repeated here.
