@@ -189,14 +189,6 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         return false;
     }
 
-    // The length-element aliasing window this pointer's referent starts — what makes
-    // `unsafe.Slice(&s[i], n)` alias the original backing store (crypto/subtle's xorBytes).
-    internal virtual bool TryGetElementWindow(int length, out slice<T> window)
-    {
-        window = default;
-        return false;
-    }
-
     // The pinned-reinterpret arm of the Reinterpret fallback (element storage only).
     internal virtual ж<TDst>? TryPinnedReinterpret<TDst>() => null;
 
