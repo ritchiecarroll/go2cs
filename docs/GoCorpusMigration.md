@@ -380,6 +380,14 @@ paragraph read "Default order (a COORD proposal, NOTES §5 Q13, unruled at 172d4
 *(Edited in place 2026-09-26, §7 lessons 7-9: steps 6-8 added.)*
 
 **Gate:** converter unit tests green **and** `go2cs.exe` demonstrably built by the new toolchain.
+*(Edited in place 2026-10-14, the Go 1.26 hop's H1, ruled by COORD: **under a pin window** (the converter's `go`
+directive has moved while H2 has not moved the corpus pin, or H5 has not regenerated the corpus), "green" admits
+ONLY tests that read GOROOT's new-release sources against something still at the corpus release: the corpus pin, the
+committed corpus, or a registry of the old release's facts. Each such test is NAMED with an owner and the stage
+that clears it. Every other test must be green. A test outside the named set is red, and so is a member still failing
+past its clearing stage. Prove the set by running the BASE (no H1 commit) under the same pin, and compare by name.
+The pairing does not rescue the converter suite, because `auto` switches `go` itself inside `src/go2cs`. Worked
+instance: [`phase4/H1-go126-toolchain.md`](phase4/H1-go126-toolchain.md) §5, eight named, three of them owed as work.)*
 
 ### H2 — The pin bump **GATE**
 
