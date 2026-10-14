@@ -69,6 +69,7 @@ jobs:
           INPUT_TAG: ${{ inputs.tag }}
         run: |
           set -euo pipefail
+          trap 'echo "::error::the record step failed at line $LINENO: $BASH_COMMAND (exit $?)"' ERR
           release_file=src/go2cs/corpus-release.txt
           if [ "$REF_TYPE" = tag ]; then tag="$REF_NAME"; tries=60; else tag="${INPUT_TAG:-}"; tries=1; fi
           if [ -z "$tag" ]; then
@@ -80,7 +81,12 @@ jobs:
             exit 1
           fi
           version="${tag#nuget-}"
-          git fetch --quiet --tags origin
+          # --force: on a tag push the checkout already wrote this tag as a lightweight ref at its commit, and
+          # origin's annotated tag would otherwise be refused as a clobber (run 38523494714 died here).
+          if ! git fetch --quiet --tags --force origin; then
+            echo "::error::git fetch --tags from origin failed"
+            exit 1
+          fi
           if ! tag_commit="$(git rev-parse --verify --quiet "refs/tags/$tag^{commit}")"; then
             echo "::error::tag '$tag' does not exist in this repository"
             exit 1
@@ -89,7 +95,10 @@ jobs:
           record=""
           try=1
           while :; do
-            git fetch --quiet origin master
+            if ! git fetch --quiet origin master; then
+              echo "::error::git fetch of origin master failed"
+              exit 1
+            fi
             if [ "$(reads "$tag_commit")" = "$version" ]; then
               record="$tag_commit"
             else
@@ -115,7 +124,10 @@ jobs:
             git diff --stat "$tag_commit" "$record" -- src/go2cs ":(exclude)$release_file"
             exit 1
           fi
-          git checkout --quiet --detach "$record"
+          if ! git checkout --quiet --detach "$record"; then
+            echo "::error::could not check out the record commit $record"
+            exit 1
+          fi
           {
             echo "tag=$tag"
             echo "version=$version"
