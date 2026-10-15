@@ -429,33 +429,30 @@ had none to lead and its comment was written after the block had closed, outside
 ### A comment after a block's `{` trails the `{`
 
 **Rule.** A one-line comment after the `{` of an `if`, `else`, `for` or `switch` header is written on the
-C# line that ends with that `{`.
+C# line that ends with that `{`. Here, from the `bidi` package of `golang.org/x/text`, which Go vendors into its own
+tree:
 
-<!-- source: GOROOT/src/strconv/ftoaryu.go:174-182 -->
+<!-- source: GOROOT/src/vendor/golang.org/x/text/unicode/bidi/core.go:676-682 -->
 ```go
-		if b > 5 {
-			roundUp = true
-		} else if b < 5 {
-			roundUp = false
-		} else { // b == 5
-			// round up if there are trailing digits,
-			// or if the new value of m is odd (round-to-even convention)
-			roundUp = trunc || m&1 == 1
-		}
+			if t == L {
+				// no change
+			} else if t == R {
+				s.resolvedLevels[i] += 1
+			} else { // t == AN || t == EN
+				s.resolvedLevels[i] += 2
+			}
 ```
 
-<!-- source: src/core/strconv/ftoaryu.cs:174-183 -->
+<!-- source: src/core/vendor/golang.org/x/text/unicode/bidi/core.cs:721-728 -->
 ```csharp
-        if (b > 5){
-            roundUp = true;
-        } else 
-        if (b < 5){
-            roundUp = false;
-        } else { // b == 5
-            // round up if there are trailing digits,
-            // or if the new value of m is odd (round-to-even convention)
-            roundUp = trunc || (uint64)(m & 1) == 1;
-        }
+            if (t == L){
+                // no change
+            } else 
+            if (t == R){
+                s.resolvedLevels[i] += 1;
+            } else { // t == AN || t == EN
+                s.resolvedLevels[i] += 2;
+            }
 ```
 
 The converter writes `else if` as `} else ` and then `if (…){` on the next line.
@@ -586,29 +583,30 @@ An empty block:
 block, keeping a blank line Go has above them. In a `case` body, comments after its last statement that are
 indented deeper than the label stay at the end of that body.
 
-<!-- source: GOROOT/src/strconv/itoa.go:126-132 -->
+<!-- source: GOROOT/src/internal/runtime/maps/table.go:1129-1135 -->
 ```go
-				i--
-				a[i] = smallsString[us*2+1]
-
-				u = q
-			}
-			// u < 1e9
+			it.key = key
+			it.elem = elem
+			return
 		}
+
+		// Continue to next table.
+	}
 ```
 
-<!-- source: src/core/strconv/itoa.cs:121-127 -->
+<!-- source: src/core/internal/runtime/maps/table.cs:1145-1151 -->
 ```csharp
-                i--;
-                a[i] = smallsString[usΔ1 * 2 + 1];
-
-                u = q;
-            }
-            // u < 1e9
+            it.key = key;
+            it.elem = elem;
+            return;
         }
+
+        // Continue to next table.
+    }
 ```
 
-`usΔ1` is a local renamed because it shadows another.
+The comment closes a `for` body in the map iterator of `internal/runtime/maps`, with the blank line Go leaves
+above it.
 
 **Limits.** Blocks the converter writes outside the ordinary block path, such as the outer block that holds
 an `if` statement's init clause, do not take this rule yet.
@@ -645,27 +643,28 @@ internal static map<@string, uint64> unitMap = new map<@string, uint64>{
 
 After the last element, above the closing bracket:
 
-<!-- source: GOROOT/src/os/exec.go:126-131 -->
+<!-- source: GOROOT/src/database/sql/sql.go:2802-2806 -->
 ```go
-	p := &Process{
-		Pid:  pid,
-		mode: modeHandle,
-		// N.B Since we set statusDone, handle will never actually be
-		// used, so its value doesn't matter.
-	}
+			rows = &Rows{
+				dc:    dc,
+				rowsi: rowsi,
+				// releaseConn set below
+			}
 ```
 
-<!-- source: src/core/os/windows/exec.cs:119-124 -->
+<!-- source: src/core/database/sql/sql.cs:3189-3193 -->
 ```csharp
-    var p = Ꮡ(new Process(
-        Pid: pid,
-        mode: modeHandle
-        // N.B Since we set statusDone, handle will never actually be
-        // used, so its value doesn't matter.
-    ));
+                Ꮡrows.ValueSlot = Ꮡ(new Rows(
+                    dc: dc,
+                    rowsi: Ꮡrowsi.ValueSlot
+                    // releaseConn set below
+                ));
 ```
 
-`Ꮡ(…)` is golib's address-of, Go's `&`.
+`Ꮡ(…)` is golib's address-of, Go's `&`. The sample sits in a closure that `Stmt.QueryContext` passes to
+`retry`, and `rows` and `rowsi` are locals of `QueryContext` that the closure assigns. So each lives in a heap
+box, and the closure writes the box's `ValueSlot` (see
+[Function Values and Closures](../ConversionStrategies.md#function-values-and-closures)).
 
 **Limits.** A package-level `const` or `var` writes the comments before it above its doc, and the comments
 inside its value where the literal reaches them. Any the emission does not reach are still written above the
