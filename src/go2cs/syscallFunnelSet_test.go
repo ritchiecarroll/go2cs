@@ -42,8 +42,11 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
+	"go/version"
 	"io"
 	"log"
+	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -793,4 +796,59 @@ func funnelCallsOf(t *testing.T, pkgPath, src string) map[string]bool {
 	})
 
 	return calls
+}
+
+// TestSyscallFunnelPackagePathsAreRealPackages holds syscallFunnelPackagePaths to the GOROOT under
+// test, because a funnel PATH fails silently when Go moves the package: its callers stop being funnel
+// calls, their pointer arguments go unpinned, and everything still compiles. Go 1.26 moved Syscall6
+// from internal/runtime/syscall to internal/runtime/syscall/linux, and the 1.26 emission of
+// EpollWait/EpollCtl/Open/Read lost every KeepAlive the 1.24 emission had (the i9's H5 re-run,
+// 2026-10-15). A live entry must be a real std package for SOME GOOS, since every funnel package is
+// platform-specific and a host-only `go list std` omits it; a retired entry
+// (syscallFunnelRetiredPaths) must be GONE from any release at or past its retirement, so a stale
+// retirement fails too. The go command on PATH is the GOROOT under test.
+func TestSyscallFunnelPackagePathsAreRealPackages(t *testing.T) {
+	goVersion, err := exec.Command("go", "env", "GOVERSION").Output()
+
+	if err != nil {
+		t.Skipf("go command unavailable: %v", err)
+	}
+
+	release := strings.TrimSpace(string(goVersion))
+	std := map[string]bool{}
+
+	for _, goos := range []string{"linux", "darwin", "windows"} {
+		list := exec.Command("go", "list", "-e", "std")
+		list.Env = append(os.Environ(), "GOOS="+goos, "GOARCH=amd64", "CGO_ENABLED=0")
+		out, err := list.Output()
+
+		if err != nil {
+			t.Fatalf("go list std (GOOS=%s) failed: %v", goos, err)
+		}
+
+		for _, pkg := range strings.Fields(string(out)) {
+			std[pkg] = true
+		}
+	}
+
+	if !std["syscall"] {
+		t.Fatalf("go list std under %s does not list package syscall: the listing is not reading a GOROOT", release)
+	}
+
+	for path := range syscallFunnelRetiredPaths {
+		if !syscallFunnelPackagePaths[path] {
+			t.Errorf("syscallFunnelRetiredPaths names %q, which syscallFunnelPackagePaths does not", path)
+		}
+	}
+
+	for path := range syscallFunnelPackagePaths {
+		retiredAt, retired := syscallFunnelRetiredPaths[path]
+
+		switch {
+		case retired && version.Compare(release, retiredAt) >= 0 && std[path]:
+			t.Errorf("funnel path %q is marked retired at %s, but %s still lists it: the retirement is stale", path, retiredAt, release)
+		case (!retired || version.Compare(release, retiredAt) < 0) && !std[path]:
+			t.Errorf("funnel path %q is not a std package under %s for linux, darwin or windows: its callers are no longer funnel calls and their pointer arguments go unpinned; follow the move and retire the old path in syscallFunnelRetiredPaths", path, release)
+		}
+	}
 }
