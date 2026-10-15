@@ -93,6 +93,14 @@ Every test function of the 17 added and 5 removed rows was matched against every
 A partial arc annotates the target with the source's whole banked count: `internal/strconv` reads
 "receives `runtime (10819)`" though one test moved, as ruled for the same shape at 1.25.14 (kept as provenance).
 
+**AMENDED 2026-10-15 (COORD ruling on H3 route 2, the i9):** the `runtime` → `internal/strconv` arc is DROPPED, and
+its row is removed from the TSV, which now holds four arcs. The i9 read the bodies: internal/strconv's `TestAtoi` uses
+strconv's `parseInt32Tests`/`parseInt64Tests` and the error-returning `Atoi`. runtime's used `atoi32tests`/`atoi64tests`
+and `runtime.Atoi`'s ok bool, and those tables exist nowhere at go1.26.9 (checked: only 1.24.13's
+`runtime/string_test.go` holds them). The 0.84 above was the shared switch/range/Errorf skeleton; the exact-body ratios
+are runtime 0.43 and strconv 0.64. runtime's `TestAtoi` and `TestAtoi32` are recorded as DELETED at 1.26, and
+`internal/strconv` receives nothing from `runtime`. The population (242) and the other four arcs agree byte for byte.
+
 ## 5. Fixtures that moved (the H5 refresh's input)
 
 Std `testdata/` (cmd excluded): 1,916 files at 1.24.13, 2,057 at 1.26.9; 23 left their path. Matched by content

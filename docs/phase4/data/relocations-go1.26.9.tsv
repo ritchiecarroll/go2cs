@@ -19,6 +19,11 @@
 #   runtime -> internal/strconv: PARTIAL, the source row survives. TestAtoi left runtime/string_test.go and is
 #     internal/strconv's TestAtoi at 0.84 (0.74 against strconv's own). TestAtoi32 left runtime too, and is in no
 #     go1.26.9 package. (At 1.25.14 the same pair sat in internal/runtime/strconv, which go1.26.9 removed.)
+#   AMENDED 2026-10-15 (H3 route 2, the i9): runtime -> internal/strconv is DROPPED; its row is removed below.
+#     internal/strconv's TestAtoi uses strconv's parseInt32Tests/parseInt64Tests and the error-returning Atoi;
+#     runtime's used atoi32tests/atoi64tests and runtime.Atoi's ok bool, tables that exist nowhere at go1.26.9.
+#     The 0.84 was a shared switch/range/Errorf skeleton (exact-body ratio: runtime 0.43, strconv 0.64).
+#     runtime's TestAtoi and TestAtoi32 are DELETED at 1.26. Four arcs remain.
 # NOT relocations, though a name says so:
 #   crypto/internal/hpke -> crypto/hpke (the RECON's name list): its one test, TestRFC9180Vectors, scores 0.17 at
 #     best against crypto/hpke's tests, which are new; its vectors file is replaced, not moved (6 entries in the
@@ -37,4 +42,3 @@ runtime/internal/wasitest	internal/runtime/wasitest
 internal/trace/internal/oldtrace	internal/trace/internal/tracev1
 go/ast/internal/tests	go/ast
 strconv	internal/strconv
-runtime	internal/strconv
