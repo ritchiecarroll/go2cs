@@ -158,6 +158,15 @@ func isManualVarInPackage(pkgPath string, goos string, goName string) bool {
 // Free functions ("funcName") and methods on other types ("recvTypeName.funcName") owned by the
 // same manual files — declarations whose bodies are inseparable from the manual types' semantics.
 var manualConversionFuncs = map[string]map[string]goosScope{
+	"crypto/internal/constanttime": {
+		// boolToUint8 is a Go compiler INTRINSIC whose written body is `panic("unreachable; must be
+		// intrinsicified")`, and every helper of the package (Select, ByteEq, Eq, LessOrEq) calls it, so
+		// converted it made every GCM Open panic (Go 1.26, H7). Its result MEANS something (1 / 0), which
+		// compilerIntrinsic.go's no-op rule for `panic("intrinsic")` cannot supply. The branchless body is
+		// in crypto/internal/constanttime/constant_time_impl.cs; TestIntrinsicPlaceholdersAreClassified
+		// requires every such placeholder to be either the rule's or a registered hand-own.
+		"boolToUint8": goosAny,
+	},
 	"crypto/internal/fips140/alias": {
 		// AnyOverlap orders element ADDRESSES — four `(uintptr)Ꮡ(…)` takes, each pinning its backing only
 		// until the box that took it is finalized, so a collection landing between two takes relocates one
