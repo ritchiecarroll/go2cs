@@ -59,31 +59,50 @@ public class BubbledWaitGroupTests
     private static void AssertNoFailure(Exception? escaped) =>
         Assert.IsNull(escaped, $"escaped: {escaped}");
 
+    // Runs body as a bubble's root. What it throws is caught there and returned: a root goroutine that
+    // throws ends the test host, as an unrecovered goroutine panic ends a Go program, so a red run (the
+    // seat's WaitGroup absent) would take every later test down with it instead of failing each by name.
+    private static Exception? InBubble(Action body)
+    {
+        Exception? thrown = null;
+
+        Exception? escaped = OnGoroutine(() => SyncTestBubble.Run(() =>
+        {
+            try
+            {
+                body();
+            }
+            catch (Exception ex)
+            {
+                thrown = ex;
+            }
+        }));
+
+        return thrown ?? escaped;
+    }
+
     [TestMethod]
     public void AWaitOnAWaitGroupAddedInTheBubbleIsDurable()
     {
         WaitReason parkedWith = default;
 
-        AssertNoFailure(OnGoroutine(() =>
+        AssertNoFailure(InBubble(() =>
         {
-            SyncTestBubble.Run(() =>
+            ж<sync.WaitGroup> wg = NewWaitGroup();
+            Goroutine? waiter = null;
+            wg.Add(1);
+
+            Goroutine.Start(() =>
             {
-                ж<sync.WaitGroup> wg = NewWaitGroup();
-                Goroutine? waiter = null;
-                wg.Add(1);
-
-                Goroutine.Start(() =>
-                {
-                    Volatile.Write(ref waiter, Goroutine.Current);
-                    wg.Wait();
-                });
-
-                // Returns only once every member is durably blocked: the waiter's Wait must count.
-                SyncTestBubble.Wait();
-                parkedWith = Volatile.Read(ref waiter)!.Reason;
-
-                wg.Done();
+                Volatile.Write(ref waiter, Goroutine.Current);
+                wg.Wait();
             });
+
+            // Returns only once every member is durably blocked: the waiter's Wait must count.
+            SyncTestBubble.Wait();
+            parkedWith = Volatile.Read(ref waiter)!.Reason;
+
+            wg.Done();
         }));
 
         Assert.AreEqual(WaitReason.SynctestWaitGroupWait, parkedWith);
@@ -127,15 +146,20 @@ public class BubbledWaitGroupTests
             }
         });
 
-        Assert.IsTrue(SpinWait.SpinUntil(() => Volatile.Read(ref waiter)?.State == GoroutineState.Parked, TimeoutMs),
-            "the waiter never parked");
-
+        // Observed first and asserted last: the Done below must run whatever was seen, or a failing run
+        // would leave the member parked and the bubble open past the test.
+        bool parked = SpinWait.SpinUntil(() => Volatile.Read(ref waiter)?.State == GoroutineState.Parked, TimeoutMs);
         Thread.Sleep(500);
-        Assert.AreEqual(0, Volatile.Read(ref waitReturned), "synctest.Wait returned while a member waited on a WaitGroup added outside the bubble");
-        Assert.AreEqual(WaitReason.SyncWaitGroupWait, Volatile.Read(ref waiter)!.Reason);
+        int returnedEarly = Volatile.Read(ref waitReturned);
+        WaitReason parkedWith = Volatile.Read(ref waiter)?.Reason ?? default;
 
         wg.Done();   // from no bubble, on a WaitGroup no bubble added to: no fatal
-        Assert.IsTrue(done.Wait(TimeoutMs), "the bubble never finished");
+        bool finished = done.Wait(TimeoutMs);
+
+        Assert.IsTrue(parked, "the waiter never parked");
+        Assert.AreEqual(0, returnedEarly, "synctest.Wait returned while a member waited on a WaitGroup added outside the bubble");
+        Assert.AreEqual(WaitReason.SyncWaitGroupWait, parkedWith);
+        Assert.IsTrue(finished, "the bubble never finished");
         AssertNoFailure(escaped);
     }
 
@@ -150,7 +174,7 @@ public class BubbledWaitGroupTests
     private static SyncTestBubble BubbleOf()
     {
         SyncTestBubble? captured = null;
-        AssertNoFailure(OnGoroutine(() => SyncTestBubble.Run(() => captured = SyncTestBubble.Current)));
+        AssertNoFailure(InBubble(() => captured = SyncTestBubble.Current));
         return captured!;
     }
 
@@ -207,19 +231,16 @@ public class BubbledWaitGroupTests
         ж<sync.WaitGroup> released = NewWaitGroup();
         SyncTestBubble? keptBy = null, releasedBy = null;
 
-        AssertNoFailure(OnGoroutine(() =>
+        AssertNoFailure(InBubble(() =>
         {
-            SyncTestBubble.Run(() =>
-            {
-                kept.Add(1);
-                kept.Done();
-                keptBy = BubbleRecordOf(kept);
+            kept.Add(1);
+            kept.Done();
+            keptBy = BubbleRecordOf(kept);
 
-                released.Add(1);
-                released.Done();
-                released.Wait();   // zero count, no waiter: Go 1.26 disassociates here
-                releasedBy = BubbleRecordOf(released);
-            });
+            released.Add(1);
+            released.Done();
+            released.Wait();   // zero count, no waiter: Go 1.26 disassociates here
+            releasedBy = BubbleRecordOf(released);
         }));
 
         // The control: without the Wait the association outlives the count, as Go's special does.
@@ -227,7 +248,7 @@ public class BubbledWaitGroupTests
         Assert.IsNull(releasedBy, "a zero-count Wait left the WaitGroup associated");
 
         // And it can be reused from another bubble without Go's fatal.
-        AssertNoFailure(OnGoroutine(() => SyncTestBubble.Run(() => { released.Add(1); released.Done(); })));
+        AssertNoFailure(InBubble(() => { released.Add(1); released.Done(); }));
     }
 
     // Exactly a converted package-level variable's shape: `internal static ж<T> ᏑX = new StandardBox<T>(...)`.
@@ -246,26 +267,23 @@ public class BubbledWaitGroupTests
         WaitReason parkedWith = default;
         SyncTestBubble? recorded = null;
 
-        AssertNoFailure(OnGoroutine(() =>
+        AssertNoFailure(InBubble(() =>
         {
-            SyncTestBubble.Run(() =>
+            Goroutine? waiter = null;
+            wg.Add(1);
+            recorded = BubbleRecordOf(wg);
+
+            Goroutine.Start(() =>
             {
-                Goroutine? waiter = null;
-                wg.Add(1);
-                recorded = BubbleRecordOf(wg);
-
-                Goroutine.Start(() =>
-                {
-                    Volatile.Write(ref waiter, Goroutine.Current);
-                    wg.Wait();
-                });
-
-                // Go: this would not return (the waiter's Wait is not durable for a global).
-                SyncTestBubble.Wait();
-                parkedWith = Volatile.Read(ref waiter)!.Reason;
-
-                wg.Done();   // releases the waiter and disassociates, leaving the global reusable
+                Volatile.Write(ref waiter, Goroutine.Current);
+                wg.Wait();
             });
+
+            // Go: this would not return (the waiter's Wait is not durable for a global).
+            SyncTestBubble.Wait();
+            parkedWith = Volatile.Read(ref waiter)!.Reason;
+
+            wg.Done();   // releases the waiter and disassociates, leaving the global reusable
         }));
 
         Assert.IsNotNull(recorded, "the difference this test states is gone: a global was left unbubbled, as Go does");
@@ -308,20 +326,17 @@ public class BubbledWaitGroupTests
     {
         int ran = 0;
 
-        AssertNoFailure(OnGoroutine(() =>
+        AssertNoFailure(InBubble(() =>
         {
-            SyncTestBubble.Run(() =>
-            {
-                ж<sync.WaitGroup> wg = NewWaitGroup();
-                channel<int> gate = new(0);
+            ж<sync.WaitGroup> wg = NewWaitGroup();
+            channel<int> gate = new(0);
 
-                wg.Go(() => { gate.Receive(); Interlocked.Increment(ref ran); });
+            wg.Go(() => { gate.Receive(); Interlocked.Increment(ref ran); });
 
-                // Both members durably blocked: the task on a bubbled channel, nothing else running.
-                SyncTestBubble.Wait();
-                gate.Send(1);
-                wg.Wait();
-            });
+            // Both members durably blocked: the task on a bubbled channel, nothing else running.
+            SyncTestBubble.Wait();
+            gate.Send(1);
+            wg.Wait();
         }));
 
         Assert.AreEqual(1, Volatile.Read(ref ran));
