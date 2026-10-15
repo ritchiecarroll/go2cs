@@ -64,6 +64,21 @@ comparable operators ALONE, with no arithmetic siblings. (Guarded by `Constraint
 `recordA | recordB | recordC` union through a generic function instantiated at each term; without the
 fix it reproduces CS0315 at all three sites.)
 
+The breadcrumb is spelled as Go writes the constraint: a foreign term by its package NAME
+(`runtime.StackRecord`) and a term of the constraint's own package bare, never by import path
+(`crypto/x509.parsedURI`). A NAMED methodless union carries its union beside its name, so the reader
+sees the type set at the declaration and the elided-constraint ratchet (repoguard) can tell it from a
+lost constraint:
+
+```csharp
+internal static T firstOf<T>(slice<T> p)
+    where T : /* RecordUnion = recordA | recordB | recordC */ new()
+```
+
+(`constraintUnionText`, guarded by `TestNamedUnionConstraintBreadcrumbCarriesItsUnion` and the
+`Constraints` golden. With the bare name the ratchet gated `internal/trace/event.cs`'s two
+`EventDetails` clauses; with the import-path form it gated `crypto/x509/constraints.cs`.)
+
 ## A single-term pointer constraint `[P *T]` erases the parameter to `ж<T>`
 
 A type parameter constrained to a single, non-tilde pointer term — go/types' flat-copy helper
