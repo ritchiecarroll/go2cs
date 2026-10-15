@@ -173,9 +173,6 @@
 
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="../../../../LICENSE" Pack="true" PackagePath="" Condition="!Exists('$(MSBuildProjectDirectory)/LICENSE')" />
-  </ItemGroup>
   <!-- Layout L3: this package's direct imports differ by GOOS, so the references that are not
        common to every platform are selected by $(GoTargetOS)
        (docs/phase4/DESIGN-multiplatform-corpus.md §8). A group with no items is not noise: it
@@ -193,4 +190,7 @@
     <ProjectReference Include="$(go2csPath)core/internal/syscall/windows/internal.syscall.windows.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="../../../../LICENSE" Pack="true" PackagePath="" Condition="!Exists('$(MSBuildProjectDirectory)/LICENSE')" />
+  </ItemGroup>
 </Project>
