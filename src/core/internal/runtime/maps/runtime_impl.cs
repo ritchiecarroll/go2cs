@@ -43,7 +43,6 @@
 // `using go.golib` would also pull that namespace's extension methods into a hand-owned file sitting
 // beside converted code.
 using FatalReport = go.golib.FatalReport;
-using GoReflect = go.GoReflect;
 
 // rand, the second member of the same push block (runtime.cs:18; pushed by runtime/rand.go:182,
 // `maps_rand` -> `return rand()`), takes the companion for the same cycle reason. Go's runtime.rand is
@@ -97,15 +96,15 @@ partial class maps_package
 
     internal static partial void typedmemclr(ж<abi.Type> typ, @unsafe.Pointer ptr) => throw refuseRawGroupMemory("typedmemclr");
 
-    // typeString, pushed at Go 1.26 from runtime/type.go (`//go:linkname maps_typeString
-    // internal/runtime/maps.typeString`, body `toRType(typ).string()`), names the key type in
-    // unhashableTypeError's "hash of unhashable type: T". toRType resolves the descriptor's name offset,
-    // which the managed model never fills; the descriptor instead carries the System.Type it stands
-    // for (abi's type_impl.cs, sysType), and golib renders that exactly as %T and reflect's String do.
-    // A descriptor with no carried type has no name to give, and that refuses by name rather than
-    // printing a made-up one.
+    // typeString (Go 1.26, map.go:897-898; pushed by runtime/type.go:16, `maps_typeString` ->
+    // `toRType(typ).string()`) names a key type for unhashableTypeError's message, "hash of unhashable
+    // type: <T>". The same cycle rule as the rest of the push block puts it here, not in a linkname
+    // row. Runtime's own body reads the linker's name blob through nameOff, which a synthesized
+    // descriptor does not have; what it DOES carry is its managed type, and GoReflect.GoTypeName is the
+    // Go spelling golib already writes for the same panic (GoEqualityComparer's "hash of unhashable
+    // type"). Unfilled, the generator stubs this with a throwing body, so the first unhashable-key
+    // panic would have reported NotImplementedException instead of Go's message. A descriptor with no
+    // managed type names no Go type at all, and cannot be a map key's; it answers so, plainly.
     internal static partial @string typeString(ж<abi.Type> typ) =>
-        typ.Value.sysType is { } sysType ?
-            GoReflect.GoTypeName(sysType) :
-            throw panic("runtime-capability: typeString needs a type descriptor that carries its managed type");
+        typ != nil && typ.Value.sysType is { } st ? GoReflect.GoTypeName(st) : "<type with no managed descriptor>";
 }

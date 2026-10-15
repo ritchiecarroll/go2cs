@@ -91,6 +91,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using @unsafe = unsafe_package;
+using abi = go.@internal.abi_package;
 
 partial class runtime_package {
 
@@ -388,9 +389,14 @@ internal static void cgoCheckPointer(any ptr, any arg)
     checkArg(ptr, ptr?.GetType() ?? typeof(object), top: true);
 }
 
-private static PanicException cgoCheckFailure()
+// Go 1.26 names the offending KIND: cgoCheckPointerFail became a cgoErrorMsg code (it was the message
+// string), and every panic site in cgoCheckArg reads `panic(cgoFormatErr(msg, t.Kind()))` with the kind
+// of the type checked at that level, while a word found by cgoCheckUnknownPointer names abi.Pointer. The
+// converted cgoFormatErr (cgocall.cs) composes "argument of cgo function has Go pointer to unpinned Go
+// <kind>", so each site below passes the kind of its own arm.
+private static PanicException cgoCheckFailure(abiꓸKind kind)
 {
-    return panic((errorString)cgoCheckPointerFail);
+    return panic(cgoFormatErr(cgoCheckPointerFail, kind));
 }
 
 // Go's cgoCheckArg: p is a value of static type t; top is whether we are at the top level, where
@@ -414,7 +420,7 @@ private static void checkArg(object? value, Type staticType, bool top)
             return;
 
         if (!top && !PinTable.IsPinned(word))
-            throw cgoCheckFailure();
+            throw cgoCheckFailure(abi.Interface);
 
         checkArg(value, value.GetType(), top: false);
         return;
@@ -423,11 +429,11 @@ private static void checkArg(object? value, Type staticType, bool top)
     switch (value)
     {
         case @unsafe.Pointer up:
-            checkPointer(goReferentOfUnsafePointer(up), top);
+            checkPointer(goReferentOfUnsafePointer(up), top, abi.UnsafePointer);
             return;
 
         case INilPointer box:
-            checkPointer(goReferentOfBox(box), top);
+            checkPointer(goReferentOfBox(box), top, abi.Pointer);
             return;
 
         case @string str:
@@ -435,7 +441,7 @@ private static void checkArg(object? value, Type staticType, bool top)
             object? data = stringBacking(str);
 
             if (data is not null && !top && !PinTable.IsPinned(data))
-                throw cgoCheckFailure();
+                throw cgoCheckFailure(abi.ΔString);
 
             return;
         }
@@ -448,7 +454,7 @@ private static void checkArg(object? value, Type staticType, bool top)
                 return;
 
             if (!top && !PinTable.IsPinned(backing))
-                throw cgoCheckFailure();
+                throw cgoCheckFailure(abi.Slice);
 
             Type elementType = elementTypeOf(slice.GetType());
 
@@ -467,14 +473,14 @@ private static void checkArg(object? value, Type staticType, bool top)
             // "These types contain internal pointers that will always be allocated in the Go
             // heap. It's never OK to pass them to C." A nil channel or map is a nil word.
             if (!isDefaultStruct(value))
-                throw cgoCheckFailure();
+                throw cgoCheckFailure(value is IChannel ? abi.Chan : abi.Map);
 
             return;
 
         case Delegate function:
             // A closure is a heap funcval (a Go pointer); a plain function's funcval is RODATA.
             if (function.Target is not null)
-                throw cgoCheckFailure();
+                throw cgoCheckFailure(abi.Func);
 
             return;
 
@@ -508,13 +514,13 @@ private static void checkArg(object? value, Type staticType, bool top)
 
 // The abi.Pointer / abi.UnsafePointer arm: below top level the pointer itself must be pinned;
 // then its pointee's words are the next (and last) level.
-private static void checkPointer(object? referent, bool top)
+private static void checkPointer(object? referent, bool top, abiꓸKind kind)
 {
     if (referent is null)
         return;
 
     if (!top && !PinTable.IsPinned(referent))
-        throw cgoCheckFailure();
+        throw cgoCheckFailure(kind);
 
     checkWords(referent);
 }
@@ -556,7 +562,7 @@ private static void checkWords(object referent)
 private static void requirePinned(object? referent)
 {
     if (referent is not null && !PinTable.IsPinned(referent))
-        throw cgoCheckFailure();
+        throw cgoCheckFailure(abi.Pointer);
 }
 
 // The pointer words of one value, INLINE: nested structs and fixed arrays are part of the same
@@ -596,13 +602,13 @@ private static void checkWordsOfValue(object? value, Type staticType)
         case IChannel:
         case IMap:
             if (!isDefaultStruct(value))
-                throw cgoCheckFailure();
+                throw cgoCheckFailure(abi.Pointer);
 
             return;
 
         case Delegate function:
             if (function.Target is not null)
-                throw cgoCheckFailure();
+                throw cgoCheckFailure(abi.Pointer);
 
             return;
 

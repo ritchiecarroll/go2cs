@@ -42,7 +42,9 @@ partial class runtime_package
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool VirtualFree(nint lpAddress, nuint dwSize, uint dwFreeType);
 
-    internal static @unsafe.Pointer sysAllocOS(uintptr n)
+    // Go 1.26 adds an unnamed label parameter to sysAllocOS, sysReserveOS and sysMapOS (the mapping's
+    // name, for the OS's memory-region annotation where it has one); Windows ignores it, as Go does.
+    internal static @unsafe.Pointer sysAllocOS(uintptr n, @string _)
     {
         nint p = VirtualAlloc(0, (nuint)n, (uint)(_MEM_COMMIT | _MEM_RESERVE), (uint)_PAGE_READWRITE);
 
@@ -64,7 +66,7 @@ partial class runtime_package
     // unsafe.Pointer PARAMETER emitted as `v.Value = ...`, a converter defect routed separately), which
     // this hand-own leaves behind.
 
-    internal static @unsafe.Pointer sysReserveOS(@unsafe.Pointer v, uintptr n)
+    internal static @unsafe.Pointer sysReserveOS(@unsafe.Pointer v, uintptr n, @string _)
     {
         // v is just a hint. First try at v; this fails if any of [v, v+n) is already reserved.
         nint p = VirtualAlloc((nint)(nuint)(uintptr)v, (nuint)n, (uint)_MEM_RESERVE, (uint)_PAGE_READWRITE);
@@ -152,11 +154,11 @@ partial class runtime_package
     }
 
     // TEST SEAMS (pinner_impl.cs's pattern; GolibTests is not in the InternalsVisibleTo grant).
-    public static nuint GoSysAllocOS(nuint n) => ((uintptr)sysAllocOS(n)).Value;
+    public static nuint GoSysAllocOS(nuint n) => ((uintptr)sysAllocOS(n, ""u8)).Value;
 
     public static void GoSysFreeOS(nuint v, nuint n) => sysFreeOS(new @unsafe.Pointer(v), n);
 
-    public static nuint GoSysReserveOS(nuint v, nuint n) => ((uintptr)sysReserveOS(new @unsafe.Pointer(v), n)).Value;
+    public static nuint GoSysReserveOS(nuint v, nuint n) => ((uintptr)sysReserveOS(new @unsafe.Pointer(v), n, ""u8)).Value;
 
     public static void GoSysUsedOS(nuint v, nuint n) => sysUsedOS(new @unsafe.Pointer(v), n);
 
