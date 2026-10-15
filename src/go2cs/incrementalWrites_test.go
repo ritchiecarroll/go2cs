@@ -32,6 +32,12 @@ import (
 // not "the first run's mtime": a rewrite within the filesystem's timestamp resolution could otherwise read unchanged.
 var incrementalFixtureStamp = time.Date(2001, 1, 1, 0, 0, 0, 0, time.UTC)
 
+// supportedTestCapabilitySet is the capability set processTestConversion hands convertTestVariants,
+// for tests that drive the variant conversion directly.
+func supportedTestCapabilitySet() hashset.HashSet[string] {
+	return hashset.NewHashSet(supportedTestCapabilities())
+}
+
 func incrementalFixture(t *testing.T) (pkgDir, outDir string, options Options) {
 	t.Helper()
 

@@ -15,7 +15,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ritchiecarroll/hashset"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -197,7 +196,7 @@ func convertThroughRecompileFallback(t *testing.T, pkgDir, outDir string, testOp
 
 	_, projectNamespace := getProjectName(pkgDir, testOptions)
 	compileExcluded := selectCompileExcludedTestFiles(internal, external)
-	supported := hashset.NewHashSet(supportedTestCapabilities())
+	supported := supportedTestCapabilitySet()
 
 	_, err = convertTestVariants(testProjectWhiteboxReference, production, internal, external, compileExcluded, pkgDir, outDir, projectNamespace, supported, testOptions)
 
