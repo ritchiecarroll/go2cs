@@ -26834,4 +26834,25 @@ emission corpus-wide. When it lands it retires the expected-difference test abov
 
 — R (finding), COORD (ruling)
 
+## 2026-10-15 — G: a lowered defer evaluates a method's pointer receiver when the finally runs, not when the `defer` statement runs — RUNS-LIKE-GO GAP, post-H7 seat (G) — OPEN
+
+**The difference.** Go evaluates a deferred call's receiver and arguments when the `defer` statement executes
+(`defer p.m()` binds the `p` of that moment). The converter's lowered defer re-roots the call on the entry box
+(`if (ᒐd1) Ꮡp.DerefOrNull().m();`) and reads `Ꮡp` when the finally runs. The two differ only when the body reassigns
+the pointer after the defer. Found in G's review of P2's class-6 seat (`4c659c3486`, `os/linux/pidfd_linux.cs`), which
+does not reassign. The live-alias arm has carried the same property all along.
+
+**Owed (G, after H7):** red-first by a fixture that reassigns a pointer parameter after `defer p.m()`. Go calls `m` on
+the OLD `p`. Then capture the receiver at the defer statement.
+
+— G (review note), COORD (routing)
+
+## 2026-10-15 — G: under `-var=false` a range body that writes its variable copies into an undeclared name — RECORDED, no seat
+
+With `preferVarDecl` off, the copy-on-write arms of `visitRangeStmt` (slice/array/map, and since P2's `0555ce12b9` the
+yield-func arms) put the type on the foreach TEMP and emit `lit = iᴛ1;` with no declaration. The corpus never runs
+that option, so nothing is red. COORD 2026-10-15: record only. Seat it if anything starts using `-var=false`.
+
+— G (review note)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
