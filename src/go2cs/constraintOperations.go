@@ -1392,6 +1392,17 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 						// has nothing left to enforce. `new()` is kept (unlike that arm) because a
 						// composite type set admits no pointer type argument — every term is a
 						// value type — and the generic tail would have appended it anyway.
+						//
+						// A NAMED constraint over such a union (internal/trace's `EventDetails`, nine struct
+						// types) carries its union in the breadcrumb beside its name, `/* EventDetails =
+						// Metric | Label | … */`. The bare name hid the one fact that makes `new()` the honest
+						// answer here, that the type set is a union of value types with no method to elide,
+						// and the elided-constraint ratchet (repoguard, RED 8 (d)), which reads the comment
+						// and cannot resolve a name, gated `/* EventDetails */ new()` as a lost constraint.
+						if union, ok := namedConstraintUnionText(constraint); ok {
+							originalConstraint = fmt.Sprintf("/* %s = %s */", constraintName, union)
+						}
+
 						constraintNames = append(constraintNames, fmt.Sprintf("%s%s    where %s : %s new()", v.newline, v.indent(v.indentLevel), typeParamNames[i], originalConstraint))
 						continue
 					}
@@ -1501,6 +1512,52 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 	}
 
 	return fmt.Sprintf("<%s>", strings.Join(emittedNames, ", ")), strings.Join(constraintNames, "")
+}
+
+// namedConstraintUnionText renders a NAMED constraint's type set when it is exactly one union of type
+// terms (`type EventDetails interface { Metric | Label | … }`), each term spelled as Go writes it with its
+// package NAME (never its import path), and a `~` kept. Anything else (an inline constraint, a method,
+// an embedded interface beside the union, more than one embedded element) answers false, and the
+// breadcrumb keeps its bare name.
+func namedConstraintUnionText(constraint types.Type) (string, bool) {
+	named, ok := types.Unalias(constraint).(*types.Named)
+
+	if !ok {
+		return "", false
+	}
+
+	iface, ok := named.Underlying().(*types.Interface)
+
+	if !ok || iface.NumMethods() != 0 || iface.NumEmbeddeds() != 1 {
+		return "", false
+	}
+
+	union, ok := iface.EmbeddedType(0).(*types.Union)
+
+	if !ok || union.Len() < 2 {
+		return "", false
+	}
+
+	qualifier := func(pkg *types.Package) string {
+		if pkg == named.Obj().Pkg() {
+			return ""
+		}
+
+		return pkg.Name()
+	}
+
+	terms := make([]string, union.Len())
+
+	for i := range union.Len() {
+		term := union.Term(i)
+		terms[i] = types.TypeString(term.Type(), qualifier)
+
+		if term.Tilde() {
+			terms[i] = "~" + terms[i]
+		}
+	}
+
+	return strings.Join(terms, " | "), true
 }
 
 // constraintProxyArg reports the C# constraint-proxy type name to render for type argument i of an
