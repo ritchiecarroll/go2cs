@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 using abi = go.@internal.abi_package;
+using static go.@internal.abi_package;
 using reflect = go.reflect_package;
 
 namespace GolibTests;
