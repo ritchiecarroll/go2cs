@@ -1237,9 +1237,7 @@ public static error /*err*/ SetsockoptInet4Addr(ΔHandle fd, nint level, nint op
 
 // go2cs generated this placeholder — func SetsockoptIPMreq is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-public static error /*err*/ SetsockoptIPv6Mreq(ΔHandle fd, nint level, nint opt, ж<IPv6Mreq> Ꮡmreq) {
-    return Setsockopt(fd, (int32)level, (int32)opt, Ꮡmreq.Reinterpret<IPv6Mreq, byte>(), (int32)/* unsafe.Sizeof(*mreq) */ (uintptr)20);
-}
+// go2cs generated this placeholder — func SetsockoptIPv6Mreq is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 public static nint /*pid*/ Getpid() {
     return (nint)getCurrentProcessId();
