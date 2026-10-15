@@ -13,7 +13,7 @@
 // </ImportedTypeAliases>
 
 using go;
-using static go.crypto.@internal.entropy.v1.0.0.entropy_package;
+using static go.crypto.@internal.entropy.v1_0_0.entropy_package;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -53,7 +53,7 @@ using static go.crypto.@internal.entropy.v1.0.0.entropy_package;
 [assembly: go.GoPositionMap("crypto/internal/entropy/v1.0.0/sha384.go", "sha384.cs", "AA4cAAoWopSCgoKCgoKClIKCgpSmgoKmgqaCgqiSgoKCgpSClKaCgoKCgoKCgqYAUqYBooKCgpSCgoKUuJSChJaCgoKCgoKCpoKCgoKCgoKmgoKogoKCgoKCgoKC", "", "", "190=RotateLeft64/3/3/1;191=RotateLeft64/3/3/1")]
 // </GoSourcePositionMaps>
 
-namespace go.crypto.@internal.entropy.v1.0.0;
+namespace go.crypto.@internal.entropy.v1_0_0;
 
 [GoPackage("entropy", ImportPath = "crypto/internal/entropy/v1.0.0")]
 public static partial class entropy_package
