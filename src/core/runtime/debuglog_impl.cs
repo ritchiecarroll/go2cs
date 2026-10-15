@@ -127,7 +127,7 @@ partial class runtime_package
         l.w.uvarint((uint64)len(b));
         l.w.bytes(b);
         if (len(b) != len(x)) {
-            l.w.@byte(debugLogStringOverflow);
+            l.w.@byte(debugLogOverflow);
             l.w.uvarint((uint64)(len(x) - len(b)));
         }
         return Ꮡl;
@@ -294,10 +294,32 @@ partial class runtime_package
             r.uvarint();
             r.uvarint();
             dlogWrite("<const string>"u8);
-        } else if (typ == debugLogStringOverflow) {
+        } else if (typ == debugLogOverflow) {
             dlogWrite("..("u8);
             printuint(r.uvarint());
             dlogWrite(" more bytes).."u8);
+        } else if (typ == debugLogHexdump) {
+            // Go 1.26. hexdumper prints through golib's print, which the runtime's print sink routes
+            // to the goroutine's writebuf (print fidelity R1), so DumpDebugLog captures it.
+            var p = (uintptr)r.uvarint();
+            var bl = r.uvarint();
+            if (r.begin + bl > r.end) {
+                r.begin = r.end;
+                dlogWrite("<hexdump length corrupted>"u8);
+            } else {
+                dlogWrite("\n"u8); // Start on a new line
+                var hd = new hexdumper(addr: p);
+                while (bl > 0) {
+                    var b = (~r.data).b[(int)(r.begin % (uint64)len((~r.data).b))..];
+                    if ((uint64)len(b) > bl) {
+                        b = b[..(int)(bl)];
+                    }
+                    r.begin += (uint64)len(b);
+                    bl -= (uint64)len(b);
+                    hd.write(b);
+                }
+                hd.close();
+            }
         } else if (typ == debugLogPC) {
             printDebugLogPC((uintptr)r.uvarint(), false);
         } else if (typ == debugLogTraceback) {
