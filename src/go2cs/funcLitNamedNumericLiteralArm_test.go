@@ -138,6 +138,8 @@ func main() {
 
 // TestFuncLitStatesItsResultAtANamedNumericLiteralArm pins the rule and its control.
 func TestFuncLitStatesItsResultAtANamedNumericLiteralArm(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
