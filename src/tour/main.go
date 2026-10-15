@@ -172,13 +172,25 @@ func main() {
 	}
 
 	url := "http://" + listener.Addr().String()
-	log.Printf("Tour of go2cs is ready at %s", url)
-	if !options.noOpen {
-		go openBrowser(url)
-	}
 
 	errs := make(chan error, 1)
 	go func() { errs <- httpServer.Serve(listener) }()
+
+	// The server listens from the start, but the Tour is announced and the browser opened only once
+	// the warmup has ended (ready or failed), so the first page a user sees already runs warm.
+	// Without a warmup there is nothing to wait for.
+	if pipeline.warm.status().State == warmupRunning {
+		log.Printf("Tour of go2cs is listening at %s; it opens when the .NET warmup finishes", url)
+	}
+	go func() {
+		if pipeline.waitForWarmup(ctx) != nil {
+			return
+		}
+		log.Printf("Tour of go2cs is ready at %s", url)
+		if !options.noOpen {
+			openBrowser(url)
+		}
+	}()
 
 	select {
 	case <-ctx.Done():

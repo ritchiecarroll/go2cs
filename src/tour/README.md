@@ -115,11 +115,13 @@ go2cs, restores the `go.*` packages into the NuGet cache, and starts MSBuild and
 the C# compiler. The server makes that trip itself as soon as it starts, in the
 background, by converting, building, and running the Tour's own hello-world
 program in a scratch workspace of its own — the same stages, runtime, and
-environment a lesson uses. The page shows **Warming up .NET...** in the header
-while this runs and **.NET ready** briefly when it ends, so by the time a
-lesson is open its first run takes about as long as any later one.
+environment a lesson uses. The server prints that it is ready, and opens the
+browser, only when the warmup ends, so the first lesson a user sees already
+runs warm: its first run takes about as long as any later one.
 
-The server answers requests throughout. A conversion proceeds right away; a
+The server answers requests throughout. A page opened during the warmup shows
+**Warming up .NET...** in the header while it runs and **.NET ready** briefly
+when it ends. A conversion proceeds right away; a
 .NET build that arrives mid-warmup waits for the warmup to finish rather than
 racing it for the same packages, then builds warm. If the warmup fails, the
 server logs why and the page shows nothing: the first lesson simply pays the
