@@ -230,16 +230,17 @@ zones, sockets, the `syscall` surface) follows Windows semantics or fails.
 ## Real-world Go modules
 
 **In short.** Beyond the standard library, go2cs converts third-party Go modules and holds each to the
-same bar: its own tests must match Go's. Three modules pass today, and a larger one is next.
+same bar: its own tests must match Go's. Five modules pass today, and a larger one is next.
 
 Third-party modules are the proving ground after the standard library. Each module is converted,
 validated against its own Go test suite exactly as a standard-library package is, and given a proof
 page beside the conversion rather than on the standard-library roster. `go2cs -tests -recurse` runs a
 module's tests across all of its packages, and a validated module packs as one NuGet package.
 
-Three modules validate today, each on the platforms [Validated Modules](ValidatedModules.md) names:
-`golang.org/x/sync`, [`google/uuid`](https://github.com/google/uuid) and
-[`golang-jwt/jwt`](https://github.com/golang-jwt/jwt) v5. `uuid` is one package with no dependencies; it
+Five modules validate today, each on the platforms [Validated Modules](ValidatedModules.md) names:
+`golang.org/x/sync`, [`google/uuid`](https://github.com/google/uuid),
+[`golang-jwt/jwt`](https://github.com/golang-jwt/jwt) v5, [`ritchiecarroll/hashset`](https://github.com/ritchiecarroll/hashset)
+and [`spf13/pflag`](https://github.com/spf13/pflag). `uuid` is one package with no dependencies; it
 brings Go's v1, v3, v5 and v6 UUIDs to .NET, where `System.Guid` generates v4 and v7. `jwt` is the first
 module whose tests span several of its own packages, and it exercises the converted crypto stack in
 real code. The next candidate:

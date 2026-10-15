@@ -4,22 +4,32 @@ Third-party Go modules whose own `_test.go` suites go2cs converted with `go2cs -
 built against the converted standard library, ran under the Go-semantics test host, and compared
 verdict for verdict against a clean `go test -json` baseline of the same sources — the same bar the
 [standard-library roster](ValidatedTestPackages.md) holds every package to. A module appears here
-only when every package the run reached matched `go test` test for test.
+only when, in every package the run reached, each test either matched `go test` or is disclosed, by its exact
+failure, as something the converted code does not do.
 
 Each module's pages are written by the converter beside its conversion and copied here unedited:
-the module summary sums the per-package proof pages, and each proof page lists every verdict.
+the module summary sums the per-package proof pages, and each proof page lists every verdict. For
+`golang.org/x/sync`, `github.com/ritchiecarroll/hashset` and `github.com/spf13/pflag` the summary is the
+`VALIDATION.md` their NuGet package carries, below the package's notice.
 
 | Module | Version | Packages | Matched | Disclosed | Platform | Proof |
 |:--|:--|--:|--:|--:|:--|:--|
-| `golang.org/x/sync` | v0.19.0 | 4 | 28 | 0 | `windows/amd64` | [summary](validation/modules/golang.org/x/sync@v0.19.0/MODULE.md) |
+| `golang.org/x/sync` | v0.19.0 | 4 | 27 | 1 | `linux/amd64` | [summary](validation/modules/golang.org/x/sync@v0.19.0/MODULE.md) |
 | `github.com/google/uuid` | v1.6.0 | 1 | 54 | 0 | `windows/amd64`, `linux/amd64` | [summary](validation/modules/github.com/google/uuid@v1.6.0/MODULE.md) |
 | `github.com/golang-jwt/jwt/v5` | v5.3.1 | 2 | 189 | 0 | `windows/amd64`, `linux/amd64` | [summary](validation/modules/github.com/golang-jwt/jwt/v5@v5.3.1/MODULE.md) |
+| `github.com/ritchiecarroll/hashset` | v1.0.0 | 1 | 37 | 0 | `linux/amd64` | [summary](validation/modules/github.com/ritchiecarroll/hashset@v1.0.0/MODULE.md) |
+| `github.com/spf13/pflag` | v1.0.9 | 1 | 177 | 0 | `linux/amd64` | [summary](validation/modules/github.com/spf13/pflag@v1.0.9/MODULE.md) |
 
 Measured with Go 1.24.13 at `Release` with the tiered JIT off, the test host's default.
 
-**`golang.org/x/sync`:** two runs on their own each matched all 28 verdicts. In a third run, made while the
-machine was running other heavy test jobs, `semaphore`'s `TestWeightedAcquire` failed once. That test depends
-on timing, so the matches above are claimed only for a machine that is not busy with other work.
+**`golang.org/x/sync`:** `semaphore`'s `TestWeightedAcquire` gives each acquire attempt a 10 ms deadline. With
+the tiered JIT off, the first attempt compiles the acquire path at full optimization before it can wait, which
+on the `linux/amd64` machine measured takes longer than 10 ms, so the test fails there and is disclosed as
+`runtime-capability`; the semaphore proof page pins the exact failure. With the tiered JIT on (`-test-tiered`),
+the same machine matches all 8 of `semaphore`'s tests and all 28 of the module's. On `windows/amd64`, two runs on
+their own each matched all 28 verdicts, and a third, made while the machine was running other heavy test jobs,
+failed `TestWeightedAcquire` once; those proof pages are not reproduced here. That test depends on timing, so the
+result above is claimed only for a machine that is not busy with other work.
 
 **`github.com/google/uuid` and `github.com/golang-jwt/jwt/v5`:** each was read once on `windows/amd64` (the proof
 pages linked above) and once on `linux/amd64`, from the same module sources (their module sums match), and both
