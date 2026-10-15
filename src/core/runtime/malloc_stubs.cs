@@ -646,7 +646,7 @@ internal static uintptr writeHeapBitsSmallStub(ж<mspan> Ꮡspan, uintptr x, uin
     } else {
         // One write.
         var dstΔ1 = (ж<uintptr>)(uintptr)((uintptr)add(dst, i * (uintptr)goarch.PtrSize));
-        dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((((1 << (int)((min(bits, (uintptr)(ptrBits)))))) - 1) << (int)(j)))) | (src.Lsh((uint64)(j)))); // We're taking the min so this compiles on 32 bit platforms. But if bits > ptrbits we always take the other branch
+        dstΔ1.Value = (uintptr)((uintptr)((dstΔ1.Value) & ~(((uintptr)(/* ((1 << (min(bits, ptrBits))) - 1) */ 1)).Lsh((uint64)(j)))) | (src.Lsh((uint64)(j)))); // We're taking the min so this compiles on 32 bit platforms. But if bits > ptrbits we always take the other branch
     }
 
     const bool doubleCheck = false;
