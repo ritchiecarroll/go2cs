@@ -774,8 +774,9 @@ var linknamePushTargets = map[string]linknamePush{
 	// FlightRecorder.Start, whose recorder then needs runtime.traceAdvance and runtime.traceClockNow,
 	// the converted tracer's generation and clock, which never run under the managed tracer. Answering
 	// here let Start subscribe and succeed, and the first batch then died on the reader goroutine.
-	// Refusing here makes Start itself refuse, by name, in the caller's goroutine. The three pulls are
-	// refused the same way in runtime/trace/flightrecorder_impl.cs.
+	// Refusing here makes Start itself refuse, by name, in the caller's goroutine. The two pulls are
+	// refused the same way in runtime/trace/flightrecorder_impl.cs, which also bodies runtime_readTrace,
+	// a bare //go:linkname declaration that go1.26.9 neither calls nor defines.
 	"runtime/trace.runtime_traceClockUnitsPerSecond": {
 		source: "runtime.traceClockUnitsPerSecond",
 		reason: "the flight recorder reads the converted execution tracer's generations, and the managed tracer (golib ExecutionTracer, behind runtime.StartTrace) has none to advance or clock; runtime/trace.Start is supported, trace.FlightRecorder is not",
