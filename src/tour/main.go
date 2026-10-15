@@ -248,6 +248,11 @@ func (s *server) handleConvert(w http.ResponseWriter, r *http.Request) {
 		s.writePipelineError(w, err)
 		return
 	}
+	// The build starts now, in the background, rather than when the page asks for it: by the time
+	// Run (or a synchronized Go run) requests the build, it is finished or under way.
+	if result.Successful {
+		s.pipeline.startPrebuild(result.ConversionID)
+	}
 	writeJSON(w, http.StatusOK, result)
 }
 
