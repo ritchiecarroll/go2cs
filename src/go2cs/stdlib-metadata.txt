@@ -1892,8 +1892,6 @@
 [assembly: GoImplement<InterfaceMulticastAddrMessage, Message>(Pointer = true)]
 [assembly: GoImplement<InterfaceMulticastAddrMessage, Message>]
 [assembly: GoImplement<LinkAddr, Addr>(Pointer = true)]
-[assembly: GoImplement<binaryBigEndian, binaryByteOrder>]
-[assembly: GoImplement<binaryLittleEndian, binaryByteOrder>]
 
 ##internal.runtime.atomic
 // <ExportedTypeAliases>
