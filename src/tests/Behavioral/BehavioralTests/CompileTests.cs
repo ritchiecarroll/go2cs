@@ -1462,6 +1462,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNewAnonStructIfaceEmbed() => CheckTarget("NewAnonStructIfaceEmbed");
 
     [TestMethod]
+    public void CheckNewExpr() => CheckTarget("NewExpr");
+
+    [TestMethod]
     public void CheckNilAdapterOpsClosure() => CheckTarget("NilAdapterOpsClosure");
 
     [TestMethod]

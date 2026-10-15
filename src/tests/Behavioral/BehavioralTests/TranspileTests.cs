@@ -1462,6 +1462,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNewAnonStructIfaceEmbed() => CheckTarget("NewAnonStructIfaceEmbed");
 
     [TestMethod]
+    public void CheckNewExpr() => CheckTarget("NewExpr");
+
+    [TestMethod]
     public void CheckNilAdapterOpsClosure() => CheckTarget("NilAdapterOpsClosure");
 
     [TestMethod]
