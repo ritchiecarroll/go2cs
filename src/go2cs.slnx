@@ -110,9 +110,6 @@
   <Folder Name="/core/internal/runtime/exithook/">
     <Project Path="core/internal/runtime/exithook/internal.runtime.exithook.csproj" />
   </Folder>
-  <Folder Name="/core/internal/runtime/syscall/">
-    <Project Path="core/internal/runtime/syscall/internal.runtime.syscall.csproj" />
-  </Folder>
   <Folder Name="/core/internal/stringslite/">
     <Project Path="core/internal/stringslite/internal.stringslite.csproj" />
   </Folder>

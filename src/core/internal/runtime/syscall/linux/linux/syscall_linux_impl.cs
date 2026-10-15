@@ -8,7 +8,14 @@
 // The Linux kernel boundary — the one declaration the entire converted Linux syscall surface
 // funnels through.
 //
-// Go implements Syscall6 in assembly (internal/runtime/syscall/asm_linux_amd64.s): it loads the
+// RE-HOMED 2026-10-14, ahead of the go1.26 hop's H5 regen. Go 1.26 split internal/runtime/syscall into
+// the packages internal/runtime/syscall/linux and .../windows, so Syscall6 is now declared by package
+// `linux` (class linux_package) and this body moves with it, unchanged. The 1.24 copy beside the 1.24
+// package (internal/runtime/syscall/linux/syscall_linux_impl.cs, class syscall_package) stays until H5c
+// removes that package. Without this file the regen still BUILDS GREEN: go2cs-gen stubs the bodyless
+// declaration with a throwing body, and every Linux syscall would throw at run time.
+//
+// Go implements Syscall6 in assembly (internal/runtime/syscall/linux/asm_linux_amd64.s): it loads the
 // call number into RAX and a1..a6 into RDI, RSI, RDX, R10, R8, R9, executes SYSCALL, and reports
 // RAX and RDX. There is no Go body and no linkname anywhere — this is raw metal, so the converted
 // declaration is bodyless and PartialStubGenerator was throwing NotImplementedException from it.
@@ -85,9 +92,9 @@ using System.Runtime.InteropServices;
 // unsafe, so the requirement has to be declared by the file that has it.
 [module: go.GoRequiresUnsafe]
 
-namespace go.@internal.runtime;
+namespace go.@internal.runtime.syscall;
 
-partial class syscall_package {
+partial class linux_package {
 
 // glibc's syscall(2). Declared with the number plus six arguments as fixed native ints — see
 // note (1) in the file header for why that is correct here despite the C declaration being
@@ -148,4 +155,4 @@ private static (uintptr r1, uintptr r2, uintptr errno) rawSyscall6(uintptr num, 
         : (r1, a3, default(uintptr));
 }
 
-} // end syscall_package
+} // end linux_package
