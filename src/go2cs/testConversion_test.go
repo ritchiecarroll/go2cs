@@ -4446,9 +4446,10 @@ func TestAliasScanCoversRecompiledProductionSources(t *testing.T) {
 // the TEST files rather than the missing folder.
 //
 // Three things are pinned: the target folder is taken, a NON-target folder is not (it is a
-// different build), and the per-GOOS `package_init.cs` is included — a `-tests` run rewrites it to
-// declare the `initᴛᴛtests()` partial the internal variant implements, and a declaration whose
-// implementation is in another compilation is no hook at all.
+// different build), and the per-GOOS `package_init.cs` is included — it holds the production static
+// ctor the internal variant's module initializer forces before its own relocations
+// (TestPackageInitIsIdenticalFromEitherMode), and a ctor left out of the compilation leaves
+// production's relocated vars unset.
 func TestProductionCSFilesTakeTheTargetPlatformFolder(t *testing.T) {
 	dir := t.TempDir()
 
@@ -4556,9 +4557,9 @@ func TestTestVariantContinuesProductionInitOrdinals(t *testing.T) {
 
 // X6 guard (the production static-ctor probe follows LAYOUT L3): the internal variant shares the
 // production `<pkg>_package` class, which has exactly one static-constructor slot. When the
-// production package_init.cs exists it owns that slot and the test side implements its erasable
-// `initᴛᴛtests()` partial hook instead of declaring a second ctor — and the probe deciding which
-// shape to emit is a file-exists check that looked FLAT only.
+// production package_init.cs exists it owns that slot and the test side emits an `initᴛᴛtests()`
+// module initializer that forces it, instead of declaring a second ctor — and the probe deciding
+// which shape to emit is a file-exists check that looked FLAT only.
 //
 // L3 keeps package_init.cs in the package's per-GOOS folder (Go's InitOrder differs when the file
 // set does), so an L3 package answered "no production ctor" and got a SECOND
@@ -4592,8 +4593,8 @@ func TestProductionInitProbeFollowsPlatformLayout(t *testing.T) {
 	}
 
 	// A package with no production static ctor at all must still answer "absent" — the test side
-	// owns the slot there, and a probe answering "present" would emit a hook implementation with no
-	// declaration to implement.
+	// owns the slot there, and a probe answering "present" would trade the variant's own static ctor
+	// for a module initializer that runs its relocations eagerly where nothing requires it.
 	empty := t.TempDir()
 	if _, err := os.Stat(platformLayoutPath(empty, "windows", PackageInitFileName)); err == nil {
 		t.Fatal("a package with no package_init.cs must probe as absent")

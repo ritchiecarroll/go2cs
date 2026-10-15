@@ -669,17 +669,16 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		restoreUnchangedMarkedSources(outputFileNames)
 
 		// Emit the ordered package-var initialization file (no-op unless any initializer was
-		// relocated for init-order correctness). Package (directory) conversions only. Under
-		// -tests, the ctor carries the erasable test hook so the internal test variant can
-		// append its own relocations (writeTestVariantInitFile) — like the IP-4 csproj
-		// exclusions, this production-file difference is intended -tests output, not drift.
+		// relocated for init-order correctness). Package (directory) conversions only. The same
+		// file from -stdlib and -tests: an internal test variant that adds relocations to this
+		// class runs them from its own module initializer (writeTestVariantInitFile).
 		if isDir {
 			// Go's InitOrder differs when the file set does, so package_init.cs is per-GOOS in the
 			// four packages where it varies (design §4.3) — routed by the same L3 rule, passed as
 			// the directory this writer joins its fixed file name onto.
 			packageInitDir := platformLayoutDir(packageOutputPath, goosOfTarget(options.targetPlatform), PackageInitFileName)
 
-			if err := writePackageInitFile(packageInitDir, packageNamespace, packageName, options.convertTests); err != nil {
+			if err := writePackageInitFile(packageInitDir, packageNamespace, packageName); err != nil {
 				log.Fatalf("Failed to write package init file for \"%s\": %s\n", packageOutputPath, err)
 			}
 		}
