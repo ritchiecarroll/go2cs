@@ -258,6 +258,16 @@ type structDecl struct {
 
 type structTable struct {
 	byName map[string][]structDecl
+
+	// opaque holds the declarations written with an empty multi-line body -- Go's opaque placeholder
+	// `struct{}`, such as syscall's _PROC_THREAD_ATTRIBUTE_LIST, whose memory is a native block the
+	// managed side never lays fields over. Such a struct carries no references. It answers only when no
+	// bodied declaration does, so an empty partial never shadows the fields another partial declares.
+	opaque map[string][]structDecl
+
+	// unparsed keys "<dir>/<name>" for a declaration whose body has content but no field the patterns
+	// read. An empty partial beside one never answers: the fields are there and unread.
+	unparsed map[string]bool
 }
 
 // readTrackedText reads a tracked file and normalises line endings; the corpus is committed CRLF and a
@@ -278,7 +288,7 @@ func readTrackedText(t *testing.T, root, rel string) string {
 func buildStructTable(t *testing.T, root string, tracked []string) *structTable {
 	t.Helper()
 
-	table := &structTable{byName: map[string][]structDecl{}}
+	table := &structTable{byName: map[string][]structDecl{}, opaque: map[string][]structDecl{}, unparsed: map[string]bool{}}
 
 	for _, rel := range tracked {
 		if !strings.HasPrefix(rel, "src/core/") || !strings.HasSuffix(rel, ".cs") {
@@ -297,9 +307,14 @@ func buildStructTable(t *testing.T, root string, tracked []string) *structTable 
 
 			depth := strings.Count(lines[i], "{") - strings.Count(lines[i], "}")
 			var fields []string
+			bodyEmpty := depth > 0
 			j := i + 1
 
 			for ; j < len(lines) && depth > 0; j++ {
+				if trimmed := strings.TrimSpace(lines[j]); trimmed != "" && !(trimmed == "}" && depth == 1) {
+					bodyEmpty = false
+				}
+
 				if depth == 1 {
 					if embedded := embeddedFieldPattern.FindStringSubmatch(lines[j]); embedded != nil {
 						fields = append(fields, embedded[1])
@@ -315,6 +330,10 @@ func buildStructTable(t *testing.T, root string, tracked []string) *structTable 
 			// not shadow the bodied declaration it mirrors.
 			if len(fields) > 0 {
 				table.byName[match[1]] = append(table.byName[match[1]], structDecl{dir: dir, fields: fields})
+			} else if bodyEmpty {
+				table.opaque[match[1]] = append(table.opaque[match[1]], structDecl{dir: dir})
+			} else if depth == 0 && j > i+1 {
+				table.unparsed[dir+"/"+match[1]] = true
 			}
 
 			i = j - 1
@@ -329,8 +348,20 @@ func buildStructTable(t *testing.T, root string, tracked []string) *structTable 
 // ambiguous name is what a bare generic type parameter looks like, and resolving `T` against some
 // unrelated struct named T is how a census invents a verdict.
 func (table *structTable) resolve(dir, name string) (structDecl, bool) {
-	decls := table.byName[name]
+	if decl, ok := pickDecl(table.byName[name], dir); ok {
+		return decl, true
+	}
 
+	decl, ok := pickDecl(table.opaque[name], dir)
+
+	if !ok || table.unparsed[decl.dir+"/"+name] {
+		return structDecl{}, false
+	}
+
+	return decl, true
+}
+
+func pickDecl(decls []structDecl, dir string) (structDecl, bool) {
 	if len(decls) == 0 {
 		return structDecl{}, false
 	}
@@ -708,6 +739,18 @@ func TestBoxDerefScannerFires(t *testing.T) {
     public uint32 Length;
     public uint32 Flags;
 }
+
+// Opaque is Go's opaque placeholder struct{}, declared with an empty body; HalfRead's empty partial sits
+// beside a body the field patterns cannot read, so it must not answer.
+public partial struct Opaque {
+}
+
+public partial struct HalfRead {
+}
+
+partial struct HalfRead {
+    @string Name;
+}
 `)
 
 	write("src/core/syscall/windows/zsyscall_windows.cs", `public static (ж<Hostent> h, error err) _GetHostByName(@string name) {
@@ -726,6 +769,18 @@ public static (ж<Absent> a, error err) _GetAbsent() {
     var (r0, _, e1) = Syscall(procabsent.Addr(), 0, 0, 0, 0);
     a = (ж<Absent>)(uintptr)((@unsafe.Pointer)r0);
     return (a, err);
+}
+
+public static (ж<Opaque> o, error err) _GetOpaque() {
+    var (r0, _, e1) = Syscall(procopaque.Addr(), 0, 0, 0, 0);
+    o = (ж<Opaque>)(uintptr)((@unsafe.Pointer)r0);
+    return (o, err);
+}
+
+public static (ж<HalfRead> h, error err) _GetHalfRead() {
+    var (r0, _, e1) = Syscall(prochalfread.Addr(), 0, 0, 0, 0);
+    h = (ж<HalfRead>)(uintptr)((@unsafe.Pointer)r0);
+    return (h, err);
 }
 
 public static (ж<uint16> cmd, error err) _GetCommandLine() {
@@ -789,7 +844,10 @@ public static (ж<Hostent> h, error err) _GetHostByNameUnqualified() {
 		t.Fatalf("control reported hazards %v\nwant %v", scan.hazards, wantHazards)
 	}
 
-	wantUnresolved := []string{"syscall/windows/zsyscall_windows.cs :: _GetAbsent -> Absent"}
+	wantUnresolved := []string{
+		"syscall/windows/zsyscall_windows.cs :: _GetAbsent -> Absent",
+		"syscall/windows/zsyscall_windows.cs :: _GetHalfRead -> HalfRead",
+	}
 
 	if fmt.Sprint(scan.unresolved) != fmt.Sprint(wantUnresolved) {
 		t.Fatalf("control reported unresolved %v\nwant %v", scan.unresolved, wantUnresolved)
@@ -797,8 +855,8 @@ public static (ж<Hostent> h, error err) _GetHostByNameUnqualified() {
 
 	// The known negative and its neighbours: two blittable code sites, both syntactically identical to
 	// the hazards. A predicate that cannot tell them apart matches everything and means nothing.
-	if scan.blittable != 2 {
-		t.Fatalf("control reported %d blittable code sites, want 2 (the uint16 line the corpus carries four times, and a resolvable all-scalar struct)", scan.blittable)
+	if scan.blittable != 3 {
+		t.Fatalf("control reported %d blittable code sites, want 3 (the uint16 line the corpus carries four times, a resolvable all-scalar struct, and an opaque empty-bodied struct)", scan.blittable)
 	}
 
 	if scan.inComment != 2 {

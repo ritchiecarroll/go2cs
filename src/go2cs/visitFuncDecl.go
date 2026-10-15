@@ -2383,15 +2383,28 @@ var linknameForwardTargets = map[string]bool{
 	// it returns real random bits. unique already references runtime. COMPILE AT H5, when unique's
 	// 1.26 canonmap.go first enters the corpus.
 	//
-	// NOT HERE, both pulled at 1.26 and both kept for H5 bodies rather than rowed:
-	//   - runtime.traceClockNow (runtime/trace/recorder.go): the handle exists, but the target returns
-	//     runtime's unexported traceTime, so widening it public is CS0050 and runtime/trace's uint64
-	//     would not take it (TestLinknameForwardTargetsExposeNoUnexportedTypes refuses the shape).
-	//   - syscall.utimensat (internal/syscall/unix/utimes.go, unix): the one-arg handle is only in
-	//     syscall_darwin.go, but the puller also builds on linux, where no file carries the handle,
-	//     packageFuncAccess leaves utimensat internal, and the forwarder would be CS0122.
-	//     TestLinknameForwardTargetsMatchGoSource ignores build constraints, so it would pass that row.
+	// NOT HERE: runtime.traceClockNow (runtime/trace/recorder.go). The handle exists, but the target
+	// returns runtime's unexported traceTime, so widening it public is CS0050 and runtime/trace's uint64
+	// would not take it (TestLinknameForwardTargetsExposeNoUnexportedTypes refuses the shape).
 	"runtime.rand": true,
+	// syscall's utimensat, pulled at Go 1.26 by internal/syscall/unix/utimes.go (`//go:linkname
+	// Utimensat syscall.utimensat`, built on every unix), whose one caller is os.Root's Chtimes
+	// (root_unix.go). ORDINARY CONVERTED Go on both unix targets: a generated libc wrapper on darwin
+	// and a raw SYS_UTIMENSAT on linux. The one-arg handle is in syscall_darwin.go ONLY, so linux
+	// widens it through linknameForwardHandleElsewhere below. No new project reference.
+	"syscall.utimensat": true,
+}
+
+// linknameForwardHandleElsewhere names linknameForwardTargets rows that packageFuncAccess widens
+// WITHOUT the one-arg handle in the files being converted, because Go's handle for the symbol is in a
+// file that builds for another target. Go's linker requires that handle only for a pull from outside
+// the standard library, and these pullers are std packages, so the pull is authorized on every target
+// where it builds; the converter, reading one target's files, sees the handle on some targets and not
+// others. Keyed by the forward row; the value records where the handle is and where it is missing.
+// TestLinknameForwardHandlesCoverEveryPullingTarget requires every row whose puller builds where the
+// handle does not to be here, and every entry here to still need it.
+var linknameForwardHandleElsewhere = map[string]string{
+	"syscall.utimensat": "handle in syscall_darwin.go; linux builds internal/syscall/unix/utimes.go with none",
 }
 
 // linknameForwardDefinitions names the DEFINITION of a linknameForwardTargets row whose symbol is not
