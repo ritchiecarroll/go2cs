@@ -769,9 +769,17 @@ var linknamePushTargets = map[string]linknamePush{
 	// pushing definition there; the H6 os rewrite must declare net_newWindowsFile public by hand.
 	"net.newWindowsFile": {source: "os.net_newWindowsFile", bareDecl: true},
 	// runtime/trace's flight-recorder clock rate, pushed by runtime/tracetime.go into a one-arg HANDLE
-	// in runtime/trace/flightrecorder.go. Ordinary converted Go over osHasLowResClock, ticksPerSecond
-	// and traceTimeDiv, returning uint64 (no unexported type crosses). HONORABLE.
-	"runtime/trace.runtime_traceClockUnitsPerSecond": {source: "runtime.traceClockUnitsPerSecond"},
+	// in runtime/trace/flightrecorder.go. UNHONORABLE, by ruling (PREREAD 6.5, H6 audit row 45): the
+	// body itself is ordinary converted Go and would answer, but its ONLY consumer is
+	// FlightRecorder.Start, whose recorder then needs runtime.traceAdvance and runtime.traceClockNow,
+	// the converted tracer's generation and clock, which never run under the managed tracer. Answering
+	// here let Start subscribe and succeed, and the first batch then died on the reader goroutine.
+	// Refusing here makes Start itself refuse, by name, in the caller's goroutine. The three pulls are
+	// refused the same way in runtime/trace/flightrecorder_impl.cs.
+	"runtime/trace.runtime_traceClockUnitsPerSecond": {
+		source: "runtime.traceClockUnitsPerSecond",
+		reason: "the flight recorder reads the converted execution tracer's generations, and the managed tracer (golib ExecutionTracer, behind runtime.StartTrace) has none to advance or clock; runtime/trace.Start is supported, trace.FlightRecorder is not",
+	},
 	// sync's external-test twin of unique's cleanup-queue drain, pushed by runtime/mcleanup.go into a
 	// one-arg HANDLE in sync/oncefunc_test.go (package sync_test, hence the key). Its body is the same
 	// hand-written wait as unique's, in runtime/mcleanup.cs. HONORABLE.
