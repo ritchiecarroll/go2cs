@@ -3,9 +3,9 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using startlinetest = global::go.runtime.@internal.startlinetest_package;
+using startlinetest = @internal.runtime.startlinetest_package;
 using testing = testing_package;
-using global::go.runtime.@internal;
+using @internal.runtime;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {

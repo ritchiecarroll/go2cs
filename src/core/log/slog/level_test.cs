@@ -262,4 +262,28 @@ public static void TestLevelVarString(ж<testing.T> Ꮡt) {
     }
 }
 
+public static void BenchmarkLevelString(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var levels = new global::go.log.slog_package.ΔLevel[]{
+        0,
+        LevelError,
+        LevelError + 2,
+        LevelError - 2,
+        LevelWarn,
+        LevelWarn - 1,
+        LevelInfo,
+        LevelInfo + 1,
+        LevelInfo - 3,
+        LevelDebug,
+        LevelDebug - 2
+    }.slice();
+    b.ResetTimer();
+    while (Ꮡb.Loop()) {
+        foreach (var (_, level) in levels) {
+            _ = level.String();
+        }
+    }
+}
+
 } // end slog_internal_test_package

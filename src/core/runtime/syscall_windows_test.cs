@@ -5,6 +5,8 @@ namespace go;
 
 using fmt = fmt_package;
 using abi = @internal.abi_package;
+using race = @internal.race_package;
+using windows = @internal.runtime.syscall.windows_package;
 using sysdll = @internal.syscall.windows.sysdll_package;
 using testenv = @internal.testenv_package;
 using Δio = io_package;
@@ -20,6 +22,7 @@ using syscall = syscall_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
 using @internal;
+using @internal.runtime.syscall;
 using @internal.syscall.windows;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
@@ -781,7 +784,7 @@ public static void TestZeroDivisionException(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string testWerDialogueˢ = "TEST_WER_DIALOGUE"u8;
-internal static readonly @string testRunTestWERDialogueˢ = "-test.run=TestWERDialogue"u8;
+internal static readonly @string testRunTestWERDialogueˢ = "-test.run=^TestWERDialogue$"u8;
 internal static readonly object testProgramSucceededˢ = (@string)"test program succeeded unexpectedly"u8;
 
 public static void TestWERDialogue(ж<testing.T> Ꮡt) {
@@ -807,9 +810,13 @@ public static void TestWERDialogue(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object skippingTestRaceModeUsesˢ = (@string)"skipping test: race mode uses more stack memory"u8;
 internal static readonly @string stackMemoryˢ = "StackMemory"u8;
 
 public static void TestWindowsStackMemory(ж<testing.T> Ꮡt) {
+    if (race.Enabled) {
+        Ꮡt.Skip(skippingTestRaceModeUsesˢ);
+    }
     @string o = runTestProg(Ꮡt, testprogˢ, stackMemoryˢ);
     var (stackUsage, err) = strconv.Atoi(o);
     if (err != default!) {
@@ -946,7 +953,7 @@ public static void TestSyscallN(ж<testing.T> Ꮡt) {
         Ꮡt.Skipf("skipping test: GOARCH=%s"u8, Δruntime.GOARCH);
     }
 
-    for (nint arglen = 0; arglen <= runtime_internal_test_package.MaxArgs; arglen++) {
+    for (nint arglen = 0; arglen <= windows.MaxArgs; arglen++) {
         nint arglenΔ1 = arglen;
         Ꮡt.Run(fmt.Sprintf("arg-%d"u8, arglenΔ1), (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
@@ -1240,7 +1247,7 @@ internal static error resumeChildThread(ж<syscall.DLL> Ꮡkernel32, nint childp
 internal static readonly @string goWantHelperProcessˢ = "GO_WANT_HELPER_PROCESS"u8;
 internal static readonly @string getProcessAffinityMaskˢ = "GetProcessAffinityMask"u8;
 internal static readonly @string setProcessAffinityMaskˢ = "SetProcessAffinityMask"u8;
-internal static readonly @string testRunTestNumCPUˢ = "-test.run=TestNumCPU"u8;
+internal static readonly @string testRunTestNumCPUˢ = "-test.run=^TestNumCPU$"u8;
 
 public static void TestNumCPU(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
@@ -1275,7 +1282,7 @@ public static void TestNumCPU(ж<testing.T> Ꮡt) {
         var _GetProcessAffinityMask = kernel32.MustFindProc(getProcessAffinityMaskˢ);
         var _SetProcessAffinityMask = kernel32.MustFindProc(setProcessAffinityMaskˢ);
 
-        var cmd = exec.Command(Δos.Args[0], testRunTestNumCPUˢ);
+        var cmd = exec.Command(testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunTestNumCPUˢ);
         cmd.Value.Env = append(Δos.Environ(), "GO_WANT_HELPER_PROCESS=1"u8);
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         cmd.Value.Stdout = new runtime_test_package.strings_BuilderжWriter(Ꮡbuf);

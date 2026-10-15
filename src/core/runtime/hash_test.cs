@@ -5,6 +5,7 @@ namespace go;
 
 using binary = encoding.binary_package;
 using fmt = fmt_package;
+using byteorder = @internal.byteorder_package;
 using race = @internal.race_package;
 using testenv = @internal.testenv_package;
 using Δmath = math_package;
@@ -361,10 +362,7 @@ internal static void genPerm(ж<HashSet> Ꮡh, slice<byte> b, slice<uint32> s, n
         return;
     }
     foreach (var (_, v) in s) {
-        b[n] = (byte)v;
-        b[n + 1] = (byte)((v >> (int)(8)));
-        b[n + 2] = (byte)((v >> (int)(16)));
-        b[n + 3] = (byte)((v >> (int)(24)));
+        byteorder.LEPutUint32(b.slice(n), v);
         genPerm(Ꮡh, b, s, n + 4);
     }
 }
@@ -743,11 +741,10 @@ internal static readonly @string testIssue66841ˢ = "TEST_ISSUE_66841"u8;
 internal static readonly @string testRunTestIssue66841ˢ = "-test.run=^TestIssue66841$"u8;
 
 public static void TestIssue66841(ж<testing.T> Ꮡt) {
-    testenv.MustHaveExec(new runtime_test_package.testing_TжTB(Ꮡt));
     if (runtime_internal_test_package.UseAeshash.Value && Δos.Getenv(testIssue66841ˢ) == ""u8) {
         // We want to test the backup hash, so if we're running on a machine
         // that uses aeshash, exec ourselves while turning aes off.
-        var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), Δos.Args[0], testRunTestIssue66841ˢ));
+        var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunTestIssue66841ˢ));
         cmd.Value.Env = append((~cmd).Env, "GODEBUG=cpu.aes=off"u8, "TEST_ISSUE_66841=1");
         var (@out, err) = cmd.CombinedOutput();
         if (err != default!) {

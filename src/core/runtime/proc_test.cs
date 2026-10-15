@@ -3,13 +3,18 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using bytes = bytes_package;
 using fmt = fmt_package;
 using race = @internal.race_package;
 using testenv = @internal.testenv_package;
+using trace = @internal.trace_package;
+using testtrace = @internal.trace.testtrace_package;
+using Δio = io_package;
 using Δmath = math_package;
 using Δnet = net_package;
 using Δruntime = runtime_package;
 using Δdebug = global::go.runtime.debug_package;
+using slices = slices_package;
 using strings = strings_package;
 using Δsync = sync_package;
 using atomic = global::go.sync.atomic_package;
@@ -17,10 +22,12 @@ using syscall = syscall_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
+using @internal.trace;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.runtime;
 using global::go.sync;
+using iter = iter_package;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -28,9 +35,9 @@ partial class runtime_test_package {
 internal static channel<bool> stop = new channel<bool>(1);
 
 internal static partial void perpetuumMobile() {
-    var selᴛ80 = stop;
-    switch (trySelect(ᐸꟷ(selᴛ80, ꓸꓸꓸ))) {
-    case 0 when selᴛ80.ꟷᐳ(out _): {
+    var selᴛ81 = stop;
+    switch (trySelect(ᐸꟷ(selᴛ81, ꓸꓸꓸ))) {
+    case 0 when selᴛ81.ꟷᐳ(out _): {
         break;
     }
     default: {
@@ -91,9 +98,9 @@ internal static partial void testYieldProgress(bool locked) {
             Δruntime.LockOSThread();
         }
         while (ᐧ) {
-            var selᴛ81 = cʗ1;
-            switch (trySelect(ᐸꟷ(selᴛ81, ꓸꓸꓸ))) {
-            case 0 when selᴛ81.ꟷᐳ(out _): {
+            var selᴛ82 = cʗ1;
+            switch (trySelect(ᐸꟷ(selᴛ82, ꓸꓸꓸ))) {
+            case 0 when selᴛ82.ꟷᐳ(out _): {
                 cackʗ1.ᐸꟷ(true);
                 return;
             }
@@ -302,13 +309,13 @@ public static partial void TestTimerFairness(ж<testing.T> Ꮡt) {
         var doneʗ1 = done;
         goǃ(() => {
             while (ᐧ) {
-                var selᴛ82 = cʗ1.ᐸꟷ(true, ꓸꓸꓸ);
-                var selᴛ83 = doneʗ1;
-                switch (select(selᴛ82, ᐸꟷ(selᴛ83, ꓸꓸꓸ))) {
+                var selᴛ83 = cʗ1.ᐸꟷ(true, ꓸꓸꓸ);
+                var selᴛ84 = doneʗ1;
+                switch (select(selᴛ83, ᐸꟷ(selᴛ84, ꓸꓸꓸ))) {
                 case 0: {
                     break;
                 }
-                case 1 when selᴛ83.ꟷᐳ(out _): {
+                case 1 when selᴛ84.ꟷᐳ(out _): {
                     return;
                 }}
             }
@@ -317,13 +324,13 @@ public static partial void TestTimerFairness(ж<testing.T> Ꮡt) {
 
     var timer = time.After(20 * time.Millisecond);
     while (ᐧ) {
-        var selᴛ84 = c;
-        var selᴛ85 = timer;
-        switch (select(ᐸꟷ(selᴛ84, ꓸꓸꓸ), ᐸꟷ(selᴛ85, ꓸꓸꓸ))) {
-        case 0 when selᴛ84.ꟷᐳ(out _): {
+        var selᴛ85 = c;
+        var selᴛ86 = timer;
+        switch (select(ᐸꟷ(selᴛ85, ꓸꓸꓸ), ᐸꟷ(selᴛ86, ꓸꓸꓸ))) {
+        case 0 when selᴛ85.ꟷᐳ(out _): {
             break;
         }
-        case 1 when selᴛ85.ꟷᐳ(out _): {
+        case 1 when selᴛ86.ꟷᐳ(out _): {
             close(done);
             return;
         }}
@@ -345,17 +352,17 @@ public static partial void TestTimerFairness2(ж<testing.T> Ꮡt) {
             ref var buf = ref heap(new array<byte>(1), out var Ꮡbuf);
             while (ᐧ) {
                 syscall.Read(0, buf[0..0]);
-                var selᴛ86 = cʗ1.ᐸꟷ(true, ꓸꓸꓸ);
-                var selᴛ87 = cʗ1;
-                var selᴛ88 = timer;
-                switch (select(selᴛ86, ᐸꟷ(selᴛ87, ꓸꓸꓸ), ᐸꟷ(selᴛ88, ꓸꓸꓸ))) {
+                var selᴛ87 = cʗ1.ᐸꟷ(true, ꓸꓸꓸ);
+                var selᴛ88 = cʗ1;
+                var selᴛ89 = timer;
+                switch (select(selᴛ87, ᐸꟷ(selᴛ88, ꓸꓸꓸ), ᐸꟷ(selᴛ89, ꓸꓸꓸ))) {
                 case 0: {
                     break;
                 }
-                case 1 when selᴛ87.ꟷᐳ(out _): {
+                case 1 when selᴛ88.ꟷᐳ(out _): {
                     break;
                 }
-                case 2 when selᴛ88.ꟷᐳ(out _): {
+                case 2 when selᴛ89.ꟷᐳ(out _): {
                     doneʗ1.ᐸꟷ(true);
                     return;
                 }}
@@ -478,7 +485,7 @@ public static void TestGCFairness2(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string numGoroutineˢ = "NumGoroutine"u8;
 internal static readonly @string inGoroutineˢ = "in goroutine"u8;
-internal static readonly @string goroutineˢ = "goroutine "u8;
+internal static readonly @string goroutineˢ2 = "goroutine "u8;
 
 public static partial void TestNumGoroutine(ж<testing.T> Ꮡt) {
     @string output = runTestProg(Ꮡt, testprogˢ, numGoroutineˢ);
@@ -505,7 +512,7 @@ public static partial void TestNumGoroutine(ж<testing.T> Ꮡt) {
         // To avoid double-counting "goroutine" in "goroutine $m [running]:"
         // and "created by $func in goroutine $n", remove the latter
         @string outputΔ1 = strings.ReplaceAll(((@string)buf), inGoroutineˢ, ""u8);
-        nint nstk = strings.Count(outputΔ1, goroutineˢ);
+        nint nstk = strings.Count(outputΔ1, goroutineˢ2);
         if (n == nstk) {
             break;
         }
@@ -545,13 +552,13 @@ public static partial void TestPingPongHog(ж<testing.T> Ꮡt) {
         var doneʗ1 = done;
         void run(nint limit, ж<nint> counter, channel<bool> wake) {
             while (ᐧ) {
-                var selᴛ89 = doneʗ1;
-                var selᴛ90 = wake;
-                switch (select(ᐸꟷ(selᴛ89, ꓸꓸꓸ), ᐸꟷ(selᴛ90, ꓸꓸꓸ))) {
-                case 0 when selᴛ89.ꟷᐳ(out _): {
+                var selᴛ90 = doneʗ1;
+                var selᴛ91 = wake;
+                switch (select(ᐸꟷ(selᴛ90, ꓸꓸꓸ), ᐸꟷ(selᴛ91, ꓸꓸꓸ))) {
+                case 0 when selᴛ90.ꟷᐳ(out _): {
                     return;
                 }
-                case 1 when selᴛ90.ꟷᐳ(out _): {
+                case 1 when selᴛ91.ꟷᐳ(out _): {
                     for (nint i = 0; i < limit; i++) {
                         counter.Value++;
                     }
@@ -612,9 +619,9 @@ public static partial void BenchmarkPingPongHog(ж<testing.B> Ꮡb) {
         var stopʗ1 = stop;
         goǃ(() => {
             while (ᐧ) {
-                var selᴛ91 = stopʗ1;
-                switch (trySelect(ᐸꟷ(selᴛ91, ꓸꓸꓸ))) {
-                case 0 when selᴛ91.ꟷᐳ(out _): {
+                var selᴛ92 = stopʗ1;
+                switch (trySelect(ᐸꟷ(selᴛ92, ꓸꓸꓸ))) {
+                case 0 when selᴛ92.ꟷᐳ(out _): {
                     doneʗ1.ᐸꟷ(true);
                     return;
                 }
@@ -705,9 +712,9 @@ internal static nint big(channel<nint> stop) {
         bigframe(stop);
 
         // check if we've been asked to stop.
-        var selᴛ92 = stop;
-        switch (select(ᐸꟷ(selᴛ92, ꓸꓸꓸ))) {
-        case 0 when selᴛ92.ꟷᐳ(out _): {
+        var selᴛ93 = stop;
+        switch (select(ᐸꟷ(selᴛ93, ꓸꓸꓸ))) {
+        case 0 when selᴛ93.ꟷᐳ(out _): {
             return n;
         }}
         return default!;
@@ -742,9 +749,9 @@ internal static nint small(channel<nint> stop, /*[8192]*/ ж<array<byte>> Ꮡx) 
 
 internal static bool nonleaf(channel<nint> stop) {
     // do something that won't be inlined:
-    var selᴛ93 = stop;
-    switch (trySelect(ᐸꟷ(selᴛ93, ꓸꓸꓸ))) {
-    case 0 when selᴛ93.ꟷᐳ(out _): {
+    var selᴛ94 = stop;
+    switch (trySelect(ᐸꟷ(selᴛ94, ꓸꓸꓸ))) {
+    case 0 when selᴛ94.ꟷᐳ(out _): {
         return true;
     }
     default: {
@@ -840,10 +847,10 @@ public static partial void BenchmarkCreateGoroutinesCapture(ж<testing.B> Ꮡb) 
         const nint N = 4;
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(N);
-        for (nint iΔ1 = 0; iΔ1 < N; iΔ1++) {
-            nint iΔ2 = iΔ1;
+        for (nint iΔ1ᴛ1 = 0; iΔ1ᴛ1 < N; iΔ1ᴛ1++) {
+            var iΔ1 = iΔ1ᴛ1;
             goǃ(() => {
-                if (iΔ2 >= N) {
+                if (iΔ1 >= N) {
                     Ꮡb.Logf("bad"u8); // just to capture b
                 }
                 Ꮡwg.Done();
@@ -1203,6 +1210,20 @@ public static void TestLockOSThreadTemplateThreadRace(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string lockOSThreadVgetrandomˢ = "LockOSThreadVgetrandom"u8;
+
+public static void TestLockOSThreadVgetrandom(ж<testing.T> Ꮡt) {
+    if (Δruntime.GOOS != "linux"u8) {
+        Ꮡt.Skipf("vgetrandom only relevant on Linux"u8);
+    }
+    @string output = runTestProg(Ꮡt, testprogˢ, lockOSThreadVgetrandomˢ);
+    @string want = "OK\n"u8;
+    if (output != want) {
+        Ꮡt.Errorf("want %q, got %q"u8, want, output);
+    }
+}
+
 // fakeSyscall emulates a system call.
 //
 //go:nosplit
@@ -1312,9 +1333,9 @@ loop:
         runtime_internal_test_package.Usleep(100);
         runtime_internal_test_package.NetpollBreak();
         runtime_internal_test_package.NetpollBreak();
-        var selᴛ94 = c;
-        switch (trySelect(ᐸꟷ(selᴛ94, ꓸꓸꓸ))) {
-        case 0 when selᴛ94.ꟷᐳ(out _): {
+        var selᴛ95 = c;
+        switch (trySelect(ᐸꟷ(selᴛ95, ꓸꓸꓸ))) {
+        case 0 when selᴛ95.ꟷᐳ(out _): {
             goto break_loop;
             break;
         }
@@ -1352,6 +1373,440 @@ public static void TestBigGOMAXPROCS(ж<testing.T> Ꮡt) {
     }
     if (!strings.Contains(output, unknownFunctionˢ)) {
         Ꮡt.Errorf("output:\n%s\nwanted:\nunknown function: NonexistentTest"u8, output);
+    }
+}
+
+partial struct goroutineState {
+    public trace.GoID G;     // This goroutine.
+    public trace.ProcID P;   // Most recent P this goroutine ran on.
+    public trace.ThreadID M; // Most recent M this goroutine ran on.
+}
+
+internal static partial ж<goroutineState> newGoroutineState(trace.GoID g) {
+    return Ꮡ(new goroutineState(
+        G: g,
+        P: trace.NoProc,
+        M: trace.NoThread
+    ));
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object thisTestSetsGomaxprocs4ˢ = (@string)"This test sets GOMAXPROCS=4 and wants to avoid thread descheduling as much as possible. Skip on machines with less than 4 CPUs"u8;
+internal static readonly @string traceSTWˢ = "TraceSTW"u8;
+internal static readonly @string stopTheWorldReadMemStatsˢ = "stop-the-world (read mem stats)"u8;
+
+// TestTraceSTW verifies that goroutines continue running on the same M and P
+// after a STW.
+public static void TestTraceSTW(ж<testing.T> Ꮡt) {
+    // Across STW, the runtime attempts to keep goroutines running on the
+    // same P and the P running on the same M. It does this by keeping
+    // goroutines in the P's local runq, and remembering which M the P ran
+    // on before STW and preferring that M when restarting.
+    //
+    // This test verifies that affinity by analyzing a trace of testprog
+    // TraceSTW.
+    //
+    // The affinity across STW is best-effort, so have to allow some
+    // failure rate, thus we test many times and ensure the error rate is
+    // low.
+    //
+    // The expected affinity can fail for a variety of reasons. The most
+    // obvious is that while procresize assigns Ps back to their original
+    // M, startTheWorldWithSema calls wakep to start a spinning M. The
+    // spinning M may steal a goroutine from another P if that P is too
+    // slow to start.
+    if (testing.Short()) {
+        Ꮡt.Skip(skippingInShortModeˢ2);
+    }
+
+    if (Δruntime.NumCPU() < 4) {
+        Ꮡt.Skip(thisTestSetsGomaxprocs4ˢ);
+    }
+
+    UntypedInt runs = 50;
+
+    nint errors = default!;
+    foreach (var i in range(runs)) {
+        var err = runTestTracesSTW(Ꮡt, i, traceSTWˢ, stopTheWorldReadMemStatsˢ);
+        if (err != default!) {
+            Ꮡt.Logf("Run %d failed: %v"u8, i, err);
+            errors++;
+        }
+    }
+
+    var pct = (float64)errors / (float64)runs;
+    Ꮡt.Logf("Errors: %d/%d = %f%%"u8, errors, (nint)(runs), 100D * pct);
+    if (pct > 0.25D) {
+        Ꮡt.Errorf("Error rate too high"u8);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object thisTestSetsGomaxprocs8ˢ = (@string)"This test sets GOMAXPROCS=8 and wants to avoid thread descheduling as much as possible. Skip on machines with less than 8 CPUs"u8;
+internal static readonly @string traceGCSTWˢ = "TraceGCSTW"u8;
+internal static readonly @string stopTheWorldGcSweepˢ = "stop-the-world (GC sweep termination)"u8;
+
+// TestTraceGCSTW verifies that goroutines continue running on the same M and P
+// after a GC STW.
+public static void TestTraceGCSTW(ж<testing.T> Ꮡt) {
+    // Very similar to TestTraceSTW, but using a STW that starts the GC.
+    // When the GC starts, the background GC mark workers start running,
+    // which provide an additional source of disturbance to the scheduler.
+    //
+    // procresize assigns GC workers to previously-idle Ps to avoid
+    // changing what the previously-running Ps are doing.
+    if (testing.Short()) {
+        Ꮡt.Skip(skippingInShortModeˢ2);
+    }
+
+    if (Δruntime.NumCPU() < 8) {
+        Ꮡt.Skip(thisTestSetsGomaxprocs8ˢ);
+    }
+
+    UntypedInt runs = 50;
+
+    nint errors = default!;
+    foreach (var i in range(runs)) {
+        var err = runTestTracesSTW(Ꮡt, i, traceGCSTWˢ, stopTheWorldGcSweepˢ);
+        if (err != default!) {
+            Ꮡt.Logf("Run %d failed: %v"u8, i, err);
+            errors++;
+        }
+    }
+
+    var pct = (float64)errors / (float64)runs;
+    Ꮡt.Logf("Errors: %d/%d = %f%%"u8, errors, (nint)(runs), 100D * pct);
+    if (pct > 0.25D) {
+        Ꮡt.Errorf("Error rate too high"u8);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string goraceAtexitSleepMs0ˢ = "GORACE=atexit_sleep_ms=0"u8;
+internal static readonly object canTFindStwInTheTestˢ = (@string)"Can't find STW in the test trace"u8;
+internal static readonly object targetGoroutinesˢ = (@string)"Target goroutines:"u8;
+
+internal static error /*err*/ runTestTracesSTW(ж<testing.T> Ꮡt, nint run, @string name, @string stwType) {
+    heap<error>(out var Ꮡerr);
+    GoFrame ᒐ = default;
+    try {
+        ref var err = ref Ꮡerr.ValueSlot;
+
+        Ꮡt.Logf("Run %d"u8, run);
+
+        // By default, TSAN sleeps for 1s at exit to allow background
+        // goroutines to race. This slows down execution for this test far too
+        // much, since we are running 50 iterations, so disable the sleep.
+        //
+        // Outside of race mode, GORACE does nothing.
+        var buf = slice<byte>(runTestProg(Ꮡt, testprogˢ, name, goraceAtexitSleepMs0ˢ));
+
+        // We locally "fail" the run (return an error) if the trace exhibits
+        // unwanted scheduling. i.e., the target goroutines did not remain on
+        // the same P/M.
+        //
+        // We fail the entire test (t.Fatal) for other cases that should never
+        // occur, such as a trace parse error.
+        var bufʗ1 = buf;
+        defer(() => {
+            if (Ꮡerr.ValueSlot != default! || Ꮡt.Failed()) {
+                testtrace.Dump(Ꮡt, fmt.Sprintf("Test%s-run%d"u8, name, run), ((slice<byte>)bufʗ1), false);
+            }
+        }, ref ᒐ);
+
+        (var br, err) = trace.NewReader(new runtime_test_package.bytes_ReaderжReader(bytes.NewReader(buf)));
+        if (err != default!) {
+            Ꮡt.Fatalf("NewReader got err %v want nil"u8, err);
+        }
+
+        ref var targetGoroutines = ref heap<slice<ж<goroutineState>>>(out var ᏑtargetGoroutines);
+        ж<goroutineState> findGoroutine(trace.GoID goid) {
+            foreach (var (_, gs) in ᏑtargetGoroutines.ValueSlot) {
+                if ((~gs).G == goid) {
+                    return gs;
+                }
+            }
+            return default!;
+        }
+        ж<goroutineState> findProc(trace.ProcID pid) {
+            foreach (var (_, gs) in ᏑtargetGoroutines.ValueSlot) {
+                if ((~gs).P == pid) {
+                    return gs;
+                }
+            }
+            return default!;
+        }
+
+        // 1. Find the goroutine IDs for the target goroutines. This will be in
+        // the StateTransition from NotExist.
+        //
+        // 2. Once found, track which M and P the target goroutines run on until...
+        //
+        // 3. Look for the first STW after the "TraceSTW" "start" log message,
+        // where we commit the target goroutines' "before" M and P.
+        //
+        // N.B. We must do (1) and (2) together because the first target
+        // goroutine may start running before the second is created.
+        bool startLogSeen = default!;
+        bool stwSeen = default!;
+findStart:
+        while (ᐧ) {
+            var (ev, errΔ1) = br.ReadEvent();
+            if (AreEqual(errΔ1, Δio.EOF)) {
+                // Reached the end of the trace without finding case (3).
+                Ꮡt.Fatalf("Trace missing start log message"u8);
+            }
+            if (errΔ1 != default!) {
+                Ꮡt.Fatalf("ReadEvent got err %v want nil"u8, errΔ1);
+            }
+            Ꮡt.Logf("Event: %s"u8, ev.String());
+
+            var exprᴛ1 = ev.Kind();
+            if (exprᴛ1 == trace.EventStateTransition) {
+                var st = ev.StateTransition();
+                if (st.Resource.Kind != trace.ResourceGoroutine) {
+                    continue;
+                }
+
+                var goid = st.Resource.Goroutine();
+                var (from, to) = st.Goroutine();
+
+                // Potentially case (1): Goroutine creation.
+                if (from == trace.GoNotExist) {
+                    foreach (var sf in range<trace.StackFrame>(st.Stack.Frames().Invoke)) {
+                        if (sf.Func == "main.traceSTWTarget"u8) {
+                            targetGoroutines = append(targetGoroutines, newGoroutineState(goid));
+                            Ꮡt.Logf("Identified target goroutine id %d"u8, goid);
+                        }
+
+                        // Always break, the goroutine entrypoint is always the
+                        // first frame.
+                        break;
+                    }
+                }
+
+                // Potentially case (2): Goroutine running.
+                if (to == trace.GoRunning) {
+                    var gs = findGoroutine(goid);
+                    if (gs == nil) {
+                        continue;
+                    }
+                    gs.Value.P = ev.Proc();
+                    gs.Value.M = ev.Thread();
+                    Ꮡt.Logf("G %d running on P %d M %d"u8, (~gs).G, (~gs).P, (~gs).M);
+                }
+            }
+            else if (exprᴛ1 == trace.EventLog) {
+                // Potentially case (3): Start log event.
+                var log = ev.Log();
+                if (log.Category != "TraceSTW"u8) {
+                    continue;
+                }
+                if (log.Message != "start"u8) {
+                    Ꮡt.Fatalf("Log message got %s want start"u8, log.Message);
+                }
+
+                // Found start point, move on to next stage.
+                Ꮡt.Logf("Found start message"u8);
+                startLogSeen = true;
+            }
+            else if (exprᴛ1 == trace.EventRangeBegin) {
+                if (!startLogSeen) {
+                    // Ignore spurious STW before we expect.
+                    continue;
+                }
+
+                var r = ev.Range();
+                if (r.Name == stwType) {
+                    Ꮡt.Logf("Found STW"u8);
+                    stwSeen = true;
+                    goto break_findStart;
+                }
+            }
+continue_findStart:;
+        }
+break_findStart:;
+
+        if (!stwSeen) {
+            Ꮡt.Fatal(canTFindStwInTheTestˢ);
+        }
+
+        Ꮡt.Log(targetGoroutinesˢ);
+        foreach (var (_, gs) in targetGoroutines) {
+            Ꮡt.Logf("%+v"u8, gs.OrTypedNil());
+        }
+
+        if (len(targetGoroutines) != 2) {
+            Ꮡt.Fatalf("len(targetGoroutines) got %d want 2"u8, len(targetGoroutines));
+        }
+
+        foreach (var (_, gs) in targetGoroutines) {
+            if ((~gs).P == trace.NoProc) {
+                Ꮡt.Fatalf("Goroutine %+v not running on a P"u8, gs.OrTypedNil());
+            }
+            if ((~gs).M == trace.NoThread) {
+                Ꮡt.Fatalf("Goroutine %+v not running on an M"u8, gs.OrTypedNil());
+            }
+        }
+
+        // The test continues until we see the "end" log message.
+        //
+        // What we want to observe is that the target goroutines run only on
+        // the original P and M.
+        //
+        // They will be stopped by STW [1], but should resume on the original P
+        // and M.
+        //
+        // However, this is best effort. For example, startTheWorld wakep's a
+        // spinning M. If the original M is slow to restart (e.g., due to poor
+        // kernel scheduling), the spinning M may legally steal the goroutine
+        // and run it instead.
+        //
+        // In practice, we see this occur frequently on builders, likely
+        // because they are overcommitted on CPU. Thus, we instead check
+        // slightly more constrained properties:
+        // - The original P must run on the original M (if it runs at all).
+        // - The original P must run the original G before anything else,
+        //   unless that G has already run elsewhere.
+        //
+        // This allows a spinning M to steal the G from a slow-to-start M, but
+        // does not allow the original P to just flat out run something
+        // completely different from expected.
+        //
+        // Note this is still somewhat racy: the spinning M may steal the
+        // target G, but before it marks the target G as running, the original
+        // P runs an alternative G. This test will fail that case, even though
+        // it is legitimate. We allow that failure because such a race should
+        // be very rare, particularly because the test process usually has no
+        // other runnable goroutines.
+        //
+        // [1] This is slightly fragile because there is a small window between
+        // the "start" log and actual STW during which the target goroutines
+        // could legitimately migrate.
+        slice<trace.ProcID> pRunning = default!;
+        slice<trace.GoID> gRunning = default!;
+findEnd:
+        while (ᐧ) {
+            var (ev, errΔ2) = br.ReadEvent();
+            if (AreEqual(errΔ2, Δio.EOF)) {
+                break;
+            }
+            if (errΔ2 != default!) {
+                Ꮡt.Fatalf("ReadEvent got err %v want nil"u8, errΔ2);
+            }
+            Ꮡt.Logf("Event: %s"u8, ev.String());
+
+            var exprᴛ2 = ev.Kind();
+            if (exprᴛ2 == trace.EventStateTransition) {
+                var st = ev.StateTransition();
+                var exprᴛ3 = st.Resource.Kind;
+                if (exprᴛ3 == trace.ResourceProc) {
+                    var p = st.Resource.Proc();
+                    var (_, to) = st.Proc();
+
+                    // Proc running. Ensure it didn't migrate.
+                    if (to == trace.ProcRunning) {
+                        var gs = findProc(p);
+                        if (gs == nil) {
+                            continue;
+                        }
+
+                        if (slices.Contains(pRunning, p)) {
+                            // Only check the first
+                            // transition to running.
+                            // Afterwards it is free to
+                            // migrate anywhere.
+                            continue;
+                        }
+                        pRunning = append(pRunning, p);
+
+                        var m = ev.Thread();
+                        if (m != (~gs).M) {
+                            Ꮡt.Logf("Proc %d running on M %d want M %d"u8, p, m, (~gs).M);
+                            err = fmt.Errorf("P did not remain on M"u8); goto ᒐdone;
+                        }
+                    }
+                }
+                else if (exprᴛ3 == trace.ResourceGoroutine) {
+                    var goid = st.Resource.Goroutine();
+                    var (_, to) = st.Goroutine();
+
+                    // Goroutine running. Ensure it didn't migrate.
+                    if (to == trace.GoRunning) {
+                        var p = ev.Proc();
+                        var m = ev.Thread();
+
+                        var gs = findGoroutine(goid);
+                        if (gs == nil) {
+                            // This isn't a target
+                            // goroutine. Is it a target P?
+                            // That shouldn't run anything
+                            // other than the target G.
+                            gs = findProc(p);
+                            if (gs == nil) {
+                                continue;
+                            }
+
+                            if (slices.Contains(gRunning, (~gs).G)) {
+                                // This P's target G ran elsewhere. This probably
+                                // means that this P was slow to start, so
+                                // another P stole it. That isn't ideal, but
+                                // we'll allow it.
+                                continue;
+                            }
+
+                            Ꮡt.Logf("Goroutine %d running on P %d M %d want this P to run G %d"u8, goid, p, m, (~gs).G);
+                            err = fmt.Errorf("P ran incorrect goroutine"u8); goto ᒐdone;
+                        }
+
+                        if (!slices.Contains(gRunning, goid)) {
+                            gRunning = append(gRunning, goid);
+                        }
+
+                        if (p != (~gs).P || m != (~gs).M) {
+                            Ꮡt.Logf("Goroutine %d running on P %d M %d want P %d M %d"u8, goid, p, m, (~gs).P, (~gs).M);
+                            // We don't want this to occur,
+                            // but allow it for cases of
+                            // bad kernel scheduling. See
+                            // "The test continues" comment
+                            // above.
+                        }
+                    }
+                }
+            }
+            else if (exprᴛ2 == trace.EventLog) {
+                // Potentially end log event.
+                var log = ev.Log();
+                if (log.Category != "TraceSTW"u8) {
+                    continue;
+                }
+                if (log.Message != "end"u8) {
+                    Ꮡt.Fatalf("Log message got %s want end"u8, log.Message);
+                }
+
+                // Found end point.
+                Ꮡt.Logf("Found end message"u8);
+                goto break_findEnd;
+            }
+continue_findEnd:;
+        }
+break_findEnd:;
+
+        err = default!;
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    ᒐdone: return Ꮡerr.ValueSlot;
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string mexitSTWˢ = "mexitSTW"u8;
+
+public static void TestMexitSTW(ж<testing.T> Ꮡt) {
+    @string got = runTestProg(Ꮡt, testprogˢ, mexitSTWˢ);
+    @string want = "OK\n"u8;
+    if (got != want) {
+        Ꮡt.Fatalf("expected %q, but got:\n%s"u8, want, got);
     }
 }
 

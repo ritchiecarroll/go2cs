@@ -141,8 +141,8 @@
     <ProjectReference Include="$(go2csPath)core/internal/asan/internal.asan.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/bytealg/internal.bytealg.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/byteorder/internal.byteorder.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/itoa/internal.itoa.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/math/internal.runtime.math.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/bits/math.bits.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/math.csproj" />

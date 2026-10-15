@@ -109,6 +109,7 @@
     <Compile Include="json_handler_test.cs" />
     <Compile Include="level_test.cs" />
     <Compile Include="logger_test.cs" />
+    <Compile Include="multi_handler_test.cs" />
     <Compile Include="package_info_internal_test.cs" />
     <Compile Include="package_test_info.cs" />
     <Compile Include="record_test.cs" />
@@ -127,6 +128,7 @@
     <None Include="example_log_level_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="example_logvaluer_group_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="example_logvaluer_secret_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="example_multi_handler_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="example_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="example_wrap_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="handler.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -137,6 +139,8 @@
     <None Include="level_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="logger.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="logger_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="multi_handler.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="multi_handler_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="record.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="record_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="slogtest_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -148,8 +152,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="$(go2csPath)core/bufio/bufio.csproj" />
     <ProjectReference Include="$(go2csPath)core/bytes/bytes.csproj" />
     <ProjectReference Include="$(go2csPath)core/context/context.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/time/crypto.internal.fips140deps.time.csproj" />
     <ProjectReference Include="$(go2csPath)core/encoding/encoding.csproj" />
     <ProjectReference Include="$(go2csPath)core/encoding/json/encoding.json.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
@@ -160,16 +166,18 @@
     <ProjectReference Include="$(go2csPath)core/internal/msan/internal.msan.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/race/internal.race.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/math/internal.runtime.math.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
+    <ProjectReference Include="$(go2csPath)core/iter/iter.csproj" />
     <ProjectReference Include="$(go2csPath)core/log/internal/log.internal.csproj" />
     <ProjectReference Include="$(go2csPath)core/log/log.csproj" />
     <ProjectReference Include="$(go2csPath)core/log/slog/internal/buffer/log.slog.internal.buffer.csproj" />
-    <ProjectReference Include="$(go2csPath)core/log/slog/internal/slogtest/log.slog.internal.slogtest.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/math.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/http/net.http.csproj" />
+    <ProjectReference Include="$(go2csPath)core/os/exec/os.exec.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
     <ProjectReference Include="$(go2csPath)core/path/filepath/path.filepath.csproj" />
     <ProjectReference Include="$(go2csPath)core/reflect/reflect.csproj" />

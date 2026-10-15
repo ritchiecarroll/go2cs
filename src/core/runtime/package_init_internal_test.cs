@@ -11,6 +11,7 @@ partial class runtime_internal_test_package {
         initᴛExitsyscall();
         initᴛReadRandomFailed();
         initᴛFastlog2();
+        initᴛCyclesPerSecond();
         initᴛNetpollBreak();
         initᴛUsleep();
         initᴛPhysPageSize();
@@ -37,6 +38,8 @@ partial class runtime_internal_test_package {
         initᴛZeroBase();
         initᴛIsPinned();
         initᴛGetPinCounter();
+        initᴛX86HasAVX();
+        initᴛDebugDecorateMappings();
         initᴛOsYield();
         initᴛTimeBeginPeriodRetValue();
         initᴛtiuStart();

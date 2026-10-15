@@ -1472,6 +1472,20 @@ one of H5c's deletions or a named merge move.)*
   differed), and each working copy `cmp`-equals GOROOT's;
 - `git check-attr text` is `unset` on every binary fixture;
 - both guards go green.)*
+*(Noted 2026-10-15, the Go 1.26 hop's H5, the TARGETED `-tests` REGEN (COORD's ruling on
+`TestCommittedCoreReferencesResolve`: a `.tests.csproj` naming an H5-removed package is regenerated, never
+hand-edited). A `-tests` convert into a seeded package writes what it emits, but never removes a test file Go deleted.
+So:
+- Remove the package's FLAT test-side files first (`*_test.cs`, `package_test_info.cs`, `go2cs_test_host.cs`,
+  `*.tests.csproj`), in the git-backed worktree.
+- Convert. Then `git status` reads M = re-emitted, A = new, D = not emitted at the target.
+- A D whose `<name>.go` still exists at the target is restored as unselected, never deleted.
+- **First, list every `*_impl_test.cs` and every marked test file, and keep them out of the removal.** A hand-written
+  test companion is unmarked and `_impl`-named, and the converter never emits it. i9's run took runtime's
+  `export_impl_test.cs` and `export_windows_impl_test.cs` and restored them before committing.
+- Restore from HEAD what the run rewrites outside its scope: README Tests badges (it demotes them to "not yet
+  validated"; badges are the bank's) and `.cs.auto` review siblings (H6's).
+- Keep its `initᴛᴛtests()` hook in `package_init.cs`.)*
 
 Then the marker census re-measured in `<tree>`, T0 phantoms restored per §4, and staging by explicit path —
 never `git add -A` (floor 8). `<tree>` is a worktree ON the version branch COORD names (checked out at `<H2>`, not

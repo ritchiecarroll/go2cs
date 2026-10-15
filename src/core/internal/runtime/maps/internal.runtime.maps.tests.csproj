@@ -101,31 +101,24 @@
        shared directory (Generated/**, *.cs.auto review siblings, the production package_info.cs)
        can leak in because it is never listed. -->
   <ItemGroup>
-    <Compile Include="export_swiss_test.cs" />
     <Compile Include="export_test.cs" />
     <Compile Include="fuzz_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
-    <Compile Include="map_swiss_test.cs" />
     <Compile Include="map_test.cs" />
     <Compile Include="package_info_internal_test.cs" />
     <Compile Include="package_test_info.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="export_noswiss_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="export_swiss_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="export_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="fuzz_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="group.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="map.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="map_swiss_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="map_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="runtime.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="runtime_fast32_swiss.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="runtime_fast64_swiss.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="runtime_faststr_swiss.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="runtime_noswiss.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="runtime_swiss.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="runtime_fast32.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="runtime_fast64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="runtime_faststr.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="table.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="table_debug.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
   </ItemGroup>

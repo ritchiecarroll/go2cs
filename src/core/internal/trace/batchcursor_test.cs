@@ -83,7 +83,7 @@ public static void TestHeap(ж<testing.T> Ꮡt) {
     nint l = len(heap);
     slice<ж<global::go.@internal.trace_package.batchCursor>> removed = default!;
     for (nint i = 0; i < l; i++) {
-        removed = append(removed, heap[0]);
+        removed = builtin.append(removed, heap[0]);
         heap = heapRemove(heap, 0);
         checkHeap(Ꮡt, heap);
     }

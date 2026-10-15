@@ -3,8 +3,11 @@
 // license that can be found in the LICENSE file.
 namespace go.log;
 
+using bufio = bufio_package;
 using bytes = bytes_package;
 using context = context_package;
+using errors = errors_package;
+using fmt = fmt_package;
 using asan = go.@internal.asan_package;
 using msan = go.@internal.msan_package;
 using race = go.@internal.race_package;
@@ -12,6 +15,8 @@ using testenv = go.@internal.testenv_package;
 using io = io_package;
 using log = log_package;
 using loginternal = go.log.internal_package;
+using os = os_package;
+using exec = go.os.exec_package;
 using filepath = path.filepath_package;
 using regexp = regexp_package;
 using runtime = runtime_package;
@@ -23,6 +28,7 @@ using time = time_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.@internal;
+using go.os;
 using path;
 using static go.log.slog_package;
 
@@ -220,6 +226,9 @@ public static void TestAttrs(ж<testing.T> Ꮡt) {
     check(attrsSlice((~h).r), Int("c"u8, 3));
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object gotNilSourceˢ = (@string)"got nil source"u8;
+
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string wantFuncᶜ = "log/slog.TestCallDepth"u8;
 
@@ -239,7 +248,10 @@ public static void TestCallDepth(ж<testing.T> Ꮡt) {
             @string wantFunc = wantFuncᶜ;
             @string wantFile = wantFileᶜ;
             nint wantLine = startLine + count * 2;
-            var got = (~hʗ1).r.source();
+            var got = (~hʗ1).r.Source();
+            if (got == nil) {
+                Ꮡt.Fatal(gotNilSourceˢ);
+            }
             @string gotFile = filepath.Base((~got).File);
             if ((~got).Function != wantFunc || gotFile != wantFile || (~got).Line != wantLine) {
                 Ꮡt.Errorf("got (%s, %s, %d), want (%s, %s, %d)"u8,
@@ -287,9 +299,149 @@ public static void TestCallDepth(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object skippingTestInShortModeˢ = (@string)"skipping test in short mode"u8;
+internal static readonly object logFatalˢ = (@string)"log.Fatal"u8;
+internal static readonly object logFatallnˢ = (@string)"log.Fatalln"u8;
+internal static readonly @string logOutputˢ = "log.Output"u8;
+internal static readonly object logPanicˢ = (@string)"log.Panic"u8;
+internal static readonly object logDefaultFatalˢ = (@string)"log.Default.Fatal"u8;
+internal static readonly object logDefaultFatallnˢ = (@string)"log.Default.Fatalln"u8;
+internal static readonly @string logDefaultOutputˢ = "log.Default.Output"u8;
+internal static readonly object logDefaultPanicˢ = (@string)"log.Default.Panic"u8;
+internal static readonly @string testCount1ˢ = "-test.count=1"u8;
+
+internal partial struct TestCallDepthConnection_tests /*dyn*/ {
+    internal @string name;
+    internal Action log;
+}
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string envVarᶜ = "SLOGTEST_CALL_DEPTH_CONNECTION"u8;
+
+public static partial void TestCallDepthConnection(ж<testing.T> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    if (testing.Short()) {
+        Ꮡt.Skip(skippingTestInShortModeˢ);
+    }
+
+    testenv.MustHaveExec(new slog_test_package.testing_TжTB(Ꮡt));
+    var (ep, err) = os.Executable();
+    if (err != default!) {
+        Ꮡt.Fatalf("Executable failed: %v"u8, err);
+    }
+
+    var tests = new TestCallDepthConnection_tests[]{
+        new("log.Fatal"u8, () => {
+            log_package.Fatal(logFatalˢ);
+        }),
+        new("log.Fatalf"u8, () => {
+            log_package.Fatalf("log.Fatalf"u8);
+        }),
+        new("log.Fatalln"u8, () => {
+            log_package.Fatalln(logFatallnˢ);
+        }),
+        new("log.Output"u8, () => {
+            log_package.Output(1, logOutputˢ);
+        }),
+        new("log.Panic"u8, () => {
+            log_package.Panic(logPanicˢ);
+        }),
+        new("log.Panicf"u8, () => {
+            log_package.Panicf("log.Panicf"u8);
+        }),
+        new("log.Panicln"u8, () => {
+            log_package.Panicf("log.Panicln"u8);
+        }),
+        new("log.Default.Fatal"u8, () => {
+            log_package.Default().Fatal(logDefaultFatalˢ);
+        }),
+        new("log.Default.Fatalf"u8, () => {
+            log_package.Default().Fatalf("log.Default.Fatalf"u8);
+        }),
+        new("log.Default.Fatalln"u8, () => {
+            log_package.Default().Fatalln(logDefaultFatallnˢ);
+        }),
+        new("log.Default.Output"u8, () => {
+            log_package.Default().Output(1, logDefaultOutputˢ);
+        }),
+        new("log.Default.Panic"u8, () => {
+            log_package.Default().Panic(logDefaultPanicˢ);
+        }),
+        new("log.Default.Panicf"u8, () => {
+            log_package.Default().Panicf("log.Default.Panicf"u8);
+        }),
+        new("log.Default.Panicln"u8, () => {
+            log_package.Default().Panicf("log.Default.Panicln"u8);
+        })
+    }.slice();
+
+    // calculate the line offset until the first test case
+    var (_, _, line, ok) = runtime.Caller(0);
+    if (!ok) {
+        Ꮡt.Fatalf("runtime.Caller failed"u8);
+    }
+    line -= len(tests) + 3;
+
+    foreach (var (i, vᴛ1) in tests) {
+        ref var tt = ref heap(new TestCallDepthConnection_tests(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
+            // inside spawned test executable
+            @string envVar = envVarᶜ;
+            if (os.Getenv(envVar) == "1"u8) {
+                var h = NewTextHandler(new os.FileжWriter(os.Stderr), Ꮡ(new HandlerOptions(
+                    AddSource: true,
+                    ReplaceAttr: (slice<@string> groups, global::go.log.slog_package.Attr a) => {
+                        if ((a.Key == MessageKey || a.Key == SourceKey) && len(groups) == 0) {
+                            return a;
+                        }
+                        return new Attr(nil);
+                    }
+                )));
+                SetDefault(New(new global::go.log.slog_package.TextHandlerжΔHandler(h)));
+                log_package.SetFlags(log_package.Lshortfile);
+                ttʗ1.log();
+                os.Exit(1);
+            }
+
+            // spawn test executable
+            var cmd = testenv.Command(new slog_test_package.testing_TжTB(tΔ1), ep,
+                "-test.run=^"u8 + regexp.QuoteMeta(tΔ1.Name()) + "$"u8,
+                testCount1ˢ);
+            cmd.Value.Env = builtin.append(cmd.Environ(), envVar + "=1");
+
+            var (@out, errΔ1) = cmd.CombinedOutput();
+            {
+                var (_, okΔ1) = errors.AsType<ж<exec.ExitError>>(errΔ1); if (!okΔ1) {
+                    tΔ1.Fatalf("expected exec.ExitError: %v"u8, errΔ1);
+                }
+            }
+
+            (_, var firstLine, errΔ1) = bufio.ScanLines(@out, true);
+            if (errΔ1 != default!) {
+                tΔ1.Fatalf("failed to split line: %v"u8, errΔ1);
+            }
+            @string got = ((@string)firstLine);
+
+            @string want = fmt.Sprintf(
+                @"msg=""logger_test.go:%d: %s"""u8,
+                line + i, ttʗ1.name);
+            if (got != want) {
+                tΔ1.Errorf(
+                    "output from %s() mismatch:\n\t got: %s\n\twant: %s"u8,
+                    ttʗ1.name, got, want);
+            }
+        });
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string infoˢ3 = "Info"u8;
 internal static readonly @string helloˢ = "hello"u8;
-internal static readonly @string errorˢ2 = "Error"u8;
+internal static readonly @string errorˢ3 = "Error"u8;
 internal static readonly @string loggerInfoˢ = "logger.Info"u8;
 internal static readonly @string loggerLogˢ = "logger.Log"u8;
 internal static readonly @string pairsˢ = "2 pairs"u8;
@@ -298,7 +450,6 @@ internal static readonly @string pairsDisabledInlineˢ = "2 pairs disabled inlin
 internal static readonly @string pairsDisabledˢ = "2 pairs disabled"u8;
 internal static readonly @string kvsˢ = "9 kvs"u8;
 internal static readonly @string pairsˢ2 = "pairs"u8;
-internal static readonly @string errorˢ3 = "error"u8;
 internal static readonly @string attrs1ˢ = "attrs1"u8;
 internal static readonly @string attrs3ˢ = "attrs3"u8;
 internal static readonly @string attrs3Disabledˢ = "attrs3 disabled"u8;
@@ -318,7 +469,7 @@ public static void TestAlloc(ж<testing.T> Ꮡt) {
                 Info(helloˢ);
             });
         });
-        Ꮡt.Run(errorˢ2, (ж<testing.T> tΔ2) => {
+        Ꮡt.Run(errorˢ3, (ж<testing.T> tΔ2) => {
             wantAllocs(tΔ2, 0, [MethodImpl(MethodImplOptions.NoInlining)] () => {
                 go.log.slog_package.Error(helloˢ);
             });
@@ -344,7 +495,7 @@ public static void TestAlloc(ж<testing.T> Ꮡt) {
             @string s = abcˢ;
             nint i = 2000;
             var dlʗ6 = dlʗ5;
-            wantAllocs(tΔ5, 2, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            wantAllocs(tΔ5, 0, [MethodImpl(MethodImplOptions.NoInlining)] () => {
                 dlʗ6.Info(helloˢ,
                     (@string)"n"u8, i,
                     (@string)"s"u8, s);
@@ -357,7 +508,7 @@ public static void TestAlloc(ж<testing.T> Ꮡt) {
             nint i = 2000;
             var ctxʗ4 = ctxʗ3;
             var lʗ1 = l;
-            wantAllocs(tΔ6, 2, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            wantAllocs(tΔ6, 0, [MethodImpl(MethodImplOptions.NoInlining)] () => {
                 lʗ1.Log(ctxʗ4, LevelInfo, helloˢ,
                     (@string)"n"u8, i,
                     (@string)"s"u8, s);
@@ -384,7 +535,7 @@ public static void TestAlloc(ж<testing.T> Ꮡt) {
             nint i = 2000;
             var d = time_package.ΔSecond;
             var dlʗ8 = dlʗ7;
-            wantAllocs(tΔ8, 10, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            wantAllocs(tΔ8, 1, [MethodImpl(MethodImplOptions.NoInlining)] () => {
                 dlʗ8.Info(helloˢ,
                     (@string)"n"u8, i, (@string)"s"u8, s, (@string)"d"u8, d,
                     (@string)"n"u8, i, (@string)"s"u8, s, (@string)"d"u8, d,
@@ -395,7 +546,7 @@ public static void TestAlloc(ж<testing.T> Ꮡt) {
         Ꮡt.Run(pairsˢ2, (ж<testing.T> tΔ9) => {
             var dlʗ10 = dlʗ9;
             wantAllocs(tΔ9, 0, [MethodImpl(MethodImplOptions.NoInlining)] () => {
-                dlʗ10.Info(""u8, errorˢ3, io.EOF);
+                dlʗ10.Info(""u8, errorˢ2, io.EOF);
             });
         });
         var ctxʗ7 = ctx;
@@ -409,7 +560,7 @@ public static void TestAlloc(ж<testing.T> Ꮡt) {
             var ctxʗ9 = ctxʗ7;
             var dlʗ13 = dlʗ11;
             wantAllocs(tΔ10, 0, [MethodImpl(MethodImplOptions.NoInlining)] () => {
-                dlʗ13.LogAttrs(ctxʗ9, LevelInfo, ""u8, go.log.slog_package.Any(errorˢ3, io.EOF));
+                dlʗ13.LogAttrs(ctxʗ9, LevelInfo, ""u8, go.log.slog_package.Any(errorˢ2, io.EOF));
             });
         });
         var ctxʗ10 = ctx;
@@ -579,7 +730,7 @@ public static void TestLogLoggerLevelForHandlerWriter(ж<testing.T> Ꮡt) {
     log_package.SetFlags(0);
     SetLogLoggerLevel(LevelError);
     SetDefault(New(new global::go.log.slog_package.TextHandlerжΔHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(ᏑlogBuf), Ꮡ(new HandlerOptions(ReplaceAttr: removeTime))))));
-    log_package.Print(errorˢ3);
+    log_package.Print(errorˢ2);
     checkLogOutput(Ꮡt, ᏑlogBuf.String(), levelErrorMsgErrorˢ);
 }
 
@@ -803,7 +954,6 @@ internal static slice<T> concat<T>(slice<T> s1, slice<T> s2) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string noAttrsˢ = "no attrs"u8;
-internal static readonly @string attrsˢ = "attrs"u8;
 internal static readonly @string attrsParallelˢ = "attrs-parallel"u8;
 internal static readonly @string keysValuesˢ = "keys-values"u8;
 internal static readonly @string withContextˢ = "WithContext"u8;

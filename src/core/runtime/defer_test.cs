@@ -213,7 +213,7 @@ internal static readonly object panic1ˢ = (@string)"panic1"u8;
 // This tests that recover() does not succeed unless it is called directly from a
 // defer function that is directly called by the panic.  Here, we first call it
 // from a defer function that is created by the defer function called directly by
-// the panic.  In
+// the panic.
 public static void TestRecoverMatching(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {

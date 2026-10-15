@@ -44,8 +44,4 @@ public static bool IsZero(this ΔPrefix p) {
     return p.isZero();
 }
 
-public static nint Compare(this ΔPrefix p, ΔPrefix p2) {
-    return p.compare(p2);
-}
-
 } // end netip_package

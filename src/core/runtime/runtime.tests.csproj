@@ -113,33 +113,36 @@
     <Compile Include="closure_test.cs" />
     <Compile Include="complex_test.cs" />
     <Compile Include="coro_test.cs" />
+    <Compile Include="cpuflags_amd64_test.cs" />
     <Compile Include="crash_test.cs" />
     <Compile Include="debuglog_test.cs" />
+    <Compile Include="decoratemappings_test.cs" />
     <Compile Include="defer_test.cs" />
     <Compile Include="ehooks_test.cs" />
     <Compile Include="env_test.cs" />
     <Compile Include="export_debuglog_test.cs" />
-    <Compile Include="export_impl_test.cs" />
-    <Compile Include="export_map_swiss_test.cs" />
     <Compile Include="export_test.cs" />
-    <Compile Include="export_windows_impl_test.cs" />
     <Compile Include="export_windows_test.cs" />
     <Compile Include="fastlog2_test.cs" />
     <Compile Include="float_test.cs" />
     <Compile Include="gc_test.cs" />
     <Compile Include="gcinfo_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
+    <Compile Include="gomaxprocs_windows_test.cs" />
+    <Compile Include="goroutineleakprofile_test.cs" />
     <Compile Include="hash_test.cs" />
     <Compile Include="heap_test.cs" />
+    <Compile Include="hexdump_test.cs" />
     <Compile Include="histogram_test.cs" />
     <Compile Include="iface_test.cs" />
     <Compile Include="import_test.cs" />
     <Compile Include="importx_test.cs" />
     <Compile Include="lfstack_test.cs" />
+    <Compile Include="list_manual_test.cs" />
+    <Compile Include="list_test.cs" />
     <Compile Include="lockrank_test.cs" />
     <Compile Include="malloc_test.cs" />
     <Compile Include="map_benchmark_test.cs" />
-    <Compile Include="map_swiss_test.cs" />
     <Compile Include="map_test.cs" />
     <Compile Include="mcleanup_test.cs" />
     <Compile Include="memmove_test.cs" />
@@ -161,6 +164,8 @@
     <Compile Include="panic_test.cs" />
     <Compile Include="panicnil_test.cs" />
     <Compile Include="pinner_test.cs" />
+    <Compile Include="print_quoted_test.cs" />
+    <Compile Include="print_test.cs" />
     <Compile Include="proc_runtime_test.cs" />
     <Compile Include="proc_test.cs" />
     <Compile Include="profbuf_test.cs" />
@@ -182,12 +187,14 @@
     <Compile Include="symtab_test.cs" />
     <Compile Include="symtabinl_test.cs" />
     <Compile Include="synctest_test.cs" />
+    <Compile Include="syscall_test.cs" />
     <Compile Include="syscall_windows_test.cs" />
     <Compile Include="time_test.cs" />
     <Compile Include="trace2map_test.cs" />
     <Compile Include="traceback_system_test.cs" />
     <Compile Include="traceback_test.cs" />
     <Compile Include="tracebackx_test.cs" />
+    <Compile Include="tracestack_test.cs" />
     <Compile Include="unsafepoint_test.cs" />
   </ItemGroup>
 
@@ -213,6 +220,9 @@
     <None Include="cgocall.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="cgocallback.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="cgocheck.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="cgroup_linux.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="cgroup_linux_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="cgroup_stubs.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="chan.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="chan_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="chanbarrier_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -229,6 +239,7 @@
     <None Include="covermeta.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="cpuflags.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="cpuflags_amd64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="cpuflags_amd64_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="cpuflags_arm64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="cpuprof.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="cputicks.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -247,6 +258,7 @@
     <None Include="debuglog_off.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="debuglog_on.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="debuglog_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="decoratemappings_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="defer_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="defs1_linux.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="defs1_netbsd_386.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -292,7 +304,6 @@
     <None Include="defs_openbsd_amd64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="defs_openbsd_arm.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="defs_openbsd_arm64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="defs_openbsd_mips64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="defs_openbsd_ppc64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="defs_openbsd_riscv64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="defs_plan9_386.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -300,11 +311,7 @@
     <None Include="defs_plan9_arm.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="defs_solaris.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="defs_solaris_amd64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="defs_windows.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="defs_windows_386.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="defs_windows_amd64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="defs_windows_arm.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="defs_windows_arm64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="dit.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="ehooks_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="env_plan9.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="env_posix.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -321,13 +328,12 @@
     <None Include="export_debug_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="export_debuglog_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="export_linux_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="export_map_noswiss_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="export_map_swiss_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="export_mmap_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="export_pipe2_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="export_pipe_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="export_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="export_unix_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="export_vdso_linux_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="export_windows_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="extern.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="fastlog2.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -336,15 +342,20 @@
     <None Include="fds_nonunix.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="fds_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="fds_unix.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="fipsbypass.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="float.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="float_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="gc_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="gcinfo_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="gomaxprocs_windows_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="goroutineleakprofile_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="hash32.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="hash64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="hash_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="heap_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="heapdump.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="hexdump.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="hexdump_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="histogram.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="histogram_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="iface.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -355,13 +366,15 @@
     <None Include="lfstack_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="libfuzzer.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="linkname.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="linkname_swiss.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="linkname_shim.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="linkname_unix.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="list.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="list_manual.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="list_manual_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="list_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="lock_futex.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="lock_futex_tristate.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="lock_js.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="lock_sema.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="lock_sema_tristate.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="lock_spinbit.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="lock_wasip1.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="lockrank.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -369,18 +382,16 @@
     <None Include="lockrank_on.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="lockrank_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="malloc.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="malloc_generated.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="malloc_stubs.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="malloc_tables_generated.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="malloc_tables_plan9.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="malloc_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="map.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="map_benchmark_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="map_fast32_noswiss.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="map_fast32_swiss.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="map_fast64_noswiss.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="map_fast64_swiss.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="map_faststr_noswiss.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="map_faststr_swiss.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="map_noswiss.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="map_noswiss_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="map_swiss.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="map_swiss_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="map_fast32.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="map_fast64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="map_faststr.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="map_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="mbarrier.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="mbitmap.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -404,6 +415,7 @@
     <None Include="memmove_linux_amd64_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="memmove_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="metrics.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="metrics_cgo_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="metrics_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="mfinal.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="mfinal_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -412,6 +424,8 @@
     <None Include="mgclimit.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="mgclimit_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="mgcmark.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="mgcmark_greenteagc.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="mgcmark_nogreenteagc.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="mgcpacer.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="mgcpacer_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="mgcscavenge.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -426,7 +440,6 @@
     <None Include="mkfastlog2table.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="mklockrank.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="mkpreempt.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="mksizeclasses.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="mmap.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="mpagealloc.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="mpagealloc_32bit.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -486,10 +499,11 @@
     <None Include="os_freebsd_arm.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_freebsd_arm64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_freebsd_noauxv.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="os_freebsd_riscv64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_illumos.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_js.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_linux.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="os_linux32.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="os_linux64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_linux_arm.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_linux_arm64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_linux_be64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -502,7 +516,6 @@
     <None Include="os_linux_ppc64x.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_linux_riscv64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_linux_s390x.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="os_linux_x86.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_netbsd.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_netbsd_386.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_netbsd_amd64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -513,11 +526,6 @@
     <None Include="os_openbsd.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_openbsd_arm.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_openbsd_arm64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="os_openbsd_libc.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="os_openbsd_mips64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="os_openbsd_syscall.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="os_openbsd_syscall1.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="os_openbsd_syscall2.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_plan9.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_plan9_arm.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_solaris.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -526,7 +534,6 @@
     <None Include="os_wasip1.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_wasm.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_windows.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="os_windows_arm.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="os_windows_arm64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="panic.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="panic32.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -541,8 +548,15 @@
     <None Include="pprof/testdata/test64" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="pprof/testdata/test64be" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="preempt.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="preempt_amd64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="preempt_arm64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="preempt_loong64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="preempt_nonwindows.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="preempt_noxreg.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="preempt_xreg.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="print.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="print_quoted_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="print_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="proc.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="proc_runtime_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="proc_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -560,6 +574,7 @@
     <None Include="race/testdata/issue12225_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="race/testdata/issue12664_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="race/testdata/issue13264_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="race/testdata/main_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="race/testdata/map_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="race/testdata/mop_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="race/testdata/mutex_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -571,6 +586,7 @@
     <None Include="race/testdata/select_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="race/testdata/slice_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="race/testdata/sync_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="race/testdata/synctest_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="race/testdata/time_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="race/testdata/waitgroup_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="race0.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -586,12 +602,18 @@
     <None Include="runtime1.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="runtime2.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="runtime_boring.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="runtime_clearenv.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="runtime_linux_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="runtime_mmap_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="runtime_noclearenv.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="runtime_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="runtime_unix_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="rwmutex.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="rwmutex_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="secret.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="secret_asm.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="secret_noasm.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="secret_nosecret.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="security_aix.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="security_issetugid.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="security_linux.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -602,6 +624,8 @@
     <None Include="sema.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="sema_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="semasleep_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="set_vma_name_linux.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="set_vma_name_stub.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="sigaction.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="signal_386.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="signal_aix_ppc64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -642,7 +666,6 @@
     <None Include="signal_openbsd_amd64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="signal_openbsd_arm.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="signal_openbsd_arm64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="signal_openbsd_mips64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="signal_openbsd_ppc64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="signal_openbsd_riscv64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="signal_plan9.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -652,6 +675,9 @@
     <None Include="signal_solaris_amd64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="signal_unix.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="signal_windows.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="signal_windows_386.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="signal_windows_amd64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="signal_windows_arm64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="signal_windows_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="sigqueue.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="sigqueue_note.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -659,7 +685,6 @@
     <None Include="sigtab_aix.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="sigtab_linux_generic.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="sigtab_linux_mipsx.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="sizeclasses.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="sizeof_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="slice.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="slice_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -706,9 +731,6 @@
     <None Include="sys_mipsx.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="sys_nonppc64x.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="sys_openbsd.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="sys_openbsd1.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="sys_openbsd2.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="sys_openbsd3.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="sys_ppc64x.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="sys_riscv64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="sys_s390x.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -717,6 +739,7 @@
     <None Include="syscall2_solaris.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="syscall_aix.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="syscall_solaris.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="syscall_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="syscall_unix_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="syscall_windows.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="syscall_windows_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -728,6 +751,7 @@
     <None Include="time.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="time_fake.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="time_nofake.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="time_plan9.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="time_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="timeasm.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="timestub.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -745,20 +769,21 @@
     <None Include="tracebuf.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="tracecpu.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="traceevent.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="traceexp.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="tracemap.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="traceregion.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="traceruntime.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="tracestack.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="tracestack_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="tracestatus.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="tracestring.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="tracetime.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="tracetype.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="type.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="typekind.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="unsafe.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="unsafepoint_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="utf8.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="valgrind.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="valgrind0.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="vdso_elf32.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="vdso_elf64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="vdso_freebsd.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -777,6 +802,7 @@
     <None Include="vdso_linux_ppc64x.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="vdso_linux_riscv64.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="vdso_linux_s390x.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="vdso_linux_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="vdso_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="vgetrandom_linux.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="vgetrandom_unsupported.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -792,6 +818,7 @@
     <ProjectReference Include="$(go2csPath)core/bufio/bufio.csproj" />
     <ProjectReference Include="$(go2csPath)core/bytes/bytes.csproj" />
     <ProjectReference Include="$(go2csPath)core/context/context.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/time/crypto.internal.fips140deps.time.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/rand/crypto.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/encoding/binary/encoding.binary.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
@@ -807,27 +834,36 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/abi/internal.abi.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/asan/internal.asan.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/byteorder/internal.byteorder.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/chacha8rand/internal.chacha8rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/cpu/internal.cpu.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/goarch/internal.goarch.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/goexperiment/internal.goexperiment.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/goos/internal.goos.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/platform/internal.platform.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/msan/internal.msan.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/profile/internal.profile.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/race/internal.race.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/atomic/internal.runtime.atomic.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/runtime/gc/internal.runtime.gc.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/maps/internal.runtime.maps.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/math/internal.runtime.math.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/runtime/startlinetest/internal.runtime.startlinetest.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/sys/internal.runtime.sys.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/runtime/syscall/windows/internal.runtime.syscall.windows.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/stringslite/internal.stringslite.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/synctest/internal.synctest.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/syscall/windows/internal.syscall.windows.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/syscall/windows/sysdll/internal.syscall.windows.sysdll.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/trace/internal.trace.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/trace/testtrace/internal.trace.testtrace.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/trace/tracev2/internal.trace.tracev2.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/types/errors/internal.types.errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
+    <ProjectReference Include="$(go2csPath)core/iter/iter.csproj" />
     <ProjectReference Include="$(go2csPath)core/log/log.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/bits/math.bits.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/cmplx/math.cmplx.csproj" />
@@ -840,7 +876,6 @@
     <ProjectReference Include="$(go2csPath)core/reflect/reflect.csproj" />
     <ProjectReference Include="$(go2csPath)core/regexp/regexp.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/debug/runtime.debug.csproj" />
-    <ProjectReference Include="$(go2csPath)core/runtime/internal/startlinetest/runtime.internal.startlinetest.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/metrics/runtime.metrics.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/pprof/runtime.pprof.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/trace/runtime.trace.csproj" />
