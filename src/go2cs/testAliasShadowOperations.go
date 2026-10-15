@@ -66,6 +66,10 @@ func collectSiblingTestSignals(packageDir, packageName string, options Options) 
 	buildContext.GOOS = targetParts[0]
 	buildContext.GOARCH = targetParts[1]
 	buildContext.BuildTags = append([]string(nil), options.buildTags...)
+	// The GOROOT's own release and tool tags, not this binary's: a go1.26-built go2cs reading a 1.24
+	// GOROOT's tests would otherwise select them by 1.26's experiments (see loaderToolTags).
+	buildContext.ReleaseTags = loaderReleaseTags(packageDir)
+	buildContext.ToolTags = loaderToolTags(packageDir)
 
 	entries, err := os.ReadDir(packageDir)
 	if err != nil {
