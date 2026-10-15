@@ -375,14 +375,18 @@ type linknamePush struct {
 // hand-written companion that a converter-emitted body would collide with. Linking them wholesale
 // would be a regression dressed as a feature, so each entry is a judgment recorded here.
 var linknamePushTargets = map[string]linknamePush{
-	// unique's cleanup registration, pushed by runtime/mgc.go. The pushed body is ORDINARY converted
-	// Go — it makes a `chan struct{}` and starts a goroutine that drains it and calls the callback —
-	// so the managed model runs the real thing: the registration succeeds and the cleanup goroutine
-	// parks on the channel. Nothing signals it, because the converted runtime's clearpools() is
-	// driven by Go's own GC, which does not run; that is Go's OWN behavior for a program whose GC
-	// never fires (unique's map simply keeps its entries), not a fabricated answer. Before this the
-	// stub threw out of `unique.Make`'s setupMake.Do, taking net/netip and gob's TestNetIP with it.
-	"unique.runtime_registerUniqueMapCleanup": {source: "runtime.unique_runtime_registerUniqueMapCleanup"},
+	// unique's cleanup-queue drain, pushed by runtime/mcleanup.go
+	// (`//go:linkname unique_runtime_blockUntilEmptyCleanupQueue unique.runtime_blockUntilEmptyCleanupQueue`).
+	// HANDLE consumer shape, in an IN-PACKAGE test file: handle_test.go's drainCleanupQueue calls it
+	// after runtime.GC() so the canonical map's cleanups have run before checkMapsFor looks. The pushed
+	// body lives in mcleanup.go, which the corpus hand-owns (runtime/mcleanup.cs), so the body is the
+	// hand-own's: cleanups run on the same managed queue as finalizers, and it waits on that queue the
+	// way blockUntilEmptyFinalizerQueue does.
+	//
+	// Until Go 1.26 this row was unique.runtime_registerUniqueMapCleanup, pushed by runtime/mgc.go and
+	// called from unique.Make's setupMake.Do. Go 1.26 rebuilt unique's map on weak pointers and
+	// runtime.AddCleanup, and the registration and its consumer are gone.
+	"unique.runtime_blockUntilEmptyCleanupQueue": {source: "runtime.unique_runtime_blockUntilEmptyCleanupQueue"},
 	// runtime/pprof's cycles-per-second -- the ONE member of the self-symbol shape (see selfSymbolPull).
 	// runtime/cpuprof.go carries the body (`return ticksPerSecond()`) under the two-arg directive
 	// `//go:linkname pprof_cyclesPerSecond runtime/pprof.runtime_cyclesPerSecond`, and
@@ -737,6 +741,52 @@ var linknamePushTargets = map[string]linknamePush{
 	"reflect.resolveNameOff": {source: "runtime.reflect_resolveNameOff", bareDecl: true},
 	"reflect.resolveTypeOff": {source: "runtime.reflect_resolveTypeOff", bareDecl: true},
 	"reflect.resolveTextOff": {source: "runtime.reflect_resolveTextOff", bareDecl: true},
+	// Go 1.26's new runtime pushes, rowed at the hop (PLAN-hop-go126 H4). Each pushing definition lives
+	// in a runtime (or os) file the corpus does not carry until H5 regenerates it, so every row below
+	// is COMPILE AT H5 (net.newWindowsFile: H6, see its row); the conversion of each consumer at
+	// go1.26.9 is what was measured here, the forwarder or refusal line it emits.
+	//
+	// crypto/fips140's per-goroutine FIPS-only bypass, pushed by runtime/fipsbypass.go into three
+	// one-arg HANDLES in crypto/fips140/enforcement.go. Each body reads or writes
+	// getg().fipsOnlyBypass, an ordinary g field, and getg() returns the running goroutine's managed g
+	// (runtime/stubs_impl.cs), so the flag is per goroutine as Go means it. HONORABLE.
+	"crypto/fips140.isBypassed":  {source: "runtime.fips140_isBypassed"},
+	"crypto/fips140.setBypass":   {source: "runtime.fips140_setBypass"},
+	"crypto/fips140.unsetBypass": {source: "runtime.fips140_unsetBypass"},
+	// crypto/subtle's data-independent-timing switch, pushed by runtime/dit.go into two one-arg HANDLES
+	// in crypto/subtle/dit.go. The bodies set g.ditWanted and g.m.ditEnabled (managed getg mints an m
+	// per goroutine) and call internal/runtime/sys.EnableDIT/DisableDIT, which on amd64 are the no_dit
+	// shapes: EnableDIT reports false and DisableDIT does nothing. So WithDataIndependentTiming runs f
+	// with DIT reported unavailable, which is Go's own amd64 answer. HONORABLE.
+	"crypto/subtle.setDITEnabled":  {source: "runtime.dit_setEnabled"},
+	"crypto/subtle.setDITDisabled": {source: "runtime.dit_setDisabled"},
+	// net's conn.File on windows, pushed by os/file_windows.go (`//go:linkname net_newWindowsFile
+	// net.newWindowsFile`) into a BARE declaration in net/fd_windows.go. COMPILE AT H6, not H5:
+	// os/windows/file_windows.cs is a hand-owned whole file, so packageFuncAccess cannot widen the
+	// pushing definition there; the H6 os rewrite must declare net_newWindowsFile public by hand.
+	"net.newWindowsFile": {source: "os.net_newWindowsFile", bareDecl: true},
+	// runtime/trace's flight-recorder clock rate, pushed by runtime/tracetime.go into a one-arg HANDLE
+	// in runtime/trace/flightrecorder.go. Ordinary converted Go over osHasLowResClock, ticksPerSecond
+	// and traceTimeDiv, returning uint64 (no unexported type crosses). HONORABLE.
+	"runtime/trace.runtime_traceClockUnitsPerSecond": {source: "runtime.traceClockUnitsPerSecond"},
+	// sync's external-test twin of unique's cleanup-queue drain, pushed by runtime/mcleanup.go into a
+	// one-arg HANDLE in sync/oncefunc_test.go (package sync_test, hence the key). Its body is the same
+	// hand-written wait as unique's, in runtime/mcleanup.cs. HONORABLE.
+	"sync_test.runtime_blockUntilEmptyCleanupQueue": {source: "runtime.sync_test_runtime_blockUntilEmptyCleanupQueue"},
+	// runtime/pprof's goroutine-leak profile, pushed by runtime/mgc.go and runtime/proc.go into two
+	// BARE declarations in runtime/pprof/runtime.go. UNHONORABLE, both: the managed model has no
+	// leak-detecting GC cycle, so a count would be a fabricated 0, and goroutineLeakGC spins on
+	// work.goroutineLeak.pending, which only that cycle clears.
+	"runtime/pprof.runtime_goroutineLeakGC": {
+		source:   "runtime.goroutineLeakGC",
+		reason:   "the pushed body waits for a goroutine-leak GC cycle the managed collector never runs, so it would spin forever",
+		bareDecl: true,
+	},
+	"runtime/pprof.runtime_goroutineleakcount": {
+		source:   "runtime.goroutineleakcount",
+		reason:   "goroutine leak detection needs a GC that marks blocked goroutines unreachable, which the managed model does not do, so any count would be a fabricated 0",
+		bareDecl: true,
+	},
 }
 
 // linknamePushSources is the reverse index of the FORWARDED entries of linknamePushTargets: the set
@@ -901,7 +951,14 @@ func typeIsPubliclyAccessible(t types.Type) bool {
 // Go 1.23 requires the remote's package to authorize the pull with a matching one-arg handle, which
 // the converter honors by emitting that remote public (see packageVarAccess) — so the forwarding
 // property compiles across the assembly boundary. The comment may sit on the GenDecl or the spec.
-func varLinknamePull(name string, options Options, docs ...*ast.CommentGroup) (ref string, pkgPath string, ok bool) {
+//
+// lateBound reports a pull whose direct reference would close a project cycle (linknamePullWouldCycle):
+// the caller then reaches the remote BY NAME through golib's LinknameVar instead of by a compiled
+// reference, so no ProjectReference is queued and the var still aliases the remote's storage. Before,
+// such a pull kept a plain field of its own, which is never Go's value: at go1.26.9 runtime imports
+// math/bits, so math/bits's pulls of runtime.overflowError / runtime.divideError became null fields and
+// bits.Div64 panicked with nil where Go's own tests assert a runtime.Error.
+func varLinknamePull(name string, options Options, docs ...*ast.CommentGroup) (ref string, pkgPath string, lateBound bool, ok bool) {
 	for _, doc := range docs {
 		if doc == nil {
 			continue
@@ -923,21 +980,25 @@ func varLinknamePull(name string, options Options, docs ...*ast.CommentGroup) (r
 			}
 
 			pkgPath = target[:dot]
-
-			// A pull whose forwarding reference would form a project-ref cycle keeps its plain-field
-			// form (the pre-feature behavior) — runtime pulling internal/syscall/windows.CanUseLongPaths.
-			if linknamePullWouldCycle(pkgPath, options) {
-				return "", "", false
-			}
-
 			remote := getSanitizedIdentifier(target[dot+1:])
 			class := RootNamespace + "." + convertImportPathToNamespace(pkgPath, PackageSuffix)
 
-			return class + "." + remote, pkgPath, true
+			// A pull whose forwarding reference would form a project-ref cycle is reached late-bound
+			// (lateBound above). A pull of the package's OWN symbol is not a cross-assembly pull at all
+			// and keeps its plain field, as before.
+			if linknamePullWouldCycle(pkgPath, options) {
+				if pkgPath == currentPackagePath {
+					return "", "", false, false
+				}
+
+				return class + "." + remote, pkgPath, true, true
+			}
+
+			return class + "." + remote, pkgPath, false, true
 		}
 	}
 
-	return "", "", false
+	return "", "", false, false
 }
 
 // varLinknameAliasForward recognizes a package var that is the FORWARDING side of an inverted

@@ -186,7 +186,9 @@ internal static class TestFlagBridge
         // flag.Usage that calls flag.PrintDefaults() — produces output comparable with `go test`.
         registrar.Bool("test.short", options.Short, "run smaller test suite to save time");
         registrar.Bool("test.failfast", false, "do not start new tests after the first test failure");
-        registrar.String("test.outputdir", "", "write profiles to `dir`");
+        registrar.String("test.outputdir", options.OutputDir ?? "", "write profiles to `dir`");
+        // Go 1.26 (testing.go:458); the usage string is Go's own, typo included.
+        registrar.Bool("test.artifacts", options.Artifacts, "store test artifacts in test.,outputdir");
         // The one flag of the set that is NOT a primitive in Go — see ChattyFlag. Bool is the
         // conservative belt (today's behaviour exactly) for a flag package whose Value interface
         // carries no runtime shells; the guard asserts the tri-state path is the one taken, so a

@@ -204,6 +204,7 @@
     <None Include="$(MSBuildThisFileDirectory)importInit_test.go" />
     <None Include="$(MSBuildThisFileDirectory)importOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)implicitConvValueType_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)implicitRuntimeReference_test.go" />
     <None Include="$(MSBuildThisFileDirectory)importInitSection.go" />
     <None Include="$(MSBuildThisFileDirectory)importOperations_test.go" />
     <None Include="$(MSBuildThisFileDirectory)importSegmentShadow_test.go" />
@@ -278,6 +279,7 @@
     <None Include="$(MSBuildThisFileDirectory)linknameForward_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameForwardDarwin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameForwardRegistry_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)linknameLateBound_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknameOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)linknamePush_test.go" />
     <None Include="$(MSBuildThisFileDirectory)linknamePushRegistry_test.go" />
@@ -355,6 +357,7 @@
     <None Include="$(MSBuildThisFileDirectory)packageGlobalState.go" />
     <None Include="$(MSBuildThisFileDirectory)packageIdLine_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageImportPathStamp_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)packageInfoAdoption_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageInfoWriter.go" />
     <None Include="$(MSBuildThisFileDirectory)packageInitFacts.go" />
     <None Include="$(MSBuildThisFileDirectory)packageInputDigest.go" />

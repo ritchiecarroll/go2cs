@@ -1256,8 +1256,23 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 							// identical, but assert it rather than inherit it: this arm mints a
 							// wrapper over a zero value, so a mismatch would construct silently.
 							if argPtr, ok := types.Unalias(v.info.TypeOf(arg)).(*types.Pointer); ok && types.Identical(argPtr.Elem().Underlying(), targetArr) {
-								elemName := convertToCSTypeName(v.getAliasQualifiedTypeName(targetArr.Elem(), false))
 								namedCS := convertToCSTypeName(v.getAliasQualifiedTypeName(targetNamed, false))
+
+								// Go 1.26's `new(expr)` carries a VALUE, and a wrapper over a zero value would drop
+								// it silently. Its box is a FRESH copy no other name reaches -- unlike the
+								// `&existing` case above, which has no correct emission -- so the wrapper is
+								// built over that copy: `(*row)(new(raw))` is `Ꮡ(new row(raw.Clone()))`.
+								if newArg := argCall.Args[0]; v.info.Types[newArg].IsValue() {
+									value := v.convExpr(newArg, nil)
+
+									if v.exprReadsValueNeedingClone(newArg) {
+										value = appendValueClone(value, argPtr.Elem())
+									}
+
+									return fmt.Sprintf("Ꮡ(new %s(%s))", namedCS, value)
+								}
+
+								elemName := convertToCSTypeName(v.getAliasQualifiedTypeName(targetArr.Elem(), false))
 
 								return fmt.Sprintf("Ꮡ(new %s(new array<%s>(%s)))", namedCS, elemName, csNintLiteral(targetArr.Len()))
 							}
@@ -2855,6 +2870,14 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// Handle new call as a special case
 		if ident.Name == "new" {
 			typeExpr := callExpr.Args[0]
+
+			// Go 1.26: `new(expr)` allocates a variable initialized to the VALUE of expr, typed as expr
+			// (its default type when untyped: `new(42)` is a *int). Before this arm every such call read
+			// as `new(T)` and emitted the zero-value `@new<T>()`, a silently wrong value.
+			if tv, ok := v.info.Types[typeExpr]; ok && tv.IsValue() {
+				return v.convNewOfValue(callExpr, typeExpr)
+			}
+
 			typeName := convertToCSTypeName(v.getExpressionTypeName(typeExpr, false))
 
 			// `new([N]T)` — golib's `@new<T>()` builds the zero value through the parameterless
@@ -5355,6 +5378,47 @@ func (v *Visitor) arrayPointerAliasEmission(callExpr *ast.CallExpr, arg ast.Expr
 	elemName := convertToCSTypeName(v.getAliasQualifiedTypeName(targetArr.Elem(), false))
 
 	return fmt.Sprintf("array<%s>.AliasPointer(%s, %s)", elemName, v.convExpr(p, []ExprContext{identContext}), csNintLiteral(targetArr.Len())), true
+}
+
+// convNewOfValue renders Go 1.26's `new(expr)`: a fresh variable holding a COPY of expr's value, boxed.
+// The pointee type is the call's own result type (`*T`, T already defaulted for an untyped constant), and the
+// value is cast to it, so C#'s inference cannot pick another type: `new(42)` is `Ꮡ((nint)(42))`, never a
+// box of C# int. A value read from existing storage that Go copies by value -- an array, or a struct holding
+// one -- takes the strongly-typed `.Clone()`, exactly as the assignment paths do; a C# struct copies itself.
+func (v *Visitor) convNewOfValue(callExpr *ast.CallExpr, valueExpr ast.Expr) string {
+	pointer, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Pointer)
+
+	if !ok {
+		v.showWarning("@convNewOfValue - new(expr) result is not a pointer type")
+		return fmt.Sprintf("%s(%s)", AddressPrefix, v.convExpr(valueExpr, nil))
+	}
+
+	elemType := pointer.Elem()
+	value := v.convExpr(valueExpr, nil)
+
+	if v.exprReadsValueNeedingClone(valueExpr) {
+		value = appendValueClone(value, elemType)
+	}
+
+	// A non-constant value already has the pointee's type, so it boxes as itself: `new(pt)` is `Ꮡ(pt)`. A
+	// CONSTANT takes the cast: C# would infer its own literal type for it (int, double, a u8 span), and
+	// go/types records a constant operand's CONVERTED type, so a type comparison cannot tell `new(42)` apart.
+	if tv := v.info.Types[valueExpr]; tv.Type != nil && types.Identical(tv.Type, elemType) {
+		// An explicit CONVERSION (`new(int64(7))`) is a constant that already renders with its own cast.
+		conversion := false
+
+		if call, isCall := ast.Unparen(valueExpr).(*ast.CallExpr); isCall {
+			conversion = v.info.Types[call.Fun].IsType()
+		}
+
+		if tv.Value == nil || conversion {
+			return fmt.Sprintf("%s(%s)", AddressPrefix, value)
+		}
+	}
+
+	typeName := convertToCSTypeName(v.getAliasQualifiedTypeName(elemType, false))
+
+	return fmt.Sprintf("%s((%s)(%s))", AddressPrefix, typeName, value)
 }
 
 // csNintLiteral renders a Go array length as a C# `nint` argument. A literal that fits in `int` binds

@@ -491,6 +491,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckElidedStructInterfaceField() => CheckTarget("ElidedStructInterfaceField");
 
     [TestMethod]
+    public void CheckEmbedDirectiveForms() => CheckTarget("EmbedDirectiveForms");
+
+    [TestMethod]
     public void CheckEmbeddedInterfaceWitness() => CheckTarget("EmbeddedInterfaceWitness");
 
     [TestMethod]
@@ -1407,6 +1410,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNewAnonStructIfaceEmbed() => CheckTarget("NewAnonStructIfaceEmbed");
+
+    [TestMethod]
+    public void CheckNewExpr() => CheckTarget("NewExpr");
 
     [TestMethod]
     public void CheckNilAdapterOpsClosure() => CheckTarget("NilAdapterOpsClosure");
