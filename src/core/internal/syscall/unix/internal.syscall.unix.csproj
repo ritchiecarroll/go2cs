@@ -186,6 +186,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(GoTargetOS)'=='linux'">
+    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="$(go2csPath)core/sync/atomic/sync.atomic.csproj" />
     <ProjectReference Include="$(go2csPath)core/syscall/syscall.csproj" />

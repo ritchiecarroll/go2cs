@@ -11,7 +11,7 @@
 // two non-literal codes are a clear code and an EOF code.
 //
 // The TIFF file format uses a similar but incompatible version of the LZW
-// algorithm. See the golang.org/x/image/tiff/lzw package for an
+// algorithm. See the [golang.org/x/image/tiff/lzw] package for an
 // implementation.
 namespace go.compress;
 
@@ -37,7 +37,7 @@ internal static UntypedInt maxWidth => 12;
 internal static UntypedInt decoderInvalidCode => 0xffff;
 internal static UntypedInt flushBuffer => /* 1 << maxWidth */ 4096;
 
-// Reader is an io.Reader which can be used to read compressed data in the
+// Reader is an [io.Reader] which can be used to read compressed data in the
 // LZW format.
 partial struct Reader {
     internal io.ByteReader r;
@@ -110,7 +110,7 @@ internal static (uint16, error) readMSB(this ref Reader r) {
     return (code, default!);
 }
 
-// Read implements io.Reader, reading uncompressed bytes from its underlying [Reader].
+// Read implements io.Reader, reading uncompressed bytes from its underlying reader.
 public static (nint, error) Read(this ж<Reader> Ꮡr, slice<byte> b) {
     ref var r = ref Ꮡr.DerefOrNull();
 

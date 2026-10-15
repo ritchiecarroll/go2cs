@@ -8,10 +8,9 @@ using fmt = fmt_package;
 using ast = global::go.go.ast_package;
 using constant = global::go.go.constant_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
-using errors = @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
-using ꓸꓸꓸany = Span<any>;
 
 partial class types_package {
 
@@ -167,27 +166,15 @@ internal static void unary(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.U
         return;
     }
     if (exprᴛ1 == token.ARROW) {
-        var u = coreType(x.typ);
-        if (u == default!) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidReceive, invalidOp + "cannot receive from %s (no core type)", Ꮡx.OrTypedNil());
-            x.mode = invalid;
-            return;
+        {
+            var elem = Ꮡcheck.chanElem(new operandжpositioner(Ꮡx), Ꮡx, true); if (elem != default!) {
+                x.mode = commaok;
+                x.typ = elem;
+                check.hasCallOrRecv = true;
+                return;
+            }
         }
-        var (ch, _) = u._<ж<Chan>>(ᐧ);
-        if (ch == nil) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidReceive, invalidOp + "cannot receive from non-channel %s", Ꮡx.OrTypedNil());
-            x.mode = invalid;
-            return;
-        }
-        if ((~ch).dir == SendOnly) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidReceive, invalidOp + "cannot receive from send-only channel %s", Ꮡx.OrTypedNil());
-            x.mode = invalid;
-            return;
-        }
-
-        x.mode = commaok;
-        x.typ = ch.Value.elem;
-        check.hasCallOrRecv = true;
+        x.mode = invalid;
         return;
     }
     if (exprᴛ1 == token.TILDE) {
@@ -223,6 +210,52 @@ internal static void unary(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.U
 
     x.mode = value;
     // x.typ remains unchanged
+}
+
+// chanElem returns the channel element type of x for a receive from x (recv == true)
+// or send to x (recv == false) operation. If the operation is not valid, chanElem
+// reports an error and returns nil.
+internal static ΔType chanElem(this ж<Checker> Ꮡcheck, positioner pos, ж<operand> Ꮡx, bool recv) {
+    ref var x = ref Ꮡx.DerefOrNull();
+
+    var (u, err) = commonUnder(x.typ, (ΔType t, ΔType uΔ1) => {
+        if (uΔ1 == default!) {
+            return typeErrorf("no specific channel type"u8);
+        }
+        var (ch, _) = uΔ1._<ж<Chan>>(ᐧ);
+        if (ch == nil) {
+            return typeErrorf("non-channel %s"u8, t);
+        }
+        if (recv && (~ch).dir == SendOnly) {
+            return typeErrorf("send-only channel %s"u8, t);
+        }
+        if (!recv && (~ch).dir == RecvOnly) {
+            return typeErrorf("receive-only channel %s"u8, t);
+        }
+        return default!;
+    });
+
+    if (u != default!) {
+        return (~u._<ж<Chan>>()).elem;
+    }
+
+    @string cause = err.format(Ꮡcheck);
+    if (recv){
+        if (isTypeParam(x.typ)){
+            Ꮡcheck.errorf(pos, InvalidReceive, invalidOp + "cannot receive from %s: %s", Ꮡx.OrTypedNil(), cause);
+        } else {
+            // In this case, only the non-channel and send-only channel error are possible.
+            Ꮡcheck.errorf(pos, InvalidReceive, invalidOp + "cannot receive from %s %s", cause, Ꮡx.OrTypedNil());
+        }
+    } else {
+        if (isTypeParam(x.typ)){
+            Ꮡcheck.errorf(pos, InvalidSend, invalidOp + "cannot send to %s: %s", Ꮡx.OrTypedNil(), cause);
+        } else {
+            // In this case, only the non-channel and receive-only channel error are possible.
+            Ꮡcheck.errorf(pos, InvalidSend, invalidOp + "cannot send to %s %s", cause, Ꮡx.OrTypedNil());
+        }
+    }
+    return default!;
 }
 
 internal static bool isShift(token.Token op) {
@@ -343,7 +376,7 @@ internal static void updateExprType(this ж<Checker> Ꮡcheck, ast.Expr x, ΔTyp
     // If the new type is not final and still untyped, just
     // update the recorded type.
     if (!final && isUntyped(typ)) {
-        old.typ = under(typ)._<ж<Basic>>();
+        old.typ = typ.Underlying()._<ж<Basic>>();
         check.untyped[x] = old;
         return;
     }
@@ -412,7 +445,7 @@ internal static (ΔType, constant.Value, errors.Code) implicitTypeAndValue(this 
         return (default!, default!, InvalidUntypedConversion);
     }
 
-    var switchᴛ6 = under(target);
+    var switchᴛ6 = target.Underlying();
     switch (switchᴛ6.type()) {
     case ж<Basic> u: {
         if (x.mode == constant_) {
@@ -643,19 +676,14 @@ internal static void comparison(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
 // incomparableCause returns a more specific cause why typ is not comparable.
 // If there is no more specific cause, the result is "".
 internal static @string incomparableCause(this ж<Checker> Ꮡcheck, ΔType typ) {
-    switch (under(typ).type()) {
+    switch (typ.Underlying().type()) {
     case ж<Slice> _:
     case ж<ΔSignature> _:
     case ж<Map> _: {
         return compositeKind(typ) + " can only be compared to nil"u8;
     }}
     // see if we can extract a more specific error
-    @string cause = default!;
-    comparableType(typ, true, default!, (@string format, params ꓸꓸꓸany argsʗp) => {
-        var args = argsʗp.sslice();
-        cause = Ꮡcheck.sprintf(format, args.ꓸꓸꓸ);
-    });
-    return cause;
+    return comparableType(typ, true, default!).format(Ꮡcheck);
 }
 
 // If e != nil, it must be the shift expression; it may be nil for non-constant shifts.
@@ -944,6 +972,10 @@ internal static void matchTypes(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<
         if (isTyped((~xΔ1).typ) && isTyped((~yΔ1).typ)) {
             return false;
         }
+        // A numeric type can only convert to another numeric type.
+        if (allNumeric((~xΔ1).typ) != allNumeric((~yΔ1).typ)) {
+            return false;
+        }
         // An untyped operand may convert to its default type when paired with an empty interface
         // TODO(gri) This should only matter for comparisons (the only binary operation that is
         //           valid with interfaces), but in that case the assignability check should take
@@ -1007,7 +1039,7 @@ partial struct target {
 internal static ж<target> newTarget(ΔType typ, @string desc) {
     if (typ != default!) {
         {
-            var (sig, _) = under(typ)._<ж<ΔSignature>>(ᐧ); if (sig != nil) {
+            var (sig, _) = typ.Underlying()._<ж<ΔSignature>>(ᐧ); if (sig != nil) {
                 return Ꮡ(new target(sig, desc));
             }
         }
@@ -1045,6 +1077,13 @@ internal static exprKind rawExpr(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<
             Ꮡcheck.nonGeneric(ᏑT, Ꮡx);
         }
 
+        // Here, x is a value, meaning it has a type. If that type is pending, then we have
+        // a cycle. As an example:
+        //
+        //  type T [unsafe.Sizeof(T{})]int
+        //
+        // has a cycle T->T which is deemed valid (by decl.go), but which is in fact invalid.
+        Ꮡcheck.pendingType(Ꮡx);
         check.record(Ꮡx);
 
         return kind;
@@ -1093,8 +1132,23 @@ internal static void nonGeneric(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<o
     }
 }
 
+// If x has a pending type (i.e. its declaring object is on the object path), pendingType
+// reports an error and invalidates x.mode and x.typ.
+// Otherwise it leaves x alone.
+internal static void pendingType(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
+    ref var x = ref Ꮡx.DerefOrNull();
+
+    if (x.mode == invalid || x.mode == novalue) {
+        return;
+    }
+    if (!Ꮡcheck.finiteSize(x.typ)) {
+        x.mode = invalid;
+        x.typ = new BasicжΔType(Typ[Invalid]);
+    }
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string invalidUseOfˢ = "invalid use of '...'"u8;
+internal static readonly @string invalidUseOfˢ = "invalid use of ..."u8;
 internal static readonly @string useOfTypeOutsideTypeˢ = "use of .(type) outside type switch"u8;
 internal static readonly @string noKeyValueExpectedˢ = "no key:value expected"u8;
 
@@ -1117,13 +1171,12 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
         break;
     }
     case ж<ast.Ident> eΔ1: {
-        Ꮡcheck.ident(Ꮡx, eΔ1, nil, false);
+        Ꮡcheck.ident(Ꮡx, eΔ1, false);
         break;
     }
     case ж<ast.Ellipsis> eΔ1: {
-        // ellipses are handled explicitly where they are legal
-        // (array composite literals and parameter lists)
-        Ꮡcheck.error(new ast_Ellipsisжpositioner(eΔ1), BadDotDotDotSyntax, invalidUseOfˢ);
+        // ellipses are handled explicitly where they are valid
+        Ꮡcheck.error(new ast_Ellipsisжpositioner(eΔ1), InvalidSyntaxTree, invalidUseOfˢ);
         goto ΔError;
         break;
     }
@@ -1155,7 +1208,7 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
         return kind;
     }
     case ж<ast.SelectorExpr> eΔ1: {
-        Ꮡcheck.selector(Ꮡx, eΔ1, nil, false);
+        Ꮡcheck.selector(Ꮡx, eΔ1, false);
         break;
     }
     case ж<ast.IndexExpr> _:
@@ -1197,7 +1250,7 @@ internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT
             goto ΔError;
         }
         {
-            var (_, ok) = under(x.typ)._<ж<Interface>>(ᐧ); if (!ok) {
+            var (_, ok) = x.typ.Underlying()._<ж<Interface>>(ᐧ); if (!ok) {
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidAssert, invalidOp + "%s is not an interface", Ꮡx.OrTypedNil());
                 goto ΔError;
             }

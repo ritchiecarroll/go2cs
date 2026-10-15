@@ -171,6 +171,7 @@
     <ProjectReference Include="$(go2csPath)core/sort/sort.csproj" />
     <ProjectReference Include="$(go2csPath)core/strconv/strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
+    <ProjectReference Include="$(go2csPath)core/sync/sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/unicode/unicode.csproj" />
     <ProjectReference Include="$(go2csPath)core/unicode/utf8/unicode.utf8.csproj" />
   </ItemGroup>

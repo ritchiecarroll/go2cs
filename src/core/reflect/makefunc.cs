@@ -5,6 +5,7 @@
 namespace go;
 
 using abi = @internal.abi_package;
+using goarch = @internal.goarch_package;
 using @unsafe = unsafe_package;
 using @internal;
 using Δsync = sync_package;
@@ -104,6 +105,9 @@ partial struct makeFuncCtxt {
     internal abi.IntArgRegBitmap regPtrs;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string alwaysIn0IntArgRegsˢ = "always in [0:IntArgRegs]"u8;
+
 // moveMakeFuncArgPtrs uses ctxt.regPtrs to copy integer pointer arguments
 // in args.Ints to args.Ptrs where the GC can see them.
 //
@@ -115,20 +119,22 @@ partial struct makeFuncCtxt {
 // memory.
 //
 //go:nosplit
-internal static void moveMakeFuncArgPtrs(ж<makeFuncCtxt> Ꮡctxt, ж<abi.RegArgs> Ꮡargs) {
-    ref var ctxt = ref Ꮡctxt.DerefOrNull();
-    ref var args = ref Ꮡargs.DerefOrNull();
-
+internal static void moveMakeFuncArgPtrs(ж<makeFuncCtxt> Ꮡctxt, ref abi.RegArgs args) {
     foreach (var (i, arg) in args.Ints.ΔRangeSnapshot()) {
         // Avoid write barriers! Because our write barrier enqueues what
         // was there before, we might enqueue garbage.
-        if (ctxt.regPtrs.Get(i)){
-            (Ꮡargs.at(abi.RegArgs.ᏑPtrs, i).Reinterpret<@unsafe.Pointer, uintptr>()).Value = arg;
+        // Also avoid bounds checks, we don't have the stack space for it.
+        // (Normally the prove pass removes them, but for -N builds we
+        // use too much stack.)
+        // ptr := &args.Ptrs[i] (but cast from *unsafe.Pointer to *uintptr)
+        var ptr = (ж<uintptr>)(uintptr)((uintptr)add(@unsafe.Pointer.FromBox(@unsafe.SliceData(args.Ptrs[..])), (uintptr)i * (uintptr)goarch.PtrSize, alwaysIn0IntArgRegsˢ));
+        if (Ꮡctxt.of(makeFuncCtxt.ᏑregPtrs).Get(i)){
+            ptr.Value = arg;
         } else {
             // We *must* zero this space ourselves because it's defined in
             // assembly code and the GC will scan these pointers. Otherwise,
             // there will be garbage here.
-            (Ꮡargs.at(abi.RegArgs.ᏑPtrs, i).Reinterpret<@unsafe.Pointer, uintptr>()).Value = 0;
+            ptr.Value = 0;
         }
     }
 }

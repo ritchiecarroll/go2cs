@@ -7,10 +7,10 @@
 namespace go.go;
 
 using constant = global::go.go.constant_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using unicode = unicode_package;
 using ast = global::go.go.ast_package;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using ꓸꓸꓸany = Span<any>;
 
@@ -25,7 +25,7 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
 
     bool constConvertibleTo(ΔType TΔ1, ж<constant.Value> val) {
         {
-            var (t, _) = under(TΔ1)._<ж<Basic>>(ᐧ);
+            var (t, _) = TΔ1.Underlying()._<ж<Basic>>(ᐧ);
             switch (ᐧ) {
             case {} when t == nil: {
                 // nothing to do
@@ -174,8 +174,8 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
     var origT = T;
     var V = Unalias(x.typ);
     T = Unalias(T);
-    var Vu = under(V);
-    var Tu = under(T);
+    var Vu = V.Underlying();
+    var Tu = T.Underlying();
     var (Vp, _) = V._<ж<TypeParam>>(ᐧ);
     var (Tp, _) = T._<ж<TypeParam>>(ᐧ);
 
@@ -192,7 +192,7 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
         var (VΔ1, ok) = V._<ж<Pointer>>(ᐧ); if (ok) {
             {
                 var (TΔ1, okΔ1) = T._<ж<Pointer>>(ᐧ); if (okΔ1) {
-                    if (IdenticalIgnoreTags(under((~VΔ1).@base), under((~TΔ1).@base)) && !isTypeParam((~VΔ1).@base) && !isTypeParam((~TΔ1).@base)) {
+                    if (IdenticalIgnoreTags((~VΔ1).@base.Underlying(), (~TΔ1).@base.Underlying()) && !isTypeParam((~VΔ1).@base) && !isTypeParam((~TΔ1).@base)) {
                         return true;
                     }
                 }
@@ -251,7 +251,7 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
             }
             case ж<Pointer> a: {
                 {
-                    var (aΔ1, _) = under(a.Elem())._<ж<Array>>(ᐧ); if (aΔ1 != nil) {
+                    var (aΔ1, _) = a.Elem().Underlying()._<ж<Array>>(ᐧ); if (aΔ1 != nil) {
                         if (Identical(s.Elem(), aΔ1.Elem())) {
                             if (Ꮡcheck == nil || check.allowVersion(go1_17)) {
                                 return true;
@@ -351,24 +351,24 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
 }
 
 internal static bool isUintptr(ΔType typ) {
-    var (t, _) = under(typ)._<ж<Basic>>(ᐧ);
+    var (t, _) = typ.Underlying()._<ж<Basic>>(ᐧ);
     return t != nil && (~t).kind == Uintptr;
 }
 
 internal static bool isUnsafePointer(ΔType typ) {
-    var (t, _) = under(typ)._<ж<Basic>>(ᐧ);
+    var (t, _) = typ.Underlying()._<ж<Basic>>(ᐧ);
     return t != nil && (~t).kind == UnsafePointer;
 }
 
 internal static bool isPointer(ΔType typ) {
-    var (_, ok) = under(typ)._<ж<Pointer>>(ᐧ);
+    var (_, ok) = typ.Underlying()._<ж<Pointer>>(ᐧ);
     return ok;
 }
 
 internal static bool isBytesOrRunes(ΔType typ) {
     {
-        var (s, _) = under(typ)._<ж<Slice>>(ᐧ); if (s != nil) {
-            var (t, _) = under((~s).elem)._<ж<Basic>>(ᐧ);
+        var (s, _) = typ.Underlying()._<ж<Slice>>(ᐧ); if (s != nil) {
+            var (t, _) = (~s).elem.Underlying()._<ж<Basic>>(ᐧ);
             return t != nil && ((~t).kind == Byte || (~t).kind == Rune);
         }
     }

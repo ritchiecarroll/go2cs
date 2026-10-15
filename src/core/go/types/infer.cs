@@ -287,7 +287,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                     }
                     case {} when single && !(~core).tilde: {
                         if (traceInference) {
-                            u.tracef("-> set type parameter %s to constraint core type %s"u8, tpar.OrTypedNil(), (~core).typ);
+                            u.tracef("-> set type parameter %s to constraint's common underlying type %s"u8, tpar.OrTypedNil(), (~core).typ);
                         }
                         // The corresponding type argument tx is unknown and the core term
                         // describes a single specific type and no tilde.
@@ -452,7 +452,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                         // Note that if t0 was a signature, t1 must be a signature, and t1
                         // can only be a generic signature if it originated from a generic
                         // function argument. Those signatures are never defined types and
-                        // thus there is no need to call under below.
+                        // thus there is no need to call Underlying below.
                         // TODO(gri) Consider doing this in Checker.subst.
                         //           Then this would fall out automatically here and also
                         //           in instantiation (where we also explicitly nil out
@@ -720,12 +720,13 @@ internal static (ж<Δterm>, bool) coreTerm(ж<TypeParam> Ꮡtpar) {
     });
     if (n == 1) {
         if (debug) {
-            assert(debug && AreEqual(under((~single).typ), coreType(new TypeParamжΔType(Ꮡtpar))));
+            var (u, _) = commonUnder(new TypeParamжΔType(Ꮡtpar), default!);
+            assert(AreEqual((~single).typ.Underlying(), u));
         }
         return (single, true);
     }
     {
-        var typ = coreType(new TypeParamжΔType(Ꮡtpar)); if (typ != default!) {
+        var (typ, _) = commonUnder(new TypeParamжΔType(Ꮡtpar), default!); if (typ != default!) {
             // A core type is always an underlying type.
             // If any term of tpar has a tilde, we don't
             // have a precise core type and we must return

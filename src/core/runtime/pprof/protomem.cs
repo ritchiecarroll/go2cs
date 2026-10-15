@@ -75,8 +75,7 @@ internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfile
             }
         });
     }
-    b.build();
-    return default!;
+    return b.build();
 }
 
 // scaleHeapSample adjusts the data from a heap Sample to

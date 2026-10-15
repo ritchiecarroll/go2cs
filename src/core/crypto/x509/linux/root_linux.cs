@@ -24,7 +24,7 @@ internal static slice<@string> certDirectories = new @string[]{
     "/etc/pki/tls/certs"u8 // Fedora/RHEL
 }.slice();
 
-[GoInit] internal static void init() {
+[GoInit] internal static void initΔ1() {
     if (goos.IsAndroid == 1) {
         certDirectories = append(certDirectories,
             "/system/etc/security/cacerts"u8, // Android system roots

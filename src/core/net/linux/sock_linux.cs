@@ -18,9 +18,8 @@ partial class net_package {
 //
 // See issue 5030 and 41470.
 internal static nint maxAckBacklog(nint n) {
-    var (major, minor) = unix.KernelVersion();
     nint size = 16;
-    if (major > 4 || (major == 4 && minor >= 1)) {
+    if (unix.KernelVersionGE(4, 1)) {
         size = 32;
     }
 

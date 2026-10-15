@@ -96,6 +96,7 @@ public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) {
         if (t.common == nil) {
             return (nt, default!);
         }
+        nt.Value.option = t.option;
         Ꮡt.of(Template.ᏑmuTmpl).RLock();
         ᒐd1 = true;
         foreach (var (k, v) in t.tmpl) {

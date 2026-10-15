@@ -62,9 +62,7 @@ public static nint Size(this ref Digest d) {
 // Reset resets the Digest to its initial state.
 public static void Reset(this ref Digest d) {
     // Zero the permutation's state.
-    foreach (var (i, _) in d.a) {
-        d.a[i] = 0;
-    }
+    clear(d.a[..]);
     d.state = spongeAbsorbing;
     d.n = 0;
 }

@@ -5,8 +5,10 @@ namespace go.crypto.@internal;
 
 using Δboring = go.crypto.@internal.boring_package;
 using impl = go.crypto.@internal.impl_package;
+using goarch = go.@internal.goarch_package;
 using goos = go.@internal.goos_package;
 using testenv = go.@internal.testenv_package;
+using strings = strings_package;
 using testing = testing_package;
 using go.@internal;
 using go.crypto.@internal;
@@ -14,8 +16,6 @@ using go.crypto.@internal;
 partial class cryptotest_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object knownIssueSeeGolangOrgˢ = (@string)"known issue, see golang.org/issue/69592"u8;
-private static readonly object knownIssueSeeGolangOrgˢ2 = (@string)"known issue, see golang.org/issue/69593"u8;
 private static readonly object builderDoesnTSupportCpuˢ = (@string)"builder doesn't support CPU features needed to test this implementation"u8;
 private static readonly object implementationNotˢ = (@string)"implementation not supported"u8;
 private static readonly @string baseˢ = "Base"u8;
@@ -46,15 +46,9 @@ public static void TestAllImplementations(ж<testing.T> Ꮡt, @string pkg, Actio
                 Ꮡt.Run(name, f);
             } else {
                 Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
-                    // Report an error if we're on Linux CI (assumed to be the most
-                    // consistent) and the builder can't test this implementation.
-                    if (testenv.Builder() != ""u8 && goos.GOOS == "linux"){
-                        if (name == "SHA-NI"u8) {
-                            tΔ1.Skip(knownIssueSeeGolangOrgˢ);
-                        }
-                        if (name == "Armv8.2"u8) {
-                            tΔ1.Skip(knownIssueSeeGolangOrgˢ2);
-                        }
+                    // Report an error if we're on the most capable builder for the
+                    // architecture and the builder can't test this implementation.
+                    if (flagshipBuilder()){
                         tΔ1.Error(builderDoesnTSupportCpuˢ);
                     } else {
                         tΔ1.Skip(implementationNotˢ);
@@ -67,6 +61,28 @@ public static void TestAllImplementations(ж<testing.T> Ꮡt, @string pkg, Actio
     // Test the generic implementation.
     impl.Select(pkg, ""u8);
     Ꮡt.Run(baseˢ, f);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string avx512ˢ = "_avx512"u8;
+
+internal static bool flagshipBuilder() {
+    @string builder = testenv.Builder();
+    if (builder == ""u8) {
+        return false;
+    }
+    var exprᴛ1 = goarch.GOARCH;
+    if (exprᴛ1 == "amd64"u8) {
+        return strings.Contains(builder, avx512ˢ);
+    }
+    if (exprᴛ1 == "arm64"u8) {
+        // Apple M chips support everything we use.
+        return goos.GOOS == "darwin";
+    }
+    { /* default: */
+        // Presumably the Linux builders are the most capable.
+        return goos.GOOS == "linux";
+    }
 }
 
 } // end cryptotest_package

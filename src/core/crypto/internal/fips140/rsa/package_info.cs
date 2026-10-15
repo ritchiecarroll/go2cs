@@ -52,10 +52,10 @@ using static go.crypto.@internal.fips140.rsa_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/rsa/cast.go", "cast.cs", "ABAglAAgQgAgQgAQIgAQIgAQIgAQIgAQIgAJFIKCgtwAIUSCgpSAgqSClA==")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/keygen.go", "keygen.cs", "ABciooKUgoKmgoKClIKCpoKClIKCpoKmgoKUggAOHoKUlIKmgoIABxCmggAPIIKCpoKS3IKClLjK5sIABxCSgpSmgoKUggAHEIKUgpSAgrbaooKmgoKAgqSAgv6AgpSCyAARJIIABBjygpSmpoKCpgAQIoKClLS0tLS0tLS2goKCgIKkgpSUgpSCggALGAAQHqKmgoKUgpSmgoKUuIKCgqYACgyUgpSCgIKkggAIEoKCuIKCgpSUuA==", "114-126:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/keygen.go", "keygen.cs", "ABciooKUgoKmgoKClIKCpoKClIKCpoKmgoKUggAOHoKUlIKmgoIABxCmggAPIIKCpoKS3IKClLjK5sIABxCSgpSmgoKUggAHEIKUgpSAgrbaooKmgoKAgtqC3IKUgrgAESSCAAQY8oKUuIKigoIAECKCgpS0tLS0tLS0toKCgoKCgpSUgpSCggANHAAeOqKmgoKUgpSmgoKUuIKCgqYACgyUgpSCgIKkggAIEoKCuIKCgpSUuA==", "114-126:1")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v15.go", "pkcs1v15.cs", "ABcyABAqwoKClKaCgoKm1qSSgoKCgsqCgpSCgoKUgoKuwoKClKaigIKSguyCpoKCpoKClIKmpoK4")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v22.go", "pkcs1v22.cs", "ABVIAA4CgIKkgIKkgIKkqqKClIKCgoKClIKClOiWgoIABxCCyoKmgoKCAAwalIKCgpQABxCC3MqmpvqWgoKCAAcQgriCyoLKgpqygty4poKCgpTKgu6CgoKmgrgABxCCgoKClKaClKrCgoK4gpTYsoKCAAcQgriClIKAgraCgoIACRSAkoKCtqiSqJKClKaigoKCgIKSgraCpoKCgoIABxCCgpSmpoLmygAIDoKCgoCCkoKkgoKmgoKUgoKUgoKUgIK2gpSosoKClIKEpoKCpoKClJSClIKU3J7ygpSCgoKCgqaCpg==", "", "", "460=Size/1/1/1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/rsa.go", "rsa.cs", "ABMqogAVLIKuwoKClIKClIKClIKClNaygoKClJSCgoKUuJSUgoKU7oCCpKqigoKUgoKUgoKUgoKUgoKm7oCCpKyygoKUgoKU3ICCpK4ADQKCgoKClIKCgoKCAAsKopSAgpKCtpSCpoKCpoK4goCCpIKAgqSCAAsYgoKUgoKUgoKCgqaCgpSCgpSCgoK4gpSUggAIEoKAlIKCprjIggAIEoKmAAkGooKClILKgpSClIK4griC3IKUqJKCgIKkpoKCgpSmkpLckoKqooKssoKmgqSCgqaUgpaClJSUlJSUpoKCgrg=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v22.go", "pkcs1v22.cs", "ABdMAA4CgIKkgIKkgIKkqqKClIKCgoKClIKClOiWgoIABxCCyoKmgoKCAAwalIKCgpQABxCC3MqmpvqWgoKCAAcQgriCyoLKgpqygty4poKCgpTKgu6CgoKmgrgABxCCgoKClKaClKrCgoK4gpTYsoKCAAcQgriClIKAgraCgoIACRSAkoKCtqiSqJKClKaigoKCgIKSgraCpoKCgoIABxCCgpSmpoLmygAIDoKCgoCCkoKkgoKmgoKUgoKUgoKUgIK2gpSosoKClIKEpoKCpoKClJSClIKU3J7ygpSCgoKCgqaCpg==", "", "", "462=Size/1/1/1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/rsa.go", "rsa.cs", "ABMqogAVLIKuwoKClIKClIKClIKClNaygoKClJSCgoKUuJSUgoKU7oCCpKqigoKUgoKUgoKUgoKUgoKm7oCCpKyygoKUgoKU3ICCpK4ADQKCgoKClIKCgoKCAA0KopSAgpKCtpSCpoKCpoK4goCCpIKAgqSCAAoWgoKUgoKUgoKCgqaCgpSCgpSCgoK4gpSUgsqCgpSCggAIEoKAlIKCprjIggAIEoKmAAkGooKClILKgpSClIK4griC3IKUqJKCgIKkpoKCgpSmkpLckoKqooKssoKmgqSCgqaUgpaClJSUlJSUpoKCgrg=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -92,6 +92,7 @@ public static partial class rsa_package
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸsha512() => builtin.initPackage(typeof(go.crypto.@internal.fips140.sha512_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸsubtle() => builtin.initPackage(typeof(go.crypto.@internal.fips140.subtle_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
+    [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     // </ImportInitializers>

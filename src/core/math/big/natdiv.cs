@@ -503,53 +503,70 @@ partial class big_package {
 
 // rem returns r such that r = u%v.
 // It uses z as the storage for r.
-internal static nat /*r*/ rem(this nat z, nat u, nat v) {
-    nat r = default!;
+internal static Δnat /*r*/ rem(this Δnat z, ж<stack> Ꮡstk, Δnat u, Δnat v) {
+    Δnat r = default!;
+    GoFrame ᒐ = default;
+    try {
+        ref var stk = ref Ꮡstk.DerefOrNull();
 
-    if (alias(z, u)) {
-        z = default!;
+        if (alias(z, u)) {
+            z = default!;
+        }
+        defer(Ꮡstk.restore, Ꮡstk.Value.save(), ref ᒐ);
+        var q = stk.nat(max(1, len(u) - (len(v) - 1)));
+        (_, r) = q.div(Ꮡstk, z, u, v);
     }
-    var qp = getNat(0);
-    (var q, r) = (~qp).div(z, u, v);
-    qp.ValueSlot = q;
-    putNat(qp);
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
     return r;
 }
 
 // div returns q, r such that q = ⌊u/v⌋ and r = u%v = u - q·v.
 // It uses z and z2 as the storage for q and r.
-internal static (nat q, nat r) div(this nat z, nat z2, nat u, nat v) {
-    nat q = default!;
-    nat r = default!;
+// The caller may pass stk == nil to request that div obtain and release one itself.
+internal static (Δnat q, Δnat r) div(this Δnat z, ж<stack> Ꮡstk, Δnat z2, Δnat u, Δnat v) {
+    Δnat q = default!;
+    Δnat r = default!;
+    GoFrame ᒐ = default;
+    try {
+        ref var stk = ref Ꮡstk.DerefOrNull();
 
-    if (len(v) == 0) {
-        throw panic("division by zero");
+        if (len(v) == 0) {
+            throw panic("division by zero");
+        }
+
+        if (len(v) == 1) {
+            // Short division: long optimized for a single-word divisor.
+            // In that case, the 2-by-1 guess is all we need at each step.
+            Word r2 = default!;
+            (q, r2) = z.divW(u, v[0]);
+            r = z2.setWord(r2);
+            goto ᒐdone;
+        }
+
+        if (u.cmp(v) < 0) {
+            q = z[..0];
+            r = z2.set(u);
+            goto ᒐdone;
+        }
+
+        if (Ꮡstk == nil) {
+            Ꮡstk = getStack(); stk = ref Ꮡstk.DerefOrNull();
+            defer(Ꮡstk.free, ref ᒐ);
+        }
+
+        (q, r) = z.divLarge(Ꮡstk, z2, u, v);
     }
-
-    if (u.cmp(v) < 0) {
-        q = z[..0];
-        r = z2.set(u);
-        return (q, r);
-    }
-
-    if (len(v) == 1) {
-        // Short division: long optimized for a single-word divisor.
-        // In that case, the 2-by-1 guess is all we need at each step.
-        Word r2 = default!;
-        (q, r2) = z.divW(u, v[0]);
-        r = z2.setWord(r2);
-        return (q, r);
-    }
-
-    (q, r) = z.divLarge(z2, u, v);
-    return (q, r);
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    ᒐdone: return (q, r);
 }
 
 // divW returns q, r such that q = ⌊x/y⌋ and r = x%y = x - q·y.
 // It uses z as the storage for q.
 // Note that y is a single digit (Word), not a big number.
-internal static (nat q, Word r) divW(this nat z, nat x, Word y) {
-    nat q = default!;
+internal static (Δnat q, Word r) divW(this Δnat z, Δnat x, Word y) {
+    Δnat q = default!;
     Word r = default!;
 
     nint m = len(x);
@@ -574,9 +591,9 @@ internal static (nat q, Word r) divW(this nat z, nat x, Word y) {
 }
 
 // modW returns x % d.
-internal static Word /*r*/ modW(this nat x, Word d) {
+internal static Word /*r*/ modW(this Δnat x, Word d) {
     // TODO(agl): we don't actually need to store the q value.
-    nat q = default!;
+    Δnat q = default!;
     q = q.make(len(x));
     return divWVW(q, 0, x, d);
 }
@@ -603,129 +620,146 @@ internal static Word /*r*/ divWVW(slice<Word> z, Word xn, slice<Word> x, Word y)
 // It uses z and u as the storage for q and r.
 // The caller must ensure that len(vIn) ≥ 2 (use divW otherwise)
 // and that len(uIn) ≥ len(vIn) (the answer is 0, uIn otherwise).
-internal static (nat q, nat r) divLarge(this nat z, nat u, nat uIn, nat vIn) {
-    nat q = default!;
-    nat r = default!;
+internal static (Δnat q, Δnat r) divLarge(this Δnat z, ж<stack> Ꮡstk, Δnat u, Δnat uIn, Δnat vIn) {
+    Δnat q = default!;
+    Δnat r = default!;
+    GoFrame ᒐ = default;
+    try {
+        ref var stk = ref Ꮡstk.DerefOrNull();
 
-    nint n = len(vIn);
-    nint m = len(uIn) - n;
+        nint n = len(vIn);
+        nint m = len(uIn) - n;
 
-    // Scale the inputs so vIn's top bit is 1 (see “Scaling Inputs” above).
-    // vIn is treated as a read-only input (it may be in use by another
-    // goroutine), so we must make a copy.
-    // uIn is copied to u.
-    nuint shift = nlz(vIn[n - 1]);
-    var vp = getNat(n);
-    var v = vp.ValueSlot;
-    shlVU(v, vIn, shift);
-    u = u.make(len(uIn) + 1);
-    u[len(uIn)] = shlVU(u.slice(0, len(uIn)), uIn, shift);
+        // Scale the inputs so vIn's top bit is 1 (see “Scaling Inputs” above).
+        // vIn is treated as a read-only input (it may be in use by another
+        // goroutine), so we must make a copy.
+        // uIn is copied to u.
+        defer(Ꮡstk.restore, Ꮡstk.Value.save(), ref ᒐ);
+        nuint shift = nlz(vIn[n - 1]);
+        var v = stk.nat(n);
+        u = u.make(len(uIn) + 1);
+        if (shift == 0){
+            copy(v, vIn);
+            copy(u.slice(0, len(uIn)), uIn);
+            u[len(uIn)] = 0;
+        } else {
+            lshVU(v, vIn, shift);
+            u[len(uIn)] = lshVU(u.slice(0, len(uIn)), uIn, shift);
+        }
 
-    // The caller should not pass aliased z and u, since those are
-    // the two different outputs, but correct just in case.
-    if (alias(z, u)) {
-        z = default!;
+        // The caller should not pass aliased z and u, since those are
+        // the two different outputs, but correct just in case.
+        if (alias(z, u)) {
+            z = default!;
+        }
+        q = z.make(m + 1);
+
+        // Use basic or recursive long division depending on size.
+        if (n < divRecursiveThreshold){
+            q.divBasic(Ꮡstk, u, v);
+        } else {
+            q.divRecursive(Ꮡstk, u, v);
+        }
+
+        q = q.norm();
+
+        // Undo scaling of remainder.
+        if (shift != 0) {
+            rshVU(u, u, shift);
+        }
+        r = u.norm();
     }
-    q = z.make(m + 1);
-
-    // Use basic or recursive long division depending on size.
-    if (n < divRecursiveThreshold){
-        q.divBasic(u, v);
-    } else {
-        q.divRecursive(u, v);
-    }
-    putNat(vp);
-
-    q = q.norm();
-
-    // Undo scaling of remainder.
-    shrVU(u, u, shift);
-    r = u.norm();
-
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
     return (q, r);
 }
 
 // divBasic implements long division as described above.
 // It overwrites q with ⌊u/v⌋ and overwrites u with the remainder r.
 // q must be large enough to hold ⌊u/v⌋.
-internal static void divBasic(this nat q, nat u, nat v) {
-    nint n = len(v);
-    nint m = len(u) - n;
+internal static void divBasic(this Δnat q, ж<stack> Ꮡstk, Δnat u, Δnat v) {
+    GoFrame ᒐ = default;
+    try {
+        ref var stk = ref Ꮡstk.DerefOrNull();
 
-    var qhatvp = getNat(n + 1);
-    var qhatv = qhatvp.ValueSlot;
+        nint n = len(v);
+        nint m = len(u) - n;
 
-    // Set up for divWW below, precomputing reciprocal argument.
-    Word vn1 = v[n - 1];
-    Word rec = reciprocalWord(vn1);
+        defer(Ꮡstk.restore, Ꮡstk.Value.save(), ref ᒐ);
+        var qhatv = stk.nat(n + 1);
 
-    // Invent a leading 0 for u, for the first iteration.
-    // Invariant: ujn == u[j+n] in each iteration.
-    Word ujn = ((Word)0);
+        // Set up for divWW below, precomputing reciprocal argument.
+        Word vn1 = v[n - 1];
+        Word rec = reciprocalWord(vn1);
 
-    // Compute each digit of quotient.
-    for (nint j = m; j >= 0; j--) {
-        // Compute the 2-by-1 guess q̂.
-        Word qhat = ((Word)_M);
+        // Invent a leading 0 for u, for the first iteration.
+        // Invariant: ujn == u[j+n] in each iteration.
+        Word ujn = ((Word)0);
 
-        // ujn ≤ vn1, or else q̂ would be more than one digit.
-        // For ujn == vn1, we set q̂ to the max digit M above.
-        // Otherwise, we compute the 2-by-1 guess.
-        if (ujn != vn1) {
-            Word rhat = default!;
-            (qhat, rhat) = divWW(ujn, u[j + n - 1], vn1, rec);
+        // Compute each digit of quotient.
+        for (nint j = m; j >= 0; j--) {
+            // Compute the 2-by-1 guess q̂.
+            Word qhat = ((Word)_M);
 
-            // Refine q̂ to a 3-by-2 guess. See “Refining Guesses” above.
-            Word vn2 = v[n - 2];
-            var (x1, x2) = mulWW(qhat, vn2);
-            Word ujn2 = u[j + n - 2];
-            while (greaterThan(x1, x2, rhat, ujn2)) { // x1x2 > r̂ u[j+n-2]
-                qhat--;
-                Word prevRhat = rhat;
-                rhat += vn1;
-                // If r̂  overflows, then
-                // r̂ u[j+n-2]v[n-1] is now definitely > x1 x2.
-                if (rhat < prevRhat) {
-                    break;
+            // ujn ≤ vn1, or else q̂ would be more than one digit.
+            // For ujn == vn1, we set q̂ to the max digit M above.
+            // Otherwise, we compute the 2-by-1 guess.
+            if (ujn != vn1) {
+                Word rhat = default!;
+                (qhat, rhat) = divWW(ujn, u[j + n - 1], vn1, rec);
+
+                // Refine q̂ to a 3-by-2 guess. See “Refining Guesses” above.
+                Word vn2 = v[n - 2];
+                var (x1, x2) = mulWW(qhat, vn2);
+                Word ujn2 = u[j + n - 2];
+                while (greaterThan(x1, x2, rhat, ujn2)) { // x1x2 > r̂ u[j+n-2]
+                    qhat--;
+                    Word prevRhat = rhat;
+                    rhat += vn1;
+                    // If r̂  overflows, then
+                    // r̂ u[j+n-2]v[n-1] is now definitely > x1 x2.
+                    if (rhat < prevRhat) {
+                        break;
+                    }
+                    // TODO(rsc): No need for a full mulWW.
+                    // x2 += vn2; if x2 overflows, x1++
+                    (x1, x2) = mulWW(qhat, vn2);
                 }
-                // TODO(rsc): No need for a full mulWW.
-                // x2 += vn2; if x2 overflows, x1++
-                (x1, x2) = mulWW(qhat, vn2);
             }
-        }
 
-        // Compute q̂·v.
-        qhatv[n] = mulAddVWW(qhatv.slice(0, n), v, qhat, 0);
-        nint qhl = len(qhatv);
-        if (j + qhl > len(u) && qhatv[n] == 0) {
-            qhl--;
-        }
-
-        // Subtract q̂·v from the current section of u.
-        // If it underflows, q̂·v > u, which we fix up
-        // by decrementing q̂ and adding v back.
-        Word c = subVV(u.slice(j, j + qhl), u.slice(j), qhatv);
-        if (c != 0) {
-            Word cΔ1 = addVV(u.slice(j, j + n), u.slice(j), v);
-            // If n == qhl, the carry from subVV and the carry from addVV
-            // cancel out and don't affect u[j+n].
-            if (n < qhl) {
-                u[j + n] += cΔ1;
+            // Compute q̂·v.
+            qhatv[n] = mulAddVWW(qhatv.slice(0, n), v, qhat, 0);
+            nint qhl = len(qhatv);
+            if (j + qhl > len(u) && qhatv[n] == 0) {
+                qhl--;
             }
-            qhat--;
-        }
 
-        ujn = u[j + n - 1];
+            // Subtract q̂·v from the current section of u.
+            // If it underflows, q̂·v > u, which we fix up
+            // by decrementing q̂ and adding v back.
+            Word c = subVV(u.slice(j, j + qhl), u.slice(j, j + qhl), qhatv.slice(0, qhl));
+            if (c != 0) {
+                Word cΔ1 = addVV(u.slice(j, j + n), u.slice(j, j + n), v);
+                // If n == qhl, the carry from subVV and the carry from addVV
+                // cancel out and don't affect u[j+n].
+                if (n < qhl) {
+                    u[j + n] += cΔ1;
+                }
+                qhat--;
+            }
 
-        // Save quotient digit.
-        // Caller may know the top digit is zero and not leave room for it.
-        if (j == m && m == len(q) && qhat == 0) {
-            continue;
+            ujn = u[j + n - 1];
+
+            // Save quotient digit.
+            // Caller may know the top digit is zero and not leave room for it.
+            if (j == m && m == len(q) && qhat == 0) {
+                continue;
+            }
+            q[j] = qhat;
         }
-        q[j] = qhat;
     }
-
-    putNat(qhatvp);
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
 }
 
 // greaterThan reports whether the two digit numbers x1 x2 > y1 y2.
@@ -737,31 +771,16 @@ internal static bool greaterThan(Word x1, Word x2, Word y1, Word y2) {
 
 // divRecursiveThreshold is the number of divisor digits
 // at which point divRecursive is faster than divBasic.
-internal static UntypedInt divRecursiveThreshold => 100;
+internal static nint divRecursiveThreshold = 40; // see calibrate_test.go
 
 // divRecursive implements recursive division as described above.
 // It overwrites z with ⌊u/v⌋ and overwrites u with the remainder r.
 // z must be large enough to hold ⌊u/v⌋.
 // This function is just for allocating and freeing temporaries
 // around divRecursiveStep, the real implementation.
-internal static void divRecursive(this nat z, nat u, nat v) {
-    // Recursion depth is (much) less than 2 log₂(len(v)).
-    // Allocate a slice of temporaries to be reused across recursion,
-    // plus one extra temporary not live across the recursion.
-    nint recDepth = 2 * bits.Len((nuint)len(v));
-    var tmp = getNat(3 * len(v));
-    var temps = new slice<ж<nat>>(recDepth);
-
+internal static void divRecursive(this Δnat z, ж<stack> Ꮡstk, Δnat u, Δnat v) {
     clear(z);
-    z.divRecursiveStep(u, v, 0, tmp, temps);
-
-    // Free temporaries.
-    foreach (var (_, n) in temps) {
-        if (n != nil) {
-            putNat(n);
-        }
-    }
-    putNat(tmp);
+    z.divRecursiveStep(Ꮡstk, u, v, 0);
 }
 
 // divRecursiveStep is the actual implementation of recursive division.
@@ -769,152 +788,156 @@ internal static void divRecursive(this nat z, nat u, nat v) {
 // z must be large enough to hold ⌊u/v⌋.
 // It uses temps[depth] (allocating if needed) as a temporary live across
 // the recursive call. It also uses tmp, but not live across the recursion.
-internal static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ж<nat> Ꮡtmp, slice<ж<nat>> temps) {
-    ref var tmp = ref Ꮡtmp.DerefOrNull();
+internal static void divRecursiveStep(this Δnat z, ж<stack> Ꮡstk, Δnat u, Δnat v, nint depth) {
+    GoFrame ᒐ = default;
+    try {
+        ref var stk = ref Ꮡstk.DerefOrNull();
 
-    // u is a subsection of the original and may have leading zeros.
-    // TODO(rsc): The v = v.norm() is useless and should be removed.
-    // We know (and require) that v's top digit is ≥ B/2.
-    u = u.norm();
-    v = v.norm();
-    if (len(u) == 0) {
-        clear(z);
-        return;
-    }
-
-    // Fall back to basic division if the problem is now small enough.
-    nint n = len(v);
-    if (n < divRecursiveThreshold) {
-        z.divBasic(u, v);
-        return;
-    }
-
-    // Nothing to do if u is shorter than v (implies u < v).
-    nint m = len(u) - n;
-    if (m < 0) {
-        return;
-    }
-
-    // We consider B digits in a row as a single wide digit.
-    // (See “Recursive Division” above.)
-    //
-    // TODO(rsc): rename B to Wide, to avoid confusion with _B,
-    // which is something entirely different.
-    // TODO(rsc): Look into whether using ⌈n/2⌉ is better than ⌊n/2⌋.
-    nint B = n / 2;
-
-    // Allocate a nat for qhat below.
-    if (temps[depth] == nil){
-        temps[depth] = getNat(n); // TODO(rsc): Can be just B+1.
-    } else {
-        temps[depth].ValueSlot = (~temps[depth]).make(B + 1);
-    }
-
-    // Compute each wide digit of the quotient.
-    //
-    // TODO(rsc): Change the loop to be
-    //	for j := (m+B-1)/B*B; j > 0; j -= B {
-    // which will make the final step a regular step, letting us
-    // delete what amounts to an extra copy of the loop body below.
-    nint j = m;
-    while (j > B) {
-        // Divide u[j-B:j+n] (3 wide digits) by v (2 wide digits).
-        // First make the 2-by-1-wide-digit guess using a recursive call.
-        // Then extend the guess to the full 3-by-2 (see “Refining Guesses”).
-        //
-        // For the 2-by-1-wide-digit guess, instead of doing 2B-by-B-digit,
-        // we use a (2B+1)-by-(B+1) digit, which handles the possibility that
-        // the result has an extra leading 1 digit as well as guaranteeing
-        // that the computed q̂ will be off by at most 1 instead of 2.
-        // s is the number of digits to drop from the 3B- and 2B-digit chunks.
-        // We drop B-1 to be left with 2B+1 and B+1.
-        nint sΔ1 = (B - 1);
-
-        // uu is the up-to-3B-digit section of u we are working on.
-        var uu = u.slice(j - B);
-
-        // Compute the 2-by-1 guess q̂, leaving r̂ in uu[s:B+n].
-        var qhatΔ1 = temps[depth].ValueSlot;
-        clear(qhatΔ1);
-        qhatΔ1.divRecursiveStep(uu.slice(sΔ1, B + n), v.slice(sΔ1), depth + 1, Ꮡtmp, temps);
-        qhatΔ1 = qhatΔ1.norm();
-
-        // Extend to a 3-by-2 quotient and remainder.
-        // Because divRecursiveStep overwrote the top part of uu with
-        // the remainder r̂, the full uu already contains the equivalent
-        // of r̂·B + uₙ₋₂ from the “Refining Guesses” discussion.
-        // Subtracting q̂·vₙ₋₂ from it will compute the full-length remainder.
-        // If that subtraction underflows, q̂·v > u, which we fix up
-        // by decrementing q̂ and adding v back, same as in long division.
-
-        // TODO(rsc): Instead of subtract and fix-up, this code is computing
-        // q̂·vₙ₋₂ and decrementing q̂ until that product is ≤ u.
-        // But we can do the subtraction directly, as in the comment above
-        // and in long division, because we know that q̂ is wrong by at most one.
-        var qhatvΔ1 = tmp.make(3 * n);
-        clear(qhatvΔ1);
-        qhatvΔ1 = qhatvΔ1.mul(qhatΔ1, v.slice(0, sΔ1));
-        for (nint i = 0; i < 2; i++) {
-            nint e = qhatvΔ1.cmp(uu.norm());
-            if (e <= 0) {
-                break;
-            }
-            subVW(qhatΔ1, qhatΔ1, 1);
-            Word cΔ1 = subVV(qhatvΔ1.slice(0, sΔ1), qhatvΔ1.slice(0, sΔ1), v.slice(0, sΔ1));
-            if (len(qhatvΔ1) > sΔ1) {
-                subVW(qhatvΔ1.slice(sΔ1), qhatvΔ1.slice(sΔ1), cΔ1);
-            }
-            addAt(uu.slice(sΔ1), v.slice(sΔ1), 0);
+        // u is a subsection of the original and may have leading zeros.
+        // TODO(rsc): The v = v.norm() is useless and should be removed.
+        // We know (and require) that v's top digit is ≥ B/2.
+        u = u.norm();
+        v = v.norm();
+        if (len(u) == 0) {
+            clear(z);
+            return;
         }
-        if (qhatvΔ1.cmp(uu.norm()) > 0) {
+
+        // Fall back to basic division if the problem is now small enough.
+        nint n = len(v);
+        if (n < divRecursiveThreshold) {
+            z.divBasic(Ꮡstk, u, v);
+            return;
+        }
+
+        // Nothing to do if u is shorter than v (implies u < v).
+        nint m = len(u) - n;
+        if (m < 0) {
+            return;
+        }
+
+        // We consider B digits in a row as a single wide digit.
+        // (See “Recursive Division” above.)
+        //
+        // TODO(rsc): rename B to Wide, to avoid confusion with _B,
+        // which is something entirely different.
+        // TODO(rsc): Look into whether using ⌈n/2⌉ is better than ⌊n/2⌋.
+        nint B = n / 2;
+
+        // Allocate a nat for qhat below.
+        defer(Ꮡstk.restore, Ꮡstk.Value.save(), ref ᒐ);
+        var qhat0 = stk.nat(B + 1);
+
+        // Compute each wide digit of the quotient.
+        //
+        // TODO(rsc): Change the loop to be
+        //	for j := (m+B-1)/B*B; j > 0; j -= B {
+        // which will make the final step a regular step, letting us
+        // delete what amounts to an extra copy of the loop body below.
+        nint j = m;
+        while (j > B) {
+            // Divide u[j-B:j+n] (3 wide digits) by v (2 wide digits).
+            // First make the 2-by-1-wide-digit guess using a recursive call.
+            // Then extend the guess to the full 3-by-2 (see “Refining Guesses”).
+            //
+            // For the 2-by-1-wide-digit guess, instead of doing 2B-by-B-digit,
+            // we use a (2B+1)-by-(B+1) digit, which handles the possibility that
+            // the result has an extra leading 1 digit as well as guaranteeing
+            // that the computed q̂ will be off by at most 1 instead of 2.
+            // s is the number of digits to drop from the 3B- and 2B-digit chunks.
+            // We drop B-1 to be left with 2B+1 and B+1.
+            nint sΔ1 = (B - 1);
+
+            // uu is the up-to-3B-digit section of u we are working on.
+            var uu = u.slice(j - B);
+
+            // Compute the 2-by-1 guess q̂, leaving r̂ in uu[s:B+n].
+            var qhatΔ1 = qhat0;
+            clear(qhatΔ1);
+            qhatΔ1.divRecursiveStep(Ꮡstk, uu.slice(sΔ1, B + n), v.slice(sΔ1), depth + 1);
+            qhatΔ1 = qhatΔ1.norm();
+
+            // Extend to a 3-by-2 quotient and remainder.
+            // Because divRecursiveStep overwrote the top part of uu with
+            // the remainder r̂, the full uu already contains the equivalent
+            // of r̂·B + uₙ₋₂ from the “Refining Guesses” discussion.
+            // Subtracting q̂·vₙ₋₂ from it will compute the full-length remainder.
+            // If that subtraction underflows, q̂·v > u, which we fix up
+            // by decrementing q̂ and adding v back, same as in long division.
+
+            // TODO(rsc): Instead of subtract and fix-up, this code is computing
+            // q̂·vₙ₋₂ and decrementing q̂ until that product is ≤ u.
+            // But we can do the subtraction directly, as in the comment above
+            // and in long division, because we know that q̂ is wrong by at most one.
+            nint mark = stk.save();
+            var qhatvΔ1 = stk.nat(3 * n);
+            clear(qhatvΔ1);
+            qhatvΔ1 = qhatvΔ1.mul(Ꮡstk, qhatΔ1, v.slice(0, sΔ1));
+            for (nint i = 0; i < 2; i++) {
+                nint e = qhatvΔ1.cmp(uu.norm());
+                if (e <= 0) {
+                    break;
+                }
+                subVW(qhatΔ1, qhatΔ1, 1);
+                Word cΔ1 = subVV(qhatvΔ1.slice(0, sΔ1), qhatvΔ1.slice(0, sΔ1), v.slice(0, sΔ1));
+                if (len(qhatvΔ1) > sΔ1) {
+                    subVW(qhatvΔ1.slice(sΔ1), qhatvΔ1.slice(sΔ1), cΔ1);
+                }
+                addTo(uu.slice(sΔ1), v.slice(sΔ1));
+            }
+            if (qhatvΔ1.cmp(uu.norm()) > 0) {
+                throw panic("impossible");
+            }
+            Word cΔ2 = subVV(uu.slice(0, len(qhatvΔ1)), uu.slice(0, len(qhatvΔ1)), qhatvΔ1);
+            if (cΔ2 > 0) {
+                subVW(uu.slice(len(qhatvΔ1)), uu.slice(len(qhatvΔ1)), cΔ2);
+            }
+            addTo(z.slice(j - B), qhatΔ1);
+            j -= B;
+            stk.restore(mark);
+        }
+
+        // TODO(rsc): Rewrite loop as described above and delete all this code.
+
+        // Now u < (v<<B), compute lower bits in the same way.
+        // Choose shift = B-1 again.
+        nint s = B - 1;
+        var qhat = qhat0;
+        clear(qhat);
+        qhat.divRecursiveStep(Ꮡstk, u.slice(s).norm(), v.slice(s), depth + 1);
+        qhat = qhat.norm();
+        var qhatv = stk.nat(3 * n);
+        clear(qhatv);
+        qhatv = qhatv.mul(Ꮡstk, qhat, v.slice(0, s));
+        // Set the correct remainder as before.
+        for (nint i = 0; i < 2; i++) {
+            {
+                nint e = qhatv.cmp(u.norm()); if (e > 0) {
+                    subVW(qhat, qhat, 1);
+                    Word cΔ3 = subVV(qhatv.slice(0, s), qhatv.slice(0, s), v.slice(0, s));
+                    if (len(qhatv) > s) {
+                        subVW(qhatv.slice(s), qhatv.slice(s), cΔ3);
+                    }
+                    addTo(u.slice(s), v.slice(s));
+                }
+            }
+        }
+        if (qhatv.cmp(u.norm()) > 0) {
             throw panic("impossible");
         }
-        Word cΔ2 = subVV(uu.slice(0, len(qhatvΔ1)), uu.slice(0, len(qhatvΔ1)), qhatvΔ1);
-        if (cΔ2 > 0) {
-            subVW(uu.slice(len(qhatvΔ1)), uu.slice(len(qhatvΔ1)), cΔ2);
+        Word c = subVV(u.slice(0, len(qhatv)), u.slice(0, len(qhatv)), qhatv);
+        if (c > 0) {
+            c = subVW(u.slice(len(qhatv)), u.slice(len(qhatv)), c);
         }
-        addAt(z, qhatΔ1, j - B);
-        j -= B;
-    }
-
-    // TODO(rsc): Rewrite loop as described above and delete all this code.
-
-    // Now u < (v<<B), compute lower bits in the same way.
-    // Choose shift = B-1 again.
-    nint s = B - 1;
-    var qhat = temps[depth].ValueSlot;
-    clear(qhat);
-    qhat.divRecursiveStep(u.slice(s).norm(), v.slice(s), depth + 1, Ꮡtmp, temps);
-    qhat = qhat.norm();
-    var qhatv = tmp.make(3 * n);
-    clear(qhatv);
-    qhatv = qhatv.mul(qhat, v.slice(0, s));
-    // Set the correct remainder as before.
-    for (nint i = 0; i < 2; i++) {
-        {
-            nint e = qhatv.cmp(u.norm()); if (e > 0) {
-                subVW(qhat, qhat, 1);
-                Word cΔ3 = subVV(qhatv.slice(0, s), qhatv.slice(0, s), v.slice(0, s));
-                if (len(qhatv) > s) {
-                    subVW(qhatv.slice(s), qhatv.slice(s), cΔ3);
-                }
-                addAt(u.slice(s), v.slice(s), 0);
-            }
+        if (c > 0) {
+            throw panic("impossible");
         }
-    }
-    if (qhatv.cmp(u.norm()) > 0) {
-        throw panic("impossible");
-    }
-    Word c = subVV(u.slice(0, len(qhatv)), u.slice(0, len(qhatv)), qhatv);
-    if (c > 0) {
-        c = subVW(u.slice(len(qhatv)), u.slice(len(qhatv)), c);
-    }
-    if (c > 0) {
-        throw panic("impossible");
-    }
 
-    // Done!
-    addAt(z, qhat.norm(), 0);
+        // Done!
+        addTo(z, qhat.norm());
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
 }
 
 } // end big_package

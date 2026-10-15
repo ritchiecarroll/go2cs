@@ -422,4 +422,40 @@ internal static error UnmarshalBinary(this ref sum128a s, slice<byte> b) {
     return default!;
 }
 
+internal static (hash.Cloner, error) Clone(this ref sum32 d) {
+    ref var r = ref heap<sum32>(out var Ꮡr);
+    r = d;
+    return (new sum32жCloner(Ꮡr), default!);
+}
+
+internal static (hash.Cloner, error) Clone(this ref sum32a d) {
+    ref var r = ref heap<sum32a>(out var Ꮡr);
+    r = d;
+    return (new sum32aжCloner(Ꮡr), default!);
+}
+
+internal static (hash.Cloner, error) Clone(this ref sum64 d) {
+    ref var r = ref heap<sum64>(out var Ꮡr);
+    r = d;
+    return (new sum64жCloner(Ꮡr), default!);
+}
+
+internal static (hash.Cloner, error) Clone(this ref sum64a d) {
+    ref var r = ref heap<sum64a>(out var Ꮡr);
+    r = d;
+    return (new sum64aжCloner(Ꮡr), default!);
+}
+
+internal static (hash.Cloner, error) Clone(this ref sum128 d) {
+    ref var r = ref heap<sum128>(out var Ꮡr);
+    r = d.Clone();
+    return (new sum128жCloner(Ꮡr), default!);
+}
+
+internal static (hash.Cloner, error) Clone(this ref sum128a d) {
+    ref var r = ref heap<sum128a>(out var Ꮡr);
+    r = d.Clone();
+    return (new sum128aжCloner(Ꮡr), default!);
+}
+
 } // end fnv_package

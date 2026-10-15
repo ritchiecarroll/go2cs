@@ -279,7 +279,16 @@ internal static partial void reflectcall(ж<_type> stackArgsType, @unsafe.Pointe
 // See go.dev/issue/67401.
 //
 //go:linkname procyield
-internal static partial void procyield(uint32 cycles);
+//go:nosplit
+internal static void procyield(uint32 cycles) {
+    if (cycles == 0) {
+        return;
+    }
+    procyieldAsm(cycles);
+}
+
+// procyieldAsm is the assembly implementation of procyield.
+internal static partial void procyieldAsm(uint32 cycles);
 
 partial struct neverCallThisFunction {
 }
@@ -331,13 +340,6 @@ internal static partial void morestack();
 internal static partial void morestack_noctxt();
 
 internal static partial void rt0_go();
-
-// return0 is a stub used to return 0 from deferproc.
-// It is called at the very end of deferproc to signal
-// the calling Go function that it should not jump
-// to deferreturn.
-// in asm_*.s
-internal static partial void return0();
 
 // in asm_*.s
 // not called directly; definitions here supply type information for traceback.

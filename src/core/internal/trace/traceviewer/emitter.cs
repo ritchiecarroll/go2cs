@@ -8,9 +8,10 @@ using fmt = fmt_package;
 using trace = go.@internal.trace_package;
 using format = go.@internal.trace.traceviewer.format_package;
 using io = io_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using time = time_package;
 using encoding;
+using go;
 using go.@internal;
 using go.@internal.trace.traceviewer;
 
@@ -668,10 +669,10 @@ public static void Flush(this ref Emitter e) {
 
     e.processMeta(format.ProcsSection, e.resourceType, 2);
 
-    e.threadMeta(format.ProcsSection, trace.GCP, "GC"u8, -6);
-    e.threadMeta(format.ProcsSection, trace.NetpollP, networkˢ, -5);
-    e.threadMeta(format.ProcsSection, trace.TimerP, timersˢ, -4);
-    e.threadMeta(format.ProcsSection, trace.SyscallP, syscallsˢ, -3);
+    e.threadMeta(format.ProcsSection, GCP, "GC"u8, -6);
+    e.threadMeta(format.ProcsSection, NetpollP, networkˢ, -5);
+    e.threadMeta(format.ProcsSection, TimerP, timersˢ, -4);
+    e.threadMeta(format.ProcsSection, SyscallP, syscallsˢ, -3);
 
     foreach (var (id, name) in e.resources) {
         nint priority = (nint)id;
@@ -719,12 +720,12 @@ internal static void processMeta(this ref Emitter e, uint64 sectionID, @string n
 
 // Stack emits the given frames and returns a unique id for the stack. No
 // pointers to the given data are being retained beyond the call to Stack.
-public static nint Stack(this ref Emitter e, slice<ж<trace.Frame>> stk) {
+public static nint Stack(this ref Emitter e, slice<trace.StackFrame> stk) {
     return e.buildBranch(e.frameTree, stk);
 }
 
 // buildBranch builds one branch in the prefix tree rooted at ctx.frameTree.
-internal static nint buildBranch(this ref Emitter e, frameNode parent, slice<ж<trace.Frame>> stk) {
+internal static nint buildBranch(this ref Emitter e, frameNode parent, slice<trace.StackFrame> stk) {
     if (len(stk) == 0) {
         return parent.id;
     }
@@ -732,13 +733,13 @@ internal static nint buildBranch(this ref Emitter e, frameNode parent, slice<ж<
     var frame = stk[last];
     stk = stk.slice(0, last);
 
-    var (node, ok) = parent.children[(~frame).PC, ꟷ];
+    var (node, ok) = parent.children[frame.PC, ꟷ];
     if (!ok) {
         e.frameSeq++;
         node.id = e.frameSeq;
         node.children = new map<uint64, frameNode>();
-        parent.children[(~frame).PC] = node;
-        e.c.ConsumeViewerFrame(strconv.Itoa(node.id), new format.Frame(Name: fmt.Sprintf("%v:%v"u8, (~frame).Fn, (~frame).Line), Parent: parent.id));
+        parent.children[frame.PC] = node;
+        e.c.ConsumeViewerFrame(strconv.Itoa(node.id), new format.Frame(Name: fmt.Sprintf("%v:%v"u8, frame.Func, frame.Line), Parent: parent.id));
     }
     return e.buildBranch(node, stk);
 }

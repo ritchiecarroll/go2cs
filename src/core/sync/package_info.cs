@@ -64,7 +64,7 @@ using static go.sync_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("sync/cond.go", "cond.cs", "ACxgkgACJAARAoKCgoIAAhTygq7CggAROLI=")]
-[assembly: go.GoPositionMap("sync/hashtriemap.go", "hashtriemap.cs", "ACxisqiSqJKssqqiqJKqoqyyAAIQ0gACHAALAg==")]
+[assembly: go.GoPositionMap("sync/map.go", "map.cs", "ACtesqiSqJKssqqiqqKqoqyyAAIQ0gACHAALAg==")]
 [assembly: go.GoPositionMap("sync/runtime.go", "runtime.cs", "AAkc5gACFAAJAgABEgAIBqampqaigoKmkg==")]
 // </GoSourcePositionMaps>
 
@@ -96,6 +96,7 @@ public static partial class sync_package
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸrace() => builtin.initPackage(typeof(@internal.race_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸsync() => builtin.initPackage(typeof(@internal.sync_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸsynctest() => builtin.initPackage(typeof(@internal.synctest_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(go.sync.atomic_package));
     // </ImportInitializers>

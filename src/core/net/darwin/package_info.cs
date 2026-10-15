@@ -13,6 +13,7 @@
 global using dnsmessageꓸAAAAResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔAAAAResource;
 global using dnsmessageꓸAResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔAResource;
 global using dnsmessageꓸCNAMEResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔCNAMEResource;
+global using dnsmessageꓸHTTPSResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔHTTPSResource;
 global using dnsmessageꓸMXResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔMXResource;
 global using dnsmessageꓸNSResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔNSResource;
 global using dnsmessageꓸOPTResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔOPTResource;
@@ -20,6 +21,7 @@ global using dnsmessageꓸPTRResource = go.vendor.golang.org.x.net.dns.dnsmessag
 global using dnsmessageꓸQuestion = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔQuestion;
 global using dnsmessageꓸSOAResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔSOAResource;
 global using dnsmessageꓸSRVResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔSRVResource;
+global using dnsmessageꓸSVCBResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔSVCBResource;
 global using dnsmessageꓸTXTResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔTXTResource;
 global using dnsmessageꓸUnknownResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔUnknownResource;
 global using netipꓸAddr = go.net.netip_package.ΔAddr;
@@ -29,9 +31,8 @@ global using osꓸFileInfo = go.io.fs_package.FileInfo;
 global using osꓸFileMode = go.io.fs_package.FileMode;
 global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
-global using routeꓸSys = go.vendor.golang.org.x.net.route_package.ΔSys;
-global using routeꓸSysType = go.vendor.golang.org.x.net.route_package.ΔSysType;
 global using runtimeꓸError = go.runtime_package.ΔError;
+global using strconvꓸError = go.@internal.strconv_package.ΔError;
 global using syscallꓸSignal = go.syscall_package.ΔSignal;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
@@ -134,36 +135,37 @@ using static go.net_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("net/addrselect.go", "addrselect.cs", "AAwcgoKUpoKClIKCgu6Cgu6ygpKCgoKCgoCCpKYACBKCgpSCAA0k8oKCgoKCgoKUgtyClIKUgu6ClIIAFSyElITcgpSCAAwagpSCAAsYgoKUgpSC7gAMGgA7fsSClIKCpgAMHoKClIKCgriClAACGgAMAoCCpIKCpoKClIKCgoKClIKCgoKCgoKCuA==", "", "", "27=ipAttrOf/1/2/2,ipAttrOf/2/2/4;77=classifyScope/1/1/1;226=AddrFrom16/1/9/3,PrefixFrom/1/9/3,AddrFrom16/2/9/10,PrefixFrom/2/9/10,AddrFrom16/3/9/16,PrefixFrom/3/9/16,AddrFrom16/4/9/23,PrefixFrom/4/9/23,AddrFrom16/5/9/30,PrefixFrom/5/9/30,AddrFrom16/6/9/36,PrefixFrom/6/9/36,AddrFrom16/7/9/42,PrefixFrom/7/9/42,AddrFrom16/8/9/48,PrefixFrom/8/9/48,AddrFrom16/9/9/54,PrefixFrom/9/9/54")]
-[assembly: go.GoPositionMap("net/cgo_unix.go", "cgo_unix.cs", "ACJGgKKAooCmAAgO8oCCgv6CgpaKgrKCgoKipLSkggALELKCgpSylKaCgraCpIKklJS0tqrCgoKmgpSCgoKUgpSkpKaUgpSCgqSCgqbmwoKCgoKUtLaCgpSCgoKkAAcQlKSk3JSkqJSUgpSUgoKkgoKm5oIADSSigoKUgoKmuqKCgoKCgoKmgpSClKSkpoCCpKaCgIKkgIKkpsKCgpSCgpSqotqigoKCgoKCgpSAgqQACRSCgpSCgqaCgoKClIK4goKmgoCCpIKCgpQ=", "68-73:1;119-121:1;236-238:1;264-266:1;323-325:1", "", "67=mapErr/1/1/2,Error/1/1/2;102=Err/1/2/2,mapErr/1/1/2,Error/1/1/2,Err/2/2/3")]
-[assembly: go.GoPositionMap("net/cgo_unix_syscall.go", "cgo_unix_syscall.cs", "ACZYgKSCgpSmgKKAooCigKKAooCkgqaCpoKmgoKmgoKmgqaCgqaCkoKmgpKC")]
+[assembly: go.GoPositionMap("net/cgo_unix.go", "cgo_unix.cs", "ACJGgKKAooCmAAgO8oCCgraCgpaKgrKCgoKipLSkgviygoKUspSmgoK2gqSCpJSUtLaqwoKCpoKUgoKClIKUpKSmlIKUgoKkgoKm5sKCgoKClLS2goKUgoKCpAAHEJSkpNyUpKiUlIKUlIKCpIKCpuaCAA0kooKClIKCprqigoKCgoKCpoKUgpSkpKaAgqSmgoCCpICCpKaygoKUgoKUqqLaooKCgoKCgoKUgIKkAAkUgpKUpoKCpoKCgoKUgriCgqaCgIKkgoKClA==", "64-69:1;111-113:1;228-230:1;256-258:1;315-317:1;345-348:1")]
+[assembly: go.GoPositionMap("net/cgo_unix_syscall.go", "cgo_unix_syscall.cs", "ACZYgKSCgpSmgKKAooCigKKAooCkgqaCpoKmgoKmgoKmgqaCpoKSgqaCkoI=")]
 [assembly: go.GoPositionMap("net/conf.go", "conf.cs", "AEWUAZiSggAICsKCgoKUgoKClIKUlIKUxoKUxoKSgpQAChSmgriCgriU7oKCgsqCgrSoogAHEMrKpr7SgqYABxCCuKwACQKCgqbsAAkCgoKmAA0GpKSCuIKSlJKUuqa4griUAAgSlJSmpsq4gqaCypSUlJSCgqaUpIKCppS2AAcQlIKmgrimlKamgpSSgoKClJSClIKClIKUpoK4gpSCgpS0yqyylIKUlKSklIKUxriCgoKCggAHEIKCgu6UgpTGpLimAAEcAA8CgoKClIKUpoCCgoKkggAICqLaotqi", "92-121:1;222-224:1;234-236:1;500-509:1")]
-[assembly: go.GoPositionMap("net/dial.go", "dial.cs", "ACdSAAoagpSkuIKUpqaCgpQADB6ClKTKgpSmpoKClABq7AGApIKClIKUAAISAAgCgpSAgqSmgoKUqqKClIKCpoSSgoKUpqaCgpS4soKC2ILYlJSClIKCgoKCppSssoKClIKUlIKClIKUlIKClLyUgrSCtIKkgoKClJSClLSClLSClLaClK7CAAIS4gACZgAwAoIAAhoACgKSAAki8gAFKgAWAoKUgoKCgIKCkraAgoKSsrToyIKAgpKCgraCgqbckoKUpgAMDuKCpoKEAAEQwoKClILmgtq2gpK2gqSCtIKSxoKUgpSUgpTKAAkQ4pSCpNiCgIKClIKUlIKCgtiCgpSCuIKU2gAIAoKCgoKUgpC2gpSCgqTWgsSCxILUlIKUAClawgACEuIABRTygoKUyoKClIKk1tSUgpQAAhTygoKUyoKClMTE1JSClAAIPAAVAoIAAjgAGQKC", "541-547:1;601-614:1;711-711:1")]
-[assembly: go.GoPositionMap("net/dnsclient.go", "dnsclient.cs", "ABAoxIKmgqyygoKUgqaUgoLcgqaygpSCgoKClIKUgqYAAiAADgSCAAoWgoKmgoKCgoKUpILGxoKUgsaClIKUpJSCpgACFgAIAoKUAA0gooKClIKCgoKCgoKUpoK6koKAgqSUgoKCgqYACxqSgoKU", "200-205:1;231-233:1")]
-[assembly: go.GoPositionMap("net/dnsclient_unix.go", "dnsclient_unix.cs", "AClWgoKCgoLKqJTigpKAgqSAgraCpoCCpIKAgqSAgsiCgpSCgoKCprKClIKUgpSmooCCtoKCgoKUuIKClIKClLiigIK2goCCpIKClIKClIKCgpSCgpSClKjSgoKClIKClJSCgqSCgpSAgqSCgoCClKSCgpSAggAJEoKUlNiylIKmgoLKgqbcgpSmpqKCgoKUgpSClICCAAUQsoKCgoKCgpSCgpSAgt7CgoKUgoKU3IKClJKCpoCCpIKmgIKmlIK2gIKmlIK2pgASIoKCqNaCuKwACAKUgriClJSCgpSUAAgQgoCCpIK4gqKkgqSkuIKmotymgqaqgoKClICmtoKUgLik3sKClIKopIKCgriCgpSmgoKmlIKmgoKCuIKUAA4iAAcQgoCCpKaylIKCpoKmgoKUgrKUqMKCgoKAgoK2gqrSggAIBsKCgpSCgoKClKaCuJSUjIKmgoKClJS0pIKCgpKigoKC1pKCkpKCpqiCgoKUgoKCgoCUgpKUpAARJIKCgoLcgpSUgoLKlIKCuIKCypSCgriCgsqUgriAgsqk2LiClIKmgLikgoKCgoKCgoKClKaCptiSgqiSgoKCpoK4goKUkoKCgoKCgriUgoKCgpSC3IKCgtyUgoLcqA==", "656-656:1;657-662:2;664-671:3;666-670:3.1;672-674:4", "", "831=Error/1/1/1;844=Error/1/1/1;859=Error/1/1/1;874=Error/1/1/1;888=Error/1/1/1;989=Error/1/1/1;998=Error/1/1/1;1008=Error/1/1/1")]
-[assembly: go.GoPositionMap("net/dnsconfig.go", "dnsconfig.cs", "ABo2lAATMOKClA==")]
+[assembly: go.GoPositionMap("net/dial.go", "dial.cs", "AClUAAoagpSkuIKUpqaCgpQADB6ClKTKgpSmpoKClABq7AGApIKClIKUAAISAAgCgpSAgqSmgoKUqqKClIKCpoSSgoKUpqaCgpS4soKC2ILYlJSClIKCgoKCppSssoKClIKUlIKClIKUlIKClLyUgrSCtIKkgoKClJSClLSClLSClLaClK7CAAIS4gACZgAwAoIAAhoACgKSAAki8gAFKgAWAoK2goCCkoKCtoKCptySgpSm1oKClIKSgoKAgoKCtoCCgrK06KSigpSCAAQaAAwCgpIABRYADAKCkgAFFgAMAoKSAAUWAAwCgpIADA7igqaChAABEMKCgpSC5oLatoKStoKkgrSCksaClIKUlIKUygAJEOKUgqTYgoCCgpSClJSCgoLYgoKUgriClNoACAKCgoKClIKQtoKUgoKk1oLEgsSC1JSClAApWsIAAhLiAAUU8oKClMqCgpSCpNbUlIKUAAIU8oKClMqCgpTExNSUgpQACDwAFQKCAAI4ABkCgg==", "576-582:1;585-592:2;671-684:1;781-781:1")]
+[assembly: go.GoPositionMap("net/dnsclient.go", "dnsclient.cs", "ABAo5IKmgqyygoKUgqaUgoLcgqaygpSCgoKClIKUgqYAAiAADgSCAAoWgoKmgoKCgoKUpILGxoKUgsaClIKUpJSCpgACFgAIAoKUAA0gooKClIKCgoKCgoKUpoK6koKAgqSUgoKCgqYACxqSgoKU", "200-205:1;231-233:1")]
+[assembly: go.GoPositionMap("net/dnsclient_unix.go", "dnsclient_unix.cs", "AClWgoKCgoLKqJTigpKAgqSAgraCpoCCpIKAgqSAgsiCgpSCgoKCprKClIKUgpSmooCCtoKCgoKUuIKClIKClLiigIK2goCCpIKClIKClIKCgpSCgpSClKjSgoKClIKClJSCgqSCgpSAgqSCgoCClKSCgpSAggAJEoKUlNiylIKmgoLKgqbcgpSmpqKCgoKUgpSClICCAAUQsoKCgoKCgpSCgpSAgt7CgoKUgoKU3IKClJKCpoCCpIKmgIKmlIK2gIKmlIK2pgASIoKCqNaCuKwACAKUgriClJSCgpSUAAgQgoCCpIK4gqKkgqSkuIKmotymgqaqgoKClICmtoKUgLik3sKClIKopIKCgriCgpSmgoKmlIKmgoKCuIKUAA4iAAcQgoCCpKaylIKCpoKmgoKUgrKUqMKCgoKAgoK2gqrSggAIBsKCgpSCgoKClKaCuJSUjIKmgoKClJS0pIKCgpKigoKC1pKCkpKCpqiCgoKUgoKCgoCUgpKUpAARJIKCgoLcgpSUgoLKlIKCuIKCypSCgriCgsqUgriAgsqk2LiClIKmgLikgoKCgoKCgoKClKaCptiSgqiSgoKCpoK4goKUkoKAgoKCgsiUgoKCgpSC3IKCgtyUgoLcqA==", "656-656:1;657-662:2;664-671:3;666-670:3.1;672-674:4", "", "831=Error/1/1/1;844=Error/1/1/1;859=Error/1/1/1;874=Error/1/1/1;888=Error/1/1/1;990=Error/1/1/1;999=Error/1/1/1;1009=Error/1/1/1")]
+[assembly: go.GoPositionMap("net/dnsconfig.go", "dnsconfig.cs", "ABk0lAATMOKClA==")]
 [assembly: go.GoPositionMap("net/dnsconfig_unix.go", "dnsconfig_unix.cs", "ABcmssqCgoKCgpSSgIKUgoKCpIKUlIKClJS4gILagriCgoKClLiClIKCkoKUtIKClLSCgpS0AAgOAAkQtAAICrQACBCmpoKUgpTWgoKUlICCpKaCgpQ=")]
 [assembly: go.GoPositionMap("net/error_posix.go", "error_posix.cs", "AAsgooCCpA==")]
 [assembly: go.GoPositionMap("net/error_unix.go", "error_unix.cs", "AAoWgoCCpA==")]
-[assembly: go.GoPositionMap("net/fd_posix.go", "fd_posix.cs", "ABo6ooKCpoKC1oKCgqaCpoKmsoKCpsKCgqSygoKmsoKCpuKCgqbSgoKm0oKCprKCgqaygoKmsoKCprKCgqbCgoKmwoKCpsKCgqaCpoKmgg==")]
-[assembly: go.GoPositionMap("net/fd_unix.go", "fd_unix.cs", "ABg0ggAJFKaipoKSgpSClOYACQiA1qTGgIKkgv6ClKSkgIKkgIKCAAgQgqaCgqKCgO6CtrLqgoK02gAIEoCCpMakgoKUgMbagILGpPjCgoKClKaAgoKkgIKCpIKCqMSygoKClKY=", "104-116:1;117-129:2")]
+[assembly: go.GoPositionMap("net/fd_posix.go", "fd_posix.cs", "ABo6gpKClIKUpqKClKaUgtaCgoKmgqaCprKCgqbCgoKksoKCprKCgqbigoKm0oKCptKCgqaygoKmsoKCprKCgqaygoKmwoKCpsKCgqbCgoKmgqaCpoI=")]
+[assembly: go.GoPositionMap("net/fd_unix.go", "fd_unix.cs", "ABc0ggAJFKai5gAJCIDWpMaAgqSC/oKUpKSAgraCgoCCgtqCyIKUku7uAAgSgIKkxqSCgpSAxtqAgsak+MKCgoKUpoCCgqSAgoKkgoKoxLKCgoKUpg==", "88-94:1;95-107:2")]
 [assembly: go.GoPositionMap("net/file.go", "file.cs", "AA4coKKArAAIAoKClK4ACAKCgpSuAAgCgoKU")]
-[assembly: go.GoPositionMap("net/file_unix.go", "file_unix.cs", "ABEegoKCgpSUgIKCpKaCgoKUgoKCgpSCgpS0tLSClIKCgpSCgoKAgoKkgqaCgoKUlKSkpJSCpoKCgpSUpJSCpoKCgpSUpKSUgg==")]
+[assembly: go.GoPositionMap("net/file_posix.go", "file_posix.cs", "ABEegoKClIKCgoKUgoKClIKUtLS0gpSCgoKUgoKCgIKCpIKmgoKClJSkpKSUgqaCgoKUlKSUgqaCgoKUlKSklII=")]
+[assembly: go.GoPositionMap("net/file_unix.go", "file_unix.cs", "ABIigoKCgpSUgIKCpA==")]
 [assembly: go.GoPositionMap("net/hook.go", "hook.cs", "AAweAAAQkuw=")]
 [assembly: go.GoPositionMap("net/hook_unix.go", "hook_unix.cs", "AAoY2oKCgg==")]
 [assembly: go.GoPositionMap("net/hosts.go", "hosts.cs", "ABMkgoKClAAbOqKClIKUgoKCpoKUgoKCuIKSgoCUpIKClIKCpoKCgoKClIKmlICCuLYABxCCgoKCgqKmsoKCgoKCgoKUgIKCgrbYsoKCgoKClIKAgoKCtg==")]
-[assembly: go.GoPositionMap("net/interface.go", "interface.cs", "ABtAgoKCggAVMgAIEoKCgoKClKaClKqigpSCgpSqooKUgoKUqJKCgpSClAACENKCgpQAAhDSgpSCgpSCgpSmgrKCpqiSgpSCgpSClLKCpgAPIAAFEAAIAoKCgoKUgoKCgIK2goKCgoCCtuaCgpSCgoKCgoKCgpSClKaCgpSCgoKCgoKCgpSClA==")]
-[assembly: go.GoPositionMap("net/interface_bsd.go", "interface_bsd.cs", "AAwksoKClIKClIKCgpSClIKCgoCCgqSCgIKCtoKCyKaCgoKUgpSClIKUgpSClKzSgoKUgoKUgoKUgpSClLSCpIKUtIKkgsg=")]
-[assembly: go.GoPositionMap("net/interface_darwin.go", "interface_darwin.cs", "AAsagoKClKqigoKUgoKUgoKUgpSClLSCpILI")]
+[assembly: go.GoPositionMap("net/interface.go", "interface.cs", "ABIsgoKCggAVMgAIEoKCgoKClKaClKqigpSCgpSqooKUgoKUqJKCgpSClAACENKCgpQAAhDSgpSCgpSCgpSmgrKCpqiSgpSCgpSClLKCpgAPIAAFEAAIAoKCgoKUgoKCgIK2goKCgoKAgsjmgoKUgoKCgoKCgoKUgpSmgoKUgoKCgoKCgoKUgpQ=")]
+[assembly: go.GoPositionMap("net/interface_bsd.go", "interface_bsd.cs", "AA0isoKClIKClIKCgpSClIKCgoCCgqSCgoLIpoKCgpSClIKUgpSClIKUrNKCgpSCgpSCgpSClIKUgoKSgoKCtoKUgoKSgoKCtoLI")]
+[assembly: go.GoPositionMap("net/interface_darwin.go", "interface_darwin.cs", "AAwYgqqigoKUgoKUgpSClIKCkoKCgraCyA==")]
 [assembly: go.GoPositionMap("net/ip.go", "ip.cs", "ADBqooKCgoKCgqaYooKCgoKCrLKClIKUgoKCgoKCgpSClLqCgoKqgoKCgoKaoqiSgIKkqqKA7syokoCCpKqiqqKAgqSqooCCpAACFgAIAgACEpKCgqaqooKUiJSqooKUgpS6goKcsoCCpJSkpLiCgoKmqJKClIKUgoKUgoKUAAUS4oKmgqaClIKkgpSCpoKCgpSqooKUqrSAgqSCrLKClIKmrMSCgpSqooKClJKCgpSCrLKClIKUgpSmgqqigrKCgriCgqaClIKCppSs4oKClKiSgpSmsoCCgoK2gpSCtoK2lKiSgoCCpIKClIKCptiQAAIQ4oKUgoKUgoKUAAIS4oCCpKaCgoKUAAIWAAgCgoKmgoKmgoKUgoKmgoKC", "", "", "195=Equal/1/1/1,IsUnspecified/1/1/2,IsLoopback/1/1/3,IsMulticast/1/1/4,IsLinkLocalUnicast/1/1/5;214=isZeros/1/1/1")]
-[assembly: go.GoPositionMap("net/iprawsock.go", "iprawsock.cs", "ACBKkKSigpSCgpSmooKUpoKClAACIAANAoKUgoKUtpSCgpQACBbCgpSosoKUgoKUqLKClIKClIKUAAIUAA4CgpSCgpSosoKUgoKUqLKClIKClIKClAACEgALAoKUgoKUpoAAAhLygpSCgoKUAAIUAAkCgpSCgoKU")]
+[assembly: go.GoPositionMap("net/iprawsock.go", "iprawsock.cs", "AAxEABICAAsakKSigpSCgpSmooKUpoKClAACIAANAoKUgoKUtpSCgpQACBbCgpSosoKUgoKUqLKClIKClIKUAAIUAA4CgpSCgpSosoKUgoKUqLKClIKClIKClAACEgALAoKUgoKUpoAAAhLypqKClIKClIKClAACFAAJAoKUgoKClA==", "", "", "32=AsSlice/1/1/1,Zone/1/1/2")]
 [assembly: go.GoPositionMap("net/iprawsock_posix.go", "iprawsock_posix.cs", "AAscgpSklKaigpSClKaigpSmgqaGooKUgrSkpoKClIKClIKUgqbigoKUtKSmgoKUgpSCgpSmooKUgpSCgpSmooKClLaUgoKYgoKUpqKCgpS2lIKCmIKClA==", "127-129:1;150-152:1")]
 [assembly: go.GoPositionMap("net/ipsock.go", "ipsock.cs", "AB5CooKqooKs1pSmgt6SlKSklKiQqrKCpraUgpSqooKCpgACEgAJAoKCgoKClKauwoKCgqaClKiSqJIADRgADAKYgpS2goKmlIKClKb8gpSUgpSCgqaClIKmgqbWgIKUpAACEPaClK7CupSCgIKkgILYgraUkpSkpKSmgriCgtyCpoKClIKUAAIcAAsCgpQ=", "170-172:1;272-283:1")]
-[assembly: go.GoPositionMap("net/ipsock_posix.go", "ipsock_posix.cs", "ABY4AA4CpoKCgqaCtoKUAAUSypSCgoKUgoKCgpSAgqSClMYAAmoAMwKUpKaCgpSClKaElKaClIKmgqaCgpSCgpSCgqYAChaCuIKClIKCAAIcAAsClJKClKSSgpSUpu6CgpS4pu6CgpTK", "", "", "55=ParseIP/1/1/5,IPv4/1/1/7;165=family/2/2/1;263=As4/1/1/1,Port/1/1/2;281=As16/1/1/1,Port/1/1/2,Zone/1/1/3,index/1/1/3")]
-[assembly: go.GoPositionMap("net/lookup.go", "lookup.cs", "ABsyAA0cABo4goKCgoKClAAMFIKUgIKkpKSUpoKAgoKCgoCCpKSqooKUgoKUygAlVsCioKSCgpQAAhDSqrSClICCpKqigoKUgoKUqqKuwoKClLamgpSCgqaCgpSuAAgKgoKUgoKAgrYAFRSWkqSkAAMQwqq0gpSAgqSCgsqCgIIACBCUgoKitoKCgpQAChKCgrSkgoKUpIKCgoKAgraCgpTMooKUgoKCgpSokoKClK7CrOKCgraklIKCpoKUAAImABACAAIgAA0CgoKUgpQAAiIADgIAAiIADgKCgpSClIKCgpSClJSClAACGAAJAgACEuKCgpSCgoKUgpSUgpQAAhgACQIAAhLigoKUgoKClIKUlIKUAAIU8q7CAAIeAAwCAAIS4oKClIKCgqaClAAHFtzSgoKUgpSClAACGAANAoKUlJKClIKCgoKUgtyCgILslIKUgoLclIKokpKClIKCgoKUgtyCgILslIKC3JaCqJKSgpSCgoKClILcgoCC7JSCgtyUqJKSgpSCgoKClILcgoCC7JSCggAIEoKClIKClIKUlOaCgpSCgpQ=", "333-335:1;337-341:2;353-353:3")]
-[assembly: go.GoPositionMap("net/lookup_unix.go", "lookup_unix.cs", "ABQmwoKClKSUgIKkgoKUgIKAgqSCgIIACAqoooKmgoKClKaigoKUgqamgoKmgIK2lKaCgoKAgramgqaCpoKmgqaCgoKU")]
-[assembly: go.GoPositionMap("net/mac.go", "mac.cs", "AAwYgoKUgoKClIKUAAIeAA4CgqaCgpSCgpSCgoKAgqSkgoKUgoKUgoKCgIKkgIKkppSUgg==")]
+[assembly: go.GoPositionMap("net/ipsock_posix.go", "ipsock_posix.cs", "ABY4AA4CpoKCgqaCtoKUAAUSypSCgoKUgoKCgpSAgqSClMYAAmoAMwKUpKaCgpSClKaElKaClIKmgqaCgpSCgpSCgqYAChaCuIKClIKCAAIcAAsClJKClKSSgpSUpu6CgpS4pu6Cyg==", "", "", "55=ParseIP/1/1/5,IPv4/1/1/7;165=family/2/2/1;263=As4/1/1/1,Port/1/1/2;278=As16/1/1/1,Port/1/1/2,Zone/1/1/3,index/1/1/3")]
+[assembly: go.GoPositionMap("net/lookup.go", "lookup.cs", "ABw0AA0cABo4goKCgoKClAAMFIKUgIKkpKSUpoKAgoKCgoCCpKSqooKUgoKUygAlVsCioKSCgpQAAhDSqrSClICCpKqigoKUgoKUqqKuwoKClLamgpSCgqaCgpSuAAgKgoKUgoKAgrYAFRSWkqSkAAMQwqq0gpSAgqSCgsqCgIIACBCUgoKitoKCgpQAChKCgrSkgoKUpIKCgoKAgraCgpTMooKUgoKCgpSokoKClK7CrOKCgraklIKCpoKUAAImABACAAIgAA0CgoKUgpQAAiIADgIAAiIADgKCgpSClIKCgpSClJSClAACGAAJAgACEuKCgpSCgoKUpoKCppSClAACGAAJAgACEuKCgpSCgoKUgpSUgpQAAhTyrsIAAh4ADAIAAhLigoKUgoKCpoKUAAcW3NKCgpSClIKUAAIYAA0CgpSUkoKUgoKCgpSC3IKAguyUgpSCgtyUgqiSkoKUgoKCgpSC3IKAguyUgoLcloKokpKClIKCgoKUgtyCgILslIKC3JSokpKClIKCgoKUgtyCgILslIKCAAgSgoKUgoKUgpSU5oKClIKClA==", "334-336:1;338-342:2;354-354:3")]
+[assembly: go.GoPositionMap("net/lookup_unix.go", "lookup_unix.cs", "ABEiooKClKSUgIKkgoKUgIKAgqSCgIIACAqoooKmgoKClKaigoKUgqamgoKmgIK2lKaCgoKAgramgqaCpoKmgqaCgoKU")]
+[assembly: go.GoPositionMap("net/mac.go", "mac.cs", "AAwYgoKUgoKClIKUAAIgAA8CgqaCgpSCgpSCgoKAgqSkgoKUgoKUgoKCgIKkgIKkpoKmgoKmgoKCgIKkppSC")]
 [assembly: go.GoPositionMap("net/mptcpsock_stub.go", "mptcpsock_stub.cs", "AAoagqaCpoI=")]
-[assembly: go.GoPositionMap("net/net.go", "net.cs", "AKkB8gKgqtKClIKClKiygpSCgpSosoKUgoKUrNKClKzSgpSosoKUgIKkqLKClICCpKiygpSAgqSqwoKUgIKkqsKClICCpAACFAAKAoKClABCqgEADQKAkgAbQKamggAJDoCkgKiilKSkAB1EgKSigpSCgpSClIKClJSUgsy4gt6CgIKCpILupoKmgIKCpIIACxqApICigP6igpSCgpSmgKKAyICigKKAyICigKKAAA0a+ICigKKApIIACBKAooCigKKAuIL+gAAIDICigKKAABAmoryAgoLagqaSAAoYkKSigpSCgpSCrLCqsMjuAAYQogAKGrQABxKiAAoYpAAMGoKClLSkyIIAESaCAAESAAkCgIKkgoKCgoKmggACEgAJAoKCgoKUgpSmgoKCgoKUgoI=", "400-400:1;805-807:1", "", "788=Error/1/1/2")]
+[assembly: go.GoPositionMap("net/net.go", "net.cs", "AKkB9gKgqtKClIKClKiygpSCgpSosoKUgoKUrNKClKzSgpSosoKUgIKkqLKClICCpKiygpSAgqSqwoKUgIKkqsKClICCpAACGgANAoKClABCqgEADQKAkgAbQKamggAJDoCkgKiilKSkAB1EgKSigpSCgpSClIKClJSUgsy4gt6CgIKCpILupoKmgIKCpIIACxqApICigP6igpSCgpSmgKKAyICigKKAyICigKKAAA0a+ICigKKApIIACBKAooCigKKAuIL+gAAIDICigKKAABAmoryAgoLagqaSAAoYkKSigpSCgpSCrLCqsMjuAAYQogAKGrQABxKiAAoYpAAMGoKClLSkyIIAESaCAAESAAkCgIKkgoKCgoKmggACEgAJAoKCgoKUgpSmgoKCgoKUgoI=", "405-405:1;810-812:1", "", "791=Error/1/1/2")]
 [assembly: go.GoPositionMap("net/nss.go", "nss.cs", "AB9CgoKCgoLYkoKCqOKmgpSUgoKUlIKAgqSCpoKCgqKkgqaCpKS4ggAOIqKCgqYADhyygpSClKS2lIKUpqKCgpSSgoKmgoIACQaigoKCgpSCgoKUgoKCgoKUgoKCgpSClJSCgoKClIKCgoKUlIKU3OjCgoKCgpSClIKClIKCgpTKlA==", "223-247:1")]
 [assembly: go.GoPositionMap("net/parse.go", "parse.cs", "ABcugKSygoKCgoKUgoKCgqaUgoKUprKAgqSCgoKClIKmgqaigoKUpoKCgpSmooKClKiSgoKCpqiSgoKCgoKCgpSmgoKUpoDe0oKCgoKmgpSq0oKCgoKSgoKSgoKUlIKmgpSuwoKUgqiSgoKmqJKCgsySgpSokoKUgpSokqqigIKkqqKCgoKClICCgILGlKqiqqKClIKCpg==")]
 [assembly: go.GoPositionMap("net/pipe.go", "pipe.cs", "ABMqggACEgALAoKUgpSmgoKClLiAgoKUgpTIgrSm4oKC1oKkpAAJDICigAATONKCgoKCgpTu7qaAooCkgoKClKailKSkptSCgqSkpMiCgoKUpuKUpKSmgoKC1IKCtKSkpuaigpSCgqaigpSCpqKClIKmgoCS", "54-56:1;236-236:1", "", "145=makePipeDeadline/1/2/4,makePipeDeadline/2/2/5;152=makePipeDeadline/1/2/4,makePipeDeadline/2/2/5")]
@@ -171,24 +173,26 @@ using static go.net_package;
 [assembly: go.GoPositionMap("net/port_unix.go", "port_unix.cs", "ABMkooKClKSUgIKkgoKUgoKClIKCgoKUgoLYppKC")]
 [assembly: go.GoPositionMap("net/rawconn.go", "rawconn.cs", "ABc0oKSigpSCgoKUpqKClIKCgpSmooKUgoKClAACFAAJAoKUpoIAAhTy7oKmgqaC")]
 [assembly: go.GoPositionMap("net/rlimit_unix.go", "rlimit_unix.cs", "AAoqAAoCgoCCpIKCkoKU")]
-[assembly: go.GoPositionMap("net/sendfile_unix_alt.go", "sendfile_unix_alt.cs", "ABIwAAsCgoKCgoLKgoKmgoKmgoKClIKmgqY=", "46-49:1")]
+[assembly: go.GoPositionMap("net/sendfile.go", "sendfile.cs", "ABIwAAsCgpSCgoKCgsqCgqaCgqaCgoKUgqaCpg==", "49-52:1")]
+[assembly: go.GoPositionMap("net/sendfile_nonwindows.go", "sendfile_nonwindows.cs", "AAgUkg==")]
 [assembly: go.GoPositionMap("net/sock_bsd.go", "sock_bsd.cs", "ABAcgpiUpNiUgsqClA==")]
 [assembly: go.GoPositionMap("net/sock_posix.go", "sock_posix.cs", "AA4k0oKClICCgqSAgoIAGTKClICCgqSkgIKCpKaAgoKkpoKUlJSUgpTWooKCgoKCkoKUgILIgoKCgIKSgoCC2IKCgoCCpICCpJSAggAJEoKCkoCClKSmooKAgqSCgIK2goKAgsiAgqSAgqSAgqSCgqaiAAgSgoCCpJKUpJS2goKAgraCgoCCtoCCpICCpIKC")]
 [assembly: go.GoPositionMap("net/sockaddr_posix.go", "sockaddr_posix.cs", "AB5IgpSUpKS2lKSkpg==", "57-57:1")]
 [assembly: go.GoPositionMap("net/sockopt_bsd.go", "sockopt_bsd.cs", "AA8egsqUpKa4lJSUppSmpoCC7A==")]
-[assembly: go.GoPositionMap("net/sockopt_posix.go", "sockopt_posix.cs", "AA0gkoKUpoKClIKClIKUgsaCyKaCgpSCgpSClICCgtaAgoLYgoKUpoKCgqaCgoKmgoKCpoKCgoKUgpSCgg==")]
-[assembly: go.GoPositionMap("net/sockoptip_bsdvar.go", "sockoptip_bsdvar.cs", "AAwcgoKClIKCgoKmgoKC")]
-[assembly: go.GoPositionMap("net/sockoptip_posix.go", "sockoptip_posix.cs", "AAwcgoKAgqSCgqaigoKUgoKmgoKCpqKCgoKUgoI=")]
+[assembly: go.GoPositionMap("net/sockopt_posix.go", "sockopt_posix.cs", "AAwekoKUpoKClIKClIKUgsaCyKaCgoKmgoKCpoKCgqaCgoKClIKUgoI=")]
+[assembly: go.GoPositionMap("net/sockoptip4_bsdvar.go", "sockoptip4_bsdvar.cs", "AAwcgoKClIKCgoKmgoKC")]
+[assembly: go.GoPositionMap("net/sockoptip4_posix_nonlinux.go", "sockoptip4_posix_nonlinux.cs", "AA0egoKAgqSCgqaCgpSCgpSClICCgtaAgoLYgoKU")]
+[assembly: go.GoPositionMap("net/sockoptip6_posix.go", "sockoptip6_posix.cs", "AAwcooKClIKCpoKCgqaigoKClIKC")]
 [assembly: go.GoPositionMap("net/splice_stub.go", "splice_stub.cs", "AAoWgqaC")]
 [assembly: go.GoPositionMap("net/sys_cloexec.go", "sys_cloexec.cs", "ABIotIKCgpSCgpSAgoKk")]
-[assembly: go.GoPositionMap("net/tcpsock.go", "tcpsock.cs", "ABtA8oKUgoKokKSigpSCgpSmooKUpoKClAACJAAPAraklIKClKyyACxkwoKUqLKClIKClKiygpSCgpSqwoKUgIKkqsKClICCpAACIgAQAoKUgIKkqsKClICCpAACEPKClICCpK7igpSAgqQAAhgACwKClKaCgoLKgoKClIKCpgACFPK2lIKUgpiClJSClAAJHvKClKrCgpSCgpSqwoKUgoKUqsKClICCpKywqMKClAACFAALAoKUgoKUAAIYAAsCtpSClIKYgpSUgpSokg==", "", "", "114=Addr/1/2/1,AsSlice/1/1/1,Addr/2/2/2,Zone/1/1/2,Port/1/1/3")]
+[assembly: go.GoPositionMap("net/tcpsock.go", "tcpsock.cs", "ABtA8oKUgoKokKSigpSCgpSmooKUpoKClAACJAAPAraklIKClKyyACxkwoKUqLKClIKClKiygpSCgpSqwoKUgIKkqsKClICCpAACIgAQAoKUgIKkqsKClICCpAACEPKClICCpK7igpSAgqQAAhgACwKClKaCgoLKgoKClIKCpgACFPKmoraUgpSCmIKUgpSUgpQACR7ygpSqwoKUgoKUqsKClIKClKrCgpSAgqSssKjCgpQAAhoADgKClIKClAACGAALAraUgpSCmIKUlIKUqJI=", "", "", "114=Addr/1/2/1,AsSlice/1/1/1,Addr/2/2/2,Zone/1/1/2,Port/1/1/3")]
 [assembly: go.GoPositionMap("net/tcpsock_posix.go", "tcpsock_posix.cs", "AA4ggpSklKaigpSClKaigpSmgqaigIKkgIKkpqKAgqSmooCCpICCpKaCprKCgpgAGTSCgpSmgpSmlIIAChaClIKCpoKAgqSAgqSmoKSCgoKUpoKmgoKClKaCpqKCgpiCgpQ=", "81-83:1;185-187:1")]
 [assembly: go.GoPositionMap("net/tcpsock_unix.go", "tcpsock_unix.cs", "AAsYsoKmgIKkgIKkgIKkgIK2")]
 [assembly: go.GoPositionMap("net/tcpsockopt_darwin.go", "tcpsockopt_darwin.cs", "ABAmgoKSgriCgoKmgoKSgriCgoKmgoKSgqaCgg==")]
 [assembly: go.GoPositionMap("net/tcpsockopt_posix.go", "tcpsockopt_posix.cs", "AAwcgoKC")]
-[assembly: go.GoPositionMap("net/udpsock.go", "udpsock.cs", "ABxG8oKUgoKokKSigpSCgpSmooKUpoKClAACJAAPAraklIKClKyyAAsYgAAIFMKClKjaqMKClIKClKiSgpSUAAIQAAoCgpSCgpQAAhQADQKCgoKUqAAIAoKUgoKUqLKClIKClKiygpSCgpSosoKUgoKUgoKUAAIWAA0CgpSCgpSo4oKUgoKUpoAAAhLytpSClIKCgpQAAhgACwK2lIKUgoKClAACLgAWAraUgpSCgoKU", "", "", "115=Addr/1/2/1,AsSlice/1/1/1,Addr/2/2/2,Zone/1/1/2,Port/1/1/3")]
-[assembly: go.GoPositionMap("net/udpsock_posix.go", "udpsock_posix.cs", "AA0egpSklKaigpSClKaigpSmgqaigoKUgoKCgraCgoKCppSUpsKCgpSCgoKCtoKCgoKmgpSm4pSCgoKkgoKClKaigpSCppSSgpSkkoKUpLiCgpSCppSSgpSkkoKUpLiigpSClIKClKaCgpSCppSSgpSkkoKUpLiigoKYgoKUpqKCgpiCgpSmsoKCmIKClIKAgoCCgraAgoLGpoKCgIK2gIKkgIKkpoKCgIK2gIKkgIKk", "208-210:1;222-224:1;236-238:1")]
-[assembly: go.GoPositionMap("net/unixsock.go", "unixsock.cs", "ABg6oqaigpSmoqaCgpQAAhLilKQACRjCgpSqwoKUgIKkqsKClICCpKiygpSCgpSosoKUgoKUgpQAAhQADgKClIKClKiygpSCgpSosoKUgoKUgoKUAAISAAsCgpSCgpSmgAACEOK2lIKCgpQADBqgrvKClKrCgpSCgpSqwoKUgoKUqsKClICCpKywqMKClAACFAALAoKUgoKUrLK2lIKUgoKClKyytpSClIKCgpQ=")]
+[assembly: go.GoPositionMap("net/udpsock.go", "udpsock.cs", "ABpA8oKUgoKokKSigpSCgpSmooKUpoKClAACJAAPAraklIKClKyyAAsYgAAIFMKClKjaqMKClIKClKiSgpSUAAIQAAoCgpSCgpQAAhQADQKCgoKUqAAIAoKUgoKUqLKClIKClKiygpSCgpSosoKUgoKUgoKUAAIWAA0CgpSCgpSo4oKUgoKUpoAAAhLypqK2lIKUgoKUgoKUAAIYAAsCtpSClIKCgpQAAi4AFgK2lIKUgoKClA==", "", "", "113=Addr/1/2/1,AsSlice/1/1/1,Addr/2/2/2,Zone/1/1/2,Port/1/1/3")]
+[assembly: go.GoPositionMap("net/udpsock_posix.go", "udpsock_posix.cs", "AA0egpSklKaigpSClKaigpSmgqaigoKUgoKCgraCgoKCppSUpsKCgpSCgoKCtoKCgoKmgpSm4pSCgoKkgoKClKaigpSCppSSgpSkkoKUpLiCgpSCppSSgpSkkoKUpLiigpSClIKClKaCgpSCppSCgpKClJSkgoKSgpSUpLiigoKYgoKUpqKCgpiCgpSmsoKCmIKClIKAgoCCgraAgoLGpoKCgIK2gIKkgIKkpoKCgIK2gIKkgIKk", "216-218:1;230-232:1;244-246:1")]
+[assembly: go.GoPositionMap("net/unixsock.go", "unixsock.cs", "ABg6oqaigpSmoqaCgpQAAhLilKQACRjCgpSqwoKUgIKkqsKClICCpKiygpSCgpSosoKUgoKUgpQAAhQADgKClIKClKiygpSCgpSosoKUgoKUgoKUAAISAAsCgpSCgpSmgAACEOKmoraUgoKUgoKUAAwaoK7ygpSqwoKUgoKUqsKClIKClKrCgpSAgqSssKjCgpQAAhoADgKClIKClKyytpSClIKCgpSssraUgpSCgoKU")]
 [assembly: go.GoPositionMap("net/unixsock_posix.go", "unixsock_posix.cs", "AA0ggoKUpKSkppSClIKUgtimgoKUpoKAgqSmgoCCpKaCgIKk9oKUpKSkuIKmooKUpoKmgoKClIK2puKCgoKmlIK2pqKClIKUgpSCpqKClIKCgpSUpqKCgpiCgpSmgoKClKYADRiCgqamgoKClAACFgAIAqaygoKYgoKUpqKCgpiCgpQ=", "160-162:1;191-195:1;222-224:1;236-238:1")]
 [assembly: go.GoPositionMap("net/unixsock_readmsg_cloexec.go", "unixsock_readmsg_cloexec.cs", "AAwagoKCprKCgoKUgg==")]
 [assembly: go.GoPositionMap("net/writev_unix.go", "writev_unix.cs", "AAwcooKUgoKU1rKCgg==")]
@@ -310,7 +314,9 @@ public static partial class net_package
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸbytealg() => builtin.initPackage(typeof(@internal.bytealg_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸgodebug() => builtin.initPackage(typeof(@internal.godebug_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸpoll() => builtin.initPackage(typeof(@internal.poll_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸroutebsd() => builtin.initPackage(typeof(@internal.routebsd_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸsingleflight() => builtin.initPackage(typeof(@internal.singleflight_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸstrconv() => builtin.initPackage(typeof(@internal.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸstringslite() => builtin.initPackage(typeof(@internal.stringslite_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸsyscallꓸunix() => builtin.initPackage(typeof(@internal.syscall.unix_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
@@ -324,6 +330,5 @@ public static partial class net_package
     [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     [GoInit] internal static void initᴛᴛimportꓸvendorꓸgolang_orgꓸxꓸnetꓸdnsꓸdnsmessage() => builtin.initPackage(typeof(vendor.golang.org.x.net.dns.dnsmessage_package));
-    [GoInit] internal static void initᴛᴛimportꓸvendorꓸgolang_orgꓸxꓸnetꓸroute() => builtin.initPackage(typeof(vendor.golang.org.x.net.route_package));
     // </ImportInitializers>
 }

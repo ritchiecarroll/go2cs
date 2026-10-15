@@ -36,7 +36,7 @@ internal static (ж<User>, error) lookupUser(@string username) {
     if (err != default!) {
         return (default!, fmt.Errorf("user: lookup username %s: %v"u8, username, err));
     }
-    return (buildUser(ref pwd), err);
+    return (buildUser(ref pwd), default!);
 }
 
 internal static (ж<User>, error) lookupUserId(@string uid) {

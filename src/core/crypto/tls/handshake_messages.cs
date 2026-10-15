@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto;
 
+using bytes = bytes_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using slices = slices_package;
@@ -336,7 +337,8 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
             });
         });
     }
-    if (len(m.pskIdentities) > 0) { // pre_shared_key must be the last extension
+    // pre_shared_key must be the last extension
+    if (len(m.pskIdentities) > 0 && (echInner || len(m.encryptedClientHello) == 0 || bytes.Equal(m.encryptedClientHello, new byte[]{(byte)innerECHExt}.slice()))) {
         // RFC 8446, Section 4.2.11
         exts.AddUint16(extensionPreSharedKey);
         Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ32) => {
@@ -1090,6 +1092,7 @@ partial struct encryptedExtensionsMsg {
     internal slice<byte> quicTransportParameters;
     internal bool earlyData;
     internal slice<byte> echRetryConfigs;
+    internal bool serverNameAck;
 }
 
 internal static (slice<byte>, error) marshal(this ж<encryptedExtensionsMsg> Ꮡm) {
@@ -1125,6 +1128,10 @@ internal static (slice<byte>, error) marshal(this ж<encryptedExtensionsMsg> Ꮡ
                     bΔ7.AddBytes(Ꮡm.Value.echRetryConfigs);
                 });
             }
+            if (Ꮡm.Value.serverNameAck) {
+                bΔ2.AddUint16(extensionServerName);
+                bΔ2.AddUint16(0); // empty extension_data
+            }
         });
     });
 
@@ -1141,12 +1148,18 @@ internal static bool unmarshal(this ref encryptedExtensionsMsg m, slice<byte> da
         return false;
     }
 
+    var seenExts = new map<uint16, bool>();
     while (!extensions.Empty()) {
         ref var extension = ref heap(new uint16(), out var Ꮡextension);
         ref var extData = ref heap<cryptobyte.String>(out var ᏑextData);
         if (!extensions.ReadUint16(Ꮡextension) || !extensions.ReadUint16LengthPrefixed(ᏑextData)) {
             return false;
         }
+
+        if (seenExts[extension]) {
+            return false;
+        }
+        seenExts[extension] = true;
 
         switch (extension) {
         case extensionALPN: {
@@ -1178,6 +1191,13 @@ internal static bool unmarshal(this ref encryptedExtensionsMsg m, slice<byte> da
             if (!extData.CopyBytes(m.echRetryConfigs)) {
                 return false;
             }
+            break;
+        }
+        case extensionServerName: {
+            if (len(extData) != 0) {
+                return false;
+            }
+            m.serverNameAck = true;
             break;
         }
         default: {
@@ -1903,7 +1923,7 @@ internal static bool unmarshal(this ref certificateRequestMsg m, slice<byte> dat
         }
         var sigAndHashLen = (uint16)((uint16)((uint16)data[0] << (int)(8)) | (uint16)data[1]);
         data = data[2..];
-        if ((uint16)(sigAndHashLen & 1) != 0) {
+        if ((uint16)(sigAndHashLen & 1) != 0 || sigAndHashLen == 0) {
             return false;
         }
         if (len(data) < (nint)sigAndHashLen) {

@@ -13,7 +13,7 @@ using context = context_package;
 using errors = errors_package;
 using bytealg = @internal.bytealg_package;
 using godebug = @internal.godebug_package;
-using itoa = @internal.itoa_package;
+using strconv = @internal.strconv_package;
 using stringslite = @internal.stringslite_package;
 using Δio = io_package;
 using os = os_package;
@@ -642,7 +642,7 @@ internal static @string String(this ΔhostLookupOrder o) {
             return s;
         }
     }
-    return "hostLookupOrder="u8 + itoa.Itoa((nint)o) + "??"u8;
+    return "hostLookupOrder="u8 + strconv.Itoa((nint)o) + "??"u8;
 }
 
 internal static (slice<@string> addrs, error err) goLookupHostOrder(this ж<Resolver> Ꮡr, context.Context ctx, @string name, ΔhostLookupOrder order, ж<dnsConfig> Ꮡconf) {
@@ -968,12 +968,13 @@ internal static (slice<@string>, error) goLookupPTR(this ж<Resolver> Ꮡr, cont
     ref var server = ref heap<@string>(out var Ꮡserver);
     (var p, server, err) = Ꮡr.lookup(ctx, arpa, dnsmessage.TypePTR, Ꮡconf);
     if (err != default!) {
-        ref var dnsErr = ref heap<ж<DNSError>>(out var ᏑdnsErr);
-        if (errors.As(err, ᏑdnsErr) && (~dnsErr).IsNotFound) {
-            if (order == hostLookupDNSFiles) {
-                var names = lookupStaticAddr(addr);
-                if (len(names) > 0) {
-                    return (names, default!);
+        {
+            var (dnsErr, ok) = errors.AsType<ж<DNSError>>(err); if (ok && (~dnsErr).IsNotFound) {
+                if (order == hostLookupDNSFiles) {
+                    var names = lookupStaticAddr(addr);
+                    if (len(names) > 0) {
+                        return (names, default!);
+                    }
                 }
             }
         }

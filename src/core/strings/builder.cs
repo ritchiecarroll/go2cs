@@ -23,6 +23,12 @@ partial struct Builder {
     internal slice<byte> buf;
 }
 
+// copyCheck implements a dynamic check to prevent modification after
+// copying a non-zero Builder, which would be unsafe (see #25907, #47276).
+//
+// We cannot add a noCopy field to Builder, to cause vet's copylocks
+// check to report copying, because copylocks cannot reliably
+// discriminate the zero and nonzero cases.
 internal static void copyCheck(this ж<Builder> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 

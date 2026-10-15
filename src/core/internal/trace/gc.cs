@@ -75,7 +75,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
     var states = new map<GoID, GoState>();
     var bgMark = new map<GoID, bool>();
     var procs = new MutatorUtilizationV2_procsCount[]{}.slice();
-    var seenSync = false;
+    nint nSync = 0;
 
     // Helpers.
     bool handleSTW(ΔRange r) => (UtilFlags)(flags & UtilSTW) != 0 && isGCSTW(r);
@@ -91,7 +91,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
         // Process the event.
         var exprᴛ1 = (~ev).Kind();
         if (exprᴛ1 == EventSync) {
-            seenSync = true;
+            nSync = (~ev).Sync().N;
         }
         else if (exprᴛ1 == EventMetric) {
             do {
@@ -114,12 +114,12 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                     nint series = 0;
                     if ((UtilFlags)(flags & UtilPerProc) != 0 || len(@out) == 0) {
                         series = len(@out);
-                        @out = append(@out, new MutatorUtil[]{new((int64)(~ev).Time(), 1D)}.slice());
+                        @out = builtin.append(@out, new MutatorUtil[]{new((int64)(~ev).Time(), 1D)}.slice());
                     }
-                    ps = append(ps, new MutatorUtilizationV2_perP(series: series));
+                    ps = builtin.append(ps, new MutatorUtilizationV2_perP(series: series));
                 }
                 if (len(procs) == 0 || gomaxprocs != procs[len(procs) - 1].n) {
-                    procs = append(procs, new MutatorUtilizationV2_procsCount(time: (int64)(~ev).Time(), n: gomaxprocs));
+                    procs = builtin.append(procs, new MutatorUtilizationV2_procsCount(time: (int64)(~ev).Time(), n: gomaxprocs));
                 }
             } while (false);
         }
@@ -134,9 +134,9 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
         var matchᴛ1 = false;
         if (exprᴛ2 == EventRangeActive) { matchᴛ1 = true;
             do {
-                if (seenSync) {
-                    // If we've seen a sync, then we can be sure we're not finding out about
-                    // something late; we have complete information after that point, and these
+                if (nSync > 1) {
+                    // If we've seen a full generation, then we can be sure we're not finding out
+                    // about something late; we have complete information after that point, and these
                     // active events will just be redundant.
                     break;
                 }
@@ -328,7 +328,7 @@ internal static slice<MutatorUtil> addUtil(slice<MutatorUtil> util, MutatorUtil 
             return util;
         }
     }
-    return append(util, mu);
+    return builtin.append(util, mu);
 }
 
 // totalUtil is total utilization, measured in nanoseconds. This is a
@@ -469,7 +469,7 @@ internal static void Swap(this bandUtilHeap h, nint i, nint j) {
 }
 
 internal static void Push(this ref bandUtilHeap h, any x) {
-    h = append(h, x._<bandUtil>());
+    h = builtin.append(h, x._<bandUtil>());
 }
 
 internal static any Pop(this ref bandUtilHeap h) {
@@ -503,7 +503,7 @@ internal static void Swap(this utilHeap h, nint i, nint j) {
 }
 
 internal static void Push(this ref utilHeap h, any x) {
-    h = append(h, x._<UtilWindow>());
+    h = builtin.append(h, x._<UtilWindow>());
 }
 
 internal static any Pop(this ref utilHeap h) {
@@ -750,7 +750,7 @@ internal static void mmu(this ref MMUCurve c, time.Duration window, ж<accumulat
         if (bandU == default!){
             bandU = bandU1;
         } else {
-            bandU = appendꓸꓸꓸ(bandU, bandU1);
+            bandU = builtin.appendꓸꓸꓸ(bandU, bandU1);
         }
     }
 

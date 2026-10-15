@@ -13,7 +13,6 @@
 // 8.0.
 namespace go;
 
-using errors = errors_package;
 using unix = @internal.syscall.unix_package;
 using runtime = runtime_package;
 using Δsync = sync_package;
@@ -68,6 +67,7 @@ internal static (uintptr, bool) getPidfd(ref syscall.SysProcAttr sysAttr, bool n
     return ((uintptr)h, true);
 }
 
+// pidfdFind returns the process handle for pid.
 internal static (uintptr, error) pidfdFind(nint pid) {
     if (!pidfdWorks()) {
         return (0, syscall.ENOSYS);
@@ -83,6 +83,8 @@ internal static (uintptr, error) pidfdFind(nint pid) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string waitidˢ = "waitid"u8;
 
+// pidfdWait waits for the process to complete,
+// and updates the process status to done.
 internal static (ж<ProcessState>, error) pidfdWait(this ж<Process> Ꮡp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
@@ -113,9 +115,11 @@ internal static (ж<ProcessState>, error) pidfdWait(this ж<Process> Ꮡp) {
         if (err != default!) {
             return (default!, NewSyscallError(waitidˢ, err));
         }
-        // Release the Process' handle reference, in addition to the reference
-        // we took above.
-        Ꮡp.handlePersistentRelease(statusDone);
+
+        // Update the Process status to statusDone.
+        // This also releases a reference to the handle.
+        Ꮡp.doRelease(statusDone);
+
         return (Ꮡ(new ProcessState(
             pid: (nint)info.Pid,
             status: info.WaitStatus(),
@@ -123,9 +127,10 @@ internal static (ж<ProcessState>, error) pidfdWait(this ж<Process> Ꮡp) {
         )), default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
-    finally { if (ᒐd1) Ꮡp.handleTransientRelease(); ᒐ.Run(); }
+    finally { if (ᒐd1) p.handleTransientRelease(); ᒐ.Run(); }
 }
 
+// pidfdSendSignal sends a signal to the process.
 internal static error pidfdSendSignal(this ж<Process> Ꮡp, syscallꓸSignal s) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
@@ -136,20 +141,22 @@ internal static error pidfdSendSignal(this ж<Process> Ꮡp, syscallꓸSignal s)
             return ErrProcessDone;
         }
         if (exprᴛ1 == statusReleased) {
-            return errors.New(osProcessAlreadyReleasedˢ);
+            return errProcessReleased;
         }
         ᒐd1 = true;
 
         return convertESRCH(unix.PidFDSendSignal(handle, s));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
-    finally { if (ᒐd1) Ꮡp.handleTransientRelease(); ᒐ.Run(); }
+    finally { if (ᒐd1) p.handleTransientRelease(); ᒐ.Run(); }
 }
 
+// pidfdWorks returns whether we can use pidfd on this system.
 internal static bool pidfdWorks() {
     return checkPidfdOnce() == default!;
 }
 
+// checkPidfdOnce is used to only check whether pidfd works once.
 internal static Func<error> checkPidfdOnce;
 internal static void initᴛcheckPidfdOnce() { checkPidfdOnce = Δsync.OnceValue<error>(checkPidfd); }
 
@@ -184,7 +191,12 @@ internal static error checkPidfd() {
         defer(syscall.Close, (nint)fd, ref ᒐ);
 
         // Check waitid(P_PIDFD) works.
-        err = ignoringEINTR(() => unix.Waitid(unix.P_PIDFD, (nint)fd, nil, syscall.WEXITED, nil));
+        err = ignoringEINTR(() => {
+            ref var info = ref heap(new unix.SiginfoChild(), out var Ꮡinfo);
+            // We don't actually care about the info, but passing a nil pointer
+            // makes valgrind complain because 0x0 is unaddressable.
+            return unix.Waitid(unix.P_PIDFD, (nint)fd, Ꮡinfo, syscall.WEXITED, nil);
+        });
         // Expect ECHILD from waitid since we're not our own parent.
         if (!AreEqual(err, syscall.ECHILD)) {
             return NewSyscallError(pidfdWaitˢ, err);

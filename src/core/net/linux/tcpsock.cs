@@ -4,7 +4,7 @@
 namespace go;
 
 using context = context_package;
-using itoa = @internal.itoa_package;
+using strconv = @internal.strconv_package;
 using Δio = io_package;
 using netip = net.netip_package;
 using os = os_package;
@@ -15,7 +15,7 @@ using net;
 
 partial class net_package {
 
-// BUG(mikio): On JS and Windows, the File method of TCPConn and
+// BUG(mikio): On JS, the File method of TCPConn and
 // TCPListener is not implemented.
 
 // TCPAddr represents the address of a TCP end point.
@@ -54,9 +54,9 @@ public static @string String(this ж<TCPAddr> Ꮡa) {
     }
     @string ip = ipEmptyString(a.IP);
     if (a.Zone != ""u8) {
-        return JoinHostPort(ip + "%"u8 + a.Zone, itoa.Itoa(a.Port));
+        return JoinHostPort(ip + "%"u8 + a.Zone, strconv.Itoa(a.Port));
     }
-    return JoinHostPort(ip, itoa.Itoa(a.Port));
+    return JoinHostPort(ip, strconv.Itoa(a.Port));
 }
 
 internal static bool isWildcard(this ж<TCPAddr> Ꮡa) {
@@ -355,6 +355,12 @@ internal static ж<TCPConn> newTCPConn(ж<netFD> Ꮡfd, time.Duration keepAliveI
 // If the IP field of raddr is nil or an unspecified IP address, the
 // local system is assumed.
 public static (ж<TCPConn>, error) DialTCP(@string network, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> Ꮡraddr) {
+    return dialTCP(context.Background(), nil, network, Ꮡladdr, Ꮡraddr);
+}
+
+internal static (ж<TCPConn>, error) dialTCP(context.Context ctx, ж<Dialer> Ꮡdialer, @string network, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> Ꮡraddr) {
+    ref var dialer = ref Ꮡdialer.DerefOrNull();
+
     var exprᴛ1 = network;
     if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8) {
     }
@@ -367,10 +373,13 @@ public static (ж<TCPConn>, error) DialTCP(@string network, ж<TCPAddr> Ꮡladdr
     var sd = Ꮡ(new sysDialer(network: network, address: Ꮡraddr.String()));
     ж<TCPConn> c = default!;
     error err = default!;
+    if (Ꮡdialer != nil) {
+        sd.Value.Dialer = dialer;
+    }
     if (sd.of(sysDialer.ᏑDialer).MultipathTCP()){
-        (c, err) = sd.dialMPTCP(context.Background(), Ꮡladdr, Ꮡraddr);
+        (c, err) = sd.dialMPTCP(ctx, Ꮡladdr, Ꮡraddr);
     } else {
-        (c, err) = sd.dialTCP(context.Background(), Ꮡladdr, Ꮡraddr);
+        (c, err) = sd.dialTCP(ctx, Ꮡladdr, Ꮡraddr);
     }
     if (err != default!) {
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: Ꮡladdr.opAddr(), Addr: Ꮡraddr.opAddr(), Err: err))));
@@ -470,6 +479,9 @@ public static error SetDeadline(this ж<TCPListener> Ꮡl, time.Time t) {
 // The returned os.File's file descriptor is different from the
 // connection's. Attempting to change properties of the original
 // using this duplicate may or may not have the desired effect.
+//
+// On Windows, the returned os.File's file descriptor is not
+// usable on other processes.
 public static (ж<os.File> f, error err) File(this ж<TCPListener> Ꮡl) {
     ж<os.File> f = default!;
     error err = default!;

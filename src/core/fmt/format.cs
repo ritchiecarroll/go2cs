@@ -361,10 +361,7 @@ internal static slice<byte> truncate(this ref fmt f, slice<byte> b) {
             if (n < 0) {
                 return b.slice(0, i);
             }
-            nint wid = 1;
-            if (b[i] >= utf8.RuneSelf) {
-                (_, wid) = utf8.DecodeRune(b.slice(i));
-            }
+            var (_, wid) = utf8.DecodeRune(b.slice(i));
             i += wid;
         }
     }

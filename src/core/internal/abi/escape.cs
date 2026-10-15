@@ -34,4 +34,40 @@ public static T Escape<T>(T x) {
     return x;
 }
 
+// EscapeNonString forces v to be on the heap, if v contains a
+// non-string pointer.
+//
+// This is used in hash/maphash.Comparable. We cannot hash pointers
+// to local variables on stack, as their addresses might change on
+// stack growth. Strings are okay as the hash depends on only the
+// content, not the pointer.
+//
+// This is essentially
+//
+//	if hasNonStringPointers(T) { Escape(v) }
+//
+// Implemented as a compiler intrinsic.
+public static void EscapeNonString<T>(T v) {
+    // Go COMPILER INTRINSIC: the gc compiler replaces every call, so the written `panic("intrinsic")` body is unreachable by construction and has no CLR counterpart.
+}
+
+// EscapeToResultNonString models a data flow edge from v to the result,
+// if v contains a non-string pointer. If v contains only string pointers,
+// it returns a copy of v, but is not modeled as a data flow edge
+// from the escape analysis's perspective.
+//
+// This is used in unique.clone, to model the data flow edge on the
+// value with strings excluded, because strings are cloned (by
+// content).
+//
+// TODO: probably we should define this as a intrinsic and EscapeNonString
+// could just be "heap = EscapeToResultNonString(v)". This way we can model
+// an edge to the result but not necessarily heap.
+public static T EscapeToResultNonString<T>(T vʗp) {
+    ref var v = ref heap(vʗp, out var Ꮡv);
+
+    EscapeNonString(v);
+    return ~Ꮡv;
+}
+
 } // end abi_package

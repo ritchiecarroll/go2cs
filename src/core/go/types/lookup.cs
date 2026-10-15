@@ -10,6 +10,51 @@ using bytes = bytes_package;
 
 partial class types_package {
 
+// LookupSelection selects the field or method whose ID is Id(pkg,
+// name), on a value of type T. If addressable is set, T is the type
+// of an addressable variable (this matters only for method lookups).
+// T must not be nil.
+//
+// If the selection is valid:
+//
+//   - [Selection.Obj] returns the field ([Var]) or method ([Func]);
+//   - [Selection.Indirect] reports whether there were any pointer
+//     indirections on the path to the field or method.
+//   - [Selection.Index] returns the index sequence, defined below.
+//
+// The last index entry is the field or method index in the (possibly
+// embedded) type where the entry was found, either:
+//
+//  1. the list of declared methods of a named type; or
+//  2. the list of all methods (method set) of an interface type; or
+//  3. the list of fields of a struct type.
+//
+// The earlier index entries are the indices of the embedded struct
+// fields traversed to get to the found entry, starting at depth 0.
+//
+// See also [LookupFieldOrMethod], which returns the components separately.
+public static (Selection, bool) LookupSelection(ΔType T, bool addressable, ж<Package> Ꮡpkg, @string name) {
+    var (obj, index, indirect) = LookupFieldOrMethod(T, addressable, Ꮡpkg, name);
+    SelectionKind kind = default!;
+    switch (obj.type()) {
+    case null: {
+        return (new Selection(nil), false);
+    }
+    case ж<Func>: {
+        kind = MethodVal;
+        break;
+    }
+    case ж<Var>: {
+        kind = FieldVal;
+        break;
+    }
+    default: {
+        throw panic(obj); // can't happen
+        break;
+    }}
+    return (new Selection(kind, T, obj, index, indirect), true);
+}
+
 // Internal use of LookupFieldOrMethod: If the obj result is a method
 // associated with a concrete (non-interface) type, the method's signature
 // may not be fully set up. Call Checker.objDecl(obj, nil) before accessing
@@ -40,6 +85,8 @@ partial class types_package {
 //   - If indirect is set, a method with a pointer receiver type was found
 //     but there was no pointer on the path from the actual receiver type to
 //     the method's formal receiver base type, nor was the receiver addressable.
+//
+// See also [LookupSelection], which returns the result as a [Selection].
 public static (Object obj, slice<nint> index, bool indirect) LookupFieldOrMethod(ΔType T, bool addressable, ж<Package> Ꮡpkg, @string name) {
     if (T == default!) {
         throw panic("LookupFieldOrMethod on nil type");
@@ -79,14 +126,14 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
 
     (obj, index, indirect) = lookupFieldOrMethodImpl(T, addressable, Ꮡpkg, name, foldCase);
 
-    // If we didn't find anything and if we have a type parameter with a core type,
-    // see if there is a matching field (but not a method, those need to be declared
-    // explicitly in the constraint). If the constraint is a named pointer type (see
-    // above), we are ok here because only fields are accepted as results.
+    // If we didn't find anything and if we have a type parameter with a common underlying
+    // type, see if there is a matching field (but not a method, those need to be declared
+    // explicitly in the constraint). If the constraint is a named pointer type (see above),
+    // we are ok here because only fields are accepted as results.
     const bool enableTParamFieldLookup = false; // see go.dev/issue/51576
     if (enableTParamFieldLookup && obj == default! && isTypeParam(T)) {
         {
-            var t = coreType(T); if (t != default!) {
+            var (t, _) = commonUnder(T, default!); if (t != default!) {
                 (obj, index, indirect) = lookupFieldOrMethodImpl(t, addressable, Ꮡpkg, name, foldCase);
                 {
                     var (_, ok) = obj._<ж<Var>>(ᐧ); if (!ok) {
@@ -123,15 +170,15 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
         return (obj, index, indirect); // blank fields/methods are never found
     }
 
-    // Importantly, we must not call under before the call to deref below (nor
-    // does deref call under), as doing so could incorrectly result in finding
+    // Importantly, we must not call Underlying before the call to deref below (nor
+    // does deref call Underlying), as doing so could incorrectly result in finding
     // methods of the pointer base type when T is a (*Named) pointer type.
     var (typ, isPtr) = deref(T);
 
     // *typ where typ is an interface (incl. a type parameter) has no methods.
     if (isPtr) {
         {
-            var (_, ok) = under(typ)._<ж<Interface>>(ᐧ); if (ok) {
+            var (_, ok) = typ.Underlying()._<ж<Interface>>(ᐧ); if (ok) {
                 return (obj, index, indirect);
             }
         }
@@ -188,7 +235,7 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
                 }
             }
 
-            switch (under(typΔ1).type()) {
+            switch (typΔ1.Underlying().type()) {
             case ж<Struct> t: {
                 // look for a matching field and collect embedded types
                 foreach (var (i, f) in (~t).fields) {
@@ -371,7 +418,7 @@ public static (ж<Func> method, bool wrongType) MissingMethod(ΔType V, ж<Inter
 internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, bool @static, Func<ΔType, ΔType, bool> equivalent, ж<@string> Ꮡcause) {
     ref var cause = ref Ꮡcause.DerefOrNull();
 
-    var methods = under(T)._<ж<Interface>>().typeSet().Value.methods; // T must be an interface
+    var methods = T.Underlying()._<ж<Interface>>().typeSet().Value.methods; // T must be an interface
     if (len(methods) == 0) {
         return (default!, false);
     }
@@ -390,7 +437,7 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
     ж<Func> f = default!;           // method on V, if found (state is one of ok, wrongName, wrongSig)
 
     {
-        var (u, _) = under(V)._<ж<Interface>>(ᐧ); if (u != nil){
+        var (u, _) = V.Underlying()._<ж<Interface>>(ᐧ); if (u != nil){
             var tset = u.typeSet();
             foreach (var (_, vᴛ1) in methods) {
                 m = vᴛ1;
@@ -453,7 +500,7 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
 
                 // methods may not have a fully set up signature yet
                 if (Ꮡcheck != nil) {
-                    Ꮡcheck.objDecl(new FuncжObject(f), nil);
+                    Ꮡcheck.objDecl(new FuncжObject(f));
                 }
 
                 if (!equivalent((~f).typ, (~m).typ)) {
@@ -473,7 +520,7 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
             // This method may be formatted in funcString below, so must have a fully
             // set up signature.
             if (Ꮡcheck != nil) {
-                Ꮡcheck.objDecl(new FuncжObject(f), nil);
+                Ꮡcheck.objDecl(new FuncжObject(f));
             }
         }
         var exprᴛ1 = state;
@@ -558,7 +605,7 @@ internal static bool hasAllMethods(this ж<Checker> Ꮡcheck, ΔType V, ΔType T
 // (directly or indirectly) embedded fields with invalid types.
 internal static bool hasInvalidEmbeddedFields(ΔType T, map<ж<Struct>, bool> seen) {
     {
-        var (S, _) = under(derefStructPtr(T))._<ж<Struct>>(ᐧ); if (S != nil && !seen[S]) {
+        var (S, _) = derefStructPtr(T).Underlying()._<ж<Struct>>(ᐧ); if (S != nil && !seen[S]) {
             if (seen == default!) {
                 seen = new map<ж<Struct>, bool>();
             }
@@ -574,7 +621,7 @@ internal static bool hasInvalidEmbeddedFields(ΔType T, map<ж<Struct>, bool> se
 }
 
 internal static bool isInterfacePtr(ΔType T) {
-    var (p, _) = under(T)._<ж<Pointer>>(ᐧ);
+    var (p, _) = T.Underlying()._<ж<Pointer>>(ᐧ);
     return p != nil && IsInterface((~p).@base);
 }
 
@@ -582,7 +629,7 @@ internal static bool isInterfacePtr(ΔType T) {
 internal static @string interfacePtrError(this ж<Checker> Ꮡcheck, ΔType T) {
     assert(isInterfacePtr(T));
     {
-        var (p, _) = under(T)._<ж<Pointer>>(ᐧ); if (isTypeParam((~p).@base)) {
+        var (p, _) = T.Underlying()._<ж<Pointer>>(ᐧ); if (isTypeParam((~p).@base)) {
             return Ꮡcheck.sprintf("type %s is pointer to type parameter, not type parameter"u8, T);
         }
     }
@@ -661,9 +708,9 @@ internal static (ΔType, bool) deref(ΔType typ) {
 // (named or unnamed) struct and returns its base. Otherwise it returns typ.
 internal static ΔType derefStructPtr(ΔType typ) {
     {
-        var (p, _) = under(typ)._<ж<Pointer>>(ᐧ); if (p != nil) {
+        var (p, _) = typ.Underlying()._<ж<Pointer>>(ᐧ); if (p != nil) {
             {
-                var (_, ok) = under((~p).@base)._<ж<Struct>>(ᐧ); if (ok) {
+                var (_, ok) = (~p).@base.Underlying()._<ж<Struct>>(ᐧ); if (ok) {
                     return (~p).@base;
                 }
             }

@@ -50,8 +50,9 @@ internal static partial void runtime_AfterForkInChild();
 // they might have been locked at the time of the fork. This means
 // no rescheduling, no malloc calls, and no new stack segments.
 // For the same reason compiler does not race instrument it.
-// The calls to rawSyscall are okay because they are assembly
-// functions that do not grow the stack.
+// The calls to rawSyscall are okay because they are nosplit
+// functions that do not grow the stack and are not race
+// instrumented (go:norace).
 //
 //go:norace
 internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, slice<ж<byte>> argv, slice<ж<byte>> envv, ж<byte> Ꮡchroot, ж<byte> Ꮡdir, ref ProcAttr attr, ref SysProcAttr sys, nint pipe) {
@@ -62,7 +63,6 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
     uintptr r1 = default!;
     nint nextfd = default!;
     nint i = default!;
-    error err = default!;
     ref var pgrp = ref heap(new _C_int(), out var Ꮡpgrp);
     ж<Credential> cred = default!;
     uintptr ngroups = default!;
@@ -102,11 +102,13 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> Ꮡargv0, sli
 
     // Enable tracing if requested.
     if (sys.Ptrace) {
-        {
-            err = ptrace(PTRACE_TRACEME, 0, 0, 0); if (err != default!) {
-                err1 = err._<Errno>();
-                goto childerror;
-            }
+        if (runtime.GOOS == "ios"u8) {
+            err1 = ENOSYS;
+            goto childerror;
+        }
+        (_, _, err1) = rawSyscall6(abi.FuncPCABI0(libc_ptrace_trampoline), PTRACE_TRACEME, 0, 0, 0, 0, 0);
+        if (err1 != 0) {
+            goto childerror;
         }
     }
 

@@ -463,13 +463,6 @@ internal static nint Len(this ref ΔisolatingRunSequence i) {
     return len(i.indexes);
 }
 
-internal static level maxLevel(level a, level b) {
-    if (a > b) {
-        return a;
-    }
-    return b;
-}
-
 // Rule X10, second bullet: Determine the start-of-sequence (sos) and end-of-sequence (eos) types,
 // either L or R, for each isolating run sequence.
 internal static ж<ΔisolatingRunSequence> isolatingRunSequence(this ж<paragraph> Ꮡp, slice<nint> indexes) {
@@ -512,8 +505,8 @@ internal static ж<ΔisolatingRunSequence> isolatingRunSequence(this ж<paragrap
         indexes: indexes,
         types: types,
         level: level,
-        sos: typeForLevel(maxLevel(prevLevel, level)),
-        eos: typeForLevel(maxLevel(succLevel, level))
+        sos: typeForLevel(max(prevLevel, level)),
+        eos: typeForLevel(max(succLevel, level))
     ));
 }
 

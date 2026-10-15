@@ -187,32 +187,4 @@ internal static void cgoCheckBits(@unsafe.Pointer src, ж<byte> Ꮡgcbits, uintp
     }
 }
 
-// cgoCheckUsingType is like cgoCheckTypedBlock, but is a last ditch
-// fall back to look for pointers in src using the type information.
-// We only use this when looking at a value on the stack when the type
-// uses a GC program, because otherwise it's more efficient to use the
-// GC bits. This is called on the system stack.
-//
-//go:nowritebarrier
-//go:systemstack
-internal static void cgoCheckUsingType(ж<_type> Ꮡtyp, @unsafe.Pointer src, uintptr off, uintptr size) {
-    ref var typ = ref Ꮡtyp.DerefOrNull();
-
-    if (!typ.Pointers()) {
-        return;
-    }
-
-    // Anything past typ.PtrBytes is not a pointer.
-    if (typ.PtrBytes <= off) {
-        return;
-    }
-    {
-        var ptrdataSize = typ.PtrBytes - off; if (size > ptrdataSize) {
-            size = ptrdataSize;
-        }
-    }
-
-    cgoCheckBits(src, getGCMask(Ꮡtyp), off, size);
-}
-
 } // end runtime_package

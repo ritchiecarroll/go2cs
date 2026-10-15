@@ -50,7 +50,7 @@ using static go.@internal.coverage_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/coverage/defs.go", "defs.cs", "ADdwAJ0BsgKClKSkpKSUpoKClKSkpKSklAAOGoKUpJQAGTYARIoBgg==")]
-[assembly: go.GoPositionMap("internal/coverage/pkid.go", "pkid.cs", "AC5eABk6soKCpg==")]
+[assembly: go.GoPositionMap("internal/coverage/pkid.go", "pkid.cs", "AC5eACVSsoKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

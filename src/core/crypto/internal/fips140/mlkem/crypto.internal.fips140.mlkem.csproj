@@ -171,10 +171,12 @@
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/check/crypto.internal.fips140.check.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/crypto.internal.fips140.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/drbg/crypto.internal.fips140.drbg.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/sha256/crypto.internal.fips140.sha256.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/sha3/crypto.internal.fips140.sha3.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/subtle/crypto.internal.fips140.subtle.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/byteorder/crypto.internal.fips140deps.byteorder.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
+    <ProjectReference Include="$(go2csPath)core/sync/sync.csproj" />
   </ItemGroup>
 
   <ItemGroup>

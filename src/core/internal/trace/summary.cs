@@ -69,7 +69,7 @@ public static slice<ж<UserTaskSummary>> Descendents(this ж<UserTaskSummary> �
 
     var descendents = new ж<UserTaskSummary>[]{Ꮡs}.slice();
     foreach (var (_, child) in s.Children) {
-        descendents = appendꓸꓸꓸ(descendents, child.Descendents());
+        descendents = builtin.appendꓸꓸꓸ(descendents, child.Descendents());
     }
     return descendents;
 }
@@ -232,7 +232,7 @@ internal static void finalize(this ref GoroutineSummary g, ΔTime lastTs, ж<ΔE
         foreach (var (_, s) in g.activeRegions) {
             s.Value.End = Ꮡtrigger;
             s.Value.GoroutineExecStats = finalStat.sub((~s).GoroutineExecStats);
-            g.Regions = append(g.Regions, s);
+            g.Regions = builtin.append(g.Regions, s);
         }
     }
     (g.goroutineSummary).Value = new goroutineSummary(nil);
@@ -317,16 +317,51 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
                 // Handle transition out.
                 var g = s.gs[id];
                 var exprᴛ3 = old;
-                if (exprᴛ3 == GoUndetermined || exprᴛ3 == GoNotExist) {
+                if (exprᴛ3 == GoUndetermined) {
                     g = Ꮡ(new GoroutineSummary(ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
+
+                    // The goroutine is being named for the first time.
                     // If we're coming out of GoUndetermined, then the creation time is the
                     // time of the last sync.
-                    if (old == GoUndetermined){
-                        g.Value.CreationTime = s.syncTs;
-                    } else {
-                        g.Value.CreationTime = ev.Time();
+                    g.Value.CreationTime = s.syncTs;
+                    g.Value.lastRangeTime = new map<@string, ΔTime>();
+                    g.Value.BlockTimeByReason = new map<@string, time.Duration>();
+                    g.Value.RangeTime = new map<@string, time.Duration>();
+
+                    // Accumulate all the time we spent in new as if it was old.
+                    //
+                    // Note that we still handle "new" again below because the time until
+                    // the *next* event still needs to be accumulated (even though it's
+                    // probably going to come immediately after this event).
+                    var stateTime = ev.Time().Sub(s.syncTs);
+                    var exprᴛ4 = @new;
+                    if (exprᴛ4 == GoRunning) {
+                        g.Value.ExecTime += stateTime;
                     }
-                    // The goroutine is being created, or it's being named for the first time.
+                    else if (exprᴛ4 == GoWaiting) {
+                        g.Value.BlockTimeByReason[st.Reason] += stateTime;
+                    }
+                    else if (exprᴛ4 == GoRunnable) {
+                        g.Value.SchedWaitTime += stateTime;
+                    }
+                    else if (exprᴛ4 == GoSyscall) {
+                        // For a syscall, we're not going to be 'naming' this P from afar.
+                        // It's "executing" somewhere. If we've got a P, then that means
+                        // we've had that P since the start, so this is regular syscall time.
+                        // Otherwise, this is syscall block time (no P).
+                        if (ev.Proc() == NoProc){
+                            g.Value.SyscallBlockTime += stateTime;
+                        } else {
+                            g.Value.SyscallTime += stateTime;
+                        }
+                    }
+                    s.gs[(~g).ID] = g;
+                }
+                else if (exprᴛ3 == GoNotExist) {
+                    g = Ꮡ(new GoroutineSummary(ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
+
+                    // The goroutine is being created.
+                    g.Value.CreationTime = ev.Time();
                     g.Value.lastRangeTime = new map<@string, ΔTime>();
                     g.Value.BlockTimeByReason = new map<@string, time.Duration>();
                     g.Value.RangeTime = new map<@string, time.Duration>();
@@ -404,19 +439,19 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
                 }
 
                 // Handle transition in.
-                var exprᴛ4 = @new;
+                var exprᴛ5 = @new;
                 var matchᴛ1 = false;
-                if (exprᴛ4 == GoRunning) { matchᴛ1 = true;
+                if (exprᴛ5 == GoRunning) { matchᴛ1 = true;
                     // We started running. Record it.
                     g.Value.lastStartTime = ev.Time();
                     if ((~g).StartTime == 0) {
                         g.Value.StartTime = ev.Time();
                     }
                 }
-                else if (exprᴛ4 == GoRunnable) { matchᴛ1 = true;
+                else if (exprᴛ5 == GoRunnable) { matchᴛ1 = true;
                     g.Value.lastRunnableTime = ev.Time();
                 }
-                else if (exprᴛ4 == GoWaiting) { matchᴛ1 = true;
+                else if (exprᴛ5 == GoWaiting) { matchᴛ1 = true;
                     do {
                         if (st.Reason != "forever"u8) {
                             g.Value.lastBlockTime = ev.Time();
@@ -427,10 +462,10 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
                         fallthrough = true;
                     } while (false);
                 }
-                if (fallthrough || !matchᴛ1 && exprᴛ4 == GoNotExist) {
+                if (fallthrough || !matchᴛ1 && exprᴛ5 == GoNotExist) {
                     g.finalize(ev.Time(), Ꮡev);
                 }
-                else if (exprᴛ4 == GoSyscall) { matchᴛ1 = true;
+                else if (exprᴛ5 == GoSyscall) { matchᴛ1 = true;
                     s.syscallingP[ev.Proc()] = id;
                     s.syscallingG[id] = ev.Proc();
                     g.Value.lastSyscallTime = ev.Time();
@@ -458,8 +493,8 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
         do {
             var r = ev.Range();
             ж<GoroutineSummary> g = default!;
-            var exprᴛ5 = r.Scope.Kind;
-            if (exprᴛ5 == ResourceGoroutine) {
+            var exprᴛ6 = r.Scope.Kind;
+            if (exprᴛ6 == ResourceGoroutine) {
                 // Simple goroutine range. We attribute the entire range regardless of
                 // goroutine stats. Lots of situations are still identifiable, e.g. a
                 // goroutine blocked often in mark assist will have both high mark assist
@@ -467,7 +502,7 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
                 // trace viewer.
                 g = s.gs[r.Scope.Goroutine()];
             }
-            else if (exprᴛ5 == ResourceProc) {
+            else if (exprᴛ6 == ResourceProc) {
                 // N.B. These ranges are not actually bound to the goroutine, they're
                 // bound to the P. But if we happen to be on the P the whole time, let's
                 // try to attribute it to the goroutine. (e.g. GC sweeps are here.)
@@ -495,11 +530,11 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
         do {
             var r = ev.Range();
             ж<GoroutineSummary> g = default!;
-            var exprᴛ6 = r.Scope.Kind;
-            if (exprᴛ6 == ResourceGoroutine) {
+            var exprᴛ7 = r.Scope.Kind;
+            if (exprᴛ7 == ResourceGoroutine) {
                 g = s.gs[r.Scope.Goroutine()];
             }
-            else if (exprᴛ6 == ResourceProc) {
+            else if (exprᴛ7 == ResourceProc) {
                 var rp = new rangeP(id: r.Scope.Proc(), name: r.Name);
                 {
                     var (goid, ok) = s.rangesP[rp, ꟷ]; if (ok) {
@@ -533,10 +568,10 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
             Start: Ꮡev,
             GoroutineExecStats: g.snapshotStat(ev.Time())
         ));
-        g.Value.activeRegions = append((~g).activeRegions, region);
+        g.Value.activeRegions = builtin.append((~g).activeRegions, region);
         // Associate the region and current goroutine to the task.
         var task = s.getOrAddTask(r.Task);
-        task.Value.Regions = append((~task).Regions, region);
+        task.Value.Regions = builtin.append((~task).Regions, region);
         task.Value.Goroutines[(~g).ID] = g;
     }
     else if (exprᴛ1 == EventRegionEnd) {
@@ -557,12 +592,12 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
                 // Associate the region and current goroutine to the task.
                 var task = s.getOrAddTask(r.Task);
                 task.Value.Goroutines[(~g).ID] = g;
-                task.Value.Regions = append((~task).Regions, sd);
+                task.Value.Regions = builtin.append((~task).Regions, sd);
             }
         }
         sd.Value.GoroutineExecStats = g.snapshotStat(ev.Time()).sub((~sd).GoroutineExecStats);
         sd.Value.End = Ꮡev;
-        g.Value.Regions = append((~g).Regions, sd);
+        g.Value.Regions = builtin.append((~g).Regions, sd);
     }
     // Handle tasks and logs.
     else if (exprᴛ1 == EventTaskBegin || exprᴛ1 == EventTaskEnd) {
@@ -582,7 +617,7 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
         if (t.Parent != NoTask && (~task).Parent == nil) {
             var parent = s.getOrAddTask(t.Parent);
             task.Value.Parent = parent;
-            parent.Value.Children = append((~parent).Children, task);
+            parent.Value.Children = builtin.append((~parent).Children, task);
         }
     }
     else if (exprᴛ1 == EventLog) {
@@ -591,7 +626,7 @@ public static void Event(this ref Summarizer s, ж<ΔEvent> Ꮡev) {
         // doesn't exist (it's just been mentioned now).
         var task = s.getOrAddTask(log.Task);
         task.Value.Goroutines[ev.Goroutine()] = s.gs[ev.Goroutine()];
-        task.Value.Logs = append((~task).Logs, Ꮡev);
+        task.Value.Logs = builtin.append((~task).Logs, Ꮡev);
     }
 }
 
@@ -665,7 +700,7 @@ public static map<GoID, EmptyStruct> RelatedGoroutinesV2(slice<ΔEvent> events, 
         if (old == @new || old != GoWaiting) {
             continue;
         }
-        unblockEdges = append(unblockEdges, new RelatedGoroutinesV2_unblockEdge(
+        unblockEdges = builtin.append(unblockEdges, new RelatedGoroutinesV2_unblockEdge(
             @operator: ev.Goroutine(),
             operand: id
         ));

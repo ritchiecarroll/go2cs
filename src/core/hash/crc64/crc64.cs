@@ -145,6 +145,12 @@ internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     return default!;
 }
 
+internal static (hash.Cloner, error) Clone(this ref digest d) {
+    ref var r = ref heap<digest>(out var Ꮡr);
+    r = d;
+    return (new digestжCloner(Ꮡr), default!);
+}
+
 internal static uint64 update(uint64 crc, ref Table tab, slice<byte> p) {
     buildSlicing8TablesOnce();
     crc = ~crc;

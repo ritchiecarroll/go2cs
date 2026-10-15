@@ -149,7 +149,7 @@ partial interface unmarshaler {
 }
 
 // Assert that the known curves implement unmarshaler.
-internal static slice<unmarshaler> _ᴛ1ʗ = new unmarshaler[]{new nistCurveжunmarshaler<P224PointжnistPoint>(p224), new p256Curveжunmarshaler(p256), new nistCurveжunmarshaler<P384PointжnistPoint>(p384), new nistCurveжunmarshaler<P521PointжnistPoint>(p521)}.slice();
+internal static slice<unmarshaler> _ᴛ1ʗ = new unmarshaler[]{new nistCurveжunmarshaler<P224PointжnistPoint>(p224), new nistCurveжunmarshaler<P256PointжnistPoint>(p256), new nistCurveжunmarshaler<P384PointжnistPoint>(p384), new nistCurveжunmarshaler<P521PointжnistPoint>(p521)}.slice();
 
 // Unmarshal converts a point, serialized by [Marshal], into an x, y pair. It is
 // an error if the point is not in uncompressed form, is not on the curve, or is
@@ -273,7 +273,7 @@ public static Curve P224() {
 // The cryptographic operations are implemented using constant-time algorithms.
 public static Curve P256() {
     Ꮡinitonce.Do(initAll);
-    return new p256CurveжCurve(p256);
+    return new nistCurveжCurve<P256PointжnistPoint>(p256);
 }
 
 // P384 returns a [Curve] which implements NIST P-384 (FIPS 186-3, section D.2.4),

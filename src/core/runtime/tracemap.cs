@@ -23,6 +23,13 @@ using @internal.runtime;
 
 partial class runtime_package {
 
+// traceMap is a map of a variable-sized array of bytes to a unique ID.
+//
+// Because traceMap just operates on raw bytes, this type is used as the
+// backing store for both the trace string table and trace stack table,
+// the latter of which is just an array of PCs.
+//
+// ID 0 is reserved for arrays of bytes of size zero.
 partial struct traceMap {
     internal atomic.UnsafePointer root; // *traceMapNode (can't use generics because it's notinheap)
     internal cpu.CacheLinePad _;

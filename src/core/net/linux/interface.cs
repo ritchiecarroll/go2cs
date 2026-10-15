@@ -4,7 +4,7 @@
 namespace go;
 
 using errors = errors_package;
-using itoa = @internal.itoa_package;
+using strconv = @internal.strconv_package;
 using Δsync = sync_package;
 using time = time_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
@@ -16,19 +16,10 @@ partial class net_package {
 // Interface are not implemented.
 // BUG(mikio): On AIX, DragonFly BSD, NetBSD, OpenBSD, Plan 9 and
 // Solaris, the MulticastAddrs method of Interface is not implemented.
-// errNoSuchInterface should be an internal detail,
-// but widely used packages access it using linkname.
-// Notable members of the hall of shame include:
-//   - github.com/sagernet/sing
-//
-// Do not remove or change the type signature.
-// See go.dev/issue/67401.
-//
-//go:linkname errNoSuchInterface
 internal static error errInvalidInterface = errors.New("invalid network interface"u8);
 internal static error errInvalidInterfaceIndex = errors.New("invalid network interface index"u8);
 internal static error errInvalidInterfaceName = errors.New("invalid network interface name"u8);
-public static error errNoSuchInterface = errors.New("no such network interface"u8);
+internal static error errNoSuchInterface = errors.New("no such network interface"u8);
 internal static error errNoSuchMulticastInterface = errors.New("no such multicast network interface"u8);
 
 // Interface represents a mapping between network interface name
@@ -37,7 +28,7 @@ internal static error errNoSuchMulticastInterface = errors.New("no such multicas
 partial struct Interface {
     public nint Index;         // positive integer that starts at one, zero is never used
     public nint MTU;         // maximum transmission unit
-    public @string Name;      // e.g., "en0", "lo0", "eth0.100"
+    public @string Name;      // e.g., "en0", "lo0", "eth0.100"; may be the empty string
     public HardwareAddr HardwareAddr; // IEEE MAC-48, EUI-48 and EUI-64 form
     public Flags Flags;        // e.g., FlagUp, FlagLoopback, FlagMulticast
 }
@@ -228,10 +219,12 @@ internal static bool /*updated*/ update(this ж<ipv6ZoneCache> Ꮡzc, slice<Inte
         zc.toIndex = new map<@string, nint>(len(ift));
         zc.toName = new map<nint, @string>(len(ift));
         foreach (var (_, ifi) in ift) {
-            zc.toIndex[ifi.Name] = ifi.Index;
-            {
-                var (_, ok) = zc.toName[ifi.Index, ꟷ]; if (!ok) {
-                    zc.toName[ifi.Index] = ifi.Name;
+            if (ifi.Name != ""u8) {
+                zc.toIndex[ifi.Name] = ifi.Index;
+                {
+                    var (_, ok) = zc.toName[ifi.Index, ꟷ]; if (!ok) {
+                        zc.toName[ifi.Index] = ifi.Name;
+                    }
                 }
             }
         }
@@ -257,7 +250,7 @@ internal static @string name(this ref ipv6ZoneCache zc, nint index) {
         ᏑzoneCache.of(ipv6ZoneCache.ᏑRWMutex).RUnlock();
     }
     if (!ok) { // last resort
-        name = itoa.Uitoa((nuint)index);
+        name = strconv.Itoa(index);
     }
     return name;
 }

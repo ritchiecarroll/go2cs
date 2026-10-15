@@ -3,8 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto.@internal.fips140;
 
-using subtle = go.crypto.@internal.fips140.subtle_package;
-using go.crypto.@internal.fips140;
+using constanttime = go.crypto.@internal.constanttime_package;
+using go.crypto.@internal;
 
 partial class edwards25519_package {
 
@@ -105,7 +105,7 @@ internal static void SelectInto(this ref projLookupTable v, ж<projCached> Ꮡde
     Ꮡdest.Zero();
     for (nint j = 1; j <= 8; j++) {
         // Set dest = j*Q if |x| = j
-        nint cond = subtle.ConstantTimeByteEq(xabs, (uint8)j);
+        nint cond = constanttime.ByteEq(xabs, (uint8)j);
         Ꮡdest.Select(Ꮡ(v.points, j - 1), Ꮡdest, cond);
     }
     // Now dest = |x|*Q, conditionally negate to get x*Q
@@ -121,7 +121,7 @@ internal static void SelectInto(this ref affineLookupTable v, ж<affineCached> �
     Ꮡdest.Zero();
     for (nint j = 1; j <= 8; j++) {
         // Set dest = j*Q if |x| = j
-        nint cond = subtle.ConstantTimeByteEq(xabs, (uint8)j);
+        nint cond = constanttime.ByteEq(xabs, (uint8)j);
         Ꮡdest.Select(Ꮡ(v.points, j - 1), Ꮡdest, cond);
     }
     // Now dest = |x|*Q, conditionally negate to get x*Q

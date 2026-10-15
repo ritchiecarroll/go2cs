@@ -1,19 +1,21 @@
 // Copyright 2023 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-// Trace stack table and acquisition.
+// Trace type table.
 namespace go;
 
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
+using tracev2 = @internal.trace.tracev2_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using @internal.trace;
 using atomic = @internal.runtime.atomic_package;
 
 partial class runtime_package {
 
-// traceTypeTable maps stack traces (arrays of PC's) to unique uint32 ids.
+// traceTypeTable maps types to unique uint32 ids.
 // It is lock-free for reading.
 partial struct traceTypeTable {
     internal traceMap tab;
@@ -39,7 +41,7 @@ internal static uint64 put(this ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) {
 // releases all memory and resets state. It must only be called once the caller
 // can guarantee that there are no more writers to the table.
 internal static void dump(this ж<traceTypeTable> Ꮡt, uintptr gen) {
-    var w = unsafeTraceExpWriter(gen, nil, traceExperimentAllocFree);
+    var w = unsafeTraceExpWriter(gen, nil, tracev2.AllocFree);
     {
         var root = (ж<traceMapNode>)(uintptr)(Ꮡt.of(traceTypeTable.Ꮡtab).of(traceMap.Ꮡroot).Load()); if (root != nil) {
             w = dumpTypesRec(root, w);
@@ -71,7 +73,7 @@ internal static traceWriter dumpTypesRec(ж<traceMapNode> Ꮡnode, traceWriter w
     }
 
     // Emit type.
-    w.varint((uint64)node.id);
+    w.varint(node.id);
     w.varint((uint64)(uintptr)typ);
     w.varint((uint64)typ.Size());
     w.varint((uint64)(~typ).PtrBytes);

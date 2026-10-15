@@ -382,7 +382,7 @@ internal static bool isProtocolSwitchResponse(nint code, ΔHeader h) {
 // isProtocolSwitchHeader reports whether the request or response header
 // is for a protocol switch.
 internal static bool isProtocolSwitchHeader(ΔHeader h) {
-    return h.Get(upgradeˢ) != ""u8 && httpguts.HeaderValuesContainsToken(h[connectionˢ], upgradeˢ);
+    return h.Get(upgradeˢ2) != ""u8 && httpguts.HeaderValuesContainsToken(h[connectionˢ], upgradeˢ2);
 }
 
 } // end http_package

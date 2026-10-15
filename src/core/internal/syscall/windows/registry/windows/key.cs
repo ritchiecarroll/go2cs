@@ -137,7 +137,11 @@ public static (Key newk, bool openedExisting, error err) CreateKey(Key k, @strin
 
     ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
     ref var d = ref heap(new uint32(), out var Ꮡd);
-    err = regCreateKeyEx(((syscallꓸHandle)k), syscall.StringToUTF16Ptr(path),
+    (var pathp, err) = syscall.UTF16PtrFromString(path);
+    if (err != default!) {
+        return ((Key)(syscallꓸHandle)(0), false, err);
+    }
+    err = regCreateKeyEx(((syscallꓸHandle)k), pathp,
         0, nil, _REG_OPTION_NON_VOLATILE, access, nil, Ꮡh, Ꮡd);
     if (err != default!) {
         return ((Key)(syscallꓸHandle)(0), false, err);
@@ -147,7 +151,11 @@ public static (Key newk, bool openedExisting, error err) CreateKey(Key k, @strin
 
 // DeleteKey deletes the subkey path of key k and its values.
 public static error DeleteKey(Key k, @string path) {
-    return regDeleteKey(((syscallꓸHandle)k), syscall.StringToUTF16Ptr(path));
+    var (pathp, err) = syscall.UTF16PtrFromString(path);
+    if (err != default!) {
+        return err;
+    }
+    return regDeleteKey(((syscallꓸHandle)k), pathp);
 }
 
 // A KeyInfo describes the statistics of a key. It is returned by Stat.

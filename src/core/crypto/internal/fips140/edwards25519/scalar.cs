@@ -5,7 +5,9 @@ namespace go.crypto.@internal.fips140;
 
 using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
 using errors = errors_package;
+using bits = math.bits_package;
 using go.crypto.@internal.fips140deps;
+using math;
 
 partial class edwards25519_package {
 
@@ -215,16 +217,23 @@ internal static bool isReduced(slice<byte> s) {
         return false;
     }
 
-    for (nint i = len(s) - 1; i >= 0; i--) {
-        switch (ᐧ) {
-        case {} when s[i] > scalarMinusOneBytes[i]: {
-            return false;
-        }
-        case {} when s[i] < scalarMinusOneBytes[i]: {
-            return true;
-        }}
-    }
-    return true;
+    var s0 = byteorder.LEUint64(s[..8]);
+    var s1 = byteorder.LEUint64(s[8..16]);
+    var s2 = byteorder.LEUint64(s[16..24]);
+    var s3 = byteorder.LEUint64(s[24..]);
+
+    var l0 = byteorder.LEUint64(scalarMinusOneBytes[..8]);
+    var l1 = byteorder.LEUint64(scalarMinusOneBytes[8..16]);
+    var l2 = byteorder.LEUint64(scalarMinusOneBytes[16..24]);
+    var l3 = byteorder.LEUint64(scalarMinusOneBytes[24..]);
+
+    // Do a constant time subtraction chain scalarMinusOneBytes - s. If there is
+    // a borrow at the end, then s > scalarMinusOneBytes.
+    var (_, b) = bits.Sub64(l0, s0, 0);
+    (_, b) = bits.Sub64(l1, s1, b);
+    (_, b) = bits.Sub64(l2, s2, b);
+    (_, b) = bits.Sub64(l3, s3, b);
+    return b == 0;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

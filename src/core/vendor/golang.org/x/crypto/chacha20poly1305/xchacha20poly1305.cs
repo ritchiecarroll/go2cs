@@ -22,6 +22,9 @@ partial struct xchacha20poly1305 {
 // preferred when nonce uniqueness cannot be trivially ensured, or whenever
 // nonces are randomly generated.
 public static (cipher.AEAD, error) NewX(slice<byte> key) {
+    if (fips140Enforced()) {
+        return (default!, errors.New(chacha20poly1305UseOfˢ));
+    }
     if (len(key) != KeySize) {
         return (default!, errors.New(chacha20poly1305BadKeyˢ));
     }

@@ -344,7 +344,8 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
 
 // NewTable decodes the Go symbol table (the ".gosymtab" section in ELF),
 // returning an in-memory representation.
-// Starting with Go 1.3, the Go symbol table no longer includes symbol data.
+// Starting with Go 1.3, the Go symbol table no longer includes symbol data;
+// callers should pass nil for the symtab parameter.
 public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡpcln) {
     ref var pcln = ref Ꮡpcln.DerefOrNull();
 

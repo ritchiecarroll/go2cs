@@ -412,7 +412,7 @@ internal static (bool truth, bool ok) isTrue(reflectꓸValue val) {
     else if (exprᴛ1 == reflect.Complex64 || exprᴛ1 == reflect.Complex128) {
         truth = val.Complex() != 0D;
     }
-    else if (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func || exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.ΔInterface) {
+    else if (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func || exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.ΔUnsafePointer || exprᴛ1 == reflect.ΔInterface) {
         truth = !val.IsNil();
     }
     else if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {

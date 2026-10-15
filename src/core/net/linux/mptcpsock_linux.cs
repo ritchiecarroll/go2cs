@@ -54,9 +54,8 @@ internal static void initMPTCPavailable() {
         mptcpAvailable = true;
     }
 
-    var (major, minor) = unix.KernelVersion();
-    // SOL_MPTCP only supported from kernel 5.16
-    hasSOLMPTCP = major > 5 || (major == 5 && minor >= 16);
+    // SOL_MPTCP only supported from kernel 5.16.
+    hasSOLMPTCP = unix.KernelVersionGE(5, 16);
 }
 
 internal static (ж<TCPConn>, error) dialMPTCP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> Ꮡraddr) {

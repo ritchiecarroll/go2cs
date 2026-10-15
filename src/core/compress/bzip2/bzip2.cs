@@ -41,7 +41,7 @@ partial struct reader {
     internal nuint repeats;    // the number of copies of lastByte to output.
 }
 
-// NewReader returns an io.Reader which decompresses bzip2 data from r.
+// NewReader returns an [io.Reader] which decompresses bzip2 data from r.
 // If r does not also implement [io.ByteReader],
 // the decompressor may read more data than necessary from r.
 public static io.Reader NewReader(io.Reader r) {

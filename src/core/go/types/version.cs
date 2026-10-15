@@ -5,8 +5,8 @@ namespace go.go;
 
 using fmt = fmt_package;
 using version = global::go.go.version_package;
-using goversion = @internal.goversion_package;
-using @internal;
+using goversion = global::go.@internal.goversion_package;
+using global::go.@internal;
 using global::go.go;
 using ꓸꓸꓸany = Span<any>;
 
@@ -44,6 +44,7 @@ internal static goVersion go1_20 = asGoVersion("go1.20"u8);
 internal static goVersion go1_21 = asGoVersion("go1.21"u8);
 internal static goVersion go1_22 = asGoVersion("go1.22"u8);
 internal static goVersion go1_23 = asGoVersion("go1.23"u8);
+internal static goVersion go1_26 = asGoVersion("go1.26"u8);
 
 // current (deployed) Go version
 internal static goVersion go_current = asGoVersion(fmt.Sprintf("go1.%d"u8, (nint)(goversion.Version)));

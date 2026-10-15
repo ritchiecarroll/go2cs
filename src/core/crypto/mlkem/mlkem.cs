@@ -11,6 +11,7 @@
 // [NIST FIPS 203]: https://doi.org/10.6028/NIST.FIPS.203
 namespace go.crypto;
 
+using crypto = crypto_package;
 using mlkem = go.crypto.@internal.fips140.mlkem_package;
 using go.crypto.@internal.fips140;
 
@@ -41,7 +42,7 @@ partial struct DecapsulationKey768 {
 }
 
 // GenerateKey768 generates a new decapsulation key, drawing random bytes from
-// the default crypto/rand source. The decapsulation key must be kept secret.
+// a secure source. The decapsulation key must be kept secret.
 public static (ж<DecapsulationKey768>, error) GenerateKey768() {
     var (key, err) = mlkem.GenerateKey768();
     if (err != default!) {
@@ -83,6 +84,16 @@ public static ж<EncapsulationKey768> EncapsulationKey(this ref DecapsulationKey
     return Ꮡ(new EncapsulationKey768(dk.key.EncapsulationKey()));
 }
 
+// Encapsulator returns the encapsulation key, like
+// [DecapsulationKey768.EncapsulationKey].
+//
+// It implements [crypto.Decapsulator].
+public static crypto.Encapsulator Encapsulator(this ref DecapsulationKey768 dk) {
+    return new EncapsulationKey768жEncapsulator(dk.EncapsulationKey());
+}
+
+internal static crypto.Decapsulator _ᴛ1ʗ = new DecapsulationKey768жDecapsulator(((ж<DecapsulationKey768>)nil));
+
 // An EncapsulationKey768 is the public key used to produce ciphertexts to be
 // decapsulated by the corresponding DecapsulationKey768.
 partial struct EncapsulationKey768 {
@@ -106,9 +117,12 @@ public static slice<byte> Bytes(this ref EncapsulationKey768 ek) {
 }
 
 // Encapsulate generates a shared key and an associated ciphertext from an
-// encapsulation key, drawing random bytes from the default crypto/rand source.
+// encapsulation key, drawing random bytes from a secure source.
 //
 // The shared key must be kept secret.
+//
+// For testing, derandomized encapsulation is provided by the
+// [crypto/mlkem/mlkemtest] package.
 public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this ref EncapsulationKey768 ek) {
     return ek.key.Encapsulate();
 }
@@ -120,7 +134,7 @@ partial struct DecapsulationKey1024 {
 }
 
 // GenerateKey1024 generates a new decapsulation key, drawing random bytes from
-// the default crypto/rand source. The decapsulation key must be kept secret.
+// a secure source. The decapsulation key must be kept secret.
 public static (ж<DecapsulationKey1024>, error) GenerateKey1024() {
     var (key, err) = mlkem.GenerateKey1024();
     if (err != default!) {
@@ -162,6 +176,16 @@ public static ж<EncapsulationKey1024> EncapsulationKey(this ref DecapsulationKe
     return Ꮡ(new EncapsulationKey1024(dk.key.EncapsulationKey()));
 }
 
+// Encapsulator returns the encapsulation key, like
+// [DecapsulationKey1024.EncapsulationKey].
+//
+// It implements [crypto.Decapsulator].
+public static crypto.Encapsulator Encapsulator(this ref DecapsulationKey1024 dk) {
+    return new EncapsulationKey1024жEncapsulator(dk.EncapsulationKey());
+}
+
+internal static crypto.Decapsulator _ᴛ2ʗ = new DecapsulationKey1024жDecapsulator(((ж<DecapsulationKey1024>)nil));
+
 // An EncapsulationKey1024 is the public key used to produce ciphertexts to be
 // decapsulated by the corresponding DecapsulationKey1024.
 partial struct EncapsulationKey1024 {
@@ -185,9 +209,12 @@ public static slice<byte> Bytes(this ref EncapsulationKey1024 ek) {
 }
 
 // Encapsulate generates a shared key and an associated ciphertext from an
-// encapsulation key, drawing random bytes from the default crypto/rand source.
+// encapsulation key, drawing random bytes from a secure source.
 //
 // The shared key must be kept secret.
+//
+// For testing, derandomized encapsulation is provided by the
+// [crypto/mlkem/mlkemtest] package.
 public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this ref EncapsulationKey1024 ek) {
     return ek.key.Encapsulate();
 }

@@ -4,15 +4,18 @@
 // Trace string management.
 namespace go;
 
+using tracev2 = @internal.trace.tracev2_package;
+using @internal.trace;
 using @unsafe = unsafe_package;
 
 partial class runtime_package {
 
 // Trace strings.
-internal static UntypedInt maxTraceStringLen => 1024;
 
 // traceStringTable is map of string -> unique ID that also manages
 // writing strings out into the trace.
+//
+// ID 0 is reserved for the empty string.
 partial struct traceStringTable {
     // lock protects buf.
     internal mutex @lock;
@@ -39,6 +42,9 @@ internal static uint64 put(this ж<traceStringTable> Ꮡt, uintptr gen, @string 
 
 // emit emits a string and creates an ID for it, but doesn't add it to the table. Returns the ID.
 internal static uint64 emit(this ж<traceStringTable> Ꮡt, uintptr gen, @string s) {
+    if (len(s) == 0) {
+        return 0; // Empty strings are implicitly assigned ID 0 already.
+    }
     // Grab an ID and write the string to the buffer.
     var id = Ꮡt.of(traceStringTable.Ꮡtab).stealID();
     systemstack(() => {
@@ -56,8 +62,8 @@ internal static void writeString(this ж<traceStringTable> Ꮡt, uintptr gen, ui
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Truncate the string if necessary.
-    if (len(s) > maxTraceStringLen) {
-        s = s[..(int)(maxTraceStringLen)];
+    if (len(s) > tracev2.MaxEventTrailerDataSize) {
+        s = s[..(int)(tracev2.MaxEventTrailerDataSize)];
     }
 
     @lock(Ꮡt.of(traceStringTable.Ꮡlock));
@@ -65,14 +71,14 @@ internal static void writeString(this ж<traceStringTable> Ꮡt, uintptr gen, ui
 
     // Ensure we have a place to write to.
     bool flushed = default!;
-    (w, flushed) = w.ensure((nint)(2 + 2 * traceBytesPerNumber) + len(s) /* traceEvStrings + traceEvString + ID + len + string data */);
+    (w, flushed) = w.ensure((nint)(2 + 2 * traceBytesPerNumber) + len(s) /* tracev2.EvStrings + tracev2.EvString + ID + len + string data */);
     if (flushed) {
         // Annotate the batch as containing strings.
-        w.@byte((byte)traceEvStrings);
+        w.@byte((byte)tracev2.EvStrings);
     }
 
     // Write out the string.
-    w.@byte((byte)traceEvString);
+    w.@byte((byte)tracev2.EvString);
     w.varint(id);
     w.varint((uint64)len(s));
     w.stringData(s);

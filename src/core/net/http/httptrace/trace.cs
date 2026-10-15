@@ -82,7 +82,7 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
 // during a single round trip and has no hooks that span a series
 // of redirected requests.
 //
-// See https://blog.golang.org/http-tracing for more.
+// See https://go.dev/blog/http-tracing for more.
 partial struct ClientTrace {
     // GetConn is called before a connection is created or
     // retrieved from an idle pool. The hostPort is the

@@ -35,7 +35,7 @@ internal static readonly @string cryptoDesUseOfDesIsNotˢ = "crypto/des: use of 
 
 // NewCipher creates and returns a new [cipher.Block].
 public static (cipher.Block, error) NewCipher(slice<byte> key) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoDesUseOfDesIsNotˢ));
     }
 
@@ -88,7 +88,7 @@ internal static readonly @string cryptoDesUseOfTripleDESˢ = "crypto/des: use of
 
 // NewTripleDESCipher creates and returns a new [cipher.Block].
 public static (cipher.Block, error) NewTripleDESCipher(slice<byte> key) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoDesUseOfTripleDESˢ));
     }
 

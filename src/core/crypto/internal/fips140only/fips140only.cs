@@ -3,21 +3,23 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto.@internal;
 
+using Δfips140 = go.crypto.fips140_package;
 using drbg = go.crypto.@internal.fips140.drbg_package;
 using sha256 = go.crypto.@internal.fips140.sha256_package;
 using sha3 = go.crypto.@internal.fips140.sha3_package;
 using sha512 = go.crypto.@internal.fips140.sha512_package;
 using hash = hash_package;
-using godebug = go.@internal.godebug_package;
 using io = io_package;
-using go.@internal;
+using go.crypto;
 using go.crypto.@internal.fips140;
 
 partial class fips140only_package {
 
-// Enabled reports whether FIPS 140-only mode is enabled, in which non-approved
+// Enforced reports whether FIPS 140-only mode is enabled and enforced, in which non-approved
 // cryptography returns an error or panics.
-public static bool Enabled = godebug.New("fips140"u8).Value() == "only"u8;
+public static bool Enforced() {
+    return Δfips140.Enforced();
+}
 
 public static bool ApprovedHash(hash.Hash h) {
     switch (h.type()) {

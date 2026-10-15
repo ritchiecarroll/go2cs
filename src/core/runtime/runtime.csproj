@@ -191,10 +191,16 @@
     <ProjectReference Include="$(go2csPath)core/internal/profilerecord/internal.profilerecord.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/atomic/internal.runtime.atomic.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/exithook/internal.runtime.exithook.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/runtime/gc/internal.runtime.gc.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/runtime/gc/scan/internal.runtime.gc.scan.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/maps/internal.runtime.maps.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/math/internal.runtime.math.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/runtime/pprof/label/internal.runtime.pprof.label.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/sys/internal.runtime.sys.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/stringslite/internal.stringslite.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/trace/tracev2/internal.trace.tracev2.csproj" />
+    <ProjectReference Include="$(go2csPath)core/math/bits/math.bits.csproj" />
     <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
   </ItemGroup>
 
@@ -206,10 +212,13 @@
   <ItemGroup Condition="'$(GoTargetOS)'=='darwin'" />
 
   <ItemGroup Condition="'$(GoTargetOS)'=='linux'">
-    <ProjectReference Include="$(go2csPath)core/internal/runtime/syscall/internal.runtime.syscall.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/runtime/cgroup/internal.runtime.cgroup.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/runtime/syscall/linux/internal.runtime.syscall.linux.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(GoTargetOS)'=='windows'" />
+  <ItemGroup Condition="'$(GoTargetOS)'=='windows'">
+    <ProjectReference Include="$(go2csPath)core/internal/runtime/syscall/windows/internal.runtime.syscall.windows.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="../LICENSE" Pack="true" PackagePath="" Condition="!Exists('$(MSBuildProjectDirectory)/LICENSE')" />

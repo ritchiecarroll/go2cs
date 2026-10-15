@@ -272,7 +272,9 @@ public static void Shuffle(this ref Rand r, nint n, Action<nint, nint> swap) {
 internal static ж<Rand> globalRand = Ꮡ(new Rand(src: new runtimeSource(nil)));
 
 //go:linkname runtime_rand runtime.rand
-internal static partial uint64 runtime_rand();
+/*linkname*/ internal static partial uint64 runtime_rand() {
+    return go.runtime_package.rand();
+}
 
 // runtimeSource is a Source that uses the runtime fastrand functions.
 partial struct runtimeSource {

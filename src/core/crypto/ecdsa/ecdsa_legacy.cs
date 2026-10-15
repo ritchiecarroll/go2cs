@@ -26,7 +26,7 @@ internal static readonly @string cryptoEcdsaUseOfCustomˢ = "crypto/ecdsa: use o
 // This file contains a math/big implementation of ECDSA that is only used for
 // deprecated custom curves.
 internal static (ж<PrivateKey>, error) generateLegacy(elliptic.Curve c, io.Reader rand) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoEcdsaUseOfCustomˢ));
     }
 
@@ -70,6 +70,11 @@ internal static readonly @string invalidAsn1FromSignASN1ˢ = "invalid ASN.1 from
 // private key's curve order, the hash will be truncated to that length. It
 // returns the signature as a pair of integers. Most applications should use
 // [SignASN1] instead of dealing directly with r, s.
+//
+// The signature is randomized. Since Go 1.26, a secure source of random bytes
+// is always used, and the Reader is ignored unless GODEBUG=cryptocustomrand=1
+// is set. This setting will be removed in a future Go release. Instead, use
+// [testing/cryptotest.SetGlobalRandom].
 public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rand, ж<PrivateKey> Ꮡpriv, slice<byte> hash) {
     ж<bigꓸInt> r = default!;
     ж<bigꓸInt> s = default!;
@@ -92,7 +97,7 @@ public static (ж<bigꓸInt> r, ж<bigꓸInt> s, error err) Sign(io.Reader rand,
 internal static (slice<byte> sig, error err) signLegacy(ref PrivateKey priv, io.Reader csprng, slice<byte> hash) {
     error err = default!;
 
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoEcdsaUseOfCustomˢ));
     }
 
@@ -172,7 +177,7 @@ public static bool Verify(ж<PublicKey> Ꮡpub, slice<byte> hash, ж<bigꓸInt> 
 }
 
 internal static bool verifyLegacy(ref PublicKey pub, slice<byte> hash, slice<byte> sig) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/ecdsa: use of custom curves is not allowed in FIPS 140-only mode");
     }
 

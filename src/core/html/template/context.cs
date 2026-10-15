@@ -4,6 +4,7 @@
 namespace go.html;
 
 using fmt = fmt_package;
+using slices = slices_package;
 using parse = text.template.parse_package;
 using text.template;
 
@@ -37,12 +38,12 @@ internal static @string String(this context c) {
     if (c.err != nil) {
         err = new ΔErrorжerror(c.err);
     }
-    return fmt.Sprintf("{%v %v %v %v %v %v %v}"u8, c.state, c.delim, c.urlPart, c.jsCtx, c.attr, c.element, err);
+    return fmt.Sprintf("{%v %v %v %v %v %v %v %v}"u8, c.state, c.delim, c.urlPart, c.jsCtx, c.jsBraceDepth, c.attr, c.element, err);
 }
 
 // eq reports whether two contexts are equal.
 internal static bool eq(this context c, context d) {
-    return c.state == d.state && c.delim == d.delim && c.urlPart == d.urlPart && c.jsCtx == d.jsCtx && c.attr == d.attr && c.element == d.element && c.err == d.err;
+    return c.state == d.state && c.delim == d.delim && c.urlPart == d.urlPart && c.jsCtx == d.jsCtx && slices.Equal<slice<nint>, nint>(c.jsBraceDepth, d.jsBraceDepth) && c.attr == d.attr && c.element == d.element && c.err == d.err;
 }
 
 // mangle produces an identifier that includes a suffix that distinguishes it
@@ -62,6 +63,9 @@ internal static @string mangle(this context c, @string templateName) {
     if (c.jsCtx != jsCtxRegexp) {
         s += "_"u8 + c.jsCtx.String();
     }
+    if (c.jsBraceDepth != default!) {
+        s += fmt.Sprintf("_jsBraceDepth(%v)"u8, c.jsBraceDepth);
+    }
     if (c.attr != attrNone) {
         s += "_"u8 + c.attr.String();
     }
@@ -69,6 +73,13 @@ internal static @string mangle(this context c, @string templateName) {
         s += "_"u8 + c.element.String();
     }
     return s;
+}
+
+// clone returns a copy of c with the same field values.
+internal static context clone(this context c) {
+    var clone = c;
+    clone.jsBraceDepth = slices.Clone<slice<nint>, nint>(c.jsBraceDepth);
+    return clone;
 }
 
 // state describes a high-level HTML parser state.
@@ -149,8 +160,12 @@ internal static state stateCSSLineCmt => 26;
 // stateError is an infectious error state outside any valid
 // HTML/CSS/JS construct.
 internal static state stateError => 27;
+// stateMetaContent occurs inside a HTML meta element content attribute.
+internal static state stateMetaContent => 28;
+// stateMetaContentURL occurs inside a "url=" tag in a HTML meta element content attribute.
+internal static state stateMetaContentURL => 29;
 // stateDead marks unreachable code after a {{break}} or {{continue}}.
-internal static state stateDead => 28;
+internal static state stateDead => 30;
 
 // isComment is true for any state that contains content meant for template
 // authors & maintainers, not for end-users or machines.
@@ -252,6 +267,8 @@ internal static element elementStyle => 2;
 internal static element elementTextarea => 3;
 // elementTitle corresponds to the RCDATA <title> element.
 internal static element elementTitle => 4;
+// elementMeta corresponds to the HTML <meta> element.
+internal static element elementMeta => 5;
 
 //go:generate stringer -type attr
 
@@ -271,5 +288,7 @@ internal static attr attrStyle => 3;
 internal static attr attrURL => 4;
 // attrSrcset corresponds to a srcset attribute.
 internal static attr attrSrcset => 5;
+// attrMetaContent corresponds to the content attribute in meta HTML element.
+internal static attr attrMetaContent => 6;
 
 } // end template_package

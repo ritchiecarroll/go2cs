@@ -33,7 +33,7 @@ private static readonly @string cryptoCipherUseOfGcmWithˢ = "crypto/cipher: use
 // An exception is when the underlying [Block] was created by aes.NewCipher
 // on systems with hardware support for AES. See the [crypto/aes] package documentation for details.
 public static (AEAD, error) NewGCM(Block cipher) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoCipherUseOfGcmWithˢ));
     }
     return newGCM(cipher, gcmStandardNonceSize, gcmTagSize);
@@ -47,7 +47,7 @@ public static (AEAD, error) NewGCM(Block cipher) {
 // cryptosystem that uses non-standard nonce lengths. All other users should use
 // [NewGCM], which is faster and more resistant to misuse.
 public static (AEAD, error) NewGCMWithNonceSize(Block cipher, nint size) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoCipherUseOfGcmWithˢ));
     }
     return newGCM(cipher, size, gcmTagSize);
@@ -62,7 +62,7 @@ public static (AEAD, error) NewGCMWithNonceSize(Block cipher, nint size) {
 // cryptosystem that uses non-standard tag lengths. All other users should use
 // [NewGCM], which is more resistant to misuse.
 public static (AEAD, error) NewGCMWithTagSize(Block cipher, nint tagSize) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoCipherUseOfGcmWithˢ));
     }
     return newGCM(cipher, gcmStandardNonceSize, tagSize);
@@ -74,7 +74,7 @@ private static readonly @string cryptoCipherUseOfGcmWithˢ2 = "crypto/cipher: us
 internal static (AEAD, error) newGCM(Block cipher, nint nonceSize, nint tagSize) {
     var (c, ok) = cipher._<ж<aes.Block>>(ᐧ);
     if (!ok) {
-        if (fips140only.Enabled) {
+        if (fips140only.Enforced()) {
             return (default!, errors.New(cryptoCipherUseOfGcmWithˢ2));
         }
         return newGCMFallback(cipher, nonceSize, tagSize);
@@ -93,7 +93,7 @@ private static readonly @string cipherˢ = "cipher: NewGCMWithRandomNonce requir
 
 // NewGCMWithRandomNonce returns the given cipher wrapped in Galois Counter
 // Mode, with randomly-generated nonces. The cipher must have been created by
-// [aes.NewCipher].
+// [crypto/aes.NewCipher].
 //
 // It generates a random 96-bit nonce, which is prepended to the ciphertext by Seal,
 // and is extracted from the ciphertext by Open. The NonceSize of the AEAD is zero,

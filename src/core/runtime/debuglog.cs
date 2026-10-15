@@ -24,6 +24,7 @@
 namespace go;
 
 using abi = @internal.abi_package;
+using byteorder = @internal.byteorder_package;
 using atomic = @internal.runtime.atomic_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
@@ -133,10 +134,11 @@ internal static UntypedInt debugLogHex => 6;
 internal static UntypedInt debugLogPtr => 7;
 internal static UntypedInt debugLogString => 8;
 internal static UntypedInt debugLogConstString => 9;
-internal static UntypedInt debugLogStringOverflow => 10;
+internal static UntypedInt debugLogHexdump => 10;
+internal static UntypedInt debugLogOverflow => 11;
 
-internal static UntypedInt debugLogPC => 11;
-internal static UntypedInt debugLogTraceback => 12;
+internal static UntypedInt debugLogPC => 12;
+internal static UntypedInt debugLogTraceback => 13;
 
 //go:nosplit
 internal static dloggerFake b(this dloggerFake l, bool x) {
@@ -305,7 +307,7 @@ internal static ж<dloggerImpl> p(this ж<dloggerImpl> Ꮡl, any xʗp) {
         l.w.uvarint(0);
     } else {
         var v = efaceOf(Ꮡx);
-        var exprᴛ1 = (abiꓸKind)((~(~v)._type).Kind_ & abi.KindMask);
+        var exprᴛ1 = (~v)._type.Kind();
         if (exprᴛ1 == abi.Chan || exprᴛ1 == abi.Func || exprᴛ1 == abi.Map || exprᴛ1 == abi.Pointer || exprᴛ1 == abi.UnsafePointer) {
             l.w.uvarint((uint64)(uintptr)(~v).data);
         }
@@ -322,6 +324,36 @@ internal static dloggerFake s(this dloggerFake l, @string x) {
 }
 
 // go2cs generated this placeholder — func s is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
+
+//go:nosplit
+internal static dloggerFake hexdump(this dloggerFake l, @unsafe.Pointer Δp, uintptr bytes) {
+    return l;
+}
+
+//go:nosplit
+internal static ж<dloggerImpl> hexdump(this ж<dloggerImpl> Ꮡl, @unsafe.Pointer Δp, uintptr bytes) {
+    ref var l = ref Ꮡl.DerefOrNull();
+
+    ref var b = ref heap<slice<byte>>(out var Ꮡb);
+    var bb = Ꮡb.Reinterpret<slice<byte>, Δsliceᴛ>();
+    bb.Value.Δarray = (@unsafe.Pointer)Δp;
+    (bb.Value.len, bb.Value.cap) = ((nint)bytes, (nint)bytes);
+    if (len(b) > debugLogStringLimit) {
+        b = b[..(int)(debugLogStringLimit)];
+    }
+
+    l.w.@byte(debugLogHexdump);
+    l.w.uvarint((uint64)(uintptr)Δp);
+    l.w.uvarint((uint64)len(b));
+    l.w.bytes(b);
+
+    if ((uintptr)len(b) != bytes) {
+        l.w.@byte(debugLogOverflow);
+        l.w.uvarint((uint64)bytes - (uint64)len(b));
+    }
+
+    return Ꮡl;
+}
 
 //go:nosplit
 internal static dloggerFake pc(this dloggerFake l, uintptr x) {
@@ -435,14 +467,7 @@ internal static void writeSync(this ref debugLogWriter l, uint64 tick, uint64 na
 //go:nosplit
 internal static void writeUint64LE(this ref debugLogWriter l, uint64 x) {
     array<byte> b = new(8);
-    b[0] = (byte)x;
-    b[1] = (byte)((x >> (int)(8)));
-    b[2] = (byte)((x >> (int)(16)));
-    b[3] = (byte)((x >> (int)(24)));
-    b[4] = (byte)((x >> (int)(32)));
-    b[5] = (byte)((x >> (int)(40)));
-    b[6] = (byte)((x >> (int)(48)));
-    b[7] = (byte)((x >> (int)(56)));
+    byteorder.LEPutUint64(b[..], x);
     l.bytes(b[..]);
 }
 
@@ -531,7 +556,7 @@ internal static uint64 readUint64LEAt(this ref debugLogReader r, uint64 pos) {
         b[i] = (~r.data).b[pos % (uint64)len((~r.data).b)];
         pos++;
     }
-    return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)b[0] | ((uint64)b[1] << (int)(8))) | ((uint64)b[2] << (int)(16))) | ((uint64)b[3] << (int)(24))) | ((uint64)b[4] << (int)(32))) | ((uint64)b[5] << (int)(40))) | ((uint64)b[6] << (int)(48))) | ((uint64)b[7] << (int)(56)));
+    return byteorder.LEUint64(b[..]);
 }
 
 internal static uint64 /*tick*/ peek(this ref debugLogReader r) {

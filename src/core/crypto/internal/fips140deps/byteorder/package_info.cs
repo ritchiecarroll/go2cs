@@ -49,7 +49,7 @@ using static go.crypto.@internal.fips140deps.byteorder_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140deps/byteorder/byteorder.go", "byteorder.cs", "AAoWgqaCpoKmgqaCpoKmgqaCpoKmgqaC")]
+[assembly: go.GoPositionMap("crypto/internal/fips140deps/byteorder/byteorder.go", "byteorder.cs", "AAoSgqaCpoKmgqaCpoKmgqaCpoKmgqaCpoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140deps;

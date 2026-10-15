@@ -10,12 +10,12 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using oldtraceꓸSTWReason = go.@internal.trace.@internal.oldtrace_package.ΔSTWReason;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
+global using tracev1ꓸSTWReason = go.@internal.trace.@internal.tracev1_package.ΔSTWReason;
 using bufio = go.bufio_package;
-using oldtrace = go.@internal.trace.@internal.oldtrace_package;
+using tracev1 = go.@internal.trace.@internal.tracev1_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -42,6 +42,7 @@ using static go.@internal.trace_package;
 [assembly: GoTypeAlias("Region", "ΔRegion")]
 [assembly: GoTypeAlias("Stack", "ΔStack")]
 [assembly: GoTypeAlias("StateTransition", "ΔStateTransition")]
+[assembly: GoTypeAlias("Sync", "ΔSync")]
 [assembly: GoTypeAlias("Task", "ΔTask")]
 [assembly: GoTypeAlias("Time", "ΔTime")]
 // </ExportedTypeAliases>
@@ -68,8 +69,8 @@ using static go.@internal.trace_package;
 [assembly: GoImplicitConv<dataTable<stringID, @string>, ж<dataTable<stringID, @string>>>(Indirect = true)]
 [assembly: GoImplicitConv<evTable, ж<evTable>>(Indirect = true)]
 [assembly: GoImplicitConv<spilledBatch, ж<spilledBatch>>(Indirect = true)]
-[assembly: GoImplicitConv<ΔTime, oldtrace.Timestamp>(Inverted = false, ValueType = "int64")]
 [assembly: GoImplicitConv<ΔTime, timestamp>(Inverted = true, ValueType = "int64")]
+[assembly: GoImplicitConv<ΔTime, tracev1.Timestamp>(Inverted = false, ValueType = "int64")]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -80,19 +81,19 @@ using static go.@internal.trace_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/base.go", "base.cs", "ACRMopSUABQyooKUgpSAgqSCgoKCqqKClAALHvKClICCpIKs0pSmgoKCgpSCppSmgpSClIKCgoKClKrCgpSCgqSCgIK2qLKCgpSCpoKUgoKmrNKCgpTekgASMPYABxCCAAcQgoKClA==")]
-[assembly: go.GoPositionMap("internal/trace/batch.go", "batch.cs", "AB06gqaCpoKmggAICKqCgpSAgsiCgoKClMqCgpSCgpSCgriCgpSCqJKCgoKUgrg=", "", "", "111=Bytes/1/1/3")]
-[assembly: go.GoPositionMap("internal/trace/batchcursor.go", "batchcursor.cs", "ABgw1oKCgqaCpoKmgoKmpqaCpqIAAhQACASCgoKUpoKClKaCgpSmgoKClIKUppSmgqaUgqamlIKCpoKUgqaCgoKUpoKCgpSUgpSmgoKCgpSCgIKCtoKAgoK2")]
-[assembly: go.GoPositionMap("internal/trace/event.go", "event.cs", "AFe0AZKClKYAKFSSAHSCApKSgpSCgoLcggAHEAA2frKosgACGAALAgACEPIAAhoADAKu4oKUgpSCgsqCgpT80oKUgpSCpIKkgqSUrNKClIKUAAoS0oCCpIK4gqSCpIKCgpSUpIKCgpS2lKzSgpSClAALHtKAgqSCgpSCpIKklAAGFNKAgqSClAAFEtKClIKUAAYU0oKUgpSktoLKlLakgoKUgqSkpIKkpIKCpIKC2qSCpIKkgqSCgqSUrNKClIKCAAkUADVs7gAKFNKCgpSApIKkgqSCgoKCgoKUlLaCpIKkgqSCgpSCgqSCgpSCgoKCgsiCpICCgoKCgraqwoKUpoKCgoLugoKCgqamgg==", "270-287:1", "", "266=mustGet/1/2/2,mustGet/2/2/3;465=mustGet/1/1/1;594=mustGet/1/1/2;612=mustGet/1/2/2,mustGet/2/2/3")]
+[assembly: go.GoPositionMap("internal/trace/base.go", "base.cs", "AB5CopSUABMwooKUgpSAgqSCgoKCqqKClAALHvKClICCpIKosoKUgoKs0pSmgoKCgpSCppSmgpSClIKCgoKClKrCgpSCgqSCgIK2qLKCgpSCpoKUgoKmrNKCgpTekgASMPYABxCCAAcQgoKClA==")]
+[assembly: go.GoPositionMap("internal/trace/batch.go", "batch.cs", "ABw6gqaCpoKmgqqCAAgIqoKClICCpICCyIKCgoKUyoKClIKClIKCuIKClIKokoKCgpSCuA==", "", "", "119=Bytes/1/1/3")]
+[assembly: go.GoPositionMap("internal/trace/batchcursor.go", "batchcursor.cs", "ABYu1oKCgqaCpoKmgoKmpqaCpqIAAhQACASCgoKUpoKClKaCgpSmgoKClIKUppSmgqaUgqamlIKCpoKUgqaCgoKUpoKCgpSUgpSmgoKCgpSCgIKCtoKAgoK2")]
+[assembly: go.GoPositionMap("internal/trace/event.go", "event.cs", "AFq8AZKClKYAKFSSAHD4AaSCgoIACxqSkoKUgoKC3IIABRKygoKmgoKC3AAgSpKClIKClAAjUgAIBMqkgpSSuKaClIKUpICCxoCCxoCCxoCCxoCCxoCCxoCCxoCCxoCCtuaigpSUpKSklIKmooKUgpSCppbWlIKUlKSkpLaClJSCpIKklKS2gpSUgqSCpJSktoKClIKUlJSklKSUlKailIKmgoK0grSCgoLGgoKCgraCgpSCgoKUgpSUlIKCpIKCpIKktoKklIKkgoKkgoKkgqS2lIKkgqSCpLaUgqS2yJSmooKCgpSCgoKCgoKmgqaCgoKUlNaigpSClIKCpIKCtpSmooKClKSklKaigoKCgqaigoKCpqKCgtyUAAkWsqiyAAIYAAsCAAIQ8gACGgAMAq7igpSClIKCyoKClPzSgpSClIKkgqSCpJSs0oKUgpQAChLSgIKkgriCpIKkgoKClLaCgoKUtpSs0oKUgpQACx7SgIKkgoKUgqSCpJQABhTSgIKkgpQABRLSgpSClAAGFNKClIKUpLaCypS2pIKClIKkpKSkpIKCpIKC2qSCpKSkgoKCpJSqwoKUgoKCgpSCgu4AHkzSgpSCggAKFgA1bO7u7gAJEtKCgpSApIKCgpSkgqSCgoKCgoKUlLaCpIKkgqSClIKCpIKClIKCgoK2goKCgpSUpIKCgu6AgoKCpKrCgpSmgoKCgu6CgoKCpqaCAAsYgg==", "287-304:1;418-433:1", "", "283=mustGet/1/2/2,mustGet/2/2/3;870=append/1/2/2,append/2/2/3;1017=mustGet/1/1/1;1087=Uint64Value/1/2/3,Uint64Value/2/2/7;1145=mustGet/1/1/2;1163=mustGet/1/2/2,mustGet/2/2/3;1277=mul/1/1/1;1326=Experiments/1/1/2;1508=Format/1/1/3")]
 [assembly: go.GoPositionMap("internal/trace/gc.go", "gc.cs", "AD1uAAgEAAAegoKCgoKCpoaGmpKCgqaUtIKClIKClIKmlJSCgoKUlIK2uKa0uNyCpKa4AAwUgriSgoKClIKClNq0goKSgpKCgoCC2IKCkoKSgoKAguiCgpSCgoKUkpSmtIIABxCCgsqUgpSCgpSCgri4poKCgoKU3ILugoKUpoKClJSUgpSmAAcQgqiSAB9GooKClO6UgoKCgoKCAAcQgqaUgoKCuIKSgoKCgoKCgpSmprKCggAOHoKmgqaCpoKmgoKCAAsYgqaCgpSmgqaCpoKCggAYPNgAAhDygpSUprjcgoKUpoLKgoKUppSmpoKUlIKAgsrIuK7CkoIAAhDSkoKCAAIaAAoCggAOHoKCggACEuKCgoKmuJKCpoKCggANHJSUpqKCgqaCgqKCgIK2goKUysqCgoK43oKCgpSCgoKUgor4goKCuIKUgoKUtLSkyoKmpqrCABAigoKCgIKkgpSCgpSC7sqAgpSkgpS4AA0isp7ilIK4koKCgpSmlIKCgpSqooKCptaCpoKmgg==", "81-83:1;84-86:2;87-89:3")]
-[assembly: go.GoPositionMap("internal/trace/generation.go", "generation.cs", "AClgAAkC7oKCgIKkmKKCooKUgriClJSUlJSUgoKUAAcQlICC2oIACBKCpoCCyIKCpoaospSAgtaAgtaCgpS0goKUgpS0gpSAgtaAgqSkqsqCkoKCgoKUgoKClIKCgqaUrNKClIKCgqaClIKClIK4goK4goKUgriCgpSCuIKCgIK2rNKClIKCgqaUgoKUgriCgriCgpSCuIKUgoKUgoKUgoKUgoKUlICCAAoUgIK2rLKClIKCgqaUgoKUgriCgriCgpSmgoKUpoKClIKCuIKCuAAJFKiSgpSCpoKCpqqigpSCgoKUuA==", "133-135:1;189-208:1")]
+[assembly: go.GoPositionMap("internal/trace/generation.go", "generation.cs", "ACdMooKUAAcQgoKCgpSUgpSUlIKUlJSClIKUgILagpSCAAkUgqaAgsiCAA8oAAkCgpTulIKCgIKklpKCooKUgriClJSUlJSUlIKUAAcQlIKUgILagpSCAAkUgqaAgsiC2LKUgILWgILWgoKUtICC1oKUgILWpICCpKSqyoKSgoKCgpSCgoKUgoKCppSs0oKUgoKCpoKUgoKUgriCgriCgpSCuIKClIK4goKAgras0oKUgoKCppSCgpSCuIKCuIKClIK4gpSCgpSCgpSCgpSCgpSUgIIAChSAgrassoKUgoKCppSCgpSCuIKCuIKClKaCgpSmgoKUgoK4goK4AAkUAAsYgoKUgoKCgriClIKClIKUgqaCgqa0gpSUgoKUgoKCgpSCgoKUgoLKtKaqooKUuKaUgoKm", "271-290:1;600-602:1")]
 [assembly: go.GoPositionMap("internal/trace/mud.go", "mud.cs", "ADR4woKmgriClIK4goKCgpSClIKCgpSClIKCgoLcgIKClJSmAAUU0riCgoKUgoKUlIIAAhDSgpQAAhTygriCmIKClIKCkoKCgpKCgpKCgpSCpriCgoKmypSUgpSUgpQ=", "170-172:1")]
-[assembly: go.GoPositionMap("internal/trace/oldtrace.go", "oldtrace.cs", "AHm8AaKCgoKCgoKCgoKUlpKCgoKmuIKUgpKAgraCgoKUgqaClIKSgoKUgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpSUpqaCyoLugoKCqsKCgpSCuIKUgqaCgqaUgpKCyoKUgqYAARIACgKCgpSUgqaCuAAOHoK2goCCgpSCgsaAgoKUgoLGpKSCgoKkgqSkpIKClKSCgoKUtgANGgAOHKSCpIKkgqSCpIKkpIKkgqSCpIKkgqSCpILIgoKCyoKUlIKCygANHAAJFIK4pKSCgqS4gqSkpKSkgoKClIKCpKaCgoLutpS0pKSCpNykpoKAgsiCgoCCtoKUgoKUAAwaqqKCgg==", "124-128:1;142-146:2;409-420:1", "", "575=addExtraString/1/1/4")]
-[assembly: go.GoPositionMap("internal/trace/order.go", "order.cs", "ACNcAA8ClKaSgpSCgoKClpKCgriUgoKmgoKUgpSClNoASJIBopKSgpSCgIK4gpK4gpKClJSCgpS2poKCAAcQlIKCgoKCgqaCpoKmooLKgtzKgoCCpIKCgoKCpgALFIKClIKUgoCCpIKCgoKmooKCgrimgoCCAAgQgqaCuIKCuJSClIKUgoK4goK4ggAIEoKCpqKSgqSClIKAgoKUkpSClKSUgqa0gsqCypSC7oKmlLiSuMqkgqbGgoCCtoCCtpKAgqSSgpSCgqbYgIKkgoKUgriCpoK2graClIKmooKCgrimgoCCpIKCgoKCprSCgoK4lIKmgqYACxSAgqSCgpSClIKCgriUyqa4tqamgoKCpoKCgqbGgIKkgoKUgqaCgoKUAAsYgoKUgoKm2ICCpIKClIKUpoKClIKUgoKmAAwWgoKClILKgIKkgoKUgpSCgoKCptiAgraSgIKklIKCgqYAEiKAgraCgpSCpoKCpoKCgpSCpoKmgoKUgqYAChCCgILIgriCyoKCgpSCgIKkgqaygoC4goKmgqSAgqSCprKAgqSCgoKClIKClICCpIKmsoCCpIKCgoKUgoKUgIKkggACFAAJAoKCgpSCgoKUlJSClIKAgqSCpqKCgoKCgpSUlIKUgoKAgqSCpqKClJSClIKUgoKAgqSCprSAgqSCprSAgqSCprSAgqSAgqSCpqLKgoKUgIKkgqaigIKkgoKUgqa0gIKkgoKUgoKUgIKkgqaiuIKClICCpIKmooCCpIKClIKClKaUgqa0gIKkgqiSAAkYtIKSgriCkoK4gpKClAARHpKUpKSUABUukoCCpAANIpKCqJKUlICCpIIAFziygpSCqqKCgpSSgpSokoKCpqyygoKCgoKmgqaCgoIACBSSqJKokqaCgoKUgoKUgoKUgoIAECaSgpSCqJKCgriCgoKCpoKCqqKClIKCgoIAAhDyAAcQgg==")]
-[assembly: go.GoPositionMap("internal/trace/reader.go", "reader.cs", "ACJGkoKCgpSUgoKUyAAMGAADEAAKAoKClJQAEyiCgpSAgqSClLiAgsiCgoKUgpTclpKCgpSmprKCgoKClJSUuJSClICCyIKClJSmlKaCgoKCyoKUgIKS3IKCgoCCkoKCtoLagoKU5oKCgoKCgpSU", "98-109:1;162-182:2", "", "48=convertOldFormat/1/1/1")]
-[assembly: go.GoPositionMap("internal/trace/resources.go", "resources.cs", "AC5kogAIDLKUpKSkpKSUAA0kotyylKSkpJQAEyaylKSkpJQACRaygoKUtLSkgqyygpSssoKUrLKClKyygpQAGz6C7oIABhzygpQAAhTygpQ=")]
-[assembly: go.GoPositionMap("internal/trace/summary.go", "summary.cs", "ADqKAaKqwoKClAAkVILugriokoSCuIKUqLKCgoKClIKCgoKUpqKCgoKUgoKUrNKUgriCuIKUgpSClIKUgpSClKzSgpSU3IKCgoKmACFOkgANHrKClJSmuIK2koKUuIKUpoKUpoKCAAsYgIKCgqS2graCgsiCgsiCgoKUlIKmggAHEILcgsq2goK2tIKCgqa0pIKC7IKCgoCCgoIACA6Cgu7agoKmgpSCgIKklNaCgpSkgoCCppS2gpSCgpSCyIKC3JSCgqSCgoKAlIKCgriUgoKkgoLKgoKCgoKUyoKCgramgoK4goKCgpSqooKmgoKCgoKUlIKUlJQADhK6iqKClIKUgoKUgoKClO6CgpSCgpSCgIK2lNa4", "587-600:1", "", "112=UnknownTime/1/1/5;530=Time/1/1/4,snapshotStat/1/1/4;668=Goroutine/1/1/1")]
-[assembly: go.GoPositionMap("internal/trace/value.go", "value.cs", "ABU64qyygpSuwpSU")]
+[assembly: go.GoPositionMap("internal/trace/order.go", "order.cs", "ACNeAA8ClKaSgpSCgoKClpKCgriUgoKmgoKUgpSClKaC2gBIkgGikpKClIKAgriCkriCkoKUlIKClLamgoIABxCUgoKCgoKCpoKmgqaigsqC3MqCgIKkgoKCgoKmAAsUgoKUgpSCgIKkgoKCgqaigoKCuKaCgIIACBCCpoK4goK4lIKUgpSCgriCgriCAAgSgoKmopKCpIKUgoCCgpSSlIKUpJSCprSCyoLKlILugqaUuJK4yqSCpsaCgIK2gIK2koCCpJKClIKCptiAgqSCgpSCuIKmgraCtoKUgqaigoKCuKaCgIKkgoKCgoKmtIKCgriUgqaCpgALFICCpIKClIKUgoKCuJTKpri2pqaCgoKmgoKCpsaAgqSCgpSCpoKCgpQACxiCgpSCgqbYgIKkgoKUgpSmgoKUgpSCgqYADBaCgoKUgsqAgqSCgpSClIKCgoKm2ICCtpKAgqSUgoKCpgASIoCCtoKClIKmgoKmgoKClIKmgqaCgpSCpgAKEIKAgsiCuILKgoKClIKAgqSCprKCgLiCgqaCpICCpIKmsoCCpIKCgoKUgoKUgIKkgqaygIKkgoKCgpSCgpSAgqSCAAIUAAkCgoKClIKCgpSUlIKUgoCCpIKmooKCgoKClJSUgpSCgoCCpIKmooKUlIKUgpSCgoCCpIKmtICCpIKmtICCpIKmtICCpICCpIKmosqCgpSAgqSCpqKAgqSCgpSCprSAgqSCgpSCgpSAgqSCpqK4goKUgIKkgqaigIKkgoKUgoKUppSCprSAgqSCqJIACRi0gpKCuIKSgriCkoKUABEekpSkpJQAFS6SgIKkAA0ikoKokpSUgIKkggAXOLKClIKqooKClJKClKiSrLKCgoKCgqaCpoKCggAIFJKokqiSpoKCgpSCgpSCgpSCggAQJpKClIKokoKCuIKCgoKmgoKqooKUgoKCggACEPIABxCCABMs")]
+[assembly: go.GoPositionMap("internal/trace/reader.go", "reader.cs", "ADJskoKSgpSUgoKUyAAMGL4ACgSCuIKUgoKCpoKUgoKSgpQAEyiCgpSAgqSClLiAgsiCgpSClIK4goKClJSClICCyIKClJSmlKaCgoKCyoKUgIKS3IKCgoCCkoKCtoLagoKUAAkKooKUgoKUgoKU3IKCqJKCgoKCgpSqwpSCgoKUpqaygoKCgpSUlJSmpoKCgoKCgpSU", "134-145:1;172-192:2", "", "65=convertV1Trace/1/1/1")]
+[assembly: go.GoPositionMap("internal/trace/resources.go", "resources.cs", "AC5kogAIDLKUpKSkpKSUAA0kotyylKSkpJQAEyaylKSkpJQACRaygoKUtLSkgqyygpSssoKUrLKClKyygpQAGj6SAAYQkgAGHPKClAACFPKClA==")]
+[assembly: go.GoPositionMap("internal/trace/summary.go", "summary.cs", "ADqKAaKqwoKClAAkVILugriokoSCuIKUqLKCgoKClIKCgoKUpqKCgoKUgoKUrNKUgriCuIKUgpSClIKUgpSClKzSgpSU3IKCgoKmACFOkgANHrKClJSmuIK2koKUuIKUyoKCgu6ClKSk7IKUpqSmgoKCAAsYgIKCgqS2graCgsiCgsiCgoKUlIKmggAHEILcgsq2goK2tIKCgqa0pIKC7IKCgoCCgoIACA6Cgu7agoKmgpSCgIKklNaCgpSkgoCCppS2gpSCgpSCyIKC3JSCgqSCgoKAlIKCgriUgoKkgoLKgoKCgoKUyoKCgramgoK4goKCgpSqooKmgoKCgoKUlIKUlJQADhK6iqKClIKUgoKUgoKClO6CgpSCgpSCgIK2lNa4", "618-631:1", "", "112=UnknownTime/1/1/5;565=Time/1/1/4,snapshotStat/1/1/4;703=Goroutine/1/1/1")]
+[assembly: go.GoPositionMap("internal/trace/tracev1.go", "tracev1.cs", "AHe6AaKCgoKCgoKCgoKUlpKCgoKmuIKUgpKAgraCgoKUgqaClIKSgoKUgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpSUpqaCyoLugoKCqsKCgpSCuIKUgqaCgqaUgpKCyoKUgqYAARIACgKCgpSUgqaCuAAOHoK2goCCgpSCgsaAgoKUgoLGpKSCgoKkgqSkpIKClKSCgoKUtgANGgAOHKSCpIKkgqSCpIKkpIKkgqSCpIKkgqSCpILIgoKCyoKUlIKCygANHAAJFIK4pKSCgqS4gqSkpKSkgoKClIKCpKaCgoLutpS0pKSCpNykpoKAgsiCgoCCtoKUgoKUAAwaqqKCgg==", "123-127:1;141-145:2;408-419:1", "", "573=addExtraString/1/1/4")]
+[assembly: go.GoPositionMap("internal/trace/value.go", "value.cs", "ABhE4qyygpTaooKUlJSokqiS")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -133,7 +134,6 @@ public static partial class trace_package
     internal partial struct mmuBand {}
     internal partial struct mmuSeries {}
     [GoValueClone("hist")] internal partial struct mud {}
-    [GoValueClone("extraArr")] internal partial struct oldTraceConverter {}
     internal partial struct ordering {}
     internal partial struct pState {}
     internal partial struct queue<T> {}
@@ -141,22 +141,26 @@ public static partial class trace_package
     internal partial struct rangeState {}
     internal partial struct rangeType {}
     internal partial struct schedCtx {}
+    internal partial struct schedReqs {}
     internal partial struct seqCounter {}
     internal partial struct spilledBatch {}
     internal partial struct stack {}
     internal partial struct stackID {}
     internal partial struct stringID {}
+    internal partial struct sync {}
     internal partial struct taskState {}
     internal partial struct timedEventArgs {}
     internal partial struct timestamp {}
     internal partial struct totalUtil {}
+    [GoValueClone("extraArr")] internal partial struct traceV1Converter {}
     internal partial struct userRegion {}
     internal partial struct utilHeap {}
+    public partial interface EventDetails<ΔT> {}
+    public partial struct ClockSnapshot {}
+    public partial struct EventConfig<T> {}
     public partial struct EventKind {}
     public partial struct ExperimentalBatch {}
-    public partial struct ExperimentalData {}
     public partial struct ExperimentalEvent {}
-    public partial struct Frame {}
     public partial struct GoID {}
     public partial struct GoState {}
     public partial struct GoroutineExecStats {}
@@ -170,6 +174,7 @@ public static partial class trace_package
     public partial struct ResourceID {}
     public partial struct ResourceKind {}
     public partial struct StackFrame {}
+    public partial struct StackSample {}
     public partial struct Summarizer {}
     public partial struct Summary {}
     public partial struct TaskID {}
@@ -180,6 +185,7 @@ public static partial class trace_package
     public partial struct UtilWindow {}
     public partial struct Value {}
     public partial struct ValueKind {}
+    public partial struct constraint {}
     [GoValueClone("@base")] public partial struct ΔEvent {}
     public partial struct ΔLabel {}
     public partial struct ΔLog {}
@@ -188,6 +194,7 @@ public static partial class trace_package
     public partial struct ΔRegion {}
     public partial struct ΔStack {}
     public partial struct ΔStateTransition {}
+    public partial struct ΔSync {}
     public partial struct ΔTask {}
     public partial struct ΔTime {}
     // </TypeAccessibility>
@@ -205,15 +212,16 @@ public static partial class trace_package
     [GoInit] internal static void initᴛᴛimportꓸencodingꓸbinary() => builtin.initPackage(typeof(encoding.binary_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸevent() => builtin.initPackage(typeof(go.@internal.trace.event_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸeventꓸgo122() => builtin.initPackage(typeof(go.@internal.trace.@event.go122_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸinternalꓸoldtrace() => builtin.initPackage(typeof(go.@internal.trace.@internal.oldtrace_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸinternalꓸtracev1() => builtin.initPackage(typeof(go.@internal.trace.@internal.tracev1_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸtracev2() => builtin.initPackage(typeof(go.@internal.trace.tracev2_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸversion() => builtin.initPackage(typeof(go.@internal.trace.version_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸiter() => builtin.initPackage(typeof(iter_package));
     [GoInit] internal static void initᴛᴛimportꓸmath() => builtin.initPackage(typeof(math_package));
+    [GoInit] internal static void initᴛᴛimportꓸregexp() => builtin.initPackage(typeof(regexp_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸsort() => builtin.initPackage(typeof(sort_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(go.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>

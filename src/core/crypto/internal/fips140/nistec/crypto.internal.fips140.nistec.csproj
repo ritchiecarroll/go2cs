@@ -167,9 +167,9 @@
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/constanttime/crypto.internal.constanttime.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/check/crypto.internal.fips140.check.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/nistec/fiat/crypto.internal.fips140.nistec.fiat.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/subtle/crypto.internal.fips140.subtle.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/byteorder/crypto.internal.fips140deps.byteorder.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/cpu/crypto.internal.fips140deps.cpu.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />

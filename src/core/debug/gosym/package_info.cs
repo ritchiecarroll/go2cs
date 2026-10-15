@@ -10,6 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using abiꓸArrayType = go.@internal.abi_package.ΔArrayType;
+global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
+global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
+global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
+global using abiꓸKind = go.@internal.abi_package.ΔKind;
+global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
+global using abiꓸName = go.@internal.abi_package.ΔName;
+global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 // </ImportedTypeAliases>
 
 using go;
@@ -52,8 +60,8 @@ using static go.debug.gosym_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("debug/gosym/pclntab.go", "pclntab.cs", "AEqiAQAMEoKCgoKUgoKUgoK0tLSCpJSmgpKs0oKUgq7igpSCgqYAAhYACAIAAh4ADgKCAAcYooKUqNKCgoIABxCUgpTKlqaCgoKUtLS0tLS0tLSUpoKUhqiUgoKCgoKCgoKCgqSCgoKCgoKCgoKkgoKCgoKCgoKCgqS0puSCgriCgoKCgoKCgoKCAAcQlNiykoKUloKospKCgoKCgoKmgqiSgIKkgoKCqJKAgqSCgoKokqiSgpSosgAJFpKokoKClKiSqJKClAAIFLKCqJKotqaUpoCigKKAooCigKqygriCgpSCgqjCgoKUgpSUgoKCgqyypJKSgoKmAAIS4oKmkpKSkpKSgoKCgpTKgpSCgpSCpqaUqOKCgriCgpSCgujigoK4goKUgoKCgoKUpoKUgoCCpOjigoK4goKCrLKCgoKCgoKUlJSCgqbo4oKUgpSUgoKCpoKCgoKmoqrygoK4goK0", "209-212:1;251-253:2;254-256:3;303-305:1;337-339:1;570-574:1;587-591:1;619-623:1;686-688:1", "", "354=nameOff/1/1/3,funcName/1/1/3")]
-[assembly: go.GoPositionMap("debug/gosym/symtab.go", "symtab.cs", "ACFGkK7SgoKUgpSU6qLcgriCpoKCpoCCpKyypoKCuJSClMqCqJKCgIKCgsqmpAA5eoKCloKClIKCyoK0tIKkgoKClIKClJSCgoKClIKCgoKUlIKCgoKmgoKUgriCgoKCgpSClIKUgoKmgoKUgsqCgpSCgpSCgqiSgoKCgqaUgoKCgsiClIKClIKCpoKUlKzSgoKClIKmgoKUgoKCgoKSgoKCgoKCgqaCgoKCgpSClLSClIKSgoKUgIKktpS0pIKUgqaClIKUgoKUyoKCgpSUpoKUpoKClpKCgIK2gqaCgoKClIKU2oCCpIKoooKCgpS0tPqCgoKCgoKCgoK4koKClIKClLSCgrSCgrbIgpSClKqigoKCgpS0pLaq4oCCpIKClJSs8oKCpoKCgpSmgoKUgoKCgqaqtIKClILIqqKCgoKmqJKCgpSCyAAMHAAJAgAAEJSCgpKUyMiClILI6IKUpoKCppSCuIKCgoKCgpSmgoKSgsiClNaUAAoWgAAKFIIAChaCgoKUgg==", "338-341:1;355-401:2")]
+[assembly: go.GoPositionMap("debug/gosym/pclntab.go", "pclntab.cs", "AEykAQAMEoKCgoKUgoKUgoK0tLSCpJSmgpKs0oKUgq7igpSCgqYAAhYACAIAAh4ADgKCqqKClKjSgoKCAAcQlIKUypamyoKUlLS0tLS0tLS0lKaClIaolIKCgoKCgoKCgoKkgoKCgoKCgoKCpIKCgoKCgoKCgoKktKbkgoK4goKCgoKCgoKCggAHEJTYspKClJaCqLKSgoKCgoKCpoKokoCCpIKCgqiSgIKkgoKCqJKokoKUqLIACRaSqJKCgpSokqiSgpQACBSygqiSqLamlKaAooCigKKAooCqsoK4goKUgoKowoKClIKUlIKCgoKssqSSkoKCpgACEuKCppKSkpKSkoKCgoKUyoKUgoKUgqamlKjigoK4goKUgoLo4oKCuIKClIKCgoKClKaClIKAgqTo4oKCuIKCgqyygoKCgoKClJSUgoKm6OKClIKUlIKCgqaCgoKCpqKq8oKCuIKCtA==", "203-206:1;250-252:2;253-255:3;302-304:1;336-338:1;569-573:1;586-590:1;618-622:1;685-687:1", "", "356=nameOff/1/1/3,funcName/1/1/3")]
+[assembly: go.GoPositionMap("debug/gosym/symtab.go", "symtab.cs", "ACFGkK7SgoKUgpSU6qLcgriCpoKCpoCCpKyypoKCuJSClMqCqJKCgIKCgsqmpAA5eoKCloKClIKCyoK0tIKkgoKClIKClJSCgoKClIKCgoKUlIKCgoKmgoKUgriCgoKCgpSClIKUgoKmgoKUgsqCgpSCgpSCgqiSgoKCgqaUgoKCgsiClIKClIKCpoKUlK7igoKClIKmgoKUgoKCgoKSgoKCgoKCgqaCgoKCgpSClLSClIKSgoKUgIKktpS0pIKUgqaClIKUgoKUyoKCgpSUpoKUpoKClpKCgIK2gqaCgoKClIKU2oCCpIKoooKCgpS0tPqCgoKCgoKCgoK4koKClIKClLSCgrSCgrbIgpSClKqigoKCgpS0pLaq4oCCpIKClJSs8oKCpoKCgpSmgoKUgoKCgqaqtIKClILIqqKCgoKmqJKCgpSCyAAMHAAJAgAAEJSCgpKUyMiClILI6IKUpoKCppSCuIKCgoKCgpSmgoKSgsiClNaUAAoWgAAKFIIAChaCgoKUgg==", "339-342:1;356-402:2")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;
@@ -93,6 +101,7 @@ public static partial class gosym_package
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸencodingꓸbinary() => builtin.initPackage(typeof(encoding.binary_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸabi() => builtin.initPackage(typeof(@internal.abi_package));
     [GoInit] internal static void initᴛᴛimportꓸsort() => builtin.initPackage(typeof(sort_package));
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));

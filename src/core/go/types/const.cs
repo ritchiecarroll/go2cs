@@ -8,10 +8,10 @@ namespace go.go;
 
 using constant = global::go.go.constant_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using math = math_package;
 using ast = global::go.go.ast_package;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -40,7 +40,7 @@ internal static void overflow(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, token
     // x.typ cannot be a type parameter (type
     // parameters cannot be constant types).
     if (isTyped(x.typ)) {
-        Ꮡcheck.representable(Ꮡx, under(x.typ)._<ж<Basic>>());
+        Ꮡcheck.representable(Ꮡx, x.typ.Underlying()._<ж<Basic>>());
         return;
     }
 

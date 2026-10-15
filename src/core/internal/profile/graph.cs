@@ -267,12 +267,8 @@ public static ж<Graph> NewGraph(ж<Profile> Ꮡprof, ж<Options> Ꮡo) {
         if (dw == 0 && w == 0) {
             continue;
         }
-        foreach (var (k, _) in seenNode) {
-            delete(seenNode, k);
-        }
-        foreach (var (k, _) in seenEdge) {
-            delete(seenEdge, k);
-        }
+        clear(seenNode);
+        clear(seenEdge);
         ж<Node> parent = default!;
         // A residual edge goes over one or more nodes that were not kept.
         var residual = false;

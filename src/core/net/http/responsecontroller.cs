@@ -70,7 +70,7 @@ public static error Flush(this ref ResponseController c) {
 }
 
 // Hijack lets the caller take over the connection.
-// See the Hijacker interface for details.
+// See the [Hijacker] interface for details.
 public static (net.Conn, ж<bufio.ReadWriter>, error) Hijack(this ref ResponseController c) {
     var rw = c.rw;
     while (ᐧ) {

@@ -142,7 +142,7 @@ internal static bool includes(this ж<Δterm> Ꮡx, ΔType t) {
 
     var u = t;
     if (x.tilde) {
-        u = under(u);
+        u = u.Underlying();
     }
     return Identical(x.typ, u);
 }
@@ -190,11 +190,11 @@ internal static bool disjoint(this ref Δterm x, ж<Δterm> Ꮡy) {
     }
     var ux = x.typ;
     if (y.tilde) {
-        ux = under(ux);
+        ux = ux.Underlying();
     }
     var uy = y.typ;
     if (x.tilde) {
-        uy = under(uy);
+        uy = uy.Underlying();
     }
     return !Identical(ux, uy);
 }

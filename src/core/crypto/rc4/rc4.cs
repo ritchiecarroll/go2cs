@@ -36,7 +36,7 @@ internal static readonly @string cryptoRc4UseOfRc4IsNotˢ = "crypto/rc4: use of 
 // NewCipher creates and returns a new [Cipher]. The key argument should be the
 // RC4 key, at least 1 byte and at most 256 bytes.
 public static (ж<Cipher>, error) NewCipher(slice<byte> key) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoRc4UseOfRc4IsNotˢ));
     }
     nint k = len(key);
@@ -60,9 +60,7 @@ public static (ж<Cipher>, error) NewCipher(slice<byte> key) {
 // Deprecated: Reset can't guarantee that the key will be entirely removed from
 // the process's memory.
 public static void Reset(this ref Cipher c) {
-    foreach (var (i, _) in c.s) {
-        c.s[i] = 0;
-    }
+    clear(c.s[..]);
     (c.i, c.j) = (0, 0);
 }
 

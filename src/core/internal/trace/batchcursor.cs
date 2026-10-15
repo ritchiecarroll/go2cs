@@ -6,11 +6,9 @@ namespace go.@internal;
 using cmp = cmp_package;
 using binary = encoding.binary_package;
 using fmt = fmt_package;
-using @event = go.@internal.trace.event_package;
-using go122 = go.@internal.trace.@event.go122_package;
+using tracev2 = go.@internal.trace.tracev2_package;
 using encoding;
 using go.@internal.trace;
-using go.@internal.trace.@event;
 
 partial class trace_package {
 
@@ -72,8 +70,8 @@ internal static nint compare(this ref batchCursor b, ж<batchCursor> Ꮡa) {
 // be the case for every event in a plain EventBatch.
 internal static (nint, timestamp, error) readTimedBaseEvent(slice<byte> b, ref baseEvent e) {
     // Get the event type.
-    var typ = ((@event.Type)b[0]);
-    var specs = go122.Specs();
+    var typ = ((tracev2.EventType)b[0]);
+    var specs = tracev2.Specs();
     if ((nint)(uint8)typ >= len(specs)) {
         return (0, 0, fmt.Errorf("found invalid event type: %v"u8, typ));
     }
@@ -107,7 +105,7 @@ internal static (nint, timestamp, error) readTimedBaseEvent(slice<byte> b, ref b
 
 internal static slice<ж<batchCursor>> heapInsert(slice<ж<batchCursor>> heap, ж<batchCursor> Ꮡbc) {
     // Add the cursor to the end of the heap.
-    heap = append(heap, Ꮡbc);
+    heap = builtin.append(heap, Ꮡbc);
 
     // Sift the new entry up to the right place.
     heapSiftUp(heap, len(heap) - 1);

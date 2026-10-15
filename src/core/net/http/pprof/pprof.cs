@@ -67,7 +67,7 @@
 // in your browser.
 //
 // For a study of the facility in action, visit
-// https://blog.golang.org/2011/06/profiling-go-programs.html.
+// https://go.dev/blog/pprof.
 namespace go.net.http;
 
 using bufio = bufio_package;
@@ -76,6 +76,7 @@ using context = context_package;
 using fmt = fmt_package;
 using html = html_package;
 using godebug = go.@internal.godebug_package;
+using goexperiment = go.@internal.goexperiment_package;
 using profile = go.@internal.profile_package;
 using io = io_package;
 using log = log_package;
@@ -416,6 +417,7 @@ internal static (ж<profile.Profile>, error) collectProfile(ж<pprof.Profile> �
 internal static map<handler, bool> profileSupportsDelta = new map<handler, bool>{
     ["allocs"u8] = true,
     ["block"u8] = true,
+    ["goroutineleak"u8] = true,
     ["goroutine"u8] = true,
     ["heap"u8] = true,
     ["mutex"u8] = true,
@@ -434,6 +436,12 @@ internal static map<@string, @string> profileDescriptions = new map<@string, @st
     ["threadcreate"u8] = "Stack traces that led to the creation of new OS threads"u8,
     ["trace"u8] = "A trace of execution of the current program. You can specify the duration in the seconds GET parameter. After you get the trace file, use the go tool trace command to investigate the trace."u8
 };
+
+[GoInit] internal static void initΔ1() {
+    if (goexperiment.GoroutineLeakProfile) {
+        profileDescriptions["goroutineleak"u8] = "Stack traces of all leaked goroutines. Use debug=2 as a query parameter to export in the same format as an unrecovered panic."u8;
+    }
+}
 
 partial struct profileEntry {
     public @string Name;

@@ -50,7 +50,7 @@ using static go.@internal.chacha8rand_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/chacha8rand/chacha8.go", "chacha8.cs", "ABMoAA8wAAkCgoKUgqiyAAcSwoKCgoKs0oIABxCCgoKClIKCgoIAAxDigoKCgoKClKYAAhDygoKCgoKUAAgKgqiygpSCgpSClIKCgoKClA==", "", "", "58=LEUint64/1/4/1,LEUint64/2/4/2,LEUint64/3/4/3,LEUint64/4/4/4")]
+[assembly: go.GoPositionMap("internal/chacha8rand/chacha8.go", "chacha8.cs", "ABk8AA8wAAkCgoKUgqiyAAcSwoKCgoKs0oIABxCCgoKClIKCgoIAAxDigoKCgoKClKYAAhDygoKCgoKUAAgKgqiygpSCgpSClIKCgoKClA==", "", "", "64=LEUint64/1/4/1,LEUint64/2/4/2,LEUint64/3/4/3,LEUint64/4/4/4")]
 [assembly: go.GoPositionMap("internal/chacha8rand/chacha8_generic.go", "chacha8_generic.cs", "ADqWApSCggAEnAGSgoKCgoKCgoKCgoKC")]
 // </GoSourcePositionMaps>
 

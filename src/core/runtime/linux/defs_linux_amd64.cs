@@ -9,6 +9,7 @@ partial class runtime_package {
 internal static UntypedInt _EINTR => 0x4;
 internal static UntypedInt _EAGAIN => 0xb;
 internal static UntypedInt _ENOMEM => 0xc;
+internal static UntypedInt _ENOSYS => 0x26;
 
 internal static UntypedInt _PROT_NONE => 0x0;
 internal static UntypedInt _PROT_READ => 0x1;

@@ -8,214 +8,85 @@ using atomic = @internal.runtime.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using ꓸꓸꓸuintptr = Span<uintptr>;
 
 partial class runtime_package {
 
-internal partial struct syscall_syscall_args /*dyn*/ {
-    internal uintptr fn, a1, a2, a3, r1, r2, err;
+internal static partial void libc_error_trampoline();
+
+internal partial struct libc_error_addr_args /*dyn*/ {
+    internal uintptr addr;
 }
 
-// The X versions of syscall expect the libc call to return a 64-bit result.
-// Otherwise (the non-X version) expects a 32-bit result.
-// This distinction is required because an error is indicated by returning -1,
-// and we need to know whether to check 32 or 64 bits of the result.
-// (Some libc functions that return 32 bits put junk in the upper 32 bits of AX.)
-
-// golang.org/x/sys linknames syscall_syscall
-// (in addition to standard package syscall).
-// Do not remove or change the type signature.
+// libc_error_addr puts the libc error
+// address into addr.
 //
-//go:linkname syscall_syscall syscall.syscall
-//go:nosplit
-internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscall(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    uintptr err = default!;
-
-    ref var args = ref heap<syscall_syscall_args>(out var Ꮡargs);
-    args = new syscall_syscall_args(fn, a1, a2, a3, r1, r2, err);
-    entersyscall();
-    libcCall((@unsafe.Pointer)abi.FuncPCABI0(syscall), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    exitsyscall();
-    return (args.r1, args.r2, args.err);
-}
-
-internal static partial void syscall();
-
-internal partial struct syscall_syscallX_args /*dyn*/ {
-    internal uintptr fn, a1, a2, a3, r1, r2, err;
-}
-
-//go:linkname syscall_syscallX syscall.syscallX
-//go:nosplit
-internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscallX(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    uintptr err = default!;
-
-    ref var args = ref heap<syscall_syscallX_args>(out var Ꮡargs);
-    args = new syscall_syscallX_args(fn, a1, a2, a3, r1, r2, err);
-    entersyscall();
-    libcCall((@unsafe.Pointer)abi.FuncPCABI0(syscallX), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    exitsyscall();
-    return (args.r1, args.r2, args.err);
-}
-
-internal static partial void syscallX();
-
-internal partial struct syscall_syscall6_args /*dyn*/ {
-    internal uintptr fn, a1, a2, a3, a4, a5, a6, r1, r2, err;
-}
-
-// golang.org/x/sys linknames syscall.syscall6
-// (in addition to standard package syscall).
-// Do not remove or change the type signature.
-//
-// syscall.syscall6 is meant for package syscall (and x/sys),
-// but widely used packages access it using linkname.
-// Notable members of the hall of shame include:
-//   - github.com/tetratelabs/wazero
-//
-// See go.dev/issue/67401.
-//
-//go:linkname syscall_syscall6 syscall.syscall6
-//go:nosplit
-internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscall6(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    uintptr err = default!;
-
-    ref var args = ref heap<syscall_syscall6_args>(out var Ꮡargs);
-    args = new syscall_syscall6_args(fn, a1, a2, a3, a4, a5, a6, r1, r2, err);
-    entersyscall();
-    libcCall((@unsafe.Pointer)abi.FuncPCABI0(syscall6), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    exitsyscall();
-    return (args.r1, args.r2, args.err);
-}
-
-internal static partial void syscall6();
-
-internal partial struct syscall_syscall9_args /*dyn*/ {
-    internal uintptr fn;
-    internal uintptr a1;
-    internal uintptr a2;
-    internal uintptr a3;
-    internal uintptr a4;
-    internal uintptr a5;
-    internal uintptr a6;
-    internal uintptr a7;
-    internal uintptr a8;
-    internal uintptr a9;
-}
-
-// golang.org/x/sys linknames syscall.syscall9
-// (in addition to standard package syscall).
-// Do not remove or change the type signature.
-//
-//go:linkname syscall_syscall9 syscall.syscall9
 //go:nosplit
 //go:cgo_unsafe_args
-internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscall9(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6, uintptr a7, uintptr a8, uintptr a9) {
+internal static void libc_error_addr(ж<ж<int32>> Ꮡaddr) {
+    ref var args = ref heap(new libc_error_addr_args((uintptr)Ꮡaddr.OrTypedNil()), out var Ꮡargs);
+
+    libcCall((@unsafe.Pointer)abi.FuncPCABI0(libc_error_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
+}
+
+// libcCallInfo is a structure used to pass parameters to the system call.
+partial struct libcCallInfo {
+    internal uintptr fn;
+    internal uintptr n; // number of parameters
+    internal uintptr args; // parameters
+    internal uintptr r1, r2; // return values
+}
+
+// syscall_syscalln is a wrapper around the libc call with variable arguments.
+//
+//go:linkname syscall_syscalln syscall.syscalln
+//go:nosplit
+//go:uintptrkeepalive
+internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscalln(uintptr fn, params ꓸꓸꓸuintptr argsʗp) {
     uintptr r1 = default!;
     uintptr r2 = default!;
     uintptr err = default!;
-    ref var args = ref heap(new syscall_syscall9_args(fn, a1, a2, a3, a4, a5, a6, a7, a8, a9), out var Ꮡargs);
+    var args = argsʗp.sslice();
 
     entersyscall();
-    libcCall((@unsafe.Pointer)abi.FuncPCABI0(syscall9), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
+    (r1, r2, err) = syscall_rawsyscalln(fn, args.ꓸꓸꓸ);
     exitsyscall();
     return (r1, r2, err);
 }
 
-internal static partial void syscall9();
-
-internal partial struct syscall_syscall6X_args /*dyn*/ {
-    internal uintptr fn, a1, a2, a3, a4, a5, a6, r1, r2, err;
-}
-
-//go:linkname syscall_syscall6X syscall.syscall6X
-//go:nosplit
-internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscall6X(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    uintptr err = default!;
-
-    ref var args = ref heap<syscall_syscall6X_args>(out var Ꮡargs);
-    args = new syscall_syscall6X_args(fn, a1, a2, a3, a4, a5, a6, r1, r2, err);
-    entersyscall();
-    libcCall((@unsafe.Pointer)abi.FuncPCABI0(syscall6X), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    exitsyscall();
-    return (args.r1, args.r2, args.err);
-}
-
-internal static partial void syscall6X();
-
-internal partial struct syscall_syscallPtr_args /*dyn*/ {
-    internal uintptr fn, a1, a2, a3, r1, r2, err;
-}
-
-// golang.org/x/sys linknames syscall.syscallPtr
-// (in addition to standard package syscall).
-// Do not remove or change the type signature.
+// syscall_rawsyscalln is a wrapper around the libc call with variable arguments.
+// The scheduler is not notified about the system call.
+// The syscall is executed on the current goroutine thread rather than on a
+// dedicated syscall thread.
 //
-//go:linkname syscall_syscallPtr syscall.syscallPtr
+//go:linkname syscall_rawsyscalln syscall.rawsyscalln
 //go:nosplit
-internal static (uintptr r1, uintptr r2, uintptr err) syscall_syscallPtr(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
+//go:uintptrkeepalive
+internal static (uintptr r1, uintptr r2, uintptr err) syscall_rawsyscalln(uintptr fn, params ꓸꓸꓸuintptr argsʗp) {
     uintptr err = default!;
+    var args = argsʗp.slice();
 
-    ref var args = ref heap<syscall_syscallPtr_args>(out var Ꮡargs);
-    args = new syscall_syscallPtr_args(fn, a1, a2, a3, r1, r2, err);
-    entersyscall();
-    libcCall((@unsafe.Pointer)abi.FuncPCABI0(syscallPtr), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    exitsyscall();
-    return (args.r1, args.r2, args.err);
+    var c = Ꮡ(new libcCallInfo(
+        fn: fn,
+        n: (uintptr)len(args)
+    ));
+    if ((~c).n != 0) {
+        c.Value.args = (uintptr)(uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡ(args, 0)));
+    }
+    libcCall((@unsafe.Pointer)abi.FuncPCABI0(syscallN_trampoline), @unsafe.Pointer.FromPinnedBox(c));
+    {
+        var gp = getg(); if (gp != nil && (~gp).m != nil && (~(~gp).m).errnoAddr != nil){
+            err = (uintptr)((~(~gp).m).errnoAddr.Value);
+        } else {
+            ref var errnoAddr = ref heap<ж<int32>>(out var ᏑerrnoAddr);
+            libc_error_addr(ᏑerrnoAddr);
+            err = (uintptr)(errnoAddr.Value);
+        }
+    }
+    return ((~c).r1, (~c).r2, err);
 }
 
-internal static partial void syscallPtr();
-
-internal partial struct syscall_rawSyscall_args /*dyn*/ {
-    internal uintptr fn, a1, a2, a3, r1, r2, err;
-}
-
-// golang.org/x/sys linknames syscall_rawSyscall
-// (in addition to standard package syscall).
-// Do not remove or change the type signature.
-//
-//go:linkname syscall_rawSyscall syscall.rawSyscall
-//go:nosplit
-internal static (uintptr r1, uintptr r2, uintptr err) syscall_rawSyscall(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    uintptr err = default!;
-
-    ref var args = ref heap<syscall_rawSyscall_args>(out var Ꮡargs);
-    args = new syscall_rawSyscall_args(fn, a1, a2, a3, r1, r2, err);
-    libcCall((@unsafe.Pointer)abi.FuncPCABI0(syscall), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    return (args.r1, args.r2, args.err);
-}
-
-internal partial struct syscall_rawSyscall6_args /*dyn*/ {
-    internal uintptr fn, a1, a2, a3, a4, a5, a6, r1, r2, err;
-}
-
-// golang.org/x/sys linknames syscall_rawSyscall6
-// (in addition to standard package syscall).
-// Do not remove or change the type signature.
-//
-//go:linkname syscall_rawSyscall6 syscall.rawSyscall6
-//go:nosplit
-internal static (uintptr r1, uintptr r2, uintptr err) syscall_rawSyscall6(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    uintptr err = default!;
-
-    ref var args = ref heap<syscall_rawSyscall6_args>(out var Ꮡargs);
-    args = new syscall_rawSyscall6_args(fn, a1, a2, a3, a4, a5, a6, r1, r2, err);
-    libcCall((@unsafe.Pointer)abi.FuncPCABI0(syscall6), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    return (args.r1, args.r2, args.err);
-}
+internal static partial void syscallN_trampoline();
 
 internal partial struct crypto_x509_syscall_args /*dyn*/ {
     internal uintptr fn, a1, a2, a3, a4, a5;

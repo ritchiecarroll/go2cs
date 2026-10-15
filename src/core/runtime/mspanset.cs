@@ -53,13 +53,22 @@ partial struct spanSet {
 internal static UntypedInt spanSetBlockEntries => 512; // 4KB on 64-bit
 internal static UntypedInt spanSetInitSpineCap => 256; // Enough for 1GB heap on 64-bit
 
-partial struct spanSetBlock {
+partial struct spanSetBlockHeader {
     // Free spanSetBlocks are managed via a lock-free stack.
     internal partial ref lfnode lfnode { get; }
     // popped is the number of pop operations that have occurred on
     // this block. This number is used to help determine when a block
     // may be safely recycled.
     internal atomic.Uint32 popped;
+}
+
+partial struct spanSetBlockHeader2 {
+    internal partial ref spanSetBlockHeader spanSetBlockHeader { get; }
+    internal array<byte> pad = new((uintptr)tagAlign - /* unsafe.Sizeof(spanSetBlockHeader{}) */ (uintptr)24);
+}
+
+partial struct spanSetBlock {
+    internal partial ref spanSetBlockHeader2 spanSetBlockHeader2 { get; }
     // spans is the set of spans in this block.
     internal array<atomicMSpanPointer> spans = new(spanSetBlockEntries);
 }
@@ -138,6 +147,11 @@ retry:
 internal static ж<mspan> pop(this ж<spanSet> Ꮡb) {
     uint32 head = default!;
     uint32 tail = default!;
+    uint32 backoff = default!;
+    // TODO: tweak backoff parameters on other architectures.
+    if (GOARCH == "arm64"u8) {
+        backoff = 128;
+    }
 claimLoop:
     while (ᐧ) {
         var headtail = Ꮡb.of(spanSet.Ꮡindex).load();
@@ -166,6 +180,14 @@ claimLoop:
             if (Ꮡb.of(spanSet.Ꮡindex).cas(headtail, makeHeadTailIndex(want + 1, tail))) {
                 goto break_claimLoop;
             }
+            // Use a backoff approach to reduce demand to the shared memory location
+            // decreases memory contention and allows for other threads to make quicker
+            // progress.
+            // Read more in this Arm blog post:
+            // https://community.arm.com/arm-community-blogs/b/architectures-and-processors-blog/posts/multi-threaded-applications-arm
+            procyield(backoff);
+            // Increase backoff time.
+            backoff += backoff / 2;
             headtail = Ꮡb.of(spanSet.Ꮡindex).load();
             (head, tail) = headtail.split();
         }
@@ -321,7 +343,7 @@ internal static ж<spanSetBlock> alloc(this ж<spanSetBlockAlloc> Ꮡp) {
             return s;
         }
     }
-    return (ж<spanSetBlock>)(uintptr)(persistentalloc(/* unsafe.Sizeof(spanSetBlock{}) */ (uintptr)4120, cpu.CacheLineSize, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
+    return (ж<spanSetBlock>)(uintptr)(persistentalloc(/* unsafe.Sizeof(spanSetBlock{}) */ (uintptr)4608, builtin.max(cpu.CacheLineSize, (uintptr)(tagAlign)), Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
 }
 
 // free returns a spanSetBlock back to the pool.
@@ -409,7 +431,7 @@ internal static ж<mspan> Load(this ж<atomicMSpanPointer> Ꮡp) {
     return (ж<mspan>)(uintptr)(Ꮡp.of(atomicMSpanPointer.Ꮡp).Load());
 }
 
-// Store stores an *mspan.
+// StoreNoWB stores an *mspan.
 internal static void StoreNoWB(this ж<atomicMSpanPointer> Ꮡp, ж<mspan> Ꮡs) {
     Ꮡp.of(atomicMSpanPointer.Ꮡp).StoreNoWB(@unsafe.Pointer.FromPinnedBox(Ꮡs));
 }

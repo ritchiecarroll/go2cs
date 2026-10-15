@@ -85,9 +85,9 @@ partial struct Reader {
 // If r does not also implement [io.ByteReader],
 // the decompressor may read more data than necessary from r.
 //
-// It is the caller's responsibility to call Close on the [Reader] when done.
+// It is the caller's responsibility to call [Reader.Close] when done.
 //
-// The [Reader.Header] fields will be valid in the [Reader] returned.
+// The Reader.[Header] fields will be valid in the [Reader] returned.
 public static (ж<Reader>, error) NewReader(io.Reader r) {
     var z = @new<Reader>();
     {
@@ -262,7 +262,7 @@ internal static (Header hdr, error err) readHeader(this ref Reader z) {
     return (hdr, default!);
 }
 
-// Read implements [io.Reader], reading uncompressed bytes from its underlying [Reader].
+// Read implements [io.Reader], reading uncompressed bytes from its underlying reader.
 public static (nint n, error err) Read(this ref Reader z, slice<byte> p) {
     nint n = default!;
 
@@ -310,7 +310,7 @@ public static (nint n, error err) Read(this ref Reader z, slice<byte> p) {
     return (n, default!);
 }
 
-// Close closes the [Reader]. It does not close the underlying [io.Reader].
+// Close closes the [Reader]. It does not close the underlying reader.
 // In order for the GZIP checksum to be verified, the reader must be
 // fully consumed until the [io.EOF].
 public static error Close(this ref Reader z) {

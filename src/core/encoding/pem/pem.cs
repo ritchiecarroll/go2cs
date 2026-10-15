@@ -89,7 +89,7 @@ internal static slice<byte> colon = slice<byte>(":"u8);
 // Decode will find the next PEM formatted block (certificate, private key
 // etc) in the input. It returns that block and the remainder of the input. If
 // no PEM data is found, p is nil and the whole of the input is returned in
-// rest.
+// rest. Blocks must start at the beginning of a line and end at the end of a line.
 public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
     ж<Block> p = default!;
     slice<byte> rest = default!;

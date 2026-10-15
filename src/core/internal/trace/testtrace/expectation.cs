@@ -7,8 +7,9 @@ using bufio = bufio_package;
 using bytes = bytes_package;
 using fmt = fmt_package;
 using regexp = regexp_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using strings = strings_package;
+using go;
 using io = io_package;
 
 partial class testtrace_package {

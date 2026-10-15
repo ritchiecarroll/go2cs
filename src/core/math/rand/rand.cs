@@ -371,7 +371,9 @@ internal static ж<Rand> globalRand() {
 }
 
 //go:linkname runtime_rand runtime.rand
-internal static partial uint64 runtime_rand();
+/*linkname*/ internal static partial uint64 runtime_rand() {
+    return go.runtime_package.rand();
+}
 
 // runtimeSource is an implementation of Source64 that uses the runtime
 // fastrand functions.

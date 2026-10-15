@@ -397,10 +397,6 @@ partial struct inputString {
 
 internal static (rune, nint) step(this ref inputString i, nint pos) {
     if (pos < len(i.str)) {
-        var c = i.str[pos];
-        if (c < utf8.RuneSelf) {
-            return ((rune)c, 1);
-        }
         return utf8.DecodeRuneInString(i.str.slice(pos));
     }
     return (endOfText, 0);
@@ -426,17 +422,11 @@ internal static lazyFlag context(this ref inputString i, nint pos) {
     var (r1, r2) = (endOfText, endOfText);
     // 0 < pos && pos <= len(i.str)
     if ((nuint)(pos - 1) < (nuint)len(i.str)) {
-        r1 = (rune)i.str[pos - 1];
-        if (r1 >= utf8.RuneSelf) {
-            (r1, _) = utf8.DecodeLastRuneInString(i.str.slice(0, pos));
-        }
+        (r1, _) = utf8.DecodeLastRuneInString(i.str.slice(0, pos));
     }
     // 0 <= pos && pos < len(i.str)
     if ((nuint)pos < (nuint)len(i.str)) {
-        r2 = (rune)i.str[pos];
-        if (r2 >= utf8.RuneSelf) {
-            (r2, _) = utf8.DecodeRuneInString(i.str.slice(pos));
-        }
+        (r2, _) = utf8.DecodeRuneInString(i.str.slice(pos));
     }
     return newLazyFlag(r1, r2);
 }
@@ -448,10 +438,6 @@ partial struct inputBytes {
 
 internal static (rune, nint) step(this ref inputBytes i, nint pos) {
     if (pos < len(i.str)) {
-        var c = i.str[pos];
-        if (c < utf8.RuneSelf) {
-            return ((rune)c, 1);
-        }
         return utf8.DecodeRune(i.str.slice(pos));
     }
     return (endOfText, 0);
@@ -477,17 +463,11 @@ internal static lazyFlag context(this ref inputBytes i, nint pos) {
     var (r1, r2) = (endOfText, endOfText);
     // 0 < pos && pos <= len(i.str)
     if ((nuint)(pos - 1) < (nuint)len(i.str)) {
-        r1 = (rune)i.str[pos - 1];
-        if (r1 >= utf8.RuneSelf) {
-            (r1, _) = utf8.DecodeLastRune(i.str.slice(0, pos));
-        }
+        (r1, _) = utf8.DecodeLastRune(i.str.slice(0, pos));
     }
     // 0 <= pos && pos < len(i.str)
     if ((nuint)pos < (nuint)len(i.str)) {
-        r2 = (rune)i.str[pos];
-        if (r2 >= utf8.RuneSelf) {
-            (r2, _) = utf8.DecodeRune(i.str.slice(pos));
-        }
+        (r2, _) = utf8.DecodeRune(i.str.slice(pos));
     }
     return newLazyFlag(r1, r2);
 }

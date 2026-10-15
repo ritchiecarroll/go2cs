@@ -17,6 +17,7 @@ global using reflectꓸKind = go.reflect_package.ΔKind;
 global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
+global using runtimeꓸError = go.runtime_package.ΔError;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
@@ -71,9 +72,9 @@ using static go.encoding.asn1_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/asn1/asn1.go", "asn1.cs", "ACxWgP6ArNKCgtyUtLS2rsKClIKUgpSq0oKClJSClIKCuIKCqqKAgqSCgpSClKaYooCCpIKUgoKUgoKClIIADB6igpSCgqqigoKmgoKCgqaowoKClIKGgpSCgtymAAYQkqaCgpSCgoKUpqzigoLK3IKClIKClIKmgoKCgpSUggAMHuKCgqaCgpSCpoKClIKCgpSClKaCqsKUgoKCgpSCpoCCgraUptrSgpSAgraAgrauwoKCpqiSAAIQ8oKCgqaCAAwisgALMPKCgoKmgq7C3sKClN7CgriAgraCgoKmABIsAAoCpoKClIKCgoK4goKCpoKCpoKClIKClKaCgoKUgoKCgpSCgqaClIKClIK4goK4rOKCgoLKgoKCgoKUyramgoKUgoKUgpSCgoKClIKCgoKCgoKmqIKCgoKCgoKaotzigqaCgpS4gIKCgoKUgoKUgoKClKSkpKSkpKSkpKSkpNqCgpSClLaCgpSCgoKUgoKUgqSCgoKmgoKUgriCgpSUuIKCgu6CgpSkgtyCpoKmgoKUgoKCpoKCgqaCgoK4loKClJSUgoKUgqaUgqSCpIKkgoKUgqSCgpSCpIKkgoKUgpSApIKClIKkgoKClJSCgpSUtpSCgoK4hIKmgoKCgpSCgtykgoKCgpSCgpSCpIKUpKSkpOykppSClKSCqqKUpqzSgpSCgpSClAACkAEARQIACxKCgqaClKrCgoKUgoKU", "", "", "1014=Field/1/1/1")]
+[assembly: go.GoPositionMap("encoding/asn1/asn1.go", "asn1.cs", "AC1YgP6ArNKCgtyUtLS2rsKClIKUgpSq0oKClJSClIKCuIKCqqKAgqSCgpSClKaYooCCpIKUgoKUgoKClIIADB6igpSCgqqigoKmgoKCgqaowoKClIKGgpSCgtymAAYQkqaCgpSCgoKUpqzigoLK3IKClIKClIKmgoKCgpSUggAMHuKCgqaCgpSCpoKClIKCgpSClKaCqsKUgoKCgpSCpoCCgraUptrSgpSAgraAgrauwoKCpqiSAAIQ8oKCgqaCAAwisgALMPKCgoKmgq4ADRSClJTewoKU3gALEoK4gIK2goK4hpSCpgASLAAKAqaCgpSCgoKCuIKCgqaCgqaCgpSCgpSmgoKClIKCgoKUgoKmgpSCgpSCuIKCuKzigoKCyoKCgoKClMq2poKClIKClIKUgoKCgpSCgoKCgoKCpqiCgoKCgoKCmqLc4oKYgpSCpoKClLiAgoKCgpSCgpSCgoKUpKSkpKSkpKSkpKSk2oKClIKUtoKClIKCgpSCgpSCpIKCgqaCgpSCuIKClJS4goKC7oKClKSCAAgSgoKCpIK4gqaCgpSCgoKmgoKCpoKCgriWgoKUlJSCgpSCppSCpIKkgqSCgpSCpIKClIKkgqSCgpSClICkgoKUgqSCgoKUlIKClJS2lIKCgriEgqaCgoKClIKC3KSCgoKClIKClIKkgpSkpKSk7KSmlIKUpIKqopSmrNKClIKClIKUAAKeAQBMAgALEoKCpoKUqsKCgpSCgpQ=", "", "", "1059=Field/1/1/1")]
 [assembly: go.GoPositionMap("encoding/asn1/common.go", "common.cs", "AFW8AQAIAoKCgpS0goLGtLS0tLS0goKCxoKCgsa0goLGgoLGttqilKSkpKSklJSkpKSClIKUpJQ=")]
-[assembly: go.GoPositionMap("encoding/asn1/marshal.go", "marshal.cs", "AB9CgqaCyoKmgoLcgqaCgtyCgoKUpoKCgoLcgoKClKYACBKCgoIACBKUgoKCAAsYgqaCgsqClIKCpoKCpqaClIK4goKmgoKmpoKUgoKCgqampqKCpsqCgoKClIKUkpSUgqaUuIKUgqamooKCgpSmgoKClIKCgpSCpoKCgpSmyoKmgoKC3IKCgpSmgoKCuIKCpqaC7oK4poKCgrimgoKCuKaCpoKmgu6CgqailIKCpqailIKCpqaClJS0tKamgoKCppSmgpSClJSCgpSUlKS0toKCpoKUpoKCgpSmopSkgoKUpKSkpoCkgpSkpJSCgriUgoLKgoKCyqamgKSkpIKCgoK4xoKCppSApKSklIKCgriClMaUpKSkyNaigqaCpoKmgoKUgu6CgriCgoKmlIKUpoKCpoKmgqaUuIKCgpSCuLaCuIKClAAHEIKmlIKCppSCgoKSgpSmgpSUlO64ppQAAhwACwKqooKClIKC", "", "", "749=Len/1/1/3")]
+[assembly: go.GoPositionMap("encoding/asn1/marshal.go", "marshal.cs", "AB9CgqaCyoKmgoLcgqaCgtyCgoKUpoKCgoLcgoKClKYACBKCgoIACBKUgoKCAAsYgqaCgsqClIKCpoKCpqaClIK4goKmgoKmpoKUgoKCgqampqKCpsqCgoKClIKUkpSUgqaUuIKUgqamooKCgpSmgoKClIKCgpSCpoKCgpSmyoKmgoKC3IKCgpSmgoKCuIKCpqaC7oK4poKCgrimgoKCuKaCpoKmgu6CgqailIKCpqailIKCpqaClJS0tKamgoKCppSmgpSClJSCgpSUlKS0toKCpoKUpoKCgpSmopSkgoKUpIKkgqSCpoCkgpSkpJSCgriUgoLKgoKCyqamgKSkpIKCgoK4xoKCppSApKSklIKCgriClMaUpKSkyNaigqaCpoKmgoKUgu6CgriCgoKmlIKUpoKCpoKmgqaUuIKCgpSCuLaCgriCgpQABxCCppSCgqaUgoKCkoKUpoKUlJTuuKaUAAIeAAwCqqKCgpSCgg==", "", "", "753=Len/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -127,6 +128,7 @@ public static partial class asn1_package
     [GoInit] internal static void initᴛᴛimportꓸmath() => builtin.initPackage(typeof(math_package));
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbig() => builtin.initPackage(typeof(go.math.big_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
+    [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));

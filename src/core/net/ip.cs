@@ -11,7 +11,7 @@
 namespace go;
 
 using bytealg = @internal.bytealg_package;
-using itoa = @internal.itoa_package;
+using strconv = @internal.strconv_package;
 using stringslite = @internal.stringslite_package;
 using netip = net.netip_package;
 using @internal;
@@ -538,7 +538,7 @@ public static @string String(this ж<IPNet> Ꮡn) {
     if (l == -1) {
         return nn.String() + "/"u8 + m.String();
     }
-    return nn.String() + "/"u8 + itoa.Uitoa((nuint)l);
+    return nn.String() + "/"u8 + strconv.Itoa(l);
 }
 
 // ParseIP parses s as an IP address, returning the result.

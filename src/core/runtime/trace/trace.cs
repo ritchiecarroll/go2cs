@@ -109,64 +109,20 @@
 namespace go.runtime;
 
 using io = io_package;
-using runtime = runtime_package;
-using sync = sync_package;
-using atomic = go.sync.atomic_package;
-using System.Runtime.CompilerServices;
-using go.sync;
 
 partial class trace_package {
 
 // Start enables tracing for the current program.
 // While tracing, the trace will be buffered and written to w.
 // Start returns an error if tracing is already enabled.
-public static partial error Start(io.Writer w) {
-    GoFrame ᒐ = default;
-    try {
-        Ꮡtracing.of(tracingᴛ1.ᏑMutex).Lock();
-        defer(Ꮡtracing.of(tracingᴛ1.ᏑMutex).Unlock, ref ᒐ);
-
-        {
-            var err = runtime.StartTrace(); if (err != default!) {
-                return err;
-            }
-        }
-        goǃ(() => {
-            while (ᐧ) {
-                var data = runtime.ReadTrace();
-                if (data == default!) {
-                    break;
-                }
-                w.Write(data);
-            }
-        });
-        Ꮡtracing.of(tracingᴛ1.Ꮡenabled).Store(true);
-        return default!;
-    }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
-    finally { ᒐ.Run(); }
+public static error Start(io.Writer w) {
+    return Ꮡtracing.subscribeTraceStartWriter(w);
 }
 
 // Stop stops the current tracing, if any.
 // Stop only returns after all the writes for the trace have completed.
 public static void Stop() {
-    GoFrame ᒐ = default;
-    try {
-        Ꮡtracing.of(tracingᴛ1.ᏑMutex).Lock();
-        defer(Ꮡtracing.of(tracingᴛ1.ᏑMutex).Unlock, ref ᒐ);
-        Ꮡtracing.of(tracingᴛ1.Ꮡenabled).Store(false);
-
-        runtime.StopTrace();
-    }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { ᒐ.Run(); }
+    Ꮡtracing.unsubscribeTraceStartWriter();
 }
-
-partial struct tracingᴛ1 /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; } // gate mutators (Start, Stop)
-    internal atomic.Bool enabled;
-}
-internal static ж<tracingᴛ1> Ꮡtracing = new StandardBox<tracingᴛ1>(new tracingᴛ1(nil));
-internal static ref tracingᴛ1 tracing => ref Ꮡtracing.Value;
 
 } // end trace_package

@@ -151,6 +151,23 @@ public static bool FullRuneInString(@string s) {
 // out of range, or is not the shortest possible UTF-8 encoding for the
 // value. No other validation is performed.
 public static (rune r, nint size) DecodeRune(slice<byte> p) {
+    rune r = default!;
+    nint size = default!;
+
+    // Inlineable fast path for ASCII characters; see #48195.
+    // This implementation is weird but effective at rendering the
+    // function inlineable.
+    foreach (var (_, b) in p) {
+        if (b < RuneSelf) {
+            return ((rune)b, 1);
+        }
+        break;
+    }
+    (r, size) = decodeRuneSlow(p);
+    return (r, size);
+}
+
+internal static (rune r, nint size) decodeRuneSlow(slice<byte> p) {
     nint n = len(p);
     if (n < 1) {
         return (RuneError, 0);
@@ -199,6 +216,21 @@ public static (rune r, nint size) DecodeRune(slice<byte> p) {
 // out of range, or is not the shortest possible UTF-8 encoding for the
 // value. No other validation is performed.
 public static (rune r, nint size) DecodeRuneInString(sstring s) {
+    rune r = default!;
+    nint size = default!;
+
+    // Inlineable fast path for ASCII characters; see #48195.
+    // This implementation is a bit weird but effective at rendering the
+    // function inlineable.
+    if (s != ""u8 && s[0] < RuneSelf){
+        return ((rune)s[0], 1);
+    } else {
+        (r, size) = decodeRuneInStringSlow(s);
+    }
+    return (r, size);
+}
+
+internal static (rune, nint) decodeRuneInStringSlow(@string s) {
     nint n = len(s);
     if (n < 1) {
         return (RuneError, 0);
@@ -262,10 +294,7 @@ public static (rune r, nint size) DecodeLastRune(slice<byte> p) {
     // guard against O(n^2) behavior when traversing
     // backwards through strings with long sequences of
     // invalid UTF-8.
-    nint lim = end - (nint)UTFMax;
-    if (lim < 0) {
-        lim = 0;
-    }
+    nint lim = max(end - (nint)UTFMax, 0);
     for (start--; start >= lim; start--) {
         if (RuneStart(p[start])) {
             break;
@@ -305,10 +334,7 @@ public static (rune r, nint size) DecodeLastRuneInString(@string s) {
     // guard against O(n^2) behavior when traversing
     // backwards through strings with long sequences of
     // invalid UTF-8.
-    nint lim = end - (nint)UTFMax;
-    if (lim < 0) {
-        lim = 0;
-    }
+    nint lim = max(end - (nint)UTFMax, 0);
     for (start--; start >= lim; start--) {
         if (RuneStart(s[start])) {
             break;
@@ -461,119 +487,126 @@ public static bool RuneStart(byte b) {
     return (byte)(b & 0xC0) != 0x80;
 }
 
+internal static UntypedInt ptrSize => /* 4 << (^uintptr(0) >> 63) */ 8;
+
+internal static UntypedInt hiBits => /* 0x8080808080808080 >> (64 - 8*ptrSize) */ 9259542123273814144;
+
+internal static uintptr word<T>(T s)
+    where T : /* string | []byte */ IByteSeq<T, byte>, new()
+{
+    if (ptrSize == 4) {
+        return (uintptr)((uintptr)((uintptr)((uintptr)s[0] | ((uintptr)s[1] << (int)(8))) | ((uintptr)s[2] << (int)(16))) | ((uintptr)s[3] << (int)(24)));
+    }
+    return (uintptr)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)s[0] | ((uint64)s[1] << (int)(8))) | ((uint64)s[2] << (int)(16))) | ((uint64)s[3] << (int)(24))) | ((uint64)s[4] << (int)(32))) | ((uint64)s[5] << (int)(40))) | ((uint64)s[6] << (int)(48))) | ((uint64)s[7] << (int)(56))));
+}
+
 // Valid reports whether p consists entirely of valid UTF-8-encoded runes.
 public static bool Valid(slice<byte> p) {
     // This optimization avoids the need to recompute the capacity
-    // when generating code for p[8:], bringing it to parity with
+    // when generating code for slicing p, bringing it to parity with
     // ValidString, which was 20% faster on long ASCII strings.
     p = p.slice(0, len(p), len(p));
 
-    // Fast path. Check for and skip 8 bytes of ASCII characters per iteration.
-    while (len(p) >= 8) {
-        // Combining two 32 bit loads allows the same code to be used
-        // for 32 and 64 bit platforms.
-        // The compiler can generate a 32bit load for first32 and second32
-        // on many platforms. See test/codegen/memcombine.go.
-        var first32 = (uint32)((uint32)((uint32)((uint32)p[0] | ((uint32)p[1] << (int)(8))) | ((uint32)p[2] << (int)(16))) | ((uint32)p[3] << (int)(24)));
-        var second32 = (uint32)((uint32)((uint32)((uint32)p[4] | ((uint32)p[5] << (int)(8))) | ((uint32)p[6] << (int)(16))) | ((uint32)p[7] << (int)(24)));
-        if ((uint32)(((uint32)(first32 | second32)) & 0x80808080U) != 0) {
-            // Found a non ASCII byte (>= RuneSelf).
-            break;
-        }
-        p = p[8..];
-    }
-    nint n = len(p);
-    for (nint i = 0; i < n; ) {
-        var pi = p[i];
-        if (pi < RuneSelf) {
-            i++;
-            continue;
-        }
-        var x = first[pi];
-        if (x == xx) {
-            return false; // Illegal starter byte.
-        }
-        nint size = (nint)((uint8)(x & 7));
-        if (i + size > n) {
-            return false; // Short or invalid.
-        }
-        var accept = acceptRanges[(x >> (int)(4))];
-        {
-            var c = p[i + 1]; if (c < accept.lo || accept.hi < c){
-                return false;
-            } else 
-            if (size == 2){
-            } else 
-            {
-                var cΔ1 = p[i + 2]; if (cΔ1 < locb || hicb < cΔ1){
-                    return false;
-                } else 
-                if (size == 3){
-                } else 
-                {
-                    var cΔ2 = p[i + 3]; if (cΔ2 < locb || hicb < cΔ2) {
-                        return false;
+    while (len(p) > 0) {
+        var p0 = p[0];
+        if (p0 < RuneSelf) {
+            p = p[1..];
+            // If there's one ASCII byte, there are probably more.
+            // Advance quickly through ASCII-only data.
+            // Note: using > instead of >= here is intentional. That avoids
+            // needing pointing-past-the-end fixup on the slice operations.
+            if (len(p) > ptrSize && (uintptr)(word(p) & (uintptr)hiBits) == 0) {
+                p = p[(int)(ptrSize)..];
+                if (len(p) > (nint)(2 * ptrSize) && (uintptr)(((uintptr)(word(p) | word(p[(int)(ptrSize)..]))) & (uintptr)hiBits) == 0) {
+                    p = p[(int)(2 * ptrSize)..];
+                    while (len(p) > (nint)(4 * ptrSize) && (uintptr)(((uintptr)(((uintptr)(word(p) | word(p[(int)(ptrSize)..]))) | ((uintptr)(word(p[(int)(2 * ptrSize)..]) | word(p[(int)(3 * ptrSize)..]))))) & (uintptr)hiBits) == 0) {
+                        p = p[(int)(4 * ptrSize)..];
                     }
                 }
             }
+            continue;
         }
-        i += size;
+        var x = first[p0];
+        nint size = (nint)((uint8)(x & 7));
+        var accept = acceptRanges[(x >> (int)(4))];
+        switch (size) {
+        case 2: {
+            if (len(p) < 2 || p[1] < accept.lo || accept.hi < p[1]) {
+                return false;
+            }
+            p = p[2..];
+            break;
+        }
+        case 3: {
+            if (len(p) < 3 || p[1] < accept.lo || accept.hi < p[1] || p[2] < locb || hicb < p[2]) {
+                return false;
+            }
+            p = p[3..];
+            break;
+        }
+        case 4: {
+            if (len(p) < 4 || p[1] < accept.lo || accept.hi < p[1] || p[2] < locb || hicb < p[2] || p[3] < locb || hicb < p[3]) {
+                return false;
+            }
+            p = p[4..];
+            break;
+        }
+        default: {
+            return false; // illegal starter byte
+        }}
     }
     return true;
 }
 
 // ValidString reports whether s consists entirely of valid UTF-8-encoded runes.
 public static bool ValidString(@string s) {
-    // Fast path. Check for and skip 8 bytes of ASCII characters per iteration.
-    while (len(s) >= 8) {
-        // Combining two 32 bit loads allows the same code to be used
-        // for 32 and 64 bit platforms.
-        // The compiler can generate a 32bit load for first32 and second32
-        // on many platforms. See test/codegen/memcombine.go.
-        var first32 = (uint32)((uint32)((uint32)((uint32)s[0] | ((uint32)s[1] << (int)(8))) | ((uint32)s[2] << (int)(16))) | ((uint32)s[3] << (int)(24)));
-        var second32 = (uint32)((uint32)((uint32)((uint32)s[4] | ((uint32)s[5] << (int)(8))) | ((uint32)s[6] << (int)(16))) | ((uint32)s[7] << (int)(24)));
-        if ((uint32)(((uint32)(first32 | second32)) & 0x80808080U) != 0) {
-            // Found a non ASCII byte (>= RuneSelf).
-            break;
-        }
-        s = s[8..];
-    }
-    nint n = len(s);
-    for (nint i = 0; i < n; ) {
-        var si = s[i];
-        if (si < RuneSelf) {
-            i++;
-            continue;
-        }
-        var x = first[si];
-        if (x == xx) {
-            return false; // Illegal starter byte.
-        }
-        nint size = (nint)((uint8)(x & 7));
-        if (i + size > n) {
-            return false; // Short or invalid.
-        }
-        var accept = acceptRanges[(x >> (int)(4))];
-        {
-            var c = s[i + 1]; if (c < accept.lo || accept.hi < c){
-                return false;
-            } else 
-            if (size == 2){
-            } else 
-            {
-                var cΔ1 = s[i + 2]; if (cΔ1 < locb || hicb < cΔ1){
-                    return false;
-                } else 
-                if (size == 3){
-                } else 
-                {
-                    var cΔ2 = s[i + 3]; if (cΔ2 < locb || hicb < cΔ2) {
-                        return false;
+    while (len(s) > 0) {
+        var s0 = s[0];
+        if (s0 < RuneSelf) {
+            s = s[1..];
+            // If there's one ASCII byte, there are probably more.
+            // Advance quickly through ASCII-only data.
+            // Note: using > instead of >= here is intentional. That avoids
+            // needing pointing-past-the-end fixup on the slice operations.
+            if (len(s) > ptrSize && (uintptr)(word(s) & (uintptr)hiBits) == 0) {
+                s = s[(int)(ptrSize)..];
+                if (len(s) > (nint)(2 * ptrSize) && (uintptr)(((uintptr)(word(s) | word(s[(int)(ptrSize)..]))) & (uintptr)hiBits) == 0) {
+                    s = s[(int)(2 * ptrSize)..];
+                    while (len(s) > (nint)(4 * ptrSize) && (uintptr)(((uintptr)(((uintptr)(word(s) | word(s[(int)(ptrSize)..]))) | ((uintptr)(word(s[(int)(2 * ptrSize)..]) | word(s[(int)(3 * ptrSize)..]))))) & (uintptr)hiBits) == 0) {
+                        s = s[(int)(4 * ptrSize)..];
                     }
                 }
             }
+            continue;
         }
-        i += size;
+        var x = first[s0];
+        nint size = (nint)((uint8)(x & 7));
+        var accept = acceptRanges[(x >> (int)(4))];
+        switch (size) {
+        case 2: {
+            if (len(s) < 2 || s[1] < accept.lo || accept.hi < s[1]) {
+                return false;
+            }
+            s = s[2..];
+            break;
+        }
+        case 3: {
+            if (len(s) < 3 || s[1] < accept.lo || accept.hi < s[1] || s[2] < locb || hicb < s[2]) {
+                return false;
+            }
+            s = s[3..];
+            break;
+        }
+        case 4: {
+            if (len(s) < 4 || s[1] < accept.lo || accept.hi < s[1] || s[2] < locb || hicb < s[2] || s[3] < locb || hicb < s[3]) {
+                return false;
+            }
+            s = s[4..];
+            break;
+        }
+        default: {
+            return false; // illegal starter byte
+        }}
     }
     return true;
 }

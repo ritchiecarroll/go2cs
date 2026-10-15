@@ -70,9 +70,9 @@ public static partial class format_package
     public partial struct GoroutineCountersArg {}
     public partial struct HeapCountersArg {}
     public partial struct NameArg {}
+    public partial struct SchedCtxArg {}
     public partial struct SortIndexArg {}
     public partial struct ThreadCountersArg {}
-    public partial struct ThreadIDArg {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

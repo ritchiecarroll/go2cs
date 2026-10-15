@@ -31,7 +31,7 @@ partial class big_package {
 // standard library.
 partial struct ΔInt {
     internal bool neg; // sign
-    internal nat abs;  // absolute value of the integer
+    internal Δnat abs;  // absolute value of the integer
 }
 
 internal static ж<ΔInt> intOne;
@@ -128,7 +128,7 @@ public static slice<Word> Bits(this ref ΔInt x) {
 public static ж<ΔInt> SetBits(this ж<ΔInt> Ꮡz, slice<Word> abs) {
     ref var z = ref Ꮡz.DerefOrNull();
 
-    z.abs = ((nat)abs).norm();
+    z.abs = ((Δnat)abs).norm();
     z.neg = false;
     return Ꮡz;
 }
@@ -204,6 +204,15 @@ public static ж<ΔInt> Sub(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy)
 // Mul sets z to the product x*y and returns z.
 public static ж<ΔInt> Mul(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
+
+    z.mul(nil, Ꮡx, Ꮡy);
+    return Ꮡz;
+}
+
+// mul is like Mul but takes an explicit stack to use, for internal use.
+// It does not return a *Int because doing so makes the stack-allocated Ints
+// used in natmul.go escape to the heap (even though the result is unused).
+internal static void mul(this ref ΔInt z, ж<stack> Ꮡstk, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -212,13 +221,12 @@ public static ж<ΔInt> Mul(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy)
     // (-x) * y == -(x * y)
     // (-x) * (-y) == x * y
     if (Ꮡx == Ꮡy) {
-        z.abs = z.abs.sqr(x.abs);
+        z.abs = z.abs.sqr(Ꮡstk, x.abs);
         z.neg = false;
-        return Ꮡz;
+        return;
     }
-    z.abs = z.abs.mul(x.abs, y.abs);
+    z.abs = z.abs.mul(Ꮡstk, x.abs, y.abs);
     z.neg = len(z.abs) > 0 && x.neg != y.neg; // 0 has no sign
-    return Ꮡz;
 }
 
 // MulRange sets z to the product of all integers
@@ -242,7 +250,7 @@ public static ж<ΔInt> MulRange(this ж<ΔInt> Ꮡz, int64 a, int64 b) {
         (a, b) = (-b, -a);
     }
 
-    z.abs = z.abs.mulRange((uint64)a, (uint64)b);
+    z.abs = z.abs.mulRange(nil, (uint64)a, (uint64)b);
     z.neg = neg;
     return Ꮡz;
 }
@@ -300,7 +308,7 @@ public static ж<ΔInt> Quo(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy)
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
-    (z.abs, _) = z.abs.div(default!, x.abs, y.abs);
+    (z.abs, _) = z.abs.div(nil, default!, x.abs, y.abs);
     z.neg = len(z.abs) > 0 && x.neg != y.neg; // 0 has no sign
     return Ꮡz;
 }
@@ -313,7 +321,7 @@ public static ж<ΔInt> Rem(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy)
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
-    (_, z.abs) = ((nat)default!).div(z.abs, x.abs, y.abs);
+    (_, z.abs) = ((Δnat)default!).div(nil, z.abs, x.abs, y.abs);
     z.neg = len(z.abs) > 0 && x.neg; // 0 has no sign
     return Ꮡz;
 }
@@ -335,7 +343,7 @@ public static (ж<ΔInt>, ж<ΔInt>) QuoRem(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx,
     ref var y = ref Ꮡy.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
 
-    (z.abs, r.abs) = z.abs.div(r.abs, x.abs, y.abs);
+    (z.abs, r.abs) = z.abs.div(nil, r.abs, x.abs, y.abs);
     (z.neg, r.neg) = (len(z.abs) > 0 && x.neg != y.neg, len(r.abs) > 0 && x.neg); // 0 has no sign
     return (Ꮡz, Ꮡr);
 }
@@ -465,7 +473,7 @@ public static nint CmpAbs(this ref ΔInt x, ж<ΔInt> Ꮡy) {
 }
 
 // low32 returns the least significant 32 bits of x.
-internal static uint32 low32(nat x) {
+internal static uint32 low32(Δnat x) {
     if (len(x) == 0) {
         return 0;
     }
@@ -473,7 +481,7 @@ internal static uint32 low32(nat x) {
 }
 
 // low64 returns the least significant 64 bits of x.
-internal static uint64 low64(nat x) {
+internal static uint64 low64(Δnat x) {
     if (len(x) == 0) {
         return 0;
     }
@@ -661,7 +669,7 @@ internal static ж<ΔInt> exp(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡ
     }
     var yWords = y.abs;
 
-    nat mWords = default!;
+    Δnat mWords = default!;
     if (Ꮡm != nil) {
         if (Ꮡz == Ꮡm || alias(z.abs, m.abs)) {
             Ꮡm = @new<ΔInt>().Set(Ꮡm); m = ref Ꮡm.DerefOrNull();
@@ -669,7 +677,7 @@ internal static ж<ΔInt> exp(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡ
         mWords = m.abs; // m.abs may be nil for m == 0
     }
 
-    z.abs = z.abs.expNN(xWords, yWords, mWords, slow);
+    z.abs = z.abs.expNN(nil, xWords, yWords, mWords, slow);
     z.neg = len(z.abs) > 0 && x.neg && len(yWords) > 0 && (Word)(yWords[0] & 1) == 1; // 0 has no sign
     if (z.neg && len(mWords) > 0) {
         // make modulus result positive
@@ -811,51 +819,39 @@ internal static (Word u0, Word u1, Word v0, Word v1, bool even) lehmerSimulate(r
 // For even == true: u0, v1 >= 0 && u1, v0 <= 0
 // For even == false: u0, v1 <= 0 && u1, v0 >= 0
 // q, r, s, t are temporary variables to avoid allocations in the multiplication.
-internal static void lehmerUpdate(ж<ΔInt> ᏑA, ж<ΔInt> ᏑB, ж<ΔInt> Ꮡq, ж<ΔInt> Ꮡr, ж<ΔInt> Ꮡs, ж<ΔInt> Ꮡt, Word u0, Word u1, Word v0, Word v1, bool even) {
-    ref var q = ref Ꮡq.DerefOrNull();
-    ref var r = ref Ꮡr.DerefOrNull();
-    ref var s = ref Ꮡs.DerefOrNull();
-    ref var t = ref Ꮡt.DerefOrNull();
+internal static void lehmerUpdate(ж<ΔInt> ᏑA, ж<ΔInt> ᏑB, ж<ΔInt> Ꮡq, ж<ΔInt> Ꮡr, Word u0, Word u1, Word v0, Word v1, bool even) {
+    mulW(ref (Ꮡq).DerefOrNull(), ref (ᏑB).DerefOrNull(), even, v0);
+    mulW(ref (Ꮡr).DerefOrNull(), ref (ᏑA).DerefOrNull(), even, u1);
+    mulW(ref (ᏑA).DerefOrNull(), ref (ᏑA).DerefOrNull(), !even, u0);
+    mulW(ref (ᏑB).DerefOrNull(), ref (ᏑB).DerefOrNull(), !even, v1);
+    ᏑA.Add(ᏑA, Ꮡq);
+    ᏑB.Add(ᏑB, Ꮡr);
+}
 
-    t.abs = t.abs.setWord(u0);
-    s.abs = s.abs.setWord(v0);
-    t.neg = !even;
-    s.neg = even;
-
-    Ꮡt.Mul(ᏑA, Ꮡt);
-    Ꮡs.Mul(ᏑB, Ꮡs);
-
-    r.abs = r.abs.setWord(u1);
-    q.abs = q.abs.setWord(v1);
-    r.neg = even;
-    q.neg = !even;
-
-    Ꮡr.Mul(ᏑA, Ꮡr);
-    Ꮡq.Mul(ᏑB, Ꮡq);
-
-    ᏑA.Add(Ꮡt, Ꮡs);
-    ᏑB.Add(Ꮡr, Ꮡq);
+// mulW sets z = x * (-?)w
+// where the minus sign is present when neg is true.
+internal static void mulW(ref ΔInt z, ref ΔInt x, bool neg, Word w) {
+    z.abs = z.abs.mulAddWW(x.abs, w, 0);
+    z.neg = x.neg != neg;
 }
 
 // euclidUpdate performs a single step of the Euclidean GCD algorithm
 // if extended is true, it also updates the cosequence Ua, Ub.
-internal static void euclidUpdate(ж<ΔInt> ᏑA, ж<ΔInt> ᏑB, ж<ΔInt> ᏑUa, ж<ΔInt> ᏑUb, ж<ΔInt> Ꮡq, ж<ΔInt> Ꮡr, ж<ΔInt> Ꮡs, ж<ΔInt> Ꮡt, bool extended) {
-    ref var A = ref ᏑA.DerefOrNull();
-    ref var B = ref ᏑB.DerefOrNull();
-    ref var q = ref Ꮡq.DerefOrNull();
-    ref var r = ref Ꮡr.DerefOrNull();
+// q and r are used as temporaries; the initial values are ignored.
+internal static (ж<ΔInt> nA, ж<ΔInt> nB, ж<ΔInt> nr, ж<ΔInt> nUa, ж<ΔInt> nUb) euclidUpdate(ж<ΔInt> ᏑA, ж<ΔInt> ᏑB, ж<ΔInt> ᏑUa, ж<ΔInt> ᏑUb, ж<ΔInt> Ꮡq, ж<ΔInt> Ꮡr, bool extended) {
+    ref var Ua = ref ᏑUa.DerefOrNull();
+    ref var Ub = ref ᏑUb.DerefOrNull();
 
-    (Ꮡq, Ꮡr) = Ꮡq.QuoRem(ᏑA, ᏑB, Ꮡr); q = ref Ꮡq.DerefOrNull(); r = ref Ꮡr.DerefOrNull();
-
-    (A, B, r) = (B, r, A);
+    Ꮡq.QuoRem(ᏑA, ᏑB, Ꮡr);
 
     if (extended) {
-        // Ua, Ub = Ub, Ua - q*Ub
-        Ꮡt.Set(ᏑUb);
-        Ꮡs.Mul(ᏑUb, Ꮡq);
-        ᏑUb.Sub(ᏑUa, Ꮡs);
-        ᏑUa.Set(Ꮡt);
+        // Ua, Ub = Ub, Ua-q*Ub
+        Ꮡq.Mul(Ꮡq, ᏑUb);
+        (ᏑUa, ᏑUb) = (ᏑUb, ᏑUa); Ua = ref ᏑUa.DerefOrNull(); Ub = ref ᏑUb.DerefOrNull();
+        ᏑUb.Sub(ᏑUb, Ꮡq);
     }
+
+    return (ᏑB, Ꮡr, ᏑA, ᏑUa, ᏑUb);
 }
 
 // lehmerGCD sets z to the greatest common divisor of a and b,
@@ -869,7 +865,6 @@ internal static void euclidUpdate(ж<ΔInt> ᏑA, ж<ΔInt> ᏑB, ж<ΔInt> ᏑU
 // The cosequences are updated according to Algorithm 10.45 from
 // Cohen et al. "Handbook of Elliptic and Hyperelliptic Curve Cryptography" pp 192.
 internal static ж<ΔInt> lehmerGCD(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy, ж<ΔInt> Ꮡa, ж<ΔInt> Ꮡb) {
-    ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
@@ -893,8 +888,6 @@ internal static ж<ΔInt> lehmerGCD(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔIn
     // temp variables for multiprecision update
     var q = @new<ΔInt>();
     var r = @new<ΔInt>();
-    var s = @new<ΔInt>();
-    var t = @new<ΔInt>();
 
     // ensure A >= B
     if ((~A).abs.cmp((~B).abs) < 0) {
@@ -912,17 +905,17 @@ internal static ж<ΔInt> lehmerGCD(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔIn
             // Simulate the effect of the single-precision steps using the cosequences.
             // A = u0*A + v0*B
             // B = u1*A + v1*B
-            lehmerUpdate(A, B, q, r, s, t, u0, u1, v0, v1, even);
+            lehmerUpdate(A, B, q, r, u0, u1, v0, v1, even);
 
             if (extended) {
                 // Ua = u0*Ua + v0*Ub
                 // Ub = u1*Ua + v1*Ub
-                lehmerUpdate(Ua, Ub, q, r, s, t, u0, u1, v0, v1, even);
+                lehmerUpdate(Ua, Ub, q, r, u0, u1, v0, v1, even);
             }
         } else {
             // Single-digit calculations failed to simulate any quotients.
             // Do a standard Euclidean step.
-            euclidUpdate(A, B, Ua, Ub, q, r, s, t, extended);
+            (A, B, r, Ua, Ub) = euclidUpdate(A, B, Ua, Ub, q, r, extended);
         }
     }
 
@@ -930,7 +923,7 @@ internal static ж<ΔInt> lehmerGCD(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔIn
         // extended Euclidean algorithm base case if B is a single Word
         if (len((~A).abs) > 1) {
             // A is longer than a single Word, so one update is needed.
-            euclidUpdate(A, B, Ua, Ub, q, r, s, t, extended);
+            (A, B, r, Ua, Ub) = euclidUpdate(A, B, Ua, Ub, q, r, extended);
         }
         if (len((~B).abs) > 0) {
             // A and B are both a single Word.
@@ -953,15 +946,9 @@ internal static ж<ΔInt> lehmerGCD(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔIn
                     even = !even;
                 }
 
-                t.Value.abs = (~t).abs.setWord(ua);
-                s.Value.abs = (~s).abs.setWord(va);
-                t.Value.neg = !even;
-                s.Value.neg = even;
-
-                t.Mul(Ua, t);
-                s.Mul(Ub, s);
-
-                Ua.Add(t, s);
+                mulW(ref (Ua).DerefOrNull(), ref (Ua).DerefOrNull(), !even, ua);
+                mulW(ref (Ub).DerefOrNull(), ref (Ub).DerefOrNull(), even, va);
+                Ua.Add(Ua, Ub);
             } else {
                 while (bWord != 0) {
                     (aWord, bWord) = (bWord, aWord % bWord);
@@ -988,13 +975,13 @@ internal static ж<ΔInt> lehmerGCD(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔIn
     }
 
     if (Ꮡx != nil) {
-        x = Ua.Value;
+        Ꮡx.Set(Ua);
         if (negA) {
             x.neg = !x.neg;
         }
     }
 
-    z = A.Value;
+    Ꮡz.Set(A);
 
     return Ꮡz;
 }
@@ -1054,7 +1041,7 @@ public static ж<ΔInt> ModInverse(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡg, ж<ΔInt
     return Ꮡz;
 }
 
-internal static nat modInverse(this nat z, nat g, nat n) {
+internal static Δnat modInverse(this Δnat z, Δnat g, Δnat n) {
     // TODO(rsc): ModInverse should be implemented in terms of this function.
     return (~(Ꮡ(new ΔInt(abs: z))).ModInverse(Ꮡ(new ΔInt(abs: g)), Ꮡ(new ΔInt(abs: n)))).abs;
 }
@@ -1255,7 +1242,7 @@ public static ж<ΔInt> Lsh(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, nuint n) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
-    z.abs = z.abs.shl(x.abs, n);
+    z.abs = z.abs.lsh(x.abs, n);
     z.neg = x.neg;
     return Ꮡz;
 }
@@ -1268,13 +1255,13 @@ public static ж<ΔInt> Rsh(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, nuint n) {
     if (x.neg) {
         // (-x) >> s == ^(x-1) >> s == ^((x-1) >> s) == -(((x-1) >> s) + 1)
         var t = z.abs.sub(x.abs, natOne); // no underflow because |x| > 0
-        t = t.shr(t, n);
+        t = t.rsh(t, n);
         z.abs = t.add(t, natOne);
         z.neg = true; // z cannot be zero if x is negative
         return Ꮡz;
     }
 
-    z.abs = z.abs.shr(x.abs, n);
+    z.abs = z.abs.rsh(x.abs, n);
     z.neg = false;
     return Ꮡz;
 }
@@ -1293,7 +1280,7 @@ public static nuint Bit(this ref ΔInt x, nint i) {
         throw panic("negative bit index");
     }
     if (x.neg) {
-        var t = ((nat)default!).sub(x.abs, natOne);
+        var t = ((Δnat)default!).sub(x.abs, natOne);
         return (nuint)(t.bit((nuint)i) ^ 1);
     }
 
@@ -1333,8 +1320,8 @@ public static ж<ΔInt> And(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy)
     if (x.neg == y.neg) {
         if (x.neg) {
             // (-x) & (-y) == ^(x-1) & ^(y-1) == ^((x-1) | (y-1)) == -(((x-1) | (y-1)) + 1)
-            var x1 = ((nat)default!).sub(x.abs, natOne);
-            var y1Δ1 = ((nat)default!).sub(y.abs, natOne);
+            var x1 = ((Δnat)default!).sub(x.abs, natOne);
+            var y1Δ1 = ((Δnat)default!).sub(y.abs, natOne);
             z.abs = z.abs.add(z.abs.or(x1, y1Δ1), natOne);
             z.neg = true; // z cannot be zero if x and y are negative
             return Ꮡz;
@@ -1352,7 +1339,7 @@ public static ж<ΔInt> And(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy)
     }
 
     // x & (-y) == x & ^(y-1) == x &^ (y-1)
-    var y1 = ((nat)default!).sub(y.abs, natOne);
+    var y1 = ((Δnat)default!).sub(y.abs, natOne);
     z.abs = z.abs.andNot(x.abs, y1);
     z.neg = false;
     return Ꮡz;
@@ -1367,8 +1354,8 @@ public static ж<ΔInt> AndNot(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> �
     if (x.neg == y.neg) {
         if (x.neg) {
             // (-x) &^ (-y) == ^(x-1) &^ ^(y-1) == ^(x-1) & (y-1) == (y-1) &^ (x-1)
-            var x1 = ((nat)default!).sub(x.abs, natOne);
-            var y1Δ1 = ((nat)default!).sub(y.abs, natOne);
+            var x1 = ((Δnat)default!).sub(x.abs, natOne);
+            var y1Δ1 = ((Δnat)default!).sub(y.abs, natOne);
             z.abs = z.abs.andNot(y1Δ1, x1);
             z.neg = false;
             return Ꮡz;
@@ -1382,14 +1369,14 @@ public static ж<ΔInt> AndNot(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> �
 
     if (x.neg) {
         // (-x) &^ y == ^(x-1) &^ y == ^(x-1) & ^y == ^((x-1) | y) == -(((x-1) | y) + 1)
-        var x1 = ((nat)default!).sub(x.abs, natOne);
+        var x1 = ((Δnat)default!).sub(x.abs, natOne);
         z.abs = z.abs.add(z.abs.or(x1, y.abs), natOne);
         z.neg = true; // z cannot be zero if x is negative and y is positive
         return Ꮡz;
     }
 
     // x &^ (-y) == x &^ ^(y-1) == x & (y-1)
-    var y1 = ((nat)default!).sub(y.abs, natOne);
+    var y1 = ((Δnat)default!).sub(y.abs, natOne);
     z.abs = z.abs.and(x.abs, y1);
     z.neg = false;
     return Ꮡz;
@@ -1404,8 +1391,8 @@ public static ж<ΔInt> Or(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) 
     if (x.neg == y.neg) {
         if (x.neg) {
             // (-x) | (-y) == ^(x-1) | ^(y-1) == ^((x-1) & (y-1)) == -(((x-1) & (y-1)) + 1)
-            var x1 = ((nat)default!).sub(x.abs, natOne);
-            var y1Δ1 = ((nat)default!).sub(y.abs, natOne);
+            var x1 = ((Δnat)default!).sub(x.abs, natOne);
+            var y1Δ1 = ((Δnat)default!).sub(y.abs, natOne);
             z.abs = z.abs.add(z.abs.and(x1, y1Δ1), natOne);
             z.neg = true; // z cannot be zero if x and y are negative
             return Ꮡz;
@@ -1423,7 +1410,7 @@ public static ж<ΔInt> Or(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) 
     }
 
     // x | (-y) == x | ^(y-1) == ^((y-1) &^ x) == -(^((y-1) &^ x) + 1)
-    var y1 = ((nat)default!).sub(y.abs, natOne);
+    var y1 = ((Δnat)default!).sub(y.abs, natOne);
     z.abs = z.abs.add(z.abs.andNot(y1, x.abs), natOne);
     z.neg = true; // z cannot be zero if one of x or y is negative
     return Ꮡz;
@@ -1438,8 +1425,8 @@ public static ж<ΔInt> Xor(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy)
     if (x.neg == y.neg) {
         if (x.neg) {
             // (-x) ^ (-y) == ^(x-1) ^ ^(y-1) == (x-1) ^ (y-1)
-            var x1 = ((nat)default!).sub(x.abs, natOne);
-            var y1Δ1 = ((nat)default!).sub(y.abs, natOne);
+            var x1 = ((Δnat)default!).sub(x.abs, natOne);
+            var y1Δ1 = ((Δnat)default!).sub(y.abs, natOne);
             z.abs = z.abs.xor(x1, y1Δ1);
             z.neg = false;
             return Ꮡz;
@@ -1457,7 +1444,7 @@ public static ж<ΔInt> Xor(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy)
     }
 
     // x ^ (-y) == x ^ ^(y-1) == ^(x ^ (y-1)) == -((x ^ (y-1)) + 1)
-    var y1 = ((nat)default!).sub(y.abs, natOne);
+    var y1 = ((Δnat)default!).sub(y.abs, natOne);
     z.abs = z.abs.add(z.abs.xor(x.abs, y1), natOne);
     z.neg = true; // z cannot be zero if only one of x or y is negative
     return Ꮡz;
@@ -1491,7 +1478,7 @@ public static ж<ΔInt> Sqrt(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx) {
         throw panic("square root of negative number");
     }
     z.neg = false;
-    z.abs = z.abs.sqrt(x.abs);
+    z.abs = z.abs.sqrt(nil, x.abs);
     return Ꮡz;
 }
 

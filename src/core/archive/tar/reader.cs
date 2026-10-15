@@ -556,7 +556,8 @@ internal static (sparseDatas, error) readOldGNUSparseMap(this ref Reader tr, ж<
     }
     var s = Ꮡblk.toGNU().sparse();
     var spd = new sparseDatas(0, s.maxEntries());
-    while (ᐧ) {
+    nint totalSize = len(s);
+    while (totalSize < maxSpecialFileSize) {
         for (nint i = 0; i < s.maxEntries(); i++) {
             // This termination condition is identical to GNU and BSD tar.
             if (s.entry(i).offset()[0] == 0x00) {
@@ -567,7 +568,11 @@ internal static (sparseDatas, error) readOldGNUSparseMap(this ref Reader tr, ж<
             if (p.err != default!) {
                 return (default!, p.err);
             }
-            spd = append(spd, new sparseEntry(Offset: offset, Length: length));
+            error err = default!;
+            (spd, err) = appendSparseEntry(spd, new sparseEntry(Offset: offset, Length: length));
+            if (err != default!) {
+                return (default!, err);
+            }
         }
 
         if (s.isExtended()[0] > 0) {
@@ -578,10 +583,12 @@ internal static (sparseDatas, error) readOldGNUSparseMap(this ref Reader tr, ж<
                 }
             }
             s = blk.toSparse();
+            totalSize += len(s);
             continue;
         }
         return (spd, default!); // Done
     }
+    return (default!, errSparseTooLong);
 }
 
 // readGNUSparseMap1x0 reads the sparse map as stored in GNU's PAX sparse format
@@ -659,7 +666,10 @@ internal static (sparseDatas, error) readGNUSparseMap1x0(io.Reader r) {
         if (err1 != default! || err2 != default!) {
             return (default!, ErrHeader);
         }
-        spd = append(spd, new sparseEntry(Offset: offset, Length: length));
+        (spd, err) = appendSparseEntry(spd, new sparseEntry(Offset: offset, Length: length));
+        if (err != default!) {
+            return (default!, err);
+        }
     }
     return (spd, default!);
 }
@@ -693,10 +703,20 @@ internal static (sparseDatas, error) readGNUSparseMap0x1(map<@string, @string> p
         if (err1 != default! || err2 != default!) {
             return (default!, ErrHeader);
         }
-        spd = append(spd, new sparseEntry(Offset: offset, Length: length));
+        (spd, err) = appendSparseEntry(spd, new sparseEntry(Offset: offset, Length: length));
+        if (err != default!) {
+            return (default!, err);
+        }
         sparseMap = sparseMap[2..];
     }
     return (spd, default!);
+}
+
+internal static (sparseDatas, error) appendSparseEntry(sparseDatas spd, sparseEntry ent) {
+    if (len(spd) >= maxSparseFileEntries) {
+        return (default!, errSparseTooLong);
+    }
+    return (append(spd, ent), default!);
 }
 
 // Read reads from the current file in the tar archive.

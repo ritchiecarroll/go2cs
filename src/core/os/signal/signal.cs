@@ -306,6 +306,9 @@ internal static void process(osꓸSignal sig) {
 // the returned context. Future interrupts received will not trigger the default
 // (exit) behavior until the returned stop function is called.
 //
+// If a signal causes the returned context to be canceled, calling
+// [context.Cause] on it will return an error describing the signal.
+//
 // The stop function releases resources associated with it, so code should
 // call stop as soon as the operations running in this Context complete and
 // signals no longer need to be diverted to the context.
@@ -313,7 +316,7 @@ public static partial (context.Context ctx, Action stop) NotifyContext(context.C
     context.Context ctx = default!;
     var signals = signalsʗp.slice();
 
-    (ctx, var cancel) = context.WithCancel(parent);
+    (ctx, var cancel) = context.WithCancelCause(parent);
     var c = Ꮡ(new signalCtx(
         Context: ctx,
         cancel: cancel,
@@ -327,8 +330,8 @@ public static partial (context.Context ctx, Action stop) NotifyContext(context.C
             var selᴛ3 = (~cʗ1).ch;
             var selᴛ4 = (~cʗ1).Context.Done();
             switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-            case 0 when selᴛ3.ꟷᐳ(out _): {
-                (~cʗ1).cancel();
+            case 0 when selᴛ3.ꟷᐳ(out var s): {
+                (~cʗ1).cancel(((signalError)(s.String() + " signal received"u8)));
                 break;
             }
             case 1 when selᴛ4.ꟷᐳ(out _): {
@@ -341,13 +344,13 @@ public static partial (context.Context ctx, Action stop) NotifyContext(context.C
 
 partial struct signalCtx {
     /*embed*/ public context_package.Context Context;
-    internal Action cancel;
+    internal Action<error> cancel;
     internal slice<osꓸSignal> signals;
     internal channel<osꓸSignal> ch;
 }
 
 internal static void stop(this ref signalCtx c) {
-    c.cancel();
+    c.cancel(default!);
     Stop(c.ch.WithDirection(GoChanDir.Send));
 }
 
@@ -374,6 +377,19 @@ internal static @string String(this ref signalCtx c) {
     }
     buf = append(buf, (byte)((rune)')'));
     return ((@string)buf);
+}
+
+partial struct signalError /*@string*/;
+
+internal static @string Error(this signalError s) {
+    return ((@string)s);
+}
+
+internal static bool Is(this signalError s, error target) {
+    if (AreEqual(target, context.Canceled)) {
+        return true;
+    }
+    return false;
 }
 
 } // end signal_package

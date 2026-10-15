@@ -96,8 +96,12 @@ public static void Set(this ref IntArgRegBitmap b, nint i) {
 // on the reflectcall return path.
 //
 //go:nosplit
-public static bool Get(this ref IntArgRegBitmap b, nint i) {
-    return (uint8)(b.Value[i / 8] & (((uint8)1).Lsh((int64)((i % 8))))) != 0;
+public static bool Get(this ж<IntArgRegBitmap> Ꮡb, nint i) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    // Compute p=&b[i/8], but without a bounds check. We don't have the stack for it.
+    var p = (ж<byte>)(uintptr)((@unsafe.Pointer)((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref b) + (uintptr)(i / 8)));
+    return (byte)(p.Value & (((uint8)1).Lsh((int64)((i % 8))))) != 0;
 }
 
 } // end abi_package

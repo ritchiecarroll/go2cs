@@ -82,9 +82,6 @@
   <Folder Name="/core/internal/goos/">
     <Project Path="core/internal/goos/internal.goos.csproj" />
   </Folder>
-  <Folder Name="/core/internal/itoa/">
-    <Project Path="core/internal/itoa/internal.itoa.csproj" />
-  </Folder>
   <Folder Name="/core/internal/msan/">
     <Project Path="core/internal/msan/internal.msan.csproj" />
   </Folder>
@@ -109,6 +106,13 @@
   </Folder>
   <Folder Name="/core/internal/runtime/exithook/">
     <Project Path="core/internal/runtime/exithook/internal.runtime.exithook.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/runtime/syscall/" />
+  <Folder Name="/core/internal/runtime/syscall/linux/">
+    <Project Path="core/internal/runtime/syscall/linux/internal.runtime.syscall.linux.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/runtime/syscall/windows/">
+    <Project Path="core/internal/runtime/syscall/windows/internal.runtime.syscall.windows.csproj" />
   </Folder>
   <Folder Name="/core/internal/stringslite/">
     <Project Path="core/internal/stringslite/internal.stringslite.csproj" />

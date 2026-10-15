@@ -45,12 +45,12 @@ using static go.crypto.elliptic_package;
 [assembly: GoImplement<go.crypto.@internal.fips140.nistec_package.P521Point, nistPoint<go.crypto.@internal.fips140.nistec_package.P521Point>>(ConstraintProxy = true)]
 [assembly: GoImplement<nistCurve<P224PointжnistPoint>, Curve>(Pointer = true)]
 [assembly: GoImplement<nistCurve<P224PointжnistPoint>, unmarshaler>(Pointer = true)]
+[assembly: GoImplement<nistCurve<P256PointжnistPoint>, Curve>(Pointer = true)]
+[assembly: GoImplement<nistCurve<P256PointжnistPoint>, unmarshaler>(Pointer = true)]
 [assembly: GoImplement<nistCurve<P384PointжnistPoint>, Curve>(Pointer = true)]
 [assembly: GoImplement<nistCurve<P384PointжnistPoint>, unmarshaler>(Pointer = true)]
 [assembly: GoImplement<nistCurve<P521PointжnistPoint>, Curve>(Pointer = true)]
 [assembly: GoImplement<nistCurve<P521PointжnistPoint>, unmarshaler>(Pointer = true)]
-[assembly: GoImplement<p256Curve, Curve>(Pointer = true)]
-[assembly: GoImplement<p256Curve, unmarshaler>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -65,8 +65,7 @@ using static go.crypto.elliptic_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/elliptic/elliptic.go", "elliptic.cs", "AD+IAZ4ACgKCgoKUgoKCuKamgqaUAAISAAkClJSClIKUrOKCgoKCggAMGgABEAAJAoCCtoKClIKUgoKCgpSClKzigIK2goKUgpSCgoKmgoKClIKUgpSm1oKmguyCgoKCAAIU8oIAAhYACAKCAAIU8oIAAhTygg==")]
-[assembly: go.GoPositionMap("crypto/elliptic/nistec.go", "nistec.cs", "AA0auIIADyDIggALGLiCAAsiuIIAJl6ipvaClILmAAgGgqaClIKmgoKCgoKm0oKmlIKCgqaigoKUgoKUpqKCgpSqwoKClIKClIKmooKClIKCgpSmooKCgpSqwoKCgpSCgpSCgoKUptKCpoKCyoKCgqaigpSCgpSmgoKClKaCgoKU", "", "", "19=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;41=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;58=bigFromDecimal/1/2/4,bigFromDecimal/2/2/6,bigFromHex/1/3/8,bigFromHex/2/3/10,bigFromHex/3/3/12;75=bigFromDecimal/1/2/4,bigFromDecimal/2/2/7,bigFromHex/1/3/10,bigFromHex/2/3/13,bigFromHex/3/3/16")]
-[assembly: go.GoPositionMap("crypto/elliptic/nistec_p256.go", "nistec_p256.cs", "AA0copSUlJSCgoKU")]
+[assembly: go.GoPositionMap("crypto/elliptic/nistec.go", "nistec.cs", "AA0auIIACxi4ggALGLiCAAsiuIIAJl6ipvaClILmAAgGgqaClIKmgoKCgoKm0oKmlIKCgqaigoKUgoKUpqKCgpSqwoKClIKClIKmooKClIKCgpSmooKCgpSm0oKmgoLKgoKCpqKClIKClKaCgoKUpoKCgpQ=", "", "", "19=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;36=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;53=bigFromDecimal/1/2/4,bigFromDecimal/2/2/6,bigFromHex/1/3/8,bigFromHex/2/3/10,bigFromHex/3/3/12;70=bigFromDecimal/1/2/4,bigFromDecimal/2/2/7,bigFromHex/1/3/10,bigFromHex/2/3/13,bigFromHex/3/3/16")]
 [assembly: go.GoPositionMap("crypto/elliptic/params.go", "params.cs", "ABkwggACFgAIAoKUgpSCgpQAAhIADAaAgraEuIKUrOKCgpSq4oKmgpSCgoKCggACEgAKBoCCpIKUgoK65IKCgoKClIKCgoKmgoKClIKCgoKCgoKUgoKUgoKCgoKCgoKUgoKUgpSCgoKCgpSCgoKCgoKUgoKCgoKUAAISAAoGgIKklIK6tIKCgoKCgpSCgoKClJSCgoKCgpSUgoKCgpSCgpSUgoKClJSCgpSCgpSUAAISAAoGgIKklIKUooKCgpS4AAISAAoGgIK2poKCgqY=", "", "", "71=Sign/2/2/1,Cmp/2/2/1")]
 // </GoSourcePositionMaps>
 
@@ -85,7 +84,6 @@ public static partial class elliptic_package
     internal partial interface nistPoint<T> {}
     internal partial interface unmarshaler {}
     internal partial struct nistCurve<Point> {}
-    internal partial struct p256Curve {}
     public partial interface Curve {}
     public partial struct CurveParams {}
     // </TypeAccessibility>

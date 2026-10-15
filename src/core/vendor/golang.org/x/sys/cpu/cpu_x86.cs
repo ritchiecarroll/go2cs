@@ -53,6 +53,9 @@ internal static void initOptions() {
         new(Name: "sse41"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE41)),
         new(Name: "sse42"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE42)),
         new(Name: "ssse3"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSSE3)),
+        new(Name: "avxifma"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVXIFMA)),
+        new(Name: "avxvnni"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVXVNNI)),
+        new(Name: "avxvnniint8"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVXVNNIInt8)),
 
         // These capabilities should always be enabled on amd64:
         new(Name: "sse2"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE2), Required: runtime.GOARCH == "amd64"u8)
@@ -106,7 +109,7 @@ internal static void archInit() {
         return;
     }
 
-    var (_, ebx7, ecx7, edx7) = cpuid(7, 0);
+    var (eax7, ebx7, ecx7, edx7) = cpuid(7, 0);
     X86.HasBMI1 = isSet(3, ebx7);
     X86.HasAVX2 = isSet(5, ebx7) && osSupportsAVX;
     X86.HasBMI2 = isSet(8, ebx7);
@@ -134,14 +137,24 @@ internal static void archInit() {
         X86.HasAVX512VAES = isSet(9, ecx7);
         X86.HasAVX512VBMI2 = isSet(6, ecx7);
         X86.HasAVX512BITALG = isSet(12, ecx7);
-
-        var (eax71, _, _, _) = cpuid(7, 1);
-        X86.HasAVX512BF16 = isSet(5, eax71);
     }
 
     X86.HasAMXTile = isSet(24, edx7);
     X86.HasAMXInt8 = isSet(25, edx7);
     X86.HasAMXBF16 = isSet(22, edx7);
+
+    // These features depend on the second level of extended features.
+    if (eax7 >= 1) {
+        var (eax71, _, _, edx71) = cpuid(7, 1);
+        if (X86.HasAVX512) {
+            X86.HasAVX512BF16 = isSet(5, eax71);
+        }
+        if (X86.HasAVX) {
+            X86.HasAVXIFMA = isSet(23, eax71);
+            X86.HasAVXVNNI = isSet(4, eax71);
+            X86.HasAVXVNNIInt8 = isSet(4, edx71);
+        }
+    }
 }
 
 internal static bool isSet(nuint bitpos, uint32 value) {

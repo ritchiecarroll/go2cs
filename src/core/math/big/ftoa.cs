@@ -200,16 +200,16 @@ internal static void roundShortest(ж<@decimal> Ꮡd, ref Float x) {
     // 1) Compute normalized mantissa mant and exponent exp for x such
     // that the lsb of mant corresponds to 1/2 ulp for the precision of
     // x (i.e., for mant we want x.prec + 1 bits).
-    var mant = ((nat)default!).set(x.mant);
+    var mant = ((Δnat)default!).set(x.mant);
     nint exp = (nint)x.exp - mant.bitLen();
     nint s = mant.bitLen() - (nint)(x.prec + 1);
     switch (ᐧ) {
     case {} when s is < 0: {
-        mant = mant.shl(mant, (nuint)(-s));
+        mant = mant.lsh(mant, (nuint)(-s));
         break;
     }
     case {} when s is > 0: {
-        mant = mant.shr(mant, (nuint)(+s));
+        mant = mant.rsh(mant, (nuint)(+s));
         break;
     }}
     exp += s;
@@ -217,7 +217,7 @@ internal static void roundShortest(ж<@decimal> Ꮡd, ref Float x) {
 
     // 2) Compute lower bound by subtracting 1/2 ulp.
     ref var lower = ref heap(new @decimal(), out var Ꮡlower);
-    nat tmp = default!;
+    Δnat tmp = default!;
     Ꮡlower.init(tmp.sub(mant, natOne), exp);
 
     // 3) Compute upper bound by adding 1/2 ulp.
@@ -353,11 +353,11 @@ internal static slice<byte> fmtB(this ref Float x, slice<byte> buf) {
         var w = (uint32)len(x.mant) * (uint32)_W;
         switch (ᐧ) {
         case {} when w < x.prec: {
-            m = ((nat)default!).shl(m, (nuint)(x.prec - w));
+            m = ((Δnat)default!).lsh(m, (nuint)(x.prec - w));
             break;
         }
         case {} when w > x.prec: {
-            m = ((nat)default!).shr(m, (nuint)(w - x.prec));
+            m = ((Δnat)default!).rsh(m, (nuint)(w - x.prec));
             break;
         }}
     }
@@ -412,11 +412,11 @@ internal static slice<byte> fmtX(this ж<Float> Ꮡx, slice<byte> buf, nint prec
         nuint w = (nuint)len(x.mant) * (nuint)_W;
         switch (ᐧ) {
         case {} when w < n: {
-            m = ((nat)default!).shl(m, n - w);
+            m = ((Δnat)default!).lsh(m, n - w);
             break;
         }
         case {} when w > n: {
-            m = ((nat)default!).shr(m, w - n);
+            m = ((Δnat)default!).rsh(m, w - n);
             break;
         }}
     }

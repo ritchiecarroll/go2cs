@@ -7,10 +7,10 @@ namespace go;
 using errorspkg = errors_package;
 using asan = @internal.asan_package;
 using bytealg = @internal.bytealg_package;
-using itoa = @internal.itoa_package;
 using msan = @internal.msan_package;
 using oserror = @internal.oserror_package;
 using race = @internal.race_package;
+using strconv = @internal.strconv_package;
 using runtime = runtime_package;
 using Δsync = sync_package;
 using @unsafe = unsafe_package;
@@ -131,7 +131,7 @@ public static @string Error(this Errno e) {
             return s;
         }
     }
-    return "errno "u8 + itoa.Itoa((nint)(uintptr)e);
+    return "errno "u8 + strconv.Itoa((nint)(uintptr)e);
 }
 
 public static bool Is(this Errno e, error target) {
@@ -198,7 +198,7 @@ public static @string String(this ΔSignal s) {
             return str;
         }
     }
-    return "signal "u8 + itoa.Itoa((nint)s);
+    return "signal "u8 + strconv.Itoa((nint)s);
 }
 
 public static (nint n, error err) Read(nint fd, slice<byte> p) {
@@ -440,9 +440,13 @@ public static error /*err*/ Sendmsg(nint fd, slice<byte> p, slice<byte> oob, Soc
 internal static (nint n, error err) sendmsgNInet4(nint fd, slice<byte> p, slice<byte> oob, ж<SockaddrInet4> Ꮡto, nint flags) {
     error err = default!;
 
-    (var ptr, var salen, err) = Ꮡto.sockaddr();
-    if (err != default!) {
-        return (0, err);
+    @unsafe.Pointer ptr = default!;
+    _Socklen salen = default!;
+    if (Ꮡto != nil) {
+        (ptr, salen, err) = Ꮡto.sockaddr();
+        if (err != default!) {
+            return (0, err);
+        }
     }
     return sendmsgN(fd, p, oob, ptr, salen, flags);
 }
@@ -450,9 +454,13 @@ internal static (nint n, error err) sendmsgNInet4(nint fd, slice<byte> p, slice<
 internal static (nint n, error err) sendmsgNInet6(nint fd, slice<byte> p, slice<byte> oob, ж<SockaddrInet6> Ꮡto, nint flags) {
     error err = default!;
 
-    (var ptr, var salen, err) = Ꮡto.sockaddr();
-    if (err != default!) {
-        return (0, err);
+    @unsafe.Pointer ptr = default!;
+    _Socklen salen = default!;
+    if (Ꮡto != nil) {
+        (ptr, salen, err) = Ꮡto.sockaddr();
+        if (err != default!) {
+            return (0, err);
+        }
     }
     return sendmsgN(fd, p, oob, ptr, salen, flags);
 }

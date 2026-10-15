@@ -49,7 +49,7 @@ using static go.@internal.godebugs_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/godebugs/table.go", "table.cs", "ABw2ADBipIKCgoKCgpSClKY=")]
+[assembly: go.GoPositionMap("internal/godebugs/table.go", "table.cs", "AB04AEKEAbqkgoKCgoKClIKUpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -65,6 +65,7 @@ public static partial class godebugs_package
 
     // <TypeAccessibility>
     public partial struct Info {}
+    public partial struct RemovedInfo {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

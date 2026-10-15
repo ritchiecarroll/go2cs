@@ -61,8 +61,8 @@ public static int64 /*result*/ Alignof(this ж<StdSizes> Ꮡs, ΔType T) {
 
         // For arrays and structs, alignment is defined in terms
         // of alignment of the elements and fields, respectively.
-        var switchᴛ14 = under(T);
-        switch (switchᴛ14.type()) {
+        var switchᴛ13 = T.Underlying();
+        switch (switchᴛ13.type()) {
         case ж<Array> t: {
             // spec: "For a variable x of array type: unsafe.Alignof(x)
             // is the same as unsafe.Alignof(x[0]), but at least 1."
@@ -95,7 +95,7 @@ public static int64 /*result*/ Alignof(this ж<StdSizes> Ꮡs, ΔType T) {
         }
         case ж<Slice> _:
         case ж<Interface> _: {
-            var t = switchᴛ14;
+            var t = switchᴛ13;
             // Multiword data structures are effectively structs
             // in which each element has size WordSize.
             // Type parameters lead to variable sizes/alignments;
@@ -112,7 +112,7 @@ public static int64 /*result*/ Alignof(this ж<StdSizes> Ꮡs, ΔType T) {
         }
         case ж<TypeParam> _:
         case ж<Union> _: {
-            var t = switchᴛ14;
+            var t = switchᴛ13;
             throw panic("unreachable");
             break;
         }}
@@ -187,8 +187,8 @@ internal static array<byte> basicSizes = new golib.SparseArray<byte>{
 public static int64 Sizeof(this ж<StdSizes> Ꮡs, ΔType T) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    var switchᴛ15 = under(T);
-    switch (switchᴛ15.type()) {
+    var switchᴛ14 = T.Underlying();
+    switch (switchᴛ14.type()) {
     case ж<Basic> t: {
         assert(isTyped(T));
         BasicKind k = t.Value.kind;
@@ -256,7 +256,7 @@ public static int64 Sizeof(this ж<StdSizes> Ꮡs, ΔType T) {
     }
     case ж<TypeParam> _:
     case ж<Union> _: {
-        var t = switchᴛ15;
+        var t = switchᴛ14;
         throw panic("unreachable");
         break;
     }}
@@ -354,7 +354,7 @@ internal static slice<int64> offsetsof(this ref Config conf, ж<Struct> ᏑT) {
 internal static int64 offsetof(this ref Config conf, ΔType T, slice<nint> index) {
     int64 offs = default!;
     foreach (var (_, i) in index) {
-        var s = under(T)._<ж<Struct>>();
+        var s = T.Underlying()._<ж<Struct>>();
         var d = conf.offsetsof(s)[i];
         if (d < 0) {
             return -1;

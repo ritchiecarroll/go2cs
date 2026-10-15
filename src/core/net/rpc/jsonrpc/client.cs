@@ -131,7 +131,7 @@ public static (ж<rpc.Client>, error) Dial(@string network, @string address) {
     if (err != default!) {
         return (default!, err);
     }
-    return (NewClient(new net_ConnᴠReadWriteCloser(conn)), err);
+    return (NewClient(new net_ConnᴠReadWriteCloser(conn)), default!);
 }
 
 } // end jsonrpc_package

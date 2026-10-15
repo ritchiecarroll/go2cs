@@ -286,8 +286,8 @@ public static (@string, error) DecodeHeader(this ref WordDecoder d, @string head
         var (content, err) = decode(encoding, text);
         if (err != default!) {
             betweenWords = false;
-            Ꮡbuf.WriteString(header.slice(0, start + 2));
-            header = header.slice(start + 2);
+            Ꮡbuf.WriteString(header.slice(0, end));
+            header = header.slice(end);
             continue;
         }
 

@@ -4,11 +4,16 @@
 
 // Package ast declares the types used to represent syntax trees for Go
 // packages.
+//
+// Syntax trees may be constructed directly, but they are typically
+// produced from Go source code by the parser; see the ParseFile
+// function in package [go/parser].
 namespace go.go;
 
 using token = global::go.go.token_package;
 using strings = strings_package;
 using global::go.go;
+using iter = iter_package;
 
 partial class ast_package {
 
@@ -153,10 +158,10 @@ public static @string Text(this ж<CommentGroup> Ꮡg) {
         }}
 
         // Split on newlines.
-        var cl = strings.Split(c, "\n"u8);
+        var cl = strings.SplitSeq(c, "\n"u8);
 
         // Walk lines, stripping trailing white space and adding to list.
-        foreach (var (_, l) in cl) {
+        foreach (var l in range<@string>(cl.Invoke)) {
             lines = append(lines, stripTrailingWhitespace(l));
         }
     }
@@ -339,11 +344,10 @@ partial struct Ellipsis {
 //
 // For raw string literals (Kind == token.STRING && Value[0] == '`'),
 // the Value field contains the string text without carriage returns (\r) that
-// may have been present in the source. Because the end position is
-// computed using len(Value), the position reported by [BasicLit.End] does not match the
-// true source end position for raw string literals containing carriage returns.
+// may have been present in the source.
 partial struct BasicLit {
     public tokenꓸPos ValuePos;   // literal position
+    public tokenꓸPos ValueEnd;   // position immediately after the literal
     public token.Token Kind; // token.INT, token.FLOAT, token.IMAG, token.CHAR, or token.STRING
     public @string Value;     // literal string; e.g. 42, 0x7f, 3.14, 1e-9, 2.4i, 'a', '\x7f', "foo" or `\m\n\o`
 }
@@ -628,7 +632,13 @@ public static tokenꓸPos End(this ref Ellipsis x) {
 }
 
 public static tokenꓸPos End(this ref BasicLit x) {
-    return ((tokenꓸPos)((nint)x.ValuePos + len(x.Value)));
+    if (!x.ValueEnd.IsValid()) {
+        // Not from parser; use a heuristic.
+        // (Incorrect for `...` containing \r\n;
+        // see https://go.dev/issue/76031.)
+        return ((tokenꓸPos)((nint)x.ValuePos + len(x.Value)));
+    }
+    return x.ValueEnd;
 }
 
 public static tokenꓸPos End(this ref FuncLit x) {
@@ -1449,7 +1459,7 @@ partial struct File {
     public ж<Scope> Scope;       // package scope (this file only). Deprecated: see Object
     public slice<ж<ImportSpec>> Imports; // imports in this file
     public slice<ж<Ident>> Unresolved; // unresolved identifiers in this file. Deprecated: see Object
-    public slice<ж<CommentGroup>> Comments; // list of all comments in the source file
+    public slice<ж<CommentGroup>> Comments; // comments in the file, in lexical order
     public @string GoVersion;         // minimum Go version required by //go:build or // +build directives
 }
 
@@ -1523,7 +1533,7 @@ internal static (@string, bool) generator(ref File @file) {
             // opt: check Contains first to avoid unnecessary array allocation in Split.
             @string prefix = prefixᶜ;
             if (strings.Contains((~comment).Text, prefix)) {
-                foreach (var (_, line) in strings.Split((~comment).Text, "\n"u8)) {
+                foreach (var line in range<@string>(strings.SplitSeq((~comment).Text, "\n"u8).Invoke)) {
                     {
                         var (rest, ok) = strings.CutPrefix(line, prefix); if (ok) {
                             {

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using goarch = @internal.goarch_package;
+using strconv = @internal.strconv_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
@@ -13,6 +13,10 @@ partial class runtime_package {
 // The compiler knows that a print of a value of this type
 // should use printhex instead of printuint (decimal).
 partial struct Δhex /*num:uint64*/;
+
+// The compiler knows that a print of a value of this type should use
+// printquoted instead of printstring.
+partial struct quoted /*@string*/;
 
 // go2cs generated this placeholder — func bytes is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -114,131 +118,140 @@ internal static void printbool(bool v) {
     }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string naNˢ = "NaN"u8;
-internal static readonly @string infˢ = "+Inf"u8;
-internal static readonly @string infˢ2 = "-Inf"u8;
+// float64 requires 1+17+1+1+1+3 = 24 bytes max (sign+digits+decimal point+e+sign+exponent digits).
+internal static UntypedInt float64Bytes => 24;
 
-internal static void printfloat(float64 v) {
-    switch (ᐧ) {
-    case {} when v != v: {
-        printstring(naNˢ);
-        return;
-    }
-    case {} when v + v == v && v > 0D: {
-        printstring(infˢ);
-        return;
-    }
-    case {} when v + v == v && v < 0D: {
-        printstring(infˢ2);
-        return;
-    }}
-
-    UntypedInt n = 7; // digits printed
-    array<byte> buf = new(14); /* n + 7 */
-    buf[0] = (rune)'+';
-    nint e = 0; // exp
-    if (v == 0D){
-        if (1D / v < 0D) {
-            buf[0] = (rune)'-';
-        }
-    } else {
-        if (v < 0D) {
-            v = -v;
-            buf[0] = (rune)'-';
-        }
-
-        // normalize
-        while (v >= 10D) {
-            e++;
-            v /= 10D;
-        }
-        while (v < 1D) {
-            e--;
-            v *= 10D;
-        }
-
-        // round
-        var h = 5.0D;
-        for (nint i = 0; i < n; i++) {
-            h /= 10D;
-        }
-        v += h;
-        if (v >= 10D) {
-            e++;
-            v /= 10D;
-        }
-    }
-
-    // format +d.dddd+edd
-    for (nint i = 0; i < n; i++) {
-        nint s = (nint)v;
-        buf[i + 2] = (byte)(s + (rune)'0');
-        v -= (float64)s;
-        v *= 10D;
-    }
-    buf[1] = buf[2];
-    buf[2] = (rune)'.';
-
-    buf[n + 2] = (rune)'e';
-    buf[n + 3] = (rune)'+';
-    if (e < 0) {
-        e = -e;
-        buf[n + 3] = (rune)'-';
-    }
-
-    buf[n + 4] = (byte)((byte)(e / 100) + (rune)'0');
-    buf[n + 5] = (byte)((byte)(e / 10) % 10 + (rune)'0');
-    buf[n + 6] = (byte)((byte)(e % 10) + (rune)'0');
-    gwrite(buf[..]);
+internal static void printfloat64(float64 v) {
+    array<byte> buf = new(24); /* float64Bytes */
+    gwrite(strconv.AppendFloat(buf[..0], v, (rune)'g', -1, 64));
 }
 
-internal static void printcomplex(complex128 c) {
-    print((@string)"("u8, real(c), imag(c), (@string)"i)"u8);
+// float32 requires 1+9+1+1+1+2 = 15 bytes max (sign+digits+decimal point+e+sign+exponent digits).
+internal static UntypedInt float32Bytes => 15;
+
+internal static void printfloat32(float32 v) {
+    array<byte> buf = new(15); /* float32Bytes */
+    gwrite(strconv.AppendFloat(buf[..0], (float64)v, (rune)'g', -1, 32));
+}
+
+// complex128 requires 24+24+1+1+1 = 51 bytes max (paren+float64+float64+i+paren).
+internal static UntypedInt complex128Bytes => /* 2*float64Bytes + 3 */ 51;
+
+internal static void printcomplex128(complex128 c) {
+    array<byte> buf = new(51); /* complex128Bytes */
+    gwrite(strconv.AppendComplex(buf[..0], c, (rune)'g', -1, 128));
+}
+
+// complex64 requires 15+15+1+1+1 = 33 bytes max (paren+float32+float32+i+paren).
+internal static UntypedInt complex64Bytes => /* 2*float32Bytes + 3 */ 33;
+
+internal static void printcomplex64(complex64 c) {
+    array<byte> buf = new(33); /* complex64Bytes */
+    gwrite(strconv.AppendComplex(buf[..0], (complex128)c, (rune)'g', -1, 64));
 }
 
 internal static void printuint(uint64 v) {
-    array<byte> buf = new(100);
-    nint i = len(buf);
-    for (i--; i > 0; i--) {
-        buf[i] = (byte)(v % 10 + (rune)'0');
-        if (v < 10) {
-            break;
-        }
-        v /= 10;
-    }
+    // Note: Avoiding strconv.AppendUint so that it's clearer
+    // that there are no allocations in this routine.
+    // cmd/link/internal/ld.TestAbstractOriginSanity
+    // sees the append and doesn't realize it doesn't allocate.
+    array<byte> buf = new(20);
+    nint i = strconv.RuntimeFormatBase10(buf[..], v);
     gwrite(buf.slice(i));
 }
 
 internal static void printint(int64 v) {
-    if (v < 0) {
-        printstring("-"u8);
-        v = -v;
+    // Note: Avoiding strconv.AppendUint so that it's clearer
+    // that there are no allocations in this routine.
+    // cmd/link/internal/ld.TestAbstractOriginSanity
+    // sees the append and doesn't realize it doesn't allocate.
+    var neg = v < 0;
+    var u = (uint64)v;
+    if (neg) {
+        u = ((uint64)0 - u);
     }
-    printuint((uint64)v);
+    array<byte> buf = new(20);
+    nint i = strconv.RuntimeFormatBase10(buf[..], u);
+    if (neg) {
+        i--;
+        buf[i] = (rune)'-';
+    }
+    gwrite(buf.slice(i));
 }
 
 internal static nint minhexdigits = 0; // protected by printlock
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string digᶜ = "0123456789abcdef"u8;
+internal static readonly @string digᶜ1 = "0123456789abcdef"u8;
 
-internal static void printhex(uint64 v) {
-    @string dig = digᶜ;
+internal static void printhexopts(bool include0x, nint mindigits, uint64 v) {
+    @string dig = digᶜ1;
     array<byte> buf = new(100);
     nint i = len(buf);
     for (i--; i > 0; i--) {
         buf[i] = dig[v % 16];
-        if (v < 16 && len(buf) - i >= minhexdigits) {
+        if (v < 16 && len(buf) - i >= mindigits) {
             break;
         }
         v /= 16;
     }
-    i--;
-    buf[i] = (rune)'x';
-    i--;
-    buf[i] = (rune)'0';
+    if (include0x) {
+        i--;
+        buf[i] = (rune)'x';
+        i--;
+        buf[i] = (rune)'0';
+    }
     gwrite(buf.slice(i));
+}
+
+internal static void printhex(uint64 v) {
+    printhexopts(true, minhexdigits, v);
+}
+
+internal static void printquoted(@string s) {
+    printlock();
+    gwrite(slice<byte>(@""""u8));
+    foreach (var (_, r) in s) {
+        switch (r) {
+        case (rune)'\n': {
+            gwrite(slice<byte>(@"\n"u8));
+            continue;
+            break;
+        }
+        case (rune)'\r': {
+            gwrite(slice<byte>(@"\r"u8));
+            continue;
+            break;
+        }
+        case (rune)'\t': {
+            gwrite(slice<byte>(@"\t"u8));
+            print();
+            continue;
+            break;
+        }
+        case (rune)'\\' or (rune)'"': {
+            gwrite(new byte[]{(byte)(rune)'\\', (byte)r}.slice());
+            continue;
+            break;
+        }}
+        // For now, only allow basic printable ascii through unescaped
+        if (r >= (rune)' ' && r <= (rune)'~'){
+            gwrite(new byte[]{(byte)r}.slice());
+        } else 
+        if (r < 127){
+            gwrite(bytes(@"\x"u8));
+            printhexopts(false, 2, (uint64)r);
+        } else 
+        if (r < 0x1_0000){
+            gwrite(bytes(@"\u"u8));
+            printhexopts(false, 4, (uint64)r);
+        } else {
+            gwrite(bytes(@"\U"u8));
+            printhexopts(false, 8, (uint64)r);
+        }
+    }
+    gwrite(new byte[]{(byte)(rune)'"'}.slice());
+    printunlock();
 }
 
 internal static void printpointer(@unsafe.Pointer Δp) {
@@ -267,46 +280,6 @@ internal static void printeface(eface e) {
 
 internal static void printiface(iface i) {
     print((@string)"("u8, i.tab.OrTypedNil(), (@string)","u8, @unsafe.Pointer.OrTypedNil(i.data), (@string)")"u8);
-}
-
-// hexdumpWords prints a word-oriented hex dump of [p, end).
-//
-// If mark != nil, it will be called with each printed word's address
-// and should return a character mark to appear just before that
-// word's value. It can return 0 to indicate no mark.
-internal static void hexdumpWords(uintptr Δp, uintptr end, Func<uintptr, byte> mark) {
-    printlock();
-    array<byte> markbuf = new(1);
-    markbuf[0] = (rune)' ';
-    minhexdigits = (nint)(/* unsafe.Sizeof(uintptr(0)) */ (uintptr)8 * 2);
-    for (var i = (uintptr)0; Δp + i < end; i += goarch.PtrSize) {
-        if (i % 16 == 0) {
-            if (i != 0) {
-                println();
-            }
-            print(((Δhex)(uint64)(Δp + i)), (@string)": "u8);
-        }
-
-        if (mark != default!) {
-            markbuf[0] = mark(Δp + i);
-            if (markbuf[0] == 0) {
-                markbuf[0] = (rune)' ';
-            }
-        }
-        gwrite(markbuf[..]);
-        var val = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)(Δp + i));
-        print(((Δhex)(uint64)val));
-        print((@string)" "u8);
-
-        // Can we symbolize val?
-        var fn = findfunc(val);
-        if (fn.valid()) {
-            print((@string)"<"u8, funcname(fn), (@string)"+"u8, ((Δhex)(uint64)(val - fn.entry())), (@string)"> "u8);
-        }
-    }
-    minhexdigits = 0;
-    println();
-    printunlock();
 }
 
 } // end runtime_package

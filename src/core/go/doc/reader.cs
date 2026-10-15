@@ -7,14 +7,14 @@ using cmp = cmp_package;
 using fmt = fmt_package;
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using lazyregexp = @internal.lazyregexp_package;
+using lazyregexp = global::go.@internal.lazyregexp_package;
 using path = path_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
 using utf8 = global::go.unicode.utf8_package;
-using @internal;
+using global::go.@internal;
 using global::go.go;
 using global::go.unicode;
 

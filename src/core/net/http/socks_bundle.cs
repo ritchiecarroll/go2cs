@@ -59,15 +59,15 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
             var doneʗ2 = done;
             var errChʗ2 = errCh;
             goǃ(() => {
-                var selᴛ89 = ctx.Done();
-                var selᴛ90 = doneʗ2;
-                switch (select(ᐸꟷ(selᴛ89, ꓸꓸꓸ), ᐸꟷ(selᴛ90, ꓸꓸꓸ))) {
-                case 0 when selᴛ89.ꟷᐳ(out _): {
+                var selᴛ94 = ctx.Done();
+                var selᴛ95 = doneʗ2;
+                switch (select(ᐸꟷ(selᴛ94, ꓸꓸꓸ), ᐸꟷ(selᴛ95, ꓸꓸꓸ))) {
+                case 0 when selᴛ94.ꟷᐳ(out _): {
                     c.SetDeadline(socksaLongTimeAgo);
                     errChʗ2.ᐸꟷ(ctx.Err());
                     break;
                 }
-                case 1 when selᴛ90.ꟷᐳ(out _): {
+                case 1 when selᴛ95.ꟷᐳ(out _): {
                     errChʗ2.ᐸꟷ(default!);
                     break;
                 }}
@@ -568,7 +568,7 @@ internal static error Authenticate(this ref socksUsernamePassword up, context.Co
         b = append(b, up.Username.ꓸꓸꓸ);
         b = append(b, (byte)builtin.len(up.Password));
         b = append(b, up.Password.ꓸꓸꓸ);
-        // TODO(mikio): handle IO deadlines and cancelation if
+        // TODO(mikio): handle IO deadlines and cancellation if
         // necessary
         {
             var (_, err) = rw.Write(b); if (err != default!) {

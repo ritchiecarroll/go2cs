@@ -126,11 +126,7 @@ internal static (map<@string, slice<@string>>, error) readHeader(ж<textproto.Re
 
 // Layouts suitable for passing to time.Parse.
 // These are tried in order.
-internal static ж<sync.Once> ᏑdateLayoutsBuildOnce = new StandardBox<sync.Once>(default(sync.Once));
-internal static ref sync.Once dateLayoutsBuildOnce => ref ᏑdateLayoutsBuildOnce.Value;
-internal static slice<@string> dateLayouts;
-
-internal static void buildDateLayouts() {
+internal static Func<slice<@string>> dateLayouts = sync.OnceValue(slice<@string> () => {
     // Generate layouts based on RFC 5322, section 3.3.
     var dows = new @string[]{""u8, "Mon, "u8}.array(); // day-of-week
     var days = new @string[]{"2"u8, "02"u8}.array(); // day = 1*2DIGIT
@@ -139,19 +135,24 @@ internal static void buildDateLayouts() {
     // "-0700 (MST)" is not in RFC 5322, but is common.
     var zones = new @string[]{"-0700"u8, "MST"u8, "UT"u8}.array(); // zone = (("+" / "-") 4DIGIT) / "UT" / "GMT" / ...
 
+    nint total = builtin.len(dows) * builtin.len(days) * builtin.len(years) * builtin.len(seconds) * builtin.len(zones);
+    var layouts = new slice<@string>(0, total);
+
     foreach (var (_, dow) in dows.ΔRangeSnapshot()) {
         foreach (var (_, day) in days.ΔRangeSnapshot()) {
             foreach (var (_, year) in years.ΔRangeSnapshot()) {
                 foreach (var (_, second) in seconds.ΔRangeSnapshot()) {
                     foreach (var (_, zone) in zones.ΔRangeSnapshot()) {
                         @string s = dow + day + " Jan "u8 + year + " 15:04"u8 + second + " "u8 + zone;
-                        dateLayouts = append(dateLayouts, s);
+                        layouts = append(layouts, s);
                     }
                 }
             }
         }
     }
-}
+
+    return layouts;
+});
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string mailHeaderHasACrWithoutˢ = "mail: header has a CR without LF"u8;
@@ -160,7 +161,6 @@ internal static readonly @string mailHeaderCouldNotBeˢ = "mail: header could no
 
 // ParseDate parses an RFC 5322 date string.
 public static (time.Time, error) ParseDate(@string date) {
-    ᏑdateLayoutsBuildOnce.Do(buildDateLayouts);
     // CR and LF must match and are tolerated anywhere in the date field.
     date = strings.ReplaceAll(date, "\r\n"u8, ""u8);
     if (strings.Contains(date, "\r"u8)) {
@@ -200,7 +200,7 @@ public static (time.Time, error) ParseDate(@string date) {
     if (!p.skipCFWS()) {
         return (new time.Time(nil), errors.New(mailMisformattedˢ));
     }
-    foreach (var (_, layout) in dateLayouts) {
+    foreach (var (_, layout) in dateLayouts()) {
         var (t, err) = time.Parse(layout, date);
         if (err == default!) {
             return (t, default!);
@@ -641,7 +641,7 @@ internal static (@string phrase, error err) consumePhrase(this ref addrParser p)
     debug.Printf("consumePhrase: [%s]"u8, p.s);
     // phrase = 1*word
     slice<@string> words = default!;
-    bool isPrevEncoded = default!;
+    ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     while (ᐧ) {
         // obs-phrase allows CFWS after one word
         if (builtin.len(words) > 0) {
@@ -673,13 +673,27 @@ internal static (@string phrase, error err) consumePhrase(this ref addrParser p)
             break;
         }
         debug.Printf("consumePhrase: consumed %q"u8, word);
-        if (isPrevEncoded && isEncoded){
-            words[builtin.len(words) - 1] += word;
-        } else {
-            words = append(words, word);
+        switch (ᐧ) {
+        case {} when isEncoded: {
+            Ꮡsb.WriteString(word);
+            break;
         }
-        isPrevEncoded = isEncoded;
+        case {} when !isEncoded && sb.Len() > 0: {
+            words = append(words, sb.String());
+            sb.Reset();
+            words = append(words, word);
+            break;
+        }
+        default: {
+            words = append(words, word);
+            break;
+        }}
     }
+
+    if (sb.Len() > 0) {
+        words = append(words, sb.String());
+    }
+
     // Ignore any error if we got at least one word.
     if (err != default! && builtin.len(words) == 0) {
         debug.Printf("consumePhrase: hit err: %v"u8, err);
@@ -924,7 +938,7 @@ internal static (@string, bool) consumeComment(this ref addrParser p) {
     // '(' already consumed.
     nint depth = 1;
 
-    @string comment = default!;
+    ref var comment = ref heap(new strings.Builder(), out var Ꮡcomment);
     while (ᐧ) {
         if (p.empty() || depth == 0) {
             break;
@@ -940,12 +954,12 @@ internal static (@string, bool) consumeComment(this ref addrParser p) {
             depth--;
         }
         if (depth > 0) {
-            comment += p.s[..1];
+            Ꮡcomment.WriteByte(p.s[0]);
         }
         p.s = p.s[1..];
     }
 
-    return (comment, depth == 0);
+    return (comment.String(), depth == 0);
 }
 
 internal static (@string word, bool isEncoded, error err) decodeRFC2047Word(this ref addrParser p, @string s) {

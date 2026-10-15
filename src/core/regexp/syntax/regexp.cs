@@ -74,7 +74,7 @@ public static bool Equal(this ж<Regexp> Ꮡx, ж<Regexp> Ꮡy) {
         }
     }
     else if (exprᴛ1 == OpLiteral || exprᴛ1 == OpCharClass) {
-        return slices.Equal<slice<rune>, rune>(x.Rune, y.Rune);
+        return (Flags)(x.Flags & FoldCase) == (Flags)(y.Flags & FoldCase) && slices.Equal<slice<rune>, rune>(x.Rune, y.Rune);
     }
     else if (exprᴛ1 == OpAlternate || exprᴛ1 == OpConcat) {
         return slices.EqualFunc<slice<ж<Regexp>>, slice<ж<Regexp>>, ж<Regexp>, ж<Regexp>>(x.Sub, y.Sub, ((Func<ж<Regexp>, ж<Regexp>, bool>)(Equal)));

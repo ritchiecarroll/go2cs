@@ -32,7 +32,7 @@
 //
 // To make it possible for gcc-compiled C code to call a Go function p.GoF,
 // cgo writes a gcc-compiled function named GoF (not p.GoF, since gcc doesn't
-// know about packages).  The gcc-compiled C function f calls GoF.
+// know about packages). The gcc-compiled C function f calls GoF.
 //
 // GoF initializes "frame", a structure containing all of its
 // arguments and slots for p.GoF's results. It calls
@@ -57,10 +57,10 @@
 // m.g0 stack, so that it can be restored later.
 //
 // runtime.cgocallbackg (below) is now running on a real goroutine
-// stack (not an m.g0 stack).  First it calls runtime.exitsyscall, which will
+// stack (not an m.g0 stack). First it calls runtime.exitsyscall, which will
 // block until the $GOMAXPROCS limit allows running this goroutine.
 // Once exitsyscall has returned, it is safe to do things like call the memory
-// allocator or invoke the Go callback function.  runtime.cgocallbackg
+// allocator or invoke the Go callback function. runtime.cgocallbackg
 // first defers a function to unwind m.g0.sched.sp, so that if p.GoF
 // panics, m.g0.sched.sp will be restored to its old value: the m.g0 stack
 // and the m.curg stack will be unwound in lock step.
@@ -200,8 +200,8 @@ internal static int32 cgocall(@unsafe.Pointer fn, @unsafe.Pointer arg) {
 
     osPreemptExtExit(mp);
 
-    // Save current syscall parameters, so m.winsyscall can be
-    // used again if callback decide to make syscall.
+    // After exitsyscall we can be rescheduled on a different M,
+    // so we need to restore the original M's winsyscall.
     var winsyscall = mp.Value.winsyscall;
 
     exitsyscall();
@@ -212,6 +212,19 @@ internal static int32 cgocall(@unsafe.Pointer fn, @unsafe.Pointer arg) {
     // wired this M to a P.
     if (raceenabled) {
         raceacquire(@unsafe.Pointer.FromPinnedBox(Ꮡracecgosync));
+    }
+
+    if (sys.DITSupported) {
+        // C code may have enabled or disabled DIT on this thread, restore
+        // our state to the expected one.
+        var ditEnabled = sys.DITEnabled();
+        var gp = getg();
+        if (!(~gp).ditWanted && ditEnabled){
+            sys.DisableDIT();
+        } else 
+        if ((~gp).ditWanted && !ditEnabled) {
+            sys.EnableDIT();
+        }
     }
 
     // From the garbage collector's perspective, time can move
@@ -407,7 +420,7 @@ internal static void cgocallbackg1(@unsafe.Pointer fn, @unsafe.Pointer frame, ui
             // Now we need to set gp.cgoCtxt = s, but we could get
             // a SIGPROF signal while manipulating the slice, and
             // the SIGPROF handler could pick up gp.cgoCtxt while
-            // tracing up the stack.  We need to ensure that the
+            // tracing up the stack. We need to ensure that the
             // handler always sees a valid slice, so set the
             // values in an order such that it always does.
             var Δp = gp.of(g.ᏑcgoCtxt).Reinterpret<slice<uintptr>, Δsliceᴛ>();
@@ -442,11 +455,21 @@ internal static void cgocallbackg1(@unsafe.Pointer fn, @unsafe.Pointer frame, ui
         restore = true;
         defer(ᴛ1 => unwindm(ref ᴛ1.DerefOrNull()), Ꮡrestore, ref ᒐ);
 
-        bool ditAlreadySet = default!;
-        if (debug.dataindependenttiming == 1 && (~(~gp).m).isextra) {
+        bool ditStateM = default!;
+        bool ditStateG = default!;
+        if (debug.dataindependenttiming == 1 && (~(~gp).m).isextra){
             // We only need to enable DIT for threads that were created by C, as it
             // should already by enabled on threads that were created by Go.
-            ditAlreadySet = sys.EnableDIT();
+            ditStateM = sys.EnableDIT();
+        } else 
+        if (sys.DITSupported && debug.dataindependenttiming != 1) {
+            // C code may have enabled or disabled DIT on this thread. Set the flag
+            // on the M and G accordingly, saving their previous state to restore
+            // on return from the callback.
+            (ditStateM, ditStateG) = (gp.Value.m.Value.ditEnabled, gp.Value.ditWanted);
+            var ditEnabled = sys.DITEnabled();
+            gp.Value.ditWanted = ditEnabled;
+            gp.Value.m.Value.ditEnabled = ditEnabled;
         }
 
         if (raceenabled) {
@@ -465,9 +488,17 @@ internal static void cgocallbackg1(@unsafe.Pointer fn, @unsafe.Pointer frame, ui
             racereleasemerge(@unsafe.Pointer.FromPinnedBox(Ꮡracecgosync));
         }
 
-        if (debug.dataindependenttiming == 1 && !ditAlreadySet) {
+        if (debug.dataindependenttiming == 1 && !ditStateM){
             // Only unset DIT if it wasn't already enabled when cgocallback was called.
             sys.DisableDIT();
+        } else 
+        if (sys.DITSupported && debug.dataindependenttiming != 1) {
+            // Restore DIT state on M and G.
+            gp.Value.ditWanted = ditStateG;
+            gp.Value.m.Value.ditEnabled = ditStateM;
+            if (!ditStateM) {
+                sys.DisableDIT();
+            }
         }
 
         // Do not unwind m->g0->sched.sp.
@@ -555,19 +586,20 @@ internal static ref uint64 racecgosync => ref Ꮡracecgosync.Value; // represent
 // pointers.)
 // go2cs generated this placeholder — func cgoCheckPointer is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static readonly @string cgoCheckPointerFail = "cgo argument has Go pointer to unpinned Go pointer"u8;
+partial struct cgoErrorMsg /*num:nint*/;
 
-internal static readonly @string cgoResultFail = "cgo result is unpinned Go pointer or points to unpinned Go pointer"u8;
+internal static cgoErrorMsg cgoCheckPointerFail => /* iota */ 0;
+internal static cgoErrorMsg cgoResultFail => 1;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string canTHappenˢ = "can't happen"u8;
 
-// cgoCheckArg is the real work of cgoCheckPointer. The argument p
-// is either a pointer to the value (of type t), or the value itself,
-// depending on indir. The top parameter is whether we are at the top
+// cgoCheckArg is the real work of cgoCheckPointer and cgoCheckResult.
+// The argument p is either a pointer to the value (of type t), or the value
+// itself, depending on indir. The top parameter is whether we are at the top
 // level, where Go pointers are allowed. Go pointers to pinned objects are
 // allowed as long as they don't reference other unpinned pointers.
-internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir, bool top, @string msg) {
+internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir, bool top, cgoErrorMsg msg) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (!t.Pointers() || Δp == nil) {
@@ -575,14 +607,14 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
         return;
     }
 
-    var exprᴛ1 = (abiꓸKind)(t.Kind_ & abi.KindMask);
+    var exprᴛ1 = t.Kind();
     if (exprᴛ1 == abi.Array) {
         var at = Ꮡt.Reinterpret<_type, arraytype>();
         if (!indir) {
             if ((~at).Len != 1) {
                 @throw(canTHappenˢ);
             }
-            cgoCheckArg((~at).Elem, Δp, (abiꓸKind)((~(~at).Elem).Kind_ & abi.KindDirectIface) == 0, top, msg);
+            cgoCheckArg((~at).Elem, Δp, !(~at).Elem.IsDirectIface(), top, msg);
             return;
         }
         for (var i = (uintptr)0; i < (~at).Len; i++) {
@@ -594,7 +626,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
         // These types contain internal pointers that will
         // always be allocated in the Go heap. It's never OK
         // to pass them to C.
-        throw panic(((errorString)msg));
+        throw panic(cgoFormatErr(msg, t.Kind()));
     }
     else if (exprᴛ1 == abi.Func) {
         if (indir) {
@@ -603,7 +635,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
         if (!cgoIsGoPointer(Δp)) {
             return;
         }
-        throw panic(((errorString)msg));
+        throw panic(cgoFormatErr(msg, t.Kind()));
     }
     else if (exprᴛ1 == abi.Interface) {
         var it = ~(ж<ж<_type>>)(uintptr)(Δp);
@@ -614,16 +646,16 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
         // constant. A type not known at compile time will be
         // in the heap and will not be OK.
         if (inheap((uintptr)it)) {
-            throw panic(((errorString)msg));
+            throw panic(cgoFormatErr(msg, t.Kind()));
         }
         Δp = ~(ж<@unsafe.Pointer>)(uintptr)((uintptr)add(Δp, goarch.PtrSize));
         if (!cgoIsGoPointer(Δp)) {
             return;
         }
         if (!top && !isPinned(Δp)) {
-            throw panic(((errorString)msg));
+            throw panic(cgoFormatErr(msg, t.Kind()));
         }
-        cgoCheckArg(it, Δp, (abiꓸKind)((~it).Kind_ & abi.KindDirectIface) == 0, false, msg);
+        cgoCheckArg(it, Δp, !it.IsDirectIface(), false, msg);
     }
     else if (exprᴛ1 == abi.Slice) {
         var st = Ꮡt.Reinterpret<_type, slicetype>();
@@ -633,7 +665,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
             return;
         }
         if (!top && !isPinned(Δp)) {
-            throw panic(((errorString)msg));
+            throw panic(cgoFormatErr(msg, t.Kind()));
         }
         if (!(~st).Elem.Pointers()) {
             return;
@@ -649,7 +681,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
             return;
         }
         if (!top && !isPinned((~ss).str)) {
-            throw panic(((errorString)msg));
+            throw panic(cgoFormatErr(msg, t.Kind()));
         }
     }
     else if (exprᴛ1 == abi.Struct) {
@@ -658,7 +690,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
             if (len((~st).Fields) != 1) {
                 @throw(canTHappenˢ);
             }
-            cgoCheckArg((~st).Fields[0].Typ, Δp, (abiꓸKind)((~(~st).Fields[0].Typ).Kind_ & abi.KindDirectIface) == 0, top, msg);
+            cgoCheckArg((~st).Fields[0].Typ, Δp, !(~st).Fields[0].Typ.IsDirectIface(), top, msg);
             return;
         }
         foreach (var (_, f) in (~st).Fields) {
@@ -680,7 +712,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
             return;
         }
         if (!top && !isPinned(Δp)) {
-            throw panic(((errorString)msg));
+            throw panic(cgoFormatErr(msg, t.Kind()));
         }
 
         cgoCheckUnknownPointer(Δp, msg);
@@ -694,7 +726,7 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
 // memory. It checks whether that Go memory contains any other
 // pointer into unpinned Go memory. If it does, we panic.
 // The return values are unused but useful to see in panic tracebacks.
-internal static (uintptr @base, uintptr i) cgoCheckUnknownPointer(@unsafe.Pointer Δp, @string msg) {
+internal static (uintptr @base, uintptr i) cgoCheckUnknownPointer(@unsafe.Pointer Δp, cgoErrorMsg msg) {
     uintptr @base = default!;
     uintptr i = default!;
 
@@ -714,7 +746,7 @@ internal static (uintptr @base, uintptr i) cgoCheckUnknownPointer(@unsafe.Pointe
             }
             @unsafe.Pointer pp = ~(ж<@unsafe.Pointer>)(uintptr)((@unsafe.Pointer)addr);
             if (cgoIsGoPointer(pp) && !isPinned(pp)) {
-                throw panic(((errorString)msg));
+                throw panic(cgoFormatErr(msg, abi.Pointer));
             }
         }
         return (@base, i);
@@ -724,7 +756,7 @@ internal static (uintptr @base, uintptr i) cgoCheckUnknownPointer(@unsafe.Pointe
         if (cgoInRange(Δp, (~datap).data, (~datap).edata) || cgoInRange(Δp, (~datap).bss, (~datap).ebss)) {
             // We have no way to know the size of the object.
             // We have to assume that it might contain a pointer.
-            throw panic(((errorString)msg));
+            throw panic(cgoFormatErr(msg, abi.Pointer));
         }
         // In the text or noptr sections, we know that the
         // pointer does not point to a Go pointer.
@@ -777,7 +809,102 @@ internal static void cgoCheckResult(any valʗp) {
 
     var ep = efaceOf(Ꮡval);
     var t = ep.Value._type;
-    cgoCheckArg(t, (~ep).data, (abiꓸKind)((~t).Kind_ & abi.KindDirectIface) == 0, false, cgoResultFail);
+    if (t == nil) {
+        return;
+    }
+    cgoCheckArg(t, (~ep).data, !t.IsDirectIface(), false, cgoResultFail);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string unknownˢ = "unknown"u8;
+internal static readonly @string channelˢ = "channel"u8;
+internal static readonly @string functionˢ = "function"u8;
+internal static readonly @string interfaceˢ = "interface"u8;
+internal static readonly @string mapˢ = "map"u8;
+internal static readonly @string pointerˢ = "pointer"u8;
+internal static readonly @string sliceˢ = "slice"u8;
+internal static readonly @string stringˢ = "string"u8;
+internal static readonly @string structˢ = "struct"u8;
+internal static readonly @string unsafePointerˢ = "unsafe pointer"u8;
+
+// cgoFormatErr is called by cgoCheckArg and cgoCheckUnknownPointer
+// to format panic error messages.
+internal static errorString cgoFormatErr(cgoErrorMsg error, abiꓸKind kind) {
+    @string msg = default!;
+    @string kindname = default!;
+    @string cgoFunction = unknownˢ;
+    nint offset = default!;
+    array<byte> buf = new(20);
+
+    // We expect one of these abi.Kind from cgoCheckArg
+    var exprᴛ1 = kind;
+    if (exprᴛ1 == abi.Chan) {
+        kindname = channelˢ;
+    }
+    else if (exprᴛ1 == abi.Func) {
+        kindname = functionˢ;
+    }
+    else if (exprᴛ1 == abi.Interface) {
+        kindname = interfaceˢ;
+    }
+    else if (exprᴛ1 == abi.Map) {
+        kindname = mapˢ;
+    }
+    else if (exprᴛ1 == abi.Pointer) {
+        kindname = pointerˢ;
+    }
+    else if (exprᴛ1 == abi.Slice) {
+        kindname = sliceˢ;
+    }
+    else if (exprᴛ1 == abi.ΔString) {
+        kindname = stringˢ;
+    }
+    else if (exprᴛ1 == abi.Struct) {
+        kindname = structˢ;
+    }
+    else if (exprᴛ1 == abi.UnsafePointer) {
+        kindname = unsafePointerˢ;
+    }
+    else { /* default: */
+        kindname = pointerˢ;
+    }
+
+    // The cgo function name might need an offset to be obtained
+    if (error == cgoResultFail) {
+        offset = 21;
+    }
+
+    // Relatively to cgoFormatErr, this is the stack frame:
+    // 0. cgoFormatErr
+    // 1. cgoCheckArg or cgoCheckUnknownPointer
+    // 2. cgoCheckPointer or cgoCheckResult
+    // 3. cgo function
+    var (pc, path, line, ok) = Caller(3);
+    if (ok && error == cgoResultFail) {
+        var function = FuncForPC(pc);
+
+        if (function != nil) {
+            // Expected format of cgo function name:
+            // - caller: _cgoexp_3c910ddb72c4_foo
+            if (offset > len(function.Name())){
+                cgoFunction = function.Name();
+            } else {
+                cgoFunction = function.Name().slice(offset);
+            }
+        }
+    }
+
+    var exprᴛ2 = error;
+    if (exprᴛ2 == cgoResultFail) {
+        msg = path + ":"u8 + ((@string)itoa(buf[..], (uint64)line));
+        msg += ": result of Go function "u8 + cgoFunction + " called from cgo"u8;
+        msg += " is unpinned Go "u8 + kindname + " or points to unpinned Go "u8 + kindname;
+    }
+    else if (exprᴛ2 == cgoCheckPointerFail) {
+        msg += "argument of cgo function has Go pointer to unpinned Go "u8 + kindname;
+    }
+
+    return ((errorString)msg);
 }
 
 } // end runtime_package

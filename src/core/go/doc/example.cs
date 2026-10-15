@@ -7,16 +7,16 @@ namespace go.go;
 using cmp = cmp_package;
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using lazyregexp = @internal.lazyregexp_package;
-using path = path_package;
+using lazyregexp = global::go.@internal.lazyregexp_package;
 using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using unicode = unicode_package;
 using utf8 = global::go.unicode.utf8_package;
-using @internal;
+using global::go.@internal;
 using global::go.go;
 using global::go.unicode;
+using iter = iter_package;
 using ꓸꓸꓸжastꓸFile = Span<ж<global::go.go.ast_package.File>>;
 
 partial class doc_package {
@@ -87,6 +87,11 @@ public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFiles
             {
                 var @params = f.Value.Type.Value.Params; if (len((~@params).List) != 0) {
                     continue; // function has params; not a valid example
+                }
+            }
+            {
+                var results = f.Value.Type.Value.Results; if (results != nil && len((~results).List) != 0) {
+                    continue; // function has results; not a valid example
                 }
             }
             if ((~f).Body == nil) { // ast.File.Body nil dereference (see issue 28044)
@@ -252,7 +257,7 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
             // because the package syscall/js is not available in the playground.
             return default!;
         }
-        @string n = path.Base(p);
+        @string n = assumedPackageName(p);
         if ((~s).Name != nil) {
             n = s.Value.Name.Value.Name;
             var exprᴛ1 = n;
@@ -269,10 +274,10 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
             // Copy the spec and its path to avoid modifying the original.
             ref var spec = ref heap<ast.ImportSpec>(out var Ꮡspec);
             spec = s.Value;
-            ref var pathΔ1 = ref heap<ast.BasicLit>(out var ᏑpathΔ1);
-            pathΔ1 = (~s).Path.Value;
-            spec.Path = ᏑpathΔ1;
-            spec.Path.Value.ValuePos = groupStart(Ꮡspec);
+            ref var path = ref heap<ast.BasicLit>(out var Ꮡpath);
+            path = (~s).Path.Value;
+            spec.Path = Ꮡpath;
+            updateBasicLitPos(spec.Path, groupStart(Ꮡspec));
             namedImports = append(namedImports, (ast.Spec)(new ast.ImportSpecжSpec(Ꮡspec)));
             delete(unresolved, n);
         }
@@ -547,19 +552,16 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
 }
 
 internal static bool hasIota(ast.Spec s) {
-    var has = false;
-    ast.Inspect(s, (ast.Node n) => {
+    foreach (var n in range<ast.Node>(ast.Preorder(s).Invoke)) {
         // Check that this is the special built-in "iota" identifier, not
         // a user-defined shadow.
         {
             var (id, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok && (~id).Name == "iota"u8 && (~id).Obj == nil) {
-                has = true;
-                return false;
+                return true;
             }
         }
-        return true;
-    });
-    return has;
+    }
+    return false;
 }
 
 // findImportGroupStarts finds the start positions of each sequence of import
@@ -797,6 +799,19 @@ internal static (@string prefix, @string suffix, bool ok) splitExampleName(@stri
 internal static bool isExampleSuffix(@string s) {
     var (r, size) = utf8.DecodeRuneInString(s);
     return size > 0 && unicode.IsLower(r);
+}
+
+// updateBasicLitPos updates lit.Pos,
+// ensuring that lit.End is displaced by the same amount.
+// (See https://go.dev/issue/76395.)
+internal static void updateBasicLitPos(ж<ast.BasicLit> Ꮡlit, tokenꓸPos pos) {
+    ref var lit = ref Ꮡlit.DerefOrNull();
+
+    tokenꓸPos len = lit.End() - lit.Pos();
+    lit.ValuePos = pos;
+    if (lit.ValueEnd.IsValid()) {
+        lit.ValueEnd = pos + len;
+    }
 }
 
 } // end doc_package

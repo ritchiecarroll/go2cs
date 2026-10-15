@@ -111,17 +111,16 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
         // The relationship between these parameters, as well as the overly-large and
         // unconfigurable 10 MB added on to maxMemory, is unfortunate but difficult to change
         // within the constraints of the API as documented.
+        if (maxMemory < 0) {
+            maxMemory = 0;
+        }
         var maxFileMemoryBytes = maxMemory;
         if (maxFileMemoryBytes == math.MaxInt64) {
             maxFileMemoryBytes--;
         }
         var maxMemoryBytes = maxMemory + (int64)(((int64)10 << (int)(20)));
         if (maxMemoryBytes <= 0) {
-            if (maxMemory < 0){
-                maxMemoryBytes = 0;
-            } else {
-                maxMemoryBytes = math.MaxInt64;
-            }
+            maxMemoryBytes = math.MaxInt64;
         }
         slice<byte> copyBuf = default!;
         while (ᐧ) {

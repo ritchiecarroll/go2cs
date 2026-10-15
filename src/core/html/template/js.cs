@@ -108,7 +108,9 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
             while (j > 0 && isJSIdentPart((rune)s[j - 1])) {
                 j--;
             }
-            if (regexpPrecederKeywords[tmpstring(s.slice(j))]) {
+            // An IdentifierName after a property-access dot is a property name,
+            // which precedes a div op.
+            if (regexpPrecederKeywords[tmpstring(s.slice(j))] && !bytes.HasSuffix(bytes.TrimRight(s.slice(0, j), jsWhitespace), slice<byte>("."u8))) {
                 return jsCtxRegexp;
             }
             break;
@@ -120,8 +122,9 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
     return jsCtxDivOp;
 }
 
-// regexpPrecederKeywords is a set of reserved JS keywords that can precede a
-// regular expression in JS source.
+// regexpPrecederKeywords is a set of JS keywords that can precede a regular
+// expression in JS source. It deliberately treats the context-sensitive
+// keyword yield as a keyword.
 internal static map<@string, bool> regexpPrecederKeywords = new map<@string, bool>{
     ["break"u8] = true,
     ["case"u8] = true,
@@ -136,7 +139,8 @@ internal static map<@string, bool> regexpPrecederKeywords = new map<@string, boo
     ["throw"u8] = true,
     ["try"u8] = true,
     ["typeof"u8] = true,
-    ["void"u8] = true
+    ["void"u8] = true,
+    ["yield"u8] = true
 };
 
 internal static reflectꓸType jsonMarshalType = reflect.TypeFor<json.Marshaler>();
@@ -511,7 +515,7 @@ internal static bool isJSType(@string mimeType) {
     mimeType = strings.ToLower(mimeType);
     mimeType = strings.TrimSpace(mimeType);
     var exprᴛ1 = mimeType;
-    if (exprᴛ1 == "application/ecmascript"u8 || exprᴛ1 == "application/javascript"u8 || exprᴛ1 == "application/json"u8 || exprᴛ1 == "application/ld+json"u8 || exprᴛ1 == "application/x-ecmascript"u8 || exprᴛ1 == "application/x-javascript"u8 || exprᴛ1 == "module"u8 || exprᴛ1 == "text/ecmascript"u8 || exprᴛ1 == "text/javascript"u8 || exprᴛ1 == "text/javascript1.0"u8 || exprᴛ1 == "text/javascript1.1"u8 || exprᴛ1 == "text/javascript1.2"u8 || exprᴛ1 == "text/javascript1.3"u8 || exprᴛ1 == "text/javascript1.4"u8 || exprᴛ1 == "text/javascript1.5"u8 || exprᴛ1 == "text/jscript"u8 || exprᴛ1 == "text/livescript"u8 || exprᴛ1 == "text/x-ecmascript"u8 || exprᴛ1 == "text/x-javascript"u8) {
+    if (exprᴛ1 == ""u8 || exprᴛ1 == "application/ecmascript"u8 || exprᴛ1 == "application/javascript"u8 || exprᴛ1 == "application/json"u8 || exprᴛ1 == "application/ld+json"u8 || exprᴛ1 == "application/x-ecmascript"u8 || exprᴛ1 == "application/x-javascript"u8 || exprᴛ1 == "module"u8 || exprᴛ1 == "text/ecmascript"u8 || exprᴛ1 == "text/javascript"u8 || exprᴛ1 == "text/javascript1.0"u8 || exprᴛ1 == "text/javascript1.1"u8 || exprᴛ1 == "text/javascript1.2"u8 || exprᴛ1 == "text/javascript1.3"u8 || exprᴛ1 == "text/javascript1.4"u8 || exprᴛ1 == "text/javascript1.5"u8 || exprᴛ1 == "text/jscript"u8 || exprᴛ1 == "text/livescript"u8 || exprᴛ1 == "text/x-ecmascript"u8 || exprᴛ1 == "text/x-javascript"u8) {
         return true;
     }
     { /* default: */

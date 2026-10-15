@@ -228,7 +228,7 @@ internal static partial void testPingPong(ж<testing.T> Ꮡt, net.Conn c1, net.C
 }
 
 // testRacyRead tests that it is safe to mutate the input Read buffer
-// immediately after cancelation has occurred.
+// immediately after cancellation has occurred.
 internal static partial void testRacyRead(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     GoFrame ᒐ = default;
     try {
@@ -266,7 +266,7 @@ internal static partial void testRacyRead(ж<testing.T> Ꮡt, net.Conn c1, net.C
 }
 
 // testRacyWrite tests that it is safe to mutate the input Write buffer
-// immediately after cancelation has occurred.
+// immediately after cancellation has occurred.
 internal static partial void testRacyWrite(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     GoFrame ᒐ = default;
     try {
@@ -467,7 +467,7 @@ internal static partial void testCloseTimeout(ж<testing.T> Ꮡt, net.Conn c1, n
         defer(Ꮡwg.Wait, ref ᒐ);
         Ꮡwg.Add(3);
 
-        // Test for cancelation upon connection closure.
+        // Test for cancellation upon connection closure.
         c1.SetDeadline(neverTimeout);
         goǃ(() => {
             GoFrame ᒐ = default;

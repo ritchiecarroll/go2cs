@@ -15,6 +15,7 @@ global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
 global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
 global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
 global using abiꓸKind = go.@internal.abi_package.ΔKind;
+global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
 global using abiꓸName = go.@internal.abi_package.ΔName;
 global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 global using osꓸDirEntry = go.io.fs_package.DirEntry;
@@ -75,16 +76,16 @@ using static go.runtime.pprof_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("runtime/pprof/elf.go", "elf.cs", "AA0egprCgoKClKSAgsiCpoKUpLS2gpKUpIKCgpS0goKClLaCgIKkgIKkkpSCpoKUgoKAgqSCgoKCgoKUgpSAgqSm")]
-[assembly: go.GoPositionMap("runtime/pprof/label.go", "label.cs", "ABs2goKClAAJGMKClJSCpoKqooKmgoKSgqaSgoKUgqSCpIKCyoKUAAISAAgCgpSCgoKClJSGgoKClKaUqqKCgoKmqqKCgoI=", "114-116:1")]
+[assembly: go.GoPositionMap("runtime/pprof/label.go", "label.cs", "ABgugoKClAAJGMKClJSCpoKqooKmgoKSgqaCkoKClIKkgqSCgsqClAACEgAIAoKUgoKCgpSUhoKCgpSmlKqigoKCpqqigoKC", "111-113:1")]
 [assembly: go.GoPositionMap("runtime/pprof/map.go", "map.cs", "ABw4lIKCgpSClpKCgoKUgoK4goKClNiClIKCgpSCpoKUgpSClIKCgpSClA==")]
 [assembly: go.GoPositionMap("runtime/pprof/pe.go", "pe.cs", "AAwawoKClA==")]
-[assembly: go.GoPositionMap("runtime/pprof/pprof.go", "pprof.cs", "AMUBgAPs7Ozs7NyCgpQAChaCAAISAAgCgoKClIKUuILYsoKC2LKClIKCpobYkqjigoKClAAFKAAWAoKUgqaCgoKUpoKCgpSiqPKCgqIAAiIAEQKClIK4goKClKaUyoCigKKAAAwesoKCgqaCgoKm7tSCgoKClJSCgoKCgqaCgpSC2qSSgoKCgpSCgpSUgoKCgoKCgoKUppSUgoKCgpS4goKClIKCgqaCgoKCkoK4lIIACBKAooCigpKSgpTqooKCgoKCgoKSpoKUgqamgpSuwqiSgqiS2qKmgoKmggACFPKCuIKCgoLKgqaYgoKUgoKCgoKC3AAHEIKCgqbKgoKmgpSCyoKCgoKCgoKUgoKCgoKUgoKCgoKUgoKCgoKCgqaUgqiSgtjIgrqS2JKClKa4goKCgoKUlJSUgqaO4oKUuIKCgoKCygAHEICigKKAAAomAA0UAAoEgoKCpoKUgoKCAAUQAAkEgoKCgoKCgIKkgqamlIKs0oKUgpSCgqKmkoKokoLYktiS6JKCgoKCgoKCuJiCpoKClIKCgpSCgoKCgoKClIKCuIKUqNbG1tbW1sY=", "287-289:1;464-475:1;518-522:2;637-639:1;740-742:1;939-941:1", "", "751=InUseObjects/1/1/1;758=InUseObjects/1/1/1,InUseBytes/1/1/1")]
+[assembly: go.GoPositionMap("runtime/pprof/pprof.go", "pprof.cs", "AMEB+ALs7Ozs7OwAIj6CgpQABxCCyoIAAhIACAKCgoKUgpS4gtiygoLYsoKUgoSmhtiSqOKCgoKUAAUoABYCgpSCpoKCgpSmgoKClKKo8oKCogACIgARAoKUgriCgoKUppTKgKKAooAADB6ygoKCpoKCgqbu1IKCgoKUlIKCgoKCpoKClNqkkoKCgoKUgoKUlIKCgoKCgoKClKaUlIKCgoKUuIKCgpSCgoKmgoKCgpKCuJQACBKAooCigpKSgpTqooKCgoKCgoKSpoKUgqamgpSuwqiSgqiS2qKmgoKmggACFPKCuIKCgoLKgqaYgoKUgoKCgoKC3AAHEIKCgqbKgoKmgpSCyoKCgoKCgoKUgoKCgoKUgoKCgoKUgoKCgoKCgqaUgqiSgtjIgrqS2JKClKoACg6CuLiCuNa4goKCgoKUlJSUgqaO4oKUuIKCgoKCygAHEICigKKAAAomAA0UAAoEgoKCpoKUgoKCAAUQAAkEgoKCgpSUgoCCpIKmppSCrNKClIKUgoKippKCqJKC2JLYkuiSgoKCgoKCgriYgqaCgpSCgoKUgoKCgoKCgpSCgriClKjWpsbW1tbWxg==", "318-320:1;494-505:1;548-552:2;666-668:1;769-771:1;997-999:1", "", "784=InUseObjects/1/1/1;791=InUseObjects/1/1/1,InUseBytes/1/1/1")]
 [assembly: go.GoPositionMap("runtime/pprof/pprof_rusage.go", "pprof_rusage.cs", "AA0ikoKUpKSkpoKCgg==")]
-[assembly: go.GoPositionMap("runtime/pprof/proto.go", "proto.cs", "ABQusABm3AGigoKCgpSmgoKCgrqSgoKCqJKCgoKClIKokoKCgoKokoKCgqiSgoKCgoKC7oKUpsqCgqamgoKmppSCgoKUAA8swoIACBKCrsKUgpSCuIKCpgARJIKClIKUgpSCgoKClJSC7qaClOiylIKCgoKCgqaClJKClIKCkoLKlKaCgtyCggACGAALAqaClIKCgAALGIKAgoLagILI7oKUgraCgoCCpIKmgIKC2oCCyICCgpSCtoCCpAA4dIKCgoKCrLKAppKSgpSCpoKUgraCgoKCgpQACw4ACQKClJSCip6C7oKCgsSCgoKCgu6UgoKUgoKCpqaCgoKCgoKCpoLWksQAFCymgoKCgqaCgoKCgpSCgpSCgpSClJSCgpSCgoKUpoKCgqbKAAoWgriCpoI=", "369-373:1;687-692:1", "", "256=Now/1/1/3;326=FuncPCABIInternal/1/1/4;655=runtime_FrameStartLine/1/1/4")]
+[assembly: go.GoPositionMap("runtime/pprof/proto.go", "proto.cs", "ABQusABm3AGigoKCgpSmgoKCgrqSgoKCqJKCgoKClIKokoKCgoKokoKCgqiSgoKCgoKC7oKUpsqCgqamgoKmppSCgoKUAA8swoIACBKCrsKUgpSCuIKCpgARJIKClIKUgpSCgoKClJSC7qaClOiylIKCgoKCgqaClJKClIKCkoLKlKaCgtyCgoKUAAIYAAsCpoKUgoKAAAsYgoCCgtqAgsjugpSCtoKCgIKkgqaAgoLagILIgIKClIK2gIKkADh0goKCgoKssoCmkpKClIKmgpSCtoKCgoKClAALDgAJAoKUlIKKnoLugoKCxIKCgoKC7pSCgpSCgoKmpoKCgoKCgoKmgtaSxAAULKaCgoKCpoKCgoKClIKClIKClIKUlIKClIKCgpSmgoKCpsoAChaCuIKmgg==", "369-373:1;690-695:1", "", "256=Now/1/1/3;326=FuncPCABIInternal/1/1/4;658=runtime_FrameStartLine/1/1/4")]
 [assembly: go.GoPositionMap("runtime/pprof/protobuf.go", "protobuf.cs", "AA4cgoKClKaCgqaUgqaClIKClIKCgoKCgpSCuIKClKaCgqaCgpSmgpSCgpSCgoKCgoKUgriCgqaCgriCgpSmgoKUuIKClMqCgqaCgoKCgoKCgg==")]
-[assembly: go.GoPositionMap("runtime/pprof/protomem.go", "protomem.cs", "ABUgkoKCgoKCgoKCpoKCooKCuIKCgIK2gqaCgpSmgoKCgpSSgriCAAIYAAkCgqampoKU", "60-64:1")]
-[assembly: go.GoPositionMap("runtime/pprof/runtime.go", "runtime.cs", "AAsgysampqqyggACFAAJAoKCgqI=")]
-[assembly: go.GoPositionMap("runtime/pprof/vminfo_darwin.go", "vminfo_darwin.cs", "AAoYgqqigpKCgpS4gpSUlLjKlLiUpoKCyoKUrtY=", "", "", "40=read64/1/1/2,regionFilename/1/1/3;58=Getpid/1/1/1")]
+[assembly: go.GoPositionMap("runtime/pprof/protomem.go", "protomem.cs", "ABUgkoKCgoKCgoKCpoKCooKCuIKCgIK2gqaCgpSmgoKCgpSSgrgAAhgACQKCpqamgpQ=", "60-64:1")]
+[assembly: go.GoPositionMap("runtime/pprof/runtime.go", "runtime.cs", "AAsgysampqbGyrKCAAIUAAkCgoKCog==")]
+[assembly: go.GoPositionMap("runtime/pprof/vminfo_darwin.go", "vminfo_darwin.cs", "AAwagqqigpKCgpS4gpSUlLjKlLiCgsqClK7W", "", "", "42=LEUint64/1/1/2,regionFilename/1/1/3;55=Getpid/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.runtime;
@@ -103,7 +104,6 @@ public static partial class pprof_package
     internal partial struct cpuᴛ1 {}
     [GoLocalName("newFunc")] internal partial struct emitLocation_newFunc {}
     internal partial struct keysByCount {}
-    internal partial struct label {}
     internal partial struct labelContextKey {}
     internal partial struct labelMap {}
     internal partial struct locInfo {}

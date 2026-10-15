@@ -41,6 +41,7 @@ using static go.crypto.sha1_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<digest, hash_package.Cloner>(Pointer = true)]
 [assembly: GoImplement<digest, hash_package.Hash>(Pointer = true)]
 // </InterfaceImplementations>
 
@@ -55,7 +56,7 @@ using static go.crypto.sha1_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/sha1/sha1.go", "sha1.cs", "ABUoggAaPoKmgoKCgoKCgoKCguaCgpSClIKCgoKCgoKCgqaCpoKmgoKCgoKCgq7CgpSCgqaApIDUwoKUgoKCgoKCgoKUlIKCgpSClKaClJKCpqKCpoSSgoKClLiCgoKUgqaUgoKCgpSokpKCpqKCpoKCgqaCgpSCgqamlJTKlIKCgoKCppSCgpTKlIKCgoKmqJKClIKUgoKC")]
+[assembly: go.GoPositionMap("crypto/sha1/sha1.go", "sha1.cs", "ABUoggAaPoKmgoKCgoKCgoKCguaCgpSClIKCgoKCgoKCgqaCpoKmgpKmgoKCgoKCgq7CgpSCgqaApIDUwoKUgoKCgoKCgoKUlIKCgpSClKaClJKCpqKCpoSSgoKClLiCgoKUgqaUgoKCgpSokpKCpqKCpoKCgqaCgpSCgqamlJTKlIKCgoKCppSCgpTKlIKCgoKmqJKClIKUgoKC")]
 [assembly: go.GoPositionMap("crypto/sha1/sha1block.go", "sha1block.cs", "AA8oopSCpoKCpsqCgoKClIKClIKClIKCgoKClIKCgoKClIKCgoKCpoKCgoKUpg==")]
 [assembly: go.GoPositionMap("crypto/sha1/sha1block_generic.go", "sha1block_generic.cs", "AAgSgg==")]
 // </GoSourcePositionMaps>

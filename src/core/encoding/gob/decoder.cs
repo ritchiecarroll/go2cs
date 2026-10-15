@@ -220,7 +220,7 @@ public static error Decode(this ж<Decoder> Ꮡdec, any e) {
     var value = reflect.ValueOf(e);
     // If e represents a value as opposed to a pointer, the answer won't
     // get back to the caller. Make sure it's a pointer.
-    if (value.Type().Kind() != reflect.ΔPointer) {
+    if (value.Kind() != reflect.ΔPointer) {
         dec.err = errors.New(gobAttemptToDecodeIntoAˢ);
         return dec.err;
     }

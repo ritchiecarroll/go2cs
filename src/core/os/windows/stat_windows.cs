@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using errors = errors_package;
 using filepathlite = @internal.filepathlite_package;
 using windows = @internal.syscall.windows_package;
 using syscall = syscall_package;
@@ -40,6 +41,9 @@ internal static (FileInfo, error) stat(@string funcname, @string name, bool foll
         // See https://golang.org/issues/19922#issuecomment-300031421 for details.
         ref var fa = ref heap(new syscall.Win32FileAttributeData(), out var Ꮡfa);
         err = syscall.GetFileAttributesEx(namep, syscall.GetFileExInfoStandard, Ꮡfa.Reinterpret<syscall.Win32FileAttributeData, byte>());
+        if (errors.Is(err, ErrNotExist)) {
+            return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "GetFileAttributesEx"u8, Path: name, Err: err))));
+        }
         if (err == default! && (uint32)(fa.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) == 0) {
             // Not a surrogate for another named entity, because it isn't any kind of reparse point.
             // The information we got from GetFileAttributesEx is good enough for now.
@@ -129,7 +133,7 @@ internal static (FileInfo, error) statHandle(@string name, syscallꓸHandle h) {
         return (default!, err);
     }
     fs.Value.filetype = ft;
-    return (new fileStatжFileInfo(fs), err);
+    return (new fileStatжFileInfo(fs), default!);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

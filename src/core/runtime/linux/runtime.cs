@@ -165,6 +165,7 @@ internal static void godebug_setNewIncNonDefault(Func<@string, Action> newIncNon
     var Δp = @new<Func<@string, Action>>();
     Δp.ValueSlot = newIncNonDefault;
     ᏑgodebugNewIncNonDefault.Store(Δp);
+    defaultGOMAXPROCSUpdateGODEBUG();
 }
 
 // A godebugInc provides access to internal/godebug's IncNonDefault function
@@ -295,23 +296,15 @@ internal static uintptr setCrashFD(uintptr fd) {
 }
 
 // auxv is populated on relevant platforms but defined here for all platforms
-// so x/sys/cpu can assume the getAuxv symbol exists without keeping its list
-// of auxv-using GOOS build tags in sync.
+// so x/sys/cpu and x/sys/unix can assume the getAuxv symbol exists without
+// keeping its list of auxv-using GOOS build tags in sync.
 //
 // It contains an even number of elements, (tag, value) pairs.
 internal static slice<uintptr> auxv;
 
-// golang.org/x/sys/cpu uses getAuxv via linkname.
+// golang.org/x/sys/cpu and golang.org/x/sys/unix use getAuxv via linkname.
 // Do not remove or change the type signature.
-// (See go.dev/issue/57336.)
-//
-// getAuxv should be an internal detail,
-// but widely used packages access it using linkname.
-// Notable members of the hall of shame include:
-//   - github.com/cilium/ebpf
-//
-// Do not remove or change the type signature.
-// See go.dev/issue/67401.
+// See go.dev/issue/57336 and go.dev/issue/67401.
 //
 //go:linkname getAuxv
 internal static slice<uintptr> getAuxv() {

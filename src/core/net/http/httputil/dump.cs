@@ -190,7 +190,6 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
 
         req.Body = save;
         if (err != default!) {
-            pw.Close();
             dr.Value.err = err;
             close(quitReadCh);
             return (default!, err);

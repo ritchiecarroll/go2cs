@@ -73,7 +73,7 @@ internal static ж<multipart.Form> cloneMultipartForm(ж<multipart.Form> Ꮡf) {
         Value: ((map<@string, slice<@string>>)((ΔHeader)f.Value).Clone())
     ));
     if (f.File != default!) {
-        var m = new map<@string, slice<ж<multipart.FileHeader>>>();
+        var m = new map<@string, slice<ж<multipart.FileHeader>>>(builtin.len(f.File));
         foreach (var (k, vv) in f.File) {
             var vv2 = new slice<ж<multipart.FileHeader>>(builtin.len(vv));
             foreach (var (i, v) in vv) {

@@ -181,8 +181,8 @@
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/bytealg/internal.bytealg.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/filepathlite/internal.filepathlite.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/itoa/internal.itoa.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/poll/internal.poll.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/stringslite/internal.stringslite.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/syscall/execenv/internal.syscall.execenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testlog/internal.testlog.csproj" />

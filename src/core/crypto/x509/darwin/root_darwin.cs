@@ -3,16 +3,17 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto;
 
-using macOS = go.crypto.x509.@internal.macOS_package;
+using macos = go.crypto.x509.@internal.macos_package;
 using errors = errors_package;
 using fmt = fmt_package;
+using go.crypto.x509.@internal;
 using time = time_package;
 
 partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string invalidLeafCertificateˢ = "invalid leaf certificate"u8;
-internal static readonly @string x509MacOSCertificateˢ = "x509: macOS certificate verification internal error"u8;
+internal static readonly @string x509MacosCertificateˢ = "x509: macos certificate verification internal error"u8;
 
 internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(this ж<Certificate> Ꮡc, ж<VerifyOptions> Ꮡopts) {
     slice<slice<ж<Certificate>>> chains = default!;
@@ -22,46 +23,46 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
         ref var c = ref Ꮡc.DerefOrNull();
         ref var opts = ref Ꮡopts.DerefOrNull();
 
-        var certs = macOS.CFArrayCreateMutable();
-        defer(macOS.ReleaseCFArray, certs, ref ᒐ);
-        (var leaf, err) = macOS.SecCertificateCreateWithData(c.Raw);
+        var certs = macos.CFArrayCreateMutable();
+        defer(macos.ReleaseCFArray, certs, ref ᒐ);
+        (var leaf, err) = macos.SecCertificateCreateWithData(c.Raw);
         if (err != default!) {
             (chains, err) = (default!, errors.New(invalidLeafCertificateˢ)); goto ᒐdone;
         }
-        macOS.CFArrayAppendValue(certs, leaf);
+        macos.CFArrayAppendValue(certs, leaf);
         if (opts.Intermediates != nil) {
             foreach (var (_, lc) in (~opts.Intermediates).lazyCerts) {
                 var (cΔ1, errΔ1) = lc.getCert();
                 if (errΔ1 != default!) {
                     (chains, err) = (default!, errΔ1); goto ᒐdone;
                 }
-                (var sc, errΔ1) = macOS.SecCertificateCreateWithData((~cΔ1).Raw);
+                (var sc, errΔ1) = macos.SecCertificateCreateWithData((~cΔ1).Raw);
                 if (errΔ1 != default!) {
                     (chains, err) = (default!, errΔ1); goto ᒐdone;
                 }
-                macOS.CFArrayAppendValue(certs, sc);
+                macos.CFArrayAppendValue(certs, sc);
             }
         }
 
-        var policies = macOS.CFArrayCreateMutable();
-        defer(macOS.ReleaseCFArray, policies, ref ᒐ);
-        (var sslPolicy, err) = macOS.SecPolicyCreateSSL(opts.DNSName);
+        var policies = macos.CFArrayCreateMutable();
+        defer(macos.ReleaseCFArray, policies, ref ᒐ);
+        (var sslPolicy, err) = macos.SecPolicyCreateSSL(opts.DNSName);
         if (err != default!) {
             (chains, err) = (default!, err); goto ᒐdone;
         }
-        macOS.CFArrayAppendValue(policies, sslPolicy);
+        macos.CFArrayAppendValue(policies, sslPolicy);
 
-        (var trustObj, err) = macOS.SecTrustCreateWithCertificates(certs, policies);
+        (var trustObj, err) = macos.SecTrustCreateWithCertificates(certs, policies);
         if (err != default!) {
             (chains, err) = (default!, err); goto ᒐdone;
         }
-        defer(macOS.CFRelease, trustObj, ref ᒐ);
+        defer(macos.CFRelease, trustObj, ref ᒐ);
 
         if (!opts.CurrentTime.IsZero()) {
-            var dateRef = macOS.TimeToCFDateRef(opts.CurrentTime);
-            defer(macOS.CFRelease, dateRef, ref ᒐ);
+            var dateRef = macos.TimeToCFDateRef(opts.CurrentTime);
+            defer(macos.CFRelease, dateRef, ref ᒐ);
             {
-                var errΔ2 = macOS.SecTrustSetVerifyDate(trustObj, dateRef); if (errΔ2 != default!) {
+                var errΔ2 = macos.SecTrustSetVerifyDate(trustObj, dateRef); if (errΔ2 != default!) {
                     (chains, err) = (default!, errΔ2); goto ᒐdone;
                 }
             }
@@ -73,15 +74,15 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
         // using TLS or OCSP for that.
 
         {
-            var (ret, errΔ3) = macOS.SecTrustEvaluateWithError(trustObj); if (errΔ3 != default!) {
+            var (ret, errΔ3) = macos.SecTrustEvaluateWithError(trustObj); if (errΔ3 != default!) {
                 var exprᴛ1 = ret;
-                if (exprᴛ1 == macOS.ErrSecCertificateExpired) {
+                if (exprᴛ1 == macos.ErrSecCertificateExpired) {
                     (chains, err) = (default!, new CertificateInvalidError(Ꮡc, Expired, errΔ3.Error())); goto ᒐdone;
                 }
-                if (exprᴛ1 == macOS.ErrSecHostNameMismatch) {
+                if (exprᴛ1 == macos.ErrSecHostNameMismatch) {
                     (chains, err) = (default!, new HostnameError(Ꮡc, opts.DNSName)); goto ᒐdone;
                 }
-                if (exprᴛ1 == macOS.ErrSecNotTrusted) {
+                if (exprᴛ1 == macos.ErrSecNotTrusted) {
                     (chains, err) = (default!, new UnknownAuthorityError(Cert: Ꮡc)); goto ᒐdone;
                 }
                 { /* default: */
@@ -91,13 +92,14 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
         }
 
         var chain = new slice<ж<Certificate>>[]{new ж<Certificate>[]{}.slice()}.slice();
-        nint numCerts = macOS.SecTrustGetCertificateCount(trustObj);
-        for (nint i = 0; i < numCerts; i++) {
-            var (certRef, errΔ4) = macOS.SecTrustGetCertificateAtIndex(trustObj, i);
-            if (errΔ4 != default!) {
-                (chains, err) = (default!, errΔ4); goto ᒐdone;
-            }
-            (var cert, errΔ4) = exportCertificate(certRef);
+        (var chainRef, err) = macos.SecTrustCopyCertificateChain(trustObj);
+        if (err != default!) {
+            (chains, err) = (default!, err); goto ᒐdone;
+        }
+        defer(macos.CFRelease, chainRef, ref ᒐ);
+        for (nint i = 0; i < macos.CFArrayGetCount(chainRef); i++) {
+            var certRef = macos.CFArrayGetValueAtIndex(chainRef, i);
+            var (cert, errΔ4) = exportCertificate(certRef);
             if (errΔ4 != default!) {
                 (chains, err) = (default!, errΔ4); goto ᒐdone;
             }
@@ -105,7 +107,7 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
         }
         if (builtin.len(chain[0]) == 0) {
             // This should _never_ happen, but to be safe
-            (chains, err) = (default!, errors.New(x509MacOSCertificateˢ)); goto ᒐdone;
+            (chains, err) = (default!, errors.New(x509MacosCertificateˢ)); goto ᒐdone;
         }
 
         if (opts.DNSName != ""u8) {
@@ -141,8 +143,8 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
 }
 
 // exportCertificate returns a *Certificate for a SecCertificateRef.
-internal static (ж<Certificate>, error) exportCertificate(macOS.CFRef cert) {
-    var (data, err) = macOS.SecCertificateCopyData(cert);
+internal static (ж<Certificate>, error) exportCertificate(macos.CFRef cert) {
+    var (data, err) = macos.SecCertificateCopyData(cert);
     if (err != default!) {
         return (default!, err);
     }

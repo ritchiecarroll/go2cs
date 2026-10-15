@@ -157,4 +157,32 @@ internal static void writeUnlock(this ж<FD> Ꮡfd) {
     }
 }
 
+// readWriteLock adds a reference to fd and locks fd for reading and writing.
+// It returns an error when fd cannot be used for reading and writing.
+internal static error readWriteLock(this ж<FD> Ꮡfd) {
+    ref var fd = ref Ꮡfd.DerefOrNull();
+
+    if (!fd.fdmu.rwlock(true) || !fd.fdmu.rwlock(false)) {
+        return errClosing(fd.isFile);
+    }
+    return default!;
+}
+
+// readWriteUnlock removes a reference from fd and unlocks fd for reading and writing.
+// It also closes fd when the state of fd is set to closed and there
+// is no remaining reference.
+internal static void readWriteUnlock(this ж<FD> Ꮡfd) {
+    ref var fd = ref Ꮡfd.DerefOrNull();
+
+    fd.fdmu.rwunlock(true);
+    if (fd.fdmu.rwunlock(false)) {
+        Ꮡfd.destroy();
+    }
+}
+
+// closing returns true if fd is closing.
+internal static bool closing(this ж<FD> Ꮡfd) {
+    return (uint64)(atomic.LoadUint64(Ꮡfd.of(FD.Ꮡfdmu).of(fdMutex.Ꮡstate)) & (uint64)mutexClosed) != 0;
+}
+
 } // end poll_package

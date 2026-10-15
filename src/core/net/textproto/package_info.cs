@@ -62,8 +62,8 @@ using static go.net.textproto_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("net/textproto/header.go", "header.cs", "AAsaooKssgACENKClIKClAACENKClKiS")]
 [assembly: go.GoPositionMap("net/textproto/pipeline.go", "pipeline.cs", "ACFIsoKCgoKqoqqiqqKqogAMINKCgoKUgoKUgoKs0oKCgpSCgoKUgoKUgoI=")]
-[assembly: go.GoPositionMap("net/textproto/reader.go", "reader.cs", "ABQsAAke0qqigqiSgoKUrLKCgoKCgpSCpoKUgoKmAAIqABICgqqigoKUgoKUqqKCgpQAAhDSgriCgpSCpoCC/oKChNyUgpSmgoKClIKClJSokoKCgpSUgoKUlKbSgoKUptKCgpSCgoKClIKGlAACKAAVAoKClAACOgAeAoKCgoKCgoKmgoKCgoKCgpSClIKUlAACJgASAoKCAAcS2AAIEIKCgoKCgpSUlIKClIKClKaCgpSCgpSmgoK4goK2goKmgoK2goKUgqaClIKUgpSqooKUgqa+sq7IsoKCgoKCgpS4goKUlJSmAAEqABMCAAIQ+LKCgoKUpsqCpoCCgoKClLaCgoK4goKUgoKUgoK4goK4lIKCgpSCgpTKgoKUpoLOoKqygpSmmNSCgoKUgoKCgpSUlJSUAAIWAAkEgoKCgpSCgpSCgpSUAAcaAAgKABcmAAUgAAwMAAsIAAIcAAoCgriCgoKmuIKUlIKmguqCkoKUgpS4gIKkAAgQgoIAKFI=")]
-[assembly: go.GoPositionMap("net/textproto/textproto.go", "textproto.cs", "AChQgu6CAA4gkgAGEJKqooKClAACNgAcAoKCgoKClKiSgpSClKiSgpSClKaCpoKC", "", "", "67=NewReader/1/1/1,NewWriter/1/1/2")]
+[assembly: go.GoPositionMap("net/textproto/reader.go", "reader.cs", "ABQsAAke0qqigqiSgoKUrLKCgoKCgpSCpoKUgoKmAAIqABICgqqigoKUgoKClKqigoKUAAIQ0oK4goKUgqaAgv6CgoTclIKUpoKCgpSCgpSUqJKCgoKUlIKClJSm0oKClKbSgoKUgoKCgpSChpQAAigAFQKCgpQAAjoAHgKCgoKCgoKCpoKCgoKCgoKUgpSClJQAAiYAEgKCggAHEtgACBCCgoKCgoKUlJSCgpSCgpSmgoKUgoKUpoKCuIKCtoKCpoKCtoKClIKmgpSClIKUqqKClIKmvrKuyLKCgoKCgoKUuIKClJSUpgABKgATAgACEPKCrLKCgoKUpqaAgoKCgpS2goKCuIKClIKClIKCuIKCuJSChrSClIKClMqCgpSmgs6gqrKClKaY1IKCgpSCgoKClJSUlJQAAhYACQSCgoKClIKClIKClJQABxoACAoAFyYABSAADAwACwgAAhwACgKCuIKCgqa4gpSUgqaC6oKSgpSClLiAgqQACBCCggAoUg==")]
+[assembly: go.GoPositionMap("net/textproto/textproto.go", "textproto.cs", "ACtWgu6CAA4gkgAGEJKqooKClAACNgAcAoKCgoKClKiSgpSClKiSgpSClKaCpoKC", "", "", "70=NewReader/1/1/1,NewWriter/1/1/2")]
 [assembly: go.GoPositionMap("net/textproto/writer.go", "writer.cs", "ABMqkqaSlrKCgoIAAhQACQKCgqaCggANILKCgoKkgpSUpoKUgoK4goKmgIKklKaigpSCtIKkgqSU")]
 // </GoSourcePositionMaps>
 

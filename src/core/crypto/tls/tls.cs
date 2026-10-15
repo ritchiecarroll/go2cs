@@ -4,13 +4,24 @@
 
 // Package tls partially implements TLS 1.2, as specified in RFC 5246,
 // and TLS 1.3, as specified in RFC 8446.
+//
+// # FIPS 140-3 mode
+//
+// When the program is in [FIPS 140-3 mode], this package behaves as if only
+// SP 800-140C and SP 800-140D approved protocol versions, cipher suites,
+// signature algorithms, certificate public key types and sizes, and key
+// exchange and derivation algorithms were implemented. Others are silently
+// ignored and not negotiated, or rejected. This set may depend on the
+// algorithms supported by the FIPS 140-3 Go Cryptographic Module selected with
+// GOFIPS140, and may change across Go versions.
+//
+// [FIPS 140-3 mode]: https://go.dev/doc/security/fips140
 namespace go.crypto;
 
 // BUG(agl): The crypto/tls package only implements some countermeasures
 // against Lucky13 attacks on CBC-mode encryption, and only on SHA1
 // variants. See http://www.isg.rhul.ac.uk/tls/TLStiming.pdf and
 // https://www.imperialviolet.org/2013/02/04/luckythirteen.html.
-using bytes = bytes_package;
 using context = context_package;
 using crypto = crypto_package;
 using ecdsa = go.crypto.ecdsa_package;
@@ -24,11 +35,9 @@ using godebug = go.@internal.godebug_package;
 using net = net_package;
 using os = os_package;
 using strings = strings_package;
-using big = math.big_package;
 using encoding;
 using go.@internal;
 using go.crypto;
-using math;
 using time = time_package;
 
 partial class tls_package {
@@ -378,7 +387,7 @@ public static (Certificate, error) X509KeyPair(slice<byte> certPEMBlock, slice<b
         if (!ok) {
             return fail(errors.New(tlsPrivateKeyTypeDoesNotˢ));
         }
-        if ((~pub).N.Cmp((~priv).N) != 0) {
+        if (!priv.of(rsa.PrivateKey.ᏑPublicKey).Equal(pub.OrTypedNil())) {
             return fail(errors.New(tlsPrivateKeyDoesNotˢ));
         }
         break;
@@ -388,7 +397,7 @@ public static (Certificate, error) X509KeyPair(slice<byte> certPEMBlock, slice<b
         if (!ok) {
             return fail(errors.New(tlsPrivateKeyTypeDoesNotˢ));
         }
-        if ((~pub).X.Cmp((~priv).X) != 0 || (~pub).Y.Cmp((~priv).Y) != 0) {
+        if (!priv.of(ecdsa.PrivateKey.ᏑPublicKey).Equal(pub.OrTypedNil())) {
             return fail(errors.New(tlsPrivateKeyDoesNotˢ));
         }
         break;
@@ -398,7 +407,7 @@ public static (Certificate, error) X509KeyPair(slice<byte> certPEMBlock, slice<b
         if (!ok) {
             return fail(errors.New(tlsPrivateKeyTypeDoesNotˢ));
         }
-        if (!bytes.Equal(priv.Public()._<ed25519.PublicKey>(), pub)) {
+        if (!priv.Public()._<ed25519.PublicKey>().Equal(pub)) {
             return fail(errors.New(tlsPrivateKeyDoesNotˢ));
         }
         break;

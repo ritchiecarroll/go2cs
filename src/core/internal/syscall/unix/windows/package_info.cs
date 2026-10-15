@@ -49,6 +49,7 @@ using static go.@internal.syscall.unix_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
+[assembly: go.GoPositionMap("internal/syscall/unix/kernel_version_ge.go", "kernel_version_ge.cs", "AAcSopQ=")]
 [assembly: go.GoPositionMap("internal/syscall/unix/kernel_version_other.go", "kernel_version_other.cs", "AAgSgg==")]
 // </GoSourcePositionMaps>
 

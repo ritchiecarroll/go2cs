@@ -51,7 +51,7 @@ internal static UntypedInt maxShift => /* _W - 4 */ 60;
 
 // Init initializes x to the decimal representation of m << shift (for
 // shift >= 0), or m >> -shift (for shift < 0).
-internal static void init(this ж<@decimal> Ꮡx, nat m, nint shift) {
+internal static void init(this ж<@decimal> Ꮡx, Δnat m, nint shift) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // special case 0
@@ -70,13 +70,13 @@ internal static void init(this ж<@decimal> Ꮡx, nat m, nint shift) {
         if (sΔ1 >= ntz) {
             sΔ1 = ntz; // shift at most ntz bits
         }
-        m = ((nat)default!).shr(m, sΔ1);
+        m = ((Δnat)default!).rsh(m, sΔ1);
         shift += (nint)sΔ1;
     }
 
     // Do any shift left in binary representation.
     if (shift > 0) {
-        m = ((nat)default!).shl(m, (nuint)shift);
+        m = ((Δnat)default!).lsh(m, (nuint)shift);
         shift = 0;
     }
 
@@ -94,15 +94,15 @@ internal static void init(this ж<@decimal> Ꮡx, nat m, nint shift) {
     // Do any (remaining) shift right in decimal representation.
     if (shift < 0) {
         while (shift < (nint)(-maxShift)) {
-            shr(ref (Ꮡx).DerefOrNull(), maxShift);
+            rsh(ref (Ꮡx).DerefOrNull(), maxShift);
             shift += maxShift;
         }
-        shr(ref (Ꮡx).DerefOrNull(), (nuint)(-shift));
+        rsh(ref (Ꮡx).DerefOrNull(), (nuint)(-shift));
     }
 }
 
-// shr implements x >> s, for s <= maxShift.
-internal static void shr(ref @decimal x, nuint s) {
+// rsh implements x >> s, for s <= maxShift.
+internal static void rsh(ref @decimal x, nuint s) {
     // Division by 1<<s using shift-and-subtract algorithm.
     // pick up enough leading digits to cover first shift
     nint r = 0; // read index

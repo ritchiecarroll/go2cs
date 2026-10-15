@@ -1227,6 +1227,19 @@ done
      sibling newer than the seed). Order of tests: src/reconvert-deletions.ps1:746-756 (Resolve-Principal, Test-ConversionTarget with
      Get-SourceStdSet -ForGoos, :679) before the name and marker test :758-771; std membership is flavour-dependent :498-500.
      (f) is a posting rule only: src/reconvert-deletions.ps1:153-156 asks flat files under -Goos. -->
+*(Noted 2026-10-15, the Go 1.26 hop's H5, i9's first real `-Apply` with `-Orphan`: three instrument changes, each red
+on the real post-H5c root first. **(1)** The after-count owes `- $orphansDeleted`: the run deleted 88 rows, 9 residue
+`.cs` and the 3 ruled orphans, then refused 4405 against 4402 on disk, exit 3. **(2) Arm 1 without a child:** a
+package removed whole whose staged `.cs` all sit in per-GOOS folders, with no GOOS child at the target, now has its
+parent's project, README, icons and `.editorconfig` swept as residue. `vendor/golang.org/x/net/route` (darwin-only)
+kept all five, and its solution entry, under exit 0 ×3. **(3) An emptied `<Folder>` goes with its last `<Project>`**,
+through the instrument's own solution editor: 8 empty Folders were left (9 with route's), against 0 in the generated
+file. A Folder that was empty before the pass, or still holds a line, is never touched. Re-applied from the backup:
+exit 0 ×3, 363 `<Project>` entries, 0 empty Folders; `check-h5c-goos-child.ps1` still passes all 18 arms. **Usage:**
+`-Orphan` is `[string[]]`, so give it ONCE as an array through `-Command`
+(`-Orphan @('<p1>=delete','<p2>=delete') -Apply; exit $LASTEXITCODE`). Under `-File`, a repeated `-Orphan` is
+ParameterAlreadyBound before the script runs, and `a,b` arrives as one string. On a later flavour, pass only the
+orphans still present: the stale arm refuses a disposition that names a deleted path.)*
 *(Noted 2026-10-14, PLAN-hop-go126 §9: in step 2, `-ExpectGo go1.24.13` is the incoming release and
 `-ExpectSourceGo go1.23.12` the outgoing one, as the H4a and H5 note above defines them. `reconvert-deletions.ps1`
 requires `-ExpectGo`, and derives `-ExpectSourceGo` from the `version.props` beside the script only when it is

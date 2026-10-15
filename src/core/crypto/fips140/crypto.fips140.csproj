@@ -28,6 +28,13 @@
     <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
   </PropertyGroup>
 
+  <!-- Same-package Go tests run in a separate assembly but retain package-private access. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="$(AssemblyName).tests" />
+    <!-- reflect.StructOf mints synthesized structs into this fixed-name dynamic assembly; a field type that is internal here cannot be loaded from there without the grant. -->
+    <InternalsVisibleTo Include="go2cs.SynthesizedStructs" />
+  </ItemGroup>
+
   <!-- Build outputs are copied to $(OutDir), so this default must also defer to an explicit
        $(BaseOutputPath); otherwise that redirection silently never takes effect. -->
   <PropertyGroup Condition="'$(OutDir)'=='' AND '$(BaseOutputPath)'==''">
@@ -163,6 +170,8 @@
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/check/crypto.internal.fips140.check.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/crypto.internal.fips140.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/godebug/internal.godebug.csproj" />
+    <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
+    <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
   </ItemGroup>
 
   <ItemGroup>

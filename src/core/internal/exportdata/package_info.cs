@@ -57,7 +57,7 @@ using static go.@internal.exportdata_package;
 
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("internal/exportdata/exportdata.go", "exportdata.cs", "ACJuACEGopSCgpSUgoKUgoKmgoKUlpKUgoK4goKokoKClICCgrYABRYADgiCgoK4goK4goKCpgAFEgALBsaAgoKkpoKCuJSCgpSCuIKClAADFAALBIKCpoKUgqaCgoKmAAgOgriCpoLeAAgCgqaCuICCpIKCgoKCgpSCppSUyILsgraCgsqCgoKClIK4goKUpgAKFvKCgqqCgoKCgoKCgoCCpKaCgoKmprg=", "327-351:1;328-348:1.1")]
-[assembly: global::go.GoPositionMap("internal/exportdata/support.go", "support.cs", "AA0ilKSCgIKkgoKUgoI=")]
+[assembly: global::go.GoPositionMap("internal/exportdata/support.go", "support.cs", "AA4ilKSCgIKkgoKUgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -91,7 +91,7 @@ public static partial class exportdata_package
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸosꓸexec() => builtin.initPackage(typeof(global::go.os.exec_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
-    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(global::go.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(global::go.sync_package));
     // </ImportInitializers>

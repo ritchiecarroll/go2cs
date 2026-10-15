@@ -63,9 +63,11 @@ public static partial class hash_package
     // via declarations below.
 
     // <TypeAccessibility>
+    public partial interface Cloner {}
     public partial interface Hash {}
     public partial interface Hash32 {}
     public partial interface Hash64 {}
+    public partial interface XOF {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

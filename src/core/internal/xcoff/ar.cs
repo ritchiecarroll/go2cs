@@ -7,9 +7,10 @@ using binary = encoding.binary_package;
 using fmt = fmt_package;
 using io = io_package;
 using os = os_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using strings = strings_package;
 using encoding;
+using go;
 
 partial class xcoff_package {
 

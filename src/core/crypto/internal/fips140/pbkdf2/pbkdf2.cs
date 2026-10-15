@@ -6,6 +6,7 @@ namespace go.crypto.@internal.fips140;
 using fips140 = go.crypto.@internal.fips140_package;
 using hmac = go.crypto.@internal.fips140.hmac_package;
 using errors = errors_package;
+using hash = hash_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 
@@ -25,7 +26,7 @@ private static readonly @string pkbdf2KeyLengthMustBeˢ = "pkbdf2: keyLength mus
 private static readonly @string pbkdf2KeyLengthTooLongˢ = "pbkdf2: keyLength too long"u8;
 
 public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, slice<byte> salt, nint iter, nint keyLength)
-    where Hash : fips140.Hash
+    where Hash : hash.Hash
 {
     setServiceIndicator(salt, keyLength);
 

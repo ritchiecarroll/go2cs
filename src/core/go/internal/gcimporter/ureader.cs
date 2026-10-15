@@ -56,13 +56,13 @@ internal static ж<types.Package> readUnifiedPackage(ж<token.FileSet> Ꮡfset, 
             ),
             ctxt: Ꮡctxt,
             imports: imports,
-            posBases: new slice<@string>(input.NumElems(pkgbits.RelocPosBase)),
-            pkgs: new slice<ж<types.Package>>(input.NumElems(pkgbits.RelocPkg)),
-            typs: new slice<typesꓸType>(input.NumElems(pkgbits.RelocType))
+            posBases: new slice<@string>(input.NumElems(pkgbits.SectionPosBase)),
+            pkgs: new slice<ж<types.Package>>(input.NumElems(pkgbits.SectionPkg)),
+            typs: new slice<typesꓸType>(input.NumElems(pkgbits.SectionType))
         );
         defer(Ꮡpr.of(pkgReader.Ꮡfake).setLines, ref ᒐ);
 
-        var r = Ꮡpr.newReader(pkgbits.RelocMeta, pkgbits.PublicRootIdx, pkgbits.SyncPublic);
+        var r = Ꮡpr.newReader(pkgbits.SectionMeta, pkgbits.PublicRootIdx, pkgbits.SyncPublic);
         var pkg = r.pkg();
         if (r.of(reader.ᏑDecoder).Version().Has(pkgbits.HasInit)) {
             r.of(reader.ᏑDecoder).Bool();
@@ -75,7 +75,7 @@ internal static ж<types.Package> readUnifiedPackage(ж<token.FileSet> Ꮡfset, 
             if (r.of(reader.ᏑDecoder).Version().Has(pkgbits.DerivedFuncInstance)) {
                 assert(!r.of(reader.ᏑDecoder).Bool());
             }
-            (~r).p.objIdx(r.of(reader.ᏑDecoder).Reloc(pkgbits.RelocObj));
+            (~r).p.objIdx(r.of(reader.ᏑDecoder).Reloc(pkgbits.SectionObj));
             assert(r.of(reader.ᏑDecoder).Len() == 0);
         }
 
@@ -128,14 +128,14 @@ partial struct readerDict {
     internal slice<typesꓸType> derivedTypes; // lazily instantiated from derived
 }
 
-internal static ж<reader> newReader(this ж<pkgReader> Ꮡpr, pkgbits.RelocKind k, pkgbits.Index idx, pkgbits.SyncMarker marker) {
+internal static ж<reader> newReader(this ж<pkgReader> Ꮡpr, pkgbits.SectionKind k, pkgbits.Index idx, pkgbits.SyncMarker marker) {
     return Ꮡ(new reader(
         Decoder: Ꮡpr.of(pkgReader.ᏑPkgDecoder).NewDecoder(k, idx, marker),
         p: Ꮡpr
     ));
 }
 
-internal static ж<reader> tempReader(this ж<pkgReader> Ꮡpr, pkgbits.RelocKind k, pkgbits.Index idx, pkgbits.SyncMarker marker) {
+internal static ж<reader> tempReader(this ж<pkgReader> Ꮡpr, pkgbits.SectionKind k, pkgbits.Index idx, pkgbits.SyncMarker marker) {
     return Ꮡ(new reader(
         Decoder: Ꮡpr.of(pkgReader.ᏑPkgDecoder).TempDecoder(k, idx, marker),
         p: Ꮡpr
@@ -165,7 +165,7 @@ internal static tokenꓸPos pos(this ж<reader> Ꮡr) {
 internal static @string posBase(this ж<reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    return r.p.posBaseIdx(Ꮡr.of(reader.ᏑDecoder).Reloc(pkgbits.RelocPosBase));
+    return r.p.posBaseIdx(Ꮡr.of(reader.ᏑDecoder).Reloc(pkgbits.SectionPosBase));
 }
 
 internal static @string posBaseIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) {
@@ -179,7 +179,7 @@ internal static @string posBaseIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) 
 
     @string filename = default!;
     {
-        var r = Ꮡpr.tempReader(pkgbits.RelocPosBase, idx, pkgbits.SyncPosBase);
+        var r = Ꮡpr.tempReader(pkgbits.SectionPosBase, idx, pkgbits.SyncPosBase);
 
         // Within types2, position bases have a lot more details (e.g.,
         // keeping track of where //line directives appeared exactly).
@@ -212,7 +212,7 @@ internal static ж<types.Package> pkg(this ж<reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncPkg);
-    return r.p.pkgIdx(Ꮡr.of(reader.ᏑDecoder).Reloc(pkgbits.RelocPkg));
+    return r.p.pkgIdx(Ꮡr.of(reader.ᏑDecoder).Reloc(pkgbits.SectionPkg));
 }
 
 internal static ж<types.Package> pkgIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) {
@@ -226,7 +226,7 @@ internal static ж<types.Package> pkgIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index
         }
     }
 
-    var pkg = Ꮡpr.newReader(pkgbits.RelocPkg, idx, pkgbits.SyncPkgDef).doPkg();
+    var pkg = Ꮡpr.newReader(pkgbits.SectionPkg, idx, pkgbits.SyncPkgDef).doPkg();
     pr.pkgs[idx] = pkg;
     return pkg;
 }
@@ -272,7 +272,7 @@ internal static typeInfo typInfo(this ж<reader> Ꮡr) {
     if (Ꮡr.of(reader.ᏑDecoder).Bool()) {
         return new typeInfo(idx: ((pkgbits.Index)(int32)Ꮡr.of(reader.ᏑDecoder).Len()), derived: true);
     }
-    return new typeInfo(idx: Ꮡr.of(reader.ᏑDecoder).Reloc(pkgbits.RelocType), derived: false);
+    return new typeInfo(idx: Ꮡr.of(reader.ᏑDecoder).Reloc(pkgbits.SectionType), derived: false);
 }
 
 internal static typesꓸType typIdx(this ж<pkgReader> Ꮡpr, typeInfo info, ж<readerDict> Ꮡdict) {
@@ -296,7 +296,7 @@ internal static typesꓸType typIdx(this ж<pkgReader> Ꮡpr, typeInfo info, ж<
 
     typesꓸType typ = default!;
     {
-        var r = Ꮡpr.tempReader(pkgbits.RelocType, idx, pkgbits.SyncTypeIdx);
+        var r = Ꮡpr.tempReader(pkgbits.SectionType, idx, pkgbits.SyncTypeIdx);
         r.Value.dict = Ꮡdict;
 
         typ = r.doTyp();
@@ -438,32 +438,34 @@ internal static ж<types.Interface> interfaceType(this ж<reader> Ꮡr) {
 internal static ж<typesꓸSignature> signature(this ж<reader> Ꮡr, ж<types.Var> Ꮡrecv, slice<ж<types.TypeParam>> rtparams, slice<ж<types.TypeParam>> tparams) {
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncSignature);
 
-    var @params = Ꮡr.@params();
-    var results = Ꮡr.@params();
+    var @params = Ꮡr.@params(types.ParamVar);
+    var results = Ꮡr.@params(types.ResultVar);
     var variadic = Ꮡr.of(reader.ᏑDecoder).Bool();
 
     return types.NewSignatureType(Ꮡrecv, rtparams, tparams, @params, results, variadic);
 }
 
-internal static ж<types.Tuple> @params(this ж<reader> Ꮡr) {
+internal static ж<types.Tuple> @params(this ж<reader> Ꮡr, types.VarKind kind) {
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncParams);
 
     var @params = new slice<ж<types.Var>>(Ꮡr.of(reader.ᏑDecoder).Len());
     foreach (var (i, _) in @params) {
-        @params[i] = Ꮡr.param();
+        @params[i] = Ꮡr.param(kind);
     }
 
     return types.NewTuple(@params.ꓸꓸꓸ);
 }
 
-internal static ж<types.Var> param(this ж<reader> Ꮡr) {
+internal static ж<types.Var> param(this ж<reader> Ꮡr, types.VarKind kind) {
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncParam);
 
     tokenꓸPos pos = Ꮡr.pos();
     var (pkg, name) = Ꮡr.localIdent();
     var typ = Ꮡr.typ();
 
-    return types.NewParam(pos, pkg, name, typ);
+    var param = types.NewParam(pos, pkg, name, typ);
+    param.SetKind(kind); // ∈ {Recv,Param,Result}Var
+    return param;
 }
 
 // @@@ Objects
@@ -476,7 +478,7 @@ internal static (types.Object, slice<typesꓸType>) obj(this ж<reader> Ꮡr) {
         assert(!Ꮡr.of(reader.ᏑDecoder).Bool());
     }
 
-    var (pkg, name) = r.p.objIdx(Ꮡr.of(reader.ᏑDecoder).Reloc(pkgbits.RelocObj));
+    var (pkg, name) = r.p.objIdx(Ꮡr.of(reader.ᏑDecoder).Reloc(pkgbits.SectionObj));
     var obj = pkgScope(pkg).Lookup(name);
 
     var targs = new slice<typesꓸType>(Ꮡr.of(reader.ᏑDecoder).Len());
@@ -494,7 +496,7 @@ internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pk
     @string objName = default!;
     pkgbits.CodeObj tag = default!;
     {
-        var rname = Ꮡpr.tempReader(pkgbits.RelocName, idx, pkgbits.SyncObject1);
+        var rname = Ꮡpr.tempReader(pkgbits.SectionName, idx, pkgbits.SyncObject1);
 
         (objPkg, objName) = rname.qualifiedIdent();
         assert(objName != ""u8);
@@ -518,7 +520,7 @@ internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pk
     if (objPkg.Scope().Lookup(objName) == default!) {
         var dict = Ꮡpr.objDictIdx(idx);
 
-        var r = Ꮡpr.newReader(pkgbits.RelocObj, idx, pkgbits.SyncObject1);
+        var r = Ꮡpr.newReader(pkgbits.SectionObj, idx, pkgbits.SyncObject1);
         r.Value.dict = dict;
 
         var objPkgʗ1 = objPkg;
@@ -567,9 +569,10 @@ internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pk
                     var methods = new slice<ж<types.Func>>(iface.NumExplicitMethods());
                     foreach (var (i, _) in methods) {
                         var fn = iface.ExplicitMethod(i);
-                        var sig = fn.Type()._<ж<typesꓸSignature>>();
+                        var sig = fn.Signature();
 
                         var recv = types.NewVar(fn.Pos(), fn.Pkg(), ""u8, new types.NamedжΔType(named));
+                        recv.SetKind(types.RecvVar);
                         methods[i] = types.NewFunc(fn.Pos(), fn.Pkg(), fn.Name(), types.NewSignature(recv, sig.Params(), sig.Results(), sig.Variadic()));
                     }
 
@@ -609,7 +612,7 @@ internal static ж<readerDict> objDictIdx(this ж<pkgReader> Ꮡpr, pkgbits.Inde
     ref var dict = ref heap(new readerDict(), out var Ꮡdict);
 
     {
-        var r = Ꮡpr.tempReader(pkgbits.RelocObjDict, idx, pkgbits.SyncObject1);
+        var r = Ꮡpr.tempReader(pkgbits.SectionObjDict, idx, pkgbits.SyncObject1);
         {
             nint implicits = r.of(reader.ᏑDecoder).Len(); if (implicits != 0) {
                 errorf("unexpected object with %v implicit type parameter(s)"u8, implicits);
@@ -624,7 +627,7 @@ internal static ж<readerDict> objDictIdx(this ж<pkgReader> Ꮡpr, pkgbits.Inde
         dict.derived = new slice<derivedInfo>(r.of(reader.ᏑDecoder).Len());
         dict.derivedTypes = new slice<typesꓸType>(len(dict.derived));
         foreach (var (i, _) in dict.derived) {
-            dict.derived[i] = new derivedInfo(idx: r.of(reader.ᏑDecoder).Reloc(pkgbits.RelocType));
+            dict.derived[i] = new derivedInfo(idx: r.of(reader.ᏑDecoder).Reloc(pkgbits.SectionType));
             if (r.of(reader.ᏑDecoder).Version().Has(pkgbits.DerivedInfoNeeded)) {
                 assert(!r.of(reader.ᏑDecoder).Bool());
             }
@@ -700,7 +703,7 @@ internal static ж<types.Func> method(this ж<reader> Ꮡr) {
     var (pkg, name) = Ꮡr.selector();
 
     var rparams = Ꮡr.typeParamNames();
-    var sig = Ꮡr.signature(Ꮡr.param(), rparams, default!);
+    var sig = Ꮡr.signature(Ꮡr.param(types.RecvVar), rparams, default!);
 
     _ = Ꮡr.pos(); // TODO(mdempsky): Remove; this is a hacker for linker.go.
     return types.NewFunc(pos, pkg, name, sig);

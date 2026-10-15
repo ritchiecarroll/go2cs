@@ -619,7 +619,7 @@ internal static nint tzruleTime(nint year, rule r, nint off) {
             }
             d += 7;
         }
-        d += (nint)daysBefore(((ΔMonth)r.mon));
+        d += daysBefore(((ΔMonth)r.mon));
         if (isLeap(year) && r.mon > 2) {
             d++;
         }

@@ -15,6 +15,7 @@ global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
 global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
 global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
 global using abiꓸKind = go.@internal.abi_package.ΔKind;
+global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
 global using abiꓸName = go.@internal.abi_package.ΔName;
 global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 global using runtimeꓸError = go.runtime_package.ΔError;
@@ -59,7 +60,8 @@ using static go.unique_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("unique/handle.go", "handle.cs", "ABs6oqzEgoKUgqaClJ7okoKCgpSUgpSClIK4goK4lIIAIULKgoKUgraSgpSmlO6SlKaCgqaCuIKUpr4=", "60-67:1;131-140:1;134-139:1.1;151-173:1")]
+[assembly: go.GoPositionMap("unique/canonmap.go", "canonmap.cs", "ABo0goKUgoKCgqaypIKCgpSCgpSCgpSUptKkgoKCgpSCgoKClIKClIKUuICCpIKUlIK4goKUpu6kgoKCgJS2yIKU3JSSlNzkgqaCpoKCgoKUgoKCgoKClIKClK7CgoKCgpSCgoKClIKClJSClJSClJSCuIKCyoKClAAHEIKClKaCgoKCgpSCpgAJFKKClKaigpQAEyyCpoKCgqYAChaCgoKSAAYU0oKCgpSUqLKCgpSUrOSCgpSUgriCgoKCgpSUlK4=", "136-138:1")]
+[assembly: go.GoPositionMap("unique/handle.go", "handle.cs", "ABk0oqzEgoKUgoKClKaClJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -74,7 +76,11 @@ public static partial class unique_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct canonMap<T> {}
+    internal partial struct node<T> {}
     internal partial struct uniqueMap<T> {}
+    internal partial struct Δentry<T> {}
+    [GoValueClone("children")] internal partial struct Δindirect<T> {}
     public partial struct Handle<T> {}
     // </TypeAccessibility>
 
@@ -90,6 +96,7 @@ public static partial class unique_package
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸsync() => builtin.initPackage(typeof(@internal.sync_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
+    [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(go.sync.atomic_package));
     [GoInit] internal static void initᴛᴛimportꓸweak() => builtin.initPackage(typeof(weak_package));
     // </ImportInitializers>
 }

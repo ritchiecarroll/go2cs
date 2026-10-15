@@ -263,7 +263,11 @@ internal static int64 mono(this ref Time t) {
 // IsZero reports whether t represents the zero time instant,
 // January 1, year 1, 00:00:00 UTC.
 public static bool IsZero(this Time t) {
-    return t.sec() == 0 && t.nsec() == 0;
+    // If hasMonotonic is set in t.wall, then the time can't be before 1885, so it can't be the year 1.
+    // If hasMonotonic is zero, then all the bits in wall other than the nanoseconds field should be 0.
+    // So if there are no nanoseconds then t.wall == 0, and if there are no seconds then t.ext == 0.
+    // This is equivalent to t.sec() == 0 && t.nsec() == 0, but is more efficient.
+    return t.wall == 0 && t.ext == 0;
 }
 
 // After reports whether the time instant t is after u.
@@ -670,7 +674,7 @@ internal static (absCentury century, absCyear cyear, absYday ayday) split(this a
     // so do that instead, saving a few cycles.
     // See Neri and Schneider, section 8.3
     // for more about this optimization.
-    var (hi, lo) = bits.Mul32(2939745, (uint32)cd);
+    var (hi, lo) = bits.Mul32(2939745, cd);
     cyear = ((absCyear)(nint)hi);
     ayday = ((absYday)(nint)(lo / 2939745 / 4));
     return (century, cyear, ayday);
@@ -1262,7 +1266,7 @@ internal static Duration subMono(int64 t, int64 u) {
 // Since returns the time elapsed since t.
 // It is shorthand for time.Now().Sub(t).
 public static Duration Since(Time t) {
-    if ((uint64)(t.wall & (uint64)hasMonotonic) != 0) {
+    if ((uint64)(t.wall & (uint64)hasMonotonic) != 0 && !runtimeIsBubbled()) {
         // Common case optimization: if t has monotonic time, then Sub will use only it.
         return subMono(runtimeNano() - startNano, t.ext);
     }
@@ -1272,7 +1276,7 @@ public static Duration Since(Time t) {
 // Until returns the duration until t.
 // It is shorthand for t.Sub(time.Now()).
 public static Duration Until(Time t) {
-    if ((uint64)(t.wall & (uint64)hasMonotonic) != 0) {
+    if ((uint64)(t.wall & (uint64)hasMonotonic) != 0 && !runtimeIsBubbled()) {
         // Common case optimization: if t has monotonic time, then Sub will use only it.
         return subMono(t.ext, runtimeNano() - startNano);
     }
@@ -1365,6 +1369,9 @@ internal static partial (int64 sec, int32 nsec, int64 mono) runtimeNow();
 //
 //go:linkname runtimeNano
 internal static partial int64 runtimeNano();
+
+//go:linkname runtimeIsBubbled
+internal static partial bool runtimeIsBubbled();
 
 // Monotonic times are reported as offsets from startNano.
 // We initialize startNano to runtimeNano() - 1 so that on systems where

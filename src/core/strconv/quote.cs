@@ -34,12 +34,8 @@ internal static slice<byte> appendQuotedWith(slice<byte> buf, @string s, byte qu
         buf = nBuf;
     }
     buf = append(buf, quote);
-    for (nint width = 0; len(s) > 0; s = s.slice(width)) {
-        var r = (rune)s[0];
-        width = 1;
-        if (r >= utf8.RuneSelf) {
-            (r, width) = utf8.DecodeRuneInString(s);
-        }
+    for ((var r, nint width) = ((rune)0, 0); len(s) > 0; s = s.slice(width)) {
+        (r, width) = utf8.DecodeRuneInString(s);
         if (width == 1 && r == utf8.RuneError) {
             buf = append(buf, ((@string)@"\x"u8).ꓸꓸꓸ);
             buf = append(buf, lowerhex[(s[0] >> (int)(4))]);

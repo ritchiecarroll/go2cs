@@ -479,20 +479,23 @@ internal static (encoder e, error err) makeBody(reflectꓸValue value, fieldPara
         return (((bytesEncoder)default!), default!);
     }
     if (AreEqual(exprᴛ1, timeType)) {
-        var t = value.Interface()._<time.Time>();
+        var (t, _) = reflect.TypeAssert<time.Time>(value);
         if (@params.timeType == TagGeneralizedTime || outsideUTCRange(t)) {
             return makeGeneralizedTime(t);
         }
         return makeUTCTime(t);
     }
     if (AreEqual(exprᴛ1, bitStringType)) {
-        return (((bitStringEncoder)(value.Interface()._<BitString>())), default!);
+        var (v, _) = reflect.TypeAssert<BitString>(value);
+        return (((bitStringEncoder)v), default!);
     }
     if (AreEqual(exprᴛ1, objectIdentifierType)) {
-        return makeObjectIdentifier(value.Interface()._<ObjectIdentifier>());
+        var (v, _) = reflect.TypeAssert<ObjectIdentifier>(value);
+        return makeObjectIdentifier(v);
     }
     if (AreEqual(exprᴛ1, bigIntType)) {
-        return makeBigInt(value.Interface()._<ж<bigꓸInt>>());
+        var (v, _) = reflect.TypeAssert<ж<bigꓸInt>>(value);
+        return makeBigInt(v);
     }
 
     {
@@ -652,7 +655,7 @@ internal static (encoder e, error err) makeField(reflectꓸValue v, fieldParamet
     }
 
     if (AreEqual(v.Type(), rawValueType)) {
-        var rv = v.Interface()._<RawValue>();
+        var (rv, _) = reflect.TypeAssert<RawValue>(v);
         if (len(rv.FullBytes) != 0) {
             return (((bytesEncoder)rv.FullBytes), default!);
         }
@@ -698,7 +701,8 @@ internal static (encoder e, error err) makeField(reflectꓸValue v, fieldParamet
         }
     }
     else if (exprᴛ1 == TagUTCTime) {
-        if (@params.timeType == TagGeneralizedTime || outsideUTCRange(v.Interface()._<time.Time>())) {
+        var (tΔ3, _) = reflect.TypeAssert<time.Time>(v);
+        if (@params.timeType == TagGeneralizedTime || outsideUTCRange(tΔ3)) {
             tag = TagGeneralizedTime;
         }
     }
@@ -774,6 +778,7 @@ internal static (encoder e, error err) makeField(reflectꓸValue v, fieldParamet
 //	omitempty:   causes empty slices to be skipped
 //	printable:   causes strings to be marshaled as ASN.1, PrintableString values
 //	utf8:        causes strings to be marshaled as ASN.1, UTF8String values
+//	numeric:     causes strings to be marshaled as ASN.1, NumericString values
 //	utc:         causes time.Time to be marshaled as ASN.1, UTCTime values
 //	generalized: causes time.Time to be marshaled as ASN.1, GeneralizedTime values
 public static (slice<byte>, error) Marshal(any val) {

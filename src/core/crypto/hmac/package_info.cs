@@ -37,7 +37,6 @@ using static go.crypto.hmac_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<go.crypto.@internal.fips140.hmac_package.HMAC, hash_package.Hash>(Pointer = true)]
-[assembly: GoImplement<hash_package.Hash, go.crypto.@internal.fips140_package.Hash>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -51,7 +50,7 @@ using static go.crypto.hmac_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/hmac/hmac.go", "hmac.cs", "ACRO4oKCgriCgoKUgqaoyA==")]
+[assembly: go.GoPositionMap("crypto/hmac/hmac.go", "hmac.cs", "ACNO4oKCgriCgoKUgqaoyA==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

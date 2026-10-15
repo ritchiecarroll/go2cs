@@ -6,10 +6,10 @@
 namespace go.go;
 
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using slices = slices_package;
 using strings = strings_package;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -53,7 +53,7 @@ internal static bool IsComparable(this ref _TypeSet s, map<ΔType, bool> seen) {
         return s.comparable;
     }
     var seenʗ1 = seen;
-    return s.@is((ж<Δterm> t) => t != nil && comparableType((~t).typ, false, seenʗ1, default!));
+    return s.@is((ж<Δterm> t) => t != nil && comparableType((~t).typ, false, seenʗ1) == nil);
 }
 
 // NumMethods returns the number of methods available.
@@ -126,29 +126,29 @@ internal static bool subsetOf(this ref _TypeSet s1, ж<_TypeSet> Ꮡs2) {
     return s1.terms.subsetOf(s2.terms);
 }
 
-// typeset is an iterator over the (type/underlying type) pairs in s.
-// If s has no specific terms, typeset calls yield with (nil, nil).
-// In any case, typeset is guaranteed to call yield at least once.
-internal static void typeset(this ref _TypeSet s, Func<ΔType, ΔType, bool> yield) {
+// all reports whether f(t, u) is true for each (type/underlying type) pairs in s.
+// If s has no specific terms, all calls f(nil, nil).
+// In any case, all is guaranteed to call f at least once.
+internal static bool all(this ref _TypeSet s, Func<ΔType, ΔType, bool> f) {
     if (!s.hasTerms()) {
-        yield(default!, default!);
-        return;
+        return f(default!, default!);
     }
 
     foreach (var (_, t) in s.terms) {
         assert((~t).typ != default!);
-        // Unalias(x) == under(x) for ~x terms
+        // Unalias(x) == x.Underlying() for ~x terms
         var u = Unalias((~t).typ);
         if (!(~t).tilde) {
-            u = under(u);
+            u = u.Underlying();
         }
         if (debug) {
-            assert(Identical(u, under(u)));
+            assert(Identical(u, u.Underlying()));
         }
-        if (!yield((~t).typ, u)) {
-            break;
+        if (!f((~t).typ, u)) {
+            return false;
         }
     }
+    return true;
 }
 
 // is calls f with the specific type terms of s and reports whether
@@ -307,8 +307,8 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
             }
             bool comparable = default!;
             termlist terms = default!;
-            var switchᴛ16 = under(typ);
-            switch (switchᴛ16.type()) {
+            var switchᴛ15 = typ.Underlying();
+            switch (switchᴛ15.type()) {
             case ж<Interface> u: {
                 // For now we don't permit type parameters as constraints.
                 assert(!isTypeParam(typ));
@@ -338,7 +338,7 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
                 break;
             }
             default: {
-                var u = switchᴛ16;
+                var u = switchᴛ15;
                 if (!isValid(u)) {
                     continue;
                 }
@@ -384,7 +384,7 @@ internal static (termlist, bool) intersectTermLists(termlist xterms, bool xcomp,
         nint i = 0;
         foreach (var (_, t) in terms) {
             assert((~t).typ != default!);
-            if (comparableType((~t).typ, false, /* strictly comparable */ default!, default!)) {
+            if (comparableType((~t).typ, false, /* strictly comparable */ default!) == nil) {
                 terms[i] = t;
                 i++;
             }
@@ -440,7 +440,7 @@ internal static ж<_TypeSet> computeUnionTypeSet(ж<Checker> Ꮡcheck, map<ж<Un
         var t = vᴛ1;
 
         termlist terms = default!;
-        var u = under((~t).typ);
+        var u = (~t).typ.Underlying();
         {
             var (ui, _) = u._<ж<Interface>>(ᐧ); if (ui != nil){
                 // For now we don't permit type parameters as constraints.

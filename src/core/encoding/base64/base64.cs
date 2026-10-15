@@ -5,11 +5,11 @@
 // Package base64 implements base64 encoding as specified by RFC 4648.
 namespace go.encoding;
 
-using binary = go.encoding.binary_package;
+using byteorder = @internal.byteorder_package;
 using io = io_package;
 using slices = slices_package;
 using strconv = strconv_package;
-using go.encoding;
+using @internal;
 
 partial class base64_package {
 
@@ -552,7 +552,7 @@ public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst,
                 enc.decodeMap[src2[5]],
                 enc.decodeMap[src2[6]],
                 enc.decodeMap[src2[7]]); if (ok){
-                binary.BigEndian.PutUint64(dst.slice(n), dn);
+                byteorder.BEPutUint64(dst.slice(n), dn);
                 n += 6;
                 si += 8;
             } else {
@@ -574,7 +574,7 @@ public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst,
                 enc.decodeMap[src2[1]],
                 enc.decodeMap[src2[2]],
                 enc.decodeMap[src2[3]]); if (ok){
-                binary.BigEndian.PutUint32(dst.slice(n), dn);
+                byteorder.BEPutUint32(dst.slice(n), dn);
                 n += 3;
                 si += 4;
             } else {

@@ -161,7 +161,7 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/check/crypto.internal.fips140.check.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/crypto.internal.fips140.csproj" />
+    <ProjectReference Include="$(go2csPath)core/hash/hash.csproj" />
   </ItemGroup>
 
   <ItemGroup>

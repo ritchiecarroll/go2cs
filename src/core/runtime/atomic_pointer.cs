@@ -52,7 +52,7 @@ internal static void atomicstorep(@unsafe.Pointer ptr, @unsafe.Pointer @new) {
     atomic.StorepNoWB((uintptr)noescape(ptr), @new);
 }
 
-// atomic_storePointer is the implementation of runtime/internal/UnsafePointer.Store
+// atomic_storePointer is the implementation of internal/runtime/atomic.UnsafePointer.Store
 // (like StoreNoWB but with the write barrier).
 //
 //go:nosplit
@@ -61,7 +61,7 @@ internal static void atomic_storePointer(ж<@unsafe.Pointer> Ꮡptr, @unsafe.Poi
     atomicstorep(@unsafe.Pointer.FromPinnedBox(Ꮡptr), @new);
 }
 
-// atomic_casPointer is the implementation of runtime/internal/UnsafePointer.CompareAndSwap
+// atomic_casPointer is the implementation of internal/runtime/atomic.UnsafePointer.CompareAndSwap
 // (like CompareAndSwapNoWB but with the write barrier).
 //
 //go:nosplit

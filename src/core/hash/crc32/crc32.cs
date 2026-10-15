@@ -209,6 +209,12 @@ internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     return default!;
 }
 
+internal static (hash.Cloner, error) Clone(this ref digest d) {
+    ref var r = ref heap<digest>(out var Ꮡr);
+    r = d;
+    return (new digestжCloner(Ꮡr), default!);
+}
+
 internal static uint32 update(uint32 crc, ж<Table> Ꮡtab, slice<byte> p, bool checkInitIEEE) {
     switch (ᐧ) {
     case {} when ᏑhaveCastagnoli.Load() && Ꮡtab == castagnoliTable: {

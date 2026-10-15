@@ -1,7 +1,11 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-//go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris || wasip1
+//go:build unix || wasip1
+
+// sysfdType is the native type of a file handle
+// (int on Unix, syscall.Handle on Windows),
+// permitting helper functions to be written portably.
 global using sysfdType = nint;
 
 namespace go;
@@ -10,8 +14,10 @@ using errors = errors_package;
 using unix = @internal.syscall.unix_package;
 using runtime = runtime_package;
 using syscall = syscall_package;
+using time = time_package;
 using @internal.syscall;
 using fs = go.io.fs_package;
+using go.io;
 using poll = @internal.poll_package;
 
 partial class os_package {
@@ -63,7 +69,7 @@ internal static (ж<Root>, error) newRoot(nint fd, @string name) {
 internal static (ж<Root>, error) openRootInRoot(ж<Root> Ꮡr, @string name) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    var (fd, err) = doInRoot(ref (Ꮡr).DerefOrNull(), name, (nint fd, error err) (nint parent, @string nameΔ1) => {
+    var (fd, err) = doInRoot(ref (Ꮡr).DerefOrNull(), name, 0, default!, (nint fd, error err) (nint parent, @string nameΔ1, bool endsInSlash) => {
         nint fdΔ1 = default!;
         error errΔ1 = default!;
         ignoringEINTR(() => {
@@ -85,13 +91,24 @@ internal static (ж<Root>, error) openRootInRoot(ж<Root> Ꮡr, @string name) {
 internal static (ж<File>, error) rootOpenFileNolog(ж<Root> Ꮡroot, @string name, nint flag, FileMode perm) {
     ref var root = ref Ꮡroot.DerefOrNull();
 
-    var (fd, err) = doInRoot(ref (Ꮡroot).DerefOrNull(), name, (nint fd, error err) (nint parent, @string nameΔ1) => {
+    var (fd, err) = doInRoot(ref (Ꮡroot).DerefOrNull(), name, 0, default!, (nint fd, error err) (nint parent, @string nameΔ1, bool endsInSlash) => {
         nint fdΔ1 = default!;
         error errΔ1 = default!;
         ignoringEINTR(() => {
-            (fdΔ1, errΔ1) = unix.Openat(parent, nameΔ1, (nint)((nint)(nint)((nint)syscall.O_NOFOLLOW | (nint)syscall.O_CLOEXEC) | flag), (uint32)perm);
-            if (isNoFollowErr(errΔ1) || AreEqual(errΔ1, syscall.ENOTDIR)) {
-                errΔ1 = checkSymlink(parent, nameΔ1, errΔ1);
+            nint openFlag = (nint)((nint)(nint)((nint)syscall.O_NOFOLLOW | (nint)syscall.O_CLOEXEC) | flag);
+            (fdΔ1, errΔ1) = unix.Openat(parent, nameΔ1, openFlag, (uint32)perm);
+            if (errΔ1 != default!) {
+                // Never follow symlinks when O_CREATE|O_EXCL, no matter
+                // what error the OS returns.
+                var isCreateExcl = (nint)(flag & (nint)((nint)(O_CREATE | O_EXCL))) == ((nint)(O_CREATE | O_EXCL));
+                if (!isCreateExcl && (isNoFollowErr(errΔ1) || AreEqual(errΔ1, syscall.ENOTDIR))) {
+                    errΔ1 = checkSymlink(parent, nameΔ1, errΔ1);
+                }
+                // AIX returns ELOOP instead of EEXIST for a dangling symlink.
+                // Convert this to EEXIST so it matches ErrExists.
+                if (isCreateExcl && AreEqual(errΔ1, syscall.ELOOP)) {
+                    errΔ1 = syscall.EEXIST;
+                }
             }
             return errΔ1;
         });
@@ -101,6 +118,7 @@ internal static (ж<File>, error) rootOpenFileNolog(ж<Root> Ꮡroot, @string na
         return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openat"u8, Path: name, Err: err))));
     }
     var f = newFile(fd, joinPath(root.Name(), name), kindOpenFile, unix.HasNonblockFlag(flag));
+    f.Value.inRoot = true;
     return (f, default!);
 }
 
@@ -124,23 +142,74 @@ internal static (nint, error) rootOpenDir(nint parent, @string name) {
 }
 
 internal static (FileInfo, error) rootStat(ref Root r, @string name, bool lstat) {
-    var (fi, err) = doInRoot(ref r, name, (FileInfo, error) (sysfdType parent, @string n) => {
-        ref var fs = ref heap(new fileStat(), out var Ꮡfs);
-        {
-            var errΔ1 = unix.Fstatat(parent, n, Ꮡfs.of(fileStat.Ꮡsys), unix.AT_SYMLINK_NOFOLLOW); if (errΔ1 != default!) {
-                return (default!, errΔ1);
-            }
+    var (fi, err) = doInRoot(ref r, name, 0, default!, (FileInfo, error) (sysfdType parent, @string n, bool endsInSlash) => {
+        var (fiΔ1, errΔ1) = lstatatWithName(parent, name, n);
+        if (errΔ1 != default!) {
+            return (default!, errΔ1);
         }
-        fillFileStatFromSys(Ꮡfs, name);
-        if (!lstat && (FileMode)(fs.Mode() & ModeSymlink) != 0) {
+        if (!lstat && (fs.FileMode)(fiΔ1.Mode() & ModeSymlink) != 0) {
             return (default!, checkSymlink(parent, n, syscall.ELOOP));
         }
-        return (new fileStatжFileInfo(Ꮡfs), default!);
+        return (fiΔ1, default!);
     });
     if (err != default!) {
         return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "statat"u8, Path: name, Err: err))));
     }
     return (fi, default!);
+}
+
+internal static error rootSymlink(ref Root r, @string oldname, @string newname) {
+    var (_, err) = doInRoot(ref r, newname, 0, default!, (EmptyStruct, error) (sysfdType parent, @string name, bool endsInSlash) => (new EmptyStruct(), symlinkat(oldname, parent, name)));
+    if (err != default!) {
+        return new LinkErrorжerror(Ꮡ(new LinkError("symlinkat"u8, oldname, newname, err)));
+    }
+    return default!;
+}
+
+// On systems which use fchmodat, fchownat, etc., we have a race condition:
+// When "name" is a symlink, Root.Chmod("name") should act on the target of that link.
+// However, fchmodat doesn't allow us to chmod a file only if it is not a symlink;
+// the AT_SYMLINK_NOFOLLOW parameter causes the operation to act on the symlink itself.
+//
+// We do the best we can by first checking to see if the target of the operation is a symlink,
+// and only attempting the fchmodat if it is not. If the target is replaced between the check
+// and the fchmodat, we will chmod the symlink rather than following it.
+//
+// This race condition is unfortunate, but does not permit escaping a root:
+// We may act on the wrong file, but that file will be contained within the root.
+internal static error afterResolvingSymlink(nint parent, @string name, Func<error> f) {
+    {
+        var err = checkSymlink(parent, name, default!); if (err != default!) {
+            return err;
+        }
+    }
+    return f();
+}
+
+internal static error chmodat(nint parent, @string name, FileMode mode) {
+    return afterResolvingSymlink(parent, name, () => ignoringEINTR(() => unix.Fchmodat(parent, name, syscallMode(mode), unix.AT_SYMLINK_NOFOLLOW)));
+}
+
+internal static error chownat(nint parent, @string name, nint uid, nint gid) {
+    return afterResolvingSymlink(parent, name, () => ignoringEINTR(() => unix.Fchownat(parent, name, uid, gid, unix.AT_SYMLINK_NOFOLLOW)));
+}
+
+internal static error lchownat(nint parent, @string name, nint uid, nint gid) {
+    return ignoringEINTR(() => unix.Fchownat(parent, name, uid, gid, unix.AT_SYMLINK_NOFOLLOW));
+}
+
+internal static error chtimesat(nint parent, @string name, time.Time atime, time.Time mtime) {
+    var atimeʗ1 = atime;
+    var mtimeʗ1 = mtime;
+    return afterResolvingSymlink(parent, name, () => {
+        var atimeʗ2 = atimeʗ1;
+        var mtimeʗ2 = mtimeʗ1;
+        return ignoringEINTR(() => {
+            ref var utimes = ref heap<array<syscall.Timespec>>(out var Ꮡutimes);
+            utimes = chtimesUtimes(atimeʗ2, mtimeʗ2);
+            return unix.Utimensat(parent, name, Ꮡutimes, unix.AT_SYMLINK_NOFOLLOW);
+        });
+    });
 }
 
 internal static error mkdirat(nint fd, @string name, FileMode perm) {
@@ -163,6 +232,41 @@ internal static error removeat(nint fd, @string name) {
         return e1;
     }
     return e;
+}
+
+internal static error removefileat(nint fd, @string name) {
+    return ignoringEINTR(() => unix.Unlinkat(fd, name, 0));
+}
+
+internal static error removedirat(nint fd, @string name) {
+    return ignoringEINTR(() => unix.Unlinkat(fd, name, unix.AT_REMOVEDIR));
+}
+
+internal static error renameat(nint oldfd, @string oldname, nint newfd, @string newname) {
+    return unix.Renameat(oldfd, oldname, newfd, newname);
+}
+
+internal static error linkat(nint oldfd, @string oldname, nint newfd, @string newname) {
+    return unix.Linkat(oldfd, oldname, newfd, newname, 0);
+}
+
+internal static error symlinkat(@string oldname, nint newfd, @string newname) {
+    return unix.Symlinkat(oldname, newfd, newname);
+}
+
+internal static (FileInfo, error) lstatat(nint parent, @string name) {
+    return lstatatWithName(parent, name, name);
+}
+
+internal static (FileInfo, error) lstatatWithName(nint parent, @string origName, @string name) {
+    ref var fs = ref heap(new fileStat(), out var Ꮡfs);
+    {
+        var err = unix.Fstatat(parent, name, Ꮡfs.of(fileStat.Ꮡsys), unix.AT_SYMLINK_NOFOLLOW); if (err != default!) {
+            return (default!, err);
+        }
+    }
+    fillFileStatFromSys(Ꮡfs, origName);
+    return (new fileStatжFileInfo(Ꮡfs), default!);
 }
 
 // checkSymlink resolves the symlink name in parent,
@@ -193,13 +297,22 @@ internal static (@string, error) readlinkat(nint fd, @string name) {
         if (e != default!) {
             return ("", e);
         }
-        if (n < 0) {
-            n = 0;
-        }
+        n = max(n, 0);
         if (n < len) {
             return (((@string)(b.slice(0, n))), default!);
         }
     }
+}
+
+internal static bool isLink(FileInfo fi) {
+    return (fs.FileMode)(fi.Mode() & ModeSymlink) != 0;
+}
+
+// isDirectoryLink always returns false, because Unix systems don't have separate
+// symlink types for files and directories.
+// (See the Windows version of this function for more details.)
+internal static bool isDirectoryLink(FileInfo fi) {
+    return false;
 }
 
 } // end os_package

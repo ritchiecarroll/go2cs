@@ -34,6 +34,9 @@ public static bool FileExports(ж<File> Ꮡsrc) {
 //
 // PackageExports reports whether there are exported declarations;
 // it returns false otherwise.
+//
+// Deprecated: use the type checker [go/types] instead of [Package];
+// see [Object]. Alternatively, use [FileExports].
 public static bool PackageExports(ж<Package> Ꮡpkg) {
     return filterPackage(ref (Ꮡpkg).DerefOrNull(), new Func<@string, bool>(exportFilter), true);
 }
@@ -303,6 +306,9 @@ internal static bool filterFile(ref File src, Func<@string, bool> f, bool export
 //
 // FilterPackage reports whether there are any top-level declarations
 // left after filtering.
+//
+// Deprecated: use the type checker [go/types] instead of [Package];
+// see [Object]. Alternatively, use [FilterFile].
 public static bool FilterPackage(ж<Package> Ꮡpkg, Func<@string, bool> f) {
     return filterPackage(ref (Ꮡpkg).DerefOrNull(), f, false);
 }
@@ -321,8 +327,13 @@ internal static bool filterPackage(ref Package pkg, Func<@string, bool> f, bool 
 // Merging of package files
 
 // The MergeMode flags control the behavior of [MergePackageFiles].
+//
+// Deprecated: use the type checker [go/types] instead of [Package];
+// see [Object].
 partial struct MergeMode /*num:nuint*/;
 
+// Deprecated: use the type checker [go/types] instead of [Package];
+// see [Object].
 // If set, duplicate function declarations are excluded.
 public static MergeMode FilterFuncDuplicates => /* 1 << iota */ 1;
 // If set, comments that are not associated with a specific
@@ -363,6 +374,9 @@ internal static ж<Comment> separator = Ꮡ(new Comment(token.NoPos, "//"u8));
 
 // MergePackageFiles creates a file AST by merging the ASTs of the
 // files belonging to a package. The mode flags control merging behavior.
+//
+// Deprecated: this function is poorly specified and has unfixable
+// bugs; also [Package] is deprecated.
 public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
     ref var pkg = ref Ꮡpkg.DerefOrNull();
 

@@ -1,7 +1,7 @@
 // Copyright 2018 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-//go:build amd64 || arm || arm64 || ppc64le || ppc64 || riscv64 || s390x
+//go:build amd64 || arm || arm64 || loong64 || mips64le || mips64 || ppc64le || ppc64 || riscv64 || s390x
 namespace go.@internal;
 
 partial class bytealg_package {

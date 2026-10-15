@@ -51,7 +51,7 @@ using static go.crypto.dsa_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/dsa/dsa.go", "dsa.cs", "AC9eABImwoIABxCSlIKkgqSCpIKkpoKUgoKCgpSCgoCCtoKClIKmgoCCtoKUgoKCgoKmgqaCgtiCgpSClIKCgoKmguzCgqaCpoKUgoKClIKCuIKCgq7CgoIAAhwAEAKCpriCgoKUlIKCgoKCgoKUyoK4lIKUgqaUgoKCgpSC3IKmAAISAAoCgsqCpoKUgqaCgqaCgpSUgoKCgoKCgoKU")]
+[assembly: go.GoPositionMap("crypto/dsa/dsa.go", "dsa.cs", "AC9eABImwoIABxCSlIKkgqSCpIKkpoKUgoKCgpSCgoCCtoKClIKmgoCCtoKUgoKCgoKmgqaCgtiCgpSClIKCgoKmguzCgqaCpoKUgoKClIKCuIKCgq7CgoIAAiQAFAKCpriCgoKUlIKCgoKCgoKUyoK4lIKUgqaUgoKCgpSC3IKmAAISAAoCgsqCpoKUgqaCgqaCgpSUgoKCgoKCgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -80,7 +80,7 @@ public static partial class dsa_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140only() => builtin.initPackage(typeof(go.crypto.@internal.fips140only_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸrandutil() => builtin.initPackage(typeof(go.crypto.@internal.randutil_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸrand() => builtin.initPackage(typeof(go.crypto.@internal.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbig() => builtin.initPackage(typeof(math.big_package));

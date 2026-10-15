@@ -50,7 +50,7 @@ using static go.crypto.@internal.fips140.subtle_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/subtle/constant_time.go", "constant_time.cs", "AAcWwoKmlIKmqqCmkqiSrLKCpoKCgryigoI=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/subtle/constant_time.go", "constant_time.cs", "AA4iwoKmlIKmrsKCqqKCgoKCgpSCgoKCgoKClKyygqaCgoI=")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/subtle/xor.go", "xor.cs", "AAoiAAgCgoKUgpSClII=")]
 // </GoSourcePositionMaps>
 
@@ -75,6 +75,7 @@ public static partial class subtle_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     // </ImportInitializers>
 }
