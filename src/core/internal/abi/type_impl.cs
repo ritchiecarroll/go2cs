@@ -354,9 +354,14 @@ private static ж<Type> synthesizeDescriptor(System.Type st, nint[]? arrayDims, 
     // non-pointer-shaped type reaching funcLayout. So the readers are live; the honest
     // classification simply agrees with what they already concluded.
     //
-    // Kind() masks with KindMask (31), so bit 5 cannot disturb the kind it sits beside.
+    // GO 1.26 MOVED THE BIT (H6, 2026-10-15). It was bit 5 of the KIND byte (`KindDirectIface`), which
+    // Kind() masked off with KindMask; Go 1.26 deletes KindMask, makes Kind() return Kind_ unmasked, and
+    // reads directness from the TYPE FLAGS (`IsDirectIface`: `t.TFlag&TFlagDirectIface != 0`). Stamped
+    // into Kind_ as before, every direct-iface descriptor would report its kind plus 32 (a pointer is not
+    // Pointer, a map not Map) and read as indirect besides. `KindDirectIface` survives upstream only as
+    // a breadcrumb for dlv; nothing may set it.
     if (GoReflect.GoIsDirectIface(st, arrayDims)) {
-        t.Kind_ |= (ΔKind)KindDirectIface;
+        t.TFlag |= TFlagDirectIface;
     }
     // Carry Go comparability on the descriptor: reflect.Type.Comparable and internal/reflectlite's
     // Comparable both report `Equal != nil`, and errors.Is gates its equality match on the latter — so a
@@ -439,7 +444,7 @@ public static ж<Type> TypeOf(any a) {
 
 private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<ΔStructType>> s_structTypes = new();
 private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<ΔArrayType>> s_arrayTypes = new();
-private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<mapType>> s_mapTypes = new();
+private static readonly System.Collections.Concurrent.ConcurrentDictionary<ж<Type>, ж<ΔMapType>> s_mapTypes = new();
 
 // StructType returns t cast to a *StructType, or nil if its tag does not match.
 public static ж<ΔStructType> StructType(this ж<Type> Ꮡt) {
@@ -601,8 +606,8 @@ public static slice<ж<Type>> OutSlice(this ж<ΔFuncType> Ꮡt) {
 // ==== the descriptor ACCESSORS that reach an element or a key: Elem() / Key() ====
 //
 // The SAME prefix-downcast idiom as the specializations above, one level in: Go's Elem() casts the
-// Type header to the sliceType/arrayType/chanType/mapType/ptrType the linker really allocated
-// behind it and reads that record's Elem field, and Key() does it for a mapType. So both inherited
+// Type header to the SliceType/ArrayType/ChanType/MapType/PtrType the linker really allocated
+// behind it and reads that record's Elem field, and Key() does it for a MapType. So both inherited
 // exactly the defect documented above — Reinterpret rightly refuses to alias managed storage for a
 // reference-bearing pair — and answered nil for every slice, array, chan, map and pointer
 // descriptor in the corpus.
@@ -703,14 +708,15 @@ public static ΔChanDir ChanDir(this ж<Type> Ꮡt) {
 // is ONE managed type for every key length, so the datum reaches here from the converter's stamp on
 // the declaring FIELD — the position a decode target reads, where the map itself is still nil and a
 // live entry could reveal nothing. Unstamped answers Go's dimension-less array, unchanged.
-// MapType returns t cast to a *mapType (SwissMapType under the swissmap build), or nil if its tag
-// does not match. HAND-OWNED because the auto body is `Ꮡt.Reinterpret<Type, mapType>()` -- Go's
-// `(*mapType)(unsafe.Pointer(t))` taken literally -- and a SYNTHESIZED descriptor has no native
+// MapType returns t cast to a *MapType, or nil if its tag does not match. (Go 1.26 retired the swissmap
+// experiment and its `mapType` alias for SwissMapType: the record is now `MapType`, whose C# name is
+// `ΔMapType` beside this method, with the same fields.) HAND-OWNED because the auto body is
+// `Ꮡt.Reinterpret<Type, ΔMapType>()` -- Go's `(*MapType)(unsafe.Pointer(t))` taken literally -- and a SYNTHESIZED descriptor has no native
 // storage to reinterpret. Measured (internal/sync's TestHashTrieMapTruncHash, 2026-09-20): the
 // reinterpret fell through golib's aliasing gate -- which requires `SizeOf<TDst> <= SizeOf<T>`, and
-// a mapType is WIDER than the Type it embeds -- and the address fallback minted a NativeBox over an
+// a MapType is WIDER than the Type it embeds -- and the address fallback minted a NativeBox over an
 // ORDER TOKEN, so the first field read panicked in ж.NativeBox.get_Value with "dereference of a
-// managed pointer with no address (*SwissMapType ...)". That refusal is CORRECT: materializing a
+// managed pointer with no address (*SwissMapType ...)", the 1.24 spelling. That refusal is CORRECT: materializing a
 // reference-bearing struct out of token bytes would fabricate managed references. So the fix belongs
 // here, at the producer -- a synthetic descriptor answers its kind view through a real PROJECTION,
 // never through a reinterpretation. Same shape, cache discipline and nil rule as StructType and
@@ -747,27 +753,27 @@ public static ΔChanDir ChanDir(this ж<Type> Ꮡt) {
 // predicates that sit on Flags (NeedKeyUpdate, HashMightPanic, IndirectKey, IndirectElem)
 // therefore answer false, the same honest zero -- including IndirectKey/IndirectElem, which the
 // group's layout above already applied to its slot size.
-public static ж<mapType> MapType(this ж<Type> Ꮡt) {
+public static ж<ΔMapType> MapType(this ж<Type> Ꮡt) {
     if (Ꮡt == nil || Ꮡt.Value.Kind() != Map || Ꮡt.Value.sysType is null) {
         return default!;
     }
     return s_mapTypes.GetOrAdd(Ꮡt, static box => synthesizeMapType(box));
 }
 
-// The raw spelling of the same downcast -- `(*SwissMapType)(unsafe.Pointer(abi.TypeOf(m)))`, which
+// The raw spelling of the same downcast -- `(*abi.MapType)(unsafe.Pointer(abi.TypeOf(m)))` (`*SwissMapType` at 1.24), which
 // internal/runtime/maps' newTestMapType writes -- reaches golib's Reinterpret, not MapType. Register
 // the projection there so both spellings answer the ONE cached box (Go's pointer identity), and a
 // descriptor of any other kind answers nil and keeps the reinterpret it had.
 [System.Runtime.CompilerServices.ModuleInitializer]
 internal static void registerMapTypeProjection() {
-    PrefixProjection<Type, mapType>.Project = static box => box.MapType();
+    PrefixProjection<Type, ΔMapType>.Project = static box => box.MapType();
 }
 
-private static ж<mapType> synthesizeMapType(ж<Type> Ꮡt) {
+private static ж<ΔMapType> synthesizeMapType(ж<Type> Ꮡt) {
     var key = Ꮡt.Key();
     var elem = Ꮡt.Elem();
     var group = synthesizeGroup(key, elem);
-    return new StandardBox<mapType>(new mapType(
+    return new StandardBox<ΔMapType>(new ΔMapType(
         Type: Ꮡt.Value,
         Key: key,
         Elem: elem,
@@ -784,8 +790,8 @@ private static ж<mapType> synthesizeMapType(ж<Type> Ꮡt) {
 // not answer). A field's size, alignment and pointer prefix come off its stamped descriptor, and a
 // field wider than its swiss limit is replaced by a pointer exactly as the compiler does.
 private static ж<Type> synthesizeGroup(ж<Type> Ꮡkey, ж<Type> Ꮡelem) {
-    if (!groupField(Ꮡkey, (nuint)SwissMapMaxKeyBytes, out nuint keySize, out nuint keyAlign, out nuint keyPtrBytes) ||
-        !groupField(Ꮡelem, (nuint)SwissMapMaxElemBytes, out nuint elemSize, out nuint elemAlign, out nuint elemPtrBytes)) {
+    if (!groupField(Ꮡkey, (nuint)MapMaxKeyBytes, out nuint keySize, out nuint keyAlign, out nuint keyPtrBytes) ||
+        !groupField(Ꮡelem, (nuint)MapMaxElemBytes, out nuint elemSize, out nuint elemAlign, out nuint elemPtrBytes)) {
         return default!;
     }
     // slot = struct { key; elem }
@@ -793,8 +799,8 @@ private static ж<Type> synthesizeGroup(ж<Type> Ꮡkey, ж<Type> Ꮡelem) {
     nuint slotAlign = keyAlign > elemAlign ? keyAlign : elemAlign;
     nuint slotSize = structSize(elemOff + elemSize, elemSize == 0, slotAlign);
     nuint slotPtrBytes = elemPtrBytes > 0 ? elemOff + elemPtrBytes : keyPtrBytes;
-    // group = struct { ctrl uint64; slots [SwissMapGroupSlots]slot }
-    nuint slots = (nuint)SwissMapGroupSlots;
+    // group = struct { ctrl uint64; slots [MapGroupSlots]slot }
+    nuint slots = (nuint)MapGroupSlots;
     nuint slotsSize = slots * slotSize;
     nuint groupAlign = slotAlign > 8 ? slotAlign : 8;
     ref var t = ref heap<Type>(out var Ꮡt);
@@ -890,7 +896,7 @@ private static ж<ΔArrayType> synthesizeArrayType(ж<Type> Ꮡt) {
 // The test is on the KIND, never on the absence of a System.Type. That distinction is the whole
 // point: a descriptor that BYPASSED synthType still names a real Go type and so still reports a
 // real Kind, and must keep tripping canonType's assert; only a descriptor naming NO Go kind at all
-// is admitted here. Go's Kind_ is left zero by the mint and Kind() masks with KindMask, so Invalid
+// is admitted here. Go's Kind_ is left zero by the mint and Kind() returns it (unmasked since Go 1.26), so Invalid
 // is exactly "this descriptor names no Go kind". It also fails CLOSED: were a future Go release to
 // start stamping a kind on the frame type, this predicate would stop recognizing it and the assert
 // would fire — a loud stop, not a silent admission.
