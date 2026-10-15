@@ -11,6 +11,10 @@ release candidate was packed. Nothing here is published or publishable.**
 | `mousetrap/Test-SheetPaste.ps1` | the pflag kit's paste test; run it with `-Path mousetrap/OWNER-SHEET-DRAFT.md` (93 submissions, 0 findings) |
 | `mousetrap/rows/linux-x64-SCRATCH.md` | a real linux-x64 behavior row, written against a SCRATCH 1.1.0-int.1 from a local folder feed; it binds no release |
 | `cobra/MODULE-prep.md` | cobra's section-1 MODULE.md at the prep tree (non-root, writable copy) |
+| `wave/PIN1-SHEET.md` | S1: ONE owner sheet for PIN session 1: six packages signed in one process, pushed in wave order |
+| `wave/Test-PIN1Gates.ps1` | S1's test: block 0 both ways, and block 3's gates against the published packages as stand-ins |
+| `wave/Invoke-NugetgoWaveRepack.ps1` | S2: the wave driver, one tested module per run (runbook sections 1 and 2) |
+| `wave/wave-modules.psd1` | S2's table: each module's published pack arguments and its kit's counts |
 
 ## Readings
 
