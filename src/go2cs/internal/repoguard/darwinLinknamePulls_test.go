@@ -49,12 +49,6 @@ var declaredDormantDarwinPulls = map[string]string{
 	// never through runtime's linkname of main.main.
 	"runtime.main_main": "the managed entry point is reached by the CLR, never through runtime.main_main",
 
-	// x/sys/cpu's darwin AVX-512 probe. Its only importer in GOROOT, chacha20poly1305_amd64.go, is
-	// built `gc && !purego`; purego is the corpus's tag, so no corpus project references
-	// vendor.golang.org.x.sys.cpu and its init never runs. It wakes, with the package's own bodyless
-	// cpuid/xgetbv, the day purego stops applying to that importer.
-	"vendor/golang.org/x/sys/cpu.syscall_syscall6": "unreachable under purego: x/sys/cpu has no importer in the corpus",
-
 	// os's darwin readdir is hand-owned (os/darwin/dir_darwin_impl.cs, dropped from the auto form by
 	// manualConversionFuncs) and calls libc's readdir_r directly, because syscall.Dirent is not blittable
 	// in the conversion. The pull's only caller is gone, so a forward would route nowhere live -- and to
