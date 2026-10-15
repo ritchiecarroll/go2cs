@@ -304,7 +304,7 @@ internal static void runfinq() {
                     // confusing the write barrier.
                     ((ж<array<uintptr>>)(uintptr)(frame)).Value = new uintptr[]{}.array();
                 }
-                var exprᴛ1 = (~(~f).fint).Kind();
+                var exprᴛ1 = (~f).fint.Kind();
                 if (exprᴛ1 == abi.Pointer) {
                     ((ж<@unsafe.Pointer>)(uintptr)(r)).Value = f.Value.arg;
                 }
