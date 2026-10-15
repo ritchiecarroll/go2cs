@@ -44,7 +44,7 @@ partial class runtime_internal_test_package
     {
         ж<abi.Type> typ = abi.TypeOf(Ꮡout.Value);
 
-        if (typ == nil || (abiꓸKind)((~typ).Kind_ & abi.KindMask) != abi.Pointer) {
+        if (typ == nil || (~typ).Kind() != abi.Pointer) {
             throw panic("new result of non-ptr type");
         }
 

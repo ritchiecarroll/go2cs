@@ -114,13 +114,13 @@ partial class runtime_package
 
         ж<_type> typ = abi.TypeOf(sl);
 
-        if (typ == nil || (abiꓸKind)((~typ).Kind_ & abi.KindMask) != abi.Pointer) {
+        if (typ == nil || (~typ).Kind() != abi.Pointer) {
             throw panic("slice result of non-ptr type");
         }
 
         typ = abi.Elem(typ);
 
-        if ((abiꓸKind)((~typ).Kind_ & abi.KindMask) != abi.Slice) {
+        if ((~typ).Kind() != abi.Slice) {
             throw panic("slice of non-ptr-to-slice type");
         }
 
@@ -161,7 +161,7 @@ partial class runtime_package
     internal static any arena_heapify(any s)
     {
         ж<_type> t = abi.TypeOf(s);
-        abiꓸKind kind = t == nil ? abi.Invalid : (abiꓸKind)((~t).Kind_ & abi.KindMask);
+        abiꓸKind kind = t == nil ? abi.Invalid : (~t).Kind();
 
         if (kind == abi.ΔString) {
             if (s is not @string str || str.Length == 0 || !userArenaIsMember(((INilPointer)@unsafe.StringData(str)).ReferentObject)) {
