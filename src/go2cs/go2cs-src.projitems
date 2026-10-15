@@ -149,6 +149,7 @@
     <None Include="$(MSBuildThisFileDirectory)displacedPromotedCall_test.go" />
     <None Include="$(MSBuildThisFileDirectory)displacedRefReceiverCall_test.go" />
     <None Include="$(MSBuildThisFileDirectory)docComments_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)dottedDigitSegment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)duplicatePartialMembers_test.go" />
     <None Include="$(MSBuildThisFileDirectory)dynamicStructOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)dynamicTypeGate_test.go" />

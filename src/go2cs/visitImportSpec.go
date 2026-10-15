@@ -1093,5 +1093,5 @@ func namespaceWithDirectorySegment(namespace, importPath, name string) string {
 		return namespace
 	}
 
-	return namespace + "." + getCoreSanitizedIdentifier(tail)
+	return namespace + "." + getCoreSanitizedIdentifier(joinDigitLeadingParts(tail))
 }
