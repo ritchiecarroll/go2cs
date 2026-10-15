@@ -99,6 +99,8 @@ func TestPackageInitIsIdenticalFromEitherMode(t *testing.T) {
 		{name: "recompile-fallback implementer", testSource: packageInitFixtureImplementer, implementer: true},
 	} {
 		t.Run(fixture.name, func(t *testing.T) {
+			isolateConverterPathGlobals(t)
+
 			pkgDir, outDir, options := incrementalFixture(t)
 
 			for _, name := range []string{"a.go", "b.go"} {
