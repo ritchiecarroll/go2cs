@@ -355,6 +355,11 @@ type Visitor struct {
 	// literals inside the declaration inherit it, which is what lets a `reflect.TypeFor[T]` written
 	// inside a closure render the companion the enclosing declaration declared.
 	currentFuncCompanionNames map[*types.TypeParam]string
+	// closedConstraintsRecorded holds the (type argument, closed constraint) pairs
+	// recordClosedConstraintImplementation has recorded, so each records once. It is also what
+	// ends the recursion of a SELF-referential constraint, whose recording renders the closed
+	// constraint and so reaches the same pair again. Lazily initialized.
+	closedConstraintsRecorded map[string]bool
 	// identAddressTakenCache memoizes per-object `&ident` scans of the current function
 	// (see identAddressTaken); lazily initialized, keyed by the *types.Object so entries
 	// from prior functions are simply never consulted again.

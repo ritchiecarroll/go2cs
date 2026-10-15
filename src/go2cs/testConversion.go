@@ -3229,7 +3229,7 @@ func appendExternalTestPackageClass(testInfoPath, packageNamespace, productionPa
 type conversionRecordSet struct {
 	interfaceImplements map[string]hashset.HashSet[string]
 	promotedImplements  map[string]hashset.HashSet[string]
-	proxies             map[string][2]string
+	proxies             map[string][3]string
 	implicitConvs       map[string]hashset.HashSet[string]
 	invertedConvs       map[string]hashset.HashSet[string]
 	indirectConvs       map[string]hashset.HashSet[string]
@@ -3241,7 +3241,7 @@ func newConversionRecordSet() conversionRecordSet {
 	return conversionRecordSet{
 		interfaceImplements: make(map[string]hashset.HashSet[string]),
 		promotedImplements:  make(map[string]hashset.HashSet[string]),
-		proxies:             make(map[string][2]string),
+		proxies:             make(map[string][3]string),
 		implicitConvs:       make(map[string]hashset.HashSet[string]),
 		invertedConvs:       make(map[string]hashset.HashSet[string]),
 		indirectConvs:       make(map[string]hashset.HashSet[string]),

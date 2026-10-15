@@ -1592,6 +1592,73 @@ func (v *Visitor) recordNominalProductionConstraint(typeParam *types.TypeParam, 
 	packageLock.Unlock()
 }
 
+// recordClosedConstraintImplementation records the nominal implementation a VALUE type argument needs
+// to satisfy a GENERIC method-set constraint — `Sum[A Adder[A]]` at `vec` emits `where A : Adder<A>`,
+// which C# checks as `vec : Adder<vec>`, and only a GoImplement record makes go2cs-gen declare that
+// base. A non-generic constraint gets its record where the argument converts to the type parameter
+// (convertToInterfaceType), but that site sees the constraint over the callee's OWN type parameter,
+// `Adder[A]`, which no concrete type implements, so the generic form went unrecorded and every such
+// instantiation was CS0315. It is the shape Go 1.26's self-referential constraints are written in
+// (`type Adder[A Adder[A]] interface`), and it predates them: `Adder[A any]` failed identically.
+//
+// The constraint is closed over the argument where it names this type parameter. A constraint naming
+// any OTHER type parameter (`Linker[T, N]` at N) is left alone, since only the instantiation knows
+// what that one is.
+func (v *Visitor) recordClosedConstraintImplementation(typeParam *types.TypeParam, typeArg types.Type) {
+	if _, ok := types.Unalias(typeArg).(*types.Named); !ok || typeContainsTypeParams(typeArg) {
+		return
+	}
+
+	constraintNamed, ok := types.Unalias(typeParam.Constraint()).(*types.Named)
+
+	if !ok || constraintNamed.TypeArgs().Len() == 0 {
+		return
+	}
+
+	if iface, ok := constraintNamed.Underlying().(*types.Interface); !ok || iface.NumMethods() == 0 || !iface.IsMethodSet() {
+		return
+	}
+
+	closedArgs := make([]types.Type, constraintNamed.TypeArgs().Len())
+
+	for i := range closedArgs {
+		arg := constraintNamed.TypeArgs().At(i)
+
+		if tp, ok := arg.(*types.TypeParam); ok && tp == typeParam {
+			closedArgs[i] = typeArg
+		} else if typeContainsTypeParams(arg) {
+			return
+		} else {
+			closedArgs[i] = arg
+		}
+	}
+
+	closed, err := types.Instantiate(nil, constraintNamed.Origin(), closedArgs, true)
+
+	if err != nil {
+		return
+	}
+
+	if iface, ok := closed.Underlying().(*types.Interface); !ok || !types.Implements(typeArg, iface) {
+		return
+	}
+
+	// Once per pair, and marked BEFORE recording: rendering a self-referential constraint's closed
+	// form (`Adder[vec]`) instantiates Adder's own `A` at `vec` and reaches this pair again.
+	key := typeArg.String() + "|" + closed.String()
+
+	if v.closedConstraintsRecorded[key] {
+		return
+	}
+
+	if v.closedConstraintsRecorded == nil {
+		v.closedConstraintsRecorded = make(map[string]bool)
+	}
+
+	v.closedConstraintsRecorded[key] = true
+	v.convertToInterfaceType(closed, typeArg, "")
+}
+
 // constraintProxyFor is the (type parameter, type argument) core shared by every instantiation
 // form. A generic NAMED TYPE reaches it through constraintProxyArg; a generic FUNCTION reaches it
 // through constraintProxySigArg — Go's `benchmarkScalarMult[P nistPoint[P]]` called with
@@ -1614,6 +1681,7 @@ func (v *Visitor) constraintProxyFor(typeParam *types.TypeParam, typeArg types.T
 	ptr, ok := types.Unalias(typeArg).(*types.Pointer)
 
 	if !ok {
+		v.recordClosedConstraintImplementation(typeParam, typeArg)
 		return "", false
 	}
 
@@ -1732,11 +1800,36 @@ func (v *Visitor) constraintProxyFor(typeParam *types.TypeParam, typeArg types.T
 		interfaceFullName = interfaceFullName[:idx]
 	}
 
+	// The record's interface argument is a placeholder, and the element serves — unless the interface
+	// constrains its OWN type parameter by itself (Go 1.26, `type GraphNode[N GraphNode[N]] interface`).
+	// Its C# declaration then carries `where N : GraphNode<N>`, which C# enforces on the attribute's
+	// type arguments too, and the element (a struct the proxy wraps) satisfies nothing: CS0315 on the
+	// record. The proxy implements the interface over itself, so it satisfies that bound by
+	// construction; the generator reads only the interface's open definition, so either serves it.
+	placeholder := elementFullName
+
+	if interfaceConstrainsItself(interfaceOrigin) {
+		placeholder = proxyName
+	}
+
 	packageLock.Lock()
-	constraintProxies[elementFullName+"|"+interfaceFullName] = [2]string{elementFullName, interfaceFullName}
+	constraintProxies[elementFullName+"|"+interfaceFullName] = [3]string{elementFullName, interfaceFullName, placeholder}
 	packageLock.Unlock()
 
 	return proxyName, true
+}
+
+// interfaceConstrainsItself reports whether a generic interface constrains one of its own type
+// parameters by an instantiation of ITSELF — `type Adder[A Adder[A]] interface`, legal from Go 1.26
+// (before it, "invalid recursive type").
+func interfaceConstrainsItself(origin *types.Named) bool {
+	for i := range origin.TypeParams().Len() {
+		if constraint, ok := types.Unalias(origin.TypeParams().At(i).Constraint()).(*types.Named); ok && constraint.Origin() == origin {
+			return true
+		}
+	}
+
+	return false
 }
 
 // namedHasConstraintProxy reports whether any type argument of the instantiated generic `named`
