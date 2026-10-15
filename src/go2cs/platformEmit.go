@@ -611,6 +611,11 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 
 	conditioned := map[string]bool{}
 	residual := map[string]string{}
+	converted := make([]map[string]bool, len(emissions))
+
+	for i, emission := range emissions {
+		converted[i] = convertedPackages(emission)
+	}
 
 	for _, rawPath := range sortedKeys(names) {
 		destination := filepath.Join(coreDir, filepath.FromSlash(rawPath))
@@ -659,11 +664,31 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 		// A review sibling in a per-GOOS folder is the exception: only that GOOS's target can emit
 		// it, and every other stage merely holds the seed copy it was staged with, so "first target
 		// that has it" would hand the root back its own seed bytes (see perGOOSReviewSiblingOwner).
+		//
+		// "Has it" is also too weak for the targets themselves. Every stage is a whole-tree copy of
+		// the seed, so a target that never CONVERTED the package still holds the seed's copy of its
+		// companions — and, first in order, handed the root back those seed bytes. Measured (H5,
+		// 2026-10-15): crypto/x509/internal/macos is darwin-only, and its README kept the seeded
+		// `macOS_package` from the Windows stage while the darwin stage emitted `macos_package`. So
+		// the first pass takes the first target that converted the package (convertedPackages), and
+		// only when none did does the second fall back to the first that has it. "Converted", not
+		// "emitted this companion": emission is read from modification time, a byte-identical
+		// rewrite does not move it, and os/exec/internal/fdtest's README — which Windows emits in its
+		// own flavor — would then go to whichever later target happened to differ.
 		source := ""
 		owner := perGOOSReviewSiblingOwner(rawPath, emissions)
+		pkg := companionPackage(rawPath, emissions)
 
-		for _, emission := range emissions {
-			if _, ok := emission.artifacts[rawPath]; ok && (len(owner) == 0 || emission.goos == owner) {
+		for pass := 0; pass < 2 && len(source) == 0; pass++ {
+			for i, emission := range emissions {
+				if _, ok := emission.artifacts[rawPath]; !ok || (len(owner) != 0 && emission.goos != owner) {
+					continue
+				}
+
+				if pass == 0 && !converted[i][pkg] {
+					continue
+				}
+
 				source = filepath.Join(emission.root, "core", filepath.FromSlash(rawPath))
 				break
 			}
@@ -685,6 +710,35 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 	}
 
 	return sortedKeys(conditioned), residual, written, nil
+}
+
+// convertedPackages returns the packages (logical `<pkg>` paths) a target CONVERTED this run: those
+// with at least one `.cs` it emitted. A census stage writes every source whether or not its bytes
+// changed (alwaysWriteSources), so for `.cs` emission is exact, unlike for a companion, which the
+// converter may leave untouched when it would rewrite the same bytes. A package the target does not
+// build — or a hand-owned one, which the conversion never writes as a plain `.cs` — is absent.
+func convertedPackages(emission *platformEmission) map[string]bool {
+	packages := map[string]bool{}
+
+	for rawPath, state := range emission.artifacts {
+		if state.emitted && filepath.Ext(rawPath) == ".cs" {
+			packages[path.Dir(state.logicalPath(rawPath))] = true
+		}
+	}
+
+	return packages
+}
+
+// companionPackage returns the logical package a companion belongs to, read through the first
+// emission that holds it so a per-GOOS folder is folded exactly as convertedPackages folds it.
+func companionPackage(rawPath string, emissions []*platformEmission) string {
+	for _, emission := range emissions {
+		if state, ok := emission.artifacts[rawPath]; ok {
+			return path.Dir(state.logicalPath(rawPath))
+		}
+	}
+
+	return path.Dir(rawPath)
 }
 
 // perGOOSReviewSiblingOwner returns the GOOS whose folder a `.cs.auto` review sibling sits in, or ""
