@@ -26813,4 +26813,25 @@ reads as the known boundary, not a new finding. COORD 2026-10-12: record, do not
 
 — G
 
+## 2026-10-15 — R: a package-level `sync.WaitGroup` is bubble-associated here, where Go leaves it Unbubbled — KNOWN DIFFERENCE for the Go 1.26 hop, POST-HOP SEAT OWED (G) — OPEN
+
+**The difference.** Go answers Unbubbled for a WaitGroup that is not in a heap span (a package-level variable,
+`runtime/synctest.go:383-386`). Converted code boxes a package-level variable exactly like a heap value (a
+`StandardBox<T>` behind the `Ꮡname` field), so golib cannot tell them apart. A global WaitGroup used inside a
+synctest bubble is therefore associated with that bubble here. This shows up in two places: Go's two fatals ("called
+from multiple synctest bubbles", "from inside and outside synctest bubble") fire for a global, and a global's `Wait`
+counts as durably blocking.
+
+**Ruled for the hop (COORD 2026-10-15, owner OK the same day):** option (a). The difference is stated, and an
+expected-difference test, `GoLeavesAPackageLevelWaitGroupUnbubbled_HereItIsAssociated`, rides R's G-W1 seat. Option
+(c), a converter special case for `sync.WaitGroup` globals only, is refused.
+
+**Owed after the hop (G, design-measure first):** option (b), a package-level box marker (for example a
+`StaticBox<T>` subtype, or a flag on `StandardBox`), so golib can answer Go's non-heap questions. First measure which
+golib or runtime questions besides synctest key on heap-ness, and the CNR footprint, since it moves every global's
+emission corpus-wide. When it lands it retires the expected-difference test above, and this row closes. Owner,
+2026-10-15: do the WaitGroup behavior sync after the 1.26 hop, "as long as we don't forget".
+
+— R (finding), COORD (ruling)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
