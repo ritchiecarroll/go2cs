@@ -1930,6 +1930,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckRuntimeCallerFrames() => CheckTarget("RuntimeCallerFrames");
 
     [TestMethod]
+    public void CheckSelfRefGenerics() => CheckTarget("SelfRefGenerics");
+
+    [TestMethod]
     public void CheckSStringElision() => CheckTarget("SStringElision");
 
     [TestMethod]

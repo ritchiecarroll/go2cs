@@ -312,6 +312,19 @@ interface, and embedded-interface instantiations of a method-set-constrained gen
 constraint method on the parameter and widening walkList-style, values vs Go; clears go/ast's
 CS0308, the go/* toolchain gate.)
 
+A **value** instantiation of a **generic** method-set constraint — `Sum[A Adder[A]]` at `vec` —
+satisfies `where A : Adder<A>` only as `vec : Adder<vec>`, a base go2cs-gen declares from a
+`[assembly: GoImplement<vec, Adder<vec>>]` record. A non-generic constraint (`where T : Namer`) gets
+its record where the argument converts to the type parameter, but that site sees the constraint over
+the callee's own parameter, `Adder[A]`, which no concrete type implements, so the generic form was
+never recorded and every such instantiation was CS0315. `recordClosedConstraintImplementation`, on
+the per-instantiation path every form reaches (`constraintProxyFor`), closes the constraint over the
+argument and records it, once per pair: rendering a self-referential closed form re-enters the same
+path, so the once-guard is also what ends that recursion. A constraint naming a SECOND type parameter
+(`Linker[T, N]` at `N`) is left alone, since only the instantiation knows the other argument. The gap
+dates from Go generics' arrival (`Adder[A any]` failed identically), and it is the shape Go 1.26's
+self-referential constraints are written in. (Guarded by `SelfRefGenerics`, output-compared vs Go.)
+
 ## A SELF-REFERENTIAL generic method-set constraint uses a box-wrapping proxy as the type argument
 
 The widen-to-the-interface escape above works only when the constraint interface is **non-generic**
@@ -410,6 +423,18 @@ deep and another two, recorded from two instantiation sites to exercise the per-
 output-compared vs `go run`. Reverting the walk reproduces CS0535 on `Middle.Size()` and `Base.Name()`
 — both levels. Embedding the constrained generic and greening the whole crypto-curve family is the
 next subsection.)
+
+6. **An interface that constrains ITSELF takes the proxy as the record's placeholder.** Go 1.26 lets
+   a generic type name itself in its own type-parameter list — `type GraphNode[N GraphNode[N]]
+   interface { Next() N; Owner() *Graph[N] }`, and `type Graph[N GraphNode[N]] struct`, a cycle that
+   was "invalid recursive type" before. The interface declaration carries `where N : GraphNode<N>`,
+   and C# enforces it on an attribute's type arguments too, so the element placeholder in
+   `GoImplement<gnode, GraphNode<gnode>>` was CS0315 on the record itself. For such an interface
+   (`interfaceConstrainsItself`) the placeholder is the proxy, `GraphNode<gnodeжGraphNode>`: it
+   implements the interface over itself, so it satisfies the bound by construction, and the generator
+   reads only the interface's open definition. Every other record keeps the element. The proxy is
+   generated into the class that carries the record, so the placeholder is named bare. (Guarded by
+   `SelfRefGenerics`: the cycle at a pointer instantiation, values vs Go.)
 
 ### A func LITERAL at a proxied delegate position declares its parameters AT the proxy
 

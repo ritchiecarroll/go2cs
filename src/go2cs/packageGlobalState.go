@@ -240,10 +240,11 @@ var promotedInterfaceImplementations map[string]hashset.HashSet[string]
 // generic type instantiated with a pointer type whose type parameter carries a self-referential
 // generic method-set interface constraint (nistCurve's `Point nistPoint[Point]` at `*P224Point`).
 // The box ж<P224Point> can't nominally implement nistPoint<…>, so a proxy stands in as the type
-// argument. Keyed "elementFullName|interfaceFullName" → {elementFullName, interfaceFullName}; each
-// becomes a `[assembly: GoImplement<element, iface<element>>(ConstraintProxy = true)]` record that
-// drives ImplementGenerator's EmitConstraintProxy. See constraintProxyArg.
-var constraintProxies map[string][2]string
+// argument. Keyed "elementFullName|interfaceFullName" → {elementFullName, interfaceFullName,
+// placeholder}; each becomes a `[assembly: GoImplement<element, iface<placeholder>>(ConstraintProxy =
+// true)]` record that drives ImplementGenerator's EmitConstraintProxy. The placeholder is the element,
+// or the proxy itself for an interface that constrains itself (see constraintProxyFor).
+var constraintProxies map[string][3]string
 
 // nominalProductionConstraints collects the (production type argument, test-declared constraint
 // interface) pairs a WHITE-BOX REFERENCE test conversion has emitted a nominal C# `where` clause

@@ -938,6 +938,7 @@
     <Project Path="tests/Behavioral/RelationalPatternGuard/RelationalPatternGuard.csproj" />
     <Project Path="tests/Behavioral/RingPointerMethods/RingPointerMethods.csproj" />
     <Project Path="tests/Behavioral/RuntimeCallerFrames/RuntimeCallerFrames.csproj" />
+    <Project Path="tests/Behavioral/SelfRefGenerics/SelfRefGenerics.csproj" />
     <Project Path="tests/Behavioral/SStringElision/SStringElision.csproj" />
     <Project Path="tests/Behavioral/SStringTwinPilot/SStringTwinPilot.csproj" />
     <Project Path="tests/Behavioral/SamePackageImplementNoWitness/SamePackageImplementNoWitness.csproj" />

@@ -618,7 +618,8 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 		// Add self-referential constraint proxies (nistCurve[*P224Point]'s Point). Each is a
 		// `GoImplement<element, iface<element>>(ConstraintProxy = true)` — the interface's own
 		// type argument is a PLACEHOLDER (the generator closes it over the emitted proxy itself),
-		// so the element doubles as the dummy. See constraintProxyArg / EmitConstraintProxy.
+		// so the element doubles as the dummy — except where the interface constrains itself (see
+		// constraintProxyFor). See constraintProxyArg / EmitConstraintProxy.
 		for _, proxy := range constraintProxies {
 			elementRef := qualifyLocalTypeRef(proxy[0])
 			interfaceRef := qualifyLocalTypeRef(proxy[1])
@@ -638,7 +639,15 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 				continue
 			}
 
-			lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s<%s>>(ConstraintProxy = true)]", elementRef, interfaceRef, elementRef))
+			// The placeholder is the element, or — for an interface that constrains itself — the proxy,
+			// which is generated into the class carrying this record and so is named bare.
+			placeholderRef := elementRef
+
+			if proxy[2] != proxy[0] {
+				placeholderRef = proxy[2]
+			}
+
+			lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s<%s>>(ConstraintProxy = true)]", elementRef, interfaceRef, placeholderRef))
 		}
 
 		// Sort lines

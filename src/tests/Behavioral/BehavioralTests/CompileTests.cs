@@ -1930,6 +1930,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckRuntimeCallerFrames() => CheckTarget("RuntimeCallerFrames");
 
     [TestMethod]
+    public void CheckSelfRefGenerics() => CheckTarget("SelfRefGenerics");
+
+    [TestMethod]
     public void CheckSStringElision() => CheckTarget("SStringElision");
 
     [TestMethod]
