@@ -3,7 +3,7 @@
     Guards handown-census.ps1's hand-own -> upstream mapping (src/handown-upstream.ps1) on FABRICATED GOROOTs.
 
 .DESCRIPTION
-    Builds two temporary GOROOTs, From and To, and checks Resolve-HandOwnUpstream on six layouts:
+    Builds two temporary GOROOTs, From and To, and checks Resolve-HandOwnUpstream on eight layouts:
       plain       pkg/x_impl.cs, upstream pkg/x.go in both                     -> pkg/x.go both, not relocated
       l3          pkg/linux/x_impl.cs, upstream pkg/x.go in both (layout L3)   -> pkg/x.go both, not relocated
       moved       pkg/linux/x_impl.cs, pkg/x.go at From, pkg/linux/x.go at To  -> RELOCATED pkg/x.go -> pkg/linux/x.go
@@ -13,6 +13,10 @@
                   (a real package named after a GOOS, read where the L3 fold finds nothing)
       vanished    pkg/linux/x_impl.cs, pkg/x.go at From only, nothing at To    -> pkg/x.go both, not relocated
                   (a true deletion stays a deletion)
+      double-goos pkg/linux/linux/x_impl.cs, pkg/x.go at From, pkg/linux/x.go at To -> RELOCATED pkg/x.go -> pkg/linux/x.go
+                  (Go 1.26's internal/runtime/syscall/linux hand-own after H5's L3 fold put it two GOOS folders deep)
+      double-real pkg/linux/linux/x_impl.cs, pkg/linux/x.go in both              -> pkg/linux/x.go both, not relocated
+                  (the control: one fold finds the real package at both releases, so nothing folds further)
 
     Exit 0 clean, 1 on any violation. Writes only under the host's temp directory.
 #>
@@ -50,6 +54,8 @@ try {
     Plant $from 'back/linux/x.go';   Plant $to 'back/x.go'
     Plant $from 'real/linux/x.go';   Plant $to 'real/linux/x.go'
     Plant $from 'gone/x.go'
+    Plant $from 'deep/x.go';         Plant $to 'deep/linux/x.go'
+    Plant $from 'deepr/linux/x.go';  Plant $to 'deepr/linux/x.go'
 
     Expect 'plain'      'plain\x_impl.cs'       'plain/x.go'       'plain/x.go'       $false
     Expect 'l3'         'l3\linux\x_impl.cs'    'l3/x.go'          'l3/x.go'          $false
@@ -57,6 +63,8 @@ try {
     Expect 'moved-back' 'back\linux\x_impl.cs'  'back/linux/x.go'  'back/x.go'        $true
     Expect 'real-goos'  'real\linux\x_impl.cs'  'real/linux/x.go'  'real/linux/x.go'  $false
     Expect 'vanished'   'gone\linux\x_impl.cs'  'gone/x.go'        'gone/x.go'        $false
+    Expect 'double-goos' 'deep\linux\linux\x_impl.cs'  'deep/x.go'         'deep/linux/x.go'  $true
+    Expect 'double-real' 'deepr\linux\linux\x_impl.cs' 'deepr/linux/x.go'  'deepr/linux/x.go' $false
 }
 finally {
     Remove-Item -Recurse -Force -LiteralPath $work -ErrorAction SilentlyContinue
