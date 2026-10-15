@@ -372,7 +372,7 @@ internal static ж<eface> efaceOf(ж<any> Ꮡep) {
     // current in-progress goroutine profile
     internal goroutineProfileStateHolder goroutineProfiled;
     internal ж<coro> coroarg; // argument during coroutine transfers
-    internal ж<synctestGroup> syncGroup;
+    internal ж<synctestBubble> bubble;
     // Per-G tracer state.
     internal gTraceState trace;
 // Per-G GC state
