@@ -1899,6 +1899,27 @@ go1.24.13 … || exit 3`, run from a no-module directory.
      2c6aa2259: the golib arm, 338 predicted against 343 measured. The i7's windows second read at COORD fe23ab855 is the
      second of the two windows boxes. COORD's rung-7 close: a065b1bd9. -->
 
+*(Noted 2026-10-15, the Go 1.26 hop's H7, ruled COORD: **the ladder of record is the stub census's own Release build,
+plus one Debug build per flavour at H7's close.**
+- `src/check-stub-census.ps1 -Flavors <fl> -Predicted docs/phase4/data/stub-census-h0/predicted-h5.tsv` purges
+  `Generated/` and builds `go2cs-stdlib.slnx -c Release -p:GoTargetOS=<fl> --no-incremental -m:4
+  -p:UseSharedCompilation=false`. That one build per flavour per pass is scored in this section's units.
+- The census REFUSES (exit 2) on any build error. During the ladder, exit 2 is expected and only the build reading
+  is reported. The census VERDICT (exit 0 every appearance predicted, 1 FINDING) is read when that flavour first
+  reaches 0 errors. Never weaken the refusal.
+- At H7's close, one Debug build per flavour confirms the record (an `#if DEBUG` divergence surfaces only there).
+**Scoring that log:**
+- it is UTF-16LE, written by PowerShell's `*>`. Decode it first and prove the decode: 0 NULs, and a known line
+  present. Scored raw, i9's first pass read 0 errors against 26.
+- Turn backslashes into `/` with `tr '\134' '/'`, not a sed escape; the shell layer collapses `\\`.
+- Key a site on any non-space run ending `.cs(l,c): error CSnnnn`, after cutting the trailing `[project.csproj]`.
+  Generated file names carry non-ASCII (`Δ`), and an ASCII-only key mis-split ROOTS/CASCADE 10/3 against 4/9.
+  A greedy `.*/core/` reaches into that bracket.
+- **A `Generated/` site whose cause is its own** (a duplicate member, as at pass 2's
+  `NoInliningPartialGenerator/stubs_impl.noinline.g.cs` CS0111) is reported as a ROOT beside the CASCADE unit,
+  which keeps its definition.
+- ASM reads `bin/Release`.)*
+
 
 ### H7a — The master fold **GATE**
 
