@@ -21,12 +21,15 @@
 // Hand-owned: registered in manualConversionFuncs["runtime"]["schedStatsAggregate.compute"], so a -stdlib
 // reconvert emits the declaration as a placeholder and never regenerates the body over this file.
 
-using System.Threading;
-using atomic = go.@internal.runtime.atomic_package;
-
 [module: go.GoManualConversion]
 
 namespace go;
+
+// The converted body's own usings (metrics.cs), so it binds as it does there.
+using System.Threading;
+using atomic = @internal.runtime.atomic_package;
+using @internal;
+using @internal.runtime;
 
 partial class runtime_package
 {
@@ -67,12 +70,14 @@ partial class runtime_package
                 // is running, but it will be accurate.
             }
 
+            ref var pp = ref Δp.Value;
+
             while (true) {
                 var h = atomic.Load(Δp.of(runtime_package.Δp.Ꮡrunqhead));
                 var t = atomic.Load(Δp.of(runtime_package.Δp.Ꮡrunqtail));
                 // Go: `next := atomic.Loaduintptr((*uintptr)(&p.runnext))`, read only for `next != 0`. The
                 // managed reference, read with the same acquire, answers that without a numeric view.
-                var runnextSet = Volatile.Read(ref (~Δp).runnext.m_ref) is not null;
+                var runnextSet = Volatile.Read(ref pp.runnext.m_ref) is not null;
                 var runnable = (int32)(t - h);
                 if (atomic.Load(Δp.of(runtime_package.Δp.Ꮡrunqhead)) != h || runnable < 0) {
                     continue;
