@@ -93,4 +93,41 @@ func TestDottedDigitPathSegmentIsOneNamespaceLevel(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(moduleOut, "ent", "v1.0.0")); err != nil {
 		t.Fatalf("the versioned package's output directory moved: %v", err)
 	}
+
+	// ONE spelling everywhere the package is named as C#: every emitted source of the module (both
+	// packages' code and package_info, the importer's forcing hook and GoPackage attribute included)
+	// names it `v1_0_0` outside string literals. The Go import path stays `v1.0.0` INSIDE them
+	// (ImportPath, GoPositionMap), which is Go's identity and correct.
+	stringLiteral := regexp.MustCompile(`"(?:[^"\\]|\\.)*"`)
+	scanned := 0
+
+	err := filepath.WalkDir(moduleOut, func(path string, entry os.DirEntry, walkErr error) error {
+		if walkErr != nil || entry.IsDir() || !strings.HasSuffix(path, ".cs") {
+			return walkErr
+		}
+
+		data, readErr := os.ReadFile(path)
+
+		if readErr != nil {
+			return readErr
+		}
+
+		scanned++
+
+		for number, line := range strings.Split(string(data), "\n") {
+			if code := stringLiteral.ReplaceAllString(line, `""`); strings.Contains(code, "v1.0.0") {
+				t.Errorf("%s:%d names the package by its dotted path outside a string: %s", filepath.Base(path), number+1, strings.TrimSpace(line))
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if scanned < 4 {
+		t.Fatalf("scanned %d emitted sources: the fixture no longer emits both packages and their package_info", scanned)
+	}
 }
