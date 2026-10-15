@@ -104,8 +104,24 @@
   <Folder Name="/core/internal/runtime/atomic/">
     <Project Path="core/internal/runtime/atomic/internal.runtime.atomic.csproj" />
   </Folder>
+  <Folder Name="/core/internal/runtime/cgroup/">
+    <Project Path="core/internal/runtime/cgroup/internal.runtime.cgroup.csproj" />
+  </Folder>
   <Folder Name="/core/internal/runtime/exithook/">
     <Project Path="core/internal/runtime/exithook/internal.runtime.exithook.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/runtime/gc/">
+    <Project Path="core/internal/runtime/gc/internal.runtime.gc.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/runtime/gc/scan/">
+    <Project Path="core/internal/runtime/gc/scan/internal.runtime.gc.scan.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/runtime/maps/">
+    <Project Path="core/internal/runtime/maps/internal.runtime.maps.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/runtime/pprof/" />
+  <Folder Name="/core/internal/runtime/pprof/label/">
+    <Project Path="core/internal/runtime/pprof/label/internal.runtime.pprof.label.csproj" />
   </Folder>
   <Folder Name="/core/internal/runtime/syscall/" />
   <Folder Name="/core/internal/runtime/syscall/linux/">
@@ -113,6 +129,9 @@
   </Folder>
   <Folder Name="/core/internal/runtime/syscall/windows/">
     <Project Path="core/internal/runtime/syscall/windows/internal.runtime.syscall.windows.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/strconv/">
+    <Project Path="core/internal/strconv/internal.strconv.csproj" />
   </Folder>
   <Folder Name="/core/internal/stringslite/">
     <Project Path="core/internal/stringslite/internal.stringslite.csproj" />
@@ -135,6 +154,10 @@
   </Folder>
   <Folder Name="/core/internal/testlog/">
     <Project Path="core/internal/testlog/internal.testlog.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/trace/" />
+  <Folder Name="/core/internal/trace/tracev2/">
+    <Project Path="core/internal/trace/tracev2/internal.trace.tracev2.csproj" />
   </Folder>
   <Folder Name="/core/internal/unsafeheader/">
     <Project Path="core/internal/unsafeheader/internal.unsafeheader.csproj" />
