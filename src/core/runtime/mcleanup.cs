@@ -52,6 +52,11 @@
 
 namespace go;
 
+using atomic = @internal.runtime.atomic_package;
+using cpu = @internal.cpu_package;
+using sys = @internal.runtime.sys_package;
+using @unsafe = unsafe_package;
+
 partial class runtime_package {
 
 // AddCleanup attaches a cleanup function to ptr. Some time after ptr is no longer
@@ -328,7 +333,17 @@ private sealed class GoCleanupSentinel
 
         // HAND OFF, never invoke here -- running a Go body on the CLR finalizer thread is the
         // deadlock GoFinalizerQueue exists to avoid, and it is no less a deadlock for a cleanup.
-        GoFinalizerQueue.EnqueueCleanup(body);
+        // readQueueStats' two counts (the cleanup-queue surface below): queued when the cleanup is handed
+        // to the runner, executed once its body has run.
+        global::System.Threading.Interlocked.Increment(ref s_cleanupsQueued);
+        GoFinalizerQueue.EnqueueCleanup(() => {
+            try {
+                body();
+            }
+            finally {
+                global::System.Threading.Interlocked.Increment(ref s_cleanupsExecuted);
+            }
+        });
     }
 
     // ---- the id table, which exists ONLY so Cleanup.Stop can find a sentinel it must not hold ----
@@ -408,6 +423,124 @@ private sealed class GoCleanupSentinel
                 s_byID.TryRemove(entry.Key, out global::System.WeakReference<GoCleanupSentinel>? _);
         }
     }
+}
+
+// =====================================================================================================
+// THE GO 1.25 CLEANUP-QUEUE SURFACE (option A, COORD ruling 2026-10-14; PREREAD-h6-runtime-go126 §6.1)
+// =====================================================================================================
+//
+// Go 1.25 moved cleanups onto their own queue: gcCleanups, a cleanupQueue of cleanupBlock lists that
+// up to max(GOMAXPROCS/4, 1) cleanup goroutines drain, fed at sweep from the mspan specials. That
+// queue is not private to mcleanup.go. Eight converted runtime files reach into it at go1.26.9, so
+// the runtime does not compile until it is declared. This file keeps A11's sentinel mechanism (above)
+// and divergence 1 (cleanups run sequentially on the fing analogue). It declares Go's types as the
+// converter emits them from go1.26.9's mcleanup.go, and answers each member the converted code calls
+// with a managed shim:
+//
+//   member                 site (go1.26.9)                         answer here
+//   ---------------------  --------------------------------------  ----------------------------------------
+//   lock                   mgc.go gcinit: lockInit(&gcCleanups.     a real mutex field, initialised and never
+//                          lock, lockRankCleanupQueue)              contended (nothing below takes it)
+//   all                    mgcmark.go markroot, fixedRootCleanups:  stays nil (no cleanupBlock exists), so
+//                          walks gcCleanups.all as cleanupBlock     the root loop runs zero times
+//   cleanupBlock,          mgcmark.go (the same loop: alllink, n,   declared as emitted; nothing allocates
+//   cleanupBlockPtrMask    cleanups[0], cleanupBlockPtrMask)        one
+//   cleanupFn,             mheap.go specialCleanup.cleanup and      declared as emitted; specialCleanup
+//   cleanupFnPtrMask       addCleanup; mgcmark.go markrootSpans     records are never made here
+//   enqueue(cleanupFn)     mheap.go freeSpecial, _KindSpecial-      UNREACHABLE: no mspan cleanup special
+//                          Cleanup arm                              exists here, so reaching it throws by name
+//   flush()                mgcsweep.go: the last sweeper            a no-op: no P holds a local block
+//   needsWake(), wake()    proc.go findRunnable                     false, and a no-op
+//   running                mprof.go goroutineProfileWithLabels      stays 0: a running cleanup is on the fing
+//                          (counts cleanup goroutines)              runner, not a cleanup goroutine
+//   queued                 proc.go destroy: queued += pp.           the field, as Go's; p.cleanupsQueued is
+//                          cleanupsQueued (runtime2.cs)             never written here, so it adds 0
+//   readQueueStats()       metrics.go /gc/cleanups/*; mgc.go        REAL counts: the managed path counts
+//                          gcMarkTermination                        queued and executed (s_cleanups* below)
+//   blockUntilEmpty(t)     export_test.go BlockUntilEmptyCleanup-   the finalizer-queue wait, the one the
+//                          Queue (mcleanup_test, metrics_test)      two pushed bodies above already use
+//
+// Out of scope here, and why: cleanupBlock's own methods (enqueue, full, empty, take), cleanupQueue's
+// addWork, tryTakeWork, dequeue, needG, createGs, beginRunningCleanups and endRunningCleanups,
+// runCleanups, and p.cleanups are all reached only from inside go1.26.9's mcleanup.go, which this file
+// replaces whole. Option B, porting the queue for Go's concurrency, is a post-hop design item.
+
+internal static UntypedInt cleanupBlockSize => 512;
+
+[GoType] internal partial struct cleanupBlock {
+    internal partial ref cleanupBlockHeader cleanupBlockHeader { get; }
+    internal array<cleanupFn> cleanups = new((uintptr)((uintptr)cleanupBlockSize - /* unsafe.Sizeof(cleanupBlockHeader{}) */ (uintptr)32) / /* unsafe.Sizeof(cleanupFn{}) */ (uintptr)24);
+}
+
+internal static ж<array<uint8>> ᏑcleanupFnPtrMask = new StandardBox<array<uint8>>(new uint8[]{0b111}.array());
+internal static ref array<uint8> cleanupFnPtrMask => ref ᏑcleanupFnPtrMask.Value;
+
+[GoType] internal partial struct cleanupFn {
+    internal Action<ж<funcval>, @unsafe.Pointer> call;
+    internal ж<funcval> fn;
+    internal @unsafe.Pointer arg;
+}
+
+internal static ж<array<byte>> ᏑcleanupBlockPtrMask = new StandardBox<array<byte>>(new array<byte>(8));
+internal static ref array<byte> cleanupBlockPtrMask => ref ᏑcleanupBlockPtrMask.Value;
+
+[GoType] internal partial struct cleanupBlockHeader {
+    internal sys.NotInHeap _;
+    internal partial ref lfnode lfnode { get; }
+    internal ж<cleanupBlock> alllink;
+    internal uint32 n;
+}
+
+[GoType] internal partial struct cleanupQueue {
+    internal lfstack full;
+    internal atomic.Uint64 workUnits;
+    internal array<byte> _ = new((uintptr)((uintptr)cpu.CacheLinePadSize - /* unsafe.Sizeof(lfstack(0)) */ (uintptr)8) - /* unsafe.Sizeof(atomic.Uint64{}) */ (uintptr)8);
+    internal lfstack free;
+    internal atomic.Bool flushed;
+    internal array<byte> __ = new((uintptr)((uintptr)cpu.CacheLinePadSize - /* unsafe.Sizeof(lfstack(0)) */ (uintptr)8) - 1);
+    internal atomic.UnsafePointer all;
+    internal array<byte> ___ = new((uintptr)cpu.CacheLinePadSize - /* unsafe.Sizeof(atomic.UnsafePointer{}) */ (uintptr)8);
+    internal mutex @lock;
+    internal gList sleeping;
+    internal atomic.Uint32 asleep;
+    internal atomic.Uint32 running;
+    internal atomic.Uint32 ng;
+    internal atomic.Uint32 needg;
+    internal uint64 queued;
+    internal atomic.Uint64 executed;
+}
+
+internal static ж<cleanupQueue> ᏑgcCleanups = new StandardBox<cleanupQueue>(new cleanupQueue());
+internal static ref cleanupQueue gcCleanups => ref ᏑgcCleanups.Value;
+
+// The managed path's two counts, read by readQueueStats. Incremented by the sentinel's finalizer when it
+// hands a cleanup to GoFinalizerQueue, and after the cleanup body returns.
+private static long s_cleanupsQueued;
+private static long s_cleanupsExecuted;
+
+internal static void enqueue(this ж<cleanupQueue> Ꮡq, cleanupFn c) {
+    @throw("runtime: gcCleanups.enqueue reached: the managed runtime makes no mspan cleanup specials (mcleanup.cs runs cleanups through GoFinalizerQueue)"u8);
+}
+
+internal static void flush(this ж<cleanupQueue> Ꮡq) {
+}
+
+internal static bool needsWake(this ж<cleanupQueue> Ꮡq) {
+    return false;
+}
+
+internal static void wake(this ж<cleanupQueue> Ꮡq) {
+}
+
+internal static (uint64 queued, uint64 executed) readQueueStats(this ж<cleanupQueue> Ꮡq) {
+    ref var q = ref Ꮡq.DerefOrNull();
+    uint64 queued = q.queued + (uint64)global::System.Threading.Interlocked.Read(ref s_cleanupsQueued);
+    uint64 executed = (uint64)global::System.Threading.Interlocked.Read(ref s_cleanupsExecuted);
+    return (queued, executed);
+}
+
+internal static bool blockUntilEmpty(this ж<cleanupQueue> Ꮡq, int64 timeout) {
+    return blockUntilEmptyFinalizerQueue(timeout);
 }
 
 } // end runtime_package
