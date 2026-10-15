@@ -48,8 +48,6 @@ using static go.@internal.routebsd_package;
 [assembly: GoImplement<InterfaceMulticastAddrMessage, Message>(Pointer = true)]
 [assembly: GoImplement<InterfaceMulticastAddrMessage, Message>]
 [assembly: GoImplement<LinkAddr, Addr>(Pointer = true)]
-[assembly: GoImplement<binaryBigEndian, binaryByteOrder>]
-[assembly: GoImplement<binaryLittleEndian, binaryByteOrder>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -70,7 +68,7 @@ using static go.@internal.routebsd_package;
 [assembly: go.GoPositionMap("internal/routebsd/interface_multicast.go", "interface_multicast.cs", "AAgSgoKUgoKU7oKCgpQ=", "", "", "17=Uint32/1/1/3,Uint16/1/1/4")]
 [assembly: go.GoPositionMap("internal/routebsd/message.go", "message.cs", "AA0gooKSgoKCgpSClIKClICClIKClIKUtriClA==")]
 [assembly: go.GoPositionMap("internal/routebsd/route.go", "route.cs", "AA8kgoKCnsKCgoKasoKmvrKCgpSCgpQ=")]
-[assembly: go.GoPositionMap("internal/routebsd/sys.go", "sys.cs", "ABAqgpKCgpSmgqaCgpQ=")]
+[assembly: go.GoPositionMap("internal/routebsd/sys.go", "sys.cs", "ABJEgoKU")]
 [assembly: go.GoPositionMap("internal/routebsd/sys_darwin.go", "sys_darwin.cs", "AAkUktyCgpKCkoKSgpKCpA==")]
 // </GoSourcePositionMaps>
 
