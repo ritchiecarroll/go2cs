@@ -80,7 +80,7 @@ name of Go's `out`.
 With `-comments`, from the converted standard library, the blank line stays above the comment that opens
 the next group:
 
-<!-- source: GOROOT/src/strconv/ftoa.go:405-413 -->
+<!-- source: GOROOT/src/internal/strconv/ftoa.go:429-437 -->
 ```go
 		}
 	}
@@ -93,7 +93,7 @@ the next group:
 	}
 ```
 
-<!-- source: src/core/strconv/ftoa.cs:456-464 -->
+<!-- source: src/core/internal/strconv/ftoa.cs:473-481 -->
 ```csharp
         }
     }
@@ -198,7 +198,7 @@ No blank line where Go has none:
 
 A blank line where Go has one:
 
-<!-- source: GOROOT/src/strconv/ftoa.go:428-432 -->
+<!-- source: GOROOT/src/internal/strconv/ftoa.go:452-456 -->
 ```go
 	default:
 		dst = append(dst, byte(exp/100)+'0', byte(exp/10)%10+'0', byte(exp%10)+'0')
@@ -207,7 +207,7 @@ A blank line where Go has one:
 	return dst
 ```
 
-<!-- source: src/core/strconv/ftoa.cs:483-488 -->
+<!-- source: src/core/internal/strconv/ftoa.cs:500-505 -->
 ```csharp
     default: {
         dst = append(dst, (byte)((byte)(exp / 100) + (rune)'0'), (byte)((byte)(exp / 10) % 10 + (rune)'0'), (byte)((byte)(exp % 10) + (rune)'0'));
@@ -310,7 +310,7 @@ The same file shows the group rule above: the blank line Go has before `ErrTrail
 **Rule.** The doc comment of a named numeric, slice, map, channel, pointer or function type is written above
 its C# declaration, as a struct's is.
 
-<!-- source: GOROOT/src/sort/sort.go:118-121 -->
+<!-- source: GOROOT/src/sort/sort.go:120-123 -->
 ```go
 // Convenience types for common cases
 
@@ -318,7 +318,7 @@ its C# declaration, as a struct's is.
 type IntSlice []int
 ```
 
-<!-- source: src/core/sort/sort.cs:114-117 -->
+<!-- source: src/core/sort/sort.cs:116-119 -->
 ```csharp
 // Convenience types for common cases
 
@@ -391,14 +391,14 @@ its `global using` line then has none.
 **Rule.** A comment written on the same source line as a statement's end is written after one space on that
 statement's last emitted C# line.
 
-<!-- source: GOROOT/src/strings/strings.go:1142-1144 -->
+<!-- source: GOROOT/src/strings/strings.go:1139-1141 -->
 ```go
 	if old == new || n == 0 {
 		return s // avoid allocation
 	}
 ```
 
-<!-- source: src/core/strings/strings.cs:1181-1183 -->
+<!-- source: src/core/strings/strings.cs:1177-1179 -->
 ```csharp
     if (old == @new || n == 0) {
         return s; // avoid allocation
@@ -495,7 +495,7 @@ hold in every lowered form: a C# `switch`, the `if`/`else` chain a switch can be
 
 Above a label:
 
-<!-- source: GOROOT/src/strconv/atof.go:437-443 -->
+<!-- source: GOROOT/src/internal/strconv/atof.go:434-440 -->
 ```go
 	switch {
 	case exp == 0:
@@ -506,7 +506,7 @@ Above a label:
 	case exp > 0 && exp <= 15+22: // int * 10^k
 ```
 
-<!-- source: src/core/strconv/atof.cs:486-493 -->
+<!-- source: src/core/internal/strconv/atof.cs:487-494 -->
 ```csharp
     switch (ᐧ) {
     case {} when exp is 0: {
@@ -557,7 +557,7 @@ that block.
 
 An empty block:
 
-<!-- source: GOROOT/src/encoding/xml/xml.go:1123-1129 -->
+<!-- source: GOROOT/src/encoding/xml/xml.go:1130-1136 -->
 ```go
 		if b == '\r' {
 			d.buf.WriteByte('\n')
@@ -568,7 +568,7 @@ An empty block:
 		}
 ```
 
-<!-- source: src/core/encoding/xml/xml.cs:1234-1241 -->
+<!-- source: src/core/encoding/xml/xml.cs:1241-1248 -->
 ```csharp
         if (b == (rune)'\r'){
             d.buf.WriteByte((rune)'\n');
@@ -625,7 +625,7 @@ its own opening bracket.
 
 Trailing an element:
 
-<!-- source: GOROOT/src/time/format.go:1605-1609 -->
+<!-- source: GOROOT/src/time/format.go:1615-1619 -->
 ```go
 var unitMap = map[string]uint64{
 	"ns": uint64(Nanosecond),
@@ -634,7 +634,7 @@ var unitMap = map[string]uint64{
 	"μs": uint64(Microsecond), // U+03BC = Greek letter mu
 ```
 
-<!-- source: src/core/time/format.cs:1755-1759 -->
+<!-- source: src/core/time/format.cs:1765-1769 -->
 ```csharp
 internal static map<@string, uint64> unitMap = new map<@string, uint64>{
     ["ns"u8] = (uint64)(int64)ΔNanosecond,
@@ -701,12 +701,12 @@ internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
 
 `appendꓸꓸꓸ(x, y)` is Go's `append(x, y...)`. Inline between call arguments:
 
-<!-- source: GOROOT/src/crypto/tls/handshake_client.go:865-865 -->
+<!-- source: GOROOT/src/crypto/tls/handshake_client.go:864 -->
 ```go
 		clientCipher = hs.suite.cipher(clientKey, clientIV, false /* not for reading */)
 ```
 
-<!-- source: src/core/crypto/tls/handshake_client.cs:987-987 -->
+<!-- source: src/core/crypto/tls/handshake_client.cs:983 -->
 ```csharp
         clientCipher = (~hs.suite).cipher(clientKey, clientIV, false /* not for reading */);
 ```

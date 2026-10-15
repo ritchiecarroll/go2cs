@@ -1341,7 +1341,7 @@ func TestExt(t *testing.T) {
 	}
 }
 ```
-<!-- source: src/core/path/path_test.cs:4-255 -->
+<!-- source: src/core/path/path_test.cs:4-263 -->
 ```csharp
 namespace go;
 
@@ -1415,7 +1415,7 @@ func StringFind(pattern, text string) int {
 	return makeStringFinder(pattern).next(text)
 }
 ```
-<!-- source: src/core/strings/export_test.cs:4-59 -->
+<!-- source: src/core/strings/export_test.cs:4-60 -->
 ```csharp
 namespace go;
 
@@ -1442,7 +1442,7 @@ package strings_test
 …
 		got := StringFind(tc.pat, tc.text)
 ```
-<!-- source: src/core/strings/search_test.cs:4-37 -->
+<!-- source: src/core/strings/search_test.cs:4-38 -->
 ```csharp
 namespace go;
 
@@ -1731,7 +1731,7 @@ const (
 	flushBuffer        = 1 << maxWidth
 )
 ```
-<!-- source: src/core/compress/lzw/reader.cs:32-34 -->
+<!-- source: src/core/compress/lzw/reader.cs:36-38 -->
 ```csharp
 internal static UntypedInt maxWidth => 12;
 internal static UntypedInt decoderInvalidCode => 0xffff;
@@ -1837,7 +1837,7 @@ integer ([Integer Types and Arithmetic](#integer-types-and-arithmetic)). This fi
 package's `windows/` folder, which holds the files that differ between target operating systems
 ([Package Conversion](#package-conversion)):
 
-<!-- source: GOROOT/src/os/file.go:80 -->
+<!-- source: GOROOT/src/os/file.go:81 -->
 ```go
 	O_RDONLY int = syscall.O_RDONLY // open the file read-only.
 ```
@@ -1895,7 +1895,7 @@ const (
 	MSB
 )
 ```
-<!-- source: src/core/compress/lzw/reader.cs:27-30 -->
+<!-- source: src/core/compress/lzw/reader.cs:28-34 -->
 ```csharp
 partial struct Order /*num:nint*/;
 
@@ -2345,7 +2345,7 @@ for `long`, `byte` and `double` ([Integer Types and Arithmetic](#integer-types-a
 **A named type, its constants and its methods.** Here is Go's `time.Duration`, a count of nanoseconds, with
 its unit constants and one method:
 
-<!-- source: GOROOT/src/time/time.go:911-1090 -->
+<!-- source: GOROOT/src/time/time.go:915-1094 -->
 ```go
 type Duration int64
 …
@@ -2364,7 +2364,7 @@ func (d Duration) Seconds() float64 {
 	return float64(sec) + float64(nsec)/1e9
 }
 ```
-<!-- source: src/core/time/time.cs:910-1097 -->
+<!-- source: src/core/time/time.cs:937-1126 -->
 ```csharp
 partial struct Duration /*num:int64*/;
 …
@@ -2465,7 +2465,7 @@ When the other type already is the underlying type, one cast is enough: `int32(s
 each value is computed ahead of time, and the first keeps its Go expression as a comment. The type is renamed
 `ΔMonth` because `Time` also has a `Month()` method, and both live in `time_package`.
 
-<!-- source: GOROOT/src/time/time.go:320-335 -->
+<!-- source: GOROOT/src/time/time.go:324-339 -->
 ```go
 type Month int
 
@@ -2477,7 +2477,7 @@ const (
 	December
 )
 ```
-<!-- source: src/core/time/time.cs:324-337 -->
+<!-- source: src/core/time/time.cs:329-342 -->
 ```csharp
 partial struct ΔMonth /*num:nint*/;
 
@@ -3823,7 +3823,7 @@ func ReadAtLeast(r Reader, buf []byte, min int) (n int, err error) {
 	return
 }
 ```
-<!-- source: src/core/io/io.cs:341-361 -->
+<!-- source: src/core/io/io.cs:339-358 -->
 ```csharp
 public static (nint n, error err) ReadAtLeast(Reader r, slice<byte> buf, nint min) {
     nint n = default!;
@@ -4739,7 +4739,7 @@ fmt.Println(fmt.Sprintf("xxx"u8));
 
 Go's `func Sprintf(format string, a ...any) string` is declared this way in the converted `fmt` package:
 
-<!-- source: src/core/fmt/print.cs:268-269 and :276 -->
+<!-- source: src/core/fmt/print.cs:254-255 and :262 -->
 ```csharp
 public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
@@ -10862,7 +10862,7 @@ In `internal/syscall/unix`, Go's `GetRandom` calls
 `syscall.Syscall(getrandomTrap, uintptr(unsafe.Pointer(unsafe.SliceData(p))), uintptr(len(p)), uintptr(flags))`.
 It becomes:
 <!-- Go side: Go 1.24.13 GOROOT/src/internal/syscall/unix/getrandom.go:36-39 (not in this repo): `syscall.Syscall(getrandomTrap, uintptr(unsafe.Pointer(unsafe.SliceData(p))), uintptr(len(p)), uintptr(flags))` -->
-<!-- source: src/core/internal/syscall/unix/linux/getrandom.cs:26-27, 38-40, 47-48 -->
+<!-- source: src/core/internal/syscall/unix/linux/getrandom.cs:27-28, 39-41, 48-49 -->
 ```csharp
 // GetRandom calls the getrandom system call.
 public static (nint n, error err) GetRandom(slice<byte> p, GetRandomFlag flags) {
@@ -11542,7 +11542,7 @@ converted package is one C# `partial class` spread over many files, so callers s
 `runtime.Gosched` is one. Its Go body calls `mcall`, a runtime primitive that switches to the scheduler's
 own stack. .NET has no such primitive:
 
-<!-- source: GOROOT/src/runtime/proc.go:362-365 -->
+<!-- source: GOROOT/src/runtime/proc.go:389-392 -->
 ```go
 func Gosched() {
 	checkTimeouts()
@@ -11552,7 +11552,7 @@ func Gosched() {
 
 The converted `proc.cs` keeps only a placeholder where `Gosched` would be:
 
-<!-- source: src/core/runtime/windows/proc.cs:352 -->
+<!-- source: src/core/runtime/windows/proc.cs:402 -->
 ```csharp
 // go2cs generated this placeholder — func Gosched is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 ```
@@ -11584,12 +11584,12 @@ Like any [function without a Go body](#functions-without-a-go-body), such a func
 
 On Linux, Go's system call wrappers all end in `Syscall6`, which Go writes in assembly:
 
-<!-- source: GOROOT/src/internal/runtime/syscall/syscall_linux.go:15-16 -->
+<!-- source: GOROOT/src/internal/runtime/syscall/linux/syscall_linux.go:15-16 -->
 ```go
 // Syscall6 calls system call number 'num' with arguments a1-6.
 func Syscall6(num, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2, errno uintptr)
 ```
-<!-- source: src/core/internal/runtime/syscall/linux/syscall_linux.cs:15-16 -->
+<!-- source: src/core/internal/runtime/syscall/linux/linux/syscall_linux.cs:16-17 -->
 ```csharp
 // Syscall6 calls system call number 'num' with arguments a1-6.
 public static partial (uintptr r1, uintptr r2, uintptr errno) Syscall6(uintptr num, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6);
@@ -11603,7 +11603,7 @@ The hand-owned `syscall_linux_impl.cs` gives `Syscall6` its body. In the ordinar
 arguments to `rawSyscall6`, which calls glibc's `syscall(2)` through one .NET native binding,
 `libc_syscall`:
 
-<!-- source: src/core/internal/runtime/syscall/linux/syscall_linux_impl.cs:96-150 -->
+<!-- source: src/core/internal/runtime/syscall/linux/linux/syscall_linux_impl.cs:103-156 -->
 ```csharp
 [LibraryImport("libc", EntryPoint = "syscall", SetLastError = true)]
 private static partial nint libc_syscall(nint number, nint a1, nint a2, nint a3, nint a4, nint a5, nint a6);
@@ -11967,7 +11967,7 @@ func EncodeRune(p []byte, r rune) int {
 	return encodeRuneNonASCII(p, r)
 }
 ```
-<!-- source: src/core/unicode/utf8/utf8.cs:366-376 -->
+<!-- source: src/core/unicode/utf8/utf8.cs:378-388 -->
 ```csharp
 // EncodeRune writes into p (which must be large enough) the UTF-8 encoding of the rune.
 // If the rune is out of range, it writes the encoding of [RuneError].
@@ -11995,7 +11995,7 @@ type acceptRange struct {
 	hi uint8 // highest value for second byte.
 }
 ```
-<!-- source: src/core/unicode/utf8/utf8.cs:97-102 -->
+<!-- source: src/core/unicode/utf8/utf8.cs:86-91 -->
 ```csharp
 // acceptRange gives the range of valid values for the second byte in a UTF-8
 // sequence.
@@ -12041,7 +12041,7 @@ A statement's trailing comment follows the statement's last C# line, after one s
 	}
 ```
 
-<!-- source: src/core/strconv/ftoa.cs:456-464 -->
+<!-- source: src/core/internal/strconv/ftoa.cs:473-481 -->
 ```csharp
         }
     }
@@ -12385,7 +12385,7 @@ reason.
 Here is one place this shows. In Go's `math/big` package, `(*Int).And` swaps its two pointer
 parameters:
 
-<!-- source: GOROOT/src/math/big/int.go:1171-1191 -->
+<!-- source: GOROOT/src/math/big/int.go:1164-1184 -->
 ```go
 func (z *Int) And(x, y *Int) *Int {
 …
@@ -12408,7 +12408,7 @@ The body also declares `x`, a C# `ref` alias to the value inside the box. This l
 `x.neg` just as the Go does ([Implicit Pointer Dereferencing](#implicit-pointer-dereferencing)).
 `DerefOrNull()` returns that reference. For a nil pointer, it lets the first use panic, as Go does.
 
-<!-- source: src/core/math/big/int.cs:1303-1325 -->
+<!-- source: src/core/math/big/int.cs:1315-1339 -->
 ```csharp
 public static ж<ΔInt> And(this ж<ΔInt> Ꮡz, ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
