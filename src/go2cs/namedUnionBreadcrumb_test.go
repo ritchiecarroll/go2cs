@@ -6,11 +6,13 @@
 // version 3 only, which can be found in the LICENSE file.
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
-// Guards namedConstraintUnionText (constraintOperations.go): a NAMED constraint whose type set is one
+// Guards constraintUnionText (constraintOperations.go): a NAMED constraint whose type set is one
 // union of value types (internal/trace's `type EventDetails interface { Metric | Label | … }`) emits its
 // union beside its name in the `new()` breadcrumb, `where T : /* Details = A | B */ new()`. With only the
 // name, the elided-constraint ratchet (repoguard) gated internal/trace/event.cs:374,394 as a lost
-// constraint. The control: an INLINE union keeps its existing breadcrumb, unchanged.
+// constraint. An INLINE union is spelled the same way, terms by package name and its own package's types
+// bare: go/types' import-path form (`crypto/x509.parsedURI`) failed the ratchet's term grammar and gated
+// crypto/x509/constraints.cs:486.
 
 package main
 
@@ -45,7 +47,7 @@ type Config[T Details] struct{ v T }
 
 func Make[T Details](c Config[T]) T { return c.v }
 
-// CONTROL -- an inline union keeps its breadcrumb as it was.
+// INLINE -- spelled as Go writes it, no import path and no name.
 func Inline[T A | B](v T) T { return v }
 
 func main() {
@@ -94,9 +96,13 @@ func TestNamedUnionConstraintBreadcrumbCarriesItsUnion(t *testing.T) {
 		t.Errorf("want the union beside the name at both the generic type and the generic func, got %d:\n%s", got, cs)
 	}
 
-	// The inline union keeps the breadcrumb it always had: the constraint's own text (go/types spells its
-	// terms with their import path), never a `Name =` prefix, since an inline constraint has no name.
-	if !strings.Contains(cs, "where T : /* example.com/namedunion.A | example.com/namedunion.B */ new()") {
-		t.Errorf("the inline union's breadcrumb changed; it must stay the constraint's own text:\n%s", cs)
+	// The inline union is spelled as Go writes it (its own package's types bare), never with an import path
+	// and never with a `Name =` prefix, since an inline constraint has no name.
+	if !strings.Contains(cs, "where T : /* A | B */ new()") {
+		t.Errorf("the inline union's breadcrumb is not Go's spelling `/* A | B */ new()`:\n%s", cs)
+	}
+
+	if strings.Contains(cs, "example.com/namedunion.") {
+		t.Errorf("a breadcrumb still spells a term by its import path (the ratchet's grammar refuses `/`):\n%s", cs)
 	}
 }

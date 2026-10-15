@@ -225,8 +225,9 @@ func TestPointerUnionDeclarationAgreesWithProxy(t *testing.T) {
 		"ptrElemCurve": "",
 
 		// THE CONTROL for both: the same methodless shape with no pointer anywhere KEEPS `new()`.
-		// Without it the two arms above pass for a change that drops the clause everywhere.
-		"valueKeyCurve": "where K : /* valueKeySet */ new()",
+		// Without it the two arms above pass for a change that drops the clause everywhere. (Since H7 the
+		// breadcrumb carries the named set's union beside its name, constraintUnionText; the clause is the same.)
+		"valueKeyCurve": "where K : /* valueKeySet = int32 | int64 | string | V1 */ new()",
 	} {
 		_, constraints := visitor.getGenericDefinition(pointerUnionNamed(t, scope, curve))
 		got := strings.TrimSpace(constraints)

@@ -483,7 +483,7 @@ partial struct constraints<T, V> {
 }
 
 internal static error checkConstraints<T, V, P>(constraints<T, V> c, V s, P p)
-    where P : /* string | net.IP | crypto/x509.parsedURI | crypto/x509.rfc2821Mailbox */ new()
+    where P : /* string | net.IP | parsedURI | rfc2821Mailbox */ new()
 {
     if (c.permitted != default!) {
         {

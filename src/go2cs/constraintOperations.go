@@ -1399,8 +1399,15 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 						// answer here, that the type set is a union of value types with no method to elide,
 						// and the elided-constraint ratchet (repoguard, RED 8 (d)), which reads the comment
 						// and cannot resolve a name, gated `/* EventDetails */ new()` as a lost constraint.
-						if union, ok := namedConstraintUnionText(constraint); ok {
-							originalConstraint = fmt.Sprintf("/* %s = %s */", constraintName, union)
+						// An INLINE union is spelled the same way, terms by package NAME: Go's own spelling,
+						// and the ratchet's term grammar, which go/types' import-path form (`crypto/x509.
+						// parsedURI`, crypto/x509's checkConstraints) fails, gating a legitimate union.
+						if union, ok := constraintUnionText(constraint, v.pkg); ok {
+							if _, isNamed := types.Unalias(constraint).(*types.Named); isNamed {
+								originalConstraint = fmt.Sprintf("/* %s = %s */", constraintName, union)
+							} else {
+								originalConstraint = fmt.Sprintf("/* %s */", union)
+							}
 						}
 
 						constraintNames = append(constraintNames, fmt.Sprintf("%s%s    where %s : %s new()", v.newline, v.indent(v.indentLevel), typeParamNames[i], originalConstraint))
@@ -1514,21 +1521,24 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 	return fmt.Sprintf("<%s>", strings.Join(emittedNames, ", ")), strings.Join(constraintNames, "")
 }
 
-// namedConstraintUnionText renders a NAMED constraint's type set when it is exactly one union of type
-// terms (`type EventDetails interface { Metric | Label | … }`), each term spelled as Go writes it with its
-// package NAME (never its import path), and a `~` kept. Anything else (an inline constraint, a method,
-// an embedded interface beside the union, more than one embedded element) answers false, and the
-// breadcrumb keeps its bare name.
-func namedConstraintUnionText(constraint types.Type) (string, bool) {
-	named, ok := types.Unalias(constraint).(*types.Named)
+// constraintUnionText renders a constraint's type set when it is exactly one union of type terms, NAMED
+// (`type EventDetails interface { Metric | Label | … }`) or inline (`[P string | net.IP | parsedURI]`), each
+// term spelled as Go writes it: with its package NAME (never its import path), bare in the package that
+// declares the constraint (`local` for an inline one), and a `~` kept. Anything else (a method, an embedded
+// interface beside the union, more than one embedded element) answers false, and the breadcrumb keeps the
+// text it had.
+func constraintUnionText(constraint types.Type, local *types.Package) (string, bool) {
+	var iface *types.Interface
 
-	if !ok {
-		return "", false
+	switch c := types.Unalias(constraint).(type) {
+	case *types.Named:
+		iface, _ = c.Underlying().(*types.Interface)
+		local = c.Obj().Pkg()
+	case *types.Interface:
+		iface = c
 	}
 
-	iface, ok := named.Underlying().(*types.Interface)
-
-	if !ok || iface.NumMethods() != 0 || iface.NumEmbeddeds() != 1 {
+	if iface == nil || iface.NumMethods() != 0 || iface.NumEmbeddeds() != 1 {
 		return "", false
 	}
 
@@ -1539,7 +1549,7 @@ func namedConstraintUnionText(constraint types.Type) (string, bool) {
 	}
 
 	qualifier := func(pkg *types.Package) string {
-		if pkg == named.Obj().Pkg() {
+		if pkg == local {
 			return ""
 		}
 
