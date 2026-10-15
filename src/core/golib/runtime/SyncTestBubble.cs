@@ -134,14 +134,16 @@ public sealed class SyncTestBubble
     public int Active { get { lock (m_mu) return m_active; } }
 
     // isIdleInSynctest (runtime2.go), whole: Sleep included since S3 put a bubbled sleep on the fake
-    // clock (see the class remarks).
+    // clock (see the class remarks). Go 1.25 replaced waitReasonSyncWaitGroupWait with
+    // waitReasonSynctestWaitGroupWait here (1.26.9 runtime2.go:1391): only a Wait on a WaitGroup associated
+    // with the waiter's own bubble is durable; a plain WaitGroup wait no longer counts idle.
     internal static bool IsIdle(WaitReason reason) => reason is
         WaitReason.ChanReceiveNilChan or
         WaitReason.ChanSendNilChan or
         WaitReason.SelectNoCases or
         WaitReason.Sleep or
         WaitReason.SyncCondWait or
-        WaitReason.SyncWaitGroupWait or
+        WaitReason.SynctestWaitGroupWait or
         WaitReason.Coroutine or
         WaitReason.SynctestRun or
         WaitReason.SynctestWait or

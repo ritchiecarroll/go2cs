@@ -520,7 +520,7 @@ internal sealed class ChanCore<T> : ChanCore
         Waiter parked = new(isSend: true) { Elem = value };
         Sendq.Enqueue(parked);
 
-        // A bubbled channel parks as Go's "chan send (synctest)", which its bubble counts idle.
+        // A bubbled channel parks as Go's "chan send (durable)", which its bubble counts idle.
         using (Goroutine.Park(Bubble is null ? WaitReason.ChanSend : WaitReason.SynctestChanSend))
         {
             Monitor.Exit(SyncRoot);
@@ -619,7 +619,7 @@ internal sealed class ChanCore<T> : ChanCore
         Waiter parked = new(isSend: false);
         Recvq.Enqueue(parked);
 
-        // A bubbled channel parks as Go's "chan receive (synctest)", which its bubble counts idle.
+        // A bubbled channel parks as Go's "chan receive (durable)", which its bubble counts idle.
         using (Goroutine.Park(Bubble is null ? WaitReason.ChanReceive : WaitReason.SynctestChanReceive))
         {
             Monitor.Exit(SyncRoot);
@@ -973,7 +973,7 @@ internal static class SelectRuntime
         // ready a parked goroutine. A waker that claimed us between the unlock and this wait has
         // already released the semaphore, so the wait returns immediately — no lost wakeup.
         // Go: a bubble member whose every (non-nil) case is a bubbled channel parks as "select
-        // (synctest)", which its bubble counts idle.
+        // (durable)", which its bubble counts idle.
         using (Goroutine.Park(allSynctest && SyncTestBubble.Current is not null ? WaitReason.SynctestSelect : WaitReason.Select))
         {
             UnlockAll(lockOrder);
@@ -1113,7 +1113,7 @@ internal static class SelectRuntime
     // ("select on synctest channel from outside bubble"); returns whether EVERY non-nil case is on a
     // bubbled channel. Nil cases are omitted from both questions, as Go omits them from its poll and
     // lock orders (COORD's addition 3): Server.Shutdown's select over a bubbled channel and
-    // context.Background().Done() -- a nil channel -- still parks as "select (synctest)".
+    // context.Background().Done() -- a nil channel -- still parks as "select (durable)".
     private static bool AllCasesBubbled(SelectOp[] ops)
     {
         bool all = true;
