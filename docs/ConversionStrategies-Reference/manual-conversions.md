@@ -1905,7 +1905,7 @@ The converter emits a tagged field's Go struct tag verbatim at the declaration:
 ```go
 NamedCurveOID asn1.ObjectIdentifier `asn1:"optional,explicit,tag:0"`
 ```
-<!-- source: src/core/crypto/x509/sec1.cs:32 -->
+<!-- source: src/core/crypto/x509/sec1.cs:31 -->
 ```csharp
 public asn1.ObjectIdentifier NamedCurveOID; /*`asn1:"optional,explicit,tag:0"`*/
 ```
