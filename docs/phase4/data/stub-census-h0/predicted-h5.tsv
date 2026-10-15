@@ -1,0 +1,4 @@
+# H5 PREDICTED stub appearances for src/check-stub-census.ps1 -Predicted (COORD-owned).
+# goos<TAB>project<TAB>namespace.class.member<TAB>owner and disposition; * in goos matches every flavour.
+windows	core/internal/runtime/syscall/windows	go.internal.runtime.syscall.windows_package.StdCall	G: unreached, as runtime.asmstdcall at 1.24 (pre-seat 2 withdrawn 2026-10-14)
+windows	core/internal/runtime/syscall/windows	go.internal.runtime.syscall.windows_package.asmstdcall	G: unreached, as runtime.asmstdcall at 1.24 (pre-seat 2 withdrawn 2026-10-14)
