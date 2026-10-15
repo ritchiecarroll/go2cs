@@ -28,6 +28,8 @@ label, before a `}`, between list items, or between operands. Each placement bel
 comment no point claims is written at the next place the converter writes loose comments, on its own line;
 that fallback is what [Limits](#limits-where-a-comment-still-lands-elsewhere) describes.
 
+<a id="the-rule"></a>
+
 ## Blank lines
 
 ### Between the statements of a body, Go's blank lines are kept
@@ -715,6 +717,8 @@ internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
 
 A `+` chain of string literals that carries comments and folds to one byte-array constant is written one Go
 operand per line, each line's bytes followed by its comment.
+
+<a id="what-is-still-deferred"></a>
 
 ## Limits: where a comment still lands elsewhere
 

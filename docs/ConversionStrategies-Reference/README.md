@@ -483,7 +483,10 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [`runtime.Pinner` — a pin BIT keyed by the referent allocation, and Go's two-level cgo walk over managed values](manual-conversions.md#runtimepinner--a-pin-bit-keyed-by-the-referent-allocation-and-gos-two-level-cgo-walk-over-managed-values)
 - **[Comments](comments.md)**
   - [Where a comment is attached, and where it is not](comments.md#where-a-comment-is-attached-and-where-it-is-not)
-  - [The rule](comments.md#the-rule)
-  - [What is still deferred](comments.md#what-is-still-deferred)
+  - [Blank lines](comments.md#blank-lines)
+  - [Doc comments](comments.md#doc-comments)
+  - [Comments inside a body](comments.md#comments-inside-a-body)
+  - [Comments inside expressions](comments.md#comments-inside-expressions)
+  - [Limits: where a comment still lands elsewhere](comments.md#limits-where-a-comment-still-lands-elsewhere)
 - **[Deterministic Output](deterministic-output.md)**
 - **[Packages That Do Not Type-Check](packages-that-do-not-type-check.md)**
