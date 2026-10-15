@@ -610,3 +610,95 @@ func TestReleaseTagsResolveLazily(t *testing.T) {
 		t.Error("release tags were not resolved even though the constraint names one")
 	}
 }
+
+// TestToolTagsGovernMatching locks the dotted half of the tag namespace to the LOADER's tool tags, not
+// the set compiled into this binary. A go1.26.9-built go2cs converting the 1.24.13 GOROOT matched
+// `goexperiment.swissmap` against 1.26's defaults, which no longer list it, and dropped
+// internal/runtime/maps' runtime_swiss.go after go/packages had selected it (the i9's H5 phase-B
+// finding). Each tag set below is one release's `go list -f {{context.ToolTags}}` answer, and the
+// assertions read only the evaluator's resolved set, so they hold whichever Go built this test.
+func TestToolTagsGovernMatching(t *testing.T) {
+	releases := []struct {
+		name     string
+		toolTags []string
+		on, off  []string
+	}{
+		{"go1.24.13", []string{"goexperiment.regabiwrappers", "goexperiment.regabiargs", "goexperiment.coverageredesign", "goexperiment.aliastypeparams", "goexperiment.swissmap", "goexperiment.spinbitmutex", "goexperiment.synchashtriemap", "amd64.v1"},
+			[]string{"goexperiment.swissmap", "goexperiment.synchashtriemap", "amd64.v1"}, []string{"goexperiment.greenteagc", "!goexperiment.swissmap"}},
+		{"go1.26.9", []string{"goexperiment.regabiwrappers", "goexperiment.regabiargs", "goexperiment.dwarf5", "goexperiment.greenteagc", "goexperiment.randomizedheapbase64", "amd64.v1"},
+			[]string{"goexperiment.greenteagc", "!goexperiment.swissmap"}, []string{"goexperiment.swissmap", "goexperiment.synchashtriemap"}},
+	}
+
+	for _, release := range releases {
+		evaluator := newLinuxAmd64Evaluator()
+		evaluator.toolTags = release.toolTags
+
+		for _, want := range []bool{true, false} {
+			constraints := release.on
+
+			if !want {
+				constraints = release.off
+			}
+
+			for _, constraint := range constraints {
+				got, err := evaluator.EvaluateConstraint(constraint)
+
+				if err != nil {
+					t.Fatalf("EvaluateConstraint(%q) returned error %v", constraint, err)
+				}
+
+				if got != want {
+					t.Errorf("EvaluateConstraint(%q) against a %s loader = %v, want %v", constraint, release.name, got, want)
+				}
+			}
+		}
+	}
+}
+
+// TestParseToolTagsList covers go list's rendering of the tool-tag slice, including the empty list,
+// which is a real answer (no experiment active), not a failure to fall back from.
+func TestParseToolTagsList(t *testing.T) {
+	for _, tt := range []struct {
+		text string
+		want []string
+		ok   bool
+	}{
+		{"[goexperiment.regabiargs amd64.v1]\n", []string{"goexperiment.regabiargs", "amd64.v1"}, true},
+		{"[]\r\n", []string{}, true},
+		{"goexperiment.regabiargs", nil, false},
+		{"", nil, false},
+	} {
+		got, err := parseToolTagsList(tt.text)
+
+		if (err == nil) != tt.ok {
+			t.Fatalf("parseToolTagsList(%q) error = %v, want ok=%v", tt.text, err, tt.ok)
+		}
+
+		if tt.ok && (got == nil || strings.Join(got, ",") != strings.Join(tt.want, ",")) {
+			t.Errorf("parseToolTagsList(%q) = %#v, want %#v", tt.text, got, tt.want)
+		}
+	}
+}
+
+// TestLoaderToolTagsAskTheGoCommand asks the go command on PATH from this package's directory and
+// requires the answer to be the go command's own, so a regression back to build.Default.ToolTags is
+// caught whenever the binary and the PATH toolchain differ — and the answer must never be nil.
+func TestLoaderToolTagsAskTheGoCommand(t *testing.T) {
+	dir, err := os.Getwd()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want, err := goListToolTags(moduleRootDir(dir))
+
+	if err != nil {
+		t.Skipf("go command unavailable: %v", err)
+	}
+
+	got := loaderToolTags(dir)
+
+	if got == nil || strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Errorf("loaderToolTags(%q) = %v, want the go command's %v", dir, got, want)
+	}
+}
