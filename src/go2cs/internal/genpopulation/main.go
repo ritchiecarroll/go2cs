@@ -81,6 +81,10 @@ func run(goroot, goos, goarch, tags, out string) error {
 		"-f", "{{.ImportPath}}\t{{.Dir}}\t{{join .TestGoFiles \",\"}}\t{{join .XTestGoFiles \",\"}}", "std")
 	list.Env = append(os.Environ(), "GOROOT="+goroot, "GOTOOLCHAIN=local", "GOOS="+goos, "GOARCH="+goarch,
 		"CGO_ENABLED=0", "GOFLAGS=")
+	// Run where no go.mod applies. From inside src/go2cs the go command reads that module's go
+	// directive, and an older release's go refuses it ("go.mod requires go >= ..."), so the
+	// outgoing population of a hop could not be regenerated from the module that pins the new one.
+	list.Dir = goroot
 
 	var stderr bytes.Buffer
 	list.Stderr = &stderr
