@@ -589,8 +589,8 @@ partial class runtime_package
     private static void gcCycleLocked(bool forced)
     {
         // Go's gcStart runs clearpools() at the START of every cycle, and that is what ages
-        // sync.Pool's victim cache — without it a Pool never releases what it cached. All three of
-        // clearpools' arms are wired here.
+        // sync.Pool's victim cache — without it a Pool never releases what it cached. Both of
+        // clearpools' cache arms are wired here (Go 1.25 removed the third, unique's; see below).
         if (poolcleanup != default!)
             poolcleanup();
 
@@ -609,19 +609,18 @@ partial class runtime_package
         // any more, which is the point rather than a defect.
         golib.BoringCaches.ClearAll();
 
-        // unique's map cleanup, the second arm — verbatim clearpools(): a NON-BLOCKING send that
-        // wakes the goroutine unique_runtime_registerUniqueMapCleanup parked on this channel, which
-        // evicts every intern-map entry whose weak pointer has gone nil. Inert until unique.Make has
-        // run (the channel is nil before registration), so nothing else pays for it.
+        // unique's map cleanup WAS clearpools' second arm through Go 1.24: a NON-BLOCKING send on
+        // uniqueMapCleanup that woke the goroutine unique_runtime_registerUniqueMapCleanup parked,
+        // which evicted every intern-map entry whose weak pointer had gone nil. Go 1.25 deletes the
+        // channel, the registration and this arm (go1.25.14's mgc.go names none of them). unique
+        // now evicts through runtime.AddCleanup, and its drainMaps waits on
+        // unique_runtime_blockUntilEmptyCleanupQueue (mcleanup.cs), so the cleanup queue drained
+        // below carries the eviction, and nothing here is owed to unique.
         //
-        // Wiring it is not cosmetic: `unique`'s own suite calls drainMaps() — arm a one-shot
-        // notification, runtime.GC(), then BLOCK on `<-wait` until the cleanup runs — so with this
-        // arm missing the cleanup could never run and every TestHandle subtest deadlocked, taking
-        // the whole test host to its package timeout and erasing the verdicts of the rows that had
-        // nothing to do with it. That deadlock only became REACHABLE once internal/weak stopped
-        // panicking (its hand-own, same arc); before that the subtests died one frame earlier.
-        if (uniqueMapCleanup != default!)
-            uniqueMapCleanup.TrySend(new EmptyStruct());
+        // Why the 1.24 arm was wired, kept as the reason the replacement path matters: `unique`'s own
+        // suite calls drainMaps(), which runs runtime.GC() and then BLOCKS until the cleanup has run.
+        // With the arm missing, every TestHandle subtest deadlocked, taking the whole test host to its
+        // package timeout and erasing the verdicts of the rows that had nothing to do with it.
 
         // Go's GC() is documented to complete a full cycle, and callers (sync's pool/oncefunc
         // tests among them) rely on finalizers having RUN by the time it returns. The second
